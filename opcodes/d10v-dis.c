@@ -21,8 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/d10v.h" 
 #include "dis-asm.h"
 
-static void dis_2_short PARAMS ((unsigned long insn, char *str, int order));
-static void dis_long PARAMS ((unsigned long insn, char *str));
+static void dis_2_short PARAMS ((unsigned long insn, bfd_vma memaddr, 
+				 struct disassemble_info *info, int order));
+static void dis_long PARAMS ((unsigned long insn, bfd_vma memaddr, 
+			      struct disassemble_info *info));
 
 int 
 print_insn_d10v (memaddr, info)
@@ -32,9 +34,6 @@ print_insn_d10v (memaddr, info)
   int status;
   bfd_byte buffer[4];
   unsigned long insn;
-  char str[64];
-
-  strcpy (str, "unknown");
 
   status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status != 0)
@@ -47,54 +46,54 @@ print_insn_d10v (memaddr, info)
   status = insn & FM11;
   switch (status) {
   case 0:
-    dis_2_short (insn, str, 2);
+    dis_2_short (insn, memaddr, info, 2);
     break;
   case FM01:
-    dis_2_short (insn, str, 0);
+    dis_2_short (insn, memaddr, info, 0);
     break;
   case FM10:
-    dis_2_short (insn, str, 1);
+    dis_2_short (insn, memaddr, info, 1);
     break;
   case FM11:
-    dis_long (insn, str);
+    dis_long (insn, memaddr, info);
     break;
   }
-  (*info->fprintf_func) (info->stream, "\t%s", str, insn);  
   return 4;
 }
 
 static void
-print_operand (buf, oper, insn, op)
-     char *buf;
+print_operand (oper, insn, op, memaddr, info)
      struct d10v_operand *oper;
      unsigned long insn;
      struct d10v_opcode *op;
+     bfd_vma memaddr;
+     struct disassemble_info *info;
 {
   int num, shift;
 
   if (oper->flags == OPERAND_ATMINUS)
     {
-      strcpy (buf,"@-");
+      (*info->fprintf_func) (info->stream, "@-");   
       return;
     }
   if (oper->flags == OPERAND_MINUS)
     {
-      strcpy (buf,"-");
+      (*info->fprintf_func) (info->stream, "-");   
       return;
     }
   if (oper->flags == OPERAND_PLUS)
     {
-      strcpy (buf,"+");
+      (*info->fprintf_func) (info->stream, "+");   
       return;
     }
   if (oper->flags == OPERAND_ATSIGN)
     {
-      strcpy (buf,"@");
+      (*info->fprintf_func) (info->stream, "@");   
       return;
     }
   if (oper->flags == OPERAND_ATPAR)
     {
-      strcpy (buf,"@(");
+      (*info->fprintf_func) (info->stream, "@(");   
       return;
     }
 
@@ -116,36 +115,56 @@ print_operand (buf, oper, insn, op)
 	  if (num == pre_defined_registers[i].value)
 	    {
 	      if (pre_defined_registers[i].pname)
-		strcpy(buf,pre_defined_registers[i].pname);
+		(*info->fprintf_func) (info->stream, "%s",pre_defined_registers[i].pname);
 	      else
-		strcpy(buf,pre_defined_registers[i].name);
+		(*info->fprintf_func) (info->stream, "%s",pre_defined_registers[i].name);
 	      match=1;
 	      break;
 	    }
 	}
       if (match==0)
 	{
+	  /* this would only get executed if a register was not in the 
+	     register table */
 	  if (oper->flags & OPERAND_ACC)
-	    *buf++ = 'a';
+	    (*info->fprintf_func) (info->stream, "a");
 	  else if (oper->flags & OPERAND_CONTROL)
-	    {
-	      *buf++ ='c';
-	      *buf++ ='r';
-	    }
+	    (*info->fprintf_func) (info->stream, "cr");
 	  else if(oper->flags & OPERAND_REG)
-	    *buf++ = 'r';
-	  sprintf (buf, "%d", num);
+	    (*info->fprintf_func) (info->stream, "r");
+	  (*info->fprintf_func) (info->stream, "%d",num);
 	}
     }
   else
-    sprintf (buf, "0x%x", num);
+    {
+      /* addresses are right-shifted by 2 */
+      if (oper->flags & OPERAND_ADDR)
+	{
+	  long max;
+	  int neg=0;
+	  max = (1 << (oper->bits - 1));
+	  if (num & max)
+	    {
+	      num = -num & (max-1);
+	      neg = 1;
+	    }
+	  num = num<<2;
+	  if (neg)
+	    (*info->print_address_func) (memaddr - num, info); 
+	  else
+	    (*info->print_address_func) (memaddr + num, info); 
+	}
+      else
+	(*info->fprintf_func) (info->stream, "0x%x",num);
+    }
 }
 
 
 static void
-dis_long (insn, str)
+dis_long (insn, memaddr, info)
      unsigned long insn;
-     char *str;
+     bfd_vma memaddr;
+     struct disassemble_info *info;
 {
   int i;
   char buf[32];
@@ -157,32 +176,31 @@ dis_long (insn, str)
     {
       if ((op->format & LONG_OPCODE) && ((op->mask & insn) == op->opcode))
 	{
-	  strcpy (str, op->name);
-	  strcat (str, "\t");
+	  (*info->fprintf_func) (info->stream, "%s\t", op->name);   
 	  for ( i=0; op->operands[i]; i++)
 	    {
 	      oper = (struct d10v_operand *)&d10v_operands[op->operands[i]];
 	      if (oper->flags == OPERAND_ATPAR)
 		need_paren = 1;
-	      print_operand (buf, oper, insn, op);
-	      strcat (str, buf);
+	      print_operand (oper, insn, op, memaddr, info);
 	      if (op->operands[i+1] && oper->bits &&
 		  d10v_operands[op->operands[i+1]].flags != OPERAND_PLUS &&
 		  d10v_operands[op->operands[i+1]].flags != OPERAND_MINUS)
-		strcat (str,", ");
+		(*info->fprintf_func) (info->stream, ", ");   
 	    }
 	  break;
 	}
       op++;
     }
   if (need_paren)
-    strcat (str, ")");
+    (*info->fprintf_func) (info->stream, ")");   
 }
 
 static void
-dis_2_short (insn, str, order)
+dis_2_short (insn, memaddr, info, order)
      unsigned long insn;
-     char *str;
+     bfd_vma memaddr;
+     struct disassemble_info *info;
      int order;
 {
   int i,j;
@@ -197,8 +215,6 @@ dis_2_short (insn, str, order)
   ins[0] = (insn & 0x3FFFFFFF) >> 15;
   ins[1] = insn & 0x00007FFF;
 
-  *str = 0;
-
   for(j=0;j<2;j++)
     {
       op = (struct d10v_opcode *)d10v_opcodes;
@@ -207,19 +223,17 @@ dis_2_short (insn, str, order)
 	{
 	  if ((op->format & SHORT_OPCODE) && ((op->mask & ins[j]) == op->opcode))
 	    {
-	      strcat (str, op->name);
-	      strcat (str, "\t");
+	      (*info->fprintf_func) (info->stream, "%s\t",op->name);   
 	      for (i=0; op->operands[i]; i++)
 		{
 		  oper = (struct d10v_operand *)&d10v_operands[op->operands[i]];
 		  if (oper->flags == OPERAND_ATPAR)
 		    need_paren = 1;
-		  print_operand (buf, oper, ins[j], op);
-		  strcat (str, buf);
+		  print_operand (oper, ins[j], op, memaddr, info);
 		  if (op->operands[i+1] && oper->bits && 
 		  d10v_operands[op->operands[i+1]].flags != OPERAND_PLUS &&
 		  d10v_operands[op->operands[i+1]].flags != OPERAND_MINUS)
-		    strcat( str,", ");
+		    (*info->fprintf_func) (info->stream, ", ");   
 		}
 	      match = 1;
 	      num_match++;
@@ -228,20 +242,20 @@ dis_2_short (insn, str, order)
 	  op++;
 	}
       if (!match)
-	  strcat (str, "unknown");
+	(*info->fprintf_func) (info->stream, "unknown");   
 
       switch (order)
 	{
 	case 0:
-	  strcat ( str, "\t->\t");
+	  (*info->fprintf_func) (info->stream, "\t->\t");   
 	  order = -1;
 	  break;
 	case 1:
-	  strcat (str, "\t<-\t");
+	  (*info->fprintf_func) (info->stream, "\t<-\t");   
 	  order = -1;
 	  break;
 	case 2:
-	  strcat (str, "\t||\t");
+	  (*info->fprintf_func) (info->stream, "\t||\t");   
 	  order = -1;
 	  break;
 	default:
@@ -250,8 +264,8 @@ dis_2_short (insn, str, order)
     }
 
   if (num_match == 0)
-    sprintf (str, ".long\t0x%08x", insn);
+    (*info->fprintf_func) (info->stream, ".long\t0x%08x",insn);   
 
   if (need_paren)
-    strcat (str, ")");
+    (*info->fprintf_func) (info->stream, ")");   
 }

@@ -1,3 +1,9 @@
+start-sanitize-d10v
+Tue Jul 23 11:02:53 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v-dis.c: Change all functions to use info->print_address_func.
+
+end-sanitize-d10v	
 Mon Jul 22 15:38:53 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k-opc.c (m68k_opcodes): Make opcode masks for the ColdFire
