@@ -1,3 +1,19 @@
+2003-12-15  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	Fix handling of constructor/destructor of standard substitution:
+	* cp-demangle.c (struct d_standard_sub_info): Define.
+	(d_substitution): Add prefix argument.  Change all callers.
+	Rework handling of standard substitutions to print full name when
+	qualifying a constructor/destructor, or when DMGL_VERBOSE is set.
+	* testsuite/demangle-expected: Add test case.
+
+	Fix handling of negative literal constants:
+	* cp-demangle.c (enum d_comp_type): Add D_COMP_LITERAL_NEG.
+	(d_dump, d_make_comp): Handle D_COMP_LITERAL_NEG.
+	(d_expr_primary): Use D_COMP_LITERAL_NEG for a negative number.
+	(d_print_comp): Handle D_COMP_LITERAL_NEG.
+	* testsuite/demangle-expected: Add test case.
+
 2003-12-04  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* cp-demangle.c (IS_UPPER, IS_LOWER): Define.
@@ -123,10 +139,6 @@
 
 	* cp-demangle.c: Complete rewrite.
 
-2003-11-20  Ian Lance Taylor  <ian@wasabisystems.com>
-
-	* cp-demangle.c: Complete rewrite.
-
 2003-11-19  Mark Mitchell  <mark@codesourcery.com>
 
 	* cp-demangle.c (demangle_type): Correct thinko in substitution
@@ -148,16 +160,16 @@
 
 	* testsuite/Makefile.in (test-demangle): Depend upon libiberty.a.
 
-2003-11-18  Ian Lance Taylor  <ian@wasabisystems.com>
-
-	* testsuite/test-demangle.c (main): Don't pass DMGL_VERBOSE to
-	cplus_demangle.
-
-	* testsuite/Makefile.in (test-demangle): Depend upon libiberty.a.
-
 2003-10-31  Andreas Jaeger  <aj@suse.de>
 
 	* floatformat.c (floatformat_always_valid): Add unused attribute.
+
+2003-10-30  Josef Zlomek  <zlomekj@suse.cz>
+
+	Jan Hubicka <jh@suse.cz>
+	* vasprintf.c (int_vasprintf): Pass va_list by value.
+	Use va_copy for copying va_list.
+	(vasprintf): Pass va_list by value.
 
 2003-10-30  Josef Zlomek  <zlomekj@suse.cz>
 
