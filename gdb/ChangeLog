@@ -1,3 +1,9 @@
+Wed Jun  7 17:46:33 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/rs6000/tm-rs6000.h (BREAKPOINT): Define as either
+	BIG_BREAKPOINT or LITTLE_BREAKPOINT depending on the target byte
+	order.
+
 Wed Jun  7 12:41:42 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* somsolib.c (som_solib_section_offsets): Handle relative pathnames.
