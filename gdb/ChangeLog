@@ -1,3 +1,26 @@
+2003-10-17  Andrew Cagney  <cagney@redhat.com>
+
+	* target.h (struct target_ops): Add "to_read_partial" and
+	"to_write_partial", delete "to_query".
+	(target_read_partial, target_write_partial): Declare.
+	(target_read, target_write): Declare.
+	(target_query): Delete macro.
+	* target.c (target_read_partial): New function.
+	(target_write_partial, target_read, target_write): New function.
+	(update_current_target): Delete inheritance of "to_query".  Add
+	comments about "to_read_partial" and "to_write_partial".
+	(debug_to_partial_read, debug_to_partial_write): New functions.
+	(debug_to_query): Delete function.
+	(setup_target_debug): Set "to_read_partial" and "to_write_partial"
+	instead of "to_query".
+	* remote.c (remote_read_partial): Replace "remote_query".
+	(init_remote_ops): Set "to_read_partial" instead of "to_query".
+	(init_remote_async_ops): Ditto.
+	* kod.c (gdb_kod_query): Make "bufsize" a LONGEST.  Use
+	"target_read_partial" instead of "target_query".
+	* avr-tdep.c (avr_io_reg_read_command): Make "bufsize" a LONGEST.
+	Use "target_read_partial" instead of "target_query".
+
 2003-10-17  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* frame.h (struct frame_id): Add new field: special_addr.

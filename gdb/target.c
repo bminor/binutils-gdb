@@ -159,8 +159,6 @@ static int debug_to_thread_alive (ptid_t);
 
 static void debug_to_stop (void);
 
-static int debug_to_query (int /*char */ , char *, char *, int *);
-
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the 
    array.  */
@@ -422,7 +420,8 @@ update_current_target (void)
       INHERIT (to_pid_to_str, t);
       INHERIT (to_extra_thread_info, t);
       INHERIT (to_stop, t);
-      INHERIT (to_query, t);
+      /* Do not inherit to_read_partial.  */
+      /* Do not inherit to_write_partial.  */
       INHERIT (to_rcmd, t);
       INHERIT (to_enable_exception_callback, t);
       INHERIT (to_get_current_exception_event, t);
@@ -1054,6 +1053,90 @@ int
 target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 {
   return target_xfer_memory_partial (memaddr, buf, len, 1, err);
+}
+
+/* More generic transfers.  */
+
+LONGEST
+target_read_partial (struct target_ops *ops,
+		     enum target_object object,
+		     const char *annex, void *buf,
+		     ULONGEST offset, LONGEST len)
+{
+  struct target_ops *op;
+
+  /* Find the first target stratum that can handle the request.  */
+  for (op = ops;
+       op != NULL && op->to_read_partial == NULL;
+       op = op->beneath)
+    ;
+  if (op == NULL)
+    return -1;
+  
+  /* Now apply the operation at that level.  */
+  return op->to_read_partial (op, object, annex, buf, offset, len);
+}
+
+LONGEST
+target_write_partial (struct target_ops *ops,
+		      enum target_object object,
+		      const char *annex, const void *buf,
+		      ULONGEST offset, LONGEST len)
+{
+  struct target_ops *op;
+
+  /* Find the first target stratum that can handle the request.  */
+  for (op = ops;
+       op != NULL && op->to_write_partial == NULL;
+       op = op->beneath)
+    ;
+  if (op == NULL)
+    return -1;
+  
+  return op->to_write_partial (op, object, annex, buf, offset, len);
+}
+
+/* Wrappers to perform the full transfer.  */
+LONGEST
+target_read (struct target_ops *ops,
+	     enum target_object object,
+	     const char *annex, void *buf,
+	     ULONGEST offset, LONGEST len)
+{
+  LONGEST xfered = 0;
+  while (xfered < len)
+    {
+      LONGEST xfer = target_write_partial (ops, object, annex,
+					   (bfd_byte *) buf + xfered,
+					   offset + xfered, len - xfered);
+      /* Call an observer, notifying them of the xfer progress?  */
+      if (xfer < 0)
+	return xfer;
+      xfered += xfer;
+      QUIT;
+    }
+  return len;
+}
+
+LONGEST
+target_write (struct target_ops *ops,
+	      enum target_object object,
+	      const char *annex, const void *buf,
+	      ULONGEST offset, LONGEST len)
+{
+  LONGEST xfered = 0;
+  while (xfered < len)
+    {
+      LONGEST xfer = target_write_partial (ops, object, annex,
+					   (bfd_byte *) buf + xfered,
+					   offset + xfered, len - xfered);
+      /* Call an observer, notifying them of the xfer progress?  */
+      if (xfer < 0)
+	return xfer;
+      xfered += xfer;
+      QUIT;
+    }
+  return len;
 }
 
 static void
@@ -2128,14 +2211,42 @@ debug_to_stop (void)
   fprintf_unfiltered (gdb_stdlog, "target_stop ()\n");
 }
 
-static int
-debug_to_query (int type, char *req, char *resp, int *siz)
+static LONGEST
+debug_to_read_partial (struct target_ops *ops,
+		       enum target_object object,
+		       const char *annex, void *buf,
+		       ULONGEST offset, LONGEST len)
 {
-  int retval;
+  LONGEST retval;
 
-  retval = debug_target.to_query (type, req, resp, siz);
+  retval = target_read_partial (&debug_target, object, annex, buf, offset,
+				len);
 
-  fprintf_unfiltered (gdb_stdlog, "target_query (%c, %s, %s,  %d) = %d\n", type, req, resp, *siz, retval);
+  fprintf_unfiltered (gdb_stdlog,
+		      "target_read_partial (%d, %s, 0x%lx,  0x%s, %s) = %s\n",
+		      (int) object, (annex ? annex : "(null)"),
+		      (long) buf, paddr_nz (offset),
+		      paddr_d (len), paddr_d (retval));
+
+  return retval;
+}
+
+static LONGEST
+debug_to_write_partial (struct target_ops *ops,
+			enum target_object object,
+			const char *annex, const void *buf,
+			ULONGEST offset, LONGEST len)
+{
+  LONGEST retval;
+
+  retval = target_write_partial (&debug_target, object, annex, buf, offset,
+				len);
+
+  fprintf_unfiltered (gdb_stdlog,
+		      "target_write_partial (%d, %s, 0x%lx,  0x%s, %s) = %s\n",
+		      (int) object, (annex ? annex : "(null)"),
+		      (long) buf, paddr_nz (offset),
+		      paddr_d (len), paddr_d (retval));
 
   return retval;
 }
@@ -2237,7 +2348,8 @@ setup_target_debug (void)
   current_target.to_thread_alive = debug_to_thread_alive;
   current_target.to_find_new_threads = debug_to_find_new_threads;
   current_target.to_stop = debug_to_stop;
-  current_target.to_query = debug_to_query;
+  current_target.to_read_partial = debug_to_read_partial;
+  current_target.to_write_partial = debug_to_write_partial;
   current_target.to_rcmd = debug_to_rcmd;
   current_target.to_enable_exception_callback = debug_to_enable_exception_callback;
   current_target.to_get_current_exception_event = debug_to_get_current_exception_event;

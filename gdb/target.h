@@ -26,6 +26,7 @@
 struct objfile;
 struct ui_file;
 struct mem_attrib;
+struct target_ops;
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -175,6 +176,77 @@ extern char *target_signal_to_name (enum target_signal);
 /* Given a name (SIGHUP, etc.), return its signal.  */
 enum target_signal target_signal_from_name (char *);
 
+/* Request the transfer of up to LEN 8-bit bytes of the target's
+   OBJECT.  The OFFSET, for a seekable object, specifies the starting
+   point.  The ANNEX can be used to provide additional data-specific
+   information to the target.
+
+   Return the number of bytes actually transfered, zero when no
+   further transfer is possible, and -1 when the transfer is not
+   supported.
+   
+   NOTE: cagney/2003-10-17: The current interface does not support a
+   "retry" mechanism.  Instead it assumes that at least one byte will
+   be transfered on each call.
+
+   NOTE: cagney/2003-10-17: The current interface can lead to
+   fragmented transfers.  Lower target levels should not implement
+   hacks, such as enlarging the transfer, in an attempt to compensate
+   for this.  Instead, the target stack should be extended so that it
+   implements supply/collect methods and a look-aside object cache.
+   With that available, the lowest target can safely and freely "push"
+   data up the stack.
+
+   NOTE: cagney/2003-10-17: Unlike the old query and the memory
+   transfer mechanisms, these methods are explicitly parameterized by
+   the target that it should be applied to.
+
+   NOTE: cagney/2003-10-17: Just like the old query and memory xfer
+   methods, these new methods perform partial transfers.  The only
+   difference is that these new methods thought to include "partial"
+   in the name.  The old code's failure to do this lead to much
+   confusion and duplication of effort as each target object attempted
+   to locally take responsibility for something it didn't have to
+   worry about.
+
+   NOTE: cagney/2003-10-17: For backward compatibility with the
+   "target_query" method that this replaced, when BUF, OFFSET and LEN
+   are NULL/zero, return the "minimum" buffer size.  See "remote.c"
+   for further information.  */
+
+enum target_object
+{
+  /* Kernel Object Display transfer.  See "kod.c" and "remote.c".  */
+  TARGET_OBJECT_KOD,
+  /* AVR target specific transfer.  See "avr-tdep.c" and "remote.c".  */
+  TARGET_OBJECT_AVR,
+  /* Transfer up-to LEN bytes of memory starting at OFFSET.  */
+  TARGET_OBJECT_MEORY
+  /* Possible future ojbects: TARGET_OJBECT_FILE, TARGET_OBJECT_PROC,
+     TARGET_OBJECT_AUXV, ...  */
+};
+
+extern LONGEST target_read_partial (struct target_ops *ops,
+				    enum target_object object,
+				    const char *annex, void *buf,
+				    ULONGEST offset, LONGEST len);
+
+extern LONGEST target_write_partial (struct target_ops *ops,
+				     enum target_object object,
+				     const char *annex, const void *buf,
+				     ULONGEST offset, LONGEST len);
+
+/* Wrappers to perform the full transfer.  */
+extern LONGEST target_read (struct target_ops *ops,
+			    enum target_object object,
+			    const char *annex, void *buf,
+			    ULONGEST offset, LONGEST len);
+
+extern LONGEST target_write (struct target_ops *ops,
+			     enum target_object object,
+			     const char *annex, const void *buf,
+			     ULONGEST offset, LONGEST len);
+
 
 /* If certain kinds of activity happen, target_wait should perform
    callbacks.  */
@@ -271,7 +343,6 @@ struct target_ops
     char *(*to_pid_to_str) (ptid_t);
     char *(*to_extra_thread_info) (struct thread_info *);
     void (*to_stop) (void);
-    int (*to_query) (int /*char */ , char *, char *, int *);
     void (*to_rcmd) (char *command, struct ui_file *output);
     struct symtab_and_line *(*to_enable_exception_callback) (enum
 							     exception_event_kind,
@@ -310,6 +381,16 @@ struct target_ops
     CORE_ADDR (*to_get_thread_local_address) (ptid_t ptid,
 					      struct objfile *objfile,
 					      CORE_ADDR offset);
+
+    /* See above.  */
+    LONGEST (*to_read_partial) (struct target_ops *ops,
+				enum target_object object,
+				const char *annex, void *buf, 
+				ULONGEST offset, LONGEST len);
+    LONGEST (*to_write_partial) (struct target_ops *ops,
+				 enum target_object object,
+				 const char *annex, const void *buf,
+				 ULONGEST offset, LONGEST len);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
@@ -721,16 +802,6 @@ extern void target_load (char *arg, int from_tty);
    used by GUIs to implement a stop button.  */
 
 #define target_stop current_target.to_stop
-
-/* Queries the target side for some information.  The first argument is a
-   letter specifying the type of the query, which is used to determine who
-   should process it.  The second argument is a string that specifies which 
-   information is desired and the third is a buffer that carries back the 
-   response from the target side. The fourth parameter is the size of the
-   output buffer supplied.  */
-
-#define	target_query(query_type, query, resp_buffer, bufffer_size)	\
-     (*current_target.to_query) (query_type, query, resp_buffer, bufffer_size)
 
 /* Send the specified COMMAND to the target's monitor
    (shell,interpreter) for execution.  The result of the query is

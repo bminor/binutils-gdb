@@ -87,11 +87,13 @@ gdb_kod_display (char *arg)
 static void
 gdb_kod_query (char *arg, char *result, int *maxsiz)
 {
-  int bufsiz = 0;
+  LONGEST bufsiz = 0;
 
-  /* Check if current target has remote_query capabilities.
-     If not, it does not have kod either.  */
-  if (! current_target.to_query)
+  /* Check if current target has remote_query capabilities.  If not,
+     it does not have kod either.  */
+  bufsiz = target_read_partial (&current_target, TARGET_OBJECT_KOD,
+				NULL, NULL, 0, 0);
+  if (bufsiz < 0)
     {
       strcpy (result,
               "ERR: Kernel Object Display not supported by current target\n");
@@ -99,7 +101,6 @@ gdb_kod_query (char *arg, char *result, int *maxsiz)
     }
 
   /* Just get the maximum buffer size.  */
-  target_query ((int) 'K', 0, 0, &bufsiz);
 
   /* Check if *we* were called just for getting the buffer size.  */
   if (*maxsiz == 0)
@@ -119,7 +120,8 @@ gdb_kod_query (char *arg, char *result, int *maxsiz)
     error ("kod: query argument too long");
 
   /* Send actual request.  */
-  if (target_query ((int) 'K', arg, result, &bufsiz))
+  if (target_read_partial (&current_target, TARGET_OBJECT_KOD,
+			   arg, result, 0, bufsiz) < 0)
     strcpy (result, "ERR: remote query failed");
 }
 

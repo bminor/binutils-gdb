@@ -161,8 +161,6 @@ static int ishex (int ch, int *val);
 
 static int stubhex (int ch);
 
-static int remote_query (int /*char */ , char *, char *, int *);
-
 static int hexnumstr (char *, ULONGEST);
 
 static int hexnumnstr (char *, ULONGEST, int);
@@ -5103,41 +5101,47 @@ the loaded file\n");
     printf_filtered ("No loaded section named '%s'.\n", args);
 }
 
-static int
-remote_query (int query_type, char *buf, char *outbuf, int *bufsiz)
+static LONGEST
+remote_read_partial (struct target_ops *ops, enum target_object object,
+		     const char *annex, void *buf,
+		     ULONGEST offset, LONGEST len)
 {
   struct remote_state *rs = get_remote_state ();
   int i;
   char *buf2 = alloca (rs->remote_packet_size);
   char *p2 = &buf2[0];
+  char query_type;
 
-  if (!bufsiz)
-    error ("null pointer to remote bufer size specified");
-
-  /* minimum outbuf size is (rs->remote_packet_size) - if bufsiz is not large enough let 
-     the caller know and return what the minimum size is   */
-  /* Note: a zero bufsiz can be used to query the minimum buffer size */
-  if (*bufsiz < (rs->remote_packet_size))
+  /* Map pre-existing objects onto letters.  DO NOT do this for new
+     objects!!!  Instead specify new query packets.  */
+  switch (object)
     {
-      *bufsiz = (rs->remote_packet_size);
+    case TARGET_OBJECT_KOD:
+      query_type = 'K';
+      break;
+    case TARGET_OBJECT_AVR:
+      query_type = 'R';
+      break;
+    default:
       return -1;
     }
+
+  /* Note: a zero BUF, OFFSET and LEN can be used to query the minimum
+     buffer size.  */
+  if (buf == NULL && offset == 0 && len == 0)
+    return (rs->remote_packet_size);
+  /* Minimum outbuf size is (rs->remote_packet_size) - if bufsiz is
+     not large enough let the caller.  */
+  if (len < (rs->remote_packet_size))
+    return -1;
+  len = rs->remote_packet_size;
 
   /* except for querying the minimum buffer size, target must be open */
   if (!remote_desc)
     error ("remote query is only available after target open");
 
-  /* we only take uppercase letters as query types, at least for now */
-  if ((query_type < 'A') || (query_type > 'Z'))
-    error ("invalid remote query type");
-
-  if (!buf)
-    error ("null remote query specified");
-
-  if (!outbuf)
-    error ("remote query requires a buffer to receive data");
-
-  outbuf[0] = '\0';
+  gdb_assert (annex != NULL);
+  gdb_assert (buf != NULL);
 
   *p2++ = 'q';
   *p2++ = query_type;
@@ -5147,27 +5151,23 @@ remote_query (int query_type, char *buf, char *outbuf, int *bufsiz)
      plus one extra in case we are debugging (remote_debug),
      we have PBUFZIZ - 7 left to pack the query string */
   i = 0;
-  while (buf[i] && (i < ((rs->remote_packet_size) - 8)))
+  while (annex[i] && (i < ((rs->remote_packet_size) - 8)))
     {
-      /* bad caller may have sent forbidden characters */
-      if ((!isprint (buf[i])) || (buf[i] == '$') || (buf[i] == '#'))
-	error ("illegal characters in query string");
-
-      *p2++ = buf[i];
+      /* Bad caller may have sent forbidden characters.  */
+      gdb_assert (isprint (annex[i]) && annex[i] != '$' && annex[i] != '#');
+      *p2++ = annex[i];
       i++;
     }
-  *p2 = buf[i];
-
-  if (buf[i])
-    error ("query larger than available buffer");
+  *p2 = '\0';
+  gdb_assert (annex[i] == '\0');
 
   i = putpkt (buf2);
   if (i < 0)
     return i;
 
-  getpkt (outbuf, *bufsiz, 0);
+  getpkt (buf, len, 0);
 
-  return 0;
+  return strlen (buf);
 }
 
 static void
@@ -5445,7 +5445,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_pid_to_str = remote_pid_to_str;
   remote_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_ops.to_stop = remote_stop;
-  remote_ops.to_query = remote_query;
+  remote_ops.to_read_partial = remote_read_partial;
   remote_ops.to_rcmd = remote_rcmd;
   remote_ops.to_stratum = process_stratum;
   remote_ops.to_has_all_memory = 1;
@@ -5965,7 +5965,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_pid_to_str = remote_pid_to_str;
   remote_async_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_async_ops.to_stop = remote_stop;
-  remote_async_ops.to_query = remote_query;
+  remote_async_ops.to_read_partial = remote_read_partial;
   remote_async_ops.to_rcmd = remote_rcmd;
   remote_async_ops.to_stratum = process_stratum;
   remote_async_ops.to_has_all_memory = 1;

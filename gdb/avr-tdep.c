@@ -1359,7 +1359,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 avr_io_reg_read_command (char *args, int from_tty)
 {
-  int bufsiz = 0;
+  LONGEST bufsiz = 0;
   char buf[400];
   char query[400];
   char *p;
@@ -1367,22 +1367,23 @@ avr_io_reg_read_command (char *args, int from_tty)
   unsigned int val;
   int i, j, k, step;
 
-  if (!current_target.to_query)
+  /* Just get the maximum buffer size. */
+  bufsiz = target_read_partial (&current_target, TARGET_OBJECT_AVR,
+				NULL, NULL, 0, 0);
+  if (bufsiz < 0)
     {
       fprintf_unfiltered (gdb_stderr,
 			  "ERR: info io_registers NOT supported by current "
                           "target\n");
       return;
     }
-
-  /* Just get the maximum buffer size. */
-  target_query ((int) 'R', 0, 0, &bufsiz);
   if (bufsiz > sizeof (buf))
     bufsiz = sizeof (buf);
 
   /* Find out how many io registers the target has. */
   strcpy (query, "avr.io_reg");
-  target_query ((int) 'R', query, buf, &bufsiz);
+  target_read_partial (&current_target, TARGET_OBJECT_AVR, query, buf, 0,
+		       bufsiz);
 
   if (strncmp (buf, "", bufsiz) == 0)
     {
@@ -1413,7 +1414,8 @@ avr_io_reg_read_command (char *args, int from_tty)
         j = nreg - i;           /* last block is less than 8 registers */
 
       snprintf (query, sizeof (query) - 1, "avr.io_reg:%x,%x", i, j);
-      target_query ((int) 'R', query, buf, &bufsiz);
+      target_read_partial (&current_target, TARGET_OBJECT_AVR, query, buf,
+			   0, bufsiz);
 
       p = buf;
       for (k = i; k < (i + j); k++)
