@@ -135,8 +135,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 					running and the debugger should
 					continue to wait for 'W', 'T', etc.
 
-	or...         	Otext		Send text to stdout.
-
 	thread alive	TXX		Find out if the thread XX is alive.
 	reply		OK		thread is still alive
 			ENN		thread is dead
@@ -594,7 +592,7 @@ fromhex (a)
     return a - '0';
   else if (a >= 'a' && a <= 'f')
     return a - 'a' + 10;
-  else
+  else 
     error ("Reply contains invalid hex digit %d", a);
 }
 
@@ -1054,33 +1052,45 @@ remote_write_bytes (memaddr, myaddr, len)
   char buf[PBUFSIZ];
   int i;
   char *p;
+  int done;
+  /* Chop the transfer down if necessary */
 
-  /* FIXME-32x64: Need a version of print_address_numeric which puts the
-     result in a buffer like sprintf.  */
-  sprintf (buf, "M%lx,%x:", (unsigned long) memaddr, len);
-
-  /* We send target system values byte by byte, in increasing byte addresses,
-     each byte encoded as two hex characters.  */
-
-  p = buf + strlen (buf);
-  for (i = 0; i < len; i++)
+  done = 0;
+  while (done < len)
     {
-      *p++ = tohex ((myaddr[i] >> 4) & 0xf);
-      *p++ = tohex (myaddr[i] & 0xf);
-    }
-  *p = '\0';
+      int todo = len - done;
+      int cando = PBUFSIZ /2 - 32; /* number of bytes that will fit. */
+      if (todo > cando)
+	todo = cando;
 
-  putpkt (buf);
-  getpkt (buf, 0);
+      /* FIXME-32x64: Need a version of print_address_numeric which puts the
+	 result in a buffer like sprintf.  */
+      sprintf (buf, "M%lx,%x:", (unsigned long) memaddr + done, todo);
 
-  if (buf[0] == 'E')
-    {
-      /* There is no correspondance between what the remote protocol uses
-	 for errors and errno codes.  We would like a cleaner way of
-	 representing errors (big enough to include errno codes, bfd_error
-	 codes, and others).  But for now just return EIO.  */
-      errno = EIO;
-      return 0;
+      /* We send target system values byte by byte, in increasing byte addresses,
+	 each byte encoded as two hex characters.  */
+
+      p = buf + strlen (buf);
+      for (i = 0; i < todo; i++)
+	{
+	  *p++ = tohex ((myaddr[i + done] >> 4) & 0xf);
+	  *p++ = tohex (myaddr[i + done] & 0xf);
+	}
+      *p = '\0';
+
+      putpkt (buf);
+      getpkt (buf, 0);
+
+      if (buf[0] == 'E')
+	{
+	  /* There is no correspondance between what the remote protocol uses
+	     for errors and errno codes.  We would like a cleaner way of
+	     representing errors (big enough to include errno codes, bfd_error
+	     codes, and others).  But for now just return EIO.  */
+	  errno = EIO;
+	  return 0;
+	}
+      done += todo;
     }
   return len;
 }

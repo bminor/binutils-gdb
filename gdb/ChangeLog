@@ -1,3 +1,7 @@
+Tue Aug 15 07:51:21 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* remote.c (remote_write_bytes): Chop up large transfers.
+
 Mon Aug 14 17:56:36 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gcc.patch: Remove, relevant only to long-ago versions of GCC.
