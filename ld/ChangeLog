@@ -1,5 +1,10 @@
 Thu Feb  9 11:38:22 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldmain.c (main): If trace_file_tries is true, and we are using
+	an internal linker script, print out the script.
+	* ldfile.c (try_open): Reindent function.  Make the messages about
+	opening script files more informative.
+
 	* lexsup.c (parse_args): For -V, call ldversion with 1, not 0.
 	* ld.texinfo, ld.1: Update accordingly.
 
