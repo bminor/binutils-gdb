@@ -586,4 +586,7 @@ const struct ia64_operand elf64_ia64_operands[IA64_OPND_COUNT] =
       "a branch target" },
     { REL, ins_rsvd, ext_rsvd, 0, {{0, 0}}, 0,                  /* TGT64  */
       "a branch target" },
+
+    { ABS, ins_const, ext_const, 0, {{0, 0}}, 0,		/* LDXMOV */
+      "ldxmov target" },
   };

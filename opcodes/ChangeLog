@@ -1,3 +1,8 @@
+2002-12-03  Richard Henderson  <rth@redhat.com>
+
+	* ia64-opc-m.c: Add ld8.mov.
+	* ia64-asmtab.c: Regenerate.
+
 2002-12-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* arm-dis.c (print_insn_arm): Constify "insn".  Formatting.

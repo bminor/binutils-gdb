@@ -5523,6 +5523,15 @@ operand_match (idesc, index, e)
 	}
       break;
 
+    case IA64_OPND_LDXMOV:
+      fix = CURR_SLOT.fixup + CURR_SLOT.num_fixups;
+      fix->code = BFD_RELOC_IA64_LDXMOV;
+      fix->opnd = idesc->operands[index];
+      fix->expr = *e;
+      fix->is_pcrel = 0;
+      ++CURR_SLOT.num_fixups;
+      return OPERAND_MATCH;
+
     default:
       break;
     }

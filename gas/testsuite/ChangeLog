@@ -1,3 +1,9 @@
+2002-12-03  Richard Henderson  <rth@redhat.com>
+
+	* gas/ia64/ldxmov-1.[ds]: New.
+	* gas/ia64/ldxmov-2.[ls]: New.
+	* gas/ia64/ia64.exp: Run them.
+
 2002-12-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/arm/adrl.s: Test behaviour against globals too.

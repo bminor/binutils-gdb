@@ -265,6 +265,10 @@ struct ia64_opcode ia64_opcodes_m[] =
     {"ld8.c.clr.acq.nt1", M, OpMXX6aHint (4, 0, 0, 0x2b, 1), {R1, MR3}, EMPTY},
     {"ld8.c.clr.acq.nta", M, OpMXX6aHint (4, 0, 0, 0x2b, 3), {R1, MR3}, EMPTY},
 
+    /* Pseudo-op that generates ldxmov relocation.  */
+    {"ld8.mov",		M, OpMXX6aHint (4, 0, 0, 0x03, 0),
+     {R1, MR3, IA64_OPND_LDXMOV}, EMPTY},
+
     /* Integer load w/increment by register.  */
 #define LDINCREG(c,h) M, OpMXX6aHint (4, 1, 0, c, h), {R1, MR3, R2}, POSTINC, 0, NULL
     {"ld1",		LDINCREG (0x00, 0)},
