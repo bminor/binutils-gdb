@@ -1563,6 +1563,9 @@ sparc64_elf_adjust_dynamic_symbol (info, h)
       if (s->_raw_size == 0)
 	s->_raw_size = PLT_HEADER_SIZE;
 
+      /* To simplify matters later, just store the plt index here.  */
+      h->plt.offset = s->_raw_size / PLT_ENTRY_SIZE;
+
       /* If this symbol is not defined in a regular file, and we are
 	 not generating a shared library, then set the symbol to this
 	 location in the .plt.  This is required to make function
@@ -1572,11 +1575,8 @@ sparc64_elf_adjust_dynamic_symbol (info, h)
 	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  h->root.u.def.section = s;
-	  h->root.u.def.value = s->_raw_size;
+	  h->root.u.def.value = sparc64_elf_plt_entry_offset (h->plt.offset);
 	}
-
-      /* To simplify matters later, just store the plt index here.  */
-      h->plt.offset = s->_raw_size / PLT_ENTRY_SIZE;
 
       /* Make room for this entry.  */
       s->_raw_size += PLT_ENTRY_SIZE;
