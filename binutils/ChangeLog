@@ -1,4 +1,8 @@
-2004-04-27  John Paul Wallington <jpw@gnu.org>
+2004-04-30  Michael Deutschmann  <michael@talamasca.ocis.net>
+
+	* ranlib.sh: Quote $1 argument in case it contains spaces.
+
+2004-04-27  John Paul Wallington  <jpw@gnu.org>
 
 	* objcopy.c (copy_usage, strip_usage): Fix spelling.
 
