@@ -293,8 +293,6 @@ MULTI_CFILES = \
 	config/e-mipsecoff.c \
 	config/e-mipself.c
 
-# @target_frag@
-
 OBJS = \
 	$(TARG_CPU_O) \
 	$(OBJ_FORMAT_O) \
@@ -347,7 +345,7 @@ INCDIR = $(BASEDIR)/include
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -D_GNU_SOURCE $(INTERNAL_CFLAGS) $(CROSS) $(HDEFINES) $(TDEFINES) -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR)
+INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/config -I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR)
 
 # How to link with both our special library facilities
 # and the system's installed libraries.
@@ -780,7 +778,7 @@ dep-am: .dep
 	cat .dep >> tmp-Makefile.am
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.am $(srcdir)/Makefile.am
 
-.PHONY: dep dep-in
+.PHONY: dep dep-in dep-am
 
 # start-sanitize-arc
 TCDEP_arc_elf = $(INCDIR)/opcode/arc.h

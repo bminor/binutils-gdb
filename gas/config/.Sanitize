@@ -56,8 +56,6 @@ fi
 Things-to-keep:
 
 aout_gnu.h
-arm-big.mt
-arm-lit.mt
 atof-ieee.c
 atof-tahoe.c
 atof-vax.c
@@ -66,15 +64,10 @@ e-i386coff.c
 e-i386elf.c
 e-mipsecoff.c
 e-mipself.c
-i386coff.mt
 itbl-mips.h
 m68k-parse.h
 m68k-parse.y
-m68kcoff.mt
 m88k-opcode.h
-m88kcoff.mt
-mips-big.mt
-mips-lit.mt
 obj-aout.c
 obj-aout.h
 obj-bout.c
@@ -99,10 +92,6 @@ obj-som.c
 obj-som.h
 obj-vms.c
 obj-vms.h
-ppc-big.mt
-ppc-lit.mt
-ppc-sol.mt
-sco5.mt
 tc-a29k.c
 tc-a29k.h
 tc-alpha.c

@@ -1,5 +1,24 @@
 Wed Aug  6 00:30:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Define TARGET_BYTES_BIG_ENDIAN if endian is set.
+	Don't set targ or gas_target.  Define SCO_ELF and
+	TARGET_SOLARIS_COMMENT when appropriate.  Don't substitute for
+	target_frag.
+	* Makefile.am: Remove @target_frag@.
+	(INCLUDES): Remove $(INTERNAL_CFLAGS), $(CROSS), $(HDEFINES), and
+	$(TDEFINES).
+	(dep-am): Mark as phony.
+	* acconfig.h: Add TARGET_BYTES_BIG_ENDIAN, TARGET_SOLARIS_COMMENT,
+	and SCO_ELF.
+	* config/arm-big.mt, config/arm-lit.mt: Remove.
+	* config/mips-big.mt, config/mips-lit.mt: Remove.
+	* config/ppc-big.mt, config/ppc-lit.mt: Remove.
+	* config/ppc-sol.mt: Remove.
+	* config/i386coff.mt, config/m68kcoff.mt: Remove.
+	* config/m88kcoff.mt: Remove.
+	* config/sco5.mt: Remove.
+	* configure, config.in, Makefile.in: Rebuild.
+
 	* Makefile.am ($(srcdir)/config/m68k-parse.h): New target, to
 	further try to circumvent the .y.h rule.
 	* Makefile.in: Rebuild.
