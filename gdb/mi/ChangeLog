@@ -1,5 +1,10 @@
 2001-06-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbmi.texinfo (GDB/MI Output Syntax): Delete reference to query
+	packet.
+
+2001-06-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* mi-cmd-stack.c (list_args_or_locals): Output a list of "args" or
 	"locals" entries.
 	* gdbmi.texinfo (stack-list-locals, stack-list-arguments)

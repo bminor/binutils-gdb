@@ -294,14 +294,6 @@ depending on the needs---this is still in development).
 @end table
 
 @noindent
-In addition, the following are still being developed:
-
-@table @code
-@item @var{query}
-This action is currently undefined.
-@end table
-
-@noindent
 Notes:
 
 @itemize @bullet
