@@ -2976,89 +2976,89 @@ void OP_CB (insn, extension)
 void OP_F500 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* getx */
 void OP_F6F0 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* mulq */
 void OP_F600 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* mulq */
 void OP_F90000 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* mulq */
 void OP_FB000000 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* mulq */
 void OP_FD000000 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* mulqu */
 void OP_F610 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* mulqu */
 void OP_F91400 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* mulqu */
 void OP_FB140000 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* mulqu */
 void OP_FD140000 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* sat16 */
 void OP_F640 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* sat24 */
 void OP_F650 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
 
 /* bsch */
 void OP_F670 (insn, extension)
      unsigned long insn, extension;
 {
-  abort ()
+  abort ();
 }
