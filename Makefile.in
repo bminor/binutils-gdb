@@ -26,6 +26,8 @@ bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
 tooldir = $(libdir)
 
+program_transform_name =
+
 datadir = $(prefix)/lib
 mandir = $(prefix)/man
 man1dir = $(mandir)/man1
@@ -51,6 +53,7 @@ AR = ar
 AR_FLAGS = qc
 CFLAGS = -g
 RANLIB = ranlib
+NM = nm
 
 BISON = `if [ -f $${rootme}/byacc/byacc ] ; \
 	    then echo $${rootme}/byacc/byacc ; \
@@ -65,7 +68,7 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
 
-SUBDIRS = libiberty mmalloc glob readline opcodes bfd gdb  binutils ld gas tgas gcc libg++ newlib libm # clib -- newlib replaces
+SUBDIRS = libiberty mmalloc glob readline opcodes bfd gdb  binutils ld gas tgas gcc libg++ newlib
 OTHERS = 
 
 ALL = all.normal
@@ -74,17 +77,65 @@ INSTALL_TARGET = install.all
 ### for debugging
 #GCCVERBOSE=-v
 
-GXX = `if [ -f $${rootme}/gcc/gcc ] ; \
-	then echo $${rootme}/gcc/gcc -B$${rootme}/gcc/ ; \
-	else echo gcc ; fi`
+CC_FOR_TARGET = ` \
+  if [ -f $${rootme}/gcc/Makefile ] ; then \
+    echo $${rootme}/gcc/gcc -B$${rootme}/gcc/; \
+  else \
+    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+      echo $(CC); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e '' $$t; \
+    fi; \
+  fi`
 
-XTRAFLAGS = `if [ -f $${rootme}/gcc/gcc ] ; \
-	then echo -I$${rootme}/gcc/include ; \
-	else echo ; fi`
+AR_FOR_TARGET = ` \
+  if [ -f $${rootme}/binutils/Makefile ] ; then \
+    echo $${rootme}/binutils/ar ; \
+  else \
+    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+      echo $(AR); \
+    else \
+       t='$(program_transform_name)'; echo ar | sed -e '' $$t ; \
+    fi \
+  fi`
+
+RANLIB_FOR_TARGET = ` \
+  if [ -f $${rootme}/binutils/Makefile ] ; then \
+    echo $${rootme}/binutils/ranlib ; \
+  else \
+    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+      echo $(RANLIB); \
+    else \
+       t='$(program_transform_name)'; echo ranlib | sed -e '' $$t ; \
+    fi \
+  fi`
+
+NM_FOR_TARGET = ` \
+  if [ -f $${rootme}/binutils/Makefile ] ; then \
+    echo $${rootme}/binutils/nm ; \
+  else \
+    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+      echo $(NM); \
+    else \
+       t='$(program_transform_name)'; echo nm | sed -e '' $$t ; \
+    fi \
+  fi`
+
+XTRAFLAGS = ` \
+  if [ -f $${rootme}/gcc/Makefile ] ; then \
+    if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
+      echo -I$${rootme}/gcc/include ; \
+    else \
+      echo -I$${rootme}/gcc/include -I$${srcroot}/newlib/libc/include ; \
+    fi ; \
+  else \
+     echo ; \
+  fi`
 
 #### host and target specific makefile fragments come in here.
 ###
 
+# Flags to pass down to sub-makes
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
@@ -103,6 +154,28 @@ FLAGS_TO_PASS = \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
 
+# Flags to pass down to makes which are built with the target
+# environment (e.g. libg++, xiberty, newlib).
+TARGET_FLAGS_TO_PASS = \
+	"prefix=$(prefix)" \
+	"exec_prefix=$(exec_prefix)" \
+	"tooldir=$(tooldir)" \
+	"AR_FLAGS=$(AR_FLAGS)" \
+	"CFLAGS=$(CFLAGS)" \
+	"LOADLIBES=$(LOADLIBES)" \
+	"LDFLAGS=$(LDFLAGS)" \
+	"BISON=$(BISON)" \
+	"LEX=$(LEX)" \
+	"MAKEINFO=$(MAKEINFO)" \
+	"INSTALL=$(INSTALL)" \
+	"INSTALL_DATA=$(INSTALL_DATA)" \
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"CC=$(CC_FOR_TARGET)" \
+	"AR=$(AR_FOR_TARGET)" \
+	"RANLIB=$(RANLIB_FOR_TARGET)" \
+	"NM=$(NM_FOR_TARGET)" \
+	"XTRAFLAGS=$(XTRAFLAGS)"
+
 .PHONY: all info install-info clean-info
 .NOEXPORT:
 
@@ -111,22 +184,18 @@ all:	$(ALL)
 info:	
 	@rootme=`pwd` ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) subdir_do DO=info "DODIRS=$(SUBDIRS)" 
 
-# Note libg++ has to be handled specially (we can't compile it with CC=cc).
 check:
-	@rootme=`pwd` ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) subdir_do DO=check \
-	  "DODIRS=`echo $(SUBDIRS) | sed -e \"s/libg\+\+//\"" 
-	@rootme=`pwd` ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) subdir_do DO=check \
-	  "DODIRS=libg++" "CC=${GXX}" "XTRAFLAGS=${XTRAFLAGS}"
+	@rootme=`pwd` ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) DO=check "DODIRS=$(SUBDIRS)" subdir_do
 
 clean-info:
-	@$(MAKE) $(FLAGS_TO_PASS)  subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
+	@rootme='pwd' ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) DO=clean-info "DODIRS=$(SUBDIRS)" subdir_do
 	
 install-info: install-info-dirs force
 	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
-	@$(MAKE) $(FLAGS_TO_PASS) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
-	@$(MAKE) $(FLAGS_TO_PASS) dir.info install-dir.info
+	@rootme='pwd' ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) DO=install-info "DODIRS=$(SUBDIRS)" subdir_do
+	@rootme='pwd' ; export rootme ; $(MAKE) $(FLAGS_TO_PASS) dir.info install-dir.info
 
 install-dir.info:
 	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
@@ -144,7 +213,6 @@ all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
 all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
 	 all-opcodes all-bfd all-readline all-gdb all-binutils all-gcc \
 	all-newlib
-#	$(MAKE) $(FLAGS_TO_PASS) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 clean: clean-autoconf clean-libiberty clean-mmalloc clean-texinfo \
 	clean-bfd clean-newlib clean-binutils clean-flex \
@@ -328,7 +396,6 @@ install-mmalloc: force
 all-texinfo: all-libiberty
 	@if [ -f ./texinfo/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
-		rootme=`pwd` ; export rootme ; \
 		(cd ./texinfo; \
 		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
@@ -439,11 +506,12 @@ install-binutils: force
 	fi
 
 ### newlib
-all-newlib: force
+all-newlib: all-binutils all-ld all-gas all-gcc
 	@if [ -f ./newlib/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
 		(cd ./newlib; \
-		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+		$(MAKE) $(TARGET_FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -451,8 +519,9 @@ all-newlib: force
 clean-newlib: force
 	@if [ -f ./newlib/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
 		(cd ./newlib; \
-		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
+		$(MAKE) $(TARGET_FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -460,8 +529,9 @@ clean-newlib: force
 install-newlib: force
 	@if [ -f ./newlib/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
 		(cd ./newlib; \
-		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+		$(MAKE) $(TARGET_FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -469,21 +539,27 @@ install-newlib: force
 ### gprof
 all-gprof: all-libiberty all-bfd
 	@if [ -f ./gprof/Makefile ] ; then \
-		(cd gprof; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./gprof; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
 
 clean-gprof: force
 	@if [ -f ./gprof/Makefile ] ; then \
-		(cd gprof; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./gprof; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
 
 install-gprof: force
 	@if [ -f ./gprof/Makefile ] ; then \
-		(cd gprof; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./gprof; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1009,8 +1085,9 @@ install-libm: force
 all-libg++: all-gas all-ld all-gcc
 	@if [ -f ./libg++/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
 		(cd ./libg++; \
-		$(MAKE) $(FLAGS_TO_PASS) "CC=${GXX}" all) ; \
+		$(MAKE) $(TARGET_FLAGS_TO_PASS) all) ; \
 	else \
 		true ; \
 	fi
@@ -1018,8 +1095,9 @@ all-libg++: all-gas all-ld all-gcc
 clean-libg++: force
 	@if [ -f ./libg++/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
 		(cd ./libg++; \
-		$(MAKE) $(FLAGS_TO_PASS) "CC=${GXX}" clean) ; \
+		$(MAKE) $(TARGET_FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi
@@ -1027,8 +1105,9 @@ clean-libg++: force
 install-libg++: force
 	@if [ -f ./libg++/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
 		(cd ./libg++; \
-		$(MAKE) $(FLAGS_TO_PASS) "CC=${GXX}" install) ; \
+		$(MAKE) $(TARGET_FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
 	fi
@@ -1042,16 +1121,23 @@ all.xclib:	all.normal
 
 subdir_do:
 	@for i in $(DODIRS); do \
-		if [ -f ./$$i/localenv ] ; then \
-			if (rootme=`pwd` ; export rootme ; cd ./$$i; \
-				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
-				else exit 1 ; fi ; \
-		else if [ -f ./$$i/Makefile ] ; then \
-			if (rootme=`pwd` ; export rootme ; cd ./$$i; \
-				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
-			else exit 1 ; fi ; \
-		else true ; fi ; \
-	fi ; \
+	  if [ -f ./$$i/localenv ] || [ -f ./$$i/Makefile ] ; then \
+	    case $$i in \
+	    libg++ | xiberty | newlib) \
+	      if (rootme=`pwd` ; export rootme ; \
+		  srcroot=`cd $(srcdir); pwd` ; export srcroot ; \
+		  cd ./$$i ; \
+		  $(MAKE) $(TARGET_FLAGS_TO_PASS) $(DO)) ; then true ; \
+	      else exit 1 ; fi \
+	      ;; \
+	    *) \
+	      if (rootme=`pwd` ; export rootme ; \
+		  cd ./$$i ; \
+		  $(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
+	      else exit 1 ; fi \
+	      ;; \
+	    esac ; \
+	  else true ; fi ; \
 	done
 
 # The "else true" stuff is for Ultrix; the shell returns the exit code

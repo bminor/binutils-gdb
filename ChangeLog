@@ -1,3 +1,10 @@
+Wed Sep  9 12:21:42 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: added TARGET_FLAGS_TO_PASS, CC_FOR_TARGET,
+	AR_FOR_TARGET, RANLIB_FOR_TARGET, NM_FOR_TARGET.  Pass
+	TARGET_FLAGS_TO_PASS, which defines CC, AR, RANLIB and NM as the
+	FOR_TARGET variants, to newlib and libg++.
+
 Tue Sep  8 17:28:30 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (all-gas, all-gdb): Require all-opcodes to be built
