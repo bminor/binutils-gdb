@@ -1,3 +1,13 @@
+2002-02-23  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-02-22 Alfred M. Szmidt <ams@kemisten.nu>:
+
+	* configure.in: (AC_CHECK_FUNCS) Added test for
+	canonicalize_file_name Regenerated.
+        * config.in, configure: Regenerated.
+        * utils.c: (gdb_realpath) If HAVE_CANONICALIZE_FILE_NAME is
+	defined use canonicalize_file_name.
+        
 2002-02-23  Michael Chastain  <mec@shout.net>
 
 	* MAINTAINERS: Remove Michael Chastain from "paper trail" list.

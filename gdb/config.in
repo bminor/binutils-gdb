@@ -202,6 +202,9 @@
 /* Define if you have the bzero function.  */
 #undef HAVE_BZERO
 
+/* Define if you have the canonicalize_file_name function.  */
+#undef HAVE_CANONICALIZE_FILE_NAME
+
 /* Define if you have the dcgettext function.  */
 #undef HAVE_DCGETTEXT
 

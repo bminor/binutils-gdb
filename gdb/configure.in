@@ -131,8 +131,8 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(bcopy btowc bzero isascii poll realpath sbrk setpgid setpgrp \
-	sigaction sigprocmask sigsetmask)
+AC_CHECK_FUNCS(bcopy btowc bzero canonicalize_file_name isascii poll \
+	realpath sbrk setpgid setpgrp sigaction sigprocmask sigsetmask )
 AC_FUNC_ALLOCA
 AC_FUNC_VFORK
 dnl AC_FUNC_SETPGRP does not work when cross compiling

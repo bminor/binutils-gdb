@@ -2526,7 +2526,9 @@ string_to_core_addr (const char *my_string)
 char *
 gdb_realpath (const char *filename)
 {
-#ifdef HAVE_REALPATH
+#ifdef HAVE_CANONICALIZE_FILE_NAME
+  return canonicalize_file_name (filename);
+#elif defined (HAVE_REALPATH)
 #if defined (PATH_MAX)
   char buf[PATH_MAX];
 #elif defined (MAXPATHLEN)
