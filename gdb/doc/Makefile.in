@@ -100,7 +100,7 @@ DVIPS = dvips
 PDFTEX = pdftex
 
 # Main GDB manual's source files
-SFILES_INCLUDED = gdb-cfg.texi $(srcdir)/annotate.texi
+SFILES_INCLUDED = gdb-cfg.texi $(srcdir)/annotate.texi $(srcdir)/fdl.texi
 
 SFILES_LOCAL = $(srcdir)/gdb.texinfo GDBvn.texi $(SFILES_INCLUDED)
 
