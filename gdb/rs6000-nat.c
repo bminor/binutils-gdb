@@ -215,6 +215,8 @@ store_inferior_registers (regno)
 
   else if (regno < FP0_REGNUM)	/* a GPR */
     {
+      if (regno == SP_REGNUM)
+	exec_one_dummy_insn ();
       ptrace (PT_WRITE_GPR, inferior_pid, (PTRACE_ARG3_TYPE) regno,
 	      *(int *) &registers[REGISTER_BYTE (regno)], 0);
     }
@@ -231,6 +233,11 @@ store_inferior_registers (regno)
       ptrace (PT_WRITE_GPR, inferior_pid,
 	      (PTRACE_ARG3_TYPE) special_regs[regno - FIRST_UISA_SP_REGNUM],
 	      *(int *) &registers[REGISTER_BYTE (regno)], 0);
+    }
+
+  else if (regno < NUM_REGS)
+    {
+      /* Ignore it.  */
     }
 
   else

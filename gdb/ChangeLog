@@ -1,3 +1,41 @@
+2000-02-15  Kevin Buettner  <kevinb@redhat.com>
+
+	Changes for AIX 4.3:
+	* rs6000-tdep.c (rs6000_fix_call_dummy): Set TOC register
+	to correct value for generic dummy frames.  When using
+	generic dummy frames, don't attempt to write TOC value or
+	function to call into the call dummy.
+        (rs6000_push_arguments): Adapt USE_GENERIC_DUMMY_FRAMES
+	code to also handle the PowerOpen ABI.
+	(ppc_push_return_address): Enable for all ports.
+	* config/powerpc/tm-ppc-aix.h (USE_GENERIC_DUMMY_FRAMES,
+	PUSH_DUMMY_FRAME, PUSH_RETURN_ADDRESS, GET_SAVED_REGISTER, 
+	CALL_DUMMY_BREAKPOINT_OFFSET, CALL_DUMMY_LOCATION,
+	CALL_DUMMY_ADDRESS, CALL_DUMMY_START_OFFSET): Override defaults
+	provided by generic RS6000 definitions so that call dummies
+	are implemented using generic dummy frames instead.
+
+	* rs6000-nat.c (store_inferior_registers): Call exec_one_dummy_insn()
+	prior to changing the stack pointer via ptrace().  Also, ignore
+	attempts to store to undefined registers that are less than
+	NUM_REGS.
+
+	* rs6000-tdep.c (DUMMY_FRAME_SIZE): Change size of the dummy
+	frame from 436 to 448 to account for alignment padding.
+	(rs6000_push_arguments): Obtain actual register size instead
+	of assuming the register is 4 bytes long.  [There's still
+	more work to be done to totally remove the 4 byte assumption,
+	however.]  Make sure the stack is 16 byte aligned as required
+	by the PowerOpen ABI.  Also, make sure that small structures
+	passed in registers are properly aligned within the register.
+
+2000-02-15  Jesper Skov  <jskov@cygnus.co.uk>
+
+	Patch applied by Kevin Buettner <kevinb@redhat.com>
+	
+	* rs6000-tdep.c (skip_prologue): skip copying of argument
+	registers to local variable registers.
+
 2000-02-14  Jim Kingdon  <kingdon@redhat.com>
 
 	* elfread.c (elf_symtab_read): Revert changes by Amit S. Kale.  A

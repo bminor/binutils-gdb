@@ -481,6 +481,16 @@ skip_prologue (pc, fdata)
 	  minimal_toc_loaded = 1;
 	  continue;
 
+	  /* move parameters from argument registers to local variable
+             registers */
+ 	}
+      else if ((op & 0xfc0007fe) == 0x7c000378 &&	/* mr(.)  Rx,Ry */
+               (((op >> 21) & 31) >= 3) &&              /* R3 >= Ry >= R10 */
+               (((op >> 21) & 31) <= 10) &&
+               (((op >> 16) & 31) >= fdata->saved_gpr)) /* Rx: local var reg */
+	{
+	  continue;
+
 	  /* store parameters in stack */
 	}
       else if ((op & 0xfc1f0000) == 0x90010000 ||	/* st rx,NUM(r1) */
@@ -559,20 +569,22 @@ skip_prologue (pc, fdata)
 
 
 /*************************************************************************
-  Support for creating pushind a dummy frame into the stack, and popping
+  Support for creating pushing a dummy frame into the stack, and popping
   frames, etc. 
 *************************************************************************/
 
 /* The total size of dummy frame is 436, which is;
 
-   32 gpr's     - 128 bytes
-   32 fpr's     - 256   "
-   7  the rest  - 28    "
-   and 24 extra bytes for the callee's link area. The last 24 bytes
-   for the link area might not be necessary, since it will be taken
-   care of by push_arguments(). */
+   32 gpr's           - 128 bytes
+   32 fpr's           - 256 bytes
+   7  the rest        -  28 bytes
+   callee's link area -  24 bytes
+   padding            -  12 bytes
 
-#define DUMMY_FRAME_SIZE 436
+   Note that the last 24 bytes for the link area might not be necessary,
+   since it will be taken care of by push_arguments(). */
+
+#define DUMMY_FRAME_SIZE 448
 
 #define	DUMMY_FRAME_ADDR_SIZE 10
 
@@ -834,28 +846,39 @@ rs6000_fix_call_dummy (dummyname, pc, fun, nargs, args, type, gcc_p)
   int ii;
   CORE_ADDR target_addr;
 
-  if (find_toc_address_hook != NULL)
+  if (USE_GENERIC_DUMMY_FRAMES)
     {
-      CORE_ADDR tocvalue;
-
-      tocvalue = (*find_toc_address_hook) (fun);
-      ii = *(int *) ((char *) dummyname + TOC_ADDR_OFFSET);
-      ii = (ii & 0xffff0000) | (tocvalue >> 16);
-      *(int *) ((char *) dummyname + TOC_ADDR_OFFSET) = ii;
-
-      ii = *(int *) ((char *) dummyname + TOC_ADDR_OFFSET + 4);
-      ii = (ii & 0xffff0000) | (tocvalue & 0x0000ffff);
-      *(int *) ((char *) dummyname + TOC_ADDR_OFFSET + 4) = ii;
+      if (find_toc_address_hook != NULL)
+	{
+	  CORE_ADDR tocvalue = (*find_toc_address_hook) (fun);
+	  write_register (TOC_REGNUM, tocvalue);
+	}
     }
+  else
+    {
+      if (find_toc_address_hook != NULL)
+	{
+	  CORE_ADDR tocvalue;
 
-  target_addr = fun;
-  ii = *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET);
-  ii = (ii & 0xffff0000) | (target_addr >> 16);
-  *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET) = ii;
+	  tocvalue = (*find_toc_address_hook) (fun);
+	  ii = *(int *) ((char *) dummyname + TOC_ADDR_OFFSET);
+	  ii = (ii & 0xffff0000) | (tocvalue >> 16);
+	  *(int *) ((char *) dummyname + TOC_ADDR_OFFSET) = ii;
 
-  ii = *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET + 4);
-  ii = (ii & 0xffff0000) | (target_addr & 0x0000ffff);
-  *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET + 4) = ii;
+	  ii = *(int *) ((char *) dummyname + TOC_ADDR_OFFSET + 4);
+	  ii = (ii & 0xffff0000) | (tocvalue & 0x0000ffff);
+	  *(int *) ((char *) dummyname + TOC_ADDR_OFFSET + 4) = ii;
+	}
+
+      target_addr = fun;
+      ii = *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET);
+      ii = (ii & 0xffff0000) | (target_addr >> 16);
+      *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET) = ii;
+
+      ii = *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET + 4);
+      ii = (ii & 0xffff0000) | (target_addr & 0x0000ffff);
+      *(int *) ((char *) dummyname + TARGET_ADDR_OFFSET + 4) = ii;
+    }
 }
 
 /* Pass the arguments in either registers, or in the stack. In RS6000,
@@ -928,6 +951,7 @@ rs6000_push_arguments (nargs, args, sp, struct_return, struct_addr)
 
   for (argno = 0, argbytes = 0; argno < nargs && ii < 8; ++ii)
     {
+      int reg_size = REGISTER_RAW_SIZE (ii + 3);
 
       arg = args[argno];
       type = check_typedef (VALUE_TYPE (arg));
@@ -950,17 +974,18 @@ rs6000_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	  ++f_argno;
 	}
 
-      if (len > 4)
+      if (len > reg_size)
 	{
 
 	  /* Argument takes more than one register. */
 	  while (argbytes < len)
 	    {
-	      memset (&registers[REGISTER_BYTE (ii + 3)], 0, sizeof (int));
+	      memset (&registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
 	      memcpy (&registers[REGISTER_BYTE (ii + 3)],
 		      ((char *) VALUE_CONTENTS (arg)) + argbytes,
-		      (len - argbytes) > 4 ? 4 : len - argbytes);
-	      ++ii, argbytes += 4;
+		      (len - argbytes) > reg_size
+		        ? reg_size : len - argbytes);
+	      ++ii, argbytes += reg_size;
 
 	      if (ii >= 8)
 		goto ran_out_of_registers_for_arguments;
@@ -970,8 +995,10 @@ rs6000_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	}
       else
 	{			/* Argument can fit in one register. No problem. */
-	  memset (&registers[REGISTER_BYTE (ii + 3)], 0, sizeof (int));
-	  memcpy (&registers[REGISTER_BYTE (ii + 3)], VALUE_CONTENTS (arg), len);
+	  int adj = TARGET_BYTE_ORDER == BIG_ENDIAN ? reg_size - len : 0;
+	  memset (&registers[REGISTER_BYTE (ii + 3)], 0, reg_size);
+	  memcpy ((char *)&registers[REGISTER_BYTE (ii + 3)] + adj, 
+	          VALUE_CONTENTS (arg), len);
 	}
       ++argno;
     }
@@ -981,6 +1008,16 @@ ran_out_of_registers_for_arguments:
   if (USE_GENERIC_DUMMY_FRAMES)
     {
       saved_sp = read_sp ();
+#ifndef ELF_OBJECT_FORMAT
+      /* location for 8 parameters are always reserved. */
+      sp -= 4 * 8;
+
+      /* another six words for back chain, TOC register, link register, etc. */
+      sp -= 24;
+
+      /* stack pointer must be quadword aligned */
+      sp &= -16;
+#endif
     }
   else
     {
@@ -989,6 +1026,9 @@ ran_out_of_registers_for_arguments:
 
       /* another six words for back chain, TOC register, link register, etc. */
       sp -= 24;
+
+      /* stack pointer must be quadword aligned */
+      sp &= -16;
     }
 
   /* if there are more arguments, allocate space for them in 
@@ -1013,7 +1053,7 @@ ran_out_of_registers_for_arguments:
 	}
 
       /* add location required for the rest of the parameters */
-      space = (space + 7) & -8;
+      space = (space + 15) & -16;
       sp -= space;
 
       /* This is another instance we need to be concerned about securing our
@@ -1083,7 +1123,7 @@ ran_out_of_registers_for_arguments:
   target_store_registers (-1);
   return sp;
 }
-#ifdef ELF_OBJECT_FORMAT
+/* #ifdef ELF_OBJECT_FORMAT */
 
 /* Function: ppc_push_return_address (pc, sp)
    Set up the return address for the inferior function call. */
@@ -1097,7 +1137,7 @@ ppc_push_return_address (pc, sp)
   return sp;
 }
 
-#endif
+/* #endif */
 
 /* a given return value in `regbuf' with a type `valtype', extract and copy its
    value into `valbuf' */
