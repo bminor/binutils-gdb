@@ -1,3 +1,7 @@
+Tue Mar 24 18:32:47 1998  H.J. Lu  <hjl@gnu.org>
+
+	* i386.h: Set LinearAddress for lidt and lgdt.
+
 start-sanitize-sky
 Mon Mar 23 10:00:19 1998  Doug Evans  <devans@canuck.cygnus.com>
 
