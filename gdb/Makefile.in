@@ -391,7 +391,7 @@ DEPFILES = $(TDEPFILES) $(XDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES)
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
 # and it's more useful to see it in the .y file.
-TAGFILES = $(SFILES) $(HFILES) $(ALLPARAM) $(POSSLIBS) 
+TAGFILES = $(SFILES) $(HFILES) $(ALLDEPFILES) $(ALLPARAM) $(POSSLIBS) 
 
 TARFILES = $(SFILES) $(HFILES) $(NONSRC) $(ALLDEPFILES) $(ALLCONFIG) \
 	$(ALLPARAM) $(INFOFILES) $(POSSLIBS) $(REMOTE_EXAMPLES)
@@ -579,12 +579,6 @@ setup-to-dist: force_update
 	$(MAKE) $(MFLAGS) gdb.info
 	$(MAKE) $(MFLAGS) refcard.ps
 
-# Update the "alldeps.mak" file in a source directory.
-update-alldeps: force_update
-	../configure none -norecursion
-	rm -f alldeps.mak
-	$(MAKE) $(MFLAGS) alldeps.mak
-
 # Build a tar file from a proto-gdb.dir.
 gdb-$(VERSION).tar.Z: force_update
 	rm -f gdb.tar gdb-$(VERSION).tar.Z
@@ -701,8 +695,10 @@ version.c: Makefile
 
 # c-exp.tab.c is generated in objdir from c-exp.y if it doesn't exist
 # in srcdir, then compiled in objdir to c-exp.tab.o.
-# c-exp.tab.c is so the command argument will never match c-exp.y
-# (some "makes" rewrite the VPATH into command arguments if they match deps).
+
+# If we said c-exp.tab.c rather than ./c-exp.tab.c some makes
+# would sometimes re-write it into $(srcdir)/c-exp.tab.c.
+
 # Remove bogus decls for malloc/realloc/free which conflict with everything
 # else.
 c-exp.tab.o: c-exp.tab.c
@@ -717,7 +713,7 @@ c-exp.tab.c: c-exp.y Makefile.in
 	     -e 's/realloc/xrealloc/g' \
 	  < y.tab.c > c-exp.new
 	-rm y.tab.c
-	mv c-exp.new c-exp.tab.c
+	mv c-exp.new ./c-exp.tab.c
 
 # ch-exp.tab.c is generated in objdir from ch-exp.y if it doesn't exist
 # in srcdir, then compiled in objdir to ch-exp.tab.o.
@@ -737,7 +733,7 @@ ch-exp.tab.c: ch-exp.y Makefile.in c-exp.tab.c
 	     -e 's/realloc/xrealloc/g' \
 	  < y.tab.c > ch-exp.new
 	-rm y.tab.c
-	mv ch-exp.new ch-exp.tab.c
+	mv ch-exp.new ./ch-exp.tab.c
 
 # m2-exp.tab.c is generated in objdir from m2-exp.y if it doesn't exist
 # in srcdir, then compiled in objdir to m2-exp.tab.o.
@@ -757,7 +753,7 @@ m2-exp.tab.c: m2-exp.y Makefile.in ch-exp.tab.c
 	     -e 's/realloc/xrealloc/g' \
 	  < y.tab.c > m2-exp.new
 	-rm y.tab.c
-	mv m2-exp.new m2-exp.tab.c
+	mv m2-exp.new ./m2-exp.tab.c
 
 # These files are updated atomically, so make never has to remove them
 .PRECIOUS: m2-exp.tab.c ch-exp.tab.c c-exp.tab.c
@@ -790,7 +786,7 @@ unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 # These are things from config/*/*.m? fragments.  There is no good reason
 # why they are separate from the lists of files above.
 
-ALLDEPFILES = 29k-share/udi/udi/udip2soc.c 29k-share/udi/udi/udr.c \
+ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	a29k-pinsn.c a29k-tdep.c a68v-nat.c altos-xdep.c arm-convert.s \
 	arm-pinsn.c arm-tdep.c arm-xdep.c convex-pinsn.c convex-tdep.c \
 	convex-xdep.c core-svr4.c coredep.c corelow.c exec.c fork-child.c \

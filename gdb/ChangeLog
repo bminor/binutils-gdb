@@ -1,5 +1,12 @@
 Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Makefile.in (*.tab.c): Use ./c-exp.tab.c not just c-exp.tab.c.
+	Make comment explaining this comprehensible.
+	(TAGFILES): Include ALLDEPFILES.
+	(ALLDEPFILES): udi2soc.c and udr.c are in 29k-share/udi, not
+	29k-share/udi/udi.
+	(update-alldeps): Remove; obsolete.
+
 	* remote.c: Move comments regarding packets to top of file with the
 	rest of the protocol comments.
 	Fix incorrect description of 'T' response.
