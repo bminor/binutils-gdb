@@ -2,7 +2,8 @@
 
 	* arch-utils.c (deprecated_select_gdbarch_hack): Delete function.
 	(gdbarch_from_bfd): Call gdbarch_find_by_info.
-	(set_gdbarch_from_file): Call "deprecated_select_gdbarch_hack".
+	(set_gdbarch_from_file): Call
+	"deprecated_current_gdbarch_select_hack".
 
 2003-11-09  Andrew Cagney  <cagney@redhat.com>
 
