@@ -505,10 +505,7 @@ f:2:INIT_FRAME_PC:void:init_frame_pc:int fromleaf, struct frame_info *prev:froml
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
 v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::
 f:2:COERCE_FLOAT_TO_DOUBLE:int:coerce_float_to_double:struct type *formal, struct type *actual:formal, actual:::default_coerce_float_to_double::0
-# GET_SAVED_REGISTER is like DUMMY_FRAMES.  It is at level one as the
-# old code has strange #ifdef interaction.  So far no one has found
-# that default_get_saved_register() is the default they are after.
-f:1:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval::generic_get_saved_register:0
+f:2:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval:::generic_unwind_get_saved_register::0
 #
 f:2:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr:::generic_register_convertible_not::0
 f:2:REGISTER_CONVERT_TO_VIRTUAL:void:register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0::0

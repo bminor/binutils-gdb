@@ -63,71 +63,6 @@ find_saved_register (struct frame_info *frame, int regnum)
   return addr;
 }
 
-/* DEFAULT_GET_SAVED_REGISTER ()
-
-   Find register number REGNUM relative to FRAME and put its (raw,
-   target format) contents in *RAW_BUFFER.  Set *OPTIMIZED if the
-   variable was optimized out (and thus can't be fetched).  Set *LVAL
-   to lval_memory, lval_register, or not_lval, depending on whether
-   the value was fetched from memory, from a register, or in a strange
-   and non-modifiable way (e.g. a frame pointer which was calculated
-   rather than fetched).  Set *ADDRP to the address, either in memory
-   on as a REGISTER_BYTE offset into the registers array.
-
-   Note that this implementation never sets *LVAL to not_lval.  But
-   it can be replaced by defining GET_SAVED_REGISTER and supplying
-   your own.
-
-   The argument RAW_BUFFER must point to aligned memory.  */
-
-static void
-default_get_saved_register (char *raw_buffer,
-			    int *optimized,
-			    CORE_ADDR *addrp,
-			    struct frame_info *frame,
-			    int regnum,
-			    enum lval_type *lval)
-{
-  CORE_ADDR addr;
-
-  if (!target_has_registers)
-    error ("No registers.");
-
-  /* Normal systems don't optimize out things with register numbers.  */
-  if (optimized != NULL)
-    *optimized = 0;
-  addr = find_saved_register (frame, regnum);
-  if (addr != 0)
-    {
-      if (lval != NULL)
-	*lval = lval_memory;
-      if (regnum == SP_REGNUM)
-	{
-	  if (raw_buffer != NULL)
-	    {
-	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			     (LONGEST) addr);
-	    }
-	  if (addrp != NULL)
-	    *addrp = 0;
-	  return;
-	}
-      if (raw_buffer != NULL)
-	target_read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
-    }
-  else
-    {
-      if (lval != NULL)
-	*lval = lval_register;
-      addr = REGISTER_BYTE (regnum);
-      if (raw_buffer != NULL)
-	read_register_gen (regnum, raw_buffer);
-    }
-  if (addrp != NULL)
-    *addrp = addr;
-}
-
 void
 frame_register_unwind (struct frame_info *frame, int regnum,
 		       int *optimizedp, enum lval_type *lvalp,
@@ -216,11 +151,6 @@ generic_unwind_get_saved_register (char *raw_buffer,
     frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
 			   &realnumx, raw_buffer);
 }
-
-#if !defined (GET_SAVED_REGISTER)
-#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-  default_get_saved_register(raw_buffer, optimized, addrp, frame, regnum, lval)
-#endif
 
 void
 get_saved_register (char *raw_buffer,

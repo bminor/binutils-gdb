@@ -1,5 +1,13 @@
 2002-06-08  Andrew Cagney  <ac131313@redhat.com>
 
+	* frame.c (GET_SAVED_REGISTER): Delete macro definition.
+	(default_get_saved_register): Delete function.
+	* gdbarch.sh (GET_SAVED_REGISTER): Set default to
+	generic_unwind_get_saved_register.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
+2002-06-08  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh (FRAME_CHAIN_VALID): Set default to
 	generic_func_frame_chain_valid.
 	* gdbarch.h, gdbarch.c: Re-generate.

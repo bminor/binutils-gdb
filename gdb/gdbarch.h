@@ -1184,18 +1184,19 @@ extern void set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, gdbarch
 #endif
 #endif
 
-/* GET_SAVED_REGISTER is like DUMMY_FRAMES.  It is at level one as the
-   old code has strange #ifdef interaction.  So far no one has found
-   that default_get_saved_register() is the default they are after. */
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (GET_SAVED_REGISTER)
+#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (generic_unwind_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval))
+#endif
 
 typedef void (gdbarch_get_saved_register_ftype) (char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
 extern void gdbarch_get_saved_register (struct gdbarch *gdbarch, char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
 extern void set_gdbarch_get_saved_register (struct gdbarch *gdbarch, gdbarch_get_saved_register_ftype *get_saved_register);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (GET_SAVED_REGISTER)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (GET_SAVED_REGISTER)
 #error "Non multi-arch definition of GET_SAVED_REGISTER"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (GET_SAVED_REGISTER)
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (GET_SAVED_REGISTER)
 #define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (gdbarch_get_saved_register (current_gdbarch, raw_buffer, optimized, addrp, frame, regnum, lval))
 #endif
 #endif
