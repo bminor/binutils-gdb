@@ -16,18 +16,35 @@ VPATH=..
 	scanph -i $< $@
 
 
-DOCFILES = syms.texi  bfd.texi  cache.texi \
-	 format.texi  section.texi  archive.texi \
-	 core.texi  libbfd.texi  archures.texi \
-	 reloc.texi  opncls.texi  targets.texi \
-	 aoutx.texi  coffcode.texi cache.texi
+DOCFILES = aoutx.texi  archive.texi archures.texi \
+	bfd.texi  cache.texi coffcode.texi \
+	core.texi  format.texi  libbfd.texi  \
+	opncls.texi  reloc.texi  section.texi  \
+	syms.texi  targets.texi 
 
-PROTOS = opncls.p archures.p libbfd.p \
-	section.p syms.p bfd.p \
-	archive.p reloc.p targets.p \
-	format.p coffcode.p core.p
+PROTOS = archive.p archures.p bfd.p \
+	coffcode.p core.p format.p \
+	libbfd.p opncls.p reloc.p \
+	section.p syms.p targets.p 
 
 IPROTOS = cache.ip libbfd.ip reloc.ip
+
+# SRCDOC, SRCPROT, SRCIPROT only used to sidestep Sun Make bug in interaction 
+# between VPATH and suffix rules.  If you use GNU Make, perhaps other Makes,
+# you don't need these three:
+SRCDOC = aoutx.h  archive.c archures.c \
+	bfd.c  cache.c coffcode.h \
+	core.c  format.c  libbfd.c  \
+	opncls.c  reloc.c  section.c  \
+	syms.c  targets.c 
+
+SRCPROT = archive.c archures.c bfd.c \
+	coffcode.h core.c format.c \
+	libbfd.c opncls.c reloc.c \
+	section.c syms.c targets.c 
+
+SRCIPROT = cache.c libbfd.c reloc.c
+
 
 docs: protos bfd.info bfd.dvi bfd.ps
 
@@ -36,7 +53,10 @@ protos: $(PROTOS) $(IPROTOS)
 	sed -f tolibbfd libbfd-in.h  > libbfd.h
 	sed -f tolibcoff libcoff-in.h  > libcoff.h
 
-
+# Following three rules only for the benefit of Sun Make; see comment above
+$(DOCFILES) : $(SRCDOC)
+$(PROTOS) : $(SRCPROT)
+$(IPROTOS) : $(SRCIPROT)
 
 clean:
 	rm -f $(PROTOS) *.p *.ip *.h bfd.?? $(DOCFILES) bfd.dvi bfd.ps *~* *# bfd.??? 
