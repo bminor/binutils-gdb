@@ -943,12 +943,12 @@ main (argc, argv)
       char *bp;
       char *ep;
 
-      if (strncmp(*argv, "BAUD=", 5) == 0) 
+      if (strnicmp(*argv, "BAUD=", 5) == 0) 
 	{
 	  struct bitRate *brp;
 
 	  bp = *argv + 5;
-	  for (brp = bitRateTable; brp->bitRateString != NULL; brp++) 
+	  for (brp = bitRateTable; brp->bitRate != (BYTE) -1; brp++) 
 	    {
 	      if (strcmp(brp->bitRateString, bp) == 0) 
 		{
@@ -964,7 +964,7 @@ main (argc, argv)
 	      exit (1);
 	    }
 	}
-      else if (strncmp(*argv, "NODE=", 5) == 0)
+      else if (strnicmp(*argv, "NODE=", 5) == 0)
 	{
 	  bp = *argv + 5;
 	  board = strtol (bp, &ep, 0);
@@ -975,7 +975,7 @@ main (argc, argv)
 	      exit(1);
 	    }
 	}
-      else if (strncmp(*argv, "PORT=", 5) == 0)
+      else if (strnicmp(*argv, "PORT=", 5) == 0)
 	{
 	  bp = *argv + 5;
 	  port = strtol (bp, &ep, 0);
@@ -1029,14 +1029,16 @@ main (argc, argv)
   if (err == AIO_QUALIFIED_SUCCESS)
     {
       AIOPORTCONFIG portConfig;
-      AIODVRCONFIG dvrConfig;
 
       fprintf (stderr, "Port configuration changed!\n");
-      AIOGetPortConfiguration (AIOhandle, &portConfig, &dvrConfig);
+
+      portConfig.returnLength = sizeof(portConfig);
+      AIOGetPortConfiguration (AIOhandle, &portConfig, NULL);
+
       fprintf (stderr,
 	       "  Bit Rate: %s, Data Bits: %c, Stop Bits: %s, Parity: %c,\
  Flow:%s\n",
-	       bitRateTable[portConfig.bitRate],
+	       bitRateTable[portConfig.bitRate].bitRateString,
 	       dataBitsTable[portConfig.dataBits],
 	       stopBitsTable[portConfig.stopBits],
 	       parity[portConfig.parityMode],

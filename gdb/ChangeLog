@@ -1,3 +1,10 @@
+Wed Jul 27 14:34:42 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* i386-nlmstub.c: The returnLength field must be initialized
+	  before portConfig is passed to AIOGetPortConfiguration.
+	  Compare command line arguments with strnicmp(); args are
+	  case insensitive on netware.
+
 Wed Jul 27 09:24:19 1994  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (DISTSTUFF):  Add definition.
