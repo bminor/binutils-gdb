@@ -2037,7 +2037,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
     {
       if (address_expr->X_op == O_constant)
 	{
-	  unsigned long tmp;
+	  valueT tmp;
 
 	  switch (*reloc_type)
 	    {
