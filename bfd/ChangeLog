@@ -1,3 +1,9 @@
+Sun Nov  1 12:46:53 1998  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Allocate two slots
+	for later PLT entries in large PLTs.
+	(ppc_elf_finish_dynamic_symbol): Allow for the extra slots.
+
 Sat Oct 31 20:10:09 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-ppc.c (ppc_elf_reload_section): Fix typo.
