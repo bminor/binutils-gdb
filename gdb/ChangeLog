@@ -1,5 +1,20 @@
 2004-06-06  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.h (struct value): Forward declaration.
+	(gdbarch_tdep): Define tdep find_global_pointer method.
+	* hppa-tdep.c (hppa32_push_dummy_call): Find the global pointer
+	associated with the function we are trying to call, and write it
+	to the gp register.
+	(hppa32_convert_from_funct_ptr_addr): New function.
+	(hppa_find_global_pointer): New function.
+	(hppa_gdbarch_init): Set default find_global_pointer method; set
+	convert_from_func_ptr_addr method.
+	* hppa-linux-tdep.c (hppa_linux_find_global_pointer): New function.
+	(hppa_linux_init_abi): Set find_global_pointer method.
+	* Makefile.in (hppa-linux-tdep.o): Add value.h dependency.
+
+2004-06-06  Randolph Chung  <tausq@debian.org>
+
 	* gdbarch.sh (PUSH_DUMMY_CALL): Change CORE_ADDR func_addr argument
 	to struct value *function.
 	* gdbarch.c: Regenerate.

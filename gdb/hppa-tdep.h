@@ -78,6 +78,10 @@ struct gdbarch_tdep
   /* Is this an ELF target? This can be 64-bit HP-UX, or a 32/64-bit GNU/Linux
      system.  */
   int is_elf;
+
+  /* Given a function address, try to find the global pointer for the 
+     corresponding shared object.  */
+  CORE_ADDR (*find_global_pointer) (struct value *);
 };
 
 /*

@@ -28,7 +28,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "frame-unwind.h"
 #include "trad-frame.h"
 #include "dwarf2-frame.h"
+#include "value.h"
 #include "hppa-tdep.h"
+
+#include "elf/common.h"
 
 #if 0
 /* Convert DWARF register number REG to the appropriate register
@@ -466,6 +469,93 @@ hppa_linux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
   return NULL;
 }
 
+/* Attempt to find (and return) the global pointer for the given
+   function.
+
+   This is a rather nasty bit of code searchs for the .dynamic section
+   in the objfile corresponding to the pc of the function we're trying
+   to call.  Once it finds the addresses at which the .dynamic section
+   lives in the child process, it scans the Elf32_Dyn entries for a
+   DT_PLTGOT tag.  If it finds one of these, the corresponding
+   d_un.d_ptr value is the global pointer.  */
+
+static CORE_ADDR
+hppa_linux_find_global_pointer (struct value *function)
+{
+  struct obj_section *faddr_sect;
+  CORE_ADDR faddr;
+  
+  faddr = value_as_address (function);
+
+  /* Is this a plabel? If so, dereference it to get the gp value.  */
+  if (faddr & 2)
+    {
+      int status;
+      char buf[4];
+
+      faddr &= ~3;
+
+      status = target_read_memory (faddr + 4, buf, sizeof (buf));
+      if (status == 0)
+	return extract_unsigned_integer (buf, sizeof (buf));
+    }
+
+  /* If the address is in the plt section, then the real function hasn't 
+     yet been fixed up by the linker so we cannot determine the gp of 
+     that function.  */
+  if (in_plt_section (faddr, NULL))
+    return 0;
+
+  faddr_sect = find_pc_section (faddr);
+  if (faddr_sect != NULL)
+    {
+      struct obj_section *osect;
+
+      ALL_OBJFILE_OSECTIONS (faddr_sect->objfile, osect)
+	{
+	  if (strcmp (osect->the_bfd_section->name, ".dynamic") == 0)
+	    break;
+	}
+
+      if (osect < faddr_sect->objfile->sections_end)
+	{
+	  CORE_ADDR addr;
+
+	  addr = osect->addr;
+	  while (addr < osect->endaddr)
+	    {
+	      int status;
+	      LONGEST tag;
+	      char buf[4];
+
+	      status = target_read_memory (addr, buf, sizeof (buf));
+	      if (status != 0)
+		break;
+	      tag = extract_signed_integer (buf, sizeof (buf));
+
+	      if (tag == DT_PLTGOT)
+		{
+		  CORE_ADDR global_pointer;
+
+		  status = target_read_memory (addr + 4, buf, sizeof (buf));
+		  if (status != 0)
+		    break;
+		  global_pointer = extract_unsigned_integer (buf, sizeof (buf));
+
+		  /* The payoff... */
+		  return global_pointer;
+		}
+
+	      if (tag == DT_NULL)
+		break;
+
+	      addr += 8;
+	    }
+	}
+    }
+  return 0;
+}
+
 /* Forward declarations.  */
 extern initialize_file_ftype _initialize_hppa_linux_tdep;
 
@@ -476,6 +566,8 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Linux is always ELF.  */
   tdep->is_elf = 1;
+
+  tdep->find_global_pointer = hppa_linux_find_global_pointer;
 
   set_gdbarch_write_pc (gdbarch, hppa_linux_target_write_pc);
 

@@ -727,6 +727,12 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Two passes.  First pass computes the location of everything,
      second pass writes the bytes out.  */
   int write_pass;
+
+  /* Global pointer (r19) of the function we are trying to call.  */
+  CORE_ADDR gp;
+
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   for (write_pass = 0; write_pass < 2; write_pass++)
     {
       CORE_ADDR struct_ptr = 0;
@@ -846,6 +852,11 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      address */
   if (struct_return)
     write_register (28, struct_addr);
+
+  gp = tdep->find_global_pointer (function);
+
+  if (gp != 0)
+    write_register (19, gp);
 
   /* Set the return address.  */
   regcache_cooked_write_unsigned (regcache, HPPA_RP_REGNUM, bp_addr);
@@ -977,6 +988,22 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* The stack will have 32 bytes of additional space for a frame marker.  */
   return param_end + 64;
+}
+
+static CORE_ADDR
+hppa32_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
+				   CORE_ADDR addr,
+				   struct target_ops *targ)
+{
+  if (addr & 2)
+    {
+      CORE_ADDR plabel;
+
+      plabel = addr & ~3;
+      target_read_memory(plabel, (char *)&addr, 4);
+    }
+
+  return addr;
 }
 
 static CORE_ADDR
@@ -2309,6 +2336,12 @@ hppa_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     store_unsigned_integer (buf, sizeof(tmp), tmp);
 }
 
+static CORE_ADDR
+hppa_find_global_pointer (struct value *function)
+{
+  return 0;
+}
+
 void
 hppa_frame_prev_register_helper (struct frame_info *next_frame,
 			         struct trad_frame_saved_reg saved_regs[],
@@ -2410,6 +2443,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     tdep->bytes_per_address = 4;
 
+  tdep->find_global_pointer = hppa_find_global_pointer;
+
   /* Some parts of the gdbarch vector depend on whether we are running
      on a 32 bits or 64 bits target.  */
   switch (tdep->bytes_per_address)
@@ -2469,6 +2504,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case 4:
       set_gdbarch_push_dummy_call (gdbarch, hppa32_push_dummy_call);
       set_gdbarch_frame_align (gdbarch, hppa32_frame_align);
+      set_gdbarch_convert_from_func_ptr_addr
+        (gdbarch, hppa32_convert_from_func_ptr_addr);
       break;
     case 8:
       set_gdbarch_push_dummy_call (gdbarch, hppa64_push_dummy_call);
