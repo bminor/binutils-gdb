@@ -1,5 +1,17 @@
 Thu Jun  3 03:34:49 1993  Stu Grossman  (grossman@cygnus.com)
 
+	* Makefile.in:  Remove ser-tcp.[co].  (Use XDEPFILES instead.)
+	* alldeps.mak, depend:  Rebuild to account for ser-tcp.
+	* config/sparc/sun4os4.mh:  Add ser-tcp to XDEPFILES.
+	* gdbserver/Makefile.in (gdbserver):  Use -lbsd.
+	* gdbserver/remote-inflow{-sparc}.c (create_inferior):  Don't use a
+	shell when running the child, as args have been expanded by the
+	time we get here.  Simplify calling convention.
+	* gdbserver/remote-server.c (main):  Use new calling convention
+	for create_inferior, remove defunct code for coalescing argv.
+	Remove extra calls to mywait(), as we no longer have to wade
+	through a shell.
+
 	* target.c (target_read_memory_partial):  Don't deref errnoptr
 	when checking for null pointer.
 

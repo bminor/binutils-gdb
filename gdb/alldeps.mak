@@ -1,5 +1,6 @@
 # Start of "alldeps.mak" definitions
 ALLDEPFILES=\
+${srcdir}/#\
 ${srcdir}/29k-share/udi/udip2soc.c\
 ${srcdir}/29k-share/udi/udr.c\
 ${srcdir}/a29k-pinsn.c\
@@ -66,6 +67,7 @@ ${srcdir}/remote-es1800.c\
 ${srcdir}/remote-hms.c\
 ${srcdir}/remote-mips.c\
 ${srcdir}/remote-mm.c\
+${srcdir}/remote-monitor.c\
 ${srcdir}/remote-nindy.c\
 ${srcdir}/remote-sim.c\
 ${srcdir}/remote-st2000.c\
@@ -75,7 +77,8 @@ ${srcdir}/remote-z8k.c\
 ${srcdir}/rs6000-nat.c\
 ${srcdir}/rs6000-pinsn.c\
 ${srcdir}/rs6000-tdep.c\
-${srcdir}/sh-tdep.c\
+${srcdir}/ser-go32.c\
+${srcdir}/ser-tcp.c\
 ${srcdir}/solib.c\
 ${srcdir}/sparc-nat.c\
 ${srcdir}/sparc-pinsn.c\
@@ -113,6 +116,7 @@ ${srcdir}/config/gould/xm-pn.h\
 ${srcdir}/config/h8300/tm-h8300.h\
 ${srcdir}/config/h8500/tm-h8500.h\
 ${srcdir}/config/i386/nm-i386bsd.h\
+${srcdir}/config/i386/nm-i386lynx.h\
 ${srcdir}/config/i386/nm-i386mach.h\
 ${srcdir}/config/i386/nm-i386sco.h\
 ${srcdir}/config/i386/nm-i386sco4.h\
@@ -121,6 +125,7 @@ ${srcdir}/config/i386/nm-i386v4.h\
 ${srcdir}/config/i386/nm-linux.h\
 ${srcdir}/config/i386/nm-sun386.h\
 ${srcdir}/config/i386/tm-i386bsd.h\
+${srcdir}/config/i386/tm-i386lynx.h\
 ${srcdir}/config/i386/tm-i386v.h\
 ${srcdir}/config/i386/tm-i386v4.h\
 ${srcdir}/config/i386/tm-linux.h\
@@ -128,6 +133,7 @@ ${srcdir}/config/i386/tm-sun386.h\
 ${srcdir}/config/i386/tm-symmetry.h\
 ${srcdir}/config/i386/xm-go32.h\
 ${srcdir}/config/i386/xm-i386bsd.h\
+${srcdir}/config/i386/xm-i386lynx.h\
 ${srcdir}/config/i386/xm-i386mach.h\
 ${srcdir}/config/i386/xm-i386sco.h\
 ${srcdir}/config/i386/xm-i386v.h\
@@ -154,6 +160,7 @@ ${srcdir}/config/m68k/tm-hp300hpux.h\
 ${srcdir}/config/m68k/tm-isi.h\
 ${srcdir}/config/m68k/tm-m68k-fp.h\
 ${srcdir}/config/m68k/tm-m68k-nofp.h\
+${srcdir}/config/m68k/tm-monitor.h\
 ${srcdir}/config/m68k/tm-news.h\
 ${srcdir}/config/m68k/tm-os68k.h\
 ${srcdir}/config/m68k/tm-st2000.h\
@@ -211,7 +218,6 @@ ${srcdir}/config/romp/xm-rtbsd.h\
 ${srcdir}/config/rs6000/nm-rs6000.h\
 ${srcdir}/config/rs6000/tm-rs6000.h\
 ${srcdir}/config/rs6000/xm-rs6000.h\
-${srcdir}/config/sh/tm-sh.h\
 ${srcdir}/config/sparc/nm-sun4os4.h\
 ${srcdir}/config/sparc/tm-sparclite.h\
 ${srcdir}/config/sparc/tm-spc-em.h\
@@ -248,6 +254,8 @@ ${srcdir}/config/i386/go32.mh\
 ${srcdir}/config/i386/i386aout.mt\
 ${srcdir}/config/i386/i386bsd.mh\
 ${srcdir}/config/i386/i386bsd.mt\
+${srcdir}/config/i386/i386lynx.mh\
+${srcdir}/config/i386/i386lynx.mt\
 ${srcdir}/config/i386/i386mach.mh\
 ${srcdir}/config/i386/i386sco.mh\
 ${srcdir}/config/i386/i386sco4.mh\
@@ -285,6 +293,7 @@ ${srcdir}/config/m68k/isi.mh\
 ${srcdir}/config/m68k/isi.mt\
 ${srcdir}/config/m68k/m68k-fp.mt\
 ${srcdir}/config/m68k/m68k-nofp.mt\
+${srcdir}/config/m68k/monitor.mt\
 ${srcdir}/config/m68k/news.mh\
 ${srcdir}/config/m68k/news.mt\
 ${srcdir}/config/m68k/news1000.mh\
@@ -328,7 +337,6 @@ ${srcdir}/config/pyr/pyramid.mt\
 ${srcdir}/config/romp/rtbsd.mh\
 ${srcdir}/config/rs6000/rs6000.mh\
 ${srcdir}/config/rs6000/rs6000.mt\
-${srcdir}/config/sh/sh.mt\
 ${srcdir}/config/sparc/sparc-em.mt\
 ${srcdir}/config/sparc/sparclite.mt\
 ${srcdir}/config/sparc/sun4os4.mh\
