@@ -71,6 +71,8 @@ readline_headers =\
 
 /version/s/"{s}"version\.c/"{o}"version.c/g
 /version/s/^version\.c/"{o}"version.c/
+/config/s/"{s}"config\.h/"{o}"config.h/g
+/config/s/^config\.h/"{o}"config.h/
 /xm/s/"{s}"xm\.h/"{o}"xm.h/g
 /xm/s/^xm\.h/"{o}"xm.h/
 /tm/s/"{s}"tm\.h/"{o}"tm.h/g
@@ -151,6 +153,8 @@ install-only \\Option-f \
 # Edit out actions that only confuse MPW Make.
 /^config.status \\Option-f/,/^$/d
 /^Makefile \\Option-f/,/^$/d
+
+/^"{o}"config.h \\Option-f/s/^/#/
 
 # Add an action to build SIOWgdb.
 $a\

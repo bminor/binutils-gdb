@@ -1,3 +1,8 @@
+Mon Apr  1 16:31:00 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Change references to config.h to be in objdir,
+	edit out rules to rebuild config.h.
+
 Mon Apr  1 08:32:23 1996  Fred Fish  <fnf@cygnus.com>
 
 	* hppa-tdep.c (hppa_pop_frame): Call clear_proceed_status before
