@@ -1,5 +1,8 @@
 /*** coff information for 80960.  Origins: Intel corp, natch. */
 
+/* This include file is also used for rudimentary ECOFF support on MIPS
+   machines.  Such differences as are needed are #ifdef MIPS.  */
+
 /* NOTE: Tagentries (cf TAGBITS) are not used by the 960 */
 
 /********************** FILE HEADER **********************/
@@ -85,6 +88,7 @@ typedef struct {
 #define A_MAGIC5    (0437)	/* (?) "system overlay, separated I&D" */
 #define SASMAGIC    (010000)	/* (?) "Single Address Space" */    
 #define MASMAGIC    (020000)	/* (?) "Multiple (separate I/D) Addr. Spaces" */
+
 typedef	struct aouthdr {
 	short		magic;	/* type of file				*/
 	short		vstamp;	/* version stamp			*/
@@ -170,7 +174,10 @@ struct scnhdr {
 	unsigned short	s_nreloc;	/* number of relocation entries	*/
 	unsigned short	s_nlnno;	/* number of line number entries*/
 	long		s_flags;	/* flags			*/
+#ifndef MIPS
+ /* This field exists in Intel COFF, not in Mips ECOFF. */
 	unsigned long	s_align;	/* section alignment		*/
+#endif
 };
 
 /*
