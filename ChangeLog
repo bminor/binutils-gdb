@@ -1,3 +1,9 @@
+Thu Apr 23 12:26:38 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (GAS_SUPPORT_DIRS): Add intl.
+	(BINUTILS_SUPPORT_DIRS, GASB_SUPPORT_DIRS): Likewise.
+	(GDB_SUPPORT_DIRS): Likewise.
+
 Wed Apr 22 12:30:10 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (target_makefile_frag): If --enable-target-optspace,
