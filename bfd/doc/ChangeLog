@@ -1,3 +1,21 @@
+Mon Jun 16 15:33:15 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (CC, CFLAGS): Substitute from configure script.
+
+Tue Apr 15 12:37:41 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (install-info): Use mkinstalldirs to build
+	$(infodir).
+
+Tue Apr  8 12:49:46 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (install-info): Permit info files to be in srcdir.
+	(stamp-*): Add a stamp-X target for each X.texi target.
+	(*.texi): Just depend upon stamp-X.
+	(clean): Remove stamp-*.
+	(distclean): Depend upon mostlyclean.  Remove stamp-*.  Don't
+	remove $(DOCFILES).
+
 Mon Apr  7 15:23:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (distclean): Don't remove *.info files.
