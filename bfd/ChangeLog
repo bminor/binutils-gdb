@@ -1,3 +1,14 @@
+Wed Feb 28 11:25:47 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* libhppa.h (hppa_reloc_field_selector_type): Add R_HPPA_NLSEL
+	and R_HPPA_NLRSEL.
+	(e_nsel, e_nlsel, e_nlrsel): Undefine.  Add to
+	hppa_reloc_field_selector_type_alt.
+	(hppa_field_adjust): Handle e_nlsel, e_nlrsel.  Fix e_nsel handling.
+	* som.c (hppa_som_gen_reloc_type): Handle N', NL' NLR' field
+	selectors.
+	(som_write_fixups): Finish handling of R_N0SEL and R_N1SEL.
+
 Wed Feb 28 11:00:24 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (assign_file_positions_for_segments): Adjust the segment
