@@ -1,3 +1,8 @@
+2001-05-04  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Set
+        EF_ARM_HASENTRY if the start address is set.
+
 2001-05-03  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* targets.c (_bfd_target_vector_entries): Compute value based on

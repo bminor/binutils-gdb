@@ -1019,6 +1019,18 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
   bfd_signed_vma                signed_addend;
   struct elf32_arm_link_hash_table * globals;
 
+  /* If the start address has been set, then set the EF_ARM_HASENTRY
+     flag.  Setting this more than once is redundant, but the cost is
+     not too high, and it keeps the code simple.
+     
+     The test is done  here, rather than somewhere else, because the
+     start address is only set just before the final link commences.
+
+     Note - if the user deliberately sets a start address of 0, the
+     flag will not be set.  */
+  if (bfd_get_start_address (output_bfd) != 0)
+    elf_elfheader (output_bfd)->e_flags |= EF_ARM_HASENTRY;
+      
   globals = elf32_arm_hash_table (info);
 
   dynobj = elf_hash_table (info)->dynobj;
