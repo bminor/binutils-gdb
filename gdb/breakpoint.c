@@ -7009,10 +7009,32 @@ breakpoint_re_set_one (PTR bint)
 	  delete_breakpoint (b);
 	  return 0;
 	}
-      /* In case we have a problem, disable this breakpoint.  We'll restore
-         its status if we succeed.  */
+      /* HACK: cagney/2001-11-11: kettenis/2001-11-11: MarkK wrote:
+
+	 ``And a hack it is, although Apple's Darwin version of GDB
+	 contains an almost identical hack to implement a "future
+	 break" command.  It seems to work in many real world cases,
+	 but it is easy to come up with a test case where the patch
+	 doesn't help at all.''
+
+	 ``It seems that the way GDB implements breakpoints - in -
+	 shared - libraries was designed for a.out shared library
+	 systems (SunOS 4) where shared libraries were loaded at a
+	 fixed address in memory.  Since ELF shared libraries can (and
+	 will) be loaded at any address in memory, things break.
+	 Fixing this is not trivial.  Therefore, I'm not sure whether
+	 we should add this hack to the branch only.  I cannot
+	 guarantee that things will be fixed on the trunk in the near
+	 future.''
+
+         In case we have a problem, disable this breakpoint.  We'll
+         restore its status if we succeed.  Don't disable a
+         shlib_disabled breakpoint though.  There's a fair chance we
+         can't re-set it if the shared library it's in hasn't been
+         loaded yet.  */
       save_enable = b->enable_state;
-      b->enable_state = bp_disabled;
+      if (b->enable_state != bp_shlib_disabled)
+        b->enable_state = bp_disabled;
 
       set_language (b->language);
       input_radix = b->input_radix;
