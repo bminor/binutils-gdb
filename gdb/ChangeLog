@@ -1,3 +1,9 @@
+2002-07-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* dwarf2read.c (set_cu_language): Add handler for LANG_Ada95.
+	This does not change anything at the moment, but will be helpful
+	later when full Ada support is integrated.
+
 2002-07-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-tdep.c (_initialize_mips_tdep): Add "n64" to "set mips abi"

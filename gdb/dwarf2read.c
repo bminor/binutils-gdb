@@ -4110,6 +4110,7 @@ set_cu_language (unsigned int lang)
       cu_language = language_java;
       break;
     case DW_LANG_Ada83:
+    case DW_LANG_Ada95:
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:
     case DW_LANG_Pascal83:
