@@ -1,3 +1,13 @@
+2003-03-13  Danny Smith  <dannysmith@users.sourceforge,net> 
+
+	* deffilep.y (def_import):  Use default extension of "dll"
+	if no extension provided in parsed IMPORT definition.
+
+	* deffilep.y (def_lex): Revert 2003-03-12 change.
+	(dot_name): New id type and rule.
+	(expline): Use instead of ID.
+	(opt_equal_name): Likewise.
+
 2003-03-12  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* deffilep.y (def_lex): Accept '.' as valid non-lead char.

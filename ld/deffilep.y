@@ -116,7 +116,7 @@ static const char *lex_parse_string_end = 0;
 %token <number> NUMBER
 %type  <number> opt_base opt_ordinal
 %type  <number> attr attr_list opt_number exp_opt_list exp_opt
-%type  <id> opt_name opt_equal_name 
+%type  <id> opt_name opt_equal_name dot_name 
 
 %%
 
@@ -151,7 +151,7 @@ expline:
 		/* The opt_comma is necessary to support both the usual
 		  DEF file syntax as well as .drectve syntax which
 		  mandates <expsym>,<expoptlist>.  */
-		ID opt_equal_name opt_ordinal opt_comma exp_opt_list
+		dot_name opt_equal_name opt_ordinal opt_comma exp_opt_list
 			{ def_exports ($1, $2, $3, $5); }
 	;
 exp_opt_list:
@@ -231,7 +231,7 @@ opt_ordinal:
 	;
 
 opt_equal_name:
-          '=' ID	{ $$ = $2; }
+          '=' dot_name	{ $$ = $2; }
         | 		{ $$ =  0; }			 
 	;
 
@@ -239,6 +239,14 @@ opt_base: BASE	'=' NUMBER	{ $$ = $3;}
 	|	{ $$ = 0;}
 	;
 
+dot_name: ID		{ $$ = $1; }
+	| dot_name '.' ID	
+	  { 
+	    char * name = xmalloc (strlen ($1) + 1 + strlen ($3) + 1);
+	    sprintf (name, "%s.%s", $1, $3);
+	    $$ = name;
+	  }
+	;
 	
 
 %%
@@ -799,13 +807,11 @@ def_import (internal_name, module, dllext, name, ordinal)
      int ordinal;
 {
   char *buf = 0;
-
-  if (dllext != NULL)
-    {
-      buf = (char *) xmalloc (strlen (module) + strlen (dllext) + 2);
-      sprintf (buf, "%s.%s", module, dllext);
-      module = buf;
-    }
+  const char *ext = dllext ? dllext : "dll";    
+   
+  buf = (char *) xmalloc (strlen (module) + strlen (ext) + 2);
+  sprintf (buf, "%s.%s", module, ext);
+  module = buf;
 
   def_file_add_import (def, name, module, ordinal, internal_name);
   if (buf)
@@ -1020,7 +1026,7 @@ def_lex ()
 #endif
 	}
 
-      while (c != EOF && (ISALNUM (c) || strchr ("$:-_?/@.", c)))
+      while (c != EOF && (ISALNUM (c) || strchr ("$:-_?/@", c)))
 	{
 	  put_buf (c);
 	  c = def_getc ();
