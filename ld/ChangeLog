@@ -1,5 +1,8 @@
 2001-08-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/elf32.em: For SEC_EXCLUDE sections, ensure that
+	output_section is set non-NULL.
+
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Return
 	`true' for SEC_EXCLUDE sections so that the generic code doesn't
 	needlessly create an output_section_statement.  Treat a correctly
@@ -229,7 +232,7 @@
 
 2001-07-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
-	* Makefile.am (em32relf.c): Chnage dependencu from generic.em to
+	* Makefile.am (em32relf.c): Change dependency from generic.em to
 	elf32.em.
 	* Makefile.in: Regenerate.
 
@@ -346,7 +349,7 @@
 	* ldlang.c (walk_wild): Only call walk_wild_file if
 	lookup_name returns something.
 	(lookup_name): If load_symbols fails, return NULL.
-	(load_symbols): Chnage to a boolean function.
+	(load_symbols): Change to a boolean function.
 	(open_input_bfds): If load_symbols fails then do not make the
 	executable.
 

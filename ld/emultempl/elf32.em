@@ -1084,7 +1084,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 		  & (SEC_LOAD | SEC_ALLOC)) == 0))
 	{
 	  /* We already have an output section statement with this
-	     name, and its bfd section has compatible flags.  */
+	     name, and its bfd section, if any, has compatible flags.  */
 	  wild_doit (&os->children, s, os, file);
 	  return true;
 	}
@@ -1113,7 +1113,11 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 (hold.os != NULL || (hold.os = lang_output_section_find (name)) != NULL)
 
   if (s->flags & SEC_EXCLUDE)
-    return true;
+    {
+      if (s->output_section == NULL)
+	s->output_section = bfd_abs_section_ptr;
+      return true;
+    }
 
   place = NULL;
   if ((s->flags & SEC_ALLOC) == 0)
