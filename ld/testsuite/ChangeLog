@@ -1,3 +1,8 @@
+2003-12-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* ld-srec/srec.exp (run_srec_test): Remove -fgnu-linker, since GCC
+	3.4 does not support it.
+
 2003-12-18  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-mips-elf/reloc-1[ab].s: New source files.

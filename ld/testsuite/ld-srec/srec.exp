@@ -403,7 +403,7 @@ if { [which $CXX] == 0 } {
     return
 }
 
-if ![ld_compile "$CXX $CXXFLAGS -fgnu-linker -fno-exceptions" $srcdir/$subdir/sr3.cc tmpdir/sr3.o] {
+if ![ld_compile "$CXX $CXXFLAGS -fno-exceptions" $srcdir/$subdir/sr3.cc tmpdir/sr3.o] {
     unresolved $test2
     return
 }
