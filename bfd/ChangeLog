@@ -1,5 +1,11 @@
 Wed Feb  2 12:30:13 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coffswap.h (coff_swap_reloc_out): If RS6000COFF_C, handle type
+	and size correctly.
+	(coff_swap_aux_in): If RS6000COFF_C, change x_csect.x_scnlen to
+	x_csect.x_scnlen.l to match change in coff/internal.h.
+	(coff_swap_aux_out): Likewise.
+
 	* coff-mips.c (mips_ecoff_backend_data), coff-alpha.c
 	(alpha_ecoff_backend_data): Change casts of aux_in and aux_out
 	fields to match yesterday's changes.
