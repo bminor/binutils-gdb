@@ -1,59 +1,20 @@
-		Known problems in GDB 5.1.1
 
+			Known problems in GDB 5.2
 
-See also the bug database http://www.gnu.org/software/gdb/bugs/
-
-
-Contrary to the GDB 5.1.1 announcement, the update did not contain
-fixes to a i386 floating point problem.  The latest sources do contain
-the fix and it will be included in GDB 5.2.
-
-
-		Known problems in GDB 5.1
+		See also: http://www.gnu.org/software/gdb/bugs/
 
 
 hppa2.0-hp-hpux10.20
+--------------------
 
-Due to a problem (conflicting types) with libiberty/regex.c, GDB 5.1
-does not build on HP/UX 10.20 when using the HP supplied compiler.
+gdb/487: The top level make files used to build GDB are not compatible
+with HP/UX make.  As a workaround, use GNU make.
 
-Due to bit rot, GDB 5.1 does not work on HP/UX 10.20 when built with
-GCC.
+gdb/486: The HP/UX C compiler defaults to K&R mode but GDB only builds
+with an ISO C compiler.  The top level configuration incorrectly sets
+CC to `cc' instead of `cc -Ae'.  As a workaround, the correct compiler
+can be specified as part of the configuration vis:
 
-
-hppa2.0w-hp-hpux11.00
-
-Due to a problem with ltconfig and long argument lines, GDB 5.1 does
-not configure on HP/UX 11.00.
-
-
-alpha-dec-osf5.1
-
-GDB 5.1 has a number of problems on this platform (Ref PR gdb/237).  A
-GDB 5.1 built with ``CC="cc -DUSE_LDR_ROUTINES"'' is reported to work
-much better.
+    $  'CC=cc -Ae' ./configure
 
 
-alpha-dec-osf4.0e
-
-GDB 5.1 is known to have problems on this platform (encounters an
-internal error in the symbol table reader).
-
-
-sparcv9-sun-solaris2.8
-
-There are known problems with building GDB 5.1 using GCC 3.0.x for the
-64 bit SPARC target (bad code gen).  You could try a development
-version of GCC.
-
-
-i586-sco-sysv5uw7.1.1
-
-There are known problems with GDB 5.1's thread support on this
-platform.  Non-threaded programs should work.
-
-
-*-*-*
-
-GDB 5.1 assumes that the host C compiler implemends alloca().  GCC is
-one such compiler.  This problem should be fixed on the trunk.

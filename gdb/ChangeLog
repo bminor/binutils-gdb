@@ -1,4 +1,8 @@
 2002-04-15  Andrew Cagney  <ac131313@redhat.com>
+ 
+ 	* PROBLEMS: Mention hppa2.0-hp-hpux10.20 compile problems.
+ 
+2002-04-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* bcache.c: Include <stddef.h> and <stdlib.h> after "defs.h".
 	Update copyright.
