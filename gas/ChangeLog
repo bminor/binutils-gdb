@@ -1,5 +1,9 @@
 Mon Aug 21 13:57:20 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* doc/as.texinfo: Document irp, irpc, macro, and rept. MRI mode
+	now supports macros, ifc, ifnc, irp, irpc, rept, and endr, without
+	using gasp.
+
 	Add support for macros.
 	* as.c: Include sb.h and macro.h.
 	(max_macro_next): New global variable.

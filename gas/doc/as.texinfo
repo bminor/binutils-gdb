@@ -1084,19 +1084,6 @@ The @code{OPT} @code{D} option is the default, unlike the MRI assembler.
 
 The @code{XREF} pseudo-op is ignored.
 
-@item macros
-
-Macros are not supported directly, but are supported by @code{gasp}.
-
-@item @code{IFC}, @code{IFNC} pseudo-ops.
-
-The @code{IFC} and @code{IFNC} pseudo-ops are not supported directly, but are
-supported by @code{gasp}.
-
-@item @code{IRP}, @code{IRPC}, @code{REPT}, @code{ENDR} pseudo-ops
-
-The repeating pseudo-ops are not supported directly, but are supported by
-@code{gasp}.
 @end itemize
 
 @node o
@@ -2882,6 +2869,8 @@ Some machine configurations provide additional directives.
 * If::                          @code{.if @var{absolute expression}}
 * Include::                     @code{.include "@var{file}"}
 * Int::                         @code{.int @var{expressions}}
+* Irp::				@code{.irp @var{symbol},@var{values}}@dots{}
+* Irpc::			@code{.irpc @var{symbol},@var{values}}@dots{}
 * Lcomm::                       @code{.lcomm @var{symbol} , @var{length}}
 * Lflags::                      @code{.lflags}
 @ifclear no-line-dir
@@ -2895,12 +2884,15 @@ Some machine configurations provide additional directives.
 * Lsym::                        @code{.lsym @var{symbol}, @var{expression}}
 @end ignore
 
+* Macro::			@code{.macro @var{name} @var{args}}@dots{}
+
 * Nolist::                      @code{.nolist}
 * Octa::                        @code{.octa @var{bignums}}
 * Org::                         @code{.org @var{new-lc} , @var{fill}}
 * P2align::                     @code{.p2align @var{abs-expr} , @var{abs-expr}}
 * Psize::                       @code{.psize @var{lines}, @var{columns}}
 * Quad::                        @code{.quad @var{bignums}}
+* Rept::			@code{.rept @var{count}}
 * Sbttl::                       @code{.sbttl "@var{subheading}"}
 @ifset COFF
 * Scl::                         @code{.scl @var{class}}
@@ -3407,6 +3399,62 @@ integers.  On the H8/300H and the Hitachi SH, however, @code{.int} emits
 @end ifset
 @end ifclear
 
+@node Irp
+@section @code{.irp @var{symbol},@var{values}}@dots{}
+
+@cindex @code{irp} directive
+Evaluate a sequence of statements assigning different values to @var{symbol}.
+The sequence of statements starts at the @code{.irp} directive, and is
+terminated by an @code{.endr} directive.  For each @var{value}, @var{symbol} is
+set to @var{value}, and the sequence of statements is assembled.  If no
+@var{value} is listed, the sequence of statements is assembled once, with
+@var{symbol} set to the null string.  To refer to @var{symbol} within the
+sequence of statements, use @var{\symbol}.
+
+For example, assembling
+
+@example
+        .irp    param,1,2,3
+        move    d\param,sp@@-
+        .endr
+@end example
+
+is equivalent to assembling
+
+@example
+        move    d1,sp@@-
+        move    d2,sp@@-
+        move    d3,sp@@-
+@end example
+
+@node Irpc
+@section @code{.irpc @var{symbol},@var{values}}@dots{}
+
+@cindex @code{irpc} directive
+Evaluate a sequence of statements assigning different values to @var{symbol}.
+The sequence of statements starts at the @code{.irpc} directive, and is
+terminated by an @code{.endr} directive.  For each character in @var{value},
+@var{symbol} is set to the character, and the sequence of statements is
+assembled.  If no @var{value} is listed, the sequence of statements is
+assembled once, with @var{symbol} set to the null string.  To refer to
+@var{symbol} within the sequence of statements, use @var{\symbol}.
+
+For example, assembling
+
+@example
+        .irpc    param,123
+        move    d\param,sp@@-
+        .endr
+@end example
+
+is equivalent to assembling
+
+@example
+        move    d1,sp@@-
+        move    d2,sp@@-
+        move    d3,sp@@-
+@end example
+
 @node Lcomm
 @section @code{.lcomm @var{symbol} , @var{length}}
 
@@ -3536,6 +3584,99 @@ the same as the expression value:
 The new symbol is not flagged as external.
 @end ignore
 
+@node Macro
+@section @code{.macro}
+
+@cindex macros
+The commands @code{.macro} and @code{.endm} allow you to define macros that
+generate assembly output.  For example, this definition specifies a macro
+@code{sum} that puts a sequence of numbers into memory:
+
+@example
+        .macro  sum from=0, to=5
+        .long   \from
+        .if     \to-\from
+        sum     "(\from+1)",\to
+        .endif
+        .endm
+@end example
+
+@noindent
+With that definition, @samp{SUM 0,5} is equivalent to this assembly input:
+
+@example
+        .long   0
+        .long   1
+        .long   2
+        .long   3
+        .long   4
+        .long   5
+@end example
+
+@ftable @code
+@item .macro @var{macname}
+@itemx .macro @var{macname} @var{macargs} @dots{}
+@cindex @code{macro} directive
+Begin the definition of a macro called @var{macname}.  If your macro
+definition requires arguments, specify their names after the macro name,
+separated by commas or spaces.  You can supply a default value for any
+macro argument by following the name with @samp{=@var{deflt}}.  For
+example, these are all valid @code{.macro} statements:
+
+@table @code
+@item .macro comm
+Begin the definition of a macro called @code{comm}, which takes no
+arguments.
+
+@item .macro plus1 p, p1
+@itemx .macro plus1 p p1
+Either statement begins the definition of a macro called @code{plus1},
+which takes two arguments; within the macro definition, write
+@samp{\p} or @samp{\p1} to evaluate the arguments.
+
+@item .macro reserve_str p1=0 p2
+Begin the definition of a macro called @code{reserve_str}, with two
+arguments.  The first argument has a default value, but not the second.
+After the definition is complete, you can call the macro either as
+@samp{reserve_str @var{a},@var{b}} (with @samp{\p1} evaluating to
+@var{a} and @samp{\p2} evaluating to @var{b}), or as @samp{reserve_str
+,@var{b}} (with @samp{\p1} evaluating as the default, in this case
+@samp{0}, and @samp{\p2} evaluating to @var{b}).
+@end table
+
+When you call a macro, you can specify the argument values either by
+position, or by keyword.  For example, @samp{sum 9,17} is equivalent to
+@samp{sum to=17, from=9}.
+
+@item .endm
+@cindex @code{endm} directive
+Mark the end of a macro definition.
+
+@item .exitm
+@cindex @code{exitm} directive
+Exit early from the current macro definition.
+
+@cindex number of macros executed
+@cindex macros, count executed
+@item \@@
+@code{@value{AS}} maintains a counter of how many macros it has
+executed in this pseudo-variable; you can copy that number to your
+output with @samp{\@@}, but @emph{only within a macro definition}.
+
+@ignore
+@item LOCAL @var{name} [ , @dots{} ]
+@emph{Warning: @code{LOCAL} is only available if you select ``alternate
+macro syntax'' with @samp{-a} or @samp{--alternate}.}  @xref{Alternate,,
+Alternate macro syntax}.
+
+Generate a string replacement for each of the @var{name} arguments, and
+replace any instances of @var{name} in each macro expansion.  The
+replacement string is unique in the assembly, and different for each
+separate macro expansion.  @code{LOCAL} allows you to write macros that
+define symbols, without fear of conflict between separate macro expansions.
+@end ignore
+@end ftable
+
 @node Nolist
 @section @code{.nolist}
 
@@ -3653,6 +3794,29 @@ warning message; and just takes the lowest order 16 bytes of the bignum.
 @cindex sixteen-byte integer
 @cindex integer, 16-byte
 @end ifset
+
+@node Rept
+@section @code{.rept @var{count}}
+
+@cindex @code{rept} directive
+Repeat the sequence of lines between the @code{.rept} directive and the next
+@code{.endr} directive @var{count} times.
+
+For example, assembling
+
+@example
+        .rept   3
+        .long   0
+        .endr
+@end example
+
+is equivalent to assembling
+
+@example
+        .long   0
+        .long   0
+        .long   0
+@end example
 
 @node Sbttl
 @section @code{.sbttl "@var{subheading}"}
