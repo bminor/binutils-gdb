@@ -36,28 +36,78 @@ char *am33_register_names [] =
   "sp", "pc", "mdr", "psw", "lir", "lar", "",
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
   "ssp", "msp", "usp", "mcrh", "mcrl", "mcvf", "", "", ""};
+int am33_mode;
 /* end-sanitize-am33 */
+
+static CORE_ADDR mn10300_analyze_prologue PARAMS ((struct frame_info *fi,
+						  CORE_ADDR pc));
+
+/* Values for frame_info.status */
+
+#define MY_FRAME_IN_SP 0x1
+#define MY_FRAME_IN_FP 0x2
+#define NO_MORE_FRAMES 0x4
+ 
+
+/* Fix fi->frame if it's bogus at this point.  This is a helper
+   function for mn10300_analyze_prologue. */
+
+static void
+fix_frame_pointer (fi, stack_size)
+    struct frame_info *fi;
+    int stack_size;
+{
+  if (fi && fi->next == NULL)
+    {
+      if (fi->status & MY_FRAME_IN_SP)
+	fi->frame = read_sp () - stack_size;
+      else if (fi->status & MY_FRAME_IN_FP)
+	fi->frame = read_register (A3_REGNUM);
+    }
+}
 
 
 /* Set offsets of registers saved by movm instruction.
    This is a helper function for mn10300_analyze_prologue.  */
 
 static void
-set_movm_offsets (fi, found_movm)
+set_movm_offsets (fi, movm_args)
     struct frame_info *fi;
-    int found_movm;
+    int movm_args;
 {
-  if (fi == NULL || found_movm == 0)
+  int offset = 0;
+
+  if (fi == NULL || movm_args == 0)
     return;
-  fi->fsr.regs[7] = fi->frame;
-  fi->fsr.regs[6] = fi->frame + 4;
-  fi->fsr.regs[3] = fi->frame + 8;
-  fi->fsr.regs[2] = fi->frame + 12;
+
+  if (movm_args & 0x10)
+    {
+      fi->fsr.regs[A3_REGNUM] = fi->frame + offset;
+      offset += 4;
+    }
+  if (movm_args & 0x20)
+    {
+      fi->fsr.regs[A2_REGNUM] = fi->frame + offset;
+      offset += 4;
+    }
+  if (movm_args & 0x40)
+    {
+      fi->fsr.regs[D3_REGNUM] = fi->frame + offset;
+      offset += 4;
+    }
+  if (movm_args & 0x80)
+    {
+      fi->fsr.regs[D2_REGNUM] = fi->frame + offset;
+      offset += 4;
+    }
   /* start-sanitize-am33 */
-  fi->fsr.regs[E0_REGNUM+5] = fi->frame + 16;
-  fi->fsr.regs[E0_REGNUM+4] = fi->frame + 20;
-  fi->fsr.regs[E0_REGNUM+3] = fi->frame + 24;
-  fi->fsr.regs[E0_REGNUM+2] = fi->frame + 28;
+  if (am33_mode && movm_args & 0x02)
+    {
+      fi->fsr.regs[E0_REGNUM+5] = fi->frame + offset;
+      fi->fsr.regs[E0_REGNUM+4] = fi->frame + offset + 4;
+      fi->fsr.regs[E0_REGNUM+3] = fi->frame + offset + 8;
+      fi->fsr.regs[E0_REGNUM+2] = fi->frame + offset + 12;
+    }
   /* end-sanitize-am33 */
 }
 
@@ -110,10 +160,6 @@ set_movm_offsets (fi, found_movm)
       if the first instruction looks like mov <imm>,sp.  This tells
       frame chain to not bother trying to unwind past this frame.  */
 
-#define MY_FRAME_IN_SP 0x1
-#define MY_FRAME_IN_FP 0x2
-#define NO_MORE_FRAMES 0x4
- 
 static CORE_ADDR
 mn10300_analyze_prologue (fi, pc)
     struct frame_info *fi;
@@ -123,7 +169,7 @@ mn10300_analyze_prologue (fi, pc)
   CORE_ADDR stack_size;
   int imm_size;
   unsigned char buf[4];
-  int status, found_movm = 0;
+  int status, movm_args = 0;
   char *name;
 
   /* Use the PC in the frame if it's provided to look up the
@@ -189,8 +235,7 @@ mn10300_analyze_prologue (fi, pc)
   status = read_memory_nobpt (addr, buf, 2);
   if (status != 0)
     {
-      if (fi && fi->next == NULL && fi->status & MY_FRAME_IN_SP)
-	fi->frame = read_sp ();
+      fix_frame_pointer (fi, 0);
       return addr;
     }
 
@@ -210,7 +255,10 @@ mn10300_analyze_prologue (fi, pc)
      in fsr.regs as needed.  */
   if (buf[0] == 0xcf)
     {
-      found_movm = 1;
+      /* Extract the register list for the movm instruction.  */
+      status = read_memory_nobpt (addr + 1, buf, 1);
+      movm_args = *buf;
+
       addr += 2;
 
       /* Quit now if we're beyond the stop point.  */
@@ -221,7 +269,7 @@ mn10300_analyze_prologue (fi, pc)
 	    fi->frame = read_sp ();
 
 	  /* Note if/where callee saved registers were saved.  */
-	  set_movm_offsets (fi, found_movm);
+	  set_movm_offsets (fi, movm_args);
 	  return addr;
 	}
 
@@ -234,7 +282,7 @@ mn10300_analyze_prologue (fi, pc)
 	    fi->frame = read_sp ();
 
 	  /* Note if/where callee saved registers were saved.  */
-	  set_movm_offsets (fi, found_movm);
+	  set_movm_offsets (fi, movm_args);
 	  return addr;
 	}
     }
@@ -254,8 +302,11 @@ mn10300_analyze_prologue (fi, pc)
       /* Quit now if we're beyond the stop point.  */
       if (addr >= stop)
 	{
+	  /* Fix fi->frame if it's bogus at this point.  */
+	  fix_frame_pointer (fi, 0);
+
 	  /* Note if/where callee saved registers were saved.  */
-	  set_movm_offsets (fi, found_movm);
+	  set_movm_offsets (fi, movm_args);
 	  return addr;
 	}
 
@@ -263,8 +314,11 @@ mn10300_analyze_prologue (fi, pc)
       status = read_memory_nobpt (addr, buf, 2);
       if (status != 0)
 	{
+	  /* Fix fi->frame if it's bogus at this point.  */
+	  fix_frame_pointer (fi, 0);
+
 	  /* Note if/where callee saved registers were saved.  */
-	  set_movm_offsets (fi, found_movm);
+	  set_movm_offsets (fi, movm_args);
 	  return addr;
 	}
     }
@@ -283,11 +337,10 @@ mn10300_analyze_prologue (fi, pc)
   if (status != 0)
     {
       /* Fix fi->frame if it's bogus at this point.  */
-      if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	fi->frame = read_sp ();
+      fix_frame_pointer (fi, 0);
 
       /* Note if/where callee saved registers were saved.  */
-      set_movm_offsets (fi, found_movm);
+      set_movm_offsets (fi, movm_args);
       return addr;
     }
 
@@ -307,11 +360,10 @@ mn10300_analyze_prologue (fi, pc)
       if (status != 0)
 	{
 	  /* Fix fi->frame if it's bogus at this point.  */
-	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	    fi->frame = read_sp ();
+	  fix_frame_pointer (fi, 0);
 
 	  /* Note if/where callee saved registers were saved.  */
-	  set_movm_offsets (fi, found_movm);
+	  set_movm_offsets (fi, movm_args);
 	  return addr;
 	}
 
@@ -325,22 +377,20 @@ mn10300_analyze_prologue (fi, pc)
 
       /* No more prologue insns follow, so begin preparation to return.  */
       /* Fix fi->frame if it's bogus at this point.  */
-      if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	fi->frame = read_sp () - stack_size;
+      fix_frame_pointer (fi, stack_size);
 
       /* Note if/where callee saved registers were saved.  */
-      set_movm_offsets (fi, found_movm);
+      set_movm_offsets (fi, movm_args);
       return addr;
     }
 
   /* We never found an insn which allocates local stack space, regardless
      this is the end of the prologue.  */
   /* Fix fi->frame if it's bogus at this point.  */
-  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-    fi->frame = read_sp ();
+  fix_frame_pointer (fi, 0);
 
   /* Note if/where callee saved registers were saved.  */
-  set_movm_offsets (fi, found_movm);
+  set_movm_offsets (fi, movm_args);
   return addr;
 }
   
@@ -372,8 +422,8 @@ mn10300_frame_chain (fi)
        If our caller has a frame pointer, then we need to
        find the entry value of $a3 to our function.
 
-	 If fsr.regs[7] is nonzero, then it's at the memory
-	 location pointed to by fsr.regs[7].
+	 If fsr.regs[A3_REGNUM] is nonzero, then it's at the memory
+	 location pointed to by fsr.regs[A3_REGNUM].
 
 	 Else it's still in $a3.
 
@@ -389,30 +439,33 @@ mn10300_frame_chain (fi)
   memset (dummy_frame.fsr.regs, '\000', sizeof dummy_frame.fsr.regs);
   dummy_frame.status = 0;
   dummy_frame.stack_size = 0;
-  mn10300_analyze_prologue (&dummy_frame);
+  mn10300_analyze_prologue (&dummy_frame, 0);
 
   if (dummy_frame.status & MY_FRAME_IN_FP)
     {
       /* Our caller has a frame pointer.  So find the frame in $a3 or
          in the stack.  */
-      if (fi->fsr.regs[7])
-	return (read_memory_integer (fi->fsr.regs[FP_REGNUM], REGISTER_SIZE));
+      if (fi->fsr.regs[A3_REGNUM])
+	return (read_memory_integer (fi->fsr.regs[A3_REGNUM], REGISTER_SIZE));
       else
-	return read_register (FP_REGNUM);
+	return read_register (A3_REGNUM);
     }
   else
     {
       int adjust = 0;
 
-      adjust += (fi->fsr.regs[2] ? 4 : 0);
-      adjust += (fi->fsr.regs[3] ? 4 : 0);
-      adjust += (fi->fsr.regs[6] ? 4 : 0);
-      adjust += (fi->fsr.regs[7] ? 4 : 0);
+      adjust += (fi->fsr.regs[D2_REGNUM] ? 4 : 0);
+      adjust += (fi->fsr.regs[D3_REGNUM] ? 4 : 0);
+      adjust += (fi->fsr.regs[A2_REGNUM] ? 4 : 0);
+      adjust += (fi->fsr.regs[A3_REGNUM] ? 4 : 0);
       /* start-sanitize-am33 */
-      adjust += (fi->fsr.regs[E0_REGNUM+5] ? 4 : 0);
-      adjust += (fi->fsr.regs[E0_REGNUM+4] ? 4 : 0);
-      adjust += (fi->fsr.regs[E0_REGNUM+3] ? 4 : 0);
-      adjust += (fi->fsr.regs[E0_REGNUM+2] ? 4 : 0);
+      if (am33_mode)
+	{
+	  adjust += (fi->fsr.regs[E0_REGNUM+5] ? 4 : 0);
+	  adjust += (fi->fsr.regs[E0_REGNUM+4] ? 4 : 0);
+	  adjust += (fi->fsr.regs[E0_REGNUM+3] ? 4 : 0);
+	  adjust += (fi->fsr.regs[E0_REGNUM+2] ? 4 : 0);
+	}
       /* end-sanitize-am33 */
 
       /* Our caller does not have a frame pointer.  So his frame starts
@@ -600,15 +653,18 @@ mn10300_frame_saved_pc (fi)
 {
   int adjust = 0;
 
-  adjust += (fi->fsr.regs[2] ? 4 : 0);
-  adjust += (fi->fsr.regs[3] ? 4 : 0);
-  adjust += (fi->fsr.regs[6] ? 4 : 0);
-  adjust += (fi->fsr.regs[7] ? 4 : 0);
+  adjust += (fi->fsr.regs[D2_REGNUM] ? 4 : 0);
+  adjust += (fi->fsr.regs[D3_REGNUM] ? 4 : 0);
+  adjust += (fi->fsr.regs[A2_REGNUM] ? 4 : 0);
+  adjust += (fi->fsr.regs[A3_REGNUM] ? 4 : 0);
   /* start-sanitize-am33 */
-  adjust += (fi->fsr.regs[E0_REGNUM+5] ? 4 : 0);
-  adjust += (fi->fsr.regs[E0_REGNUM+4] ? 4 : 0);
-  adjust += (fi->fsr.regs[E0_REGNUM+3] ? 4 : 0);
-  adjust += (fi->fsr.regs[E0_REGNUM+2] ? 4 : 0);
+  if (am33_mode)
+    {
+      adjust += (fi->fsr.regs[E0_REGNUM+5] ? 4 : 0);
+      adjust += (fi->fsr.regs[E0_REGNUM+4] ? 4 : 0);
+      adjust += (fi->fsr.regs[E0_REGNUM+3] ? 4 : 0);
+      adjust += (fi->fsr.regs[E0_REGNUM+2] ? 4 : 0);
+    }
   /* end-sanitize-am33 */
 
   return (read_memory_integer (fi->frame + adjust, REGISTER_SIZE));
@@ -670,10 +726,12 @@ set_machine_hook (filename)
     }
 
   /* start-sanitize-am33 */
+  am33_mode = 0;
   if (bfd_get_mach (exec_bfd) == bfd_mach_am33)
     {
       for (i = 0; i < NUM_REGS; i++)
 	reg_names[i] = am33_register_names[i];
+      am33_mode = 1;
     }
   /* end-sanitize-am33 */
 }

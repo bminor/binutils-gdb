@@ -1,3 +1,18 @@
+Thu Sep  3 13:50:20 1998  Mark Alexander  <marka@cygnus.com>
+
+	* config/mn10300/tm-mn10300.h (FP_REGNUM): Redefine to be a
+	pseudo-register, not the same as a3.
+	(D2_REGNUM, D3_REGNUM, A2_REGNUM, A3_REGNUM): Define.
+	* mn10300-tdep.c (fix_frame_pointer): New function.
+	(set_movm_offsets): Use register number macros instead of
+	hard-coded constants.
+	(mn10300_analyze_prologue): Fix to handle redefinition of FP_REGNUM.
+	(mn10300_frame_chain):  Fix to handle redefinition of FP_REGNUM;
+	use register number macros instead of hard-coded constants;
+	add missing parameter to call of mn10300_analyze_prologue.
+	(mn10300_frame_saved_pc): Use register number macros instead of
+	hard-coded constants.
+
 Tue Sep  1 12:04:57 EDT 1998  Zdenek Radouch   (radouch@cygnus.com)
 
 	Changes to support/fix ARM/ELF port.  Use MAKE_MSYMBOL_SPECIAL for

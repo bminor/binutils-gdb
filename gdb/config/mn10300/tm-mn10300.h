@@ -41,8 +41,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 { "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3", \
   "sp", "pc", "mdr", "psw", "lir", "lar", "", "", \
   "", "", "", "", "", "", "", "", \
-  "", "", "", "", "", "", "", "" }
+  "", "", "", "", "", "", "", "fp" }
 
+#define D2_REGNUM 2
+#define D3_REGNUM 3
+#define A2_REGNUM 6
+#define A3_REGNUM 7
 #define SP_REGNUM 8
 #define PC_REGNUM 9
 #define MDR_REGNUM 10
@@ -53,7 +57,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define E0_REGNUM 14
 /* end-sanitize-am33 */
 
-#define FP_REGNUM 7
+/* Pseudo register that contains true address of executing stack frame */
+#define FP_REGNUM 31
 
 /* The breakpoint instruction must be the same size as the smallest
    instruction in the instruction set.
