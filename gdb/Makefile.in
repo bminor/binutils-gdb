@@ -1818,7 +1818,7 @@ ppc-bdm.o: ppc-bdm.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(serial_h) ocd.h $(regcache_h)
 
 ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdbcore_h) $(frame_h) \
-	$(inferior_h) $(target_h) $(regcache_h)
+	$(inferior_h) $(target_h) $(regcache_h) ppc-tdep.h
 
 ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(target_h) ppc-tdep.h $(regcache_h) $(value_h)

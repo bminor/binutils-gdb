@@ -46,6 +46,7 @@ CORE_ADDR rs6000_frame_chain (struct frame_info *);
 /* Some important register numbers. */
 
 #define	PPC_GP0_REGNUM 0		/* GPR register 0 */
+#define	PPC_GPLAST_REGNUM 31		/* GPR register 31 */
 #define	PPC_TOC_REGNUM 2		/* TOC register */
 #define PPC_PS_REGNUM 65		/* Processor (or machine) status (%msr) */
 #define	PPC_CR_REGNUM 66		/* Condition register */

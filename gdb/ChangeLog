@@ -1,3 +1,17 @@
+2001-11-29  Elena Zannoni  <ezannoni@redhat.com>
+
+	* Makefile.in (ppc-linux-nat.o): Add dependency on ppc-tdep.h.
+
+	* ppc-tdep.h (PPC_GPLAST_REGNUM): Define.
+
+	* ppc-linux-nat.c: Include ppc-tdep.h.
+	(ppc_register_u_addr): Don't use the static array regmap[],
+	dynamically define the mapping instead.
+	(supply_gregset): Ditto.
+	(fill_gregset): Ditto.
+	(COPY_REG): Delete macro defintion.
+	(regmap): Delete array.
+
 2001-11-29  Jim Blandy  <jimb@redhat.com>
 
 	Tighten up GDB's support for returning structs by value.
