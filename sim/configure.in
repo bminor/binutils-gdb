@@ -84,7 +84,8 @@ case "${target}" in
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
   sparc64-*-*)
-	;; # Don't build erc32 if sparc64.
+	sim_target=none # Don't build erc32 if sparc64.
+	;;
   sparc*-*-*)
 	# The SPARC simulator can only be compiled by gcc.
 	sim_target=erc32
@@ -112,7 +113,7 @@ yes)
 	;;
 esac
 
-if test x"${sim_target}" != x ; then
+if test x"${sim_target}" != xnone ; then
 	configdirs="common ${sim_target}"
 	AC_CONFIG_SUBDIRS($configdirs)
 fi
