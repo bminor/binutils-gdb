@@ -1,3 +1,7 @@
+2002-05-16  Michael Snyder  <msnyder@redhat.com>
+
+	* arm-tdep.c: Spelling fix in comment.
+
 2002-05-16  Jim Blandy  <jimb@redhat.com>
 
 	Add commands for manually expanding macros and showing their

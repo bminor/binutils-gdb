@@ -93,7 +93,7 @@
 #define MSYMBOL_SIZE(msym)				\
 	((long) MSYMBOL_INFO (msym) & 0x7fffffff)
 
-/* This table matches the indicees assigned to enum arm_abi. 
+/* This table matches the indices assigned to enum arm_abi. 
    Keep them in sync.  */
 
 static const char * const arm_abi_names[] =
