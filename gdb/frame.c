@@ -905,8 +905,8 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   fi->next = create_sentinel_frame (current_regcache);
   fi->type = frame_type_from_pc (pc);
 
-  if (INIT_EXTRA_FRAME_INFO_P ())
-    INIT_EXTRA_FRAME_INFO (0, fi);
+  if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
+    DEPRECATED_INIT_EXTRA_FRAME_INFO (0, fi);
 
   /* Select/initialize an unwind function.  */
   fi->unwind = frame_unwind_find_by_pc (current_gdbarch, fi->pc);
@@ -1037,25 +1037,25 @@ legacy_get_prev_frame (struct frame_info *next_frame)
 
   /* This change should not be needed, FIXME!  We should determine
      whether any targets *need* DEPRECATED_INIT_FRAME_PC to happen
-     after INIT_EXTRA_FRAME_INFO and come up with a simple way to
-     express what goes on here.
+     after DEPRECATED_INIT_EXTRA_FRAME_INFO and come up with a simple
+     way to express what goes on here.
 
-     INIT_EXTRA_FRAME_INFO is called from two places: create_new_frame
-     (where the PC is already set up) and here (where it isn't).
-     DEPRECATED_INIT_FRAME_PC is only called from here, always after
-     INIT_EXTRA_FRAME_INFO.
+     DEPRECATED_INIT_EXTRA_FRAME_INFO is called from two places:
+     create_new_frame (where the PC is already set up) and here (where
+     it isn't).  DEPRECATED_INIT_FRAME_PC is only called from here,
+     always after DEPRECATED_INIT_EXTRA_FRAME_INFO.
 
-     The catch is the MIPS, where INIT_EXTRA_FRAME_INFO requires the
-     PC value (which hasn't been set yet).  Some other machines appear
-     to require INIT_EXTRA_FRAME_INFO before they can do
-     DEPRECATED_INIT_FRAME_PC.  Phoo.
+     The catch is the MIPS, where DEPRECATED_INIT_EXTRA_FRAME_INFO
+     requires the PC value (which hasn't been set yet).  Some other
+     machines appear to require DEPRECATED_INIT_EXTRA_FRAME_INFO
+     before they can do DEPRECATED_INIT_FRAME_PC.  Phoo.
 
      We shouldn't need DEPRECATED_INIT_FRAME_PC_FIRST to add more
      complication to an already overcomplicated part of GDB.
      gnu@cygnus.com, 15Sep92.
 
      Assuming that some machines need DEPRECATED_INIT_FRAME_PC after
-     INIT_EXTRA_FRAME_INFO, one possible scheme:
+     DEPRECATED_INIT_EXTRA_FRAME_INFO, one possible scheme:
 
      SETUP_INNERMOST_FRAME(): Default version is just create_new_frame
      (read_fp ()), read_pc ()).  Machines with extra frame info would
@@ -1065,13 +1065,14 @@ legacy_get_prev_frame (struct frame_info *next_frame)
      create_new_frame would no longer init extra frame info;
      SETUP_ARBITRARY_FRAME would have to do that.
 
-     INIT_PREV_FRAME(fromleaf, prev) Replace INIT_EXTRA_FRAME_INFO and
-     DEPRECATED_INIT_FRAME_PC.  This should also return a flag saying
-     whether to keep the new frame, or whether to discard it, because
-     on some machines (e.g.  mips) it is really awkward to have
-     FRAME_CHAIN_VALID called *before* INIT_EXTRA_FRAME_INFO (there is
-     no good way to get information deduced in FRAME_CHAIN_VALID into
-     the extra fields of the new frame).  std_frame_pc(fromleaf, prev)
+     INIT_PREV_FRAME(fromleaf, prev) Replace
+     DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC.
+     This should also return a flag saying whether to keep the new
+     frame, or whether to discard it, because on some machines (e.g.
+     mips) it is really awkward to have FRAME_CHAIN_VALID called
+     BEFORE DEPRECATED_INIT_EXTRA_FRAME_INFO (there is no good way to
+     get information deduced in FRAME_CHAIN_VALID into the extra
+     fields of the new frame).  std_frame_pc(fromleaf, prev)
 
      This is the default setting for INIT_PREV_FRAME.  It just does
      what the default DEPRECATED_INIT_FRAME_PC does.  Some machines
@@ -1108,8 +1109,8 @@ legacy_get_prev_frame (struct frame_info *next_frame)
   if (DEPRECATED_INIT_FRAME_PC_FIRST_P ())
     prev->pc = (DEPRECATED_INIT_FRAME_PC_FIRST (fromleaf, prev));
 
-  if (INIT_EXTRA_FRAME_INFO_P ())
-    INIT_EXTRA_FRAME_INFO (fromleaf, prev);
+  if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
+    DEPRECATED_INIT_EXTRA_FRAME_INFO (fromleaf, prev);
 
   /* This entry is in the frame queue now, which is good since
      FRAME_SAVED_PC may use that queue to figure out its value (see
@@ -1282,7 +1283,7 @@ get_prev_frame (struct frame_info *next_frame)
      frames use the new unwind code.  */
   if ((DEPRECATED_INIT_FRAME_PC_P ()
        || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
-       || INIT_EXTRA_FRAME_INFO_P ()
+       || DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()
        || FRAME_CHAIN_P ())
       && next_frame->level >= 0)
     {
@@ -1315,7 +1316,8 @@ get_prev_frame (struct frame_info *next_frame)
      frame chain.  This is ok since, for old targets, both
      frame_pc_unwind (nee, FRAME_SAVED_PC) and FRAME_CHAIN()) assume
      NEXT_FRAME's data structures have already been initialized (using
-     INIT_EXTRA_FRAME_INFO) and hence the call order doesn't matter.
+     DEPRECATED_INIT_EXTRA_FRAME_INFO) and hence the call order
+     doesn't matter.
 
      By unwinding the PC first, it becomes possible to, in the case of
      a dummy frame, avoid also unwinding the frame ID.  This is
@@ -1381,12 +1383,13 @@ get_prev_frame (struct frame_info *next_frame)
      (passed to the unwind functions) to store additional frame info.
      Unfortunatly legacy targets can't use legacy_get_prev_frame() to
      unwind the sentinel frame and, consequently, are forced to take
-     this code path and rely on the below call to INIT_EXTR_FRAME_INFO
-     to initialize the inner-most frame.  */
-  if (INIT_EXTRA_FRAME_INFO_P ())
+     this code path and rely on the below call to
+     DEPRECATED_INIT_EXTRA_FRAME_INFO to initialize the inner-most
+     frame.  */
+  if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
     {
       gdb_assert (prev_frame->level == 0);
-      INIT_EXTRA_FRAME_INFO (0, prev_frame);
+      DEPRECATED_INIT_EXTRA_FRAME_INFO (0, prev_frame);
     }
 
   return prev_frame;

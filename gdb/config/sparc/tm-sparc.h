@@ -468,7 +468,7 @@ void sparc_get_saved_register (char *raw_buffer,
 
 #define FRAME_INIT_SAVED_REGS(FP)	/*no-op */
 
-#define INIT_EXTRA_FRAME_INFO(FROMLEAF, FCI) \
+#define DEPRECATED_INIT_EXTRA_FRAME_INFO(FROMLEAF, FCI) \
      sparc_init_extra_frame_info (FROMLEAF, FCI)
 extern void sparc_init_extra_frame_info (int, struct frame_info *);
 
@@ -509,7 +509,8 @@ extern CORE_ADDR sparc_frame_saved_pc (struct frame_info *);
      sparc_print_extra_frame_info (FI)
 extern void sparc_print_extra_frame_info (struct frame_info *);
 
-/* INIT_EXTRA_FRAME_INFO needs the PC to detect flat frames.  */
+/* DEPRECATED_INIT_EXTRA_FRAME_INFO needs the PC to detect flat
+   frames.  */
 
 /* NOTE: cagney/2002-12-08: Add local declaration of
    init_frame_pc_noop() because it isn't possible to include

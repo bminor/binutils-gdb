@@ -4292,7 +4292,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, cris_use_struct_convention);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);
-  set_gdbarch_init_extra_frame_info (gdbarch, cris_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, cris_init_extra_frame_info);
   set_gdbarch_skip_prologue (gdbarch, cris_skip_prologue);
   set_gdbarch_prologue_frameless_p (gdbarch, generic_prologue_frameless_p);
   

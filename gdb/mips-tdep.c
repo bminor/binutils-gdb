@@ -5982,7 +5982,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_ecoff_reg_to_regnum (gdbarch, mips_ecoff_reg_to_regnum);
 
   /* Initialize a frame */
-  set_gdbarch_init_extra_frame_info (gdbarch, mips_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mips_init_extra_frame_info);
   set_gdbarch_frame_init_saved_regs (gdbarch, mips_frame_init_saved_regs);
 
   /* MIPS version of CALL_DUMMY */

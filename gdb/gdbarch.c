@@ -226,7 +226,7 @@ struct gdbarch
   gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address;
   gdbarch_use_struct_convention_ftype *use_struct_convention;
   gdbarch_frame_init_saved_regs_ftype *frame_init_saved_regs;
-  gdbarch_init_extra_frame_info_ftype *init_extra_frame_info;
+  gdbarch_deprecated_init_extra_frame_info_ftype *deprecated_init_extra_frame_info;
   gdbarch_skip_prologue_ftype *skip_prologue;
   gdbarch_prologue_frameless_p_ftype *prologue_frameless_p;
   gdbarch_inner_than_ftype *inner_than;
@@ -737,7 +737,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of deprecated_extract_struct_value_address, has predicate */
   /* Skip verify of use_struct_convention, invalid_p == 0 */
   /* Skip verify of frame_init_saved_regs, has predicate */
-  /* Skip verify of init_extra_frame_info, has predicate */
+  /* Skip verify of deprecated_init_extra_frame_info, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->skip_prologue == 0))
     fprintf_unfiltered (log, "\n\tskip_prologue");
@@ -1169,6 +1169,29 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
                         (long) current_gdbarch->deprecated_extract_struct_value_address
                         /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
+#endif
+#ifdef DEPRECATED_INIT_EXTRA_FRAME_INFO_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_INIT_EXTRA_FRAME_INFO_P()",
+                      XSTRING (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_INIT_EXTRA_FRAME_INFO_P() = %d\n",
+                      DEPRECATED_INIT_EXTRA_FRAME_INFO_P ());
+#endif
+#ifdef DEPRECATED_INIT_EXTRA_FRAME_INFO
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_INIT_EXTRA_FRAME_INFO(fromleaf, frame)",
+                      XSTRING (DEPRECATED_INIT_EXTRA_FRAME_INFO (fromleaf, frame)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_INIT_EXTRA_FRAME_INFO = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_init_extra_frame_info
+                        /*DEPRECATED_INIT_EXTRA_FRAME_INFO ()*/);
 #endif
 #ifdef DEPRECATED_INIT_FRAME_PC_P
   fprintf_unfiltered (file,
@@ -1610,29 +1633,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: HAVE_NONSTEPPABLE_WATCHPOINT = %d\n",
                       HAVE_NONSTEPPABLE_WATCHPOINT);
-#endif
-#ifdef INIT_EXTRA_FRAME_INFO_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INIT_EXTRA_FRAME_INFO_P()",
-                      XSTRING (INIT_EXTRA_FRAME_INFO_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: INIT_EXTRA_FRAME_INFO_P() = %d\n",
-                      INIT_EXTRA_FRAME_INFO_P ());
-#endif
-#ifdef INIT_EXTRA_FRAME_INFO
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INIT_EXTRA_FRAME_INFO(fromleaf, frame)",
-                      XSTRING (INIT_EXTRA_FRAME_INFO (fromleaf, frame)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: INIT_EXTRA_FRAME_INFO = <0x%08lx>\n",
-                        (long) current_gdbarch->init_extra_frame_info
-                        /*INIT_EXTRA_FRAME_INFO ()*/);
 #endif
 #ifdef INNER_THAN
   fprintf_unfiltered (file,
@@ -4483,29 +4483,29 @@ set_gdbarch_frame_init_saved_regs (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_init_extra_frame_info_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_init_extra_frame_info_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->init_extra_frame_info != 0;
+  return gdbarch->deprecated_init_extra_frame_info != 0;
 }
 
 void
-gdbarch_init_extra_frame_info (struct gdbarch *gdbarch, int fromleaf, struct frame_info *frame)
+gdbarch_deprecated_init_extra_frame_info (struct gdbarch *gdbarch, int fromleaf, struct frame_info *frame)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->init_extra_frame_info == 0)
+  if (gdbarch->deprecated_init_extra_frame_info == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_init_extra_frame_info invalid");
+                    "gdbarch: gdbarch_deprecated_init_extra_frame_info invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_init_extra_frame_info called\n");
-  gdbarch->init_extra_frame_info (fromleaf, frame);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_init_extra_frame_info called\n");
+  gdbarch->deprecated_init_extra_frame_info (fromleaf, frame);
 }
 
 void
-set_gdbarch_init_extra_frame_info (struct gdbarch *gdbarch,
-                                   gdbarch_init_extra_frame_info_ftype init_extra_frame_info)
+set_gdbarch_deprecated_init_extra_frame_info (struct gdbarch *gdbarch,
+                                              gdbarch_deprecated_init_extra_frame_info_ftype deprecated_init_extra_frame_info)
 {
-  gdbarch->init_extra_frame_info = init_extra_frame_info;
+  gdbarch->deprecated_init_extra_frame_info = deprecated_init_extra_frame_info;
 }
 
 CORE_ADDR

@@ -485,8 +485,8 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
 
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct, and
-   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
-   called for the new frame.
+   then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
+   will be called for the new frame.
 
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
@@ -1118,7 +1118,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /*
    * Frame Info
    */
-  set_gdbarch_init_extra_frame_info (gdbarch, h8300_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, h8300_init_extra_frame_info);
   set_gdbarch_frame_init_saved_regs (gdbarch, h8300_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, h8300_frame_chain);
   set_gdbarch_saved_pc_after_call (gdbarch, h8300_saved_pc_after_call);

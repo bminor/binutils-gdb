@@ -816,8 +816,8 @@ m68hc11_skip_prologue (CORE_ADDR pc)
 
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct, and
-   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
-   called for the new frame.  */
+   then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
+   will be called for the new frame.  */
 
 static CORE_ADDR
 m68hc11_frame_chain (struct frame_info *frame)
@@ -1417,7 +1417,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, m68hc11_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, m68hc11_use_struct_convention);
-  set_gdbarch_init_extra_frame_info (gdbarch, m68hc11_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, m68hc11_init_extra_frame_info);
   set_gdbarch_pop_frame (gdbarch, m68hc11_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, m68hc11_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

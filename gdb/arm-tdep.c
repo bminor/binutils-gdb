@@ -1014,7 +1014,7 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
 }
 /* Function: frame_chain Given a GDB frame, determine the address of
    the calling function's frame.  This will be used to create a new
-   GDB frame struct, and then INIT_EXTRA_FRAME_INFO and
+   GDB frame struct, and then DEPRECATED_INIT_EXTRA_FRAME_INFO and
    DEPRECATED_INIT_FRAME_PC will be called for the new frame.  For
    ARM, we save the frame size when we initialize the frame_info.  */
 
@@ -1112,7 +1112,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   /* Determine whether or not we're in a sigtramp frame.
      Unfortunately, it isn't sufficient to test (get_frame_type (fi)
      == SIGTRAMP_FRAME) because this value is sometimes set after
-     invoking INIT_EXTRA_FRAME_INFO.  So we test *both*
+     invoking DEPRECATED_INIT_EXTRA_FRAME_INFO.  So we test *both*
      (get_frame_type (fi) == SIGTRAMP_FRAME) and PC_IN_SIGTRAMP to
      determine if we need to use the sigcontext addresses for the
      saved registers.
@@ -2904,7 +2904,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Frame handling.  */
   set_gdbarch_frame_chain_valid (gdbarch, arm_frame_chain_valid);
-  set_gdbarch_init_extra_frame_info (gdbarch, arm_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, arm_init_extra_frame_info);
   set_gdbarch_read_fp (gdbarch, arm_read_fp);
   set_gdbarch_frame_chain (gdbarch, arm_frame_chain);
   set_gdbarch_frameless_function_invocation

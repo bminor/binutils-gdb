@@ -1103,7 +1103,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_words (gdbarch, frv_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (frv_call_dummy_words));
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_init_extra_frame_info (gdbarch, frv_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, frv_init_extra_frame_info);
 
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

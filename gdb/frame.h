@@ -243,7 +243,7 @@ extern enum frame_type get_frame_type (struct frame_info *);
    PC_IN_SIGTRAMP() indicates a SIGTRAMP_FRAME and
    DEPRECATED_PC_IN_CALL_DUMMY() indicates a DUMMY_FRAME.  I suspect
    the real problem here is that get_prev_frame() only sets
-   initialized after INIT_EXTRA_FRAME_INFO as been called.
+   initialized after DEPRECATED_INIT_EXTRA_FRAME_INFO as been called.
    Consequently, some targets found that the frame's type was wrong
    and tried to fix it.  The correct fix is to modify get_prev_frame()
    so that it initializes the frame's type before calling any other
@@ -394,7 +394,7 @@ struct frame_info
     /* Anything extra for this structure that may have been defined
        in the machine dependent files. */
     /* Allocated by frame_extra_info_zalloc () which is called /
-       initialized by INIT_EXTRA_FRAME_INFO */
+       initialized by DEPRECATED_INIT_EXTRA_FRAME_INFO */
     struct frame_extra_info *extra_info;
 
     /* If dwarf2 unwind frame informations is used, this structure holds all

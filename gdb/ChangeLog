@@ -1,5 +1,41 @@
 2003-03-01  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_INIT_EXTRA_FRAME_INFO): Rename
+	INIT_EXTRA_FRAME_INFO.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* arm-tdep.c: Update comments.
+	* sh-tdep.c, mcore-tdep.c, m68hc11-tdep.c: Ditto.
+	* i386-interix-tdep.c, hppa-tdep.c, h8300-tdep.c: Ditto.
+	* frame.h, avr-tdep.c: Ditto.
+	* frame.c (get_prev_frame): DEPRECATED_INIT_EXTRA_FRAME_INFO.
+	(create_new_frame, legacy_get_prev_frame): Ditto.
+	* config/sparc/tm-sparc.h (DEPRECATED_INIT_EXTRA_FRAME_INFO): Rename.
+	* config/pa/tm-hppa.h (DEPRECATED_INIT_EXTRA_FRAME_INFO): Rename.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Initialize
+	deprecated_init_extra_frame_info instead of init_extra_frame_info.
+	* x86-64-tdep.c (x86_64_init_abi): Ditto.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* sparc-tdep.c (sparc_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* i386-interix-tdep.c (i386_interix_init_abi): Ditto.
+	* hppa-tdep.c (hppa_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+	* arm-tdep.c (arm_gdbarch_init): Ditto.
+	* alpha-tdep.c (alpha_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+
+2003-03-01  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (register_type): New function with predicate.
 	(REGISTER_VIRTUAL_TYPE): Change to function with predicate.
 	* gdbarch.h, gdbarch.c: Re-generate.

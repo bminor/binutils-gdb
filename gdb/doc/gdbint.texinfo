@@ -247,14 +247,15 @@ create_new_frame (read_register (FP_REGNUM), read_pc ()));
 Other than that, all the meaning imparted to @code{FP_REGNUM} is
 imparted by the machine-dependent code.  So, @code{FP_REGNUM} can have
 any value that is convenient for the code that creates new frames.
-(@code{create_new_frame} calls @code{INIT_EXTRA_FRAME_INFO} if it is
-defined; that is where you should use the @code{FP_REGNUM} value, if
-your frames are nonstandard.)
+(@code{create_new_frame} calls @code{DEPRECATED_INIT_EXTRA_FRAME_INFO}
+if it is defined; that is where you should use the @code{FP_REGNUM}
+value, if your frames are nonstandard.)
 
 @cindex frame chain
 Given a @value{GDBN} frame, define @code{FRAME_CHAIN} to determine the
 address of the calling function's frame.  This will be used to create a
-new @value{GDBN} frame struct, and then @code{INIT_EXTRA_FRAME_INFO} and
+new @value{GDBN} frame struct, and then
+@code{DEPRECATED_INIT_EXTRA_FRAME_INFO} and
 @code{DEPRECATED_INIT_FRAME_PC} will be called for the new frame.
 
 @section Breakpoint Handling
@@ -3357,8 +3358,8 @@ On HP-UX, certain system routines (millicode) have names beginning with
 @samp{$} or @samp{$$}.  For example, @code{$$dyncall} is a millicode
 routine that handles inter-space procedure calls on PA-RISC.
 
-@item INIT_EXTRA_FRAME_INFO (@var{fromleaf}, @var{frame})
-@findex INIT_EXTRA_FRAME_INFO
+@item DEPRECATED_INIT_EXTRA_FRAME_INFO (@var{fromleaf}, @var{frame})
+@findex DEPRECATED_INIT_EXTRA_FRAME_INFO
 If additional information about the frame is required this should be
 stored in @code{frame->extra_info}.  Space for @code{frame->extra_info}
 is allocated using @code{frame_extra_info_zalloc}.

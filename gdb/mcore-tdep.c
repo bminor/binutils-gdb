@@ -643,8 +643,8 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
 
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct, and
-   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
-   called for the new frame. */
+   then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
+   will be called for the new frame. */
 
 CORE_ADDR
 mcore_frame_chain (struct frame_info * fi)
@@ -1136,7 +1136,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Frames:  */
 
-  set_gdbarch_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
   set_gdbarch_frame_chain (gdbarch, mcore_frame_chain);
   set_gdbarch_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
   set_gdbarch_frame_saved_pc (gdbarch, mcore_frame_saved_pc);

@@ -1167,7 +1167,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   /* Stack unwinding.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_saved_pc_after_call (gdbarch, mn10300_saved_pc_after_call);
-  set_gdbarch_init_extra_frame_info (gdbarch, mn10300_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mn10300_init_extra_frame_info);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_frame_init_saved_regs (gdbarch, mn10300_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, mn10300_frame_chain);

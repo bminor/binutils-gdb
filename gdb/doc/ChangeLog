@@ -1,3 +1,8 @@
+2003-02-26  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo: Rename INIT_EXTRA_FRAME_INFO to
+	DEPRECATED_INIT_EXTRA_FRAME_INFO.
+
 2003-02-23  Raoul Gough  <RaoulGough@yahoo.co.uk>
 
 	* gdb.texinfo (Cygwin Native): Links to Non-debug DLL symbols.

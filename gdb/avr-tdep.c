@@ -974,8 +974,8 @@ avr_frame_address (struct frame_info *fi)
 
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct, and
-   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
-   called for the new frame.
+   then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
+   will be called for the new frame.
 
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
@@ -1188,7 +1188,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_store_struct_return (gdbarch, avr_store_struct_return);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, avr_scan_prologue);
-  set_gdbarch_init_extra_frame_info (gdbarch, avr_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, avr_init_extra_frame_info);
   set_gdbarch_skip_prologue (gdbarch, avr_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 

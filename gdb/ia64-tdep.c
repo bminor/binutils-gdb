@@ -100,7 +100,6 @@ static gdbarch_deprecated_extract_return_value_ftype ia64_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype ia64_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype ia64_use_struct_convention;
 static gdbarch_frameless_function_invocation_ftype ia64_frameless_function_invocation;
-static gdbarch_init_extra_frame_info_ftype ia64_init_extra_frame_info;
 static gdbarch_store_struct_return_ftype ia64_store_struct_return;
 static gdbarch_push_arguments_ftype ia64_push_arguments;
 static gdbarch_push_return_address_ftype ia64_push_return_address;
@@ -2231,7 +2230,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_words (gdbarch, ia64_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (ia64_call_dummy_words));
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_init_extra_frame_info (gdbarch, ia64_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, ia64_init_extra_frame_info);
   set_gdbarch_frame_args_address (gdbarch, ia64_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, ia64_frame_locals_address);
 

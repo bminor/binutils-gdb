@@ -74,7 +74,6 @@ static gdbarch_frame_init_saved_regs_ftype alpha_frame_init_saved_regs;
 static gdbarch_push_arguments_ftype alpha_push_arguments;
 static gdbarch_pop_frame_ftype alpha_pop_frame;
 static gdbarch_fix_call_dummy_ftype alpha_fix_call_dummy;
-static gdbarch_init_extra_frame_info_ftype alpha_init_extra_frame_info;
 
 static gdbarch_get_longjmp_target_ftype alpha_get_longjmp_target;
 
@@ -1871,7 +1870,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, alpha_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, alpha_frame_locals_address);
-  set_gdbarch_init_extra_frame_info (gdbarch, alpha_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, alpha_init_extra_frame_info);
 
   /* Alpha OSF/1 inhibits execution of code on the stack.  But there is
      no need for a dummy on the Alpha.  PUSH_ARGUMENTS takes care of all

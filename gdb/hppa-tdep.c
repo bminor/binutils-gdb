@@ -1110,8 +1110,8 @@ hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct, and
-   then INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC will be
-   called for the new frame.
+   then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
+   will be called for the new frame.
 
    This may involve searching through prologues for several functions
    at boundaries where GCC calls HP C code, or where code which has
@@ -5006,7 +5006,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, hppa_extract_struct_value_address);
   set_gdbarch_cannot_store_register (gdbarch, hppa_cannot_store_register);
-  set_gdbarch_init_extra_frame_info (gdbarch, hppa_init_extra_frame_info);
+  set_gdbarch_deprecated_init_extra_frame_info (gdbarch, hppa_init_extra_frame_info);
   set_gdbarch_frame_chain (gdbarch, hppa_frame_chain);
   set_gdbarch_frame_chain_valid (gdbarch, hppa_frame_chain_valid);
   set_gdbarch_frameless_function_invocation

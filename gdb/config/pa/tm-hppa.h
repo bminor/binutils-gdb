@@ -383,7 +383,7 @@ extern int hppa_cannot_store_register (int regnum);
 #endif
 
 #if !GDB_MULTI_ARCH
-#define INIT_EXTRA_FRAME_INFO(fromleaf, frame) hppa_init_extra_frame_info (fromleaf, frame)
+#define DEPRECATED_INIT_EXTRA_FRAME_INFO(fromleaf, frame) hppa_init_extra_frame_info (fromleaf, frame)
 extern void hppa_init_extra_frame_info (int, struct frame_info *);
 #endif
 
