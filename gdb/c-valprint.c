@@ -197,7 +197,7 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		  fputs_filtered (SYMBOL_SOURCE_NAME (msymbol), stream);
 		  fputs_filtered (">", stream);
 		}
-	      if (vtblprint)
+	      if (vt_address && vtblprint)
 	        {
 		  value vt_val;
 	          struct symbol *wsym = (struct symbol *)NULL;
@@ -206,8 +206,8 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		  struct block *block = (struct block *)NULL;
 		  int is_this_fld;
 
-
-              	  wsym = lookup_symbol (SYMBOL_NAME(msymbol), block, 
+		  if (msymbol != NULL)
+              	    wsym = lookup_symbol (SYMBOL_NAME(msymbol), block, 
 				VAR_NAMESPACE, &is_this_fld, &s);
  
 		  if (wsym)
