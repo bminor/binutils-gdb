@@ -240,7 +240,7 @@ coff_swap_reloc_out (abfd, src, dst)
 #ifdef SWAP_OUT_RELOC_EXTRA
   SWAP_OUT_RELOC_EXTRA(abfd,reloc_src, reloc_dst);
 #endif
-  return sizeof(struct external_reloc);
+  return RELSZ;
 }
 
 
@@ -403,7 +403,7 @@ coff_swap_filehdr_out (abfd, in, out)
 
 
 
-  return sizeof(FILHDR);
+  return FILHSZ;
 }
 #else
 
@@ -425,7 +425,7 @@ coff_swap_filehdr_out (abfd, in, out)
   bfd_h_put_16(abfd, filehdr_in->f_opthdr, (bfd_byte *) filehdr_out->f_opthdr);
   bfd_h_put_16(abfd, filehdr_in->f_flags, (bfd_byte *) filehdr_out->f_flags);
 
-  return sizeof(FILHDR);
+  return FILHSZ;
 }
 
 #endif
@@ -520,7 +520,7 @@ coff_swap_sym_out (abfd, inp, extp)
   bfd_h_put_8(abfd,  in->n_sclass , ext->e_sclass);
   bfd_h_put_8(abfd,  in->n_numaux , ext->e_numaux);
 
-  return sizeof(SYMENT);
+  return SYMESZ;
 }
 
 static void
@@ -635,7 +635,7 @@ coff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
       memcpy (ext->x_file.x_fname, in->x_file.x_fname, FILNMLEN);
 #endif
     }
-    return sizeof (AUXENT);
+    return AUXESZ;
 
 
   case C_STAT:
@@ -653,7 +653,7 @@ coff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
 		    (bfd_byte *) ext->x_scn.x_associated);
       bfd_h_put_8 (abfd, in->x_scn.x_comdat,
 		   (bfd_byte *) ext->x_scn.x_comdat);
-      return sizeof (AUXENT);
+      return AUXESZ;
     }
     break;
   }
@@ -692,7 +692,7 @@ coff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
       PUT_LNSZ_SIZE (abfd, in->x_sym.x_misc.x_lnsz.x_size, ext);
     }
 
-  return sizeof(AUXENT);
+  return AUXESZ;
 }
 
 
@@ -721,7 +721,7 @@ coff_swap_lineno_out (abfd, inp, outp)
 	  ext->l_addr.l_symndx);
 
   PUT_LINENO_LNNO (abfd, in->l_lnno, ext);
-  return sizeof(struct external_lineno);
+  return LINESZ;
 }
 
 
@@ -974,7 +974,7 @@ coff_swap_aouthdr_out (abfd, in, out)
       }
   }
 
-  return sizeof(AOUTHDR);
+  return AOUTSZ;
 }
 
 static void
@@ -1023,7 +1023,7 @@ coff_swap_scnhdr_out (abfd, in, out)
 {
   struct internal_scnhdr *scnhdr_int = (struct internal_scnhdr *)in;
   SCNHDR *scnhdr_ext = (SCNHDR *)out;
-  unsigned int ret = sizeof (SCNHDR);
+  unsigned int ret = SCNHSZ;
   bfd_vma ps;
   bfd_vma ss;
 
@@ -1897,6 +1897,8 @@ pe_bfd_copy_private_bfd_data (ibfd, obfd)
   return true;
 }
 
+#ifdef COFF_IMAGE_WITH_PE
+
 /* Copy private section data.  */
 
 #define coff_bfd_copy_private_section_data pe_bfd_copy_private_section_data
@@ -1934,3 +1936,5 @@ pe_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
 
   return true;
 }
+
+#endif
