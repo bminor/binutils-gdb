@@ -1,6 +1,11 @@
+Fri May 21 06:20:52 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
+
+	* config.guess: Recognize some Sequent platforms.
+
 Thu May 20 14:33:48 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
-	* configure.in: actually use the Sun3 makefile fragment that's in config/
+	* configure.in: actually use the Sun3 makefile fragment that's in
+	config/
 
 Thu May 20 14:19:18 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
