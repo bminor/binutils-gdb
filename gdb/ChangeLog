@@ -1,5 +1,18 @@
 Thu Apr 21 07:45:49 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* utils.c (prompt_for_continue): Annotate prompt.
+	(query): Annotate query.
+	* printcmd.c (print_frame_args): Change syntax of argument
+	annotation to make name and value part of a single group of
+	annotations, not two separate groups.
+	* cp-valprint.c (cp_print_value_fields): Likewise for fields.
+	* valprint.c (val_print_array_elements): Change syntax of
+	annotation to be more concise.
+	* main.c, defs.h (command_line_input): New argument tells what
+	string to include in the annotations.
+	* symtab.c (decode_line_2), main.c (read_command_lines,
+	command_loop): Change callers.
+
 	* breakpoint.c (watch_command): Use (CORE_ADDR)0, not NULL, for
 	target null pointer.
 	* blockframe.c (find_frame_addr_in_frame_chain): Likewise.

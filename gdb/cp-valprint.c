@@ -277,20 +277,20 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	  else
 	    {
 	      if (annotation_level > 1)
-		printf_filtered ("\n\032\032field-name-begin\n");
+		{
+		  printf_filtered ("\n\032\032field-begin ");
+		  print_value_flags (TYPE_FIELD_TYPE (type, i));
+		  printf_filtered ("\n");
+		}
+
 	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
 				       language_cplus,
 				       DMGL_PARAMS | DMGL_ANSI);
 	      if (annotation_level > 1)
 		printf_filtered ("\n\032\032field-name-end\n");
 	      fputs_filtered (" = ", stream);
-	    }
-
-	  if (annotation_level > 1)
-	    {
-	      printf_filtered ("\n\032\032field-begin ");
-	      print_value_flags (TYPE_FIELD_TYPE (type, i));
-	      printf_filtered ("\n");
+	      if (annotation_level > 1)
+		printf_filtered ("\n\032\032field-value\n");
 	    }
 
 	  if (TYPE_FIELD_PACKED (type, i))
