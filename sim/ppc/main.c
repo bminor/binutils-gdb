@@ -81,10 +81,11 @@ main(int argc, char **argv)
   psim_status status;
   int letter;
   int i;
+  int print_info = 0;
 
   /* check for arguments -- note sim_calls.c also contains argument processing
      code for the simulator linked within gdb.  */
-  while ((letter = getopt (argc, argv, "acCipst")) != EOF)
+  while ((letter = getopt (argc, argv, "acCiIpst")) != EOF)
     {
       switch (letter) {
       case 'a':
@@ -105,6 +106,9 @@ main(int argc, char **argv)
 	break;
       case 'i':
 	trace[trace_icu_device] = 1;
+	break;
+      case 'I':
+	print_info = 1;
 	break;
       case 't':
 	trace[trace_device_tree] = 1;
@@ -132,6 +136,9 @@ main(int argc, char **argv)
   psim_stack(system, &argv[optind], environ);
 
   psim_run(system);
+
+  if (print_info)
+    psim_print_info (system, 1);
 
   /* why did we stop */
   status = psim_get_status(system);

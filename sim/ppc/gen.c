@@ -2802,6 +2802,8 @@ gen_idecode_c(insn_table *table, lf *file)
 	      idecode_cache == 1 ? insn_formal : cache_idecode_formal);
   lf_printf(file, "{\n");
   lf_indent(file, +2);
+  if (!idecode_cache)
+    lf_printf(file, "cpu_increment_number_of_insns (processor);\n");
   if (table->opcode_rule->use_switch)
     lf_print_idecode_switch(file, table);
   else

@@ -226,6 +226,12 @@ write_stack_arguments(psim *system,
 		      unsigned_word start_block,
 		      unsigned_word start_arg)
 {
+  if (CURRENT_ENVIRONMENT != VIRTUAL_ENVIRONMENT)
+    {
+      TRACE(trace_create_stack, ("write_stack_arguments() - skipping, OEA program\n"));
+      return;
+    }
+
   TRACE(trace_create_stack,
 	("write_stack_arguments() - %s=0x%x %s=0x%x %s=0x%x %s=0x%x\n",
 	 "system", system, "arg", arg,
@@ -900,5 +906,13 @@ psim_write_memory(psim *system,
 				  buffer, vaddr, len, mode, 1);
 }
 
+
+INLINE_PSIM void
+psim_print_info(psim *system, int verbose)
+{
+  int i;
+  for (i = 0; i < system->nr_cpus; i++)
+    cpu_print_info (system->processors[i], verbose);
+}
 
 #endif /* _PSIM_C_ */

@@ -40,6 +40,7 @@
 static psim *simulator;
 static int nr_cpus;
 static char *register_names[] = REGISTER_NAMES;
+static int print_info = 0;
 
 void
 sim_open (char *args)
@@ -65,7 +66,7 @@ sim_open (char *args)
 	while (*++p != '\0') {
 	  switch (*p) {
 	  default:
-	    error ("Usage: target sim [ -a -p -c -C -s -i -t ]\n");
+	    error ("Usage: target sim [ -a -p -c -C -s -i -I -t ]\n");
 	    break;
 	  case 'a':
 	    for (i = 0; i < nr_trace; i++)
@@ -85,6 +86,9 @@ sim_open (char *args)
 	    break;
 	  case 'i':
 	    trace[trace_icu_device] = 1;
+	    break;
+	  case 'I':
+	    print_info = 1;
 	    break;
 	  case 't':
 	    trace[trace_device_tree] = 1;
@@ -107,6 +111,9 @@ void
 sim_close (int quitting)
 {
   TRACE(trace_gdb, ("sim_close(quitting=%d) called\n", quitting));
+  if (print_info)
+    psim_print_info (simulator, 1);
+
   /* nothing to do */
 }
 
@@ -187,8 +194,7 @@ void
 sim_info (int verbose)
 {
   TRACE(trace_gdb, ("sim_info(verbose=%d) called\n", verbose));
-  TRACE(trace_tbd, ("sim_info(verbose=%d) should do something\n"));
-  /* FIXME: */
+  psim_print_info (simulator, verbose);
 }
 
 

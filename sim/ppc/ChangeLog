@@ -1,9 +1,28 @@
 Mon Oct  2 11:46:37 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* cpu.c (struct _cpu): Add number_of_insns field to tract how many
+	instructions are executed.
+	(cpu_increment_number_of_insns): New function to increment the
+	number of instructions issued.
+	(cpu_get_number_of_insns): New function to return the number of
+	instructions issued.
+	(cpu_print_info): New function to print cpu related information.
+	At present, print the number of instructions executed.
+
+	* gen_idecode_c: Emit call to cpu_increment_number_of_insns within
+	idecode_issue.
+
+	* psim.c (psim_print_info): New function to iterate over each of
+	the CPU's calling cpu_print_info.
+	
+	* psim.h,cpu.h: Add new declarations.
+
 	* sim_calls.c (sim_open): Add argument processing to add the same
 	switches main.c accepts for the standalone processor.
+	(sim_close): Call psim_print_info if -I.
+
 	* main.c (main): Add comment saying to update sim_calls.c when
-	adding switches.
+	adding switches.  Add -I to call psim_print_info when done.
 
 Sun Oct  1 13:52:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
