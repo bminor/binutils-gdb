@@ -22,13 +22,13 @@
 
 /* This file was created with the aid of ``gdbarch.sh''.
 
-   The bourn shell script ``gdbarch.sh'' creates the files
+   The Bourne shell script ``gdbarch.sh'' creates the files
    ``new-gdbarch.c'' and ``new-gdbarch.h and then compares them
    against the existing ``gdbarch.[hc]''.  Any differences found
    being reported.
 
    If editing this file, please also run gdbarch.sh and merge any
-   changes into that script. Conversely, when makeing sweeping changes
+   changes into that script. Conversely, when making sweeping changes
    to this file, modifying gdbarch.sh and using its output may prove
    easier. */
 
@@ -189,7 +189,15 @@ extern void set_gdbarch_long_double_bit (struct gdbarch *gdbarch, int long_doubl
 #endif
 #endif
 
-/* Number of bits in a pointer for the target machine */
+/* For most targets, a pointer on the target and its representation as an
+   address in GDB have the same size and "look the same".  For such a
+   target, you need only set TARGET_PTR_BIT / ptr_bit and TARGET_ADDR_BIT
+   / addr_bit will be set from it.
+  
+   If TARGET_PTR_BIT and TARGET_ADDR_BIT are different, you'll probably
+   also need to set POINTER_TO_ADDRESS and ADDRESS_TO_POINTER as well.
+  
+   ptr_bit is the size of a pointer on the target */
 
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_PTR_BIT)
@@ -201,6 +209,21 @@ extern void set_gdbarch_ptr_bit (struct gdbarch *gdbarch, int ptr_bit);
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_PTR_BIT)
 #define TARGET_PTR_BIT (gdbarch_ptr_bit (current_gdbarch))
+#endif
+#endif
+
+/* addr_bit is the size of a target address as represented in gdb */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_ADDR_BIT)
+#define TARGET_ADDR_BIT (TARGET_PTR_BIT)
+#endif
+
+extern int gdbarch_addr_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_addr_bit (struct gdbarch *gdbarch, int addr_bit);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_ADDR_BIT)
+#define TARGET_ADDR_BIT (gdbarch_addr_bit (current_gdbarch))
 #endif
 #endif
 

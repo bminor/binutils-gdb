@@ -319,8 +319,18 @@ v::TARGET_FLOAT_BIT:int:float_bit::::8 * sizeof (float):4*TARGET_CHAR_BIT::0
 v::TARGET_DOUBLE_BIT:int:double_bit::::8 * sizeof (double):8*TARGET_CHAR_BIT::0
 # Number of bits in a long double for the target machine.
 v::TARGET_LONG_DOUBLE_BIT:int:long_double_bit::::8 * sizeof (long double):2*TARGET_DOUBLE_BIT::0
-# Number of bits in a pointer for the target machine
+# For most targets, a pointer on the target and its representation as an
+# address in GDB have the same size and "look the same".  For such a
+# target, you need only set TARGET_PTR_BIT / ptr_bit and TARGET_ADDR_BIT
+# / addr_bit will be set from it.
+#
+# If TARGET_PTR_BIT and TARGET_ADDR_BIT are different, you'll probably
+# also need to set POINTER_TO_ADDRESS and ADDRESS_TO_POINTER as well.
+#
+# ptr_bit is the size of a pointer on the target
 v::TARGET_PTR_BIT:int:ptr_bit::::8 * sizeof (void*):TARGET_INT_BIT::0
+# addr_bit is the size of a target address as represented in gdb
+v::TARGET_ADDR_BIT:int:addr_bit::::8 * sizeof (void*):0:TARGET_PTR_BIT:
 # Number of bits in a BFD_VMA for the target object file format.
 v::TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address::0
 #
@@ -515,13 +525,13 @@ cat <<EOF
 
 /* This file was created with the aid of \`\`gdbarch.sh''.
 
-   The bourn shell script \`\`gdbarch.sh'' creates the files
+   The Bourne shell script \`\`gdbarch.sh'' creates the files
    \`\`new-gdbarch.c'' and \`\`new-gdbarch.h and then compares them
    against the existing \`\`gdbarch.[hc]''.  Any differences found
    being reported.
 
    If editing this file, please also run gdbarch.sh and merge any
-   changes into that script. Conversely, when makeing sweeping changes
+   changes into that script. Conversely, when making sweeping changes
    to this file, modifying gdbarch.sh and using its output may prove
    easier. */
 

@@ -3573,10 +3573,10 @@ search_symbols (regexp, kind, nfiles, files, matches)
   if (kind < LABEL_NAMESPACE)
     error ("must search on specific namespace");
 
-  ourtype = types[(int) (kind - LABEL_NAMESPACE)];
-  ourtype2 = types2[(int) (kind - LABEL_NAMESPACE)];
-  ourtype3 = types3[(int) (kind - LABEL_NAMESPACE)];
-  ourtype4 = types4[(int) (kind - LABEL_NAMESPACE)];
+  ourtype = types[(int) (kind - VARIABLES_NAMESPACE)];
+  ourtype2 = types2[(int) (kind - VARIABLES_NAMESPACE)];
+  ourtype3 = types3[(int) (kind - VARIABLES_NAMESPACE)];
+  ourtype4 = types4[(int) (kind - VARIABLES_NAMESPACE)];
 
   sr = *matches = NULL;
   tail = NULL;
@@ -3903,7 +3903,7 @@ symtab_symbol_info (char *regexp, namespace_enum kind, int from_tty)
   printf_filtered (regexp
 		   ? "All %ss matching regular expression \"%s\":\n"
 		   : "All defined %ss:\n",
-		   classnames[(int) (kind - LABEL_NAMESPACE - 1)], regexp);
+		   classnames[(int) (kind - VARIABLES_NAMESPACE)], regexp);
 
   for (p = symbols; p != NULL; p = p->next)
     {

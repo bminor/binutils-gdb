@@ -2929,7 +2929,7 @@ build_gdbtypes (void)
      though the two can be different (cf d10v) */
   builtin_type_ptr = make_pointer_type (builtin_type_void, NULL);
   builtin_type_CORE_ADDR =
-    init_type (TYPE_CODE_INT, TARGET_PTR_BIT / 8,
+    init_type (TYPE_CODE_INT, TARGET_ADDR_BIT / 8,
 	       TYPE_FLAG_UNSIGNED,
 	       "__CORE_ADDR", (struct objfile *) NULL);
   builtin_type_bfd_vma =

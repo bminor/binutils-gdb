@@ -22,13 +22,13 @@
 
 /* This file was created with the aid of ``gdbarch.sh''.
 
-   The bourn shell script ``gdbarch.sh'' creates the files
+   The Bourne shell script ``gdbarch.sh'' creates the files
    ``new-gdbarch.c'' and ``new-gdbarch.h and then compares them
    against the existing ``gdbarch.[hc]''.  Any differences found
    being reported.
 
    If editing this file, please also run gdbarch.sh and merge any
-   changes into that script. Conversely, when makeing sweeping changes
+   changes into that script. Conversely, when making sweeping changes
    to this file, modifying gdbarch.sh and using its output may prove
    easier. */
 
@@ -136,6 +136,7 @@ struct gdbarch
   int double_bit;
   int long_double_bit;
   int ptr_bit;
+  int addr_bit;
   int bfd_vma_bit;
   int ieee_float;
   gdbarch_read_pc_ftype *read_pc;
@@ -256,6 +257,7 @@ struct gdbarch startup_gdbarch =
   8 * sizeof (float),
   8 * sizeof (double),
   8 * sizeof (long double),
+  8 * sizeof (void*),
   8 * sizeof (void*),
   8 * sizeof (void*),
   0,
@@ -469,6 +471,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of double_bit, invalid_p == 0 */
   /* Skip verify of long_double_bit, invalid_p == 0 */
   /* Skip verify of ptr_bit, invalid_p == 0 */
+  if (gdbarch->addr_bit == 0)
+    gdbarch->addr_bit = TARGET_PTR_BIT;
   /* Skip verify of bfd_vma_bit, invalid_p == 0 */
   /* Skip verify of ieee_float, invalid_p == 0 */
   /* Skip verify of read_pc, invalid_p == 0 */
@@ -727,6 +731,11 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_PTR_BIT # %s\n",
                       XSTRING (TARGET_PTR_BIT));
+#endif
+#ifdef TARGET_ADDR_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_ADDR_BIT # %s\n",
+                      XSTRING (TARGET_ADDR_BIT));
 #endif
 #ifdef TARGET_BFD_VMA_BIT
   fprintf_unfiltered (file,
@@ -1334,6 +1343,11 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_PTR_BIT = %ld\n",
                       (long) TARGET_PTR_BIT);
+#endif
+#ifdef TARGET_ADDR_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_ADDR_BIT = %ld\n",
+                      (long) TARGET_ADDR_BIT);
 #endif
 #ifdef TARGET_BFD_VMA_BIT
   fprintf_unfiltered (file,
@@ -2090,6 +2104,23 @@ set_gdbarch_ptr_bit (struct gdbarch *gdbarch,
                      int ptr_bit)
 {
   gdbarch->ptr_bit = ptr_bit;
+}
+
+int
+gdbarch_addr_bit (struct gdbarch *gdbarch)
+{
+  if (gdbarch->addr_bit == 0)
+    internal_error ("gdbarch: gdbarch_addr_bit invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_addr_bit called\n");
+  return gdbarch->addr_bit;
+}
+
+void
+set_gdbarch_addr_bit (struct gdbarch *gdbarch,
+                      int addr_bit)
+{
+  gdbarch->addr_bit = addr_bit;
 }
 
 int

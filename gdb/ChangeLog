@@ -1,3 +1,19 @@
+Fri Aug 25 12:11:21 2000  David Taylor  <taylor@texas.cygnus.com>
+
+	* symtab.c (search_symbols): Fix off by one error in index for
+ 	initializing variables ourtype, ourtype2, ourtype3, and ourtype4.
+	(symtab_symbol_info): fix similar off by one error.
+	
+Fri Aug 25 12:03:15 2000  David Taylor  <taylor@texas.cygnus.com>
+
+	* gdbarch.sh (TARGET_ADDR_BIT): New macro for the number
+	of bits in gdb's representation of a target address.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* gdbtypes.c (build_gdbtypes): Use TARGET_ADDR_BIT instead of
+ 	TARGET_PTR_BIT when initializing builtin_type_CORE_ADDR.
+	* printcmd.c (print_address_numeric): Use TARGET_ADDR_BIT instead
+ 	of TARGET_PTR_BIT, because we're printing an address, not a pointer.
+
 2000-08-25  Pierre Muller  <muller@ics.u-strasbg.fr>
 
        * Makefile.in: add rules to compile and link pascal specific files.

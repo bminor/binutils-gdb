@@ -726,9 +726,9 @@ print_address_numeric (CORE_ADDR addr, int use_local, struct ui_file *stream)
      kept in the least significant bits of ADDR - the upper bits were
      either zero or sign extended.  Should ADDRESS_TO_POINTER() or
      some ADDRESS_TO_PRINTABLE() be used to do the conversion?  */
-  int ptr_bit = TARGET_PTR_BIT;
-  if (ptr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
-    addr &= ((CORE_ADDR) 1 << ptr_bit) - 1;
+  int addr_bit = TARGET_ADDR_BIT;
+  if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
+    addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
   print_longest (stream, 'x', use_local, (ULONGEST) addr);
 }
 
