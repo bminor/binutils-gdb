@@ -1,3 +1,11 @@
+2003-07-15  Andrew Cagney  <cagney@redhat.com>
+
+	* complaints.c (struct explanation): Define.
+	(struct complaints): Change type of "explanation" to "struct
+	explanation".
+	(symfile_explanations): Convert to a "struct explanation" table.
+	(vcomplaint): Update.
+
 2003-07-15  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-linux-nat.c (regmap): Removed.
