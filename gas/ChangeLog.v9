@@ -1,3 +1,7 @@
+Wed Jul 14 09:37:43 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* configure.in: Make sparc64-*-aout* use bfd gas.
+
 Wed Jul  7 12:17:48 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-sparc.h (ENV64): Define for v9.
