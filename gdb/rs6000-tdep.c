@@ -209,25 +209,28 @@ CORE_ADDR pc;
        If the next is not a nop, this branch was part of the function
        prologue. */
 
-    if (op == 0x4def7b82 ||		/* crorc 15, 15, 15 */
+    if (op == 0x4def7b82 ||			/* crorc 15, 15, 15 */
 	op == 0x0)
-      return pc - 4;			/* don't skip over this branch */
+      return pc - 4;				/* don't skip over this branch */
   }
 
-  if ((op & 0xfc1f0000) == 0xd8010000) { /* stfd Rx,NUM(r1) */
-    pc += 4;				 /* store floating register double */
+  if ((op & 0xfc1f0000) == 0xd8010000) {	/* stfd Rx,NUM(r1) */
+    pc += 4;					/* store floating register double */
     op = read_memory_integer (pc, 4);
   }
 
-  if ((op & 0xfc1f0000) == 0xbc010000) { /* stm Rx, NUM(r1) */
+  if ((op & 0xfc1f0000) == 0xbc010000) {	/* stm Rx, NUM(r1) */
     pc += 4;
     op = read_memory_integer (pc, 4);
   }
 
-  while (((tmp = op >> 16) == 0x9001) || /* st   r0, NUM(r1) */
-	 (tmp == 0x9421) ||		/* stu  r1, NUM(r1) */
-	 (tmp == 0x93e1)) 		/* st   r31,NUM(r1) */
-  {
+  while ((op & 0xfc1f0000) == 0x9001 && 	/* st rx,NUM(r1), rx >= r13 */
+	 (op & 0x03e00000) >= 0x01a00000) {
+    pc += 4;
+    op = read_memory_integer (pc, 4);
+  }
+	 
+  if ((op & 0xfc1f0000) == 0x94210000) {	/* stu r1,NUM(r1) */
     pc += 4;
     op = read_memory_integer (pc, 4);
   }

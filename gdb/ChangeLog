@@ -1,3 +1,9 @@
+Fri Mar  3 12:33:24 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* rs6000-tdep.c (skip_prologue): Skip multiple stores of the saved
+	registers that GCC emits on the PowerPC by default in addition to
+	the store multiple instruction used on the Power series.
+
 Fri Mar  3 00:54:58 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-tdep.c (decode_asi): New function.
