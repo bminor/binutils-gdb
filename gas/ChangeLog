@@ -1,3 +1,22 @@
+2005-04-05  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c: Warning fixes throughout.
+	(xtensa_fetch_width): Change to unsigned.
+	(assemble_nop, xtensa_find_unaligned_branch_targets,
+	xtensa_find_unaligned_loops, xg_assemble_vliw_tokens,
+	is_narrow_branch_guaranteed_in_range, xtensa_fix_close_loop_end_frags,
+	min_bytes_to_other_loop_end, unrelaxed_frag_min_size,
+	unrelaxed_frag_max_size, xtensa_fix_short_loop_frags,
+	count_insns_to_loop_end, unrelaxed_frag_min_insn_count,
+	get_text_align_max_fill_size, get_text_align_nop_count,
+	get_text_align_nth_nop_size, get_noop_aligned_address,
+	get_aligned_diff, convert_frag_align_next_opcode,
+	convert_frag_immed_finish_loop, xtensa_create_property_segments,
+	xtensa_create_xproperty_segments, xt_block_aligned_size): Clean up
+	types, avoiding size_t and using offsetT and addressT appropriately.
+	(get_text_align_power): Clean up types.  Avoid incorrect bound.
+	(get_text_align_fill_size): Clean up types.  Restructure for clarity.
+
 2005-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ia64.c (start_unwind_section): Undo the change
