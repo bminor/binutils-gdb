@@ -6928,10 +6928,6 @@ breakpoint_re_set (void)
 #endif
 }
 
-/* Set ignore-count of breakpoint number BPTNUM to COUNT.
-   If from_tty is nonzero, it prints a message to that effect,
-   which ends with a period (no newline).  */
-
 /* Reset the thread number of this breakpoint:
 
    - If the breakpoint is for all threads, leave it as-is.
@@ -6945,6 +6941,10 @@ breakpoint_re_set_thread (struct breakpoint *b)
 	b->thread = pid_to_thread_id (inferior_ptid);
     }
 }
+
+/* Set ignore-count of breakpoint number BPTNUM to COUNT.
+   If from_tty is nonzero, it prints a message to that effect,
+   which ends with a period (no newline).  */
 
 void
 set_ignore_count (int bptnum, int count, int from_tty)
