@@ -366,10 +366,10 @@ static void
 coff_start_symtab ()
 {
   start_symtab (
-		/* We fill in the filename later.  start_symtab
-		   puts this pointer into last_source file and in
-		   coff_end_symtab we assume we can free() it.
-		   FIXME: leaks memory.  */
+		/* We fill in the filename later.  start_symtab puts
+		   this pointer into last_source_file and we put it in
+		   subfiles->name, which end_symtab frees; that's why
+		   it must be malloc'd.  */
 		savestring ("", 0),
 		/* We never know the directory name for COFF.  */
 		NULL,
@@ -400,6 +400,8 @@ complete_symtab (name, start_addr, size)
     CORE_ADDR start_addr;
     unsigned int size;
 {
+  if (last_source_file != NULL)
+    free (last_source_file);
   last_source_file = savestring (name, strlen (name));
   current_source_start_addr = start_addr;
   current_source_end_addr = start_addr + size;
@@ -461,8 +463,10 @@ record_minimal_symbol (name, address, type, objfile)
   /* We don't want TDESC entry points in the minimal symbol table */
   if (name[0] == '@') return;
 
-  prim_record_minimal_symbol (savestring (name, strlen (name)), address, type,
-			      objfile);
+  prim_record_minimal_symbol
+    (obsavestring (name, strlen (name), &objfile->symbol_obstack),
+     address, type,
+     objfile);
 }
 
 /* coff_symfile_init ()
@@ -1148,6 +1152,10 @@ coff_getfilename (aux_entry)
       buffer[FILNMLEN] = '\0';
     }
   result = buffer;
+
+  /* FIXME: We should not be throwing away the information about what
+     directory.  It should go into dirname of the symtab, or some such
+     place.  */
   if ((temp = strrchr (result, '/')) != NULL)
     result = temp + 1;
   return (result);
@@ -1850,7 +1858,10 @@ coff_read_struct_type (index, length, lastsym)
 	    list = new;
 
 	    /* Save the data.  */
-	    list->field.name = savestring (name, strlen (name));
+	    list->field.name =
+	      obsavestring (name,
+			    strlen (name),
+			    &current_objfile->symbol_obstack);
 	    list->field.type = decode_type (ms, ms->c_type, &sub_aux);
 	    list->field.bitpos = 8 * ms->c_value;
 	    list->field.bitsize = 0;
@@ -1865,7 +1876,10 @@ coff_read_struct_type (index, length, lastsym)
 	    list = new;
 
 	    /* Save the data.  */
-	    list->field.name = savestring (name, strlen (name));
+	    list->field.name =
+	      obsavestring (name,
+			    strlen (name),
+			    &current_objfile->symbol_obstack);
 	    list->field.type = decode_type (ms, ms->c_type, &sub_aux);
 	    list->field.bitpos = ms->c_value;
 	    list->field.bitsize = sub_aux.x_sym.x_misc.x_lnsz.x_size;
@@ -1933,10 +1947,14 @@ coff_read_enum_type (index, length, lastsym)
       switch (ms->c_sclass)
 	{
 	  case C_MOE:
-	    sym = (struct symbol *) xmalloc (sizeof (struct symbol));
+	    sym = (struct symbol *) obstack_alloc
+	      (&current_objfile->symbol_obstack,
+	       sizeof (struct symbol));
 	    memset (sym, 0, sizeof (struct symbol));
 
-	    SYMBOL_NAME (sym) = savestring (name, strlen (name));
+	    SYMBOL_NAME (sym) =
+	      obsavestring (name, strlen (name),
+			    &current_objfile->symbol_obstack);
 	    SYMBOL_CLASS (sym) = LOC_CONST;
 	    SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
 	    SYMBOL_VALUE (sym) = ms->c_value;

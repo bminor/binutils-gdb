@@ -1,3 +1,8 @@
+Wed Sep 28 17:48:18 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* coffread.c (complete_symtab): If last_source_file is set upon
+	entry, free it.
+
 Wed Sep 28 08:59:14 1994  Jim Kingdon  (kingdon@cygnus.com)
 
 	* xcoffread.c (read_xcoff_symtab, case C_FILE):
