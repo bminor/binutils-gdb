@@ -1,19 +1,17 @@
-
-
 		   On Configuring Development Tools
 
-	 Last Mod Fri Jul 19 17:59:52 PDT 1991 by gnu@cygnus.com
+			K. Richard Pixley
+			Cygnus Support
+
+		 Last Mod 19 Jul 1991 by gnu@cygnus.com
 
 INTRO
 -----
 
     This document attempts to describe the general concepts behind
     configuration of the Cygnus Support release of the GNU Development
-    Tools.  It also discusses common usage.  For a more in succint
-    description, please refer to the man page on "configure" which you
-    should have received {FIXME: ALONG WITH LOTS OF OTHER VERY PRETTY
-    HARD COPY OR IN A DIFFERENT DISTRIBUTION OR ON THIS TAPE OR SHRINK
-    BOX OR SOMETHING}.
+    Tools.  It also discusses common usage.  Eventually, FIXME, there
+    will also be a man page for "configure", an "info" tree, etc.
 
 
 BASICS
