@@ -62,8 +62,6 @@ struct bfd_link_hash_entry
   struct bfd_hash_entry root;
   /* Type of this entry.  */
   enum bfd_link_hash_type type;
-  /* Whether this symbol has been written out.  */
-  boolean written;
   /* Undefined and common entries are kept in a linked list through
      this field.  This field is not in the union because that would
      force us to remove entries from the list when we changed their
@@ -308,6 +306,7 @@ enum bfd_link_order_type
   bfd_undefined_link_order,	/* Undefined.  */
   bfd_indirect_link_order,	/* Built from a section.  */
   bfd_fill_link_order,		/* Fill with a 16 bit constant.  */
+  bfd_data_link_order,		/* Set to explicit data.  */
   bfd_section_reloc_link_order,	/* Relocate against a section.  */
   bfd_symbol_reloc_link_order	/* Relocate against a symbol.  */
 };
@@ -343,6 +342,12 @@ struct bfd_link_order
 	  /* Value to fill with.  */
 	  unsigned int value;
 	} fill;
+      struct
+	{
+	  /* Data to put into file.  The size field gives the number
+	     of bytes which this field points to.  */
+	  bfd_byte *contents;
+	} data;
       struct
 	{
 	  /* Description of reloc to generate.  Used for
