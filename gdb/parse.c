@@ -71,6 +71,7 @@ struct expression *expout;
 int expout_size;
 int expout_ptr;
 struct block *expression_context_block;
+CORE_ADDR expression_context_pc;
 struct block *innermost_block;
 int arglist_len;
 union type_stack_elt *type_stack;
@@ -1140,7 +1141,13 @@ parse_exp_1 (char **stringptr, struct block *block, int comma)
   old_chain = make_cleanup (free_funcalls, 0 /*ignore*/);
   funcall_chain = 0;
 
-  expression_context_block = block ? block : get_selected_block (0);
+  if (block)
+    {
+      expression_context_block = block;
+      expression_context_pc = block->startaddr;
+    }
+  else
+    expression_context_block = get_selected_block (&expression_context_pc);
 
   namecopy = (char *) alloca (strlen (lexptr) + 1);
   expout_size = 10;
