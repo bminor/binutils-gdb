@@ -1264,12 +1264,13 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		      && ((! info->symbolic && h->dynindx != -1)
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
-		      && ( r_type == R_X86_64_8 ||
-			   r_type == R_X86_64_16 ||
-                           r_type == R_X86_64_32 ||
-			   r_type == R_X86_64_64 ||
-                           r_type == R_X86_64_PC16 ||
-			   r_type == R_X86_64_PC32)
+		      && (r_type == R_X86_64_8
+			  || r_type == R_X86_64_16
+			  || r_type == R_X86_64_32
+			  || r_type == R_X86_64_64
+			  || r_type == R_X86_64_PC8
+			  || r_type == R_X86_64_PC16
+			  || r_type == R_X86_64_PC32)
                       && ((input_section->flags & SEC_ALLOC) != 0
                           /* DWARF will emit R_X86_64_32 relocations in its
                              sections against symbols defined externally
@@ -1440,11 +1441,12 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_X86_64_PC8:
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
-	  /* FIXME: The abi says the linker should make sure the value is
+	  /* FIXME: The ABI says the linker should make sure the value is
 	     the same when it's zeroextended to 64 bit.	 */
 	  if (info->shared
 	      && (input_section->flags & SEC_ALLOC) != 0
-	      && ((r_type != R_X86_64_PC8 && r_type != R_X86_64_PC16
+	      && ((r_type != R_X86_64_PC8
+		   && r_type != R_X86_64_PC16
 		   && r_type != R_X86_64_PC32)
 		  || (h != NULL
 		      && h->dynindx != -1
@@ -1505,7 +1507,8 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 		  memset (&outrel, 0, sizeof outrel);
 		  relocate = false;
 		}
-	      else if ((r_type == R_X86_64_PC8) || (r_type == R_X86_64_PC16)
+	      else if ((r_type == R_X86_64_PC8)
+		       || (r_type == R_X86_64_PC16)
 		       || (r_type == R_X86_64_PC32))
 		{
 		  BFD_ASSERT (h != NULL && h->dynindx != -1);
