@@ -1,5 +1,7 @@
 /* Readline.h -- the names of functions callable from within readline. */
 
+#include "sysdep.h"
+
 #if !defined (_READLINE_H_)
 #define _READLINE_H_
 
