@@ -206,7 +206,7 @@ case ${generic_target} in
 			;;
   mips-*-ecoff*)	obj_format=ecoff gas_target=mips-big ;;
   mips-*-irix5*)	obj_format=elf gas_target=mips-big ;;
-  mips-*-irix*)		obj_format=ecoff gas_target=mips-big emulation=irix ;;
+  mips-*-irix*)		obj_format=ecoff gas_target=mips-big ;;
   mips-*-riscos*)	obj_format=ecoff gas_target=mips-big ;;
   mips-*-sysv*)		obj_format=ecoff gas_target=mips-big ;;
   mips-*-elf*)		obj_format=elf 

@@ -1,5 +1,10 @@
 Wed Aug 24 12:46:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* config/tc-mips.h (LOCAL_LABEL): Define as 0, for compatibility
+	with native MIPS assembler.
+	* configure.in (mips-*-irix*): Don't set emulation.
+	* config/te-irix.h: Remove.
+
 	* ecoff.c (ecoff_symbol_new_hook): Don't add a new file if we
 	haven't seen any input files yet.
 	* config/tc-alpha.c (md_begin): Just call symbol_create, rather

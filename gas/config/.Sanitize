@@ -133,7 +133,6 @@ te-hp300.h
 te-hppa.h
 te-i386aix.h
 te-ic960.h
-te-irix.h
 te-linux.h
 te-lynx.h
 te-mach.h
