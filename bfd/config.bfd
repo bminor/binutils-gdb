@@ -790,6 +790,9 @@ case "${targ}" in
     case "${targ}" in
       *-*-aix4.[3456789]* | *-*-aix[56789]*)
 	want64=true;;
+	
+	*)
+	targ_cflags=-DSMALL_ARCHIVE;;
     esac
     ;;
 #ifdef BFD64
