@@ -1,5 +1,8 @@
 Tue Nov 26 13:24:17 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300-dis.c (disasemble): Finish conversion to '$' as
+	register prefix.
+
 	* mn10300-opc.c (mn10300_opcodes): Fix mask field for
 	mov am,(imm32,sp).
 
