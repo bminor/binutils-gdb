@@ -30,7 +30,6 @@
 #undef	DEFAULT_LR_SAVE
 #define	DEFAULT_LR_SAVE 4	/* eabi saves LR at 4 off of SP */
 
-#undef PC_LOAD_SEGMENT
 #undef PROCESS_LINENUMBER_HOOK
 
 #undef TEXT_SEGMENT_BASE

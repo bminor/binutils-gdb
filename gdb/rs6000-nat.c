@@ -605,6 +605,9 @@ vmap_symtab (struct vmap *vp)
 	return;
       objfile = symfile_objfile;
     }
+  else if (!vp->loaded)
+    /* If symbols are not yet loaded, offsets are not yet valid. */
+    return;
 
   new_offsets = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
 
@@ -630,6 +633,23 @@ objfile_symbol_add (void *arg)
   syms_from_objfile (obj, NULL, 0, 0);
   new_symfile_objfile (obj, 0, 0);
   return 1;
+}
+
+/* Add symbols for a vmap. Return zero upon error.  */
+
+int
+vmap_add_symbols (struct vmap *vp)
+{
+  if (catch_errors (objfile_symbol_add, vp->objfile,
+		    "Error while reading shared library symbols:\n",
+		    RETURN_MASK_ALL))
+    {
+      /* Note this is only done if symbol reading was successful.  */
+      vp->loaded = 1;
+      vmap_symtab (vp);
+      return 1;
+    }
+  return 0;
 }
 
 /* Add a new vmap entry based on ldinfo() information.
@@ -666,8 +686,11 @@ add_vmap (LdInfo *ldi)
   else
     abfd = bfd_fdopenr (objname, gnutarget, fd);
   if (!abfd)
-    error ("Could not open `%s' as an executable file: %s",
-	   objname, bfd_errmsg (bfd_get_error ()));
+    {
+      warning ("Could not open `%s' as an executable file: %s",
+	       objname, bfd_errmsg (bfd_get_error ()));
+      return NULL;
+    }
 
   /* make sure we have an object file */
 
@@ -684,41 +707,35 @@ add_vmap (LdInfo *ldi)
 
       if (!last)
 	{
+	  warning ("\"%s\": member \"%s\" missing.", objname, mem);
 	  bfd_close (abfd);
-	  /* FIXME -- should be error */
-	  warning ("\"%s\": member \"%s\" missing.", abfd->filename, mem);
-	  return 0;
+	  return NULL;
 	}
 
       if (!bfd_check_format (last, bfd_object))
 	{
-	  bfd_close (last);	/* XXX???       */
-	  goto obj_err;
+	  warning ("\"%s\": member \"%s\" not in executable format: %s.",
+		   objname, mem, bfd_errmsg (bfd_get_error ()));
+	  bfd_close (last);
+	  bfd_close (abfd);
+	  return NULL;
 	}
 
       vp = map_vmap (last, abfd);
     }
   else
     {
-    obj_err:
+      warning ("\"%s\": not in executable format: %s.",
+	       objname, bfd_errmsg (bfd_get_error ()));
       bfd_close (abfd);
-      error ("\"%s\": not in executable format: %s.",
-	     objname, bfd_errmsg (bfd_get_error ()));
-      /*NOTREACHED */
+      return NULL;
     }
   obj = allocate_objfile (vp->bfd, 0);
   vp->objfile = obj;
 
-#ifndef SOLIB_SYMBOLS_MANUAL
-  if (catch_errors (objfile_symbol_add, obj,
-		    "Error while reading shared library symbols:\n",
-		    RETURN_MASK_ALL))
-    {
-      /* Note this is only done if symbol reading was successful.  */
-      vmap_symtab (vp);
-      vp->loaded = 1;
-    }
-#endif
+  /* Always add symbols for the main objfile.  */
+  if (vp == vmap || auto_solib_add)
+    vmap_add_symbols (vp);
   return vp;
 }
 
@@ -985,12 +1002,6 @@ xcoff_relocate_core (struct target_ops *target)
   char *buffer = xmalloc (buffer_size);
   struct cleanup *old = make_cleanup (free_current_contents, &buffer);
 
-  /* FIXME, this restriction should not exist.  For now, though I'll
-     avoid coredumps with error() pending a real fix.  */
-  if (vmap == NULL)
-    error
-      ("Can't debug a core file without an executable file (on the RS/6000)");
-
   ldinfo_sec = bfd_get_section_by_name (core_bfd, ".ldinfo");
   if (ldinfo_sec == NULL)
     {
@@ -1036,12 +1047,16 @@ xcoff_relocate_core (struct target_ops *target)
 	ldi->l32.ldinfo_fd = -1;
 
       /* The first ldinfo is for the exec file, allocated elsewhere.  */
-      if (offset == 0)
+      if (offset == 0 && vmap != NULL)
 	vp = vmap;
       else
 	vp = add_vmap (ldi);
 
+      /* Process next shared library upon error. */
       offset += LDI_NEXT (ldi, arch64);
+      if (vp == NULL)
+	continue;
+
       vmap_secs (vp, ldi, arch64);
 
       /* Unless this is the exec file,
@@ -1125,9 +1140,5 @@ _initialize_core_rs6000 (void)
      starting a child process. */
   rs6000_set_host_arch_hook = set_host_arch;
 
-  /* For native configurations, where this module is included, inform
-     the xcoffsolib module where it can find the function for symbol table
-     relocation at runtime. */
-  xcoff_relocate_symtab_hook = xcoff_relocate_symtab;
   add_core_fns (&rs6000_core_fns);
 }

@@ -26,7 +26,6 @@
 
 #define GDB_TARGET_POWERPC
 
-#undef PC_LOAD_SEGMENT
 #undef PROCESS_LINENUMBER_HOOK
 
 #endif /* TM_PPC_NW_H */

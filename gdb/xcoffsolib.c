@@ -19,122 +19,15 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#if 0
-#include <sys/types.h>
-#include <sys/ldr.h>
-#endif
-
 #include "defs.h"
 #include "bfd.h"
 #include "xcoffsolib.h"
 #include "inferior.h"
-#include "command.h"
+#include "gdbcmd.h"
+#include "symfile.h"
+#include "frame.h"
+#include "gdb_regex.h"
 
-/* Hook to relocate symbols at runtime.  If gdb is build natively, this
-   hook is initialized in by rs6000-nat.c.  If not, it is currently left
-   NULL and never called. */
-
-void (*xcoff_relocate_symtab_hook) (unsigned int) = NULL;
-
-#ifdef SOLIB_SYMBOLS_MANUAL
-
-extern struct symtab *current_source_symtab;
-extern int current_source_line;
-
-/* The real work of adding a shared library file to the symtab and
-   the section list.  */
-
-void
-solib_add (char *arg_string, int from_tty, struct target_ops *target)
-{
-  char *val;
-  struct vmap *vp = vmap;
-  struct objfile *obj;
-  struct symtab *saved_symtab;
-  int saved_line;
-
-  int loaded = 0;		/* true if any shared obj loaded */
-  int matched = 0;		/* true if any shared obj matched */
-
-  if (arg_string == 0)
-    re_comp (".");
-  else if (val = (char *) re_comp (arg_string))
-    {
-      error ("Invalid regexp: %s", val);
-    }
-  if (!vp || !vp->nxt)
-    return;
-
-  /* save current symbol table and line number, in case they get changed
-     in symbol loading process. */
-
-  saved_symtab = current_source_symtab;
-  saved_line = current_source_line;
-
-  /* skip over the first vmap, it is the main program, always loaded. */
-  vp = vp->nxt;
-
-  for (; vp; vp = vp->nxt)
-    {
-
-      if (re_exec (vp->name) || (*vp->member && re_exec (vp->member)))
-	{
-
-	  matched = 1;
-
-	  /* if already loaded, continue with the next one. */
-	  if (vp->loaded)
-	    {
-
-	      printf_unfiltered ("%s%s%s%s: already loaded.\n",
-				 *vp->member ? "(" : "",
-				 vp->member,
-				 *vp->member ? ") " : "",
-				 vp->name);
-	      continue;
-	    }
-
-	  printf_unfiltered ("Loading  %s%s%s%s...",
-			     *vp->member ? "(" : "",
-			     vp->member,
-			     *vp->member ? ") " : "",
-			     vp->name);
-	  gdb_flush (gdb_stdout);
-
-	  /* This is gross and doesn't work.  If this code is re-enabled,
-	     just stick a objfile member into the struct vmap; that's the
-	     way solib.c (for SunOS/SVR4) does it.  */
-	  obj = lookup_objfile_bfd (vp->bfd);
-	  if (!obj)
-	    {
-	      warning ("\nObj structure for the shared object not found. Loading failed.");
-	      continue;
-	    }
-
-	  syms_from_objfile (obj, NULL, 0, 0);
-	  new_symfile_objfile (obj, 0, 0);
-	  vmap_symtab (vp);
-	  printf_unfiltered ("Done.\n");
-	  loaded = vp->loaded = 1;
-	}
-    }
-  /* if any shared object is loaded, then misc_func_vector needs sorting. */
-  if (loaded)
-    {
-#if 0
-      sort_misc_function_vector ();
-#endif
-      current_source_symtab = saved_symtab;
-      current_source_line = saved_line;
-
-      /* Getting new symbols might change our opinion about what is frameless.
-         Is this correct?? FIXME. */
-/*    reinit_frame_cache(); */
-    }
-  else if (!matched)
-    printf_unfiltered ("No matching shared object found.\n");
-}
-#endif /* SOLIB_SYMBOLS_MANUAL */
 
 /* Return the module name of a given text address. Note that returned buffer
    is not persistent. */
@@ -162,6 +55,7 @@ pc_load_segment_name (CORE_ADDR addr)
 }
 
 static void solib_info (char *, int);
+static void sharedlibrary_command (char *pattern, int from_tty);
 
 static void
 solib_info (char *args, int from_tty)
@@ -169,8 +63,8 @@ solib_info (char *args, int from_tty)
   struct vmap *vp = vmap;
 
   /* Check for new shared libraries loaded with load ().  */
-  if (xcoff_relocate_symtab_hook != NULL)
-    (*xcoff_relocate_symtab_hook) (inferior_pid);
+  if (inferior_pid)
+    xcoff_relocate_symtab (inferior_pid);
 
   if (vp == NULL || vp->nxt == NULL)
     {
@@ -197,18 +91,66 @@ Text Range		Data Range		Syms	Shared Object Library\n");
     }
 }
 
-void
-sharedlibrary_command (char *args, int from_tty)
+static void
+sharedlibrary_command (char *pattern, int from_tty)
 {
   dont_repeat ();
 
   /* Check for new shared libraries loaded with load ().  */
-  if (xcoff_relocate_symtab_hook != NULL)
-    (*xcoff_relocate_symtab_hook) (inferior_pid);
+  if (inferior_pid)
+    xcoff_relocate_symtab (inferior_pid);
 
-#ifdef SOLIB_SYMBOLS_MANUAL
-  solib_add (args, from_tty, (struct target_ops *) 0);
-#endif /* SOLIB_SYMBOLS_MANUAL */
+  if (pattern)
+    {
+      char *re_err = re_comp (pattern);
+
+      if (re_err)
+	error ("Invalid regexp: %s", re_err);
+    }
+
+  /* Walk the list of currently loaded shared libraries, and read
+     symbols for any that match the pattern --- or any whose symbols
+     aren't already loaded, if no pattern was given.  */
+  {
+    int any_matches = 0;
+    int loaded_any_symbols = 0;
+    struct vmap *vp = vmap;
+
+    if (!vp)
+      return;
+
+    /* skip over the first vmap, it is the main program, always loaded. */
+    for (vp = vp->nxt; vp; vp = vp->nxt)
+      if (! pattern
+	    || re_exec (vp->name)
+	    || (*vp->member && re_exec (vp->member)))
+	{
+	  any_matches = 1;
+
+	  if (vp->loaded)
+	    {
+	      if (from_tty)
+		printf_unfiltered ("Symbols already loaded for %s\n",
+				   vp->name);
+	    }
+	  else
+	    {
+	      if (vmap_add_symbols (vp))
+		loaded_any_symbols = 1;
+	    }
+	}
+
+    if (from_tty && pattern && ! any_matches)
+      printf_unfiltered
+	("No loaded shared libraries match the pattern `%s'.\n", pattern);
+
+    if (loaded_any_symbols)
+      {
+	/* Getting new symbols may change our opinion about what is
+	   frameless.  */
+	reinit_frame_cache ();
+      }
+  }
 }
 
 void
@@ -218,4 +160,15 @@ _initialize_solib (void)
 	   "Load shared object library symbols for files matching REGEXP.");
   add_info ("sharedlibrary", solib_info,
 	    "Status of loaded shared object libraries");
+
+  add_show_from_set
+    (add_set_cmd ("auto-solib-add", class_support, var_zinteger,
+		  (char *) &auto_solib_add,
+		  "Set autoloading of shared library symbols.\n\
+If nonzero, symbols from all shared object libraries will be loaded\n\
+automatically when the inferior begins execution or when the dynamic linker\n\
+informs gdb that a new library has been loaded.  Otherwise, symbols\n\
+must be loaded manually, using `sharedlibrary'.",
+		  &setlist),
+     &showlist);
 }

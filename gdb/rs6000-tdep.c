@@ -28,7 +28,6 @@
 #include "gdbcmd.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "xcoffsolib.h"
 #include "arch-utils.h"
 
 #include "bfd/libbfd.h"		/* for bfd_default_set_arch_mach */

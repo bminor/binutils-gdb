@@ -1801,10 +1801,10 @@ rom68k-rom.o: rom68k-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h
 
 rs6000-nat.o: rs6000-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h \
-	xcoffsolib.h
+	$(gdbcore_h) xcoffsolib.h symfile.h objfiles.h gdb-stabs.h
 
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	target.h xcoffsolib.h ppc-tdep.h
+	target.h ppc-tdep.h
 
 scm-exp.o: $(defs_h) $(value_h) parser-defs.h language.h c-lang.h \
 	scm-lang.h scm-tags.h
@@ -1967,7 +1967,8 @@ xcoffread.o: xcoffread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	complaints.h $(defs_h) $(gdbtypes_h) objfiles.h stabsread.h symfile.h \
 	$(symtab_h) partial-stab.h gdb_string.h
 
-xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) xcoffsolib.h
+xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) xcoffsolib.h $(inferior_h) \
+	$(gdbcmd_h) symfile.h $(frame_h) gnu-regex.h
 
 # FIXME: z8k-tdep.c calls _initialize_gdbtypes().  Since that isn't
 # declared -Wimplicit fails. It should be using the GDBARCH framework.

@@ -1,3 +1,45 @@
+2000-11-09  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	Add auto-solib-add support for AIX, remove obsolete and unused
+	SOLIB_SYMBOLS_MANUAL code, cleanup of AIX shared library handling code.
+	* rs6000-nat.c (vmap_symtab):  Do not try to modify offsets
+	if symbols are not yet loaded.
+	(vmap_add_symbols):  New function to add symbols for a vmap entry.
+	(add_vmap):  Turn errors into warnings, return NULL vmap upon
+	failure. Add symbols via vmap_add_symbols only if requested.
+	(xcoff_relocate_core):  Allow debugging of core files without an
+	executable file. Handle NULL returns from add_vmap gracefully.
+	* xcoffsolib.c (solib_add):  Remove, no longer needed.
+	(solib_info):  Do not check for new shared libraries if there is no
+	inferior process.
+	(sharedlibrary_command):  Made static.
+	Do not check for new shared libraries if there is no inferior process.
+	Add symbols for requested shared libraries via vmap_add_symbols.
+	(_initialize_solib):  Add `set auto-solib-add' command.
+	* xcoffsolib.h (vmap_add_symbols):  Add prototype declaration.
+
+	* config/rs6000/tm-rs6000.h (PC_LOAD_SEGMENT):  Move from here ...
+	* config/rs6000/nm-rs6000.h:  ... to here, this is an AIX native
+	feature.
+	* config/powerpc/tm-macos.h, config/powerpc/tm-ppc-eabi.h,
+	config/powerpc/tm-ppc-nw.h, config/rs6000/tm-rs6000ly.h:
+	Remove #undef PC_LOAD_SEGMENT.
+	* config/powerpc/aix.mt, config/rs6000/aix4.mt, config/rs6000/rs6000.mt
+	(TDEPFILES):  Move xcoffsolib.o from here ...
+	* config/powerpc/aix.mh, config/rs6000/aix4.mh, config/rs6000/rs6000.mh
+	(NATDEPFILES):  ... to here, xcoffsolib.o contains AIX native code
+	only.
+	* rs6000-tdep.c:  Remove #include xcoffsolib.h, no longer needed.
+	* xcoffsolib.h (xcoff_relocate_symtab_hook):  Remove declaration.
+	* rs6000-nat.c (_initialize_core_rs6000):  Remove setting of
+	xcoff_relocate_symtab_hook, no longer needed.
+	* xcoffsolib.c (solib_info, sharedlibrary_command):  Remove
+	xcoff_relocate_symtab_hook indirection, call xcoff_relocate_symtab
+	directly, as xcoffsolib.c is now compiled in native AIX configurations
+	only.
+	* Makefile.in:  Update dependencies for rs6000-tdep.o, rs6000-nat.o
+	and xcoffsolib.o.
+
 Thu Nov  9 17:16:29 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Specify the vax-dec-vms5.5 target tupple.

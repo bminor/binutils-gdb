@@ -26,8 +26,6 @@
 /* Use generic RS6000 definitions. */
 #include "rs6000/tm-rs6000.h"
 
-#undef PC_LOAD_SEGMENT
-
 #define CANNOT_STORE_REGISTER(regno) (regno == PS_REGNUM)
 
 #endif /* TM_RS6000LYNX_H */

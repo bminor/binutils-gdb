@@ -26,11 +26,6 @@
 
 #define TEXT_SEGMENT_BASE	0x10000000
 
-/* Load segment of a given pc value. */
-
-#define	PC_LOAD_SEGMENT(PC)	pc_load_segment_name(PC)
-extern char *pc_load_segment_name (CORE_ADDR);
-
 /* AIX's assembler doesn't grok dollar signs in identifiers.
    So we use dots instead.  This item must be coordinated with G++. */
 #undef CPLUS_MARKER
