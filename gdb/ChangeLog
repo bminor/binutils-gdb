@@ -1,5 +1,11 @@
 2001-11-11  Andrew Cagney  <ac131313@redhat.com>
 
+	* README (alpha-dec-osf5.1): Mention -DUSE_LDR_ROUTINES.
+	(sparcv9-sun-solars2.8): Mention problem with 64 bit GCC 3.0.x.
+	(i586-sco-sysv5uw7.1.1): Mention problem with threads.
+
+2001-11-11  Andrew Cagney  <ac131313@redhat.com>
+
 	From Mark Kettenis  <kettenis@gnu.org>:
 	* breakpoint.c (breakpoint_re_set_one): Don't discard SHLIB
 	breakpoints when they fail.
