@@ -60,14 +60,19 @@ are preserved on all copies.
 @end titlepage
 
 @node Top
-@top
-@c IMHO much information should go into *comments* as you discover it
-@c or design changes to GDB.  It's more likely to get noticed and
-@c easier to maintain there.  -kingdon
-This documents the internals of the GNU debugger, GDB.  It is a
-collection of miscellaneous information with little form at this point.
-Mostly, it is a repository into which you can put information about
-GDB as you discover it (or as you design changes to GDB).
+@c Perhaps this should be the title of the document (but only for info,
+@c not for TeX).  Existing GNU manuals seem inconsistent on this point.
+@top Scope of this Document
+
+This document documents the internals of the GNU debugger, GDB.  It is
+intended to document aspects of GDB which apply across many different
+parts of GDB (for example, @pxref{Coding Style}), or which are global
+aspects of design (for example, what are the major modules and which
+files document them in detail?).  Information which pertains to specific
+data structures, functions, variables, etc., should be put in comments
+in the source code, not here.  It is more likely to get noticed and kept
+up to date there.  Some of the information in this document should
+probably be moved into comments.
 
 @menu
 * README::			The README File
@@ -112,7 +117,7 @@ GDB is a large and complicated program, and if you first starting to
 work on it, it can be hard to know where to start.  Fortunately, if you
 know how to go about it, there are ways to figure out what is going on:
 
-@table @bullet
+@itemize @bullet
 @item
 This manual, the GDB Internals manual, has information which applies
 generally to many parts of GDB.
@@ -190,7 +195,7 @@ on @code{bug-gdb}.  But @emph{never} post a generic question like ``I was
 wondering if anyone could give me some tips about understanding
 GDB''---if we had some magic secret we would put it in this manual.
 Suggestions for improving the manual are always welcome, of course.
-@end table
+@end itemize
 
 Good luck!
 
@@ -198,7 +203,7 @@ Good luck!
 @chapter Debugging GDB with itself
 If gdb is limping on your machine, this is the preferred way to get it
 fully functional.  Be warned that in some ancient Unix systems, like
-Ultrix 4.0, a program can't be running in one process while it is being
+Ultrix 4.2, a program can't be running in one process while it is being
 debugged in another.  Rather than typing the command @code{@w{./gdb
 ./gdb}}, which works on Suns and such, you can copy @file{gdb} to
 @file{gdb2} and then type @code{@w{./gdb ./gdb2}}.
@@ -399,9 +404,9 @@ Specifies Makefile fragments needed when hosting on machine @var{xxx}.
 In particular, this lists the required machine-dependent object files,
 by defining @samp{XDEPFILES=@dots{}}.  Also
 specifies the header file which describes host @var{xxx}, by defining
-@samp{XM_FILE= xm-@var{xxx}.h}.  You can also define @samp{CC},
-@samp{REGEX} and @samp{REGEX1}, @samp{SYSV_DEFINE}, @samp{XM_CFLAGS},
-@samp{XM_ADD_FILES}, @samp{XM_CLIBS}, @samp{XM_CDEPS},
+@code{XM_FILE= xm-@var{xxx}.h}.  You can also define @code{CC},
+@code{REGEX} and @code{REGEX1}, @code{SYSV_DEFINE}, @code{XM_CFLAGS},
+@code{XM_ADD_FILES}, @code{XM_CLIBS}, @code{XM_CDEPS},
 etc.; see @file{Makefile.in}.
 
 @item gdb/config/@var{arch}/xm-@var{xxx}.h
@@ -2006,8 +2011,6 @@ inflow.c
 inflow.c
 @item TIOCNOTTY
 inflow.c
-@item TM_FILE_OVERRIDE
-defs.h
 @item T_ARG
 coffread.c
 @item T_VOID
@@ -2589,8 +2592,6 @@ in an ordinary register.
 defs.h
 @item TDESC
 infrun.c
-@item TM_FILE_OVERRIDE
-defs.h
 @item T_ARG
 coffread.c
 @item T_VOID

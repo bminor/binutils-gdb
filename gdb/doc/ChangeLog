@@ -1,3 +1,13 @@
+Tue Aug 10 13:28:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbint.texinfo (Getting Started): Use @itemize, not @table.
+
+	* gdbint.texinfo (Top): Add name to @top line, and re-write the
+	paragraph which follows.
+
+	* gdbint.texinfo (Host): Use @code not @samp for Makefile
+	variables.  Looks better and avoids overful hbox.
+
 Fri Jul 30 18:26:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Procedures): Improve stuff on nested functions.
