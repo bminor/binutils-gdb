@@ -1,3 +1,9 @@
+Thu Sep  7 12:50:49 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* scripttemp/pe.sc:  Allow both spellings of .ctors/.dtors.
+	Start .text section on the right boundary. Always align
+	stabs.
+
 Tue Sep 12 12:24:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo: Clarify -L option.
