@@ -7,15 +7,11 @@ Changes since version 2.3:
   and memory used while linking; slightly poorer performance than
   before for formats not converted yet.
 
-* Irix 5 support.
-
 * Command-line parsing is no longer done with flex.  This means
   oddball characters in filenames won't get treated as argument
   separators.
 
 * HP-PA ELF support, by Jeff Law.  (No SOM support yet.)
-
-* PowerPC and RS/6000 support, by Ian Taylor.
 
 * Mach i386 support, by David Mackenzie.
 
