@@ -1,3 +1,8 @@
+2002-09-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc_build_one_stub): Don't build glink stubs here.
+	(ppc64_elf_build_stubs): Build them here instead.
+
 2002-09-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:

@@ -4467,27 +4467,6 @@ ppc_build_one_stub (gen_entry, in_arg)
       break;
 
     case ppc_stub_plt_call:
-      /* Build the .glink lazy link call stub.  */
-      p = htab->sglink->contents + htab->sglink->_cooked_size;
-      indx = htab->sglink->reloc_count;
-      if (indx < 0x8000)
-	{
-	  bfd_put_32 (htab->sglink->owner, LI_R0_0 | indx, p);
-	  p += 4;
-	}
-      else
-	{
-	  bfd_put_32 (htab->sglink->owner, LIS_R0_0 | PPC_HI (indx), p);
-	  p += 4;
-	  bfd_put_32 (htab->sglink->owner, ORI_R0_R0_0 | PPC_LO (indx), p);
-	  p += 4;
-	}
-      bfd_put_32 (htab->sglink->owner,
-		  B_DOT | ((htab->sglink->contents - p) & 0x3fffffc), p);
-      p += 4;
-      htab->sglink->_cooked_size = p - htab->sglink->contents;
-      htab->sglink->reloc_count += 1;
-
       /* Do the best we can for shared libraries built without
 	 exporting ".foo" for each "foo".  This can happen when symbol
 	 versioning scripts strip all bar a subset of symbols.  */
@@ -5152,6 +5131,8 @@ ppc64_elf_build_stubs (info)
 
   if (htab->splt != NULL)
     {
+      unsigned int indx;
+
       /* Build the .glink plt call stub.  */
       plt_r2 = (htab->splt->output_offset
 		+ htab->splt->output_section->vma
@@ -5159,15 +5140,33 @@ ppc64_elf_build_stubs (info)
 		- TOC_BASE_OFF);
       p = htab->sglink->contents;
       p = build_plt_stub (htab->sglink->owner, p, (int) plt_r2, 1);
-      while (p - htab->sglink->contents < GLINK_CALL_STUB_SIZE)
+      while (p < htab->sglink->contents + GLINK_CALL_STUB_SIZE)
 	{
 	  bfd_put_32 (htab->sglink->owner, NOP, p);
 	  p += 4;
 	}
-      htab->sglink->_cooked_size = p - htab->sglink->contents;
 
-      /* Use reloc_count to count entries.  */
-      htab->sglink->reloc_count = 0;
+      /* Build the .glink lazy link call stubs.  */
+      indx = 0;
+      while (p < htab->sglink->contents + htab->sglink->_raw_size)
+	{
+	  if (indx < 0x8000)
+	    {
+	      bfd_put_32 (htab->sglink->owner, LI_R0_0 | indx, p);
+	      p += 4;
+	    }
+	  else
+	    {
+	      bfd_put_32 (htab->sglink->owner, LIS_R0_0 | PPC_HI (indx), p);
+	      p += 4;
+	      bfd_put_32 (htab->sglink->owner, ORI_R0_R0_0 | PPC_LO (indx), p);
+	      p += 4;
+	    }
+	  bfd_put_32 (htab->sglink->owner,
+		      B_DOT | ((htab->sglink->contents - p) & 0x3fffffc), p);
+	  p += 4;
+	}
+      htab->sglink->_cooked_size = p - htab->sglink->contents;
     }
 
   if (htab->sbrlt->_raw_size != 0)
@@ -5180,7 +5179,6 @@ ppc64_elf_build_stubs (info)
 
   /* Build the stubs as directed by the stub hash table.  */
   bfd_hash_traverse (&htab->stub_hash_table, ppc_build_one_stub, info);
-  htab->sglink->reloc_count = 0;
 
   for (stub_sec = htab->stub_bfd->sections;
        stub_sec != NULL;
