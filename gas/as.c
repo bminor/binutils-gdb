@@ -672,6 +672,9 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case 'a':
 	  if (optarg)
 	    {
+	      if (md_parse_option (optc, optarg) != 0)
+		break;
+
 	      while (*optarg)
 		{
 		  switch (*optarg)

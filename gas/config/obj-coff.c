@@ -429,7 +429,7 @@ int coff_n_line_nos;
 static void
 add_lineno (frag, offset, num)
      fragS *frag;
-     int offset;
+     addressT offset;
      int num;
 {
   struct line_no *new_line =

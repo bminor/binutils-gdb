@@ -1901,9 +1901,13 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #endif
 
 #ifdef RS6000COFF_C
+#ifdef XCOFF64
+    case U802TOC64MAGIC:
+#else
     case U802ROMAGIC:
     case U802WRMAGIC:
     case U802TOCMAGIC:
+#endif
       {
 	int cputype;
 
@@ -1930,7 +1934,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
 		    free (buf);
 		    return false;
 		  }
-		coff_swap_sym_in (abfd, (PTR) buf, (PTR) &sym);
+		bfd_coff_swap_sym_in (abfd, (PTR) buf, (PTR) &sym);
 		if (sym.n_sclass == C_FILE)
 		  cputype = sym.n_type & 0xff;
 		else
@@ -1952,7 +1956,11 @@ coff_set_arch_mach_hook (abfd, filehdr)
 	    machine = 0;
 #else
 	    arch = bfd_arch_rs6000;
+#ifdef XCOFF64
+	    machine = 620;
+#else
 	    machine = 6000;
+#endif
 #endif /* POWERMAC */
 	    break;
 
@@ -2125,6 +2133,10 @@ symname_in_debug_hook (abfd, sym)
 
 #ifdef RS6000COFF_C
 
+#ifdef XCOFF64
+#define FORCE_SYMNAMES_IN_STRINGS
+#endif
+  
 /* Handle the csect auxent of a C_EXT or C_HIDEXT symbol.  */
 
 static boolean coff_pointerize_aux_hook
@@ -2667,12 +2679,18 @@ coff_set_flags (abfd, magicp, flagsp)
       break;
 #endif
 
-#ifdef U802TOCMAGIC
+#ifdef RS6000COFF_C
     case bfd_arch_rs6000:
 #ifndef PPCMAGIC
     case bfd_arch_powerpc:
 #endif
-      *magicp = U802TOCMAGIC;
+#ifdef XCOFF64
+      if (bfd_get_mach (abfd) == 620 && !strncmp (abfd->xvec->name,"aix", 3))
+	*magicp = U802TOC64MAGIC; 
+      else
+#else
+    	*magicp = U802TOCMAGIC; 
+#endif
       return true;
       break;
 #endif
@@ -2780,8 +2798,8 @@ coff_compute_section_file_positions (abfd)
 	      size_t len;
 
 	      len = strlen (bfd_asymbol_name (*symp));
-	      if (len > SYMNMLEN)
-		sz += len + 3;
+	      if (len > SYMNMLEN || bfd_coff_force_symnames_in_strings (abfd))
+		sz += len + 1 + bfd_coff_debug_string_prefix_length (abfd);
 	    }
 	}
       if (sz > 0)
@@ -3309,13 +3327,15 @@ coff_write_object_contents (abfd)
 	  && ! is_reloc_section)
 	hasdebug = true;
 
-#ifdef RS6000COFF_C
+#ifdef RS6000COFF_C 
+#ifndef XCOFF64
       /* Indicate the use of an XCOFF overflow section header.  */
       if (current->reloc_count >= 0xffff || current->lineno_count >= 0xffff)
 	{
 	  section.s_nreloc = 0xffff;
 	  section.s_nlnno = 0xffff;
 	}
+#endif
 #endif
 
       section.s_flags = sec_to_styp_flags (current->name, current->flags);
@@ -4068,7 +4088,7 @@ coff_slurp_line_table (abfd, asect)
       while (counter < asect->lineno_count)
 	{
 	  struct internal_lineno dst;
-	  coff_swap_lineno_in (abfd, src, &dst);
+	  bfd_coff_swap_lineno_in (abfd, src, &dst);
 	  cache_ptr->line_number = dst.l_lnno;
 
 	  if (cache_ptr->line_number == 0)
@@ -5009,7 +5029,17 @@ static const bfd_coff_backend_data bfd_coff_std_swap_table =
 #else
   false,
 #endif
-  COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
+  COFF_DEFAULT_SECTION_ALIGNMENT_POWER, 
+#ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
+  true,
+#else
+  false,
+#endif
+#ifdef COFF_DEBUG_STRING_WIDE_PREFIX
+  4,
+#else
+  2,
+#endif
   coff_SWAP_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,
   coff_SWAP_reloc_in, coff_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,

@@ -42,7 +42,7 @@ m88*)	targ_archs=bfd_m88k_arch ;;
 mips*)	targ_archs=bfd_mips_arch ;;
 pj*)	targ_archs="bfd_pj_arch bfd_i386_arch";;
 powerpc*) targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
-rs6000)	targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
+rs6000)	targ_archs="bfd_rs6000_arch bfd_powerpc_64_arch bfd_powerpc_arch" ;;
 sparc*) targ_archs=bfd_sparc_arch ;;
 v850*)	targ_archs=bfd_v850_arch ;;
 z8k*)	targ_archs=bfd_z8k_arch ;;
@@ -628,6 +628,7 @@ case "${targ}" in
 
   powerpc-*-aix* | powerpc-*-beos*)
     targ_defvec=rs6000coff_vec
+    targ_selvecs="rs6000coff64_vec"
     ;;
   powerpc-*-*bsd* | powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | \
   powerpc-*-solaris2* | powerpc-*-linux-gnu* | powerpc-*-rtems* | \

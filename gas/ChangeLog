@@ -1,3 +1,22 @@
+Mon Apr 24 15:21:11 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* as.c (parse_args): Allow md_parse_option to override -a listing
+	option.
+	* config/obj-coff.c (add_lineno): Change type of offset parameter
+	from "int" to "bfd_vma."
+	* config/tc-ppc.c (md_pseudo_table): Add "llong" and "machine."
+	(ppc_mach, ppc_subseg_align, ppc_target_format): New.
+	(ppc_change_csect): Align correctly for XCOFF64.	
+	(ppc_machine): New function, which discards "ppc_machine" line.
+	(ppc_tc): Cons for 8 when code is 64 bit.
+	(md_apply_fix3): Don't check operand->insert.  Handle 64 bit
+	relocations.
+	(md_parse_option): Handle -a64 and -a32.
+	(ppc_xcoff64): New.
+	* config/tc-ppc.h (TARGET_MACH): Define.
+	(TARGET_FORMAT): Move to function.
+	(SUB_SEGMENT_ALIGN): Use ppc_subseg_align.
+
 2000-04-26  David O'Brien  <obrien@FreeBSD.org>
 
 	* doc/as.1: Fix unbalanced brackets.

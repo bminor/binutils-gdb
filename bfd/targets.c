@@ -614,6 +614,7 @@ extern const bfd_target ppcboot_vec;
 extern const bfd_target riscix_vec;
 extern const bfd_target pmac_xcoff_vec;
 extern const bfd_target rs6000coff_vec;
+extern const bfd_target rs6000coff64_vec;
 extern const bfd_target shcoff_vec;
 extern const bfd_target shlcoff_vec;
 extern const bfd_target shcoff_small_vec;
@@ -867,6 +868,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&pmac_xcoff_vec,
 #endif
 	&rs6000coff_vec,
+	&rs6000coff64_vec,
 	&ppcboot_vec,
 	&shcoff_vec,
 	&shlcoff_vec,

@@ -574,6 +574,8 @@ do
     mcore_pei_little_vec)	tb="$tb pei-mcore.lo peigen.lo cofflink.lo" ;;
     newsos3_vec)		tb="$tb newsos3.lo aout32.lo" ;;
     nlm32_i386_vec)		tb="$tb nlm32-i386.lo nlm32.lo nlm.lo" ;;
+    rs6000coff64_vec)		tb="$tb coff64-rs6000.lo xcofflink.lo"
+				target64=true ;;
     nlm32_sparc_vec)		tb="$tb nlm32-sparc.lo nlm32.lo nlm.lo" ;;
     nlm32_alpha_vec)		tb="$tb nlm32-alpha.lo nlm32.lo nlm.lo"
 				target64=true ;;

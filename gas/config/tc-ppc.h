@@ -47,31 +47,16 @@ struct fix;
 
 /* The target BFD architecture.  */
 #define TARGET_ARCH (ppc_arch ())
+#define TARGET_MACH (ppc_mach ())
 extern enum bfd_architecture ppc_arch PARAMS ((void));
+extern unsigned long ppc_mach PARAMS ((void));
 
 /* Whether or not the target is big endian */
 extern int target_big_endian;
 
 /* The target BFD format.  */
-#ifdef OBJ_COFF
-#ifdef TE_PE
-#define TARGET_FORMAT (target_big_endian ? "pe-powerpc" : "pe-powerpcle")
-#else
-#define TARGET_FORMAT "aixcoff-rs6000"
-#endif
-#endif
-
-/* PowerMac has a BFD slightly different from AIX's.  */
-#ifdef TE_POWERMAC
-#ifdef TARGET_FORMAT
-#undef TARGET_FORMAT
-#endif
-#define TARGET_FORMAT "xcoff-powermac"
-#endif
-
-#ifdef OBJ_ELF
-#define TARGET_FORMAT (target_big_endian ? "elf32-powerpc" : "elf32-powerpcle")
-#endif
+#define TARGET_FORMAT (ppc_target_format ())
+extern char* ppc_target_format ();
 
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
@@ -186,7 +171,8 @@ extern int ppc_frob_symbol PARAMS ((symbolS *));
 extern void ppc_adjust_symtab PARAMS ((void));
 
 /* Niclas Andersson <nican@ida.liu.se> says this is needed.  */
-#define SUB_SEGMENT_ALIGN(SEG) 2
+extern int ppc_subseg_align PARAMS ((void));
+#define SUB_SEGMENT_ALIGN(SEG) ppc_subseg_align()
 
 /* We also need to copy, in particular, the class of the symbol,
    over what obj-coff would otherwise have copied.  */

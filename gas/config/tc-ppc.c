@@ -86,6 +86,7 @@ static void ppc_stabx PARAMS ((int));
 static void ppc_rename PARAMS ((int));
 static void ppc_toc PARAMS ((int));
 static void ppc_xcoff_cons PARAMS ((int));
+static void ppc_machine PARAMS ((int));
 static void ppc_vbyte PARAMS ((int));
 #endif
 
@@ -182,9 +183,11 @@ const pseudo_typeS md_pseudo_table[] =
   { "text",	ppc_section,	't' },
   { "toc",	ppc_toc,	0 },
   { "long",	ppc_xcoff_cons,	2 },
+  { "llong",	ppc_xcoff_cons,	3 },
   { "word",	ppc_xcoff_cons,	1 },
   { "short",	ppc_xcoff_cons,	1 },
   { "vbyte",    ppc_vbyte,	0 },
+  { "machine",  ppc_machine,    0 },
 #endif
 
 #ifdef OBJ_ELF
@@ -591,6 +594,9 @@ static int ppc_cpu = 0;
    PPC_OPCODE_32 or PPC_OPCODE_64.  */
 static unsigned long ppc_size = PPC_OPCODE_32;
 
+/* Whether to target xcoff64 */
+static int ppc_xcoff64 = 0;
+
 /* Opcode hash table.  */
 static struct hash_control *ppc_hash;
 
@@ -740,6 +746,16 @@ md_parse_option (c, arg)
       break;
 #endif
 
+      /* a64 and a32 determine whether to use XCOFF64 or XCOFF32.  */
+    case 'a':
+      if (strcmp (arg, "64") == 0)
+	ppc_xcoff64 = 1;
+      else if (strcmp (arg, "32") == 0)
+	ppc_xcoff64 = 0;
+      else
+	return 0;
+      break;
+	
     case 'm':
       /* -mpwrx and -mpwr2 mean to assemble for the IBM POWER/2
          (RIOS2).  */
@@ -946,6 +962,37 @@ ppc_arch ()
 
   as_fatal (_("Neither Power nor PowerPC opcodes were selected."));
   return bfd_arch_unknown;
+}
+
+unsigned long
+ppc_mach ()
+{
+  return (ppc_size == PPC_OPCODE_64) ? 620 : 0;
+}
+
+int
+ppc_subseg_align()
+{
+  return (ppc_xcoff64) ? 3 : 2;
+}
+
+extern char* 
+ppc_target_format()
+{
+#ifdef OBJ_COFF
+#ifdef TE_PE
+  return (target_big_endian ? "pe-powerpc" : "pe-powerpcle");
+#elif TE_POWERMAC
+#else
+  return (ppc_xcoff64 ? "aixcoff64-rs6000" : "aixcoff-rs6000");
+#endif
+#ifdef TE_POWERMAC
+  return "xcoff-powermac";
+#endif
+#endif
+#ifdef OBJ_ELF
+  return (target_big_endian ? "elf32-powerpc" : "elf32-powerpcle");
+#endif
 }
 
 /* This function is called when the assembler starts up.  It is called
@@ -2478,7 +2525,7 @@ ppc_change_csect (sym)
       symbol_set_frag (sym, frag_now);
       S_SET_VALUE (sym, (valueT) frag_now_fix ());
 
-      symbol_get_tc (sym)->align = 2;
+      symbol_get_tc (sym)->align = (ppc_xcoff64) ? 3 : 2;
       symbol_get_tc (sym)->output = 1;
       symbol_get_tc (sym)->within = sym;
 	  
@@ -3150,6 +3197,14 @@ ppc_xcoff_cons (log_size)
 }
 
 static void
+ppc_machine(dummy) 
+    int dummy;
+{
+    discard_rest_of_line();
+   /* What does aix use this for?  */
+}
+
+static void
 ppc_vbyte (dummy)
      int dummy;
 {
@@ -3269,7 +3324,7 @@ ppc_tc (ignore)
   else
     {
       ++input_line_pointer;
-      cons (4);
+      cons ((ppc_size == PPC_OPCODE_64) ? 8 : 4);
     }
 }
 
@@ -4802,7 +4857,6 @@ md_apply_fix3 (fixp, valuep, seg)
       else if ((operand->flags & PPC_OPERAND_PARENS) != 0
 	       && operand->bits == 16
 	       && operand->shift == 0
-	       && operand->insert == NULL
 	       && fixp->fx_addsy != NULL
 	       && ppc_is_toc_sym (fixp->fx_addsy))
 	{
@@ -4849,6 +4903,14 @@ md_apply_fix3 (fixp, valuep, seg)
 			      value, 4);
 	  break;
 
+	case BFD_RELOC_64:
+	  if (fixp->fx_pcrel)
+	    fixp->fx_r_type = BFD_RELOC_64_PCREL;
+					/* fall through */
+	case BFD_RELOC_64_PCREL:
+	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+			      value, 8);
+	  break;  
 	case BFD_RELOC_LO16:
 	case BFD_RELOC_16:
 	case BFD_RELOC_GPREL16:

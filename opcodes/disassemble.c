@@ -216,7 +216,10 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_rs6000
     case bfd_arch_rs6000:
-      disassemble = print_insn_rs6000;
+      if (bfd_get_mach (abfd) == 620)
+	disassemble = print_insn_big_powerpc;
+      else
+	disassemble = print_insn_rs6000;
       break;
 #endif
 #ifdef ARCH_sh

@@ -180,6 +180,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_pyramid_arch)	;;
 	bfd_romp_arch)		;;
 	bfd_rs6000_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
+	bfd_powerpc_64_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
 	bfd_sh_arch)		ta="$ta sh-dis.lo" ;;
 	bfd_sparc_arch)		ta="$ta sparc-dis.lo sparc-opc.lo" ;;
 	bfd_tahoe_arch)		;;

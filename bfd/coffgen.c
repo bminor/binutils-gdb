@@ -819,7 +819,16 @@ coff_fix_symbol_name (abfd, symbol, native, string_size_p,
     {
       unsigned int filnmlen;
 
-      strncpy (native->u.syment._n._n_name, ".file", SYMNMLEN);
+      if (bfd_coff_force_symnames_in_strings (abfd))
+	{
+          native->u.syment._n._n_n._n_offset = 
+	      (*string_size_p + STRING_SIZE_SIZE);
+	  native->u.syment._n._n_n._n_zeroes = 0;
+	  *string_size_p += 6;  /* strlen(".file") + 1 */
+	}
+      else
+  	strncpy (native->u.syment._n._n_name, ".file", SYMNMLEN);
+
       auxent = &(native + 1)->u.auxent;
 
       filnmlen = bfd_coff_filnmlen (abfd);
@@ -846,7 +855,7 @@ coff_fix_symbol_name (abfd, symbol, native, string_size_p,
     }
   else
     {
-      if (name_length <= SYMNMLEN)
+      if (name_length <= SYMNMLEN && !bfd_coff_force_symnames_in_strings (abfd))
 	{
 	  /* This name will fit into the symbol neatly */
 	  strncpy (native->u.syment._n._n_name, symbol->name, SYMNMLEN);
@@ -861,7 +870,8 @@ coff_fix_symbol_name (abfd, symbol, native, string_size_p,
       else
 	{
 	  long filepos;
-	  bfd_byte buf[2];
+	  bfd_byte buf[4];
+	  int prefix_len = bfd_coff_debug_string_prefix_length (abfd);
 
 	  /* This name should be written into the .debug section.  For
 	     some reason each name is preceded by a two byte length
@@ -871,24 +881,29 @@ coff_fix_symbol_name (abfd, symbol, native, string_size_p,
 	  if (*debug_string_section_p == (asection *) NULL)
 	    *debug_string_section_p = bfd_get_section_by_name (abfd, ".debug");
 	  filepos = bfd_tell (abfd);
-	  bfd_put_16 (abfd, name_length + 1, buf);
+	  if (prefix_len == 4)
+	    bfd_put_32 (abfd, name_length + 1, buf);
+	  else
+	    bfd_put_16 (abfd, name_length + 1, buf);
+
 	  if (!bfd_set_section_contents (abfd,
 					 *debug_string_section_p,
 					 (PTR) buf,
 					 (file_ptr) *debug_string_size_p,
-					 (bfd_size_type) 2)
+					 (bfd_size_type) prefix_len)
 	      || !bfd_set_section_contents (abfd,
 					    *debug_string_section_p,
 					    (PTR) symbol->name,
 					    ((file_ptr) *debug_string_size_p
-					     + 2),
+					     + prefix_len),
 					    (bfd_size_type) name_length + 1))
 	    abort ();
 	  if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
 	    abort ();
-	  native->u.syment._n._n_n._n_offset = *debug_string_size_p + 2;
+	  native->u.syment._n._n_n._n_offset = 
+	      *debug_string_size_p + prefix_len;
 	  native->u.syment._n._n_n._n_zeroes = 0;
-	  *debug_string_size_p += name_length + 3;
+	  *debug_string_size_p += name_length + 1 + prefix_len;
 	}
     }
 }
@@ -1244,7 +1259,7 @@ coff_write_symbols (abfd)
 	    {
 	      /* This is not a COFF symbol, so it certainly is not a
 	         file name, nor does it go in the .debug section.  */
-	      maxlen = SYMNMLEN;
+	      maxlen = bfd_coff_force_symnames_in_strings (abfd) ? 0 : SYMNMLEN;
 	    }
 	  else if (bfd_coff_symname_in_debug (abfd,
 					      &c_symbol->native->u.syment))
@@ -1255,9 +1270,13 @@ coff_write_symbols (abfd)
 	    }
 	  else if (c_symbol->native->u.syment.n_sclass == C_FILE
 		   && c_symbol->native->u.syment.n_numaux > 0)
-	    maxlen = bfd_coff_filnmlen (abfd);
+	    {
+	      if (bfd_coff_force_symnames_in_strings (abfd)) 
+      		bfd_write (".file", 1, 6, abfd);
+	      maxlen = bfd_coff_filnmlen (abfd);
+	    }
 	  else
-	    maxlen = SYMNMLEN;
+	    maxlen = bfd_coff_force_symnames_in_strings (abfd) ? 0 : SYMNMLEN;
 
 	  if (name_length > maxlen)
 	    {

@@ -1,3 +1,63 @@
+Mon Apr 24 15:20:35 2000  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* Makefile.am (coff64-rs6000.lo): New rule.
+	* Makefile.in: Regenerate.
+	* coff-rs6000.c (xcoff_mkobject, xcoff_copy_private_bfd_data,
+	xcoff_is_local_label_name, xcoff_rtype2howto,
+	xcoff_reloc_type_lookup, xcoff_slurp_armap, xcoff_archive_p,
+	xcoff_read_ar_hdr, xcoff_openr_next_archived_file, xcoff_write_armap,
+	xcoff_write_archive_contents): No longer static, and prefix with _bfd_.
+	(NO_COFF_SYMBOLS): Define.
+	(xcoff64_swap_sym_in, xcoff64_swap_sym_out, xcoff64_swap_aux_in,
+	xcoff64_swap_aux_out): New functions; handle xcoff symbol tables
+	internally.
+	(MINUS_ONE): New macro.
+	(xcoff_howto_tabl, xcoff_reloc_type_lookup): Add 64 bit POS 
+	relocation.
+	(coff_SWAP_sym_in, coff_SWAP_sym_out, coff_SWAP_aux_in, 
+	coff_SWAP_aux_out): Map to the new functions.
+	* coff64-rs6000.c: New file.
+	* libcoff.h (bfd_coff_backend_data): Add new fields 
+	_bfd_coff_force_symnames_in_strings and 
+	_bfd_coff_debug_string_prefix_length.
+	(bfd_coff_force_symnames_in_strings, 
+	bfd_coff_debug_string_prefix_length): New macros for above fields.
+	* coffcode.h (coff_set_arch_mach_hook): Handle XCOFF64 magic.
+	Set machine to 620 for XCOFF64.  Use bfd_coff_swap_sym_in instead 
+	of using coff_swap_sym_in directly.
+	(FORCE_SYMNAMES_IN_STRINGS): New macro, defined for XCOFF64.
+	(coff_set_flags) Set magic for XCOFF64.	
+	(coff_compute_section_file_positions): Add symbol name length to
+	string section length if bfd_coff_debug_string_prefix_length is
+	true.
+	(coff_write_object_contents): Don't do reloc overflow for XCOFF64.
+	(coff_slurp_line_table): Use bfd_coff_swap_lineno_in instead of
+	using coff_swap_lineno_in directly.
+	(bfd_coff_backend_data): Add _bfd_coff_force_symnames_in_strings
+	and _bfd_coff_debug_string_prefix_length fields.
+	* coffgen.c (coff_fix_symbol_name, coff_write_symbols): Force 
+	symbol names into strings table when 
+	bfd_coff_force_symnames_in_strings is true.
+	* coffswap.h (MAX_SCNHDR_NRELOC, MAX_SCNHDR_NLNNO, GET_RELOC_VADDR,
+	SET_RELOC_VADDR): New macros.
+	(coff_swap_reloc_in, coff_swap_reloc_out): Use above macros.	
+	(coff_swap_aux_in, coff_swap_aux_out): Remove RS6000COFF_C
+	code.
+	(coff_swap_aouthdr_in, coff_swap_aouthdr_out): Handle XCOFF64
+	changes within RS6000COFF_C specific code.
+	(coff_swap_scnhdr_out): Use PUT_SCNHDR_NLNNO, PUT_SCNHDR_NRELOC, 
+	MAX_SCNHDR_NRELOC, and MAX_SCNHDR_NLNNO.
+	* reloc.c (bfd_perform_relocation, bfd_install_relocation):
+	Extend existing hack on target name.
+	* xcofflink.c (XCOFF_XVECP): Extend existing hack on
+	target name.
+	* coff-tic54x.c (ticof): Keep up to date with new fields
+	in bfd_coff_backend_data.
+	* config.bfd: Add bfd_powerpc_64_arch to targ_arch and define
+	targ_selvecs to include rs6000coff64_vec for rs6000.
+	* configure.in: Add rs6000coff64_vec case.
+ 	* cpu-powerpc.c: New bfd_arch_info_type.
+
 Mon Apr 24 02:17:31 2000  Jeffrey A Law  (law@cygnus.com)
 
 	* config.bfd: Only disable elf32-hppa vectors, not all of the
