@@ -1,5 +1,8 @@
 2001-02-20  Martin M. Hunt  <hunt@redhat.com>
 
+	* solib.c (info_sharedlibrary_command): Don't assume pointers
+	are the same size of long, call	longest_local_hex_string_custom().
+
 	* solib-svr4.c (LM_ADDR): LM_ADDR is a signed offset, so
 	extract_signed_integer() should be called instead of
 	extract_address().

@@ -638,14 +638,14 @@ info_sharedlibrary_command (char *ignore, int from_tty)
 
 	  printf_unfiltered ("%-*s", addr_width,
 			     so->textsection != NULL 
-			       ? local_hex_string_custom (
-			           (unsigned long) so->textsection->addr,
+			       ? longest_local_hex_string_custom (
+			           (LONGEST) so->textsection->addr,
 	                           addr_fmt)
 			       : "");
 	  printf_unfiltered ("%-*s", addr_width,
 			     so->textsection != NULL 
-			       ? local_hex_string_custom (
-			           (unsigned long) so->textsection->endaddr,
+			       ? longest_local_hex_string_custom (
+			           (LONGEST) so->textsection->endaddr,
 	                           addr_fmt)
 			       : "");
 	  printf_unfiltered ("%-12s", so->symbols_loaded ? "Yes" : "No");
