@@ -1355,7 +1355,7 @@ coff_pointerize_aux (abfd, table_base, symbol, indaux, auxent)
   /* Otherwise patch up */
 #define N_TMASK coff_data (abfd)->local_n_tmask
 #define N_BTSHFT coff_data (abfd)->local_n_btshft
-  if ((ISFCN (type) || ISTAG (class) || class == C_BLOCK)
+  if ((ISFCN (type) || ISTAG (class) || class == C_BLOCK || class == C_FCN)
       && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l > 0)
     {
       auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p =

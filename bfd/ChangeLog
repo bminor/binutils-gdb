@@ -1,3 +1,24 @@
+Thu Apr 18 18:51:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libcoff-in.h (struct coff_final_link_info): Add last_bf_index
+	and last_bf fields.
+	* libcoff.h: Rebuild.
+	* coffswap.h (coff_swap_aux_in): Swap endndx field for C_FCN
+	symbols.
+	(coff_swap_aux_out): Likewise.
+	* peicode.h (coff_swap_aux_in): Likewise.
+	(coff_swap_aux_out): Likewise.
+	* coffgen.c (coff_pointerize_aux): Check endndx field for C_FCN
+	symbols.
+	* cofflink.c (_bfd_coff_final_link): Initialize last_bf_index
+	field.
+	(_bfd_coff_link_input_bfd): Check endndx field for C_FCN symbols.
+	Fix up .bf endndx link fields.
+	* coff-ppc.c (ppc_bfd_coff_final_link): Initialize last_bf_index
+	field.
+	* xcofflink.c (xcoff_link_input_bfd): Check endndx field for C_FCN
+	symbols.
+
 Wed Apr 17 12:08:24 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* pe{,i}-ppc.c (PPC_PE): Define instead of PPC, so that compiling

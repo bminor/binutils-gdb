@@ -2,6 +2,9 @@
    Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
+** NOTE: libcoff.h is a GENERATED file.  Don't change it; instead,
+** change libcoff-in.h or coffcode.h.
+
 This file is part of BFD, the Binary File Descriptor library.
 
 This program is free software; you can redistribute it and/or modify
@@ -405,6 +408,11 @@ struct coff_final_link_info
   long last_file_index;
   /* Contents of last C_FILE symbol.  */
   struct internal_syment last_file;
+  /* Symbol index of first aux entry of last .bf symbol with an empty
+     endndx field (-1 if none).  */
+  long last_bf_index;
+  /* Contents of last_bf_index aux entry.  */
+  union internal_auxent last_bf;
   /* Hash table used to merge debug information.  */
   struct coff_debug_merge_hash_table debug_merge;
   /* Buffer large enough to hold swapped symbols of any input file.  */
@@ -814,7 +822,7 @@ typedef struct
 #define bfd_coff_adjust_symndx(obfd, info, ibfd, sec, rel, adjustedp)\
         ((coff_backend_info (abfd)->_bfd_coff_adjust_symndx)\
          (obfd, info, ibfd, sec, rel, adjustedp))
-#define bfd_coff_link_add_one_symbol(info, abfd, name, flags, section, value, string, cp, coll, hashp)\
+#define bfd_coff_link_add_one_symbol(info,abfd,name,flags,section,value,string,cp,coll,hashp)\
         ((coff_backend_info (abfd)->_bfd_coff_link_add_one_symbol)\
          (info, abfd, name, flags, section, value, string, cp, coll, hashp))
 

@@ -447,6 +447,7 @@ _bfd_coff_final_link (abfd, info)
   finfo.strtab = NULL;
   finfo.section_info = NULL;
   finfo.last_file_index = -1;
+  finfo.last_bf_index = -1;
   finfo.internal_syms = NULL;
   finfo.sec_ptrs = NULL;
   finfo.sym_indices = NULL;
@@ -1546,7 +1547,8 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 
 		  if (ISFCN (isymp->n_type)
 		      || ISTAG (isymp->n_sclass)
-		      || isymp->n_sclass == C_BLOCK)
+		      || isymp->n_sclass == C_BLOCK
+		      || isymp->n_sclass == C_FCN)
 		    {
 		      indx = auxp->x_sym.x_fcnary.x_fcn.x_endndx.l;
 		      if (indx > 0
@@ -1579,6 +1581,80 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 			auxp->x_sym.x_tagndx.l = 0;
 		      else
 			auxp->x_sym.x_tagndx.l = symindx;
+		    }
+
+		  /* The .bf symbols are supposed to be linked through
+		     the endndx field.  We need to carry this list
+		     across object files.  */
+		  if (i == 0
+		      && h == NULL
+		      && isymp->n_sclass == C_FCN
+		      && (isymp->_n._n_n._n_zeroes != 0
+			  || isymp->_n._n_n._n_offset == 0)
+		      && isymp->_n._n_name[0] == '.'
+		      && isymp->_n._n_name[1] == 'b'
+		      && isymp->_n._n_name[2] == 'f'
+		      && isymp->_n._n_name[3] == '\0')
+		    {
+		      if (finfo->last_bf_index != -1)
+			{
+			  finfo->last_bf.x_sym.x_fcnary.x_fcn.x_endndx.l =
+			    *indexp;
+
+			  if ((bfd_size_type) finfo->last_bf_index
+			      >= syment_base)
+			    {
+			      PTR auxout;
+
+			      /* The last .bf symbol is in this input
+				 file.  This will only happen if the
+				 assembler did not set up the .bf
+				 endndx symbols correctly.  */
+			      auxout = (PTR) (finfo->outsyms
+					      + ((finfo->last_bf_index
+						  - syment_base)
+						 * osymesz));
+			      bfd_coff_swap_aux_out (output_bfd,
+						     (PTR) &finfo->last_bf,
+						     isymp->n_type,
+						     isymp->n_sclass,
+						     0, isymp->n_numaux,
+						     auxout);
+			    }
+			  else
+			    {
+			      /* We have already written out the last
+                                 .bf aux entry.  We need to write it
+                                 out again.  We borrow *outsym
+                                 temporarily.  FIXME: This case should
+                                 be made faster.  */
+			      bfd_coff_swap_aux_out (output_bfd,
+						     (PTR) &finfo->last_bf,
+						     isymp->n_type,
+						     isymp->n_sclass,
+						     0, isymp->n_numaux,
+						     (PTR) outsym);
+			      if (bfd_seek (output_bfd,
+					    (obj_sym_filepos (output_bfd)
+					     + finfo->last_bf_index * osymesz),
+					    SEEK_SET) != 0
+				  || bfd_write (outsym, osymesz, 1,
+						output_bfd) != osymesz)
+				return false;
+			    }
+			}
+
+		      if (auxp->x_sym.x_fcnary.x_fcn.x_endndx.l != 0)
+			finfo->last_bf_index = -1;
+		      else
+			{
+			  /* The endndx field of this aux entry must
+                             be updated with the symbol number of the
+                             next .bf symbol.  */
+			  finfo->last_bf = *auxp;
+			  finfo->last_bf_index = ((outsym - finfo->outsyms)
+						  / osymesz);
+			}
 		    }
 		}
 
