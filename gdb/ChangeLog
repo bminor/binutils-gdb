@@ -1,3 +1,8 @@
+2002-07-09  Grace Sainsbury  <graces@redhat.com>
+
+	* config/m68k/tm-m68k.h: Remove macros wrapped in 
+	#if !GDB_MULTI_ARCH. 
+
 2002-07-09  David O'Brien  <obrien@FreeBSD.org>
 
 	* gdbserver/gdbreplay.c (stdlib.h, unistd.h): Conditionaly include.
