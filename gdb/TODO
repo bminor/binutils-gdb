@@ -38,11 +38,10 @@ the hooks for PREPARE_TO_PROCEED and ATTACH_TO_THREAD, which I haven't
 merged--can these go in target_resume()?
 
 4.  BFD problem--"Undefined symbol _aout_32_swap_exec_header_in".
+Believed to be fixed (fix not yet tested with GDB).
 
 5.  The linker complains about mfree and so on being multiply defined.
-As one version is in a library, this seems like a linker bug.  But I
-think changing MMALLOC_LIB to MMALLOC in the .mh files is all that is
-necessary to fix it.
+Believed to be fixed (fix not yet tested).
 
 6.  i386_mach3_float_info and register_addr were undefined in the
 link.  I haven't investigated, but probably just another easy
@@ -50,8 +49,9 @@ configuration thing or something.
 
 7.  I couldn't find mach_port_t in any of the headers in
 /usr/include/*.h or /usr/include/mach/*.h (I think those are the two
-places I tried).  Typedeffing it to void * in nm-m3.h seemed to work,
-but of course that's hardly an elegant solution.
+places I grepped; I don't know what headers I was actually getting).
+Typedeffing it to void * in nm-m3.h seemed to work, but of course
+that's hardly an elegant solution.
 
 8.  Implement the features which CMU gdb has which the main GDB does
 not.  This could be done by getting paperwork from CMU and merging

@@ -5,5 +5,5 @@ NATDEPFILES= i386m3-nat.o m3-nat.o
 XM_FILE= xm-i386m3.h
 
 # Don't use the mmalloc library in Mach 3.
-MMALLOC_LIB = 
+MMALLOC = 
 MMALLOC_DISABLE = -DNO_MMALLOC
