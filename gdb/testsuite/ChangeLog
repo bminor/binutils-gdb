@@ -1,3 +1,8 @@
+2005-03-08  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add iq2000 case.
+	* gdb.asm/iq2000.inc: New file.
+
 2005-03-07  Manoj Iyer <manjo@austin.ibm.com>
 	
 	* gdb.base/command.exp: Change hardcoded value to regular expression.

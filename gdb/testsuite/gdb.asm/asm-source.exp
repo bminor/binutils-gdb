@@ -122,6 +122,9 @@ switch -glob -- [istarget] {
         set asm-flags "-I${srcdir}/${subdir} -I${objdir}/${subdir}"
 	set debug-flags "-gdwarf-2"
     }
+    "iq2000-*-*" {
+    	set asm-arch iq2000
+    }
     "hppa*-linux-*" {
         set asm-arch pa
         set asm-flags "-I${srcdir}/${subdir} -I${objdir}/${subdir}"
