@@ -1,3 +1,8 @@
+2000-09-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* language.c (show_case_command, set_case_command): Protoize.
+	* m3-nat.c (m3_xfer_memory, fetch_thread_info): Protoize.
+
 2000-09-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* lin-thread.c (threadlist_iter, get_lwp_from_thread_id,

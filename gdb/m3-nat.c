@@ -2010,14 +2010,11 @@ out:
   return length;
 }
 
-/* Return 0 on failure, number of bytes handled otherwise.  */
+/* Return 0 on failure, number of bytes handled otherwise.  TARGET is
+   ignored. */
 static int
-m3_xfer_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;	/* IGNORED */
+m3_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		struct target_ops *target)
 {
   int result;
 
@@ -2139,9 +2136,7 @@ get_thread_name (gdb_thread_t one_cproc, int id)
 }
 
 int
-fetch_thread_info (task, mthreads_out)
-     mach_port_t task;
-     gdb_thread_t *mthreads_out;	/* out */
+fetch_thread_info (mach_port_t task, gdb_thread_t *mthreads_out)
 {
   kern_return_t ret;
   thread_array_t th_table;

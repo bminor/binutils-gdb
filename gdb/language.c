@@ -330,9 +330,7 @@ set_range_command (char *ignore, int from_tty)
 /* Show command.  Display a warning if the case sensitivity setting does
    not match the current language. */
 static void
-show_case_command(ignore, from_tty)
-   char *ignore;
-   int from_tty;
+show_case_command (char *ignore, int from_tty)
 {
    if (case_sensitivity != current_language->la_case_sensitivity)
       printf_unfiltered(
@@ -341,9 +339,7 @@ show_case_command(ignore, from_tty)
 
 /* Set command.  Change the setting for case sensitivity. */
 static void
-set_case_command(ignore, from_tty)
-   char *ignore;
-   int from_tty;
+set_case_command (char *ignore, int from_tty)
 {
    if (STREQ (case_sensitive, "on"))
    {
