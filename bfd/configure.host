@@ -44,9 +44,11 @@ mips-dec-*)		my_host=decstation ;;
 mips-sgi-irix3*)	my_host=irix3 ;;
 mips-sgi-irix4*)	my_host=irix4 ;;
 mips-*-sysv*)		my_host=riscos ;;
+mips-*-riscos*)		my_host=riscos ;;
 
 m68*-apollo*-sysv*)	my_host=apollov68 ;;
 m68*-apollo*-bsd*)	my_host=apollo68 ;;
+m68*-bull*-sysv*)	my_host=dpx2 ;;
 m68*-convergent-sysv*)	my_host=miniframe ;;
 m68*-cbm-amigados)	my_host=amigados ;;
 m68*-cbm-sysv4*)	my_host=amix ;;

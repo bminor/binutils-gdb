@@ -84,7 +84,8 @@ BFD32_BACKENDS = \
 	aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
 	i386aout.o i386bsd.o i386linux.o i386lynx.o \
 	hp300hpux.o bout.o \
-	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
+	coff-i960.o coff-a29k.o coff-m68k.o coff-m68k-un.o \
+	coff-i386.o coff-m88k.o \
 	coff-rs6000.o coff-h8300.o coff-h8500.o coff-z8k.o coff-we32k.o \
 	coff-mips.o coff-msym.o coff-alpha.o coff-sh.o \
 	hppa.o oasys.o ieee.o srec.o \
@@ -130,7 +131,8 @@ FLAGS_TO_PASS = \
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 archures.c coff-i386.c aout64.c aout32.c sunos.c demo64.c \
-	 coff-i960.c srec.c tekhex.c oasys.c ieee.c coff-m68k.c \
+	 coff-i960.c srec.c tekhex.c oasys.c ieee.c \
+	 coff-m68k.c coff-m68k-un.c \
 	 coff-a29k.c coff-rs6000.c coff-msym.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
 	 seclet.c coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c \

@@ -1,3 +1,21 @@
+Thu Jul  1 14:52:47 1993  Frederic Pierresteguy (F.Pierresteguy@frcl.bull.fr)
+			  and Jim Kingdon (kingdon@cygnus.com)
+
+	* elfcode.h: Use memset not bzero.
+	* trad-core.c: Don't include <sys/file.h>.
+	* i386linux.h: Include <sys/file.h>.
+	* coff-m68k-un.c: new file to handle names with underscores on
+	svr3 machines.
+	* coff-m68k.c (m68k_rtype2howto): added #ifdef ONLY_DECLARE_RELOCS 
+	to not duplicate the function in the executable.
+	(TARGET_SYM, TARGET_NAME, NAMES_HAVE_UNDERSCORE): new macros needed
+	by coff-m68k-un.c.
+	* coffcode.h (MC68KBCSMAGIC): case added.
+	* targets.c: Add m68kcoffun_vec.
+	* configure.host: added support for Bull dpx/2.
+	* config/dpx2.mh, hosts/dpx2.h: new files.
+	* Makefile.in: added target coff-m68k-un.
+
 Fri Jul  9 00:43:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* aoutf1.h: Add definition of MACHTYPE_OK.

@@ -372,6 +372,7 @@ extern bfd_target ieee_vec;
 extern bfd_target oasys_vec;
 extern bfd_target m88kbcs_vec;
 extern bfd_target m68kcoff_vec;
+extern bfd_target m68kcoffun_vec;
 extern bfd_target i386coff_vec;
 extern bfd_target i386aout_vec;
 extern bfd_target i386linux_vec;
@@ -452,6 +453,7 @@ bfd_target *target_vector[] = {
 	&b_out_vec_little_host,
 	&b_out_vec_big_host,
 	&m68kcoff_vec,
+	&m68kcoffun_vec,
 	&a29kcoff_big_vec,
 	&rs6000coff_vec,
 #if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)

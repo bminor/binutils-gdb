@@ -34,6 +34,7 @@ dgux.h
 delta68.h
 delta88.h
 dose.h
+dpx2.h
 go32.h
 harris.h
 hp300bsd.h

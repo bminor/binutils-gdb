@@ -38,7 +38,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 
 #include <sys/user.h>		/* After a.out.h  */
+#if 0
+/* file.h is included by std-host.h.  So we better not try to include it
+   twice; on some systems (dpx2) it is not protected against multiple
+   inclusion.  I have checked that all the hosts which use this file
+   include sys/file.h in the hosts file.  */
 #include <sys/file.h>
+#endif
 
 #include <errno.h>
 
@@ -110,7 +116,12 @@ trad_unix_core_file_p (abfd)
 	bfd_error = file_truncated;
 	return 0;
       }
-    if (NBPG * (UPAGES + u.u_dsize + u.u_ssize) < statbuf.st_size)
+    if (NBPG * (UPAGES + u.u_dsize + u.u_ssize)
+#ifdef TRAD_CORE_EXTRA_SIZE_ALLOWED
+	/* Some systems write the file too big.  */
+	+ TRAD_CORE_EXTRA_SIZE_ALLOWED
+#endif
+	< statbuf.st_size)
       {
 	/* The file is too big.  Maybe it's not a core file
 	   or we otherwise have bad values for u_dsize and u_ssize).  */
@@ -272,6 +283,9 @@ trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 #define	trad_unix_print_symbol			(void (*) PARAMS	\
 	((bfd *, PTR, struct symbol_cache_entry  *,			\
 	bfd_print_symbol_type))) bfd_false
+#define	trad_unix_get_symbol_info		(void (*) PARAMS	\
+	((bfd *, struct symbol_cache_entry  *,			\
+	symbol_info *))) bfd_false
 #define	trad_unix_get_lineno			(alent * (*) PARAMS	\
 	((bfd *, struct symbol_cache_entry *))) bfd_nullvoidptr
 #define	trad_unix_set_arch_mach			(boolean (*) PARAMS	\
@@ -304,6 +318,7 @@ swap_abort()
 }
 #define	NO_GET	((bfd_vma (*) PARAMS ((         bfd_byte *))) swap_abort )
 #define	NO_PUT	((void    (*) PARAMS ((bfd_vma, bfd_byte *))) swap_abort )
+#define	NO_SIGNED_GET ((bfd_signed_vma (*) PARAMS ((bfd_byte *))) swap_abort )
 
 bfd_target trad_core_vec =
   {
@@ -319,12 +334,12 @@ bfd_target trad_core_vec =
     ' ',						   /* ar_pad_char */
     16,							   /* ar_max_namelen */
     3,							   /* minimum alignment power */
-    NO_GET, NO_GET, NO_PUT,	/* 64 bit data */
-    NO_GET, NO_GET, NO_PUT,	/* 32 bit data */
-    NO_GET, NO_GET, NO_PUT,	/* 16 bit data */
-    NO_GET, NO_GET, NO_PUT,	/* 64 bit hdrs */
-    NO_GET, NO_GET, NO_PUT,	/* 32 bit hdrs */
-    NO_GET, NO_GET, NO_PUT,	/* 16 bit hdrs */
+    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 64 bit data */
+    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 32 bit data */
+    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 16 bit data */
+    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 64 bit hdrs */
+    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 32 bit hdrs */
+    NO_GET, NO_SIGNED_GET, NO_PUT,	/* 16 bit hdrs */
 
     {				/* bfd_check_format */
      _bfd_dummy_target,		/* unknown format */

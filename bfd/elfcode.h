@@ -2264,7 +2264,7 @@ DEFUN (elf_build_phdrs, (abfd, i_ehdrp, i_shdrp, phdr_cnt),
 
   /* F. Set up the "end of program header table" sentinel.	*/
 
-  bzero ((char *) (phdr_buf + idx), sizeof (Elf_Internal_Phdr));
+  memset ((char *) (phdr_buf + idx), 0, sizeof (Elf_Internal_Phdr));
   idx++;
 
   BFD_ASSERT (idx - 1 == *phdr_cnt);
