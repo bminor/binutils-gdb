@@ -654,10 +654,10 @@ SYNOPSIS
 
 DESCRIPTION
 	Invent a section name that is unique in @var{abfd} by tacking
-	a digit suffix onto the original @var{templat}.  If @var{count}
-	is non-NULL, then it specifies the first number	tried as a
-	suffix to generate a unique name.  The value pointed to by
-	@var{count} will be incremented in this case.
+	a dot and a digit suffix onto the original @var{templat}.  If
+	@var{count} is non-NULL, then it specifies the first number
+	tried as a suffix to generate a unique name.  The value
+	pointed to by @var{count} will be incremented in this case.
 */
 
 char *
@@ -671,7 +671,7 @@ bfd_get_unique_section_name (abfd, templat, count)
   char *sname;
 
   len = strlen (templat);
-  sname = bfd_malloc (len + 7);
+  sname = bfd_malloc (len + 8);
   strcpy (sname, templat);
   num = 1;
   if (count != NULL)
@@ -682,7 +682,7 @@ bfd_get_unique_section_name (abfd, templat, count)
       /* If we have a million sections, something is badly wrong.  */
       if (num > 999999)
 	abort ();
-      sprintf (sname + len, "%d", num++);
+      sprintf (sname + len, ".%d", num++);
     }
   while (bfd_get_section_by_name (abfd, sname) != NULL);
 
