@@ -10,7 +10,7 @@
 
 HDEFINES=
 HOSTING_CRT0=/lib/crt0.o
-HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ]; then libgcc=../gcc/libgcc.a; else libgcc=\`${CC} -print-libgcc-file-name\`; fi; if [ -f ../gcc/libgcc_eh.a ]; then libgcc="$libgcc ../gcc/libgcc_eh.a"; else libgcc_eh=\`${CC} -print-file-name=libgcc_eh.a\`; if [ x"$libgcc_eh" != xlibgcc_eh.a ]; then libgcc="$libgcc $libgcc_eh"; fi; fi; echo $libgcc -lc $libgcc`'
+HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ]; then libgcc=../gcc/libgcc.a; else libgcc=\`${CC} -print-libgcc-file-name\`; fi; if [ -f ../gcc/libgcc_eh.a ]; then libgcc="$libgcc ../gcc/libgcc_eh.a"; else libgcc_eh=\`${CC} -print-file-name=libgcc_eh.a\`; if [ x"$libgcc_eh" != xlibgcc_eh.a ]; then libgcc="$libgcc $libgcc_eh"; fi; fi; echo --start-group $libgcc -lc --end-group`'
 
 #
 #	Generic configurations:
@@ -53,7 +53,6 @@ case "${host}" in
     # Support for GCC's crtstuff not present.
     HOSTING_CRT0="$HOSTING_CRT0 `${CC} --print-file-name=crtbegin.o`"
   fi
-  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi`'
   if [ -f `${CC} --print-file-name=crtn.o` ]; then
     # Support for GCC's crtstuff present.
     if [ -f ../gcc/crtbegin.o ]; then
@@ -81,26 +80,17 @@ case "${host}" in
   ;;
 
 am33_2.0-*-linux*)
-  HOSTING_CRT0='-dynamic-linker `fgrep ld-linux.so \`${CC} --print-file-name=specs\` | sed -e "s,.*-dynamic-linker[ 	][ 	]*\(.*/ld-linux.so..\).*,\1,"` `${CC} --print-file-name=crt1.o` `${CC} --print-file-name=crti.o` `if [ -f ../gcc/crtbegin.o ]; then echo ../gcc/crtbegin.o; else ${CC} --print-file-name=crtbegin.o; fi`'
-  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` -L`dirname \`${CC} --print-file-name=libc.so\`` -lc `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` `${CC} --print-file-name=crtn.o`'
+  HOSTING_CRT0=`echo "$HOSTING_CRT0" | sed -e "s,ld\[^ \]\*,ld-linux,g"`
   ;;
 
 arm*-*-linux-gnu*)
-  HOSTING_CRT0='-p '`echo "$HOSTING_CRT0" | sed -e "s,ld\[^ \]*\*,ld-linux,g"`
+  HOSTING_CRT0='-p '`echo "$HOSTING_CRT0" | sed -e "s,ld\[^ \]\*,ld-linux,g"`
   ;;
 
 hppa*64*-*-hpux11*)
   HOSTING_CRT0=/usr/ccs/lib/pa20_64/crt0.o
   # Even if CC is not gcc, the tests use gcc.
-  HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else if test "$GCC" = yes; then ${CC} --print-libgcc-file-name; else gcc --print-libgcc-file-name; fi fi` -lc /usr/lib/pa20_64/milli.a'
-  ;;
-
-hppa*64*-*-linux*)
-  ;;
-
-hppa*-*-linux*)
-  # Need libgcc for $$dyncall.
-  HOSTING_LIBS='-L`dirname \`${CC} --print-file-name=libc.so\`` '"$HOSTING_LIBS"' `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} --print-libgcc-file-name; fi` `if [ -f ../gcc/crtend.o ]; then echo ../gcc/crtend.o; else ${CC} --print-file-name=crtend.o; fi` `${CC} --print-file-name=crtn.o`'
+  HOSTING_LIBS='--start-group `if [ -f ../gcc/libgcc.a ]; then echo ../gcc/libgcc.a; else if test "$GCC" = yes; then ${CC} --print-libgcc-file-name; else gcc --print-libgcc-file-name; fi fi` -lc --end-group /usr/lib/pa20_64/milli.a'
   ;;
 
 i[3-7]86-*-bsd* | i[3-7]86-*-freebsd[12] | i[3-7]86-*-freebsd[12]\.* | i[3-7]86-*-freebsd*aout*)

@@ -1,5 +1,14 @@
+2003-11-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.host (HOSTING_LIBS): Group libgcc and libc with
+	--start-group, --end-group pair.
+	(*-*-netbsd*, am33_2.0-*-linux*): Use the default HOSTING_LIBS.
+	(am33_2.0-*-linux*): Edit default HOSTING_CRT0.
+	(arm*-*-linux-gnu*): Remove extraneous '*' in sed expression.
+	(hppa*64*-*-linux*, hppa*-*-linux*): Remove target specific case.
+
 2003-11-07  Jonathan R. Grant  <jg-binutils@jguk.org>
-	
+
 	* ldfile.c (ldfile_open_file): Use "No such file" error message.
 
 2003-11-06  Bruno Rohee  <bruno@rohee.com>
