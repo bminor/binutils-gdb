@@ -1,3 +1,8 @@
+1999-01-19  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-dis.c (print_insn_arm): Display ARM syntax for PC relative
+	offsets as well as symbloic address.
+
 Tue Jan 19 10:51:01 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	* hppa-dis.c: fix comments and some indentation.
