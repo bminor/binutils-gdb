@@ -1,3 +1,7 @@
+2003-08-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-prologue.c, gdb.arch/i386-prologue.exp: New files.
+
 2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
 
        * gdb.base/completion.exp: Remove reduntant completion test
