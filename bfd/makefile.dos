@@ -39,6 +39,8 @@ OBJS = \
 	coff-go32.o \
 	cofflink.o \
 	elf32.o \
+	binary.o \
+	tekhex.o \
 	$E
 
 libbfd.a : $(OBJS)

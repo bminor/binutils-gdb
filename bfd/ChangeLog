@@ -1,3 +1,8 @@
+Mon Jul 10 11:45:55 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* makefile.dos (OBJS): Add binary.o and tekhex.o.  From DJ
+	Delorie.
+
 Mon Jul 10 11:09:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/m68k-coff.mt (SELECT_VECS): Rename from SELECT_VECTORS.
