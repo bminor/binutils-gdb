@@ -1499,7 +1499,13 @@ void
 ecoff_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
-  if (cur_file_ptr == (efdr_t *) NULL)
+  /* Make sure that we have a file pointer, but only if we have seen a
+     file.  If we haven't seen a file, then this is a probably special
+     symbol created by md_begin which may required special handling at
+     some point.  Creating a dummy file with a dummy name is certainly
+     wrong.  */
+  if (cur_file_ptr == (efdr_t *) NULL
+      && seen_at_least_1_file ())
     add_file ((const char *) NULL, 0);
   symbolP->ecoff_file = cur_file_ptr;
   symbolP->ecoff_symbol = NULL;
@@ -2191,7 +2197,8 @@ add_file (file_name, indx)
 	as_fatal ("fake .file after real one");
       as_where (&file, (unsigned int *) NULL);
       file_name = (const char *) file;
-      generate_asm_line_stab = 1;
+      if (! symbol_table_frozen)
+	generate_asm_line_stab = 1;
     }
   else
       generate_asm_line_stab = 0;
@@ -2278,15 +2285,15 @@ add_file (file_name, indx)
 					   &cur_file_ptr->thash_head[0]);
       if (generate_asm_line_stab)
 	{
-	  static char itstr[] = "void:t1=1";
 	  mark_stabs (0);
           (void) add_ecoff_symbol (file_name, st_Nil, sc_Nil,
-                               symbol_new ("L0\001", now_seg,
-                                           (valueT) frag_now_fix (),
-                                           frag_now),
-                               0, ECOFF_MARK_STAB (N_SO));
-          (void) add_ecoff_symbol (itstr, st_Nil, sc_Nil,
-                               (symbolS *)NULL, 0, ECOFF_MARK_STAB (N_LSYM));
+				   symbol_new ("L0\001", now_seg,
+					       (valueT) frag_now_fix (),
+					       frag_now),
+				   0, ECOFF_MARK_STAB (N_SO));
+          (void) add_ecoff_symbol ("void:t1=1", st_Nil, sc_Nil,
+				   (symbolS *) NULL, 0,
+				   ECOFF_MARK_STAB (N_LSYM));
 	}
     }
 }

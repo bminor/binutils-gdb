@@ -1,3 +1,19 @@
+Fri Sep  2 16:05:50 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ecoff.c (add_file): Don't try to generate line numbers if the
+	symbol table has been frozen.
+
+Thu Sep  1 19:48:01 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* aclocal.m4 (AC_PROG_CC): Use AC_DEFUN, and omit AC_PROVIDE.
+
+	* configure.in: Handle user-specified bfd-assembler option with
+	separate variable from preferred configuration, until the two are
+	resolved.  Indicate bfd_gas=preferred for linux a.out.  Use
+	AC_PROGRAM_TRANSFORM_NAME, for which a patch has been sent to djm.
+	* Makefile.in (target_alias, program_transform_name): Define,
+	using autoconf @-substitutions.
+
 Wed Aug 31 17:43:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* atof-generic.c: Deleted alloca handling here.
