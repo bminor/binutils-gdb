@@ -65,14 +65,17 @@ PROTO (char *, zalloc, (bfd_size_type size));
 PROTO(PTR, bfd_alloc, (bfd *abfd, bfd_size_type size));
 PROTO(PTR, bfd_zalloc,(bfd *abfd, bfd_size_type size));
 PROTO(PTR, bfd_realloc,(bfd *abfd, PTR orig, bfd_size_type new));
+PROTO(void, bfd_alloc_grow,(bfd *abfd, PTR thing, bfd_size_type size));
+PROTO(PTR, bfd_alloc_finish,(bfd *abfd));
+
 #define bfd_release(x,y) (void) obstack_free(&(x->memory),y)
 
-PROTO (bfd_target *, bfd_find_target, (CONST char *target_name, bfd *));
+
 PROTO (bfd_size_type, bfd_read, (PTR ptr, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
 PROTO (bfd_size_type, bfd_write, (PTR ptr, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
 
-PROTO (FILE *, bfd_cache_lookup, (bfd *));
-PROTO (void, bfd_cache_close, (bfd *));
+
+
 PROTO (int, bfd_seek,(bfd* abfd, file_ptr fp , int direction));
 PROTO (long, bfd_tell, (bfd *abfd));
 PROTO (bfd *, _bfd_create_empty_archive_element_shell, (bfd *obfd));
@@ -161,8 +164,6 @@ PROTO (void, bfd_assert,(char*,int));
 PROTO (FILE *, bfd_cache_lookup_worker, (bfd *));
 
 extern bfd *bfd_last_cache;
-#define bfd_cache_lookup(x) \
-     (x==bfd_last_cache?(FILE*)(bfd_last_cache->iostream):bfd_cache_lookup_worker(x))
     
 /* Now Steve, what's the story here? */
 #ifdef lint
@@ -175,3 +176,51 @@ extern bfd *bfd_last_cache;
 
 /* Generic routine for close_and_cleanup is really just bfd_true.  */
 #define	bfd_generic_close_and_cleanup	bfd_true
+
+/* THE FOLLOWING IS EXTRACTED FROM THE SOURCE*/
+
+/* Return the log base 2 of the value supplied, rounded up. eg an arg
+of 1025 would return 11.
+*/
+PROTO(bfd_vma, bfd_log2,(bfd_vma x));
+/* The maxiumum number of files which the cache will keep open at one
+time.
+*/
+#define BFD_CACHE_MAX_OPEN 10
+
+/* Zero, or a pointer to the topmost bfd on the chain.  This is used by the
+bfd_cache_lookup() macro in libbfd.h to determine when it can avoid a function
+call.  
+*/
+extern bfd *bfd_last_cache;
+
+/* Checks to see if the required bfd is the same as the last one looked
+up. If so then it can use the iostream in the bfd with impunity, since
+it can't have changed since the last lookup, otherwise it has to
+perform the complicated lookup function
+*/
+#define bfd_cache_lookup(x) \
+     ((x)==bfd_last_cache? \
+        (FILE*)(bfd_last_cache->iostream): \
+         bfd_cache_lookup_worker(x))
+
+
+/* Initialize a BFD by putting it on the cache LRU.
+*/
+PROTO(void, bfd_cache_init, (bfd *));
+/* Remove the bfd from the cache. If the attatched file is open, then close it too.
+*/
+PROTO(void, bfd_cache_close, (bfd *));
+/* Call the OS to open a file for this BFD.  Returns the FILE *
+(possibly null) that results from this operation.  Sets up the
+BFD so that future accesses know the file is open. If the FILE *
+returned is null, then there is won't have been put in the cache, so
+it won't have to be removed from it.
+*/
+PROTO(FILE *, bfd_open_file, (bfd *));
+/* Called when the macro @code{bfd_cache_lookup} fails to find a quick
+answer. Finds a file descriptor for this BFD.  If necessary, it open it.
+If there are already more than BFD_CACHE_MAX_OPEN files open, it trys to close
+one first, to avoid running out of file descriptors. 
+*/
+PROTO(FILE *, bfd_cache_lookup_worker, (bfd *));

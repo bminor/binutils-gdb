@@ -1,4 +1,4 @@
-#
+ #
 # Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 #
 # This file is part of BFD, the Binary File Diddler.
@@ -20,6 +20,8 @@
 # $Id$
 
 srcdir = .
+destdir = /usr/local
+libdir = $(destdir)/lib
 
 RANLIB = ranlib
 AR = ar
@@ -35,18 +37,21 @@ CFLAGS = -g $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) # -DINTEL960VERSION
 
 
 BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
-	archures.o 
+	archures.o core.o section.o format.o syms.o reloc.o
 
-BFD_BACKENDS = oasys.o ieee.o srec.o aout64.o aout32.o sunos.o icoff.o demo64.o \
-	m68kcoff.o i386coff.o m88k-bcs.o coffswap.o ecoff.o newsos3.o # trad-core.o bout.o
+BFD_BACKENDS = oasys.o ieee.o srec.o aout64.o aout32.o sunos.o icoff.o \
+demo64.o \
+m68kcoff.o i386coff.o m88k-bcs.o  ecoff.o newsos3.o # trad-core.o bout.o
 
 BFD_H=$(INCDIR)/bfd.h
 SYSDEP_H=$(INCDIR)/sysdep.h
 
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
-	 i386coff.c aout64.c aout32.c sunos.c demo64.c icoff.c srec.c oasys.c ieee.c m68kcoff.c \
-	 m88k-bcs.c coffswap.c ecoff.c trad-core.c newsos3.c #bout.c
+	 i386coff.c aout64.c aout32.c sunos.c demo64.c icoff.c srec.c \
+oasys.c ieee.c m68kcoff.c \
+format.c section.c core.c syms.c reloc.c \
+	 m88k-bcs.c ecoff.c trad-core.c newsos3.c #bout.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 
@@ -149,6 +154,8 @@ roll:
 force:
 
 install:
+	install -c libbfd.a $(libdir)
+	$(RANLIB) $(libdir)/libbfd.a
 
 # Target to uncomment host-specific lines in this makefile.  Such lines must
 # have the following string beginning in column 1: #__<hostname>__#
@@ -181,3 +188,81 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 
 dep: $(CFILES)
 	mkdep $(CFLAGS) $?
+
+
+# Stuff to make the documentation for bfd.
+#
+# make docs
+#	rebuilds the documentation. Has to be done when the source is
+#	modified until I work out how to do this properly
+# 
+# make docs headers
+#	rebuilds the header files from the source
+#
+# make docs texdoc
+#	rebuilds the bfd.dvi manual
+#
+# make docs texinfo
+#	rebuilts the bfdinfo manual
+
+
+.SUFFIXES: .doc .o .c .h .proto
+
+.c.doc:
+	makedoc <$< doc/$*.doc doc/$*.proto doc/$*.protointernal doc/$*.drop
+
+.h.doc:
+	makedoc <$< doc/$*.doc doc/$*.proto doc/$*.protointernal doc/$*.drop
+
+.proto.doc:
+	makedoc <$< doc/$*.doc doc/$*.proto doc/$*.protointernal doc/$*.drop
+
+
+DSRC=$(CFILES)
+
+docs: syms.doc bfd.doc cache.doc format.doc section.doc archive.doc \
+	core.doc libbfd.doc archures.doc reloc.doc opncls.doc \
+	targets.doc aoutx.doc coffcode.doc
+
+
+PROTOS = doc/opncls.proto doc/archures.proto doc/libbfd.proto doc/section.proto doc/syms.proto  doc/bfd.proto doc/archive.proto \
+	doc/reloc.proto doc/targets.proto doc/format.proto 
+
+
+headers : $(PROTOS)
+	mkdir -f doc
+	# Rebuild prototypes in bfd.h
+	sed <$(BFD_H) >bfd.h.new -e '1,/THE FOLLOWING/!d'
+	cat doc/opncls.proto doc/archures.proto \
+	doc/libbfd.proto doc/section.proto doc/syms.proto  doc/bfd.proto doc/archive.proto \
+	doc/reloc.proto doc/targets.proto doc/format.proto >>bfd.h.new
+	echo >> bfd.h.new
+	echo "#endif" >> bfd.h.new
+	echo >> bfd.h.new
+	mv bfd.h.new $(BFD_H)
+
+	# and libbfd.h
+	sed < libbfd.h >libbfd.h.new -e '1,/THE FOLLOWING/!d'
+	cat  doc/libbfd.protointernal doc/cache.protointernal doc/reloc.protointernal  >> libbfd.h.new
+	echo >> libbfd.h.new
+	mv libbfd.h.new libbfd.h
+	
+	# and libcoff.h
+	sed < $(srcdir)/libcoff.h >libcoff.h.new -e '1,/THE FOLLOWING/!d'
+	cat doc/coffcode.proto >>libcoff.h.new
+	mv libcoff.h.new $(srcdir)/libcoff.h
+
+
+texinfo:
+	makeinfo +no-validate bfd.texinfo
+
+texdoc:
+	tex bfd.texinfo
+	texindex bfd.??
+	tex bfd.texinfo
+	
+quickdoc: $(DSRC) docs
+	tex bfd.texinfo
+
+
+

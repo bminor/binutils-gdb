@@ -119,14 +119,14 @@ standard requires:
 */
 
 
-#define this_byte(ieee) *(ieee->input_p)
-#define next_byte(ieee) (ieee->input_p++)
-#define this_byte_and_next(ieee) (*(ieee->input_p++))
+#define this_byte(ieee) *((ieee)->input_p)
+#define next_byte(ieee) ((ieee)->input_p++)
+#define this_byte_and_next(ieee) (*((ieee)->input_p++))
 
 
 static unsigned short 
 DEFUN(read_2bytes,(ieee),
-     ieee_data_type *ieee)
+   common_header_type *ieee)
 {
   unsigned  char c1 = this_byte_and_next(ieee);
   unsigned  char c2 = this_byte_and_next(ieee);
@@ -136,7 +136,7 @@ DEFUN(read_2bytes,(ieee),
 
 static void
 DEFUN(bfd_get_string,(ieee, string, length),
-    ieee_data_type *ieee AND
+    common_header_type *ieee AND
       char *string AND
       size_t length)
 {
@@ -148,7 +148,7 @@ DEFUN(bfd_get_string,(ieee, string, length),
 
 static char *
 DEFUN(read_id,(ieee),
-    ieee_data_type *ieee)
+  common_header_type *ieee)
 {
   size_t length;
   char *string;
@@ -272,7 +272,7 @@ DEFUN(ieee_write_int5_out, (abfd, value),
 
 static boolean 
 DEFUN(parse_int,(ieee, value_ptr),
-      ieee_data_type  *ieee AND
+      common_header_type  *ieee AND
       bfd_vma *value_ptr)
 {
   int value = this_byte(ieee);
@@ -297,7 +297,7 @@ DEFUN(parse_int,(ieee, value_ptr),
 }
 static int
 DEFUN(parse_i,(ieee, ok),
-    ieee_data_type *ieee AND
+   common_header_type *ieee AND
       boolean *ok)
 {
   bfd_vma x;
@@ -307,7 +307,7 @@ DEFUN(parse_i,(ieee, ok),
 
 static bfd_vma 
 DEFUN(must_parse_int,(ieee),
-      ieee_data_type *ieee)
+     common_header_type *ieee)
 {
   bfd_vma result;
   BFD_ASSERT(parse_int(ieee, &result) == true);
@@ -364,15 +364,15 @@ DEFUN(parse_expression,(ieee, value, section, symbol, pcrel, extra),
   ieee_value_type *sp = stack;
 
   while (loop) {
-    switch (this_byte(ieee)) 
+    switch (this_byte(&(ieee->h))) 
 	{
 	case ieee_variable_P_enum:
 	  /* P variable, current program counter for section n */
 	    {
 	      int section_n ;
-	      next_byte(ieee);
+	      next_byte(&(ieee->h));
 	      *pcrel = true;
-	      section_n  = must_parse_int(ieee);
+	      section_n  = must_parse_int(&(ieee->h));
 	      PUSH(NOSYMBOL, 0,
 		   TOS.value = ieee->section_table[section_n]->vma +
 		   ieee_per_section(ieee->section_table[section_n])->pc);
@@ -380,29 +380,29 @@ DEFUN(parse_expression,(ieee, value, section, symbol, pcrel, extra),
 	    }
 	case ieee_variable_L_enum:
 	  /* L variable  address of section N */
-	  next_byte(ieee);
-	  PUSH(NOSYMBOL,ieee->section_table[must_parse_int(ieee)],0);
+	  next_byte(&(ieee->h));
+	  PUSH(NOSYMBOL,ieee->section_table[must_parse_int(&(ieee->h))],0);
 	  break;
 	case ieee_variable_R_enum:
 	  /* R variable, logical address of section module */
 	  /* FIXME, this should be different to L */
-	  next_byte(ieee);
-	  PUSH(NOSYMBOL,ieee->section_table[must_parse_int(ieee)],0);
+	  next_byte(&(ieee->h));
+	  PUSH(NOSYMBOL,ieee->section_table[must_parse_int(&(ieee->h))],0);
 	  break;
 	case ieee_variable_S_enum:
 	  /* S variable, size in MAUS of section module */
-	  next_byte(ieee);
+	  next_byte(&(ieee->h));
 	  PUSH(NOSYMBOL,
 	       0,
-	       ieee->section_table[must_parse_int(ieee)]->size);
+	       ieee->section_table[must_parse_int(&(ieee->h))]->size);
 	  break;
 
 	case ieee_variable_X_enum:
 	  /* Push the address of external variable n */
 	    {
 	      ieee_symbol_index_type sy;
-	      next_byte(ieee);
-	      sy.index  = (int)(must_parse_int(ieee)) ;
+	      next_byte(&(ieee->h));
+	      sy.index  = (int)(must_parse_int(&(ieee->h))) ;
 	      sy.letter = 'X';
 
 	      PUSH(sy, 0, 0);
@@ -413,7 +413,7 @@ DEFUN(parse_expression,(ieee, value, section, symbol, pcrel, extra),
 	      bfd_vma value1, value2;
 	      asection *section1, *section_dummy;
 	      ieee_symbol_index_type sy;
-	      next_byte(ieee);
+	      next_byte(&(ieee->h));
 
 	      POP(sy, section1, value1);
 	      POP(sy, section_dummy, value2);
@@ -427,7 +427,7 @@ DEFUN(parse_expression,(ieee, value, section, symbol, pcrel, extra),
 	      asection *section2;
 	      ieee_symbol_index_type sy1;
 	      ieee_symbol_index_type sy2;
-	      next_byte(ieee);
+	      next_byte(&(ieee->h));
 
 	      POP(sy1, section1, value1);
 	      POP(sy2, section2, value2);
@@ -437,9 +437,9 @@ DEFUN(parse_expression,(ieee, value, section, symbol, pcrel, extra),
 	default: 
 	    {
 	      bfd_vma va;
-	      BFD_ASSERT(this_byte(ieee) < (int)ieee_variable_A_enum 
-			 || this_byte(ieee) > (int)ieee_variable_Z_enum);
-	      if (parse_int(ieee, &va)) 
+	      BFD_ASSERT(this_byte(&(ieee->h)) < (int)ieee_variable_A_enum 
+			 || this_byte(&(ieee->h)) > (int)ieee_variable_Z_enum);
+	      if (parse_int(&(ieee->h), &va)) 
 		  {
 		    PUSH(NOSYMBOL,0, va);
 		  }
@@ -472,7 +472,9 @@ DEFUN(parse_expression,(ieee, value, section, symbol, pcrel, extra),
 
 
 #define ieee_seek(abfd, offset) \
-  ieee_data(abfd)->input_p = ieee_data(abfd)->first_byte + offset
+  ieee_data(abfd)->h.input_p = ieee_data(abfd)->h.first_byte + offset
+
+#define ieee_pos(abfd)   ieee_data(abfd)->h.input_p -ieee_data(abfd)->h.first_byte 
 
 static void
 DEFUN(ieee_slurp_external_symbols,(abfd),
@@ -492,21 +494,21 @@ DEFUN(ieee_slurp_external_symbols,(abfd),
   ieee_seek(abfd, offset );
 
   while (loop) {
-    switch (this_byte(ieee)) {
+    switch (this_byte(&(ieee->h))) {
     case ieee_external_symbol_enum:
-      next_byte(ieee);
-      symbol =  (ieee_symbol_type *)bfd_alloc(ieee->abfd, sizeof(ieee_symbol_type));
+      next_byte(&(ieee->h));
+      symbol =  (ieee_symbol_type *)bfd_alloc(ieee->h.abfd, sizeof(ieee_symbol_type));
 
       *prev_symbols_ptr = symbol;
       prev_symbols_ptr= &symbol->next;
-      symbol->index = must_parse_int(ieee);
+      symbol->index = must_parse_int(&(ieee->h));
       if (symbol->index > ieee->external_symbol_max_index) {
 	ieee->external_symbol_max_index = symbol->index;
       }
       BFD_ASSERT (symbol->index >= ieee->external_symbol_min_index);
       symbol_count++;
       symbol->symbol.the_bfd = abfd;
-      symbol->symbol.name = read_id(ieee);
+      symbol->symbol.name = read_id(&(ieee->h));
       symbol->symbol.udata = (PTR)NULL;
       symbol->symbol.flags = BSF_NO_FLAGS;
       break;
@@ -516,13 +518,13 @@ DEFUN(ieee_slurp_external_symbols,(abfd),
 	unsigned int symbol_type_index;
 	unsigned int symbol_attribute_def;
 	bfd_vma value;
-	next_byte(ieee);	/* Skip prefix */
-	next_byte(ieee);
-	symbol_name_index = must_parse_int(ieee);
-	symbol_type_index = must_parse_int(ieee);
-	symbol_attribute_def = must_parse_int(ieee);
+	next_byte(&(ieee->h));	/* Skip prefix */
+	next_byte(&(ieee->h));
+	symbol_name_index = must_parse_int(&(ieee->h));
+	symbol_type_index = must_parse_int(&(ieee->h));
+	symbol_attribute_def = must_parse_int(&(ieee->h));
 
-	parse_int(ieee,&value);
+	parse_int(&(ieee->h),&value);
 
       }
       break;
@@ -532,10 +534,10 @@ DEFUN(ieee_slurp_external_symbols,(abfd),
 	ieee_symbol_index_type symbol_ignore;
 	boolean pcrel_ignore;
 	unsigned int extra;
-	next_byte(ieee);
-	next_byte(ieee);
+	next_byte(&(ieee->h));
+	next_byte(&(ieee->h));
 
-	symbol_name_index = must_parse_int(ieee);
+	symbol_name_index = must_parse_int(&(ieee->h));
 	parse_expression(ieee,
 	     &symbol->symbol.value,
 	     &symbol->symbol.section,
@@ -553,13 +555,13 @@ DEFUN(ieee_slurp_external_symbols,(abfd),
     case ieee_weak_external_reference_enum:
       { bfd_vma size;
 	bfd_vma value ;
-	next_byte(ieee);
+	next_byte(&(ieee->h));
 	/* Throw away the external reference index */
-	(void)must_parse_int(ieee);
+	(void)must_parse_int(&(ieee->h));
 	/* Fetch the default size if not resolved */
-	size = must_parse_int(ieee);
+	size = must_parse_int(&(ieee->h));
 	/* Fetch the defautlt value if available */
-	if (  parse_int(ieee, &value) == false) {
+	if (  parse_int(&(ieee->h), &value) == false) {
 	  value = 0;
 	}
 	/* This turns into a common */
@@ -569,14 +571,14 @@ DEFUN(ieee_slurp_external_symbols,(abfd),
       break;
 
     case ieee_external_reference_enum: 
-      next_byte(ieee);
-      symbol = (ieee_symbol_type *)bfd_alloc(ieee->abfd, sizeof(ieee_symbol_type));
+      next_byte(&(ieee->h));
+      symbol = (ieee_symbol_type *)bfd_alloc(ieee->h.abfd, sizeof(ieee_symbol_type));
       symbol_count++;
       *prev_reference_ptr = symbol;
       prev_reference_ptr = &symbol->next;
-      symbol->index = must_parse_int(ieee);
+      symbol->index = must_parse_int(&(ieee->h));
       symbol->symbol.the_bfd = abfd;
-      symbol->symbol.name = read_id(ieee);
+      symbol->symbol.name = read_id(&(ieee->h));
       symbol->symbol.udata = (PTR)NULL;
       symbol->symbol.section = (asection *)NULL;
       symbol->symbol.value = (bfd_vma)0;
@@ -715,12 +717,12 @@ DEFUN(ieee_slurp_sections,(abfd),
     bfd_byte section_type[3];
     ieee_seek(abfd, offset);
     while (true) {
-      switch (this_byte(ieee)) {
+      switch (this_byte(&(ieee->h))) {
       case ieee_section_type_enum:
 	{
 	  unsigned int section_index ;
-	  next_byte(ieee);
-	  section_index = must_parse_int(ieee);
+	  next_byte(&(ieee->h));
+	  section_index = must_parse_int(&(ieee->h));
 	  /* Fixme to be nice about a silly number of sections */
 	  BFD_ASSERT(section_index < NSECTIONS);
 
@@ -728,24 +730,24 @@ DEFUN(ieee_slurp_sections,(abfd),
 	  ieee->section_table[section_index] = section;
 	  section->flags = SEC_NO_FLAGS;
 	  section->target_index = section_index;
-	  section_type[0] =  this_byte_and_next(ieee);
+	  section_type[0] =  this_byte_and_next(&(ieee->h));
 	  switch (section_type[0]) {
 	  case 0xC3:
-	    section_type[1] = this_byte(ieee);
-	    section->flags = SEC_LOAD;
+	    section_type[1] = this_byte(&(ieee->h));
+	    section->flags = SEC_LOAD | SEC_ALLOC | SEC_HAS_CONTENTS;
 	    switch (section_type[1]) {
 	    case 0xD0:
 	      /* Normal code */
-	      next_byte(ieee);
+	      next_byte(&(ieee->h));
 	      section->flags |= SEC_LOAD | SEC_CODE;
 	      break;
 	    case 0xC4:
-	      next_byte(ieee);
+	      next_byte(&(ieee->h));
 	      section->flags |= SEC_LOAD  | SEC_DATA;
 	      /* Normal data */
 	      break;
 	    case 0xD2:
-	      next_byte(ieee);
+	      next_byte(&(ieee->h));
 	      /* Normal rom data */
 	      section->flags |= SEC_LOAD | SEC_ROM | SEC_DATA;
 	      break;
@@ -753,11 +755,11 @@ DEFUN(ieee_slurp_sections,(abfd),
 	      break;
 	    }
 	  }
-	  section->name = read_id(ieee);
+	  section->name = read_id(&(ieee->h));
 	  { bfd_vma parent, brother, context;
-	    parse_int(ieee, &parent);
-	    parse_int(ieee, &brother);
-	    parse_int(ieee, &context);
+	    parse_int(&(ieee->h), &parent);
+	    parse_int(&(ieee->h), &brother);
+	    parse_int(&(ieee->h), &context);
 	  }
 
 
@@ -767,47 +769,47 @@ DEFUN(ieee_slurp_sections,(abfd),
 	{ 
 	  unsigned int section_index;
 	  bfd_vma value;
-	  next_byte(ieee);
-	  section_index = must_parse_int(ieee);
+	  next_byte(&(ieee->h));
+	  section_index = must_parse_int(&ieee->h);
 	  if (section_index > ieee->section_count) {
 	    ieee->section_count = section_index;
 	  }
 	  ieee->section_table[section_index]->alignment_power =
-	    bfd_log2(must_parse_int(ieee));
-	  (void)parse_int(ieee, & value);
+	    bfd_log2(must_parse_int(&ieee->h));
+	  (void)parse_int(&(ieee->h), & value);
 	}
 	break;
       case ieee_e2_first_byte_enum: 
 	{
-	  ieee_record_enum_type t = read_2bytes(ieee);
+	  ieee_record_enum_type t = read_2bytes(&(ieee->h));
 	  switch (t) {
 	  case ieee_section_size_enum:
-	    section = ieee->section_table[must_parse_int(ieee)];
-	    section->size = must_parse_int(ieee);
+	    section = ieee->section_table[must_parse_int(&(ieee->h))];
+	    section->size = must_parse_int(&(ieee->h));
 	    break;
 	  case ieee_physical_region_size_enum:
-	    section = ieee->section_table[must_parse_int(ieee)];
-	    section->size = must_parse_int(ieee);
+	    section = ieee->section_table[must_parse_int(&(ieee->h))];
+	    section->size = must_parse_int(&(ieee->h));
 	    break;
 	  case ieee_region_base_address_enum:
-	    section = ieee->section_table[must_parse_int(ieee)];
-	    section->vma = must_parse_int(ieee);
+	    section = ieee->section_table[must_parse_int(&(ieee->h))];
+	    section->vma = must_parse_int(&(ieee->h));
 	    break;
 	  case ieee_mau_size_enum:
-	    must_parse_int(ieee);
-	    must_parse_int(ieee);
+	    must_parse_int(&(ieee->h));
+	    must_parse_int(&(ieee->h));
 	    break;
 	  case ieee_m_value_enum:
-	    must_parse_int(ieee);
-	    must_parse_int(ieee);
+	    must_parse_int(&(ieee->h));
+	    must_parse_int(&(ieee->h));
 	    break;
 	  case ieee_section_base_address_enum:
-	    section = ieee->section_table[must_parse_int(ieee)];
-	    section->vma = must_parse_int(ieee);
+	    section = ieee->section_table[must_parse_int(&(ieee->h))];
+	    section->vma = must_parse_int(&(ieee->h));
 	    break;
 	  case ieee_section_offset_enum:
-	    (void) must_parse_int(ieee);
-	    (void) must_parse_int(ieee);
+	    (void) must_parse_int(&(ieee->h));
+	    (void) must_parse_int(&(ieee->h));
 	    break;
 	  default:
 	    return;
@@ -828,81 +830,107 @@ bfd_target *
 DEFUN(ieee_archive_p,(abfd),
       bfd *abfd)
 {
-  return 0;			
-#if 0
   char *library;
   boolean loop;
-  ieee_ar_data_type *ar;
+
   unsigned int i;
+uint8e_type buffer[512];
+  int buffer_i = 0;
+  int buffer_offset = 0;
+  ieee_ar_data_type *save = ieee_ar_data(abfd);
+  ieee_ar_data_type *ieee ;
+  set_tdata(abfd, bfd_alloc(abfd, sizeof(ieee_ar_data_type)));
+  ieee=  ieee_ar_data(abfd);
 
 
-/* FIXME */
-  ieee_seek(abfd, (file_ptr) 0);
-  if (this_byte(abfd) != Module_Beginning) return (bfd_target*)NULL;
-  next_byte(ieee);
-  library= read_id(ieee);
+  bfd_read((PTR)buffer, 1, sizeof(buffer), abfd);
+
+  ieee->h.first_byte = buffer;
+  ieee->h.input_p = buffer;
+
+  ieee->h.abfd = abfd;
+
+  if (this_byte(&(ieee->h)) != Module_Beginning) return (bfd_target*)NULL;
+
+  next_byte(&(ieee->h));
+  library= read_id(&(ieee->h));
   if (strcmp(library , "LIBRARY") != 0) {
-    free(library);
+   bfd_release(abfd, ieee);
+   ieee_ar_data(abfd)= save;
     return (bfd_target *)NULL;
   }
   /* Throw away the filename */
-  free( read_id(ieee));
+  free( read_id(&(ieee->h)));
   /* This must be an IEEE archive, so we'll buy some space to do
      things */
-  ar = (ieee_ar_data_type *) malloc(sizeof(ieee_ar_data_type));
-  set_tdata (abfd, ar);
-  ar->element_count = 0;
-  ar->element_index = 0;
-  obstack_init(&ar->element_obstack);
+  ieee->element_count = 0;
+  ieee->element_index = 0;
 
-  next_byte(ieee);		/* Drop the ad part */
-  must_parse_int(ieee);		/* And the two dummy numbers */
-  must_parse_int(ieee);
+  next_byte(&(ieee->h));	/* Drop the ad part */
+  must_parse_int(&(ieee->h));	/* And the two dummy numbers */
+  must_parse_int(&(ieee->h));
 
   loop = true;
   /* Read the index of the BB table */
   while (loop) {
     ieee_ar_obstack_type t; 
-    int rec =read_2bytes(abfd);
+    int rec =read_2bytes(&(ieee->h));
     if (rec ==ieee_assign_value_to_variable_enum) {
-      int record_number = must_parse_int(ieee);
-      t.file_offset = must_parse_int(ieee);
+      int record_number = must_parse_int(&(ieee->h));
+      t.file_offset = must_parse_int(&(ieee->h));
       t.abfd = (bfd *)NULL;
-      ar->element_count++;
-      obstack_grow(&ar->element_obstack, (PTR)&t, sizeof(t));
+      ieee->element_count++;
+      bfd_alloc_grow(abfd, (PTR)&t, sizeof(t));
+
+      /* Make sure that we don't go over the end of the buffer */
+
+      if (ieee_pos(abfd) > sizeof(buffer)/2) {
+	/* Past half way, reseek and reprime */
+	buffer_offset += ieee_pos(abfd);
+	bfd_seek(abfd, buffer_offset, SEEK_SET);
+	bfd_read(buffer, 1, sizeof(buffer), abfd);
+	ieee->h.first_byte = buffer;
+	ieee->h.input_p = buffer;
+      }
     }
     else loop = false;
   }
-  ar->elements = (ieee_ar_obstack_type *)obstack_base(&ar->element_obstack);
+
+  ieee->elements = (ieee_ar_obstack_type *)bfd_alloc_finish(abfd);
 
   /* Now scan the area again, and replace BB offsets with file */
   /* offsets */
 
 
-  for (i = 2; i < ar->element_count; i++) {
-    ieee_seek(abfd, ar->elements[i].file_offset);
-    next_byte(ieee);		/* Drop F8 */
-    next_byte(ieee);		/* Drop 14 */
-    must_parse_int(ieee);	/* Drop size of block */
-    if (must_parse_int(ieee) != 0) {
+  for (i = 2; i < ieee->element_count; i++) {
+    bfd_seek(abfd, ieee->elements[i].file_offset, SEEK_SET);
+    bfd_read(buffer, 1, sizeof(buffer), abfd);
+    ieee->h.first_byte = buffer;
+    ieee->h.input_p = buffer;
+    
+    next_byte(&(ieee->h));	/* Drop F8 */
+    next_byte(&(ieee->h));	/* Drop 14 */
+    must_parse_int(&(ieee->h));	/* Drop size of block */
+    if (must_parse_int(&(ieee->h)) != 0) {
       /* This object has been deleted */
-      ar->elements[i].file_offset = 0;
+      ieee->elements[i].file_offset = 0;
     }
     else {
-      ar->elements[i].file_offset = must_parse_int(ieee);
+      ieee->elements[i].file_offset = must_parse_int(&(ieee->h));
     }
   }
 
-  obstack_finish(&ar->element_obstack);
   return abfd->xvec;
-#endif
+
 }
 
 static boolean
 DEFUN(ieee_mkobject,(abfd),
       bfd *abfd)
-{
-  set_tdata (abfd, bfd_alloc(abfd,sizeof(ieee_data_type)));
+{ 
+  set_tdata (abfd, bfd_zalloc(abfd,sizeof(ieee_data_type)));
+  
+
   return true;
 }
 
@@ -922,8 +950,8 @@ DEFUN(ieee_object_p,(abfd),
   /* Read the first few bytes in to see if it makes sense */
   bfd_read((PTR)buffer, 1, sizeof(buffer), abfd);
 
-  ieee->input_p = buffer;
-  if (this_byte_and_next(ieee) != Module_Beginning) goto fail;
+  ieee->h.input_p = buffer;
+  if (this_byte_and_next(&(ieee->h)) != Module_Beginning) goto fail;
 
   ieee->read_symbols= false;
   ieee->read_data= false;
@@ -932,46 +960,46 @@ DEFUN(ieee_object_p,(abfd),
   ieee->external_symbol_min_index = IEEE_PUBLIC_BASE;
   ieee->external_reference_min_index =IEEE_REFERENCE_BASE;
   ieee->external_reference_max_index = 0;
-  ieee->abfd = abfd;
+  ieee->h.abfd = abfd;
   memset((PTR)ieee->section_table, 0,	 sizeof(ieee->section_table));
 
-  processor = ieee->mb.processor = read_id(ieee);
+  processor = ieee->mb.processor = read_id(&(ieee->h));
   if (strcmp(processor,"LIBRARY") == 0) goto fail;
-  ieee->mb.module_name = read_id(ieee);
+  ieee->mb.module_name = read_id(&(ieee->h));
   if (abfd->filename == (char *)NULL) {
     abfd->filename =  ieee->mb.module_name;
   }
   /* Determine the architecture and machine type of the object file.  */
   bfd_scan_arch_mach(processor, &abfd->obj_arch, &abfd->obj_machine);
 
-  if (this_byte(ieee) != ieee_address_descriptor_enum) {
+  if (this_byte(&(ieee->h)) != ieee_address_descriptor_enum) {
     goto fail;
   }
-  next_byte(ieee);	
+  next_byte(&(ieee->h));	
 
-  if (parse_int(ieee, &ieee->ad.number_of_bits_mau) == false) {
+  if (parse_int(&(ieee->h), &ieee->ad.number_of_bits_mau) == false) {
     goto fail;
   }
-  if(parse_int(ieee, &ieee->ad.number_of_maus_in_address) == false) {
+  if(parse_int(&(ieee->h), &ieee->ad.number_of_maus_in_address) == false) {
     goto fail;
   }
 
   /* If there is a byte order info, take it */
-  if (this_byte(ieee) == ieee_variable_L_enum ||
-      this_byte(ieee) == ieee_variable_M_enum)
-    next_byte(ieee);
+  if (this_byte(&(ieee->h)) == ieee_variable_L_enum ||
+      this_byte(&(ieee->h)) == ieee_variable_M_enum)
+    next_byte(&(ieee->h));
 
 
   for (part = 0; part < N_W_VARIABLES; part++) {
     boolean ok;
-    if (read_2bytes(ieee) != ieee_assign_value_to_variable_enum) {
+    if (read_2bytes(&(ieee->h)) != ieee_assign_value_to_variable_enum) {
       goto fail;
     }
-    if (this_byte_and_next(ieee) != part)  {
+    if (this_byte_and_next(&(ieee->h)) != part)  {
       goto fail;
     }
 
-    ieee->w.offset[part] = parse_i(ieee, &ok);
+    ieee->w.offset[part] = parse_i(&(ieee->h), &ok);
     if (ok==false) {
       goto fail;
     }
@@ -984,10 +1012,10 @@ DEFUN(ieee_object_p,(abfd),
    quickly. We can work out how big the file is from the trailer
    record */
 
-  ieee_data(abfd)->first_byte = (uint8e_type *) bfd_alloc(ieee->abfd, ieee->w.r.me_record
+  ieee_data(abfd)->h.first_byte = (uint8e_type *) bfd_alloc(ieee->h.abfd, ieee->w.r.me_record
 					    + 50);
   bfd_seek(abfd, 0, 0);
-  bfd_read((PTR)(ieee_data(abfd)->first_byte), 1,   ieee->w.r.me_record+50,  abfd);
+  bfd_read((PTR)(ieee_data(abfd)->h.first_byte), 1,   ieee->w.r.me_record+50,  abfd);
 
   ieee_slurp_sections(abfd);
   return abfd->xvec;
@@ -1049,18 +1077,18 @@ DEFUN(do_one,(ieee, current_map, location_ptr,s),
       uint8e_type *location_ptr AND
       asection *s)
 {
-  switch (this_byte(ieee))  
+  switch (this_byte(&(ieee->h)))  
       {
       case ieee_load_constant_bytes_enum:
 	  {
 	    unsigned int number_of_maus;
 	    unsigned int i;
-	    next_byte(ieee);
-	    number_of_maus = must_parse_int(ieee);
+	    next_byte(&(ieee->h));
+	    number_of_maus = must_parse_int(&(ieee->h));
 
 	    for (i = 0; i < number_of_maus; i++) {
-	      location_ptr[current_map->pc++]= this_byte(ieee);
-	      next_byte(ieee);
+	      location_ptr[current_map->pc++]= this_byte(&(ieee->h));
+	      next_byte(&(ieee->h));
 	    }
 	  }
 	break;
@@ -1068,10 +1096,10 @@ DEFUN(do_one,(ieee, current_map, location_ptr,s),
       case ieee_load_with_relocation_enum:
 	  {
 	    boolean loop = true;
-	    next_byte(ieee);
+	    next_byte(&(ieee->h));
 	    while (loop) 
 		{
-		  switch (this_byte(ieee)) 
+		  switch (this_byte(&(ieee->h))) 
 		      {
 		      case ieee_variable_R_enum:
 
@@ -1083,13 +1111,13 @@ DEFUN(do_one,(ieee, current_map, location_ptr,s),
 			    boolean pcrel = false;
 
 			    ieee_reloc_type *r = 
-			      (ieee_reloc_type *) bfd_alloc(ieee->abfd,
+			      (ieee_reloc_type *) bfd_alloc(ieee->h.abfd,
 							    sizeof(ieee_reloc_type));
 
 			    *(current_map->reloc_tail_ptr) = r;
 			    current_map->reloc_tail_ptr= &r->next;
 			    r->next = (ieee_reloc_type *)NULL;
-			    next_byte(ieee);
+			    next_byte(&(ieee->h));
 			    parse_expression(ieee,
 					     &r->relent.addend,
 					     &r->relent.section,
@@ -1097,24 +1125,24 @@ DEFUN(do_one,(ieee, current_map, location_ptr,s),
 					     &pcrel, &extra);
 			    r->relent.address = current_map->pc;
 			    s->reloc_count++;
-			    switch (this_byte(ieee)) {
+			    switch (this_byte(&(ieee->h))) {
 			    case ieee_function_signed_close_b_enum:
-			      next_byte(ieee);
+			      next_byte(&(ieee->h));
 			      break;
 			    case ieee_function_unsigned_close_b_enum:
-			      next_byte(ieee);
+			      next_byte(&(ieee->h));
 			      break;
 			    case ieee_function_either_close_b_enum:
-			      next_byte(ieee);
+			      next_byte(&(ieee->h));
 			      break;
 			    default:
 			      break;
 			    }
 			    /* Build a relocation entry for this type */
-			    if (this_byte(ieee) == ieee_comma) {
-			      next_byte(ieee);
+			    if (this_byte(&(ieee->h)) == ieee_comma) {
+			      next_byte(&(ieee->h));
 			      /* Fetch number of bytes to pad */
-			      extra = must_parse_int(ieee);
+			      extra = must_parse_int(&(ieee->h));
 			    };
 		   
 			    /* If pc rel then stick -ve pc into instruction
@@ -1126,14 +1154,14 @@ DEFUN(do_one,(ieee, current_map, location_ptr,s),
 				case 4:
 				  if (pcrel == true) 
 				      {
-					bfd_put_32(ieee->abfd, -current_map->pc, location_ptr +
+					bfd_put_32(ieee->h.abfd, -current_map->pc, location_ptr +
 						    current_map->pc);
 					r->relent.howto = &rel32_howto;
 					r->relent.addend -= current_map->pc;
 				      }
 				  else 
 				      {
-					bfd_put_32(ieee->abfd, 0, location_ptr +
+					bfd_put_32(ieee->h.abfd, 0, location_ptr +
 						    current_map->pc);
 					r->relent.howto = &abs32_howto;
 				      }
@@ -1141,12 +1169,12 @@ DEFUN(do_one,(ieee, current_map, location_ptr,s),
 				  break;
 				case 2:
 				  if (pcrel == true) {
-				    bfd_put_16(ieee->abfd, (int)(-current_map->pc),  location_ptr +current_map->pc);
+				    bfd_put_16(ieee->h.abfd, (int)(-current_map->pc),  location_ptr +current_map->pc);
 				    r->relent.addend -= current_map->pc;
 				    r->relent.howto = &rel16_howto;
 				  }
 				  else {
-				    bfd_put_16(ieee->abfd, 0,  location_ptr +current_map->pc);
+				    bfd_put_16(ieee->h.abfd, 0,  location_ptr +current_map->pc);
 				    r->relent.howto = &abs16_howto;
 				  }
 				  current_map->pc +=2;
@@ -1161,11 +1189,11 @@ DEFUN(do_one,(ieee, current_map, location_ptr,s),
 		      default: 
 			  {
 			    bfd_vma this_size ;
-			    if (parse_int(ieee, &this_size) == true) {
+			    if (parse_int(&(ieee->h), &this_size) == true) {
 			      unsigned int i;
 			      for (i = 0; i < this_size; i++) {
-				location_ptr[current_map->pc ++] = this_byte(ieee);
-				next_byte(ieee);
+				location_ptr[current_map->pc ++] = this_byte(&(ieee->h));
+				next_byte(&(ieee->h));
 			      }
 			    }
 			    else {
@@ -1178,7 +1206,7 @@ DEFUN(do_one,(ieee, current_map, location_ptr,s),
       }
 }
 
-      /* Read in all the section data and relocation stuff too */
+/* Read in all the section data and relocation stuff too */
 static boolean 
 DEFUN(ieee_slurp_section_data,(abfd),
       bfd *abfd)
@@ -1199,7 +1227,7 @@ DEFUN(ieee_slurp_section_data,(abfd),
 
   for (s = abfd->sections; s != (asection *)NULL; s = s->next) {
     ieee_per_section_type *per = (ieee_per_section_type *) s->used_by_bfd;
-    per->data = (bfd_byte *) bfd_alloc(ieee->abfd, s->size);
+    per->data = (bfd_byte *) bfd_alloc(ieee->h.abfd, s->size);
     /*SUPPRESS 68*/
     per->reloc_tail_ptr =
       (ieee_reloc_type **)&(s->relocation);
@@ -1208,15 +1236,15 @@ DEFUN(ieee_slurp_section_data,(abfd),
 
 
   while (true) {
-    switch (this_byte(ieee)) 
+    switch (this_byte(&(ieee->h))) 
 	{
 	  /* IF we see anything strange then quit */
 	default:
 	  return true;
 
 	case ieee_set_current_section_enum:
-	  next_byte(ieee);
-	  section_number = must_parse_int(ieee);
+	  next_byte(&(ieee->h));
+	  section_number = must_parse_int(&(ieee->h));
 	  s = ieee->section_table[section_number];
 	  current_map = (ieee_per_section_type *) s->used_by_bfd;
 	  location_ptr = current_map->data - s->vma;
@@ -1228,8 +1256,8 @@ DEFUN(ieee_slurp_section_data,(abfd),
 
 
 	case ieee_e2_first_byte_enum:
-	  next_byte(ieee);
-	  switch (this_byte(ieee))
+	  next_byte(&(ieee->h));
+	  switch (this_byte(&(ieee->h)))
 	      {
 	      case ieee_set_current_pc_enum & 0xff:
 		  {
@@ -1238,8 +1266,8 @@ DEFUN(ieee_slurp_section_data,(abfd),
 		    ieee_symbol_index_type symbol;
 		    unsigned int extra;
 		    boolean pcrel;
-		    next_byte(ieee);
-		    must_parse_int(ieee); /* Thow away section #*/
+		    next_byte(&(ieee->h));
+		    must_parse_int(&(ieee->h)); /* Thow away section #*/
 		    parse_expression(ieee, &value, &dsection, &symbol,
 				     &pcrel, &extra);
 		    current_map->pc = value;
@@ -1259,18 +1287,31 @@ DEFUN(ieee_slurp_section_data,(abfd),
 	    {
 	      /* Repeat the following LD or LR n times - we do this by
 		 remembering the stream pointer before running it and
-		 resetting it and running it n times 
+		 resetting it and running it n times. We special case
+		 the repetition of a repeat_data/load_constant
 		 */
 
 	      unsigned int iterations ;
 	      uint8e_type *start ;
-	      next_byte(ieee);
-	      iterations = must_parse_int(ieee);
-	      start =  ieee->input_p;
-	      while (iterations != 0) {
-		ieee->input_p = start;
-		do_one(ieee, current_map, location_ptr,s);
-		iterations --;
+	      next_byte(&(ieee->h));
+	      iterations = must_parse_int(&(ieee->h));
+	      start =  ieee->h.input_p;
+	      if (start[0] == ieee_load_constant_bytes_enum &&
+		  start[1] == 1) {
+		while (iterations != 0) {
+		  location_ptr[current_map->pc++] = start[2];
+		  iterations--;
+		}
+		next_byte(&(ieee->h));
+		next_byte(&(ieee->h));
+		next_byte(&(ieee->h));
+	      }
+	      else {
+		while (iterations != 0) {
+		  ieee->h.input_p = start;
+		  do_one(ieee, current_map, location_ptr,s);
+		  iterations --;
+		}
 	      }
 	    }
 	  break;
@@ -1393,32 +1434,42 @@ DEFUN(ieee_write_section_part,(abfd),
     ieee_write_byte(abfd, ieee_section_type_enum);
     ieee_write_byte(abfd, s->index + IEEE_SECTION_NUMBER_BASE);
 
-    switch (s->flags & (SEC_LOAD | SEC_CODE | SEC_DATA | SEC_ROM)) {
-    case  SEC_LOAD | SEC_CODE:
-      /* Normal named section, code */
-      ieee_write_byte(abfd, ieee_variable_C_enum);
-      ieee_write_byte(abfd, ieee_variable_P_enum);
-      break;
-    case  SEC_LOAD | SEC_DATA:
-      /* Normal named section, data */
-      ieee_write_byte(abfd, ieee_variable_C_enum);
-      ieee_write_byte(abfd, ieee_variable_D_enum);
-      break;
-    case  SEC_LOAD | SEC_DATA | SEC_ROM:
-      /* Normal named section, data rom */
-      ieee_write_byte(abfd, ieee_variable_C_enum);
-      ieee_write_byte(abfd, ieee_variable_R_enum);
-      break;
-    default:
-      ieee_write_byte(abfd, ieee_variable_C_enum);
-      break;
-    }
+    if (abfd->flags & EXEC_P) 
+	{
+	  /* This image is executable, so output absolute sections */
+	  ieee_write_byte(abfd, ieee_variable_A_enum);
+	  ieee_write_byte(abfd, ieee_variable_S_enum);
+	}
+    else  
+	{
+	  ieee_write_byte(abfd, ieee_variable_C_enum);
+	}
+
+    switch (s->flags &(SEC_CODE | SEC_DATA | SEC_ROM)) 
+	{
+	case SEC_CODE | SEC_LOAD:
+	case SEC_CODE:
+	  ieee_write_byte(abfd, ieee_variable_P_enum);
+	  break;
+	case SEC_DATA:
+	default:
+	  ieee_write_byte(abfd, ieee_variable_D_enum);
+	  break;
+	case SEC_ROM:
+	case SEC_ROM | SEC_DATA:
+	case SEC_ROM | SEC_LOAD:
+	case SEC_ROM | SEC_DATA | SEC_LOAD:
+
+	  ieee_write_byte(abfd, ieee_variable_R_enum);
+	}
+
 
     ieee_write_id(abfd, s->name);
+#if 0
     ieee_write_int(abfd, 0);	/* Parent */
     ieee_write_int(abfd, 0);	/* Brother */
     ieee_write_int(abfd, 0);	/* Context */
-
+#endif
     /* Alignment */
     ieee_write_byte(abfd, ieee_section_alignment_enum);
     ieee_write_byte(abfd, s->index + IEEE_SECTION_NUMBER_BASE);
@@ -1430,7 +1481,7 @@ DEFUN(ieee_write_section_part,(abfd),
     ieee_write_int(abfd, s->size);
 
     /* Vma */
-    ieee_write_2bytes(abfd, ieee_region_base_address_enum);
+    ieee_write_2bytes(abfd, ieee_section_base_address_enum);
     ieee_write_byte(abfd, s->index + IEEE_SECTION_NUMBER_BASE);
     ieee_write_int(abfd, s->vma);
 
@@ -1439,6 +1490,716 @@ DEFUN(ieee_write_section_part,(abfd),
 
 
 
+static void 
+DEFUN(do_with_relocs,(abfd, s),
+      bfd *abfd AND
+      asection *s)
+{
+  unsigned int relocs_to_go = s->reloc_count;
+  bfd_byte  header[11];
+
+  bfd_byte *stream = ieee_per_section(s)->data;
+  arelent **p = s->orelocation;
+
+  bfd_size_type current_byte_index = 0;
+
+  qsort(s->orelocation,
+	relocs_to_go,
+	sizeof(arelent **),
+	comp);
+
+
+
+  /* Output the section preheader */
+  header[0] =ieee_set_current_section_enum;
+  header[1] = s->index + IEEE_SECTION_NUMBER_BASE;
+
+  header[2] = ieee_set_current_pc_enum >> 8;
+  header[3]= ieee_set_current_pc_enum  & 0xff;
+  header[4] = s->index + IEEE_SECTION_NUMBER_BASE;
+  ieee_write_int5(header+5, s->vma );
+  header[10] = ieee_load_with_relocation_enum;
+  bfd_write((PTR)header, 1, sizeof(header), abfd);
+
+  /* Output the data stream as the longest sequence of bytes
+     possible, allowing for the a reasonable packet size and
+     relocation stuffs */
+
+  if ((PTR)stream == (PTR)NULL) {
+    /* Outputting a section without data, fill it up */
+    stream = (uint8e_type *)(bfd_alloc(abfd, s->size));
+    memset((PTR)stream, 0, s->size);
+  }
+  while (current_byte_index < s->size) {
+    bfd_size_type run;
+    unsigned int MAXRUN = 32;
+    if (relocs_to_go) {
+      run = (*p)->address - current_byte_index;
+    }
+    else {
+      run = MAXRUN;
+    }
+    if (run > s->size - current_byte_index) {
+      run = s->size - current_byte_index;
+    }
+
+    if (run != 0) {
+      /* Output a stream of bytes */
+      ieee_write_int(abfd, run);
+      bfd_write((PTR)(stream + current_byte_index), 
+		1,
+		run,
+		abfd);
+      current_byte_index += run;
+    }
+    /* Output any relocations here */
+    if (relocs_to_go && (*p) && (*p)->address == current_byte_index) {
+      while (relocs_to_go && (*p) && (*p)->address == current_byte_index) {
+
+	arelent *r = *p;
+	bfd_vma ov;
+	if (r->howto->pc_relative) {
+	  r->addend += current_byte_index;
+	}
+
+	switch (r->howto->size) {
+	case 2:
+
+	  ov = bfd_get_32(abfd,
+			  stream+current_byte_index);
+	  current_byte_index +=4;
+	  break;
+	case 1:
+	  ov = bfd_get_16(abfd,
+			  stream+current_byte_index);
+	  current_byte_index +=2;
+	  break;
+	default:
+	  BFD_FAIL();
+	}
+	ieee_write_byte(abfd, ieee_function_either_open_b_enum);
+
+	if (r->sym_ptr_ptr != (asymbol **)NULL) {
+	  ieee_write_expression(abfd, r->addend + ov,
+				r->section,
+				*(r->sym_ptr_ptr),
+				r->howto->pc_relative, s->target_index);
+	}
+	else {
+	  ieee_write_expression(abfd, r->addend + ov,
+				r->section,
+				(asymbol *)NULL,
+				r->howto->pc_relative, s->target_index);
+	}
+	ieee_write_byte(abfd,
+			ieee_function_either_close_b_enum);
+	if (r->howto->size != 2) {
+	  ieee_write_byte(abfd, ieee_comma);
+	  ieee_write_int(abfd, 1<< r->howto->size);
+	}
+
+	relocs_to_go --;
+	p++;
+      }
+
+    }
+  }
+}
+
+/* If there are no relocations in the output section then we can
+be clever about how we write. We block items up into a max of 127
+bytes */
+
+static void 
+DEFUN(do_as_repeat, (abfd, s),
+      bfd *abfd AND
+      asection *s)
+{
+  ieee_write_byte(abfd, ieee_set_current_section_enum);
+  ieee_write_byte(abfd, s->index + IEEE_SECTION_NUMBER_BASE);
+  ieee_write_byte(abfd, ieee_set_current_pc_enum >> 8);
+  ieee_write_byte(abfd, ieee_set_current_pc_enum  & 0xff);
+  ieee_write_byte(abfd, s->index + IEEE_SECTION_NUMBER_BASE);
+  ieee_write_int(abfd,  s->vma );
+
+  ieee_write_byte(abfd,ieee_repeat_data_enum);
+  ieee_write_int(abfd, s->size);
+  ieee_write_byte(abfd, ieee_load_constant_bytes_enum);
+  ieee_write_byte(abfd, 1);
+  ieee_write_byte(abfd, 0);
+}
+
+static void 
+DEFUN(do_without_relocs, (abfd, s),
+      bfd *abfd AND
+      asection *s)
+{
+  bfd_byte *stream = ieee_per_section(s)->data;
+
+  if (stream == 0 || ((s->flags & SEC_LOAD) == 0)) 
+      {
+	do_as_repeat(abfd, s);
+      }
+  else 
+      {
+	unsigned int i;
+	for (i = 0; i < s->size; i++) {
+	  if (stream[i] != 0) {
+	    do_with_relocs(abfd, s);
+	    return;
+	  }
+	}
+	do_as_repeat(abfd, s);
+      }
+  
+}
+
+
+static unsigned char *output_ptr_start;
+static unsigned char *output_ptr;
+static unsigned char *output_ptr_end;
+static unsigned char *input_ptr_start;
+static unsigned char *input_ptr;
+static unsigned char *input_ptr_end;
+static bfd *input_bfd;
+static bfd *output_bfd;
+static int output_buffer;
+
+static void fill()
+{
+  bfd_read(input_ptr_start, 1, input_ptr_end - input_ptr_start, input_bfd);
+  input_ptr = input_ptr_start;
+}
+static void flush()
+{
+  bfd_write(output_ptr_start,1,output_ptr - output_ptr_start, output_bfd);
+  output_ptr = output_ptr_start;
+  output_buffer++;
+}
+
+#define THIS() ( *input_ptr )
+#define NEXT() { input_ptr++; if (input_ptr == input_ptr_end) fill(); }
+#define OUT(x) { *output_ptr++ = (x); if(output_ptr == output_ptr_end)  flush(); }
+
+static void write_int(value)
+int value;
+{
+  if (value >= 0 && value <= 127) {
+    OUT(value);
+  }
+  else {
+    unsigned int length;
+    /* How many significant bytes ? */
+    /* FIXME FOR LONGER INTS */
+    if (value & 0xff000000) {
+      length = 4;
+    }
+    else if (value & 0x00ff0000) {
+      length  = 3;
+    }
+    else if (value & 0x0000ff00) {
+      length = 2;
+    }
+    else length = 1;
+
+    OUT((int)ieee_number_repeat_start_enum + length);
+    switch (length) {
+    case 4:
+      OUT( value >> 24);
+    case 3:
+      OUT( value >> 16);
+    case 2:
+      OUT( value >> 8);
+    case 1:
+      OUT( value);
+    }
+
+  }
+}
+static void copy_id() 
+{
+  int length  = THIS();
+  char ch;
+  OUT(length);
+  NEXT();
+  while (length--) {
+    ch = THIS();
+    OUT(ch);
+    NEXT();
+  }
+}
+#define VAR(x) ((x | 0x80))
+static void copy_expression()
+{
+  int stack[10];
+  int *tos = stack;
+  int value = 0;
+  while (1) {
+    switch (THIS()) {
+    case 0x84:
+      NEXT();
+      value =  THIS(); NEXT();
+      value = (value << 8) | THIS(); NEXT();
+      value = (value << 8) | THIS(); NEXT();
+      value = (value << 8) | THIS(); NEXT();
+      *tos ++ = value;
+      break;
+    case 0x83:
+      NEXT();
+      value =  THIS(); NEXT();
+      value = (value << 8) | THIS(); NEXT();
+      value = (value << 8) | THIS(); NEXT();
+      *tos ++ = value;
+      break;
+    case 0x82:	
+      NEXT();
+      value =  THIS(); NEXT();
+      value = (value << 8) | THIS(); NEXT();
+      *tos ++ = value;
+      break;
+    case 0x81:
+      NEXT();
+      value =  THIS(); NEXT();
+      *tos ++ = value;
+      break;
+      case 0x80:
+      NEXT();
+      *tos ++ = 0;
+      break;
+    default:
+      if (THIS() >0x84) {
+	/* Not a number, just bug out with the answer */
+	write_int(*(--tos));
+	return;
+      }
+      *tos++ = THIS();
+NEXT();
+      value = 0;
+      break;
+    case 0xa5:
+      /* PLUS anything */
+	{
+	  int value = *(--tos);
+	  value += *(--tos);
+	  *tos++ = value;
+	  NEXT();
+	}
+      break;
+    case VAR('R') :
+	{
+	  int section_number ;
+	  ieee_data_type *ieee;
+	  asection *s;
+	  NEXT();
+	  section_number = THIS();
+	
+	  NEXT();
+	  ieee= ieee_data(input_bfd);
+	  s = 	ieee->section_table[section_number];
+	  if (s->output_section) {
+	    value = s->output_section->vma ;
+	  } else { value = 0; }
+	  value += s->output_offset;
+	  *tos++ = value;
+	  value = 0;
+	}
+      break;
+    case 0x90:
+	{	
+	  NEXT();
+	  write_int(*(--tos));
+	  OUT(0x90);
+	  return;
+
+	}
+    }
+  }
+
+}
+
+/* Drop the int in the buffer, and copy a null into the gap, which we
+   will overwrite later */
+
+struct output_buffer_struct {
+unsigned  char *ptrp;
+  int buffer;
+} ;
+
+static void
+DEFUN(fill_int,(buf),
+      struct output_buffer_struct *buf)
+{
+  if (buf->buffer == output_buffer) {
+    /* Still a chance to output the size */
+    int value = output_ptr - buf->ptrp + 3;
+    buf->ptrp[0] =  value >> 24;
+    buf->ptrp[1] =  value >> 16;
+    buf->ptrp[2] =  value >> 8;
+    buf->ptrp[3] =  value >> 0;
+  }
+
+}
+static void
+DEFUN(drop_int,(buf),
+      struct output_buffer_struct *buf)
+{
+  int type = THIS();
+  int ch;
+  if (type <= 0x84) {
+    NEXT();
+    switch(type) {
+    case 0x84: ch = THIS(); NEXT();
+    case 0x83: ch = THIS(); NEXT();
+    case 0x82: ch = THIS(); NEXT();
+    case 0x81: ch = THIS(); NEXT();
+    case 0x80: break;
+    }
+  }
+  OUT(0x84);
+  buf->ptrp = output_ptr;
+  buf->buffer  = output_buffer;
+  OUT(0);OUT(0);OUT(0);OUT(0);
+}
+
+static void copy_int()
+{
+  int type = THIS();
+  int ch;
+  if (type <= 0x84) {
+    OUT(type);
+    NEXT();
+    switch(type) {
+    case 0x84: ch = THIS(); NEXT(); OUT(ch);
+    case 0x83: ch = THIS(); NEXT(); OUT(ch);
+    case 0x82: ch = THIS(); NEXT(); OUT(ch);
+    case 0x81: ch = THIS(); NEXT(); OUT(ch);
+    case 0x80: break;
+    }
+  }
+}
+
+#define ID copy_id()
+#define INT copy_int()
+#define EXP copy_expression()
+static void copy_till_end();
+#define INTn(q) copy_int()
+#define EXPn(q) copy_expression()
+static void f1_record()
+{
+  int ch;
+  /* ATN record */
+  NEXT();
+  ch = THIS();
+  switch (ch)
+      {
+      default:
+	OUT(0xf1); OUT(ch);
+	break;
+      case 0xc9:
+	NEXT();
+	OUT(0xf1); OUT(0xc9);
+	INT; INT; ch = THIS(); 
+	switch (ch) 
+	    {
+	    case 0x16: NEXT();break;
+	    case 0x01: NEXT();break;
+	    case 0x00: NEXT(); INT; break;
+	    case 0x03: NEXT(); INT; break;
+	    case 0x13: EXPn(instruction address); break;
+	    default:
+	      break;
+	    }
+	break;
+      case 0xd8:
+	/* EXternal ref */
+	NEXT();	
+	OUT(0xf1); OUT(0xd8);
+	EXP ; EXP; EXP; EXP;
+	break;
+      case 0xce:
+	NEXT();
+	OUT(0xf1);OUT(0xce); INT; INT; ch = THIS(); INT;
+	switch (ch) {
+	case 0x01:
+	  INT; INT; break;
+	case 0x02:
+	  INT; break;
+	case 0x04:
+	  EXPn(external function); break;
+	case 0x05:
+	  break;
+	case 0x07: INTn(line number); INT;
+	case 0x08: break;
+	case 0x0a: INTn(locked register); INT; break;
+	case 0x3f: copy_till_end(); break;
+	case 0x3e: copy_till_end(); break;
+	case 0x40: copy_till_end(); break;
+	case 0x41: ID; break;
+	}
+      }
+
+}
+static void f0_record()
+{
+  /* Attribute record */
+  NEXT();
+  OUT(0xf0);
+  INTn(Symbol name );
+  ID;
+}
+static void copy_till_end()
+{
+  int  ch = THIS();
+  while (1) {
+    while (ch <= 0x80) 
+	{
+	  OUT(ch);
+	  NEXT();
+	  ch = THIS();
+	}
+    switch (ch) {
+    case 0x84:
+      OUT(THIS());
+      NEXT();
+    case 0x83:
+      OUT(THIS());
+      NEXT();
+    case 0x82:
+      OUT(THIS());
+      NEXT();
+    case 0x81:
+      OUT(THIS());
+      NEXT();
+      OUT(THIS());
+      NEXT();
+
+      ch = THIS();
+      break;
+    default:
+      return;
+    }
+  }    
+
+}
+
+static void f2_record()
+{
+  int ch;
+  NEXT();
+  OUT(0xf2);
+  INT ;
+  NEXT();
+  OUT(0xce);
+  INT ;
+copy_till_end();
+}
+
+
+static void block();
+static void f8_record()
+{
+  int ch;
+  NEXT();
+  ch = THIS();
+  switch (ch) 
+      {
+      case 0x01:
+      case 0x02:
+      case 0x03:
+	/* Unique typedefs for module */
+	/* GLobal typedefs  */
+	/* High level module scope beginning */
+	  {
+	    struct output_buffer_struct ob;
+	    NEXT();
+	    OUT(0xf8); OUT(ch);
+	    drop_int(&ob); ID ;
+
+	    block();
+
+	    NEXT();
+	    fill_int(&ob);
+	    OUT(0xf9);
+	  }
+	break;
+      case 0x04:	
+	/* Global function */
+	  {
+	    struct output_buffer_struct ob;
+	    NEXT();
+	    OUT(0xf8); OUT(0x04);
+	    drop_int(&ob); ID ; INTn(stack size); INTn(ret val);
+	    EXPn(offset); 
+
+	    block();
+
+	    NEXT();
+	    OUT(0xf9);	
+	    EXPn(size of block);
+	    fill_int(&ob);
+	  }
+	break;
+
+      case 0x05:
+	/* File name for source line numbers */
+	  {
+	    struct output_buffer_struct ob;
+	    NEXT();
+	    OUT(0xf8); OUT(0x05);
+	    drop_int(&ob);
+	    ID; INTn(year); INTn(month); INTn(day);
+	    INTn(hour); INTn(monute); INTn(second);
+	    block();
+	    NEXT();
+	    OUT(0xf9);
+	    fill_int(&ob);
+	  }
+	break;
+	
+      case 0x06:
+	/* Local function */
+	  { struct output_buffer_struct ob;
+	    NEXT(); OUT(0xf8); OUT(0x06);
+	    drop_int(&ob);
+	    ID; INTn(stack size); INTn(type return);
+	    EXPn(offset);
+	    block();
+	    NEXT();
+	    OUT(0xf9);
+	    EXPn(size);
+	    fill_int(&ob);
+	  }
+	break;
+	
+      case 0x0a:
+	/* Assembler module scope beginning -*/
+	  { struct output_buffer_struct ob;
+
+	    NEXT();
+	    OUT(0xf8); OUT(0x0a); 
+	    drop_int(&ob);
+	      ID; ID; INT; ID; INT; INT; INT; INT; INT; INT;
+
+	    block();	
+
+	    NEXT();
+	    OUT(0xf9);
+	    fill_int(&ob);
+	  }
+	break;
+      case 0x0b:
+	  {
+	    struct output_buffer_struct ob;
+	    NEXT();
+	    OUT(0xf8); OUT(0x0b); 
+	    drop_int(&ob); ID ; INT; INTn(section index); EXPn(offset); INTn(stuff);
+
+	    block();
+
+	    OUT(0xf9);
+	    NEXT();      
+	    EXPn(Size in Maus);
+	    fill_int(&ob);
+	  }
+	break;
+      }
+}
+
+static void e2_record()
+{
+  OUT(0xe2);
+  NEXT();
+  OUT(0xce);
+  NEXT();
+  INT;
+  EXP;
+}
+
+static void DEFUN_VOID(block)
+{
+  int ch ;
+  while (1) {
+    ch = THIS();
+    switch (ch) {
+    case 0xe1:
+    case 0xe5:
+      return;
+    case 0xf9:
+      return;
+    case 0xf0:
+      f0_record();
+      break;
+    case 0xf1:
+      f1_record();    
+      break;
+    case 0xf2:
+      f2_record();
+      break;
+    case 0xf8:
+      f8_record();
+      break;
+    case 0xe2:
+      e2_record();
+      break;
+
+    }  
+  }
+}
+  
+
+
+/* relocate_debug, 
+   moves all the debug information from the source bfd to the output
+   bfd, and relocates any expressions it finds
+*/
+
+static void
+DEFUN(relocate_debug,(output, input),
+      bfd *output AND
+      bfd *input)
+{
+#define IBS 400
+#define OBS 400
+  unsigned char input_buffer[IBS];
+
+  input_ptr_start = input_ptr = input_buffer;
+  input_ptr_end = input_buffer + IBS;
+  input_bfd = input;
+  bfd_read(input_ptr_start, 1, IBS, input);
+  block();
+}
+/* 
+  During linking, we we told about the bfds which made up our
+  contents, we have a list of them. They will still be open, so go to
+  the debug info in each, and copy it out, relocating it as we go.
+*/
+
+static void 
+DEFUN(ieee_write_debug_part, (abfd),
+      bfd *abfd)
+{
+  ieee_data_type *ieee = ieee_data(abfd);
+  bfd_chain_type *chain = ieee->chain_root;
+  unsigned char output_buffer[OBS];
+  output_ptr_start = output_ptr = output_buffer ;
+  output_ptr_end = output_buffer + OBS;
+  output_ptr = output_buffer;
+  output_bfd = abfd;
+  ieee->w.r.debug_information_part = bfd_tell(abfd);
+  while (chain != (bfd_chain_type *)NULL) {
+    bfd *entry = chain->this;
+    ieee_data_type *entry_ieee = ieee_data(entry);
+    if (entry_ieee->w.r.debug_information_part) {
+      bfd_seek(entry, entry_ieee->w.r.debug_information_part, SEEK_SET);
+      relocate_debug(abfd, entry);
+    }
+
+    chain = chain->next;
+  }
+
+  flush();
+
+}  
 /* write the data in an ieee way */
 static void
 DEFUN(ieee_write_data_part,(abfd),
@@ -1449,118 +2210,17 @@ DEFUN(ieee_write_data_part,(abfd),
   ieee->w.r.data_part = bfd_tell(abfd);
   for (s = abfd->sections; s != (asection *)NULL; s = s->next) 
       {
-	bfd_byte  header[11];
-	bfd_byte *stream = ieee_per_section(s)->data;
-	arelent **p = s->orelocation;
-	unsigned int relocs_to_go = s->reloc_count;
-	bfd_size_type current_byte_index = 0;
-
 	/* Sort the reloc records so we can insert them in the correct
 	   places */
-	if (s->reloc_count != 0) {
-	  qsort(s->orelocation,
-		relocs_to_go,
-		sizeof(arelent **),
-		comp);
-	}
-
-
-	/* Output the section preheader */
-	header[0] =ieee_set_current_section_enum;
-	header[1] = s->index + IEEE_SECTION_NUMBER_BASE;
-
-	header[2] = ieee_set_current_pc_enum >> 8;
-	header[3]= ieee_set_current_pc_enum  & 0xff;
-	header[4] = s->index + IEEE_SECTION_NUMBER_BASE;
-	ieee_write_int5(header+5, s->vma );
-	header[10] = ieee_load_with_relocation_enum;
-	bfd_write((PTR)header, 1, sizeof(header), abfd);
-
-	/* Output the data stream as the longest sequence of bytes
-	   possible, allowing for the a reasonable packet size and
-	   relocation stuffs */
-
-	if ((PTR)stream == (PTR)NULL) {
-	  /* Outputting a section without data, fill it up */
-	  stream = (uint8e_type *)(bfd_alloc(abfd, s->size));
-	  memset((PTR)stream, 0, s->size);
-	}
-	while (current_byte_index < s->size) {
-	  bfd_size_type run;
-	  unsigned int MAXRUN = 32;
-	  if (relocs_to_go) {
-	    run = (*p)->address - current_byte_index;
-	  }
-	  else {
-	    run = MAXRUN;
-	  }
-	  if (run > s->size - current_byte_index) {
-	    run = s->size - current_byte_index;
-	  }
-
-	  if (run != 0) {
-	    /* Output a stream of bytes */
-	    ieee_write_int(abfd, run);
-	    bfd_write((PTR)(stream + current_byte_index), 
-		      1,
-		      run,
-		      abfd);
-	    current_byte_index += run;
-	  }
-	  /* Output any relocations here */
-	  if (relocs_to_go && (*p) && (*p)->address == current_byte_index) {
-	    while (relocs_to_go && (*p) && (*p)->address == current_byte_index) {
-
-	      arelent *r = *p;
-	      bfd_vma ov;
-	      if (r->howto->pc_relative) {
-		r->addend += current_byte_index;
-	      }
-
-	      switch (r->howto->size) {
-	      case 2:
-
-		ov = bfd_get_32(abfd,
-				 stream+current_byte_index);
-	    current_byte_index +=4;
-		break;
-	      case 1:
-		ov = bfd_get_16(abfd,
-				  stream+current_byte_index);
-	    current_byte_index +=2;
-		break;
-	      default:
-		BFD_FAIL();
-	      }
-	      ieee_write_byte(abfd, ieee_function_either_open_b_enum);
-
-	      if (r->sym_ptr_ptr != (asymbol **)NULL) {
-		ieee_write_expression(abfd, r->addend + ov,
-				      r->section,
-				      *(r->sym_ptr_ptr),
-				      r->howto->pc_relative, s->target_index);
-	      }
-	      else {
-		ieee_write_expression(abfd, r->addend + ov,
-				      r->section,
-				      (asymbol *)NULL,
-				      r->howto->pc_relative, s->target_index);
-	      }
-	      ieee_write_byte(abfd,
-			      ieee_function_either_close_b_enum);
-	      if (r->howto->size != 2) {
-	      ieee_write_byte(abfd, ieee_comma);
-	      ieee_write_int(abfd, 1<< r->howto->size);
+	if (s->reloc_count != 0) 
+	    {
+	      do_with_relocs(abfd, s);
 	    }
-
-	      relocs_to_go --;
-	      p++;
+	else
+	    {
+	      do_without_relocs(abfd, s);
 	    }
-
-	  }
-	}
       }
-
 }
 
 
@@ -1650,10 +2310,20 @@ DEFUN(ieee_write_external_part,(abfd),
 	ieee_write_int(abfd, public_index);
 	if (p->section != (asection *)NULL)
 	  {
-	    ieee_write_expression(abfd,
-				  p->value + p->section->output_offset,
-				  p->section->output_section,
-				  (asymbol *)NULL, false, 0);
+	    if (abfd->flags & EXEC_P) 
+		{
+		  /* If fully linked, then output all symbols
+		     relocated */
+		  ieee_write_int(abfd,
+				 p->value + p->section->output_offset+ p->section->output_section->vma);
+
+		}
+	    else { 
+	      ieee_write_expression(abfd,
+				    p->value + p->section->output_offset,
+				    p->section->output_section,
+				    (asymbol *)NULL, false, 0);
+	    }
 	  }
 	else
 	  {
@@ -1701,13 +2371,35 @@ DEFUN(ieee_write_object_contents,(abfd),
   ieee_write_id(abfd, bfd_printable_arch_mach(abfd->obj_arch,
 					      abfd->obj_machine));
   ieee_write_id(abfd, abfd->filename);
+
+
+
+
+  /* Fast forward over the variable bits */	
+
+
+
   ieee_write_byte(abfd, ieee_address_descriptor_enum);
   ieee_write_byte(abfd, 8);	/* Bits per MAU */
   ieee_write_byte(abfd, 4);	/* MAU's per address */
 
-  /* Fast forward over the variable bits */	
   old = bfd_tell(abfd);
   bfd_seek(abfd, 8 * N_W_VARIABLES, 1);
+
+
+  ieee->w.r.extension_record = bfd_tell(abfd);
+  ieee->w.r.environmental_record = bfd_tell(abfd);
+  ieee_write_byte(abfd, 0xf0);
+  ieee_write_byte(abfd, 0x20);
+  ieee_write_byte(abfd, 0x00);
+  ieee_write_byte(abfd, 0xf1);
+  ieee_write_byte(abfd, 0xce);
+  ieee_write_byte(abfd, 0x20);
+  ieee_write_byte(abfd, 0x00);
+  ieee_write_byte(abfd, 0x55);
+  ieee_write_id(abfd,"built using BFD");
+
+
 
   /*
     First write the symbols, this changes their values into table 
@@ -1718,6 +2410,13 @@ DEFUN(ieee_write_object_contents,(abfd),
 
   ieee_write_section_part(abfd);
   ieee_write_byte(abfd, ieee_record_seperator_enum);
+
+
+  /*
+    Write any debugs we have been told about 
+    */
+ieee_write_debug_part(abfd);
+
   /* 
     Can only write the data once the symbols have been written since
     the data contains relocation information which points to the
@@ -1765,9 +2464,9 @@ DEFUN(ieee_make_empty_symbol,(abfd),
 }
 
 static bfd *
-ieee_openr_next_archived_file(arch, prev)
-bfd *arch;
-bfd *prev;
+DEFUN(ieee_openr_next_archived_file,(arch, prev),
+      bfd *arch AND
+      bfd *prev)
 {
   ieee_ar_data_type *ar = ieee_ar_data(arch);
   /* take the next one from the arch state, or reset */
@@ -1788,6 +2487,7 @@ bfd *prev;
       }
     }
     else {
+      bfd_error = no_more_archived_files;
       return (bfd *)NULL;
     }
 
@@ -1838,13 +2538,76 @@ DEFUN(ieee_sizeof_headers,(abfd, x),
   return 0;
 }
 
+
+
+static void 
+DEFUN(ieee_bfd_debug_info_start,(abfd), 
+      bfd *abfd)
+  {
+
+  }
+
+static void 
+DEFUN(ieee_bfd_debug_info_end,(abfd), 
+      bfd *abfd)
+  {
+
+  }
+
+
+/* Add this section to the list of sections we have debug info for, to
+   be ready to output it at close time 
+   */
+static void 
+DEFUN(ieee_bfd_debug_info_accumulate,(abfd, section), 
+      bfd *abfd AND
+      asection *section)
+{
+  ieee_data_type *ieee = ieee_data(section->owner);
+  ieee_data_type *output_ieee = ieee_data(abfd);
+  /* can only accumulate data from other ieee bfds */
+  if (section->owner->xvec != abfd->xvec)
+    return;
+  /* Only bother once per bfd */
+  if (ieee->done_debug == true) 
+    return;
+  ieee->done_debug = true;
+
+  /* Don't bother if there is no debug info */
+  if (ieee->w.r.debug_information_part == 0)
+    return;
+
+
+  /* Add to chain */
+    {
+      bfd_chain_type *n = (bfd_chain_type *) bfd_alloc(abfd, sizeof(bfd_chain_type));
+      n->this = section->owner;
+      n->next = (bfd_chain_type *)NULL;
+	
+      if (output_ieee->chain_head) {
+	output_ieee->chain_head->next = n;
+      }
+      else {
+	output_ieee->chain_root = n;
+
+      }
+	output_ieee->chain_head = n; 
+    }
+}
+
+
+
+
+
+
+#define FOO PROTO
 #define ieee_core_file_failing_command (char *(*)())(bfd_nullvoidptr)
 #define ieee_core_file_failing_signal (int (*)())bfd_0
-#define ieee_core_file_matches_executable_p ( PROTO(boolean, (*),(bfd *, bfd *)))bfd_false
+#define ieee_core_file_matches_executable_p ( FOO(boolean, (*),(bfd *, bfd *)))bfd_false
 #define ieee_slurp_armap bfd_true
 #define ieee_slurp_extended_name_table bfd_true
 #define ieee_truncate_arname (void (*)())bfd_nullvoidptr
-#define ieee_write_armap  (PROTO( boolean, (*),(bfd *, unsigned int, struct orl *, int, int))) bfd_nullvoidptr
+#define ieee_write_armap  (FOO( boolean, (*),(bfd *, unsigned int, struct orl *, int, int))) bfd_nullvoidptr
 #define ieee_get_lineno (struct lineno_cache_entry *(*)())bfd_nullvoidptr
 #define	ieee_close_and_cleanup		bfd_generic_close_and_cleanup
 
@@ -1863,6 +2626,7 @@ bfd_target ieee_vec =
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
+    1,				/* minimum alignment */
 _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
 _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 

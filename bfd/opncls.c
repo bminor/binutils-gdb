@@ -96,8 +96,19 @@ bfd *obfd;
 	return nbfd;
 }
 
-/** bfd_openr, bfd_fdopenr -- open for reading.
-  Returns a pointer to a freshly-allocated bfd on success, or NULL. */
+/*doc*
+@section Opening and Closing BFDs
+
+*/
+/*proto*
+*i bfd_openr
+Opens the file supplied (using fopen) with the target supplied, it
+returns a pointer to the created bfd.
+
+If NULL is returned then an error has occured.
+Possible errors are no_memory, invalid_target or system_call error.
+*; PROTO(bfd*, bfd_openr, (CONST char *filename,CONST char*target));
+*-*/
 
 bfd *
 DEFUN(bfd_openr, (filename, target),
@@ -139,6 +150,15 @@ DEFUN(bfd_openr, (filename, target),
        close it if anything goes wrong.  Closing the stream means closing
        the file descriptor too, even though we didn't open it.
  */
+/*proto*
+*i bfd_fdopenr
+bfd_fdopenr is to bfd_fopenr much like  fdopen is to fopen. It opens a bfd on
+a file already described by the @var{fd} supplied. 
+
+Possible errors are no_memory, invalid_target and system_call error.
+*;  PROTO(bfd *, bfd_fdopenr,
+    (CONST char *filename, CONST char *target, int fd));
+*-*/
 
 bfd *
 DEFUN(bfd_fdopenr,(filename, target, fd),
@@ -155,7 +175,7 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
 
   bfd_error = system_call_error;
   
-  fdflags = fcntl (fd, F_GETFL);
+  fdflags = fcntl (fd, F_GETFL, NULL);
   if (fdflags == -1) return NULL;
 
 #ifdef BFD_LOCKS
@@ -214,6 +234,14 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
 
   See comment by bfd_fdopenr before you try to modify this function. */
 
+/*proto* bfd_openw
+Creates a bfd, associated with file @var{filename}, using the file
+format @var{target}, and returns a pointer to it.
+
+Possible errors are system_call_error, no_memory, invalid_target.
+*; PROTO(bfd *, bfd_openw, (CONST char *filename, CONST char *target));
+*/
+
 bfd *
 DEFUN(bfd_openw,(filename, target),
       CONST char *filename AND
@@ -246,11 +274,22 @@ DEFUN(bfd_openw,(filename, target),
   }
   return nbfd;
 }
-
-/* Close up shop, get your deposit back. */
+
+/*proto* bfd_close
+This function closes a bfd. If the bfd was open for writing, then
+pending operations are completed and the file written out and closed.
+If the created file is executable, then @code{chmod} is called to mark
+it as such.
+
+All memory attatched to the bfd's obstacks is released. 
+
+@code{true} is returned if all is ok, otherwise @code{false}.
+*; PROTO(boolean, bfd_close,(bfd *));
+*/
+
 boolean
-bfd_close (abfd)
-     bfd *abfd;
+DEFUN(bfd_close,(abfd),
+      bfd *abfd)
 {
   if (!bfd_read_p(abfd))
     if (BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)) != true)
@@ -283,12 +322,18 @@ bfd_close (abfd)
   return true;
 }
 
-/* Create a bfd with no associated file or target.  */
+/*proto* bfd_create
+This routine creates a new bfd in the manner of bfd_openw, but without
+opening a file. The new bfd takes the target from the target used by
+@var{template}. The format is always set to @code{bfd_object}.
+
+*; PROTO(bfd *, bfd_create, (CONST char *filename, bfd *template));
+*/
 
 bfd *
 DEFUN(bfd_create,(filename, template),
       CONST char *filename AND
-      CONST bfd *template)
+      bfd *template)
 {
   bfd *nbfd = new_bfd();
   if (nbfd == (bfd *)NULL) {
@@ -313,6 +358,20 @@ DEFUN(PTR bfd_alloc_by_size_t,(abfd, size),
   PTR res = obstack_alloc(&(abfd->memory), size);
   return res;
 }
+
+DEFUN(void bfd_alloc_grow,(abfd, ptr, size),
+      bfd *abfd AND
+      PTR ptr AND
+      bfd_size_type size)
+{
+   obstack_grow(&(abfd->memory), ptr, size);
+}
+DEFUN(PTR bfd_alloc_finish,(abfd),
+      bfd *abfd)
+{
+  return obstack_finish(&(abfd->memory));
+}
+
 DEFUN(PTR bfd_alloc, (abfd, size),
       bfd *abfd AND
       bfd_size_type size)
@@ -339,8 +398,14 @@ DEFUN(PTR bfd_realloc,(abfd, old, size),
   return res;
 }
 
+/*proto* bfd_alloc_size
+Return the number of bytes in the obstacks connected to the supplied
+bfd.
+*; PROTO(bfd_size_type,bfd_alloc_size,(bfd *abfd));
+*/
 
-DEFUN(bfd_size_type bfd_alloc_size,(abfd),
+bfd_size_type
+DEFUN( bfd_alloc_size,(abfd),
       bfd *abfd)
 {
   struct _obstack_chunk *chunk = abfd->memory.chunk;

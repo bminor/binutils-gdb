@@ -20,13 +20,69 @@ along with BFD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
+/*doc*
+@section a.out backends
+
+BFD supports a number of different flavours of a.out format, though
+the major differences are only the sizes of the structures on disk,
+and the shape of the relocation information. 
+
+The support is split into a basic support file @code{aoutx.h} and
+other files which derive functions from the base. One derivation file
+is @code{aoutf1.h} (for a.out flavour 1), and adds to the basic a.out
+functions support for sun3, sun4, 386 and 29k a.out files, to create a
+target jump vector for a specific target.
+
+This information is further split out into more specific files for each
+machine, including @code{sunos.c} - for sun3 and sun4 and
+@code{demo64} for a demonstration of a 64 bit a.out format.
+
+The base file @code{aoutx.h} defines general mechanisms for reading
+and writing records to and from disk, and various other methods which
+bfd requires. It is included by @code{aout32.c} and @code{aout64.c} to
+form the names aout_32_swap_exec_header_in,
+aout_64_swap_exec_header_in, etc.
+
+As an example, this is what goes on to make the back end for a sun4, from aout32.c
+
+@example
+   #define ARCH_SIZE 32
+   #include "aoutx.h"
+@end example
+
+Which exports names:
+@example
+    ...
+   aout_32_canonicalize_reloc
+   aout_32_find_nearest_line
+   aout_32_get_lineno
+   aout_32_get_reloc_upper_bound
+     ...
+@end example
+
+from sunos.c
+
+@example   
+    #define ARCH 32
+    #define TARGET_NAME "a.out-sunos-big"
+    #define VECNAME    sunos_big_vec
+    #include "aoutf1.h"
+@end example
+requires all the names from aout32.c, and produces the jump vector
+
+@example
+    sunos_big_vec
+@end example
+
+*/
+
 #include <sysdep.h>
 #include <ansidecl.h>
 
 
 #include "bfd.h"
 struct external_exec;
-#include "liba.out.h"
+#include "libaout.h"
 #include "libbfd.h"
 #include "aout64.h"
 #include "stab.gnu.h"
@@ -34,9 +90,15 @@ struct external_exec;
 
 void (*bfd_error_trap)();
 
-/*SUPPRESS558*/
-/*SUPPRESS529*/
+/*doc*
+@subsection relocations
+The file @code{aoutx.h} caters for both the @emph{standard} and
+@emph{extended} forms of a.out relocation records.
 
+The standard records are characterised by containing only an address,
+a symbol index and a type field. The extended records (used on 29ks
+and sparcs) also have a full integer for an addend. 
+*/
 #define CTOR_TABLE_RELOC_IDX 2
 static  reloc_howto_type howto_table_ext[] = 
 {
@@ -85,6 +147,24 @@ HOWTO( 7,	       0,  3, 	64, true,  0, false, true,0,"DISP64",   true, 0xfeedfac
 
 
 bfd_error_vector_type bfd_error_vector;
+
+/*doc*
+@subsection Internal Entry Points
+@code{aoutx.h} exports several routines for accessing the contents of
+an a.out file, which are gathered and exported in turn by various
+format specific files (eg sunos.c).
+*/
+
+/*doc*
+*i aout_<size>_swap_exec_header_in
+Swaps the information in an executable header taken from a raw byte stream memory image,
+into the internal exec_header structure.
+*; PROTO(void, aout_<size>_swap_exec_header_in,
+      (bfd *abfd,
+      struct external_exec *raw_bytes,
+      struct internal_exec *execp));
+*/
+	 
 void
 DEFUN(NAME(aout,swap_exec_header_in),(abfd, raw_bytes, execp),
       bfd *abfd AND
@@ -104,6 +184,15 @@ DEFUN(NAME(aout,swap_exec_header_in),(abfd, raw_bytes, execp),
   execp->a_drsize = GET_WORD (abfd, bytes->e_drsize);
 }
 
+/*doc*
+*i aout_<size>_swap_exec_header_out
+Swaps the information in an internal exec header structure into the
+supplied buffer ready for writing to disk.
+*; PROTO(void, aout_<size>_swap_exec_header_out,
+	  (bfd *abfd,
+	   struct internal_exec *execp,
+	   struct external_exec *raw_bytes));
+*/
 void
 DEFUN(NAME(aout,swap_exec_header_out),(abfd, execp, raw_bytes),
      bfd *abfd AND
@@ -128,10 +217,19 @@ struct container {
     struct internal_exec e;
 };
 
-/* Some A.OUT variant thinks that the file whose format we're checking
-   is an a.out file.  Do some more checking, and set up for access if
-   it really is.  Call back to the calling environments "finish up"
-   function just before returning, to handle any last-minute setup.  */
+
+/*doc*
+*i aout_<size>_some_aout_object_p
+
+Some A.OUT variant thinks that the file whose format we're checking
+is an a.out file.  Do some more checking, and set up for access if
+it really is.  Call back to the calling environments "finish up"
+function just before returning, to handle any last-minute setup.  
+
+*; PROTO(bfd_target *, aout_<size>_some_aout_object_p,
+	 (bfd *abfd,
+	  bfd_target *(*callback_to_real_object_p)()));
+*/
  
 bfd_target *
 DEFUN(NAME(aout,some_aout_object_p),(abfd, callback_to_real_object_p),
@@ -282,6 +380,13 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, callback_to_real_object_p),
   return (*callback_to_real_object_p)(abfd);
 }
 
+/*doc*
+*i aout_<size>_mkobject
+
+This routine initializes a bfd for use with a.out files.
+
+*; PROTO(boolean, aout_<size>_mkobject, (bfd *));
+*/
 
 boolean
 DEFUN(NAME(aout,mkobject),(abfd),
@@ -314,12 +419,21 @@ DEFUN(NAME(aout,mkobject),(abfd),
   return true;
 }
 
-/* Keep track of machine architecture and machine type for a.out's.
+
+/*doc*
+*i aout_<size>_machine_type
+
+Keep track of machine architecture and machine type for a.out's.
 Return the machine_type for a particular arch&machine, or M_UNKNOWN
 if that exact arch&machine can't be represented in a.out format.
 
 If the architecture is understood, machine type 0 (default) should
-always be understood.  */
+always be understood.  
+
+*; PROTO(enum machine_type, aout_<size>_machine_type,
+	 (enum bfd_architecture arch,
+	  unsigned long machine));
+*/
 
 enum machine_type
 DEFUN(NAME(aout,machine_type),(arch, machine),
@@ -360,6 +474,19 @@ DEFUN(NAME(aout,machine_type),(arch, machine),
   return arch_flags;
 }
 
+/*doc*
+*i aout_<size>_set_arch_mach
+
+Sets the architecture and the machine of the bfd to those values
+supplied. Verifies that the format can support the architecture
+required.
+
+*; PROTO(boolean, aout_<size>_set_arch_mach,
+	 (bfd *,
+	  enum bfd_architecture,
+	  unsigned long machine));
+*/
+
 boolean
 DEFUN(NAME(aout,set_arch_mach),(abfd, arch, machine),
       bfd *abfd AND
@@ -373,9 +500,15 @@ DEFUN(NAME(aout,set_arch_mach),(abfd, arch, machine),
     return false;		/* We can't represent this type */
   return true;			/* We're easy ... */
 }
-
-/* exec and core file sections */
 
+/*doc*
+*i aout_<size>new_section_hook
+
+Called by the bfd in response to a @code{bfd_make_section} request.
+*; PROTO(boolean, aout_<size>_new_section_hook,
+         (bfd *abfd,
+	  asection *newsect));
+*/
 boolean
 DEFUN(NAME(aout,new_section_hook),(abfd, newsect),
       bfd *abfd AND
@@ -1460,7 +1593,7 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
 	    buffer[sizeof(buffer)-1] = 0;
 	    /* Have to remove : stuff */
 	    p = strchr(buffer,':');
-	    if (p != NULL) {*p = NULL; }
+	    if (p != NULL) { *p = NULL; }
 	    *functionname_ptr = buffer;
 	    return true;
 

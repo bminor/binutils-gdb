@@ -28,7 +28,9 @@ echo Sanitizing `pwd`...
 Things-to-keep:
 
 COPYING
+bfd.texinfo
 ChangeLog
+Makefile
 Makefile.in
 TODO
 VERSION
@@ -40,19 +42,17 @@ archive.c
 archures.c
 archures.h
 bfd.c
-bfd.doc
 bout.c
 cache.c
 coffcode.h
-coffish.h
-coffswap.c
-config
-configure
+config.status
+configure*
 configure.in
-cplus-dem.c
+core.c
 demo64.c
 ecoff.c
 filemode.c
+format.c
 host-aout.c
 i386coff.c
 icoff.c
@@ -65,12 +65,14 @@ libieee.h
 liboasys.h
 m68kcoff.c
 m88k-bcs.c
-misc.h
 newsos3.c
 oasys.c
 opncls.c
+reloc.c
+section.c
 srec.c
 sunos.c
+syms.c
 targets.c
 trad-core.c
 trad-core.h
@@ -82,7 +84,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.3  1991/05/31 11:22:12  gnu
+# Revision 1.4  1991/07/04 16:52:54  steve
+# Now full of documentation. Yum Yum.
+#
+# Revision 1.3  1991/05/31  11:22:12  gnu
 # Remove coff-code.h and liba.out.h, add libaout.h.
 #
 # Revision 1.2  1991/05/29  02:40:08  gnu

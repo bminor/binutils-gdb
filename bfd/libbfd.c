@@ -138,10 +138,10 @@ DEFUN(zalloc,(size),
 
 static 
 int DEFUN(real_read,(where, a,b, file),
-	  PTR where AND
-	  int a AND
-	  int b AND
-	  FILE *file)
+          PTR where AND
+          int a AND
+          int b AND
+          FILE *file)
 {
   return fread(where, a,b,file);
 }
@@ -171,43 +171,44 @@ DEFUN(bfd_seek,(abfd, position, direction),
       CONST file_ptr position AND
       CONST int direction)
 {
-	/* For the time being, a bfd may not seek to it's end.  The
-	   problem is that we don't easily have a way to recognize
-	   the end of an element in an archive. */
+        /* For the time being, a bfd may not seek to it's end.  The
+           problem is that we don't easily have a way to recognize
+           the end of an element in an archive. */
 
-	BFD_ASSERT(direction == SEEK_SET
-		   || direction == SEEK_CUR);
-	
-	if (direction == SEEK_SET && abfd->my_archive != NULL) 
-	    {
-		    /* This is a set within an archive, so we need to
-		       add the base of the object within the archive */
-		    return(fseek(bfd_cache_lookup(abfd),
-				 position + abfd->origin,
-				 direction));
-	    }
-	else 
-	    {
-		    return(fseek(bfd_cache_lookup(abfd),  position, direction));
-	    }	
+        BFD_ASSERT(direction == SEEK_SET
+                   || direction == SEEK_CUR);
+        
+        if (direction == SEEK_SET && abfd->my_archive != NULL) 
+            {
+                    /* This is a set within an archive, so we need to
+                       add the base of the object within the archive */
+                    return(fseek(bfd_cache_lookup(abfd),
+                                 position + abfd->origin,
+                                 direction));
+            }
+        else 
+            {
+                    return(fseek(bfd_cache_lookup(abfd),  position, direction));
+            }   
 }
 
 long
 DEFUN(bfd_tell,(abfd),
       bfd *abfd)
 {
-	file_ptr ptr;
+        file_ptr ptr;
 
-	ptr = ftell (bfd_cache_lookup(abfd));
+        ptr = ftell (bfd_cache_lookup(abfd));
 
-	if (abfd->my_archive)
-	    ptr -= abfd->origin;
-	return ptr;
+        if (abfd->my_archive)
+            ptr -= abfd->origin;
+        return ptr;
 }
 
 /** Make a string table */
 
-/* Add string to table pointed to by table, at location starting with free_ptr.
+/*>bfd.h<
+ Add string to table pointed to by table, at location starting with free_ptr.
    resizes the table if necessary (if it's NULL, creates it, ignoring
    table_length).  Updates free_ptr, table, table_length */
 
@@ -227,7 +228,7 @@ DEFUN(bfd_add_to_string_table,(table, new_string, table_length, free_ptr),
     /* Avoid a useless regrow if we can (but of course we still
        take it next time */
     space_length = (string_length < DEFAULT_STRING_SPACE_SIZE ?
-		    DEFAULT_STRING_SPACE_SIZE : string_length+1);
+                    DEFAULT_STRING_SPACE_SIZE : string_length+1);
     base = zalloc (space_length);
 
     if (base == NULL) {
@@ -265,21 +266,76 @@ DEFUN(bfd_add_to_string_table,(table, new_string, table_length, free_ptr),
 
 /* FIXME: Should these take a count argument?
    Answer (gnu@cygnus.com):  No, but perhaps they should be inline
- 			     functions in swap.h #ifdef __GNUC__. 
-  			     Gprof them later and find out.  */
+                             functions in swap.h #ifdef __GNUC__. 
+                             Gprof them later and find out.  */
+
+/*proto*
+*i bfd_put_size
+*i bfd_get_size
+These macros as used for reading and writing raw data in sections;
+each access (except for bytes) is vectored through the target format
+of the bfd and mangled accordingly. The mangling performs any
+necessary endian translations and removes alignment restrictions.
+*+
+#define bfd_put_8(abfd, val, ptr) \
+                (*((char *)ptr) = (char)val)
+#define bfd_get_8(abfd, ptr) \
+                (*((char *)ptr))
+#define bfd_put_16(abfd, val, ptr) \
+                BFD_SEND(abfd, bfd_putx16, (val,ptr))
+#define bfd_get_16(abfd, ptr) \
+                BFD_SEND(abfd, bfd_getx16, (ptr))
+#define bfd_put_32(abfd, val, ptr) \
+                BFD_SEND(abfd, bfd_putx32, (val,ptr))
+#define bfd_get_32(abfd, ptr) \
+                BFD_SEND(abfd, bfd_getx32, (ptr))
+#define bfd_put_64(abfd, val, ptr) \
+                BFD_SEND(abfd, bfd_putx64, (val, ptr))
+#define bfd_get_64(abfd, ptr) \
+                BFD_SEND(abfd, bfd_getx64, (ptr))
+*-
+*-*/ 
+
+/*proto*
+*i bfd_h_put_size
+*i bfd_h_get_size
+These macros have the same function as their @code{bfd_get_x}
+bretherin, except that they are used for removing information for the
+header records of object files. Believe it or not, some object files
+keep their header records in big endian order, and their data in little
+endan order.
+*+
+#define bfd_h_put_8(abfd, val, ptr) \
+                (*((char *)ptr) = (char)val)
+#define bfd_h_get_8(abfd, ptr) \
+                (*((char *)ptr))
+#define bfd_h_put_16(abfd, val, ptr) \
+                BFD_SEND(abfd, bfd_h_putx16,(val,ptr))
+#define bfd_h_get_16(abfd, ptr) \
+                BFD_SEND(abfd, bfd_h_getx16,(ptr))
+#define bfd_h_put_32(abfd, val, ptr) \
+                BFD_SEND(abfd, bfd_h_putx32,(val,ptr))
+#define bfd_h_get_32(abfd, ptr) \
+                BFD_SEND(abfd, bfd_h_getx32,(ptr))
+#define bfd_h_put_64(abfd, val, ptr) \
+                BFD_SEND(abfd, bfd_h_putx64,(val, ptr))
+#define bfd_h_get_64(abfd, ptr) \
+                BFD_SEND(abfd, bfd_h_getx64,(ptr))
+*-
+*-*/ 
 
 unsigned int
 DEFUN(_do_getb16,(addr),
       register bfd_byte *addr)
 {
-	return (addr[0] << 8) | addr[1];
+        return (addr[0] << 8) | addr[1];
 }
 
 unsigned int
 DEFUN(_do_getl16,(addr),
       register bfd_byte *addr)
 {
-	return (addr[1] << 8) | addr[0];
+        return (addr[1] << 8) | addr[0];
 }
 
 void
@@ -287,31 +343,31 @@ DEFUN(_do_putb16,(data, addr),
       int data AND
       register bfd_byte *addr)
 {
-	addr[0] = (bfd_byte)(data >> 8);
-	addr[1] = (bfd_byte )data;
+        addr[0] = (bfd_byte)(data >> 8);
+        addr[1] = (bfd_byte )data;
 }
 
 void
 DEFUN(_do_putl16,(data, addr),
-      int data AND		
+      int data AND              
       register bfd_byte *addr)
 {
-	addr[0] = (bfd_byte )data;
-	addr[1] = (bfd_byte)(data >> 8);
+        addr[0] = (bfd_byte )data;
+        addr[1] = (bfd_byte)(data >> 8);
 }
 
 unsigned int
 DEFUN(_do_getb32,(addr),
       register bfd_byte *addr)
 {
-	return ((((addr[0] << 8) | addr[1]) << 8) | addr[2]) << 8 | addr[3];
+        return ((((addr[0] << 8) | addr[1]) << 8) | addr[2]) << 8 | addr[3];
 }
 
 unsigned int
 _do_getl32 (addr)
-	register bfd_byte *addr;
+        register bfd_byte *addr;
 {
-	return ((((addr[3] << 8) | addr[2]) << 8) | addr[1]) << 8 | addr[0];
+        return ((((addr[3] << 8) | addr[2]) << 8) | addr[1]) << 8 | addr[0];
 }
 
 bfd_64_type
@@ -322,18 +378,20 @@ DEFUN(_do_getb64,(addr),
   bfd_64_type low, high;
 
   high= ((((((((addr[0]) << 8) |
-	      addr[1]) << 8) |
-	    addr[2]) << 8) |
-	  addr[3]) );
+              addr[1]) << 8) |
+            addr[2]) << 8) |
+          addr[3]) );
 
   low = ((((((((addr[4]) << 8) |
-	      addr[5]) << 8) |
-	    addr[6]) << 8) |
-	  addr[7]));
+              addr[5]) << 8) |
+            addr[6]) << 8) |
+          addr[7]));
 
   return high << 32 | low;
 #else
+  bfd_64_type foo;
   BFD_FAIL();
+  return foo;
 #endif
 
 }
@@ -342,22 +400,26 @@ bfd_64_type
 DEFUN(_do_getl64,(addr),
       register bfd_byte *addr)
 {
-  bfd_64_type low, high;
+
 #ifdef HOST_64_BIT
+  bfd_64_type low, high;
   high= (((((((addr[7] << 8) |
-	      addr[6]) << 8) |
-	    addr[5]) << 8) |
-	  addr[4]));
+              addr[6]) << 8) |
+            addr[5]) << 8) |
+          addr[4]));
 
   low = (((((((addr[3] << 8) |
-	      addr[2]) << 8) |
-	    addr[1]) << 8) |
-	  addr[0]) );
+              addr[2]) << 8) |
+            addr[1]) << 8) |
+          addr[0]) );
 
   return high << 32 | low;
 #else
+bfd_64_type foo;
   BFD_FAIL();
+return foo;
 #endif
+
 }
 
 void
@@ -365,10 +427,10 @@ DEFUN(_do_putb32,(data, addr),
       unsigned long data AND
       register bfd_byte *addr)
 {
-	addr[0] = (bfd_byte)(data >> 24);
-	addr[1] = (bfd_byte)(data >> 16);
-	addr[2] = (bfd_byte)(data >>  8);
-	addr[3] = (bfd_byte)data;
+        addr[0] = (bfd_byte)(data >> 24);
+        addr[1] = (bfd_byte)(data >> 16);
+        addr[2] = (bfd_byte)(data >>  8);
+        addr[3] = (bfd_byte)data;
 }
 
 void
@@ -376,15 +438,15 @@ DEFUN(_do_putl32,(data, addr),
       unsigned long data AND
       register bfd_byte *addr)
 {
-	addr[0] = (bfd_byte)data;
-	addr[1] = (bfd_byte)(data >>  8);
-	addr[2] = (bfd_byte)(data >> 16);
-	addr[3] = (bfd_byte)(data >> 24);
+        addr[0] = (bfd_byte)data;
+        addr[1] = (bfd_byte)(data >>  8);
+        addr[2] = (bfd_byte)(data >> 16);
+        addr[3] = (bfd_byte)(data >> 24);
 }
 void
 DEFUN(_do_putb64,(data, addr),
-	bfd_64_type data AND
-	register bfd_byte *addr)
+        bfd_64_type data AND
+        register bfd_byte *addr)
 {
 #ifdef HOST_64_BIT
   addr[0] = (bfd_byte)(data >> (7*8));
@@ -433,10 +495,26 @@ DEFUN(bfd_generic_get_section_contents, (abfd, section, location, offset, count)
       bfd_size_type count)
 {
     if (count == 0)
-	return true;
+        return true;
     if ((bfd_size_type)offset >= section->size
-	|| bfd_seek(abfd,(file_ptr)( section->filepos + offset), SEEK_SET) == -1
-	|| bfd_read(location, (bfd_size_type)1, count, abfd) != count)
-	return (false); /* on error */
+        || bfd_seek(abfd,(file_ptr)( section->filepos + offset), SEEK_SET) == -1
+        || bfd_read(location, (bfd_size_type)1, count, abfd) != count)
+        return (false); /* on error */
     return (true);
+}
+
+/*proto-internal*
+*i bfd_log2
+Return the log base 2 of the value supplied, rounded up. eg an arg
+of 1025 would return 11.
+*; PROTO(bfd_vma, bfd_log2,(bfd_vma x));
+*-*/
+
+bfd_vma bfd_log2(x)
+bfd_vma x;
+{
+  bfd_vma  result = 0;
+  while ( (bfd_vma)(1<< result) < x)
+    result++;
+  return result;
 }

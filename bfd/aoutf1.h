@@ -1,5 +1,3 @@
-/* BFD backend for generic a.out flavour 1 */
-
 /* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Diddler.
@@ -18,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with BFD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+
 #include <ansidecl.h>
 #include <sysdep.h>
 struct external_exec;
@@ -33,6 +32,33 @@ struct external_exec;
 #include "ar.h"
 
 
+/*
+inheritd two core files and various implimentation files. 
+The file @code{aoutf1.h} contains the code for BFD's
+a.out back end. Control over the generated back end is given by these
+three preprocessor names:
+@table @code
+@item ARCH
+This value should be either 32 or 64, depending upon the size of an
+int in the target format. It changes the sizes of the structs which
+perform the memory/disk mapping of structures.
+
+The 64 bit backend may only be used if the host compiler supports 64
+ints (eg with gcc), by defining the name @code{HOST_64_BIT}. With this
+name defined, @emph{all} bfd operations are performed with 64bit
+arithmetic, not just those to a 64bit target.
+
+@item TARGETNAME
+bit long longsIf bfd is being compiled with gcc, (or any other compiler which gives
+64 bit long longs), 
+@item
+It is structured in such a way that @code{#define}ing
+the size of the architecture into a  @code{#include}ing
+it with different @code{#define}s present will alter the definitions
+of various structures in include files and generate correct code for
+th
+
+*/
 
 void (*bfd_error_trap)();
 
@@ -177,7 +203,7 @@ DEFUN(NAME(aout,sunos4_write_object_contents),(abfd),
     choose_reloc_size(abfd);
 
     /* FIXME */
-    N_SET_FLAGS (*execp, 0x81);
+    N_SET_FLAGS (*execp, 0x1);
     
     WRITE_HEADERS(abfd, execp);
 
@@ -461,31 +487,42 @@ DEFUN(swapcore,(abfd, core),
 #define	aout_64_core_file_failing_signal	sunos4_core_file_failing_signal
 #define	aout_64_core_file_matches_executable_p	sunos4_core_file_matches_executable_p
 
+#define aout_64_bfd_debug_info_start		bfd_void
+#define aout_64_bfd_debug_info_end		bfd_void
+#define aout_64_bfd_debug_info_accumulate	bfd_void
+
+#define aout_32_bfd_debug_info_start		bfd_void
+#define aout_32_bfd_debug_info_end		bfd_void
+#define aout_32_bfd_debug_info_accumulate	bfd_void
+
+
+
 /* We implement these routines ourselves, rather than using the generic
 a.out versions.  */
 #define	aout_write_object_contents	sunos4_write_object_contents
 
 bfd_target VECNAME =
   {
-TARGETNAME,
-  bfd_target_aout_flavour_enum,
-  true,				/* target byte order */
-  true,				/* target headers byte order */
-  (HAS_RELOC | EXEC_P |		/* object flags */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
-   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-   ' ',							  /* ar_pad_char */
-   16,							  /* ar_max_namelen */
-   _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
-   _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16,  /* hdrs */
-   
-  {_bfd_dummy_target, NAME(sunos,object_p),
-   bfd_generic_archive_p, sunos4_core_file_p},
-  {bfd_false, NAME(aout,mkobject),
-   _bfd_generic_mkarchive, bfd_false},
-  {bfd_false, NAME(aout,sunos4_write_object_contents), /* bfd_write_contents */
-   _bfd_write_archive_contents, bfd_false},
-   
-   JUMP_TABLE(JNAME(aout))
-};
+    TARGETNAME,
+    bfd_target_aout_flavour_enum,
+    true,			/* target byte order */
+    true,			/* target headers byte order */
+    (HAS_RELOC | EXEC_P |	/* object flags */
+     HAS_LINENO | HAS_DEBUG |
+     HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
+    (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+    ' ',						   /* ar_pad_char */
+    16,							   /* ar_max_namelen */
+    3,							   /* minimum alignment power */
+    _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
+    _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
+    
+      {_bfd_dummy_target, NAME(sunos,object_p),
+       bfd_generic_archive_p, sunos4_core_file_p},
+      {bfd_false, NAME(aout,mkobject),
+       _bfd_generic_mkarchive, bfd_false},
+      {bfd_false, NAME(aout,sunos4_write_object_contents), /* bfd_write_contents */
+       _bfd_write_archive_contents, bfd_false},
+    
+    JUMP_TABLE(JNAME(aout))
+    };

@@ -187,7 +187,7 @@ asection *section;
 	  + (HEX(buffer.u.type_3.address+1) << 16)
 	    + (HEX(buffer.u.type_3.address+2) << 8) 
 	      + (HEX(buffer.u.type_3.address+3));
-        func(abfd,section, address, buffer.u.type_2.data, bytes_on_line -1);
+        func(abfd,section, address, buffer.u.type_3.data, bytes_on_line -1);
 
 	break;
 
@@ -320,7 +320,7 @@ int bytes_to_do;
       check_sum += TOHEX(buffer.u.type_3.address+3, address >> 0);
       size = bytes_this_chunk + 5;
       data = buffer.u.type_3.data;
-
+      break;
     case 2:
       check_sum = TOHEX(buffer.u.type_3.address, address >> 16);
       check_sum += TOHEX(buffer.u.type_3.address+1, address >> 8);
@@ -334,6 +334,7 @@ int bytes_to_do;
       check_sum += TOHEX(buffer.u.type_3.address+1, address >> 0);
       size = bytes_this_chunk + 3;
       data = buffer.u.type_1.data;
+      break;
     }
 
     for (i = 0; i < bytes_this_chunk; i++) {
@@ -380,31 +381,32 @@ DEFUN(srec_make_empty_symbol, (abfd),
   new->the_bfd = abfd;
   return new;
 }
-/*SUPPRESS 460 */
-
-#define srec_new_section_hook (PROTO(boolean, (*), (bfd *, asection *)))bfd_true
+#define FOO PROTO
+#define srec_new_section_hook (FOO(boolean, (*), (bfd *, asection *)))bfd_true
 #define srec_get_symtab_upper_bound bfd_false
-#define srec_get_symtab (PROTO(unsigned int, (*), (bfd *, asymbol **)))bfd_0
-#define srec_get_reloc_upper_bound (PROTO(unsigned int, (*),(bfd*, asection *)))bfd_false
-#define srec_canonicalize_reloc (PROTO(unsigned int, (*),(bfd*,asection *, arelent **, asymbol **))) bfd_0
+#define srec_get_symtab (FOO(unsigned int, (*), (bfd *, asymbol **)))bfd_0
+#define srec_get_reloc_upper_bound (FOO(unsigned int, (*),(bfd*, asection *)))bfd_false
+#define srec_canonicalize_reloc (FOO(unsigned int, (*),(bfd*,asection *, arelent **, asymbol **))) bfd_0
 
-#define srec_print_symbol (PROTO(void,(*),(bfd *, PTR, asymbol *, bfd_print_symbol_enum_type))) bfd_void
+#define srec_print_symbol (FOO(void,(*),(bfd *, PTR, asymbol *, bfd_print_symbol_enum_type))) bfd_void
 
-#define srec_openr_next_archived_file (PROTO(bfd *, (*), (bfd*,bfd*))) bfd_nullvoidptr
-#define srec_find_nearest_line (PROTO(boolean, (*),(bfd*,asection*,asymbol**,bfd_vma, CONST char**, CONST char**, unsigned int *))) bfd_false
-#define srec_generic_stat_arch_elt  (PROTO(int, (*), (bfd *,struct stat *))) bfd_0
+#define srec_openr_next_archived_file (FOO(bfd *, (*), (bfd*,bfd*))) bfd_nullvoidptr
+#define srec_find_nearest_line (FOO(boolean, (*),(bfd*,asection*,asymbol**,bfd_vma, CONST char**, CONST char**, unsigned int *))) bfd_false
+#define srec_generic_stat_arch_elt  (FOO(int, (*), (bfd *,struct stat *))) bfd_0
 
 
 #define srec_core_file_failing_command (char *(*)())(bfd_nullvoidptr)
 #define srec_core_file_failing_signal (int (*)())bfd_0
-#define srec_core_file_matches_executable_p (PROTO(boolean, (*),(bfd*, bfd*)))bfd_false
+#define srec_core_file_matches_executable_p (FOO(boolean, (*),(bfd*, bfd*)))bfd_false
 #define srec_slurp_armap bfd_true
 #define srec_slurp_extended_name_table bfd_true
 #define srec_truncate_arname (void (*)())bfd_nullvoidptr
-#define srec_write_armap  (PROTO( boolean, (*),(bfd *, unsigned int, struct orl *, int, int))) bfd_nullvoidptr
+#define srec_write_armap  (FOO( boolean, (*),(bfd *, unsigned int, struct orl *, int, int))) bfd_nullvoidptr
 #define srec_get_lineno (struct lineno_cache_entry *(*)())bfd_nullvoidptr
-
 #define	srec_close_and_cleanup	bfd_generic_close_and_cleanup
+#define srec_bfd_debug_info_start bfd_void
+#define srec_bfd_debug_info_end bfd_void
+#define srec_bfd_debug_info_accumulate  (FOO(void, (*), (bfd *,	 asection *))) bfd_void
 
 
 bfd_target srec_vec =
@@ -420,6 +422,7 @@ bfd_target srec_vec =
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
+    1,				/* minimum alignment */
   _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
   _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 

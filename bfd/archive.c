@@ -1,6 +1,4 @@
 
-/*** archive.c -- an attempt at combining the machine-independent parts of
-  archives */
 
 /* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
@@ -20,6 +18,21 @@ You should have received a copy of the GNU General Public License
 along with BFD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+
+/*doc*
+@setfilename archive-info
+@section Archives
+
+Gumby, you promised to write this bit...
+
+Archives are supported in bfd in @code{archive.c}.
+
+An archive is represented internally just like another bfd, with a
+pointer to a chain of contained bfds. Archives can be created by
+opening bfds, linking them together and attatching them as children to
+another bfd and then closing the parent bfd. 
+
+*-*/
 
 /* Assumes:
    o - all archive elements start on an even boundary, newline padded;
@@ -72,6 +85,10 @@ _bfd_generic_mkarchive (abfd)
   return true;
 }
 
+/*proto* bfd_get_next_mapent
+What this does
+*; PROTO(symindex, bfd_get_next_mapent, (bfd *, symindex, carsym **));
+*/
 symindex
 bfd_get_next_mapent (abfd, prev, entry)
      bfd *abfd;
@@ -107,9 +124,16 @@ _bfd_create_empty_archive_element_shell (obfd)
   return nbfd;
 }
 
+/*proto* bfd_set_archive_head
+Used whilst processing archives. Sets the head of the chain of bfds
+contained in an archive to @var{new_head}. (see chapter on archives)
+*; PROTO(boolean, bfd_set_archive_head, (bfd *output, bfd *new_head));
+*/
+
 boolean
-bfd_set_archive_head (output_archive, new_head)
-     bfd *output_archive, *new_head;
+DEFUN(bfd_set_archive_head,(output_archive, new_head),
+     bfd *output_archive AND 
+     bfd *new_head)
 {
 
   output_archive->archive_head = new_head;
@@ -229,8 +253,10 @@ snarf_ar_hdr (abfd)
 	return NULL;
     }
 
-    /* extract the filename from the archive */
-    if (hdr.ar_name[0] == ' ' && bfd_ardata (abfd)->extended_names != NULL) {
+    /* extract the filename from the archive - there are two ways to
+       specify an extendend name table, either the first char of the
+       name is a space, or it's a slash  */
+    if ((hdr.ar_name[0] == '/' || hdr.ar_name[0] == ' ') && bfd_ardata (abfd)->extended_names != NULL) {
 	filename = get_extended_arelt_filename (abfd, hdr.ar_name);
 	if (filename == NULL) {
 	    bfd_error = malformed_archive;
@@ -325,10 +351,22 @@ bfd_get_elt_at_index (abfd, index)
   return result;
 }
 
-/* If you've got an archive, call this to read each subfile. */
+/*proto* bfd_openr_next_archived_file
+Initially provided a bfd containing an archive and NULL, opens a bfd
+on the first contained element and returns that. Subsequent calls to
+bfd_openr_next_archived_file should pass the archive and the previous
+return value to return a created bfd to the next contained element.
+NULL is returned when there are no more.
+
+*; PROTO(bfd*, bfd_openr_next_archived_file,
+               (bfd *archive, bfd *previous));
+
+*/
+
 bfd *
-bfd_openr_next_archived_file (archive, last_file)
-     bfd *archive, *last_file;
+DEFUN(bfd_openr_next_archived_file,(archive, last_file),
+     bfd *archive AND  
+      bfd*last_file)
 {
 
   if ((bfd_get_format (archive) != bfd_archive) ||
@@ -411,7 +449,7 @@ boolean
 bfd_slurp_bsd_armap (abfd)
      bfd *abfd;
 {
-  int i;
+
   struct areltdata *mapdata;
   char nextname[17];
   unsigned int counter = 0;
@@ -451,7 +489,7 @@ bfd_slurp_bsd_armap (abfd)
 	  goto byebye;
       }
 
-      ardata->symdef_count = bfd_h_get_32(abfd, raw_armap) / sizeof (struct symdef);
+      ardata->symdef_count = bfd_h_get_32(abfd, (PTR)raw_armap) / sizeof (struct symdef);
       ardata->cache = 0;
       rbase = raw_armap+1;
       ardata->symdefs = (carsym *) rbase;
@@ -459,8 +497,8 @@ bfd_slurp_bsd_armap (abfd)
 
       for (;counter < ardata->symdef_count; counter++) {
 	  struct symdef *sym = ((struct symdef *) rbase) + counter;
-	  sym->s.name = bfd_h_get_32(abfd, &(sym->s.string_offset)) + stringbase;
-	  sym->file_offset = bfd_h_get_32(abfd, &(sym->file_offset));
+	  sym->s.name = bfd_h_get_32(abfd, (PTR)(&(sym->s.string_offset))) + stringbase;
+	  sym->file_offset = bfd_h_get_32(abfd, (PTR)( &(sym->file_offset)));
       }
   
       ardata->first_file_filepos = bfd_tell (abfd);
@@ -501,13 +539,16 @@ bfd_slurp_coff_armap (abfd)
   if (mapdata == NULL) return false;
 
   raw_armap = (int *) bfd_alloc(abfd,mapdata->parsed_size);
-  if (raw_armap == NULL) {
+
+  if (raw_armap == NULL) 
+      {
     bfd_error = no_memory;
   byebye:
     bfd_release (abfd, (PTR)mapdata);
     return false;
   }
 
+  /* read in the raw map */
   if (bfd_read ((PTR)raw_armap, 1, mapdata->parsed_size, abfd) !=
       mapdata->parsed_size) {
     bfd_error = malformed_archive;
@@ -552,19 +593,22 @@ bfd_slurp_coff_armap (abfd)
   ardata->first_file_filepos = bfd_tell (abfd);
   /* Pad to an even boundary if you have to */
   ardata->first_file_filepos += (ardata->first_file_filepos) %2;
-  bfd_release (abfd, (PTR)raw_armap);
-  bfd_release (abfd, (PTR)mapdata);
+
+/*  bfd_release (abfd, (PTR)raw_armap);
+  bfd_release (abfd, (PTR)mapdata);*/
   bfd_has_map (abfd) = true;
   return true;
 }
 
 /** Extended name table.
 
-  Normally archives support only 14-character filenames.  Intel has extended
-  the format: longer names are stored in a special element (the first in the
-  archive, or second if there is an armap); the name in the ar_hdr is replaced
-  by <space><index into filename element>.  Index is the P.R. of an int (radix:
-  8). */
+  Normally archives support only 14-character filenames.
+
+  Intel has extended the format: longer names are stored in a special
+  element (the first in the archive, or second if there is an armap);
+  the name in the ar_hdr is replaced by <space><index into filename
+  element>.  Index is the P.R. of an int (radix: 8).  Data General have
+  extended the format by using the prefix // for the special element */
 
 /* Returns false on error, true otherwise */
 boolean
@@ -578,49 +622,52 @@ _bfd_slurp_extended_name_table (abfd)
      we probably don't want to return true.  */
   if (bfd_read ((PTR)nextname, 1, 16, abfd) == 16) {
 
-  bfd_seek (abfd, -16L, SEEK_CUR);
+    bfd_seek (abfd, -16L, SEEK_CUR);
 
-  if (strncmp (nextname, "ARFILENAMES/    ", 16)) {
-    bfd_ardata (abfd)->extended_names = NULL;
-    return true;
-  }
+    if (strncmp (nextname, "ARFILENAMES/    ", 16) != 0 &&
+	strncmp (nextname, "//              ", 16) != 0) 
+	{
+      bfd_ardata (abfd)->extended_names = NULL;
+      return true;
+    }
 
-  namedata = snarf_ar_hdr (abfd);
-  if (namedata == NULL) return false;
+    namedata = snarf_ar_hdr (abfd);
+    if (namedata == NULL) return false;
   
-  bfd_ardata (abfd)->extended_names = bfd_zalloc(abfd,namedata->parsed_size);
-  if (bfd_ardata (abfd)->extended_names == NULL) {
-    bfd_error = no_memory;
-  byebye:
-    bfd_release (abfd, (PTR)namedata);
-    return false;
-  }
+    bfd_ardata (abfd)->extended_names = bfd_zalloc(abfd,namedata->parsed_size);
+    if (bfd_ardata (abfd)->extended_names == NULL) {
+      bfd_error = no_memory;
+    byebye:
+      bfd_release (abfd, (PTR)namedata);
+      return false;
+    }
 
-  if (bfd_read ((PTR)bfd_ardata (abfd)->extended_names, 1,
-		namedata->parsed_size, abfd) != namedata->parsed_size) {
-    bfd_error = malformed_archive;
-    bfd_release (abfd, (PTR)(bfd_ardata (abfd)->extended_names));
-    bfd_ardata (abfd)->extended_names = NULL;
-    goto byebye;
-  }
+    if (bfd_read ((PTR)bfd_ardata (abfd)->extended_names, 1,
+		  namedata->parsed_size, abfd) != namedata->parsed_size) {
+      bfd_error = malformed_archive;
+      bfd_release (abfd, (PTR)(bfd_ardata (abfd)->extended_names));
+      bfd_ardata (abfd)->extended_names = NULL;
+      goto byebye;
+    }
 
-  /* It appears that the extended names are newline-padded, not null padded.
-     */
-  {
-    char *temp = bfd_ardata (abfd)->extended_names;
-    for (; *temp != '\0'; ++temp)
-      if (*temp == '\n') *temp = '\0';
-  }
+    /* Since the archive is supposed to be printable if it contains
+       text, the entries in the list are newline-padded, not null
+       padded. We'll fix that there..  */
+      {
+	char *temp = bfd_ardata (abfd)->extended_names;
+	for (; *temp != '\0'; ++temp)
+	  if (*temp == '\n') *temp = '\0';
+      }
   
-  /* Pad to an even boundary if you have to */
-  bfd_ardata (abfd)->first_file_filepos = bfd_tell (abfd);
-  bfd_ardata (abfd)->first_file_filepos +=
-    (bfd_ardata (abfd)->first_file_filepos) %2;
+    /* Pad to an even boundary if you have to */
+    bfd_ardata (abfd)->first_file_filepos = bfd_tell (abfd);
+    bfd_ardata (abfd)->first_file_filepos +=
+      (bfd_ardata (abfd)->first_file_filepos) %2;
 
-  /* FIXME, we can't release namedata here because it was allocated
-     below extended_names on the obstack... */
-  /* bfd_release (abfd, namedata); */
-}
+    /* FIXME, we can't release namedata here because it was allocated
+       below extended_names on the obstack... */
+    /* bfd_release (abfd, namedata); */
+  }
   return true;
 }
 
@@ -1127,7 +1174,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   for (i = 0; i < sizeof (struct ar_hdr); i++)
     if (((char *)(&hdr))[i] == '\0') (((char *)(&hdr))[i]) = ' ';
   bfd_write ((char *)&hdr, 1, sizeof (struct ar_hdr), arch);
-  bfd_h_put_32(arch, ranlibsize, &temp);
+  bfd_h_put_32(arch, ranlibsize, (PTR)&temp);
   bfd_write (&temp, 1, sizeof (temp), arch);
   
   for (count = 0; count < orl_count; count++) {
@@ -1143,13 +1190,13 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
     } /* if new archive element */
 
     last_elt = current;
-    bfd_h_put_32(arch, ((map[count]).namidx), &outs.s.string_offset);
-    bfd_h_put_32(arch, firstreal, &outs.file_offset);
+    bfd_h_put_32(arch, ((map[count]).namidx),(PTR) &outs.s.string_offset);
+    bfd_h_put_32(arch, firstreal,(PTR) &outs.file_offset);
     bfd_write ((char *)outp, 1, sizeof (outs), arch);
   }
 
   /* now write the strings themselves */
-  bfd_h_put_32(arch, stridx, &temp);
+  bfd_h_put_32(arch, stridx, (PTR)&temp);
   bfd_write ((PTR)&temp, 1, sizeof (temp), arch);
   for (count = 0; count < orl_count; count++)
     bfd_write (*((map[count]).name), 1, strlen (*((map[count]).name))+1, arch);
