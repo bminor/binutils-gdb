@@ -1535,16 +1535,40 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
 	      error("there is no field named %s", name);
 	    return v;
 	  }
-	if (t_field_name && t_field_name[0] == '\0'
-	    && TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_UNION)
+
+	if (t_field_name && t_field_name[0] == '\0')
 	  {
-	    /* Look for a match through the fields of an anonymous union.  */
-	    value_ptr v;
-	    v = search_struct_field (name, arg1, offset,
-				     TYPE_FIELD_TYPE (type, i),
-				     looking_for_baseclass);
-	    if (v)
-	      return v;
+	    struct type *field_type = TYPE_FIELD_TYPE (type, i);
+	    if (TYPE_CODE (field_type) == TYPE_CODE_UNION
+		|| TYPE_CODE (field_type) == TYPE_CODE_STRUCT)
+	      {
+		/* Look for a match through the fields of an anonymous union,
+		   or anonymous struct.  C++ provides anonymous unions.
+
+		   In the GNU Chill implementation of variant record types,
+		   each <alternative field> has an (anonymous) union type,
+		   each member of the union represents a <variant alternative>.
+		   Each <variant alternative> is represented as a struct,
+		   with a member for each <variant field>.  */
+		   
+		value_ptr v;
+		int new_offset = offset;
+
+		/* This is pretty gross.  In G++, the offset in an anonymous
+		   union is relative to the beginning of the enclosing struct.
+		   In the GNU Chill implementation of variant records,
+		   the bitpos is zero in an anonymous union field, so we
+		   have to add the offset of the union here. */
+		if (TYPE_CODE (field_type) == TYPE_CODE_STRUCT
+		    || (TYPE_NFIELDS (field_type) > 0
+			&& TYPE_FIELD_BITPOS (field_type, 0) == 0))
+		  new_offset += TYPE_FIELD_BITPOS (type, i) / 8;
+
+		v = search_struct_field (name, arg1, new_offset, field_type,
+					 looking_for_baseclass);
+		if (v)
+		  return v;
+	      }
 	  }
       }
 

@@ -1,3 +1,14 @@
+Wed Sep 27 10:14:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* eval.c (evaluate_struct_tuple):  New function.  Used to evaluate
+	structure tuples.  Now also handles Chill variant records.
+	(get_label):  New function, used by evaluate_struct_tuple.
+	(evaluate_subexp_standard case OP_ARRAY):  Use evaluate_struct_tuple.
+	(evaluate_labeled_field_init):  Removed.
+
+	* valops.c (search_struct_field):  Generalize to work with Chill
+	variant records.
+
 Sat Sep 23 01:22:23 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mdebugread.c (parse_partial_symbols):  Reset includes_used
