@@ -1,3 +1,41 @@
+Wed Nov 15 03:52:00 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* as.c (main): Move md_end call to just after call to
+	perform_an_assembly_pass.  Delete cpu-specific code here.
+	* config/tc-i960.h (md_end): New macro, calls brtab_emit.
+start-sanitize-rce
+	* config/tc-rce.c (md_end): Deleted.
+	* config/tc-rce.h (md_end): New macro, calls dump_literals.
+end-sanitize-rce
+	* config/tc-arm.c (md_end): Unused function deleted.
+	* config/tc-ns32k.c (md_end): Ditto.
+
+	* config/tc-i386.c (i386_align_code): New function, moved here
+	from HANDLE_ALIGN macro.
+	* config/tc-i386.h (HANDLE_ALIGN): Call it.
+
+	Mon Jul 31 14:53:19 1995  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.h (md_do_align): cast fill and 0x90 to char
+ 	before comparing
+
+	Mon May  1 10:91:49 1995  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.h (md_do_align):  Make ".align n,0x90" generate
+	multi-byte nops to avoid changing gcc.  The necessary gcc change
+	might break old assemblers.
+
+	Sat Apr 22 20:53:05 1995  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.h (md_do_align, HANDLE_ALIGN):  Add macros to
+	generate optimal multi-byte nop instructions for ".align n"
+	".align n,0x90", and aligns requiring more than 15 bytes of
+	padding still generate multiple 0x90's as before.
+
+Mon Nov 13 17:40:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (s_mri_until): Call pop_mri_control.
+
 Mon Nov 13 20:39:06 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.in (ppc-*-macos*, ppc-*-mpw*): New configurations.

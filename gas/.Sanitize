@@ -155,7 +155,7 @@ else
 	fi
 fi
 
-rce_files="configure.in as.c configure ChangeLog Makefile.in ChangeLog.1"
+rce_files="configure.in configure ChangeLog Makefile.in ChangeLog.1"
 
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
 	for i in $rce_files ; do

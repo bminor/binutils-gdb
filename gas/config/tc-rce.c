@@ -683,11 +683,6 @@ DEFUN (md_undefined_symbol, (name),
   return 0;
 }
 
-void
-DEFUN_VOID (md_end)
-{
-}
-
 /* Various routines to kill one day */
 /* Equal to MAX_PRECISION in atof-ieee.c */
 #define MAX_LITTLENUMS 6
