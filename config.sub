@@ -77,7 +77,7 @@ case $os in
 	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -hitachi* |\
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
 	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp | \
-	-sim)						# CYGNUS LOCAL
+	-sim | -cisco)						# CYGNUS LOCAL
 		os=
 		basic_machine=$1
 		;;
@@ -92,7 +92,7 @@ case $os in
 		basic_machine=`echo $1 | sed -e 's/86-.*/86-unknown/'`
 		;;
 	-hiux*)
-		os=hiuxwe2
+		os=-hiuxwe2
 		;;
 	-sco4)
 		os=-sco3.2v4
@@ -122,6 +122,12 @@ case $os in
 		;;
 	-lynx)
 		os=-lynxos
+		;;
+	-os9k)
+		os=-os9k
+		;;
+	-os9)
+		os=-os9
 		;;
 esac
 
@@ -160,7 +166,7 @@ case $basic_machine in
 # start-sanitize-v9
 	sparc64)					# CYGNUS LOCAL
 		basic_machine=sparc64-sun
-		os=-elf64i64p
+		os=-elf
 		;;
 	sparc64-*)					# CYGNUS LOCAL
 		;;
@@ -717,7 +723,7 @@ case $os in
 	      | -hiux* | -386bsd* | -netbsd* | -riscix* | -lynxos* \
 	      | -go32 | -vsta | -sim | -es1800* | -udi | -hms* | -xray | -hds* \
 	      | -os68k* | -none* | -v88r* | -aout* | -coff | -elf* | -bosx* \
-	      | -abug | -ecoff* | -netware* )
+	      | -abug | -ecoff* | -netware* | -os9* )
 				# The last three lines above are CYGNUS LOCAL
 	;;
 	-sunos5*)
@@ -813,6 +819,12 @@ case $basic_machine in
 		# This also exists in the configure program, but was not the
 		# default.
 		# os=-sunos4
+		;;
+	m68*-cisco)
+		os=-aout
+		;;
+	mips*-cisco)
+		os=-elf
 		;;
 	*-tti)	# must be before sparc entry or we get the wrong os.
 		os=-sysv3
