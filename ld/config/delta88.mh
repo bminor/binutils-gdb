@@ -1,4 +1,4 @@
-HDEFINES = -DHiSTEVE
+HDEFINES = 
 
 CC = gcc -Wall -ansi
 YACC=yacc -tvd
