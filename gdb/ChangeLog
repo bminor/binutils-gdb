@@ -1,3 +1,10 @@
+Wed Mar 15 15:18:27 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* utils.c, defs.h (putchar_unfiltered, fputc_unfiltered): Make
+	argument be an int, not a char.  Using a prototype followed by an
+	old-style function definition in a case where an argument is
+	widened is a GCC-ism not supported by the native AIX compiler.
+
 Wed Mar 15 12:22:35 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* nlmstub.def: Removed, this was moved to nlm/gdbserve.def 

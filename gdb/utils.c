@@ -1382,25 +1382,29 @@ fputs_filtered (linebuffer, stream)
   fputs_maybe_filtered (linebuffer, stream, 1);
 }
 
-void
-putc_unfiltered (c)
+int
+putchar_unfiltered (c)
      int c;
 {
   char buf[2];
+
   buf[0] = c;
   buf[1] = 0;
   fputs_unfiltered (buf, gdb_stdout);
+  return c;
 }
 
-void
+int
 fputc_unfiltered (c, stream)
      int c;
      FILE * stream;
 {
   char buf[2];
+
   buf[0] = c;
   buf[1] = 0;
   fputs_unfiltered (buf, stream);
+  return c;
 }
 
 
