@@ -1,3 +1,17 @@
+2003-02-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_link_hash_table_create): Init tls_get_addr.
+	(ppc64_elf_copy_indirect_symbol): Merge tls_mask too.
+	(ppc64_elf_gc_sweep_hook): Simplify removal of dyn_relocs.
+	(allocate_dynrelocs): Don't treat undefined and undefweak specially.
+	(ppc_size_one_stub): Fix warning, and tighten plt entry check.
+	(group_sections): Don't share a stub section if stubs are for a large
+	section.  Adjust comment.
+	(ppc64_elf_size_stubs): Roughly double the size left for stubs if
+	!stubs_always_before_branch.
+	(ppc64_elf_relocate_section): Initialize tlsld GOT entry once.  Don't
+	treat undefined and undefweak specially when processing dyn relocs.
+
 2003-02-13  Jakub Jelinek  <jakub@redhat.com>
 
 	* elflink.h (elf_link_add_object_symbols): Handle .symver x, x@FOO.
@@ -142,7 +156,7 @@
 	TLS_EXPLICIT): Define.
 	(struct ppc_link_hash_table): Add tls_sec, tls_get_addr, tlsld_got.
 	(link_hash_newfunc): Init new fields.
-	(ppc64_elf_link_hash_table_create): Likewise.  Set init_relcount and
+	(ppc64_elf_link_hash_table_create): Likewise.  Set init_refcount and
 	init_offset to NULL.
 	(ppc64_elf_copy_indirect_symbol): Copy got and plt info.  Don't call
 	_bfd_elf_link_hash_copy_indirect, rather insert relevant code from

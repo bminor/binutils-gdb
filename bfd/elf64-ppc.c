@@ -2533,7 +2533,8 @@ struct plt_entry
 };
 
 /* Of those relocs that might be copied as dynamic relocs, this macro
-   selects those that must be copied when linking a shared library.  */
+   selects those that must be copied when linking a shared library,
+   even when the symbol is local.  */
 
 #define MUST_BE_DYN_RELOC(RTYPE)		\
   ((RTYPE) != R_PPC64_REL32			\
@@ -2968,6 +2969,7 @@ ppc64_elf_link_hash_table_create (abfd)
   htab->sbrlt = NULL;
   htab->srelbrlt = NULL;
   htab->tls_sec = NULL;
+  htab->tls_get_addr = NULL;
   htab->tlsld_got.refcount = 0;
   htab->stub_error = 0;
   htab->has_14bit_branch = 0;
@@ -3306,6 +3308,7 @@ ppc64_elf_copy_indirect_symbol (bed, dir, ind)
   edir->is_func |= eind->is_func;
   edir->is_func_descriptor |= eind->is_func_descriptor;
   edir->is_entry |= eind->is_entry;
+  edir->tls_mask |= eind->tls_mask;
 
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
@@ -4106,11 +4109,29 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
     {
       unsigned long r_symndx;
       enum elf_ppc64_reloc_type r_type;
-      struct elf_link_hash_entry *h;
+      struct elf_link_hash_entry *h = NULL;
       char tls_type = 0;
 
       r_symndx = ELF64_R_SYM (rel->r_info);
       r_type = (enum elf_ppc64_reloc_type) ELF64_R_TYPE (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  struct ppc_link_hash_entry *eh;
+	  struct ppc_dyn_relocs **pp;
+	  struct ppc_dyn_relocs *p;
+
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  eh = (struct ppc_link_hash_entry *) h;
+
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    if (p->sec == sec)
+	      {
+		/* Everything must go for SEC.  */
+		*pp = p->next;
+		break;
+	      }
+	}
+
       switch (r_type)
 	{
 	case R_PPC64_GOT_TLSLD16:
@@ -4152,11 +4173,8 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	  {
 	    struct got_entry *ent;
 
-	    if (r_symndx >= symtab_hdr->sh_info)
-	      {
-		h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-		ent = h->got.glist;
-	      }
+	    if (h != NULL)
+	      ent = h->got.glist;
 	    else
 	      ent = local_got_ents[r_symndx];
 
@@ -4180,11 +4198,10 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	case R_PPC64_REL14_BRNTAKEN:
 	case R_PPC64_REL14_BRTAKEN:
 	case R_PPC64_REL24:
-	  if (r_symndx >= symtab_hdr->sh_info)
+	  if (h != NULL)
 	    {
 	      struct plt_entry *ent;
 
-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	      for (ent = h->plt.plist; ent != NULL; ent = ent->next)
 		if (ent->addend == rel->r_addend)
 		  break;
@@ -4192,73 +4209,6 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
 		abort ();
 	      if (ent->plt.refcount > 0)
 		ent->plt.refcount -= 1;
-	    }
-	  break;
-
-	case R_PPC64_REL30:
-	case R_PPC64_REL32:
-	case R_PPC64_REL64:
-	  if (r_symndx >= symtab_hdr->sh_info)
-	    {
-	      struct ppc_link_hash_entry *eh;
-	      struct ppc_dyn_relocs **pp;
-	      struct ppc_dyn_relocs *p;
-
-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	      eh = (struct ppc_link_hash_entry *) h;
-
-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-		if (p->sec == sec)
-		  {
-		    p->pc_count -= 1;
-		    p->count -= 1;
-		    if (p->count == 0)
-		      *pp = p->next;
-		    break;
-		  }
-	    }
-	  break;
-
-	case R_PPC64_DTPMOD64:
-	case R_PPC64_DTPREL64:
-	case R_PPC64_TPREL64:
-	case R_PPC64_ADDR14:
-	case R_PPC64_ADDR14_BRNTAKEN:
-	case R_PPC64_ADDR14_BRTAKEN:
-	case R_PPC64_ADDR16:
-	case R_PPC64_ADDR16_DS:
-	case R_PPC64_ADDR16_HA:
-	case R_PPC64_ADDR16_HI:
-	case R_PPC64_ADDR16_HIGHER:
-	case R_PPC64_ADDR16_HIGHERA:
-	case R_PPC64_ADDR16_HIGHEST:
-	case R_PPC64_ADDR16_HIGHESTA:
-	case R_PPC64_ADDR16_LO:
-	case R_PPC64_ADDR16_LO_DS:
-	case R_PPC64_ADDR24:
-	case R_PPC64_ADDR32:
-	case R_PPC64_ADDR64:
-	case R_PPC64_UADDR16:
-	case R_PPC64_UADDR32:
-	case R_PPC64_UADDR64:
-	case R_PPC64_TOC:
-	  if (r_symndx >= symtab_hdr->sh_info)
-	    {
-	      struct ppc_link_hash_entry *eh;
-	      struct ppc_dyn_relocs **pp;
-	      struct ppc_dyn_relocs *p;
-
-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	      eh = (struct ppc_link_hash_entry *) h;
-
-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-		if (p->sec == sec)
-		  {
-		    p->count -= 1;
-		    if (p->count == 0)
-		      *pp = p->next;
-		    break;
-		  }
 	    }
 	  break;
 
@@ -5663,11 +5613,8 @@ allocate_dynrelocs (h, inf)
 	 dynamic.  */
 
       if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-	  && (((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-	      || (htab->elf.dynamic_sections_created
-		  && (h->root.type == bfd_link_hash_undefweak
-		      || h->root.type == bfd_link_hash_undefined))))
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  /* Make sure this symbol is output as a dynamic symbol.
 	     Undefined weak syms won't yet be marked as dynamic.  */
@@ -6272,13 +6219,14 @@ ppc_size_one_stub (gen_entry, in_arg)
   if (stub_entry->stub_type == ppc_stub_plt_call)
     {
       struct plt_entry *ent;
+      off = (bfd_vma) -1;
       for (ent = stub_entry->h->elf.plt.plist; ent != NULL; ent = ent->next)
 	if (ent->addend == stub_entry->addend)
 	  {
 	    off = ent->plt.offset & ~(bfd_vma) 1;
 	    break;
 	  }
-      if (ent == NULL)
+      if (off >= (bfd_vma) -2)
 	abort ();
       off += (htab->splt->output_offset
 	      + htab->splt->output_section->vma
@@ -6458,12 +6406,15 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
 	  asection *curr;
 	  asection *prev;
 	  bfd_size_type total;
+	  bfd_boolean big_sec;
 
 	  curr = tail;
 	  if (tail->_cooked_size)
 	    total = tail->_cooked_size;
 	  else
 	    total = tail->_raw_size;
+	  big_sec = total >= stub_group_size;
+
 	  while ((prev = PREV_SEC (curr)) != NULL
 		 && ((total += curr->output_offset - prev->output_offset)
 		     < stub_group_size))
@@ -6478,7 +6429,7 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
 	     section size.  That's a little tricky, and this way will
 	     only break if stubs added make the total size more than
 	     2^25, ie. for the default stub_group_size, if stubs total
-	     more than 2834432 bytes, or over 100000 plt call stubs.  */
+	     more than 2097152 bytes, or nearly 75000 plt call stubs.  */
 	  do
 	    {
 	      prev = PREV_SEC (tail);
@@ -6488,8 +6439,11 @@ group_sections (htab, stub_group_size, stubs_always_before_branch)
 	  while (tail != curr && (tail = prev) != NULL);
 
 	  /* But wait, there's more!  Input sections up to stub_group_size
-	     bytes before the stub section can be handled by it too.  */
-	  if (!stubs_always_before_branch)
+	     bytes before the stub section can be handled by it too.
+	     Don't do this if we have a really large section after the
+	     stubs, as adding more stubs increases the chance that
+	     branches may not reach into the stub section.  */
+	  if (!stubs_always_before_branch && !big_sec)
 	    {
 	      total = 0;
 	      while (prev != NULL
@@ -6541,9 +6495,18 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
   if (stub_group_size == 1)
     {
       /* Default values.  */
-      stub_group_size = 30720000;
-      if (htab->has_14bit_branch)
-	stub_group_size = 30000;
+      if (stubs_always_before_branch)
+	{
+	  stub_group_size = 0x1e00000;
+	  if (htab->has_14bit_branch)
+	    stub_group_size = 0x7800;
+	}
+      else
+	{
+	  stub_group_size = 0x1c00000;
+	  if (htab->has_14bit_branch)
+	    stub_group_size = 0x7000;
+	}
     }
 
   group_sections (htab, stub_group_size, stubs_always_before_branch);
@@ -6998,20 +6961,26 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
     ppc_howto_init ();
 
   htab = ppc_hash_table (info);
-  if (info->shared && (htab->tlsld_got.offset & 1) == 0)
+  if ((htab->tlsld_got.offset & 1) == 0)
     {
-      outrel.r_offset = (htab->sgot->output_section->vma
-			 + htab->sgot->output_offset
-			 + htab->tlsld_got.offset);
-      outrel.r_info = ELF64_R_INFO (0, R_PPC64_DTPMOD64);
-      outrel.r_addend = 0;
+      if (info->shared)
+	{
+	  outrel.r_offset = (htab->sgot->output_section->vma
+			     + htab->sgot->output_offset
+			     + htab->tlsld_got.offset);
+	  outrel.r_info = ELF64_R_INFO (0, R_PPC64_DTPMOD64);
+	  outrel.r_addend = 0;
 
-      loc = htab->srelgot->contents;
-      loc += htab->srelgot->reloc_count++ * sizeof (Elf64_External_Rela);
-      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+	  loc = htab->srelgot->contents;
+	  loc += htab->srelgot->reloc_count++ * sizeof (Elf64_External_Rela);
+	  bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+	}
+      else
+	bfd_put_64 (output_bfd, (bfd_vma) 1,
+		    htab->sgot->contents + htab->tlsld_got.offset);
+
       htab->tlsld_got.offset |= 1;
     }
-
   local_got_ents = elf_local_got_ents (input_bfd);
   TOCstart = elf_gp (output_bfd);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -7692,9 +7661,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		/* Init the .got section contents if we're not
 		   emitting a reloc.  */
-		if (!(info->shared || indx != 0))
+		if (!(info->shared || indx != 0)
+		    && tls_type != (TLS_TLS | TLS_LD))
 		  {
-
 		    relocation += ent->addend;
 		    if (tls_type != 0)
 		      {
@@ -7703,10 +7672,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			  relocation += DTP_OFFSET - TP_OFFSET;
 		      }
 
-		    if ((tls_type & (TLS_GD | TLS_LD)) != 0)
+		    if ((tls_type & TLS_GD) != 0)
 		      {
-			if ((tls_type & TLS_LD) != 0)
-			  relocation = - DTP_OFFSET;
 			bfd_put_64 (output_bfd, relocation,
 				    htab->sgot->contents + off + 8);
 			relocation = 1;
@@ -7879,12 +7846,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  && h != NULL
 		  && h->dynindx != -1
 		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-		  && (((h->elf_link_hash_flags
-			& ELF_LINK_HASH_DEF_DYNAMIC) != 0
-		       && (h->elf_link_hash_flags
-			   & ELF_LINK_HASH_DEF_REGULAR) == 0)
-		      || h->root.type == bfd_link_hash_undefweak
-		      || h->root.type == bfd_link_hash_undefined)))
+		  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0))
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip, relocate;
