@@ -1,3 +1,9 @@
+Thu Jun 27 11:24:29 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Add AC_ISC_POSIX, and check for setitimer and
+	sysconf functions (for gprof).
+	* configure, config.in: Rebuild.
+
 Wed Jun 26 16:29:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (_bfd_ecoff_archive_p): Check the first object file in
