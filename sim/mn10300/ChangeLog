@@ -1,3 +1,11 @@
+Tue Jun 30 11:23:20 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300_sim.h: Include bfd.h
+	(struct state): Add more room for processor specific registers.
+start-sanitize-am33
+	(REG_E0): Define.
+end-sanitize-am33
+
 start-sanitize-am30
 Thu Jun 25 10:12:03 1998  Joyce Janczyn  <janczyn@cygnus.com>
 

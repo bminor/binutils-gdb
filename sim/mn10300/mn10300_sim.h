@@ -5,6 +5,7 @@
 #include "opcode/mn10300.h"
 #include <limits.h>
 #include "remote-sim.h"
+#include "bfd.h"
 
 #ifndef INLINE
 #ifdef __GNUC__
@@ -69,8 +70,9 @@ struct simops
 
 struct _state
 {
-  reg_t regs[15];		/* registers, d0-d3, a0-a3, sp, pc, mdr, psw,
-				   lir, lar, mdrq */
+  reg_t regs[32];		/* registers, d0-d3, a0-a3, sp, pc, mdr, psw,
+				   lir, lar, mdrq, plus some room for processor
+				   specific regs.  */
   uint8 *mem;			/* main memory */
   int exception;
   int exited;
@@ -79,13 +81,19 @@ struct _state
 extern uint32 OP[4];
 extern struct simops Simops[];
 
-#define PC	(State.regs[9])
+#define PC	(State.regs[REG_PC])
+#define SP	(State.regs[REG_SP])
 
 #define PSW (State.regs[11])
 #define PSW_Z 0x1
 #define PSW_N 0x2
 #define PSW_C 0x4
 #define PSW_V 0x8
+#define PSW_IE LSBIT (11)
+#define PSW_LM LSMASK (10, 8)
+
+#define EXTRACT_PSW_LM LSEXTRACTED16 (PSW, 10, 8)
+#define INSERT_PSW_LM(l) LSINSERTED16 ((l), 10, 8)
 
 #define REG_D0 0
 #define REG_A0 4
@@ -96,6 +104,9 @@ extern struct simops Simops[];
 #define REG_LIR 12
 #define REG_LAR 13
 #define REG_MDRQ 14
+/* start-sanitize-am33 */
+#define REG_E0 15
+/* end-sanitize-am33 */
 
 #if WITH_COMMON
 /* These definitions conflict with similar macros in common.  */
@@ -337,10 +348,10 @@ void put_byte PARAMS ((uint8 *, uint8));
 
 extern uint8 *map PARAMS ((SIM_ADDR addr));
 
-void genericAdd PARAMS ((unsigned long source, unsigned long destReg));
-void genericSub PARAMS ((unsigned long source, unsigned long destReg));
-void genericCmp PARAMS ((unsigned long leftOpnd, unsigned long rightOpnd));
-void genericOr PARAMS ((unsigned long source, unsigned long destReg));
-void genericXor PARAMS ((unsigned long source, unsigned long destReg));
-void genericBtst PARAMS ((unsigned long leftOpnd, unsigned long rightOpnd));
-void do_syscall PARAMS ((void));
+INLINE_SIM_MAIN (void) genericAdd PARAMS ((unsigned long source, unsigned long destReg));
+INLINE_SIM_MAIN (void) genericSub PARAMS ((unsigned long source, unsigned long destReg));
+INLINE_SIM_MAIN (void) genericCmp PARAMS ((unsigned long leftOpnd, unsigned long rightOpnd));
+INLINE_SIM_MAIN (void) genericOr PARAMS ((unsigned long source, unsigned long destReg));
+INLINE_SIM_MAIN (void) genericXor PARAMS ((unsigned long source, unsigned long destReg));
+INLINE_SIM_MAIN (void) genericBtst PARAMS ((unsigned long leftOpnd, unsigned long rightOpnd));
+INLINE_SIM_MAIN (void) do_syscall PARAMS ((void));
