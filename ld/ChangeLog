@@ -1,3 +1,10 @@
+Mon Jul 28 19:04:50 1997  Rob Savoye  <rob@chinadoll.cygnus.com>
+
+        * configure.in: Use CYGWIN and EXEEXT autoconf macro to look for
+        win32 dependencies.
+        * configure: Regenerated with autoconf 2.12.
+        * Makefile.in: Add $(EXEEXT) to executable.
+
 Tue Jul 22 18:50:38 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>
 
 	* emulparams/i386go32.sh (OUTPUT_FORMAT): Set to "coff-go32".

@@ -59,6 +59,7 @@ INSTALL_DATA = @INSTALL_DATA@
 AR = ar
 AR_FLAGS = qv
 CC = @CC@
+EXEEXT = @EXEEXT@
 CFLAGS = @CFLAGS@
 LDFLAGS = @LDFLAGS@
 HLDFLAGS = @HLDFLAGS@
@@ -167,7 +168,7 @@ CXX_FOR_TARGET = ` \
 # go directly to ld.new in case this ld isn't capable of
 # linking native object on this host.  It can be renamed on
 # install.
-LD_PROG	= ld.new
+LD_PROG	= ld.new$(EXEEXT)
 
 all: $(LD_PROG)
 .PHONY: all
@@ -408,19 +409,19 @@ eelf32b4300.c: $(srcdir)/emulparams/elf32b4300.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32b4300 "$(tdir_elf32b4300)"
 eelf32bmip.c: $(srcdir)/emulparams/elf32bmip.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfmips.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32bmip "$(tdir_elf32bmip)"
 eelf32ebmip.c: $(srcdir)/emulparams/elf32ebmip.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfmips.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ebmip "$(tdir_elf32ebmip)"
 eelf32elmip.c: $(srcdir)/emulparams/elf32elmip.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfmips.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32elmip "$(tdir_elf32elmip)"
 eelf32l4300.c: $(srcdir)/emulparams/elf32l4300.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32l4300 "$(tdir_elf32l4300)"
 eelf32lmip.c: $(srcdir)/emulparams/elf32lmip.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfmips.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lmip "$(tdir_elf32lmip)"
 eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfppc.sc ${GEN_DEPENDS}
@@ -955,13 +956,13 @@ TAGS:
 	etags -t $(srcdir)/*.[chly] *.[chly]
 
 
-install: ld.new installdirs
+install: ld.new$(EXEEXT) installdirs
 	n=`echo ld | sed '$(program_transform_name)'`; \
-	$(INSTALL_PROGRAM) ld.new $(bindir)/$$n; \
+	$(INSTALL_PROGRAM) ld.new$(EXEEXT) $(bindir)/$$n$(EXEEXT); \
 	$(INSTALL_DATA) $(srcdir)/ld.1 $(man1dir)/$$n.1; \
-	rm -f $(tooldir)/bin/ld; \
-	ln $(bindir)/$$n $(tooldir)/bin/ld >/dev/null 2>/dev/null \
-	 || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld
+	rm -f $(tooldir)/bin/ld$(EXEEXT); \
+	ln $(bindir)/$$n $(tooldir)/bin/ld$(EXEEXT) >/dev/null 2>/dev/null \
+	 || $(INSTALL_PROGRAM) ld.new$(EXEEXT) $(tooldir)/bin/ld$(EXEEXT)
 	for f in ldscripts/*; do \
 	  $(INSTALL_DATA) $$f $(scriptdir)/$$f ; \
 	done
