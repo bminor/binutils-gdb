@@ -17114,6 +17114,32 @@ List the functions in the executable.
 N.A.
 
 
+@subheading The @code{-symbol-list-lines} Command
+@findex -symbol-list-lines
+
+@subsubheading Synopsis
+
+@smallexample
+ -symbol-list-lines @var{filename}
+@end smallexample
+
+Print the list of lines that contain code and their associated program
+addresses for the given source filename.  The entries are sorted in
+ascending PC order.
+
+@subsubheading @value{GDBN} Command
+
+There is no corresponding @value{GDBN} command.
+
+@subsubheading Example
+@smallexample
+(@value{GDBP})
+-symbol-list-lines basics.c
+^done,lines=[{pc="0x08048554",line="7"},{pc="0x0804855a",line="8"}]
+(@value{GDBP})
+@end smallexample
+
+
 @subheading The @code{-symbol-list-types} Command
 @findex -symbol-list-types
 
