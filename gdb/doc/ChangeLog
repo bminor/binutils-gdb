@@ -1,3 +1,12 @@
+Tue Oct 12 09:11:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo: Update ld stabs in elf relocation to reflect the fact
+	that Sun has backed away from the linker kludge and thus the relevant
+	issue is changes to the SunPRO tools, not the Solaris linker.
+
+	* stabs.texinfo (Traditional Integer Types): Clean up description
+	of octal bounds a little bit.  Document extra leading zeroes.
+
 Thu Oct  7 16:15:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.texinfo (Signaling): Update for symbolic symbol names
