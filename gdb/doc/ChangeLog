@@ -1,3 +1,7 @@
+Thu Mar 16 12:11:32 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Negative Type Numbers): Document types -31 to -34.
+
 Mon Mar 13 16:49:13 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* gdb.texinfo (Define):  Document $arg0... arguments to commands,

@@ -1639,6 +1639,18 @@ floating point values.
 @item -30
 @code{wchar}.  Wide character, 16 bits wide, unsigned (what format?
 Unicode?).
+
+@item -31
+@code{long long}, 64 bit signed integral type.
+
+@item -32
+@code{unsigned long long}, 64 bit unsigned integral type.
+
+@item -33
+@code{logical*8}, 64 bit unsigned integral type.
+
+@item -34
+@code{integer*8}, 64 bit signed integral type.
 @end table
 
 @node Miscellaneous Types
