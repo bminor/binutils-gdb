@@ -1051,6 +1051,7 @@ objdump [ -a | --archive-headers ]
         [ -w | --wide ] [ --start-address=@var{address} ]
         [ --stop-address=@var{address} ]
         [ --prefix-addresses] [ --show-raw-insn ]
+        [ --adjust-vma=@var{offset} ]
         [ --version ]  [ --help ]
         @var{objfile}@dots{}
 @end smallexample
@@ -1076,6 +1077,15 @@ If any of the @var{objfile} files are archives, display the archive
 header information (in a format similar to @samp{ls -l}).  Besides the
 information you could list with @samp{ar tv}, @samp{objdump -a} shows
 the object file format of each archive member.
+
+@item --adjust-vma=@var{offset}
+@cindex section addresses in objdump
+@cindex VMA in objdump
+When dumping information, first add @var{offset} to all the section
+addresses.  This is useful if the section addresses do not correspond to
+the symbol table, which can happen when putting sections at particular
+addresses when using a format which can not represent section addresses,
+such as a.out.
 
 @item -b @var{bfdname}
 @itemx --target=@var{bfdname}

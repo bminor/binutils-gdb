@@ -59,6 +59,9 @@ objdump \- display information from object files.
 .RB "[\|" "\-\-stop\-address="\c
 .I address\c
 \&\|]
+.RB "[\|" "\-\-adjust\-vma="\c
+.I offset\c
+\&\|]
 .RB "[\|" \-\-version "\|]"
 .RB "[\|" \-\-help "\|]"
 .I objfile\c
@@ -102,6 +105,15 @@ information you could list with `\|\c
 .B objdump \-a\c
 \|' shows
 the object file format of each archive member.
+
+.TP
+.BI "\-\-adjust\-vma=" "offset"
+When dumping information, first add
+.I offset
+to all the section addresses.  This is useful if the section addresses
+do not correspond to the symbol table, which can happen when putting
+sections at particular addresses when using a format which can not
+represent section addresses, such as a.out.
 
 .TP
 .BI "\-b " "bfdname"\c
