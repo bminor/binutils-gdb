@@ -82,6 +82,8 @@ GDB as you discover it (or as you design changes to GDB).
 * Wrapping::			Wrapping Output Lines
 * Frames::			Keeping track of function calls
 * Coding Style::		Strunk and White for GDB maintainers
+* Clean Design::		Frank Lloyd Wright for GDB maintainers
+* Submitting Patches::		How to get your changes into GDB releases
 * Host Conditionals::		What features exist in the host
 * Target Conditionals::		What features exist in the target
 * Native Conditionals::		Conditionals for when host and target are same
@@ -1057,6 +1059,150 @@ a declaration near the top of their source file.
 We don't have a gcc option that will properly check that these rules
 have been followed, but it's GDB policy, and we periodically check it
 using the tools available (plus manual labor), and clean up any remnants.
+
+@node Clean Design
+@chapter Clean Design
+
+In addition to getting the syntax right, there's the little question of
+semantics.  Some things are done in certain ways in GDB because long
+experience has shown that the more obvious ways caused various kinds of
+trouble.  In particular:
+
+@table @bullet
+@item
+You can't assume the byte order of anything that comes from a
+target (including @var{value}s, object files, and instructions).  Such
+things must be byte-swapped using @code{SWAP_HOST_AND_TARGET} in GDB,
+or one of the swap routines defined in @file{bfd.h}, such as @code{bfd_get_32}.
+
+@item
+You can't assume that you know what interface is being used to talk to
+the target system.  All references to the target must go through the
+current @code{target_ops} vector.
+
+@item
+You can't assume that the host and target machines are the same machine
+(except in the ``native'' support modules).
+In particular, you can't assume that the target machine's header files
+will be available on the host machine.  Target code must bring along its
+own header files -- written from scratch or explicitly donated by their
+owner, to avoid copyright problems.
+
+@item
+Insertion of new @code{#ifdef}'s will be frowned upon.
+
+@item
+New @code{#ifdef}'s which test for specific compilers or manufacturers
+or operating systems are unacceptable.  All @code{#ifdef}'s should test
+for features.  The information about which configurations contain which
+features should be segregated into the configuration files.  Experience
+has proven far too often that a feature unique to one particular system
+often creeps into other systems; and that a conditional based on 
+some predefined macro for your current system will become worthless
+over time, as new versions of your system come out that behave differently
+with regard to this feature.
+
+@item
+Adding code that handles specific architectures, operating systems, target
+interfaces, or hosts, is not acceptable in generic code.  If a hook
+is needed at that point, invent a generic hook and define it for your
+configuration, with something like:
+
+@example
+#ifdef	WRANGLE_SIGNALS
+   WRANGLE_SIGNALS (signo);
+#endif
+@end example
+
+In your host, target, or native configuration file, as appropriate, 
+define @code{WRANGLE_SIGNALS} to do the machine-dependent thing.  Take
+a bit of care in defining the hook, so that it can be used by other
+ports in the future, if they need a hook in the same place.
+
+@item
+@emph{Do} write code that doesn't depend on the sizes of C data types,
+the format of the host's floating point numbers, the alignment of anything,
+or the order of evaluation of expressions.  In short, follow good 
+programming practices for writing portable C code.
+
+@end table
+
+@node Submitting Patches
+@chapter Submitting Patches
+
+Thanks for thinking of offering your changes back to the community of
+GDB users.  In general we like to get well designed enhancements.
+Thanks also for checking in advance about the best way to transfer the
+changes.
+
+The two main problems with getting your patches in are,
+
+@table @bullet
+@item
+The GDB maintainers will only install "cleanly designed" patches.
+You may not always agree on what is clean design.
+@pxref{Coding Style}, @pxref{Clean Design}.
+
+@item
+If the maintainers don't have time to put the patch in when it
+arrives, or if there is any question about a patch, it
+goes into a large queue with everyone else's patches and
+bug reports
+@end table
+
+I don't know how to get past these problems except by continuing to try.
+
+There are two issues here -- technical and legal.
+
+The legal issue is that to incorporate substantial changes requires a
+copyright assignment from you and/or your employer, granting ownership of the changes to
+the Free Software Foundation.  You can get the standard document for
+doing this by sending mail to @code{gnu@prep.ai.mit.edu} and asking for it.
+I recommend that people write in "All programs owned by the
+Free Software Foundation" as "NAME OF PROGRAM", so that changes in
+many programs (not just GDB, but GAS, Emacs, GCC, etc) can be
+contributed with only one piece of legalese pushed through the
+bureacracy and filed with the FSF.  I can't start merging changes until
+this paperwork is received by the FSF (their rules, which I follow since
+I maintain it for them).
+
+Technically, the easiest way to receive changes is to receive each
+feature as a small context diff or unidiff, suitable for "patch".
+Each message sent to me should include the changes to C code and
+header files for a single feature, plus ChangeLog entries for each
+directory where files were modified, and diffs for any changes needed
+to the manuals (gdb/doc/gdb.texi or gdb/doc/gdbint.texi).  If there
+are a lot of changes for a single feature, they can be split down
+into multiple messages.
+
+In this way, if I read and like the feature, I can add it to the
+sources with a single patch command, do some testing, and check it in.
+If you leave out the ChangeLog, I have to write one.  If you leave
+out the doc, I have to puzzle out what needs documenting.  Etc.
+
+The reason to send each change in a separate message is that I will
+not install some of the changes.  They'll be returned to you with
+questions or comments.  If I'm doing my job, my message back to you
+will say what you have to fix in order to make the change acceptable.
+The reason to have separate messages for separate features is so
+that other changes (which I @emph{am} willing to accept) can be installed
+while one or more changes are being reworked.  If multiple features
+are sent in a single message, I tend to not put in the effort to sort
+out the acceptable changes from the unacceptable, so none of the
+features get installed until all are acceptable.
+
+If this sounds painful or authoritarian, well, it is.  But I get a lot
+of bug reports and a lot of patches, and most of them don't get
+installed because I don't have the time to finish the job that the bug
+reporter or the contributor could have done.  Patches that arrive
+complete, working, and well designed, tend to get installed on the day
+they arrive.  The others go into a queue and get installed if and when
+I scan back over the queue -- which can literally take months
+sometimes.  It's in both our interests to make patch installation easy
+-- you get your changes installed, and I make some forward progress on
+GDB in a normal 12-hour day (instead of them having to wait until I
+have a 14-hour or 16-hour day to spend cleaning up patches before I
+can install them).
 
 @node Host Conditionals
 @chapter Host Conditionals
