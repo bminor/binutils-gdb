@@ -1,3 +1,11 @@
+Tue Aug  3 18:28:25 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t09/Makefile.in (clean):  Remove corefile.
+
+Mon Aug  2 12:47:44 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t07/watchpoint.exp: Add missing `$prompt $'.
+
 Mon Aug  2 12:30:14 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 			  and Jim Kingdon (kingdon@cygnus.com)
 
