@@ -1,5 +1,10 @@
 Mon Jun  3 11:01:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* bfd-in.h: Use #error if BFD_HOST_64_BIT can not be defined.
+	* bfd-in2.h: Rebuild.
+	* configure.in: Warn if there is no known 64 bit type.
+	* configure: Rebuild.
+
 	* Makefile.in: Rebuild dependencies.
  	(BFD32_BACKENDS): Add ppcboot.o.
 	(BFD32_BACKENDS_CFILES): Add ppcboot.c.
