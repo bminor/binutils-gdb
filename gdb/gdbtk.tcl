@@ -1977,7 +1977,7 @@ proc populate_reg_window {} {
 
     set width [expr $max_regname_width + 15]
 
-    set height [llength $regnames]
+    set height [expr [llength $regnames] + 1]
 
     if {$height > 60} {set height 60}
 
