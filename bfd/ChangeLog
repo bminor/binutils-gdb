@@ -1,5 +1,8 @@
 Mon Mar  4 12:49:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffgen.c (coff_find_nearest_line): Don't look at the line
+	numbers for the section if section->lineno is NULL.
+
 	* elf.c (_bfd_elf_symbol_from_bfd_symbol): Print a useful error
 	message rather than calling BFD_ASSERT.
 	* elfcode.h (write_relocs): Check return value of
@@ -665,7 +668,7 @@ Thu Jan 25 12:14:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* xcofflink.c (bfd_xcoff_size_dynamic_sections): Don't set
 	entry_section from hentry.
 	(xcoff_link_input_bfd): If a defined symbol has XCOFF_ENTRY set,
-	set snentyr.
+	set snenty.
 	(xcoff_link_input_bfd): Set sntoc, not toc_section.
 	(xcoff_write_global_symbol): Get toc_section from sntoc, rather
 	than using toc_section directly.
