@@ -2980,7 +2980,7 @@ md_apply_fix3 (fixP, valP, seg)
 {
   /* This assignment truncates upper bits if valueT is 64 bits (as with
      --enable-64-bit-bfd), which is fine here, though we cast to avoid
-     compiler any warnings.  */
+     any compiler warnings.  */
   long val = (long) *valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
