@@ -98,13 +98,13 @@ extern int mips_step_skips_delay (CORE_ADDR);
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#define REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
+#define MIPS_REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
 
 /* Return the GDB type object for the "standard" data type of data in
    register N.  */
 
-#ifndef REGISTER_VIRTUAL_TYPE
-#define REGISTER_VIRTUAL_TYPE(N) \
+#ifndef MIPS_REGISTER_TYPE
+#define MIPS_REGISTER_TYPE(N) \
 	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_float \
 	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
 	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \

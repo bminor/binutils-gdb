@@ -1,3 +1,57 @@
+2003-06-21  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c: Include "reggroups.h" and "sim-regno.h".
+	(mips_register_name): Return names for NUM_REGS..2*NUM_REGS
+	instead of 0..NUM_REGS.
+	(mips_register_reggroup_p): New function.
+	(mips_pseudo_register_write): New function.
+	(mips_pseudo_register_read): New function.
+	(mips_register_raw_size): For NUM_REGS..2*NUM_REGS return the size
+	based on the register's type.
+	(read_next_frame_reg): Simplify.  Assert that REGNO is a pseudo /
+	cooked.
+	(mips_get_saved_register): Simplify.  Assert that REGNO is a
+	pseudo / cooked.
+	(mips_register_byte): New function.  Use MIPS_REGISTER_BYTE.
+	(mips_register_type): Replace mips_register_virtual_type.  Map
+	NUM_REGS..2*NUM_REGS onto 0..NUM_REGS.  Use MIPS_REGISTER_TYPE
+	when available.
+	(read_next_frame_reg): Simplify, but handle SP_REGNUM.  Assert
+	that the register is cooked / virtual.
+	(mips_frame_saved_pc): Fetch the cooked PC, and not the raw PC.
+	Only get the extra info when needed.
+	(set_reg_offset): Save the offset in NUM_REGS..2*NUM_REGS as well.
+	(mips32_heuristic_proc_desc): Fetch the cooked register.
+	(heuristic_proc_desc, mips_pop_frame, get_frame_pointer): Ditto.
+	(mips_init_extra_frame_info, get_frame_pointer): Ditto.
+	(mips_print_register): Use gdbarch_register_type, instead of
+	REGISTER_VIRTUAL_TYPE.
+	(print_gp_register_row): Use gdbarch_register_type, instead of
+	REGISTER_VIRTUAL_TYPE.  Allow for a pseudo / cooked REGNUM.
+	(mips_print_registers_info): Assert REGNO is pseodo / cooked.
+	Print the pseudo / cooked registers.
+	(mips_print_registers_info): Assert REGNO is pseodo / cooked.
+	Print the pseudo / cooked registers.
+	(mips_xfer_register): Use regcache_cooked_read_part.  Assert that
+	REG_NUM is pseudo / cooked.
+	(mips_o32_xfer_return_value): Xfer the pseudo / cooked register.
+	(mips_n32n64_xfer_return_value): Ditto.
+	(mips_stab_reg_to_regnum): Map onto NUM_REGS..2*NUM_REGS.
+	(mips_dwarf_dwarf2_ecoff_reg_to_regnum): Ditto.
+	(mips_register_sim_regno): New function.
+	(mips_gdbarch_init): Set deprecated_register_byte,
+	register_group_p, pseudo_register_write, pseudo_register_read,
+	register_sim_regno, and num_pseudo_regs.  Set register_type,
+	instead of register_virtual_type.
+	* Makefile.in (mips-tdep.o): Update dependencies.
+	* config/mips/tm-mips64.h (MIPS_REGISTER_TYPE): Rename
+	REGISTER_VIRTUAL_TYPE.
+	* config/mips/tm-mips.h	(MIPS_REGISTER_TYPE): Ditto.
+	* config/mips/tm-irix5.h (MIPS_REGISTER_TYPE): Ditto.
+	* config/mips/tm-mips.h (MIPS_REGISTER_BYTE): Rename REGISTER_BYTE.
+	* config/mips/tm-irix6.h (MIPS_REGISTER_BYTE): Ditto.
+	* config/mips/tm-irix5.h (MIPS_REGISTER_BYTE): Ditto.
+
 2003-06-21  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (cli-cmds.o): Depend on $(gdb_vfork_h)

@@ -62,8 +62,8 @@
 #define FCRIR_REGNUM 70		/* FP implementation/revision */
 
 
-#undef  REGISTER_BYTE
-#define REGISTER_BYTE(N) \
+#undef  MIPS_REGISTER_BYTE
+#define MIPS_REGISTER_BYTE(N) \
      (((N) < FP0_REGNUM) ? (N) * MIPS_REGSIZE : \
       ((N) < FP0_REGNUM + 32) ?     \
       FP0_REGNUM * MIPS_REGSIZE + \
@@ -94,4 +94,4 @@
 #define SIGFRAME_REG_SIZE	8
 
 /* Undefine those methods which have been multiarched.  */
-#undef REGISTER_VIRTUAL_TYPE
+#undef MIPS_REGISTER_TYPE
