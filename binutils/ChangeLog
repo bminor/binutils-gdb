@@ -1,3 +1,12 @@
+2000-05-14  Alan Modra  <alan@linuxcare.com.au>
+
+	* size.c (usage): Associate short options with corresponding long
+	option to give a clue as to their function.
+
+2000-05-14  Philippe De Muyter  <phdm@macqel.be>
+
+	* size.c (main): Accept and ignore `-f' option.
+
 2000-05-13  Alan Modra  <alan@linuxcare.com.au>
 
 	* bucomm.h (gettext, dgettext, dcgettext, textdomain,
