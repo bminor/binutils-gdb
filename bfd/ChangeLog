@@ -1,3 +1,7 @@
+2004-01-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* elf32-sparc.c (elf32_sparc_grok_psinfo): New function.
+
 2004-01-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* elf32-i386.c (elf_i386_grok_prstatus): Add support for FreeBSD.
