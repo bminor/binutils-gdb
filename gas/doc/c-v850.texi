@@ -2,7 +2,7 @@
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 
-@node v850 Machine Dependencies
+@node V850-Dependent
 @chapter v850 Dependent Features
 
 @cindex V850 support

@@ -1,4 +1,9 @@
 start-sanitize-v850
+Tue Aug 26 16:51:14 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/as.texinfo (Machine Dependencies): Add v850 to menu.
+	* doc/c-v850.texi: Change node name to match other chapter nodes.
+
 Tue Aug 26 09:46:22 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/c-v850.texi (V850 Opcodes): Correct name for tiny data area

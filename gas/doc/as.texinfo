@@ -4670,6 +4670,9 @@ subject, see the hardware manufacturer's manual.
 @ifset SPARC
 * Sparc-Dependent::             SPARC Dependent Features
 @end ifset
+@ifset V850
+* V850-Dependent::              V850 Dependent Features
+@end ifset
 @ifset Z8000
 * Z8000-Dependent::             Z8000 Dependent Features
 @end ifset
