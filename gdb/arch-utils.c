@@ -294,7 +294,7 @@ generic_register_size (int regnum)
     /* FIXME: cagney/2003-03-01: Once all architectures implement
        gdbarch_register_type(), this entire function can go away.  It
        is made obsolete by register_size().  */
-    return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (regnum)); /* OK */
+    return TYPE_LENGTH (DEPRECATED_REGISTER_VIRTUAL_TYPE (regnum)); /* OK */
 }
 
 /* Assume all registers are adjacent.  */

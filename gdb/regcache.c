@@ -167,11 +167,11 @@ init_regcache_descr (struct gdbarch *gdbarch)
     {
       if (gdbarch_register_type_p (gdbarch))
 	{
-	  gdb_assert (!REGISTER_VIRTUAL_TYPE_P ()); /* OK */
+	  gdb_assert (!DEPRECATED_REGISTER_VIRTUAL_TYPE_P ()); /* OK */
 	  descr->register_type[i] = gdbarch_register_type (gdbarch, i);
 	}
       else
-	descr->register_type[i] = REGISTER_VIRTUAL_TYPE (i); /* OK */
+	descr->register_type[i] = DEPRECATED_REGISTER_VIRTUAL_TYPE (i); /* OK */
     }
 
   /* Construct a strictly RAW register cache.  Don't allow pseudo's

@@ -467,10 +467,10 @@ f:2:SDB_REG_TO_REGNUM:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr:::no_op_reg_
 f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:::no_op_reg_to_regnum::0
 f::REGISTER_NAME:const char *:register_name:int regnr:regnr
 
-# REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE.
+# REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE.
 M:2:REGISTER_TYPE:struct type *:register_type:int reg_nr:reg_nr
-# REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE.
-F:2:REGISTER_VIRTUAL_TYPE:struct type *:deprecated_register_virtual_type:int reg_nr:reg_nr
+# REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE.
+F:2:DEPRECATED_REGISTER_VIRTUAL_TYPE:struct type *:deprecated_register_virtual_type:int reg_nr:reg_nr
 # DEPRECATED_REGISTER_BYTES can be deleted.  The value is computed
 # from REGISTER_TYPE.
 v::DEPRECATED_REGISTER_BYTES:int:deprecated_register_bytes

@@ -121,9 +121,9 @@ extern int register_offset_hack (struct gdbarch *gdbarch, int regnum);
    value stored in a table.
 
    NOTE: cagney/2002-08-17: The original macro was called
-   REGISTER_VIRTUAL_TYPE.  This was because the register could have
-   different raw and cooked (nee virtual) representations.  The
-   CONVERTABLE methods being used to convert between the two
+   DEPRECATED_REGISTER_VIRTUAL_TYPE.  This was because the register
+   could have different raw and cooked (nee virtual) representations.
+   The CONVERTABLE methods being used to convert between the two
    representations.  Current code does not do this.  Instead, the
    first [0..NUM_REGS) registers are 1:1 raw:cooked, and the type
    exactly describes the register's representation.  Consequently, the

@@ -2032,9 +2032,9 @@ sparc_print_registers (struct gdbarch *gdbarch,
 	{
 	  if (!print_all)
 	    {
-	      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
+	      if (TYPE_CODE (DEPRECATED_REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
 		continue;
-	      if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)))
+	      if (TYPE_VECTOR (DEPRECATED_REGISTER_VIRTUAL_TYPE (i)))
 		continue;
 	    }
 	}
@@ -2063,11 +2063,11 @@ sparc_print_registers (struct gdbarch *gdbarch,
 
       /* If virtual format is floating, print it that way, and in raw
          hex.  */
-      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
+      if (TYPE_CODE (DEPRECATED_REGISTER_VIRTUAL_TYPE (i)) == TYPE_CODE_FLT)
 	{
 	  int j;
 
-	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+	  val_print (DEPRECATED_REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
 		     file, 0, 1, 0, Val_pretty_default);
 
 	  fprintf_filtered (file, "\t(raw 0x");
@@ -2085,14 +2085,14 @@ sparc_print_registers (struct gdbarch *gdbarch,
       else
 	{
 	  /* Print the register in hex.  */
-	  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+	  val_print (DEPRECATED_REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
 		     file, 'x', 1, 0, Val_pretty_default);
           /* If not a vector register, print it also according to its
              natural format.  */
-	  if (TYPE_VECTOR (REGISTER_VIRTUAL_TYPE (i)) == 0)
+	  if (TYPE_VECTOR (DEPRECATED_REGISTER_VIRTUAL_TYPE (i)) == 0)
 	    {
 	      fprintf_filtered (file, "\t");
-	      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
+	      val_print (DEPRECATED_REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0,
 			 file, 0, 1, 0, Val_pretty_default);
 	    }
 	}

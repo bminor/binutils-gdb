@@ -2778,7 +2778,7 @@ This is the size a @code{struct value}'s buffer will have, holding that
 register's value.
 @end deftypefn
 
-@deftypefn {Target Macro} struct type *REGISTER_VIRTUAL_TYPE (int @var{reg})
+@deftypefn {Target Macro} struct type *DEPRECATED_REGISTER_VIRTUAL_TYPE (int @var{reg})
 This is the type of the virtual representation of register number
 @var{reg}.  Note that there is no need for a macro giving a type for the
 register's raw form; once the register's value has been obtained, @value{GDBN}
@@ -2787,7 +2787,7 @@ always uses the virtual form.
 
 @deftypefn {Target Macro} void REGISTER_CONVERT_TO_VIRTUAL (int @var{reg}, struct type *@var{type}, char *@var{from}, char *@var{to})
 Convert the value of register number @var{reg} to @var{type}, which
-should always be @code{REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
+should always be @code{DEPRECATED_REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
 at @var{from} holds the register's value in raw format; the macro should
 convert the value to virtual format, and place it at @var{to}.
 
@@ -2802,7 +2802,7 @@ value.
 
 @deftypefn {Target Macro} void REGISTER_CONVERT_TO_RAW (struct type *@var{type}, int @var{reg}, char *@var{from}, char *@var{to})
 Convert the value of register number @var{reg} to @var{type}, which
-should always be @code{REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
+should always be @code{DEPRECATED_REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
 at @var{from} holds the register's value in raw format; the macro should
 convert the value to virtual format, and place it at @var{to}.
 
@@ -3540,7 +3540,7 @@ register's virtual type.
 Return the virtual size of @var{reg}.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
 
-@item REGISTER_VIRTUAL_TYPE (@var{reg})
+@item DEPRECATED_REGISTER_VIRTUAL_TYPE (@var{reg})
 @findex REGISTER_VIRTUAL_TYPE
 Return the virtual type of @var{reg}.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
@@ -3548,7 +3548,7 @@ Return the virtual type of @var{reg}.
 @item struct type *register_type (@var{gdbarch}, @var{reg})
 @findex register_type
 If defined, return the type of register @var{reg}.  This function
-superseeds @code{REGISTER_VIRTUAL_TYPE}.  @xref{Target Architecture
+superseeds @code{DEPRECATED_REGISTER_VIRTUAL_TYPE}.  @xref{Target Architecture
 Definition, , Raw and Virtual Register Representations}.
 
 @item REGISTER_CONVERT_TO_VIRTUAL(@var{reg}, @var{type}, @var{from}, @var{to})

@@ -2158,7 +2158,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			    + REGISTER_RAW_SIZE (base_regnum) * portion));
 
       /* We must pay attention to the endiannes. */
-      sh_sh64_register_convert_to_virtual (reg_nr, REGISTER_VIRTUAL_TYPE (reg_nr),
+      sh_sh64_register_convert_to_virtual (reg_nr, DEPRECATED_REGISTER_VIRTUAL_TYPE (reg_nr),
 					   temp_buffer, buffer);
 
     }
@@ -2228,7 +2228,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			    + REGISTER_RAW_SIZE (base_regnum) * portion));
 
       /* We must pay attention to the endiannes. */
-      sh_sh64_register_convert_to_virtual (reg_nr, REGISTER_VIRTUAL_TYPE (reg_nr),
+      sh_sh64_register_convert_to_virtual (reg_nr, DEPRECATED_REGISTER_VIRTUAL_TYPE (reg_nr),
 					   temp_buffer, buffer);
     }
 
@@ -2314,7 +2314,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       base_regnum = dr_reg_base_num (reg_nr);
       /* We must pay attention to the endiannes. */
-      sh_sh64_register_convert_to_raw (REGISTER_VIRTUAL_TYPE (reg_nr), reg_nr,
+      sh_sh64_register_convert_to_raw (DEPRECATED_REGISTER_VIRTUAL_TYPE (reg_nr), reg_nr,
 				       buffer, temp_buffer);
 	  
 
@@ -2385,7 +2385,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 2; portion++)
 	{
 	  /* We must pay attention to the endiannes. */
-	  sh_sh64_register_convert_to_raw (REGISTER_VIRTUAL_TYPE (reg_nr), reg_nr,
+	  sh_sh64_register_convert_to_raw (DEPRECATED_REGISTER_VIRTUAL_TYPE (reg_nr), reg_nr,
 					   buffer, temp_buffer);
 
 	  regcache_raw_write (regcache, base_regnum + portion,

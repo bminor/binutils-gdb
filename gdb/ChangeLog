@@ -1,4 +1,10 @@
-2003-09-30  Andrew Cagney  <cagney@redhat.com>
+2003-09-29  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_REGISTER_VIRTUAL_TYPE): Rename
+	DEPRECATED_REGISTER_VIRTUAL_TYPE.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* arch-utils.c,	hppa-tdep.c, regcache.c, regcache.h: Update.
+	* sh64-tdep.c, sparc-tdep.c: Update.
 
 	* remote-vxsparc.c (vx_read_register): Replace bzero with memset.
 	* remote-vxmips.c (vx_read_register): Ditto.

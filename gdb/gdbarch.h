@@ -454,7 +454,7 @@ extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register
 #define REGISTER_NAME(regnr) (gdbarch_register_name (current_gdbarch, regnr))
 #endif
 
-/* REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE. */
+/* REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE. */
 
 extern int gdbarch_register_type_p (struct gdbarch *gdbarch);
 
@@ -462,31 +462,31 @@ typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, in
 extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register_type_ftype *register_type);
 
-/* REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE. */
+/* REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE. */
 
-#if defined (REGISTER_VIRTUAL_TYPE)
-/* Legacy for systems yet to multi-arch REGISTER_VIRTUAL_TYPE */
-#if !defined (REGISTER_VIRTUAL_TYPE_P)
-#define REGISTER_VIRTUAL_TYPE_P() (1)
+#if defined (DEPRECATED_REGISTER_VIRTUAL_TYPE)
+/* Legacy for systems yet to multi-arch DEPRECATED_REGISTER_VIRTUAL_TYPE */
+#if !defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
+#define DEPRECATED_REGISTER_VIRTUAL_TYPE_P() (1)
 #endif
 #endif
 
 extern int gdbarch_deprecated_register_virtual_type_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_TYPE_P)
-#error "Non multi-arch definition of REGISTER_VIRTUAL_TYPE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_TYPE"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_TYPE_P)
-#define REGISTER_VIRTUAL_TYPE_P() (gdbarch_deprecated_register_virtual_type_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
+#define DEPRECATED_REGISTER_VIRTUAL_TYPE_P() (gdbarch_deprecated_register_virtual_type_p (current_gdbarch))
 #endif
 
 typedef struct type * (gdbarch_deprecated_register_virtual_type_ftype) (int reg_nr);
 extern struct type * gdbarch_deprecated_register_virtual_type (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_deprecated_register_virtual_type (struct gdbarch *gdbarch, gdbarch_deprecated_register_virtual_type_ftype *deprecated_register_virtual_type);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_TYPE)
-#error "Non multi-arch definition of REGISTER_VIRTUAL_TYPE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_TYPE)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_TYPE"
 #endif
-#if !defined (REGISTER_VIRTUAL_TYPE)
-#define REGISTER_VIRTUAL_TYPE(reg_nr) (gdbarch_deprecated_register_virtual_type (current_gdbarch, reg_nr))
+#if !defined (DEPRECATED_REGISTER_VIRTUAL_TYPE)
+#define DEPRECATED_REGISTER_VIRTUAL_TYPE(reg_nr) (gdbarch_deprecated_register_virtual_type (current_gdbarch, reg_nr))
 #endif
 
 /* DEPRECATED_REGISTER_BYTES can be deleted.  The value is computed
@@ -2044,7 +2044,7 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
 #define ADDR_BITS_REMOVE(addr) (gdbarch_addr_bits_remove (current_gdbarch, addr))
 #endif
 
-/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into 
+/* It is not at all clear why SMASH_TEXT_ADDRESS is not folded into
    ADDR_BITS_REMOVE. */
 
 typedef CORE_ADDR (gdbarch_smash_text_address_ftype) (CORE_ADDR addr);
@@ -2338,7 +2338,7 @@ typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int re
 extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
 extern void set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch, gdbarch_register_reggroup_p_ftype *register_reggroup_p);
 
-/* Fetch the pointer to the ith function argument.   */
+/* Fetch the pointer to the ith function argument. */
 
 #if defined (FETCH_POINTER_ARGUMENT)
 /* Legacy for systems yet to multi-arch FETCH_POINTER_ARGUMENT */
