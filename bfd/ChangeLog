@@ -5,6 +5,8 @@ Mon Aug  1 17:55:53 1994  Fred Fish  (fnf@cygnus.com)
 
 Mon Aug  1 12:04:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* elf64-sparc.c (ELF_MAXPAGESIZE): Define.
+
 	ELF linker patches from Eric Youngdale <ericy@cais.cais.com>.
 	* elfcode.h (elf_link_create_dynamic_sections): Set type of
 	_DYNAMIC to STT_OBJECT.
