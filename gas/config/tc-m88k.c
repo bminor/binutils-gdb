@@ -188,8 +188,6 @@ md_begin ()
   /* initialize hash table */
 
   op_hash = hash_new ();
-  if (op_hash == NULL)
-    as_fatal ("Could not initialize hash table");
 
   /* loop until you see the end of the list */
 
@@ -1228,7 +1226,6 @@ emit_relocations (fixP, segment_address_in_file)
 	  append (&next_object_file_charP, (char *) &ri, sizeof (ri));
 	}
     }
-  return;
 }
 
 #endif /* 0 */
@@ -1313,8 +1310,6 @@ s_bss ()
     {
       input_line_pointer++;
     }
-
-  return;
 }
 
 #endif /* 0 */

@@ -208,8 +208,7 @@ obj_symbol_new_hook (symbolP)
 {
   S_SET_OTHER (symbolP, 0);
   S_SET_DESC (symbolP, 0);
-  return;
-}				/* obj_symbol_new_hook() */
+}
 
 static void
 obj_bout_line (ignore)
@@ -225,8 +224,7 @@ obj_bout_line (ignore)
 void
 obj_read_begin_hook ()
 {
-  return;
-}				/* obj_read_begin_hook() */
+}
 
 void
 obj_crawl_symbol_chain (headers)
@@ -302,9 +300,7 @@ obj_crawl_symbol_chain (headers)
     }				/* for each symbol */
 
   H_SET_SYMBOL_TABLE_SIZE (headers, symbol_number);
-
-  return;
-}				/* obj_crawl_symbol_chain() */
+}
 
 /*
  * Find strings by crawling along symbol table chain.
@@ -329,8 +325,6 @@ obj_emit_strings (where)
       if (S_GET_NAME (symbolP))
 	append (where, S_GET_NAME (symbolP), (unsigned long) (strlen (S_GET_NAME (symbolP)) + 1));
     }				/* walk symbol chain */
-
-  return;
-}				/* obj_emit_strings() */
+}
 
 /* end of obj-bout.c */

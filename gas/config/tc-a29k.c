@@ -168,7 +168,6 @@ s_use (ignore)
 
   as_bad ("Unknown segment type");
   demand_empty_rest_of_line ();
-  return;
 }
 
 static void
@@ -176,7 +175,6 @@ s_data1 ()
 {
   subseg_set (SEG_DATA, 1);
   demand_empty_rest_of_line ();
-  return;
 }
 
 #endif /* OBJ_COFF */
@@ -349,7 +347,6 @@ md_begin ()
 void
 md_end ()
 {
-  return;
 }
 
 /* Assemble a single instruction.  Its label has already been handled
@@ -874,7 +871,6 @@ md_apply_fix (fixP, val)
       as_bad ("bad relocation type: 0x%02x", fixP->fx_r_type);
       break;
     }
-  return;
 }
 
 #ifdef OBJ_COFF
@@ -1000,7 +996,6 @@ print_insn (insn)
   fprintf (stderr, "\t\tX_add_number = %d\n",
 	   insn->exp.X_add_number);
   fprintf (stderr, "}\n");
-  return;
 }
 
 #endif

@@ -714,9 +714,7 @@ obj_symbol_new_hook (symbolP)
     SF_SET_STRING (symbolP);
   if (!underscore && S_IS_LOCAL (symbolP))
     SF_SET_LOCAL (symbolP);
-
-  return;
-}				/* obj_symbol_new_hook() */
+}
 
 /* stack stuff */
 static stack *
@@ -822,8 +820,7 @@ obj_coff_ln (appline)
   }
 #endif
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_line() */
+}
 
 /*
  *			def()
@@ -896,8 +893,7 @@ DEFUN (obj_coff_def, (what),
   *input_line_pointer = name_end;
 
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_def() */
+}
 
 unsigned int dim_index;
 
@@ -1067,7 +1063,6 @@ obj_coff_endef (ignore)
 
   def_symbol_in_progress = NULL;
   demand_empty_rest_of_line ();
-  return;
 }
 
 static void
@@ -1108,8 +1103,7 @@ obj_coff_dim (ignore)
     }				/* for each dimension */
 
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_dim() */
+}
 
 static void
 obj_coff_line (ignore)
@@ -1143,8 +1137,7 @@ obj_coff_line (ignore)
   SA_SET_SYM_LNNO (def_symbol_in_progress, line_base);
 
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_line() */
+}
 
 static void
 obj_coff_size (ignore)
@@ -1160,8 +1153,7 @@ obj_coff_size (ignore)
   S_SET_NUMBER_AUXILIARY (def_symbol_in_progress, 1);
   SA_SET_SYM_SIZE (def_symbol_in_progress, get_absolute_expression ());
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_size() */
+}
 
 static void
 obj_coff_scl (ignore)
@@ -1176,8 +1168,7 @@ obj_coff_scl (ignore)
 
   S_SET_STORAGE_CLASS (def_symbol_in_progress, get_absolute_expression ());
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_scl() */
+}
 
 static void
 obj_coff_tag (ignore)
@@ -1209,8 +1200,7 @@ obj_coff_tag (ignore)
   *input_line_pointer = name_end;
 
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_tag() */
+}
 
 static void
 obj_coff_type (ignore)
@@ -1232,8 +1222,7 @@ obj_coff_type (ignore)
     }				/* is a function */
 
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_type() */
+}
 
 static void
 obj_coff_val (ignore)
@@ -1293,8 +1282,7 @@ obj_coff_val (ignore)
     }				/* if symbol based */
 
   demand_empty_rest_of_line ();
-  return;
-}				/* obj_coff_val() */
+}
 
 /*
  * Maintain a list of the tagnames of the structres.
@@ -1304,8 +1292,7 @@ static void
 tag_init ()
 {
   tag_hash = hash_new ();
-  return;
-}				/* tag_init() */
+}
 
 static void
 tag_insert (name, symbolP)
@@ -1319,8 +1306,7 @@ tag_insert (name, symbolP)
       as_fatal ("Inserting \"%s\" into structure table failed: %s",
 		name, error_string);
     }
-  return;
-}				/* tag_insert() */
+}
 
 static symbolS *
 tag_find_or_make (name)
@@ -1361,9 +1347,7 @@ obj_read_begin_hook ()
   know (SYMESZ == AUXESZ);
 #endif
   tag_init ();
-
-  return;
-}				/* obj_read_begin_hook() */
+}
 
 /* This function runs through the symbol table and puts all the
    externals onto another chain */
@@ -1680,8 +1664,6 @@ DEFUN (crawl_symbols, (h, abfd),
   H_SET_SYMBOL_TABLE_SIZE (h, tie_tags ());
   know (symbol_externP == NULL);
   know (symbol_extern_lastP == NULL);
-
-  return;
 }
 
 /*
@@ -1712,7 +1694,6 @@ DEFUN (w_strings, (where),
 
 	}
     }
-
 }
 
 static void

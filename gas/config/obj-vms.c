@@ -377,8 +377,7 @@ vms_resolve_symbol_redef (sym)
 void 
 obj_read_begin_hook ()
 {
-  return;
-}				/* obj_read_begin_hook() */
+}
 
 void 
 obj_crawl_symbol_chain (headers)
@@ -3423,10 +3422,6 @@ VMS_Modify_Psect_Attributes (Name, Attribute_Pointer)
       if (*Name == '_')
 	Name++;
     }
-  /*
-   *	Done
-   */
-  return;
 }
 
 

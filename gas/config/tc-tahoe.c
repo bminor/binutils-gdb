@@ -358,24 +358,15 @@ md_begin ()
   char *errorval = 0;
   int synthetic_too = 1;	/* If 0, just use real opcodes. */
 
-  if ((op_hash = hash_new ()))
-    {
-      for (tP = totstrs; *tP->name && !*errorval; tP++)
-	{
-	  errorval = hash_insert (op_hash, tP->name, &tP->detail);
-	}
-      if (synthetic_too)
-	{
-	  for (tP = synthetic_totstrs; *tP->name && !*errorval; tP++)
-	    {
-	      errorval = hash_insert (op_hash, tP->name, &tP->detail);
-	    }
-	}
-    }
-  else
-    {
-      errorval = "Virtual memory exceeded";
-    }
+  op_hash = hash_new ();
+
+  for (tP = totstrs; *tP->name && !errorval; tP++)
+    errorval = hash_insert (op_hash, tP->name, &tP->detail);
+
+  if (synthetic_too)
+    for (tP = synthetic_totstrs; *tP->name && !errorval; tP++)
+      errorval = hash_insert (op_hash, tP->name, &tP->detail);
+
   if (errorval)
     as_fatal (errorval);
 }
@@ -383,7 +374,7 @@ md_begin ()
 void
 md_end ()
 {
-}				/* md_end */
+}
 
 int
 md_parse_option (argP, cntP, vecP)
@@ -480,11 +471,9 @@ tc_apply_fix (fixP, val)
      fixS *fixP;
      long val;
 {
-  /*	char *place = fixP->fx_where + fixP->fx_frag->fr_literal; */
   /* should never be called */
   know (0);
-  return;
-}				/* tc_apply_fix() */
+}
 
 void				/* Knows about order of bytes in address. */
 md_number_to_disp (con, value, nbytes)
@@ -574,9 +563,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
 		       ? 2
 		       : 42)))) << 5) & 0x60)
 	      | ((!S_IS_DEFINED (fixP->fx_addsy) << 4) & 0x10));
-
-  return;
-}				/* tc_aout_fix_to_chars() */
+}
 
 /* Relocate byte stuff */
 

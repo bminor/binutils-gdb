@@ -1322,8 +1322,6 @@ md_begin ()
   pa_spaces_begin ();
 
   op_hash = hash_new ();
-  if (op_hash == NULL)
-    as_fatal ("Virtual memory exhausted");
 
   while (i < NUMOPCODES)
     {
@@ -1362,7 +1360,6 @@ md_begin ()
 void
 md_end ()
 {
-  return;
 }
 
 /* Assemble a single instruction storing it into a frag.  */
@@ -2436,7 +2433,6 @@ pa_ip (str)
     }
 
   the_insn.opcode = opcode;
-  return;
 }
 
 /* Turn a string in input_line_pointer into a floating point constant of type
@@ -3964,7 +3960,6 @@ pa_block (z)
 
   pa_undefine_label ();
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Handle a .CALL pseudo-op.  This involves storing away information
@@ -3977,7 +3972,6 @@ pa_call (unused)
 {
   pa_call_args (&last_call_desc);
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Do the dirty work of building a call descriptor which describes
@@ -4242,7 +4236,6 @@ pa_callinfo (unused)
     }
 
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Switch into the code subspace.  */
@@ -4269,7 +4262,6 @@ pa_code (unused)
   SPACE_DEFINED (sdchain) = 1;
   subseg_set (text_section, SUBSEG_CODE);
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* This is different than the standard GAS s_comm(). On HP9000/800 machines,
@@ -4330,7 +4322,6 @@ pa_end (unused)
      int unused;
 {
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Process a .ENTER pseudo-op.  This is not supported.  */
@@ -4339,7 +4330,6 @@ pa_enter (unused)
      int unused;
 {
   abort ();
-  return;
 }
 
 /* Process a .ENTRY pseudo-op.  .ENTRY marks the beginning of the
@@ -4381,8 +4371,6 @@ pa_entry (unused)
 		  (char *) &last_call_info->ci_unwind.descriptor);
   }
 #endif
-
-  return;
 }
 
 /* Handle a .EQU pseudo-op.  */
@@ -4410,7 +4398,6 @@ pa_equ (reg)
 
   pa_undefine_label ();
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Helper function.  Does processing for the end of a function.  This
@@ -4471,7 +4458,6 @@ pa_exit (unused)
 	}
     }
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Process a .EXPORT directive.  This makes functions external
@@ -4512,7 +4498,6 @@ pa_export (unused)
     }
 
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Helper function to process arguments to a .EXPORT pseudo-op.  */
@@ -4694,7 +4679,6 @@ pa_import (unused)
     }
 
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Handle a .LABEL pseudo-op.  */
@@ -4725,7 +4709,6 @@ pa_label (unused)
       ignore_rest_of_line ();
     }
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Handle a .LEAVE pseudo-op.  This is not supported yet.  */
@@ -4745,7 +4728,6 @@ pa_origin (unused)
 {
   s_org (0);
   pa_undefine_label ();
-  return;
 }
 
 /* Handle a .PARAM pseudo-op.  This is much like a .EXPORT, except it
@@ -4781,7 +4763,6 @@ pa_param (unused)
     }
 
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Handle a .PROC pseudo-op.  It is used to mark the beginning
@@ -4847,7 +4828,6 @@ pa_proc (unused)
   }
 
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Process the syntatical end of a procedure.  Make sure all the 
@@ -4875,7 +4855,6 @@ pa_procend (unused)
 
   within_procedure = FALSE;
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Parse the parameters to a .SPACE directive; if CREATE_FLAG is nonzero,
@@ -5107,7 +5086,6 @@ pa_space (unused)
 						  sd_chain->sd_last_subseg);
       demand_empty_rest_of_line ();
     }
-  return;
 }
 
 /* Switch to a new space.  (I think).  FIXME.  */
@@ -5134,7 +5112,6 @@ pa_spnum (unused)
 
   *input_line_pointer = c;
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* If VALUE is an exact power of two between zero and 2^31, then 
@@ -5378,7 +5355,6 @@ pa_subspace (unused)
       subseg_set (current_subspace->ssd_seg, current_subspace->ssd_subseg);
     }
   SUBSPACE_DEFINED (current_subspace) = 1;
-  return;
 }
 
 
@@ -6251,8 +6227,6 @@ hppa_tc_make_sections (abfd)
 
   /* Switch back to the original segment.  */
   subseg_set (save_seg, save_subseg);
-
-  return;
 }
 
 /* Make the symbol extension section.  */

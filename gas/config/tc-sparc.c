@@ -466,16 +466,14 @@ s_seg (ignore)
     }
   as_bad ("Unknown segment type");
   demand_empty_rest_of_line ();
-  return;
-}				/* s_seg() */
+}
 
 static void
 s_data1 ()
 {
   subseg_set (data_section, 1);
   demand_empty_rest_of_line ();
-  return;
-}				/* s_data1() */
+}
 
 static void
 s_proc (ignore)
@@ -486,8 +484,7 @@ s_proc (ignore)
       ++input_line_pointer;
     }
   ++input_line_pointer;
-  return;
-}				/* s_proc() */
+}
 
 /* start-sanitize-v9 */
 #ifndef NO_V9
@@ -560,8 +557,6 @@ md_begin ()
   register unsigned int i = 0;
 
   op_hash = hash_new ();
-  if (op_hash == NULL)
-    as_fatal ("Virtual memory exhausted");
 
   while (i < NUMOPCODES)
     {
@@ -789,23 +784,30 @@ sparc_ip (str)
 			  ++s;
 		      }
 		  }
-		else if (isdigit (*s))
+		else
 		  {
+		    expressionS exp;
+		    char *hold;
 		    char *send;
 
-		    kmask = strtol (s, &send, 0);
-		    if (kmask < 0 || kmask > 127)
+		    hold = input_line_pointer;
+		    input_line_pointer = s;
+		    expression (&exp);
+		    send = input_line_pointer;
+		    input_line_pointer = hold;
+
+		    kmask = exp.X_add_number;
+		    if (exp.X_op != O_constant
+			|| kmask < 0
+			|| kmask > 127)
 		      {
 			error_message = ": invalid membar mask number";
 			goto error;
 		      }
+
 		    s = send;
 		  }
-		else
-		  {
-		    error_message = ": unrecognizable membar mask";
-		    goto error;
-		  }
+
 		opcode |= SIMM13 (kmask);
 		continue;
 	      }
@@ -1472,6 +1474,8 @@ sparc_ip (str)
 		      the_insn.reloc = BFD_RELOC_LO10;
 		      the_insn.exp.X_add_number >>= 32;
 		      break;
+		    default:
+		      break;
 		    }
 #endif
 		  /* end-sanitize-v9 */
@@ -1713,8 +1717,7 @@ sparc_ip (str)
     }				/* forever looking for a match */
 
   the_insn.opcode = opcode;
-  return;
-}				/* sparc_ip() */
+}
 
 static int
 getExpression (str)
@@ -1819,30 +1822,8 @@ md_number_to_chars (buf, val, n)
      valueT val;
      int n;
 {
-
-  switch (n)
-    {
-      /* start-sanitize-v9 */
-    case 8:
-      *buf++ = val >> 56;
-      *buf++ = val >> 48;
-      *buf++ = val >> 40;
-      *buf++ = val >> 32;
-      /* end-sanitize-v9 */
-    case 4:
-      *buf++ = val >> 24;
-      *buf++ = val >> 16;
-    case 2:
-      *buf++ = val >> 8;
-    case 1:
-      *buf = val;
-      break;
-
-    default:
-      as_fatal ("failed sanity check.");
-    }
-  return;
-}				/* md_number_to_chars() */
+  number_to_chars_bigendian (buf, val, n);
+}
 
 /* Apply a fixS to the frags, now that we know the value it ought to
    hold. */
@@ -1869,18 +1850,14 @@ md_apply_fix (fixP, value)
     return 1;
 #endif
 
-  /*
-   * This is a hack.  There should be a better way to
-   * handle this.
-   */
+  /* This is a hack.  There should be a better way to
+     handle this.  Probably in terms of howto fields, once
+     we can look at these fixups in terms of howtos.  */
   if (fixP->fx_r_type == BFD_RELOC_32_PCREL_S2 && fixP->fx_addsy)
-    {
-      val += fixP->fx_where + fixP->fx_frag->fr_address;
-    }
+    val += fixP->fx_where + fixP->fx_frag->fr_address;
 
   switch (fixP->fx_r_type)
     {
-
     case BFD_RELOC_16:
       buf[0] = val >> 8;
       buf[1] = val;
@@ -2051,18 +2028,6 @@ md_apply_fix (fixP, value)
   return 1;
 }
 
-/* should never be called for sparc */
-void
-md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr;
-     addressT to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal ("sparc_create_short_jmp\n");
-}
-
 /* Translate internal representation of relocation info to BFD target
    format.  */
 arelent *
@@ -2078,24 +2043,6 @@ tc_gen_reloc (section, fixp)
 
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
-  reloc->addend = 0;
-  if (fixp->fx_pcrel == 0)
-    reloc->addend += fixp->fx_addnumber;
-  else
-    {
-      reloc->addend += fixp->fx_offset;
-      switch (OUTPUT_FLAVOR)
-	{
-	case bfd_target_elf_flavour:
-	  break;
-	case bfd_target_aout_flavour:
-	  reloc->addend -= reloc->address;
-	  break;
-	default:
-	  /* What's a good default here?  Is there any??  */
-	  abort ();
-	}
-    }
 
   switch (fixp->fx_r_type)
     {
@@ -2124,30 +2071,19 @@ tc_gen_reloc (section, fixp)
     }
   reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
   assert (reloc->howto != 0);
+  assert (!fixp->fx_pcrel == !reloc->howto->pc_relative);
+
+  /* @@ Why fx_addnumber sometimes and fx_offset other times?  */
+  if (reloc->howto->pc_relative == 0)
+    reloc->addend = fixp->fx_addnumber;
+  else if (reloc->howto->pcrel_offset)
+    reloc->addend = fixp->fx_offset - reloc->address;
+  else
+    reloc->addend = fixp->fx_offset;
 
   return reloc;
 }
 
-/* should never be called for sparc */
-void
-md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr, to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal ("sparc_create_long_jump\n");
-}				/* md_create_long_jump() */
-
-/* should never be called for sparc */
-int
-md_estimate_size_before_relax (fragP, segtype)
-     fragS *fragP;
-     segT segtype;
-{
-  as_fatal ("sparc_estimate_size_before_relax\n");
-  return (1);
-}				/* md_estimate_size_before_relax() */
 
 #if 0
 /* for debugging only */
@@ -2155,8 +2091,7 @@ static void
 print_insn (insn)
      struct sparc_it *insn;
 {
-  char *Reloc[] =
-  {
+  const char *const Reloc[] = {
     "RELOC_8",
     "RELOC_16",
     "RELOC_32",
@@ -2185,9 +2120,7 @@ print_insn (insn)
   };
 
   if (insn->error)
-    {
-      fprintf (stderr, "ERROR: %s\n");
-    }
+    fprintf (stderr, "ERROR: %s\n");
   fprintf (stderr, "opcode=0x%08x\n", insn->opcode);
   fprintf (stderr, "reloc = %s\n", Reloc[insn->reloc]);
   fprintf (stderr, "exp = {\n");
@@ -2206,9 +2139,7 @@ print_insn (insn)
   fprintf (stderr, "\t\tX_add_number = %d\n",
 	   insn->exp.X_add_number);
   fprintf (stderr, "}\n");
-  return;
-}				/* print_insn() */
-
+}
 #endif
 
 /*
