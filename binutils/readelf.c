@@ -955,6 +955,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  break;
 
 	case EM_PPC:
+	case EM_PPC64:
 	  rtype = elf_ppc_reloc_type (type);
 	  break;
 
