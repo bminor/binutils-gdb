@@ -1,3 +1,10 @@
+2003-09-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_link_read_relocs_from_section): Add an argument
+	of a pointer to section. Check bad symbol index.
+	(_bfd_elf_link_read_relocs): Modify calls to
+	elf_link_read_relocs_from_section.
+
 2003-09-23  DJ Delorie  <dj@redhat.com>
 
 	* elf32-sh.c (sh_elf_howto_table): R_SH_SWITCH8,

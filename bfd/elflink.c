@@ -1879,6 +1879,7 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 
 static bfd_boolean
 elf_link_read_relocs_from_section (bfd *abfd,
+				   asection *sec,
 				   Elf_Internal_Shdr *shdr,
 				   void *external_relocs,
 				   Elf_Internal_Rela *internal_relocs)
@@ -1888,6 +1889,8 @@ elf_link_read_relocs_from_section (bfd *abfd,
   const bfd_byte *erela;
   const bfd_byte *erelaend;
   Elf_Internal_Rela *irela;
+  Elf_Internal_Shdr *symtab_hdr;
+  size_t nsyms;
 
   /* If there aren't any relocations, that's OK.  */
   if (!shdr)
@@ -1900,6 +1903,9 @@ elf_link_read_relocs_from_section (bfd *abfd,
   /* Read the relocations.  */
   if (bfd_bread (external_relocs, shdr->sh_size, abfd) != shdr->sh_size)
     return FALSE;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  nsyms = symtab_hdr->sh_size / symtab_hdr->sh_entsize;
 
   bed = get_elf_backend_data (abfd);
 
@@ -1919,7 +1925,21 @@ elf_link_read_relocs_from_section (bfd *abfd,
   irela = internal_relocs;
   while (erela < erelaend)
     {
+      bfd_vma r_symndx;
+
       (*swap_in) (abfd, erela, irela);
+      r_symndx = ELF32_R_SYM (irela->r_info);
+      if (bed->s->arch_size == 64)
+	r_symndx >>= 24;
+      if ((size_t) r_symndx >= nsyms)
+	{
+	  (*_bfd_error_handler)
+	    (_("%s: bad reloc symbol index (0x%lx >= 0x%lx) for offset 0x%lx in section `%s'"),
+	     bfd_archive_filename (abfd), (unsigned long) r_symndx,
+	     (unsigned long) nsyms, irela->r_offset, sec->name);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
       irela += bed->s->int_rels_per_ext_rel;
       erela += shdr->sh_entsize;
     }
@@ -1983,12 +2003,12 @@ _bfd_elf_link_read_relocs (bfd *abfd,
       external_relocs = alloc1;
     }
 
-  if (!elf_link_read_relocs_from_section (abfd, rel_hdr,
+  if (!elf_link_read_relocs_from_section (abfd, o, rel_hdr,
 					  external_relocs,
 					  internal_relocs))
     goto error_return;
   if (!elf_link_read_relocs_from_section
-      (abfd,
+      (abfd, o,
        elf_section_data (o)->rel_hdr2,
        ((bfd_byte *) external_relocs) + rel_hdr->sh_size,
        internal_relocs + (NUM_SHDR_ENTRIES (rel_hdr)
