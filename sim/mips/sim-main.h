@@ -773,12 +773,7 @@ char* pr_addr PARAMS ((SIM_ADDR addr));
 char* pr_uword64 PARAMS ((uword64 addr));
 
 
-/* Some mips flavours split their GPR banks into two halves. */
-#ifdef SPLIT_GPR
-#define GPR_CLEAR(N) do { GPR_SET((N),0); GPR1_SET((N),0); } while (0)
-#else
 #define GPR_CLEAR(N) do { GPR_SET((N),0); } while (0)
-#endif
 
 void mips_cpu_exception_trigger(SIM_DESC sd, sim_cpu* cpu, address_word pc);
 void mips_cpu_exception_suspend(SIM_DESC sd, sim_cpu* cpu, int exception);

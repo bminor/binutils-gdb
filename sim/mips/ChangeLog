@@ -1,3 +1,8 @@
+2000-10-19  Frank Ch. Eigler  <fche@redhat.com>
+
+	On advice from Chris G. Demetriou <cgd@sibyte.com>:
+	* sim-main.h (GPR_CLEAR): Remove unused alternative macro.
+
 Thu Jul 27 22:02:05 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Maciej W. Rozycki <macro@ds2.pg.gda.pl>:
