@@ -114,6 +114,7 @@ engine_run_until_stop (SIM_DESC sd,
       do
 	{
 	  instruction_word insn = IMEM (cia);
+	  cpu->reg[0] = 0;		/* force r0 to always contain 0 */
 	  cia = idecode_issue (sd, insn, cia);
 	}
       while (*keep_running);
@@ -135,6 +136,7 @@ engine_step (SIM_DESC sd)
       sd->restart_ok = 1;
       cia = cpu->cia;
       insn = IMEM (cia);
+      cpu->reg[0] = 0;		/* force r0 to always contain 0 */
       cia = idecode_issue (sd, insn, cia);
       engine_halt (sd, cpu, cia, sim_stopped, SIGTRAP);
     }

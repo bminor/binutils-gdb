@@ -1005,6 +1005,7 @@ void::function::do_swcr:int Dest, signed32 rSource, signed32 cr
 
 // trap
 void::function::do_trap:unsigned32 trap_number
+	int i;
 	TRACE_SINK1 (MY_INDEX, trap_number);
 	switch (trap_number)
 	  {
@@ -1041,6 +1042,12 @@ void::function::do_trap:unsigned32 trap_number
 	          break;
 	        }
 	      default:
+		/* For system calls which are defined, just return EINVAL instead of trapping */
+		if (GPR(15) <= 204)
+		  {
+		    GPR(2) = -22;		/* -EINVAL */
+		    break;
+		  }
 	        engine_error (SD, CPU, cia,
 	                      "0x%lx: unknown syscall %d",
 	                      (unsigned long) cia.ip, GPR(15));
@@ -1048,6 +1055,25 @@ void::function::do_trap:unsigned32 trap_number
 	    break;
 	  case 73:
 	    engine_halt (SD, CPU, cia, sim_stopped, SIGTRAP);
+
+	  /* Add a few traps for now to print the register state */
+	  case 74:
+	  case 75:
+	  case 76:
+	  case 77:
+	  case 78:
+	  case 79:
+	    if (!TRACE_ALU_P (CPU))
+	      trace_one_insn (SD, CPU, cia.ip, 1, itable[MY_INDEX].file,
+			      itable[MY_INDEX].line_nr, "trap",
+			      "Trap %d", trap_number);
+
+	    for (i = 0; i < 32; i++)
+	      sim_io_eprintf (SD, "%s0x%.8lx%s", ((i % 8) == 0) ? "\t" : " ", (long)GPR(i),
+			      (((i+1) % 8) == 0) ? "\n" : "");
+	    sim_io_write_stderr (SD, "\n", 1);
+	    break;
+
 	  default:
 	    engine_error (SD, CPU, cia,
 	                  "0x%lx: unsupported trap %d",

@@ -1,3 +1,12 @@
+Tue May 13 18:00:10 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* insns (do_trap): For system calls that are defined, but not
+	provided return EINVAL. Temporarily add traps 74-79 to just print
+	the register state.
+
+	* interp.c (engine_{run_until_stop,step}): Before executing
+	instructions, make sure r0 == 0.
+
 Tue May 13 16:39:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* alu.h (IMEM): Take full cia not just IP as argument.
