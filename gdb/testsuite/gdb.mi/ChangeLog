@@ -1,5 +1,10 @@
 2002-09-17  Keith Seitz  <keiths@redhat.com>
 
+	* mi-var-cmd.exp: Add tests to check when varobj pinned to a
+	selected frame changes type.
+
+2002-09-17  Keith Seitz  <keiths@redhat.com>
+
 	* mi-console.exp: Update copyright.
 	* mi-var-block.exp: Likewise.
 	* mi-var-cmd.exp: Likewise.
