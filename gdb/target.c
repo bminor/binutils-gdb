@@ -1,7 +1,8 @@
 /* Select target systems and architectures at runtime for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.
 
    This file is part of GDB.
@@ -40,8 +41,6 @@ extern int errno;
 
 static void target_info (char *, int);
 
-static void cleanup_target (struct target_ops *);
-
 static void maybe_kill_then_create_inferior (char *, char *, char **);
 
 static void maybe_kill_then_attach (char *, int);
@@ -69,8 +68,6 @@ void target_ignore (void);
 static void target_command (char *, int);
 
 static struct target_ops *find_default_run_target (char *);
-
-static void update_current_target (void);
 
 static void nosupport_runtime (void);
 
@@ -232,7 +229,6 @@ add_target (struct target_ops *t)
 		  target_struct_allocsize * sizeof (*target_structs));
     }
   target_structs[target_struct_size++] = t;
-/*  cleanup_target (t); */
 
   if (targetlist == NULL)
     add_prefix_cmd ("target", class_run, target_command,
@@ -343,16 +339,121 @@ maybe_kill_then_create_inferior (char *exec, char *args, char **env)
   target_create_inferior (exec, args, env);
 }
 
-/* Clean up a target struct so it no longer has any zero pointers in it.
-   We default entries, at least to stubs that print error messages.  */
+/* Go through the target stack from top to bottom, copying over zero
+   entries in current_target, then filling in still empty entries.  In
+   effect, we are doing class inheritance through the pushed target
+   vectors.
+
+   NOTE: cagney/2003-10-17: The problem with this inheritance, as it
+   is currently implemented, is that it discards any knowledge of
+   which target an inherited method originally belonged to.
+   Consequently, new new target methods should instead explicitly and
+   locally search the target stack for the target that can handle the
+   request.  */
 
 static void
-cleanup_target (struct target_ops *t)
+update_current_target (void)
 {
+  struct target_ops *t;
+
+  /* First, reset curren'ts contents.  */
+  memset (&current_target, 0, sizeof (current_target));
+
+#define INHERIT(FIELD, TARGET) \
+      if (!current_target.FIELD) \
+	current_target.FIELD = (TARGET)->FIELD
+
+  for (t = target_stack; t; t = t->beneath)
+    {
+      INHERIT (to_shortname, t);
+      INHERIT (to_longname, t);
+      INHERIT (to_doc, t);
+      INHERIT (to_open, t);
+      INHERIT (to_close, t);
+      INHERIT (to_attach, t);
+      INHERIT (to_post_attach, t);
+      INHERIT (to_detach, t);
+      INHERIT (to_disconnect, t);
+      INHERIT (to_resume, t);
+      INHERIT (to_wait, t);
+      INHERIT (to_post_wait, t);
+      INHERIT (to_fetch_registers, t);
+      INHERIT (to_store_registers, t);
+      INHERIT (to_prepare_to_store, t);
+      INHERIT (to_xfer_memory, t);
+      INHERIT (to_files_info, t);
+      INHERIT (to_insert_breakpoint, t);
+      INHERIT (to_remove_breakpoint, t);
+      INHERIT (to_can_use_hw_breakpoint, t);
+      INHERIT (to_insert_hw_breakpoint, t);
+      INHERIT (to_remove_hw_breakpoint, t);
+      INHERIT (to_insert_watchpoint, t);
+      INHERIT (to_remove_watchpoint, t);
+      INHERIT (to_stopped_data_address, t);
+      INHERIT (to_stopped_by_watchpoint, t);
+      INHERIT (to_have_continuable_watchpoint, t);
+      INHERIT (to_region_size_ok_for_hw_watchpoint, t);
+      INHERIT (to_terminal_init, t);
+      INHERIT (to_terminal_inferior, t);
+      INHERIT (to_terminal_ours_for_output, t);
+      INHERIT (to_terminal_ours, t);
+      INHERIT (to_terminal_save_ours, t);
+      INHERIT (to_terminal_info, t);
+      INHERIT (to_kill, t);
+      INHERIT (to_load, t);
+      INHERIT (to_lookup_symbol, t);
+      INHERIT (to_create_inferior, t);
+      INHERIT (to_post_startup_inferior, t);
+      INHERIT (to_acknowledge_created_inferior, t);
+      INHERIT (to_insert_fork_catchpoint, t);
+      INHERIT (to_remove_fork_catchpoint, t);
+      INHERIT (to_insert_vfork_catchpoint, t);
+      INHERIT (to_remove_vfork_catchpoint, t);
+      INHERIT (to_follow_fork, t);
+      INHERIT (to_insert_exec_catchpoint, t);
+      INHERIT (to_remove_exec_catchpoint, t);
+      INHERIT (to_reported_exec_events_per_exec_call, t);
+      INHERIT (to_has_exited, t);
+      INHERIT (to_mourn_inferior, t);
+      INHERIT (to_can_run, t);
+      INHERIT (to_notice_signals, t);
+      INHERIT (to_thread_alive, t);
+      INHERIT (to_find_new_threads, t);
+      INHERIT (to_pid_to_str, t);
+      INHERIT (to_extra_thread_info, t);
+      INHERIT (to_stop, t);
+      INHERIT (to_query, t);
+      INHERIT (to_rcmd, t);
+      INHERIT (to_enable_exception_callback, t);
+      INHERIT (to_get_current_exception_event, t);
+      INHERIT (to_pid_to_exec_file, t);
+      INHERIT (to_stratum, t);
+      INHERIT (to_has_all_memory, t);
+      INHERIT (to_has_memory, t);
+      INHERIT (to_has_stack, t);
+      INHERIT (to_has_registers, t);
+      INHERIT (to_has_execution, t);
+      INHERIT (to_has_thread_control, t);
+      INHERIT (to_sections, t);
+      INHERIT (to_sections_end, t);
+      INHERIT (to_can_async_p, t);
+      INHERIT (to_is_async_p, t);
+      INHERIT (to_async, t);
+      INHERIT (to_async_mask_value, t);
+      INHERIT (to_find_memory_regions, t);
+      INHERIT (to_make_corefile_notes, t);
+      INHERIT (to_get_thread_local_address, t);
+      INHERIT (to_magic, t);
+    }
+#undef INHERIT
+
+  /* Clean up a target struct so it no longer has any zero pointers in
+     it.  We default entries, at least to stubs that print error
+     messages.  */
 
 #define de_fault(field, value) \
-  if (!t->field)               \
-    t->field = value
+  if (!current_target.field)               \
+    current_target.field = value
 
   de_fault (to_open, 
 	    (void (*) (char *, int)) 
@@ -525,109 +626,11 @@ cleanup_target (struct target_ops *t)
 	    (void (*) (void (*) (enum inferior_event_type, void*), void*)) 
 	    tcomplain);
 #undef de_fault
-}
 
-/* Go through the target stack from top to bottom, copying over zero entries in
-   current_target.  In effect, we are doing class inheritance through the
-   pushed target vectors.  */
-
-static void
-update_current_target (void)
-{
-  struct target_ops *t;
-
-  /* First, reset current_target */
-  memset (&current_target, 0, sizeof current_target);
-
-  for (t = target_stack; t; t = t->beneath)
-    {
-
-#define INHERIT(FIELD, TARGET) \
-      if (!current_target.FIELD) \
-	current_target.FIELD = TARGET->FIELD
-
-      INHERIT (to_shortname, t);
-      INHERIT (to_longname, t);
-      INHERIT (to_doc, t);
-      INHERIT (to_open, t);
-      INHERIT (to_close, t);
-      INHERIT (to_attach, t);
-      INHERIT (to_post_attach, t);
-      INHERIT (to_detach, t);
-      INHERIT (to_disconnect, t);
-      INHERIT (to_resume, t);
-      INHERIT (to_wait, t);
-      INHERIT (to_post_wait, t);
-      INHERIT (to_fetch_registers, t);
-      INHERIT (to_store_registers, t);
-      INHERIT (to_prepare_to_store, t);
-      INHERIT (to_xfer_memory, t);
-      INHERIT (to_files_info, t);
-      INHERIT (to_insert_breakpoint, t);
-      INHERIT (to_remove_breakpoint, t);
-      INHERIT (to_can_use_hw_breakpoint, t);
-      INHERIT (to_insert_hw_breakpoint, t);
-      INHERIT (to_remove_hw_breakpoint, t);
-      INHERIT (to_insert_watchpoint, t);
-      INHERIT (to_remove_watchpoint, t);
-      INHERIT (to_stopped_data_address, t);
-      INHERIT (to_stopped_by_watchpoint, t);
-      INHERIT (to_have_continuable_watchpoint, t);
-      INHERIT (to_region_size_ok_for_hw_watchpoint, t);
-      INHERIT (to_terminal_init, t);
-      INHERIT (to_terminal_inferior, t);
-      INHERIT (to_terminal_ours_for_output, t);
-      INHERIT (to_terminal_ours, t);
-      INHERIT (to_terminal_save_ours, t);
-      INHERIT (to_terminal_info, t);
-      INHERIT (to_kill, t);
-      INHERIT (to_load, t);
-      INHERIT (to_lookup_symbol, t);
-      INHERIT (to_create_inferior, t);
-      INHERIT (to_post_startup_inferior, t);
-      INHERIT (to_acknowledge_created_inferior, t);
-      INHERIT (to_insert_fork_catchpoint, t);
-      INHERIT (to_remove_fork_catchpoint, t);
-      INHERIT (to_insert_vfork_catchpoint, t);
-      INHERIT (to_remove_vfork_catchpoint, t);
-      INHERIT (to_follow_fork, t);
-      INHERIT (to_insert_exec_catchpoint, t);
-      INHERIT (to_remove_exec_catchpoint, t);
-      INHERIT (to_reported_exec_events_per_exec_call, t);
-      INHERIT (to_has_exited, t);
-      INHERIT (to_mourn_inferior, t);
-      INHERIT (to_can_run, t);
-      INHERIT (to_notice_signals, t);
-      INHERIT (to_thread_alive, t);
-      INHERIT (to_find_new_threads, t);
-      INHERIT (to_pid_to_str, t);
-      INHERIT (to_extra_thread_info, t);
-      INHERIT (to_stop, t);
-      INHERIT (to_query, t);
-      INHERIT (to_rcmd, t);
-      INHERIT (to_enable_exception_callback, t);
-      INHERIT (to_get_current_exception_event, t);
-      INHERIT (to_pid_to_exec_file, t);
-      INHERIT (to_stratum, t);
-      INHERIT (to_has_all_memory, t);
-      INHERIT (to_has_memory, t);
-      INHERIT (to_has_stack, t);
-      INHERIT (to_has_registers, t);
-      INHERIT (to_has_execution, t);
-      INHERIT (to_has_thread_control, t);
-      INHERIT (to_sections, t);
-      INHERIT (to_sections_end, t);
-      INHERIT (to_can_async_p, t);
-      INHERIT (to_is_async_p, t);
-      INHERIT (to_async, t);
-      INHERIT (to_async_mask_value, t);
-      INHERIT (to_find_memory_regions, t);
-      INHERIT (to_make_corefile_notes, t);
-      INHERIT (to_get_thread_local_address, t);
-      INHERIT (to_magic, t);
-
-#undef INHERIT
-    }
+  /* Finally, position the target-stack beneath the squashed
+     "current_target".  That way code looking for a non-inherited
+     target method can quickly and simply find it.  */
+  current_target.beneath = target_stack;
 }
 
 /* Push a new target type into the stack of the existing target accessors,
@@ -682,8 +685,6 @@ push_target (struct target_ops *t)
 
   update_current_target ();
 
-  cleanup_target (&current_target);	/* Fill in the gaps */
-
   if (targetdebug)
     setup_target_debug ();
 
@@ -721,7 +722,6 @@ unpush_target (struct target_ops *t)
   tmp->beneath = NULL;
 
   update_current_target ();
-  cleanup_target (&current_target);
 
   return 1;
 }

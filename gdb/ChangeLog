@@ -1,5 +1,13 @@
 2003-10-17  Andrew Cagney  <cagney@redhat.com>
 
+	* target.c (update_current_target): Perform the target cleanup.
+	Put the target stack beneath the squashed "current_target".
+	(add_target): Delete disabled call to "cleanup_target".
+	(cleanup_target): Delete function.
+	(push_target, unpush_target): Do not call "cleanup_target".
+
+2003-10-17  Andrew Cagney  <cagney@redhat.com>
+
 	* target.c (target_stack): Change to a static target_ops.
 	(update_current_target): Walk the "struct target_ops" stack.
 	(pop_target, do_xfer_memory, target_info): Ditto.
