@@ -1,3 +1,9 @@
+Fri Oct 15 11:52:56 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t12/scope.exp:  Remove xfails, filename::var syntax should be
+	working now. Add an xfail if accesing a bss variable causes
+	a memory error if the target is not yet run.
+
 Thu Oct 14 19:16:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t24/demangle.exp: Clean up spacing (2 strings), inclusion of
