@@ -1,3 +1,8 @@
+2003-06-13  Jim Blandy  <jimb@redhat.com>
+
+	* frv-tdep.c (frv_use_struct_convention): Delete static
+	declaration for function deleted in my change of 2003-06-12.
+
 2003-06-13  Theodore A. Roth  <troth@openavr.org>
 
 	* avr-tdep.c (avr_address_to_pointer): Shift code addrs right 1 bit.
