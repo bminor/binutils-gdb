@@ -1,3 +1,7 @@
+2001-07-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (libgdb): Rewrite.
+
 2001-07-26  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* Makefile.in (gdbgui.dvi, gdb-gui, gdbgui.info): Targets deleted.

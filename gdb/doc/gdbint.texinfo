@@ -87,6 +87,7 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 * Overall Structure::
 * Algorithms::
 * User Interface::
+* libgdb::
 * Symbol Handling::
 * Language Support::
 * Host Definition::
@@ -1371,11 +1372,119 @@ It became:
 
 @section TUI
 
-@section libgdb
+@node libgdb
 
+@chapter libgdb
+
+@section libgdb 1.0
 @cindex @code{libgdb}
-@code{libgdb} was an abortive project of years ago.  The theory was to
-provide an API to @value{GDBN}'s functionality.
+@code{libgdb} 1.0 was an abortive project of years ago.  The theory was
+to provide an API to @value{GDBN}'s functionality.
+
+@section libgdb 2.0
+@cindex @code{libgdb}
+@code{libgdb} 2.0 is an ongoing effort to update @value{GDBN} so that is
+better able to support graphical and other environments.
+
+Since @code{libgdb} development is on-going, its architecture is still
+evolving.  The following components have so far been identified:
+
+@itemize @bullet
+@item
+Observer - @file{gdb-events.h}.  
+@item
+Builder - @file{ui-out.h}
+@item
+Event Loop - @file{event-loop.h}
+@item
+Library - @file{gdb.h}
+@end itemize
+
+The model that ties these components together is described below.
+
+@section The @code{libgdb} Model
+
+A client of @code{libgdb} interacts with the library in two ways.
+
+@itemize @bullet
+@item
+As an observer (using @file{gdb-events}) receiving notifications from
+@code{libgdb} of any internal state changes (break point changes, run
+state, etc).
+@item
+As a client querying @code{libgdb} (using the @file{ui-out} builder) to
+obtain various status values from @value{GDBN}.
+@end itemize
+
+Since @code{libgdb} could have multiple clients (e.g. a GUI supporting
+the existing @value{GDBN} CLI), those clients must co-operate when
+controlling @code{libgdb}.  In particular, a client must ensure that
+@code{libgdb} is idle (i.e. no other client is using @code{libgdb})
+before responding to a @file{gdb-event} by making a query.
+
+@section CLI support
+
+At present @value{GDBN}'s CLI is very much entangled in with the core of
+@code{libgdb}.  Consequently, a client wishing to include the CLI in
+their interface needs to carefully co-ordinate its own and the CLI's
+requirements.
+
+It is suggested that the client set @code{libgdb} up to be bi-modal
+(alternate between CLI and client query modes).  The notes below sketch
+out the theory:
+
+@itemize @bullet
+@item
+The client registers itself as an observer of @code{libgdb}.
+@item
+The client create and install @code{cli-out} builder using its own
+versions of the @code{ui-file} @code{gdb_stderr}, @code{gdb_stdtarg} and
+@code{gdb_stdout} streams.
+@item
+The client creates a separate custom @code{ui-out} builder that is only
+used while making direct queries to @code{libgdb}.
+@end itemize
+
+When the client receives input intended for the CLI, it simply passes it
+along.  Since the @code{cli-out} builder is installed by default, all
+the CLI output in response to that command is routed (pronounced rooted)
+through to the client controlled @code{gdb_stdout} et.@: al.@: streams.
+At the same time, the client is kept abreast of internal changes by
+virtue of being a @code{libgdb} observer.
+
+The only restriction on the client is that it must wait until
+@code{libgdb} becomes idle before initiating any queries (using the
+client's custom builder).
+
+@section @code{libgdb} components
+
+@subheading Observer - @file{gdb-events.h}
+@file{gdb-events} provides the client with a very raw mechanism that can
+be used to implement an observer.  At present it only allows for one
+observer and that observer must, internally, handle the need to delay
+the processing of any event notifications until after @code{libgdb} has
+finished the current command.
+
+@subheading Builder - @file{ui-out.h}
+@file{ui-out} provides the infrastructure necessary for a client to
+create a builder.  That builder is then passed down to @code{libgdb}
+when doing any queries.
+
+@subheading Event Loop - @file{event-loop.h}
+@c There could be an entire section on the event-loop
+@file{event-loop}, currently non-re-entrant, provides a simple event
+loop.  A client would need to either plug its self into this loop or,
+implement a new event-loop that GDB would use.
+
+The event-loop will eventually be made re-entrant.  This is so that
+@value{GDB} can better handle the problem of some commands blocking
+instead of returning.
+
+@subheading Library - @file{gdb.h}
+@file{libgdb} is the most obvious component of this system.  It provides
+the query interface.  Each function is parameterized by a @code{ui-out}
+builder.  The result of the query is constructed using that builder
+before the query function returns.
 
 @node Symbol Handling
 
