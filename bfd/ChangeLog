@@ -1,3 +1,10 @@
+2004-03-26  Stan Shebs  <shebs@apple.com>
+
+	Remove MPW support, no longer used.
+	* config.bfd (powerpc-*-mpw*): Remove configuration.
+	* mpw-config.in, mpw-make.sed: Remove files.
+	* ecoffswap.h [MPW_C]: Remove MPW-C-friendly version of code.
+
 2004-03-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (elf_backend_add_symbol_hook): Define.
