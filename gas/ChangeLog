@@ -1,3 +1,7 @@
+2000-11-05  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c: Add include of "dwarf2dbg.h"
+
 2000-11-02  Per Lundberg  <plundis@chaosdev.org>
 
 	* configure.in: Recognise i[3456]86-chaosdev-storm-chaos.

@@ -35,6 +35,7 @@
 
 #ifdef OBJ_ELF
 #include "elf/arm.h"
+#include "dwarf2dbg.h"
 #endif
 
 /* Types of processor to assemble for.  */
