@@ -1,3 +1,12 @@
+2004-09-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2004-09-11  Andreas Schwab  <schwab@suse.de>
 
 	* configure: Rebuild.
