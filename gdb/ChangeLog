@@ -1,5 +1,13 @@
 2003-11-22  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c (hppa_value_returned_from_stack): Delete function.
+	* config/pa/tm-hppa.h (hppa_value_returned_from_stack): Delete
+	declaration.
+	(DEPRECATED_VALUE_RETURNED_FROM_STACK): Delete macro.
+	* infcall.c (call_function_by_hand): Delete #ifdef
+	DEPRECATED_VALUE_RETURNED_FROM_STACK code.
+	* infcmd.c (print_return_value): Ditto.
+
 	* mips-tdep.c (skip_prologue_using_sal): New function.
 	(mips32_skip_prologue, mips16_skip_prologue): Use
 	skip_prologue_using_sal to get an upper bound on the search.

@@ -1075,22 +1075,6 @@ the function call).", name);
   do_cleanups (inf_status_cleanup);
 
   /* Figure out the value returned by the function.  */
-  /* elz: I defined this new macro for the hppa architecture only.
-     this gives us a way to get the value returned by the function
-     from the stack, at the same address we told the function to put
-     it.  We cannot assume on the pa that r28 still contains the
-     address of the returned structure. Usually this will be
-     overwritten by the callee.  I don't know about other
-     architectures, so I defined this macro */
-  /* FIXME: cagney/2003-09-27: This is no longer needed.  The problem
-     is now handled directly be by the code below.  */
-#ifdef DEPRECATED_VALUE_RETURNED_FROM_STACK
-  if (struct_return)
-    {
-      do_cleanups (retbuf_cleanup);
-      return DEPRECATED_VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
-    }
-#endif
   if (struct_return)
     {
       /* NOTE: cagney/2003-09-27: This assumes that PUSH_DUMMY_CALL

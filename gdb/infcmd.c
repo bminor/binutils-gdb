@@ -1086,13 +1086,7 @@ print_return_value (int structure_return, struct type *value_type)
      a more complicated case of what is already being done in in the
      inferior function call code.  In fact, when inferior function
      calls are made async, this will likely be made the norm.  */
-#ifdef DEPRECATED_VALUE_RETURNED_FROM_STACK
-#define DEPRECATED_VALUE_RETURNED_FROM_STACK_P 1
-#else
-#define DEPRECATED_VALUE_RETURNED_FROM_STACK_P 0
-#endif
-  else if (gdbarch_return_value_p (current_gdbarch)
-	   || DEPRECATED_VALUE_RETURNED_FROM_STACK_P)
+  else if (gdbarch_return_value_p (current_gdbarch))
     /* We cannot determine the contents of the structure because it is
        on the stack, and we don't know where, since we did not
        initiate the call, as opposed to the call_function_by_hand
