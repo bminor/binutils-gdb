@@ -177,7 +177,6 @@ te-pe.h
 te-ppcnw.h
 te-psos.h
 te-riscix.h
-te-sco386.h
 te-sparcaout.h
 te-sun3.h
 te-svr4.h
