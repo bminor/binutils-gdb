@@ -1,3 +1,7 @@
+2003-09-17  Jim Blandy  <jimb@redhat.com>
+
+	* Makefile.in (dis_asm_h): Note that this #includes "bfd.h".
+
 2003-09-17  Andrew Cagney  <cagney@redhat.com>
 
 	* ppcnbsd-tdep.c (ppcnbsd_use_struct_convention): New function.
