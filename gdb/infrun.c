@@ -2274,6 +2274,8 @@ handle_inferior_event (struct execution_control_state *ecs)
            the HP-UX maintainer to furnish a fix that doesn't break other
            platforms.  --JimB, 20 May 1999 */
 	check_sigtramp2 (ecs);
+	keep_going (ecs);
+	return;
       }
 
     /* Handle cases caused by hitting a breakpoint.  */

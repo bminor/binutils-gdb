@@ -1,3 +1,9 @@
+2000-05-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* infrun.c (handle_inferior_event): Add missing call to keep_going
+	and missing return when handling an ordinary signal from the
+	inferior.
+
 Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
         * objfiles.h (SECT_OFF_DATA, SECT_OFF_TEXT, SECT_OFF_BSS,
