@@ -23,6 +23,8 @@ Tue Oct 31 16:34:28 1995  David Mosberger-Tang  <davidm@azstarnet.com>
 
 Tue Oct 31 13:29:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-ppc.c (ppc_lglobl): Do the right thing.
+
 	* config/tc-ppc.c (ppc_bb): Call SF_SET_PROCESS.
 	(ppc_eb): Likewise.  Set the storage class to C_BLOCK, not C_FCN.
 	(ppc_frob_symbol): Don't change C_BLOCK symbols to C_HIDEXT.

@@ -2086,15 +2086,26 @@ ppc_extern (ignore)
   demand_empty_rest_of_line ();
 }
 
-/* The .lglobl pseudo-op.  I think the RS/6000 assembler only needs
-   this because it can't handle undefined symbols.  I think we can
-   just ignore it.  */
+/* The .lglobl pseudo-op.  Keep the symbol in the symbol table.  */
 
 static void
 ppc_lglobl (ignore)
      int ignore;
 {
-  s_ignore (0);
+  char *name;
+  char endc;
+  symbolS *sym;
+
+  name = input_line_pointer;
+  endc = get_symbol_end ();
+
+  sym = symbol_find_or_make (name);
+
+  *input_line_pointer = endc;
+
+  sym->sy_tc.output = 1;
+
+  demand_empty_rest_of_line ();
 }
 
 /* The .rename pseudo-op.  The RS/6000 assembler can rename symbols,
