@@ -1,3 +1,17 @@
+Thu Jun 12 12:27:51 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dlltool.c (export_type): Add data field.
+	(def_exports): Add data parameter.  Change all callers.
+	(dump_def_info): Print data field.
+	(gen_def_file): Likewise.
+	(make_one_lib_file): Handle data field by not emitting simple
+	label and not emitting anything in SEC_TEXT.
+	(dtab): Print data field.
+	(process_duplicates): Merge data field.
+	* dlltool.h (def_exports): Update declaration.
+	* defparse.y (expline): Accept opt_DATA.  Pass it to def_exports.
+	(opt_DATA): New non-terminal.
+
 Wed Jun 11 17:15:47 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* dlltool.h: New file.

@@ -33,7 +33,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 %token READ WRITE EXECUTE SHARED NONAME
 %token <id> ID
 %token <number> NUMBER
-%type  <number> opt_base opt_ordinal opt_NONAME opt_CONSTANT attr attr_list opt_number
+%type  <number> opt_base opt_ordinal opt_NONAME opt_CONSTANT opt_DATA
+%type  <number> attr attr_list opt_number
 %type  <id> opt_name opt_equal_name 
 
 %%
@@ -64,8 +65,8 @@ explist:
 	;
 
 expline:
-		ID opt_equal_name opt_ordinal opt_NONAME opt_CONSTANT
-			{ def_exports ($1, $2, $3, $4, $5);}
+		ID opt_equal_name opt_ordinal opt_NONAME opt_CONSTANT opt_DATA
+			{ def_exports ($1, $2, $3, $4, $5, $6);}
 	;
 implist:	
 		implist impline
@@ -109,9 +110,15 @@ opt_CONSTANT:
 		CONSTANT {$$=1;}
 	|		 {$$=0;}
 	;
+
 opt_NONAME:
 		NONAME {$$=1;}
 	|		 {$$=0;}
+	;
+
+opt_DATA:
+		DATA { $$ = 1; }
+	|	     { $$ = 0; }
 	;
 
 opt_name: ID		{ $$ =$1; }
