@@ -865,3 +865,4 @@ extern void bfd_ticoff_set_section_load_page
 
 extern int bfd_ticoff_get_section_load_page
   PARAMS ((struct sec *));
+
