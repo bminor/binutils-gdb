@@ -301,8 +301,7 @@ process_def_file (abfd, info)
 
 	  for (j = 0; j < nsyms; j++)
 	    {
-	      if ((symbols[j]->flags & (BSF_FUNCTION | BSF_GLOBAL))
-		  == (BSF_FUNCTION | BSF_GLOBAL))
+	      if (symbols[j]->flags & BSF_GLOBAL)
 		{
 		  const char *sn = symbols[j]->name;
 		  if (*sn == '_')
@@ -1661,10 +1660,17 @@ pe_process_import_defs (output_bfd, link_info)
 	    struct bfd_link_hash_entry *blhe;
 
 	    /* see if we need this import */
-	    char *name = (char *) xmalloc (strlen (pe_def_file->imports[i].internal_name) + 2);
+	    char *name = (char *) xmalloc (strlen (pe_def_file->imports[i].internal_name) + 2 + 6);
 	    sprintf (name, "%s%s", U(""), pe_def_file->imports[i].internal_name);
 	    blhe = bfd_link_hash_lookup (link_info->hash, name,
 					 false, false, false);
+	    if (!blhe || (blhe && blhe->type != bfd_link_hash_undefined))
+	      {
+		sprintf (name, "%s%s", U("_imp__"),
+			 pe_def_file->imports[i].internal_name);
+		blhe = bfd_link_hash_lookup (link_info->hash, name,
+					     false, false, false);
+	      }
 	    free (name);
 	    if (blhe && blhe->type == bfd_link_hash_undefined)
 	      {

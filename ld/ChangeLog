@@ -1,3 +1,8 @@
+2000-07-17  DJ Delorie  <dj@cygnus.com>
+
+	* pe-dll.c (process_def_file): auto-export data items also
+	(pe_process_import_defs): also see if _imp_ form needed
+
 2000-07-12  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* pe-dll.c (make_one): fix a typo in the __imp_ name decoration
