@@ -811,8 +811,9 @@ value_fn_field (arg1p, f, j, type, offset)
       *arg1p = value_ind (value_cast (lookup_pointer_type (type),
 				      value_addr (*arg1p)));
 
-    /* Move the `this' pointer according to the offset. */
+    /* Move the `this' pointer according to the offset. 
     VALUE_OFFSET (*arg1p) += offset;
+    */
     }
 
   return v;
@@ -876,8 +877,9 @@ value_virtual_fn_field (arg1p, f, j, type, offset)
      a virtual function.  */
   entry = value_subscript (vtbl, vi);
 
-  /* Move the `this' pointer according to the virtual function table.  */
-  VALUE_OFFSET (arg1) += value_as_long (value_field (entry, 0)) + offset;
+  /* Move the `this' pointer according to the virtual function table. */ 
+  VALUE_OFFSET (arg1) += value_as_long (value_field (entry, 0))/* + offset*/;
+
   if (! VALUE_LAZY (arg1))
     {
       VALUE_LAZY (arg1) = 1;
@@ -962,7 +964,7 @@ value_headof (in_arg, btype, dtype)
        * But we leave it in for future use, when we will hopefully
        * have optimizes the vtable to use thunks instead of offsets. */
       /* Use the name of vtable itself to extract a base type. */
-      demangled_name += 4;  /* Skip _vt$ prefix. */
+      demangled_name += 4;  /* Skip vt$ prefix. */
     }
   else
     {
@@ -1019,10 +1021,10 @@ vb_match (type, index, basetype)
 
   if (*name != '_')
     return 0;
-  /* gcc 2.4 uses _vb$.  */
+  /* gcc 2.4 uses vb$.  */
   if (name[1] == 'v' && name[2] == 'b' && name[3] == CPLUS_MARKER)
     field_class_name = name + 4;
-  /* gcc 2.5 will use __vb_.  */
+  /* gcc 2.5 will use _vb_.  */
   if (name[1] == '_' && name[2] == 'v' && name[3] == 'b' && name[4] == '_')
     field_class_name = name + 5;
 
