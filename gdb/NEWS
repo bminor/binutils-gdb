@@ -1,7 +1,13 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 6.1:
+*** Changes in GDB 6.1.1:
+
+* Added execute permission to gdb/gdbserver/configure
+
+The shell script gdb/testsuite/gdb.stabs/configure lacked execute
+permission.  This bug would cause configure to fail on a number of
+systems (Solaris, IRIX).  Ref: server/519.
 
 *** Changes in GDB 6.1:
 

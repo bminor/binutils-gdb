@@ -1,3 +1,8 @@
+2004-04-28  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Mention GDB 6.1.1.  Mention gdb/gdbserver/configure
+	execute permission changed.  PR server/519.
+
 2004-04-03  GDB Administrator  <gdbadmin@sourceware.org>
 
 	GDB 6.1 released.
