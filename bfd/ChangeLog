@@ -1,5 +1,11 @@
 Tue Nov 25 11:26:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.am (BFD32_BACKENDS): Remove tekhex.lo.
+	(BFD32_BACKENDS_CFILES): Remove tekhex.c.
+	* Makefile.in: Rebuild.
+	* aclocal.m4, configure, src/Makefile.in: Rebuild with current
+	automake and autoconf.
+
 	* coff-arm.c (arm_allocate_interworking_sections): Fix typo
 	(COFF_WITH_PR to COFF_WITH_PE).
 
