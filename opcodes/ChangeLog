@@ -1,3 +1,13 @@
+Thu Aug 12 12:04:53 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips-opc.c: Added lwc1 E,A(b) to go with lwc1 T,A(b).  Similarly
+	for swc1.
+
+Sun Aug  8 15:09:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* sparc-opc.c: Change CONST to const to deal with gcc
+	-Dconst=__const -traditional.
+
 Fri Aug  6 10:58:55 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips-opc.c: From davidj@ICSI.Berkeley.EDU (David Johnson): Took
