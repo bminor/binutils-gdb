@@ -60,7 +60,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef CGEN_INT_INSN
 typedef unsigned int cgen_insn_t;
 #else
-typedef char *cgen_insn_t;
+typedef char * cgen_insn_t;
 #endif
 
 #ifdef __GNUC__
@@ -71,7 +71,8 @@ typedef char *cgen_insn_t;
 
 /* Perhaps we should just use bfd.h, but it's not clear
    one would want to require that yet.  */
-enum cgen_endian {
+enum cgen_endian
+{
   CGEN_ENDIAN_UNKNOWN,
   CGEN_ENDIAN_LITTLE,
   CGEN_ENDIAN_BIG
@@ -81,7 +82,8 @@ enum cgen_endian {
    Attributes are used to describe various random things.  */
 
 /* Struct to record attribute information.  */
-typedef struct {
+typedef struct
+{
   unsigned char num_nonbools;
   unsigned int bool;
   unsigned int nonbool[1];
@@ -112,17 +114,19 @@ const struct { unsigned char num_nonbools; \
 /* Attribute name/value tables.
    These are used to assist parsing of descriptions at runtime.  */
 
-typedef struct {
-  const char *name;
-  int value;
+typedef struct
+{
+  const char * name;
+  int          value;
 } CGEN_ATTR_ENTRY;
 
 /* For each domain (fld,operand,insn), list of attributes.  */
 
-typedef struct {
-  const char *name;
+typedef struct
+{
+  const char *            name;
   /* NULL for boolean attributes.  */
-  const CGEN_ATTR_ENTRY *vals;
+  const CGEN_ATTR_ENTRY * vals;
 } CGEN_ATTR_TABLE;
 
 /* Parse result (also extraction result).
@@ -234,7 +238,8 @@ extern cgen_print_fn * CGEN_SYM (print_handlers) [];
 #define CGEN_MAX_INSN_ATTRS 1
 #endif
 
-struct cgen_base {
+struct cgen_base
+{
   /* Indices into the handler tables.
      We could use pointers here instead, but in the case of the insn table,
      90% of them would be identical and that's a lot of redundant data.
@@ -266,16 +271,21 @@ struct cgen_base {
    The parsed value is stored in the bfd_vma *.  */
 
 /* Values for indicating what the caller wants.  */
-enum cgen_parse_operand_type {
-  CGEN_PARSE_OPERAND_INIT, CGEN_PARSE_OPERAND_INTEGER,
+enum cgen_parse_operand_type
+{
+  CGEN_PARSE_OPERAND_INIT,
+  CGEN_PARSE_OPERAND_INTEGER,
   CGEN_PARSE_OPERAND_ADDRESS
 };
 
 /* Values for indicating what was parsed.
    ??? Not too useful at present but in time.  */
-enum cgen_parse_operand_result {
-  CGEN_PARSE_OPERAND_RESULT_NUMBER, CGEN_PARSE_OPERAND_RESULT_REGISTER,
-  CGEN_PARSE_OPERAND_RESULT_QUEUED, CGEN_PARSE_OPERAND_RESULT_ERROR
+enum cgen_parse_operand_result
+{
+  CGEN_PARSE_OPERAND_RESULT_NUMBER,
+  CGEN_PARSE_OPERAND_RESULT_REGISTER,
+  CGEN_PARSE_OPERAND_RESULT_QUEUED,
+  CGEN_PARSE_OPERAND_RESULT_ERROR
 };
 
 /* Don't require bfd.h unnecessarily.  */
@@ -320,22 +330,24 @@ void cgen_asm_finish_insn PARAMS ((const struct cgen_insn *, cgen_insn_t *,
 
 /* Types of assembler elements.  */
 
-enum cgen_asm_type {
+enum cgen_asm_type
+{
   CGEN_ASM_KEYWORD, CGEN_ASM_MAX
 };
 
 /* List of hardware elements.  */
 
-typedef struct cgen_hw_entry {
-  struct cgen_hw_entry *next;
-  char *name;
-  enum cgen_asm_type asm_type;
-  PTR asm_data;
+typedef struct cgen_hw_entry
+{
+  struct cgen_hw_entry * next;
+  char *                 name;
+  enum cgen_asm_type     asm_type;
+  PTR                    asm_data;
 } CGEN_HW_ENTRY;
 
-extern CGEN_HW_ENTRY *CGEN_SYM (hw_list);
+extern CGEN_HW_ENTRY * CGEN_SYM (hw_list);
 
-CGEN_HW_ENTRY *cgen_hw_lookup PARAMS ((const char *));
+CGEN_HW_ENTRY * cgen_hw_lookup PARAMS ((const char *));
 
 #ifndef CGEN_MAX_KEYWORD_ATTRS
 #define CGEN_MAX_KEYWORD_ATTRS 1
@@ -343,9 +355,10 @@ CGEN_HW_ENTRY *cgen_hw_lookup PARAMS ((const char *));
 
 /* This struct is used to describe things like register names, etc.  */
 
-typedef struct cgen_keyword_entry {
+typedef struct cgen_keyword_entry
+{
   /* Name (as in register name).  */
-  char *name;
+  char * name;
 
   /* Value (as in register number).
      The value cannot be -1 as that is used to indicate "not found".
@@ -373,32 +386,42 @@ typedef struct cgen_keyword_entry {
 
    This struct supports runtime entry of new values, and hashed lookups.  */
 
-typedef struct {
+typedef struct cgen_keyword
+{
   /* Pointer to initial [compiled in] values.  */
-  CGEN_KEYWORD_ENTRY *init_entries;
+  CGEN_KEYWORD_ENTRY * init_entries;
+  
   /* Number of entries in `init_entries'.  */
   unsigned int num_init_entries;
+  
   /* Hash table used for name lookup.  */
-  CGEN_KEYWORD_ENTRY **name_hash_table;
+  CGEN_KEYWORD_ENTRY ** name_hash_table;
+  
   /* Hash table used for value lookup.  */
-  CGEN_KEYWORD_ENTRY **value_hash_table;
+  CGEN_KEYWORD_ENTRY ** value_hash_table;
+  
   /* Number of entries in the hash_tables.  */
   unsigned int hash_table_size;
+  
   /* Pointer to null keyword "" entry if present.  */
-  const CGEN_KEYWORD_ENTRY *null_entry;
+  const CGEN_KEYWORD_ENTRY * null_entry;
 } CGEN_KEYWORD;
 
 /* Structure used for searching.  */
 
-typedef struct {
+typedef struct
+{
   /* Table being searched.  */
-  const CGEN_KEYWORD *table;
+  const CGEN_KEYWORD * table;
+  
   /* Specification of what is being searched for.  */
-  const char *spec;
+  const char * spec;
+  
   /* Current index in hash table.  */
   unsigned int current_hash;
+  
   /* Current element in current hash chain.  */
-  CGEN_KEYWORD_ENTRY *current_entry;
+  CGEN_KEYWORD_ENTRY * current_entry;
 } CGEN_KEYWORD_SEARCH;
 
 /* Lookup a keyword from its name.  */
@@ -441,9 +464,10 @@ const char * cgen_validate_unsigned_integer PARAMS ((unsigned long,
 #define CGEN_MAX_OPERAND_ATTRS 1
 #endif
 
-typedef struct {
+typedef struct cgen_operand
+{
   /* Name as it appears in the syntax string.  */
-  char *name;
+  char * name;
 
   /* Bit position (msb of first byte = bit 0).
      This is just a hint, and may be unused in more complex operands.
@@ -497,7 +521,8 @@ enum cgen_operand_type;
 #define CGEN_MAX_SYNTAX_BYTES 16
 #endif
 
-typedef struct {
+typedef struct
+{
   unsigned char syntax[CGEN_MAX_SYNTAX_BYTES];
 } CGEN_SYNTAX;
 
@@ -520,7 +545,8 @@ typedef struct {
    This cuts down on the size of the opcode table as there are relatively few
    formats compared with the number of instructions.  */
 
-typedef struct {
+typedef struct
+{
   /* Length that MASK and VALUE have been calculated to
      [VALUE is recorded elsewhere].
      Normally it is CGEN_BASE_INSN_BITSIZE.  On [V]LIW architectures where
@@ -540,37 +566,39 @@ typedef struct {
 
 /* This struct defines each entry in the instruction table.  */
 
-struct cgen_insn {
+struct cgen_insn
+{
   /* ??? Further table size reductions can be had by moving this element
      either to the format table or to a separate table of its own.  Not
      sure this is desirable yet.  */
   struct cgen_base base;
+  
 /* Given a pointer to a cgen_insn struct, return a pointer to `base'.  */
 #define CGEN_INSN_BASE(insn) (&(insn)->base)
 
   /* Name of entry (that distinguishes it from all other entries).
      This is used, for example, in simulator profiling results.  */
   /* ??? If mnemonics have operands, try to print full mnemonic.  */
-  const char *name;
+  const char * name;
 #define CGEN_INSN_NAME(insn) ((insn)->name)
 
   /* Mnemonic.  This is used when parsing and printing the insn.
      In the case of insns that have operands on the mnemonics, this is
      only the constant part.  E.g. for conditional execution of an `add' insn,
      where the full mnemonic is addeq, addne, etc., this is only "add".  */
-  const char *mnemonic;
+  const char * mnemonic;
 #define CGEN_INSN_MNEMONIC(insn) ((insn)->mnemonic)
 
   /* Syntax string.
      For now this only points to CGEN_SYNTAX elements, but it can point
      to other things (e.g. something different for macros?).  */
-  const CGEN_SYNTAX *syntax;
+  const CGEN_SYNTAX * syntax;
 #define CGEN_INSN_SYNTAX(insn) ((CGEN_SYNTAX *) (insn)->syntax)
 
   /* Format entry.
      For now this only points to CGEN_FORMAT elements, but it can point
      to other things (e.g. something different for macros?).  */
-  const CGEN_FORMAT *format;
+  const CGEN_FORMAT * format;
 #define CGEN_INSN_MASK_BITSIZE(insn) (((CGEN_FORMAT *) (insn)->format)->mask_length)
 #define CGEN_INSN_BITSIZE(insn) (((CGEN_FORMAT *) (insn)->format)->length)
 
@@ -594,28 +622,37 @@ CGEN_ATTR_VALUE (insn, CGEN_INSN_ATTRS (insn), attr)
 /* Instruction lists.
    This is used for adding new entries and for creating the hash lists.  */
 
-typedef struct cgen_insn_list {
-  struct cgen_insn_list *next;
-  const CGEN_INSN *insn;
+typedef struct cgen_insn_list
+{
+  struct cgen_insn_list * next;
+  const CGEN_INSN * insn;
 } CGEN_INSN_LIST;
 
 /* The table of instructions.  */
 
-typedef struct {
+typedef struct
+{
   /* Pointer to initial [compiled in] entries.  */
-  const CGEN_INSN *init_entries;
+  const CGEN_INSN * init_entries;
+  
   /* Size of an entry (since the attribute member is variable sized).  */
   unsigned int entry_size;
+  
   /* Number of entries in `init_entries', including trailing NULL entry.  */
   unsigned int num_init_entries;
+  
   /* Values added at runtime.  */
-  CGEN_INSN_LIST *new_entries;
+  CGEN_INSN_LIST * new_entries;
+  
   /* Assembler hash function.  */
-  unsigned int (*asm_hash) PARAMS ((const char *));
+  unsigned int (* asm_hash) PARAMS ((const char *));
+  
   /* Number of entries in assembler hash table.  */
   unsigned int asm_hash_table_size;
+  
   /* Disassembler hash function.  */
-  unsigned int (*dis_hash) PARAMS ((const char *, unsigned long));
+  unsigned int (* dis_hash) PARAMS ((const char *, unsigned long));
+  
   /* Number of entries in disassembler hash table.  */
   unsigned int dis_hash_table_size;
 } CGEN_INSN_TABLE;
@@ -673,10 +710,11 @@ CGEN_INSN_LIST * cgen_dis_lookup_insn PARAMS ((const char *, unsigned long));
 
 /* Top level structures and functions.  */
 
-typedef struct {
-  CGEN_HW_ENTRY *hw_list;
-  /*CGEN_OPERAND_TABLE *operand_table; - FIXME:wip */
-  CGEN_INSN_TABLE *insn_table;
+typedef struct
+{
+  CGEN_HW_ENTRY *        hw_list;
+  /*CGEN_OPERAND_TABLE * operand_table; - FIXME:wip */
+  CGEN_INSN_TABLE *      insn_table;
 } CGEN_OPCODE_DATA;
 
 /* Each CPU has one of these.  */
