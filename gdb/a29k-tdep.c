@@ -646,7 +646,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
     {
       if (raw_buffer != NULL)
 	{
-	  store_address (raw_buffer, REGISTER_RAW_BYTES (regnum), fi->frame);
+	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), fi->frame);
 	}
       if (lvalp != NULL)
 	*lvalp = not_lval;
@@ -656,7 +656,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
     {
       if (raw_buffer != NULL)
 	{
-	  store_address (raw_buffer, REGISTER_RAW_BYTES (regnum), fi->pc);
+	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), fi->pc);
 	}
 
       /* Not sure we have to do this.  */
@@ -671,7 +671,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
 	{
 	  if (fi->next != NULL)
 	    {
-	      store_address (raw_buffer, REGISTER_RAW_BYTES (regnum),
+	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
 			     fi->next->saved_msp);
 	    }
 	  else

@@ -1,3 +1,7 @@
+Wed Jul 14 13:51:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* a29k-tdep.c (get_saved_register): Fix typo.
+
 Wed Jul 14 09:45:52 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* configure.in: Recognize h8300h (variant of h8300).
