@@ -240,14 +240,6 @@ static int total_len;		/* used to calculate the total length of variable
    section. */
 static int gave_compiler_message = 0;
 
-/* A pointer to the current routine that we are working on.  */
-
-static symbolS *Current_Routine;
-
-/* The psect number for $code a.k.a. the text section. */
-
-static int Text_Psect;
-
 
 /*
  *	Global data (Object records limited to 512 bytes by VAX-11 "C" runtime)
@@ -338,7 +330,7 @@ const segT N_TYPE_seg[N_TYPE + 2] =
 
 static struct input_file *find_file PARAMS ((symbolS *));
 static struct VMS_DBG_Symbol *find_symbol PARAMS ((int));
-static symbolS *Define_Routine PARAMS ((symbolS *,int));
+static symbolS *Define_Routine PARAMS ((symbolS *,int,symbolS *,int));
 
 static char *cvt_integer PARAMS ((char *,int *));
 static char *fix_name PARAMS ((char *));
@@ -372,7 +364,7 @@ static void VMS_TBT_Module_End PARAMS ((void));
 static void VMS_TBT_Routine_Begin PARAMS ((symbolS *,int));
 static void VMS_TBT_Routine_End PARAMS ((int,symbolS *));
 static void VMS_TBT_Block_Begin PARAMS ((symbolS *,int,char *));
-static void VMS_TBT_Block_End PARAMS ((int));
+static void VMS_TBT_Block_End PARAMS ((valueT));
 static void VMS_TBT_Line_PC_Correlation PARAMS ((int,int,int,int));
 static void VMS_TBT_Source_Lines PARAMS ((int,int,int));
 static void fpush PARAMS ((int,int));
@@ -390,8 +382,7 @@ static void VMS_LCSYM_Parse PARAMS ((symbolS *,int));
 static void VMS_STSYM_Parse PARAMS ((symbolS *,int));
 static void VMS_RSYM_Parse PARAMS ((symbolS *,symbolS *,int));
 static void VMS_LSYM_Parse PARAMS ((void));
-static void Define_Local_Symbols PARAMS ((symbolS *,symbolS *));
-static void VMS_DBG_Define_Routine PARAMS ((symbolS *,symbolS *,int));
+static void Define_Local_Symbols PARAMS ((symbolS *,symbolS *,symbolS *,int));
 static void Write_VMS_MHD_Records PARAMS ((void));
 static void Write_VMS_EOM_Record PARAMS ((int,int));
 static void VMS_Case_Hack_Symbol PARAMS ((const char *,char *));
@@ -1178,7 +1169,7 @@ VMS_TBT_Block_Begin (symbolP, Psect, Name)
  */
 static void
 VMS_TBT_Block_End (Size)
-     int Size;
+     valueT Size;
 {
   char Local[16];
 
@@ -3110,38 +3101,41 @@ VMS_LSYM_Parse ()
 }
 
 static void
-Define_Local_Symbols (s1, s2)
-     symbolS *s1, *s2;
+Define_Local_Symbols (s0P, s2P, Current_Routine, Text_Psect)
+     symbolS *s0P, *s2P;
+     symbolS *Current_Routine;
+     int Text_Psect;
 {
-  symbolS *symbolP1;
-  for (symbolP1 = symbol_next (s1); symbolP1 != s2; symbolP1 = symbol_next (symbolP1))
+  symbolS *s1P;		/* each symbol from s0P .. s2P (exclusive) */
+
+  for (s1P = symbol_next (s0P); s1P != s2P; s1P = symbol_next (s1P))
     {
-      if (symbolP1 == (symbolS *) NULL)
-	return;
-      if (S_GET_RAW_TYPE (symbolP1) == N_FUN)
+      if (!s1P)
+	break;		/* and return */
+      if (S_GET_RAW_TYPE (s1P) == N_FUN)
 	{
-	  char * pnt=(char*) strchr (S_GET_NAME (symbolP1), ':') + 1;
+	  char *pnt = (char *) strchr (S_GET_NAME (s1P), ':') + 1;
 	  if (*pnt == 'F' || *pnt == 'f') break;
 	}
+      if (!S_IS_DEBUG (s1P))
+	continue;
       /*
-       *	Deal with STAB symbols
+       *	Dispatch on STAB type
        */
-      if (S_IS_DEBUG (symbolP1))
+      switch (S_GET_RAW_TYPE (s1P))
 	{
-	  /*
-	   *	Dispatch on STAB type
-	   */
-	  switch (S_GET_RAW_TYPE (symbolP1))
-	    {
-	    case N_LSYM:
-	    case N_PSYM:
-	      VMS_local_stab_Parse (symbolP1);
-	      break;
-	    case N_RSYM:
-	      VMS_RSYM_Parse (symbolP1, Current_Routine, Text_Psect);
-	      break;
-	    }			/*switch*/
-	}			/* if */
+	default:
+	  continue;		/* not left or right brace */
+
+	case N_LSYM:
+	case N_PSYM:
+	  VMS_local_stab_Parse (s1P);
+	  break;
+
+	case N_RSYM:
+	  VMS_RSYM_Parse (s1P, Current_Routine, Text_Psect);
+	  break;
+	}			/*switch*/
     }				/* for */
 }
 
@@ -3153,69 +3147,57 @@ Define_Local_Symbols (s1, s2)
  */
 
 static symbolS *
-Define_Routine (symbolP, Level)
-     symbolS *symbolP;
+Define_Routine (s0P, Level, Current_Routine, Text_Psect)
+     symbolS *s0P;
      int Level;
+     symbolS *Current_Routine;
+     int Text_Psect;
 {
-  symbolS *sstart;
-  symbolS *symbolP1;
-  char str[10];
+  symbolS *s1P;
+  valueT Offset;
   int rcount = 0;
-  int Offset;
-  sstart = symbolP;
-  for (symbolP1 = symbol_next (symbolP); symbolP1; symbolP1 = symbol_next (symbolP1))
+
+  for (s1P = symbol_next (s0P); s1P != 0; s1P = symbol_next (s1P))
     {
-      if (S_GET_RAW_TYPE (symbolP1) == N_FUN)
+      if (S_GET_RAW_TYPE (s1P) == N_FUN)
 	{
-	  char * pnt=(char*) strchr (S_GET_NAME (symbolP1), ':') + 1;
+	  char *pnt = (char *) strchr (S_GET_NAME (s1P), ':') + 1;
 	  if (*pnt == 'F' || *pnt == 'f') break;
 	}
+      if (!S_IS_DEBUG (s1P))
+	continue;
       /*
-       *	Deal with STAB symbols
+       *	Dispatch on STAB type
        */
-      if (S_IS_DEBUG (symbolP1))
+      switch (S_GET_RAW_TYPE (s1P))
 	{
-	  /*
-	   *	Dispatch on STAB type
-	   */
-	  switch (S_GET_RAW_TYPE (symbolP1))
-	    {
-	    case N_LBRAC:
-	      if (Level != 0)
-		{
-		  sprintf (str, "$%d", rcount++);
-		  VMS_TBT_Block_Begin (symbolP1, Text_Psect, str);
-		}
-	      Offset = S_GET_VALUE (symbolP1);
-	      Define_Local_Symbols (sstart, symbolP1);
-	      symbolP1 =
-		Define_Routine (symbolP1, Level + 1);
-	      if (Level != 0)
-		VMS_TBT_Block_End (S_GET_VALUE (symbolP1) -
-				   Offset);
-	      sstart = symbolP1;
-	      break;
-	    case N_RBRAC:
-	      return symbolP1;
-	    }			/*switch*/
-	}			/* if */
-    }				/* for */
-  /* we end up here if there were no brackets in this function. Define
-everything */
-  Define_Local_Symbols (sstart, (symbolS *) 0);
-  return symbolP1;
-}
-
+	default:
+	  continue;		/* not left or right brace */
 
-static void
-VMS_DBG_Define_Routine (symbolP, Curr_Routine, Txt_Psect)
-     symbolS *symbolP;
-     symbolS *Curr_Routine;
-     int Txt_Psect;
-{
-  Current_Routine = Curr_Routine;
-  Text_Psect = Txt_Psect;
-  Define_Routine (symbolP, 0);
+	case N_LBRAC:
+	  if (Level != 0)
+	    {
+	      char str[10];
+	      sprintf (str, "$%d", rcount++);
+	      VMS_TBT_Block_Begin (s1P, Text_Psect, str);
+	    }
+	  Offset = S_GET_VALUE (s1P);	/* side-effect: fully resolve symbol */
+	  Define_Local_Symbols (s0P, s1P, Current_Routine, Text_Psect);
+	  s1P = Define_Routine (s1P, Level + 1, Current_Routine, Text_Psect);
+	  if (Level != 0)
+	    VMS_TBT_Block_End (S_GET_VALUE (s1P) - Offset);
+	  s0P = s1P;
+	  break;
+
+	case N_RBRAC:
+	  return s1P;
+	}			/*switch*/
+    }				/* for */
+
+  /* We end up here if there were no brackets in this function.
+     Define everything.  */
+  Define_Local_Symbols (s0P, (symbolS *)0, Current_Routine, Text_Psect);
+  return s1P;
 }
 
 
@@ -3389,26 +3371,14 @@ Write_VMS_EOM_Record (Psect, Offset)
    *	 Text_Psect==0)
    */
   Set_VMS_Object_File_Record (OBJ_S_C_EOM);
-  /*
-   *	Store record Type
-   */
-  PUT_CHAR (OBJ_S_C_EOM);
-  /*
-   *	Store the error severity (0)
-   */
-  PUT_CHAR (0);
+  PUT_CHAR (OBJ_S_C_EOM);	/* Record type.  */
+  PUT_CHAR (0);			/* Error severity level (we ignore it). */
   /*
    *	Store the entry point, if it exists
    */
   if (Psect >= 0)
     {
-      /*
-       *	Store the entry point Psect
-       */
       PUT_CHAR (Psect);
-      /*
-       *	Store the entry point Psect offset
-       */
       PUT_LONG (Offset);
     }
   /*
@@ -4054,6 +4024,7 @@ VMS_Initialized_Data_Size (sp, End_Of_Data)
   return Next_Symbol ? (next_val - sp_val) : (End_Of_Data - sp_val);
 }
 
+
 /*
  *	Check symbol names for the Psect hack with a globalvalue, and then
  *	generate globalvalues for those that have it.
@@ -4511,6 +4482,7 @@ VMS_Fix_Indirect_Reference (Text_Psect, Offset, fragP, text_frag_root)
     }
 }
 
+
 /*
  *	If the procedure "main()" exists we have to add the instruction
  *	"jsb c$main_args" at the beginning to be compatible with VAX-11 "C".
@@ -5198,7 +5170,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	   */
 	  if (fixP->fx_subsy && fixP->fx_addsy)
 	    {
-	      int i;
+	      offsetT dif;
 
 	      /*
 	       *	They need to be in the same segment
@@ -5222,7 +5194,8 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	       *	Subtract their values to get the
 	       *	difference.
 	       */
-	      i = S_GET_VALUE (fixP->fx_addsy) - S_GET_VALUE (fixP->fx_subsy);
+	      dif = S_GET_VALUE (fixP->fx_addsy) - S_GET_VALUE (fixP->fx_subsy);
+	      md_number_to_chars (Local, (valueT) dif, fixP->fx_size);
 	      /*
 	       *	Now generate the fixup object records
 	       *	Set the psect and store the data
@@ -5230,7 +5203,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	      VMS_Set_Psect (Text_Psect,
 			     fixP->fx_where + fixP->fx_frag->fr_address,
 			     OBJ_S_C_TIR);
-	      VMS_Store_Immediate_Data (&i,
+	      VMS_Store_Immediate_Data (Local,
 					fixP->fx_size,
 					OBJ_S_C_TIR);
 	      /*
@@ -5348,7 +5321,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 	       */
 	      if (fixP->fx_subsy && fixP->fx_addsy)
 		{
-		  int i;
+		  offsetT dif;
 
 		  /*
 		   *	They need to be in the same segment
@@ -5372,8 +5345,9 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 		   *	Subtract their values to get the
 		   *	difference.
 		   */
-		  i = S_GET_VALUE (fixP->fx_addsy) -
-		    S_GET_VALUE (fixP->fx_subsy);
+		  dif = S_GET_VALUE (fixP->fx_addsy) -
+		       S_GET_VALUE (fixP->fx_subsy);
+		  md_number_to_chars (Local, (valueT) dif, fixP->fx_size);
 		  /*
 		   *	Now generate the fixup object records
 		   *	Set the psect and store the data
@@ -5384,7 +5358,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 				 S_GET_VALUE (vsp->Symbol) +
 				 vsp->Psect_Offset,
 				 OBJ_S_C_TIR);
-		  VMS_Store_Immediate_Data (&i,
+		  VMS_Store_Immediate_Data (Local,
 					    fixP->fx_size,
 					    OBJ_S_C_TIR);
 		  /*
@@ -5607,8 +5581,8 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 		  if ((*(--pnt) == '\0') && (*(--pnt1) == ':'))
 		    break;
 		}
-	      if (symbolP1 != (symbolS *) NULL)
-		VMS_DBG_Define_Routine (symbolP1, Current_Routine, Text_Psect);
+	      if (symbolP1)
+		Define_Routine (symbolP1, 0, Current_Routine, Text_Psect);
 	    }			/* local symbol block */
 	    /*
 	     *	Done
