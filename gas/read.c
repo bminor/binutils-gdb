@@ -1711,17 +1711,17 @@ s_mri_sect (type)
 	flagword flags;
 
 	flags = SEC_NO_FLAGS;
-	if (type == 'C')
+	if (*type == 'C')
 	  flags = SEC_CODE;
-	else if (type == 'D')
+	else if (*type == 'D')
 	  flags = SEC_DATA;
-	else if (type == 'R')
+	else if (*type == 'R')
 	  flags = SEC_ROM;
 	if (flags != SEC_NO_FLAGS)
 	  {
 	    if (! bfd_set_section_flags (stdoutput, seg, flags))
 	      as_warn ("error setting flags for \"%s\": %s",
-		       bfd_section_name (stdoutput, sec),
+		       bfd_section_name (stdoutput, seg),
 		       bfd_errmsg (bfd_get_error ()));
 	  }
       }
@@ -3273,7 +3273,23 @@ s_include (arg)
   FILE *try;
   char *path;
 
-  filename = demand_copy_string (&i);
+  if (! flag_mri)
+    filename = demand_copy_string (&i);
+  else
+    {
+      SKIP_WHITESPACE ();
+      i = 0;
+      while (! is_end_of_line[(unsigned char) *input_line_pointer]
+	     && *input_line_pointer != ' '
+	     && *input_line_pointer != '\t')
+	{
+	  obstack_1grow (&notes, *input_line_pointer);
+	  ++input_line_pointer;
+	  ++i;
+	}
+      obstack_1grow (&notes, '\0');
+      filename = obstack_finish (&notes);
+    }
   demand_empty_rest_of_line ();
   path = xmalloc ((unsigned long) i + include_dir_maxlen + 5 /* slop */ );
   for (i = 0; i < include_dir_count; i++)

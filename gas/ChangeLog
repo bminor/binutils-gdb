@@ -1,5 +1,9 @@
 Fri Aug 18 10:58:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (s_include): In MRI mode, don't expect quotes around the
+	file name.
+	* listing.c (listing_title): Don't require the title to be quoted.
+
 	* gasp.c (include_print_where_line): Always subtract 1 from
 	linecount before printing it.
 	(process_file): In MRI mode, lines beginning with '*' or '!' are
