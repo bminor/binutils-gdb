@@ -27,7 +27,8 @@ FLAGS_TO_PASS = \
 all:	 subdirs
 
 .PHONY: check installcheck
-check:
+info:
+install-info:
 install:
 installcheck:
 
