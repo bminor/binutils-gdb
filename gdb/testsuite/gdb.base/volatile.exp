@@ -254,7 +254,7 @@ gdb_test "ptype vendor" "type = const volatile unsigned char \\* const volatile.
 local_compiler_xfail_check
 send_gdb "ptype qux2\n"
 gdb_expect {
-    -re "type = int \\(volatile unsigned char, const volatile int, volatile short, volatile long \\*, float \\* volatile, const volatile signed char \\* const volatile\\).*$gdb_prompt $" {
+    -re "type = int \\(volatile unsigned char, const volatile int, volatile short( int)?, volatile long( int)? \\*, float \\* volatile, const volatile signed char \\* const volatile\\).*$gdb_prompt $" {
         pass "ptype qux2"
     }
     -re ".*$gdb_prompt $" { fail "ptype qux2" }
