@@ -803,7 +803,8 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	  return;
 	}
 
-      /* Floating-point return values can be found in %st(0).  */
+      /* Floating-point return values can be found in %st(0).
+         FIXME: Does %st(0) always correspond to FP0?  */
       if (len == TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT
 	  && TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
 	{
@@ -861,6 +862,8 @@ i386_store_return_value (struct type *type, char *valbuf)
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
+      unsigned int fstat;
+
       if (NUM_FREGS == 0)
 	{
 	  warning ("Cannot set floating-point return value.");
@@ -889,6 +892,16 @@ i386_store_return_value (struct type *type, char *valbuf)
 	  write_register_bytes (REGISTER_BYTE (FP0_REGNUM), buf,
 				FPU_REG_RAW_SIZE);
 	}
+
+      /* Set the top of the floating point register stack to 7.  That
+         makes sure that FP0 (which we set above) is indeed %st(0).
+         FIXME: Perhaps we should completely reset the status word?  */
+      fstat = read_register (FSTAT_REGNUM);
+      fstat |= (7 << 11);
+      write_register (FSTAT_REGNUM, fstat);
+
+      /* Mark %st(1) through %st(7) as empty.  */
+      write_register (FTAG_REGNUM, 0x3fff);
     }
   else
     {

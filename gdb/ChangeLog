@@ -1,5 +1,9 @@
 2001-07-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_extract_return_value): "Fix" comment.
+	(i386_store_return_value): Frob FPU status and tag word to make
+	sure the return value is the only value on the FPU stack.
+
 	* config/tm-linux.h: Do not include <signal.h>.  Instead provide
 	reasonable defaults for REALTIME_LO and REALTIME_HI if they're not
 	already defined.
