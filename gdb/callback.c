@@ -268,7 +268,7 @@ host_callback *p;
 /* VARARGS */
 void
 #ifdef ANSI_PROTOTYPES
-os_printf_filtered (host_callback *p, char *format, ...)
+os_printf_filtered (host_callback *p, const char *format, ...)
 #else
 os_printf_filtered (p, va_alist)
      host_callback *p;

@@ -77,6 +77,12 @@ struct
 #define RDP_OPEN 	 		0
 #define RDP_OPEN_TYPE_COLD 		0
 #define RDP_OPEN_TYPE_WARM 		1
+#define RDP_OPEN_TYPE_BAUDRATE          2
+
+#define RDP_OPEN_BAUDRATE_9600       	1
+#define RDP_OPEN_BAUDRATE_19200        	2
+#define RDP_OPEN_BAUDRATE_38400        	3
+
 #define RDP_OPEN_TYPE_RETURN_SEX	(1<<3)
 
 #define RDP_CLOSE 			1
@@ -138,7 +144,7 @@ struct
 #define RDP_RES_VALUE_BIG_ENDIAN 	241
 #define RDP_RES_RESET			0x7f
 #define RDP_RES_AT_BREAKPOINT    	143
-
+#define RDP_RES_IDUNNO			0xe6
 #define RDP_OSOpReply           	0x13
 #define RDP_OSOpWord            	2
 #define RDP_OSOpNothing         	0
@@ -160,6 +166,9 @@ get_byte ()
 {
   int c = SERIAL_READCHAR (io, timeout);
 
+  if (remote_debug)
+    printf ("[%02x]", c);
+
   if (c == SERIAL_TIMEOUT)
     {
       if (timeout == 0)
@@ -168,8 +177,6 @@ get_byte ()
       error ("Timeout reading from remote_system");
     }
 
-  if (remote_debug)
-    printf ("[%02x]", c);
   return c;
 }
 
@@ -193,6 +200,8 @@ static void
 put_byte (val)
      char val;
 {
+  if (remote_debug)
+    printf("(%02x)", val);
   SERIAL_WRITE (io, &val, 1);
 }
 
@@ -207,6 +216,9 @@ put_word (val)
   b[2] = val >> 16;
   b[3] = val >> 24;
 
+  if (remote_debug)
+    printf("(%04x)", val);
+
   SERIAL_WRITE (io, b, 4);
 }
 
@@ -214,66 +226,99 @@ put_word (val)
 
 /* Stuff for talking to the RDP layer. */
 
-
 /* This is a bit more fancy that need be so that it syncs even in nasty cases. */
 
 static void
-rdp_init ()
+rdp_init (int cold)
 {
   int oloop;
+  int sync = 0;
+  int type = cold ? RDP_OPEN_TYPE_COLD : RDP_OPEN_TYPE_WARM;
+  int try;
+  int rcount = 0;
+  int bi;
 
-  for (oloop = 0; oloop < 2; oloop++)
+  for (try = 0; !sync && try < 10 ; try++)
     {
-      int longtry;
+      int restype;
+      QUIT;
       SERIAL_FLUSH_INPUT (io);
-      for (longtry = 0; longtry < 2; longtry++)
+      put_byte (RDP_OPEN);
+
+      if (baud_rate == 19200) 
 	{
-	  int try;
-	  int flush_and_retry = 0;
+	  put_byte (type | RDP_OPEN_TYPE_RETURN_SEX | RDP_OPEN_TYPE_BAUDRATE);
+	  put_word (0);
+	  put_word (RDP_OPEN_BAUDRATE_19200);
+	}
+      else 
+	{
+	  put_byte (type | RDP_OPEN_TYPE_RETURN_SEX);
+	  put_word (0);
+	}
 
-	  for (try = 0; try < 10 && !flush_and_retry; try++)
+      restype = SERIAL_READCHAR (io, 1);
+
+      if (remote_debug)
+	printf_unfiltered ("[%02x]\n", restype);
+
+      if (restype == RDP_RESET) 
+	{
+	  put_byte (RDP_RESET);
+	  while ((restype = SERIAL_READCHAR (io, 1)) == RDP_RESET)
+	    ;
+	  while ((restype = SERIAL_READCHAR (io, 1)) > 0) 
 	    {
-	      int restype;
-
-	      put_byte (RDP_OPEN);
-	      put_byte (RDP_OPEN_TYPE_COLD | RDP_OPEN_TYPE_RETURN_SEX);
-	      put_word (0);
-
-	      restype = SERIAL_READCHAR (io, 1);
-
-	      switch (restype)
-		{
-		case SERIAL_TIMEOUT:
-		  flush_and_retry = 1;
-		  break;
-		case RDP_RESET:
-		  return;
-		default:
-		  printf_unfiltered ("Got res return %d\n", restype);
-		  break;
-		case RDP_RES_VALUE:
-		  {
-		    int resval = SERIAL_READCHAR (io, 1);
-
-		    switch (resval)
-		      {
-		      case SERIAL_TIMEOUT:
-			break;
-		      case RDP_RES_VALUE_LITTLE_ENDIAN:
-			target_byte_order = LITTLE_ENDIAN;
-			return;
-		      case RDP_RES_VALUE_BIG_ENDIAN:
-			target_byte_order = BIG_ENDIAN;
-			return;
-		      default:
-			printf_unfiltered ("Trying to sync, got resval %d\n", resval);
-		      }
-		  }
-		}
+	      printf_unfiltered ("%c", isgraph(restype) ? restype : ' ');
 	    }
+	  while ((restype = SERIAL_READCHAR (io, 1)) > 0)  
+	    ;
+	  printf_unfiltered("\n");
+	  error("board reset, try again.\n");
+	  continue;
+	} 
+	  
+      switch (restype)
+	{
+	case SERIAL_TIMEOUT:
+	  break;
+	case RDP_RESET:
+	  /* Ignore a load of these */
+	  break;
+	default:
+	  break;
+	case RDP_RES_VALUE:
+	  {
+	    int resval = SERIAL_READCHAR (io, 1);
+	    switch (resval)
+	      {
+	      case SERIAL_TIMEOUT:
+		break;
+	      case RDP_RES_VALUE_LITTLE_ENDIAN:
+		target_byte_order = LITTLE_ENDIAN;
+		sync =1 ;
+		break;
+	      case RDP_RES_VALUE_BIG_ENDIAN:
+		target_byte_order = BIG_ENDIAN;
+		sync =1 ;
+		break;
+	      default:
+		break;
+	      }
+	  }
 	}
     }
-  error ("Couldn't reset the board, try pressing the reset button");
+
+  if (sync)
+    {
+      SERIAL_FLUSH_INPUT (io);
+      SERIAL_SETBAUDRATE (io, baud_rate);
+      SERIAL_FLUSH_INPUT (io);
+    }
+  else 
+    {
+      error ("Couldn't reset the board, try pressing the reset button");
+    }
 }
 
 
@@ -939,6 +984,9 @@ remote_rdp_open (args, from_tty)
   if (!args)
     error_no_arg ("serial port device name");
 
+  if (baud_rate != 19200)
+    baud_rate = 9600;
+    
   target_preopen (from_tty);
 
   io = SERIAL_OPEN (args);
@@ -948,13 +996,15 @@ remote_rdp_open (args, from_tty)
 
   SERIAL_RAW (io);
 
-  rdp_init ();
+  rdp_init (0);
 
-  rdp_info ();
+
   if (from_tty)
     {
-      printf_unfiltered ("Remote RDP debugging using %s\n", args);
+      printf_unfiltered ("Remote RDP debugging using %s at %d baud\n", args, baud_rate);
     }
+
+  rdp_info ();
 
   push_target (&remote_rdp_ops);
 
@@ -976,7 +1026,9 @@ remote_rdp_close (quitting)
      int quitting;
 {
   callback->shutdown (callback);
-  SERIAL_CLOSE (io);
+  if (io)
+    SERIAL_CLOSE (io);
+  io = 0;
 }
 
 /* Terminate the open connection to the remote debugger. */
