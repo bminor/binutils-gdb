@@ -1,6 +1,6 @@
 2001-11-06  Jim Blandy  <jimb@redhat.com>
 
-	* gdb/s390-nat.c (s390_register_u_addr): Pass proper arguments to
+	* s390-nat.c (s390_register_u_addr): Pass proper arguments to
  	internal_error.
 
 2001-11-06  Andrew Cagney  <ac131313@redhat.com>
