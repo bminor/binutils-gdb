@@ -1,3 +1,25 @@
+Wed Sep  8 19:34:55 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
+
+	* simops.c (op_types): Added new memory indirect type OP_MEMREF3.
+	(trace_input_func): Added support for OP_MEMREF3.
+	(OP_32010000): New instruction ld.
+	(OP_33010000): New instruction ld2w.
+	(OP_5209): New instruction sac.
+	(OP_4209): New instruction sachi.
+	(OP_3220): New instruction slae.
+	(OP_36010000): New instruction st.
+	(OP_37010000): New instruction st2w.
+
+1999-09-09  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* interp.c (old_segment_mapping): New global.
+	(xfer_mem): Change the default segment mapping to be the way
+	that Mitsubishi prefers, but use the previous mapping if
+	old_segment_mapping is true.
+	(sim_open): Add an option -oldseg to get the old mapping.
+	(sim_create_inferior): Init mapping registers based on the
+	value of old_segment_mapping.
+
 1999-09-07  Nick Clifton  <nickc@cygnus.com>
 
 	* simops.c (OP_6601): Do not write back decremented address if

@@ -34,6 +34,7 @@ enum op_types {
   OP_CONSTANT4,
   OP_MEMREF,
   OP_MEMREF2,
+  OP_MEMREF3,
   OP_POSTDEC,
   OP_POSTINC,
   OP_PREDEC,
@@ -307,6 +308,12 @@ trace_input_func (name, in1, in2, in3)
 	  comma = ",";
 	  break;
 
+	case OP_MEMREF3:
+	  sprintf (p, "%s@%d", comma, OP[i]);
+	  p += strlen (p);
+	  comma = ",";
+	  break;
+
 	case OP_POSTINC:
 	  sprintf (p, "%s@r%d+", comma, OP[i]);
 	  p += strlen (p);
@@ -378,6 +385,10 @@ trace_input_func (name, in1, in2, in3)
 	    case OP_PREDEC:
 	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "",
 						 (uint16) GPR (OP[i]));
+	      break;
+
+	    case OP_MEMREF3:
+	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s0x%.4x", SIZE_VALUES-6, "", (uint16) OP[i]);
 	      break;
 
 	    case OP_DREG:
@@ -1312,6 +1323,18 @@ OP_6000 ()
   trace_output_16 (tmp);
 }
 
+/* ld */
+void
+OP_32010000 ()
+{
+  uint16 tmp;
+  
+  trace_input ("ld", OP_REG_OUTPUT, OP_MEMREF3, OP_VOID);
+  tmp = RW (OP[1]);
+  SET_GPR (OP[0], tmp);
+  trace_output_16 (tmp);
+}
+
 /* ld2w */
 void
 OP_31000000 ()
@@ -1360,6 +1383,18 @@ OP_6200 ()
   int32 tmp;
   trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF, OP_VOID);
   tmp = RLW (addr + 0);
+  SET_GPR32 (OP[0], tmp);
+  trace_output_32 (tmp);
+}
+
+/* ld2w */
+void
+OP_33010000 ()
+{
+  int32 tmp;
+  
+  trace_input ("ld2w", OP_REG_OUTPUT, OP_MEMREF3, OP_VOID);
+  tmp = RLW (OP[1]);
   SET_GPR32 (OP[0], tmp);
   trace_output_32 (tmp);
 }
@@ -2207,6 +2242,74 @@ OP_5F40 ()
   trace_output_void ();
 }
 
+
+/* sac */
+void OP_5209 ()
+{
+  int64 tmp;
+
+  trace_input ("sac", OP_REG_OUTPUT, OP_ACCUM, OP_VOID);
+
+  tmp = SEXT40(ACC (OP[1]));
+
+  SET_PSW_F1 (PSW_F0);
+
+  if (tmp > SEXT40(MAX32))
+    {
+      tmp = (MAX32);
+      SET_PSW_F0 (1);
+    }
+  else if (tmp < SEXT40(MIN32))
+    {
+      tmp = 0x80000000;
+      SET_PSW_F0 (1);
+    }
+  else
+    {
+      tmp = (tmp & MASK32);
+      SET_PSW_F0 (0);
+    }
+
+  SET_GPR32 (OP[0], tmp);
+
+  trace_output_40 (tmp);
+}
+
+
+/* sachi */
+void
+OP_4209 ()
+{
+  int64 tmp;
+
+  trace_input ("sachi", OP_REG_OUTPUT, OP_ACCUM, OP_VOID);
+
+  tmp = SEXT40(ACC (OP[1]));
+
+  SET_PSW_F1 (PSW_F0);
+
+  if (tmp > SEXT40(MAX32))
+    {
+      tmp = 0x7fff;
+      SET_PSW_F0 (1);
+    }
+  else if (tmp < SEXT40(MIN32))
+    {
+      tmp = 0x8000;
+      SET_PSW_F0 (1);
+    }
+  else
+    {
+      tmp >>= 16;
+      SET_PSW_F0 (0);
+    }
+
+  SET_GPR (OP[0], tmp);
+
+  trace_output_16 (OP[0]);
+}
+
+
 /* sadd */
 void
 OP_1223 ()
@@ -2251,6 +2354,59 @@ OP_4613 ()
   SET_GPR (OP[0], tmp);
   trace_output_16 (tmp);
 }
+
+/* slae */
+void
+OP_3220 ()
+{
+  int64 tmp;
+  int16 reg;
+
+  trace_input ("slae", OP_ACCUM, OP_REG, OP_VOID);
+
+  reg = SEXT16( GPR (OP[1]));
+
+  if (reg >= 17 || reg <= -17)
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", reg);
+      State.exception = SIGILL;
+      return;
+    }
+
+  tmp = SEXT40 (ACC (OP[0]));
+
+  if (PSW_ST && (tmp < SEXT40 (MIN32) || tmp > SEXT40 (MAX32)))
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: value to shift 0x%x out of range.\n", tmp);
+      State.exception = SIGILL;
+      return;
+    }
+
+  if (reg >= 0 && reg <= 16)
+    {
+      tmp = SEXT56 ((SEXT56 (tmp)) << (GPR (OP[1])));
+      if (PSW_ST)
+	{
+	  if (tmp > SEXT40(MAX32))
+	    tmp = (MAX32);
+	  else if (tmp < SEXT40(MIN32))
+	    tmp = (MIN32);
+	  else
+	    tmp = (tmp & MASK40);
+	}
+      else
+	tmp = (tmp & MASK40);
+    }
+  else
+    {
+      tmp = (SEXT40 (ACC (OP[0]))) >> (-GPR (OP[1]));
+    }
+
+  SET_ACC(OP[0], tmp);
+
+  trace_output_40(tmp);
+}
+
 
 /* sleep */
 void
@@ -2535,6 +2691,15 @@ OP_6C01 ()
   trace_output_void ();
 }
 
+/* st */
+void
+OP_36010000 ()
+{
+  trace_input ("st", OP_REG, OP_MEMREF3, OP_VOID);
+  SW (OP[1], GPR (OP[0]));
+  trace_output_void ();
+}
+
 /* st2w */
 void
 OP_35000000 ()
@@ -2598,6 +2763,16 @@ OP_6E01 ()
   SW (GPR (OP[1]) + 0, GPR (OP[0] + 0));
   SW (GPR (OP[1]) + 2, GPR (OP[0] + 1));
   INC_ADDR (OP[1], -4);
+  trace_output_void ();
+}
+
+/* st2w */
+void
+OP_37010000 ()
+{
+  trace_input ("st2w", OP_DREG, OP_MEMREF3, OP_VOID);
+  SW (OP [1] + 0, GPR (OP[0] + 0));
+  SW (OP [1] + 2, GPR (OP[0] + 1));
   trace_output_void ();
 }
 

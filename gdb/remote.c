@@ -5149,13 +5149,13 @@ _initialize_remote ()
 Remote protocol specific variables\n\
 Configure various remote-protocol specific variables such as\n\
 the packets being used",
-		  &remote_set_cmdlist, "remote ",
+		  &remote_set_cmdlist, "set remote ",
 		  0/*allow-unknown*/, &setlist);
   add_prefix_cmd ("remote", class_maintenance, set_remote_cmd, "\
 Remote protocol specific variables\n\
 Configure various remote-protocol specific variables such as\n\
 the packets being used",
-		  &remote_show_cmdlist, "remote ",
+		  &remote_show_cmdlist, "show remote ",
 		  0/*allow-unknown*/, &showlist);
 
   add_cmd ("compare-sections", class_obscure, compare_sections_command,

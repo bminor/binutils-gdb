@@ -41,6 +41,7 @@ TESTS = \
 	exit47.ko \
 	hello.hi \
 	t-dbt.ok \
+	t-ld-st.ok \
 	t-mac.ok \
 	t-mvtac.ok \
 	t-mvtc.ok \
@@ -51,7 +52,10 @@ TESTS = \
 	t-rdt.ok \
 	t-rep.ok \
 	t-rte.ok \
+	t-sac.ok \
+	t-sachi.ok \
 	t-sadd.ok \
+	t-slae.ok \
 	t-sp.ok \
 	t-sub2w.ok \
 	t-sub.ok \

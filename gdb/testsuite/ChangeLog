@@ -1,3 +1,8 @@
+1999-09-09  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* long_long.exp: Add variations of test cases that work for
+	targets with 16-bit ints and 32-bit doubles.
+
 1999-09-08  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* break.c (main): Compare a possibly-uninitialized argc with an

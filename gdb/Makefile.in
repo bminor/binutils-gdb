@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990908
+VERSION = 19990913
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -1197,7 +1197,7 @@ i386v-nat.o: i386v-nat.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) language.h target.h
 
 i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
-	$(symtab_h) $(frame_h) $(symfile_h) $(objfiles_h) 
+	$(symtab_h) $(frame_h) symfile.h objfiles.h
 
 i386v4-nat.o: i386v4-nat.c $(defs_h)
 

@@ -28,11 +28,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    gotten working yet.  */
 #define GDB_TARGET_IS_HPPA_20W
 
-/* The low two bits of the IA are the privilege level of the instruction.  */
 #include "pa/tm-hppah.h"
 
 #define HPUX_1100 1
 
+/* The low two bits of the IA are the privilege level of the instruction.  */
 #define ADDR_BITS_REMOVE(addr) ((CORE_ADDR)addr & (CORE_ADDR)~3)
 
 /* Say how long (ordinary) registers are.  This is used in

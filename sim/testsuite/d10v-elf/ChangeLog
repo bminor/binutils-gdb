@@ -1,3 +1,10 @@
+Wed Sep  8 19:34:55 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
+
+	* t-ld-st.s: New file.
+	* t-sac.s: New file.
+	* t-sachi.s: New file.
+	* t-slae.s: New file.
+
 1999-01-13  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* t-sadd.s: New file.

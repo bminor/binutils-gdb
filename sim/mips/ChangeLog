@@ -1,3 +1,7 @@
+Thu Sep  9 15:12:08 1999  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* mips.igen (MULT): Correct previous mis-applied patch.
+
 Tue Sep  7 13:34:54 1999  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* mips.igen (delayslot32): Handle sequence like

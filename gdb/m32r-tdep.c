@@ -250,7 +250,7 @@ decode_prologue (start_pc, scan_limit,
       /* End of prolog if any of these are branch instructions */
       if ((op1 == 0x7000)
 	  || (op1 == 0xb000)
-	  || (op1 == 0x7000))
+	  || (op1 == 0xf000))
 	{
 	  after_prologue = current_pc;
 	  insn_debug (("Done: branch\n"));
@@ -350,7 +350,7 @@ m32r_scan_prologue (fi, fsr)
 {
   struct symtab_and_line sal;
   CORE_ADDR prologue_start, prologue_end, current_pc;
-  unsigned long framesize;
+  unsigned long framesize = 0;
 
   /* this code essentially duplicates skip_prologue, 
      but we need the start address below.  */

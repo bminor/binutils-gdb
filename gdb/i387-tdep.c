@@ -102,7 +102,7 @@ print_387_control_bits (control)
 	puts_unfiltered (" LOS");
       puts_unfiltered (";");
     }
-  printf_unfiltered ("\n");
+
   if (control & 0xe080)
     warning ("\nreserved bits on: %s",
 	     local_hex_string (control & 0xe080));

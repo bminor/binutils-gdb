@@ -45,7 +45,7 @@ struct frame_extra_info
 /* these are the addresses the D10V-EVA board maps data */
 /* and instruction memory to. */
 
-#define DMEM_START	0x0000000
+#define DMEM_START	0x2000000
 #define IMEM_START	0x1000000
 #define STACK_START	0x0007ffe
 
@@ -1454,25 +1454,25 @@ _initialize_d10v_tdep ()
 
   add_com ("regs", class_vars, show_regs, "Print all registers");
 
-  add_com ("trace", class_support, trace_command,
+  add_com ("itrace", class_support, trace_command,
 	   "Enable tracing of instruction execution.");
 
-  add_com ("untrace", class_support, untrace_command,
+  add_com ("iuntrace", class_support, untrace_command,
 	   "Disable tracing of instruction execution.");
 
-  add_com ("tdisassemble", class_vars, tdisassemble_command,
+  add_com ("itdisassemble", class_vars, tdisassemble_command,
 	   "Disassemble the trace buffer.\n\
 Two optional arguments specify a range of trace buffer entries\n\
 as reported by info trace (NOT addresses!).");
 
-  add_info ("trace", trace_info,
+  add_info ("itrace", trace_info,
 	    "Display info about the trace data buffer.");
 
-  add_show_from_set (add_set_cmd ("tracedisplay", no_class,
+  add_show_from_set (add_set_cmd ("itracedisplay", no_class,
 				  var_integer, (char *) &trace_display,
 			     "Set automatic display of trace.\n", &setlist),
 		     &showlist);
-  add_show_from_set (add_set_cmd ("tracesource", no_class,
+  add_show_from_set (add_set_cmd ("itracesource", no_class,
 			   var_integer, (char *) &default_trace_show_source,
 		      "Set display of source code with trace.\n", &setlist),
 		     &showlist);

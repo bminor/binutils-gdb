@@ -1,3 +1,45 @@
+Mon Sep 13 18:54:05 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh: Describe each of the fields.
+	
+Mon Sep 13 17:51:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 1999-09-12 Jim Blandy <jimb@cris.red-bean.com>:
+	* gdbarch.sh (generating setters): Use sed to generate the proper
+	indentation, not tr; tr's behavior is notoriously unportable.
+
+1999-09-10  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* i387-tdep.c (print_387_control_bits): Don't print newline; the
+	callers take care of that.  (Thanks to H.J. Lu.)
+
+1999-09-09  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* d10v-tdep.c (DMEM_START): Set to 0x2000000.
+	(itrace, iuntrace, info itrace, itdisassemble, itracedisplay,
+ 	itracesource): Add 'i' prefix to commands, so as not to conflict
+ 	with generic trace commands.
+
+1999-09-09  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* remote.c (_initialize_remote): Fix the specification of the
+	"remote" prefix to set and show commands.
+
+1999-09-09  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-loop.c (create_file_event): New function. Creates a gdb
+ 	event for a given fd.
+	(gdb_wait_for_event): Use create_file_event().  
+	* event-loop.h: export create_file_event().
+
+	* event-loop.c (delete_file_handler): Move the clearing of the
+ 	mask to later on in the function, because we need it in order to
+ 	deactivate the correct fd when using select().
+
+	* m32r-tdep.c (decode_prologue): Fix typo. Instructions starting
+ 	with 0xf are branch instructions.
+	(m32r_scan_prologue): Initialize framesize to 0.
+
 1999-09-07  J.T. Conklin  <jtc@redback.com>
 
 	* i386-stub.c (exceptionHook, oldExceptionHook): Removed.
@@ -61,7 +103,7 @@ Fri Sep  3 22:29:39 1999  Kevin Buettner  <kevinb@cygnus.com>
 Fri Sep  3 00:47:44 1999  Kevin Buettner  <kevinb@cygnus.com>
 
 	[Merged linux/x86 floating point code from Bill Metzenthen,
-	Jim Blandy, Anthony Green, H. J. Liu, and possibly others.  The
+	Jim Blandy, Anthony Green, H. J. Lu, and possibly others.  The
 	following remarks are Jim Blandy's.]
 
 	* findvar.c (extract_floating): Call TARGET_EXTRACT_FLOATING, if
@@ -368,7 +410,7 @@ Wed Sep  1 09:22:50 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 1999-08-13  Jim Kingdon  <kingdon@redhat.com>
 
 	Threads code from gdb 4.18-codefusion-990706
-	[Thanks to Eric Paire, H. J. Liu, Jim Blandy and others]
+	[Thanks to Eric Paire, H. J. Lu, Jim Blandy and others]
 	* infrun.c (signal_stop_update, signal_print_update,
 	signal_pass_update): new functions.
 	* inferior.h: new prototypes for above functions.

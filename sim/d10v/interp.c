@@ -16,6 +16,11 @@ enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 static char *myname;
 static SIM_OPEN_KIND sim_kind;
 int d10v_debug;
+
+/* Set this to true to get the previous segment layout. */
+
+int old_segment_mapping;
+
 host_callback *d10v_callback;
 unsigned long ins_type_counters[ (int)INS_MAX ];
 
@@ -375,17 +380,53 @@ xfer_mem (SIM_ADDR addr,
     }
 #endif
 
-  /* to access data, we use the following mapping 
-      0x00xxxxxx: Logical data address segment        (DMAP translated memory)
-      0x01xxxxxx: Logical instruction address segment (IMAP translated memory)
-      0x10xxxxxx: Physical data memory segment        (On-chip data memory)
-      0x11xxxxxx: Physical instruction memory segment (On-chip insn memory)
-      0x12xxxxxx: Phisical unified memory segment     (Unified memory)
+  /* To access data, we use the following mappings:
+
+     0x00xxxxxx: Physical unified memory segment     (Unified memory)
+     0x01xxxxxx: Physical instruction memory segment (On-chip insn memory)
+     0x02xxxxxx: Physical data memory segment        (On-chip data memory)
+     0x10xxxxxx: Logical data address segment        (DMAP translated memory)
+     0x11xxxxxx: Logical instruction address segment (IMAP translated memory)
+
+     Alternatively, the "old segment mapping" is still available by setting
+     old_segment_mapping to 1.  It looks like this:
+
+     0x00xxxxxx: Logical data address segment        (DMAP translated memory)
+     0x01xxxxxx: Logical instruction address segment (IMAP translated memory)
+     0x10xxxxxx: Physical data memory segment        (On-chip data memory)
+     0x11xxxxxx: Physical instruction memory segment (On-chip insn memory)
+     0x12xxxxxx: Physical unified memory segment     (Unified memory)
+
    */
+
+  /* However, if we've asked to use the previous generation of segment
+     mapping, rearrange the segments as follows. */
+
+  if (old_segment_mapping)
+    {
+      switch (segment)
+	{
+	case 0x00: /* DMAP translated memory */
+	  segment = 0x10;
+	  break;
+	case 0x01: /* IMAP translated memory */
+	  segment = 0x11;
+	  break;
+	case 0x10: /* On-chip data memory */
+	  segment = 0x02;
+	  break;
+	case 0x11: /* On-chip insn memory */
+	  segment = 0x01;
+	  break;
+	case 0x12: /* Unified memory */
+	  segment = 0x00;
+	  break;
+	}
+    }
 
   switch (segment)
     {
-    case 0x00: /* DMAP translated memory */
+    case 0x10: /* DMAP translated memory */
       {
 	int byte;
 	for (byte = 0; byte < size; byte++)
@@ -401,7 +442,7 @@ xfer_mem (SIM_ADDR addr,
 	return byte;
       }
 
-    case 0x01: /* IMAP translated memory */
+    case 0x11: /* IMAP translated memory */
       {
 	int byte;
 	for (byte = 0; byte < size; byte++)
@@ -417,7 +458,7 @@ xfer_mem (SIM_ADDR addr,
 	return byte;
       }
 
-    case 0x10: /* On-chip data memory */
+    case 0x02: /* On-chip data memory */
       {
 	addr &= ((1 << DMEM_SIZE) - 1);
 	if ((addr + size) > (1 << DMEM_SIZE))
@@ -430,7 +471,7 @@ xfer_mem (SIM_ADDR addr,
 	break;
       }
 
-    case 0x11: /* On-chip insn memory */
+    case 0x01: /* On-chip insn memory */
       {
 	addr &= ((1 << IMEM_SIZE) - 1);
 	if ((addr + size) > (1 << IMEM_SIZE))
@@ -443,7 +484,7 @@ xfer_mem (SIM_ADDR addr,
 	break;
       }
 
-    case 0x12: /* Unified memory */
+    case 0x00: /* Unified memory */
       {
 	int startsegment, startoffset;	/* Segment and offset within segment where xfer starts */
 	int endsegment, endoffset;	/* Segment and offset within segment where xfer ends */
@@ -484,12 +525,23 @@ xfer_mem (SIM_ADDR addr,
     default:
       {
 	(*d10v_callback->printf_filtered) (d10v_callback, "ERROR: address 0x%lx is not in valid range\n", (long) addr);
- 	(*d10v_callback->printf_filtered) (d10v_callback, "0x00xxxxxx:  Logical data address segment		(DMAP translated memory)\n");
- 	(*d10v_callback->printf_filtered) (d10v_callback, "0x01xxxxxx:  Logical instruction address segment	(IMAP translated memory)\n");
- 	(*d10v_callback->printf_filtered) (d10v_callback, "0x10xxxxxx:  Physical data memory segment		(On-chip data memory)\n");
- 	(*d10v_callback->printf_filtered) (d10v_callback, "0x11xxxxxx:  Physical instruction memory segment	(On-chip insn memory)\n");
- 	(*d10v_callback->printf_filtered) (d10v_callback, "0x12xxxxxx:  Phisical unified memory segment		(Unified memory)\n");
-	return (0);
+	if (old_segment_mapping)
+	  {
+	    (*d10v_callback->printf_filtered) (d10v_callback, "0x00xxxxxx:  Logical data address segment            (DMAP translated memory)\n");
+	    (*d10v_callback->printf_filtered) (d10v_callback, "0x01xxxxxx:  Logical instruction address segment     (IMAP translated memory)\n");
+	    (*d10v_callback->printf_filtered) (d10v_callback, "0x10xxxxxx:  Physical data memory segment            (On-chip data memory)\n");
+	    (*d10v_callback->printf_filtered) (d10v_callback, "0x11xxxxxx:  Physical instruction memory segment     (On-chip insn memory)\n");
+	    (*d10v_callback->printf_filtered) (d10v_callback, "0x12xxxxxx:  Phisical unified memory segment         (Unified memory)\n");
+	  }
+	else
+	  {
+	    (*d10v_callback->printf_filtered) (d10v_callback, "0x00xxxxxx:  Physical unified memory segment		(Unified memory)\n");
+	    (*d10v_callback->printf_filtered) (d10v_callback, "0x01xxxxxx:  Physical instruction memory segment	(On-chip insn memory)\n");
+	    (*d10v_callback->printf_filtered) (d10v_callback, "0x02xxxxxx:  Physical data memory segment		(On-chip data memory)\n");
+	    (*d10v_callback->printf_filtered) (d10v_callback, "0x10xxxxxx:  Logical data address segment		(DMAP translated memory)\n");
+	    (*d10v_callback->printf_filtered) (d10v_callback, "0x11xxxxxx:  Logical instruction address segment	(IMAP translated memory)\n");
+	  }
+ 	return (0);
       }
     }
 
@@ -544,14 +596,17 @@ sim_open (kind, callback, abfd, argv)
   sim_kind = kind;
   d10v_callback = callback;
   myname = argv[0];
+  old_segment_mapping = 0;
 
   for (p = argv + 1; *p; ++p)
     {
+      if (strcmp (*p, "-oldseg") == 0)
+	old_segment_mapping = 1;
 #ifdef DEBUG
-      if (strcmp (*p, "-t") == 0)
+      else if (strcmp (*p, "-t") == 0)
 	d10v_debug = DEBUG;
-      else
 #endif
+      else
 	(*d10v_callback->printf_filtered) (d10v_callback, "ERROR: unsupported option(s): %s\n",*p);
     }
   
@@ -969,7 +1024,7 @@ sim_create_inferior (sd, abfd, argv, env)
 
   /* cpu resets imap0 to 0 and imap1 to 0x7f, but D10V-EVA board */
   /* resets imap0 and imap1 to 0x1000. */
-  if (1)
+  if (old_segment_mapping)
     {
       SET_IMAP0 (0x0000);
       SET_IMAP1 (0x007f);

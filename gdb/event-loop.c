@@ -122,6 +122,7 @@ static int async_handler_ready = 0;
 
 static void create_file_handler PARAMS ((int, int, handler_func *, gdb_client_data));
 static void invoke_async_signal_handler PARAMS ((void));
+static void handle_file_event PARAMS ((int));
 static int gdb_wait_for_event PARAMS ((void));
 static int gdb_do_one_event PARAMS ((void));
 static int check_async_ready PARAMS ((void));
@@ -162,6 +163,22 @@ async_queue_event (event_ptr, position)
 	event_queue.last_event = event_ptr;
       event_queue.first_event = event_ptr;
     }
+}
+
+/* Create a file event, to be enqueued in the event queue for
+   processing. The procedure associated to this event is always
+   handle_file_event, which will in turn invoke the one that was
+   associated to FD when it was registered with the event loop. */
+gdb_event *
+create_file_event (fd)
+     int fd;
+{
+  gdb_event *file_event_ptr;
+
+  file_event_ptr = (gdb_event *) xmalloc (sizeof (gdb_event));
+  file_event_ptr->proc = handle_file_event;
+  file_event_ptr->fd = fd;
+  return (file_event_ptr);
 }
 
 /* Process one event.
@@ -439,11 +456,6 @@ delete_file_handler (fd)
   if (file_ptr == NULL)
     return;
 
-  /* Deactivate the file descriptor, by clearing its mask, 
-     so that it will not fire again. */
-
-  file_ptr->mask = 0;
-
 #ifdef HAVE_POLL
   /* Create a new poll_fds array by copying every fd's information but the
      one we want to get rid of. */
@@ -499,6 +511,11 @@ delete_file_handler (fd)
 	}
     }
 #endif /* HAVE_POLL */
+
+  /* Deactivate the file descriptor, by clearing its mask, 
+     so that it will not fire again. */
+
+  file_ptr->mask = 0;
 
   /* Get rid of the file handler in the file handler list. */
   if (file_ptr == gdb_notifier.first_file_handler)
@@ -634,10 +651,7 @@ gdb_wait_for_event ()
 	     this fd. */
 	  if (file_ptr->ready_mask == 0)
 	    {
-	      file_event_ptr =
-		(gdb_event *) xmalloc (sizeof (gdb_event));
-	      file_event_ptr->proc = handle_file_event;
-	      file_event_ptr->fd = file_ptr->fd;
+	      file_event_ptr = create_file_event (file_ptr->fd);
 	      async_queue_event (file_event_ptr, TAIL);
 	    }
 	}
@@ -671,10 +685,7 @@ gdb_wait_for_event ()
 
       if (file_ptr->ready_mask == 0)
 	{
-	  file_event_ptr =
-	    (gdb_event *) xmalloc (sizeof (gdb_event));
-	  file_event_ptr->proc = handle_file_event;
-	  file_event_ptr->fd = file_ptr->fd;
+	  file_event_ptr = create_file_event (file_ptr->fd);
 	  async_queue_event (file_event_ptr, TAIL);
 	}
       file_ptr->ready_mask = mask;

@@ -19,28 +19,111 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-IFS=:
-
 read="class level macro returntype function formal actual attrib default init init_p fmt print print_p description"
+
+# dump out/verify the doco
+for field in ${read}
+do
+  case ${field} in
+
+    class ) : ;;
+      # # -> line disable
+      # f -> function
+      #   hiding a function
+      # v -> variable
+      #   hiding a variable
+      # i -> set from info
+      #   hiding something from the ``struct info'' object
+
+    level ) : ;;
+
+      # See GDB_MULTI_ARCH description.  Having GDB_MULTI_ARCH >=
+      # LEVEL is a predicate on checking that a given method is
+      # initialized (using INIT_P).
+
+    macro ) : ;;
+
+      # The name of the MACRO that this method is to be accessed by.
+
+    returntype ) : ;;
+
+      # For functions, the return type; for variables, the data type
+
+    function ) : ;;
+
+      # For functions, the member function name; for variables, the
+      # variable name.  Member function names are always prefixed with
+      # ``gdbarch_'' for name-space purity.
+
+    formal ) : ;;
+
+      # The formal argument list.  It is assumed that the formal
+      # argument list includes the actual name of each list element.
+      # A function with no arguments shall have ``void'' as the formal
+      # argument list.
+
+    actual ) : ;;
+
+      # The list of actual arguments.  The arguments specified shall
+      # match the FORMAL list given above.  Functions with out
+      # arguments leave this blank.
+
+    attrib ) : ;;
+
+      # Any GCC attributes that should be attached to the function
+      # declaration.  At present this field is unused.
+
+    default ) : ;;
+
+      # To help with the GDB startup a default static gdbarch object
+      # is created.  DEFAULT is the value to insert into that
+      # array. It defaults to ZERO.
+
+    init ) : ;;
+
+      # Any initial value to assign to the member after it is been
+      # MALLOCed.  Defaults to zero.  
+
+    init_p ) : ;;
+
+      # A predicate equation that tests to see if the code creating
+      # the new architecture has correctly updated this
+      # MEMBER. Default is to check that the value is no longer equal
+      # to INIT.
+
+    fmt ) : ;;
+
+      # printf style format string that can be used to print out the
+      # MEMBER.  The default is to assume "%ld" is safe.  Sometimes
+      # "%s" is useful.  For functions, this is ignored and the
+      # function address is printed.
+
+    print ) : ;;
+
+      # An optional equation that converts the MEMBER into a value
+      # suitable for that FMT.  By default it is assumed that the
+      # member's MACRO cast to long is safe.
+
+    print_p ) : ;;
+
+      # An optional indicator for any predicte to wrap around the
+      # print member code.
+      #   # -> Wrap print up in ``#ifdef MACRO''
+      #   exp -> Wrap print up in ``if (${print_p}) ...
+
+    description ) : ;;
+
+      # Currently unused.
+
+    *) exit 1;;
+  esac
+done
+
+IFS=:
 
 function_list ()
 {
-  # category:
-  #        # -> disable
-  #        f -> function
-  #        v -> variable
-  #        i -> set from info
-  # macro-name
-  # return-type
-  # name
-  # formal argument list
-  # actual argument list
-  # attrib
-  # default exp
-  # init exp
-  # init_p exp
-  # print
-  # description
+  # See below (DOCO) for description of each field
   cat <<EOF |
 i:2:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info::::&bfd_default_arch_struct:::%s:TARGET_ARCHITECTURE->printable_name:TARGET_ARCHITECTURE != NULL
 #
@@ -983,7 +1066,7 @@ do
 	echo ""
 	echo "void"
 	echo "set_gdbarch_${function} (struct gdbarch *gdbarch,"
-        echo "            `echo ${function} | tr '[0-9a-z_]' ' '`  gdbarch_${function}_ftype ${function})"
+        echo "            `echo ${function} | sed -e 's/./ /g'`  gdbarch_${function}_ftype ${function})"
 	echo "{"
 	echo "  gdbarch->${function} = ${function};"
 	echo "}"
@@ -1010,7 +1093,7 @@ do
 	echo ""
 	echo "void"
 	echo "set_gdbarch_${function} (struct gdbarch *gdbarch,"
-        echo "            `echo ${function} | tr '[0-9a-z_]' ' '`  ${returntype} ${function})"
+        echo "            `echo ${function} | sed -e 's/./ /g'`  ${returntype} ${function})"
 	echo "{"
 	echo "  gdbarch->${function} = ${function};"
 	echo "}"

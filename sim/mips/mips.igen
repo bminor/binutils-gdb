@@ -1749,7 +1749,7 @@
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr4100:
 {
-  do_multu (SD_, RS, RT, RD);
+  do_multu (SD_, RS, RT, 0);
 }
 
 000000,5.RS,5.RT,5.RD,00000011001:SPECIAL:32::MULTU
@@ -1758,7 +1758,7 @@
 *vr5000:
 *r3900:
 {
-  do_multu (SD_, RS, RT, 0);
+  do_multu (SD_, RS, RT, RD);
 }
 
 
