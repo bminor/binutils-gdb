@@ -1,3 +1,9 @@
+2001-11-16  Chris Demetriou  <cgd@broadcom.cOm>
+
+	* gas/mips/elf-rel5.s, gas/mips/elf-rel5.s: New test
+	to test symbol plus offset relocations in various ways.
+	* gas/mips/mips.exp: Run new test.
+
 2001-11-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/ppc/booke.d: Modify reloc and target matches for powerpc64.
