@@ -33,7 +33,7 @@
 @c !!set GDB manual's revision date
 @set DATE December 2001
 
-@c THIS MANUAL REQUIRES TEXINFO 3.12 OR LATER.
+@c THIS MANUAL REQUIRES TEXINFO 4.0 OR LATER.
 
 @c This is a dir.info fragment to support semi-automated addition of
 @c manuals to an info tree.
@@ -105,7 +105,7 @@ development.''
 @end titlepage
 @page
 
-@ifinfo
+@ifnottex
 @node Top, Summary, (dir), (dir)
 
 @top Debugging with @value{GDBN}
@@ -158,69 +158,9 @@ Copyright (C) 1988-2002 Free Software Foundation, Inc.
 * Index::                       Index
 @end menu
 
-@end ifinfo
+@end ifnottex
 
-@c the replication sucks, but this avoids a texinfo 3.12 lameness
-
-@ifhtml
-@node Top
-
-@top Debugging with @value{GDBN}
-
-This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
-
-This is the @value{EDITION} Edition, @value{DATE}, for @value{GDBN} Version
-@value{GDBVN}.
-
-Copyright (C) 1988-2000 Free Software Foundation, Inc.
-
-@menu
-* Summary::                     Summary of @value{GDBN}
-* Sample Session::              A sample @value{GDBN} session
-
-* Invocation::                  Getting in and out of @value{GDBN}
-* Commands::                    @value{GDBN} commands
-* Running::                     Running programs under @value{GDBN}
-* Stopping::                    Stopping and continuing
-* Stack::                       Examining the stack
-* Source::                      Examining source files
-* Data::                        Examining data
-* Tracepoints::                 Debugging remote targets non-intrusively
-* Overlays::                    Debugging programs that use overlays
-
-* Languages::                   Using @value{GDBN} with different languages
-
-* Symbols::                     Examining the symbol table
-* Altering::                    Altering execution
-* GDB Files::                   @value{GDBN} files
-* Targets::                     Specifying a debugging target
-* Remote Debugging::            Debugging remote programs
-* Configurations::              Configuration-specific information
-* Controlling GDB::             Controlling @value{GDBN}
-* Sequences::                   Canned sequences of commands
-* TUI::                         @value{GDBN} Text User Interface
-* Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
-* Annotations::                 @value{GDBN}'s annotation interface.
-* GDB/MI::                      @value{GDBN}'s Machine Interface.
-
-* GDB Bugs::                    Reporting bugs in @value{GDBN}
-* Formatting Documentation::    How to format and print @value{GDBN} documentation
-
-* Command Line Editing::        Command Line Editing
-* Using History Interactively:: Using History Interactively
-* Installing GDB::              Installing GDB
-* Maintenance Commands::        Maintenance Commands
-* Remote Protocol::             GDB Remote Serial Protocol
-* GNU Free Documentation License::  The license for this documentation
-* Index::                       Index
-@end menu
-
-@end ifhtml
-
-@c TeX can handle the contents at the start but makeinfo 3.12 can not
-@iftex
 @contents
-@end iftex
 
 @node Summary
 @unnumbered Summary of @value{GDBN}
@@ -14905,13 +14845,5 @@ Example sequence of a target being stepped by a single instruction:
 \page\colophon
 % Blame: doc@cygnus.com, 1991.
 @end tex
-
-@c TeX can handle the contents at the start but makeinfo 3.12 can not
-@ifinfo
-@contents
-@end ifinfo
-@ifhtml
-@contents
-@end ifhtml
 
 @bye

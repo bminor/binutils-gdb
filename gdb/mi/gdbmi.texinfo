@@ -109,6 +109,11 @@ Elena Zannoni.
 * GDB/MI Data Manipulation::
 * GDB/MI Program Control::
 * GDB/MI Miscellaneous Commands::
+@ignore
+* GDB/MI Kod Commands::
+* GDB/MI Memory Overlay Commands::
+* GDB/MI Signal Handling Commands::
+@end ignore
 * GDB/MI Stack Manipulation::
 * GDB/MI Symbol Query::
 * GDB/MI Target Manipulation::
@@ -116,16 +121,6 @@ Elena Zannoni.
 * GDB/MI Tracepoint Commands::
 * GDB/MI Variable Objects::
 @end menu
-
-@c When these are implemented, they should be moved to be between Misc and
-@c Stack Manipulation in the above menu.  They are now outside the menu
-@c because makeinfo 3.12 barfs if it sees @ignore or @comments in the
-@c middle of a menu.
-@ignore
-* GDB/MI Kod Commands::
-* GDB/MI Memory Overlay Commands::
-* GDB/MI Signal Handling Commands::
-@end ignore
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Command Syntax

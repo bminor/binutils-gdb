@@ -64,10 +64,7 @@ this GNU Manual, like GNU software.  Copies published by the Free
 Software Foundation raise funds for GNU development.''
 @end titlepage
 
-@c TeX can handle the contents at the start but makeinfo 3.12 can not
-@iftex
 @contents
-@end iftex
 
 @node Top
 @c Perhaps this should be the title of the document (but only for info,
@@ -5371,13 +5368,5 @@ exec.c
 @unnumbered Index
 
 @printindex cp
-
-@c TeX can handle the contents at the start but makeinfo 3.12 can not
-@ifinfo
-@contents
-@end ifinfo
-@ifhtml
-@contents
-@end ifhtml
 
 @bye
