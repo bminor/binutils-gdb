@@ -1,5 +1,10 @@
 Thu Feb 12 14:06:59 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	NetBSD patches from Gordon W. Ross <gwr@mc.com>:
+	* configure.in (alpha*-*-netbsd*): New target.
+	* config/te-nbsd.h (LOCAL_LABELS_FB): Define.
+	* configure: Rebuild.
+
 	* as.h (flag_warn_suppress_instructionswap): Move from here...
 	* config/tc-d10v.c (flag_warn_suppress_instructionswap): ...to
 	here, and make static.
