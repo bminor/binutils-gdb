@@ -10,6 +10,7 @@
 	(exp_fold_tree): Likewise.
 	* ldlang.c (lang_size_sections_1): Likewise.
 	(lang_one_common): Likewise.
+	* ld.texinfo (ALIGN): Remove power of 2 restriction.
 
 2002-07-31  Graeme Peterson  <gp@qnx.com>
 

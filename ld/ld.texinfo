@@ -4158,12 +4158,7 @@ SECTIONS @{ @dots{}
 @cindex round up location counter
 @cindex align location counter
 Return the location counter (@code{.}) aligned to the next @var{exp}
-boundary.  @var{exp} must be an expression whose value is a power of
-two.  This is equivalent to
-@smallexample
-(. + @var{exp} - 1) & ~(@var{exp} - 1)
-@end smallexample
-
+boundary.
 @code{ALIGN} doesn't change the value of the location counter---it just
 does arithmetic on it.  Here is an example which aligns the output
 @code{.data} section to the next @code{0x2000} byte boundary after the
