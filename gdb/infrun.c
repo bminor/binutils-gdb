@@ -1555,12 +1555,12 @@ handle_inferior_event (struct execution_control_state *ecs)
 	stop_signal = ecs->ws.value.sig;
 	target_terminal_ours ();	/* Must do this before mourn anyway */
 
-	/* This looks pretty bogus to me.  Doesn't TARGET_WAITKIND_SIGNALLED
-	   mean it is already dead?  This has been here since GDB 2.8, so
-	   perhaps it means rms didn't understand unix waitstatuses?
-	   For the moment I'm just kludging around this in remote.c
-	   rather than trying to change it here --kingdon, 5 Dec 1994.  */
-	target_kill ();		/* kill mourns as well */
+	/* Note: By definition of TARGET_WAITKIND_SIGNALLED, we shouldn't
+	   reach here unless the inferior is dead.  However, for years
+	   target_kill() was called here, which hints that fatal signals aren't
+	   really fatal on some systems.  If that's true, then some changes
+	   may be needed. */
+	target_mourn_inferior ();
 
 	print_stop_reason (SIGNAL_EXITED, stop_signal);
 	singlestep_breakpoints_inserted_p = 0;	/*SOFTWARE_SINGLE_STEP_P */

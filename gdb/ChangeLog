@@ -1,3 +1,8 @@
+2000-04-04  Nick Duffek  <nsd@cygnus.com>
+
+	* infrun.c (handle_inferior_event): Call target_mourn_inferior
+	instead of kill_target.
+
 2000-04-04  Daniel Berlin  <dan@cgsoftware.com>
 
 	* TODO: Make note of various C++ things i have planned for 5.1.
