@@ -1,3 +1,10 @@
+2002-05-15  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* aix5ppc-core.c (xcoff64_core_p): Replace bfd_read with
+        bfd_bread.
+        (xcoff64_core_file_matches_executable_p): Replace bfd_read
+        with bfd_bread.
+
 2002-05-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* aix5ppc-core.c: Warning fixes.
