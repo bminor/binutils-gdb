@@ -1,3 +1,8 @@
+2004-10-21  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (ebb_propose_action): Put declarations before
+	statements.
+
 2004-10-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.in: (AM_INIT_AUTOMAKE): Set version to 2.15.94.

@@ -5598,9 +5598,10 @@ ebb_propose_action (ebb_constraint *c,
   if (c->action_allocated <= c->action_count)
     {
       unsigned new_allocated, i;
+      proposed_action *new_actions;
 
       new_allocated = (c->action_count + 2) * 2;
-      proposed_action *new_actions = (proposed_action *)
+      new_actions = (proposed_action *)
 	bfd_zmalloc (sizeof (proposed_action) * new_allocated);
 
       for (i = 0; i < c->action_count; i++)
