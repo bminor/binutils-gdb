@@ -200,13 +200,19 @@ extern struct block *block_for_pc (CORE_ADDR);
 
 extern struct block *block_for_pc_sect (CORE_ADDR, asection *);
 
+extern const char *block_scope (const struct block *block);
+
 extern void block_set_scope (struct block *block, const char *scope,
 			     struct obstack *obstack);
+
+extern struct using_direct *block_using (const struct block *block);
 
 extern void block_set_using (struct block *block,
 			     struct using_direct *using,
 			     struct obstack *obstack);
 
 extern const struct block *block_static_block (const struct block *block);
+
+extern const struct block *block_global_block (const struct block *block);
 
 #endif /* BLOCK_H */

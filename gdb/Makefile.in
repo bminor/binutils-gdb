@@ -626,7 +626,7 @@ complaints_h = complaints.h
 completer_h = completer.h
 config_h = config.h
 cp_abi_h = cp-abi.h
-cp_support_h = cp-support.h
+cp_support_h = cp-support.h $(symtab_h)
 dcache_h = dcache.h
 defs_h = defs.h $(config_h) $(gdb_locale_h) $(gdb_signals_h) $(ansidecl_h) \
 	$(libiberty_h) $(progress_h) $(bfd_h) $(tui_h) $(ui_file_h) $(xm_h) \

@@ -1,3 +1,12 @@
+2003-05-19  David Carlton  <carlton@bactrian.org>
+
+	* gdb.c++/namespace.exp: Add namespace scope and anonymous
+	namespace tests.
+	Bump copyright date.
+	* gdb.c++/namespace.cc: Add anonymous namespace and namespace C.
+	(main): Call C::D::marker2.
+	* gdb.c++/namespace1.cc: New file.
+
 2003-05-14  Jeff Johnston  <jjohnstn@redhat.com>
 
 	Roland McGrath  <roland@redhat.com>

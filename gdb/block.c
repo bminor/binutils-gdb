@@ -155,8 +155,25 @@ block_for_pc (register CORE_ADDR pc)
   return block_for_pc_sect (pc, find_pc_mapped_section (pc));
 }
 
-/* Now come some functions designed to deal with C++ namespace
-   issues.  */
+/* Now come some functions designed to deal with C++ namespace issues.
+   The accessors are safe to use even in the non-C++ case.  */
+
+/* This returns the namespace that BLOCK is enclosed in, or "" if it
+   isn't enclosed in a namespace at all.  This travels the chain of
+   superblocks looking for a scope, if necessary.  */
+
+const char *
+block_scope (const struct block *block)
+{
+  for (; block != NULL; block = BLOCK_SUPERBLOCK (block))
+    {
+      if (BLOCK_NAMESPACE (block) != NULL
+	  && BLOCK_NAMESPACE (block)->scope != NULL)
+	return BLOCK_NAMESPACE (block)->scope;
+    }
+
+  return "";
+}
 
 /* Set BLOCK's scope member to SCOPE; if needed, allocate memory via
    OBSTACK.  (It won't make a copy of SCOPE, however, so that already
@@ -169,6 +186,27 @@ block_set_scope (struct block *block, const char *scope,
   block_initialize_namespace (block, obstack);
 
   BLOCK_NAMESPACE (block)->scope = scope;
+}
+
+/* This returns the first using directives associated to BLOCK, if
+   any.  */
+
+/* FIXME: carlton/2003-04-23: This uses the fact that we currently
+   only have using directives in static blocks, because we only
+   generate using directives from anonymous namespaces.  Eventually,
+   when we support using directives everywhere, we'll want to replace
+   this by some iterator functions.  */
+
+struct using_direct *
+block_using (const struct block *block)
+{
+  const struct block *static_block = block_static_block (block);
+
+  if (static_block == NULL
+      || BLOCK_NAMESPACE (static_block) == NULL)
+    return NULL;
+  else
+    return BLOCK_NAMESPACE (static_block)->using;
 }
 
 /* Set BLOCK's using member to USING; if needed, allocate memory via
@@ -210,6 +248,21 @@ block_static_block (const struct block *block)
     return NULL;
 
   while (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) != NULL)
+    block = BLOCK_SUPERBLOCK (block);
+
+  return block;
+}
+
+/* Return the static block associated to BLOCK.  Return NULL if block
+   is NULL.  */
+
+const struct block *
+block_global_block (const struct block *block)
+{
+  if (block == NULL)
+    return NULL;
+
+  while (BLOCK_SUPERBLOCK (block) != NULL)
     block = BLOCK_SUPERBLOCK (block);
 
   return block;

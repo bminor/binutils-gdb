@@ -1,5 +1,21 @@
 2003-05-19  David Carlton  <carlton@bactrian.org>
 
+	Partial fix for PR c++/827.
+	* cp-support.h: Include symtab.h.
+	Declare cp_lookup_symbol_nonlocal, cp_lookup_symbol_namespace.
+	* cp-namespace.c: Update contributors.
+	(cp_lookup_symbol_nonlocal): New.
+	(lookup_namespace_scope, cp_lookup_symbol_namespace)
+	(lookup_symbol_file): Ditto.
+	* c-lang.c (cplus_language_defn): Use cp_lookup_symbol_nonlocal.
+	* block.h: Declare block_scope, block_using, block_global_block.
+	* block.c (block_scope): New.
+	(block_using, block_global_block): Ditto.
+	* Makefile.in (cp_support_h): Depend on symtab_h.
+	* config/djgpp/fnchange.lst: Add testsuite/gdb.c++/namespace1.cc.
+
+2003-05-19  David Carlton  <carlton@bactrian.org>
+
 	* language.h (struct language_defn): Add 'la_value_of_this'
 	and 'la_lookup_symbol_nonlocal' members.
 	* symtab.h: Declare basic_lookup_symbol_nonlocal,
