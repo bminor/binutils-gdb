@@ -1,3 +1,8 @@
+2000-04-16  Jim Blandy  <jimb@redhat.com>
+
+	* findvar.c (store_typed_address, extract_typed_address): Fix
+	function names in error messages.
+
 2000-04-16  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* config/djgpp/config.sed: Fix the lines which edit clean: and
