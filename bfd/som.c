@@ -1609,7 +1609,7 @@ setup_sections (abfd, file_hdr)
   /* First, read in space names */
 
   space_strings = malloc (file_hdr->space_strings_size);
-  if (!space_strings)
+  if (!space_strings && file_hdr->space_strings_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
@@ -2098,15 +2098,11 @@ som_prep_for_fixups (abfd, syms, num_syms)
     {
       /* Handle a section symbol; these have no pointers back to the 
 	 SOM symbol info.  So we just use the pointer field (udata)
-	 to hold the relocation count.
-
-	 FIXME.  While we're here set the name of any section symbol
-	 to something which will not screw GDB.  How do other formats
-	 deal with this?!?  */
-      if (som_symbol_data (syms[i]) == NULL)
+	 to hold the relocation count.  */
+      if (som_symbol_data (syms[i]) == NULL
+	  || syms[i]->flags & BSF_SECTION_SYM)
 	{
 	  syms[i]->flags |= BSF_SECTION_SYM;
-	  syms[i]->name = "L$0\002";
 	  syms[i]->udata = (PTR) 0;
 	}
       else
@@ -2677,6 +2673,14 @@ som_begin_writing (abfd)
      we support only the copyright and version headers.  */
   obj_som_file_hdr (abfd)->aux_header_location = current_offset;
   obj_som_file_hdr (abfd)->aux_header_size = 0;
+  if (abfd->flags & EXEC_P)
+    {
+      /* Parts of the exec header will be filled in later, so
+	 delay writing the header itself.  Just leave space for
+	 it.  */
+      current_offset += sizeof (struct som_exec_auxhdr);
+      obj_som_file_hdr (abfd)->aux_header_size += sizeof (struct som_exec_auxhdr);
+    }
   if (obj_som_version_hdr (abfd) != NULL)
     {
       unsigned int len;
@@ -3251,7 +3255,7 @@ som_build_and_write_symbol_table (abfd)
      to hold the symbol table as we build it.  */
   symtab_size = num_syms * sizeof (struct symbol_dictionary_record);
   som_symtab = (struct symbol_dictionary_record *) malloc (symtab_size);
-  if (som_symtab == NULL)
+  if (som_symtab == NULL && symtab_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
@@ -3434,7 +3438,7 @@ som_slurp_symbol_table (abfd)
 
   /* Read in the external SOM representation.  */
   buf = malloc (symbol_count * symsize);
-  if (buf == NULL)
+  if (buf == NULL && symbol_count * symsize != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
@@ -3550,9 +3554,15 @@ som_slurp_symbol_table (abfd)
 	}
 
       /* Mark section symbols and symbols used by the debugger.  */
-      if (!strcmp (sym->symbol.name, "L$0\002"))
+      if (sym->symbol.name[0] == '$'
+	  && sym->symbol.name[strlen (sym->symbol.name) - 1] == '$')
 	sym->symbol.flags |= BSF_SECTION_SYM;
-      else if (!strncmp (sym->symbol.name, "L$0", 3))
+      else if (!strncmp (sym->symbol.name, "L$0\002", 4))
+	{
+	  sym->symbol.flags |= BSF_SECTION_SYM;
+	  sym->symbol.name = sym->symbol.section->name;
+	}
+      else if (!strncmp (sym->symbol.name, "L$0\001", 4))
 	sym->symbol.flags |= BSF_DEBUGGING;
 
       /* Note increment at bottom of loop, since we skip some symbols
@@ -4343,7 +4353,7 @@ som_bfd_count_ar_symbols (abfd, lst_header, count)
 
   hash_table = 
     (unsigned int *) malloc (lst_header->hash_size * sizeof (unsigned int));
-  if (hash_table == NULL)
+  if (hash_table == NULL && lst_header->hash_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
@@ -4436,7 +4446,7 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
 
   hash_table = 
     (unsigned int *) malloc (lst_header->hash_size * sizeof (unsigned int));
-  if (hash_table == NULL)
+  if (hash_table == NULL && lst_header->hash_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
@@ -4445,7 +4455,7 @@ som_bfd_fill_in_ar_symbols (abfd, lst_header, syms)
   som_dict =
     (struct som_entry *) malloc (lst_header->module_count
 				 * sizeof (struct som_entry));
-  if (som_dict == NULL)
+  if (som_dict == NULL && lst_header->module_count != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
@@ -4823,7 +4833,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 
   hash_table =
     (unsigned int *) malloc (lst.hash_size * sizeof (unsigned int));
-  if (hash_table == NULL)
+  if (hash_table == NULL && lst.hash_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
@@ -4831,7 +4841,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   som_dict =
     (struct som_entry *) malloc (lst.module_count
 				 * sizeof (struct som_entry));
-  if (som_dict == NULL)
+  if (som_dict == NULL && lst.module_count != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
@@ -4840,7 +4850,7 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
   last_hash_entry =
     ((struct lst_symbol_record **)
      malloc (lst.hash_size * sizeof (struct lst_symbol_record *)));
-  if (last_hash_entry == NULL)
+  if (last_hash_entry == NULL && lst.hash_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
@@ -4868,13 +4878,13 @@ som_bfd_ar_write_symbol_stuff (abfd, nsyms, string_size, lst)
 
   /* FIXME should be done with buffers just like everything else... */
   lst_syms = malloc (nsyms * sizeof (struct lst_symbol_record));
-  if (lst_syms == NULL)
+  if (lst_syms == NULL && nsyms != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
     }
   strings = malloc (string_size);
-  if (strings == NULL)
+  if (strings == NULL && string_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;

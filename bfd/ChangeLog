@@ -1,3 +1,13 @@
+Thu Mar 17 10:37:07 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* aoutx.h, elfcode.h, coff-alpha.c, bout.c, ecoff.c, ecofflink.c,
+	elf32-hppa.c, elf32-mips.c, linker.c, som.c, sunos.c: If malloc(0)
+	returns NULL, it is not an error.  It's possible that some of
+	these checks are not necessary (because the size can never be
+	zero), but putting in the checks is the conservative thing to do
+	in light of the fact that some of these malloc calls replaced
+	unchecked alloca calls, in which a zero argument would work fine.
+
 Thu Mar 17 11:44:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* reloc.c (bfd_generic_get_relocated_section_contents): Don't fail

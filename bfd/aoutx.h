@@ -125,7 +125,6 @@ DESCRIPTION
 #include <string.h>		/* For strchr and friends */
 #include "bfd.h"
 #include <sysdep.h>
-#include <ansidecl.h>
 #include "bfdlink.h"
 
 #include "libaout.h"
@@ -208,9 +207,9 @@ HOWTO(10,	       0,  2,   32, false, 0, complain_overflow_bitfield,0,"BASE32",	f
 #define TABLE_SIZE(TABLE)	(sizeof(TABLE)/sizeof(TABLE[0]))
 
 CONST struct reloc_howto_struct *
-DEFUN(NAME(aout,reloc_type_lookup),(abfd,code),
-      bfd *abfd AND
-      bfd_reloc_code_real_type code)
+NAME(aout,reloc_type_lookup) (abfd,code)
+     bfd *abfd;
+     bfd_reloc_code_real_type code;
 {
 #define EXT(i,j)	case i: return &howto_table_ext[j]
 #define STD(i,j)	case i: return &howto_table_std[j]
@@ -276,10 +275,10 @@ DESCRIPTION
 
 #ifndef NAME_swap_exec_header_in
 void
-DEFUN(NAME(aout,swap_exec_header_in),(abfd, raw_bytes, execp),
-      bfd *abfd AND
-      struct external_exec *raw_bytes AND
-      struct internal_exec *execp)
+NAME(aout,swap_exec_header_in) (abfd, raw_bytes, execp)
+     bfd *abfd;
+     struct external_exec *raw_bytes;
+     struct internal_exec *execp;
 {
   struct external_exec *bytes = (struct external_exec *)raw_bytes;
 
@@ -316,10 +315,10 @@ DESCRIPTION
 	@var{execp} into the buffer @var{raw_bytes} ready for writing to disk.
 */
 void
-DEFUN(NAME(aout,swap_exec_header_out),(abfd, execp, raw_bytes),
-     bfd *abfd AND
-     struct internal_exec *execp AND
-     struct external_exec *raw_bytes)
+NAME(aout,swap_exec_header_out) (abfd, execp, raw_bytes)
+     bfd *abfd;
+     struct internal_exec *execp;
+     struct external_exec *raw_bytes;
 {
   struct external_exec *bytes = (struct external_exec *)raw_bytes;
 
@@ -354,10 +353,10 @@ DESCRIPTION
 */
 
 bfd_target *
-DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
-      bfd *abfd AND
-      struct internal_exec *execp AND
-      bfd_target *(*callback_to_real_object_p) PARAMS ((bfd *)))
+NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
+     bfd *abfd;
+     struct internal_exec *execp;
+     bfd_target *(*callback_to_real_object_p) PARAMS ((bfd *));
 {
   struct aout_data_struct *rawptr, *oldrawptr;
   bfd_target *result;
@@ -547,8 +546,8 @@ DESCRIPTION
 */
 
 boolean
-DEFUN(NAME(aout,mkobject),(abfd),
-     bfd *abfd)
+NAME(aout,mkobject) (abfd)
+     bfd *abfd;
 {
   struct aout_data_struct  *rawptr;
 
@@ -601,9 +600,9 @@ DESCRIPTION
 */
 
 enum machine_type
-DEFUN(NAME(aout,machine_type),(arch, machine),
-      enum bfd_architecture arch AND
-      unsigned long machine)
+NAME(aout,machine_type) (arch, machine)
+     enum bfd_architecture arch;
+     unsigned long machine;
 {
   enum machine_type arch_flags;
 
@@ -668,10 +667,10 @@ DESCRIPTION
 */
 
 boolean
-DEFUN(NAME(aout,set_arch_mach),(abfd, arch, machine),
-      bfd *abfd AND
-      enum bfd_architecture arch AND
-      unsigned long machine)
+NAME(aout,set_arch_mach) (abfd, arch, machine)
+     bfd *abfd;
+     enum bfd_architecture arch;
+     unsigned long machine;
 {
   if (! bfd_default_set_arch_mach (abfd, arch, machine))
     return false;
@@ -871,8 +870,10 @@ adjust_n_magic (abfd, execp)
 }
 
 boolean
-DEFUN (NAME(aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
-       bfd *abfd AND bfd_size_type *text_size AND file_ptr *text_end)
+NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
+     bfd *abfd;
+     bfd_size_type *text_size;
+     file_ptr *text_end;
 {
   struct internal_exec *execp = exec_hdr (abfd);
 
@@ -975,9 +976,9 @@ DESCRIPTION
 	request.
 */
 boolean
-DEFUN(NAME(aout,new_section_hook),(abfd, newsect),
-	bfd *abfd AND
-	asection *newsect)
+NAME(aout,new_section_hook) (abfd, newsect)
+     bfd *abfd;
+     asection *newsect;
 {
   /* align to double at least */
   newsect->alignment_power = bfd_get_arch_info(abfd)->section_align_power;
@@ -1010,12 +1011,12 @@ DEFUN(NAME(aout,new_section_hook),(abfd, newsect),
 }
 
 boolean
-DEFUN(NAME(aout,set_section_contents),(abfd, section, location, offset, count),
-      bfd *abfd AND
-      sec_ptr section AND
-      PTR location AND
-      file_ptr offset AND
-      bfd_size_type count)
+NAME(aout,set_section_contents) (abfd, section, location, offset, count)
+     bfd *abfd;
+     sec_ptr section;
+     PTR location;
+     file_ptr offset;
+     bfd_size_type count;
 {
   file_ptr text_end;
   bfd_size_type text_size;
@@ -1084,10 +1085,10 @@ DEFUN(NAME(aout,set_section_contents),(abfd, section, location, offset, count),
   stabilised these should be inlined into their (single) caller */
 
 static boolean
-DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
-       struct external_nlist *sym_pointer AND
-       aout_symbol_type * cache_ptr AND
-       bfd * abfd)
+translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd)
+     struct external_nlist *sym_pointer;
+     aout_symbol_type * cache_ptr;
+     bfd * abfd;
 {
   cache_ptr->symbol.section = 0;
   switch (cache_ptr->type & N_TYPE)
@@ -1304,10 +1305,10 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
 
 
 static boolean
-DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
-     struct external_nlist *sym_pointer AND
-     asymbol *cache_ptr AND
-     bfd *abfd)
+translate_to_native_sym_flags (sym_pointer, cache_ptr, abfd)
+     struct external_nlist *sym_pointer;
+     asymbol *cache_ptr;
+     bfd *abfd;
 {
   bfd_vma value = cache_ptr->value;
 
@@ -1386,8 +1387,8 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
 
 
 asymbol *
-DEFUN(NAME(aout,make_empty_symbol),(abfd),
-      bfd *abfd)
+NAME(aout,make_empty_symbol) (abfd)
+     bfd *abfd;
 {
   aout_symbol_type  *new =
     (aout_symbol_type *)bfd_zalloc (abfd, sizeof (aout_symbol_type));
@@ -1456,8 +1457,8 @@ translate_symbol_table (abfd, in, ext, count, str, strsize, dynamic)
    hold them all plus all the cached symbol entries. */
 
 boolean
-DEFUN(NAME(aout,slurp_symbol_table),(abfd),
-      bfd *abfd)
+NAME(aout,slurp_symbol_table) (abfd)
+     bfd *abfd;
 {
   bfd_size_type symbol_size;
   bfd_size_type string_size;
@@ -1941,8 +1942,8 @@ emit_strtab (abfd, tab)
 }
 
 boolean
-DEFUN(NAME(aout,write_syms),(abfd),
-      bfd *abfd)
+NAME(aout,write_syms) (abfd)
+     bfd *abfd;
 {
   unsigned int count ;
   asymbol **generic = bfd_get_outsymbols (abfd);
@@ -1993,9 +1994,9 @@ DEFUN(NAME(aout,write_syms),(abfd),
 
 
 unsigned int
-DEFUN(NAME(aout,get_symtab),(abfd, location),
-      bfd *abfd AND
-      asymbol **location)
+NAME(aout,get_symtab) (abfd, location)
+     bfd *abfd;
+     asymbol **location;
 {
     unsigned int counter = 0;
     aout_symbol_type *symbase;
@@ -2013,10 +2014,10 @@ DEFUN(NAME(aout,get_symtab),(abfd, location),
 /* Output standard relocation information to a file in target byte order. */
 
 void
-DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
-      bfd *abfd AND
-      arelent *g AND
-      struct reloc_std_external *natptr)
+NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
+     bfd *abfd;
+     arelent *g;
+     struct reloc_std_external *natptr;
 {
   int r_index;
   asymbol *sym = *(g->sym_ptr_ptr);
@@ -2109,10 +2110,10 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
 /* Output extended relocation information to a file in target byte order. */
 
 void
-DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
-      bfd *abfd AND
-      arelent *g AND
-      register struct reloc_ext_external *natptr)
+NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
+     bfd *abfd;
+     arelent *g;
+     register struct reloc_ext_external *natptr;
 {
   int r_index;
   int r_extern;
@@ -2221,11 +2222,11 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
   }     								\
 
 void
-DEFUN(NAME(aout,swap_ext_reloc_in), (abfd, bytes, cache_ptr, symbols),
-      bfd *abfd AND
-      struct reloc_ext_external *bytes AND
-      arelent *cache_ptr AND
-      asymbol **symbols)
+NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols)
+     bfd *abfd;
+     struct reloc_ext_external *bytes;
+     arelent *cache_ptr;
+     asymbol **symbols;
 {
   int r_index;
   int r_extern;
@@ -2256,11 +2257,11 @@ DEFUN(NAME(aout,swap_ext_reloc_in), (abfd, bytes, cache_ptr, symbols),
 }
 
 void
-DEFUN(NAME(aout,swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
-  bfd *abfd AND
-  struct reloc_std_external *bytes AND
-  arelent *cache_ptr AND
-  asymbol **symbols)
+NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
+     bfd *abfd;
+     struct reloc_std_external *bytes;
+     arelent *cache_ptr;
+     asymbol **symbols;
 {
   int r_index;
   int r_extern;
@@ -2311,10 +2312,10 @@ DEFUN(NAME(aout,swap_std_reloc_in), (abfd, bytes, cache_ptr, symbols),
 /* Reloc hackery */
 
 boolean
-DEFUN(NAME(aout,slurp_reloc_table),(abfd, asect, symbols),
-      bfd *abfd AND
-      sec_ptr asect AND
-      asymbol **symbols)
+NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
+     bfd *abfd;
+     sec_ptr asect;
+     asymbol **symbols;
 {
   unsigned int count;
   bfd_size_type reloc_size;
@@ -2450,9 +2451,9 @@ DEFUN(NAME(aout,slurp_reloc_table),(abfd, asect, symbols),
 /* Write out a relocation section into an object file.  */
 
 boolean
-DEFUN(NAME(aout,squirt_out_relocs),(abfd, section),
-      bfd *abfd AND
-      asection *section)
+NAME(aout,squirt_out_relocs) (abfd, section)
+     bfd *abfd;
+     asection *section;
 {
   arelent **generic;
   unsigned char *native, *natptr;
@@ -2499,11 +2500,11 @@ DEFUN(NAME(aout,squirt_out_relocs),(abfd, section),
 
 /* This is stupid.  This function should be a boolean predicate */
 unsigned int
-DEFUN(NAME(aout,canonicalize_reloc),(abfd, section, relptr, symbols),
-      bfd *abfd AND
-      sec_ptr section AND
-      arelent **relptr AND
-      asymbol **symbols)
+NAME(aout,canonicalize_reloc) (abfd, section, relptr, symbols)
+     bfd *abfd;
+     sec_ptr section;
+     arelent **relptr;
+     asymbol **symbols;
 {
   arelent *tblptr = section->relocation;
   unsigned int count;
@@ -2533,9 +2534,9 @@ DEFUN(NAME(aout,canonicalize_reloc),(abfd, section, relptr, symbols),
 }
 
 unsigned int
-DEFUN(NAME(aout,get_reloc_upper_bound),(abfd, asect),
-     bfd *abfd AND
-     sec_ptr asect)
+NAME(aout,get_reloc_upper_bound) (abfd, asect)
+     bfd *abfd;
+     sec_ptr asect;
 {
   bfd_size_type dynrel_count = 0;
 
@@ -2573,9 +2574,9 @@ DEFUN(NAME(aout,get_reloc_upper_bound),(abfd, asect),
 }
 
 
- unsigned int
-DEFUN(NAME(aout,get_symtab_upper_bound),(abfd),
-     bfd *abfd)
+unsigned int
+NAME(aout,get_symtab_upper_bound) (abfd)
+     bfd *abfd;
 {
   if (!NAME(aout,slurp_symbol_table)(abfd)) return 0;
 
@@ -2584,19 +2585,19 @@ DEFUN(NAME(aout,get_symtab_upper_bound),(abfd),
 
 /*ARGSUSED*/
  alent *
-DEFUN(NAME(aout,get_lineno),(ignore_abfd, ignore_symbol),
-      bfd *ignore_abfd AND
-      asymbol *ignore_symbol)
+NAME(aout,get_lineno) (ignore_abfd, ignore_symbol)
+     bfd *ignore_abfd;
+     asymbol *ignore_symbol;
 {
 return (alent *)NULL;
 }
 
 /*ARGSUSED*/
 void
-DEFUN(NAME(aout,get_symbol_info),(ignore_abfd, symbol, ret),
-      bfd *ignore_abfd AND
-      asymbol *symbol AND
-      symbol_info *ret)
+NAME(aout,get_symbol_info) (ignore_abfd, symbol, ret)
+     bfd *ignore_abfd;
+     asymbol *symbol;
+     symbol_info *ret;
 {
   bfd_symbol_info (symbol, ret);
 
@@ -2620,11 +2621,11 @@ DEFUN(NAME(aout,get_symbol_info),(ignore_abfd, symbol, ret),
 
 /*ARGSUSED*/
 void
-DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
-      bfd *ignore_abfd AND
-      PTR afile AND
-      asymbol *symbol AND
-      bfd_print_symbol_type how)
+NAME(aout,print_symbol) (ignore_abfd, afile, symbol, how)
+     bfd *ignore_abfd;
+     PTR afile;
+     asymbol *symbol;
+     bfd_print_symbol_type how;
 {
   FILE *file = (FILE *)afile;
 
@@ -2664,20 +2665,15 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
 */
 
 boolean
-DEFUN(NAME(aout,find_nearest_line),(abfd,
-				     section,
-				     symbols,
-				     offset,
-				     filename_ptr,
-				     functionname_ptr,
-				     line_ptr),
-      bfd *abfd AND
-      asection *section AND
-      asymbol **symbols AND
-      bfd_vma offset AND
-      CONST char **filename_ptr AND
-      CONST char **functionname_ptr AND
-      unsigned int *line_ptr)
+NAME(aout,find_nearest_line)
+     (abfd, section, symbols, offset, filename_ptr, functionname_ptr, line_ptr)
+     bfd *abfd;
+     asection *section;
+     asymbol **symbols;
+     bfd_vma offset;
+     CONST char **filename_ptr;
+     CONST char **functionname_ptr;
+     unsigned int *line_ptr;
 {
   /* Run down the file looking for the filename, function and linenumber */
   asymbol **p;
@@ -2774,9 +2770,9 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
 
 /*ARGSUSED*/
 int
-DEFUN(NAME(aout,sizeof_headers),(abfd, execable),
-      bfd *abfd AND
-      boolean execable)
+NAME(aout,sizeof_headers) (abfd, execable)
+     bfd *abfd;
+     boolean execable;
 {
   return adata(abfd).exec_bytes_size;
 }
@@ -2990,7 +2986,7 @@ aout_link_get_symbols (abfd)
      to free them.  */
   syms = ((struct external_nlist *)
 	  malloc ((size_t) count * EXTERNAL_NLIST_SIZE));
-  if (syms == (struct external_nlist *) NULL)
+  if (syms == (struct external_nlist *) NULL && count != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
@@ -3008,7 +3004,7 @@ aout_link_get_symbols (abfd)
     return false;
   stringsize = GET_WORD (abfd, string_chars);
   strings = (char *) malloc ((size_t) stringsize);
-  if (strings == NULL)
+  if (strings == NULL && stringsize != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
@@ -3545,7 +3541,7 @@ aout_link_input_bfd (finfo, input_bfd)
 
   sym_count = obj_aout_external_sym_count (input_bfd);
   symbol_map = (int *) malloc ((size_t) sym_count * sizeof (int));
-  if (symbol_map == NULL)
+  if (symbol_map == NULL && sym_count != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
@@ -4014,7 +4010,7 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
   /* Get the section contents.  */
   input_size = bfd_section_size (input_bfd, input_section);
   contents = (bfd_byte *) malloc (input_size);
-  if (contents == NULL)
+  if (contents == NULL && input_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
@@ -4025,7 +4021,7 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
 
   /* Read in the relocs.  */
   relocs = (PTR) malloc (rel_size);
-  if (relocs == NULL)
+  if (relocs == NULL && rel_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
