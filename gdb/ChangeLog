@@ -1,3 +1,10 @@
+2004-01-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparcnbsd-tdep.c (GDB_OSABI_NETBSD_CORE): Define, based on the
+	value of GDB_OSABI_DEFAULT.
+	(sparcnbsd_core_osabi_sniffer): Return GDB_OSABI_NETBSD_CORE
+	instead of GDB_OSABI_NETBSD_AOUT.
+
 2004-01-24  Nick Roberts  <nick@nick.uklinux.net>
 
 	* mi/mi-cmd-stack.c, mi/mi-cmd-var.c, mi/mi-cmds.h: Update

@@ -284,11 +284,24 @@ sparcnbsd_aout_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
+/* OpenBSD uses the traditional NetBSD core file format, even for
+   ports that use ELF.  Therefore, if the default OS ABI is OpenBSD
+   ELF, we return that instead of NetBSD a.out.  This is mainly for
+   the benfit of OpenBSD/sparc64, which inherits the sniffer below
+   since we include this file for an OpenBSD/sparc64 target.  For
+   OpenBSD/sparc, the NetBSD a.out OS ABI is probably similar enough
+   to both the OpenBSD a.out and the OpenBSD ELF OS ABI.  */
+#if defined (GDB_OSABI_DEFAULT) && (GDB_OSABI_DEFAULT == GDB_OSABI_OPENBSD_ELF)
+#define GDB_OSABI_NETBSD_CORE GDB_OSABI_OPENBSD_ELF
+#else
+#define GDB_OSABI_NETBSD_CORE GDB_OSABI_NETBSD_AOUT
+#endif
+
 static enum gdb_osabi
 sparcnbsd_core_osabi_sniffer (bfd *abfd)
 {
   if (strcmp (bfd_get_target (abfd), "netbsd-core") == 0)
-    return GDB_OSABI_NETBSD_AOUT;
+    return GDB_OSABI_NETBSD_CORE;
 
   return GDB_OSABI_UNKNOWN;
 }
