@@ -210,6 +210,30 @@ struct elf_link_hash_entry
 #define ELF_LINK_DYNAMIC_WEAK 040000
 };
 
+/* Will references to this symbol always reference the symbol
+   in this object?  STV_PROTECTED is excluded from the visibility test
+   here so that function pointer comparisons work properly.  Since
+   function symbols not defined in an app are set to their .plt entry,
+   it's necessary for shared libs to also reference the .plt even
+   though the symbol is really local to the shared lib.  */
+#define SYMBOL_REFERENCES_LOCAL(INFO, H)				\
+  ((! (INFO)->shared							\
+    || (INFO)->symbolic							\
+    || (H)->dynindx == -1						\
+    || ELF_ST_VISIBILITY ((H)->other) == STV_INTERNAL			\
+    || ELF_ST_VISIBILITY ((H)->other) == STV_HIDDEN			\
+    || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)		\
+   && ((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+
+/* Will _calls_ to this symbol always call the version in this object?  */
+#define SYMBOL_CALLS_LOCAL(INFO, H)					\
+  ((! (INFO)->shared							\
+    || (INFO)->symbolic							\
+    || (H)->dynindx == -1						\
+    || ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT			\
+    || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)		\
+   && ((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+
 /* Records local symbols to be emitted in the dynamic symbol table.  */
 
 struct elf_link_local_dynamic_entry
@@ -850,6 +874,12 @@ struct elf_backend_data
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
   const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;
+
+  /* This function implements `bfd_elf_bfd_from_remote_memory';
+     see elf.c, elfcode.h.  */
+  bfd *(*elf_backend_bfd_from_remote_memory)
+     PARAMS ((bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
+	      int (*target_read_memory) (bfd_vma vma, char *myaddr, int len)));
 
   /* Alternate EM_xxxx machine codes for this backend.  */
   int elf_machine_alt1;
@@ -1725,6 +1755,13 @@ extern char *elfcore_write_prxfpreg
   PARAMS ((bfd *, char *, int *, const PTR, int));
 extern char *elfcore_write_lwpstatus
   PARAMS ((bfd *, char *, int *, long, int, const PTR));
+
+extern bfd *_bfd_elf32_bfd_from_remote_memory
+  PARAMS ((bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
+	   int (*target_read_memory) (bfd_vma, char *, int)));
+extern bfd *_bfd_elf64_bfd_from_remote_memory
+  PARAMS ((bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
+	   int (*target_read_memory) (bfd_vma, char *, int)));
 
 /* SH ELF specific routine.  */
 

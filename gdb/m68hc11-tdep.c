@@ -1374,7 +1374,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_fp_regnum (gdbarch, SOFT_FP_REGNUM);
   set_gdbarch_register_name (gdbarch, m68hc11_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 2);
-  set_gdbarch_register_bytes (gdbarch, M68HC11_ALL_REGS * 2);
+  set_gdbarch_deprecated_register_bytes (gdbarch, M68HC11_ALL_REGS * 2);
   set_gdbarch_register_virtual_type (gdbarch, m68hc11_register_virtual_type);
   set_gdbarch_pseudo_register_read (gdbarch, m68hc11_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, m68hc11_pseudo_register_write);

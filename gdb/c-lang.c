@@ -32,6 +32,7 @@
 #include "charset.h"
 #include "gdb_string.h"
 #include "demangle.h"
+#include "cp-support.h"
 
 extern void _initialize_c_language (void);
 static void c_emit_char (int c, struct ui_file * stream, int quoter);
@@ -91,7 +92,6 @@ c_printstr (struct ui_file *stream, char *string, unsigned int length,
   unsigned int things_printed = 0;
   int in_quotes = 0;
   int need_comma = 0;
-  extern int inspect_it;
 
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in traditional C
@@ -554,6 +554,8 @@ const struct language_defn c_language_defn =
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  NULL,				/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
@@ -608,6 +610,8 @@ const struct language_defn cplus_language_defn =
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  value_of_this,		/* value_of_this */
+  cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   cplus_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
@@ -639,6 +643,8 @@ const struct language_defn asm_language_defn =
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  NULL,				/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
@@ -675,6 +681,8 @@ const struct language_defn minimal_language_defn =
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  NULL,				/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */

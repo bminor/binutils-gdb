@@ -1105,7 +1105,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_register_name (gdbarch, h8300_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, BINWORD);
-  set_gdbarch_register_bytes (gdbarch, E_NUM_REGS * BINWORD);
+  set_gdbarch_deprecated_register_bytes (gdbarch, E_NUM_REGS * BINWORD);
   set_gdbarch_register_byte (gdbarch, h8300_register_byte);
   set_gdbarch_register_raw_size (gdbarch, h8300_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, h8300h_reg_size);

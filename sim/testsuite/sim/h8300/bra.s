@@ -72,8 +72,8 @@ bra_reg8:
 	;;  bra rn.b		; 8-bit register indirect
 	sub.l	#src8, @disp8
 	mov.l	@disp8, er5
-;;; 	bra	er5.b
-	.word	0x5955
+	bra	r5l.b
+;;; 	.word	0x5955
 src8:	fail
 	
 tgt_reg8:
@@ -94,8 +94,8 @@ bra_reg16:
 	;;  bra rn.w		; 16-bit register indirect
 	sub.l	#src16, @disp16
 	mov.l	@disp16, er5
-;;; 	bra	er5.w
-	.word	0x5956
+	bra	r5.w
+;;; 	.word	0x5956
 src16:	fail
 	
 tgt_reg16:
@@ -116,8 +116,8 @@ bra_reg32:
 	;;  bra ern		; 32-bit register indirect
 	sub.l	#src32, @disp32
 	mov.l	@disp32, er5
-;;; 	bra	er5.l
-	.word	0x5957
+	bra	er5.l
+;;; 	.word	0x5957
 src32:	fail
 
 tgt_reg32:	
@@ -134,8 +134,8 @@ tgt_reg32:
 bra_s:	set_grs_a5a5
 	set_ccr_zero
 
-;;; 	bra/s	tgt_post_delay
-	.word	0x4017
+	bra/s	tgt_post_delay
+;;; 	.word	0x4017
 	;; The following instruction is in the delay slot, and should execute.
 	mov.b	#1, @dslot
 	;; After this, the next instructions should not execute.

@@ -148,7 +148,7 @@ extern int i386_mxcsr_regnum_p (int regnum);
 
 /* Sizes of individual register sets.  These cover the entire register
    file, so summing up the sizes of those portions actually present
-   yields REGISTER_BYTES.  */
+   yields DEPRECATED_REGISTER_BYTES.  */
 #define I386_SIZEOF_GREGS	(I386_NUM_GREGS * 4)
 #define I386_SIZEOF_FREGS	(8 * 10 + 8 * 4)
 #define I386_SIZEOF_XREGS	(8 * 16 + 4)

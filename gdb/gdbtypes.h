@@ -281,7 +281,7 @@ struct main_type
   /* Name of this type, or NULL if none.
 
      This is used for printing only, except by poorly designed C++ code.
-     For looking up a name, look for a symbol in the VAR_NAMESPACE.  */
+     For looking up a name, look for a symbol in the VAR_DOMAIN.  */
 
   char *name;
 
@@ -292,7 +292,7 @@ struct main_type
      with this feature.
 
      This is used for printing only, except by poorly designed C++ code.
-     For looking up a name, look for a symbol in the STRUCT_NAMESPACE.
+     For looking up a name, look for a symbol in the STRUCT_DOMAIN.
      One more legitimate use is that if TYPE_FLAG_STUB is set, this is
      the name to use to look for definitions in other files.  */
 

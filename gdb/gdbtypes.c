@@ -1058,7 +1058,7 @@ lookup_typename (char *name, struct block *block, int noerr)
   register struct symbol *sym;
   register struct type *tmp;
 
-  sym = lookup_symbol (name, block, VAR_NAMESPACE, 0, (struct symtab **) NULL);
+  sym = lookup_symbol (name, block, VAR_DOMAIN, 0, (struct symtab **) NULL);
   if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
     {
       tmp = lookup_primitive_typename (name);
@@ -1111,7 +1111,7 @@ lookup_struct (char *name, struct block *block)
 {
   register struct symbol *sym;
 
-  sym = lookup_symbol (name, block, STRUCT_NAMESPACE, 0,
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0,
 		       (struct symtab **) NULL);
 
   if (sym == NULL)
@@ -1134,7 +1134,7 @@ lookup_union (char *name, struct block *block)
   register struct symbol *sym;
   struct type *t;
 
-  sym = lookup_symbol (name, block, STRUCT_NAMESPACE, 0,
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0,
 		       (struct symtab **) NULL);
 
   if (sym == NULL)
@@ -1165,7 +1165,7 @@ lookup_enum (char *name, struct block *block)
 {
   register struct symbol *sym;
 
-  sym = lookup_symbol (name, block, STRUCT_NAMESPACE, 0,
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0,
 		       (struct symtab **) NULL);
   if (sym == NULL)
     {
@@ -1191,7 +1191,7 @@ lookup_template_type (char *name, struct type *type, struct block *block)
   strcat (nam, TYPE_NAME (type));
   strcat (nam, " >");		/* FIXME, extra space still introduced in gcc? */
 
-  sym = lookup_symbol (nam, block, VAR_NAMESPACE, 0, (struct symtab **) NULL);
+  sym = lookup_symbol (nam, block, VAR_DOMAIN, 0, (struct symtab **) NULL);
 
   if (sym == NULL)
     {
@@ -1386,7 +1386,7 @@ check_typedef (struct type *type)
 
 	  name = type_name_no_tag (type);
 	  /* FIXME: shouldn't we separately check the TYPE_NAME and the
-	     TYPE_TAG_NAME, and look in STRUCT_NAMESPACE and/or VAR_NAMESPACE
+	     TYPE_TAG_NAME, and look in STRUCT_DOMAIN and/or VAR_DOMAIN
 	     as appropriate?  (this code was written before TYPE_NAME and
 	     TYPE_TAG_NAME were separate).  */
 	  if (name == NULL)
@@ -1394,7 +1394,7 @@ check_typedef (struct type *type)
 	      stub_noname_complaint ();
 	      return type;
 	    }
-	  sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0,
+	  sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0,
 			       (struct symtab **) NULL);
 	  if (sym)
 	    TYPE_TARGET_TYPE (type) = SYMBOL_TYPE (sym);
@@ -1430,7 +1430,7 @@ check_typedef (struct type *type)
     {
       char *name = type_name_no_tag (type);
       /* FIXME: shouldn't we separately check the TYPE_NAME and the
-         TYPE_TAG_NAME, and look in STRUCT_NAMESPACE and/or VAR_NAMESPACE
+         TYPE_TAG_NAME, and look in STRUCT_DOMAIN and/or VAR_DOMAIN
          as appropriate?  (this code was written before TYPE_NAME and
          TYPE_TAG_NAME were separate).  */
       struct symbol *sym;
@@ -1439,7 +1439,7 @@ check_typedef (struct type *type)
 	  stub_noname_complaint ();
 	  return type;
 	}
-      sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, (struct symtab **) NULL);
+      sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0, (struct symtab **) NULL);
       if (sym)
 	make_cv_type (is_const, is_volatile, SYMBOL_TYPE (sym), &type);
     }

@@ -147,27 +147,6 @@ static bfd_boolean ppc_elf_grok_psinfo
 #define TP_OFFSET	0x7000
 #define DTP_OFFSET	0x8000
 
-/* Will references to this symbol always reference the symbol
-   in this object?  STV_PROTECTED is excluded from the visibility test
-   here so that function pointer comparisons work properly.  Since
-   function symbols not defined in an app are set to their .plt entry,
-   it's necessary for shared libs to also reference the .plt even
-   though the symbol is really local to the shared lib.  */
-#define SYMBOL_REFERENCES_LOCAL(INFO, H)				\
-  ((! INFO->shared							\
-    || INFO->symbolic							\
-    || H->dynindx == -1							\
-    || ELF_ST_VISIBILITY (H->other) == STV_INTERNAL			\
-    || ELF_ST_VISIBILITY (H->other) == STV_HIDDEN)			\
-   && (H->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
-
-/* Will _calls_ to this symbol always call the version in this object?  */
-#define SYMBOL_CALLS_LOCAL(INFO, H)					\
-  ((! INFO->shared							\
-    || INFO->symbolic							\
-    || H->dynindx == -1							\
-    || ELF_ST_VISIBILITY (H->other) != STV_DEFAULT)			\
-   && (H->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
 
 /* The PPC linker needs to keep track of the number of relocs that it
    decides to copy as dynamic relocs in check_relocs for each symbol.
@@ -2516,19 +2495,21 @@ ppc_elf_adjust_dynamic_symbol (info, h)
     {
       /* Clear procedure linkage table information for any symbol that
 	 won't need a .plt entry.  */
-      if (! htab->elf.dynamic_sections_created
+      if (h->plt.refcount <= 0
 	  || SYMBOL_CALLS_LOCAL (info, h)
-	  || h->plt.refcount <= 0)
+	  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      && h->root.type == bfd_link_hash_undefweak))
 	{
 	  /* A PLT entry is not required/allowed when:
 
-	  1. We are not using ld.so; because then the PLT entry
-	  can't be set up, so we can't use one.
+	     1. We are not using ld.so; because then the PLT entry
+	     can't be set up, so we can't use one.  In this case,
+	     ppc_elf_adjust_dynamic_symbol won't even be called.
 
-	  2. We know for certain that a call to this symbol
-	  will go to this object.
+	     2. GC has rendered the entry unused.
 
-	  3. GC has rendered the entry unused.  */
+	     3. We know for certain that a call to this symbol
+	     will go to this object, or will remain undefined.  */
 	  h->plt.offset = (bfd_vma) -1;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	}
@@ -2694,9 +2675,7 @@ allocate_dynrelocs (h, inf)
 
   htab = ppc_elf_hash_table (info);
   if (htab->elf.dynamic_sections_created
-      && h->plt.refcount > 0
-      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	  || h->root.type != bfd_link_hash_undefweak))
+      && h->plt.refcount > 0)
     {
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (h->dynindx == -1
@@ -2817,11 +2796,16 @@ allocate_dynrelocs (h, inf)
      defined in regular objects.  For the normal shared case, discard
      space for relocs that have become local due to symbol visibility
      changes.  */
+
   if (info->shared)
     {
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
-	      || info->symbolic))
+      /* Relocs that use pc_count are those that appear on a call insn,
+	 or certain REL relocs (see MUST_BE_DYN_RELOC) that can be
+	 generated via assembly.  We want calls to protected symbols to
+	 resolve directly to the function rather than going via the plt.
+	 If people want function pointer comparisons to work as expected
+	 then they should avoid writing weird assembly.  */ 
+      if (SYMBOL_CALLS_LOCAL (info, h))
 	{
 	  struct ppc_elf_dyn_relocs **pp;
 
@@ -5013,10 +4997,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (MUST_BE_DYN_RELOC (r_type)
 		   || (h != NULL
-		       && h->dynindx != -1
-		       && (!info->symbolic
-			   || (h->elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+		       && !SYMBOL_CALLS_LOCAL (info, h))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && (input_section->flags & SEC_ALLOC) != 0

@@ -599,7 +599,7 @@ print_symbol (void *args)
   struct ui_file *outfile = ((struct print_symbol_args *) args)->outfile;
 
   print_spaces (depth, outfile);
-  if (SYMBOL_NAMESPACE (symbol) == LABEL_NAMESPACE)
+  if (SYMBOL_DOMAIN (symbol) == LABEL_DOMAIN)
     {
       fprintf_filtered (outfile, "label %s at ", SYMBOL_PRINT_NAME (symbol));
       print_address_numeric (SYMBOL_VALUE_ADDRESS (symbol), 1, outfile);
@@ -611,7 +611,7 @@ print_symbol (void *args)
 	fprintf_filtered (outfile, "\n");
       return 1;
     }
-  if (SYMBOL_NAMESPACE (symbol) == STRUCT_NAMESPACE)
+  if (SYMBOL_DOMAIN (symbol) == STRUCT_DOMAIN)
     {
       if (TYPE_TAG_NAME (SYMBOL_TYPE (symbol)))
 	{
@@ -838,22 +838,22 @@ print_partial_symbols (struct partial_symbol **p, int count, char *what,
 	  fprintf_filtered (outfile, "  `%s'", SYMBOL_DEMANGLED_NAME (*p));
 	}
       fputs_filtered (", ", outfile);
-      switch (SYMBOL_NAMESPACE (*p))
+      switch (SYMBOL_DOMAIN (*p))
 	{
-	case UNDEF_NAMESPACE:
-	  fputs_filtered ("undefined namespace, ", outfile);
+	case UNDEF_DOMAIN:
+	  fputs_filtered ("undefined domain, ", outfile);
 	  break;
-	case VAR_NAMESPACE:
+	case VAR_DOMAIN:
 	  /* This is the usual thing -- don't print it */
 	  break;
-	case STRUCT_NAMESPACE:
-	  fputs_filtered ("struct namespace, ", outfile);
+	case STRUCT_DOMAIN:
+	  fputs_filtered ("struct domain, ", outfile);
 	  break;
-	case LABEL_NAMESPACE:
-	  fputs_filtered ("label namespace, ", outfile);
+	case LABEL_DOMAIN:
+	  fputs_filtered ("label domain, ", outfile);
 	  break;
 	default:
-	  fputs_filtered ("<invalid namespace>, ", outfile);
+	  fputs_filtered ("<invalid domain>, ", outfile);
 	  break;
 	}
       switch (SYMBOL_CLASS (*p))
@@ -1151,7 +1151,7 @@ maintenance_check_symtabs (char *ignore, int from_tty)
     while (length--)
       {
 	sym = lookup_block_symbol (b, DEPRECATED_SYMBOL_NAME (*psym),
-				   NULL, SYMBOL_NAMESPACE (*psym));
+				   NULL, SYMBOL_DOMAIN (*psym));
 	if (!sym)
 	  {
 	    printf_filtered ("Static symbol `");
@@ -1168,7 +1168,7 @@ maintenance_check_symtabs (char *ignore, int from_tty)
     while (length--)
       {
 	sym = lookup_block_symbol (b, DEPRECATED_SYMBOL_NAME (*psym),
-				   NULL, SYMBOL_NAMESPACE (*psym));
+				   NULL, SYMBOL_DOMAIN (*psym));
 	if (!sym)
 	  {
 	    printf_filtered ("Global symbol `");

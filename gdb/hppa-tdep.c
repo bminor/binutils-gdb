@@ -642,6 +642,14 @@ find_unwind_entry (CORE_ADDR pc)
   return NULL;
 }
 
+const unsigned char *
+hppa_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+{
+  static const char breakpoint[] = {0x00, 0x01, 0x00, 0x04};
+  (*len) = sizeof (breakpoint);
+  return breakpoint;
+}
+
 /* Return the adjustment necessary to make for addresses on the stack
    as presented by hpread.c.
 
@@ -1973,10 +1981,10 @@ find_stub_with_shl_get (struct minimal_symbol *function, CORE_ADDR handle)
 
   args = alloca (sizeof (struct value *) * 8);		/* 6 for the arguments and one null one??? */
   funcval = find_function_in_inferior ("__d_shl_get");
-  get_sym = lookup_symbol ("__d_shl_get", NULL, VAR_NAMESPACE, NULL, NULL);
+  get_sym = lookup_symbol ("__d_shl_get", NULL, VAR_DOMAIN, NULL, NULL);
   buff_minsym = lookup_minimal_symbol ("__buffer", NULL, NULL);
   msymbol = lookup_minimal_symbol ("__shldp", NULL, NULL);
-  symbol2 = lookup_symbol ("__shldp", NULL, VAR_NAMESPACE, NULL, NULL);
+  symbol2 = lookup_symbol ("__shldp", NULL, VAR_DOMAIN, NULL, NULL);
   endo_buff_addr = SYMBOL_VALUE_ADDRESS (buff_minsym);
   namelen = strlen (DEPRECATED_SYMBOL_NAME (function));
   value_return_addr = endo_buff_addr + namelen;
@@ -2529,7 +2537,7 @@ hppa_alignof (struct type *type)
 void
 pa_do_registers_info (int regnum, int fpregs)
 {
-  char raw_regs[REGISTER_BYTES];
+  char *raw_regs = alloca (DEPRECATED_REGISTER_BYTES);
   int i;
 
   /* Make a copy of gdb's save area (may cause actual
@@ -2573,7 +2581,7 @@ void
 pa_do_strcat_registers_info (int regnum, int fpregs, struct ui_file *stream,
 			     enum precision_type precision)
 {
-  char raw_regs[REGISTER_BYTES];
+  char *raw_regs = alloca (DEPRECATED_REGISTER_BYTES);
   int i;
 
   /* Make a copy of gdb's save area (may cause actual
@@ -4345,7 +4353,7 @@ initialize_hp_cxx_exception_support (void)
 
   /* Next look for the catch enable flag provided in end.o */
   sym = lookup_symbol (HP_ACC_EH_catch_catch, (struct block *) NULL,
-		       VAR_NAMESPACE, 0, (struct symtab **) NULL);
+		       VAR_DOMAIN, 0, (struct symtab **) NULL);
   if (sym)			/* sometimes present in debug info */
     {
       eh_catch_catch_addr = SYMBOL_VALUE_ADDRESS (sym);
@@ -4371,7 +4379,7 @@ initialize_hp_cxx_exception_support (void)
 
   /* Next look for the catch enable flag provided end.o */
   sym = lookup_symbol (HP_ACC_EH_catch_catch, (struct block *) NULL,
-		       VAR_NAMESPACE, 0, (struct symtab **) NULL);
+		       VAR_DOMAIN, 0, (struct symtab **) NULL);
   if (sym)			/* sometimes present in debug info */
     {
       eh_catch_throw_addr = SYMBOL_VALUE_ADDRESS (sym);
@@ -4997,7 +5005,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
   set_gdbarch_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
   set_gdbarch_register_raw_size (gdbarch, hppa_register_raw_size);
-  set_gdbarch_register_bytes (gdbarch, hppa_num_regs * 4);
+  set_gdbarch_deprecated_register_bytes (gdbarch, hppa_num_regs * 4);
   set_gdbarch_register_byte (gdbarch, hppa_register_byte);
   set_gdbarch_register_virtual_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);

@@ -23,8 +23,6 @@
 #ifndef TM_LINUX_H
 #define TM_LINUX_H
 
-#define I386_GNULINUX_TARGET
-
 #include "i386/tm-i386.h"
 #include "config/tm-linux.h"
 

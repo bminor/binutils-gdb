@@ -1,6 +1,6 @@
 /* Motorola m68k target-dependent support for GNU/Linux.
 
-   Copyright 1996, 1998, 2000, 2001, 2002 Free Software Foundation,
+   Copyright 1996, 1998, 2000, 2001, 2002, 2003 Free Software Foundation,
    Inc.
 
    This file is part of GDB.
@@ -24,7 +24,10 @@
 #include "gdbcore.h"
 #include "frame.h"
 #include "target.h"
-
+#include "gdb_string.h"
+#include "gdbtypes.h"
+#include "osabi.h"
+#include "m68k-tdep.h"
 
 /* Check whether insn1 and insn2 are parts of a signal trampoline.  */
 
@@ -66,8 +69,8 @@ m68k_linux_in_sigtramp (CORE_ADDR pc)
   if (IS_RT_SIGTRAMP (insn0, insn1))
     return 2;
 
-  insn0 = (insn0 << 16) | (insn1 >> 16);
-  insn1 = (insn1 << 16) | (insn2 >> 16);
+  insn0 = ((insn0 << 16) & 0xffffffff) | (insn1 >> 16);
+  insn1 = ((insn1 << 16) & 0xffffffff) | (insn2 >> 16);
   if (IS_SIGTRAMP (insn0, insn1))
     return 1;
   if (IS_RT_SIGTRAMP (insn0, insn1))
@@ -93,9 +96,9 @@ m68k_linux_sigtramp_saved_pc (struct frame_info *frame)
   int sigcontext_offs = (2 * TARGET_INT_BIT) / TARGET_CHAR_BIT;
 
   /* Get sigcontext address, it is the third parameter on the stack.  */
-  if (frame->next)
+  if (get_next_frame (frame))
     sigcontext_addr
-      = read_memory_unsigned_integer (FRAME_ARGS_ADDRESS (frame->next)
+      = read_memory_unsigned_integer (get_frame_base (get_next_frame (frame))
 				      + FRAME_ARGS_SKIP
 				      + sigcontext_offs,
 				      ptrbytes);
@@ -107,7 +110,7 @@ m68k_linux_sigtramp_saved_pc (struct frame_info *frame)
 
   /* Don't cause a memory_error when accessing sigcontext in case the
      stack layout has changed or the stack is corrupt.  */
-  if (m68k_linux_in_sigtramp (frame->pc) == 2)
+  if (m68k_linux_in_sigtramp (get_frame_pc (frame)) == 2)
     target_read_memory (sigcontext_addr + UCONTEXT_PC_OFFSET, buf, ptrbytes);
   else
     target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
@@ -116,11 +119,89 @@ m68k_linux_sigtramp_saved_pc (struct frame_info *frame)
 
 /* Return the saved program counter for FRAME.  */
 
-CORE_ADDR
+static CORE_ADDR
 m68k_linux_frame_saved_pc (struct frame_info *frame)
 {
   if (get_frame_type (frame) == SIGTRAMP_FRAME)
     return m68k_linux_sigtramp_saved_pc (frame);
 
-  return read_memory_unsigned_integer (frame->frame + 4, 4);
+  return read_memory_unsigned_integer (get_frame_base (frame) + 4, 4);
+}
+
+/* The following definitions are appropriate when using the ELF
+   format, where floating point values are returned in fp0, pointer
+   values in a0 and other values in d0.  */
+
+/* Extract from an array REGBUF containing the (raw) register state a
+   function return value of type TYPE, and copy that, in virtual
+   format, into VALBUF.  */
+
+static void
+m68k_linux_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    {
+       REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM, type,
+				    regbuf + REGISTER_BYTE (FP0_REGNUM),
+				    valbuf);
+    }
+  else if (TYPE_CODE (type) == TYPE_CODE_PTR)
+    memcpy (valbuf, regbuf + REGISTER_BYTE (M68K_A0_REGNUM),
+	    TYPE_LENGTH (type));
+  else
+    memcpy (valbuf,
+	    regbuf + (TYPE_LENGTH (type) >= 4 ? 0 : 4 - TYPE_LENGTH (type)),
+	    TYPE_LENGTH (type));
+}
+
+/* Write into appropriate registers a function return value of type
+   TYPE, given in virtual format.  */
+
+static void
+m68k_linux_store_return_value (struct type *type, char *valbuf)
+{
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    {
+      char raw_buffer[REGISTER_RAW_SIZE (FP0_REGNUM)];
+      REGISTER_CONVERT_TO_RAW (type, FP0_REGNUM, valbuf, raw_buffer);
+      deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM),
+				       raw_buffer, TYPE_LENGTH (type));
+    }
+  else
+    {
+      if (TYPE_CODE (type) == TYPE_CODE_PTR)
+	deprecated_write_register_bytes (REGISTER_BYTE (M68K_A0_REGNUM),
+					 valbuf, TYPE_LENGTH (type));
+      deprecated_write_register_bytes (0, valbuf, TYPE_LENGTH (type));
+    }
+}
+
+/* Extract from an array REGBUF containing the (raw) register state
+   the address in which a function should return its structure value,
+   as a CORE_ADDR.  */
+
+static CORE_ADDR
+m68k_linux_extract_struct_value_address (char *regbuf)
+{
+  return *(CORE_ADDR *) (regbuf + REGISTER_BYTE (M68K_A0_REGNUM));
+}
+
+static void
+m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch,
+					 m68k_linux_frame_saved_pc);
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+					       m68k_linux_extract_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch,
+					     m68k_linux_store_return_value);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+						       m68k_linux_extract_struct_value_address);
+}
+
+void
+_initialize_m68k_linux_tdep (void)
+{
+  gdbarch_register_osabi (bfd_arch_m68k, 0, GDB_OSABI_LINUX,
+			  m68k_linux_init_abi);
 }

@@ -371,6 +371,168 @@ mov_b_imm8_to_disp32:
 .Lnext8:
 	mov.b	#0, @byte_dst	; zero it again for the next use.
 
+mov_b_imm8_to_indexb16:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffffff01, er1
+	set_ccr_zero
+	;; mov.b #xx:8, @(dd:16, rd.b)
+	mov.b	#0xa5:8, @(byte_dst-1:16, r1.b) ; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_h_gr32	0xffffff01, er1
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	#0xa5, @byte_dst
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+
+mov_b_imm8_to_indexw16:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffff0002, er1
+	set_ccr_zero
+	;; mov.b #xx:8, @(dd:16, rd.w)
+	mov.b	#0xa5:8, @(byte_dst-2:16, r1.w) ; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_h_gr32	0xffff0002, er1
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	#0xa5, @byte_dst
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+
+mov_b_imm8_to_indexl16:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0x00000003, er1
+	set_ccr_zero
+	;; mov.b #xx:8, @(dd:16, erd.l)
+	mov.b	#0xa5:8, @(byte_dst-3:16, er1.l) ; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_h_gr32	0x00000003, er1
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	#0xa5, @byte_dst
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+
+mov_b_imm8_to_indexb32:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffffff04, er1
+	set_ccr_zero
+	;; mov.b #xx:8, @(dd:32, rd.b)
+	mov.b	#0xa5:8, @(byte_dst-4:32, r1.b)	; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_h_gr32	0xffffff04 er1
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	#0xa5, @byte_dst
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+
+mov_b_imm8_to_indexw32:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffff0005, er1
+	set_ccr_zero
+	;; mov.b #xx:8, @(dd:32, rd.w)
+	mov.b	#0xa5:8, @(byte_dst-5:32, r1.w)	; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_h_gr32	0xffff0005 er1
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	#0xa5, @byte_dst
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+
+mov_b_imm8_to_indexl32:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0x00000006, er1
+	set_ccr_zero
+	;; mov.b #xx:8, @(dd:32, erd.l)
+	mov.b	#0xa5:8, @(byte_dst-6:32, er1.l)	; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_h_gr32	0x00000006 er1
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	#0xa5, @byte_dst
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+
 mov_b_imm8_to_abs16:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
@@ -736,6 +898,201 @@ mov_b_reg8_to_disp32:
 	mov.b	#0, r0l
 	mov.b	r0l, @byte_dst	; zero it again for the next use.
 
+.if (sim_cpu == h8sx)
+mov_b_reg8_to_indexb16:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffffff01, er1
+	set_ccr_zero
+	;; mov.b ers, @(dd:16, rd.b)
+	mov.b	r0l, @(byte_dst-1:16, r1.b)	; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32	0xffffff01 er1
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_dst, r0l
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+
+mov_b_reg8_to_indexw16:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffff0002, er1
+	set_ccr_zero
+	;; mov.b ers, @(dd:16, rd.w)
+	mov.b	r0l, @(byte_dst-2:16, r1.w)	; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32	0xffff0002 er1
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_dst, r0l
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+
+mov_b_reg8_to_indexl16:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0x00000003, er1
+	set_ccr_zero
+	;; mov.b ers, @(dd:16, erd.l)
+	mov.b	r0l, @(byte_dst-3:16, er1.l)	; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32	0x00000003 er1
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_dst, r0l
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+
+mov_b_reg8_to_indexb32:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffffff04 er1
+	set_ccr_zero
+	;; mov.b ers, @(dd:32, rd.b)
+	mov.b	r0l, @(byte_dst-4:32, r1.b)	; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32	0xffffff04, er1
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_dst, r0l
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+
+mov_b_reg8_to_indexw32:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffff0005 er1
+	set_ccr_zero
+	;; mov.b ers, @(dd:32, rd.w)
+	mov.b	r0l, @(byte_dst-5:32, r1.w)	; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32	0xffff0005, er1
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_dst, r0l
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+
+mov_b_reg8_to_indexl32:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0x00000006 er1
+	set_ccr_zero
+	;; mov.b ers, @(dd:32, erd.l)
+	mov.b	r0l, @(byte_dst-6:32, er1.l)	; byte indexed operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32	0x00000006, er1
+	test_gr_a5a5 0		; Make sure other general regs not disturbed
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_dst, r0l
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+.endif
+
+.if (sim_cpu == h8sx)
+mov_b_reg8_to_abs8:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+
+	mov.l	#byte_dst-20, er0
+	ldc	er0, sbr
+	set_ccr_zero
+	;; mov.b ers, @aa:8
+	mov.b	r1l, @20:8	; 8-bit address-direct (sbr-relative) operand
+
+	;; test ccr		; H=0 N=1 Z=0 V=0 C=0
+	test_neg_set
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32  byte_dst-20, er0
+	test_gr_a5a5 1		; Make sure other general regs not disturbed
+	test_gr_a5a5 2
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_dst, r1l
+	bne	fail1
+	mov.b	#0, @byte_dst	; zero it again for the next use.
+.endif
+
 mov_b_reg8_to_abs16:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
@@ -1019,6 +1376,173 @@ mov_b_disp32_to_reg8:
 	test_gr_a5a5 5
 	test_gr_a5a5 6
 	test_gr_a5a5 7
+
+.if (sim_cpu == h8sx)
+mov_b_indexb16_to_reg8:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffffff01, er1
+	set_ccr_zero
+	;; mov.b @(dd:16, rs.b), rd
+	mov.b	@(byte_src-1:16, r1.b), r0l	; indexed byte operand
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32 0xa5a5a577 er0	; mov result:	a5a5a5 | 77
+
+	test_h_gr32  0xffffff01, er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+mov_b_indexw16_to_reg8:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffff0002, er1
+	set_ccr_zero
+	;; mov.b @(dd:16, rs.w), rd
+	mov.b	@(byte_src-2:16, r1.w), r0l	; indexed byte operand
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32 0xa5a5a577 er0	; mov result:	a5a5a5 | 77
+
+	test_h_gr32  0xffff0002, er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+mov_b_indexl16_to_reg8:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0x00000003, er1
+	set_ccr_zero
+	;; mov.b @(dd:16, ers.l), rd
+	mov.b	@(byte_src-3:16, er1.l), r0l	; indexed byte operand
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32 0xa5a5a577 er0	; mov result:	a5a5a5 | 77
+
+	test_h_gr32  0x00000003, er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+mov_b_indexb32_to_reg8:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffffff04, er1
+	set_ccr_zero
+	;; mov.b @(dd:32, rs.b), rd
+	mov.b	@(byte_src-4:32, r1.b), r0l	; indexed byte operand
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32 0xa5a5a577 er0	; mov result:	a5a5 | 7777
+
+	test_h_gr32  0xffffff04 er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+mov_b_indexw32_to_reg8:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffff0005, er1
+	set_ccr_zero
+	;; mov.b @(dd:32, rs.w), rd
+	mov.b	@(byte_src-5:32, r1.w), r0l	; indexed byte operand
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32 0xa5a5a577 er0	; mov result:	a5a5 | 7777
+
+	test_h_gr32  0xffff0005 er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+mov_b_indexl32_to_reg8:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0x00000006, er1
+	set_ccr_zero
+	;; mov.b @(dd:32, ers.l), rd
+	mov.b	@(byte_src-6:32, er1.l), r0l	; indexed byte operand
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32 0xa5a5a577 er0	; mov result:	a5a5 | 7777
+
+	test_h_gr32  0x00000006 er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+.endif
+
+.if (sim_cpu == h8sx)
+mov_b_abs8_to_reg8:
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#byte_src-255, er1
+	ldc	er1, sbr
+	set_ccr_zero
+	;; mov.b @aa:8, rd
+	mov.b	@0xff:8, r0l	; 8-bit (sbr relative) address-direct operand
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	test_h_gr32 0xa5a5a577 er0
+
+	test_h_gr32  byte_src-255, er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+.endif
 
 mov_b_abs16_to_reg8:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -1408,6 +1932,204 @@ mov_b_disp32_to_disp32:		; reg 32-bit disp, memory to memory
 	fail
 .Lnext126:				; OK, pass on.
 
+mov_b_indexb16_to_indexb16:	; reg 16-bit indexed, memory to memory
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffffff01, er1
+	mov.l	#0xffffff02, er0
+	;; mov.b @(dd:16, rs.b), @(dd:16, rd.b)
+	set_ccr_zero
+	mov.b	@(byte_src-1:16, r1.b), @(byte_dst-2:16, r0.b)
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	;; Verify the affected registers.
+
+	test_h_gr32  0xffffff02 er0
+	test_h_gr32  0xffffff01 er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_src, @byte_dst
+	bne	fail1
+	;; Now clear the destination location, and verify that.
+	mov.b	#0, @byte_dst
+	cmp.b	@byte_src, @byte_dst
+	beq	fail1
+
+mov_b_indexw16_to_indewb16:	; reg 16-bit indexed, memory to memory
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffff0003, er1
+	mov.l	#0xffff0004, er0
+	;; mov.b @(dd:16, rs.w), @(dd:16, rd.w)
+	set_ccr_zero
+	mov.b	@(byte_src-3:16, r1.w), @(byte_dst-4:16, r0.w)
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	;; Verify the affected registers.
+
+	test_h_gr32  0xffff0004 er0
+	test_h_gr32  0xffff0003 er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_src, @byte_dst
+	bne	fail1
+	;; Now clear the destination location, and verify that.
+	mov.b	#0, @byte_dst
+	cmp.b	@byte_src, @byte_dst
+	beq	fail1
+
+mov_b_indexl16_to_indexl16:	; reg 16-bit indexed, memory to memory
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0x00000005, er1
+	mov.l	#0x00000006, er0
+	;; mov.b @(dd:16, ers.l), @(dd:16, erd.l)
+	set_ccr_zero
+	mov.b	@(byte_src-5:16, er1.l), @(byte_dst-6:16, er0.l)
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	;; Verify the affected registers.
+
+	test_h_gr32  0x00000006 er0
+	test_h_gr32  0x00000005 er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_src, @byte_dst
+	bne	fail1
+	;; Now clear the destination location, and verify that.
+	mov.b	#0, @byte_dst
+	cmp.b	@byte_src, @byte_dst
+	beq	fail1
+
+mov_b_indexb32_to_indexb32:	; reg 32-bit indexed, memory to memory
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffffff01, er1
+	mov.l	#0xffffff02, er0
+	set_ccr_zero
+	;; mov.b @(dd:32, rs.b), @(dd:32, rd.b)
+	mov.b	@(byte_src-1:32, r1.b), @(byte_dst-2:32, r0.b)
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	;; Verify the affected registers.
+
+	test_h_gr32  0xffffff02 er0
+	test_h_gr32  0xffffff01 er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_src, @byte_dst
+	bne	fail1
+	;; Now clear the destination location, and verify that.
+	mov.b	#0, @byte_dst
+	cmp.b	@byte_src, @byte_dst
+	beq	fail1
+
+mov_b_indexw32_to_indexw32:	; reg 32-bit indexed, memory to memory
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0xffff0003, er1
+	mov.l	#0xffff0004, er0
+	set_ccr_zero
+	;; mov.b @(dd:32, rs.w), @(dd:32, rd.w)
+	mov.b	@(byte_src-3:32, r1.w), @(byte_dst-4:32, r0.w)
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	;; Verify the affected registers.
+
+	test_h_gr32  0xffff0004 er0
+	test_h_gr32  0xffff0003 er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_src, @byte_dst
+	bne	fail1
+	;; Now clear the destination location, and verify that.
+	mov.b	#0, @byte_dst
+	cmp.b	@byte_src, @byte_dst
+	beq	fail1
+
+mov_b_indexl32_to_indexl32:	; reg 32-bit indexed, memory to memory
+	set_grs_a5a5		; Fill all general regs with a fixed pattern
+	mov.l	#0x00000005, er1
+	mov.l	#0x00000006, er0
+	set_ccr_zero
+	;; mov.b @(dd:32, rs.w), @(dd:32, rd.w)
+	mov.b	@(byte_src-5:32, er1.l), @(byte_dst-6:32, er0.l)
+
+	;; test ccr		; H=0 N=0 Z=0 V=0 C=0
+	test_neg_clear
+	test_zero_clear
+	test_ovf_clear
+	test_carry_clear
+
+	;; Verify the affected registers.
+
+	test_h_gr32  0x00000006 er0
+	test_h_gr32  0x00000005 er1
+	test_gr_a5a5 2		; Make sure other general regs not disturbed
+	test_gr_a5a5 3
+	test_gr_a5a5 4
+	test_gr_a5a5 5
+	test_gr_a5a5 6
+	test_gr_a5a5 7
+
+	;; Now check the result of the move to memory.
+	cmp.b	@byte_src, @byte_dst
+	bne	fail1
+	;; Now clear the destination location, and verify that.
+	mov.b	#0, @byte_dst
+	cmp.b	@byte_src, @byte_dst
+	beq	fail1
+
 mov_b_abs16_to_abs16:		; 16-bit absolute addr, memory to memory
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
@@ -1493,3 +2215,7 @@ mov_b_abs32_to_abs32:		; 32-bit absolute addr, memory to memory
 	pass
 
 	exit 0
+
+fail1:
+	fail
+	

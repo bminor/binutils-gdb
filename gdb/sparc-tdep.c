@@ -151,6 +151,14 @@ int deferred_stores = 0;    /* Accumulated stores we want to do eventually. */
 #endif
 
 
+const unsigned char *
+sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len)
+{
+  static const char breakpoint[] = {0x91, 0xd0, 0x20, 0x01};
+  (*len) = sizeof (breakpoint);
+  return breakpoint;
+}
+
 /* Fetch a single instruction.  Even on bi-endian machines
    such as sparc86x, instructions are always big-endian.  */
 
@@ -859,7 +867,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
       if (raw_buffer != NULL)
 	{
 	  /* Put it back in target format.  */
-	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), get_frame_pc (frame));
+	  store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), get_frame_pc (frame));
 	}
       if (addrp != NULL)
 	*addrp = 0;
@@ -967,7 +975,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	  if (raw_buffer != NULL)
 	    {
 	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), addr);
+	      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), addr);
 	    }
 	  if (addrp != NULL)
 	    *addrp = 0;
@@ -1261,7 +1269,7 @@ sparc_pop_frame (void)
   int regnum;
 
   fsr = alloca (NUM_REGS * sizeof (CORE_ADDR));
-  raw_buffer = alloca (REGISTER_BYTES);
+  raw_buffer = alloca (DEPRECATED_REGISTER_BYTES);
   sparc_frame_find_saved_regs (frame, &fsr[0]);
   if (SPARC_HAS_FPU)
     {
@@ -3153,7 +3161,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* First set settings that are common for all sparc architectures.  */
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
-  set_gdbarch_breakpoint_from_pc (gdbarch, memory_breakpoint_from_pc);
+  set_gdbarch_breakpoint_from_pc (gdbarch, sparc_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sparc_extract_struct_value_address);
@@ -3373,7 +3381,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sparc:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
-      set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
+      set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0
@@ -3409,7 +3417,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sparc_v8plus:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
-      set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
+      set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
       tdep->print_insn_mach = bfd_mach_sparc;
@@ -3421,7 +3429,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sparc_v8plusa:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
-      set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
+      set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0
@@ -3445,7 +3453,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sparc_v9:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc64_extract_return_value);
       set_gdbarch_num_regs (gdbarch, 125);
-      set_gdbarch_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
+      set_gdbarch_deprecated_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
       set_gdbarch_register_name (gdbarch, sparc64_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0
@@ -3457,7 +3465,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sparc_v9a:
       set_gdbarch_deprecated_extract_return_value (gdbarch, sparc64_extract_return_value);
       set_gdbarch_num_regs (gdbarch, 125);
-      set_gdbarch_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
+      set_gdbarch_deprecated_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
       set_gdbarch_register_name (gdbarch, sparc64_register_name);
       set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0

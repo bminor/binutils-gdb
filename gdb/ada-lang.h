@@ -223,13 +223,13 @@ extern struct type *ada_index_type (struct type *, int);
 extern struct value *ada_array_bound (struct value *, int, int);
 
 extern int ada_lookup_symbol_list (const char *, struct block *,
-				   namespace_enum, struct symbol ***,
+				   domain_enum, struct symbol ***,
 				   struct block ***);
 
 extern char *ada_fold_name (const char *);
 
 extern struct symbol *ada_lookup_symbol (const char *, struct block *,
-					 namespace_enum);
+					 domain_enum);
 
 extern struct minimal_symbol *ada_lookup_minimal_symbol (const char *);
 

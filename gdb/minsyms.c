@@ -189,7 +189,15 @@ lookup_minimal_symbol (register const char *name, const char *sfile,
 
             while (msymbol != NULL && found_symbol == NULL)
 		{
-                if (DEPRECATED_SYMBOL_MATCHES_NAME (msymbol, name))
+		  /* FIXME: carlton/2003-02-27: This is an unholy
+		     mixture of linkage names and natural names.  If
+		     you want to test the linkage names with strcmp,
+		     do that.  If you want to test the natural names
+		     with strcmp_iw, use SYMBOL_MATCHES_NATURAL_NAME.  */
+		  if (strcmp (DEPRECATED_SYMBOL_NAME (msymbol), (name)) == 0
+		      || (SYMBOL_DEMANGLED_NAME (msymbol) != NULL
+			  && strcmp_iw (SYMBOL_DEMANGLED_NAME (msymbol),
+					(name)) == 0))
 		    {
                     switch (MSYMBOL_TYPE (msymbol))
                       {

@@ -33,7 +33,7 @@ ac_help="$ac_help
   --enable-maintainer-mode enable make rules and dependencies not useful
                           (and sometimes confusing) to the casual installer"
 ac_help="$ac_help
-  --install-libbfd controls installation of libbfd and related headers"
+  --enable-install-libbfd controls installation of libbfd and related headers"
 ac_help="$ac_help
   --disable-nls           do not use Native Language Support"
 ac_help="$ac_help
@@ -1669,7 +1669,7 @@ irix5* | irix6*)
 # This must be Linux ELF.
 linux-gnu*)
   case $host_cpu in
-  alpha* | hppa* | i*86 | powerpc* | sparc* | ia64* )
+  alpha* | mips* | hppa* | i*86 | powerpc* | sparc* | ia64* )
     lt_cv_deplibs_check_method=pass_all ;;
   *)
     # glibc up to 2.1.1 does not perform some relocations on ARM
@@ -2650,7 +2650,7 @@ else
 fi
 
 
-ALL_LINGUAS="fr sv tr es da de id pt_BR"
+ALL_LINGUAS="fr sv tr es da de id pt_BR ro"
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
 echo "configure:2656: checking how to run the C preprocessor" >&5
 # On Suns, sometimes $CPP names a directory.

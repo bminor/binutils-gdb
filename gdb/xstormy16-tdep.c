@@ -648,7 +648,7 @@ xstormy16_skip_prologue (CORE_ADDR pc)
         return plg_end;
 
       /* Found a function.  */
-      sym = lookup_symbol (func_name, NULL, VAR_NAMESPACE, NULL, NULL);
+      sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL, NULL);
       /* Don't use line number debug info for assembly source files. */
       if (sym && SYMBOL_LANGUAGE (sym) != language_asm)
 	{
@@ -985,7 +985,7 @@ xstormy16_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
       if (addr2)
 	addr = addr2;
     }
-  store_address (buf, TYPE_LENGTH (type), addr);
+  store_unsigned_integer (buf, TYPE_LENGTH (type), addr);
 }
 
 static CORE_ADDR
@@ -1039,7 +1039,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_register_name (gdbarch, xstormy16_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, xstormy16_reg_size);
-  set_gdbarch_register_bytes (gdbarch, E_ALL_REGS_SIZE);
+  set_gdbarch_deprecated_register_bytes (gdbarch, E_ALL_REGS_SIZE);
   set_gdbarch_register_byte (gdbarch, xstormy16_register_byte);
   set_gdbarch_register_raw_size (gdbarch, xstormy16_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, xstormy16_pc_size);

@@ -855,7 +855,7 @@ _bfd_elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
   /* If the old symbol has non-default visibility, we ignore the new
      definition from a dynamic object.  */
   if (newdyn
-      && ELF_ST_VISIBILITY (h->other)
+      && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
       && !bfd_is_und_section (sec))
     {
       *skip = TRUE;
@@ -871,7 +871,7 @@ _bfd_elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
 	return TRUE;
     }
   else if (!newdyn
-	   && ELF_ST_VISIBILITY (sym->st_other)
+	   && ELF_ST_VISIBILITY (sym->st_other) != STV_DEFAULT
 	   && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0)
     {
       /* If the new symbol with non-default visibility comes from a
@@ -884,7 +884,8 @@ _bfd_elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
       if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
 	{
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_DEF_DYNAMIC;
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
+	  h->elf_link_hash_flags |= (ELF_LINK_HASH_REF_DYNAMIC
+				     | ELF_LINK_DYNAMIC_DEF);
 	}
       /* FIXME: Should we check type and size for protected symbol?  */
       h->size = 0;
@@ -2427,17 +2428,14 @@ _bfd_elf_fix_symbol_flags (h, eif)
   /* If -Bsymbolic was used (which means to bind references to global
      symbols to the definition within the shared object), and this
      symbol was defined in a regular object, then it actually doesn't
-     need a PLT entry, and we can accomplish that by forcing it local.
-     Likewise, if the symbol has hidden or internal visibility.
-     FIXME: It might be that we also do not need a PLT for other
-     non-hidden visibilities, but we would have to tell that to the
-     backend specifically; we can't just clear PLT-related data here.  */
+     need a PLT entry.  Likewise, if the symbol has non-default
+     visibility.  If the symbol has hidden or internal visibility, we
+     will force it local.  */
   if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0
       && eif->info->shared
       && is_elf_hash_table (eif->info)
       && (eif->info->symbolic
-	  || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
-	  || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN)
+	  || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
     {
       struct elf_backend_data *bed;
@@ -2452,7 +2450,7 @@ _bfd_elf_fix_symbol_flags (h, eif)
 
   /* If a weak undefined symbol has non-default visibility, we also
      hide it from the dynamic linker.  */
-  if (ELF_ST_VISIBILITY (h->other)
+  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
       && h->root.type == bfd_link_hash_undefweak)
     {
       struct elf_backend_data *bed;

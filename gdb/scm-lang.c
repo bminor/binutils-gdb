@@ -167,7 +167,7 @@ scm_lookup_name (char *str)
   if (in_eval_c ()
       && (sym = lookup_symbol ("env",
 			       expression_context_block,
-			       VAR_NAMESPACE, (int *) NULL,
+			       VAR_DOMAIN, (int *) NULL,
 			       (struct symtab **) NULL)) != NULL)
     args[2] = value_of_variable (sym, expression_context_block);
   else
@@ -181,7 +181,7 @@ scm_lookup_name (char *str)
 
   sym = lookup_symbol (str,
 		       expression_context_block,
-		       VAR_NAMESPACE, (int *) NULL,
+		       VAR_DOMAIN, (int *) NULL,
 		       (struct symtab **) NULL);
   if (sym)
     return value_of_variable (sym, NULL);
@@ -252,6 +252,8 @@ const struct language_defn scm_language_defn =
   scm_val_print,		/* Print a value using appropriate syntax */
   scm_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  value_of_this,		/* value_of_this */
+  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"#o%lo", "#o", "o", ""},	/* Octal format info */

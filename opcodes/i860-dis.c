@@ -138,8 +138,11 @@ print_insn_i860 (memaddr, info)
       const char *s;
       int val;
 
-      /* If this a flop and its dual bit is set, prefix with 'd.'.  */ 	
-      if ((insn & 0xfc000000) == 0x48000000 && (insn & 0x200))
+      /* If this a flop (or a shrd) and its dual bit is set,
+         prefix with 'd.'.  */ 	
+      if (((insn & 0xfc000000) == 0x48000000
+           || (insn & 0xfc000000) == 0xb0000000)
+          && (insn & 0x200))
 	(*info->fprintf_func) (info->stream, "d.%s\t", opcode->name);
       else
 	(*info->fprintf_func) (info->stream, "%s\t", opcode->name);

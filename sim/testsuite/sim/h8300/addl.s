@@ -327,8 +327,8 @@ add_l_imm16_to_disp2:
 	set_ccr_zero
 
 	;; add.l #xx:16, @(dd:2, erd)
-	mov.l	#long_dst-3, er1
-	add.l	#0xdead:16, @(3:2, er1)	; Imm16, reg plus 2-bit disp. operand
+	mov.l	#long_dst-12, er1
+	add.l	#0xdead:16, @(12:2, er1) ; Imm16, reg plus 2-bit disp. operand
 ;;;	.word	0x010e
 ;;;	.word	0x3110
 ;;;	.word	0xdead
@@ -340,7 +340,7 @@ add_l_imm16_to_disp2:
 	test_carry_clear
 
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
-	test_h_gr32	long_dst-3, er1
+	test_h_gr32	long_dst-12, er1
 	test_gr_a5a5 2
 	test_gr_a5a5 3
 	test_gr_a5a5 4
@@ -659,8 +659,8 @@ add_l_imm32_to_disp2:
 	set_ccr_zero
 
 	;; add.l #xx:32, @(dd:2, erd)
-	mov.l	#long_dst-3, er1
-	add.l	#0xcafedead:32, @(3:2, er1)	; Imm32, reg plus 2-bit disp. operand
+	mov.l	#long_dst-12, er1
+	add.l	#0xcafedead:32, @(12:2, er1) ; Imm32, reg plus 2-bit disp. operand
 ;;;	.word	0x010e
 ;;;	.word	0x3118
 ;;;	.long	0xcafedead
@@ -672,7 +672,7 @@ add_l_imm32_to_disp2:
 	test_carry_set
 
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
-	test_h_gr32	long_dst-3, er1
+	test_h_gr32	long_dst-12, er1
 	test_gr_a5a5 2
 	test_gr_a5a5 3
 	test_gr_a5a5 4
@@ -1017,8 +1017,8 @@ add_l_reg32_to_disp2:
 	set_ccr_zero
 
 	;; add.l ers, @(dd:2, erd)
-	mov.l	#long_dst-3, er1
-	add.l	er0, @(3:2, er1)	; Register plus 2-bit disp. operand
+	mov.l	#long_dst-12, er1
+	add.l	er0, @(12:2, er1)	; Register plus 2-bit disp. operand
 ;;;	.word	0x0109
 ;;;	.word	0x3110
 
@@ -1029,7 +1029,7 @@ add_l_reg32_to_disp2:
 	test_carry_set
 
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
-	test_h_gr32	long_dst-3, er1
+	test_h_gr32	long_dst-12, er1
 	test_gr_a5a5 2
 	test_gr_a5a5 3
 	test_gr_a5a5 4
@@ -1314,8 +1314,8 @@ add_l_disp2_to_reg32:
 	set_ccr_zero
 
 	;; add.l @(dd:2, ers), erd
-	mov.l	#long_src-1, er1
-	add.l	@(1:2, er1), er0	; Register plus 2-bit disp. operand
+	mov.l	#long_src-4, er1
+	add.l	@(4:2, er1), er0	; Register plus 2-bit disp. operand
 ;;; 	.word	0x010a
 ;;; 	.word	0x1110
 
@@ -1327,7 +1327,7 @@ add_l_disp2_to_reg32:
 
 	test_h_gr32 0xb7d9fc1d er0	; mov result:	a5a5 | 7777
 
-	test_h_gr32	long_src-1, er1
+	test_h_gr32	long_src-4, er1
 	test_gr_a5a5 2		; Make sure other general regs not disturbed
 	test_gr_a5a5 3
 	test_gr_a5a5 4
@@ -1656,9 +1656,9 @@ add_l_disp2_to_disp2:		; reg 2-bit disp, memory to memory
 	set_ccr_zero
 
 	;; add.l @(dd:2, ers), @(dd:2, erd)
-	mov.l	#long_src-1, er1
-	mov.l	#long_dst-2, er0
-	add.l	@(1:2, er1), @(2:2, er0)
+	mov.l	#long_src-4, er1
+	mov.l	#long_dst-8, er0
+	add.l	@(4:2, er1), @(8:2, er0)
 ;;; 	.word	0x0105
 ;;;	.word	0x691c
 ;;; 	.word	0x2010
@@ -1671,8 +1671,8 @@ add_l_disp2_to_disp2:		; reg 2-bit disp, memory to memory
 
 	;; Verify the affected registers.
 
-	test_h_gr32  long_dst-2 er0
-	test_h_gr32  long_src-1 er1
+	test_h_gr32  long_dst-8 er0
+	test_h_gr32  long_src-4 er1
 	test_gr_a5a5 2		; Make sure other general regs not disturbed
 	test_gr_a5a5 3
 	test_gr_a5a5 4

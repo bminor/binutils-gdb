@@ -2389,7 +2389,7 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
       return NULL;
     }
 
-  sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, 0, NULL);
+  sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_DOMAIN, 0, NULL);
 
   /* If we never found a PDR for this function in symbol reading, then
      examine prologues to find the information.  */
@@ -2767,7 +2767,7 @@ mips_eabi_push_arguments (int nargs,
       if (len > MIPS_SAVED_REGSIZE
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
-	  store_address (valbuf, MIPS_SAVED_REGSIZE, VALUE_ADDRESS (arg));
+	  store_unsigned_integer (valbuf, MIPS_SAVED_REGSIZE, VALUE_ADDRESS (arg));
 	  typecode = TYPE_CODE_PTR;
 	  len = MIPS_SAVED_REGSIZE;
 	  val = valbuf;
@@ -4561,7 +4561,7 @@ return_value_location (struct type *valtype,
 
 static void
 mips_eabi_extract_return_value (struct type *valtype,
-				char regbuf[REGISTER_BYTES],
+				char regbuf[],
 				char *valbuf)
 {
   struct return_value_word lo;
@@ -4580,7 +4580,7 @@ mips_eabi_extract_return_value (struct type *valtype,
 
 static void
 mips_o64_extract_return_value (struct type *valtype,
-			       char regbuf[REGISTER_BYTES],
+			       char regbuf[],
 			       char *valbuf)
 {
   struct return_value_word lo;
@@ -5119,19 +5119,6 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
     return print_insn_little_mips (memaddr, info);
 }
 
-/* Old-style breakpoint macros.
-   The IDT board uses an unusual breakpoint value, and sometimes gets
-   confused when it sees the usual MIPS breakpoint instruction.  */
-
-#define BIG_BREAKPOINT {0, 0x5, 0, 0xd}
-#define LITTLE_BREAKPOINT {0xd, 0, 0x5, 0}
-#define PMON_BIG_BREAKPOINT {0, 0, 0, 0xd}
-#define PMON_LITTLE_BREAKPOINT {0xd, 0, 0, 0}
-#define IDT_BIG_BREAKPOINT {0, 0, 0x0a, 0xd}
-#define IDT_LITTLE_BREAKPOINT {0xd, 0x0a, 0, 0}
-#define MIPS16_BIG_BREAKPOINT {0xe8, 0xa5}
-#define MIPS16_LITTLE_BREAKPOINT {0xa5, 0xe8}
-
 /* This function implements the BREAKPOINT_FROM_PC macro.  It uses the program
    counter value to determine whether a 16- or 32-bit breakpoint should be
    used.  It returns a pointer to a string of bytes that encode a breakpoint
@@ -5146,17 +5133,19 @@ mips_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
     {
       if (pc_is_mips16 (*pcptr))
 	{
-	  static unsigned char mips16_big_breakpoint[] =
-	    MIPS16_BIG_BREAKPOINT;
+	  static unsigned char mips16_big_breakpoint[] = {0xe8, 0xa5};
 	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
 	  *lenptr = sizeof (mips16_big_breakpoint);
 	  return mips16_big_breakpoint;
 	}
       else
 	{
-	  static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
-	  static unsigned char pmon_big_breakpoint[] = PMON_BIG_BREAKPOINT;
-	  static unsigned char idt_big_breakpoint[] = IDT_BIG_BREAKPOINT;
+	  /* The IDT board uses an unusual breakpoint value, and
+	     sometimes gets confused when it sees the usual MIPS
+	     breakpoint instruction.  */
+	  static unsigned char big_breakpoint[] = {0, 0x5, 0, 0xd};
+	  static unsigned char pmon_big_breakpoint[] = {0, 0, 0, 0xd};
+	  static unsigned char idt_big_breakpoint[] = {0, 0, 0x0a, 0xd};
 
 	  *lenptr = sizeof (big_breakpoint);
 
@@ -5174,19 +5163,16 @@ mips_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
     {
       if (pc_is_mips16 (*pcptr))
 	{
-	  static unsigned char mips16_little_breakpoint[] =
-	    MIPS16_LITTLE_BREAKPOINT;
+	  static unsigned char mips16_little_breakpoint[] = {0xa5, 0xe8};
 	  *pcptr = UNMAKE_MIPS16_ADDR (*pcptr);
 	  *lenptr = sizeof (mips16_little_breakpoint);
 	  return mips16_little_breakpoint;
 	}
       else
 	{
-	  static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
-	  static unsigned char pmon_little_breakpoint[] =
-	    PMON_LITTLE_BREAKPOINT;
-	  static unsigned char idt_little_breakpoint[] =
-	    IDT_LITTLE_BREAKPOINT;
+	  static unsigned char little_breakpoint[] = {0xd, 0, 0x5, 0};
+	  static unsigned char pmon_little_breakpoint[] = {0xd, 0, 0, 0};
+	  static unsigned char idt_little_breakpoint[] = {0xd, 0x0a, 0, 0};
 
 	  *lenptr = sizeof (little_breakpoint);
 
@@ -5442,7 +5428,7 @@ mips_get_saved_register (char *raw_buffer,
 	      /* Only MIPS_SAVED_REGSIZE bytes of GP registers are
 		 saved. */
 	      LONGEST val = read_memory_integer ((*addrp), MIPS_SAVED_REGSIZE);
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), val);
+	      store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum), val);
 	    }
 	}
     }
@@ -6138,8 +6124,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: BADVADDR_REGNUM = %d\n",
 		      BADVADDR_REGNUM);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: BIG_BREAKPOINT = delete?\n");
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: CAUSE_REGNUM = %d\n",
 		      CAUSE_REGNUM);
   fprintf_unfiltered (file,
@@ -6170,10 +6154,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep:  HI_REGNUM = %d\n",
 		      HI_REGNUM);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: IDT_BIG_BREAKPOINT = delete?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: IDT_LITTLE_BREAKPOINT = delete?\n");
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: IGNORE_HELPER_CALL # %s\n",
 		      XSTRING (IGNORE_HELPER_CALL (PC)));
   fprintf_unfiltered (file,
@@ -6187,8 +6167,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: LAST_EMBED_REGNUM = %d\n",
 		      LAST_EMBED_REGNUM);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: LITTLE_BREAKPOINT = delete?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: LO_REGNUM = %d\n",
 		      LO_REGNUM);
@@ -6210,12 +6188,8 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MAKE_MIPS16_ADDR = FIXME!\n");
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS16_BIG_BREAKPOINT = delete?\n");
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS16_INSTLEN = %d\n",
 		      MIPS16_INSTLEN);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS16_LITTLE_BREAKPOINT = delete?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_DEFAULT_ABI = FIXME!\n");
   fprintf_unfiltered (file,
@@ -6239,10 +6213,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: OP_LDFPR = used?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: OP_LDGPR = used?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: PMON_BIG_BREAKPOINT = delete?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: PMON_LITTLE_BREAKPOINT = delete?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: PRID_REGNUM = %d\n",
 		      PRID_REGNUM);

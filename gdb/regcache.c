@@ -120,12 +120,13 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
     }
 
   /* Compute the real size of the register buffer.  Start out by
-     trusting REGISTER_BYTES, but then adjust it upwards should that
-     be found to not be sufficient.  */
-  /* FIXME: cagney/2002-11-05: Instead of using REGISTER_BYTES, this
-     code should, as is done in init_regcache_descr(), compute the
-     total number of register bytes using the accumulated offsets.  */
-  descr->sizeof_cooked_registers = REGISTER_BYTES; /* OK use.  */
+     trusting DEPRECATED_REGISTER_BYTES, but then adjust it upwards
+     should that be found to not be sufficient.  */
+  /* FIXME: cagney/2002-11-05: Instead of using the macro
+     DEPRECATED_REGISTER_BYTES, this code should, as is done in
+     init_regcache_descr(), compute the total number of register bytes
+     using the accumulated offsets.  */
+  descr->sizeof_cooked_registers = DEPRECATED_REGISTER_BYTES; /* OK */
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       long regend;
@@ -243,7 +244,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
       gdb_assert (descr->sizeof_register[i] == REGISTER_VIRTUAL_SIZE (i));
 #endif
     }
-  /* gdb_assert (descr->sizeof_raw_registers == REGISTER_BYTES (i));  */
+  /* gdb_assert (descr->sizeof_raw_registers == DEPRECATED_REGISTER_BYTES (i));  */
 
   return descr;
 }
@@ -497,12 +498,6 @@ char *
 deprecated_grub_regcache_for_registers (struct regcache *regcache)
 {
   return regcache->registers;
-}
-
-char *
-deprecated_grub_regcache_for_register_valid (struct regcache *regcache)
-{
-  return regcache->register_valid_p;
 }
 
 /* Global structure containing the current regcache.  */
@@ -1424,7 +1419,7 @@ build_regcache (void)
   current_regcache = regcache_xmalloc (current_gdbarch);
   current_regcache->readonly_p = 0;
   deprecated_registers = deprecated_grub_regcache_for_registers (current_regcache);
-  deprecated_register_valid = deprecated_grub_regcache_for_register_valid (current_regcache);
+  deprecated_register_valid = current_regcache->register_valid_p;
 }
 
 static void

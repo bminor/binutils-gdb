@@ -1197,13 +1197,7 @@ gprel32_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
   if (reloc_entry->address > input_section->_cooked_size)
     return bfd_reloc_outofrange;
 
-  if (reloc_entry->howto->src_mask == 0)
-    {
-      /* This case arises with the 64-bit MIPS ELF ABI.  */
-      val = 0;
-    }
-  else
-    val = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
+  val = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
 
   /* Set val to the offset into the section or symbol.  */
   val += reloc_entry->addend;

@@ -51,16 +51,19 @@
 /* Map gdb internal register number to ptrace ``address''.
    These ``addresses'' are defined in DECstation <sys/ptrace.h> */
 
-#define REGISTER_PTRACE_ADDR(regno) \
-   (regno < 32 ? 		GPR_BASE + regno \
-  : regno == PC_REGNUM ?	PC	\
-  : regno == CAUSE_REGNUM ?	CAUSE	\
-  : regno == HI_REGNUM ?	MMHI	\
-  : regno == LO_REGNUM ?	MMLO	\
-  : regno == FCRCS_REGNUM ?	FPC_CSR	\
-  : regno == FCRIR_REGNUM ?	FPC_EIR	\
-  : regno >= FP0_REGNUM ?	FPR_BASE + (regno - FP0_REGNUM) \
-  : 0)
+static int
+register_ptrace_addr (int regno)
+{
+  return (regno < 32 ? GPR_BASE + regno
+	  : regno == PC_REGNUM ? PC
+	  : regno == CAUSE_REGNUM ? CAUSE
+	  : regno == HI_REGNUM ? MMHI
+	  : regno == LO_REGNUM ? MMLO
+	  : regno == FCRCS_REGNUM ? FPC_CSR
+	  : regno == FCRIR_REGNUM ? FPC_EIR
+	  : regno >= FP0_REGNUM ? FPR_BASE + (regno - FP0_REGNUM)
+	  : 0);
+}
 
 static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
@@ -79,7 +82,7 @@ fetch_inferior_registers (int regno)
 
   for (regno = 1; regno < NUM_REGS; regno++)
     {
-      regaddr = REGISTER_PTRACE_ADDR (regno);
+      regaddr = register_ptrace_addr (regno);
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	{
 	  *(int *) &buf[i] = ptrace (PT_READ_U, PIDGET (inferior_ptid),
@@ -111,7 +114,7 @@ store_inferior_registers (int regno)
 	  || regno == FCRIR_REGNUM || regno == DEPRECATED_FP_REGNUM
 	  || (regno >= FIRST_EMBED_REGNUM && regno <= LAST_EMBED_REGNUM))
 	return;
-      regaddr = REGISTER_PTRACE_ADDR (regno);
+      regaddr = register_ptrace_addr (regno);
       errno = 0;
       ptrace (PT_WRITE_U, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) regaddr,
 	      read_register (regno));

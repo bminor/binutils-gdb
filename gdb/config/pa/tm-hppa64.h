@@ -21,6 +21,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+struct type;
+struct frame_info;
+
 /* PA 64-bit specific definitions.  Override those which are in
    tm-hppa.h */
 
@@ -94,9 +97,8 @@ extern CORE_ADDR hppa_stack_align (CORE_ADDR sp);
 #define STACK_ALIGN(sp) hppa_stack_align (sp)
 #endif
 
-/* Amount PC must be decremented by after a breakpoint.
-   This is often the number of bytes in BREAKPOINT
-   but not always.
+/* Amount PC must be decremented by after a breakpoint.  This is often
+   the number of bytes returned by BREAKPOINT_FROM_PC but not always.
 
    Not on the PA-RISC */
 
@@ -150,7 +152,7 @@ extern int hppa_register_raw_size (int reg_nr);
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 #if !GDB_MULTI_ARCH
-#define REGISTER_BYTES (NUM_REGS * 4)
+#define DEPRECATED_REGISTER_BYTES (NUM_REGS * 4)
 #endif
 
 #if !GDB_MULTI_ARCH
@@ -375,8 +377,8 @@ extern CORE_ADDR hppa_target_read_fp (void);
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 
-#undef REGISTER_BYTES
-#define REGISTER_BYTES (NUM_REGS * 8)
+#undef DEPRECATED_REGISTER_BYTES
+#define DEPRECATED_REGISTER_BYTES (NUM_REGS * 8)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */

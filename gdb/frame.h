@@ -28,6 +28,7 @@ struct frame_unwind;
 struct frame_base;
 struct block;
 struct gdbarch;
+struct ui_file;
 
 /* A legacy unwinder to prop up architectures using the old style
    saved regs array.  */

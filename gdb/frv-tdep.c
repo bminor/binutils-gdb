@@ -843,7 +843,7 @@ frv_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
       if (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
 	{
-	  store_address (valbuf, 4, VALUE_ADDRESS (arg));
+	  store_unsigned_integer (valbuf, 4, VALUE_ADDRESS (arg));
 	  typecode = TYPE_CODE_PTR;
 	  len = 4;
 	  val = valbuf;
@@ -1058,7 +1058,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_name (gdbarch, frv_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 4);
-  set_gdbarch_register_bytes (gdbarch, frv_num_regs * 4);
+  set_gdbarch_deprecated_register_bytes (gdbarch, frv_num_regs * 4);
   set_gdbarch_register_byte (gdbarch, frv_register_byte);
   set_gdbarch_register_raw_size (gdbarch, frv_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);

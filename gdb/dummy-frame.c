@@ -111,7 +111,7 @@ find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 }
 
 struct regcache *
-generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
+deprecated_find_dummy_frame_regcache (CORE_ADDR pc, CORE_ADDR fp)
 {
   struct dummy_frame *dummy = find_dummy_frame (pc, fp);
   if (dummy != NULL)
@@ -123,7 +123,7 @@ generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 char *
 deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
 {
-  struct regcache *regcache = generic_find_dummy_frame (pc, fp);
+  struct regcache *regcache = deprecated_find_dummy_frame_regcache (pc, fp);
   if (regcache == NULL)
     return NULL;
   return deprecated_grub_regcache_for_registers (regcache);
@@ -176,7 +176,7 @@ pc_in_dummy_frame (CORE_ADDR pc)
 CORE_ADDR
 deprecated_read_register_dummy (CORE_ADDR pc, CORE_ADDR fp, int regno)
 {
-  struct regcache *dummy_regs = generic_find_dummy_frame (pc, fp);
+  struct regcache *dummy_regs = deprecated_find_dummy_frame_regcache (pc, fp);
 
   if (dummy_regs)
     {

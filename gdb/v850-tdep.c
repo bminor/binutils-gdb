@@ -958,7 +958,7 @@ v850_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       if (!v850_type_is_scalar (VALUE_TYPE (*args))
 	  && TYPE_LENGTH (VALUE_TYPE (*args)) > E_MAX_RETTYPE_SIZE_IN_REGS)
 	{
-	  store_address (valbuf, 4, VALUE_ADDRESS (*args));
+	  store_unsigned_integer (valbuf, 4, VALUE_ADDRESS (*args));
 	  len = 4;
 	  val = valbuf;
 	}
@@ -1230,7 +1230,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_register_name (gdbarch, v850_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, v850_reg_size);
-  set_gdbarch_register_bytes (gdbarch, E_ALL_REGS_SIZE);
+  set_gdbarch_deprecated_register_bytes (gdbarch, E_ALL_REGS_SIZE);
   set_gdbarch_register_byte (gdbarch, v850_register_byte);
   set_gdbarch_register_raw_size (gdbarch, v850_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, v850_reg_size);

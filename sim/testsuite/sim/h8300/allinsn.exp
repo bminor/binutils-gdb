@@ -3,40 +3,43 @@
 set all "h8300 h8300h h8300s h8sx"
 
 if {[istarget h8300*-*-*] || [istarget h8sx*-*-*]} then {
-    run_sim_test add.b.s $all
-    run_sim_test add.w.s $all
-    run_sim_test add.l.s $all
+    run_sim_test addb.s $all
+    run_sim_test addw.s $all
+    run_sim_test addl.s $all
     run_sim_test adds.s  $all
     run_sim_test addx.s  $all
-    run_sim_test and.b.s $all
-    run_sim_test and.w.s $all
-    run_sim_test and.l.s $all
+    run_sim_test andb.s $all
+    run_sim_test andw.s $all
+    run_sim_test andl.s $all
     run_sim_test bfld.s  h8sx
+    run_sim_test brabc.s h8sx
     run_sim_test bra.s   $all
     run_sim_test bset.s  $all
-    run_sim_test cmp.b.s $all
-    run_sim_test cmp.w.s $all
-    run_sim_test cmp.l.s $all
+    run_sim_test cmpb.s $all
+    run_sim_test cmpw.s $all
+    run_sim_test cmpl.s $all
     run_sim_test daa.s   $all
     run_sim_test das.s   $all
     run_sim_test dec.s   $all
-    run_sim_test ext.w.s $all
-    run_sim_test ext.l.s $all
+    run_sim_test extw.s $all
+    run_sim_test extl.s $all
     run_sim_test inc.s   $all
     run_sim_test jmp.s   $all
     run_sim_test ldc.s   $all
+    run_sim_test ldm.s   $all
     run_sim_test mac.s   $all
-    run_sim_test mov.b.s $all
-    run_sim_test mov.w.s $all
-    run_sim_test mov.l.s $all
+    run_sim_test mova.s  h8sx
+    run_sim_test movb.s $all
+    run_sim_test movw.s $all
+    run_sim_test movl.s $all
     run_sim_test movmd.s h8sx
     run_sim_test movsd.s h8sx
     run_sim_test neg.s   $all
     run_sim_test nop.s   $all
     run_sim_test not.s   $all
-    run_sim_test or.b.s  $all
-    run_sim_test or.w.s  $all
-    run_sim_test or.l.s  $all
+    run_sim_test orb.s  $all
+    run_sim_test orw.s  $all
+    run_sim_test orl.s  $all
     run_sim_test rotl.s  $all
     run_sim_test rotr.s  $all
     run_sim_test rotxl.s $all
@@ -46,10 +49,10 @@ if {[istarget h8300*-*-*] || [istarget h8sx*-*-*]} then {
     run_sim_test shll.s  $all
     run_sim_test shlr.s  $all
     run_sim_test stc.s   $all
-    run_sim_test sub.b.s $all
-    run_sim_test sub.w.s $all
-    run_sim_test sub.l.s $all
-    run_sim_test xor.b.s $all
-    run_sim_test xor.w.s $all
-    run_sim_test xor.l.s $all
+    run_sim_test subb.s $all
+    run_sim_test subw.s $all
+    run_sim_test subl.s $all
+    run_sim_test xorb.s $all
+    run_sim_test xorw.s $all
+    run_sim_test xorl.s $all
 }

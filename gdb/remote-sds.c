@@ -473,10 +473,10 @@ sds_fetch_registers (int regno)
 {
   unsigned char buf[PBUFSIZ];
   int i, retlen;
-  char regs[REGISTER_BYTES];
+  char *regs = alloca (DEPRECATED_REGISTER_BYTES);
 
   /* Unimplemented registers read as all bits zero.  */
-  memset (regs, 0, REGISTER_BYTES);
+  memset (regs, 0, DEPRECATED_REGISTER_BYTES);
 
   buf[0] = 18;
   buf[1] = 1;
@@ -509,7 +509,7 @@ static void
 sds_prepare_to_store (void)
 {
   /* Make sure the entire registers array is valid.  */
-  deprecated_read_register_bytes (0, (char *) NULL, REGISTER_BYTES);
+  deprecated_read_register_bytes (0, (char *) NULL, DEPRECATED_REGISTER_BYTES);
 }
 
 /* Store register REGNO, or all registers if REGNO == -1, from the contents

@@ -305,14 +305,11 @@ branch_dest (int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety)
 
 /* Sequence of bytes for breakpoint instruction.  */
 
-#define BIG_BREAKPOINT { 0x7d, 0x82, 0x10, 0x08 }
-#define LITTLE_BREAKPOINT { 0x08, 0x10, 0x82, 0x7d }
-
 const static unsigned char *
 rs6000_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 {
-  static unsigned char big_breakpoint[] = BIG_BREAKPOINT;
-  static unsigned char little_breakpoint[] = LITTLE_BREAKPOINT;
+  static unsigned char big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
+  static unsigned char little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
   *bp_size = 4;
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     return big_breakpoint;
@@ -984,7 +981,7 @@ rs6000_pop_frame (void)
     }
 
   /* Make sure that all registers are valid.  */
-  deprecated_read_register_bytes (0, NULL, REGISTER_BYTES);
+  deprecated_read_register_bytes (0, NULL, DEPRECATED_REGISTER_BYTES);
 
   /* Figure out previous %pc value.  If the function is frameless, it is 
      still in the link register, otherwise walk the frames and retrieve the
@@ -1269,7 +1266,7 @@ ran_out_of_registers_for_arguments:
     write_register (SP_REGNUM, sp);
 
   /* set back chain properly */
-  store_address (tmp_buffer, 4, saved_sp);
+  store_unsigned_integer (tmp_buffer, 4, saved_sp);
   write_memory (sp, tmp_buffer, 4);
 
   target_store_registers (-1);
@@ -2879,7 +2876,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
   set_gdbarch_register_name (gdbarch, rs6000_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, wordsize);
-  set_gdbarch_register_bytes (gdbarch, off);
+  set_gdbarch_deprecated_register_bytes (gdbarch, off);
   set_gdbarch_register_byte (gdbarch, rs6000_register_byte);
   set_gdbarch_register_raw_size (gdbarch, rs6000_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 16);

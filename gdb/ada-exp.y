@@ -840,7 +840,7 @@ write_object_renaming (orig_left_context, renaming)
      parser-defs.h, implemented in parse.c */    
   strncpy (name, expr, suffix-expr);
   name[suffix-expr] = '\000';
-  sym = lookup_symbol (name, orig_left_context, VAR_NAMESPACE, 0, NULL);
+  sym = lookup_symbol (name, orig_left_context, VAR_DOMAIN, 0, NULL);
   /*  if (sym == NULL) 
     error ("Could not find renamed variable: %s", ada_demangle (name));
   */
@@ -893,7 +893,7 @@ write_object_renaming (orig_left_context, renaming)
 	    suffix = end;
 
 	    index_sym = 
-	      lookup_symbol (index_name, NULL, VAR_NAMESPACE, 0, NULL);
+	      lookup_symbol (index_name, NULL, VAR_DOMAIN, 0, NULL);
 	    if (index_sym == NULL)
 	      error ("Could not find %s", index_name);
 	    write_var_from_sym (NULL, block_found, sym);

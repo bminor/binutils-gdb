@@ -1,3 +1,28 @@
+2003-05-20  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace1.cc: Actually do 'cvs add' before committing
+	this time.
+
+2003-05-19  David Carlton  <carlton@bactrian.org>
+
+	* gdb.c++/rtti.exp: New file, containing tests for PR c++/488.
+	* gdb.c++/rtti.h, gdb.c++/rtti1.cc, gdb.c++/rtti2.cc: Ditto.
+
+2003-05-19  David Carlton  <carlton@bactrian.org>
+
+	* gdb.c++/namespace.exp: Add namespace scope and anonymous
+	namespace tests.
+	Bump copyright date.
+	* gdb.c++/namespace.cc: Add anonymous namespace and namespace C.
+	(main): Call C::D::marker2.
+	* gdb.c++/namespace1.cc: New file.
+
+2003-05-14  Jeff Johnston  <jjohnstn@redhat.com>
+
+	Roland McGrath  <roland@redhat.com>
+	* gdb.threads/linux-dp.exp: Account for fact that in nptl model 
+	there is no manager thread.
+
 2003-05-08  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.threads/schedlock.exp: Remove assumption that all threads 

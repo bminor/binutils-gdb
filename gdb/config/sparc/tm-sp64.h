@@ -360,8 +360,8 @@ extern void sp64_extract_return_value (struct type *, char[], char *, int);
    register state, the array `registers'.
    Some of the registers aren't 64 bits, but it's a lot simpler just to assume
    they all are (since most of them are).  */
-#undef  REGISTER_BYTES
-#define REGISTER_BYTES (32*8+32*8+45*8)
+#undef  DEPRECATED_REGISTER_BYTES
+#define DEPRECATED_REGISTER_BYTES (32*8+32*8+45*8)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */

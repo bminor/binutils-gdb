@@ -68,6 +68,70 @@ void marker1(void)
   return;
 }
 
+namespace
+{
+  int X = 9;
+
+  namespace G
+  {
+    int Xg = 10;
+  }
+}
+
+namespace C
+{
+  int c = 1;
+  int shadow = 12;
+
+  namespace
+  {
+    int cX = 6;
+    
+    namespace F
+    {
+      int cXf = 7;
+    }
+  }
+
+  namespace C
+  {
+    int cc = 2;
+  }
+
+  namespace D
+  {
+    int cd = 3;
+    int shadow = 13;
+
+    namespace E
+    {
+      int cde = 5;
+    }
+
+    void marker2 (void)
+    {
+      // NOTE: carlton/2003-04-23: I'm listing the expressions that I
+      // plan to have GDB try to print out, just to make sure that the
+      // compiler and I agree which ones should be legal!  It's easy
+      // to screw up when testing the boundaries of namespace stuff.
+      c;
+      //cc;
+      C::cc;
+      cd;
+      E::cde;
+      shadow;
+      cX;
+      F::cXf;
+      X;
+      G::Xg;
+      //cXOtherFile;
+      //XOtherFile;
+
+      return;
+    }
+
+  }
+}
 
 int main ()
 {
@@ -95,9 +159,5 @@ int main ()
 
   marker1();
   
+  C::D::marker2 ();
 }
-
-  
-
-
-

@@ -40,11 +40,6 @@ extern CORE_ADDR generic_cannot_extract_struct_value_address (char *dummy);
    being passed */
 extern gdbarch_frame_num_args_ftype frame_num_args_unknown;
 
-/* Implementation of breakpoint from PC using any of the deprecated
-   macros BREAKPOINT, LITTLE_BREAKPOINT, BIG_BREAPOINT.  For legacy
-   targets that don't yet implement their own breakpoint_from_pc(). */
-extern gdbarch_breakpoint_from_pc_ftype legacy_breakpoint_from_pc;
-
 /* Implementation of extract return value that grubs around in the
    register cache.  */
 extern gdbarch_extract_return_value_ftype legacy_extract_return_value;

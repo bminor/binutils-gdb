@@ -1134,8 +1134,6 @@ extern void store_signed_integer (void *, int, LONGEST);
 
 extern void store_unsigned_integer (void *, int, ULONGEST);
 
-extern void store_address (void *, int, LONGEST);
-
 extern void store_typed_address (void *buf, struct type *type, CORE_ADDR addr);
 
 

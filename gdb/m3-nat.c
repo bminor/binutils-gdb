@@ -2434,7 +2434,7 @@
 // OBSOLETE 
 // OBSOLETE   sym = lookup_symbol (name,
 // OBSOLETE 		       (struct block *) NULL,
-// OBSOLETE 		       VAR_NAMESPACE,
+// OBSOLETE 		       VAR_DOMAIN,
 // OBSOLETE 		       (int *) NULL,
 // OBSOLETE 		       (struct symtab **) NULL);
 // OBSOLETE 

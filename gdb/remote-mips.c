@@ -2251,13 +2251,13 @@ mips_mourn_inferior (void)
 /* We can write a breakpoint and read the shadow contents in one
    operation.  */
 
-/* Insert a breakpoint.  On targets that don't have built-in breakpoint
-   support, we read the contents of the target location and stash it,
-   then overwrite it with a breakpoint instruction.  ADDR is the target
-   location in the target machine.  CONTENTS_CACHE is a pointer to 
-   memory allocated for saving the target contents.  It is guaranteed
-   by the caller to be long enough to save sizeof BREAKPOINT bytes (this
-   is accomplished via BREAKPOINT_MAX).  */
+/* Insert a breakpoint.  On targets that don't have built-in
+   breakpoint support, we read the contents of the target location and
+   stash it, then overwrite it with a breakpoint instruction.  ADDR is
+   the target location in the target machine.  CONTENTS_CACHE is a
+   pointer to memory allocated for saving the target contents.  It is
+   guaranteed by the caller to be long enough to save the breakpoint
+   length returned by BREAKPOINT_FROM_PC.  */
 
 static int
 mips_insert_breakpoint (CORE_ADDR addr, char *contents_cache)

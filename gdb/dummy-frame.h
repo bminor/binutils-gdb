@@ -81,6 +81,6 @@ extern int pc_in_dummy_frame (CORE_ADDR pc);
    deprecated_generic_get_saved_register.  Eliminate that function and
    this, to, can go.  */
 
-extern struct regcache *generic_find_dummy_frame (CORE_ADDR pc,
-						  CORE_ADDR fp);
+extern struct regcache *deprecated_find_dummy_frame_regcache (CORE_ADDR pc,
+							      CORE_ADDR fp);
 #endif /* !defined (DUMMY_FRAME_H)  */

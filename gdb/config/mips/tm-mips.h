@@ -106,7 +106,7 @@ extern int mips_step_skips_delay (CORE_ADDR);
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 
-#define REGISTER_BYTES (NUM_REGS*MIPS_REGSIZE)
+#define DEPRECATED_REGISTER_BYTES (NUM_REGS*MIPS_REGSIZE)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */

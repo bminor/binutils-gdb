@@ -1332,7 +1332,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 	     are not combined in symbol-reading.  */
 
 	  sym2 = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
-		   b, VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
+		   b, VAR_DOMAIN, (int *) NULL, (struct symtab **) NULL);
 	  print_variable_value (sym2, fi, stream);
 	  fprintf_filtered (stream, "\n");
 	  break;

@@ -730,13 +730,13 @@ extern void set_gdbarch_deprecated_register_size (struct gdbarch *gdbarch, int d
 #define DEPRECATED_REGISTER_SIZE (gdbarch_deprecated_register_size (current_gdbarch))
 #endif
 
-extern int gdbarch_register_bytes (struct gdbarch *gdbarch);
-extern void set_gdbarch_register_bytes (struct gdbarch *gdbarch, int register_bytes);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_BYTES)
-#error "Non multi-arch definition of REGISTER_BYTES"
+extern int gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch, int deprecated_register_bytes);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_BYTES)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_BYTES"
 #endif
-#if !defined (REGISTER_BYTES)
-#define REGISTER_BYTES (gdbarch_register_bytes (current_gdbarch))
+#if !defined (DEPRECATED_REGISTER_BYTES)
+#define DEPRECATED_REGISTER_BYTES (gdbarch_deprecated_register_bytes (current_gdbarch))
 #endif
 
 /* NOTE: cagney/2002-05-02: This function with predicate has a valid
@@ -2161,11 +2161,6 @@ extern void set_gdbarch_inner_than (struct gdbarch *gdbarch, gdbarch_inner_than_
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (INNER_THAN)
 #define INNER_THAN(lhs, rhs) (gdbarch_inner_than (current_gdbarch, lhs, rhs))
 #endif
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (BREAKPOINT_FROM_PC)
-#define BREAKPOINT_FROM_PC(pcptr, lenptr) (legacy_breakpoint_from_pc (pcptr, lenptr))
 #endif
 
 typedef const unsigned char * (gdbarch_breakpoint_from_pc_ftype) (CORE_ADDR *pcptr, int *lenptr);

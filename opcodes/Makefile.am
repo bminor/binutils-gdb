@@ -282,8 +282,8 @@ disassemble.lo: disassemble.c $(INCDIR)/dis-asm.h
 	$(LIBTOOL) --mode=compile $(COMPILE) -c @archdefs@ $(srcdir)/disassemble.c
 
 libopcodes_la_SOURCES =  dis-buf.c disassemble.c
-libopcodes_la_DEPENDENCIES = $(OFILES)
-libopcodes_la_LIBADD = $(OFILES) @WIN32LIBADD@
+libopcodes_la_DEPENDENCIES = $(OFILES) ../bfd/libbfd.la
+libopcodes_la_LIBADD = $(OFILES) @WIN32LIBADD@ ../bfd/libbfd.la
 libopcodes_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
 
 # libtool will build .libs/libopcodes.a.  We create libopcodes.a in

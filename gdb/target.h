@@ -552,11 +552,11 @@ extern void print_section_info (struct target_ops *, bfd *);
 #define	target_files_info()	\
      (*current_target.to_files_info) (&current_target)
 
-/* Insert a breakpoint at address ADDR in the target machine.
-   SAVE is a pointer to memory allocated for saving the
-   target contents.  It is guaranteed by the caller to be long enough
-   to save "sizeof BREAKPOINT" bytes.  Result is 0 for success, or
-   an errno value.  */
+/* Insert a breakpoint at address ADDR in the target machine.  SAVE is
+   a pointer to memory allocated for saving the target contents.  It
+   is guaranteed by the caller to be long enough to save the number of
+   breakpoint bytes indicated by BREAKPOINT_FROM_PC.  Result is 0 for
+   success, or an errno value.  */
 
 #define	target_insert_breakpoint(addr, save)	\
      (*current_target.to_insert_breakpoint) (addr, save)
@@ -1125,9 +1125,6 @@ extern int memory_insert_breakpoint (CORE_ADDR, char *);
 extern int default_memory_remove_breakpoint (CORE_ADDR, char *);
 
 extern int default_memory_insert_breakpoint (CORE_ADDR, char *);
-
-extern const unsigned char *memory_breakpoint_from_pc (CORE_ADDR *pcptr,
-						       int *lenptr);
 
 
 /* From target.c */

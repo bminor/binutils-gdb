@@ -178,7 +178,7 @@ static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR reg_addr)
 {
-  if (core_reg_size != REGISTER_BYTES)
+  if (core_reg_size != DEPRECATED_REGISTER_BYTES)
     {
       warning ("wrong size gregset struct in core file");
       return;

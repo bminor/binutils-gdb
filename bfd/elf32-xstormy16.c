@@ -96,7 +96,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_XSTORMY16_16",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -176,7 +176,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 "R_XSTORMY16_REL_12",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x0fff,		/* dst_mask */
+	 0x0ffe,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   /* A 24-bit absolute relocation suitable for the jump instructions.  */

@@ -280,7 +280,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 		  struct symbol *sym2;
 		  if (!locals)
 		    sym2 = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
-					  block, VAR_NAMESPACE,
+					  block, VAR_DOMAIN,
 					  (int *) NULL,
 					  (struct symtab **) NULL);
 		  else

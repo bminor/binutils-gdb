@@ -462,13 +462,13 @@ extu_l_disp2_n:
 	set_grs_a5a5
 	set_ccr_zero
 	;; extu.l @(dd:2, ern32)
-	mov.l	#neg-2, er1
-	extu.l	@(2:2, er1)
+	mov.l	#neg-8, er1
+	extu.l	@(8:2, er1)
 
 	;; Test ccr		H=0 N=0 Z=0 V=0 C=0
 	test_cc_clear
 
-	test_h_gr32  neg-2 er1	; er1 still contains target address
+	test_h_gr32  neg-8 er1	; er1 still contains target address
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -1021,13 +1021,13 @@ extu_l_disp2_2_n:
 	set_grs_a5a5
 	set_ccr_zero
 	;; extu.l #2, @(dd:2, ern32)
-	mov.l	#neg2-2, er1
-	extu.l	#2, @(2:2, er1)
+	mov.l	#neg2-8, er1
+	extu.l	#2, @(8:2, er1)
 
 	;; Test ccr		H=0 N=0 Z=0 V=0 C=0
 	test_cc_clear
 
-	test_h_gr32  neg2-2 er1	; result of zero extend
+	test_h_gr32  neg2-8 er1	; result of zero extend
 	test_gr_a5a5 0		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3

@@ -768,15 +768,15 @@ rotr_w_disp2_1:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#word_dest-2, er0
-	rotr.w	@(2:2, er0)	; shift right arithmetic by one, disp2
+	mov	#word_dest-4, er0
+	rotr.w	@(4:2, er0)	; shift right arithmetic by one, disp2
 
 	test_carry_set		; H=0 N=1 Z=0 V=0 C=1
 	test_zero_clear
 	test_ovf_clear
 	test_neg_set
 
-	test_h_gr32  word_dest-2 er0
+	test_h_gr32  word_dest-4 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -1059,15 +1059,15 @@ rotr_w_disp2_2:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#word_dest-2, er0
-	rotr.w	#2, @(2:2, er0)	; shift right arithmetic by two, disp2
+	mov	#word_dest-4, er0
+	rotr.w	#2, @(4:2, er0)	; shift right arithmetic by two, disp2
 
 	test_carry_clear		; H=0 N=0 Z=0 V=0 C=0
 	test_zero_clear
 	test_ovf_clear
 	test_neg_clear
 
-	test_h_gr32  word_dest-2 er0
+	test_h_gr32  word_dest-4 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -1357,15 +1357,15 @@ rotr_l_disp2_1:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#long_dest-2, er0
-	rotr.l	@(2:2, er0)	; shift right arithmetic by one, disp2
+	mov	#long_dest-8, er0
+	rotr.l	@(8:2, er0)	; shift right arithmetic by one, disp2
 
 	test_carry_set		; H=0 N=1 Z=0 V=0 C=1
 	test_zero_clear
 	test_ovf_clear
 	test_neg_set
 
-	test_h_gr32  long_dest-2 er0
+	test_h_gr32  long_dest-8 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3
@@ -1660,15 +1660,15 @@ rotr_l_disp2_2:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	set_ccr_zero
 
-	mov	#long_dest-2, er0
-	rotr.l	#2, @(2:2, er0)	; shift right arithmetic by two, disp2
+	mov	#long_dest-8, er0
+	rotr.l	#2, @(8:2, er0)	; shift right arithmetic by two, disp2
 
 	test_carry_clear		; H=0 N=0 Z=0 V=0 C=0
 	test_zero_clear
 	test_ovf_clear
 	test_neg_clear
 
-	test_h_gr32  long_dest-2 er0
+	test_h_gr32  long_dest-8 er0
 	test_gr_a5a5 1		; Make sure other general regs not disturbed
 	test_gr_a5a5 2
 	test_gr_a5a5 3

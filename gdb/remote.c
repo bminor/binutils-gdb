@@ -263,7 +263,7 @@ init_remote_state (struct gdbarch *gdbarch)
 
   /* Start out by having the remote protocol mimic the existing
      behavour - just copy in the description of the register cache.  */
-  rs->sizeof_g_packet = REGISTER_BYTES; /* OK use.   */
+  rs->sizeof_g_packet = DEPRECATED_REGISTER_BYTES; /* OK */
 
   /* Assume a 1:1 regnum<->pnum table.  */
   rs->regs = xcalloc (NUM_REGS + NUM_PSEUDO_REGS, sizeof (struct packet_reg));
@@ -3529,7 +3529,7 @@ remote_prepare_to_store (void)
          forcing the register cache to read its and not the target
          registers.  */
       deprecated_read_register_bytes (0, (char *) NULL,
-				      REGISTER_BYTES); /* OK use.  */
+				      DEPRECATED_REGISTER_BYTES); /* OK */
       break;
     case PACKET_ENABLE:
       break;
@@ -4624,11 +4624,12 @@ extended_remote_async_create_inferior (char *exec_file, char *args, char **env)
 }
 
 
-/* On some machines, e.g. 68k, we may use a different breakpoint instruction
-   than other targets; in those use REMOTE_BREAKPOINT instead of just
-   BREAKPOINT.  Also, bi-endian targets may define LITTLE_REMOTE_BREAKPOINT
-   and BIG_REMOTE_BREAKPOINT.  If none of these are defined, we just call
-   the standard routines that are in mem-break.c.  */
+/* On some machines, e.g. 68k, we may use a different breakpoint
+   instruction than other targets; in those use REMOTE_BREAKPOINT
+   instead of just BREAKPOINT_FROM_PC.  Also, bi-endian targets may
+   define LITTLE_REMOTE_BREAKPOINT and BIG_REMOTE_BREAKPOINT.  If none
+   of these are defined, we just call the standard routines that are
+   in mem-break.c.  */
 
 /* FIXME, these ought to be done in a more dynamic fashion.  For instance,
    the choice of breakpoint instruction affects target program design and
@@ -4652,13 +4653,13 @@ static unsigned char little_break_insn[] = LITTLE_REMOTE_BREAKPOINT;
 
 #endif /* REMOTE_BREAKPOINT */
 
-/* Insert a breakpoint on targets that don't have any better breakpoint
-   support.  We read the contents of the target location and stash it,
-   then overwrite it with a breakpoint instruction.  ADDR is the target
-   location in the target machine.  CONTENTS_CACHE is a pointer to 
-   memory allocated for saving the target contents.  It is guaranteed
-   by the caller to be long enough to save sizeof BREAKPOINT bytes (this
-   is accomplished via BREAKPOINT_MAX).  */
+/* Insert a breakpoint on targets that don't have any better
+   breakpoint support.  We read the contents of the target location
+   and stash it, then overwrite it with a breakpoint instruction.
+   ADDR is the target location in the target machine.  CONTENTS_CACHE
+   is a pointer to memory allocated for saving the target contents.
+   It is guaranteed by the caller to be long enough to save the number
+   of bytes returned by BREAKPOINT_FROM_PC.  */
 
 static int
 remote_insert_breakpoint (CORE_ADDR addr, char *contents_cache)

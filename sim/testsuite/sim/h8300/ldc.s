@@ -270,8 +270,8 @@ ldc_postinc_ccr:
 	ldc	@er1+, ccr	; postinc src
 	stc	ccr, r0l	; copy into general reg
 
-	test_h_gr32 0xa5a5a5ff er0	; ff in r0l, a5 elsewhere.
-	test_h_gr32 byte_post, er1	; er1 still contains address
+	test_h_gr32  0xa5a5a5ff er0	; ff in r0l, a5 elsewhere.
+	test_h_gr32  byte_src+2, er1	; er1 still contains address
 	test_gr_a5a5 2		; Make sure other general regs not disturbed
 	test_gr_a5a5 3
 	test_gr_a5a5 4
@@ -288,8 +288,8 @@ ldc_postinc_exr:
 	ldc	@er1+, exr	; postinc src
 	stc	exr, r0l	; copy into general reg
 
-	test_h_gr32 0xa5a5a587 er0	; 87 in r0l, a5 elsewhere.
-	test_h_gr32 byte_post, er1	; er1 still contains address
+	test_h_gr32  0xa5a5a587 er0	; 87 in r0l, a5 elsewhere.
+	test_h_gr32  byte_src+2, er1	; er1 still contains address
 	test_gr_a5a5 2		; Make sure other general regs not disturbed
 	test_gr_a5a5 3
 	test_gr_a5a5 4

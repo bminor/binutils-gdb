@@ -80,11 +80,12 @@ FILE *log_file;
 #endif
 
 static int timeout = 30;
-/* Having this larger than 400 causes us to be incompatible with m68k-stub.c
-   and i386-stub.c.  Normally, no one would notice because it only matters
-   for writing large chunks of memory (e.g. in downloads).  Also, this needs
-   to be more than 400 if required to hold the registers (see below, where
-   we round it up based on REGISTER_BYTES).  */
+/* Having this larger than 400 causes us to be incompatible with
+   m68k-stub.c and i386-stub.c.  Normally, no one would notice because
+   it only matters for writing large chunks of memory (e.g. in
+   downloads).  Also, this needs to be more than 400 if required to
+   hold the registers (see below, where we round it up based on
+   DEPRECATED_REGISTER_BYTES).  */
 #define PBUFSIZ 400
 
 /* 

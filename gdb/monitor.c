@@ -2098,7 +2098,7 @@ monitor_insert_breakpoint (CORE_ADDR addr, char *shadow)
     addr = ADDR_BITS_REMOVE (addr);
 
   /* Determine appropriate breakpoint size for this address.  */
-  bp = memory_breakpoint_from_pc (&addr, &bplen);
+  bp = gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &bplen);
 
   for (i = 0; i < current_monitor->num_breakpoints; i++)
     {

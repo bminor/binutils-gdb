@@ -983,8 +983,10 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
 	  *addrp = 0;
 	  *realnump = -1;
 	  if (bufferp != NULL)
-	    store_address (bufferp, REGISTER_RAW_SIZE (regnum),
-			   get_frame_saved_regs (frame)[regnum]);
+	    /* NOTE: cagney/2003-05-09: In-lined store_address with
+               it's body - store_unsigned_integer.  */
+	    store_unsigned_integer (bufferp, REGISTER_RAW_SIZE (regnum),
+				    get_frame_saved_regs (frame)[regnum]);
 	}
       else
 	{
@@ -1110,8 +1112,8 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 		   fly, constructs either a raw or pseudo register
 		   from the raw register cache.  */
 		regcache_raw_read
-		  (generic_find_dummy_frame (get_frame_pc (frame),
-					     get_frame_base (frame)),
+		  (deprecated_find_dummy_frame_regcache (get_frame_pc (frame),
+							 get_frame_base (frame)),
 		   regnum, raw_buffer);
 	      return;
 	    }
@@ -1125,8 +1127,11 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 	      if (regnum == SP_REGNUM)
 		{
 		  if (raw_buffer)	/* SP register treated specially */
-		    store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-				   get_frame_saved_regs (frame)[regnum]);
+		    /* NOTE: cagney/2003-05-09: In-line store_address
+                       with it's body - store_unsigned_integer.  */
+		    store_unsigned_integer (raw_buffer,
+					    REGISTER_RAW_SIZE (regnum),
+					    get_frame_saved_regs (frame)[regnum]);
 		}
 	      else
 		{
