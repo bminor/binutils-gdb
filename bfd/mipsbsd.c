@@ -1,5 +1,5 @@
 /* BFD backend for MIPS BSD (a.out) binaries.
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995, 1997 Free Software Foundation, Inc.
    Written by Ralph Campbell.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define BYTES_IN_WORD 4
 /* #define ENTRY_CAN_BE_ZERO */
@@ -28,8 +28,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
     )
 #define N_DATADDR(x) (N_TXTADDR(x)+N_TXTSIZE(x))
 #define TEXT_START_ADDR 4096
-#define PAGE_SIZE 4096
-#define SEGMENT_SIZE PAGE_SIZE
+#define TARGET_PAGE_SIZE 4096
+#define SEGMENT_SIZE TARGET_PAGE_SIZE
 #define DEFAULT_ARCH bfd_arch_mips
 #define MACHTYPE_OK(mtype) ((mtype) == M_UNKNOWN \
 			    || (mtype) == M_MIPS1 || (mtype) == M_MIPS2)
@@ -127,11 +127,11 @@ MY(write_object_contents) (abfd)
   switch (bfd_get_arch(abfd)) {
   case bfd_arch_m68k:
     switch (bfd_get_mach(abfd)) {
-    case 68010:
+    case bfd_mach_m68010:
       N_SET_MACHTYPE(*execp, M_68010);
       break;
     default:
-    case 68020:
+    case bfd_mach_m68020:
       N_SET_MACHTYPE(*execp, M_68020);
       break;
     }
@@ -295,7 +295,7 @@ static reloc_howto_type mips_howto_table_ext[] = {
 	"LO16",     false, 0, 0x0000ffff, false},
 };
 
-static const reloc_howto_type *
+static reloc_howto_type *
 MY(reloc_howto_type_lookup) (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -376,8 +376,9 @@ MY(canonicalize_reloc)(abfd, section, relptr, symbols)
 static CONST struct aout_backend_data MY(backend_data) = {
   0,				/* zmagic contiguous */
   1,				/* text incl header */
+  0,				/* entry is text address */
   0,				/* exec_hdr_flags */
-  PAGE_SIZE,			/* text vma */
+  TARGET_PAGE_SIZE,			/* text vma */
   MY_set_sizes,
   0,				/* text size includes exec header */
   0,				/* add_dynamic_symbols */
@@ -392,16 +393,15 @@ const bfd_target aout_mips_little_vec =
 {
   "a.out-mips-little",		/* name */
   bfd_target_aout_flavour,
-  false,			/* target byte order (little) */
-  false,			/* target headers byte order (little) */
+  BFD_ENDIAN_LITTLE,		/* target byte order (little) */
+  BFD_ENDIAN_LITTLE,		/* target headers byte order (little) */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA),
   MY_symbol_leading_char,
   ' ',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-  1,				/* minimum alignment */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
@@ -432,16 +432,15 @@ const bfd_target aout_mips_big_vec =
 {
   "a.out-mips-big",		/* name */
   bfd_target_aout_flavour,
-  true,				/* target byte order (big) */
-  true,				/* target headers byte order (big) */
+  BFD_ENDIAN_BIG,		/* target byte order (big) */
+  BFD_ENDIAN_BIG,		/* target headers byte order (big) */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA),
   MY_symbol_leading_char,
   ' ',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-  1,				/* minimum alignment */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,
      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */

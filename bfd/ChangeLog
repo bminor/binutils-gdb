@@ -1,5 +1,18 @@
 Wed Mar 25 13:59:24 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
+	* archures.c (bfd_mach_m68*): Add definitions for various m68k
+	variants.
+	(bfd_default_scan): Remove m68k special cases.
+	* bfd-in2.h: Rebuild.
+	* mipsbsd.c (MY(write_object_contents)): Use bfd_mach_m680*
+	instead of plain numbers.
+	* sparclynx.c (NAME(lynx,set_arch_mach)): Likewise.
+	* cpu-m68k.c (arch_info_struct): Likewise.  Add entry for
+	m68k:68000.
+	(bfd_m68k_arch): Set mach field to zero to signal no explicit
+	selection, change printable_name to just "m68k" and make that the
+	default instead of m68k:68020.
+
 	* aout-tic30.c (NAME): Define this to avoid multiple definitions
 	from aoutx.h.
 	(MY_get_section_contents): Define as aout_32_get_section_contents
@@ -17,6 +30,9 @@ Wed Mar 25 10:41:35 1998  Richard Henderson  <rth@cygnus.com>
 	(calljx_callback): Use it.
 
 Wed Mar 25 11:19:28 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libbfd-in.h (BFD_ALIGN): Cast this parameter to bfd_vma.
+	* libbfd.h: Rebuild.
 
 	* elf-m10300.c (elf32_mn10300_finish_hash_table_entry): Change
 	byte_count to unsigned int.
