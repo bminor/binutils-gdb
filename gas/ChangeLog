@@ -1,3 +1,7 @@
+2004-12-25  Marek Michalkiewicz  <marekm@amelek.gda.pl>
+
+	* config/tc-avr.c (mcu_types): Move attiny{13,2313} from avr4 to avr2.
+
 2004-12-23  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* config/tc-crx.c: Support 'bcop' relaxation (dealt as in 'cmp&branch'
