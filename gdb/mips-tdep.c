@@ -138,7 +138,6 @@ struct gdbarch_tdep
     int mips_last_fp_arg_regnum;
     int mips_default_saved_regsize;
     int mips_fp_register_double;
-    int mips_regs_have_home_p;
     int mips_default_stack_argsize;
     int gdb_target_is_mips64;
     int default_mask_address_p;
@@ -205,11 +204,6 @@ mips2_fp_compat (void)
    determine if the ABI is using double-precision registers.  See also
    MIPS_FPU_TYPE. */
 #define FP_REGISTER_DOUBLE (gdbarch_tdep (current_gdbarch)->mips_fp_register_double)
-
-/* Does the caller allocate a ``home'' for each register used in the
-   function call?  The N32 ABI and MIPS_EABI do not, the others do. */
-
-#define MIPS_REGS_HAVE_HOME_P (gdbarch_tdep (current_gdbarch)->mips_regs_have_home_p)
 
 /* The amount of space reserved on the stack for registers. This is
    different to MIPS_SAVED_REGSIZE as it determines the alignment of
@@ -2450,18 +2444,17 @@ mips_type_needs_double_align (struct type *type)
 #define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
 
 CORE_ADDR
-mips_push_arguments (int nargs,
-		     struct value **args,
-		     CORE_ADDR sp,
-		     int struct_return,
-		     CORE_ADDR struct_addr)
+mips_eabi_push_arguments (int nargs,
+			  struct value **args,
+			  CORE_ADDR sp,
+			  int struct_return,
+			  CORE_ADDR struct_addr)
 {
   int argreg;
   int float_argreg;
   int argnum;
   int len = 0;
   int stack_offset = 0;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   /* First ensure that the stack and structure return address (if any)
      are properly aligned.  The stack has to be at least 64-bit
@@ -2472,31 +2465,31 @@ mips_push_arguments (int nargs,
   sp = ROUND_DOWN (sp, 16);
   struct_addr = ROUND_DOWN (struct_addr, 16);
 
-  /* Now make space on the stack for the args. We allocate more
+  /* Now make space on the stack for the args.  We allocate more
      than necessary for EABI, because the first few arguments are
-     passed in registers, but that's OK. */
+     passed in registers, but that's OK.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), MIPS_STACK_ARGSIZE);
+    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
+		     MIPS_STACK_ARGSIZE);
   sp -= ROUND_UP (len, 16);
 
   if (mips_debug)
-    fprintf_unfiltered (gdb_stdlog, "mips_push_arguments: sp=0x%s allocated %d\n",
+    fprintf_unfiltered (gdb_stdlog, 
+			"mips_eabi_push_arguments: sp=0x%s allocated %d\n",
 			paddr_nz (sp), ROUND_UP (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
   float_argreg = FPA0_REGNUM;
 
-  /* the struct_return pointer occupies the first parameter-passing reg */
+  /* The struct_return pointer occupies the first parameter-passing reg.  */
   if (struct_return)
     {
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_push_arguments: struct_return reg=%d 0x%s\n",
+			    "mips_eabi_push_arguments: struct_return reg=%d 0x%s\n",
 			    argreg, paddr_nz (struct_addr));
       write_register (argreg++, struct_addr);
-      if (MIPS_REGS_HAVE_HOME_P)
-	stack_offset += MIPS_STACK_ARGSIZE;
     }
 
   /* Now load as many as possible of the first arguments into
@@ -2513,13 +2506,12 @@ mips_push_arguments (int nargs,
 
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "mips_push_arguments: %d len=%d type=%d",
+			    "mips_eabi_push_arguments: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
       /* The EABI passes structures that do not fit in a register by
-         reference. In all other cases, pass the structure by value.  */
-      if (MIPS_EABI
-	  && len > MIPS_SAVED_REGSIZE
+         reference.  */
+      if (len > MIPS_SAVED_REGSIZE
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
 	  store_address (valbuf, MIPS_SAVED_REGSIZE, VALUE_ADDRESS (arg));
@@ -2535,8 +2527,8 @@ mips_push_arguments (int nargs,
       /* 32-bit ABIs always start floating point arguments in an
          even-numbered floating point register.  Round the FP register
          up before the check to see if there are any FP registers
-         left. Non MIPS_EABI targets also pass the FP in the integer
-         registers so also round up normal registers. */
+         left.  Non MIPS_EABI targets also pass the FP in the integer
+         registers so also round up normal registers.  */
       if (!FP_REGISTER_DOUBLE
 	  && fp_register_arg_p (typecode, arg_type))
 	{
@@ -2555,7 +2547,7 @@ mips_push_arguments (int nargs,
          because those registers are normally skipped.  */
       /* MIPS_EABI squeezes a struct that contains a single floating
          point value into an FP register instead of pushing it onto the
-         stack. */
+         stack.  */
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
 	{
@@ -2570,13 +2562,6 @@ mips_push_arguments (int nargs,
 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
 				    float_argreg, phex (regval, 4));
 	      write_register (float_argreg++, regval);
-	      if (!MIPS_EABI)
-		{
-		  if (mips_debug)
-		    fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
-					argreg, phex (regval, 4));
-		  write_register (argreg++, regval);
-		}
 
 	      /* Write the high word of the double to the odd register(s).  */
 	      regval = extract_unsigned_integer (val + 4 - low_offset, 4);
@@ -2584,41 +2569,19 @@ mips_push_arguments (int nargs,
 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
 				    float_argreg, phex (regval, 4));
 	      write_register (float_argreg++, regval);
-	      if (!MIPS_EABI)
-		{
-		  if (mips_debug)
-		    fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
-					argreg, phex (regval, 4));
-		  write_register (argreg++, regval);
-		}
 	    }
 	  else
 	    {
 	      /* This is a floating point value that fits entirely
 	         in a single register.  */
 	      /* On 32 bit ABI's the float_argreg is further adjusted
-                 above to ensure that it is even register aligned. */
+                 above to ensure that it is even register aligned.  */
 	      LONGEST regval = extract_unsigned_integer (val, len);
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
 				    float_argreg, phex (regval, len));
 	      write_register (float_argreg++, regval);
-	      if (!MIPS_EABI)
-		{
-		  /* CAGNEY: 32 bit MIPS ABI's always reserve two FP
-                     registers for each argument.  The below is (my
-                     guess) to ensure that the corresponding integer
-                     register has reserved the same space. */
-		  if (mips_debug)
-		    fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
-					argreg, phex (regval, len));
-		  write_register (argreg, regval);
-		  argreg += FP_REGISTER_DOUBLE ? 1 : 2;
-		}
 	    }
-	  /* Reserve space for the FP register. */
-	  if (MIPS_REGS_HAVE_HOME_P)
-	    stack_offset += ROUND_UP (len, MIPS_STACK_ARGSIZE);
 	}
       else
 	{
@@ -2631,21 +2594,15 @@ mips_push_arguments (int nargs,
 	     compatibility, we will put them in both places.  */
 	  int odd_sized_struct = ((len > MIPS_SAVED_REGSIZE) &&
 				  (len % MIPS_SAVED_REGSIZE != 0));
-	  /* Structures should be aligned to eight bytes (even arg registers)
-	     on MIPS_ABI_O32 if their first member has double precision. */
-	  if (tdep->mips_abi == MIPS_ABI_O32
-	      && mips_type_needs_double_align (arg_type))
-	    {
-	      if ((argreg & 1))
-	        argreg++;
-	    }
+
 	  /* Note: Floating-point values that didn't fit into an FP
-             register are only written to memory. */
+             register are only written to memory.  */
 	  while (len > 0)
 	    {
 	      /* Remember if the argument was written to the stack.  */
 	      int stack_used_p = 0;
-	      int partial_len = len < MIPS_SAVED_REGSIZE ? len : MIPS_SAVED_REGSIZE;
+	      int partial_len = 
+		len < MIPS_SAVED_REGSIZE ? len : MIPS_SAVED_REGSIZE;
 
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " -- partial=%d",
@@ -2700,47 +2657,13 @@ mips_push_arguments (int nargs,
 
 	      /* Note!!! This is NOT an else clause.  Odd sized
 	         structs may go thru BOTH paths.  Floating point
-	         arguments will not. */
+	         arguments will not.  */
 	      /* Write this portion of the argument to a general
-                 purpose register. */
+                 purpose register.  */
 	      if (argreg <= MIPS_LAST_ARG_REGNUM
 		  && !fp_register_arg_p (typecode, arg_type))
 		{
 		  LONGEST regval = extract_unsigned_integer (val, partial_len);
-
-		  /* A non-floating-point argument being passed in a
-		     general register.  If a struct or union, and if
-		     the remaining length is smaller than the register
-		     size, we have to adjust the register value on
-		     big endian targets.
-
-		     It does not seem to be necessary to do the
-		     same for integral types.
-
-		     Also don't do this adjustment on EABI and O64
-		     binaries.
-
-		     cagney/2001-07-23: gdb/179: Also, GCC, when
-		     outputting LE O32 with sizeof (struct) <
-		     MIPS_SAVED_REGSIZE, generates a left shift as
-		     part of storing the argument in a register a
-		     register (the left shift isn't generated when
-		     sizeof (struct) >= MIPS_SAVED_REGSIZE).  Since it
-		     is quite possible that this is GCC contradicting
-		     the LE/O32 ABI, GDB has not been adjusted to
-		     accommodate this.  Either someone needs to
-		     demonstrate that the LE/O32 ABI specifies such a
-		     left shift OR this new ABI gets identified as
-		     such and GDB gets tweaked accordingly.  */
-
-		  if (!MIPS_EABI
-		      && MIPS_SAVED_REGSIZE < 8
-		      && TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-		      && partial_len < MIPS_SAVED_REGSIZE
-		      && (typecode == TYPE_CODE_STRUCT ||
-			  typecode == TYPE_CODE_UNION))
-		    regval <<= ((MIPS_SAVED_REGSIZE - partial_len) *
-				TARGET_CHAR_BIT);
 
 		  if (mips_debug)
 		    fprintf_filtered (gdb_stdlog, " - reg=%d val=%s",
@@ -2748,12 +2671,6 @@ mips_push_arguments (int nargs,
 				      phex (regval, MIPS_SAVED_REGSIZE));
 		  write_register (argreg, regval);
 		  argreg++;
-
-		  /* If this is the old ABI, prevent subsequent floating
-		     point arguments from being passed in floating point
-		     registers.  */
-		  if (!MIPS_EABI)
-		    float_argreg = MIPS_LAST_FP_ARG_REGNUM + 1;
 		}
 
 	      len -= partial_len;
@@ -2762,15 +2679,10 @@ mips_push_arguments (int nargs,
 	      /* Compute the the offset into the stack at which we
 		 will copy the next parameter.
 
-		 In older ABIs, the caller reserved space for
-		 registers that contained arguments.  This was loosely
-		 refered to as their "home".  Consequently, space is
-		 always allocated.
-
 	         In the new EABI (and the NABI32), the stack_offset
-	         only needs to be adjusted when it has been used.. */
+	         only needs to be adjusted when it has been used.  */
 
-	      if (MIPS_REGS_HAVE_HOME_P || stack_used_p)
+	      if (stack_used_p)
 		stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
@@ -2821,7 +2733,7 @@ mips_n32n64_push_arguments (int nargs,
   argreg = A0_REGNUM;
   float_argreg = FPA0_REGNUM;
 
-  /* the struct_return pointer occupies the first parameter-passing reg */
+  /* The struct_return pointer occupies the first parameter-passing reg.  */
   if (struct_return)
     {
       if (mips_debug)
@@ -3022,7 +2934,6 @@ mips_o32o64_push_arguments (int nargs,
   int argnum;
   int len = 0;
   int stack_offset = 0;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   /* First ensure that the stack and structure return address (if any)
      are properly aligned.  The stack has to be at least 64-bit
@@ -5082,7 +4993,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_fp_register_double = 0;
       tdep->mips_last_arg_regnum = A0_REGNUM + 4 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 4 - 1;
-      tdep->mips_regs_have_home_p = 1;
       tdep->gdb_target_is_mips64 = 0;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
@@ -5100,7 +5010,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 4 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 4 - 1;
-      tdep->mips_regs_have_home_p = 1;
       tdep->gdb_target_is_mips64 = 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
@@ -5112,13 +5021,12 @@ mips_gdbarch_init (struct gdbarch_info info,
 					 mips_o32_use_struct_convention);
       break;
     case MIPS_ABI_EABI32:
-      set_gdbarch_push_arguments (gdbarch, mips_push_arguments);
+      set_gdbarch_push_arguments (gdbarch, mips_eabi_push_arguments);
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 4;
       tdep->mips_fp_register_double = 0;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
-      tdep->mips_regs_have_home_p = 0;
       tdep->gdb_target_is_mips64 = 0;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
@@ -5130,13 +5038,12 @@ mips_gdbarch_init (struct gdbarch_info info,
 					 mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_EABI64:
-      set_gdbarch_push_arguments (gdbarch, mips_push_arguments);
+      set_gdbarch_push_arguments (gdbarch, mips_eabi_push_arguments);
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
-      tdep->mips_regs_have_home_p = 0;
       tdep->gdb_target_is_mips64 = 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 64);
@@ -5154,7 +5061,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
-      tdep->mips_regs_have_home_p = 0;
       tdep->gdb_target_is_mips64 = 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
@@ -5184,7 +5090,6 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
-      tdep->mips_regs_have_home_p = 0;
       tdep->gdb_target_is_mips64 = 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 64);
@@ -5414,9 +5319,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: FP_REGISTER_DOUBLE = %d\n",
 		      FP_REGISTER_DOUBLE);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS_REGS_HAVE_HOME_P = %d\n",
-		      MIPS_REGS_HAVE_HOME_P);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_DEFAULT_STACK_ARGSIZE = %d\n",
 		      MIPS_DEFAULT_STACK_ARGSIZE);

@@ -1,3 +1,12 @@
+2002-08-13  Michael Snyder  <msnyder@redhat.com>
+
+	* mips-tdep.c (mips_push_arguments): Rename to
+	mips_eabi_push_arguments, and tune for EABI.
+	(MIPS_REGS_HAVE_HOME_P): Delete.
+	(struct gdbarch_tdep): Remove mips_regs_have_home_p field.
+	(mips_gdbarch_init): Set gdbarch push_arguments for eabi.
+	Delete references to mips_regs_have_home_p.
+
 2002-08-14  Keith Seitz  <keiths@redhat.com>
 
 	* Makefile.in (install-gdbtk): Create insight plugin directory.
