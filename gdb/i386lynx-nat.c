@@ -50,6 +50,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	FS	0
 #define	GS	0
 
+static struct target_ops lynx_core_ops;
+
 /* this table must line up with REGISTER_NAMES in m-i386.h */
 static unsigned int regmap[] = 
 {
@@ -184,36 +186,6 @@ store_inferior_registers (regno)
       store_register (regno, offset, inferior_pid);
 }
 
-/* Extract the register values out of the core file and store
-   them where `read_register' will find them.
-
-   CORE_REG_SECT points to the register values themselves, read into memory.
-   CORE_REG_SIZE is the size of that area.
-   WHICH says which set of registers we are handling (0 = int, 2 = float
-         on machines where they are discontiguous).
-   REG_ADDR is the offset from u.u_ar0 to the register values relative to
-            core_reg_sect.  This is used with old-fashioned core files to
-	    locate the registers in a large upage-plus-stack ".reg" section.
-	    Original upage address X is at location core_reg_sect+x+reg_addr.
- */
-
-void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     unsigned reg_addr;
-{
-  struct st_entry s;
-  unsigned int regno, addr;
-
-  for (regno = 0; regno < NUM_REGS; regno++)
-    {
-      addr = register_addr (regno, (char *) &s.ec - (char *) &s);
-      supply_register (regno, core_reg_sect + addr);
-    }
-}
-
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer STATUS.  */
 
@@ -269,26 +241,6 @@ child_wait (status)
     }
 }
 
-/* Return the PC of the caller from the call frame.  Assumes the subr prologue
-   has already been executed, and the frame pointer setup.  If this is the
-   outermost frame, we check to see if we are in a system call by examining the
-   previous instruction.  If so, then the return PC is actually at SP+4 because
-   system calls use a different calling sequence.  */
-
-CORE_ADDR
-i386lynx_saved_pc_after_call (frame)
-     struct frame_info *frame;
-{
-  char opcode[7];
-  static const char call_inst[] = {0x9a, 0, 0, 0, 0, 8, 0}; /* lcall 0x8,0x0 */
-
-  read_memory (frame->pc - 7, opcode, 7);
-  if (memcmp (opcode, call_inst, 7) == 0)
-    return read_memory_integer (read_register (SP_REGNUM) + 4, 4);
-
-  return read_memory_integer (read_register (SP_REGNUM), 4);
-}
-
 /* Convert a Lynx process ID to a string.  Returns the string in a static
    buffer.  */
 
@@ -302,3 +254,274 @@ i386lynx_pid_to_str (pid)
 
   return buf;
 }
+
+/* Extract the register values out of the core file and store
+   them where `read_register' will find them.
+
+   CORE_REG_SECT points to the register values themselves, read into memory.
+   CORE_REG_SIZE is the size of that area.
+   WHICH says which set of registers we are handling (0 = int, 2 = float
+         on machines where they are discontiguous).
+   REG_ADDR is the offset from u.u_ar0 to the register values relative to
+            core_reg_sect.  This is used with old-fashioned core files to
+	    locate the registers in a large upage-plus-stack ".reg" section.
+	    Original upage address X is at location core_reg_sect+x+reg_addr.
+ */
+
+void
+fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
+     char *core_reg_sect;
+     unsigned core_reg_size;
+     int which;
+     unsigned reg_addr;
+{
+  struct st_entry s;
+  unsigned int regno, addr;
+
+  for (regno = 0; regno < NUM_REGS; regno++)
+    {
+      addr = register_addr (regno, (char *) &s.ec - (char *) &s);
+      supply_register (regno, core_reg_sect + addr);
+    }
+}
+
+#if 0
+
+/* Discard all vestiges of any previous core file
+   and mark data and stack spaces as empty.  */
+
+/* ARGSUSED */
+static void
+lynx_core_close (quitting)
+     int quitting;
+{
+  if (core_bfd)
+    {
+      free (bfd_get_filename (core_bfd));
+      bfd_close (core_bfd);
+      core_bfd = NULL;
+
+      if (core_ops.to_sections)
+	{
+	  free ((PTR)lynx_core_ops.to_sections);
+	  lynx_core_ops.to_sections = NULL;
+	  lynx_core_ops.to_sections_end = NULL;
+	}
+    }
+}
+
+/* This routine opens and sets up the core file bfd */
+
+static void
+lynx_core_open (filename, from_tty)
+     char *filename;
+     int from_tty;
+{
+  const char *p;
+  int siggy;
+  struct cleanup *old_chain;
+  char *temp;
+  bfd *temp_bfd;
+  int ontop;
+  int scratch_chan;
+
+  target_preopen (from_tty);
+  if (!filename)
+    {
+      error (core_bfd ? 
+	     "No core file specified.  (Use `detach' to stop debugging a core file.)"
+	     : "No core file specified.");
+    }
+
+  filename = tilde_expand (filename);
+  if (filename[0] != '/')
+    {
+      temp = concat (current_directory, "/", filename, NULL);
+      free (filename);
+      filename = temp;
+    }
+
+  old_chain = make_cleanup (free, filename);
+
+  scratch_chan = open (filename, write_files? O_RDWR: O_RDONLY, 0);
+  if (scratch_chan < 0)
+    perror_with_name (filename);
+
+  temp_bfd = bfd_fdopenr (filename, NULL, scratch_chan);
+  if (temp_bfd == NULL)
+    perror_with_name (filename);
+
+  if (!bfd_check_format (temp_bfd, bfd_core))
+    {
+      /* Do it after the err msg */
+      make_cleanup (bfd_close, temp_bfd);
+      error ("\"%s\" is not a core dump: %s", filename, bfd_errmsg(bfd_error));
+    }
+
+  /* Looks semi-reasonable.  Toss the old core file and work on the new.  */
+
+  discard_cleanups (old_chain);		/* Don't free filename any more */
+  unpush_target (&core_ops);
+  core_bfd = temp_bfd;
+  old_chain = make_cleanup (core_close, core_bfd);
+
+  validate_files ();
+
+  /* Find the data section */
+  if (build_section_table (core_bfd, &core_ops.to_sections,
+			   &core_ops.to_sections_end))
+    error ("Can't find sections in `%s': %s", bfd_get_filename(core_bfd),
+	   bfd_errmsg (bfd_error));
+
+  ontop = !push_target (&core_ops);
+  discard_cleanups (old_chain);
+
+  p = bfd_core_file_failing_command (core_bfd);
+  if (p)
+    printf_filtered ("Core was generated by `%s'.\n", p);
+
+  siggy = bfd_core_file_failing_signal (core_bfd);
+  if (siggy > 0)
+    printf_filtered ("Program terminated with signal %d, %s.\n", siggy,
+	    safe_strsignal (siggy));
+
+  /* Locate all of the thread register sections.  They have names like .regxx,
+     where xx is the thread-id.  */
+
+  bfd_map_over_sections (core_bfd, grok_register_sections, 
+
+  if (ontop)
+    {
+      /* Fetch all registers from core file */
+      target_fetch_registers (-1);
+
+      /* Now, set up the frame cache, and print the top of stack */
+      set_current_frame (create_new_frame (read_fp (),
+					   read_pc ()));
+      select_frame (get_current_frame (), 0);
+      print_stack_frame (selected_frame, selected_frame_level, 1);
+    }
+  else
+    {
+      warning (
+	       "you won't be able to access this core file until you terminate\n\
+your %s; do ``info files''", current_target->to_longname);
+    }
+}
+
+static void
+lynx_core_detach (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  if (args)
+    error ("Too many arguments");
+  unpush_target (&core_ops);
+  if (from_tty)
+    printf_filtered ("No core file now.\n");
+}
+
+/* Get the registers out of a core file.  This is the machine-
+   independent part.  Fetch_core_registers is the machine-dependent
+   part, typically implemented in the xm-file for each architecture.  */
+
+/* We just get all the registers, so we don't use regno.  */
+/* ARGSUSED */
+static void
+get_core_registers (regno)
+     int regno;
+{
+  sec_ptr reg_sec;
+  unsigned size;
+  char *the_regs;
+  char regsecname[20];
+
+  sprintf (regsecname, ".reg%d", TIDGET (inferior_pid));
+
+  reg_sec = bfd_get_section_by_name (core_bfd, regsecname);
+  if (!reg_sec)
+    goto cant;
+  size = bfd_section_size (core_bfd, reg_sec);
+  the_regs = alloca (size);
+  if (bfd_get_section_contents (core_bfd, reg_sec, the_regs, (file_ptr)0,
+				size))
+    {
+      fetch_core_registers (the_regs, size, 0,
+			    (unsigned) bfd_section_vma (abfd,reg_sec));
+    }
+  else
+    {
+cant:
+      fprintf_filtered (stderr, "Couldn't fetch registers from core file: %s\n",
+	       bfd_errmsg (bfd_error));
+    }
+
+  registers_fetched();
+}
+
+static void
+core_files_info (t)
+  struct target_ops *t;
+{
+  print_section_info (t, core_bfd);
+}
+
+/* If mourn is being called in all the right places, this could be say
+   `gdb internal error' (since generic_mourn calls mark_breakpoints_out).  */
+
+static int
+ignore (addr, contents)
+     CORE_ADDR addr;
+     char *contents;
+{
+}
+
+static struct target_ops
+lynx_core_ops =
+{
+  "core",
+  "Local core dump file",
+  "Use a core file as a target.  Specify the filename of the core file.",
+  lynx_core_open,
+  lynx_core_close,
+  find_default_attach,
+  lynx_core_detach,
+  0,
+  0,
+  get_core_registers, 
+  0,
+  0,
+  xfer_memory,
+  lynx_core_files_info,
+  ignore,
+  ignore,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  find_default_create_inferior,
+  0,				/* mourn_inferior */
+  0,				/* can_run */
+  0,				/* notice_signals */
+  core_stratum,
+  0,				/* next */
+  0,
+  1,
+  1,
+  1,
+  0,
+  0,
+  0,
+  OPS_MAGIC,			/* Always the last thing */
+};
+
+void
+_initialize_i386lynx_nat()
+{
+  add_target (&lynx_core_ops);
+}
+#endif

@@ -83,7 +83,9 @@ exec_close (quitting)
      int quitting;
 {
   if (exec_bfd) {
+    char *name = bfd_get_filename (exec_bfd);
     bfd_close (exec_bfd);
+    free (name);
     exec_bfd = NULL;
   }
   if (exec_ops.to_sections) {
@@ -143,7 +145,7 @@ exec_file_command (args, from_tty)
       if (scratch_chan < 0)
 	perror_with_name (filename);
 
-      exec_bfd = bfd_fdopenr (scratch_pathname, NULL, scratch_chan);
+      exec_bfd = bfd_fdopenr (scratch_pathname, gnutarget, scratch_chan);
       if (!exec_bfd)
 	error ("Could not open `%s' as an executable file: %s",
 	       scratch_pathname, bfd_errmsg (bfd_error));
@@ -162,7 +164,7 @@ exec_file_command (args, from_tty)
       {
 	struct section_table *p;
 	for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
-	  if (!strcmp (".text", bfd_section_name (p->bfd, p->sec_ptr)))
+	  if (STREQ (".text", bfd_section_name (p->bfd, p->sec_ptr)))
 	    {
 	      text_start = p->addr;
 	      text_end   = p->endaddr;
@@ -341,7 +343,8 @@ print_section_info (t, abfd)
   printf_filtered ("\t`%s', ", bfd_get_filename(abfd));
   wrap_here ("        ");
   printf_filtered ("file type %s.\n", bfd_get_target(abfd));
-
+  printf_filtered ("\tEntry point: %s\n",
+		   local_hex_string (bfd_get_start_address (exec_bfd)));
   for (p = t->to_sections; p < t->to_sections_end; p++) {
     printf_filtered ("\t%s", local_hex_string_custom (p->addr, "08"));
     printf_filtered (" - %s", local_hex_string_custom (p->endaddr, "08"));
@@ -403,6 +406,17 @@ set_section_command (args, from_tty)
   error ("Section %s not found", secprint);
 }
 
+/* If mourn is being called in all the right places, this could be say
+   `gdb internal error' (since generic_mourn calls mark_breakpoints_out).  */
+
+static int
+ignore (addr, contents)
+     CORE_ADDR addr;
+     char *contents;
+{
+  return 0;
+}
+
 struct target_ops exec_ops = {
 	"exec", "Local exec file",
 	"Use an executable file as a target.\n\
@@ -412,7 +426,7 @@ Specify the filename of the executable file.",
 	0, 0, /* fetch_registers, store_registers, */
 	0, /* prepare_to_store, */
 	xfer_memory, exec_files_info,
-	0, 0, /* insert_breakpoint, remove_breakpoint, */
+	ignore, ignore, /* insert_breakpoint, remove_breakpoint, */
 	0, 0, 0, 0, 0, /* terminal stuff */
 	0, 0, /* kill, load */
 	0, /* lookup sym */
@@ -429,20 +443,23 @@ Specify the filename of the executable file.",
 void
 _initialize_exec()
 {
+  struct cmd_list_element *c;
 
-  add_com ("file", class_files, file_command,
-	   "Use FILE as program to be debugged.\n\
+  c = add_cmd ("file", class_files, file_command,
+	       "Use FILE as program to be debugged.\n\
 It is read for its symbols, for getting the contents of pure memory,\n\
 and it is the program executed when you use the `run' command.\n\
 If FILE cannot be found as specified, your execution directory path\n\
 ($PATH) is searched for a command of that name.\n\
-No arg means to have no executable file and no symbols.");
+No arg means to have no executable file and no symbols.", &cmdlist);
+  c->completer = filename_completer;
 
-  add_com ("exec-file", class_files, exec_file_command,
+  c = add_cmd ("exec-file", class_files, exec_file_command,
 	   "Use FILE as program for getting contents of pure memory.\n\
 If FILE cannot be found as specified, your execution directory path\n\
 is searched for a command of that name.\n\
-No arg means have no executable file.");
+No arg means have no executable file.", &cmdlist);
+  c->completer = filename_completer;
 
   add_com ("section", class_files, set_section_command,
    "Change the base address of section SECTION of the exec file to ADDR.\n\

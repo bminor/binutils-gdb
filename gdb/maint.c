@@ -29,6 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "demangle.h"
+#include "gdbcore.h"
 
 static void
 maintenance_command PARAMS ((char *, int));
@@ -124,6 +125,79 @@ maintenance_info_command (arg, from_tty)
   help_list (maintenanceinfolist, "maintenance info ", -1, stdout);
 }
 
+static void
+print_section_table (abfd, asect, ignore)
+     bfd *abfd;
+     asection *asect;
+     PTR ignore;
+{
+  flagword flags;
+
+  flags = bfd_get_section_flags (abfd, asect);
+
+  printf_filtered ("    %s",
+		   local_hex_string_custom (bfd_section_vma (abfd, asect),
+					    "08"));
+  printf_filtered ("->%s",
+		   local_hex_string_custom ((bfd_section_vma (abfd, asect)
+					     + bfd_section_size (abfd, asect)),
+					    "08"));
+  printf_filtered (" at %s", local_hex_string_custom (asect->filepos, "08"));
+  printf_filtered (": %s", bfd_section_name (abfd, asect));
+
+  if (flags & SEC_ALLOC)
+    printf_filtered (" ALLOC");
+  if (flags & SEC_LOAD)
+    printf_filtered (" LOAD");
+  if (flags & SEC_RELOC)
+    printf_filtered (" RELOC");
+  if (flags & SEC_READONLY)
+    printf_filtered (" READONLY");
+  if (flags & SEC_CODE)
+    printf_filtered (" CODE");
+  if (flags & SEC_DATA)
+    printf_filtered (" DATA");
+  if (flags & SEC_ROM)
+    printf_filtered (" ROM");
+  if (flags & SEC_CONSTRUCTOR)
+    printf_filtered (" CONSTRUCTOR");
+  if (flags & SEC_HAS_CONTENTS)
+    printf_filtered (" HAS_CONTENTS");
+  if (flags & SEC_NEVER_LOAD)
+    printf_filtered (" NEVER_LOAD");
+  if (flags & SEC_SHARED_LIBRARY)
+    printf_filtered (" SHARED_LIBRARY");
+  if (flags & SEC_IS_COMMON)
+    printf_filtered (" IS_COMMON");
+
+  printf_filtered ("\n");
+}
+
+/* ARGSUSED */
+static void
+maintenance_info_sections (arg, from_tty)
+     char *arg;
+     int from_tty;
+{
+  if (exec_bfd)
+    {
+      printf_filtered ("Exec file:\n");
+      printf_filtered ("    `%s', ", bfd_get_filename(exec_bfd));
+      wrap_here ("        ");
+      printf_filtered ("file type %s.\n", bfd_get_target(exec_bfd));
+      bfd_map_over_sections(exec_bfd, print_section_table, 0);
+    }
+
+  if (core_bfd)
+    {
+      printf_filtered ("Core file:\n");
+      printf_filtered ("    `%s', ", bfd_get_filename(core_bfd));
+      wrap_here ("        ");
+      printf_filtered ("file type %s.\n", bfd_get_target(core_bfd));
+      bfd_map_over_sections(core_bfd, print_section_table, 0);
+    }
+}
+
 /* The "maintenance print" command is defined as a prefix, with allow_unknown
    0.  Therefore, its own definition is called only for "maintenance print"
    with no args.  */
@@ -173,6 +247,10 @@ to test internal functions such as the C++ demangler, etc.",
 		  "Commands for showing internal info about the program being debugged.",
 		  &maintenanceinfolist, "maintenance info ", 0,
 		  &maintenancelist);
+
+  add_cmd ("sections", class_maintenance, maintenance_info_sections,
+	   "List the BFD sections of the exec and core files.",
+	   &maintenanceinfolist);
 
   add_prefix_cmd ("print", class_maintenance, maintenance_print_command,
 		  "Maintenance command for printing GDB internal state.",

@@ -1,3 +1,23 @@
+Wed Sep 22 08:02:57 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in:  Add i386lynx-tdep to the right places.
+	(TARDIRS):  Add gdbserver.
+
+	* exec.c (print_section_info):  Print entry point.
+	* i386lynx-nat.c (i386lynx_saved_pc_after_call):  Move into
+	i386lynx-tdep.c.  Add core file support.
+	* i386lynx-tdep.c:  New module for Lynx/386 target dependant code.
+	* maint.c:  Add `maint info sections' command to print info about all
+	sections that BFD knows about for exec and core files.
+	* sparc-tdep.c (sparc_push_dummy_frame):  Update stack pointer
+	before putting frame on the stack.  Consolidate writes to reduce
+	traffic for remote debugging.
+	* config/i386/i386lynx.mh (NATDEPFILES):  Remove exec.o.
+	* config/i386/i386lynx.mt (TDEPFILES):  Add exec.o, i386lynx-tdep.o.
+	* config/i386/nm-i386lynx.h:  Add target_pid_to_str().
+	* config/i386/tm-i386lynx.h:  Remove target_pid_to_str().
+	* sparclite/Makefile.in:  Add deps to keep Sun make happy.
+
 Tue Sep 21 17:48:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.h, breakpoint.c (bpstat_stop_status): Add new argument

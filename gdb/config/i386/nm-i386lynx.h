@@ -20,6 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef NM_I386LYNX_H
 #define NM_I386LYNX_H
 
+#include <sys/conf.h>
 #include <sys/kernel.h>
 #include <sys/mem.h>
 #include <sys/signal.h>
@@ -54,5 +55,14 @@ i386_register_u_addr PARAMS ((int, int));
 
 #define CHILD_WAIT
 extern int child_wait PARAMS ((int *status));
+
+/* Lynx needs a special definition of this so that we can
+   print out the pid and thread number seperatly.  */
+
+#undef target_pid_to_str
+
+#define target_pid_to_str(PID) \
+	i386lynx_pid_to_str (PID)
+extern char *i386lynx_pid_to_str PARAMS ((int pid));
 
 #endif /* NM_I386LYNX_H */
