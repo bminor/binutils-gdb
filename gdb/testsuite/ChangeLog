@@ -1,3 +1,24 @@
+Fri Sep 11 13:58:02 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.c++/classes.exp: Change all regular expressions to match
+	arbitrary combinations of newline/carriage-return, so that they
+	will work equally well on Unix and Windows.
+	* gdb.c++/inherit.exp: ditto.
+	* gdb.c++/virtfunc.exp: ditto.
+
+1998-08-11 Dawn Perchik  <dawn@cygnus.com>
+
+	* gdb.base/setshow.exp: Fix error introduced by call to runto_main.
+
+start-sanitize-gdbtk
+Fri Jul 24 14:57:19 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* gdb.gdbtk/Makefile.in: Add new example program "stack".
+	* gdb.gdbtk/browser.test,browser.exp: Add browser window
+	  tests.
+	* gdb.gdbtk/stack1.c,stack2.c: Test case for browser window.
+	
+end-sanitize-gdbtk
 start-sanitize-am33
 Fri Jul 24 15:51:34 1998  Jeffrey A Law  (law@cygnus.com)
 
