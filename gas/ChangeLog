@@ -1,3 +1,10 @@
+Thu Dec 19 12:06:08 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* write.c (adjust_reloc_syms): If the fixup symbol has been
+	equated to an undefined symbol, convert the fixup to being against
+	the target symbol.  Remove obsolete code handling a special case
+	for i386 PIC.
+
 start-sanitize-d10v
 Wed Dec 18 16:00:42 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

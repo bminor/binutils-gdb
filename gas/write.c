@@ -667,7 +667,6 @@ adjust_reloc_syms (abfd, sec, xxx)
 #endif
 
 	sym = fixp->fx_addsy;
-	symsec = sym->bsym->section;
 
 	/* All symbols should have already been resolved at this
 	   point.  It is possible to see unresolved expression
@@ -677,6 +676,18 @@ adjust_reloc_syms (abfd, sec, xxx)
 	  resolve_symbol_value (sym);
 	if (fixp->fx_subsy != NULL && ! fixp->fx_subsy->sy_resolved)
 	  resolve_symbol_value (fixp->fx_subsy);
+
+	/* If this symbol is equated to an undefined symbol, convert
+           the fixup to being against that symbol.  */
+	if (sym->sy_value.X_op == O_symbol
+	    && (! S_IS_DEFINED (sym) || S_IS_COMMON (sym)))
+	  {
+	    fixp->fx_offset += sym->sy_value.X_add_number;
+	    sym = sym->sy_value.X_add_symbol;
+	    fixp->fx_addsy = sym;
+	  }
+
+	symsec = S_GET_SEGMENT (sym);
 
 	if (sym != NULL && sym->sy_mri_common)
 	  {
@@ -780,27 +791,6 @@ adjust_reloc_syms (abfd, sec, xxx)
 	    goto done;
 	  }
 #endif
-
-	/* For PIC support: We may get expressions like
-	   "_GLOBAL_OFFSET_TABLE_+(.-L5)" where "." and "L5" may not
-	   necessarily have had a fixed difference initially.  But now
-	   it should be a known constant, so we can reduce it.  Since
-	   we can't easily handle a symbol value that looks like
-	   someUndefinedSymbol+const, though, we convert the fixup to
-	   access the undefined symbol directly, and discard the
-	   intermediate symbol.  */
-	if (S_GET_SEGMENT (sym) == expr_section
-	    && sym->sy_value.X_op == O_add
-	    && (resolve_symbol_value (sym->sy_value.X_add_symbol),
-		S_GET_SEGMENT (sym->sy_value.X_add_symbol) == undefined_section)
-	    && (resolve_symbol_value (sym->sy_value.X_op_symbol),
-		S_GET_SEGMENT (sym->sy_value.X_op_symbol) == absolute_section))
-	  {
-	    fixp->fx_offset += S_GET_VALUE (sym->sy_value.X_op_symbol);
-	    fixp->fx_offset += sym->sy_value.X_add_number;
-	    fixp->fx_addsy = sym->sy_value.X_add_symbol;
-	    goto reduce_fixup;
-	  }
 
 	/* If the section symbol isn't going to be output, the relocs
 	   at least should still work.  If not, figure out what to do
