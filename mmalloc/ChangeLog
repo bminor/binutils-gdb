@@ -1,3 +1,7 @@
+Sun Nov  5 00:27:36 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in: AC_CHECK_HEADERS, not AC_CHECK_HEADER.
+
 Sun Nov  5 00:14:13 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in: add check for stddef.h

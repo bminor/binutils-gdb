@@ -847,15 +847,17 @@ EOF
 
 fi
 
-ac_safe=`echo "stddef.h" | tr './\055' '___'`
-echo $ac_n "checking for stddef.h""... $ac_c" 1>&6
+for ac_hdr in stddef.h
+do
+ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
+echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 857 "configure"
+#line 859 "configure"
 #include "confdefs.h"
-#include <stddef.h>
+#include <$ac_hdr>
 EOF
 eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
 ac_err=`grep -v '^ *+' conftest.out`
@@ -871,10 +873,15 @@ rm -f conftest*
 fi
 if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  :
+    ac_tr_hdr=HAVE_`echo $ac_hdr | tr '[a-z]./\055' '[A-Z]___'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_hdr 1
+EOF
+ 
 else
   echo "$ac_t""no" 1>&6
 fi
+done
 
 
 trap '' 1 2 15
