@@ -1,3 +1,8 @@
+Fri Jun 26 11:09:10 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* source.c (print_source_lines): for DOS interoperability; don't
+	print CR (013) as ^M.
+
 Thu Jun 25 15:18:42 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* dbxread.c (dbx_symfile_init):  Move more code under hp9000s800
