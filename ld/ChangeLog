@@ -1,5 +1,8 @@
 2003-10-19  Andreas Schwab  <schwab@suse.de>
 
+	* emultempl/ticoff.em (gld_${EMULATION_NAME}_list_options): Add
+	newline to message.
+
 	* deffilep.y: Remove commas from %token lines.
 
 2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>

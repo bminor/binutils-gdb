@@ -62,7 +62,7 @@ gld${EMULATION_NAME}_add_options
 static void
 gld_${EMULATION_NAME}_list_options (FILE * file)
 {
-  fprintf (file, _("  --format 0|1|2         Specify which COFF version to use"));
+  fprintf (file, _("  --format 0|1|2         Specify which COFF version to use\n"));
 }				  
 
 static bfd_boolean
