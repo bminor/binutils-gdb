@@ -1,7 +1,11 @@
 start-sanitize-sky
+Wed Jun 24 19:09:03 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/t-cop2.vuexpect: Adapt to new disassembly format.
+
 Wed Jun 24 18:16:00 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
 
-        * sim/sky/t-int.c, sim/sky/t-int-handler.c:
+	* sim/sky/t-int.c, sim/sky/t-int-handler.c:
 	Testcase errors: two in the former file, one in the latter.
 
 Wed Jun 24 17:35:00 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
