@@ -1,3 +1,7 @@
+Sat Aug 15 20:55:08 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c (elf64_alpha_relax_section): Handle indirect symbols.
+
 Fri Aug 14 09:12:28 1998  Stan Cox  <scox@cygnus.com>
 
 	* aoutx.h (aout_link_input_section_ext): Use the relocation already
