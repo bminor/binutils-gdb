@@ -423,7 +423,7 @@
 	for various msp430 configurations.
 	* gen-doc.texi: Enable msp430 documenation.
 	* ld.texinfo: Document msp430 sections.
-	* scripttempl/elf32msp430.sc: New file.-b Linker script for msp430.-A
+	* scripttempl/elf32msp430.sc: New file.  Linker script for msp430.
 	* scripttempl/elf32msp430_3.sc: New file.  Linker script for msp430.
 
 2002-12-30  Ralf Habacker  <Ralf.Habacker@freenet.de>
