@@ -83,17 +83,30 @@ sparc64obsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
   CORE_ADDR start_pc = (pc & ~(sparc64obsd_page_size - 1));
   unsigned long insn;
+  int offset = 0;
 
   if (name)
     return 0;
 
+ retry:
   /* Check for "restore %g0, SYS_sigreturn, %g1".  */
-  insn = sparc_fetch_instruction (start_pc + 0xe8);
+  insn = sparc_fetch_instruction (start_pc + offset + 0xec);
   if (insn != 0x83e82067)
-    return 0;
+    {
+      if (offset == 0)
+	{
+	  /* In OpenBSD 3.5 and earlier releases, the code
+             implementing the sigreturn system call was at a different
+             offset within the signal trampoline.  Try again.  */
+	  offset = -4;
+	  goto retry;
+	}
+
+      return 0;
+    }
 
   /* Check for "t ST_SYSCALL".  */
-  insn = sparc_fetch_instruction (start_pc + 0xf0);
+  insn = sparc_fetch_instruction (start_pc + offset + 0xf4);
   if (insn != 0x91d02000)
     return 0;
 

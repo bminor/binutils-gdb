@@ -1,5 +1,8 @@
 2004-07-23  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64obsd-tdep.c (sparc64obsd_pc_in_sigtramp): Adjust for
+	changed signal trampoline in OpenBSD 3.5-current.
+
 	* sparc64nbsd-nat.c: Include "regcache.h", <sys/types.h>,
 	<machine/pcb.h> and "bsd-kvm.h".
 	(sparc64nbsd_supply_pcb): New function.
