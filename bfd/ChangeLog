@@ -1,3 +1,9 @@
+Thu Jun  1 13:51:49 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* coffcode.h (sec_to_styp_flags, styp_to_sec_flags, 
+	coff_new_section_hook):  Any section that starts ".stab"
+	is now marked as debugging.
+
 Thu Jun  1 16:15:16 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* archive.c (_bfd_write_archive_contents): Disable extended name
