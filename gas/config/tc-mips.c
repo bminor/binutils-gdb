@@ -1993,7 +1993,8 @@ load_address (counter, reg, ep)
 	   lui		$reg,<sym>		(BFD_RELOC_HI16_S)
 	   addiu	$reg,$reg,<sym>		(BFD_RELOC_LO16)
 	 If we have an addend, we always use the latter form.  */
-      if (ep->X_add_number != 0 || nopic_need_relax (ep->X_add_symbol))
+      if ((valueT) ep->X_add_number >= MAX_GPREL_OFFSET
+          || nopic_need_relax (ep->X_add_symbol))
 	p = NULL;
       else
 	{
@@ -2860,7 +2861,7 @@ macro (ip)
 	       addiu	$tempreg,$tempreg,<sym>	(BFD_RELOC_LO16)
 	     If we have a constant, we need two instructions anyhow,
 	     so we may as well always use the latter form.  */
-	  if (offset_expr.X_add_number != 0
+	  if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
 	      || nopic_need_relax (offset_expr.X_add_symbol))
 	    p = NULL;
 	  else
@@ -3571,7 +3572,7 @@ macro (ip)
 	     With a constant we always use the latter case.  */
 	  if (breg == 0)
 	    {
-	      if (offset_expr.X_add_number != 0
+	      if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
 		  || nopic_need_relax (offset_expr.X_add_symbol))
 		p = NULL;
 	      else
@@ -3595,7 +3596,7 @@ macro (ip)
 	    }
 	  else
 	    {
-	      if (offset_expr.X_add_number != 0
+	      if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
 		  || nopic_need_relax (offset_expr.X_add_symbol))
 		p = NULL;
 	      else
@@ -4000,7 +4001,7 @@ macro (ip)
 	     If there is a base register, we add it to $at after the
 	     lui instruction.  If there is a constant, we always use
 	     the last case.  */
-	  if (offset_expr.X_add_number != 0
+	  if ((valueT) offset_expr.X_add_number >= MAX_GPREL_OFFSET
 	      || nopic_need_relax (offset_expr.X_add_symbol))
 	    {
 	      p = NULL;
