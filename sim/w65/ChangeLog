@@ -1,3 +1,12 @@
+Wed Jun 26 12:30:45 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+        * Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir,
+        INSTALL_PROGRAM, INSTALL_DATA): Use autoconf-set values.
+        (docdir): Removed.
+        * configure.in (AC_PREREQ): autoconf 2.5 or higher.
+        (AC_PROG_INSTALL): Added.
+        * configure: Rebuilt.
+
 Wed Feb 21 12:17:04 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Regenerate with autoconf 2.7.
