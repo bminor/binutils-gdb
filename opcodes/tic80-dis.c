@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define M_SI(insn,op) ((((op) -> flags & TIC80_OPERAND_M_SI) != 0) && ((insn) & (1 << 17)))
 #define M_LI(insn,op) ((((op) -> flags & TIC80_OPERAND_M_LI) != 0) && ((insn) & (1 << 15)))
+#define R_SCALED(insn,op) ((((op) -> flags & TIC80_OPERAND_SCALED) != 0) && ((insn) & (1 << 11)))
 
 int 
 print_insn_tic80 (memaddr, info)
@@ -290,6 +291,13 @@ print_insn_tic80 (memaddr, info)
 		{
 		  (*info -> fprintf_func) (info -> stream, "%ld", value);
 		}
+	    }
+
+	  /* If this is a scaled operand, then print the modifier */
+
+	  if (R_SCALED (insn[0], operand))
+	    {
+	      (*info -> fprintf_func) (info -> stream, ":s");
 	    }
 
 	  /* If we printed an open paren before printing this operand, close
