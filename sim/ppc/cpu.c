@@ -292,7 +292,7 @@ cpu_get_number_of_insns(cpu *processor)
 INLINE_CPU void
 cpu_print_info(cpu *processor, int verbose)
 {
-  printf_filtered("CPU %d executed %ld instructions.\n",
+  printf_filtered("CPU #%d executed %ld instructions.\n",
 		  processor->cpu_nr+1,
 		  processor->number_of_insns);
 }
