@@ -1,5 +1,9 @@
 Fri May  6 15:15:35 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ldfile.c (ldfile_open_command_file): Set bfd_error_system_call
+	before calling einfo, since we are reporting an fopen failure.
+	From jrs@world.std.com (Rick Sladkey).
+
 	* configure.in: Use "e" rather than "em_" as prefix for
 	emulations.
 
