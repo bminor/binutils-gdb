@@ -1,3 +1,8 @@
+Tue Sep 15 15:35:38 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (install): if $(tooldir) exists, install ld in
+	$(tooldir)/bin.
+
 Fri Sep 11 10:24:22 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* Makefile.in, configure.in: modified to support i386-coff
