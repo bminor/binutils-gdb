@@ -117,9 +117,7 @@ case ${target_cpu} in
 esac
 
 gas_target=${cpu_type}
-
 generic_target=${cpu_type}-${target_vendor}-${target_os}
-
 dev=no
 
 # assign object format
@@ -127,6 +125,8 @@ case ${generic_target} in
   a29k-amd-udi)		obj_format=coffbfd gas_target=ebmon29k ;;
   a29k-amd-ebmon)	obj_format=coffbfd gas_target=ebmon29k ;;
   a29k-amd-ebmonold)	obj_format=coff gas_target=ebmon29k ;;
+
+  alpha-*-osf*)		obj_format=ecoff dev=yes ;;
 
   hppa-*-osf)		obj_format=elf emulation=hppa dev=yes ;;
   hppa-*-hpux*)		obj_format=som emulation=hppa ;;
@@ -186,10 +186,13 @@ case ${generic_target} in
 			fi
 			;;
 
+  sh-*-coff)		obj_format=coffbfd ;;
+
   sparc*-*-sunos4*)	obj_format=aout emulation=sun3 bfd_gas=yes ;;
   sparc*-*-aout | sparc*-*-vxworks)
 			obj_format=aout bfd_gas=yes ;;
   sparc*-*-coff)	obj_format=coff bfd_gas=yes ;;
+  sparc*-*-lynxos)	obj_format=coff bfd_gas=yes ;;
   sparc*-fujitsu-none)	obj_format=aout bfd_gas=yes ;;
   sparc*-*-elf | sparc*-*-solaris*)
 			obj_format=elf ;;
