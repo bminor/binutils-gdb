@@ -180,8 +180,6 @@ list_info_type;
 static struct list_info_struct *head;
 struct list_info_struct *listing_tail;
 extern int listing;
-extern fragS *frag_now;
-
 
 static int paper_width = 200;
 static int paper_height = 60;
@@ -303,6 +301,12 @@ listing_newline (ps)
   static unsigned int last_line = 0xffff;
   static char *last_file = NULL;
   list_info_type *new;
+
+  if (listing == 0)
+    return;
+
+  if (now_seg == absolute_section)
+    return;
 
   as_where (&file, &line);
   if (line != last_line || (last_file && file && strcmp(file, last_file)))
@@ -514,7 +518,8 @@ calc_hex (list)
 	unsigned int var_rep_idx = byte_in_frag;
 
 	/* Print as many bytes from the variable part as is sensible */
-	while (byte_in_frag < frag_ptr->fr_var * frag_ptr->fr_offset
+	while ((byte_in_frag
+		< frag_ptr->fr_fix + frag_ptr->fr_var * frag_ptr->fr_offset)
 	       && data_buffer_size < sizeof (data_buffer) - 10)
 	  {
 	    if (address == ~0)
@@ -533,7 +538,7 @@ calc_hex (list)
 	    var_rep_idx++;
 	    byte_in_frag++;
 
-	    if (var_rep_idx >= frag_ptr->fr_var)
+	    if (var_rep_idx >= frag_ptr->fr_fix + frag_ptr->fr_var)
 	      var_rep_idx = var_rep_max;
 	  }
       }
@@ -967,7 +972,8 @@ void
 listing_eject (ignore)
      int ignore;
 {
-  listing_tail->edict = EDICT_EJECT;
+  if (listing)
+    listing_tail->edict = EDICT_EJECT;
 }
 
 void
@@ -983,7 +989,8 @@ void
 listing_list (on)
      int on;
 {
-  listing_tail->edict = on ? EDICT_LIST : EDICT_NOLIST;
+  if (listing)
+    listing_tail->edict = on ? EDICT_LIST : EDICT_NOLIST;
 }
 
 
@@ -1016,22 +1023,39 @@ listing_psize (width_only)
 }
 
 void
+listing_nopage (ignore)
+     int ignore;
+{
+  paper_height = 0;
+}
+
+void
 listing_title (depth)
      int depth;
 {
+  int quoted;
   char *start;
   char *ttl;
   unsigned int length;
 
   SKIP_WHITESPACE ();
-  if (*input_line_pointer == '\"')
+  if (*input_line_pointer != '\"')
+    quoted = 0;
+  else
     {
-      input_line_pointer++;
-      start = input_line_pointer;
+      quoted = 1;
+      ++input_line_pointer;
+    }
 
-      while (*input_line_pointer)
+  start = input_line_pointer;
+
+  while (*input_line_pointer)
+    {
+      if (quoted
+	  ? *input_line_pointer == '\"'
+	  : is_end_of_line[(unsigned char) *input_line_pointer])
 	{
-	  if (*input_line_pointer == '\"')
+	  if (listing)
 	    {
 	      length = input_line_pointer - start;
 	      ttl = xmalloc (length + 1);
@@ -1039,25 +1063,22 @@ listing_title (depth)
 	      ttl[length] = 0;
 	      listing_tail->edict = depth ? EDICT_SBTTL : EDICT_TITLE;
 	      listing_tail->edict_arg = ttl;
-	      input_line_pointer++;
-	      demand_empty_rest_of_line ();
-	      return;
 	    }
-	  else if (*input_line_pointer == '\n')
-	    {
-	      as_bad ("New line in title");
-	      demand_empty_rest_of_line ();
-	      return;
-	    }
-	  else
-	    {
-	      input_line_pointer++;
-	    }
+	  if (quoted)
+	    input_line_pointer++;
+	  demand_empty_rest_of_line ();
+	  return;
 	}
-    }
-  else
-    {
-      as_bad ("expecting title in quotes");
+      else if (*input_line_pointer == '\n')
+	{
+	  as_bad ("New line in title");
+	  demand_empty_rest_of_line ();
+	  return;
+	}
+      else
+	{
+	  input_line_pointer++;
+	}
     }
 }
 
@@ -1067,17 +1088,19 @@ void
 listing_source_line (line)
      unsigned int line;
 {
-  new_frag ();
-  listing_tail->hll_line = line;
-  new_frag ();
-
+  if (listing)
+    {
+      new_frag ();
+      listing_tail->hll_line = line;
+      new_frag ();
+    }
 }
 
 void
 listing_source_file (file)
      const char *file;
 {
-  if (listing_tail)
+  if (listing)
     listing_tail->hll_file = file_info (file);
 }
 
@@ -1111,6 +1134,13 @@ listing_eject (ignore)
 
 void 
 listing_psize (ignore)
+     int ignore;
+{
+  s_ignore (0);
+}
+
+void
+listing_nopage (ignore)
      int ignore;
 {
   s_ignore (0);
