@@ -1,3 +1,8 @@
+2000-11-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (md_pseudo_table): Add support for .line and
+	.file pseudo ops.
+
 2000-11-17  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-i386.c (md_pseudo_table): Add .file and .loc.

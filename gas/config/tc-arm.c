@@ -1120,6 +1120,8 @@ CONST pseudo_typeS md_pseudo_table[] =
   { "sect.s",      arm_s_section, 0 },
   { "word",        s_arm_elf_cons, 4 },
   { "long",        s_arm_elf_cons, 4 },
+  { "file",        dwarf2_directive_file, 0 },
+  { "loc",         dwarf2_directive_loc,  0 },
 #else
   { "word",        cons, 4},
 #endif
@@ -6299,8 +6301,8 @@ tc_gen_reloc (section, fixp)
 	  default:                         type = _("<unknown>"); break;
 	  }
 	as_bad_where (fixp->fx_file, fixp->fx_line,
-		      _("Can not represent %s relocation in this object file format (%d)"),
-		      type, fixp->fx_pcrel);
+		      _("Cannot represent %s relocation in this object file format"),
+		      type);
 	return NULL;
       }
     }
