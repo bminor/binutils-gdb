@@ -1879,16 +1879,26 @@ coff_write_object_contents (abfd)
 #ifdef COFF_IMAGE_WITH_PE
   struct internal_extra_pe_aouthdr extra_a;
   struct internal_extra_pe_filehdr extra_f;
-
-  bfd_link_pe_info *pe_info = coff_data (abfd)->link_info->pe_info;
   bfd_link_pe_info defs;
+  struct bfd_link_info dummy_info;
+  struct bfd_link_info *info ;
+  struct bfd_link_pe_info *pe_info;
+
+  if (coff_data (abfd)->link_info)
+      info =coff_data (abfd)->link_info;
+  else 
+    {
+      coff_data (abfd)->link_info = info = &dummy_info;
+      info->pe_info = 0;
+    }
+  pe_info = info->pe_info;
+
   if (!pe_info)
     {
       /* Just use sensible defaults */
       memset (&defs, 0, sizeof (defs));
       coff_data (abfd)->link_info->pe_info = &defs;
     }
-
 #endif
 
   bfd_set_error (bfd_error_system_call);

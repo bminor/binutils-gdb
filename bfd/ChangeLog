@@ -8,6 +8,7 @@ Mon Aug 21 17:49:28 1995  steve chamberlain  <sac@slash.cygnus.com>
 	* coffcode.h (pe_value): New function.
 	(fill_pe_header_info): New function.
 	(coff_write_object_contents): Use new function.
+	(coff_write_object_contents): Initialze link_data if not set.
 	* cofflink.c (coff_final_link_info): Remove pe randomness.
 	(dores_com): Update info in bfd_link_pe_info_dval.
 	(process_embedded_commands): Use the bfd_link_pe_info_dval.
