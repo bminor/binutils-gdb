@@ -326,9 +326,6 @@ esac
 noconfigdirs=""
 
 case "${host}" in
-  i[345]86-*-netbsd*)
-    noconfigdirs="tk fileutils"
-    ;;
   i[345]86-*-vsta)
     noconfigdirs="tcl expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
     ;;
