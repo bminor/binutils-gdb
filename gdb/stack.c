@@ -17,25 +17,79 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
-
 #include "defs.h"
-#include "param.h"
-#include "language.h"
+#include "value.h"
 #include "symtab.h"
+#include "gdbtypes.h"
+#include "expression.h"
+#include "language.h"
 #include "frame.h"
 #include "gdbcmd.h"
-#include "value.h"
 #include "gdbcore.h"
 #include "target.h"
 #include "breakpoint.h"
+#include "demangle.h"
+
+static void
+return_command PARAMS ((char *, int));
+
+static void
+down_command PARAMS ((char *, int));
+
+static void
+down_silently_command PARAMS ((char *, int));
+
+static void
+up_command PARAMS ((char *, int));
+
+static void
+up_silently_command PARAMS ((char *, int));
+
+static void
+frame_command PARAMS ((char *, int));
+
+static void
+select_frame_command PARAMS ((char *, int));
+
+static void
+args_info PARAMS ((char *, int));
+
+static void
+print_frame_arg_vars PARAMS ((FRAME, FILE *));
+
+static void
+catch_info PARAMS ((char *, int));
+
+static void
+locals_info PARAMS ((char *, int));
+
+static void
+print_frame_label_vars PARAMS ((FRAME, int, FILE *));
+
+static void
+print_frame_local_vars PARAMS ((FRAME, FILE *));
+
+static int
+print_block_frame_labels PARAMS ((struct block *, int *, FILE *));
+
+static int
+print_block_frame_locals PARAMS ((struct block *, FRAME, FILE *));
+
+static void
+backtrace_command PARAMS ((char *, int));
+
+static FRAME
+parse_frame_specification PARAMS ((char *));
+
+static void
+frame_info PARAMS ((char *, int));
+
 
 extern int addressprint;	/* Print addresses, or stay symbolic only? */
 extern int info_verbose;	/* Verbosity of symbol reading msgs */
 extern int lines_to_list;	/* # of lines "list" command shows by default */
-extern char *reg_names[];	/* Names of registers */
 
-/* Thie "selected" stack frame is used by default for local and arg access.
+/* The "selected" stack frame is used by default for local and arg access.
    May be zero, for no selected frame.  */
 
 FRAME selected_frame;
@@ -51,7 +105,6 @@ int selected_frame_level;
 
 int frame_file_full_name = 0;
 
-void print_frame_info ();
 
 /* Print a stack frame briefly.  FRAME should be the frame id
    and LEVEL should be its level in the stack (or -1 for level not defined).
@@ -106,11 +159,15 @@ print_frame_info (fi, level, source, args)
       if (addressprint)
         printf_filtered ("%s in ", local_hex_string(fi->pc));
 
-      fputs_demangled (fname, stdout, -1);
+      fputs_demangled (fname, stdout, 0);
       fputs_filtered (" (...)\n", stdout);
       
       return;
     }
+#endif
+
+#ifdef CORE_NEEDS_RELOCATION
+  CORE_NEEDS_RELOCATION(fi->pc);
 #endif
 
   sal = find_pc_line (fi->pc, fi->next_frame);
@@ -125,14 +182,15 @@ print_frame_info (fi, level, source, args)
 	 ends has been truncated by ar because it is longer than 15
 	 characters).
 
-	 So look in the misc_function_vector as well, and if it comes
+	 So look in the minimal symbol tables as well, and if it comes
 	 up with a larger address for the function use that instead.
-	 I don't think this can ever cause any problems;
-	 there shouldn't be any
-	 misc_function_vector symbols in the middle of a function.  */
-      int misc_index = find_pc_misc_function (fi->pc);
-      if (misc_index >= 0
-	  && (misc_function_vector[misc_index].address
+	 I don't think this can ever cause any problems; there shouldn't
+	 be any minimal symbols in the middle of a function.
+	 FIXME:  (Not necessarily true.  What about text labels) */
+
+      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
+      if (msymbol != NULL
+	  && (msymbol -> address
 	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
 	{
 	  /* In this case we have no way of knowing the source file
@@ -141,16 +199,16 @@ print_frame_info (fi, level, source, args)
 	  /* We also don't know anything about the function besides
 	     its address and name.  */
 	  func = 0;
-	  funname = misc_function_vector[misc_index].name;
+	  funname = msymbol -> name;
 	}
       else
 	funname = SYMBOL_NAME (func);
     }
   else
     {
-      register int misc_index = find_pc_misc_function (fi->pc);
-      if (misc_index >= 0)
-	funname = misc_function_vector[misc_index].name;
+      register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
+      if (msymbol != NULL)
+	funname = msymbol -> name;
     }
 
   if (source >= 0 || !sal.symtab)
@@ -160,7 +218,7 @@ print_frame_info (fi, level, source, args)
       if (addressprint)
 	if (fi->pc != sal.pc || !sal.symtab)
 	  printf_filtered ("%s in ", local_hex_string(fi->pc));
-      fputs_demangled (funname ? funname : "??", stdout, -1);
+      fputs_demangled (funname ? funname : "??", stdout, 0);
       wrap_here ("   ");
       fputs_filtered (" (", stdout);
       if (args)
@@ -174,6 +232,16 @@ print_frame_info (fi, level, source, args)
           wrap_here ("   ");
 	  printf_filtered (" at %s:%d", sal.symtab->filename, sal.line);
 	}
+
+#ifdef PC_LOAD_SEGMENT
+     /* If we couldn't print out function name but if can figure out what
+        load segment this pc value is from, at least print out some info
+	about its load segment. */
+      if (!funname) {
+	wrap_here ("  ");
+	printf_filtered (" from %s", PC_LOAD_SEGMENT (fi->pc));
+      }
+#endif
       printf_filtered ("\n");
     }
 
@@ -196,8 +264,6 @@ print_frame_info (fi, level, source, args)
 
   fflush (stdout);
 }
-
-void flush_cached_frames ();
 
 #ifdef FRAME_SPECIFICATION_DYADIC
 extern FRAME setup_arbitrary_frame ();
@@ -312,8 +378,9 @@ parse_frame_specification (frame_exp)
    This means absolutely all information in the frame is printed.  */
 
 static void
-frame_info (addr_exp)
+frame_info (addr_exp, from_tty)
      char *addr_exp;
+     int from_tty;
 {
   FRAME frame;
   struct frame_info *fi;
@@ -340,9 +407,9 @@ frame_info (addr_exp)
     funname = SYMBOL_NAME (func);
   else
     {
-      register int misc_index = find_pc_misc_function (fi->pc);
-      if (misc_index >= 0)
-	funname = misc_function_vector[misc_index].name;
+      register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
+      if (msymbol != NULL)
+	funname = msymbol -> name;
     }
   calling_frame = get_prev_frame (frame);
 
@@ -362,7 +429,7 @@ frame_info (addr_exp)
   if (funname)
     {
       printf_filtered (" in ");
-      fputs_demangled (funname, stdout, 1);
+      fputs_demangled (funname, stdout, DMGL_ANSI | DMGL_PARAMS);
     }
   wrap_here ("   ");
   if (sal.symtab)
@@ -371,6 +438,16 @@ frame_info (addr_exp)
   wrap_here ("    ");
   printf_filtered ("saved %s %s\n", reg_names[PC_REGNUM],
 		   local_hex_string(FRAME_SAVED_PC (frame)));
+
+  {
+    int frameless = 0;
+#ifdef FRAMELESS_FUNCTION_INVOCATION
+    FRAMELESS_FUNCTION_INVOCATION (fi, frameless);
+#endif
+    if (frameless)
+      printf_filtered (" (FRAMELESS),");
+  }
+
   if (calling_frame)
     printf_filtered (" called by frame at %s", 
 		     local_hex_string(FRAME_FP (calling_frame)));
@@ -408,6 +485,15 @@ frame_info (addr_exp)
 	print_frame_args (func, fi, numargs, stdout);
 	puts_filtered ("\n");
       }
+  }
+  {
+    /* Address of the local variables for this frame, or 0.  */
+    CORE_ADDR arg_list = FRAME_LOCALS_ADDRESS (fi);
+
+    if (arg_list == 0)
+	printf_filtered (" Locals at unknown address,");
+    else
+	printf_filtered (" Locals at %s,", local_hex_string(arg_list));
   }
 
 #if defined (FRAME_FIND_SAVED_REGS)  
@@ -618,7 +704,7 @@ print_block_frame_labels (b, have_default, stream)
 	  struct symtab_and_line sal;
 	  sal = find_pc_line (SYMBOL_VALUE_ADDRESS (sym), 0);
 	  values_printed = 1;
-	  fputs_demangled (SYMBOL_NAME (sym), stream, 1);
+	  fputs_demangled (SYMBOL_NAME (sym), stream, DMGL_ANSI | DMGL_PARAMS);
 	  if (addressprint)
 	    fprintf_filtered (stream, " %s", 
 			      local_hex_string(SYMBOL_VALUE_ADDRESS (sym)));
@@ -677,7 +763,6 @@ print_frame_label_vars (frame, this_level_only, stream)
      int this_level_only;
      register FILE *stream;
 {
-  extern struct blockvector *blockvector_for_pc ();
   register struct blockvector *bl;
   register struct block *block = get_frame_block (frame);
   register int values_printed = 0;
@@ -755,7 +840,9 @@ locals_info (args, from_tty)
 }
 
 static void
-catch_info ()
+catch_info (ignore, from_tty)
+     char *ignore;
+     int from_tty;
 {
   if (!selected_frame)
     error ("No frame selected.");
@@ -812,7 +899,9 @@ print_frame_arg_vars (frame, stream)
 }
 
 static void
-args_info ()
+args_info (ignore, from_tty)
+     char *ignore;
+     int from_tty;
 {
   if (!selected_frame)
     error ("No frame selected.");
@@ -854,7 +943,7 @@ record_selected_frame (frameaddrp, levelp)
      FRAME_ADDR *frameaddrp;
      int *levelp;
 {
-  *frameaddrp = selected_frame ? FRAME_FP (selected_frame) : NULL;
+  *frameaddrp = selected_frame ? FRAME_FP (selected_frame) : 0;
   *levelp = selected_frame_level;
 }
 
@@ -1038,6 +1127,8 @@ return_command (retval_exp, from_tty)
   FRAME_ADDR selected_frame_addr;
   CORE_ADDR selected_frame_pc;
   FRAME frame;
+  char *funcname;
+  struct cleanup *back_to;
 
   if (selected_frame == NULL)
     error ("No selected frame.");
@@ -1051,8 +1142,14 @@ return_command (retval_exp, from_tty)
     {
       if (thisfun != 0)
 	{
-	  if (!query ("Make %s return now? ", SYMBOL_NAME (thisfun)))
-	    error ("Not confirmed.");
+	  funcname = strdup_demangled (SYMBOL_NAME (thisfun));
+	  back_to = make_cleanup (free, funcname);
+	  if (!query ("Make %s return now? ", funcname))
+	    {
+	      error ("Not confirmed.");
+	      /* NOTREACHED */
+	    }
+	  do_cleanups (back_to);
 	}
       else
 	if (!query ("Make selected stack frame return now? "))

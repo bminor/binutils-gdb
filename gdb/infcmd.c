@@ -413,6 +413,10 @@ jump_command (arg, from_tty)
   register CORE_ADDR addr;
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
+  struct symbol *fn;
+  struct symbol *sfn;
+  char *fname;
+  struct cleanup *back_to;
 
   ERROR_NO_INFERIOR;
 
@@ -433,14 +437,20 @@ jump_command (arg, from_tty)
 
   resolve_sal_pc (&sal);			/* May error out */
 
-  {
-    struct symbol *fn = get_frame_function (get_current_frame ());
-    struct symbol *sfn = find_pc_function (sal.pc);
-    if (fn != 0 && sfn != fn
-	&& ! query ("Line %d is not in `%s'.  Jump anyway? ",
-		    sal.line, SYMBOL_NAME (fn)))
-      error ("Not confirmed.");
-  }
+  /* See if we are trying to jump to another function. */
+  fn = get_frame_function (get_current_frame ());
+  sfn = find_pc_function (sal.pc);
+  if (fn != NULL && sfn != fn)
+    {
+      fname = strdup_demangled (SYMBOL_NAME (fn));
+      back_to = make_cleanup (free, fname);
+      if (!query ("Line %d is not in `%s'.  Jump anyway? ", sal.line, fname))
+	{
+	  error ("Not confirmed.");
+	  /* NOTREACHED */
+	}
+      do_cleanups (back_to);
+    }
 
   addr = ADDR_BITS_SET (sal.pc);
 
@@ -1203,7 +1213,7 @@ then the same breakpoint won't break until the Nth time it is reached.");
 	   "Start debugged program.  You may specify arguments to give it.\n\
 Args may include \"*\", or \"[...]\"; they are expanded using \"sh\".\n\
 Input and output redirection with \">\", \"<\", or \">>\" are also allowed.\n\n\
-With no arguments, uses arguments last specified (with \"run\" or \"set args\".\n\
+With no arguments, uses arguments last specified (with \"run\" or \"set args\").\n\
 To cancel previous arguments and run with no arguments,\n\
 use \"set args\" without arguments.");
   add_com_alias ("r", "run", class_run, 1);
