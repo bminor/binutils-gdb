@@ -2894,10 +2894,10 @@ void OP_F020 (insn, extension)
 /* Registers passed to trap 0 */
 
 /* Function number.  */
-#define FUNC   (load_mem (State.regs[REG_SP] + 4, 4))
+#define FUNC   (State.regs[0])
 
 /* Parameters.  */
-#define PARM1   (load_mem (State.regs[REG_SP] + 8, 4))
+#define PARM1   (State.regs[1])
 #define PARM2   (load_mem (State.regs[REG_SP] + 12, 4))
 #define PARM3   (load_mem (State.regs[REG_SP] + 16, 4))
 
