@@ -144,6 +144,8 @@ an instruction which will not execute on the target floating point unit.
 The following format options are recognized:
 @code{softfpa},
 @code{fpe},
+@code{fpe2},
+@code{fpe3},
 @code{fpa},
 @code{fpa10},
 @code{fpa11},
