@@ -1,5 +1,11 @@
 Thu Nov 21 14:40:29 1991  Stu Grossman  (grossman at cygnus.com)
 
+	* readline.c:  Move config stuff to sysdep.h, use typedef dirent
+	consistently, remove refs to d_namlen (& D_NAMLEN) to improve
+	portability.  Also, update copyright notice.
+	readline.h:  remove config stuff that I added erroneously in the
+	first place.
+
 	* emacs_keymap.c, funmap.c, history.c, keymaps.c, vi_keymap.c,
 	vi_mode.c:  move config stuff to sysdep.h, update copyright notices.
 
