@@ -1,3 +1,17 @@
+start-sanitize-d30v
+Tue Feb 18 17:37:20 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d30v.h: New file.
+
+end-sanitize-d30v
+start-sanitize-tic80
+Fri Feb 14 13:16:15 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h (PDS_NAME): Macro to access name field of predefined symbols.
+	(PDS_VALUE): Macro to access value field of predefined symbols.
+	(tic80_next_predefined_symbol): Add prototype.
+
+end-sanitize-tic80
 start-sanitize-r5900
 Fri Feb  7 11:12:44 1997  Gavin Koch  <gavin@cygnus.com>
         
