@@ -311,7 +311,9 @@ config-stamp: Makefile
 	echo '#define TARGET_CANONICAL "$(target_canonical)"' >> config.new
 	echo '#define GAS_VERSION      "$(VERSION)"'          >> config.new
 	if [ "$(defs)" != "" ]; then \
-	  echo '#define $(defs)'			      >> config.new ; \
+	  for d in $(defs) ; do	\
+	    echo "#define $$d"				      >> config.new ; \
+	  done ; \
 	else true; fi
 	echo '#endif /* TARGET_CPU */'			      >> config.new
 	$(srcdir)/../move-if-change config.new config.h
