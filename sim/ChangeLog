@@ -1,8 +1,19 @@
+Mon May  3 08:29:01 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* Makefile.in (endian): Add explicit rule for broken makes.
+
+Mon Mar 15 15:47:53 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (info, install-info): New targets.
+	(DO_INSTALL): Renamed from INSTALL, which is overridden by the top
+	level Makefile.
+
 Wed Feb 10 20:12:27 1993  K. Richard Pixley  (rich@ok.cygnus.com)
 
 	* Makefile.in (endian.h): build endian.h via a temporary file so
 	  that we don't leave an incomplete file lying around on
 	  interrupted builds.
+	  (clean): remove endian, e.h, and endian.h.
 
 Mon Feb  8 11:46:06 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 

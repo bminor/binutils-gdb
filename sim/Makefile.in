@@ -103,6 +103,8 @@ endian.h: endian
 	./endian > e.h
 	mv -f e.h endian.h
 
+endian: endian.c
+
 ### none
 
 all-nothing: force
