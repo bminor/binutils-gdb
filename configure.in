@@ -1,14 +1,70 @@
-# This file is a shell script fragment that supplies the information
-# necessary to tailor a template configure script into the configure
-# script appropriate for this directory.  For more information, check
-# any existing configure script.
+################################################################################
+
+## This file is a shell script fragment that supplies the information
+## necessary to tailor a template configure script into the configure
+## script appropriate for this directory.  For more information, check
+## any existing configure script.  
+
+## Be warned, there are two types of configure.in files.  There are those
+## used by Autoconf, which are macros which are expanded into a configure
+## script by autoconf.  The other sort, of which this is one, is executed
+## by Cygnus configure.  
+
+## For more information on these two systems, check out the documentation
+## for 'Autoconf' (autoconf.texi) and 'Configure' (configure.texi).  
+
+################################################################################
+
+### To add a new directory to the tree, first choose whether it is a target
+### or a host dependent tool.  Then put it into the appropriate list
+### (library or tools, host or target), doing a dependency sort.  For
+### example, gdb requires that byacc (or bison) be built first, so it is in
+### the ${host_tools} list after byacc and bison.  
 
 
-configdirs="mmalloc libiberty texinfo flex byacc bison opcodes bfd binutils gcc readline glob ld gas gdb make patch send_pr libg++ gprof gdbtest libm tgas etc tcl expect tk deja-gnu z8ksim"
+# these libraries are used by various programs built for the host environment
+#
+host_libs="mmalloc libiberty opcodes bfd readline glob tcl tk"
 
-cross_only_tools="xiberty newlib"
+# these tools are built for the host environment
+#
+host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
+	    send_pr gprof gdbtest tgas etc expect deja-gnu z8ksim
+            m4 autoconf ispell grep diff rcs cvs sed fileutils shellutils
+	    textutils wdiff find emacs"
 
-native_only_tools="m4 autoconf ispell grep diff rcs cvs sed fileutils shellutils textutils wdiff find emacs"
+
+# these libraries are built for the target environment, and are built after the host
+# libraries and the host tools (which may be a cross compiler)
+#
+target_libs="libm xiberty newlib libg++"
+
+# these tools are built using the target libs, and are intended to run only in the
+# target environment.  we currently have none
+#
+target_tools=
+
+################################################################################
+
+## These two lists are of directories that are to be removed from the
+## ${configdirs} list for either cross-compilations or for native-
+## compilations.  For example, it doesn't make that much sense to
+## cross-compile Emacs, nor is it terribly useful to compile xiberty in
+## a native environment.  
+
+# directories to be built in the native environment only
+#
+native_only="m4 autoconf ispell grep diff rcs cvs sed fileutils shellutils textutils wdiff find emacs"
+
+# directories to be built in the target environment only
+#
+cross_only="xiberty newlib"
+
+## All tools belong in one of the four categories, and are assigned above
+#
+configdirs="${host_libs} ${host_tools} ${target_libs} ${target_tools}"
+
+################################################################################
 
 srctrigger=move-if-change
 srcname="gnu development package"
@@ -54,10 +110,19 @@ esac
 # cross-compiler.
 
 if [ x"${host}" = x"${target}" ] ; then
-	configdirs="${configdirs} ${native_only_tools}"
+	# when doing a native toolchain, don't build the targets
+	# that are in the 'cross only' list
+	for i in ${cross_only} ; do
+	  configdirs=`echo ${configdirs} | sed -e "s/$i//"`
+	done
 else
-	configdirs="${configdirs} ${cross_only_tools}"
+	# similarly, don't build the targets in the 'native only' 
+	# list when building a cross compiler
+	for i in ${native_only} ; do
+	  configdirs=`echo ${configdirs} | sed -e "s/$i//"`
+	done
 fi	
+
 
 # remove more programs from consideration, based on the host or 
 # target this usually means that a port of the program doesn't
