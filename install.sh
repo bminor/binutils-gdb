@@ -1,5 +1,8 @@
 #!/bin/sh
 #
+# install - install a program, script, or datafile
+# This comes from X11R5 (mit/util/scripts/install.sh).
+#
 # Copyright 1991 by the Massachusetts Institute of Technology
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
@@ -12,33 +15,8 @@
 # suitability of this software for any purpose.  It is provided "as is"
 # without express or implied warranty.
 #
-# install - install a program, script, or datafile
-# The original version of this script came from X11R5
-# (mit/util/scripts/install.sh); it is not part of GNU.
-#
-# $XConsortium: install.sh,v 1.2 89/12/18 14:47:22 jim Exp $
-#
 # This script is compatible with the BSD install script, but was written
 # from scratch.
-#
-# At Cygnus this script is duplicated as:
-#
-#     install.sh
-#     apache/install-sh
-#     dejagnu/install-sh
-#     expect/install-sh
-#     inet/install-sh
-#
-# if you change one of these, you will probably want to change them
-# all.  Variants of it also appear in:
-#
-#     tcl/unix/install-sh
-#     tk/unix/install-sh
-#
-# however these versions are the versions of this script from the
-# original Tcl/Tk distribution, and are somewhat different, and so
-# changing these will result in divergences from the Tcl/Tk
-# distribution.
 #
 
 
