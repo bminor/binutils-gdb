@@ -795,7 +795,7 @@ bfd_generic_stat_arch_elt (abfd, buf)
 void
 bfd_dont_truncate_arname (abfd, pathname, arhdr)
      bfd *abfd;
-     char *pathname;
+     CONST char *pathname;
      char *arhdr;
 {
   /* FIXME: This interacts unpleasantly with ar's quick-append option.
@@ -805,7 +805,7 @@ bfd_dont_truncate_arname (abfd, pathname, arhdr)
    
   struct ar_hdr *hdr = (struct ar_hdr *) arhdr;
   int length;
-  char *filename = strrchr (pathname, '/');
+  CONST char *filename = strrchr (pathname, '/');
   int maxlen = ar_maxnamelen (abfd);
 
   if (filename == NULL)
@@ -826,12 +826,12 @@ bfd_dont_truncate_arname (abfd, pathname, arhdr)
 void
 bfd_bsd_truncate_arname (abfd, pathname, arhdr)
      bfd *abfd;
-     char *pathname;
+     CONST char *pathname;
      char *arhdr;
 {
   struct ar_hdr *hdr = (struct ar_hdr *) arhdr;
   int length;
-  char *filename = strrchr (pathname, '/');
+  CONST char *filename = strrchr (pathname, '/');
   int maxlen = ar_maxnamelen (abfd);
 
 
@@ -864,12 +864,12 @@ bfd_bsd_truncate_arname (abfd, pathname, arhdr)
 void
 bfd_gnu_truncate_arname (abfd, pathname, arhdr)
      bfd *abfd;
-     char *pathname;
+     CONST char *pathname;
      char *arhdr;
 {
   struct ar_hdr *hdr = (struct ar_hdr *) arhdr;
   int length;
-  char *filename = strrchr (pathname, '/');
+  CONST char *filename = strrchr (pathname, '/');
   int maxlen = ar_maxnamelen (abfd);
 	
   if (filename == NULL)
