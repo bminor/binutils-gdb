@@ -1,3 +1,9 @@
+start-sanitize-v850
+Sat Nov 23 10:23:01 1996  Gavin Koch  <gavin@cygnus.com>
+        
+	* config.sub: Handle v850-unknown.
+
+end-sanitize-v850
 Thu Nov 21 16:19:44 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* Makefile.in: add findutils
