@@ -1,5 +1,8 @@
 2003-05-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* i387-tdep.c (fxsave_offset): Add entries for %xmm8-%xmm15.
+	(FXSAVE_ADDR, i387_supply_fxsave): Add support for %xmm8-%xmm15.
+
 	* i386-linux-nat.c (supply_gregset): Remove unnecessary casts.
 
 2003-05-03  J. Brobecker  <brobecker@gnat.com>
