@@ -1,5 +1,8 @@
 Tue Mar 22 13:08:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* scripttempl/aout.sc: Force _end and __end to be aligned to a
+	four byte boundary.
+
 	* ldwrite.c (build_link_order): Handle lang_data_statement_enum by
 	building a bfd_data_link_order, rather than by setting the section
 	contents immediately.
