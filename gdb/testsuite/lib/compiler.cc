@@ -19,27 +19,35 @@
    Please email any bugs, comments, and/or additions to this file to:
    bug-gdb@prep.ai.mit.edu  */
 
-/* Often the behavior of any particular test depends upon what compiler was
-   used to compile the test.  As each test is compiled, this file is
-   preprocessed by the same compiler used to compile that specific test
-   (different tests might be compiled by different compilers, particularly
-   if compiled at different times), and used to generate a *.ci (compiler
-   info) file for that test.
+/* This file is exactly like compiler.c.  I could just use compiler.c if
+   I could be sure that every C++ compiler accepted extensions of ".c".  */
 
-   I.E., when callfuncs is compiled, a callfuncs.ci file will be generated,
-   which can then be sourced by callfuncs.exp to give callfuncs.exp access
-   to information about the compilation environment.
-
-   TODO:  It might be a good idea to add expect code that tests each
-   definition made with 'set" to see if one already exists, and if so
-   warn about conflicts if it is being set to something else.  */
+set compiler_info ""
 
 #if defined (__GNUC__)
-set gcc_compiled __GNUC__
 set compiler_info [join {gcc __GNUC__ __GNUC_MINOR__ } -]
+set gcc_compiled __GNUC__
 #else
 set gcc_compiled 0
-set compiler_info ""
 #endif
 
-return 0
+#if defined (__HP_cc)
+set compiler_info [join {hpcc __HP_cc} -]
+set hp_cc_compiler __HP_cc
+#else
+set hp_cc_compiler 0
+#endif
+
+#if defined (__HP_aCC)
+set compiler_info [join {hpacc __HP_aCC} -]
+set hp_aCC_compiler __HP_aCC
+#else
+set hp_aCC_compiler 0
+#endif
+
+/* gdb.base/whatis.exp still uses this */
+#if defined (__STDC__) || defined (_AIX)
+set signed_keyword_not_used 0
+#else
+set signed_keyword_not_used 1
+#endif
