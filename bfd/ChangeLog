@@ -1,3 +1,9 @@
+Tue Feb 10 15:01:39 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Change -linux* to -linux-gnu*.
+	* config.bfd, configure.host: Likewise.
+	* configure: Rebuild.
+
 Mon Feb  9 19:40:59 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_store_addend_in_insn): Fix another

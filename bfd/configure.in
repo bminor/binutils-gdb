@@ -110,7 +110,7 @@ COREFILE=
 COREFLAG=
 if test "${target}" = "${host}"; then
   case "${host}" in
-  alpha*-*-linux*)
+  alpha*-*-linux-gnu*)
 	COREFILE=trad-core.lo
 	AC_DEFINE(TRAD_HEADER,"hosts/alphalinux.h")
 	;;
@@ -163,7 +163,7 @@ changequote([,])dnl
 	AC_DEFINE(TRAD_HEADER,"hosts/i386mach3.h")
 	;;
 changequote(,)dnl
-  i[3456]86-*-linux*)
+  i[3456]86-*-linux-gnu*)
 changequote([,])dnl
 	COREFILE=trad-core.lo
 	AC_DEFINE(TRAD_HEADER,"hosts/i386linux.h")
@@ -216,7 +216,7 @@ changequote([,])dnl
 	COREFILE=trad-core.lo
 	AC_DEFINE(TRAD_HEADER,"hosts/hp300bsd.h")
 	;;
-  m68*-*-linux*)
+  m68*-*-linux-gnu*)
 	COREFILE=trad-core.lo
 	AC_DEFINE(TRAD_HEADER,"hosts/m68klinux.h")
 	;;
@@ -258,7 +258,7 @@ changequote([,])dnl
   sparc-*-netbsd* | sparc-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
-  sparc*-*-linux*)
+  sparc*-*-linux-gnu*)
 	COREFILE=trad-core.lo
 	AC_DEFINE(TRAD_HEADER,"hosts/sparclinux.h")
 	;;
