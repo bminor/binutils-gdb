@@ -1209,7 +1209,7 @@ enum bfd_architecture
 #define bfd_mach_mips4650              4650
   /* start-sanitize-vr4320 */
 #define bfd_mach_mips4320              4320
-  /* start-sanitize-vr4320 */
+  /* end-sanitize-vr4320 */
   /* start-sanitize-tx49 */
 #define bfd_mach_mips4900              4900
   /* end-sanitize-tx49 */
