@@ -439,8 +439,8 @@ case "${target}" in
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
     # Can't build gdb for cygwin32 if not native.
-    case "${host}:${build}" in
-      *-*-cygwin32 | *-*-cygwin32:*-*-cygwin32) ;; # keep gdb
+    case "${host}" in
+      *-*-cygwin32) ;; # keep gdb
       *) noconfigdirs="$noconfigdirs gdb"
     esac
     ;;    
@@ -571,7 +571,7 @@ esac
 # If we are building a Canadian Cross, discard tools that can not be built
 # using a cross compiler.  FIXME: These tools should be fixed.
 if [ "${build}" != "${host}" ]; then
-  noconfigdirs="$noconfigdirs expect dejagnu make texinfo diff"
+  noconfigdirs="$noconfigdirs expect dejagnu texinfo diff"
 fi
 
 # Make sure we don't let GNU ld be added if we didn't want it.
