@@ -1,3 +1,7 @@
+2004-07-03  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* gas/mips/elf-rel9.[sd]: Fix typo in %lo() expression.
+
 2004-07-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/ia64/group-1.d: New.
