@@ -54,10 +54,12 @@ ansi=
 arguments=$*
 commontargets=
 configdirs=
+ddestdir=
 defaulttargets=
 destdir=
 fatal=
 hostsubdir=
+idestdir=
 norecursion=
 objdir=
 objdiroption=
@@ -78,19 +80,27 @@ do
 		ansi=true
 		clib=clib
 		;;
-	-destdir=* | +destdir=* | +destdi=* | +destd=* | +dest=* | +des=* | +de=* | +d=*)
-		destdir=`echo ${arg} | sed 's/[+-]d[a-z]*=//'`
+	-ddestdir=* | +ddestdir=* | +ddestdi=* | +ddestd=* | +ddest=* | +ddes=* | +dde=* | +dd=*)
+		ddestdir=`echo ${arg} | sed 's/[+-]dd[a-z]*=//'`
 		;;
-	-languages=* | +languages=* | +language=* | +languag=* \
-		| +langua=* | +langu=* | +lang=* | +lan=* | +la=* \
-		| +l=*)
-		languages="${languages} `echo ${arg} | sed 's/[+-]l[a-z]*=//'`"
+	-destdir=* | +destdir=* | +destdi=* | +destd=* | +dest=* | +des=* | +de=*)
+		destdir=`echo ${arg} | sed 's/[+-]d[a-z]*=//'`
+		ddestdir=${destdir}
+		idestdir=${destdir}
 		;;
 	-gas | +g*)
 		gas=yes
 		;;
 	-help | +h*)
 		fatal=true
+		;;
+	-idestdir=* | +idestdir=* | +idestdi=* | +idestd=* | +idest=* | +ides=* | +ide=* | +id=*)
+		idestdir=`echo ${arg} | sed 's/[+-]id[a-z]*=//'`
+		;;
+	-languages=* | +languages=* | +language=* | +languag=* \
+		| +langua=* | +langu=* | +lang=* | +lan=* | +la=* \
+		| +l=*)
+		languages="${languages} `echo ${arg} | sed 's/[+-]l[a-z]*=//'`"
 		;;
 	-nfp | +nf*)
 		nfp=yes
@@ -201,7 +211,12 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	echo ;
 	echo "Options: [defaults in brackets]" ;
 	echo " +ansi		configure w/ANSI library. [no ansi lib]" ;
-	echo " +destdir=MYDIR	configure for installation into MYDIR. [\"/usr/local\"]" ;
+	echo " +ddestdir=MYDIR	configure for installation host dependent files" ;
+	echo "			into MYDIR. [\"/usr/local\"]" ;
+	echo " +idestdir=MYDIR	configure for installation host independent files" ;
+	echo "			into MYDIR. [\"/usr/local\"]" ;
+	echo " +destdir=MYDIR	configure for installation of both host dependent and" ;
+	echo "			host independent files into MYDIR. [\"/usr/local\"]" ;
 	echo " +gas		configure the compilers for use with gas. [native as]" ;
 	echo " +help		print this message. [normal config]" ;
 	echo " +lang=LANG	configure to build LANG. [gcc]" ;
@@ -480,6 +495,20 @@ for host in ${hosts} ; do
 			# add "Makefile.in" (or whatever it's called)
 			cat ${srcdir}/${Makefile_in} >> ${Makefile}
 
+			# Conditionalize the makefile for this site.
+			if [ -n "${site}" ] ; then
+				site_makefile_frag=config/ms-${site}
+
+				if [ -f ${srcdir}/${site_makefile_frag} ] ; then
+					(echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" ; 
+						sed -e "/^####/  r ${srcdir}/${site_makefile_frag}" ${Makefile}) > Makefile.tem
+				else
+					(echo "site_makefile_frag =" ; 
+						cat ${Makefile}) > Makefile.tem
+				fi
+				mv Makefile.tem ${Makefile}
+			fi
+
 			# Conditionalize the makefile for this host.
 			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
 				(echo "host_makefile_frag = ${srcdir}/${host_makefile_frag}" ;
@@ -500,27 +529,19 @@ for host in ${hosts} ; do
 			fi
 			mv Makefile.tem ${Makefile}
 
-			# Conditionalize the makefile for this site.
-			if [ -n "${site}" ] ; then
-				site_makefile_frag=config/ms-${site}
-
-				if [ -f ${srcdir}/${site_makefile_frag} ] ; then
-					(echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" ; 
-						sed -e "/^####/  r ${srcdir}/${site_makefile_frag}" ${Makefile}) > Makefile.tem
-				else
-					(echo "site_makefile_frag =" ; 
-						cat ${Makefile}) > Makefile.tem
-				fi
-				mv Makefile.tem ${Makefile}
-			fi
-
 			# set srcdir
 			sed "s@^srcdir = \.@srcdir = ${srcdir}@" ${Makefile} > Makefile.tem
 			mv Makefile.tem ${Makefile}
 
-			# set destdir
-			if [ -n "${destdir}" ] ; then
-				sed "s:^destdir =.*$:destdir = ${destdir}:" ${Makefile} > Makefile.tem
+			# set ddestdir
+			if [ -n "${ddestdir}" ] ; then
+				sed "s:^ddestdir =.*$:ddestdir = ${ddestdir}:" ${Makefile} > Makefile.tem
+				mv Makefile.tem ${Makefile}
+			fi
+
+			# set idestdir
+			if [ -n "${idestdir}" ] ; then
+				sed "s:^idestdir =.*$:idestdir = ${idestdir}:" ${Makefile} > Makefile.tem
 				mv Makefile.tem ${Makefile}
 			fi
 
@@ -646,7 +667,13 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.63  1991/10/25 02:07:18  steve
+# Revision 1.65  1991/11/01 00:25:28  rich
+# new install theme
+#
+# Revision 1.64  1991/10/30  06:55:25  rich
+# suck in site makefile frags first
+#
+# Revision 1.63  1991/10/25  02:07:18  steve
 # More name changing
 #
 # Revision 1.62  1991/10/24  11:59:03  rich

@@ -16,12 +16,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Tue Oct 22 22:40:07 PDT 1991, by rich@cygnus.com
+# Last Mod Thu Oct 31 02:58:25 PST 1991, by rich@rtl.cygnus.com
 #
 # $Id$
 
 srcdir = .
-destdir = /usr/local
+
+idestdir = /usr/local
+ddestdir = $(idestdir)
 
 SHELL=/bin/sh
 
@@ -156,27 +158,27 @@ install: install-dirs install-fixed-includes
 # of the "if" command, if no commands are run in the "then" or "else" part,
 # causing Make to quit.
 install-dirs: force
-	- mkdir $(destdir)
-	- mkdir $(destdir)/include
-	- mkdir $(destdir)/H-$(host_alias)
-	- mkdir $(destdir)/H-$(host_alias)/T-independent
-	- mkdir $(destdir)/H-$(host_alias)/T-independent/bin
-	- mkdir $(destdir)/H-$(host_alias)/T-independent/lib
-	- mkdir $(destdir)/H-$(host_alias)/T-$(target_alias)
-	- mkdir $(destdir)/H-$(host_alias)/T-$(target_alias)/bin
-	- mkdir $(destdir)/H-$(host_alias)/T-$(target_alias)/lib
-	- mkdir $(destdir)/H-independent
-	- mkdir $(destdir)/H-independent/include
-	- mkdir $(destdir)/H-independent/doc
-	- mkdir $(destdir)/H-independent/man
-	- mkdir $(destdir)/H-independent/man/man1
-	- mkdir $(destdir)/H-independent/man/man2
-	- mkdir $(destdir)/H-independent/man/man3
-	- mkdir $(destdir)/H-independent/man/man4
-	- mkdir $(destdir)/H-independent/man/man5
-	- mkdir $(destdir)/H-independent/man/man6
-	- mkdir $(destdir)/H-independent/man/man7
-	- mkdir $(destdir)/H-independent/man/man8
+	- mkdir $(ddestdir)
+	- mkdir $(ddestdir)/include
+	- mkdir $(ddestdir)/lib
+	- mkdir $(ddestdir)/lib/emacs
+	- mkdir $(ddestdir)/bin
+	- mkdir $(ddestdir)/lib
+	- mkdir $(ddestdir)
+	- mkdir $(ddestdir)/bin
+	- mkdir $(ddestdir)/lib
+	- mkdir $(idestdir)
+	- mkdir $(idestdir)include
+	- mkdir $(idestdir)/doc
+	- mkdir $(idestdir)/man
+	- mkdir $(idestdir)/man/man1
+	- mkdir $(idestdir)/man/man2
+	- mkdir $(idestdir)/man/man3
+	- mkdir $(idestdir)/man/man4
+	- mkdir $(idestdir)/man/man5
+	- mkdir $(idestdir)/man/man6
+	- mkdir $(idestdir)/man/man7
+	- mkdir $(idestdir)/man/man8
 	if [ -d $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
                 then echo .$(target) ; fi`$(subdir) ] ; then \
 		(cd  $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
