@@ -772,7 +772,7 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 ldctor.o : ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h ld.h ldexp.h ldlang.h ldmisc.h \
-  ldgram.h ldctor.h
+  ldgram.h ldmain.h ldctor.h
 ldemul.o : ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(INCDIR)/fopen-same.h \
   config.h ld.h ldemul.h ldmisc.h ldfile.h ldmain.h ldemul-list.h
