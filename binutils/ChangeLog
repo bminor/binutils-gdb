@@ -1,3 +1,11 @@
+2002-06-07  H.J. Lu <hjl@gnu.org>
+
+	* readelf.c (DW_CFA_GNU_args_size): Don't define.
+	(DW_CFA_GNU_negative_offset_extended): Likewise.
+	(DW_CFA_GNU_window_save): Likewise.
+	(display_debug_frames): Handle DW_CFA_offset_extended_sf,
+	DW_CFA_def_cfa_sf and DW_CFA_def_cfa_offset_sf.
+
 2002-06-07  Elias Athanasopoulos  <eathan@otenet.gr>
 	
 	* nm.c: When computing size of symbols for an ELF target use the

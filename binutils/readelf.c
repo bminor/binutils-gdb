@@ -8473,15 +8473,20 @@ display_debug_frames (section, start, file)
 		case DW_CFA_def_cfa_offset:
 		  LEB ();
 		  break;
-#ifndef DW_CFA_GNU_args_size
-#define DW_CFA_GNU_args_size 0x2e
-#endif
+		case DW_CFA_offset_extended_sf:
+		  reg = LEB (); SLEB ();
+		  frame_need_space (fc, reg);
+		  fc->col_type[reg] = DW_CFA_undefined;
+		  break;
+		case DW_CFA_def_cfa_sf:
+		  LEB (); SLEB ();
+		  break;
+		case DW_CFA_def_cfa_offset_sf:
+		  SLEB ();
+		  break;
 		case DW_CFA_GNU_args_size:
 		  LEB ();
 		  break;
-#ifndef DW_CFA_GNU_negative_offset_extended
-#define DW_CFA_GNU_negative_offset_extended 0x2f
-#endif
 		case DW_CFA_GNU_negative_offset_extended:
 		  reg = LEB (); LEB ();
 		  frame_need_space (fc, reg);
@@ -8676,9 +8681,31 @@ display_debug_frames (section, start, file)
 		printf ("  DW_CFA_nop\n");
 	      break;
 
-#ifndef DW_CFA_GNU_window_save
-#define DW_CFA_GNU_window_save 0x2d
-#endif
+	    case DW_CFA_offset_extended_sf:
+	      reg = LEB ();
+	      l = SLEB ();
+	      frame_need_space (fc, reg);
+	      if (! do_debug_frames_interp)
+		printf ("  DW_CFA_offset_extended_sf: r%ld at cfa%+ld\n",
+			reg, l * fc->data_factor);
+	      fc->col_type[reg] = DW_CFA_offset;
+	      fc->col_offset[reg] = l * fc->data_factor;
+	      break;
+
+	    case DW_CFA_def_cfa_sf:
+	      fc->cfa_reg = LEB ();
+	      fc->cfa_offset = SLEB ();
+	      if (! do_debug_frames_interp)
+		printf ("  DW_CFA_def_cfa_sf: r%d ofs %d\n",
+			fc->cfa_reg, fc->cfa_offset);
+	      break;
+
+	    case DW_CFA_def_cfa_offset_sf:
+	      fc->cfa_offset = SLEB ();
+	      if (! do_debug_frames_interp)
+		printf ("  DW_CFA_def_cfa_offset_sf: %d\n", fc->cfa_offset);
+	      break;
+
 	    case DW_CFA_GNU_window_save:
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_GNU_window_save\n");
@@ -8699,6 +8726,17 @@ display_debug_frames (section, start, file)
 			reg, l * fc->data_factor);
 	      fc->col_type[reg] = DW_CFA_offset;
 	      fc->col_offset[reg] = l * fc->data_factor;
+	      break;
+
+	    /* FIXME: How do we handle these? */
+	    case DW_CFA_def_cfa_expression:
+	      fprintf (stderr, "unsupported DW_CFA_def_cfa_expression\n");
+	      start = block_end;
+	      break;
+
+	    case DW_CFA_expression:
+	      fprintf (stderr, "unsupported DW_CFA_expression\n");
+	      start = block_end;
 	      break;
 
 	    default:
