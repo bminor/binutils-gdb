@@ -1805,7 +1805,7 @@ signal_exception (SIM_DESC sd,
 #ifdef SUBTARGET_3900
 	 /* Exception vector: BEV=0 BFC00000 / BEF=1 BFC00000  */
 	 PC = (signed)0xBFC00000;
-#endif SUBTARGET_3900
+#endif /* SUBTARGET_3900 */
 	 return;
 
        case TLBModification:

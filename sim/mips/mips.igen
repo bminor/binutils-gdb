@@ -4348,6 +4348,7 @@
 
 
 101111,5.BASE,5.OP,16.OFFSET:NORMAL:32::CACHE
+"cache <OP>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
 *mipsV:

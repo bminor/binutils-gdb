@@ -1,3 +1,9 @@
+2002-03-01  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips.igen (CACHE): Provide instruction-printing string.
+
+	* interp.c (signal_exception): Comment tokens after #endif.
+
 2002-02-28  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips.igen (LWXC1): Mark with filter "64,f", rather than just "32".
