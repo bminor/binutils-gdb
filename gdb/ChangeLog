@@ -1,3 +1,20 @@
+Thu Aug 22 14:05:47 1991  Stu Grossman  (grossman at cygint.cygnus.com)
+
+	* expread.y, coffread.c, dbxread.c, target.c, mem-break.c,
+	  cplus-dem.c, values.c, valprint.c, symfile.c, remote.c,
+	  breakpoint.c, main.c:  lint.
+
+Thu Aug 22 02:02:26 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Install new configuration scheme for GDB and friends.
+
+	* config.sub:  Translate ordinary names to three-part names.
+	* configure:  Use three-part names internally.
+	* configure.in:  Translate three-part names to filenames.
+
+	* README, WHATS.NEW:  Update for gdb-4.0.
+	* Makefile.in:  Roll VERSION to 3.99.
+
 Wed Aug 21 18:21:09 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* infptrace.c (KERNEL_U_ADDR_BSD):  Include a.out.gnu.h.
