@@ -1,3 +1,11 @@
+1999-02-01  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in: Require autoconf 2.13.
+	(AM_EXEEXT): Replace with new AC_EXEEXT.
+	* acinclude.m4: Move itcl header macros from aclocal.m4 to here.
+	* aclocal.m4: Regenerated.
+	* configure: Regenerated.
+
 1999-02-01  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	Allow PPC users to select which PPC/RS6000 variant they're debugging

@@ -19,7 +19,7 @@ dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.12.1)dnl
+AC_PREREQ(2.13)dnl
 AC_INIT(main.c)
 AC_CONFIG_HEADER(config.h:config.in)
 
@@ -977,7 +977,7 @@ fi
 AC_LINK_FILES($files, $links)
 
 dnl Check for exe extension set on certain hosts (e.g. Win32)
-AM_EXEEXT
+AC_EXEEXT
 
 AC_CONFIG_SUBDIRS($configdirs)
 AC_OUTPUT(Makefile tui/Makefile .gdbinit:gdbinit.in,

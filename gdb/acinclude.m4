@@ -481,15 +481,117 @@ dnl    AC_SUBST(TK_EXEC_PREFIX)
     AC_SUBST(TK_LIB_SPEC)
 ])
 
+# check for Itcl headers. 
+
+AC_DEFUN(CY_AC_PATH_ITCLCONFIG, [
+#
+# Ok, lets find the itcl configuration
+# First, look for one uninstalled.  
+# the alternative search directory is invoked by --with-itclconfig
+#
+
+if test x"${no_itcl}" = x ; then
+  # we reset no_itcl in case something fails here
+  no_itcl=true
+  AC_ARG_WITH(itclconfig, [  --with-itclconfig           directory containing itcl configuration (itclConfig.sh)],
+         with_itclconfig=${withval})
+  AC_MSG_CHECKING([for Itcl configuration])
+  AC_CACHE_VAL(ac_cv_c_itclconfig,[
+
+  # First check to see if --with-itclconfig was specified.
+  if test x"${with_itclconfig}" != x ; then
+    if test -f "${with_itclconfig}/itclConfig.sh" ; then
+      ac_cv_c_itclconfig=`(cd ${with_itclconfig}; pwd)`
+    else
+      AC_MSG_ERROR([${with_itclconfig} directory doesn't contain itclConfig.sh])
+    fi
+  fi
+
+  # then check for a private Itcl library
+  if test x"${ac_cv_c_itclconfig}" = x ; then
+    for i in \
+		../itcl/itcl \
+		`ls -dr ../itcl[[4-9]]*/itcl 2>/dev/null` \
+		../../itcl \
+		`ls -dr ../../itcl[[4-9]]*/itcl 2>/dev/null` \
+		../../../itcl \
+		`ls -dr ../../../itcl[[4-9]]*/itcl 2>/dev/null` ; do
+      if test -f "$i/${configdir}/itclConfig.sh" ; then
+        ac_cv_c_itclconfig=`(cd $i/${configdir}; pwd)`
+	break
+      fi
+    done
+  fi
+  # check in a few common install locations
+  if test x"${ac_cv_c_itclconfig}" = x ; then
+    for i in `ls -d ${prefix}/lib /usr/local/lib 2>/dev/null` ; do
+      if test -f "$i/itclConfig.sh" ; then
+        ac_cv_c_itclconfig=`(cd $i; pwd)`
+	break
+      fi
+    done
+  fi
+  # check in a few other private locations
+  if test x"${ac_cv_c_itclconfig}" = x ; then
+    for i in \
+		${srcdir}/../itcl/itcl \
+		`ls -dr ${srcdir}/../itcl[[4-9]]*/itcl 2>/dev/null` ; do
+      if test -f "$i/${configdir}/itclConfig.sh" ; then
+        ac_cv_c_itclconfig=`(cd $i/${configdir}; pwd)`
+	break
+      fi
+    done
+  fi
+  ])
+  if test x"${ac_cv_c_itclconfig}" = x ; then
+    ITCLCONFIG="# no Itcl configs found"
+    AC_MSG_WARN(Can't find Itcl configuration definitions)
+  else
+    no_itcl=
+    ITCLCONFIG=${ac_cv_c_itclconfig}/itclConfig.sh
+    AC_MSG_RESULT(found $ITCLCONFIG)
+  fi
+fi
+
+])
+
+# Defined as a separate macro so we don't have to cache the values
+# from PATH_ITCLCONFIG (because this can also be cached).
+AC_DEFUN(CY_AC_LOAD_ITCLCONFIG, [
+    if test -f "$ITCLCONFIG" ; then
+      . $ITCLCONFIG
+    fi
+
+    AC_SUBST(ITCL_VERSION)
+dnl not actually used, don't export to save symbols
+dnl    AC_SUBST(ITCL_MAJOR_VERSION)
+dnl    AC_SUBST(ITCL_MINOR_VERSION)
+    AC_SUBST(ITCL_DEFS)
+
+dnl not used, don't export to save symbols
+    dnl AC_SUBST(ITCL_LIB_FILE)
+
+dnl not used outside of configure
+dnl    AC_SUBST(ITCL_LIBS)
+dnl not used, don't export to save symbols
+dnl    AC_SUBST(ITCL_PREFIX)
+
+dnl not used, don't export to save symbols
+dnl    AC_SUBST(ITCL_EXEC_PREFIX)
+
+    AC_SUBST(ITCL_BUILD_INCLUDES)
+    AC_SUBST(ITCL_BUILD_LIB_SPEC)
+    AC_SUBST(ITCL_LIB_SPEC)
+])
 
 # check for Itcl headers. 
 
 AC_DEFUN(CY_AC_PATH_ITCLH, [
 AC_MSG_CHECKING(for Itcl private headers. srcdir=${srcdir})
 if test x"${ac_cv_c_itclh}" = x ; then
-  for i in ${srcdir}/../itcl ${srcdir}/../../itcl ${srcdir}/../../../itcl ; do
-    if test -f $i/src/itcl.h ; then
-      ac_cv_c_itclh=`(cd $i/src; pwd)`
+  for i in ${srcdir}/../itcl ${srcdir}/../../itcl ${srcdir}/../../../itcl ${srcdir}/../itcl/itcl; do
+    if test -f $i/generic/itcl.h ; then
+      ac_cv_c_itclh=`(cd $i/generic; pwd)`
       break
     fi
   done
@@ -502,9 +604,134 @@ if test x"${ac_cv_c_itclh}" != x ; then
      ITCLHDIR="-I${ac_cv_c_itclh}"
 fi
 # should always be here
-     ITCLLIB="../itcl/src/libitcl.a"
+#     ITCLLIB="../itcl/itcl/unix/libitcl.a"
 AC_SUBST(ITCLHDIR)
-AC_SUBST(ITCLLIB)
+#AC_SUBST(ITCLLIB)
+])
+
+
+AC_DEFUN(CY_AC_PATH_ITKCONFIG, [
+#
+# Ok, lets find the itk configuration
+# First, look for one uninstalled.  
+# the alternative search directory is invoked by --with-itkconfig
+#
+
+if test x"${no_itk}" = x ; then
+  # we reset no_itk in case something fails here
+  no_itk=true
+  AC_ARG_WITH(itkconfig, [  --with-itkconfig           directory containing itk configuration (itkConfig.sh)],
+         with_itkconfig=${withval})
+  AC_MSG_CHECKING([for Itk configuration])
+  AC_CACHE_VAL(ac_cv_c_itkconfig,[
+
+  # First check to see if --with-itkconfig was specified.
+  if test x"${with_itkconfig}" != x ; then
+    if test -f "${with_itkconfig}/itkConfig.sh" ; then
+      ac_cv_c_itkconfig=`(cd ${with_itkconfig}; pwd)`
+    else
+      AC_MSG_ERROR([${with_itkconfig} directory doesn't contain itkConfig.sh])
+    fi
+  fi
+
+  # then check for a private Itk library
+  if test x"${ac_cv_c_itkconfig}" = x ; then
+    for i in \
+		../itcl/itk \
+		`ls -dr ../itcl[[4-9]]*/itk 2>/dev/null` \
+		../../itk \
+		`ls -dr ../../itcl[[4-9]]*/itk 2>/dev/null` \
+		../../../itk \
+		`ls -dr ../../../itcl[[4-9]]*/itk 2>/dev/null` ; do
+      if test -f "$i/${configdir}/itkConfig.sh" ; then
+        ac_cv_c_itkconfig=`(cd $i/${configdir}; pwd)`
+	break
+      fi
+    done
+  fi
+  # check in a few common install locations
+  if test x"${ac_cv_c_itkconfig}" = x ; then
+    for i in `ls -d ${prefix}/lib /usr/local/lib 2>/dev/null` ; do
+      if test -f "$i/itkConfig.sh" ; then
+        ac_cv_c_itkconfig=`(cd $i; pwd)`
+	break
+      fi
+    done
+  fi
+  # check in a few other private locations
+  if test x"${ac_cv_c_itkconfig}" = x ; then
+    for i in \
+		${srcdir}/../itcl/itk \
+		`ls -dr ${srcdir}/../itcl[[4-9]]*/itk 2>/dev/null` ; do
+      if test -f "$i/${configdir}/itkConfig.sh" ; then
+        ac_cv_c_itkconfig=`(cd $i/${configdir}; pwd)`
+	break
+      fi
+    done
+  fi
+  ])
+  if test x"${ac_cv_c_itkconfig}" = x ; then
+    ITKCONFIG="# no Itk configs found"
+    AC_MSG_WARN(Can't find Itk configuration definitions)
+  else
+    no_itk=
+    ITKCONFIG=${ac_cv_c_itkconfig}/itkConfig.sh
+    AC_MSG_RESULT(found $ITKCONFIG)
+  fi
+fi
+
+])
+
+# Defined as a separate macro so we don't have to cache the values
+# from PATH_ITKCONFIG (because this can also be cached).
+AC_DEFUN(CY_AC_LOAD_ITKCONFIG, [
+    if test -f "$ITKCONFIG" ; then
+      . $ITKCONFIG
+    fi
+
+    AC_SUBST(ITK_VERSION)
+dnl not actually used, don't export to save symbols
+dnl    AC_SUBST(ITK_MAJOR_VERSION)
+dnl    AC_SUBST(ITK_MINOR_VERSION)
+    AC_SUBST(ITK_DEFS)
+
+dnl not used, don't export to save symbols
+    dnl AC_SUBST(ITK_LIB_FILE)
+
+dnl not used outside of configure
+dnl    AC_SUBST(ITK_LIBS)
+dnl not used, don't export to save symbols
+dnl    AC_SUBST(ITK_PREFIX)
+
+dnl not used, don't export to save symbols
+dnl    AC_SUBST(ITK_EXEC_PREFIX)
+
+    AC_SUBST(ITK_BUILD_INCLUDES)
+    AC_SUBST(ITK_BUILD_LIB_SPEC)
+    AC_SUBST(ITK_LIB_SPEC)
+])
+
+AC_DEFUN(CY_AC_PATH_ITKH, [
+AC_MSG_CHECKING(for Itk private headers. srcdir=${srcdir})
+if test x"${ac_cv_c_itkh}" = x ; then
+  for i in ${srcdir}/../itcl ${srcdir}/../../itcl ${srcdir}/../../../itcl ${srcdir}/../itcl/itk; do
+    if test -f $i/generic/itk.h ; then
+      ac_cv_c_itkh=`(cd $i/generic; pwd)`
+      break
+    fi
+  done
+fi
+if test x"${ac_cv_c_itkh}" = x ; then
+  ITKHDIR="# no Itk private headers found"
+  AC_MSG_ERROR([Can't find Itk private headers])
+fi
+if test x"${ac_cv_c_itkh}" != x ; then
+     ITKHDIR="-I${ac_cv_c_itkh}"
+fi
+# should always be here
+#     ITKLIB="../itcl/itk/unix/libitk.a"
+AC_SUBST(ITKHDIR)
+#AC_SUBST(ITKLIB)
 ])
 
 # check for Tix headers. 
