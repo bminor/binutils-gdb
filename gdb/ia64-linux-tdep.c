@@ -1,6 +1,6 @@
 /* Target-dependent code for the IA-64 for GDB, the GNU debugger.
-   Copyright 2000, 2004
-   Free Software Foundation, Inc.
+
+   Copyright 2000, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "ia64-tdep.h"
 #include "arch-utils.h"
 #include "gdbcore.h"
 

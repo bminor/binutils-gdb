@@ -683,6 +683,7 @@ hppa_tdep_h = hppa-tdep.h
 i386_linux_tdep_h = i386-linux-tdep.h
 i386_tdep_h = i386-tdep.h
 i387_tdep_h = i387-tdep.h
+ia64_tdep_h = ia64-tdep.h
 infcall_h = infcall.h
 inferior_h = inferior.h $(breakpoint_h) $(target_h) $(frame_h)
 inf_loop_h = inf-loop.h
@@ -1823,13 +1824,14 @@ ia64-aix-nat.o: ia64-aix-nat.c $(defs_h) $(inferior_h) $(target_h) \
 ia64-aix-tdep.o: ia64-aix-tdep.c $(defs_h)
 ia64-linux-nat.o: ia64-linux-nat.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 	$(target_h) $(gdbcore_h) $(regcache_h) $(gdb_wait_h) $(gregset_h)
-ia64-linux-tdep.o: ia64-linux-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h)
+ia64-linux-tdep.o: ia64-linux-tdep.c $(defs_h) $(ia64_tdep_h) \
+	$(arch_utils_h) $(gdbcore_h)
 ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(arch_utils_h) $(floatformat_h) $(regcache_h) $(reggroups_h) \
 	$(frame_h) $(frame_base_h) $(frame_unwind_h) $(doublest_h) \
 	$(value_h) $(gdb_assert_h) $(objfiles_h) $(elf_common_h) \
-	$(elf_bfd_h) $(elf_h) $(dis_asm_h) $(libunwind_frame_h) \
-	$(libunwind_ia64_h)
+	$(elf_bfd_h) $(elf_h) $(dis_asm_h) $(ia64_tdep_h) \
+	$(libunwind_frame_h) $(libunwind_ia64_h)
 infcall.o: infcall.c $(defs_h) $(breakpoint_h) $(target_h) $(regcache_h) \
 	$(inferior_h) $(gdb_assert_h) $(block_h) $(gdbcore_h) $(language_h) \
 	$(objfiles_h) $(gdbcmd_h) $(command_h) $(gdb_string_h) $(infcall_h)
