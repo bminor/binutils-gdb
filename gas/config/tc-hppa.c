@@ -1717,407 +1717,424 @@ pa_ip (str)
 		INSERT_FIELD_AND_CONTINUE (opcode, a, 13);
 	      }
 
-	    /* Handle a non-negated compare/stubtract condition.  */
-	    case '<':
-	      cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s, 1);
-	      if (cmpltr < 0)
-		{
-		  as_bad (_("Invalid Compare/Subtract Condition: %c"), *s);
-		  cmpltr = 0;
-		}
-	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
-
-	    /* Handle a negated or non-negated compare/subtract condition.  */
+	    /* Handle all conditions.  */
 	    case '?':
-	      save_s = s;
-	      cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s, 1);
-	      if (cmpltr < 0)
-		{
-		  s = save_s;
-		  cmpltr = pa_parse_neg_cmpsub_cmpltr (&s, 1);
-		  if (cmpltr < 0)
-		    {
-		      as_bad (_("Invalid Compare/Subtract Condition."));
-		      cmpltr = 0;
-		    }
-		  else
-		    {
-		      /* Negated condition requires an opcode change.  */
-		      opcode |= 1 << 27;
-		    }
-		}
-	
-	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
+	      {
+		args++;
+		switch (*args)
+		  {
+ 		  /* Handle FP compare conditions.  */
+ 		  case 'f':
+ 		    cond = pa_parse_fp_cmp_cond (&s);
+ 		    INSERT_FIELD_AND_CONTINUE (opcode, cond, 0);
 
-	    /* Handle non-negated add condition.  */
-	    case '!':
-	      cmpltr = pa_parse_nonneg_add_cmpltr (&s, 1);
-	      if (cmpltr < 0)
-		{
-		  as_bad (_("Invalid Compare/Subtract Condition: %c"), *s);
-		  cmpltr = 0;
-		}
-	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
+		  /* Handle an add condition.  */
+		  case 'a':
+ 		    cmpltr = 0;
+ 		    flag = 0;
+		    if (*s == ',')
+		      {
+			s++;
+			name = s;
+			while (*s != ',' && *s != ' ' && *s != '\t')
+			  s += 1;
+			c = *s;
+			*s = 0x00;
+			if (strcmp (name, "=") == 0)
+			  cmpltr = 1;
+			else if (strcmp (name, "<") == 0)
+			  cmpltr = 2;
+			else if (strcmp (name, "<=") == 0)
+			  cmpltr = 3;
+			else if (strcasecmp (name, "nuv") == 0)
+			  cmpltr = 4;
+			else if (strcasecmp (name, "znv") == 0)
+			  cmpltr = 5;
+			else if (strcasecmp (name, "sv") == 0)
+			  cmpltr = 6;
+			else if (strcasecmp (name, "od") == 0)
+			  cmpltr = 7;
+			else if (strcasecmp (name, "tr") == 0)
+			  {
+			    cmpltr = 0;
+			    flag = 1;
+			  }
+			else if (strcmp (name, "<>") == 0)
+			  {
+			    cmpltr = 1;
+			    flag = 1;
+			  }
+			else if (strcmp (name, ">=") == 0)
+			  {
+			    cmpltr = 2;
+			    flag = 1;
+			  }
+			else if (strcmp (name, ">") == 0)
+			  {
+			    cmpltr = 3;
+			    flag = 1;
+			  }
+			else if (strcasecmp (name, "uv") == 0)
+			  {
+			    cmpltr = 4;
+			    flag = 1;
+			  }
+			else if (strcasecmp (name, "vnz") == 0)
+			  {
+			    cmpltr = 5;
+			    flag = 1;
+			  }
+			else if (strcasecmp (name, "nsv") == 0)
+			  {
+			    cmpltr = 6;
+			    flag = 1;
+			  }
+			else if (strcasecmp (name, "ev") == 0)
+			  {
+			    cmpltr = 7;
+			    flag = 1;
+			  }
+			else
+			  as_bad (_("Invalid Add Condition: %s"), name);
+			*s = c;
+		      }
+		    opcode |= cmpltr << 13;
+		    INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
 
-	    /* Handle a negated or non-negated add condition.  */
-	    case '@':
-	      save_s = s;
-	      cmpltr = pa_parse_nonneg_add_cmpltr (&s, 1);
-	      if (cmpltr < 0)
-		{
-		  s = save_s;
-		  cmpltr = pa_parse_neg_add_cmpltr (&s, 1);
-		  if (cmpltr < 0)
-		    {
-		      as_bad (_("Invalid Compare/Subtract Condition"));
-		      cmpltr = 0;
-		    }
-		  else
-		    {
-		      /* Negated condition requires an opcode change.  */
-		      opcode |= 1 << 27;
-		    }
-		}
-	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
+		  /* Handle non-negated add and branch condition.  */
+		  case 'd':
+		    cmpltr = pa_parse_nonneg_add_cmpltr (&s, 1);
+		    if (cmpltr < 0)
+		      {
+			as_bad (_("Invalid Compare/Subtract Condition: %c"), *s);
+			cmpltr = 0;
+		      }
+		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
-	    /* Handle a compare/subtract condition.  */
-	    case 'a':
-	      cmpltr = 0;
-	      flag = 0;
-	      if (*s == ',')
-		{
-		  s++;
-		  name = s;
-		  while (*s != ',' && *s != ' ' && *s != '\t')
-		    s += 1;
-		  c = *s;
-		  *s = 0x00;
-		  if (strcmp (name, "=") == 0)
-		    cmpltr = 1;
-		  else if (strcmp (name, "<") == 0)
-		    cmpltr = 2;
-		  else if (strcmp (name, "<=") == 0)
-		    cmpltr = 3;
-		  else if (strcasecmp (name, "<<") == 0)
-		    cmpltr = 4;
-		  else if (strcasecmp (name, "<<=") == 0)
-		    cmpltr = 5;
-		  else if (strcasecmp (name, "sv") == 0)
-		    cmpltr = 6;
-		  else if (strcasecmp (name, "od") == 0)
-		    cmpltr = 7;
-		  else if (strcasecmp (name, "tr") == 0)
-		    {
-		      cmpltr = 0;
-		      flag = 1;
-		    }
-		  else if (strcmp (name, "<>") == 0)
-		    {
-		      cmpltr = 1;
-		      flag = 1;
-		    }
-		  else if (strcmp (name, ">=") == 0)
-		    {
-		      cmpltr = 2;
-		      flag = 1;
-		    }
-		  else if (strcmp (name, ">") == 0)
-		    {
-		      cmpltr = 3;
-		      flag = 1;
-		    }
-		  else if (strcasecmp (name, ">>=") == 0)
-		    {
-		      cmpltr = 4;
-		      flag = 1;
-		    }
-		  else if (strcasecmp (name, ">>") == 0)
-		    {
-		      cmpltr = 5;
-		      flag = 1;
-		    }
-		  else if (strcasecmp (name, "nsv") == 0)
-		    {
-		      cmpltr = 6;
-		      flag = 1;
-		    }
-		  else if (strcasecmp (name, "ev") == 0)
-		    {
-		      cmpltr = 7;
-		      flag = 1;
-		    }
-		  else
-		    as_bad (_("Invalid Add Condition: %s"), name);
-		  *s = c;
-		}
-	      opcode |= cmpltr << 13;
-	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
+		  /* Handle a negated or non-negated add and branch 
+		     condition.  */
+		  case '@':
+		    save_s = s;
+		    cmpltr = pa_parse_nonneg_add_cmpltr (&s, 1);
+		    if (cmpltr < 0)
+		      {
+			s = save_s;
+			cmpltr = pa_parse_neg_add_cmpltr (&s, 1);
+			if (cmpltr < 0)
+			  {
+			    as_bad (_("Invalid Compare/Subtract Condition"));
+			    cmpltr = 0;
+			  }
+			else
+			  {
+			    /* Negated condition requires an opcode change. */
+			    opcode |= 1 << 27;
+			  }
+		      }
+		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
-	    /* Handle a non-negated add condition.  */
-	    case 'd':
-	      cmpltr = 0;
-	      flag = 0;
-	      if (*s == ',')
-		{
-		  s++;
-		  name = s;
-		  while (*s != ',' && *s != ' ' && *s != '\t')
-		    s += 1;
-		  c = *s;
-		  *s = 0x00;
-		  if (strcmp (name, "=") == 0)
-		    cmpltr = 1;
-		  else if (strcmp (name, "<") == 0)
-		    cmpltr = 2;
-		  else if (strcmp (name, "<=") == 0)
-		    cmpltr = 3;
-		  else if (strcasecmp (name, "nuv") == 0)
-		    cmpltr = 4;
-		  else if (strcasecmp (name, "znv") == 0)
-		    cmpltr = 5;
-		  else if (strcasecmp (name, "sv") == 0)
-		    cmpltr = 6;
-		  else if (strcasecmp (name, "od") == 0)
-		    cmpltr = 7;
-		  else if (strcasecmp (name, "tr") == 0)
-		    {
-		      cmpltr = 0;
-		      flag = 1;
-		    }
-		  else if (strcmp (name, "<>") == 0)
-		    {
-		      cmpltr = 1;
-		      flag = 1;
-		    }
-		  else if (strcmp (name, ">=") == 0)
-		    {
-		      cmpltr = 2;
-		      flag = 1;
-		    }
-		  else if (strcmp (name, ">") == 0)
-		    {
-		      cmpltr = 3;
-		      flag = 1;
-		    }
-		  else if (strcasecmp (name, "uv") == 0)
-		    {
-		      cmpltr = 4;
-		      flag = 1;
-		    }
-		  else if (strcasecmp (name, "vnz") == 0)
-		    {
-		      cmpltr = 5;
-		      flag = 1;
-		    }
-		  else if (strcasecmp (name, "nsv") == 0)
-		    {
-		      cmpltr = 6;
-		      flag = 1;
-		    }
-		  else if (strcasecmp (name, "ev") == 0)
-		    {
-		      cmpltr = 7;
-		      flag = 1;
-		    }
-		  else
-		    as_bad (_("Invalid Add Condition: %s"), name);
-		  *s = c;
-		}
-	      opcode |= cmpltr << 13;
-	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
+		  /* Handle branch on bit conditions.  */
+		  case 'b':
+		    cmpltr = 0;
+		    if (*s == ',')
+		      {
+			s++;
+			if (strncmp (s, "<", 1) == 0)
+			  {
+			    cmpltr = 0;
+			    s++;
+			  }
+			else if (strncmp (s, ">=", 2) == 0)
+			  {
+			    cmpltr = 1;
+			    s += 2;
+			  }
+			else
+			  as_bad (_("Invalid Bit Branch Condition: %c"), *s);
+		      }
+		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 15);
 
-	    /* HANDLE a logical instruction condition.  */
-	    case '&':
-	      cmpltr = 0;
-	      flag = 0;
-	      if (*s == ',')
-		{
-		  s++;
-		  name = s;
-		  while (*s != ',' && *s != ' ' && *s != '\t')
-		    s += 1;
-		  c = *s;
-		  *s = 0x00;
+		  /* Handle a compare/subtract condition.  */
+		  case 's':
+		    cmpltr = 0;
+		    flag = 0;
+		    if (*s == ',')
+		      {
+			s++;
+			name = s;
+			while (*s != ',' && *s != ' ' && *s != '\t')
+			  s += 1;
+			c = *s;
+			*s = 0x00;
+			if (strcmp (name, "=") == 0)
+			  cmpltr = 1;
+			else if (strcmp (name, "<") == 0)
+			  cmpltr = 2;
+			else if (strcmp (name, "<=") == 0)
+			  cmpltr = 3;
+			else if (strcasecmp (name, "<<") == 0)
+			  cmpltr = 4;
+			else if (strcasecmp (name, "<<=") == 0)
+			  cmpltr = 5;
+			else if (strcasecmp (name, "sv") == 0)
+			  cmpltr = 6;
+			else if (strcasecmp (name, "od") == 0)
+			  cmpltr = 7;
+			else if (strcasecmp (name, "tr") == 0)
+			  {
+			    cmpltr = 0;
+			    flag = 1;
+			  }
+			else if (strcmp (name, "<>") == 0)
+			  {
+			    cmpltr = 1;
+			    flag = 1;
+			  }
+			else if (strcmp (name, ">=") == 0)
+			  {
+			    cmpltr = 2;
+			    flag = 1;
+			  }
+			else if (strcmp (name, ">") == 0)
+			  {
+			    cmpltr = 3;
+			    flag = 1;
+			  }
+			else if (strcasecmp (name, ">>=") == 0)
+			  {
+			    cmpltr = 4;
+			    flag = 1;
+			  }
+			else if (strcasecmp (name, ">>") == 0)
+			  {
+			    cmpltr = 5;
+			    flag = 1;
+			  }
+			else if (strcasecmp (name, "nsv") == 0)
+			  {
+			    cmpltr = 6;
+			    flag = 1;
+			  }
+			else if (strcasecmp (name, "ev") == 0)
+			  {
+			    cmpltr = 7;
+			    flag = 1;
+			  }
+			else
+			  as_bad (_("Invalid Compare/Subtract Condition: %s"),
+				  name);
+			*s = c;
+		      }
+		    opcode |= cmpltr << 13;
+		    INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
 
+		  /* Handle a non-negated compare condition.  */
+		  case 't':
+		    cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s, 1);
+		    if (cmpltr < 0)
+		      {
+			as_bad (_("Invalid Compare/Subtract Condition: %c"), *s);
+			cmpltr = 0;
+		      }
+		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
+  
+		  /* Handle a negated or non-negated compare/subtract
+		     condition.  */
+		  case 'n':
+		    save_s = s;
+		    cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s, 1);
+		    if (cmpltr < 0)
+		      {
+			s = save_s;
+			cmpltr = pa_parse_neg_cmpsub_cmpltr (&s, 1);
+			if (cmpltr < 0)
+			  {
+			    as_bad (_("Invalid Compare/Subtract Condition."));
+			    cmpltr = 0;
+			  }
+			else
+			  {
+			    /* Negated condition requires an opcode change. */
+			    opcode |= 1 << 27;
+			  }
+		      }
+	    
+		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
-		  if (strcmp (name, "=") == 0)
-		    cmpltr = 1;
-		  else if (strcmp (name, "<") == 0)
-		    cmpltr = 2;
-		  else if (strcmp (name, "<=") == 0)
-		    cmpltr = 3;
-		  else if (strcasecmp (name, "od") == 0)
-		    cmpltr = 7;
-		  else if (strcasecmp (name, "tr") == 0)
-		    {
-		      cmpltr = 0;
-		      flag = 1;
-		    }
-		  else if (strcmp (name, "<>") == 0)
-		    {
-		      cmpltr = 1;
-		      flag = 1;
-		    }
-		  else if (strcmp (name, ">=") == 0)
-		    {
-		      cmpltr = 2;
-		      flag = 1;
-		    }
-		  else if (strcmp (name, ">") == 0)
-		    {
-		      cmpltr = 3;
-		      flag = 1;
-		    }
-		  else if (strcasecmp (name, "ev") == 0)
-		    {
-		      cmpltr = 7;
-		      flag = 1;
-		    }
-		  else
-		    as_bad (_("Invalid Logical Instruction Condition."));
-		  *s = c;
-		}
-	      opcode |= cmpltr << 13;
-	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
+		    /* Handle a logical instruction condition.  */
+		  case 'l':
+		    cmpltr = 0;
+		    flag = 0;
+		    if (*s == ',')
+		      {
+			s++;
+			name = s;
+			while (*s != ',' && *s != ' ' && *s != '\t')
+			  s += 1;
+			c = *s;
+			*s = 0x00;
+	    
+	    
+			if (strcmp (name, "=") == 0)
+			  cmpltr = 1;
+			else if (strcmp (name, "<") == 0)
+			  cmpltr = 2;
+			else if (strcmp (name, "<=") == 0)
+			  cmpltr = 3;
+			else if (strcasecmp (name, "od") == 0)
+			  cmpltr = 7;
+			else if (strcasecmp (name, "tr") == 0)
+			  {
+			    cmpltr = 0;
+			    flag = 1;
+			  }
+			else if (strcmp (name, "<>") == 0)
+			  {
+			    cmpltr = 1;
+			    flag = 1;
+			  }
+			else if (strcmp (name, ">=") == 0)
+			  {
+			    cmpltr = 2;
+			    flag = 1;
+			  }
+			else if (strcmp (name, ">") == 0)
+			  {
+			    cmpltr = 3;
+			    flag = 1;
+			  }
+			else if (strcasecmp (name, "ev") == 0)
+			  {
+			    cmpltr = 7;
+			    flag = 1;
+			  }
+			else
+			  as_bad (_("Invalid Logical Instruction Condition."));
+			*s = c;
+		      }
+		    opcode |= cmpltr << 13;
+		    INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
 
-	    /* Handle a unit instruction condition.  */
-	    case 'U':
-	      cmpltr = 0;
-	      flag = 0;
-	      if (*s == ',')
-		{
-		  s++;
+		  /* Handle a shift/extract/deposit condition.  */
+		  case 'x':
+		  case 'y':
+		    cmpltr = 0;
+		    if (*s == ',')
+		      {
+			save_s = s++;
 
+			name = s;
+			while (*s != ',' && *s != ' ' && *s != '\t')
+			  s += 1;
+			c = *s;
+			*s = 0x00;
+			if (strcmp (name, "=") == 0)
+			  cmpltr = 1;
+			else if (strcmp (name, "<") == 0)
+			  cmpltr = 2;
+			else if (strcasecmp (name, "od") == 0)
+			  cmpltr = 3;
+			else if (strcasecmp (name, "tr") == 0)
+			  cmpltr = 4;
+			else if (strcmp (name, "<>") == 0)
+			  cmpltr = 5;
+			else if (strcmp (name, ">=") == 0)
+			  cmpltr = 6;
+			else if (strcasecmp (name, "ev") == 0)
+			  cmpltr = 7;
+			/* Handle movb,n.  Put things back the way they were.
+			   This includes moving s back to where it started.  */
+			else if (strcasecmp (name, "n") == 0 && *args == 'y')
+			  {
+			    *s = c;
+			    s = save_s;
+			    continue;
+			  }
+			else
+			  as_bad (_("Invalid Shift/Extract/Deposit Condition."));
+			*s = c;
+		      }
+		    INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
 
-		  if (strncasecmp (s, "sbz", 3) == 0)
-		    {
-		      cmpltr = 2;
-		      s += 3;
-		    }
-		  else if (strncasecmp (s, "shz", 3) == 0)
-		    {
-		      cmpltr = 3;
-		      s += 3;
-		    }
-		  else if (strncasecmp (s, "sdc", 3) == 0)
-		    {
-		      cmpltr = 4;
-		      s += 3;
-		    }
-		  else if (strncasecmp (s, "sbc", 3) == 0)
-		    {
-		      cmpltr = 6;
-		      s += 3;
-		    }
-		  else if (strncasecmp (s, "shc", 3) == 0)
-		    {
-		      cmpltr = 7;
-		      s += 3;
-		    }
-		  else if (strncasecmp (s, "tr", 2) == 0)
-		    {
-		      cmpltr = 0;
-		      flag = 1;
-		      s += 2;
-		    }
-		  else if (strncasecmp (s, "nbz", 3) == 0)
-		    {
-		      cmpltr = 2;
-		      flag = 1;
-		      s += 3;
-		    }
-		  else if (strncasecmp (s, "nhz", 3) == 0)
-		    {
-		      cmpltr = 3;
-		      flag = 1;
-		      s += 3;
-		    }
-		  else if (strncasecmp (s, "ndc", 3) == 0)
-		    {
-		      cmpltr = 4;
-		      flag = 1;
-		      s += 3;
-		    }
-		  else if (strncasecmp (s, "nbc", 3) == 0)
-		    {
-		      cmpltr = 6;
-		      flag = 1;
-		      s += 3;
-		    }
-		  else if (strncasecmp (s, "nhc", 3) == 0)
-		    {
-		      cmpltr = 7;
-		      flag = 1;
-		      s += 3;
-		    }
-		  else
-		    as_bad (_("Invalid Logical Instruction Condition."));
-		}
-	      opcode |= cmpltr << 13;
-	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
+		  /* Handle a unit instruction condition.  */
+		  case 'u':	/* unit */
+		    cmpltr = 0;
+		    flag = 0;
+		    if (*s == ',')
+		      {
+			s++;
+	    
+			if (strncasecmp (s, "sbz", 3) == 0)
+			  {
+			    cmpltr = 2;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "shz", 3) == 0)
+			  {
+			    cmpltr = 3;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "sdc", 3) == 0)
+			  {
+			    cmpltr = 4;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "sbc", 3) == 0)
+			  {
+			    cmpltr = 6;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "shc", 3) == 0)
+			  {
+			    cmpltr = 7;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "tr", 2) == 0)
+			  {
+			    cmpltr = 0;
+			    flag = 1;
+			    s += 2;
+			  }
+			else if (strncasecmp (s, "nbz", 3) == 0)
+			  {
+			    cmpltr = 2;
+			    flag = 1;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "nhz", 3) == 0)
+			  {
+			    cmpltr = 3;
+			    flag = 1;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "ndc", 3) == 0)
+			  {
+			    cmpltr = 4;
+			    flag = 1;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "nbc", 3) == 0)
+			  {
+			    cmpltr = 6;
+			    flag = 1;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "nhc", 3) == 0)
+			  {
+			    cmpltr = 7;
+			    flag = 1;
+			    s += 3;
+			  }
+			else
+			  as_bad (_("Invalid Unit Instruction Condition."));
+		      }
+		    opcode |= cmpltr << 13;
+		    INSERT_FIELD_AND_CONTINUE (opcode, flag, 12);
 
-	    /* Handle a shift/extract/deposit condition.  */
-	    case '|':
-	    case '>':
-	      cmpltr = 0;
-	      if (*s == ',')
-		{
-		  save_s = s++;
-
-
-		  name = s;
-		  while (*s != ',' && *s != ' ' && *s != '\t')
-		    s += 1;
-		  c = *s;
-		  *s = 0x00;
-		  if (strcmp (name, "=") == 0)
-		    cmpltr = 1;
-		  else if (strcmp (name, "<") == 0)
-		    cmpltr = 2;
-		  else if (strcasecmp (name, "od") == 0)
-		    cmpltr = 3;
-		  else if (strcasecmp (name, "tr") == 0)
-		    cmpltr = 4;
-		  else if (strcmp (name, "<>") == 0)
-		    cmpltr = 5;
-		  else if (strcmp (name, ">=") == 0)
-		    cmpltr = 6;
-		  else if (strcasecmp (name, "ev") == 0)
-		    cmpltr = 7;
-		  /* Handle movb,n.  Put things back the way they were.
-		     This includes moving s back to where it started.  */
-		  else if (strcasecmp (name, "n") == 0 && *args == '|')
-		    {
-		      *s = c;
-		      s = save_s;
-		      continue;
-		    }
-		  else
-		    as_bad (_("Invalid Shift/Extract/Deposit Condition."));
-		  *s = c;
-		}
-	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 13);
-
-	    /* Handle bvb and bb conditions.  */
-	    case '~':
-	      cmpltr = 0;
-	      if (*s == ',')
-		{
-		  s++;
-		  if (strncmp (s, "<", 1) == 0)
-		    {
-		      cmpltr = 0;
-		      s++;
-		    }
-		  else if (strncmp (s, ">=", 2) == 0)
-		    {
-		      cmpltr = 1;
-		      s += 2;
-		    }
-		  else
-		    as_bad (_("Invalid Bit Branch Condition: %c"), *s);
-		}
-	      INSERT_FIELD_AND_CONTINUE (opcode, cmpltr, 15);
+		  default:
+		    abort ();
+		  }
+	      }
 
 	    /* Handle a system control completer.  */
 	    case 'Z':
@@ -2429,11 +2446,6 @@ pa_ip (str)
 	      flag = pa_parse_fp_format (&s);
 	      the_insn.fpof2 = flag;
 	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 13);
-
-	    /* Handle FP compare conditions.  */
-	    case 'M':
-	      cond = pa_parse_fp_cmp_cond (&s);
-	      INSERT_FIELD_AND_CONTINUE (opcode, cond, 0);
 
 	    /* Handle L/R register halves like 't'.  */
 	    case 'v':

@@ -1,3 +1,7 @@
+Thu Aug  5 16:52:51 1999  Jerry Quinn <jquinn@nortelnetworks.com>
+
+	* config/tc-hppa.c (pa_ip): Change condition args to have '?' prefix.
+
 Thu Aug  5 23:05:56 1999  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c (md_assemble):  Call as_bad when there are excess
