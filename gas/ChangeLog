@@ -1,3 +1,8 @@
+2000-08-11  Andreas Schwab  <schwab@suse.de>
+
+	* doc/c-i860.texi (Opcodes for i860): Remove braces from @item
+	argument.
+
 2000-08-11  Kazu Hirata  <kazu@hxi.com>
 
 	* expr.c: Fix formatting.

@@ -107,7 +107,7 @@ a very undesirable feature that should be avoided -- in particular, when
 they result in an expansion to multiple actual i860 instructions. Below
 are the pseudo-instructions that result in expansions.
 @itemize @bullet
-@item {Load large immediate into general register:}
+@item Load large immediate into general register:
 
 The pseudo-instruction @code{mov imm,%rn} (where the immediate does
 not fit within a signed 16-bit field) will be expanded into:
@@ -115,7 +115,7 @@ not fit within a signed 16-bit field) will be expanded into:
 orh large_imm@@h,%r0,%rn
 or large_imm@@l,%rn,%rn
 @end smallexample
-@item {Load/store with relocatable address expression:}
+@item Load/store with relocatable address expression:
 
 For example, the pseudo-instruction @code{ld.b addr,%rn} 
 will be expanded into:
@@ -125,7 +125,8 @@ ld.l addr_exp@@l(%r31),%rn
 @end smallexample
 
 The analogous expansions apply to @code{ld.x, st.x, fld.x, pfld.x, fst.x}, and @code{pst.x} as well.
-@item {Signed large immediate with add/subtract:}
+@item Signed large immediate with add/subtract:
+
 If any of the arithmetic operations @code{adds, addu, subs, subu} are used
 with an immediate larger than 16-bits (signed), then they will be expanded.
 For instance, the pseudo-instruction @code{adds large_imm,%rx,%rn} expands to:
@@ -134,7 +135,8 @@ orh large_imm@@h,%r0,%r31
 or large_imm@@l,%r31,%r31
 adds %r31,%rx,%rn
 @end smallexample
-@item {Unsigned large immediate with logical operations:}
+@item Unsigned large immediate with logical operations:
+
 Logical operations (@code{or, andnot, or, xor}) also result in expansions.
 The pseudo-instruction @code{or large_imm,%rx,%rn} results in:
 @smallexample
