@@ -1,3 +1,31 @@
+2002-10-08  Petr Sorfa <petrs@caldera.com>
+
+	Revised and re-submitted by John Wolfe <jlw@caldera.com>
+
+	Move the Dwarf 2 abbrev table to a per-compilation-unit structure,
+	so we can work on more than one compilation unit at a time.  This
+	helps prepare GDB to handle inter-CU die references.
+	* dwarf2read.c (ABBREV_HASH_SIZE): moved definition forward in
+	the code to be defined before struct comp_unit_head.
+	(comp_unit_head): Added new members - offset, cu_head,
+	begin_die, next and dwarf2_abbrevs.
+	(dwarf2_abbrevs): Removed single static var; now member of
+	struct comp_unit_head.
+	dwarf2_build_psymtabs_hard): Complete new struct comp_unit_head
+	members.
+	(psymtab_to_symtab_1): Changed to work with the new
+	struct comp_unit_head.
+	(dwarf2_read_abbrevs): Now accepts a cu_header parameter and
+	constructs the dwarf2_abbrevs[] inside the cu_header.
+	(dwarf2_empty_abbrev_table): Now expects a ptr to a
+	dwarf2_abbrev table to clean up.
+	(dwarf2_lookup_abbrev): Now accepts a cu_header parameter and
+	handling of dwarf2_abbrevs inside the cu_header.
+	(read_partial_die): Now supports the call to the new
+	dwarf2_lookup_abbrev.
+	(read_full_die): Now supports the call to the new
+	dwarf2_lookup_abbrev.
+
 2002-10-06  Christopher Faylor  <cgf@redhat.com>
 
 	* Makefile.in (install-gdbtk): Add missing continuation backslash to
