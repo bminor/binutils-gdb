@@ -1407,8 +1407,9 @@ corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 gcore.o: gcore.c $(defs_h) $(command_h) $(inferior_h) $(gdbcore_h) \
 	$(BFD_SRC)/elf-bfd.h $(symfile_h) $(objfiles_h) 
 
-linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(gregset_h) \
-	$(gdbcore_h) $(gdbthread_h) $(regcache_h) $(BFD_SRC)/elf-bfd.h 
+linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(regcache_h) $(gregset_h) \
+	$(gdbcore_h) $(gdbthread_h) $(elf_bfd_h) $(cli_decode_h) \
+	$(gdb_string_h)
 
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h)
 
