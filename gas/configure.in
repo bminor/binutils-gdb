@@ -124,6 +124,7 @@ changequote([,])dnl
     case ${cpu} in
       am33_2.0)		cpu_type=mn10300 endian=little ;;
       alpha*)		cpu_type=alpha ;;
+      arm*be|xscale*be|strongarm*be | \
       arm*b|xscale*b|strongarm*b) cpu_type=arm endian=big ;;
       arm*|xscale*|strongarm*)    cpu_type=arm endian=little ;;
       c4x*)		cpu_type=tic4x ;;

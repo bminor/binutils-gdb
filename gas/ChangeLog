@@ -1,3 +1,8 @@
+2004-07-15  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Accept armbe as a big-endian arm configuration.
+	* configure: Regenerate.
+
 2004-07-13  Thomas Nystrom  <thn@saeab.se>
 
 	* config/tc-i386.c (T_SHIFTOP): New constant.
