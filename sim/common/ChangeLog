@@ -1,5 +1,7 @@
 Wed Sep  3 17:32:54 1997  Doug Evans  <dje@seba.cygnus.com>
 
+	* sim-hload.c (sim_load): Add assert for SIM_MAGIC_NUMBER.
+
 	* gdbinit.in: New file.
 	* aclocal.m4 (SIM_AC_OUTPUT): Build .gdbinit.
 	* Make-common.in (distclean): Delete .gdbinit.
