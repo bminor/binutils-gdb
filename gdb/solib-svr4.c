@@ -1110,8 +1110,8 @@ svr4_relocate_main_executable (void)
       displacement = pc - bfd_get_start_address (exec_bfd);
       changed = 0;
 
-      new_offsets = xcalloc (sizeof (struct section_offsets),
-			     symfile_objfile->num_sections);
+      new_offsets = xcalloc (symfile_objfile->num_sections,
+			     sizeof (struct section_offsets));
       old_chain = make_cleanup (xfree, new_offsets);
 
       for (i = 0; i < symfile_objfile->num_sections; i++)

@@ -1,3 +1,11 @@
+2002-01-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-aix5.c (build_so_list_from_mapfile)
+	(aix5_relocate_main_executable): Fix xcalloc() calls so order of
+	arguments is not reversed.
+	* solib-sunos.c (sunos_relocate_main_executable): Likewise.
+	* solib-svr4.c (svr4_relocate_main_executable): Likewise.
+	
 2002-01-22  Elena Zannoni  <ezannoni@redhat.com>
 
 	* sh-tdep.c (sh_pseudo_register_read): New function. Renamed and

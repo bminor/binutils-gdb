@@ -262,9 +262,9 @@ build_so_list_from_mapfile (int pid, long match_mask, long match_val)
 
       if (sop == NULL)
 	{
-	  sop = xcalloc (sizeof (struct so_list), 1);
+	  sop = xcalloc (1, sizeof (struct so_list));
 	  make_cleanup (xfree, sop);
-	  sop->lm_info = xcalloc (sizeof (struct lm_info), 1);
+	  sop->lm_info = xcalloc (1, sizeof (struct lm_info));
 	  make_cleanup (xfree, sop->lm_info);
 	  sop->lm_info->mapname = xstrdup (mapname);
 	  make_cleanup (xfree, sop->lm_info->mapname);
@@ -714,8 +714,8 @@ aix5_relocate_main_executable (void)
 
   /* Allocate the data structure which'll contain the new offsets to
      relocate by.  Initialize it so it contains the current offsets.  */
-  new_offsets = xcalloc (sizeof (struct section_offsets),
-                         symfile_objfile->num_sections);
+  new_offsets = xcalloc (symfile_objfile->num_sections,
+			 sizeof (struct section_offsets));
   make_cleanup (xfree, new_offsets);
   for (i = 0; i < symfile_objfile->num_sections; i++)
     new_offsets->offsets[i] = ANOFFSET (symfile_objfile->section_offsets, i);
