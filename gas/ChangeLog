@@ -1,3 +1,8 @@
+Sun Jun 16 22:57:47 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* config/tc-hppa.c (md_pseudo_table): Add ".level" pseudo op.
+	(pa_level): New function.
+
 Fri Jun 14 20:06:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* listing.c (listing_newline): Don't do anything if listing is 0.
