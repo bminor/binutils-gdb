@@ -2159,7 +2159,10 @@ sparc_ip (str, pinsn)
 		    if (s1)
 		      {
 			*s1 = '\0';
-			(void) get_expression (s);
+			if (op_arg && s1 == s + 1)
+			  the_insn.exp.X_op = O_absent;
+			else
+			  (void) get_expression (s);
 			*s1 = '+';
 			if (op_arg)
 			  *s = ')';

@@ -1,3 +1,7 @@
+1999-08-08  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* config/tc-sparc.c (sparc_ip): Allow assembly of %lo()+%reg.
+
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
 	* Makefile.am: Change all uses of itbl-test-ops to itbl-tops to
