@@ -1,4 +1,4 @@
-# Expect script for ld-i386 tests
+# Expect script for ld-x86_64 tests
 #   Copyright (C) 2002 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
@@ -16,13 +16,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-# Test i386 linking; all types of relocs.  This tests the assembler and
+# Test x86_64 linking; all types of relocs.  This tests the assembler and
 # tools like objdump as well as the linker.
 
-if { !([istarget "i?86-*-elf*"]		
-       || ([istarget "i?86-*-linux*"]
-	   && ![istarget "*-*-*aout*"]
-	   && ![istarget "*-*-*oldld*"])) } {
+if { !([istarget "x86_64-*-elf*"]
+       || [istarget "x86_64-*-linux*"]) } {
     return
 }
 
@@ -35,23 +33,19 @@ if { !([istarget "i?86-*-elf*"]
 # nm: Apply nm options on result.  Compare with regex (last arg).
 # readelf: Apply readelf options on result.  Compare with regex (last arg).
 
-set i386tests {
-    {"TLS -fpic -shared transitions" "-shared -melf_i386"
-     "--32" {tlspic1.s tlspic2.s}
-     {{readelf -Ssrl tlspic.rd} {objdump -drj.text tlspic.dd}
+set x86_64tests {
+    {"TLS -fpic -shared transitions" "-shared -melf_x86_64"
+     "--64" {tlspic1.s tlspic2.s}
+     {{readelf -WSsrl tlspic.rd} {objdump -drj.text tlspic.dd}
       {objdump -sj.got tlspic.sd} {objdump -sj.tdata tlspic.td}}
       "libtlspic.so"}
-    {"Helper shared library" "-shared -melf_i386"
-     "--32" {tlslib.s} {} "libtlslib.so"}
+    {"Helper shared library" "-shared -melf_x86_64"
+     "--64" {tlslib.s} {} "libtlslib.so"}
     {"TLS -fpic and -fno-pic exec transitions"
-     "-melf_i386 tmpdir/libtlslib.so" "--32" {tlsbinpic.s tlsbin.s}
-     {{readelf -Ssrl tlsbin.rd} {objdump -drj.text tlsbin.dd}
+     "-melf_x86_64 tmpdir/libtlslib.so" "--64" {tlsbinpic.s tlsbin.s}
+     {{readelf -WSsrl tlsbin.rd} {objdump -drj.text tlsbin.dd}
       {objdump -sj.got tlsbin.sd} {objdump -sj.tdata tlsbin.td}}
       "tlsbin"}
-    {"TLS -fno-pic -shared" "-shared -melf_i386"
-     "--32" {tlsnopic1.s tlsnopic2.s}
-     {{readelf -Ssrl tlsnopic.rd} {objdump -drj.text tlsnopic.dd}
-      {objdump -sj.got tlsnopic.sd}} "libtlsnopic.so"}
 }
 
-run_ld_link_tests $i386tests
+run_ld_link_tests $x86_64tests

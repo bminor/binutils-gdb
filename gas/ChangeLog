@@ -1,3 +1,13 @@
+2002-09-26  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Add x86-64 TLS relocs.
+	Define them if not BFD_ASSEMBLER.
+	(lex_got): Handle @tlsgd, @dtpoff and @tpoff in 64-bit mode, add
+	@tlsld.
+	(md_apply_fix3): No addend for BFD_RELOC_X86_64_TLSGD,
+	BFD_RELOC_X86_64_TLSLD and BFD_RELOC_X86_64_GOTTPOFF.
+	(tc_gen_reloc): Handle x86-64 TLS relocs.
+
 2002-09-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-avr.c (md_apply_fix3): Reinstate code handling pcrel

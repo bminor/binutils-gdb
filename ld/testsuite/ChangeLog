@@ -1,3 +1,25 @@
+2002-09-27  Jakub Jelinek  <jakub@redhat.com>
+
+	* lib/ld-lib.exp (run_ld_link_tests): Add.
+	* ld-sh/sh64/sh64.exp (run_ld_link_tests, regexp_diff,
+	file_contents): Remove.
+	(sh64tests): Add 6th field to the tests array.
+	* ld-i386/i386.exp (run_ld_link_tests): Remove.
+	* ld-x86-64/x86-64.exp: New.
+	* ld-x86-64/tlsbin.dd: New test.
+	* ld-x86-64/tlsbinpic.s: New test.
+	* ld-x86-64/tlsbin.rd: New test.
+	* ld-x86-64/tlsbin.s: New test.
+	* ld-x86-64/tlsbin.sd: New test.
+	* ld-x86-64/tlsbin.td: New test.
+	* ld-x86-64/tlslib.s: New test.
+	* ld-x86-64/tlspic1.s: New test.
+	* ld-x86-64/tlspic2.s: New test.
+	* ld-x86-64/tlspic.dd: New test.
+	* ld-x86-64/tlspic.rd: New test.
+	* ld-x86-64/tlspic.sd: New test.
+	* ld-x86-64/tlspic.td: New test.
+
 2002-09-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-undefined/undefined.exp: Adjust function test.
