@@ -1,5 +1,10 @@
 Thu Mar 31 11:52:15 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coffcode.h (CALC_ADDEND): Change to fetch original symbol value
+	from original BFD, rather than using value of current BFD symbol.
+	Needed for new linker.
+	* coff-sparc.c (CALC_ADDEND): Likewise.
+
 	* ecoff.c (ecoff_write_object_contents): Set the text_start and
 	data_start entries in the optional header correctly even if a text
 	or data section starts at location zero.

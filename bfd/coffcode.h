@@ -2266,16 +2266,23 @@ SUBSUBSECTION
 */
 
 #ifndef CALC_ADDEND
-#define CALC_ADDEND(abfd, ptr, reloc, cache_ptr) 	\
-	    if (ptr && bfd_asymbol_bfd(ptr) == abfd	\
-		&& !bfd_is_com_section(ptr->section)	\
-		&& !(ptr->flags & BSF_OLD_COMMON))	\
-	    {						\
-		cache_ptr->addend = -(ptr->section->vma + ptr->value);	\
-	    }						\
-	    else {					\
-		cache_ptr->addend = 0;			\
-	    }
+#define CALC_ADDEND(abfd, ptr, reloc, cache_ptr)                \
+  {                                                             \
+    coff_symbol_type *coffsym = (coff_symbol_type *) NULL;      \
+    if (ptr && bfd_asymbol_bfd (ptr) != abfd)                   \
+      coffsym = (obj_symbols (abfd)                             \
+                 + (cache_ptr->sym_ptr_ptr - symbols));         \
+    else if (ptr)                                               \
+      coffsym = coff_symbol_from (abfd, ptr);                   \
+    if (coffsym != (coff_symbol_type *) NULL                    \
+        && coffsym->native->u.syment.n_scnum == 0)              \
+      cache_ptr->addend = 0;                                    \
+    else if (ptr && bfd_asymbol_bfd (ptr) == abfd               \
+             && ptr->section != (asection *) NULL)              \
+      cache_ptr->addend = - (ptr->section->vma + ptr->value);   \
+    else                                                        \
+      cache_ptr->addend = 0;                                    \
+  }
 #endif
 
 static boolean
