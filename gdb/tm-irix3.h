@@ -30,6 +30,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*#define NAMES_HAVE_UNDERSCORE*/
 
+/* SGI's assembler doesn't grok dollar signs in identifiers.
+   So we use dots instead.  This item must be coordinated with G++. */
+#undef CPLUS_MARKER
+#define CPLUS_MARKER '.'
+
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 

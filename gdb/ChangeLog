@@ -1,3 +1,9 @@
+Wed May  6 14:34:18 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* tm-irix3.h:  Re-define CPLUS_MARKER to '.'.
+	* xm-rs6000.h, tm-rs6000.h:  Move re-definition of CPLUS_MARKER
+	from former to latter.
+
 Wed May  6 14:12:35 1992  Fred Fish  (fnf@cygnus.com)
 
 	* cplus-dem.c (do_args):  Handle void args the same as others.

@@ -60,11 +60,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define NO_SINGLE_STEP
 
-/* AIX's assembler doesn't grok dollar signs in identifiers.
-   So we use dots instead.  This item must be coordinated with G++. */
-#undef CPLUS_MARKER
-#define CPLUS_MARKER '.'
-
 /* Flag for machine-specific stuff in shared files.  FIXME */
 #define IBM6000_HOST
 
