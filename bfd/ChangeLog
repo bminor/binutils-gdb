@@ -1,3 +1,20 @@
+2003-05-19  Roland McGrath  <roland@redhat.com>
+
+	* elf.c (bfd_elf_bfd_from_remote_memory): New function.
+	* bfd-in.h: Declare it.
+	* bfd-in2.h: Regenerated.
+	* elfcode.h (NAME(_bfd_elf,bfd_from_remote_memory)): New function.
+	* elf-bfd.h (struct elf_backend_data): New function pointer member
+	elf_backend_bfd_from_remote_memory.
+	(_bfd_elf32_bfd_from_remote_memory, _bfd_elf64_bfd_from_remote_memory):
+	Declare them.
+	* elfxx-target.h (elf_backend_bfd_from_remote_memory): New macro.
+	(elfNN_bed): Add that to the initializer.
+
+2003-05-15  Roland McGrath  <roland@redhat.com>
+
+	* elf.c (elfcore_grok_note): Grok NT_AUXV note, make ".auxv" section.
+
 2003-05-20  Jakub Jelinek  <jakub@redhat.com>
 
 	* elflink.h (elf_link_output_extsym): Only issue error about !=
@@ -336,7 +353,7 @@
 	(elf_i386_relocate_section): Initialize the GOT entries and
 	skip R_386_32/R_386_PC32 for weak undefined symbols with
 	non-default visibility.
- 
+
 	* elfxx-ia64.c (allocate_fptr): Don't allocate function
 	descriptors for weak undefined symbols with non-default
 	visibility.
