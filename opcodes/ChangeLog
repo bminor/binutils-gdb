@@ -1,5 +1,8 @@
 Tue Jan 28 15:57:34 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* mips-dis.c (print_insn_mips16): Set insn_info information.
+	(print_mips16_insn_arg): Likewise.
+
 	* mips-dis.c (print_insn_mips16): Better handling of an extend
  	opcode followed by an instruction which can not be extended.
 

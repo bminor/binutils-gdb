@@ -351,6 +351,13 @@ print_insn_mips16 (memaddr, info)
   int extend;
   const struct mips_opcode *op, *opend;
 
+  info->insn_info_valid = 1;
+  info->branch_delay_insns = 0;
+  info->data_size = 0;
+  info->insn_type = dis_nonbranch;
+  info->target = 0;
+  info->target2 = 0;
+
   status = (*info->read_memory_func) (memaddr, buffer, 2, info);
   if (status != 0)
     {
@@ -393,6 +400,7 @@ print_insn_mips16 (memaddr, info)
 	{
 	  (*info->fprintf_func) (info->stream, "extend 0x%x",
 				 (unsigned int) extend);
+	  info->insn_type = dis_noninsn;
 	  return length;
 	}
 
@@ -414,6 +422,7 @@ print_insn_mips16 (memaddr, info)
 		{
 		  (*info->fprintf_func) (info->stream, "extend 0x%x",
 					 (unsigned int) extend);
+		  info->insn_type = dis_noninsn;
 		  return length - 2;
 		}
 
@@ -462,6 +471,13 @@ print_insn_mips16 (memaddr, info)
 				     info);
 	    }
 
+	  if ((op->pinfo & INSN_UNCOND_BRANCH_DELAY) != 0)
+	    {
+	      info->branch_delay_insns = 1;
+	      if (info->insn_type != dis_jsr)
+		info->insn_type = dis_branch;
+	    }
+
 	  return length;
 	}
     }
@@ -469,6 +485,7 @@ print_insn_mips16 (memaddr, info)
   if (use_extend)
     (*info->fprintf_func) (info->stream, "0x%x", extend | 0xf000);
   (*info->fprintf_func) (info->stream, "0x%x", insn);
+  info->insn_type = dis_noninsn;
 
   return length;
 }
@@ -612,21 +629,33 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	  case '5':
 	    nbits = 5;
 	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
+	    info->insn_type = dis_dref;
+	    info->data_size = 1;
 	    break;
 	  case 'H':
 	    nbits = 5;
 	    shift = 1;
 	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
+	    info->insn_type = dis_dref;
+	    info->data_size = 2;
 	    break;
 	  case 'W':
 	    nbits = 5;
 	    shift = 2;
 	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
+	    if ((op->pinfo & MIPS16_INSN_READ_PC) == 0
+		&& (op->pinfo & MIPS16_INSN_READ_SP) == 0)
+	      {
+		info->insn_type = dis_dref;
+		info->data_size = 4;
+	      }
 	    break;
 	  case 'D':
 	    nbits = 5;
 	    shift = 3;
 	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
+	    info->insn_type = dis_dref;
+	    info->data_size = 8;
 	    break;
 	  case 'j':
 	    nbits = 5;
@@ -645,11 +674,17 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	    nbits = 8;
 	    shift = 2;
 	    immed = (l >> MIPS16OP_SH_IMM8) & MIPS16OP_MASK_IMM8;
+	    /* FIXME: This might be lw, or it might be addiu to $sp or
+               $pc.  We assume it's load.  */
+	    info->insn_type = dis_dref;
+	    info->data_size = 4;
 	    break;
 	  case 'C':
 	    nbits = 8;
 	    shift = 3;
 	    immed = (l >> MIPS16OP_SH_IMM8) & MIPS16OP_MASK_IMM8;
+	    info->insn_type = dis_dref;
+	    info->data_size = 8;
 	    break;
 	  case 'U':
 	    nbits = 8;
@@ -673,6 +708,7 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	    signedp = 1;
 	    pcrel = 1;
 	    branch = 1;
+	    info->insn_type = dis_condbranch;
 	    break;
 	  case 'q':
 	    nbits = 11;
@@ -680,18 +716,24 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	    signedp = 1;
 	    pcrel = 1;
 	    branch = 1;
+	    info->insn_type = dis_branch;
 	    break;
 	  case 'A':
 	    nbits = 8;
 	    shift = 2;
 	    immed = (l >> MIPS16OP_SH_IMM8) & MIPS16OP_MASK_IMM8;
 	    pcrel = 1;
+	    /* FIXME: This can be lw or la.  We assume it is lw.  */
+	    info->insn_type = dis_dref;
+	    info->data_size = 4;
 	    break;
 	  case 'B':
 	    nbits = 5;
 	    shift = 3;
 	    immed = (l >> MIPS16OP_SH_IMM5) & MIPS16OP_MASK_IMM5;
 	    pcrel = 1;
+	    info->insn_type = dis_dref;
+	    info->data_size = 8;
 	    break;
 	  case 'E':
 	    nbits = 5;
@@ -775,6 +817,7 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	      }
 	    val = (baseaddr & ~ ((1 << shift) - 1)) + immed;
 	    (*info->print_address_func) (val, info);
+	    info->target = val;
 	  }
       }
       break;
@@ -784,6 +827,9 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	extend = 0;
       l = ((l & 0x1f) << 23) | ((l & 0x3e0) << 13) | (extend << 2);
       (*info->print_address_func) ((memaddr & 0xf0000000) | l, info);
+      info->insn_type = dis_jsr;
+      info->target = (memaddr & 0xf0000000) | l;
+      info->branch_delay_insns = 1;
       break;
 
     case 'l':
