@@ -1,3 +1,13 @@
+2002-05-23  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* rdcoff.c: Fix formatting.
+	* rddbg.c: Likewise.
+	* readelf.c: Likewise.
+	* rename.c: Likewise.
+	* resbin.c: Likewise.
+	* resrc.c: Likewise.
+	* resres.c: Likewise.
+
 2002-05-21  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* filemode.c: Fix formatting.

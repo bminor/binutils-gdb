@@ -534,7 +534,7 @@ print_symbol (width, symbol)
     printf (symbol);
   else if (width < 0)
     printf ("%-*.*s", width, width, symbol);
-  else 
+  else
     printf ("%-.*s", width, symbol);
 }
 
@@ -911,7 +911,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	}
       else
 	{
-	  if (elf_header.e_machine == EM_MIPS) 
+	  if (elf_header.e_machine == EM_MIPS)
 	    {
 	      type  = ELF64_MIPS_R_TYPE (info);
 	      type2 = ELF64_MIPS_R_TYPE2 (info);
@@ -1041,7 +1041,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_MIPS:
 	case EM_MIPS_RS3_LE:
 	  rtype = elf_mips_reloc_type (type);
-	  if (!is_32bit_elf) 
+	  if (!is_32bit_elf)
 	    {
 	      rtype2 = elf_mips_reloc_type (type2);
 	      rtype3 = elf_mips_reloc_type (type3);
@@ -1095,10 +1095,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  rtype = elf_x86_64_reloc_type (type);
 	  break;
 
-        case EM_S390_OLD:
-        case EM_S390:
-          rtype = elf_s390_reloc_type (type);
-          break;
+	case EM_S390_OLD:
+	case EM_S390:
+	  rtype = elf_s390_reloc_type (type);
+	  break;
 
 	case EM_XSTORMY16:
 	  rtype = elf_xstormy16_reloc_type (type);
@@ -1151,7 +1151,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
       putchar ('\n');
 
-      if (! is_32bit_elf && elf_header.e_machine == EM_MIPS) 
+      if (! is_32bit_elf && elf_header.e_machine == EM_MIPS)
 	{
 	  printf ("                    Type2: ");
 
@@ -1175,7 +1175,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  else
 	    printf ("%-17.17s", rtype3);
 
-          putchar ('\n');
+	  putchar ('\n');
 	}
     }
 
@@ -1705,12 +1705,12 @@ get_machine_flags (e_flags, e_machine)
 	  decode_ARM_machine_flags (e_flags, buf);
 	  break;
 
-        case EM_68K:
-          if (e_flags & EF_CPU32)
-            strcat (buf, ", cpu32");
+	case EM_68K:
+	  if (e_flags & EF_CPU32)
+	    strcat (buf, ", cpu32");
 	  if (e_flags & EF_M68000)
 	    strcat (buf, ", m68000");
-          break;
+	  break;
 
 	case EM_PPC:
 	  if (e_flags & EF_PPC_EMB)
@@ -2392,7 +2392,7 @@ parse_args (argc, argv)
 	  else
 	    {
 	      unsigned int index = 0;
-	      
+
 	      do_debugging = 0;
 
 	      while (optarg[index])
@@ -2443,7 +2443,7 @@ parse_args (argc, argv)
 		  case 'O':
 		    do_debug_loc = 1;
 		    break;
-		    
+
 		  default:
 		    warn (_("Unrecognized debug option '%s'\n"), optarg);
 		    break;
@@ -3425,13 +3425,13 @@ process_section_headers (file)
 	{
 	  putchar (' ');
 	  print_vma (section->sh_addr, LONG_HEX);
- 	  if ((long) section->sh_offset == section->sh_offset)
- 	    printf ("  %8.8lx", (unsigned long) section->sh_offset);
- 	  else
- 	    {
- 	      printf ("  ");
- 	      print_vma (section->sh_offset, LONG_HEX);
- 	    }
+	  if ((long) section->sh_offset == section->sh_offset)
+	    printf ("  %8.8lx", (unsigned long) section->sh_offset);
+	  else
+	    {
+	      printf ("  ");
+	      print_vma (section->sh_offset, LONG_HEX);
+	    }
 	  printf ("\n       ");
 	  print_vma (section->sh_size, LONG_HEX);
 	  printf ("  ");
@@ -6169,12 +6169,12 @@ display_debug_lines (section, start, file)
 	      state_machine_regs.line += adv;
 	      printf (_(" and Line by %d to %d\n"),
 		      adv, state_machine_regs.line);
-	    } 
-	  else switch (op_code) 
+	    }
+	  else switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
 	      data += process_extended_line_op (data, info.li_default_is_stmt,
-                                                debug_line_pointer_size);
+						debug_line_pointer_size);
 	      break;
 
 	    case DW_LNS_copy:
@@ -6243,17 +6243,17 @@ display_debug_lines (section, start, file)
 	    case DW_LNS_set_prologue_end:
 	      printf (_("  Set prologue_end to true\n"));
 	      break;
-	      
+
 	    case DW_LNS_set_epilogue_begin:
 	      printf (_("  Set epilogue_begin to true\n"));
 	      break;
-	      
+
 	    case DW_LNS_set_isa:
 	      adv = read_leb128 (data, & bytes_read, 0);
 	      data += bytes_read;
 	      printf (_("  Set ISA to %d\n"), adv);
 	      break;
-	      
+
 	    default:
 	      printf (_("  Unknown opcode %d with operands: "), op_code);
 	      {
@@ -7252,7 +7252,7 @@ display_debug_loc (section, start, file)
   unsigned long bytes;
   unsigned char *section_begin = start;
   bfd_vma addr;
-  
+
   addr = section->sh_addr;
   bytes = section->sh_size;
   section_end = start + bytes;
@@ -7274,7 +7274,7 @@ display_debug_loc (section, start, file)
 
       while (1)
 	{
-          /* Normally, the lists in  the debug_loc section are related to a
+	  /* Normally, the lists in  the debug_loc section are related to a
 	     given compilation unit, and thus, we would use the
 	     pointer size of that compilation unit.  However, since we are
 	     displaying it seperately here, we either have to store
@@ -7285,20 +7285,20 @@ display_debug_loc (section, start, file)
 	  start += debug_line_pointer_size;
 	  end = byte_get (start, debug_line_pointer_size);
 	  start += debug_line_pointer_size;
-	  
+
 	  if (begin == 0 && end == 0)
 	    break;
-	  
+
 	  begin += addr;
 	  end += addr;
-	  
+
 	  length = byte_get (start, 2);
 	  start += 2;
-	  
+
 	  printf ("    %8.8lx %8.8lx %8.8lx (", offset, begin, end);
 	  decode_location_expression (start, debug_line_pointer_size, length);
 	  printf (")\n");
-	  
+
 	  start += length;
 	}
       printf ("\n");
@@ -7485,7 +7485,7 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
       data += bytes_read;
       printf (" %s", get_FORM_name (form));
       return read_and_display_attr_value (attribute, form, data, cu_offset,
-                                          pointer_size);
+					  pointer_size);
     }
 
   switch (form)
@@ -7734,7 +7734,7 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
 {
   printf ("     %-18s:", get_AT_name (attribute));
   data = read_and_display_attr_value (attribute, form, data, cu_offset,
-                                      pointer_size);
+				      pointer_size);
   printf ("\n");
   return data;
 }
@@ -8373,102 +8373,102 @@ display_debug_frames (section, start, file)
 	 about to interpret instructions for the chunk.  */
 
       if (do_debug_frames_interp)
-      {
-	/* Start by making a pass over the chunk, allocating storage
-           and taking note of what registers are used.  */
-	unsigned char * tmp = start;
+	{
+	  /* Start by making a pass over the chunk, allocating storage
+	     and taking note of what registers are used.  */
+	  unsigned char * tmp = start;
 
-	while (start < block_end)
-	  {
-	    unsigned op, opa;
-	    unsigned long reg;
+	  while (start < block_end)
+	    {
+	      unsigned op, opa;
+	      unsigned long reg;
 
-	    op = * start ++;
-	    opa = op & 0x3f;
-	    if (op & 0xc0)
-	      op &= 0xc0;
+	      op = * start ++;
+	      opa = op & 0x3f;
+	      if (op & 0xc0)
+		op &= 0xc0;
 
-	    /* Warning: if you add any more cases to this switch, be
-	       sure to add them to the corresponding switch below.  */
-	    switch (op)
-	      {
-	      case DW_CFA_advance_loc:
-		break;
-	      case DW_CFA_offset:
-		LEB ();
-		frame_need_space (fc, opa);
-		fc->col_type[opa] = DW_CFA_undefined;
-		break;
-	      case DW_CFA_restore:
-		frame_need_space (fc, opa);
-		fc->col_type[opa] = DW_CFA_undefined;
-		break;
-	      case DW_CFA_set_loc:
-		start += encoded_ptr_size;
-		break;
-	      case DW_CFA_advance_loc1:
-		start += 1;
-		break;
-	      case DW_CFA_advance_loc2:
-		start += 2;
-		break;
-	      case DW_CFA_advance_loc4:
-		start += 4;
-		break;
-	      case DW_CFA_offset_extended:
-		reg = LEB (); LEB ();
-		frame_need_space (fc, reg);
-		fc->col_type[reg] = DW_CFA_undefined;
-		break;
-	      case DW_CFA_restore_extended:
-		reg = LEB ();
-		frame_need_space (fc, reg);
-		fc->col_type[reg] = DW_CFA_undefined;
-		break;
-	      case DW_CFA_undefined:
-		reg = LEB ();
-		frame_need_space (fc, reg);
-		fc->col_type[reg] = DW_CFA_undefined;
-		break;
-	      case DW_CFA_same_value:
-		reg = LEB ();
-		frame_need_space (fc, reg);
-		fc->col_type[reg] = DW_CFA_undefined;
-		break;
-	      case DW_CFA_register:
-		reg = LEB (); LEB ();
-		frame_need_space (fc, reg);
-		fc->col_type[reg] = DW_CFA_undefined;
-		break;
-	      case DW_CFA_def_cfa:
-		LEB (); LEB ();
-		break;
-	      case DW_CFA_def_cfa_register:
-		LEB ();
-		break;
-	      case DW_CFA_def_cfa_offset:
-		LEB ();
-		break;
+	      /* Warning: if you add any more cases to this switch, be
+	         sure to add them to the corresponding switch below.  */
+	      switch (op)
+		{
+		case DW_CFA_advance_loc:
+		  break;
+		case DW_CFA_offset:
+		  LEB ();
+		  frame_need_space (fc, opa);
+		  fc->col_type[opa] = DW_CFA_undefined;
+		  break;
+		case DW_CFA_restore:
+		  frame_need_space (fc, opa);
+		  fc->col_type[opa] = DW_CFA_undefined;
+		  break;
+		case DW_CFA_set_loc:
+		  start += encoded_ptr_size;
+		  break;
+		case DW_CFA_advance_loc1:
+		  start += 1;
+		  break;
+		case DW_CFA_advance_loc2:
+		  start += 2;
+		  break;
+		case DW_CFA_advance_loc4:
+		  start += 4;
+		  break;
+		case DW_CFA_offset_extended:
+		  reg = LEB (); LEB ();
+		  frame_need_space (fc, reg);
+		  fc->col_type[reg] = DW_CFA_undefined;
+		  break;
+		case DW_CFA_restore_extended:
+		  reg = LEB ();
+		  frame_need_space (fc, reg);
+		  fc->col_type[reg] = DW_CFA_undefined;
+		  break;
+		case DW_CFA_undefined:
+		  reg = LEB ();
+		  frame_need_space (fc, reg);
+		  fc->col_type[reg] = DW_CFA_undefined;
+		  break;
+		case DW_CFA_same_value:
+		  reg = LEB ();
+		  frame_need_space (fc, reg);
+		  fc->col_type[reg] = DW_CFA_undefined;
+		  break;
+		case DW_CFA_register:
+		  reg = LEB (); LEB ();
+		  frame_need_space (fc, reg);
+		  fc->col_type[reg] = DW_CFA_undefined;
+		  break;
+		case DW_CFA_def_cfa:
+		  LEB (); LEB ();
+		  break;
+		case DW_CFA_def_cfa_register:
+		  LEB ();
+		  break;
+		case DW_CFA_def_cfa_offset:
+		  LEB ();
+		  break;
 #ifndef DW_CFA_GNU_args_size
 #define DW_CFA_GNU_args_size 0x2e
 #endif
-	      case DW_CFA_GNU_args_size:
-		LEB ();
-		break;
+		case DW_CFA_GNU_args_size:
+		  LEB ();
+		  break;
 #ifndef DW_CFA_GNU_negative_offset_extended
 #define DW_CFA_GNU_negative_offset_extended 0x2f
 #endif
-	      case DW_CFA_GNU_negative_offset_extended:
-		reg = LEB (); LEB ();
-		frame_need_space (fc, reg);
-		fc->col_type[reg] = DW_CFA_undefined;
+		case DW_CFA_GNU_negative_offset_extended:
+		  reg = LEB (); LEB ();
+		  frame_need_space (fc, reg);
+		  fc->col_type[reg] = DW_CFA_undefined;
 
-	      default:
-		break;
-	      }
-	  }
-	start = tmp;
-      }
+		default:
+		  break;
+		}
+	    }
+	  start = tmp;
+	}
 
       /* Now we know what registers are used, make a second pass over
          the chunk, this time actually printing out the info.  */
@@ -8485,16 +8485,16 @@ display_debug_frames (section, start, file)
 	  if (op & 0xc0)
 	    op &= 0xc0;
 
-	    /* Warning: if you add any more cases to this switch, be
-	       sure to add them to the corresponding switch above.  */
+	  /* Warning: if you add any more cases to this switch, be
+	     sure to add them to the corresponding switch above.  */
 	  switch (op)
 	    {
 	    case DW_CFA_advance_loc:
 	      if (do_debug_frames_interp)
-	        frame_display_row (fc, &need_col_headers, &max_regs);
+		frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
-	        printf ("  DW_CFA_advance_loc: %d to %08lx\n",
-		        opa * fc->code_factor,
+		printf ("  DW_CFA_advance_loc: %d to %08lx\n",
+			opa * fc->code_factor,
 			fc->pc_begin + opa * fc->code_factor);
 	      fc->pc_begin += opa * fc->code_factor;
 	      break;
@@ -8502,7 +8502,7 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_offset:
 	      roffs = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_offset: r%d at cfa%+ld\n",
+		printf ("  DW_CFA_offset: r%d at cfa%+ld\n",
 			opa, roffs * fc->data_factor);
 	      fc->col_type[opa] = DW_CFA_offset;
 	      fc->col_offset[opa] = roffs * fc->data_factor;
@@ -8510,7 +8510,7 @@ display_debug_frames (section, start, file)
 
 	    case DW_CFA_restore:
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_restore: r%d\n", opa);
+		printf ("  DW_CFA_restore: r%d\n", opa);
 	      fc->col_type[opa] = cie->col_type[opa];
 	      fc->col_offset[opa] = cie->col_offset[opa];
 	      break;
@@ -8519,19 +8519,19 @@ display_debug_frames (section, start, file)
 	      vma = byte_get (start, encoded_ptr_size);
 	      start += encoded_ptr_size;
 	      if (do_debug_frames_interp)
-	        frame_display_row (fc, &need_col_headers, &max_regs);
+		frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
-	        printf ("  DW_CFA_set_loc: %08lx\n", (unsigned long)vma);
+		printf ("  DW_CFA_set_loc: %08lx\n", (unsigned long)vma);
 	      fc->pc_begin = vma;
 	      break;
 
 	    case DW_CFA_advance_loc1:
 	      ofs = byte_get (start, 1); start += 1;
 	      if (do_debug_frames_interp)
-	        frame_display_row (fc, &need_col_headers, &max_regs);
+		frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
-	        printf ("  DW_CFA_advance_loc1: %ld to %08lx\n",
-		        ofs * fc->code_factor,
+		printf ("  DW_CFA_advance_loc1: %ld to %08lx\n",
+			ofs * fc->code_factor,
 			fc->pc_begin + ofs * fc->code_factor);
 	      fc->pc_begin += ofs * fc->code_factor;
 	      break;
@@ -8539,10 +8539,10 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_advance_loc2:
 	      ofs = byte_get (start, 2); start += 2;
 	      if (do_debug_frames_interp)
-	        frame_display_row (fc, &need_col_headers, &max_regs);
+		frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
-	        printf ("  DW_CFA_advance_loc2: %ld to %08lx\n",
-		        ofs * fc->code_factor,
+		printf ("  DW_CFA_advance_loc2: %ld to %08lx\n",
+			ofs * fc->code_factor,
 			fc->pc_begin + ofs * fc->code_factor);
 	      fc->pc_begin += ofs * fc->code_factor;
 	      break;
@@ -8550,10 +8550,10 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_advance_loc4:
 	      ofs = byte_get (start, 4); start += 4;
 	      if (do_debug_frames_interp)
-	        frame_display_row (fc, &need_col_headers, &max_regs);
+		frame_display_row (fc, &need_col_headers, &max_regs);
 	      else
-	        printf ("  DW_CFA_advance_loc4: %ld to %08lx\n",
-		        ofs * fc->code_factor,
+		printf ("  DW_CFA_advance_loc4: %ld to %08lx\n",
+			ofs * fc->code_factor,
 			fc->pc_begin + ofs * fc->code_factor);
 	      fc->pc_begin += ofs * fc->code_factor;
 	      break;
@@ -8571,7 +8571,7 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_restore_extended:
 	      reg = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_restore_extended: r%ld\n", reg);
+		printf ("  DW_CFA_restore_extended: r%ld\n", reg);
 	      fc->col_type[reg] = cie->col_type[reg];
 	      fc->col_offset[reg] = cie->col_offset[reg];
 	      break;
@@ -8579,7 +8579,7 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_undefined:
 	      reg = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_undefined: r%ld\n", reg);
+		printf ("  DW_CFA_undefined: r%ld\n", reg);
 	      fc->col_type[reg] = DW_CFA_undefined;
 	      fc->col_offset[reg] = 0;
 	      break;
@@ -8587,7 +8587,7 @@ display_debug_frames (section, start, file)
 	    case DW_CFA_same_value:
 	      reg = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_same_value: r%ld\n", reg);
+		printf ("  DW_CFA_same_value: r%ld\n", reg);
 	      fc->col_type[reg] = DW_CFA_same_value;
 	      fc->col_offset[reg] = 0;
 	      break;
@@ -8596,14 +8596,14 @@ display_debug_frames (section, start, file)
 	      reg = LEB ();
 	      roffs = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_register: r%ld\n", reg);
+		printf ("  DW_CFA_register: r%ld\n", reg);
 	      fc->col_type[reg] = DW_CFA_register;
 	      fc->col_offset[reg] = roffs;
 	      break;
 
 	    case DW_CFA_remember_state:
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_remember_state\n");
+		printf ("  DW_CFA_remember_state\n");
 	      rs = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
 	      rs->ncols = fc->ncols;
 	      rs->col_type = (short int *) xmalloc (rs->ncols * sizeof (short int));
@@ -8616,7 +8616,7 @@ display_debug_frames (section, start, file)
 
 	    case DW_CFA_restore_state:
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_restore_state\n");
+		printf ("  DW_CFA_restore_state\n");
 	      rs = remembered_state;
 	      remembered_state = rs->next;
 	      frame_need_space (fc, rs->ncols-1);
@@ -8631,25 +8631,25 @@ display_debug_frames (section, start, file)
 	      fc->cfa_reg = LEB ();
 	      fc->cfa_offset = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_def_cfa: r%d ofs %d\n",
+		printf ("  DW_CFA_def_cfa: r%d ofs %d\n",
 			fc->cfa_reg, fc->cfa_offset);
 	      break;
 
 	    case DW_CFA_def_cfa_register:
 	      fc->cfa_reg = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_def_cfa_reg: r%d\n", fc->cfa_reg);
+		printf ("  DW_CFA_def_cfa_reg: r%d\n", fc->cfa_reg);
 	      break;
 
 	    case DW_CFA_def_cfa_offset:
 	      fc->cfa_offset = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_def_cfa_offset: %d\n", fc->cfa_offset);
+		printf ("  DW_CFA_def_cfa_offset: %d\n", fc->cfa_offset);
 	      break;
 
 	    case DW_CFA_nop:
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_nop\n");
+		printf ("  DW_CFA_nop\n");
 	      break;
 
 #ifndef DW_CFA_GNU_window_save
@@ -8657,13 +8657,13 @@ display_debug_frames (section, start, file)
 #endif
 	    case DW_CFA_GNU_window_save:
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_GNU_window_save\n");
+		printf ("  DW_CFA_GNU_window_save\n");
 	      break;
 
 	    case DW_CFA_GNU_args_size:
 	      ul = LEB ();
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_GNU_args_size: %ld\n", ul);
+		printf ("  DW_CFA_GNU_args_size: %ld\n", ul);
 	      break;
 
 	    case DW_CFA_GNU_negative_offset_extended:
@@ -8671,7 +8671,7 @@ display_debug_frames (section, start, file)
 	      l = - LEB ();
 	      frame_need_space (fc, reg);
 	      if (! do_debug_frames_interp)
-	        printf ("  DW_CFA_GNU_negative_offset_extended: r%ld at cfa%+ld\n",
+		printf ("  DW_CFA_GNU_negative_offset_extended: r%ld at cfa%+ld\n",
 			reg, l * fc->data_factor);
 	      fc->col_type[reg] = DW_CFA_offset;
 	      fc->col_offset[reg] = l * fc->data_factor;
@@ -8684,7 +8684,7 @@ display_debug_frames (section, start, file)
 	}
 
       if (do_debug_frames_interp)
-        frame_display_row (fc, &need_col_headers, &max_regs);
+	frame_display_row (fc, &need_col_headers, &max_regs);
 
       start = block_end;
     }
@@ -8823,11 +8823,11 @@ process_section_contents (file)
       int       j;
 
       if (section->sh_size == 0)
-        continue;
+	continue;
 
       /* See if there is some pre-scan operation for this section.  */
       for (j = NUM_ELEM (debug_displays); j--;)
-        if (strcmp (debug_displays[j].name, name) == 0)
+	if (strcmp (debug_displays[j].name, name) == 0)
 	  {
 	    if (debug_displays[j].prescan != NULL)
 	      {
@@ -8845,8 +8845,8 @@ process_section_contents (file)
 		free (start);
 	      }
 
-            break;
-          }
+	    break;
+	  }
     }
 
   for (i = 0, section = section_headers;
@@ -9374,7 +9374,7 @@ get_netbsd_elfcore_note_type (e_type)
    If the value of namesz is zero, there is no name present.  */
 static int
 process_note (pnote)
-  Elf32_Internal_Note * pnote;
+     Elf32_Internal_Note * pnote;
 {
   const char *nt;
 
