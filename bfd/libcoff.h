@@ -46,7 +46,7 @@ typedef struct {
 
 typedef struct icofdata 
 {
-  struct aouthdr hdr;		/* exec file header */
+/*  struct internal_aouthdr hdr;		/* exec file header */
   coff_symbol_type  *symbols;	/* symtab for input bfd */
   unsigned int *conversion_table;
   file_ptr sym_filepos;

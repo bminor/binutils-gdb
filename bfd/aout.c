@@ -722,15 +722,15 @@ DEFUN(aout_slurp_symbol_table, (abfd),
       /* run through the table and byte swap if needed */
       for (sym_pointer = syms; sym_pointer < sym_end;  sym_pointer++) {
         sym_pointer->n_un.n_strx =
-	  bfd_h_get_x (abfd, &sym_pointer->n_un.n_strx);
+	  bfd_h_getlong (abfd, &sym_pointer->n_un.n_strx);
         sym_pointer->n_desc =
-	  bfd_h_get_x (abfd, &sym_pointer->n_desc);
+	  bfd_h_getshort (abfd, &sym_pointer->n_desc);
         sym_pointer->n_value =
-	  bfd_h_get_x (abfd, &sym_pointer->n_value);
+	  bfd_h_getlong (abfd, &sym_pointer->n_value);
 	sym_pointer->n_other = (char)
-	  bfd_h_get_x(abfd, &sym_pointer->n_other);
+	  bfd_h_getchar(abfd, &sym_pointer->n_other);
 	sym_pointer->n_type = (char)
-	  bfd_h_get_x(abfd, &sym_pointer->n_type);
+	  bfd_h_getchar(abfd, &sym_pointer->n_type);
       }
 
       /* Run through table and copy values */

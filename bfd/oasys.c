@@ -214,28 +214,29 @@ DEFUN(oasys_archive_p,(abfd),
       bfd *abfd)
 {
   oasys_archive_header_type header;
+  oasys_external_archive_header_type header_ext;
   unsigned int i;
   
   bfd_seek(abfd, (file_ptr) 0, false);
 
   
-  bfd_read((PTR)&header, 1, sizeof(header), abfd);
+  bfd_read((PTR)&header_ext, 1, sizeof(header_ext), abfd);
 
-  
-  swap(header.version);
-  swap(header.mod_count);
-  swap(header.mod_tbl_offset);
-  swap(header.sym_tbl_size);
-  swap(header.sym_count);
-  swap(header.sym_tbl_offset);
-  swap(header.xref_count);
-  swap(header.xref_lst_offset);
+
+  header.version = bfd_h_get_x(abfd, header_ext.version);
+  header.mod_count = bfd_h_get_x(abfd, header_ext.mod_count);
+  header.mod_tbl_offset = bfd_h_get_x(abfd, header_ext.mod_tbl_offset);
+  header.sym_tbl_size = bfd_h_get_x(abfd, header_ext.sym_tbl_size);
+  header.sym_count = bfd_h_get_x(abfd, header_ext.sym_count);
+  header.sym_tbl_offset = bfd_h_get_x(abfd, header_ext.sym_tbl_offset);
+  header.xref_count = bfd_h_get_x(abfd, header_ext.xref_count);
+  header.xref_lst_offset = bfd_h_get_x(abfd, header_ext.xref_lst_offset);
 
   /*
-     There isn't a magic number in an Oasys archive, so the best we
-     can do to verify reasnableness is to make sure that the values in
-     the header are too weird
-     */
+    There isn't a magic number in an Oasys archive, so the best we
+    can do to verify reasnableness is to make sure that the values in
+    the header are too weird
+    */
 
   if (header.version>10000 ||
       header.mod_count>10000 ||
@@ -243,42 +244,45 @@ DEFUN(oasys_archive_p,(abfd),
       header.xref_count > 100000) return (bfd_target *)NULL;
 
   /*
-     That all worked, lets buy the space for the header and read in
-     the headers.
-     */
-  {
-    oasys_ar_data_type *ar =
-      (oasys_ar_data_type*) bfd_alloc(abfd, sizeof(oasys_ar_data_type));
+    That all worked, lets buy the space for the header and read in
+    the headers.
+    */
+    {
+      oasys_ar_data_type *ar =
+	(oasys_ar_data_type*) bfd_alloc(abfd, sizeof(oasys_ar_data_type));
 
 
-    oasys_module_info_type *module = 
-      (oasys_module_info_type*)
-	bfd_alloc(abfd, sizeof(oasys_module_info_type) * header.mod_count);
+      oasys_module_info_type *module = 
+	(oasys_module_info_type*)
+	  bfd_alloc(abfd, sizeof(oasys_module_info_type) * header.mod_count);
 
-    oasys_module_table_type record;
+      oasys_module_table_type record;
+      oasys_external_module_table_type record_ext;
 
-    set_tdata(abfd, ar);
-    ar->module = module;
-    ar->module_count = header.mod_count;
+      set_tdata(abfd, ar);
+      ar->module = module;
+      ar->module_count = header.mod_count;
 
-    bfd_seek(abfd , header.mod_tbl_offset, SEEK_SET);
-    for (i = 0; i < header.mod_count; i++) {
-      bfd_read((PTR)&record, 1, sizeof(record), abfd);
-      swap(record.mod_size);
-      swap(record.file_offset);
-      swap(record.mod_name_length);
-      module[i].name = bfd_alloc(abfd,record.mod_name_length+1);
+      bfd_seek(abfd , header.mod_tbl_offset, SEEK_SET);
+      for (i = 0; i < header.mod_count; i++) {
+	bfd_read((PTR)&record_ext, 1, sizeof(record_ext), abfd);
+	
+	record.mod_size = bfd_h_get_x(abfd, record_ext.mod_size);
+	record.file_offset = bfd_h_get_x(abfd, record_ext.file_offset);
+	record.mod_name_length = bfd_h_get_x(abfd, record_ext.mod_name_length);
 
-      bfd_read(module[i].name, 1, record.mod_name_length +1, abfd);
-      /* SKip some stuff */
-      bfd_seek(abfd, record.dep_count * sizeof(int32_type),
-	    SEEK_CUR);
+	module[i].name = bfd_alloc(abfd,record.mod_name_length+1);
 
-      module[i].size = record.mod_size;
-      module[i].pos = record.file_offset;
-    }
+	bfd_read(module[i].name, 1, record.mod_name_length +1, abfd);
+	/* SKip some stuff */
+	bfd_seek(abfd, record.dep_count * sizeof(int32_type),
+		 SEEK_CUR);
+
+	module[i].size = record.mod_size;
+	module[i].pos = record.file_offset;
+      }
       
-  }
+    }
   return abfd->xvec;
 }
 

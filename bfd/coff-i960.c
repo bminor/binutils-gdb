@@ -62,24 +62,24 @@ asection *ignore_input_section;
      result = bfd_reloc_dangerous;
   }
   else  {
-    switch (bfd_h_get_x(abfd, & cs->native->n_sclass)) 
+    switch (cs->native->n_sclass) 
       {
       case C_LEAFSTAT:
       case C_LEAFEXT:
   	/* This is a call to a leaf procedure, replace instruction with a bal
 	 to the correct location */
 	{
-	 AUXENT *aux = (AUXENT *)(cs->native+2);
+	  union internal_auxent *aux = (union internal_auxent *)(cs->native+2);
 	  int word = bfd_getlong(abfd, data + reloc_entry->address);
-	  BFD_ASSERT(bfd_h_get_x(abfd, &cs->native->n_numaux)==2);
+	  int olf = (aux->x_bal.x_balntry - cs->native->n_value);
+	  BFD_ASSERT(cs->native->n_numaux==2);
 	  /* We replace the original call instruction with a bal to */
 	  /* the bal entry point - the offset of which is described in the */
 	  /* 2nd auxent of the original symbol. We keep the native sym and */
 	  /* auxents untouched, so the delta between the two is the */
 	  /* offset of the bal entry point */
-	  word = ((word + (bfd_h_get_x(abfd, &aux->x_bal.x_balntry) -
-			   bfd_h_get_x(abfd, &cs->native->n_value)))
-		  & BAL_MASK) | BAL;
+
+	  word = ((word +  olf)  & BAL_MASK) | BAL;
   	  bfd_putlong(abfd, word,  data+reloc_entry->address);
   	}
 	result = bfd_reloc_ok;

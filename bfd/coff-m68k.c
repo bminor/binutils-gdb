@@ -72,6 +72,8 @@ bfd_target m68kcoff_vec =
      bfd_generic_archive_p, _bfd_dummy_target},
   {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
      bfd_false},
+  {bfd_false, coff_write_object_contents,	/* bfd_write_contents */
+     _bfd_write_archive_contents, bfd_false},
 
      JUMP_TABLE(coff)
 
