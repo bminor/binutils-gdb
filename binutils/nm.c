@@ -368,6 +368,7 @@ display_archive (file)
      bfd *file;
 {
   bfd *arfile = NULL;
+  char **matching;
 
   (*format->print_archive_filename) (bfd_get_filename (file));
 
@@ -385,14 +386,21 @@ display_archive (file)
 	  break;
 	}
 
-      if (bfd_check_format (arfile, bfd_object))
+      if (bfd_check_format_matches (arfile, bfd_object, &matching))
 	{
 	  (*format->print_archive_member) (bfd_get_filename (file),
 					   bfd_get_filename (arfile));
 	  display_rel_file (arfile, file);
 	}
       else
-	printf ("%s: not an object file\n", arfile->filename);
+	{
+	  bfd_nonfatal (bfd_get_filename (arfile));
+	  if (bfd_error == file_ambiguously_recognized)
+	    {
+	      list_matching_formats (matching);
+	      free (matching);
+	    }
+	}
     }
 }
 

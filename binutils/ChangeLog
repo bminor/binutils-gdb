@@ -2,7 +2,7 @@ Wed Feb  2 13:42:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* nlmconv.c (main): Use bfd_get_flavour instead of struct member.
 	* ar.c (print_contents, extract_file), size.c
-	(print_berkeley_format): Use bfd_get_filename and 
+	(print_berkeley_format, print_sysv_format): Use bfd_get_filename and 
 	bfd_my_archive instead of dereferencing the structs directly.
 
 	* ar.c: Use bfd_fatal and bfd_nonfatal instead of bfd_perror and exit.
@@ -10,7 +10,8 @@ Wed Feb  2 13:42:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* nlmconv.c (main), objcopy.c (copy_file): Print matching formats
 	if ambiguous match.
-	* nm.c (display_file), size.c (display_bfd): Eliminate gotos.
+	* nm.c (display_file, display_archive), size.c (display_bfd):
+	Eliminate gotos.
 	Print matching formats if there is an ambiguous match.  Use
 	bfd_nonfatal instead of hardcoded error message if nothing matches.
 

@@ -404,8 +404,8 @@ print_sysv_format (file)
   svi_total = 0;
 
   printf ("%s  ", bfd_get_filename (file));
-  if (file->my_archive)
-    printf (" (ex %s)", file->my_archive->filename);
+  if (bfd_my_archive (file))
+    printf (" (ex %s)", bfd_get_filename (bfd_my_archive (file)));
 
   puts (":\nsection\t\tsize\t     addr");
   bfd_map_over_sections (file, sysv_internal_printer, (PTR) NULL);
