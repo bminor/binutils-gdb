@@ -1,3 +1,8 @@
+Fri Nov 22 10:06:19 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/i386/nm-i386v4.h (LOSING_POLL):  Define, needed for
+	Unixware 1.1.2.
+
 Thu Nov 21 19:13:58 1996  Mark Alexander  <marka@cygnus.com>
 
 	* mips-tdep.c: Replace hard-coded constants with MIPS_INSTLEN.
