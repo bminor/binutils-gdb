@@ -1,3 +1,10 @@
+2004-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/ia64.exp: Run invalid-ar.
+	
+	* gas/ia64/invalid-ar.l: New file. Test invalid AR access.
+	* gas/ia64/invalid-ar.s: Likewise.
+
 2004-05-24  Peter Barada  <peter@the-baradas.com>
 
 	* gas/m68k/mcf-emac.d: Provide correct disassembler results.
