@@ -1,5 +1,10 @@
 Wed Jun 19 14:46:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* objdump.c (stabs): Change from struct internal_nlist * to
+	bfd_byte *.
+	(print_section_stabs): Fetch stabs information directly, rather
+	than assuming that struct internal_nlist is the right size.
+
 	* binutils.texi: Document change to binary format: file position
 	based on load address, not section VMA.
 
