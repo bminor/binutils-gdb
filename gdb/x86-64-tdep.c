@@ -1013,7 +1013,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_extract_return_value (gdbarch, x86_64_extract_return_value);
 
-  set_gdbarch_push_arguments (gdbarch, x86_64_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, x86_64_push_arguments);
   set_gdbarch_push_return_address (gdbarch, x86_64_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, x86_64_pop_frame);
   set_gdbarch_deprecated_store_struct_return (gdbarch, x86_64_store_struct_return);

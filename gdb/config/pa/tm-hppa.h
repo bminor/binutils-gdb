@@ -614,7 +614,7 @@ extern CORE_ADDR hppa_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
 		                      struct value **, struct type *, int);
 
 #if !GDB_MULTI_ARCH
-#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
+#define DEPRECATED_PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
   (hppa_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR hppa_push_arguments (int, struct value **, CORE_ADDR, int,
 				      CORE_ADDR);

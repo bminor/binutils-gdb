@@ -1392,7 +1392,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_deprecated_extract_return_value (gdbarch, m68hc11_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, m68hc11_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, m68hc11_push_arguments);
   set_gdbarch_push_return_address (gdbarch, m68hc11_push_return_address);
   set_gdbarch_return_value_on_stack (gdbarch, m68hc11_return_value_on_stack);
 

@@ -2924,9 +2924,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      64-bit code.  At some point in the future, this matter needs to be
      revisited.  */
   if (sysv_abi && wordsize == 4)
-    set_gdbarch_push_arguments (gdbarch, ppc_sysv_abi_push_arguments);
+    set_gdbarch_deprecated_push_arguments (gdbarch, ppc_sysv_abi_push_arguments);
   else
-    set_gdbarch_push_arguments (gdbarch, rs6000_push_arguments);
+    set_gdbarch_deprecated_push_arguments (gdbarch, rs6000_push_arguments);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, rs6000_store_struct_return);
   set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);

@@ -3259,7 +3259,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_npc_regnum (gdbarch, SPARC32_NPC_REGNUM);
       set_gdbarch_pc_regnum (gdbarch, SPARC32_PC_REGNUM);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-      set_gdbarch_push_arguments (gdbarch, sparc32_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, sparc32_push_arguments);
       set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
       set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
 
@@ -3315,7 +3315,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_npc_regnum (gdbarch, SPARC64_NPC_REGNUM);
       set_gdbarch_pc_regnum (gdbarch, SPARC64_PC_REGNUM);
       set_gdbarch_ptr_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-      set_gdbarch_push_arguments (gdbarch, sparc64_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, sparc64_push_arguments);
       /* NOTE different for at_entry */
       set_gdbarch_read_fp (gdbarch, sparc64_read_fp);
       set_gdbarch_read_sp (gdbarch, sparc64_read_sp);

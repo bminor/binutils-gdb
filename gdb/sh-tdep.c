@@ -4375,7 +4375,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sh_init_extra_frame_info);
   set_gdbarch_deprecated_extract_return_value (gdbarch, sh_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, sh_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, sh_push_arguments);
   set_gdbarch_deprecated_store_struct_return (gdbarch, sh_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, sh_use_struct_convention);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
@@ -4617,7 +4617,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_frame_chain (gdbarch, sh64_frame_chain);
       set_gdbarch_deprecated_get_saved_register (gdbarch, sh64_get_saved_register);
       set_gdbarch_deprecated_extract_return_value (gdbarch, sh64_extract_return_value);
-      set_gdbarch_push_arguments (gdbarch, sh64_push_arguments);
+      set_gdbarch_deprecated_push_arguments (gdbarch, sh64_push_arguments);
       /*set_gdbarch_deprecated_store_struct_return (gdbarch, sh64_store_struct_return);*/
       set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh64_extract_struct_value_address);
       set_gdbarch_use_struct_convention (gdbarch, sh64_use_struct_convention);

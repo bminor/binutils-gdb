@@ -1692,7 +1692,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_extract_return_value (gdbarch, d10v_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, d10v_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, d10v_push_arguments);
   set_gdbarch_push_return_address (gdbarch, d10v_push_return_address);
 
   set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);

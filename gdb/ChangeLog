@@ -1,3 +1,43 @@
+2003-03-26  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_PUSH_ARGUMENTS): Rename PUSH_ARGUMENTS.
+	(push_dummy_call): New pure multi-arch replacement with gdbarch,
+	regcache and dummy_addr parameters.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* valops.c (hand_function_call): Use gdbarch_push_dummy_call when
+	available; assume it will handle stack alignment and return
+	address issues.  Fall back to DEPRECATED_PUSH_ARGUMENTS and
+	legacy_push_arguments.
+	(legacy_push_arguments): Rename default_push_arguments.
+	* value.h (legacy_push_arguments): Rename default_push_arguments.
+	* i386-tdep.c (i386_push_arguments): Call legacy_push_arguments.
+	* config/sparc/tm-sparc.h (DEPRECATED_PUSH_ARGUMENTS): Update.
+	* config/sparc/tm-sp64.h (DEPRECATED_PUSH_ARGUMENTS): Update.
+	* config/pa/tm-hppa.h (DEPRECATED_PUSH_ARGUMENTS): Update.
+	* config/i386/tm-symmetry.h: Update.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_init_abi): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* hppa-tdep.c (hppa_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* d10v-tdep.c (d10v_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* arm-linux-tdep.c (arm_linux_init_abi): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+
 2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
 
 	* signals/signals.c (do_target_signal_to_host): Correct realtime

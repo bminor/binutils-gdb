@@ -1090,7 +1090,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_push_arguments (gdbarch, frv_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, frv_push_arguments);
   set_gdbarch_push_return_address (gdbarch, frv_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, frv_pop_frame);
 

@@ -925,7 +925,7 @@ static CORE_ADDR
 i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
-  sp = default_push_arguments (nargs, args, sp, struct_return, struct_addr);
+  sp = legacy_push_arguments (nargs, args, sp, struct_return, struct_addr);
   
   if (struct_return)
     {
@@ -1586,7 +1586,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_parm_boundary (gdbarch, 32);
 
   set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, i386_push_arguments);
   set_gdbarch_push_return_address (gdbarch, i386_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, i386_pop_frame);
   set_gdbarch_deprecated_store_struct_return (gdbarch, i386_store_struct_return);

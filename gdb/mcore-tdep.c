@@ -1130,7 +1130,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, mcore_breakpoint_from_pc);
   set_gdbarch_push_return_address (gdbarch, mcore_push_return_address);
-  set_gdbarch_push_arguments (gdbarch, mcore_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, mcore_push_arguments);
   set_gdbarch_call_dummy_length (gdbarch, 0);
 
   /* Frames:  */
