@@ -59,7 +59,8 @@ static char *ecoff_type_to_string PARAMS ((bfd *abfd, FDR *fdr,
 					   unsigned int indx));
 static boolean ecoff_slurp_reloc_table PARAMS ((bfd *abfd, asection *section,
 						asymbol **symbols));
-static void ecoff_compute_section_file_positions PARAMS ((bfd *abfd));
+static int ecoff_sort_hdrs PARAMS ((const PTR, const PTR));
+static boolean ecoff_compute_section_file_positions PARAMS ((bfd *abfd));
 static bfd_size_type ecoff_compute_reloc_file_positions PARAMS ((bfd *abfd));
 static boolean ecoff_get_extr PARAMS ((asymbol *, EXTR *));
 static void ecoff_set_index PARAMS ((asymbol *, bfd_size_type));
@@ -133,17 +134,6 @@ _bfd_ecoff_mkobject_hook (abfd, filehdr, aouthdr)
      information is written out.  */
 
   return (PTR) ecoff;
-}
-
-/* This is a hook needed by SCO COFF, but we have nothing to do.  */
-
-/*ARGSUSED*/
-asection *
-_bfd_ecoff_make_section_hook (abfd, name)
-     bfd *abfd;
-     char *name;
-{
-  return (asection *) NULL;
 }
 
 /* Initialize a new section.  */
@@ -324,6 +314,27 @@ ecoff_sec_to_styp_flags (name, flags)
     styp = STYP_XDATA;
   else if (strcmp (name, _LIB) == 0)
     styp = STYP_ECOFF_LIB;
+  else if (strcmp (name, _GOT) == 0)
+    styp = STYP_GOT;
+  else if (strcmp (name, _HASH) == 0)
+    styp = STYP_HASH;
+  else if (strcmp (name, _DYNAMIC) == 0)
+    styp = STYP_DYNAMIC;
+  else if (strcmp (name, _LIBLIST) == 0)
+    styp = STYP_LIBLIST;
+  else if (strcmp (name, _RELDYN) == 0)
+    styp = STYP_RELDYN;
+  else if (strcmp (name, _CONFLIC) == 0)
+    styp = STYP_CONFLIC;
+  else if (strcmp (name, _DYNSTR) == 0)
+    styp = STYP_DYNSTR;
+  else if (strcmp (name, _DYNSYM) == 0)
+    styp = STYP_DYNSYM;
+  else if (strcmp (name, _COMMENT) == 0)
+    {
+      styp = STYP_COMMENT;
+      flags &=~ SEC_NEVER_LOAD;
+    }
   else if (flags & SEC_CODE) 
     styp = STYP_TEXT;
   else if (flags & SEC_DATA) 
@@ -361,7 +372,14 @@ _bfd_ecoff_styp_to_sec_flags (abfd, hdr, name)
      actually a shared library section.  */
   if ((styp_flags & STYP_TEXT)
       || (styp_flags & STYP_ECOFF_INIT)
-      || (styp_flags & STYP_ECOFF_FINI))
+      || (styp_flags & STYP_ECOFF_FINI)
+      || (styp_flags & STYP_DYNAMIC)
+      || (styp_flags & STYP_LIBLIST)
+      || (styp_flags & STYP_RELDYN)
+      || styp_flags == STYP_CONFLIC
+      || (styp_flags & STYP_DYNSTR)
+      || (styp_flags & STYP_DYNSYM)
+      || (styp_flags & STYP_HASH))
     {
       if (sec_flags & SEC_NEVER_LOAD)
 	sec_flags |= SEC_CODE | SEC_COFF_SHARED_LIBRARY;
@@ -372,7 +390,8 @@ _bfd_ecoff_styp_to_sec_flags (abfd, hdr, name)
 	   || (styp_flags & STYP_RDATA)
 	   || (styp_flags & STYP_SDATA)
 	   || styp_flags == STYP_PDATA
-	   || styp_flags == STYP_XDATA)
+	   || styp_flags == STYP_XDATA
+	   || (styp_flags & STYP_GOT))
     {
       if (sec_flags & SEC_NEVER_LOAD)
 	sec_flags |= SEC_DATA | SEC_COFF_SHARED_LIBRARY;
@@ -2011,26 +2030,76 @@ _bfd_ecoff_get_section_contents (abfd, section, location, offset, count)
 					    offset, count);
 }
 
+/* Sort sections by VMA, but put SEC_ALLOC sections first.  This is
+   called via qsort.  */
+
+static int
+ecoff_sort_hdrs (arg1, arg2)
+     const PTR arg1;
+     const PTR arg2;
+{
+  const asection *hdr1 = *(const asection **) arg1;
+  const asection *hdr2 = *(const asection **) arg2;
+
+  if ((hdr1->flags & SEC_ALLOC) != 0)
+    {
+      if ((hdr2->flags & SEC_ALLOC) == 0)
+	return -1;
+    }
+  else
+    {
+      if ((hdr2->flags & SEC_ALLOC) != 0)
+	return 1;
+    }
+  if (hdr1->vma < hdr2->vma)
+    return -1;
+  else if (hdr1->vma > hdr2->vma)
+    return 1;
+  else
+    return 0;
+}
+
 /* Calculate the file position for each section, and set
    reloc_filepos.  */
 
-static void
+static boolean
 ecoff_compute_section_file_positions (abfd)
      bfd *abfd;
 {
-  asection *current;
   file_ptr sofar;
+  asection **sorted_hdrs;
+  asection *current;
+  unsigned int i;
   file_ptr old_sofar;
-  boolean first_data;
+  boolean first_data, first_nonalloc;
+  const bfd_vma round = ecoff_backend (abfd)->round;
 
   sofar = _bfd_ecoff_sizeof_headers (abfd, false);
 
+  /* Sort the sections by VMA.  */
+  sorted_hdrs = (asection **) malloc (abfd->section_count
+				      * sizeof (asection *));
+  if (sorted_hdrs == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+  for (current = abfd->sections, i = 0;
+       current != NULL;
+       current = current->next, i++)
+    sorted_hdrs[i] = current;
+  BFD_ASSERT (i == abfd->section_count);
+
+  qsort (sorted_hdrs, abfd->section_count, sizeof (asection *),
+	 ecoff_sort_hdrs);
+
   first_data = true;
-  for (current = abfd->sections;
-       current != (asection *) NULL;
-       current = current->next)
+  first_nonalloc = true;
+  for (i = 0; i < abfd->section_count; i++)
     {
       unsigned int alignment_power;
+
+      current = sorted_hdrs[i];
 
       /* Only deal with sections which have contents */
       if ((current->flags & (SEC_HAS_CONTENTS | SEC_LOAD)) == 0)
@@ -2062,18 +2131,25 @@ ecoff_compute_section_file_positions (abfd)
 	      || strcmp (current->name, _RDATA) != 0)
 	  && strcmp (current->name, _PDATA) != 0)
 	{
-	  const bfd_vma round = ecoff_backend (abfd)->round;
-
 	  sofar = (sofar + round - 1) &~ (round - 1);
 	  first_data = false;
 	}
       else if (strcmp (current->name, _LIB) == 0)
 	{
-	  const bfd_vma round = ecoff_backend (abfd)->round;
 	  /* On Irix 4, the location of contents of the .lib section
 	     from a shared library section is also rounded up to a
 	     page boundary.  */
 
+	  sofar = (sofar + round - 1) &~ (round - 1);
+	}
+      else if (first_nonalloc
+	       && (current->flags & SEC_ALLOC) == 0
+	       && (abfd->flags & D_PAGED) != 0)
+	{
+	  /* Skip up to the next page for an unallocated section, such
+             as the .comment section on the Alpha.  This leaves room
+             for the .bss section.  */
+	  first_nonalloc = false;
 	  sofar = (sofar + round - 1) &~ (round - 1);
 	}
 
@@ -2081,6 +2157,10 @@ ecoff_compute_section_file_positions (abfd)
 	 which they are aligned in virtual memory.  */
       old_sofar = sofar;
       sofar = BFD_ALIGN (sofar, 1 << alignment_power);
+
+      if ((abfd->flags & D_PAGED) != 0
+	  && (current->flags & SEC_ALLOC) != 0)
+	sofar += (current->vma - sofar) % round;
 
       current->filepos = sofar;
 
@@ -2092,7 +2172,12 @@ ecoff_compute_section_file_positions (abfd)
       current->_raw_size += sofar - old_sofar;
     }
 
+  free (sorted_hdrs);
+  sorted_hdrs = NULL;
+
   ecoff_data (abfd)->reloc_filepos = sofar;
+
+  return true;
 }
 
 /* Determine the location of the relocs for all the sections in the
@@ -2112,7 +2197,8 @@ ecoff_compute_reloc_file_positions (abfd)
 
   if (! abfd->output_has_begun)
     {
-      ecoff_compute_section_file_positions (abfd);
+      if (! ecoff_compute_section_file_positions (abfd))
+	abort ();
       abfd->output_has_begun = true;
     }
   
@@ -2164,7 +2250,10 @@ _bfd_ecoff_set_section_contents (abfd, section, location, offset, count)
   /* This must be done first, because bfd_set_section_contents is
      going to set output_has_begun to true.  */
   if (abfd->output_has_begun == false)
-    ecoff_compute_section_file_positions (abfd);
+    {
+      if (! ecoff_compute_section_file_positions (abfd))
+	return false;
+    }
 
   /* If this is a .lib section, bump the vma address so that it winds
      up being the number of .lib sections output.  This is right for
@@ -2472,7 +2561,16 @@ _bfd_ecoff_write_object_contents (abfd)
       if ((section.s_flags & STYP_TEXT) != 0
 	  || ((section.s_flags & STYP_RDATA) != 0
 	      && backend->rdata_in_text)
-	  || strcmp (current->name, _PDATA) == 0)
+	  || section.s_flags == STYP_PDATA
+	  || (section.s_flags & STYP_DYNAMIC) != 0
+	  || (section.s_flags & STYP_LIBLIST) != 0
+	  || (section.s_flags & STYP_RELDYN) != 0
+	  || section.s_flags == STYP_CONFLIC
+	  || (section.s_flags & STYP_DYNSTR) != 0
+	  || (section.s_flags & STYP_DYNSYM) != 0
+	  || (section.s_flags & STYP_HASH) != 0
+	  || (section.s_flags & STYP_ECOFF_INIT) != 0
+	  || (section.s_flags & STYP_ECOFF_FINI) != 0)
 	{
 	  text_size += bfd_get_section_size_before_reloc (current);
 	  if (! set_text_start || text_start > vma)
@@ -2487,7 +2585,8 @@ _bfd_ecoff_write_object_contents (abfd)
 	       || (section.s_flags & STYP_LIT8) != 0
 	       || (section.s_flags & STYP_LIT4) != 0
 	       || (section.s_flags & STYP_SDATA) != 0
-	       || strcmp (current->name, _XDATA) == 0)
+	       || section.s_flags == STYP_XDATA
+	       || (section.s_flags & STYP_GOT) != 0)
 	{
 	  data_size += bfd_get_section_size_before_reloc (current);
 	  if (! set_data_start || data_start > vma)
@@ -2499,7 +2598,9 @@ _bfd_ecoff_write_object_contents (abfd)
       else if ((section.s_flags & STYP_BSS) != 0
 	       || (section.s_flags & STYP_SBSS) != 0)
 	bss_size += bfd_get_section_size_before_reloc (current);
-      else if ((section.s_flags & STYP_ECOFF_LIB) != 0)
+      else if (section.s_flags == 0
+	       || (section.s_flags & STYP_ECOFF_LIB) != 0
+	       || section.s_flags == STYP_COMMENT)
 	/* Do nothing */ ;
       else
 	abort ();
@@ -2590,6 +2691,13 @@ _bfd_ecoff_write_object_contents (abfd)
   internal_a.fprmask = ecoff_data (abfd)->fprmask;
   for (i = 0; i < 4; i++)
     internal_a.cprmask[i] = ecoff_data (abfd)->cprmask[i];
+
+  /* Let the backend adjust the headers if necessary.  */
+  if (backend->adjust_headers)
+    {
+      if (! (*backend->adjust_headers) (abfd, &internal_f, &internal_a))
+	goto error_return;
+    }
 
   /* Write out the file header and the optional header.  */
 

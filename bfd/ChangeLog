@@ -1,5 +1,27 @@
 Thu Oct  5 11:45:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libecoff.h (struct ecoff_backend_data): Add adjust_headers
+	field.
+	* ecoff.c (ecoff_sec_to_styp_flags): Check for various Alpha
+	sections, and set styp correctly for them: .got, .hash, .dynamic,
+	.liblist, .rel.dyn, .conflic, .dynstr, .dynsym, .comment.
+	(_bfd_ecoff_styp_to_sec_flags): Check for various Alpha section
+	types.
+	(ecoff_sort_hdrs): New static function.
+	(ecoff_compute_section_file_positions): Return boolean, not void.
+	Sort the sections by VMA before looking through them.  Put the
+	first non SEC_ALLOC section on a new page.  Put every SEC_ALLOC
+	section on an appropriate boundary within the page.
+	(ecoff_compute_reloc_file_positions): Check return value of
+	ecoff_compute_section_file_positions.
+	(_bfd_ecoff_set_section_contents): Likewise.
+	(_bfd_ecoff_write_object_contents): Check for various Alpha
+	section types when incrementing text_size and data_size.  Call
+	adjust_headers backend function if it exists.
+	* coff-alpha.c (alpha_adjust_headers): New static function.
+	(alpha_ecoff_backend_data): Initialize adjust_headers field.
+	* coff-mips.c (mips_ecoff_backend_data): Likewise.
+
 	* hosts/i386bsd.h: Restore file incorrectly deleted on Sep 6.
 
 Wed Oct  4 18:15:02 1995  Jeff Law  (law@hurl.cygnus.com)

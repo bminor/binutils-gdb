@@ -55,6 +55,8 @@ static bfd_vma alpha_convert_external_reloc
 static boolean alpha_relocate_section PARAMS ((bfd *, struct bfd_link_info *,
 					       bfd *, asection *,
 					       bfd_byte *, PTR));
+static boolean alpha_adjust_headers
+  PARAMS ((bfd *, struct internal_filehdr *, struct internal_aouthdr *));
 
 /* ECOFF has COFF sections, but the debugging information is stored in
    a completely different format.  ECOFF targets use some of the
@@ -1935,6 +1937,23 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
+/* Do final adjustments to the filehdr and the aouthdr.  This routine
+   sets the dynamic bits in the file header.  */
+
+/*ARGSUSED*/
+static boolean
+alpha_adjust_headers (abfd, fhdr, ahdr)
+     bfd *abfd;
+     struct internal_filehdr *fhdr;
+     struct internal_aouthdr *ahdr;
+{
+  if ((abfd->flags & (DYNAMIC | EXEC_P)) == (DYNAMIC | EXEC_P))
+    fhdr->f_flags |= F_ALPHA_CALL_SHARED;
+  else if ((abfd->flags & DYNAMIC) != 0)
+    fhdr->f_flags |= F_ALPHA_SHARABLE;
+  return true;
+}
+
 /* This is the ECOFF backend structure.  The backend field of the
    target vector points to this.  */
 
@@ -1956,8 +1975,7 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
     alpha_ecoff_swap_scnhdr_in, NULL,
     alpha_ecoff_bad_format_hook, _bfd_ecoff_set_arch_mach_hook,
     alpha_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
-    _bfd_ecoff_make_section_hook, _bfd_ecoff_set_alignment_hook,
-    _bfd_ecoff_slurp_symbol_table,
+    _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL
   },
   /* Supported architecture.  */
@@ -2023,7 +2041,9 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
   alpha_adjust_reloc_in,
   alpha_adjust_reloc_out,
   /* Relocate section contents while linking.  */
-  alpha_relocate_section
+  alpha_relocate_section,
+  /* Do final adjustments to filehdr and aouthdr.  */
+  alpha_adjust_headers
 };
 
 /* Looking up a reloc type is Alpha specific.  */

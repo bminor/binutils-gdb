@@ -2441,8 +2441,7 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     mips_ecoff_swap_scnhdr_in, NULL,
     mips_ecoff_bad_format_hook, _bfd_ecoff_set_arch_mach_hook,
     _bfd_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
-    _bfd_ecoff_make_section_hook, _bfd_ecoff_set_alignment_hook,
-    _bfd_ecoff_slurp_symbol_table,
+    _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL
   },
   /* Supported architecture.  */
@@ -2508,7 +2507,9 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
   mips_adjust_reloc_in,
   mips_adjust_reloc_out,
   /* Relocate section contents while linking.  */
-  mips_relocate_section
+  mips_relocate_section,
+  /* Do final adjustments to filehdr and aouthdr.  */
+  NULL
 };
 
 /* Looking up a reloc type is MIPS specific.  */

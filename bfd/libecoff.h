@@ -68,6 +68,9 @@ struct ecoff_backend_data
 				       bfd *input_bfd, asection *input_section,
 				       bfd_byte *contents,
 				       PTR external_relocs));
+  /* Do final adjustments to filehdr and aouthdr.  */
+  boolean (*adjust_headers) PARAMS ((bfd *, struct internal_filehdr *,
+				     struct internal_aouthdr *));
 };
 
 /* This is the target specific information kept for ECOFF files.  */
@@ -312,7 +315,6 @@ extern boolean _bfd_ecoff_bfd_final_link
 /* Hook functions for the generic COFF section reading code.  */
 
 extern PTR _bfd_ecoff_mkobject_hook PARAMS ((bfd *, PTR filehdr, PTR aouthdr));
-extern asection *_bfd_ecoff_make_section_hook PARAMS ((bfd *abfd, char *name));
 #define _bfd_ecoff_set_alignment_hook \
   ((void (*) PARAMS ((bfd *, asection *, PTR))) bfd_void)
 extern boolean _bfd_ecoff_set_arch_mach_hook PARAMS ((bfd *abfd, PTR filehdr));
