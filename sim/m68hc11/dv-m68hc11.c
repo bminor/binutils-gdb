@@ -1,4 +1,4 @@
-/*  dv-m68hc11.c -- CPU 68HC11 as a device.
+/*  dv-m68hc11.c -- CPU 68HC11&68HC12 as a device.
     Copyright (C) 1999, 2000 Free Software Foundation, Inc.
     Written by Stephane Carrez (stcarrez@worldnet.fr)
     (From a driver model Contributed by Cygnus Solutions.)
@@ -26,12 +26,12 @@
 /* DEVICE
 
         m68hc11cpu - m68hc11 cpu virtual device
-
+        m68hc12cpu - m68hc12 cpu virtual device
    
    DESCRIPTION
 
-        Implements the external m68hc11 functionality.  This includes the
-        delivery of of interrupts generated from other devices and the
+        Implements the external m68hc11/68hc12 functionality.  This includes
+        the delivery of of interrupts generated from other devices and the
         handling of device specific registers.
 
 
@@ -39,7 +39,7 @@
 
    reg <base> <size>
 
-        Register base (should be 0x1000 0x03f).
+        Register base (should be 0x1000 0x03f for C11, 0x0000 0x3ff for HC12).
 
    clock <hz>
 
@@ -272,8 +272,6 @@ m68hc11cpu_finish (struct hw *me)
   attach_m68hc11_regs (me, controller);
 }
 
-
-
 /* An event arrives on an interrupt port.  */
 
 static void
@@ -442,7 +440,7 @@ m68hc11cpu_io_read_buffer (struct hw *me,
   
   while (nr_bytes)
     {
-      if (base >= 0x3F)
+      if (base >= controller->attach_size)
 	break;
 
       memcpy (dest, &cpu->ios[base], 1);
@@ -574,7 +572,7 @@ m68hc11cpu_io_write_buffer (struct hw *me,
   while (nr_bytes)
     {
       uint8 val;
-      if (base >= 0x3F)
+      if (base >= controller->attach_size)
 	break;
 
       val = *((uint8*) source);
@@ -588,7 +586,8 @@ m68hc11cpu_io_write_buffer (struct hw *me,
 }
 
 const struct hw_descriptor dv_m68hc11_descriptor[] = {
-  { "m68hc11", m68hc11cpu_finish, },
+  { "m68hc11", m68hc11cpu_finish },
+  { "m68hc12", m68hc11cpu_finish },
   { NULL },
 };
 

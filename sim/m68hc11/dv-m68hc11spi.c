@@ -527,7 +527,8 @@ m68hc11spi_io_write_buffer (struct hw *me,
 
 
 const struct hw_descriptor dv_m68hc11spi_descriptor[] = {
-  { "m68hc11spi", m68hc11spi_finish, },
+  { "m68hc11spi", m68hc11spi_finish },
+  { "m68hc12spi", m68hc11spi_finish },
   { NULL },
 };
 

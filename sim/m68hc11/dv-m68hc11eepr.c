@@ -621,7 +621,8 @@ m68hc11eepr_io_write_buffer (struct hw *me,
 }
 
 const struct hw_descriptor dv_m68hc11eepr_descriptor[] = {
-  { "m68hc11eepr", m68hc11eepr_finish, },
+  { "m68hc11eepr", m68hc11eepr_finish },
+  { "m68hc12eepr", m68hc11eepr_finish },
   { NULL },
 };
 

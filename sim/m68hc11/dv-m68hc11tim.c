@@ -111,7 +111,6 @@ attach_m68hc11tim_regs (struct hw *me,
 		     me);
 }
 
-
 static void
 m68hc11tim_finish (struct hw *me)
 {
@@ -128,7 +127,7 @@ m68hc11tim_finish (struct hw *me)
 #else
   me->to_ioctl = m68hc11tim_ioctl;
 #endif
-
+  
   /* Preset defaults.  */
   controller->clock_prescaler = 1;
   controller->tcnt_adjust = 0;
@@ -688,7 +687,8 @@ m68hc11tim_io_write_buffer (struct hw *me,
 
 
 const struct hw_descriptor dv_m68hc11tim_descriptor[] = {
-  { "m68hc11tim", m68hc11tim_finish, },
+  { "m68hc11tim", m68hc11tim_finish },
+  { "m68hc12tim", m68hc11tim_finish },
   { NULL },
 };
 

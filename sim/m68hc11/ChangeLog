@@ -1,3 +1,14 @@
+2000-11-26  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* dv-m68hc11.c (m68hc11cpu_io_read_buffer): Use attach_size
+	instead of a hard-coded value.
+	(m68hc11cpu_io_write_buffer): Likewise.
+	(dv_m68hc11_descriptor): Define a 68hc12 device.
+	* dv-m68hc11eepr.c (dv_m68hc11eepr_descriptor): Likewise.
+	* dv-m68hc11tim.c (dv_m68hc11tim_descriptor): Likewise.
+	* dv-m68hc11spi.c (dv_m68hc11spi_descriptor): Likewise.
+	* dv-m68hc11sio.c (dv_m68hc11sio_descriptor): Likewise.
+
 2000-11-22  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* dv-m68hc11.c (attach_m68hc11_regs): Register a delete handler.

@@ -657,7 +657,8 @@ m68hc11sio_io_write_buffer (struct hw *me,
 
 
 const struct hw_descriptor dv_m68hc11sio_descriptor[] = {
-  { "m68hc11sio", m68hc11sio_finish, },
+  { "m68hc11sio", m68hc11sio_finish },
+  { "m68hc12sio", m68hc11sio_finish },
   { NULL },
 };
 
