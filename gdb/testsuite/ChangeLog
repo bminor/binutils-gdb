@@ -1,6 +1,12 @@
 2002-05-27  Michael Chastain  <mec@shout.net>
 From Benjamin Kosnik  <bkoz@redhat.com>
 
+	* gdb.c++/m-data.cc: New file.
+	* gdb.c++/m-data.exp: New file.
+
+2002-05-27  Michael Chastain  <mec@shout.net>
+From Benjamin Kosnik  <bkoz@redhat.com>
+
 	* gdb.c++/try_catch.cc: New file.
 	* gdb.c++/try_catch.exp: New file.	
 
