@@ -1,3 +1,7 @@
+2005-03-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
 2005-03-15  Nick Clifton  <nickc@redhat.com>
 
 	* basic_blocks.c (print_exec_counts): Step through sorted array of
