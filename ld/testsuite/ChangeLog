@@ -1,3 +1,9 @@
+2005-02-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/align2a.d: Don't assume anything about section
+	padding or alignment, or max page size.  Allow 64-bit addresses.
+	* ld-scripts/align2b.d: Likewise.
+
 2005-02-17  Zack Weinberg  <zack@codesourcery.com>
 
 	* ld-scripts/align.exp: Rename existing "ALIGN" test to "align1".
