@@ -35,7 +35,6 @@
 #include "completer.h"
 #include "regcache.h"
 #include "top.h"
-#include "i386-tdep.h"
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -53,6 +52,9 @@
 #include <sys/param.h>
 #include <unistd.h>
 #include "exec.h"
+
+#include "i386-tdep.h"
+#include "i387-tdep.h"
 
 /* The ui's event loop. */
 extern int (*ui_loop_hook) (int signo);
@@ -346,12 +348,15 @@ do_child_fetch_inferior_registers (int r)
 {
   char *context_offset = ((char *) &current_thread->context) + mappings[r];
   long l;
-  if (r == FCS_REGNUM)
+
+#define I387_ST0_REGNUM I386_ST0_REGNUM
+
+  if (r == I387_FISEG_REGNUM)
     {
       l = *((long *) context_offset) & 0xffff;
       supply_register (r, (char *) &l);
     }
-  else if (r == FOP_REGNUM)
+  else if (r == I387_FOP_REGNUM)
     {
       l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
       supply_register (r, (char *) &l);
@@ -363,6 +368,8 @@ do_child_fetch_inferior_registers (int r)
       for (r = 0; r < NUM_REGS; r++)
 	do_child_fetch_inferior_registers (r);
     }
+
+#undef I387_ST0_REGNUM
 }
 
 static void

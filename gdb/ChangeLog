@@ -1,5 +1,13 @@
 2003-10-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.h (FCS_REGNUM, FCOFF_REGNUM, FDS_REGNUM,
+	FDOFF_REGNUM): Remove defines.
+	* win32-nat.c (do_child_fetch_inferior_registers): Include
+	"i387-tdep.h".
+	(do_child_fetch_inferior_registers): Use I387_FISEG_ST0_REGNUM and
+	I387_FOP_REGNUM instead of FCS_REGNUM and FOP_REGNUM.  Define and
+	undefine I387_ST0_REGNUM.
+
 	* i386-tdep.h (FPU_REG_RAW_SIZE): Remove define.
 	* x86-64-tdep.c (x86_64_store_return_value): Use
 	I386_MAX_REGISTER_SIZE instead of FPU_REG_RAW_SIZE.

@@ -150,12 +150,6 @@ extern int i386_fpc_regnum_p (int regnum);
 #define MXCSR_REGNUM \
   (XMM0_REGNUM + gdbarch_tdep (current_gdbarch)->num_xmm_regs)
 
-/* FIXME: kettenis/2001-11-24: Obsolete macro's.  */
-#define FCS_REGNUM FISEG_REGNUM
-#define FCOFF_REGNUM FIOFF_REGNUM
-#define FDS_REGNUM FOSEG_REGNUM
-#define FDOFF_REGNUM FOOFF_REGNUM
-
 /* Register numbers of various important registers.  */
 
 enum i386_regnum
