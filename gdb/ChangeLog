@@ -1,6 +1,8 @@
 2002-06-06  Michael Snyder  <msnyder@redhat.com>
 
-	* d10v-tdep.c (d10v_store_return_value): Char return values
+	* d10v-tdep.c (d10v_push_arguments): Handle struct_return.
+	Delete extra braces and re-indent.
+	(d10v_store_return_value): Char return values
 	must be shifted over by one byte in R0.
 	(d10v_extract_return_value): Delete extra braces, re-indent.
 

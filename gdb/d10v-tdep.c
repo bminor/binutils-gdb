@@ -1086,6 +1086,15 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   int i;
   int regnum = ARG1_REGNUM;
   struct stack_item *si = NULL;
+  long val;
+
+  /* If struct_return is true, then the struct return address will
+     consume one argument-passing register.  No need to actually 
+     write the value to the register -- that's done by 
+     d10v_store_struct_return().  */
+
+  if (struct_return)
+    regnum++;
 
   /* Fill in registers and arg lists */
   for (i = 0; i < nargs; i++)
@@ -1094,38 +1103,37 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       struct type *type = check_typedef (VALUE_TYPE (arg));
       char *contents = VALUE_CONTENTS (arg);
       int len = TYPE_LENGTH (type);
+      int aligned_regnum = (regnum + 1) & ~1;
+
       /* printf ("push: type=%d len=%d\n", TYPE_CODE (type), len); */
+      if (len <= 2 && regnum <= ARGN_REGNUM)
+	/* fits in a single register, do not align */
 	{
-	  int aligned_regnum = (regnum + 1) & ~1;
-	  if (len <= 2 && regnum <= ARGN_REGNUM)
-	    /* fits in a single register, do not align */
+	  val = extract_unsigned_integer (contents, len);
+	  write_register (regnum++, val);
+	}
+      else if (len <= (ARGN_REGNUM - aligned_regnum + 1) * 2)
+	/* value fits in remaining registers, store keeping left
+	   aligned */
+	{
+	  int b;
+	  regnum = aligned_regnum;
+	  for (b = 0; b < (len & ~1); b += 2)
 	    {
-	      long val = extract_unsigned_integer (contents, len);
+	      val = extract_unsigned_integer (&contents[b], 2);
 	      write_register (regnum++, val);
 	    }
-	  else if (len <= (ARGN_REGNUM - aligned_regnum + 1) * 2)
-	    /* value fits in remaining registers, store keeping left
-	       aligned */
+	  if (b < len)
 	    {
-	      int b;
-	      regnum = aligned_regnum;
-	      for (b = 0; b < (len & ~1); b += 2)
-		{
-		  long val = extract_unsigned_integer (&contents[b], 2);
-		  write_register (regnum++, val);
-		}
-	      if (b < len)
-		{
-		  long val = extract_unsigned_integer (&contents[b], 1);
-		  write_register (regnum++, (val << 8));
-		}
+	      val = extract_unsigned_integer (&contents[b], 1);
+	      write_register (regnum++, (val << 8));
 	    }
-	  else
-	    {
-	      /* arg will go onto stack */
-	      regnum = ARGN_REGNUM + 1;
-	      si = push_stack_item (si, contents, len);
-	    }
+	}
+      else
+	{
+	  /* arg will go onto stack */
+	  regnum = ARGN_REGNUM + 1;
+	  si = push_stack_item (si, contents, len);
 	}
     }
 
