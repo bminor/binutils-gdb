@@ -1,5 +1,8 @@
 Mon Jan 17 00:14:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* hppa.h: More minor template fixes for sfu and copr (to allow
+	for easier disassembly).
+
 	* hppa.h: Fix templates for all the sfu and copr instructions.
 
 Wed Dec 15 15:12:42 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
