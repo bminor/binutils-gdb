@@ -119,7 +119,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <string.h>
 #include "defs.h"
-#include "param.h"
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"
@@ -149,6 +148,8 @@ extern int original_stack_limit;
 
 extern char *getenv ();
 extern char **environ;
+
+extern void new_tty_prefork ();		/* In inflow.c */
 
 extern struct target_ops child_ops;	/* In inftarg.c */
 
@@ -901,7 +902,7 @@ wait_for_inferior ()
 	     will be set and we should check whether we've hit the
 	     step breakpoint.  */
 	  if (stop_signal == SIGTRAP && trap_expected
-	      && step_resume_break_address == NULL)
+	      && step_resume_break_address == 0)
 	    bpstat_clear (&stop_bpstat);
 	  else
 	    {
@@ -1312,7 +1313,7 @@ wait_for_inferior ()
 	      breakpoints_inserted = 0;
 	    }
 	  else if (!breakpoints_inserted &&
-		   (step_resume_break_address != NULL || !another_trap))
+		   (step_resume_break_address != 0 || !another_trap))
 	    {
 	      insert_step_breakpoint ();
 	      breakpoints_failed = insert_breakpoints ();

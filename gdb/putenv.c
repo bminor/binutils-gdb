@@ -73,7 +73,7 @@ putenv( entry )
 
   /*  Find the length of the "NAME="  */
 
-  if ( (length=(unsigned) index(entry,'=')) == NULL )
+  if ( (length=(unsigned) index(entry,'=')) == 0 )
     return( -1 );
 
   length = length - (unsigned) entry + 1;
@@ -85,7 +85,7 @@ putenv( entry )
     if ( strncmp( entry, *p, length ) == 0 )
       {
       *p = entry;
-      return( NULL );
+      return( 0 );
       }
 
 
@@ -105,5 +105,5 @@ putenv( entry )
 
   environ = new_environ;
 
-  return(NULL);
+  return(0);
 }

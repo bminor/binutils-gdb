@@ -1,3 +1,32 @@
+Fri Dec 13 16:09:23 1991  Fred Fish  (fnf at cygnus.com)
+
+	* breakpoint.c, findvar.c, infrun.c, putenv.c, stack.c:  Fix
+	miscellaneous comparisons of integer with NULL that elicit
+	compiler warnings about comparison of integer with pointer, when
+	NULL is ((void *) 0) rather than just a bare 0.
+
+Tue Dec 10 04:07:22 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: infodir belongs in datadir.
+
+Sun Dec  8 21:13:33 1991  Michael Tiemann  (tiemann at sphagnum.cygnus.com)
+
+	* symtab.h (struct fn_field): Add new fields `is_private',
+	`is_protected', `is_stub', making room by reducing the size of
+	`voffset'.
+	(struct fn_fieldlist): Delete the fields `private_fn_field_bits'
+	and `protected_fn_field_bits'.
+	(TYPE_FN_{PRIVATE,PROTECTED}_BITS): Deleted.
+	(SET_TYPE_FN_{PRIVATE,PROTECTED}): Deleted.
+	(TYPE_FN_{PRIVATE,PROTECTED}): Deleted.
+	(TYPE_FN_FIELD_{STUB,PRIVATE,PROTECTED}): New macros.
+	* valops.c, valprint.c, symtab.c: All callers updated.
+
+	* buildsym.c (read_struct_type): Delete the `visibility' field
+	from `struct next_fnfield', and rework code so that visibility
+	info is stored into the fn_field directly.  Also, hacked to set
+	TYPE_FN_FIELD_STUB for both static and normal member functions.
+
 Sat Dec  7 18:13:11 1991  Fred Fish  (fnf at cygnus.com)
 
 	* i386-tdep.c:  Fix a problem on i386 systems where buffered code
