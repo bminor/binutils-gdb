@@ -36,6 +36,9 @@ Thu Sep 12 00:22:24 1991  John Gilmore  (gnu at cygint.cygnus.com)
 	RETURN_REGNUM from GR96_REGNUM and DUMMY_SAVE_GREGS from
 	DUMMY_SAVE_GR96, for handling kernel calling conventions
 	that use GR64+ rather than GR96+.
+	* tm-ultra3.h:  New file, for use on Ultra3 Unix as well as for
+	remote debugging of Ultra3 kernel.  Includes tm-29k.h and
+	overrides various things.
 
 	* remote-mm.c (mm_attach, mm_wait):  Handle attach like
 	child_attach does, making a clean stop in the newly attached
