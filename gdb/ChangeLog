@@ -1,5 +1,10 @@
 2000-12-01  Fernando Nasser  <fnasser@redhat.com>
 
+	* p-exp.y: Define strncasecmp as strnicmp for MSVC.
+	(yylex): Use strncasecmp, not strnicmp.
+
+2000-12-01  Fernando Nasser  <fnasser@redhat.com>
+
 	* cli/cli-decode.c: New file. Handle lists of commands, their decoding
 	and documentation.
 	(add_cmd, deprecate_cmd, add_abbrev_cmd, add_alias_cmd, add_prefix_cmd,
