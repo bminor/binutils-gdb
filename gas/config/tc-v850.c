@@ -1248,6 +1248,10 @@ md_assemble (str)
 		{
 		  switch (reloc)
 		    {
+		    case BFD_RELOC_V850_ZDA_16_16_OFFSET:
+		      /* To cope with "not1 7, zdaoff(0xfffff006)[r0]"  and the like.  */
+		      /* Fall through.  */
+		      
 		    case BFD_RELOC_LO16:
 		      {
 			/* Truncate, then sign extend the value.  */
@@ -1287,9 +1291,10 @@ md_assemble (str)
 		      ex.X_add_number       = 0;
 		      break;
 /* end-sanitize-v850e */
-			 
+		      
 		    default:
-		      as_bad ( "AAARG -> unhandled constant reloc");
+		      fprintf (stderr, "reloc: %d\n", reloc);
+		      as_bad ("AAARG -> unhandled constant reloc");
 		      break;
 		    }
 
