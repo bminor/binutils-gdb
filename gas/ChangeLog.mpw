@@ -1,3 +1,10 @@
+Wed Jun 29 17:56:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in (as.c): Compile with C not gC.
+	(config-stamp): Touch correctly.
+	(install-only): New target.
+	(install): Depend on all and install-only.
+
 Sun Jun 26 16:42:12 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-config.in: Parse target and use to generate forward includes

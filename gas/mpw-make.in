@@ -29,7 +29,7 @@ bindir = {prefix}bin:
 
 OBJECTS = \Option-d
 		"{o}"app.c.o \Option-d
-		"{o}"as.gc.o \Option-d
+		"{o}"as.c.o \Option-d
 		"{o}"atof-generic.c.o \Option-d
 		"{o}"bignum-copy.c.o \Option-d
 		"{o}"cond.c.o \Option-d
@@ -89,10 +89,10 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 #	else true; fi
 	echo '#endif /* TARGET_CPU */'			      >> "{o}"config.new
 	MoveIfChange "{o}"config.new "{o}"config.h
-	Echo ' ' "{o}"config-stamp
+	Echo ' ' >"{o}"config-stamp
 
 "{o}"app.c.o \Option-f "{s}"app.c {INCLUDES}
-"{o}"as.gc.o \Option-f "{s}"as.c {INCLUDES}
+"{o}"as.c.o \Option-f "{s}"as.c {INCLUDES}
 "{o}"atof-generic.c.o \Option-f "{s}"atof-generic.c {INCLUDES}
 "{o}"bignum-copy.c.o \Option-f "{s}"bignum-copy.c {INCLUDES}
 "{o}"cond.c.o \Option-f "{s}"cond.c {INCLUDES}
@@ -119,7 +119,9 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 "{o}"obj-format.c.o \Option-f "{o}"obj-format.c {INCLUDES}
 "{o}"atof-targ.c.o \Option-f "{o}"atof-targ.c {INCLUDES}
 
-install \Option-f
+install \Option-f  all install-only
+
+install-only \Option-f
 	If "`Exists "{prefix}"`" == ""
 		Echo "{prefix}" does not exist, cannot install anything
 		Exit 1
