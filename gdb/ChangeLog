@@ -1,3 +1,7 @@
+Sun Mar  5 19:40:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* MAINTAINERS (readline/): Expand to include host maintainers.
+
 2000-03-04  Mark Kettenis  <kettenis@gnu.org>
 
 	Fix support for Linux/i386 signal trampolines.  The old approach
@@ -40,7 +44,7 @@ Sat Mar  4 16:19:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 Sat Mar  4 15:58:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	From Sun 20 Feb 2000 Robert Lipe <robertl at sco dot com>:
+	From Sun 20 Feb 2000 Robert Lipe <robertl@sco.com>:
 	* language.c (longest_local_hex_string_custom): Don't compile
  	'long long' section if host doesn't have 'long long'.
 

@@ -80,7 +80,6 @@ Core: Generic components used by all of GDB
 generic arch support	Andrew Cagney		cagney@cygnus.com
 target vector		Andrew Cagney		cagney@cygnus.com
 main (main.c, top.c)	Elena Zannoni		ezannoni@cygnus.com
-readline		Elena Zannoni		ezannoni@cygnus.com
 event loop		Elena Zannoni           ezannoni@cygnus.com
 generic symtabs		Jim Blandy		jimb@cygnus.com
 dwarf readers		Jim Blandy		jimb@cygnus.com
@@ -133,6 +132,11 @@ mmalloc/		ALL Host maintainers
 
 sim/			See sim/MAINTAINERS, co-ordinated by:
 			Frank Ch. Eigler	fche@cygnus.com
+
+readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
+			Elena Zannoni		ezannoni@cygnus.com
+			Host maintainers (host dependant parts)
+			(but get your changes into the master version)
 
 
 
