@@ -1616,8 +1616,49 @@ add_aexpr(collect, aexpr)
   collect->next_aexpr_elt++;
 }
 
-
 static char target_buf[2048];
+
+/* Set "transparent" memory ranges
+
+   Allow trace mechanism to treat text-like sections
+   (and perhaps all read-only sections) transparently, 
+   i.e. don't reject memory requests from these address ranges
+   just because they haven't been collected.  */
+
+static void
+remote_set_transparent_ranges (void)
+{
+  extern bfd *exec_bfd;
+  asection *s;
+  bfd_size_type size;
+  bfd_vma lma;
+  int anysecs = 0;
+
+  if (!exec_bfd)
+    return;		/* no information to give. */
+
+  strcpy (target_buf, "QTro");
+  for (s = exec_bfd->sections; s; s = s->next)
+    {
+      char tmp[40];
+
+      if ((s->flags & SEC_LOAD)     == 0 ||
+       /* (s->flags & SEC_CODE)     == 0 || */
+	  (s->flags & SEC_READONLY) == 0)
+	continue;
+
+      anysecs = 1;
+      lma  = s->lma;
+      size = bfd_get_section_size_before_reloc (s);
+      sprintf (tmp, ":%x,%x", lma, lma + size);
+      strcat (target_buf, tmp);
+    }
+  if (anysecs)
+    {
+      putpkt (target_buf);
+      getpkt (target_buf, 0);
+    }
+}
 
 /* tstart command:
  
@@ -1707,6 +1748,9 @@ trace_start_command (args, from_tty)
 	      do_cleanups (old_chain);
 	    }
 	}
+      /* Tell target to treat text-like sections as transparent */
+      remote_set_transparent_ranges ();
+      /* Now insert traps and begin collecting data */
       putpkt ("QTStart");
       remote_get_noisy_reply (target_buf);
       if (strcmp (target_buf, "OK"))

@@ -1,3 +1,10 @@
+Mon Jul 27 16:11:42 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* tracepoint.c (remote_set_transparent_ranges): new function.
+	Send the start and end addresses of all loadable read-only
+	sections down to the trace target, so that it can treat them
+	as "transparent" (ie. don't care if they were collected or not).
+
 Mon Jul 27 15:38:07 1998  Mark Alexander  <marka@cygnus.com>
 
 	* mn10300-tdep.c (mn10300_analyze_prologue): Undo previous fix
