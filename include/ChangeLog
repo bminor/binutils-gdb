@@ -1,3 +1,8 @@
+Thu May 15 01:24:16 1997  Mark Alexander  <marka@cygnus.com>
+
+	* obstack.h (obstack_specify_allocation_with_arg, obstack_chunkfun,
+	obstack_freefun): Eliminate compile warnings in gdb.
+
 Tue May 13 10:21:14 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* coff/arm.h (constants):   Added new flag bits F_APCS_26 and
