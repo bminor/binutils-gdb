@@ -13699,7 +13699,6 @@ md_parse_option (c, arg)
 	    }
 	}
 
-      as_bad (_("unrecognized option `-%c%s'"), c, arg ? arg : "");
       return 0;
     }
 

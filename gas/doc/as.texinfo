@@ -227,8 +227,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @smallexample
 @c man begin SYNOPSIS
 @value{AS} [@b{-a}[@b{cdhlns}][=@var{file}]] [@b{--alternate}] [@b{-D}]
- [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{--gstabs}] [@b{--gstabs+}]
- [@b{--gdwarf2}] [@b{--help}] [@b{-I} @var{dir}] [@b{-J}] [@b{-K}] [@b{-L}]
+ [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{-g}] [@b{--gstabs}] [@b{--gstabs+}]
+ [@b{--gdwarf-2}] [@b{--help}] [@b{-I} @var{dir}] [@b{-J}] [@b{-K}] [@b{-L}]
  [@b{--listing-lhs-width}=@var{NUM}] [@b{--listing-lhs-width2}=@var{NUM}]
  [@b{--listing-rhs-width}=@var{NUM}] [@b{--listing-cont-lines}=@var{NUM}]
  [@b{--keep-locals}] [@b{-o} @var{objfile}] [@b{-R}] [@b{--statistics}] [@b{-v}]
@@ -479,6 +479,12 @@ indicates a hexadecimal value, and a leading @samp{0} indicates an octal value.
 ``fast''---skip whitespace and comment preprocessing (assume source is
 compiler output).
 
+@item -g
+@itemx --gen-debug
+Generate debugging information for each assembler source line using whichever
+debug format is preferred by the target.  This currently means either STABS,
+ECOFF or DWARF2.
+
 @item --gstabs
 Generate stabs debugging information for each assembler line.  This
 may help debugging assembler code, if the debugger can handle it.
@@ -490,7 +496,7 @@ debuggers crash or refuse to read your program.  This
 may help debugging assembler code.  Currently the only GNU extension is
 the location of the current working directory at assembling time.
 
-@item --gdwarf2
+@item --gdwarf-2
 Generate DWARF2 debugging information for each assembler line.  This
 may help debugging assembler code, if the debugger can handle it.  Note---this
 option is only supported by some targets, not all of them.

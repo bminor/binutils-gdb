@@ -1169,21 +1169,14 @@ md_parse_option (c, arg)
      char *arg;
 {
   if (c != 'm')
-    {
-      if (c != 'a')
-	/* xgettext:c-format  */
-	fprintf (stderr, _("unknown command line option: -%c%s\n"), c, arg);
-      return 0;
-    }
+    return 0;
 
   if (strcmp (arg, "warn-signed-overflow") == 0)
-    {
-      warn_signed_overflows = TRUE;
-    }
+    warn_signed_overflows = TRUE;
+
   else if (strcmp (arg, "warn-unsigned-overflow") == 0)
-    {
-      warn_unsigned_overflows = TRUE;
-    }
+    warn_unsigned_overflows = TRUE;
+
   else if (strcmp (arg, "v850") == 0)
     {
       machine = 0;
@@ -1211,11 +1204,7 @@ md_parse_option (c, arg)
   else if (strcmp (arg, "relax") == 0)
     v850_relax = 1;
   else
-    {
-      /* xgettext:c-format  */
-      fprintf (stderr, _("unknown command line option: -%c%s\n"), c, arg);
-      return 0;
-    }
+    return 0;
 
   return 1;
 }

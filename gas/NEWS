@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add a -g command line option to generate debug information in the target's
+  preferred debug format.
+
 * Support for the crx-elf target added.
 
 * Support for the sh-symbianelf target added.

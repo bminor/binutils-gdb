@@ -7095,18 +7095,15 @@ md_parse_option (int c, char *arg)
 	    if (!strcmp (arg, archs[i].name))
 	      break;
 	  if (i == n_archs)
-	    {
-	    unknown:
-	      as_bad (_("unrecognized option `%s'"), oarg);
-	      return 0;
-	    }
+	    return 0;
+
 	  arch = archs[i].arch;
 	  if (arch == m68881)
 	    no_68881 = 1;
 	  else if (arch == m68851)
 	    no_68851 = 1;
 	  else
-	    goto unknown;
+	    return 0;
 	}
       else
 	{
@@ -7119,6 +7116,7 @@ md_parse_option (int c, char *arg)
 	    if (!strcmp (arg, archs[i].name))
 	      {
 		unsigned long arch = archs[i].arch;
+
 		if (cpu_of_arch (arch))
 		  /* It's a cpu spec.  */
 		  {

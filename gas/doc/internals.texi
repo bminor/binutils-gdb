@@ -858,13 +858,17 @@ independent string passed to @code{getopt}.  @code{md_longopts} is a
 passed to @code{getopt}; you may use @code{OPTION_MD_BASE}, defined in
 @file{as.h}, as the start of a set of long option indices, if necessary.
 @code{md_longopts_size} is a @code{size_t} holding the size @code{md_longopts}.
+
 GAS will call @code{md_parse_option} whenever @code{getopt} returns an
 unrecognized code, presumably indicating a special code value which appears in
-@code{md_longopts}.  GAS will call @code{md_show_usage} when a usage message is
-printed; it should print a description of the machine specific options.
-@code{md_after_pase_args}, if defined, is called after all options are
-processed, to let the backend override settings done by the generic option
-parsing.
+@code{md_longopts}.  This function should return non-zero if it handled the
+option and zero otherwise.  There is no need to print a message about an option
+not being recognised.  This will be handled by the generic code.
+
+GAS will call @code{md_show_usage} when a usage message is printed; it should
+print a description of the machine specific options. @code{md_after_pase_args},
+if defined, is called after all options are processed, to let the backend
+override settings done by the generic option parsing.
 
 @item md_begin
 @cindex md_begin
@@ -1519,6 +1523,20 @@ other tools will be unaffected by this setting.
 It should return the size of an address, as it should be represented in
 debugging info.  If you don't define this macro, the default definition uses
 the number of bits per address, as defined in @var{bfd}, divided by 8.
+
+@item   MD_DEBUG_FORMAT_SELECTOR
+@cindex MD_DEBUG_FORMAT_SELECTOR
+If defined this macro is the name of a function to be called when the
+@samp{--gen-debug} switch is detected on the assembler's command line.  The
+prototype for the function looks like this:
+
+@smallexample
+   enum debug_info_type MD_DEBUG_FORMAT_SELECTOR (int * use_gnu_extensions)
+@end smallexample
+
+The function should return the debug format that is preferred by the CPU
+backend.  This format will be used when generating assembler specific debug
+information.
 
 @end table
 

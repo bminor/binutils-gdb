@@ -1,3 +1,24 @@
+2004-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (MD_DEBUG_FORMAT_SELECTOR): Provide default definition.
+	(show_usage): Add -g.
+	(std_longopts): Add --gen-debug.  Alpha sort the table.
+	(parse_args): Print an error message if a switch is not handled.
+	Handle the -g switch, calling md_debug_format_selector() if
+	necessary.
+	* NEWS: Mention new feature.
+	* doc/as.texinfo: Document new switch.
+	* doc/internals.texi: Document behaviour of md_parse_option.
+	
+	* config/tc-arm.c (md_parse_option): Do not issue an error message
+	if the switch is not recognised.
+	* config/tc-m68k.c (md_parse_option): Likewise.
+	* config/tc-pdp11.c (md_parse_option): Likewise.
+	* config/tc-v850.c (md_parse_option): Likewise.
+
+	* as.h: Fix up formatting.
+	* tc.h: Likewise.
+
 2004-08-16  Nick Clifton  <nickc@redhat.com>
 
 	* macro.c (macro_set_alternate): Use ISO C90 formatting.

@@ -43,70 +43,64 @@ struct relax_type
 
 typedef struct relax_type relax_typeS;
 
-extern const int md_reloc_size;	/* Size of a relocation record */
+extern const int md_reloc_size;	/* Size of a relocation record.  */
 
-char *md_atof (int what_statement_type, char *literalP, int *sizeP);
-#ifndef md_estimate_size_before_relax
-int md_estimate_size_before_relax (fragS * fragP, segT segment);
-#endif
-int md_parse_option (int c, char *arg);
-void md_show_usage (FILE *);
-#ifndef md_pcrel_from
-long md_pcrel_from (fixS * fixP);
-#endif
-short tc_coff_fix2rtype (fixS * fixP);
-void md_assemble (char *str);
-void md_begin (void);
+char * md_atof (int, char *, int *);
+int    md_parse_option (int, char *);
+void   md_show_usage (FILE *);
+short  tc_coff_fix2rtype (fixS *);
+void   md_assemble (char *);
+void   md_begin (void);
+void   md_number_to_chars (char *, valueT, int);
+void   md_apply_fix3 (fixS *, valueT *, segT);
+
+
 #ifndef md_create_long_jump
-void md_create_long_jump (char *ptr, addressT from_addr,
-			  addressT to_addr, fragS * frag,
-			  symbolS * to_symbol);
+void    md_create_long_jump (char *, addressT, addressT, fragS *, symbolS *);
 #endif
 #ifndef md_create_short_jump
-void md_create_short_jump (char *ptr, addressT from_addr,
-			   addressT to_addr, fragS * frag,
-			   symbolS * to_symbol);
+void    md_create_short_jump (char *, addressT, addressT, fragS *, symbolS *);
 #endif
-void md_number_to_chars (char *buf, valueT val, int n);
-
+#ifndef md_pcrel_from
+long    md_pcrel_from (fixS *);
+#endif
 #ifndef md_operand
-void md_operand (expressionS * expressionP);
+void    md_operand (expressionS *);
 #endif
-
-void md_apply_fix3 (fixS *, valueT *, segT);
+#ifndef md_estimate_size_before_relax
+int     md_estimate_size_before_relax (fragS * fragP, segT);
+#endif
+#ifndef md_section_align
+valueT  md_section_align (segT, valueT);
+#endif
+#ifndef  md_undefined_symbol
+symbolS *md_undefined_symbol (char *);
+#endif
 
 #ifdef BFD_ASSEMBLER
+
 #ifndef md_convert_frag
-void md_convert_frag (bfd * headers, segT sec, fragS * fragP);
+void    md_convert_frag (bfd *, segT, fragS *);
 #endif
 #ifndef tc_headers_hook
-void tc_headers_hook (segT *, fixS *);
+void    tc_headers_hook (segT *, fixS *);
 #endif
 #ifndef RELOC_EXPANSION_POSSIBLE
 extern arelent *tc_gen_reloc (asection *, fixS *);
 #else
 extern arelent **tc_gen_reloc (asection *, fixS *);
 #endif
+
 #else /* not BFD_ASSEMBLER */
+
 #ifndef md_convert_frag
-void md_convert_frag (object_headers * headers, segT, fragS * fragP);
+void    md_convert_frag (object_headers *, segT, fragS *);
 #endif
-
 #ifndef tc_crawl_symbol_chain
-void tc_crawl_symbol_chain (object_headers * headers);
-#endif /* tc_crawl_symbol_chain */
-
+void    tc_crawl_symbol_chain (object_headers *);
+#endif
 #ifndef tc_headers_hook
-void tc_headers_hook (object_headers * headers);
-#endif /* tc_headers_hook */
+void    tc_headers_hook (object_headers *);
+#endif
+
 #endif /* BFD_ASSEMBLER */
-
-#ifndef md_section_align
-valueT md_section_align (segT seg, valueT size);
-#endif
-
-#ifndef md_undefined_symbol
-symbolS *md_undefined_symbol (char *name);
-#endif
-
-/* end of tc.h */

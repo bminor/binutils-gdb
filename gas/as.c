@@ -89,6 +89,11 @@ int listing;
 enum debug_info_type debug_type = DEBUG_UNSPECIFIED;
 int use_gnu_debug_info_extensions = 0;
 
+#ifndef MD_DEBUG_FORMAT_SELECTOR
+#define MD_DEBUG_FORMAT_SELECTOR NULL
+#endif
+static enum debug_info_type (*md_debug_format_selector) (int *) = MD_DEBUG_FORMAT_SELECTOR;
+
 /* Maximum level of macro nesting.  */
 int max_macro_nest = 100;
 
@@ -279,11 +284,13 @@ Options:\n\
   fprintf (stream, _("\
   -f                      skip whitespace and comment preprocessing\n"));
   fprintf (stream, _("\
-  --gstabs                generate stabs debugging information\n"));
+  -g --gen-debug          generate debugging information\n"));
   fprintf (stream, _("\
-  --gstabs+               generate stabs debug info with GNU extensions\n"));
+  --gstabs                generate STABS debugging information\n"));
   fprintf (stream, _("\
-  --gdwarf2               generate DWARF2 debugging information\n"));
+  --gstabs+               generate STABS debug info with GNU extensions\n"));
+  fprintf (stream, _("\
+  --gdwarf-2              generate DWARF2 debugging information\n"));
   fprintf (stream, _("\
   --help                  show this message and exit\n"));
   fprintf (stream, _("\
@@ -378,7 +385,7 @@ parse_args (int * pargc, char *** pargv)
     /* -K is not meaningful if .word is not being hacked.  */
     'K',
 #endif
-    'L', 'M', 'R', 'W', 'Z', 'a', ':', ':', 'D', 'f', 'I', ':', 'o', ':',
+    'L', 'M', 'R', 'W', 'Z', 'a', ':', ':', 'D', 'f', 'g', 'I', ':', 'o', ':',
 #ifndef VMS
     /* -v takes an argument on VMS, so we don't make it a generic
        option.  */
@@ -411,61 +418,68 @@ parse_args (int * pargc, char *** pargv)
       OPTION_DEPFILE,
       OPTION_GSTABS,
       OPTION_GSTABS_PLUS,
+      OPTION_GDWARF2,
       OPTION_STRIP_LOCAL_ABSOLUTE,
       OPTION_TRADITIONAL_FORMAT,
-      OPTION_GDWARF2,
       OPTION_WARN,
       OPTION_TARGET_HELP,
       OPTION_EXECSTACK,
       OPTION_NOEXECSTACK,
       OPTION_ALTERNATE,
       OPTION_WARN_FATAL
+    /* When you add options here, check that they do
+       not collide with OPTION_MD_BASE.  See as.h.  */
     };
   
   static const struct option std_longopts[] =
   {
-    {"help", no_argument, NULL, OPTION_HELP},
-    /* getopt allows abbreviations, so we do this to stop it from
-       treating -k as an abbreviation for --keep-locals.  Some
-       ports use -k to enable PIC assembly.  */
-    {"keep-locals", no_argument, NULL, 'L'},
-    {"keep-locals", no_argument, NULL, 'L'},
-    {"mri", no_argument, NULL, 'M'},
-    {"nocpp", no_argument, NULL, OPTION_NOCPP},
-    {"statistics", no_argument, NULL, OPTION_STATISTICS},
-    {"version", no_argument, NULL, OPTION_VERSION},
-    {"dump-config", no_argument, NULL, OPTION_DUMPCONFIG},
-    {"verbose", no_argument, NULL, OPTION_VERBOSE},
-    {"emulation", required_argument, NULL, OPTION_EMULATION},
-    {"defsym", required_argument, NULL, OPTION_DEFSYM},
+    /* Note: commas are placed at the start of the line rather than
+       the end of the preceeding line so that it is simpler to
+       selectively add and remove lines from this list.  */
+    {"alternate", no_argument, NULL, OPTION_ALTERNATE}
+    ,{"defsym", required_argument, NULL, OPTION_DEFSYM}
+    ,{"dump-config", no_argument, NULL, OPTION_DUMPCONFIG}
+    ,{"emulation", required_argument, NULL, OPTION_EMULATION}
+#if defined BFD_ASSEMBLER && (defined OBJ_ELF || defined OBJ_MAYBE_ELF)
+    ,{"execstack", no_argument, NULL, OPTION_EXECSTACK}
+    ,{"noexecstack", no_argument, NULL, OPTION_NOEXECSTACK}
+#endif
+    ,{"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
+    ,{"gdwarf-2", no_argument, NULL, OPTION_GDWARF2}
+    /* GCC uses --gdwarf-2 but GAS uses to use --gdwarf2,
+       so we keep it here for backwards compatibility.  */
+    ,{"gdwarf2", no_argument, NULL, OPTION_GDWARF2}
+    ,{"gen-debug", no_argument, NULL, 'g'}
+    ,{"gstabs", no_argument, NULL, OPTION_GSTABS}
+    ,{"gstabs+", no_argument, NULL, OPTION_GSTABS_PLUS}
+    ,{"help", no_argument, NULL, OPTION_HELP}
     /* New option for extending instruction set (see also -t above).
        The "-t file" or "--itbl file" option extends the basic set of
        valid instructions by reading "file", a text file containing a
        list of instruction formats.  The additional opcodes and their
        formats are added to the built-in set of instructions, and
        mnemonics for new registers may also be defined.  */
-    {"itbl", required_argument, NULL, OPTION_INSTTBL},
-    {"listing-lhs-width", required_argument, NULL, OPTION_LISTING_LHS_WIDTH},
-    {"listing-lhs-width2", required_argument, NULL, OPTION_LISTING_LHS_WIDTH2},
-    {"listing-rhs-width", required_argument, NULL, OPTION_LISTING_RHS_WIDTH},
-    {"listing-cont-lines", required_argument, NULL, OPTION_LISTING_CONT_LINES},
-    {"MD", required_argument, NULL, OPTION_DEPFILE},
-    {"gstabs", no_argument, NULL, OPTION_GSTABS},
-    {"gstabs+", no_argument, NULL, OPTION_GSTABS_PLUS},
-    {"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE},
-    {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT},
-    {"gdwarf2", no_argument, NULL, OPTION_GDWARF2},
-    {"no-warn", no_argument, NULL, 'W'},
-    {"warn", no_argument, NULL, OPTION_WARN},
-    {"target-help", no_argument, NULL, OPTION_TARGET_HELP},
-#if defined BFD_ASSEMBLER && (defined OBJ_ELF || defined OBJ_MAYBE_ELF)
-    {"execstack", no_argument, NULL, OPTION_EXECSTACK},
-    {"noexecstack", no_argument, NULL, OPTION_NOEXECSTACK},
-#endif
-    {"alternate", no_argument, NULL, OPTION_ALTERNATE},
-    {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
-    /* When you add options here, check that they do not collide with
-       OPTION_MD_BASE.  See as.h.  */
+    ,{"itbl", required_argument, NULL, OPTION_INSTTBL}
+    /* getopt allows abbreviations, so we do this to stop it from
+       treating -k as an abbreviation for --keep-locals.  Some
+       ports use -k to enable PIC assembly.  */
+    ,{"keep-locals", no_argument, NULL, 'L'}
+    ,{"keep-locals", no_argument, NULL, 'L'}
+    ,{"listing-lhs-width", required_argument, NULL, OPTION_LISTING_LHS_WIDTH}
+    ,{"listing-lhs-width2", required_argument, NULL, OPTION_LISTING_LHS_WIDTH2}
+    ,{"listing-rhs-width", required_argument, NULL, OPTION_LISTING_RHS_WIDTH}
+    ,{"listing-cont-lines", required_argument, NULL, OPTION_LISTING_CONT_LINES}
+    ,{"MD", required_argument, NULL, OPTION_DEPFILE}
+    ,{"mri", no_argument, NULL, 'M'}
+    ,{"nocpp", no_argument, NULL, OPTION_NOCPP}
+    ,{"no-warn", no_argument, NULL, 'W'}
+    ,{"statistics", no_argument, NULL, OPTION_STATISTICS}
+    ,{"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE}
+    ,{"version", no_argument, NULL, OPTION_VERSION}
+    ,{"verbose", no_argument, NULL, OPTION_VERBOSE}
+    ,{"target-help", no_argument, NULL, OPTION_TARGET_HELP}
+    ,{"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT}
+    ,{"warn", no_argument, NULL, OPTION_WARN}
   };
 
   /* Construct the option lists from the standard list and the target
@@ -526,6 +540,8 @@ parse_args (int * pargc, char *** pargv)
 		verbose = 1;
 	      break;
 	    }
+	  else
+	    as_bad (_("unrecognized option -%c%s"), optc, optarg ? optarg : "");
 	  /* Fall through.  */
 
 	case '?':
@@ -654,6 +670,23 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  start_dependencies (optarg);
 	  break;
 
+	case 'g':
+	  /* Some backends, eg Alpha, use the -g switch for their own
+	     purposes.  So we check here for an explicit -g and allow
+	     the backend to decide if it wants to process it.  */
+	  if (   old_argv[optind - 1][1] == 'g'
+	      && old_argv[optind - 1][2] == 0
+	      && md_parse_option (optc, optarg))
+	    continue;
+
+	  if (md_debug_format_selector)
+	    debug_type = md_debug_format_selector (& use_gnu_debug_info_extensions);
+	  else if (IS_ELF)
+	    debug_type = DEBUG_DWARF2;
+	  else
+	    debug_type = DEBUG_STABS;
+	  break;
+
 	case OPTION_GSTABS_PLUS:
 	  use_gnu_debug_info_extensions = 1;
 	  /* Fall through.  */
@@ -686,6 +719,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case OPTION_LISTING_LHS_WIDTH2:
 	  {
 	    int tmp = atoi (optarg);
+
 	    if (tmp > listing_lhs_width)
 	      listing_lhs_width_second = tmp;
 	  }
@@ -809,6 +843,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case 'I':
 	  {			/* Include file directory.  */
 	    char *temp = xstrdup (optarg);
+
 	    add_include_dir (temp);
 	    break;
 	  }
@@ -1179,4 +1214,3 @@ main (int argc, char ** argv)
 
   xexit (EXIT_SUCCESS);
 }
-
