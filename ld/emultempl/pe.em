@@ -384,7 +384,7 @@ set_pe_name (name, val)
 	  return;
 	}
     }
-  abort();
+  abort ();
 }
 
 
@@ -507,7 +507,7 @@ set_pe_stack_heap (resname, comname)
 
 
 static int
-gld_${EMULATION_NAME}_parse_args(argc, argv)
+gld_${EMULATION_NAME}_parse_args (argc, argv)
      int argc;
      char **argv;
 {
@@ -633,7 +633,7 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       pe_enable_auto_image_base = 0;
       break;
     case OPTION_DLL_SEARCH_PREFIX:
-      pe_dll_search_prefix = xstrdup( optarg );
+      pe_dll_search_prefix = xstrdup (optarg);
       break;
     case OPTION_NO_DEFAULT_EXCLUDES:
       pe_dll_do_default_excludes = 0;
@@ -733,16 +733,16 @@ gld_${EMULATION_NAME}_set_symbols ()
       lang_assignment_statement_type *rv;
       rv = lang_add_assignment (exp_assop ('=', init[j].symbol,
 					   exp_intop (val)));
-      if (init[j].size == sizeof(short))
-	*(short *)init[j].ptr = val;
-      else if (init[j].size == sizeof(int))
-	*(int *)init[j].ptr = val;
-      else if (init[j].size == sizeof(long))
-	*(long *)init[j].ptr = val;
+      if (init[j].size == sizeof (short))
+	*(short *) init[j].ptr = val;
+      else if (init[j].size == sizeof (int))
+	*(int *) init[j].ptr = val;
+      else if (init[j].size == sizeof (long))
+	*(long *) init[j].ptr = val;
       /* This might be a long long or other special type.  */
-      else if (init[j].size == sizeof(bfd_vma))
-	*(bfd_vma *)init[j].ptr = val;
-      else	abort();
+      else if (init[j].size == sizeof (bfd_vma))
+	*(bfd_vma *) init[j].ptr = val;
+      else	abort ();
       if (j == IMAGEBASEOFF)
 	image_base_statement = rv;
     }
@@ -843,8 +843,8 @@ pe_fixup_stdcalls ()
 		    if (! gave_warning_message)
 		      {
 			gave_warning_message = 1;
-			einfo(_("Use --enable-stdcall-fixup to disable these warnings\n"));
-			einfo(_("Use --disable-stdcall-fixup to disable these fixups\n"));
+			einfo (_("Use --enable-stdcall-fixup to disable these warnings\n"));
+			einfo (_("Use --disable-stdcall-fixup to disable these fixups\n"));
 		      }
 		  }
 	      }
@@ -869,8 +869,8 @@ pe_fixup_stdcalls ()
 		    if (! gave_warning_message)
 		      {
 			gave_warning_message = 1;
-			einfo(_("Use --enable-stdcall-fixup to disable these warnings\n"));
-			einfo(_("Use --disable-stdcall-fixup to disable these fixups\n"));
+			einfo (_("Use --enable-stdcall-fixup to disable these warnings\n"));
+			einfo (_("Use --disable-stdcall-fixup to disable these fixups\n"));
 		      }
 		  }
 	      }
@@ -890,7 +890,7 @@ make_import_fixup (rel, s)
     printf ("arelent: %s@%#lx: add=%li\n", sym->name,
 	    (long) rel->address, (long) rel->addend);
 
-  if (!bfd_get_section_contents(s->owner, s, &addend, rel->address, sizeof(addend)))
+  if (! bfd_get_section_contents (s->owner, s, &addend, rel->address, sizeof (addend)))
     einfo (_("%C: Cannot get section contents - auto-import exception\n"),
 	   s->owner, s, rel->address);
 
@@ -935,8 +935,8 @@ pe_find_data_imports ()
 
 	       for (i = 0; i < nsyms; i++)
 		 {
-		   if (memcmp(symbols[i]->name, "__head_",
-			      sizeof ("__head_") - 1))
+		   if (memcmp (symbols[i]->name, "__head_",
+			       sizeof ("__head_") - 1))
 		     continue;
 
 		   if (pe_dll_extra_pe_debug)
@@ -1009,9 +1009,10 @@ gld_${EMULATION_NAME}_after_open ()
   if (pe_enable_stdcall_fixup) /* -1=warn or 1=disable */
     pe_fixup_stdcalls ();
 
+  pe_process_import_defs (output_bfd, & link_info);
+
   pe_find_data_imports ();
 
-  pe_process_import_defs(output_bfd, &link_info);
   if (link_info.shared)
     pe_dll_build_sections (output_bfd, &link_info);
 
@@ -1219,7 +1220,7 @@ gld_${EMULATION_NAME}_after_open ()
 }
 
 static void
-gld_${EMULATION_NAME}_before_allocation()
+gld_${EMULATION_NAME}_before_allocation ()
 {
 #ifdef TARGET_IS_ppcpe
   /* Here we rummage through the found bfds to collect toc information.  */
@@ -1280,7 +1281,7 @@ saw_option (char * option)
 #endif /* DLL_SUPPORT */
 
 static bfd_boolean
-gld_${EMULATION_NAME}_unrecognized_file(entry)
+gld_${EMULATION_NAME}_unrecognized_file (entry)
      lang_input_statement_type *entry ATTRIBUTE_UNUSED;
 {
 #ifdef DLL_SUPPORT
@@ -1300,7 +1301,7 @@ gld_${EMULATION_NAME}_unrecognized_file(entry)
 
 	  for (i = 0; i < pe_def_file->num_exports; i++)
 	    {
-	      len = strlen(pe_def_file->exports[i].internal_name);
+	      len = strlen (pe_def_file->exports[i].internal_name);
 	      if (buflen < len + 2)
 		buflen = len + 2;
 	    }
@@ -1311,7 +1312,7 @@ gld_${EMULATION_NAME}_unrecognized_file(entry)
 	    {
 	      struct bfd_link_hash_entry *h;
 
-	      sprintf(buf, "_%s", pe_def_file->exports[i].internal_name);
+	      sprintf (buf, "_%s", pe_def_file->exports[i].internal_name);
 
 	      h = bfd_link_hash_lookup (link_info.hash, buf, TRUE, TRUE, TRUE);
 	      if (h == (struct bfd_link_hash_entry *) NULL)
@@ -1370,7 +1371,7 @@ gld_${EMULATION_NAME}_unrecognized_file(entry)
 }
 
 static bfd_boolean
-gld_${EMULATION_NAME}_recognized_file(entry)
+gld_${EMULATION_NAME}_recognized_file (entry)
   lang_input_statement_type *entry ATTRIBUTE_UNUSED;
 {
 #ifdef DLL_SUPPORT
@@ -1388,10 +1389,16 @@ gld_${EMULATION_NAME}_recognized_file(entry)
 #endif
   if (bfd_get_format (entry->the_bfd) == bfd_object)
     {
-      const char *ext = entry->filename + strlen (entry->filename) - 4;
+      char fbuf[LD_PATHMAX];
+      const char *ext;
+
+      if (REALPATH (entry->filename, fbuf) == NULL)
+	strncpy (fbuf, entry->filename, LD_PATHMAX);
+
+      ext = fbuf + strlen (fbuf) - 4;
 
       if (strcmp (ext, ".dll") == 0 || strcmp (ext, ".DLL") == 0)
-	return pe_implied_import_dll (entry->filename);
+	return pe_implied_import_dll (fbuf);
     }
 #endif
   return FALSE;
@@ -1903,7 +1910,7 @@ gld_${EMULATION_NAME}_find_potential_libraries (name, entry)
 }
 
 static char *
-gld_${EMULATION_NAME}_get_script(isfile)
+gld_${EMULATION_NAME}_get_script (isfile)
      int *isfile;
 EOF
 # Scripts compiled in.

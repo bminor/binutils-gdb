@@ -2418,7 +2418,7 @@ pe_process_import_defs (output_bfd, link_info)
 		exp.hint = exp.ordinal >= 0 ? exp.ordinal : 0;
 		exp.flag_private = 0;
 		exp.flag_constant = 0;
-		exp.flag_data = 0;
+		exp.flag_data = pe_def_file->imports[i].data;
 		exp.flag_noname = exp.name ? 0 : 1;
 		one = make_one (&exp, output_bfd);
 		add_bfd_to_link (one, one->filename, link_info);
@@ -2491,9 +2491,16 @@ pe_implied_import_dll (filename)
   bfd *dll;
   unsigned long pe_header_offset, opthdr_ofs, num_entries, i;
   unsigned long export_rva, export_size, nsections, secptr, expptr;
+  unsigned long exp_funcbase;
   unsigned char *expdata, *erva;
   unsigned long name_rvas, ordinals, nexp, ordbase;
   const char *dll_name;
+  /* Initialization with start > end guarantees that is_data
+     will not be set by mistake, and avoids compiler warning.  */
+  unsigned long data_start = 1;
+  unsigned long data_end   = 0;
+  unsigned long bss_start  = 1;
+  unsigned long bss_end    = 0;
 
   /* No, I can't use bfd here.  kernel32.dll puts its export table in
      the middle of the .rdata section.  */
@@ -2511,11 +2518,7 @@ pe_implied_import_dll (filename)
       return FALSE;
     }
 
-  dll_name = filename;
-  for (i = 0; filename[i]; i++)
-    if (filename[i] == '/' || filename[i] == '\\' || filename[i] == ':')
-      dll_name = filename + i + 1;
-
+  /* Get pe_header, optional header and numbers of export entries.  */
   pe_header_offset = pe_get32 (dll, 0x3c);
   opthdr_ofs = pe_header_offset + 4 + 20;
   num_entries = pe_get32 (dll, opthdr_ofs + 92);
@@ -2530,6 +2533,7 @@ pe_implied_import_dll (filename)
 	    pe_get16 (dll, pe_header_offset + 4 + 16));
   expptr = 0;
 
+  /* Get the rva and size of the export section.  */ 
   for (i = 0; i < nsections; i++)
     {
       char sname[8];
@@ -2550,6 +2554,40 @@ pe_implied_import_dll (filename)
 	}
     }
 
+  /* Scan sections and store the base and size of the
+     data and bss segments in data/base_start/end.  */ 
+  for (i = 0; i < nsections; i++)
+    {
+      unsigned long secptr1 = secptr + 40 * i;
+      unsigned long vsize = pe_get32 (dll, secptr1 + 8);
+      unsigned long vaddr = pe_get32 (dll, secptr1 + 12);
+      unsigned long flags = pe_get32 (dll, secptr1 + 36);
+      char sec_name[9];
+
+      sec_name[8] = '\0';
+      bfd_seek (dll, (file_ptr) secptr1 + 0, SEEK_SET);
+      bfd_bread (sec_name, (bfd_size_type) 8, dll);
+
+      if (strcmp(sec_name,".data") == 0)
+	{
+	  data_start = vaddr;
+	  data_end = vaddr + vsize;
+
+	  if (pe_dll_extra_pe_debug)
+	    printf ("%s %s: 0x%08lx-0x%08lx (0x%08lx)\n",
+		    __FUNCTION__, sec_name, vaddr, vaddr + vsize, flags);
+        }
+      else if (strcmp (sec_name,".bss") == 0)
+	{
+	  bss_start = vaddr;
+	  bss_end = vaddr + vsize;
+
+	  if (pe_dll_extra_pe_debug)
+	    printf ("%s %s: 0x%08lx-0x%08lx (0x%08lx)\n",
+		    __FUNCTION__, sec_name, vaddr, vaddr + vsize, flags);
+	}
+    }
+
   expdata = (unsigned char *) xmalloc (export_size);
   bfd_seek (dll, (file_ptr) expptr, SEEK_SET);
   bfd_bread (expdata, (bfd_size_type) export_size, dll);
@@ -2562,14 +2600,41 @@ pe_implied_import_dll (filename)
   name_rvas = pe_as32 (expdata + 32);
   ordinals = pe_as32 (expdata + 36);
   ordbase = pe_as32 (expdata + 16);
+  exp_funcbase = pe_as32 (expdata + 28);
 
+  /* Use internal dll name instead of filename
+     to enable symbolic dll linking.  */
+  dll_name = pe_as32 (expdata + 12) + erva;
+
+  /* Iterate through the list of symbols.  */
   for (i = 0; i < nexp; i++)
     {
+      /* Pointer to the names vector.  */
       unsigned long name_rva = pe_as32 (erva + name_rvas + i * 4);
       def_file_import *imp;
+      /* Pointer to the function address vector.  */ 
+      unsigned long func_rva = pe_as32 (erva + exp_funcbase + i * 4);
+      int is_data = 0;
 
-      imp = def_file_add_import (pe_def_file, erva + name_rva, dll_name,
-				 i, 0);
+      /* Skip unwanted symbols, which are
+	 exported in buggy auto-import releases.  */
+      if (strncmp (erva + name_rva, "_nm_", 4) != 0)
+ 	{
+ 	  /* is_data is true if the address is in the data or bss segment.  */
+ 	  is_data =
+	    (func_rva >= data_start && func_rva < data_end)
+	    || (func_rva >= bss_start && func_rva < bss_end);
+
+	  imp = def_file_add_import (pe_def_file, erva + name_rva,
+				     dll_name, i, 0);
+ 	  /* Mark symbole type.  */
+ 	  imp->data = is_data;
+ 
+ 	  if (pe_dll_extra_pe_debug)
+	    printf ("%s dll-name: %s sym: %s addr: 0x%lx %s\n",
+		    __FUNCTION__, dll_name, erva + name_rva,
+		    func_rva, is_data ? "(data)" : "");
+ 	}
     }
 
   return TRUE;

@@ -1,3 +1,33 @@
+2002-12-13  Ralf Habacker  <Ralf.Habacker@freenet.de>
+            Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* configure.in: Add check for realpath function.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* deffile.h: Add .data field to def_file_import
+	structure.
+	* pe-dll.c (pe_proces_import_defs): Use .data field of
+	def_file_import structure to initialize flag_data field of
+	def_file_export structure.
+	(pe_implied_import_dll): New variables exp_funcbase and
+	[data|bss]_[start|end].  Use DLL's internal name to set dll_name,
+	not filename (which may be a symlink). 	Scan the sections and
+	initialize [data|bss]_[start|end].  When scanning the export
+	table, skip _nm_ symbols, and mark any symbols whose rva indicates
+	that it is in the .bss or .data sections as data.
+	* sysdep.h: Include limits.h and sys/param.h, and define
+	LD_PATHMAX as appropriate.  Also define REALPATH as realpath if it
+	exists, NULL otherwise.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Call
+	pe_process_import_defs before pe_find_data_imports, so that
+	auto-import will check the virtual implib as well as "real"
+	implibs.
+	(gld_${EMULATION_NAME}_recognized_file): Use REALPATH to follow
+	symlinks to their target; check that the target's extension is
+	.dll before calling pe_implied_import_dll(), not the filename
+	itself (which may be a symlink).
+
 2002-12-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (struct orphan_save): Add os_tail field.
