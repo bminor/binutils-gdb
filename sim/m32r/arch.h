@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef M32R_ARCH_H
 #define M32R_ARCH_H
 
-#define MAX_INSNS 128
+#define MAX_INSNS 166
 
 #define TARGET_BIG_ENDIAN 1
 
@@ -32,6 +32,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Macros to determine which cpus are supported.  */
 #define HAVE_CPU_M32R
+/* start-sanitize-m32rx */
+#define HAVE_CPU_M32RX
+/* end-sanitize-m32rx */
 
 /* Enum declaration for mode types.  */
 typedef enum mode_type {
@@ -48,7 +51,7 @@ typedef enum mode_type {
 
 /* Enum declaration for model types.  */
 typedef enum model_type {
-  MODEL_M32R_D, MODEL_TEST, MODEL_MAX
+  MODEL_M32R_D, MODEL_TEST, MODEL_M32RX, MODEL_MAX
 } MODEL_TYPE;
 
 #define MAX_MODELS ((int) MODEL_MAX)
@@ -56,7 +59,7 @@ typedef enum model_type {
 /* Enum declaration for unit types.  */
 typedef enum unit_type {
   UNIT_NONE, UNIT_M32R_D_U_STORE, UNIT_M32R_D_U_LOAD, UNIT_M32R_D_U_EXEC,
-  UNIT_TEST_U_EXEC, UNIT_MAX
+  UNIT_TEST_U_EXEC, UNIT_M32RX_U_EXEC, UNIT_MAX
 } UNIT_TYPE;
 
 #define MAX_UNITS (1)

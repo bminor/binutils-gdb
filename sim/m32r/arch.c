@@ -26,6 +26,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 const MACH machs[] = {
   { "m32r", 32, 32, & m32r_models[0], & m32r_imp_properties },
+/* start-sanitize-m32rx */
+  { "m32rx", 32, 32, & m32rx_models[0], & m32rx_imp_properties },
+/* end-sanitize-m32rx */
   { 0 }
 };
 
