@@ -1,3 +1,16 @@
+2004-08-04  Jim Blandy  <jimb@redhat.com>
+
+	Use a fixed register numbering when communicating with the PowerPC
+	simulator.
+	* ppc-tdep.h (struct gdbarch_tdep): New member: 'sim_regno'.
+	* rs6000-tdep.c: #include "sim-regno.h" and "gdb/sim-ppc.h".
+	(set_sim_regno, init_sim_regno_table, rs6000_register_sim_regno): 
+	New functions.
+	(rs6000_gdbarch_init): Register rs6000_register_sim_regno.  Call
+	init_sim_regno_table.
+	* Makefile.in (gdb_sim_ppc_h): New variable.
+	(rs6000-tdep.o): Update dependencies.
+
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
 	* cris-tdep.c (cris_register_size): Restore function, still used

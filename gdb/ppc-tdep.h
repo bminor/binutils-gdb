@@ -171,6 +171,11 @@ struct gdbarch_tdep
     int ppc_spefscr_regnum;     /* SPE 'spefscr' register */
     int lr_frame_offset;	/* Offset to ABI specific location where
                                    link register is saved.  */
+
+    /* An array of integers, such that sim_regno[I] is the simulator
+       register number for GDB register number I, or -1 if the
+       simulator does not implement that register.  */
+    int *sim_regno;
 };
 
 

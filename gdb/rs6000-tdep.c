@@ -37,6 +37,8 @@
 #include "parser-defs.h"
 #include "osabi.h"
 #include "infcall.h"
+#include "sim-regno.h"
+#include "gdb/sim-ppc.h"
 
 #include "libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */
@@ -182,6 +184,106 @@ ppc_floating_point_unit_p (struct gdbarch *gdbarch)
   return (tdep->ppc_fp0_regnum >= 0
           && tdep->ppc_fpscr_regnum >= 0);
 }
+
+static void
+set_sim_regno (int *table, int gdb_regno, int sim_regno)
+{
+  /* Make sure we don't try to assign any given GDB register a sim
+     register number more than once.  */
+  gdb_assert (table[gdb_regno] == -1);
+  table[gdb_regno] = sim_regno;
+}
+
+static void
+init_sim_regno_table (struct gdbarch *arch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
+  int total_regs = gdbarch_num_regs (arch) + gdbarch_num_pseudo_regs (arch);
+  const struct reg *regs = tdep->regs;
+  int *sim_regno = GDBARCH_OBSTACK_CALLOC (arch, total_regs, int);
+  int i;
+
+  /* Presume that all registers not explicitly mentioned below are
+     unavailable from the sim.  */
+  for (i = 0; i < total_regs; i++)
+    sim_regno[i] = -1;
+
+  /* General-purpose registers.  */
+  for (i = 0; i < ppc_num_gprs; i++)
+    set_sim_regno (sim_regno, tdep->ppc_gp0_regnum + i, sim_ppc_r0_regnum + i);
+  
+  /* Floating-point registers.  */
+  if (tdep->ppc_fp0_regnum >= 0)
+    for (i = 0; i < ppc_num_fprs; i++)
+      set_sim_regno (sim_regno,
+                     tdep->ppc_fp0_regnum + i,
+                     sim_ppc_f0_regnum + i);
+  if (tdep->ppc_fpscr_regnum >= 0)
+    set_sim_regno (sim_regno, tdep->ppc_fpscr_regnum, sim_ppc_fpscr_regnum);
+
+  set_sim_regno (sim_regno, gdbarch_pc_regnum (arch), sim_ppc_pc_regnum);
+  set_sim_regno (sim_regno, tdep->ppc_ps_regnum, sim_ppc_ps_regnum);
+  set_sim_regno (sim_regno, tdep->ppc_cr_regnum, sim_ppc_cr_regnum);
+
+  /* Segment registers.  */
+  if (tdep->ppc_sr0_regnum >= 0)
+    for (i = 0; i < ppc_num_srs; i++)
+      set_sim_regno (sim_regno,
+                     tdep->ppc_sr0_regnum + i,
+                     sim_ppc_sr0_regnum + i);
+
+  /* Altivec registers.  */
+  if (tdep->ppc_vr0_regnum >= 0)
+    {
+      for (i = 0; i < ppc_num_vrs; i++)
+        set_sim_regno (sim_regno,
+                       tdep->ppc_vr0_regnum + i,
+                       sim_ppc_vr0_regnum + i);
+
+      /* FIXME: jimb/2004-07-15: when we have tdep->ppc_vscr_regnum,
+         we can treat this more like the other cases.  */
+      set_sim_regno (sim_regno,
+                     tdep->ppc_vr0_regnum + ppc_num_vrs,
+                     sim_ppc_vscr_regnum);
+    }
+  /* vsave is a special-purpose register, so the code below handles it.  */
+
+  /* SPE APU (E500) registers.  */
+  if (tdep->ppc_ev0_regnum >= 0)
+    for (i = 0; i < ppc_num_gprs; i++)
+      set_sim_regno (sim_regno,
+                     tdep->ppc_ev0_regnum + i,
+                     sim_ppc_ev0_regnum + i);
+  if (tdep->ppc_acc_regnum >= 0)
+    set_sim_regno (sim_regno, tdep->ppc_acc_regnum, sim_ppc_acc_regnum);
+  /* spefscr is a special-purpose register, so the code below handles it.  */
+
+  /* Now handle all special-purpose registers.  Verify that they
+     haven't mistakenly been assigned numbers by any of the above
+     code).  */
+  for (i = 0; i < total_regs; i++)
+    if (regs[i].spr_num >= 0)
+      set_sim_regno (sim_regno, i, regs[i].spr_num + sim_ppc_spr0_regnum);
+
+  /* Drop the initialized array into place.  */
+  tdep->sim_regno = sim_regno;
+}
+
+static int
+rs6000_register_sim_regno (int reg)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  int sim_regno;
+
+  gdb_assert (0 <= reg && reg <= NUM_REGS + NUM_PSEUDO_REGS);
+  sim_regno = tdep->sim_regno[reg];
+
+  if (sim_regno >= 0)
+    return sim_regno;
+  else
+    return LEGACY_SIM_REGNO_IGNORE;
+}
+
 
 
 /* Register set support functions.  */
@@ -2911,6 +3013,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 1);
   set_gdbarch_deprecated_fp_regnum (gdbarch, 1);
+  set_gdbarch_register_sim_regno (gdbarch, rs6000_register_sim_regno);
   if (sysv_abi && wordsize == 8)
     set_gdbarch_return_value (gdbarch, ppc64_sysv_abi_return_value);
   else if (sysv_abi && wordsize == 4)
@@ -3105,6 +3208,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        /* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
        set_gdbarch_software_single_step (gdbarch, rs6000_software_single_step);
     }
+
+  init_sim_regno_table (gdbarch);
 
   return gdbarch;
 }

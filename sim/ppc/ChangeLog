@@ -1,3 +1,18 @@
+2004-08-04  Jim Blandy  <jimb@redhat.com>
+
+	Use a fixed register numbering when communicating with the PowerPC
+	simulator.
+	* sim_calls.c: #include "registers.h" and "gdb/sim-ppc.h"; do not
+	include GDB's "defs.h".
+	(gdb_register_name_table): New variable.
+	(gdb_register_name_table_size): New enum constant.
+	(gdb_register_name): New function.
+	(sim_fetch_register, sim_store_register): Use gdb_register_name,
+	instead of calling gdbarch_register_name.
+	* Makefile.in (GDB_SIM_PPC_H): New variable.
+	(DEFS_H): Delete variable.
+	(sim_calls.o): Update dependencies.
+
 2004-07-26  Andrew Cagney  <cagney@gnu.org>
 
 	Problem from Olaf Hering <olh@suse.de>.

@@ -25,6 +25,7 @@
 
 #include "psim.h"
 #include "options.h"
+#include "registers.h"
 
 #undef printf_filtered /* blow away the mapping */
 
@@ -40,10 +41,10 @@
 #endif
 #endif
 
-#include "defs.h"
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
+#include "gdb/sim-ppc.h"
 
 /* Define the rate at which the simulator should poll the host
    for a quit. */
@@ -58,29 +59,6 @@ static int poll_quit_count = POLL_QUIT_INTERVAL;
 static psim *simulator;
 static device *root_device;
 static host_callback *callbacks;
-
-/* We use GDB's gdbarch_register_name function to map GDB register
-   numbers onto names, which we can then look up in the register
-   table.  Since the `set architecture' command can select a new
-   processor variant at run-time, the meanings of the register numbers
-   can change, so we need to make sure the sim uses the same
-   name/number mapping that GDB uses.
-
-   (We don't use the REGISTER_NAME macro, which is a wrapper for
-   gdbarch_register_name.  We #include GDB's "defs.h", which tries to
-   #include GDB's "config.h", but gets ours instead, and REGISTER_NAME
-   ends up not getting defined.  Simpler to just use
-   gdbarch_register_name directly.)
-
-   We used to just use the REGISTER_NAMES macro from GDB's
-   target-dependent header files, which expanded into an initializer
-   for an array of strings.  That was kind of nice, because it meant
-   that libsim.a had only a compile-time dependency on GDB; using
-   gdbarch_register_name directly means that there are now link-time
-   and run-time dependencies too.
-
-   Perhaps the host_callback structure could provide a function for
-   retrieving register names; that would be cleaner.  */
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
@@ -177,6 +155,82 @@ sim_write (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 }
 
 
+/* A table mapping register numbers (as received from GDB) to register
+   names.  This table does not handle special-purpose registers: the
+   SPR whose number is N is assigned the register number
+   sim_ppc_spr0_regnum + N.  */
+static const char *gdb_register_name_table[] = {
+
+  /* General-purpose registers: 0 .. 31.  */
+  "r0",   "r1",  "r2",  "r3",  "r4",  "r5",  "r6",  "r7", 
+  "r8",   "r9", "r10", "r11", "r12", "r13", "r14", "r15", 
+  "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23", 
+  "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31", 
+
+  /* Floating-point registers: 32 .. 63.  */
+  "f0",   "f1",  "f2",  "f3",  "f4",  "f5",  "f6",  "f7", 
+  "f8",   "f9", "f10", "f11", "f12", "f13", "f14", "f15", 
+  "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23", 
+  "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
+
+  /* Altivec registers: 64 .. 95.  */
+  "vr0",   "vr1",  "vr2",  "vr3",  "vr4",  "vr5",  "vr6",  "vr7", 
+  "vr8",   "vr9", "vr10", "vr11", "vr12", "vr13", "vr14", "vr15", 
+  "vr16", "vr17", "vr18", "vr19", "vr20", "vr21", "vr22", "vr23", 
+  "vr24", "vr25", "vr26", "vr27", "vr28", "vr29", "vr30", "vr31", 
+  
+  /* SPE APU GPR upper halves: 96 .. 127.  */
+  "rh0",   "rh1",  "rh2",  "rh3",  "rh4",  "rh5",  "rh6",  "rh7", 
+  "rh8",   "rh9", "rh10", "rh11", "rh12", "rh13", "rh14", "rh15", 
+  "rh16", "rh17", "rh18", "rh19", "rh20", "rh21", "rh22", "rh23", 
+  "rh24", "rh25", "rh26", "rh27", "rh28", "rh29", "rh30", "rh31", 
+
+  /* SPE APU full 64-bit vector registers: 128 .. 159.  */
+  "ev0",   "ev1",  "ev2",  "ev3",  "ev4",  "ev5",  "ev6",  "ev7", 
+  "ev8",   "ev9", "ev10", "ev11", "ev12", "ev13", "ev14", "ev15", 
+  "ev16", "ev17", "ev18", "ev19", "ev20", "ev21", "ev22", "ev23", 
+  "ev24", "ev25", "ev26", "ev27", "ev28", "ev29", "ev30", "ev31", 
+
+  /* Segment registers: 160 .. 175.  */
+  "sr0", "sr1",  "sr2",  "sr3",  "sr4",  "sr5",  "sr6",  "sr7", 
+  "sr8", "sr9", "sr10", "sr11", "sr12", "sr13", "sr14", "sr15", 
+
+  /* Miscellaneous (not special-purpose!) registers: 176 .. 181.  */
+  "pc", "ps", "cr", "fpscr", "acc", "vscr"
+};
+
+enum {
+  gdb_register_name_table_size = (sizeof (gdb_register_name_table)
+                                  / sizeof (gdb_register_name_table[0])),
+};
+
+
+/* Return the name of the register whose number is REGNUM, or zero if
+   REGNUM is an invalid register number.  */
+static const char *
+gdb_register_name (int regnum)
+{
+  /* Is it a special-purpose register?  */
+  if (sim_ppc_spr0_regnum <= regnum
+      && regnum < sim_ppc_spr0_regnum + sim_ppc_num_sprs)
+    {
+      int spr = regnum - sim_ppc_spr0_regnum;
+      if (spr_is_valid (spr))
+        return spr_name (spr);
+      else
+        return 0;
+    }
+
+  /* Is it a valid non-SPR register number?  */
+  else if (0 <= regnum && regnum < gdb_register_name_table_size)
+    return gdb_register_name_table[regnum];
+
+  /* Not a valid register number at all.  */
+  else
+    return 0;
+}
+
+
 int
 sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
 {
@@ -186,15 +240,11 @@ sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
     return 0;
   }
 
-  /* GDB will sometimes ask for the contents of a register named "";
-     we ignore such requests, and leave garbage in *BUF.  In GDB
-     terms, the empty string means "the register with this number is
-     not present in the currently selected architecture variant."
-     That's following the kludge we're using for the MIPS processors.
-     But there are loops that just walk through the entire list of
-     names and try to get everything.  */
-  regname = gdbarch_register_name (current_gdbarch, regno);
-  if (! regname || regname[0] == '\0')
+  regname = gdb_register_name (regno);
+
+  /* Occasionally, GDB will pass invalid register numbers to us; it
+     wants us to ignore them.  */
+  if (! regname)
     return -1;
 
   TRACE(trace_gdb, ("sim_fetch_register(regno=%d(%s), buf=0x%lx)\n",
@@ -212,9 +262,11 @@ sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
   if (simulator == NULL)
     return 0;
 
-  /* See comments in sim_fetch_register, above.  */
-  regname = gdbarch_register_name (current_gdbarch, regno);
-  if (! regname || regname[0] == '\0')
+  regname = gdb_register_name (regno);
+
+  /* Occasionally, GDB will pass invalid register numbers to us; it
+     wants us to ignore them.  */
+  if (! regname)
     return -1;
 
   TRACE(trace_gdb, ("sim_store_register(regno=%d(%s), buf=0x%lx)\n",
