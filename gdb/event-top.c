@@ -685,20 +685,17 @@ command_line_handler (char *rl)
     {
       p--;			/* Put on top of '\'.  */
 
-      if (*p == '\\')
-	{
-	  readline_input_state.linebuffer = savestring (linebuffer,
-							strlen (linebuffer));
-	  readline_input_state.linebuffer_ptr = p;
+      readline_input_state.linebuffer = savestring (linebuffer,
+						    strlen (linebuffer));
+      readline_input_state.linebuffer_ptr = p;
 
-	  /* We will not invoke a execute_command if there is more
-	     input expected to complete the command. So, we need to
-	     print an empty prompt here. */
-	  more_to_come = 1;
-	  push_prompt ("", "", "");
-	  display_gdb_prompt (0);
-	  return;
-	}
+      /* We will not invoke a execute_command if there is more
+	 input expected to complete the command. So, we need to
+	 print an empty prompt here. */
+      more_to_come = 1;
+      push_prompt ("", "", "");
+      display_gdb_prompt (0);
+      return;
     }
 
 #ifdef STOP_SIGNAL
