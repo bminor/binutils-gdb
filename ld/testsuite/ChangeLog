@@ -1,3 +1,8 @@
+1999-07-07  Ian Lance Taylor  <ian@zembu.com>
+
+	* ld-elfvers/vers.exp: Add new tests vers17 to vers19.
+	* ld/elfvers/{vers17.*, vers18.*, vers19.*}: New files.
+
 1999-06-13  Ian Lance Taylor  <ian@zembu.com>
 
 	* ld-checks/asm.s: Use a symbol name for .lcomm.
