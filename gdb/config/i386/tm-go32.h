@@ -1,5 +1,5 @@
 /* Target-dependent definitions for Intel x86 running DJGPP.
-   Copyright 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,6 +18,10 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef TM_GO32_H
+#define TM_GO32_H
+
+#define I386_DJGPP_TARGET
 #undef HAVE_SSE_REGS	/* FIXME! go32-nat.c needs to support XMMi registers */
 #define HAVE_I387_REGS
 
@@ -60,18 +64,30 @@ extern int i387_hex_long_double_input (char *p, long double *putithere);
   *((long double *)(TO)) = val;						\
 }
 
-/* Return the GDB type object for the "standard" data type of data in 
-   register N.  Perhaps si and di should go here, but potentially they
-   could be used for things other than address.  */
-
-#define REGISTER_VIRTUAL_TYPE(N)				\
-  (((N) == PC_REGNUM || (N) == FP_REGNUM || (N) == SP_REGNUM)	\
-   ? lookup_pointer_type (builtin_type_void)			\
-   : IS_FP_REGNUM(N) ? builtin_type_long_double 		\
-   : IS_SSE_REGNUM(N) ? builtin_type_v4sf			\
-   : builtin_type_int)
-
-#endif /* LD_I387 */
-
 #undef TARGET_LONG_DOUBLE_BIT
 #define TARGET_LONG_DOUBLE_BIT 96
+
+/* FRAME_CHAIN takes a frame's nominal address and produces the frame's
+   chain-pointer.
+   In the case of the i386, the frame's nominal address
+   is the address of a 4-byte word containing the calling frame's address.
+   DJGPP doesn't have any special frames for signal handlers, they are
+   just normal C functions. */
+#undef  FRAME_CHAIN
+#define FRAME_CHAIN(thisframe) \
+  (!inside_entry_file ((thisframe)->pc) ? \
+   read_memory_integer ((thisframe)->frame, 4) :\
+   0)
+
+/* A macro that tells us whether the function invocation represented
+   by FI does not have a frame on the stack associated with it.  If it
+   does not, FRAMELESS is set to 1, else 0.  */
+#undef  FRAMELESS_FUNCTION_INVOCATION
+#define FRAMELESS_FUNCTION_INVOCATION(FI) \
+     (frameless_look_for_prologue(FI))
+
+#undef  FRAME_SAVED_PC
+#define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
+
+#endif /* LD_I387 */
+#endif /* TM_GO32_H */

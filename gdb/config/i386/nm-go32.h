@@ -48,6 +48,7 @@
 
 #define TARGET_REGION_OK_FOR_HW_WATCHPOINT(addr,len) \
 	go32_region_ok_for_watchpoint(addr,len)
+extern int go32_region_ok_for_watchpoint (CORE_ADDR, int);
 
 /* After a watchpoint trap, the PC points to the instruction after the
    one that caused the trap.  Therefore we don't need to step over it.
@@ -60,24 +61,24 @@
 
 #define target_stopped_data_address() \
   go32_stopped_by_watchpoint (inferior_pid, 1)
+extern CORE_ADDR go32_stopped_by_watchpoint (int, int);
 
 /* Use these macros for watchpoint insertion/removal.  */
 
 #define target_insert_watchpoint(addr, len, type)  \
   go32_insert_watchpoint (inferior_pid, addr, len, type)
+extern int go32_insert_watchpoint (int, CORE_ADDR, int, int);
 
 #define target_remove_watchpoint(addr, len, type)  \
   go32_remove_watchpoint (inferior_pid, addr, len, type)
+extern int go32_remove_watchpoint (int, CORE_ADDR, int, int);
 
 #define target_insert_hw_breakpoint(addr, shadow)  \
   go32_insert_hw_breakpoint(addr, shadow)
+extern int go32_insert_hw_breakpoint (CORE_ADDR, void *);
 
 #define target_remove_hw_breakpoint(addr, shadow)  \
   go32_remove_hw_breakpoint(addr, shadow)
+extern int go32_remove_hw_breakpoint (CORE_ADDR, void *);
 
 #define DECR_PC_AFTER_HW_BREAK 0
-
-#undef FLOAT_INFO
-#define FLOAT_INFO { i386_go32_float_info (); }
-
-extern void i386_go32_float_info (void);

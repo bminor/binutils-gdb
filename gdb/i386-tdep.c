@@ -702,9 +702,12 @@ i386_extract_return_value (type, regbuf, valbuf)
      char regbuf[REGISTER_BYTES];
      char *valbuf;
 {
-  /* On AIX and i386 GNU/Linux, floating point values are returned in
-     floating point registers.  */
-#if defined(I386_AIX_TARGET) || defined(I386_GNULINUX_TARGET)
+  /* On AIX, i386 GNU/Linux and DJGPP, floating point values are
+     returned in floating point registers.  */
+  /* FIXME: cagney/2000-02-29: This function needs to be rewritten
+     using multi-arch. Please don't keep adding to this #ifdef
+     spaghetti. */
+#if defined(I386_AIX_TARGET) || defined(I386_GNULINUX_TARGET) || defined(I386_DJGPP_TARGET)
   if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
       double d;
@@ -720,7 +723,7 @@ i386_extract_return_value (type, regbuf, valbuf)
       store_floating (valbuf, TYPE_LENGTH (type), d);
     }
   else
-#endif /* I386_AIX_TARGET || I386_GNULINUX_TARGET*/
+#endif /* I386_AIX_TARGET || I386_GNULINUX_TARGET || I386_DJGPP_TARGET */
     {
 #if defined(LOW_RETURN_REGNUM)
       int len = TYPE_LENGTH (type);
