@@ -96,6 +96,8 @@ static struct mcu_type_s mcu_types[] =
   {"msp430x122", MSP430_ISA_12, bfd_mach_msp12},
   {"msp430x122", MSP430_ISA_12, bfd_mach_msp12},
   {"msp430x1222",MSP430_ISA_12, bfd_mach_msp12},
+  {"msp430x1122",MSP430_ISA_11, bfd_mach_msp110},
+  {"msp430x1132",MSP430_ISA_11, bfd_mach_msp110},
   {"msp430x123", MSP430_ISA_12, bfd_mach_msp12},
   {"msp430x1232",MSP430_ISA_12, bfd_mach_msp12},
   {"msp430x133", MSP430_ISA_13, bfd_mach_msp13},
@@ -121,6 +123,7 @@ static struct mcu_type_s mcu_types[] =
   {"msp430x1351",MSP430_ISA_13, bfd_mach_msp13},
   {"msp430x435", MSP430_ISA_43, bfd_mach_msp43},
   {"msp430x436", MSP430_ISA_43, bfd_mach_msp43},
+  {"msp430x437", MSP430_ISA_43, bfd_mach_msp43},
   {"msp430x447", MSP430_ISA_44, bfd_mach_msp44},
   {"msp430x448", MSP430_ISA_44, bfd_mach_msp44},
   {"msp430x449", MSP430_ISA_44, bfd_mach_msp44},
@@ -179,21 +182,20 @@ md_show_usage (stream)
   fprintf (stream,
 	   _("MSP430 options:\n"
 	     "  -mmcu=[msp430-name] select microcontroller type\n"
-	     "			msp430x1101 msp430x1111 msp430x1121\n"
-	     "			msp430x1331 msp430x1351\n"
-	     "			msp430x1222 msp430x1232\n"
-	     "			msp430x311 msp430x312 msp430x313 msp430x314 msp430x315\n"
-	     "			msp430x323 msp430x325\n"
-	     "			msp430x336 msp430x337\n"
-	     "			msp430x412 msp430x413\n"
-	     "			msp430x110 msp430x112\n"
-	     "			msp430x122 msp430x123\n"
-	     "			msp430x133 msp430x135\n"
-	     "			msp430x147 msp430x148 msp430x149\n"
-	     "			msp430x167 msp430x168 msp430x169\n"
-	     "			msp430x155 msp430x156 msp430x157\n"
-	     "			msp430x447 msp430x448 msp430x449\n"
-	     "			msp430x435 msp430x436\n"));
+	     "                  msp430x110  msp430x112\n"
+	     "                  msp430x1101 msp430x1111\n"
+	     "                  msp430x1121 msp430x1122 msp430x1132\n"
+	     "                  msp430x122  msp430x123\n"
+	     "                  msp430x1331 msp430x1351\n"
+	     "                  msp430x147  msp430x148  msp430x149\n"
+	     "                  msp430x155  msp430x156  msp430x157\n"
+	     "                  msp430x167  msp430x168  msp430x169\n"
+	     "                  msp430x311  msp430x312  msp430x313  msp430x314  msp430x315\n"
+	     "                  msp430x323  msp430x325\n"
+	     "                  msp430x336  msp430x337\n"
+	     "                  msp430x412  msp430x413\n"
+	     "                  msp430x435  msp430x436  msp430x437\n"
+	     "                  msp430x447  msp430x448  msp430x449\n"));
 
   show_mcu_list (stream);
 }

@@ -1,4 +1,10 @@
-Mon Mar  3 20:36:47 2003  J"orn Rennecke <joern.rennecke@superh.com>
+2003-03-04  Dmitry Diky  <diwil@mail.ru>
+
+	* config/tc-msp430.c (mcu_types): Add recenly announced x1122
+	and x1123 devices, add missed x437. 
+	(md_show_usage): Sort device list.
+
+2003-03-03  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config/tc-sh.c (sh_dsp): Replace with preset_target_arch.
 	(md_begin): Use preset_target_arch.
