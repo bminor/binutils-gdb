@@ -294,7 +294,7 @@ versions of GDB can do something halfway reasonable.
 Clean up formatting of "info registers" on MIPS and 88k.  See if it
 is possible to do this generically across all target architectures.
 
-GDB gets bfd/core.c and gdb/core.c confused (this should be easy to
+GDB gets bfd/corefile.c and gdb/corefile.c confused (this should be easy to
 repeat even with something more recent than GDB 4.9).
 
 Check that unmatched RBRAC doesn't abort().

@@ -41,8 +41,6 @@
 #include "monitor.h"
 #include "remote-utils.h"
 
-extern int baud_rate;
-
 static const char hexchars[]="0123456789abcdef";
 static char *hex2mem();
 
@@ -559,7 +557,6 @@ array_create_inferior (execfile, args, env)
  * array_open -- open a connection to a remote debugger.
  *	NAME is the filename used for communication.
  */
-static int baudrate = 9600;
 static char dev_name[100];
 
 static void
@@ -845,7 +842,7 @@ static void
 array_files_info ()
 {
   printf ("\tAttached to %s at %d baud.\n",
-	  dev_name, baudrate);
+	  dev_name, baud_rate);
 }
 
 /*

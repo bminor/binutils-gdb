@@ -129,7 +129,7 @@ store_inferior_registers (regno)
 }
 
 /* Work with core dump and executable files, for GDB. 
-   This code would be in core.c if it weren't machine-dependent. */
+   This code would be in corefile.c if it weren't machine-dependent. */
 
 /* Structure to describe the chain of shared libraries used
    by the execfile.

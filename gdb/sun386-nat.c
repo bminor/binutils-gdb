@@ -41,7 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/core.h>
 
 
-/* Machine-dependent code which would otherwise be in core.c */
+/* Machine-dependent code which would otherwise be in corefile.c */
 /* Work with core files, for GDB. */
 
 

@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* core.c is supposed to be the more machine-independent aspects of this;
+/* corefile.c is supposed to be the more machine-independent aspects of this;
    this file is more machine-specific.  */
 
 #include "defs.h"

@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_stat.h"
 
 /* Work with core dump and executable files, for GDB. 
-   This code would be in core.c if it weren't machine-dependent. */
+   This code would be in corefile.c if it weren't machine-dependent. */
 
 void
 core_file_command (filename, from_tty)

@@ -140,7 +140,7 @@ copying.awk
 copying.c
 core-sol2.c
 core-svr4.c
-core.c
+corefile.c
 coredep.c
 corelow.c
 cp-valprint.c

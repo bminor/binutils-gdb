@@ -1,3 +1,18 @@
+Fri Nov  3 12:30:43 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (COMMON_OBS): Use corefile.o rather than core.o
+	* core.c:  Rename to corefile.c.
+	* config/pyr/tm-pyr.h, umax-xdep.c, sun386-nat.c, pyr-xdep.c,
+	* Makefile.in (SFILES), gould-xdep.c, coredep.c, armtdep.c,
+ 	arm-xdep.c, altos-xdep.c: Change core.c references to corefile.c.
+
+ 	From Graham Stoney <greyham@research.canon.oz.au>.
+	* Makefile.in (remote-array.o):  Add rule to build.
+	(ALLDEPFILES): Add remote-array.c
+	* remote-array.c (baud_rate):  Remove unnecessary declaration.
+	(baudrate):  Remove.
+	(array_files_info):  Print global baud_rate not baudrate.
+
 Sat Nov  4 10:21:58 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in (INTERNAL_CFLAGS):  Add ENABLE_CFLAGS.

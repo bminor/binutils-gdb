@@ -171,7 +171,7 @@ extern unsigned int last_frame_offset;
 
 #ifdef PYRAMID_CORE
 
-/* Can't make definitions here static, since core.c needs them
+/* Can't make definitions here static, since corefile.c needs them
    to do bounds checking on the core-file areas. O well. */
 
 /* have two stacks: one for data, one for register windows. */
@@ -192,7 +192,7 @@ extern int reg_stack_offset;
 
 
 /* Work with core dump and executable files, for GDB. 
-   This code would be in core.c if it weren't machine-dependent. */
+   This code would be in corefile.c if it weren't machine-dependent. */
 
 void
 core_file_command (filename, from_tty)
