@@ -1,3 +1,8 @@
+2002-02-10  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* binutils-all/objdump.exp: Add 'xscale' to the list of expected
+	CPUs.
+
 2002-01-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* binutils-all/objcopy.exp: Expect xscale-coff to fail simple
