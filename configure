@@ -767,6 +767,7 @@ EOF
                       fi
                       if [ -f ${package_makefile_frag} ] ; then
                               sed -e "/^####/  r ${package_makefile_frag}" ${subdir}/Makefile.tem > ${Makefile}
+			      rm -f ${subdir}/Makefile.tem
                       else
                               echo '***' Expected package makefile fragment \"${package_makefile_frag}\" 1>&2
                               echo '***' is missing in ${PWD=`pwd`}. 1>&2

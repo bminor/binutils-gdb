@@ -1,3 +1,8 @@
+Tue Jun  7 12:06:24 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* configure: If there is a package_makefile_frag, remove
+	${subdir}/Makefile.tem after copying it in.
+
 Mon Jun  6 16:06:34 1994  Karen Christiansen (karen@cirdan.cygnus.com)
 
 	* brought devo/test-build.mk update-to-date with progressive/
