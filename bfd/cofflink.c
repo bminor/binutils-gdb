@@ -1028,10 +1028,27 @@ _bfd_coff_final_link (bfd *abfd,
 	      bfd_coff_swap_reloc_out (abfd, irel, erel);
 	    }
 
-	  if (bfd_seek (abfd, o->rel_filepos, SEEK_SET) != 0
-	      || (bfd_bwrite (external_relocs,
-			     (bfd_size_type) relsz * o->reloc_count, abfd)
-		  != (bfd_size_type) relsz * o->reloc_count))
+	  if (bfd_seek (abfd, o->rel_filepos, SEEK_SET) != 0)
+	    goto error_return;
+	  if (obj_pe (abfd) && o->reloc_count >= 0xffff)
+	    {
+	      /* In PE COFF, write the count of relocs as the first
+		 reloc.  The header overflow bit will be set
+		 elsewhere. */
+	      struct internal_reloc incount;
+	      bfd_byte *excount = (bfd_byte *)bfd_malloc (relsz);
+	      
+	      memset (&incount, 0, sizeof (incount));
+	      incount.r_vaddr = o->reloc_count + 1;
+	      bfd_coff_swap_reloc_out (abfd, (PTR) &incount, (PTR) excount);
+	      if (bfd_bwrite (excount, relsz, abfd) != relsz)
+		/* We'll leak, but it's an error anyway. */
+		goto error_return;
+	      free (excount);
+	    }
+	  if (bfd_bwrite (external_relocs,
+			  (bfd_size_type) relsz * o->reloc_count, abfd)
+	      != (bfd_size_type) relsz * o->reloc_count)
 	    goto error_return;
 	}
 

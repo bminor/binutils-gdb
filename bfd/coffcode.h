@@ -1694,15 +1694,21 @@ coff_set_alignment_hook (abfd, section, scnhdr)
       struct external_reloc dst;
       struct internal_reloc n;
       file_ptr oldpos = bfd_tell (abfd);
+      bfd_size_type relsz = bfd_coff_relsz (abfd);
+      
       bfd_seek (abfd, (file_ptr) hdr->s_relptr, 0);
-      if (bfd_bread ((PTR) &dst, (bfd_size_type) bfd_coff_relsz (abfd), abfd)
-	  != bfd_coff_relsz (abfd))
+      if (bfd_bread ((PTR) &dst, relsz, abfd) != relsz)
 	return;
 
       coff_swap_reloc_in (abfd, &dst, &n);
       bfd_seek (abfd, oldpos, 0);
-      section->reloc_count = hdr->s_nreloc = n.r_vaddr;
+      section->reloc_count = hdr->s_nreloc = n.r_vaddr - 1;
+      section->rel_filepos += relsz;
     }
+  else if (hdr->s_nreloc == 0xffff)
+    (*_bfd_error_handler)
+      ("%s: warning: claims to have 0xffff relocs, without overflow",
+       bfd_get_filename (abfd));
 }
 #undef ALIGN_SET
 #undef ELIFALIGN_SET

@@ -990,7 +990,11 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
 	  ret = 0;
 	}
 
-      if (scnhdr_int->s_nreloc <= 0xffff)
+      /* Although we could encode 0xffff relocs here, we do not, to be
+         consistent with other parts of bfd. Also it lets us warn, as
+         we should never see 0xffff here w/o having the overflow flag
+         set.  */
+      if (scnhdr_int->s_nreloc < 0xffff)
 	H_PUT_16 (abfd, scnhdr_int->s_nreloc, scnhdr_ext->s_nreloc);
       else
 	{

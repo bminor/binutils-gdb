@@ -1,3 +1,14 @@
+2003-10-07  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* coffcode.h (coff_set_alignment_hook): With PE_COFF reloc
+	overflow, set reloc start position to after the count
+	reloc. Subtract one from num relocs. Give error on 0xffff relocs
+	and no overflow.
+	* cofflink.c (_bfd_coff_final_link): Deal with PE_COFF reloc
+	overflow.
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Do overflow if >=
+	0xffff.
+
 2003-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Pad the
