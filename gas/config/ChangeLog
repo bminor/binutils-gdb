@@ -1,3 +1,8 @@
+Mon Jul  6 17:09:32 1992  Steve Chamberlain  (sac@cygnus.com)
+
+	* obj-coffbfd.c (fill_section): mark .lit sections as STYP_LIT
+
+
 Tue Jun  9 07:50:46 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* tc-m68k.c (m68kip): Fix typo so that only arch's >=68020 do
