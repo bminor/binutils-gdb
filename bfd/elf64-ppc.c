@@ -2400,6 +2400,15 @@ ppc64_elf_mkobject (bfd *abfd)
   return TRUE;
 }
 
+static bfd_boolean
+is_ppc64_target (const struct bfd_target *targ)
+{
+  extern const bfd_target bfd_elf64_powerpc_vec;
+  extern const bfd_target bfd_elf64_powerpcle_vec;
+
+  return targ == &bfd_elf64_powerpc_vec || targ == &bfd_elf64_powerpcle_vec;
+}
+
 /* Fix bad default arch selected for a 64 bit input bfd when the
    default is 32 bit.  */
 
@@ -4027,12 +4036,9 @@ ppc64_elf_check_directives (bfd *abfd ATTRIBUTE_UNUSED,
 			    struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
-  extern const bfd_target bfd_elf64_powerpc_vec;
-  extern const bfd_target bfd_elf64_powerpcle_vec;
 
   htab = ppc_hash_table (info);
-  if (htab->elf.root.creator != &bfd_elf64_powerpc_vec
-      && htab->elf.root.creator != &bfd_elf64_powerpcle_vec)
+  if (!is_ppc64_target (htab->elf.root.creator))
     return TRUE;
 
   elf_link_hash_traverse (&htab->elf, add_symbol_adjust, info);
@@ -6892,7 +6898,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       Elf_Internal_Shdr *symtab_hdr;
       asection *srel;
 
-      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+      if (!is_ppc64_target (ibfd->xvec))
 	continue;
 
       if (ppc64_tlsld_got (ibfd)->refcount > 0)
@@ -7062,6 +7068,9 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
+      if (!is_ppc64_target (ibfd->xvec))
+	continue;
+
       s = ppc64_elf_tdata (ibfd)->got;
       if (s != NULL && s != htab->got)
 	{
@@ -10101,10 +10110,15 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
     }
 
   /* We need to handle writing out multiple GOT sections ourselves,
-     since we didn't add them to DYNOBJ.  */
+     since we didn't add them to DYNOBJ.  We know dynobj is the first
+     bfd.  */
   while ((dynobj = dynobj->link_next) != NULL)
     {
       asection *s;
+
+      if (!is_ppc64_target (dynobj->xvec))
+	continue;
+
       s = ppc64_elf_tdata (dynobj)->got;
       if (s != NULL
 	  && s->size != 0

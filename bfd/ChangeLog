@@ -1,3 +1,11 @@
+2004-09-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (is_ppc64_target): New function, extracted from..
+	(ppc64_elf_check_directives): ..here.
+	(ppc64_elf_size_dynamic_sections): Use it here to check bfd type
+	before accessing ppc64_elf_tdata.
+	(ppc64_elf_finish_dynamic_sections): And here too.
+
 2004-09-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd.c (_bfd_default_error_handler): Correct loop exit.
