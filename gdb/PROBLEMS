@@ -121,3 +121,20 @@ gdb/1505: [regression] gdb prints a bad backtrace for a thread
 When backtracing a thread, gdb does not stop when it reaches the
 outermost frame, instead continuing until it hits garbage.  This is
 sensitive to the operating system and thread library.
+
+*** Threads
+
+threads/1650: manythreads.exp
+
+A program which creates many threads which exit very quickly (hundreds
+of thousands of threads in the test program) can cause gdb to generate
+an internal error.  The internal error often looks like:
+
+  lin-lwp.c:744: internal-error: stop_callback: Assertion `lp->status == 0' failed.
+  A problem internal to GDB has been detected.
+  further debugging may prove unreliable.
+  Quit this debugging session? (y or n)
+
+This has been observed on native i686-pc-linux-gnu with linuxthreads,
+the old threading model.  With NPTL threads, this internal error has not
+been observed.

@@ -1,3 +1,8 @@
+2004-07-26  Michael Chastain  <mec.gnu@mindspring.com>
+
+	Document PR threads/1650.
+	* PROBLEMS (Threads): Document problem with many threads
+
 2004-07-26  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb-mi.el: Move from here ...
