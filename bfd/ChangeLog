@@ -1,3 +1,8 @@
+2000-10-14  Geoffrey Keating  <geoffk@shoggoth.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_finish_dynamic_symbol): Don't make PLT
+	entries that could serve as a definition for a weak symbol.
+
 2000-10-13  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	From  Ralf Baechle  <ralf@gnu.org>

@@ -1715,7 +1715,8 @@ ppc_elf_adjust_dynamic_symbol (info, h)
 
 	     2. We know for certain that a symbol is defined in
 	     this object, because this object is the application,
-	     is linked with -Bsymbolic, or because the symbol is local.
+	     is linked with -Bsymbolic, the symbol is local,
+	     or because the symbol is protected or hidden.
 
 	     3. GC has rendered the entry unused.
 	     Note, however, that in an executable all references to the
@@ -2675,6 +2676,13 @@ ppc_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  /* Mark the symbol as undefined, rather than as defined in
 	     the .plt section.  Leave the value alone.  */
 	  sym->st_shndx = SHN_UNDEF;
+	  /* If the symbol is weak, we do need to clear the value.
+	     Otherwise, the PLT entry would provide a definition for
+	     the symbol even if the symbol wasn't defined anywhere,
+	     and so the symbol would never be NULL.  */
+	  if ((h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR_NONWEAK) 
+	      == 0)
+	    sym->st_value = 0;
 	}
     }
 
