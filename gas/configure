@@ -702,7 +702,7 @@ case ${target_cpu} in
 #define SPARC_V9 1
 EOF
  ;;
-  sparclite*)   cpu_type=sparc ;;
+  sparc*)	cpu_type=sparc ;;
   *)		cpu_type=${target_cpu} ;;
 esac
 
@@ -778,7 +778,7 @@ for this_target in $target $canon_targets ; do
       powerpc*)		cpu_type=ppc endian=big ;;
       rs6000*)		cpu_type=ppc ;;
       sparc64)		cpu_type=sparc want_sparc_v9=true ;;
-      sparclite*)	cpu_type=sparc ;;
+      sparc*)		cpu_type=sparc ;;
       *)		cpu_type=${cpu} ;;
     esac
 
