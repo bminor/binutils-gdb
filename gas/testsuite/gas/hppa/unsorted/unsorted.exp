@@ -151,6 +151,11 @@ if [istarget hppa*-*-*] then {
     do_frchain_test
 
     # Test bug where switching between subspaces creates bogus alignments
-;    do_align3_test
+    do_align3_test
+
+    # Test a problem where $global$ is defined, then used within the
+    # same source file.
+    setup_xfail hppa*-*-*
+    gas_test "globalbug.s" "" "" "Use \$global\$ in file which defines it"
 }
 
