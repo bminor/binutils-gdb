@@ -1,3 +1,9 @@
+Wed Feb  4 19:17:37 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Set libtool_enable_shared rather than
+	libtool_shared.  Remove diversion hack.
+	* configure, Makefile.in, aclocal.m4: Rebuild with new libtool.
+
 Tue Feb  3 17:19:40 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-opc.c (cgen_set_cpu): Initialize hardware table.
