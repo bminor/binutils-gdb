@@ -888,16 +888,19 @@ wait_for_inferior ()
 	 do not stop.  */
 
       /* If this is the breakpoint at the end of a stack dummy,
-	 just stop silently.  */
-      if (PC_IN_CALL_DUMMY (stop_pc, stop_sp, stop_frame_address))
-	  {
-	    stop_print_frame = 0;
-	    stop_stack_dummy = 1;
+	 just stop silently, unless the user was doing an si/ni, in which
+	 case she'd better know what she's doing.  */
+
+      if (PC_IN_CALL_DUMMY (stop_pc, stop_sp, stop_frame_address)
+	  && !step_range_end)
+	{
+	  stop_print_frame = 0;
+	  stop_stack_dummy = 1;
 #ifdef HP_OS_BUG
-	    trap_expected_after_continue = 1;
+	  trap_expected_after_continue = 1;
 #endif
-	    break;
-	  }
+	  break;
+	}
       
       if (step_resume_breakpoint)
 	/* Having a step-resume breakpoint overrides anything

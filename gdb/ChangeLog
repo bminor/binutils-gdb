@@ -1,3 +1,8 @@
+Thu Sep 16 13:16:22 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* infrun.c (wait_for_inferior):  Allow user to single step within
+	a stack dummy.
+
 Thu Sep 16 12:34:01 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
 	* dbxread.c (copy_pending): Deal with END NULL.
