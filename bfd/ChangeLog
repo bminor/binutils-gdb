@@ -1,3 +1,13 @@
+Tue May  7 11:15:19 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* coff-h8300.c (howto_table): Update names to match recent
+	changes to include/coff/internal.h.  Fix minor errors in the
+	existing relocs.  Add R_MOVL1 and R_MOVL2.
+	(rtype2howto): Similarly.
+	(h8300_reloc16_estimate): Rewrite to simplify, fix bugs in the
+	existing relaxing code  and peform more relaxing.
+	(h8300_reloc16_extra_cases): Likewise.
+
 Mon May  6 18:24:09 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* reloc16.c (bfd_coff_reloc16_get_value): Handle common
