@@ -1,5 +1,5 @@
 /* Assemble Matsushita MN10300 instructions.
-   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ const struct mn10300_operand mn10300_operands[] = {
 #define IMM16_PCREL    (IMM16+1)
   {16, 0, MN10300_OPERAND_PCREL | MN10300_OPERAND_RELAX | MN10300_OPERAND_SIGNED},
 
-/* 16bit unsigned dispacement in a memory operation which
+/* 16bit unsigned displacement in a memory operation which
    may promote to a 32bit displacement.  */
 #define IMM16_MEM    (IMM16_PCREL+1)
   {16, 0, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_MEMADDR},
@@ -151,11 +151,11 @@ const struct mn10300_operand mn10300_operands[] = {
 #define DI (MDR+1)
   {2, 2, MN10300_OPERAND_DREG},
 
-/* 8 bit signed displacement, may promote to 16bit signed dispacement.  */
+/* 8 bit signed displacement, may promote to 16bit signed displacement.  */
 #define SD8    (DI+1)
   {8, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
 
-/* 16 bit signed displacement, may promote to 32bit dispacement.  */
+/* 16 bit signed displacement, may promote to 32bit displacement.  */
 #define SD16    (SD8+1)
   {16, 0, MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
 
@@ -279,7 +279,7 @@ const struct mn10300_operand mn10300_operands[] = {
 #define RD2      (RD0+1)
   {4, -4, MN10300_OPERAND_RREG},
 
-/* 8 unsigned dispacement in a memory operation which
+/* 8 unsigned displacement in a memory operation which
    may promote to a 32bit displacement.  */
 #define IMM8_MEM    (RD2+1)
   {8, 0, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_MEMADDR},
@@ -288,7 +288,7 @@ const struct mn10300_operand mn10300_operands[] = {
 #define RI (IMM8_MEM+1)
   {4, 4, MN10300_OPERAND_RREG},
 
-/* 24 bit signed displacement, may promote to 32bit dispacement.  */
+/* 24 bit signed displacement, may promote to 32bit displacement.  */
 #define SD24    (RI+1)
   {8, 0, MN10300_OPERAND_24BIT | MN10300_OPERAND_SIGNED | MN10300_OPERAND_PROMOTE},
 
@@ -302,12 +302,12 @@ const struct mn10300_operand mn10300_operands[] = {
 #define SIMM24    (IMM24+1)
   {8, 0, MN10300_OPERAND_24BIT | MN10300_OPERAND_PROMOTE | MN10300_OPERAND_SIGNED},
 
-/* 16bit unsigned dispacement in a memory operation which
+/* 24bit unsigned displacement in a memory operation which
    may promote to a 32bit displacement.  */
 #define IMM24_MEM    (SIMM24+1)
   {8, 0, MN10300_OPERAND_24BIT | MN10300_OPERAND_PROMOTE | MN10300_OPERAND_MEMADDR},
-/* 32bit immediate, high 24 bits in the main instruction
-   word, 8 in the extension word.
+/* 32bit immediate, high 8 bits in the main instruction
+   word, 24 in the extension word.
 
    The "bits" field indicates how many bits are in the
    main instruction word for MN10300_OPERAND_SPLIT!  */
@@ -747,6 +747,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "inc",	0x40,	     0xf3,	  0,    FMT_S0, 0,	{DN1}},
 { "inc",	0x41,	     0xf3,	  0,    FMT_S0, 0,	{AN1}},
 { "inc",	0xf9b800,    0xffff00,    0,    FMT_D6, AM33,	{RN02}},
+  /* FIXME: inc and inc4 may accept two registers */
 
 { "inc4",	0x50,	     0xfc,	  0,    FMT_S0, 0,	{AN0}},
 { "inc4",	0xf9c800,    0xffff00,    0,    FMT_D6, AM33,	{RN02}},
