@@ -1,3 +1,8 @@
+Thu Feb 15 19:50:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (host *-*-cygwin32): Don't build gdb if we are
+	building NT native compilers on Unix.
+
 Thu Feb 15 17:42:25 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Don't get CC from the host Makefile fragment if we

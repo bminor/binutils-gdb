@@ -408,8 +408,8 @@ case "${target}" in
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
     # Can't build gdb for cygwin32 if not native.
-    case "${host}" in
-      *-*-cygwin32) ;; # keep gdb
+    case "${host}:${build}" in
+      *-*-cygwin32 | *-*-cygwin32:*-*-cygwin32) ;; # keep gdb
       *) noconfigdirs="$noconfigdirs gdb"
     esac
 
