@@ -1,3 +1,10 @@
+2001-04-30  Elena Zannoni  <ezannoni@redhat.com>
+
+	* sh-tdep.c: Get rid of the function prototypes.
+	(sh_sh4_build_float_register_type): Move earlier in file.
+	(fv_reg_base_num): Ditto.
+	(dr_reg_base_num): Ditto.
+
 2001-04-30  Michael Snyder  <msnyder@redhat.com>
 
 	* thread-db.c: Revert 2001-04-26 change for debugging output.

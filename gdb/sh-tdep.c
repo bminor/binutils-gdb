@@ -45,73 +45,6 @@
 #undef XMALLOC
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
-
-/* Frame interpretation related functions. */
-static gdbarch_breakpoint_from_pc_ftype sh_breakpoint_from_pc;
-static gdbarch_frame_chain_ftype sh_frame_chain;
-static gdbarch_frame_saved_pc_ftype sh_frame_saved_pc;
-static gdbarch_skip_prologue_ftype sh_skip_prologue;
-
-static gdbarch_frame_init_saved_regs_ftype sh_nofp_frame_init_saved_regs;
-static gdbarch_frame_init_saved_regs_ftype sh_fp_frame_init_saved_regs;
-static gdbarch_init_extra_frame_info_ftype sh_init_extra_frame_info;
-static gdbarch_pop_frame_ftype sh_pop_frame;
-static gdbarch_saved_pc_after_call_ftype sh_saved_pc_after_call;
-
-/* Function call related functions. */
-static gdbarch_extract_return_value_ftype sh_extract_return_value;
-static gdbarch_extract_return_value_ftype sh3e_sh4_extract_return_value;
-static gdbarch_extract_struct_value_address_ftype sh_extract_struct_value_address;
-static gdbarch_use_struct_convention_ftype sh_use_struct_convention;
-static gdbarch_store_struct_return_ftype sh_store_struct_return;
-static gdbarch_push_arguments_ftype sh_push_arguments;
-static gdbarch_push_return_address_ftype sh_push_return_address;
-static gdbarch_coerce_float_to_double_ftype sh_coerce_float_to_double;
-static gdbarch_store_return_value_ftype	sh_default_store_return_value;
-static gdbarch_store_return_value_ftype	sh3e_sh4_store_return_value;
-
-static gdbarch_register_name_ftype sh_generic_register_name;
-static gdbarch_register_name_ftype sh_sh_register_name;
-static gdbarch_register_name_ftype sh_sh3_register_name;
-static gdbarch_register_name_ftype sh_sh3e_register_name;
-static gdbarch_register_name_ftype sh_sh_dsp_register_name;
-static gdbarch_register_name_ftype sh_sh3_dsp_register_name;
-
-/* Registers display related functions */
-static gdbarch_register_raw_size_ftype sh_default_register_raw_size;
-static gdbarch_register_raw_size_ftype sh_sh4_register_raw_size;
-
-static gdbarch_register_virtual_size_ftype sh_register_virtual_size;
-
-static gdbarch_register_byte_ftype sh_default_register_byte;
-static gdbarch_register_byte_ftype sh_sh4_register_byte;
-
-static gdbarch_register_virtual_type_ftype sh_sh3e_register_virtual_type;
-static gdbarch_register_virtual_type_ftype sh_sh4_register_virtual_type;
-static gdbarch_register_virtual_type_ftype sh_default_register_virtual_type;
-
-static void sh_generic_show_regs (void);
-static void sh3_show_regs (void);
-static void sh3e_show_regs (void);
-static void sh3_dsp_show_regs (void);
-static void sh_dsp_show_regs (void);
-static void sh4_show_regs (void);
-static void sh_show_regs_command (char *, int);
-
-static struct type *sh_sh4_build_float_register_type (int high);
-
-static gdbarch_fetch_pseudo_register_ftype sh_fetch_pseudo_register;
-static gdbarch_store_pseudo_register_ftype sh_store_pseudo_register;
-static int fv_reg_base_num (int);
-static int dr_reg_base_num (int);
-static gdbarch_do_registers_info_ftype sh_do_registers_info;
-static void do_fv_register_info (int fv_regnum);
-static void do_dr_register_info (int dr_regnum);
-static void sh_do_pseudo_register (int regnum);
-static void sh_do_fp_register (int regnum);
-static void sh_do_register (int regnum);
-static void sh_print_register (int regnum);
-
 void (*sh_show_regs) (void);
 int (*print_sh_insn) (bfd_vma, disassemble_info*);
 
@@ -1461,6 +1394,26 @@ void sh_show_regs_command (char *args, int from_tty)
     (*sh_show_regs)();
 }
 
+static int
+fv_reg_base_num (int fv_regnum)
+{
+  int fp_regnum;
+
+  fp_regnum = FP0_REGNUM + 
+    (fv_regnum - gdbarch_tdep (current_gdbarch)->FV0_REGNUM) * 4;
+  return fp_regnum;
+}
+
+static int
+dr_reg_base_num (int dr_regnum)
+{
+  int fp_regnum;
+
+  fp_regnum = FP0_REGNUM + 
+    (dr_regnum - gdbarch_tdep (current_gdbarch)->DR0_REGNUM) * 2;
+  return fp_regnum;
+}
+
 /* Index within `registers' of the first byte of the space for
    register N.  */
 static int
@@ -1526,6 +1479,15 @@ sh_sh3e_register_virtual_type (int reg_nr)
 }
 
 static struct type *
+sh_sh4_build_float_register_type (int high)
+{
+  struct type *temp;
+
+  temp = create_range_type (NULL, builtin_type_int, 0, high);
+  return create_array_type (NULL, builtin_type_float, temp);
+}
+
+static struct type *
 sh_sh4_register_virtual_type (int reg_nr)
 {
   if ((reg_nr >= FP0_REGNUM
@@ -1540,15 +1502,6 @@ sh_sh4_register_virtual_type (int reg_nr)
     return sh_sh4_build_float_register_type (3);
   else
     return builtin_type_int;
-}
-
-static struct type *
-sh_sh4_build_float_register_type (int high)
-{
-  struct type *temp;
-
-  temp = create_range_type (NULL, builtin_type_int, 0, high);
-  return create_array_type (NULL, builtin_type_float, temp);
 }
 
 static struct type *
@@ -1683,26 +1636,6 @@ sh_store_pseudo_register (int reg_nr)
 	  target_store_registers (base_regnum + portion);
 	}
     }
-}
-
-static int
-fv_reg_base_num (int fv_regnum)
-{
-  int fp_regnum;
-
-  fp_regnum = FP0_REGNUM + 
-    (fv_regnum - gdbarch_tdep (current_gdbarch)->FV0_REGNUM) * 4;
-  return fp_regnum;
-}
-
-static int
-dr_reg_base_num (int dr_regnum)
-{
-  int fp_regnum;
-
-  fp_regnum = FP0_REGNUM + 
-    (dr_regnum - gdbarch_tdep (current_gdbarch)->DR0_REGNUM) * 2;
-  return fp_regnum;
 }
 
 static void
