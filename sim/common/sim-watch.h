@@ -38,6 +38,7 @@ typedef enum {
 
 typedef struct _sim_watch_point {
   watchpoint_action action;
+  int is_within;
   long arg;
   sim_event *event;
 } sim_watch_point;

@@ -93,6 +93,7 @@ struct _sim_event {
   /* watch sim addr */
   void *host_addr;
   /* watch core/sim range */
+  int is_within; /* 0/1 */
   unsigned ub;
   unsigned lb;
   unsigned64 ub64;
@@ -474,6 +475,7 @@ sim_events_watch_sim (SIM_DESC sd,
 		      void *host_addr,
 		      int nr_bytes,
 		      int byte_order,
+		      int is_within,
 		      unsigned64 lb,
 		      unsigned64 ub,
 		      sim_event_handler *handler,
@@ -526,6 +528,7 @@ sim_events_watch_sim (SIM_DESC sd,
   new_event->lb64 = lb;
   new_event->ub = ub;
   new_event->ub64 = ub;
+  new_event->is_within = (is_within != 0);
   /* insert */
   new_event->next = events->watchpoints;
   events->watchpoints = new_event;
@@ -550,6 +553,7 @@ sim_events_watch_core (SIM_DESC sd,
 		       sim_core_maps core_map,
 		       int nr_bytes,
 		       int byte_order,
+		       int is_within,
 		       unsigned64 lb,
 		       unsigned64 ub,
 		       sim_event_handler *handler,
@@ -603,6 +607,7 @@ sim_events_watch_core (SIM_DESC sd,
   new_event->lb64 = lb;
   new_event->ub = ub;
   new_event->ub64 = ub;
+  new_event->is_within = (is_within != 0);
   /* insert */
   new_event->next = events->watchpoints;
   events->watchpoints = new_event;
@@ -672,10 +677,13 @@ sim_watch_valid (SIM_DESC sd,
 
 #define WATCH_CORE(N,OP,EXT) \
       { \
-	unsigned_##N word; \
-	sim_core_read_buffer (sd, to_do->core_map, &word, to_do->core_addr, sizeof (word)); \
+	unsigned_##N word = 0; \
+	int nr_read = sim_core_read_buffer (sd, NULL, to_do->core_map, &word, to_do->core_addr, sizeof (word)); \
 	OP (word); \
-	return (word >= to_do->lb##EXT && word <= to_do->ub##EXT); \
+	return (nr_read == sizeof (unsigned_##N) \
+		&& (to_do->is_within \
+		    == (word >= to_do->lb##EXT \
+			&& word <= to_do->ub##EXT))); \
       }
     case watch_core_targ_1: WATCH_CORE (1, T2H,);
     case watch_core_targ_2: WATCH_CORE (2, T2H,);
@@ -697,7 +705,9 @@ sim_watch_valid (SIM_DESC sd,
       { \
 	unsigned_##N word = *(unsigned_##N*)to_do->host_addr; \
         OP (word); \
-	return (word >= to_do->lb##EXT && word <= to_do->ub##EXT); \
+	return (to_do->is_within \
+		== (word >= to_do->lb##EXT \
+		    && word <= to_do->ub##EXT)); \
       }
 
     case watch_sim_host_1: WATCH_SIM (1, word = ,);

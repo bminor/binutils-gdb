@@ -1,3 +1,7 @@
+Tue May 27 14:12:32 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.h: Stop options and code gen type bit masks overlaping.
+
 Fri May 23 12:01:08 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen-semantics.c (print_semantic_body): Incorrect test for

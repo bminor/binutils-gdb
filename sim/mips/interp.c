@@ -1475,40 +1475,46 @@ sim_do_command (sd,cmd)
 
   /* NOTE: Accessed from the GDB "sim" commmand: */
   for (cptr = sim_commands; cptr && cptr->name; cptr++)
-   if (strncmp(cmd,cptr->name,strlen(cptr->name)) == 0) {
-     cmd += strlen(cptr->name);
-     switch (cptr->id) {
-       case e_help: /* no arguments */
-        { /* no arguments */
-          struct t_sim_command *lptr;
-          callback->printf_filtered(callback,"List of MIPS simulator commands:\n");
-          for (lptr = sim_commands; lptr->name; lptr++)
-           callback->printf_filtered(callback,"%s %s\n",lptr->name,lptr->help);
-        }
+    if (strncmp (cmd, cptr->name, strlen(cptr->name)) == 0)
+      {
+	cmd += strlen(cptr->name);
+	switch (cptr->id) {
+	case e_help: /* no arguments */
+	  { /* no arguments */
+	    struct t_sim_command *lptr;
+	    callback->printf_filtered(callback,"List of MIPS simulator commands:\n");
+	    for (lptr = sim_commands; lptr->name; lptr++)
+	      callback->printf_filtered(callback,"%s %s\n",lptr->name,lptr->help);
+	    sim_args_command (sd, "help");
+	  }
         break;
 
-       case e_setmemsize: /* memory size argument */
-        {
-          unsigned int newsize = (unsigned int)getnum(cmd);
-          sim_size(newsize);
-        }
+	case e_setmemsize: /* memory size argument */
+	  {
+	    unsigned int newsize = (unsigned int)getnum(cmd);
+	    sim_size(newsize);
+	  }
         break;
 
-       case e_reset: /* no arguments */
-        ColdReset();
-        /* NOTE: See the comments in sim_open() relating to device
-           initialisation. */
-        break;
+	case e_reset: /* no arguments */
+	  ColdReset();
+	  /* NOTE: See the comments in sim_open() relating to device
+	     initialisation. */
+	  break;
 
-       default:
-        callback->printf_filtered(callback,"FATAL: Matched \"%s\", but failed to match command id %d.\n",cmd,cptr->id);
-        break;
-     }
-     break;
-   }
+	default:
+	  callback->printf_filtered(callback,"FATAL: Matched \"%s\", but failed to match command id %d.\n",cmd,cptr->id);
+	  break;
+	}
+	break;
+      }
 
   if (!(cptr->name))
-    callback->printf_filtered(callback,"Error: \"%s\" is not a valid MIPS simulator command.\n",cmd);
+    {
+      /* try for a common command when the sim specific lookup fails */
+      if (sim_args_command (sd, cmd) != SIM_RC_OK)
+	callback->printf_filtered(callback,"Error: \"%s\" is not a valid MIPS simulator command.\n",cmd);
+    }
 
   return;
 }
@@ -3887,7 +3893,7 @@ Convert(rm,op,from,to)
 
 /*-- co-processor support routines ------------------------------------------*/
 
-static int
+static int UNUSED
 CoProcPresent(coproc_number)
      unsigned int coproc_number;
 {

@@ -239,7 +239,7 @@ standard_option_handler (sd, opt, arg, is_command)
       break;
 
     case 'H':
-      sim_print_help (sd);
+      sim_print_help (sd, is_command);
       if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
 	exit (0);
       /* FIXME: 'twould be nice to do something similar if gdb.  */
@@ -391,8 +391,9 @@ sim_parse_args (sd, argv)
 /* Print help messages for the options.  */
 
 void
-sim_print_help (sd)
+sim_print_help (sd, is_command)
      SIM_DESC sd;
+     int is_command;
 {
   const struct option_list *ol;
   const OPTION *opt;
@@ -425,32 +426,35 @@ sim_print_help (sd)
 	comma = 0;
 	len = 2;
 
-	o = opt;
-	do
+	if (!is_command)
 	  {
-	    if (o->shortopt != '\0')
+	    o = opt;
+	    do
 	      {
-		sim_io_printf (sd, "%s-%c", comma ? ", " : "", o->shortopt);
-		len += (comma ? 2 : 0) + 2;
-		if (o->arg != NULL)
+		if (o->shortopt != '\0')
 		  {
-		    if (o->opt.has_arg == optional_argument)
+		    sim_io_printf (sd, "%s-%c", comma ? ", " : "", o->shortopt);
+		    len += (comma ? 2 : 0) + 2;
+		    if (o->arg != NULL)
 		      {
-			sim_io_printf (sd, "[%s]", o->arg);
-			len += 1 + strlen (o->arg) + 1;
+			if (o->opt.has_arg == optional_argument)
+			  {
+			    sim_io_printf (sd, "[%s]", o->arg);
+			    len += 1 + strlen (o->arg) + 1;
+			  }
+			else
+			  {
+			    sim_io_printf (sd, " %s", o->arg);
+			    len += 1 + strlen (o->arg);
+			  }
 		      }
-		    else
-		      {
-			sim_io_printf (sd, " %s", o->arg);
-			len += 1 + strlen (o->arg);
-		      }
+		    comma = 1;
 		  }
-		comma = 1;
+		++o;
 	      }
-	    ++o;
+	    while (o->opt.name != NULL && o->doc == NULL);
 	  }
-	while (o->opt.name != NULL && o->doc == NULL);
-
+	
 	o = opt;
 	do
 	  {
@@ -461,11 +465,12 @@ sim_print_help (sd)
 	      name = o->opt.name;
 	    if (name != NULL)
 	      {
-		sim_io_printf (sd, "%s--%s",
+		sim_io_printf (sd, "%s%s%s",
 			       comma ? ", " : "",
+			       is_command ? "" : "--",
 			       name);
 		len += ((comma ? 2 : 0)
-			+ 2
+			+ (is_command ? 0 : 2)
 			+ strlen (name));
 		if (o->arg != NULL)
 		  {

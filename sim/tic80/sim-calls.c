@@ -148,7 +148,7 @@ sim_kill (SIM_DESC sd)
 int
 sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 {
-  return sim_core_read_buffer (sd, sim_core_write_map,
+  return sim_core_read_buffer (sd, NULL, sim_core_write_map,
 			       buf, mem, length);
 }
 
@@ -156,7 +156,7 @@ sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 int
 sim_write (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 {
-  return sim_core_write_buffer (sd, sim_core_write_map,
+  return sim_core_write_buffer (sd, NULL, sim_core_write_map,
 				buf, mem, length);
 }
 

@@ -43,7 +43,7 @@ sim_core_read_aligned_N(sim_cpu *cpu,
 			unsigned_word xaddr)
 {
   sim_cpu_core *cpu_core = CPU_CORE (cpu);
-  sim_core *core = &cpu_core->common;
+  sim_core_common *core = &cpu_core->common;
   unsigned_N val;
   sim_core_mapping *mapping;
   address_word addr;
@@ -106,8 +106,8 @@ sim_core_read_unaligned_N(sim_cpu *cpu,
       case NONSTRICT_ALIGNMENT:
 	{
 	  unsigned_N val;
-	  if (sim_core_read_buffer (CPU_STATE (cpu), map, &val, addr,
-				    sizeof(unsigned_N))
+	  if (sim_core_xor_read_buffer (CPU_STATE (cpu), cpu, map, &val, addr,
+					sizeof(unsigned_N))
 	      != sizeof(unsigned_N))
 	    SIM_CORE_SIGNAL (CPU_STATE (cpu), cpu, cia, map,
 			     sizeof (unsigned_N), addr,
@@ -139,7 +139,7 @@ sim_core_write_aligned_N(sim_cpu *cpu,
 			 unsigned_N val)
 {
   sim_cpu_core *cpu_core = CPU_CORE (cpu);
-  sim_core *core = &cpu_core->common;
+  sim_core_common *core = &cpu_core->common;
   sim_core_mapping *mapping;
   address_word addr;
   if (WITH_XOR_ENDIAN)
@@ -201,9 +201,9 @@ sim_core_write_unaligned_N(sim_cpu *cpu,
 	break;
       case NONSTRICT_ALIGNMENT:
 	{
-	  val = T2H_N(val);
-	  if (sim_core_write_buffer (CPU_STATE (cpu), map, &val, addr,
-				     sizeof(unsigned_N))
+	  unsigned_N val = H2T_N (val);
+	  if (sim_core_xor_write_buffer (CPU_STATE (cpu), cpu, map, &val, addr,
+					 sizeof(unsigned_N))
 	      != sizeof(unsigned_N))
 	    SIM_CORE_SIGNAL (CPU_STATE (cpu), cpu, cia, map,
 			     sizeof (unsigned_N), addr,

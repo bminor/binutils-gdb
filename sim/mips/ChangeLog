@@ -1,3 +1,13 @@
+Tue May 27 14:22:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (CoProcPresent): Add UNUSED attribute - not used by all
+ 	mips architectures.
+
+Tue May 27 14:22:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_do_command): Check for common commands if a
+ 	simulator specific command fails.
+
 Thu May 22 09:32:03 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* interp.c (sim_engine_run): ifdef out uses of simSTOP, simSTEP

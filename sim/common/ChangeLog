@@ -1,3 +1,49 @@
+Tue May 27 14:32:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-watch.c (schedule_watchpoint): Add is_within option so that
+ 	inequality test is possible.
+	(handle_watchpoint): Re-pass is_within arg.
+	(watch_option_handler): When `!' prefix to pc-watchpoint arg pass
+ 	0 to schedule_watchpoint's is_within arg.
+	(sim_watchpoint_init): Re-pass is_within arg.
+
+	* sim-options.c (sim_print_help): Add is_command argument.  Don't
+ 	include -- prefix when called from the command line interpreter.
+
+	* sim-watch.c (schedule_watchpoint): Pass true is_within argument.
+
+	* sim-events.c (sim_events_watch_sim): Add is_within argument,
+ 	zero indicates that the test should be reversed.
+	(sim_events_watch_core): Ditto.
+	(WATCH_CORE): Compare range against is_within.
+	(WATCH_SIM): Ditto.
+
+Tue May 27 12:48:03 1997  Andrew Cagney  <cagney@b2.cygnus.com>
+
+	* sim-events.c (WATCH_CORE): Pass NULL cpu argument to
+ 	sim_core_read_buffer.  Check nr-bytes transfered.
+
+	* sim-core.h (sim_core_common): Define a new struct that contains
+ 	the common data.  to sd and cpu structures.
+	* sim-core.c (sim_core_attach): Update.
+	(sim_core_init): Update. Remember to copy initialized data to each
+ 	cpu.
+	(sim_core_find_mapping): Ditto.
+
+	* sim-core.c (sim_core_read_buffer): Add cpu argument.
+	(sim_core_write_buffer): Ditto.
+
+	* sim-n-core.h (sim_core_read_unaligned_N): When mis-aligned
+ 	transfer use xor version of read buffer.
+	(sim_core_write_unaligned_N): Ditto for write.
+	
+	* sim-core.c (sim_core_xor_read_buffer): New function implement
+ 	xor-endian data read breaking transfer up into xor-endian sized
+ 	blocks.
+	(sim_core_xor_write_buffer): Ditto for write.
+	(reverse_n): Reverse order of arbitrary number of bytes in buffer
+ 	- needed for xor-endian transfers.
+
 Fri May 23 14:24:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-inline.h: Review description.
