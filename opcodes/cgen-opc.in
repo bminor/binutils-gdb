@@ -30,6 +30,9 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "@prefix@-opc.h"
 #include "opintl.h"
 
+/* Used by the ifield rtx function.  */
+#define FLD(f) (fields->f)
+
 /* The hash functions are recorded here to help keep assembler code out of
    the disassembler and vice versa.  */
 
@@ -98,7 +101,8 @@ const CGEN_INSN *
 	      /* Basic bit mask must be correct.  */
 	      /* ??? May wish to allow target to defer this check until the
 		 extract handler.  */
-	      if ((base_insn & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
+	      if ((base_insn & CGEN_INSN_BASE_MASK (insn))
+		  == CGEN_INSN_BASE_VALUE (insn))
 		{
 		  /* ??? 0 is passed for `pc' */
 		  int elength = (*CGEN_EXTRACT_FN (insn)) (od, insn, info,
