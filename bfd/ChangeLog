@@ -1,3 +1,8 @@
+Thu Sep 17 17:20:36 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* dwarf2.c: Add comment describing problem computing line numbers
+	for undefined symbols at link time.
+
 Thu Sep 17 16:03:28 1998  Richard Henderson  <rth@cygnus.com>
 
         * elf64-alpha.c (elf64_alpha_adjust_dynamic_symbol): Don't
