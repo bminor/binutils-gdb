@@ -1,5 +1,7 @@
 Tue Oct 19 10:43:16 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* breakpoint.h (struct bpstat_what): Don't use bitfields.
+
 	* typeprint.c: Add "class CLASS-NAME" to docstring for ptype.
 
 Tue Oct 19 06:17:10 1993  Fred Fish  (fnf@cirdan.cygnus.com)
