@@ -395,7 +395,7 @@ static reloc_howto_type xcoff_howto_table[] =
 	 0,	                /* bitpos */                               
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */                     
-	 "R_REL",               /* name */                                 
+	 "R_CREL",              /* name */                                 
 	 true,	                /* partial_inplace */                      
 	 0xffff,	        /* src_mask */                             
 	 0xffff,        	/* dst_mask */                             
@@ -440,7 +440,7 @@ static reloc_howto_type xcoff_howto_table[] =
 	 0,	                /* bitpos */                               
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,		        /* special_function */                     
-	 "R_REL",               /* name */                                 
+	 "R_RBR",               /* name */                                 
 	 true,	                /* partial_inplace */                      
 	 0xffff,	        /* src_mask */                             
 	 0xffff,        	/* dst_mask */                             
@@ -455,7 +455,7 @@ static reloc_howto_type xcoff_howto_table[] =
 	 0,	                /* bitpos */                               
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,		        /* special_function */                     
-	 "R_REL",               /* name */                                 
+	 "R_RBRC",              /* name */                                 
 	 true,	                /* partial_inplace */                      
 	 0xffff,	        /* src_mask */                             
 	 0xffff,        	/* dst_mask */                             

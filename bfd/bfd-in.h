@@ -511,6 +511,7 @@ struct ecoff_debug_swap;
 struct ecoff_extr;
 struct symbol_cache_entry;
 struct bfd_link_info;
+struct bfd_link_hash_entry;
 #endif
 extern bfd_vma bfd_ecoff_get_gp_value PARAMS ((bfd * abfd));
 extern boolean bfd_ecoff_set_gp_value PARAMS ((bfd *abfd, bfd_vma gp_value));
@@ -586,6 +587,8 @@ extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 
 /* SunOS shared library support routines for the linker.  */
 
+extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
+  PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_sunos_record_link_assignment
   PARAMS ((bfd *, struct bfd_link_info *, const char *));
 extern boolean bfd_sunos_size_dynamic_sections
@@ -596,5 +599,18 @@ extern boolean bfd_sunos_size_dynamic_sections
 
 extern boolean bfd_linux_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+
+/* XCOFF support routines for the linker.  */
+
+extern boolean bfd_xcoff_import_symbol
+  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *,
+	   bfd_vma, const char *, const char *, const char *));
+extern boolean bfd_xcoff_export_symbol
+  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *,
+	   boolean));
+extern boolean bfd_xcoff_size_dynamic_sections
+  PARAMS ((bfd *, struct bfd_link_info *, const char *, const char *,
+	   unsigned long, unsigned long, unsigned long, boolean,
+	   int, boolean));
 
 /* And more from the source.  */

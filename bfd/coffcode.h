@@ -477,6 +477,10 @@ styp_to_sec_flags (abfd, hdr, name)
       sec_flags |= SEC_DEBUGGING;
 #endif
     }
+  else if (styp_flags & STYP_PAD)
+    {
+      sec_flags = 0;
+    }
   else if (strcmp (name, _TEXT) == 0)
     {
       if (sec_flags & SEC_NEVER_LOAD)
@@ -2299,6 +2303,8 @@ coff_write_object_contents (abfd)
   if (bss_sec)
     {
       internal_a.bsize = bfd_get_section_size_before_reloc (bss_sec);
+      if (internal_a.bsize && bss_sec->vma < internal_a.data_start)
+	internal_a.data_start = bss_sec->vma;
     }
 
   internal_a.entry = bfd_get_start_address (abfd);

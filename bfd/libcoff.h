@@ -93,6 +93,7 @@ typedef struct pe_tdata
   struct internal_extra_pe_aouthdr pe_opthdr;
   int dll;
   int has_reloc_section;
+  boolean (*in_reloc_p) PARAMS((bfd *, reloc_howto_type *));
 } pe_data_type;
 
 #define pe_data(bfd)		((bfd)->tdata.pe_obj_data)
@@ -116,11 +117,19 @@ struct xcoff_tdata
   /* modtype from optional header.  */
   short modtype;
 
+  /* cputype from optional header.  */
+  short cputype;
+
   /* maxdata from optional header.  */
   bfd_size_type maxdata;
 
   /* maxstack from optional header.  */
   bfd_size_type maxstack;
+
+  /* Used by the XCOFF backend linker.  */
+  asection **csects;
+  unsigned long *debug_indices;
+  unsigned int import_file_id;
 };
 
 #define xcoff_data(abfd) ((abfd)->tdata.xcoff_obj_data)
@@ -154,6 +163,25 @@ struct coff_section_tdata
 /* An accessor macro for the coff_section_tdata structure.  */
 #define coff_section_data(abfd, sec) \
   ((struct coff_section_tdata *) (sec)->used_by_bfd)
+
+/* Tdata for sections in XCOFF files.  This is used by the linker.  */
+
+struct xcoff_section_tdata
+{
+  /* Used for XCOFF csects created by the linker; points to the real
+     XCOFF section which contains this csect.  */
+  asection *enclosing;
+  /* The first and one past the last symbol indices for symbols used
+     by this csect.  */
+  unsigned long first_symndx;
+  unsigned long last_symndx;
+  /* The number of .loader relocs in this csect.  */
+  size_t ldrel_count;
+};
+
+/* An accessor macro the xcoff_section_tdata structure.  */
+#define xcoff_section_data(abfd, sec) \
+  ((struct xcoff_section_tdata *) coff_section_data ((abfd), (sec))->tdata)
 
 /* COFF linker hash table entries.  */
 
@@ -254,6 +282,13 @@ extern void bfd_perform_slip PARAMS ((bfd *abfd, unsigned int slip,
 
 /* Functions in cofflink.c.  */
 
+extern struct bfd_hash_entry *_bfd_coff_link_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+extern boolean _bfd_coff_link_hash_table_init
+  PARAMS ((struct coff_link_hash_table *, bfd *,
+	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
+				       struct bfd_hash_table *,
+				       const char *)));
 extern struct bfd_link_hash_table *_bfd_coff_link_hash_table_create
   PARAMS ((bfd *));
 extern const char *_bfd_coff_internal_syment_name
@@ -266,6 +301,18 @@ extern struct internal_reloc *_bfd_coff_read_internal_relocs
   PARAMS ((bfd *, asection *, boolean, bfd_byte *, boolean,
 	   struct internal_reloc *));
 extern boolean _bfd_coff_generic_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   struct internal_reloc *, struct internal_syment *, asection **));
+
+/* Functions in xcofflink.c.  */
+
+extern struct bfd_link_hash_table *_bfd_xcoff_bfd_link_hash_table_create
+  PARAMS ((bfd *));
+extern boolean _bfd_xcoff_bfd_link_add_symbols
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean _bfd_xcoff_bfd_final_link
+  PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean _bfd_ppc_xcoff_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
 
