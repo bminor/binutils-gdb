@@ -2,7 +2,7 @@
 # ie. a debug agent running as a native process on the same or
 # a different host.
 
-#   Copyright 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
+# Copyright 2000, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -201,7 +201,7 @@ proc gdb_load { arg } {
 
     if { ! [info exists server_exec] } {
 	if [is_remote target] {
-	    set server_exec [remote_download target $host_exec]
+	    set server_exec [remote_download target $host_exec /tmp/[file tail $host_exec].[pid]]
 	} else {
 	    set server_exec $host_exec
 	}
