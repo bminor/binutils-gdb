@@ -1,3 +1,9 @@
+start-sanitize-sky
+Wed Dec  9 14:01:32 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/vtable/vtable.exp: Do not run these tests for the dvp assembler.
+
+end-sanitize-sky
 1998-12-03  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/fr30/allinsn.d: Updated to match latest assembler output.

@@ -17,6 +17,12 @@ proc run_list_test { name opts } {
 # Vtable bits are only supported by ELF targets.
 if {[istarget "*-*-elf*"] || [istarget "*-*-linux*"]} then {
 
+# start-sanitize-sky
+    if {[istarget "dvp-*-*"]} then {
+      return
+    }
+# end-sanitize-sky
+
     run_dump_test "inherit0" 
     run_list_test "inherit1" "-al"
 
