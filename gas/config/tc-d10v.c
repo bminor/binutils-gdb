@@ -55,7 +55,7 @@ static Fixups *fixups;
 /* local functions */
 static int reg_name_search PARAMS ((char *name));
 static int register_name PARAMS ((expressionS *expressionP));
-static int check_range PARAMS ((unsigned long num, int bits, int sign));
+static int check_range PARAMS ((unsigned long num, int bits, int flags));
 static int postfix PARAMS ((char *p));
 static bfd_reloc_code_real_type get_reloc PARAMS ((struct d10v_operand *op));
 static int get_operands PARAMS ((expressionS exp[]));
@@ -147,15 +147,25 @@ register_name (expressionP)
 
 
 static int
-check_range (num, bits, sign)
+check_range (num, bits, flags)
      unsigned long num;
      int bits;
-     int sign;
+     int flags;
 {
   long min, max;
   int retval=0;
 
-  if (sign)
+  if (flags & OPERAND_SHIFT)
+    {
+      /* all special shift operands are unsigned */
+      /* and <= 16.  We allow 0 for now. */
+      if (num>16)
+	return 1;
+      else
+	return 0;
+    }
+
+  if (flags & OPERAND_SIGNED)
     {
       max = (1 << (bits - 1)) - 1; 
       min = - (1 << (bits - 1));  
@@ -401,7 +411,7 @@ d10v_insert_operand (insn, op_type, value, left)
   bits = d10v_operands[op_type].bits;
 
   /* truncate to the proper number of bits */
-  if (check_range (value, bits, d10v_operands[op_type].flags & OPERAND_SIGNED))
+  if (check_range (value, bits, d10v_operands[op_type].flags))
     as_bad("operand out of range: %d",value);
 
   value &= 0x7FFFFFFF >> (31 - bits);
@@ -467,7 +477,7 @@ build_insn (opcode, opers, insn)
 	}
 
       /* truncate to the proper number of bits */
-      if ((opers[i].X_op == O_constant) && check_range (number, bits, flags & OPERAND_SIGNED))
+      if ((opers[i].X_op == O_constant) && check_range (number, bits, flags))
 	as_bad("operand out of range: %d",number);
       number &= 0x7FFFFFFF >> (31 - bits);
       insn = insn | (number << shift);
@@ -528,6 +538,9 @@ write_1_short (opcode, insn, fx)
   char *f = frag_more(4);
   int i;
 
+  if (opcode->exec_type == PARONLY)
+    as_fatal ("Instruction must be executed in parallel with another instruction.");
+
   /* the other container needs to be NOP */
   /* according to 4.3.1: for FM=00, sub-instructions performed only
      by IU cannot be encoded in L-container. */
@@ -572,6 +585,13 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   char *f;
   int i,j;
 
+  if ( (exec_type != 1) && ((opcode1->exec_type == PARONLY)
+	                || (opcode2->exec_type == PARONLY)))
+    as_fatal("Instruction must be executed in parallel");
+  
+  if ( (opcode1->format & LONG_OPCODE) || (opcode2->format & LONG_OPCODE))
+    as_fatal ("Long instructions may not be combined.");
+
   if(opcode1->exec_type == BRANCH_LINK)
     {
       /* subroutines must be called from 32-bit boundaries */
@@ -595,15 +615,37 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	}
       break;
     case 1:	/* parallel */
-	  insn = FM00 | (insn1 << 15) | insn2;  
-	  fx = fx->next;
+      if (opcode1->exec_type == SEQ || opcode2->exec_type == SEQ)
+	as_fatal ("One of these instructions may not be executed in parallel.");
+
+      if (opcode1->unit == IU)
+	{
+	  if (opcode2->unit == IU)
+	    as_fatal ("Two IU instructions may not be executed in parallel");
+	  as_warn ("Swapping instruction order");
+ 	  insn = FM00 | (insn2 << 15) | insn1;
+	}
+      else if (opcode2->unit == MU)
+	{
+	  if (opcode1->unit == MU)
+	    as_fatal ("Two MU instructions may not be executed in parallel");
+	  as_warn ("Swapping instruction order");
+	  insn = FM00 | (insn2 << 15) | insn1;
+	}
+      else
+	insn = FM00 | (insn1 << 15) | insn2;  
+      fx = fx->next;
       break;
     case 2:	/* sequential */
-	  insn = FM01 | (insn1 << 15) | insn2;  
-	  fx = fx->next;
+      if (opcode1->unit == IU)
+	as_fatal ("IU instruction may not be in the left container");
+      insn = FM01 | (insn1 << 15) | insn2;  
+      fx = fx->next;
       break;
     case 3:	/* reverse sequential */
-	  insn = FM10 | (insn1 << 15) | insn2;  
+      if (opcode2->unit == MU)
+	as_fatal ("MU instruction may not be in the right container");
+      insn = FM10 | (insn1 << 15) | insn2;  
       break;
     default:
       as_fatal("unknown execution type passed to write_2_short()");
@@ -817,7 +859,7 @@ do_assemble (str, opcode)
 	    {
 	      int bits = d10v_operands[next_opcode->operands[opnum]].bits;
 	      int flags = d10v_operands[next_opcode->operands[opnum]].flags;
-	      if (!check_range (myops[opnum].X_add_number, bits, flags & OPERAND_SIGNED))
+	      if (!check_range (myops[opnum].X_add_number, bits, flags))
 		{
 		  match = 1;
 		  break;
@@ -915,7 +957,6 @@ do_assemble (str, opcode)
 	      myops[i].X_add_symbol = symbol_find_or_make ((char *)myops[i].X_op_symbol);
 	      myops[i].X_add_number = 0;
 	      myops[i].X_op_symbol = NULL;
-	      /* FIXME create a fixup */
 	    }
 	}
     }
