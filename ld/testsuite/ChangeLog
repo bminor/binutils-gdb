@@ -1,3 +1,9 @@
+2004-10-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 371
+	* ld-undefined/undefined.exp: Remove redundant XPASS
+	specifications.
+
 2004-10-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tls.s (gd, ld): Set tls type for undefined syms.

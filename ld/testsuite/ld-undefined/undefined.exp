@@ -72,28 +72,26 @@ checkund $mu $testund
 # Just doesn't work for PA ELF.  No clue why.
 setup_xfail "hppa*-*-*elf*"
 
-# With dwarf-2, we can't get the function in which the reference
-# occurs; see below.
-setup_xfail "alpha*-*-linux*"
-setup_xfail "hppa*64*-*-*"
-setup_xfail "mn10300-*-elf"
-setup_xfail "sh-*-*"
-
 set mf "tmpdir/undefined.o* In function `function':"
 checkund $mf $testfn
 
-# COFF SH gets this test wrong--it reports line 10, because although
-# the jump is at line 9, the function address, and the reloc, is
-# stored at the end of the function.
-setup_xfail "sh-*-*"
+if [is_elf_format] {
+    
+    # Just doesn't work for PA ELF.  No clue why.
+    setup_xfail "hppa*-*-*"
+    
+} else {
 
-# ARM PE defaults to using stabs debugging, which we can't handle for
-# a COFF file.
-#setup_xfail "arm*-*-pe*"
-#setup_xfail "thumb*-*-pe*"
+    # COFF SH gets this test wrong--it reports line 10, because although
+    # the jump is at line 9, the function address, and the reloc, is
+    # stored at the end of the function.
+    setup_xfail "sh-*-*"
 
-# Just doesn't work for PA ELF.  No clue why.
-setup_xfail "hppa*-*-*elf*"
+    # ARM PE defaults to using stabs debugging, which we can't handle for
+    # a COFF file.
+    #setup_xfail "arm*-*-pe*"
+    #setup_xfail "thumb*-*-pe*"
+}
 
 set ml "undefined.c:9: undefined reference to `*this_function_is_not_defined'"
 # With targets that use elf/dwarf2, such as the arm-elf and thumb-elf
