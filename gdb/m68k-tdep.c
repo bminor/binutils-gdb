@@ -507,6 +507,9 @@ lose:;
 
 #include <sys/procfs.h>
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 /*  The /proc interface divides the target machine's register set up into
    two different sets, the general register set (gregset) and the floating
    point register set (fpregset).  For each set, there is an ioctl to get

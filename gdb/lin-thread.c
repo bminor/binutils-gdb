@@ -125,6 +125,9 @@
 
 #include <dlfcn.h>		/* dynamic library interface */
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 #ifndef TIDGET
 #define TIDGET(PID)		(((PID) & 0x7fffffff) >> 16)
 #define PIDGET(PID)		(((PID) & 0xffff))

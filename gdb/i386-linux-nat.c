@@ -35,6 +35,9 @@
 #include <sys/reg.h>
 #endif
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 /* On Linux, threads are implemented as pseudo-processes, in which
    case we may be tracing more than one process at a time.  In that
    case, inferior_pid will contain the main process ID and the

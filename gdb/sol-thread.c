@@ -72,19 +72,8 @@ extern struct target_ops procfs_ops;	/* target vector for procfs.c */
 extern struct target_ops core_ops;	/* target vector for corelow.c */
 extern char *procfs_pid_to_str PARAMS ((int pid));
 
-/* Note that these prototypes differ slightly from those used in procfs.c
-   for of two reasons.  One, we can't use gregset_t, as that's got a whole
-   different meaning under Solaris (also, see above).  Two, we can't use the
-   pointer form here as these are actually arrays of ints (for Sparc's at
-   least), and are automatically coerced into pointers to ints when used as
-   parameters.  That makes it impossible to avoid a compiler warning when
-   passing pr{g fp}regset_t's from a parameter to an argument of one of
-   these functions.  */
-
-extern void supply_gregset PARAMS ((const prgregset_t));
-extern void fill_gregset PARAMS ((prgregset_t, int));
-extern void supply_fpregset PARAMS ((const prfpregset_t *));
-extern void fill_fpregset PARAMS ((prfpregset_t *, int));
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
 
 /* This struct is defined by us, but mainly used for the proc_service interface.
    We don't have much use for it, except as a handy place to get a real pid
@@ -660,8 +649,8 @@ sol_thread_fetch_registers (regno)
    because the td routines call ps_lget* which affect the values stored in the
    registers array.  */
 
-  supply_gregset (gregset);
-  supply_fpregset (&fpregset);
+  supply_gregset  ((gdb_gregset_t *)  &gregset);
+  supply_fpregset ((gdb_fpregset_t *) &fpregset);
 
 #if 0
 /* thread_db doesn't seem to handle this right */
@@ -688,7 +677,7 @@ sol_thread_store_registers (regno)
   thread_t thread;
   td_thrhandle_t thandle;
   td_err_e val;
-  prgregset_t regset;
+  prgregset_t  gregset;
   prfpregset_t fpregset;
 #if 0
   int xregsize;
@@ -716,7 +705,7 @@ sol_thread_store_registers (regno)
       char old_value[REGISTER_SIZE];
       memcpy (old_value, &registers[REGISTER_BYTE (regno)], REGISTER_SIZE);
 
-      val = p_td_thr_getgregs (&thandle, regset);
+      val = p_td_thr_getgregs (&thandle, gregset);
       if (val != TD_OK)
 	error ("sol_thread_store_registers: td_thr_getgregs %s",
 	       td_err_string (val));
@@ -746,10 +735,10 @@ sol_thread_store_registers (regno)
 #endif
     }
 
-  fill_gregset (regset, regno);
-  fill_fpregset (&fpregset, regno);
+  fill_gregset  ((gdb_gregset_t *)  &gregset,  regno);
+  fill_fpregset ((gdb_fpregset_t *) &fpregset, regno);
 
-  val = p_td_thr_setgregs (&thandle, regset);
+  val = p_td_thr_setgregs (&thandle, gregset);
   if (val != TD_OK)
     error ("sol_thread_store_registers: td_thr_setgregs %s",
 	   td_err_string (val));
@@ -1163,7 +1152,7 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
     procfs_ops.to_fetch_registers (-1);
   else
     orig_core_ops.to_fetch_registers (-1);
-  fill_gregset (gregset, -1);
+  fill_gregset ((gdb_gregset_t *) gregset, -1);
 
   do_cleanups (old_chain);
 
@@ -1182,7 +1171,7 @@ ps_lsetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
   inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
 
-  supply_gregset (gregset);
+  supply_gregset ((gdb_gregset_t *) gregset);
   if (target_has_execution)
     procfs_ops.to_store_registers (-1);
   else
@@ -1295,7 +1284,7 @@ ps_lgetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
     procfs_ops.to_fetch_registers (-1);
   else
     orig_core_ops.to_fetch_registers (-1);
-  fill_fpregset (fpregset, -1);
+  fill_fpregset ((gdb_fpregset_t *) fpregset, -1);
 
   do_cleanups (old_chain);
 
@@ -1314,7 +1303,7 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
   inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
 
-  supply_fpregset (fpregset);
+  supply_fpregset ((gdb_fpregset_t *) fpregset);
   if (target_has_execution)
     procfs_ops.to_store_registers (-1);
   else

@@ -281,6 +281,9 @@ m88k_register_u_addr (blockend, regnum)
 
 #include <sys/procfs.h>
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 /*  Given a pointer to a general register set in /proc format (gregset_t *),
    unpack the register contents and supply them as gdb's idea of the current
    register values. */

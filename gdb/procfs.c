@@ -89,6 +89,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "proc-utils.h"
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 /* =================== TARGET_OPS "MODULE" =================== */
 
 /*
@@ -244,24 +247,6 @@ typedef lwpstatus_t gdb_lwpstatus_t;
 typedef prstatus_t gdb_prstatus_t;
 typedef prstatus_t gdb_lwpstatus_t;
 #endif /* NEW_PROC_API */
-
-
-/* These #ifdefs are for sol2.x in particular.  sol2.x has
-   both a "gregset_t" and a "prgregset_t", which have
-   similar uses but different layouts.  sol2.x gdb tries to
-   use prgregset_t (and prfpregset_t) everywhere. */
-
-#ifdef GDB_GREGSET_TYPE
-  typedef GDB_GREGSET_TYPE gdb_gregset_t;
-#else
-  typedef gregset_t gdb_gregset_t;
-#endif
-
-#ifdef GDB_FPREGSET_TYPE
-  typedef GDB_FPREGSET_TYPE gdb_fpregset_t;
-#else
-  typedef fpregset_t gdb_fpregset_t;
-#endif
 
 /* Provide default composite pid manipulation macros for systems that
    don't have threads. */
@@ -3469,19 +3454,6 @@ do_detach (signo)
  * So we cache the results, and mark the cache invalid when the process
  * is resumed.
  */
-
-/* These could go in a header file, but the many and various
-   definitions of gregset_t would make it tricky and ugly.  Several
-   different native operating systems (notably Solaris and Linux) have
-   various different definitions for gregset_t and fpregset_t.  We
-   have been kludging around this problem for a while, it would be
-   nice if someday we came up with a prettier way of handling it
-   (FIXME).  */
-
-extern void fill_gregset (gdb_gregset_t *, int);
-extern void fill_fpregset (gdb_fpregset_t *, int);
-extern void supply_gregset (gdb_gregset_t *);
-extern void supply_fpregset (gdb_fpregset_t *);
 
 static void
 procfs_fetch_registers (regno)

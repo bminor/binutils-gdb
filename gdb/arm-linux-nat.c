@@ -28,6 +28,9 @@
 #include <sys/utsname.h>
 #include <sys/procfs.h>
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 extern int arm_apcs_32;
 
 #define		typeNone		0x00

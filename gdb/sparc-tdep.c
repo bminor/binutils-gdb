@@ -39,6 +39,9 @@
 
 #include "symfile.h" 	/* for 'entry_point_address' */
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 /*
  * Some local macros that have multi-arch and non-multi-arch versions:
  */
@@ -1431,15 +1434,13 @@ sunos4_skip_trampoline_code (pc)
  */
 /* *INDENT-ON* */
 
-
-
 /* Given a pointer to a general register set in /proc format (gregset_t *),
    unpack the register contents and supply them as gdb's idea of the current
    register values. */
 
 void
 supply_gregset (gregsetp)
-     prgregset_t *gregsetp;
+     gdb_gregset_t *gregsetp;
 {
   prgreg_t *regp = (prgreg_t *) gregsetp;
   int regi, offset = 0;
@@ -1561,7 +1562,7 @@ supply_gregset (gregsetp)
 
 void
 fill_gregset (gregsetp, regno)
-     prgregset_t *gregsetp;
+     gdb_gregset_t *gregsetp;
      int regno;
 {
   prgreg_t *regp = (prgreg_t *) gregsetp;
@@ -1643,7 +1644,7 @@ fill_gregset (gregsetp, regno)
 
 void
 supply_fpregset (fpregsetp)
-     prfpregset_t *fpregsetp;
+     gdb_fpregset_t *fpregsetp;
 {
   register int regi;
   char *from;
@@ -1682,7 +1683,7 @@ supply_fpregset (fpregsetp)
 
 void
 fill_fpregset (fpregsetp, regno)
-     prfpregset_t *fpregsetp;
+     gdb_fpregset_t *fpregsetp;
      int regno;
 {
   int regi;

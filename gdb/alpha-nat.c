@@ -199,6 +199,9 @@ kernel_u_size ()
 #if defined(USE_PROC_FS) || defined(HAVE_GREGSET_T)
 #include <sys/procfs.h>
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 /*
  * See the comment in m68k-tdep.c regarding the utility of these functions.
  */

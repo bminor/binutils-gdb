@@ -34,6 +34,9 @@
 #include <asm/ptrace_offsets.h>
 #include <sys/procfs.h>
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 /* These must match the order of the register names.
 
    Some sort of lookup table is needed because the offsets associated

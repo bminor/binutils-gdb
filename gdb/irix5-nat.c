@@ -33,6 +33,9 @@
 #include <sys/procfs.h>
 #include <setjmp.h>		/* For JB_XXX.  */
 
+/* Prototypes for supply_gregset etc. */
+#include "gregset.h"
+
 static void
 fetch_core_registers PARAMS ((char *, unsigned int, int, CORE_ADDR));
 
