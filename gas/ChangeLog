@@ -5591,9 +5591,6 @@ Fri Dec  1 11:57:56 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: Don't always use te-generic.h for emulation.
 	(powerpc-apple-macos): Use emulation te-macos.h.
-start-sanitize-gm
-	(mips-gm-magic): New configuration.
-end-sanitize-gm
 	* mpw-make.sed (install, install-only): Edit in Mac-specific
 	install procedure.
 
