@@ -1060,8 +1060,20 @@ sh_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 static void
 sh_default_store_return_value (struct type *type, char *valbuf)
 {
-  write_register_bytes (REGISTER_BYTE (0), 
-			valbuf, TYPE_LENGTH (type));
+  char buf[32];	/* more than enough... */
+
+  if (TYPE_LENGTH (type) < REGISTER_RAW_SIZE (R0_REGNUM))
+    {
+      /* Add leading zeros to the value. */
+      memset (buf, 0, REGISTER_RAW_SIZE (R0_REGNUM));
+      memcpy (buf + REGISTER_RAW_SIZE (R0_REGNUM) - TYPE_LENGTH (type),
+	      valbuf, TYPE_LENGTH (type));
+      write_register_bytes (REGISTER_BYTE (R0_REGNUM), buf, 
+			    REGISTER_RAW_SIZE (R0_REGNUM));
+    }
+  else
+    write_register_bytes (REGISTER_BYTE (R0_REGNUM), valbuf, 
+			  TYPE_LENGTH (type));
 }
 
 static void
@@ -1071,8 +1083,7 @@ sh3e_sh4_store_return_value (struct type *type, char *valbuf)
     write_register_bytes (REGISTER_BYTE (FP0_REGNUM), 
 			  valbuf, TYPE_LENGTH (type));
   else
-    write_register_bytes (REGISTER_BYTE (0), 
-			  valbuf, TYPE_LENGTH (type));
+    sh_default_store_return_value (type, valbuf);
 }
 
 

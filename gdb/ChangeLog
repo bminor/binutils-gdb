@@ -1,5 +1,8 @@
 2001-01-02  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
+	* sh-tdep.c (sh_extract_return_value):  Allow for small return type.
+	(sh_sh4_extract_return_value): Call sh_extract_return_value for
+	non-float types.
 	* sparc-tdep.c (sparc_frame_chain): Fix typo in comment.
 	Update copyright notice.
 	
