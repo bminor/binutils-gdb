@@ -1,3 +1,7 @@
+2002-10-20  Joel Brobecker  <brobecker@gnat.com>
+
+	* configure: Regenerate using the proper version of autoconf.
+
 2002-10-21  Elena Zannoni  <ezannoni@redhat.com>
 
 	* findvar.c (read_var_value): Temporarily disable TLS code, until
