@@ -1,5 +1,8 @@
 2004-01-03  Mark Kettenis  <kettenis@gnu.org>
 
+	* NEWS: Mention revised SPARC target.  Add sparc-*-lynxos* and
+	sparc-*-sunos4* to the list of REMOVED configurations.
+
 	* configure.tgt: Add back sparc-*-vxworks*.
 	* remote-vxsparc.c: Remove all includes except for "defs.h",
 	"regcache.h", "vx-share/ptrace.h" and "vx-share/regPacket.h".
