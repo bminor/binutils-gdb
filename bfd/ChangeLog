@@ -1,3 +1,21 @@
+Thu Sep 28 18:48:47 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config.bfd: Add powerpc-*-macos*, powerpc-*-mpw*.
+	* configure, configure.in: Add pmac_xcoff_vec case.
+	* Makefile.in (BFD32_BACKENDS): Add coff-pmac.o.
+	* coff-pmac.c: New file, PowerMac XCOFF support.
+	* coffcode.h (coff_set_arch_mach_hook): Add PowerMac case.
+	* targets.c (pmac_xcoff_vec): Declare.
+
+	* mpw-config.in: Various changes to be compatible with the
+	autoconf-based configury.
+	* mpw-make.sed: New file, sed commands to translate Unix
+	makefile into MPW syntax.
+	* mpw-make.in: Remove.
+	* hosts/mpw.h: Remove.
+	* bfd-in.h, bfd-in2.h: If MPW, include the file that defines
+	true and false as enums, then define TRUE_FALSE_ALREADY_DEFINED.
+
 Thu Sep 28 17:06:23 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* binary.c (binary_get_symtab): Return an empty string on error.
