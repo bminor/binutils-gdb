@@ -1,3 +1,8 @@
+2000-10-31  Eric Christopher  <echristo@redhat.com>
+
+	* config/tc-mn10300.c (md_apply_fix3): Use valuep if fully resolved
+	or pc-relative, else use fx_offset.
+
 2000-10-31  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-ia64.c (struct md): New field tag_fixups.
@@ -10,7 +15,7 @@
 	(ia64_unrecognized_line, case '['): Parse tags.
 	(ia64_frob_label): Create tag_fixups.
 	(md_assemble): Reset md.qp.X_op after using it.
-	
+
 2000-10-31  Kaz Kojima <kkojima@rr.iij4u.or.jp>
 
 	* config/tc-sh.c (md_apply_fix [BFD_RELOC_SH_PCDISP12BY2]): Allow 4094.
@@ -41,7 +46,7 @@
 	* configure.in (emulations): Add m68hc12.
 	* configure: Regenerate.
 	* po/gas.pot: Regenerate.
-	
+
 2000-10-27  Aldy Hernandez  <aldyh@redhat.com>
 
         * config/tc-arm.c (psrs): Remove lowercase versions of spsr* and
@@ -61,10 +66,10 @@
 
 	* doc/as.texinfo: Note that --gdwarf2 only works on some targets,
 	not all.
-	
+
 	* config/tc-arm.h (md_end): Define.
 	(DWARF2_LINE_MIN_INSN_LENGTH): Define.
-	
+
 	* config/tc-arm.c (output_inst): Call dwarf2_generate_asm_lineno
 	if generating DWARF2 line numbers.
 	(arm_end_of_source): New function.  Call dwarf2_finish if
@@ -73,7 +78,7 @@
 	* config/tc-hppa.c (md_assemble): Use dwarf2_generate_asm_lineno.
 	* config/tc-m68hc11.c (m68hc11_new_insn): Use dwarf2_generate_asm_lineno.
 	* config/tc-sh.c (md_assemble): Use dwarf2_generate_asm_lineno.
-	
+
 2000-10-25  Diego Novillo  <dnovillo@cygnus.com>
 
 	* tc-i386.c: Fix prototype declarations for functions taking no

@@ -1912,17 +1912,35 @@ md_pcrel_from (fixp)
 int
 md_apply_fix3 (fixp, valuep, seg)
      fixS *fixp;
-     valueT *valuep ATTRIBUTE_UNUSED;
+     valueT *valuep;
      segT seg;
 {
   char *fixpos = fixp->fx_where + fixp->fx_frag->fr_literal;
   int size = 0;
+  int value;
 
   assert (fixp->fx_r_type < BFD_RELOC_UNUSED);
 
   /* This should never happen.  */
   if (seg->flags & SEC_ALLOC)
       abort ();
+
+  /* The value we are passed in *valuep includes the symbol values.
+     Since we are using BFD_ASSEMBLER, if we are doing this relocation
+     the code in write.c is going to call bfd_install_relocation, which
+     is also going to use the symbol value.  That means that if the
+     reloc is fully resolved we want to use *valuep since
+     bfd_install_relocation is not being used.
+
+     However, if the reloc is not fully resolved we do not want to use
+     *valuep, and must use fx_offset instead.  However, if the reloc
+     is PC relative, we do want to use *valuep since it includes the
+     result of md_pcrel_from.  */
+  if (fixp->fx_addsy == (symbolS *) NULL || fixp->fx_pcrel)
+    value = *valuep;
+  else
+    value = fixp->fx_offset;
+
 
   /* If the fix is relative to a symbol which is not defined, or not
      in the same segment as the fix, we cannot resolve it here.  */
@@ -1959,7 +1977,7 @@ md_apply_fix3 (fixp, valuep, seg)
                    _("Bad relocation fixup type (%d)"), fixp->fx_r_type);
     }
 
-  md_number_to_chars (fixpos, fixp->fx_offset, size);
+  md_number_to_chars (fixpos, value, size);
 
   fixp->fx_done = 1;
   return 0;
