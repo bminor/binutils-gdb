@@ -308,7 +308,25 @@ int baud_rate = -1;
 
 /* Timeout limit for response from target. */
 
-int remote_timeout = 20;	/* Set default to 20 */
+/* The default value has been changed many times over the years.  It 
+   was originally 5 seconds.  But that was thought to be a long time 
+   to sit and wait, so it was changed to 2 seconds.  That was thought
+   to be plenty unless the connection was going through some terminal 
+   server or multiplexer or other form of hairy serial connection.
+
+   In mid-1996, remote_timeout was moved from remote.c to top.c and 
+   it began being used in other remote-* targets.  It appears that the
+   default was changed to 20 seconds at that time, perhaps because the
+   Hitachi E7000 ICE didn't always respond in a timely manner.
+
+   But if 5 seconds is a long time to sit and wait for retransmissions,
+   20 seconds is far worse.  This demonstrates the difficulty of using 
+   a single variable for all protocol timeouts.
+
+   As remote.c is used much more than remote-e7000.c, it was changed 
+   back to 2 seconds in 1999. */
+
+int remote_timeout = 2;
 
 /* Non-zero tells remote* modules to output debugging info.  */
 

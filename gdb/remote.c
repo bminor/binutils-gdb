@@ -245,15 +245,6 @@ static struct target_ops remote_async_ops;
 
 static struct target_ops extended_async_remote_ops;
 
-/* This was 5 seconds, which is a long time to sit and wait.
-   Unless this is going though some terminal server or multiplexer or
-   other form of hairy serial connection, I would think 2 seconds would
-   be plenty.  */
-
-/* Changed to allow option to set timeout value.
-   was static int remote_timeout = 2; */
-extern int remote_timeout;
-
 /* FIXME: cagney/1999-09-23: Even though getpkt was called with
    ``forever'' still use the normal timeout mechanism.  This is
    currently used by the ASYNC code to guarentee that target reads
@@ -5519,13 +5510,6 @@ this command sends the string TEXT to the inferior, and displays the\n\
 response packet.  GDB supplies the initial `$' character, and the\n\
 terminating `#' character and checksum.",
 	   &maintenancelist);
-
-  add_show_from_set
-    (add_set_cmd ("remotetimeout", no_class,
-		  var_integer, (char *) &remote_timeout,
-		  "Set timeout value for remote read.\n",
-		  &setlist),
-     &showlist);
 
   add_show_from_set
     (add_set_cmd ("remotebreak", no_class,

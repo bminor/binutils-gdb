@@ -1,3 +1,10 @@
+1999-08-23  J.T. Conklin  <jtc@redback.com>
+
+        * top.c (remote_timeout): Change default to 2.  Add comment
+        explaining history of changes to the default value.
+        * remote.c (_initialize_remote): Remove code that adds set/ 
+        show remotetimeout, as that's also done in top.c
+
 1999-10-18  J.T. Conklin  <jtc@redback.com>
 
         * m32r-stub.c, sparcl-stub.c, sparclet-stub.c (handle_exception):
