@@ -248,15 +248,18 @@ print_itrace(lf *file,
 	     table_entry *file_entry,
 	     int idecode)
 {
+  const char *phase = (idecode) ? "DECODE" : "INSN";
+  const char *phase_lc = (idecode) ? "decode" : "insn";
   lf_printf(file, "\n");
   lf_indent_suppress(file);
   lf_printf(file, "#if defined(WITH_TRACE)\n");
   lf_printf(file, "/* trace the instructions execution if enabled */\n");
-  lf_printf(file, "if (TRACE_%s_P (CPU)) {\n", (idecode) ? "DECODE" : "INSN");
-  lf_printf(file, "  trace_one_insn (SD, CPU, \"%s\", %d, %d, %s, itable[MY_INDEX].name);\n",
-	    filter_filename(file_entry->file_name),
-	    file_entry->line_nr,
-	    idecode,
+  lf_printf(file, "if (TRACE_%s_P (CPU)) {\n", phase);
+  lf_printf(file, "  static const TRACE_INSN_DATA my_insn_data = { \"%s\", &itable[MY_INDEX].file, &itable[MY_INDEX].name, %d };\n",
+	    phase_lc,
+	    file_entry->line_nr);
+
+  lf_printf(file, "  trace_one_insn (SD, CPU, %s, TRACE_LINENUM_P (CPU), &my_insn_data);\n",
 	    (code & generate_with_semantic_delayed_branch) ? "cia.ip" : "cia");
 	    
   lf_printf(file, "}\n");

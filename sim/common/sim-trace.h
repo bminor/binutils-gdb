@@ -89,6 +89,15 @@ typedef struct {
   FILE *trace_file;
 #define TRACE_FILE(t) ((t)->trace_file)
 } TRACE_DATA;
+
+/* Structure containing constant stuff to pass to trace_one_insn */
+
+typedef struct {
+  const char *phase;		/* which phase this in (decode,insn) */
+  char **p_filename;		/* ptr to filename insns where defined in */
+  char **p_name;		/* ptr to instruction name */
+  int linenum;			/* line number of line where insn is defined */
+} TRACE_INSN_DATA;
 
 /* Usage macros.  */
 
@@ -113,9 +122,9 @@ struct _sim_cpu;
 /* Non-zero if "--trace-fpu" specified for CPU. */
 #define TRACE_FPU_P(cpu) TRACE_P (cpu, TRACE_FPU_IDX)
 
-extern void trace_one_insn PARAMS ((SIM_DESC, sim_cpu *, const char *, 
-				    int, int, address_word,
-				    const char *name));
+extern void trace_one_insn PARAMS ((SIM_DESC, sim_cpu *,
+				    address_word, int,
+				    const TRACE_INSN_DATA *));
 
 extern void trace_printf PARAMS ((SIM_DESC, sim_cpu *, const char *, ...))
      __attribute__((format (printf, 3, 4)));

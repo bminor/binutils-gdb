@@ -262,22 +262,16 @@ trace_uninstall (SIM_DESC sd)
 }
 
 void
-trace_one_insn (SIM_DESC sd, sim_cpu *cpu, const char *filename, 
-		int linenum, int idecode, address_word pc, const char *name)
+trace_one_insn (SIM_DESC sd, sim_cpu *cpu, address_word pc,
+		int line_p, const TRACE_INSN_DATA *insn_data)
 {
-  if (idecode)
-    trace_printf(sd, cpu, "%s:%-*d 0x%.*lx (decode) %s\n",
-		 filename,
-		 SIZE_LINE_NUMBER, linenum,
+  if (!line_p)
+    trace_printf(sd, cpu, "trace-%s: %s:%-*d 0x%.*lx %s\n",
+		 insn_data->phase,
+		 *(insn_data->p_filename),
+		 SIZE_LINE_NUMBER, insn_data->linenum,
 		 SIZE_PC, (long)pc,
-		 name);
-
-  else if (!TRACE_LINENUM_P (cpu))
-    trace_printf(sd, cpu, "%s:%-*d 0x%.*lx %s\n",
-		 filename,
-		 SIZE_LINE_NUMBER, linenum,
-		 SIZE_PC, (long)pc,
-		 name);
+		 *(insn_data->p_name));
 
   else
     {
@@ -315,10 +309,10 @@ trace_one_insn (SIM_DESC sd, sim_cpu *cpu, const char *filename,
 		  sprintf (p, "%s ", pc_function);
 		  p += strlen (p);
 		}
-	      else if (filename)
+	      else if (pc_filename)
 		{
-		  char *q = (char *) strrchr (filename, '/');
-		  sprintf (p, "%s ", (q) ? q+1 : filename);
+		  char *q = (char *) strrchr (pc_filename, '/');
+		  sprintf (p, "%s ", (q) ? q+1 : pc_filename);
 		  p += strlen (p);
 		}
 
@@ -327,10 +321,13 @@ trace_one_insn (SIM_DESC sd, sim_cpu *cpu, const char *filename,
 	    }
 	}
 
-      trace_printf (sd, cpu, "0x%.*x %-*.*s %s\n",
+      trace_printf (sd, cpu, "trace-%s: %s:%-*d 0x%.*x %-*.*s %s\n",
+		    insn_data->phase,
+		    *(insn_data->p_filename),
+		    SIZE_LINE_NUMBER, insn_data->linenum,
 		    SIZE_PC, (unsigned) pc,
 		    SIZE_LOCATION, SIZE_LOCATION, buf,
-		    name);
+		    *(insn_data->p_name));
     }
 }
 
