@@ -1,3 +1,15 @@
+Tue Feb 20 17:32:05 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* config/nm-nbsd.h (FETCH_INFERIOR_REGISTERS): Defined.
+	* config/xm-nbsd.h (CC_HAS_LONG_LONG, PRINTF_HAS_LONG_LONG):
+	#ifdef'd out definitions ---  Causes serious gdb failures on 
+	the i386.  Need to investigate further before enabling.
+
+	* i386b-nat.c (fetch_inferior_registers, store_inferior_registers,
+	fetch_core_registers): New functions.  These functions are defined
+	if FETCH_INFERIOR_REGISTERS is set.  Registers are fetched/stored
+	with ptrace PT_GETREGS/PT_SETREGS.
+
 Tue Feb 20 16:55:06 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* findvar.c (extract_floating store_floating):  Replace `long

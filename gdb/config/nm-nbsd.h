@@ -1,5 +1,5 @@
-/* Host-dependent definitions for any CPU running NetBSD.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+/* Native-dependent definitions for NetBSD.
+   Copyright 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,21 +17,14 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* We have to include these files now, so that GDB will not make
-   competing definitions in defs.h.  */
-#include <limits.h>
+/* This is the amount to subtract from u.u_ar0
+   to get the offset in the core file of the register values.  */
 
-#include <machine/endian.h>
-#if BYTE_ORDER == BIG_ENDIAN
-#define HOST_BYTE_ORDER BIG_ENDIAN
-#else
-#define HOST_BYTE_ORDER LITTLE_ENDIAN
-#endif
+#include <machine/vmparam.h>
+#define KERNEL_U_ADDR USRSTACK
 
-/* NetBSD has termios facilities. */
-#define HAVE_TERMIOS
+#define PTRACE_ARG3_TYPE char*
 
-#if 0
-#define CC_HAS_LONG_LONG	1
-#define PRINTF_HAS_LONG_LONG	1
-#endif
+#define FETCH_INFERIOR_REGISTERS
+
+#define ATTACH_DETACH

@@ -18,6 +18,47 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+
+#ifdef FETCH_INFERIOR_REGISTERS
+#include <sys/types.h>
+#include <sys/ptrace.h>
+#include <machine/reg.h>
+#include <machine/frame.h>
+#include "inferior.h"
+
+void
+fetch_inferior_registers(regno)
+     int regno;
+{
+  struct reg inferior_registers;
+
+  ptrace (PT_GETREGS, inferior_pid, (PTRACE_ARG3_TYPE) &inferior_registers, 0);
+  memcpy (&registers[REGISTER_BYTE (0)], &inferior_registers, 4*NUM_REGS);
+  registers_fetched ();
+}
+
+void
+store_inferior_registers(regno)
+     int regno;
+{
+  struct reg inferior_registers;
+
+  memcpy (&inferior_registers, &registers[REGISTER_BYTE (0)], 4*NUM_REGS);
+  ptrace (PT_SETREGS, inferior_pid, (PTRACE_ARG3_TYPE) &inferior_registers, 0);
+}
+
+void
+fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
+     char *core_reg_sect;
+     unsigned core_reg_size;
+     int which;
+     unsigned int ignore;
+{
+  abort();
+}
+
+#else
+
 #include <machine/reg.h>
 
 /* this table must line up with REGISTER_NAMES in tm-i386.h */
@@ -29,25 +70,12 @@ static int tregmap[] =
   tEIP, tEFLAGS, tCS, tSS
 };
 
-#ifdef sEAX
 static int sregmap[] = 
 {
   sEAX, sECX, sEDX, sEBX,
   sESP, sEBP, sESI, sEDI,
   sEIP, sEFLAGS, sCS, sSS
 };
-#else /* No sEAX */
-
-/* NetBSD has decided to collapse the s* and t* symbols.  So if the s*
-   ones aren't around, use the t* ones for sregmap too.  */
-
-static int sregmap[] = 
-{
-  tEAX, tECX, tEDX, tEBX,
-  tESP, tEBP, tESI, tEDI,
-  tEIP, tEFLAGS, tCS, tSS
-};
-#endif /* No sEAX */
 
 /* blockend is the value of u.u_ar0, and points to the
    place where ES is stored.  */
@@ -70,6 +98,7 @@ i386_register_u_addr (blockend, regnum)
     return (blockend + 4 * sregmap[regnum]);
 }
 
+#endif /* !FETCH_INFERIOR_REGISTERS */
 
 #ifdef FLOAT_INFO
 #include "language.h"			/* for local_hex_string */
