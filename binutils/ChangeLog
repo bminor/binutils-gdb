@@ -1,5 +1,26 @@
 Thu Aug 22 17:08:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* wrstabs.c (struct string_hash_entry): Add next field.
+	(struct stab_write_handle): Change strings to a pointer to
+	string_hash_entry.  Add last_strings field.  Remove strings_alloc
+	field.
+	(string_hash_newfunc): Initialize next field.
+	(stab_write_symbol): Copy string into hash table rather than into
+	buffer.  Keep a list of hash table entries.
+	(write_stabs_in_sections_debugging_info): Initialize last_string.
+	Copy strings from list of hash table entries in memory.
+	(stab_modify_type): If the entry on the stack is a definition,
+	make a new definition rather than failing an assert.
+	(stab_array_type): The size is only zero if high is strictly less
+	than low.
+
+	* ieee.c (struct ieee_info): Add saw_filename field.
+	(parse_ieee): Initialize saw_filename.
+	(parse_ieee_bb): Set saw_filename for a BB1 or BB2.  In a BB1,
+	discard the current variables and types.  In a BB10, if no
+	filename has been seen, call debug_set_filename.
+	(parse_ieee_ty): In case 'g', the type is optional.
+
 	* prdbg.c (pr_fix_visibility): Don't abort on
 	DEBUG_VISIBILITY_IGNORE.
 
