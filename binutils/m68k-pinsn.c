@@ -24,6 +24,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include "opcode/m68k.h"
 
+/* Sign-extend an (unsigned char). */
+#if __STDC__ == 1
+#define COERCE_SIGNED_CHAR(ch) ((signed char)(ch))
+#else
+#define COERCE_SIGNED_CHAR(ch) ((int)(((ch) ^ 0x80) & 0xFF) - 128)
+#endif
+
 extern void print_address();
 
 /* 68k instructions are never longer than this many bytes.  */
@@ -42,7 +49,7 @@ static unsigned char *print_indexed ();
 static void print_base ();
 static int fetch_arg ();
 
-#define NEXTBYTE(p)  (p += 2, ((char *)p)[-1])
+#define NEXTBYTE(p)  (p += 2, COERCE_SIGNED_CHAR(p[-1]))
 
 #define NEXTWORD(p)  \
   (p += 2, ((((char *)p)[-2]) << 8) + p[-1])
@@ -307,7 +314,7 @@ print_insn_arg (d, buffer, p, addr, stream)
       if (place == 'b')
 	val = NEXTBYTE (p);
       else if (place == 'B')
-	val = buffer[1] > 127 ?  buffer[1] - 256 : buffer[1];
+	val = COERCE_SIGNED_CHAR(buffer[1]);
       else if (place == 'w' || place == 'W')
 	val = NEXTWORD (p);
       else if (place == 'l' || place == 'L')

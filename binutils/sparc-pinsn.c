@@ -242,14 +242,31 @@ memcpy(&insn,buffer, sizeof (insn));
 
 #define	freg(n)	fprintf (stream, "%%%s", freg_names[n])
 		  case 'e':
+		  case 'v':	/* double/even */
+		  case 'V':	/* quad/multiple of 4 */
 		    freg (insn.rs1);
 		    break;
 
 		  case 'f':
+		  case 'B':	/* double/even */
+		  case 'R':	/* quad/multiple of 4 */
 		    freg (insn.rs2);
 		    break;
 
+#ifndef NO_V9
+#if 0
+/* Somebody who know needs to define rs3. */
+		  case 'j':
+		  case 'u':	/* double/even */
+		  case 'U':	/* quad/multiple of 4 */
+		    freg (insn.rs3);
+		    break;
+#endif
+#endif				/* NO_V9 */
+
 		  case 'g':
+		  case 'H':	/* double/even */
+		  case 'J':	/* quad/multiple of 4 */
 		    freg (insn.rd);
 		    break;
 #undef	freg
