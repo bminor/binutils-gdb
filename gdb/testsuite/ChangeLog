@@ -1,5 +1,9 @@
 2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/namespace.exp: Accept gcc abi 2.
+
+2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/method.exp: Accept gcc abi 2.
 
 2004-01-01  Michael Chastain  <mec.gnu@mindspring.com>
