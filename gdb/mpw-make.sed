@@ -16,7 +16,7 @@
 /^MMALLOC_DIR = /s/::mmalloc/mmalloc:/
 /^MMALLOC_SRC = /s/"{srcdir}"/"{topsrcdir}"/
 /^MMALLOC =/s/=.*$/=/
-/#MMALLOC_DISABLE/s/^#//
+/MMALLOC_CFLAGS =/s/=.*$/= -d NO_MMALLOC/
 
 /^BFD_DIR = /s/::bfd/bfd:/
 /^BFD = /s/{BFD_DIR}:libbfd/{BFD_DIR}libbfd/
@@ -32,17 +32,12 @@
 
 /^TERMCAP =/s/ =.*$/ =/
 
-# Whack out autoconf hook for thread debugging.
+# Whack out various autoconf vars that we don't need.
 /@CONFIG_LDFLAGS@/s/@CONFIG_LDFLAGS@//g
-
 /@DEFS@/s/@DEFS@//g
-
 /@YACC@/s/@YACC@/byacc/g
-
 /@ENABLE_OBS@/s/@ENABLE_OBS@//g
-
 /@ENABLE_CLIBS@/s/@ENABLE_CLIBS@//g
-
 /@LIBS@/s/@LIBS@//g
 
 # Whack out autoconf hook for thread debugging.
@@ -65,8 +60,6 @@
 /^readline_headers =/,/^$/c\
 readline_headers =\
 
-
-/{MMALLOC_CHECK}/s/{MMALLOC_CHECK}//g
 
 # This isn't really useful, and seems to cause nonsensical complaints.
 /{ALLDEPFILES}/s/{ALLDEPFILES}//g
@@ -99,6 +92,7 @@ readline_headers =\
 /init/s/"{s}"init\.c/"{o}"init.c/g
 /init/s/^init\.c/"{o}"init.c/
 
+# Fix up the generation of version.c.
 /"{o}"version.c \\Option-f Makefile/,/^$/c\
 "{o}"version.c \\Option-f Makefile\
 	echo -n 'char *version = "'	 >"{o}"version.c\
@@ -111,6 +105,8 @@ readline_headers =\
 	echo -n "{target_alias}"	>>"{o}"version.c\
 	echo '";'			>>"{o}"version.c\
 
+
+/ansidecl/s/include "{s}""ansidecl.h"/include "ansidecl.h"/
 
 # Open-brace in a command causes much confusion; replace with the
 # result from a script.
@@ -145,6 +141,7 @@ readline_headers =\
 	{MAKEPEF} gdb{PROG_EXT} -o gdb {MAKEPEF_TOOL_FLAGS} {MAKEPEF_FLAGS}\
 	{REZ} "{s}"mac-gdb.r -o gdb -append -d PROG_NAME='"'gdb'"' -d VERSION_STRING='"'{version}'"'\
 
+# Replace the install actions with MPW-friendly script.
 /^install \\Option-f /,/^$/c\
 install \\Option-f all install-only\
 \
@@ -162,6 +159,7 @@ install-only \\Option-f \
 /^config.status \\Option-f/,/^$/d
 /^Makefile \\Option-f/,/^$/d
 
+# Don't test config.h dependencies.
 /^"{o}"config.h \\Option-f/s/^/#/
 
 # Add an action to build SIOWgdb.

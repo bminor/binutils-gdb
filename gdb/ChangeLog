@@ -1,3 +1,11 @@
+Fri Aug 16 13:52:21 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Update for various recent changes, add some
+	comments.
+start-sanitize-gm
+	* mpw-config.in: Fix name of Magic Cap-specific file.
+end-sanitize-gm
+
 Fri Aug 16 15:47:36 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/rs6000/tm-rs6000.h (FIX_CALL_DUMMY): Cast args to be an

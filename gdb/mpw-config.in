@@ -46,7 +46,7 @@ Else If "{target_canonical}" =~ /mips-gm-magic/
 	forward-include "{srcdir}"config:mips:tm-embed.h tm.h
 	forward-include "{srcdir}"config:mips:tm-bigmips.h 'mips/tm-bigmips.h'
 	forward-include "{srcdir}"config:mips:tm-mips.h 'mips/tm-mips.h'
-	Set tdepfiles '"{o}"mips-tdep.c.o "{o}"remote-mips.c.o "{o}"magic.c.o'
+	Set tdepfiles '"{o}"mips-tdep.c.o "{o}"remote-mips.c.o "{o}"gmagic.c.o'
 	If {host_cc} =~ /gcc/
 		Set enable_cflags '-DGENERAL_MAGIC'
 	Else
