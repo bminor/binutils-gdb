@@ -1,3 +1,8 @@
+Fri Sep  8 00:27:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gasp.c (show_usage): Put program_name argument in first fprintf,
+	not second.
+
 Thu Sep  7 12:33:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* expr.c (operand): Handle 08 and 09 in MRI mode.

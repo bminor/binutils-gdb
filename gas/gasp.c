@@ -3500,14 +3500,14 @@ Usage: %s \n\
   [-h]      [--help]              print this message\n\
   [-M]      [--mri]               enter MRI compatibility mode\n\
   [-o out]  [--output out]        set the output file\n\
-  [-p]      [--print]             print line numbers\n");
+  [-p]      [--print]             print line numbers\n", program_name);
   fprintf (file, "\
   [-s]      [--copysource]        copy source through as comments \n\
   [-u]      [--unreasonable]      allow unreasonable nesting\n\
   [-v]      [--version]           print the program version\n\
   [-Dname=value]                  create preprocessor variable called name, with value\n\
   [-Ipath]                        add to include path list\n\
-  [in-file]\n",   program_name);
+  [in-file]\n");
   exit (status);
 }
 
