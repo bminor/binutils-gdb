@@ -114,7 +114,7 @@ struct gdbarch_tdep
 #define FOP_REGNUM	(FPC_REGNUM + 7)
 
 /* Return non-zero if N corresponds to a FPU data registers.  */
-#define FP_REGNUM_P(n)	(FP0_REGNUM <= (n) && (n) < FPC_REGNUM)
+#define FP_REGNUM_P(n)	(FP0_REGNUM && FP0_REGNUM <= (n) && (n) < FPC_REGNUM)
 
 /* Return non-zero if N corresponds to a FPU control register.  */
 #define FPC_REGNUM_P(n)	(FPC_REGNUM <= (n) && (n) < XMM0_REGNUM)
