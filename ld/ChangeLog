@@ -1,3 +1,7 @@
+2001-08-22  H.J. Lu  <hjl@gnu.org>
+
+	* emulparams/elf32fr30.sh: Add a newline.
+
 2001-08-21  Andreas Jaeger  <aj@suse.de>
 
 	* deffilep.y: Add missing prototypes.
