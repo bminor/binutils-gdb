@@ -1,3 +1,7 @@
+2004-04-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (process_section_headers): Use %3lu on sh_info.
+
 2004-04-30  Michael Deutschmann  <michael@talamasca.ocis.net>
 
 	* ranlib.sh: Quote $1 argument in case it contains spaces.

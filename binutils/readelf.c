@@ -3631,7 +3631,7 @@ process_section_headers (FILE *file)
 
 	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
-	  printf ("%2ld %3lx %2ld\n",
+	  printf ("%2ld %3lu %2ld\n",
 		  (unsigned long) section->sh_link,
 		  (unsigned long) section->sh_info,
 		  (unsigned long) section->sh_addralign);
@@ -3666,7 +3666,7 @@ process_section_headers (FILE *file)
 
 	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
-	  printf ("%2ld %3lx ",
+	  printf ("%2ld %3lu ",
 		  (unsigned long) section->sh_link,
 		  (unsigned long) section->sh_info);
 
@@ -3696,7 +3696,7 @@ process_section_headers (FILE *file)
 
 	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
-	  printf ("     %2ld   %3lx     %ld\n",
+	  printf ("     %2ld   %3lu     %ld\n",
 		  (unsigned long) section->sh_link,
 		  (unsigned long) section->sh_info,
 		  (unsigned long) section->sh_addralign);
