@@ -1,5 +1,5 @@
 /* tc-xstormy16.c -- Assembler for the Sanyo XSTORMY16.
-   Copyright (C) 2000, 2001, 2002 Free Software Foundation.
+   Copyright 2000, 2001, 2002 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -388,7 +388,7 @@ xstormy16_force_relocation (fix)
 /* Return true if a relocation against a symbol may be replaced with
    a relocation against section+offset.  */
 
-boolean
+bfd_boolean
 xstormy16_fix_adjustable (fixP)
    fixS * fixP;
 {
@@ -491,7 +491,7 @@ xstormy16_md_apply_fix3 (fixP, valueP, seg)
       /* The operand isn't fully resolved.  Determine a BFD reloc value
 	 based on the operand information and leave it to
 	 bfd_install_relocation.  Note that this doesn't work when
-	 partial_inplace == false.  */
+	 !partial_inplace.  */
 
       reloc_type = md_cgen_lookup_reloc (insn, operand, fixP);
       if (reloc_type != BFD_RELOC_NONE)

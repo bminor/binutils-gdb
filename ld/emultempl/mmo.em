@@ -32,7 +32,7 @@ EOF
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
-static boolean mmo_place_orphan
+static bfd_boolean mmo_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
 static asection *output_prev_sec_find
   PARAMS ((lang_output_section_statement_type *));
@@ -84,7 +84,7 @@ struct orphan_save {
    SEC_READONLY sections right after MMO_TEXT_SECTION_NAME.  Much borrowed
    from elf32.em.  */
 
-static boolean
+static bfd_boolean
 mmo_place_orphan (file, s)
 	lang_input_statement_type *file;
 	asection *s;
@@ -100,7 +100,7 @@ mmo_place_orphan (file, s)
   if (link_info.relocateable
       || (bfd_get_section_flags (s->owner, s)
 	  & (SEC_EXCLUDE | SEC_LOAD)) != SEC_LOAD)
-    return false;
+    return FALSE;
 
   /* Only care for sections we're going to load.  */
   os = lang_output_section_find (bfd_get_section_name (s->owner, s));
@@ -110,13 +110,13 @@ mmo_place_orphan (file, s)
   if (os != NULL)
     {
       lang_add_section (&os->children, s, os, file);
-      return true;
+      return TRUE;
     }
 
   /* If this section does not have .text-type section flags or there's no
      MMO_TEXT_SECTION_NAME, we don't have anything to say.  */
   if ((bfd_get_section_flags (s->owner, s) & (SEC_CODE | SEC_READONLY)) == 0)
-    return false;
+    return FALSE;
 
   if (hold_text.os == NULL)
     hold_text.os = lang_output_section_find (MMO_TEXT_SECTION_NAME);
@@ -155,7 +155,7 @@ mmo_place_orphan (file, s)
   snew = os->bfd_section;
   if (snew == NULL)
     /* /DISCARD/ section.  */
-    return true;
+    return TRUE;
 
   /* We need an output section for .text as a root, so if there was none
      (might happen with a peculiar linker script such as in "map
@@ -164,7 +164,7 @@ mmo_place_orphan (file, s)
   if (hold_text.os == NULL)
     {
       if (os == NULL)
-	return false;
+	return FALSE;
       hold_text.os = os;
     }
 
@@ -219,7 +219,7 @@ mmo_place_orphan (file, s)
       place->stmt = add.tail;
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Remove the spurious settings of SEC_RELOC that make it to the output at

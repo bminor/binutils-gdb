@@ -144,11 +144,11 @@ static unsigned long cpu_variant;
 static int target_oabi = 0;
 
 /* Flags stored in private area of BFD structure.  */
-static int uses_apcs_26      = false;
-static int atpcs             = false;
-static int support_interwork = false;
-static int uses_apcs_float   = false;
-static int pic_code          = false;
+static int uses_apcs_26      = FALSE;
+static int atpcs             = FALSE;
+static int support_interwork = FALSE;
+static int uses_apcs_float   = FALSE;
+static int pic_code          = FALSE;
 
 /* Variables that we set while parsing command-line options.  Once all
    options have been read we re-process these values to set the real
@@ -342,8 +342,8 @@ static const struct asm_cond conds[] =
 
 struct asm_psr
 {
-  const char *  template;
-  boolean       cpsr;
+  const char *template;
+  bfd_boolean cpsr;
   unsigned long field;
 };
 
@@ -360,143 +360,143 @@ struct asm_psr
 
 static const struct asm_psr psrs[] =
 {
-  {"CPSR",	true,  PSR_c | PSR_f},
-  {"CPSR_all",	true,  PSR_c | PSR_f},
-  {"SPSR",	false, PSR_c | PSR_f},
-  {"SPSR_all",	false, PSR_c | PSR_f},
-  {"CPSR_flg",	true,  PSR_f},
-  {"CPSR_f",    true,  PSR_f},
-  {"SPSR_flg",	false, PSR_f},
-  {"SPSR_f",    false, PSR_f},
-  {"CPSR_c",	true,  PSR_c},
-  {"CPSR_ctl",	true,  PSR_c},
-  {"SPSR_c",	false, PSR_c},
-  {"SPSR_ctl",	false, PSR_c},
-  {"CPSR_x",    true,  PSR_x},
-  {"CPSR_s",    true,  PSR_s},
-  {"SPSR_x",    false, PSR_x},
-  {"SPSR_s",    false, PSR_s},
+  {"CPSR",	TRUE,  PSR_c | PSR_f},
+  {"CPSR_all",	TRUE,  PSR_c | PSR_f},
+  {"SPSR",	FALSE, PSR_c | PSR_f},
+  {"SPSR_all",	FALSE, PSR_c | PSR_f},
+  {"CPSR_flg",	TRUE,  PSR_f},
+  {"CPSR_f",    TRUE,  PSR_f},
+  {"SPSR_flg",	FALSE, PSR_f},
+  {"SPSR_f",    FALSE, PSR_f},
+  {"CPSR_c",	TRUE,  PSR_c},
+  {"CPSR_ctl",	TRUE,  PSR_c},
+  {"SPSR_c",	FALSE, PSR_c},
+  {"SPSR_ctl",	FALSE, PSR_c},
+  {"CPSR_x",    TRUE,  PSR_x},
+  {"CPSR_s",    TRUE,  PSR_s},
+  {"SPSR_x",    FALSE, PSR_x},
+  {"SPSR_s",    FALSE, PSR_s},
   /* Combinations of flags.  */
-  {"CPSR_fs",	true, PSR_f | PSR_s},
-  {"CPSR_fx",	true, PSR_f | PSR_x},
-  {"CPSR_fc",	true, PSR_f | PSR_c},
-  {"CPSR_sf",	true, PSR_s | PSR_f},
-  {"CPSR_sx",	true, PSR_s | PSR_x},
-  {"CPSR_sc",	true, PSR_s | PSR_c},
-  {"CPSR_xf",	true, PSR_x | PSR_f},
-  {"CPSR_xs",	true, PSR_x | PSR_s},
-  {"CPSR_xc",	true, PSR_x | PSR_c},
-  {"CPSR_cf",	true, PSR_c | PSR_f},
-  {"CPSR_cs",	true, PSR_c | PSR_s},
-  {"CPSR_cx",	true, PSR_c | PSR_x},
-  {"CPSR_fsx",	true, PSR_f | PSR_s | PSR_x},
-  {"CPSR_fsc",	true, PSR_f | PSR_s | PSR_c},
-  {"CPSR_fxs",	true, PSR_f | PSR_x | PSR_s},
-  {"CPSR_fxc",	true, PSR_f | PSR_x | PSR_c},
-  {"CPSR_fcs",	true, PSR_f | PSR_c | PSR_s},
-  {"CPSR_fcx",	true, PSR_f | PSR_c | PSR_x},
-  {"CPSR_sfx",	true, PSR_s | PSR_f | PSR_x},
-  {"CPSR_sfc",	true, PSR_s | PSR_f | PSR_c},
-  {"CPSR_sxf",	true, PSR_s | PSR_x | PSR_f},
-  {"CPSR_sxc",	true, PSR_s | PSR_x | PSR_c},
-  {"CPSR_scf",	true, PSR_s | PSR_c | PSR_f},
-  {"CPSR_scx",	true, PSR_s | PSR_c | PSR_x},
-  {"CPSR_xfs",	true, PSR_x | PSR_f | PSR_s},
-  {"CPSR_xfc",	true, PSR_x | PSR_f | PSR_c},
-  {"CPSR_xsf",	true, PSR_x | PSR_s | PSR_f},
-  {"CPSR_xsc",	true, PSR_x | PSR_s | PSR_c},
-  {"CPSR_xcf",	true, PSR_x | PSR_c | PSR_f},
-  {"CPSR_xcs",	true, PSR_x | PSR_c | PSR_s},
-  {"CPSR_cfs",	true, PSR_c | PSR_f | PSR_s},
-  {"CPSR_cfx",	true, PSR_c | PSR_f | PSR_x},
-  {"CPSR_csf",	true, PSR_c | PSR_s | PSR_f},
-  {"CPSR_csx",	true, PSR_c | PSR_s | PSR_x},
-  {"CPSR_cxf",	true, PSR_c | PSR_x | PSR_f},
-  {"CPSR_cxs",	true, PSR_c | PSR_x | PSR_s},
-  {"CPSR_fsxc",	true, PSR_f | PSR_s | PSR_x | PSR_c},
-  {"CPSR_fscx",	true, PSR_f | PSR_s | PSR_c | PSR_x},
-  {"CPSR_fxsc",	true, PSR_f | PSR_x | PSR_s | PSR_c},
-  {"CPSR_fxcs",	true, PSR_f | PSR_x | PSR_c | PSR_s},
-  {"CPSR_fcsx",	true, PSR_f | PSR_c | PSR_s | PSR_x},
-  {"CPSR_fcxs",	true, PSR_f | PSR_c | PSR_x | PSR_s},
-  {"CPSR_sfxc",	true, PSR_s | PSR_f | PSR_x | PSR_c},
-  {"CPSR_sfcx",	true, PSR_s | PSR_f | PSR_c | PSR_x},
-  {"CPSR_sxfc",	true, PSR_s | PSR_x | PSR_f | PSR_c},
-  {"CPSR_sxcf",	true, PSR_s | PSR_x | PSR_c | PSR_f},
-  {"CPSR_scfx",	true, PSR_s | PSR_c | PSR_f | PSR_x},
-  {"CPSR_scxf",	true, PSR_s | PSR_c | PSR_x | PSR_f},
-  {"CPSR_xfsc",	true, PSR_x | PSR_f | PSR_s | PSR_c},
-  {"CPSR_xfcs",	true, PSR_x | PSR_f | PSR_c | PSR_s},
-  {"CPSR_xsfc",	true, PSR_x | PSR_s | PSR_f | PSR_c},
-  {"CPSR_xscf",	true, PSR_x | PSR_s | PSR_c | PSR_f},
-  {"CPSR_xcfs",	true, PSR_x | PSR_c | PSR_f | PSR_s},
-  {"CPSR_xcsf",	true, PSR_x | PSR_c | PSR_s | PSR_f},
-  {"CPSR_cfsx",	true, PSR_c | PSR_f | PSR_s | PSR_x},
-  {"CPSR_cfxs",	true, PSR_c | PSR_f | PSR_x | PSR_s},
-  {"CPSR_csfx",	true, PSR_c | PSR_s | PSR_f | PSR_x},
-  {"CPSR_csxf",	true, PSR_c | PSR_s | PSR_x | PSR_f},
-  {"CPSR_cxfs",	true, PSR_c | PSR_x | PSR_f | PSR_s},
-  {"CPSR_cxsf",	true, PSR_c | PSR_x | PSR_s | PSR_f},
-  {"SPSR_fs",	false, PSR_f | PSR_s},
-  {"SPSR_fx",	false, PSR_f | PSR_x},
-  {"SPSR_fc",	false, PSR_f | PSR_c},
-  {"SPSR_sf",	false, PSR_s | PSR_f},
-  {"SPSR_sx",	false, PSR_s | PSR_x},
-  {"SPSR_sc",	false, PSR_s | PSR_c},
-  {"SPSR_xf",	false, PSR_x | PSR_f},
-  {"SPSR_xs",	false, PSR_x | PSR_s},
-  {"SPSR_xc",	false, PSR_x | PSR_c},
-  {"SPSR_cf",	false, PSR_c | PSR_f},
-  {"SPSR_cs",	false, PSR_c | PSR_s},
-  {"SPSR_cx",	false, PSR_c | PSR_x},
-  {"SPSR_fsx",	false, PSR_f | PSR_s | PSR_x},
-  {"SPSR_fsc",	false, PSR_f | PSR_s | PSR_c},
-  {"SPSR_fxs",	false, PSR_f | PSR_x | PSR_s},
-  {"SPSR_fxc",	false, PSR_f | PSR_x | PSR_c},
-  {"SPSR_fcs",	false, PSR_f | PSR_c | PSR_s},
-  {"SPSR_fcx",	false, PSR_f | PSR_c | PSR_x},
-  {"SPSR_sfx",	false, PSR_s | PSR_f | PSR_x},
-  {"SPSR_sfc",	false, PSR_s | PSR_f | PSR_c},
-  {"SPSR_sxf",	false, PSR_s | PSR_x | PSR_f},
-  {"SPSR_sxc",	false, PSR_s | PSR_x | PSR_c},
-  {"SPSR_scf",	false, PSR_s | PSR_c | PSR_f},
-  {"SPSR_scx",	false, PSR_s | PSR_c | PSR_x},
-  {"SPSR_xfs",	false, PSR_x | PSR_f | PSR_s},
-  {"SPSR_xfc",	false, PSR_x | PSR_f | PSR_c},
-  {"SPSR_xsf",	false, PSR_x | PSR_s | PSR_f},
-  {"SPSR_xsc",	false, PSR_x | PSR_s | PSR_c},
-  {"SPSR_xcf",	false, PSR_x | PSR_c | PSR_f},
-  {"SPSR_xcs",	false, PSR_x | PSR_c | PSR_s},
-  {"SPSR_cfs",	false, PSR_c | PSR_f | PSR_s},
-  {"SPSR_cfx",	false, PSR_c | PSR_f | PSR_x},
-  {"SPSR_csf",	false, PSR_c | PSR_s | PSR_f},
-  {"SPSR_csx",	false, PSR_c | PSR_s | PSR_x},
-  {"SPSR_cxf",	false, PSR_c | PSR_x | PSR_f},
-  {"SPSR_cxs",	false, PSR_c | PSR_x | PSR_s},
-  {"SPSR_fsxc",	false, PSR_f | PSR_s | PSR_x | PSR_c},
-  {"SPSR_fscx",	false, PSR_f | PSR_s | PSR_c | PSR_x},
-  {"SPSR_fxsc",	false, PSR_f | PSR_x | PSR_s | PSR_c},
-  {"SPSR_fxcs",	false, PSR_f | PSR_x | PSR_c | PSR_s},
-  {"SPSR_fcsx",	false, PSR_f | PSR_c | PSR_s | PSR_x},
-  {"SPSR_fcxs",	false, PSR_f | PSR_c | PSR_x | PSR_s},
-  {"SPSR_sfxc",	false, PSR_s | PSR_f | PSR_x | PSR_c},
-  {"SPSR_sfcx",	false, PSR_s | PSR_f | PSR_c | PSR_x},
-  {"SPSR_sxfc",	false, PSR_s | PSR_x | PSR_f | PSR_c},
-  {"SPSR_sxcf",	false, PSR_s | PSR_x | PSR_c | PSR_f},
-  {"SPSR_scfx",	false, PSR_s | PSR_c | PSR_f | PSR_x},
-  {"SPSR_scxf",	false, PSR_s | PSR_c | PSR_x | PSR_f},
-  {"SPSR_xfsc",	false, PSR_x | PSR_f | PSR_s | PSR_c},
-  {"SPSR_xfcs",	false, PSR_x | PSR_f | PSR_c | PSR_s},
-  {"SPSR_xsfc",	false, PSR_x | PSR_s | PSR_f | PSR_c},
-  {"SPSR_xscf",	false, PSR_x | PSR_s | PSR_c | PSR_f},
-  {"SPSR_xcfs",	false, PSR_x | PSR_c | PSR_f | PSR_s},
-  {"SPSR_xcsf",	false, PSR_x | PSR_c | PSR_s | PSR_f},
-  {"SPSR_cfsx",	false, PSR_c | PSR_f | PSR_s | PSR_x},
-  {"SPSR_cfxs",	false, PSR_c | PSR_f | PSR_x | PSR_s},
-  {"SPSR_csfx",	false, PSR_c | PSR_s | PSR_f | PSR_x},
-  {"SPSR_csxf",	false, PSR_c | PSR_s | PSR_x | PSR_f},
-  {"SPSR_cxfs",	false, PSR_c | PSR_x | PSR_f | PSR_s},
-  {"SPSR_cxsf",	false, PSR_c | PSR_x | PSR_s | PSR_f},
+  {"CPSR_fs",	TRUE, PSR_f | PSR_s},
+  {"CPSR_fx",	TRUE, PSR_f | PSR_x},
+  {"CPSR_fc",	TRUE, PSR_f | PSR_c},
+  {"CPSR_sf",	TRUE, PSR_s | PSR_f},
+  {"CPSR_sx",	TRUE, PSR_s | PSR_x},
+  {"CPSR_sc",	TRUE, PSR_s | PSR_c},
+  {"CPSR_xf",	TRUE, PSR_x | PSR_f},
+  {"CPSR_xs",	TRUE, PSR_x | PSR_s},
+  {"CPSR_xc",	TRUE, PSR_x | PSR_c},
+  {"CPSR_cf",	TRUE, PSR_c | PSR_f},
+  {"CPSR_cs",	TRUE, PSR_c | PSR_s},
+  {"CPSR_cx",	TRUE, PSR_c | PSR_x},
+  {"CPSR_fsx",	TRUE, PSR_f | PSR_s | PSR_x},
+  {"CPSR_fsc",	TRUE, PSR_f | PSR_s | PSR_c},
+  {"CPSR_fxs",	TRUE, PSR_f | PSR_x | PSR_s},
+  {"CPSR_fxc",	TRUE, PSR_f | PSR_x | PSR_c},
+  {"CPSR_fcs",	TRUE, PSR_f | PSR_c | PSR_s},
+  {"CPSR_fcx",	TRUE, PSR_f | PSR_c | PSR_x},
+  {"CPSR_sfx",	TRUE, PSR_s | PSR_f | PSR_x},
+  {"CPSR_sfc",	TRUE, PSR_s | PSR_f | PSR_c},
+  {"CPSR_sxf",	TRUE, PSR_s | PSR_x | PSR_f},
+  {"CPSR_sxc",	TRUE, PSR_s | PSR_x | PSR_c},
+  {"CPSR_scf",	TRUE, PSR_s | PSR_c | PSR_f},
+  {"CPSR_scx",	TRUE, PSR_s | PSR_c | PSR_x},
+  {"CPSR_xfs",	TRUE, PSR_x | PSR_f | PSR_s},
+  {"CPSR_xfc",	TRUE, PSR_x | PSR_f | PSR_c},
+  {"CPSR_xsf",	TRUE, PSR_x | PSR_s | PSR_f},
+  {"CPSR_xsc",	TRUE, PSR_x | PSR_s | PSR_c},
+  {"CPSR_xcf",	TRUE, PSR_x | PSR_c | PSR_f},
+  {"CPSR_xcs",	TRUE, PSR_x | PSR_c | PSR_s},
+  {"CPSR_cfs",	TRUE, PSR_c | PSR_f | PSR_s},
+  {"CPSR_cfx",	TRUE, PSR_c | PSR_f | PSR_x},
+  {"CPSR_csf",	TRUE, PSR_c | PSR_s | PSR_f},
+  {"CPSR_csx",	TRUE, PSR_c | PSR_s | PSR_x},
+  {"CPSR_cxf",	TRUE, PSR_c | PSR_x | PSR_f},
+  {"CPSR_cxs",	TRUE, PSR_c | PSR_x | PSR_s},
+  {"CPSR_fsxc",	TRUE, PSR_f | PSR_s | PSR_x | PSR_c},
+  {"CPSR_fscx",	TRUE, PSR_f | PSR_s | PSR_c | PSR_x},
+  {"CPSR_fxsc",	TRUE, PSR_f | PSR_x | PSR_s | PSR_c},
+  {"CPSR_fxcs",	TRUE, PSR_f | PSR_x | PSR_c | PSR_s},
+  {"CPSR_fcsx",	TRUE, PSR_f | PSR_c | PSR_s | PSR_x},
+  {"CPSR_fcxs",	TRUE, PSR_f | PSR_c | PSR_x | PSR_s},
+  {"CPSR_sfxc",	TRUE, PSR_s | PSR_f | PSR_x | PSR_c},
+  {"CPSR_sfcx",	TRUE, PSR_s | PSR_f | PSR_c | PSR_x},
+  {"CPSR_sxfc",	TRUE, PSR_s | PSR_x | PSR_f | PSR_c},
+  {"CPSR_sxcf",	TRUE, PSR_s | PSR_x | PSR_c | PSR_f},
+  {"CPSR_scfx",	TRUE, PSR_s | PSR_c | PSR_f | PSR_x},
+  {"CPSR_scxf",	TRUE, PSR_s | PSR_c | PSR_x | PSR_f},
+  {"CPSR_xfsc",	TRUE, PSR_x | PSR_f | PSR_s | PSR_c},
+  {"CPSR_xfcs",	TRUE, PSR_x | PSR_f | PSR_c | PSR_s},
+  {"CPSR_xsfc",	TRUE, PSR_x | PSR_s | PSR_f | PSR_c},
+  {"CPSR_xscf",	TRUE, PSR_x | PSR_s | PSR_c | PSR_f},
+  {"CPSR_xcfs",	TRUE, PSR_x | PSR_c | PSR_f | PSR_s},
+  {"CPSR_xcsf",	TRUE, PSR_x | PSR_c | PSR_s | PSR_f},
+  {"CPSR_cfsx",	TRUE, PSR_c | PSR_f | PSR_s | PSR_x},
+  {"CPSR_cfxs",	TRUE, PSR_c | PSR_f | PSR_x | PSR_s},
+  {"CPSR_csfx",	TRUE, PSR_c | PSR_s | PSR_f | PSR_x},
+  {"CPSR_csxf",	TRUE, PSR_c | PSR_s | PSR_x | PSR_f},
+  {"CPSR_cxfs",	TRUE, PSR_c | PSR_x | PSR_f | PSR_s},
+  {"CPSR_cxsf",	TRUE, PSR_c | PSR_x | PSR_s | PSR_f},
+  {"SPSR_fs",	FALSE, PSR_f | PSR_s},
+  {"SPSR_fx",	FALSE, PSR_f | PSR_x},
+  {"SPSR_fc",	FALSE, PSR_f | PSR_c},
+  {"SPSR_sf",	FALSE, PSR_s | PSR_f},
+  {"SPSR_sx",	FALSE, PSR_s | PSR_x},
+  {"SPSR_sc",	FALSE, PSR_s | PSR_c},
+  {"SPSR_xf",	FALSE, PSR_x | PSR_f},
+  {"SPSR_xs",	FALSE, PSR_x | PSR_s},
+  {"SPSR_xc",	FALSE, PSR_x | PSR_c},
+  {"SPSR_cf",	FALSE, PSR_c | PSR_f},
+  {"SPSR_cs",	FALSE, PSR_c | PSR_s},
+  {"SPSR_cx",	FALSE, PSR_c | PSR_x},
+  {"SPSR_fsx",	FALSE, PSR_f | PSR_s | PSR_x},
+  {"SPSR_fsc",	FALSE, PSR_f | PSR_s | PSR_c},
+  {"SPSR_fxs",	FALSE, PSR_f | PSR_x | PSR_s},
+  {"SPSR_fxc",	FALSE, PSR_f | PSR_x | PSR_c},
+  {"SPSR_fcs",	FALSE, PSR_f | PSR_c | PSR_s},
+  {"SPSR_fcx",	FALSE, PSR_f | PSR_c | PSR_x},
+  {"SPSR_sfx",	FALSE, PSR_s | PSR_f | PSR_x},
+  {"SPSR_sfc",	FALSE, PSR_s | PSR_f | PSR_c},
+  {"SPSR_sxf",	FALSE, PSR_s | PSR_x | PSR_f},
+  {"SPSR_sxc",	FALSE, PSR_s | PSR_x | PSR_c},
+  {"SPSR_scf",	FALSE, PSR_s | PSR_c | PSR_f},
+  {"SPSR_scx",	FALSE, PSR_s | PSR_c | PSR_x},
+  {"SPSR_xfs",	FALSE, PSR_x | PSR_f | PSR_s},
+  {"SPSR_xfc",	FALSE, PSR_x | PSR_f | PSR_c},
+  {"SPSR_xsf",	FALSE, PSR_x | PSR_s | PSR_f},
+  {"SPSR_xsc",	FALSE, PSR_x | PSR_s | PSR_c},
+  {"SPSR_xcf",	FALSE, PSR_x | PSR_c | PSR_f},
+  {"SPSR_xcs",	FALSE, PSR_x | PSR_c | PSR_s},
+  {"SPSR_cfs",	FALSE, PSR_c | PSR_f | PSR_s},
+  {"SPSR_cfx",	FALSE, PSR_c | PSR_f | PSR_x},
+  {"SPSR_csf",	FALSE, PSR_c | PSR_s | PSR_f},
+  {"SPSR_csx",	FALSE, PSR_c | PSR_s | PSR_x},
+  {"SPSR_cxf",	FALSE, PSR_c | PSR_x | PSR_f},
+  {"SPSR_cxs",	FALSE, PSR_c | PSR_x | PSR_s},
+  {"SPSR_fsxc",	FALSE, PSR_f | PSR_s | PSR_x | PSR_c},
+  {"SPSR_fscx",	FALSE, PSR_f | PSR_s | PSR_c | PSR_x},
+  {"SPSR_fxsc",	FALSE, PSR_f | PSR_x | PSR_s | PSR_c},
+  {"SPSR_fxcs",	FALSE, PSR_f | PSR_x | PSR_c | PSR_s},
+  {"SPSR_fcsx",	FALSE, PSR_f | PSR_c | PSR_s | PSR_x},
+  {"SPSR_fcxs",	FALSE, PSR_f | PSR_c | PSR_x | PSR_s},
+  {"SPSR_sfxc",	FALSE, PSR_s | PSR_f | PSR_x | PSR_c},
+  {"SPSR_sfcx",	FALSE, PSR_s | PSR_f | PSR_c | PSR_x},
+  {"SPSR_sxfc",	FALSE, PSR_s | PSR_x | PSR_f | PSR_c},
+  {"SPSR_sxcf",	FALSE, PSR_s | PSR_x | PSR_c | PSR_f},
+  {"SPSR_scfx",	FALSE, PSR_s | PSR_c | PSR_f | PSR_x},
+  {"SPSR_scxf",	FALSE, PSR_s | PSR_c | PSR_x | PSR_f},
+  {"SPSR_xfsc",	FALSE, PSR_x | PSR_f | PSR_s | PSR_c},
+  {"SPSR_xfcs",	FALSE, PSR_x | PSR_f | PSR_c | PSR_s},
+  {"SPSR_xsfc",	FALSE, PSR_x | PSR_s | PSR_f | PSR_c},
+  {"SPSR_xscf",	FALSE, PSR_x | PSR_s | PSR_c | PSR_f},
+  {"SPSR_xcfs",	FALSE, PSR_x | PSR_c | PSR_f | PSR_s},
+  {"SPSR_xcsf",	FALSE, PSR_x | PSR_c | PSR_s | PSR_f},
+  {"SPSR_cfsx",	FALSE, PSR_c | PSR_f | PSR_s | PSR_x},
+  {"SPSR_cfxs",	FALSE, PSR_c | PSR_f | PSR_x | PSR_s},
+  {"SPSR_csfx",	FALSE, PSR_c | PSR_s | PSR_f | PSR_x},
+  {"SPSR_csxf",	FALSE, PSR_c | PSR_s | PSR_x | PSR_f},
+  {"SPSR_cxfs",	FALSE, PSR_c | PSR_x | PSR_f | PSR_s},
+  {"SPSR_cxsf",	FALSE, PSR_c | PSR_x | PSR_s | PSR_f},
 };
 
 enum vfp_dp_reg_pos
@@ -2113,7 +2113,7 @@ static int arm_parse_fpu PARAMS ((char *));
 */
 
 symbolS *  last_label_seen;
-static int label_is_thumb_function_name = false;
+static int label_is_thumb_function_name = FALSE;
 
 /* Literal Pool stuff.  */
 
@@ -2504,7 +2504,7 @@ s_thumb_func (ignore)
 
   /* The following label is the name/address of the start of a Thumb function.
      We need to know this for the interworking support.  */
-  label_is_thumb_function_name = true;
+  label_is_thumb_function_name = TRUE;
 
   demand_empty_rest_of_line ();
 }
@@ -4449,7 +4449,7 @@ my_get_float_expression (str)
   return -1;
 }
 
-/* Return true if anything in the expression is a bignum.  */
+/* Return TRUE if anything in the expression is a bignum.  */
 
 static int
 walk_no_bignums (sp)
@@ -11311,7 +11311,7 @@ arm_frob_label (sym)
 
       THUMB_SET_FUNC (sym, 1);
 
-      label_is_thumb_function_name = false;
+      label_is_thumb_function_name = FALSE;
     }
 }
 
@@ -11439,7 +11439,7 @@ arm_validate_fix (fixP)
    be resolved before the binbary is emitted, so it is safe to say that
    it is adjustable.  */
 
-boolean
+bfd_boolean
 arm_fix_adjustable (fixP)
    fixS * fixP;
 {
@@ -11462,7 +11462,7 @@ arm_fix_adjustable (fixP)
    addresses also ought to have their bottom bit set (assuming that
    they reside in Thumb code), but at the moment they will not.  */
 
-boolean
+bfd_boolean
 arm_fix_adjustable (fixP)
    fixS * fixP;
 {

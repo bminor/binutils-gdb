@@ -62,21 +62,31 @@ static struct bfd_hash_entry *
 funcvec_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 
-static boolean
+static bfd_boolean
 funcvec_hash_table_init
   PARAMS ((struct funcvec_hash_table *, bfd *,
-           struct bfd_hash_entry *(*) PARAMS ((struct bfd_hash_entry *,
-                                               struct bfd_hash_table *,
-                                               const char *))));
+           struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
+				       struct bfd_hash_table *,
+				       const char *)));
 
-static bfd_reloc_status_type special PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static int select_reloc PARAMS ((reloc_howto_type *));
-static void rtype2howto PARAMS ((arelent *, struct internal_reloc *));
-static void reloc_processing PARAMS ((arelent *, struct internal_reloc *, asymbol **, bfd *, asection *));
-static boolean h8300_symbol_address_p PARAMS ((bfd *, asection *, bfd_vma));
-static int h8300_reloc16_estimate PARAMS ((bfd *, asection *, arelent *, unsigned int, struct bfd_link_info *));
-static void h8300_reloc16_extra_cases PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *, arelent *, bfd_byte *, unsigned int *, unsigned int *));
-static boolean h8300_bfd_link_add_symbols PARAMS ((bfd *, struct bfd_link_info *));
+static bfd_reloc_status_type special
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static int select_reloc
+  PARAMS ((reloc_howto_type *));
+static void rtype2howto
+  PARAMS ((arelent *, struct internal_reloc *));
+static void reloc_processing
+  PARAMS ((arelent *, struct internal_reloc *, asymbol **, bfd *, asection *));
+static bfd_boolean h8300_symbol_address_p
+  PARAMS ((bfd *, asection *, bfd_vma));
+static int h8300_reloc16_estimate
+  PARAMS ((bfd *, asection *, arelent *, unsigned int,
+    struct bfd_link_info *));
+static void h8300_reloc16_extra_cases
+  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *, arelent *,
+    bfd_byte *, unsigned int *, unsigned int *));
+static bfd_boolean h8300_bfd_link_add_symbols
+  PARAMS ((bfd *, struct bfd_link_info *));
 
 /* To lookup a value in the function vector hash table.  */
 #define funcvec_hash_lookup(table, string, create, copy) \
@@ -159,13 +169,13 @@ funcvec_hash_newfunc (entry, gen_table, string)
 
 /* Initialize the function vector hash table.  */
 
-static boolean
+static bfd_boolean
 funcvec_hash_table_init (table, abfd, newfunc)
      struct funcvec_hash_table *table;
      bfd *abfd;
-     struct bfd_hash_entry *(*newfunc) PARAMS ((struct bfd_hash_entry *,
-						struct bfd_hash_table *,
-						const char *));
+     struct bfd_hash_entry *(*newfunc)
+       PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *,
+		const char *));
 {
   /* Initialize our local fields, then call the generic initialization
      routine.  */
@@ -232,37 +242,37 @@ special (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 }
 
 static reloc_howto_type howto_table[] = {
-  HOWTO (R_RELBYTE, 0, 0, 8, false, 0, complain_overflow_bitfield, special, "8", false, 0x000000ff, 0x000000ff, false),
-  HOWTO (R_RELWORD, 0, 1, 16, false, 0, complain_overflow_bitfield, special, "16", false, 0x0000ffff, 0x0000ffff, false),
-  HOWTO (R_RELLONG, 0, 2, 32, false, 0, complain_overflow_bitfield, special, "32", false, 0xffffffff, 0xffffffff, false),
-  HOWTO (R_PCRBYTE, 0, 0, 8, true, 0, complain_overflow_signed, special, "DISP8", false, 0x000000ff, 0x000000ff, true),
-  HOWTO (R_PCRWORD, 0, 1, 16, true, 0, complain_overflow_signed, special, "DISP16", false, 0x0000ffff, 0x0000ffff, true),
-  HOWTO (R_PCRLONG, 0, 2, 32, true, 0, complain_overflow_signed, special, "DISP32", false, 0xffffffff, 0xffffffff, true),
-  HOWTO (R_MOV16B1, 0, 1, 16, false, 0, complain_overflow_bitfield, special, "relaxable mov.b:16", false, 0x0000ffff, 0x0000ffff, false),
-  HOWTO (R_MOV16B2, 0, 1, 8, false, 0, complain_overflow_bitfield, special, "relaxed mov.b:16", false, 0x000000ff, 0x000000ff, false),
-  HOWTO (R_JMP1, 0, 1, 16, false, 0, complain_overflow_bitfield, special, "16/pcrel", false, 0x0000ffff, 0x0000ffff, false),
-  HOWTO (R_JMP2, 0, 0, 8, false, 0, complain_overflow_bitfield, special, "pcrecl/16", false, 0x000000ff, 0x000000ff, false),
-  HOWTO (R_JMPL1, 0, 2, 32, false, 0, complain_overflow_bitfield, special, "24/pcrell", false, 0x00ffffff, 0x00ffffff, false),
-  HOWTO (R_JMPL2, 0, 0, 8, false, 0, complain_overflow_bitfield, special, "pc8/24", false, 0x000000ff, 0x000000ff, false),
-  HOWTO (R_MOV24B1, 0, 1, 32, false, 0, complain_overflow_bitfield, special, "relaxable mov.b:24", false, 0xffffffff, 0xffffffff, false),
-  HOWTO (R_MOV24B2, 0, 1, 8, false, 0, complain_overflow_bitfield, special, "relaxed mov.b:24", false, 0x0000ffff, 0x0000ffff, false),
+  HOWTO (R_RELBYTE, 0, 0, 8, FALSE, 0, complain_overflow_bitfield, special, "8", FALSE, 0x000000ff, 0x000000ff, FALSE),
+  HOWTO (R_RELWORD, 0, 1, 16, FALSE, 0, complain_overflow_bitfield, special, "16", FALSE, 0x0000ffff, 0x0000ffff, FALSE),
+  HOWTO (R_RELLONG, 0, 2, 32, FALSE, 0, complain_overflow_bitfield, special, "32", FALSE, 0xffffffff, 0xffffffff, FALSE),
+  HOWTO (R_PCRBYTE, 0, 0, 8, TRUE, 0, complain_overflow_signed, special, "DISP8", FALSE, 0x000000ff, 0x000000ff, TRUE),
+  HOWTO (R_PCRWORD, 0, 1, 16, TRUE, 0, complain_overflow_signed, special, "DISP16", FALSE, 0x0000ffff, 0x0000ffff, TRUE),
+  HOWTO (R_PCRLONG, 0, 2, 32, TRUE, 0, complain_overflow_signed, special, "DISP32", FALSE, 0xffffffff, 0xffffffff, TRUE),
+  HOWTO (R_MOV16B1, 0, 1, 16, FALSE, 0, complain_overflow_bitfield, special, "relaxable mov.b:16", FALSE, 0x0000ffff, 0x0000ffff, FALSE),
+  HOWTO (R_MOV16B2, 0, 1, 8, FALSE, 0, complain_overflow_bitfield, special, "relaxed mov.b:16", FALSE, 0x000000ff, 0x000000ff, FALSE),
+  HOWTO (R_JMP1, 0, 1, 16, FALSE, 0, complain_overflow_bitfield, special, "16/pcrel", FALSE, 0x0000ffff, 0x0000ffff, FALSE),
+  HOWTO (R_JMP2, 0, 0, 8, FALSE, 0, complain_overflow_bitfield, special, "pcrecl/16", FALSE, 0x000000ff, 0x000000ff, FALSE),
+  HOWTO (R_JMPL1, 0, 2, 32, FALSE, 0, complain_overflow_bitfield, special, "24/pcrell", FALSE, 0x00ffffff, 0x00ffffff, FALSE),
+  HOWTO (R_JMPL2, 0, 0, 8, FALSE, 0, complain_overflow_bitfield, special, "pc8/24", FALSE, 0x000000ff, 0x000000ff, FALSE),
+  HOWTO (R_MOV24B1, 0, 1, 32, FALSE, 0, complain_overflow_bitfield, special, "relaxable mov.b:24", FALSE, 0xffffffff, 0xffffffff, FALSE),
+  HOWTO (R_MOV24B2, 0, 1, 8, FALSE, 0, complain_overflow_bitfield, special, "relaxed mov.b:24", FALSE, 0x0000ffff, 0x0000ffff, FALSE),
 
   /* An indirect reference to a function.  This causes the function's address
      to be added to the function vector in lo-mem and puts the address of
      the function vector's entry in the jsr instruction.  */
-  HOWTO (R_MEM_INDIRECT, 0, 0, 8, false, 0, complain_overflow_bitfield, special, "8/indirect", false, 0x000000ff, 0x000000ff, false),
+  HOWTO (R_MEM_INDIRECT, 0, 0, 8, FALSE, 0, complain_overflow_bitfield, special, "8/indirect", FALSE, 0x000000ff, 0x000000ff, FALSE),
 
   /* Internal reloc for relaxing.  This is created when a 16bit pc-relative
      branch is turned into an 8bit pc-relative branch.  */
-  HOWTO (R_PCRWORD_B, 0, 0, 8, true, 0, complain_overflow_bitfield, special, "relaxed bCC:16", false, 0x000000ff, 0x000000ff, false),
+  HOWTO (R_PCRWORD_B, 0, 0, 8, TRUE, 0, complain_overflow_bitfield, special, "relaxed bCC:16", FALSE, 0x000000ff, 0x000000ff, FALSE),
 
-  HOWTO (R_MOVL1, 0, 2, 32, false, 0, complain_overflow_bitfield,special, "32/24 relaxable move", false, 0xffffffff, 0xffffffff, false),
+  HOWTO (R_MOVL1, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,special, "32/24 relaxable move", FALSE, 0xffffffff, 0xffffffff, FALSE),
 
-  HOWTO (R_MOVL2, 0, 1, 16, false, 0, complain_overflow_bitfield, special, "32/24 relaxed move", false, 0x0000ffff, 0x0000ffff, false),
+  HOWTO (R_MOVL2, 0, 1, 16, FALSE, 0, complain_overflow_bitfield, special, "32/24 relaxed move", FALSE, 0x0000ffff, 0x0000ffff, FALSE),
 
-  HOWTO (R_BCC_INV, 0, 0, 8, true, 0, complain_overflow_signed, special, "DISP8 inverted", false, 0x000000ff, 0x000000ff, true),
+  HOWTO (R_BCC_INV, 0, 0, 8, TRUE, 0, complain_overflow_signed, special, "DISP8 inverted", FALSE, 0x000000ff, 0x000000ff, TRUE),
 
-  HOWTO (R_JMP_DEL, 0, 0, 8, true, 0, complain_overflow_signed, special, "Deleted jump", false, 0x000000ff, 0x000000ff, true),
+  HOWTO (R_JMP_DEL, 0, 0, 8, TRUE, 0, complain_overflow_signed, special, "Deleted jump", FALSE, 0x000000ff, 0x000000ff, TRUE),
 };
 
 /* Turn a howto into a reloc number.  */
@@ -401,7 +411,7 @@ reloc_processing (relent, reloc, symbols, abfd, section)
 #endif
 }
 
-static boolean
+static bfd_boolean
 h8300_symbol_address_p (abfd, input_section, address)
      bfd *abfd;
      asection *input_section;
@@ -421,10 +431,10 @@ h8300_symbol_address_p (abfd, input_section, address)
 	  && (input_section->output_section->vma
 	      + input_section->output_offset
 	      + p->value) == address)
-	return true;
+	return TRUE;
       s++;
     }
-  return false;
+  return FALSE;
 }
 
 /* If RELOC represents a relaxable instruction/reloc, change it into
@@ -505,7 +515,7 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
 
 	     Only perform this optimisation for jumps (code 0x5a) not
 	     subroutine calls, as otherwise it could transform:
-	     
+
 	     	             mov.w   r0,r0
 	     	             beq     .L1
 	           	     jsr     @_bar
@@ -516,7 +526,7 @@ h8300_reloc16_estimate (abfd, input_section, reloc, shrink, link_info)
 	     	             bne     _bar
 	     	             rts
 	     	      _bar:  rts
-	     
+
 	     which changes the call (jsr) into a branch (bne).  */
 	  if (code == 0x5a
 	      && gap <= 126
@@ -1131,7 +1141,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	  }
 
 	ftab = h8300_coff_hash_table (link_info)->funcvec_hash_table;
-	h = funcvec_hash_lookup (ftab, name, false, false);
+	h = funcvec_hash_lookup (ftab, name, FALSE, FALSE);
 
 	/* This shouldn't ever happen.  If it does that means we've got
 	   data corruption of some kind.  Aborting seems like a reasonable
@@ -1196,7 +1206,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
    from this BFD to the bfd linker hash table.  It may add a few
    selected static symbols to the bfd linker hash table.  */
 
-static boolean
+static bfd_boolean
 h8300_bfd_link_add_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -1222,21 +1232,21 @@ h8300_bfd_link_add_symbols (abfd, info)
 	  || ! bfd_set_section_flags (abfd,
 				      h8300_coff_hash_table(info)->vectors_sec,
 				      flags))
-	return false;
+	return FALSE;
 
       /* Also create the vector hash table.  */
       amt = sizeof (struct funcvec_hash_table);
       funcvec_hash_table = (struct funcvec_hash_table *) bfd_alloc (abfd, amt);
 
       if (!funcvec_hash_table)
-	return false;
+	return FALSE;
 
       /* And initialize the funcvec hash table.  */
       if (!funcvec_hash_table_init (funcvec_hash_table, abfd,
 				    funcvec_hash_newfunc))
 	{
 	  bfd_release (abfd, funcvec_hash_table);
-	  return false;
+	  return FALSE;
 	}
 
       /* Store away a pointer to the funcvec hash table.  */
@@ -1264,7 +1274,7 @@ h8300_bfd_link_add_symbols (abfd, info)
 
       relocs = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);
       if (!relocs)
-	return false;
+	return FALSE;
 
       /* The symbols should have been read in by _bfd_generic link_add_symbols
 	 call abovec, so we can cheat and use the pointer to them that was
@@ -1313,17 +1323,17 @@ h8300_bfd_link_add_symbols (abfd, info)
 
 	      /* Look this symbol up in the function vector hash table.  */
 	      ftab = h8300_coff_hash_table (info)->funcvec_hash_table;
-	      h = funcvec_hash_lookup (ftab, name, false, false);
+	      h = funcvec_hash_lookup (ftab, name, FALSE, FALSE);
 
 	      /* If this symbol isn't already in the hash table, add
 		 it and bump up the size of the hash table.  */
 	      if (h == NULL)
 		{
-		  h = funcvec_hash_lookup (ftab, name, true, true);
+		  h = funcvec_hash_lookup (ftab, name, TRUE, TRUE);
 		  if (h == NULL)
 		    {
 		      free (relocs);
-		      return false;
+		      return FALSE;
 		    }
 
 		  /* Bump the size of the vectors section.  Each vector
@@ -1354,7 +1364,7 @@ h8300_bfd_link_add_symbols (abfd, info)
       sec->contents = bfd_malloc (sec->_raw_size);
     }
 
-  return true;
+  return TRUE;
 }
 
 #define coff_reloc16_extra_cases h8300_reloc16_extra_cases

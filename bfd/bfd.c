@@ -53,12 +53,12 @@ CODE_FRAGMENT
 .
 .  {* Is the file descriptor being cached?  That is, can it be closed as
 .     needed, and re-opened when accessed later?  *}
-.  boolean cacheable;
+.  bfd_boolean cacheable;
 .
 .  {* Marks whether there was a default target specified when the
 .     BFD was opened. This is used to select which matching algorithm
 .     to use to choose the back end.  *}
-.  boolean target_defaulted;
+.  bfd_boolean target_defaulted;
 .
 .  {* The caching routines use these to maintain a
 .     least-recently-used list of BFDs.  *}
@@ -69,13 +69,13 @@ CODE_FRAGMENT
 .  ufile_ptr where;
 .
 .  {* ... and here: (``once'' means at least once).  *}
-.  boolean opened_once;
+.  bfd_boolean opened_once;
 .
 .  {* Set if we have a locally maintained mtime value, rather than
 .     getting it from the file each time.  *}
-.  boolean mtime_set;
+.  bfd_boolean mtime_set;
 .
-.  {* File modified time, if mtime_set is true.  *}
+.  {* File modified time, if mtime_set is TRUE.  *}
 .  long mtime;
 .
 .  {* Reserved for an unimplemented file locking extension.  *}
@@ -104,7 +104,7 @@ CODE_FRAGMENT
 .
 .  {* Remember when output has begun, to stop strange things
 .     from happening.  *}
-.  boolean output_has_begun;
+.  bfd_boolean output_has_begun;
 .
 .  {* A hash table for section names.  *}
 .  struct bfd_hash_table section_htab;
@@ -139,7 +139,7 @@ CODE_FRAGMENT
 .  struct _bfd *my_archive;     {* The containing archive BFD.  *}
 .  struct _bfd *next;           {* The next BFD in the archive.  *}
 .  struct _bfd *archive_head;   {* The first BFD in the archive.  *}
-.  boolean has_armap;
+.  bfd_boolean has_armap;
 .
 .  {* A chain of BFD structures involved in a link.  *}
 .  struct _bfd *link_next;
@@ -659,7 +659,7 @@ FUNCTION
 	bfd_set_file_flags
 
 SYNOPSIS
-	boolean bfd_set_file_flags(bfd *abfd, flagword flags);
+	bfd_boolean bfd_set_file_flags(bfd *abfd, flagword flags);
 
 DESCRIPTION
 	Set the flag word in the BFD @var{abfd} to the value @var{flags}.
@@ -674,7 +674,7 @@ DESCRIPTION
 
 */
 
-boolean
+bfd_boolean
 bfd_set_file_flags (abfd, flags)
      bfd *abfd;
      flagword flags;
@@ -682,23 +682,23 @@ bfd_set_file_flags (abfd, flags)
   if (abfd->format != bfd_object)
     {
       bfd_set_error (bfd_error_wrong_format);
-      return false;
+      return FALSE;
     }
 
   if (bfd_read_p (abfd))
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return false;
+      return FALSE;
     }
 
   bfd_get_file_flags (abfd) = flags;
   if ((flags & bfd_applicable_file_flags (abfd)) != flags)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return false;
+      return FALSE;
     }
 
-  return true;
+  return TRUE;
 }
 
 void
@@ -810,22 +810,22 @@ FUNCTION
 	bfd_set_start_address
 
 SYNOPSIS
- 	boolean bfd_set_start_address(bfd *abfd, bfd_vma vma);
+ 	bfd_boolean bfd_set_start_address(bfd *abfd, bfd_vma vma);
 
 DESCRIPTION
 	Make @var{vma} the entry point of output BFD @var{abfd}.
 
 RETURNS
-	Returns <<true>> on success, <<false>> otherwise.
+	Returns <<TRUE>> on success, <<FALSE>> otherwise.
 */
 
-boolean
+bfd_boolean
 bfd_set_start_address (abfd, vma)
      bfd *abfd;
      bfd_vma vma;
 {
   abfd->start_address = vma;
-  return true;
+  return TRUE;
 }
 
 /*
@@ -1013,11 +1013,11 @@ FUNCTION
 	bfd_copy_private_bfd_data
 
 SYNOPSIS
-	boolean bfd_copy_private_bfd_data(bfd *ibfd, bfd *obfd);
+	bfd_boolean bfd_copy_private_bfd_data(bfd *ibfd, bfd *obfd);
 
 DESCRIPTION
 	Copy private BFD information from the BFD @var{ibfd} to the
-	the BFD @var{obfd}.  Return <<true>> on success, <<false>> on error.
+	the BFD @var{obfd}.  Return <<TRUE>> on success, <<FALSE>> on error.
 	Possible error returns are:
 
 	o <<bfd_error_no_memory>> -
@@ -1034,12 +1034,12 @@ FUNCTION
 	bfd_merge_private_bfd_data
 
 SYNOPSIS
-	boolean bfd_merge_private_bfd_data(bfd *ibfd, bfd *obfd);
+	bfd_boolean bfd_merge_private_bfd_data(bfd *ibfd, bfd *obfd);
 
 DESCRIPTION
 	Merge private BFD information from the BFD @var{ibfd} to the
-	the output file BFD @var{obfd} when linking.  Return <<true>>
-	on success, <<false>> on error.  Possible error returns are:
+	the output file BFD @var{obfd} when linking.  Return <<TRUE>>
+	on success, <<FALSE>> on error.  Possible error returns are:
 
 	o <<bfd_error_no_memory>> -
 	Not enough memory exists to create private data for @var{obfd}.
@@ -1055,11 +1055,11 @@ FUNCTION
 	bfd_set_private_flags
 
 SYNOPSIS
-	boolean bfd_set_private_flags(bfd *abfd, flagword flags);
+	bfd_boolean bfd_set_private_flags(bfd *abfd, flagword flags);
 
 DESCRIPTION
 	Set private BFD flag information in the BFD @var{abfd}.
-	Return <<true>> on success, <<false>> on error.  Possible error
+	Return <<TRUE>> on success, <<FALSE>> on error.  Possible error
 	returns are:
 
 	o <<bfd_error_no_memory>> -
@@ -1152,7 +1152,7 @@ DESCRIPTION
 .extern bfd_byte *bfd_get_relocated_section_contents
 .	PARAMS ((bfd *, struct bfd_link_info *,
 .		  struct bfd_link_order *, bfd_byte *,
-.		  boolean, asymbol **));
+.		  bfd_boolean, asymbol **));
 .
 
 */
@@ -1164,12 +1164,12 @@ bfd_get_relocated_section_contents (abfd, link_info, link_order, data,
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     boolean relocateable;
+     bfd_boolean relocateable;
      asymbol **symbols;
 {
   bfd *abfd2;
   bfd_byte *(*fn) PARAMS ((bfd *, struct bfd_link_info *,
-			   struct bfd_link_order *, bfd_byte *, boolean,
+			   struct bfd_link_order *, bfd_byte *, bfd_boolean,
 			   asymbol **));
 
   if (link_order->type == bfd_indirect_link_order)
@@ -1188,17 +1188,17 @@ bfd_get_relocated_section_contents (abfd, link_info, link_order, data,
 
 /* Record information about an ELF program header.  */
 
-boolean
+bfd_boolean
 bfd_record_phdr (abfd, type, flags_valid, flags, at_valid, at,
 		 includes_filehdr, includes_phdrs, count, secs)
      bfd *abfd;
      unsigned long type;
-     boolean flags_valid;
+     bfd_boolean flags_valid;
      flagword flags;
-     boolean at_valid;
+     bfd_boolean at_valid;
      bfd_vma at;
-     boolean includes_filehdr;
-     boolean includes_phdrs;
+     bfd_boolean includes_filehdr;
+     bfd_boolean includes_phdrs;
      unsigned int count;
      asection **secs;
 {
@@ -1206,13 +1206,13 @@ bfd_record_phdr (abfd, type, flags_valid, flags, at_valid, at,
   bfd_size_type amt;
 
   if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
-    return true;
+    return TRUE;
 
   amt = sizeof (struct elf_segment_map);
   amt += ((bfd_size_type) count - 1) * sizeof (asection *);
   m = (struct elf_segment_map *) bfd_alloc (abfd, amt);
   if (m == NULL)
-    return false;
+    return FALSE;
 
   m->next = NULL;
   m->p_type = type;
@@ -1230,7 +1230,7 @@ bfd_record_phdr (abfd, type, flags_valid, flags, at_valid, at,
     ;
   *pm = m;
 
-  return true;
+  return TRUE;
 }
 
 void
@@ -1262,7 +1262,7 @@ FUNCTION
 	bfd_alt_mach_code
 
 SYNOPSIS
-	boolean bfd_alt_mach_code(bfd *abfd, int alternative);
+	bfd_boolean bfd_alt_mach_code(bfd *abfd, int alternative);
 
 DESCRIPTION
 
@@ -1273,7 +1273,7 @@ DESCRIPTION
 	machine codes.
 */
 
-boolean
+bfd_boolean
 bfd_alt_mach_code (abfd, alternative)
      bfd *abfd;
      int alternative;
@@ -1291,25 +1291,25 @@ bfd_alt_mach_code (abfd, alternative)
 	case 1:
 	  code = get_elf_backend_data (abfd)->elf_machine_alt1;
 	  if (code == 0)
-	    return false;
+	    return FALSE;
 	  break;
 
 	case 2:
 	  code = get_elf_backend_data (abfd)->elf_machine_alt2;
 	  if (code == 0)
-	    return false;
+	    return FALSE;
 	  break;
 
 	default:
-	  return false;
+	  return FALSE;
 	}
 
       elf_elfheader (abfd)->e_machine = code;
 
-      return true;
+      return TRUE;
     }
 
-  return false;
+  return FALSE;
 }
 
 /*
@@ -1334,7 +1334,7 @@ FUNCTION
 	bfd_preserve_save
 
 SYNOPSIS
-	boolean bfd_preserve_save (bfd *, struct bfd_preserve *);
+	bfd_boolean bfd_preserve_save (bfd *, struct bfd_preserve *);
 
 DESCRIPTION
 	When testing an object for compatibility with a particular
@@ -1349,7 +1349,7 @@ DESCRIPTION
 
 */
 
-boolean
+bfd_boolean
 bfd_preserve_save (abfd, preserve)
      bfd *abfd;
      struct bfd_preserve *preserve;
@@ -1363,7 +1363,7 @@ bfd_preserve_save (abfd, preserve)
   preserve->section_htab = abfd->section_htab;
 
   if (! bfd_hash_table_init (&abfd->section_htab, bfd_section_hash_newfunc))
-    return false;
+    return FALSE;
 
   abfd->tdata.any = NULL;
   abfd->arch_info = &bfd_default_arch_struct;
@@ -1372,7 +1372,7 @@ bfd_preserve_save (abfd, preserve)
   abfd->section_tail = &abfd->sections;
   abfd->section_count = 0;
 
-  return true;
+  return TRUE;
 }
 
 /*

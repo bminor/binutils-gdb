@@ -1,7 +1,7 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
 cat >e${EMULATION_NAME}.c <<EOF
-/* Copyright 1991, 1993, 1994, 1996, 1999, 2000, 2001
+/* Copyright 1991, 1993, 1994, 1996, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -61,7 +61,7 @@ gld960_before_parse()
       ldfile_add_library_path (concat (env,
 				       "/lib/libcoff",
 				       (const char *) NULL),
-			       false);
+			       FALSE);
     }
   }
   ldfile_output_architecture = bfd_arch_i960;
@@ -74,12 +74,12 @@ static void gld960_before_parse()
   char *env ;
   env =  getenv("G960LIB");
   if (env) {
-    ldfile_add_library_path(env, false);
+    ldfile_add_library_path(env, FALSE);
   }
   env = getenv("G960BASE");
   if (env)
     ldfile_add_library_path (concat (env, "/lib", (const char *) NULL),
-			     false);
+			     FALSE);
   ldfile_output_architecture = bfd_arch_i960;
 }
 
@@ -143,19 +143,19 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {			     
   *isfile = 0;
 
-  if (link_info.relocateable == true && config.build_constructors == true)
+  if (link_info.relocateable && config.build_constructors)
     return
 EOF
-sed $sc ldscripts/${EMULATION_NAME}.xu                     >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocateable == true) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xr                     >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.magic_demand_paged) return'     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xn                     >> e${EMULATION_NAME}.c
-echo '  ; else return'                                     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.x                      >> e${EMULATION_NAME}.c
-echo '; }'                                                 >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocateable) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.magic_demand_paged) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xn                 >> e${EMULATION_NAME}.c
+echo '  ; else return'                                 >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.x                  >> e${EMULATION_NAME}.c
+echo '; }'                                             >> e${EMULATION_NAME}.c
 
 else
 # Scripts read from the filesystem.
@@ -164,9 +164,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {			     
   *isfile = 1;
 
-  if (link_info.relocateable == true && config.build_constructors == true)
+  if (link_info.relocateable && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocateable == true)
+  else if (link_info.relocateable)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";

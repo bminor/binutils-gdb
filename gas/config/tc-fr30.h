@@ -49,7 +49,7 @@
 
 #define tc_fix_adjustable(FIX) fr30_fix_adjustable (FIX)
 struct fix;
-extern boolean fr30_fix_adjustable PARAMS ((struct fix *));
+extern bfd_boolean fr30_fix_adjustable PARAMS ((struct fix *));
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) fr30_force_relocation (fix)

@@ -35,8 +35,8 @@ gld${EMULATION_NAME}_before_parse ()
 #ifndef TARGET_			/* I.e., if not generic.  */
   ldfile_set_output_arch ("`echo ${ARCH}`");
 #endif /* not TARGET_ */
-  config.dynamic_link = ${DYNAMIC_LINK-true};
-  config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo true ; else echo false ; fi`;
+  config.dynamic_link = ${DYNAMIC_LINK-TRUE};
+  config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
 }
 
 static void arm_elf_after_open PARAMS ((void));
@@ -73,7 +73,7 @@ arm_elf_set_bfd_for_interworking (statement)
      lang_statement_union_type *statement;
 {
   if (statement->header.type == lang_input_section_enum
-      && statement->input_section.ifile->just_syms_flag == false)
+      && !statement->input_section.ifile->just_syms_flag)
     {
       asection *i = statement->input_section.section;
       asection *output_section = i->output_section;
@@ -85,7 +85,7 @@ arm_elf_set_bfd_for_interworking (statement)
 	  && ! i->owner->output_has_begun)
 	{
 	  bfd_for_interwork = i->owner;
-	  bfd_for_interwork->output_has_begun = true;
+	  bfd_for_interwork->output_has_begun = TRUE;
 	}
     }
 }
@@ -105,12 +105,12 @@ arm_elf_before_allocation ()
       /* The interworking bfd must be the last one in the link.  */
       bfd_for_interwork = NULL;
       for (tem = link_info.input_bfds; tem != NULL; tem = tem->link_next)
-	tem->output_has_begun = false;
+	tem->output_has_begun = FALSE;
 
       lang_for_each_statement (arm_elf_set_bfd_for_interworking);
       ASSERT (bfd_for_interwork != NULL);
       for (tem = link_info.input_bfds; tem != NULL; tem = tem->link_next)
-	tem->output_has_begun = false;
+	tem->output_has_begun = FALSE;
 
       bfd_elf32_arm_get_bfd_for_interworking (bfd_for_interwork, &link_info);
     }
@@ -148,7 +148,7 @@ arm_elf_finish ()
     return;
   
   h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol,
-			    false, false, true);
+			    FALSE, FALSE, TRUE);
 
   if (h != (struct bfd_link_hash_entry *) NULL
       && (h->type == bfd_link_hash_defined

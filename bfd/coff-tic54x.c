@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C54X coff binaries.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -30,19 +30,32 @@
 #undef  F_LSYMS
 #define	F_LSYMS		F_LSYMS_TICOFF
 
-static void                  tic54x_reloc_processing        PARAMS ((arelent *, struct internal_reloc *, asymbol **, bfd *, asection *));
-static bfd_reloc_status_type tic54x_relocation              PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static boolean               tic54x_set_section_contents    PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
-static reloc_howto_type *    coff_tic54x_rtype_to_howto     PARAMS ((bfd *, asection *, struct internal_reloc *,  struct coff_link_hash_entry *, struct internal_syment *, bfd_vma *));
-static bfd_vma               tic54x_getl32                  PARAMS ((const bfd_byte *));
-static void                  tic54x_putl32                  PARAMS ((bfd_vma, bfd_byte *));
-static bfd_signed_vma        tic54x_getl_signed_32          PARAMS ((const bfd_byte *));
-static boolean               tic54x_set_arch_mach           PARAMS ((bfd *, enum bfd_architecture, unsigned long));
-static reloc_howto_type *    tic54x_coff_reloc_type_lookup  PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void                  tic54x_lookup_howto            PARAMS ((arelent *, struct internal_reloc *));
-static boolean               ticoff0_bad_format_hook        PARAMS ((bfd *, PTR));
-static boolean               ticoff1_bad_format_hook        PARAMS ((bfd *, PTR));
-static boolean               ticoff_bfd_is_local_label_name PARAMS ((bfd *, const char *));
+static void tic54x_reloc_processing
+  PARAMS ((arelent *, struct internal_reloc *, asymbol **, bfd *, asection *));
+static bfd_reloc_status_type tic54x_relocation
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_boolean tic54x_set_section_contents
+  PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
+static reloc_howto_type *coff_tic54x_rtype_to_howto
+  PARAMS ((bfd *, asection *, struct internal_reloc *, struct coff_link_hash_entry *, struct internal_syment *, bfd_vma *));
+static bfd_vma tic54x_getl32
+  PARAMS ((const bfd_byte *));
+static void tic54x_putl32
+  PARAMS ((bfd_vma, bfd_byte *));
+static bfd_signed_vma tic54x_getl_signed_32
+  PARAMS ((const bfd_byte *));
+static bfd_boolean tic54x_set_arch_mach
+  PARAMS ((bfd *, enum bfd_architecture, unsigned long));
+static reloc_howto_type * tic54x_coff_reloc_type_lookup
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
+static void tic54x_lookup_howto
+  PARAMS ((arelent *, struct internal_reloc *));
+static bfd_boolean ticoff0_bad_format_hook
+  PARAMS ((bfd *, PTR));
+static bfd_boolean ticoff1_bad_format_hook
+  PARAMS ((bfd *, PTR));
+static bfd_boolean ticoff_bfd_is_local_label_name
+  PARAMS ((bfd *, const char *));
 
 /* 32-bit operations
    The octet order is screwy.  words are LSB first (LS octet, actually), but
@@ -125,7 +138,7 @@ bfd_ticoff_get_section_load_page (sect)
 /* Set the architecture appropriately.  Allow unkown architectures
    (e.g. binary).  */
 
-static boolean
+static bfd_boolean
 tic54x_set_arch_mach (abfd, arch, machine)
      bfd *abfd;
      enum bfd_architecture arch;
@@ -135,7 +148,7 @@ tic54x_set_arch_mach (abfd, arch, machine)
     arch = bfd_arch_tic54x;
 
   else if (arch != bfd_arch_tic54x)
-    return false;
+    return FALSE;
 
   return bfd_default_set_arch_mach (abfd, arch, machine);
 }
@@ -170,59 +183,59 @@ reloc_howto_type tic54x_howto_table[] =
 
     /* NORMAL BANK */
     /* 16-bit direct reference to symbol's address.  */
-    HOWTO (R_RELWORD,0,1,16,false,0,complain_overflow_dont,
-	   tic54x_relocation,"REL16",false,0xFFFF,0xFFFF,false),
+    HOWTO (R_RELWORD,0,1,16,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"REL16",FALSE,0xFFFF,0xFFFF,FALSE),
 
     /* 7 LSBs of an address */
-    HOWTO (R_PARTLS7,0,1,7,false,0,complain_overflow_dont,
-	   tic54x_relocation,"LS7",false,0x007F,0x007F,false),
+    HOWTO (R_PARTLS7,0,1,7,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"LS7",FALSE,0x007F,0x007F,FALSE),
 
     /* 9 MSBs of an address */
     /* TI assembler doesn't shift its encoding, and is thus incompatible */
-    HOWTO (R_PARTMS9,7,1,9,false,0,complain_overflow_dont,
-	   tic54x_relocation,"MS9",false,0x01FF,0x01FF,false),
+    HOWTO (R_PARTMS9,7,1,9,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"MS9",FALSE,0x01FF,0x01FF,FALSE),
 
     /* 23-bit relocation */
-    HOWTO (R_EXTWORD,0,2,23,false,0,complain_overflow_dont,
-	   tic54x_relocation,"RELEXT",false,0x7FFFFF,0x7FFFFF,false),
+    HOWTO (R_EXTWORD,0,2,23,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"RELEXT",FALSE,0x7FFFFF,0x7FFFFF,FALSE),
 
     /* 16 bits of 23-bit extended address */
-    HOWTO (R_EXTWORD16,0,1,16,false,0,complain_overflow_dont,
-	   tic54x_relocation,"RELEXT16",false,0x7FFFFF,0x7FFFFF,false),
+    HOWTO (R_EXTWORD16,0,1,16,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"RELEXT16",FALSE,0x7FFFFF,0x7FFFFF,FALSE),
 
     /* upper 7 bits of 23-bit extended address */
-    HOWTO (R_EXTWORDMS7,16,1,7,false,0,complain_overflow_dont,
-	   tic54x_relocation,"RELEXTMS7",false,0x7F,0x7F,false),
+    HOWTO (R_EXTWORDMS7,16,1,7,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"RELEXTMS7",FALSE,0x7F,0x7F,FALSE),
 
     /* ABSOLUTE BANK */
     /* 16-bit direct reference to symbol's address, absolute */
-    HOWTO (R_RELWORD,0,1,16,false,0,complain_overflow_dont,
-	   tic54x_relocation,"AREL16",false,0xFFFF,0xFFFF,false),
+    HOWTO (R_RELWORD,0,1,16,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"AREL16",FALSE,0xFFFF,0xFFFF,FALSE),
 
     /* 7 LSBs of an address, absolute */
-    HOWTO (R_PARTLS7,0,1,7,false,0,complain_overflow_dont,
-	   tic54x_relocation,"ALS7",false,0x007F,0x007F,false),
+    HOWTO (R_PARTLS7,0,1,7,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"ALS7",FALSE,0x007F,0x007F,FALSE),
 
     /* 9 MSBs of an address, absolute */
     /* TI assembler doesn't shift its encoding, and is thus incompatible */
-    HOWTO (R_PARTMS9,7,1,9,false,0,complain_overflow_dont,
-	   tic54x_relocation,"AMS9",false,0x01FF,0x01FF,false),
+    HOWTO (R_PARTMS9,7,1,9,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"AMS9",FALSE,0x01FF,0x01FF,FALSE),
 
     /* 23-bit direct reference, absolute */
-    HOWTO (R_EXTWORD,0,2,23,false,0,complain_overflow_dont,
-	   tic54x_relocation,"ARELEXT",false,0x7FFFFF,0x7FFFFF,false),
+    HOWTO (R_EXTWORD,0,2,23,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"ARELEXT",FALSE,0x7FFFFF,0x7FFFFF,FALSE),
 
     /* 16 bits of 23-bit extended address, absolute */
-    HOWTO (R_EXTWORD16,0,1,16,false,0,complain_overflow_dont,
-	   tic54x_relocation,"ARELEXT16",false,0x7FFFFF,0x7FFFFF,false),
+    HOWTO (R_EXTWORD16,0,1,16,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"ARELEXT16",FALSE,0x7FFFFF,0x7FFFFF,FALSE),
 
     /* upper 7 bits of 23-bit extended address, absolute */
-    HOWTO (R_EXTWORDMS7,16,1,7,false,0,complain_overflow_dont,
-	   tic54x_relocation,"ARELEXTMS7",false,0x7F,0x7F,false),
+    HOWTO (R_EXTWORDMS7,16,1,7,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"ARELEXTMS7",FALSE,0x7F,0x7F,FALSE),
 
     /* 32-bit relocation exclusively for stabs */
-    HOWTO (R_RELLONG,0,2,32,false,0,complain_overflow_dont,
-	   tic54x_relocation,"STAB",false,0xFFFFFFFF,0xFFFFFFFF,false),
+    HOWTO (R_RELLONG,0,2,32,FALSE,0,complain_overflow_dont,
+	   tic54x_relocation,"STAB",FALSE,0xFFFFFFFF,0xFFFFFFFF,FALSE),
   };
 
 #define coff_bfd_reloc_type_lookup tic54x_coff_reloc_type_lookup
@@ -310,7 +323,7 @@ coff_tic54x_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
   return genrel.howto;
 }
 
-static boolean
+static bfd_boolean
 ticoff0_bad_format_hook (abfd, filehdr)
      bfd * abfd ATTRIBUTE_UNUSED;
      PTR filehdr;
@@ -318,12 +331,12 @@ ticoff0_bad_format_hook (abfd, filehdr)
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
 
   if (COFF0_BADMAG (*internal_f))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 ticoff1_bad_format_hook (abfd, filehdr)
      bfd * abfd ATTRIBUTE_UNUSED;
      PTR filehdr;
@@ -331,22 +344,22 @@ ticoff1_bad_format_hook (abfd, filehdr)
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
 
   if (COFF1_BADMAG (*internal_f))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 /* Replace the stock _bfd_coff_is_local_label_name to recognize TI COFF local
    labels.  */
 
-static boolean
+static bfd_boolean
 ticoff_bfd_is_local_label_name (abfd, name)
   bfd *abfd ATTRIBUTE_UNUSED;
   const char *name;
 {
   if (TICOFF_LOCAL_LABEL_P(name))
-    return true;
-  return false;
+    return TRUE;
+  return FALSE;
 }
 
 #define coff_bfd_is_local_label_name ticoff_bfd_is_local_label_name
@@ -358,7 +371,7 @@ ticoff_bfd_is_local_label_name (abfd, name)
 #define BADMAG(x) COFF2_BADMAG(x)
 #include "coffcode.h"
 
-static boolean
+static bfd_boolean
 tic54x_set_section_contents (abfd, section, location, offset, bytes_to_do)
      bfd *abfd;
      sec_ptr section;
@@ -432,19 +445,19 @@ static const bfd_coff_backend_data ticoff0_swap_table =
     coff_SWAP_scnhdr_out,
     FILHSZ_V0, AOUTSZ, SCNHSZ_V01, SYMESZ, AUXESZ, RELSZ_V0, LINESZ, FILNMLEN,
 #ifdef COFF_LONG_FILENAMES
-    true,
+    TRUE,
 #else
-    false,
+    FALSE,
 #endif
 #ifdef COFF_LONG_SECTION_NAMES
-    true,
+    TRUE,
 #else
-    false,
+    FALSE,
 #endif
 #ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
-    true,
+    TRUE,
 #else
-    false,
+    FALSE,
 #endif
 #ifdef COFF_DEBUG_STRING_WIDE_PREFIX
     4,
@@ -473,20 +486,20 @@ static const bfd_coff_backend_data ticoff1_swap_table =
     coff_SWAP_scnhdr_out,
     FILHSZ, AOUTSZ, SCNHSZ_V01, SYMESZ, AUXESZ, RELSZ, LINESZ, FILNMLEN,
 #ifdef COFF_LONG_FILENAMES
-    true,
+    TRUE,
 #else
-    false,
+    FALSE,
 #endif
 #ifdef COFF_LONG_SECTION_NAMES
-    true,
+    TRUE,
 #else
-    false,
+    FALSE,
 #endif
     COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
 #ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
-    true,
+    TRUE,
 #else
-    false,
+    FALSE,
 #endif
 #ifdef COFF_DEBUG_STRING_WIDE_PREFIX
     4,

@@ -1,3 +1,11 @@
+2002-11-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* basic_blocks.c, basic_blocks.h, cg_arcs.c, cg_dfn.c, cg_print.c,
+	corefile.c, gmon_io.c, gprof.c, gprof.h, hist.c, mips.c, source.c,
+	source.h, sym_ids.c, sym_ids.h, symtab.h, tahoe.c, vax.c: Replace
+	boolean with bfd_boolean, true with TRUE, false with FALSE.
+	Formatting.
+
 2002-11-12  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add da.

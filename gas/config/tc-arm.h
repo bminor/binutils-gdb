@@ -122,7 +122,7 @@ struct fix;
 #define EXTERN_FORCE_RELOC 1
 
 #define tc_fix_adjustable(FIX) arm_fix_adjustable (FIX)
-boolean arm_fix_adjustable PARAMS ((struct fix *));
+bfd_boolean arm_fix_adjustable PARAMS ((struct fix *));
 
 /* Values passed to md_apply_fix3 don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0

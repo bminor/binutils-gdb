@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2001 Free Software Foundation, Inc.
+#   Copyright 2001, 2002 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -39,7 +39,7 @@ elfmmix_before_parse ()
      page in the linked file, which is non-intuitive.  If there's ever a
      full system with shared libraries and demand paging, you will want to
      exclude this file.  */
-  config.magic_demand_paged = false;
+  config.magic_demand_paged = FALSE;
 }
 EOF
 

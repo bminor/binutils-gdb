@@ -90,29 +90,29 @@ enum
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (32, 32, bfd_mach_mips3000, "mips:3000",      false, NN(I_mips3000)),
-  N (32, 32, bfd_mach_mips3900, "mips:3900",      false, NN(I_mips3900)),
-  N (64, 64, bfd_mach_mips4000, "mips:4000",      false, NN(I_mips4000)),
-  N (64, 64, bfd_mach_mips4010, "mips:4010",      false, NN(I_mips4010)),
-  N (64, 64, bfd_mach_mips4100, "mips:4100",      false, NN(I_mips4100)),
-  N (64, 64, bfd_mach_mips4111, "mips:4111",      false, NN(I_mips4111)),
-  N (64, 64, bfd_mach_mips4120, "mips:4120",      false, NN(I_mips4120)),
-  N (64, 64, bfd_mach_mips4300, "mips:4300",      false, NN(I_mips4300)),
-  N (64, 64, bfd_mach_mips4400, "mips:4400",      false, NN(I_mips4400)),
-  N (64, 64, bfd_mach_mips4600, "mips:4600",      false, NN(I_mips4600)),
-  N (64, 64, bfd_mach_mips4650, "mips:4650",      false, NN(I_mips4650)),
-  N (64, 64, bfd_mach_mips5000, "mips:5000",      false, NN(I_mips5000)),
-  N (64, 64, bfd_mach_mips5400, "mips:5400",      false, NN(I_mips5400)),
-  N (64, 64, bfd_mach_mips5500, "mips:5500",      false, NN(I_mips5500)),
-  N (32, 32, bfd_mach_mips6000, "mips:6000",      false, NN(I_mips6000)),
-  N (64, 64, bfd_mach_mips8000, "mips:8000",      false, NN(I_mips8000)),
-  N (64, 64, bfd_mach_mips10000,"mips:10000",     false, NN(I_mips10000)),
-  N (64, 64, bfd_mach_mips12000,"mips:12000",     false, NN(I_mips12000)),
-  N (64, 64, bfd_mach_mips16,   "mips:16",        false, NN(I_mips16)),
-  N (64, 64, bfd_mach_mips5,    "mips:mips5",     false, NN(I_mips5)),
-  N (32, 32, bfd_mach_mipsisa32,  "mips:isa32",   false, NN(I_mipsisa32)),
-  N (64, 64, bfd_mach_mipsisa64,  "mips:isa64",   false, NN(I_mipsisa64)),
-  N (64, 64, bfd_mach_mips_sb1, "mips:sb1",       false, 0),
+  N (32, 32, bfd_mach_mips3000, "mips:3000",      FALSE, NN(I_mips3000)),
+  N (32, 32, bfd_mach_mips3900, "mips:3900",      FALSE, NN(I_mips3900)),
+  N (64, 64, bfd_mach_mips4000, "mips:4000",      FALSE, NN(I_mips4000)),
+  N (64, 64, bfd_mach_mips4010, "mips:4010",      FALSE, NN(I_mips4010)),
+  N (64, 64, bfd_mach_mips4100, "mips:4100",      FALSE, NN(I_mips4100)),
+  N (64, 64, bfd_mach_mips4111, "mips:4111",      FALSE, NN(I_mips4111)),
+  N (64, 64, bfd_mach_mips4120, "mips:4120",      FALSE, NN(I_mips4120)),
+  N (64, 64, bfd_mach_mips4300, "mips:4300",      FALSE, NN(I_mips4300)),
+  N (64, 64, bfd_mach_mips4400, "mips:4400",      FALSE, NN(I_mips4400)),
+  N (64, 64, bfd_mach_mips4600, "mips:4600",      FALSE, NN(I_mips4600)),
+  N (64, 64, bfd_mach_mips4650, "mips:4650",      FALSE, NN(I_mips4650)),
+  N (64, 64, bfd_mach_mips5000, "mips:5000",      FALSE, NN(I_mips5000)),
+  N (64, 64, bfd_mach_mips5400, "mips:5400",      FALSE, NN(I_mips5400)),
+  N (64, 64, bfd_mach_mips5500, "mips:5500",      FALSE, NN(I_mips5500)),
+  N (32, 32, bfd_mach_mips6000, "mips:6000",      FALSE, NN(I_mips6000)),
+  N (64, 64, bfd_mach_mips8000, "mips:8000",      FALSE, NN(I_mips8000)),
+  N (64, 64, bfd_mach_mips10000,"mips:10000",     FALSE, NN(I_mips10000)),
+  N (64, 64, bfd_mach_mips12000,"mips:12000",     FALSE, NN(I_mips12000)),
+  N (64, 64, bfd_mach_mips16,   "mips:16",        FALSE, NN(I_mips16)),
+  N (64, 64, bfd_mach_mips5,    "mips:mips5",     FALSE, NN(I_mips5)),
+  N (32, 32, bfd_mach_mipsisa32,  "mips:isa32",   FALSE, NN(I_mipsisa32)),
+  N (64, 64, bfd_mach_mipsisa64,  "mips:isa64",   FALSE, NN(I_mipsisa64)),
+  N (64, 64, bfd_mach_mips_sb1, "mips:sb1",       FALSE, 0),
 };
 
 /* The default architecture is mips:3000, but with a machine number of
@@ -120,4 +120,4 @@ static const bfd_arch_info_type arch_info_struct[] =
    of mips, and an explicit setting of mips:3000.  */
 
 const bfd_arch_info_type bfd_mips_arch =
-N (32, 32, 0, "mips", true, &arch_info_struct[0]);
+N (32, 32, 0, "mips", TRUE, &arch_info_struct[0]);

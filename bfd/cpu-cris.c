@@ -1,5 +1,5 @@
 /* BFD support for the Axis CRIS architecture.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2002 Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson.
 
@@ -38,7 +38,7 @@ bfd_cris_arch =
   "cris",			/* The printable name is the same.  */
   1,				/* Section alignment power; each section
 				   is aligned to (only) 2^1 bytes.  */
-  true,				/* This is the default "machine", since
+  TRUE,				/* This is the default "machine", since
 				   there's only one.  */
   bfd_default_compatible,	/* A default function for testing
 				   "machine" compatibility of two

@@ -590,7 +590,7 @@ process_def_file (abfd, info)
 		    sprintf (name, "%s%s", U("_imp_"), sn);
 
 		    blhe = bfd_link_hash_lookup (info->hash, name,
-						 false, false, false);
+						 FALSE, FALSE, FALSE);
 		    free (name);
 
 		    if (blhe && blhe->type == bfd_link_hash_defined)
@@ -721,7 +721,7 @@ process_def_file (abfd, info)
 
       blhe = bfd_link_hash_lookup (info->hash,
 				   name,
-				   false, false, true);
+				   FALSE, FALSE, TRUE);
 
       if (blhe
 	  && (blhe->type == bfd_link_hash_defined
@@ -936,7 +936,7 @@ fill_exported_offsets (abfd, info)
 
       blhe = bfd_link_hash_lookup (info->hash,
 				   name,
-				   false, false, true);
+				   FALSE, FALSE, TRUE);
 
       if (blhe && (blhe->type == bfd_link_hash_defined))
 	exported_symbol_offsets[i] = blhe->u.def.value;
@@ -1822,7 +1822,7 @@ make_one (exp, parent)
   id5 = quick_section (abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
   id4 = quick_section (abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
   id6 = quick_section (abfd, ".idata$6", SEC_HAS_CONTENTS, 2);
- 
+
   if  (*exp->internal_name == '@')
     {
       if (! exp->flag_data)
@@ -2026,7 +2026,7 @@ make_import_fixup_mark (rel)
   bh = NULL;
   bfd_coff_link_add_one_symbol (&link_info, abfd, fixup_name, BSF_GLOBAL,
 				current_sec, /* sym->section, */
-				rel->address, NULL, true, false, &bh);
+				rel->address, NULL, TRUE, FALSE, &bh);
 
   if (0)
     {
@@ -2216,7 +2216,7 @@ pe_create_import_fixup (rel, s, addend)
       add_bfd_to_link (b, b->filename, &link_info);
 
       /* If we ever use autoimport, we have to cast text section writable.  */
-      config.text_read_only = false;
+      config.text_read_only = FALSE;
     }
 
   if (addend == 0 || link_info.pei386_runtime_pseudo_reloc)
@@ -2244,7 +2244,7 @@ pe_create_import_fixup (rel, s, addend)
 	      add_bfd_to_link (b, b->filename, &link_info);
 	    }
 	  runtime_pseudo_relocs_created++;
-	} 
+	}
       else
 	{
 	  einfo (_("%C: variable '%T' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"),
@@ -2376,7 +2376,7 @@ pe_process_import_defs (output_bfd, link_info)
 	  {
 	    def_file_export exp;
 	    struct bfd_link_hash_entry *blhe;
-	    int lead_at = (*pe_def_file->imports[i].internal_name == '@');  
+	    int lead_at = (*pe_def_file->imports[i].internal_name == '@');
 	    /* See if we need this import.  */
 	    char *name = (char *) xmalloc (strlen (pe_def_file->imports[i].internal_name) + 2 + 6);
 
@@ -2386,7 +2386,7 @@ pe_process_import_defs (output_bfd, link_info)
 	      sprintf (name, "%s%s",U (""), pe_def_file->imports[i].internal_name);
 
 	    blhe = bfd_link_hash_lookup (link_info->hash, name,
-					 false, false, false);
+					 FALSE, FALSE, FALSE);
 
 	    if (!blhe || (blhe && blhe->type != bfd_link_hash_undefined))
 	      {
@@ -2398,7 +2398,7 @@ pe_process_import_defs (output_bfd, link_info)
 			   pe_def_file->imports[i].internal_name);
 
 		blhe = bfd_link_hash_lookup (link_info->hash, name,
-					     false, false, false);
+					     FALSE, FALSE, FALSE);
 	      }
 	    free (name);
 
@@ -2435,8 +2435,8 @@ pe_process_import_defs (output_bfd, link_info)
 }
 
 /* We were handed a *.DLL file.  Parse it and turn it into a set of
-   IMPORTS directives in the def file.  Return true if the file was
-   handled, false if not.  */
+   IMPORTS directives in the def file.  Return TRUE if the file was
+   handled, FALSE if not.  */
 
 static unsigned int
 pe_get16 (abfd, where)
@@ -2484,7 +2484,7 @@ pe_as32 (ptr)
   return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
 }
 
-boolean
+bfd_boolean
 pe_implied_import_dll (filename)
      const char *filename;
 {
@@ -2501,14 +2501,14 @@ pe_implied_import_dll (filename)
   if (!dll)
     {
       einfo ("%Xopen %s: %s\n", filename, bfd_errmsg (bfd_get_error ()));
-      return false;
+      return FALSE;
     }
 
   /* PEI dlls seem to be bfd_objects.  */
   if (!bfd_check_format (dll, bfd_object))
     {
       einfo ("%X%s: this doesn't appear to be a DLL\n", filename);
-      return false;
+      return FALSE;
     }
 
   dll_name = filename;
@@ -2521,7 +2521,7 @@ pe_implied_import_dll (filename)
   num_entries = pe_get32 (dll, opthdr_ofs + 92);
 
   if (num_entries < 1) /* No exports.  */
-    return false;
+    return FALSE;
 
   export_rva = pe_get32 (dll, opthdr_ofs + 96);
   export_size = pe_get32 (dll, opthdr_ofs + 100);
@@ -2572,7 +2572,7 @@ pe_implied_import_dll (filename)
 				 i, 0);
     }
 
-  return true;
+  return TRUE;
 }
 
 /* These are the main functions, called from the emulation.  The first

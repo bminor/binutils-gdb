@@ -1,5 +1,5 @@
 /* tc-frv.h -- Header file for tc-frv.c.
-   Copyright (C) 2002 Free Software Foundation, Inc.
+   Copyright 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -57,7 +57,7 @@ extern long frv_relax_frag PARAMS ((fragS *, long));
 
 #define tc_fix_adjustable(FIX) frv_fix_adjustable (FIX)
 struct fix;
-extern boolean frv_fix_adjustable PARAMS ((struct fix *));
+extern bfd_boolean frv_fix_adjustable PARAMS ((struct fix *));
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) frv_force_relocation (fix)

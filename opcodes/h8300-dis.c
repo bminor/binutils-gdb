@@ -48,7 +48,7 @@ bfd_h8_disassemble_init ()
   struct h8_instruction *pi;
 
   nopcodes = sizeof (h8_opcodes) / sizeof (struct h8_opcode);
-  
+
   h8_instructions = (struct h8_instruction *)
     xmalloc (nopcodes * sizeof (struct h8_instruction));
 
@@ -112,7 +112,7 @@ bfd_h8_disassemble (addr, info, mode)
   int abs = 0;
   int bit = 0;
   int plen = 0;
-  static boolean init = 0;
+  static bfd_boolean init = 0;
   const struct h8_instruction *qi;
   char const **pregnames = mode != 0 ? lregnames : wregnames;
   int status;

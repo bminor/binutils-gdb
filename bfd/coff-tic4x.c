@@ -31,11 +31,11 @@
 #undef  F_LSYMS
 #define	F_LSYMS		F_LSYMS_TICOFF
 
-static boolean ticoff0_bad_format_hook
+static bfd_boolean ticoff0_bad_format_hook
     PARAMS ((bfd *, PTR ));
-static boolean ticoff1_bad_format_hook
+static bfd_boolean ticoff1_bad_format_hook
     PARAMS ((bfd *, PTR ));
-static boolean ticoff_bfd_is_local_label_name
+static bfd_boolean ticoff_bfd_is_local_label_name
     PARAMS ((bfd *, const char *));
 static bfd_reloc_status_type tic4x_relocation
     PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char ** ));
@@ -49,7 +49,7 @@ static void tic4x_reloc_processing
     PARAMS ((arelent *, struct internal_reloc *, asymbol **, bfd *, asection * ));
 
 
-static boolean
+static bfd_boolean
 ticoff0_bad_format_hook (abfd, filehdr)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR filehdr;
@@ -57,12 +57,12 @@ ticoff0_bad_format_hook (abfd, filehdr)
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
 
   if (COFF0_BADMAG (*internal_f))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 ticoff1_bad_format_hook (abfd, filehdr)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR filehdr;
@@ -70,21 +70,21 @@ ticoff1_bad_format_hook (abfd, filehdr)
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
 
   if (COFF1_BADMAG (*internal_f))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 /* Replace the stock _bfd_coff_is_local_label_name to recognize TI COFF local
    labels.  */
-static boolean 
+static bfd_boolean
 ticoff_bfd_is_local_label_name (abfd, name)
   bfd *abfd ATTRIBUTE_UNUSED;
   const char *name;
 {
   if (TICOFF_LOCAL_LABEL_P(name))
-    return true;
-  return false;
+    return TRUE;
+  return FALSE;
 }
 
 #define coff_bfd_is_local_label_name ticoff_bfd_is_local_label_name
@@ -100,7 +100,7 @@ ticoff_bfd_is_local_label_name (abfd, name)
 #include "coffcode.h"
 
 static bfd_reloc_status_type
-tic4x_relocation (abfd, reloc_entry, symbol, data, input_section, 
+tic4x_relocation (abfd, reloc_entry, symbol, data, input_section,
 		  output_bfd, error_message)
   bfd *abfd ATTRIBUTE_UNUSED;
   arelent *reloc_entry;
@@ -109,7 +109,7 @@ tic4x_relocation (abfd, reloc_entry, symbol, data, input_section,
   asection *input_section;
   bfd *output_bfd;
   char **error_message ATTRIBUTE_UNUSED;
-{  
+{
   if (output_bfd != (bfd *) NULL)
     {
       /* This is a partial relocation, and we want to apply the
@@ -121,22 +121,22 @@ tic4x_relocation (abfd, reloc_entry, symbol, data, input_section,
   return bfd_reloc_continue;
 }
 
-reloc_howto_type tic4x_howto_table[] = 
+reloc_howto_type tic4x_howto_table[] =
 {
-    HOWTO(R_RELWORD,	 0,  2, 16, false, 0, complain_overflow_signed,   tic4x_relocation, "RELWORD",   true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_REL24,	 0,  2, 24, false, 0, complain_overflow_bitfield, tic4x_relocation, "REL24",     true, 0x00ffffff, 0x00ffffff, false),
-    HOWTO(R_RELLONG,	 0,  2, 32, false, 0, complain_overflow_dont,     tic4x_relocation, "RELLONG",   true, 0xffffffff, 0xffffffff, false),
-    HOWTO(R_PCRWORD,	 0,  2, 16, true,  0, complain_overflow_signed,   tic4x_relocation, "PCRWORD",   true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_PCR24,	 0,  2, 24, true,  0, complain_overflow_signed,   tic4x_relocation, "PCR24",     true, 0x00ffffff, 0x00ffffff, false),
-    HOWTO(R_PARTLS16,	 0,  2, 16, false, 0, complain_overflow_dont,     tic4x_relocation, "PARTLS16",  true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_PARTMS8,	16,  2, 16, false, 0, complain_overflow_dont,     tic4x_relocation, "PARTMS8",   true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_RELWORD,	 0,  2, 16, false, 0, complain_overflow_signed,   tic4x_relocation, "ARELWORD",  true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_REL24,	 0,  2, 24, false, 0, complain_overflow_signed,   tic4x_relocation, "AREL24",    true, 0x00ffffff, 0x00ffffff, false),
-    HOWTO(R_RELLONG,	 0,  2, 32, false, 0, complain_overflow_signed,   tic4x_relocation, "ARELLONG",  true, 0xffffffff, 0xffffffff, false),
-    HOWTO(R_PCRWORD,	 0,  2, 16, true,  0, complain_overflow_signed,   tic4x_relocation, "APCRWORD",  true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_PCR24,	 0,  2, 24, true,  0, complain_overflow_signed,   tic4x_relocation, "APCR24",    true, 0x00ffffff, 0x00ffffff, false),
-    HOWTO(R_PARTLS16,	 0,  2, 16, false, 0, complain_overflow_dont,     tic4x_relocation, "APARTLS16", true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_PARTMS8,	16,  2, 16, false, 0, complain_overflow_dont,     tic4x_relocation, "APARTMS8",  true, 0x0000ffff, 0x0000ffff, false),
+    HOWTO(R_RELWORD,	 0,  2, 16, FALSE, 0, complain_overflow_signed,   tic4x_relocation, "RELWORD",   TRUE, 0x0000ffff, 0x0000ffff, FALSE),
+    HOWTO(R_REL24,	 0,  2, 24, FALSE, 0, complain_overflow_bitfield, tic4x_relocation, "REL24",     TRUE, 0x00ffffff, 0x00ffffff, FALSE),
+    HOWTO(R_RELLONG,	 0,  2, 32, FALSE, 0, complain_overflow_dont,     tic4x_relocation, "RELLONG",   TRUE, 0xffffffff, 0xffffffff, FALSE),
+    HOWTO(R_PCRWORD,	 0,  2, 16, TRUE,  0, complain_overflow_signed,   tic4x_relocation, "PCRWORD",   TRUE, 0x0000ffff, 0x0000ffff, FALSE),
+    HOWTO(R_PCR24,	 0,  2, 24, TRUE,  0, complain_overflow_signed,   tic4x_relocation, "PCR24",     TRUE, 0x00ffffff, 0x00ffffff, FALSE),
+    HOWTO(R_PARTLS16,	 0,  2, 16, FALSE, 0, complain_overflow_dont,     tic4x_relocation, "PARTLS16",  TRUE, 0x0000ffff, 0x0000ffff, FALSE),
+    HOWTO(R_PARTMS8,	16,  2, 16, FALSE, 0, complain_overflow_dont,     tic4x_relocation, "PARTMS8",   TRUE, 0x0000ffff, 0x0000ffff, FALSE),
+    HOWTO(R_RELWORD,	 0,  2, 16, FALSE, 0, complain_overflow_signed,   tic4x_relocation, "ARELWORD",  TRUE, 0x0000ffff, 0x0000ffff, FALSE),
+    HOWTO(R_REL24,	 0,  2, 24, FALSE, 0, complain_overflow_signed,   tic4x_relocation, "AREL24",    TRUE, 0x00ffffff, 0x00ffffff, FALSE),
+    HOWTO(R_RELLONG,	 0,  2, 32, FALSE, 0, complain_overflow_signed,   tic4x_relocation, "ARELLONG",  TRUE, 0xffffffff, 0xffffffff, FALSE),
+    HOWTO(R_PCRWORD,	 0,  2, 16, TRUE,  0, complain_overflow_signed,   tic4x_relocation, "APCRWORD",  TRUE, 0x0000ffff, 0x0000ffff, FALSE),
+    HOWTO(R_PCR24,	 0,  2, 24, TRUE,  0, complain_overflow_signed,   tic4x_relocation, "APCR24",    TRUE, 0x00ffffff, 0x00ffffff, FALSE),
+    HOWTO(R_PARTLS16,	 0,  2, 16, FALSE, 0, complain_overflow_dont,     tic4x_relocation, "APARTLS16", TRUE, 0x0000ffff, 0x0000ffff, FALSE),
+    HOWTO(R_PARTMS8,	16,  2, 16, FALSE, 0, complain_overflow_dont,     tic4x_relocation, "APARTMS8",  TRUE, 0x0000ffff, 0x0000ffff, FALSE),
 };
 #define HOWTO_SIZE (sizeof(tic4x_howto_table) / sizeof(tic4x_howto_table[0]))
 
@@ -153,7 +153,7 @@ tic4x_coff_reloc_type_lookup (abfd, code)
 {
   unsigned int type;
   unsigned int i;
-    
+
   switch (code)
     {
     case BFD_RELOC_32:		type = R_RELLONG; break;
@@ -166,7 +166,7 @@ tic4x_coff_reloc_type_lookup (abfd, code)
     default:
       return NULL;
     }
-    
+
   for (i = 0; i < HOWTO_SIZE; i++)
     {
       if (tic4x_howto_table[i].type == type)
@@ -238,7 +238,7 @@ tic4x_reloc_processing (relent, reloc, symbols, abfd, section)
   asymbol *ptr;
 
   relent->address = reloc->r_vaddr;
-  
+
   if (reloc->r_symndx != -1)
     {
       if (reloc->r_symndx < 0 || reloc->r_symndx >= obj_conv_table_size (abfd))
@@ -261,26 +261,26 @@ tic4x_reloc_processing (relent, reloc, symbols, abfd, section)
       relent->sym_ptr_ptr = section->symbol_ptr_ptr;
       ptr = *(relent->sym_ptr_ptr);
     }
-  
+
   /* The symbols definitions that we have read in have been relocated
      as if their sections started at 0.  But the offsets refering to
      the symbols in the raw data have not been modified, so we have to
      have a negative addend to compensate.
-     
+
      Note that symbols which used to be common must be left alone.  */
-  
+
   /* Calculate any reloc addend by looking at the symbol.  */
   CALC_ADDEND (abfd, ptr, *reloc, relent);
-  
+
   relent->address -= section->vma;
   /* !!     relent->section = (asection *) NULL;  */
-  
+
   /* Fill in the relent->howto field from reloc->r_type.  */
   tic4x_lookup_howto (relent, reloc);
 }
 
 
-static const bfd_coff_backend_data ticoff0_swap_table = 
+static const bfd_coff_backend_data ticoff0_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -289,19 +289,19 @@ static const bfd_coff_backend_data ticoff0_swap_table =
   coff_SWAP_scnhdr_out,
   FILHSZ_V0, AOUTSZ, SCNHSZ_V01, SYMESZ, AUXESZ, RELSZ_V0, LINESZ, FILNMLEN,
 #ifdef COFF_LONG_FILENAMES
-  true,
+  TRUE,
 #else
-  false,
+  FALSE,
 #endif
 #ifdef COFF_LONG_SECTION_NAMES
-  true,
+  TRUE,
 #else
-  false,
+  FALSE,
 #endif
 #ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
-  true,
+  TRUE,
 #else
-  false,
+  FALSE,
 #endif
 #ifdef COFF_DEBUG_STRING_WIDE_PREFIX
   4,
@@ -321,7 +321,7 @@ static const bfd_coff_backend_data ticoff0_swap_table =
 };
 
 /* COFF1 differs in section header size.  */
-static const bfd_coff_backend_data ticoff1_swap_table = 
+static const bfd_coff_backend_data ticoff1_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -330,19 +330,19 @@ static const bfd_coff_backend_data ticoff1_swap_table =
   coff_SWAP_scnhdr_out,
   FILHSZ, AOUTSZ, SCNHSZ_V01, SYMESZ, AUXESZ, RELSZ, LINESZ, FILNMLEN,
 #ifdef COFF_LONG_FILENAMES
-  true,
+  TRUE,
 #else
-  false,
+  FALSE,
 #endif
 #ifdef COFF_LONG_SECTION_NAMES
-  true,
+  TRUE,
 #else
-  false,
+  FALSE,
 #endif
 #ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
-  true,
+  TRUE,
 #else
-  false,
+  FALSE,
 #endif
 #ifdef COFF_DEBUG_STRING_WIDE_PREFIX
   4,

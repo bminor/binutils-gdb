@@ -43,13 +43,13 @@ static bfd_vma m68hc12_phys_page PARAMS ((bfd_vma));
 static asection *elf32_m68hc11_gc_mark_hook
   PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
-static boolean elf32_m68hc11_gc_sweep_hook
+static bfd_boolean elf32_m68hc11_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 
-boolean _bfd_m68hc12_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
-boolean _bfd_m68hc12_elf_set_private_flags PARAMS ((bfd *, flagword));
-boolean _bfd_m68hc12_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
+bfd_boolean _bfd_m68hc12_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
+bfd_boolean _bfd_m68hc12_elf_set_private_flags PARAMS ((bfd *, flagword));
+bfd_boolean _bfd_m68hc12_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
 
 
 
@@ -120,7 +120,7 @@ boolean _bfd_m68hc12_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
 
 
    The 'call _foo' must be relocated with page 3 and 16-bit address
-   mapped at 0x8000.  
+   mapped at 0x8000.
 
    The 3-bit and 16-bit PC rel relocation is only used by 68HC12.  */
 static reloc_howto_type elf_m68hc11_howto_table[] = {
@@ -129,90 +129,90 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC12_NONE",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 8 bit absolute relocation */
   HOWTO (R_M68HC11_8,		/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC12_8",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x00ff,		/* src_mask */
 	 0x00ff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 8 bit absolute relocation (upper address) */
   HOWTO (R_M68HC11_HI8,		/* type */
 	 8,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC12_HI8",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x00ff,		/* src_mask */
 	 0x00ff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 8 bit absolute relocation (upper address) */
   HOWTO (R_M68HC11_LO8,		/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC12_LO8",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x00ff,		/* src_mask */
 	 0x00ff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 8 bit PC-rel relocation */
   HOWTO (R_M68HC11_PCREL_8,	/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC12_PCREL_8",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x00ff,		/* src_mask */
 	 0x00ff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 16 bit absolute relocation */
   HOWTO (R_M68HC11_16,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont /*bitfield */ ,	/* complain_on_overflow */
 	 m68hc12_elf_special_reloc,	/* special_function */
 	 "R_M68HC12_16",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 32 bit absolute relocation.  This one is never used for the
      code relocation.  It's used by gas for -gstabs generation.  */
@@ -220,120 +220,120 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC12_32",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 3 bit absolute relocation */
   HOWTO (R_M68HC11_3B,		/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 3,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC12_4B",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x003,			/* src_mask */
 	 0x003,			/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 16 bit PC-rel relocation */
   HOWTO (R_M68HC11_PCREL_16,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC12_PCREL_16",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_M68HC11_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,			/* special_function */
 	 "R_M68HC11_GNU_VTINHERIT",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_M68HC11_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 _bfd_elf_rel_vtable_reloc_fn,	/* special_function */
 	 "R_M68HC11_GNU_VTENTRY",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 24 bit relocation */
   HOWTO (R_M68HC11_24,	        /* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 24,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 m68hc12_elf_special_reloc,	/* special_function */
 	 "R_M68HC12_24",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
-  
+	 FALSE),		/* pcrel_offset */
+
   /* A 16-bit low relocation */
   HOWTO (R_M68HC11_LO16,        /* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 m68hc12_elf_special_reloc,/* special_function */
 	 "R_M68HC12_LO16",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A page relocation */
   HOWTO (R_M68HC11_PAGE,        /* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 m68hc12_elf_special_reloc,/* special_function */
 	 "R_M68HC12_PAGE",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x00ff,		/* src_mask */
 	 0x00ff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   EMPTY_HOWTO (14),
   EMPTY_HOWTO (15),
@@ -341,36 +341,36 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   EMPTY_HOWTO (17),
   EMPTY_HOWTO (18),
   EMPTY_HOWTO (19),
-  
+
   /* Mark beginning of a jump instruction (any form).  */
   HOWTO (R_M68HC11_RL_JUMP,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 m68hc11_elf_ignore_reloc,	/* special_function */
 	 "R_M68HC12_RL_JUMP",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 true),                 /* pcrel_offset */
+	 TRUE),                 /* pcrel_offset */
 
   /* Mark beginning of Gcc relaxation group instruction.  */
   HOWTO (R_M68HC11_RL_GROUP,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 m68hc11_elf_ignore_reloc,	/* special_function */
 	 "R_M68HC12_RL_GROUP",	/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 true),                 /* pcrel_offset */
+	 TRUE),                 /* pcrel_offset */
 };
 
 /* Map BFD reloc types to M68HC11 ELF reloc types.  */
@@ -495,7 +495,7 @@ m68hc12_elf_special_reloc (abfd, reloc_entry, symbol, data, input_section,
   bfd_vma phys_page;
   bfd_vma insn_page;
   bfd_vma insn_addr;
-  
+
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (! reloc_entry->howto->partial_inplace
@@ -551,7 +551,7 @@ m68hc12_elf_special_reloc (abfd, reloc_entry, symbol, data, input_section,
                                "the normal address space");
             return bfd_reloc_dangerous;
          }
-      
+
     case R_M68HC11_LO16:
       bfd_put_16 (abfd, phys_addr, (bfd_byte*) data + reloc_entry->address);
       break;
@@ -569,7 +569,7 @@ m68hc12_elf_special_reloc (abfd, reloc_entry, symbol, data, input_section,
        abort ();
        break;
     }
-  
+
   return bfd_reloc_ok;
 }
 
@@ -621,7 +621,7 @@ elf32_m68hc11_gc_mark_hook (sec, info, rel, h, sym)
   return NULL;
 }
 
-static boolean
+static bfd_boolean
 elf32_m68hc11_gc_sweep_hook (abfd, info, sec, relocs)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
@@ -629,13 +629,13 @@ elf32_m68hc11_gc_sweep_hook (abfd, info, sec, relocs)
      const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
   /* We don't use got and plt entries for 68hc11/68hc12.  */
-  return true;
+  return TRUE;
 }
 
 
 /* Set and control ELF flags in ELF header.  */
 
-boolean
+bfd_boolean
 _bfd_m68hc12_elf_set_private_flags (abfd, flags)
      bfd *abfd;
      flagword flags;
@@ -644,29 +644,29 @@ _bfd_m68hc12_elf_set_private_flags (abfd, flags)
 	      || elf_elfheader (abfd)->e_flags == flags);
 
   elf_elfheader (abfd)->e_flags = flags;
-  elf_flags_init (abfd) = true;
-  return true;
+  elf_flags_init (abfd) = TRUE;
+  return TRUE;
 }
 
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
-boolean
+bfd_boolean
 _bfd_m68hc12_elf_merge_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
   flagword old_flags;
   flagword new_flags;
-  boolean ok = true;
+  bfd_boolean ok = TRUE;
 
   /* Check if we have the same endianess */
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
-    return false;
+  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+    return FALSE;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
+    return TRUE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
   elf_elfheader (obfd)->e_flags |= new_flags & EF_M68HC11_ABI;
@@ -674,7 +674,7 @@ _bfd_m68hc12_elf_merge_private_bfd_data (ibfd, obfd)
 
   if (! elf_flags_init (obfd))
     {
-      elf_flags_init (obfd) = true;
+      elf_flags_init (obfd) = TRUE;
       elf_elfheader (obfd)->e_flags = new_flags;
       elf_elfheader (obfd)->e_ident[EI_CLASS]
 	= elf_elfheader (ibfd)->e_ident[EI_CLASS];
@@ -684,10 +684,10 @@ _bfd_m68hc12_elf_merge_private_bfd_data (ibfd, obfd)
 	{
 	  if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),
 				   bfd_get_mach (ibfd)))
-	    return false;
+	    return FALSE;
 	}
 
-      return true;
+      return TRUE;
     }
 
   /* Check ABI compatibility.  */
@@ -697,7 +697,7 @@ _bfd_m68hc12_elf_merge_private_bfd_data (ibfd, obfd)
 	(_("%s: linking files compiled for 16-bit integers (-mshort) "
            "and others for 32-bit integers"),
 	 bfd_archive_filename (ibfd));
-      ok = false;
+      ok = FALSE;
     }
   if ((new_flags & E_M68HC11_F64) != (old_flags & E_M68HC11_F64))
     {
@@ -705,7 +705,7 @@ _bfd_m68hc12_elf_merge_private_bfd_data (ibfd, obfd)
 	(_("%s: linking files compiled for 32-bit double (-fshort-double) "
            "and others for 64-bit double"),
 	 bfd_archive_filename (ibfd));
-      ok = false;
+      ok = FALSE;
     }
   new_flags &= ~EF_M68HC11_ABI;
   old_flags &= ~EF_M68HC11_ABI;
@@ -717,19 +717,19 @@ _bfd_m68hc12_elf_merge_private_bfd_data (ibfd, obfd)
 	(_("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"),
 	 bfd_archive_filename (ibfd), (unsigned long) new_flags,
 	 (unsigned long) old_flags);
-      ok = false;
+      ok = FALSE;
     }
 
   if (! ok)
     {
       bfd_set_error (bfd_error_bad_value);
-      return false;
+      return FALSE;
     }
 
-  return true;
+  return TRUE;
 }
 
-boolean
+bfd_boolean
 _bfd_m68hc12_elf_print_private_bfd_data (abfd, ptr)
      bfd *abfd;
      PTR ptr;
@@ -756,7 +756,7 @@ _bfd_m68hc12_elf_print_private_bfd_data (abfd, ptr)
 
   fputc ('\n', file);
 
-  return true;
+  return TRUE;
 }
 
 /* Below is the only difference between elf32-m68hc12.c and elf32-m68hc11.c.

@@ -92,11 +92,11 @@ compute_offset (first_page, page_size, entry_size, index)
   return (page_number * page_size) + page_offset;
 }
 
-boolean
+bfd_boolean
 bfd_sym_mkobject (abfd)
      bfd *abfd ATTRIBUTE_UNUSED;
 {
-  return (boolean) true;
+  return 1;
 }
 
 void
@@ -109,7 +109,7 @@ bfd_sym_print_symbol (abfd, afile, symbol, how)
   return;
 }
 
-boolean
+bfd_boolean
 bfd_sym_valid (abfd)
      bfd *abfd;
 {
@@ -242,7 +242,7 @@ bfd_sym_read_header (abfd, header, version)
       return bfd_sym_read_header_v32 (abfd, header);
     case BFD_SYM_VERSION_3_1:
     default:
-      return false;
+      return FALSE;
     }
 }
 
@@ -2423,7 +2423,7 @@ bfd_sym_get_symtab (abfd, sym)
 int
 bfd_sym_sizeof_headers (abfd, exec)
      bfd *abfd ATTRIBUTE_UNUSED;
-     boolean exec ATTRIBUTE_UNUSED;
+     bfd_boolean exec ATTRIBUTE_UNUSED;
 {
   return 0;
 }

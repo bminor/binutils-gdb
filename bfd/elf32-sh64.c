@@ -1,5 +1,5 @@
 /* Hitachi SH64-specific support for 32-bit ELF
-   Copyright (C) 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -37,28 +37,35 @@ struct sh64_find_section_vma_data
    bfd_vma addr;
  };
 
-static boolean sh64_elf_copy_private_data PARAMS ((bfd *, bfd *));
-static boolean sh64_elf_merge_private_data PARAMS ((bfd *, bfd *));
-static boolean sh64_elf_fake_sections PARAMS ((bfd *, Elf_Internal_Shdr *,
-					      asection *));
-static boolean sh64_elf_set_private_flags PARAMS ((bfd *, flagword));
-static boolean sh64_elf_set_mach_from_flags PARAMS ((bfd *));
-static boolean shmedia_prepare_reloc
+static bfd_boolean sh64_elf_copy_private_data
+  PARAMS ((bfd *, bfd *));
+static bfd_boolean sh64_elf_merge_private_data
+  PARAMS ((bfd *, bfd *));
+static bfd_boolean sh64_elf_fake_sections
+  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
+static bfd_boolean sh64_elf_set_private_flags
+  PARAMS ((bfd *, flagword));
+static bfd_boolean sh64_elf_set_mach_from_flags
+  PARAMS ((bfd *));
+static bfd_boolean shmedia_prepare_reloc
   PARAMS ((struct bfd_link_info *, bfd *, asection *,
 	   bfd_byte *, const Elf_Internal_Rela *, bfd_vma *));
-static int sh64_elf_get_symbol_type PARAMS ((Elf_Internal_Sym *, int));
-static boolean sh64_elf_add_symbol_hook
+static int sh64_elf_get_symbol_type
+  PARAMS ((Elf_Internal_Sym *, int));
+static bfd_boolean sh64_elf_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
-static boolean sh64_elf_link_output_symbol_hook
+static bfd_boolean sh64_elf_link_output_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
 	   asection *));
-static boolean sh64_backend_section_from_shdr
+static bfd_boolean sh64_backend_section_from_shdr
   PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
-static void sh64_elf_final_write_processing PARAMS ((bfd *, boolean));
-static boolean sh64_bfd_elf_copy_private_section_data
+static void sh64_elf_final_write_processing
+  PARAMS ((bfd *, bfd_boolean));
+static bfd_boolean sh64_bfd_elf_copy_private_section_data
   PARAMS ((bfd *, asection *, bfd *, asection *));
-static void sh64_find_section_for_address PARAMS ((bfd *, asection *, PTR));
+static void sh64_find_section_for_address
+  PARAMS ((bfd *, asection *, PTR));
 
 /* Let elf32-sh.c handle the "bfd_" definitions, so we only have to
    intrude with an #ifndef around the function definition.  */
@@ -85,9 +92,9 @@ static void sh64_find_section_for_address PARAMS ((bfd *, asection *, PTR));
 	sh64_bfd_elf_copy_private_section_data
 
 /* This COFF-only function (only compiled with COFF support, making
-   ELF-only chains problematic) returns true early for SH4, so let's just
-   define it true here.  */
-#define _bfd_sh_align_load_span(a,b,c,d,e,f,g,h,i,j) true
+   ELF-only chains problematic) returns TRUE early for SH4, so let's just
+   define it TRUE here.  */
+#define _bfd_sh_align_load_span(a,b,c,d,e,f,g,h,i,j) TRUE
 
 #define GOT_BIAS (-((long)-32768))
 #define INCLUDE_SHMEDIA
@@ -96,7 +103,7 @@ static void sh64_find_section_for_address PARAMS ((bfd *, asection *, PTR));
 /* Set the SHF_SH5_ISA32 flag for ISA SHmedia code sections, and pass
    through SHT_SH5_CR_SORTED on a sorted .cranges section.  */
 
-boolean
+bfd_boolean
 sh64_elf_fake_sections (output_bfd, elf_section_hdr, asect)
      bfd *output_bfd ATTRIBUTE_UNUSED;
      Elf_Internal_Shdr *elf_section_hdr;
@@ -113,10 +120,10 @@ sh64_elf_fake_sections (output_bfd, elf_section_hdr, asect)
 		 SH64_CRANGES_SECTION_NAME) == 0)
     elf_section_hdr->sh_type = SHT_SH5_CR_SORTED;
 
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 sh64_elf_set_mach_from_flags (abfd)
      bfd *abfd;
 {
@@ -133,7 +140,7 @@ sh64_elf_set_mach_from_flags (abfd)
 
     default:
       bfd_set_error (bfd_error_wrong_format);
-      return false;
+      return FALSE;
     }
 
   /* We also need to set SEC_DEBUGGING on an incoming .cranges section.
@@ -146,29 +153,29 @@ sh64_elf_set_mach_from_flags (abfd)
       && ! bfd_set_section_flags (abfd, cranges,
 				  bfd_get_section_flags (abfd, cranges)
 				  | SEC_DEBUGGING))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 sh64_elf_copy_private_data (ibfd, obfd)
      bfd * ibfd;
      bfd * obfd;
 {
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
+    return TRUE;
 
   BFD_ASSERT (!elf_flags_init (obfd)
 	      || (elf_elfheader (obfd)->e_flags
 		  == elf_elfheader (ibfd)->e_flags));
 
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 sh64_elf_merge_private_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
@@ -176,11 +183,11 @@ sh64_elf_merge_private_data (ibfd, obfd)
   flagword old_flags, new_flags;
 
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
-    return false;
+    return FALSE;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
+    return TRUE;
 
   if (bfd_get_arch_size (ibfd) != bfd_get_arch_size (obfd))
     {
@@ -198,7 +205,7 @@ sh64_elf_merge_private_data (ibfd, obfd)
       (*_bfd_error_handler) (msg, bfd_get_filename (ibfd),
 			     bfd_get_filename (obfd));
       bfd_set_error (bfd_error_wrong_format);
-      return false;
+      return FALSE;
     }
 
   old_flags = elf_elfheader (obfd)->e_flags;
@@ -206,7 +213,7 @@ sh64_elf_merge_private_data (ibfd, obfd)
   if (! elf_flags_init (obfd))
     {
       /* This happens when ld starts out with a 'blank' output file.  */
-      elf_flags_init (obfd) = true;
+      elf_flags_init (obfd) = TRUE;
       elf_elfheader (obfd)->e_flags = old_flags = new_flags;
     }
   /* We don't allow linking in non-SH64 code.  */
@@ -216,7 +223,7 @@ sh64_elf_merge_private_data (ibfd, obfd)
 	("%s: uses non-SH64 instructions while previous modules use SH64 instructions",
 	 bfd_get_filename (ibfd));
       bfd_set_error (bfd_error_bad_value);
-      return false;
+      return FALSE;
     }
 
   /* I can't think of anything sane other than old_flags being EF_SH5 and
@@ -230,7 +237,7 @@ sh64_elf_merge_private_data (ibfd, obfd)
 
    We only recognize SHT_SH5_CR_SORTED, on the .cranges section.  */
 
-boolean
+bfd_boolean
 sh64_backend_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      Elf_Internal_Shdr *hdr;
@@ -239,13 +246,13 @@ sh64_backend_section_from_shdr (abfd, hdr, name)
   flagword flags = 0;
 
   /* We do like MIPS with a bit switch for recognized types, and returning
-     false for a recognized section type with an unexpected name.  Right
+     FALSE for a recognized section type with an unexpected name.  Right
      now we only have one recognized type, but that might change.  */
   switch (hdr->sh_type)
     {
     case SHT_SH5_CR_SORTED:
       if (strcmp (name, SH64_CRANGES_SECTION_NAME) != 0)
-	return false;
+	return FALSE;
 
       /* We set the SEC_SORT_ENTRIES flag so it can be passed on to
 	 sh64_elf_fake_sections, keeping SHT_SH5_CR_SORTED if this object
@@ -256,20 +263,20 @@ sh64_backend_section_from_shdr (abfd, hdr, name)
       break;
 
     default:
-      return false;
+      return FALSE;
     }
 
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
-    return false;
+    return FALSE;
 
   if (flags
       && ! bfd_set_section_flags (abfd, hdr->bfd_section,
 				  bfd_get_section_flags (abfd,
 							 hdr->bfd_section)
 				  | flags))
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 /* In contrast to sh64_backend_section_from_shdr, this is called for all
@@ -277,7 +284,7 @@ sh64_backend_section_from_shdr (abfd, hdr, name)
    assembling.  We need to set up the sh64_elf_section_data (asection *)
    structure for the SH64 ELF section flags to be copied correctly.  */
 
-boolean
+bfd_boolean
 sh64_bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
      bfd *ibfd;
      asection *isec;
@@ -288,10 +295,10 @@ sh64_bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
 
   if (ibfd->xvec->flavour != bfd_target_elf_flavour
       || obfd->xvec->flavour != bfd_target_elf_flavour)
-    return true;
+    return TRUE;
 
   if (! _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec))
-    return false;
+    return FALSE;
 
   sh64_sec_data = sh64_elf_section_data (isec);
   if (sh64_sec_data == NULL)
@@ -299,7 +306,7 @@ sh64_bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
       sh64_sec_data = bfd_zmalloc (sizeof (struct sh64_section_data));
 
       if (sh64_sec_data == NULL)
-	return false;
+	return FALSE;
 
       sh64_sec_data->contents_flags
 	= (elf_section_data (isec)->this_hdr.sh_flags
@@ -308,12 +315,12 @@ sh64_bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
       sh64_elf_section_data (osec) = sh64_sec_data;
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Function to keep SH64 specific file flags.  */
 
-static boolean
+static bfd_boolean
 sh64_elf_set_private_flags (abfd, flags)
      bfd *    abfd;
      flagword flags;
@@ -322,7 +329,7 @@ sh64_elf_set_private_flags (abfd, flags)
 	      || elf_elfheader (abfd)->e_flags == flags);
 
   elf_elfheader (abfd)->e_flags = flags;
-  elf_flags_init (abfd) = true;
+  elf_flags_init (abfd) = TRUE;
   return sh64_elf_set_mach_from_flags (abfd);
 }
 
@@ -357,7 +364,7 @@ sh64_elf_get_symbol_type (elf_sym, type)
    or the hash entry, alternatively adding the index to Elf_Internal_Sym
    (not so good).  */
 
-static boolean
+static bfd_boolean
 sh64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -388,13 +395,13 @@ sh64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
       /* Allocation may fail.  */
       if (dl_name == NULL)
-	return false;
+	return FALSE;
 
       strcpy (dl_name, *namep);
       strcat (dl_name, DATALABEL_SUFFIX);
 
       h = (struct elf_link_hash_entry *)
-	bfd_link_hash_lookup (info->hash, dl_name, false, false, false);
+	bfd_link_hash_lookup (info->hash, dl_name, FALSE, FALSE, FALSE);
 
       if (h == NULL)
 	{
@@ -404,11 +411,11 @@ sh64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
 	  if (! _bfd_generic_link_add_one_symbol (info, abfd, dl_name,
 						  flags, *secp, *valp,
-						  *namep, false,
+						  *namep, FALSE,
 						  bed->collect, &bh))
 	    {
 	      free (dl_name);
-	      return false;
+	      return FALSE;
 	    }
 
 	  h = (struct elf_link_hash_entry *) bh;
@@ -431,7 +438,7 @@ sh64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	    (_("%s: encountered datalabel symbol in input"),
 	     bfd_get_filename (abfd));
 	  bfd_set_error (bfd_error_bad_value);
-	  return false;
+	  return FALSE;
 	}
 
       /* Now find the hash-table slot for this entry and fill it in.  */
@@ -443,7 +450,7 @@ sh64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       *namep = NULL;
     }
 
-  return true;
+  return TRUE;
 }
 
 /* This hook function is called before the linker writes out a global
@@ -458,7 +465,7 @@ sh64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
    we don't need to look up and make sure to emit the main symbol for each
    DataLabel symbol.  */
 
-boolean
+bfd_boolean
 sh64_elf_link_output_symbol_hook (abfd, info, cname, sym, input_sec)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
@@ -474,14 +481,14 @@ sh64_elf_link_output_symbol_hook (abfd, info, cname, sym, input_sec)
 	name[strlen (name) - strlen (DATALABEL_SUFFIX)] = 0;
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Check a SH64-specific reloc and put the value to relocate to into
    RELOCATION, ready to pass to _bfd_final_link_relocate.  Return FALSE if
    bad value, TRUE if ok.  */
 
-static boolean
+static bfd_boolean
 shmedia_prepare_reloc (info, abfd, input_section,
 		       contents, rel, relocation)
      struct bfd_link_info *info;
@@ -520,7 +527,7 @@ shmedia_prepare_reloc (info, abfd, input_section,
 		&& ! ((*info->callbacks->reloc_dangerous)
 		      (info, msg, abfd, input_section,
 		       rel->r_offset)))
-	      return false;
+	      return FALSE;
 	  }
 	else
 	  {
@@ -534,7 +541,7 @@ shmedia_prepare_reloc (info, abfd, input_section,
 		(*_bfd_error_handler)
 		  (_("%s: GAS error: unexpected PTB insn with R_SH_PT_16"),
 		   bfd_get_filename (input_section->owner));
-		return false;
+		return FALSE;
 	      }
 
 	    /* Change the PTA to a PTB, if destination indicates so.  */
@@ -567,7 +574,7 @@ shmedia_prepare_reloc (info, abfd, input_section,
       break;
 
     default:
-      return false;
+      return FALSE;
     }
 
   disp = (*relocation & 0xf);
@@ -584,10 +591,10 @@ shmedia_prepare_reloc (info, abfd, input_section,
 	(_("%s: error: unaligned relocation type %d at %08x reloc %08x\n"),
 	 bfd_get_filename (input_section->owner), ELF32_R_TYPE (rel->r_info),
 	 (unsigned)rel->r_offset, (unsigned)relocation);
-      return false;
+      return FALSE;
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Helper function to locate the section holding a certain address.  This
@@ -634,8 +641,8 @@ sh64_find_section_for_address (abfd, section, data)
 
 static void
 sh64_elf_final_write_processing (abfd, linker)
-     bfd *   abfd;
-     boolean linker ATTRIBUTE_UNUSED;
+     bfd *abfd;
+     bfd_boolean linker ATTRIBUTE_UNUSED;
 {
   bfd_vma ld_generated_cranges_size;
   asection *cranges

@@ -1,6 +1,6 @@
 /* BFD back-end data structures for a.out (and similar) files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -131,7 +131,7 @@ struct aout_link_hash_entry
 {
   struct bfd_link_hash_entry root;
   /* Whether this symbol has been written out.  */
-  boolean written;
+  bfd_boolean written;
   /* Symbol index in output file.  */
   int indx;
 };
@@ -154,7 +154,7 @@ struct aout_link_hash_table
 #define aout_link_hash_traverse(table, func, info)			\
   (bfd_link_hash_traverse						\
    (&(table)->root,							\
-    (boolean (*) PARAMS ((struct bfd_link_hash_entry *, PTR))) (func),	\
+    (bfd_boolean (*) PARAMS ((struct bfd_link_hash_entry *, PTR))) (func), \
     (info)))
 
 /* Get the a.out link hash table from the info structure.  This is
@@ -193,7 +193,7 @@ struct aout_backend_data
 
   /* Callback for setting the page and segment sizes, if they can't be
      trivially determined from the architecture.  */
-  boolean (*set_sizes)
+  bfd_boolean (*set_sizes)
     PARAMS ((bfd *));
 
   /* zmagic files only. For go32, the length of the exec header contributes
@@ -203,39 +203,39 @@ struct aout_backend_data
 
   /* Callback from the add symbols phase of the linker code to handle
      a dynamic object.  */
-  boolean (*add_dynamic_symbols)
+  bfd_boolean (*add_dynamic_symbols)
     PARAMS ((bfd *, struct bfd_link_info *, struct external_nlist **,
 	     bfd_size_type *, char **));
 
   /* Callback from the add symbols phase of the linker code to handle
      adding a single symbol to the global linker hash table.  */
-  boolean (*add_one_symbol)
+  bfd_boolean (*add_one_symbol)
     PARAMS ((struct bfd_link_info *, bfd *, const char *, flagword,
-	     asection *, bfd_vma, const char *, boolean, boolean,
+	     asection *, bfd_vma, const char *, bfd_boolean, bfd_boolean,
 	     struct bfd_link_hash_entry **));
 
   /* Called to handle linking a dynamic object.  */
-  boolean (*link_dynamic_object)
+  bfd_boolean (*link_dynamic_object)
     PARAMS ((struct bfd_link_info *, bfd *));
 
   /* Called for each global symbol being written out by the linker.
      This should write out the dynamic symbol information.  */
-  boolean (*write_dynamic_symbol)
+  bfd_boolean (*write_dynamic_symbol)
     PARAMS ((bfd *, struct bfd_link_info *, struct aout_link_hash_entry *));
 
   /* If this callback is not NULL, the linker calls it for each reloc.
      RELOC is a pointer to the unswapped reloc.  If *SKIP is set to
-     true, the reloc will be skipped.  *RELOCATION may be changed to
+     TRUE, the reloc will be skipped.  *RELOCATION may be changed to
      change the effects of the relocation.  */
-  boolean (*check_dynamic_reloc)
+  bfd_boolean (*check_dynamic_reloc)
     PARAMS ((struct bfd_link_info *info, bfd *input_bfd,
 	     asection *input_section, struct aout_link_hash_entry *h,
-	     PTR reloc, bfd_byte *contents, boolean *skip,
+	     PTR reloc, bfd_byte *contents, bfd_boolean *skip,
 	     bfd_vma *relocation));
 
   /* Called at the end of a link to finish up any dynamic linking
      information.  */
-  boolean (*finish_dynamic_link)
+  bfd_boolean (*finish_dynamic_link)
     PARAMS ((bfd *, struct bfd_link_info *));
 };
 #define aout_backend_info(abfd) \
@@ -491,41 +491,41 @@ struct aout_section_data_struct
 
 /* Prototype declarations for functions defined in aoutx.h  */
 
-extern boolean NAME(aout,squirt_out_relocs)
+extern bfd_boolean NAME(aout,squirt_out_relocs)
   PARAMS ((bfd *, asection *));
 
-extern boolean NAME(aout,make_sections)
+extern bfd_boolean NAME(aout,make_sections)
   PARAMS ((bfd *));
 
 extern const bfd_target * NAME(aout,some_aout_object_p)
   PARAMS ((bfd *, struct internal_exec *, const bfd_target *(*) (bfd *)));
 
-extern boolean NAME(aout,mkobject)
+extern bfd_boolean NAME(aout,mkobject)
   PARAMS ((bfd *));
 
 extern enum machine_type NAME(aout,machine_type)
-  PARAMS ((enum bfd_architecture, unsigned long, boolean *));
+  PARAMS ((enum bfd_architecture, unsigned long, bfd_boolean *));
 
-extern boolean NAME(aout,set_arch_mach)
+extern bfd_boolean NAME(aout,set_arch_mach)
   PARAMS ((bfd *, enum bfd_architecture, unsigned long));
 
-extern boolean NAME(aout,new_section_hook)
+extern bfd_boolean NAME(aout,new_section_hook)
   PARAMS ((bfd *, asection *));
 
-extern boolean NAME(aout,set_section_contents)
+extern bfd_boolean NAME(aout,set_section_contents)
   PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
 
 extern asymbol * NAME(aout,make_empty_symbol)
   PARAMS ((bfd *));
 
-extern boolean NAME(aout,translate_symbol_table)
+extern bfd_boolean NAME(aout,translate_symbol_table)
   PARAMS ((bfd *, aout_symbol_type *, struct external_nlist *, bfd_size_type,
-	   char *, bfd_size_type, boolean));
+	   char *, bfd_size_type, bfd_boolean));
 
-extern boolean NAME(aout,slurp_symbol_table)
+extern bfd_boolean NAME(aout,slurp_symbol_table)
   PARAMS ((bfd *));
 
-extern boolean NAME(aout,write_syms)
+extern bfd_boolean NAME(aout,write_syms)
   PARAMS ((bfd *));
 
 extern void NAME(aout,reclaim_symbol_table)
@@ -547,7 +547,7 @@ extern void NAME(aout,swap_std_reloc_in)
 extern reloc_howto_type * NAME(aout,reloc_type_lookup)
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 
-extern boolean NAME(aout,slurp_reloc_table)
+extern bfd_boolean NAME(aout,slurp_reloc_table)
   PARAMS ((bfd *, sec_ptr, asymbol **));
 
 extern long NAME(aout,canonicalize_reloc)
@@ -568,20 +568,20 @@ extern void NAME(aout,print_symbol)
 extern void NAME(aout,get_symbol_info)
   PARAMS ((bfd *, asymbol *, symbol_info *));
 
-extern boolean NAME(aout,find_nearest_line)
+extern bfd_boolean NAME(aout,find_nearest_line)
   PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
 	   const char **, unsigned int *));
 
 extern long NAME(aout,read_minisymbols)
-  PARAMS ((bfd *, boolean, PTR *, unsigned int *));
+  PARAMS ((bfd *, bfd_boolean, PTR *, unsigned int *));
 
 extern asymbol * NAME(aout,minisymbol_to_symbol)
-  PARAMS ((bfd *, boolean, const PTR, asymbol *));
+  PARAMS ((bfd *, bfd_boolean, const PTR, asymbol *));
 
 extern int NAME(aout,sizeof_headers)
-  PARAMS ((bfd *, boolean));
+  PARAMS ((bfd *, bfd_boolean));
 
-extern boolean NAME(aout,adjust_sizes_and_vmas)
+extern bfd_boolean NAME(aout,adjust_sizes_and_vmas)
   PARAMS ((bfd *, bfd_size_type *, file_ptr *));
 
 extern void NAME(aout,swap_exec_header_in)
@@ -593,7 +593,7 @@ extern void NAME(aout,swap_exec_header_out)
 extern struct bfd_hash_entry * NAME(aout,link_hash_newfunc)
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 
-extern boolean NAME(aout,link_hash_table_init)
+extern bfd_boolean NAME(aout,link_hash_table_init)
   PARAMS ((struct aout_link_hash_table *, bfd *,
 	   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
 				       struct bfd_hash_table *,
@@ -602,14 +602,14 @@ extern boolean NAME(aout,link_hash_table_init)
 extern struct bfd_link_hash_table * NAME(aout,link_hash_table_create)
   PARAMS ((bfd *));
 
-extern boolean NAME(aout,link_add_symbols)
+extern bfd_boolean NAME(aout,link_add_symbols)
   PARAMS ((bfd *, struct bfd_link_info *));
 
-extern boolean NAME(aout,final_link)
+extern bfd_boolean NAME(aout,final_link)
   PARAMS ((bfd *, struct bfd_link_info *,
 	   void (*) (bfd *, file_ptr *, file_ptr *, file_ptr *)));
 
-extern boolean NAME(aout,bfd_free_cached_info)
+extern bfd_boolean NAME(aout,bfd_free_cached_info)
   PARAMS ((bfd *));
 
 /* A.out uses the generic versions of these routines... */
@@ -647,28 +647,28 @@ extern boolean NAME(aout,bfd_free_cached_info)
 	if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0		      \
 	    || bfd_bwrite ((PTR) &exec_bytes, (bfd_size_type) EXEC_BYTES_SIZE, \
 			  abfd) != EXEC_BYTES_SIZE)			      \
-	  return false;							      \
+	  return FALSE;							      \
 	/* Now write out reloc info, followed by syms and strings */	      \
   									      \
 	if (bfd_get_outsymbols (abfd) != (asymbol **) NULL		      \
 	    && bfd_get_symcount (abfd) != 0) 				      \
 	  {								      \
 	    if (bfd_seek (abfd, (file_ptr) (N_SYMOFF(*execp)), SEEK_SET) != 0)\
-	      return false;						      \
+	      return FALSE;						      \
 									      \
 	    if (! NAME(aout,write_syms) (abfd))				      \
-	      return false;						      \
+	      return FALSE;						      \
 	  }								      \
 									      \
 	if (bfd_seek (abfd, (file_ptr) (N_TRELOFF(*execp)), SEEK_SET) != 0)   \
-	  return false;						      	      \
+	  return FALSE;						      	      \
 	if (!NAME(aout,squirt_out_relocs) (abfd, obj_textsec (abfd)))         \
-	  return false;						      	      \
+	  return FALSE;						      	      \
 									      \
 	if (bfd_seek (abfd, (file_ptr) (N_DRELOFF(*execp)), SEEK_SET) != 0)   \
-	  return false;						      	      \
+	  return FALSE;						      	      \
 	if (!NAME(aout,squirt_out_relocs) (abfd, obj_datasec (abfd)))         \
-	  return false;						      	      \
+	  return FALSE;						      	      \
       }
 #endif
 

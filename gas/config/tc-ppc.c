@@ -47,9 +47,9 @@ static int set_target_endian = 0;
 /* Whether to use user friendly register names.  */
 #ifndef TARGET_REG_NAMES_P
 #ifdef TE_PE
-#define TARGET_REG_NAMES_P true
+#define TARGET_REG_NAMES_P TRUE
 #else
-#define TARGET_REG_NAMES_P false
+#define TARGET_REG_NAMES_P FALSE
 #endif
 #endif
 
@@ -83,9 +83,9 @@ static int set_target_endian = 0;
 
 #define SEX16(val) ((((val) & 0xffff) ^ 0x8000) - 0x8000)
 
-static boolean reg_names_p = TARGET_REG_NAMES_P;
+static bfd_boolean reg_names_p = TARGET_REG_NAMES_P;
 
-static boolean register_name PARAMS ((expressionS *));
+static bfd_boolean register_name PARAMS ((expressionS *));
 static void ppc_set_cpu PARAMS ((void));
 static unsigned long ppc_insert_operand
   PARAMS ((unsigned long insn, const struct powerpc_operand *operand,
@@ -603,7 +603,7 @@ reg_name_search (regs, regcount, name)
  *      original state.
  */
 
-static boolean
+static bfd_boolean
 register_name (expressionP)
      expressionS *expressionP;
 {
@@ -618,7 +618,7 @@ register_name (expressionP)
     name = ++input_line_pointer;
 
   else if (!reg_names_p || !ISALPHA (name[0]))
-    return false;
+    return FALSE;
 
   c = get_symbol_end ();
   reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
@@ -635,12 +635,12 @@ register_name (expressionP)
       /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      return true;
+      return TRUE;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return false;
+  return FALSE;
 }
 
 /* This function is called for each symbol seen in an expression.  It
@@ -648,7 +648,7 @@ register_name (expressionP)
    to use for condition codes.  */
 
 /* Whether to do the special parsing.  */
-static boolean cr_operand;
+static bfd_boolean cr_operand;
 
 /* Names to recognize in a condition code.  This table is sorted.  */
 static const struct pd_reg cr_names[] =
@@ -716,12 +716,12 @@ static flagword ppc_flags = 0;
 
 /* Whether this is Solaris or not.  */
 #ifdef TARGET_SOLARIS_COMMENT
-#define SOLARIS_P true
+#define SOLARIS_P TRUE
 #else
-#define SOLARIS_P false
+#define SOLARIS_P FALSE
 #endif
 
-static boolean msolaris = SOLARIS_P;
+static bfd_boolean msolaris = SOLARIS_P;
 #endif
 
 #ifdef OBJ_XCOFF
@@ -796,8 +796,8 @@ symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE" */
 #define PPC_APUINFO_EFS		0x101
 #define PPC_APUINFO_BRLOCK	0x102
 
-/* 
- * We keep a list of APUinfo 
+/*
+ * We keep a list of APUinfo
  */
 unsigned long *ppc_apuinfo_list;
 unsigned int ppc_apuinfo_num;
@@ -891,8 +891,8 @@ md_parse_option (c, arg)
       /* -m601 means to assemble for the PowerPC 601, which includes
 	 instructions that are holdovers from the Power.  */
       else if (strcmp (arg, "601") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
-	          | PPC_OPCODE_601 | PPC_OPCODE_32;
+	ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+		   | PPC_OPCODE_601 | PPC_OPCODE_32);
       /* -mppc, -mppc32, -m603, and -m604 mean to assemble for the
 	 PowerPC 603/604.  */
       else if (strcmp (arg, "ppc") == 0
@@ -902,28 +902,29 @@ md_parse_option (c, arg)
 	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_32;
       /* -m403 and -m405 mean to assemble for the PowerPC 403/405.  */
       else if (strcmp (arg, "403") == 0
-               || strcmp (arg, "405") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
-                  | PPC_OPCODE_403 | PPC_OPCODE_32;
+	       || strcmp (arg, "405") == 0)
+	ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+		   | PPC_OPCODE_403 | PPC_OPCODE_32);
       else if (strcmp (arg, "7400") == 0
-               || strcmp (arg, "7410") == 0
-               || strcmp (arg, "7450") == 0
-               || strcmp (arg, "7455") == 0)
-	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
-                  | PPC_OPCODE_ALTIVEC | PPC_OPCODE_32;
+	       || strcmp (arg, "7410") == 0
+	       || strcmp (arg, "7450") == 0
+	       || strcmp (arg, "7455") == 0)
+	ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+		   | PPC_OPCODE_ALTIVEC | PPC_OPCODE_32);
       else if (strcmp (arg, "altivec") == 0)
-        {
-          if (ppc_cpu == 0)
-            ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_ALTIVEC;
-          else
-            ppc_cpu |= PPC_OPCODE_ALTIVEC;
-        }
+	{
+	  if (ppc_cpu == 0)
+	    ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_ALTIVEC;
+	  else
+	    ppc_cpu |= PPC_OPCODE_ALTIVEC;
+	}
       else if (strcmp (arg, "e500") == 0 || strcmp (arg, "e500x2") == 0)
 	{
-	  ppc_cpu = PPC_OPCODE_PPC  | PPC_OPCODE_BOOKE    | PPC_OPCODE_SPE
-		  | PPC_OPCODE_ISEL | PPC_OPCODE_EFS      | PPC_OPCODE_BRLOCK
-		  | PPC_OPCODE_PMR  | PPC_OPCODE_CACHELCK | PPC_OPCODE_RFMCI;
-        }
+	  ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_SPE
+		     | PPC_OPCODE_ISEL | PPC_OPCODE_EFS | PPC_OPCODE_BRLOCK
+		     | PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK
+		     | PPC_OPCODE_RFMCI);
+	}
       else if (strcmp (arg, "spe") == 0)
 	{
 	  if (ppc_cpu == 0)
@@ -939,8 +940,8 @@ md_parse_option (c, arg)
 	}
       else if (strcmp (arg, "ppc64bridge") == 0)
 	{
-	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
-                    | PPC_OPCODE_64_BRIDGE | PPC_OPCODE_64;
+	  ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+		     | PPC_OPCODE_64_BRIDGE | PPC_OPCODE_64);
 	}
       /* -mbooke/-mbooke32 mean enable 32-bit BookE support.  */
       else if (strcmp (arg, "booke") == 0 || strcmp (arg, "booke32") == 0)
@@ -950,13 +951,13 @@ md_parse_option (c, arg)
       /* -mbooke64 means enable 64-bit BookE support.  */
       else if (strcmp (arg, "booke64") == 0)
 	{
-	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_BOOKE |
-		    PPC_OPCODE_BOOKE64 | PPC_OPCODE_64;
+	  ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE
+		     | PPC_OPCODE_BOOKE64 | PPC_OPCODE_64);
 	}
       else if (strcmp (arg, "power4") == 0)
 	{
-	  ppc_cpu = PPC_OPCODE_PPC| PPC_OPCODE_CLASSIC
-                    | PPC_OPCODE_64 | PPC_OPCODE_POWER4;
+	  ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+		     | PPC_OPCODE_64 | PPC_OPCODE_POWER4);
 	}
       /* -mcom means assemble for the common intersection between Power
 	 and PowerPC.  At present, we just allow the union, rather
@@ -968,10 +969,10 @@ md_parse_option (c, arg)
 	ppc_cpu = PPC_OPCODE_ANY | PPC_OPCODE_32;
 
       else if (strcmp (arg, "regnames") == 0)
-	reg_names_p = true;
+	reg_names_p = TRUE;
 
       else if (strcmp (arg, "no-regnames") == 0)
-	reg_names_p = false;
+	reg_names_p = FALSE;
 
 #ifdef OBJ_ELF
       /* -mrelocatable/-mrelocatable-lib -- warn about initializations
@@ -1008,13 +1009,13 @@ md_parse_option (c, arg)
 
       else if (strcmp (arg, "solaris") == 0)
 	{
-	  msolaris = true;
+	  msolaris = TRUE;
 	  ppc_comment_chars = ppc_solaris_comment_chars;
 	}
 
       else if (strcmp (arg, "no-solaris") == 0)
 	{
-	  msolaris = false;
+	  msolaris = FALSE;
 	  ppc_comment_chars = ppc_eabi_comment_chars;
 	}
 #endif
@@ -1116,12 +1117,12 @@ ppc_set_cpu ()
       else if (strcmp (default_cpu, "rs6000") == 0)
 	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_32;
       else if (strncmp (default_cpu, "powerpc", 7) == 0)
-        {
-          if (default_cpu[7] == '6' && default_cpu[8] == '4')
-            ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_64;
-          else
-            ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_32;
-        }
+	{
+	  if (default_cpu[7] == '6' && default_cpu[8] == '4')
+	    ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_64;
+	  else
+	    ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_32;
+	}
       else
 	as_fatal (_("Unknown default cpu = %s, os = %s"),
 		  default_cpu, default_os);
@@ -1197,7 +1198,7 @@ md_begin ()
   const struct powerpc_opcode *op_end;
   const struct powerpc_macro *macro;
   const struct powerpc_macro *macro_end;
-  boolean dup_insn = false;
+  bfd_boolean dup_insn = FALSE;
 
   ppc_set_cpu ();
 
@@ -1244,7 +1245,7 @@ md_begin ()
 
 	      as_bad (_("Internal assembler error for instruction %s"),
 		      op->name);
-	      dup_insn = true;
+	      dup_insn = TRUE;
 	    }
 	}
     }
@@ -1263,7 +1264,7 @@ md_begin ()
 	  if (retval != (const char *) NULL)
 	    {
 	      as_bad (_("Internal assembler error for macro %s"), macro->name);
-	      dup_insn = true;
+	      dup_insn = TRUE;
 	    }
 	}
     }
@@ -1345,8 +1346,8 @@ ppc_cleanup ()
 
     for (i = 0; i < ppc_apuinfo_num; i++)
       {
-        p = frag_more (4);
-        md_number_to_chars (p, (valueT) ppc_apuinfo_list[i], 4);
+	p = frag_more (4);
+	md_number_to_chars (p, (valueT) ppc_apuinfo_list[i], 4);
       }
 
     frag_align (2, 0, 0);
@@ -1968,7 +1969,7 @@ ppc_apuinfo_section_add (apu, version)
   for (i = 0; i < ppc_apuinfo_num; i++)
     if (ppc_apuinfo_list[i] == APUID (apu, version))
       return;
-    
+
   if (ppc_apuinfo_num == ppc_apuinfo_num_alloc)
     {
       if (ppc_apuinfo_num_alloc == 0)
@@ -2272,9 +2273,9 @@ md_assemble (str)
 	  if (! register_name (&ex))
 	    {
 	      if ((operand->flags & PPC_OPERAND_CR) != 0)
-		cr_operand = true;
+		cr_operand = TRUE;
 	      expression (&ex);
-	      cr_operand = false;
+	      cr_operand = FALSE;
 	    }
 	}
 
@@ -2491,19 +2492,19 @@ md_assemble (str)
     {
       /* These are all version "1".  */
       if (opcode->flags & PPC_OPCODE_SPE)
-        ppc_apuinfo_section_add (PPC_APUINFO_SPE, 1);
+	ppc_apuinfo_section_add (PPC_APUINFO_SPE, 1);
       if (opcode->flags & PPC_OPCODE_ISEL)
-        ppc_apuinfo_section_add (PPC_APUINFO_ISEL, 1);
+	ppc_apuinfo_section_add (PPC_APUINFO_ISEL, 1);
       if (opcode->flags & PPC_OPCODE_EFS)
-        ppc_apuinfo_section_add (PPC_APUINFO_EFS, 1);
+	ppc_apuinfo_section_add (PPC_APUINFO_EFS, 1);
       if (opcode->flags & PPC_OPCODE_BRLOCK)
-        ppc_apuinfo_section_add (PPC_APUINFO_BRLOCK, 1);
+	ppc_apuinfo_section_add (PPC_APUINFO_BRLOCK, 1);
       if (opcode->flags & PPC_OPCODE_PMR)
-        ppc_apuinfo_section_add (PPC_APUINFO_PMR, 1);
+	ppc_apuinfo_section_add (PPC_APUINFO_PMR, 1);
       if (opcode->flags & PPC_OPCODE_CACHELCK)
-        ppc_apuinfo_section_add (PPC_APUINFO_CACHELCK, 1);
+	ppc_apuinfo_section_add (PPC_APUINFO_CACHELCK, 1);
       if (opcode->flags & PPC_OPCODE_RFMCI)
-        ppc_apuinfo_section_add (PPC_APUINFO_RFMCI, 1);
+	ppc_apuinfo_section_add (PPC_APUINFO_RFMCI, 1);
     }
 #endif
 
@@ -2759,7 +2760,7 @@ ppc_byte (ignore)
 
 /* This is set if we are creating a .stabx symbol, since we don't want
    to handle symbol suffixes for such symbols.  */
-static boolean ppc_stab_symbol;
+static bfd_boolean ppc_stab_symbol;
 
 /* The .comm and .lcomm pseudo-ops for XCOFF.  XCOFF puts common
    symbols in the .bss segment as though they were local common
@@ -3202,9 +3203,9 @@ ppc_stabx (ignore)
     }
   ++input_line_pointer;
 
-  ppc_stab_symbol = true;
+  ppc_stab_symbol = TRUE;
   sym = symbol_make (name);
-  ppc_stab_symbol = false;
+  ppc_stab_symbol = FALSE;
 
   symbol_get_tc (sym)->real_name = name;
 
@@ -3933,11 +3934,11 @@ ppc_previous (ignore)
 
 /* pseudo-op: .pdata
    behaviour: predefined read only data section
-              double word aligned
+	      double word aligned
    errors:    None
    warnings:  None
    initial:   .section .pdata "adr3"
-              a - don't know -- maybe a misprint
+	      a - don't know -- maybe a misprint
 	      d - initialized data
 	      r - readable
 	      3 - double word aligned (that would be 4 byte boundary)
@@ -3969,11 +3970,11 @@ ppc_pdata (ignore)
 
 /* pseudo-op: .ydata
    behaviour: predefined read only data section
-              double word aligned
+	      double word aligned
    errors:    None
    warnings:  None
    initial:   .section .ydata "drw3"
-              a - don't know -- maybe a misprint
+	      a - don't know -- maybe a misprint
 	      d - initialized data
 	      r - readable
 	      3 - double word aligned (that would be 4 byte boundary)
@@ -4003,7 +4004,7 @@ ppc_ydata (ignore)
 
 /* pseudo-op: .reldata
    behaviour: predefined read write data section
-              double word aligned (4-byte)
+	      double word aligned (4-byte)
 	      FIXME: relocation is applied to it
 	      FIXME: what's the difference between this and .data?
    errors:    None
@@ -4041,7 +4042,7 @@ ppc_reldata (ignore)
 
 /* pseudo-op: .rdata
    behaviour: predefined read only data section
-              double word aligned
+	      double word aligned
    errors:    None
    warnings:  None
    initial:   .section .rdata "dr3"
@@ -4071,7 +4072,7 @@ ppc_rdata (ignore)
 
 /* pseudo-op: .ualong
    behaviour: much like .int, with the exception that no alignment is
-              performed.
+	      performed.
 	      FIXME: test the alignment statement
    errors:    None
    warnings:  None  */
@@ -4086,7 +4087,7 @@ ppc_ualong (ignore)
 
 /* pseudo-op: .znop  <symbol name>
    behaviour: Issue a nop instruction
-              Issue a IMAGE_REL_PPC_IFGLUE relocation against it, using
+	      Issue a IMAGE_REL_PPC_IFGLUE relocation against it, using
 	      the supplied symbol name.
    errors:    None
    warnings:  Missing symbol name  */
@@ -4648,7 +4649,7 @@ ppc_frob_label (sym)
    seen.  It tells ppc_adjust_symtab whether it needs to look through
    the symbols.  */
 
-static boolean ppc_saw_abs;
+static bfd_boolean ppc_saw_abs;
 
 /* Change the name of a symbol just before writing it out.  Set the
    real name if the .rename pseudo-op was used.  Otherwise, remove any
@@ -4791,7 +4792,7 @@ ppc_frob_symbol (sym)
 	{
 	  /* This is an absolute symbol.  The csect will be created by
 	     ppc_adjust_symtab.  */
-	  ppc_saw_abs = true;
+	  ppc_saw_abs = TRUE;
 	  a->x_csect.x_smtyp = XTY_LD;
 	  if (symbol_get_tc (sym)->class == -1)
 	    symbol_get_tc (sym)->class = XMC_XO;
@@ -4959,7 +4960,7 @@ ppc_adjust_symtab ()
       coffsymbol (symbol_get_bfdsym (sym))->native[i].fix_scnlen = 1;
     }
 
-  ppc_saw_abs = false;
+  ppc_saw_abs = FALSE;
 }
 
 /* Set the VMA for a section.  This is called on all the sections in

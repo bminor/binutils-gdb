@@ -3949,7 +3949,7 @@ pa_ip (str)
 
  failed:
       /* Check if the args matched.  */
-      if (match == FALSE)
+      if (!match)
 	{
 	  if (&insn[1] - pa_opcodes < (int) NUMOPCODES
 	      && !strcmp (insn->name, insn[1].name))
@@ -4680,7 +4680,7 @@ pa_parse_number (s, is_float)
   symbolS *sym;
   int status;
   char *p = *s;
-  boolean have_prefix;
+  bfd_boolean have_prefix;
 
   /* Skip whitespace before the number.  */
   while (*p == ' ' || *p == '\t')
@@ -4819,7 +4819,7 @@ pa_parse_number (s, is_float)
 	      num = S_GET_VALUE (sym);
 	      /* Well, we don't really have one, but we do have a
 		 register, so...  */
-	      have_prefix = true;
+	      have_prefix = TRUE;
 	    }
 	  else if (S_GET_SEGMENT (sym) == &bfd_abs_section)
 	    num = S_GET_VALUE (sym);

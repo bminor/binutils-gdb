@@ -158,11 +158,11 @@ const pseudo_typeS md_pseudo_table[] =
 /* ***************************************************************** */
 
 /* Whether to use user friendly register names.  */
-#define TARGET_REG_NAMES_P true
+#define TARGET_REG_NAMES_P TRUE
 
-static boolean reg_names_p = TARGET_REG_NAMES_P;
+static bfd_boolean reg_names_p = TARGET_REG_NAMES_P;
 
-static boolean register_name PARAMS ((expressionS *));
+static bfd_boolean register_name PARAMS ((expressionS *));
 static void i370_set_cpu PARAMS ((void));
 static i370_insn_t i370_insert_operand
   PARAMS ((i370_insn_t insn, const struct i370_operand *operand, offsetT val));
@@ -323,7 +323,7 @@ reg_name_search (regs, regcount, name)
  *      original state.
  */
 
-static boolean
+static bfd_boolean
 register_name (expressionP)
      expressionS *expressionP;
 {
@@ -338,7 +338,7 @@ register_name (expressionP)
     name = ++input_line_pointer;
 
   else if (!reg_names_p)
-    return false;
+    return FALSE;
 
   while (' ' == *name)
     name = ++input_line_pointer;
@@ -367,12 +367,12 @@ register_name (expressionP)
       /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      return true;
+      return TRUE;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return false;
+  return FALSE;
 }
 
 /* Local variables.  */
@@ -479,10 +479,10 @@ md_parse_option (c, arg)
 	i370_cpu = I370_OPCODE_370;
 
       else if (strcmp (arg, "regnames") == 0)
-	reg_names_p = true;
+	reg_names_p = TRUE;
 
       else if (strcmp (arg, "no-regnames") == 0)
-	reg_names_p = false;
+	reg_names_p = FALSE;
 
 #ifdef OBJ_ELF
       /* -mrelocatable/-mrelocatable-lib -- warn about initializations that require relocation */
@@ -572,7 +572,7 @@ md_begin ()
   const struct i370_opcode *op_end;
   const struct i370_macro *macro;
   const struct i370_macro *macro_end;
-  boolean dup_insn = false;
+  bfd_boolean dup_insn = FALSE;
 
   i370_set_cpu ();
 
@@ -598,7 +598,7 @@ md_begin ()
            if (retval != (const char *) NULL)
              {
                as_bad ("Internal assembler error for instruction %s", op->name);
-               dup_insn = true;
+               dup_insn = TRUE;
              }
          }
      }
@@ -617,7 +617,7 @@ md_begin ()
           if (retval != (const char *) NULL)
             {
               as_bad ("Internal assembler error for macro %s", macro->name);
-              dup_insn = true;
+              dup_insn = TRUE;
             }
         }
     }
@@ -1477,7 +1477,7 @@ symbol_locate (symbolP, name, segment, valu, frag)
  * register operands. For example, "BL .L33" branch low
  * to .L33 RX form insn frequently terminates for-loops,
  */
-static boolean
+static bfd_boolean
 i370_addr_offset (expressionS *exx)
 {
   char *dot, *lab;
@@ -1517,7 +1517,7 @@ i370_addr_offset (expressionS *exx)
   dot = strchr (input_line_pointer, '*');
 
   if (!dot && !islabel)
-    return false;
+    return FALSE;
 
   /* replace * with . and let expr munch on it.  */
   if (dot)
@@ -1539,7 +1539,7 @@ i370_addr_offset (expressionS *exx)
   if (dot)
     *dot = '*';
 
-  return true;
+  return TRUE;
 }
 
 /* handle address constants of various sorts */
@@ -1550,7 +1550,7 @@ i370_addr_offset (expressionS *exx)
  *    =F'1234'        32-bit const int
  *    =H'1234'        16-bit const int
  */
-static boolean
+static bfd_boolean
 i370_addr_cons (expressionS *exp)
 {
   char *name;
@@ -1568,7 +1568,7 @@ i370_addr_cons (expressionS *exp)
     }
   else
     {
-      return false;
+      return FALSE;
     }
   switch (name[0])
     {
@@ -1686,17 +1686,17 @@ i370_addr_cons (expressionS *exp)
       if ((exp->X_op != O_constant) && (exp->X_op != O_big))
 	{
 	  as_bad ("expression not a constant");
-	  return false;
+	  return FALSE;
 	}
       add_to_lit_pool (exp, 0x0, cons_len);
       break;
 
     default:
       as_bad ("Unknown/unsupported address literal type");
-      return false;
+      return FALSE;
     }
 
-  return true;
+  return TRUE;
 }
 
 

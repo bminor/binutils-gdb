@@ -48,9 +48,9 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 #define md_number_to_chars           number_to_chars_bigendian
 
 int d30v_cleanup PARAMS ((int));
-#define md_after_pass_hook()	     d30v_cleanup (false)
-#define md_cleanup()		     d30v_cleanup (false)
-#define TC_START_LABEL(ch, ptr)      (ch == ':' && d30v_cleanup (false))
+#define md_after_pass_hook()	     d30v_cleanup (FALSE)
+#define md_cleanup()		     d30v_cleanup (FALSE)
+#define TC_START_LABEL(ch, ptr)      (ch == ':' && d30v_cleanup (FALSE))
 void d30v_start_line PARAMS ((void));
 #define md_start_line_hook()	     d30v_start_line ()
 

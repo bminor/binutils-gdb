@@ -586,7 +586,7 @@ gmon_out_read (filename)
       printf (nbbs == 1 ?
 	      _("\t%d basic-block count record\n") :
 	      _("\t%d basic-block count records\n"), nbbs);
-      first_output = false;
+      first_output = FALSE;
     }
 }
 

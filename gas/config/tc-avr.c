@@ -694,25 +694,25 @@ avr_operand (opcode, where, op, line)
     case 'h':
       str = parse_exp (str, &op_expr);
       fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		   &op_expr, false, BFD_RELOC_AVR_CALL);
+		   &op_expr, FALSE, BFD_RELOC_AVR_CALL);
       break;
 
     case 'L':
       str = parse_exp (str, &op_expr);
       fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		   &op_expr, true, BFD_RELOC_AVR_13_PCREL);
+		   &op_expr, TRUE, BFD_RELOC_AVR_13_PCREL);
       break;
 
     case 'l':
       str = parse_exp (str, &op_expr);
       fix_new_exp (frag_now, where, opcode->insn_size * 2,
-		   &op_expr, true, BFD_RELOC_AVR_7_PCREL);
+		   &op_expr, TRUE, BFD_RELOC_AVR_7_PCREL);
       break;
 
     case 'i':
       str = parse_exp (str, &op_expr);
       fix_new_exp (frag_now, where + 2, opcode->insn_size * 2,
-		   &op_expr, false, BFD_RELOC_16);
+		   &op_expr, FALSE, BFD_RELOC_16);
       break;
 
     case 'M':
@@ -723,7 +723,7 @@ avr_operand (opcode, where, op, line)
 	r_type = avr_ldi_expression (&op_expr);
 	str = input_line_pointer;
 	fix_new_exp (frag_now, where, 3,
-		     &op_expr, false, r_type);
+		     &op_expr, FALSE, r_type);
       }
       break;
 
@@ -1283,16 +1283,16 @@ avr_cons_fix_new (frag, where, nbytes, exp)
   if (exp_mod_pm == 0)
     {
       if (nbytes == 2)
-	fix_new_exp (frag, where, nbytes, exp, false, BFD_RELOC_16);
+	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_16);
       else if (nbytes == 4)
-	fix_new_exp (frag, where, nbytes, exp, false, BFD_RELOC_32);
+	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_32);
       else
 	as_bad (_("illegal %srelocation size: %d"), "", nbytes);
     }
   else
     {
       if (nbytes == 2)
-	fix_new_exp (frag, where, nbytes, exp, false, BFD_RELOC_AVR_16_PM);
+	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_AVR_16_PM);
       else
 	as_bad (_("illegal %srelocation size: %d"), "`pm' ", nbytes);
       exp_mod_pm = 0;

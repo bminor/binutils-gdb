@@ -55,9 +55,9 @@ static struct obstack stat_obstack;
 #define obstack_chunk_free free
 static const char *startup_file;
 static lang_statement_list_type input_file_chain;
-static boolean placed_commons = false;
+static bfd_boolean placed_commons = FALSE;
 static lang_output_section_statement_type *default_common_section;
-static boolean map_option_f;
+static bfd_boolean map_option_f;
 static bfd_vma print_dot;
 static lang_input_statement_type *first_file;
 static const char *current_target;
@@ -69,52 +69,77 @@ static void lang_for_each_statement_worker
   PARAMS ((void (*) (lang_statement_union_type *),
 	   lang_statement_union_type *));
 static lang_input_statement_type *new_afile
-  PARAMS ((const char *, lang_input_file_enum_type, const char *, boolean));
-static lang_memory_region_type *lang_memory_default PARAMS ((asection *));
-static void lang_map_flags PARAMS ((flagword));
-static void init_os PARAMS ((lang_output_section_statement_type *));
-static void exp_init_os PARAMS ((etree_type *));
-static void section_already_linked PARAMS ((bfd *, asection *, PTR));
+  PARAMS ((const char *, lang_input_file_enum_type, const char *,
+	   bfd_boolean));
+static lang_memory_region_type *lang_memory_default
+  PARAMS ((asection *));
+static void lang_map_flags
+  PARAMS ((flagword));
+static void init_os
+  PARAMS ((lang_output_section_statement_type *));
+static void exp_init_os
+  PARAMS ((etree_type *));
+static void section_already_linked
+  PARAMS ((bfd *, asection *, PTR));
 static struct bfd_hash_entry *already_linked_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
-static void already_linked_table_init PARAMS ((void));
-static void already_linked_table_free PARAMS ((void));
-static boolean wildcardp PARAMS ((const char *));
+static void already_linked_table_init
+  PARAMS ((void));
+static void already_linked_table_free
+  PARAMS ((void));
+static bfd_boolean wildcardp
+  PARAMS ((const char *));
 static lang_statement_union_type *wild_sort
   PARAMS ((lang_wild_statement_type *, struct wildcard_list *,
 	   lang_input_statement_type *, asection *));
 static void output_section_callback
   PARAMS ((lang_wild_statement_type *, struct wildcard_list *, asection *,
 	   lang_input_statement_type *, PTR));
-static lang_input_statement_type *lookup_name PARAMS ((const char *));
-static boolean load_symbols
+static lang_input_statement_type *lookup_name
+  PARAMS ((const char *));
+static bfd_boolean load_symbols
   PARAMS ((lang_input_statement_type *, lang_statement_list_type *));
 static void wild
   PARAMS ((lang_wild_statement_type *,
 	   const char *, lang_output_section_statement_type *));
-static bfd *open_output PARAMS ((const char *));
-static void ldlang_open_output PARAMS ((lang_statement_union_type *));
-static void open_input_bfds PARAMS ((lang_statement_union_type *, boolean));
-static void lang_reasonable_defaults PARAMS ((void));
-static void insert_undefined PARAMS ((const char *));
-static void lang_place_undefineds PARAMS ((void));
+static bfd *open_output
+  PARAMS ((const char *));
+static void ldlang_open_output
+  PARAMS ((lang_statement_union_type *));
+static void open_input_bfds
+  PARAMS ((lang_statement_union_type *, bfd_boolean));
+static void lang_reasonable_defaults
+  PARAMS ((void));
+static void insert_undefined
+  PARAMS ((const char *));
+static void lang_place_undefineds
+  PARAMS ((void));
 static void map_input_to_output_sections
   PARAMS ((lang_statement_union_type *, const char *,
 	   lang_output_section_statement_type *));
-static void strip_excluded_output_sections PARAMS ((void));
+static void strip_excluded_output_sections
+  PARAMS ((void));
 static void print_output_section_statement
   PARAMS ((lang_output_section_statement_type *));
 static void print_assignment
   PARAMS ((lang_assignment_statement_type *,
 	   lang_output_section_statement_type *));
-static void print_input_statement PARAMS ((lang_input_statement_type *));
-static boolean print_one_symbol PARAMS ((struct bfd_link_hash_entry *, PTR));
-static void print_input_section PARAMS ((lang_input_section_type *));
-static void print_fill_statement PARAMS ((lang_fill_statement_type *));
-static void print_data_statement PARAMS ((lang_data_statement_type *));
-static void print_address_statement PARAMS ((lang_address_statement_type *));
-static void print_reloc_statement PARAMS ((lang_reloc_statement_type *));
-static void print_padding_statement PARAMS ((lang_padding_statement_type *));
+static void print_input_statement
+  PARAMS ((lang_input_statement_type *));
+static bfd_boolean print_one_symbol
+  PARAMS ((struct bfd_link_hash_entry *, PTR));
+static void print_input_section
+  PARAMS ((lang_input_section_type *));
+static void print_fill_statement
+  PARAMS ((lang_fill_statement_type *));
+static void print_data_statement
+  PARAMS ((lang_data_statement_type *));
+static void print_address_statement
+  PARAMS ((lang_address_statement_type *));
+static void print_reloc_statement
+  PARAMS ((lang_reloc_statement_type *));
+static void print_padding_statement
+  PARAMS ((lang_padding_statement_type *));
 static void print_wild_statement
   PARAMS ((lang_wild_statement_type *, lang_output_section_statement_type *));
 static void print_group
@@ -123,51 +148,63 @@ static void print_statement
   PARAMS ((lang_statement_union_type *, lang_output_section_statement_type *));
 static void print_statement_list
   PARAMS ((lang_statement_union_type *, lang_output_section_statement_type *));
-static void print_statements PARAMS ((void));
+static void print_statements
+  PARAMS ((void));
 static void insert_pad
   PARAMS ((lang_statement_union_type **, fill_type *,
 	   unsigned int, asection *, bfd_vma));
 static bfd_vma size_input_section
   PARAMS ((lang_statement_union_type **, lang_output_section_statement_type *,
 	   fill_type *, bfd_vma));
-static void lang_finish PARAMS ((void));
-static void ignore_bfd_errors PARAMS ((const char *, ...));
-static void lang_check PARAMS ((void));
-static void lang_common PARAMS ((void));
-static boolean lang_one_common PARAMS ((struct bfd_link_hash_entry *, PTR));
-static void lang_place_orphans PARAMS ((void));
-static int topower PARAMS ((int));
-static void lang_set_startof PARAMS ((void));
+static void lang_finish
+  PARAMS ((void));
+static void ignore_bfd_errors
+  PARAMS ((const char *, ...));
+static void lang_check
+  PARAMS ((void));
+static void lang_common
+  PARAMS ((void));
+static bfd_boolean lang_one_common
+  PARAMS ((struct bfd_link_hash_entry *, PTR));
+static void lang_place_orphans
+  PARAMS ((void));
+static int topower
+  PARAMS ((int));
+static void lang_set_startof
+  PARAMS ((void));
 static void gc_section_callback
   PARAMS ((lang_wild_statement_type *, struct wildcard_list *, asection *,
 	   lang_input_statement_type *, PTR));
-static void lang_get_regions PARAMS ((struct memory_region_struct **,
-				      struct memory_region_struct **,
-				      const char *, const char *, int));
-static void lang_record_phdrs PARAMS ((void));
-static void lang_gc_wild PARAMS ((lang_wild_statement_type *));
-static void lang_gc_sections_1 PARAMS ((lang_statement_union_type *));
-static void lang_gc_sections PARAMS ((void));
+static void lang_get_regions
+  PARAMS ((struct memory_region_struct **, struct memory_region_struct **,
+	   const char *, const char *, int));
+static void lang_record_phdrs
+  PARAMS ((void));
+static void lang_gc_wild
+  PARAMS ((lang_wild_statement_type *));
+static void lang_gc_sections_1
+  PARAMS ((lang_statement_union_type *));
+static void lang_gc_sections
+  PARAMS ((void));
 static int lang_vers_match_lang_c
   PARAMS ((struct bfd_elf_version_expr *, const char *));
 static int lang_vers_match_lang_cplusplus
   PARAMS ((struct bfd_elf_version_expr *, const char *));
 static int lang_vers_match_lang_java
   PARAMS ((struct bfd_elf_version_expr *, const char *));
-static void lang_do_version_exports_section PARAMS ((void));
-static void lang_check_section_addresses PARAMS ((void));
+static void lang_do_version_exports_section
+  PARAMS ((void));
+static void lang_check_section_addresses
+  PARAMS ((void));
 static void os_region_check
   PARAMS ((lang_output_section_statement_type *,
 	   struct memory_region_struct *, etree_type *, bfd_vma));
 static bfd_vma lang_size_sections_1
   PARAMS ((lang_statement_union_type *, lang_output_section_statement_type *,
-	   lang_statement_union_type **, fill_type *, bfd_vma, boolean *));
-
-typedef void (*callback_t) PARAMS ((lang_wild_statement_type *,
-				    struct wildcard_list *,
-				    asection *,
-				    lang_input_statement_type *,
-				    PTR));
+	   lang_statement_union_type **, fill_type *, bfd_vma, bfd_boolean *));
+typedef void (*callback_t)
+  PARAMS ((lang_wild_statement_type *, struct wildcard_list *, asection *,
+	   lang_input_statement_type *, PTR));
 static void walk_wild
   PARAMS ((lang_wild_statement_type *, callback_t, PTR));
 static void walk_wild_section
@@ -176,13 +213,18 @@ static void walk_wild_section
 static void walk_wild_file
   PARAMS ((lang_wild_statement_type *, lang_input_statement_type *,
 	   callback_t, PTR));
-
-static int    get_target PARAMS ((const bfd_target *, PTR));
-static void   stricpy PARAMS ((char *, char *));
-static void   strcut PARAMS ((char *, char *));
-static int    name_compare PARAMS ((char *, char *));
-static int    closest_target_match PARAMS ((const bfd_target *, PTR));
-static char * get_first_input_target PARAMS ((void));
+static int get_target
+  PARAMS ((const bfd_target *, PTR));
+static void stricpy
+  PARAMS ((char *, char *));
+static void strcut
+  PARAMS ((char *, char *));
+static int name_compare
+  PARAMS ((char *, char *));
+static int closest_target_match
+  PARAMS ((const bfd_target *, PTR));
+static char * get_first_input_target
+  PARAMS ((void));
 
 /* EXPORTS */
 lang_output_section_statement_type *abs_output_section;
@@ -191,11 +233,11 @@ lang_statement_list_type *stat_ptr = &statement_list;
 lang_statement_list_type file_chain = { NULL, NULL };
 struct bfd_sym_chain entry_symbol = { NULL, NULL };
 const char *entry_section = ".text";
-boolean entry_from_cmdline;
-boolean lang_has_input_file = false;
-boolean had_output_filename = false;
-boolean lang_float_flag = false;
-boolean delete_output_file_on_failure = false;
+bfd_boolean entry_from_cmdline;
+bfd_boolean lang_has_input_file = FALSE;
+bfd_boolean had_output_filename = FALSE;
+bfd_boolean lang_float_flag = FALSE;
+bfd_boolean delete_output_file_on_failure = FALSE;
 struct lang_nocrossrefs *nocrossref_list;
 struct unique_sections *unique_section_list;
 
@@ -227,7 +269,7 @@ stat_alloc (size)
   return obstack_alloc (&stat_obstack, size);
 }
 
-boolean
+bfd_boolean
 unique_section_p (secnam)
      const char *secnam;
 {
@@ -238,10 +280,10 @@ unique_section_p (secnam)
 	? fnmatch (unam->name, secnam, 0) == 0
 	: strcmp (unam->name, secnam) == 0)
       {
-	return true;
+	return TRUE;
       }
 
-  return false;
+  return FALSE;
 }
 
 /* Generic traversal routines for finding matching sections.  */
@@ -268,7 +310,7 @@ walk_wild_section (ptr, file, callback, data)
 
       while (sec != NULL)
 	{
-	  boolean skip = false;
+	  bfd_boolean skip = FALSE;
 	  struct name_list *list_tmp;
 
 	  /* Don't process sections from files which were
@@ -490,7 +532,7 @@ new_afile (name, file_type, target, add_to_list)
      const char *name;
      lang_input_file_enum_type file_type;
      const char *target;
-     boolean add_to_list;
+     bfd_boolean add_to_list;
 {
   lang_input_statement_type *p;
 
@@ -503,57 +545,57 @@ new_afile (name, file_type, target, add_to_list)
       p->header.next = NULL;
     }
 
-  lang_has_input_file = true;
+  lang_has_input_file = TRUE;
   p->target = target;
   switch (file_type)
     {
     case lang_input_file_is_symbols_only_enum:
       p->filename = name;
-      p->is_archive = false;
-      p->real = true;
+      p->is_archive = FALSE;
+      p->real = TRUE;
       p->local_sym_name = name;
-      p->just_syms_flag = true;
-      p->search_dirs_flag = false;
+      p->just_syms_flag = TRUE;
+      p->search_dirs_flag = FALSE;
       break;
     case lang_input_file_is_fake_enum:
       p->filename = name;
-      p->is_archive = false;
-      p->real = false;
+      p->is_archive = FALSE;
+      p->real = FALSE;
       p->local_sym_name = name;
-      p->just_syms_flag = false;
-      p->search_dirs_flag = false;
+      p->just_syms_flag = FALSE;
+      p->search_dirs_flag = FALSE;
       break;
     case lang_input_file_is_l_enum:
-      p->is_archive = true;
+      p->is_archive = TRUE;
       p->filename = name;
-      p->real = true;
+      p->real = TRUE;
       p->local_sym_name = concat ("-l", name, (const char *) NULL);
-      p->just_syms_flag = false;
-      p->search_dirs_flag = true;
+      p->just_syms_flag = FALSE;
+      p->search_dirs_flag = TRUE;
       break;
     case lang_input_file_is_marker_enum:
       p->filename = name;
-      p->is_archive = false;
-      p->real = false;
+      p->is_archive = FALSE;
+      p->real = FALSE;
       p->local_sym_name = name;
-      p->just_syms_flag = false;
-      p->search_dirs_flag = true;
+      p->just_syms_flag = FALSE;
+      p->search_dirs_flag = TRUE;
       break;
     case lang_input_file_is_search_file_enum:
       p->filename = name;
-      p->is_archive = false;
-      p->real = true;
+      p->is_archive = FALSE;
+      p->real = TRUE;
       p->local_sym_name = name;
-      p->just_syms_flag = false;
-      p->search_dirs_flag = true;
+      p->just_syms_flag = FALSE;
+      p->search_dirs_flag = TRUE;
       break;
     case lang_input_file_is_file_enum:
       p->filename = name;
-      p->is_archive = false;
-      p->real = true;
+      p->is_archive = FALSE;
+      p->real = TRUE;
       p->local_sym_name = name;
-      p->just_syms_flag = false;
-      p->search_dirs_flag = false;
+      p->just_syms_flag = FALSE;
+      p->search_dirs_flag = FALSE;
       break;
     default:
       FAIL ();
@@ -565,7 +607,7 @@ new_afile (name, file_type, target, add_to_list)
   p->symbol_count = 0;
   p->dynamic = config.dynamic_link;
   p->whole_archive = whole_archive;
-  p->loaded = false;
+  p->loaded = FALSE;
   lang_statement_append (&input_file_chain,
 			 (lang_statement_union_type *) p,
 			 &p->next_real_file);
@@ -578,8 +620,8 @@ lang_add_input_file (name, file_type, target)
      lang_input_file_enum_type file_type;
      const char *target;
 {
-  lang_has_input_file = true;
-  return new_afile (name, file_type, target, true);
+  lang_has_input_file = TRUE;
+  return new_afile (name, file_type, target, TRUE);
 }
 
 /* Build enough state so that the parser can build its tree.  */
@@ -669,7 +711,7 @@ lang_memory_region_lookup (name)
     new->not_flags = 0;
     new->length = ~(bfd_size_type) 0;
     new->current = 0;
-    new->had_full_message = false;
+    new->had_full_message = FALSE;
 
     return new;
   }
@@ -740,7 +782,7 @@ lang_output_section_statement_lookup (name)
 
       lookup->next = (lang_statement_union_type *) NULL;
       lookup->bfd_section = (asection *) NULL;
-      lookup->processed = false;
+      lookup->processed = FALSE;
       lookup->sectype = normal_section;
       lookup->addr_tree = (etree_type *) NULL;
       lang_list_init (&lookup->children);
@@ -997,7 +1039,7 @@ section_already_linked (abfd, sec, data)
 
   already_linked_list =
     ((struct already_linked_hash_entry *)
-     bfd_hash_lookup (&already_linked_table, name, true, false));
+     bfd_hash_lookup (&already_linked_table, name, TRUE, FALSE));
 
   for (l = already_linked_list->entry; l != NULL; l = l->next)
     {
@@ -1100,13 +1142,13 @@ already_linked_table_free ()
    explicit actions, like foo.o(.text), bar.o(.text) and
    foo.o(.text, .data).  */
 
-/* Return true if the PATTERN argument is a wildcard pattern.
+/* Return TRUE if the PATTERN argument is a wildcard pattern.
    Although backslashes are treated specially if a pattern contains
    wildcards, we do not consider the mere presence of a backslash to
    be enough to cause the pattern to be treated as a wildcard.
    That lets us handle DOS filenames more naturally.  */
 
-static boolean
+static bfd_boolean
 wildcardp (pattern)
      const char *pattern;
 {
@@ -1116,8 +1158,8 @@ wildcardp (pattern)
     if (*s == '?'
 	|| *s == '*'
 	|| *s == '[')
-      return true;
-  return false;
+      return TRUE;
+  return FALSE;
 }
 
 /* Add SECTION to the output section OUTPUT.  Do this by creating a
@@ -1132,29 +1174,29 @@ lang_add_section (ptr, section, output, file)
      lang_input_statement_type *file;
 {
   flagword flags;
-  boolean discard;
+  bfd_boolean discard;
 
   flags = bfd_get_section_flags (section->owner, section);
 
-  discard = false;
+  discard = FALSE;
 
   /* Discard sections marked with SEC_EXCLUDE if we are doing a final
      link.  Discard debugging sections marked with SEC_EXCLUDE on a
      relocatable link too.  */
   if ((flags & SEC_EXCLUDE) != 0
       && ((flags & SEC_DEBUGGING) != 0 || !link_info.relocateable))
-    discard = true;
+    discard = TRUE;
 
   /* Discard input sections which are assigned to a section named
      DISCARD_SECTION_NAME.  */
   if (strcmp (output->name, DISCARD_SECTION_NAME) == 0)
-    discard = true;
+    discard = TRUE;
 
   /* Discard debugging sections if we are stripping debugging
      information.  */
   if ((link_info.strip == strip_debugger || link_info.strip == strip_all)
       && (flags & SEC_DEBUGGING) != 0)
-    discard = true;
+    discard = TRUE;
 
   if (discard)
     {
@@ -1168,7 +1210,7 @@ lang_add_section (ptr, section, output, file)
 
   if (section->output_section == NULL)
     {
-      boolean first;
+      bfd_boolean first;
       lang_input_section_type *new;
       flagword flags;
 
@@ -1305,7 +1347,7 @@ wild_sort (wild, sec, file, section)
       if (wild->filenames_sorted)
 	{
 	  const char *fn, *ln;
-	  boolean fa, la;
+	  bfd_boolean fa, la;
 	  int i;
 
 	  /* The PE support for the .idata section as generated by
@@ -1317,24 +1359,24 @@ wild_sort (wild, sec, file, section)
 	      && bfd_my_archive (file->the_bfd) != NULL)
 	    {
 	      fn = bfd_get_filename (bfd_my_archive (file->the_bfd));
-	      fa = true;
+	      fa = TRUE;
 	    }
 	  else
 	    {
 	      fn = file->filename;
-	      fa = false;
+	      fa = FALSE;
 	    }
 
 	  if (ls->ifile->the_bfd != NULL
 	      && bfd_my_archive (ls->ifile->the_bfd) != NULL)
 	    {
 	      ln = bfd_get_filename (bfd_my_archive (ls->ifile->the_bfd));
-	      la = true;
+	      la = TRUE;
 	    }
 	  else
 	    {
 	      ln = ls->ifile->filename;
-	      la = false;
+	      la = FALSE;
 	    }
 
 	  i = strcmp (fn, ln);
@@ -1458,7 +1500,7 @@ lookup_name (name)
 
   if (search == (lang_input_statement_type *) NULL)
     search = new_afile (name, lang_input_file_is_file_enum, default_target,
-			false);
+			FALSE);
 
   /* If we have already added this file, or this file is not real
      (FIXME: can that ever actually happen?) or the name is NULL
@@ -1476,7 +1518,7 @@ lookup_name (name)
 
 /* Get the symbols for an input file.  */
 
-static boolean
+static bfd_boolean
 load_symbols (entry, place)
      lang_input_statement_type *entry;
      lang_statement_list_type *place;
@@ -1484,7 +1526,7 @@ load_symbols (entry, place)
   char **matching;
 
   if (entry->loaded)
-    return true;
+    return TRUE;
 
   ldfile_open_file (entry);
 
@@ -1493,13 +1535,13 @@ load_symbols (entry, place)
     {
       bfd_error_type err;
       lang_statement_list_type *hold;
-      boolean bad_load = true;
+      bfd_boolean bad_load = TRUE;
 
       err = bfd_get_error ();
 
       /* See if the emulation has some special knowledge.  */
       if (ldemul_unrecognized_file (entry))
-	return true;
+	return TRUE;
 
       if (err == bfd_error_file_ambiguously_recognized)
 	{
@@ -1515,7 +1557,7 @@ load_symbols (entry, place)
 	       || place == NULL)
 	  einfo (_("%F%B: file not recognized: %E\n"), entry->the_bfd);
       else
-	bad_load = false;
+	bad_load = FALSE;
 
       bfd_close (entry->the_bfd);
       entry->the_bfd = NULL;
@@ -1526,10 +1568,10 @@ load_symbols (entry, place)
       hold = stat_ptr;
       stat_ptr = place;
 
-      ldfile_assumed_script = true;
+      ldfile_assumed_script = TRUE;
       parser_input = input_script;
       yyparse ();
-      ldfile_assumed_script = false;
+      ldfile_assumed_script = FALSE;
 
       stat_ptr = hold;
 
@@ -1537,7 +1579,7 @@ load_symbols (entry, place)
     }
 
   if (ldemul_recognized_file (entry))
-    return true;
+    return TRUE;
 
   /* We don't call ldlang_add_file for an archive.  Instead, the
      add_symbols entry point will call ldlang_add_file, via the
@@ -1558,7 +1600,7 @@ load_symbols (entry, place)
       if (entry->whole_archive)
 	{
 	  bfd *member = NULL;
-	  boolean loaded = true;
+	  bfd_boolean loaded = TRUE;
 
 	  for (;;)
 	    {
@@ -1571,7 +1613,7 @@ load_symbols (entry, place)
 		{
 		  einfo (_("%F%B: member %B in archive is not an object\n"),
 			 entry->the_bfd, member);
-		  loaded = false;
+		  loaded = FALSE;
 		}
 
 	      if (! ((*link_info.callbacks->add_archive_element)
@@ -1581,7 +1623,7 @@ load_symbols (entry, place)
 	      if (! bfd_link_add_symbols (member, &link_info))
 		{
 		  einfo (_("%F%B: could not read symbols: %E\n"), member);
-		  loaded = false;
+		  loaded = FALSE;
 		}
 	    }
 
@@ -1592,7 +1634,7 @@ load_symbols (entry, place)
     }
 
   if (bfd_link_add_symbols (entry->the_bfd, &link_info))
-    entry->loaded = true;
+    entry->loaded = TRUE;
   else
     einfo (_("%F%B: could not read symbols: %E\n"), entry->the_bfd);
 
@@ -1628,7 +1670,7 @@ wild (s, target, output)
     }
 }
 
-/* Return true iff target is the sought target.  */
+/* Return TRUE iff target is the sought target.  */
 
 static int
 get_target (target, data)
@@ -1879,7 +1921,7 @@ open_output (name)
       einfo (_("%P%F: cannot open output file %s: %E\n"), name);
     }
 
-  delete_output_file_on_failure = true;
+  delete_output_file_on_failure = TRUE;
 
 #if 0
   output->flags |= D_PAGED;
@@ -1937,7 +1979,7 @@ ldlang_open_output (statement)
 static void
 open_input_bfds (s, force)
      lang_statement_union_type *s;
-     boolean force;
+     bfd_boolean force;
 {
   for (; s != (lang_statement_union_type *) NULL; s = s->header.next)
     {
@@ -1967,7 +2009,7 @@ open_input_bfds (s, force)
 	    do
 	      {
 		undefs = link_info.hash->undefs_tail;
-		open_input_bfds (s->group_statement.children.head, true);
+		open_input_bfds (s->group_statement.children.head, TRUE);
 	      }
 	    while (undefs != link_info.hash->undefs_tail);
 	  }
@@ -1991,12 +2033,12 @@ open_input_bfds (s, force)
 		  && s->input_statement.loaded
 		  && bfd_check_format (s->input_statement.the_bfd,
 				       bfd_archive))
-		s->input_statement.loaded = false;
+		s->input_statement.loaded = FALSE;
 
 	      lang_list_init (&add);
 
 	      if (! load_symbols (&s->input_statement, &add))
-		config.make_executable = false;
+		config.make_executable = FALSE;
 
 	      if (add.head != NULL)
 		{
@@ -2071,7 +2113,7 @@ insert_undefined (name)
 {
   struct bfd_link_hash_entry *h;
 
-  h = bfd_link_hash_lookup (link_info.hash, name, true, false, true);
+  h = bfd_link_hash_lookup (link_info.hash, name, TRUE, FALSE, TRUE);
   if (h == (struct bfd_link_hash_entry *) NULL)
     einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
   if (h->type == bfd_link_hash_new)
@@ -2307,7 +2349,7 @@ print_input_statement (statm)
 /* Print all symbols defined in a particular section.  This is called
    via bfd_link_hash_traverse.  */
 
-static boolean
+static bfd_boolean
 print_one_symbol (hash_entry, ptr)
      struct bfd_link_hash_entry *hash_entry;
      PTR ptr;
@@ -2330,7 +2372,7 @@ print_one_symbol (hash_entry, ptr)
       minfo ("             %T\n", hash_entry->root.string);
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Print information about an input section to the map file.  */
@@ -2932,7 +2974,7 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
      lang_statement_union_type **prev;
      fill_type *fill;
      bfd_vma dot;
-     boolean *relax;
+     bfd_boolean *relax;
 {
   unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
 						ldfile_output_machine);
@@ -3072,7 +3114,7 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 		(after - os->bfd_section->vma) * opb;
 
 	    dot = os->bfd_section->vma + os->bfd_section->_raw_size / opb;
-	    os->processed = true;
+	    os->processed = TRUE;
 
 	    if (os->update_dot_tree != 0)
 	      exp_fold_tree (os->update_dot_tree, abs_output_section,
@@ -3207,12 +3249,12 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 	      }
 	    else
 	      {
-		boolean again;
+		bfd_boolean again;
 
 		if (! bfd_relax_section (i->owner, i, &link_info, &again))
 		  einfo (_("%P%F: can't relax section: %E\n"));
 		if (again)
-		  *relax = true;
+		  *relax = TRUE;
 	      }
 	    dot = size_input_section (prev, output_section_statement,
 				      output_section_statement->fill, dot);
@@ -3305,7 +3347,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      lang_statement_union_type **prev;
      fill_type *fill;
      bfd_vma dot;
-     boolean *relax;
+     bfd_boolean *relax;
 {
   bfd_vma result;
 
@@ -3520,7 +3562,7 @@ lang_set_startof ()
       buf = xmalloc (10 + strlen (secname));
 
       sprintf (buf, ".startof.%s", secname);
-      h = bfd_link_hash_lookup (link_info.hash, buf, false, false, true);
+      h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE, TRUE);
       if (h != NULL && h->type == bfd_link_hash_undefined)
 	{
 	  h->type = bfd_link_hash_defined;
@@ -3529,7 +3571,7 @@ lang_set_startof ()
 	}
 
       sprintf (buf, ".sizeof.%s", secname);
-      h = bfd_link_hash_lookup (link_info.hash, buf, false, false, true);
+      h = bfd_link_hash_lookup (link_info.hash, buf, FALSE, FALSE, TRUE);
       if (h != NULL && h->type == bfd_link_hash_undefined)
 	{
 	  unsigned opb;
@@ -3552,23 +3594,23 @@ static void
 lang_finish ()
 {
   struct bfd_link_hash_entry *h;
-  boolean warn;
+  bfd_boolean warn;
 
   if (link_info.relocateable || link_info.shared)
-    warn = false;
+    warn = FALSE;
   else
-    warn = true;
+    warn = TRUE;
 
   if (entry_symbol.name == (const char *) NULL)
     {
       /* No entry has been specified.  Look for start, but don't warn
 	 if we don't find it.  */
       entry_symbol.name = "start";
-      warn = false;
+      warn = FALSE;
     }
 
   h = bfd_link_hash_lookup (link_info.hash, entry_symbol.name,
-			    false, false, true);
+			    FALSE, FALSE, TRUE);
   if (h != (struct bfd_link_hash_entry *) NULL
       && (h->type == bfd_link_hash_defined
 	  || h->type == bfd_link_hash_defweak)
@@ -3733,7 +3775,7 @@ lang_common ()
 
 /* Place one common symbol in the correct section.  */
 
-static boolean
+static bfd_boolean
 lang_one_common (h, info)
      struct bfd_link_hash_entry *h;
      PTR info;
@@ -3745,14 +3787,14 @@ lang_one_common (h, info)
 						ldfile_output_machine);
 
   if (h->type != bfd_link_hash_common)
-    return true;
+    return TRUE;
 
   size = h->u.c.size;
   power_of_two = h->u.c.p->alignment_power;
 
   if (config.sort_common
       && power_of_two < (unsigned int) *(int *) info)
-    return true;
+    return TRUE;
 
   section = h->u.c.p->section;
 
@@ -3779,7 +3821,7 @@ lang_one_common (h, info)
 
   if (config.map_file != NULL)
     {
-      static boolean header_printed;
+      static bfd_boolean header_printed;
       int len;
       char *name;
       char buf[50];
@@ -3788,7 +3830,7 @@ lang_one_common (h, info)
 	{
 	  minfo (_("\nAllocating common symbols\n"));
 	  minfo (_("Common symbol       size              file\n\n"));
-	  header_printed = true;
+	  header_printed = TRUE;
 	}
 
       name = demangle (h->root.string);
@@ -3824,7 +3866,7 @@ lang_one_common (h, info)
       minfo ("%B\n", section->owner);
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Run through the input files and ensure that every input section has
@@ -4027,7 +4069,7 @@ lang_add_output (name, from_script)
   if (!had_output_filename || !from_script)
     {
       output_filename = name;
-      had_output_filename = true;
+      had_output_filename = TRUE;
     }
 }
 
@@ -4196,7 +4238,7 @@ lang_gc_sections ()
   for (ulist = link_info.gc_sym_list; ulist; ulist = ulist->next)
     {
       h = bfd_link_hash_lookup (link_info.hash, ulist->name,
-				false, false, false);
+				FALSE, FALSE, FALSE);
 
       if (h != (struct bfd_link_hash_entry *) NULL
 	  && (h->type == bfd_link_hash_defined
@@ -4228,7 +4270,7 @@ lang_process ()
 
   /* Create a bfd for each input file.  */
   current_target = default_target;
-  open_input_bfds (statement_list.head, false);
+  open_input_bfds (statement_list.head, FALSE);
 
   link_info.gc_sym_list = &entry_symbol;
   if (entry_symbol.name == NULL)
@@ -4308,13 +4350,13 @@ lang_process ()
   if (command_line.relax)
     {
       /* Keep relaxing until bfd_relax_section gives up.  */
-      boolean relax_again;
+      bfd_boolean relax_again;
 
       do
 	{
 	  lang_reset_memory_regions ();
 
-	  relax_again = false;
+	  relax_again = FALSE;
 
 	  /* Note: pe-dll.c does something like this also.  If you find
 	     you need to change this code, you probably need to change
@@ -4367,7 +4409,7 @@ void
 lang_add_wild (filespec, section_list, keep_sections)
      struct wildcard_spec *filespec;
      struct wildcard_list *section_list;
-     boolean keep_sections;
+     bfd_boolean keep_sections;
 {
   struct wildcard_list *curr, *next;
   lang_wild_statement_type *new;
@@ -4378,7 +4420,7 @@ lang_add_wild (filespec, section_list, keep_sections)
        section_list = curr, curr = next)
     {
       if (curr->spec.name != NULL && strcmp (curr->spec.name, "COMMON") == 0)
-	placed_commons = true;
+	placed_commons = TRUE;
 
       next = curr->next;
       curr->next = section_list;
@@ -4389,12 +4431,12 @@ lang_add_wild (filespec, section_list, keep_sections)
       if (strcmp (filespec->name, "*") == 0)
 	filespec->name = NULL;
       else if (! wildcardp (filespec->name))
-	lang_has_input_file = true;
+	lang_has_input_file = TRUE;
     }
 
   new = new_stat (lang_wild_statement, stat_ptr);
   new->filename = NULL;
-  new->filenames_sorted = false;
+  new->filenames_sorted = FALSE;
   if (filespec != NULL)
     {
       new->filename = filespec->name;
@@ -4425,7 +4467,7 @@ lang_section_start (name, address)
 void
 lang_add_entry (name, cmdline)
      const char *name;
-     boolean cmdline;
+     bfd_boolean cmdline;
 {
   if (entry_symbol.name == NULL
       || cmdline
@@ -4456,7 +4498,7 @@ lang_add_map (name)
       switch (*name)
 	{
 	case 'F':
-	  map_option_f = true;
+	  map_option_f = TRUE;
 	  break;
 	}
       name++;
@@ -4543,14 +4585,14 @@ lang_startup (name)
     }
   first_file->filename = name;
   first_file->local_sym_name = name;
-  first_file->real = true;
+  first_file->real = TRUE;
 
   startup_file = name;
 }
 
 void
 lang_float (maybe)
-     boolean maybe;
+     bfd_boolean maybe;
 {
   lang_float_flag = maybe;
 }
@@ -4562,7 +4604,7 @@ lang_float (maybe)
    MEMSPEC is the name of the run-time region, or "*default*" if the
    statement didn't specify one.  LMA_MEMSPEC is the name of the
    load-time region, or null if the statement didn't specify one.
-   HAVE_LMA_P is true if the statement had an explicit load address.
+   HAVE_LMA_P is TRUE if the statement had an explicit load address.
 
    It is an error to specify both a load region and a load address.  */
 
@@ -4613,7 +4655,7 @@ lang_abs_symbol_at_beginning_of (secname, name)
 {
   struct bfd_link_hash_entry *h;
 
-  h = bfd_link_hash_lookup (link_info.hash, name, true, true, true);
+  h = bfd_link_hash_lookup (link_info.hash, name, TRUE, TRUE, TRUE);
   if (h == (struct bfd_link_hash_entry *) NULL)
     einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
 
@@ -4646,7 +4688,7 @@ lang_abs_symbol_at_end_of (secname, name)
 {
   struct bfd_link_hash_entry *h;
 
-  h = bfd_link_hash_lookup (link_info.hash, name, true, true, true);
+  h = bfd_link_hash_lookup (link_info.hash, name, TRUE, TRUE, TRUE);
   if (h == (struct bfd_link_hash_entry *) NULL)
     einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
 
@@ -4732,8 +4774,8 @@ void
 lang_new_phdr (name, type, filehdr, phdrs, at, flags)
      const char *name;
      etree_type *type;
-     boolean filehdr;
-     boolean phdrs;
+     bfd_boolean filehdr;
+     bfd_boolean phdrs;
      etree_type *at;
      etree_type *flags;
 {
@@ -4812,7 +4854,7 @@ lang_record_phdrs ()
 		    }
 		  secs[c] = os->bfd_section;
 		  ++c;
-		  pl->used = true;
+		  pl->used = TRUE;
 		}
 	    }
 	}
@@ -4870,7 +4912,7 @@ lang_add_nocrossref (l)
   nocrossref_list = n;
 
   /* Set notice_all so that we get informed about all symbols.  */
-  link_info.notice_all = true;
+  link_info.notice_all = TRUE;
 }
 
 /* Overlay handling.  We handle overlays with some static variables.  */
@@ -5089,7 +5131,7 @@ lang_vers_match_lang_cplusplus (expr, sym)
   if (!alt_sym)
     {
       /* cplus_demangle (also) returns NULL when it is not a C++ symbol.
-	 Should we early out false in this case?  */
+	 Should we early out FALSE in this case?  */
       result = fnmatch (expr->pattern, sym, 0) == 0;
     }
   else
@@ -5116,7 +5158,7 @@ lang_vers_match_lang_java (expr, sym)
   if (!alt_sym)
     {
       /* cplus_demangle (also) returns NULL when it is not a Java symbol.
-	 Should we early out false in this case?  */
+	 Should we early out FALSE in this case?  */
       result = fnmatch (expr->pattern, sym, 0) == 0;
     }
   else

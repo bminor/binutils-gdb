@@ -48,15 +48,19 @@
 #include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
 
-static asection *make_bfd_asection PARAMS ((bfd *, const char *,
-					    flagword, bfd_size_type,
-					    file_ptr, unsigned int));
-static const bfd_target *hppabsd_core_core_file_p PARAMS ((bfd *));
-static char *hppabsd_core_core_file_failing_command PARAMS ((bfd *));
-static int hppabsd_core_core_file_failing_signal PARAMS ((bfd *));
-static boolean hppabsd_core_core_file_matches_executable_p
+static asection *make_bfd_asection
+  PARAMS ((bfd *, const char *, flagword, bfd_size_type, file_ptr,
+	   unsigned int));
+static const bfd_target *hppabsd_core_core_file_p
+  PARAMS ((bfd *));
+static char *hppabsd_core_core_file_failing_command
+  PARAMS ((bfd *));
+static int hppabsd_core_core_file_failing_signal
+  PARAMS ((bfd *));
+static bfd_boolean hppabsd_core_core_file_matches_executable_p
   PARAMS ((bfd *, bfd *));
-static void swap_abort PARAMS ((void));
+static void swap_abort
+  PARAMS ((void));
 
 /* These are stored in the bfd's tdata.  */
 
@@ -218,12 +222,12 @@ hppabsd_core_core_file_failing_signal (abfd)
 }
 
 /* ARGSUSED */
-static boolean
+static bfd_boolean
 hppabsd_core_core_file_matches_executable_p (core_bfd, exec_bfd)
      bfd *core_bfd, *exec_bfd;
 {
   /* There's no way to know this...  */
-  return true;
+  return TRUE;
 }
 
 /* If somebody calls any byte-swapping routines, shoot them.  */

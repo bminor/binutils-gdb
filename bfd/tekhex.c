@@ -104,21 +104,21 @@ static void tekhex_print_symbol
  PARAMS ((bfd *, PTR, asymbol *, bfd_print_symbol_type));
 static void tekhex_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 static asymbol *tekhex_make_empty_symbol PARAMS ((bfd *));
-static int tekhex_sizeof_headers PARAMS ((bfd *, boolean));
-static boolean tekhex_write_object_contents PARAMS ((bfd *));
+static int tekhex_sizeof_headers PARAMS ((bfd *, bfd_boolean));
+static bfd_boolean tekhex_write_object_contents PARAMS ((bfd *));
 static void out PARAMS ((bfd *, int, char *, char *));
 static void writesym PARAMS ((char **, const char *));
 static void writevalue PARAMS ((char **, bfd_vma));
-static boolean tekhex_set_section_contents
+static bfd_boolean tekhex_set_section_contents
  PARAMS ((bfd*, sec_ptr, PTR, file_ptr, bfd_size_type));
-static boolean tekhex_set_arch_mach
+static bfd_boolean tekhex_set_arch_mach
  PARAMS ((bfd *, enum bfd_architecture, unsigned long));
-static boolean tekhex_get_section_contents
+static bfd_boolean tekhex_get_section_contents
  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
 static void move_section_contents
- PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type, boolean));
+ PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type, bfd_boolean));
 static const bfd_target *tekhex_object_p PARAMS ((bfd *));
-static boolean tekhex_mkobject PARAMS ((bfd *));
+static bfd_boolean tekhex_mkobject PARAMS ((bfd *));
 static long tekhex_get_symtab_upper_bound PARAMS ((bfd *));
 static long tekhex_get_symtab PARAMS ((bfd *, asymbol **));
 static void pass_over PARAMS ((bfd *, void (*) (bfd*, int, char *)));
@@ -239,12 +239,12 @@ static void
 tekhex_init ()
 {
   unsigned int i;
-  static boolean inited = false;
+  static bfd_boolean inited = FALSE;
   int val;
 
   if (! inited)
     {
-      inited = true;
+      inited = TRUE;
       hex_init ();
       val = 0;
       for (i = 0; i < 10; i++)
@@ -480,7 +480,7 @@ pass_over (abfd, func)
      void (*func) PARAMS ((bfd *, int, char *));
 {
   unsigned int chars_on_line;
-  boolean eof = false;
+  bfd_boolean eof = FALSE;
 
   /* To the front of the file */
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
@@ -492,10 +492,10 @@ pass_over (abfd, func)
       char type;
 
       /* Find first '%' */
-      eof = (boolean) (bfd_bread (src, (bfd_size_type) 1, abfd) != 1);
+      eof = (bfd_boolean) (bfd_bread (src, (bfd_size_type) 1, abfd) != 1);
       while (*src != '%' && !eof)
 	{
-	  eof = (boolean) (bfd_bread (src, (bfd_size_type) 1, abfd) != 1);
+	  eof = (bfd_boolean) (bfd_bread (src, (bfd_size_type) 1, abfd) != 1);
 	}
       if (eof)
 	break;
@@ -547,7 +547,7 @@ tekhex_get_symtab_upper_bound (abfd)
 
 }
 
-static boolean
+static bfd_boolean
 tekhex_mkobject (abfd)
      bfd *abfd;
 {
@@ -555,17 +555,17 @@ tekhex_mkobject (abfd)
 
   tdata = (tdata_type *) bfd_alloc (abfd, (bfd_size_type) sizeof (tdata_type));
   if (!tdata)
-    return false;
+    return FALSE;
   abfd->tdata.tekhex_data = tdata;
   tdata->type = 1;
   tdata->head = (tekhex_data_list_type *) NULL;
   tdata->symbols = (struct tekhex_symbol_struct *) NULL;
   tdata->data = (struct data_struct *) NULL;
-  return true;
+  return TRUE;
 }
 
 /*
-  Return true if the file looks like it's in TekHex format. Just look
+  Return TRUE if the file looks like it's in TekHex format. Just look
   for a percent sign and some hex digits */
 
 static const bfd_target *
@@ -596,7 +596,7 @@ move_section_contents (abfd, section, locationp, offset, count, get)
      PTR locationp;
      file_ptr offset;
      bfd_size_type count;
-     boolean get;
+     bfd_boolean get;
 {
   bfd_vma addr;
   char *location = (char *) locationp;
@@ -639,7 +639,7 @@ move_section_contents (abfd, section, locationp, offset, count, get)
 
 }
 
-static boolean
+static bfd_boolean
 tekhex_get_section_contents (abfd, section, locationp, offset, count)
      bfd *abfd;
      asection *section;
@@ -649,14 +649,14 @@ tekhex_get_section_contents (abfd, section, locationp, offset, count)
 {
   if (section->flags & (SEC_LOAD | SEC_ALLOC))
     {
-      move_section_contents (abfd, section, locationp, offset, count, true);
-      return true;
+      move_section_contents (abfd, section, locationp, offset, count, TRUE);
+      return TRUE;
     }
   else
-    return false;
+    return FALSE;
 }
 
-static boolean
+static bfd_boolean
 tekhex_set_arch_mach (abfd, arch, machine)
      bfd *abfd;
      enum bfd_architecture arch;
@@ -668,7 +668,7 @@ tekhex_set_arch_mach (abfd, arch, machine)
 /* we have to save up all the Tekhexords for a splurge before output,
     */
 
-static boolean
+static bfd_boolean
 tekhex_set_section_contents (abfd, section, locationp, offset, bytes_to_do)
      bfd *abfd;
      sec_ptr section;
@@ -698,11 +698,11 @@ tekhex_set_section_contents (abfd, section, locationp, offset, bytes_to_do)
   if (section->flags & (SEC_LOAD | SEC_ALLOC))
     {
       move_section_contents (abfd, section, locationp, offset, bytes_to_do,
-			     false);
-      return true;
+			     FALSE);
+      return TRUE;
     }
   else
-    return false;
+    return FALSE;
 
 }
 
@@ -804,7 +804,7 @@ out (abfd, type, start, end)
     abort ();
 }
 
-static boolean
+static bfd_boolean
 tekhex_write_object_contents (abfd)
      bfd *abfd;
 {
@@ -907,7 +907,7 @@ tekhex_write_object_contents (abfd)
 		case 'C':
 		case 'U':
 		  bfd_set_error (bfd_error_wrong_format);
-		  return false;
+		  return FALSE;
 		}
 
 	      writesym (&dst, sym->name);
@@ -920,13 +920,13 @@ tekhex_write_object_contents (abfd)
   /* And the terminator */
   if (bfd_bwrite ("%0781010\n", (bfd_size_type) 9, abfd) != 9)
     abort ();
-  return true;
+  return TRUE;
 }
 
 static int
 tekhex_sizeof_headers (abfd, exec)
      bfd *abfd ATTRIBUTE_UNUSED;
-     boolean exec ATTRIBUTE_UNUSED;
+     bfd_boolean exec ATTRIBUTE_UNUSED;
 
 {
   return 0;

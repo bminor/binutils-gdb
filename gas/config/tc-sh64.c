@@ -1,5 +1,5 @@
 /* tc-sh64.c -- Assemble code for the Hitachi Super-H SHcompact and SHmedia.
-   Copyright (C) 2000, 2001, 2002 Free Software Foundation.
+   Copyright 2000, 2001, 2002 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -87,36 +87,36 @@ static enum sh64_abi_values sh64_abi = sh64_abi_unspecified;
 
 /* A note that says if we're in a sequence of insns without label
    settings, segment or ISA mode changes or emitted data.  */
-static boolean seen_insn = false;
+static bfd_boolean seen_insn = FALSE;
 
-/* This is set to true in shmedia_md_end, so that we don't emit any
+/* This is set to TRUE in shmedia_md_end, so that we don't emit any
    .cranges entries when the assembler calls output functions while
    grinding along after all input is seen.  */
-static boolean sh64_end_of_assembly = false;
+static bfd_boolean sh64_end_of_assembly = FALSE;
 
 /* Controlled by the option -no-mix, this invalidates mixing SHcompact and
    SHmedia code in the same section, and also invalidates mixing data and
    SHmedia code in the same section.  No .cranges will therefore be
    emitted, unless -shcompact-const-crange is specified and there is a
    constant pool in SHcompact code.  */
-static boolean sh64_mix = true;
+static bfd_boolean sh64_mix = TRUE;
 
-static boolean sh64_shcompact_const_crange = false;
+static bfd_boolean sh64_shcompact_const_crange = FALSE;
 
 /* Controlled by the option -no-expand, this says whether or not we expand
    MOVI and PT/PTA/PTB.  When we do not expand these insns to fit an
    operand, we will emit errors for operands out of range and generate the
    basic instruction and reloc for an external symbol.  */
-static boolean sh64_expand = true;
+static bfd_boolean sh64_expand = TRUE;
 
 /* Controlled by the option -expand-pt32, this says whether we expand
    PT/PTA/PTB of an external symbol to (only) 32 or (the full) 64 bits
    when -abi=64 is in effect.  */
-static boolean sh64_pt32 = false;
+static bfd_boolean sh64_pt32 = FALSE;
 
 /* When emitting a .cranges descriptor, we want to avoid getting recursive
    calls through emit_expr.  */
-static boolean emitting_crange = false;
+static bfd_boolean emitting_crange = FALSE;
 
 /* SHmedia mnemonics.  */
 static struct hash_control *shmedia_opcode_hash_control = NULL;
@@ -133,32 +133,58 @@ static const unsigned char shmedia_little_nop_pattern[4] =
    (SHMEDIA_NOP_OPC >> 16) & 255, (SHMEDIA_NOP_OPC >> 24) & 255
  };
 
-static void shmedia_md_begin PARAMS ((void));
-static int shmedia_parse_reg PARAMS ((char *, int *, int *, shmedia_arg_type));
-static void shmedia_md_assemble PARAMS ((char *));
-static void shmedia_md_apply_fix3 PARAMS ((fixS *, valueT *));
-static int shmedia_md_estimate_size_before_relax PARAMS ((fragS *, segT));
-static int shmedia_init_reloc PARAMS ((arelent *, fixS *));
-static char *shmedia_get_operands PARAMS ((shmedia_opcode_info *, char *, shmedia_operands_info *));
-static void s_sh64_mode PARAMS ((int));
-static void s_sh64_abi PARAMS ((int));
-static void shmedia_md_convert_frag PARAMS ((bfd *, segT, fragS *, boolean));
-static void shmedia_check_limits PARAMS ((offsetT *, bfd_reloc_code_real_type, fixS *));
-static void sh64_set_contents_type PARAMS ((enum sh64_elf_cr_type));
-static void shmedia_get_operand PARAMS ((char **, shmedia_operand_info *, shmedia_arg_type));
-static unsigned long shmedia_immediate_op PARAMS ((char *, shmedia_operand_info *, int, bfd_reloc_code_real_type));
-static char *shmedia_parse_exp PARAMS ((char *, shmedia_operand_info *));
-static void shmedia_frob_file_before_adjust PARAMS ((void));
-static void sh64_emit_crange PARAMS ((symbolS *, symbolS *, enum sh64_elf_cr_type));
-static void sh64_flush_last_crange PARAMS ((bfd *, asection *, PTR));
-static void sh64_flag_output PARAMS ((void));
-static void sh64_update_contents_mark PARAMS ((boolean));
-static void sh64_vtable_entry PARAMS ((int));
-static void sh64_vtable_inherit  PARAMS ((int));
-static char * strip_datalabels PARAMS ((void));
-static int shmedia_build_Mytes PARAMS ((shmedia_opcode_info *, shmedia_operands_info *));
-static shmedia_opcode_info * shmedia_find_cooked_opcode PARAMS ((char **));
-static unsigned long shmedia_mask_number PARAMS ((unsigned long, bfd_reloc_code_real_type));
+static void shmedia_md_begin
+  PARAMS ((void));
+static int shmedia_parse_reg
+  PARAMS ((char *, int *, int *, shmedia_arg_type));
+static void shmedia_md_assemble
+  PARAMS ((char *));
+static void shmedia_md_apply_fix3
+  PARAMS ((fixS *, valueT *));
+static int shmedia_md_estimate_size_before_relax
+  PARAMS ((fragS *, segT));
+static int shmedia_init_reloc
+  PARAMS ((arelent *, fixS *));
+static char *shmedia_get_operands
+  PARAMS ((shmedia_opcode_info *, char *, shmedia_operands_info *));
+static void s_sh64_mode
+  PARAMS ((int));
+static void s_sh64_abi
+  PARAMS ((int));
+static void shmedia_md_convert_frag
+  PARAMS ((bfd *, segT, fragS *, bfd_boolean));
+static void shmedia_check_limits
+  PARAMS ((offsetT *, bfd_reloc_code_real_type, fixS *));
+static void sh64_set_contents_type
+  PARAMS ((enum sh64_elf_cr_type));
+static void shmedia_get_operand
+  PARAMS ((char **, shmedia_operand_info *, shmedia_arg_type));
+static unsigned long shmedia_immediate_op
+  PARAMS ((char *, shmedia_operand_info *, int, bfd_reloc_code_real_type));
+static char *shmedia_parse_exp
+  PARAMS ((char *, shmedia_operand_info *));
+static void shmedia_frob_file_before_adjust
+  PARAMS ((void));
+static void sh64_emit_crange
+  PARAMS ((symbolS *, symbolS *, enum sh64_elf_cr_type));
+static void sh64_flush_last_crange
+  PARAMS ((bfd *, asection *, PTR));
+static void sh64_flag_output
+  PARAMS ((void));
+static void sh64_update_contents_mark
+  PARAMS ((bfd_boolean));
+static void sh64_vtable_entry
+  PARAMS ((int));
+static void sh64_vtable_inherit
+  PARAMS ((int));
+static char * strip_datalabels
+  PARAMS ((void));
+static int shmedia_build_Mytes
+  PARAMS ((shmedia_opcode_info *, shmedia_operands_info *));
+static shmedia_opcode_info * shmedia_find_cooked_opcode
+  PARAMS ((char **));
+static unsigned long shmedia_mask_number
+  PARAMS ((unsigned long, bfd_reloc_code_real_type));
 
 #include "tc-sh.c"
 
@@ -169,7 +195,7 @@ shmedia_md_end ()
 
   /* First, update the last range to include whatever data was last
      emitted.  */
-  sh64_update_contents_mark (true);
+  sh64_update_contents_mark (TRUE);
 
   /* Make sure frags generated after this point are not marked with the
      wrong ISA; make them easily spottable.  We still want to distinguish
@@ -178,7 +204,7 @@ shmedia_md_end ()
   if (sh64_isa_mode != sh64_isa_unspecified)
     sh64_isa_mode = sh64_isa_sh5_guard;
 
-  sh64_end_of_assembly = true;
+  sh64_end_of_assembly = TRUE;
 
   bfd_map_over_sections (stdoutput, sh64_flush_last_crange, NULL);
 
@@ -315,7 +341,7 @@ sh64_do_align (n, fill, len, max)
      int max;
 {
   /* Update region, or put a data region in front.  */
-  sh64_update_contents_mark (true);
+  sh64_update_contents_mark (TRUE);
 
   /* Only make a frag if we HAVE to...  */
   if (n != 0 && !need_pass_2)
@@ -334,7 +360,7 @@ sh64_do_align (n, fill, len, max)
     }
 
   /* Update mark for current region with current type.  */
-  sh64_update_contents_mark (false);
+  sh64_update_contents_mark (FALSE);
 }
 
 /* The MAX_MEM_FOR_RS_ALIGN_CODE worker.  We have to find out the ISA of
@@ -801,7 +827,7 @@ shmedia_md_convert_frag (output_bfd, seg, fragP, final)
      bfd *output_bfd ATTRIBUTE_UNUSED;
      segT seg ATTRIBUTE_UNUSED;
      fragS *fragP;
-     boolean final;
+     bfd_boolean final;
 {
   /* Pointer to first byte in variable-sized part of the frag.	*/
   char *var_partp;
@@ -819,7 +845,7 @@ shmedia_md_convert_frag (output_bfd, seg, fragP, final)
      and offsets to varying parts.  */
   symbolS *symbolP = fragP->fr_symbol;
 
-  boolean reloc_needed
+  bfd_boolean reloc_needed
     = (! final
        || sh_relax
        || symbolP == NULL
@@ -1915,7 +1941,7 @@ shmedia_md_estimate_size_before_relax (fragP, segment_type)
   expressionS *exp;
 
   /* For ELF, we can't relax externally visible symbols; see tc-i386.c.  */
-  boolean sym_relaxable
+  bfd_boolean sym_relaxable
     = (fragP->fr_symbol
        && S_GET_SEGMENT (fragP->fr_symbol) == segment_type
        && ! S_IS_EXTERNAL (fragP->fr_symbol)
@@ -2153,7 +2179,7 @@ shmedia_md_estimate_size_before_relax (fragP, segment_type)
 	  /* MOVI expansions that get here have not been converted to
 	     PC-relative frags, but instead expanded by
 	     md_number_to_chars or by calling shmedia_md_convert_frag
-	     with final == false.  We must not have them around as
+	     with final == FALSE.  We must not have them around as
 	     frags anymore; symbols would be prematurely evaluated
 	     when relaxing.  We will not need to have md_convert_frag
 	     called again with them; any further handling is through
@@ -2814,11 +2840,11 @@ shmedia_md_assemble (str)
 
   /* Start a SHmedia code region, if there has been pseudoinsns or similar
      seen since the last one.  */
-  if (seen_insn == false)
+  if (!seen_insn)
     {
-      sh64_update_contents_mark (true);
+      sh64_update_contents_mark (TRUE);
       sh64_set_contents_type (CRT_SH5_ISA32);
-      seen_insn = true;
+      seen_insn = TRUE;
     }
 
   op_end = shmedia_get_operands (opcode, op_end, &operands);
@@ -2867,7 +2893,7 @@ s_sh64_mode (ignore)
 
   /* Make sure data up to this location is handled according to the
      previous ISA.  */
-  sh64_update_contents_mark (true);
+  sh64_update_contents_mark (TRUE);
 
   while (!is_end_of_line[(unsigned char) *input_line_pointer])
     input_line_pointer++;
@@ -2893,7 +2919,7 @@ s_sh64_mode (ignore)
 
   /* Contents type up to this new point is the same as before; don't add a
      data region just because the new frag we created.  */
-  sh64_update_contents_mark (false);
+  sh64_update_contents_mark (FALSE);
 
   *input_line_pointer = ch;
   demand_empty_rest_of_line ();
@@ -3157,7 +3183,7 @@ sh64_set_contents_type (new_contents_type)
 
   /* We will not be called when emitting .cranges output, since callers
      stop that.  Validize that assumption.  */
-  know (emitting_crange == false);
+  know (!emitting_crange);
 
   seginfo = seg_info (now_seg);
 
@@ -3223,10 +3249,10 @@ sh64_set_contents_type (new_contents_type)
 	    as_bad (
 _("SHmedia code not allowed in same section as constants and SHcompact code"));
 
-	  emitting_crange = true;
+	  emitting_crange = TRUE;
 	  sh64_emit_crange (seginfo->tc_segment_info_data.mode_start_symbol,
 			    symp, contents_type);
-	  emitting_crange = false;
+	  emitting_crange = FALSE;
 	  seginfo->tc_segment_info_data.emitted_ranges++;
 	}
 
@@ -3387,7 +3413,7 @@ sh64_exclude_symbol (symp)
 
 static void
 sh64_update_contents_mark (update_type)
-     boolean update_type;
+     bfd_boolean update_type;
 {
   segment_info_type *seginfo;
   seginfo = seg_info (now_seg);
@@ -3433,7 +3459,7 @@ sh64_update_contents_mark (update_type)
 	}
     }
 
-  seen_insn = false;
+  seen_insn = FALSE;
 }
 
 /* Called when the assembler is about to output some data, or maybe it's
@@ -3442,7 +3468,7 @@ sh64_update_contents_mark (update_type)
 void
 sh64_flush_pending_output ()
 {
-  sh64_update_contents_mark (true);
+  sh64_update_contents_mark (TRUE);
   sh_flush_pending_output ();
 }
 
@@ -3494,9 +3520,9 @@ static void
 sh64_flag_output ()
 {
   if (sh64_isa_mode != sh64_isa_unspecified
-      && seen_insn == false
-      && sh64_end_of_assembly == false
-      && ! emitting_crange)
+      && !seen_insn
+      && !sh64_end_of_assembly
+      && !emitting_crange)
     {
       md_flush_pending_output ();
       sh64_set_contents_type (CRT_DATA);

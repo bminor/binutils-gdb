@@ -50,7 +50,7 @@ char *check_procedure;
 /* File named by CUSTOM.  */
 char *custom_file;
 /* Whether to generate debugging information (DEBUG).  */
-boolean debug_info;
+bfd_boolean debug_info;
 /* Procedure named by EXIT.  */
 char *exit_procedure;
 /* Exported symbols (EXPORT).  */
@@ -60,7 +60,7 @@ struct string_list *input_files;
 /* Map file name (MAP, FULLMAP).  */
 char *map_file;
 /* Whether a full map has been requested (FULLMAP).  */
-boolean full_map;
+bfd_boolean full_map;
 /* File named by HELP.  */
 char *help_file;
 /* Imported symbols (IMPORT).  */
@@ -76,7 +76,7 @@ char *sharelib_file;
 /* Start procedure name (START).  */
 char *start_procedure;
 /* VERBOSE.  */
-boolean verbose;
+bfd_boolean verbose;
 /* RPC description file (XDCDATA).  */
 char *rpc_file;
 
@@ -93,7 +93,7 @@ static char *symbol_prefix;
 /* Local functions.  */
 static int yylex PARAMS ((void));
 static void nlmlex_file_push PARAMS ((const char *));
-static boolean nlmlex_file_open PARAMS ((const char *));
+static bfd_boolean nlmlex_file_open PARAMS ((const char *));
 static int nlmlex_buf_init PARAMS ((void));
 static char nlmlex_buf_add PARAMS ((int));
 static long nlmlex_get_number PARAMS ((const char *));
@@ -141,7 +141,7 @@ static char *xstrdup PARAMS ((const char *));
 
 /* The entire file is just a list of commands.  */
 
-file:	
+file:
 	  commands
 	;
 
@@ -205,7 +205,7 @@ command:
 	  }
 	| DEBUG
 	  {
-	    debug_info = true;
+	    debug_info = TRUE;
 	  }
 	| DESCRIPTION QUOTED_STRING
 	  {
@@ -248,12 +248,12 @@ command:
 	| FULLMAP
 	  {
 	    map_file = "";
-	    full_map = true;
+	    full_map = TRUE;
 	  }
 	| FULLMAP STRING
 	  {
 	    map_file = $2;
-	    full_map = true;
+	    full_map = TRUE;
 	  }
 	| HELP STRING
 	  {
@@ -366,7 +366,7 @@ command:
 	  }
 	| VERBOSE
 	  {
-	    verbose = true;
+	    verbose = TRUE;
 	  }
 	| VERSIONK STRING STRING STRING
 	  {
@@ -536,7 +536,7 @@ static struct input current;
 
 /* Start the lexer going on the main input file.  */
 
-boolean
+bfd_boolean
 nlmlex_file (name)
      const char *name;
 {
@@ -565,7 +565,7 @@ nlmlex_file_push (name)
 
 /* Start lexing from a file.  */
 
-static boolean
+static bfd_boolean
 nlmlex_file_open (name)
      const char *name;
 {
@@ -574,12 +574,12 @@ nlmlex_file_open (name)
     {
       fprintf (stderr, "%s:%s: %s\n", program_name, name, strerror (errno));
       ++parse_errors;
-      return false;
+      return FALSE;
     }
   current.name = xstrdup (name);
   current.lineno = 1;
   current.state = BEGINNING_OF_LINE;
-  return true;
+  return TRUE;
 }
 
 /* Table used to turn keywords into tokens.  */
@@ -746,7 +746,7 @@ tail_recurse:
       BUF_FINISH ();
 
       ungetc (c, current.file);
-      
+
       nlmlex_file_push (lex_buf);
       goto tail_recurse;
     }
@@ -785,7 +785,7 @@ tail_recurse:
 		  return keyword_tokens[i].token;
 		}
 	    }
-	  
+
 	  nlmheader_identify ();
 	  fprintf (stderr, _("%s:%d: unrecognized keyword: %s\n"),
 		   current.name, current.lineno, lex_buf);

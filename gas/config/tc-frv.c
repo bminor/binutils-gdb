@@ -1,5 +1,5 @@
 /* tc-frv.c -- Assembler for the Fujitsu FRV.
-   Copyright (C) 2002 Free Software Foundation.
+   Copyright 2002 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -67,8 +67,8 @@ enum vliw_insn_type
 #define NOP_KEEP 1		/* Keep these NOPS.  */
 #define NOP_DELETE 2		/* Delete these NOPS.  */
 
-#define DO_COUNT    true
-#define DONT_COUNT  false
+#define DO_COUNT    TRUE
+#define DONT_COUNT  FALSE
 
 /* A list of insns within a VLIW insn.  */
 struct vliw_insn_list
@@ -469,7 +469,7 @@ int chain_num = 0;
 
 struct vliw_insn_list *
 frv_insert_vliw_insn (count)
-      boolean count;
+      bfd_boolean count;
 {
   struct vliw_insn_list *vliw_insn_list_entry;
   struct vliw_chain     *vliw_chain_entry;
@@ -631,7 +631,7 @@ frv_tomcat_shuffle (this_nop_type, vliw_to_split, insert_before_insn)
    struct vliw_insn_list *insert_before_insn;
 {
 
-  boolean pack_prev = false;
+  bfd_boolean pack_prev = FALSE;
   struct vliw_chain *return_me = NULL;
   struct vliw_insn_list *prev_insn = NULL;
   struct vliw_insn_list *curr_insn = vliw_to_split->insn_list;
@@ -652,7 +652,7 @@ frv_tomcat_shuffle (this_nop_type, vliw_to_split, insert_before_insn)
 	Then don't set pack bit later.  */
 
       if (curr_insn->type != VLIW_LABEL_TYPE)
-	pack_prev = true;
+	pack_prev = TRUE;
       prev_insn = curr_insn;
       curr_insn = curr_insn->next;
     } 
@@ -1182,11 +1182,11 @@ md_cgen_lookup_reloc (insn, operand, fixP)
   switch (operand->type)
     {
     case FRV_OPERAND_LABEL16:
-      fixP->fx_pcrel = true;
+      fixP->fx_pcrel = TRUE;
       return BFD_RELOC_FRV_LABEL16;
 
     case FRV_OPERAND_LABEL24:
-      fixP->fx_pcrel = true;
+      fixP->fx_pcrel = TRUE;
       return BFD_RELOC_FRV_LABEL24;
 
     case FRV_OPERAND_UHI16:
@@ -1298,7 +1298,7 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-boolean
+bfd_boolean
 frv_fix_adjustable (fixP)
    fixS * fixP;
 {

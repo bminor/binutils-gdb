@@ -80,7 +80,7 @@ struct fix;
 extern int md_dlx_force_relocation PARAMS ((struct fix *));
 
 #define tc_fix_adjustable(FIX) md_dlx_fix_adjustable (FIX)
-extern boolean md_dlx_fix_adjustable PARAMS ((struct fix *));
+extern bfd_boolean md_dlx_fix_adjustable PARAMS ((struct fix *));
 
 /* Values passed to md_apply_fix3 don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0

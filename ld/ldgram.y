@@ -49,13 +49,13 @@ static enum section_type sectype;
 
 lang_memory_region_type *region;
 
-boolean ldgram_want_filename = true;
-FILE *  saved_script_handle = NULL;
-boolean force_make_executable = false;
+bfd_boolean ldgram_want_filename = TRUE;
+FILE *saved_script_handle = NULL;
+bfd_boolean force_make_executable = FALSE;
 
-boolean ldgram_in_script = false;
-boolean ldgram_had_equals = false;
-boolean ldgram_had_keep = false;
+bfd_boolean ldgram_in_script = FALSE;
+bfd_boolean ldgram_had_equals = FALSE;
+bfd_boolean ldgram_had_keep = FALSE;
 char *ldgram_vers_current_lang = NULL;
 
 #define ERROR_NAME_MAX 20
@@ -81,8 +81,8 @@ static int error_index;
   union etree_union *etree;
   struct phdr_info
     {
-      boolean filehdr;
-      boolean phdrs;
+      bfd_boolean filehdr;
+      bfd_boolean phdrs;
       union etree_union *at;
       union etree_union *flags;
     } phdr;
@@ -249,7 +249,7 @@ mri_script_command:
 		mri_script_lines END
 		{ ldlex_popstate (); }
 	|	START NAME
-		{ lang_add_entry ($2, false); }
+		{ lang_add_entry ($2, FALSE); }
         |
 	;
 
@@ -319,7 +319,7 @@ ifile_p1:
 	|	TARGET_K '(' NAME ')'
 		{ lang_add_target($3); }
 	|	SEARCH_DIR '(' filename ')'
-		{ ldfile_add_library_path ($3, false); }
+		{ ldfile_add_library_path ($3, FALSE); }
 	|	OUTPUT '(' filename ')'
 		{ lang_add_output($3, 1); }
         |	OUTPUT_FORMAT '(' NAME ')'
@@ -330,9 +330,9 @@ ifile_p1:
         |	OUTPUT_ARCH '(' NAME ')'
 		  { ldfile_set_output_arch($3); }
 	|	FORCE_COMMON_ALLOCATION
-		{ command_line.force_common_definition = true ; }
+		{ command_line.force_common_definition = TRUE ; }
 	|	INHIBIT_COMMON_ALLOCATION
-		{ command_line.inhibit_common_definition = true ; }
+		{ command_line.inhibit_common_definition = TRUE ; }
 	|	INPUT '(' input_list ')'
 	|	GROUP
 		  { lang_enter_group (); }
@@ -384,7 +384,7 @@ sec_or_group_p1:
 
 statement_anywhere:
 		ENTRY '(' NAME ')'
-		{ lang_add_entry ($3, false); }
+		{ lang_add_entry ($3, FALSE); }
 	|	assignment end
 	;
 
@@ -409,25 +409,25 @@ wildcard_spec:
 		wildcard_name
 			{
 			  $$.name = $1;
-			  $$.sorted = false;
+			  $$.sorted = FALSE;
 			  $$.exclude_name_list = NULL;
 			}
 	| 	EXCLUDE_FILE '(' exclude_name_list ')' wildcard_name
 			{
 			  $$.name = $5;
-			  $$.sorted = false;
+			  $$.sorted = FALSE;
 			  $$.exclude_name_list = $3;
 			}
 	|	SORT '(' wildcard_name ')'
 			{
 			  $$.name = $3;
-			  $$.sorted = true;
+			  $$.sorted = TRUE;
 			  $$.exclude_name_list = NULL;
 			}
 	|	SORT '(' EXCLUDE_FILE '(' exclude_name_list ')' wildcard_name ')'
 			{
 			  $$.name = $7;
-			  $$.sorted = true;
+			  $$.sorted = TRUE;
 			  $$.exclude_name_list = $5;
 			}
 	;
@@ -478,7 +478,7 @@ input_section_spec_no_keep:
 			  struct wildcard_spec tmp;
 			  tmp.name = $1;
 			  tmp.exclude_name_list = NULL;
-			  tmp.sorted = false;
+			  tmp.sorted = FALSE;
 			  lang_add_wild (&tmp, NULL, ldgram_had_keep);
 			}
         |	'[' file_NAME_list ']'
@@ -494,9 +494,9 @@ input_section_spec_no_keep:
 input_section_spec:
 		input_section_spec_no_keep
 	|	KEEP '('
-			{ ldgram_had_keep = true; }
+			{ ldgram_had_keep = TRUE; }
 		input_section_spec_no_keep ')'
-			{ ldgram_had_keep = false; }
+			{ ldgram_had_keep = FALSE; }
 	;
 
 statement:
@@ -513,7 +513,7 @@ statement:
 		}
 	| SORT '(' CONSTRUCTORS ')'
 		{
-		  constructors_sorted = true;
+		  constructors_sorted = TRUE;
 		  lang_add_attribute (lang_constructors_statement_enum);
 		}
 	| input_section_spec
@@ -697,9 +697,9 @@ low_level_library:
 
 floating_point_support:
 		FLOAT
-			{ lang_float(true); }
+			{ lang_float(TRUE); }
 	|	NOFLOAT
-			{ lang_float(false); }
+			{ lang_float(FALSE); }
 	;
 		
 nocrossref_list:
@@ -933,7 +933,7 @@ phdr_opt:
 		  n = ((struct lang_output_section_phdr_list *)
 		       xmalloc (sizeof *n));
 		  n->name = $3;
-		  n->used = false;
+		  n->used = FALSE;
 		  n->next = $1;
 		  $$ = n;
 		}
@@ -1015,9 +1015,9 @@ phdr_qualifiers:
 		{
 		  $$ = $3;
 		  if (strcmp ($1, "FILEHDR") == 0 && $2 == NULL)
-		    $$.filehdr = true;
+		    $$.filehdr = TRUE;
 		  else if (strcmp ($1, "PHDRS") == 0 && $2 == NULL)
-		    $$.phdrs = true;
+		    $$.phdrs = TRUE;
 		  else if (strcmp ($1, "FLAGS") == 0 && $2 != NULL)
 		    $$.flags = $2;
 		  else

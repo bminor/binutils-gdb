@@ -49,7 +49,7 @@ build_link_order (statement)
 	asection *output_section;
 	struct bfd_link_order *link_order;
 	bfd_vma value;
-	boolean big_endian = false;
+	bfd_boolean big_endian = FALSE;
 
 	output_section = statement->data_statement.output_section;
 	ASSERT (output_section->owner == output_bfd);
@@ -70,24 +70,24 @@ build_link_order (statement)
 	   endianness are big endian, so we must swap here if the
 	   input file is little endian.  */
 	if (bfd_big_endian (output_bfd))
-	  big_endian = true;
+	  big_endian = TRUE;
 	else if (bfd_little_endian (output_bfd))
-	  big_endian = false;
+	  big_endian = FALSE;
 	else
 	  {
-	    boolean swap;
+	    bfd_boolean swap;
 
-	    swap = false;
+	    swap = FALSE;
 	    if (command_line.endian == ENDIAN_BIG)
-	      big_endian = true;
+	      big_endian = TRUE;
 	    else if (command_line.endian == ENDIAN_LITTLE)
 	      {
-		big_endian = false;
-		swap = true;
+		big_endian = FALSE;
+		swap = TRUE;
 	      }
 	    else if (command_line.endian == ENDIAN_UNSET)
 	      {
-		big_endian = true;
+		big_endian = TRUE;
 		{
 		  LANG_FOR_EACH_INPUT_STATEMENT (s)
 		    {
@@ -95,8 +95,8 @@ build_link_order (statement)
 			{
 			  if (bfd_little_endian (s->the_bfd))
 			    {
-			      big_endian = false;
-			      swap = true;
+			      big_endian = FALSE;
+			      swap = TRUE;
 			    }
 			  break;
 			}
@@ -226,7 +226,7 @@ build_link_order (statement)
     case lang_input_section_enum:
       /* Create a new link_order in the output section with this
 	 attached */
-      if (statement->input_section.ifile->just_syms_flag == false)
+      if (!statement->input_section.ifile->just_syms_flag)
 	{
 	  asection *i = statement->input_section.section;
 	  asection *output_section = i->output_section;
@@ -320,7 +320,7 @@ clone_section (abfd, s, name, count)
   if ((sname = bfd_get_unique_section_name (abfd, templ, count)) == NULL
       || (n = bfd_make_section_anyway (abfd, sname)) == NULL
       || (h = bfd_link_hash_lookup (link_info.hash,
-				    sname, true, true, false)) == NULL)
+				    sname, TRUE, TRUE, FALSE)) == NULL)
     {
       einfo (_("%F%P: clone section failed: %E\n"));
       /* Silence gcc warnings.  einfo exits, so we never reach here.  */

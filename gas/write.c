@@ -691,11 +691,11 @@ size_seg (abfd, sec, xxx)
   else
     flags &= ~SEC_RELOC;
   x = bfd_set_section_flags (abfd, sec, flags);
-  assert (x == true);
+  assert (x);
 
   newsize = md_section_align (sec, size);
   x = bfd_set_section_size (abfd, sec, newsize);
-  assert (x == true);
+  assert (x);
 
   /* If the size had to be rounded up, add some padding in the last
      non-empty frag.  */
@@ -1148,7 +1148,7 @@ write_contents (abfd, sec, xxx)
 	  x = bfd_set_section_contents (stdoutput, sec,
 					f->fr_literal, (file_ptr) offset,
 					(bfd_size_type) f->fr_fix);
-	  if (x == false)
+	  if (!x)
 	    {
 	      bfd_perror (stdoutput->filename);
 	      as_perror (_("FATAL: Can't write %s"), stdoutput->filename);
@@ -1172,7 +1172,7 @@ write_contents (abfd, sec, xxx)
 						fill_literal,
 						(file_ptr) offset,
 						(bfd_size_type) fill_size);
-		  if (x == false)
+		  if (!x)
 		    {
 		      bfd_perror (stdoutput->filename);
 		      as_perror (_("FATAL: Can't write %s"),
@@ -1206,7 +1206,7 @@ write_contents (abfd, sec, xxx)
 		  x = bfd_set_section_contents
 		    (stdoutput, sec, buf, (file_ptr) offset,
 		     (bfd_size_type) n_per_buf * fill_size);
-		  if (x != true)
+		  if (!x)
 		    as_fatal (_("cannot write to output file"));
 		  offset += n_per_buf * fill_size;
 		}
@@ -1340,7 +1340,7 @@ set_symtab ()
   int nsyms;
   asymbol **asympp;
   symbolS *symp;
-  boolean result;
+  bfd_boolean result;
   extern PTR bfd_alloc PARAMS ((bfd *, bfd_size_type));
 
   /* Count symbols.  We can't rely on a count made by the loop in
@@ -1366,7 +1366,7 @@ set_symtab ()
   else
     asympp = 0;
   result = bfd_set_symtab (stdoutput, asympp, nsyms);
-  assert (result == true);
+  assert (result);
   symbol_table_frozen = 1;
 }
 #endif

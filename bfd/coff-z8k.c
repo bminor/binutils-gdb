@@ -1,5 +1,5 @@
 /* BFD back-end for Zilog Z800n COFF binaries.
-   Copyright 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001
+   Copyright 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
@@ -36,40 +36,40 @@ static int coff_z8k_select_reloc PARAMS ((reloc_howto_type *));
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (1)
 
 static reloc_howto_type r_imm32 =
-HOWTO (R_IMM32, 0, 2, 32, false, 0,
-       complain_overflow_bitfield, 0, "r_imm32", true, 0xffffffff,
-       0xffffffff, false);
+HOWTO (R_IMM32, 0, 2, 32, FALSE, 0,
+       complain_overflow_bitfield, 0, "r_imm32", TRUE, 0xffffffff,
+       0xffffffff, FALSE);
 
 static reloc_howto_type r_imm4l =
-HOWTO (R_IMM4L, 0, 0, 4, false, 0,
-       complain_overflow_bitfield, 0, "r_imm4l", true, 0xf, 0xf, false);
+HOWTO (R_IMM4L, 0, 0, 4, FALSE, 0,
+       complain_overflow_bitfield, 0, "r_imm4l", TRUE, 0xf, 0xf, FALSE);
 
 static reloc_howto_type r_da =
-HOWTO (R_IMM16, 0, 1, 16, false, 0,
-       complain_overflow_bitfield, 0, "r_da", true, 0x0000ffff, 0x0000ffff,
-       false);
+HOWTO (R_IMM16, 0, 1, 16, FALSE, 0,
+       complain_overflow_bitfield, 0, "r_da", TRUE, 0x0000ffff, 0x0000ffff,
+       FALSE);
 
 static reloc_howto_type r_imm8 =
-HOWTO (R_IMM8, 0, 0, 8, false, 0,
-       complain_overflow_bitfield, 0, "r_imm8", true, 0x000000ff, 0x000000ff,
-       false);
+HOWTO (R_IMM8, 0, 0, 8, FALSE, 0,
+       complain_overflow_bitfield, 0, "r_imm8", TRUE, 0x000000ff, 0x000000ff,
+       FALSE);
 
 static reloc_howto_type r_rel16 =
-HOWTO (R_REL16, 0, 1, 16, false, 0,
-       complain_overflow_bitfield, 0, "r_rel16", true, 0x0000ffff, 0x0000ffff,
-       true);
+HOWTO (R_REL16, 0, 1, 16, FALSE, 0,
+       complain_overflow_bitfield, 0, "r_rel16", TRUE, 0x0000ffff, 0x0000ffff,
+       TRUE);
 
 static reloc_howto_type r_jr =
-HOWTO (R_JR, 0, 0, 8, true, 0, complain_overflow_signed, 0,
-       "r_jr", true, 0, 0, true);
+HOWTO (R_JR, 0, 0, 8, TRUE, 0, complain_overflow_signed, 0,
+       "r_jr", TRUE, 0, 0, TRUE);
 
 static reloc_howto_type r_disp7 =
-HOWTO (R_DISP7, 0, 0, 7, true, 0, complain_overflow_bitfield, 0,
-       "r_disp7", true, 0, 0, true);
+HOWTO (R_DISP7, 0, 0, 7, TRUE, 0, complain_overflow_bitfield, 0,
+       "r_disp7", TRUE, 0, 0, TRUE);
 
 static reloc_howto_type r_callr =
-HOWTO (R_CALLR, 0, 1, 12, true, 0, complain_overflow_signed, 0,
-       "r_callr", true, 0xfff, 0xfff, true);
+HOWTO (R_CALLR, 0, 1, 12, TRUE, 0, complain_overflow_signed, 0,
+       "r_callr", TRUE, 0xfff, 0xfff, TRUE);
 
 /* Turn a howto into a reloc number */
 

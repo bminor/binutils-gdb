@@ -111,12 +111,12 @@ static void gld_${EMULATION_NAME}_after_parse PARAMS ((void));
 static void gld_${EMULATION_NAME}_before_allocation PARAMS ((void));
 static asection *output_prev_sec_find
   PARAMS ((lang_output_section_statement_type *));
-static boolean gld_${EMULATION_NAME}_place_orphan
+static bfd_boolean gld_${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
 static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 static void gld_${EMULATION_NAME}_finish PARAMS ((void));
-static boolean gld_${EMULATION_NAME}_open_dynamic_archive
+static bfd_boolean gld_${EMULATION_NAME}_open_dynamic_archive
   PARAMS ((const char *, search_dirs_type *, lang_input_statement_type *));
 static void gld_${EMULATION_NAME}_list_options PARAMS ((FILE *));
 static void set_pe_name PARAMS ((char *, long));
@@ -125,17 +125,17 @@ static void set_pe_value PARAMS ((char *));
 static void set_pe_stack_heap PARAMS ((char *, char *));
 
 #ifdef DLL_SUPPORT
-static boolean pe_undef_cdecl_match
+static bfd_boolean pe_undef_cdecl_match
   PARAMS ((struct bfd_link_hash_entry *, PTR));
 static void pe_fixup_stdcalls PARAMS ((void));
 static int make_import_fixup PARAMS ((arelent *, asection *));
 static void pe_find_data_imports PARAMS ((void));
 #endif
 
-static boolean pr_sym PARAMS ((struct bfd_hash_entry *, PTR string));
-static boolean gld_${EMULATION_NAME}_unrecognized_file
+static bfd_boolean pr_sym PARAMS ((struct bfd_hash_entry *, PTR string));
+static bfd_boolean gld_${EMULATION_NAME}_unrecognized_file
   PARAMS ((lang_input_statement_type *));
-static boolean gld_${EMULATION_NAME}_recognized_file
+static bfd_boolean gld_${EMULATION_NAME}_recognized_file
   PARAMS ((lang_input_statement_type *));
 static int gld_${EMULATION_NAME}_find_potential_libraries
   PARAMS ((char *, lang_input_statement_type *));
@@ -171,10 +171,10 @@ gld_${EMULATION_NAME}_before_parse()
     ldfile_output_architecture = bfd_arch_${ARCH};
   output_filename = "${EXECUTABLE_NAME:-a.exe}";
 #ifdef DLL_SUPPORT
-  config.dynamic_link = true;
+  config.dynamic_link = TRUE;
   config.has_shared = 1;
   link_info.pei386_auto_import = -1;
-  link_info.pei386_runtime_pseudo_reloc = false;
+  link_info.pei386_runtime_pseudo_reloc = FALSE;
 
 #if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
 #if defined TARGET_IS_mipspe || defined TARGET_IS_armpe
@@ -253,7 +253,7 @@ static struct option longopts[] = {
   {"output-def", required_argument, NULL, OPTION_OUT_DEF},
   {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL},
   {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMBOLS},
-  {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},	
+  {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},
   {"kill-at", no_argument, NULL, OPTION_KILL_ATS},
   {"add-stdcall-alias", no_argument, NULL, OPTION_STDCALL_ALIASES},
   {"enable-stdcall-fixup", no_argument, NULL, OPTION_ENABLE_STDCALL_FIXUP},
@@ -342,7 +342,7 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"));
   fprintf (file, _("  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"));
   fprintf (file, _("  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"));
-  fprintf (file, _("  --exclude-libs lib,lib,...         Exclude libraries from automatic export\n"));	
+  fprintf (file, _("  --exclude-libs lib,lib,...         Exclude libraries from automatic export\n"));
   fprintf (file, _("  --export-all-symbols               Automatically export all globals to DLL\n"));
   fprintf (file, _("  --kill-at                          Remove @nn from exported symbols\n"));
   fprintf (file, _("  --out-implib <file>                Generate import library\n"));
@@ -789,7 +789,7 @@ char * pe_data_import_dll;
 #ifdef DLL_SUPPORT
 static struct bfd_link_hash_entry *pe_undef_found_sym;
 
-static boolean
+static bfd_boolean
 pe_undef_cdecl_match (h, string)
   struct bfd_link_hash_entry *h;
   PTR string;
@@ -801,9 +801,9 @@ pe_undef_cdecl_match (h, string)
       && h->root.string[sl] == '@')
     {
       pe_undef_found_sym = h;
-      return false;
+      return FALSE;
     }
-  return true;
+  return TRUE;
 }
 
 static void
@@ -821,7 +821,7 @@ pe_fixup_stdcalls ()
 	char* at = strchr (undef->root.string, '@');
 	int lead_at = (*undef->root.string == '@');
 	/* For now, don't try to fixup fastcall symbols.  */
-      
+
 	if (at && !lead_at)
 	  {
 	    /* The symbol is a stdcall symbol, so let's look for a
@@ -965,7 +965,7 @@ pe_find_data_imports ()
 }
 #endif /* DLL_SUPPORT */
 
-static boolean
+static bfd_boolean
 pr_sym (h, string)
   struct bfd_hash_entry *h;
   PTR string ATTRIBUTE_UNUSED;
@@ -973,7 +973,7 @@ pr_sym (h, string)
   if (pe_dll_extra_pe_debug)
     printf ("+%s\n",h->string);
 
-  return true;
+  return TRUE;
 }
 
 
@@ -1124,7 +1124,7 @@ gld_${EMULATION_NAME}_after_open ()
 			/* Thunk section with reloc to another bfd.  */
 			blhe = bfd_link_hash_lookup (link_info.hash,
 						     s->name,
-						     false, false, true);
+						     FALSE, FALSE, TRUE);
 
 			if (blhe == NULL
 			    || blhe->type != bfd_link_hash_defined)
@@ -1279,7 +1279,7 @@ saw_option (char * option)
 }
 #endif /* DLL_SUPPORT */
 
-static boolean
+static bfd_boolean
 gld_${EMULATION_NAME}_unrecognized_file(entry)
      lang_input_statement_type *entry ATTRIBUTE_UNUSED;
 {
@@ -1313,7 +1313,7 @@ gld_${EMULATION_NAME}_unrecognized_file(entry)
 
 	      sprintf(buf, "_%s", pe_def_file->exports[i].internal_name);
 
-	      h = bfd_link_hash_lookup (link_info.hash, buf, true, true, true);
+	      h = bfd_link_hash_lookup (link_info.hash, buf, TRUE, TRUE, TRUE);
 	      if (h == (struct bfd_link_hash_entry *) NULL)
 		einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
 	      if (h->type == bfd_link_hash_new)
@@ -1362,14 +1362,14 @@ gld_${EMULATION_NAME}_unrecognized_file(entry)
 	      if (pe_def_file->heap_commit != -1)
 		pe.SizeOfHeapCommit = pe_def_file->heap_commit;
 	    }
-	  return true;
+	  return TRUE;
 	}
     }
 #endif
-  return false;
+  return FALSE;
 }
 
-static boolean
+static bfd_boolean
 gld_${EMULATION_NAME}_recognized_file(entry)
   lang_input_statement_type *entry ATTRIBUTE_UNUSED;
 {
@@ -1394,7 +1394,7 @@ gld_${EMULATION_NAME}_recognized_file(entry)
 	return pe_implied_import_dll (entry->filename);
     }
 #endif
-  return false;
+  return FALSE;
 }
 
 static void
@@ -1405,7 +1405,8 @@ gld_${EMULATION_NAME}_finish ()
 
   if (thumb_entry_symbol != NULL)
     {
-      h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol, false, false, true);
+      h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol,
+				FALSE, FALSE, TRUE);
 
       if (h != (struct bfd_link_hash_entry *) NULL
 	  && (h->type == bfd_link_hash_defined
@@ -1519,7 +1520,7 @@ struct orphan_save
   lang_statement_union_type **stmt;
 };
 
-static boolean
+static bfd_boolean
 gld_${EMULATION_NAME}_place_orphan (file, s)
      lang_input_statement_type *file;
      asection *s;
@@ -1760,11 +1761,11 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 
     if (dollar != NULL)
       {
-	boolean found_dollar;
+	bfd_boolean found_dollar;
 
 	/* The section name has a '$'.  Sort it with the other '$'
 	   sections.  */
-	found_dollar = false;
+	found_dollar = FALSE;
 	for ( ; *pl != NULL; pl = &(*pl)->header.next)
 	  {
 	    lang_input_section_type *ls;
@@ -1783,7 +1784,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 	      }
 	    else
 	      {
-		found_dollar = true;
+		found_dollar = TRUE;
 		if (strcmp (secname, lname) < 0)
 		  break;
 	      }
@@ -1799,10 +1800,10 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
 
   free (hold_section_name);
 
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
      const char * arch ATTRIBUTE_UNUSED;
      search_dirs_type * search;
@@ -1812,7 +1813,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
   char * string;
 
   if (! entry->is_archive)
-    return false;
+    return FALSE;
 
   filename = entry->filename;
 
@@ -1863,7 +1864,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
                           if (! ldfile_try_open_bfd (string, entry))
                             {
                               free (string);
-                              return false;
+                              return FALSE;
                             }
                         }
                     }
@@ -1880,7 +1881,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
                       if (! ldfile_try_open_bfd (string, entry))
                         {
                           free (string);
-                          return false;
+                          return FALSE;
                         }
                     }
                 }
@@ -1890,7 +1891,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
 
   entry->filename = string;
 
-  return true;
+  return TRUE;
 }
 
 static int
@@ -1913,19 +1914,19 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocateable == true && config.build_constructors == true)
+  if (link_info.relocateable && config.build_constructors)
     return
 EOF
-sed $sc ldscripts/${EMULATION_NAME}.xu                     >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocateable == true) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xr                     >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.magic_demand_paged) return'     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xn                     >> e${EMULATION_NAME}.c
-echo '  ; else return'                                     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.x                      >> e${EMULATION_NAME}.c
-echo '; }'                                                 >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocateable) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.magic_demand_paged) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xn                 >> e${EMULATION_NAME}.c
+echo '  ; else return'                                 >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.x                  >> e${EMULATION_NAME}.c
+echo '; }'                                             >> e${EMULATION_NAME}.c
 
 cat >>e${EMULATION_NAME}.c <<EOF
 

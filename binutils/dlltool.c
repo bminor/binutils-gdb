@@ -267,12 +267,16 @@
 #endif
 
 /* Forward references.  */
-static char *look_for_prog PARAMS ((const char *, const char *, int));
-static char *deduce_name PARAMS ((const char *));
+static char *look_for_prog
+  PARAMS ((const char *, const char *, int));
+static char *deduce_name
+  PARAMS ((const char *));
 
 #ifdef DLLTOOL_MCORE_ELF
-static void mcore_elf_cache_filename PARAMS ((char *));
-static void mcore_elf_gen_out_file PARAMS ((void));
+static void mcore_elf_cache_filename
+  PARAMS ((char *));
+static void mcore_elf_gen_out_file
+  PARAMS ((void));
 #endif
 
 #ifdef HAVE_SYS_WAIT_H
@@ -358,20 +362,20 @@ static int add_indirect = 0;
 static int add_underscore = 0;
 static int dontdeltemps = 0;
 
-/* True if we should export all symbols.  Otherwise, we only export
+/* TRUE if we should export all symbols.  Otherwise, we only export
    symbols listed in .drectve sections or in the def file.  */
-static boolean export_all_symbols;
+static bfd_boolean export_all_symbols;
 
-/* True if we should exclude the symbols in DEFAULT_EXCLUDES when
+/* TRUE if we should exclude the symbols in DEFAULT_EXCLUDES when
    exporting all symbols.  */
-static boolean do_default_excludes=true;
+static bfd_boolean do_default_excludes = TRUE;
 
 /* Default symbols to exclude when exporting all the symbols.  */
 static const char *default_excludes = "DllMain@12,DllEntryPoint@0,impure_ptr";
 
-/* True if we should add __imp_<SYMBOL> to import libraries for backward
+/* TRUE if we should add __imp_<SYMBOL> to import libraries for backward
    compatibility to old Cygwin releases.  */
-static boolean create_compat_implib;
+static bfd_boolean create_compat_implib;
 
 static char *def_file;
 
@@ -652,49 +656,90 @@ struct string_list
 
 static struct string_list *excludes;
 
-static const char *rvaafter PARAMS ((int));
-static const char *rvabefore PARAMS ((int));
-static const char *asm_prefix PARAMS ((int));
-static void process_def_file PARAMS ((const char *));
-static void new_directive PARAMS ((char *));
-static void append_import PARAMS ((const char *, const char *, int));
-static void run PARAMS ((const char *, char *));
-static void scan_drectve_symbols PARAMS ((bfd *));
-static void scan_filtered_symbols PARAMS ((bfd *, PTR, long, unsigned int));
-static void add_excludes PARAMS ((const char *));
-static boolean match_exclude PARAMS ((const char *));
-static void set_default_excludes PARAMS ((void));
-static long filter_symbols PARAMS ((bfd *, PTR, long, unsigned int));
-static void scan_all_symbols PARAMS ((bfd *));
-static void scan_open_obj_file PARAMS ((bfd *));
-static void scan_obj_file PARAMS ((const char *));
-static void dump_def_info PARAMS ((FILE *));
-static int sfunc PARAMS ((const void *, const void *));
-static void flush_page PARAMS ((FILE *, long *, int, int));
-static void gen_def_file PARAMS ((void));
-static void generate_idata_ofile PARAMS ((FILE *));
-static void assemble_file PARAMS ((const char *, const char *));
-static void gen_exp_file PARAMS ((void));
-static const char *xlate PARAMS ((const char *));
+static const char *rvaafter
+  PARAMS ((int));
+static const char *rvabefore
+  PARAMS ((int));
+static const char *asm_prefix
+  PARAMS ((int));
+static void process_def_file
+  PARAMS ((const char *));
+static void new_directive
+  PARAMS ((char *));
+static void append_import
+  PARAMS ((const char *, const char *, int));
+static void run
+  PARAMS ((const char *, char *));
+static void scan_drectve_symbols
+  PARAMS ((bfd *));
+static void scan_filtered_symbols
+  PARAMS ((bfd *, PTR, long, unsigned int));
+static void add_excludes
+  PARAMS ((const char *));
+static bfd_boolean match_exclude
+  PARAMS ((const char *));
+static void set_default_excludes
+  PARAMS ((void));
+static long filter_symbols
+  PARAMS ((bfd *, PTR, long, unsigned int));
+static void scan_all_symbols
+  PARAMS ((bfd *));
+static void scan_open_obj_file
+  PARAMS ((bfd *));
+static void scan_obj_file
+  PARAMS ((const char *));
+static void dump_def_info
+  PARAMS ((FILE *));
+static int sfunc
+  PARAMS ((const void *, const void *));
+static void flush_page
+  PARAMS ((FILE *, long *, int, int));
+static void gen_def_file
+  PARAMS ((void));
+static void generate_idata_ofile
+  PARAMS ((FILE *));
+static void assemble_file
+  PARAMS ((const char *, const char *));
+static void gen_exp_file
+  PARAMS ((void));
+static const char *xlate
+  PARAMS ((const char *));
 #if 0
-static void dump_iat PARAMS ((FILE *, export_type *));
+static void dump_iat
+  PARAMS ((FILE *, export_type *));
 #endif
-static char *make_label PARAMS ((const char *, const char *));
-static char *make_imp_label PARAMS ((const char *, const char *));
-static bfd *make_one_lib_file PARAMS ((export_type *, int));
-static bfd *make_head PARAMS ((void));
-static bfd *make_tail PARAMS ((void));
-static void gen_lib_file PARAMS ((void));
-static int pfunc PARAMS ((const void *, const void *));
-static int nfunc PARAMS ((const void *, const void *));
-static void remove_null_names PARAMS ((export_type **));
-static void dtab PARAMS ((export_type **));
-static void process_duplicates PARAMS ((export_type **));
-static void fill_ordinals PARAMS ((export_type **));
-static int alphafunc PARAMS ((const void *, const void *));
-static void mangle_defs PARAMS ((void));
-static void usage PARAMS ((FILE *, int));
-static void inform PARAMS ((const char *, ...));
+static char *make_label
+  PARAMS ((const char *, const char *));
+static char *make_imp_label
+  PARAMS ((const char *, const char *));
+static bfd *make_one_lib_file
+  PARAMS ((export_type *, int));
+static bfd *make_head
+  PARAMS ((void));
+static bfd *make_tail
+  PARAMS ((void));
+static void gen_lib_file
+  PARAMS ((void));
+static int pfunc
+  PARAMS ((const void *, const void *));
+static int nfunc
+  PARAMS ((const void *, const void *));
+static void remove_null_names
+  PARAMS ((export_type **));
+static void dtab
+  PARAMS ((export_type **));
+static void process_duplicates
+  PARAMS ((export_type **));
+static void fill_ordinals
+  PARAMS ((export_type **));
+static int alphafunc
+  PARAMS ((const void *, const void *));
+static void mangle_defs
+  PARAMS ((void));
+static void usage
+  PARAMS ((FILE *, int));
+static void inform
+  PARAMS ((const char *, ...));
 
 
 static void
@@ -1252,7 +1297,7 @@ scan_drectve_symbols (abfd)
 
 	  if (add_stdcall_alias && strchr (c, '@'))
 	    {
-	      int lead_at = (*c == '@') ;	
+	      int lead_at = (*c == '@') ;
 	      char *exported_name = xstrdup (c + lead_at);
 	      char *atsym = strchr (exported_name, '@');
 	      *atsym = '\0';
@@ -1290,7 +1335,7 @@ scan_filtered_symbols (abfd, minisyms, symcount, size)
       asymbol *sym;
       const char *symbol_name;
 
-      sym = bfd_minisymbol_to_symbol (abfd, false, from, store);
+      sym = bfd_minisymbol_to_symbol (abfd, FALSE, from, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 
@@ -1349,7 +1394,7 @@ add_excludes (new_excludes)
 
 /* See if STRING is on the list of symbols to exclude.  */
 
-static boolean
+static bfd_boolean
 match_exclude (string)
      const char *string;
 {
@@ -1357,8 +1402,8 @@ match_exclude (string)
 
   for (excl_item = excludes; excl_item; excl_item = excl_item->next)
     if (strcmp (string, excl_item->string) == 0)
-      return true;
-  return false;
+      return TRUE;
+  return FALSE;
 }
 
 /* Add the default list of symbols to exclude.  */
@@ -1394,7 +1439,7 @@ filter_symbols (abfd, minisyms, symcount, size)
       int keep = 0;
       asymbol *sym;
 
-      sym = bfd_minisymbol_to_symbol (abfd, false, (const PTR) from, store);
+      sym = bfd_minisymbol_to_symbol (abfd, FALSE, (const PTR) from, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 
@@ -1440,7 +1485,7 @@ scan_all_symbols (abfd)
       return;
     }
 
-  symcount = bfd_read_minisymbols (abfd, false, &minisyms, &size);
+  symcount = bfd_read_minisymbols (abfd, FALSE, &minisyms, &size);
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
 
@@ -2532,14 +2577,14 @@ make_one_lib_file (exp, i)
 	    case PDATA:
 	      {
 		/* The .pdata section is 5 words long.
-		   Think of it as:                    
-		   struct                             
-		   {                                  
-		     bfd_vma BeginAddress,     [0x00] 
-		             EndAddress,       [0x04] 
-			     ExceptionHandler, [0x08] 
-			     HandlerData,      [0x0c] 
-			     PrologEndAddress; [0x10] 
+		   Think of it as:
+		   struct
+		   {
+		     bfd_vma BeginAddress,     [0x00]
+		             EndAddress,       [0x04]
+			     ExceptionHandler, [0x08]
+			     HandlerData,      [0x0c]
+			     PrologEndAddress; [0x10]
 		   };  */
 
 		/* So this pdata section setups up this as a glue linkage to
@@ -3255,16 +3300,16 @@ main (ac, av)
       switch (c)
 	{
 	case OPTION_EXPORT_ALL_SYMS:
-	  export_all_symbols = true;
+	  export_all_symbols = TRUE;
 	  break;
 	case OPTION_NO_EXPORT_ALL_SYMS:
-	  export_all_symbols = false;
+	  export_all_symbols = FALSE;
 	  break;
 	case OPTION_EXCLUDE_SYMS:
 	  add_excludes (optarg);
 	  break;
 	case OPTION_NO_DEFAULT_EXCLUDES:
-	  do_default_excludes = false;
+	  do_default_excludes = FALSE;
 	  break;
 	case 'x':
 	  no_idata4 = 1;
@@ -3378,7 +3423,7 @@ main (ac, av)
      symbols in the .drectve section.  The default excludes are meant
      to avoid exporting DLL entry point and Cygwin32 impure_ptr.  */
   if (! export_all_symbols)
-    do_default_excludes = false;
+    do_default_excludes = FALSE;
 
   if (do_default_excludes)
     set_default_excludes ();

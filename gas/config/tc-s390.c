@@ -41,15 +41,15 @@ static enum s390_opcode_arch_val current_architecture = S390_OPCODE_ESA;
 static int current_arch_mask = 1 << S390_OPCODE_ESA;
 static int current_arch_requested = 0;
 
-/* Whether to use user friendly register names. Default is true.  */
+/* Whether to use user friendly register names. Default is TRUE.  */
 #ifndef TARGET_REG_NAMES_P
-#define TARGET_REG_NAMES_P true
+#define TARGET_REG_NAMES_P TRUE
 #endif
 
-static boolean reg_names_p = TARGET_REG_NAMES_P;
+static bfd_boolean reg_names_p = TARGET_REG_NAMES_P;
 
 /* Set to TRUE if we want to warn about zero base/index registers.  */
-static boolean warn_areg_zero = FALSE;
+static bfd_boolean warn_areg_zero = FALSE;
 
 /* Generic assembler global variables which must be defined by all
    targets.  */
@@ -204,7 +204,7 @@ static const struct pd_reg pre_defined_registers[] =
 
 static int reg_name_search
   PARAMS ((const struct pd_reg *, int, const char *));
-static boolean register_name PARAMS ((expressionS *));
+static bfd_boolean register_name PARAMS ((expressionS *));
 static void init_default_arch PARAMS ((void));
 static void s390_insert_operand
   PARAMS ((unsigned char *, const struct s390_operand *, offsetT, char *,
@@ -256,7 +256,7 @@ reg_name_search (regs, regcount, name)
  *      original state.
  */
 
-static boolean
+static bfd_boolean
 register_name (expressionP)
      expressionS *expressionP;
 {
@@ -270,7 +270,7 @@ register_name (expressionP)
   if (name[0] == '%' && ISALPHA (name[1]))
     name = ++input_line_pointer;
   else
-    return false;
+    return FALSE;
 
   c = get_symbol_end ();
   reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
@@ -287,12 +287,12 @@ register_name (expressionP)
       /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      return true;
+      return TRUE;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return false;
+  return FALSE;
 }
 
 /* Local variables.  */
@@ -366,10 +366,10 @@ md_parse_option (c, arg)
       break;
     case 'm':
       if (arg != NULL && strcmp (arg, "regnames") == 0)
-	reg_names_p = true;
+	reg_names_p = TRUE;
 
       else if (arg != NULL && strcmp (arg, "no-regnames") == 0)
-	reg_names_p = false;
+	reg_names_p = FALSE;
 
       else if (arg != NULL && strcmp (arg, "warn-areg-zero") == 0)
 	warn_areg_zero = TRUE;
@@ -440,7 +440,7 @@ md_begin ()
 {
   register const struct s390_opcode *op;
   const struct s390_opcode *op_end;
-  boolean dup_insn = false;
+  bfd_boolean dup_insn = FALSE;
   const char *retval;
 
   /* Give a warning if the combination -m64-bit and -Aesa is used.  */
@@ -462,7 +462,7 @@ md_begin ()
 	{
 	  as_bad (_("Internal assembler error for instruction format %s"),
 		  op->name);
-	  dup_insn = true;
+	  dup_insn = TRUE;
 	}
     }
 
@@ -476,7 +476,7 @@ md_begin ()
       if (retval != (const char *) NULL)
 	{
 	  as_bad (_("Internal assembler error for instruction %s"), op->name);
-	  dup_insn = true;
+	  dup_insn = TRUE;
 	}
     }
 
@@ -973,9 +973,9 @@ s390_elf_cons (nbytes)
 	      where = frag_more (nbytes);
 	      md_number_to_chars (where, 0, size);
 	      /* To make fixup_segment do the pc relative conversion the
-		 pcrel parameter on the fix_new_exp call needs to be false.  */
+		 pcrel parameter on the fix_new_exp call needs to be FALSE.  */
 	      fix_new_exp (frag_now, where - frag_now->fr_literal,
-			   size, &exp, false, reloc);
+			   size, &exp, FALSE, reloc);
 	    }
 	  else
 	    as_bad (_("relocation not applicable"));
@@ -1080,11 +1080,11 @@ md_gather_operands (str, insn, opcode)
 	    {
 	      if ((operand->flags & S390_OPERAND_INDEX)
 		  && ex.X_add_number == 0
-		  && warn_areg_zero == TRUE)
+		  && warn_areg_zero)
 		as_warn ("index register specified but zero");
 	      if ((operand->flags & S390_OPERAND_BASE)
 		  && ex.X_add_number == 0
-		  && warn_areg_zero == TRUE)
+		  && warn_areg_zero)
 		as_warn ("base register specified but zero");
 	      s390_insert_operand (insn, operand, ex.X_add_number, NULL, 0);
 	    }

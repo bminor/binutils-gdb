@@ -58,9 +58,9 @@ static void gld${EMULATION_NAME}_vercheck
   PARAMS ((lang_input_statement_type *));
 static void gld${EMULATION_NAME}_stat_needed
   PARAMS ((lang_input_statement_type *));
-static boolean gld${EMULATION_NAME}_try_needed
+static bfd_boolean gld${EMULATION_NAME}_try_needed
   PARAMS ((const char *, int));
-static boolean gld${EMULATION_NAME}_search_needed
+static bfd_boolean gld${EMULATION_NAME}_search_needed
   PARAMS ((const char *, const char *, int));
 static void gld${EMULATION_NAME}_check_needed
   PARAMS ((lang_input_statement_type *));
@@ -72,13 +72,13 @@ static void gld${EMULATION_NAME}_find_statement_assignment
   PARAMS ((lang_statement_union_type *));
 static void gld${EMULATION_NAME}_before_allocation
   PARAMS ((void));
-static boolean gld${EMULATION_NAME}_open_dynamic_archive
+static bfd_boolean gld${EMULATION_NAME}_open_dynamic_archive
   PARAMS ((const char *, search_dirs_type *, lang_input_statement_type *));
 static lang_output_section_statement_type *output_rel_find
   PARAMS ((asection *));
 static asection *output_prev_sec_find
   PARAMS ((lang_output_section_statement_type *));
-static boolean gld${EMULATION_NAME}_place_orphan
+static bfd_boolean gld${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
 static void gld${EMULATION_NAME}_finish
   PARAMS ((void));
@@ -114,8 +114,8 @@ gld${EMULATION_NAME}_before_parse ()
     }
   else
     ldfile_output_architecture = bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`;
-  config.dynamic_link = ${DYNAMIC_LINK-true};
-  config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo true ; else echo false ; fi`;
+  config.dynamic_link = ${DYNAMIC_LINK-TRUE};
+  config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
 }
 
 EOF
@@ -128,9 +128,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 static struct bfd_link_needed_list *global_needed;
 static struct stat global_stat;
-static boolean global_found;
+static bfd_boolean global_found;
 static struct bfd_link_needed_list *global_vercheck_needed;
-static boolean global_vercheck_failed;
+static bfd_boolean global_vercheck_failed;
 
 
 /* On Linux, it's possible to have different versions of the same
@@ -193,7 +193,7 @@ gld${EMULATION_NAME}_vercheck (s)
              FOO.SO.VER2, and VER1 and VER2 are different.  This
              appears to be a version mismatch, so we tell the caller
              to try a different version of this library.  */
-	  global_vercheck_failed = true;
+	  global_vercheck_failed = TRUE;
 	  return;
 	}
     }
@@ -225,7 +225,7 @@ gld${EMULATION_NAME}_stat_needed (s)
   if (st.st_dev == global_stat.st_dev
       && st.st_ino == global_stat.st_ino)
     {
-      global_found = true;
+      global_found = TRUE;
       return;
     }
 
@@ -259,7 +259,7 @@ gld${EMULATION_NAME}_stat_needed (s)
    named by a DT_NEEDED entry.  The FORCE parameter indicates whether
    to skip the check for a conflicting version.  */
 
-static boolean
+static bfd_boolean
 gld${EMULATION_NAME}_try_needed (name, force)
      const char *name;
      int force;
@@ -269,23 +269,23 @@ gld${EMULATION_NAME}_try_needed (name, force)
 
   abfd = bfd_openr (name, bfd_get_target (output_bfd));
   if (abfd == NULL)
-    return false;
+    return FALSE;
   if (! bfd_check_format (abfd, bfd_object))
     {
       bfd_close (abfd);
-      return false;
+      return FALSE;
     }
   if ((bfd_get_file_flags (abfd) & DYNAMIC) == 0)
     {
       bfd_close (abfd);
-      return false;
+      return FALSE;
     }
 
   /* For DT_NEEDED, they have to match.  */
   if (abfd->xvec != output_bfd->xvec)
     {
       bfd_close (abfd);
-      return false;
+      return FALSE;
     }
 
   /* Check whether this object would include any conflicting library
@@ -303,14 +303,14 @@ gld${EMULATION_NAME}_try_needed (name, force)
       if (needed != NULL)
 	{
 	  global_vercheck_needed = needed;
-	  global_vercheck_failed = false;
+	  global_vercheck_failed = FALSE;
 	  lang_for_each_input_file (gld${EMULATION_NAME}_vercheck);
 	  if (global_vercheck_failed)
 	    {
 	      bfd_close (abfd);
-	      /* Return false to force the caller to move on to try
+	      /* Return FALSE to force the caller to move on to try
                  another file on the search path.  */
-	      return false;
+	      return FALSE;
 	    }
 
 	  /* But wait!  It gets much worse.  On Linux, if a shared
@@ -333,7 +333,7 @@ case ${target} in
 	    if (l == NULL)
 	      {
 		bfd_close (abfd);
-		return false;
+		return FALSE;
 	      }
 	  }
 
@@ -363,13 +363,13 @@ cat >>e${EMULATION_NAME}.c <<EOF
   if (trace_file_tries)
     info_msg (_("found %s at %s\n"), soname, name);
 
-  global_found = false;
+  global_found = FALSE;
   lang_for_each_input_file (gld${EMULATION_NAME}_stat_needed);
   if (global_found)
     {
-      /* Return true to indicate that we found the file, even though
+      /* Return TRUE to indicate that we found the file, even though
          we aren't going to do anything with it.  */
-      return true;
+      return TRUE;
     }
 
   /* Tell the ELF backend that we don't want the output file to have a
@@ -385,13 +385,13 @@ cat >>e${EMULATION_NAME}.c <<EOF
   if (! bfd_link_add_symbols (abfd, &link_info))
     einfo ("%F%B: could not read symbols: %E\n", abfd);
 
-  return true;
+  return TRUE;
 }
 
 
 /* Search for a needed file in a path.  */
 
-static boolean
+static bfd_boolean
 gld${EMULATION_NAME}_search_needed (path, name, force)
      const char *path;
      const char *name;
@@ -404,7 +404,7 @@ gld${EMULATION_NAME}_search_needed (path, name, force)
     return gld${EMULATION_NAME}_try_needed (name, force);
 
   if (path == NULL || *path == '\0')
-    return false;
+    return FALSE;
   len = strlen (name);
   while (1)
     {
@@ -426,7 +426,7 @@ gld${EMULATION_NAME}_search_needed (path, name, force)
       strcpy (sset, name);
 
       if (gld${EMULATION_NAME}_try_needed (filename, force))
-	return true;
+	return TRUE;
 
       free (filename);
 
@@ -435,7 +435,7 @@ gld${EMULATION_NAME}_search_needed (path, name, force)
       path = s + 1;
     }
 
-  return false;
+  return FALSE;
 }
 
 EOF
@@ -450,15 +450,15 @@ if [ "x${host}" = "x${target}" ] ; then
    in which we may find shared libraries.  /etc/ld.so.conf is really
    only meaningful on Linux.  */
 
-static boolean gld${EMULATION_NAME}_check_ld_so_conf
+static bfd_boolean gld${EMULATION_NAME}_check_ld_so_conf
   PARAMS ((const char *, int));
 
-static boolean
+static bfd_boolean
 gld${EMULATION_NAME}_check_ld_so_conf (name, force)
      const char *name;
      int force;
 {
-  static boolean initialized;
+  static bfd_boolean initialized;
   static char *ld_so_conf;
 
   if (! initialized)
@@ -518,11 +518,11 @@ gld${EMULATION_NAME}_check_ld_so_conf (name, force)
 	  ld_so_conf = b;
 	}
 
-      initialized = true;
+      initialized = TRUE;
     }
 
   if (ld_so_conf == NULL)
-    return false;
+    return FALSE;
 
   return gld${EMULATION_NAME}_search_needed (ld_so_conf, name, force);
 }
@@ -550,7 +550,7 @@ gld${EMULATION_NAME}_check_needed (s)
 
       if (strcmp (s->filename, global_needed->name) == 0)
 	{
-	  global_found = true;
+	  global_found = TRUE;
 	  return;
 	}
 
@@ -560,7 +560,7 @@ gld${EMULATION_NAME}_check_needed (s)
 	  if (f != NULL
 	      && strcmp (f + 1, global_needed->name) == 0)
 	    {
-	      global_found = true;
+	      global_found = TRUE;
 	      return;
 	    }
 	}
@@ -574,7 +574,7 @@ gld${EMULATION_NAME}_check_needed (s)
       if (soname != NULL
 	  && strcmp (soname, global_needed->name) == 0)
 	{
-	  global_found = true;
+	  global_found = TRUE;
 	  return;
 	}
     }
@@ -620,7 +620,7 @@ gld${EMULATION_NAME}_after_open ()
 
       /* See if this file was included in the link explicitly.  */
       global_needed = l;
-      global_found = false;
+      global_found = FALSE;
       lang_for_each_input_file (gld${EMULATION_NAME}_check_needed);
       if (global_found)
 	continue;
@@ -756,7 +756,7 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
     {
     case etree_provide:
       h = bfd_link_hash_lookup (link_info.hash, exp->assign.dst,
-				false, false, false);
+				FALSE, FALSE, FALSE);
       if (h == NULL)
 	break;
 
@@ -774,7 +774,7 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
 	{
 	  if (! (bfd_elf${ELFSIZE}_record_link_assignment
 		 (output_bfd, &link_info, exp->assign.dst,
-		  exp->type.node_class == etree_provide ? true : false)))
+		  exp->type.node_class == etree_provide ? TRUE : FALSE)))
 	    einfo ("%P%F: failed to record assignment to %s: %E\n",
 		   exp->assign.dst);
 	}
@@ -877,7 +877,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	asection *s;
 	bfd_size_type sz;
 	char *msg;
-	boolean ret;
+	bfd_boolean ret;
 
 	if (is->just_syms_flag)
 	  continue;
@@ -916,7 +916,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
    dynamic libraries have an extension of .so (or .sl on oddball systems
    like hpux).  */
 
-static boolean
+static bfd_boolean
 gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
      const char *arch;
      search_dirs_type *search;
@@ -926,7 +926,7 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
   char *string;
 
   if (! entry->is_archive)
-    return false;
+    return FALSE;
 
   filename = entry->filename;
 
@@ -954,7 +954,7 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
   if (! ldfile_try_open_bfd (string, entry))
     {
       free (string);
-      return false;
+      return FALSE;
     }
 
   entry->filename = string;
@@ -984,7 +984,7 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
       bfd_elf_set_dt_needed_name (entry->the_bfd, filename);
     }
 
-  return true;
+  return TRUE;
 }
 
 EOF
@@ -1073,7 +1073,7 @@ struct orphan_save {
   lang_statement_union_type **stmt;
 };
 
-static boolean
+static bfd_boolean
 gld${EMULATION_NAME}_place_orphan (file, s)
      lang_input_statement_type *file;
      asection *s;
@@ -1121,7 +1121,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	  /* We already have an output section statement with this
 	     name, and its bfd section, if any, has compatible flags.  */
 	  lang_add_section (&os->children, s, os, file);
-	  return true;
+	  return TRUE;
 	}
     }
 
@@ -1136,7 +1136,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
       && hold_text.os != NULL)
     {
       lang_add_section (&hold_text.os->children, s, hold_text.os, file);
-      return true;
+      return TRUE;
     }
 
   /* Decide which segment the section should go in based on the
@@ -1151,7 +1151,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
     {
       if (s->output_section == NULL)
 	s->output_section = bfd_abs_section_ptr;
-      return true;
+      return TRUE;
     }
 
   place = NULL;
@@ -1334,7 +1334,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 	}
     }
 
-  return true;
+  return TRUE;
 }
 EOF
 fi
@@ -1383,33 +1383,33 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocateable == true && config.build_constructors == true)
+  if (link_info.relocateable && config.build_constructors)
     return
 EOF
-sed $sc ldscripts/${EMULATION_NAME}.xu                     >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocateable == true) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xr                     >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocateable) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c
 if cmp -s ldscripts/${EMULATION_NAME}.x ldscripts/${EMULATION_NAME}.xn; then : ; else
-echo '  ; else if (!config.magic_demand_paged) return'     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xn                     >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.magic_demand_paged) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xn                 >> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 echo '  ; else if (link_info.shared && link_info.combreloc) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xsc                    >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xsc                >> e${EMULATION_NAME}.c
 fi
-echo '  ; else if (link_info.shared) return'		   >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xs                     >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.shared) return'	       >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xs                 >> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
-echo '  ; else if (link_info.combreloc) return'            >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xc                     >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.combreloc) return'        >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xc                 >> e${EMULATION_NAME}.c
 fi
-echo '  ; else return'                                     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.x                      >> e${EMULATION_NAME}.c
-echo '; }'                                                 >> e${EMULATION_NAME}.c
+echo '  ; else return'                                 >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.x                  >> e${EMULATION_NAME}.c
+echo '; }'                                             >> e${EMULATION_NAME}.c
 
 else
 # Scripts read from the filesystem.
@@ -1418,9 +1418,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 1;
 
-  if (link_info.relocateable == true && config.build_constructors == true)
+  if (link_info.relocateable && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocateable == true)
+  else if (link_info.relocateable)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";
@@ -1521,21 +1521,21 @@ EOF
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 cat >>e${EMULATION_NAME}.c <<EOF
     case OPTION_DISABLE_NEW_DTAGS:
-      link_info.new_dtags = false;
+      link_info.new_dtags = FALSE;
       break;
 
     case OPTION_ENABLE_NEW_DTAGS:
-      link_info.new_dtags = true;
+      link_info.new_dtags = TRUE;
       break;
 
     case OPTION_EH_FRAME_HDR:
-      link_info.eh_frame_hdr = true;
+      link_info.eh_frame_hdr = TRUE;
       break;
 
     case OPTION_GROUP:
       link_info.flags_1 |= (bfd_vma) DF_1_GROUP;
       /* Groups must be self-contained.  */
-      link_info.no_undefined = true;
+      link_info.no_undefined = TRUE;
       break;
 
     case 'z':
@@ -1564,15 +1564,15 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  link_info.flags_1 |= (bfd_vma) DF_1_ORIGIN;
 	}
       else if (strcmp (optarg, "defs") == 0)
-	link_info.no_undefined = true;
+	link_info.no_undefined = TRUE;
       else if (strcmp (optarg, "muldefs") == 0)
-	link_info.allow_multiple_definition = true;
+	link_info.allow_multiple_definition = TRUE;
       else if (strcmp (optarg, "combreloc") == 0)
-	link_info.combreloc = true;
+	link_info.combreloc = TRUE;
       else if (strcmp (optarg, "nocombreloc") == 0)
-	link_info.combreloc = false;
+	link_info.combreloc = FALSE;
       else if (strcmp (optarg, "nocopyreloc") == 0)
-        link_info.nocopyreloc = true;
+        link_info.nocopyreloc = TRUE;
       /* What about the other Solaris -z options? FIXME.  */
       break;
 EOF

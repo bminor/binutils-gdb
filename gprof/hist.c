@@ -468,7 +468,7 @@ hist_print ()
   bfd_vma addr;
 
   if (first_output)
-    first_output = false;
+    first_output = FALSE;
   else
     printf ("\f\n");
 

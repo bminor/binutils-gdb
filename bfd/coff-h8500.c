@@ -1,5 +1,5 @@
 /* BFD back-end for Hitachi H8/500 COFF binaries.
-   Copyright 1993, 1994, 1995, 1997, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1997, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
@@ -36,38 +36,38 @@ static void extra_case       PARAMS ((bfd *, struct bfd_link_info *, struct bfd_
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (1)
 
 static reloc_howto_type r_imm8 =
-HOWTO (R_H8500_IMM8, 0, 1, 8, false, 0,
-       complain_overflow_bitfield, 0, "r_imm8", true, 0x000000ff, 0x000000ff, false);
+HOWTO (R_H8500_IMM8, 0, 1, 8, FALSE, 0,
+       complain_overflow_bitfield, 0, "r_imm8", TRUE, 0x000000ff, 0x000000ff, FALSE);
 
 static reloc_howto_type r_imm16 =
-HOWTO (R_H8500_IMM16, 0, 1, 16, false, 0,
-       complain_overflow_bitfield, 0, "r_imm16", true, 0x0000ffff, 0x0000ffff, false);
+HOWTO (R_H8500_IMM16, 0, 1, 16, FALSE, 0,
+       complain_overflow_bitfield, 0, "r_imm16", TRUE, 0x0000ffff, 0x0000ffff, FALSE);
 
 static reloc_howto_type r_imm24 =
-HOWTO (R_H8500_IMM24, 0, 1, 24, false, 0,
-       complain_overflow_bitfield, 0, "r_imm24", true, 0x00ffffff, 0x00ffffff, false);
+HOWTO (R_H8500_IMM24, 0, 1, 24, FALSE, 0,
+       complain_overflow_bitfield, 0, "r_imm24", TRUE, 0x00ffffff, 0x00ffffff, FALSE);
 
 static reloc_howto_type r_imm32 =
-HOWTO (R_H8500_IMM32, 0, 1, 32, false, 0,
-       complain_overflow_bitfield, 0, "r_imm32", true, 0xffffffff, 0xffffffff, false);
+HOWTO (R_H8500_IMM32, 0, 1, 32, FALSE, 0,
+       complain_overflow_bitfield, 0, "r_imm32", TRUE, 0xffffffff, 0xffffffff, FALSE);
 
 static reloc_howto_type r_high8 =
-HOWTO (R_H8500_HIGH8, 0, 1, 8, false, 0,
-       complain_overflow_dont, 0, "r_high8", true, 0x000000ff, 0x000000ff, false);
+HOWTO (R_H8500_HIGH8, 0, 1, 8, FALSE, 0,
+       complain_overflow_dont, 0, "r_high8", TRUE, 0x000000ff, 0x000000ff, FALSE);
 
 static reloc_howto_type r_low16 =
-HOWTO (R_H8500_LOW16, 0, 1, 16, false, 0,
-       complain_overflow_dont, 0, "r_low16", true, 0x0000ffff, 0x0000ffff, false);
+HOWTO (R_H8500_LOW16, 0, 1, 16, FALSE, 0,
+       complain_overflow_dont, 0, "r_low16", TRUE, 0x0000ffff, 0x0000ffff, FALSE);
 
 static reloc_howto_type r_pcrel8 =
-HOWTO (R_H8500_PCREL8, 0, 1, 8, true, 0, complain_overflow_signed, 0, "r_pcrel8", true, 0, 0, true);
+HOWTO (R_H8500_PCREL8, 0, 1, 8, TRUE, 0, complain_overflow_signed, 0, "r_pcrel8", TRUE, 0, 0, TRUE);
 
 static reloc_howto_type r_pcrel16 =
-HOWTO (R_H8500_PCREL16, 0, 1, 16, true, 0, complain_overflow_signed, 0, "r_pcrel16", true, 0, 0, true);
+HOWTO (R_H8500_PCREL16, 0, 1, 16, TRUE, 0, complain_overflow_signed, 0, "r_pcrel16", TRUE, 0, 0, TRUE);
 
 static reloc_howto_type r_high16 =
-HOWTO (R_H8500_HIGH16, 0, 1, 8, false, 0,
-       complain_overflow_dont, 0, "r_high16", true, 0x000ffff, 0x0000ffff, false);
+HOWTO (R_H8500_HIGH16, 0, 1, 8, FALSE, 0,
+       complain_overflow_dont, 0, "r_high16", TRUE, 0x000ffff, 0x0000ffff, FALSE);
 
 /* Turn a howto into a reloc number.  */
 

@@ -37,7 +37,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "libiberty.h"
 
 const char *ldfile_input_filename;
-boolean ldfile_assumed_script = false;
+bfd_boolean ldfile_assumed_script = FALSE;
 const char *ldfile_output_machine_name = "";
 unsigned long ldfile_output_machine;
 enum bfd_architecture ldfile_output_architecture;
@@ -75,7 +75,7 @@ static FILE *try_open PARAMS ((const char *name, const char *exten));
 void
 ldfile_add_library_path (name, cmdline)
      const char *name;
-     boolean cmdline;
+     bfd_boolean cmdline;
 {
   search_dirs_type *new;
 
@@ -92,7 +92,7 @@ ldfile_add_library_path (name, cmdline)
 
 /* Try to open a BFD for a lang_input_statement.  */
 
-boolean
+bfd_boolean
 ldfile_try_open_bfd (attempt, entry)
      const char *attempt;
      lang_input_statement_type *entry;
@@ -111,7 +111,7 @@ ldfile_try_open_bfd (attempt, entry)
     {
       if (bfd_get_error () == bfd_error_invalid_target)
 	einfo (_("%F%P: invalid BFD target `%s'\n"), entry->target);
-      return false;
+      return FALSE;
     }
 
   /* If we are searching for this file, see if the architecture is
@@ -142,8 +142,8 @@ ldfile_try_open_bfd (attempt, entry)
 
 		  /* Try to interpret the file as a linker script.  */
 		  ldfile_open_command_file (attempt);
-		              
-		  ldfile_assumed_script = true;
+
+		  ldfile_assumed_script = TRUE;
 		  parser_input = input_selected;
 		  ldlex_both ();
 		  token = INPUT_SCRIPT;
@@ -210,7 +210,7 @@ ldfile_try_open_bfd (attempt, entry)
 		        }
 		      token = yylex ();
 		    }
-		  ldfile_assumed_script = false;
+		  ldfile_assumed_script = FALSE;
 		  fclose (yyin);
 		  yyin = NULL;
 		  if (skip)
@@ -219,10 +219,10 @@ ldfile_try_open_bfd (attempt, entry)
 			     attempt, entry->local_sym_name);
 		      bfd_close (entry->the_bfd);
 		      entry->the_bfd = NULL;
-		      return false;
+		      return FALSE;
 		    }
 		}
-	      return true;
+	      return TRUE;
 	    }
 
 	  if ((bfd_arch_get_compatible (check, output_bfd) == NULL)
@@ -235,18 +235,18 @@ ldfile_try_open_bfd (attempt, entry)
 		     attempt, entry->local_sym_name);
 	      bfd_close (entry->the_bfd);
 	      entry->the_bfd = NULL;
-	      return false;
+	      return FALSE;
 	    }
 	}
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Search for and open the file specified by ENTRY.  If it is an
    archive, use ARCH, LIB and SUFFIX to modify the file name.  */
 
-boolean
+bfd_boolean
 ldfile_open_file_search (arch, entry, lib, suffix)
      const char *arch;
      lang_input_statement_type *entry;
@@ -260,7 +260,7 @@ ldfile_open_file_search (arch, entry, lib, suffix)
   if (! entry->is_archive)
     {
       if (ldfile_try_open_bfd (entry->filename, entry))
-	return true;
+	return TRUE;
     }
 
   for (search = search_head;
@@ -272,7 +272,7 @@ ldfile_open_file_search (arch, entry, lib, suffix)
       if (entry->dynamic && ! link_info.relocateable)
 	{
 	  if (ldemul_open_dynamic_archive (arch, search, entry))
-	    return true;
+	    return TRUE;
 	}
 
       string = (char *) xmalloc (strlen (search->name)
@@ -300,13 +300,13 @@ ldfile_open_file_search (arch, entry, lib, suffix)
       if (ldfile_try_open_bfd (string, entry))
 	{
 	  entry->filename = string;
-	  return true;
+	  return TRUE;
 	}
 
       free (string);
     }
 
-  return false;
+  return FALSE;
 }
 
 /* Open the input file specified by ENTRY.  */
@@ -331,7 +331,7 @@ ldfile_open_file (entry)
   else
     {
       search_arch_type *arch;
-      boolean found = false;
+      bfd_boolean found = FALSE;
 
       /* Try to open <filename><suffix> or lib<filename><suffix>.a */
       for (arch = search_arch_head;
@@ -354,7 +354,7 @@ ldfile_open_file (entry)
       /* If we have found the file, we don't need to search directories
 	 again.  */
       if (found)
-	entry->search_dirs_flag = false;
+	entry->search_dirs_flag = FALSE;
       else
 	einfo (_("%F%P: cannot find %s\n"), entry->local_sym_name);
     }

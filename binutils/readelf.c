@@ -31,7 +31,7 @@
 #if __GNUC__ >= 2
 /* Define BFD64 here, even if our default architecture is 32 bit ELF
    as this will allow us to read in and parse 64bit and 32bit ELF files.
-   Only do this if we belive that the compiler can support a 64 bit
+   Only do this if we believe that the compiler can support a 64 bit
    data type.  For now we only rely on GCC being able to do this.  */
 #define BFD64
 #endif
@@ -89,58 +89,58 @@
 #include "bucomm.h"
 #include "getopt.h"
 
-char *			program_name = "readelf";
-unsigned int		dynamic_addr;
-bfd_size_type		dynamic_size;
-unsigned int		rela_addr;
-unsigned int		rela_size;
-char *			dynamic_strings;
-char *			string_table;
-unsigned long		string_table_length;
-unsigned long           num_dynamic_syms;
-Elf_Internal_Sym *	dynamic_symbols;
-Elf_Internal_Syminfo *	dynamic_syminfo;
-unsigned long		dynamic_syminfo_offset;
-unsigned int		dynamic_syminfo_nent;
-char			program_interpreter [64];
-int			dynamic_info[DT_JMPREL + 1];
-int			version_info[16];
-int			loadaddr = 0;
-Elf_Internal_Ehdr       elf_header;
-Elf_Internal_Shdr *     section_headers;
-Elf_Internal_Dyn *      dynamic_segment;
-Elf_Internal_Shdr *     symtab_shndx_hdr;
-int			show_name;
-int			do_dynamic;
-int			do_syms;
-int			do_reloc;
-int			do_sections;
-int			do_segments;
-int			do_unwind;
-int			do_using_dynamic;
-int			do_header;
-int			do_dump;
-int			do_version;
-int			do_wide;
-int			do_histogram;
-int			do_debugging;
-int                     do_debug_info;
-int                     do_debug_abbrevs;
-int                     do_debug_lines;
-int                     do_debug_pubnames;
-int                     do_debug_aranges;
-int                     do_debug_frames;
-int                     do_debug_frames_interp;
-int			do_debug_macinfo;
-int			do_debug_str;
-int                     do_debug_loc;
-int                     do_arch;
-int                     do_notes;
-int			is_32bit_elf;
+char *program_name = "readelf";
+unsigned int dynamic_addr;
+bfd_size_type dynamic_size;
+unsigned int rela_addr;
+unsigned int rela_size;
+char *dynamic_strings;
+char *string_table;
+unsigned long string_table_length;
+unsigned long num_dynamic_syms;
+Elf_Internal_Sym *dynamic_symbols;
+Elf_Internal_Syminfo *dynamic_syminfo;
+unsigned long dynamic_syminfo_offset;
+unsigned int dynamic_syminfo_nent;
+char program_interpreter[64];
+int dynamic_info[DT_JMPREL + 1];
+int version_info[16];
+int loadaddr = 0;
+Elf_Internal_Ehdr elf_header;
+Elf_Internal_Shdr *section_headers;
+Elf_Internal_Dyn *dynamic_segment;
+Elf_Internal_Shdr *symtab_shndx_hdr;
+int show_name;
+int do_dynamic;
+int do_syms;
+int do_reloc;
+int do_sections;
+int do_segments;
+int do_unwind;
+int do_using_dynamic;
+int do_header;
+int do_dump;
+int do_version;
+int do_wide;
+int do_histogram;
+int do_debugging;
+int do_debug_info;
+int do_debug_abbrevs;
+int do_debug_lines;
+int do_debug_pubnames;
+int do_debug_aranges;
+int do_debug_frames;
+int do_debug_frames_interp;
+int do_debug_macinfo;
+int do_debug_str;
+int do_debug_loc;
+int do_arch;
+int do_notes;
+int is_32bit_elf;
 
 /* A dynamic array of flags indicating which sections require dumping.  */
-char *			dump_sects = NULL;
-unsigned int		num_dump_sects = 0;
+char *dump_sects = NULL;
+unsigned int num_dump_sects = 0;
 
 #define HEX_DUMP	(1 << 0)
 #define DISASS_DUMP	(1 << 1)
@@ -160,120 +160,226 @@ typedef enum print_mode
 print_mode;
 
 /* Forward declarations for dumb compilers.  */
-static void		  print_vma		      PARAMS ((bfd_vma, print_mode));
-static void		  print_symbol		      PARAMS ((int, const char *));
-static bfd_vma (*         byte_get)                   PARAMS ((unsigned char *, int));
-static bfd_vma            byte_get_little_endian      PARAMS ((unsigned char *, int));
-static bfd_vma            byte_get_big_endian         PARAMS ((unsigned char *, int));
-static const char *       get_mips_dynamic_type       PARAMS ((unsigned long));
-static const char *       get_sparc64_dynamic_type    PARAMS ((unsigned long));
-static const char *       get_ppc64_dynamic_type      PARAMS ((unsigned long));
-static const char *       get_parisc_dynamic_type     PARAMS ((unsigned long));
-static const char *       get_dynamic_type            PARAMS ((unsigned long));
-static int		  slurp_rela_relocs	      PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **, unsigned long *));
-static int		  slurp_rel_relocs	      PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **, unsigned long *));
-static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, unsigned long, char *, int));
-static char *             get_file_type               PARAMS ((unsigned));
-static char *             get_machine_name            PARAMS ((unsigned));
-static void		  decode_ARM_machine_flags    PARAMS ((unsigned, char []));
-static char *             get_machine_flags           PARAMS ((unsigned, unsigned));
-static const char *       get_mips_segment_type       PARAMS ((unsigned long));
-static const char *       get_parisc_segment_type     PARAMS ((unsigned long));
-static const char *       get_ia64_segment_type       PARAMS ((unsigned long));
-static const char *       get_segment_type            PARAMS ((unsigned long));
-static const char *       get_mips_section_type_name  PARAMS ((unsigned int));
-static const char *       get_parisc_section_type_name PARAMS ((unsigned int));
-static const char *       get_ia64_section_type_name  PARAMS ((unsigned int));
-static const char *       get_section_type_name       PARAMS ((unsigned int));
-static const char *       get_symbol_binding          PARAMS ((unsigned int));
-static const char *       get_symbol_type             PARAMS ((unsigned int));
-static const char *       get_symbol_visibility       PARAMS ((unsigned int));
-static const char *       get_symbol_index_type       PARAMS ((unsigned int));
-static const char *       get_dynamic_flags	      PARAMS ((bfd_vma));
-static void               usage                       PARAMS ((void));
-static void               parse_args                  PARAMS ((int, char **));
-static int                process_file_header         PARAMS ((void));
-static int                process_program_headers     PARAMS ((FILE *));
-static int                process_section_headers     PARAMS ((FILE *));
-static int		  process_unwind	      PARAMS ((FILE *));
-static void               dynamic_segment_mips_val    PARAMS ((Elf_Internal_Dyn *));
-static void               dynamic_segment_parisc_val  PARAMS ((Elf_Internal_Dyn *));
-static int                process_dynamic_segment     PARAMS ((FILE *));
-static int                process_symbol_table        PARAMS ((FILE *));
-static int                process_syminfo             PARAMS ((FILE *));
-static int                process_section_contents    PARAMS ((FILE *));
-static void               process_mips_fpe_exception  PARAMS ((int));
-static int                process_mips_specific       PARAMS ((FILE *));
-static int                process_file                PARAMS ((char *));
-static int                process_relocs              PARAMS ((FILE *));
-static int                process_version_sections    PARAMS ((FILE *));
-static char *             get_ver_flags               PARAMS ((unsigned int));
-static int                get_32bit_section_headers   PARAMS ((FILE *, unsigned int));
-static int                get_64bit_section_headers   PARAMS ((FILE *, unsigned int));
-static int		  get_32bit_program_headers   PARAMS ((FILE *, Elf_Internal_Phdr *));
-static int		  get_64bit_program_headers   PARAMS ((FILE *, Elf_Internal_Phdr *));
-static int                get_file_header             PARAMS ((FILE *));
-static Elf_Internal_Sym * get_32bit_elf_symbols       PARAMS ((FILE *, Elf_Internal_Shdr *));
-static Elf_Internal_Sym * get_64bit_elf_symbols       PARAMS ((FILE *, Elf_Internal_Shdr *));
-static const char *	  get_elf_section_flags	      PARAMS ((bfd_vma));
-static int *              get_dynamic_data            PARAMS ((FILE *, unsigned int));
-static int                get_32bit_dynamic_segment   PARAMS ((FILE *));
-static int                get_64bit_dynamic_segment   PARAMS ((FILE *));
+static void print_vma		     
+  PARAMS ((bfd_vma, print_mode));
+static void print_symbol		     
+  PARAMS ((int, const char *));
+static bfd_vma (*byte_get)                  
+  PARAMS ((unsigned char *, int));
+static bfd_vma byte_get_little_endian     
+  PARAMS ((unsigned char *, int));
+static bfd_vma byte_get_big_endian        
+  PARAMS ((unsigned char *, int));
+static const char *get_mips_dynamic_type      
+  PARAMS ((unsigned long));
+static const char *get_sparc64_dynamic_type   
+  PARAMS ((unsigned long));
+static const char *get_ppc64_dynamic_type     
+  PARAMS ((unsigned long));
+static const char *get_parisc_dynamic_type    
+  PARAMS ((unsigned long));
+static const char *get_dynamic_type           
+  PARAMS ((unsigned long));
+static int slurp_rela_relocs	     
+  PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **,
+	   unsigned long *));
+static int slurp_rel_relocs	     
+  PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **,
+	   unsigned long *));
+static int dump_relocations           
+  PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *,
+	   unsigned long, char *, int));
+static char *get_file_type              
+  PARAMS ((unsigned));
+static char *get_machine_name           
+  PARAMS ((unsigned));
+static void decode_ARM_machine_flags   
+  PARAMS ((unsigned, char[]));
+static char *get_machine_flags          
+  PARAMS ((unsigned, unsigned));
+static const char *get_mips_segment_type      
+  PARAMS ((unsigned long));
+static const char *get_parisc_segment_type    
+  PARAMS ((unsigned long));
+static const char *get_ia64_segment_type      
+  PARAMS ((unsigned long));
+static const char *get_segment_type           
+  PARAMS ((unsigned long));
+static const char *get_mips_section_type_name 
+  PARAMS ((unsigned int));
+static const char *get_parisc_section_type_name
+  PARAMS ((unsigned int));
+static const char *get_ia64_section_type_name 
+  PARAMS ((unsigned int));
+static const char *get_section_type_name      
+  PARAMS ((unsigned int));
+static const char *get_symbol_binding         
+  PARAMS ((unsigned int));
+static const char *get_symbol_type            
+  PARAMS ((unsigned int));
+static const char *get_symbol_visibility      
+  PARAMS ((unsigned int));
+static const char *get_symbol_index_type      
+  PARAMS ((unsigned int));
+static const char *get_dynamic_flags	     
+  PARAMS ((bfd_vma));
+static void usage                      
+  PARAMS ((void));
+static void parse_args                 
+  PARAMS ((int, char **));
+static int process_file_header        
+  PARAMS ((void));
+static int process_program_headers    
+  PARAMS ((FILE *));
+static int process_section_headers    
+  PARAMS ((FILE *));
+static int process_unwind	     
+  PARAMS ((FILE *));
+static void dynamic_segment_mips_val   
+  PARAMS ((Elf_Internal_Dyn *));
+static void dynamic_segment_parisc_val 
+  PARAMS ((Elf_Internal_Dyn *));
+static int process_dynamic_segment    
+  PARAMS ((FILE *));
+static int process_symbol_table       
+  PARAMS ((FILE *));
+static int process_syminfo            
+  PARAMS ((FILE *));
+static int process_section_contents   
+  PARAMS ((FILE *));
+static void process_mips_fpe_exception 
+  PARAMS ((int));
+static int process_mips_specific      
+  PARAMS ((FILE *));
+static int process_file               
+  PARAMS ((char *));
+static int process_relocs             
+  PARAMS ((FILE *));
+static int process_version_sections   
+  PARAMS ((FILE *));
+static char *get_ver_flags              
+  PARAMS ((unsigned int));
+static int get_32bit_section_headers  
+  PARAMS ((FILE *, unsigned int));
+static int get_64bit_section_headers  
+  PARAMS ((FILE *, unsigned int));
+static int get_32bit_program_headers  
+  PARAMS ((FILE *, Elf_Internal_Phdr *));
+static int get_64bit_program_headers  
+  PARAMS ((FILE *, Elf_Internal_Phdr *));
+static int get_file_header            
+  PARAMS ((FILE *));
+static Elf_Internal_Sym *get_32bit_elf_symbols      
+  PARAMS ((FILE *, Elf_Internal_Shdr *));
+static Elf_Internal_Sym *get_64bit_elf_symbols      
+  PARAMS ((FILE *, Elf_Internal_Shdr *));
+static const char *get_elf_section_flags	     
+  PARAMS ((bfd_vma));
+static int *get_dynamic_data           
+  PARAMS ((FILE *, unsigned int));
+static int get_32bit_dynamic_segment  
+  PARAMS ((FILE *));
+static int get_64bit_dynamic_segment  
+  PARAMS ((FILE *));
 #ifdef SUPPORT_DISASSEMBLY
-static int	          disassemble_section         PARAMS ((Elf_Internal_Shdr *, FILE *));
+static int disassemble_section        
+  PARAMS ((Elf_Internal_Shdr *, FILE *));
 #endif
-static int	          dump_section                PARAMS ((Elf_Internal_Shdr *, FILE *));
-static int	          display_debug_section       PARAMS ((Elf_Internal_Shdr *, FILE *));
-static int                display_debug_info          PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int                display_debug_not_supported PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int                prescan_debug_info          PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int                display_debug_lines         PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int                display_debug_pubnames      PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int                display_debug_abbrev        PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int                display_debug_aranges       PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int                display_debug_frames        PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int                display_debug_macinfo       PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int                display_debug_str           PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int                display_debug_loc           PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static unsigned char *    process_abbrev_section      PARAMS ((unsigned char *, unsigned char *));
-static void               load_debug_str              PARAMS ((FILE *));
-static void               free_debug_str              PARAMS ((void));
-static const char *       fetch_indirect_string       PARAMS ((unsigned long));
-static void               load_debug_loc              PARAMS ((FILE *));
-static void               free_debug_loc              PARAMS ((void));
-static unsigned long      read_leb128                 PARAMS ((unsigned char *, int *, int));
-static int                process_extended_line_op    PARAMS ((unsigned char *, int, int));
-static void               reset_state_machine         PARAMS ((int));
-static char *             get_TAG_name                PARAMS ((unsigned long));
-static char *             get_AT_name                 PARAMS ((unsigned long));
-static char *             get_FORM_name               PARAMS ((unsigned long));
-static void               free_abbrevs                PARAMS ((void));
-static void               add_abbrev                  PARAMS ((unsigned long, unsigned long, int));
-static void               add_abbrev_attr             PARAMS ((unsigned long, unsigned long));
-static unsigned char *    read_and_display_attr       PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long, unsigned long));
-static unsigned char *    read_and_display_attr_value PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long, unsigned long));
-static unsigned char *    display_block               PARAMS ((unsigned char *, unsigned long));
-static void               decode_location_expression  PARAMS ((unsigned char *, unsigned int, unsigned long));
-static void		  request_dump                PARAMS ((unsigned int, int));
-static const char *       get_elf_class               PARAMS ((unsigned int));
-static const char *       get_data_encoding           PARAMS ((unsigned int));
-static const char *       get_osabi_name              PARAMS ((unsigned int));
-static int		  guess_is_rela               PARAMS ((unsigned long));
-static const char *	  get_note_type		         PARAMS ((unsigned int));
-static const char *	  get_netbsd_elfcore_note_type   PARAMS ((unsigned int));
-static int		  process_note		         PARAMS ((Elf_Internal_Note *));
-static int		  process_corefile_note_segment  PARAMS ((FILE *, bfd_vma, bfd_vma));
-static int		  process_corefile_note_segments PARAMS ((FILE *));
-static int		  process_corefile_contents	 PARAMS ((FILE *));
-static int		  process_arch_specific		 PARAMS ((FILE *));
-static int		  process_gnu_liblist		 PARAMS ((FILE *));
+static int dump_section               
+  PARAMS ((Elf_Internal_Shdr *, FILE *));
+static int display_debug_section      
+  PARAMS ((Elf_Internal_Shdr *, FILE *));
+static int display_debug_info         
+  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+static int display_debug_not_supported
+  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+static int prescan_debug_info         
+  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+static int display_debug_lines        
+  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+static int display_debug_pubnames     
+  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+static int display_debug_abbrev       
+  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+static int display_debug_aranges      
+  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+static int display_debug_frames       
+  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+static int display_debug_macinfo      
+  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+static int display_debug_str          
+  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+static int display_debug_loc          
+  PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+static unsigned char *process_abbrev_section     
+  PARAMS ((unsigned char *, unsigned char *));
+static void load_debug_str             
+  PARAMS ((FILE *));
+static void free_debug_str             
+  PARAMS ((void));
+static const char *fetch_indirect_string      
+  PARAMS ((unsigned long));
+static void load_debug_loc             
+  PARAMS ((FILE *));
+static void free_debug_loc             
+  PARAMS ((void));
+static unsigned long read_leb128                
+  PARAMS ((unsigned char *, int *, int));
+static int process_extended_line_op   
+  PARAMS ((unsigned char *, int, int));
+static void reset_state_machine        
+  PARAMS ((int));
+static char *get_TAG_name               
+  PARAMS ((unsigned long));
+static char *get_AT_name                
+  PARAMS ((unsigned long));
+static char *get_FORM_name              
+  PARAMS ((unsigned long));
+static void free_abbrevs               
+  PARAMS ((void));
+static void add_abbrev                 
+  PARAMS ((unsigned long, unsigned long, int));
+static void add_abbrev_attr            
+  PARAMS ((unsigned long, unsigned long));
+static unsigned char *read_and_display_attr      
+  PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long,
+	   unsigned long));
+static unsigned char *read_and_display_attr_value
+  PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long,
+	   unsigned long));
+static unsigned char *display_block              
+  PARAMS ((unsigned char *, unsigned long));
+static void decode_location_expression 
+  PARAMS ((unsigned char *, unsigned int, unsigned long));
+static void request_dump               
+  PARAMS ((unsigned int, int));
+static const char *get_elf_class              
+  PARAMS ((unsigned int));
+static const char *get_data_encoding          
+  PARAMS ((unsigned int));
+static const char *get_osabi_name             
+  PARAMS ((unsigned int));
+static int guess_is_rela              
+  PARAMS ((unsigned long));
+static const char *get_note_type		        
+  PARAMS ((unsigned int));
+static const char *get_netbsd_elfcore_note_type  
+  PARAMS ((unsigned int));
+static int process_note		        
+  PARAMS ((Elf_Internal_Note *));
+static int process_corefile_note_segment 
+  PARAMS ((FILE *, bfd_vma, bfd_vma));
+static int process_corefile_note_segments
+  PARAMS ((FILE *));
+static int process_corefile_contents	
+  PARAMS ((FILE *));
+static int process_arch_specific		
+  PARAMS ((FILE *));
+static int process_gnu_liblist		
+  PARAMS ((FILE *));
 
 typedef int Elf32_Word;
 
-#ifndef TRUE
-#define TRUE     1
-#define FALSE    0
-#endif
 #define UNKNOWN -1
 
 #define SECTION_NAME(X)	((X) == NULL ? "<none>" : \
@@ -390,17 +496,17 @@ get_data (var, file, offset, size, reason)
 
 static bfd_vma
 byte_get_little_endian (field, size)
-     unsigned char * field;
-     int             size;
+     unsigned char *field;
+     int size;
 {
   switch (size)
     {
     case 1:
-      return * field;
+      return *field;
 
     case 2:
-      return  ((unsigned int) (field [0]))
-	|    (((unsigned int) (field [1])) << 8);
+      return  ((unsigned int) (field[0]))
+	|    (((unsigned int) (field[1])) << 8);
 
 #ifndef BFD64
     case 8:
@@ -410,10 +516,10 @@ byte_get_little_endian (field, size)
       /* Fall through.  */
 #endif
     case 4:
-      return  ((unsigned long) (field [0]))
-	|    (((unsigned long) (field [1])) << 8)
-	|    (((unsigned long) (field [2])) << 16)
-	|    (((unsigned long) (field [3])) << 24);
+      return  ((unsigned long) (field[0]))
+	|    (((unsigned long) (field[1])) << 8)
+	|    (((unsigned long) (field[2])) << 16)
+	|    (((unsigned long) (field[3])) << 24);
 
 #ifdef BFD64
     case 8:
@@ -422,14 +528,14 @@ byte_get_little_endian (field, size)
 	 It means that we are loading an 8 byte value from a field
 	 in an external structure into an 8 byte value in a field
 	 in an internal strcuture.  */
-      return  ((bfd_vma) (field [0]))
-	|    (((bfd_vma) (field [1])) << 8)
-	|    (((bfd_vma) (field [2])) << 16)
-	|    (((bfd_vma) (field [3])) << 24)
-	|    (((bfd_vma) (field [4])) << 32)
-	|    (((bfd_vma) (field [5])) << 40)
-	|    (((bfd_vma) (field [6])) << 48)
-	|    (((bfd_vma) (field [7])) << 56);
+      return  ((bfd_vma) (field[0]))
+	|    (((bfd_vma) (field[1])) << 8)
+	|    (((bfd_vma) (field[2])) << 16)
+	|    (((bfd_vma) (field[3])) << 24)
+	|    (((bfd_vma) (field[4])) << 32)
+	|    (((bfd_vma) (field[5])) << 40)
+	|    (((bfd_vma) (field[6])) << 48)
+	|    (((bfd_vma) (field[7])) << 56);
 #endif
     default:
       error (_("Unhandled data length: %d\n"), size);
@@ -535,7 +641,7 @@ print_vma (vma, mode)
 static void
 print_symbol (width, symbol)
      int width;
-     const char * symbol;
+     const char *symbol;
 {
   if (do_wide)
     printf ("%s", symbol);
@@ -547,31 +653,31 @@ print_symbol (width, symbol)
 
 static bfd_vma
 byte_get_big_endian (field, size)
-     unsigned char * field;
-     int             size;
+     unsigned char *field;
+     int size;
 {
   switch (size)
     {
     case 1:
-      return * field;
+      return *field;
 
     case 2:
-      return ((unsigned int) (field [1])) | (((int) (field [0])) << 8);
+      return ((unsigned int) (field[1])) | (((int) (field[0])) << 8);
 
     case 4:
-      return ((unsigned long) (field [3]))
-	|   (((unsigned long) (field [2])) << 8)
-	|   (((unsigned long) (field [1])) << 16)
-	|   (((unsigned long) (field [0])) << 24);
+      return ((unsigned long) (field[3]))
+	|   (((unsigned long) (field[2])) << 8)
+	|   (((unsigned long) (field[1])) << 16)
+	|   (((unsigned long) (field[0])) << 24);
 
 #ifndef BFD64
     case 8:
       /* Although we are extracing data from an 8 byte wide field, we
 	 are returning only 4 bytes of data.  */
-      return ((unsigned long) (field [7]))
-	|   (((unsigned long) (field [6])) << 8)
-	|   (((unsigned long) (field [5])) << 16)
-	|   (((unsigned long) (field [4])) << 24);
+      return ((unsigned long) (field[7]))
+	|   (((unsigned long) (field[6])) << 8)
+	|   (((unsigned long) (field[5])) << 16)
+	|   (((unsigned long) (field[4])) << 24);
 #else
     case 8:
     case -8:
@@ -579,14 +685,14 @@ byte_get_big_endian (field, size)
 	 It means that we are loading an 8 byte value from a field
 	 in an external structure into an 8 byte value in a field
 	 in an internal strcuture.  */
-      return ((bfd_vma) (field [7]))
-	|   (((bfd_vma) (field [6])) << 8)
-	|   (((bfd_vma) (field [5])) << 16)
-	|   (((bfd_vma) (field [4])) << 24)
-	|   (((bfd_vma) (field [3])) << 32)
-	|   (((bfd_vma) (field [2])) << 40)
-	|   (((bfd_vma) (field [1])) << 48)
-	|   (((bfd_vma) (field [0])) << 56);
+      return ((bfd_vma) (field[7]))
+	|   (((bfd_vma) (field[6])) << 8)
+	|   (((bfd_vma) (field[5])) << 16)
+	|   (((bfd_vma) (field[4])) << 24)
+	|   (((bfd_vma) (field[3])) << 32)
+	|   (((bfd_vma) (field[2])) << 40)
+	|   (((bfd_vma) (field[1])) << 48)
+	|   (((bfd_vma) (field[0])) << 56);
 #endif
 
     default:
@@ -695,7 +801,7 @@ slurp_rela_relocs (file, rel_offset, rel_size, relasp, nrelasp)
 
   if (is_32bit_elf)
     {
-      Elf32_External_Rela * erelas;
+      Elf32_External_Rela *erelas;
 
       erelas = (Elf32_External_Rela *) get_data (NULL, file, rel_offset,
 						 rel_size, _("relocs"));
@@ -724,7 +830,7 @@ slurp_rela_relocs (file, rel_offset, rel_size, relasp, nrelasp)
     }
   else
     {
-      Elf64_External_Rela * erelas;
+      Elf64_External_Rela *erelas;
 
       erelas = (Elf64_External_Rela *) get_data (NULL, file, rel_offset,
 						 rel_size, _("relocs"));
@@ -770,7 +876,7 @@ slurp_rel_relocs (file, rel_offset, rel_size, relsp, nrelsp)
 
   if (is_32bit_elf)
     {
-      Elf32_External_Rel * erels;
+      Elf32_External_Rel *erels;
 
       erels = (Elf32_External_Rel *) get_data (NULL, file, rel_offset,
 					       rel_size, _("relocs"));
@@ -798,7 +904,7 @@ slurp_rel_relocs (file, rel_offset, rel_size, relsp, nrelsp)
     }
   else
     {
-      Elf64_External_Rel * erels;
+      Elf64_External_Rel *erels;
 
       erels = (Elf64_External_Rel *) get_data (NULL, file, rel_offset,
 					       rel_size, _("relocs"));
@@ -832,16 +938,16 @@ slurp_rel_relocs (file, rel_offset, rel_size, relsp, nrelsp)
 /* Display the contents of the relocation data found at the specified offset.  */
 static int
 dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
-     FILE *             file;
-     unsigned long      rel_offset;
-     unsigned long      rel_size;
-     Elf_Internal_Sym * symtab;
-     unsigned long      nsyms;
-     char *             strtab;
-     int                is_rela;
+     FILE *file;
+     unsigned long rel_offset;
+     unsigned long rel_size;
+     Elf_Internal_Sym *symtab;
+     unsigned long nsyms;
+     char *strtab;
+     int is_rela;
 {
-  unsigned int        i;
-  Elf_Internal_Rela * rels;
+  unsigned int i;
+  Elf_Internal_Rela *rels;
 
 
   if (is_rela == UNKNOWN)
@@ -895,18 +1001,18 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
   for (i = 0; i < rel_size; i++)
     {
-      const char * rtype;
-      const char * rtype2 = NULL;
-      const char * rtype3 = NULL;
-      bfd_vma      offset;
-      bfd_vma      info;
-      bfd_vma      symtab_index;
-      bfd_vma      type;
-      bfd_vma      type2 = (bfd_vma) NULL;
-      bfd_vma      type3 = (bfd_vma) NULL;
+      const char *rtype;
+      const char *rtype2 = NULL;
+      const char *rtype3 = NULL;
+      bfd_vma offset;
+      bfd_vma info;
+      bfd_vma symtab_index;
+      bfd_vma type;
+      bfd_vma type2 = (bfd_vma) NULL;
+      bfd_vma type3 = (bfd_vma) NULL;
 
-      offset = rels [i].r_offset;
-      info   = rels [i].r_info;
+      offset = rels[i].r_offset;
+      info   = rels[i].r_info;
 
       if (is_32bit_elf)
 	{
@@ -1150,7 +1256,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	    printf (" bad symbol index: %08lx", (unsigned long) symtab_index);
 	  else
 	    {
-	      Elf_Internal_Sym * psym;
+	      Elf_Internal_Sym *psym;
 
 	      psym = symtab + symtab_index;
 
@@ -1194,7 +1300,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 		print_symbol (22, strtab + psym->st_name);
 
 	      if (is_rela)
-		printf (" + %lx", (unsigned long) rels [i].r_addend);
+		printf (" + %lx", (unsigned long) rels[i].r_addend);
 	    }
 	}
       else if (is_rela)
@@ -1350,7 +1456,7 @@ static const char *
 get_dynamic_type (type)
      unsigned long type;
 {
-  static char buff [32];
+  static char buff[32];
 
   switch (type)
     {
@@ -1429,7 +1535,7 @@ get_dynamic_type (type)
     default:
       if ((type >= DT_LOPROC) && (type <= DT_HIPROC))
 	{
-	  const char * result;
+	  const char *result;
 
 	  switch (elf_header.e_machine)
 	    {
@@ -1455,7 +1561,7 @@ get_dynamic_type (type)
 	}
       else if ((type >= DT_LOOS) && (type <= DT_HIOS))
 	{
-	  const char * result;
+	  const char *result;
 
 	  switch (elf_header.e_machine)
 	    {
@@ -1483,7 +1589,7 @@ static char *
 get_file_type (e_type)
      unsigned e_type;
 {
-  static char buff [32];
+  static char buff[32];
 
   switch (e_type)
     {
@@ -1508,7 +1614,7 @@ static char *
 get_machine_name (e_machine)
      unsigned e_machine;
 {
-  static char buff [64]; /* XXX */
+  static char buff[64]; /* XXX */
 
   switch (e_machine)
     {
@@ -1533,7 +1639,7 @@ get_machine_name (e_machine)
     case EM_V800:		return "NEC V800";
     case EM_FR20:		return "Fujitsu FR20";
     case EM_RH32:		return "TRW RH32";
-    case EM_MCORE:	        return "MCORE";
+    case EM_MCORE:		return "MCORE";
     case EM_ARM:		return "ARM";
     case EM_OLD_ALPHA:		return "Digital Alpha (old)";
     case EM_SH:			return "Hitachi SH";
@@ -1552,7 +1658,7 @@ get_machine_name (e_machine)
     case EM_CYGNUS_D10V:
     case EM_D10V:		return "d10v";
     case EM_CYGNUS_D30V:
-    case EM_D30V:	        return "d30v";
+    case EM_D30V:		return "d30v";
     case EM_CYGNUS_M32R:
     case EM_M32R:		return "Mitsubishi M32r";
     case EM_CYGNUS_V850:
@@ -1563,9 +1669,9 @@ get_machine_name (e_machine)
     case EM_MN10200:		return "mn10200";
     case EM_CYGNUS_FR30:
     case EM_FR30:		return "Fujitsu FR30";
-    case EM_CYGNUS_FRV:	        return "Fujitsu FR-V";
+    case EM_CYGNUS_FRV:		return "Fujitsu FR-V";
     case EM_PJ_OLD:
-    case EM_PJ:                 return "picoJava";
+    case EM_PJ:			return "picoJava";
     case EM_MMA:		return "Fujitsu Multimedia Accelerator";
     case EM_PCP:		return "Siemens PCP";
     case EM_NCPU:		return "Sony nCPU embedded RISC processor";
@@ -1585,23 +1691,23 @@ get_machine_name (e_machine)
     case EM_ST19:		return "STMicroelectronics ST19 8-bit microcontroller";
     case EM_VAX:		return "Digital VAX";
     case EM_AVR_OLD:
-    case EM_AVR:                return "Atmel AVR 8-bit microcontroller";
+    case EM_AVR:		return "Atmel AVR 8-bit microcontroller";
     case EM_CRIS:		return "Axis Communications 32-bit embedded processor";
     case EM_JAVELIN:		return "Infineon Technologies 32-bit embedded cpu";
     case EM_FIREPATH:		return "Element 14 64-bit DSP processor";
     case EM_ZSP:		return "LSI Logic's 16-bit DSP processor";
-    case EM_MMIX:	        return "Donald Knuth's educational 64-bit processor";
+    case EM_MMIX:		return "Donald Knuth's educational 64-bit processor";
     case EM_HUANY:		return "Harvard Universitys's machine-independent object format";
     case EM_PRISM:		return "SiTera Prism";
     case EM_X86_64:		return "Advanced Micro Devices X86-64";
     case EM_S390_OLD:
-    case EM_S390:               return "IBM S/390";
+    case EM_S390:		return "IBM S/390";
     case EM_XSTORMY16:		return "Sanyo Xstormy16 CPU core";
     case EM_OPENRISC:
     case EM_OR32:		return "OpenRISC";
     case EM_DLX:		return "OpenDLX";
     case EM_IP2K_OLD:
-    case EM_IP2K:               return "Ubicom IP2xxx 8-bit microcontrollers";
+    case EM_IP2K:		return "Ubicom IP2xxx 8-bit microcontrollers";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;
@@ -1755,7 +1861,7 @@ get_machine_flags (e_flags, e_machine)
      unsigned e_flags;
      unsigned e_machine;
 {
-  static char buf [1024];
+  static char buf[1024];
 
   buf[0] = '\0';
 
@@ -2050,17 +2156,17 @@ static const char *
 get_segment_type (p_type)
      unsigned long p_type;
 {
-  static char buff [32];
+  static char buff[32];
 
   switch (p_type)
     {
-    case PT_NULL:       return "NULL";
-    case PT_LOAD:       return "LOAD";
+    case PT_NULL:	return "NULL";
+    case PT_LOAD:	return "LOAD";
     case PT_DYNAMIC:	return "DYNAMIC";
-    case PT_INTERP:     return "INTERP";
-    case PT_NOTE:       return "NOTE";
-    case PT_SHLIB:      return "SHLIB";
-    case PT_PHDR:       return "PHDR";
+    case PT_INTERP:	return "INTERP";
+    case PT_NOTE:	return "NOTE";
+    case PT_SHLIB:	return "SHLIB";
+    case PT_PHDR:	return "PHDR";
     case PT_TLS:	return "TLS";
 
     case PT_GNU_EH_FRAME:
@@ -2069,7 +2175,7 @@ get_segment_type (p_type)
     default:
       if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
 	{
-	  const char * result;
+	  const char *result;
 
 	  switch (elf_header.e_machine)
 	    {
@@ -2095,7 +2201,7 @@ get_segment_type (p_type)
 	}
       else if ((p_type >= PT_LOOS) && (p_type <= PT_HIOS))
 	{
-	  const char * result;
+	  const char *result;
 
 	  switch (elf_header.e_machine)
 	    {
@@ -2128,44 +2234,44 @@ get_mips_section_type_name (sh_type)
 {
   switch (sh_type)
     {
-    case SHT_MIPS_LIBLIST:       return "MIPS_LIBLIST";
-    case SHT_MIPS_MSYM:          return "MIPS_MSYM";
-    case SHT_MIPS_CONFLICT:      return "MIPS_CONFLICT";
-    case SHT_MIPS_GPTAB:         return "MIPS_GPTAB";
-    case SHT_MIPS_UCODE:         return "MIPS_UCODE";
-    case SHT_MIPS_DEBUG:         return "MIPS_DEBUG";
-    case SHT_MIPS_REGINFO:       return "MIPS_REGINFO";
-    case SHT_MIPS_PACKAGE:       return "MIPS_PACKAGE";
-    case SHT_MIPS_PACKSYM:       return "MIPS_PACKSYM";
-    case SHT_MIPS_RELD:          return "MIPS_RELD";
-    case SHT_MIPS_IFACE:         return "MIPS_IFACE";
-    case SHT_MIPS_CONTENT:       return "MIPS_CONTENT";
-    case SHT_MIPS_OPTIONS:       return "MIPS_OPTIONS";
-    case SHT_MIPS_SHDR:          return "MIPS_SHDR";
-    case SHT_MIPS_FDESC:         return "MIPS_FDESC";
-    case SHT_MIPS_EXTSYM:        return "MIPS_EXTSYM";
-    case SHT_MIPS_DENSE:         return "MIPS_DENSE";
-    case SHT_MIPS_PDESC:         return "MIPS_PDESC";
-    case SHT_MIPS_LOCSYM:        return "MIPS_LOCSYM";
-    case SHT_MIPS_AUXSYM:        return "MIPS_AUXSYM";
-    case SHT_MIPS_OPTSYM:        return "MIPS_OPTSYM";
-    case SHT_MIPS_LOCSTR:        return "MIPS_LOCSTR";
-    case SHT_MIPS_LINE:          return "MIPS_LINE";
-    case SHT_MIPS_RFDESC:        return "MIPS_RFDESC";
-    case SHT_MIPS_DELTASYM:      return "MIPS_DELTASYM";
-    case SHT_MIPS_DELTAINST:     return "MIPS_DELTAINST";
-    case SHT_MIPS_DELTACLASS:    return "MIPS_DELTACLASS";
-    case SHT_MIPS_DWARF:         return "MIPS_DWARF";
-    case SHT_MIPS_DELTADECL:     return "MIPS_DELTADECL";
-    case SHT_MIPS_SYMBOL_LIB:    return "MIPS_SYMBOL_LIB";
-    case SHT_MIPS_EVENTS:        return "MIPS_EVENTS";
-    case SHT_MIPS_TRANSLATE:     return "MIPS_TRANSLATE";
-    case SHT_MIPS_PIXIE:         return "MIPS_PIXIE";
-    case SHT_MIPS_XLATE:         return "MIPS_XLATE";
-    case SHT_MIPS_XLATE_DEBUG:   return "MIPS_XLATE_DEBUG";
-    case SHT_MIPS_WHIRL:         return "MIPS_WHIRL";
-    case SHT_MIPS_EH_REGION:     return "MIPS_EH_REGION";
-    case SHT_MIPS_XLATE_OLD:     return "MIPS_XLATE_OLD";
+    case SHT_MIPS_LIBLIST:	 return "MIPS_LIBLIST";
+    case SHT_MIPS_MSYM:		 return "MIPS_MSYM";
+    case SHT_MIPS_CONFLICT:	 return "MIPS_CONFLICT";
+    case SHT_MIPS_GPTAB:	 return "MIPS_GPTAB";
+    case SHT_MIPS_UCODE:	 return "MIPS_UCODE";
+    case SHT_MIPS_DEBUG:	 return "MIPS_DEBUG";
+    case SHT_MIPS_REGINFO:	 return "MIPS_REGINFO";
+    case SHT_MIPS_PACKAGE:	 return "MIPS_PACKAGE";
+    case SHT_MIPS_PACKSYM:	 return "MIPS_PACKSYM";
+    case SHT_MIPS_RELD:		 return "MIPS_RELD";
+    case SHT_MIPS_IFACE:	 return "MIPS_IFACE";
+    case SHT_MIPS_CONTENT:	 return "MIPS_CONTENT";
+    case SHT_MIPS_OPTIONS:	 return "MIPS_OPTIONS";
+    case SHT_MIPS_SHDR:		 return "MIPS_SHDR";
+    case SHT_MIPS_FDESC:	 return "MIPS_FDESC";
+    case SHT_MIPS_EXTSYM:	 return "MIPS_EXTSYM";
+    case SHT_MIPS_DENSE:	 return "MIPS_DENSE";
+    case SHT_MIPS_PDESC:	 return "MIPS_PDESC";
+    case SHT_MIPS_LOCSYM:	 return "MIPS_LOCSYM";
+    case SHT_MIPS_AUXSYM:	 return "MIPS_AUXSYM";
+    case SHT_MIPS_OPTSYM:	 return "MIPS_OPTSYM";
+    case SHT_MIPS_LOCSTR:	 return "MIPS_LOCSTR";
+    case SHT_MIPS_LINE:		 return "MIPS_LINE";
+    case SHT_MIPS_RFDESC:	 return "MIPS_RFDESC";
+    case SHT_MIPS_DELTASYM:	 return "MIPS_DELTASYM";
+    case SHT_MIPS_DELTAINST:	 return "MIPS_DELTAINST";
+    case SHT_MIPS_DELTACLASS:	 return "MIPS_DELTACLASS";
+    case SHT_MIPS_DWARF:	 return "MIPS_DWARF";
+    case SHT_MIPS_DELTADECL:	 return "MIPS_DELTADECL";
+    case SHT_MIPS_SYMBOL_LIB:	 return "MIPS_SYMBOL_LIB";
+    case SHT_MIPS_EVENTS:	 return "MIPS_EVENTS";
+    case SHT_MIPS_TRANSLATE:	 return "MIPS_TRANSLATE";
+    case SHT_MIPS_PIXIE:	 return "MIPS_PIXIE";
+    case SHT_MIPS_XLATE:	 return "MIPS_XLATE";
+    case SHT_MIPS_XLATE_DEBUG:	 return "MIPS_XLATE_DEBUG";
+    case SHT_MIPS_WHIRL:	 return "MIPS_WHIRL";
+    case SHT_MIPS_EH_REGION:	 return "MIPS_EH_REGION";
+    case SHT_MIPS_XLATE_OLD:	 return "MIPS_XLATE_OLD";
     case SHT_MIPS_PDR_EXCEPTION: return "MIPS_PDR_EXCEPTION";
     default:
       break;
@@ -2206,7 +2312,7 @@ static const char *
 get_section_type_name (sh_type)
      unsigned int sh_type;
 {
-  static char buff [32];
+  static char buff[32];
 
   switch (sh_type)
     {
@@ -2230,8 +2336,8 @@ get_section_type_name (sh_type)
     case SHT_GNU_verdef:	return "VERDEF";
     case SHT_GNU_verneed:	return "VERNEED";
     case SHT_GNU_versym:	return "VERSYM";
-    case 0x6ffffff0:	        return "VERSYM";
-    case 0x6ffffffc:	        return "VERDEF";
+    case 0x6ffffff0:		return "VERSYM";
+    case 0x6ffffffc:		return "VERDEF";
     case 0x7ffffffd:		return "AUXILIARY";
     case 0x7fffffff:		return "FILTER";
     case SHT_GNU_LIBLIST:	return "GNU_LIBLIST";
@@ -2239,7 +2345,7 @@ get_section_type_name (sh_type)
     default:
       if ((sh_type >= SHT_LOPROC) && (sh_type <= SHT_HIPROC))
 	{
-	  const char * result;
+	  const char *result;
 
 	  switch (elf_header.e_machine)
 	    {
@@ -2276,35 +2382,35 @@ get_section_type_name (sh_type)
 
 #define OPTION_DEBUG_DUMP	512
 
-struct option options [] =
+struct option options[] =
 {
-  {"all",              no_argument, 0, 'a'},
+  {"all",	       no_argument, 0, 'a'},
   {"file-header",      no_argument, 0, 'h'},
   {"program-headers",  no_argument, 0, 'l'},
-  {"headers",          no_argument, 0, 'e'},
-  {"histogram",        no_argument, 0, 'I'},
-  {"segments",         no_argument, 0, 'l'},
-  {"sections",         no_argument, 0, 'S'},
+  {"headers",	       no_argument, 0, 'e'},
+  {"histogram",	       no_argument, 0, 'I'},
+  {"segments",	       no_argument, 0, 'l'},
+  {"sections",	       no_argument, 0, 'S'},
   {"section-headers",  no_argument, 0, 'S'},
-  {"symbols",          no_argument, 0, 's'},
-  {"syms",             no_argument, 0, 's'},
-  {"relocs",           no_argument, 0, 'r'},
-  {"notes",            no_argument, 0, 'n'},
-  {"dynamic",          no_argument, 0, 'd'},
+  {"symbols",	       no_argument, 0, 's'},
+  {"syms",	       no_argument, 0, 's'},
+  {"relocs",	       no_argument, 0, 'r'},
+  {"notes",	       no_argument, 0, 'n'},
+  {"dynamic",	       no_argument, 0, 'd'},
   {"arch-specific",    no_argument, 0, 'A'},
   {"version-info",     no_argument, 0, 'V'},
   {"use-dynamic",      no_argument, 0, 'D'},
-  {"hex-dump",         required_argument, 0, 'x'},
+  {"hex-dump",	       required_argument, 0, 'x'},
   {"debug-dump",       optional_argument, 0, OPTION_DEBUG_DUMP},
   {"unwind",	       no_argument, 0, 'u'},
 #ifdef SUPPORT_DISASSEMBLY
   {"instruction-dump", required_argument, 0, 'i'},
 #endif
 
-  {"version",          no_argument, 0, 'v'},
-  {"wide",             no_argument, 0, 'W'},
-  {"help",             no_argument, 0, 'H'},
-  {0,                  no_argument, 0, 0}
+  {"version",	       no_argument, 0, 'v'},
+  {"wide",	       no_argument, 0, 'W'},
+  {"help",	       no_argument, 0, 'H'},
+  {0,		       no_argument, 0, 0}
 };
 
 static void
@@ -2351,11 +2457,11 @@ usage ()
 static void
 request_dump (section, type)
      unsigned int section;
-     int         type;
+     int type;
 {
   if (section >= num_dump_sects)
     {
-      char * new_dump_sects;
+      char *new_dump_sects;
 
       new_dump_sects = (char *) calloc (section + 1, 1);
 
@@ -2374,7 +2480,7 @@ request_dump (section, type)
     }
 
   if (dump_sects)
-    dump_sects [section] |= type;
+    dump_sects[section] |= type;
 
   return;
 }
@@ -2382,7 +2488,7 @@ request_dump (section, type)
 static void
 parse_args (argc, argv)
      int argc;
-     char ** argv;
+     char **argv;
 {
   int c;
 
@@ -2392,8 +2498,8 @@ parse_args (argc, argv)
   while ((c = getopt_long
 	  (argc, argv, "ersuahnldSDAIw::x:i:vVW", options, NULL)) != EOF)
     {
-      char *    cp;
-      int	section;
+      char *cp;
+      int section;
 
       switch (c)
 	{
@@ -2405,67 +2511,67 @@ parse_args (argc, argv)
 	  break;
 
 	case 'a':
-	  do_syms ++;
-	  do_reloc ++;
-	  do_unwind ++;
-	  do_dynamic ++;
-	  do_header ++;
-	  do_sections ++;
-	  do_segments ++;
-	  do_version ++;
-	  do_histogram ++;
-	  do_arch ++;
-	  do_notes ++;
+	  do_syms++;
+	  do_reloc++;
+	  do_unwind++;
+	  do_dynamic++;
+	  do_header++;
+	  do_sections++;
+	  do_segments++;
+	  do_version++;
+	  do_histogram++;
+	  do_arch++;
+	  do_notes++;
 	  break;
 	case 'e':
-	  do_header ++;
-	  do_sections ++;
-	  do_segments ++;
+	  do_header++;
+	  do_sections++;
+	  do_segments++;
 	  break;
 	case 'A':
-	  do_arch ++;
+	  do_arch++;
 	  break;
 	case 'D':
-	  do_using_dynamic ++;
+	  do_using_dynamic++;
 	  break;
 	case 'r':
-	  do_reloc ++;
+	  do_reloc++;
 	  break;
 	case 'u':
-	  do_unwind ++;
+	  do_unwind++;
 	  break;
 	case 'h':
-	  do_header ++;
+	  do_header++;
 	  break;
 	case 'l':
-	  do_segments ++;
+	  do_segments++;
 	  break;
 	case 's':
-	  do_syms ++;
+	  do_syms++;
 	  break;
 	case 'S':
-	  do_sections ++;
+	  do_sections++;
 	  break;
 	case 'd':
-	  do_dynamic ++;
+	  do_dynamic++;
 	  break;
 	case 'I':
-	  do_histogram ++;
+	  do_histogram++;
 	  break;
 	case 'n':
-	  do_notes ++;
+	  do_notes++;
 	  break;
 	case 'x':
-	  do_dump ++;
+	  do_dump++;
 	  section = strtoul (optarg, & cp, 0);
-	  if (! * cp && section >= 0)
+	  if (! *cp && section >= 0)
 	    {
 	      request_dump (section, HEX_DUMP);
 	      break;
 	    }
 	  goto oops;
 	case 'w':
-	  do_dump ++;
+	  do_dump++;
 	  if (optarg == 0)
 	    do_debugging = 1;
 	  else
@@ -2530,7 +2636,7 @@ parse_args (argc, argv)
 	    }
 	  break;
 	case OPTION_DEBUG_DUMP:
-	  do_dump ++;
+	  do_dump++;
 	  if (optarg == 0)
 	    do_debugging = 1;
 	  else
@@ -2613,9 +2719,9 @@ parse_args (argc, argv)
 	  break;
 #ifdef SUPPORT_DISASSEMBLY
 	case 'i':
-	  do_dump ++;
+	  do_dump++;
 	  section = strtoul (optarg, & cp, 0);
-	  if (! * cp && section >= 0)
+	  if (! *cp && section >= 0)
 	    {
 	      request_dump (section, DISASS_DUMP);
 	      break;
@@ -2626,10 +2732,10 @@ parse_args (argc, argv)
 	  print_version (program_name);
 	  break;
 	case 'V':
-	  do_version ++;
+	  do_version++;
 	  break;
 	case 'W':
-	  do_wide ++;
+	  do_wide++;
 	  break;
 	default:
 	oops:
@@ -2656,7 +2762,7 @@ static const char *
 get_elf_class (elf_class)
      unsigned int elf_class;
 {
-  static char buff [32];
+  static char buff[32];
 
   switch (elf_class)
     {
@@ -2673,7 +2779,7 @@ static const char *
 get_data_encoding (encoding)
      unsigned int encoding;
 {
-  static char buff [32];
+  static char buff[32];
 
   switch (encoding)
     {
@@ -2690,24 +2796,24 @@ static const char *
 get_osabi_name (osabi)
      unsigned int osabi;
 {
-  static char buff [32];
+  static char buff[32];
 
   switch (osabi)
     {
-    case ELFOSABI_NONE:       return "UNIX - System V";
-    case ELFOSABI_HPUX:       return "UNIX - HP-UX";
-    case ELFOSABI_NETBSD:     return "UNIX - NetBSD";
-    case ELFOSABI_LINUX:      return "UNIX - Linux";
-    case ELFOSABI_HURD:       return "GNU/Hurd";
-    case ELFOSABI_SOLARIS:    return "UNIX - Solaris";
-    case ELFOSABI_AIX:        return "UNIX - AIX";
-    case ELFOSABI_IRIX:       return "UNIX - IRIX";
-    case ELFOSABI_FREEBSD:    return "UNIX - FreeBSD";
-    case ELFOSABI_TRU64:      return "UNIX - TRU64";
-    case ELFOSABI_MODESTO:    return "Novell - Modesto";
-    case ELFOSABI_OPENBSD:    return "UNIX - OpenBSD";
-    case ELFOSABI_STANDALONE: return _("Standalone App");
-    case ELFOSABI_ARM:        return "ARM";
+    case ELFOSABI_NONE:		return "UNIX - System V";
+    case ELFOSABI_HPUX:		return "UNIX - HP-UX";
+    case ELFOSABI_NETBSD:	return "UNIX - NetBSD";
+    case ELFOSABI_LINUX:	return "UNIX - Linux";
+    case ELFOSABI_HURD:		return "GNU/Hurd";
+    case ELFOSABI_SOLARIS:	return "UNIX - Solaris";
+    case ELFOSABI_AIX:		return "UNIX - AIX";
+    case ELFOSABI_IRIX:		return "UNIX - IRIX";
+    case ELFOSABI_FREEBSD:	return "UNIX - FreeBSD";
+    case ELFOSABI_TRU64:	return "UNIX - TRU64";
+    case ELFOSABI_MODESTO:	return "Novell - Modesto";
+    case ELFOSABI_OPENBSD:	return "UNIX - OpenBSD";
+    case ELFOSABI_STANDALONE:	return _("Standalone App");
+    case ELFOSABI_ARM:		return "ARM";
     default:
       sprintf (buff, _("<unknown: %x>"), osabi);
       return buff;
@@ -2718,10 +2824,10 @@ get_osabi_name (osabi)
 static int
 process_file_header ()
 {
-  if (   elf_header.e_ident [EI_MAG0] != ELFMAG0
-      || elf_header.e_ident [EI_MAG1] != ELFMAG1
-      || elf_header.e_ident [EI_MAG2] != ELFMAG2
-      || elf_header.e_ident [EI_MAG3] != ELFMAG3)
+  if (   elf_header.e_ident[EI_MAG0] != ELFMAG0
+      || elf_header.e_ident[EI_MAG1] != ELFMAG1
+      || elf_header.e_ident[EI_MAG2] != ELFMAG2
+      || elf_header.e_ident[EI_MAG3] != ELFMAG3)
     {
       error
 	(_("Not an ELF file - it has the wrong magic bytes at the start\n"));
@@ -2734,24 +2840,24 @@ process_file_header ()
 
       printf (_("ELF Header:\n"));
       printf (_("  Magic:   "));
-      for (i = 0; i < EI_NIDENT; i ++)
-	printf ("%2.2x ", elf_header.e_ident [i]);
+      for (i = 0; i < EI_NIDENT; i++)
+	printf ("%2.2x ", elf_header.e_ident[i]);
       printf ("\n");
       printf (_("  Class:                             %s\n"),
-	      get_elf_class (elf_header.e_ident [EI_CLASS]));
+	      get_elf_class (elf_header.e_ident[EI_CLASS]));
       printf (_("  Data:                              %s\n"),
-	      get_data_encoding (elf_header.e_ident [EI_DATA]));
+	      get_data_encoding (elf_header.e_ident[EI_DATA]));
       printf (_("  Version:                           %d %s\n"),
-	      elf_header.e_ident [EI_VERSION],
-	      (elf_header.e_ident [EI_VERSION] == EV_CURRENT
+	      elf_header.e_ident[EI_VERSION],
+	      (elf_header.e_ident[EI_VERSION] == EV_CURRENT
 	       ? "(current)"
-	       : (elf_header.e_ident [EI_VERSION] != EV_NONE
+	       : (elf_header.e_ident[EI_VERSION] != EV_NONE
 		  ? "<unknown: %lx>"
 		  : "")));
       printf (_("  OS/ABI:                            %s\n"),
-	      get_osabi_name (elf_header.e_ident [EI_OSABI]));
+	      get_osabi_name (elf_header.e_ident[EI_OSABI]));
       printf (_("  ABI Version:                       %d\n"),
-	      elf_header.e_ident [EI_ABIVERSION]);
+	      elf_header.e_ident[EI_ABIVERSION]);
       printf (_("  Type:                              %s\n"),
 	      get_file_type (elf_header.e_type));
       printf (_("  Machine:                           %s\n"),
@@ -2806,13 +2912,13 @@ process_file_header ()
 
 static int
 get_32bit_program_headers (file, program_headers)
-     FILE * file;
-     Elf_Internal_Phdr * program_headers;
+     FILE *file;
+     Elf_Internal_Phdr *program_headers;
 {
-  Elf32_External_Phdr * phdrs;
-  Elf32_External_Phdr * external;
-  Elf_Internal_Phdr *   internal;
-  unsigned int          i;
+  Elf32_External_Phdr *phdrs;
+  Elf32_External_Phdr *external;
+  Elf_Internal_Phdr *internal;
+  unsigned int i;
 
   phdrs = ((Elf32_External_Phdr *)
 	   get_data (NULL, file, elf_header.e_phoff,
@@ -2823,7 +2929,7 @@ get_32bit_program_headers (file, program_headers)
 
   for (i = 0, internal = program_headers, external = phdrs;
        i < elf_header.e_phnum;
-       i ++, internal ++, external ++)
+       i++, internal++, external++)
     {
       internal->p_type   = BYTE_GET (external->p_type);
       internal->p_offset = BYTE_GET (external->p_offset);
@@ -2842,13 +2948,13 @@ get_32bit_program_headers (file, program_headers)
 
 static int
 get_64bit_program_headers (file, program_headers)
-     FILE * file;
-     Elf_Internal_Phdr * program_headers;
+     FILE *file;
+     Elf_Internal_Phdr *program_headers;
 {
-  Elf64_External_Phdr * phdrs;
-  Elf64_External_Phdr * external;
-  Elf_Internal_Phdr *   internal;
-  unsigned int          i;
+  Elf64_External_Phdr *phdrs;
+  Elf64_External_Phdr *external;
+  Elf_Internal_Phdr *internal;
+  unsigned int i;
 
   phdrs = ((Elf64_External_Phdr *)
 	   get_data (NULL, file, elf_header.e_phoff,
@@ -2859,7 +2965,7 @@ get_64bit_program_headers (file, program_headers)
 
   for (i = 0, internal = program_headers, external = phdrs;
        i < elf_header.e_phnum;
-       i ++, internal ++, external ++)
+       i++, internal++, external++)
     {
       internal->p_type   = BYTE_GET (external->p_type);
       internal->p_flags  = BYTE_GET (external->p_flags);
@@ -2880,11 +2986,11 @@ get_64bit_program_headers (file, program_headers)
 
 static int
 process_program_headers (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf_Internal_Phdr * program_headers;
-  Elf_Internal_Phdr * segment;
-  unsigned int	      i;
+  Elf_Internal_Phdr *program_headers;
+  Elf_Internal_Phdr *segment;
+  unsigned int i;
 
   if (elf_header.e_phnum == 0)
     {
@@ -2952,7 +3058,7 @@ process_program_headers (file)
 
   for (i = 0, segment = program_headers;
        i < elf_header.e_phnum;
-       i ++, segment ++)
+       i++, segment++)
     {
       if (do_segments)
 	{
@@ -3083,14 +3189,14 @@ process_program_headers (file)
       for (i = 0; i < elf_header.e_phnum; i++)
 	{
 	  unsigned int j;
-	  Elf_Internal_Shdr * section;
+	  Elf_Internal_Shdr *section;
 
 	  segment = program_headers + i;
 	  section = section_headers;
 
 	  printf ("   %2.2d     ", i);
 
-	  for (j = 1; j < elf_header.e_shnum; j++, section ++)
+	  for (j = 1; j < elf_header.e_shnum; j++, section++)
 	    {
 	      if (section->sh_size > 0
 		  /* Compare allocated sections by VMA, unallocated
@@ -3117,12 +3223,12 @@ process_program_headers (file)
 
 static int
 get_32bit_section_headers (file, num)
-     FILE * file;
+     FILE *file;
      unsigned int num;
 {
-  Elf32_External_Shdr * shdrs;
-  Elf_Internal_Shdr *   internal;
-  unsigned int          i;
+  Elf32_External_Shdr *shdrs;
+  Elf_Internal_Shdr *internal;
+  unsigned int i;
 
   shdrs = ((Elf32_External_Shdr *)
 	   get_data (NULL, file, elf_header.e_shoff,
@@ -3142,7 +3248,7 @@ get_32bit_section_headers (file, num)
 
   for (i = 0, internal = section_headers;
        i < num;
-       i ++, internal ++)
+       i++, internal++)
     {
       internal->sh_name      = BYTE_GET (shdrs[i].sh_name);
       internal->sh_type      = BYTE_GET (shdrs[i].sh_type);
@@ -3163,12 +3269,12 @@ get_32bit_section_headers (file, num)
 
 static int
 get_64bit_section_headers (file, num)
-     FILE * file;
+     FILE *file;
      unsigned int num;
 {
-  Elf64_External_Shdr * shdrs;
-  Elf_Internal_Shdr *   internal;
-  unsigned int          i;
+  Elf64_External_Shdr *shdrs;
+  Elf_Internal_Shdr *internal;
+  unsigned int i;
 
   shdrs = ((Elf64_External_Shdr *)
 	   get_data (NULL, file, elf_header.e_shoff,
@@ -3188,7 +3294,7 @@ get_64bit_section_headers (file, num)
 
   for (i = 0, internal = section_headers;
        i < num;
-       i ++, internal ++)
+       i++, internal++)
     {
       internal->sh_name      = BYTE_GET (shdrs[i].sh_name);
       internal->sh_type      = BYTE_GET (shdrs[i].sh_type);
@@ -3209,15 +3315,15 @@ get_64bit_section_headers (file, num)
 
 static Elf_Internal_Sym *
 get_32bit_elf_symbols (file, section)
-     FILE * file;
+     FILE *file;
      Elf_Internal_Shdr *section;
 {
   unsigned long number;
-  Elf32_External_Sym * esyms;
+  Elf32_External_Sym *esyms;
   Elf_External_Sym_Shndx *shndx;
-  Elf_Internal_Sym *   isyms;
-  Elf_Internal_Sym *   psym;
-  unsigned int         j;
+  Elf_Internal_Sym *isyms;
+  Elf_Internal_Sym *psym;
+  unsigned int j;
 
   esyms = ((Elf32_External_Sym *)
 	   get_data (NULL, file, section->sh_offset,
@@ -3254,7 +3360,7 @@ get_32bit_elf_symbols (file, section)
 
   for (j = 0, psym = isyms;
        j < number;
-       j ++, psym ++)
+       j++, psym++)
     {
       psym->st_name  = BYTE_GET (esyms[j].st_name);
       psym->st_value = BYTE_GET (esyms[j].st_value);
@@ -3276,15 +3382,15 @@ get_32bit_elf_symbols (file, section)
 
 static Elf_Internal_Sym *
 get_64bit_elf_symbols (file, section)
-     FILE * file;
+     FILE *file;
      Elf_Internal_Shdr *section;
 {
   unsigned long number;
-  Elf64_External_Sym * esyms;
+  Elf64_External_Sym *esyms;
   Elf_External_Sym_Shndx *shndx;
-  Elf_Internal_Sym *   isyms;
-  Elf_Internal_Sym *   psym;
-  unsigned int         j;
+  Elf_Internal_Sym *isyms;
+  Elf_Internal_Sym *psym;
+  unsigned int j;
 
   esyms = ((Elf64_External_Sym *)
 	   get_data (NULL, file, section->sh_offset,
@@ -3321,7 +3427,7 @@ get_64bit_elf_symbols (file, section)
 
   for (j = 0, psym = isyms;
        j < number;
-       j ++, psym ++)
+       j++, psym++)
     {
       psym->st_name  = BYTE_GET (esyms[j].st_name);
       psym->st_info  = BYTE_GET (esyms[j].st_info);
@@ -3345,9 +3451,9 @@ static const char *
 get_elf_section_flags (sh_flags)
      bfd_vma sh_flags;
 {
-  static char buff [32];
+  static char buff[32];
 
-  * buff = 0;
+  *buff = 0;
 
   while (sh_flags)
     {
@@ -3358,15 +3464,15 @@ get_elf_section_flags (sh_flags)
 
       switch (flag)
 	{
-	case SHF_WRITE:            strcat (buff, "W"); break;
-	case SHF_ALLOC:            strcat (buff, "A"); break;
-	case SHF_EXECINSTR:        strcat (buff, "X"); break;
-	case SHF_MERGE:            strcat (buff, "M"); break;
-	case SHF_STRINGS:          strcat (buff, "S"); break;
-	case SHF_INFO_LINK:        strcat (buff, "I"); break;
-	case SHF_LINK_ORDER:       strcat (buff, "L"); break;
+	case SHF_WRITE:		   strcat (buff, "W"); break;
+	case SHF_ALLOC:		   strcat (buff, "A"); break;
+	case SHF_EXECINSTR:	   strcat (buff, "X"); break;
+	case SHF_MERGE:		   strcat (buff, "M"); break;
+	case SHF_STRINGS:	   strcat (buff, "S"); break;
+	case SHF_INFO_LINK:	   strcat (buff, "I"); break;
+	case SHF_LINK_ORDER:	   strcat (buff, "L"); break;
 	case SHF_OS_NONCONFORMING: strcat (buff, "O"); break;
-	case SHF_GROUP:            strcat (buff, "G"); break;
+	case SHF_GROUP:		   strcat (buff, "G"); break;
 	case SHF_TLS:		   strcat (buff, "T"); break;
 
 	default:
@@ -3391,10 +3497,10 @@ get_elf_section_flags (sh_flags)
 
 static int
 process_section_headers (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf_Internal_Shdr * section;
-  unsigned int        i;
+  Elf_Internal_Shdr *section;
+  unsigned int i;
 
   section_headers = NULL;
 
@@ -3438,9 +3544,9 @@ process_section_headers (file)
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
-       i ++, section ++)
+       i++, section++)
     {
-      char * name = SECTION_NAME (section);
+      char *name = SECTION_NAME (section);
 
       if (section->sh_type == SHT_DYNSYM)
 	{
@@ -3526,7 +3632,7 @@ process_section_headers (file)
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
-       i ++, section ++)
+       i++, section++)
     {
       printf ("  [%2u] %-17.17s %-15.15s ",
 	      SECTION_HEADER_NUM (i),
@@ -3627,10 +3733,10 @@ process_section_headers (file)
 /* Process the reloc section.  */
 static int
 process_relocs (file)
-     FILE * file;
+     FILE *file;
 {
-  unsigned long    rel_size;
-  unsigned long	   rel_offset;
+  unsigned long rel_size;
+  unsigned long rel_offset;
 
 
   if (!do_reloc)
@@ -3649,7 +3755,7 @@ process_relocs (file)
 	  rel_size   = dynamic_info[DT_RELSZ];
 	  is_rela    = FALSE;
 	}
-      else if (dynamic_info [DT_RELA])
+      else if (dynamic_info[DT_RELA])
 	{
 	  rel_offset = dynamic_info[DT_RELA];
 	  rel_size   = dynamic_info[DT_RELASZ];
@@ -3688,13 +3794,13 @@ process_relocs (file)
     }
   else
     {
-      Elf_Internal_Shdr *	section;
-      unsigned long		i;
-      int		found = 0;
+      Elf_Internal_Shdr *section;
+      unsigned long i;
+      int found = 0;
 
       for (i = 0, section = section_headers;
 	   i < elf_header.e_shnum;
-	   i++, section ++)
+	   i++, section++)
 	{
 	  if (   section->sh_type != SHT_RELA
 	      && section->sh_type != SHT_REL)
@@ -3705,11 +3811,11 @@ process_relocs (file)
 
 	  if (rel_size)
 	    {
-	      Elf_Internal_Shdr * strsec;
-	      Elf_Internal_Sym *  symtab;
-	      char *              strtab;
-	      int                 is_rela;
-	      unsigned long       nsyms;
+	      Elf_Internal_Shdr *strsec;
+	      Elf_Internal_Sym *symtab;
+	      char *strtab;
+	      int is_rela;
+	      unsigned long nsyms;
 
 	      printf (_("\nRelocation section "));
 
@@ -3726,7 +3832,7 @@ process_relocs (file)
 	      nsyms = 0;
 	      if (section->sh_link)
 		{
-		  Elf_Internal_Shdr * symsec;
+		  Elf_Internal_Shdr *symsec;
 
 		  symsec = SECTION_HEADER (section->sh_link);
 		  nsyms = symsec->sh_size / symsec->sh_entsize;
@@ -3778,28 +3884,28 @@ struct unw_aux_info
   {
     struct unw_table_entry
       {
-	struct absaddr    start;
-	struct absaddr    end;
-	struct absaddr    info;
+	struct absaddr start;
+	struct absaddr end;
+	struct absaddr info;
       }
-    *table;				/* Unwind table.  */
-    unsigned long         table_len;	/* Length of unwind table.  */
-    unsigned char *       info;		/* Unwind info.  */
-    unsigned long         info_size;	/* Size of unwind info.  */
-    bfd_vma               info_addr;	/* starting address of unwind info.  */
-    bfd_vma               seg_base;	/* Starting address of segment.  */
-    Elf_Internal_Sym *    symtab;	/* The symbol table.  */
-    unsigned              long nsyms;	/* Number of symbols.  */
-    char *                strtab;	/* The string table.  */
-    unsigned long         strtab_size;	/* Size of string table.  */
+    *table;			/* Unwind table.  */
+    unsigned long table_len;	/* Length of unwind table.  */
+    unsigned char *info;	/* Unwind info.  */
+    unsigned long info_size;	/* Size of unwind info.  */
+    bfd_vma info_addr;		/* starting address of unwind info.  */
+    bfd_vma seg_base;		/* Starting address of segment.  */
+    Elf_Internal_Sym *symtab;	/* The symbol table.  */
+    unsigned long nsyms;	/* Number of symbols.  */
+    char *strtab;		/* The string table.  */
+    unsigned long strtab_size;	/* Size of string table.  */
   };
 
-static void find_symbol_for_address PARAMS ((struct unw_aux_info *,
-					     struct absaddr, const char **,
-					     bfd_vma *));
-static void dump_ia64_unwind PARAMS ((struct unw_aux_info *));
-static int  slurp_ia64_unwind_table PARAMS ((FILE *, struct unw_aux_info *,
-					    Elf_Internal_Shdr *));
+static void find_symbol_for_address
+  PARAMS ((struct unw_aux_info *, struct absaddr, const char **, bfd_vma *));
+static void dump_ia64_unwind
+  PARAMS ((struct unw_aux_info *));
+static int slurp_ia64_unwind_table
+  PARAMS ((FILE *, struct unw_aux_info *, Elf_Internal_Shdr *));
 
 static void
 find_symbol_for_address (aux, addr, symname, offset)
@@ -3842,7 +3948,7 @@ dump_ia64_unwind (aux)
      struct unw_aux_info *aux;
 {
   bfd_vma addr_size;
-  struct unw_table_entry * tp;
+  struct unw_table_entry *tp;
   int in_body;
 
   addr_size = is_32bit_elf ? 4 : 8;
@@ -3851,9 +3957,9 @@ dump_ia64_unwind (aux)
     {
       bfd_vma stamp;
       bfd_vma offset;
-      const unsigned char * dp;
-      const unsigned char * head;
-      const char * procname;
+      const unsigned char *dp;
+      const unsigned char *head;
+      const char *procname;
 
       find_symbol_for_address (aux, tp->start, &procname, &offset);
 
@@ -3957,7 +4063,7 @@ slurp_ia64_unwind_table (file, aux, sec)
     return 0;
 
   tep = aux->table = xmalloc (size / (3 * addr_size) * sizeof (aux->table[0]));
-  for (tp = table; tp < table + size; tp += 3 * addr_size, ++ tep)
+  for (tp = table; tp < table + size; tp += 3 * addr_size, ++tep)
     {
       tep->start.section = SHN_UNDEF;
       tep->end.section   = SHN_UNDEF;
@@ -4057,7 +4163,7 @@ slurp_ia64_unwind_table (file, aux, sec)
 
 static int
 process_unwind (file)
-     FILE * file;
+     FILE *file;
 {
   Elf_Internal_Shdr *sec, *unwsec = NULL, *strsec;
   unsigned long i, addr_size, unwcount = 0, unwstart = 0;
@@ -4193,7 +4299,7 @@ process_unwind (file)
 
 static void
 dynamic_segment_mips_val (entry)
-     Elf_Internal_Dyn * entry;
+     Elf_Internal_Dyn *entry;
 {
   switch (entry->d_tag)
     {
@@ -4212,7 +4318,7 @@ dynamic_segment_mips_val (entry)
 	  };
 	  unsigned int cnt;
 	  int first = 1;
-	  for (cnt = 0; cnt < NUM_ELEM (opts); ++ cnt)
+	  for (cnt = 0; cnt < NUM_ELEM (opts); ++cnt)
 	    if (entry->d_un.d_val & (1 << cnt))
 	      {
 		printf ("%s%s", first ? "" : " ", opts[cnt]);
@@ -4233,7 +4339,7 @@ dynamic_segment_mips_val (entry)
     case DT_MIPS_TIME_STAMP:
       {
 	char timebuf[20];
-	struct tm * tmp;
+	struct tm *tmp;
 
 	time_t time = entry->d_un.d_val;
 	tmp = gmtime (&time);
@@ -4268,7 +4374,7 @@ dynamic_segment_mips_val (entry)
 
 static void
 dynamic_segment_parisc_val (entry)
-     Elf_Internal_Dyn * entry;
+     Elf_Internal_Dyn *entry;
 {
   switch (entry->d_tag)
     {
@@ -4277,7 +4383,7 @@ dynamic_segment_parisc_val (entry)
 	static struct
 	{
 	  long int bit;
-	  const char * str;
+	  const char *str;
 	}
 	flags[] =
 	{
@@ -4325,11 +4431,11 @@ dynamic_segment_parisc_val (entry)
 
 static int
 get_32bit_dynamic_segment (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf32_External_Dyn * edyn;
-  Elf_Internal_Dyn *   entry;
-  bfd_size_type        i;
+  Elf32_External_Dyn *edyn;
+  Elf_Internal_Dyn *entry;
+  bfd_size_type i;
 
   edyn = (Elf32_External_Dyn *) get_data (NULL, file, dynamic_addr,
 					  dynamic_size, _("dynamic segment"));
@@ -4340,7 +4446,7 @@ get_32bit_dynamic_segment (file)
      how large this .dynamic is now.  We can do this even before the byte
      swapping since the DT_NULL tag is recognizable.  */
   dynamic_size = 0;
-  while (*(Elf32_Word *) edyn [dynamic_size++].d_tag != DT_NULL)
+  while (*(Elf32_Word *) edyn[dynamic_size++].d_tag != DT_NULL)
     ;
 
   dynamic_segment = (Elf_Internal_Dyn *)
@@ -4355,10 +4461,10 @@ get_32bit_dynamic_segment (file)
 
   for (i = 0, entry = dynamic_segment;
        i < dynamic_size;
-       i ++, entry ++)
+       i++, entry++)
     {
-      entry->d_tag      = BYTE_GET (edyn [i].d_tag);
-      entry->d_un.d_val = BYTE_GET (edyn [i].d_un.d_val);
+      entry->d_tag      = BYTE_GET (edyn[i].d_tag);
+      entry->d_un.d_val = BYTE_GET (edyn[i].d_un.d_val);
     }
 
   free (edyn);
@@ -4368,11 +4474,11 @@ get_32bit_dynamic_segment (file)
 
 static int
 get_64bit_dynamic_segment (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf64_External_Dyn * edyn;
-  Elf_Internal_Dyn *   entry;
-  bfd_size_type        i;
+  Elf64_External_Dyn *edyn;
+  Elf_Internal_Dyn *entry;
+  bfd_size_type i;
 
   edyn = (Elf64_External_Dyn *) get_data (NULL, file, dynamic_addr,
 					  dynamic_size, _("dynamic segment"));
@@ -4383,7 +4489,7 @@ get_64bit_dynamic_segment (file)
      how large this .dynamic is now.  We can do this even before the byte
      swapping since the DT_NULL tag is recognizable.  */
   dynamic_size = 0;
-  while (*(bfd_vma *) edyn [dynamic_size ++].d_tag != DT_NULL)
+  while (*(bfd_vma *) edyn[dynamic_size++].d_tag != DT_NULL)
     ;
 
   dynamic_segment = (Elf_Internal_Dyn *)
@@ -4398,10 +4504,10 @@ get_64bit_dynamic_segment (file)
 
   for (i = 0, entry = dynamic_segment;
        i < dynamic_size;
-       i ++, entry ++)
+       i++, entry++)
     {
-      entry->d_tag      = BYTE_GET8 (edyn [i].d_tag);
-      entry->d_un.d_val = BYTE_GET8 (edyn [i].d_un.d_val);
+      entry->d_tag      = BYTE_GET8 (edyn[i].d_tag);
+      entry->d_un.d_val = BYTE_GET8 (edyn[i].d_un.d_val);
     }
 
   free (edyn);
@@ -4413,7 +4519,7 @@ static const char *
 get_dynamic_flags (flags)
      bfd_vma flags;
 {
-  static char buff [128];
+  static char buff[128];
   char *p = buff;
 
   *p = '\0';
@@ -4429,12 +4535,12 @@ get_dynamic_flags (flags)
 
       switch (flag)
 	{
-	case DF_ORIGIN:   strcpy (p, "ORIGIN"); break;
-	case DF_SYMBOLIC: strcpy (p, "SYMBOLIC"); break;
-	case DF_TEXTREL:  strcpy (p, "TEXTREL"); break;
-	case DF_BIND_NOW: strcpy (p, "BIND_NOW"); break;
-	case DF_STATIC_TLS: strcpy (p, "STATIC_TLS"); break;
-	default:          strcpy (p, "unknown"); break;
+	case DF_ORIGIN:		strcpy (p, "ORIGIN"); break;
+	case DF_SYMBOLIC:	strcpy (p, "SYMBOLIC"); break;
+	case DF_TEXTREL:	strcpy (p, "TEXTREL"); break;
+	case DF_BIND_NOW:	strcpy (p, "BIND_NOW"); break;
+	case DF_STATIC_TLS:	strcpy (p, "STATIC_TLS"); break;
+	default:		strcpy (p, "unknown"); break;
 	}
 
       p = strchr (p, '\0');
@@ -4445,10 +4551,10 @@ get_dynamic_flags (flags)
 /* Parse and display the contents of the dynamic segment.  */
 static int
 process_dynamic_segment (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf_Internal_Dyn * entry;
-  bfd_size_type      i;
+  Elf_Internal_Dyn *entry;
+  bfd_size_type i;
 
   if (dynamic_size == 0)
     {
@@ -4471,7 +4577,7 @@ process_dynamic_segment (file)
     {
       for (i = 0, entry = dynamic_segment;
 	   i < dynamic_size;
-	   ++i, ++ entry)
+	   ++i, ++entry)
 	{
 	  Elf_Internal_Shdr section;
 
@@ -4511,10 +4617,10 @@ process_dynamic_segment (file)
     {
       for (i = 0, entry = dynamic_segment;
 	   i < dynamic_size;
-	   ++i, ++ entry)
+	   ++i, ++entry)
 	{
 	  unsigned long offset;
-	  long          str_tab_len;
+	  long str_tab_len;
 
 	  if (entry->d_tag != DT_STRTAB)
 	    continue;
@@ -4551,7 +4657,7 @@ process_dynamic_segment (file)
 
       for (i = 0, entry = dynamic_segment;
 	   i < dynamic_size;
-	   ++i, ++ entry)
+	   ++i, ++entry)
 	{
 	  if (entry->d_tag == DT_SYMINENT)
 	    {
@@ -4567,8 +4673,8 @@ process_dynamic_segment (file)
 
       if (dynamic_syminfo_offset != 0 && syminsz != 0)
 	{
-	  Elf_External_Syminfo * extsyminfo;
-	  Elf_Internal_Syminfo * syminfo;
+	  Elf_External_Syminfo *extsyminfo;
+	  Elf_Internal_Syminfo *syminfo;
 
 	  /* There is a syminfo section.  Read the data.  */
 	  extsyminfo = ((Elf_External_Syminfo *)
@@ -4604,11 +4710,11 @@ process_dynamic_segment (file)
 
   for (i = 0, entry = dynamic_segment;
        i < dynamic_size;
-       i++, entry ++)
+       i++, entry++)
     {
       if (do_dynamic)
 	{
-	  const char * dtype;
+	  const char *dtype;
 
 	  putchar (' ');
 	  print_vma (entry->d_tag, FULL_HEX);
@@ -4634,7 +4740,7 @@ process_dynamic_segment (file)
 	  if (do_dynamic)
 	    {
 	      switch (entry->d_tag)
-	        {
+		{
 		case DT_AUXILIARY:
 		  printf (_("Auxiliary library"));
 		  break;
@@ -4643,7 +4749,7 @@ process_dynamic_segment (file)
 		  printf (_("Filter library"));
 		  break;
 
-	        case DT_CONFIG:
+		case DT_CONFIG:
 		  printf (_("Configuration file"));
 		  break;
 
@@ -4836,7 +4942,7 @@ process_dynamic_segment (file)
 
 	  if (do_dynamic)
 	    {
-	      char * name;
+	      char *name;
 
 	      if (dynamic_strings == NULL)
 		name = NULL;
@@ -4920,11 +5026,11 @@ process_dynamic_segment (file)
 	    {
 	      if (dynamic_strings != NULL && entry->d_tag == DT_USED)
 		{
-		  char * name;
+		  char *name;
 
 		  name = dynamic_strings + entry->d_un.d_val;
 
-		  if (* name)
+		  if (*name)
 		    {
 		      printf (_("Not needed object: [%s]\n"), name);
 		      break;
@@ -4945,7 +5051,7 @@ process_dynamic_segment (file)
 	case DT_GNU_PRELINKED:
 	  if (do_dynamic)
 	    {
-	      struct tm * tmp;
+	      struct tm *tmp;
 	      time_t time = entry->d_un.d_val;
 
 	      tmp = gmtime (&time);
@@ -4958,7 +5064,7 @@ process_dynamic_segment (file)
 
 	default:
 	  if ((entry->d_tag >= DT_VERSYM) && (entry->d_tag <= DT_VERNEEDNUM))
-	    version_info [DT_VERSIONTAGIDX (entry->d_tag)] =
+	    version_info[DT_VERSIONTAGIDX (entry->d_tag)] =
 	      entry->d_un.d_val;
 
 	  if (do_dynamic)
@@ -4988,7 +5094,7 @@ static char *
 get_ver_flags (flags)
      unsigned int flags;
 {
-  static char buff [32];
+  static char buff[32];
 
   buff[0] = 0;
 
@@ -5015,26 +5121,26 @@ get_ver_flags (flags)
 /* Display the contents of the version sections.  */
 static int
 process_version_sections (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf_Internal_Shdr * section;
-  unsigned   i;
-  int        found = 0;
+  Elf_Internal_Shdr *section;
+  unsigned i;
+  int found = 0;
 
   if (! do_version)
     return 1;
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
-       i++, section ++)
+       i++, section++)
     {
       switch (section->sh_type)
 	{
 	case SHT_GNU_verdef:
 	  {
-	    Elf_External_Verdef * edefs;
-	    unsigned int          idx;
-	    unsigned int          cnt;
+	    Elf_External_Verdef *edefs;
+	    unsigned int idx;
+	    unsigned int cnt;
 
 	    found = 1;
 
@@ -5055,15 +5161,15 @@ process_version_sections (file)
 	    if (!edefs)
 	      break;
 
-	    for (idx = cnt = 0; cnt < section->sh_info; ++ cnt)
+	    for (idx = cnt = 0; cnt < section->sh_info; ++cnt)
 	      {
-		char *                 vstart;
-		Elf_External_Verdef *  edef;
-		Elf_Internal_Verdef    ent;
-		Elf_External_Verdaux * eaux;
-		Elf_Internal_Verdaux   aux;
-		int                    j;
-		int                    isum;
+		char *vstart;
+		Elf_External_Verdef *edef;
+		Elf_Internal_Verdef ent;
+		Elf_External_Verdaux *eaux;
+		Elf_Internal_Verdaux aux;
+		int j;
+		int isum;
 
 		vstart = ((char *) edefs) + idx;
 
@@ -5097,7 +5203,7 @@ process_version_sections (file)
 
 		isum = idx + ent.vd_aux;
 
-		for (j = 1; j < ent.vd_cnt; j ++)
+		for (j = 1; j < ent.vd_cnt; j++)
 		  {
 		    isum   += aux.vda_next;
 		    vstart += aux.vda_next;
@@ -5124,9 +5230,9 @@ process_version_sections (file)
 
 	case SHT_GNU_verneed:
 	  {
-	    Elf_External_Verneed *  eneed;
-	    unsigned int            idx;
-	    unsigned int            cnt;
+	    Elf_External_Verneed *eneed;
+	    unsigned int idx;
+	    unsigned int cnt;
 
 	    found = 1;
 
@@ -5147,11 +5253,11 @@ process_version_sections (file)
 
 	    for (idx = cnt = 0; cnt < section->sh_info; ++cnt)
 	      {
-		Elf_External_Verneed * entry;
-		Elf_Internal_Verneed     ent;
-		int                      j;
-		int                      isum;
-		char *                   vstart;
+		Elf_External_Verneed *entry;
+		Elf_Internal_Verneed ent;
+		int j;
+		int isum;
+		char *vstart;
 
 		vstart = ((char *) eneed) + idx;
 
@@ -5176,8 +5282,8 @@ process_version_sections (file)
 
 		for (j = 0, isum = idx + ent.vn_aux; j < ent.vn_cnt; ++j)
 		  {
-		    Elf_External_Vernaux * eaux;
-		    Elf_Internal_Vernaux   aux;
+		    Elf_External_Vernaux *eaux;
+		    Elf_Internal_Vernaux aux;
 
 		    eaux = (Elf_External_Vernaux *) vstart;
 
@@ -5210,14 +5316,14 @@ process_version_sections (file)
 
 	case SHT_GNU_versym:
 	  {
-	    Elf_Internal_Shdr *		link_section;
-	    int              		total;
-	    int              		cnt;
-	    unsigned char * 		edata;
-	    unsigned short * 		data;
-	    char *           		strtab;
-	    Elf_Internal_Sym * 		symbols;
-	    Elf_Internal_Shdr *		string_sec;
+	    Elf_Internal_Shdr *link_section;
+	    int total;
+	    int cnt;
+	    unsigned char *edata;
+	    unsigned short *data;
+	    char *strtab;
+	    Elf_Internal_Sym *symbols;
+	    Elf_Internal_Shdr *string_sec;
 
 	    link_section = SECTION_HEADER (section->sh_link);
 	    total = section->sh_size / section->sh_entsize;
@@ -5257,8 +5363,8 @@ process_version_sections (file)
 	    data = (unsigned short *) malloc (total * sizeof (short));
 
 	    for (cnt = total; cnt --;)
-	      data [cnt] = byte_get (edata + cnt * sizeof (short),
-				     sizeof (short));
+	      data[cnt] = byte_get (edata + cnt * sizeof (short),
+				    sizeof (short));
 
 	    free (edata);
 
@@ -5266,12 +5372,12 @@ process_version_sections (file)
 	      {
 		int j, nn;
 		int check_def, check_need;
-		char * name;
+		char *name;
 
 		printf ("  %03x:", cnt);
 
 		for (j = 0; (j < 4) && (cnt + j) < total; ++j)
-		  switch (data [cnt + j])
+		  switch (data[cnt + j])
 		    {
 		    case 0:
 		      fputs (_("   0 (*local*)    "), stdout);
@@ -5282,35 +5388,35 @@ process_version_sections (file)
 		      break;
 
 		    default:
-		      nn = printf ("%4x%c", data [cnt + j] & 0x7fff,
-				   data [cnt + j] & 0x8000 ? 'h' : ' ');
+		      nn = printf ("%4x%c", data[cnt + j] & 0x7fff,
+				   data[cnt + j] & 0x8000 ? 'h' : ' ');
 
 		      check_def = 1;
 		      check_need = 1;
-		      if (SECTION_HEADER (symbols [cnt + j].st_shndx)->sh_type
+		      if (SECTION_HEADER (symbols[cnt + j].st_shndx)->sh_type
 			  != SHT_NOBITS)
 			{
-			  if (symbols [cnt + j].st_shndx == SHN_UNDEF)
+			  if (symbols[cnt + j].st_shndx == SHN_UNDEF)
 			    check_def = 0;
 			  else
 			    check_need = 0;
 			}
 
 		      if (check_need
-			  && version_info [DT_VERSIONTAGIDX (DT_VERNEED)])
+			  && version_info[DT_VERSIONTAGIDX (DT_VERNEED)])
 			{
-			  Elf_Internal_Verneed     ivn;
-			  unsigned long            offset;
+			  Elf_Internal_Verneed ivn;
+			  unsigned long offset;
 
-			  offset = version_info [DT_VERSIONTAGIDX (DT_VERNEED)]
+			  offset = version_info[DT_VERSIONTAGIDX (DT_VERNEED)]
 			    - loadaddr;
 
-		          do
+			  do
 			    {
-			      Elf_Internal_Vernaux   ivna;
-			      Elf_External_Verneed   evn;
-			      Elf_External_Vernaux   evna;
-			      unsigned long          a_off;
+			      Elf_Internal_Vernaux ivna;
+			      Elf_External_Verneed evn;
+			      Elf_External_Vernaux evna;
+			      unsigned long a_off;
 
 			      get_data (&evn, file, offset, sizeof (evn),
 					_("version need"));
@@ -5330,10 +5436,10 @@ process_version_sections (file)
 
 				  a_off += ivna.vna_next;
 				}
-			      while (ivna.vna_other != data [cnt + j]
+			      while (ivna.vna_other != data[cnt + j]
 				     && ivna.vna_next != 0);
 
-			      if (ivna.vna_other == data [cnt + j])
+			      if (ivna.vna_other == data[cnt + j])
 				{
 				  ivna.vna_name = BYTE_GET (evna.vna_name);
 
@@ -5351,15 +5457,15 @@ process_version_sections (file)
 			  while (ivn.vn_next);
 			}
 
-		      if (check_def && data [cnt + j] != 0x8001
-			  && version_info [DT_VERSIONTAGIDX (DT_VERDEF)])
+		      if (check_def && data[cnt + j] != 0x8001
+			  && version_info[DT_VERSIONTAGIDX (DT_VERDEF)])
 			{
-			  Elf_Internal_Verdef  ivd;
-			  Elf_External_Verdef  evd;
-			  unsigned long        offset;
+			  Elf_Internal_Verdef ivd;
+			  Elf_External_Verdef evd;
+			  unsigned long offset;
 
-			  offset = version_info
-			    [DT_VERSIONTAGIDX (DT_VERDEF)] - loadaddr;
+			  offset = (version_info[DT_VERSIONTAGIDX (DT_VERDEF)]
+				    - loadaddr);
 
 			  do
 			    {
@@ -5371,13 +5477,13 @@ process_version_sections (file)
 
 			      offset += ivd.vd_next;
 			    }
-			  while (ivd.vd_ndx != (data [cnt + j] & 0x7fff)
+			  while (ivd.vd_ndx != (data[cnt + j] & 0x7fff)
 				 && ivd.vd_next != 0);
 
-			  if (ivd.vd_ndx == (data [cnt + j] & 0x7fff))
+			  if (ivd.vd_ndx == (data[cnt + j] & 0x7fff))
 			    {
-			      Elf_External_Verdaux  evda;
-			      Elf_Internal_Verdaux  ivda;
+			      Elf_External_Verdaux evda;
+			      Elf_Internal_Verdaux ivda;
 
 			      ivd.vd_aux = BYTE_GET (evd.vd_aux);
 
@@ -5423,13 +5529,13 @@ static const char *
 get_symbol_binding (binding)
      unsigned int binding;
 {
-  static char buff [32];
+  static char buff[32];
 
   switch (binding)
     {
-    case STB_LOCAL:  return "LOCAL";
-    case STB_GLOBAL: return "GLOBAL";
-    case STB_WEAK:   return "WEAK";
+    case STB_LOCAL:	return "LOCAL";
+    case STB_GLOBAL:	return "GLOBAL";
+    case STB_WEAK:	return "WEAK";
     default:
       if (binding >= STB_LOPROC && binding <= STB_HIPROC)
 	sprintf (buff, _("<processor specific>: %d"), binding);
@@ -5445,17 +5551,17 @@ static const char *
 get_symbol_type (type)
      unsigned int type;
 {
-  static char buff [32];
+  static char buff[32];
 
   switch (type)
     {
-    case STT_NOTYPE:   return "NOTYPE";
-    case STT_OBJECT:   return "OBJECT";
-    case STT_FUNC:     return "FUNC";
-    case STT_SECTION:  return "SECTION";
-    case STT_FILE:     return "FILE";
-    case STT_COMMON:   return "COMMON";
-    case STT_TLS:      return "TLS";
+    case STT_NOTYPE:	return "NOTYPE";
+    case STT_OBJECT:	return "OBJECT";
+    case STT_FUNC:	return "FUNC";
+    case STT_SECTION:	return "SECTION";
+    case STT_FILE:	return "FILE";
+    case STT_COMMON:	return "COMMON";
+    case STT_TLS:	return "TLS";
     default:
       if (type >= STT_LOPROC && type <= STT_HIPROC)
 	{
@@ -5494,9 +5600,9 @@ get_symbol_visibility (visibility)
 {
   switch (visibility)
     {
-    case STV_DEFAULT:   return "DEFAULT";
-    case STV_INTERNAL:  return "INTERNAL";
-    case STV_HIDDEN:    return "HIDDEN";
+    case STV_DEFAULT:	return "DEFAULT";
+    case STV_INTERNAL:	return "INTERNAL";
+    case STV_HIDDEN:	return "HIDDEN";
     case STV_PROTECTED: return "PROTECTED";
     default: abort ();
     }
@@ -5506,13 +5612,13 @@ static const char *
 get_symbol_index_type (type)
      unsigned int type;
 {
-  static char buff [32];
+  static char buff[32];
 
   switch (type)
     {
-    case SHN_UNDEF:  return "UND";
-    case SHN_ABS:    return "ABS";
-    case SHN_COMMON: return "COM";
+    case SHN_UNDEF:	return "UND";
+    case SHN_ABS:	return "ABS";
+    case SHN_COMMON:	return "COM";
     default:
       if (type >= SHN_LOPROC && type <= SHN_HIPROC)
 	sprintf (buff, "PRC[0x%04x]", type);
@@ -5530,11 +5636,11 @@ get_symbol_index_type (type)
 
 static int *
 get_dynamic_data (file, number)
-     FILE *       file;
+     FILE *file;
      unsigned int number;
 {
-  unsigned char * e_data;
-  int *  i_data;
+  unsigned char *e_data;
+  int *i_data;
 
   e_data = (unsigned char *) malloc (number * 4);
 
@@ -5550,7 +5656,7 @@ get_dynamic_data (file, number)
       return NULL;
     }
 
-  i_data = (int *) malloc (number * sizeof (* i_data));
+  i_data = (int *) malloc (number * sizeof (*i_data));
 
   if (i_data == NULL)
     {
@@ -5560,7 +5666,7 @@ get_dynamic_data (file, number)
     }
 
   while (number--)
-    i_data [number] = byte_get (e_data + number * 4, 4);
+    i_data[number] = byte_get (e_data + number * 4, 4);
 
   free (e_data);
 
@@ -5570,15 +5676,15 @@ get_dynamic_data (file, number)
 /* Dump the symbol table.  */
 static int
 process_symbol_table (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf_Internal_Shdr * section;
-  unsigned char   nb [4];
-  unsigned char   nc [4];
-  int    nbuckets = 0;
-  int    nchains = 0;
-  int *  buckets = NULL;
-  int *  chains = NULL;
+  Elf_Internal_Shdr *section;
+  unsigned char nb[4];
+  unsigned char nc[4];
+  int nbuckets = 0;
+  int nchains = 0;
+  int *buckets = NULL;
+  int *chains = NULL;
 
   if (! do_syms && !do_histogram)
     return 1;
@@ -5617,8 +5723,8 @@ process_symbol_table (file)
   if (do_syms
       && dynamic_info[DT_HASH] && do_using_dynamic && dynamic_strings != NULL)
     {
-      int    hn;
-      int    si;
+      int hn;
+      int si;
 
       printf (_("\nSymbol table for image:\n"));
       if (is_32bit_elf)
@@ -5628,12 +5734,12 @@ process_symbol_table (file)
 
       for (hn = 0; hn < nbuckets; hn++)
 	{
-	  if (! buckets [hn])
+	  if (! buckets[hn])
 	    continue;
 
-	  for (si = buckets [hn]; si < nchains && si > 0; si = chains [si])
+	  for (si = buckets[hn]; si < nchains && si > 0; si = chains[si])
 	    {
-	      Elf_Internal_Sym * psym;
+	      Elf_Internal_Sym *psym;
 
 	      psym = dynamic_symbols + si;
 
@@ -5653,16 +5759,16 @@ process_symbol_table (file)
     }
   else if (do_syms && !do_using_dynamic)
     {
-      unsigned int     i;
+      unsigned int i;
 
       for (i = 0, section = section_headers;
 	   i < elf_header.e_shnum;
 	   i++, section++)
 	{
-	  unsigned int          si;
-	  char *                strtab;
-	  Elf_Internal_Sym *    symtab;
-	  Elf_Internal_Sym *    psym;
+	  unsigned int si;
+	  char *strtab;
+	  Elf_Internal_Sym *symtab;
+	  Elf_Internal_Sym *psym;
 
 
 	  if (   section->sh_type != SHT_SYMTAB
@@ -5685,7 +5791,7 @@ process_symbol_table (file)
 	    strtab = string_table;
 	  else
 	    {
-	      Elf_Internal_Shdr * string_sec;
+	      Elf_Internal_Shdr *string_sec;
 
 	      string_sec = SECTION_HEADER (section->sh_link);
 
@@ -5696,7 +5802,7 @@ process_symbol_table (file)
 
 	  for (si = 0, psym = symtab;
 	       si < section->sh_size / section->sh_entsize;
-	       si ++, psym ++)
+	       si++, psym++)
 	    {
 	      printf ("%6d: ", si);
 	      print_vma (psym->st_value, LONG_HEX);
@@ -5709,15 +5815,15 @@ process_symbol_table (file)
 	      print_symbol (25, strtab + psym->st_name);
 
 	      if (section->sh_type == SHT_DYNSYM &&
-		  version_info [DT_VERSIONTAGIDX (DT_VERSYM)] != 0)
+		  version_info[DT_VERSIONTAGIDX (DT_VERSYM)] != 0)
 		{
-		  unsigned char   data[2];
-		  unsigned short  vers_data;
-		  unsigned long   offset;
-		  int             is_nobits;
-		  int             check_def;
+		  unsigned char data[2];
+		  unsigned short vers_data;
+		  unsigned long offset;
+		  int is_nobits;
+		  int check_def;
 
-		  offset = version_info [DT_VERSIONTAGIDX (DT_VERSYM)]
+		  offset = version_info[DT_VERSIONTAGIDX (DT_VERSYM)]
 		    - loadaddr;
 
 		  get_data (&data, file, offset + si * sizeof (vers_data),
@@ -5732,20 +5838,20 @@ process_symbol_table (file)
 
 		  if ((vers_data & 0x8000) || vers_data > 1)
 		    {
-		      if (version_info [DT_VERSIONTAGIDX (DT_VERNEED)]
+		      if (version_info[DT_VERSIONTAGIDX (DT_VERNEED)]
 			  && (is_nobits || ! check_def))
 			{
-			  Elf_External_Verneed  evn;
-			  Elf_Internal_Verneed  ivn;
-			  Elf_Internal_Vernaux  ivna;
+			  Elf_External_Verneed evn;
+			  Elf_Internal_Verneed ivn;
+			  Elf_Internal_Vernaux ivna;
 
 			  /* We must test both.  */
-			  offset = version_info
-			    [DT_VERSIONTAGIDX (DT_VERNEED)] - loadaddr;
+			  offset = (version_info[DT_VERSIONTAGIDX (DT_VERNEED)]
+				    - loadaddr);
 
 			  do
 			    {
-			      unsigned long  vna_off;
+			      unsigned long vna_off;
 
 			      get_data (&evn, file, offset, sizeof (evn),
 					_("version need"));
@@ -5757,7 +5863,7 @@ process_symbol_table (file)
 
 			      do
 				{
-				  Elf_External_Vernaux  evna;
+				  Elf_External_Vernaux evna;
 
 				  get_data (&evna, file, vna_off,
 					    sizeof (evna),
@@ -5794,26 +5900,26 @@ process_symbol_table (file)
 		      if (check_def)
 			{
 			  if (vers_data != 0x8001
-			      && version_info [DT_VERSIONTAGIDX (DT_VERDEF)])
+			      && version_info[DT_VERSIONTAGIDX (DT_VERDEF)])
 			    {
-			      Elf_Internal_Verdef     ivd;
-			      Elf_Internal_Verdaux    ivda;
-			      Elf_External_Verdaux  evda;
-			      unsigned long           offset;
+			      Elf_Internal_Verdef ivd;
+			      Elf_Internal_Verdaux ivda;
+			      Elf_External_Verdaux evda;
+			      unsigned long offset;
 
-			      offset =
-				version_info [DT_VERSIONTAGIDX (DT_VERDEF)]
-				- loadaddr;
+			      offset
+				= (version_info[DT_VERSIONTAGIDX (DT_VERDEF)]
+				   - loadaddr);
 
 			      do
 				{
-				  Elf_External_Verdef   evd;
+				  Elf_External_Verdef evd;
 
 				  get_data (&evd, file, offset, sizeof (evd),
 					    _("version def"));
 
-				  ivd.vd_ndx  = BYTE_GET (evd.vd_ndx);
-				  ivd.vd_aux  = BYTE_GET (evd.vd_aux);
+				  ivd.vd_ndx = BYTE_GET (evd.vd_ndx);
+				  ivd.vd_aux = BYTE_GET (evd.vd_aux);
 				  ivd.vd_next = BYTE_GET (evd.vd_next);
 
 				  offset += ivd.vd_next;
@@ -5852,13 +5958,13 @@ process_symbol_table (file)
 
   if (do_histogram && buckets != NULL)
     {
-      int * lengths;
-      int * counts;
-      int   hn;
-      int   si;
-      int   maxlength = 0;
-      int   nzero_counts = 0;
-      int   nsyms = 0;
+      int *lengths;
+      int *counts;
+      int hn;
+      int si;
+      int maxlength = 0;
+      int nzero_counts = 0;
+      int nsyms = 0;
 
       printf (_("\nHistogram for bucket list length (total of %d buckets):\n"),
 	      nbuckets);
@@ -5872,14 +5978,14 @@ process_symbol_table (file)
 	}
       for (hn = 0; hn < nbuckets; ++hn)
 	{
-	  if (! buckets [hn])
+	  if (! buckets[hn])
 	    continue;
 
 	  for (si = buckets[hn]; si > 0 && si < nchains; si = chains[si])
 	    {
-	      ++ nsyms;
+	      ++nsyms;
 	      if (maxlength < ++lengths[hn])
-		++ maxlength;
+		++maxlength;
 	    }
 	}
 
@@ -5891,7 +5997,7 @@ process_symbol_table (file)
 	}
 
       for (hn = 0; hn < nbuckets; ++hn)
-	++ counts [lengths [hn]];
+	++counts[lengths[hn]];
 
       if (nbuckets > 0)
 	{
@@ -5921,7 +6027,7 @@ process_symbol_table (file)
 
 static int
 process_syminfo (file)
-     FILE * file ATTRIBUTE_UNUSED;
+     FILE *file ATTRIBUTE_UNUSED;
 {
   unsigned int i;
 
@@ -5959,9 +6065,10 @@ process_syminfo (file)
 	  if (dynamic_syminfo[i].si_boundto > 0
 	      && dynamic_syminfo[i].si_boundto < dynamic_size)
 	    {
-	      print_symbol (10, dynamic_strings
-			    + dynamic_segment
-			    [dynamic_syminfo[i].si_boundto].d_un.d_val);
+	      print_symbol (10,
+			    dynamic_strings
+			    + (dynamic_segment
+			       [dynamic_syminfo[i].si_boundto].d_un.d_val));
 	      putchar (' ' );
 	    }
 	  else
@@ -5987,8 +6094,8 @@ process_syminfo (file)
 #ifdef SUPPORT_DISASSEMBLY
 static void
 disassemble_section (section, file)
-     Elf_Internal_Shdr * section;
-     FILE * file;
+     Elf_Internal_Shdr *section;
+     FILE *file;
 {
   printf (_("\nAssembly dump of section %s\n"),
 	  SECTION_NAME (section));
@@ -6001,13 +6108,13 @@ disassemble_section (section, file)
 
 static int
 dump_section (section, file)
-     Elf_Internal_Shdr * section;
-     FILE * file;
+     Elf_Internal_Shdr *section;
+     FILE *file;
 {
-  bfd_size_type   bytes;
-  bfd_vma         addr;
-  unsigned char * data;
-  unsigned char * start;
+  bfd_size_type bytes;
+  bfd_vma addr;
+  unsigned char *data;
+  unsigned char *start;
 
   bytes = section->sh_size;
 
@@ -6039,14 +6146,14 @@ dump_section (section, file)
 
       printf ("  0x%8.8lx ", (unsigned long) addr);
 
-      switch (elf_header.e_ident [EI_DATA])
+      switch (elf_header.e_ident[EI_DATA])
 	{
 	default:
 	case ELFDATA2LSB:
 	  for (j = 15; j >= 0; j --)
 	    {
 	      if (j < lbytes)
-		printf ("%2.2x", data [j]);
+		printf ("%2.2x", data[j]);
 	      else
 		printf ("  ");
 
@@ -6059,7 +6166,7 @@ dump_section (section, file)
 	  for (j = 0; j < 16; j++)
 	    {
 	      if (j < lbytes)
-		printf ("%2.2x", data [j]);
+		printf ("%2.2x", data[j]);
 	      else
 		printf ("  ");
 
@@ -6071,7 +6178,7 @@ dump_section (section, file)
 
       for (j = 0; j < lbytes; j++)
 	{
-	  k = data [j];
+	  k = data[j];
 	  if (k >= ' ' && k < 0x80)
 	    printf ("%c", k);
 	  else
@@ -6093,19 +6200,19 @@ dump_section (section, file)
 
 static unsigned long int
 read_leb128 (data, length_return, sign)
-     unsigned char * data;
-     int *           length_return;
-     int             sign;
+     unsigned char *data;
+     int *length_return;
+     int sign;
 {
   unsigned long int result = 0;
-  unsigned int      num_read = 0;
-  int               shift = 0;
-  unsigned char     byte;
+  unsigned int num_read = 0;
+  int shift = 0;
+  unsigned char byte;
 
   do
     {
-      byte = * data ++;
-      num_read ++;
+      byte = *data++;
+      num_read++;
 
       result |= (byte & 0x7f) << shift;
 
@@ -6115,7 +6222,7 @@ read_leb128 (data, length_return, sign)
   while (byte & 0x80);
 
   if (length_return != NULL)
-    * length_return = num_read;
+    *length_return = num_read;
 
   if (sign && (shift < 32) && (byte & 0x40))
     result |= -1 << shift;
@@ -6125,16 +6232,16 @@ read_leb128 (data, length_return, sign)
 
 typedef struct State_Machine_Registers
 {
-  unsigned long	address;
-  unsigned int  file;
-  unsigned int  line;
-  unsigned int  column;
-  int           is_stmt;
-  int           basic_block;
-  int	        end_sequence;
+  unsigned long address;
+  unsigned int file;
+  unsigned int line;
+  unsigned int column;
+  int is_stmt;
+  int basic_block;
+  int end_sequence;
 /* This variable hold the number of the last entry seen
    in the File Table.  */
-  unsigned int  last_file_entry;
+  unsigned int last_file_entry;
 } SMR;
 
 static SMR state_machine_regs;
@@ -6157,15 +6264,15 @@ reset_state_machine (is_stmt)
    of sequence.  */
 static int
 process_extended_line_op (data, is_stmt, pointer_size)
-     unsigned char * data;
+     unsigned char *data;
      int is_stmt;
      int pointer_size;
 {
-  unsigned char   op_code;
-  int             bytes_read;
-  unsigned int    len;
-  unsigned char * name;
-  unsigned long   adr;
+  unsigned char op_code;
+  int bytes_read;
+  unsigned int len;
+  unsigned char *name;
+  unsigned long adr;
 
   len = read_leb128 (data, & bytes_read, 0);
   data += bytes_read;
@@ -6177,7 +6284,7 @@ process_extended_line_op (data, is_stmt, pointer_size)
     }
 
   len += bytes_read;
-  op_code = * data ++;
+  op_code = *data++;
 
   printf (_("  Extended opcode %d: "), op_code);
 
@@ -6198,7 +6305,7 @@ process_extended_line_op (data, is_stmt, pointer_size)
       printf (_("  define new File Table entry\n"));
       printf (_("  Entry\tDir\tTime\tSize\tName\n"));
 
-      printf (_("   %d\t"), ++ state_machine_regs.last_file_entry);
+      printf (_("   %d\t"), ++state_machine_regs.last_file_entry);
       name = data;
       data += strlen ((char *) data) + 1;
       printf (_("%lu\t"), read_leb128 (data, & bytes_read, 0));
@@ -6224,17 +6331,17 @@ static int debug_line_pointer_size = 4;
 
 static int
 display_debug_lines (section, start, file)
-     Elf_Internal_Shdr *   section;
-     unsigned char *       start;
-     FILE *                file ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr *section;
+     unsigned char * start;
+     FILE *file ATTRIBUTE_UNUSED;
 {
-  DWARF2_External_LineInfo * external;
-  DWARF2_Internal_LineInfo   info;
-  unsigned char *            standard_opcodes;
-  unsigned char *            data = start;
-  unsigned char *            end  = start + section->sh_size;
-  unsigned char *            end_of_sequence;
-  int                        i;
+  DWARF2_External_LineInfo *external;
+  DWARF2_Internal_LineInfo info;
+  unsigned char *standard_opcodes;
+  unsigned char *data = start;
+  unsigned char *end = start + section->sh_size;
+  unsigned char *end_of_sequence;
+  int i;
 
   printf (_("\nDump of debug contents of section %s:\n\n"),
 	  SECTION_NAME (section));
@@ -6292,7 +6399,7 @@ display_debug_lines (section, start, file)
       reset_state_machine (info.li_default_is_stmt);
 
       /* Display the contents of the Opcodes table.  */
-      standard_opcodes = data + sizeof (* external);
+      standard_opcodes = data + sizeof (*external);
 
       printf (_("\n Opcodes:\n"));
 
@@ -6302,13 +6409,13 @@ display_debug_lines (section, start, file)
       /* Display the contents of the Directory table.  */
       data = standard_opcodes + info.li_opcode_base - 1;
 
-      if (* data == 0)
+      if (*data == 0)
 	printf (_("\n The Directory Table is empty.\n"));
       else
 	{
 	  printf (_("\n The Directory Table:\n"));
 
-	  while (* data != 0)
+	  while (*data != 0)
 	    {
 	      printf (_("  %s\n"), data);
 
@@ -6317,22 +6424,22 @@ display_debug_lines (section, start, file)
 	}
 
       /* Skip the NUL at the end of the table.  */
-      data ++;
+      data++;
 
       /* Display the contents of the File Name table.  */
-      if (* data == 0)
+      if (*data == 0)
 	printf (_("\n The File Name Table is empty.\n"));
       else
 	{
 	  printf (_("\n The File Name Table:\n"));
 	  printf (_("  Entry\tDir\tTime\tSize\tName\n"));
 
-	  while (* data != 0)
+	  while (*data != 0)
 	    {
-	      unsigned char * name;
+	      unsigned char *name;
 	      int bytes_read;
 
-	      printf (_("  %d\t"), ++ state_machine_regs.last_file_entry);
+	      printf (_("  %d\t"), ++state_machine_regs.last_file_entry);
 	      name = data;
 
 	      data += strlen ((char *) data) + 1;
@@ -6348,7 +6455,7 @@ display_debug_lines (section, start, file)
 	}
 
       /* Skip the NUL at the end of the table.  */
-      data ++;
+      data++;
 
       /* Now display the statements.  */
       printf (_("\n Line Number Statements:\n"));
@@ -6357,10 +6464,10 @@ display_debug_lines (section, start, file)
       while (data < end_of_sequence)
 	{
 	  unsigned char op_code;
-	  int           adv;
-	  int           bytes_read;
+	  int adv;
+	  int bytes_read;
 
-	  op_code = * data ++;
+	  op_code = *data++;
 
 	  if (op_code >= info.li_opcode_base)
 	    {
@@ -6481,13 +6588,13 @@ display_debug_lines (section, start, file)
 
 static int
 display_debug_pubnames (section, start, file)
-     Elf_Internal_Shdr *   section;
-     unsigned char *       start;
-     FILE *                file ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr *section;
+     unsigned char *start;
+     FILE *file ATTRIBUTE_UNUSED;
 {
-  DWARF2_External_PubNames * external;
-  DWARF2_Internal_PubNames   pubnames;
-  unsigned char *            end;
+  DWARF2_External_PubNames *external;
+  DWARF2_Internal_PubNames pubnames;
+  unsigned char *end;
 
   end = start + section->sh_size;
 
@@ -6495,8 +6602,8 @@ display_debug_pubnames (section, start, file)
 
   while (start < end)
     {
-      unsigned char * data;
-      unsigned long   offset;
+      unsigned char *data;
+      unsigned long offset;
 
       external = (DWARF2_External_PubNames *) start;
 
@@ -6505,7 +6612,7 @@ display_debug_pubnames (section, start, file)
       pubnames.pn_offset  = BYTE_GET (external->pn_offset);
       pubnames.pn_size    = BYTE_GET (external->pn_size);
 
-      data   = start + sizeof (* external);
+      data   = start + sizeof (*external);
       start += pubnames.pn_length + sizeof (external->pn_length);
 
       if (pubnames.pn_length == 0xffffffff)
@@ -6562,70 +6669,70 @@ get_TAG_name (tag)
 {
   switch (tag)
     {
-    case DW_TAG_padding:                return "DW_TAG_padding";
-    case DW_TAG_array_type:             return "DW_TAG_array_type";
-    case DW_TAG_class_type:             return "DW_TAG_class_type";
-    case DW_TAG_entry_point:            return "DW_TAG_entry_point";
-    case DW_TAG_enumeration_type:       return "DW_TAG_enumeration_type";
-    case DW_TAG_formal_parameter:       return "DW_TAG_formal_parameter";
-    case DW_TAG_imported_declaration:   return "DW_TAG_imported_declaration";
-    case DW_TAG_label:                  return "DW_TAG_label";
-    case DW_TAG_lexical_block:          return "DW_TAG_lexical_block";
-    case DW_TAG_member:                 return "DW_TAG_member";
-    case DW_TAG_pointer_type:           return "DW_TAG_pointer_type";
-    case DW_TAG_reference_type:         return "DW_TAG_reference_type";
-    case DW_TAG_compile_unit:           return "DW_TAG_compile_unit";
-    case DW_TAG_string_type:            return "DW_TAG_string_type";
-    case DW_TAG_structure_type:         return "DW_TAG_structure_type";
-    case DW_TAG_subroutine_type:        return "DW_TAG_subroutine_type";
-    case DW_TAG_typedef:                return "DW_TAG_typedef";
-    case DW_TAG_union_type:             return "DW_TAG_union_type";
+    case DW_TAG_padding:		return "DW_TAG_padding";
+    case DW_TAG_array_type:		return "DW_TAG_array_type";
+    case DW_TAG_class_type:		return "DW_TAG_class_type";
+    case DW_TAG_entry_point:		return "DW_TAG_entry_point";
+    case DW_TAG_enumeration_type:	return "DW_TAG_enumeration_type";
+    case DW_TAG_formal_parameter:	return "DW_TAG_formal_parameter";
+    case DW_TAG_imported_declaration:	return "DW_TAG_imported_declaration";
+    case DW_TAG_label:			return "DW_TAG_label";
+    case DW_TAG_lexical_block:		return "DW_TAG_lexical_block";
+    case DW_TAG_member:			return "DW_TAG_member";
+    case DW_TAG_pointer_type:		return "DW_TAG_pointer_type";
+    case DW_TAG_reference_type:		return "DW_TAG_reference_type";
+    case DW_TAG_compile_unit:		return "DW_TAG_compile_unit";
+    case DW_TAG_string_type:		return "DW_TAG_string_type";
+    case DW_TAG_structure_type:		return "DW_TAG_structure_type";
+    case DW_TAG_subroutine_type:	return "DW_TAG_subroutine_type";
+    case DW_TAG_typedef:		return "DW_TAG_typedef";
+    case DW_TAG_union_type:		return "DW_TAG_union_type";
     case DW_TAG_unspecified_parameters: return "DW_TAG_unspecified_parameters";
-    case DW_TAG_variant:                return "DW_TAG_variant";
-    case DW_TAG_common_block:           return "DW_TAG_common_block";
-    case DW_TAG_common_inclusion:       return "DW_TAG_common_inclusion";
-    case DW_TAG_inheritance:            return "DW_TAG_inheritance";
-    case DW_TAG_inlined_subroutine:     return "DW_TAG_inlined_subroutine";
-    case DW_TAG_module:                 return "DW_TAG_module";
-    case DW_TAG_ptr_to_member_type:     return "DW_TAG_ptr_to_member_type";
-    case DW_TAG_set_type:               return "DW_TAG_set_type";
-    case DW_TAG_subrange_type:          return "DW_TAG_subrange_type";
-    case DW_TAG_with_stmt:              return "DW_TAG_with_stmt";
-    case DW_TAG_access_declaration:     return "DW_TAG_access_declaration";
-    case DW_TAG_base_type:              return "DW_TAG_base_type";
-    case DW_TAG_catch_block:            return "DW_TAG_catch_block";
-    case DW_TAG_const_type:             return "DW_TAG_const_type";
-    case DW_TAG_constant:               return "DW_TAG_constant";
-    case DW_TAG_enumerator:             return "DW_TAG_enumerator";
-    case DW_TAG_file_type:              return "DW_TAG_file_type";
-    case DW_TAG_friend:                 return "DW_TAG_friend";
-    case DW_TAG_namelist:               return "DW_TAG_namelist";
-    case DW_TAG_namelist_item:          return "DW_TAG_namelist_item";
-    case DW_TAG_packed_type:            return "DW_TAG_packed_type";
-    case DW_TAG_subprogram:             return "DW_TAG_subprogram";
-    case DW_TAG_template_type_param:    return "DW_TAG_template_type_param";
-    case DW_TAG_template_value_param:   return "DW_TAG_template_value_param";
-    case DW_TAG_thrown_type:            return "DW_TAG_thrown_type";
-    case DW_TAG_try_block:              return "DW_TAG_try_block";
-    case DW_TAG_variant_part:           return "DW_TAG_variant_part";
-    case DW_TAG_variable:               return "DW_TAG_variable";
-    case DW_TAG_volatile_type:          return "DW_TAG_volatile_type";
-    case DW_TAG_MIPS_loop:              return "DW_TAG_MIPS_loop";
-    case DW_TAG_format_label:           return "DW_TAG_format_label";
-    case DW_TAG_function_template:      return "DW_TAG_function_template";
-    case DW_TAG_class_template:         return "DW_TAG_class_template";
+    case DW_TAG_variant:		return "DW_TAG_variant";
+    case DW_TAG_common_block:		return "DW_TAG_common_block";
+    case DW_TAG_common_inclusion:	return "DW_TAG_common_inclusion";
+    case DW_TAG_inheritance:		return "DW_TAG_inheritance";
+    case DW_TAG_inlined_subroutine:	return "DW_TAG_inlined_subroutine";
+    case DW_TAG_module:			return "DW_TAG_module";
+    case DW_TAG_ptr_to_member_type:	return "DW_TAG_ptr_to_member_type";
+    case DW_TAG_set_type:		return "DW_TAG_set_type";
+    case DW_TAG_subrange_type:		return "DW_TAG_subrange_type";
+    case DW_TAG_with_stmt:		return "DW_TAG_with_stmt";
+    case DW_TAG_access_declaration:	return "DW_TAG_access_declaration";
+    case DW_TAG_base_type:		return "DW_TAG_base_type";
+    case DW_TAG_catch_block:		return "DW_TAG_catch_block";
+    case DW_TAG_const_type:		return "DW_TAG_const_type";
+    case DW_TAG_constant:		return "DW_TAG_constant";
+    case DW_TAG_enumerator:		return "DW_TAG_enumerator";
+    case DW_TAG_file_type:		return "DW_TAG_file_type";
+    case DW_TAG_friend:			return "DW_TAG_friend";
+    case DW_TAG_namelist:		return "DW_TAG_namelist";
+    case DW_TAG_namelist_item:		return "DW_TAG_namelist_item";
+    case DW_TAG_packed_type:		return "DW_TAG_packed_type";
+    case DW_TAG_subprogram:		return "DW_TAG_subprogram";
+    case DW_TAG_template_type_param:	return "DW_TAG_template_type_param";
+    case DW_TAG_template_value_param:	return "DW_TAG_template_value_param";
+    case DW_TAG_thrown_type:		return "DW_TAG_thrown_type";
+    case DW_TAG_try_block:		return "DW_TAG_try_block";
+    case DW_TAG_variant_part:		return "DW_TAG_variant_part";
+    case DW_TAG_variable:		return "DW_TAG_variable";
+    case DW_TAG_volatile_type:		return "DW_TAG_volatile_type";
+    case DW_TAG_MIPS_loop:		return "DW_TAG_MIPS_loop";
+    case DW_TAG_format_label:		return "DW_TAG_format_label";
+    case DW_TAG_function_template:	return "DW_TAG_function_template";
+    case DW_TAG_class_template:		return "DW_TAG_class_template";
       /* DWARF 2.1 values.  */
-    case DW_TAG_dwarf_procedure:        return "DW_TAG_dwarf_procedure";
-    case DW_TAG_restrict_type:          return "DW_TAG_restrict_type";
-    case DW_TAG_interface_type:         return "DW_TAG_interface_type";
-    case DW_TAG_namespace:              return "DW_TAG_namespace";
-    case DW_TAG_imported_module:        return "DW_TAG_imported_module";
-    case DW_TAG_unspecified_type:       return "DW_TAG_unspecified_type";
-    case DW_TAG_partial_unit:           return "DW_TAG_partial_unit";
-    case DW_TAG_imported_unit:          return "DW_TAG_imported_unit";
+    case DW_TAG_dwarf_procedure:	return "DW_TAG_dwarf_procedure";
+    case DW_TAG_restrict_type:		return "DW_TAG_restrict_type";
+    case DW_TAG_interface_type:		return "DW_TAG_interface_type";
+    case DW_TAG_namespace:		return "DW_TAG_namespace";
+    case DW_TAG_imported_module:	return "DW_TAG_imported_module";
+    case DW_TAG_unspecified_type:	return "DW_TAG_unspecified_type";
+    case DW_TAG_partial_unit:		return "DW_TAG_partial_unit";
+    case DW_TAG_imported_unit:		return "DW_TAG_imported_unit";
     default:
       {
-	static char buffer [100];
+	static char buffer[100];
 
 	sprintf (buffer, _("Unknown TAG value: %lx"), tag);
 	return buffer;
@@ -6639,104 +6746,105 @@ get_AT_name (attribute)
 {
   switch (attribute)
     {
-    case DW_AT_sibling:              return "DW_AT_sibling";
-    case DW_AT_location:             return "DW_AT_location";
-    case DW_AT_name:                 return "DW_AT_name";
-    case DW_AT_ordering:             return "DW_AT_ordering";
-    case DW_AT_subscr_data:          return "DW_AT_subscr_data";
-    case DW_AT_byte_size:            return "DW_AT_byte_size";
-    case DW_AT_bit_offset:           return "DW_AT_bit_offset";
-    case DW_AT_bit_size:             return "DW_AT_bit_size";
-    case DW_AT_element_list:         return "DW_AT_element_list";
-    case DW_AT_stmt_list:            return "DW_AT_stmt_list";
-    case DW_AT_low_pc:               return "DW_AT_low_pc";
-    case DW_AT_high_pc:              return "DW_AT_high_pc";
-    case DW_AT_language:             return "DW_AT_language";
-    case DW_AT_member:               return "DW_AT_member";
-    case DW_AT_discr:                return "DW_AT_discr";
-    case DW_AT_discr_value:          return "DW_AT_discr_value";
-    case DW_AT_visibility:           return "DW_AT_visibility";
-    case DW_AT_import:               return "DW_AT_import";
-    case DW_AT_string_length:        return "DW_AT_string_length";
-    case DW_AT_common_reference:     return "DW_AT_common_reference";
-    case DW_AT_comp_dir:             return "DW_AT_comp_dir";
-    case DW_AT_const_value:          return "DW_AT_const_value";
-    case DW_AT_containing_type:      return "DW_AT_containing_type";
-    case DW_AT_default_value:        return "DW_AT_default_value";
-    case DW_AT_inline:               return "DW_AT_inline";
-    case DW_AT_is_optional:          return "DW_AT_is_optional";
-    case DW_AT_lower_bound:          return "DW_AT_lower_bound";
-    case DW_AT_producer:             return "DW_AT_producer";
-    case DW_AT_prototyped:           return "DW_AT_prototyped";
-    case DW_AT_return_addr:          return "DW_AT_return_addr";
-    case DW_AT_start_scope:          return "DW_AT_start_scope";
-    case DW_AT_stride_size:          return "DW_AT_stride_size";
-    case DW_AT_upper_bound:          return "DW_AT_upper_bound";
-    case DW_AT_abstract_origin:      return "DW_AT_abstract_origin";
-    case DW_AT_accessibility:        return "DW_AT_accessibility";
-    case DW_AT_address_class:        return "DW_AT_address_class";
-    case DW_AT_artificial:           return "DW_AT_artificial";
-    case DW_AT_base_types:           return "DW_AT_base_types";
-    case DW_AT_calling_convention:   return "DW_AT_calling_convention";
-    case DW_AT_count:                return "DW_AT_count";
-    case DW_AT_data_member_location: return "DW_AT_data_member_location";
-    case DW_AT_decl_column:          return "DW_AT_decl_column";
-    case DW_AT_decl_file:            return "DW_AT_decl_file";
-    case DW_AT_decl_line:            return "DW_AT_decl_line";
-    case DW_AT_declaration:          return "DW_AT_declaration";
-    case DW_AT_discr_list:           return "DW_AT_discr_list";
-    case DW_AT_encoding:             return "DW_AT_encoding";
-    case DW_AT_external:             return "DW_AT_external";
-    case DW_AT_frame_base:           return "DW_AT_frame_base";
-    case DW_AT_friend:               return "DW_AT_friend";
-    case DW_AT_identifier_case:      return "DW_AT_identifier_case";
-    case DW_AT_macro_info:           return "DW_AT_macro_info";
-    case DW_AT_namelist_items:       return "DW_AT_namelist_items";
-    case DW_AT_priority:             return "DW_AT_priority";
-    case DW_AT_segment:              return "DW_AT_segment";
-    case DW_AT_specification:        return "DW_AT_specification";
-    case DW_AT_static_link:          return "DW_AT_static_link";
-    case DW_AT_type:                 return "DW_AT_type";
-    case DW_AT_use_location:         return "DW_AT_use_location";
-    case DW_AT_variable_parameter:   return "DW_AT_variable_parameter";
-    case DW_AT_virtuality:           return "DW_AT_virtuality";
-    case DW_AT_vtable_elem_location: return "DW_AT_vtable_elem_location";
+    case DW_AT_sibling:			return "DW_AT_sibling";
+    case DW_AT_location:		return "DW_AT_location";
+    case DW_AT_name:			return "DW_AT_name";
+    case DW_AT_ordering:		return "DW_AT_ordering";
+    case DW_AT_subscr_data:		return "DW_AT_subscr_data";
+    case DW_AT_byte_size:		return "DW_AT_byte_size";
+    case DW_AT_bit_offset:		return "DW_AT_bit_offset";
+    case DW_AT_bit_size:		return "DW_AT_bit_size";
+    case DW_AT_element_list:		return "DW_AT_element_list";
+    case DW_AT_stmt_list:		return "DW_AT_stmt_list";
+    case DW_AT_low_pc:			return "DW_AT_low_pc";
+    case DW_AT_high_pc:			return "DW_AT_high_pc";
+    case DW_AT_language:		return "DW_AT_language";
+    case DW_AT_member:			return "DW_AT_member";
+    case DW_AT_discr:			return "DW_AT_discr";
+    case DW_AT_discr_value:		return "DW_AT_discr_value";
+    case DW_AT_visibility:		return "DW_AT_visibility";
+    case DW_AT_import:			return "DW_AT_import";
+    case DW_AT_string_length:		return "DW_AT_string_length";
+    case DW_AT_common_reference:	return "DW_AT_common_reference";
+    case DW_AT_comp_dir:		return "DW_AT_comp_dir";
+    case DW_AT_const_value:		return "DW_AT_const_value";
+    case DW_AT_containing_type:		return "DW_AT_containing_type";
+    case DW_AT_default_value:		return "DW_AT_default_value";
+    case DW_AT_inline:			return "DW_AT_inline";
+    case DW_AT_is_optional:		return "DW_AT_is_optional";
+    case DW_AT_lower_bound:		return "DW_AT_lower_bound";
+    case DW_AT_producer:		return "DW_AT_producer";
+    case DW_AT_prototyped:		return "DW_AT_prototyped";
+    case DW_AT_return_addr:		return "DW_AT_return_addr";
+    case DW_AT_start_scope:		return "DW_AT_start_scope";
+    case DW_AT_stride_size:		return "DW_AT_stride_size";
+    case DW_AT_upper_bound:		return "DW_AT_upper_bound";
+    case DW_AT_abstract_origin:		return "DW_AT_abstract_origin";
+    case DW_AT_accessibility:		return "DW_AT_accessibility";
+    case DW_AT_address_class:		return "DW_AT_address_class";
+    case DW_AT_artificial:		return "DW_AT_artificial";
+    case DW_AT_base_types:		return "DW_AT_base_types";
+    case DW_AT_calling_convention:	return "DW_AT_calling_convention";
+    case DW_AT_count:			return "DW_AT_count";
+    case DW_AT_data_member_location:	return "DW_AT_data_member_location";
+    case DW_AT_decl_column:		return "DW_AT_decl_column";
+    case DW_AT_decl_file:		return "DW_AT_decl_file";
+    case DW_AT_decl_line:		return "DW_AT_decl_line";
+    case DW_AT_declaration:		return "DW_AT_declaration";
+    case DW_AT_discr_list:		return "DW_AT_discr_list";
+    case DW_AT_encoding:		return "DW_AT_encoding";
+    case DW_AT_external:		return "DW_AT_external";
+    case DW_AT_frame_base:		return "DW_AT_frame_base";
+    case DW_AT_friend:			return "DW_AT_friend";
+    case DW_AT_identifier_case:		return "DW_AT_identifier_case";
+    case DW_AT_macro_info:		return "DW_AT_macro_info";
+    case DW_AT_namelist_items:		return "DW_AT_namelist_items";
+    case DW_AT_priority:		return "DW_AT_priority";
+    case DW_AT_segment:			return "DW_AT_segment";
+    case DW_AT_specification:		return "DW_AT_specification";
+    case DW_AT_static_link:		return "DW_AT_static_link";
+    case DW_AT_type:			return "DW_AT_type";
+    case DW_AT_use_location:		return "DW_AT_use_location";
+    case DW_AT_variable_parameter:	return "DW_AT_variable_parameter";
+    case DW_AT_virtuality:		return "DW_AT_virtuality";
+    case DW_AT_vtable_elem_location:	return "DW_AT_vtable_elem_location";
       /* DWARF 2.1 values.  */
-    case DW_AT_allocated:            return "DW_AT_allocated";
-    case DW_AT_associated:           return "DW_AT_associated";
-    case DW_AT_data_location:        return "DW_AT_data_location";
-    case DW_AT_stride:               return "DW_AT_stride";
-    case DW_AT_entry_pc:             return "DW_AT_entry_pc";
-    case DW_AT_use_UTF8:             return "DW_AT_use_UTF8";
-    case DW_AT_extension:            return "DW_AT_extension";
-    case DW_AT_ranges:               return "DW_AT_ranges";
-    case DW_AT_trampoline:           return "DW_AT_trampoline";
-    case DW_AT_call_column:          return "DW_AT_call_column";
-    case DW_AT_call_file:            return "DW_AT_call_file";
-    case DW_AT_call_line:            return "DW_AT_call_line";
+    case DW_AT_allocated:		return "DW_AT_allocated";
+    case DW_AT_associated:		return "DW_AT_associated";
+    case DW_AT_data_location:		return "DW_AT_data_location";
+    case DW_AT_stride:			return "DW_AT_stride";
+    case DW_AT_entry_pc:		return "DW_AT_entry_pc";
+    case DW_AT_use_UTF8:		return "DW_AT_use_UTF8";
+    case DW_AT_extension:		return "DW_AT_extension";
+    case DW_AT_ranges:			return "DW_AT_ranges";
+    case DW_AT_trampoline:		return "DW_AT_trampoline";
+    case DW_AT_call_column:		return "DW_AT_call_column";
+    case DW_AT_call_file:		return "DW_AT_call_file";
+    case DW_AT_call_line:		return "DW_AT_call_line";
       /* SGI/MIPS extensions.  */
-    case DW_AT_MIPS_fde:             return "DW_AT_MIPS_fde";
-    case DW_AT_MIPS_loop_begin:      return "DW_AT_MIPS_loop_begin";
-    case DW_AT_MIPS_tail_loop_begin: return "DW_AT_MIPS_tail_loop_begin";
-    case DW_AT_MIPS_epilog_begin:    return "DW_AT_MIPS_epilog_begin";
+    case DW_AT_MIPS_fde:		return "DW_AT_MIPS_fde";
+    case DW_AT_MIPS_loop_begin:		return "DW_AT_MIPS_loop_begin";
+    case DW_AT_MIPS_tail_loop_begin:	return "DW_AT_MIPS_tail_loop_begin";
+    case DW_AT_MIPS_epilog_begin:	return "DW_AT_MIPS_epilog_begin";
     case DW_AT_MIPS_loop_unroll_factor: return "DW_AT_MIPS_loop_unroll_factor";
-    case DW_AT_MIPS_software_pipeline_depth: return "DW_AT_MIPS_software_pipeline_depth";
-    case DW_AT_MIPS_linkage_name:    return "DW_AT_MIPS_linkage_name";
-    case DW_AT_MIPS_stride:          return "DW_AT_MIPS_stride";
-    case DW_AT_MIPS_abstract_name:   return "DW_AT_MIPS_abstract_name";
-    case DW_AT_MIPS_clone_origin:    return "DW_AT_MIPS_clone_origin";
-    case DW_AT_MIPS_has_inlines:     return "DW_AT_MIPS_has_inlines";
+    case DW_AT_MIPS_software_pipeline_depth:
+      return "DW_AT_MIPS_software_pipeline_depth";
+    case DW_AT_MIPS_linkage_name:	return "DW_AT_MIPS_linkage_name";
+    case DW_AT_MIPS_stride:		return "DW_AT_MIPS_stride";
+    case DW_AT_MIPS_abstract_name:	return "DW_AT_MIPS_abstract_name";
+    case DW_AT_MIPS_clone_origin:	return "DW_AT_MIPS_clone_origin";
+    case DW_AT_MIPS_has_inlines:	return "DW_AT_MIPS_has_inlines";
       /* GNU extensions.  */
-    case DW_AT_sf_names:             return "DW_AT_sf_names";
-    case DW_AT_src_info:             return "DW_AT_src_info";
-    case DW_AT_mac_info:             return "DW_AT_mac_info";
-    case DW_AT_src_coords:           return "DW_AT_src_coords";
-    case DW_AT_body_begin:           return "DW_AT_body_begin";
-    case DW_AT_body_end:             return "DW_AT_body_end";
-    case DW_AT_GNU_vector:           return "DW_AT_GNU_vector";
+    case DW_AT_sf_names:		return "DW_AT_sf_names";
+    case DW_AT_src_info:		return "DW_AT_src_info";
+    case DW_AT_mac_info:		return "DW_AT_mac_info";
+    case DW_AT_src_coords:		return "DW_AT_src_coords";
+    case DW_AT_body_begin:		return "DW_AT_body_begin";
+    case DW_AT_body_end:		return "DW_AT_body_end";
+    case DW_AT_GNU_vector:		return "DW_AT_GNU_vector";
     default:
       {
-	static char buffer [100];
+	static char buffer[100];
 
 	sprintf (buffer, _("Unknown AT value: %lx"), attribute);
 	return buffer;
@@ -6750,30 +6858,30 @@ get_FORM_name (form)
 {
   switch (form)
     {
-    case DW_FORM_addr:      return "DW_FORM_addr";
-    case DW_FORM_block2:    return "DW_FORM_block2";
-    case DW_FORM_block4:    return "DW_FORM_block4";
-    case DW_FORM_data2:     return "DW_FORM_data2";
-    case DW_FORM_data4:     return "DW_FORM_data4";
-    case DW_FORM_data8:     return "DW_FORM_data8";
-    case DW_FORM_string:    return "DW_FORM_string";
-    case DW_FORM_block:     return "DW_FORM_block";
-    case DW_FORM_block1:    return "DW_FORM_block1";
-    case DW_FORM_data1:     return "DW_FORM_data1";
-    case DW_FORM_flag:      return "DW_FORM_flag";
-    case DW_FORM_sdata:     return "DW_FORM_sdata";
-    case DW_FORM_strp:      return "DW_FORM_strp";
-    case DW_FORM_udata:     return "DW_FORM_udata";
-    case DW_FORM_ref_addr:  return "DW_FORM_ref_addr";
-    case DW_FORM_ref1:      return "DW_FORM_ref1";
-    case DW_FORM_ref2:      return "DW_FORM_ref2";
-    case DW_FORM_ref4:      return "DW_FORM_ref4";
-    case DW_FORM_ref8:      return "DW_FORM_ref8";
-    case DW_FORM_ref_udata: return "DW_FORM_ref_udata";
-    case DW_FORM_indirect:  return "DW_FORM_indirect";
+    case DW_FORM_addr:		return "DW_FORM_addr";
+    case DW_FORM_block2:	return "DW_FORM_block2";
+    case DW_FORM_block4:	return "DW_FORM_block4";
+    case DW_FORM_data2:		return "DW_FORM_data2";
+    case DW_FORM_data4:		return "DW_FORM_data4";
+    case DW_FORM_data8:		return "DW_FORM_data8";
+    case DW_FORM_string:	return "DW_FORM_string";
+    case DW_FORM_block:		return "DW_FORM_block";
+    case DW_FORM_block1:	return "DW_FORM_block1";
+    case DW_FORM_data1:		return "DW_FORM_data1";
+    case DW_FORM_flag:		return "DW_FORM_flag";
+    case DW_FORM_sdata:		return "DW_FORM_sdata";
+    case DW_FORM_strp:		return "DW_FORM_strp";
+    case DW_FORM_udata:		return "DW_FORM_udata";
+    case DW_FORM_ref_addr:	return "DW_FORM_ref_addr";
+    case DW_FORM_ref1:		return "DW_FORM_ref1";
+    case DW_FORM_ref2:		return "DW_FORM_ref2";
+    case DW_FORM_ref4:		return "DW_FORM_ref4";
+    case DW_FORM_ref8:		return "DW_FORM_ref8";
+    case DW_FORM_ref_udata:	return "DW_FORM_ref_udata";
+    case DW_FORM_indirect:	return "DW_FORM_indirect";
     default:
       {
-	static char buffer [100];
+	static char buffer[100];
 
 	sprintf (buffer, _("Unknown FORM value: %lx"), form);
 	return buffer;
@@ -6786,39 +6894,39 @@ get_FORM_name (form)
    is simple to implement.  */
 typedef struct abbrev_attr
 {
-  unsigned long        attribute;
-  unsigned long        form;
-  struct abbrev_attr * next;
+  unsigned long attribute;
+  unsigned long form;
+  struct abbrev_attr *next;
 }
 abbrev_attr;
 
 typedef struct abbrev_entry
 {
-  unsigned long          entry;
-  unsigned long          tag;
-  int                    children;
-  struct abbrev_attr *   first_attr;
-  struct abbrev_attr *   last_attr;
-  struct abbrev_entry *  next;
+  unsigned long entry;
+  unsigned long tag;
+  int children;
+  struct abbrev_attr *first_attr;
+  struct abbrev_attr *last_attr;
+  struct abbrev_entry *next;
 }
 abbrev_entry;
 
-static abbrev_entry * first_abbrev = NULL;
-static abbrev_entry * last_abbrev = NULL;
+static abbrev_entry *first_abbrev = NULL;
+static abbrev_entry *last_abbrev = NULL;
 
 static void
-free_abbrevs PARAMS ((void))
+free_abbrevs ()
 {
-  abbrev_entry * abbrev;
+  abbrev_entry *abbrev;
 
   for (abbrev = first_abbrev; abbrev;)
     {
-      abbrev_entry * next = abbrev->next;
-      abbrev_attr  * attr;
+      abbrev_entry *next = abbrev->next;
+      abbrev_attr *attr;
 
       for (attr = abbrev->first_attr; attr;)
 	{
-	  abbrev_attr * next = attr->next;
+	  abbrev_attr *next = attr->next;
 
 	  free (attr);
 	  attr = next;
@@ -6835,11 +6943,11 @@ static void
 add_abbrev (number, tag, children)
      unsigned long number;
      unsigned long tag;
-     int           children;
+     int children;
 {
-  abbrev_entry * entry;
+  abbrev_entry *entry;
 
-  entry = (abbrev_entry *) malloc (sizeof (* entry));
+  entry = (abbrev_entry *) malloc (sizeof (*entry));
 
   if (entry == NULL)
     /* ugg */
@@ -6865,9 +6973,9 @@ add_abbrev_attr (attribute, form)
      unsigned long attribute;
      unsigned long form;
 {
-  abbrev_attr * attr;
+  abbrev_attr *attr;
 
-  attr = (abbrev_attr *) malloc (sizeof (* attr));
+  attr = (abbrev_attr *) malloc (sizeof (*attr));
 
   if (attr == NULL)
     /* ugg */
@@ -6892,19 +7000,19 @@ add_abbrev_attr (attribute, form)
 
 static unsigned char *
 process_abbrev_section (start, end)
-     unsigned char * start;
-     unsigned char * end;
+     unsigned char *start;
+     unsigned char *end;
 {
   if (first_abbrev != NULL)
     return NULL;
 
   while (start < end)
     {
-      int           bytes_read;
+      int bytes_read;
       unsigned long entry;
       unsigned long tag;
       unsigned long attribute;
-      int           children;
+      int children;
 
       entry = read_leb128 (start, & bytes_read, 0);
       start += bytes_read;
@@ -6918,7 +7026,7 @@ process_abbrev_section (start, end)
       tag = read_leb128 (start, & bytes_read, 0);
       start += bytes_read;
 
-      children = * start ++;
+      children = *start++;
 
       add_abbrev (entry, tag, children);
 
@@ -6944,12 +7052,12 @@ process_abbrev_section (start, end)
 
 static int
 display_debug_macinfo (section, start, file)
-     Elf_Internal_Shdr *   section;
-     unsigned char *       start;
-     FILE *                file ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr *section;
+     unsigned char *start;
+     FILE *file ATTRIBUTE_UNUSED;
 {
-  unsigned char * end = start + section->sh_size;
-  unsigned char * curr = start;
+  unsigned char *end = start + section->sh_size;
+  unsigned char *curr = start;
   unsigned int bytes_read;
   enum dwarf_macinfo_record_type op;
 
@@ -6958,10 +7066,10 @@ display_debug_macinfo (section, start, file)
   while (curr < end)
     {
       unsigned int lineno;
-      const char * string;
+      const char *string;
 
-      op = * curr;
-      curr ++;
+      op = *curr;
+      curr++;
 
       switch (op)
 	{
@@ -7018,12 +7126,12 @@ display_debug_macinfo (section, start, file)
 
 static int
 display_debug_abbrev (section, start, file)
-     Elf_Internal_Shdr *   section;
-     unsigned char *       start;
-     FILE *                file ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr *section;
+     unsigned char *start;
+     FILE *file ATTRIBUTE_UNUSED;
 {
-  abbrev_entry *  entry;
-  unsigned char * end = start + section->sh_size;
+  abbrev_entry *entry;
+  unsigned char *end = start + section->sh_size;
 
   printf (_("Contents of the %s section:\n\n"), SECTION_NAME (section));
 
@@ -7038,7 +7146,7 @@ display_debug_abbrev (section, start, file)
 
       for (entry = first_abbrev; entry; entry = entry->next)
 	{
-	  abbrev_attr * attr;
+	  abbrev_attr *attr;
 
 	  printf (_("   %ld      %s    [%s]\n"),
 		  entry->entry,
@@ -7065,13 +7173,13 @@ display_debug_abbrev (section, start, file)
 
 static unsigned char *
 display_block (data, length)
-     unsigned char * data;
-     unsigned long   length;
+     unsigned char *data;
+     unsigned long length;
 {
   printf (_(" %lu byte block: "), length);
 
   while (length --)
-    printf ("%lx ", (unsigned long) byte_get (data ++, 1));
+    printf ("%lx ", (unsigned long) byte_get (data++, 1));
 
   return data;
 }
@@ -7079,17 +7187,17 @@ display_block (data, length)
 static void
 decode_location_expression (data, pointer_size, length)
      unsigned char * data;
-     unsigned int    pointer_size;
-     unsigned long   length;
+     unsigned int pointer_size;
+     unsigned long length;
 {
-  unsigned        op;
-  int             bytes_read;
-  unsigned long   uvalue;
-  unsigned char * end = data + length;
+  unsigned op;
+  int bytes_read;
+  unsigned long uvalue;
+  unsigned char *end = data + length;
 
   while (data < end)
     {
-      op = * data ++;
+      op = *data++;
 
       switch (op)
 	{
@@ -7408,15 +7516,15 @@ decode_location_expression (data, pointer_size, length)
     }
 }
 
-static const char * debug_loc_contents;
-static bfd_vma      debug_loc_size;
+static const char *debug_loc_contents;
+static bfd_vma debug_loc_size;
 
 static void
 load_debug_loc (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf_Internal_Shdr * sec;
-  unsigned int        i;
+  Elf_Internal_Shdr *sec;
+  unsigned int i;
 
   /* If it is already loaded, do nothing.  */
   if (debug_loc_contents != NULL)
@@ -7425,7 +7533,7 @@ load_debug_loc (file)
   /* Locate the .debug_loc section.  */
   for (i = 0, sec = section_headers;
        i < elf_header.e_shnum;
-       i ++, sec ++)
+       i++, sec++)
     if (strcmp (SECTION_NAME (sec), ".debug_loc") == 0)
       break;
 
@@ -7453,9 +7561,9 @@ free_debug_loc ()
 
 static int
 display_debug_loc (section, start, file)
-     Elf_Internal_Shdr * section;
-     unsigned char * start;
-     FILE * file ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr *section;
+     unsigned char *start;
+     FILE *file ATTRIBUTE_UNUSED;
 {
   unsigned char *section_end;
   unsigned long bytes;
@@ -7518,15 +7626,15 @@ display_debug_loc (section, start, file)
   return 1;
 }
 
-static const char * debug_str_contents;
-static bfd_vma      debug_str_size;
+static const char *debug_str_contents;
+static bfd_vma debug_str_size;
 
 static void
 load_debug_str (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf_Internal_Shdr * sec;
-  unsigned int        i;
+  Elf_Internal_Shdr *sec;
+  unsigned int i;
 
   /* If it is already loaded, do nothing.  */
   if (debug_str_contents != NULL)
@@ -7535,7 +7643,7 @@ load_debug_str (file)
   /* Locate the .debug_str section.  */
   for (i = 0, sec = section_headers;
        i < elf_header.e_shnum;
-       i ++, sec ++)
+       i++, sec++)
     if (strcmp (SECTION_NAME (sec), ".debug_str") == 0)
       break;
 
@@ -7575,12 +7683,12 @@ fetch_indirect_string (offset)
 
 static int
 display_debug_str (section, start, file)
-     Elf_Internal_Shdr * section;
-     unsigned char *       start;
-     FILE *                file ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr *section;
+     unsigned char *start;
+     FILE *file ATTRIBUTE_UNUSED;
 {
-  unsigned long   bytes;
-  bfd_vma         addr;
+  unsigned long bytes;
+  bfd_vma addr;
 
   addr  = section->sh_addr;
   bytes = section->sh_size;
@@ -7606,7 +7714,7 @@ display_debug_str (section, start, file)
       for (j = 0; j < 16; j++)
 	{
 	  if (j < lbytes)
-	    printf ("%2.2x", start [j]);
+	    printf ("%2.2x", start[j]);
 	  else
 	    printf ("  ");
 
@@ -7616,7 +7724,7 @@ display_debug_str (section, start, file)
 
       for (j = 0; j < lbytes; j++)
 	{
-	  k = start [j];
+	  k = start[j];
 	  if (k >= ' ' && k < 0x80)
 	    printf ("%c", k);
 	  else
@@ -7635,15 +7743,15 @@ display_debug_str (section, start, file)
 
 static unsigned char *
 read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
-     unsigned long   attribute;
-     unsigned long   form;
-     unsigned char * data;
-     unsigned long   cu_offset;
-     unsigned long   pointer_size;
+     unsigned long attribute;
+     unsigned long form;
+     unsigned char *data;
+     unsigned long cu_offset;
+     unsigned long pointer_size;
 {
-  unsigned long   uvalue = 0;
-  unsigned char * block_start = NULL;
-  int             bytes_read;
+  unsigned long uvalue = 0;
+  unsigned char *block_start = NULL;
+  int bytes_read;
 
   switch (form)
     {
@@ -7664,7 +7772,7 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
     case DW_FORM_ref1:
     case DW_FORM_flag:
     case DW_FORM_data1:
-      uvalue = byte_get (data ++, 1);
+      uvalue = byte_get (data++, 1);
       break;
 
     case DW_FORM_ref2:
@@ -7783,51 +7891,63 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
     case DW_AT_inline:
       switch (uvalue)
 	{
-	case DW_INL_not_inlined:          printf (_("(not inlined)")); break;
-	case DW_INL_inlined:              printf (_("(inlined)")); break;
-	case DW_INL_declared_not_inlined: printf (_("(declared as inline but ignored)")); break;
-	case DW_INL_declared_inlined:     printf (_("(declared as inline and inlined)")); break;
-	default: printf (_("  (Unknown inline attribute value: %lx)"), uvalue); break;
+	case DW_INL_not_inlined:
+	  printf (_("(not inlined)"));
+	  break;
+	case DW_INL_inlined:
+	  printf (_("(inlined)"));
+	  break;
+	case DW_INL_declared_not_inlined:
+	  printf (_("(declared as inline but ignored)"));
+	  break;
+	case DW_INL_declared_inlined:
+	  printf (_("(declared as inline and inlined)"));
+	  break;
+	default:
+	  printf (_("  (Unknown inline attribute value: %lx)"), uvalue);
+	  break;
 	}
       break;
 
     case DW_AT_language:
       switch (uvalue)
 	{
-	case DW_LANG_C:              printf ("(non-ANSI C)"); break;
-	case DW_LANG_C89:            printf ("(ANSI C)"); break;
-	case DW_LANG_C_plus_plus:    printf ("(C++)"); break;
-	case DW_LANG_Fortran77:      printf ("(FORTRAN 77)"); break;
-	case DW_LANG_Fortran90:      printf ("(Fortran 90)"); break;
-	case DW_LANG_Modula2:        printf ("(Modula 2)"); break;
-	case DW_LANG_Pascal83:       printf ("(ANSI Pascal)"); break;
-	case DW_LANG_Ada83:          printf ("(Ada)"); break;
-	case DW_LANG_Cobol74:        printf ("(Cobol 74)"); break;
-	case DW_LANG_Cobol85:        printf ("(Cobol 85)"); break;
-	  /* DWARF 2.1 values.  */
-	case DW_LANG_C99:            printf ("(ANSI C99)"); break;
-	case DW_LANG_Ada95:          printf ("(ADA 95)"); break;
-	case DW_LANG_Fortran95:      printf ("(Fortran 95)"); break;
+	case DW_LANG_C:			printf ("(non-ANSI C)"); break;
+	case DW_LANG_C89:		printf ("(ANSI C)"); break;
+	case DW_LANG_C_plus_plus:	printf ("(C++)"); break;
+	case DW_LANG_Fortran77:		printf ("(FORTRAN 77)"); break;
+	case DW_LANG_Fortran90:		printf ("(Fortran 90)"); break;
+	case DW_LANG_Modula2:		printf ("(Modula 2)"); break;
+	case DW_LANG_Pascal83:		printf ("(ANSI Pascal)"); break;
+	case DW_LANG_Ada83:		printf ("(Ada)"); break;
+	case DW_LANG_Cobol74:		printf ("(Cobol 74)"); break;
+	case DW_LANG_Cobol85:		printf ("(Cobol 85)"); break;
+	  /* DWARF 2.1 values.	*/
+	case DW_LANG_C99:		printf ("(ANSI C99)"); break;
+	case DW_LANG_Ada95:		printf ("(ADA 95)"); break;
+	case DW_LANG_Fortran95:		printf ("(Fortran 95)"); break;
 	  /* MIPS extension.  */
-	case DW_LANG_Mips_Assembler: printf ("(MIPS assembler)"); break;
-	default:                     printf ("(Unknown: %lx)", uvalue); break;
+	case DW_LANG_Mips_Assembler:	printf ("(MIPS assembler)"); break;
+	default:
+	  printf ("(Unknown: %lx)", uvalue);
+	  break;
 	}
       break;
 
     case DW_AT_encoding:
       switch (uvalue)
 	{
-	case DW_ATE_void:            printf ("(void)"); break;
-	case DW_ATE_address:         printf ("(machine address)"); break;
-	case DW_ATE_boolean:         printf ("(boolean)"); break;
-	case DW_ATE_complex_float:   printf ("(complex float)"); break;
-	case DW_ATE_float:           printf ("(float)"); break;
-	case DW_ATE_signed:          printf ("(signed)"); break;
-	case DW_ATE_signed_char:     printf ("(signed char)"); break;
-	case DW_ATE_unsigned:        printf ("(unsigned)"); break;
-	case DW_ATE_unsigned_char:   printf ("(unsigned char)"); break;
+	case DW_ATE_void:		printf ("(void)"); break;
+	case DW_ATE_address:		printf ("(machine address)"); break;
+	case DW_ATE_boolean:		printf ("(boolean)"); break;
+	case DW_ATE_complex_float:	printf ("(complex float)"); break;
+	case DW_ATE_float:		printf ("(float)"); break;
+	case DW_ATE_signed:		printf ("(signed)"); break;
+	case DW_ATE_signed_char:	printf ("(signed char)"); break;
+	case DW_ATE_unsigned:		printf ("(unsigned)"); break;
+	case DW_ATE_unsigned_char:	printf ("(unsigned char)"); break;
 	  /* DWARF 2.1 value.  */
- 	case DW_ATE_imaginary_float: printf ("(imaginary float)"); break;
+	case DW_ATE_imaginary_float:	printf ("(imaginary float)"); break;
 	default:
 	  if (uvalue >= DW_ATE_lo_user
 	      && uvalue <= DW_ATE_hi_user)
@@ -7844,17 +7964,19 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
 	case DW_ACCESS_public:		printf ("(public)"); break;
 	case DW_ACCESS_protected:	printf ("(protected)"); break;
 	case DW_ACCESS_private:		printf ("(private)"); break;
-	default:		        printf ("(unknown accessibility)"); break;
+	default:
+	  printf ("(unknown accessibility)");
+	  break;
 	}
       break;
 
     case DW_AT_visibility:
       switch (uvalue)
 	{
-	case DW_VIS_local:	printf ("(local)"); break;
-	case DW_VIS_exported:	printf ("(exported)"); break;
-	case DW_VIS_qualified:	printf ("(qualified)"); break;
-	default:		printf ("(unknown visibility)"); break;
+	case DW_VIS_local:		printf ("(local)"); break;
+	case DW_VIS_exported:		printf ("(exported)"); break;
+	case DW_VIS_qualified:		printf ("(qualified)"); break;
+	default:			printf ("(unknown visibility)"); break;
 	}
       break;
 
@@ -7864,7 +7986,7 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
 	case DW_VIRTUALITY_none:	printf ("(none)"); break;
 	case DW_VIRTUALITY_virtual:	printf ("(virtual)"); break;
 	case DW_VIRTUALITY_pure_virtual:printf ("(pure_virtual)"); break;
-	default:		        printf ("(unknown virtuality)"); break;
+	default:			printf ("(unknown virtuality)"); break;
 	}
       break;
 
@@ -7875,7 +7997,7 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
 	case DW_ID_up_case:		printf ("(up_case)"); break;
 	case DW_ID_down_case:		printf ("(down_case)"); break;
 	case DW_ID_case_insensitive:	printf ("(case_insensitive)"); break;
-	default:		        printf ("(unknown case)"); break;
+	default:			printf ("(unknown case)"); break;
 	}
       break;
 
@@ -7936,11 +8058,11 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
 
 static unsigned char *
 read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
-     unsigned long   attribute;
-     unsigned long   form;
-     unsigned char * data;
-     unsigned long   cu_offset;
-     unsigned long   pointer_size;
+     unsigned long attribute;
+     unsigned long form;
+     unsigned char *data;
+     unsigned long cu_offset;
+     unsigned long pointer_size;
 {
   printf ("     %-18s:", get_AT_name (attribute));
   data = read_and_display_attr_value (attribute, form, data, cu_offset,
@@ -7951,12 +8073,12 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
 
 static int
 display_debug_info (section, start, file)
-     Elf_Internal_Shdr *   section;
-     unsigned char *       start;
-     FILE *                file;
+     Elf_Internal_Shdr *section;
+     unsigned char *start;
+     FILE *file;
 {
-  unsigned char * end = start + section->sh_size;
-  unsigned char * section_begin = start;
+  unsigned char *end = start + section->sh_size;
+  unsigned char *section_begin = start;
 
   printf (_("The section %s contains:\n\n"), SECTION_NAME (section));
 
@@ -7965,13 +8087,13 @@ display_debug_info (section, start, file)
 
   while (start < end)
     {
-      DWARF2_External_CompUnit * external;
-      DWARF2_Internal_CompUnit   compunit;
-      Elf_Internal_Shdr *        relsec;
-      unsigned char *            tags;
-      unsigned int               i;
-      int			 level;
-      unsigned long		 cu_offset;
+      DWARF2_External_CompUnit *external;
+      DWARF2_Internal_CompUnit compunit;
+      Elf_Internal_Shdr *relsec;
+      unsigned char *tags;
+      unsigned int i;
+      int level;
+      unsigned long cu_offset;
 
       external = (DWARF2_External_CompUnit *) start;
 
@@ -8050,7 +8172,7 @@ display_debug_info (section, start, file)
 	  break;
 	}
 
-      tags = start + sizeof (* external);
+      tags = start + sizeof (*external);
       cu_offset = start - section_begin;
       start += compunit.cu_length + sizeof (external->cu_length);
 
@@ -8070,13 +8192,13 @@ display_debug_info (section, start, file)
 
       /* Read in the abbrevs used by this compilation unit.  */
       {
-	Elf_Internal_Shdr * sec;
-	unsigned char *     begin;
+	Elf_Internal_Shdr *sec;
+	unsigned char *begin;
 
 	/* Locate the .debug_abbrev section and process it.  */
 	for (i = 0, sec = section_headers;
 	     i < elf_header.e_shnum;
-	     i ++, sec ++)
+	     i++, sec++)
 	  if (strcmp (SECTION_NAME (sec), ".debug_abbrev") == 0)
 	    break;
 
@@ -8101,10 +8223,10 @@ display_debug_info (section, start, file)
       level = 0;
       while (tags < start)
 	{
-	  int            bytes_read;
-	  unsigned long  abbrev_number;
-	  abbrev_entry * entry;
-	  abbrev_attr  * attr;
+	  int bytes_read;
+	  unsigned long abbrev_number;
+	  abbrev_entry *entry;
+	  abbrev_attr *attr;
 
 	  abbrev_number = read_leb128 (tags, & bytes_read, 0);
 	  tags += bytes_read;
@@ -8157,22 +8279,22 @@ display_debug_info (section, start, file)
 
 static int
 display_debug_aranges (section, start, file)
-     Elf_Internal_Shdr *   section;
-     unsigned char *       start;
-     FILE *                file ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr *section;
+     unsigned char *start;
+     FILE *file ATTRIBUTE_UNUSED;
 {
-  unsigned char * end = start + section->sh_size;
+  unsigned char *end = start + section->sh_size;
 
   printf (_("The section %s contains:\n\n"), SECTION_NAME (section));
 
   while (start < end)
     {
-      DWARF2_External_ARange * external;
-      DWARF2_Internal_ARange   arange;
-      unsigned char *          ranges;
-      unsigned long            length;
-      unsigned long            address;
-      int		       excess;
+      DWARF2_External_ARange *external;
+      DWARF2_Internal_ARange arange;
+      unsigned char *ranges;
+      unsigned long length;
+      unsigned long address;
+      int excess;
 
       external = (DWARF2_External_ARange *) start;
 
@@ -8202,10 +8324,10 @@ display_debug_aranges (section, start, file)
 
       printf (_("\n    Address  Length\n"));
 
-      ranges = start + sizeof (* external);
+      ranges = start + sizeof (*external);
 
       /* Must pad to an alignment boundary that is twice the pointer size.  */
-      excess = sizeof (* external) % (2 * arange.ar_pointer_size);
+      excess = sizeof (*external) % (2 * arange.ar_pointer_size);
       if (excess)
 	ranges += (2 * arange.ar_pointer_size) - excess;
 
@@ -8236,21 +8358,21 @@ display_debug_aranges (section, start, file)
 
 typedef struct Frame_Chunk
 {
-  struct Frame_Chunk * next;
-  unsigned char *      chunk_start;
-  int                  ncols;
+  struct Frame_Chunk *next;
+  unsigned char *chunk_start;
+  int ncols;
   /* DW_CFA_{undefined,same_value,offset,register,unreferenced}  */
-  short int *          col_type;
-  int *                col_offset;
-  char *               augmentation;
-  unsigned int         code_factor;
-  int                  data_factor;
-  unsigned long        pc_begin;
-  unsigned long        pc_range;
-  int                  cfa_reg;
-  int                  cfa_offset;
-  int                  ra;
-  unsigned char        fde_encoding;
+  short int *col_type;
+  int *col_offset;
+  char *augmentation;
+  unsigned int code_factor;
+  int data_factor;
+  unsigned long pc_begin;
+  unsigned long pc_range;
+  int cfa_reg;
+  int cfa_offset;
+  int ra;
+  unsigned char fde_encoding;
 }
 Frame_Chunk;
 
@@ -8264,7 +8386,7 @@ static int size_of_encoded_value PARAMS ((int));
 
 static void
 frame_need_space (fc, reg)
-     Frame_Chunk * fc;
+     Frame_Chunk *fc;
      int reg;
 {
   int prev = fc->ncols;
@@ -8288,23 +8410,23 @@ frame_need_space (fc, reg)
 
 static void
 frame_display_row (fc, need_col_headers, max_regs)
-     Frame_Chunk * fc;
-     int *         need_col_headers;
-     int *         max_regs;
+     Frame_Chunk *fc;
+     int *need_col_headers;
+     int *max_regs;
 {
   int r;
   char tmp[100];
 
-  if (* max_regs < fc->ncols)
-    * max_regs = fc->ncols;
+  if (*max_regs < fc->ncols)
+    *max_regs = fc->ncols;
 
-  if (* need_col_headers)
+  if (*need_col_headers)
     {
-      * need_col_headers = 0;
+      *need_col_headers = 0;
 
       printf ("   LOC   CFA      ");
 
-      for (r = 0; r < * max_regs; r++)
+      for (r = 0; r < *max_regs; r++)
 	if (fc->col_type[r] != DW_CFA_unreferenced)
 	  {
 	    if (r == fc->ra)
@@ -8368,34 +8490,34 @@ size_of_encoded_value (encoding)
 
 static int
 display_debug_frames (section, start, file)
-     Elf_Internal_Shdr * section;
-     unsigned char *       start;
-     FILE *                file ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr *section;
+     unsigned char *start;
+     FILE *file ATTRIBUTE_UNUSED;
 {
-  unsigned char * end = start + section->sh_size;
-  unsigned char * section_start = start;
-  Frame_Chunk *   chunks = 0;
-  Frame_Chunk *   remembered_state = 0;
-  Frame_Chunk *   rs;
-  int             is_eh = (strcmp (SECTION_NAME (section), ".eh_frame") == 0);
-  int             length_return;
-  int             max_regs = 0;
-  int             addr_size = is_32bit_elf ? 4 : 8;
+  unsigned char *end = start + section->sh_size;
+  unsigned char *section_start = start;
+  Frame_Chunk *chunks = 0;
+  Frame_Chunk *remembered_state = 0;
+  Frame_Chunk *rs;
+  int is_eh = (strcmp (SECTION_NAME (section), ".eh_frame") == 0);
+  int length_return;
+  int max_regs = 0;
+  int addr_size = is_32bit_elf ? 4 : 8;
 
   printf (_("The section %s contains:\n"), SECTION_NAME (section));
 
   while (start < end)
     {
-      unsigned char * saved_start;
-      unsigned char * block_end;
-      unsigned long   length;
-      unsigned long   cie_id;
-      Frame_Chunk *   fc;
-      Frame_Chunk *   cie;
-      int             need_col_headers = 1;
-      unsigned char * augmentation_data = NULL;
-      unsigned long   augmentation_data_len = 0;
-      int	      encoded_ptr_size = addr_size;
+      unsigned char *saved_start;
+      unsigned char *block_end;
+      unsigned long length;
+      unsigned long cie_id;
+      Frame_Chunk *fc;
+      Frame_Chunk *cie;
+      int need_col_headers = 1;
+      unsigned char *augmentation_data = NULL;
+      unsigned long augmentation_data_len = 0;
+      int encoded_ptr_size = addr_size;
 
       saved_start = start;
       length = byte_get (start, 4); start += 4;
@@ -8513,7 +8635,7 @@ display_debug_frames (section, start, file)
 	}
       else
 	{
-	  unsigned char *    look_for;
+	  unsigned char *look_for;
 	  static Frame_Chunk fde_fc;
 
 	  fc = & fde_fc;
@@ -8594,14 +8716,14 @@ display_debug_frames (section, start, file)
 	{
 	  /* Start by making a pass over the chunk, allocating storage
 	     and taking note of what registers are used.  */
-	  unsigned char * tmp = start;
+	  unsigned char *tmp = start;
 
 	  while (start < block_end)
 	    {
 	      unsigned op, opa;
 	      unsigned long reg;
 
-	      op = * start ++;
+	      op = *start++;
 	      opa = op & 0x3f;
 	      if (op & 0xc0)
 		op &= 0xc0;
@@ -8703,7 +8825,7 @@ display_debug_frames (section, start, file)
 	  long l, ofs;
 	  bfd_vma vma;
 
-	  op = * start ++;
+	  op = *start++;
 	  opa = op & 0x3f;
 	  if (op & 0xc0)
 	    op &= 0xc0;
@@ -8958,9 +9080,9 @@ display_debug_frames (section, start, file)
 
 static int
 display_debug_not_supported (section, start, file)
-     Elf_Internal_Shdr * section;
-     unsigned char *     start ATTRIBUTE_UNUSED;
-     FILE *              file ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr *section;
+     unsigned char *start ATTRIBUTE_UNUSED;
+     FILE *file ATTRIBUTE_UNUSED;
 {
   printf (_("Displaying the debug contents of section %s is not yet supported.\n"),
 	    SECTION_NAME (section));
@@ -8973,11 +9095,11 @@ display_debug_not_supported (section, start, file)
    that all compilation units have the same address size.  */
 static int
 prescan_debug_info (section, start, file)
-     Elf_Internal_Shdr * section ATTRIBUTE_UNUSED;
-     unsigned char *     start;
-     FILE *              file ATTRIBUTE_UNUSED;
+     Elf_Internal_Shdr *section ATTRIBUTE_UNUSED;
+     unsigned char *start;
+     FILE *file ATTRIBUTE_UNUSED;
 {
-  DWARF2_External_CompUnit * external;
+  DWARF2_External_CompUnit *external;
 
   external = (DWARF2_External_CompUnit *) start;
 
@@ -8991,39 +9113,39 @@ prescan_debug_info (section, start, file)
      sections.  */
 struct
 {
-  const char * const name;
-  int (* display) PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-  int (* prescan) PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+  const char *const name;
+  int (*display) PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
+  int (*prescan) PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
 }
 debug_displays[] =
 {
-  { ".debug_abbrev",      display_debug_abbrev, NULL },
-  { ".debug_aranges",     display_debug_aranges, NULL },
-  { ".debug_frame",       display_debug_frames, NULL },
-  { ".debug_info",        display_debug_info, prescan_debug_info },
-  { ".debug_line",        display_debug_lines, NULL },
-  { ".debug_pubnames",    display_debug_pubnames, NULL },
-  { ".eh_frame",          display_debug_frames, NULL },
-  { ".debug_macinfo",     display_debug_macinfo, NULL },
-  { ".debug_str",         display_debug_str, NULL },
-  { ".debug_loc",         display_debug_loc, NULL },
-  { ".debug_pubtypes",    display_debug_not_supported, NULL },
-  { ".debug_ranges",      display_debug_not_supported, NULL },
-  { ".debug_static_func", display_debug_not_supported, NULL },
-  { ".debug_static_vars", display_debug_not_supported, NULL },
-  { ".debug_types",       display_debug_not_supported, NULL },
-  { ".debug_weaknames",   display_debug_not_supported, NULL }
+  { ".debug_abbrev",		display_debug_abbrev, NULL },
+  { ".debug_aranges",		display_debug_aranges, NULL },
+  { ".debug_frame",		display_debug_frames, NULL },
+  { ".debug_info",		display_debug_info, prescan_debug_info },
+  { ".debug_line",		display_debug_lines, NULL },
+  { ".debug_pubnames",		display_debug_pubnames, NULL },
+  { ".eh_frame",		display_debug_frames, NULL },
+  { ".debug_macinfo",		display_debug_macinfo, NULL },
+  { ".debug_str",		display_debug_str, NULL },
+  { ".debug_loc",		display_debug_loc, NULL },
+  { ".debug_pubtypes",		display_debug_not_supported, NULL },
+  { ".debug_ranges",		display_debug_not_supported, NULL },
+  { ".debug_static_func",	display_debug_not_supported, NULL },
+  { ".debug_static_vars",	display_debug_not_supported, NULL },
+  { ".debug_types",		display_debug_not_supported, NULL },
+  { ".debug_weaknames",		display_debug_not_supported, NULL }
 };
 
 static int
 display_debug_section (section, file)
-     Elf_Internal_Shdr * section;
-     FILE * file;
+     Elf_Internal_Shdr *section;
+     FILE *file;
 {
-  char *          name = SECTION_NAME (section);
-  bfd_size_type   length;
-  unsigned char * start;
-  int             i;
+  char *name = SECTION_NAME (section);
+  bfd_size_type length;
+  unsigned char *start;
+  int i;
 
   length = section->sh_size;
   if (length == 0)
@@ -9062,10 +9184,10 @@ display_debug_section (section, file)
 
 static int
 process_section_contents (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf_Internal_Shdr * section;
-  unsigned int	i;
+  Elf_Internal_Shdr *section;
+  unsigned int i;
 
   if (! do_dump)
     return 1;
@@ -9075,10 +9197,10 @@ process_section_contents (file)
      size of address (specified in .debug_info and .debug_aranges).  */
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum && i < num_dump_sects;
-       i ++, section ++)
+       i++, section++)
     {
-      char *	name = SECTION_NAME (section);
-      int       j;
+      char *name = SECTION_NAME (section);
+      int j;
 
       if (section->sh_size == 0)
 	continue;
@@ -9089,8 +9211,8 @@ process_section_contents (file)
 	  {
 	    if (debug_displays[j].prescan != NULL)
 	      {
-		bfd_size_type   length;
-		unsigned char * start;
+		bfd_size_type length;
+		unsigned char *start;
 
 		length = section->sh_size;
 		start = ((unsigned char *)
@@ -9109,7 +9231,7 @@ process_section_contents (file)
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum && i < num_dump_sects;
-       i ++, section ++)
+       i++, section++)
     {
 #ifdef SUPPORT_DISASSEMBLY
       if (dump_sects[i] & DISASS_DUMP)
@@ -9152,9 +9274,9 @@ process_mips_fpe_exception (mask)
 
 static int
 process_mips_specific (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf_Internal_Dyn * entry;
+  Elf_Internal_Dyn *entry;
   size_t liblist_offset = 0;
   size_t liblistno = 0;
   size_t conflictsno = 0;
@@ -9190,7 +9312,7 @@ process_mips_specific (file)
 
   if (liblist_offset != 0 && liblistno != 0 && do_dynamic)
     {
-      Elf32_External_Lib * elib;
+      Elf32_External_Lib *elib;
       size_t cnt;
 
       elib = ((Elf32_External_Lib *)
@@ -9209,7 +9331,7 @@ process_mips_specific (file)
 	      Elf32_Lib liblist;
 	      time_t time;
 	      char timebuf[20];
-	      struct tm * tmp;
+	      struct tm *tmp;
 
 	      liblist.l_name = BYTE_GET (elib[cnt].l_name);
 	      time = BYTE_GET (elib[cnt].l_time_stamp);
@@ -9233,7 +9355,7 @@ process_mips_specific (file)
 		{
 		  static const struct
 		  {
-		    const char * name;
+		    const char *name;
 		    int bit;
 		  }
 		  l_flags_vals[] =
@@ -9269,23 +9391,23 @@ process_mips_specific (file)
 
   if (options_offset != 0)
     {
-      Elf_External_Options * eopt;
-      Elf_Internal_Shdr *    sect = section_headers;
-      Elf_Internal_Options * iopt;
-      Elf_Internal_Options * option;
+      Elf_External_Options *eopt;
+      Elf_Internal_Shdr *sect = section_headers;
+      Elf_Internal_Options *iopt;
+      Elf_Internal_Options *option;
       size_t offset;
       int cnt;
 
       /* Find the section header so that we get the size.  */
       while (sect->sh_type != SHT_MIPS_OPTIONS)
-	++ sect;
+	++sect;
 
       eopt = (Elf_External_Options *) get_data (NULL, file, options_offset,
 						sect->sh_size, _("options"));
       if (eopt)
 	{
 	  iopt = ((Elf_Internal_Options *)
-		  malloc ((sect->sh_size / sizeof (eopt)) * sizeof (* iopt)));
+		  malloc ((sect->sh_size / sizeof (eopt)) * sizeof (*iopt)));
 	  if (iopt == NULL)
 	    {
 	      error (_("Out of memory"));
@@ -9297,7 +9419,7 @@ process_mips_specific (file)
 
 	  while (offset < sect->sh_size)
 	    {
-	      Elf_External_Options * eoption;
+	      Elf_External_Options *eoption;
 
 	      eoption = (Elf_External_Options *) ((char *) eopt + offset);
 
@@ -9332,8 +9454,8 @@ process_mips_specific (file)
 		  if (elf_header.e_machine == EM_MIPS)
 		    {
 		      /* 32bit form.  */
-		      Elf32_External_RegInfo * ereg;
-		      Elf32_RegInfo            reginfo;
+		      Elf32_External_RegInfo *ereg;
+		      Elf32_RegInfo reginfo;
 
 		      ereg = (Elf32_External_RegInfo *) (option + 1);
 		      reginfo.ri_gprmask = BYTE_GET (ereg->ri_gprmask);
@@ -9353,7 +9475,7 @@ process_mips_specific (file)
 		  else
 		    {
 		      /* 64 bit form.  */
-		      Elf64_External_RegInfo * ereg;
+		      Elf64_External_RegInfo *ereg;
 		      Elf64_Internal_RegInfo reginfo;
 
 		      ereg = (Elf64_External_RegInfo *) (option + 1);
@@ -9450,7 +9572,7 @@ process_mips_specific (file)
 		  break;
 		}
 
-	      len = sizeof (* eopt);
+	      len = sizeof (*eopt);
 	      while (len < option->size)
 		if (((char *) option)[len] >= ' '
 		    && ((char *) option)[len] < 0x7f)
@@ -9468,7 +9590,7 @@ process_mips_specific (file)
 
   if (conflicts_offset != 0 && conflictsno != 0)
     {
-      Elf32_Conflict * iconf;
+      Elf32_Conflict *iconf;
       size_t cnt;
 
       if (dynamic_symbols == NULL)
@@ -9477,7 +9599,7 @@ process_mips_specific (file)
 	  return 0;
 	}
 
-      iconf = (Elf32_Conflict *) malloc (conflictsno * sizeof (* iconf));
+      iconf = (Elf32_Conflict *) malloc (conflictsno * sizeof (*iconf));
       if (iconf == NULL)
 	{
 	  error (_("Out of memory"));
@@ -9486,11 +9608,11 @@ process_mips_specific (file)
 
       if (is_32bit_elf)
 	{
-	  Elf32_External_Conflict * econf32;
+	  Elf32_External_Conflict *econf32;
 
 	  econf32 = ((Elf32_External_Conflict *)
 		     get_data (NULL, file, conflicts_offset,
-			       conflictsno * sizeof (* econf32),
+			       conflictsno * sizeof (*econf32),
 			       _("conflict")));
 	  if (!econf32)
 	    return 0;
@@ -9502,11 +9624,11 @@ process_mips_specific (file)
 	}
       else
 	{
-	  Elf64_External_Conflict * econf64;
+	  Elf64_External_Conflict *econf64;
 
 	  econf64 = ((Elf64_External_Conflict *)
 		     get_data (NULL, file, conflicts_offset,
-			       conflictsno * sizeof (* econf64),
+			       conflictsno * sizeof (*econf64),
 			       _("conflict")));
 	  if (!econf64)
 	    return 0;
@@ -9523,9 +9645,9 @@ process_mips_specific (file)
 
       for (cnt = 0; cnt < conflictsno; ++cnt)
 	{
-	  Elf_Internal_Sym * psym = & dynamic_symbols [iconf [cnt]];
+	  Elf_Internal_Sym *psym = & dynamic_symbols[iconf[cnt]];
 
-	  printf ("%5lu: %8lu  ", (unsigned long) cnt, iconf [cnt]);
+	  printf ("%5lu: %8lu  ", (unsigned long) cnt, iconf[cnt]);
 	  print_vma (psym->st_value, FULL_HEX);
 	  putchar (' ');
 	  print_symbol (25, dynamic_strings + psym->st_name);
@@ -9540,11 +9662,11 @@ process_mips_specific (file)
 
 static int
 process_gnu_liblist (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf_Internal_Shdr * section, * string_sec;
-  Elf32_External_Lib * elib;
-  char * strtab;
+  Elf_Internal_Shdr *section, *string_sec;
+  Elf32_External_Lib *elib;
+  char *strtab;
   size_t cnt;
   unsigned i;
 
@@ -9553,7 +9675,7 @@ process_gnu_liblist (file)
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
-       i++, section ++)
+       i++, section++)
     {
       switch (section->sh_type)
 	{
@@ -9589,7 +9711,7 @@ process_gnu_liblist (file)
 	      Elf32_Lib liblist;
 	      time_t time;
 	      char timebuf[20];
-	      struct tm * tmp;
+	      struct tm *tmp;
 
 	      liblist.l_name = BYTE_GET (elib[cnt].l_name);
 	      time = BYTE_GET (elib[cnt].l_time_stamp);
@@ -9628,9 +9750,9 @@ get_note_type (e_type)
     {
     case NT_PRSTATUS:	return _("NT_PRSTATUS (prstatus structure)");
     case NT_FPREGSET:	return _("NT_FPREGSET (floating point registers)");
-    case NT_PRPSINFO:   return _("NT_PRPSINFO (prpsinfo structure)");
-    case NT_TASKSTRUCT: return _("NT_TASKSTRUCT (task structure)");
-    case NT_PRXFPREG:   return _("NT_PRXFPREG (user_xfpregs structure)");
+    case NT_PRPSINFO:	return _("NT_PRPSINFO (prpsinfo structure)");
+    case NT_TASKSTRUCT:	return _("NT_TASKSTRUCT (task structure)");
+    case NT_PRXFPREG:	return _("NT_PRXFPREG (user_xfpregs structure)");
     case NT_PSTATUS:	return _("NT_PSTATUS (pstatus structure)");
     case NT_FPREGS:	return _("NT_FPREGS (floating point registers)");
     case NT_PSINFO:	return _("NT_PSINFO (psinfo structure)");
@@ -9712,7 +9834,7 @@ get_netbsd_elfcore_note_type (e_type)
    If the value of namesz is zero, there is no name present.  */
 static int
 process_note (pnote)
-     Elf_Internal_Note * pnote;
+     Elf_Internal_Note *pnote;
 {
   const char *nt;
 
@@ -9743,13 +9865,13 @@ process_note (pnote)
 
 static int
 process_corefile_note_segment (file, offset, length)
-     FILE * file;
+     FILE *file;
      bfd_vma offset;
      bfd_vma length;
 {
-  Elf_External_Note *  pnotes;
-  Elf_External_Note *  external;
-  int                  res = 1;
+  Elf_External_Note *pnotes;
+  Elf_External_Note *external;
+  int res = 1;
 
   if (length <= 0)
     return 0;
@@ -9767,9 +9889,9 @@ process_corefile_note_segment (file, offset, length)
 
   while (external < (Elf_External_Note *)((char *) pnotes + length))
     {
-      Elf_External_Note * next;
-      Elf_Internal_Note   inote;
-      char * temp = NULL;
+      Elf_External_Note *next;
+      Elf_Internal_Note inote;
+      char *temp = NULL;
 
       inote.type     = BYTE_GET (external->type);
       inote.namesz   = BYTE_GET (external->namesz);
@@ -9829,12 +9951,12 @@ process_corefile_note_segment (file, offset, length)
 
 static int
 process_corefile_note_segments (file)
-     FILE * file;
+     FILE *file;
 {
-  Elf_Internal_Phdr * program_headers;
-  Elf_Internal_Phdr * segment;
-  unsigned int	      i;
-  int                 res = 1;
+  Elf_Internal_Phdr *program_headers;
+  Elf_Internal_Phdr *segment;
+  unsigned int i;
+  int res = 1;
 
   program_headers = (Elf_Internal_Phdr *) malloc
     (elf_header.e_phnum * sizeof (Elf_Internal_Phdr));
@@ -9858,7 +9980,7 @@ process_corefile_note_segments (file)
 
   for (i = 0, segment = program_headers;
        i < elf_header.e_phnum;
-       i ++, segment ++)
+       i++, segment++)
     {
       if (segment->p_type == PT_NOTE)
 	res &= process_corefile_note_segment (file,
@@ -9873,7 +9995,7 @@ process_corefile_note_segments (file)
 
 static int
 process_corefile_contents (file)
-     FILE * file;
+     FILE *file;
 {
   /* If we have not been asked to display the notes then do nothing.  */
   if (! do_notes)
@@ -9895,7 +10017,7 @@ process_corefile_contents (file)
 
 static int
 process_arch_specific (file)
-     FILE * file;
+     FILE *file;
 {
   if (! do_arch)
     return 1;
@@ -9914,14 +10036,14 @@ process_arch_specific (file)
 
 static int
 get_file_header (file)
-     FILE * file;
+     FILE *file;
 {
   /* Read in the identity array.  */
   if (fread (elf_header.e_ident, EI_NIDENT, 1, file) != 1)
     return 0;
 
   /* Determine how to read the rest of the header.  */
-  switch (elf_header.e_ident [EI_DATA])
+  switch (elf_header.e_ident[EI_DATA])
     {
     default: /* fall through */
     case ELFDATANONE: /* fall through */
@@ -9930,7 +10052,7 @@ get_file_header (file)
     }
 
   /* For now we only support 32 bit and 64 bit ELF files.  */
-  is_32bit_elf = (elf_header.e_ident [EI_CLASS] != ELFCLASS64);
+  is_32bit_elf = (elf_header.e_ident[EI_CLASS] != ELFCLASS64);
 
   /* Read in the rest of the header.  */
   if (is_32bit_elf)
@@ -10002,10 +10124,10 @@ get_file_header (file)
 
 static int
 process_file (file_name)
-     char * file_name;
+     char *file_name;
 {
-  FILE *       file;
-  struct stat  statbuf;
+  FILE *file;
+  struct stat statbuf;
   unsigned int i;
 
   if (stat (file_name, & statbuf) < 0)
@@ -10119,7 +10241,7 @@ process_file (file_name)
    symbols.  */
 
 void
-print_address (unsigned int addr, FILE * outfile)
+print_address (unsigned int addr, FILE *outfile)
 {
   fprintf (outfile,"0x%8.8x", addr);
 }
@@ -10136,8 +10258,8 @@ int main PARAMS ((int, char **));
 
 int
 main (argc, argv)
-     int     argc;
-     char ** argv;
+     int argc;
+     char **argv;
 {
   int err;
 
@@ -10157,7 +10279,7 @@ main (argc, argv)
 
   err = 0;
   while (optind < argc)
-    err |= process_file (argv [optind ++]);
+    err |= process_file (argv[optind++]);
 
   if (dump_sects != NULL)
     free (dump_sects);

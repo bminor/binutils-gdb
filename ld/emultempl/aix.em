@@ -56,25 +56,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libcoff.h"
 #include "libxcoff.h"
 
-static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
-static int gld${EMULATION_NAME}_parse_args PARAMS ((int, char **));
-static void gld${EMULATION_NAME}_after_open PARAMS ((void));
-static char *gld${EMULATION_NAME}_choose_target PARAMS ((int, char **));
-static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
-static void gld${EMULATION_NAME}_read_file PARAMS ((const char *, boolean));
-static void gld${EMULATION_NAME}_free PARAMS ((PTR));
+static void gld${EMULATION_NAME}_before_parse
+  PARAMS ((void));
+static int gld${EMULATION_NAME}_parse_args
+  PARAMS ((int, char **));
+static void gld${EMULATION_NAME}_after_open
+  PARAMS ((void));
+static char *gld${EMULATION_NAME}_choose_target
+  PARAMS ((int, char **));
+static void gld${EMULATION_NAME}_before_allocation
+  PARAMS ((void));
+static void gld${EMULATION_NAME}_read_file
+  PARAMS ((const char *, bfd_boolean));
+static void gld${EMULATION_NAME}_free
+  PARAMS ((PTR));
 static void gld${EMULATION_NAME}_find_relocs
-PARAMS ((lang_statement_union_type *));
-static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
-static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
-static boolean gld${EMULATION_NAME}_unrecognized_file
+  PARAMS ((lang_statement_union_type *));
+static void gld${EMULATION_NAME}_find_exp_assignment
+  PARAMS ((etree_type *));
+static char *gld${EMULATION_NAME}_get_script
+  PARAMS ((int *isfile));
+static bfd_boolean gld${EMULATION_NAME}_unrecognized_file
   PARAMS ((lang_input_statement_type *));
 static void gld${EMULATION_NAME}_create_output_section_statements
   PARAMS ((void));
-static void gld${EMULATION_NAME}_set_output_arch PARAMS ((void));
-
-static int is_syscall PARAMS ((char *, unsigned int *));
-static int change_symbol_mode PARAMS ((char *));
+static void gld${EMULATION_NAME}_set_output_arch
+  PARAMS ((void));
+static int is_syscall
+  PARAMS ((char *, unsigned int *));
+static int change_symbol_mode
+  PARAMS ((char *));
 
 /* The file alignment required for each section.  */
 static unsigned long file_align;
@@ -157,7 +168,7 @@ gld${EMULATION_NAME}_before_parse ()
   else
     ldfile_output_architecture = bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`;
 
-  config.has_shared = true;
+  config.has_shared = TRUE;
 
   /* The link_info.[init|fini]_functions are initialized in ld/lexsup.c.
      Override them here so we can use the link_info.init_function as a
@@ -395,19 +406,19 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       break;
 
     case OPTION_AUTOIMP:
-      link_info.static_link = false;
+      link_info.static_link = FALSE;
       break;
 
     case OPTION_ERNOTOK:
-      force_make_executable = false;
+      force_make_executable = FALSE;
       break;
 
     case OPTION_EROK:
-      force_make_executable = true;
+      force_make_executable = TRUE;
       break;
 
     case OPTION_EXPORT:
-      gld${EMULATION_NAME}_read_file (optarg, false);
+      gld${EMULATION_NAME}_read_file (optarg, FALSE);
       break;
 
     case OPTION_IMPORT:
@@ -449,7 +460,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     case OPTION_MODTYPE:
       if (*optarg == 'S')
 	{
-	  link_info.shared = true;
+	  link_info.shared = TRUE;
 	  ++optarg;
 	}
       if (*optarg == '\0' || optarg[1] == '\0')
@@ -459,11 +470,11 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       break;
 
     case OPTION_NOAUTOIMP:
-      link_info.static_link = true;
+      link_info.static_link = TRUE;
       break;
 
     case OPTION_NOSTRCMPCT:
-      link_info.traditional_format = true;
+      link_info.traditional_format = TRUE;
       break;
 
     case OPTION_PD:
@@ -512,11 +523,11 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
       break;
 
     case OPTION_STRCMPCT:
-      link_info.traditional_format = false;
+      link_info.traditional_format = FALSE;
       break;
 
     case OPTION_UNIX:
-      unix_ld = true;
+      unix_ld = TRUE;
       break;
 
     case OPTION_32:
@@ -548,18 +559,18 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
    object or an archive.  If the file starts with #!, we must treat it
    as an import file.  This is for AIX compatibility.  */
 
-static boolean
+static bfd_boolean
 gld${EMULATION_NAME}_unrecognized_file (entry)
      lang_input_statement_type *entry;
 {
   FILE *e;
-  boolean ret;
+  bfd_boolean ret;
 
   e = fopen (entry->filename, FOPEN_RT);
   if (e == NULL)
-    return false;
+    return FALSE;
 
-  ret = false;
+  ret = FALSE;
 
   if (getc (e) == '#' && getc (e) == '!')
     {
@@ -574,8 +585,8 @@ gld${EMULATION_NAME}_unrecognized_file (entry)
 	flpp = &(*flpp)->next;
       *flpp = n;
 
-      ret = true;
-      entry->loaded = true;
+      ret = TRUE;
+      entry->loaded = TRUE;
     }
 
   fclose (e);
@@ -588,7 +599,7 @@ gld${EMULATION_NAME}_unrecognized_file (entry)
 static void
 gld${EMULATION_NAME}_after_open ()
 {
-  boolean r;
+  bfd_boolean r;
   struct set_info *p;
 
   /* Call ldctor_build_sets, after pretending that this is a
@@ -598,7 +609,7 @@ gld${EMULATION_NAME}_after_open ()
      producing an XCOFF output file.  */
   r = link_info.relocateable;
   if (strstr (bfd_get_target (output_bfd), "xcoff") != NULL)
-    link_info.relocateable = true;
+    link_info.relocateable = TRUE;
   ldctor_build_sets ();
   link_info.relocateable = r;
 
@@ -641,12 +652,12 @@ gld${EMULATION_NAME}_before_allocation ()
 
   /* Handle the import and export files, if any.  */
   for (fl = import_files; fl != NULL; fl = fl->next)
-    gld${EMULATION_NAME}_read_file (fl->name, true);
+    gld${EMULATION_NAME}_read_file (fl->name, TRUE);
   for (el = export_symbols; el != NULL; el = el->next)
     {
       struct bfd_link_hash_entry *h;
 
-      h = bfd_link_hash_lookup (link_info.hash, el->name, false, false, false);
+      h = bfd_link_hash_lookup (link_info.hash, el->name, FALSE, FALSE, FALSE);
       if (h == NULL)
 	einfo ("%P%F: bfd_link_hash_lookup of export symbol failed: %E\n");
       if (!bfd_xcoff_export_symbol (output_bfd, &link_info, h))
@@ -692,9 +703,9 @@ gld${EMULATION_NAME}_before_allocation ()
   /* Let the XCOFF backend set up the .loader section.  */
   if (!bfd_xcoff_size_dynamic_sections
       (output_bfd, &link_info, libpath,	entry_symbol.name, file_align,
-       maxstack, maxdata, gc && !unix_ld ? true : false,
-       modtype,	textro ? true : false, unix_ld, special_sections,
-       rtld ? true : false))
+       maxstack, maxdata, gc && !unix_ld ? TRUE : FALSE,
+       modtype,	textro ? TRUE : FALSE, unix_ld, special_sections,
+       rtld ? TRUE : FALSE))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
   /* Look through the special sections, and put them in the right
@@ -706,7 +717,7 @@ gld${EMULATION_NAME}_before_allocation ()
       lang_statement_union_type **pls;
       lang_input_section_type *is;
       const char *oname;
-      boolean start;
+      bfd_boolean start;
 
       sec = special_sections[i];
       if (sec == NULL)
@@ -766,32 +777,32 @@ gld${EMULATION_NAME}_before_allocation ()
 	case XCOFF_SPECIAL_SECTION_TEXT:
 	  /* _text */
 	  oname = ".text";
-	  start = true;
+	  start = TRUE;
 	  break;
 
 	case XCOFF_SPECIAL_SECTION_ETEXT:
 	  /* _etext */
 	  oname = ".text";
-	  start = false;
+	  start = FALSE;
 	  break;
 
 	case XCOFF_SPECIAL_SECTION_DATA:
 	  /* _data */
 	  oname = ".data";
-	  start = true;
+	  start = TRUE;
 	  break;
 
 	case XCOFF_SPECIAL_SECTION_EDATA:
 	  /* _edata */
 	  oname = ".data";
-	  start = false;
+	  start = FALSE;
 	  break;
 
 	case XCOFF_SPECIAL_SECTION_END:
 	case XCOFF_SPECIAL_SECTION_END2:
 	  /* _end and end */
 	  oname = ".bss";
-	  start = false;
+	  start = FALSE;
 	  break;
 	}
 
@@ -939,13 +950,13 @@ is_syscall (input, flag)
 static void
 gld${EMULATION_NAME}_read_file (filename, import)
      const char *filename;
-     boolean import;
+     bfd_boolean import;
 {
   struct obstack *o;
   FILE *f;
   int lineno;
   int c;
-  boolean keep;
+  bfd_boolean keep;
   const char *imppath;
   const char *impfile;
   const char *impmember;
@@ -960,7 +971,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
       einfo ("%F%s: %E\n", filename);
     }
 
-  keep = false;
+  keep = FALSE;
 
   imppath = NULL;
   impfile = NULL;
@@ -1026,7 +1037,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	      char *file;
 
 	      (void) obstack_finish (o);
-	      keep = true;
+	      keep = TRUE;
 	      imppath = s;
 	      file = NULL;
 	      while (!ISSPACE (*s) && *s != '(' && *s != '\0')
@@ -1143,8 +1154,8 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	    }
 	  else
 	    {
-	      h = bfd_link_hash_lookup (link_info.hash, symname, false, false,
-					true);
+	      h = bfd_link_hash_lookup (link_info.hash, symname, FALSE, FALSE,
+					TRUE);
 	      if (h == NULL || h->type == bfd_link_hash_new)
 		{
 		  /* We can just ignore attempts to import an unreferenced
@@ -1221,7 +1232,7 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
     {
     case etree_provide:
       h = bfd_link_hash_lookup (link_info.hash, exp->assign.dst,
-				false, false, false);
+				FALSE, FALSE, FALSE);
       if (h == NULL)
 	break;
       /* Fall through.  */
@@ -1272,19 +1283,19 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocateable == true && config.build_constructors == true)
+  if (link_info.relocateable && config.build_constructors)
     return
 EOF
-sed $sc ldscripts/${EMULATION_NAME}.xu			   >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocateable == true) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xr			   >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.text_read_only) return'	   >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xbn			   >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.magic_demand_paged) return'	   >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xn			   >> e${EMULATION_NAME}.c
-echo '  ; else return'					   >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.x			   >> e${EMULATION_NAME}.c
-echo '; }'						   >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xu		       >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocateable) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xr		       >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xbn		       >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.magic_demand_paged) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xn		       >> e${EMULATION_NAME}.c
+echo '  ; else return'				       >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.x		       >> e${EMULATION_NAME}.c
+echo '; }'					       >> e${EMULATION_NAME}.c
 
 else
 # Scripts read from the filesystem.
@@ -1293,9 +1304,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 1;
 
-  if (link_info.relocateable == true && config.build_constructors == true)
+  if (link_info.relocateable && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocateable == true)
+  else if (link_info.relocateable)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";
@@ -1317,7 +1328,7 @@ gld${EMULATION_NAME}_create_output_section_statements ()
   if ((bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour)
       && (link_info.init_function != NULL
 	  || link_info.fini_function != NULL
-	  || rtld == true))
+	  || rtld))
     {
       initfini_file = lang_add_input_file ("initfini",
 					   lang_input_file_is_file_enum,
@@ -1334,17 +1345,17 @@ gld${EMULATION_NAME}_create_output_section_statements ()
 	}
 
       /* Call backend to fill in the rest */
-      if (false == bfd_xcoff_link_generate_rtinit (initfini_file->the_bfd,
-						   link_info.init_function,
-						   link_info.fini_function,
-						   rtld))
+      if (! bfd_xcoff_link_generate_rtinit (initfini_file->the_bfd,
+					    link_info.init_function,
+					    link_info.fini_function,
+					    rtld))
 	{
 	  einfo ("%X%P: can not create BFD %E\n");
 	  return;
 	}
 
       /* __rtld defined in /lib/librtl.a */
-      if (true == rtld)
+      if (rtld)
 	lang_add_input_file ("rtl", lang_input_file_is_l_enum, NULL);
     }
 }

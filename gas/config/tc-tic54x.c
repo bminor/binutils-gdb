@@ -4354,7 +4354,7 @@ emit_insn (insn)
       if (insn->opcode[i].unresolved)
 	fix_new_exp (frag_now, p - frag_now->fr_literal,
 		     insn->opcode[i].r_nchars, &insn->opcode[i].addr_expr,
-		     false, insn->opcode[i].r_type);
+		     FALSE, insn->opcode[i].r_type);
     }
 }
 

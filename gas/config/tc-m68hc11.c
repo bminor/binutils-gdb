@@ -1373,7 +1373,7 @@ fixup8 (oper, mode, opmode)
 	  fixS *fixp;
 
 	  fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 1,
-			      oper, true, BFD_RELOC_8_PCREL);
+			      oper, TRUE, BFD_RELOC_8_PCREL);
 	  fixp->fx_pcrel_adjust = 1;
 	}
       else
@@ -1381,7 +1381,7 @@ fixup8 (oper, mode, opmode)
 	  /* Now create an 8-bit fixup.  If there was some %hi or %lo
 	     modifier, generate the reloc accordingly.  */
 	  fix_new_exp (frag_now, f - frag_now->fr_literal, 1,
-		       oper, false,
+		       oper, FALSE,
 		       ((opmode & M6811_OP_HIGH_ADDR)
 			? BFD_RELOC_M68HC11_HI8
 			: ((opmode & M6811_OP_LOW_ADDR)
@@ -1425,7 +1425,7 @@ fixup16 (oper, mode, opmode)
       /* Now create a 16-bit fixup.  */
       fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
 			  oper,
-			  (mode & M6812_OP_JUMP_REL16 ? true : false),
+			  (mode & M6812_OP_JUMP_REL16 ? TRUE : FALSE),
 			  (mode & M6812_OP_JUMP_REL16
 			   ? BFD_RELOC_16_PCREL
                            : (mode & M6812_OP_PAGE)
@@ -1467,7 +1467,7 @@ fixup24 (oper, mode, opmode)
 
       /* Now create a 24-bit fixup.  */
       fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
-			  oper, false, BFD_RELOC_M68HC11_24);
+			  oper, FALSE, BFD_RELOC_M68HC11_24);
       number_to_chars_bigendian (f, 0, 3);
     }
   else
@@ -1907,7 +1907,7 @@ build_indexed_byte (op, format, move_insn)
 
 	  f = frag_more (2);
 	  fix_new_exp (frag_now, f - frag_now->fr_literal, 2,
-		       &op->exp, false, BFD_RELOC_16);
+		       &op->exp, FALSE, BFD_RELOC_16);
 	  number_to_chars_bigendian (f, 0, 2);
 	}
       else

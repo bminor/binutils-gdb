@@ -1,5 +1,5 @@
 /* Disassemble SH instructions.
-   Copyright 1993, 1994, 1995, 1997, 1998, 2000, 2001
+   Copyright 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -23,6 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sh-opc.h"
 #include "dis-asm.h"
+
+#ifdef ARCH_all
+#define INCLUDE_SHMEDIA
+#endif
 
 static void print_movxy
   PARAMS ((sh_opcode_info *, int, int, fprintf_ftype, void *));

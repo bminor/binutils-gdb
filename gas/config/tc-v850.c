@@ -33,8 +33,8 @@
 static bfd_reloc_code_real_type hold_cons_reloc = BFD_RELOC_UNUSED;
 
 /* Set to TRUE if we want to be pedantic about signed overflows.  */
-static boolean warn_signed_overflows   = FALSE;
-static boolean warn_unsigned_overflows = FALSE;
+static bfd_boolean warn_signed_overflows   = FALSE;
+static bfd_boolean warn_unsigned_overflows = FALSE;
 
 /* Indicates the target BFD machine number.  */
 static int machine = -1;
@@ -652,14 +652,14 @@ static const struct reg_name cc_names[] = {
    success, or -1 on failure.  */
 
 static int reg_name_search
-  PARAMS ((const struct reg_name *, int, const char *, boolean));
+  PARAMS ((const struct reg_name *, int, const char *, bfd_boolean));
 
 static int
 reg_name_search (regs, regcount, name, accept_numbers)
      const struct reg_name *regs;
      int regcount;
      const char *name;
-     boolean accept_numbers;
+     bfd_boolean accept_numbers;
 {
   int middle, low, high;
   int cmp;
@@ -714,9 +714,9 @@ reg_name_search (regs, regcount, name, accept_numbers)
  *	Input_line_pointer->(next non-blank) char after operand, or is in
  *	its original state.  */
 
-static boolean register_name PARAMS ((expressionS *));
+static bfd_boolean register_name PARAMS ((expressionS *));
 
-static boolean
+static bfd_boolean
 register_name (expressionP)
      expressionS *expressionP;
 {
@@ -746,14 +746,14 @@ register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol  = NULL;
 
-      return true;
+      return TRUE;
     }
   else
     {
       /* Reset the line as if we had not done anything.  */
       input_line_pointer = start;
 
-      return false;
+      return FALSE;
     }
 }
 
@@ -771,13 +771,14 @@ register_name (expressionP)
  *	Input_line_pointer->(next non-blank) char after operand, or is in
  *	its original state.  */
 
-static boolean system_register_name PARAMS ((expressionS *, boolean, boolean));
+static bfd_boolean system_register_name
+  PARAMS ((expressionS *, bfd_boolean, bfd_boolean));
 
-static boolean
+static bfd_boolean
 system_register_name (expressionP, accept_numbers, accept_list_names)
      expressionS *expressionP;
-     boolean accept_numbers;
-     boolean accept_list_names;
+     bfd_boolean accept_numbers;
+     bfd_boolean accept_list_names;
 {
   int reg_number;
   char *name;
@@ -833,14 +834,14 @@ system_register_name (expressionP, accept_numbers, accept_list_names)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol  = NULL;
 
-      return true;
+      return TRUE;
     }
   else
     {
       /* Reset the line as if we had not done anything.  */
       input_line_pointer = start;
 
-      return false;
+      return FALSE;
     }
 }
 
@@ -854,9 +855,9 @@ system_register_name (expressionP, accept_numbers, accept_list_names)
  *	Input_line_pointer->(next non-blank) char after operand, or is in
  *	its original state.  */
 
-static boolean cc_name PARAMS ((expressionS *));
+static bfd_boolean cc_name PARAMS ((expressionS *));
 
-static boolean
+static bfd_boolean
 cc_name (expressionP)
      expressionS *expressionP;
 {
@@ -884,14 +885,14 @@ cc_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol  = NULL;
 
-      return true;
+      return TRUE;
     }
   else
     {
       /* Reset the line as if we had not done anything.  */
       input_line_pointer = start;
 
-      return false;
+      return FALSE;
     }
 }
 
@@ -1058,7 +1059,7 @@ parse_register_list (insn, operand)
 	      return _("illegal register included in list");
 	    }
 	}
-      else if (system_register_name (&exp, true, true))
+      else if (system_register_name (&exp, TRUE, TRUE))
 	{
 	  if (regs == type1_regs)
 	    {
@@ -1488,13 +1489,13 @@ static bfd_reloc_code_real_type
 v850_reloc_prefix (operand)
      const struct v850_operand *operand;
 {
-  boolean paren_skipped = false;
+  bfd_boolean paren_skipped = FALSE;
 
   /* Skip leading opening parenthesis.  */
   if (*input_line_pointer == '(')
     {
       ++input_line_pointer;
-      paren_skipped = true;
+      paren_skipped = TRUE;
     }
 
 #define CHECK_(name, reloc) 						\
@@ -1651,7 +1652,7 @@ md_assemble (str)
   char *f;
   int i;
   int match;
-  boolean extra_data_after_insn = false;
+  bfd_boolean extra_data_after_insn = FALSE;
   unsigned extra_data_len = 0;
   unsigned long extra_data = 0;
   char *saved_input_line_pointer;
@@ -1699,7 +1700,7 @@ md_assemble (str)
       fc = 0;
       next_opindex = 0;
       insn = opcode->opcode;
-      extra_data_after_insn = false;
+      extra_data_after_insn = FALSE;
 
       input_line_pointer = str = start_of_operands;
 
@@ -1785,7 +1786,7 @@ md_assemble (str)
 			  goto error;
 			}
 
-		      extra_data_after_insn = true;
+		      extra_data_after_insn = TRUE;
 		      extra_data_len        = 4;
 		      extra_data            = 0;
 		      break;
@@ -1814,7 +1815,7 @@ md_assemble (str)
 			  goto error;
 			}
 
-		      extra_data_after_insn = true;
+		      extra_data_after_insn = TRUE;
 		      extra_data_len        = 4;
 		      extra_data            = ex.X_add_number;
 		    }
@@ -1851,7 +1852,7 @@ md_assemble (str)
 		}
 	      else if ((operand->flags & V850_OPERAND_SRG) != 0)
 		{
-		  if (!system_register_name (&ex, true, false))
+		  if (!system_register_name (&ex, TRUE, FALSE))
 		    {
 		      errmsg = _("invalid system register name");
 		    }
@@ -1911,7 +1912,7 @@ md_assemble (str)
 			errmsg = _("constant too big to fit into instruction");
 		    }
 
-		  extra_data_after_insn = true;
+		  extra_data_after_insn = TRUE;
 		  extra_data_len        = 2;
 		  extra_data            = ex.X_add_number;
 		  ex.X_add_number       = 0;
@@ -1923,7 +1924,7 @@ md_assemble (str)
 		  if (ex.X_op != O_constant)
 		    errmsg = _("constant expression expected");
 
-		  extra_data_after_insn = true;
+		  extra_data_after_insn = TRUE;
 		  extra_data_len        = 4;
 		  extra_data            = ex.X_add_number;
 		  ex.X_add_number       = 0;
@@ -1974,7 +1975,7 @@ md_assemble (str)
 				       &symbol_rootP, &symbol_lastP);
 		    }
 		}
-	      else if (system_register_name (&ex, false, false)
+	      else if (system_register_name (&ex, FALSE, FALSE)
 		       && (operand->flags & V850_OPERAND_SRG) == 0)
 		{
 		  errmsg = _("syntax error: system register not expected");
@@ -2148,7 +2149,7 @@ md_assemble (str)
 	  f = frag_more (extra_data_len);
 	  md_number_to_chars (f, extra_data, extra_data_len);
 
-	  extra_data_after_insn = false;
+	  extra_data_after_insn = FALSE;
 	}
     }
 
@@ -2450,7 +2451,7 @@ cons_fix_new_v850 (frag, where, size, exp)
   hold_cons_reloc = BFD_RELOC_UNUSED;
 }
 
-boolean
+bfd_boolean
 v850_fix_adjustable (fixP)
      fixS *fixP;
 {

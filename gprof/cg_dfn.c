@@ -44,8 +44,8 @@ typedef struct
   }
 DFN_Stack;
 
-static boolean is_numbered PARAMS ((Sym *));
-static boolean is_busy PARAMS ((Sym *));
+static bfd_boolean is_numbered PARAMS ((Sym *));
+static bfd_boolean is_busy PARAMS ((Sym *));
 static void find_cycle PARAMS ((Sym *));
 static void pre_visit PARAMS ((Sym *));
 static void post_visit PARAMS ((Sym *));
@@ -59,7 +59,7 @@ int dfn_counter = DFN_NAN;
 /*
  * Is CHILD already numbered?
  */
-static boolean
+static bfd_boolean
 is_numbered (child)
      Sym *child;
 {
@@ -70,15 +70,15 @@ is_numbered (child)
 /*
  * Is CHILD already busy?
  */
-static boolean
+static bfd_boolean
 is_busy (child)
      Sym *child;
 {
   if (child->cg.top_order == DFN_NAN)
     {
-      return false;
+      return FALSE;
     }
-  return true;
+  return TRUE;
 }
 
 

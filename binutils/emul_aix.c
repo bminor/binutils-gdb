@@ -1,5 +1,5 @@
 /* Binutils emulation layer.
-   Copyright (C) 2002 Free Software Foundation, Inc.
+   Copyright 2002 Free Software Foundation, Inc.
    Written by Tom Rix, Redhat.
 
    This file is part of GNU Binutils.
@@ -26,22 +26,28 @@
 #include "libxcoff.h"
 
 /* Default to <bigaf>.  */
-static boolean big_archive = true;
+static bfd_boolean big_archive = TRUE;
 
 /* Whether to include 32 bit objects.  */
-static boolean X32 = true;
+static bfd_boolean X32 = TRUE;
 
 /* Whether to include 64 bit objects.  */
-static boolean X64 = false;
+static bfd_boolean X64 = FALSE;
 
-static void    ar_emul_aix_usage     PARAMS ((FILE *));
-static boolean ar_emul_aix_append    PARAMS ((bfd **, char *, boolean));
-static boolean ar_emul_aix5_append   PARAMS ((bfd **, char *, boolean));
-static boolean ar_emul_aix_replace   PARAMS ((bfd **, char *, boolean));
-static boolean ar_emul_aix5_replace  PARAMS ((bfd **, char *, boolean));
-static boolean ar_emul_aix_parse_arg PARAMS ((char *));
-static boolean ar_emul_aix_internal  PARAMS ((bfd **, char *, boolean,
-					      const char *, boolean));
+static void ar_emul_aix_usage
+  PARAMS ((FILE *));
+static bfd_boolean ar_emul_aix_append
+  PARAMS ((bfd **, char *, bfd_boolean));
+static bfd_boolean ar_emul_aix5_append
+  PARAMS ((bfd **, char *, bfd_boolean));
+static bfd_boolean ar_emul_aix_replace
+  PARAMS ((bfd **, char *, bfd_boolean));
+static bfd_boolean ar_emul_aix5_replace
+  PARAMS ((bfd **, char *, bfd_boolean));
+static bfd_boolean ar_emul_aix_parse_arg
+  PARAMS ((char *));
+static bfd_boolean ar_emul_aix_internal
+  PARAMS ((bfd **, char *, bfd_boolean, const char *, bfd_boolean));
 
 static void
 ar_emul_aix_usage (fp)
@@ -55,13 +61,13 @@ ar_emul_aix_usage (fp)
   fprintf (fp, _("  [-X32_64]    - accepts 32 and 64 bit objects\n"));
 }
 
-static boolean
+static bfd_boolean
 ar_emul_aix_internal (after_bfd, file_name, verbose, target_name, is_append)
      bfd **after_bfd;
      char *file_name;
-     boolean verbose;
+     bfd_boolean verbose;
      const char * target_name;
-     boolean is_append;
+     bfd_boolean is_append;
 {
   bfd *temp;
   bfd *try_bfd;
@@ -78,11 +84,11 @@ ar_emul_aix_internal (after_bfd, file_name, verbose, target_name, is_append)
   AR_EMUL_ELEMENT_CHECK (try_bfd, file_name);
 
   if (bfd_xcoff_is_xcoff64 (try_bfd) && (! X64))
-    return false;
+    return FALSE;
 
   if (bfd_xcoff_is_xcoff32 (try_bfd)
       && bfd_check_format (try_bfd, bfd_object) && (! X32))
-    return false;
+    return FALSE;
 
   if (is_append)
     {
@@ -96,51 +102,51 @@ ar_emul_aix_internal (after_bfd, file_name, verbose, target_name, is_append)
   *after_bfd = try_bfd;
   (*after_bfd)->next = temp;
 
-  return true;
+  return TRUE;
 }
 
 
-static boolean
+static bfd_boolean
 ar_emul_aix_append (after_bfd, file_name, verbose)
      bfd **after_bfd;
      char *file_name;
-     boolean verbose;
+     bfd_boolean verbose;
 {
   return ar_emul_aix_internal (after_bfd, file_name, verbose,
-			       "aixcoff64-rs6000", true);
+			       "aixcoff64-rs6000", TRUE);
 }
 
-static boolean
+static bfd_boolean
 ar_emul_aix5_append (after_bfd, file_name, verbose)
      bfd **after_bfd;
      char *file_name;
-     boolean verbose;
+     bfd_boolean verbose;
 {
   return ar_emul_aix_internal (after_bfd, file_name, verbose,
-			       "aix5coff64-rs6000", true);
+			       "aix5coff64-rs6000", TRUE);
 }
 
-static boolean
+static bfd_boolean
 ar_emul_aix_replace (after_bfd, file_name, verbose)
      bfd **after_bfd;
      char *file_name;
-     boolean verbose;
+     bfd_boolean verbose;
 {
   return ar_emul_aix_internal (after_bfd, file_name, verbose,
-			       "aixcoff64-rs6000", false);
+			       "aixcoff64-rs6000", FALSE);
 }
 
-static boolean
+static bfd_boolean
 ar_emul_aix5_replace (after_bfd, file_name, verbose)
      bfd **after_bfd;
      char *file_name;
-     boolean verbose;
+     bfd_boolean verbose;
 {
   return ar_emul_aix_internal (after_bfd, file_name, verbose,
-			       "aix5coff64-rs6000", false);
+			       "aix5coff64-rs6000", FALSE);
 }
 
-boolean
+bfd_boolean
 ar_emul_aix_create (abfd_out, archive_file_name, file_name)
      bfd **abfd_out;
      char *archive_file_name;
@@ -156,41 +162,41 @@ ar_emul_aix_create (abfd_out, archive_file_name, file_name)
 
   /* set to small or big format.  */
   /* not done.  */
-  return true;
+  return TRUE;
 }
 
-static boolean
+static bfd_boolean
 ar_emul_aix_parse_arg (arg)
      char *arg;
 {
   if (strncmp (arg, "-X32_64", 6) == 0)
     {
-      big_archive = true;
-      X32 = true;
-      X64 = true;
+      big_archive = TRUE;
+      X32 = TRUE;
+      X64 = TRUE;
     }
   else if (strncmp (arg, "-X32", 3) == 0)
     {
-      big_archive = true;
-      X32 = true;
-      X64 = false;
+      big_archive = TRUE;
+      X32 = TRUE;
+      X64 = FALSE;
     }
   else if (strncmp (arg, "-X64", 3) == 0)
     {
-      big_archive = true;
-      X32 = false;
-      X64 = true;
+      big_archive = TRUE;
+      X32 = FALSE;
+      X64 = TRUE;
     }
   else if (strncmp (arg, "-g", 2) == 0)
     {
-      big_archive = false;
-      X32 = true;
-      X64 = false;
+      big_archive = FALSE;
+      X32 = TRUE;
+      X64 = FALSE;
     }
   else
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 struct bin_emulation_xfer_struct bin_aix_emulation =

@@ -242,11 +242,11 @@ vax_find_call (parent, p_lowpc, p_highpc)
   operandenum mode;
   operandenum firstmode;
   bfd_vma pc, destpc;
-  static boolean inited = false;
+  static bfd_boolean inited = FALSE;
 
   if (!inited)
     {
-      inited = true;
+      inited = TRUE;
       sym_init (&indirectchild);
       indirectchild.cg.prop.fract = 1.0;
       indirectchild.cg.cyc.head = &indirectchild;

@@ -86,7 +86,7 @@ static void
 move_members PARAMS ((bfd *, char **files_to_move));
 
 static void
-replace_members PARAMS ((bfd *, char **files_to_replace, boolean quick));
+replace_members PARAMS ((bfd *, char **files_to_replace, bfd_boolean quick));
 
 static void
 print_descr PARAMS ((bfd * abfd));
@@ -150,18 +150,18 @@ enum pos
 static bfd **
 get_pos_bfd PARAMS ((bfd **, enum pos, const char *));
 
-/* For extract/delete only.  If COUNTED_NAME_MODE is true, we only
+/* For extract/delete only.  If COUNTED_NAME_MODE is TRUE, we only
    extract the COUNTED_NAME_COUNTER instance of that name.  */
-static boolean counted_name_mode = 0;
+static bfd_boolean counted_name_mode = 0;
 static int counted_name_counter = 0;
 
 /* Whether to truncate names of files stored in the archive.  */
-static boolean ar_truncate = false;
+static bfd_boolean ar_truncate = FALSE;
 
 /* Whether to use a full file name match when searching an archive.
    This is convenient for archives created by the Microsoft lib
    program.  */
-static boolean full_pathname = false;
+static bfd_boolean full_pathname = FALSE;
 
 int interactive = 0;
 
@@ -204,7 +204,7 @@ map_over_members (arch, function, files, count)
 
   for (; count > 0; files++, count--)
     {
-      boolean found = false;
+      bfd_boolean found = FALSE;
 
       match_count = 0;
       for (head = arch->next; head; head = head->next)
@@ -229,7 +229,7 @@ map_over_members (arch, function, files, count)
 		  continue;
 		}
 
-	      found = true;
+	      found = TRUE;
 	      function (head);
 	    }
 	}
@@ -239,7 +239,7 @@ map_over_members (arch, function, files, count)
     }
 }
 
-boolean operation_alters_arch = false;
+bfd_boolean operation_alters_arch = FALSE;
 
 static void
 usage (help)
@@ -455,7 +455,7 @@ main (argc, argv)
 
   if (is_ranlib)
     {
-      boolean touch = false;
+      bfd_boolean touch = FALSE;
 
       if (argc < 2
 	  || strcmp (argv[1], "--help") == 0
@@ -470,7 +470,7 @@ main (argc, argv)
       if (strcmp (argv[1], "-t") == 0)
 	{
 	  ++arg_index;
-	  touch = true;
+	  touch = TRUE;
 	}
       while (arg_index < argc)
 	{
@@ -514,22 +514,22 @@ main (argc, argv)
 	    {
 	    case 'd':
 	      operation = delete;
-	      operation_alters_arch = true;
+	      operation_alters_arch = TRUE;
 	      break;
 	    case 'm':
 	      operation = move;
-	      operation_alters_arch = true;
+	      operation_alters_arch = TRUE;
 	      break;
 	    case 'p':
 	      operation = print_files;
 	      break;
 	    case 'q':
 	      operation = quick_append;
-	      operation_alters_arch = true;
+	      operation_alters_arch = TRUE;
 	      break;
 	    case 'r':
 	      operation = replace;
-	      operation_alters_arch = true;
+	      operation_alters_arch = TRUE;
 	      break;
 	    case 't':
 	      operation = print_table;
@@ -547,7 +547,7 @@ main (argc, argv)
 	  preserve_dates = 1;
 	  break;
 	case 'V':
-	  show_version = true;
+	  show_version = TRUE;
 	  break;
 	case 's':
 	  write_armap = 1;
@@ -574,13 +574,13 @@ main (argc, argv)
 	  mri_mode = 1;
 	  break;
 	case 'N':
-	  counted_name_mode = true;
+	  counted_name_mode = TRUE;
 	  break;
 	case 'f':
-	  ar_truncate = true;
+	  ar_truncate = TRUE;
 	  break;
 	case 'P':
-	  full_pathname = true;
+	  full_pathname = TRUE;
 	  break;
 	default:
 	  /* xgettext:c-format */
@@ -975,7 +975,7 @@ do_quick_append (archive_filename, files_to_append)
   long tocopy, thistime;
   bfd *temp;
   struct stat sbuf;
-  boolean newfile = false;
+  bfd_boolean newfile = FALSE;
   bfd_set_error (bfd_error_no_error);
 
   if (stat (archive_filename, &sbuf) != 0)
@@ -998,7 +998,7 @@ do_quick_append (archive_filename, files_to_append)
 	bfd_fatal (archive_filename);
 #endif
 
-      newfile = true;
+      newfile = TRUE;
     }
 
   ofile = fopen (archive_filename, FOPEN_AUB);
@@ -1013,9 +1013,9 @@ do_quick_append (archive_filename, files_to_append)
     {
       bfd_fatal (archive_filename);
     }
-  if (newfile == false)
+  if (!newfile)
     {
-      if (bfd_check_format (temp, bfd_archive) != true)
+      if (!bfd_check_format (temp, bfd_archive))
 	/* xgettext:c-format */
 	fatal (_("%s is not an archive"), archive_filename);
     }
@@ -1113,7 +1113,7 @@ write_archive (iarch)
       obfd->flags |= BFD_TRADITIONAL_FORMAT;
     }
 
-  if (bfd_set_archive_head (obfd, contents_head) != true)
+  if (!bfd_set_archive_head (obfd, contents_head))
     bfd_fatal (old_name);
 
   if (!bfd_close (obfd))
@@ -1178,8 +1178,8 @@ delete_members (arch, files_to_delete)
      char **files_to_delete;
 {
   bfd **current_ptr_ptr;
-  boolean found;
-  boolean something_changed = false;
+  bfd_boolean found;
+  bfd_boolean something_changed = FALSE;
   int match_count;
 
   for (; *files_to_delete != NULL; ++files_to_delete)
@@ -1192,12 +1192,12 @@ delete_members (arch, files_to_delete)
 
       if (!strcmp (*files_to_delete, "__.SYMDEF"))
 	{
-	  arch->has_armap = false;
+	  arch->has_armap = FALSE;
 	  write_armap = -1;
 	  continue;
 	}
 
-      found = false;
+      found = FALSE;
       match_count = 0;
       current_ptr_ptr = &(arch->next);
       while (*current_ptr_ptr)
@@ -1214,8 +1214,8 @@ delete_members (arch, files_to_delete)
 		}
 	      else
 		{
-		  found = true;
-		  something_changed = true;
+		  found = TRUE;
+		  something_changed = TRUE;
 		  if (verbose)
 		    printf ("d - %s\n",
 			    *files_to_delete);
@@ -1227,7 +1227,7 @@ delete_members (arch, files_to_delete)
 	  current_ptr_ptr = &((*current_ptr_ptr)->next);
 	}
 
-      if (verbose && found == false)
+      if (verbose && !found)
 	{
 	  /* xgettext:c-format */
 	  printf (_("No member named `%s'\n"), *files_to_delete);
@@ -1236,7 +1236,7 @@ delete_members (arch, files_to_delete)
       ;
     }
 
-  if (something_changed == true)
+  if (something_changed)
     write_archive (arch);
   else
     output_filename = NULL;
@@ -1296,9 +1296,9 @@ static void
 replace_members (arch, files_to_move, quick)
      bfd *arch;
      char **files_to_move;
-     boolean quick;
+     bfd_boolean quick;
 {
-  boolean changed = false;
+  bfd_boolean changed = FALSE;
   bfd **after_bfd;		/* New entries go after this one */
   bfd *current;
   bfd **current_ptr;
@@ -1344,7 +1344,7 @@ replace_members (arch, files_to_move, quick)
 		    {
 		      /* Snip out this entry from the chain.  */
 		      *current_ptr = (*current_ptr)->next;
-		      changed = true;
+		      changed = TRUE;
 		    }
 
 		  goto next_file;
@@ -1356,7 +1356,7 @@ replace_members (arch, files_to_move, quick)
       /* Add to the end of the archive.  */
       after_bfd = get_pos_bfd (&arch->next, pos_end, NULL);
       if (ar_emul_append (after_bfd, *files_to_move, verbose))
-	changed = true;
+	changed = TRUE;
 
     next_file:;
 

@@ -38,7 +38,7 @@ static void fskip_string PARAMS ((FILE *));
 static void annotate_with_count PARAMS ((char *, unsigned int, int, PTR));
 
 /* Default option values:  */
-boolean bb_annotate_all_lines = false;
+bfd_boolean bb_annotate_all_lines = FALSE;
 unsigned long bb_min_calls = 1;
 int bb_table_length = 10;
 
@@ -150,8 +150,8 @@ bb_read_rec (ifp, filename)
 	     care about anymore.  */
 	  if ((fread (&ncalls, sizeof (ncalls), 1, ifp) != 1)
 	      || (fread (&addr, sizeof (addr), 1, ifp) != 1)
-	      || (fskip_string (ifp), false)
-	      || (fskip_string (ifp), false)
+	      || (fskip_string (ifp), FALSE)
+	      || (fskip_string (ifp), FALSE)
 	      || (fread (&line_num, sizeof (line_num), 1, ifp) != 1))
 	    {
 	      perror (filename);
@@ -193,11 +193,11 @@ bb_read_rec (ifp, filename)
 	}
       else
 	{
-	  static boolean user_warned = false;
+	  static bfd_boolean user_warned = FALSE;
 
 	  if (!user_warned)
 	    {
-	      user_warned = true;
+	      user_warned = TRUE;
 	      fprintf (stderr,
   _("%s: warning: ignoring basic-block exec counts (use -l or --line)\n"),
 		       whoami);
@@ -262,7 +262,7 @@ print_exec_counts ()
   unsigned int i, j, len;
 
   if (first_output)
-    first_output = false;
+    first_output = FALSE;
   else
     printf ("\f\n");
 

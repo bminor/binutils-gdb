@@ -148,7 +148,7 @@ bfd_size_type
 _bfd_elf_strtab_add (tab, str, copy)
      struct elf_strtab_hash *tab;
      const char *str;
-     boolean copy;
+     bfd_boolean copy;
 {
   register struct elf_strtab_hash_entry *entry;
 
@@ -159,7 +159,7 @@ _bfd_elf_strtab_add (tab, str, copy)
 
   BFD_ASSERT (tab->sec_size == 0);
   entry = (struct elf_strtab_hash_entry *)
-	  bfd_hash_lookup (&tab->table, str, true, copy);
+	  bfd_hash_lookup (&tab->table, str, TRUE, copy);
 
   if (entry == NULL)
     return (bfd_size_type) -1;
@@ -243,7 +243,7 @@ _bfd_elf_strtab_offset (tab, idx)
   return tab->array[idx]->u.index;
 }
 
-boolean
+bfd_boolean
 _bfd_elf_strtab_emit (abfd, tab)
      register bfd *abfd;
      struct elf_strtab_hash *tab;
@@ -251,7 +251,7 @@ _bfd_elf_strtab_emit (abfd, tab)
   bfd_size_type off = 1, i;
 
   if (bfd_bwrite ("", 1, abfd) != 1)
-    return false;
+    return FALSE;
 
   for (i = 1; i < tab->size; ++i)
     {
@@ -265,13 +265,13 @@ _bfd_elf_strtab_emit (abfd, tab)
 	continue;
 
       if (bfd_bwrite ((PTR) str, (bfd_size_type) len, abfd) != len)
-	return false;
+	return FALSE;
 
       off += len;
     }
 
   BFD_ASSERT (off == tab->sec_size);
-  return true;
+  return TRUE;
 }
 
 /* Compare two elf_strtab_hash_entry structures.  This is called via qsort.  */

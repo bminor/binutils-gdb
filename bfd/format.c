@@ -52,7 +52,7 @@ FUNCTION
 	bfd_check_format
 
 SYNOPSIS
-	boolean bfd_check_format(bfd *abfd, bfd_format format);
+	bfd_boolean bfd_check_format(bfd *abfd, bfd_format format);
 
 DESCRIPTION
 	Verify if the file attached to the BFD @var{abfd} is compatible
@@ -67,7 +67,7 @@ DESCRIPTION
 	matches, it is used.  If not, exactly one target must recognize
 	the file, or an error results.
 
-	The function returns <<true>> on success, otherwise <<false>>
+	The function returns <<TRUE>> on success, otherwise <<FALSE>>
 	with one of the following error codes:
 
 	o <<bfd_error_invalid_operation>> -
@@ -85,7 +85,7 @@ DESCRIPTION
 	more than one backend recognised the file format.
 */
 
-boolean
+bfd_boolean
 bfd_check_format (abfd, format)
      bfd *abfd;
      bfd_format format;
@@ -98,10 +98,10 @@ FUNCTION
 	bfd_check_format_matches
 
 SYNOPSIS
-	boolean bfd_check_format_matches(bfd *abfd, bfd_format format, char ***matching);
+	bfd_boolean bfd_check_format_matches(bfd *abfd, bfd_format format, char ***matching);
 
 DESCRIPTION
-	Like <<bfd_check_format>>, except when it returns false with
+	Like <<bfd_check_format>>, except when it returns FALSE with
 	<<bfd_errno>> set to <<bfd_error_file_ambiguously_recognized>>.  In that
 	case, if @var{matching} is not NULL, it will be filled in with
 	a NULL-terminated list of the names of the formats that matched,
@@ -112,7 +112,7 @@ DESCRIPTION
 	should free it.
 */
 
-boolean
+bfd_boolean
 bfd_check_format_matches (abfd, format, matching)
      bfd *abfd;
      bfd_format format;
@@ -129,11 +129,11 @@ bfd_check_format_matches (abfd, format, matching)
       || (unsigned int) abfd->format >= (unsigned int) bfd_type_end)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return false;
+      return FALSE;
     }
 
   if (abfd->format != bfd_unknown)
-    return (boolean) (abfd->format == format);
+    return abfd->format == format;
 
   /* Since the target type was defaulted, check them
      all in the hope that one will be uniquely recognized.  */
@@ -149,7 +149,7 @@ bfd_check_format_matches (abfd, format, matching)
       amt = sizeof (*matching_vector) * 2 * _bfd_target_vector_entries;
       matching_vector = (const bfd_target **) bfd_malloc (amt);
       if (!matching_vector)
-	return false;
+	return FALSE;
     }
 
   right_targ = 0;
@@ -162,7 +162,7 @@ bfd_check_format_matches (abfd, format, matching)
   if (!abfd->target_defaulted)
     {
       if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)	/* rewind! */
-	return false;
+	return FALSE;
 
       right_targ = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
 
@@ -173,7 +173,7 @@ bfd_check_format_matches (abfd, format, matching)
 	  if (matching)
 	    free ((PTR) matching_vector);
 
-	  return true;			/* File position has moved, BTW.  */
+	  return TRUE;			/* File position has moved, BTW.  */
 	}
 
       /* For a long time the code has dropped through to check all
@@ -198,7 +198,7 @@ bfd_check_format_matches (abfd, format, matching)
 
 	  bfd_set_error (bfd_error_file_not_recognized);
 
-	  return false;
+	  return FALSE;
 	}
     }
 
@@ -213,7 +213,7 @@ bfd_check_format_matches (abfd, format, matching)
       abfd->xvec = *target;	/* Change BFD's target temporarily */
 
       if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
-	return false;
+	return FALSE;
 
       /* If _bfd_check_format neglects to set bfd_error, assume
 	 bfd_error_wrong_format.  We didn't used to even pay any
@@ -271,7 +271,7 @@ bfd_check_format_matches (abfd, format, matching)
 	  if (matching)
 	    free ((PTR) matching_vector);
 
-	  return false;
+	  return FALSE;
 	}
     }
 
@@ -322,7 +322,7 @@ bfd_check_format_matches (abfd, format, matching)
       if (matching)
 	free ((PTR) matching_vector);
 
-      return true;			/* File position has moved, BTW.  */
+      return TRUE;			/* File position has moved, BTW.  */
     }
 
   abfd->xvec = save_targ;		/* Restore original target type.  */
@@ -353,7 +353,7 @@ bfd_check_format_matches (abfd, format, matching)
 	}
     }
 
-  return false;
+  return FALSE;
 }
 
 /*
@@ -361,7 +361,7 @@ FUNCTION
 	bfd_set_format
 
 SYNOPSIS
-	boolean bfd_set_format(bfd *abfd, bfd_format format);
+	bfd_boolean bfd_set_format(bfd *abfd, bfd_format format);
 
 DESCRIPTION
 	This function sets the file format of the BFD @var{abfd} to the
@@ -370,7 +370,7 @@ DESCRIPTION
 	is not open for writing, then an error occurs.
 */
 
-boolean
+bfd_boolean
 bfd_set_format (abfd, format)
      bfd *abfd;
      bfd_format format;
@@ -379,11 +379,11 @@ bfd_set_format (abfd, format)
       || (unsigned int) abfd->format >= (unsigned int) bfd_type_end)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return false;
+      return FALSE;
     }
 
   if (abfd->format != bfd_unknown)
-    return (boolean) (abfd->format == format);
+    return abfd->format == format;
 
   /* Presume the answer is yes.  */
   abfd->format = format;
@@ -391,10 +391,10 @@ bfd_set_format (abfd, format)
   if (!BFD_SEND_FMT (abfd, _bfd_set_format, (abfd)))
     {
       abfd->format = bfd_unknown;
-      return false;
+      return FALSE;
     }
 
-  return true;
+  return TRUE;
 }
 
 /*

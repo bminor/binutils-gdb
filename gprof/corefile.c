@@ -41,7 +41,7 @@ unsigned int symbol_map_count;
 
 static void read_function_mappings PARAMS ((const char *));
 static int core_sym_class PARAMS ((asymbol *));
-static boolean get_src_info
+static bfd_boolean get_src_info
   PARAMS ((bfd_vma, const char **, const char **, int *));
 
 extern void i386_find_call  PARAMS ((Sym *, bfd_vma, bfd_vma));
@@ -277,7 +277,7 @@ find_call (parent, p_lowpc, p_highpc)
 	       whoami, bfd_printable_name(core_bfd));
 
       /* Don't give the error more than once.  */
-      ignore_direct_calls = false;
+      ignore_direct_calls = FALSE;
     }
 }
 
@@ -370,7 +370,7 @@ core_sym_class (sym)
 
 /* Get whatever source info we can get regarding address ADDR.  */
 
-static boolean
+static bfd_boolean
 get_src_info (addr, filename, name, line_num)
      bfd_vma addr;
      const char **filename;
@@ -390,14 +390,14 @@ get_src_info (addr, filename, name, line_num)
       *filename = fname;
       *name = func_name;
       *line_num = l;
-      return true;
+      return TRUE;
     }
   else
     {
       DBG (AOUTDEBUG, printf ("[get_src_info] no info for 0x%lx (%s:%d,%s)\n",
 			      (long) addr, fname ? fname : "<unknown>", l,
 			      func_name ? func_name : "<unknown>"));
-      return false;
+      return FALSE;
     }
 }
 
@@ -536,11 +536,11 @@ core_create_function_syms (cbfd)
 	  }
       }
 
-      symtab.limit->is_func = true;
-      symtab.limit->is_bb_head = true;
+      symtab.limit->is_func = TRUE;
+      symtab.limit->is_bb_head = TRUE;
 
       if (class == 't')
-	symtab.limit->is_static = true;
+	symtab.limit->is_static = TRUE;
 
       /* Keep track of the minimum and maximum vma addresses used by all
 	 symbols.  When computing the max_vma, use the ending address of the

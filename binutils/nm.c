@@ -68,47 +68,84 @@ struct extended_symbol_info
 #define SYM_SIZE(sym) \
   (sym->elfinfo ? sym->elfinfo->internal_elf_sym.st_size: sym->ssize)
 
-static void usage                PARAMS ((FILE *, int));
-static void set_print_radix      PARAMS ((char *));
-static void set_output_format    PARAMS ((char *));
-static void display_archive      PARAMS ((bfd *));
-static boolean display_file      PARAMS ((char *));
-static void display_rel_file     PARAMS ((bfd *, bfd *));
-static long filter_symbols       PARAMS ((bfd *, boolean, PTR, long, unsigned int));
-static long sort_symbols_by_size PARAMS ((bfd *, boolean, PTR, long, unsigned int, struct size_sym **));
-static void print_symbols        PARAMS ((bfd *, boolean, PTR, long, unsigned int, bfd *));
-static void print_size_symbols   PARAMS ((bfd *, boolean, struct size_sym *, long, bfd *));
-static void print_symname        PARAMS ((const char *, const char *, bfd *));
-static void print_symbol         PARAMS ((bfd *, asymbol *, bfd_vma ssize, bfd *));
-static void print_symdef_entry   PARAMS ((bfd *));
+static void usage
+  PARAMS ((FILE *, int));
+static void set_print_radix
+  PARAMS ((char *));
+static void set_output_format
+  PARAMS ((char *));
+static void display_archive
+  PARAMS ((bfd *));
+static bfd_boolean display_file
+  PARAMS ((char *));
+static void display_rel_file
+  PARAMS ((bfd *, bfd *));
+static long filter_symbols
+  PARAMS ((bfd *, bfd_boolean, PTR, long, unsigned int));
+static long sort_symbols_by_size
+  PARAMS ((bfd *, bfd_boolean, PTR, long, unsigned int, struct size_sym **));
+static void print_symbols
+  PARAMS ((bfd *, bfd_boolean, PTR, long, unsigned int, bfd *));
+static void print_size_symbols
+  PARAMS ((bfd *, bfd_boolean, struct size_sym *, long, bfd *));
+static void print_symname
+  PARAMS ((const char *, const char *, bfd *));
+static void print_symbol
+  PARAMS ((bfd *, asymbol *, bfd_vma ssize, bfd *));
+static void print_symdef_entry
+  PARAMS ((bfd *));
 
 /* The sorting functions.  */
-static int numeric_forward PARAMS ((const PTR, const PTR));
-static int numeric_reverse PARAMS ((const PTR, const PTR));
-static int non_numeric_forward PARAMS ((const PTR, const PTR));
-static int non_numeric_reverse PARAMS ((const PTR, const PTR));
-static int size_forward1 PARAMS ((const PTR, const PTR));
-static int size_forward2 PARAMS ((const PTR, const PTR));
+static int numeric_forward
+  PARAMS ((const PTR, const PTR));
+static int numeric_reverse
+  PARAMS ((const PTR, const PTR));
+static int non_numeric_forward
+  PARAMS ((const PTR, const PTR));
+static int non_numeric_reverse
+  PARAMS ((const PTR, const PTR));
+static int size_forward1
+  PARAMS ((const PTR, const PTR));
+static int size_forward2
+  PARAMS ((const PTR, const PTR));
 
 /* The output formatting functions.  */
-static void print_object_filename_bsd PARAMS ((char *));
-static void print_object_filename_sysv PARAMS ((char *));
-static void print_object_filename_posix PARAMS ((char *));
-static void print_archive_filename_bsd PARAMS ((char *));
-static void print_archive_filename_sysv PARAMS ((char *));
-static void print_archive_filename_posix PARAMS ((char *));
-static void print_archive_member_bsd PARAMS ((char *, const char *));
-static void print_archive_member_sysv PARAMS ((char *, const char *));
-static void print_archive_member_posix PARAMS ((char *, const char *));
-static void print_symbol_filename_bsd PARAMS ((bfd *, bfd *));
-static void print_symbol_filename_sysv PARAMS ((bfd *, bfd *));
-static void print_symbol_filename_posix PARAMS ((bfd *, bfd *));
-static void print_value PARAMS ((bfd *, bfd_vma));
-static void print_symbol_info_bsd PARAMS ((struct extended_symbol_info *, bfd *));
-static void print_symbol_info_sysv PARAMS ((struct extended_symbol_info *, bfd *));
-static void print_symbol_info_posix PARAMS ((struct extended_symbol_info *, bfd *));
-static void get_relocs PARAMS ((bfd *, asection *, PTR));
-static const char * get_symbol_type PARAMS ((unsigned int));
+static void print_object_filename_bsd
+  PARAMS ((char *));
+static void print_object_filename_sysv
+  PARAMS ((char *));
+static void print_object_filename_posix
+  PARAMS ((char *));
+static void print_archive_filename_bsd
+  PARAMS ((char *));
+static void print_archive_filename_sysv
+  PARAMS ((char *));
+static void print_archive_filename_posix
+  PARAMS ((char *));
+static void print_archive_member_bsd
+  PARAMS ((char *, const char *));
+static void print_archive_member_sysv
+  PARAMS ((char *, const char *));
+static void print_archive_member_posix
+  PARAMS ((char *, const char *));
+static void print_symbol_filename_bsd
+  PARAMS ((bfd *, bfd *));
+static void print_symbol_filename_sysv
+  PARAMS ((bfd *, bfd *));
+static void print_symbol_filename_posix
+  PARAMS ((bfd *, bfd *));
+static void print_value
+  PARAMS ((bfd *, bfd_vma));
+static void print_symbol_info_bsd
+  PARAMS ((struct extended_symbol_info *, bfd *));
+static void print_symbol_info_sysv
+  PARAMS ((struct extended_symbol_info *, bfd *));
+static void print_symbol_info_posix
+  PARAMS ((struct extended_symbol_info *, bfd *));
+static void get_relocs
+  PARAMS ((bfd *, asection *, PTR));
+static const char * get_symbol_type
+  PARAMS ((unsigned int));
 
 /* Support for different output formats.  */
 struct output_fns
@@ -592,11 +629,11 @@ display_archive (file)
     }
 }
 
-static boolean
+static bfd_boolean
 display_file (filename)
      char *filename;
 {
-  boolean retval = true;
+  bfd_boolean retval = TRUE;
   bfd *file;
   char **matching;
 
@@ -604,7 +641,7 @@ display_file (filename)
   if (file == NULL)
     {
       bfd_nonfatal (filename);
-      return false;
+      return FALSE;
     }
 
   if (bfd_check_format (file, bfd_archive))
@@ -628,10 +665,10 @@ display_file (filename)
 	  list_matching_formats (matching);
 	  free (matching);
 	}
-      retval = false;
+      retval = FALSE;
     }
 
-  if (bfd_close (file) == false)
+  if (!bfd_close (file))
     bfd_fatal (filename);
 
   lineno_cache_bfd = NULL;
@@ -643,7 +680,7 @@ display_file (filename)
 /* These globals are used to pass information into the sorting
    routines.  */
 static bfd *sort_bfd;
-static boolean sort_dynamic;
+static bfd_boolean sort_dynamic;
 static asymbol *sort_x;
 static asymbol *sort_y;
 
@@ -847,7 +884,7 @@ size_forward2 (P_x, P_y)
 static long
 sort_symbols_by_size (abfd, dynamic, minisyms, symcount, size, symsizesp)
      bfd *abfd;
-     boolean dynamic;
+     bfd_boolean dynamic;
      PTR minisyms;
      long symcount;
      unsigned int size;
@@ -1010,7 +1047,7 @@ display_rel_file (abfd, archive_bfd)
 static long
 filter_symbols (abfd, dynamic, minisyms, symcount, size)
      bfd *abfd;
-     boolean dynamic;
+     bfd_boolean dynamic;
      PTR minisyms;
      long symcount;
      unsigned int size;
@@ -1102,7 +1139,7 @@ print_symname (format, name, abfd)
 static void
 print_symbols (abfd, dynamic, minisyms, symcount, size, archive_bfd)
      bfd *abfd;
-     boolean dynamic;
+     bfd_boolean dynamic;
      PTR minisyms;
      long symcount;
      unsigned int size;
@@ -1134,7 +1171,7 @@ print_symbols (abfd, dynamic, minisyms, symcount, size, archive_bfd)
 static void
 print_size_symbols (abfd, dynamic, symsizes, symcount, archive_bfd)
      bfd *abfd;
-     boolean dynamic;
+     bfd_boolean dynamic;
      struct size_sym *symsizes;
      long symcount;
      bfd *archive_bfd;
@@ -1602,7 +1639,7 @@ print_symdef_entry (abfd)
 {
   symindex idx = BFD_NO_MORE_SYMBOLS;
   carsym *thesym;
-  boolean everprinted = false;
+  bfd_boolean everprinted = FALSE;
 
   for (idx = bfd_get_next_mapent (abfd, idx, &thesym);
        idx != BFD_NO_MORE_SYMBOLS;
@@ -1612,7 +1649,7 @@ print_symdef_entry (abfd)
       if (!everprinted)
 	{
 	  printf (_("\nArchive index:\n"));
-	  everprinted = true;
+	  everprinted = TRUE;
 	}
       elt = bfd_get_elt_at_index (abfd, idx);
       if (elt == NULL)

@@ -65,7 +65,7 @@ static void elf_init_stab_section PARAMS ((segT));
 static symbolS *elf_common PARAMS ((int));
 
 #ifdef NEED_ECOFF_DEBUG
-static boolean elf_get_extr PARAMS ((asymbol *, EXTR *));
+static bfd_boolean elf_get_extr PARAMS ((asymbol *, EXTR *));
 static void elf_set_index PARAMS ((asymbol *, bfd_size_type));
 #endif
 
@@ -1761,15 +1761,15 @@ elf_ecoff_set_ext (sym, ext)
    supposed to *EXT to the external symbol information, and return
    whether the symbol should be used at all.  */
 
-static boolean
+static bfd_boolean
 elf_get_extr (sym, ext)
      asymbol *sym;
      EXTR *ext;
 {
   if (sym->udata.p == NULL)
-    return false;
+    return FALSE;
   *ext = *(EXTR *) sym->udata.p;
-  return true;
+  return TRUE;
 }
 
 /* This function is called by bfd_ecoff_debug_externals.  It has
@@ -1849,7 +1849,7 @@ elf_frob_symbol (symp, puntp)
 	    {
 	      as_bad (_("invalid attempt to declare external version name as default in symbol `%s'"),
 		      sy_obj->versioned_name);
-	      *puntp = true;
+	      *puntp = TRUE;
 	    }
 	  S_SET_NAME (symp, sy_obj->versioned_name);
 	}
@@ -2155,7 +2155,7 @@ elf_frob_file_after_relocs ()
       /* Set up the external symbols.  */
       debug.ssext = debug.ssext_end = NULL;
       debug.external_ext = debug.external_ext_end = NULL;
-      if (! bfd_ecoff_debug_externals (stdoutput, &debug, debug_swap, true,
+      if (! bfd_ecoff_debug_externals (stdoutput, &debug, debug_swap, TRUE,
 				       elf_get_extr, elf_set_index))
 	as_fatal (_("failed to set up debugging information: %s"),
 		  bfd_errmsg (bfd_get_error ()));
@@ -2163,7 +2163,7 @@ elf_frob_file_after_relocs ()
       sec = bfd_get_section_by_name (stdoutput, ".mdebug");
       assert (sec != NULL);
 
-      know (stdoutput->output_has_begun == false);
+      know (!stdoutput->output_has_begun);
 
       /* We set the size of the section, call bfd_set_section_contents
 	 to force the ELF backend to allocate a file position, and then
@@ -2180,7 +2180,7 @@ elf_frob_file_after_relocs ()
 	as_fatal (_("can't start writing .mdebug section: %s"),
 		  bfd_errmsg (bfd_get_error ()));
 
-      know (stdoutput->output_has_begun == true);
+      know (stdoutput->output_has_begun);
       know (sec->filepos != 0);
 
       if (! bfd_ecoff_write_debug (stdoutput, &debug, debug_swap,

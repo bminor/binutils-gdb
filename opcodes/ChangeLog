@@ -1,3 +1,10 @@
+2002-11-30  Alan Modra  <amodra@bigpond.net.au>
+
+	*arm-dis.c, cris-dis.c, h8300-dis.c, mips-dis.c, mmix-dis.c, sh-dis.c,
+	sh64-dis.c, v850-dis.c: Replace boolean with bfd_boolean, true with
+	TRUE, false with FALSE.  Simplify comparisons of bfd_boolean vars
+	with TRUE/FALSE.  Formatting.
+
 2002-11-25  DJ Delorie  <dj@redhat.com>
 
 	* xstormy16-opc.c: Regenerate.

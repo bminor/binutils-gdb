@@ -5146,7 +5146,7 @@ i386_validate_fix (fixp)
     }
 }
 
-boolean
+bfd_boolean
 i386_force_relocation (fixp)
      fixS *fixp;
 {

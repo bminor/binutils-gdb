@@ -33,7 +33,9 @@ typedef struct source_file
 Source_File;
 
 /* Options.  */
-extern boolean create_annotation_files;	/* Create annotated output files?  */
+
+/* Create annotated output files?  */
+extern bfd_boolean create_annotation_files;
 
 /* List of directories to search for source files.  */
 extern Search_List src_search_list;

@@ -159,11 +159,11 @@
 #endif
 #ifndef bfd_elfNN_bfd_merge_private_bfd_data
 #define bfd_elfNN_bfd_merge_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+  ((bfd_boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
 #endif
 #ifndef bfd_elfNN_bfd_set_private_flags
 #define bfd_elfNN_bfd_set_private_flags \
-  ((boolean (*) PARAMS ((bfd *, flagword))) bfd_true)
+  ((bfd_boolean (*) PARAMS ((bfd *, flagword))) bfd_true)
 #endif
 #ifndef bfd_elfNN_bfd_is_local_label_name
 #define bfd_elfNN_bfd_is_local_label_name _bfd_elf_is_local_label_name
@@ -250,10 +250,10 @@
 #endif
 
 #ifndef elf_backend_collect
-#define elf_backend_collect false
+#define elf_backend_collect FALSE
 #endif
 #ifndef elf_backend_type_change_ok
-#define elf_backend_type_change_ok false
+#define elf_backend_type_change_ok FALSE
 #endif
 
 #ifndef elf_backend_sym_is_global

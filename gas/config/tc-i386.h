@@ -483,7 +483,7 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 #endif
 
 #define TC_FORCE_RELOCATION(FIX)	i386_force_relocation (FIX)
-extern boolean i386_force_relocation PARAMS ((struct fix *));
+extern bfd_boolean i386_force_relocation PARAMS ((struct fix *));
 
 /* This expression evaluates to true if the relocation is for a local
    object for which we still want to do the relocation at runtime.

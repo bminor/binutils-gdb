@@ -72,7 +72,7 @@ PARAMS ((bfd *abfd, PTR afile, asymbol *symbol, bfd_print_symbol_type how));
 static void bfd_pef_convert_architecture
 PARAMS ((unsigned long architecture,
 	 enum bfd_architecture *type, unsigned long *subtype));
-static boolean bfd_pef_mkobject PARAMS ((bfd *abfd));
+static bfd_boolean bfd_pef_mkobject PARAMS ((bfd *abfd));
 static int bfd_pef_parse_traceback_table
 PARAMS ((bfd *abfd, asection *section, unsigned char *buf,
 	 size_t len, size_t pos, asymbol *sym, FILE *file));
@@ -97,7 +97,7 @@ static long bfd_pef_get_symtab_upper_bound PARAMS ((bfd *));
 static long bfd_pef_get_symtab PARAMS ((bfd *, asymbol **));
 static asymbol *bfd_pef_make_empty_symbol PARAMS ((bfd *));
 static void bfd_pef_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
-static int bfd_pef_sizeof_headers PARAMS ((bfd *, boolean));
+static int bfd_pef_sizeof_headers PARAMS ((bfd *, bfd_boolean));
 
 static int bfd_pef_xlib_read_header
 PARAMS ((bfd *abfd, bfd_pef_xlib_header *header));
@@ -154,11 +154,11 @@ bfd_pef_convert_architecture (architecture, type, subtype)
     *type = bfd_arch_m68k;
 }
 
-static boolean
+static bfd_boolean
 bfd_pef_mkobject (abfd)
      bfd *abfd ATTRIBUTE_UNUSED;
 {
-  return true;
+  return TRUE;
 }
 
 static int
@@ -1094,7 +1094,7 @@ bfd_pef_get_symbol_info (abfd, symbol, ret)
 static int
 bfd_pef_sizeof_headers (abfd, exec)
      bfd *abfd ATTRIBUTE_UNUSED;
-     boolean exec ATTRIBUTE_UNUSED;
+     bfd_boolean exec ATTRIBUTE_UNUSED;
 {
   return 0;
 }

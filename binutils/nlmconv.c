@@ -124,37 +124,38 @@ static struct option long_options[] =
 
 int main PARAMS ((int, char **));
 
-static void show_usage PARAMS ((FILE *, int));
-static const char *select_output_format PARAMS ((enum bfd_architecture,
-						 unsigned long, boolean));
-static void setup_sections PARAMS ((bfd *, asection *, PTR));
-static void copy_sections PARAMS ((bfd *, asection *, PTR));
-static void mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-				   long *, char *,
-				   bfd_size_type));
-static void default_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-					   long *, char *,
-					   bfd_size_type));
-static char *link_inputs PARAMS ((struct string_list *, char *));
+static void show_usage
+  PARAMS ((FILE *, int));
+static const char *select_output_format
+  PARAMS ((enum bfd_architecture, unsigned long, bfd_boolean));
+static void setup_sections
+  PARAMS ((bfd *, asection *, PTR));
+static void copy_sections
+  PARAMS ((bfd *, asection *, PTR));
+static void mangle_relocs
+  PARAMS ((bfd *, asection *, arelent ***, long *, char *, bfd_size_type));
+static void default_mangle_relocs
+  PARAMS ((bfd *, asection *, arelent ***, long *, char *, bfd_size_type));
+static char *link_inputs
+  PARAMS ((struct string_list *, char *));
 
 #ifdef NLMCONV_I386
-static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-					long *, char *,
-					bfd_size_type));
+static void i386_mangle_relocs
+  PARAMS ((bfd *, asection *, arelent ***, long *, char *, bfd_size_type));
 #endif
 
 #ifdef NLMCONV_ALPHA
-static void alpha_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-					 long *, char *,
-					 bfd_size_type));
+static void alpha_mangle_relocs
+  PARAMS ((bfd *, asection *, arelent ***, long *, char *, bfd_size_type));
 #endif
 
 #ifdef NLMCONV_POWERPC
-static void powerpc_build_stubs PARAMS ((bfd *, bfd *, asymbol ***, long *));
-static void powerpc_resolve_stubs PARAMS ((bfd *, bfd *));
-static void powerpc_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-					   long *, char *,
-					   bfd_size_type));
+static void powerpc_build_stubs
+  PARAMS ((bfd *, bfd *, asymbol ***, long *));
+static void powerpc_resolve_stubs
+  PARAMS ((bfd *, bfd *));
+static void powerpc_mangle_relocs
+  PARAMS ((bfd *, asection *, arelent ***, long *, char *, bfd_size_type));
 #endif
 
 /* The main routine.  */
@@ -186,7 +187,7 @@ main (argc, argv)
   asymbol *endsym;
   long i;
   char inlead, outlead;
-  boolean gotstart, gotexit, gotcheck;
+  bfd_boolean gotstart, gotexit, gotcheck;
   struct stat st;
   FILE *custom_data = NULL;
   FILE *help_data = NULL;
@@ -296,18 +297,18 @@ main (argc, argv)
   memset ((PTR) &extended_hdr_struct, 0, sizeof extended_hdr_struct);
   check_procedure = NULL;
   custom_file = NULL;
-  debug_info = false;
+  debug_info = FALSE;
   exit_procedure = "_Stop";
   export_symbols = NULL;
   map_file = NULL;
-  full_map = false;
+  full_map = FALSE;
   help_file = NULL;
   import_symbols = NULL;
   message_file = NULL;
   modules = NULL;
   sharelib_file = NULL;
   start_procedure = "_Prelude";
-  verbose = false;
+  verbose = FALSE;
   rpc_file = NULL;
 
   parse_errors = 0;
@@ -459,9 +460,9 @@ main (argc, argv)
   /* Adjust symbol information.  */
   inlead = bfd_get_symbol_leading_char (inbfd);
   outlead = bfd_get_symbol_leading_char (outbfd);
-  gotstart = false;
-  gotexit = false;
-  gotcheck = false;
+  gotstart = FALSE;
+  gotexit = FALSE;
+  gotcheck = FALSE;
   newsymalloc = 10;
   newsyms = (asymbol **) xmalloc (newsymalloc * sizeof (asymbol *));
   newsymcount = 0;
@@ -653,7 +654,7 @@ main (argc, argv)
 		val += bfd_section_size (outbfd, text_sec);
 	      if (! bfd_set_start_address (outbfd, val))
 		bfd_fatal (_("set start address"));
-	      gotstart = true;
+	      gotstart = TRUE;
 	    }
 	  if (strcmp (bfd_asymbol_name (sym), exit_procedure) == 0)
 	    {
@@ -662,7 +663,7 @@ main (argc, argv)
 		  && text_sec != (asection *) NULL)
 		val += bfd_section_size (outbfd, text_sec);
 	      nlm_fixed_header (outbfd)->exitProcedureOffset = val;
-	      gotexit = true;
+	      gotexit = TRUE;
 	    }
 	  if (check_procedure != NULL
 	      && strcmp (bfd_asymbol_name (sym), check_procedure) == 0)
@@ -672,7 +673,7 @@ main (argc, argv)
 		  && text_sec != (asection *) NULL)
 		val += bfd_section_size (outbfd, text_sec);
 	      nlm_fixed_header (outbfd)->checkUnloadProcedureOffset = val;
-	      gotcheck = true;
+	      gotcheck = TRUE;
 	    }
 	}
     }
@@ -1127,7 +1128,7 @@ static const char *
 select_output_format (arch, mach, bigendian)
      enum bfd_architecture arch;
      unsigned long mach;
-     boolean bigendian ATTRIBUTE_UNUSED;
+     bfd_boolean bigendian ATTRIBUTE_UNUSED;
 {
   switch (arch)
     {
@@ -1253,7 +1254,7 @@ copy_sections (inbfd, insec, data_ptr)
 
   /* FIXME: Why are these necessary?  */
   insec->_cooked_size = insec->_raw_size;
-  insec->reloc_done = true;
+  insec->reloc_done = TRUE;
 
   if ((bfd_get_section_flags (inbfd, insec) & SEC_HAS_CONTENTS) == 0)
     contents = NULL;
@@ -1416,15 +1417,15 @@ static reloc_howto_type nlm_i386_pcrel_howto =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,			/* special_function */
 	 "DISP32",		/* name */
-	 true,			/* partial_inplace */
+	 TRUE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 true);			/* pcrel_offset */
+	 TRUE);			/* pcrel_offset */
 
 static void
 i386_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
@@ -1574,15 +1575,15 @@ static reloc_howto_type nlm32_alpha_nw_howto =
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 0,			/* special_function */
 	 "NW_RELOC",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false);		/* pcrel_offset */
+	 FALSE);		/* pcrel_offset */
 
 static void
 alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,

@@ -243,8 +243,8 @@ mri_draw_tree ()
 	  tmp->next = NULL;
 	  tmp->spec.name = p->name;
 	  tmp->spec.exclude_name_list = NULL;
-	  tmp->spec.sorted = false;
-	  lang_add_wild (NULL, tmp, false);
+	  tmp->spec.sorted = FALSE;
+	  lang_add_wild (NULL, tmp, FALSE);
 
 	  /* If there is an alias for this section, add it too.  */
 	  for (aptr = alias; aptr; aptr = aptr->next)
@@ -254,8 +254,8 @@ mri_draw_tree ()
 		tmp->next = NULL;
 		tmp->spec.name = aptr->name;
 		tmp->spec.exclude_name_list = NULL;
-		tmp->spec.sorted = false;
-		lang_add_wild (NULL, tmp, false);
+		tmp->spec.sorted = FALSE;
+		lang_add_wild (NULL, tmp, FALSE);
 	      }
 
 	  lang_leave_output_section_statement

@@ -136,9 +136,9 @@ static struct file_entry *files;
 static unsigned int files_in_use;
 static unsigned int files_allocated;
 
-/* True when we've seen a .loc directive recently.  Used to avoid
+/* TRUE when we've seen a .loc directive recently.  Used to avoid
    doing work when there's nothing to do.  */
-static boolean loc_directive_seen;
+static bfd_boolean loc_directive_seen;
 
 /* Current location as indicated by the most recent .loc directive.  */
 static struct dwarf2_line_info current;
@@ -304,7 +304,7 @@ dwarf2_emit_insn (size)
       /* Unless we generate DWARF2 debugging information for each
 	 assembler line, we only emit one line symbol for one LOC.  */
       if (debug_type != DEBUG_DWARF2)
-	loc_directive_seen = false;
+	loc_directive_seen = FALSE;
     }
   else if (debug_type != DEBUG_DWARF2)
     return;
@@ -436,7 +436,7 @@ dwarf2_directive_loc (dummy)
   current.column = column;
   current.flags = DWARF2_FLAG_BEGIN_STMT;
 
-  loc_directive_seen = true;
+  loc_directive_seen = TRUE;
 
 #ifndef NO_LISTING
   if (listing)

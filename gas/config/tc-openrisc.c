@@ -1,5 +1,5 @@
 /* tc-openrisc.c -- Assembler for the OpenRISC family.
-   Copyright (C) 2001, 2002 Free Software Foundation.
+   Copyright 2001, 2002 Free Software Foundation.
    Contributed by Johan Rydberg, jrydberg@opencores.org
 
    This file is part of GAS, the GNU Assembler.
@@ -483,7 +483,7 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-boolean
+bfd_boolean
 openrisc_fix_adjustable (fixP)
    fixS * fixP;
 {

@@ -97,7 +97,7 @@ struct mips_cl_insn
   unsigned long insn_opcode;
   const struct mips_opcode *insn_mo;
   /* The next two fields are used when generating mips16 code.  */
-  boolean use_extend;
+  bfd_boolean use_extend;
   unsigned short extend;
 };
 

@@ -89,9 +89,9 @@ static unsigned long check_operand PARAMS ((unsigned long,
 					    const struct mn10300_operand *,
 					    offsetT));
 static int reg_name_search PARAMS ((const struct reg_name *, int, const char *));
-static boolean data_register_name PARAMS ((expressionS *expressionP));
-static boolean address_register_name PARAMS ((expressionS *expressionP));
-static boolean other_register_name PARAMS ((expressionS *expressionP));
+static bfd_boolean data_register_name PARAMS ((expressionS *expressionP));
+static bfd_boolean address_register_name PARAMS ((expressionS *expressionP));
+static bfd_boolean other_register_name PARAMS ((expressionS *expressionP));
 static void set_arch_mach PARAMS ((unsigned int));
 
 /*  Set linkrelax here to avoid fixups in most sections.  */
@@ -293,7 +293,7 @@ reg_name_search (regs, regcount, name)
  *	its original state.
  */
 
-static boolean
+static bfd_boolean
 r_register_name (expressionP)
      expressionS *expressionP;
 {
@@ -321,12 +321,12 @@ r_register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
 
-      return true;
+      return TRUE;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return false;
+  return FALSE;
 }
 
 /* Summary of register_name().
@@ -340,7 +340,7 @@ r_register_name (expressionP)
  *	its original state.
  */
 
-static boolean
+static bfd_boolean
 xr_register_name (expressionP)
      expressionS *expressionP;
 {
@@ -368,12 +368,12 @@ xr_register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
 
-      return true;
+      return TRUE;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return false;
+  return FALSE;
 }
 
 /* Summary of register_name().
@@ -387,7 +387,7 @@ xr_register_name (expressionP)
  *	its original state.
  */
 
-static boolean
+static bfd_boolean
 data_register_name (expressionP)
      expressionS *expressionP;
 {
@@ -415,12 +415,12 @@ data_register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
 
-      return true;
+      return TRUE;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return false;
+  return FALSE;
 }
 
 /* Summary of register_name().
@@ -434,7 +434,7 @@ data_register_name (expressionP)
  *	its original state.
  */
 
-static boolean
+static bfd_boolean
 address_register_name (expressionP)
      expressionS *expressionP;
 {
@@ -462,12 +462,12 @@ address_register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
 
-      return true;
+      return TRUE;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return false;
+  return FALSE;
 }
 
 /* Summary of register_name().
@@ -481,7 +481,7 @@ address_register_name (expressionP)
  *	its original state.
  */
 
-static boolean
+static bfd_boolean
 other_register_name (expressionP)
      expressionS *expressionP;
 {
@@ -510,12 +510,12 @@ other_register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
 
-      return true;
+      return TRUE;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return false;
+  return FALSE;
 }
 
 void
@@ -2008,7 +2008,7 @@ mn10300_force_relocation (fixp)
 /* Return zero if the fixup in fixp should be left alone and not
    adjusted.  */
 
-boolean
+bfd_boolean
 mn10300_fix_adjustable (fixp)
      struct fix *fixp;
 {

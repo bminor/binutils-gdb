@@ -1,5 +1,5 @@
 /* ldemul.c -- clearing house for ld emulation states
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2002
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -112,7 +112,7 @@ ldemul_get_script (isfile)
   return ld_emulation->get_script (isfile);
 }
 
-boolean
+bfd_boolean
 ldemul_open_dynamic_archive (arch, search, entry)
      const char *arch;
      search_dirs_type *search;
@@ -120,17 +120,17 @@ ldemul_open_dynamic_archive (arch, search, entry)
 {
   if (ld_emulation->open_dynamic_archive)
     return (*ld_emulation->open_dynamic_archive) (arch, search, entry);
-  return false;
+  return FALSE;
 }
 
-boolean
+bfd_boolean
 ldemul_place_orphan (file, s)
      lang_input_statement_type *file;
      asection *s;
 {
   if (ld_emulation->place_orphan)
     return (*ld_emulation->place_orphan) (file, s);
-  return false;
+  return FALSE;
 }
 
 int
@@ -148,24 +148,24 @@ ldemul_parse_args (argc, argv)
 
 /* Let the emulation code handle an unrecognized file.  */
 
-boolean
+bfd_boolean
 ldemul_unrecognized_file (entry)
      lang_input_statement_type *entry;
 {
   if (ld_emulation->unrecognized_file)
     return (*ld_emulation->unrecognized_file) (entry);
-  return false;
+  return FALSE;
 }
 
 /* Let the emulation code handle a recognized file.  */
 
-boolean
+bfd_boolean
 ldemul_recognized_file (entry)
      lang_input_statement_type *entry;
 {
   if (ld_emulation->recognized_file)
     return (*ld_emulation->recognized_file) (entry);
-  return false;
+  return FALSE;
 }
 
 char *
@@ -261,12 +261,12 @@ ldemul_list_emulations (f)
      FILE *f;
 {
   ld_emulation_xfer_type **eptr = ld_emulations;
-  boolean first = true;
+  bfd_boolean first = TRUE;
 
   for (; *eptr; eptr++)
     {
       if (first)
-	first = false;
+	first = FALSE;
       else
 	fprintf (f, " ");
       fprintf (f, "%s", (*eptr)->emulation_name);

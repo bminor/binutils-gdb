@@ -1,6 +1,6 @@
 /* 8 and 16 bit COFF relocation functions, for BFD.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001
-   Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001,
+   2002 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    BFD generic relocs.  They should store the relocs in some location
    where coff_link_input_bfd can find them (and coff_link_input_bfd
    should be changed to use this location rather than rereading the
-   file) (unless info->keep_memory is false, in which case they should
+   file) (unless info->keep_memory is FALSE, in which case they should
    free up the relocs after dealing with them).  */
 
 #include "bfd.h"
@@ -64,7 +64,7 @@ bfd_coff_reloc16_get_value (reloc, link_info, input_section)
 	 the generic symbols.  */
       h = bfd_wrapped_link_hash_lookup (input_section->owner, link_info,
 					bfd_asymbol_name (symbol),
-					false, false, true);
+					FALSE, FALSE, TRUE);
       if (h != (struct bfd_link_hash_entry *) NULL
 	  && (h->type == bfd_link_hash_defined
 	      || h->type == bfd_link_hash_defweak))
@@ -79,7 +79,7 @@ bfd_coff_reloc16_get_value (reloc, link_info, input_section)
 	  if (!((*link_info->callbacks->undefined_symbol)
 		(link_info, bfd_asymbol_name (symbol),
 		 input_section->owner, input_section, reloc->address,
-		 true)))
+		 TRUE)))
 	    abort ();
 	  value = 0;
 	}
@@ -136,12 +136,12 @@ bfd_perform_slip (abfd, slip, input_section, value)
     }
 }
 
-boolean
+bfd_boolean
 bfd_coff_reloc16_relax_section (abfd, input_section, link_info, again)
      bfd *abfd;
      asection *input_section;
      struct bfd_link_info *link_info;
-     boolean *again;
+     bfd_boolean *again;
 {
   /* Get enough memory to hold the stuff.  */
   bfd *input_bfd = input_section->owner;
@@ -153,14 +153,14 @@ bfd_coff_reloc16_relax_section (abfd, input_section, link_info, again)
 
   /* We only do global relaxation once.  It is not safe to do it multiple
      times (see discussion of the "shrinks" array below).  */
-  *again = false;
+  *again = FALSE;
 
   if (reloc_size < 0)
-    return false;
+    return FALSE;
 
   reloc_vector = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);
   if (!reloc_vector && reloc_size > 0)
-    return false;
+    return FALSE;
 
   /* Get the relocs and think about them.  */
   reloc_count =
@@ -169,7 +169,7 @@ bfd_coff_reloc16_relax_section (abfd, input_section, link_info, again)
   if (reloc_count < 0)
     {
       free (reloc_vector);
-      return false;
+      return FALSE;
     }
 
   /* The reloc16.c and related relaxing code is very simple, the price
@@ -193,7 +193,7 @@ bfd_coff_reloc16_relax_section (abfd, input_section, link_info, again)
       bfd_size_type amt;
 
       /* Allocate and initialize the shrinks array for this section.
-         The last element is used as an accumlator of shrinks.  */
+	 The last element is used as an accumlator of shrinks.  */
       amt = reloc_count + 1;
       amt *= sizeof (unsigned);
       shrinks = (unsigned *) bfd_zmalloc (amt);
@@ -232,7 +232,7 @@ bfd_coff_reloc16_relax_section (abfd, input_section, link_info, again)
 
   input_section->_cooked_size -= shrink;
   free ((char *) reloc_vector);
-  return true;
+  return TRUE;
 }
 
 bfd_byte *
@@ -246,7 +246,7 @@ bfd_coff_reloc16_get_relocated_section_contents (in_abfd,
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     boolean relocateable;
+     bfd_boolean relocateable;
      asymbol **symbols;
 {
   /* Get enough memory to hold the stuff.  */

@@ -41,22 +41,22 @@ DESCRIPTION
 /* A routine which is used in target vectors for unsupported
    operations.  */
 
-boolean
+bfd_boolean
 bfd_false (ignore)
      bfd *ignore ATTRIBUTE_UNUSED;
 {
   bfd_set_error (bfd_error_invalid_operation);
-  return false;
+  return FALSE;
 }
 
 /* A routine which is used in target vectors for supported operations
    which do not actually do anything.  */
 
-boolean
+bfd_boolean
 bfd_true (ignore)
      bfd *ignore ATTRIBUTE_UNUSED;
 {
-  return true;
+  return TRUE;
 }
 
 /* A routine which is used in target vectors for unsupported
@@ -108,13 +108,13 @@ bfd_void (ignore)
 {
 }
 
-boolean
+bfd_boolean
 _bfd_nocore_core_file_matches_executable_p (ignore_core_bfd, ignore_exec_bfd)
      bfd *ignore_core_bfd ATTRIBUTE_UNUSED;
      bfd *ignore_exec_bfd ATTRIBUTE_UNUSED;
 {
   bfd_set_error (bfd_error_invalid_operation);
-  return false;
+  return FALSE;
 }
 
 /* Routine to handle core_file_failing_command entry point for targets
@@ -225,7 +225,7 @@ INTERNAL_FUNCTION
 	bfd_write_bigendian_4byte_int
 
 SYNOPSIS
-	boolean bfd_write_bigendian_4byte_int (bfd *, unsigned int);
+	bfd_boolean bfd_write_bigendian_4byte_int (bfd *, unsigned int);
 
 DESCRIPTION
 	Write a 4 byte integer @var{i} to the output BFD @var{abfd}, in big
@@ -233,14 +233,14 @@ DESCRIPTION
 	archives.
 
 */
-boolean
+bfd_boolean
 bfd_write_bigendian_4byte_int (abfd, i)
      bfd *abfd;
      unsigned int i;
 {
   bfd_byte buffer[4];
   bfd_putb32 ((bfd_vma) i, buffer);
-  return (boolean) (bfd_bwrite ((PTR) buffer, (bfd_size_type) 4, abfd) == 4);
+  return bfd_bwrite ((PTR) buffer, (bfd_size_type) 4, abfd) == 4;
 }
 
 
@@ -699,7 +699,7 @@ bfd_put_bits (data, addr, bits, big_p)
      bfd_vma data;
      bfd_byte *addr;
      int bits;
-     boolean big_p;
+     bfd_boolean big_p;
 {
   int i;
   int bytes;
@@ -721,7 +721,7 @@ bfd_vma
 bfd_get_bits (addr, bits, big_p)
      bfd_byte *addr;
      int bits;
-     boolean big_p;
+     bfd_boolean big_p;
 {
   bfd_vma data;
   int i;
@@ -744,7 +744,7 @@ bfd_get_bits (addr, bits, big_p)
 
 /* Default implementation */
 
-boolean
+bfd_boolean
 _bfd_generic_get_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
@@ -753,22 +753,22 @@ _bfd_generic_get_section_contents (abfd, section, location, offset, count)
      bfd_size_type count;
 {
   if (count == 0)
-    return true;
+    return TRUE;
 
   if (offset + count > section->_raw_size)
     {
       bfd_set_error (bfd_error_invalid_operation);
-      return false;
+      return FALSE;
     }
 
   if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
       || bfd_bread (location, count, abfd) != count)
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
-boolean
+bfd_boolean
 _bfd_generic_get_section_contents_in_window (abfd, section, w, offset, count)
      bfd *abfd ATTRIBUTE_UNUSED;
      sec_ptr section ATTRIBUTE_UNUSED;
@@ -778,7 +778,7 @@ _bfd_generic_get_section_contents_in_window (abfd, section, w, offset, count)
 {
 #ifdef USE_MMAP
   if (count == 0)
-    return true;
+    return TRUE;
   if (abfd->xvec->_bfd_get_section_contents != _bfd_generic_get_section_contents)
     {
       /* We don't know what changes the bfd's get_section_contents
@@ -790,13 +790,13 @@ _bfd_generic_get_section_contents_in_window (abfd, section, w, offset, count)
       w->i = ((bfd_window_internal *)
 	      bfd_zmalloc ((bfd_size_type) sizeof (bfd_window_internal)));
       if (w->i == NULL)
-	return false;
+	return FALSE;
       w->i->data = (PTR) bfd_malloc (count);
       if (w->i->data == NULL)
 	{
 	  free (w->i);
 	  w->i = NULL;
-	  return false;
+	  return FALSE;
 	}
       w->i->mapped = 0;
       w->i->refcount = 1;
@@ -806,9 +806,9 @@ _bfd_generic_get_section_contents_in_window (abfd, section, w, offset, count)
     }
   if (offset + count > section->_raw_size
       || ! bfd_get_file_window (abfd, section->filepos + offset, count, w,
-				true))
-    return false;
-  return true;
+				TRUE))
+    return FALSE;
+  return TRUE;
 #else
   abort ();
 #endif
@@ -818,7 +818,7 @@ _bfd_generic_get_section_contents_in_window (abfd, section, w, offset, count)
    NEW sections is disallowed.  It is useful in patching existing sections
    in read-write files, though.  See other set_section_contents functions
    to see why it doesn't work for new sections.  */
-boolean
+bfd_boolean
 _bfd_generic_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
@@ -827,13 +827,13 @@ _bfd_generic_set_section_contents (abfd, section, location, offset, count)
      bfd_size_type count;
 {
   if (count == 0)
-    return true;
+    return TRUE;
 
   if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
       || bfd_bwrite (location, count, abfd) != count)
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 /*
@@ -859,20 +859,20 @@ bfd_log2 (x)
   return result;
 }
 
-boolean
+bfd_boolean
 bfd_generic_is_local_label_name (abfd, name)
      bfd *abfd;
      const char *name;
 {
   char locals_prefix = (bfd_get_symbol_leading_char (abfd) == '_') ? 'L' : '.';
 
-  return (boolean) (name[0] == locals_prefix);
+  return name[0] == locals_prefix;
 }
 
 /*  Can be used from / for bfd_merge_private_bfd_data to check that
     endianness matches between input and output file.  Returns
-    true for a match, otherwise returns false and emits an error.  */
-boolean
+    TRUE for a match, otherwise returns FALSE and emits an error.  */
+bfd_boolean
 _bfd_generic_verify_endian_match (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
@@ -891,10 +891,10 @@ _bfd_generic_verify_endian_match (ibfd, obfd)
       (*_bfd_error_handler) (msg, bfd_archive_filename (ibfd));
 
       bfd_set_error (bfd_error_wrong_format);
-      return false;
+      return FALSE;
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Give a warning at runtime if someone compiles code which calls

@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2001 Free Software Foundation, Inc.
+#   Copyright 2001, 2002 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -35,6 +35,6 @@ need_relax_${EMULATION_NAME}_before_allocation ()
 
   /* Force -relax on if not doing a relocatable link.  */
   if (! link_info.relocateable)
-    command_line.relax = true;
+    command_line.relax = TRUE;
 }
 EOF

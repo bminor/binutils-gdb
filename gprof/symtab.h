@@ -77,7 +77,7 @@ typedef struct sym
 	double child_time;	/* Cumulative ticks in children.  */
 	int index;		/* Index in the graph list.  */
 	int top_order;		/* Graph call chain top-sort order.  */
-	boolean print_flag;	/* Should this be printed?  */
+	bfd_boolean print_flag;	/* Should this be printed?  */
 	struct
 	  {
 	    double fract;	/* What % of time propagates.  */

@@ -1,5 +1,5 @@
 /* BFD library support routines for the Hitachi-SH architecture.
-   Copyright 1993, 1994, 1997, 1998, 2000, 2001
+   Copyright 1993, 1994, 1997, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support.
 
@@ -60,7 +60,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     "sh",			/* arch_name  */
     "sh2",			/* printable name */
     1,
-    false,			/* not the default */
+    FALSE,			/* not the default */
     bfd_default_compatible,
     bfd_default_scan,
     SH2_NEXT
@@ -74,7 +74,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     "sh",			/* arch_name  */
     "sh-dsp",			/* printable name */
     1,
-    false,			/* not the default */
+    FALSE,			/* not the default */
     bfd_default_compatible,
     bfd_default_scan,
     SH_DSP_NEXT
@@ -88,7 +88,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     "sh",			/* arch_name  */
     "sh3",			/* printable name */
     1,
-    false,			/* not the default */
+    FALSE,			/* not the default */
     bfd_default_compatible,
     bfd_default_scan,
     SH3_NEXT
@@ -102,7 +102,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     "sh",			/* arch_name  */
     "sh3-dsp",			/* printable name */
     1,
-    false,			/* not the default */
+    FALSE,			/* not the default */
     bfd_default_compatible,
     bfd_default_scan,
     SH3_DSP_NEXT
@@ -116,7 +116,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     "sh",			/* arch_name  */
     "sh3e",			/* printable name */
     1,
-    false,			/* not the default */
+    FALSE,			/* not the default */
     bfd_default_compatible,
     bfd_default_scan,
     SH3E_NEXT
@@ -130,7 +130,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     "sh",			/* arch_name  */
     "sh4",			/* printable name */
     1,
-    false,			/* not the default */
+    FALSE,			/* not the default */
     bfd_default_compatible,
     bfd_default_scan,
     SH4_NEXT
@@ -144,7 +144,7 @@ static const bfd_arch_info_type arch_info_struct[] =
     "sh",			/* arch_name  */
     "sh5",			/* printable name */
     1,
-    false,			/* not the default */
+    FALSE,			/* not the default */
     bfd_default_compatible,
     bfd_default_scan,
     SH64_NEXT
@@ -161,7 +161,7 @@ const bfd_arch_info_type bfd_sh_arch =
   "sh",				/* arch_name  */
   "sh",				/* printable name */
   1,
-  true,				/* the default machine */
+  TRUE,				/* the default machine */
   bfd_default_compatible,
   bfd_default_scan,
   SH_NEXT

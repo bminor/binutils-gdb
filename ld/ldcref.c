@@ -1,5 +1,5 @@
 /* ldcref.c -- output a cross reference table
-   Copyright 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 2000, 2002 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>
 
 This file is part of GLD, the Gnu Linker.
@@ -69,10 +69,10 @@ struct cref_hash_table {
 
 static struct bfd_hash_entry *cref_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
-static boolean cref_fill_array PARAMS ((struct cref_hash_entry *, PTR));
+static bfd_boolean cref_fill_array PARAMS ((struct cref_hash_entry *, PTR));
 static int cref_sort_array PARAMS ((const PTR, const PTR));
 static void output_one_cref PARAMS ((FILE *, struct cref_hash_entry *));
-static boolean check_nocrossref PARAMS ((struct cref_hash_entry *, PTR));
+static bfd_boolean check_nocrossref PARAMS ((struct cref_hash_entry *, PTR));
 static void check_section_sym_xref PARAMS ((lang_input_statement_type *));
 static void check_refs
   PARAMS ((const char *, asection *, bfd *, struct lang_nocrossrefs *));
@@ -89,7 +89,7 @@ static void check_reloc_refs PARAMS ((bfd *, asection *, PTR));
 #define cref_hash_traverse(table, func, info)				\
   (bfd_hash_traverse							\
    (&(table)->root,							\
-    (boolean (*) PARAMS ((struct bfd_hash_entry *, PTR))) (func),	\
+    (bfd_boolean (*) PARAMS ((struct bfd_hash_entry *, PTR))) (func),	\
     (info)))
 
 /* The cref hash table.  */
@@ -98,7 +98,7 @@ static struct cref_hash_table cref_table;
 
 /* Whether the cref hash table has been initialized.  */
 
-static boolean cref_initialized;
+static bfd_boolean cref_initialized;
 
 /* The number of symbols seen so far.  */
 
@@ -156,10 +156,10 @@ add_cref (name, abfd, section, value)
     {
       if (! bfd_hash_table_init (&cref_table.root, cref_hash_newfunc))
 	einfo (_("%X%P: bfd_hash_table_init of cref table failed: %E\n"));
-      cref_initialized = true;
+      cref_initialized = TRUE;
     }
 
-  h = cref_hash_lookup (&cref_table, name, true, false);
+  h = cref_hash_lookup (&cref_table, name, TRUE, FALSE);
   if (h == NULL)
     einfo (_("%X%P: cref_hash_lookup failed: %E\n"));
 
@@ -173,24 +173,24 @@ add_cref (name, abfd, section, value)
       r->next = h->refs;
       h->refs = r;
       r->abfd = abfd;
-      r->def = false;
-      r->common = false;
-      r->undef = false;
+      r->def = FALSE;
+      r->common = FALSE;
+      r->undef = FALSE;
     }
 
   if (bfd_is_und_section (section))
-    r->undef = true;
+    r->undef = TRUE;
   else if (bfd_is_com_section (section))
-    r->common = true;
+    r->common = TRUE;
   else
-    r->def = true;
+    r->def = TRUE;
 }
 
 /* Copy the addresses of the hash table entries into an array.  This
    is called via cref_hash_traverse.  We also fill in the demangled
    name.  */
 
-static boolean
+static bfd_boolean
 cref_fill_array (h, data)
      struct cref_hash_entry *h;
      PTR data;
@@ -204,7 +204,7 @@ cref_fill_array (h, data)
 
   ++*pph;
 
-  return true;
+  return TRUE;
 }
 
 /* Sort an array of cref hash table entries by name.  */
@@ -274,8 +274,8 @@ output_one_cref (fp, h)
   struct bfd_link_hash_entry *hl;
   struct cref_ref *r;
 
-  hl = bfd_link_hash_lookup (link_info.hash, h->root.string, false,
-			     false, true);
+  hl = bfd_link_hash_lookup (link_info.hash, h->root.string, FALSE,
+			     FALSE, TRUE);
   if (hl == NULL)
     einfo ("%P: symbol `%T' missing from main hash table\n",
 	   h->root.string);
@@ -381,7 +381,7 @@ check_section_sym_xref (statement)
 
 /* Check one symbol to see if it is a prohibited cross reference.  */
 
-static boolean
+static bfd_boolean
 check_nocrossref (h, ignore)
      struct cref_hash_entry *h;
      PTR ignore ATTRIBUTE_UNUSED;
@@ -393,22 +393,22 @@ check_nocrossref (h, ignore)
   struct lang_nocrossref *ncr;
   struct cref_ref *ref;
 
-  hl = bfd_link_hash_lookup (link_info.hash, h->root.string, false,
-			     false, true);
+  hl = bfd_link_hash_lookup (link_info.hash, h->root.string, FALSE,
+			     FALSE, TRUE);
   if (hl == NULL)
     {
       einfo (_("%P: symbol `%T' missing from main hash table\n"),
 	     h->root.string);
-      return true;
+      return TRUE;
     }
 
   if (hl->type != bfd_link_hash_defined
       && hl->type != bfd_link_hash_defweak)
-    return true;
+    return TRUE;
 
   defsec = hl->u.def.section->output_section;
   if (defsec == NULL)
-    return true;
+    return TRUE;
   defsecname = bfd_get_section_name (defsec->owner, defsec);
 
   for (ncrs = nocrossref_list; ncrs != NULL; ncrs = ncrs->next)
@@ -417,7 +417,7 @@ check_nocrossref (h, ignore)
 	for (ref = h->refs; ref != NULL; ref = ref->next)
 	  check_refs (hl->root.string, hl->u.def.section, ref->abfd, ncrs);
 
-  return true;
+  return TRUE;
 }
 
 /* The struct is used to pass information from check_refs to

@@ -3629,7 +3629,7 @@ write_object_file ()
 #if 0
   /* Recent changes to write need this, but where it should
      go is up to Ken..  */
-  if (bfd_close_all_done (abfd) == false)
+  if (!bfd_close_all_done (abfd))
     as_fatal (_("Can't close %s: %s"), out_file_name,
 	      bfd_errmsg (bfd_get_error ()));
 #else

@@ -41,13 +41,20 @@ static bfd_signed_vma group_size = 1;
 /* Whether to add ".foo" entries for each "foo" in a version script.  */
 static int dotsyms = 1;
 
-static void ppc_create_output_section_statements PARAMS ((void));
-static void ppc_after_open PARAMS ((void));
-static void ppc_before_allocation PARAMS ((void));
-static asection *ppc_add_stub_section PARAMS ((const char *, asection *));
-static void ppc_layout_sections_again PARAMS ((void));
-static void gld${EMULATION_NAME}_after_allocation PARAMS ((void));
-static void build_section_lists PARAMS ((lang_statement_union_type *));
+static void ppc_create_output_section_statements
+  PARAMS ((void));
+static void ppc_after_open
+  PARAMS ((void));
+static void ppc_before_allocation
+  PARAMS ((void));
+static asection *ppc_add_stub_section
+  PARAMS ((const char *, asection *));
+static void ppc_layout_sections_again
+  PARAMS ((void));
+static void gld${EMULATION_NAME}_after_allocation
+  PARAMS ((void));
+static void build_section_lists
+  PARAMS ((lang_statement_union_type *));
 static struct bfd_elf_version_expr *gld${EMULATION_NAME}_new_vers_pattern
   PARAMS ((struct bfd_elf_version_expr *));
 
@@ -105,16 +112,16 @@ struct hook_stub_info
 
 /* Traverse the linker tree to find the spot where the stub goes.  */
 
-static boolean hook_in_stub
+static bfd_boolean hook_in_stub
   PARAMS ((struct hook_stub_info *, lang_statement_union_type **));
 
-static boolean
+static bfd_boolean
 hook_in_stub (info, lp)
      struct hook_stub_info *info;
      lang_statement_union_type **lp;
 {
   lang_statement_union_type *l;
-  boolean ret;
+  bfd_boolean ret;
 
   for (; (l = *lp) != NULL; lp = &l->header.next)
     {
@@ -152,7 +159,7 @@ hook_in_stub (info, lp)
 		 before its associated input section.  */
 	      *lp = info->add.head;
 	      *(info->add.tail) = l;
-	      return true;
+	      return TRUE;
 	    }
 	  break;
 
@@ -173,7 +180,7 @@ hook_in_stub (info, lp)
 	  break;
 	}
     }
-  return false;
+  return FALSE;
 }
 
 

@@ -71,13 +71,13 @@ typedef int packing_type;
 #define PACK_RIGHT_LEFT (3)	/* "<-"  */
 static packing_type etype = PACK_UNSPEC; /* Used by d10v_cleanup.  */
 
-/* True if instruction swapping warnings should be inhibited.
+/* TRUE if instruction swapping warnings should be inhibited.
    --nowarnswap.  */
-static boolean flag_warn_suppress_instructionswap;
+static bfd_boolean flag_warn_suppress_instructionswap;
 
-/* True if instruction packing should be performed when --gstabs is specified.
+/* TRUE if instruction packing should be performed when --gstabs is specified.
    --gstabs-packing, --no-gstabs-packing.  */
-static boolean flag_allow_gstabs_packing = 1;
+static bfd_boolean flag_allow_gstabs_packing = 1;
 
 /* Local functions.  */
 static int reg_name_search PARAMS ((char *name));
@@ -99,9 +99,9 @@ static int parallel_ok PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1
 				struct d10v_opcode *opcode2, unsigned long insn2,
 				packing_type exec_type));
 
-static void check_resource_conflict PARAMS ((struct d10v_opcode *opcode1, 
-					     unsigned long insn1, 
-					     struct d10v_opcode *opcode2, 
+static void check_resource_conflict PARAMS ((struct d10v_opcode *opcode1,
+					     unsigned long insn1,
+					     struct d10v_opcode *opcode2,
 					     unsigned long insn2));
 
 static symbolS * find_symbol_matching_register PARAMS ((expressionS *));
@@ -652,7 +652,7 @@ build_insn (opcode, opers, insn)
 		get_reloc ((struct d10v_operand *) &d10v_operands[opcode->operands[i]]);
 
 	      /* Check that a immediate was passed to ops that expect one. */
-	      if ((flags & OPERAND_NUM) 
+	      if ((flags & OPERAND_NUM)
 		  && (fixups->fix[fixups->fc].reloc == 0))
 		as_bad (_("operand is not an immediate"));
 	    }
@@ -666,10 +666,10 @@ build_insn (opcode, opers, insn)
 	  fixups->fix[fixups->fc].exp = opers[i];
 	  fixups->fix[fixups->fc].operand = opcode->operands[i];
 	  fixups->fix[fixups->fc].pcrel =
-	    (flags & OPERAND_ADDR) ? true : false;
+	    (flags & OPERAND_ADDR) ? TRUE : FALSE;
 	  (fixups->fc)++;
 	}
-  
+
       /* Truncate to the proper number of bits.  */
       if ((opers[i].X_op == O_constant) && check_range (number, bits, flags))
 	as_bad (_("operand out of range: %lu"), number);
@@ -677,8 +677,8 @@ build_insn (opcode, opers, insn)
       insn = insn | (number << shift);
     }
 
-  /* kludge: for DIVS, we need to put the operands in twice on the second 
-     pass, format is changed to LONG_R to force the second set of operands 
+  /* kludge: for DIVS, we need to put the operands in twice on the second
+     pass, format is changed to LONG_R to force the second set of operands
      to not be shifted over 15.  */
   if ((opcode->opcode == OPCODE_DIVS) && (format == LONG_L))
     insn = build_insn (opcode, opers, insn);
@@ -735,8 +735,8 @@ write_1_short (opcode, insn, fx)
   if (opcode->exec_type & PARONLY)
     as_fatal (_("Instruction must be executed in parallel with another instruction."));
 
-  /* The other container needs to be NOP.  
-     According to 4.3.1: for FM=00, sub-instructions performed only by IU 
+  /* The other container needs to be NOP.
+     According to 4.3.1: for FM=00, sub-instructions performed only by IU
      cannot be encoded in L-container.  */
   if (opcode->unit == IU)
     insn |= FM00 | (NOP << 15);		/* Right container.  */
@@ -969,8 +969,8 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
      and the second reads the PSW (which includes C, F0, and F1), then
      they cannot operate safely in parallel.  */
 
-  /* The bitmasks (mod and used) look like this (bit 31 = MSB). 
-     r0-r15	  0-15   
+  /* The bitmasks (mod and used) look like this (bit 31 = MSB).
+     r0-r15	  0-15
      a0-a1	  16-17
      cr (not psw) 18
      psw	  19
@@ -1057,7 +1057,7 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 /* Determine if there are any resource conflicts among two manually
    parallelized instructions.  Some of this was lifted from parallel_ok.  */
 
-static void 
+static void
 check_resource_conflict (op1, insn1, op2, insn2)
      struct d10v_opcode *op1, *op2;
      unsigned long insn1, insn2;
@@ -1130,17 +1130,17 @@ check_resource_conflict (op1, insn1, op2, insn2)
 	      if (flags & (OPERAND_ACC0 | OPERAND_ACC1))
 		regno += 16;
 	      else if (flags & OPERAND_CONTROL)	/* mvtc or mvfc */
-		{ 
+		{
 		  if (regno == 0)
 		    regno = 19;
 		  else
-		    regno = 18; 
+		    regno = 18;
 		}
 	      else if (flags & OPERAND_FFLAG)
 		regno = 22;
 	      else if (flags & OPERAND_CFLAG)
 		regno = 21;
-	      
+
 	      if (flags & OPERAND_DEST
 		  /* Auto inc/dec also modifies the register.  */
 		  || (op->operands[i + 1] != 0
@@ -1286,7 +1286,7 @@ md_assemble (str)
     d10v_cleanup ();
 
   if (prev_opcode
-      && (0 == write_2_short (prev_opcode, prev_insn, opcode, insn, extype, 
+      && (0 == write_2_short (prev_opcode, prev_insn, opcode, insn, extype,
 			      fixups)))
     {
       /* No instructions saved.  */
@@ -1454,14 +1454,14 @@ find_opcode (opcode, myops)
 		  unsigned long current_position;
 		  unsigned long symbol_position;
 		  unsigned long value;
-		  boolean found_symbol;
+		  bfd_boolean found_symbol;
 
 		  /* Calculate the address of the current instruction
 		     and the address of the symbol.  Do this by summing
 		     the offsets of previous frags until we reach the
 		     frag containing the symbol, and the current frag.  */
 		  sym_frag = symbol_get_frag (myops[opnum].X_add_symbol);
-		  found_symbol = false;
+		  found_symbol = FALSE;
 
 		  current_position =
 		    obstack_next_free (&frchain_now->frch_obstack)
@@ -1473,7 +1473,7 @@ find_opcode (opcode, myops)
 		      current_position += f->fr_fix + f->fr_offset;
 
 		      if (f == sym_frag)
-			found_symbol = true;
+			found_symbol = TRUE;
 
 		      if (! found_symbol)
 			symbol_position += f->fr_fix + f->fr_offset;
@@ -1512,7 +1512,7 @@ find_opcode (opcode, myops)
     }
 
   match = 0;
-  
+
   /* Now search the opcode table table for one with operands
      that matches what we've got.  */
   while (!match)
@@ -1554,19 +1554,19 @@ find_opcode (opcode, myops)
 	      break;
 	    }
 
-	  /* Unfortunatly, for the indirect operand in instructions such 
-	     as ``ldb r1, @(c,r14)'' this function can be passed 
-	     X_op == O_register (because 'c' is a valid register name).  
-	     However we cannot just ignore the case when X_op == O_register 
-	     but flags & OPERAND_REG is null, so we check to see if a symbol 
-	     of the same name as the register exists.  If the symbol does 
-	     exist, then the parser was unable to distinguish the two cases 
+	  /* Unfortunatly, for the indirect operand in instructions such
+	     as ``ldb r1, @(c,r14)'' this function can be passed
+	     X_op == O_register (because 'c' is a valid register name).
+	     However we cannot just ignore the case when X_op == O_register
+	     but flags & OPERAND_REG is null, so we check to see if a symbol
+	     of the same name as the register exists.  If the symbol does
+	     exist, then the parser was unable to distinguish the two cases
 	     and we fix things here. (Ref: PR14826)  */
 
 	  if (!(flags & OPERAND_REG) && (X_op == O_register))
 	    {
 	      symbolS * sym;
-		  
+
 	      sym = find_symbol_matching_register (& myops[i]);
 
 	      if (sym != NULL)
@@ -1764,9 +1764,9 @@ md_apply_fix3 (fixP, valP, seg)
 	  rep = (struct d10v_opcode *) hash_find (d10v_hash, "rep");
 	  repi = (struct d10v_opcode *) hash_find (d10v_hash, "repi");
 	  if ((insn & FM11) == FM11
-	      && ((repi != NULL 
+	      && ((repi != NULL
 		   && (insn & repi->mask) == (unsigned) repi->opcode)
-		  || (rep != NULL 
+		  || (rep != NULL
 		      && (insn & rep->mask) == (unsigned) rep->opcode))
 	      && value < 4)
 	    as_fatal
@@ -1892,7 +1892,7 @@ md_operand (expressionP)
     }
 }
 
-boolean
+bfd_boolean
 d10v_fix_adjustable (fixP)
      fixS *fixP;
 {

@@ -51,7 +51,7 @@ typedef struct memory_region_struct {
   bfd_size_type old_length;
   flagword flags;
   flagword not_flags;
-  boolean had_full_message;
+  bfd_boolean had_full_message;
 } lang_memory_region_type;
 
 typedef struct lang_statement_header_struct {
@@ -109,7 +109,7 @@ enum section_type {
 struct lang_output_section_phdr_list {
   struct lang_output_section_phdr_list *next;
   const char *name;
-  boolean used;
+  bfd_boolean used;
 };
 
 typedef struct lang_output_section_statement_struct {
@@ -120,7 +120,7 @@ typedef struct lang_output_section_statement_struct {
   union lang_statement_union *next;
   const char *name;
 
-  boolean processed;
+  bfd_boolean processed;
 
   asection *bfd_section;
   flagword flags;		/* Or together of all input sections */
@@ -211,7 +211,7 @@ typedef struct lang_input_statement_struct {
 
   bfd *the_bfd;
 
-  boolean closed;
+  bfd_boolean closed;
   file_ptr passive_position;
 
   /* Symbol table of the file.  */
@@ -225,30 +225,30 @@ typedef struct lang_input_statement_struct {
   /* Point to the next file, but skips archive contents */
   union lang_statement_union *next_real_file;
 
-  boolean is_archive;
+  bfd_boolean is_archive;
 
   /* 1 means search a set of directories for this file.  */
-  boolean search_dirs_flag;
+  bfd_boolean search_dirs_flag;
 
   /* 1 means this is base file of incremental load.
      Do not load this file's text or data.
      Also default text_start to after this file's bss.  */
 
-  boolean just_syms_flag;
+  bfd_boolean just_syms_flag;
 
   /* Whether to search for this entry as a dynamic archive.  */
-  boolean dynamic;
+  bfd_boolean dynamic;
 
   /* Whether to include the entire contents of an archive.  */
-  boolean whole_archive;
+  bfd_boolean whole_archive;
 
-  boolean loaded;
+  bfd_boolean loaded;
 
 #if 0
   unsigned int globals_in_this_file;
 #endif
   const char *target;
-  boolean real;
+  bfd_boolean real;
 } lang_input_statement_type;
 
 typedef struct {
@@ -267,9 +267,9 @@ typedef struct {
 typedef struct lang_wild_statement_struct {
   lang_statement_header_type header;
   const char *filename;
-  boolean filenames_sorted;
+  bfd_boolean filenames_sorted;
   struct wildcard_list *section_list;
-  boolean keep_sections;
+  bfd_boolean keep_sections;
   lang_statement_list_type children;
 } lang_wild_statement_type;
 
@@ -324,8 +324,8 @@ struct lang_phdr {
   struct lang_phdr *next;
   const char *name;
   unsigned long type;
-  boolean filehdr;
-  boolean phdrs;
+  bfd_boolean filehdr;
+  bfd_boolean phdrs;
   etree_type *at;
   etree_type *flags;
 };
@@ -359,14 +359,14 @@ extern struct unique_sections *unique_section_list;
 
 extern lang_output_section_statement_type *abs_output_section;
 extern lang_statement_list_type lang_output_section_statement;
-extern boolean lang_has_input_file;
+extern bfd_boolean lang_has_input_file;
 extern etree_type *base;
 extern lang_statement_list_type *stat_ptr;
-extern boolean delete_output_file_on_failure;
+extern bfd_boolean delete_output_file_on_failure;
 
 extern struct bfd_sym_chain entry_symbol;
 extern const char *entry_section;
-extern boolean entry_from_cmdline;
+extern bfd_boolean entry_from_cmdline;
 extern lang_statement_list_type file_chain;
 
 extern void lang_init PARAMS ((void));
@@ -389,16 +389,16 @@ extern lang_output_section_statement_type *lang_enter_output_section_statement
 extern void lang_final PARAMS ((void));
 extern void lang_process PARAMS ((void));
 extern void lang_section_start PARAMS ((const char *, union etree_union *));
-extern void lang_add_entry PARAMS ((const char *, boolean));
+extern void lang_add_entry PARAMS ((const char *, bfd_boolean));
 extern void lang_add_target PARAMS ((const char *));
 extern void lang_add_wild
-  PARAMS ((struct wildcard_spec *, struct wildcard_list *, boolean));
+  PARAMS ((struct wildcard_spec *, struct wildcard_list *, bfd_boolean));
 extern void lang_add_map PARAMS ((const char *));
 extern void lang_add_fill PARAMS ((fill_type *));
 extern lang_assignment_statement_type * lang_add_assignment PARAMS ((union etree_union *));
 extern void lang_add_attribute PARAMS ((enum statement_enum));
 extern void lang_startup PARAMS ((const char *));
-extern void lang_float PARAMS ((enum bfd_boolean));
+extern void lang_float PARAMS ((bfd_boolean));
 extern void lang_leave_output_section_statement
   PARAMS ((fill_type *, const char *, struct lang_output_section_phdr_list *,
            const char *));
@@ -451,7 +451,7 @@ extern bfd_vma lang_size_sections
   PARAMS ((lang_statement_union_type *s,
 	   lang_output_section_statement_type *output_section_statement,
 	   lang_statement_union_type **prev, fill_type *fill,
-	   bfd_vma dot, boolean *relax));
+	   bfd_vma dot, bfd_boolean *relax));
 extern void lang_enter_group PARAMS ((void));
 extern void lang_leave_group PARAMS ((void));
 extern void lang_add_section
@@ -459,7 +459,7 @@ extern void lang_add_section
 	   lang_output_section_statement_type *output,
 	   lang_input_statement_type *file));
 extern void lang_new_phdr
-  PARAMS ((const char *, etree_type *, boolean, boolean, etree_type *,
+  PARAMS ((const char *, etree_type *, bfd_boolean, bfd_boolean, etree_type *,
 	   etree_type *));
 extern void lang_add_nocrossref PARAMS ((struct lang_nocrossref *));
 extern void lang_enter_overlay PARAMS ((etree_type *));
@@ -481,7 +481,7 @@ extern struct bfd_elf_version_deps *lang_add_vers_depend
 extern void lang_register_vers_node
   PARAMS ((const char *, struct bfd_elf_version_tree *,
 	   struct bfd_elf_version_deps *));
-boolean unique_section_p PARAMS ((const char *));
+bfd_boolean unique_section_p PARAMS ((const char *));
 extern void lang_add_unique PARAMS ((const char *));
 extern const char *lang_get_output_target PARAMS ((void));
 

@@ -99,16 +99,16 @@ struct hook_stub_info
 
 /* Traverse the linker tree to find the spot where the stub goes.  */
 
-static boolean hook_in_stub
+static bfd_boolean hook_in_stub
   PARAMS ((struct hook_stub_info *, lang_statement_union_type **));
 
-static boolean
+static bfd_boolean
 hook_in_stub (info, lp)
      struct hook_stub_info *info;
      lang_statement_union_type **lp;
 {
   lang_statement_union_type *l;
-  boolean ret;
+  bfd_boolean ret;
 
   for (; (l = *lp) != NULL; lp = &l->header.next)
     {
@@ -146,7 +146,7 @@ hook_in_stub (info, lp)
 		 before its associated input section.  */
 	      *lp = info->add.head;
 	      *(info->add.tail) = l;
-	      return true;
+	      return TRUE;
 	    }
 	  break;
 
@@ -167,7 +167,7 @@ hook_in_stub (info, lp)
 	  break;
 	}
     }
-  return false;
+  return FALSE;
 }
 
 

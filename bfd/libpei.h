@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI; common header information.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
@@ -313,13 +313,13 @@ unsigned int _bfd_XXi_swap_aouthdr_out PARAMS ((bfd *, PTR, PTR));
 unsigned int _bfd_XXi_swap_scnhdr_out PARAMS ((bfd *, PTR, PTR));
 #define coff_swap_scnhdr_out _bfd_XXi_swap_scnhdr_out
 
-boolean _bfd_XX_print_private_bfd_data_common PARAMS ((bfd *, PTR));
+bfd_boolean _bfd_XX_print_private_bfd_data_common PARAMS ((bfd *, PTR));
 
-boolean _bfd_XX_bfd_copy_private_bfd_data_common PARAMS ((bfd *, bfd *));
+bfd_boolean _bfd_XX_bfd_copy_private_bfd_data_common PARAMS ((bfd *, bfd *));
 
 void _bfd_XX_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
 
-boolean _bfd_XXi_final_link_postscript
+bfd_boolean _bfd_XXi_final_link_postscript
   PARAMS ((bfd *, struct coff_final_link_info *));
 
 #ifndef coff_final_link_postscript
@@ -331,5 +331,5 @@ boolean _bfd_XXi_final_link_postscript
 
 unsigned int _bfd_XX_only_swap_filehdr_out PARAMS ((bfd*, PTR, PTR));
 unsigned int _bfd_XXi_only_swap_filehdr_out PARAMS ((bfd*, PTR, PTR));
-boolean _bfd_XX_bfd_copy_private_section_data
+bfd_boolean _bfd_XX_bfd_copy_private_section_data
   PARAMS ((bfd *, asection *, bfd *, asection *));

@@ -1,6 +1,6 @@
 /* bucomm.h -- binutils common include file.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2002 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -148,46 +148,64 @@ void *alloca ();
 #endif
 
 /* bucomm.c */
-void bfd_nonfatal PARAMS ((const char *));
+void bfd_nonfatal
+  PARAMS ((const char *));
 
-void bfd_fatal PARAMS ((const char *)) ATTRIBUTE_NORETURN;
+void bfd_fatal
+  PARAMS ((const char *)) ATTRIBUTE_NORETURN;
 
-void report PARAMS ((const char *, va_list));
+void report
+  PARAMS ((const char *, va_list));
 
-void fatal PARAMS ((const char *, ...)) ATTRIBUTE_PRINTF_1 ATTRIBUTE_NORETURN;
+void fatal
+  PARAMS ((const char *, ...)) ATTRIBUTE_PRINTF_1 ATTRIBUTE_NORETURN;
 
-void non_fatal PARAMS ((const char *, ...)) ATTRIBUTE_PRINTF_1;
+void non_fatal
+  PARAMS ((const char *, ...)) ATTRIBUTE_PRINTF_1;
 
-void set_default_bfd_target PARAMS ((void));
+void set_default_bfd_target
+  PARAMS ((void));
 
-void list_matching_formats PARAMS ((char **p));
+void list_matching_formats
+  PARAMS ((char **p));
 
-void list_supported_targets PARAMS ((const char *, FILE *));
+void list_supported_targets
+  PARAMS ((const char *, FILE *));
 
-void list_supported_architectures PARAMS ((const char *, FILE *));
+void list_supported_architectures
+  PARAMS ((const char *, FILE *));
 
-void print_arelt_descr PARAMS ((FILE *file, bfd *abfd, boolean verbose));
+void print_arelt_descr
+  PARAMS ((FILE *file, bfd *abfd, bfd_boolean verbose));
 
-char *make_tempname PARAMS ((char *));
+char *make_tempname
+  PARAMS ((char *));
 
-bfd_vma parse_vma PARAMS ((const char *, const char *));
+bfd_vma parse_vma
+  PARAMS ((const char *, const char *));
 
 extern char *program_name;
 
 /* filemode.c */
-void mode_string PARAMS ((unsigned long mode, char *buf));
+void mode_string
+  PARAMS ((unsigned long mode, char *buf));
 
 /* version.c */
-extern void print_version PARAMS ((const char *));
+extern void print_version
+  PARAMS ((const char *));
 
 /* rename.c */
-extern void set_times PARAMS ((const char *, const struct stat *));
+extern void set_times
+  PARAMS ((const char *, const struct stat *));
 
-extern int smart_rename PARAMS ((const char *, const char *, int));
+extern int smart_rename
+  PARAMS ((const char *, const char *, int));
 
 /* libiberty */
-PTR xmalloc PARAMS ((size_t));
+PTR xmalloc
+  PARAMS ((size_t));
 
-PTR xrealloc PARAMS ((PTR, size_t));
+PTR xrealloc
+  PARAMS ((PTR, size_t));
 
 #endif /* _BUCOMM_H */

@@ -593,10 +593,10 @@ parse_args (argc, argv)
              ``use only shared libraries'' but, then, we don't
              currently support shared libraries on HP/UX anyhow.  */
 	  if (strcmp (optarg, "archive") == 0)
-	    config.dynamic_link = false;
+	    config.dynamic_link = FALSE;
 	  else if (strcmp (optarg, "shared") == 0
 		   || strcmp (optarg, "default") == 0)
-	    config.dynamic_link = true;
+	    config.dynamic_link = TRUE;
 	  else
 	    einfo (_("%P%F: unrecognized -a option `%s'\n"), optarg);
 	  break;
@@ -625,17 +625,17 @@ parse_args (argc, argv)
 	  yyparse ();
 	  break;
 	case OPTION_CALL_SHARED:
-	  config.dynamic_link = true;
+	  config.dynamic_link = TRUE;
 	  break;
 	case OPTION_NON_SHARED:
-	  config.dynamic_link = false;
+	  config.dynamic_link = FALSE;
 	  break;
 	case OPTION_CREF:
-	  command_line.cref = true;
-	  link_info.notice_all = true;
+	  command_line.cref = TRUE;
+	  link_info.notice_all = TRUE;
 	  break;
 	case 'd':
-	  command_line.force_common_definition = true;
+	  command_line.force_common_definition = TRUE;
 	  break;
 	case OPTION_DEFSYM:
 	  lex_string = optarg;
@@ -647,7 +647,7 @@ parse_args (argc, argv)
 	  lex_string = NULL;
 	  break;
 	case OPTION_DEMANGLE:
-	  demangling = true;
+	  demangling = TRUE;
 	  if (optarg != NULL)
 	    {
 	      enum demangling_styles style;
@@ -671,14 +671,14 @@ parse_args (argc, argv)
 	  command_line.endian = ENDIAN_LITTLE;
 	  break;
 	case OPTION_EMBEDDED_RELOCS:
-	  command_line.embedded_relocs = true;
+	  command_line.embedded_relocs = TRUE;
 	  break;
 	case OPTION_EXPORT_DYNAMIC:
 	case 'E': /* HP/UX compatibility.  */
-	  link_info.export_dynamic = true;
+	  link_info.export_dynamic = TRUE;
 	  break;
 	case 'e':
-	  lang_add_entry (optarg, true);
+	  lang_add_entry (optarg, TRUE);
 	  break;
 	case 'f':
 	  if (command_line.auxiliary_filters == NULL)
@@ -707,7 +707,7 @@ parse_args (argc, argv)
 	  command_line.filter_shlib = optarg;
 	  break;
 	case OPTION_FORCE_EXE_SUFFIX:
-	  command_line.force_exe_suffix = true;
+	  command_line.force_exe_suffix = TRUE;
 	  break;
 	case 'G':
 	  {
@@ -721,14 +721,14 @@ parse_args (argc, argv)
 	  /* Ignore.  */
 	  break;
 	case OPTION_GC_SECTIONS:
-	  command_line.gc_sections = true;
+	  command_line.gc_sections = TRUE;
 	  break;
 	case OPTION_HELP:
 	  help ();
 	  xexit (0);
 	  break;
 	case 'L':
-	  ldfile_add_library_path (optarg, true);
+	  ldfile_add_library_path (optarg, TRUE);
 	  break;
 	case 'l':
 	  lang_add_input_file (optarg, lang_input_file_is_l_enum,
@@ -744,55 +744,55 @@ parse_args (argc, argv)
 	  config.map_filename = optarg;
 	  break;
 	case 'N':
-	  config.text_read_only = false;
-	  config.magic_demand_paged = false;
-	  config.dynamic_link = false;
+	  config.text_read_only = FALSE;
+	  config.magic_demand_paged = FALSE;
+	  config.dynamic_link = FALSE;
 	  break;
 	case OPTION_NO_OMAGIC:
-	  config.text_read_only = true;
-	  config.magic_demand_paged = true;
-	  /* NB/ Does not set dynamic_link to true.
+	  config.text_read_only = TRUE;
+	  config.magic_demand_paged = TRUE;
+	  /* NB/ Does not set dynamic_link to TRUE.
 	     Use --call-shared or -Bdynamic for this.  */
 	  break;
 	case 'n':
-	  config.magic_demand_paged = false;
-	  config.dynamic_link = false;
+	  config.magic_demand_paged = FALSE;
+	  config.dynamic_link = FALSE;
 	  break;
 	case OPTION_NO_DEFINE_COMMON:
-	  command_line.inhibit_common_definition = true;
+	  command_line.inhibit_common_definition = TRUE;
 	  break;
 	case OPTION_NO_DEMANGLE:
-	  demangling = false;
+	  demangling = FALSE;
 	  break;
 	case OPTION_NO_GC_SECTIONS:
-	  command_line.gc_sections = false;
+	  command_line.gc_sections = FALSE;
 	  break;
 	case OPTION_NO_KEEP_MEMORY:
-	  link_info.keep_memory = false;
+	  link_info.keep_memory = FALSE;
 	  break;
 	case OPTION_NO_UNDEFINED:
-	  link_info.no_undefined = true;
+	  link_info.no_undefined = TRUE;
 	  break;
 	case OPTION_ALLOW_SHLIB_UNDEFINED:
-	  link_info.allow_shlib_undefined = true;
+	  link_info.allow_shlib_undefined = TRUE;
 	  break;
 	case OPTION_ALLOW_MULTIPLE_DEFINITION:
-	  link_info.allow_multiple_definition = true;
+	  link_info.allow_multiple_definition = TRUE;
 	  break;
 	case OPTION_NO_UNDEFINED_VERSION:
-	  link_info.allow_undefined_version = false;
+	  link_info.allow_undefined_version = FALSE;
 	  break;
 	case OPTION_NO_WARN_MISMATCH:
-	  command_line.warn_mismatch = false;
+	  command_line.warn_mismatch = FALSE;
 	  break;
 	case OPTION_NOINHIBIT_EXEC:
-	  force_make_executable = true;
+	  force_make_executable = TRUE;
 	  break;
 	case OPTION_NOSTDLIB:
-	  config.only_cmd_line_lib_dirs = true;
+	  config.only_cmd_line_lib_dirs = TRUE;
 	  break;
 	case OPTION_NO_WHOLE_ARCHIVE:
-	  whole_archive = false;
+	  whole_archive = FALSE;
 	  break;
 	case 'O':
 	  /* FIXME "-O<non-digits> <value>" used to set the address of
@@ -802,7 +802,7 @@ parse_args (argc, argv)
 	     getopt can't handle two args to an option without kludges.  */
 
 	  /* Enable optimizations of output files.  */
-	  link_info.optimize = strtoul (optarg, NULL, 0) ? true : false;
+	  link_info.optimize = strtoul (optarg, NULL, 0) ? TRUE : FALSE;
 	  break;
 	case 'o':
 	  lang_add_output (optarg, 0);
@@ -811,7 +811,7 @@ parse_args (argc, argv)
 	  lang_add_output_format (optarg, (char *) NULL, (char *) NULL, 0);
 	  break;
 	case 'q':
-	  link_info.emitrelocations = true;
+	  link_info.emitrelocations = TRUE;
 	  break;
 	case 'i':
 	case 'r':
@@ -826,11 +826,11 @@ parse_args (argc, argv)
 	       and will seg-fault the next time around.  */
 	    einfo(_("%P%F: bad -rpath option\n"));
 
-	  link_info.relocateable = true;
-	  config.build_constructors = false;
-	  config.magic_demand_paged = false;
-	  config.text_read_only = false;
-	  config.dynamic_link = false;
+	  link_info.relocateable = TRUE;
+	  config.build_constructors = FALSE;
+	  config.magic_demand_paged = FALSE;
+	  config.text_read_only = FALSE;
+	  config.dynamic_link = FALSE;
 	  break;
 	case 'R':
 	  /* The GNU linker traditionally uses -R to mean to include
@@ -907,7 +907,7 @@ parse_args (argc, argv)
 	    }
 	  break;
 	case OPTION_RELAX:
-	  command_line.relax = true;
+	  command_line.relax = TRUE;
 	  break;
 	case OPTION_RETAIN_SYMBOLS_FILE:
 	  add_keepsyms_file (optarg);
@@ -920,7 +920,7 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_SHARED:
 	  if (config.has_shared)
-	    link_info.shared = true;
+	    link_info.shared = TRUE;
 	  else
 	    einfo (_("%P%F: -shared not supported\n"));
 	  break;
@@ -929,16 +929,16 @@ parse_args (argc, argv)
 	  command_line.soname = optarg;
 	  break;
 	case OPTION_SORT_COMMON:
-	  config.sort_common = true;
+	  config.sort_common = TRUE;
 	  break;
 	case OPTION_STATS:
-	  config.stats = true;
+	  config.stats = TRUE;
 	  break;
 	case OPTION_SYMBOLIC:
-	  link_info.symbolic = true;
+	  link_info.symbolic = TRUE;
 	  break;
 	case 't':
-	  trace_files = true;
+	  trace_files = TRUE;
 	  break;
 	case 'T':
 	  ldfile_open_command_file (optarg);
@@ -987,17 +987,17 @@ parse_args (argc, argv)
 	  set_section_start (".text", optarg);
 	  break;
 	case OPTION_TRADITIONAL_FORMAT:
-	  link_info.traditional_format = true;
+	  link_info.traditional_format = TRUE;
 	  break;
 	case OPTION_TASK_LINK:
-	  link_info.task_link = true;
+	  link_info.task_link = TRUE;
 	  /* Fall through - do an implied -r option.  */
 	case OPTION_UR:
-	  link_info.relocateable = true;
-	  config.build_constructors = true;
-	  config.magic_demand_paged = false;
-	  config.text_read_only = false;
-	  config.dynamic_link = false;
+	  link_info.relocateable = TRUE;
+	  config.build_constructors = TRUE;
+	  config.magic_demand_paged = FALSE;
+	  config.text_read_only = FALSE;
+	  config.dynamic_link = FALSE;
 	  break;
 	case 'u':
 	  ldlang_add_undef (optarg);
@@ -1006,20 +1006,20 @@ parse_args (argc, argv)
 	  if (optarg != NULL)
 	    lang_add_unique (optarg);
 	  else
-	    config.unique_orphan_sections = true;
+	    config.unique_orphan_sections = TRUE;
 	  break;
 	case OPTION_VERBOSE:
 	  ldversion (1);
-	  version_printed = true;
-	  trace_file_tries = true;
+	  version_printed = TRUE;
+	  trace_file_tries = TRUE;
 	  break;
 	case 'v':
 	  ldversion (0);
-	  version_printed = true;
+	  version_printed = TRUE;
 	  break;
 	case 'V':
 	  ldversion (1);
-	  version_printed = true;
+	  version_printed = TRUE;
 	  break;
 	case OPTION_VERSION:
 	  ldversion (2);
@@ -1046,25 +1046,25 @@ parse_args (argc, argv)
 	  command_line.version_exports_section = optarg;
 	  break;
 	case OPTION_WARN_COMMON:
-	  config.warn_common = true;
+	  config.warn_common = TRUE;
 	  break;
 	case OPTION_WARN_CONSTRUCTORS:
-	  config.warn_constructors = true;
+	  config.warn_constructors = TRUE;
 	  break;
 	case OPTION_WARN_FATAL:
-	  config.fatal_warnings = true;
+	  config.fatal_warnings = TRUE;
 	  break;
 	case OPTION_WARN_MULTIPLE_GP:
-	  config.warn_multiple_gp = true;
+	  config.warn_multiple_gp = TRUE;
 	  break;
 	case OPTION_WARN_ONCE:
-	  config.warn_once = true;
+	  config.warn_once = TRUE;
 	  break;
 	case OPTION_WARN_SECTION_ALIGN:
-	  config.warn_section_align = true;
+	  config.warn_section_align = TRUE;
 	  break;
 	case OPTION_WHOLE_ARCHIVE:
-	  whole_archive = true;
+	  whole_archive = TRUE;
 	  break;
 	case OPTION_WRAP:
 	  add_wrap (optarg);
@@ -1102,10 +1102,10 @@ parse_args (argc, argv)
 	    config.split_by_file = 1;
 	  break;
 	case OPTION_CHECK_SECTIONS:
-	  command_line.check_section_addresses = true;
+	  command_line.check_section_addresses = TRUE;
 	  break;
 	case OPTION_NO_CHECK_SECTIONS:
-	  command_line.check_section_addresses = false;
+	  command_line.check_section_addresses = FALSE;
 	  break;
 	case '(':
 	  if (ingroup)
@@ -1135,7 +1135,7 @@ parse_args (argc, argv)
 	      /* Convert words to bytes.  */
 	      link_info.mpc860c0 = words * 4;
 	    }
-	  command_line.relax = true;
+	  command_line.relax = TRUE;
 	  break;
 
 	case OPTION_INIT:
@@ -1171,7 +1171,7 @@ set_default_dirlist (dirlist_ptr)
       if (p != NULL)
 	*p = '\0';
       if (*dirlist_ptr != '\0')
-	ldfile_add_library_path (dirlist_ptr, true);
+	ldfile_add_library_path (dirlist_ptr, TRUE);
       if (p == NULL)
 	break;
       dirlist_ptr = p + 1;
@@ -1204,13 +1204,13 @@ help ()
     {
       if (ld_options[i].doc != NULL)
 	{
-	  boolean comma;
+	  bfd_boolean comma;
 	  int len;
 	  unsigned j;
 
 	  printf ("  ");
 
-	  comma = false;
+	  comma = FALSE;
 	  len = 2;
 
 	  j = i;
@@ -1231,7 +1231,7 @@ help ()
 		      printf ("%s", _(ld_options[j].arg));
 		      len += strlen (_(ld_options[j].arg));
 		    }
-		  comma = true;
+		  comma = TRUE;
 		}
 	      ++j;
 	    }
@@ -1260,7 +1260,7 @@ help ()
 		      printf (" %s", _(ld_options[j].arg));
 		      len += 1 + strlen (_(ld_options[j].arg));
 		    }
-		  comma = true;
+		  comma = TRUE;
 		}
 	      ++j;
 	    }

@@ -71,7 +71,7 @@ vfinfo (fp, fmt, arg)
      const char *fmt;
      va_list arg;
 {
-  boolean fatal = false;
+  bfd_boolean fatal = FALSE;
 
   while (*fmt != '\0')
     {
@@ -97,7 +97,7 @@ vfinfo (fp, fmt, arg)
 
 	    case 'X':
 	      /* no object output, fail return */
-	      config.make_executable = false;
+	      config.make_executable = FALSE;
 	      break;
 
 	    case 'V':
@@ -182,7 +182,7 @@ vfinfo (fp, fmt, arg)
 
 	    case 'F':
 	      /* Error is fatal.  */
-	      fatal = true;
+	      fatal = TRUE;
 	      break;
 
 	    case 'P':
@@ -250,7 +250,7 @@ vfinfo (fp, fmt, arg)
 		const char *filename;
 		const char *functionname;
 		unsigned int linenumber;
-		boolean discard_last;
+		bfd_boolean discard_last;
 
 		abfd = va_arg (arg, bfd *);
 		section = va_arg (arg, asection *);
@@ -281,12 +281,12 @@ vfinfo (fp, fmt, arg)
 
 		lfinfo (fp, "%B(%s+0x%v)", abfd, section->name, offset);
 
-		discard_last = true;
+		discard_last = TRUE;
 		if (bfd_find_nearest_line (abfd, section, asymbols, offset,
 					   &filename, &functionname,
 					   &linenumber))
 		  {
-		    boolean need_colon = true;
+		    bfd_boolean need_colon = TRUE;
 
 		    if (functionname != NULL && fmt[-1] == 'C')
 		      {
@@ -300,7 +300,7 @@ vfinfo (fp, fmt, arg)
 			  {
 			    lfinfo (fp, _(": In function `%T':\n"),
 				    functionname);
-			    need_colon = false;
+			    need_colon = FALSE;
 
 			    last_bfd = abfd;
 			    if (last_file != NULL)
@@ -312,7 +312,7 @@ vfinfo (fp, fmt, arg)
 			      free (last_function);
 			    last_function = xstrdup (functionname);
 			  }
-			discard_last = false;
+			discard_last = FALSE;
 		      }
 
 		    if (filename != NULL)
@@ -364,9 +364,9 @@ vfinfo (fp, fmt, arg)
     }
 
   if (config.fatal_warnings)
-    config.make_executable = false;
+    config.make_executable = FALSE;
 
-  if (fatal == true)
+  if (fatal)
     xexit (1);
 }
 

@@ -24,7 +24,7 @@
 
 static const bfd_arch_info_type * compatible
   PARAMS ((const bfd_arch_info_type *, const bfd_arch_info_type *));
-static boolean scan
+static bfd_boolean scan
   PARAMS ((const struct bfd_arch_info *, const char *));
 
 /* This routine is provided two arch_infos and works out which ARM
@@ -98,7 +98,7 @@ processors[] =
   { bfd_mach_arm_XScale, "xscale" }
 };
 
-static boolean
+static bfd_boolean
 scan (info, string)
      const struct bfd_arch_info * info;
      const char * string;
@@ -107,7 +107,7 @@ scan (info, string)
 
   /* First test for an exact match.  */
   if (strcasecmp (string, info->printable_name) == 0)
-    return true;
+    return TRUE;
 
   /* Next check for a processor name instead of an Architecture name.  */
   for (i = sizeof (processors) / sizeof (processors[0]); i--;)
@@ -117,13 +117,13 @@ scan (info, string)
     }
 
   if (i != -1 && info->mach == processors [i].mach)
-    return true;
+    return TRUE;
 
   /* Finally check for the default architecture.  */
   if (strcasecmp (string, "arm") == 0)
     return info->the_default;
 
-  return false;
+  return FALSE;
 }
 
 #define N(number, print, default, next)  \
@@ -131,17 +131,17 @@ scan (info, string)
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (bfd_mach_arm_2,      "armv2",   false, & arch_info_struct[1]),
-  N (bfd_mach_arm_2a,     "armv2a",  false, & arch_info_struct[2]),
-  N (bfd_mach_arm_3,      "armv3",   false, & arch_info_struct[3]),
-  N (bfd_mach_arm_3M,     "armv3m",  false, & arch_info_struct[4]),
-  N (bfd_mach_arm_4,      "armv4",   false, & arch_info_struct[5]),
-  N (bfd_mach_arm_4T,     "armv4t",  false, & arch_info_struct[6]),
-  N (bfd_mach_arm_5,      "armv5",   false, & arch_info_struct[7]),
-  N (bfd_mach_arm_5T,     "armv5t",  false, & arch_info_struct[8]),
-  N (bfd_mach_arm_5TE,    "armv5te", false, & arch_info_struct[9]),
-  N (bfd_mach_arm_XScale, "xscale",  false, NULL)
+  N (bfd_mach_arm_2,      "armv2",   FALSE, & arch_info_struct[1]),
+  N (bfd_mach_arm_2a,     "armv2a",  FALSE, & arch_info_struct[2]),
+  N (bfd_mach_arm_3,      "armv3",   FALSE, & arch_info_struct[3]),
+  N (bfd_mach_arm_3M,     "armv3m",  FALSE, & arch_info_struct[4]),
+  N (bfd_mach_arm_4,      "armv4",   FALSE, & arch_info_struct[5]),
+  N (bfd_mach_arm_4T,     "armv4t",  FALSE, & arch_info_struct[6]),
+  N (bfd_mach_arm_5,      "armv5",   FALSE, & arch_info_struct[7]),
+  N (bfd_mach_arm_5T,     "armv5t",  FALSE, & arch_info_struct[8]),
+  N (bfd_mach_arm_5TE,    "armv5te", FALSE, & arch_info_struct[9]),
+  N (bfd_mach_arm_XScale, "xscale",  FALSE, NULL)
 };
 
 const bfd_arch_info_type bfd_arm_arch =
-  N (0, "arm", true, & arch_info_struct[0]);
+  N (0, "arm", TRUE, & arch_info_struct[0]);

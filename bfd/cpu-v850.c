@@ -30,11 +30,11 @@
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (bfd_mach_v850e,  "v850e",  false, NULL)
+  N (bfd_mach_v850e,  "v850e",  FALSE, NULL)
 };
 
 #undef  NEXT
 #define NEXT & arch_info_struct[0]
 
 const bfd_arch_info_type bfd_v850_arch =
-  N (bfd_mach_v850, "v850", true, NEXT);
+  N (bfd_mach_v850, "v850", TRUE, NEXT);

@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define basic_blocks_h
 
 /* Options:  */
-extern boolean bb_annotate_all_lines;	/* Force annotation of all lines?  */
+extern bfd_boolean bb_annotate_all_lines; /* Force annotation of all lines?  */
 extern int bb_table_length;		/* Length of most-used bb table.  */
 extern unsigned long bb_min_calls;	/* Minimum execution count.  */
 

@@ -55,7 +55,7 @@ static void gld_${EMULATION_NAME}_set_symbols PARAMS ((void));
 static void gld_${EMULATION_NAME}_after_open PARAMS ((void));
 static void gld_${EMULATION_NAME}_before_parse PARAMS ((void));
 static void gld_${EMULATION_NAME}_before_allocation PARAMS ((void));
-static boolean gld${EMULATION_NAME}_place_orphan
+static bfd_boolean gld${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
 static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
@@ -731,7 +731,7 @@ gld_${EMULATION_NAME}_before_allocation()
    which are not mentioned in the linker script.  */
 
 /*ARGSUSED*/
-static boolean
+static bfd_boolean
 gld${EMULATION_NAME}_place_orphan (file, s)
      lang_input_statement_type *file;
      asection *s;
@@ -742,14 +742,14 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   lang_statement_union_type *l;
 
   if ((s->flags & SEC_ALLOC) == 0)
-    return false;
+    return FALSE;
 
   /* Don't process grouped sections unless doing a final link.
      If they're marked as COMDAT sections, we don't want .text\$foo to
      end up in .text and then have .text disappear because it's marked
      link-once-discard.  */
   if (link_info.relocateable)
-    return false;
+    return FALSE;
 
   secname = bfd_get_section_name (s->owner, s);
 
@@ -758,7 +758,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   if (*secname == '\$')
     einfo ("%P%F: section %s has '\$' as first character\n", secname);
   if (strchr (secname + 1, '\$') == NULL)
-    return false;
+    return FALSE;
 
   /* Look up the output section.  The Microsoft specs say sections names in
      image files never contain a '\$'.  Fortunately, lang_..._lookup creates
@@ -802,12 +802,12 @@ gld${EMULATION_NAME}_place_orphan (file, s)
       tmp->spec.name = xmalloc (strlen (output_secname) + 2);
       sprintf (tmp->spec.name, "%s\$", output_secname);
       tmp->spec.exclude_name_list = NULL;
-      tmp->sorted = false;
+      tmp->sorted = FALSE;
       new = new_stat (lang_wild_statement, &os->children);
       new->filename = NULL;
-      new->filenames_sorted = false;
+      new->filenames_sorted = FALSE;
       new->section_list = tmp;
-      new->keep_sections = false;
+      new->keep_sections = FALSE;
       lang_list_init (&new->children);
       l = new;
     }
@@ -819,7 +819,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
      sort_sections.  */
   lang_add_section (&l->wild_statement.children, s, os, file);
 
-  return true;
+  return TRUE;
 }
 
 static char *
@@ -834,19 +834,19 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {
   *isfile = 0;
 
-  if (link_info.relocateable == true && config.build_constructors == true)
+  if (link_info.relocateable && config.build_constructors)
     return
 EOF
-sed $sc ldscripts/${EMULATION_NAME}.xu                     >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocateable == true) return' >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xr                     >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.text_read_only) return'         >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xbn                    >> e${EMULATION_NAME}.c
-echo '  ; else if (!config.magic_demand_paged) return'     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xn                     >> e${EMULATION_NAME}.c
-echo '  ; else return'                                     >> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.x                      >> e${EMULATION_NAME}.c
-echo '; }'                                                 >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocateable) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c
+echo '  ; else if (!config.magic_demand_paged) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xn                 >> e${EMULATION_NAME}.c
+echo '  ; else return'                                 >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.x                  >> e${EMULATION_NAME}.c
+echo '; }'                                             >> e${EMULATION_NAME}.c
 
 cat >>e${EMULATION_NAME}.c <<EOF
 

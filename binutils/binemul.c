@@ -1,5 +1,5 @@
 /* Binutils emulation layer.
-   Copyright (C) 2002 Free Software Foundation, Inc.
+   Copyright 2002 Free Software Foundation, Inc.
    Written by Tom Rix, Redhat.
 
    This file is part of GNU Binutils.
@@ -39,23 +39,23 @@ ar_emul_default_usage (fp)
   fprintf (fp, _("  No emulation specific options\n"));
 }
 
-boolean
+bfd_boolean
 ar_emul_append (after_bfd, file_name, verbose)
      bfd **after_bfd;
      char *file_name;
-     boolean verbose;
+     bfd_boolean verbose;
 {
   if (bin_dummy_emulation.ar_append)
     return bin_dummy_emulation.ar_append (after_bfd, file_name, verbose);
 
-  return false;
+  return FALSE;
 }
 
-boolean
+bfd_boolean
 ar_emul_default_append (after_bfd, file_name, verbose)
      bfd **after_bfd;
      char *file_name;
-     boolean verbose;
+     bfd_boolean verbose;
 {
   bfd *temp;
 
@@ -67,26 +67,26 @@ ar_emul_default_append (after_bfd, file_name, verbose)
 
   (*after_bfd)->next = temp;
 
-  return true;
+  return TRUE;
 }
 
-boolean
+bfd_boolean
 ar_emul_replace (after_bfd, file_name, verbose)
      bfd **after_bfd;
      char *file_name;
-     boolean verbose;
+     bfd_boolean verbose;
 {
   if (bin_dummy_emulation.ar_replace)
     return bin_dummy_emulation.ar_replace (after_bfd, file_name, verbose);
 
-  return false;
+  return FALSE;
 }
 
-boolean
+bfd_boolean
 ar_emul_default_replace (after_bfd, file_name, verbose)
      bfd **after_bfd;
      char *file_name;
-     boolean verbose;
+     bfd_boolean verbose;
 {
   bfd *temp;
 
@@ -98,10 +98,10 @@ ar_emul_default_replace (after_bfd, file_name, verbose)
 
   (*after_bfd)->next = temp;
 
-  return true;
+  return TRUE;
 }
 
-boolean
+bfd_boolean
 ar_emul_create (abfd_out, archive_file_name, file_name)
      bfd **abfd_out;
      char *archive_file_name;
@@ -111,10 +111,10 @@ ar_emul_create (abfd_out, archive_file_name, file_name)
     return bin_dummy_emulation.ar_create (abfd_out, archive_file_name,
 					  file_name);
 
-  return false;
+  return FALSE;
 }
 
-boolean
+bfd_boolean
 ar_emul_default_create (abfd_out, archive_file_name, file_name)
      bfd **abfd_out;
      char *archive_file_name;
@@ -144,22 +144,22 @@ ar_emul_default_create (abfd_out, archive_file_name, file_name)
       || ! bfd_close (*abfd_out))
     bfd_fatal (archive_file_name);
 
-  return true;
+  return TRUE;
 }
 
-boolean
+bfd_boolean
 ar_emul_parse_arg (arg)
      char *arg;
 {
   if (bin_dummy_emulation.ar_parse_arg)
     return bin_dummy_emulation.ar_parse_arg (arg);
 
-  return false;
+  return FALSE;
 }
 
-boolean
+bfd_boolean
 ar_emul_default_parse_arg (arg)
      char *arg ATTRIBUTE_UNUSED;
 {
-  return false;
+  return FALSE;
 }

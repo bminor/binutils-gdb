@@ -38,7 +38,7 @@
 #define md_operand(x)
 
 #define tc_fix_adjustable(FIX) v850_fix_adjustable (FIX)
-extern boolean v850_fix_adjustable PARAMS ((struct fix *));
+extern bfd_boolean v850_fix_adjustable PARAMS ((struct fix *));
 
 #define TC_FORCE_RELOCATION(FIX) v850_force_relocation(FIX)
 extern int v850_force_relocation PARAMS ((struct fix *));

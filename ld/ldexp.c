@@ -41,11 +41,15 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "libiberty.h"
 #include "safe-ctype.h"
 
-static void exp_print_token PARAMS ((token_code_type code, int infix_p));
-static void make_abs PARAMS ((etree_value_type *ptr));
-static etree_value_type new_abs PARAMS ((bfd_vma value));
-static void check PARAMS ((lang_output_section_statement_type *os,
-			   const char *name, const char *op));
+static void exp_print_token
+  PARAMS ((token_code_type code, int infix_p));
+static void make_abs
+  PARAMS ((etree_value_type *ptr));
+static etree_value_type new_abs
+  PARAMS ((bfd_vma value));
+static void check
+  PARAMS ((lang_output_section_statement_type *os, const char *name,
+	   const char *op));
 static etree_value_type new_rel
   PARAMS ((bfd_vma, char *, lang_output_section_statement_type *section));
 static etree_value_type new_rel_from_section
@@ -78,7 +82,7 @@ static etree_value_type exp_fold_tree_no_dot
 struct exp_data_seg exp_data_seg;
 
 /* Print the string representation of the given token.  Surround it
-   with spaces if INFIX_P is true.  */
+   with spaces if INFIX_P is TRUE.  */
 
 static void
 exp_print_token (code, infix_p)
@@ -168,7 +172,7 @@ new_abs (value)
      bfd_vma value;
 {
   etree_value_type new;
-  new.valid_p = true;
+  new.valid_p = TRUE;
   new.section = abs_output_section;
   new.value = value;
   return new;
@@ -233,7 +237,7 @@ new_rel (value, str, section)
      lang_output_section_statement_type *section;
 {
   etree_value_type new;
-  new.valid_p = true;
+  new.valid_p = TRUE;
   new.value = value;
   new.str = str;
   new.section = section;
@@ -246,7 +250,7 @@ new_rel_from_section (value, section)
      lang_output_section_statement_type *section;
 {
   etree_value_type new;
-  new.valid_p = true;
+  new.valid_p = TRUE;
   new.value = value;
   new.str = NULL;
   new.section = section;
@@ -278,7 +282,7 @@ fold_unary (tree, current_section, allocation_done, dot, dotp)
 	    result = new_rel_from_section (align_n (dot, result.value),
 					   current_section);
 	  else
-	    result.valid_p = false;
+	    result.valid_p = FALSE;
 	  break;
 
 	case ABSOLUTE:
@@ -288,7 +292,7 @@ fold_unary (tree, current_section, allocation_done, dot, dotp)
 	      result.section = abs_output_section;
 	    }
 	  else
-	    result.valid_p = false;
+	    result.valid_p = FALSE;
 	  break;
 
 	case '~':
@@ -314,7 +318,7 @@ fold_unary (tree, current_section, allocation_done, dot, dotp)
 	      result.value = align_n (dot, result.value);
 	    }
 	  else
-	    result.valid_p = false;
+	    result.valid_p = FALSE;
 	  break;
 
 	case DATA_SEGMENT_END:
@@ -331,7 +335,7 @@ fold_unary (tree, current_section, allocation_done, dot, dotp)
 		}
 	    }
 	  else
-	    result.valid_p = false;
+	    result.valid_p = FALSE;
 	  break;
 
 	default:
@@ -462,7 +466,7 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 				    & (maxpage - other.value);
 		}
 	      else
-		result.valid_p = false;
+		result.valid_p = FALSE;
 	      break;
 
 	    default:
@@ -471,7 +475,7 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 	}
       else
 	{
-	  result.valid_p = false;
+	  result.valid_p = FALSE;
 	}
     }
 
@@ -504,7 +508,7 @@ etree_value_type
 invalid ()
 {
   etree_value_type new;
-  new.valid_p = false;
+  new.valid_p = FALSE;
   return new;
 }
 
@@ -528,29 +532,29 @@ fold_name (tree, current_section, allocation_done, dot)
 	}
       else
 	{
-	  result.valid_p = false;
+	  result.valid_p = FALSE;
 	}
       break;
     case DEFINED:
       if (allocation_done == lang_first_phase_enum)
-	result.valid_p = false;
+	result.valid_p = FALSE;
       else
 	{
 	  struct bfd_link_hash_entry *h;
 
 	  h = bfd_wrapped_link_hash_lookup (output_bfd, &link_info,
 					    tree->name.name,
-					    false, false, true);
+					    FALSE, FALSE, TRUE);
 	  result.value = (h != (struct bfd_link_hash_entry *) NULL
 			  && (h->type == bfd_link_hash_defined
 			      || h->type == bfd_link_hash_defweak
 			      || h->type == bfd_link_hash_common));
 	  result.section = 0;
-	  result.valid_p = true;
+	  result.valid_p = TRUE;
 	}
       break;
     case NAME:
-      result.valid_p = false;
+      result.valid_p = FALSE;
       if (tree->name.name[0] == '.' && tree->name.name[1] == 0)
 	{
 	  if (allocation_done != lang_first_phase_enum)
@@ -564,7 +568,7 @@ fold_name (tree, current_section, allocation_done, dot)
 
 	  h = bfd_wrapped_link_hash_lookup (output_bfd, &link_info,
 					    tree->name.name,
-					    false, false, true);
+					    FALSE, FALSE, TRUE);
 	  if (h != NULL
 	      && (h->type == bfd_link_hash_defined
 		  || h->type == bfd_link_hash_defweak))
@@ -668,7 +672,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 
   if (tree == NULL)
     {
-      result.valid_p = false;
+      result.valid_p = FALSE;
       return result;
     }
 
@@ -680,7 +684,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 
     case etree_rel:
       if (allocation_done != lang_final_phase_enum)
-	result.valid_p = false;
+	result.valid_p = FALSE;
       else
 	result = new_rel ((tree->rel.value
 			   + tree->rel.section->output_section->vma
@@ -761,15 +765,15 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 				  dot, dotp);
 	  if (result.valid_p)
 	    {
-	      boolean create;
+	      bfd_boolean create;
 	      struct bfd_link_hash_entry *h;
 
 	      if (tree->type.node_class == etree_assign)
-		create = true;
+		create = TRUE;
 	      else
-		create = false;
+		create = FALSE;
 	      h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
-					create, false, false);
+					create, FALSE, FALSE);
 	      if (h == (struct bfd_link_hash_entry *) NULL)
 		{
 		  if (tree->type.node_class == etree_assign)
@@ -1002,7 +1006,7 @@ exp_print_tree (tree)
 	fprintf (config.map_file, "%s (UNDEFINED)", tree->assign.dst->name);
 #endif
       fprintf (config.map_file, "%s", tree->assign.dst);
-      exp_print_token (tree->type.node_code, true);
+      exp_print_token (tree->type.node_code, TRUE);
       exp_print_tree (tree->assign.src);
       break;
     case etree_provide:
@@ -1014,7 +1018,7 @@ exp_print_tree (tree)
     case etree_binary:
       fprintf (config.map_file, "(");
       exp_print_tree (tree->binary.lhs);
-      exp_print_token (tree->type.node_code, true);
+      exp_print_token (tree->type.node_code, TRUE);
       exp_print_tree (tree->binary.rhs);
       fprintf (config.map_file, ")");
       break;
@@ -1026,7 +1030,7 @@ exp_print_tree (tree)
       exp_print_tree (tree->trinary.rhs);
       break;
     case etree_unary:
-      exp_print_token (tree->unary.type.node_code, false);
+      exp_print_token (tree->unary.type.node_code, FALSE);
       if (tree->unary.child)
 	{
 	  fprintf (config.map_file, " (");
@@ -1051,7 +1055,7 @@ exp_print_tree (tree)
 	}
       else
 	{
-	  exp_print_token (tree->type.node_code, false);
+	  exp_print_token (tree->type.node_code, FALSE);
 	  if (tree->name.name)
 	    fprintf (config.map_file, " (%s)", tree->name.name);
 	}

@@ -1,3 +1,19 @@
+2002-11-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.h, ldcref.c, ldctor.c, ldctor.h, ldemul.c, ldemul.h, ldexp.c,
+	ldexp.h, ldfile.c, ldfile.h, ldgram.y, ldlang.c, ldlang.h, ldmain.c,
+	ldmain.h, ldmisc.c, ldwrite.c, lexsup.c, mri.c, pe-dll.c, pe-dll.h,
+	emulparams/elf32b4300.sh, emultempl/aix.em, emultempl/armcoff.em,
+	emultempl/armelf.em, emultempl/armelf_oabi.em, emultempl/beos.em,
+	emultempl/elf32.em, emultempl/generic.em, emultempl/gld960.em,
+	emultempl/gld960c.em, emultempl/hppaelf.em, emultempl/linux.em,
+	emultempl/lnk960.em, emultempl/m68kcoff.em, emultempl/mipsecoff.em,
+	emultempl/mmix-elfnmmo.em, emultempl/mmixelf.em, emultempl/mmo.em,
+	emultempl/needrelax.em, emultempl/pe.em, emultempl/ppc64elf.em,
+	emultempl/sh64elf.em, emultempl/sunos.em, emultempl/ticoff.em: Replace
+	boolean with bfd_boolean, true with TRUE, false with FALSE.  Simplify
+	comparisons of bfd_boolean vars with TRUE/FALSE.  Formatting.
+
 2002-11-27  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.host: Fix generic FreeBSD configuration entry.

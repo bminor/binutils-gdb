@@ -2390,7 +2390,7 @@ mcore_force_relocation (fix)
 
 /* Return true if the fix can be handled by GAS, false if it must
    be passed through to the linker.  */
-boolean
+bfd_boolean
 mcore_fix_adjustable (fixP)
    fixS * fixP;
 {

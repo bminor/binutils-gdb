@@ -107,7 +107,7 @@ set_default_bfd_target ()
 	   target, bfd_errmsg (bfd_get_error ()));
 }
 
-/* After a false return from bfd_check_format_matches with
+/* After a FALSE return from bfd_check_format_matches with
    bfd_get_error () == bfd_error_file_ambiguously_recognized, print
    the possible matching targets.  */
 
@@ -169,7 +169,7 @@ void
 print_arelt_descr (file, abfd, verbose)
      FILE *file;
      bfd *abfd;
-     boolean verbose;
+     bfd_boolean verbose;
 {
   struct stat buf;
 

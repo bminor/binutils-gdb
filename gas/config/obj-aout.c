@@ -206,7 +206,7 @@ obj_aout_frob_file_before_fix ()
      Since writing to a section will cause the BFD back end to compute the
      VMAs, fake it out here....  */
   bfd_byte b = 0;
-  boolean x = true;
+  bfd_boolean x = TRUE;
   if (bfd_section_size (stdoutput, text_section) != 0)
     {
       x = bfd_set_section_contents (stdoutput, text_section, &b, (file_ptr) 0,
@@ -217,7 +217,7 @@ obj_aout_frob_file_before_fix ()
       x = bfd_set_section_contents (stdoutput, data_section, &b, (file_ptr) 0,
 				    (bfd_size_type) 1);
     }
-  assert (x == true);
+  assert (x);
 }
 
 #else /* ! BFD_ASSEMBLER */

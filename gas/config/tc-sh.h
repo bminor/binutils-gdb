@@ -211,7 +211,7 @@ extern void sh_elf_final_processing PARAMS ((void));
 #define TC_RELOC_GLOBAL_OFFSET_TABLE BFD_RELOC_SH_GOTPC
 
 #define tc_fix_adjustable(FIX) sh_fix_adjustable(FIX)
-extern boolean sh_fix_adjustable PARAMS ((struct fix *));
+extern bfd_boolean sh_fix_adjustable PARAMS ((struct fix *));
 
 /* Values passed to md_apply_fix3 don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0

@@ -37,9 +37,9 @@
 #include "bucomm.h"
 #include "budemang.h"
 
-static boolean with_functions;	/* -f, show function names.  */
-static boolean do_demangle;	/* -C, demangle names.  */
-static boolean base_names;	/* -s, strip directory names.  */
+static bfd_boolean with_functions;	/* -f, show function names.  */
+static bfd_boolean do_demangle;		/* -C, demangle names.  */
+static bfd_boolean base_names;		/* -s, strip directory names.  */
 
 static int naddr;		/* Number of addresses to process.  */
 static char **addr;		/* Hex addresses to process.  */
@@ -102,9 +102,9 @@ slurp_symtab (abfd)
   if ((bfd_get_file_flags (abfd) & HAS_SYMS) == 0)
     return;
 
-  symcount = bfd_read_minisymbols (abfd, false, (PTR) &syms, &size);
+  symcount = bfd_read_minisymbols (abfd, FALSE, (PTR) &syms, &size);
   if (symcount == 0)
-    symcount = bfd_read_minisymbols (abfd, true /* dynamic */, (PTR) &syms, &size);
+    symcount = bfd_read_minisymbols (abfd, TRUE /* dynamic */, (PTR) &syms, &size);
 
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
@@ -117,7 +117,7 @@ static bfd_vma pc;
 static const char *filename;
 static const char *functionname;
 static unsigned int line;
-static boolean found;
+static bfd_boolean found;
 
 /* Look for an address in a section.  This is called via
    bfd_map_over_sections.  */
@@ -176,7 +176,7 @@ translate_addresses (abfd)
 	  pc = bfd_scan_vma (*addr++, NULL, 16);
 	}
 
-      found = false;
+      found = FALSE;
       bfd_map_over_sections (abfd, find_address_in_section, (PTR) NULL);
 
       if (! found)
@@ -307,7 +307,7 @@ main (argc, argv)
 	  target = optarg;
 	  break;
 	case 'C':
-	  do_demangle = true;
+	  do_demangle = TRUE;
 	  if (optarg != NULL)
 	    {
 	      enum demangling_styles style;
@@ -324,10 +324,10 @@ main (argc, argv)
 	  file_name = optarg;
 	  break;
 	case 's':
-	  base_names = true;
+	  base_names = TRUE;
 	  break;
 	case 'f':
-	  with_functions = true;
+	  with_functions = TRUE;
 	  break;
 	case 'v':
 	case 'V':

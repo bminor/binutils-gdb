@@ -158,13 +158,13 @@ static char *cris_insn_first_word_frag PARAMS ((void));
 static struct hash_control *op_hash = NULL;
 
 /* Whether we demand that registers have a `$' prefix.  Default here.  */
-static boolean demand_register_prefix = false;
+static bfd_boolean demand_register_prefix = FALSE;
 
 /* Whether global user symbols have a leading underscore.  Default here.  */
-static boolean symbols_have_leading_underscore = true;
+static bfd_boolean symbols_have_leading_underscore = TRUE;
 
 /* Whether or not we allow PIC, and expand to PIC-friendly constructs.  */
-static boolean pic = false;
+static bfd_boolean pic = FALSE;
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -2920,21 +2920,21 @@ md_parse_option (arg, argp)
       return 1;
 
     case OPTION_NO_US:
-      demand_register_prefix = true;
+      demand_register_prefix = TRUE;
 
       if (OUTPUT_FLAVOR == bfd_target_aout_flavour)
 	as_bad (_("--no-underscore is invalid with a.out format"));
       else
-	symbols_have_leading_underscore = false;
+	symbols_have_leading_underscore = FALSE;
       return 1;
 
     case OPTION_US:
-      demand_register_prefix = false;
-      symbols_have_leading_underscore = true;
+      demand_register_prefix = FALSE;
+      symbols_have_leading_underscore = TRUE;
       return 1;
 
     case OPTION_PIC:
-      pic = true;
+      pic = TRUE;
       return 1;
 
     default:
@@ -3195,14 +3195,14 @@ tc_cris_check_adjusted_broken_word (new_offset, brokwP)
 
 static void cris_force_reg_prefix ()
 {
-  demand_register_prefix = true;
+  demand_register_prefix = TRUE;
 }
 
 /* Do not demand a leading REGISTER_PREFIX_CHAR for all registers.  */
 
 static void cris_relax_reg_prefix ()
 {
-  demand_register_prefix = false;
+  demand_register_prefix = FALSE;
 }
 
 /* Adjust for having a leading '_' on all user symbols.  */
@@ -3213,7 +3213,7 @@ static void cris_sym_leading_underscore ()
      thinks symbol starts with agrees with the command-line options, since
      the bfd is already created.  */
 
-  if (symbols_have_leading_underscore == false)
+  if (!symbols_have_leading_underscore)
     as_bad (_(".syntax %s requires command-line option `--underscore'"),
 	    SYNTAX_USER_SYM_LEADING_UNDERSCORE);
 }
@@ -3222,7 +3222,7 @@ static void cris_sym_leading_underscore ()
 
 static void cris_sym_no_leading_underscore ()
 {
-  if (symbols_have_leading_underscore == true)
+  if (symbols_have_leading_underscore)
     as_bad (_(".syntax %s requires command-line option `--no-underscore'"),
 	    SYNTAX_USER_SYM_NO_LEADING_UNDERSCORE);
 }

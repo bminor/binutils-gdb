@@ -793,7 +793,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	 we are not optimizing, then we have been asked to produce
 	 an error about such constructs.  For the purposes of this
 	 test, subroutine calls are considered to be branches.  */
-      write_1_short (opcode1, insn1, fx->next, false);
+      write_1_short (opcode1, insn1, fx->next, FALSE);
       return 1;
     }
 
@@ -833,14 +833,14 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	  /* We must treat repeat instructions likewise, since the
 	     following instruction has to be separate from the repeat
 	     in order to be repeated.  */
-	  write_1_short (opcode1, insn1, fx->next, false);
+	  write_1_short (opcode1, insn1, fx->next, FALSE);
 	  return 1;
 	}
       else if (prev_left_kills_right_p)
 	{
 	  /* The left instruction kils the right slot, so we
 	     must leave it empty.  */
-	  write_1_short (opcode1, insn1, fx->next, false);
+	  write_1_short (opcode1, insn1, fx->next, FALSE);
 	  return 1;
 	}
       else if (opcode1->op->unit == IU)
@@ -850,7 +850,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	      /* Case 103810 is a request from Mitsubishi that opcodes
 		 with EITHER_BUT_PREFER_MU should not be executed in
 		 reverse sequential order.  */
-	      write_1_short (opcode1, insn1, fx->next, false);
+	      write_1_short (opcode1, insn1, fx->next, FALSE);
 	      return 1;
 	    }
 
@@ -1243,7 +1243,7 @@ md_assemble (str)
 
   if ((prev_insn != -1) && prev_seg
       && ((prev_seg != now_seg) || (prev_subseg != now_subseg)))
-    d30v_cleanup (false);
+    d30v_cleanup (FALSE);
 
   if (d30v_current_align < 3)
     d30v_align (3, NULL, d30v_last_label);
@@ -1282,7 +1282,7 @@ md_assemble (str)
 
 	  /* If two instructions are present and we already have one saved,
 	     then first write it out.  */
-	  d30v_cleanup (false);
+	  d30v_cleanup (FALSE);
 
 	  /* Assemble first instruction and save it.  */
 	  prev_insn = do_assemble (str, &prev_opcode, 1, 0);
@@ -1343,13 +1343,13 @@ md_assemble (str)
 	     of NOPs for us.  */
 
 	  if (prev_insn != -1 && (strcmp (prev_opcode.op->name, "nop") == 0))
-	    d30v_cleanup (false);
+	    d30v_cleanup (FALSE);
 	  else
 	    {
 	      char *f;
 
 	      if (prev_insn != -1)
-		d30v_cleanup (true);
+		d30v_cleanup (TRUE);
 	      else
 		{
 		  f = frag_more (8);
@@ -1374,7 +1374,7 @@ md_assemble (str)
     {
       /* Can't parallelize, flush current instruction and add a
          sequential NOP.  */
-      write_1_short (&opcode, (long) insn, fixups->next->next, true);
+      write_1_short (&opcode, (long) insn, fixups->next->next, TRUE);
 
       /* Make the previous instruction the current one.  */
       extype = EXEC_UNKNOWN;
@@ -1393,7 +1393,7 @@ md_assemble (str)
     {
       if (extype != EXEC_UNKNOWN)
 	as_bad (_("Instruction uses long version, so it cannot be mixed as specified"));
-      d30v_cleanup (false);
+      d30v_cleanup (FALSE);
       write_long (&opcode, insn, fixups);
       prev_insn = -1;
     }
@@ -1999,7 +1999,7 @@ d30v_cleanup (use_sequential)
       subseg_set (seg, subseg);
       prev_insn = -1;
       if (use_sequential)
-	prev_mul32_p = false;
+	prev_mul32_p = FALSE;
     }
 
   return 1;
@@ -2031,7 +2031,7 @@ d30v_start_line ()
     c++;
 
   if (*c == '.')
-    d30v_cleanup (false);
+    d30v_cleanup (FALSE);
 }
 
 static void
@@ -2063,7 +2063,7 @@ d30v_frob_label (lab)
      symbolS *lab;
 {
   /* Emit any pending instructions.  */
-  d30v_cleanup (false);
+  d30v_cleanup (FALSE);
 
   /* Update the label's address with the current output pointer.  */
   symbol_set_frag (lab, frag_now);
@@ -2113,7 +2113,7 @@ d30v_align (n, pfill, label)
      this alignement request.  The alignment of the current frag
      can be changed under our feet, for example by a .ascii
      directive in the source code.  cf testsuite/gas/d30v/reloc.s  */
-  d30v_cleanup (false);
+  d30v_cleanup (FALSE);
 
   if (pfill == NULL)
     {
@@ -2140,7 +2140,7 @@ d30v_align (n, pfill, label)
   if (label != NULL)
     {
       symbolS     *sym;
-      int          label_seen = false;
+      int          label_seen = FALSE;
       struct frag *old_frag;
       valueT       old_value;
       valueT       new_value;
@@ -2167,7 +2167,7 @@ d30v_align (n, pfill, label)
 	  if (symbol_get_frag (sym) == old_frag
 	      && S_GET_VALUE (sym) == old_value)
 	    {
-	      label_seen = true;
+	      label_seen = TRUE;
 	      symbol_set_frag (sym, frag_now);
 	      S_SET_VALUE (sym, new_value);
 	    }

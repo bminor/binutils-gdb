@@ -161,7 +161,7 @@ read_value (abfd, buf, width)
 
   return value;
 }
-    
+
 /* Store a width sized value to memory.  */
 
 static void
@@ -210,16 +210,16 @@ int cie_compare (c1, c2)
 
 /* This function is called for each input file before the .eh_frame
    section is relocated.  It discards duplicate CIEs and FDEs for discarded
-   functions.  The function returns true iff any entries have been
+   functions.  The function returns TRUE iff any entries have been
    deleted.  */
 
-boolean
+bfd_boolean
 _bfd_elf_discard_section_eh_frame (abfd, info, sec,
 				   reloc_symbol_deleted_p, cookie)
      bfd *abfd;
      struct bfd_link_info *info;
      asection *sec;
-     boolean (*reloc_symbol_deleted_p) PARAMS ((bfd_vma, PTR));
+     bfd_boolean (*reloc_symbol_deleted_p) PARAMS ((bfd_vma, PTR));
      struct elf_reloc_cookie *cookie;
 {
   bfd_byte *ehbuf = NULL, *buf;
@@ -238,7 +238,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec,
   if (sec->_raw_size == 0)
     {
       /* This file does not contain .eh_frame information.  */
-      return false;
+      return FALSE;
     }
 
   if ((sec->output_section != NULL
@@ -246,7 +246,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec,
     {
       /* At least one of the sections is being discarded from the
          link, so we should just ignore them.  */
-      return false;
+      return FALSE;
     }
 
   htab = elf_hash_table (info);
@@ -268,7 +268,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec,
     {
       /* Empty .eh_frame section.  */
       free (ehbuf);
-      return false;
+      return FALSE;
     }
 
   /* If .eh_frame section size doesn't fit into int, we cannot handle
@@ -578,7 +578,7 @@ _bfd_elf_discard_section_eh_frame (abfd, info, sec,
 		     which we cannot turn into PC relative,
 		     don't create the binary search table,
 		     since it is affected by runtime relocations.  */
-		  hdr_info->table = false;
+		  hdr_info->table = FALSE;
 		}
 	      cie_usage_count++;
 	      hdr_info->fde_count++;
@@ -663,16 +663,16 @@ free_no_table:
     free (ehbuf);
   if (sec_info)
     free (sec_info);
-  hdr_info->table = false;
+  hdr_info->table = FALSE;
   hdr_info->last_cie.hdr.length = 0;
-  return false;
+  return FALSE;
 }
 
 /* This function is called for .eh_frame_hdr section after
    _bfd_elf_discard_section_eh_frame has been called on all .eh_frame
    input sections.  It finalizes the size of .eh_frame_hdr section.  */
 
-boolean
+bfd_boolean
 _bfd_elf_discard_section_eh_frame_hdr (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -685,7 +685,7 @@ _bfd_elf_discard_section_eh_frame_hdr (abfd, info)
   hdr_info = &htab->eh_info;
   sec = hdr_info->hdr_sec;
   if (sec == NULL)
-    return false;
+    return FALSE;
 
   sec->_cooked_size = EH_FRAME_HDR_SIZE;
   if (hdr_info->table)
@@ -694,7 +694,7 @@ _bfd_elf_discard_section_eh_frame_hdr (abfd, info)
   /* Request program headers to be recalculated.  */
   elf_tdata (abfd)->program_header_size = 0;
   elf_tdata (abfd)->eh_frame_hdr = sec;
-  return true;
+  return TRUE;
 }
 
 /* This function is called from size_dynamic_sections.
@@ -702,7 +702,7 @@ _bfd_elf_discard_section_eh_frame_hdr (abfd, info)
    because later on it is too late for calling _bfd_strip_section_from_output,
    since dynamic symbol table has been sized.  */
 
-boolean
+bfd_boolean
 _bfd_elf_maybe_strip_eh_frame_hdr (info)
      struct bfd_link_info *info;
 {
@@ -714,12 +714,12 @@ _bfd_elf_maybe_strip_eh_frame_hdr (info)
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
   if (hdr_info->hdr_sec == NULL)
-    return true;
+    return TRUE;
 
   if (bfd_is_abs_section (hdr_info->hdr_sec->output_section))
     {
       hdr_info->hdr_sec = NULL;
-      return true;
+      return TRUE;
     }
 
   abfd = NULL;
@@ -737,11 +737,11 @@ _bfd_elf_maybe_strip_eh_frame_hdr (info)
     {
       _bfd_strip_section_from_output (info, hdr_info->hdr_sec);
       hdr_info->hdr_sec = NULL;
-      return true;
+      return TRUE;
     }
 
-  hdr_info->table = true;
-  return true;
+  hdr_info->table = TRUE;
+  return TRUE;
 }
 
 /* Adjust an address in the .eh_frame section.  Given OFFSET within
@@ -809,7 +809,7 @@ _bfd_elf_eh_frame_section_offset (output_bfd, sec, offset)
 /* Write out .eh_frame section.  This is called with the relocated
    contents.  */
 
-boolean
+bfd_boolean
 _bfd_elf_write_section_eh_frame (abfd, info, sec, contents)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -954,7 +954,7 @@ _bfd_elf_write_section_eh_frame (abfd, info, sec, contents)
 	  unsigned int width;
 
 	  buf = contents + sec_info->entry[i].offset;
-	  /* Skip length.  */	
+	  /* Skip length.  */
 	  buf += 4;
 	  bfd_put_32 (abfd,
 		      sec_info->entry[i].new_offset + 4 - cie_offset, buf);
@@ -1088,7 +1088,7 @@ vma_compare (a, b)
 				 FDE initial_location field and FDE address,
 				 sorted by increasing initial_loc)  */
 
-boolean
+bfd_boolean
 _bfd_elf_write_section_eh_frame_hdr (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -1104,18 +1104,18 @@ _bfd_elf_write_section_eh_frame_hdr (abfd, info)
   hdr_info = &htab->eh_info;
   sec = hdr_info->hdr_sec;
   if (sec == NULL)
-    return true;
+    return TRUE;
 
   size = EH_FRAME_HDR_SIZE;
   if (hdr_info->array && hdr_info->array_count == hdr_info->fde_count)
     size += 4 + hdr_info->fde_count * 8;
   contents = bfd_malloc (size);
   if (contents == NULL)
-    return false;
+    return FALSE;
 
   eh_frame_sec = bfd_get_section_by_name (abfd, ".eh_frame");
   if (eh_frame_sec == NULL)
-    return false;
+    return FALSE;
 
   memset (contents, 0, EH_FRAME_HDR_SIZE);
   contents[0] = 1;				/* Version  */

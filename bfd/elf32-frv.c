@@ -1,5 +1,5 @@
 /* FRV-specific support for 32-bit ELF.
-   Copyright (C) 2002 Free Software Foundation, Inc.
+   Copyright 2002 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -31,35 +31,51 @@ static bfd_reloc_status_type elf32_frv_relocate_hi16
 static bfd_reloc_status_type elf32_frv_relocate_label24
   PARAMS ((bfd *, asection *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
 static bfd_reloc_status_type elf32_frv_relocate_gprel12
-  PARAMS ((struct bfd_link_info *, bfd *, asection *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
+  PARAMS ((struct bfd_link_info *, bfd *, asection *, Elf_Internal_Rela *,
+	   bfd_byte *, bfd_vma));
 static bfd_reloc_status_type elf32_frv_relocate_gprelu12
-  PARAMS ((struct bfd_link_info *, bfd *, asection *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
+  PARAMS ((struct bfd_link_info *, bfd *, asection *, Elf_Internal_Rela *,
+	   bfd_byte *, bfd_vma));
 static bfd_reloc_status_type elf32_frv_relocate_gprello
-  PARAMS ((struct bfd_link_info *, bfd *, asection *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
+  PARAMS ((struct bfd_link_info *, bfd *, asection *, Elf_Internal_Rela *,
+	   bfd_byte *, bfd_vma));
 static bfd_reloc_status_type elf32_frv_relocate_gprelhi
-  PARAMS ((struct bfd_link_info *, bfd *, asection *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
+  PARAMS ((struct bfd_link_info *, bfd *, asection *, Elf_Internal_Rela *,
+	   bfd_byte *, bfd_vma));
 static reloc_howto_type *frv_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void frv_info_to_howto_rela 
+static void frv_info_to_howto_rela
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
-static boolean elf32_frv_relocate_section 
-  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
-static boolean elf32_frv_add_symbol_hook
-  PARAMS (( bfd *, struct bfd_link_info *, const Elf_Internal_Sym *, const char **, flagword *, asection **, bfd_vma *));
+static bfd_boolean elf32_frv_relocate_section
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+static bfd_boolean elf32_frv_add_symbol_hook
+  PARAMS (( bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
+	    const char **, flagword *, asection **, bfd_vma *));
 static bfd_reloc_status_type frv_final_link_relocate
-  PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *, Elf_Internal_Rela *, bfd_vma));
-static boolean elf32_frv_gc_sweep_hook
-  PARAMS ((bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *));
+  PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *,
+	   Elf_Internal_Rela *, bfd_vma));
+static bfd_boolean elf32_frv_gc_sweep_hook
+  PARAMS ((bfd *, struct bfd_link_info *, asection *, const
+	   Elf_Internal_Rela *));
 static asection * elf32_frv_gc_mark_hook
-  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *, struct elf_link_hash_entry *, Elf_Internal_Sym *));
-static boolean elf32_frv_check_relocs
-  PARAMS ((bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *));
-static int elf32_frv_machine PARAMS ((bfd *));
-static boolean elf32_frv_object_p PARAMS ((bfd *));
-static boolean frv_elf_set_private_flags PARAMS ((bfd *, flagword));
-static boolean frv_elf_copy_private_bfd_data PARAMS ((bfd *, bfd *));
-static boolean frv_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
-static boolean frv_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+static bfd_boolean elf32_frv_check_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
+static int elf32_frv_machine
+  PARAMS ((bfd *));
+static bfd_boolean elf32_frv_object_p
+  PARAMS ((bfd *));
+static bfd_boolean frv_elf_set_private_flags
+  PARAMS ((bfd *, flagword));
+static bfd_boolean frv_elf_copy_private_bfd_data
+  PARAMS ((bfd *, bfd *));
+static bfd_boolean frv_elf_merge_private_bfd_data
+  PARAMS ((bfd *, bfd *));
+static bfd_boolean frv_elf_print_private_bfd_data
+  PARAMS ((bfd *, PTR));
 
 static reloc_howto_type elf32_frv_howto_table [] =
 {
@@ -68,158 +84,158 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_NONE",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 32 bit absolute relocation.  */
   HOWTO (R_FRV_32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_32",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),		/* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 16 bit pc-relative relocation.  */
   HOWTO (R_FRV_LABEL16,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_LABEL16",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   /* A 24-bit pc-relative relocation.  */
   HOWTO (R_FRV_LABEL24,	/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 26,			/* bitsize */
-	 true,			/* pc_relative */
+	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_LABEL24",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0x7e03ffff,		/* src_mask */
 	 0x7e03ffff,		/* dst_mask */
-	 true),		        /* pcrel_offset */
+	 TRUE),		        /* pcrel_offset */
 
   HOWTO (R_FRV_LO16,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_LO16",		/* name */
-	false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_FRV_HI16,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_HI16",		/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_FRV_GPREL12,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GPREL12",       /* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xfff,		        /* src_mask */
 	 0xfff,		        /* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_FRV_GPRELU12,        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GPRELU12",      /* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xfff,		        /* src_mask */
 	 0x3f03f,	        /* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_FRV_GPREL32,         /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GPREL32",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffffffff,            /* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_FRV_GPRELHI,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GPRELHI",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		        /* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 
   HOWTO (R_FRV_GPRELLO,	        /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 false,			/* pc_relative */
+	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GPRELLO",	/* name */
-	 false,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0xffff,		        /* src_mask */
 	 0xffff,		/* dst_mask */
-	 false),	        /* pcrel_offset */
+	 FALSE),	        /* pcrel_offset */
 };
 
 /* GNU extension to record C++ vtable hierarchy.  */
@@ -228,15 +244,15 @@ static reloc_howto_type elf32_frv_vtinherit_howto =
          0,                     /* rightshift */
          2,                     /* size (0 = byte, 1 = short, 2 = long) */
          0,                     /* bitsize */
-         false,                 /* pc_relative */
+         FALSE,                 /* pc_relative */
          0,                     /* bitpos */
          complain_overflow_dont, /* complain_on_overflow */
          NULL,                  /* special_function */
          "R_FRV_GNU_VTINHERIT", /* name */
-         false,                 /* partial_inplace */
+         FALSE,                 /* partial_inplace */
          0,                     /* src_mask */
          0,                     /* dst_mask */
-         false);                /* pcrel_offset */
+         FALSE);                /* pcrel_offset */
 
   /* GNU extension to record C++ vtable member usage.  */
 static reloc_howto_type elf32_frv_vtentry_howto =
@@ -244,15 +260,15 @@ static reloc_howto_type elf32_frv_vtentry_howto =
          0,                     /* rightshift */
          2,                     /* size (0 = byte, 1 = short, 2 = long) */
          0,                     /* bitsize */
-         false,                 /* pc_relative */
+         FALSE,                 /* pc_relative */
          0,                     /* bitpos */
          complain_overflow_dont, /* complain_on_overflow */
          _bfd_elf_rel_vtable_reloc_fn,  /* special_function */
          "R_FRV_GNU_VTENTRY",   /* name */
-         false,                 /* partial_inplace */
+         FALSE,                 /* partial_inplace */
          0,                     /* src_mask */
          0,                     /* dst_mask */
-         false);                /* pcrel_offset */
+         FALSE);                /* pcrel_offset */
 
 /* Map BFD reloc types to FRV ELF reloc types.  */
 #if 0
@@ -283,7 +299,8 @@ static const struct frv_reloc_map frv_reloc_map [] =
 /* Handle an FRV small data reloc.  */
 
 static bfd_reloc_status_type
-elf32_frv_relocate_gprel12 (info, input_bfd, input_section, relocation, contents, value)
+elf32_frv_relocate_gprel12 (info, input_bfd, input_section, relocation,
+			    contents, value)
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -295,7 +312,7 @@ elf32_frv_relocate_gprel12 (info, input_bfd, input_section, relocation, contents
   bfd_vma gp;
   struct bfd_link_hash_entry *h;
 
-  h = bfd_link_hash_lookup (info->hash, "_gp", false, false, true);
+  h = bfd_link_hash_lookup (info->hash, "_gp", FALSE, FALSE, TRUE);
 
   gp = (h->u.def.value
 	+ h->u.def.section->output_section->vma
@@ -321,7 +338,8 @@ elf32_frv_relocate_gprel12 (info, input_bfd, input_section, relocation, contents
 /* Handle an FRV small data reloc. for the u12 field.  */
 
 static bfd_reloc_status_type
-elf32_frv_relocate_gprelu12 (info, input_bfd, input_section, relocation, contents, value)
+elf32_frv_relocate_gprelu12 (info, input_bfd, input_section, relocation,
+			     contents, value)
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -334,12 +352,12 @@ elf32_frv_relocate_gprelu12 (info, input_bfd, input_section, relocation, content
   struct bfd_link_hash_entry *h;
   bfd_vma mask;
 
-  h = bfd_link_hash_lookup (info->hash, "_gp", false, false, true);
+  h = bfd_link_hash_lookup (info->hash, "_gp", FALSE, FALSE, TRUE);
 
   gp = (h->u.def.value
 	+ h->u.def.section->output_section->vma
 	+ h->u.def.section->output_offset);
- 
+
   value -= input_section->output_section->vma;
   value -= (gp - input_section->output_section->vma);
 
@@ -423,7 +441,7 @@ elf32_frv_relocate_label24 (input_bfd, input_section, rello, contents, value)
 
   /* The format for the call instruction is:
 
-    0 000000 0001111 000000000000000000 
+    0 000000 0001111 000000000000000000
       label6 opcode  label18
 
     The branch calculation is: pc + (4*label24)
@@ -453,7 +471,8 @@ elf32_frv_relocate_label24 (input_bfd, input_section, rello, contents, value)
 }
 
 static bfd_reloc_status_type
-elf32_frv_relocate_gprelhi (info, input_bfd, input_section, relocation, contents, value)
+elf32_frv_relocate_gprelhi (info, input_bfd, input_section, relocation,
+			    contents, value)
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -465,7 +484,7 @@ elf32_frv_relocate_gprelhi (info, input_bfd, input_section, relocation, contents
   bfd_vma gp;
   struct bfd_link_hash_entry *h;
 
-  h = bfd_link_hash_lookup (info->hash, "_gp", false, false, true);
+  h = bfd_link_hash_lookup (info->hash, "_gp", FALSE, FALSE, TRUE);
 
   gp = (h->u.def.value
         + h->u.def.section->output_section->vma
@@ -487,7 +506,8 @@ elf32_frv_relocate_gprelhi (info, input_bfd, input_section, relocation, contents
 }
 
 static bfd_reloc_status_type
-elf32_frv_relocate_gprello (info, input_bfd, input_section, relocation, contents, value)
+elf32_frv_relocate_gprello (info, input_bfd, input_section, relocation,
+			    contents, value)
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -499,7 +519,7 @@ elf32_frv_relocate_gprello (info, input_bfd, input_section, relocation, contents
   bfd_vma gp;
   struct bfd_link_hash_entry *h;
 
-  h = bfd_link_hash_lookup (info->hash, "_gp", false, false, true);
+  h = bfd_link_hash_lookup (info->hash, "_gp", FALSE, FALSE, TRUE);
 
   gp = (h->u.def.value
         + h->u.def.section->output_section->vma
@@ -523,7 +543,7 @@ elf32_frv_relocate_gprello (info, input_bfd, input_section, relocation, contents
 
 static reloc_howto_type *
 frv_reloc_type_lookup (abfd, code)
-     bfd * abfd ATTRIBUTE_UNUSED;
+     bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
   switch (code)
@@ -533,7 +553,7 @@ frv_reloc_type_lookup (abfd, code)
 
     case BFD_RELOC_NONE:
       return &elf32_frv_howto_table[ (int) R_FRV_NONE];
-  
+
     case BFD_RELOC_32:
     case BFD_RELOC_CTOR:
       return &elf32_frv_howto_table[ (int) R_FRV_32];
@@ -579,9 +599,9 @@ frv_reloc_type_lookup (abfd, code)
 
 static void
 frv_info_to_howto_rela (abfd, cache_ptr, dst)
-     bfd * abfd ATTRIBUTE_UNUSED;
-     arelent * cache_ptr;
-     Elf_Internal_Rela * dst;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *cache_ptr;
+     Elf_Internal_Rela *dst;
 {
   unsigned int r_type;
 
@@ -606,13 +626,14 @@ frv_info_to_howto_rela (abfd, cache_ptr, dst)
    routines, but a few relocs, we have to do them ourselves.  */
 
 static bfd_reloc_status_type
-frv_final_link_relocate (howto, input_bfd, input_section, contents, rel, relocation)
-     reloc_howto_type *  howto;
-     bfd *               input_bfd;
-     asection *          input_section;
-     bfd_byte *          contents;
-     Elf_Internal_Rela * rel;
-     bfd_vma             relocation;
+frv_final_link_relocate (howto, input_bfd, input_section, contents, rel,
+			 relocation)
+     reloc_howto_type *howto;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     Elf_Internal_Rela *rel;
+     bfd_vma relocation;
 {
   return _bfd_final_link_relocate (howto, input_bfd, input_section,
 				   contents, rel->r_offset, relocation,
@@ -650,25 +671,25 @@ frv_final_link_relocate (howto, input_bfd, input_section, contents, rel, relocat
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static boolean
+static bfd_boolean
 elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 			    contents, relocs, local_syms, local_sections)
-     bfd *                   output_bfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *  info;
-     bfd *                   input_bfd;
-     asection *              input_section;
-     bfd_byte *              contents;
-     Elf_Internal_Rela *     relocs;
-     Elf_Internal_Sym *      local_syms;
-     asection **             local_sections;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     Elf_Internal_Rela *relocs;
+     Elf_Internal_Sym *local_syms;
+     asection **local_sections;
 {
-  Elf_Internal_Shdr *           symtab_hdr;
-  struct elf_link_hash_entry ** sym_hashes;
-  Elf_Internal_Rela *           rel;
-  Elf_Internal_Rela *           relend;
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes;
+  Elf_Internal_Rela *rel;
+  Elf_Internal_Rela *relend;
 
   if (info->relocateable)
-    return true;
+    return TRUE;
 
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -676,29 +697,29 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 
   for (rel = relocs; rel < relend; rel ++)
     {
-      reloc_howto_type *           howto;
-      unsigned long                r_symndx;
-      Elf_Internal_Sym *           sym;
-      asection *                   sec;
-      struct elf_link_hash_entry * h;
-      bfd_vma                      relocation;
-      bfd_reloc_status_type        r;
-      const char *                 name = NULL;
-      int                          r_type;
-      
+      reloc_howto_type *howto;
+      unsigned long r_symndx;
+      Elf_Internal_Sym *sym;
+      asection *sec;
+      struct elf_link_hash_entry *h;
+      bfd_vma relocation;
+      bfd_reloc_status_type r;
+      const char * name = NULL;
+      int r_type;
+
       r_type = ELF32_R_TYPE (rel->r_info);
-      
+
       if (   r_type == R_FRV_GNU_VTINHERIT
 	  || r_type == R_FRV_GNU_VTENTRY)
 	continue;
-      
+
       /* This is a final link.  */
       r_symndx = ELF32_R_SYM (rel->r_info);
       howto  = elf32_frv_howto_table + ELF32_R_TYPE (rel->r_info);
       h      = NULL;
       sym    = NULL;
       sec    = NULL;
-      
+
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -706,7 +727,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
-	  
+
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
 	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
@@ -714,13 +735,13 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
       else
 	{
 	  h = sym_hashes [r_symndx - symtab_hdr->sh_info];
-	  
+
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
 	  name = h->root.root.string;
-	  
+
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
@@ -737,12 +758,12 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
-		      input_section, rel->r_offset, true)))
-		return false;
+		      input_section, rel->r_offset, TRUE)))
+		return FALSE;
 	      relocation = 0;
 	    }
 	}
-      
+
      if (r_type == R_FRV_HI16)
        r = elf32_frv_relocate_hi16 (input_bfd, rel, contents, relocation);
 
@@ -750,22 +771,28 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
        r = elf32_frv_relocate_lo16 (input_bfd, rel, contents, relocation);
 
      else if (r_type == R_FRV_LABEL24)
-       r = elf32_frv_relocate_label24 (input_bfd, input_section, rel, contents, relocation);
+       r = elf32_frv_relocate_label24 (input_bfd, input_section, rel,
+				       contents, relocation);
 
      else if (r_type == R_FRV_GPREL12)
-       r = elf32_frv_relocate_gprel12 (info, input_bfd, input_section, rel, contents, relocation);
+       r = elf32_frv_relocate_gprel12 (info, input_bfd, input_section, rel,
+				       contents, relocation);
 
      else if (r_type == R_FRV_GPRELU12)
-       r = elf32_frv_relocate_gprelu12 (info, input_bfd, input_section, rel, contents, relocation);
+       r = elf32_frv_relocate_gprelu12 (info, input_bfd, input_section, rel,
+					contents, relocation);
 
      else if (r_type == R_FRV_GPRELLO)
-       r = elf32_frv_relocate_gprello (info, input_bfd, input_section, rel, contents, relocation);
+       r = elf32_frv_relocate_gprello (info, input_bfd, input_section, rel,
+				       contents, relocation);
 
      else if (r_type == R_FRV_GPRELHI)
-       r = elf32_frv_relocate_gprelhi (info, input_bfd, input_section, rel, contents, relocation);
+       r = elf32_frv_relocate_gprelhi (info, input_bfd, input_section, rel,
+				       contents, relocation);
 
      else
-       r = frv_final_link_relocate (howto, input_bfd, input_section, contents, rel, relocation);
+       r = frv_final_link_relocate (howto, input_bfd, input_section, contents,
+				    rel, relocation);
 
       if (r != bfd_reloc_ok)
 	{
@@ -778,12 +805,12 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 		(info, name, howto->name, (bfd_vma) 0,
 		 input_bfd, input_section, rel->r_offset);
 	      break;
-	      
+
 	    case bfd_reloc_undefined:
 	      r = info->callbacks->undefined_symbol
-		(info, name, input_bfd, input_section, rel->r_offset, true);
+		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
 	      break;
-	      
+
 	    case bfd_reloc_outofrange:
 	      msg = _("internal error: out of range error");
 	      break;
@@ -806,11 +833,11 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	      (info, msg, name, input_bfd, input_section, rel->r_offset);
 
 	  if (! r)
-	    return false;
+	    return FALSE;
 	}
     }
 
-  return true;
+  return TRUE;
 }
 
 /* Return the section that should be marked against GC for a given
@@ -818,11 +845,11 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 
 static asection *
 elf32_frv_gc_mark_hook (sec, info, rel, h, sym)
-     asection *                   sec;
-     struct bfd_link_info *       info ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *          rel;
-     struct elf_link_hash_entry * h;
-     Elf_Internal_Sym *           sym;
+     asection *sec;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *rel;
+     struct elf_link_hash_entry *h;
+     Elf_Internal_Sym *sym;
 {
   if (h != NULL)
     {
@@ -855,21 +882,21 @@ elf32_frv_gc_mark_hook (sec, info, rel, h, sym)
 
 /* Update the got entry reference counts for the section being removed.  */
 
-static boolean
+static bfd_boolean
 elf32_frv_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *                     abfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *    info ATTRIBUTE_UNUSED;
-     asection *                sec ATTRIBUTE_UNUSED;
-     const Elf_Internal_Rela * relocs ATTRIBUTE_UNUSED;
+     bfd *abfd ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     asection *sec ATTRIBUTE_UNUSED;
+     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
-  return true;
+  return TRUE;
 }
 
 
 /* Hook called by the linker routine which adds symbols from an object
    file.  We use it to put .comm items in .scomm, and not .comm.  */
 
-static boolean
+static bfd_boolean
 elf32_frv_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -895,20 +922,20 @@ elf32_frv_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	      || !bfd_set_section_flags (abfd, scomm, (SEC_ALLOC
 						       | SEC_IS_COMMON
 						       | SEC_LINKER_CREATED)))
-	    return false;
+	    return FALSE;
 	}
 
       *secp = scomm;
       *valp = sym->st_size;
     }
 
-  return true;
+  return TRUE;
 }
 /* Look through the relocs for a section during the first phase.
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */
- 
-static boolean
+
+static bfd_boolean
 elf32_frv_check_relocs (abfd, info, sec, relocs)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -919,47 +946,47 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
- 
+
   if (info->relocateable)
-    return true;
- 
+    return TRUE;
+
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
   sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
   if (!elf_bad_symtab (abfd))
     sym_hashes_end -= symtab_hdr->sh_info;
- 
+
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
       struct elf_link_hash_entry *h;
       unsigned long r_symndx;
- 
+
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
         h = NULL;
       else
         h = sym_hashes[r_symndx - symtab_hdr->sh_info];
- 
+
       switch (ELF32_R_TYPE (rel->r_info))
         {
         /* This relocation describes the C++ object vtable hierarchy.
            Reconstruct it for later use during GC.  */
         case R_FRV_GNU_VTINHERIT:
           if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-            return false;
+            return FALSE;
           break;
- 
+
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_FRV_GNU_VTENTRY:
           if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-            return false;
+            return FALSE;
           break;
         }
     }
- 
-  return true;
+
+  return TRUE;
 }
 
 
@@ -984,56 +1011,56 @@ elf32_frv_machine (abfd)
 
 /* Set the right machine number for a FRV ELF file.  */
 
-static boolean
+static bfd_boolean
 elf32_frv_object_p (abfd)
      bfd *abfd;
 {
   bfd_default_set_arch_mach (abfd, bfd_arch_frv, elf32_frv_machine (abfd));
-  return true;
+  return TRUE;
 }
 
 /* Function to set the ELF flag bits.  */
 
-static boolean
+static bfd_boolean
 frv_elf_set_private_flags (abfd, flags)
      bfd *abfd;
      flagword flags;
 {
   elf_elfheader (abfd)->e_flags = flags;
-  elf_flags_init (abfd) = true;
-  return true;
+  elf_flags_init (abfd) = TRUE;
+  return TRUE;
 }
 
 /* Copy backend specific data from one object module to another.  */
 
-static boolean
+static bfd_boolean
 frv_elf_copy_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
+    return TRUE;
 
   BFD_ASSERT (!elf_flags_init (obfd)
 	      || elf_elfheader (obfd)->e_flags == elf_elfheader (ibfd)->e_flags);
 
   elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = true;
-  return true;
+  elf_flags_init (obfd) = TRUE;
+  return TRUE;
 }
 
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
-static boolean
+static bfd_boolean
 frv_elf_merge_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
   flagword old_flags, old_partial;
   flagword new_flags, new_partial;
-  boolean error = false;
+  bfd_boolean error = FALSE;
   char new_opt[80];
   char old_opt[80];
 
@@ -1049,7 +1076,7 @@ frv_elf_merge_private_bfd_data (ibfd, obfd)
 
   if (!elf_flags_init (obfd))			/* First call, no flags set.  */
     {
-      elf_flags_init (obfd) = true;
+      elf_flags_init (obfd) = TRUE;
       old_flags = new_flags;
     }
 
@@ -1191,7 +1218,7 @@ frv_elf_merge_private_bfd_data (ibfd, obfd)
 	    {
 	      old_flags &= ~ EF_FRV_PIC_FLAGS;
 #ifndef FRV_NO_PIC_ERROR
-	      error = true;
+	      error = TRUE;
 	      (*_bfd_error_handler)
 		(_("%s: compiled with %s and linked with modules that use non-pic relocations"),
 		 bfd_get_filename (ibfd),
@@ -1237,11 +1264,11 @@ frv_elf_merge_private_bfd_data (ibfd, obfd)
 	    case EF_FRV_CPU_TOMCAT:  strcat (old_opt, " -mcpu=tomcat"); break;
 	    }
 	}
-      
+
       /* Print out any mismatches from above.  */
       if (new_opt[0])
 	{
-	  error = true;
+	  error = TRUE;
 	  (*_bfd_error_handler)
 	    (_("%s: compiled with %s and linked with modules compiled with %s"),
 	     bfd_get_filename (ibfd), new_opt, old_opt);
@@ -1253,7 +1280,7 @@ frv_elf_merge_private_bfd_data (ibfd, obfd)
       if (new_partial != old_partial)
 	{
 	  old_flags |= new_partial;
-	  error = true;
+	  error = TRUE;
 	  (*_bfd_error_handler)
 	    (_("%s: uses different unknown e_flags (0x%lx) fields than previous modules (0x%lx)"),
 	     bfd_get_filename (ibfd), (long)new_partial, (long)old_partial);
@@ -1277,7 +1304,7 @@ frv_elf_merge_private_bfd_data (ibfd, obfd)
 }
 
 
-boolean
+bfd_boolean
 frv_elf_print_private_bfd_data (abfd, ptr)
      bfd *abfd;
      PTR ptr;
@@ -1347,7 +1374,7 @@ frv_elf_print_private_bfd_data (abfd, ptr)
     fprintf (file, " -G0");
 
   fputc ('\n', file);
-  return true;
+  return TRUE;
 }
 
 

@@ -3,7 +3,7 @@
 (echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -138,9 +138,9 @@ $s/$/n"/
 cat >>e${EMULATION_NAME}.c <<EOF
 {			     
   *isfile = 0;
-  if (link_info.relocateable == true && config.build_constructors == true)
+  if (link_info.relocateable && config.build_constructors)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xu`;
-  else if (link_info.relocateable == true)
+  else if (link_info.relocateable)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xr`;
   else if (!config.text_read_only)
     return `sed "$sc" ldscripts/${EMULATION_NAME}.xbn`;
@@ -158,9 +158,9 @@ cat >>e${EMULATION_NAME}.c <<EOF
 {			     
   *isfile = 1;
 
-  if (link_info.relocateable == true && config.build_constructors == true)
+  if (link_info.relocateable && config.build_constructors)
     return "ldscripts/${EMULATION_NAME}.xu";
-  else if (link_info.relocateable == true)
+  else if (link_info.relocateable)
     return "ldscripts/${EMULATION_NAME}.xr";
   else if (!config.text_read_only)
     return "ldscripts/${EMULATION_NAME}.xbn";

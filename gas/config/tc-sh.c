@@ -71,7 +71,7 @@ static void build_relax PARAMS ((sh_opcode_info *, sh_operand_info *));
 static char *insert_loop_bounds PARAMS ((char *, sh_operand_info *));
 static unsigned int build_Mytes
   PARAMS ((sh_opcode_info *, sh_operand_info *));
-static boolean sh_local_pcrel PARAMS ((fixS *fix));
+static bfd_boolean sh_local_pcrel PARAMS ((fixS *fix));
 
 #ifdef OBJ_ELF
 static void sh_elf_cons PARAMS ((int));
@@ -826,7 +826,7 @@ sh_elf_cons (nbytes)
 #ifdef HAVE_SH64
 
   /* Update existing range to include a previous insn, if there was one.  */
-  sh64_update_contents_mark (true);
+  sh64_update_contents_mark (TRUE);
 
   /* We need to make sure the contents type is set to data.  */
   sh64_flag_output ();
@@ -2348,13 +2348,13 @@ md_assemble (str)
     {
       /* If we've seen pseudo-directives, make sure any emitted data or
 	 frags are marked as data.  */
-      if (seen_insn == false)
+      if (!seen_insn)
 	{
-	  sh64_update_contents_mark (true);
+	  sh64_update_contents_mark (TRUE);
 	  sh64_set_contents_type (CRT_SH5_ISA16);
 	}
 
-      seen_insn = true;
+      seen_insn = TRUE;
     }
 #endif /* HAVE_SH64 */
 
@@ -2685,19 +2685,19 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_NO_MIX:
-      sh64_mix = false;
+      sh64_mix = FALSE;
       break;
 
     case OPTION_SHCOMPACT_CONST_CRANGE:
-      sh64_shcompact_const_crange = true;
+      sh64_shcompact_const_crange = TRUE;
       break;
 
     case OPTION_NO_EXPAND:
-      sh64_expand = false;
+      sh64_expand = FALSE;
       break;
 
     case OPTION_PT32:
-      sh64_pt32 = true;
+      sh64_pt32 = TRUE;
       break;
 #endif /* HAVE_SH64 */
 
@@ -3062,7 +3062,7 @@ md_convert_frag (headers, seg, fragP)
 
     default:
 #ifdef HAVE_SH64
-      shmedia_md_convert_frag (headers, seg, fragP, true);
+      shmedia_md_convert_frag (headers, seg, fragP, TRUE);
 #else
       abort ();
 #endif
@@ -3208,18 +3208,18 @@ sh_handle_align (frag)
 
 /* See whether the relocation should be resolved locally.  */
 
-static boolean
+static bfd_boolean
 sh_local_pcrel (fix)
      fixS *fix;
 {
-  return (! sh_relax && 
-	  (fix->fx_r_type == BFD_RELOC_SH_PCDISP8BY2
-	   || fix->fx_r_type == BFD_RELOC_SH_PCDISP12BY2
-	   || fix->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY2
-	   || fix->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY4
-	   || fix->fx_r_type == BFD_RELOC_8_PCREL
-	   || fix->fx_r_type == BFD_RELOC_SH_SWITCH16
-	   || fix->fx_r_type == BFD_RELOC_SH_SWITCH32));
+  return (! sh_relax
+	  && (fix->fx_r_type == BFD_RELOC_SH_PCDISP8BY2
+	      || fix->fx_r_type == BFD_RELOC_SH_PCDISP12BY2
+	      || fix->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY2
+	      || fix->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY4
+	      || fix->fx_r_type == BFD_RELOC_8_PCREL
+	      || fix->fx_r_type == BFD_RELOC_SH_SWITCH16
+	      || fix->fx_r_type == BFD_RELOC_SH_SWITCH32));
 }
 
 /* See whether we need to force a relocation into the output file.
@@ -3264,7 +3264,7 @@ sh_force_relocation (fix)
 }
 
 #ifdef OBJ_ELF
-boolean
+bfd_boolean
 sh_fix_adjustable (fixP)
    fixS *fixP;
 {

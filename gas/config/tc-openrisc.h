@@ -52,7 +52,7 @@ extern const char openrisc_comment_chars [];
 
 #define md_apply_fix3 gas_cgen_md_apply_fix3
 
-extern boolean openrisc_fix_adjustable PARAMS ((struct fix *));
+extern bfd_boolean openrisc_fix_adjustable PARAMS ((struct fix *));
 #define tc_fix_adjustable(FIX) openrisc_fix_adjustable (FIX)
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */

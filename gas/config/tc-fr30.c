@@ -641,7 +641,7 @@ fr30_is_colon_insn (start)
   return 0;
 }
 
-boolean
+bfd_boolean
 fr30_fix_adjustable (fixP)
    fixS * fixP;
 {

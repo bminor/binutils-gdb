@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+#   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -81,7 +81,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation ()
 	      }
 	  }
 
-	  command_line.relax = false;
+	  command_line.relax = FALSE;
 	}
 
       /* We wouldn't need to do anything when there's already a .cranges
@@ -106,7 +106,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation ()
 		    {
 		      einfo (_("%P: Sorry, turning off relaxing: SHmedia sections present.\n"));
 		      einfo ("  %I\n", f);
-		      command_line.relax = false;
+		      command_line.relax = FALSE;
 		      goto done_scanning_shmedia_sections;
 		    }
 		}
@@ -205,13 +205,12 @@ sh64_elf_${EMULATION_NAME}_before_allocation ()
 			      = bfd_make_section (output_bfd,
 						  SH64_CRANGES_SECTION_NAME);
 			    if (cranges == NULL
-				|| (bfd_set_section_flags (output_bfd,
+				|| !bfd_set_section_flags (output_bfd,
 							   cranges,
 							   SEC_LINKER_CREATED
 							   | SEC_KEEP
 							   | SEC_HAS_CONTENTS
-							   | SEC_DEBUGGING)
-				    == false))
+							   | SEC_DEBUGGING))
 			      einfo
 				(_("%P%E%F: Can't make .cranges section\n"));
 			  }
@@ -268,7 +267,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation ()
        osec = osec->next)
     {
       bfd_vma oflags_isa = 0;
-      boolean need_check_cranges = false;
+      bfd_boolean need_check_cranges = FALSE;
 
       /* Omit excluded or garbage-collected sections.  */
       if (bfd_get_section_flags (output_bfd, osec) & SEC_EXCLUDE)
@@ -335,7 +334,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation ()
 
 			sh64_elf_section_data (osec)->contents_flags
 			  = SHF_SH5_ISA32_MIXED;
-			need_check_cranges = true;
+			need_check_cranges = TRUE;
 			goto break_2;
 		      }
 		  }

@@ -1154,7 +1154,7 @@ md_dlx_force_relocation (fixp)
 	  || S_FORCE_RELOC (fixp->fx_addsy));
 }
 
-boolean
+bfd_boolean
 md_dlx_fix_adjustable (fixP)
    fixS *fixP;
 {

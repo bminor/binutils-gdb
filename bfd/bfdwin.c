@@ -107,13 +107,13 @@ bfd_free_window (windowp)
 
 static int ok_to_map = 1;
 
-boolean
+bfd_boolean
 bfd_get_file_window (abfd, offset, size, windowp, writable)
      bfd *abfd;
      file_ptr offset;
      bfd_size_type size;
      bfd_window *windowp;
-     boolean writable;
+     bfd_boolean writable;
 {
   static size_t pagesize;
   bfd_window_internal *i = windowp->i;
@@ -137,7 +137,7 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
 	   bfd_zmalloc ((bfd_size_type) sizeof (bfd_window_internal)));
       windowp->i = i;
       if (i == 0)
-	return false;
+	return FALSE;
       i->data = 0;
     }
 #ifdef HAVE_MMAP
@@ -189,7 +189,7 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
 	  windowp->data = 0;
 	  if (debug_windows)
 	    fprintf (stderr, "\t\tmmap failed!\n");
-	  return false;
+	  return FALSE;
 	}
       if (debug_windows)
 	fprintf (stderr, "\n\tmapped %ld at %p, offset is %ld\n",
@@ -198,7 +198,7 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
       windowp->data = (PTR) ((bfd_byte *) i->data + offset2);
       windowp->size = size;
       i->mapped = 1;
-      return true;
+      return TRUE;
     }
   else if (debug_windows)
     {
@@ -229,14 +229,14 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
   if (i->data == NULL)
     {
       if (size_to_alloc == 0)
-	return true;
-      return false;
+	return TRUE;
+      return FALSE;
     }
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
-    return false;
+    return FALSE;
   i->size = bfd_bread (i->data, size, abfd);
   if (i->size != size)
-    return false;
+    return FALSE;
   i->mapped = 0;
 #ifdef HAVE_MPROTECT
   if (!writable)
@@ -249,7 +249,7 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
 #endif
   windowp->data = i->data;
   windowp->size = i->size;
-  return true;
+  return TRUE;
 }
 
 #endif /* USE_MMAP */

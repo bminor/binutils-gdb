@@ -306,15 +306,15 @@ DESCRIPTION
 .  const char *arch_name;
 .  const char *printable_name;
 .  unsigned int section_align_power;
-.  {* True if this is the default machine for the architecture.
+.  {* TRUE if this is the default machine for the architecture.
 .     The default arch should be the first entry for an arch so that
 .     all the entries for that arch can be accessed via <<next>>.  *}
-.  boolean the_default;
+.  bfd_boolean the_default;
 .  const struct bfd_arch_info * (*compatible)
 .	PARAMS ((const struct bfd_arch_info *a,
 .	         const struct bfd_arch_info *b));
 .
-.  boolean (*scan) PARAMS ((const struct bfd_arch_info *, const char *));
+.  bfd_boolean (*scan) PARAMS ((const struct bfd_arch_info *, const char *));
 .
 .  const struct bfd_arch_info *next;
 .}
@@ -585,7 +585,7 @@ DESCRIPTION
 */
 
 const bfd_arch_info_type bfd_default_arch_struct = {
-  32, 32, 8, bfd_arch_unknown, 0, "unknown", "unknown", 2, true,
+  32, 32, 8, bfd_arch_unknown, 0, "unknown", "unknown", 2, TRUE,
   bfd_default_compatible,
   bfd_default_scan,
   0,
@@ -615,7 +615,7 @@ INTERNAL_FUNCTION
 	bfd_default_set_arch_mach
 
 SYNOPSIS
-	boolean bfd_default_set_arch_mach(bfd *abfd,
+	bfd_boolean bfd_default_set_arch_mach(bfd *abfd,
 		enum bfd_architecture arch,
 		unsigned long mach);
 
@@ -626,7 +626,7 @@ DESCRIPTION
 	pointer.
 */
 
-boolean
+bfd_boolean
 bfd_default_set_arch_mach (abfd, arch, mach)
      bfd *abfd;
      enum bfd_architecture arch;
@@ -634,11 +634,11 @@ bfd_default_set_arch_mach (abfd, arch, mach)
 {
   abfd->arch_info = bfd_lookup_arch (arch, mach);
   if (abfd->arch_info != NULL)
-    return true;
+    return TRUE;
 
   abfd->arch_info = &bfd_default_arch_struct;
   bfd_set_error (bfd_error_bad_value);
-  return false;
+  return FALSE;
 }
 
 /*
@@ -755,14 +755,14 @@ INTERNAL_FUNCTION
 	bfd_default_scan
 
 SYNOPSIS
-	boolean bfd_default_scan(const struct bfd_arch_info *info, const char *string);
+	bfd_boolean bfd_default_scan(const struct bfd_arch_info *info, const char *string);
 
 DESCRIPTION
 	The default function for working out whether this is an
 	architecture hit and a machine hit.
 */
 
-boolean
+bfd_boolean
 bfd_default_scan (info, string)
      const bfd_arch_info_type *info;
      const char *string;
@@ -777,11 +777,11 @@ bfd_default_scan (info, string)
      default architecture?  */
   if (strcasecmp (string, info->arch_name) == 0
       && info->the_default)
-    return true;
+    return TRUE;
 
   /* Exact match of the machine name (PRINTABLE_NAME)?  */
   if (strcasecmp (string, info->printable_name) == 0)
-    return true;
+    return TRUE;
 
   /* Given that printable_name contains no colon, attempt to match:
      ARCH_NAME [ ":" ] PRINTABLE_NAME?  */
@@ -795,13 +795,13 @@ bfd_default_scan (info, string)
 	    {
 	      if (strcasecmp (string + strlen_arch_name + 1,
 			      info->printable_name) == 0)
-		return true;
+		return TRUE;
 	    }
 	  else
 	    {
 	      if (strcasecmp (string + strlen_arch_name,
 			      info->printable_name) == 0)
-		return true;
+		return TRUE;
 	    }
 	}
     }
@@ -814,7 +814,7 @@ bfd_default_scan (info, string)
       if (strncasecmp (string, info->printable_name, colon_index) == 0
 	  && strcasecmp (string + colon_index,
 			 info->printable_name + colon_index + 1) == 0)
-	return true;
+	return TRUE;
     }
 
   /* Given that PRINTABLE_NAME has the form: <arch> ":" <mach>; Do not
@@ -957,16 +957,16 @@ bfd_default_scan (info, string)
       break;
 
     default:
-      return false;
+      return FALSE;
     }
 
   if (arch != info->arch)
-    return false;
+    return FALSE;
 
   if (number != info->mach)
-    return false;
+    return FALSE;
 
-  return true;
+  return TRUE;
 }
 
 /*

@@ -58,7 +58,7 @@ int d10v_cleanup PARAMS ((void));
 } while (0)
 
 #define tc_fix_adjustable(FIX) d10v_fix_adjustable(FIX)
-boolean d10v_fix_adjustable PARAMS ((struct fix *));
+bfd_boolean d10v_fix_adjustable PARAMS ((struct fix *));
 
 #define TC_FORCE_RELOCATION(FIX) d10v_force_relocation(FIX)
 extern int d10v_force_relocation PARAMS ((struct fix *));

@@ -33,7 +33,7 @@ struct sym_id
     struct sym_id *next;
     char *spec;			/* Parsing modifies this.  */
     Table_Id which_table;
-    boolean has_right;
+    bfd_boolean has_right;
 
     struct match
       {
@@ -46,10 +46,14 @@ struct sym_id
   }
  *id_list;
 
-static void parse_spec PARAMS ((char *, Sym *));
-static void parse_id PARAMS ((struct sym_id *));
-static boolean match PARAMS ((Sym *, Sym *));
-static void extend_match PARAMS ((struct match *, Sym *, Sym_Table *, boolean));
+static void parse_spec
+  PARAMS ((char *, Sym *));
+static void parse_id
+  PARAMS ((struct sym_id *));
+static bfd_boolean match
+  PARAMS ((Sym *, Sym *));
+static void extend_match
+  PARAMS ((struct match *, Sym *, Sym_Table *, bfd_boolean));
 
 
 Sym_Table syms[NUM_TABLES];
@@ -179,7 +183,7 @@ parse_id (id)
     {
       parse_spec (slash + 1, &id->right.sym);
       *slash = '\0';
-      id->has_right = true;
+      id->has_right = TRUE;
     }
   parse_spec (id->spec, &id->left.sym);
 
@@ -216,17 +220,17 @@ parse_id (id)
 
 /* Return TRUE iff PATTERN matches SYM.  */
 
-static boolean
+static bfd_boolean
 match (pattern, sym)
      Sym *pattern;
      Sym *sym;
 {
-  return (pattern->file ? pattern->file == sym->file : true)
-    && (pattern->line_num ? pattern->line_num == sym->line_num : true)
+  return (pattern->file ? pattern->file == sym->file : TRUE)
+    && (pattern->line_num ? pattern->line_num == sym->line_num : TRUE)
     && (pattern->name
 	? strcmp (pattern->name,
 		  sym->name+(discard_underscores && sym->name[0] == '_')) == 0
-	: true);
+	: TRUE);
 }
 
 
@@ -235,7 +239,7 @@ extend_match (m, sym, tab, second_pass)
      struct match *m;
      Sym *sym;
      Sym_Table *tab;
-     boolean second_pass;
+     bfd_boolean second_pass;
 {
   if (m->prev_match != sym - 1)
     {
@@ -286,10 +290,10 @@ sym_id_parse ()
       for (id = id_list; id; id = id->next)
 	{
 	  if (match (&id->left.sym, sym))
-	    extend_match (&id->left, sym, &syms[id->which_table], false);
+	    extend_match (&id->left, sym, &syms[id->which_table], FALSE);
 
 	  if (id->has_right && match (&id->right.sym, sym))
-	    extend_match (&id->right, sym, &right_ids, false);
+	    extend_match (&id->right, sym, &right_ids, FALSE);
 	}
     }
 
@@ -317,10 +321,10 @@ sym_id_parse ()
       for (id = id_list; id; id = id->next)
 	{
 	  if (match (&id->left.sym, sym))
-	    extend_match (&id->left, sym, &syms[id->which_table], true);
+	    extend_match (&id->left, sym, &syms[id->which_table], TRUE);
 
 	  if (id->has_right && match (&id->right.sym, sym))
-	    extend_match (&id->right, sym, &right_ids, true);
+	    extend_match (&id->right, sym, &right_ids, TRUE);
 	}
     }
 
@@ -368,7 +372,7 @@ sym_id_parse ()
    time requesting -k a/b.  Fortunately, those symbol tables don't get
    very big (the user has to type them!), so a linear search is probably
    tolerable.  */
-boolean
+bfd_boolean
 sym_id_arc_is_present (sym_tab, from, to)
      Sym_Table *sym_tab;
      Sym *from;
@@ -380,8 +384,8 @@ sym_id_arc_is_present (sym_tab, from, to)
     {
       if (from->addr >= sym->addr && from->addr <= sym->end_addr
 	  && arc_lookup (sym, to))
-	return true;
+	return TRUE;
     }
 
-  return false;
+  return FALSE;
 }

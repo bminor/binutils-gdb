@@ -463,25 +463,46 @@ mach_o_data_struct;
 
 typedef struct mach_o_data_struct bfd_mach_o_data_struct;
 
-boolean            bfd_mach_o_valid                     PARAMS ((bfd *));
-int                bfd_mach_o_scan_read_symtab_symbol   PARAMS ((bfd *, bfd_mach_o_symtab_command *, asymbol *, unsigned long));
-int                bfd_mach_o_scan_read_symtab_strtab   PARAMS ((bfd *, bfd_mach_o_symtab_command *));
-int                bfd_mach_o_scan_read_symtab_symbols  PARAMS ((bfd *, bfd_mach_o_symtab_command *));
-int                bfd_mach_o_scan_read_dysymtab_symbol PARAMS ((bfd *, bfd_mach_o_dysymtab_command *, bfd_mach_o_symtab_command *, asymbol *, unsigned long));
-int                bfd_mach_o_scan_start_address        PARAMS ((bfd *));
-int                bfd_mach_o_scan                      PARAMS ((bfd *, bfd_mach_o_header *, bfd_mach_o_data_struct *));
-boolean            bfd_mach_o_mkobject                  PARAMS ((bfd *));
-const bfd_target * bfd_mach_o_object_p                  PARAMS ((bfd *));
-const bfd_target * bfd_mach_o_core_p                    PARAMS ((bfd *));
-const bfd_target * bfd_mach_o_archive_p                 PARAMS ((bfd *));
-bfd *              bfd_mach_o_openr_next_archived_file  PARAMS ((bfd *, bfd *));
-int                bfd_mach_o_lookup_section            PARAMS ((bfd *, asection *, bfd_mach_o_load_command **, bfd_mach_o_section **));
-int                bfd_mach_o_lookup_command            PARAMS ((bfd *, bfd_mach_o_load_command_type, bfd_mach_o_load_command **));
-unsigned long      bfd_mach_o_stack_addr                PARAMS ((enum bfd_mach_o_cpu_type));
-int                bfd_mach_o_core_fetch_environment    PARAMS ((bfd *, unsigned char **, unsigned int *));
-char *             bfd_mach_o_core_file_failing_command PARAMS ((bfd *));
-int                bfd_mach_o_core_file_failing_signal  PARAMS ((bfd *));
-boolean            bfd_mach_o_core_file_matches_executable_p PARAMS ((bfd *, bfd *));
+bfd_boolean bfd_mach_o_valid
+  PARAMS ((bfd *));
+int bfd_mach_o_scan_read_symtab_symbol
+  PARAMS ((bfd *, bfd_mach_o_symtab_command *, asymbol *, unsigned long));
+int bfd_mach_o_scan_read_symtab_strtab
+  PARAMS ((bfd *, bfd_mach_o_symtab_command *));
+int bfd_mach_o_scan_read_symtab_symbols
+  PARAMS ((bfd *, bfd_mach_o_symtab_command *));
+int bfd_mach_o_scan_read_dysymtab_symbol
+  PARAMS ((bfd *, bfd_mach_o_dysymtab_command *, bfd_mach_o_symtab_command *,
+	   asymbol *, unsigned long));
+int bfd_mach_o_scan_start_address
+  PARAMS ((bfd *));
+int bfd_mach_o_scan
+  PARAMS ((bfd *, bfd_mach_o_header *, bfd_mach_o_data_struct *));
+bfd_boolean bfd_mach_o_mkobject
+  PARAMS ((bfd *));
+const bfd_target * bfd_mach_o_object_p
+  PARAMS ((bfd *));
+const bfd_target * bfd_mach_o_core_p
+  PARAMS ((bfd *));
+const bfd_target * bfd_mach_o_archive_p
+  PARAMS ((bfd *));
+bfd * bfd_mach_o_openr_next_archived_file
+  PARAMS ((bfd *, bfd *));
+int bfd_mach_o_lookup_section
+  PARAMS ((bfd *, asection *, bfd_mach_o_load_command **,
+	   bfd_mach_o_section **));
+int bfd_mach_o_lookup_command
+  PARAMS ((bfd *, bfd_mach_o_load_command_type, bfd_mach_o_load_command **));
+unsigned long bfd_mach_o_stack_addr
+  PARAMS ((enum bfd_mach_o_cpu_type));
+int bfd_mach_o_core_fetch_environment
+  PARAMS ((bfd *, unsigned char **, unsigned int *));
+char * bfd_mach_o_core_file_failing_command
+  PARAMS ((bfd *));
+int bfd_mach_o_core_file_failing_signal
+  PARAMS ((bfd *));
+bfd_boolean bfd_mach_o_core_file_matches_executable_p
+  PARAMS ((bfd *, bfd *));
 
 extern const bfd_target mach_o_be_vec;
 extern const bfd_target mach_o_le_vec;

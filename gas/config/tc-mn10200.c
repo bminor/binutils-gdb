@@ -1,5 +1,5 @@
 /* tc-mn10200.c -- Assembler code for the Matsushita 10200
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -81,9 +81,9 @@ static unsigned long check_operand PARAMS ((unsigned long,
 					    const struct mn10200_operand *,
 					    offsetT));
 static int reg_name_search PARAMS ((const struct reg_name *, int, const char *));
-static boolean data_register_name PARAMS ((expressionS *expressionP));
-static boolean address_register_name PARAMS ((expressionS *expressionP));
-static boolean other_register_name PARAMS ((expressionS *expressionP));
+static bfd_boolean data_register_name PARAMS ((expressionS *expressionP));
+static bfd_boolean address_register_name PARAMS ((expressionS *expressionP));
+static bfd_boolean other_register_name PARAMS ((expressionS *expressionP));
 
 /* Fixups.  */
 #define MAX_INSN_FIXUPS (5)
@@ -182,7 +182,7 @@ reg_name_search (regs, regcount, name)
  *	its original state.
  */
 
-static boolean
+static bfd_boolean
 data_register_name (expressionP)
      expressionS *expressionP;
 {
@@ -210,12 +210,12 @@ data_register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
 
-      return true;
+      return TRUE;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return false;
+  return FALSE;
 }
 
 /* Summary of register_name().
@@ -229,7 +229,7 @@ data_register_name (expressionP)
  *	its original state.
  */
 
-static boolean
+static bfd_boolean
 address_register_name (expressionP)
      expressionS *expressionP;
 {
@@ -257,12 +257,12 @@ address_register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
 
-      return true;
+      return TRUE;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return false;
+  return FALSE;
 }
 
 /* Summary of register_name().
@@ -276,7 +276,7 @@ address_register_name (expressionP)
  *	its original state.
  */
 
-static boolean
+static bfd_boolean
 other_register_name (expressionP)
      expressionS *expressionP;
 {
@@ -304,12 +304,12 @@ other_register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
 
-      return true;
+      return TRUE;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return false;
+  return FALSE;
 }
 
 void

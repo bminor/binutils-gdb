@@ -1,5 +1,5 @@
 /* BFD support for the OpenRISC architecture.
-   Copyright (C) 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
    Contributed by Johan Rydberg, jrydberg@opencores.org
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -39,4 +39,4 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
   }
 
 const bfd_arch_info_type bfd_openrisc_arch =
-  N (32, 32, 0, "openrisc", true, 0);
+  N (32, 32, 0, "openrisc", TRUE, 0);

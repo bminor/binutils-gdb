@@ -1,5 +1,5 @@
 /* Intel 860 specific support for 32-bit ELF
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -40,16 +40,16 @@ static void elf32_i960_info_to_howto_rel
 
 static reloc_howto_type elf_howto_table[]=
 {
-  HOWTO(R_960_NONE, 0, 0, 0, false, 0, complain_overflow_bitfield,
-	elf32_i960_relocate, "R_960_NONE", true,
-	0x00000000, 0x00000000, false),
+  HOWTO(R_960_NONE, 0, 0, 0, FALSE, 0, complain_overflow_bitfield,
+	elf32_i960_relocate, "R_960_NONE", TRUE,
+	0x00000000, 0x00000000, FALSE),
   EMPTY_HOWTO (1),
-  HOWTO (R_960_32, 0, 2, 32, false, 0, complain_overflow_bitfield,
-	elf32_i960_relocate, "R_960_32", true,
-	0xffffffff, 0xffffffff, false),
-  HOWTO (R_960_IP24, 0, 2, 24, true, 0, complain_overflow_signed,
-	elf32_i960_relocate, "R_960_IP24 ", true,
-	0x00ffffff, 0x00ffffff, false),
+  HOWTO (R_960_32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	elf32_i960_relocate, "R_960_32", TRUE,
+	0xffffffff, 0xffffffff, FALSE),
+  HOWTO (R_960_IP24, 0, 2, 24, TRUE, 0, complain_overflow_signed,
+	elf32_i960_relocate, "R_960_IP24 ", TRUE,
+	0x00ffffff, 0x00ffffff, FALSE),
   EMPTY_HOWTO (4),
   EMPTY_HOWTO (5),
   EMPTY_HOWTO (6),

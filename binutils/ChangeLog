@@ -1,3 +1,13 @@
+2002-11-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* addr2line.c, ar.c, arsup.c, binemul.c, binemul.h, bucomm.c, bucomm.h,
+	budbg.h, debug.c, debug.h, dlltool.c, emul_aix.c, ieee.c, nlmconv.c,
+	nlmconv.h, nlmheader.y, nm.c, objcopy.c, objdump.c, prdbg.c, rdcoff.c,
+	rddbg.c, readelf.c, rename.c, size.c, stabs.c, strings.c,
+	unwind-ia64.h, wrstabs.c: Replace boolean with bfd_boolean, true with
+	TRUE, false with FALSE.  Simplify comparisons of bfd_boolean vars
+	with TRUE/FALSE.  Formatting.
+
 2002-11-29  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c Replace occurrences of Elf32_Internal_* and

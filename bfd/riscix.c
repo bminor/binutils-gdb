@@ -1,5 +1,5 @@
 /* BFD back-end for RISC iX (Acorn, arm) binaries.
-   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001
+   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
@@ -116,27 +116,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
     if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0			    \
 	|| bfd_bwrite ((PTR) &exec_bytes, (bfd_size_type) EXEC_BYTES_SIZE,   \
 		      abfd) != EXEC_BYTES_SIZE)				    \
-      return false;							    \
+      return FALSE;							    \
     /* Now write out reloc info, followed by syms and strings */	    \
 									    \
     if (bfd_get_outsymbols (abfd) != (asymbol **) NULL			    \
 	&& bfd_get_symcount (abfd) != 0)				    \
       {									    \
 	if (bfd_seek (abfd, (file_ptr) (N_SYMOFF(*execp)), SEEK_SET) != 0)  \
-	  return false;							    \
+	  return FALSE;							    \
 									    \
-	if (! NAME(aout,write_syms) (abfd)) return false;		    \
+	if (! NAME(aout,write_syms) (abfd)) return FALSE;		    \
 									    \
 	if (bfd_seek (abfd, (file_ptr) (N_TRELOFF(*execp)), SEEK_SET) != 0) \
-	  return false;							    \
+	  return FALSE;							    \
 									    \
 	if (! riscix_squirt_out_relocs (abfd, obj_textsec (abfd)))	    \
-	  return false;							    \
+	  return FALSE;							    \
 	if (bfd_seek (abfd, (file_ptr) (N_DRELOFF(*execp)), SEEK_SET) != 0) \
-	  return false;							    \
+	  return FALSE;							    \
 									    \
 	if (!NAME(aout,squirt_out_relocs) (abfd, obj_datasec (abfd)))	    \
-	  return false;							    \
+	  return FALSE;							    \
       }									    \
   }
 
@@ -159,7 +159,7 @@ riscix_reloc_type_lookup PARAMS ((bfd *, bfd_reloc_code_real_type));
 void
 riscix_swap_std_reloc_out PARAMS ((bfd *, arelent *, struct reloc_std_external *));
 
-boolean
+bfd_boolean
 riscix_squirt_out_relocs PARAMS ((bfd *, asection *));
 
 long
@@ -171,17 +171,17 @@ riscix_some_aout_object_p PARAMS ((bfd *, struct internal_exec *, const bfd_targ
 
 static reloc_howto_type riscix_std_reloc_howto[] = {
   /* type              rs size bsz  pcrel bitpos ovrf                     sf name     part_inpl readmask  setmask    pcdone */
-  HOWTO( 0,              0,  0,   8,  false, 0, complain_overflow_bitfield,0,"8",        true, 0x000000ff,0x000000ff, false),
-  HOWTO( 1,              0,  1,   16, false, 0, complain_overflow_bitfield,0,"16",        true, 0x0000ffff,0x0000ffff, false),
-  HOWTO( 2,              0,  2,   32, false, 0, complain_overflow_bitfield,0,"32",        true, 0xffffffff,0xffffffff, false),
-  HOWTO( 3,              2,  3,   26, true, 0, complain_overflow_signed,  riscix_fix_pcrel_26 , "ARM26",      true, 0x00ffffff,0x00ffffff, false),
-  HOWTO( 4,              0,  0,   8,  true,  0, complain_overflow_signed,  0,"DISP8",     true, 0x000000ff,0x000000ff, true),
-  HOWTO( 5,              0,  1,   16, true,  0, complain_overflow_signed,  0,"DISP16",    true, 0x0000ffff,0x0000ffff, true),
-  HOWTO( 6,              0,  2,   32, true,  0, complain_overflow_signed,  0,"DISP32",    true, 0xffffffff,0xffffffff, true),
-  HOWTO( 7,              2,  3,   26, false, 0, complain_overflow_signed,  riscix_fix_pcrel_26_done, "ARM26D",true,0x00ffffff,0x00ffffff, false),
+  HOWTO( 0,              0,  0,   8,  FALSE, 0, complain_overflow_bitfield,0,"8",        TRUE, 0x000000ff,0x000000ff, FALSE),
+  HOWTO( 1,              0,  1,   16, FALSE, 0, complain_overflow_bitfield,0,"16",        TRUE, 0x0000ffff,0x0000ffff, FALSE),
+  HOWTO( 2,              0,  2,   32, FALSE, 0, complain_overflow_bitfield,0,"32",        TRUE, 0xffffffff,0xffffffff, FALSE),
+  HOWTO( 3,              2,  3,   26, TRUE, 0, complain_overflow_signed,  riscix_fix_pcrel_26 , "ARM26",      TRUE, 0x00ffffff,0x00ffffff, FALSE),
+  HOWTO( 4,              0,  0,   8,  TRUE,  0, complain_overflow_signed,  0,"DISP8",     TRUE, 0x000000ff,0x000000ff, TRUE),
+  HOWTO( 5,              0,  1,   16, TRUE,  0, complain_overflow_signed,  0,"DISP16",    TRUE, 0x0000ffff,0x0000ffff, TRUE),
+  HOWTO( 6,              0,  2,   32, TRUE,  0, complain_overflow_signed,  0,"DISP32",    TRUE, 0xffffffff,0xffffffff, TRUE),
+  HOWTO( 7,              2,  3,   26, FALSE, 0, complain_overflow_signed,  riscix_fix_pcrel_26_done, "ARM26D",TRUE,0x00ffffff,0x00ffffff, FALSE),
   EMPTY_HOWTO (-1),
-  HOWTO( 9,              0, -1,   16, false, 0, complain_overflow_bitfield,0,"NEG16",        true, 0x0000ffff,0x0000ffff, false),
-  HOWTO( 10,              0, -2,   32, false, 0, complain_overflow_bitfield,0,"NEG32",        true, 0xffffffff,0xffffffff, false)
+  HOWTO( 9,              0, -1,   16, FALSE, 0, complain_overflow_bitfield,0,"NEG16",        TRUE, 0x0000ffff,0x0000ffff, FALSE),
+  HOWTO( 10,              0, -2,   32, FALSE, 0, complain_overflow_bitfield,0,"NEG32",        TRUE, 0xffffffff,0xffffffff, FALSE)
 };
 
 #define RISCIX_TABLE_SIZE \
@@ -396,7 +396,7 @@ riscix_swap_std_reloc_out (abfd, g, natptr)
     }
 }
 
-boolean
+bfd_boolean
 riscix_squirt_out_relocs (abfd, section)
      bfd *abfd;
      asection *section;
@@ -408,14 +408,15 @@ riscix_squirt_out_relocs (abfd, section)
   unsigned int count = section->reloc_count;
   bfd_size_type natsize;
 
-  if (count == 0) return true;
+  if (count == 0)
+    return TRUE;
 
   each_size = obj_reloc_entry_size (abfd);
   natsize = each_size;
   natsize *= count;
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native)
-    return false;
+    return FALSE;
 
   generic = section->orelocation;
 
@@ -428,11 +429,11 @@ riscix_squirt_out_relocs (abfd, section)
   if (bfd_bwrite ((PTR) native, natsize, abfd) != natsize)
     {
       bfd_release (abfd, native);
-      return false;
+      return FALSE;
     }
 
   bfd_release (abfd, native);
-  return true;
+  return TRUE;
 }
 
 /*

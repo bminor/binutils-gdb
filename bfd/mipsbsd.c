@@ -53,7 +53,7 @@ static void MY(set_arch_mach) PARAMS ((bfd *abfd, unsigned long machtype));
 static void MY(choose_reloc_size) PARAMS ((bfd *abfd));
 
 #define MY_write_object_contents MY(write_object_contents)
-static boolean MY(write_object_contents) PARAMS ((bfd *abfd));
+static bfd_boolean MY(write_object_contents) PARAMS ((bfd *abfd));
 
 /* We can't use MY(x) here because it leads to a recursive call to CONCAT2
    when expanded inside JUMP_TABLE.  */
@@ -130,7 +130,7 @@ MY (choose_reloc_size) (abfd)
   Section contents have already been written.  We write the
   file header, symbols, and relocation.  */
 
-static boolean
+static bfd_boolean
 MY (write_object_contents) (abfd)
      bfd *abfd;
 {
@@ -181,7 +181,7 @@ MY (write_object_contents) (abfd)
 
   WRITE_HEADERS (abfd, execp);
 
-  return true;
+  return TRUE;
 }
 
 /* MIPS relocation types.  */
@@ -290,20 +290,20 @@ mips_fix_hi16_s (abfd, reloc_entry, symbol, data, input_section,
 }
 
 static reloc_howto_type mips_howto_table_ext[] = {
-  {MIPS_RELOC_32,      0, 2, 32, false, 0,  complain_overflow_bitfield, 0,
-	"32",       false, 0, 0xffffffff, false},
-  {MIPS_RELOC_JMP,     2, 2, 26, false, 0, complain_overflow_dont,
+  {MIPS_RELOC_32,      0, 2, 32, FALSE, 0,  complain_overflow_bitfield, 0,
+	"32",       FALSE, 0, 0xffffffff, FALSE},
+  {MIPS_RELOC_JMP,     2, 2, 26, FALSE, 0, complain_overflow_dont,
 	mips_fix_jmp_addr,
-	"MIPS_JMP", false, 0, 0x03ffffff, false},
-  {MIPS_RELOC_WDISP16, 2, 2, 16, true,  0, complain_overflow_signed, 0,
-	"WDISP16",  false, 0, 0x0000ffff, false},
-  {MIPS_RELOC_HI16,   16, 2, 16, false, 0, complain_overflow_bitfield, 0,
-	"HI16",     false, 0, 0x0000ffff, false},
-  {MIPS_RELOC_HI16_S, 16, 2, 16, false, 0, complain_overflow_bitfield,
+	"MIPS_JMP", FALSE, 0, 0x03ffffff, FALSE},
+  {MIPS_RELOC_WDISP16, 2, 2, 16, TRUE,  0, complain_overflow_signed, 0,
+	"WDISP16",  FALSE, 0, 0x0000ffff, FALSE},
+  {MIPS_RELOC_HI16,   16, 2, 16, FALSE, 0, complain_overflow_bitfield, 0,
+	"HI16",     FALSE, 0, 0x0000ffff, FALSE},
+  {MIPS_RELOC_HI16_S, 16, 2, 16, FALSE, 0, complain_overflow_bitfield,
         mips_fix_hi16_s,
-        "HI16_S",   false, 0, 0x0000ffff, false},
-  {MIPS_RELOC_LO16,    0, 2, 16, false, 0, complain_overflow_dont, 0,
-	"LO16",     false, 0, 0x0000ffff, false},
+        "HI16_S",   FALSE, 0, 0x0000ffff, FALSE},
+  {MIPS_RELOC_LO16,    0, 2, 16, FALSE, 0, complain_overflow_dont, 0,
+	"LO16",     FALSE, 0, 0x0000ffff, FALSE},
 };
 
 static reloc_howto_type *
