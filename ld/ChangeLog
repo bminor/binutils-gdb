@@ -1,3 +1,9 @@
+2002-05-17  Marek Michalkiewicz  <marekm@amelek.gda.pl>
+
+	* Makefile.am: Add new emulations avr1, avr2, avr3, avr4, avr5.
+	* Makefile.in: Regenerate.
+	* configure.tgt (avr-*-*): Add avr[1-5] to targ_extra_emuls.
+
 2002-05-16  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
 	* emulparams/avr1.sh: New file.

@@ -240,6 +240,11 @@ ALL_EMULATIONS = \
 	eavrmega103.o \
 	eavrmega161.o \
 	eavrmega603.o \
+	eavr1.o \
+	eavr2.o \
+	eavr3.o \
+	eavr4.o \
+	eavr5.o \
 	ecoff_sparc.o \
 	ecrisaout.o \
 	ecriself.o \
@@ -1164,6 +1169,26 @@ eavrmega161.c: $(srcdir)/emulparams/avrmega161.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} avrmega161 "$(tdir_avr85xx)"
+eavr1.c: $(srcdir)/emulparams/avr1.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr1 "$(tdir_avr85xx)"
+eavr2.c: $(srcdir)/emulparams/avr2.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr2 "$(tdir_avr85xx)"
+eavr3.c: $(srcdir)/emulparams/avr3.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr3 "$(tdir_avr85xx)"
+eavr4.c: $(srcdir)/emulparams/avr4.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr4 "$(tdir_avr85xx)"
+eavr5.c: $(srcdir)/emulparams/avr5.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr5 "$(tdir_avr85xx)"
 ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} coff_sparc "$(tdir_coff_sparc)"
