@@ -73,8 +73,7 @@ case $os in
 	-unicom* | -ibm* | -next* | -hp | -isi* | -apollo | -altos* | \
 	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | \
 	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
-	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp | \
-	-sim)						# CYGNUS LOCAL
+	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp)
 		os=
 		basic_machine=$1
 		;;
@@ -118,7 +117,7 @@ case $basic_machine in
 	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
 	      | hppa1.0-* | hppa1.1-* | alpha-* | we32k-* | cydra-* | ns16k-* \
 	      | pn-* | np1-* | xps100-* | clipper-* | orion-* | sparclite-* \
-	      | m680[01234]0-* | m683?2-* | z8k-*)	# CYGNUS LOCAL
+	      | m680[01234]0-* | m683?2-* | z8k-* | h8500-* | sh-*)	# CYGNUS LOCAL
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
@@ -130,6 +129,7 @@ case $basic_machine in
 	sparc64-*)					# CYGNUS LOCAL
 		;;
 # end-sanitize-v9
+
 
 	dpx20 | dpx20-*)				# CYGNUS LOCAL
 		basic_machine=rs6000-bull
@@ -290,8 +290,11 @@ case $basic_machine in
 		os=-solaris2
 		;;
 	z8ksim)						# CYGNUS LOCAL
-		basic_machine=z8k-unknown
+		basic_machine=z8k-zilog
 		os=-sim
+		;;
+	z8k)						# CYGNUS LOCAL
+		basic_machine=z8k-zilog
 		;;
 	sun3)
 		basic_machine=m68k-sun
@@ -425,6 +428,16 @@ case $basic_machine in
 		;;
 	h8300hms)					# CYGNUS LOCAL
 		basic_machine=h8300-hitachi
+		os=-hms
+		;;
+
+	sh)						# CYGNUS LOCAL
+		basic_machine=sh-hitachi
+		os=-hms
+		;;
+
+	h8500hms)					# CYGNUS LOCAL
+		basic_machine=h8500-hitachi
 		os=-hms
 		;;
 	h8300xray)					# CYGNUS LOCAL
@@ -793,6 +806,9 @@ case $basic_machine in
 				;;
 			-vxworks*)			# CYGNUS LOCAL
 				vendor=wrs
+				;;
+			-hms*)				# CYGNUS LOCAL
+				vendor=hitachi
 				;;
 		esac
 		basic_machine=`echo $basic_machine | sed "s/unknown/$vendor/"`
