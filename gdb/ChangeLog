@@ -1,3 +1,16 @@
+Tue Feb 29 18:40:08 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-02-23 Eli Zaretskii <eliz@is.elta.co.il>:
+	* utils.c [__GO32__]: Include pc.h, for prototypes of ScreenCols
+	and ScreenRows.
+	* ser-go32.c: Include string.h, for prototype of strncasecmp.
+	(dpmi_regs, dpmi_sregs): Remove unused variables.
+	(dos_flush_input): Return a value, to prevent compiler warning.
+	* expprint.c (dump_prefix_expression): Use %ld in format and cast
+	sizeof(union exp_element) to long, to prevent GCC from complaining
+	about format/argument mismatch.
+	(dump_postfix_expression): Likewise.
+
 Tue Feb 29 18:09:46 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* arm-tdep.c: Include <ctype.h>.

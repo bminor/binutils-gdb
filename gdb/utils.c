@@ -31,6 +31,10 @@
 #include <term.h>
 #endif
 
+#ifdef __GO32__
+#include <pc.h>
+#endif
+
 /* SunOS's curses.h has a '#define reg register' in it.  Thank you Sun. */
 #ifdef reg
 #undef reg
