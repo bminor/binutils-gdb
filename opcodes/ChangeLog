@@ -1,3 +1,13 @@
+2000-12-16  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure.in: Add spacing.
+	* configure: Regenerate.
+	* ia64-asmtab.c: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2000-12-12  Frank Ch. Eigler  <fche@redhat.com>
 
 	* cgen-asm.in (@arch@_cgen_assemble_insn): Prefer printing insert-time
