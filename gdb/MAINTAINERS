@@ -236,6 +236,7 @@ GNU/Linux m68k		Andreas Schwab		schwab@suse.de
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 			David O'Brien		obrien@freebsd.org
 hurd native		Mark Kettenis		kettenis@gnu.org
+NetBSD native & host	Jason Thorpe		thorpej@wasabisystems.com
 SCO/Unixware		Robert Lipe		rjl@sco.com
 GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host (devolved)

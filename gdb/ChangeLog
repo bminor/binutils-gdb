@@ -1,3 +1,8 @@
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS (Host/Native): Add Jason Thorpe as NetBSD
+	maintainer.
+
 2002-05-04  Jim Blandy  <jimb@redhat.com>
 
 	* gdbtypes.c (replace_type): Doc fix.
