@@ -63,95 +63,13 @@ struct inferior_status;
   ((X) >> (31 - (TO)) & ((1 << ((TO) - (FROM) + 1)) - 1))
 #endif
 
-#if !GDB_MULTI_ARCH
-extern int hppa_reg_struct_has_addr (int gcc_p, struct type *type);
-#define REG_STRUCT_HAS_ADDR(gcc_p,type) hppa_reg_struct_has_addr (gcc_p,type)
-#endif
-
-/* Offset from address of function to start of its code.
-   Zero on most machines.  */
-
-#if !GDB_MULTI_ARCH
-#define FUNCTION_START_OFFSET 0
-#endif
-
-/* Advance PC across any function entry prologue instructions
-   to reach some "real" code.  */
-
-#if !GDB_MULTI_ARCH
-extern CORE_ADDR hppa_skip_prologue (CORE_ADDR);
-#define SKIP_PROLOGUE(pc) (hppa_skip_prologue (pc))
-#endif
-
-/* If PC is in some function-call trampoline code, return the PC
-   where the function itself actually starts.  If not, return NULL.  */
-
-#if !GDB_MULTI_ARCH
-#define	SKIP_TRAMPOLINE_CODE(pc) hppa_skip_trampoline_code (pc)
-extern CORE_ADDR hppa_skip_trampoline_code (CORE_ADDR);
-#endif
-
-/* Return non-zero if we are in an appropriate trampoline. */
-
-#if !GDB_MULTI_ARCH
-#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
-   hppa_in_solib_call_trampoline (pc, name)
-extern int hppa_in_solib_call_trampoline (CORE_ADDR, char *);
-#endif
-
-#if !GDB_MULTI_ARCH
-#define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) \
-  hppa_in_solib_return_trampoline (pc, name)
-extern int hppa_in_solib_return_trampoline (CORE_ADDR, char *);
-#endif
-
-#if !GDB_MULTI_ARCH
-#undef	DEPRECATED_SAVED_PC_AFTER_CALL
-#define DEPRECATED_SAVED_PC_AFTER_CALL(frame) hppa_saved_pc_after_call (frame)
-extern CORE_ADDR hppa_saved_pc_after_call (struct frame_info *);
-#endif
-
-#if !GDB_MULTI_ARCH
-extern int hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs);
-#define INNER_THAN(lhs,rhs) hppa_inner_than(lhs,rhs)
-#endif
-
-#if !GDB_MULTI_ARCH
-extern CORE_ADDR hppa_stack_align (CORE_ADDR sp);
-#define STACK_ALIGN(sp) hppa_stack_align (sp)
-#endif
-
 /* Sequence of bytes for breakpoint instruction.  */
 
 #define BREAKPOINT {0x00, 0x01, 0x00, 0x04}
 #define BREAKPOINT32 0x10004
 
-/* Amount PC must be decremented by after a breakpoint.
-   This is often the number of bytes in BREAKPOINT
-   but not always.
-
-   Not on the PA-RISC */
-
-#if !GDB_MULTI_ARCH
-#define DECR_PC_AFTER_BREAK 0
-#endif
-
 extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define PC_REQUIRES_RUN_BEFORE_USE(pc) hppa_pc_requires_run_before_use (pc)
-
-/* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places; REGISTER_RAW_SIZE is the
-   real way to know how big a register is.  */
-
-#if !GDB_MULTI_ARCH
-#define REGISTER_SIZE 4
-#endif
-
-/* Number of machine registers */
-
-#if !GDB_MULTI_ARCH
-#define NUM_REGS 128
-#endif
 
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.
@@ -186,13 +104,6 @@ extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 				   other r registers.  */
 #define FLAGS_REGNUM 0		/* Various status flags */
 #define RP_REGNUM 2		/* return pointer */
-#if !GDB_MULTI_ARCH
-#define FP_REGNUM 3		/* Contains address of executing stack */
-				/* frame */
-#endif
-#if !GDB_MULTI_ARCH
-#define SP_REGNUM 30		/* Contains address of top of stack */
-#endif
 #define SAR_REGNUM 32		/* Shift Amount Register */
 #define IPSW_REGNUM 41		/* Interrupt Processor Status Word */
 #define PCOQ_HEAD_REGNUM 33	/* instruction offset queue head */
@@ -207,23 +118,12 @@ extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define CCR_REGNUM 54		/* Coprocessor Configuration Register */
 #define TR0_REGNUM 57		/* Temporary Registers (cr24 -> cr31) */
 #define CR27_REGNUM 60		/* Base register for thread-local storage, cr27 */
-#if !GDB_MULTI_ARCH
-#define FP0_REGNUM 64		/* floating point reg. 0 (fspr) */
-#endif
 #define FP4_REGNUM 72
 
 #define ARG0_REGNUM 26		/* The first argument of a callee. */
 #define ARG1_REGNUM 25		/* The second argument of a callee. */
 #define ARG2_REGNUM 24		/* The third argument of a callee. */
 #define ARG3_REGNUM 23		/* The fourth argument of a callee. */
-
-/* compatibility with the rest of gdb. */
-#if !GDB_MULTI_ARCH
-#define PC_REGNUM PCOQ_HEAD_REGNUM
-#endif
-#if !GDB_MULTI_ARCH
-#define NPC_REGNUM PCOQ_TAIL_REGNUM
-#endif
 
 /*
  * Processor Status Word Masks
@@ -262,105 +162,10 @@ extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define DEPRECATED_DO_REGISTERS_INFO(_regnum, fp) pa_do_registers_info (_regnum, fp)
 extern void pa_do_registers_info (int, int);
 
-#if 0
-#define STRCAT_REGISTER(regnum, fpregs, stream, precision) pa_do_strcat_registers_info (regnum, fpregs, stream, precision)
-extern void pa_do_strcat_registers_info (int, int, struct ui_file *, enum precision_type);
-#endif
-
 /* PA specific macro to see if the current instruction is nullified. */
 #ifndef INSTRUCTION_NULLIFIED
 extern int hppa_instruction_nullified (void);
 #define INSTRUCTION_NULLIFIED hppa_instruction_nullified ()
-#endif
-
-/* Number of bytes of storage in the actual machine representation
-   for register N.  On the PA-RISC, all regs are 4 bytes, including
-   the FP registers (they're accessed as two 4 byte halves).  */
-
-#if !GDB_MULTI_ARCH
-extern int hppa_register_raw_size (int reg_nr);
-#define REGISTER_RAW_SIZE(N) hppa_register_raw_size (N)
-#endif
-
-/* Total amount of space needed to store our copies of the machine's
-   register state, the array `registers'.  */
-#if !GDB_MULTI_ARCH
-#define REGISTER_BYTES (NUM_REGS * 4)
-#endif
-
-#if !GDB_MULTI_ARCH
-extern int hppa_register_byte (int reg_nr);
-#define REGISTER_BYTE(N) hppa_register_byte (N)
-#endif
-
-/* Number of bytes of storage in the program's representation
-   for register N. */
-
-#if !GDB_MULTI_ARCH
-#define REGISTER_VIRTUAL_SIZE(N) REGISTER_RAW_SIZE(N)
-#endif
-
-/* Largest value REGISTER_RAW_SIZE can have.  */
-
-#if !GDB_MULTI_ARCH
-#define DEPRECATED_MAX_REGISTER_RAW_SIZE 4
-#endif
-
-/* Largest value REGISTER_VIRTUAL_SIZE can have.  */
-
-#if !GDB_MULTI_ARCH
-#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE 8
-#endif
-
-#if !GDB_MULTI_ARCH
-extern struct type * hppa_register_virtual_type (int reg_nr);
-#define REGISTER_VIRTUAL_TYPE(N) hppa_register_virtual_type (N)
-#endif
-
-#if !GDB_MULTI_ARCH
-extern void hppa_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
-#define STORE_STRUCT_RETURN(ADDR, SP) hppa_store_struct_return (ADDR, SP)
-#endif
-
-/* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
-
-#if !GDB_MULTI_ARCH
-void hppa_extract_return_value (struct type *type, char *regbuf, char *valbuf);
-#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  hppa_extract_return_value (TYPE, REGBUF, VALBUF);
-#endif
-
- /* elz: decide whether the function returning a value of type type
-    will put it on the stack or in the registers.
-    The pa calling convention says that:
-    register 28 (called ret0 by gdb) contains any ASCII char,
-    and any non_floating point value up to 32-bits.
-    reg 28 and 29 contain non-floating point up tp 64 bits and larger
-    than 32 bits. (higer order word in reg 28).
-    fr4: floating point up to 64 bits
-    sr1: space identifier (32-bit)
-    stack: any lager than 64-bit, with the address in r28
-  */
-#if !GDB_MULTI_ARCH
-extern use_struct_convention_fn hppa_use_struct_convention;
-#define USE_STRUCT_CONVENTION(gcc_p,type) hppa_use_struct_convention (gcc_p,type)
-#endif
-
-/* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  */
-
-#if !GDB_MULTI_ARCH
-extern void hppa_store_return_value (struct type *type, char *valbuf);
-#define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
-  hppa_store_return_value (TYPE, VALBUF);
-#endif
-
-#if !GDB_MULTI_ARCH
-extern CORE_ADDR hppa_extract_struct_value_address (char *regbuf);
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  hppa_extract_struct_value_address (REGBUF)
 #endif
 
 /* elz: Return a large value, which is stored on the stack at addr.
@@ -378,88 +183,9 @@ struct value *hppa_value_returned_from_stack (register struct type *valtype,
 #define VALUE_RETURNED_FROM_STACK(valtype,addr) \
   hppa_value_returned_from_stack (valtype, addr)
 
-#if !GDB_MULTI_ARCH
-extern int hppa_cannot_store_register (int regnum);
-#define CANNOT_STORE_REGISTER(regno) hppa_cannot_store_register (regno)
-#endif
-
-#if !GDB_MULTI_ARCH
-#define DEPRECATED_INIT_EXTRA_FRAME_INFO(fromleaf, frame) hppa_init_extra_frame_info (fromleaf, frame)
-extern void hppa_init_extra_frame_info (int, struct frame_info *);
-#endif
-
-/* Describe the pointer in each stack frame to the previous stack frame
-   (its caller).  */
-
-/* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
-   the frame's chain-pointer.  */
-
-/* In the case of the PA-RISC, the frame's nominal address
-   is the address of a 4-byte word containing the calling frame's
-   address (previous FP).  */
-
-#if !GDB_MULTI_ARCH
-#define DEPRECATED_FRAME_CHAIN(thisframe) hppa_frame_chain (thisframe)
-extern CORE_ADDR hppa_frame_chain (struct frame_info *);
-#endif
-
-#if !GDB_MULTI_ARCH
-extern int hppa_frame_chain_valid (CORE_ADDR, struct frame_info *);
-#define DEPRECATED_FRAME_CHAIN_VALID(chain, thisframe) hppa_frame_chain_valid (chain, thisframe)
-#endif
-
-/* Define other aspects of the stack frame.  */
-
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
-#if !GDB_MULTI_ARCH
-#define FRAMELESS_FUNCTION_INVOCATION(FI) \
-  (hppa_frameless_function_invocation (FI))
-extern int hppa_frameless_function_invocation (struct frame_info *);
-#endif
-
-#if !GDB_MULTI_ARCH
-extern CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
-#define DEPRECATED_FRAME_SAVED_PC(FRAME) hppa_frame_saved_pc (FRAME)
-#endif
-
-#if !GDB_MULTI_ARCH
-extern CORE_ADDR hppa_frame_args_address (struct frame_info *fi);
-#define FRAME_ARGS_ADDRESS(fi) hppa_frame_args_address (fi)
-#endif
-
-#if !GDB_MULTI_ARCH
-extern CORE_ADDR hppa_frame_locals_address (struct frame_info *fi);
-#define FRAME_LOCALS_ADDRESS(fi) hppa_frame_locals_address (fi)
-#endif
-
-#if !GDB_MULTI_ARCH
-extern int hppa_frame_num_args (struct frame_info *frame);
-#define FRAME_NUM_ARGS(fi) hppa_frame_num_args (fi)
-#endif
-
-#if !GDB_MULTI_ARCH
-#define FRAME_ARGS_SKIP 0
-#endif
-
 extern void hppa_frame_init_saved_regs (struct frame_info *);
 #define DEPRECATED_FRAME_INIT_SAVED_REGS(FI) \
   hppa_frame_init_saved_regs (FI)
-
-/* Things needed for making the inferior call functions.  */
-
-#if !GDB_MULTI_ARCH
-#define DEPRECATED_PUSH_DUMMY_FRAME hppa_push_dummy_frame ()
-extern void hppa_push_dummy_frame (void);
-#endif
-
-/* Discard from the stack the innermost frame, 
-   restoring all saved registers.  */
-#if !GDB_MULTI_ARCH
-#define DEPRECATED_POP_FRAME  hppa_pop_frame ()
-extern void hppa_pop_frame (void);
-#endif
 
 #define INSTRUCTION_SIZE 4
 
@@ -546,9 +272,6 @@ extern void hppa_pop_frame (void);
                     0xe6c00002, 0xe4202000, 0x6bdf3fd1, 0x00010004,\
                     0x00151820, 0xe6c00002, 0x08000240, 0x08000240}
 
-#if !GDB_MULTI_ARCH
-#define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 28)
-#endif
 #define REG_PARM_STACK_SPACE 16
 
 //OBSOLETE #else /* defined PA_LEVEL_0 */
@@ -588,10 +311,6 @@ extern void hppa_pop_frame (void);
 //OBSOLETE 
 //OBSOLETE #endif /* defined PA_LEVEL_0 */
 
-#if !GDB_MULTI_ARCH
-#define CALL_DUMMY_START_OFFSET 0
-#endif
-
 /* If we've reached a trap instruction within the call dummy, then
    we'll consider that to mean that we've reached the call dummy's
    end after its successful completion. */
@@ -616,24 +335,7 @@ extern void hppa_pop_frame (void);
 extern CORE_ADDR hppa_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
 		                      struct value **, struct type *, int);
 
-#if !GDB_MULTI_ARCH
-#define DEPRECATED_PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-  (hppa_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
-extern CORE_ADDR hppa_push_arguments (int, struct value **, CORE_ADDR, int,
-				      CORE_ADDR);
-#endif
-
-
-#if !GDB_MULTI_ARCH
-extern CORE_ADDR hppa_smash_text_address (CORE_ADDR addr);
-#define SMASH_TEXT_ADDRESS(addr) hppa_smash_text_address (addr)
-#endif
-
 #define	GDB_TARGET_IS_HPPA
-
-#if !GDB_MULTI_ARCH
-#define BELIEVE_PCC_PROMOTION 1
-#endif
 
 /*
  * Unwind table and descriptor.
@@ -753,27 +455,6 @@ typedef struct obj_private_struct
     CORE_ADDR dp;
   }
 obj_private_data_t;
-
-#if 0
-extern void target_write_pc (CORE_ADDR, int);
-extern CORE_ADDR target_read_pc (int);
-extern CORE_ADDR skip_trampoline_code (CORE_ADDR, char *);
-#endif
-
-#if !GDB_MULTI_ARCH
-#define TARGET_READ_PC(pid) hppa_target_read_pc (pid)
-extern CORE_ADDR hppa_target_read_pc (ptid_t);
-#endif
-
-#if !GDB_MULTI_ARCH
-#define TARGET_WRITE_PC(v,pid) hppa_target_write_pc (v,pid)
-extern void hppa_target_write_pc (CORE_ADDR, ptid_t);
-#endif
-
-#if !GDB_MULTI_ARCH
-#define TARGET_READ_FP() hppa_target_read_fp ()
-extern CORE_ADDR hppa_target_read_fp (void);
-#endif
 
 /* For a number of horrible reasons we may have to adjust the location
    of variables on the stack.  Ugh.  */

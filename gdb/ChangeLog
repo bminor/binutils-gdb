@@ -1,5 +1,12 @@
 2003-04-21  J. Brobecker  <brobecker@gnat.com>
 
+	Ongoing multi-arch conversion effort for HP/UX:
+	* config/pa/tm-hppa.h: Move all macro that are no longer
+	defined now that GDB_MULTI_ARCH is now set to 1 from here...
+	* config/pa/tm-hppa64.h: ... to here (hppa64 is not multiarch'ed yet).
+
+2003-04-21  J. Brobecker  <brobecker@gnat.com>
+
 	* config/pa/tm-hppa.h: Obsolete a section that was only used
 	for hppa-pro.
 
