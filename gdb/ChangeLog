@@ -1,3 +1,10 @@
+Fri Sep  3 08:57:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dcache.c: Cast return value from xmalloc.
+
+	* remote.c: Move setting of immediate_quit from remote_open to
+	remote_start_dummy and set it back to zero when done.
+
 Thu Sep  2 00:07:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* m88k-tdep.c: Remove a bunch of unused #includes.

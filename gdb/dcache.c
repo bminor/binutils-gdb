@@ -204,10 +204,11 @@ dcache_init (reading, writing)
   register struct dcache_block *db;
   DCACHE *dcache;
 
-  dcache = xmalloc(sizeof(*dcache));
+  dcache = (DCACHE *) xmalloc (sizeof (*dcache));
   dcache->read_memory = reading;
   dcache->write_memory = writing;
-  dcache->the_cache = xmalloc(sizeof(*dcache->the_cache) * DCACHE_SIZE);
+  dcache->the_cache = (struct dcache_block *)
+    xmalloc (sizeof (*dcache->the_cache) * DCACHE_SIZE);
 
   dcache->dcache_free.next = dcache->dcache_free.last = &dcache->dcache_free;
   dcache->dcache_valid.next = dcache->dcache_valid.last = &dcache->dcache_valid;

@@ -238,11 +238,14 @@ static int
 remote_start_remote (dummy)
      char *dummy;
 {
+  immediate_quit = 1;		/* Allow user to interrupt it */
+
   /* Ack any packet which the remote side has already sent.  */
   /* I'm not sure this \r is needed; we don't use it any other time we
      send an ack.  */
   SERIAL_WRITE (remote_desc, "+\r", 2);
   putpkt ("?");			/* initiate a query from remote machine */
+  immediate_quit = 0;
 
   start_remote ();		/* Initialize gdb process mechanisms */
   return 1;
@@ -295,8 +298,9 @@ device is attached to the remote system (e.g. /dev/ttya).");
     }
   push_target (&remote_ops);	/* Switch to using remote target now */
 
-  /* Start the remote connection; if error (0), discard this target. */
-  immediate_quit++;		/* Allow user to interrupt it */
+  /* Start the remote connection; if error (0), discard this target.
+     In particular, if the user quits, be sure to discard it
+     (we'd be in an inconsistent state otherwise).  */
   if (!catch_errors (remote_start_remote, (char *)0, 
 	"Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
     pop_target();
