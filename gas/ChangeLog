@@ -5,6 +5,10 @@ Tue Dec 10 12:23:19 1996  Jeffrey A Law  (law@cygnus.com)
 
 Tue Dec 10 11:37:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (append_insn): Make sure there is enough room
+	in a frag after a mips16 instruction to switch it with a jump
+	instruction.
+
 	* config/tc-mips.c (mips16_extended_frag): Give an error for an
 	attempt to use a non absolute symbol in an extending frag.
 
