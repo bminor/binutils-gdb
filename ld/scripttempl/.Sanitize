@@ -15,13 +15,6 @@
 
 Do-first:
 
-d30v_files="elfd30v.sc"
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	keep_these_too="${d30v_files} ${keep_these_too}"
-else
-	lose_these_too="${d30v_files} ${lose_these_too}"
-fi
-
 tic80_files="tic80coff.sc"
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	keep_these_too="${tic80_files} ${keep_these_too}"
@@ -55,6 +48,7 @@ delta68.sc
 ebmon29k.sc
 elf.sc
 elfd10v.sc
+elfd30v.sc
 elfppc.sc
 go32coff.sc
 h8300.sc

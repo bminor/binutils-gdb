@@ -177,11 +177,9 @@ ALL_EMULATIONS = \
 	earmpe.o \
 	ecoff_sparc.o \
 	ed10velf.o \
-	$(start-sanitize-d30v) \
 	ed30velf.o \
 	ed30v_e.o \
 	ed30v_o.o \
-	$(end-sanitize-d30v) \
 	edelta68.o \
 	eebmon29k.o \
 	eelf32_sparc.o \
@@ -212,6 +210,9 @@ ALL_EMULATIONS = \
 	ehp3hpux.o \
 	ehppaelf.o \
 	ei386aout.o \
+	$(start-sanitize-beos) \
+	ei386beos.o \
+	$(end-sanitize-beos) \
 	ei386bsd.o \
 	ei386coff.o \
 	ei386go32.o \
@@ -605,10 +606,10 @@ uninstall-man1:
 	done
 install-man: $(MANS)
 	@$(NORMAL_INSTALL)
-	$(MAKE) install-man1
+	$(MAKE) $(AM_MAKEFLAGS) install-man1
 uninstall-man:
 	@$(NORMAL_UNINSTALL)
-	$(MAKE) uninstall-man1
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-man1
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -626,7 +627,7 @@ check-recursive installcheck-recursive info-recursive dvi-recursive:
 	list='$(SUBDIRS)'; for subdir in $$list; do \
 	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $$target) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$target) \
 	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
 	done && test -z "$$fail"
 
@@ -639,12 +640,12 @@ maintainer-clean-recursive:
 	for subdir in $$rev; do \
 	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $$target) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$target) \
 	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
 	done && test -z "$$fail"
 tags-recursive:
 	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  (cd $$subdir && $(MAKE) tags); \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
 	done
 
 tags: TAGS
@@ -689,12 +690,12 @@ distcheck: dist
 	dc_install_base=`cd $(distdir)/=inst && pwd`; \
 	cd $(distdir)/=build \
 	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
-	  && $(MAKE) \
-	  && $(MAKE) dvi \
-	  && $(MAKE) check \
-	  && $(MAKE) install \
-	  && $(MAKE) installcheck \
-	  && $(MAKE) dist
+	  && $(MAKE) $(AM_MAKEFLAGS) \
+	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
+	  && $(MAKE) $(AM_MAKEFLAGS) check \
+	  && $(MAKE) $(AM_MAKEFLAGS) install \
+	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
+	  && $(MAKE) $(AM_MAKEFLAGS) dist
 	-rm -rf $(distdir)
 	@echo "========================"; \
 	echo "$(distdir).tar.gz is ready for distribution"; \
@@ -722,10 +723,10 @@ distdir: $(DISTFILES)
 	  || mkdir $(distdir)/$$subdir \
 	  || exit 1; \
 	  chmod 777 $(distdir)/$$subdir; \
-	  (cd $$subdir && $(MAKE) top_distdir=../$(distdir) distdir=../$(distdir)/$$subdir distdir) \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir=../$(distdir) distdir=../$(distdir)/$$subdir distdir) \
 	    || exit 1; \
 	done
-	$(MAKE) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-info
+	$(MAKE) $(AM_MAKEFLAGS) top_distdir="$(top_distdir)" distdir="$(distdir)" dist-info
 
 DEJATOOL = $(PACKAGE)
 
@@ -752,11 +753,11 @@ site.exp: Makefile
 info: $(INFO_DEPS) info-recursive
 dvi: $(DVIS) dvi-recursive
 check:
-	$(MAKE) check-recursive check-DEJAGNU
+	$(MAKE) $(AM_MAKEFLAGS) check-recursive check-DEJAGNU
 installcheck: installcheck-recursive
 install-info: install-info-am install-info-recursive
 all-recursive-am: config.h
-	$(MAKE) all-recursive
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 all-am: Makefile $(PROGRAMS) $(MANS) config.h
 
@@ -778,7 +779,7 @@ install: install-recursive install-exec-am install-data-am
 uninstall: uninstall-recursive uninstall-am
 
 install-strip:
-	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
 installdirs: installdirs-recursive
 	$(mkinstalldirs)  $(DESTDIR)$(mandir)/man1
 
@@ -905,7 +906,6 @@ ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
 ed10velf.c: $(srcdir)/emulparams/d10velf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd10v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d10velf "$(tdir_d10v)"
-start-sanitize-d30v:
 ed30velf.c: $(srcdir)/emulparams/d30velf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd30v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d30velf "$(tdir_d30v)"
@@ -915,7 +915,6 @@ ed30v_o.c: $(srcdir)/emulparams/d30v_o.sh \
 ed30v_e.c: $(srcdir)/emulparams/d30v_e.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd30v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d30v_e "$(tdir_d30v)"
-end-sanitize-d30v:
 edelta68.c: $(srcdir)/emulparams/delta68.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} delta68 "$(tdir_delta68)"
@@ -1017,6 +1016,11 @@ ehppaelf.c: $(srcdir)/emulparams/hppaelf.sh \
 ei386aout.c: $(srcdir)/emulparams/i386aout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386aout "$(tdir_i386aout)"
+# start-sanitize-beos
+ei386beos.c: $(srcdir)/emulparams/i386beos.sh \
+  $(srcdir)/emultempl/beos.em $(srcdir)/scripttempl/i386beos.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386beos "$(tdir_i386beos)"
+# end-sanitize-beos
 ei386bsd.c: $(srcdir)/emulparams/i386bsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386bsd "$(tdir_i386bsd)"

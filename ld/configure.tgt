@@ -14,11 +14,9 @@ case "${targ}" in
 arm-*-pe)		targ_emul=armpe ;;
 arc-*-elf*)		targ_emul=arcelf ;;
 d10v-*-*)		targ_emul=d10velf ;;
-# start-sanitize-d30v
 d30v-*-*ext*)		targ_emul=d30v_e; targ_extra_emuls="d30velf d30v_o" ;;
 d30v-*-*onchip*)	targ_emul=d30v_o; targ_extra_emuls="d30velf d30v_e" ;;
 d30v-*-*)		targ_emul=d30velf; targ_extra_emuls="d30v_e d30v_o" ;;
-# end-sanitize-d30v
 sparc64-*-aout*)	targ_emul=sparcaout ;;
 sparc64-*-elf*)		targ_emul=elf64_sparc ;;
 sparc-sun-sunos4*) 	targ_emul=sun4 ;;
@@ -103,6 +101,10 @@ i[3456]86-*-winnt*)	targ_emul=i386pe ;;
 i[3456]86-*-pe)		targ_emul=i386pe ;;
 i[3456]86-*-cygwin32*)	targ_emul=i386pe ;;
 i[3456]86-*-mingw32*)	targ_emul=i386pe ;;
+# start-sanitize-beos
+i[3456]86-*-beospe*)    targ_emul=i386beos ;;
+i[3456]86-*-beos*)	targ_emul=elf_i386 ;;
+# end-sanitize-beos
 m8*-*-*)		targ_emul=m88kbcs ;;
 a29k-*-udi)		targ_emul=sa29200 ;;
 a29k-*-ebmon)		targ_emul=ebmon29k ;;

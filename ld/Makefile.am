@@ -106,11 +106,9 @@ ALL_EMULATIONS = \
 	earmpe.o \
 	ecoff_sparc.o \
 	ed10velf.o \
-	$(start-sanitize-d30v) \
 	ed30velf.o \
 	ed30v_e.o \
 	ed30v_o.o \
-	$(end-sanitize-d30v) \
 	edelta68.o \
 	eebmon29k.o \
 	eelf32_sparc.o \
@@ -141,6 +139,9 @@ ALL_EMULATIONS = \
 	ehp3hpux.o \
 	ehppaelf.o \
 	ei386aout.o \
+	$(start-sanitize-beos) \
+	ei386beos.o \
+	$(end-sanitize-beos) \
 	ei386bsd.o \
 	ei386coff.o \
 	ei386go32.o \
@@ -288,7 +289,6 @@ ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
 ed10velf.c: $(srcdir)/emulparams/d10velf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd10v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d10velf "$(tdir_d10v)"
-start-sanitize-d30v:
 ed30velf.c: $(srcdir)/emulparams/d30velf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd30v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d30velf "$(tdir_d30v)"
@@ -298,7 +298,6 @@ ed30v_o.c: $(srcdir)/emulparams/d30v_o.sh \
 ed30v_e.c: $(srcdir)/emulparams/d30v_e.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd30v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d30v_e "$(tdir_d30v)"
-end-sanitize-d30v:
 edelta68.c: $(srcdir)/emulparams/delta68.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} delta68 "$(tdir_delta68)"
@@ -400,6 +399,11 @@ ehppaelf.c: $(srcdir)/emulparams/hppaelf.sh \
 ei386aout.c: $(srcdir)/emulparams/i386aout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386aout "$(tdir_i386aout)"
+# start-sanitize-beos
+ei386beos.c: $(srcdir)/emulparams/i386beos.sh \
+  $(srcdir)/emultempl/beos.em $(srcdir)/scripttempl/i386beos.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386beos "$(tdir_i386beos)"
+# end-sanitize-beos
 ei386bsd.c: $(srcdir)/emulparams/i386bsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386bsd "$(tdir_i386bsd)"

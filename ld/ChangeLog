@@ -214,9 +214,7 @@ Mon May 18 13:14:43 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* scripttempl/elf.sc: Put *crtbegin.o before other .ctors and
 	.dtors.
 	* scripttempl/elfd10v.sc: Likewise.
-start-sanitize-d30v
 	* scripttempl/elfd30v.sc: Likewise.
-end-sanitize-d30v
 	* scripttempl/elfppc.sc: Likewise.
 
 Fri May 15 00:22:35 1998  Ian Lance Taylor  <ian@cygnus.com>
@@ -239,9 +237,7 @@ Fri May 15 00:22:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 	* mri.c (mri_draw_tree): Update calls to lang_add_wild.
 	* scripttempl/elf.sc: Sort .ctors.* and .dtors.* by section name.
 	* scripttempl/elfd10v.sc: Likewise.
-start-sanitize-d30v
 	* scripttempl/elfd30v.sc: Likewise.
-end-sanitize-d30v
 	* scripttempl/elfppc.sc: Likewise.
 
 Thu May 14 18:39:16 1998  Richard Henderson  <rth@cygnus.com>
@@ -488,14 +484,12 @@ Mon Mar  2 19:24:08 1998  Michael Meissner  <meissner@cygnus.com>
 	* ldlang.c (lang_size_sections): If the default memory region is
 	*default*, see if there is a memory region that could be used.
 
-start-sanitize-d30v
 Thu Feb 26 17:09:53 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* scripttempl/elfd30v.sc: Add support for .eit_v section and put
 	it at 0xfffff020.
 	* emulparams/d30v{elf,_o,_e}.sh: Ditto.
 
-end-sanitize-d30v
 Mon Feb 23 17:46:51 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/pe.em (sort_sections): Permit the wildcard to include
@@ -698,7 +692,6 @@ Fri Jan  2 20:15:37 1998  Michael Meissner  <meissner@cygnus.com>
 	(lang_set_flags): Update prototype to match new calling sequence.
 	(lang_memory_region_default): Add prototype.
 
-start-sanitize-d30v
 	* emulparams/d30v{_e,_o,elf}.sh ({TEXT,DATA,EMEM}_DEF_SECTION):
 	Define whether or not the region gets default sections, and if so,
 	what sections.
@@ -710,7 +703,6 @@ Thu Jan  1 22:58:04 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* scripttempl/elfd30v.sc (.eh_frame): Link into the data section.
 
-end-sanitize-d30v
 Thu Jan  1 18:04:51 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* scripttempl/h8300h.sc: Fix typo.
@@ -728,7 +720,6 @@ Wed Dec 17 12:14:11 1997  Ian Lance Taylor  <ian@cygnus.com>
 	multiple times on the same argument and confuse the getopt
 	internals.
 
-start-sanitize-d30v
 Thu Dec 11 09:00:15 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.tgt (d30v-elf-*): Rename d30velf_e to d30v_e and
@@ -738,7 +729,6 @@ Thu Dec 11 09:00:15 1997  Michael Meissner  <meissner@cygnus.com>
 	* emulparams/d30v_{o,e}: Rename from d30velf_{o,e}.
 	* emulparams/d30velf_{o,e}: Deleted.
 
-end-sanitize-d30v
 Wed Dec 10 17:40:08 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* scripttempl/armcoff.sc: Add glue sections (code taken from Arm
@@ -748,7 +738,6 @@ Wed Dec 10 17:40:08 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* emultempl/armcoff.em: New file, imported from Arm branch.
 
-start-sanitize-d30v
 Wed Dec 10 14:10:44 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* scripttempl/elfd30v.sc: Add .rel and .rela sections for all
@@ -756,7 +745,6 @@ Wed Dec 10 14:10:44 1997  Michael Meissner  <meissner@cygnus.com>
 	external memory sections for rodata.  Delete .string, .rodata1,
 	and .data1 sections.
 
-end-sanitize-d30v
 Tue Dec  9 15:28:17 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* Makefile.am: Add Oct 23 changes to Makefile.in here.
@@ -767,7 +755,6 @@ start-sanitize-tic80
 	* Makefile.{am,in}: (ALL_EMULATIONS): Add etic80coff.o.
 end-sanitize-tic80
 
-start-sanitize-d30v
 	* Makefile.{am,in}: (ALL_EMULATIONS): Add ed30velf{,_e,_o}.o.
 	(ed30velf_e.c): Like d30velf, except .text/.data/etc always go in
 	external memory.
@@ -800,7 +787,6 @@ start-sanitize-d30v
 	(.data{,1}/.strings/.rodata{,1}): Put in ${DATA_MEMORY} memory
 	region.
 	(.bss): Put in ${BSS_MEMORY} memory region.
-end-sanitize-d30v
 
 Tue Dec  2 10:14:47 1997  Nick Clifton  <nickc@cygnus.com>
 
@@ -813,7 +799,6 @@ Sat Nov 22 15:23:19 1997  Ian Lance Taylor  <ian@cygnus.com>
 	correctly.  Pass 0 rather than hex_mode to bfd_scan_vma.
 	* ldlex.h (hex_mode): Don't declare.
 
-start-sanitize-d30v
 Sun Nov 16 20:16:45 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* emulparams/d30velf.sh ({DATA,EMEM}_START_ADDR): Define as start
@@ -826,7 +811,6 @@ Sun Nov 16 20:16:45 1997  Michael Meissner  <meissner@cygnus.com>
 	to be 0x20008000, which is 1 byte beyond end of the internal data
 	region.
 
-end-sanitize-d30v
 Thu Nov 13 13:45:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.tgt (targ_extra_emuls): Make FreeBSD a i386bsd
@@ -951,14 +935,12 @@ Wed Sep 17 16:43:39 1997  Nick Clifton  <nickc@cygnus.com>
 	* scripttempl/v850.sc: Add call table data area
 
 end-sanitize-v850e
-start-sanitize-d30v
 Mon Sep 15 11:29:13 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	Merge change from Martin Hunt:
 
 	* scripttempl/elfd30v.sc: Put .rodata in the .text section.
 
-end-sanitize-d30v
 Tue Sep  9 07:49:56 1997  Fred Fish  <fnf@ninemoons.com>
 
 	* ldlang.c (lang_memory_region_lookup): Remove extraneous
@@ -1433,7 +1415,6 @@ Mon Feb 24 18:16:09 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* scripttempl/elf.sc: Add .gnu.version sections.
 	* ld.texinfo: Document symbol versioning.
 
-start-sanitize-d30v
 Fri Feb 21 17:37:51 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* Makefile.in (ed30velf.c): New target.
@@ -1441,7 +1422,6 @@ Fri Feb 21 17:37:51 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* emulparams/d30velf.sh: New file.
 	* scripttempl/elfd30v.sc: New file.
 
-end-sanitize-d30v
 Fri Feb 14 18:28:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo (Option Commands): Document the INCLUDE command.

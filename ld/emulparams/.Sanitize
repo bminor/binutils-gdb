@@ -15,13 +15,6 @@
 
 Do-first:
 
-d30v_files="d30velf.sh d30v_o.sh d30v_e.sh"
-if ( echo $* | grep keep\-d30v > /dev/null ) ; then
-	keep_these_too="${d30v_files} ${keep_these_too}"
-else
-	lose_these_too="${d30v_files} ${lose_these_too}"
-fi
-
 tic80_files="tic80coff.sh"
 if ( echo $* | grep keep\-tic80 > /dev/null ) ; then
 	keep_these_too="${tic80_files} ${keep_these_too}"
@@ -63,6 +56,9 @@ armcoff.sh
 armpe.sh
 coff_sparc.sh
 d10velf.sh
+d30v_e.sh
+d30v_o.sh
+d30velf.sh
 delta68.sh
 ebmon29k.sh
 elf32_sparc.sh
