@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: bfd 2.12.91\n"
 "POT-Creation-Date: 2002-07-23 15:55-0400\n"
-"PO-Revision-Date: 2002-09-07 21:55+0200\n"
+"PO-Revision-Date: 2002-09-14 23:25+0200\n"
 "Last-Translator: Keld Simonsen <keld@dkuug.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
 "MIME-Version: 1.0\n"
@@ -36,12 +36,12 @@ msgstr "%s: Fejlagtig relokaliseringstype importeret: %d"
 #: aoutx.h:1282 aoutx.h:1699
 #, c-format
 msgid "%s: can not represent section `%s' in a.out object file format"
-msgstr "%s: kan ikke representere sektionen \"%s\" i a.out-objektfilformat"
+msgstr "%s: kan ikke repræsentere sektionen \"%s\" i a.out-objektfilformat"
 
 #: aoutx.h:1669
 #, c-format
 msgid "%s: can not represent section for symbol `%s' in a.out object file format"
-msgstr "%s: kan ikke representere sektion for symbolet \"%s\" i a.out-objektfilformat"
+msgstr "%s: kan ikke repræsentere sektion for symbolet \"%s\" i a.out-objektfilformat"
 
 #: aoutx.h:1671
 msgid "*unknown*"
@@ -50,7 +50,7 @@ msgstr "*ukendt*"
 #: aoutx.h:3732
 #, c-format
 msgid "%s: relocateable link from %s to %s not supported"
-msgstr "%s: relokaliseringsbar lænke fra %s til %s understøttes inte"
+msgstr "%s: relokaliseringsbar lænke fra %s til %s understøttes ikke"
 
 #: archive.c:1826
 msgid "Warning: writing archive was slow: rewriting timestamp\n"
@@ -99,7 +99,7 @@ msgstr "Ingen symboler"
 
 #: bfd.c:282
 msgid "Archive has no index; run ranlib to add one"
-msgstr "Arkivet har intet index; kør ranlib for at tilføje ét"
+msgstr "Arkivet har intet index; kør ranlib til at tilføje ét"
 
 #: bfd.c:283
 msgid "No more archived files"
@@ -246,7 +246,7 @@ msgstr "FEJL: %s kompileret for APCS-%d, mens %s er kompileret for APCS-%d"
 #: coff-arm.c:2270 elf32-arm.h:2297
 #, c-format
 msgid "ERROR: %s passes floats in float registers, whereas %s passes them in integer registers"
-msgstr "FEJL: %s overfører flydende tal i flydende talsregister, mens %s overfører dem i heltalsregister"
+msgstr "FEJL: %s overfører flydende tal i flydendetalsregister, mens %s overfører dem i heltalsregister"
 
 #: coff-arm.c:2273 elf32-arm.h:2302
 #, c-format
@@ -381,7 +381,7 @@ msgstr "Ukendt TI COFF-mål-id \"0x%x\""
 #: coffcode.h:4365
 #, c-format
 msgid "%s: warning: illegal symbol index %ld in line numbers"
-msgstr "%s: advarsel: utilladt symbolindex %ld i linjenummer"
+msgstr "%s: advarsel: utilladt symbolindex %ld i linjenumre"
 
 #: coffcode.h:4379
 #, c-format
@@ -444,7 +444,7 @@ msgstr "Dwarf-fejl: Kan ikke finde sektionen .debug_abbrev."
 #: dwarf2.c:560
 #, c-format
 msgid "Dwarf Error: Abbrev offset (%lu) greater than or equal to .debug_abbrev size (%lu)."
-msgstr "Dwarf-fejl: Forkortningsafstanden (%lu) større end eller lig med størrelsen .debug_abbrev (%lu)."
+msgstr "Dwarf-fejl: Forkortelsesafstanden (%lu) større end eller lig med størrelsen .debug_abbrev (%lu)."
 
 #: dwarf2.c:757
 #, c-format
@@ -471,7 +471,7 @@ msgstr "Dwarf-fejl: vanskabt linjenummerssektion."
 #: dwarf2.c:1355 dwarf2.c:1566
 #, c-format
 msgid "Dwarf Error: Could not find abbrev number %u."
-msgstr "Dwarf-fejl: Kunne ikke finde forkortningsnumret %u."
+msgstr "Dwarf-fejl: Kunne ikke finde forkortelsesnumret %u."
 
 #: dwarf2.c:1527
 #, c-format
@@ -486,7 +486,7 @@ msgstr "Dwarf-fejl: fandt adressestørrelsen \"%u\", denne læser kan ikke håndter
 #: dwarf2.c:1557
 #, c-format
 msgid "Dwarf Error: Bad abbrev number: %u."
-msgstr "Dwarf-fejl: Fejlagtigt forkortningsnummer: %u."
+msgstr "Dwarf-fejl: Fejlagtigt forkortelsesnummer: %u."
 
 #: ecoff.c:1318
 #, c-format
@@ -518,7 +518,7 @@ msgid ""
 "      End+1 symbol: %-7ld   Type:  %s"
 msgstr ""
 "\n"
-"      Symbol slut+1: %-7ld  Typ:  %s"
+"      Symbol slut+1: %-7ld  Type:  %s"
 
 #: ecoff.c:1607
 #, c-format
@@ -1176,7 +1176,7 @@ msgstr "%s: GAS-fejl: uventet PTB-instruktion med R_SH_PT_16"
 #: elf32-sh64.c:593 elf64-sh64.c:1703
 #, c-format
 msgid "%s: error: unaligned relocation type %d at %08x reloc %08x\n"
-msgstr "%s: fejl: ojusteret relokaliseringstype %d på %08x relokalisering %08x\n"
+msgstr "%s: fejl: ujusteret relokaliseringstype %d på %08x relokalisering %08x\n"
 
 #: elf32-sh64.c:677
 #, c-format
@@ -1204,22 +1204,22 @@ msgid "%s: linking little endian files with big endian files"
 msgstr "%s: lænker little endian-filer med big endian-filer"
 
 #: elf32-v850.c:682
-#, c-format
+#, fuzzy, c-format
 msgid "Variable `%s' cannot occupy in multiple small data regions"
 msgstr "Variabel \"%s\" kan ikke befinde sig i flere små dataområder"
 
 #: elf32-v850.c:685
-#, c-format
+#, fuzzy, c-format
 msgid "Variable `%s' can only be in one of the small, zero, and tiny data regions"
 msgstr "Variabel \"%s\" kan kun være i et af de små, tomme og bittesmå dataområder"
 
 #: elf32-v850.c:688
-#, c-format
+#, fuzzy, c-format
 msgid "Variable `%s' cannot be in both small and zero data regions simultaneously"
 msgstr "Variabel \"%s\" kan ikke være i både små og tomme dataområder samtidigt"
 
 #: elf32-v850.c:691
-#, c-format
+#, fuzzy, c-format
 msgid "Variable `%s' cannot be in both small and tiny data regions simultaneously"
 msgstr "Variabel \"%s\" kan ikke være i både små og bittesmå dataområder samtidigt"
 
@@ -1361,7 +1361,7 @@ msgid ""
 "%s: Internal inconsistency error for value for\n"
 " linker-allocated global register: linked: 0x%lx%08lx != relaxed: 0x%lx%08lx\n"
 msgstr ""
-"%s: Intern inkkonsistensfejl for værdien for\n"
+"%s: Intern inkonsistensfejl for værdien for\n"
 " lænkerallokeret globalt register: lænket: 0x%lx%08lx != afslappet: 0x%lx%08lx\n"
 
 #: elf64-mmix.c:1386
@@ -1852,7 +1852,7 @@ msgstr "%s: Ingen kerne til at allokere sektionsnavn %s\n"
 #: mmo.c:536
 #, c-format
 msgid "%s: No core to allocate a symbol %d bytes long\n"
-msgstr "%s: Ingen kerne for at allokere et %d byte langt symbol\n"
+msgstr "%s: Ingen kerne til at allokere et %d byte langt symbol\n"
 
 #: mmo.c:1245
 #, c-format
@@ -1867,7 +1867,7 @@ msgstr "%s: bred tegnsekvens som ikke understøttes 0x%02X 0x%02X efter symbolnav
 #: mmo.c:1633
 #, c-format
 msgid "%s: invalid mmo file: unsupported lopcode `%d'\n"
-msgstr "%s: ugyldig mmo-fil: lopkod \"%d\" understøttes ikke\n"
+msgstr "%s: ugyldig mmo-fil: lopkode \"%d\" understøttes ikke\n"
 
 #: mmo.c:1643
 #, c-format
@@ -2051,7 +2051,7 @@ msgstr ""
 #: ppcboot.c:417
 #, c-format
 msgid "Entry offset        = 0x%.8lx (%ld)\n"
-msgstr "Startafstand        = 0x%.8lx (%ld)\n"
+msgstr "Startefstand        = 0x%.8lx (%ld)\n"
 
 #: ppcboot.c:418
 #, c-format
@@ -2429,7 +2429,7 @@ msgstr "%s: relokalisering giver overløb 1: 0x%lx > 0xffff"
 
 #: peigen.c:993 pepigen.c:993
 msgid "Export Directory [.edata (or where ever we found it)]"
-msgstr "Exportkatalog [.edata (eller hvor vi fandt det)]"
+msgstr "Eksportkatalog [.edata (eller hvor vi fandt det)]"
 
 #: peigen.c:994 pepigen.c:994
 msgid "Import Directory [parts of .idata]"
@@ -2555,7 +2555,7 @@ msgstr ""
 
 #: peigen.c:1192 pepigen.c:1192
 msgid "\tvma:  Hint/Ord Member-Name Bound-To\n"
-msgstr "\tvma: Tips/Ordn Medlemsnavn Bundet till\n"
+msgstr "\tvma: Tips/Ordn Medlemsnavn Bundet til\n"
 
 #: peigen.c:1217 pepigen.c:1217
 msgid ""
@@ -2580,7 +2580,7 @@ msgid ""
 "There is an export table in %s at 0x%lx\n"
 msgstr ""
 "\n"
-"Det findes en eksporttabel i %s ved 0x%lx\n"
+"Der findes en eksporttabel i %s ved 0x%lx\n"
 
 #: peigen.c:1393 pepigen.c:1393
 #, c-format
@@ -2694,7 +2694,7 @@ msgid ""
 "     \t\tAddress  Address  Handler  Data     Address    Mask\n"
 msgstr ""
 " vma:\t\tStart-    Slut-     EH-        EH-    Prologsluts-  Undtagelses-\n"
-"     \t\tadresse   adresse   håndterere data   adresse       maske\n"
+"     \t\tadresse   adresse   håndterer  data   adresse       maske\n"
 
 #: peigen.c:1624 pepigen.c:1624
 msgid " Register save millicode"

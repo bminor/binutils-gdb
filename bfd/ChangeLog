@@ -1,3 +1,7 @@
+2002-11-07  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Updated Danish translation.
+
 2002-11-07  Graeme Peterson  <gp@qnx.com>
 
 	* Makefile.am: Removed entries for elf32-i386qnx.c and
