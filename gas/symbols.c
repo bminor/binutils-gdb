@@ -354,6 +354,7 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
        */
       if (LOCAL_SYMBOL_CHECK (symbolP))
 	{
+#ifdef BFD_ASSEMBLER
 	  struct local_symbol *locsym = (struct local_symbol *) symbolP;
 
 	  if (locsym->lsy_section != undefined_section
@@ -368,6 +369,7 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 	  locsym->lsy_section = now_seg;
 	  local_symbol_set_frag (locsym, frag_now);
 	  locsym->lsy_offset = frag_now_fix ();
+#endif
 	}
       else if (!S_IS_DEFINED (symbolP) || S_IS_COMMON (symbolP))
 	{
@@ -615,8 +617,6 @@ symbol_find_base (name, strip_underscore)
      CONST char *name;
      int strip_underscore;
 {
-  struct local_symbol *locsym;
-
   if (strip_underscore && *name == '_')
     name++;
 
@@ -649,9 +649,15 @@ symbol_find_base (name, strip_underscore)
       *copy = '\0';
     }
 
-  locsym = (struct local_symbol *) hash_find (local_hash, name);
-  if (locsym != NULL)
-    return (symbolS *) locsym;
+#ifdef BFD_ASSEMBLER
+  {
+    struct local_symbol *locsym;
+
+    locsym = (struct local_symbol *) hash_find (local_hash, name);
+    if (locsym != NULL)
+      return (symbolS *) locsym;
+  }
+#endif
 
   return ((symbolS *) hash_find (sy_hash, name));
 }
@@ -844,6 +850,7 @@ resolve_symbol_value (symp, finalize)
   valueT final_val;
   segT final_seg;
 
+#ifdef BFD_ASSEMBLER
   if (LOCAL_SYMBOL_CHECK (symp))
     {
       struct local_symbol *locsym = (struct local_symbol *) symp;
@@ -862,6 +869,7 @@ resolve_symbol_value (symp, finalize)
 
       return final_val;
     }
+#endif
 
   if (symp->sy_resolved)
     {
@@ -1566,8 +1574,10 @@ valueT
 S_GET_VALUE (s)
      symbolS *s;
 {
+#ifdef BFD_ASSEMBLER
   if (LOCAL_SYMBOL_CHECK (s))
     return ((struct local_symbol *) s)->lsy_offset;
+#endif
 
   if (!s->sy_resolved && s->sy_value.X_op != O_constant)
     resolve_symbol_value (s, 1);
@@ -1598,11 +1608,13 @@ S_SET_VALUE (s, val)
      symbolS *s;
      valueT val;
 {
+#ifdef BFD_ASSEMBLER
   if (LOCAL_SYMBOL_CHECK (s))
     {
       ((struct local_symbol *) s)->lsy_offset = val;
       return;
     }
+#endif
 
   s->sy_value.X_op = O_constant;
   s->sy_value.X_add_number = (offsetT) val;
@@ -1909,11 +1921,13 @@ symbol_set_frag (s, f)
      symbolS *s;
      fragS *f;
 {
+#ifdef BFD_ASSEMBLER
   if (LOCAL_SYMBOL_CHECK (s))
     {
       local_symbol_set_frag ((struct local_symbol *) s, f);
       return;
     }
+#endif
   s->sy_frag = f;
 }
 
@@ -1923,8 +1937,10 @@ fragS *
 symbol_get_frag (s)
      symbolS *s;
 {
+#ifdef BFD_ASSEMBLER
   if (LOCAL_SYMBOL_CHECK (s))
     return local_symbol_get_frag ((struct local_symbol *) s);
+#endif
   return s->sy_frag;
 }
 
@@ -2066,11 +2082,13 @@ void
 symbol_mark_resolved (s)
      symbolS *s;
 {
+#ifdef BFD_ASSEMBLER
   if (LOCAL_SYMBOL_CHECK (s))
     {
       local_symbol_mark_resolved ((struct local_symbol *) s);
       return;
     }
+#endif
   s->sy_resolved = 1;
 }
 
@@ -2080,8 +2098,10 @@ int
 symbol_resolved_p (s)
      symbolS *s;
 {
+#ifdef BFD_ASSEMBLER
   if (LOCAL_SYMBOL_CHECK (s))
     return local_symbol_resolved_p ((struct local_symbol *) s);
+#endif
   return s->sy_resolved;
 }
 
@@ -2260,6 +2280,7 @@ print_symbol_value_1 (file, sym)
 
   if (LOCAL_SYMBOL_CHECK (sym))
     {
+#ifdef BFD_ASSEMBLER
       struct local_symbol *locsym = (struct local_symbol *) sym;
       if (local_symbol_get_frag (locsym) != &zero_address_frag
 	  && local_symbol_get_frag (locsym) != NULL)
@@ -2267,6 +2288,7 @@ print_symbol_value_1 (file, sym)
       if (local_symbol_resolved_p (locsym))
 	fprintf (file, " resolved");
       fprintf (file, " local");
+#endif
     }
   else
     {
@@ -2305,10 +2327,12 @@ print_symbol_value_1 (file, sym)
     {
       indent_level++;
       fprintf (file, "\n%*s<", indent_level * 4, "");
+#ifdef BFD_ASSEMBLER
       if (LOCAL_SYMBOL_CHECK (sym))
 	fprintf (file, "constant %lx",
 		 (long) ((struct local_symbol *) sym)->lsy_offset);
       else
+#endif
 	print_expr_1 (file, &sym->sy_value);
       fprintf (file, ">");
       indent_level--;

@@ -90,6 +90,8 @@ struct symbol
 #endif
 };
 
+#ifdef BFD_ASSEMBLER
+
 /* A pointer in the symbol may point to either a complete symbol
    (struct symbol above) or to a local symbol (struct local_symbol
    defined here).  The symbol code can detect the case by examining
@@ -136,6 +138,8 @@ struct local_symbol
 #define local_symbol_set_frag(l, f) ((l)->u.lsy_frag = (f))
 #define local_symbol_get_real_symbol(l) ((l)->u.lsy_sym)
 #define local_symbol_set_real_symbol(l, s) ((l)->u.lsy_sym = (s))
+
+#endif /* BFD_ASSEMBLER */
 
 #endif /* __struc_symbol_h__ */
 

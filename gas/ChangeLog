@@ -1,3 +1,20 @@
+1999-06-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-i386.c (i386_immediate): Remove unused label
+	seg_unimplemented.
+
+	* struc-symbol.h: Put local_symbol code in ifdef BFD_ASSEMBLER.
+	* symbols.c: Likewise.
+	* config/obj-aout.c (obj_crawl_symbol_chain): Refer directly to
+	sy_next field when taking address, rather than symbol_next.
+
+	* dwarf2dbg.c: Change bfd_vma to addressT and bfd_signed_vma to
+	offsetT.
+	(out_set_addr): Don't use BYTES_PER_ADDRESS.  Instead, get the
+	value from the output file architecture.
+	(dwarf2_gen_line_info): Ifdef BFD_ASSEMBLER specific code.
+	* dwarf2dbg.h: Change bfd_vma to addressT.
+
 1999-06-11  Ian Lance Taylor  <ian@zembu.com>
 
 	* dwarf2dbg.h: Use PARAMS in function declarations.
