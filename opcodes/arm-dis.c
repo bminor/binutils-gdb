@@ -741,11 +741,8 @@ print_insn_big_arm (pc, info)
     else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
      {
        es = *(elf_symbol_type **)(info->symbols);
-       is_thumb = (es->internal_elf_sym.st_other == C_THUMBEXT
-                   || es->internal_elf_sym.st_other == C_THUMBSTAT
-                   || es->internal_elf_sym.st_other == C_THUMBLABEL
-                   || es->internal_elf_sym.st_other == C_THUMBEXTFUNC
-                   || es->internal_elf_sym.st_other == C_THUMBSTATFUNC);
+       is_thumb = ELF_ST_TYPE (es->internal_elf_sym.st_info) ==
+	 STT_ARM_TFUNC;
       }
    }
 
@@ -826,14 +823,10 @@ print_insn_little_arm (pc, info)
     else if (bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour)
      {
        es = *(elf_symbol_type **)(info->symbols);
-       is_thumb = (es->internal_elf_sym.st_other == C_THUMBEXT
-                   || es->internal_elf_sym.st_other == C_THUMBSTAT
-                   || es->internal_elf_sym.st_other == C_THUMBLABEL
-                   || es->internal_elf_sym.st_other == C_THUMBEXTFUNC
-                   || es->internal_elf_sym.st_other == C_THUMBSTATFUNC);
+       is_thumb = ELF_ST_TYPE (es->internal_elf_sym.st_info) ==
+	 STT_ARM_TFUNC;
       }
    }
-  
 
   info->bytes_per_chunk = 4;
   info->display_endian = BFD_ENDIAN_LITTLE;

@@ -1,3 +1,10 @@
+Fri Sep  4 19:42:59 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-dis.c (print_insn_big_arm): Detect Thumb symbols in elf
+	object files.
+	(print_insn_little_arm): Detect Thumb symbols in elf object
+	files. 
+
 Sat Aug 29 22:24:09 1998  Richard Henderson  <rth@cygnus.com>
 
 	* alpha-dis.c (print_insn_alpha): Use the machine type to
