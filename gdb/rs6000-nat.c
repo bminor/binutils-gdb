@@ -206,9 +206,12 @@ fetch_register (int regno)
 
   /* Bogus register number. */
   else if (regno > LAST_UISA_SP_REGNUM)
-    fprintf_unfiltered (gdb_stderr,
-			"gdb error: register no %d not implemented.\n",
-			regno);
+    {
+      if (regno >= NUM_REGS)
+	fprintf_unfiltered (gdb_stderr,
+			    "gdb error: register no %d not implemented.\n",
+			    regno);
+    }
 
   /* Fixed-point registers. */
   else
