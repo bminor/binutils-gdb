@@ -632,8 +632,7 @@ write_relocs (abfd, sec, xxx)
 	  continue;
 	}
       data = fixp->fx_frag->fr_literal + fixp->fx_where;
-      /* @@ Assumes max size of reloc is 4. */
-      if (fixp->fx_where + 4
+      if (fixp->fx_where + fixp->fx_size
 	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
 	abort ();
       /* Pass bogus address so that when bfd_perform_relocation adds
@@ -686,7 +685,7 @@ write_relocs (abfd, sec, xxx)
           assert(i <= n);
 	}
       data = fixp->fx_frag->fr_literal + fixp->fx_where;
-      if (fixp->fx_where + 4
+      if (fixp->fx_where + fixp->fx_size
 	  > fixp->fx_frag->fr_fix + fixp->fx_frag->fr_offset)
 	abort ();
       for (j = 0; reloc[j]; j++)
@@ -2011,7 +2010,7 @@ fixup_segment (fixP, this_segment_type)
 	      }			/* if there's an add_symbol */
 	  }			/* if pcrel */
 
-	if (!fixP->fx_bit_fixP)
+	if (!fixP->fx_bit_fixP && size > 0)
 	  {
 	    valueT mask = 0;
 	    /* set all bits to one */

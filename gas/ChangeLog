@@ -1,5 +1,13 @@
 Mon Nov  1 21:37:04 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* Add support for marker type relocations.  These mark areas
+	of interest to the linker.  ENTRY/EXIT relocations for SOM are
+	an example of marker relocations.
+	* write.c (write_relocs): Instead of assuming size of a relocation
+	is 4 bytes, pick up the size from relocation itself.
+	(fixup_segment): Do not complain that a value is too small for 
+	marker relocations.
+
 	* struc-symbol.h: Add new "sy_used" field to the symbol structure.
 	* expr.c (operand): Set sy_used for any symbol used as an operand.
 	(expr): Likewise for any symbol used in an expression.
