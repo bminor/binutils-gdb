@@ -264,7 +264,7 @@ unsigned int fix_tag : 1;
 unsigned int fix_end : 1;
 
         /* Should the x_csect.x_scnlen field be renumbered.
-          Created by coff_slurp_symbol_table. */
+          Created by coff_pointerize_aux. */
 unsigned int fix_scnlen : 1;
 
         /* The container for the symbol structure as read and translated
@@ -406,6 +406,13 @@ typedef struct
        combined_entry_type *symbol,
        unsigned int indaux,
        combined_entry_type *aux));
+ boolean (*_bfd_coff_print_aux) PARAMS ((
+       bfd *abfd,
+       FILE *file,
+       combined_entry_type *table_base,
+       combined_entry_type *symbol,
+       combined_entry_type *aux,
+       unsigned int indaux));
  void (*_bfd_coff_reloc16_extra_cases) PARAMS ((
        bfd     *abfd,
        struct bfd_link_info *link_info,
@@ -525,6 +532,10 @@ typedef struct
 
 #define bfd_coff_symname_in_debug(abfd, sym)\
         ((coff_backend_info (abfd)->_bfd_coff_symname_in_debug) (abfd, sym))
+
+#define bfd_coff_print_aux(abfd, file, base, symbol, aux, indaux)\
+        ((coff_backend_info (abfd)->_bfd_coff_print_aux)\
+         (abfd, file, base, symbol, aux, indaux))
 
 #define bfd_coff_reloc16_extra_cases(abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)\
         ((coff_backend_info (abfd)->_bfd_coff_reloc16_extra_cases)\

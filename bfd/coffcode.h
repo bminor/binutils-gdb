@@ -265,7 +265,7 @@ CODE_FRAGMENT
 .unsigned int fix_end : 1;
 .
 .       {* Should the x_csect.x_scnlen field be renumbered.
-.          Created by coff_slurp_symbol_table. *}
+.          Created by coff_pointerize_aux. *}
 .unsigned int fix_scnlen : 1;
 .
 .       {* The container for the symbol structure as read and translated
@@ -655,6 +655,13 @@ dependent COFF routines:
 .       combined_entry_type *symbol,
 .       unsigned int indaux,
 .       combined_entry_type *aux));
+. boolean (*_bfd_coff_print_aux) PARAMS ((
+.       bfd *abfd,
+.       FILE *file,
+.       combined_entry_type *table_base,
+.       combined_entry_type *symbol,
+.       combined_entry_type *aux,
+.       unsigned int indaux));
 . void (*_bfd_coff_reloc16_extra_cases) PARAMS ((
 .       bfd     *abfd,
 .       struct bfd_link_info *link_info,
@@ -774,6 +781,10 @@ dependent COFF routines:
 .
 .#define bfd_coff_symname_in_debug(abfd, sym)\
 .        ((coff_backend_info (abfd)->_bfd_coff_symname_in_debug) (abfd, sym))
+.
+.#define bfd_coff_print_aux(abfd, file, base, symbol, aux, indaux)\
+.        ((coff_backend_info (abfd)->_bfd_coff_print_aux)\
+.         (abfd, file, base, symbol, aux, indaux))
 .
 .#define bfd_coff_reloc16_extra_cases(abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)\
 .        ((coff_backend_info (abfd)->_bfd_coff_reloc16_extra_cases)\
@@ -1177,8 +1188,7 @@ symname_in_debug_hook (abfd, sym)
 
 #ifdef RS6000COFF_C
 
-/* We don't want to pointerize the csect auxent of a C_EXT or C_HIDEXT
-   symbol.  */
+/* Handle the csect auxent of a C_EXT or C_HIDEXT symbol.  */
 
 static boolean coff_pointerize_aux_hook
   PARAMS ((bfd *, combined_entry_type *, combined_entry_type *,
@@ -1195,11 +1205,24 @@ coff_pointerize_aux_hook (abfd, table_base, symbol, indaux, aux)
 {
   int class = symbol->u.syment.n_sclass;
 
-  /* Return true if we don't want to pointerize this aux entry, which
-     is the case for the last aux entry for a C_EXT or C_HIDEXT
-     symbol.  */
-  return ((class == C_EXT || class == C_HIDEXT)
-	  && indaux + 1 == symbol->u.syment.n_numaux);
+  if ((class == C_EXT || class == C_HIDEXT)
+      && indaux + 1 == symbol->u.syment.n_numaux)
+    {
+      if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) == XTY_LD)
+	{
+	  aux->u.auxent.x_csect.x_scnlen.p =
+	    table_base + aux->u.auxent.x_csect.x_scnlen.l;
+	  aux->fix_scnlen = 1;
+	}
+
+      /* Return true to indicate that the caller should not do any
+         further work on this auxent.  */
+      return true;
+    }
+
+  /* Return false to indicate that this auxent should be handled by
+     the caller.  */
+  return false;
 }
 
 #else
@@ -1231,6 +1254,59 @@ coff_pointerize_aux_hook (abfd, table_base, symbol, indaux, aux)
 
 #endif /* ! I960 */
 #endif /* ! RS6000COFF_C */
+
+/* Print an aux entry.  This returns true if it has printed it.  */
+
+static boolean coff_print_aux
+  PARAMS ((bfd *, FILE *, combined_entry_type *, combined_entry_type *,
+	   combined_entry_type *, unsigned int));
+
+static boolean
+coff_print_aux (abfd, file, table_base, symbol, aux, indaux)
+     bfd *abfd;
+     FILE *file;
+     combined_entry_type *table_base;
+     combined_entry_type *symbol;
+     combined_entry_type *aux;
+     unsigned int indaux;
+{
+#ifdef RS6000COFF_C
+  if ((symbol->u.syment.n_sclass == C_EXT
+       || symbol->u.syment.n_sclass == C_HIDEXT)
+      && indaux + 1 == symbol->u.syment.n_numaux)
+    {
+      /* This is a csect entry.  */
+      fprintf (file, "AUX ");
+      if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) != XTY_LD)
+	{
+	  BFD_ASSERT (! aux->fix_scnlen);
+	  fprintf (file, "val %5ld", aux->u.auxent.x_csect.x_scnlen.l);
+	}
+      else
+	{
+	  fprintf (file, "indx ");
+	  if (! aux->fix_scnlen)
+	    fprintf (file, "%4ld", aux->u.auxent.x_csect.x_scnlen.l);
+	  else
+	    fprintf (file, "%4ld",
+		     (long) (aux->u.auxent.x_csect.x_scnlen.p - table_base));
+	}
+      fprintf (file,
+	       " prmhsh %ld snhsh %u typ %d algn %d clss %u stb %ld snstb %u",
+	       aux->u.auxent.x_csect.x_parmhash,
+	       (unsigned int) aux->u.auxent.x_csect.x_snhash,
+	       SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp),
+	       SMTYP_ALIGN (aux->u.auxent.x_csect.x_smtyp),
+	       (unsigned int) aux->u.auxent.x_csect.x_smclas,
+	       aux->u.auxent.x_csect.x_stab,
+	       (unsigned int) aux->u.auxent.x_csect.x_snstab);
+      return true;
+    }
+#endif
+
+  /* Return false to indicate that no special action was taken.  */
+  return false;
+}
 
 /*
 SUBSUBSECTION
@@ -2400,22 +2476,6 @@ coff_slurp_symbol_table (abfd)
 	      /* A C_HIDEXT symbol is not global.  */
 	      if (src->u.syment.n_sclass == C_HIDEXT)
 		dst->symbol.flags = BSF_LOCAL;
-
-	      /* If this symbol has a csect aux of type LD, the scnlen
-		 field is actually the index of the containing csect
-		 symbol.  We need to pointerize it.  */
-	      if (src->u.syment.n_numaux > 0)
-		{
-		  combined_entry_type *aux;
-
-		  aux = src + src->u.syment.n_numaux - 1;
-		  if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) == XTY_LD)
-		    {
-		      aux->u.auxent.x_csect.x_scnlen.p =
-			native_symbols + aux->u.auxent.x_csect.x_scnlen.l;
-		      aux->fix_scnlen = 1;
-		    }
-		}
 #endif
 
 	      break;
@@ -2908,7 +2968,7 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
   coff_swap_reloc_in, coff_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
   coff_slurp_symbol_table, symname_in_debug_hook, coff_pointerize_aux_hook,
-  coff_reloc16_extra_cases, coff_reloc16_estimate,
+  coff_print_aux, coff_reloc16_extra_cases, coff_reloc16_estimate,
   coff_sym_is_global, coff_compute_section_file_positions,
   coff_start_final_link, coff_relocate_section, coff_rtype_to_howto,
   coff_adjust_symndx

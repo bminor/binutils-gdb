@@ -1725,6 +1725,10 @@ coff_print_symbol (abfd, filep, symbol, how)
 		tagndx = auxp->u.auxent.x_sym.x_tagndx.l;
 
 	      fprintf (file, "\n");
+
+	      if (bfd_coff_print_aux (abfd, file, root, combined, auxp, aux))
+		continue;
+
 	      switch (combined->u.syment.n_sclass)
 		{
 		case C_FILE:
