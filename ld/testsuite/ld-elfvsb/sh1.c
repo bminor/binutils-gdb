@@ -247,7 +247,7 @@ visibility_funptr ()
 
 #if defined (HIDDEN_UNDEF_TEST) || defined (PROTECTED_UNDEF_TEST)
 #ifdef WEAK_TEST
-#pragma weak visibility_var;
+#pragma weak visibility_var
 #endif
 extern int visibility_var;
 #else
