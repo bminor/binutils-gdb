@@ -1,3 +1,40 @@
+Thu Sep  4 09:27:54 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-utils.c (sim_elapsed_time_get): Never return zero.
+
+	* sim-core.c (sim_core_detach): New function.
+	(sim_core_map_detach): New function. Perform the actual detach.
+	(sim_core_init): Move initialization code from here.
+	(sim_core_install): To here.
+	(sim_core_uninstall): And here.
+
+	* sim-module.c: Add memopt module.
+
+	* sim-base.h (STATE_MEMOPT, STATE_MEMOPT_P): Add memopt to
+ 	simulator base type.
+
+	* Make-common.in (sim_main_headers): Add sim-memopt.h
+	(sim-memopt.o): New target.
+
+	* sim-core.c (sim_core_install): Add core_options to the option
+ 	table.
+
+	* sim-watch.c (watch_options): Make --delete-watch a synonym for
+ 	--watch-delete.
+
+	* sim-config.h (WITH_MODULO_MEMORY): Define as 0.  Update
+ 	comments.
+
+	* sim-core.h (struct _sim_core_mapping): Change nr_bytes to type
+ 	address_word, add mask member.
+	
+	* sim-core.h, sim-core.c (sim_core_attach): Make nr_bytes of type
+ 	address_word, allow for 64bit targets in 32bit host. Add modulo
+ 	argument.
+	(sim_core_map_attach): Ditto.
+	(new_sim_core_mapping): Ditto.
+	(sim_core_translate): Mask address when modulo memory.
+
 Wed Sep  3 17:32:54 1997  Doug Evans  <dje@seba.cygnus.com>
 
 	* sim-hload.c (sim_load): Add assert for SIM_MAGIC_NUMBER.

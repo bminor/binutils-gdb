@@ -1,3 +1,14 @@
+Thu Sep  4 10:48:57 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-calls.c (sim_open): Use sim_do_command to add memory, only
+ 	add memory if none already present.
+	(sim_open): Move init of registers from here.
+	(sim_create_inferior): To here. Init modules.
+
+	* Makefile.in (SIM_OBJS): Add sim-memopt.o module.
+
+	* sim-calls.c (sim_open): Add zero modulo arg to sim_core_attach.
+
 Mon Sep  1 11:06:30 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-calls.c (sim_open): Use sim_state_alloc

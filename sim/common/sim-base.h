@@ -77,6 +77,7 @@ typedef struct _sim_cpu sim_cpu;
 #include "sim-io.h"
 #include "sim-engine.h"
 #include "sim-watch.h"
+#include "sim-memopt.h"
 
 
 /* Global pointer to current state while sim_resume is running.
@@ -198,6 +199,11 @@ typedef struct {
   /* core memory bus */
 #define STATE_CORE(sd) (&(sd)->base.core)
   sim_core core;
+
+  /* memory-options for managing the core */
+#define STATE_MEMOPT(sd) ((sd)->base.memopt)
+#define STATE_MEMOPT_P(sd) (STATE_MEMOPT (sd) != NULL)
+  sim_memopt *memopt;
 
   /* event handler */
 #define STATE_EVENTS(sd) (&(sd)->base.events)

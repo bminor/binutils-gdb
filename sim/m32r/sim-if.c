@@ -81,7 +81,7 @@ sim_open (kind, callback, abfd, argv)
 
   /* FIXME:wip */
   sim_core_attach (sd, NULL, attach_raw_memory, access_read_write_exec,
-		   0, 0, M32R_DEFAULT_MEM_SIZE, NULL, NULL);
+		   0, 0, M32R_DEFAULT_MEM_SIZE, 0, NULL, NULL);
 
   /* Only needed for profiling, but the structure member is small.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)

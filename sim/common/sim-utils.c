@@ -193,13 +193,13 @@ sim_elapsed_time_get ()
 #ifdef HAVE_GETRUSAGE
   struct rusage mytime;
   if (getrusage (RUSAGE_SELF, &mytime) == 0)
-    return (SIM_ELAPSED_TIME) (((double) mytime.ru_utime.tv_sec * 1000) + (((double) mytime.ru_utime.tv_usec + 500) / 1000));
-  return 0;
+    return 1 + (SIM_ELAPSED_TIME) (((double) mytime.ru_utime.tv_sec * 1000) + (((double) mytime.ru_utime.tv_usec + 500) / 1000));
+  return 1;
 #else
 #ifdef HAVE_TIME
-  return (SIM_ELAPSED_TIME) time ((time_t) 0);
+  return 1 + (SIM_ELAPSED_TIME) time ((time_t) 0);
 #else
-  return 0;
+  return 1;
 #endif
 #endif
 }

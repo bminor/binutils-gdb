@@ -39,8 +39,12 @@ EXTERN_SIM_CORE\
 sim_core_install (SIM_DESC sd)
 {
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* establish the other handlers */
   sim_module_add_uninstall_fn (sd, sim_core_uninstall);
   sim_module_add_init_fn (sd, sim_core_init);
+
+  /* establish any initial data structures - none */
   return SIM_RC_OK;
 }
 
@@ -51,18 +55,10 @@ STATIC_SIM_CORE\
 (void)
 sim_core_uninstall (SIM_DESC sd)
 {
-  /* FIXME: free buffers, etc. */
-}
-
-
-STATIC_SIM_CORE\
-(SIM_RC)
-sim_core_init (SIM_DESC sd)
-{
   sim_core *core = STATE_CORE(sd);
   sim_core_maps map;
+  /* blow away any mappings */
   for (map = 0; map < nr_sim_core_maps; map++) {
-    /* blow away old mappings */
     sim_core_mapping *curr = core->common.map[map].first;
     while (curr != NULL) {
       sim_core_mapping *tbd = curr;
@@ -75,20 +71,14 @@ sim_core_init (SIM_DESC sd)
     }
     core->common.map[map].first = NULL;
   }
-  core->byte_xor = 0;
-  /* Just copy this map to each of the processor specific data structures.
-     FIXME - later this will be replaced by true processor specific
-     maps. */
-  {
-    int i;
-    for (i = 0; i < MAX_NR_PROCESSORS; i++)
-      {
-	int j;
-	CPU_CORE (STATE_CPU (sd, i))->common = STATE_CORE (sd)->common;
-	for (j = 0; j < WITH_XOR_ENDIAN; j++)
-	  CPU_CORE (STATE_CPU (sd, i))->xor [j] = 0;
-      }
-  }
+}
+
+
+STATIC_SIM_CORE\
+(SIM_RC)
+sim_core_init (SIM_DESC sd)
+{
+  /* Nothing to do */
   return SIM_RC_OK;
 }
 
@@ -143,14 +133,15 @@ sim_core_map_to_str (sim_core_maps map)
 
 STATIC_SIM_CORE\
 (sim_core_mapping *)
-new_sim_core_mapping(SIM_DESC sd,
-		     attach_type attach,
-		     int space,
-		     address_word addr,
-		     unsigned nr_bytes,
-		     device *device,
-		     void *buffer,
-		     int free_buffer)
+new_sim_core_mapping (SIM_DESC sd,
+		      attach_type attach,
+		      int space,
+		      address_word addr,
+		      address_word nr_bytes,
+		      unsigned modulo,
+		      device *device,
+		      void *buffer,
+		      int free_buffer)
 {
   sim_core_mapping *new_mapping = ZALLOC(sim_core_mapping);
   /* common */
@@ -159,16 +150,22 @@ new_sim_core_mapping(SIM_DESC sd,
   new_mapping->base = addr;
   new_mapping->nr_bytes = nr_bytes;
   new_mapping->bound = addr + (nr_bytes - 1);
-  if (attach == attach_raw_memory) {
-    new_mapping->buffer = buffer;
-    new_mapping->free_buffer = free_buffer;
-  }
-  else if (attach >= attach_callback) {
-    new_mapping->device = device;
-  }
+  if (modulo == 0)
+    new_mapping->mask = (unsigned) 0 - 1;
+  else
+    new_mapping->mask = modulo - 1;
+  if (attach == attach_raw_memory)
+    {
+      new_mapping->buffer = buffer;
+      new_mapping->free_buffer = free_buffer;
+    }
+  else if (attach >= attach_callback)
+    {
+      new_mapping->device = device;
+    }
   else {
     sim_io_error (sd, "new_sim_core_mapping - internal error - unknown attach type %d\n",
-		 attach);
+		  attach);
   }
   return new_mapping;
 }
@@ -176,32 +173,36 @@ new_sim_core_mapping(SIM_DESC sd,
 
 STATIC_SIM_CORE\
 (void)
-sim_core_map_attach(SIM_DESC sd,
-		    sim_core_map *access_map,
-		    attach_type attach,
-		    int space,
-		    address_word addr,
-		    unsigned nr_bytes, /* host limited */
-		    device *client, /*callback/default*/
-		    void *buffer, /*raw_memory*/
-		    int free_buffer) /*raw_memory*/
+sim_core_map_attach (SIM_DESC sd,
+		     sim_core_map *access_map,
+		     attach_type attach,
+		     int space,
+		     address_word addr,
+		     address_word nr_bytes,
+		     unsigned modulo,
+		     device *client, /*callback/default*/
+		     void *buffer, /*raw_memory*/
+		     int free_buffer) /*raw_memory*/
 {
   /* find the insertion point for this additional mapping and then
      insert */
   sim_core_mapping *next_mapping;
   sim_core_mapping **last_mapping;
 
-  SIM_ASSERT((attach >= attach_callback && client != NULL && buffer == NULL && !free_buffer)
-	 || (attach == attach_raw_memory && client == NULL && buffer != NULL));
+  SIM_ASSERT ((attach >= attach_callback)
+	      <= (client != NULL && buffer == NULL && !free_buffer));
+  SIM_ASSERT ((attach == attach_raw_memory)
+	      <= (client == NULL && buffer != NULL));
 
   /* actually do occasionally get a zero size map */
-  if (nr_bytes == 0) {
+  if (nr_bytes == 0)
+    {
 #if (WITH_DEVICES)
-    device_error(client, "called on sim_core_map_attach with size zero");
+      device_error(client, "called on sim_core_map_attach with size zero");
 #else
-    sim_io_error (sd, "called on sim_core_map_attach with size zero");
+      sim_io_error (sd, "called on sim_core_map_attach with size zero");
 #endif
-  }
+    }
 
   /* find the insertion point (between last/next) */
   next_mapping = access_map->first;
@@ -209,14 +210,15 @@ sim_core_map_attach(SIM_DESC sd,
   while(next_mapping != NULL
 	&& (next_mapping->level < (int) attach
 	    || (next_mapping->level == (int) attach
-		&& next_mapping->bound < addr))) {
-    /* provided levels are the same */
-    /* assert: next_mapping->base > all bases before next_mapping */
-    /* assert: next_mapping->bound >= all bounds before next_mapping */
-    last_mapping = &next_mapping->next;
-    next_mapping = next_mapping->next;
-  }
-
+		&& next_mapping->bound < addr)))
+    {
+      /* provided levels are the same */
+      /* assert: next_mapping->base > all bases before next_mapping */
+      /* assert: next_mapping->bound >= all bounds before next_mapping */
+      last_mapping = &next_mapping->next;
+      next_mapping = next_mapping->next;
+    }
+  
   /* check insertion point correct */
   SIM_ASSERT (next_mapping == NULL || next_mapping->level >= (int) attach);
   if (next_mapping != NULL && next_mapping->level == (int) attach
@@ -248,7 +250,7 @@ sim_core_map_attach(SIM_DESC sd,
   /* create/insert the new mapping */
   *last_mapping = new_sim_core_mapping(sd,
 				       attach,
-				       space, addr, nr_bytes,
+				       space, addr, nr_bytes, modulo,
 				       client, buffer, free_buffer);
   (*last_mapping)->next = next_mapping;
 }
@@ -256,15 +258,16 @@ sim_core_map_attach(SIM_DESC sd,
 
 EXTERN_SIM_CORE\
 (void)
-sim_core_attach(SIM_DESC sd,
-		sim_cpu *cpu,
-		attach_type attach,
-		access_type access,
-		int space,
-		address_word addr,
-		unsigned nr_bytes, /* host limited */
-		device *client,
-		void *optional_buffer)
+sim_core_attach (SIM_DESC sd,
+		 sim_cpu *cpu,
+		 attach_type attach,
+		 access_type access,
+		 int space,
+		 address_word addr,
+		 address_word nr_bytes,
+		 unsigned modulo,
+		 device *client,
+		 void *optional_buffer)
 {
   sim_core *memory = STATE_CORE(sd);
   sim_core_maps map;
@@ -276,75 +279,166 @@ sim_core_attach(SIM_DESC sd,
     sim_io_error (sd, "sim_core_map_attach - processor specific memory map not yet supported");
 
   if ((access & access_read_write_exec) == 0
-      || (access & ~access_read_write_exec) != 0) {
+      || (access & ~access_read_write_exec) != 0)
+    {
 #if (WITH_DEVICES)
-    device_error(client, "invalid access for core attach");
+      device_error(client, "invalid access for core attach");
 #else
-    sim_io_error (sd, "invalid access for core attach");
+      sim_io_error (sd, "invalid access for core attach");
 #endif
-  }
-  /* verify the attach type */
-  if (attach == attach_raw_memory) {
-    if (optional_buffer == NULL) {
-      buffer = zalloc(nr_bytes);
-      buffer_freed = 0;
     }
-    else {
-      buffer = optional_buffer;
+
+  /* verify the attach type */
+  if (attach == attach_raw_memory)
+    {
+      if (WITH_MODULO_MEMORY && modulo != 0)
+	{
+	  unsigned mask = modulo - 1;
+	  if (mask < 7) /* 8 is minimum modulo */
+	    mask = 0;
+	  while (mask > 1) /* no zero bits */
+	    if ((mask & 1) == 0)
+	      mask = 0;
+	  if (mask == 0)
+	    {
+#if (WITH_DEVICES)
+	      device_error (client, "sim_core_attach - internal error - modulo not power of two");
+#else
+	      sim_io_error (sd, "sim_core_attach - internal error - modulo not power of two");
+#endif
+	    }
+	}
+      else if (WITH_MODULO_MEMORY && modulo != 0)
+	{
+#if (WITH_DEVICES)
+	  device_error (client, "sim_core_attach - internal error - modulo memory disabled");
+#else
+	  sim_io_error (sd, "sim_core_attach - internal error - modulo memory disabled");
+#endif
+	}
+      if (optional_buffer == NULL)
+	{
+	  buffer = zalloc (modulo == 0 ? nr_bytes : modulo);
+	  buffer_freed = 0;
+	}
+      else
+	{
+	  buffer = optional_buffer;
+	  buffer_freed = 1;
+	}
+    }
+  else if (attach >= attach_callback)
+    {
+      buffer = NULL;
       buffer_freed = 1;
     }
-  }
-  else if (attach >= attach_callback) {
-    buffer = NULL;
-    buffer_freed = 1;
-  }
-  else {
+  else
+    {
 #if (WITH_DEVICES)
-    device_error(client, "sim_core_attach - conflicting buffer and attach arguments");
+      device_error (client, "sim_core_attach - internal error - conflicting buffer and attach arguments");
 #else
-    sim_io_error (sd, "sim_core_attach - conflicting buffer and attach arguments");
+      sim_io_error (sd, "sim_core_attach - internal error - conflicting buffer and attach arguments");
 #endif
-    buffer = NULL;
-    buffer_freed = 1;
-  }
+      buffer = NULL;
+      buffer_freed = 1;
+    }
+
   /* attach the region to all applicable access maps */
   for (map = 0; 
        map < nr_sim_core_maps;
-       map++) {
-    switch (map) {
-    case sim_core_read_map:
-      if (access & access_read)
-	sim_core_map_attach(sd, &memory->common.map[map],
-			    attach,
-			    space, addr, nr_bytes,
-			    client, buffer, !buffer_freed);
-      buffer_freed ++;
-      break;
-    case sim_core_write_map:
-      if (access & access_write)
-	sim_core_map_attach(sd, &memory->common.map[map],
-			attach,
-			space, addr, nr_bytes,
-			client, buffer, !buffer_freed);
-      buffer_freed ++;
-      break;
-    case sim_core_execute_map:
-      if (access & access_exec)
-	sim_core_map_attach(sd, &memory->common.map[map],
-			attach,
-			space, addr, nr_bytes,
-			client, buffer, !buffer_freed);
-      buffer_freed ++;
-      break;
-    case nr_sim_core_maps:
-      sim_io_error (sd, "sim_core_attach - internal error - bad switch");
-      break;
+       map++)
+    {
+      switch (map)
+	{
+	case sim_core_read_map:
+	  if (access & access_read)
+	    sim_core_map_attach (sd, &memory->common.map[map],
+				 attach,
+				 space, addr, nr_bytes, modulo,
+				 client, buffer, !buffer_freed);
+	  buffer_freed ++;
+	  break;
+	case sim_core_write_map:
+	  if (access & access_write)
+	    sim_core_map_attach (sd, &memory->common.map[map],
+				 attach,
+				 space, addr, nr_bytes, modulo,
+				 client, buffer, !buffer_freed);
+	  buffer_freed ++;
+	  break;
+	case sim_core_execute_map:
+	  if (access & access_exec)
+	    sim_core_map_attach (sd, &memory->common.map[map],
+				 attach,
+				 space, addr, nr_bytes, modulo,
+				 client, buffer, !buffer_freed);
+	  buffer_freed ++;
+	  break;
+	case nr_sim_core_maps:
+	  sim_io_error (sd, "sim_core_attach - internal error - bad switch");
+	  break;
+	}
     }
-  }
-
+  
   /* Just copy this map to each of the processor specific data structures.
      FIXME - later this will be replaced by true processor specific
      maps. */
+  {
+    int i;
+    for (i = 0; i < MAX_NR_PROCESSORS; i++)
+      {
+	CPU_CORE (STATE_CPU (sd, i))->common = STATE_CORE (sd)->common;
+      }
+  }
+}
+
+
+/* Remove any memory reference related to this address */
+STATIC_INLINE_SIM_CORE\
+(void)
+sim_core_map_detach (SIM_DESC sd,
+		     sim_core_map *access_map,
+		     attach_type attach,
+		     int space,
+		     address_word addr)
+{
+  sim_core_mapping **entry;
+  for (entry = &access_map->first;
+       (*entry) != NULL;
+       entry = &(*entry)->next)
+    {
+      if ((*entry)->base == addr
+	  && (*entry)->level == attach
+	  && (*entry)->space == space)
+	{
+	  sim_core_mapping *dead = (*entry);
+	  (*entry) = dead->next;
+	  if (dead->free_buffer)
+	    zfree (dead->buffer);
+	  zfree (dead);
+	  return;
+	}
+    }
+}
+
+EXTERN_SIM_CORE\
+(void)
+sim_core_detach (SIM_DESC sd,
+		 sim_cpu *cpu,
+		 attach_type attach,
+		 int address_space,
+		 address_word addr)
+{
+  sim_core *memory = STATE_CORE (sd);
+  sim_core_maps map;
+  for (map = 0; map < nr_sim_core_maps; map++)
+    {
+      sim_core_map_detach (sd, &memory->common.map[map],
+			   attach, address_space, addr);
+    }
+  /* Just copy this update to each of the processor specific data
+     structures.  FIXME - later this will be replaced by true
+     processor specific maps. */
   {
     int i;
     for (i = 0; i < MAX_NR_PROCESSORS; i++)
@@ -391,7 +485,12 @@ STATIC_INLINE_SIM_CORE\
 sim_core_translate (sim_core_mapping *mapping,
 		    address_word addr)
 {
-  return (void *)(((char *)mapping->buffer) + addr - mapping->base);
+  if (WITH_MODULO_MEMORY)
+    return (void *)((unsigned8 *) mapping->buffer
+		    + ((addr - mapping->base) & mapping->mask));
+  else
+    return (void *)((unsigned8 *) mapping->buffer
+		    + addr - mapping->base);
 }
 
 

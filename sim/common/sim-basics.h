@@ -52,32 +52,6 @@
 #endif
 
 
-
-/* Memory management with an allocator that clears memory before use. */
-
-void *zalloc (unsigned long size);
-
-#define ZALLOC(TYPE) (TYPE*)zalloc(sizeof (TYPE))
-
-void zfree(void*);
-
-
-/* Turn VALUE into a string with commas.  */
-char *sim_add_commas (char *, int, unsigned long);
-
-
-/* Utilities for elapsed time reporting.  */
-
-/* Opaque type, known only inside sim_elapsed_time_foo fns.  */
-typedef unsigned long SIM_ELAPSED_TIME;
-
-/* Get reference point for future call to sim_time_elapsed.  */
-SIM_ELAPSED_TIME sim_elapsed_time_get (void);
-
-/* Elapsed time in milliseconds since START.  */
-unsigned long sim_elapsed_time_since (SIM_ELAPSED_TIME start);
-
-
 /* Global types that code manipulates */
 
 typedef struct _device device;
@@ -97,13 +71,20 @@ typedef enum _access_type {
 
 
 /* Address attachement types */
-typedef enum _attach_type {
+typedef enum _attach_type
+{
   attach_invalid,
   attach_raw_memory,
   attach_callback,
-  /* ... */
+  /* attach_callback + 1, attach_callback + 2, ... */
 } attach_type;
 
+
+/* Memory transfer types */
+typedef enum _transfer_type {
+  read_transfer,
+  write_transfer,
+} transfer_type;
 
 
 /* Basic definitions - ordered so that nothing calls what comes after
@@ -123,6 +104,8 @@ typedef enum _attach_type {
 #include "sim-types.h"
 #include "sim-bits.h"
 #include "sim-endian.h"
+
+#include "sim-utils.h"
 
 /* Note: Only the simpler interfaces are defined here.  More heavy
    weight objects, such as core and events, are defined in the more

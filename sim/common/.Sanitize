@@ -71,6 +71,8 @@ sim-inline.h
 sim-io.c
 sim-io.h
 sim-load.c
+sim-memopt.c
+sim-memopt.h
 sim-model.c
 sim-model.h
 sim-module.c

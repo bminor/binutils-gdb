@@ -69,13 +69,15 @@ static SIM_RC
 schedule_watchpoint (SIM_DESC sd,
 		     watchpoint_type type,
 		     unsigned long arg,
+		     int is_within,
 		     int is_command)
 {
   sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
   sim_watch_point *point = &watch->points[type];
   if (point->event != NULL)
-    delete_watchpoint (sd, type);
+    sim_events_deschedule (sd, point->event);
   point->arg = arg;
+  point->is_within = is_within;
   if (point->action == invalid_watchpoint_action)
     point->action = break_watchpoint_action;
   if (is_command)
@@ -84,6 +86,7 @@ schedule_watchpoint (SIM_DESC sd,
       case pc_watchpoint:
 	point->event = sim_events_watch_sim (sd, watch->pc, watch->sizeof_pc,
 					     0/* host-endian */,
+					     point->is_within,
 					     point->arg, point->arg, /* PC == arg? */
 					     handle_watchpoint,
 					     point);
@@ -125,7 +128,7 @@ handle_watchpoint (SIM_DESC sd, void *data)
 
     case n_interrupt_watchpoint_action:
       /* First reschedule this event */
-      schedule_watchpoint (sd, type, point->arg, 1/*is-command*/);
+      schedule_watchpoint (sd, type, point->arg, point->is_within, 1/*is-command*/);
       /* FALL-THROUGH */
 
     case interrupt_watchpoint_action:
@@ -133,8 +136,8 @@ handle_watchpoint (SIM_DESC sd, void *data)
       break;
 
     default:
-	  sim_engine_abort (sd, NULL, NULL_CIA,
-			    "handle_watchpoint - internal error - bad switch");
+      sim_engine_abort (sd, NULL, NULL_CIA,
+			"handle_watchpoint - internal error - bad switch");
 
     }
 }
@@ -145,11 +148,11 @@ action_watchpoint (SIM_DESC sd, watchpoint_type type, const char *arg)
 {
   sim_watchpoints *watch = STATE_WATCHPOINTS (sd);
   sim_watch_point *point = &watch->points[type];
-  if (strcmp (arg, "break") == NULL)
+  if (strcmp (arg, "break") == 0)
     {
       point->action = break_watchpoint_action;
     }
-  else if (strcmp (arg, "int") == NULL)
+  else if (strcmp (arg, "int") == 0)
     {
       if (watch->interrupt_handler == NULL)
 	{
@@ -181,9 +184,12 @@ static const OPTION watch_options[] =
   { {"watch-delete", required_argument, NULL, OPTION_WATCH_DELETE },
       '\0', "all|pc|cycles|clock", "Delete a watchpoint",
       watch_option_handler },
+  { {"delete-watch", required_argument, NULL, OPTION_WATCH_DELETE },
+      '\0', "all|pc|cycles|clock", NULL,
+      watch_option_handler },
 
   { {"watch-pc", required_argument, NULL, OPTION_WATCH_PC },
-      '\0', "VALUE", "Watch the PC (break)",
+      '\0', "[!] VALUE", "Watch the PC (break)",
       watch_option_handler },
   { {"watch-clock", required_argument, NULL, OPTION_WATCH_CLOCK },
       '\0', "TIME-IN-MS", "Watch the clock (break)",
@@ -244,19 +250,24 @@ watch_option_handler (sd, opt, arg, is_command)
 	  sim_io_eprintf (sd, "PC watchpoints are not supported for this simulator\n");
 	  return SIM_RC_FAIL;
 	}
-      return schedule_watchpoint (sd, pc_watchpoint, strtoul (arg, NULL, 0), is_command);
+      if (arg[0] == '!')
+	return schedule_watchpoint (sd, pc_watchpoint, strtoul (arg + 1, NULL, 0),
+				    0 /* !is_within */, is_command);
+      else
+	return schedule_watchpoint (sd, pc_watchpoint, strtoul (arg, NULL, 0),
+				    1 /* is_within */, is_command);
 
     case OPTION_WATCH_CLOCK:
-      return schedule_watchpoint (sd, clock_watchpoint, strtoul (arg, NULL, 0), is_command);
+      return schedule_watchpoint (sd, clock_watchpoint, strtoul (arg, NULL, 0), 0, is_command);
 
     case OPTION_WATCH_CYCLES:
-      return schedule_watchpoint (sd, cycles_watchpoint, strtoul (arg, NULL, 0), is_command);
+      return schedule_watchpoint (sd, cycles_watchpoint, strtoul (arg, NULL, 0), 0, is_command);
 
     case OPTION_ACTION_PC:
-      return action_watchpoint (sd, cycles_watchpoint, arg);
+      return action_watchpoint (sd, pc_watchpoint, arg);
 
     case OPTION_ACTION_CLOCK:
-      return action_watchpoint (sd, cycles_watchpoint, arg);
+      return action_watchpoint (sd, clock_watchpoint, arg);
 
     case OPTION_ACTION_CYCLES:
       return action_watchpoint (sd, cycles_watchpoint, arg);
@@ -279,7 +290,10 @@ sim_watchpoint_init (SIM_DESC sd)
   for (type = 0; type < nr_watchpoint_types; type++)
     {
       if (watch->points[type].action != invalid_watchpoint_action)
-	schedule_watchpoint (sd, type, watch->points[type].arg, 1/*is-command*/);
+	schedule_watchpoint (sd, type,
+			     watch->points[type].arg,
+			     watch->points[type].is_within,
+			     1 /*is-command*/);
     }
   return SIM_RC_OK;
 }

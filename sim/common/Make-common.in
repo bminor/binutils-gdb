@@ -176,6 +176,7 @@ sim_main_headers = \
 	$(srcdir)/../common/sim-config.h \
 	$(srcdir)/../common/sim-base.h \
 	$(srcdir)/../common/sim-basics.h \
+	$(srcdir)/../common/sim-memopt.h \
 	$(srcdir)/../common/sim-model.h \
 	$(srcdir)/../common/sim-module.h \
 	$(srcdir)/../common/sim-trace.h \
@@ -257,6 +258,10 @@ sim-inline.c: $(srcdir)/../common/sim-inline.c
 sim-io.o: $(srcdir)/../common/sim-io.c $(sim_main_headers) $(sim-io_h) \
 	$(SIM_EXTRA_DEPS)
 	$(CC) -c $(srcdir)/../common/sim-io.c $(ALL_CFLAGS)
+
+sim-memopt.o: $(srcdir)/../common/sim-memopt.c $(sim_main_headers) \
+	  $(sim-io_h) $(SIM_EXTRA_DEPS)
+	$(CC) -c $(srcdir)/../common/sim-memopt.c $(ALL_CFLAGS)
 
 sim-module.o: $(srcdir)/../common/sim-module.c $(sim_main_headers) \
 	  $(sim-io_h) $(SIM_EXTRA_DEPS)

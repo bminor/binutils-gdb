@@ -92,28 +92,22 @@ sim_open (SIM_OPEN_KIND kind,
       return 0;
     }
 
-  /* Initialize the main processor */
-  memset (&STATE_CPU (sd, 0)->reg, 0, sizeof STATE_CPU (sd, 0)->reg);
-  memset (&STATE_CPU (sd, 0)->acc, 0, sizeof STATE_CPU (sd, 0)->acc);
-  memset (&STATE_CPU (sd, 0)->cr, 0, sizeof STATE_CPU (sd, 0)->cr);
-  STATE_CPU (sd, 0)->is_user_mode = 0;
-  memset (&STATE_CPU (sd, 0)->cia, 0, sizeof STATE_CPU (sd, 0)->cia);
-  CPU_STATE (STATE_CPU (sd, 0)) = sd;
-
 #define TIC80_MEM_START 0x2000000
 #define TIC80_MEM_SIZE 0x100000
 
-  /* external memory */
-  sim_core_attach(sd,
-		  NULL,
-		  attach_raw_memory,
-		  access_read_write_exec,
-		  0, TIC80_MEM_START, TIC80_MEM_SIZE, NULL, NULL);
-  sim_core_attach(sd,
-		  NULL,
-		  attach_raw_memory,
-		  access_read_write_exec,
-		  0, 0, TIC80_MEM_SIZE, NULL, NULL);
+  if (!STATE_MEMOPT_P (sd))
+    {
+      char *buf;
+      /* main memory */
+      asprintf (&buf, "memory region 0x%lx,0x%lx",
+		TIC80_MEM_START, TIC80_MEM_SIZE);
+      sim_do_command (sd, buf);
+      free (buf);
+      /* interrupt memory */
+      sim_do_command (sd, "memory region 0x1010000,0x1000");
+      /* some memory at zero */
+      sim_do_command (sd, "memory region 0,0x100000");
+    }
 
  /* FIXME: for now */
   return sd;
@@ -206,6 +200,15 @@ sim_create_inferior (SIM_DESC sd,
 		     char **argv,
 		     char **envp)
 {
+  /* clear all registers */
+  memset (&STATE_CPU (sd, 0)->reg, 0, sizeof (STATE_CPU (sd, 0)->reg));
+  memset (&STATE_CPU (sd, 0)->acc, 0, sizeof (STATE_CPU (sd, 0)->acc));
+  memset (&STATE_CPU (sd, 0)->cr, 0, sizeof (STATE_CPU (sd, 0)->cr));
+  STATE_CPU (sd, 0)->is_user_mode = 0;
+  memset (&STATE_CPU (sd, 0)->cia, 0, sizeof (STATE_CPU (sd, 0)->cia));
+  /* initialize any modules */
+  sim_module_init (sd);
+  /* set the stack-pointer/program counter */
   if (abfd != NULL)
     STATE_CPU (sd, 0)->cia.ip = bfd_get_start_address (abfd);
   else

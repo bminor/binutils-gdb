@@ -19,6 +19,7 @@ SIM_OBJS = sim-endian.o sim-bits.o sim-config.o \
 	sim-io.o \
 	sim-utils.o \
 	sim-load.o \
+	sim-memopt.o \
 	sim-module.o \
 	sim-options.o \
 	sim-trace.o \

@@ -1,3 +1,7 @@
+Thu Sep  4 10:30:02 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-if.c (sim_open): Pass zero modulo arg to sim_core_attach.
+
 Wed Aug 27 18:13:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

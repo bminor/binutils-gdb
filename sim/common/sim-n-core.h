@@ -77,7 +77,7 @@ sim_core_read_aligned_N(sim_cpu *cpu,
   if (TRACE_P (cpu, TRACE_CORE_IDX))
     if (sizeof (unsigned_N) > 4)
       trace_printf (CPU_STATE (cpu), cpu,
-		    "sim-n-core.c:%d: read-%d %s:0x%08lx -> 0x%08lx%08lx\n",
+		    "sim-n-core.h:%d: read-%d %s:0x%08lx -> 0x%08lx%08lx\n",
 		    __LINE__,
 		    sizeof (unsigned_N),
 		    sim_core_map_to_str (map),
@@ -86,7 +86,7 @@ sim_core_read_aligned_N(sim_cpu *cpu,
 		    (unsigned long) val);
     else
       trace_printf (CPU_STATE (cpu), cpu,
-		    "sim-n-core.c:%d: read-%d %s:0x%08lx -> 0x%0*lx\n",
+		    "sim-n-core.h:%d: read-%d %s:0x%08lx -> 0x%0*lx\n",
 		    __LINE__,
 		    sizeof (unsigned_N),
 		    sim_core_map_to_str (map),
@@ -190,7 +190,7 @@ sim_core_write_aligned_N(sim_cpu *cpu,
   if (TRACE_P (cpu, TRACE_CORE_IDX))
     if (sizeof (unsigned_N) > 4)
       trace_printf (CPU_STATE (cpu), cpu,
-		    "sim-n-core.c:%d: write-%d %s:0x%08lx <- 0x%08lx%08lx\n",
+		    "sim-n-core.h:%d: write-%d %s:0x%08lx <- 0x%08lx%08lx\n",
 		    __LINE__,
 		    sizeof (unsigned_N),
 		    sim_core_map_to_str (map),
@@ -199,7 +199,7 @@ sim_core_write_aligned_N(sim_cpu *cpu,
 		    (unsigned long) val);
     else
       trace_printf (CPU_STATE (cpu), cpu,
-		    "sim-n-core.c:%d: write-%d %s:0x%08lx <- 0x%0*lx\n",
+		    "sim-n-core.h:%d: write-%d %s:0x%08lx <- 0x%0*lx\n",
 		    __LINE__,
 		    sizeof (unsigned_N),
 		    sim_core_map_to_str (map),

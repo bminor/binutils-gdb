@@ -31,7 +31,8 @@ typedef enum {
   nr_sim_core_signals,
 } sim_core_signals;
 
-/* define SIM_CORE_SIGNAL to catch these signals - see sim-core.c for details */
+/* define SIM_CORE_SIGNAL to catch these signals - see sim-core.c for
+   details */
 
 
 
@@ -44,7 +45,8 @@ struct _sim_core_mapping {
   int space;
   unsigned_word base;
   unsigned_word bound;
-  unsigned nr_bytes;
+  unsigned_word nr_bytes;
+  unsigned mask;
   /* memory map */
   int free_buffer;
   void *buffer;
@@ -69,12 +71,17 @@ typedef enum {
 } sim_core_maps;
 
 
+typedef struct _sim_core_common {
+  sim_core_map map[nr_sim_core_maps];
+} sim_core_common;
+
+
 /* Main core structure */
 
 typedef struct _sim_core sim_core;
 struct _sim_core {
-  int trace;
-  sim_core_map map[nr_sim_core_maps];
+  sim_core_common common;
+  address_word byte_xor; /* apply xor universally */
 };
 
 
@@ -82,7 +89,7 @@ struct _sim_core {
    mostly a clone of the global core data structure. */
 
 typedef struct _sim_cpu_core {
-  sim_core common;
+  sim_core_common common;
   address_word xor[WITH_XOR_ENDIAN];
 } sim_cpu_core;
 
@@ -94,27 +101,12 @@ EXTERN_SIM_CORE\
 
 
 
-/* Configure the per-cpu core's XOR endian transfer mode.  Only
-   applicable when WITH_XOR_ENDIAN is enabled.
-
-   Targets suporting XOR endian, shall notify the core of any changes
-   in state via this call.
-
-   FIXME - XOR endian memory transfers currently only work when made
-   through a correctly aligned cpu load/store. */
-
-EXTERN_SIM_CORE\
-(void) sim_core_set_xor\
-(sim_cpu *cpu,
- sim_cia cia,
- int is_xor);
-
-
-
 /* Create a memory space within the core.
 
    The CPU option (when non NULL) specifes the single processor that
-   the memory space is to be attached to. (unimplemented) */
+   the memory space is to be attached to. (UNIMPLEMENTED).
+
+   */
 
 EXTERN_SIM_CORE\
 (void) sim_core_attach
@@ -124,21 +116,41 @@ EXTERN_SIM_CORE\
  access_type access,
  int address_space,
  address_word addr,
- unsigned nr_bytes, /* host limited */
+ address_word nr_bytes,
+ unsigned modulo, /* Power of two, zero for none. */
  device *client,
  void *optional_buffer);
 
+/* Delete a memory space within the core.
+
+ */
+
+EXTERN_SIM_CORE\
+(void) sim_core_detach
+(SIM_DESC sd,
+ sim_cpu *cpu,
+ attach_type attach,
+ int address_space,
+ address_word addr);
 
 
 /* Variable sized read/write
 
    Transfer a variable sized block of raw data between the host and
    target.  Should any problems occure, the number of bytes
-   successfully transfered is returned. */
+   successfully transfered is returned.
+
+   No host/target byte endian conversion is performed.  No xor-endian
+   conversion is performed.
+
+   If CPU argument, when non NULL, specifies the processor specific
+   address map that is to be used in the transfer. */
+
 
 EXTERN_SIM_CORE\
 (unsigned) sim_core_read_buffer
 (SIM_DESC sd,
+ sim_cpu *cpu,
  sim_core_maps map,
  void *buffer,
  address_word addr,
@@ -147,22 +159,80 @@ EXTERN_SIM_CORE\
 EXTERN_SIM_CORE\
 (unsigned) sim_core_write_buffer
 (SIM_DESC sd,
+ sim_cpu *cpu,
  sim_core_maps map,
  const void *buffer,
  address_word addr,
  unsigned nr_bytes);
 
 
+
+/* Configure the core's XOR endian transfer mode.  Only applicable
+   when WITH_XOR_ENDIAN is enabled.
+
+   Targets suporting XOR endian, shall notify the core of any changes
+   in state via this call.
+
+   The CPU argument, when non NULL, specifes the single processor that
+   the xor-endian configuration is to be applied to. */
+
+EXTERN_SIM_CORE\
+(void) sim_core_set_xor\
+(SIM_DESC sd,
+ sim_cpu *cpu,
+ int is_xor);
+
+
+/* XOR version of variable sized read/write.
+
+   Transfer a variable sized block of raw data between the host and
+   target.  Should any problems occure, the number of bytes
+   successfully transfered is returned.
+
+   No host/target byte endian conversion is performed.  If applicable
+   (WITH_XOR_ENDIAN and xor-endian set), xor-endian conversion *is*
+   performed.
+
+   If CPU argument, when non NULL, specifies the processor specific
+   address map that is to be used in the transfer. */
+
+EXTERN_SIM_CORE\
+(unsigned) sim_core_xor_read_buffer
+(SIM_DESC sd,
+ sim_cpu *cpu,
+ sim_core_maps map,
+ void *buffer,
+ address_word addr,
+ unsigned nr_bytes);
+
+EXTERN_SIM_CORE\
+(unsigned) sim_core_xor_write_buffer
+(SIM_DESC sd,
+ sim_cpu *cpu,
+ sim_core_maps map,
+ const void *buffer,
+ address_word addr,
+ unsigned nr_bytes);
+
+
+
 /* Fixed sized, processor oriented, read/write.
 
    Transfer a fixed amout of memory between the host and target.  The
    data transfered is translated from/to host to/from target byte
-   order.  Should the transfer fail, the operation shall abort (no
-   return).  The aligned alternative makes the assumption that that
-   the address is N byte aligned (no alignment checks are made).  The
-   unaligned alternative checks the address for correct byte
+   order (including xor endian).  Should the transfer fail, the
+   operation shall abort (no return).
+
+   The aligned alternative makes the assumption that that the address
+   is N byte aligned (no alignment checks are made).
+
+   The unaligned alternative checks the address for correct byte
    alignment.  Action, as defined by WITH_ALIGNMENT, being taken
-   should the check fail. */
+   should the check fail.
+
+   Misaligned xor-endian accesses are broken into a sequence of
+   transfers each <= WITH_XOR_ENDIAN bytes */
+
 
 #define DECLARE_SIM_CORE_WRITE_N(ALIGNMENT,N) \
 INLINE_SIM_CORE\
