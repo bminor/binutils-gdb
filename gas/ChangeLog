@@ -1,3 +1,8 @@
+Wed Oct 23 18:20:29 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.c (md_apply_fix3): Give a better warning message
+	for an unknown relocation type.
+
 start-sanitize-v850
 Wed Oct 23 16:21:28 1996  Jeffrey A Law  (law@cygnus.com)
 
