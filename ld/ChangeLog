@@ -1,9 +1,7 @@
 Thu Dec  5 13:45:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
-	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
-	use hold_rel unless SEC_ALLOC is set for the reloc section.
-	(gld${EMULATION_NAME}_place_section): Only set hold_rel if
-	SEC_ALLOC is set.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_section): Only
+	set hold_rel if SEC_ALLOC is set.
 
 Tue Dec  3 11:29:20 1996  Ian Lance Taylor  <ian@cygnus.com>
 
