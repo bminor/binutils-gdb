@@ -1,3 +1,15 @@
+Sun Feb 21 11:15:22 1993  Mike Werner  (mtw@poseidon.cygnus.com)
+
+	* devo/dejagnu: Initial creation of devo/dejagnu.
+	Migrated dejagnu testcases and support files for testing software
+	tools to reside as subdirectories, currently called "testsuite",
+	within the directory of the software tool.  Migrated all programs,
+	support libraries, etc. beloging to dejagnu proper from
+	devo/deja-gnu to devo/dejagnu.	These files were moved "as is"
+	with no modifications.	The changes to these files which will
+	allow them to configure, build, and execute properly will be made
+	in a future update.
+
 Fri Feb 19 20:19:39 1993  Brendan Kehoe  (brendan@lisa.cygnus.com)
 
 	* Makefile.in: Change send_pr to send-pr.
