@@ -2002,6 +2002,172 @@ _bfd_ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
   return section->reloc_count;
 }
 
+
+static int
+cmp_fdrtab_entry (const void *leftp, const void *rightp)
+{
+  const struct ecoff_fdrtab_entry *lp = leftp;
+  const struct ecoff_fdrtab_entry *rp = rightp;
+
+  if (lp->base_addr < rp->base_addr)
+    return -1;
+  if (lp->base_addr > rp->base_addr)
+    return  1;
+  return 0;
+}
+
+/*
+ * Each file descriptor (FDR) has a memory address, to simplify
+ * looking up an FDR by address, we build a table covering all FDRs
+ * that have a least one procedure descriptor in them.  The final
+ * table will be sorted by address so we can look it up via binary
+ * search.
+ */
+static boolean
+mk_fdrtab (bfd *abfd)
+{
+  struct ecoff_debug_info * const debug_info = &ecoff_data (abfd)->debug_info;
+  const struct ecoff_debug_swap * const debug_swap
+    = &ecoff_backend (abfd)->debug_swap;
+  struct ecoff_fdrtab_entry *tab;
+  FDR *fdr_ptr;
+  FDR *fdr_start;
+  FDR *fdr_end;
+  boolean stabs;
+  long len;
+
+  /* Make sure we have the FDR's.  */
+  if (! _bfd_ecoff_slurp_symbolic_info (abfd, (asection *) NULL, debug_info)
+      || bfd_get_symcount (abfd) == 0)
+    return false;
+
+  fdr_start = debug_info->fdr;
+  fdr_end = fdr_start + debug_info->symbolic_header.ifdMax;
+
+  /* First, let's see how long the table needs to be: */
+  for (len = 0, fdr_ptr = fdr_start; fdr_ptr < fdr_end; fdr_ptr++)
+    {
+      if (fdr_ptr->cpd == 0)	/* skip FDRs that have no PDRs */
+	continue;
+      ++len;
+    }
+
+  /* Now, create and fill in the table: */
+
+  ecoff_data (abfd)->fdrtab = (struct ecoff_fdrtab_entry*)
+    bfd_zalloc (abfd,len * sizeof (struct ecoff_fdrtab_entry));
+  if (ecoff_data (abfd)->fdrtab == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+  ecoff_data (abfd)->fdrtab_len = len;
+
+  tab = ecoff_data (abfd)->fdrtab;
+  for (fdr_ptr = fdr_start; fdr_ptr < fdr_end; fdr_ptr++)
+    {
+      if (fdr_ptr->cpd == 0)
+	continue;
+
+      /*
+       * Check whether this file has stabs debugging information.  In
+       * a file with stabs debugging information, the second local
+       * symbol is named @stabs.
+       */
+      stabs = false;
+      if (fdr_ptr->csym >= 2)
+	{
+	  char *sym_ptr;
+	  SYMR sym;
+
+	  sym_ptr = ((char *) debug_info->external_sym
+		     + (fdr_ptr->isymBase + 1)*debug_swap->external_sym_size);
+	  (*debug_swap->swap_sym_in) (abfd, sym_ptr, &sym);
+	  if (strcmp (debug_info->ss + fdr_ptr->issBase + sym.iss,
+		      STABS_SYMBOL) == 0)
+	    stabs = true;
+	}
+
+      if (!stabs)
+	{
+	  bfd_size_type external_pdr_size;
+	  char *pdr_ptr;
+	  PDR pdr;
+
+	  external_pdr_size = debug_swap->external_pdr_size;
+
+	  pdr_ptr = ((char *) debug_info->external_pdr
+		     + fdr_ptr->ipdFirst * external_pdr_size);
+	  (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
+	  /*
+	   * The address of the first PDR is the offset of that
+	   * procedure relative to the beginning of file FDR.
+	   */
+	  tab->base_addr = fdr_ptr->adr - pdr.adr;
+	}
+      else
+	{
+	  /*
+	   * XXX I don't know about stabs, so this is a guess
+	   * (davidm@cs.arizona.edu):
+	   */
+	  tab->base_addr = fdr_ptr->adr;
+	}
+      tab->fdr = fdr_ptr;
+      ++tab;
+    }
+  /*
+   * Finally, the table is sorted in increasing memory-address order.
+   * The table is mostly sorted already, but there are cases (e.g.,
+   * static functions in include files), where this does not hold
+   * Use "odump -PFv" to verify...
+   */
+  qsort((char*) ecoff_data (abfd)->fdrtab, len,
+	sizeof(struct ecoff_fdrtab_entry), cmp_fdrtab_entry);
+
+  return true;
+}
+
+/*
+ * Return index of first FDR that covers to OFFSET.
+ */
+static long
+lookup (bfd *abfd, bfd_vma offset)
+{
+  long low, high, len;
+  long mid = -1;
+  struct ecoff_fdrtab_entry *tab;
+
+  len = ecoff_data(abfd)->fdrtab_len;
+  if (!len)
+    return -1;
+
+  tab = ecoff_data(abfd)->fdrtab;
+  for (low = 0, high = len - 1 ; low != high ;)
+    {
+      mid = (high + low) / 2;
+      if (offset >= tab[mid].base_addr && offset < tab[mid + 1].base_addr)
+	goto find_min;
+
+      if (tab[mid].base_addr > offset)
+	high = mid;
+      else
+	low = mid + 1;
+    }
+  ++mid;
+
+  /* last entry is catch-all for all higher addresses: */
+  if (offset < tab[mid].base_addr)
+    return -1;
+
+ find_min:
+
+  while (mid > 0 && tab[mid - 1].base_addr == tab[mid].base_addr)
+    --mid;
+
+  return mid;
+}
+
 /* Provided a BFD, a section and an offset into the section, calculate
    and return the name of the source file and the line nearest to the
    wanted location.  */
@@ -2021,49 +2187,39 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
   const struct ecoff_debug_swap * const debug_swap
     = &ecoff_backend (abfd)->debug_swap;
   struct ecoff_debug_info * const debug_info = &ecoff_data (abfd)->debug_info;
-  FDR *fdr_ptr;
-  FDR *fdr_start;
-  FDR *fdr_end;
-  FDR *fdr_hold;
+  struct ecoff_fdrtab_entry *tab;
   boolean stabs;
+  FDR *fdr_ptr;
+  int i;
 
   offset += section->vma;
-
-  /* If we're not in the .text section, we don't have any line
-     numbers.  */
+  /*
+   * If we're not in the .text section, we don't have any line
+   * numbers.
+   */
   if (strcmp (section->name, _TEXT) != 0
       || offset < ecoff_data (abfd)->text_start
       || offset >= ecoff_data (abfd)->text_end)
     return false;
+  /*
+   * Build FDR table (sorted by object file's base-address) if
+   * we don't have it already:
+   */
+  if (!ecoff_data (abfd)->fdrtab && !mk_fdrtab (abfd)) {
+      return false;
+  }
+  tab = ecoff_data (abfd)->fdrtab;
 
-  /* Make sure we have the FDR's.  */
-  if (! _bfd_ecoff_slurp_symbolic_info (abfd, (asection *) NULL, debug_info)
-      || bfd_get_symcount (abfd) == 0)
-    return false;
+  i = lookup(abfd, offset);	/* find first FDR for address OFFSET */
+  if (i < 0)
+    return false;		/* no FDR, no fun... */
+  fdr_ptr = tab[i].fdr;
 
-  /* Each file descriptor (FDR) has a memory address.  Here we track
-     down which FDR we want.  The FDR's are stored in increasing
-     memory order.  If speed is ever important, this can become a
-     binary search.  We must ignore FDR's with no PDR entries; they
-     will have the adr of the FDR before or after them.  */
-  fdr_start = debug_info->fdr;
-  fdr_end = fdr_start + debug_info->symbolic_header.ifdMax;
-  fdr_hold = (FDR *) NULL;
-  for (fdr_ptr = fdr_start; fdr_ptr < fdr_end; fdr_ptr++)
-    {
-      if (fdr_ptr->cpd == 0)
-	continue;
-      if (offset < fdr_ptr->adr)
-	break;
-      fdr_hold = fdr_ptr;
-    }
-  if (fdr_hold == (FDR *) NULL)
-    return false;
-  fdr_ptr = fdr_hold;
-
-  /* Check whether this file has stabs debugging information.  In a
-     file with stabs debugging information, the second local symbol is
-     named @stabs.  */
+  /*
+   * Check whether this file has stabs debugging information.  In a
+   * file with stabs debugging information, the second local symbol is
+   * named @stabs.
+   */
   stabs = false;
   if (fdr_ptr->csym >= 2)
     {
@@ -2078,58 +2234,143 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
 	stabs = true;
     }
 
-  if (! stabs)
+  if (!stabs)
     {
       bfd_size_type external_pdr_size;
       char *pdr_ptr;
-      char *pdr_end;
+      char *best_pdr = NULL;
+      FDR *best_fdr;
+      bfd_vma best_dist = ~0;
       PDR pdr;
-      bfd_vma first_off;
       unsigned char *line_ptr;
       unsigned char *line_end;
       int lineno;
-
-      /* This file uses ECOFF debugging information.  Each FDR has a
-	 list of procedure descriptors (PDR).  PDR's also have an
-	 address, which is relative to the FDR address, and are also
-	 stored in increasing memory order.  */
-      if (offset < fdr_ptr->adr)
-	return false;
-      offset -= fdr_ptr->adr;
+      /*
+       * This file uses ECOFF debugging information.  Each FDR has a
+       * list of procedure descriptors (PDR).  The address in the FDR
+       * is the absolute address of the first procedure.  The address
+       * in the first PDR gives the offset of that procedure relative
+       * to the object file's base-address.  The addresses in
+       * subsequent PDRs specify each procedure's address relative to
+       * the object file's base-address.  To make things more juicy,
+       * whenever the PROF bit in the PDR is set, the real entry point
+       * of the procedure may be 16 bytes below what would normally be
+       * the procedure's entry point.  Instead, DEC came up with a
+       * wicked scheme to create profiled libraries "on the fly":
+       * instead of shipping a regular and a profiled version of each
+       * library, they insert 16 bytes of unused space in front of
+       * each procedure and set the "prof" bit in the PDR to indicate
+       * that there is a gap there (this is done automagically by "as"
+       * when option "-pg" is specified).  Thus, normally, you link
+       * against such a library and, except for lots of 16 byte gaps
+       * between functions, things will behave as usual.  However,
+       * when invoking "ld" with option "-pg", it will fill those gaps
+       * with code that calls mcount().  It then moves the function's
+       * entry point down by 16 bytes, and out pops a binary that has
+       * all functions profiled.
+       *
+       * NOTE: Neither FDRs nor PDRs are strictly sorted in memory order.
+       *       For example, when including header-files that define
+       *       functions, the FDRs follow behind the including file,
+       *       even though their code may have been generated at a lower
+       *       address.  File coff-alpha.c from libbfd illustrates this
+       *       (use "odump -PFv" to look at a file's FDR/PDR).  Similarly,
+       *       PDRs are sometimes out of order as well.  An example of this
+       *       is OSF/1 v3.0 libc's malloc.c.  I'm not sure why this happens,
+       *       but it could be due to optimizations that reorder a function's
+       *       position within an object-file.
+       *
+       * Strategy:
+       * 
+       * On the first call to this function, we build a table of FDRs
+       * that is sorted by the base-address of the object-file the FDR
+       * is referring to.  Notice that each object-file may contain
+       * code from multiple source files (e.g., due to code defined in
+       * include files).  Thus, for any given base-address, there may
+       * be multiple FDRs (but this case is, fortunately, uncommon).
+       * lookup(addr) guarantees to return the first FDR that applies
+       * to address ADDR.  Thus, after invoking lookup(), we have a
+       * list of FDRs that may contain the PDR for ADDR.  Next, we walk
+       * through the PDRs of these FDRs and locate the one that is
+       * closest to ADDR (i.e., for which the difference between ADDR
+       * and the PDR's entry point is positive and minimal).  Once,
+       * the right FDR and PDR are located, we simply walk through the
+       * line-number table to lookup the line-number that best matches
+       * ADDR.  Obviously, things could be sped up by keeping a sorted
+       * list of PDRs instead of a sorted list of FDRs.  However, this
+       * would increase space requirements considerably, which is
+       * undesirable.
+       */
       external_pdr_size = debug_swap->external_pdr_size;
-      pdr_ptr = ((char *) debug_info->external_pdr
-		 + fdr_ptr->ipdFirst * external_pdr_size);
-      pdr_end = pdr_ptr + fdr_ptr->cpd * external_pdr_size;
+
+      /* Make offset relative to object file's start-address: */
+      offset -= tab[i].base_addr;
+      /*
+       * Search FDR list starting at tab[i] for the PDR that best matches
+       * OFFSET.  Normally, the FDR list is only one entry long.
+       */
+      best_fdr = NULL;
+      do {
+	bfd_vma dist, min_dist = 0;
+	char *pdr_hold;
+	char *pdr_end;
+
+	fdr_ptr = tab[i].fdr;
+
+	pdr_ptr = ((char *) debug_info->external_pdr
+		   + fdr_ptr->ipdFirst * external_pdr_size);
+	pdr_end = pdr_ptr + fdr_ptr->cpd * external_pdr_size;
+	(*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
+	/*
+	 * Find PDR that is closest to OFFSET.  If pdr.prof is set,
+	 * the procedure entry-point *may* be 0x10 below pdr.adr.  
+	 * We simply pretend that pdr.prof *implies* a lower entry-point.
+	 * This is safe because it just means that may identify
+	 * 4 NOPs in front of the function as belonging to the function.
+	 */
+	for (pdr_hold = NULL;
+	     pdr_ptr < pdr_end;
+	     (pdr_ptr += external_pdr_size,
+	      (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr)))
+	  {
+	    if (offset >= (pdr.adr - 0x10 * pdr.prof))
+	      {
+		dist = offset - (pdr.adr - 0x10 * pdr.prof);
+		if (!pdr_hold || dist < min_dist)
+		  {
+		    min_dist = dist;
+		    pdr_hold = pdr_ptr;
+		  }
+	      }
+	  }
+
+	if (!best_pdr || min_dist < best_dist)
+	  {
+	    best_dist = min_dist;
+	    best_fdr = fdr_ptr;
+	    best_pdr = pdr_hold;
+	  }
+	/* continue looping until base_addr of next entry is different: */
+      } while (++i < ecoff_data (abfd)->fdrtab_len
+	       && tab[i].base_addr == tab[i - 1].base_addr);
+
+      if (!best_fdr || !best_pdr)
+	return false;			/* shouldn't happen... */
+
+      /* phew, finally we got something that we can hold onto: */
+      fdr_ptr = best_fdr;
+      pdr_ptr = best_pdr;
       (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
+      /*
+       * Now we can look for the actual line number.  The line numbers
+       * are stored in a very funky format, which I won't try to
+       * describe.  The search is bounded by the end of the FDRs line
+       * number entries.
+       */
+      line_end = debug_info->line + fdr_ptr->cbLineOffset + fdr_ptr->cbLine;
 
-      /* The address of the first PDR is an offset which applies to
-	 the addresses of all the PDR's.  */
-      first_off = pdr.adr;
-
-      for (pdr_ptr += external_pdr_size;
-	   pdr_ptr < pdr_end;
-	   pdr_ptr += external_pdr_size)
-	{
-	  (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
-	  if (offset < pdr.adr - first_off)
-	    break;
-	}
-
-      /* Now we can look for the actual line number.  The line numbers
-	 are stored in a very funky format, which I won't try to
-	 describe.  Note that right here pdr_ptr and pdr hold the PDR
-	 *after* the one we want; we need this to compute line_end.  */
-      line_end = debug_info->line;
-      if (pdr_ptr == pdr_end)
-	line_end += fdr_ptr->cbLineOffset + fdr_ptr->cbLine;
-      else
-	line_end += fdr_ptr->cbLineOffset + pdr.cbLineOffset;
-
-      /* Now change pdr and pdr_ptr to the one we want.  */
-      pdr_ptr -= external_pdr_size;
-      (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
-
-      offset -= pdr.adr - first_off;
+      /* Make offset relative to procedure entry: */
+      offset -= pdr.adr - 0x10 * pdr.prof;
       lineno = pdr.lnLow;
       line_ptr = debug_info->line + fdr_ptr->cbLineOffset + pdr.cbLineOffset;
       while (line_ptr < line_end)
@@ -2155,8 +2396,10 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
 	  offset -= count * 4;
 	}
 
-      /* If fdr_ptr->rss is -1, then this file does not have full
-	 symbols, at least according to gdb/mipsread.c.  */
+      /*
+       * If fdr_ptr->rss is -1, then this file does not have full
+       * symbols, at least according to gdb/mipsread.c.
+       */
       if (fdr_ptr->rss == -1)
 	{
 	  *filename_ptr = NULL;
@@ -2346,6 +2589,7 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
 
   return true;
 }
+
 
 /* Copy private BFD data.  This is called by objcopy and strip.  We
    use it to copy the ECOFF debugging information from one BFD to the

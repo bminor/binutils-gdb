@@ -53,12 +53,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* ECOFF auxiliary information swapping routines.  These are the same
    for all ECOFF targets, so they are defined in ecoff.c.  */
-extern void ecoff_swap_tir_in PARAMS ((int, const struct tir_ext *, TIR *));
-extern void ecoff_swap_tir_out PARAMS ((int, const TIR *, struct tir_ext *));
-extern void ecoff_swap_rndx_in PARAMS ((int, const struct rndx_ext *,
-					RNDXR *));
-extern void ecoff_swap_rndx_out PARAMS ((int, const RNDXR *,
-					 struct rndx_ext *));
+extern void _bfd_ecoff_swap_tir_in
+  PARAMS ((int, const struct tir_ext *, TIR *));
+extern void _bfd_ecoff_swap_tir_out
+  PARAMS ((int, const TIR *, struct tir_ext *));
+extern void _bfd_ecoff_swap_rndx_in
+  PARAMS ((int, const struct rndx_ext *, RNDXR *));
+extern void _bfd_ecoff_swap_rndx_out
+  PARAMS ((int, const RNDXR *, struct rndx_ext *));
 
 /* Swap in the symbolic header.  */
 
@@ -281,6 +283,9 @@ ecoff_swap_fdr_out (abfd, intern_copy, ext_ptr)
 #endif
 }
 
+/* start-sanitize-mpw */
+#ifndef MPW_C
+/* end-sanitize-mpw */
 /* Swap in the procedure descriptor record.  */
 
 static void
@@ -317,6 +322,7 @@ ecoff_swap_pdr_in (abfd, ext_copy, intern)
     {
       intern->gp_used = 0 != (ext->p_bits1[0] & PDR_BITS1_GP_USED_BIG);
       intern->reg_frame = 0 != (ext->p_bits1[0] & PDR_BITS1_REG_FRAME_BIG);
+      intern->prof = 0 != (ext->p_bits1[0] & PDR_BITS1_PROF_BIG);
       intern->reserved = (((ext->p_bits1[0] & PDR_BITS1_RESERVED_BIG)
 			   << PDR_BITS1_RESERVED_SH_LEFT_BIG)
 			  | ((ext->p_bits2[0] & PDR_BITS2_RESERVED_BIG)
@@ -326,6 +332,7 @@ ecoff_swap_pdr_in (abfd, ext_copy, intern)
     {
       intern->gp_used = 0 != (ext->p_bits1[0] & PDR_BITS1_GP_USED_LITTLE);
       intern->reg_frame = 0 != (ext->p_bits1[0] & PDR_BITS1_REG_FRAME_LITTLE);
+      intern->prof = 0 != (ext->p_bits1[0] & PDR_BITS1_PROF_LITTLE);
       intern->reserved = (((ext->p_bits1[0] & PDR_BITS1_RESERVED_LITTLE)
 			   >> PDR_BITS1_RESERVED_SH_LITTLE)
 			  | ((ext->p_bits2[0] & PDR_BITS2_RESERVED_LITTLE)
@@ -374,6 +381,7 @@ ecoff_swap_pdr_out (abfd, intern_copy, ext_ptr)
     {
       ext->p_bits1[0] = ((intern->gp_used ? PDR_BITS1_GP_USED_BIG : 0)
 			 | (intern->reg_frame ? PDR_BITS1_REG_FRAME_BIG : 0)
+			 | (intern->prof ? PDR_BITS1_PROF_BIG : 0)
 			 | ((intern->reserved
 			     >> PDR_BITS1_RESERVED_SH_LEFT_BIG)
 			    & PDR_BITS1_RESERVED_BIG));
@@ -384,6 +392,7 @@ ecoff_swap_pdr_out (abfd, intern_copy, ext_ptr)
     {
       ext->p_bits1[0] = ((intern->gp_used ? PDR_BITS1_GP_USED_LITTLE : 0)
 			 | (intern->reg_frame ? PDR_BITS1_REG_FRAME_LITTLE : 0)
+			 | (intern->prof ? PDR_BITS1_PROF_LITTLE : 0)
 			 | ((intern->reserved << PDR_BITS1_RESERVED_SH_LITTLE)
 			    & PDR_BITS1_RESERVED_LITTLE));
       ext->p_bits2[0] = ((intern->reserved >>
@@ -398,6 +407,81 @@ ecoff_swap_pdr_out (abfd, intern_copy, ext_ptr)
     abort();
 #endif
 }
+/* start-sanitize-mpw */
+#else /* MPW_C */
+/* Same routines, but with ECOFF_64 code removed, so ^&%$#&! MPW C doesn't
+   corrupt itself and then freak out. */
+/* Swap in the procedure descriptor record.  */
+
+static void
+ecoff_swap_pdr_in (abfd, ext_copy, intern)
+     bfd *abfd;
+     PTR ext_copy;
+     PDR *intern;
+{
+  struct pdr_ext ext[1];
+
+  *ext = *(struct pdr_ext *) ext_copy;
+  
+  intern->adr           = ecoff_get_off (abfd, (bfd_byte *)ext->p_adr);
+  intern->isym          = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_isym);
+  intern->iline         = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_iline);
+  intern->regmask       = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_regmask);
+  intern->regoffset     = bfd_h_get_signed_32 (abfd,
+					       (bfd_byte *)ext->p_regoffset);
+  intern->iopt          = bfd_h_get_signed_32 (abfd, (bfd_byte *)ext->p_iopt);
+  intern->fregmask      = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_fregmask);
+  intern->fregoffset    = bfd_h_get_signed_32 (abfd,
+					       (bfd_byte *)ext->p_fregoffset);
+  intern->frameoffset   = bfd_h_get_signed_32 (abfd,
+					       (bfd_byte *)ext->p_frameoffset);
+  intern->framereg      = bfd_h_get_16 (abfd, (bfd_byte *)ext->p_framereg);
+  intern->pcreg         = bfd_h_get_16 (abfd, (bfd_byte *)ext->p_pcreg);
+  intern->lnLow         = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_lnLow);
+  intern->lnHigh        = bfd_h_get_32 (abfd, (bfd_byte *)ext->p_lnHigh);
+  intern->cbLineOffset  = ecoff_get_off (abfd, (bfd_byte *)ext->p_cbLineOffset);
+
+#ifdef TEST
+  if (memcmp ((char *)ext, (char *)intern, sizeof (*intern)) != 0)
+    abort();
+#endif
+}
+
+/* Swap out the procedure descriptor record.  */
+
+static void
+ecoff_swap_pdr_out (abfd, intern_copy, ext_ptr)
+     bfd *abfd;
+     const PDR *intern_copy;
+     PTR ext_ptr;
+{
+  struct pdr_ext *ext = (struct pdr_ext *) ext_ptr;
+  PDR intern[1];
+
+  *intern = *intern_copy;	/* Make it reasonable to do in-place.  */
+  
+  ecoff_put_off (abfd, intern->adr, (bfd_byte *)ext->p_adr);
+  bfd_h_put_32 (abfd, intern->isym, (bfd_byte *)ext->p_isym);
+  bfd_h_put_32 (abfd, intern->iline, (bfd_byte *)ext->p_iline);
+  bfd_h_put_32 (abfd, intern->regmask, (bfd_byte *)ext->p_regmask);
+  bfd_h_put_32 (abfd, intern->regoffset, (bfd_byte *)ext->p_regoffset);
+  bfd_h_put_32 (abfd, intern->iopt, (bfd_byte *)ext->p_iopt);
+  bfd_h_put_32 (abfd, intern->fregmask, (bfd_byte *)ext->p_fregmask);
+  bfd_h_put_32 (abfd, intern->fregoffset, (bfd_byte *)ext->p_fregoffset);
+  bfd_h_put_32 (abfd, intern->frameoffset, (bfd_byte *)ext->p_frameoffset);
+  bfd_h_put_16 (abfd, intern->framereg, (bfd_byte *)ext->p_framereg);
+  bfd_h_put_16 (abfd, intern->pcreg, (bfd_byte *)ext->p_pcreg);
+  bfd_h_put_32 (abfd, intern->lnLow, (bfd_byte *)ext->p_lnLow);
+  bfd_h_put_32 (abfd, intern->lnHigh, (bfd_byte *)ext->p_lnHigh);
+  ecoff_put_off (abfd, intern->cbLineOffset, (bfd_byte *)ext->p_cbLineOffset);
+
+#ifdef TEST
+  if (memcmp ((char *)ext, (char *)intern, sizeof (*intern)) != 0)
+    abort();
+#endif
+}
+#endif /* MPW_C */
+/* end-sanitize-mpw */
 
 /* Swap in a symbol record.  */
 
@@ -555,11 +639,19 @@ ecoff_swap_ext_out (abfd, intern_copy, ext_ptr)
 			| (intern->cobol_main ? EXT_BITS1_COBOL_MAIN_BIG : 0)
 			| (intern->weakext ? EXT_BITS1_WEAKEXT_BIG : 0));
     ext->es_bits2[0] = 0;
+#ifdef ECOFF_64
+    ext->es_bits2[1] = 0;
+    ext->es_bits2[2] = 0;
+#endif
   } else {
     ext->es_bits1[0] = ((intern->jmptbl ? EXT_BITS1_JMPTBL_LITTLE : 0)
 			| (intern->cobol_main ? EXT_BITS1_COBOL_MAIN_LITTLE : 0)
 			| (intern->weakext ? EXT_BITS1_WEAKEXT_LITTLE : 0));
     ext->es_bits2[0] = 0;
+#ifdef ECOFF_64
+    ext->es_bits2[1] = 0;
+    ext->es_bits2[2] = 0;
+#endif
   }
 
 #ifdef ECOFF_32
@@ -643,8 +735,8 @@ ecoff_swap_opt_in (abfd, ext_copy, intern)
 		       | (ext->o_bits4[0] << OPT_BITS2_VALUE_SH_LEFT_LITTLE));
     }
 
-  ecoff_swap_rndx_in (abfd->xvec->header_byteorder_big_p != false,
-		      &ext->o_rndx, &intern->rndx);
+  _bfd_ecoff_swap_rndx_in (abfd->xvec->header_byteorder_big_p != false,
+			   &ext->o_rndx, &intern->rndx);
 
   intern->offset = bfd_h_get_32 (abfd, (bfd_byte *) ext->o_offset);
 
@@ -682,8 +774,8 @@ ecoff_swap_opt_out (abfd, intern_copy, ext_ptr)
       ext->o_bits4[0] = intern->value >> OPT_BITS4_VALUE_SH_LEFT_LITTLE;
     }
 
-  ecoff_swap_rndx_out (abfd->xvec->header_byteorder_big_p != false,
-		       &intern->rndx, &ext->o_rndx);
+  _bfd_ecoff_swap_rndx_out (abfd->xvec->header_byteorder_big_p != false,
+			    &intern->rndx, &ext->o_rndx);
 
   bfd_h_put_32 (abfd, intern->value, (bfd_byte *) ext->o_offset);
 

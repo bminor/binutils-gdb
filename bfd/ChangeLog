@@ -1,3 +1,14 @@
+Mon Feb  6 20:01:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Sat Feb  4 14:20:24 1995  David Mosberger-Tang  <davidm@piston.cs.arizona.edu>
+
+	* ecoffswap.h (ecoff_swap_pdr_in, ecoff_swap_pdr_out): added
+	internalizing/externalizing new "prof" field.
+
+	* libecoff.h (ecoff_tdata): added fdrtab.
+
+	* ecoff.c (_bfd_ecoff_find_nearest_line): Fixed.
+
 Mon Feb  6 14:25:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libelf.h (struct elf_link_hash_table): Add saw_needed field.
