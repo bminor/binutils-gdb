@@ -1,10 +1,15 @@
+Wed Feb 14 18:14:11 1996  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386.h (i386_optab): Remove Data32 from pushf and popf.
+
+Thu Feb  8 14:27:21 1996  James Carlson <carlson@xylogics.com>
+
+	* i386.h (i386_regtab): Add 80486 test registers.
+
 Mon Feb  5 18:35:46 1996  Ian Lance Taylor  <ian@cygnus.com>
 
-	* i960.h (I_HX, I_HX2): Define.
-	start-sanitize-i960xl
-	(I_XL): Remove.  The HX supports all XL instructions.
-	end-sanitize-i960xl
-	(i960_opcodes): Add HX instructions.
+	* i960.h (I_HX): Define.
+	(i960_opcodes): Add HX instruction.
 
 Mon Jan 29 12:43:39 1996  Ken Raeburn  <raeburn@cygnus.com>
 
@@ -263,15 +268,11 @@ Thu Jul 28 19:28:07 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 Tue Jul 26 17:48:05 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
-	* i960.h (I_CX2): New instruction category.
-	start-sanitize-i960xl
-	It includes instructions available on Cx and XL processors.
-	(I_XL): New instruction category, for XL-only instructions.
-	end-sanitize-i960xl
-	(i960_opcodes): Put eshro and sysctl in I_CX2 category.
-	start-sanitize-i960xl
-	Added i960XL-only instructions, in I_XL category.
-	end-sanitize-i960xl
+	* i960.h (I_CX2): New instruction category.  It includes
+	instructions available on Cx and Jx processors.
+	(I_JX): New instruction category, for JX-only instructions.
+	(i960_opcodes): Put eshro and sysctl in I_CX2 category.  Added
+	Jx-only instructions, in I_JX category.
 
 Wed Jul 13 18:43:47 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
