@@ -1,3 +1,13 @@
+2000-07-27  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-d10v.c (find_opcode): Remove extraneous `='.
+
+2000-07-27  Kazu Hirata  <kazu@hxi.com>
+
+	* config/tc-d10v.c: Fix formatting.
+	* config/tc-z8k.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+
 2000-07-26  Dave Brolley  <brolley@redhat.com>
 
 	* cgen.c (queue_fixup): Declare opinfo.
