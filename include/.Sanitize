@@ -17,8 +17,6 @@
 
 Do-first:
 
-echo Sanitizing `pwd`...
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -30,8 +28,8 @@ Things-to-keep:
 COPYING
 ChangeLog
 a.out.encap.h
-a.out.gnu.h
 a.out.host.h
+a.out.hp.h
 a.out.sun4.h
 a29k-opcode.h
 h8300-opcode.h
@@ -104,7 +102,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.20  1991/10/25 10:21:10  gnu
+# Revision 1.21  1991/11/21 04:06:22  gnu
+# Bring in HP a.out remnants from GDB.  Eliminate obsolete a.out.gnu.h.
+#
+# Revision 1.20  1991/10/25  10:21:10  gnu
 # Rename coff-related files.
 #
 # Revision 1.19  1991/10/25  07:59:50  gnu

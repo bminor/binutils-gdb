@@ -1,5 +1,5 @@
 /* Special version of <a.out.h> for use under hp-ux.
-   Copyright (C) 1988 Free Software Foundation, Inc.
+   Copyright 1988, 1991 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,6 +14,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* THIS FILE IS OBSOLETE.  It needs to be revised as a variant "external"
+   a.out format for use with BFD.  */
 
 /* The `exec' structure and overall layout must be close to HP's when
    we are running on an HP system, otherwise we will not be able to
