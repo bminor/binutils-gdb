@@ -44,10 +44,10 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o core.o section.o format.o syms.o reloc.o init.o
 
 BFD_MACHINES=cpu-h8300.o cpu-i960.o  cpu-sparc.o cpu-m68k.o cpu-m88k.o \
-	cpu-vax.o cpu-mips.o cpu-a29k.o  cpu-i386.o
+	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o
 
 BFD_BACKENDS = oasys.o ieee.o srec.o \
-	aout64.o aout32.o demo64.o sunos.o newsos3.o bout.o \
+	aout64.o aout32.o demo64.o sunos.o newsos3.o i386aout.o bout.o \
 	icoff.o amdcoff.o m68kcoff.o i386coff.o m88k-bcs.o ecoff.o elf.o
 
 
@@ -61,7 +61,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 i386coff.c aout64.c aout32.c sunos.c demo64.c icoff.c srec.c \
 	 oasys.c ieee.c m68kcoff.c amdcoff.c \
 	 format.c section.c core.c syms.c reloc.c init.c \
-	 m88k-bcs.c ecoff.c trad-core.c newsos3.c bout.c elf.c \
+	 m88k-bcs.c ecoff.c trad-core.c newsos3.c i386aout.c bout.c elf.c \
 	cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c \
  	cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.o
 
@@ -191,7 +191,7 @@ make:
 	echo							>>Makefile ; \
 	sed "s/^#__$(HOST)__#//" < Makefile.old			>>Makefile
 
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure $(host_makefile_frag) $(target_makefile_frag)
+Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) ./config.status
 
 dep: $(CFILES)
@@ -273,6 +273,9 @@ ecoff.o : ecoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
 trad-core.o : trad-core.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h \
   libbfd.h libaout.h 
 newsos3.o : newsos3.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/aout64.h $(INCDIR)/stab.gnu.h $(INCDIR)/stab.def \
+  $(INCDIR)/ar.h libaout.h 
+i386aout.o : i386aout.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout64.h $(INCDIR)/stab.gnu.h $(INCDIR)/stab.def \
   $(INCDIR)/ar.h libaout.h 
 bout.o : bout.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
