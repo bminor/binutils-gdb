@@ -610,9 +610,9 @@ _1__@end smallexample
 _GDBN__ is invoked with the shell command @code{_GDBP__}.  Once started,
 it reads commands from the terminal until you tell it to exit.
 
-You can start by just calling @code{_GDBP__} with no arguments or
-options; but the most usual way to start _GDBN__ is with one argument or
-two, specifying an executable program as the argument:
+You can run @code{_GDBP__} with no arguments or options; but the most
+usual way to start _GDBN__ is with one argument or two, specifying an
+executable program as the argument:
 @example
 _GDBP__ program
 @end example
@@ -639,9 +639,15 @@ in sequential order.  The order makes a difference when the
 @menu
 * File Options::		Choosing Files
 * Mode Options::		Choosing Modes
+_if__(_GENERIC__)
+_divert__(1)
+_fi__(_GENERIC__)
 * i960-Nindy Remote::		
 * EB29K Remote::		
 * VxWorks Remote::		
+_if__(_GENERIC__)
+_divert__
+_fi__(_GENERIC__)
 @end menu
 
 @node File Options, Mode Options, Starting _GDBN__, Starting _GDBN__
@@ -651,14 +657,18 @@ As shown above, any arguments other than options specify an executable
 file and core file; that is, the first argument encountered with no
 associated option flag is equivalent to a @samp{-se} option, and the
 second, if any, is equivalent to a @samp{-c} option.  Many options have
-both long and short forms; both are shown here.
+both long and short forms; both are shown here.  The long forms are also
+recognized if you truncate them, so long as enough of the option is
+present to be unambiguous.  (If you prefer, you can flag option
+arguments with @samp{+} rather than @samp{-}, though we illustrate the
+more usual convention.)
 
 @table @code
-@item -symbols @var{file}
+@item -symbols=@var{file}
 @itemx -s @var{file}
 Read symbol table from file @var{file}.
 
-@item -exec @var{file}
+@item -exec=@var{file}
 @itemx -e @var{file}
 Use file @var{file} as the executable file to execute when
 appropriate, and for examining pure data in conjunction with a core
@@ -668,15 +678,15 @@ dump.
 Read symbol table from file @var{file} and use it as the executable
 file.
 
-@item -core @var{file}
+@item -core=@var{file}
 @itemx -c @var{file}
 Use file @var{file} as a core dump to examine.
 
-@item -command @var{file}
+@item -command=@var{file}
 @itemx -x @var{file}
 Execute _GDBN__ commands from file @var{file}.  @xref{Command Files}.
 
-@item -directory @var{directory}
+@item -directory=@var{directory}
 @itemx -d @var{directory}
 Add @var{directory} to the path to search for source files.
 @end table
@@ -734,16 +744,22 @@ Set the line speed (baud rate or bps) of any serial interface used by
 _GDBN__ for remote debugging.
 
 @item -tty @var{device}
-Run using @code{device} for your program's standard input and output.
+Run using @var{device} for your program's standard input and output.
 @end table
 
+_if__(_GENERIC__)
+_divert__(2)
+@c This text diverted to "Remote Debugging" section in general case;
+@c however, if we're doing a manual specifically for one of these, it
+@c belongs up front (in "Getting In and Out" chapter).
+_fi__(_GENERIC__)
 _if__(_I960__)
 @node i960-Nindy Remote, EB29K Remote, Mode Options, Starting _GDBN__
 @subsection _GDBN__ with a Remote i960 (Nindy)
 
-``Nindy'' is the name of a ROM Monitor program for Intel 960 target
-systems.  When _GDBN__ is configured to control a remote Intel 960 using
-Nindy, you can tell _GDBN__ how to connect to the 960 in several ways:
+@dfn{Nindy} is a ROM Monitor program for Intel 960 target systems.  When
+_GDBN__ is configured to control a remote Intel 960 using Nindy, you can
+tell _GDBN__ how to connect to the 960 in several ways:
 
 @itemize @bullet
 @item
@@ -766,7 +782,7 @@ By using the @code{target} command at any point during your _GDBN__ session.
 @subsubsection Startup with Nindy
 
 The command-line options for Nindy are detailed below.  If you simply
-start @code{_GDBP__} without using options to specify a serial port, you are
+start @code{_GDBN__} without using options to specify a serial port, you are
 prompted for it, @emph{before} you reach the ordinary _GDBN__ prompt:
 @example
 Attach /dev/ttyNN -- specify NN, or "quit" to quit:  
@@ -886,7 +902,7 @@ cu -s 9600 -l /dev/ttya
 @noindent
 The @code{cu} options shown specify, respectively, the linespeed and the
 serial port to use.  If you use @code{tip} instead, your command line
-may look something like the following instead:
+may look something like the following:
 @example
 tip -9600 /dev/ttya
 @end example
@@ -982,9 +998,7 @@ the name on the Unix side.
 
 At this point, you can set any breakpoints you wish; when you're ready
 to see your program run on the 29K board, use the _GDBN__ command
-@example
-run
-@end example
+@code{run}.
 
 To stop debugging the remote program, use the _GDBN__ @code{detach}
 command.  
@@ -1019,11 +1033,11 @@ both the UNIX host and on the VxWorks target.  The program
 
 The remote debugging interface (RDB) routines are installed and executed
 on the VxWorks target.  These routines are included in the VxWorks library
-@code{rdb.a} and are incorporated into the system image when source-level
+@file{rdb.a} and are incorporated into the system image when source-level
 debugging is enabled in the VxWorks configuration.
 
 Defining @code{INCLUDE_RDB} in the VxWorks configuration file
-@code{configAll.h} includes the RDB interface routines and spawns the
+@file{configAll.h} includes the RDB interface routines and spawns the
 source debugging task @code{tRdbTask} when VxWorks is booted.  For more
 information on configuring and remaking VxWorks, see the @cite{VxWorks
 Programmer's Guide}.
@@ -1092,7 +1106,7 @@ problems if the current working directories on the two systems differ.
 It is simplest to set the working directory on both systems to the
 directory in which the object file resides, and then to reference the
 file by its name, without any path.  Thus, to load a program
-@file{prog.o}, residing in @code{wherever/vw/demo/rdb}, on VxWorks type:
+@file{prog.o}, residing in @file{wherever/vw/demo/rdb}, on VxWorks type:
 
 @smallexample
 -> cd "wherever/vw/demo/rdb"
@@ -1126,14 +1140,18 @@ You can also attach to an existing task using the @code{attach} command as
 follows:
 
 @smallexample
-(_GDBP__) attach @var{taskId}
+(_GDBP__) attach @var{task}
 @end smallexample
 
-where @var{taskId} is the VxWorks hexadecimal task ID.  The task can be running
+where @var{task} is the VxWorks hexadecimal task ID.  The task can be running
 or suspended when you attach to it.  If running, it will be suspended at
 the time of attachment.
 
 _fi__(_VXWORKS__)
+_if__(_GENERIC__)
+_divert__
+@c end of text diverted to section "Remote Debugging" for general case
+_fi__(_GENERIC__)
 
 @node Leaving _GDBN__, Shell Commands, Starting _GDBN__, Invocation
 @section Leaving _GDBN__
@@ -1166,9 +1184,10 @@ just use the @code{shell} command.
 @item shell @var{command string}
 @kindex shell
 @cindex shell escape
-Directs _GDBN__ to invoke an inferior shell to execute @var{command string}.
-The environment variable @code{SHELL} is used if it exists, otherwise _GDBN__
-uses @code{/bin/sh}.
+Directs _GDBN__ to invoke an inferior shell to execute @var{command
+string}.  If it exists, the environment variable @code{SHELL} is used
+for the name of the shell to run.  Otherwise _GDBN__ uses
+@code{/bin/sh}.
 @end table
 
 The utility @code{make} is often needed in development environments.
@@ -1281,10 +1300,10 @@ short paragraph on how to use that command.
 
 In addition to @code{help}, you can use the _GDBN__ commands @code{info}
 and @code{show} to inquire about the state of your program, or the state
-of _GDBN__ itself.  Both commands support many ``sub-commands'', or
-topics of inquiry; this manual introduces each of them in the
-appropriate context.  The listings under ``@code{info}'' and under
-``@code{show}'' in the Index point to all the sub-commands.
+of _GDBN__ itself.  Both commands support many topics of inquiry; this
+manual introduces each of them in the appropriate context.  The listings
+under @code{info} and under @code{show} in the Index point to
+all the sub-commands.
 @c FIXME: @pxref{Index} used to be here, but even though it shows up in
 @c FIXME...the 'aux' file with a pageno the xref can't find it.  
 
@@ -1355,7 +1374,7 @@ Display the GNU ``NO WARRANTY'' statement.
 @node Compilation, Starting, Running, Running
 @section Compiling for Debugging
 
-In order to debug a program most effectively, you need to generate
+In order to debug a program effectively, you need to generate
 debugging information when you compile it.  This debugging information
 is stored in the object file; it describes the data type of each
 variable or function and the correspondence between source line numbers
@@ -1435,34 +1454,35 @@ divided into four categories:
 You specify the arguments to give your program as the arguments of the
 @code{run} command.  If a shell is available on your target, the shell
 is used to pass the arguments, so that you may use normal conventions
-(for example regular expression expansion or variable substitution) in
+(such as wildcard expansion or variable substitution) in
 describing the arguments.  In Unix systems, you can control which shell
-is used with the @code{SHELL} environment variable.
+is used with the @code{SHELL} environment variable. @xref{Arguments}.@refill
 
 @item The @i{environment.}
 Your program normally inherits its environment from _GDBN__, but you can
 use the _GDBN__ commands @code{set environment} and @code{unset
 environment} to change parts of the environment that will be given to
-the program.@refill
+the program.  @xref{Environment}.@refill
 
 @item The @i{working directory.}
 Your program inherits its working directory from _GDBN__.  You can set
 _GDBN__'s working directory with the @code{cd} command in _GDBN__.
+@xref{Working Directory}.
 
 @item The @i{standard input and output.}
 Your program normally uses the same device for standard input and
 standard output as _GDBN__ is using.  You can redirect input and output
 in the @code{run} command line, or you can use the @code{tty} command to
 set a different device for your program.
+@xref{Input/Output}.
 @end table
 
 When you issue the @code{run} command, your program begins to execute
 immediately.  @xref{Stopping}, for discussion of how to arrange for your
-program to stop.
-
-Note that once your program has been started by the @code{run} command,
-you may evaluate expressions that involve calls to functions in the
-inferior, using the @code{print} or @code{call} commands.  @xref{Data}.
+program to stop.  Once your program has been started by the @code{run}
+command (and then stopped), you may evaluate expressions that involve
+calls to functions in the inferior, using the @code{print} or
+@code{call} commands.  @xref{Data}.
 
 If the modification time of your symbol file has changed since the last
 time _GDBN__ read its symbols, _GDBN__ will discard its symbol table and re-read
@@ -1512,15 +1532,15 @@ environment without having to start _GDBN__ over again.
 Add @var{directory} to the front of the @code{PATH} environment variable
 (the search path for executables), for both _GDBN__ and your program.
 You may specify several directory names, separated by @samp{:} or
-whitespace.  If a directory is already in the path, it is moved to the
+whitespace.  If @var{directory} is already in the path, it is moved to the
 front, so it will be searched sooner.  You can use the string
 @samp{$cwd} to refer to the current working directory.
-
-This command will not repeat if you press @key{RET} a second time after
-using it once.
+@c FIXME: how is $cwd different from . or :: in 'path' or 'directory'?
+@c 'path' is explicitly nonrepeatable, but RMS points out it's silly to
+@c document that since repeating it would be a no-op.
 
 @item show paths
-@kindex info paths
+@kindex show paths
 Display the list of search paths for executables (the @code{PATH}
 environment variable).
 
@@ -1542,8 +1562,8 @@ be any string; the values of environment variables are just strings, and
 any interpretation is supplied by your program itself.  The @var{value}
 parameter is optional; if it is eliminated, the variable is set to a
 null value.
-@c FIXME: I think "any string" here doesn't include leading, trailing
-@c FIXME... blanks. Queried J Gilmore.  ---pesch@cygnus.com, 4apr91
+@c "any string" here doesn't include leading, trailing
+@c blanks. Gnu asks: does anyone care?
 
 For example, this command:
 
@@ -1553,12 +1573,13 @@ set env USER = foo
 
 @noindent
 tells a Unix program, when subsequently run, that its user is named
-@samp{foo}.
+@samp{foo}.  (The spaces around @samp{=} are used for clarity here; they
+are not actually required.)
 
 @item unset environment @var{varname}
 @kindex unset environment
 Remove variable @var{varname} from the environment to be passed to your
-program.  This is different from @samp{set env @var{varname}=};
+program.  This is different from @samp{set env @var{varname} =};
 @code{unset environment} removes the variable from the environment,
 rather than assigning it an empty value.  
 @end table
@@ -1633,8 +1654,8 @@ default to do input and output on the terminal @file{/dev/ttyb} and have
 that as their controlling terminal.
 
 An explicit redirection in @code{run} overrides the @code{tty} command's
-effect on input/output redirection, but not its effect on the
-controlling terminal.
+effect on the input/output device, but not its effect on the controlling
+terminal.
 
 When you use the @code{tty} command or redirect input in the @code{run}
 command, only the input @emph{for your program} is affected.  The input
@@ -1647,23 +1668,25 @@ for _GDBN__ still comes from your terminal.
 
 @table @code
 @item attach @var{process-id}
-If your currently selected target supports processes, this command
+This command
 attaches to a running process---one that was started outside _GDBN__.
-(@code{info files} will show your active targets).  The command takes as
+(@code{info files} will show your active targets.)  The command takes as
 argument a process ID.  The usual way to find out the process-id of
-a Unix process is with the @code{ps} utility, or with the @code{jobs -l}
+a Unix process is with the @code{ps} utility, or with the @samp{jobs -l}
 shell command.   
 
 @code{attach} will not repeat if you press @key{RET} a second time after
 executing the command.
 @end table
 
-To use @code{attach}, you must have permission to send the process a
+To use @code{attach}, you must be debugging in an environment which
+supports processes.  You must also have permission to send the process a
 signal, and it must have the same effective user ID as the _GDBN__
 process.
 
 When using @code{attach}, you should first use the @code{file} command
 to specify the program running in the process and load its symbol table.
+@xref{Files}.
 
 The first thing _GDBN__ does after arranging to debug the specified
 process is to stop it.  You can examine and modify an attached process
@@ -1681,14 +1704,14 @@ When you have finished debugging the attached process, you can use the
 the process continues its execution.  After the @code{detach} command,
 that process and _GDBN__ become completely independent once more, and you
 are ready to @code{attach} another process or start one with @code{run}.
-@code{detach} will not repeat if you press @key{RET} again after using
-it once.
+@code{detach} will not repeat if you press @key{RET} again after
+executing the command.
 @end table
 
 If you exit _GDBN__ or use the @code{run} command while you have an attached
 process, you kill that process.  By default, you will be asked for
 confirmation if you try to do either of these things; you can control
-whether or not this happens by using the @code{set confirm} command
+whether or not you need to confirm by using the @code{set confirm} command
 (@pxref{Messages/Warnings}).
 
 @group
@@ -4223,8 +4246,8 @@ a signal and would ordinary see the signal when resumed with the
 @code{continue} command; @samp{signal 0} causes it to resume without a
 signal.
 
-This command does not repeat when you press @key{RET} a second time
-after using it once.
+@code{signal} does not repeat when you press @key{RET} a second time
+after executing the command.
 @end table
 @end group
 
@@ -4696,6 +4719,12 @@ _fi__(_GENERIC__)
 @section Remote Debugging
 @cindex remote debugging
 
+_if__(_GENERIC__)
+@menu
+_undivert__(1)
+@end menu
+_fi__(_GENERIC__)
+
 If you are trying to debug a program running on a machine that can't run
 _GDBN__ in the usual way, it is often useful to use remote debugging.  For
 example, you might be debugging an operating system kernel, or debugging
@@ -4738,6 +4767,13 @@ command.
 
 Other remote targets may be available in your
 configuration of _GDBN__; use @code{help targets} to list them.  
+
+_if__(_GENERIC__)
+_undivert__(2)
+@c Text on starting up GDB in various specific cases; it goes up front
+@c in manuals configured for any of those particular situations, here
+@c otherwise. 
+_fi__(_GENERIC__)
 
 @node Controlling _GDBN__, Sequences, Targets, Top
 @chapter Controlling _GDBN__
@@ -5682,7 +5718,8 @@ unset                      [ No longer an alias for delete ]
 @end ifinfo
 
 @tex
-\halign{\tt # &\qquad#&\tt #\cr
+\vskip \parskip\vskip \baselineskip
+\halign{\tt #\hfil &\qquad#&\tt #\hfil\cr
 {\bf Old Command}         &&{\bf New Command}\cr
 add-syms                  &&add-symbol-file\cr
 delete environment        &&unset environment\cr
