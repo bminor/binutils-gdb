@@ -1,3 +1,15 @@
+Tue Oct 14 15:42:45 1997  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c (elf64_alpha_merge_ind_symbols): New function to
+	merge got and reloc entries from ind syms to their target.
+	(elf64_alpha_always_size_sections): Call it.
+	(elf64_alpha_check_relocs): Operate on the target of indirect symbols.
+	(elf64_alpha_can_merge_gots): Likewise.
+	(elf64_alpha_merge_gots): Likewise.
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Back out HJ's change,
+	as it is insufficient to handle the relocation changes as well.
+
 Mon Oct 13 23:10:08 1997  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c (elf64_alpha_calc_dynrel_sizes): Allow for RELATIVE
