@@ -1,5 +1,8 @@
 Tue Apr 28 19:41:33 1998  Tom Tromey  <tromey@cygnus.com>
 
+	* tracepoint.c (memrange_cmp): Another typo fix; `memrbnge' ->
+	`memrange'.
+
 	* tracepoint.c (memrange_cmp): Fixed typo in function intro.
 
 Tue Apr 28 17:41:20 1998  Philippe De Muyter  <phdm@macqel.be>

@@ -1092,7 +1092,7 @@ memrange_cmp (voidpa, voidpb)
   struct memrange *a, *b;
 
   a = (struct memrange *) voidpa;
-  b = (struct memrbnge *) voidpb;
+  b = (struct memrange *) voidpb;
 
   if (a->type < b->type) return -1;
   if (a->type > b->type) return  1;
