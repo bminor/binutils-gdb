@@ -55,30 +55,29 @@ floating_point=default
 gas=default
 host_alias=
 host_makefile_frag=
+moveifchange=
 next_host=
 next_prefix=
 next_site=
 next_srcdir=
 next_target=
-moveifchange=
 next_tmpdir=
 norecursion=
-removing=
 prefix=/usr/local
 progname=
 program_prefix=
 program_prefix_option=
-silent=
+redirect=">/dev/null"
+removing=
 site=
-site_option=
 site_makefile_frag=
+site_option=
 srcdir=
 srctrigger=
 subdirs=
 target_alias=
 target_makefile_frag=
 undefinedargs=
-verbose=
 version="$Revision$"
 x11=default
 
@@ -182,10 +181,6 @@ do
 		-program_prefix | --program_prefix | --program_prefi | --program_pref | --program_pre | --program_pr | --program_p | --program_ | --program | --progra | --progr | --prog | --pro)
 			next_program_prefix=yes
 			;;
-		-s | -silent | --silent | --silen | --sile | --sil)
-			silent=true
-			arguments=`echo ${arguments} | sed "s:${arg}::"`
-			;;
 		-site=* | --site=* | --sit=* | --si=*)
 			site_option=${arg}
 			site=`echo ${arg} | sed 's/^[-a-z]*=//'`
@@ -223,7 +218,8 @@ do
 			next_tmpdir=yes
 			;;
 		-v | -verbose | --v)
-			verbose=${arg}
+			redirect=
+			verbose=-v
 			;;
 		-version | -V | --version | --V)
 			echo "This is Cygnus Configure version" `echo ${version} | sed 's/[ $:]//g'`
@@ -482,7 +478,7 @@ for subdir in . ${subdirs} ; do
 	*) # otherwise relative
 		case "${subdir}" in
 		.) makesrcdir=${srcdir} ;;
-		*) makesrcdir=../${srcdir}/${subdir} ;;
+		*) makesrcdir=`echo ${subdir} | sed -e 's:[^./][^./]*:..:g'`/${srcdir}/${subdir} ;;
 		esac
 		;;
     esac
@@ -497,16 +493,15 @@ for subdir in . ${subdirs} ; do
 
     case "${removing}" in
     "")
-	if [ -n "${verbose}" -o -z "${silent}" ] ; then
-	    echo Building in ${subdir}
-	fi
+	echo Building in ${subdir}
+
 	# FIXME Should this be done recursively ??? (Useful for e.g. gdbtest)
 	# Set up the list of links to be made.
 	# ${links} is the list of link names, and ${files} is the list of names to link to.
 
 	# Make the links.
 	configlinks="${links}"
-	if [ -r config.status ] ; then
+	if [ -r ${subdir}/config.status ] ; then
 		mv -f ${subdir}/config.status ${subdir}/config.back
 	fi
 	while [ -n "${files}" ] ; do
@@ -529,10 +524,7 @@ for subdir in . ${subdirs} ; do
 			exit 1
 		fi
 
-		case "${verbose}" in
-		"") ;;
-		*)  echo "Linked \"${link}\" to \"${srcdir}/${file}\"." ;;
-		esac
+		echo "Linked \"${link}\" to \"${srcdir}/${file}\"."
 	done
 
 	# Create a .gdbinit file which runs the one in srcdir
@@ -540,8 +532,7 @@ for subdir in . ${subdirs} ; do
 
 	if [ -r ${srcdir}/${subdir}/.gdbinit ] ; then
 		case ${srcdir} in
-		.)
-			;;
+		.) ;;
 		*) cat > ${subdir}/.gdbinit <<EOF
 # ${NO_EDIT}
 dir .
@@ -678,26 +669,24 @@ EOF
 
 	rm -f ${subdir}/Makefile.tem
 
-	if [ -n "${verbose}" -o -z "${silent}" ] ; then
-		case "${host_makefile_frag}" in
-		"") using= ;;
-		*) using="and \"${host_makefile_frag}\"" ;;
-		esac
+	case "${host_makefile_frag}" in
+	"") using= ;;
+	*) using="and \"${host_makefile_frag}\"" ;;
+	esac
 
-		case "${target_makefile_frag}" in
-		"") ;;
-		*) using="${using} and \"${target_makefile_frag}\"" ;;
-		esac
+	case "${target_makefile_frag}" in
+	"") ;;
+	*) using="${using} and \"${target_makefile_frag}\"" ;;
+	esac
 
-		case "${site_makefile_frag}" in
-		"") ;;
-		*) using="${using} and \"${site_makefile_frag}\"" ;;
-		esac
+	case "${site_makefile_frag}" in
+	"") ;;
+	*) using="${using} and \"${site_makefile_frag}\"" ;;
+	esac
 
-		newusing=`echo "${using}" | sed 's/and/using/'`
-		using=${newusing}
-		echo "Created \"${Makefile}\" in" ${PWD} ${using}
-	fi
+	newusing=`echo "${using}" | sed 's/and/using/'`
+	using=${newusing}
+	echo "Created \"${Makefile}\" in" ${PWD} ${using}
 
 	. ${tmpfile}.pos
 
@@ -726,7 +715,7 @@ ${progname}" ${arguments}  "
 # ${using}" > ${subdir}/config.new
 	fi
 	chmod a+x ${subdir}/config.new
-	if [ -r config.back ] ; then
+	if [ -r ${subdir}/config.back ] ; then
 		mv -f ${subdir}/config.back ${subdir}/config.status
 	fi
 	${moveifchange} ${subdir}/config.new ${subdir}/config.status
@@ -739,10 +728,7 @@ done
 # If there are subdirectories, then recur. 
 if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then 
 	for configdir in ${configdirs} ; do
-		case "${verbose}" in
-		"") ;;
-		*) echo Configuring ${configdir}... ;;
-		esac
+		eval echo Configuring ${configdir}... ${redirect}
 
 		if [ -d ${srcdir}/${configdir} ] ; then
 			case "${srcdir}" in
@@ -781,9 +767,9 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 			fi
 
 ### The recursion line is here.
-			if ${recprog} -s ${host_alias} -target=${target_alias} \
-				${verbose} ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-				${srcdiroption} ${program_prefixoption} ${site_option} ${removing} ; then
+			if eval ${recprog} ${verbose} ${host_alias} -target=${target_alias} \
+				${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
+				${srcdiroption} ${program_prefixoption} ${site_option} ${removing} ${redirect} ; then
 				true
 			else
 				exit 1
@@ -791,18 +777,10 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 
 			cd ${POPDIR}
 		else
-			case "${verbose}" in
-			"") ;;
-			*) echo Warning: source directory \"${srcdir}/${configdir}\" is missing. ;;
-			esac
+			eval echo Warning: source directory \"${srcdir}/${configdir}\" is missing. ${redirect}
 		fi
 	done
 fi
-
-### clean up.
-
-# trap cmd above handles this now:
-#rm -f ${tmpfile}.com ${tmpfile}.tgt ${tmpfile}.hst ${tmpfile}.pos
 
 exit 0
 

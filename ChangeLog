@@ -1,5 +1,8 @@
 Fri May  8 08:31:41 1992  K. Richard Pixley  (rich@cygnus.com)
 
+	* configure: remove -s, rework -v to better accomodate guested
+	  configures.
+
 	* standards.texi: updated to 3 may, fixed librid <-> libdir typo.
 
 Fri May  1 18:00:50 1992  K. Richard Pixley  (rich@cygnus.com)
