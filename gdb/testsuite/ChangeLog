@@ -1,3 +1,7 @@
+Sat Jun 28 13:31:11 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.c++/virtfunc.exp: Remove setting of libs variable.
+
 Fri Jun 27 07:44:25 1997  Fred Fish  <fnf@cygnus.com>
 
 	* lib/gdb.exp (setup_xfail_format): New function.
