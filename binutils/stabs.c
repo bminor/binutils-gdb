@@ -1807,15 +1807,18 @@ parse_stab_range_type (dhandle, info, typename, pp, typenums)
 	    return debug_make_int_type (dhandle, 1, true);
 	  else if (n3 == 0xffff)
 	    return debug_make_int_type (dhandle, 2, true);
-	  /* -1 is used for the upper bound of (4 byte) "unsigned int"
-	     and "unsigned long", and we already checked for that, so
-	     don't need to test for it here.  */
+	  else if (n3 == 0xffffffff)
+	    return debug_make_int_type (dhandle, 4, true);
+#ifdef BFD64
+	  else if (n3 == (((bfd_vma) 0xffffffff) << 32) | 0xffffffff)
+	    return debug_make_int_type (dhandle, 8, true);
+#endif
 	}
       else if (n3 == 0
 	       && n2 < 0
 	       && (self_subrange || n2 == -8))
 	return debug_make_int_type (dhandle, - n2, true);
-      else if (n2 == - n3 - 1)
+      else if (n2 == - n3 - 1 || n2 == n3 + 1)
 	{
 	  if (n3 == 0x7f)
 	    return debug_make_int_type (dhandle, 1, false);
@@ -1823,6 +1826,10 @@ parse_stab_range_type (dhandle, info, typename, pp, typenums)
 	    return debug_make_int_type (dhandle, 2, false);
 	  else if (n3 == 0x7fffffff)
 	    return debug_make_int_type (dhandle, 4, false);
+#ifdef BFD64
+	  else if (n3 == (((bfd_vma) 0x7fffffff) << 32) | 0xffffffff)
+	    return debug_make_int_type (dhandle, 8, false);
+#endif
 	}
     }
 
@@ -3729,7 +3736,7 @@ static boolean stab_demangle_signature
 static boolean stab_demangle_qualified
   PARAMS ((struct stab_demangle_info *, const char **, debug_type *));
 static boolean stab_demangle_template
-  PARAMS ((struct stab_demangle_info *, const char **));
+  PARAMS ((struct stab_demangle_info *, const char **, char **));
 static boolean stab_demangle_class
   PARAMS ((struct stab_demangle_info *, const char **, const char **));
 static boolean stab_demangle_args
@@ -4048,7 +4055,7 @@ stab_demangle_signature (minfo, pp)
 	  /* Template.  */
 	  if (hold == NULL)
 	    hold = *pp;
-	  if (! stab_demangle_template (minfo, pp)
+	  if (! stab_demangle_template (minfo, pp, (char **) NULL)
 	      || ! stab_demangle_remember_type (minfo, hold, *pp - hold))
 	    return false;
 	  hold = NULL;
@@ -4157,10 +4164,21 @@ stab_demangle_qualified (minfo, pp, ptype)
 	++*pp;
       if (**pp == 't')
 	{
-	  /* FIXME: I don't know how to handle the ptype != NULL case
-             here.  */
-	  if (! stab_demangle_template (minfo, pp))
+	  char *name;
+
+	  if (! stab_demangle_template (minfo, pp,
+					ptype != NULL ? &name : NULL))
 	    return false;
+
+	  if (ptype != NULL)
+	    {
+	      context = stab_find_tagged_type (minfo->dhandle, minfo->info,
+					       name, strlen (name),
+					       DEBUG_KIND_CLASS);
+	      free (name);
+	      if (context == DEBUG_TYPE_NULL)
+		return false;
+	    }
 	}
       else
 	{
@@ -4256,12 +4274,14 @@ stab_demangle_qualified (minfo, pp, ptype)
   return true;
 }
 
-/* Demangle a template.  */
+/* Demangle a template.  If PNAME is not NULL, this sets *PNAME to a
+   string representation of the template.  */
 
 static boolean
-stab_demangle_template (minfo, pp)
+stab_demangle_template (minfo, pp, pname)
      struct stab_demangle_info *minfo;
      const char **pp;
+     char **pname;
 {
   const char *orig;
   unsigned int r, i;
@@ -4433,6 +4453,37 @@ stab_demangle_template (minfo, pp)
 	      *pp += len;
 	    }
 	}
+    }
+
+  /* We can translate this to a string fairly easily by invoking the
+     regular demangling routine.  */
+  if (pname != NULL)
+    {
+      char *s1, *s2, *s3, *s4;
+
+      s1 = savestring (orig, *pp - orig);
+
+      s2 = concat ("NoSuchStrinG__", s1, (const char *) NULL);
+
+      free (s1);
+
+      s3 = cplus_demangle (s2, DMGL_ANSI);
+
+      free (s2);
+
+      if (s3 != NULL)
+	s4 = strstr (s3, "::NoSuchStrinG");
+      if (s3 == NULL || s4 == NULL)
+	{
+	  stab_bad_demangle (orig);
+	  if (s3 != NULL)
+	    free (s3);
+	  return false;
+	}
+
+      *pname = savestring (s3, s4 - s3);
+
+      free (s3);
     }
 
   return true;
@@ -5049,6 +5100,7 @@ stab_demangle_fund_type (minfo, pp, ptype)
 
 	    name = savestring (hold, *pp - hold);
 	    *ptype = debug_find_named_type (minfo->dhandle, name);
+	    free (name);
 	    if (*ptype == DEBUG_TYPE_NULL)
 	      {
 		/* FIXME: It is probably incorrect to assume that
@@ -5056,29 +5108,30 @@ stab_demangle_fund_type (minfo, pp, ptype)
 		*ptype = stab_find_tagged_type (minfo->dhandle, minfo->info,
 						hold, *pp - hold,
 						DEBUG_KIND_ILLEGAL);
+		if (*ptype == DEBUG_TYPE_NULL)
+		  return false;
 	      }
-	    free (name);
 	  }
       }
       break;
 
     case 't':
-      if (! stab_demangle_template (minfo, pp))
-	return false;
-      if (ptype != NULL)
-	{
-	  debug_type t;
+      {
+	char *name;
 
-	  /* FIXME: I really don't know how a template should be
-             represented in the current type system.  Perhaps the
-             template should be demangled into a string, and the type
-             should be represented as a named type.  However, I don't
-             know what the base type of the named type should be.  */
-	  t = debug_make_void_type (minfo->dhandle);
-	  t = debug_make_pointer_type (minfo->dhandle, t);
-	  t = debug_name_type (minfo->dhandle, "TEMPLATE", t);
-	  *ptype = t;
-	}
+	if (! stab_demangle_template (minfo, pp,
+				      ptype != NULL ? &name : NULL))
+	  return false;
+	if (ptype != NULL)
+	  {
+	    *ptype = stab_find_tagged_type (minfo->dhandle, minfo->info,
+					    name, strlen (name),
+					    DEBUG_KIND_CLASS);
+	    free (name);
+	    if (*ptype == DEBUG_TYPE_NULL)
+	      return false;
+	  }
+      }
       break;
 
     default:

@@ -1,3 +1,15 @@
+Wed Jul  1 20:43:52 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* stabs.c (parse_stab_range_type): Handle 4 and 8 byte signed
+ 	integers with real upper bounds.  Handle a lower bound one larger
+ 	than the upper bound as a signed integer.  Handle 8 byte signed
+	integers.
+	(stab_demangle_template): Optionally return the demangled name of
+	the template.
+	(stab_demangle_qualified): Treat a template name as a tagged
+	type.
+	(stab_demangle_fund_type): Likewise.
+
 Wed Jul  1 16:29:50 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* objcopy.c: Minor formatting improvements.
