@@ -1,3 +1,7 @@
+Thu Jul 27 14:33:33 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* cfg-ml-pos.in (dotdot): Work around SunOS sed bug.
+
 Thu Jul 27 13:31:05 1995  Fred Fish  (fnf@cygnus.com)
 
 	* config.guess (*:Linux:*:*): First try asking the linker what the

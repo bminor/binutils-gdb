@@ -12,7 +12,7 @@ if [ -z "${with_multisubdir}" ]; then
   multisubdir=
 else
   multisubdir="/${with_multisubdir}"
-  dotdot=`echo ${with_multisubdir} | sed -e 's:[^/]*:..:g'`
+  dotdot=`echo ${with_multisubdir} | sed -e 's:[^/][^/]*:..:g'`
   # TOP is used by newlib and should not be used elsewhere for this purpose.
   # MULTITOP is the proper one to use.
   # FIXME: newlib needs to be updated to use MULTITOP so we can delete TOP.
