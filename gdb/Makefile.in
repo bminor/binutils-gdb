@@ -1158,6 +1158,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
 	infptrace.c inftarg.c irix4-nat.c irix5-nat.c \
 	lynx-nat.c m3-nat.c \
+	m68hc11-tdep.c \
 	m68k-tdep.c \
 	m88k-nat.c m88k-tdep.c mac-nat.c \
 	mcore-tdep.c \
@@ -1647,6 +1648,9 @@ p-typeprint.o: p-typeprint.c p-lang.h $(defs_h) $(expression_h) \
 
 p-valprint.o: p-valprint.c p-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h $(symtab_h) valprint.h $(value_h) $(gdb_string_h)
+
+m68hc11-tdep.o: m68hc11-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
+	$(gdbcore_h) gdb_string.h
 
 m68k-tdep.o: m68k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(value_h) \
 	$(gdbcore_h) $(gdb_string_h) $(regcache_h)
