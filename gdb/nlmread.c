@@ -222,7 +222,7 @@ nlm_symfile_read (objfile, section_offsets, mainline)
   nlm_symtab_read (abfd, offset, objfile);
 
   stabsect_build_psymtabs (objfile, section_offsets, mainline, ".stab",
-			   ".stabstr");
+			   ".stabstr", ".text");
 
   mainsym = lookup_symbol ("main", NULL, VAR_NAMESPACE, NULL, NULL);
 

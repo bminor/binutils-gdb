@@ -1,3 +1,11 @@
+Mon Jun 27 00:35:51 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* somread.c: Simplify by using stabsect_build_psymtabs.
+	* dbxread.c (stabsect_build_psymtabs): New argument "text_name"
+	corresponding to the name of the text section.  All references
+	changed.
+	(somstab_build_psymtabs): Delete function, no longer needed.
+
 Sun Jun 26 23:54:08 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* somread.c: Renamed from paread.c.  Changed function names and

@@ -203,13 +203,10 @@ extern void stabsect_build_psymtabs
 	   struct section_offsets *section_offsets,
 	   int mainline,
 	   char *stab_name,
-	   char *stabstr_name));
+	   char *stabstr_name,
+	   char *text_name));
 
 extern void elfstab_offset_sections PARAMS ((struct objfile *,
 					     struct partial_symtab *));
-
-extern void
-pastab_build_psymtabs PARAMS ((struct objfile *, struct section_offsets *,
-			       int));
 
 #undef EXTERN

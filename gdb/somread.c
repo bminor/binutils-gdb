@@ -40,12 +40,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Size of n_value and n_strx fields in a stab symbol.  */
 #define BYTES_IN_WORD 4
 
+#if 0
 #include "aout/aout64.h"
+#endif
 
 /* Various things we might complain about... */
 
 static void
-som__symfile_init PARAMS ((struct objfile *));
+som_symfile_init PARAMS ((struct objfile *));
 
 static void
 som_new_init PARAMS ((struct objfile *));
@@ -58,9 +60,6 @@ som_symfile_finish PARAMS ((struct objfile *));
 
 static void
 som_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *));
-
-static void
-free_sominfo PARAMS ((PTR));
 
 static struct section_offsets *
 som_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
@@ -107,7 +106,6 @@ som_symtab_read (abfd, addr, objfile)
      struct objfile *objfile;
 {
   unsigned int number_of_symbols;
-  unsigned int i;
   int val, dynamic;
   char *stringtab;
   asection *shlib_info;
@@ -289,8 +287,6 @@ som_symtab_read (abfd, addr, objfile)
 			     bufp->symbol_value, ms_type, 
 			     objfile);
     }
-
-  install_minimal_symbols (objfile);
 }
 
 /* Scan and build partial symbols for a symbol file.
@@ -335,44 +331,23 @@ som_symfile_read (objfile, section_offsets, mainline)
   init_minimal_symbol_collection ();
   back_to = make_cleanup (discard_minimal_symbols, 0);
 
-  make_cleanup (free_sominfo, (PTR) objfile);
-
-  /* Process the normal SOM symbol table first. */
-
   /* FIXME, should take a section_offsets param, not just an offset.  */
 
   offset = ANOFFSET (section_offsets, 0);
+
+  /* Process the normal SOM symbol table first. */
+
   som_symtab_read (abfd, offset, objfile);
 
-  /* Now process debugging information, which is contained in
-     special SOM sections.  */
+  /* Now read information from the debugging sections.  */
+  stabsect_build_psymtabs (objfile, section_offsets, mainline,
+			   "$GDB_SYMBOLS$", "$GDB_STRINGS$", "$TEXT$");
 
-  somstab_build_psymtabs (objfile, section_offsets, mainline);
+  /* Install any minimal symbols that have been collected as the current
+     minimal symbols for this objfile.  */
+  install_minimal_symbols (objfile);
 
   do_cleanups (back_to);
-}
-
-/* This cleans up the objfile's sym_stab_info pointer, and the chain of
-   stab_section_info's, that might be dangling from it.  */
-
-static void
-free_sominfo (objp)
-     PTR objp;
-{
-  struct objfile *objfile = (struct objfile *)objp;
-  struct dbx_symfile_info *dbxinfo = (struct dbx_symfile_info *)
-				     objfile->sym_stab_info;
-  struct stab_section_info *ssi, *nssi;
-
-  ssi = dbxinfo->stab_section_info;
-  while (ssi)
-    {
-      nssi = ssi->next;
-      mfree (objfile->md, ssi);
-      ssi = nssi;
-    }
-
-  dbxinfo->stab_section_info = 0;	/* Just say No mo info about this.  */
 }
 
 /* Initialize anything that needs initializing when a completely new symbol
@@ -406,101 +381,11 @@ som_symfile_finish (objfile)
 
 /* SOM specific initialization routine for reading symbols.
 
-   It is passed a pointer to a struct sym_fns which contains, among other
-   things, the BFD for the file whose symbols are being read, and a slot for
-   a pointer to "private data" which we can fill with goodies.
-
-   This routine is almost a complete ripoff of dbx_symfile_init.  The
-   common parts of these routines should be extracted and used instead of
-   duplicating this code.  FIXME. */
-
+   Nothing SOM specific left to do anymore.  */
 static void
-som_symfile_init (objfile)
-     struct objfile *objfile;
+som_symfile_init (ignore)
+     struct objfile *ignore;
 {
-  int val;
-  bfd *sym_bfd = objfile->obfd;
-  char *name = bfd_get_filename (sym_bfd);
-  asection *stabsect;		/* Section containing symbol table entries */
-  asection *stringsect;		/* Section containing symbol name strings */
-
-  stabsect = bfd_get_section_by_name (sym_bfd, "$GDB_SYMBOLS$");
-  stringsect = bfd_get_section_by_name (sym_bfd, "$GDB_STRINGS$");
-
-  /* Allocate struct to keep track of the symfile */
-  objfile->sym_stab_info = (PTR)
-    xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
-
-  memset ((PTR) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
-
-
-  /* FIXME POKING INSIDE BFD DATA STRUCTURES */
-#define	STRING_TABLE_OFFSET	(stringsect->filepos)
-#define	SYMBOL_TABLE_OFFSET	(stabsect->filepos)
-
-  /* FIXME POKING INSIDE BFD DATA STRUCTURES */
-
-  DBX_SYMFILE_INFO (objfile)->stab_section_info = NULL;
-  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, "$TEXT$");
-  if (!DBX_TEXT_SECT (objfile))
-    error ("Can't find $TEXT$ section in symbol file");
-
-  if (!stabsect)
-    return;
-
-  if (!stringsect)
-    error ("Found stabs, but not string section");
-  
-  /* FIXME: I suspect this should be external_nlist.  The size of host
-     types like long and bfd_vma should not affect how we read the
-     file.  */
-  DBX_SYMBOL_SIZE (objfile) = sizeof (struct internal_nlist);
-  DBX_SYMCOUNT (objfile) = bfd_section_size (sym_bfd, stabsect)
-    / DBX_SYMBOL_SIZE (objfile);
-  DBX_SYMTAB_OFFSET (objfile) = SYMBOL_TABLE_OFFSET;
-
-  /* Read the string table and stash it away in the psymbol_obstack.  It is
-     only needed as long as we need to expand psymbols into full symbols,
-     so when we blow away the psymbol the string table goes away as well.
-     Note that gdb used to use the results of attempting to malloc the
-     string table, based on the size it read, as a form of sanity check
-     for botched byte swapping, on the theory that a byte swapped string
-     table size would be so totally bogus that the malloc would fail.  Now
-     that we put in on the psymbol_obstack, we can't do this since gdb gets
-     a fatal error (out of virtual memory) if the size is bogus.  We can
-     however at least check to see if the size is zero or some negative
-     value. */
-
-  DBX_STRINGTAB_SIZE (objfile) = bfd_section_size (sym_bfd, stringsect);
-
-  if (DBX_SYMCOUNT (objfile) == 0
-      || DBX_STRINGTAB_SIZE (objfile) == 0)
-    return;
-
-  if (DBX_STRINGTAB_SIZE (objfile) <= 0
-      || DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
-    error ("ridiculous string table size (%d bytes).",
-	   DBX_STRINGTAB_SIZE (objfile));
-
-  DBX_STRINGTAB (objfile) =
-    (char *) obstack_alloc (&objfile -> psymbol_obstack,
-			    DBX_STRINGTAB_SIZE (objfile));
-
-  /* Now read in the string table in one big gulp.  */
-
-  val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
-  if (val < 0)
-    perror_with_name (name);
-  val = bfd_read (DBX_STRINGTAB (objfile), DBX_STRINGTAB_SIZE (objfile), 1,
-		  sym_bfd);
-  if (val == 0)
-    error ("End of file reading string table");
-  else if (val < 0)
-    /* It's possible bfd_read should be setting bfd_error, and we should be
-       checking that.  But currently it doesn't set bfd_error.  */
-    perror_with_name (name);
-  else if (val != DBX_STRINGTAB_SIZE (objfile))
-    error ("Short read reading string table");
 }
 
 /* SOM specific parsing routine for section offsets.
