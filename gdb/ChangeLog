@@ -1,3 +1,31 @@
+Tue Jun  6 10:44:25 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	From Andrew Cagney <cagney@highland.com.au>
+	* rs6000-tdep.c (single_step): Handle both little and big endian
+	breakpoints.
+	(gdb_print_insn_powerpc): Deal with disassembling both little and
+	big endian PowerPC systems.
+	(_initialize_rs6000_tdep): Use gdb_print_insn_powerpc to handle
+	disassembly, rather that assuming big endian order.
+
+	* config/rs6000/tm-rs6000.h (BREAKPOINT): Delete.
+	(BIG_BREAKPOINT): Define, big endian breakpoint instruction.
+	(LITTLE_BREAKPOINT): Define, little endian breakpoint instruction.
+
+Sat Jun  3 01:54:56 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* README:  Add note about Unixware 2.x.
+
+	* dbxread.c (process_one_symbol):  Check for exact symbol name
+	match when fixing up N_GSYM and N_STSYM symbols from Sun acc.
+
+	* valprint.c (value_print_array_elements):  Use
+	fprintf_filtered to put out `<repeats %u times>',
+	from schwab@issan.informatik.uni-dortmund.de (Andreas Schwab).
+
+	* value.h (struct value):  Change `repetitions' field from
+	`short' to `int' type.
+
 start-sanitize-arc
 Fri Jun  2 11:17:23 1995  Doug Evans  <dje@canuck.cygnus.com>
 

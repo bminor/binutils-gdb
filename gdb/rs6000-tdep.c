@@ -126,7 +126,9 @@ single_step (signal)
 {
 #define	INSNLEN(OPCODE)	 4
 
-  static char breakp[] = BREAKPOINT;
+  static char le_breakp[] = LITTLE_BREAKPOINT;
+  static char be_breakp[] = BIG_BREAKPOINT;
+  char *breakp = TARGET_BYTE_ORDER == BIG_ENDIAN ? be_breakp : le_breakp;
   int ii, insn;
   CORE_ADDR loc;
   CORE_ADDR breaks[2];
@@ -1221,12 +1223,25 @@ find_toc_address (pc)
   return loadinfo[toc_entry].dataorg + loadinfo[toc_entry].toc_offset;
 }
 
+#ifdef GDB_TARGET_POWERPC
+int
+gdb_print_insn_powerpc (memaddr, info)
+     bfd_vma memaddr;
+     disassemble_info *info;
+{
+  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
+    return print_insn_big_powerpc (memaddr, info);
+  else
+    return print_insn_little_powerpc (memaddr, info);
+}
+#endif
+
 void
 _initialize_rs6000_tdep ()
 {
   /* FIXME, this should not be decided via ifdef. */
 #ifdef GDB_TARGET_POWERPC
-  tm_print_insn = print_insn_big_powerpc;
+  tm_print_insn = gdb_print_insn_powerpc;
 #else
   tm_print_insn = print_insn_rs6000;
 #endif

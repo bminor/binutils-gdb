@@ -43,10 +43,6 @@ extern char *corefile;
 #endif
 extern int inferior_pid;
 
-/* setpgrp() messes up controling terminal. The other version of it
-   requires libbsd.a. */
-#define	setpgrp(XX,YY)		setpgid (XX, YY)
-
 /* We are missing register descriptions in the system header files. Sigh! */
 
 struct regs {
@@ -153,7 +149,8 @@ function_frame_info PARAMS ((CORE_ADDR, struct aix_framedata *));
 
 /* Sequence of bytes for breakpoint instruction.  */
 
-#define BREAKPOINT {0x7d, 0x82, 0x10, 0x08}
+#define BIG_BREAKPOINT { 0x7d, 0x82, 0x10, 0x08 }
+#define LITTLE_BREAKPOINT { 0x08, 0x10, 0x82, 0x7d }
 
 /* Amount PC must be decremented by after a breakpoint.
    This is often the number of bytes in BREAKPOINT
@@ -405,7 +402,7 @@ CORE_ADDR rs6000_frame_chain PARAMS ((struct frame_info *));
     /* We're in get_prev_frame_info */ \
     /* and this is a special signal frame.  */ \
     /* (fi->pc will be some low address in the kernel, */ \
-    /*  to which the signal handler returns).  */
+    /*  to which the signal handler returns).  */ \
     fi->signal_handler_caller = 1;
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
