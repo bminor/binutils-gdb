@@ -1712,6 +1712,9 @@ sh_do_align (n, fill, len)
       static const unsigned char big_nop_pattern[] = { 0x00, 0x09 };
       static const unsigned char little_nop_pattern[] = { 0x09, 0x00 };
 
+      /* First align to a 2 byte boundary, in case there is an odd
+         .byte.  */
+      frag_align (2, 0);
       if (target_big_endian)
 	frag_align_pattern (n, big_nop_pattern, sizeof big_nop_pattern);
       else
