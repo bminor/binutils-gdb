@@ -65,8 +65,10 @@ tm-mipsm3.h
 tm-mipsv4.h
 tm-vr4300.h
 tm-vr4300el.h
+tm-vxmips.h
 vr4300.mt
 vr4300el.mt
+vxmips.mt
 xm-irix3.h
 xm-irix4.h
 xm-irix5.h
