@@ -1,5 +1,18 @@
 2003-09-16  Andrew Cagney  <cagney@redhat.com>
 
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Set the 32 bit
+	"use_struct_convention" to "ppc_linux_use_struct_convention".
+	(ppc_linux_use_struct_convention): New function.
+	* rs6000-tdep.c (rs6000_use_struct_convention): New function.
+	(rs6000_gdbarch_init): For AIX, set "use_struct_convention" to
+	"rs6000_use_struct_convention".
+	* ppc-tdep.h (ppc_sysv_abi_broken_use_struct_convention): Delete
+	declaration.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_broken_use_struct_convention):
+	Delete function.
+
+2003-09-16  Andrew Cagney  <cagney@redhat.com>
+
 	* buildsym.c: Remove more occurances of "register".
 	* coffread.c, dbxread.c, dcache.c, dwarf2read.c: Ditto.
 	* environ.c, eval.c, f-valprint.c, findvar.c: Ditto.

@@ -591,6 +591,20 @@ ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
   return val;
 }
 
+/* For historic reasons, PPC 32 GNU/Linux follows PowerOpen rather
+   than the 32 bit SYSV R4 ABI structure return convention - all
+   structures, no matter their size, are put in memory.  Vectors,
+   which were added later, do get returned in a register though.  */
+
+static int     
+ppc_linux_use_struct_convention (int gcc_p, struct type *value_type)
+{  
+  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
+      && TYPE_VECTOR (value_type))
+    return 0;                            
+  return 1;
+}
+
 /* Fetch (and possibly build) an appropriate link_map_offsets
    structure for GNU/Linux PPC targets using the struct offsets
    defined in link.h (but without actual reference to that file).
@@ -1017,15 +1031,17 @@ ppc_linux_init_abi (struct gdbarch_info info,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  /* Until November 2001, gcc was not complying to the SYSV ABI for
-     returning structures less than or equal to 8 bytes in size. It was
-     returning everything in memory. When this was corrected, it wasn't
-     fixed for native platforms.  */
-  set_gdbarch_use_struct_convention (gdbarch,
-                                   ppc_sysv_abi_broken_use_struct_convention);
-
   if (tdep->wordsize == 4)
     {
+      /* Until November 2001, gcc did not comply with the 32 bit SysV
+	 R4 ABI requirement that structures less than or equal to 8
+	 bytes should be returned in registers.  Instead GCC was using
+	 the the AIX/PowerOpen ABI - everything returned in memory
+	 (well ignoring vectors that is).  When this was corrected, it
+	 wasn't fixed for GNU/Linux native platform.  Use the
+	 PowerOpen struct convention.  */
+      set_gdbarch_use_struct_convention (gdbarch, ppc_linux_use_struct_convention);
+
       /* Note: kevinb/2002-04-12: See note in rs6000_gdbarch_init regarding
 	 *_push_arguments().  The same remarks hold for the methods below.  */
       set_gdbarch_frameless_function_invocation (gdbarch,

@@ -1372,6 +1372,18 @@ e500_extract_return_value (struct type *valtype, struct regcache *regbuf, void *
     }
 }
 
+/* PowerOpen always puts structures in memory.  Vectors, which were
+   added later, do get returned in a register though.  */
+
+static int     
+rs6000_use_struct_convention (int gcc_p, struct type *value_type)
+{  
+  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
+      && TYPE_VECTOR (value_type))
+    return 0;                            
+  return 1;
+}
+
 static void
 rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 {
@@ -2957,7 +2969,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     				       ppc_sysv_abi_use_struct_convention);
   else
     set_gdbarch_use_struct_convention (gdbarch,
-				       generic_use_struct_convention);
+				       rs6000_use_struct_convention);
 
   set_gdbarch_frameless_function_invocation (gdbarch,
                                          rs6000_frameless_function_invocation);
