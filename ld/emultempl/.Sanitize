@@ -25,16 +25,17 @@ Do-first:
 Things-to-keep:
 
 README
-stringify.sed
 elf32.em
 generic.em
 gld960.em
 gld960c.em
 hppaelf.em
+i386pe.em
 linux.em
 lnk960.em
 m88kbcs.em
 mipsecoff.em
+stringify.sed
 sunos.em
 vanilla.em
 

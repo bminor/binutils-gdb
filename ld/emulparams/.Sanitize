@@ -45,10 +45,10 @@ alpha.sh
 coff_sparc.sh
 ebmon29k.sh
 elf32_sparc.sh
-elf64_sparc.sh
 elf32bmip.sh
 elf32lmip.sh
 elf32ppc.sh
+elf64_sparc.sh
 elf32ppcle.sh
 elf_i386.sh
 gld960.sh
@@ -59,8 +59,8 @@ h8300h.sh
 h8500.sh
 h8500b.sh
 h8500c.sh
-h8500s.sh
 h8500m.sh
+h8500s.sh
 hp300bsd.sh
 hp3hpux.sh
 hppaelf.sh
@@ -73,6 +73,7 @@ i386lynx.sh
 i386mach.sh
 i386nbsd.sh
 i386nw.sh
+i386pe.sh
 lnk960.sh
 m68kaout.sh
 m68kcoff.sh

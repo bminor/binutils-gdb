@@ -41,17 +41,18 @@ Things-to-keep:
 
 alpha.mt
 alphaosf.mh
+cf-h8300h.mt
 coff-a29k.mt
 coff-h8300.mt
-cf-h8300h.mt
 coff-h8500.mt
 coff-sh.mt
 coff-sparc.mt
+coff-w65.mt
 delta88.mh
 dgux.mh
 ebmon29k.mt
-go32.mt
 go32.mh
+go32.mt
 hp300.mh
 hp300bsd.mt
 hp300hpux.mt
@@ -70,6 +71,7 @@ i386-lynx.mt
 i386-mach.mt
 i386-nbsd.mt
 i386-nw.mt
+i386-pe.mt
 i386bsd.mh
 i386linux.mh
 i386lynx.mh
@@ -82,21 +84,21 @@ i960coff.mt
 ieee-h8300.mt
 irix4.mh
 m68k-coff.mt
-m68k.mt
 m68k-elf.mt
 m68k-lynx.mt
 m68k-nbsd.mt
+m68k.mt
 m68klynx.mh
 m68kv.mt
 m88k-bcs.mt
-mipsbsd.mh
-mipsbsd.mt
 mips-big.mt
 mips-idt.mt
+mips-lit.mt
 mipsb-elf32.mt
+mipsbsd.mh
+mipsbsd.mt
 mipsl-elf32.mt
 mipsl-idt.mt
-mips-lit.mt
 news.mt
 ns32k-nbsd.mt
 ose68.mt
@@ -108,10 +110,10 @@ riscix.mt
 rtbsd.mh
 sa29200.mt
 solaris2.mh
-sparc64-elf.mt
 sparc-ll.mh
 sparc-lynx.mt
 sparc-nbsd.mt
+sparc64-elf.mt
 st2000.mt
 sun3.mh
 sun3.mt
@@ -121,7 +123,6 @@ vax.mt
 vsta.mt
 vxworks68.mt
 z8ksim.mt
-coff-w65.mt
 
 Things-to-lose:
 
