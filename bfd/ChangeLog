@@ -1,3 +1,8 @@
+Tue Jan 30 12:09:04 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* syms.c (_bfd_stab_section_find_nearest_line): Add casts to avoid
+	warnings.
+
 Mon Jan 29 14:27:24 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* libcoff-in.h: aligned newly exported names with bfd naming 
