@@ -1332,7 +1332,7 @@ void
 initialize_non_multiarch ()
 {
   alloc_gdbarch_data (&startup_gdbarch);
-  init_gdbarch_swap (&startup_gdbarch)
+  init_gdbarch_swap (&startup_gdbarch);
   init_gdbarch_data (&startup_gdbarch);
 }
 EOF
