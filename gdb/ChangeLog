@@ -1,3 +1,8 @@
+Thu Aug  7 14:08:23 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* configure.in: Change required Tix version to 4.1.8.0 .
+	* configure: Rebuilt.
+
 Thu Aug  7 13:39:31 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* ocd.h: add OCD_SET_CONNECTION

@@ -320,14 +320,14 @@ if test "${enable_gdbtk}" = "yes"; then
 	   CY_AC_PATH_TIX
 
 	   # now look for tix library stuff
-	   TIXVERSION=4.1.7.6
+	   TIXVERSION=4.1.8.0
 	   . ${ac_cv_c_tclconfig}/tclConfig.sh
 	   case "${host}" in
 	   *-*-cygwin32*)
 		tixdir=../tix/win/tcl7.6
 		;;
 	   *)
-		tixdir=../tix/unix/tk4.2
+		tixdir=../tix/unix/tk8.0
 		;;
 	   esac 
 	   if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
