@@ -37,7 +37,7 @@ mn10300 target		Andrew Cagney		cagney@cygnus.com
 powerpc target		Kevin Buettner		kevinb@cygnus.com
 			Elena Zannoni		ezannoni@cygnus.com
 arm target		Fernando Nasser		fnasser@cygnus.com
-			Jim Ingham		jingham@cygnus.com
+			Jim Ingham		jingham@apple.com
 			Scott Bambrough		scottb@netwinder.org
 m32r target		Michael Snyder		msnyder@cygnus.com
 IA-64 target		Kevin Buettner		kevinb@cygnus.com
@@ -112,9 +112,9 @@ remote.c		Andrew Cagney		cagney@cygnus.com
 include/remote-sim.h, remote-sim.c
 			Andrew Cagney		cagney@cygnus.com
 sds protocol		Fernando Nasser		fnasser@cygnus.com
-			Jim Ingham		jingham@cygnus.com
+			Jim Ingham		jingham@apple.com
 rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
-			Jim Ingham		jingham@cygnus.com
+			Jim Ingham		jingham@apple.com
 gdbserver		Stan Shebs		shebs@apple.com
 documentation	 	Stan Shebs		shebs@apple.com
 			Eli Zaretskii		eliz@gnu.org
@@ -129,9 +129,9 @@ UI: External (user) interfaces.
 
 command interpreter	Fernando Nasser		fnasser@cygnus.com
 gdbtk (c & tcl)		Syd Polk		spolk@cygnus.com
-			Jim Ingham		jingham@cygnus.com
+			Jim Ingham		jingham@apple.com
 libgui (w/foundry, sn)	Syd Polk		spolk@cygnus.com
-			Jim Ingham		jingham@cygnus.com
+			Jim Ingham		jingham@apple.com
 mi (gdb/mi)		Andrew Cagney		cagney@cygnus.com
 			Elena Zannoni           ezannoni@cygnus.com
 			Fernando Nasser		fnasser@cygnus.com

@@ -35,16 +35,6 @@ and	ftp://sourceware.cygnus.com/pub/binutils
 
 --
 
-gdb-cvs fails to build on freebsd-elf
-http://sourceware.cygnus.com/ml/gdb/2000-04/msg00004.html
-
-Either the FreeBSD group need to contribute their local GDB changes
-back to the master sources or someone needs to provides a new
-(clean-room) implementation.  Since the former involves a fairly
-complicated assignment the latter may be easier. [cagney]
-
---
-
 Generic: lin-thread cannot handle thread exit (Mark Kettenis, Michael
 Snyder) http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00525.html
 
@@ -452,6 +442,14 @@ Eliminate abort ().
 GDB should never abort.  GDB should either throw ``error ()'' or
 ``internal_error ()''.  Better still GDB should naturally unwind with
 an error status.
+
+--
+
+GDB probably doesn't build on FreeBSD pre 2.2.x
+http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00378.html
+
+Fixes to get FreeBSD working on 2.2.x, 3.x and 4.x caused the code to
+suffer bit rot.
 
 --
 
