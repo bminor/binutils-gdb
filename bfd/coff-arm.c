@@ -1246,8 +1246,15 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
         {
           if (info->relocateable)
             continue;
+#if 0  /* We must not ignore the symbol value.  If the symbol is
+	  within the same section, the relocation should have already
+	  been fixed, but if it is not, we'll be handed a reloc into
+	  the beginning of the symbol's section, so we must not cancel
+	  out the symbol's value, otherwise we'll be adding it in
+	  twice.  */
           if (sym != NULL && sym->n_scnum != 0)
             addend += sym->n_value;
+#endif
         }
 
       val = 0;
