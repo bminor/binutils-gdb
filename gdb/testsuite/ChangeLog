@@ -1,3 +1,10 @@
+2003-09-25  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/namespace.exp: Tweak comments.  Add non-quoted versions
+	of some print tests, where appropriate.  Add tests for C::D::cd,
+	E::ce, F::cXfX, G::XgX.
+	* gdb.cp/namespace.cc: Add XgX, cXfX, ce.
+
 2003-09-25  Richard Earnshaw  <rearnsha@arm.com>
 
 	* lib/java.exp (java_init): Import target_alias before using it.

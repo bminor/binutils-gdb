@@ -379,11 +379,9 @@ extern struct value *value_struct_elt (struct value **argp,
 				       char *name, int *static_memfuncp,
 				       char *err);
 
-extern struct value *value_struct_elt_for_reference (struct type *domain,
-						     int offset,
-						     struct type *curtype,
-						     char *name,
-						     struct type *intype);
+extern struct value *value_aggregate_elt (struct type *curtype,
+					  char *name,
+					  enum noside noside);
 
 extern struct value *value_static_field (struct type *type, int fieldno);
 

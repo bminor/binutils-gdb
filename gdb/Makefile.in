@@ -1412,7 +1412,7 @@ ada-lex.c: ada-lex.l
 .PRECIOUS: c-exp.tab.c
 c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(charset_h) $(block_h)
+	$(symfile_h) $(objfiles_h) $(charset_h) $(block_h) $(cp_support_h)
 c-exp.tab.c: c-exp.y
 	$(SHELL) $(YLWRAP) "$(YACC)" \
 	    $(srcdir)/c-exp.y  y.tab.c c-exp.tmp -- $(YFLAGS) 
@@ -2418,7 +2418,8 @@ valarith.o: valarith.c $(defs_h) $(value_h) $(symtab_h) $(gdbtypes_h) \
 valops.o: valops.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(value_h) $(frame_h) \
 	$(inferior_h) $(gdbcore_h) $(target_h) $(demangle_h) $(language_h) \
 	$(gdbcmd_h) $(regcache_h) $(cp_abi_h) $(block_h) $(infcall_h) \
-	$(dictionary_h) $(cp_support_h) $(gdb_string_h) $(gdb_assert_h)
+	$(dictionary_h) $(cp_support_h) $(gdb_string_h) $(gdb_assert_h) \
+	$(cp_support_h)
 valprint.o: valprint.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(language_h) \
 	$(annotate_h) $(valprint_h) $(floatformat_h) $(doublest_h)

@@ -75,6 +75,11 @@ namespace
   namespace G
   {
     int Xg = 10;
+
+    namespace
+    {
+      int XgX = 11;
+    }
   }
 }
 
@@ -90,12 +95,22 @@ namespace C
     namespace F
     {
       int cXf = 7;
+
+      namespace
+      {
+	int cXfX = 8;
+      }
     }
   }
 
   namespace C
   {
     int cc = 2;
+  }
+
+  namespace E
+  {
+    int ce = 4;
   }
 
   namespace D
@@ -118,14 +133,18 @@ namespace C
       //cc;
       C::cc;
       cd;
+      //C::D::cd;
       E::cde;
       shadow;
+      //E::ce;
       cX;
       F::cXf;
+      F::cXfX;
       X;
       G::Xg;
       //cXOtherFile;
       //XOtherFile;
+      G::XgX;
 
       return;
     }

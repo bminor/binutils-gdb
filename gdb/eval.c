@@ -408,11 +408,9 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_SCOPE:
       tem = longest_to_int (exp->elts[pc + 2].longconst);
       (*pos) += 4 + BYTES_TO_EXP_ELEM (tem + 1);
-      arg1 = value_struct_elt_for_reference (exp->elts[pc + 1].type,
-					     0,
-					     exp->elts[pc + 1].type,
-					     &exp->elts[pc + 3].string,
-					     NULL_TYPE);
+      arg1 = value_aggregate_elt (exp->elts[pc + 1].type,
+				  &exp->elts[pc + 3].string,
+				  noside);
       if (arg1 == NULL)
 	error ("There is no field named %s", &exp->elts[pc + 3].string);
       return arg1;

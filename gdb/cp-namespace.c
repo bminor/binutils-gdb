@@ -508,6 +508,41 @@ lookup_symbol_file (const char *name,
   return NULL;
 }
 
+/* Look up a type named NESTED_NAME that is nested inside the C++
+   class or namespace given by PARENT_TYPE, from within the context
+   given by BLOCK.  Return NULL if there is no such nested type.  */
+
+/* FIXME: carlton/2003-09-24: For now, this only works for nested
+   namespaces; the patch to make this work on other sorts of nested
+   types is next on my TODO list.  */
+
+struct type *
+cp_lookup_nested_type (struct type *parent_type,
+		       const char *nested_name,
+		       const struct block *block)
+{
+  switch (TYPE_CODE (parent_type))
+    {
+    case TYPE_CODE_NAMESPACE:
+      {
+	const char *parent_name = TYPE_TAG_NAME (parent_type);
+	struct symbol *sym = cp_lookup_symbol_namespace (parent_name,
+							 nested_name,
+							 NULL,
+							 block,
+							 VAR_DOMAIN,
+							 NULL);
+	if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
+	  return NULL;
+	else
+	  return SYMBOL_TYPE (sym);
+      }
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "cp_lookup_nested_type called on a non-namespace.");
+    }
+}
+
 /* Now come functions for dealing with symbols associated to
    namespaces.  (They're used to store the namespaces themselves, not
    objects that live in the namespaces.)  These symbols come in two

@@ -1,3 +1,20 @@
+2003-09-25  David Carlton  <carlton@kealia.com>
+
+	* c-exp.y: Include cp-support.h.  Add qualified_type.
+	(yylex): Delete nested type hack; add comments.
+	* cp-namespace.c (cp_lookup_nested_type): New function.
+	* cp-support.h: Declare cp_lookup_nested_type.
+	* eval.c (evaluate_subexp_standard): Call value_aggregate_elt
+	instead of value_struct_elt_for_reference.
+	* valops.c: Include cp-support.h.
+	(value_aggregate_elt): New function.
+	(value_namespace_elt): Ditto.
+	(value_struct_elt_for_reference): Make static.
+	* value.h: Delete declaration of value_struct_elt_for_reference;
+	add declaration for value_aggregate_elt.
+	* Makefile.in (c-exp.tab.o): Depend on $(cp_support_h).
+	(valops.o): Ditto.
+
 2003-09-25  Daniel Jacobowitz  <drow@mvista.com>
 
 	* stack.c: Include "reggroups.h".

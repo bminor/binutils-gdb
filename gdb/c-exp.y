@@ -51,6 +51,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 #include "charset.h"
 #include "block.h"
+#include "cp-support.h"
 
 /* Flag indicating we're dealing with HP-compiled objects */ 
 extern int hp_som_som_object_present;
@@ -153,7 +154,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly
 %type <lval> rcurly
-%type <tval> type typebase
+%type <tval> type typebase qualified_type
 %type <tvec> nonempty_typelist
 /* %type <bval> block */
 
@@ -595,7 +596,8 @@ qualified_name:	typebase COLONCOLON name
 			{
 			  struct type *type = $1;
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-			      && TYPE_CODE (type) != TYPE_CODE_UNION)
+			      && TYPE_CODE (type) != TYPE_CODE_UNION
+			      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
 			    error ("`%s' is not defined as an aggregate type.",
 				   TYPE_NAME (type));
 
@@ -609,7 +611,8 @@ qualified_name:	typebase COLONCOLON name
 			  struct type *type = $1;
 			  struct stoken tmp_token;
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-			      && TYPE_CODE (type) != TYPE_CODE_UNION)
+			      && TYPE_CODE (type) != TYPE_CODE_UNION
+			      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
 			    error ("`%s' is not defined as an aggregate type.",
 				   TYPE_NAME (type));
 
@@ -888,6 +891,80 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = follow_types ($2); }
 	| typebase const_or_volatile_or_space_identifier_noopt 
 			{ $$ = follow_types ($1); }
+	| qualified_type
+	;
+
+/* FIXME: carlton/2003-09-25: This next bit leads to lots of
+   reduce-reduce conflicts, because the parser doesn't know whether or
+   not to use qualified_name or qualified_type: the rules are
+   identical.  If the parser is parsing 'A::B::x', then, when it sees
+   the second '::', it knows that the expression to the left of it has
+   to be a type, so it uses qualified_type.  But if it is parsing just
+   'A::B', then it doesn't have any way of knowing which rule to use,
+   so there's a reduce-reduce conflict; it picks qualified_name, since
+   that occurs earlier in this file than qualified_type.
+
+   There's no good way to fix this with the grammar as it stands; as
+   far as I can tell, some of the problems arise from ambiguities that
+   GDB introduces ('start' can be either an expression or a type), but
+   some of it is inherent to the nature of C++ (you want to treat the
+   input "(FOO)" fairly differently depending on whether FOO is an
+   expression or a type, and if FOO is a complex expression, this can
+   be hard to determine at the right time).  Fortunately, it works
+   pretty well in most cases.  For example, if you do 'ptype A::B',
+   where A::B is a nested type, then the parser will mistakenly
+   misidentify it as an expression; but evaluate_subexp will get
+   called with 'noside' set to EVAL_AVOID_SIDE_EFFECTS, and everything
+   will work out anyways.  But there are situations where the parser
+   will get confused: the most common one that I've run into is when
+   you want to do
+
+     print *((A::B *) x)"
+
+   where the parser doesn't realize that A::B has to be a type until
+   it hits the first right paren, at which point it's too late.  (The
+   workaround is to type "print *(('A::B' *) x)" instead.)  (And
+   another solution is to fix our symbol-handling code so that the
+   user never wants to type something like that in the first place,
+   because we get all the types right without the user's help!)
+
+   Perhaps we could fix this by making the lexer smarter.  Some of
+   this functionality used to be in the lexer, but in a way that
+   worked even less well than the current solution: that attempt
+   involved having the parser sometimes handle '::' and having the
+   lexer sometimes handle it, and without a clear division of
+   responsibility, it quickly degenerated into a big mess.  Probably
+   the eventual correct solution will give more of a role to the lexer
+   (ideally via code that is shared between the lexer and
+   decode_line_1), but I'm not holding my breath waiting for somebody
+   to get around to cleaning this up...  */
+
+/* FIXME: carlton/2003-09-25: Currently, the only qualified type
+   symbols that we generate are nested namespaces.  Next on my TODO
+   list is to generate all nested type names properly (or at least as
+   well as possible, assuming that we're using DWARF-2).  */
+
+qualified_type: typebase COLONCOLON name
+		{
+		  struct type *type = $1;
+		  struct type *new_type;
+		  char *ncopy = alloca ($3.length + 1);
+
+		  memcpy (ncopy, $3.ptr, $3.length);
+		  ncopy[$3.length] = '\0';
+
+		  if (TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
+		    error ("`%s' is not defined as a namespace.",
+			   TYPE_NAME (type));
+
+		  new_type = cp_lookup_nested_type (type, ncopy,
+						    expression_context_block);
+		  if (new_type == NULL)
+		    error ("No type \"%s\" in namespace \"%s\".",
+			   ncopy, TYPE_NAME (type));
+		  
+		  $$ = new_type;
+		}
 	;
 
 typename:	TYPENAME
@@ -1633,7 +1710,13 @@ yylex ()
      string to get a reasonable class/namespace spec or a
      fully-qualified name.  This is a kludge to get around the
      HP aCC compiler's generation of symbol names with embedded
-     colons for namespace and nested classes. */ 
+     colons for namespace and nested classes. */
+
+  /* NOTE: carlton/2003-09-24: I don't entirely understand the
+     HP-specific code, either here or in linespec.  Having said that,
+     I suspect that we're actually moving towards their model: we want
+     symbols whose names are fully qualified, which matches the
+     description above.  */
   if (unquoted_expr)
     {
       /* Only do it if not inside single quotes */ 
@@ -1687,92 +1770,10 @@ yylex ()
 
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
         {
-#if 1
-	  /* Despite the following flaw, we need to keep this code enabled.
-	     Because we can get called from check_stub_method, if we don't
-	     handle nested types then it screws many operations in any
-	     program which uses nested types.  */
-	  /* In "A::x", if x is a member function of A and there happens
-	     to be a type (nested or not, since the stabs don't make that
-	     distinction) named x, then this code incorrectly thinks we
-	     are dealing with nested types rather than a member function.  */
-
-	  char *p;
-	  char *namestart;
-	  struct symbol *best_sym;
-
-	  /* Look ahead to detect nested types.  This probably should be
-	     done in the grammar, but trying seemed to introduce a lot
-	     of shift/reduce and reduce/reduce conflicts.  It's possible
-	     that it could be done, though.  Or perhaps a non-grammar, but
-	     less ad hoc, approach would work well.  */
-
-	  /* Since we do not currently have any way of distinguishing
-	     a nested type from a non-nested one (the stabs don't tell
-	     us whether a type is nested), we just ignore the
-	     containing type.  */
-
-	  p = lexptr;
-	  best_sym = sym;
-	  while (1)
-	    {
-	      /* Skip whitespace.  */
-	      while (*p == ' ' || *p == '\t' || *p == '\n')
-		++p;
-	      if (*p == ':' && p[1] == ':')
-		{
-		  /* Skip the `::'.  */
-		  p += 2;
-		  /* Skip whitespace.  */
-		  while (*p == ' ' || *p == '\t' || *p == '\n')
-		    ++p;
-		  namestart = p;
-		  while (*p == '_' || *p == '$' || (*p >= '0' && *p <= '9')
-			 || (*p >= 'a' && *p <= 'z')
-			 || (*p >= 'A' && *p <= 'Z'))
-		    ++p;
-		  if (p != namestart)
-		    {
-		      struct symbol *cur_sym;
-		      /* As big as the whole rest of the expression, which is
-			 at least big enough.  */
-		      char *ncopy = alloca (strlen (tmp)+strlen (namestart)+3);
-		      char *tmp1;
-
-		      tmp1 = ncopy;
-		      memcpy (tmp1, tmp, strlen (tmp));
-		      tmp1 += strlen (tmp);
-		      memcpy (tmp1, "::", 2);
-		      tmp1 += 2;
-		      memcpy (tmp1, namestart, p - namestart);
-		      tmp1[p - namestart] = '\0';
-		      cur_sym = lookup_symbol (ncopy, expression_context_block,
-					       VAR_DOMAIN, (int *) NULL,
-					       (struct symtab **) NULL);
-		      if (cur_sym)
-			{
-			  if (SYMBOL_CLASS (cur_sym) == LOC_TYPEDEF)
-			    {
-			      best_sym = cur_sym;
-			      lexptr = p;
-			    }
-			  else
-			    break;
-			}
-		      else
-			break;
-		    }
-		  else
-		    break;
-		}
-	      else
-		break;
-	    }
-
-	  yylval.tsym.type = SYMBOL_TYPE (best_sym);
-#else /* not 0 */
+	  /* NOTE: carlton/2003-09-25: There used to be code here to
+	     handle nested types.  It didn't work very well.  See the
+	     comment before qualified_type for more info.  */
 	  yylval.tsym.type = SYMBOL_TYPE (sym);
-#endif /* not 0 */
 	  return TYPENAME;
         }
     if ((yylval.tsym.type = lookup_primitive_typename (tmp)) != 0)

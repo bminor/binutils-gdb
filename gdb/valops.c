@@ -41,6 +41,7 @@
 #include <errno.h>
 #include "gdb_string.h"
 #include "gdb_assert.h"
+#include "cp-support.h"
 
 /* Flag indicating HP compilers were used; needed to correctly handle some
    value operations with HP aCC code/runtime. */
@@ -62,6 +63,17 @@ static struct value *search_struct_method (char *, struct value **,
 				       int, int *, struct type *);
 
 static int check_field_in (struct type *, const char *);
+
+
+static struct value *value_struct_elt_for_reference (struct type *domain,
+						     int offset,
+						     struct type *curtype,
+						     char *name,
+						     struct type *intype);
+
+static struct value *value_namespace_elt (const struct type *curtype,
+					  const char *name,
+					  enum noside noside);
 
 static CORE_ADDR allocate_space_in_inferior (int);
 
@@ -2208,6 +2220,30 @@ check_field (struct value *arg1, const char *name)
 }
 
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
+   return the appropriate member.  This function is used to resolve
+   user expressions of the form "DOMAIN::NAME".  For more details on
+   what happens, see the comment before
+   value_struct_elt_for_reference.  */
+
+struct value *
+value_aggregate_elt (struct type *curtype,
+		     char *name,
+		     enum noside noside)
+{
+  switch (TYPE_CODE (curtype))
+    {
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      return value_struct_elt_for_reference (curtype, 0, curtype, name, NULL);
+    case TYPE_CODE_NAMESPACE:
+      return value_namespace_elt (curtype, name, noside);
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "non-aggregate type in value_aggregate_elt");
+    }
+}
+
+/* C++: Given an aggregate type CURTYPE, and a member name NAME,
    return the address of this member as a "pointer to member"
    type.  If INTYPE is non-null, then it will be the type
    of the member we are looking for.  This will help us resolve
@@ -2345,6 +2381,37 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	return v;
     }
   return 0;
+}
+
+/* C++: Return the member NAME of the namespace given by the type
+   CURTYPE.  */
+
+static struct value *
+value_namespace_elt (const struct type *curtype,
+		     const char *name,
+		     enum noside noside)
+{
+  const char *namespace_name = TYPE_TAG_NAME (curtype);
+  struct symbol *sym;
+  struct value *retval;
+
+  sym = cp_lookup_symbol_namespace (namespace_name, name, NULL,
+				    get_selected_block (0), VAR_DOMAIN,
+				    NULL);
+
+  if (sym == NULL)
+    retval = NULL;
+  else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
+	   && (SYMBOL_CLASS (sym) == LOC_TYPEDEF))
+    retval = allocate_value (SYMBOL_TYPE (sym));
+  else
+    retval = value_of_variable (sym, get_selected_block (0));
+
+  if (retval == NULL)
+    error ("No symbol \"%s\" in namespace \"%s\".", name,
+	   TYPE_TAG_NAME (curtype));
+
+  return retval;
 }
 
 
