@@ -351,22 +351,27 @@ cfi_get_label (void)
     {
       if ((S_GET_VALUE (symbolP) == frag_now_fix ())
 	  && (S_GET_SEGMENT (symbolP) == now_seg))
-	{
-	  return symbolP;
-	}
+	return symbolP;
+
       snprintf (symname, sizeof (symname), "%s_0x%lx_%u",
 		symbase, (long) frag_now_fix (), i++);
     }
+#ifdef BFD_ASSEMBLER
   symbolP = (symbolS *) local_symbol_make (symname, now_seg,
 					   (valueT) frag_now_fix (),
 					   frag_now);
+#else
+  symbolP = symbol_make (symname);
+#endif
   return symbolP;
 }
 
 static void
 dot_cfi_startproc (void)
 {
+#ifdef tc_cfi_frame_initial_instructions
   const char *simple = "simple";
+#endif
 
   if (cfi_info)
     {
@@ -596,7 +601,7 @@ dot_cfi_endproc (void)
   char *cie_buf, *fde_buf, *pbuf, *where;
   unsigned long buf_size, cie_size, fde_size, last_cie_offset;
   unsigned long fde_initloc_offset, fde_len_offset, fde_offset;
-  void *saved_seg, *cfi_seg;
+  segT saved_seg, cfi_seg;
   expressionS exp;
 
   if (! cfi_info)
@@ -609,8 +614,10 @@ dot_cfi_endproc (void)
   /* Open .eh_frame section.  */
   saved_seg = now_seg;
   cfi_seg = subseg_new (".eh_frame", 0);
+#ifdef BFD_ASSEMBLER
   bfd_set_section_flags (stdoutput, cfi_seg,
 			 SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
+#endif
   subseg_set (cfi_seg, 0);
 
   /* Build CIE.  */

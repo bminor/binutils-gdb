@@ -1,3 +1,11 @@
+2003-05-21  Nick Clifton  <nickc@redhat.com>
+
+	* dw2gencfi.c (cfi_get_label): Use symbol_make for non
+	BFD_ASSEMBLER targets.
+	(cfi_startproc): Change type of saved_seg and cfi_seg to segT.
+	(dot_cfi_endproc): Only call bfd_set_section_flags for targets
+	defining BFD_ASSEMBLER.
+
 2003-05-20  Michal Ludvig  <mludvig@suse.cz>
 
 	* as.c (main): Remove tc_cfi_init().
