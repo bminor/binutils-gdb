@@ -1,4 +1,15 @@
+Wed Mar 24 02:56:44 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* libbfd.c (bfd_seek): Disable optimized handling for archives and
+	archive members; they need more special reatment.  For now, verify
+	that computed and actual file positions correspond.
+
 Tue Mar 23 08:45:33 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* mipsbsd.c: Renamed from aout-mipsbsd.c.
+	(set_arch_mach): Delete non-MIPS code.
+	(reloc_howto_type_lookup): Ditto.
+	* Makefile.in: Adjusted.
 
 	* libbfd.c (bfd_tell): Update `where' field.
 	(bfd_seek): Don't do anything if we're not changing the file
