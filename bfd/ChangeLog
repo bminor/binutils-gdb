@@ -1,3 +1,9 @@
+Wed Aug 12 19:00:39 1998  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Generate PLT
+	entries unless the symbol is defined in the executable; in
+	particular, undefined weak symbols get a PLT entry.
+
 Wed Aug 12 14:48:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libaout.h: Remove nested comment to avoid warning.
