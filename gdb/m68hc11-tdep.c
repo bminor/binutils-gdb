@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "objfiles.h"
 #include "arch-utils.h"
 #include "regcache.h"
+#include "reggroups.h"
 
 #include "target.h"
 #include "opcode/m68hc11.h"
@@ -1205,6 +1206,66 @@ gdb_print_insn_m68hc11 (bfd_vma memaddr, disassemble_info *info)
     return print_insn_m68hc12 (memaddr, info);
 }
 
+
+
+/* 68HC11/68HC12 register groups.
+   Identify real hard registers and soft registers used by gcc.  */
+
+static struct reggroup *m68hc11_soft_reggroup;
+static struct reggroup *m68hc11_hard_reggroup;
+
+static void
+m68hc11_init_reggroups (void)
+{
+  m68hc11_hard_reggroup = reggroup_new ("hard", USER_REGGROUP);
+  m68hc11_soft_reggroup = reggroup_new ("soft", USER_REGGROUP);
+}
+
+static void
+m68hc11_add_reggroups (struct gdbarch *gdbarch)
+{
+  reggroup_add (gdbarch, m68hc11_hard_reggroup);
+  reggroup_add (gdbarch, m68hc11_soft_reggroup);
+  reggroup_add (gdbarch, general_reggroup);
+  reggroup_add (gdbarch, float_reggroup);
+  reggroup_add (gdbarch, all_reggroup);
+  reggroup_add (gdbarch, save_reggroup);
+  reggroup_add (gdbarch, restore_reggroup);
+  reggroup_add (gdbarch, vector_reggroup);
+  reggroup_add (gdbarch, system_reggroup);
+}
+
+static int
+m68hc11_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+                             struct reggroup *group)
+{
+  /* We must save the real hard register as well as gcc
+     soft registers including the frame pointer.  */
+  if (group == save_reggroup || group == restore_reggroup)
+    {
+      return (regnum <= gdbarch_num_regs (gdbarch)
+              || ((regnum == SOFT_FP_REGNUM
+                   || regnum == SOFT_TMP_REGNUM
+                   || regnum == SOFT_ZS_REGNUM
+                   || regnum == SOFT_XY_REGNUM)
+                  && m68hc11_register_name (regnum)));
+    }
+
+  /* Group to identify gcc soft registers (d1..dN).  */
+  if (group == m68hc11_soft_reggroup)
+    {
+      return regnum >= SOFT_D1_REGNUM && m68hc11_register_name (regnum);
+    }
+
+  if (group == m68hc11_hard_reggroup)
+    {
+      return regnum == HARD_PC_REGNUM || regnum == HARD_SP_REGNUM
+        || regnum == HARD_X_REGNUM || regnum == HARD_D_REGNUM
+        || regnum == HARD_Y_REGNUM || regnum == HARD_CCR_REGNUM;
+    }
+  return default_register_reggroup_p (gdbarch, regnum, group);
+}
+
 static struct gdbarch *
 m68hc11_gdbarch_init (struct gdbarch_info info,
                       struct gdbarch_list *arches)
@@ -1358,6 +1419,9 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_stack_align (gdbarch, m68hc11_stack_align);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_m68hc11);
 
+  m68hc11_add_reggroups (gdbarch);
+  set_gdbarch_register_reggroup_p (gdbarch, m68hc11_register_reggroup_p);
+
   /* Minsymbol frobbing.  */
   set_gdbarch_elf_make_msymbol_special (gdbarch,
                                         m68hc11_elf_make_msymbol_special);
@@ -1372,6 +1436,7 @@ _initialize_m68hc11_tdep (void)
 {
   register_gdbarch_init (bfd_arch_m68hc11, m68hc11_gdbarch_init);
   register_gdbarch_init (bfd_arch_m68hc12, m68hc11_gdbarch_init);
+  m68hc11_init_reggroups ();
 
   add_com ("regs", class_vars, show_regs, "Print all registers");
 } 
