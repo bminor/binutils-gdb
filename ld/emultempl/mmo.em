@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2001 Free Software Foundation, Inc.
+#   Copyright 2001, 2002 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -21,6 +21,13 @@
 # This file is sourced from elf32.em and mmo.em, used to define
 # linker MMIX-specifics common to ELF and MMO.
 
+cat >>e${EMULATION_NAME}.c <<EOF
+/* Need to have this define before mmix-elfnmmo, which includes
+   needrelax.em which uses this name for the before_allocation function,
+   normally defined in elf32.em.  */
+#define gldmmo_before_allocation before_allocation_default
+EOF
+
 . ${srcdir}/emultempl/mmix-elfnmmo.em
 
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -31,6 +38,7 @@ static asection *output_prev_sec_find
   PARAMS ((lang_output_section_statement_type *));
 static void mmo_finish PARAMS ((void));
 static void mmo_wipe_sec_reloc_flag PARAMS ((bfd *, asection *, PTR));
+static void mmo_after_open PARAMS ((void));
 
 /* Find the last output section before given output statement.
    Used by place_orphan.  */
@@ -220,8 +228,26 @@ mmo_finish ()
 {
   bfd_map_over_sections (output_bfd, mmo_wipe_sec_reloc_flag, NULL);
 }
+
+/* To get on-demand global register allocation right, we need to parse the
+   relocs, like what happens when linking to ELF.  It needs to be done
+   before all input sections are supposed to be present.  When linking to
+   ELF, it's done when reading symbols.  When linking to mmo, we do it
+   when all input files are seen, which is equivalent.  */
 
+static void
+mmo_after_open ()
+{
+  LANG_FOR_EACH_INPUT_STATEMENT (is)
+    {
+      if (bfd_get_flavour (is->the_bfd) == bfd_target_elf_flavour
+	  && !_bfd_mmix_check_all_relocs (is->the_bfd, &link_info))
+	einfo ("%X%P: Internal problems scanning %B after opening it",
+	       is->the_bfd);
+    }
+}
 EOF
 
 LDEMUL_PLACE_ORPHAN=mmo_place_orphan
 LDEMUL_FINISH=mmo_finish
+LDEMUL_AFTER_OPEN=mmo_after_open

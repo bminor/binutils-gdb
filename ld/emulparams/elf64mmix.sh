@@ -44,14 +44,15 @@ OTHER_TEXT_SECTIONS='
  PROVIDE (Main = DEFINED (Main) ? Main : (DEFINED (_start) ? _start : _start.));
 '
 
-OTHER_SECTIONS="
+OTHER_SECTIONS='
  .MMIX.reg_contents :
  {
    /* Note that this section always has a fixed VMA - that of its
       first register * 8.  */
+   *(.MMIX.reg_contents.linker_allocated);
    *(.MMIX.reg_contents);
  }
-"
+'
 
 # FIXME: Also bit by the PROVIDE bug?  If not, this could be
 # EXECUTABLE_SYMBOLS.

@@ -16,12 +16,12 @@ SECTIONS
     /* FIXME: Move .init, .fini, .ctors and .dtors to their own sections.  */
     ${RELOCATING+ PROVIDE (_init_start = .);}
     ${RELOCATING+ PROVIDE (_init = .);}
-    ${RELOCATING+ *(.init)}
+    ${RELOCATING+ KEEP (*(.init))}
     ${RELOCATING+ PROVIDE (_init_end = .);}
 
     ${RELOCATING+ PROVIDE (_fini_start = .);}
     ${RELOCATING+ PROVIDE (_fini = .);}
-    ${RELOCATING+ *(.fini)}
+    ${RELOCATING+ KEEP (*(.fini))}
     ${RELOCATING+ PROVIDE (_fini_end = .);}
 
     /* FIXME: Align ctors, dtors, ehframe.  */
@@ -115,6 +115,7 @@ SECTIONS
   {
     /* Note that this section always has a fixed VMA - that of its
        first register * 8.  */
+    *(.MMIX.reg_contents.linker_allocated);
     *(.MMIX.reg_contents);
   }
 

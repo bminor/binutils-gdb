@@ -1,3 +1,22 @@
+2002-02-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	Support on-demand global register allocation from
+	R_MMIX_BASE_PLUS_OFFSET relocs.
+	* emultempl/mmix-elfnmmo.em (mmix_after_allocation): Rename from
+	mmix_set_reg_section_vma.  Call
+	_bfd_mmix_finalize_linker_allocated_gregs.
+	(mmix_before_allocation): New function.
+	(LDEMUL_AFTER_ALLOCATION): Set to mmix_after_allocation.
+	(LDEMUL_BEFORE_ALLOCATION): Define to mmix_before_allocation.
+	* scripttempl/mmo.sc (.text): Mark .init, .fini as KEEP.
+	(.MMIX.reg_contents): Add .MMIX.reg_contents.linker_allocated
+	before .MMIX.reg_contents.
+	* emultempl/mmo.em (gldmmo_before_allocation): Define to default.
+	(mmo_after_open): New function.
+	(LDEMUL_AFTER_OPEN): Define to mmo_after_open.
+	* emulparams/elf64mmix.sh (OTHER_SECTIONS): Tweak formatting.  Add
+	.MMIX.reg_contents.linker_allocated before .MMIX.reg_contents.
+
 2002-01-31  Ivan Guzvinec  <ivang@opencores.org>
 
 	* emulparams/or32.sh: New file.

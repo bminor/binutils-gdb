@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2001 Free Software Foundation, Inc.
+#   Copyright 2001, 2002 Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
 #
@@ -24,13 +24,38 @@
 cat >>e${EMULATION_NAME}.c <<EOF
 #include "elf/mmix.h"
 
-static void mmix_set_reg_section_vma PARAMS ((void));
+static void mmix_before_allocation PARAMS ((void));
+static void mmix_after_allocation PARAMS ((void));
 
-/* We need to set the VMA of the .MMIX.reg_contents section when it has
-   been allocated.  */
+/* Set up handling of linker-allocated global registers.  */
 
 static void
-mmix_set_reg_section_vma ()
+mmix_before_allocation ()
+{
+  /* Call the default first.  */
+  gld${EMULATION_NAME}_before_allocation ();
+
+  /* There's a needrelax.em which uses this ..._before_allocation-hook and
+     just has the statement below as payload.  It's more of a hassle to
+     use that than to just include these two lines and take the
+     maintenance burden to keep them in sync.  (Of course we lose the
+     maintenance burden of checking that it still does what we need.)  */
+
+  /* Force -relax on if not doing a relocatable link.  */
+  if (! link_info.relocateable)
+    command_line.relax = true;
+
+  if (!_bfd_mmix_prepare_linker_allocated_gregs (output_bfd, &link_info))
+    einfo ("%X%P: Internal problems setting up section %s",
+	   MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
+}
+
+/* We need to set the VMA of the .MMIX.reg_contents section when it has
+   been allocated, and produce the final settings for the linker-generated
+   GREGs.  */
+
+static void
+mmix_after_allocation ()
 {
   asection *sec
     = bfd_get_section_by_name (output_bfd, MMIX_REG_CONTENTS_SECTION_NAME);
@@ -61,14 +86,20 @@ mmix_set_reg_section_vma ()
     }
 
   /* Simplify symbol output for the register section (without contents;
-     created for register symbols) by setting the output offset to 0.  */
+     created for register symbols) by setting the output offset to 0.
+     This section is only present when there are register symbols.  */
   sec = bfd_get_section_by_name (output_bfd, MMIX_REG_SECTION_NAME);
-  if (sec == NULL)
-    return;
+  if (sec != NULL)
+    bfd_set_section_vma (abfd, sec, 0);
 
-  bfd_set_section_vma (abfd, sec, 0);
-
+  if (!_bfd_mmix_finalize_linker_allocated_gregs (output_bfd, &link_info))
+    {
+      einfo ("%X%P: Can't finalize linker-allocated global registers\n");
+      /* In case stuff is added after this conditional.  */
+      return;
+    }
 }
 EOF
 
-LDEMUL_AFTER_ALLOCATION=mmix_set_reg_section_vma
+LDEMUL_AFTER_ALLOCATION=mmix_after_allocation
+LDEMUL_BEFORE_ALLOCATION=mmix_before_allocation
