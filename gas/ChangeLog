@@ -1,3 +1,9 @@
+Thu Apr 23 14:58:31 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (find_real_start): Ignore symbols starting with
+	.L - they are local labels and the branches are not really
+	function calls but rather far jumps.
+
 start-sanitize-sky
 Thu Apr 23 11:09:34 1998  Doug Evans  <devans@canuck.cygnus.com>
 
