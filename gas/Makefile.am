@@ -1212,11 +1212,12 @@ DEPTC_mips_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/opcode/mips.h itbl-ops.h $(INCDIR)/elf/mips.h \
   $(INCDIR)/elf/reloc-macros.h ecoff.h $(INCDIR)/coff/sym.h \
   $(INCDIR)/coff/ecoff.h
-DEPTC_mmix_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mmix.h subsegs.h \
-  $(INCDIR)/obstack.h $(INCDIR)/elf/mmix.h $(INCDIR)/elf/reloc-macros.h \
-  $(INCDIR)/opcode/mmix.h $(INCDIR)/safe-ctype.h dwarf2dbg.h
+DEPTC_mmix_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mmix.h \
+  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/mmix.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/mmix.h \
+  $(INCDIR)/safe-ctype.h dwarf2dbg.h
 DEPTC_mn10200_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-mn10200.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h \
@@ -1402,14 +1403,14 @@ DEPTC_v850_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-v850.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/v850.h dwarf2dbg.h
-DEPTC_z8k_coff = $(srcdir)/../opcodes/z8k-opc.h $(INCDIR)/symcat.h \
-  $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-z8k.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/z8k.h $(INCDIR)/coff/external.h \
-  $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h
-DEPTC_z8k_elf = $(srcdir)/../opcodes/z8k-opc.h $(INCDIR)/symcat.h \
-  $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  $(srcdir)/config/tc-z8k.h $(INCDIR)/safe-ctype.h
+DEPTC_z8k_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/tc-z8k.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/z8k.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h $(srcdir)/../opcodes/z8k-opc.h
+DEPTC_z8k_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-z8k.h \
+  $(INCDIR)/safe-ctype.h $(srcdir)/../opcodes/z8k-opc.h
 DEPTC_hppa_som = $(srcdir)/config/tc-hppa.h subsegs.h \
   $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h $(INCDIR)/opcode/hppa.h \
   $(BFDDIR)/som.h
@@ -1655,10 +1656,11 @@ DEPOBJ_mips_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   ecoff.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h \
   $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/aout/aout64.h
-DEPOBJ_mmix_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mmix.h $(INCDIR)/safe-ctype.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+DEPOBJ_mmix_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mmix.h \
+  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/aout/aout64.h
 DEPOBJ_mn10200_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-mn10200.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
@@ -2004,9 +2006,9 @@ DEP_mips_ecoff = $(srcdir)/config/obj-ecoff.h $(srcdir)/config/tc-mips.h \
 DEP_mips_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mips.h
-DEP_mmix_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mmix.h
+DEP_mmix_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-mmix.h
 DEP_mn10200_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-mn10200.h \
   $(INCDIR)/symcat.h $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h
@@ -2157,7 +2159,8 @@ flonum-mult.o: flonum-mult.c
 frags.o: frags.c $(INCDIR)/symcat.h subsegs.h $(INCDIR)/obstack.h
 hash.o: hash.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/obstack.h
-input-file.o: input-file.c $(INCDIR)/symcat.h input-file.h
+input-file.o: input-file.c $(INCDIR)/symcat.h input-file.h \
+  $(INCDIR)/safe-ctype.h
 input-scrub.o: input-scrub.c $(INCDIR)/symcat.h input-file.h \
   sb.h
 listing.o: listing.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h \
