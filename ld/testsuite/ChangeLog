@@ -1,8 +1,8 @@
 Thu Aug  1 14:10:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-scripts/crossref.exp: New test.
-	* ld-scripts/cross1.c, ld-scripts/cross2.c: New files.
-	* ld-scripts/crossref.t: New file.
+	* ld-scripts/{cross1.c, cross2.c, cross3.c}: New files.
+	* ld-scripts/{cross1.t, cross2.t}: New files.
 
 Sat Jun 29 13:40:11 1996  Ian Lance Taylor  <ian@cygnus.com>
 

@@ -24,9 +24,11 @@ Do-first:
 Things-to-keep:
 
 cross1.c
+cross1.t
 cross2.c
+cross2.t
+cross3.c
 crossref.exp
-crossref.t
 defined.exp
 defined.s
 defined.t
