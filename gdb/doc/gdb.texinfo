@@ -11902,16 +11902,30 @@ the last command, as it would from the terminal.
 @cindex @file{.gdbinit}
 @cindex @file{gdb.ini}
 When you start @value{GDBN}, it automatically executes commands from its
-@dfn{init files}.  These are files named @file{.gdbinit} on Unix, or
-@file{gdb.ini} on DOS/Windows.  @value{GDBN} reads the init file (if
-any) in your home directory@footnote{On DOS/Windows systems, the home
-directory is the one pointed to by the @code{HOME} environment
-variable.}, then processes command line options and operands, and then
-reads the init file (if any) in the current working directory.  This is
-so the init file in your home directory can set options (such as
-@code{set complaints}) which affect the processing of the command line
-options and operands.  The init files are not executed if you use the
-@samp{-nx} option; @pxref{Mode Options, ,Choosing modes}.
+@dfn{init files}.  These are files named @file{.gdbinit} on Unix and
+@file{gdb.ini} on DOS/Windows.  During startup, @value{GDBN} does the
+following:
+
+@enumerate
+@item
+Reads the init file (if any) in your home directory@footnote{On
+DOS/Windows systems, the home directory is the one pointed to by the
+@code{HOME} environment variable.}.
+
+@item
+Processes command line options and operands.
+
+@item
+Reads the init file (if any) in the current working directory.
+
+@item
+Reads command files specified by the @samp{-x} option.
+@end enumerate
+
+The init file in your home directory can set options (such as @samp{set
+complaints}) that affect subsequent processing of command line options
+and operands.  Init files are not executed if you use the @samp{-nx}
+option (@pxref{Mode Options, ,Choosing modes}).
 
 @cindex init file name
 On some configurations of @value{GDBN}, the init file is known by a

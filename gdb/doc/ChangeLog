@@ -1,3 +1,8 @@
+2000-05-01  Nick Duffek  <nsd@cygnus.com>
+
+	* gdb.texinfo (Command Files): Mention -x, use @enumerate for
+	startup sequence, minor edits.
+
 2000-05-01  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* annotate.texi: Remove "@syncodeindex fn cp", it causes grief in
