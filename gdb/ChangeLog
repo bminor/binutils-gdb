@@ -1,5 +1,8 @@
 Sun Dec 26 16:59:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* exec.c (exec_file_command): If error occurs after we have opened
+	exec_bfd but before we call push_target, make sure to close exec_bfd.
+
 	* infrun.c (wait_for_inferior): Remove confusing and inaccurate
 	stuff about subroutine calls, return, etc., from comment which
 	says "We've wandered out of the step range.".

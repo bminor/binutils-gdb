@@ -22,6 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "target.h"
 #include "gdbcmd.h"
+#include "language.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -150,25 +151,46 @@ exec_file_command (args, from_tty)
 	error ("Could not open `%s' as an executable file: %s",
 	       scratch_pathname, bfd_errmsg (bfd_error));
       if (!bfd_check_format (exec_bfd, bfd_object))
-	error ("\"%s\": not in executable format: %s.",
-	       scratch_pathname, bfd_errmsg (bfd_error));
+	{
+	  /* Make sure to close exec_bfd, or else "run" might try to use
+	     it.  */
+	  exec_close (0);
+	  error ("\"%s\": not in executable format: %s.",
+		 scratch_pathname, bfd_errmsg (bfd_error));
+	}
 
       if (build_section_table (exec_bfd, &exec_ops.to_sections,
 				&exec_ops.to_sections_end))
-	error ("Can't find the file sections in `%s': %s", 
-		exec_bfd->filename, bfd_errmsg (bfd_error));
+	{
+	  /* Make sure to close exec_bfd, or else "run" might try to use
+	     it.  */
+	  exec_close (0);
+	  error ("Can't find the file sections in `%s': %s", 
+		 exec_bfd->filename, bfd_errmsg (bfd_error));
+	}
 
 #ifdef NEED_TEXT_START_END
-      /* This is a KLUDGE (FIXME) because a few places in a few ports
-	 (29K springs to mind) need this info for now.  */
+
+      /* text_end is sometimes used for where to put call dummies.  A
+	 few ports use these for other purposes too.  */
+
       {
 	struct section_table *p;
+
+	/* Set text_start to the lowest address of the start of any
+	   readonly code section and set text_end to the highest
+	   address of the end of any readonly code section.  */
+
+	text_start = ~(CORE_ADDR)0;
+	text_end = (CORE_ADDR)0;
 	for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
-	  if (STREQ (".text", bfd_section_name (p->bfd, p->sec_ptr)))
+	  if (bfd_get_section_flags (p->bfd, p->sec_ptr)
+	      & (SEC_CODE | SEC_READONLY))
 	    {
-	      text_start = p->addr;
-	      text_end   = p->endaddr;
-	      break;
+	      if (text_start > p->addr) 
+		text_start = p->addr;
+	      if (text_end < p->endaddr)
+		text_end = p->endaddr;
 	    }
       }
 #endif
@@ -182,7 +204,7 @@ exec_file_command (args, from_tty)
 	(*exec_file_display_hook) (filename);
     }
   else if (from_tty)
-    printf ("No exec file now.\n");
+    printf_unfiltered ("No exec file now.\n");
 }
 
 /* Set both the exec file and the symbol file, in one command.  
@@ -344,13 +366,13 @@ print_section_info (t, abfd)
   wrap_here ("        ");
   printf_filtered ("file type %s.\n", bfd_get_target(abfd));
   printf_filtered ("\tEntry point: %s\n",
-		   local_hex_string (bfd_get_start_address (exec_bfd)));
+		   local_hex_string ((unsigned long) bfd_get_start_address (exec_bfd)));
   for (p = t->to_sections; p < t->to_sections_end; p++) {
-    printf_filtered ("\t%s", local_hex_string_custom (p->addr, "08"));
-    printf_filtered (" - %s", local_hex_string_custom (p->endaddr, "08"));
+    printf_filtered ("\t%s", local_hex_string_custom ((unsigned long) p->addr, "08l"));
+    printf_filtered (" - %s", local_hex_string_custom ((unsigned long) p->endaddr, "08l"));
     if (info_verbose)
       printf_filtered (" @ %s",
-		       local_hex_string_custom (p->sec_ptr->filepos, "08"));
+		       local_hex_string_custom ((unsigned long) p->sec_ptr->filepos, "08l"));
     printf_filtered (" is %s", bfd_section_name (p->bfd, p->sec_ptr));
     if (p->bfd != abfd) {
       printf_filtered (" in %s", bfd_get_filename (p->bfd));
@@ -407,7 +429,7 @@ set_section_command (args, from_tty)
 }
 
 /* If mourn is being called in all the right places, this could be say
-   `gdb internal error' (since generic_mourn calls mark_breakpoints_out).  */
+   `gdb internal error' (since generic_mourn calls breakpoint_init_inferior).  */
 
 static int
 ignore (addr, contents)
