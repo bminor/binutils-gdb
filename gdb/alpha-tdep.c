@@ -490,6 +490,11 @@ find_proc_desc (pc, next_frame)
 			     0, NULL);
     }
 
+  /* If we never found a PDR for this function in symbol reading, then
+     examine prologues to find the information.  */
+  if (sym && ((mips_extra_func_info_t) SYMBOL_VALUE (sym))->pdr.framereg == -1)
+    sym = NULL;
+
   if (sym)
     {
 	/* IF this is the topmost frame AND

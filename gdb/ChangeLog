@@ -1,3 +1,8 @@
+Mon Mar 13 15:25:47 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* alpha-tdep.c (find_proc_desc): If pdr.framereg field is -1, don't
+	use the PDR, just examine prologues instead.
+
 Fri Mar 10 16:13:18 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 start-sanitize-arc
