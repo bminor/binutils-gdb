@@ -1,3 +1,9 @@
+2001-07-11  H.J. Lu  <hjl@gnu.org>
+
+	* elf64-alpha.c (elf64_alpha_check_relocs): Set the ALLOC|LOAD
+	flags when creating the reloc section if the ALLOC flag in the
+	source section is set.
+
 2001-07-11  Steve Ellcey  <sje@cup.hp.com>
 
 	* reloc.c (bfd_reloc_code_type): Add IA64 relocs
