@@ -380,15 +380,15 @@ elf_link_add_object_symbols (abfd, info)
       /* Find the name to use in a DT_NEEDED entry that refers to this
 	 object.  If the object has a DT_SONAME entry, we use it.
 	 Otherwise, if the generic linker stuck something in
-	 elf_dt_needed_name, we use that.  Otherwise, we just use the
-	 file name.  If the generic linker put a null string into
-	 elf_dt_needed_name, we don't make a DT_NEEDED entry at all,
-	 even if there is a DT_SONAME entry.  */
+	 elf_dt_name, we use that.  Otherwise, we just use the file
+	 name.  If the generic linker put a null string into
+	 elf_dt_name, we don't make a DT_NEEDED entry at all, even if
+	 there is a DT_SONAME entry.  */
       add_needed = true;
       name = bfd_get_filename (abfd);
-      if (elf_dt_needed_name (abfd) != NULL)
+      if (elf_dt_name (abfd) != NULL)
 	{
-	  name = elf_dt_needed_name (abfd);
+	  name = elf_dt_name (abfd);
 	  if (*name == '\0')
 	    add_needed = false;
 	}
@@ -420,7 +420,7 @@ elf_link_add_object_symbols (abfd, info)
 	      Elf_Internal_Dyn dyn;
 
 	      elf_swap_dyn_in (abfd, extdyn, &dyn);
-	      if (add_needed && dyn.d_tag == DT_SONAME)
+	      if (dyn.d_tag == DT_SONAME)
 		{
 		  name = bfd_elf_string_from_elf_section (abfd, link,
 							  dyn.d_un.d_val);
@@ -520,6 +520,12 @@ elf_link_add_object_symbols (abfd, info)
 	  if (! elf_add_dynamic_entry (info, DT_NEEDED, strindex))
 	    goto error_return;
 	}
+
+      /* Save the SONAME, if there is one, because sometimes the
+         linker emulation code will need to know it.  */
+      if (*name == '\0')
+	name = bfd_get_filename (abfd);
+      elf_dt_name (abfd) = name;
     }
 
   if (bfd_seek (abfd,
