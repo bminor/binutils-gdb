@@ -7305,12 +7305,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       unresolved_reloc = FALSE;
       warned = FALSE;
 
-      if (r_type == R_PPC64_TOC)
-	{
-	  /* Relocation value is TOC base.  */
-	  relocation = TOCstart + htab->stub_group[input_section->id].toc_off;
-	}
-      else if (r_symndx < symtab_hdr->sh_info)
+      if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* It's a local symbol.  */
 	  sym = local_syms + r_symndx;
@@ -8080,6 +8075,17 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  break;
 
+	case R_PPC64_TOC:
+	  /* Relocation value is TOC base.  */
+	  relocation = TOCstart;
+	  if (r_symndx == 0)
+	    relocation += htab->stub_group[input_section->id].toc_off;
+	  else if (sec != NULL && !unresolved_reloc)
+	    relocation += htab->stub_group[sec->id].toc_off;
+	  else
+	    unresolved_reloc = TRUE;
+	  goto dodyn2;
+
 	  /* TOC16 relocs.  We want the offset relative to the TOC base,
 	     which is the address of the start of the TOC plus 0x8000.
 	     The TOC consists of sections .got, .toc, .tocbss, and .plt,
@@ -8186,7 +8192,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    break;
 	  /* Fall thru.  */
 
-	case R_PPC64_TOC:
+	dodyn2:
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 
@@ -8247,7 +8253,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		memset (&outrel, 0, sizeof outrel);
 	      else if (h != NULL
 		       && !SYMBOL_REFERENCES_LOCAL (info, h)
-		       && !is_opd)
+		       && !is_opd
+		       && r_type != R_PPC64_TOC)
 		outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
 	      else
 		{
