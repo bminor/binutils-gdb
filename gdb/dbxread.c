@@ -553,19 +553,23 @@ dbx_symfile_init (objfile)
      that we put in on the psymbol_obstack, we can't do this since gdb gets
      a fatal error (out of virtual memory) if the size is bogus.  We can
      however at least check to see if the size is zero or some negative
-     value. */
+     value.  */
 
   val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
   if (val < 0)
     perror_with_name (name);
 
+  memset (size_temp, 0, sizeof (size_temp));
   val = bfd_read ((PTR)size_temp, sizeof (long), 1, sym_bfd);
   if (val < 0)
     perror_with_name (name);
 
   DBX_STRINGTAB_SIZE (objfile) = bfd_h_get_32 (sym_bfd, size_temp);
 
-  if (DBX_STRINGTAB_SIZE (objfile) <= 0
+  if (DBX_STRINGTAB_SIZE (objfile) == 0)
+    error ("%s has no string table.", name);
+
+  if (DBX_STRINGTAB_SIZE (objfile) < 0
       || DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
     error ("ridiculous string table size (%d bytes).",
 	   DBX_STRINGTAB_SIZE (objfile));
@@ -1650,7 +1654,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	     sanity checks).  If so, that one was actually the directory
 	     name, and the current one is the real file name.
 	     Patch things up. */	   
-	  if (previous_stab_code == (int) N_SO)
+	  if (previous_stab_code == (unsigned char) N_SO)
 	    {
 	      patch_subfile_names (current_subfile, name);
 	      break;		/* Ignore repeated SOs */

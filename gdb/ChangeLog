@@ -1,5 +1,13 @@
 Tue Mar  2 17:57:56 1993  Fred Fish  (fnf@cygnus.com)
 
+	* dbxread.c (dbx_symfile_init):  Fix for nonexistant string table,
+	reported by mycroft@gnu.ai.mit.edu.
+
+	(Ultrix 2.2 support from Michael Rendell <michael@mercury.cs.mun.ca>)
+	* configure.in (vax-*-ultrix2*):  New triplet.
+	* config/vaxult2.mh:  New file.
+	* xm-vaxult2.h:  New file.
+
 	* c-exp.y (parse_number):  Change high_bit to unsigned.
 	* demangle.c:  Change all references to cfront to ARM, since the
 	actual algorithm is the one specified in the Annotated Reference

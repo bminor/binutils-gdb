@@ -376,6 +376,7 @@ xm-umax.h
 xm-vax.h
 xm-vaxbsd.h
 xm-vaxult.h
+xm-vaxult2.h
 z8k-tdep.c
 
 Do-last:
