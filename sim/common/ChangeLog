@@ -1,3 +1,9 @@
+Wed Jun 10 16:02:29 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Make-common.in (CGEN_FLAGS_TO_PASS): New variable.
+	* cgen-ops.h (ANDIF): New macro.
+	(ANDIF[BQHSD]I): Delete.
+
 Thu Jun  4 13:53:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-events.c (create_hw_event, delete_hw_event): Delete.
