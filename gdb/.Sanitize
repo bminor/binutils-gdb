@@ -103,6 +103,7 @@ go32-xdep.c
 gould-pinsn.c
 gould-xdep.c
 h8300-tdep.c
+h8500-tdep.c
 hp300ux-nat.c
 hppa-pinsn.c
 hppab-core.c
