@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -342,6 +341,40 @@ find_pc_psymbol (psymtab, pc)
 }
 
 
+/* Function called via iterate_over_msymbols() that tests a minimal symbol
+   to see if the minimal symbol's name is a C++ mangled name that matches
+   a user visible name.  The user visible name (pname) is passed as arg1
+   and the number of leading characters that must match in both the mangled
+   name and the user name (matchcount) is passed as arg2.  Returns a pointer
+   to the minimal symbol if it matches, NULL otherwise. */
+
+static PTR
+cplus_mangled_symbol (objfile, msymbol, arg1, arg2, arg3)
+  struct objfile *objfile;
+  struct minimal_symbol *msymbol;
+  PTR arg1;
+  PTR arg2;
+  PTR arg3;
+{
+  char *pname = (char *) arg1;
+  int matchcount = (int) arg2;
+  char *demangled;
+  struct minimal_symbol *foundit = NULL;
+
+  if (strncmp (msymbol -> name, pname, matchcount) == 0)
+    {
+      if ((demangled = cplus_demangle (msymbol -> name, -1)) != NULL)
+	{
+	  if (strcmp (demangled, pname) == 0)
+	    {
+	      foundit = msymbol;
+	    }
+	  free (demangled);
+	}
+    }
+  return ((PTR) foundit);
+}
+
 /* Find the definition for a specified symbol name NAME
    in namespace NAMESPACE, visible from lexical block BLOCK.
    Returns the struct symbol pointer, or zero if no symbol is found.
@@ -483,50 +516,30 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
   if (namespace == VAR_NAMESPACE)
     {
       msymbol = lookup_minimal_symbol (name, (struct objfile *) NULL);
-      /* Look for a mangled C++ name for NAME. */
       if (msymbol == NULL)
 	{
-	  int name_len = strlen (name);
-
-#if 0	/* FIXME:  Needs to be fixed to use new minimal symbol tables */
-	  for (ind = misc_function_count; --ind >= 0; )
-	      /* Assume orginal name is prefix of mangled name. */
-	      if (!strncmp (misc_function_vector[ind].name, name, name_len))
-		{
-		  char *demangled =
-		      cplus_demangle(misc_function_vector[ind].name, -1);
-		  if (demangled != NULL)
-		    {
-		      int cond = strcmp (demangled, name);
-		      free (demangled);
-		      if (!cond)
-			  break;
-		    }
-	        }
-	  /* Loop terminates on no match with ind == -1. */
-#endif
+	  /* Look for a mangled C++ name for NAME. */
+	  msymbol = (struct minimal_symbol *)
+	    iterate_over_msymbols (cplus_mangled_symbol, (PTR) name,
+				   (PTR) strlen (name), (PTR) NULL);
         }
-
       if (msymbol != NULL)
 	{
 	  s = find_pc_symtab (msymbol -> address);
-	  /* If S is zero, there are no debug symbols for this file.
+	  /* If S is NULL, there are no debug symbols for this file.
 	     Skip this stuff and check for matching static symbols below. */
-	  if (s)
+	  if (s != NULL)
 	    {
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	      sym = lookup_block_symbol (block, msymbol -> name, namespace);
-#if 0 /* defined(IBM6000) */
-              /* we kept static functions in misc_function_vector as well as
+              /* We kept static functions in minimal symbol table as well as
 		 in static scope. We want to find them in the symbol table. */
-
 		if (!sym) {
 		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_block_symbol (block, misc_function_vector[ind].name,
-							namespace);
+		  sym = lookup_block_symbol (block, msymbol -> name,
+					     namespace);
 		}
-#endif
 
 	      /* sym == 0 if symbol was found in the minimal symbol table
 		 but not in the symtab.

@@ -1,5 +1,5 @@
 /* Do various things to symbol tables (other than lookup), for GDB.
-   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,9 +18,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
-#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
+#include "gdbtypes.h"
 #include "bfd.h"
 #include "symfile.h"
 #include "breakpoint.h"
@@ -28,21 +28,99 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 
 #include <string.h>
+
+#ifndef DEV_TTY
+#define DEV_TTY "/dev/tty"
+#endif
+
+/* Prototypes for local functions */
+
+static PTR 
+dump_symtab PARAMS ((struct objfile *, struct symtab *, PTR, PTR, PTR));
+
+static PTR 
+dump_psymtab PARAMS ((struct objfile *, struct partial_symtab *, PTR, PTR,
+		      PTR));
+
+static PTR 
+dump_msymbols PARAMS ((struct objfile *, PTR, PTR, PTR));
+
+static PTR 
+dump_objfile PARAMS ((struct objfile *, PTR, PTR, PTR));
+
+static void
+printobjfiles_command PARAMS ((void));
+
+static int
+block_depth PARAMS ((struct block *));
+
+static void
+print_partial_symbol PARAMS ((struct partial_symbol *, int, char *, FILE *));
+
+static void
+printpsyms_command PARAMS ((char *, int));
+
+static void
+print_symbol PARAMS ((struct symbol *, int, FILE *));
+
+static void
+printsyms_command PARAMS ((char *, int));
+
+static void
+free_symtab_block PARAMS ((struct objfile *, struct block *));
+
+static void
+printmsyms_command PARAMS ((char *, int));
+
+static void
+dump_symtab_lines PARAMS ((struct symtab *));
+
+static void
+dump_symtabs PARAMS ((struct symtab *));
+
+static void
+dump_last_symtab PARAMS ((struct symtab *));
+
+static void
+dump_blockvector PARAMS ((struct blockvector *));
+
+static void
+dump_block PARAMS ((struct block *));
+
+static char *
+dump_addrclass PARAMS ((int));
+
+static char *
+dump_namespace PARAMS ((int));
+
+static void
+dump_symbol PARAMS ((struct symbol *));
+
+static void
+dump_type PARAMS ((struct type *));
+
+static void
+dump_linetable PARAMS ((struct linetable *));
+
+static void
+dump_strtbl PARAMS ((void));
+
 
 /* Free a struct block <- B and all the symbols defined in that block.  */
 
 static void
-free_symtab_block (b)
+free_symtab_block (objfile, b)
+     struct objfile *objfile;
      struct block *b;
 {
   register int i, n;
   n = BLOCK_NSYMS (b);
   for (i = 0; i < n; i++)
     {
-      free (SYMBOL_NAME (BLOCK_SYM (b, i)));
-      free (BLOCK_SYM (b, i));
+      mfree (objfile -> md, SYMBOL_NAME (BLOCK_SYM (b, i)));
+      mfree (objfile -> md, BLOCK_SYM (b, i));
     }
-  free (b);
+  mfree (objfile -> md, b);
 }
 
 /* Free all the storage associated with the struct symtab <- S.
@@ -75,9 +153,9 @@ free_symtab (s)
       bv = BLOCKVECTOR (s);
       n = BLOCKVECTOR_NBLOCKS (bv);
       for (i = 0; i < n; i++)
-	free_symtab_block (BLOCKVECTOR_BLOCK (bv, i));
+	free_symtab_block (s -> objfile, BLOCKVECTOR_BLOCK (bv, i));
       /* Free the blockvector itself.  */
-      free (bv);
+      mfree (s -> objfile -> md, bv);
       /* Also free the linetable.  */
       
     case free_linetable:
@@ -85,73 +163,202 @@ free_symtab (s)
 	 or by some other symtab, except for our linetable.
 	 Free that now.  */
       if (LINETABLE (s))
-	free (LINETABLE (s));
+	mfree (s -> objfile -> md, LINETABLE (s));
       break;
     }
 
   /* If there is a single block of memory to free, free it.  */
-  if (s->free_ptr)
-    free (s->free_ptr);
+  if (s -> free_ptr != NULL)
+    mfree (s -> objfile -> md, s -> free_ptr);
 
   /* Free source-related stuff */
-  if (s->line_charpos)
-    free (s->line_charpos);
-  if (s->fullname)
-    free (s->fullname);
-  free (s);
+  if (s -> line_charpos != NULL)
+    mfree (s -> objfile -> md, s -> line_charpos);
+  if (s -> fullname != NULL)
+    mfree (s -> objfile -> md, s -> fullname);
+  mfree (s -> objfile -> md, s);
 }
-
-static int block_depth ();
-static void print_symbol ();
-static void print_partial_symbol ();
 
-void
-printsyms_command (filename)
-     char *filename;
+static PTR 
+dump_objfile (objfile, arg1, arg2, arg3)
+     struct objfile *objfile;
+     PTR arg1;
+     PTR arg2;
+     PTR arg3;
 {
-  FILE *outfile;
-  register struct symtab *s;
+  struct symtab *symtab;
+  struct partial_symtab *psymtab;
+
+  printf_filtered ("\nObject file %s:  ", objfile -> name);
+  printf_filtered ("Objfile at %x, bfd at %x, %d minsyms\n\n",
+		   objfile, objfile -> obfd, objfile->minimal_symbol_count);
+
+  if (objfile -> psymtabs)
+    {
+      printf_filtered ("Psymtabs:\n");
+      for (psymtab = objfile -> psymtabs;
+	   psymtab != NULL;
+	   psymtab = psymtab -> next)
+	{
+	  printf_filtered ("%s at %x, ", psymtab -> filename, psymtab);
+	  if (psymtab -> objfile != objfile)
+	    {
+	      printf_filtered ("NOT ON CHAIN!  ");
+	    }
+	  wrap_here ("  ");
+	}
+      printf_filtered ("\n\n");
+    }
+
+  if (objfile -> symtabs)
+    {
+      printf_filtered ("Symtabs:\n");
+      for (symtab = objfile -> symtabs;
+	   symtab != NULL;
+	   symtab = symtab->next)
+	{
+	  printf_filtered ("%s at %x, ", symtab -> filename, symtab);
+	  if (symtab -> objfile != objfile)
+	    {
+	      printf_filtered ("NOT ON CHAIN!  ");
+	    }
+	  wrap_here ("  ");
+	}
+      printf_filtered ("\n\n");
+    }
+  return (NULL);
+}
+
+static PTR 
+dump_msymbols (objfile, arg1, arg2, arg3)
+     struct objfile *objfile;
+     PTR arg1;
+     PTR arg2;
+     PTR arg3;
+{
+  FILE *outfile = (FILE *) arg1;
+  char *symname = (char *) arg2;
+  struct minimal_symbol *msymbol;
+  int index;
+  char ms_type;
+  
+  /* Print minimal symbols from this objfile unless a specific linkage
+     unit file was requested, in which case we only print the symbols
+     for that one. */
+  if (symname == NULL || (strcmp (symname, objfile -> name) == 0))
+    {
+      fprintf_filtered (outfile, "\nObject file %s:\n\n", objfile -> name);
+      for (index = 0, msymbol = objfile -> msymbols;
+	   msymbol -> name != NULL; msymbol++, index++)
+	{
+	  switch (msymbol -> type)
+	    {
+	      case mst_unknown:
+		ms_type = 'u';
+		break;
+	      case mst_text:
+		ms_type = 't';
+		break;
+	      case mst_data:
+		ms_type = 'd';
+		break;
+	      case mst_bss:
+		ms_type = 'b';
+		break;
+	      case mst_abs:
+		ms_type = 'a';
+		break;
+	      default:
+		ms_type = '?';
+		break;
+	    }
+	  fprintf_filtered (outfile, "[%2d] %c %#10x %s\n", index, ms_type,
+			    msymbol -> address, msymbol -> name);
+	}
+      if (objfile -> minimal_symbol_count != index)
+	{
+	  warning ("internal error:  minimal symbol count %d != %d",
+		   objfile -> minimal_symbol_count, index);
+	}
+      fprintf_filtered (outfile, "\n");
+    }
+  return (NULL);
+}
+
+static PTR 
+dump_psymtab (objfile, psymtab, arg1, arg2, arg3)
+     struct objfile *objfile;
+     struct partial_symtab *psymtab;
+     PTR arg1;
+     PTR arg2;
+     PTR arg3;
+{
+  FILE *outfile = (FILE *) arg1;
+  char *symname = (char *) arg2;
+
+  /* If source file name is specified, reject all but that one.  */
+  if (symname == NULL || (strcmp (symname, psymtab -> filename) == 0))
+    {
+      fprintf_filtered (outfile, "\nPartial symtab for source file %s ",
+			psymtab -> filename);
+      fprintf_filtered (outfile, "(object 0x%x)\n\n", psymtab);
+      fprintf (outfile, "  Read from object file %s (0x%x)\n",
+	       objfile -> name, objfile);
+      
+      if (psymtab -> readin)
+	{
+	  fprintf_filtered (outfile,
+		    "  Full symtab was read (at 0x%x by function at 0x%x)\n",
+			    psymtab -> symtab, psymtab -> read_symtab);
+	}
+      fprintf_filtered (outfile, "  Relocate symbols by 0x%x\n",
+			psymtab -> addr);
+      fprintf_filtered (outfile, "  Symbols cover text addresses 0x%x-0x%x\n",
+			psymtab -> textlow, psymtab -> texthigh);
+      fprintf_filtered (outfile, "  Depends on %d other partial symtabs.\n",
+			psymtab -> number_of_dependencies);
+      if (psymtab -> n_global_syms > 0)
+	{
+	  print_partial_symbol (objfile -> global_psymbols.list
+				+ psymtab -> globals_offset,
+				psymtab -> n_global_syms, "Global", outfile);
+	}
+      if (psymtab -> n_static_syms > 0)
+	{
+	  print_partial_symbol (objfile -> static_psymbols.list
+				+ psymtab -> statics_offset,
+				psymtab -> n_static_syms, "Static", outfile);
+	}
+      fprintf_filtered (outfile, "\n");
+    }
+  return (NULL);
+}
+
+static PTR 
+dump_symtab (objfile, symtab, arg1, arg2, arg3)
+     struct objfile *objfile;
+     struct symtab *symtab;
+     PTR arg1;
+     PTR arg2;
+     PTR arg3;
+{
+  FILE *outfile = (FILE *) arg1;
+  char *symname = (char *) arg2;
   register int i, j;
   int len, blen;
   register struct linetable *l;
   struct blockvector *bv;
   register struct block *b;
   int depth;
-  struct cleanup *cleanups;
-  extern int fclose();
-  char *symname;
 
-  if (filename == 0)
-    error_no_arg ("file to write symbol data in");
-
-  /* If a second arg is supplied, it is a source file name to match on */
-  symname = strchr (filename, ' ');
-  if (symname)
-    *symname++ = '\0';
-
-  filename = tilde_expand (filename);
-  make_cleanup (free, filename);
-  
-  outfile = fopen (filename, "w");
-  if (outfile == 0)
-    perror_with_name (filename);
-
-  cleanups = make_cleanup (fclose, outfile);
-  immediate_quit++;
-
-  for (s = symtab_list; s; s = s->next)
+  if (symname == NULL || (strcmp (symname, symtab -> filename) == 0))
     {
-      /* If source file name is specified, reject all but that one.  */
-      if (symname)
-        if (0 != strncmp (symname, s->filename, strlen (symname)))
-	  continue;
-
-      fprintf (outfile, "Symtab for file %s\n", s->filename);
-      fprintf (outfile, "Read from object file %s (%x)\n", s->objfile->name,
-			s->objfile);
-
+      fprintf (outfile, "\nSymtab for file %s\n", symtab->filename);
+      fprintf (outfile, "Read from object file %s (%x)\n", objfile->name,
+	       objfile);
+      
       /* First print the line table.  */
-      l = LINETABLE (s);
+      l = LINETABLE (symtab);
       if (l) {
 	fprintf (outfile, "\nLine table:\n\n");
 	len = l->nitems;
@@ -161,7 +368,7 @@ printsyms_command (filename)
       }
       /* Now print the block info.  */
       fprintf (outfile, "\nBlockvector:\n\n");
-      bv = BLOCKVECTOR (s);
+      bv = BLOCKVECTOR (symtab);
       len = BLOCKVECTOR_NBLOCKS (bv);
       for (i = 0; i < len; i++)
 	{
@@ -181,10 +388,54 @@ printsyms_command (filename)
 	      print_symbol (BLOCK_SYM (b, j), depth + 1, outfile);
 	    }
 	}
+      fprintf (outfile, "\n");
+    }
+  return (NULL);
+}
 
-      fprintf (outfile, "\n\n");
+static void
+printsyms_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  char **argv;
+  FILE *outfile;
+  struct cleanup *cleanups;
+  char *symname = NULL;
+  char *filename = DEV_TTY;
+
+  dont_repeat ();
+
+  if (args == NULL)
+    {
+      error ("printsyms takes an output file name and optional symbol file name");
+    }
+  else if ((argv = buildargv (args)) == NULL)
+    {
+      nomem (0);
+    }
+  cleanups = make_cleanup (freeargv, (char *) argv);
+
+  if (argv[0] != NULL)
+    {
+      filename = argv[0];
+      /* If a second arg is supplied, it is a source file name to match on */
+      if (argv[1] != NULL)
+	{
+	  symname = argv[1];
+	}
     }
 
+  filename = tilde_expand (filename);
+  make_cleanup (free, filename);
+  
+  outfile = fopen (filename, "w");
+  if (outfile == 0)
+    perror_with_name (filename);
+  make_cleanup (fclose, (char *) outfile);
+
+  immediate_quit++;
+  iterate_over_symtabs (dump_symtab, (PTR) outfile, (PTR) symname, (PTR) NULL);
   immediate_quit--;
   do_cleanups (cleanups);
 }
@@ -301,23 +552,38 @@ print_symbol (symbol, depth, outfile)
   fprintf (outfile, "\n");
 }
 
-void
-printpsyms_command (filename)
-     char *filename;
+static void
+printpsyms_command (args, from_tty)
+     char *args;
+     int from_tty;
 {
+  char **argv;
   FILE *outfile;
-  struct partial_symtab *p;
   struct cleanup *cleanups;
-  extern int fclose();
-  char *symname;
+  char *symname = NULL;
+  char *filename = DEV_TTY;
 
-  if (filename == 0)
-    error_no_arg ("file to write partial symbol data in");
+  dont_repeat ();
 
-  /* If a second arg is supplied, it is a source file name to match on */
-  symname = strchr (filename, ' ');
-  if (symname)
-    *symname++ = '\0';
+  if (args == NULL)
+    {
+      error ("printpsyms takes an output file name and optional symbol file name");
+    }
+  else if ((argv = buildargv (args)) == NULL)
+    {
+      nomem (0);
+    }
+  cleanups = make_cleanup (freeargv, (char *) argv);
+
+  if (argv[0] != NULL)
+    {
+      filename = argv[0];
+      /* If a second arg is supplied, it is a source file name to match on */
+      if (argv[1] != NULL)
+	{
+	  symname = argv[1];
+	}
+    }
 
   filename = tilde_expand (filename);
   make_cleanup (free, filename);
@@ -325,50 +591,21 @@ printpsyms_command (filename)
   outfile = fopen (filename, "w");
   if (outfile == 0)
     perror_with_name (filename);
+  make_cleanup (fclose, outfile);
 
-  cleanups = make_cleanup (fclose, outfile);
   immediate_quit++;
-
-  for (p = partial_symtab_list; p; p = p->next)
-    {
-      /* If source file name is specified, reject all but that one.  */
-      if (symname)
-        if (0 != strncmp (symname, p->filename, strlen (symname)))
-	  continue;
-
-      fprintf_filtered (outfile, "Partial symtab for source file %s ",
-	       p->filename);
-      fprintf_filtered (outfile, "(object 0x%x)\n\n", p);
-      fprintf (outfile, "  Read from object file %s (0x%x)\n", p->objfile->name,
-			p->objfile);
-
-      if (p->readin)
-	fprintf_filtered (outfile, "  Full symtab was read (at 0x%x by function at 0x%x)\n",
-			  p->symtab, p->read_symtab);
-      fprintf_filtered (outfile, "  Relocate symbols by 0x%x\n", p->addr);
-      fprintf_filtered (outfile, "  Symbols cover text addresses 0x%x-0x%x\n",
-			p->textlow, p->texthigh);
-      fprintf_filtered (outfile, "  Depends on %d other partial symtabs.\n",
-			p->number_of_dependencies);
-      if (p->n_global_syms > 0)
-	print_partial_symbol (global_psymbols.list + p->globals_offset,
-			      p->n_global_syms, "Global", outfile);
-      if (p->n_static_syms > 0)
-	print_partial_symbol (static_psymbols.list + p->statics_offset,
-			      p->n_static_syms, "Static", outfile);
-      fprintf_filtered (outfile, "\n\n");
-    }
-
+  iterate_over_psymtabs (dump_psymtab, (PTR) outfile, (PTR) symname,
+			 (PTR) NULL);
   immediate_quit--;
   do_cleanups (cleanups);
 }
 
 static void
 print_partial_symbol (p, count, what, outfile)
-struct partial_symbol *p;
-int count;
-char *what;
-FILE *outfile;
+     struct partial_symbol *p;
+     int count;
+     char *what;
+     FILE *outfile;
 {
 
   fprintf_filtered (outfile, "  %s partial symbols:\n", what);
@@ -444,6 +681,222 @@ FILE *outfile;
     }
 }
 
+static void
+printmsyms_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  char **argv;
+  FILE *outfile;
+  struct cleanup *cleanups;
+  char *filename = DEV_TTY;
+  char *symname = NULL;
+
+  dont_repeat ();
+
+  if (args == NULL)
+    {
+      error ("printmsyms takes an output file name and optional symbol file name");
+    }
+  else if ((argv = buildargv (args)) == NULL)
+    {
+      nomem (0);
+    }
+  cleanups = make_cleanup (freeargv, argv);
+
+  if (argv[0] != NULL)
+    {
+      filename = argv[0];
+      /* If a second arg is supplied, it is a source file name to match on */
+      if (argv[1] != NULL)
+	{
+	  symname = argv[1];
+	}
+    }
+
+  filename = tilde_expand (filename);
+  make_cleanup (free, filename);
+  
+  outfile = fopen (filename, "w");
+  if (outfile == 0)
+    perror_with_name (filename);
+  make_cleanup (fclose, outfile);
+
+  immediate_quit++;
+  iterate_over_objfiles (dump_msymbols, (PTR) outfile, (PTR) symname,
+			 (PTR) NULL);
+  immediate_quit--;
+  fprintf_filtered (outfile, "\n\n");
+  do_cleanups (cleanups);
+}
+
+static void
+printobjfiles_command ()
+{
+  dont_repeat ();
+
+  immediate_quit++;
+  iterate_over_objfiles (dump_objfile, (PTR) NULL, (PTR) NULL, (PTR) NULL);
+  immediate_quit--;
+}
+
+
+/* Debugging functions from xcoffread.c originally.   Some are redundant
+   and should probably disappear.  */
+
+static void
+dump_strtbl ()
+{
+#if 0		/* We don't know its length FIXME */
+  int ii;
+  printf ("===STRING TABLE DUMP...\n\n");
+  for ( ii=0; ii < strtbl_len; ++ii )
+    printf ("%c", isprint (*(strtbl+ii)) ? *(strtbl+ii) : ' ');
+  printf ("\n");
+#endif
+}
+
+static void
+dump_linetable (ltb)
+     struct linetable *ltb;
+{
+  int ii;
+  for (ii=0; ii < ltb->nitems; ++ii)
+    printf ("line: %d, addr: 0x%x\n", ltb->item[ii].line, ltb->item[ii].pc);
+}
+
+static void
+dump_type (typeP)
+     struct type *typeP;
+{
+  printf ("0x%x: name: %s\n", typeP, typeP->name ? typeP->name : "(nil)");
+}
+
+static void
+dump_symbol (pp)
+     struct symbol *pp;
+{
+  printf (" sym: %s\t%s,\t%s\ttype: 0x%x, val: 0x%x end: 0x%x\n", 
+      pp->name, dump_namespace (pp->namespace),
+      dump_addrclass (pp->class), pp->type,
+      SYMBOL_CLASS(pp) == LOC_BLOCK ? BLOCK_START(SYMBOL_BLOCK_VALUE(pp))
+      : pp->value.value,
+      SYMBOL_CLASS(pp) == LOC_BLOCK ? BLOCK_END(SYMBOL_BLOCK_VALUE(pp)) : 0);
+}
+
+static char *
+dump_namespace (ns)
+int ns;
+{
+  static char *ns_name [] = { 
+    "UNDEF_NS", "VAR_NS", "STRUCT_NS", "LABEL_NS"};
+
+  switch (ns) {
+  case UNDEF_NAMESPACE:
+  case VAR_NAMESPACE:
+  case STRUCT_NAMESPACE:
+  case LABEL_NAMESPACE:
+    return ns_name[ns];
+  }
+ 
+  return "***ERROR***";
+}
+
+static char *
+dump_addrclass (ac)
+int ac;						/* address class */
+{
+  static char *ac_name [] = {
+    "LOC_UNDEF",
+    "LOC_CONST",
+    "LOC_STATIC",
+    "LOC_REGISTER",
+    "LOC_ARG",
+    "LOC_REF_ARG",
+    "LOC_REGPARM",
+    "LOC_LOCAL",
+    "LOC_TYPEDEF",
+    "LOC_LABEL",
+    "LOC_BLOCK",
+    "LOC_CONST_BYTES",
+    "LOC_LOCAL_ARG",
+  };
+  switch (ac) {
+  case LOC_UNDEF:
+  case LOC_CONST:
+  case LOC_STATIC:
+  case LOC_REGISTER:
+  case LOC_ARG:
+  case LOC_REF_ARG:
+  case LOC_REGPARM:
+  case LOC_LOCAL:
+  case LOC_TYPEDEF:
+  case LOC_LABEL:
+  case LOC_BLOCK:
+  case LOC_CONST_BYTES:
+  case LOC_LOCAL_ARG:
+    return ac_name [ac];
+  }
+  return "***ERROR***";
+}
+
+static void
+dump_block (pp)
+     struct block *pp;
+{
+  int ii;
+  printf ("BLOCK..: start: 0x%x, end: 0x%x\n", pp->startaddr, pp->endaddr);
+  for (ii=0; ii < pp->nsyms; ++ii)
+    dump_symbol (pp->sym[ii]);
+}
+
+static void
+dump_blockvector (pp)
+     struct blockvector *pp;
+{
+  int ii;
+  for (ii=0; ii < pp->nblocks; ++ii)
+    dump_block (pp->block [ii]);
+}
+
+static void
+dump_last_symtab (pp)
+     struct symtab *pp;
+{
+  for ( ; pp; pp = pp->next) {
+    if ( pp->next == 0 ) {
+      printf ("SYMTAB NAME: %s\n", pp->filename);
+      dump_blockvector (pp->blockvector);
+    }
+  }
+}
+
+static void
+dump_symtabs (pp)
+     struct symtab *pp;
+{
+  for ( ; pp; pp = pp->next) {
+    printf ("SYMTAB NAME: %s\n", pp->filename ? pp->filename : "(nil)");
+/*    if (pp->linetable)
+      dump_linetable (pp->linetable); */
+    dump_blockvector (pp->blockvector);
+  }
+}
+
+static void
+dump_symtab_lines (pp)
+     struct symtab *pp;
+{
+  for ( ; pp; pp = pp->next) {
+    printf ("SYMTAB NAME: %s\n", pp->filename ? pp->filename : "(nil)");
+    if (pp->linetable)
+      dump_linetable (pp->linetable);
+    /* dump_blockvector (pp->blockvector); */
+  }
+}
+
+
+
 /* Return the nexting depth of a block within other blocks in its symtab.  */
 
 static int
@@ -454,112 +907,28 @@ block_depth (block)
   while (block = BLOCK_SUPERBLOCK (block)) i++;
   return i;
 }
+
 
-static void
-printobjfiles_command ()
-{
-  struct objfile *objfile;
-  struct symtab *symtab;
-  struct partial_symtab *psymtab;
-  int first;
-
-  for (objfile = object_files;  objfile;  objfile = objfile->next) {
-    printf_filtered ("\nObject file %s:  ", objfile->name);
-    printf_filtered ("Objfile at %x, bfd at %x\n\n", objfile, objfile->obfd);
-
-    if (objfile->psymtabs) {
-      printf_filtered ("Psymtabs:\n");
-      for (psymtab = objfile->psymtabs;
-	   psymtab;
-	   psymtab = psymtab->objfile_chain) {
-        printf_filtered ("%s at %x, ", psymtab->filename, psymtab);
-	if (psymtab->objfile != objfile)
-	  printf_filtered ("NOT ON CHAIN!  ");
-        wrap_here ("  ");
-      }
-      printf_filtered ("\n\n");
-    }
-
-    if (objfile->symtabs) {
-      printf_filtered ("Symtabs:\n");
-      for (symtab = objfile->symtabs;
-	   symtab;
-	   symtab = symtab->objfile_chain) {
-        printf_filtered ("%s at %x, ", symtab->filename, symtab);
-	if (symtab->objfile != objfile)
-	  printf_filtered ("NOT ON CHAIN!  ");
-        wrap_here ("  ");
-      }
-      printf_filtered ("\n\n");
-    }
-  }
-
-  /* Now check for psymtabs that aren't owned by an objfile.  */
-
-  first = 1;
-  for (psymtab = partial_symtab_list; psymtab; psymtab = psymtab->next) {
-    for (objfile = object_files; objfile; objfile = objfile->next) {
-      if (psymtab->objfile == objfile)
-        goto next;
-    }
-    if (first)
-      printf_filtered ("Psymtabs that aren't owned by any objfile:\n");
-    first = 0;
-    printf_filtered ("  %s at %x, psymtab->objfile %x\n", psymtab->filename,
-		     psymtab, psymtab->objfile);
-  next: ;
-  }
-
-  /* Now check for symtabs that aren't owned by an objfile.  */
-
-  first = 1;
-  for (symtab = symtab_list; symtab; symtab = symtab->next) {
-    for (objfile = object_files; objfile; objfile = objfile->next) {
-      if (symtab->objfile == objfile)
-        goto next2;
-    }
-    if (first)
-      printf_filtered ("Symtabs that aren't owned by any objfile:\n");
-    first = 0;
-    printf_filtered ("  %s at %x, symtab->objfile %x\n", symtab->filename,
-		     symtab, symtab->objfile);
-  next2: ;
-  }
-}
-
-struct cplus_struct_type cplus_struct_default;
-
-void
-allocate_cplus_struct_type (type)
-     struct type *type;
-{
-  if (!HAVE_CPLUS_STRUCT (type))
-    {
-      int nfields = TYPE_NFIELDS (type);
-      TYPE_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
-	obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
-      *(TYPE_CPLUS_SPECIFIC(type)) = cplus_struct_default;
-    }
-}
-
 /* Increase the space allocated for LISTP. */
 
 void
-extend_psymbol_list(listp)
+extend_psymbol_list (listp, objfile)
      register struct psymbol_allocation_list *listp;
+     struct objfile *objfile;
 {
   int new_size;
   if (listp->size == 0)
     {
       new_size = 255;
       listp->list = (struct partial_symbol *)
-	xmalloc (new_size * sizeof (struct partial_symbol));
+	xmmalloc (objfile -> md, new_size * sizeof (struct partial_symbol));
     }
   else
     {
       new_size = listp->size * 2;
       listp->list = (struct partial_symbol *)
-	xrealloc (listp->list, new_size * sizeof (struct partial_symbol));
+	xmrealloc (objfile -> md, (char *) listp->list,
+		   new_size * sizeof (struct partial_symbol));
     }
   /* Next assumes we only went one over.  Should be good if
      program works correctly */
@@ -585,9 +954,9 @@ add_psymbol_to_list (name, namelength, namespace, class, listp, psymval)
   register struct partial_symbol *psym;
 
   if (listp -> next >= listp -> list + listp -> size)
-    extend_psymbol_list (listp);
+    extend_psymbol_list (listp, objfile);
   psym = listp -> next++;
-  SYMBOL_NAME (psym) = (char *) obstack_alloc (psymbol_obstack,
+  SYMBOL_NAME (psym) = (char *) obstack_alloc (&objfile->psymbol_obstack,
 					       namelength + 1);
   memcpy (SYMBOL_NAME (psym), name, namelength);
   SYMBOL_NAME (psym)[namelength] = '\0';
@@ -612,9 +981,9 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, listp, psymval)
   register struct partial_symbol *psym;
 
   if (listp -> next >= listp -> list + listp -> size)
-    extend_psymbol_list (listp);
+    extend_psymbol_list (listp, objfile);
   psym = listp -> next++;
-  SYMBOL_NAME (psym) = (char *) obstack_alloc (psymbol_obstack,
+  SYMBOL_NAME (psym) = (char *) obstack_alloc (&objfile->psymbol_obstack,
 					       namelength + 1);
   memcpy (SYMBOL_NAME (psym), name, namelength);
   SYMBOL_NAME (psym)[namelength] = '\0';
@@ -628,15 +997,15 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, listp, psymval)
 void
 _initialize_symmisc ()
 {
-  symtab_list = (struct symtab *) 0;
-  partial_symtab_list = (struct partial_symtab *) 0;
-  
-  add_com ("printsyms", class_obscure, printsyms_command,
-	   "Print dump of current symbol definitions to file OUTFILE.\n\
+  add_com ("printmsyms", class_obscure, printmsyms_command,
+	   "Print dump of current minimal symbol definitions to file OUTFILE.\n\
 If a SOURCE file is specified, dump only that file's symbols.");
   add_com ("printpsyms", class_obscure, printpsyms_command,
 	  "Print dump of current partial symbol definitions to file OUTFILE.\n\
 If a SOURCE file is specified, dump only that file's partial symbols.");
+  add_com ("printsyms", class_obscure, printsyms_command,
+	   "Print dump of current symbol definitions to file OUTFILE.\n\
+If a SOURCE file is specified, dump only that file's symbols.");
   add_com ("printobjfiles", class_obscure, printobjfiles_command,
 	   "Print dump of current object file definitions.");
 }

@@ -172,8 +172,6 @@ mipsread.o : mipsread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.statu
   symfile.h buildsym.h ${srcdir}/../include/coff/mips.h \
   ${srcdir}/../bfd/libaout.h ${srcdir}/../include/aout/aout64.h ${srcdir}/../include/aout/stab_gnu.h \
   ${srcdir}/../include/aout/stab.def ${srcdir}/../include/coff/ecoff-ext.h partial-stab.h 
-mmap-alloc.o : mmap-alloc.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status 
-mmap-sbrk.o : mmap-sbrk.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status 
 news-xdep.o : news-xdep.c 
 Onindy.o : ${srcdir}/nindy-share/Onindy.c ${srcdir}/nindy-share/ttycntl.h \
   ${srcdir}/nindy-share/block_io.h ${srcdir}/../include/wait.h ${srcdir}/nindy-share/env.h \
@@ -261,16 +259,13 @@ sparc-xdep.o : sparc-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.s
 stack.o : stack.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status value.h symtab.h \
   ${srcdir}/../include/obstack.h gdbtypes.h expression.h language.h frame.h gdbcmd.h \
   command.h gdbcore.h ${srcdir}/../include/bfd.h target.h breakpoint.h 
-state.o : state.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status symtab.h \
-  ${srcdir}/../include/obstack.h ${srcdir}/../include/bfd.h symfile.h state.h 
 sun3-xdep.o : sun3-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status \
   inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h \
   gdbtypes.h expression.h gdbcore.h ${srcdir}/../include/bfd.h 
 sun386-xdep.o : sun386-xdep.c 
 symfile.o : symfile.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status symtab.h \
   ${srcdir}/../include/obstack.h gdbtypes.h gdbcore.h ${srcdir}/../include/bfd.h frame.h \
-  target.h value.h expression.h symfile.h gdbcmd.h command.h breakpoint.h \
-  state.h 
+  target.h value.h expression.h symfile.h gdbcmd.h command.h breakpoint.h
 symm-tdep.o : symm-tdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status frame.h \
   inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h gdbtypes.h \
   expression.h gdbcore.h ${srcdir}/../include/bfd.h 

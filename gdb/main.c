@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "gdbcmd.h"
 #include "symtab.h"
@@ -180,6 +179,10 @@ extern char *version;
 
 extern char *error_pre_print;
 
+/* Message to be printed before the warning message, when a warning occurs.  */
+
+extern char *warning_pre_print;
+
 extern char lang_frame_mismatch_warn[];		/* language.c */
 
 /* Whether GDB's stdin is on a terminal.  */
@@ -254,6 +257,9 @@ static char dirbuf[1024];
 void (*window_hook) PARAMS ((FILE *, char *));
 
 extern int frame_file_full_name;
+extern int mapped_symbol_files;
+extern int readnow_symbol_files;
+
 int epoch_interface;
 int xgdb_verbose;
 
@@ -323,7 +329,7 @@ catch_errors (func, args, errstring)
   saved_cleanup_chain = save_cleanups ();
   saved_error_pre_print = error_pre_print;
 
-  bcopy (to_top_level, saved, sizeof (jmp_buf));
+  memcpy ((char *)saved, (char *)to_top_level, sizeof (jmp_buf));
   error_pre_print = errstring;
 
   if (setjmp (to_top_level) == 0)
@@ -334,7 +340,7 @@ catch_errors (func, args, errstring)
   restore_cleanups (saved_cleanup_chain);
 
   error_pre_print = saved_error_pre_print;
-  bcopy (saved, to_top_level, sizeof (jmp_buf));
+  memcpy ((char *)to_top_level, (char *)saved, sizeof (jmp_buf));
   return val;
 }
 
@@ -345,7 +351,7 @@ disconnect (signo)
 int signo;
 {
   kill_inferior_fast ();
-  signal (SIGHUP, SIG_DFL);
+  signal (signo, SIG_DFL);
   kill (getpid (), SIGHUP);
 }
 
@@ -407,7 +413,7 @@ main (argc, argv)
   register int i;
 
   /* This needs to happen before the first use of malloc.  */
-  init_malloc ();
+  init_malloc ((PTR) NULL);
 
 #if defined (ALIGN_STACK_ON_STARTUP)
   i = (int) &count & 0x3;
@@ -457,6 +463,10 @@ main (argc, argv)
        with no equivalent).  */
     static struct option long_options[] =
       {
+	{"readnow", no_argument, &readnow_symbol_files, 1},
+	{"r", no_argument, &readnow_symbol_files, 1},
+	{"mapped", no_argument, &mapped_symbol_files, 1},
+	{"m", no_argument, &mapped_symbol_files, 1},
 	{"quiet", no_argument, &quiet, 1},
 	{"q", no_argument, &quiet, 1},
 	{"nx", no_argument, &inhibit_gdbinit, 1},
@@ -636,6 +646,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
     }
 
   error_pre_print = "\n\n";
+  warning_pre_print = "\n\nwarning: ";
 
   /* Now perform all the actions indicated by the arguments.  */
   if (cdarg != NULL)
@@ -683,6 +694,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   if (!quiet)
     printf_filtered ("\n");
   error_pre_print = "\n";
+  warning_pre_print = "\nwarning: ";
 
   /* Set the initial language. */
   {
@@ -721,6 +733,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 
   /* Error messages should no longer be distinguished with extra output. */
   error_pre_print = 0;
+  warning_pre_print = "warning: ";
 
   {
     struct stat homebuf, cwdbuf;
@@ -745,8 +758,8 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 	   zero in case one of them fails (this guarantees that they
 	   won't match if either exists).  */
 	
-	bzero (&homebuf, sizeof (struct stat));
-	bzero (&cwdbuf, sizeof (struct stat));
+	memset (&homebuf, 0, sizeof (struct stat));
+	memset (&cwdbuf, 0, sizeof (struct stat));
 	
 	stat (homeinit, &homebuf);
 	stat (gdbinit, &cwdbuf); /* We'll only need this if
@@ -1585,6 +1598,20 @@ validate_comname (comname)
     }
 }
 
+#ifdef IBM6000
+
+lowercase (char *str)
+{
+  while (*str) {
+ 
+    /* isupper(), tolower() are function calls in AIX. */
+    if ( *str >= 'A' && *str <= 'Z')
+      *str = *str + 'a' - 'A';
+    ++str;
+  }
+}
+#endif
+
 static void
 define_command (comname, from_tty)
      char *comname;
@@ -1595,6 +1622,14 @@ define_command (comname, from_tty)
   char *tem = comname;
 
   validate_comname (comname);
+
+#ifdef IBM6000
+
+  /* If the rest of the commands will be case insensetive, this one 
+     should behave in the same manner. */
+
+  lowercase (comname);
+#endif
 
   /* Look it up, and verify that we got an exact match.  */
   c = lookup_cmd (&tem, cmdlist, "", -1, 1);
@@ -2085,14 +2120,16 @@ initialize_history()
 {
   char *tmpenv;
 
-  if (tmpenv = getenv ("HISTSIZE"))
+  tmpenv = getenv ("HISTSIZE");
+  if (tmpenv)
     history_size = atoi (tmpenv);
   else if (!history_size)
     history_size = 256;
 
   stifle_history (history_size);
 
-  if (tmpenv = getenv ("GDBHISTFILE"))
+  tmpenv = getenv ("GDBHISTFILE");
+  if (tmpenv)
     history_filename = savestring (tmpenv, strlen(tmpenv));
   else if (!history_filename) {
     /* We include the current directory so that if the user changes

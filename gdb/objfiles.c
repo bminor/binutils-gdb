@@ -26,69 +26,139 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "symfile.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <obstack.h>
+
+/* Prototypes for local functions */
+
+static int
+open_mapped_file PARAMS ((char *basefile, long mtime, int mapped));
+
+static CORE_ADDR
+map_to_address PARAMS ((void));
 
 /* Externally visible variables that are owned by this module. */
 
 struct objfile *object_files;		/* Linked list of all objfiles */
+int mapped_symbol_files;		/* Try to use mapped symbol files */
 
 /* Allocate a new objfile struct, fill it in as best we can, and return it.
    It is also linked into the list of all known object files. */
 
 struct objfile *
-allocate_objfile (abfd, filename, dumpable)
+allocate_objfile (abfd, filename, mapped)
      bfd *abfd;
      char *filename;
-    int dumpable;
+     int mapped;
 {
-  struct objfile *objfile;
+  struct objfile *objfile = NULL;
+  int fd;
+  void *md;
+  CORE_ADDR mapto;
 
-  /* First, if the objfile is to be dumpable, we must malloc the structure
-     itself using the mmap version, and arrange that all memory allocation
-     for the objfile uses the mmap routines.  Otherwise, just use the
-     old sbrk'd malloc routines. */
+  mapped |= mapped_symbol_files;
 
-  if (dumpable)
+#if !defined(NO_MMALLOC) && defined(HAVE_MMAP)
+
+  /* If we can support mapped symbol files, try to open/reopen the mapped file
+     that corresponds to the file from which we wish to read symbols.  If the
+     objfile is to be mapped, we must malloc the structure itself using the
+     mmap version, and arrange that all memory allocation for the objfile uses
+     the mmap routines.  If we are reusing an existing mapped file, from which
+     we get our objfile pointer, we have to make sure that we update the
+     pointers to the alloc/free functions in the obstack, in case these
+     functions have moved within the current gdb. */
+
+  fd = open_mapped_file (filename, bfd_get_mtime (abfd), mapped);
+  if (fd >= 0)
     {
-      objfile = (struct objfile *) mmap_xmalloc (sizeof (struct objfile));
-      (void) memset (objfile, 0, sizeof (struct objfile));
-      objfile -> malloc = mmap_malloc;
-      objfile -> realloc = mmap_realloc;
-      objfile -> xmalloc = mmap_xmalloc;
-      objfile -> xrealloc = mmap_xrealloc;
-      objfile -> free = mmap_free;
-      objfile -> flags |= OBJF_DUMPABLE;
+      if (((mapto = map_to_address ()) == NULL) ||
+	  ((md = mmalloc_attach (fd, (void *) mapto)) == NULL))
+	{
+	  close (fd);
+	}
+      else if ((objfile = (struct objfile *) mmalloc_getkey (md, 0)) != NULL)
+	{
+	  objfile -> md = md;
+	  /* Update pointers to functions to *our* copies */
+	  obstack_chunkfun (&objfile -> psymbol_obstack, xmmalloc);
+	  obstack_freefun (&objfile -> psymbol_obstack, mfree);
+	  obstack_chunkfun (&objfile -> symbol_obstack, xmmalloc);
+	  obstack_freefun (&objfile -> symbol_obstack, mfree);
+	  obstack_chunkfun (&objfile -> type_obstack, xmmalloc);
+	  obstack_freefun (&objfile -> type_obstack, mfree);
+	  /* Update memory corruption handler function addresses */
+	  init_malloc (objfile -> md);
+	}
+      else
+	{
+	  objfile = (struct objfile *) xmmalloc (md, sizeof (struct objfile));
+	  (void) memset (objfile, 0, sizeof (struct objfile));
+	  objfile -> md = md;
+	  objfile -> flags |= OBJF_MAPPED;
+	  mmalloc_setkey (objfile -> md, 0, objfile);
+	  obstack_full_begin (&objfile -> psymbol_obstack, 0, 0,
+			      xmmalloc, mfree, objfile -> md,
+			      OBSTACK_MMALLOC_LIKE);
+	  obstack_full_begin (&objfile -> symbol_obstack, 0, 0,
+			      xmmalloc, mfree, objfile -> md,
+			      OBSTACK_MMALLOC_LIKE);
+	  obstack_full_begin (&objfile -> type_obstack, 0, 0,
+			      xmmalloc, mfree, objfile -> md,
+			      OBSTACK_MMALLOC_LIKE);
+	  /* Set up to detect internal memory corruption */
+	  init_malloc (objfile -> md);
+	}
     }
-  else
+
+  if (mapped && (objfile == NULL))
+    {
+      warning ("symbol table for '%s' will not be mapped", filename);
+    }
+
+#else	/* defined(NO_MMALLOC) || !defined(HAVE_MMAP) */
+
+  if (mapped)
+    {
+      warning ("this version of gdb does not support mapped symbol tables.");
+
+      /* Turn off the global flag so we don't try to do mapped symbol tables
+	 any more, which shuts up gdb unless the user specifically gives the
+	 "mapped" keyword again. */
+
+      mapped_symbol_files = 0;
+    }
+
+#endif	/* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
+
+  /* If we don't support mapped symbol files, didn't ask for the file to be
+     mapped, or failed to open the mapped file for some reason, then revert
+     back to an unmapped objfile. */
+
+  if (objfile == NULL)
     {
       objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
       (void) memset (objfile, 0, sizeof (struct objfile));
-      objfile -> malloc = (PTR (*) PARAMS ((long))) malloc;
-      objfile -> realloc = (PTR (*) PARAMS ((PTR, long))) realloc;
-      objfile -> xmalloc = xmalloc;
-      objfile -> xrealloc = xrealloc;
-      objfile -> free = free;
+      objfile -> md = NULL;
+      obstack_full_begin (&objfile -> psymbol_obstack, 0, 0, xmalloc, free,
+			  (void *) 0, 0);
+      obstack_full_begin (&objfile -> symbol_obstack, 0, 0, xmalloc, free,
+			  (void *) 0, 0);
+      obstack_full_begin (&objfile -> type_obstack, 0, 0, xmalloc, free,
+			  (void *) 0, 0);
+
     }
 
-  /* Now, malloc a fresh copy of the filename string using the malloc
-     specified as appropriate for the objfile. */
+  /* Now, malloc a fresh copy of the filename string. */
 
-  objfile -> name = (*objfile -> xmalloc) (strlen (filename) + 1);
+  objfile -> name = xmmalloc (objfile -> md, strlen (filename) + 1);
   strcpy (objfile -> name, filename);
 
   objfile -> obfd = abfd;
 
   objfile -> mtime = bfd_get_mtime (abfd);
-
-  /* Set up the various obstacks to use the memory allocation/free
-     functions that are appropriate for this objfile. */
-
-  obstack_full_begin (&objfile -> psymbol_obstack, 0, 0,
-		      objfile -> xmalloc, objfile -> free);
-  obstack_full_begin (&objfile -> symbol_obstack, 0, 0,
-		      objfile -> xmalloc, objfile -> free);
-  obstack_full_begin (&objfile -> type_obstack, 0, 0,
-		      objfile -> xmalloc, objfile -> free);
 
   /* Push this file onto the head of the linked list of other such files. */
 
@@ -111,7 +181,7 @@ free_objfile (objfile)
 
   if (objfile -> name)
     {
-      (*objfile -> free) (objfile -> name);
+      mfree (objfile -> md, objfile -> name);
     }
   if (objfile -> obfd)
     {
@@ -156,10 +226,9 @@ free_objfile (objfile)
 
 #endif
 
-  /* The last thing we do is free the objfile struct itself, using the
-     free() that is appropriate for the objfile. */
+  /* The last thing we do is free the objfile struct itself */
 
-  (*objfile -> free) (objfile);
+  mfree (objfile -> md, objfile);
 }
 
 
@@ -336,4 +405,119 @@ iterate_over_psymtabs (func, arg1, arg2, arg3)
 	}
     }
   return (result);
+}
+
+
+/* Look for a mapped symbol file that corresponds to BASEFILE and is more
+   recent than MTIME.  If MAPPED is nonzero, the user has asked that gdb
+   use a mapped symbol file for this base file, so create a new one if
+   one does not currently exist.
+
+   If found, then return an open file descriptor for the file, otherwise
+   return -1.
+
+   This routine is responsible for implementing the policy that generates
+   the name of the mapped symbol file from the name of a file containing
+   symbols that gdb would like to read. */
+
+static int
+open_mapped_file (basefile, mtime, mapped)
+     char *basefile;
+     long mtime;
+     int mapped;
+{
+  int fd;
+  char *symfilename;
+  struct stat sbuf;
+
+  /* For now, all we do is look in the local directory for a file with
+     the name of the base file and an extension of ".syms" */
+
+  symfilename = concat ("./", basename (basefile), ".syms", (char *) NULL);
+
+  /* Check to see if the desired file already exists and is more recent than
+     the corresponding base file (specified by the passed MTIME parameter).
+     The open will fail if the file does not already exist. */
+
+  if ((fd = open (symfilename, O_RDWR)) >= 0)
+    {
+      if (fstat (fd, &sbuf) != 0)
+	{
+	  close (fd);
+	  perror_with_name (symfilename);
+	}
+      else if (sbuf.st_mtime > mtime)
+	{
+	  return (fd);
+	}
+      else
+	{
+	  close (fd);
+	  fd = -1;
+	}
+    }
+
+  /* Either the file does not already exist, or the base file has changed
+     since it was created.  In either case, if the user has specified use of
+     a mapped file, then create a new mapped file, truncating any existing
+     one.
+
+     In the case where there is an existing file, but it is out of date, and
+     the user did not specify mapped, the existing file is just silently
+     ignored.  Perhaps we should warn about this case (FIXME?).
+
+     By default the file is rw for everyone, with the user's umask taking
+     care of turning off the permissions the user wants off. */
+
+  if (mapped)
+    {
+      fd = open (symfilename, O_RDWR | O_CREAT | O_TRUNC, 0666);
+    }
+
+  return (fd);
+}
+
+/* Return the base address at which we would like the next objfile's
+   mapped data to start.
+
+   For now, we use the kludge that the configuration specifies a base
+   address to which it is safe to map the first mmalloc heap, and an
+   increment to add to this address for each successive heap.  There are
+   a lot of issues to deal with here to make this work reasonably, including:
+
+     Avoid memory collisions with existing mapped address spaces
+
+     Reclaim address spaces when their mmalloc heaps are unmapped
+
+     When mmalloc heaps are shared between processes they have to be
+     mapped at the same addresses in each
+
+     Once created, a mmalloc heap that is to be mapped back in must be
+     mapped at the original address.  I.E. each objfile will expect to
+     be remapped at it's original address.  This becomes a problem if
+     the desired address is already in use.
+
+     etc, etc, etc.
+
+ */
+
+
+static CORE_ADDR
+map_to_address ()
+{
+
+#if defined(MMAP_BASE_ADDRESS) && defined (MMAP_INCREMENT)
+
+  static CORE_ADDR next = MMAP_BASE_ADDRESS;
+  CORE_ADDR mapto = next;
+
+  next += MMAP_INCREMENT;
+  return (mapto);
+
+#else
+
+  return (0);
+
+#endif
+
 }

@@ -17,10 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
-#include "param.h"
+#include "expression.h"
 #include "language.h"
 #include "command.h"
 #include "gdbcmd.h"
@@ -36,13 +35,44 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 #include "gdbcore.h"
 #include "regex.h"
+#include "symfile.h"
+
+/* Prototypes for local functions. */
+
+static int
+open_source_file PARAMS ((struct symtab *));
+
+static int
+get_filename_and_charpos PARAMS ((struct symtab *, char **));
+
+static void
+reverse_search_command PARAMS ((char *, int));
+
+static void
+forward_search_command PARAMS ((char *, int));
+
+static void
+line_info PARAMS ((char *, int));
+
+static void
+list_command PARAMS ((char *, int));
+
+static void
+ambiguous_line_spec PARAMS ((struct symtabs_and_lines *));
+
+static void
+source_info PARAMS ((void));
+
+static void
+show_directories PARAMS ((void));
+
+static void
+find_source_lines PARAMS ((struct symtab *, int));
 
 /* If we use this declaration, it breaks because of fucking ANSI "const" stuff
    on some systems.  We just have to not declare it at all, have it default
    to int, and possibly botch on a few systems.  Thanks, ANSIholes... */
 /* extern char *strstr(); */
-
-extern void set_next_address ();
 
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
@@ -63,7 +93,7 @@ int current_source_line;
    and friends should be rewritten to count characters and see where
    things are wrapping, but that would be a fair amount of work.  */
 
-unsigned lines_to_list = 10;
+int lines_to_list = 10;
 
 /* Line number of last line printed.  Default for various commands.
    current_source_line is usually, but not always, the same as this.  */
@@ -79,8 +109,8 @@ static int first_line_listed;
    symtab.  Sigh.  Behavior specification: If it is called with a
    non-zero argument, that is the symtab to select.  If it is not,
    first lookup "main"; if it exists, use the symtab and line it
-   defines.  If not, take the last symtab in the symtab_list (if it
-   exists) or the last symtab in the psymtab_list (if *it* exists).  If
+   defines.  If not, take the last symtab in the symtab lists (if it
+   exists) or the last symtab in the psymtab lists (if *it* exists).  If
    none of this works, report an error.   */
 
 void
@@ -91,6 +121,7 @@ select_source_symtab (s)
   struct symtab_and_line sal;
   struct partial_symtab *ps;
   struct partial_symtab *cs_pst = 0;
+  struct objfile *ofp;
   
   if (s)
     {
@@ -116,35 +147,47 @@ select_source_symtab (s)
 
   current_source_line = 1;
 
-  for (s = symtab_list; s; s = s->next)
+  for (ofp = object_files; ofp != NULL; ofp = ofp -> next)
     {
-      char *name = s->filename;
-      int len = strlen (name);
-      if (! (len > 2 && !strcmp (&name[len - 2], ".h")))
-	current_source_symtab = s;
+      for (s = ofp -> symtabs; s; s = s->next)
+	{
+	  char *name = s -> filename;
+	  int len = strlen (name);
+	  if (! (len > 2 && (strcmp (&name[len - 2], ".h") == 0)))
+	    {
+	      current_source_symtab = s;
+	    }
+	}
     }
   if (current_source_symtab)
     return;
 
-  /* Howabout the partial symtab list?  */
+  /* Howabout the partial symbol tables? */
 
-  if (partial_symtab_list)
+  for (ofp = object_files; ofp != NULL; ofp = ofp -> next)
     {
-      ps = partial_symtab_list;
-      while (ps)
+      for (ps = ofp -> psymtabs; ps != NULL; ps = ps -> next)
 	{
-	  char *name = ps->filename;
+	  char *name = ps -> filename;
 	  int len = strlen (name);
-	  if (! (len > 2 && !strcmp (&name[len - 2], ".h")))
-	    cs_pst = ps;
-	  ps = ps->next;
+	  if (! (len > 2 && (strcmp (&name[len - 2], ".h") == 0)))
+	    {
+	      cs_pst = ps;
+	    }
 	}
-      if (cs_pst)
-	if (cs_pst->readin)
-	  fatal ("Internal: select_source_symtab: readin pst found and no symtabs.");
-	else
-	  current_source_symtab = PSYMTAB_TO_SYMTAB (cs_pst);
     }
+  if (cs_pst)
+    {
+      if (cs_pst -> readin)
+	{
+	  fatal ("Internal: select_source_symtab: readin pst found and no symtabs.");
+	}
+      else
+	{
+	  current_source_symtab = PSYMTAB_TO_SYMTAB (cs_pst);
+	}
+    }
+
   if (current_source_symtab)
     return;
 
@@ -166,18 +209,22 @@ void
 forget_cached_source_info ()
 {
   register struct symtab *s;
+  register struct objfile *objfile;
 
-  for (s = symtab_list; s; s = s->next)
+  for (objfile = object_files; objfile != NULL; objfile = objfile -> next)
     {
-      if (s->line_charpos != 0)
+      for (s = objfile -> symtabs; s != NULL; s = s -> next)
 	{
-	  free (s->line_charpos);
-	  s->line_charpos = 0;
-	}
-      if (s->fullname != 0)
-	{
-	  free (s->fullname);
-	  s->fullname = 0;
+	  if (s -> line_charpos != NULL)
+	    {
+	      mfree (objfile -> md, s -> line_charpos);
+	      s -> line_charpos = NULL;
+	    }
+	  if (s -> fullname != NULL)
+	    {
+	      mfree (objfile -> md, s -> fullname);
+	      s -> fullname = NULL;
+	    }
 	}
     }
 }
@@ -231,15 +278,14 @@ mod_path (dirname, which_path)
 
   do
     {
-      extern char *index ();
       char *name = dirname;
       register char *p;
       struct stat st;
 
       {
-	char *colon = index (name, ':');
-	char *space = index (name, ' ');
-	char *tab = index (name, '\t');
+	char *colon = strchr (name, ':');
+	char *space = strchr (name, ' ');
+	char *tab = strchr (name, '\t');
 	if (colon == 0 && space == 0 && tab ==  0)
 	  p = dirname = name + strlen (name);
 	else
@@ -293,7 +339,7 @@ mod_path (dirname, which_path)
       if (name[0] == '~')
 	name = tilde_expand (name);
       else if (name[0] != '/' && name[0] != '$')
-	name = concat (current_directory, "/", name);
+	name = concat (current_directory, "/", name, NULL);
       else
 	name = savestring (name, p - name);
       make_cleanup (free, name);
@@ -323,7 +369,7 @@ mod_path (dirname, which_path)
 		  goto skip_dup;	/* Same dir twice in one cmd */
 		strcpy (p, &p[len+1]);	/* Copy from next \0 or  : */
 	      }
-	    p = index (p, ':');
+	    p = strchr (p, ':');
 	    if (p != 0)
 	      ++p;
 	    else
@@ -338,15 +384,15 @@ mod_path (dirname, which_path)
 
 		c = old[prefix];
 		old[prefix] = '\0';
-		temp = concat (old, ":", name);
+		temp = concat (old, ":", name, NULL);
 		old[prefix] = c;
-		*which_path = concat (temp, "", &old[prefix]);
+		*which_path = concat (temp, "", &old[prefix], NULL);
 		prefix = strlen (temp);
 		free (temp);
 	      }
 	    else
 	      {
-		*which_path = concat (name, (old[0]? ":" : old), old);
+		*which_path = concat (name, (old[0]? ":" : old), old, NULL);
 		prefix = strlen (name);
 	      }
 	    free (old);
@@ -431,7 +477,7 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
   fd = -1;
   for (p = path; p; p = p1 ? p1 + 1 : 0)
     {
-      p1 = (char *) index (p, ':');
+      p1 = (char *) strchr (p, ':');
       if (p1)
 	len = p1 - p;
       else
@@ -478,7 +524,7 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
 	   
 	*filename_opened = concat (current_directory, 
 	   '/' == current_directory[strlen(current_directory)-1]? "": "/",
-				   filename);
+				   filename, NULL);
       }
 
   return fd;
@@ -486,13 +532,15 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
 
 /* Open a source file given a symtab S.  Returns a file descriptor
    or negative number for error.  */
-int
+
+static int
 open_source_file (s)
      struct symtab *s;
 {
   char *path = source_path;
   char *p;
   int result;
+  char *fullname;
 
   /* Quick way out if we already know its full name */
   if (s->fullname) 
@@ -501,7 +549,7 @@ open_source_file (s)
       if (result >= 0)
         return result;
       /* Didn't work -- free old one, try again. */
-      free (s->fullname);
+      mfree (s->objfile->md, s->fullname);
       s->fullname = NULL;
     }
 
@@ -525,7 +573,21 @@ open_source_file (s)
       }
     }
 
-  return openp (path, 0, s->filename, O_RDONLY, 0, &s->fullname);
+  result = openp (path, 0, s->filename, O_RDONLY, 0, &s->fullname);
+  if (result < 0)
+    {
+      /* Didn't work.  Try using just the basename. */
+      p = basename (s->filename);
+      if (p != s->filename)
+	result = openp(path, 0, p, O_RDONLY,0, &s->fullname);
+    }
+  if (result >= 0)
+    {
+      fullname = s -> fullname;
+      s -> fullname = mstrsave (s -> objfile -> md, s -> fullname);
+      free (fullname);
+    }
+  return result;
 }
 
 
@@ -543,12 +605,19 @@ find_source_lines (s, desc)
   register char *data, *p, *end;
   int nlines = 0;
   int lines_allocated = 1000;
-  int *line_charpos = (int *) xmalloc (lines_allocated * sizeof (int));
+  int *line_charpos;
+  long exec_mtime;
 
+  line_charpos = (int *) xmmalloc (s -> objfile -> md,
+				   lines_allocated * sizeof (int));
   if (fstat (desc, &st) < 0)
     perror_with_name (s->filename);
-  if (exec_bfd && bfd_get_mtime(exec_bfd) < st.st_mtime)
-    printf ("Source file is more recent than executable.\n");
+
+  if (exec_bfd) {
+    exec_mtime = bfd_get_mtime(exec_bfd);
+    if (exec_mtime && exec_mtime < st.st_mtime)
+      printf ("Source file is more recent than executable.\n");
+  }
 
 #ifdef BROKEN_LARGE_ALLOCA
   data = (char *) xmalloc (st.st_size);
@@ -571,18 +640,23 @@ find_source_lines (s, desc)
 	  if (nlines == lines_allocated)
 	    {
 	      lines_allocated *= 2;
-	      line_charpos = (int *) xrealloc (line_charpos,
-					       sizeof (int) * lines_allocated);
+	      line_charpos =
+		  (int *) xmrealloc (s -> objfile -> md, (char *) line_charpos,
+				     sizeof (int) * lines_allocated);
 	    }
 	  line_charpos[nlines++] = p - data;
 	}
     }
   s->nlines = nlines;
-  s->line_charpos = (int *) xrealloc (line_charpos, nlines * sizeof (int));
+  s->line_charpos =
+      (int *) xmrealloc (s -> objfile -> md, (char *) line_charpos,
+			 nlines * sizeof (int));
 }
 
 /* Return the character position of a line LINE in symtab S.
    Return 0 if anything is invalid.  */
+
+#if 0	/* Currently unused */
 
 int
 source_line_charpos (s, line)
@@ -618,13 +692,16 @@ source_charpos_line (s, chr)
     line = s->nlines;
   return line;
 }
+
+#endif	/* 0 */
+
 
 /* Get full pathname and line number positions for a symtab.
    Return nonzero if line numbers may have changed.
    Set *FULLNAME to actual name of the file as found by `openp',
    or to 0 if the file is not found.  */
 
-int
+static int
 get_filename_and_charpos (s, fullname)
      struct symtab *s;
      char **fullname;
@@ -781,7 +858,7 @@ list_command (arg, from_tty)
   int linenum_beg = 0;
   char *p;
 
-  if (symtab_list == 0 && partial_symtab_list == 0)
+  if (!have_full_symbols () && !have_partial_symbols())
     error ("No symbol table is loaded.  Use the \"file\" command.");
 
   /* Pull in a current source symtab if necessary */
@@ -889,11 +966,11 @@ list_command (arg, from_tty)
 	error ("No source file for address %s.", local_hex_string(sal.pc));
       sym = find_pc_function (sal.pc);
       if (sym)
-	printf ("%s is in %s (%s, line %d).\n",
+	printf ("%s is in %s (%s:%d).\n",
 		local_hex_string(sal.pc), 
 		SYMBOL_NAME (sym), sal.symtab->filename, sal.line);
       else
-	printf ("%s is in %s, line %d.\n",
+	printf ("%s is at %s:%d.\n",
 		local_hex_string(sal.pc), 
 		sal.symtab->filename, sal.line);
     }
@@ -978,11 +1055,13 @@ line_info (arg, from_tty)
 	    printf ("Line %d of \"%s\" is at pc %s but contains no code.\n",
 		    sal.line, sal.symtab->filename, local_hex_string(start_pc));
 	  else
-	    printf ("Line %d of \"%s\" starts at pc %s",
-		    sal.line, sal.symtab->filename, 
-		    local_hex_string(start_pc));
-	    printf (" and ends at %s.\n",
-		    local_hex_string(end_pc));
+	    {
+	      printf ("Line %d of \"%s\" starts at pc %s",
+		      sal.line, sal.symtab->filename, 
+		      local_hex_string(start_pc));
+	      printf (" and ends at %s.\n",
+		      local_hex_string(end_pc));
+	    }
 	  /* x/i should display this line's code.  */
 	  set_next_address (start_pc);
 	  /* Repeating "info line" should do the following line.  */

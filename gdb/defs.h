@@ -107,39 +107,33 @@ cplus_demangle PARAMS ((const char *, int));
 extern char *
 cplus_mangle_opname PARAMS ((char *, int));
 
-/* From mmap-*.c */
+/* From libmmalloc.a (memory mapped malloc library) */
 
 extern PTR
-mmap_malloc PARAMS ((long));
+mmalloc_attach PARAMS ((int, PTR));
 
 extern PTR
-mmap_realloc PARAMS ((PTR, long));
+mmalloc_detach PARAMS ((PTR));
 
 extern PTR
-mmap_xmalloc PARAMS ((long));
+mmalloc PARAMS ((PTR, long));
 
 extern PTR
-mmap_xrealloc PARAMS ((PTR, long));
+mrealloc PARAMS ((PTR, PTR, long));
 
 extern void
-mmap_free PARAMS ((PTR));
+mfree PARAMS ((PTR, PTR));
+
+extern int
+mmalloc_setkey PARAMS ((PTR, int, PTR));
 
 extern PTR
-mmap_sbrk PARAMS ((int));
-
-extern PTR
-mmap_base PARAMS ((void));
-
-extern PTR
-mmap_page_align PARAMS ((PTR));
-
-extern PTR
-mmap_remap PARAMS ((PTR, long, int, long));
+mmalloc_getkey PARAMS ((PTR, int));
 
 /* From utils.c */
 
 extern void
-init_malloc PARAMS ((void));
+init_malloc PARAMS ((PTR));
 
 extern void
 request_quit PARAMS ((int));
@@ -501,7 +495,13 @@ extern char *
 savestring PARAMS ((const char *, int));
 
 extern char *
+msavestring PARAMS ((void *, const char *, int));
+
+extern char *
 strsave PARAMS ((const char *));
+
+extern char *
+mstrsave PARAMS ((void *, const char *));
 
 extern char *
 concat PARAMS ((char *, ...));
@@ -510,7 +510,28 @@ extern PTR
 xmalloc PARAMS ((long));
 
 extern PTR
-xrealloc PARAMS ((char *, long));
+xrealloc PARAMS ((PTR, long));
+
+extern PTR
+xmmalloc PARAMS ((PTR, long));
+
+extern PTR
+xmrealloc PARAMS ((PTR, PTR, long));
+
+extern PTR
+mmalloc PARAMS ((PTR, long));
+
+extern PTR
+mrealloc PARAMS ((PTR, PTR, long));
+
+extern void
+mfree PARAMS ((PTR, PTR));
+
+extern int
+mmcheck PARAMS ((PTR, void (*) (void)));
+
+extern int
+mmtrace PARAMS ((void));
 
 extern int
 parse_escape PARAMS ((char **));
@@ -525,6 +546,9 @@ fatal ();
 
 extern NORETURN void			/* Not specified as volatile in ... */
 exit PARAMS ((int));			/* 4.10.4.3 */
+
+extern NORETURN void			/* Does not return to the caller.  */
+nomem PARAMS ((long));
 
 extern NORETURN void			/* Does not return to the caller.  */
 return_to_top_level PARAMS ((void));
@@ -553,9 +577,10 @@ freeargv PARAMS ((char **));
 /* For now, we can't include <stdlib.h> because it conflicts with
    "../include/getopt.h".  (FIXME)
 
-   However, since any prototypes for any functions defined in the ANSI
-   specific, defined in any header files in an ANSI conforming environment,
-   must match those in the ANSI standard, we can just duplicate them here
+   However, if a function is defined in the ANSI C standard and a prototype
+   for that function is defined and visible in any header file in an ANSI
+   conforming environment, then that prototype must match the definition in
+   the ANSI standard.  So we can just duplicate them here without conflict,
    since they must be the same in all conforming ANSI environments.  If
    these cause problems, then the environment is not ANSI conformant. */
    
@@ -570,6 +595,7 @@ extern double
 atof PARAMS ((const char *nptr));			/* 4.10.1.1 */
 
 #ifndef MALLOC_INCOMPATIBLE
+
 extern PTR
 malloc PARAMS ((size_t size));                          /* 4.10.3.3 */
 
@@ -577,8 +603,9 @@ extern PTR
 realloc PARAMS ((void *ptr, size_t size));              /* 4.10.3.4 */
 
 extern void
-free PARAMS ((void *));			/* 4.10.3.2 */
-#endif
+free PARAMS ((void *));					/* 4.10.3.2 */
+
+#endif	/* MALLOC_INCOMPATIBLE */
 
 extern void
 qsort PARAMS ((void *base, size_t nmemb,		/* 4.10.5.2 */

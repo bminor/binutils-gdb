@@ -1,3 +1,97 @@
+Sat Mar 14 16:38:47 1992  Fred Fish  (fnf@cygnus.com)
+
+	* gmalloc.c, gmalloc.h mcheck.c mmap-alloc.c mmap-sbrk.c mtrace.c,
+	state.c, state.h:  Removed.
+	* .gdbinit: Add ../malloc, ../libiberty, and ../bfd to list of
+	directories searched for source files.
+	* Makefile.in (GNU_MALLOC, MALLOC_CFLAGS, MALLOCSRC): Removed
+	* Makefile.in (MMALLOC_DIR, MMALLOC_DEP, MMALLOC_LIB,
+	MMALLOC_DISABLE, MMALLOC_CHECK, MMALLOC_CFLAGS): Add
+	* Makefile.in (CFLAGS):  Replace MALLOC_CFLAGS with MMALLOC_CFLAGS.
+	* Makefile.in (CLIBS, CDEPS):  Add MMALLOC_LIB
+	* Makefile.in (ADD_FILES, ADD_DEPS):  Remove GNU_MALLOC.
+	* Makefile.in (SFILES_MAINDIR): Remove stat.c mmap-alloc.c, mmap-
+	sbrk.c
+	* Makefile.in (HFILES): Remove state.h
+	* Makefile.in (POSSLIBS_MAINDIR): Remove MALLOCSRC.
+	* Makefile.in (OBS): Remove state.o mmap-alloc.o mmap-sbrk.o
+	* Makefile.in (saber_gdb): Remove mcheck, mtrace.  Add MMALLOC_DIR.
+	* Makefile.in (clean): Remove all object files.
+	* c-exp.y:  Define malloc to xmalloc and realloc to xrealloc.
+	* cplus-dem.c: Remove prototypes definitions that are now done in
+	def.h.
+	* dbxread.c (throughout):  Change from using per-objfile
+	xmalloc/xrealloc/free functions to xmmalloc/xmrealloc/mfree.
+	* defs.h: Remove prototypes for mmap_* functions.  Add prototypes
+	for xmmalloc, xmrealloc, mfree, mmcheck, mmtrace, mmalloc_attach, 
+	mmalloc_detach, mmalloc_setkey, msavestring, and mstrsave, nomem.
+	* depend:  Remove dependencies for state.o, state.h.
+	* dwarfread.c: Add declaration for warning_pre_print.
+	* dwarfread.c (dwarfwarn):  Use warning_pre_print.
+	* dwarfread.c (throughout):  Change from using per-objfile
+	xmalloc/xrealloc/free functions to xmmalloc/xmrealloc/mfree.
+	* gdbtypes.c (lookup_fundamental_type):  Fix init_type calls to
+	use supplied objfile.
+	* i386-xdep.c (print_387_status): Change to use warning() rather
+	than printfs.
+	* i387-tdep.c (print_387_control_word):  Change to use warning()
+	rather than printfs.
+	* infrun.c (wait_for_inferior):  Remove unreachable abort() call
+	that some compilers grumble about.		
+	* language.c (throughout):  Add declaration for warning_pre_print
+	and using warning() instead of printfs.
+	* m2-exp.y:  Define malloc to xmalloc and realloc to xrealloc.
+	* main.c (main):  Add declaration for warning_pre_print and set it
+	similarly to error_pre_print.  Add declarations for
+	mapped_symbol_files and readnow_symbol_files.  Add appropriate
+	definitions to long_options[].
+	* minsyms.c:  Trivial fix to comment.
+	* objfiles.c (allocate_objfile):  Substantially rewritten for
+	using mapped symbol files.
+	* objfiles.c (throughout):  Change from using per-objfile
+	xmalloc/xrealloc/free functions to xmmalloc/xmrealloc/mfree.
+	* objfiles.c (open_mapped_file, mapped_to_address):  Add functions.
+	* source.c (throughout):  Change from using per-objfile
+	xmalloc/xrealloc/free functions to xmmalloc/xmrealloc/mfree.
+	* source.c (open_source_file):  Use mstrsave to save file name in
+	mapped symbol region for objfile.
+	* symfile.c:  Remove include for state.h.
+	include to local form.
+	* symfile.c (symbol_file_add_digested):  Remove.
+	* symfile.c (symbol_file_add):  Substantially rewritten for mapped
+	symbol files.
+	* symfile.h:  Remove malloc/xrealloc/xmalloc/xrealloc/free members
+	from objfile structure.  Add malloc descriptor pointer (md).
+	* symfile.h (OBJF_DUMPABLE):  Changed name to OBJF_MAPPED.
+	* symm-xdep.c (print_fpu_status):  Use warning() rather than
+	printfs.
+	* symmisc.c (free_symtab_block):  Now takes and uses current
+	objfile pointer.
+	* symmisc.c (throughout):  Change from using per-objfile
+	xmalloc/xrealloc/free functions to xmmalloc/xmrealloc/mfree.
+	* symtab.c (cplus_mangled_symbol):  Cast return value to avoid
+	Sun compiler grumblings when PTR is char *.
+	* symtab.c (lookup_symbol):  Cast return value of iterate_over_
+	msymbols() to correct pointer type.
+	* utils.c (warning_pre_print):  Initialize to "\nwarning: ".
+	* utils.c (fatal, fatal_dump_core):  Ensure that the fatal
+	error always starts on a line of it's own.
+	* utils.c (init_malloc, malloc_botch, xmalloc, xrealloc):
+	Rewrite for new mapped malloc package use.
+	* utils.c (mmalloc, mrealloc, mfree):  Stubs for configurations
+	that don't want to use the mapped malloc package; pass arguments
+	on to traditional malloc package functions.
+	* utils.c (nomem):  Add for fatal virtual memory exhausted aborts.
+	* utils.c (xmmalloc, xmrealloc, xmalloc, xrealloc):  Like mmalloc,
+	mrealloc, malloc, and realloc but get fatal error if runs out
+	of memory.
+	* utils.c (msavestring, mstrsave):  Save a string in a specific
+	mapped malloc region.
+	* utils.c (print_spaces):  Use xmalloc to get the buffer.
+	* xm-amix.h, xm-i386v4.h, xm-sun3os4.h, xm-sun4os4.h:  Add defines
+	for MMAP_BASE_ADDRESS and MMAP_INCREMENT.
+	* config/i386v4.mh:  Insignificant reorganization.
+
 Sat Mar 14 11:44:47 1992  Fred Fish  (fnf@cygnus.com)
 
 	* xcoffread.c:  Only enable compilation of debugging functions

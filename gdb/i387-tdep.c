@@ -97,7 +97,7 @@ print_387_control_word (control)
       printf (";");
     }
   printf ("\n");
-  if (control & 0xe080) printf ("warning: reserved bits on: %s\n",
+  if (control & 0xe080) warning ("reserved bits on: %s\n",
 				local_hex_string(control & 0xe080));
 }
 

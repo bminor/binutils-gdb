@@ -78,7 +78,7 @@ compact_minimal_symbols PARAMS ((struct minimal_symbol *, int));
 /* Call the function specified by FUNC for each currently available minimal
    symbol, for as long as this function continues to return NULL.  If the
    function ever returns non-NULL, then the iteration over the minimal
-   symbols is terminated,, the result is returned to the caller.
+   symbols is terminated and the result is returned to the caller.
 
    The function called has full control over the form and content of the
    information returned via the non-NULL result, which may be as simple as a

@@ -85,6 +85,7 @@ set_type_range PARAMS ((void));
 
 /* Forward declaration */
 extern const struct language_defn unknown_language_defn;
+extern char *warning_pre_print;
   
 /* The current (default at startup) state of type and range checking.
     (If the modes are set to "auto", though, these are changed based
@@ -755,7 +756,7 @@ binop_type_check(arg1,arg2,op)
       if ((numeric_type(t1) && pointer_type(t2)) ||
 	 (pointer_type(t1) && numeric_type(t2)))
       {
-	 printf("warning:  combining pointer and integer.\n");
+	 warning ("combining pointer and integer.\n");
 	 break;
       }
    case BINOP_MUL:
@@ -780,7 +781,7 @@ binop_type_check(arg1,arg2,op)
       else if ((pointer_type(t1) && integral_type(t2)) ||
 	 (integral_type(t1) && pointer_type(t2)))
       {
-	 printf("warning:  combining integer and pointer.\n");
+	 warning ("combining integer and pointer.\n");
 	 break;
       }
       else if (!simple_type(t1) || !simple_type(t2))
@@ -809,7 +810,7 @@ binop_type_check(arg1,arg2,op)
 	 type_op_error ("A pointer can only be assigned an integer.",op);
       else if (pointer_type(t1) && integral_type(t2))
       {
-	 printf("warning:  combining integer and pointer.");
+	 warning ("combining integer and pointer.");
 	 break;
       }
       else if (!simple_type(t1) || !simple_type(t2))
@@ -834,7 +835,7 @@ binop_type_check(arg1,arg2,op)
    case UNOP_IND:
       if (integral_type(t1))
       {
-	 printf("warning:  combining pointer and integer.\n");
+	 warning ("combining pointer and integer.\n");
 	 break;
       }
       else if (!pointer_type(t1))
@@ -906,9 +907,7 @@ op_error (fmt,op,fatal)
       error (fmt,op_string(op));
    else
    {
-      printf("warning:  ");
-      printf(fmt,op_string(op));
-      printf("\n");
+      warning (fmt,op_string(op));
    }
 }
 
@@ -917,7 +916,7 @@ op_error (fmt,op,fatal)
    the rest of the arguments should be its arguments.  If
    [type|range]_check is [type|range]_check_on, then return_to_top_level()
    is called in the style of error ().  Otherwise, the message is prefixed
-   by "warning:  " and we do not return to the top level. */
+   by the value of warning_pre_print and we do not return to the top level. */
 
 void
 type_error (va_alist)
@@ -927,7 +926,7 @@ type_error (va_alist)
    char *string;
 
    if (type_check==type_check_warn)
-      fprintf(stderr,"warning:  ");
+      fprintf(stderr,warning_pre_print);
    else
       target_terminal_ours();
 
@@ -948,7 +947,7 @@ range_error (va_alist)
    char *string;
 
    if (range_check==range_check_warn)
-      fprintf(stderr,"warning:  ");
+      fprintf(stderr,warning_pre_print);
    else
       target_terminal_ours();
 

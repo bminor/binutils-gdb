@@ -98,11 +98,11 @@ typedef unsigned int DIEREF;	/* Reference to a DIE */
 extern CORE_ADDR startup_file_start;	/* From blockframe.c */
 extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 extern CORE_ADDR entry_scope_lowpc;	/* From blockframe.c */
-extern CORE_ADDR entry_scope_highpc;	/* From blockframc.c */
+extern CORE_ADDR entry_scope_highpc;	/* From blockframe.c */
 extern CORE_ADDR main_scope_lowpc;	/* From blockframe.c */
-extern CORE_ADDR main_scope_highpc;	/* From blockframc.c */
+extern CORE_ADDR main_scope_highpc;	/* From blockframe.c */
 extern int info_verbose;		/* From main.c; nonzero => verbose */
-
+extern char *warning_pre_print;		/* From utils.c */
 
 /* The DWARF debugging information consists of two major pieces,
    one is a block of DWARF Information Entries (DIE's) and the other
@@ -534,7 +534,7 @@ dwarfwarn (va_alist)
   va_start (ap);
   fmt = va_arg (ap, char *);
   warning_setup ();
-  fprintf (stderr, "DWARF warning (ref 0x%x): ", curdie -> dieref);
+  fprintf (stderr, "warning: DWARF ref 0x%x: ", curdie -> dieref);
   if (curdie -> at_name)
     {
       fprintf (stderr, "'%s': ", curdie -> at_name);
@@ -1915,7 +1915,7 @@ psymtab_to_symtab_1 (pst)
     {
       if (pst->readin)
 	{
-	  warning ("Psymtab for %s already read in.  Shouldn't happen.",
+	  warning ("psymtab for %s already read in.  Shouldn't happen.",
 		   pst -> filename);
 	}
       else
@@ -1983,7 +1983,7 @@ dwarf_psymtab_to_symtab (pst)
     {
       if (pst -> readin)
 	{
-	  warning ("Psymtab for %s already read in.  Shouldn't happen.",
+	  warning ("psymtab for %s already read in.  Shouldn't happen.",
 		   pst -> filename);
 	}
       else
@@ -2046,11 +2046,11 @@ init_psymbol_list (objfile, total_symbols)
   
   if (objfile -> global_psymbols.list)
     {
-      (*objfile -> free) (objfile -> global_psymbols.list);
+      mfree (objfile -> md, objfile -> global_psymbols.list);
     }
   if (objfile -> static_psymbols.list)
     {
-      (*objfile -> free) (objfile -> static_psymbols.list);
+      mfree (objfile -> md, objfile -> static_psymbols.list);
     }
   
   /* Current best guess is that there are approximately a twentieth
@@ -2061,11 +2061,11 @@ init_psymbol_list (objfile, total_symbols)
   objfile -> static_psymbols.size = total_symbols / 10;
   objfile -> global_psymbols.next =
     objfile -> global_psymbols.list = (struct partial_symbol *)
-      (*objfile -> xmalloc) (objfile -> global_psymbols.size
+      xmmalloc (objfile -> md, objfile -> global_psymbols.size
 			     * sizeof (struct partial_symbol));
   objfile -> static_psymbols.next =
     objfile -> static_psymbols.list = (struct partial_symbol *)
-      (*objfile -> xmalloc) (objfile -> static_psymbols.size
+      xmmalloc (objfile -> md, objfile -> static_psymbols.size
 			     * sizeof (struct partial_symbol));
 }
 

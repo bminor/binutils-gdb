@@ -78,18 +78,6 @@ extern char *cplus_demangle (const char *type, int mode);
 extern char *cplus_demangle ();
 #endif
 
-#ifdef __STDC__
-/* GDB prototypes these as void* in defs.h, so we better too, at least
-   as long as we're including defs.h.  */
-/* FIXME extern void *xmalloc (int);
-         extern void *xrealloc (char *, int); */
-extern void free (void *);
-#else
-extern char *xmalloc ();
-extern char *xrealloc ();
-extern void free ();
-#endif
-
 static char **typevec = 0;
 static int ntypes = 0;
 static int typevec_size = 0;

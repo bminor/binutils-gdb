@@ -18,7 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -29,7 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "gdbcmd.h"
 #include "breakpoint.h"
-#include "state.h"
 
 #include <obstack.h>
 #include <assert.h>
@@ -43,6 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 CORE_ADDR entry_point;			/* Where execution starts in symfile */
 struct sym_fns *symtab_fns = NULL;	/* List of all available sym_fns.  */
+int readnow_symbol_files;		/* Read full symbols immediately */
 
 /* External variables and functions referenced. */
 
@@ -58,9 +57,6 @@ load_command PARAMS ((char *, int));
 
 static void
 add_symbol_file_command PARAMS ((char *, int));
-
-static struct objfile *
-symbol_file_add_digested PARAMS ((sfd *, int));
 
 static void
 cashier_psymtab PARAMS ((struct partial_symtab *));
@@ -428,48 +424,10 @@ syms_from_objfile (objfile, addr, mainline, verbo)
   /* We're done reading the symbol file; finish off complaints.  */
   clear_complaints(0, verbo);
 
-  /* Setup the breakpoint(s) for trapping longjmp(), as it may have been
-     defined by this new file. */
-  create_longjmp_breakpoint();
-}
+  /* Fixup all the breakpoints that may have been redefined by this
+     symbol file. */
 
-/* Reload a predigested symbol file from a dumped state file.
-
-   FIXME:  For now, we load only the first dumped objfile that we
-   find, for two reasons.  (1) Our custom malloc and mmap'd sbrk
-   implementation only supports one mmap'd objfile at a time, so we
-   can only create state files with one dumped objfile in them and
-   would have no way to deal with multiple dumped objfiles when reading
-   the state file back in even if we could create them.  (2) We currently
-   have no way to select a specific objfile to load from a state file
-   containing a dump of more than one objfile, so we just select the
-   first one we encounter.  */
-
-static struct objfile *
-symbol_file_add_digested (asfd, from_tty)
-     sfd *asfd;
-     int from_tty;
-{
-  struct objfile *objfile;
-  bfd *sym_bfd;
-
-  /* First locate and map in the dumped symbol information */
-
-  objfile = objfile_from_statefile (asfd);
-
-  /* Push this file onto the head of the linked list of other such files. */
-
-  objfile -> next = object_files;
-  object_files = objfile;
-
-#if 0	/* FIXME: Things to deal with... */
-  objfile -> obfd = abfd;
-  objfile -> mtime = bfd_get_mtime (abfd);
-  obstack_full_begin (&objfile -> psymbol_obstack, 0, 0, xmalloc, free);
-  obstack_full_begin (&objfile -> symbol_obstack, 0, 0, xmalloc, free);
-  obstack_full_begin (&objfile -> type_obstack, 0, 0, xmalloc, free);
-#endif
-
+  breakpoint_re_set ();
 }
 
 /* Process a symbol file, as either the main file or as a dynamically
@@ -486,17 +444,17 @@ symbol_file_add_digested (asfd, from_tty)
    Upon failure, jumps back to command level (never returns). */
 
 struct objfile *
-symbol_file_add (name, from_tty, addr, mainline, dumpable)
+symbol_file_add (name, from_tty, addr, mainline, mapped)
      char *name;
      int from_tty;
      CORE_ADDR addr;
      int mainline;
-     int dumpable;
+     int mapped;
 {
   struct objfile *objfile;
   bfd *sym_bfd;
 
-  objfile = symfile_open (name, dumpable);
+  objfile = symfile_open (name, mapped);
   sym_bfd = objfile->obfd;
 
   /* There is a distinction between having no symbol table
@@ -510,25 +468,39 @@ symbol_file_add (name, from_tty, addr, mainline, dumpable)
       error ("%s has no symbol-table", name);
     }
 
-  if ((have_full_symbols () || have_partial_symbols ())
-      && mainline
-      && from_tty
-      && !query ("Load new symbol table from \"%s\"? ", name))
-    error ("Not confirmed.");
+  /* If the objfile uses a mapped symbol file, and we have a psymtab for
+     it, then skip reading any symbols at this time. */
 
-  if (from_tty || info_verbose)
+  if ((objfile -> psymtabs != NULL) && (objfile -> flags & OBJF_MAPPED))
     {
-      printf_filtered ("Reading symbols from %s...", name);
-      wrap_here ("");
-      fflush (stdout);
+      if (from_tty || info_verbose)
+	{
+	  printf_filtered ("Mapped symbols for %s.\n", name);
+	  fflush (stdout);
+	}
     }
-
-  syms_from_objfile (objfile, addr, mainline, from_tty);
-
-  if (from_tty || info_verbose)
+  else
     {
-      printf_filtered ("done.\n");
-      fflush (stdout);
+      if ((have_full_symbols () || have_partial_symbols ())
+	  && mainline
+	  && from_tty
+	  && !query ("Load new symbol table from \"%s\"? ", name))
+	error ("Not confirmed.");
+      
+      if (from_tty || info_verbose)
+	{
+	  printf_filtered ("Reading symbols from %s...", name);
+	  wrap_here ("");
+	  fflush (stdout);
+	}
+      
+      syms_from_objfile (objfile, addr, mainline, from_tty);
+      
+      if (from_tty || info_verbose)
+	{
+	  printf_filtered ("done.\n");
+	  fflush (stdout);
+	}
     }
   return (objfile);
 }
@@ -546,8 +518,7 @@ symbol_file_command (args, from_tty)
   struct cleanup *cleanups;
   struct objfile *objfile;
   struct partial_symtab *psymtab;
-  sfd *sym_sfd;
-  int dumpable = 0;
+  int mapped = 0;
   int readnow = 0;
 
   dont_repeat ();
@@ -575,16 +546,16 @@ symbol_file_command (args, from_tty)
     {
       if ((argv = buildargv (args)) == NULL)
 	{
-	  fatal ("virtual memory exhausted.", 0);
+	  nomem (0);
 	}
       cleanups = make_cleanup (freeargv, (char *) argv);
 
       name = *argv;
       while (*++argv != NULL)
 	{
-	  if (!strcmp (*argv, "dumpable"))
+	  if (!strcmp (*argv, "mapped"))
 	    {
-	      dumpable = 1;
+	      mapped = 1;
 	    }
 	  else if (!strcmp (*argv, "readnow"))
 	    {
@@ -594,25 +565,19 @@ symbol_file_command (args, from_tty)
 
       if (name != NULL)
 	{
-	  if ((sym_sfd = sfd_fopen (name, "r")) != NULL)
+	  /* Getting new symbols may change our opinion about what is
+	     frameless.  */
+	  reinit_frame_cache ();
+	  objfile = symbol_file_add (name, from_tty, (CORE_ADDR)0, 1,
+				     mapped);
+	  readnow |= readnow_symbol_files;
+	  if (readnow)
 	    {
-	      (void) symbol_file_add_digested (sym_sfd, from_tty);
-	    }
-	  else
-	    {
-	      /* Getting new symbols may change our opinion about what is
-		 frameless.  */
-	      reinit_frame_cache ();
-	      objfile = symbol_file_add (name, from_tty, (CORE_ADDR)0, 1,
-					 dumpable);
-	      if (readnow)
+	      for (psymtab = objfile -> psymtabs;
+		   psymtab != NULL;
+		   psymtab = psymtab -> next)
 		{
-		  for (psymtab = objfile -> psymtabs;
-		       psymtab != NULL;
-		       psymtab = psymtab -> next)
-		    {
-		      (void) psymtab_to_symtab (psymtab);
-		    }
+		  (void) psymtab_to_symtab (psymtab);
 		}
 	    }
 	}
@@ -626,9 +591,9 @@ symbol_file_command (args, from_tty)
    In case of trouble, error() is called.  */
 
 static struct objfile *
-symfile_open (name, dumpable)
+symfile_open (name, mapped)
      char *name;
-     int dumpable;
+     int mapped;
 {
   bfd *sym_bfd;
   int desc;
@@ -662,7 +627,7 @@ symfile_open (name, dumpable)
 	   name, bfd_errmsg (bfd_error));
   }
 
-  objfile = allocate_objfile (sym_bfd, name, dumpable);
+  objfile = allocate_objfile (sym_bfd, name, mapped);
   return objfile;
 }
 
@@ -778,6 +743,14 @@ reread_symbols ()
 the_big_top:
   for (objfile = object_files; objfile; objfile = objfile->next) {
     if (objfile->obfd) {
+#ifdef IBM6000
+     /* If this object is from a shared library, then you should
+        stat on the library name, not member name. */
+
+     if (objfile->obfd->my_archive)
+       res = stat (objfile->obfd->my_archive->filename, &new_statbuf);
+     else
+#endif
       res = stat (objfile->name, &new_statbuf);
       if (res != 0) {
 	/* FIXME, should use print_sys_errmsg but it's not filtered. */

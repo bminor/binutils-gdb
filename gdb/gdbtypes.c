@@ -810,141 +810,141 @@ lookup_fundamental_type (objfile, typeid)
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_INT_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_UNSIGNED,
-				  "boolean", (struct objfile *) NULL);
+				  "boolean", objfile);
 		break;
 	      case FT_STRING:
 		type = init_type (TYPE_CODE_PASCAL_ARRAY,
 				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 				  0,
-				  "string", (struct objfile *) NULL);
+				  "string", objfile);
 		break;
 	      case FT_CHAR:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 				  0,
-				  "char", (struct objfile *) NULL);
+				  "char", objfile);
 		break;
 	      case FT_SIGNED_CHAR:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_SIGNED,
-				  "signed char", (struct objfile *) NULL);
+				  "signed char", objfile);
 		break;
 	      case FT_UNSIGNED_CHAR:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_UNSIGNED,
-				  "unsigned char", (struct objfile *) NULL);
+				  "unsigned char", objfile);
 		break;
 	      case FT_SHORT:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
 				  0,
-				  "short", (struct objfile *) NULL);
+				  "short", objfile);
 		break;
 	      case FT_SIGNED_SHORT:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_SIGNED,
-				  "signed short", (struct objfile *) NULL);
+				  "signed short", objfile);
 		break;
 	      case FT_UNSIGNED_SHORT:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_SHORT_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_UNSIGNED,
-				  "unsigned short", (struct objfile *) NULL);
+				  "unsigned short", objfile);
 		break;
 	      case FT_INTEGER:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_INT_BIT / TARGET_CHAR_BIT,
 				  0,
-				  "int", (struct objfile *) NULL);
+				  "int", objfile);
 		break;
 	      case FT_SIGNED_INTEGER:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_INT_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_SIGNED,
-				  "signed int", (struct objfile *) NULL);
+				  "signed int", objfile);
 		break;
 	      case FT_UNSIGNED_INTEGER:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_INT_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_UNSIGNED,
-				  "unsigned int", (struct objfile *) NULL);
+				  "unsigned int", objfile);
 		break;
 	      case FT_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_BIT / TARGET_CHAR_BIT,
 				  0,
-				  "long", (struct objfile *) NULL);
+				  "long", objfile);
 		break;
 	      case FT_SIGNED_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_SIGNED,
-				  "signed long", (struct objfile *) NULL);
+				  "signed long", objfile);
 		break;
 	      case FT_UNSIGNED_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_UNSIGNED,
-				  "unsigned long", (struct objfile *) NULL);
+				  "unsigned long", objfile);
 		break;
 	      case FT_LONG_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
 				  0,
-				  "long long", (struct objfile *) NULL);
+				  "long long", objfile);
 		break;
 	      case FT_SIGNED_LONG_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_SIGNED,
-				  "signed long long", (struct objfile *) NULL);
+				  "signed long long", objfile);
 		break;
 	      case FT_UNSIGNED_LONG_LONG:
 		type = init_type (TYPE_CODE_INT,
 				  TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
 				  TYPE_FLAG_UNSIGNED,
 				  "unsigned long long",
-				  (struct objfile *) NULL);
+				  objfile);
 		break;
 	      case FT_FLOAT:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
 				  0,
-				  "float", (struct objfile *) NULL);
+				  "float", objfile);
 		break;
 	      case FT_DBL_PREC_FLOAT:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
 				  0,
-				  "double", (struct objfile *) NULL);
+				  "double", objfile);
 		break;
 	      case FT_EXT_PREC_FLOAT:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
 				  0,
-				  "long double", (struct objfile *) NULL);
+				  "long double", objfile);
 		break;
 	      case FT_COMPLEX:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
 				  0,
-				  "complex", (struct objfile *) NULL);
+				  "complex", objfile);
 		break;
 	      case FT_DBL_PREC_COMPLEX:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
 				  0,
-				  "double complex", (struct objfile *) NULL);
+				  "double complex", objfile);
 		break;
 	      case FT_EXT_PREC_COMPLEX:
 		type = init_type (TYPE_CODE_FLT,
 				  TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
 				  0,
 				  "long double complex",
-				  (struct objfile *) NULL);
+				  objfile);
 		break;
 	    }
 	  /* Install the newly created type in the objfile's fundamental_types

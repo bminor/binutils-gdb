@@ -40,6 +40,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 #include "parser-defs.h"
 
+/* Ensure that if the generated parser contains any calls to malloc/realloc,
+   that they get mapped to xmalloc/xrealloc. */
+
+#define malloc	xmalloc
+#define realloc	xrealloc
+
 /* These MUST be included in any grammar file!!!!
    Please choose unique names! */
 #define	yymaxdepth m2_maxdepth

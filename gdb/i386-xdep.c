@@ -160,13 +160,13 @@ print_387_status (status, ep)
       printf ("  %g\n", val);
     }
   if (ep->r0)
-    printf ("warning: reserved0 is %s\n", local_hex_string(ep->r0));
+    warning ("reserved0 is %s\n", local_hex_string(ep->r0));
   if (ep->r1)
-    printf ("warning: reserved1 is %s\n", local_hex_string(ep->r1));
+    warning ("reserved1 is %s\n", local_hex_string(ep->r1));
   if (ep->r2)
-    printf ("warning: reserved2 is %s\n", local_hex_string(ep->r2));
+    warning ("reserved2 is %s\n", local_hex_string(ep->r2));
   if (ep->r3)
-    printf ("warning: reserved3 is %s\n", local_hex_string(ep->r3));
+    warning ("reserved3 is %s\n", local_hex_string(ep->r3));
 }
 
 #ifndef U_FPSTATE

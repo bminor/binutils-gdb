@@ -652,7 +652,7 @@ child_create_inferior (exec_file, allargs, env)
      correct program, and are poised at the first instruction of the
      new program.  */
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
-  SOLIB_CREATE_INFERIOR_HOOK ();
+  SOLIB_CREATE_INFERIOR_HOOK (pid);
 #endif
 
   /* Should this perhaps just be a "proceed" call?  FIXME */
@@ -1232,7 +1232,7 @@ wait_for_inferior ()
 		goto step_over_function;
 
 	      tmp = SKIP_TRAMPOLINE_CODE (stop_pc);
-	      if (tmp != NULL)
+	      if (tmp != 0)
 		stop_func_start = tmp;
 
 	      if (find_pc_function (stop_func_start) != 0)
@@ -1316,7 +1316,7 @@ step_into_function:
 	    step_range_end = sal.end;
 	    goto save_pc;
 	  }
-	abort();		/* We never fall through here */
+	  /* We never fall through here */
 	}
 
       if (trap_expected

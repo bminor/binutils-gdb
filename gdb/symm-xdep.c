@@ -291,13 +291,13 @@ struct pt_regset ep;
 	    printf ("  %g\n", val);
 	}
     if (ep.pr_fpu.fpu_rsvd1)
-	printf ("warning: rsvd1 is 0x%x\n", ep.pr_fpu.fpu_rsvd1);
+	warning ("rsvd1 is 0x%x\n", ep.pr_fpu.fpu_rsvd1);
     if (ep.pr_fpu.fpu_rsvd2)
-	printf ("warning: rsvd2 is 0x%x\n", ep.pr_fpu.fpu_rsvd2);
+	warning ("rsvd2 is 0x%x\n", ep.pr_fpu.fpu_rsvd2);
     if (ep.pr_fpu.fpu_rsvd3)
-	printf ("warning: rsvd3 is 0x%x\n", ep.pr_fpu.fpu_rsvd3);
+	warning ("rsvd3 is 0x%x\n", ep.pr_fpu.fpu_rsvd3);
     if (ep.pr_fpu.fpu_rsvd5)
-	printf ("warning: rsvd5 is 0x%x\n", ep.pr_fpu.fpu_rsvd5);
+	warning ("rsvd5 is 0x%x\n", ep.pr_fpu.fpu_rsvd5);
 }
 
 

@@ -96,17 +96,23 @@ MAKEINFO=makeinfo
 #CC-LD=gcc -static
 CC-LD=${CC}
 
-# define this to be "gmalloc.o" if you want to use the gnu malloc routine
-# (useful for debugging memory allocation problems in gdb).  To use your
-# system malloc, uncomment the following two lines.
-#GNU_MALLOC =
-#MALLOC_CFLAGS = -DNO_MALLOC_CHECK
-GNU_MALLOC = gmalloc.o mcheck.o mtrace.o
-MALLOC_CFLAGS =
-
 # Where is the "include" directory?  Traditionally ../include or ./include
 INCLUDE_DIR =  ${srcdir}/../include
 INCLUDE_DEP = $$(INCLUDE_DIR)
+
+# Where is the source dir for the MMALLOC library? Traditionally ../mmalloc
+# or ./mmalloc  (When we want the binary library built from it, we use
+# ${MMALLOC_DIR}${subdir}.)
+# Note that mmalloc can still be used on systems without mmap().
+# To use your system malloc, comment out the following defines.
+MMALLOC_DIR = ${srcdir}/../mmalloc
+MMALLOC_DEP = $$(MMALLOC_DIR)
+MMALLOC_LIB = ./../mmalloc${subdir}/libmmalloc.a
+# To use your system malloc, uncomment MMALLOC_DISABLE.
+#MMALLOC_DISABLE = -DNO_MMALLOC
+# To use mmalloc but disable corruption checking, uncomment MMALLOC_CHECK
+#MMALLOC_CHECK = -DNO_MMALLOC_CHECK
+MMALLOC_CFLAGS = ${MMALLOC_CHECK} ${MMALLOC_DISABLE}
 
 # Where is the source dir for the BFD library?  Traditionally ../bfd or ./bfd
 # (When we want the binary library built from it, we use ${BFD_DIR}${subdir}.)
@@ -134,7 +140,7 @@ GLOBAL_CFLAGS = ${MINUS_G} ${TM_CFLAGS} ${XM_CFLAGS}
 # CFLAGS is the aggregate of several individual *_CFLAGS macros.
 # USER_CFLAGS is specifically reserved for setting from the command line
 # when running make.  I.E.  "make USER_CFLAGS=-Wmissing-prototypes".
-CFLAGS = ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${MALLOC_CFLAGS} ${INCLUDE_CFLAGS} ${USER_CFLAGS}
+CFLAGS = ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${MMALLOC_CFLAGS} ${INCLUDE_CFLAGS} ${USER_CFLAGS}
 # None of the things in CFLAGS will do any harm, and on some systems
 #  (e.g. SunOS4) it is important to use the M_CFLAGS.
 LDFLAGS = $(CFLAGS)
@@ -151,11 +157,13 @@ LIBIBERTY = ./../libiberty${subdir}/libiberty.a
 # Libraries and corresponding dependencies for compiling gdb.
 # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
 # TERMCAP comes after readline, since readline depends on it.
-CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${LIBIBERTY} ${XM_CLIBS} ${TM_CLIBS}
-CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
+CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
+	${XM_CLIBS} ${TM_CLIBS}
+CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${MMALLOC_LIB} ${LIBIBERTY} \
+	${RL_LIB} ${MMALLOC_LIB}
 
-ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
-ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
+ADD_FILES = ${REGEX} ${ALLOCA} ${XM_ADD_FILES} ${TM_ADD_FILES}
+ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
 VERSION = 4.4.5
 DIST=gdb
@@ -178,8 +186,8 @@ SFILES_MAINDIR = \
 	 utils.c valarith.c valops.c valprint.c values.c c-exp.y m2-exp.y \
 	 signame.c cplus-dem.c mem-break.c target.c inftarg.c \
 	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
-	 ieee-float.c language.c parse.c buildsym.c state.c objfiles.c \
-	 minsyms.c mmap-alloc.c mmap-sbrk.c
+	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
+	 minsyms.c
 
 # Source files in subdirectories (which will be handled separately by
 #  'make gdb.tar.Z').
@@ -224,16 +232,13 @@ SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 HFILES=	breakpoint.h buildsym.h command.h defs.h environ.h \
 	expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h \
 	ieee-float.h inferior.h minimon.h partial-stab.h \
-	signals.h signame.h symfile.h symtab.h state.h solib.h \
+	signals.h signame.h symfile.h symtab.h solib.h \
 	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h tm-sysv4.h \
 	xm-m68k.h xm-sysv4.h language.h parser-defs.h value.h
 
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c rem-multi.shar
 
-MALLOCSRC = gmalloc.c mcheck.c mtrace.c mtrace.awk \
-	    gmalloc.h
-
-POSSLIBS_MAINDIR = regex.c regex.h alloca.c $(MALLOCSRC)
+POSSLIBS_MAINDIR = regex.c regex.h alloca.c
 POSSLIBS = $(POSSLIBS_MAINDIR)
 
 TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
@@ -267,7 +272,7 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     command.o utils.o expprint.o environ.o version.o gdbtypes.o \
     copying.o $(DEPFILES) signame.o cplus-dem.o mem-break.o target.o \
     inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
-    buildsym.o state.o objfiles.o minsyms.o mmap-alloc.o mmap-sbrk.o \
+    buildsym.o objfiles.o minsyms.o \
     dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o # mipsread.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
@@ -330,9 +335,8 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#load ${LIBIBERTY_DIR}/*.c
 	#load ${BFD_DIR}/*.c
 	#load ${READLINE_DIR}/*.c
+	#load ${MMALLOC_DIR}/*.c
 	#load -ltermcap 
-	##void mcheck(a) void (*a)(); { }
-	##void mtrace() { }
 
 
 
@@ -532,8 +536,8 @@ make-proto-gdb-1: ${TARFILES} ${TARDIRS} gdb.info
 	chmod og=u `find . -print`
 
 clean:
-	rm -f ${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES}
-	rm -f init.c init.o version.c
+	rm -f *.o ${ADD_FILES}
+	rm -f init.c version.c
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]
 	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS)"

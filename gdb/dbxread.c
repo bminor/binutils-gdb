@@ -31,9 +31,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    fledged symbol table by going back and reading the symbols
    for real.  dbx_psymtab_to_symtab() is the function that does this */
 
-#include <stdio.h>
-#include <string.h>
 #include "defs.h"
+#include <string.h>
 
 #ifdef USG
 #include <sys/types.h>
@@ -453,9 +452,9 @@ dbx_symfile_read (sf, addr, mainline)
   /* Free up any memory we allocated for ourselves.  */
 
   if (!mainline) {
-    (*sf->objfile->free) (info->stringtab);	/* Stringtab is only saved for mainline */
+    mfree (sf->objfile->md, info->stringtab);	/* Stringtab is only saved for mainline */
   }
-  (*sf->objfile->free) (info);
+  mfree (sf->objfile->md, info);
   sf->sym_private = NULL;	/* Zap pointer to our (now gone) info struct */
 
   if (!have_partial_symbols ()) {
@@ -510,7 +509,7 @@ dbx_symfile_init (sf)
   unsigned char size_temp[4];
 
   /* Allocate struct to keep track of the symfile */
-  sf->sym_private = (*sf->objfile->xmalloc) (sizeof (*info));
+  sf->sym_private = xmmalloc (sf->objfile->md, sizeof (*info));
   info = (struct dbx_symfile_info *)sf->sym_private;
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
@@ -536,7 +535,7 @@ dbx_symfile_init (sf)
   if (info->stringtab_size >= 0)
     {
       /* Yes, this should be malloc, not xmalloc.  We check its result.  */
-      info->stringtab = (char *) (*sf->objfile->malloc) (info->stringtab_size);
+      info->stringtab = (char *) mmalloc (sf->objfile->md, info->stringtab_size);
       /* Caller is responsible for freeing the string table.  No cleanup. */
     }
   else
@@ -628,9 +627,9 @@ init_psymbol_list (total_symbols, objfile)
 {
   /* Free any previously allocated psymbol lists.  */
   if (objfile -> global_psymbols.list)
-    (*objfile -> free) (objfile -> global_psymbols.list);
+    mfree (objfile -> md, objfile -> global_psymbols.list);
   if (objfile -> static_psymbols.list)
-    (*objfile -> free) (objfile -> static_psymbols.list);
+    mfree (objfile -> md, objfile -> static_psymbols.list);
 
   /* Current best guess is that there are approximately a twentieth
      of the total symbols (in a debugging file) are global or static
@@ -638,9 +637,9 @@ init_psymbol_list (total_symbols, objfile)
   objfile -> global_psymbols.size = total_symbols / 10;
   objfile -> static_psymbols.size = total_symbols / 10;
   objfile -> global_psymbols.next = objfile -> global_psymbols.list = (struct partial_symbol *)
-    (*objfile -> xmalloc) (objfile -> global_psymbols.size * sizeof (struct partial_symbol));
+    xmmalloc (objfile -> md, objfile -> global_psymbols.size * sizeof (struct partial_symbol));
   objfile -> static_psymbols.next = objfile -> static_psymbols.list = (struct partial_symbol *)
-    (*objfile -> xmalloc) (objfile -> static_psymbols.size * sizeof (struct partial_symbol));
+    xmmalloc (objfile -> md, objfile -> static_psymbols.size * sizeof (struct partial_symbol));
 }
 
 /* Initialize the list of bincls to contain none and have some
@@ -653,7 +652,7 @@ init_bincl_list (number, objfile)
 {
   bincls_allocated = number;
   next_bincl = bincl_list = (struct header_file_location *)
-    (*objfile -> xmalloc) (bincls_allocated * sizeof(struct header_file_location));
+    xmmalloc (objfile -> md, bincls_allocated * sizeof(struct header_file_location));
 }
 
 /* Add a bincl to the list.  */
@@ -669,7 +668,7 @@ add_bincl_to_list (pst, name, instance)
       int offset = next_bincl - bincl_list;
       bincls_allocated *= 2;
       bincl_list = (struct header_file_location *)
-	(*pst->objfile->xrealloc) ((char *)bincl_list,
+	xmrealloc (pst->objfile->md, (char *)bincl_list,
 		  bincls_allocated * sizeof (struct header_file_location));
       next_bincl = bincl_list + offset;
     }
@@ -703,7 +702,7 @@ static void
 free_bincl_list (objfile)
      struct objfile *objfile;
 {
-  (*objfile -> free) (bincl_list);
+  mfree (objfile -> md, bincl_list);
   bincls_allocated = 0;
 }
 
@@ -975,7 +974,21 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
    && pst->n_static_syms == 0) {
     /* Throw away this psymtab, it's empty.  We can't deallocate it, since
        it is on the obstack, but we can forget to chain it on the list.  */
-    ;
+    struct partial_symtab *prev_pst;
+
+    /* First, snip it out of the psymtab chain */
+
+    if (pst->objfile->psymtabs == pst)
+      pst->objfile->psymtabs = pst->next;
+    else
+      for (prev_pst = pst->objfile->psymtabs; prev_pst; prev_pst = pst->next)
+	if (prev_pst->next == pst)
+	  prev_pst->next = pst->next;
+
+    /* Next, put it on a free list for recycling */
+
+    pst->next = pst->objfile->free_psymtabs;
+    pst->objfile->free_psymtabs = pst;
   }
 }
 
@@ -1100,8 +1113,8 @@ dbx_psymtab_to_symtab (pst)
 #endif
 	    {
 #ifdef BROKEN_LARGE_ALLOCA
-	      stringtab = (char *) (*pst->objfile->xmalloc) (stsize);
-	      make_cleanup (pst->objfile->free, stringtab);
+	      stringtab = (char *) xmalloc (stsize);
+	      make_cleanup (free, stringtab);
 #else
 	      stringtab = (char *) alloca (stsize);
 #endif
@@ -1567,7 +1580,7 @@ process_one_symbol (type, desc, valu, name, offset)
       {
 	int i;
 	struct symbol *sym =
-	  (struct symbol *) (*our_objfile -> xmalloc) (sizeof (struct symbol));
+	  (struct symbol *) xmmalloc (our_objfile -> md, sizeof (struct symbol));
 	bzero (sym, sizeof *sym);
 	SYMBOL_NAME (sym) = savestring (name, strlen (name));
 	SYMBOL_CLASS (sym) = LOC_BLOCK;
