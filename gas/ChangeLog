@@ -1,5 +1,12 @@
 2005-01-06  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (FPU_DEFAULT): Define for TE_VXWORKS.
+	(md_begin): Handle TE_VXWORKS for FP defaults.
+	(md_apply_fix3): Correct rela offsets.
+	(elf32_arm_target_format): Add VxWorks targets.
+
+2005-01-06  Paul Brook  <paul@codesourcery.com>
+
 	* configure.tgt: Set em=vxworks for *-*-vxworks.
 	* config/te-vxworks.h: New File.
 

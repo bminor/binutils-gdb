@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -27,8 +27,6 @@
 #ifndef NUM_ELEM
 #define NUM_ELEM(a)  (sizeof (a) / (sizeof (a)[0]))
 #endif
-
-#define USE_REL	1
 
 #define elf_info_to_howto               0
 #define elf_info_to_howto_rel           elf32_arm_info_to_howto
@@ -987,10 +985,6 @@ elf32_arm_nabi_grok_psinfo (abfd, note)
 #define elf_backend_grok_prstatus	elf32_arm_nabi_grok_prstatus
 #define elf_backend_grok_psinfo		elf32_arm_nabi_grok_psinfo
 
-#ifndef USE_REL
-#define USE_REL	0
-#endif
-
 typedef unsigned long int insn32;
 typedef unsigned short int insn16;
 
@@ -1179,6 +1173,9 @@ struct elf32_arm_link_hash_table
 
     /* True if the target system is Symbian OS.  */
     int symbian_p;
+
+    /* True if the target uses REL relocations.  */
+    int use_rel;
 
     /* Short-cuts to get to dynamic linker sections.  */
     asection *sgot;
@@ -1389,6 +1386,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->plt_entry_size = 12;
 #endif
   ret->symbian_p = 0;
+  ret->use_rel = 1;
   ret->sym_sec.abfd = NULL;
   ret->obfd = abfd;
 
@@ -2288,20 +2286,21 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
   local_got_offsets = elf_local_got_offsets (input_bfd);
   r_symndx = ELF32_R_SYM (rel->r_info);
 
-#if USE_REL
-  addend = bfd_get_32 (input_bfd, hit_data) & howto->src_mask;
-
-  if (addend & ((howto->src_mask + 1) >> 1))
+  if (globals->use_rel)
     {
-      signed_addend = -1;
-      signed_addend &= ~ howto->src_mask;
-      signed_addend |= addend;
+      addend = bfd_get_32 (input_bfd, hit_data) & howto->src_mask;
+
+      if (addend & ((howto->src_mask + 1) >> 1))
+	{
+	  signed_addend = -1;
+	  signed_addend &= ~ howto->src_mask;
+	  signed_addend |= addend;
+	}
+      else
+	signed_addend = addend;
     }
   else
-    signed_addend = addend;
-#else
-  addend = signed_addend = rel->r_addend;
-#endif
+    addend = signed_addend = rel->r_addend;
 
   switch (r_type)
     {
@@ -2508,7 +2507,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  value -= (input_section->output_section->vma
 		    + input_section->output_offset);
 	  value -= rel->r_offset;
-	  value += (signed_addend << howto->size);
+	  if (globals->use_rel)
+	    value += (signed_addend << howto->size);
+	  else
+	    /* RELA addends do not have to be adjusted by howto->size.  */
+	    value += signed_addend;
 
 	  signed_addend = value;
 	  signed_addend >>= howto->rightshift;
@@ -2602,12 +2605,13 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
     case R_ARM_THM_ABS5:
       /* Support ldr and str instructions for the thumb.  */
-#if USE_REL
-      /* Need to refetch addend.  */
-      addend = bfd_get_16 (input_bfd, hit_data) & howto->src_mask;
-      /* ??? Need to determine shift amount from operand size.  */
-      addend >>= howto->rightshift;
-#endif
+      if (globals->use_rel)
+	{
+	  /* Need to refetch addend.  */
+	  addend = bfd_get_16 (input_bfd, hit_data) & howto->src_mask;
+	  /* ??? Need to determine shift amount from operand size.  */
+	  addend >>= howto->rightshift;
+	}
       value += addend;
 
       /* ??? Isn't value unsigned?  */
@@ -2634,17 +2638,16 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_vma check;
 	bfd_signed_vma signed_check;
 
-#if USE_REL
 	/* Need to refetch the addend and squish the two 11 bit pieces
 	   together.  */
-	{
-	  bfd_vma upper = upper_insn & 0x7ff;
-	  bfd_vma lower = lower_insn & 0x7ff;
-	  upper = (upper ^ 0x400) - 0x400; /* Sign extend.  */
-	  addend = (upper << 12) | (lower << 1);
-	  signed_addend = addend;
-	}
-#endif
+	if (globals->use_rel)
+	  {
+	    bfd_vma upper = upper_insn & 0x7ff;
+	    bfd_vma lower = lower_insn & 0x7ff;
+	    upper = (upper ^ 0x400) - 0x400; /* Sign extend.  */
+	    addend = (upper << 12) | (lower << 1);
+	    signed_addend = addend;
+	  }
 #ifndef OLD_ARM_ABI
 	if (r_type == R_ARM_THM_XPC22)
 	  {
@@ -2735,22 +2738,23 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
 	bfd_signed_vma signed_check;
 
-#if USE_REL
-	/* Need to refetch addend.  */
-	addend = bfd_get_16 (input_bfd, hit_data) & howto->src_mask;
-	if (addend & ((howto->src_mask + 1) >> 1))
+	if (globals->use_rel)
 	  {
-	    signed_addend = -1;
-	    signed_addend &= ~ howto->src_mask;
-	    signed_addend |= addend;
+	    /* Need to refetch addend.  */
+	    addend = bfd_get_16 (input_bfd, hit_data) & howto->src_mask;
+	    if (addend & ((howto->src_mask + 1) >> 1))
+	      {
+		signed_addend = -1;
+		signed_addend &= ~ howto->src_mask;
+		signed_addend |= addend;
+	      }
+	    else
+	      signed_addend = addend;
+	    /* The value in the insn has been right shifted.  We need to
+	       undo this, so that we can perform the address calculation
+	       in terms of bytes.  */
+	    signed_addend <<= howto->rightshift;
 	  }
-	else
-	  signed_addend = addend;
-	/* The value in the insn has been right shifted.  We need to
-	   undo this, so that we can perform the address calculation
-	   in terms of bytes.  */
-	signed_addend <<= howto->rightshift;
-#endif
 	relocation = value + signed_addend;
 
 	relocation -= (input_section->output_section->vma
@@ -2780,11 +2784,12 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_vma relocation;
 
 	insn = bfd_get_32 (input_bfd, hit_data);
-#if USE_REL
-	/* Extract the addend.  */
-	addend = (insn & 0xff) << ((insn & 0xf00) >> 7);
-	signed_addend = addend;
-#endif
+	if (globals->use_rel)
+	  {
+	    /* Extract the addend.  */
+	    addend = (insn & 0xff) << ((insn & 0xf00) >> 7);
+	    signed_addend = addend;
+	  }
 	relocation = value + signed_addend;
 
 	relocation -= (input_section->output_section->vma
@@ -2985,7 +2990,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     }
 }
 
-#if USE_REL
 /* Add INCREMENT to the reloc (of type HOWTO) at ADDRESS.  */
 static void
 arm_add_to_rel (bfd *              abfd,
@@ -3059,7 +3063,6 @@ arm_add_to_rel (bfd *              abfd,
       bfd_put_32 (abfd, contents, address);
     }
 }
-#endif /* USE_REL */
 
 /* Relocate an ARM ELF section.  */
 static bfd_boolean
@@ -3079,12 +3082,10 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
   const char *name;
   struct elf32_arm_link_hash_table * globals;
 
-#if !USE_REL
-  if (info->relocatable)
-    return TRUE;
-#endif
-
   globals = elf32_arm_hash_table (info);
+  if (info->relocatable && !globals->use_rel)
+    return TRUE;
+
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
 
@@ -3113,8 +3114,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
       bfd_reloc.howto = elf32_arm_howto_from_type (r_type);
       howto = bfd_reloc.howto;
 
-#if USE_REL
-      if (info->relocatable)
+      if (info->relocatable && globals->use_rel)
 	{
 	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
@@ -3135,7 +3135,6 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 
 	  continue;
 	}
-#endif
 
       /* This is a final link.  */
       h = NULL;
@@ -3146,48 +3145,49 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-#if USE_REL
-	  relocation = (sec->output_section->vma
-			+ sec->output_offset
-			+ sym->st_value);
-	  if ((sec->flags & SEC_MERGE)
-		   && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	  if (globals->use_rel)
 	    {
-	      asection *msec;
-	      bfd_vma addend, value;
-
-	      if (howto->rightshift)
+	      relocation = (sec->output_section->vma
+			    + sec->output_offset
+			    + sym->st_value);
+	      if ((sec->flags & SEC_MERGE)
+		       && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 		{
-		  (*_bfd_error_handler)
-		    (_("%B(%A+0x%lx): %s relocation against SEC_MERGE section"),
-		     input_bfd, input_section,
-		     (long) rel->r_offset, howto->name);
-		  return FALSE;
+		  asection *msec;
+		  bfd_vma addend, value;
+
+		  if (howto->rightshift)
+		    {
+		      (*_bfd_error_handler)
+			(_("%B(%A+0x%lx): %s relocation against SEC_MERGE section"),
+			 input_bfd, input_section,
+			 (long) rel->r_offset, howto->name);
+		      return FALSE;
+		    }
+
+		  value = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+		  /* Get the (signed) value from the instruction.  */
+		  addend = value & howto->src_mask;
+		  if (addend & ((howto->src_mask + 1) >> 1))
+		    {
+		      bfd_signed_vma mask;
+
+		      mask = -1;
+		      mask &= ~ howto->src_mask;
+		      addend |= mask;
+		    }
+		  msec = sec;
+		  addend =
+		    _bfd_elf_rel_local_sym (output_bfd, sym, &msec, addend)
+		    - relocation;
+		  addend += msec->output_section->vma + msec->output_offset;
+		  value = (value & ~ howto->dst_mask) | (addend & howto->dst_mask);
+		  bfd_put_32 (input_bfd, value, contents + rel->r_offset);
 		}
-
-	      value = bfd_get_32 (input_bfd, contents + rel->r_offset);
-
-	      /* Get the (signed) value from the instruction.  */
-	      addend = value & howto->src_mask;
-	      if (addend & ((howto->src_mask + 1) >> 1))
-		{
-		  bfd_signed_vma mask;
-
-		  mask = -1;
-		  mask &= ~ howto->src_mask;
-		  addend |= mask;
-		}
-	      msec = sec;
-	      addend =
-		_bfd_elf_rel_local_sym (output_bfd, sym, &msec, addend)
-		- relocation;
-	      addend += msec->output_section->vma + msec->output_offset;
-	      value = (value & ~ howto->dst_mask) | (addend & howto->dst_mask);
-	      bfd_put_32 (input_bfd, value, contents + rel->r_offset);
 	    }
-#else
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
-#endif
+	  else
+	    relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	}
       else
 	{
@@ -5734,13 +5734,61 @@ const struct elf_size_info elf32_arm_size_info = {
 #define elf_backend_plt_readonly    1
 #define elf_backend_want_got_plt    1
 #define elf_backend_want_plt_sym    0
-#if !USE_REL
-#define elf_backend_rela_normal     1
-#endif
+#define elf_backend_may_use_rel_p   1
+#define elf_backend_may_use_rela_p  0
+#define elf_backend_default_use_rela_p 0
+#define elf_backend_rela_normal     0
 
 #define elf_backend_got_header_size	12
 
 #include "elf32-target.h"
+
+/* VxWorks Targets */
+
+#undef TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM               bfd_elf32_littlearm_vxworks_vec
+#undef TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME              "elf32-littlearm-vxworks"
+#undef TARGET_BIG_SYM
+#define TARGET_BIG_SYM                  bfd_elf32_bigarm_vxworks_vec
+#undef TARGET_BIG_NAME
+#define TARGET_BIG_NAME                 "elf32-bigarm-vxworks"
+
+/* Like elf32_arm_link_hash_table_create -- but overrides
+   appropriately for VxWorks.  */
+static struct bfd_link_hash_table *
+elf32_arm_vxworks_link_hash_table_create (bfd *abfd)
+{
+  struct bfd_link_hash_table *ret;
+
+  ret = elf32_arm_link_hash_table_create (abfd);
+  if (ret)
+    {
+      struct elf32_arm_link_hash_table *htab
+	= (struct elf32_arm_link_hash_table *)ret;
+      htab->use_rel = 0;
+    }
+  return ret;
+}     
+
+#undef elf32_bed
+#define elf32_bed elf32_arm_vxworks_bed
+
+#undef bfd_elf32_bfd_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_create \
+  elf32_arm_vxworks_link_hash_table_create
+
+#undef elf_backend_may_use_rel_p
+#define elf_backend_may_use_rel_p   0
+#undef elf_backend_may_use_rela_p
+#define elf_backend_may_use_rela_p  1
+#undef elf_backend_default_use_rela_p
+#define elf_backend_default_use_rela_p 1
+#undef elf_backend_rela_normal
+#define elf_backend_rela_normal     1
+
+#include "elf32-target.h"
+
 
 /* Symbian OS Targets */
 
@@ -5858,5 +5906,14 @@ elf32_arm_symbian_modify_segment_map (bfd *abfd,
 /* Similarly, there is no .got.plt section.  */
 #undef elf_backend_want_got_plt
 #define elf_backend_want_got_plt 0
+
+#undef elf_backend_may_use_rel_p
+#define elf_backend_may_use_rel_p   1
+#undef elf_backend_may_use_rela_p
+#define elf_backend_may_use_rela_p  0
+#undef elf_backend_default_use_rela_p
+#define elf_backend_default_use_rela_p 1
+#undef elf_backend_rela_normal
+#define elf_backend_rela_normal     0
 
 #include "elf32-target.h"

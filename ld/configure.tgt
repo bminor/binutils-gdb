@@ -257,7 +257,7 @@ arm-*-nto*)		targ_emul=armnto ;;
 arm-*-openbsd*)		targ_emul=armnbsd ;;
 arm-*-rtems*)		targ_emul=armelf ;;
 armeb-*-elf)		targ_emul=armelfb ;;
-arm-*-elf | arm-*-vxworks | arm*-*-eabi*)
+arm-*-elf | arm*-*-eabi*)
 	  		targ_emul=armelf ;;
 arm*-*-symbianelf*)     targ_emul=armsymbian;;
 arm-*-kaos*)		targ_emul=armelf ;;
@@ -266,6 +266,7 @@ arm*b-*-linux-gnu*)	targ_emul=armelfb_linux; targ_extra_emuls=armelfb ;;
 arm*-*-linux-gnueabi)	targ_emul=armelf_linux_eabi ;;
 arm*-*-linux-gnu*)	targ_emul=armelf_linux; targ_extra_emuls=armelf ;;
 arm*-*-uclinux*)	targ_emul=armelf_linux; targ_extra_emuls=armelf ;;
+arm-*-vxworks)		targ_emul=armelf_vxworks ;;
 arm*-*-conix*)		targ_emul=armelf ;;
 thumb-*-linux-gnu* | thumb-*-uclinux*)	targ_emul=armelf_linux; targ_extra_emuls=armelf ;;
 strongarm-*-coff)	targ_emul=armcoff ;;

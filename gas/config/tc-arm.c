@@ -1,5 +1,6 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+   2005
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
@@ -125,6 +126,8 @@ enum arm_float_abi
     /* Legacy a.out format.  */
 #   define FPU_DEFAULT FPU_ARCH_FPA	/* Soft-float, but FPA order.  */
 #  endif
+# elif defined (TE_VXWORKS)
+#  define FPU_DEFAULT FPU_ARCH_VFP	/* Soft-float, VFP order.  */
 # else
    /* For backwards compatibility, default to FPA.  */
 #  define FPU_DEFAULT FPU_ARCH_FPA
@@ -11059,7 +11062,7 @@ md_begin (void)
     }
   else if (mfpu_opt == -1)
     {
-#if !(defined (TE_LINUX) || defined (TE_NetBSD))
+#if !(defined (TE_LINUX) || defined (TE_NetBSD) || defined (TE_VXWORKS)) 
       /* Some environments specify a default FPU.  If they don't, infer it
 	 from the processor.  */
       if (mcpu_fpu_opt != -1)
@@ -11764,7 +11767,18 @@ md_apply_fix3 (fixS *   fixP,
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("out of range branch"));
 
-      newval = (value & 0x00ffffff) | (newval & 0xff000000);
+      if (seg->use_rela_p && !fixP->fx_done)
+	{
+	  /* Must unshift the value before storing it in the addend.  */
+	  value <<= 2;
+#ifdef OBJ_ELF
+	  fixP->fx_offset = value;
+#endif
+	  fixP->fx_addnumber = value;
+	  newval = newval & 0xff000000;
+	}
+      else
+	  newval = (value & 0x00ffffff) | (newval & 0xff000000);
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
@@ -11779,7 +11793,21 @@ md_apply_fix3 (fixS *   fixP,
 	hbit   = (value >> 1) & 1;
 	value  = (value >> 2) & 0x00ffffff;
 	value  = (value + (newval & 0x00ffffff)) & 0x00ffffff;
-	newval = value | (newval & 0xfe000000) | (hbit << 24);
+
+	if (seg->use_rela_p && !fixP->fx_done)
+	  {
+	    /* Must sign-extend and unshift the value before storing
+	       it in the addend.  */
+	    value = SEXT24 (value);
+	    value = (value << 2) | hbit;
+#ifdef OBJ_ELF
+	    fixP->fx_offset = value;
+#endif
+	    fixP->fx_addnumber = value;
+	    newval = newval & 0xfe000000;
+	  }
+	else
+	  newval = value | (newval & 0xfe000000) | (hbit << 24);
 	md_number_to_chars (buf, newval, INSN_SIZE);
       }
       break;
@@ -11795,7 +11823,16 @@ md_apply_fix3 (fixS *   fixP,
 	if ((value & ~0xff) && ((value & ~0xff) != ~0xff))
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("branch out of range"));
-	newval = (newval & 0xff00) | ((value & 0x1ff) >> 1);
+	if (seg->use_rela_p && !fixP->fx_done)
+	  {
+#ifdef OBJ_ELF
+	    fixP->fx_offset = value;
+#endif
+	    fixP->fx_addnumber = value;
+	    newval = newval & 0xff00;
+	  }
+	else
+	  newval = (newval & 0xff00) | ((value & 0x1ff) >> 1);
       }
       md_number_to_chars (buf, newval, THUMB_SIZE);
       break;
@@ -11811,7 +11848,16 @@ md_apply_fix3 (fixS *   fixP,
 	if ((value & ~0x7ff) && ((value & ~0x7ff) != ~0x7ff))
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("branch out of range"));
-	newval = (newval & 0xf800) | ((value & 0xfff) >> 1);
+	if (seg->use_rela_p && !fixP->fx_done)
+	  {
+#ifdef OBJ_ELF
+	    fixP->fx_offset = value;
+#endif
+	    fixP->fx_addnumber = value;
+	    newval = newval & 0xf800;
+	  }
+	else
+	  newval = (newval & 0xf800) | ((value & 0xfff) >> 1);
       }
       md_number_to_chars (buf, newval, THUMB_SIZE);
       break;
@@ -11836,20 +11882,35 @@ md_apply_fix3 (fixS *   fixP,
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("branch with link out of range"));
 
-	newval  = (newval  & 0xf800) | ((value & 0x7fffff) >> 12);
-	newval2 = (newval2 & 0xf800) | ((value & 0xfff) >> 1);
 	if (fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
 	  /* For a BLX instruction, make sure that the relocation is rounded up
 	     to a word boundary.  This follows the semantics of the instruction
 	     which specifies that bit 1 of the target address will come from bit
 	     1 of the base address.  */
-	  newval2 = (newval2 + 1) & ~ 1;
+	  value = (value + 1) & ~ 1;
+
+	if (seg->use_rela_p && !fixP->fx_done)
+	  {
+#ifdef OBJ_ELF
+	    fixP->fx_offset = value;
+#endif
+	    fixP->fx_addnumber = value;
+	    newval = newval & 0xf800;
+	    newval2 = newval2 & 0xf800;
+	  }
+	else
+	  {
+	    newval  = (newval  & 0xf800) | ((value & 0x7fffff) >> 12);
+	    newval2 = (newval2 & 0xf800) | ((value & 0xfff) >> 1);
+	  }
 	md_number_to_chars (buf, newval, THUMB_SIZE);
 	md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
       }
       break;
 
     case BFD_RELOC_8:
+      if (seg->use_rela_p && !fixP->fx_done)
+	break;
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 1);
 #ifdef OBJ_ELF
@@ -11862,6 +11923,8 @@ md_apply_fix3 (fixS *   fixP,
       break;
 
     case BFD_RELOC_16:
+      if (seg->use_rela_p && !fixP->fx_done)
+	break;
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 2);
 #ifdef OBJ_ELF
@@ -11877,6 +11940,8 @@ md_apply_fix3 (fixS *   fixP,
     case BFD_RELOC_ARM_GOT32:
     case BFD_RELOC_ARM_GOTOFF:
     case BFD_RELOC_ARM_TARGET2:
+      if (seg->use_rela_p && !fixP->fx_done)
+	break;
       md_number_to_chars (buf, 0, 4);
       break;
 #endif
@@ -11887,6 +11952,8 @@ md_apply_fix3 (fixS *   fixP,
     case BFD_RELOC_ARM_ROSEGREL32:
     case BFD_RELOC_ARM_SBREL32:
     case BFD_RELOC_32_PCREL:
+      if (seg->use_rela_p && !fixP->fx_done)
+	break;
       if (fixP->fx_done || fixP->fx_pcrel)
 	md_number_to_chars (buf, value, 4);
 #ifdef OBJ_ELF
@@ -13502,6 +13569,10 @@ elf32_arm_target_format (void)
   return (target_big_endian
 	  ? "elf32-bigarm-symbian"
 	  : "elf32-littlearm-symbian");
+#elif defined (TE_VXWORKS)
+  return (target_big_endian
+	  ? "elf32-bigarm-vxworks"
+	  : "elf32-littlearm-vxworks");
 #else
   if (target_big_endian)
     return "elf32-bigarm";

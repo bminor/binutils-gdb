@@ -1,6 +1,6 @@
 /* Generic target-file-type support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004
+   2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -536,6 +536,7 @@ extern const bfd_target bfd_elf32_big_generic_vec;
 extern const bfd_target bfd_elf32_bigarc_vec;
 extern const bfd_target bfd_elf32_bigarm_vec;
 extern const bfd_target bfd_elf32_bigarm_symbian_vec;
+extern const bfd_target bfd_elf32_bigarm_vxworks_vec;
 extern const bfd_target bfd_elf32_bigmips_vec;
 extern const bfd_target bfd_elf32_cr16c_vec;
 extern const bfd_target bfd_elf32_cris_vec;
@@ -564,6 +565,7 @@ extern const bfd_target bfd_elf32_little_generic_vec;
 extern const bfd_target bfd_elf32_littlearc_vec;
 extern const bfd_target bfd_elf32_littlearm_vec;
 extern const bfd_target bfd_elf32_littlearm_symbian_vec;
+extern const bfd_target bfd_elf32_littlearm_vxworks_vec;
 extern const bfd_target bfd_elf32_littlemips_vec;
 extern const bfd_target bfd_elf32_m32r_vec;
 extern const bfd_target bfd_elf32_m32rle_vec;
@@ -833,6 +835,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_bigarc_vec,
 	&bfd_elf32_bigarm_vec,
 	&bfd_elf32_bigarm_symbian_vec,
+	&bfd_elf32_bigarm_vxworks_vec,
 	&bfd_elf32_bigmips_vec,
 	&bfd_elf32_cr16c_vec,
 	&bfd_elf32_cris_vec,
@@ -863,6 +866,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_littlearc_vec,
 	&bfd_elf32_littlearm_vec,
 	&bfd_elf32_littlearm_symbian_vec,
+	&bfd_elf32_littlearm_vxworks_vec,
 	&bfd_elf32_littlemips_vec,
 	&bfd_elf32_m32r_vec,
         &bfd_elf32_m32rle_vec,

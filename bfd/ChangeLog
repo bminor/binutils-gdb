@@ -1,3 +1,21 @@
+2005-01-06  Paul Brook  <paul@codesourcery.com>
+
+	* config.bfd: Add entry for arm-*-vxworks and arm-*-windiss.
+	* configure.in: Add bfd_elf32_{big,little}arm_vxworks_vec.
+	* configure: Regenerate.
+	* elf32-arm.c: Add VxWorks target bfd.
+	(USE_REL): Remove.
+	(elf32_arm_link_hash_table): Add use_rel.
+	(elf32_arm_link_hash_table_create, elf32_arm_final_link_relocate,
+	elf32_arm_relocate_section): Replace USE_REL with runtime check.
+	Correct offset calculation for RELA case.
+	(elf_backend_may_use_rel_p, elf_backend_may_use_rela_p,
+	elf_backend_default_use_rela_p, elf_backend_rela_normal): Define.
+	(elf32_arm_vxworks_link_hash_table_create): New function.
+	* targets.c (bfd_elf32_bigarm_vxworks_vec): Add declaration.
+	(bfd_elf32_littlearm_vxworks_vec): Ditto.
+	(_bfd_target_vector): Add bfd_elf32_{big,little}arm_vxworks_vec.
+
 2005-01-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (struct ppc_link_hash_table): Add no_multi_toc and
