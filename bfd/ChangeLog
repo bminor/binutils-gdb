@@ -1,3 +1,12 @@
+Tue Apr 26 15:07:24 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* cf-sparclynx.c (LYNXOS, COFF_LONG_FILENAMES): Define.
+	* coff-sparc.c (BADMAG): Recognize LYNXCOFFMAGIC.
+	(COFF_SPARC): Define.
+	* coffcode.h (coff_new_section_hook): If COFF_SPARC, set alignment
+	power of data and bss sections to 3.
+	* hosts/lynx.h (__LYNXOS): Define.
+
 Tue Apr 26 15:04:26 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.c (hppa_elf_reloc): Adjust the addend of relocations

@@ -12,6 +12,10 @@
 
 #include <sys/conf.h>
 #include <sys/kernel.h>
+/* sys/kernel.h should define this, but doesn't always, sigh. */
+#ifndef __LYNXOS
+#define __LYNXOS
+#endif
 #include <sys/mem.h>
 #include <sys/signal.h>
 #include <sys/time.h>
