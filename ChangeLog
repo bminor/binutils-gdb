@@ -1,7 +1,30 @@
+Sun Dec 13 00:37:26 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: extensive cleanup::  removed all of the explicit 
+	clean-* targets, collapsed many wrappers around subdir_do into 
+	one, added additional targets to satisfy standards.texi, deleted
+	some old targets, some changes for consistency
+
+Fri Dec 11 20:18:02 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: handle some programs as cross-only, and others as
+	native only
+
+	* test-build.mk: handle partial holes in a more generic manner
+
+	* Makefile.in: m4 depends on libiberty
+
+Mon Dec  7 06:43:27 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* config/mh-sco: don't default $(CC) to gcc
+
 Thu Dec  3 21:52:11 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: add m4, textutils, fileutils, sed, shellutils,
 	time, wdiff, and find to configdirs
+
+	* Makefile.in: all, clean, and install rules for the new programs
+	added to configure.in
 
 Mon Nov 30 14:54:34 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
