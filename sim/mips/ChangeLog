@@ -1,3 +1,8 @@
+2002-04-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	* interp.c (sim_open): Disable chunk of code that wrote code in
+	vector table entries.
+
 2002-03-19  Chris Demetriou  <cgd@broadcom.com>
 
 	* cp1.c (FP_S_s, FP_D_s, FP_S_be, FP_D_be, FP_S_e, FP_D_e, FP_S_f)
