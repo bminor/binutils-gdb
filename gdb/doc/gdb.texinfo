@@ -5601,9 +5601,11 @@ to enable, disable, or remove a memory region, you specify that number.
 
 @table @code
 @kindex mem
-@item mem @var{address1} @var{address2} @var{attributes}@dots{}
-Define memory region bounded by @var{address1} and @var{address2}
-with attributes @var{attributes}@dots{}.
+@item mem @var{lower} @var{upper} @var{attributes}@dots{}
+Define memory region bounded by @var{lower} and @var{upper} with
+attributes @var{attributes}@dots{}.  Note that @var{upper} == 0 is a
+special case: it is treated as the the target's maximum memory address.
+(0xffff on 16 bit targets, 0xffffffff on 32 bit targets, etc.)
 
 @kindex delete mem
 @item delete mem @var{nums}@dots{}
