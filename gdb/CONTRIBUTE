@@ -165,5 +165,9 @@ o	When submitting a patch that fixes a bug
 	to the bug can be included in the ChangeLog
 	vis
 
-	* CONTRIBUTE: Mention PR convention. Fix
-	gdb/4705.
+	* CONTRIBUTE: Mention PR convention.
+	Fix PR gdb/4705.
+
+	The text ``PR gdb/4705'' should also be included
+	in the CVS commit message.  That causes the
+	patch to automatically be archived with the PR.

@@ -1,5 +1,9 @@
 2001-03-02  Andrew Cagney  <ac131313@redhat.com>
 
+	* CONTRIBUTE: Update note on ``Fix PR gdb/4706'' convention.
+
+2001-03-02  Andrew Cagney  <ac131313@redhat.com>
+
 	From 2001-03-01 Tom Rix <trix@redhat.com>:
 	* mn10200-tdep.c (mn10200_frame_chain): Pass 0 for ``pc''
 	parameter to mn10200_analyze_prologue.
