@@ -1,5 +1,13 @@
 2003-06-08  Andrew Cagney  <cagney@redhat.com>
 
+	* trad-frame.h (struct trad_frame_saved_reg): Rename "struct
+	trad_frame".  Update comments.
+	* d10v-tdep.c (struct d10v_unwind_cache): Update.
+	* trad-frame.c (trad_frame_alloc_saved_regs): Update.
+	(trad_frame_register_value, trad_frame_prev_register): Update.
+
+2003-06-08  Andrew Cagney  <cagney@redhat.com>
+
 	* acinclude.m4 (gcc_AC_CHECK_DECL, (gcc_AC_CHECK_DECL): Stolen
 	from GCC's acinclude.m4.
 	* configure.in: Check for getopt's delcaration.

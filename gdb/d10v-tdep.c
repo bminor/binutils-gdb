@@ -577,7 +577,7 @@ struct d10v_unwind_cache
   LONGEST r11_offset;
   int uses_frame;
   /* Table indicating the location of each and every register.  */
-  struct trad_frame *saved_regs;
+  struct trad_frame_saved_reg *saved_regs;
 };
 
 static int

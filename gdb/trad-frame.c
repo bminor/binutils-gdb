@@ -29,41 +29,41 @@
    non-optimized frames, the technique is reliable (just need to check
    for all potential instruction sequences).  */
 
-struct trad_frame *
+struct trad_frame_saved_reg *
 trad_frame_alloc_saved_regs (struct frame_info *next_frame)
 {
-  int i;
+  int regnum;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   int numregs = NUM_REGS + NUM_PSEUDO_REGS;
-  struct trad_frame *this_saved_regs
-    = FRAME_OBSTACK_CALLOC (numregs, struct trad_frame);
-  for (i = 0; i < numregs; i++)
-    this_saved_regs[i].regnum = i;
+  struct trad_frame_saved_reg *this_saved_regs
+    = FRAME_OBSTACK_CALLOC (numregs, struct trad_frame_saved_reg);
+  for (regnum = 0; regnum < numregs; regnum++)
+    this_saved_regs[regnum].realnum = regnum;
   return this_saved_regs;
 }
 
 void
-trad_frame_register_value (struct trad_frame this_saved_regs[],
+trad_frame_register_value (struct trad_frame_saved_reg this_saved_regs[],
 			   int regnum, LONGEST val)
 {
-  /* Make the REGNUM invalid, indicating that the ADDR contains the
+  /* Make the REALNUM invalid, indicating that the ADDR contains the
      register's value.  */
-  this_saved_regs[regnum].regnum = -1;
+  this_saved_regs[regnum].realnum = -1;
   this_saved_regs[regnum].addr = val;
 }
 
 void
 trad_frame_prev_register (struct frame_info *next_frame,
-			  struct trad_frame this_saved_regs[],
+			  struct trad_frame_saved_reg this_saved_regs[],
 			  int regnum, int *optimizedp,
 			  enum lval_type *lvalp, CORE_ADDR *addrp,
 			  int *realnump, void *bufferp)
 {
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  if (this_saved_regs[regnum].regnum >= 0
+  if (this_saved_regs[regnum].realnum >= 0
       && this_saved_regs[regnum].addr != 0)
     {
-      /* The register was saved on the stack, fetch it.  */
+      /* The register was saved in memory.  */
       *optimizedp = 0;
       *lvalp = lval_memory;
       *addrp = this_saved_regs[regnum].addr;
@@ -75,11 +75,11 @@ trad_frame_prev_register (struct frame_info *next_frame,
 			    register_size (gdbarch, regnum));
 	}
     }
-  else if (this_saved_regs[regnum].regnum >= 0
+  else if (this_saved_regs[regnum].realnum >= 0
 	   && this_saved_regs[regnum].addr == 0)
     {
       /* As the next frame to return the value of the register.  */
-      frame_register_unwind (next_frame, this_saved_regs[regnum].regnum,
+      frame_register_unwind (next_frame, this_saved_regs[regnum].realnum,
 			     optimizedp, lvalp, addrp, realnump, bufferp);
     }
   else
