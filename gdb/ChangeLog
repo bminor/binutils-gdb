@@ -1,3 +1,8 @@
+2002-05-05  Alexandre Oliva  <aoliva@redhat.com>
+
+	* alpha-tdep.c (alpha_extract_return_value): Don't use
+	non-constant array size in prototype.
+
 2002-05-04  Andrew Cagney  <ac131313@redhat.com>
 
 	From Brian Taylor <briant at model dot com>:

@@ -1530,7 +1530,7 @@ alpha_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 
 static void
 alpha_extract_return_value (struct type *valtype,
-			    char regbuf[REGISTER_BYTES], char *valbuf)
+			    char regbuf[ALPHA_REGISTER_BYTES], char *valbuf)
 {
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     alpha_register_convert_to_virtual (FP0_REGNUM, valtype,
