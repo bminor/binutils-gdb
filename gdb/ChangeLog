@@ -1,3 +1,7 @@
+2000-04-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * xcoffsolib.c (solib_add): Fix call to vmap_symtab().
+
 2000-04-19  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* TODO:  Update.

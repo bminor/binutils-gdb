@@ -116,7 +116,7 @@ solib_add (arg_string, from_tty, target)
 
 	  syms_from_objfile (obj, NULL, 0, 0);
 	  new_symfile_objfile (obj, 0, 0);
-	  vmap_symtab (vp, 0, 0);
+	  vmap_symtab (vp);
 	  printf_unfiltered ("Done.\n");
 	  loaded = vp->loaded = 1;
 	}
