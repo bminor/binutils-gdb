@@ -1,3 +1,11 @@
+2003-05-02  Charles Lepple <clepple@ghz.cc>
+	    Nick Clifton <nickc@redhat.com>
+
+	* acinclude.m4: Fix name of --enable-install-libbfd switch.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2003-05-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Test whether the
@@ -1324,7 +1332,7 @@
 	* libbfd.h: Regenerate.
 	* reloc.c: Add s390 TLS relocations.
 
-2003-01-24  Charles Lepple clepple.ghz.cc
+2003-01-24  Charles Lepple  <clepple@ghz.cc>
 
 	* aclocal.m4: Fix name of --enable-install-libbfd switch.
 
