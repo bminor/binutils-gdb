@@ -1698,12 +1698,21 @@ do_form (idx, in)
 
 }
 
+
+/* Fetch string from the input stream,
+   rules:
+    'Bxyx<whitespace>  	-> return 'Bxyza
+    %<char>		-> return string of decimal value of x
+    "<string>"		-> return string
+    xyx<whitespace>     -> return xyz
+*/
 int
-get_any_string (idx, in, out, expand)
+get_any_string (idx, in, out, expand, pretend_quoted)
      int idx;
      sb *in;
      sb *out;
      int expand;
+     int pretend_quoted;
 {
   sb_reset (out);
   idx = sb_skip_white (idx, in);
@@ -1733,12 +1742,13 @@ get_any_string (idx, in, out, expand)
 	       || in->ptr[idx] == '<'
 	       || (alternate && in->ptr[idx] == '\''))
 	{
-	  if (alternate && !expand)
+	  if (alternate && expand)
 	    {
 	      /* Keep the quotes */
-	      /*	      sb_add_char (out,  '\"');*/
+	            sb_add_char (out,  '\"');
+		    
 	      idx =  getstring (idx, in, out);
-	      /*	      sb_add_char (out,  '\"');*/
+	    	      sb_add_char (out,  '\"');
 
 	    }
 	  else {
@@ -1750,6 +1760,7 @@ get_any_string (idx, in, out, expand)
 	  while (idx < in->len 
 		 && (in->ptr[idx] == '"'
 		     || in->ptr[idx] == '\''
+		     || pretend_quoted 
 		     || !ISSEP (in->ptr[idx])))
 	    {
 	      if (in->ptr[idx] == '"' 
@@ -1998,7 +2009,7 @@ get_and_process (idx, in, out)
 {
   sb t;
   sb_new (&t);
-  idx = get_any_string (idx, in, &t, 1);
+  idx = get_any_string (idx, in, &t, 1, 0);
   process_assigns (0, &t, out);
   sb_kill (&t);
   return idx;
@@ -2682,7 +2693,7 @@ do_formals (macro, idx, in)
 	  if (idx < in->len && in->ptr[idx] == '=')
 	    {
 	      /* Got a default */
-	      idx = get_any_string (idx + 1, in, &formal->def, 1);
+	      idx = get_any_string (idx + 1, in, &formal->def, 1, 0);
 	    }
 	}
 
@@ -2911,7 +2922,7 @@ macro_expand (name, idx, in, m)
 	    {
 	      /* Insert this value into the right place */
 	      sb_reset (&ptr->value.f->actual);
-	      idx = get_any_string (idx + 1, in, &ptr->value.f->actual, 0);
+	      idx = get_any_string (idx + 1, in, &ptr->value.f->actual, 0, 0);
 	    }
 	}
       else
@@ -2930,7 +2941,7 @@ macro_expand (name, idx, in, m)
 	    }
 
 	  sb_reset (&f->actual);
-	  idx = get_any_string (idx, in, &f->actual, 1);
+	  idx = get_any_string (idx, in, &f->actual, 1, 0);
 	  f = f->next;
 	}
       idx = sb_skip_comma (idx, in);
@@ -3165,7 +3176,7 @@ do_sdata (idx, in, type)
       idx = sb_skip_white (idx, in);
       while (!eol (idx, in))
 	{
-	  pidx = idx = get_any_string (idx, in, &acc, 1);
+	  pidx = idx = get_any_string (idx, in, &acc, 0, 1);
 	  if (type == 'c')
 	    {
 	      if (acc.len > 255)
@@ -3565,7 +3576,7 @@ process_pseudo_op (idx, line, acc)
 	  switch (ptr->value.i)
 	    {
 	    case K_AIF:
-	      do_aif ();
+	      do_aif (idx, line);
 	      break;
 	    case K_AELSE:
 	      do_aelse ();

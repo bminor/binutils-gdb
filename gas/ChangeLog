@@ -1,3 +1,10 @@
+Fri Jul  8 15:22:07 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* (process_pseudo_op): Pass right are do do_aif.
+	(get_any_string): New arg 'pretend_quote'.
+	(get_and_process, do_formals, macro_expand, do_sdata,
+	process_pseudo_op): Use new arg.
+
 Fri Jul  8 12:23:44 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* config/obj-ecoff.h: define macro OBJ_GENERATE_ASM_LINE_STAB.
