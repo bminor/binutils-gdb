@@ -1,3 +1,7 @@
+2004-08-26  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.threads/schedlock.c: Add copyright notice.
+
 2004-08-25  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb.base/sigstep.exp (breakpoint_to_handler, skip_to_handler)
