@@ -58,7 +58,7 @@ MAKEINFO = `if [ -d $${rootme}/texinfo/C ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
 
-SUBDIRS = libiberty glob readline bfd gdb binutils ld gas gcc libg++ libgcc clib newlib
+SUBDIRS = libiberty mmalloc glob readline bfd gdb binutils ld gas gcc libg++ libgcc clib newlib
 OTHERS = 
 
 ALL = all.normal
@@ -111,15 +111,17 @@ install-dir.info:
 
 # clib send_pr
 #	all-libgcc
-all.normal: .stmp-libiberty .stmp-texinfo .stmp-bison .stmp-byacc \
+all.normal: .stmp-libiberty .stmp-mmalloc .stmp-texinfo .stmp-bison .stmp-byacc \
 	.stmp-bfd .stmp-ld .stmp-gas .stmp-gcc .stmp-binutils \
 	.stmp-libg++ .stmp-readline .stmp-gdb .stmp-make .stmp-cvs \
 	.stmp-grep .stmp-patch .stmp-emacs .stmp-ispell .stmp-fileutils \
-	.stmp-newlib 
-all.cross: .stmp-libiberty .stmp-gas .stmp-bison .stmp-ld .stmp-libgcc .stmp-gdb
+	.stmp-newlib
+all.cross: .stmp-libiberty .stmp-mmalloc .stmp-gas .stmp-bison .stmp-ld \
+	.stmp-bfd .stmp-libgcc .stmp-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
-clean: clean-stamps clean-libiberty clean-texinfo clean-bfd clean-newlib clean-binutils \
+clean: clean-stamps clean-libiberty clean-mmalloc clean-texinfo clean-bfd \
+	clean-newlib clean-binutils \
 	clean-bison clean-byacc clean-ld clean-gas \
 	clean-gcc clean-libgcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs clean-gdbm \
@@ -133,16 +135,16 @@ clean-stamps:
 install: $(INSTALL_TARGET) $(srcdir)/configure.man
 	$(INSTALL_DATA) $(srcdir)/configure.man $(man1dir)/configure.1
 
-install.all: install-dirs install-libiberty install-texinfo \
+install.all: install-dirs install-libiberty install-mmalloc install-texinfo \
 	install-bfd install-binutils install-bison install-byacc \
 	install-ld install-gas install-gcc \
 	install-libgcc install-readline install-glob install-gdb \
 	install-make install-cvs install-patch install-emacs \
 	install-ispell install-fileutils install-libg++ install-newlib
 
-install.cross: install-dirs install-libiberty install-binutils install-bison \
-	install-byacc install-ld install-gas install-libgcc \
-	install-readline install-glob install-gdb
+install.cross: install-dirs install-libiberty install-mmalloc install-binutils \
+	install-bison install-byacc install-ld install-gas install-libgcc \
+	install-readline install-glob install-gdb install-mmalloc
 
 ### libiberty
 all-libiberty: .stmp-libiberty
@@ -189,6 +191,66 @@ install-libiberty: force
 	if [ -d ./libiberty ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libiberty; \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			install) ; \
+	else \
+		true ; \
+	fi
+
+### mmalloc
+all-mmalloc: .stmp-mmalloc
+.stmp-mmalloc:
+	if [ -d ./mmalloc ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./mmalloc; \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			all) ; \
+	else \
+		true ; \
+	fi
+	touch .stmp-mmalloc
+
+clean-mmalloc: force
+	if [ -d ./mmalloc ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./mmalloc; \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			clean) ; \
+	else \
+		true ; \
+	fi
+
+install-mmalloc: force
+	if [ -d ./mmalloc ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./mmalloc; \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
@@ -973,7 +1035,8 @@ install-libgcc: force
 	fi
 
 ### gdb
-all-gdb: .stmp-bfd .stmp-libiberty .stmp-readline .stmp-glob .stmp-bison .stmp-gdb
+all-gdb: .stmp-bfd .stmp-libiberty .stmp-mmalloc .stmp-readline .stmp-glob \
+	.stmp-bison .stmp-gdb
 .stmp-gdb: 
 	if [ -d ./gdb ] ; then \
 		rootme=`pwd` ; export rootme ; \
@@ -1885,7 +1948,7 @@ Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
 
 DEVO_SUPPORT= README cfg-paper.texi Makefile.in configure configure.in \
 	config.sub config configure.man
-GDB_SUPPORT_DIRS= bfd include libiberty readline glob
+GDB_SUPPORT_DIRS= bfd include libiberty mmalloc readline glob
 GDB_SUPPORT_FILES= $(GDB_SUPPORT_DIRS) texinfo/fsf/texinfo.tex
 
 setup-dirs: force_update

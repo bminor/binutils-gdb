@@ -1,3 +1,11 @@
+Thu Mar 19 16:49:36 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in (all.cross):  Add .stmp-bfd.
+
+Wed Mar 18 15:29:33 1992  Mike Stump  (mrs@cygnus.com)
+
+	* configure: Change exec_prefix so that it really defaults to prefix.
+
 Sat Mar 14 17:20:38 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in, configure.in:  Add support for mmalloc library.
