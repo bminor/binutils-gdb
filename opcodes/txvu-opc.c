@@ -227,7 +227,7 @@ const struct txvu_operand txvu_operands[] =
 #define LPCREL11 (LUIMM12UP6 + 1)
   { 11, 0, TXVU_OPERAND_SIGNED + TXVU_OPERAND_RELATIVE_BRANCH, 0, 0, 0, 0 },
 
-  /* Destination indicator, single letter only, with leading '.'.  */
+  /* Destination indicator, single letter only, with leading '.' or '/'.  */
 #define LDOTDEST1 (LPCREL11 + 1)
   { 4, TXVU_SHIFT_DEST, TXVU_OPERAND_SUFFIX,
       /* Note that we borrow the insert/extract/print functions from the
@@ -560,7 +560,7 @@ parse_dotdest (pstr, errmsg)
 {
   long dest;
 
-  if (**pstr != '.')
+  if (**pstr != '.' && **pstr != '/')
     {
       *errmsg = "missing `.'";
       return 0;
@@ -588,7 +588,7 @@ parse_dotdest1 (pstr, errmsg)
   char c;
   long dest;
 
-  if (**pstr != '.')
+  if (**pstr != '.' && **pstr != '/')
     {
       *errmsg = "missing `.'";
       return 0;
