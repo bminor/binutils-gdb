@@ -1,3 +1,16 @@
+Tue Jan 28 22:59:22 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* sparc.h:  fix opcode for tsubcctv.
+
+Tue Jan  7 17:19:39 1992  K. Richard Pixley  (rich at cygnus.com)
+
+	* sparc.h: fba and cba are now aliases for fb and cb respectively.
+
+Fri Dec 27 10:55:50 1991  Per Bothner  (bothner at cygnus.com)
+
+	* sparc.h (nop):  Made the 'lose' field be even tighter,
+	so only a standard 'nop' is disassembled as a nop.
+
 Sun Dec 22 12:18:18 1991  Michael Tiemann  (tiemann at cygnus.com)
 
 	* sparc.h (nop): Add RD_GO to `lose' so that only %g0 in dest is

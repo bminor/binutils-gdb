@@ -96,6 +96,7 @@ Kinds of operands:
 	h	22 high bits.
 	I	11 bit Immediate. (v9)
 	i	13 bit Immediate.
+	n	22 bit immediate.
 	k	2+14 bit PC relative immediate. (v9)
 	G	19 bit PC relative immediate. (v9)
 	l	22 bit PC relative immediate.
@@ -126,7 +127,7 @@ Kinds of operands:
 	9	fcc3. (v9)
 
 The following chars are unused: (note: ,[] are used as punctuation)
-[nosxOX3450]
+[osxOX3450]
 
 */
 
@@ -1639,58 +1640,58 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 { "fmovzs",	F3F(2, 0x35, 0x0c1)|MCOND(FCONDZ,0), F3F(~2, ~0x35, ~0x0c1)|MCOND(~FCONDZ,~0),	"8,f,g", F_ALIAS, v9 },
 { "fmovzs",	F3F(2, 0x35, 0x0e1)|MCOND(FCONDZ,0), F3F(~2, ~0x35, ~0x0e1)|MCOND(~FCONDZ,~0),	"9,f,g", F_ALIAS, v9 },
 
-#define brfc(opcode, mask, lose) \
- { opcode, (mask), ANNUL|(lose), "l",   F_DELAYED, v6 }, \
- { opcode, (mask)|ANNUL, (lose), ",a l", F_DELAYED, v6 }
+#define brfc(opcode, mask, lose, flags) \
+ { opcode, (mask), ANNUL|(lose), "l",    flags|F_DELAYED, v6 }, \
+ { opcode, (mask)|ANNUL, (lose), ",a l", flags|F_DELAYED, v6 }
 
-#define brfcx(opcode, mask, lose) /* v9 */ \
- { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), "6,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a 6,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), ",N 6,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a,N 6,G", F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask)|BPRED, ANNUL|FBFCC(~0)|(lose), ",T 6,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask)|BPRED|ANNUL, FBFCC(~0)|(lose), ",a,T 6,G", F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), "7,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a 7,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), ",N 7,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a,N 7,G", F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask)|BPRED, ANNUL|FBFCC(~1)|(lose), ",T 7,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask)|BPRED|ANNUL, FBFCC(~1)|(lose), ",a,T 7,G", F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), "8,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a 8,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), ",N 8,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a,N 8,G", F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask)|BPRED, ANNUL|FBFCC(~2)|(lose), ",T 8,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask)|BPRED|ANNUL, FBFCC(~2)|(lose), ",a,T 8,G", F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), "9,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a 9,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), ",N 9,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a,N  9,G", F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask)|BPRED, ANNUL|FBFCC(~3)|(lose), ",T 9,G",   F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask)|BPRED|ANNUL, FBFCC(~3)|(lose), ",a,T 9,G", F_DELAYED, v9 }
+#define brfcx(opcode, mask, lose, flags) /* v9 */ \
+ { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), "6,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a 6,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), ",N 6,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a,N 6,G", flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|BPRED, ANNUL|FBFCC(~0)|(lose), ",T 6,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|BPRED|ANNUL, FBFCC(~0)|(lose), ",a,T 6,G", flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), "7,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a 7,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), ",N 7,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a,N 7,G", flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|BPRED, ANNUL|FBFCC(~1)|(lose), ",T 7,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|BPRED|ANNUL, FBFCC(~1)|(lose), ",a,T 7,G", flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), "8,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a 8,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), ",N 8,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a,N 8,G", flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|BPRED, ANNUL|FBFCC(~2)|(lose), ",T 8,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|BPRED|ANNUL, FBFCC(~2)|(lose), ",a,T 8,G", flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), "9,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a 9,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), ",N 9,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a,N  9,G", flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|BPRED, ANNUL|FBFCC(~3)|(lose), ",T 9,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|BPRED|ANNUL, FBFCC(~3)|(lose), ",a,T 9,G", flags|F_DELAYED, v9 }
 
-#define condfc(fop, cop, mask) \
-  brfc(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask))), \
-  brfcx(fop, F2(0, 5)|COND(mask), F2(~0, ~5)|COND(~(mask))), /* v9 */ \
-  brfc(cop, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask))) \
+#define condfc(fop, cop, mask, flags) \
+  brfc(fop, F2(0, 6)|COND(mask), F2(~0, ~6)|COND(~(mask)), flags), \
+  brfcx(fop, F2(0, 5)|COND(mask), F2(~0, ~5)|COND(~(mask)), flags), /* v9 */ \
+  brfc(cop, F2(0, 7)|COND(mask), F2(~0, ~7)|COND(~(mask)), flags) \
 
-condfc("fb",	"cb",	 0x8),
-condfc("fba",	"cba",	 0x8),
-condfc("fbe",	"cb0",	 0x9),
-condfc("fbg",	"cb2",	 0x6),
-condfc("fbge",	"cb02",	 0xb),
-condfc("fbl",	"cb1",	 0x4),
-condfc("fble",	"cb01",	 0xd),
-condfc("fblg",	"cb12",	 0x2),
-condfc("fbn",	"cbn",	 0x0),
-condfc("fbne",	"cb123", 0x1),
-condfc("fbo",	"cb012", 0xf),
-condfc("fbu",	"cb3",	 0x7),
-condfc("fbue",	"cb03",	 0xa),
-condfc("fbug",	"cb23",	 0x5),
-condfc("fbuge",	"cb023", 0xc),
-condfc("fbul",	"cb13",	 0x3),
-condfc("fbule",	"cb013", 0xe),
+condfc("fb",	"cb",	 0x8, 0),
+condfc("fba",	"cba",	 0x8, F_ALIAS),
+condfc("fbe",	"cb0",	 0x9, 0),
+condfc("fbg",	"cb2",	 0x6, 0),
+condfc("fbge",	"cb02",	 0xb, 0),
+condfc("fbl",	"cb1",	 0x4, 0),
+condfc("fble",	"cb01",	 0xd, 0),
+condfc("fblg",	"cb12",	 0x2, 0),
+condfc("fbn",	"cbn",	 0x0, 0),
+condfc("fbne",	"cb123", 0x1, 0),
+condfc("fbo",	"cb012", 0xf, 0),
+condfc("fbu",	"cb3",	 0x7, 0),
+condfc("fbue",	"cb03",	 0xa, 0),
+condfc("fbug",	"cb23",	 0x5, 0),
+condfc("fbuge",	"cb023", 0xc, 0),
+condfc("fbul",	"cb13",	 0x3, 0),
+condfc("fbule",	"cb013", 0xe, 0),
 
 #undef condfc
 #undef brfc
@@ -1701,7 +1702,7 @@ condfc("fbule",	"cb013", 0xe),
 { "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0,		"i+1", F_DELAYED, v6 }, /* jmpl i+rs1,%g0 */
 { "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0|RS1_G0,	"i", F_DELAYED, v6 }, /* jmpl %g0+i,%g0 */
 
-{ "nop",	F2(0, 4), F2(~0, ~4)|RD_G0, "", 0, v6 }, /* sethi 0, %g0 */
+{ "nop",	F2(0, 4), 0xfeffffff, "", 0, v6 }, /* sethi 0, %g0 */
 
 { "set",	F2(0x0, 0x4), F2(~0x0, ~0x4), "Sh,d", F_ALIAS, v6 },
 
@@ -1716,10 +1717,10 @@ condfc("fbule",	"cb013", 0xe),
 
 { "tsubcc",	F3(2, 0x21, 0), F3(~2, ~0x21, ~0)|ASI(~0),	"1,2,d", 0, v6 },
 { "tsubcc",	F3(2, 0x21, 1), F3(~2, ~0x21, ~1),		"1,i,d", 0, v6 },
-{ "tsubcctv",	F3(2, 0x0b, 0), F3(~2, ~0x0b, ~0)|ASI(~0),	"1,2,d", 0, v6 },
-{ "tsubcctv",	F3(2, 0x0b, 1), F3(~2, ~0x0b, ~1),		"1,i,d", 0, v6 },
+{ "tsubcctv",	F3(2, 0x23, 0), F3(~2, ~0x0b, ~0)|ASI(~0),	"1,2,d", 0, v6 },
+{ "tsubcctv",	F3(2, 0x23, 1), F3(~2, ~0x0b, ~1),		"1,i,d", 0, v6 },
 
-{ "unimp",	F2(0x0, 0x0), 0xffffffff, "l", 0, v6 },
+{ "unimp",	F2(0x0, 0x0), 0xffc00000, "n", 0, v6 },
 
 { "iflush",	F3(2, 0x3b, 0), F3(~2, ~0x3b, ~0)|ASI(~0),	"1+2", 0, v6 },
 { "iflush",	F3(2, 0x3b, 1), F3(~2, ~0x3b, ~1),		"1+i", 0, v6 },
