@@ -1,4 +1,11 @@
 start-sanitize-v850
+Thu Jul 31 15:13:43 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-v850.c (md_assemble): Sign extend constants value
+	for hi and hi0 expressions.
+	(v850_insert_operand): Enable range checking for generic 16bit
+	operands.
+
 Tue Jul 29 14:20:43 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-v850.c (md_assemble): Turn on fx_no_overflow for

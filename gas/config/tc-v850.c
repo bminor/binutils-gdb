@@ -655,13 +655,28 @@ md_assemble (str)
 		      }
 
 		    case BFD_RELOC_HI16:
-		      ex.X_add_number = ((ex.X_add_number >> 16) & 0xffff);
-		      break;
+		      {
+			/* Truncate, then sign extend the value.  */
+		        int temp = (ex.X_add_number >> 16) & 0xffff;
+
+			/* XXX Assumes 32bit ints! */
+		        temp = (temp << 16) >> 16;
+			ex.X_add_number = temp;
+			break;
+		      }
 
 		    case BFD_RELOC_HI16_S:
-		      ex.X_add_number = ((ex.X_add_number >> 16) & 0xffff)
-			+ ((ex.X_add_number >> 15) & 1);
-		      break;
+		      {
+			/* Truncate, then sign extend the value.  */
+		        int temp = (ex.X_add_number >> 16) & 0xffff;
+
+			temp += (ex.X_add_number >> 15) & 1;
+
+			/* XXX Assumes 32bit ints! */
+		        temp = (temp << 16) >> 16;
+			ex.X_add_number = temp;
+			break;
+		      }
 
 		    default:
 		      break;
@@ -1062,7 +1077,7 @@ v850_insert_operand (insn, operand, val, file, line)
      char *file;
      unsigned int line;
 {
-  if (operand->bits != 16)
+  if (operand->bits != 32)
     {
       long min, max;
       offsetT test;
