@@ -1,3 +1,8 @@
+Wed Mar  2 11:31:08 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* osfsolib.c (xfer_link_map_member): Update to use new
+	target_read_string interface.
+
 Wed Mar  2 09:17:55 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* infrun.c (wait_for_inferior): In checking

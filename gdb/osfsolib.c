@@ -344,11 +344,17 @@ xfer_link_map_member (so_list_ptr, lm)
 	len = MAX_PATH_SIZE;
       strncpy (so_list_ptr->so_name, LM_NAME (so_list_ptr), MAX_PATH_SIZE);
 #else
-      if (!target_read_string((CORE_ADDR) LM_NAME (so_list_ptr),
-			      so_list_ptr->so_name, MAX_PATH_SIZE - 1))
-	error ("xfer_link_map_member: Can't read pathname for load map\n");
+      int errcode;
+      char *buffer;
+      target_read_string ((CORE_ADDR) LM_NAME (so_list_ptr), &buffer,
+			  MAX_PATH_SIZE - 1, &errcode);
+      if (errcode != 0)
+	error ("xfer_link_map_member: Can't read pathname for load map: %s\n",
+	       safe_strerror (errcode));
+      strncpy (so_list_ptr->so_name, buffer, MAX_PATH_SIZE - 1);
+      free (buffer);
 #endif
-      so_list_ptr->so_name[MAX_PATH_SIZE - 1] = 0;
+      so_list_ptr->so_name[MAX_PATH_SIZE - 1] = '\0';
 
       solib_map_sections (so_list_ptr);
     }
