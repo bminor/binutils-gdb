@@ -272,7 +272,8 @@ pa64_solib_add_solib_objfile (so, name, from_tty, text_addr)
   tmp_bfd = NULL;
 
   /* Now let the generic code load up symbols for this library.  */
-  section_addrs.text_addr = text_addr;
+  section_addrs.other[0].addr = text_addr;
+  section_addrs.other[0].name = ".text";
   so->objfile = symbol_file_add (name, from_tty, &section_addrs, 0, OBJF_SHARED);
   so->abfd = so->objfile->obfd;
 

@@ -1,3 +1,11 @@
+2000-04-27  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* cxux-nat.c (add_shared_symbol_files): Don't treat .text section
+ 	as special in the section_addr_info structure.
+	* pa64solib.c (pa64_solib_add_solib_objfile): Ditto.
+	* osfsolib.c (symbol_add_stub): Ditto.
+	* irix5-nat.c (symbol_add_stub): Ditto.
+
 Thu Apr 27 14:07:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c, d10v-tdep.c: Include "arch-utils.h".

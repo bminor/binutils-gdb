@@ -386,7 +386,8 @@ add_shared_symbol_files ()
 	    {
 	      struct section_addr_info section_addrs;
 	      memset (&section_addrs, 0, sizeof (section_addrs));
-	      section_addrs.text_addr = lms.l_addr;
+	      section_addrs.other[0].addr = lms.l_addr;
+              section_addrs.other[0].name = ".text";
 	      symbol_file_add (path_name, 1, &section_addrs, 0, 0);
 	      free (path_name);
 	    }
