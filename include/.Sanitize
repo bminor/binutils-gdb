@@ -35,6 +35,7 @@ a.out.host.h
 a.out.sun4.h
 a.out.vax.h
 a29k-opcode.h
+h8300-opcode.h
 amdcoff.h
 ansidecl.h
 aout64.h
@@ -101,7 +102,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.13  1991/09/13 05:17:53  gnu
+# Revision 1.14  1991/09/26 22:46:53  steve
+# Newly created
+#
+# Revision 1.13  1991/09/13  05:17:53  gnu
 # Removes sparc-opcode.h rather than the file it is sanitizing, if not testing!
 # (fixed...)
 #
