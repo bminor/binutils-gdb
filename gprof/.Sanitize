@@ -39,7 +39,7 @@ gmon.h
 gprof.1
 gprof.c
 gprof.h
-gprog.texi
+gprof.texi
 hertz.c
 i386.c
 i386.h
