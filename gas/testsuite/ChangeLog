@@ -1,3 +1,7 @@
+Wed Feb  4 15:27:44 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/arm/arm7t.d: Update to match latest assembler output.
+
 Wed Feb  4 15:40:00 1998  Geoffrey Keating  <geoffk@ozemail.com.au>
 
 	* gas/ppc/ppc.exp: New file.
