@@ -1,3 +1,12 @@
+Fri Feb 21 16:15:18 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-mn10200.c (mn10200_elf_final_link_relocate): Simplify
+	somewhat.
+	(mn10200_elf_relax_section): Correctly compute a symbol's value
+	when the symbol is local, but not in the same section as we are
+	relaxing.  Implement abs24 -> abs16, imm24 -> imm16 and d24 -> d16
+	relaxing.
+
 start-sanitize-m32r
 Fri Feb 21 13:55:14 1997  Doug Evans  <dje@seba.cygnus.com>
 

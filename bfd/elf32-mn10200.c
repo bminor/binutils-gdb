@@ -243,13 +243,11 @@ mn10200_elf_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_MN10200_32:
-      value += bfd_get_32 (input_bfd, hit_data);
       value += addend;
       bfd_put_32 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
     case R_MN10200_16:
-      value += (short)bfd_get_16 (input_bfd, hit_data);
       value += addend;
 
       if ((long)value > 0x7fff || (long)value < -0x8000)
@@ -259,7 +257,6 @@ mn10200_elf_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_MN10200_8:
-      value += (char)bfd_get_8 (input_bfd, hit_data);
       value += addend;
 
       if ((long)value > 0x7fff || (long)value < -0x8000)
@@ -269,7 +266,6 @@ mn10200_elf_final_link_relocate (howto, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_MN10200_24:
-      value += (bfd_get_32 (input_bfd, hit_data) & 0xffffff);
       value += addend;
 
       if ((long)value > 0x7fffff || (long)value < -0x800000)
@@ -617,25 +613,17 @@ mn10200_elf_relax_section (abfd, sec, link_info, again)
       if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
 	  Elf_Internal_Sym isym;
+	  asection *sym_sec;
 
 	  /* A local symbol.  */
 	  bfd_elf32_swap_symbol_in (abfd,
 				    extsyms + ELF32_R_SYM (irel->r_info),
 				    &isym);
 
-#if 0
-	  if (isym.st_shndx != _bfd_elf_section_from_bfd_section (abfd, sec))
-	    {
-	      ((*_bfd_error_handler)
-	       ("%s: 0x%lx: warning: symbol in unexpected section",
-		bfd_get_filename (abfd), (unsigned long) 0));
-	      continue;
-	    }
-#endif
-
+	  sym_sec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 	  symval = (isym.st_value
-		    + sec->output_section->vma
-		    + sec->output_offset);
+		    + sym_sec->output_section->vma
+		    + sym_sec->output_offset);
 	}
       else
 	{
@@ -939,6 +927,274 @@ mn10200_elf_relax_section (abfd, sec, link_info, again)
 	  *again = true;
 	}
 
+      /* Try to turn a 24bit immediate, displacement or absolute address
+	 into a 16bit immediate, displacement or absolute address.  */
+      if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10200_24)
+	{
+	  bfd_vma value = symval;
+
+	  /* See if the value will fit in 16 bits. 
+	     We allow any 16bit match here.  We prune those we can't
+	     handle below.  */
+	  if ((long)value < 0x7fff && (long)value > -0x8000)
+	    {
+	      unsigned char code;
+
+	      /* All insns which have 24bit operands are 5 bytes long,
+		 the first byte will always be 0xf4, but we double check
+		 it just in case.  */
+
+	      /* Get the first opcode.  */
+	      code = bfd_get_8 (abfd, contents + irel->r_offset - 2);
+
+	      if (code != 0xf4)
+		continue;
+
+	      /* Get the second opcode.  */
+	      code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
+
+	      switch (code & 0xfc)
+		{
+		/* mov imm24,dn -> mov imm16,dn */
+		case 0x70:
+		  /* Not safe if the high bit is on as relaxing may
+		     move the value out of high mem and thus not fit
+		     in a signed 16bit value.  */
+		  if (value & 0x8000)
+		    continue;
+
+		  /* Note that we've changed the reldection contents, etc.  */
+		  elf_section_data (sec)->relocs = internal_relocs;
+		  free_relocs = NULL;
+
+		  elf_section_data (sec)->this_hdr.contents = contents;
+		  free_contents = NULL;
+
+		  symtab_hdr->contents = (bfd_byte *) extsyms;
+		  free_extsyms = NULL;
+
+		  /* Fix the opcode.  */
+		  bfd_put_8 (abfd, 0xf8 + (code & 0x03),
+			     contents + irel->r_offset - 2);
+
+		  /* Fix the relocation's type.  */
+		  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+					       R_MN10200_16);
+
+		  /* The opcode got shorter too, so we have to fix the
+		     addend and offset too!  */
+		  irel->r_offset -= 1;
+
+		  /* Delete two bytes of data.  */
+		  if (!mn10200_elf_relax_delete_bytes (abfd, sec,
+						       irel->r_offset + 1, 2))
+		    goto error_return;
+
+		  /* That will change things, so, we should relax again.
+		     Note that this is not required, and it may be slow.  */
+		  *again = true;
+		  break;
+
+		/* mov imm24,an -> mov imm16,an 
+		   cmp imm24,an -> cmp imm16,an
+		   mov (abs24),dn -> mov (abs16),dn
+		   mov dn,(abs24) -> mov dn,(abs16)
+		   movb dn,(abs24) -> movb dn,(abs16)
+		   movbu (abs24),dn -> movbu (abs16),dn */
+		case 0x74:
+		case 0x7c:
+		case 0xc0:
+		case 0x40:
+		case 0x44:
+		case 0xc8:
+		  /* Note that we've changed the reldection contents, etc.  */
+		  elf_section_data (sec)->relocs = internal_relocs;
+		  free_relocs = NULL;
+
+		  elf_section_data (sec)->this_hdr.contents = contents;
+		  free_contents = NULL;
+
+		  symtab_hdr->contents = (bfd_byte *) extsyms;
+		  free_extsyms = NULL;
+
+		  if ((code & 0xfc) == 0x74)
+		    code = 0xdc + (code & 0x03);
+		  else if ((code & 0xfc) == 0x7c)
+		    code = 0xec + (code & 0x03);
+		  else if ((code & 0xfc) == 0xc0)
+		    code = 0xc8 + (code & 0x03);
+		  else if ((code & 0xfc) == 0x40)
+		    code = 0xc0 + (code & 0x03);
+		  else if ((code & 0xfc) == 0x44)
+		    code = 0xc4 + (code & 0x03);
+		  else if ((code & 0xfc) == 0xc8)
+		    code = 0xcc + (code & 0x03);
+
+		  /* Fix the opcode.  */
+		  bfd_put_8 (abfd, code, contents + irel->r_offset - 2);
+
+		  /* Fix the relocation's type.  */
+		  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+					       R_MN10200_16);
+
+		  /* The opcode got shorter too, so we have to fix the
+		     addend and offset too!  */
+		  irel->r_offset -= 1;
+
+		  /* Delete two bytes of data.  */
+		  if (!mn10200_elf_relax_delete_bytes (abfd, sec,
+						       irel->r_offset + 1, 2))
+		    goto error_return;
+
+		  /* That will change things, so, we should relax again.
+		     Note that this is not required, and it may be slow.  */
+		  *again = true;
+		  break;
+
+		/* cmp imm24,dn -> cmp imm16,dn
+		   mov (abs24),an -> mov (abs16),an
+		   mov an,(abs24) -> mov an,(abs16)
+		   add imm24,dn -> add imm16,dn
+		   add imm24,an -> add imm16,an
+		   sub imm24,dn -> sub imm16,dn
+		   sub imm24,an -> sub imm16,an 
+		   And all d24->d16 in memory ops.  */
+		case 0x78:
+		case 0xd0:
+		case 0x50:
+		case 0x60:
+		case 0x64:
+		case 0x68:
+		case 0x6c:
+		case 0x80:
+		case 0xf0:
+		case 0x00:
+		case 0x10:
+		case 0xb0:
+		case 0x30:
+		case 0xa0:
+		case 0x20:
+		case 0x90:
+		  /* Not safe if the high bit is on as relaxing may
+		     move the value out of high mem and thus not fit
+		     in a signed 16bit value.  */
+		  if (((code & 0xfc) == 0x78
+			|| (code & 0xfc) == 0x60
+			|| (code & 0xfc) == 0x64
+			|| (code & 0xfc) == 0x68
+			|| (code & 0xfc) == 0x6c
+			|| (code & 0xfc) == 0x80
+			|| (code & 0xfc) == 0xf0
+			|| (code & 0xfc) == 0x00
+			|| (code & 0xfc) == 0x10
+			|| (code & 0xfc) == 0xb0
+			|| (code & 0xfc) == 0x30
+			|| (code & 0xfc) == 0xa0
+			|| (code & 0xfc) == 0x20
+			|| (code & 0xfc) == 0x90)
+		       && (value & 0x8000) != 0)
+		    continue;
+
+		  /* Note that we've changed the reldection contents, etc.  */
+		  elf_section_data (sec)->relocs = internal_relocs;
+		  free_relocs = NULL;
+
+		  elf_section_data (sec)->this_hdr.contents = contents;
+		  free_contents = NULL;
+
+		  symtab_hdr->contents = (bfd_byte *) extsyms;
+		  free_extsyms = NULL;
+
+		  /* Fix the opcode.  */
+		  bfd_put_8 (abfd, 0xf7, contents + irel->r_offset - 2);
+
+		  if ((code & 0xfc) == 0x78)
+		    code = 0x48 + (code & 0x03);
+		  else if ((code & 0xfc) == 0xd0)
+		    code = 0x30 + (code & 0x03);
+		  else if ((code & 0xfc) == 0x50)
+		    code = 0x20 + (code & 0x03);
+		  else if ((code & 0xfc) == 0x60)
+		    code = 0x18 + (code & 0x03);
+		  else if ((code & 0xfc) == 0x64)
+		    code = 0x08 + (code & 0x03);
+		  else if ((code & 0xfc) == 0x68)
+		    code = 0x1c + (code & 0x03);
+		  else if ((code & 0xfc) == 0x6c)
+		    code = 0x0c + (code & 0x03);
+		  else if ((code & 0xfc) == 0x80)
+		    code = 0xc0 + (code & 0x07);
+		  else if ((code & 0xfc) == 0xf0)
+		    code = 0xb0 + (code & 0x07);
+		  else if ((code & 0xfc) == 0x00)
+		    code = 0x80 + (code & 0x07);
+		  else if ((code & 0xfc) == 0x10)
+		    code = 0xa0 + (code & 0x07);
+		  else if ((code & 0xfc) == 0xb0)
+		    code = 0x70 + (code & 0x07);
+		  else if ((code & 0xfc) == 0x30)
+		    code = 0x60 + (code & 0x07);
+		  else if ((code & 0xfc) == 0xa0)
+		    code = 0xd0 + (code & 0x07);
+		  else if ((code & 0xfc) == 0x20)
+		    code = 0x90 + (code & 0x07);
+		  else if ((code & 0xfc) == 0x90)
+		    code = 0x50 + (code & 0x07);
+
+		  bfd_put_8 (abfd, code, contents + irel->r_offset - 1);
+
+		  /* Fix the relocation's type.  */
+		  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+					       R_MN10200_16);
+
+		  /* Delete one bytes of data.  */
+		  if (!mn10200_elf_relax_delete_bytes (abfd, sec,
+						       irel->r_offset + 2, 1))
+		    goto error_return;
+
+		  /* That will change things, so, we should relax again.
+		     Note that this is not required, and it may be slow.  */
+		  *again = true;
+		  break;
+
+		/* movb (abs24),dn ->movbu (abs16),dn extxb bn */
+		case 0xc4:
+		  /* Note that we've changed the reldection contents, etc.  */
+		  elf_section_data (sec)->relocs = internal_relocs;
+		  free_relocs = NULL;
+
+		  elf_section_data (sec)->this_hdr.contents = contents;
+		  free_contents = NULL;
+
+		  symtab_hdr->contents = (bfd_byte *) extsyms;
+		  free_extsyms = NULL;
+
+		  bfd_put_8 (abfd, 0xcc + (code & 0x03),
+			     contents + irel->r_offset - 2);
+
+		  bfd_put_8 (abfd, 0xb8 + (code & 0x03),
+			     contents + irel->r_offset - 1);
+
+		  /* Fix the relocation's type.  */
+		  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+					       R_MN10200_16);
+
+		  /* The reloc will be applied one byte in front of its
+		     current location.  */
+		  irel->r_offset -= 1;
+
+		  /* Delete one bytes of data.  */
+		  if (!mn10200_elf_relax_delete_bytes (abfd, sec,
+						       irel->r_offset + 2, 1))
+		    goto error_return;
+
+		  /* That will change things, so, we should relax again.
+		     Note that this is not required, and it may be slow.  */
+		  *again = true;
+		  break;
+		}
+	    }
+	}
     }
 
   if (free_relocs != NULL)
