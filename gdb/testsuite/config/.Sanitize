@@ -27,6 +27,7 @@ gdbserver.exp
 h8300.exp
 hmsirom.exp
 hppro.exp
+i386-bozo.exp
 i960.exp
 m32r.exp
 m32r-stub.exp

@@ -38,7 +38,9 @@ proc gdb_target_monitor { } {
     if [target_info exists baud] {
 	gdb_test "set remotebaud [target_info baud]" "" ""
     }
-    if [target_info exists netport] {
+    if [target_info exists gdb_serial] {
+       set serialport "[target_info gdb_serial]";
+    } elseif [target_info exists netport] {
 	set serialport "[target_info netport]"
     } else {
 	set serialport "[target_info serial]"
@@ -88,6 +90,10 @@ proc gdb_target_monitor { } {
     return -1;
 }
 
+proc gdb_target_exec { } {
+    gdb_test "target exec" "No exec file now." "" ".*Kill it.*y or n.*" "y"
+    
+}
 #
 # gdb_load -- load a file into the debugger.
 #             return a -1 if anything goes wrong.
@@ -102,56 +108,87 @@ proc gdb_load { arg } {
 
     for { set j 1; } { $j <= 2 } {incr j; } {
 	if [target_info exists gdb,use_standard_load] {
-	    gdb_test "target exec" "No exec file now." "" ".*Kill it.*y or n.*" "y"
+	    gdb_target_exec;
 	    remote_push_conn host;
 	    set state [remote_ld target $arg];
 	    remote_close target;
 	    remote_pop_conn host;
-	    if { $state != "pass" } {
-		perror "Couldn't load file into GDB."
-		return -1;
+	    if { $state == "pass" } {
+		if { $arg != "" } {
+		    if [gdb_file_cmd $arg] { return -1 }
+		}
+		gdb_target_monitor;
+		gdb_test "list main" ".*" ""
+		verbose "Loaded $arg into $GDB\n";
+		return 1;
 	    }
+	} else {
 	    if { $arg != "" } {
 		if [gdb_file_cmd $arg] { return -1 }
 	    }
-	    gdb_target_monitor;
-	    gdb_test "list main" ".*" ""
-	    verbose "Loaded $arg into $GDB\n";
-	    return 1;
-	}
+	    gdb_target_monitor
 
-	if { $arg != "" } {
-	    if [gdb_file_cmd $arg] { return -1 }
-	}
-	gdb_target_monitor
-
-	if [is_remote host] {
-	    # FIXME:
-	    set arg a.out;
-	}
-
-	verbose "Loading $arg"
-	send_gdb "load $arg\n"
-	set timeout 1000
-	verbose "Timeout is now $timeout seconds" 2
-	gdb_expect {
-	    -re ".*\[Ff\]ailed.*$gdb_prompt $" {
-		verbose "load failed";
+	    if [target_info exists gdb_sect_offset] {
+		set textoff [target_info gdb_sect_offset];
+		send_gdb "sect .text $textoff\n";
+		gdb_expect {
+		    -re "(0x\[0-9a-z]+) - 0x\[0-9a-z\]+ is \\.data" {
+			set dataoff $expect_out(1,string);
+			exp_continue;
+		    }
+		    -re "(0x\[0-9a-z\]+) - 0x\[0-9a-z\]+ is \\.bss" {
+			set bssoff $expect_out(1,string);
+			exp_continue;
+		    }
+		    -re "$gdb_prompt" { }
+		}
+		set dataoff [format 0x%x [expr $dataoff + $textoff]];
+		set bssoff [format 0x%x [expr $bssoff + $textoff]];
+		send_gdb "sect .data $dataoff\n";
+		gdb_expect {
+		    -re "$gdb_prompt" { }
+		}
+		send_gdb "sect .bss $bssoff\n";
+		gdb_expect {
+		    -re "$gdb_prompt" { }
+		}
 	    }
-	    -re ".*$gdb_prompt $" {
-		verbose "Loaded $arg into $GDB\n"
-		return 1
+	    if [is_remote host] {
+		# FIXME:
+		set arg a.out;
 	    }
-	    timeout {
-		if { $verbose > 1 } {
-		    perror "Timed out trying to load $arg."
+
+	    verbose "Loading $arg"
+	    if [target_info exists gdb_load_offset] {
+		set command "load $arg [target_info gdb_load_offset]\n";
+	    } else {
+		set command "load $arg\n";
+	    }
+	    send_gdb $command;
+	    set timeout 1000
+	    verbose "Timeout is now $timeout seconds" 2
+	    gdb_expect {
+		-re ".*\[Ff\]ailed.*$gdb_prompt $" {
+		    verbose "load failed";
+		}
+		-re ".*$gdb_prompt $" {
+		    verbose "Loaded $arg into $GDB\n"
+		    return 1
+		}
+		timeout {
+		    if { $verbose > 1 } {
+			perror "Timed out trying to load $arg."
+		    }
 		}
 	    }
 	}
-	gdb_test "target exec" "No exec file now." "" ".*Kill it.*y or n.*" "y"
 
-	if { $j == 1 && ![reboot_target] } {
-	    break;
+	gdb_target_exec;
+
+	if { $j == 1 } {
+	    if { ![reboot_target] } {
+		break;
+	    }
 	}
     }
     perror "Couldn't load file into GDB.";
@@ -161,11 +198,17 @@ proc gdb_load { arg } {
 proc gdb_start { } {
     global timeout
     global reboot
+    global gdb_prompt;
 
     # reboot the board to get a clean start
     if $reboot then {
 	reboot_target;
     }
+
+    if [board_info target exists gdb_prompt] {
+	set gdb_prompt [board_info target gdb_prompt];
+    }
+
     catch default_gdb_start;
 
     set timeout 10

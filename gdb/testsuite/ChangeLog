@@ -1,5 +1,8 @@
 Fri May 23 13:28:29 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* config/monitor.exp(gdb_load): Handle gdb_sect_offset and
+ 	gdb_load_offset.
+
 	* config/i386-bozo.exp: New file.
 
 Thu May 22 18:51:32 1997  Bob Manson  <manson@charmed.cygnus.com>
