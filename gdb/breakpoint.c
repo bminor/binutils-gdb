@@ -6970,12 +6970,22 @@ breakpoint_re_set_one (void *bint)
 
       /* So for now, just use a global context.  */
       if (b->exp)
-	xfree (b->exp);
+	{
+	  xfree (b->exp);
+	  /* Avoid re-freeing b->exp if an error during the call to
+             parse_expression.  */
+	  b->exp = NULL;
+	}
       b->exp = parse_expression (b->exp_string);
       b->exp_valid_block = innermost_block;
       mark = value_mark ();
       if (b->val)
-	value_free (b->val);
+	{
+	  value_free (b->val);
+	  /* Avoid re-freeing b->val if an error during the call to
+             evaluate_expression.  */
+	  b->val = NULL;
+	}
       b->val = evaluate_expression (b->exp);
       release_value (b->val);
       if (VALUE_LAZY (b->val) && breakpoint_enabled (b))
@@ -6985,7 +6995,12 @@ breakpoint_re_set_one (void *bint)
 	{
 	  s = b->cond_string;
 	  if (b->cond)
-	    xfree (b->cond);
+	    {
+	      xfree (b->cond);
+	      /* Avoid re-freeing b->exp if an error during the call
+		 to parse_exp_1.  */
+	      b->cond = NULL;
+	    }
 	  b->cond = parse_exp_1 (&s, (struct block *) 0, 0);
 	}
       if (breakpoint_enabled (b))

@@ -1,3 +1,11 @@
+2004-01-27  Paul N. Hilfinger  <hilfinger@gnat.com>
+	
+	* breakpoint.c (breakpoint_re_set_one): Set b->cond, b->val, and
+	b->exp to NULL after freeing so that error during re-parsing or
+	evaluation of expressions associated with breakpoint don't
+	eventually lead to re-freeing of storage.
+	Committed by Andrew Cagney.
+
 2004-01-27  Andrew Cagney  <cagney@redhat.com>
 
 	* source.c (ambiguous_line_spec): Delete undefined declaration.
