@@ -17,7 +17,7 @@
 .\"
 .\"     @(#)gprof.1	6.6 (Berkeley) 7/24/90
 .\"
-.TH GPROF 1 "July 24, 1990"
+.TH GPROF 1 "January 29, 1993"
 .SH NAME
 gprof \- display call graph profile data
 .SH SYNOPSIS
@@ -29,7 +29,7 @@ gprof \- display call graph profile data
 .B [ \-k
 .I fromname toname
 .B ] [ 
-.I a.out
+.I objfile
 .B [ 
 .I gmon.out
 .B ] 
@@ -94,7 +94,7 @@ suppresses the printing of statically declared functions.
 If this option is given, all relevant information about the static function
 (e.g., time samples, calls to other functions, calls from other functions)
 belongs to the function loaded just before the static function in the
-\&`a.out' file.
+\&`objfile' file.
 .TP
 .B \-b
 suppresses the printing of a description of each field in the profile.
@@ -187,7 +187,7 @@ the sum of the profile information in all the specified profile files.
 This summary profile file may be given to later
 executions of gprof (probably also with a
 .BR \-s  )
-to accumulate profile data across several runs of an `a.out' file.
+to accumulate profile data across several runs of an `objfile' file.
 .TP
 .B -z
 displays routines that have zero usage (as shown by call counts
