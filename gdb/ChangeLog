@@ -1,3 +1,8 @@
+Sun Mar 29 15:17:16 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* tracepoint.c (trace_start_command): Set trace_running_p.
+	(trace_stop_command): Clear trace_running_p.
+
 Sat Mar 28 15:19:48 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* NEWS: Update for 4.17 release.
