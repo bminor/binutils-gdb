@@ -16,6 +16,9 @@ end-sanitize-r5900
 	* configure: Only build libopcodes shared if --enable-shared's value
 	was `yes', or was set to `*opcodes*'.
 	* aclocal.m4: Likewise.
+	* NOTE: this really needs to be fixed in libtool/libtool.m4, the
+	original source of this bit of code.  It's not clear what the best fix
+	would be, though.
 
 start-sanitize-r5900
 Mon Dec 15 12:43:36 1997  Jeffrey A Law  (law@cygnus.com)
