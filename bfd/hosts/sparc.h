@@ -18,7 +18,7 @@ extern PROTO(int, fcntl,(int des, int cmd));
 extern PROTO(int, fprintf,(FILE *,char *,...));
 extern PROTO(int, printf,(char *,...));
 extern PROTO(int, oqsort,(void *data,int els, int siz, int func()));
-extern PROTO(int, exit,(int));
+extern PROTO(void, exit,(int));
 extern PROTO(int, fseek,(FILE*, int, int));
 extern PROTO(int, fclose,(FILE*));
 extern PROTO(void, bcopy,(char*,char*,int));
