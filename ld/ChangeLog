@@ -1,3 +1,8 @@
+2001-01-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	* emultempl/elf32.em: Correct spelling in comments and listed
+	options.
+
 2001-01-23  Alan Modra  <alan@linuxcare.com.au>
 
 	* ldlang.c (lang_leave_overlay): Only set lma_region from the

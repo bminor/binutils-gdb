@@ -77,7 +77,7 @@ if test -n "$EXTRA_EM_FILE" ; then
 . ${srcdir}/emultempl/${EXTRA_EM_FILE}.em
 fi
 
-# Functions in this file can be overriden by setting the LDEMUL_* shell
+# Functions in this file can be overridden by setting the LDEMUL_* shell
 # variables.  If the name of the overriding function is the same as is
 # defined in this file, then don't output this file's version.
 # If a different overriding name is given then output the standard function
@@ -123,7 +123,7 @@ static boolean global_vercheck_failed;
 
    This is called via lang_for_each_input_file.
    GLOBAL_VERCHECK_NEEDED is the list of objects needed by the object
-   which we ar checking.  This sets GLOBAL_VERCHECK_FAILED if we find
+   which we are checking.  This sets GLOBAL_VERCHECK_FAILED if we find
    a conflicting version.  */
 
 static void
@@ -216,7 +216,7 @@ gld${EMULATION_NAME}_stat_needed (s)
      different versions of the same shared library.  For example,
      there may be a problem if -lc picks up libc.so.6 but some other
      shared library has a DT_NEEDED entry of libc.so.5.  This is a
-     hueristic test, and it will only work if the name looks like
+     heuristic test, and it will only work if the name looks like
      NAME.so.VERSION.  FIXME: Depending on file names is error-prone.
      If we really want to issue warnings about mixing version numbers
      of shared libraries, we need to find a better way.  */
@@ -1102,7 +1102,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 
   /* Choose a unique name for the section.  This will be needed if the
      same section name appears in the input file with different
-     loadable or allocateable characteristics.  */
+     loadable or allocatable characteristics.  */
   outsecname = secname;
   if (bfd_get_section_by_name (output_bfd, outsecname) != NULL)
     {
@@ -1465,13 +1465,13 @@ if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  --disable-new-dtags\tDisable new dynamic tags\n"));
   fprintf (file, _("  --enable-new-dtags\tEnable new dynamic tags\n"));
-  fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at rutime\n"));
-  fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but execuable\n"));
+  fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at runtime\n"));
+  fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but executable\n"));
   fprintf (file, _("  -z loadfltr\t\tMark object requiring immediate process\n"));
   fprintf (file, _("  -z nodefaultlib\tMark object not to use default search paths\n"));
   fprintf (file, _("  -z nodelete\t\tMark DSO non-deletable at runtime\n"));
-  fprintf (file, _("  -z nodlopen\t\tMark DSO not availale to dlopen\n"));
-  fprintf (file, _("  -z nodump\t\tMark DSO not availale to dldump\n"));
+  fprintf (file, _("  -z nodlopen\t\tMark DSO not available to dlopen\n"));
+  fprintf (file, _("  -z nodump\t\tMark DSO not available to dldump\n"));
   fprintf (file, _("  -z now\t\tMark object non-lazy runtime binding\n"));
   fprintf (file, _("  -z origin\t\tMark object requiring immediate \$ORIGIN processing\n"));
   fprintf (file, _("\t\t\t  at runtime\n"));
