@@ -29,6 +29,11 @@ if ![istarget mips*-*-ecoff*] {
 
 set testname relax
 
+if { [which $CC] == 0 } {
+    untested $testname
+    return
+}
+
 # Test that relaxation works correctly.  This testsuite was composed
 # (by experimentation) to force the linker to relax twice--that is,
 # the first relaxation pass will force another call to be out of

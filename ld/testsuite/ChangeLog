@@ -1,3 +1,19 @@
+Mon Jul 24 15:34:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-empic/empic.exp: If $CC does not exist, call untested rather
+	than unresolved.
+
+Thu Jul 20 15:09:26 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-undefined/undefined.exp: If $CC does not exist, mark the
+	tests as untested rather than unresolved.  Clear ELF xfails for
+	mips*, not just mips.
+
+Tue Jul 18 12:00:41 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-undefined/undefined.exp: Add setup_xfail for sh-*-* for
+	undefined line test.
+
 Fri Jul 14 13:07:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-undefined/undefined.exp: New test, to check reporting of
