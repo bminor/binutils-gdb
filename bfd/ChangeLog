@@ -1,5 +1,10 @@
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+
+2005-02-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* coffgen.c (bfd_coff_get_comdat_section): Check that
 	coff_section_data isn't NULL.
 

@@ -970,8 +970,8 @@ cpu-m68k.lo: cpu-m68k.c $(INCDIR)/filenames.h
 cpu-m88k.lo: cpu-m88k.c $(INCDIR)/filenames.h
 cpu-m10200.lo: cpu-m10200.c $(INCDIR)/filenames.h
 cpu-m10300.lo: cpu-m10300.c $(INCDIR)/filenames.h
-cpu-mcore.lo: cpu-mcore.c $(INCDIR)/filenames.h
 cpu-maxq.lo: cpu-maxq.c $(INCDIR)/filenames.h
+cpu-mcore.lo: cpu-mcore.c $(INCDIR)/filenames.h
 cpu-mips.lo: cpu-mips.c $(INCDIR)/filenames.h
 cpu-mmix.lo: cpu-mmix.c $(INCDIR)/filenames.h
 cpu-msp430.lo: cpu-msp430.c $(INCDIR)/filenames.h
@@ -1081,7 +1081,8 @@ coff-m88k.lo: coff-m88k.c $(INCDIR)/filenames.h $(INCDIR)/coff/m88k.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 coff-maxq.lo: coff-maxq.c $(INCDIR)/filenames.h $(INCDIR)/coff/maxq.h \
-  $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h \
   coffcode.h coffswap.h
 coff-mips.lo: coff-mips.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h \
