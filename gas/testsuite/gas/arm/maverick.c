@@ -99,7 +99,7 @@ off8s (func_arg * arg, insn_data * data)
     {
       val = - val;
       val &= ~3;
-      sprintf (value, ", -#%i", val);
+      sprintf (value, ", #-%i", val);
       data->dis_out = strdup (value);
       sprintf (value, ", #-%i", val);
       data->as_in = strdup (value);
