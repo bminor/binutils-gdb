@@ -616,13 +616,11 @@ bfd_section_from_shdr (abfd, shindex)
 	if (! bfd_section_from_shdr (abfd, hdr->sh_link))
 	  return false;
 
-	/* If this reloc section does not use the main symbol table,
-	   or if it is in the process image, we don't treat it as a
-	   reloc section.  BFD can't adequately represent such a
-	   section, so at least for now, we don't try.  We just
-	   present it as a normal section.  */
-	if ((hdr->sh_flags & SHF_ALLOC) != 0
-	    || hdr->sh_link != elf_onesymtab (abfd))
+	/* If this reloc section does not use the main symbol table we
+	   don't treat it as a reloc section.  BFD can't adequately
+	   represent such a section, so at least for now, we don't
+	   try.  We just present it as a normal section.  */
+	if (hdr->sh_link != elf_onesymtab (abfd))
 	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
 	/* Don't allow REL relocations on a machine that uses RELA and
@@ -1267,8 +1265,7 @@ elf_fake_sections (abfd, asect, ignore)
 
 /* Assign all ELF section numbers.  The dummy first section is handled here
    too.  The link/info pointers for the standard section types are filled
-   in here too, while we're at it.  (Link pointers for .stab sections are
-   not filled in here.)  */
+   in here too, while we're at it.  */
 
 static boolean
 assign_section_numbers (abfd)
@@ -2581,8 +2578,7 @@ elf_section_from_bfd_section (abfd, asect)
 	case SHT_REL:
 	case SHT_RELA:
 	  /* We sometimes map a reloc section to a BFD section.  */
-	  if (((hdr->sh_flags & SHF_ALLOC) != 0
-	       || hdr->sh_link != elf_onesymtab (abfd))
+	  if (hdr->sh_link != elf_onesymtab (abfd)
 	      && (asection *) hdr->rawdata == asect)
 	    return index;
 	  break;

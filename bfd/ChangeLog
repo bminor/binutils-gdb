@@ -1,5 +1,10 @@
 Mon Jun  6 10:57:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elfcode.h (bfd_section_from_shdr): Don't turn a reloc section
+	into a BFD section just because SHF_ALLOC is set; require that it
+	not use the normal symbol table.
+	(elf_section_from_bfd_section): Corresponding change.
+
 	Better indirect and warning symbol handling inspired by Stuart
 	Quick <stuck@cs.man.ac.uk>.
 	* linker.c (enum link_action): Add REF, MIND, CWARN, REFC.
