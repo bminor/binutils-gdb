@@ -1,3 +1,7 @@
+Fri Feb 18 08:26:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* README: Change GhostScript to Ghostscript.
+
 Fri Feb 18 07:30:55 1994  Jim Kingdon  (kingdon@cygnus.com)
 
 	* config/rs6000/{tm-rs6000lynx.h,nm-rs6000lynx.h,xm-rs6000lynx.h}:
