@@ -20,6 +20,8 @@
 
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* stack.c: Whitespace tweaks.
+	* somsolib.[ch]: Whitespace tweaks.
 	* solib-aix.c: Whitespace tweaks.
 	* solib.c: Whitespace tweaks.
 	* solib-frv.c: Whitespace tweaks.

@@ -513,7 +513,9 @@ print_frame_info (struct frame_info *fi, int print_level,
       if (!done)
 	{
 	  if (deprecated_print_frame_info_listing_hook)
-	    deprecated_print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
+	    deprecated_print_frame_info_listing_hook (sal.symtab, 
+						      sal.line, 
+						      sal.line + 1, 0);
 	  else
 	    {
 	      /* We used to do this earlier, but that is clearly
@@ -523,7 +525,7 @@ print_frame_info (struct frame_info *fi, int print_level,
 		 when we stepi/nexti into the middle of a source
 		 line. Only the command line really wants this
 		 behavior. Other UIs probably would like the
-		 ability to decide for themselves if it is desired. */
+		 ability to decide for themselves if it is desired.  */
 	      if (addressprint && mid_statement)
 		{
 		  ui_out_field_core_addr (uiout, "addr", get_frame_pc (fi));
