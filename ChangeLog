@@ -1,3 +1,7 @@
+Wed Mar 25 10:34:19 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* configure: re-add -rm.
+
 Tue Mar 24 23:50:16 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Maskefile.in: add .stmp-rcs to all.
