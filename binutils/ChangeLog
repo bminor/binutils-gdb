@@ -1,3 +1,10 @@
+2004-07-13  Nick Clifton  <nickc@redhat.com>
+
+	* dllwrap.c: Replace 'program_name' with 'prog_name' to avoid
+	conflicts with exported global defined in bucomm.h.
+	(deduce_name): Rename parameter 'program_name' to 'name' to avoid
+	shadowing the global defined in bucomm.h.
+
 2004-07-12  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* dlltool.c (ext_prefix_alias): New global variable.
