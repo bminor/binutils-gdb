@@ -17,8 +17,6 @@
 
 Do-first:
 
-recover=aoutx.h
-
 echo Sanitizing `pwd`.
 
 # All files listed between the "Things-to-keep:" line and the
@@ -90,7 +88,11 @@ else
 	rm -f new
 	while grep -s start-sanitize-v9 aoutx.h ; do
 		sed -e '/start-sanitize-v9/,/end-sanitize-v9/d' <aoutx.h >new
-		rm aoutx.h
+		if [ -n "${safe}" ] ; then
+			mv aoutx.h .Recover
+		else
+			rm aoutx.h
+		fi
 		mv new aoutx.h
 	done
 fi
@@ -100,7 +102,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.19  1991/09/03 22:21:30  rich
+# Revision 1.20  1991/09/04 03:59:15  rich
+# Added "recover"'ability.
+#
+# Revision 1.19  1991/09/03  22:21:30  rich
 # "recover" aoutx.h
 #
 # Revision 1.18  1991/08/29  00:35:06  gnu
