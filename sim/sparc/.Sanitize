@@ -33,17 +33,25 @@ configure
 configure.in
 cpu32.c
 cpu32.h
+cpu64.c
+cpu64.h
 cpuall.h
 decode32.c
 decode32.h
+decode64.c
+decode64.h
 dev32.c
 dev32.h
 dev64.c
 dev64.h
 mloop32.in
+mloop64.in
 model32.c
+model64.c
 regs32.h
+regs64.h
 sem32.c
+sem64.c
 sim-if.c
 sim-main.h
 sparc-sim.h
@@ -53,6 +61,7 @@ sparc64.c
 tconfig.in
 trap32.c
 trap32.h
+trap64.c
 trap64.h
 
 Things-to-lose:
