@@ -117,16 +117,8 @@ target_map_name_to_register (char *str, int len)
 {
   int i;
 
-  /* Search architectural register name space. */
-  for (i = 0; i < NUM_REGS; i++)
-    if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))
-	&& STREQN (str, REGISTER_NAME (i), len))
-      {
-	return i;
-      }
-
-  /* Try pseudo-registers, if any. */
-  for (i = NUM_REGS; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+  /* Search register name space. */
+  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
     if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))
 	&& STREQN (str, REGISTER_NAME (i), len))
       {

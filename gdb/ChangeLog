@@ -1,3 +1,8 @@
+2002-01-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* parse.c (target_map_name_to_register): Simplify, search regs and
+	pseudo-regs using a single loop.
+
 2002-01-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* PROBLEMS: Note that the i386 fix was missing from 5.1.1.
