@@ -2108,7 +2108,7 @@ s_endgif (ignore)
   if (count < 0
       || fixup_count != 0)
     {
-      as_bad ("bad data count");
+      as_warn ("bad data count");
       return;
     }
 
@@ -2130,7 +2130,7 @@ s_endgif (ignore)
 	}
       if (! ok_p)
 	{
-	  as_bad ("nloop value does not match size of data");
+	  as_warn ("nloop value does not match size of data");
 	  return;
 	}
     }
