@@ -1,5 +1,13 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-frv.c (frv_insert_vliw_insn): Prototype.
+	(frv_find_in_vliw): Likewise.
+	(frv_debug_tomcat): Likewise.
+	(frv_adjust_vliw_count): Likewise.
+	(frv_tomcat_shuffle): Likewise.
+	(frv_tomcat_analyze_vliw_chains): Likewise.  Correct args to
+	frv_find_in_vliw call.
+	(md_atof): Remove declaration of atof_ieee.
 	* config/tc-h8500.c (cons): Delete declaration.
 	(md_begin <opcode>): Constify.
 	(displacement_size, immediate_size, absolute_size): Remove.

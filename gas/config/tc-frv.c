@@ -467,6 +467,8 @@ md_begin ()
 
 int chain_num = 0;
 
+struct vliw_insn_list *frv_insert_vliw_insn PARAMS ((bfd_boolean));
+
 struct vliw_insn_list *
 frv_insert_vliw_insn (count)
       bfd_boolean count;
@@ -538,6 +540,9 @@ frv_insert_vliw_insn (count)
 
 /* Check a vliw insn for an insn of type containing the sym passed in label_sym.  */
 
+static struct vliw_insn_list *frv_find_in_vliw
+  PARAMS ((enum vliw_insn_type, struct vliw_chain *, symbolS *));
+
 static struct vliw_insn_list *
 frv_find_in_vliw (vliw_insn_type, this_chain, label_sym)
     enum vliw_insn_type vliw_insn_type;
@@ -573,6 +578,8 @@ enum vliw_nop_type
   VLIW_DOUBLE_THEN_SINGLE_NOP
 };
 
+static void frv_debug_tomcat PARAMS ((struct vliw_chain *));
+
 static void
 frv_debug_tomcat (start_chain)
    struct vliw_chain *start_chain;
@@ -601,6 +608,7 @@ frv_debug_tomcat (start_chain)
    }
 }
 
+static void frv_adjust_vliw_count PARAMS ((struct vliw_chain *));
 
 static void
 frv_adjust_vliw_count (this_chain)
@@ -623,6 +631,8 @@ frv_adjust_vliw_count (this_chain)
 /* Insert the desired nop combination in the vliw chain before insert_before_insn.
    Rechain the vliw insn.  */
 
+static struct vliw_chain *frv_tomcat_shuffle
+  PARAMS ((enum vliw_nop_type, struct vliw_chain *, struct vliw_insn_list *));
 
 static struct vliw_chain *
 frv_tomcat_shuffle (this_nop_type, vliw_to_split, insert_before_insn)
@@ -792,6 +802,8 @@ frv_tomcat_shuffle (this_nop_type, vliw_to_split, insert_before_insn)
   return return_me;
 }
 
+static void frv_tomcat_analyze_vliw_chains PARAMS ((void));
+
 static void
 frv_tomcat_analyze_vliw_chains ()
 {
@@ -861,7 +873,7 @@ workaround_top:
 	{
 	  if (this_insn->type == VLIW_LABEL_TYPE)
 	    {
-	      if ((temp_insn = frv_find_in_vliw (VLIW_BRANCH_TYPE, vliw2, this_insn->sym, temp_insn)) != NULL)
+	      if ((temp_insn = frv_find_in_vliw (VLIW_BRANCH_TYPE, vliw2, this_insn->sym)) != NULL)
 		{
 		  temp_insn->snop_frag->fr_subtype = NOP_KEEP;
 		  vliw1 = frv_tomcat_shuffle (VLIW_SINGLE_NOP, vliw2, this_insn);
@@ -892,7 +904,7 @@ workaround_top:
 
       if (frv_is_branch_insn (this_insn->insn))
 	{
-	  if ((temp_insn = frv_find_in_vliw (VLIW_LABEL_TYPE, vliw1, this_insn->sym, temp_insn)) != NULL)
+	  if ((temp_insn = frv_find_in_vliw (VLIW_LABEL_TYPE, vliw1, this_insn->sym)) != NULL)
 	    {
 	      /* Insert [nop/nop] [nop] before branch.  */
 	      this_insn->snop_frag->fr_subtype = NOP_KEEP;
@@ -1258,7 +1270,6 @@ md_atof (type, litP, sizeP)
   int              prec;
   LITTLENUM_TYPE   words [MAX_LITTLENUMS];
   char *           t;
-  char *           atof_ieee ();
 
   switch (type)
     {
