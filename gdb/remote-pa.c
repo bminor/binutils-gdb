@@ -1196,7 +1196,7 @@ putpkt (buf)
 		case '$':
 		  if (started_error_output)
 		    {
-		      putc_unfiltered ('\n');
+		      putchar_unfiltered ('\n');
 		      started_error_output = 0;
 		    }
 		}
@@ -1227,7 +1227,7 @@ putpkt (buf)
 		      started_error_output = 1;
 		      printf_unfiltered ("putpkt: Junk: ");
 		    }
-		  putc_unfiltered (ch & 0177);
+		  putchar_unfiltered (ch & 0177);
 		}
 	      continue;
 	    }

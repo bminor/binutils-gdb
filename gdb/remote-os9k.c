@@ -49,13 +49,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
-#include <termio.h>
-
-#ifdef HAVE_TERMIO
-#  define TERMINAL struct termios
-#else
-#  define TERMINAL struct sgttyb
-#endif
 
 struct monitor_ops *current_monitor;
 struct cmd_list_element *showlist;

@@ -521,12 +521,12 @@ hms_wait (pid, status)
 
 	  /* Print out any characters which have been swallowed.  */
 	  for (p = swallowed; p < swallowed_p; ++p)
-	    putc_unfiltered (*p);
+	    putchar_unfiltered (*p);
 	  swallowed_p = swallowed;
 
 	  if ((ch != '\r' && ch != '\n') || swallowed_cr > 10)
 	    {
-	      putc_unfiltered (ch);
+	      putchar_unfiltered (ch);
 	      swallowed_cr = 10;
 	    }
 	  swallowed_cr++;
