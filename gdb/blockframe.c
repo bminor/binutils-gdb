@@ -292,10 +292,16 @@ get_prev_frame_info (next_frame)
 
   if (!next_frame)
     {
+#if 0
+      /* This screws value_of_variable, which just wants a nice clean
+	 NULL return from block_innermost_frame if there are no frames.
+	 I don't think I've ever seen this message happen otherwise.
+	 And returning NULL here is a perfectly legitimate thing to do.  */
       if (!current_frame)
 	{
 	  error ("You haven't set up a process's stack to examine.");
 	}
+#endif
 
       return current_frame;
     }
@@ -383,13 +389,18 @@ get_prev_frame_info (next_frame)
      Only change here is that create_new_frame would no longer init extra
      frame info; SETUP_ARBITRARY_FRAME would have to do that.
    INIT_PREV_FRAME(fromleaf, prev)
-     Replace INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC.
+     Replace INIT_EXTRA_FRAME_INFO and INIT_FRAME_PC.  This should
+     also return a flag saying whether to keep the new frame, or
+     whether to discard it, because on some machines (e.g.  mips) it
+     is really awkward to have FRAME_CHAIN_VALID called *before*
+     INIT_EXTRA_FRAME_INFO (there is no good way to get information
+     deduced in FRAME_CHAIN_VALID into the extra fields of the new frame).
    std_frame_pc(fromleaf, prev)
      This is the default setting for INIT_PREV_FRAME.  It just does what
      the default INIT_FRAME_PC does.  Some machines will call it from
      INIT_PREV_FRAME (either at the beginning, the end, or in the middle).
      Some machines won't use it.
-   kingdon@cygnus.com, 13Apr93.  */
+   kingdon@cygnus.com, 13Apr93, 31Jan94.  */
 
 #ifdef INIT_FRAME_PC_FIRST
   INIT_FRAME_PC_FIRST (fromleaf, prev);
@@ -400,9 +411,24 @@ get_prev_frame_info (next_frame)
 #endif
 
   /* This entry is in the frame queue now, which is good since
-     FRAME_SAVED_PC may use that queue to figure out it's value
+     FRAME_SAVED_PC may use that queue to figure out its value
      (see tm-sparc.h).  We want the pc saved in the inferior frame. */
   INIT_FRAME_PC(fromleaf, prev);
+
+  /* If ->frame and ->pc are unchanged, we are in the process of getting
+     ourselves into an infinite backtrace.  Some architectures check this
+     in FRAME_CHAIN or thereabouts, but it seems like there is no reason
+     this can't be an architecture-independent check.  */
+  if (next_frame != NULL)
+    {
+      if (prev->frame == next_frame->frame
+	  && prev->pc == next_frame->pc)
+	{
+	  next_frame->prev = NULL;
+	  obstack_free (&frame_cache_obstack, prev);
+	  return NULL;
+	}
+    }
 
   find_pc_partial_function (prev->pc, &name,
 			    (CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
@@ -720,7 +746,7 @@ find_pc_partial_function (pc, name, address, endaddr)
 
   /* See if we're in a transfer table for Sun shared libs.  */
 
-  if (msymbol -> type == mst_text)
+  if (msymbol -> type == mst_text || msymbol -> type == mst_file_text)
     cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
   else
     /* It is a transfer table for Sun shared libraries.  */

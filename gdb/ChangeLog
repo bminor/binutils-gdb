@@ -1,5 +1,7 @@
 Wed Mar 30 00:31:49 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
+	* blockframe.c (find_pc_partial_function):  mst_file_text
+	symbols do not live in the shared library transfer table.
 	* ch-exp.y (decode_integer_value, match_character_literal,
 	match_bitstring_literal):  Guard tolower calls with isupper,
 	tolower on old BSD systems blindly subtracts a constant.
