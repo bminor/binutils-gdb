@@ -5,6 +5,11 @@ Mon Feb 21 10:12:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 Mon Feb 21 09:50:06 1994  Ian Lance Taylor  (ian@lisa.cygnus.com)
 
+	* ecofflink.c (ecoff_write_symhdr): Set symhdr->magic here.
+	* ecoff.c (ecoff_write_object_contents): Make sure .bss section
+	ends on a page boundary if there is no symbol table.
+	(ecoff_bfd_final_link): Don't set symhdr->magic here.
+
 	* hosts/hp300.h: Include <stdlib.h>; don't declare free.
 
 	* som.c (som_bfd_count_ar_symbols): Use a pointer and alloca
