@@ -1,3 +1,7 @@
+Tue Jan 19 10:51:01 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* hppa-dis.c: fix comments and some indentation.
+
 1999-01-12  Doug Evans  <devans@casey.cygnus.com>
 
 start-sanitize-cygnus
