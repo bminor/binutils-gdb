@@ -94,7 +94,10 @@ FLAGS_TO_PASS = \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
 
-RUNTEST=runtest
+RUNTEST = `if [ -f ${srcdir}/../dejagnu/runtest ] ; then \
+		echo ${srcdir}/../dejagnu/runtest ; else echo runtest; \
+	   fi`
+RUNTESTFLAGS=
 CHECKFLAGS= \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
 	"RUNTEST=$(RUNTEST)"
@@ -113,7 +116,6 @@ REAL_SOURCES = \
 	$(srcdir)/flonum-mult.c \
 	$(srcdir)/frags.c \
 	$(srcdir)/hash.c \
-	$(srcdir)/hex-value.c \
 	$(srcdir)/input-file.c \
 	$(srcdir)/input-scrub.c \
 	$(srcdir)/literal.c \
@@ -178,7 +180,6 @@ OBJS = \
 	flonum-mult.o \
 	frags.o \
 	hash.o \
-	hex-value.o \
 	input-file.o \
 	input-scrub.o \
 	literal.o \
@@ -204,7 +205,8 @@ VMS_OTHER_OBJS = \
 	../libiberty/concat.o \
 	../libiberty/getopt.o \
 	../libiberty/getopt1.o \
-	../libiberty/getruntime.o
+	../libiberty/getruntime.o \
+	../libiberty/hex.o
 
 all: .gdbinit as.new gasp.new
 	@srcroot=`cd $(srcroot); pwd`; export srcroot; \
@@ -288,6 +290,34 @@ config-stamp: Makefile conf
 
 # Compiling object files from source files.
 
+TARG_CPU_DEP_a29k    =
+TARG_CPU_DEP_alpha   =
+# start-sanitize-arc
+TARG_CPU_DEP_arc     = $(srcdir)/../include/opcode/arc.h
+# end-sanitize-arc
+TARG_CPU_DEP_arm     =
+TARG_CPU_DEP_generic =
+TARG_CPU_DEP_h8300   = $(srcdir)/../include/opcode/h8300.h
+TARG_CPU_DEP_h8500   = $(srcdir)/../opcodes/h8500-opc.h
+TARG_CPU_DEP_hppa    =
+TARG_CPU_DEP_i386    = $(srcdir)/../include/opcode/i386.h
+TARG_CPU_DEP_i860    =
+TARG_CPU_DEP_i960    =
+TARG_CPU_DEP_m68k    = $(srcdir)/../include/opcode/m68k.h
+TARG_CPU_DEP_m88k    = $(srcdir)/config/m88k-opcode.h
+TARG_CPU_DEP_mips    = $(srcdir)/../include/opcode/mips.h
+TARG_CPU_DEP_ns32k   =
+TARG_CPU_DEP_ppc     =
+# start-sanitize-rce
+TARG_CPU_DEP_rce     = $(srcdir)/../opcodes/rce-opc.h
+# end-sanitize-rce
+TARG_CPU_DEP_sh      = $(srcdir)/../opcodes/sh-opc.h
+TARG_CPU_DEP_sparc   =
+TARG_CPU_DEP_tahoe   =
+TARG_CPU_DEP_vax     =
+TARG_CPU_DEP_w65     = $(srcdir)/../opcodes/w65-opc.h
+TARG_CPU_DEP_z8k     = $(srcdir)/../opcodes/z8k-opc.h
+
 gasp.o : gasp.c config.h
 app.o : app.c write.h
 as.o : as.c output-file.h write.h subsegs.h
@@ -301,7 +331,6 @@ flonum-copy.o : flonum-copy.c
 flonum-mult.o : flonum-mult.c
 frags.o : frags.c subsegs.h
 hash.o : hash.c
-hex-value.o : hex-value.c
 input-file.o : input-file.c input-file.h
 input-scrub.o : input-scrub.c input-file.h
 listing.o : listing.c input-file.h subsegs.h
@@ -320,7 +349,7 @@ ecoff.o : ecoff.c ecoff.h \
 stabs.o : stabs.c subsegs.h $(srcdir)/../include/aout/stab_gnu.h
 atof-targ.o : atof-targ.c
 obj-format.o : obj-format.c
-targ-cpu.o : targ-cpu.c $(TARG_CPU_DEPENDENTS)
+targ-cpu.o : targ-cpu.c $(TARG_CPU_DEP_@cpu_type@)
 
 # Remake the info files.
 

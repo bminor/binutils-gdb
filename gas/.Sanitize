@@ -120,7 +120,7 @@ else
 	done
 fi
 
-rce_files="configure.in as.c configure ChangeLog"
+rce_files="configure.in as.c configure ChangeLog Makefile.in"
 
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
 	for i in $rce_files ; do
@@ -149,7 +149,7 @@ else
 	done
 fi
 
-arc_files="ChangeLog configure.in configure"
+arc_files="ChangeLog configure.in configure Makefile.in"
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
 		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then

@@ -1,5 +1,28 @@
 Tue May  2 00:17:04 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
+	* Makefile.in (TARG_CPU_DEP_*): New variables.
+	(targ-cpu.o): Depend on one, selected by autoconf substitution,
+	instead of TARG_CPU_DEPENDENTS.
+	* configure.in: Substitute $cpu_type, $obj_format, $atof, and
+	$emulation into Makefile.in.
+start-sanitize-arc
+	* config/arc.mt: Deleted.
+end-sanitize-arc
+	* config/h8300.mt: Deleted.
+	* config/h8500.mt: Deleted.
+	* config/i386coff.mt (TARG_CPU_DEPENDENTS): Deleted.
+	* config/m68k.mt: Deleted.
+	* config/m68kcoff.mt (TARG_CPU_DEPENDENTS): Deleted.
+	* config/m88kcoff.mt (TARG_CPU_DEPENDENTS): Deleted.
+	* config/mips-big.mt (TARG_CPU_DEPENDENTS): Deleted.
+	* config/mips-lit.mt (TARG_CPU_DEPENDENTS): Deleted.
+start-sanitize-rce
+	* config/rce.mt: Deleted.
+end-sanitize-rce
+	* config/sh.mt: Deleted.
+	* config/w65.mt: Deleted.
+	* config/z8k.mt: Deleted.
+
 	* config/te-dpx2.h (dpx2): Deleted unused macro.
 	* config/te-generic.h (TE_GENERIC): Ditto.
 	* config/te-go32.h (TE_GO32): Ditto.

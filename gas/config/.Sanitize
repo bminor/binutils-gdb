@@ -15,7 +15,7 @@
 
 Do-first:
 
-rce_files="tc-rce.c tc-rce.h rce.mt"
+rce_files="tc-rce.c tc-rce.h"
 
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
 	keep_these_too="${rce_files} ${keep_these_too}"
@@ -23,7 +23,7 @@ else
 	lose_these_too="${rce_files} ${lose_these_too}"
 fi
 
-arc_files="tc-arc.c tc-arc.h arc.mt"
+arc_files="tc-arc.c tc-arc.h"
 
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	keep_these_too="${arc_files} ${keep_these_too}"
@@ -45,10 +45,7 @@ atof-ieee.c
 atof-tahoe.c
 atof-vax.c
 go32.cfg
-h8300.mt
-h8500.mt
 i386coff.mt
-m68k.mt
 m68kcoff.mt
 m88k-opcode.h
 m88kcoff.mt
@@ -74,7 +71,6 @@ obj-som.c
 obj-som.h
 obj-vms.c
 obj-vms.h
-sh.mt
 tc-a29k.c
 tc-a29k.h
 tc-alpha.c
@@ -139,8 +135,6 @@ te-sun3.h
 te-sysv32.h
 vax-inst.h
 vms-conf.h
-w65.mt
-z8k.mt
 
 Things-to-lose:
 

@@ -1,2 +1,0 @@
-TARG_CPU_DEPENDENTS=$(srcdir)/../opcodes/z8k-opc.h
-#TDEFINES=-DSINGLE_QUOTE_STRINGS

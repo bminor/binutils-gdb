@@ -4,7 +4,7 @@ dnl And be careful when changing it!  If you must add tests with square
 dnl brackets, be sure changequote invocations surround it.
 dnl
 dnl
-AC_PREREQ(1.118)dnl
+AC_PREREQ(2.3)dnl We only need 2.0, but pre-2.3 loses on some AIX version.
 AC_INIT(as.h)dnl
 dnl
 bfd_gas=no
@@ -41,7 +41,6 @@ changequote([,])dnl
   m8*)		cpu_type=m88k ;;
   mips*el)	cpu_type=mips endian=little;;
   mips*)	cpu_type=mips endian=big ;;
-  powerpc*eabi*) cpu_type=ppc obj_format=elf;;
   powerpc*)	cpu_type=ppc ;;
   rs6000*)	cpu_type=ppc ;;
   sparc64)	cpu_type=sparc obj_format=elf
@@ -68,6 +67,7 @@ dev=no
 case ${generic_target} in
   a29k-amd-udi)		obj_format=coff gas_target=ebmon29k ;;
   a29k-amd-ebmon)	obj_format=coff gas_target=ebmon29k ;;
+  a29k-*-vxworks*)      obj_format=coff ;;
 
   alpha-*-netware*)	obj_format=ecoff ;;
   alpha-*-osf*)		obj_format=ecoff ;;
@@ -91,10 +91,10 @@ case ${generic_target} in
   i386-*-bsd*)		obj_format=aout emulation=386bsd ;;
   i386-*-netbsd0.8)	obj_format=aout emulation=386bsd ;;
   i386-*-netbsd*)	obj_format=aout emulation=nbsd bfd_gas=yes;;
-  i386-*-linux*elf*)	obj_format=elf  emulation=linux ;;
+  i386-*-linux*aout*)	obj_format=aout  emulation=linux ;;
   i386-*-linux*coff*)	obj_format=coff emulation=linux
 			 gas_target=i386coff ;;
-  i386-*-linux*)	obj_format=aout emulation=linux ;;
+  i386-*-linux*)	obj_format=elf emulation=linux ;;
   i386-*-lynxos*)	obj_format=coff gas_target=i386coff
 			 emulation=lynx ;;
   i386-*-sysv4* | i386-*-solaris* | i386-*-elf)
@@ -116,13 +116,14 @@ case ${generic_target} in
   i960-*-vxworks5.*)	obj_format=coff emulation=ic960 gas_target=ic960coff ;;
   i960-*-vxworks*)	obj_format=bout ;;
 
-  m68k-wrs-vxworks | m68k-ericsson-ose | m68k-*-sunos*)
+  m68k-*-vxworks* | m68k-ericsson-ose | m68k-*-sunos*)
 			obj_format=aout emulation=sun3 ;;
   m68k-motorola-sysv)	obj_format=coff gas_target=m68kcoff emulation=delta ;;
   m68k-bull-sysv3*)	obj_format=coff gas_target=m68kcoff emulation=dpx2 ;;
   m68k-apollo-*)	obj_format=coff gas_target=apollo emulation=apollo ;;
   m68k-*-coff | m68k-*-sysv*)
 			obj_format=coff gas_target=m68kcoff ;;
+  m68k-*-elf)		obj_format=elf ;;
   m68k-*-hpux*)		obj_format=hp300 emulation=hp300 ;;
   m68k-*-lynxos*)	obj_format=coff gas_target=m68kcoff
 			 emulation=lynx ;;
@@ -160,6 +161,7 @@ case ${generic_target} in
 			;;
   ppc-*-aix*)		obj_format=coff ;;
   ppc-*-elf*)		obj_format=elf ;;
+  ppc-*-eabi*)		obj_format=elf ;;
   ppc-*-netware*)	obj_format=elf emulation=ppcnw ;;
   ppc-*-sysv4*)		obj_format=elf ;;
 
@@ -287,6 +289,11 @@ case ${reject_dev_configs}-${dev} in
     AC_MSG_ERROR(GAS does not support the ${generic_target} configuration.)
     ;;
 esac
+
+AC_SUBST(cpu_type)
+AC_SUBST(obj_format)
+AC_SUBST(atof)
+AC_SUBST(emulation)
 
 AC_LINK_FILES(config/tc-${cpu_type}.c	config/tc-${cpu_type}.h \
 	config/obj-${obj_format}.h config/obj-${obj_format}.c \
