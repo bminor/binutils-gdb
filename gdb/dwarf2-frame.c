@@ -544,6 +544,13 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
 
       /* Skip the return address column.  */
       if (reg == fs->retaddr_column)
+	/* NOTE: cagney/2003-06-07: Is this right?  What if the
+           RETADDR_COLUM corresponds to a real register (and, worse,
+           that isn't the PC_REGNUM)?  I'm guessing that the PC_REGNUM
+           further down is trying to handle this.  That can't be right
+           though - PC_REGNUM may not be valid (it can be -ve).  I
+           think, instead when RETADDR_COLUM isn't a real register, it
+           should map itself onto frame_pc_unwind.  */
 	continue;
 
       /* Use the GDB register number as index.  */
@@ -558,12 +565,22 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
      implies a copy from the ra column register.  */
   if (fs->retaddr_column < fs->regs.num_regs
       && fs->regs.reg[fs->retaddr_column].how != REG_UNSAVED)
-    cache->reg[PC_REGNUM] = fs->regs.reg[fs->retaddr_column];
+    {
+      /* See comment above about a possibly -ve PC_REGNUM.  If this
+         assertion fails, it's a problem with this code and not the
+         architecture.  */
+      gdb_assert (PC_REGNUM >= 0);
+      cache->reg[PC_REGNUM] = fs->regs.reg[fs->retaddr_column];
+    }
   else
     {
       reg = DWARF2_REG_TO_REGNUM (fs->retaddr_column);
       if (reg != PC_REGNUM)
 	{
+	  /* See comment above about PC_REGNUM being -ve.  If this
+	     assertion fails, it's a problem with this code and not
+	     the architecture.  */
+	  gdb_assert (PC_REGNUM >= 0);
 	  cache->reg[PC_REGNUM].loc.reg = reg;
 	  cache->reg[PC_REGNUM].how = REG_SAVED_REG;
 	}
@@ -606,6 +623,21 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	  /* GCC defines the CFA as the value of the stack pointer
 	     just before the call instruction is executed.  Do other
 	     compilers use the same definition?  */
+	  /* DWARF V3 Draft 7 p102: Typically, the CFA is defined to
+	     be the value of the stack pointer at the call site in the
+	     previous frame (which may be different from its value on
+	     entry to the current frame).  */
+	  /* DWARF V3 Draft 7 p103: The first column of the rules
+             defines the rule which computes the CFA value; it may be
+             either a register and a signed offset that are added
+             together or a DWARF expression that is evaluated.  */
+	  /* FIXME: cagney/2003-07-07: I don't understand this.  The
+             CFI info should have provided unwind information for the
+             SP register and then pointed ->cfa_reg at it, not the
+             reverse.  Assuming that SP_REGNUM is !-ve, there is a
+             very real posibility that CFA is an offset from some
+             other register, having nothing to do with the unwound SP
+             value.  */
 	  *optimizedp = 0;
 	  if (valuep)
 	    {

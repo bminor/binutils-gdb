@@ -1,5 +1,11 @@
 2003-06-07  Andrew Cagney  <cagney@redhat.com>
 
+	* dwarf2-frame.c (dwarf2_frame_cache): Add comments on PC_REGNUM.
+	Assert that PC_REGNUM is valid.
+	(dwarf2_frame_prev_register): Add comments on SP_REGNUM.
+
+2003-06-07  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (TARGET_READ_SP): Add predicate, delete default.
 	* gdbarch.h, gdbarch.c: Regenerate.
 	* mn10300-tdep.c: Include "gdb_assert.h".
