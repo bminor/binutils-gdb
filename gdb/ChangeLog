@@ -1,3 +1,21 @@
+Mon Apr  8 12:53:56 1996  Fred Fish  <fnf@phydeaux.cygnus.com>
+
+	* Makefile.in (scm-exp.o, scm-lang.o, scm-valprint.o): Add targets and
+	dependencies.
+	* scm-lang.c (gdb_string.h): Include.
+	* objfiles.c (add_to_objfile_sections): Cast second arg of obstack_grow
+	call to correct type (char *).
+	* cp-valprint.c (cp_print_static_field): Ditto.
+	* somsolib.c (som_solib_create_inferior_hook): Add a declaration
+	for external find_unwind_entry function (from hppa-tdep.c).
+	* remote-pa.c (remote_write_bytes, remote_read_bytes): Change
+	type of second arg to "char *" to be type compatible with
+	dcache.
+	(remote_wait): Cast second arg to strtol to correct type.
+	* hppa-tdep.c (compare_unwind_entries): Change argument types to
+	"const void *" to be type compatible with qsort, and then
+	assign to local args prior to use.
+
 Mon Apr  8 15:35:52 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* infptrace.c (kill_inferior): Remove call to "kill"; update

@@ -73,8 +73,7 @@ static int pc_in_interrupt_handler PARAMS ((CORE_ADDR));
 
 static int pc_in_linker_stub PARAMS ((CORE_ADDR));
 
-static int compare_unwind_entries PARAMS ((const struct unwind_table_entry *,
-					   const struct unwind_table_entry *));
+static int compare_unwind_entries PARAMS ((const void *, const void *));
 
 static void read_unwind_info PARAMS ((struct objfile *));
 
@@ -284,10 +283,13 @@ extract_17 (word)
    larger than the first, and zero if they are equal.  */
 
 static int
-compare_unwind_entries (a, b)
-     const struct unwind_table_entry *a;
-     const struct unwind_table_entry *b;
+compare_unwind_entries (arg1, arg2)
+     const void *arg1;
+     const void *arg2;
 {
+  const struct unwind_table_entry *a = arg1;
+  const struct unwind_table_entry *b = arg2;
+
   if (a->region_start > b->region_start)
     return 1;
   else if (a->region_start < b->region_start)

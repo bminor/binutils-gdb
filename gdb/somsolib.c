@@ -557,6 +557,7 @@ som_solib_create_inferior_hook()
   ALL_OBJFILES (objfile)
     {
       struct unwind_table_entry *u;
+      extern struct unwind_table_entry *find_unwind_entry PARAMS ((CORE_ADDR pc));
 
       /* What a crock.  */
       msymbol = lookup_minimal_symbol_solib_trampoline (SYMBOL_NAME (msymbol),

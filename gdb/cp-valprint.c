@@ -499,7 +499,7 @@ cp_print_static_field (type, val, stream, format, recurse, pretty)
 	    }
 	}
 
-      obstack_grow (&dont_print_statmem_obstack, &VALUE_ADDRESS (val),
+      obstack_grow (&dont_print_statmem_obstack, (char *) &VALUE_ADDRESS (val),
 		    sizeof (CORE_ADDR));
 
       CHECK_TYPEDEF (type);

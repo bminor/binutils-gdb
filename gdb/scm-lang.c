@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "c-lang.h"
 #include "scm-lang.h"
 #include "scm-tags.h"
+#include "gdb_string.h"
 
 extern struct type ** const (c_builtin_types[]);
 extern value_ptr value_allocate_space_in_inferior PARAMS ((int));

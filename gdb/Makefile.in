@@ -1408,6 +1408,15 @@ rs6000-nat.o: rs6000-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h xcoffsolib.h
 
+scm-exp.o: $(defs_h) $(value_h) parser-defs.h language.h c-lang.h \
+	scm-lang.h scm-tags.h
+
+scm-lang.o: $(defs_h) $(value_h) parser-defs.h language.h c-lang.h \
+	scm-lang.h scm-tags.h gdb_string.h
+
+scm-valprint.o: $(defs_h) $(value_h) parser-defs.h language.h  \
+	scm-lang.h valprint.h
+
 ser-go32.o: ser-go32.c $(defs_h) serial.h 
 
 ser-mac.o: ser-mac.c $(defs_h) serial.h signals.h

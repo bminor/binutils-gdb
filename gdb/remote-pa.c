@@ -160,10 +160,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Prototypes for local functions */
 
 static int
-remote_write_bytes PARAMS ((CORE_ADDR memaddr, unsigned char *myaddr, int len));
+remote_write_bytes PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
 
 static int
-remote_read_bytes PARAMS ((CORE_ADDR memaddr, unsigned char *myaddr, int len));
+remote_read_bytes PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
 
 static void
 remote_files_info PARAMS ((struct target_ops *ignore));
@@ -650,7 +650,7 @@ remote_wait (pid, status)
 	      {
 		unsigned char *p1;
 
-		regno = strtol (p, &p1, 16); /* Read the register number */
+		regno = strtol (p, (char **) &p1, 16); /* Read the register number */
 
 		if (p1 == p)
 		  warning ("Remote sent badly formed register number: %s\nPacket: '%s'\n",
@@ -880,7 +880,7 @@ remote_store_word (addr, word)
 static int
 remote_write_bytes (memaddr, myaddr, len)
      CORE_ADDR memaddr;
-     unsigned char *myaddr;
+     char *myaddr;
      int len;
 {
   char buf[PBUFSIZ];
@@ -928,7 +928,7 @@ remote_write_bytes (memaddr, myaddr, len)
 static int
 remote_read_bytes (memaddr, myaddr, len)
      CORE_ADDR memaddr;
-     unsigned char *myaddr;
+     char *myaddr;
      int len;
 {
   char buf[PBUFSIZ];
@@ -995,11 +995,9 @@ remote_xfer_memory(memaddr, myaddr, len, should_write, target)
 	xfersize = len;
 
       if (should_write)
-        bytes_xferred = remote_write_bytes (memaddr,
-					    (unsigned char *)myaddr, xfersize);
+        bytes_xferred = remote_write_bytes (memaddr, myaddr, xfersize);
       else
-	bytes_xferred = remote_read_bytes (memaddr,
-					   (unsigned char *)myaddr, xfersize);
+	bytes_xferred = remote_read_bytes (memaddr, myaddr, xfersize);
 
       /* If we get an error, we are done xferring.  */
       if (bytes_xferred == 0)

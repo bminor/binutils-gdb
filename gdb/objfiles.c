@@ -84,7 +84,7 @@ add_to_objfile_sections (abfd, asect, objfile_p_char)
   section.the_bfd_section = asect;
   section.addr = bfd_section_vma (abfd, asect);
   section.endaddr = section.addr + bfd_section_size (abfd, asect);
-  obstack_grow (&objfile->psymbol_obstack, &section, sizeof(section));
+  obstack_grow (&objfile->psymbol_obstack, (char *) &section, sizeof(section));
   objfile->sections_end = (struct obj_section *) (((unsigned long) objfile->sections_end) + 1);
 }
 
