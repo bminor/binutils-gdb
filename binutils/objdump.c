@@ -97,34 +97,35 @@ bfd *abfd;
   for (section = abfd->sections;
        section != (asection *) NULL;
        section = section->next) 
-    {
-      char *comma = "";
+      {
+	char *comma = "";
 #define PF(x,y) \
-      if (section->flags & x) {  printf("%s%s",comma,y); comma = ", "; }
+	if (section->flags & x) {  printf("%s%s",comma,y); comma = ", "; }
 
-      printf("SECTION %d [%s]\t: size %08x",
-	     section->index,
-	     section->name,
-(unsigned)     section->size);
-      printf(" vma ");
-printf_vma(section->vma);
-printf(" align 2**%u\n ",
-	     section->alignment_power);
-      PF(SEC_ALLOC,"ALLOC");
-      PF(SEC_CONSTRUCTOR,"CONSTRUCTOR");
-      PF(SEC_CONSTRUCTOR_TEXT,"CONSTRUCTOR TEXT");
-      PF(SEC_CONSTRUCTOR_DATA,"CONSTRUCTOR DATA");
-      PF(SEC_CONSTRUCTOR_BSS,"CONSTRUCTOR BSS");
-      PF(SEC_LOAD,"LOAD");
-      PF(SEC_RELOC,"RELOC");
-      PF(SEC_BALIGN,"BALIGN");
-      PF(SEC_READONLY,"READONLY");
-      PF(SEC_CODE,"CODE");
-      PF(SEC_DATA,"DATA");
-      PF(SEC_ROM,"ROM");
-      printf("\n");
+
+	printf("SECTION %d [%s]\t: size %08x",
+	       section->index,
+	       section->name,
+	       (unsigned)     section->size);
+	printf(" vma ");
+	printf_vma(section->vma);
+	printf(" align 2**%u\n ",
+	       section->alignment_power);
+	PF(SEC_ALLOC,"ALLOC");
+	PF(SEC_CONSTRUCTOR,"CONSTRUCTOR");
+	PF(SEC_CONSTRUCTOR_TEXT,"CONSTRUCTOR TEXT");
+	PF(SEC_CONSTRUCTOR_DATA,"CONSTRUCTOR DATA");
+	PF(SEC_CONSTRUCTOR_BSS,"CONSTRUCTOR BSS");
+	PF(SEC_LOAD,"LOAD");
+	PF(SEC_RELOC,"RELOC");
+	PF(SEC_BALIGN,"BALIGN");
+	PF(SEC_READONLY,"READONLY");
+	PF(SEC_CODE,"CODE");
+	PF(SEC_DATA,"DATA");
+	PF(SEC_ROM,"ROM");
+	printf("\n");
 #undef PF
-    }
+      }
 }
 
 static asymbol **
@@ -146,7 +147,7 @@ bfd *abfd;
     }
   }
   symcount = bfd_canonicalize_symtab (abfd, sy);
-return sy;
+  return sy;
 }
 /* Sort symbols into value order */
 static int comp(ap,bp)
@@ -197,7 +198,7 @@ FILE *stream;
       oldthisplace = thisplace;
       thisplace = (max + min )/2  ;
       if (thisplace == oldthisplace) break;
-	vardiff = syms[thisplace]->value - vma;
+      vardiff = syms[thisplace]->value - vma;
 
       if (vardiff) {
 	if (vardiff > 0) {
@@ -217,7 +218,7 @@ FILE *stream;
  	    && match_name[sym_len - 1] == 'o'
  	    && thisplace + 1 < symcount
  	    && syms[thisplace+1]->value == vma)
- 	    match_name = syms[thisplace+1]->name;
+	  match_name = syms[thisplace+1]->name;
 	/* Totally awesome! the exact right symbol */
 	fprintf_vma(stream, vma);
 	fprintf(stream," (%s)", syms[thisplace]->name);
@@ -235,7 +236,7 @@ FILE *stream;
       }
     }
     
-      fprintf_vma(stream, vma);
+    fprintf_vma(stream, vma);
     if (syms[thisplace]->value > vma) {
       fprintf(stream," (%s-)", syms[thisplace]->name);
       fprintf_vma(stream,  syms[thisplace]->value - vma);
@@ -255,13 +256,15 @@ disassemble_data(abfd)
 bfd *abfd;
 {
   bfd_byte *data = NULL;
+  bfd_arch_info_type *info ;
   bfd_size_type datasize = 0;
   bfd_size_type i;
-  int (*print)() ;
-  int print_insn_m68k();
-  int print_insn_a29k();
-  int print_insn_i960();
-  int print_insn_sparc();
+  unsigned int (*print)() ;
+  unsigned int print_insn_m68k();
+  unsigned int print_insn_a29k();
+  unsigned int print_insn_i960();
+  unsigned int print_insn_sparc();
+  unsigned int print_insn_h8300();
   enum bfd_architecture a;
   unsigned long m;
   asection *section;
@@ -291,37 +294,47 @@ bfd *abfd;
     }
 
 
+
+
   if (machine!= (char *)NULL) {
-    if (bfd_scan_arch_mach(machine, &a, &m) == false) {
+    info =  bfd_scan_arch(machine);
+    if (info == 0) {
       fprintf(stderr,"%s: Can't use supplied machine %s\n",
 	      program_name,
 	      machine);
       exit(1);
     }
-  }
-  else {
-    a =   bfd_get_architecture(abfd);
-  }
-  switch (a) {
-  case bfd_arch_sparc:
-    print = print_insn_sparc;
-    break;
-  case bfd_arch_m68k:
-    print = print_insn_m68k;
-    break;
-  case bfd_arch_a29k:
-    print = print_insn_a29k;
-    break;
-  case bfd_arch_i960:
-    print = print_insn_i960;
-    break;
-  default:
-    fprintf(stderr,"%s: Can't disassemble for architecture %s\n",
-	    program_name,
-	    bfd_printable_arch_mach(bfd_get_architecture(abfd),0));
-    exit(1);
+    abfd->arch_info = info;
   }
 
+  /* See if we can disassemble using bfd */
+
+  if(abfd->arch_info->disassemble) {
+    print = abfd->arch_info->disassemble;
+  }
+  else {
+    a =   bfd_get_arch(abfd);
+    switch (a) {
+    case bfd_arch_sparc:
+      print = print_insn_sparc;
+      break;
+    case bfd_arch_m68k:
+      print = print_insn_m68k;
+      break;
+    case bfd_arch_a29k:
+      print = print_insn_a29k;
+      break;
+    case bfd_arch_i960:
+      print = print_insn_i960;
+      break;
+    default:
+      fprintf(stderr,"%s: Can't disassemble for architecture %s\n",
+	      program_name,
+	      bfd_printable_arch_mach(bfd_get_arch(abfd),0));
+      exit(1);
+    }
+
+  }
 
   for (section = abfd->sections;
        section != (asection *)NULL;
@@ -407,8 +420,8 @@ display_bfd (abfd)
     char *comma = "";
 
     printf("architecture: %s, ",
-	   bfd_printable_arch_mach (bfd_get_architecture (abfd),
-				    bfd_get_machine (abfd)));
+	   bfd_printable_arch_mach (bfd_get_arch (abfd),
+				    bfd_get_mach (abfd)));
     printf("flags 0x%08x:\n", abfd->flags);
     
 #define PF(x, y)    if (abfd->flags & x) {printf("%s%s", comma, y); comma=", ";}
@@ -429,7 +442,7 @@ display_bfd (abfd)
   if (dump_section_headers)
     dump_headers(abfd);
   if (dump_symtab || dump_reloc_info || disassemble) {
-syms =  slurp_symtab(abfd);
+    syms =  slurp_symtab(abfd);
   }
   if (dump_symtab) dump_symbols (abfd);
   if (dump_reloc_info) dump_relocs(abfd);
@@ -553,12 +566,14 @@ dump_symbols (abfd)
   printf("SYMBOL TABLE:\n");
 
   for (count = 0; count < symcount; count++) {
-    if ((*current)->the_bfd) {
+
+    if (*current && (*current)->the_bfd) {
       bfd_print_symbol((*current)->the_bfd,
 		       stdout,
-		       *current, bfd_print_symbol_all_enum);
+		       *current, bfd_print_symbol_all);
 
       printf("\n");
+
     }
     current++;
   }
@@ -647,9 +662,11 @@ DEFUN_VOID(display_info)
 	  {
 	    for (j = (int)bfd_arch_obscure +1; j < (int)bfd_arch_last; j++) 
 		{
+
 		  if (bfd_set_arch_mach(abfd, (enum bfd_architecture)j, 0)) 
 		    printf("  %s\n",
-			  bfd_printable_arch_mach((enum bfd_architecture)j,0));
+			   bfd_printable_arch_mach((enum bfd_architecture)j,0));
+
 		}
 
 	  }
@@ -660,29 +677,34 @@ DEFUN_VOID(display_info)
     printf("%s ",target_vector[i]->name);
   }
   printf("\n");
-  for (j = (int)bfd_arch_obscure +1; j <(int) bfd_arch_last; j++) {
-    printf("%11s ", bfd_printable_arch_mach((enum bfd_architecture)j,0));
-    for (i = 0; target_vector[i]; i++) {
-	{
-	  bfd_target *p = target_vector[i];
-	  bfd *abfd = bfd_openw("##dummy",p->name);
-	  int l = strlen(p->name);
-	  int ok = bfd_set_arch_mach(abfd, (enum bfd_architecture)j, 0);
-	  if (ok) {
-	    printf("%s ", p->name);
-	  }
-	  else {
-	    while (l--) {
-	      printf("%c",ok?'*':'-');
-	    }
-	    printf(" ");
-	  }
 
+
+  for (j = (int)bfd_arch_obscure +1; (int)j <(int) bfd_arch_last; j++)
+      {
+	if (strcmp(bfd_printable_arch_mach(j,0),"UNKNOWN!") != 0) {
+	  printf("%11s ", bfd_printable_arch_mach(j,0));
+	  for (i = 0; target_vector[i]; i++) {
+	      {
+		bfd_target *p = target_vector[i];
+		bfd *abfd = bfd_openw("##dummy",p->name);
+		int l = strlen(p->name);
+		int ok = bfd_set_arch_mach(abfd, j, 0);
+		if (ok) {
+		  printf("%s ", p->name);
+		}
+		else {
+		  while (l--) {
+		    printf("%c",ok?'*':'-');
+		  }
+		  printf(" ");
+		}
+
+	      }
+
+	  }
+	  printf("\n");
 	}
-    }
-
-    printf("\n");
-  }
+      }
 }
 /** main and like trivia */
 int
@@ -697,6 +719,7 @@ main (argc, argv)
   boolean seenflag = false;
   int ind = 0;
 
+  bfd_init();
   program_name = *argv;
 
   while ((c = getopt_long (argc, argv, "ib:m:dlfahrtxsj:", long_options, &ind))
@@ -747,11 +770,11 @@ main (argc, argv)
     display_info();
   }
   else {
-  if (optind == argc)
-    display_file ("a.out", target);
-  else
-    for (; optind < argc;)
-      display_file (argv[optind++], target);
-}
+    if (optind == argc)
+      display_file ("a.out", target);
+    else
+      for (; optind < argc;)
+	display_file (argv[optind++], target);
+  }
   return 0;
 }
