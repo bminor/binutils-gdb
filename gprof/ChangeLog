@@ -1,3 +1,11 @@
+2003-03-27  Chris Demetriou  <cgd@broadcom.com>
+
+	* gmon_io.c (enum gmon_ptr_size, enum gmon_ptr_signedness): New.
+	(gmon_get_ptr_size, gmon_get_ptr_signedness): New.
+	(gmon_io_read_vma, gmon_io_write_vma, gmon_read_raw_arc)
+	(gmon_write_raw_arc, gmon_out_read, gmon_out_write): Adjust to
+	use new functions and enums.
+
 2003-02-21  K Schutte  <schutte@fel.tno.nl>
 
 	* corefile.c (core_create_line_syms): Check for a NULL sentinel

@@ -34,6 +34,19 @@
 #include "hist.h"
 #include "libiberty.h"
 
+enum gmon_ptr_size {
+  ptr_32bit,
+  ptr_64bit
+};
+
+enum gmon_ptr_signedness {
+  ptr_signed,
+  ptr_unsigned
+};
+
+static enum gmon_ptr_size gmon_get_ptr_size PARAMS ((void));
+static enum gmon_ptr_signedness gmon_get_ptr_signedness PARAMS ((void));
+
 #ifdef BFD_HOST_U_64_BIT
 static int gmon_io_read_64 PARAMS ((FILE *, BFD_HOST_U_64_BIT *));
 static int gmon_io_write_64 PARAMS ((FILE *, BFD_HOST_U_64_BIT));
@@ -45,6 +58,44 @@ static int gmon_write_raw_arc
 
 int gmon_input = 0;
 int gmon_file_version = 0;	/* 0 == old (non-versioned) file format.  */
+
+static enum gmon_ptr_size
+gmon_get_ptr_size ()
+{
+  int size;
+
+  /* Pick best size for pointers.  Start with the ELF size, and if not
+     elf go with the architecture's address size.  */
+  size = bfd_get_arch_size (core_bfd);
+  if (size == -1)
+    size = bfd_arch_bits_per_address (core_bfd);
+
+  switch (size)
+    {
+    case 32:
+      return ptr_32bit;
+
+    case 64:
+      return ptr_64bit;
+
+    default:
+      fprintf (stderr, _("%s: address size has unexpected value of %u\n"),
+	       whoami, size);
+      done (1);
+    }
+}
+
+static enum gmon_ptr_signedness
+gmon_get_ptr_signedness ()
+{
+  int sext;
+
+  /* Figure out whether to sign extend.  If BFD doesn't know, assume no.  */
+  sext = bfd_get_sign_extend_vma (core_bfd);
+  if (sext == -1)
+    return ptr_unsigned;
+  return (sext ? ptr_signed : ptr_unsigned);
+}
 
 int
 gmon_io_read_32 (ifp, valp)
@@ -84,26 +135,29 @@ gmon_io_read_vma (ifp, valp)
   BFD_HOST_U_64_BIT val64;
 #endif
 
-  switch (bfd_arch_bits_per_address (core_bfd))
+  switch (gmon_get_ptr_size ())
     {
-    case 32:
+    case ptr_32bit:
       if (gmon_io_read_32 (ifp, &val32))
 	return 1;
-      *valp = val32;
+      if (gmon_get_ptr_signedness () == ptr_signed)
+        *valp = (int) val32;
+      else
+        *valp = val32;
       break;
 
 #ifdef BFD_HOST_U_64_BIT
-    case 64:
+    case ptr_64bit:
       if (gmon_io_read_64 (ifp, &val64))
 	return 1;
-      *valp = val64;
+#ifdef BFD_HOST_64_BIT
+      if (gmon_get_ptr_signedness () == ptr_signed)
+        *valp = (BFD_HOST_64_BIT) val64;
+      else
+#endif
+        *valp = val64;
       break;
 #endif
-
-    default:
-      fprintf (stderr, _("%s: bits per address has unexpected value of %u\n"),
-	       whoami, bfd_arch_bits_per_address (core_bfd));
-      done (1);
     }
   return 0;
 }
@@ -153,24 +207,19 @@ gmon_io_write_vma (ofp, val)
      bfd_vma val;
 {
 
-  switch (bfd_arch_bits_per_address (core_bfd))
+  switch (gmon_get_ptr_size ())
     {
-    case 32:
+    case ptr_32bit:
       if (gmon_io_write_32 (ofp, (unsigned int) val))
 	return 1;
       break;
 
 #ifdef BFD_HOST_U_64_BIT
-    case 64:
+    case ptr_64bit:
       if (gmon_io_write_64 (ofp, (BFD_HOST_U_64_BIT) val))
 	return 1;
       break;
 #endif
-
-    default:
-      fprintf (stderr, _("%s: bits per address has unexpected value of %u\n"),
-	       whoami, bfd_arch_bits_per_address (core_bfd));
-      done (1);
     }
   return 0;
 }
@@ -215,26 +264,21 @@ gmon_read_raw_arc (ifp, fpc, spc, cnt)
       || gmon_io_read_vma (ifp, spc))
     return 1;
 
-  switch (bfd_arch_bits_per_address (core_bfd))
+  switch (gmon_get_ptr_size ())
     {
-    case 32:
+    case ptr_32bit:
       if (gmon_io_read_32 (ifp, &cnt32))
 	return 1;
       *cnt = cnt32;
       break;
 
 #ifdef BFD_HOST_U_64_BIT
-    case 64:
+    case ptr_64bit:
       if (gmon_io_read_64 (ifp, &cnt64))
 	return 1;
       *cnt = cnt64;
       break;
 #endif
-
-    default:
-      fprintf (stderr, _("%s: bits per address has unexpected value of %u\n"),
-	       whoami, bfd_arch_bits_per_address (core_bfd));
-      done (1);
     }
   return 0;
 }
@@ -251,24 +295,19 @@ gmon_write_raw_arc (ofp, fpc, spc, cnt)
       || gmon_io_write_vma (ofp, spc))
     return 1;
 
-  switch (bfd_arch_bits_per_address (core_bfd))
+  switch (gmon_get_ptr_size ())
     {
-    case 32:
+    case ptr_32bit:
       if (gmon_io_write_32 (ofp, (unsigned int) cnt))
 	return 1;
       break;
 
 #ifdef BFD_HOST_U_64_BIT
-    case 64:
+    case ptr_64bit:
       if (gmon_io_write_64 (ofp, (BFD_HOST_U_64_BIT) cnt))
 	return 1;
       break;
 #endif
-
-    default:
-      fprintf (stderr, _("%s: bits per address has unexpected value of %u\n"),
-	       whoami, bfd_arch_bits_per_address (core_bfd));
-      done (1);
     }
   return 0;
 }
@@ -425,21 +464,15 @@ gmon_out_read (filename)
 	      done (1);
 	    }
 
-	  switch (bfd_arch_bits_per_address (core_bfd))
+	  switch (gmon_get_ptr_size ())
 	    {
-	    case 32:
+	    case ptr_32bit:
 	      header_size = GMON_HDRSIZE_BSD44_32;
 	      break;
 
-	    case 64:
+	    case ptr_64bit:
 	      header_size = GMON_HDRSIZE_BSD44_64;
 	      break;
-
-	    default:
-              fprintf (stderr,
-                       _("%s: bits per address has unexpected value of %u\n"),
-	               whoami, bfd_arch_bits_per_address (core_bfd));
-              done (1);
 	    }
 	}
       else
@@ -452,21 +485,15 @@ gmon_out_read (filename)
 	      done (1);
 	    }
 
-	  switch (bfd_arch_bits_per_address (core_bfd))
+	  switch (gmon_get_ptr_size ())
 	    {
-	    case 32:
+	    case ptr_32bit:
 	      header_size = GMON_HDRSIZE_OLDBSD_32;
 	      break;
 
-	    case 64:
+	    case ptr_64bit:
 	      header_size = GMON_HDRSIZE_OLDBSD_64;
 	      break;
-
-	    default:
-              fprintf (stderr,
-                       _("%s: bits per address has unexpected value of %u\n"),
-	               whoami, bfd_arch_bits_per_address (core_bfd));
-              done (1);
 	    }
 	}
 
@@ -649,33 +676,27 @@ gmon_out_write (filename)
 	  || hz != hertz())
 	{
 	  padsize = 3*4;
-	  switch (bfd_arch_bits_per_address (core_bfd))
+	  switch (gmon_get_ptr_size ())
 	    {
-	    case 32:
+	    case ptr_32bit:
 	      hdrsize = GMON_HDRSIZE_BSD44_32;
 	      break;
 
-	    case 64:
+	    case ptr_64bit:
 	      hdrsize = GMON_HDRSIZE_BSD44_64;
 	      break;
-
-	    default:
-              fprintf (stderr,
-                       _("%s: bits per address has unexpected value of %u\n"),
-	               whoami, bfd_arch_bits_per_address (core_bfd));
-              done (1);
 	    }
 	}
       else
 	{
 	  padsize = 0;
-	  switch (bfd_arch_bits_per_address (core_bfd))
+	  switch (gmon_get_ptr_size ())
 	    {
-	    case 32:
+	    case ptr_32bit:
 	      hdrsize = GMON_HDRSIZE_OLDBSD_32;
 	      break;
 
-	    case 64:
+	    case ptr_64bit:
 	      hdrsize = GMON_HDRSIZE_OLDBSD_64;
 	      /* FIXME: Checking host compiler defines here means that we can't
 		 use a cross gprof alpha OSF.  */ 
@@ -683,12 +704,6 @@ gmon_out_write (filename)
 	      padsize = 4;
 #endif
 	      break;
-
-	    default:
-              fprintf (stderr,
-                       _("%s: bits per address has unexpected value of %u\n"),
-	               whoami, bfd_arch_bits_per_address (core_bfd));
-              done (1);
 	    }
 	}
 
