@@ -1,3 +1,9 @@
+2003-12-25  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (get_child_debug_event): Keep main thread id around even
+	after thread exits since Windows insists on continuing to report events
+	against it.
+
 2003-12-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (dwarf2_frame_cache): Don't skip the return
