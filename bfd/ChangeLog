@@ -1,3 +1,8 @@
+2003-01-07  John David Anglin  <dave.anglin@nrc.gc.ca>
+
+	* elf32-hppa.c (final_link_relocate): For all DP relative relocations,
+	adjust addil instructions if the symbol has no section.
+
 2003-01-07  DJ Delorie  <dj@redhat.com>
 
 	* elf32-xstormy16.c (xstormy16_elf_howto_table): Make REL_12 not

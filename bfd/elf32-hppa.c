@@ -3416,15 +3416,14 @@ final_link_relocate (input_section, contents, rel, value, htab, sym_sec, h)
     case R_PARISC_DPREL14R:
     case R_PARISC_DPREL14F:
     /* For all the DP relative relocations, we need to examine the symbol's
-       section.  If it's a code section, then "data pointer relative" makes
-       no sense.  In that case we don't adjust the "value", and for 21 bit
-       addil instructions, we change the source addend register from %dp to
-       %r0.  This situation commonly arises when a variable's "constness"
+       section.  If it has no section or if it's a code section, then
+       "data pointer relative" makes no sense.  In that case we don't
+       adjust the "value", and for 21 bit addil instructions, we change the
+       source addend register from %dp to %r0.  This situation commonly
+       arises for undefined weak symbols and when a variable's "constness"
        is declared differently from the way the variable is defined.  For
        instance: "extern int foo" with foo defined as "const int foo".  */
-      if (sym_sec == NULL)
-	break;
-      if ((sym_sec->flags & SEC_CODE) != 0)
+      if (sym_sec == NULL || (sym_sec->flags & SEC_CODE) != 0)
 	{
 	  if ((insn & ((0x3f << 26) | (0x1f << 21)))
 	      == (((int) OP_ADDIL << 26) | (27 << 21)))
