@@ -1,3 +1,7 @@
+2001-11-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* coffgen.c (coff_object_p): Add comment to H.J.'s recent patch.
+
 2001-11-02  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* som.c (setup_sections): Initialize subspace_sections.

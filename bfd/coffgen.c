@@ -280,6 +280,14 @@ coff_object_p (abfd)
   bfd_coff_swap_filehdr_in (abfd, filehdr, &internal_f);
   bfd_release (abfd, filehdr);
 
+  /* The XCOFF format has two sizes for the f_opthdr.  SMALL_AOUTSZ
+     (less than aoutsz) used in object files and AOUTSZ (equal to
+     aoutsz) in executables.  The bfd_coff_swap_aouthdr_in function
+     expects this header to be aoutsz bytes in length, so we use that
+     value in the call to bfd_alloc below.  But we must be careful to
+     only read in f_opthdr bytes in the call to bfd_bread.  We should
+     also attempt to catch corrupt or non-COFF binaries with a strange
+     value for f_opthdr.  */
   if (bfd_coff_bad_format_hook (abfd, &internal_f) == false
       || internal_f.f_opthdr > aoutsz)
     {
@@ -294,7 +302,7 @@ coff_object_p (abfd)
 
       opthdr = bfd_alloc (abfd, aoutsz);
       if (opthdr == NULL)
-	return 0;;
+	return 0;
       if (bfd_bread (opthdr, (bfd_size_type) internal_f.f_opthdr, abfd)
 	  != internal_f.f_opthdr)
 	{
