@@ -1,3 +1,7 @@
+2003-11-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_extract_return_value): Don't use bfd_byte.
+
 2003-11-16  Andrew Cagney  <cagney@redhat.com>
 
 	* config/mips/linux64.mt: Delete file.

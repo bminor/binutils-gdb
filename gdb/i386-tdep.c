@@ -1157,10 +1157,9 @@ i386_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 
 static void
 i386_extract_return_value (struct type *type, struct regcache *regcache,
-			   void *dst)
+			   void *valbuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
-  bfd_byte *valbuf = dst;
   int len = TYPE_LENGTH (type);
   char buf[I386_MAX_REGISTER_SIZE];
 
@@ -1202,7 +1201,7 @@ i386_extract_return_value (struct type *type, struct regcache *regcache,
 	  regcache_raw_read (regcache, LOW_RETURN_REGNUM, buf);
 	  memcpy (valbuf, buf, low_size);
 	  regcache_raw_read (regcache, HIGH_RETURN_REGNUM, buf);
-	  memcpy (valbuf + low_size, buf, len - low_size);
+	  memcpy ((char *) valbuf + low_size, buf, len - low_size);
 	}
       else
 	internal_error (__FILE__, __LINE__,
