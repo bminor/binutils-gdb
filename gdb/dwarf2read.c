@@ -2486,8 +2486,6 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
       /* No children, must be stub. */
       TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
     }
-
-  finish_cv_type (die->type);
 }
 
 /* Given a pointer to a die which begins an enumeration, process all

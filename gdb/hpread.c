@@ -4403,9 +4403,6 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
   /* Clear the global saying what template we are in the middle of processing */
   current_template = NULL;
 
-  /* Fix up any cv-qualified versions of this type.  */
-  finish_cv_type (type);
-
   return type;
 }
 

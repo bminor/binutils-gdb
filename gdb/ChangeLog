@@ -1,3 +1,32 @@
+2002-05-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbtypes.h: Update accessor macros to use TYPE_MAIN_TYPE.
+	(TYPE_CONST, TYPE_VOLATILE, TYPE_CODE_SPACE, TYPE_DATA_SPACE): Use
+	TYPE_INSTANCE_FLAGS.
+	(struct main_type): New.
+	(struct type): Move most members to struct main_type.  Change
+	cv_type and as_type to new type_chain member.  Add instance_flags.
+	(TYPE_MAIN_TYPE, TYPE_CHAIN, TYPE_INSTANCE_FLAGS): New macros.
+	(TYPE_CV_TYPE, TYPE_AS_TYPE): Remove.
+	(finish_cv_type): Remove prototype.
+	* gdbtypes.c (alloc_type): Update comment.  Allocate TYPE_MAIN_TYPE.
+	Set TYPE_CHAIN.
+	(alloc_type_instance): New function.
+	(smash_type): New function.
+	(make_pointer_type, make_reference_type, make_function_type)
+	(smash_to_member_type, smash_to_method_type): Call smash_type.
+	(make_qualified_type): New function.
+	(make_type_with_address_space): Call make_qualified_type.
+	(make_cv_type): Likewise.
+	(finish_cv_type): Remove unnecessary function.
+	(replace_type): Update comment.  Copy TYPE_MAIN_TYPE.
+	(recursive_dump_type): Dump TYPE_CHAIN and TYPE_INSTANCE_FLAGS;
+	remove TYPE_CV_TYPE and TYPE_AS_TYPE.
+	* c-typeprint.c (c_type_print_modifier): Use TYPE_INSTANCE_FLAGS.
+	* dwarf2read.c (read_structure_scope): Don't call finish_cv_type.
+	* hpread.c (hpread_read_struct_type): Likewise.
+	* stabsread.c (read_struct_type): Likewise.
+
 2002-05-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* configure.tgt: Add a catch all sh* target, for cases like

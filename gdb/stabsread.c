@@ -4302,8 +4302,6 @@ read_struct_type (char **pp, struct type *type, enum type_code type_code,
       type = error_type (pp, objfile);
     }
 
-  /* Fix up any cv-qualified versions of this type.  */
-  finish_cv_type (type);
   do_cleanups (back_to);
   return (type);
 }

@@ -135,7 +135,8 @@ static void virtual_base_list_aux (struct type *dclass);
 
 /* Alloc a new type structure and fill it with some defaults.  If
    OBJFILE is non-NULL, then allocate the space for the type structure
-   in that objfile's type_obstack. */
+   in that objfile's type_obstack.  Otherwise allocate the new type structure
+   by xmalloc () (for permanent types).  */
 
 struct type *
 alloc_type (struct objfile *objfile)
@@ -146,25 +147,71 @@ alloc_type (struct objfile *objfile)
 
   if (objfile == NULL)
     {
-      type = (struct type *) xmalloc (sizeof (struct type));
+      type = xmalloc (sizeof (struct type));
+      memset (type, 0, sizeof (struct type));
+      TYPE_MAIN_TYPE (type) = xmalloc (sizeof (struct main_type));
     }
   else
     {
-      type = (struct type *) obstack_alloc (&objfile->type_obstack,
-					    sizeof (struct type));
+      type = obstack_alloc (&objfile->type_obstack,
+			    sizeof (struct type));
+      memset (type, 0, sizeof (struct type));
+      TYPE_MAIN_TYPE (type) = obstack_alloc (&objfile->type_obstack,
+					     sizeof (struct main_type));
       OBJSTAT (objfile, n_types++);
     }
-  memset ((char *) type, 0, sizeof (struct type));
+  memset (TYPE_MAIN_TYPE (type), 0, sizeof (struct main_type));
 
   /* Initialize the fields that might not be zero. */
 
   TYPE_CODE (type) = TYPE_CODE_UNDEF;
   TYPE_OBJFILE (type) = objfile;
   TYPE_VPTR_FIELDNO (type) = -1;
-  TYPE_CV_TYPE (type) = type;	/* chain back to itself */
-  TYPE_AS_TYPE (type) = type;	/* ditto */
+  TYPE_CHAIN (type) = type;	/* Chain back to itself.  */
 
   return (type);
+}
+
+/* Alloc a new type instance structure, fill it with some defaults,
+   and point it at OLDTYPE.  Allocate the new type instance from the
+   same place as OLDTYPE.  */
+
+static struct type *
+alloc_type_instance (struct type *oldtype)
+{
+  struct type *type;
+
+  /* Allocate the structure.  */
+
+  if (TYPE_OBJFILE (oldtype) == NULL)
+    {
+      type = xmalloc (sizeof (struct type));
+      memset (type, 0, sizeof (struct type));
+    }
+  else
+    {
+      type = obstack_alloc (&TYPE_OBJFILE (oldtype)->type_obstack,
+			    sizeof (struct type));
+      memset (type, 0, sizeof (struct type));
+    }
+  TYPE_MAIN_TYPE (type) = TYPE_MAIN_TYPE (oldtype);
+
+  TYPE_CHAIN (type) = type;	/* Chain back to itself for now.  */
+
+  return (type);
+}
+
+/* Clear all remnants of the previous type at TYPE, in preparation for
+   replacing it with something else.  */
+static void
+smash_type (struct type *type)
+{
+  memset (TYPE_MAIN_TYPE (type), 0, sizeof (struct main_type));
+
+  /* For now, delete the rings.  */
+  TYPE_CHAIN (type) = type;
+
+  /* For now, leave the pointer/reference types alone.  */
 }
 
 /* Lookup a pointer to a type TYPE.  TYPEPTR, if nonzero, points
@@ -202,7 +249,7 @@ make_pointer_type (struct type *type, struct type **typeptr)
     {
       ntype = *typeptr;
       objfile = TYPE_OBJFILE (ntype);
-      memset ((char *) ntype, 0, sizeof (struct type));
+      smash_type (ntype);
       TYPE_OBJFILE (ntype) = objfile;
     }
 
@@ -269,7 +316,7 @@ make_reference_type (struct type *type, struct type **typeptr)
     {
       ntype = *typeptr;
       objfile = TYPE_OBJFILE (ntype);
-      memset ((char *) ntype, 0, sizeof (struct type));
+      smash_type (ntype);
       TYPE_OBJFILE (ntype) = objfile;
     }
 
@@ -318,7 +365,7 @@ make_function_type (struct type *type, struct type **typeptr)
     {
       ntype = *typeptr;
       objfile = TYPE_OBJFILE (ntype);
-      memset ((char *) ntype, 0, sizeof (struct type));
+      smash_type (ntype);
       TYPE_OBJFILE (ntype) = objfile;
     }
 
@@ -368,6 +415,47 @@ address_space_int_to_name (int space_flag)
     return NULL;
 }
 
+/* Create a new type with instance flags NEW_FLAGS, based on TYPE.
+   If STORAGE is non-NULL, create the new type instance there.  */
+
+struct type *
+make_qualified_type (struct type *type, int new_flags,
+		     struct type *storage)
+{
+  struct type *ntype;
+
+  ntype = type;
+  do {
+    if (TYPE_INSTANCE_FLAGS (ntype) == new_flags)
+      return ntype;
+    ntype = TYPE_CHAIN (ntype);
+  } while (ntype != type);
+
+  /* Create a new type instance.  */
+  if (storage == NULL)
+    ntype = alloc_type_instance (type);
+  else
+    {
+      ntype = storage;
+      TYPE_MAIN_TYPE (ntype) = TYPE_MAIN_TYPE (type);
+      TYPE_CHAIN (ntype) = ntype;
+    }
+
+  /* Pointers or references to the original type are not relevant to
+     the new type.  */
+  TYPE_POINTER_TYPE (ntype) = (struct type *) 0;
+  TYPE_REFERENCE_TYPE (ntype) = (struct type *) 0;
+
+  /* Chain the new qualified type to the old type.  */
+  TYPE_CHAIN (ntype) = TYPE_CHAIN (type);
+  TYPE_CHAIN (type) = ntype;
+
+  /* Now set the instance flags and return the new type.  */
+  TYPE_INSTANCE_FLAGS (ntype) = new_flags;
+
+  return ntype;
+}
+
 /* Make an address-space-delimited variant of a type -- a type that
    is identical to the one supplied except that it has an address
    space attribute attached to it (such as "code" or "data").
@@ -378,35 +466,12 @@ struct type *
 make_type_with_address_space (struct type *type, int space_flag)
 {
   struct type *ntype;
+  int new_flags = ((TYPE_INSTANCE_FLAGS (type)
+		    & ~(TYPE_FLAG_CODE_SPACE | TYPE_FLAG_DATA_SPACE))
+		   | space_flag);
 
-  ntype = type;
-  do {
-    if ((ntype->flags & space_flag) != 0)
-      return ntype;
-    ntype = TYPE_AS_TYPE (ntype);
-  } while (ntype != type);
-
-  /* Create a new, duplicate type. */
-  ntype = alloc_type (TYPE_OBJFILE (type));
-  /* Copy original type. */
-  memcpy ((char *) ntype, (char *) type, sizeof (struct type));
-
-  /* Pointers or references to the original type are not relevant to
-     the new type; but if the original type is a pointer, the new type
-     points to the same thing (so TYPE_TARGET_TYPE remains unchanged). */
-  TYPE_POINTER_TYPE (ntype) = (struct type *) 0;
-  TYPE_REFERENCE_TYPE (ntype) = (struct type *) 0;
-  TYPE_CV_TYPE (ntype) = ntype;
-
-  /* Chain the new address-space-specific type to the old type. */
-  ntype->as_type = type->as_type;
-  type->as_type = ntype;
-
-  /* Now set the address-space flag, and return the new type. */
-  ntype->flags |= space_flag;
-  return ntype;
+  return make_qualified_type (type, new_flags, NULL);
 }
-
 
 /* Make a "c-v" variant of a type -- a type that is identical to the
    one supplied except that it may have const or volatile attributes
@@ -425,142 +490,60 @@ make_cv_type (int cnst, int voltl, struct type *type, struct type **typeptr)
   register struct type *tmp_type = type;	/* tmp type */
   struct objfile *objfile;
 
-  ntype = TYPE_CV_TYPE (type);
+  int new_flags = (TYPE_INSTANCE_FLAGS (type)
+		   & ~(TYPE_FLAG_CONST | TYPE_FLAG_VOLATILE));
 
-  while (ntype != type)
-    {
-      if ((TYPE_CONST (ntype) == cnst) &&
-	  (TYPE_VOLATILE (ntype) == voltl))
-	{
-	  if (typeptr == 0)
-	    return ntype;
-	  else if (*typeptr == 0)
-	    {
-	      *typeptr = ntype;	/* Tracking alloc, and we have new type.  */
-	      return ntype;
-	    }
-	}
-      tmp_type = ntype;
-      ntype = TYPE_CV_TYPE (ntype);
-    }
-
-  if (typeptr == 0 || *typeptr == 0)	/* We'll need to allocate one.  */
-    {
-      ntype = alloc_type (TYPE_OBJFILE (type));
-      if (typeptr)
-	*typeptr = ntype;
-    }
-  else
-    /* We have storage, but need to reset it.  */
-    {
-      ntype = *typeptr;
-      objfile = TYPE_OBJFILE (ntype);
-      /* memset ((char *) ntype, 0, sizeof (struct type)); */
-      TYPE_OBJFILE (ntype) = objfile;
-    }
-
-  /* Copy original type */
-  memcpy ((char *) ntype, (char *) type, sizeof (struct type));
-  /* But zero out fields that shouldn't be copied */
-  TYPE_POINTER_TYPE (ntype) = (struct type *) 0;	/* Need new pointer kind */
-  TYPE_REFERENCE_TYPE (ntype) = (struct type *) 0;	/* Need new referene kind */
-  TYPE_AS_TYPE (ntype) = ntype;		/* Need new address-space kind. */
-  /* Note: TYPE_TARGET_TYPE can be left as is */
-
-  /* Set flags appropriately */
   if (cnst)
-    TYPE_FLAGS (ntype) |= TYPE_FLAG_CONST;
-  else
-    TYPE_FLAGS (ntype) &= ~TYPE_FLAG_CONST;
+    new_flags |= TYPE_FLAG_CONST;
 
   if (voltl)
-    TYPE_FLAGS (ntype) |= TYPE_FLAG_VOLATILE;
-  else
-    TYPE_FLAGS (ntype) &= ~TYPE_FLAG_VOLATILE;
+    new_flags |= TYPE_FLAG_VOLATILE;
 
-  /* Fix the chain of cv variants */
-  TYPE_CV_TYPE (ntype) = type;
-  TYPE_CV_TYPE (tmp_type) = ntype;
+  if (typeptr && *typeptr != NULL)
+    {
+      /* Objfile is per-core-type.  This const-qualified type had best
+	 belong to the same objfile as the type it is qualifying, unless
+	 we are overwriting a stub type, in which case the safest thing
+	 to do is to copy the core type into the new objfile.  */
+
+      gdb_assert (TYPE_OBJFILE (*typeptr) == TYPE_OBJFILE (type)
+		  || TYPE_STUB (*typeptr));
+      if (TYPE_OBJFILE (*typeptr) != TYPE_OBJFILE (type))
+	{
+	  TYPE_MAIN_TYPE (*typeptr)
+	    = TYPE_ALLOC (*typeptr, sizeof (struct main_type));
+	  *TYPE_MAIN_TYPE (*typeptr)
+	    = *TYPE_MAIN_TYPE (type);
+	}
+    }
+  
+  ntype = make_qualified_type (type, new_flags, typeptr ? *typeptr : NULL);
+
+  if (typeptr != NULL)
+    *typeptr = ntype;
 
   return ntype;
 }
 
-/* When reading in a class type, we may have created references to
-   cv-qualified versions of the type (in method arguments, for
-   instance).  Update everything on the cv ring from the primary
-   type TYPE.
-
-   The only reason we do not need to do the same thing for address
-   spaces is that type readers do not create address space qualified
-   types.  */
-void
-finish_cv_type (struct type *type)
-{
-  struct type *ntype, *cv_type, *ptr_type, *ref_type;
-  int cv_flags;
-
-  gdb_assert (!TYPE_CONST (type) && !TYPE_VOLATILE (type));
-
-  ntype = type;
-  while ((ntype = TYPE_CV_TYPE (ntype)) != type)
-    {
-      /* Save cv_flags.  */
-      cv_flags = TYPE_FLAGS (ntype) & (TYPE_FLAG_VOLATILE | TYPE_FLAG_CONST);
-
-      /* If any reference or pointer types were created, save them too.  */
-      ptr_type = TYPE_POINTER_TYPE (ntype);
-      ref_type = TYPE_REFERENCE_TYPE (ntype);
-
-      /* Don't disturb the CV chain.  */
-      cv_type = TYPE_CV_TYPE (ntype);
-
-      /* Verify that we haven't added any address-space qualified types,
-	 for the future.  */
-      gdb_assert (ntype == TYPE_AS_TYPE (ntype));
-
-      /* Copy original type */
-      memcpy ((char *) ntype, (char *) type, sizeof (struct type));
-
-      /* Restore everything.  */
-      TYPE_POINTER_TYPE (ntype) = ptr_type;
-      TYPE_REFERENCE_TYPE (ntype) = ref_type;
-      TYPE_CV_TYPE (ntype) = cv_type;
-      TYPE_FLAGS (ntype) = TYPE_FLAGS (ntype) | cv_flags;
-
-      TYPE_AS_TYPE (ntype) = ntype;
-    }
-}
-
-/* Replace the contents of ntype with the type *type.
+/* Replace the contents of ntype with the type *type.  This changes the
+   contents, rather than the pointer for TYPE_MAIN_TYPE (ntype); thus
+   the changes are propogated to all types in the TYPE_CHAIN.
 
    In order to build recursive types, it's inevitable that we'll need
    to update types in place --- but this sort of indiscriminate
    smashing is ugly, and needs to be replaced with something more
-   controlled.  For example, Daniel Jacobowitz has suggested moving
-   the fields common to a set of c/v variants into their own object,
-   which the variants would share.
-
-   This function does not handle the replacement type being
-   cv-qualified; it could be easily fixed to, but it would be better
-   to just change the whole approach.  */
+   controlled.  TYPE_MAIN_TYPE is a step in this direction; it's not
+   clear if more steps are needed.  */
 void
 replace_type (struct type *ntype, struct type *type)
 {
   struct type *cv_chain, *as_chain, *ptr, *ref;
 
-  cv_chain = TYPE_CV_TYPE (ntype);
-  as_chain = TYPE_AS_TYPE (ntype);
-  ptr = TYPE_POINTER_TYPE (ntype);
-  ref = TYPE_REFERENCE_TYPE (ntype);
+  *TYPE_MAIN_TYPE (ntype) = *TYPE_MAIN_TYPE (type);
 
-  *ntype = *type;
-
-  TYPE_POINTER_TYPE (ntype) = ptr;
-  TYPE_REFERENCE_TYPE (ntype) = ref;
-  TYPE_CV_TYPE (ntype) = cv_chain;
-  TYPE_AS_TYPE (ntype) = as_chain;
-
-  finish_cv_type (ntype);
+  /* Assert that the two types have equivalent instance qualifiers.
+     This should be true for at least all of our debug readers.  */
+  gdb_assert (TYPE_INSTANCE_FLAGS (ntype) == TYPE_INSTANCE_FLAGS (type));
 }
 
 /* Implement direct support for MEMBER_TYPE in GNU C++.
@@ -879,7 +862,7 @@ smash_to_member_type (struct type *type, struct type *domain,
 
   objfile = TYPE_OBJFILE (type);
 
-  memset ((char *) type, 0, sizeof (struct type));
+  smash_type (type);
   TYPE_OBJFILE (type) = objfile;
   TYPE_TARGET_TYPE (type) = to_type;
   TYPE_DOMAIN_TYPE (type) = domain;
@@ -902,7 +885,7 @@ smash_to_method_type (struct type *type, struct type *domain,
 
   objfile = TYPE_OBJFILE (type);
 
-  memset ((char *) type, 0, sizeof (struct type));
+  smash_type (type);
   TYPE_OBJFILE (type) = objfile;
   TYPE_TARGET_TYPE (type) = to_type;
   TYPE_DOMAIN_TYPE (type) = domain;
@@ -3011,12 +2994,27 @@ recursive_dump_type (struct type *type, int spaces)
   printfi_filtered (spaces, "reference_type ");
   gdb_print_host_address (TYPE_REFERENCE_TYPE (type), gdb_stdout);
   printf_filtered ("\n");
-  printfi_filtered (spaces, "cv_type ");
-  gdb_print_host_address (TYPE_CV_TYPE (type), gdb_stdout);
+  printfi_filtered (spaces, "type_chain ");
+  gdb_print_host_address (TYPE_CHAIN (type), gdb_stdout);
   printf_filtered ("\n");
-  printfi_filtered (spaces, "as_type ");
-  gdb_print_host_address (TYPE_AS_TYPE (type), gdb_stdout);
-  printf_filtered ("\n");
+  printfi_filtered (spaces, "instance_flags 0x%x", TYPE_INSTANCE_FLAGS (type));
+  if (TYPE_CONST (type))
+    {
+      puts_filtered (" TYPE_FLAG_CONST");
+    }
+  if (TYPE_VOLATILE (type))
+    {
+      puts_filtered (" TYPE_FLAG_VOLATILE");
+    }
+  if (TYPE_CODE_SPACE (type))
+    {
+      puts_filtered (" TYPE_FLAG_CODE_SPACE");
+    }
+  if (TYPE_DATA_SPACE (type))
+    {
+      puts_filtered (" TYPE_FLAG_DATA_SPACE");
+    }
+  puts_filtered ("\n");
   printfi_filtered (spaces, "flags 0x%x", TYPE_FLAGS (type));
   if (TYPE_UNSIGNED (type))
     {
@@ -3038,14 +3036,6 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_FLAG_STATIC");
     }
-  if (TYPE_CONST (type))
-    {
-      puts_filtered (" TYPE_FLAG_CONST");
-    }
-  if (TYPE_VOLATILE (type))
-    {
-      puts_filtered (" TYPE_FLAG_VOLATILE");
-    }
   if (TYPE_PROTOTYPED (type))
     {
       puts_filtered (" TYPE_FLAG_PROTOTYPED");
@@ -3053,14 +3043,6 @@ recursive_dump_type (struct type *type, int spaces)
   if (TYPE_INCOMPLETE (type))
     {
       puts_filtered (" TYPE_FLAG_INCOMPLETE");
-    }
-  if (TYPE_CODE_SPACE (type))
-    {
-      puts_filtered (" TYPE_FLAG_CODE_SPACE");
-    }
-  if (TYPE_DATA_SPACE (type))
-    {
-      puts_filtered (" TYPE_FLAG_DATA_SPACE");
     }
   if (TYPE_VARARGS (type))
     {

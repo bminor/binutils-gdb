@@ -316,7 +316,7 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
       did_print_modifier = 1;
     }
 
-  address_space_id = address_space_int_to_name (TYPE_FLAGS (type));
+  address_space_id = address_space_int_to_name (TYPE_INSTANCE_FLAGS (type));
   if (address_space_id)
     {
       if (did_print_modifier || need_pre_space)
