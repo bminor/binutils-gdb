@@ -1,5 +1,10 @@
 2000-05-23  H.J. Lu  <hjl@gnu.org>
 
+	* elf64-alpha.c (elf64_alpha_relocate_section): Check
+	h->root.other not h->other.
+
+2000-05-23  H.J. Lu  <hjl@gnu.org>
+
 	* elf32-i386.c (elf_i386_relocate_section): Don't allow the
 	undefined symbol with the non-default visibility attributes.
 	* elf-hppa.h (elf_hppa_relocate_section): Likewise.

@@ -3477,7 +3477,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    relocation = 0;
 	  else if (info->shared && !info->symbolic
 		   && !info->no_undefined
-		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+		   && ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
 	    relocation = 0;
 	  else
 	    {
@@ -3485,7 +3485,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		    (info, h->root.root.root.string, input_bfd,
 		     input_section, rel->r_offset,
 		     (!info->shared || info->no_undefined
-		      || ELF_ST_VISIBILITY (h->other)))))
+		      || ELF_ST_VISIBILITY (h->root.other)))))
 		return false;
 	      relocation = 0;
 	    }
