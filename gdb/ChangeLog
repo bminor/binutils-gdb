@@ -1,5 +1,9 @@
 2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
 
+	* lin-lwp.c (child_wait): Call linux_record_stopped_pid.
+
+2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
+
 	* Makefile.in (i386-linux-nat.o): Update dependencies.
 	* config/i386/nm-linux.h (LINUX_CHILD_POST_STARTUP_INFERIOR): Define.
 	* config/nm-linux.h (CHILD_POST_STARTUP_INFERIOR, CHILD_POST_ATTACH)

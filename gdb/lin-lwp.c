@@ -1049,6 +1049,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       if (pid != -1 && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP
 	  && pid != GET_PID (inferior_ptid))
 	{
+	  linux_record_stopped_pid (pid);
 	  pid = -1;
 	  save_errno = EINTR;
 	}
