@@ -1,3 +1,10 @@
+2002-11-03  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-tdep.c (i387_print_float_info): Replace calls to
+	register_read and deprecated_read_register_gen with calls to
+	frame_register_read, and make the necessary adjustments to the
+	surrounding code.
+
 2002-11-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (register_reggroup_p): Allow default value.
