@@ -77,7 +77,7 @@ copy_over (ldsym, bfdsym)
 {
   while (list && *list)
     {
-      refize(Q_enter_global_ref(list, name));
+      refize(enter_global_ref(list, name));
       list = (asymbol **)((*list)->udata);
     }
 }
