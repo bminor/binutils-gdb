@@ -3181,6 +3181,7 @@ Some machine configurations provide additional directives.
 @ifset COFF
 * ABORT::                       @code{.ABORT}
 @end ifset
+
 * Align::                       @code{.align @var{abs-expr} , @var{abs-expr}}
 * Ascii::                       @code{.ascii "@var{string}"}@dots{}
 * Asciz::                       @code{.asciz "@var{string}"}@dots{}
@@ -3197,6 +3198,7 @@ Some machine configurations provide additional directives.
 @ifset COFF
 * Dim::                         @code{.dim}
 @end ifset
+
 * Double::                      @code{.double @var{flonums}}
 * Eject::                       @code{.eject}
 * Else::                        @code{.else}
@@ -3205,6 +3207,7 @@ Some machine configurations provide additional directives.
 @ifset COFF
 * Endef::                       @code{.endef}
 @end ifset
+
 * Endfunc::                     @code{.endfunc}
 * Endif::                       @code{.endif}
 * Equ::                         @code{.equ @var{symbol}, @var{expression}}
@@ -3216,6 +3219,7 @@ Some machine configurations provide additional directives.
 @ifclear no-file-dir
 * File::                        @code{.file @var{string}}
 @end ifclear
+
 * Fill::                        @code{.fill @var{repeat} , @var{size} , @var{value}}
 * Float::                       @code{.float @var{flonums}}
 * Func::                        @code{.func}  
@@ -3223,6 +3227,7 @@ Some machine configurations provide additional directives.
 @ifset ELF
 * Hidden::                      @code{.hidden @var{names}}
 @end ifset
+
 * hword::                       @code{.hword @var{expressions}}
 * Ident::                       @code{.ident}
 * If::                          @code{.if @var{absolute expression}}
@@ -3231,6 +3236,7 @@ Some machine configurations provide additional directives.
 @ifset ELF
 * Internal::                    @code{.internal @var{names}}
 @end ifset
+
 * Irp::				@code{.irp @var{symbol},@var{values}}@dots{}
 * Irpc::			@code{.irpc @var{symbol},@var{values}}@dots{}
 * Lcomm::                       @code{.lcomm @var{symbol} , @var{length}}
@@ -3238,6 +3244,7 @@ Some machine configurations provide additional directives.
 @ifclear no-line-dir
 * Line::                        @code{.line @var{line-number}}
 @end ifclear
+
 * Ln::                          @code{.ln @var{line-number}}
 * Linkonce::			@code{.linkonce [@var{type}]}
 * List::                        @code{.list}
@@ -3245,6 +3252,7 @@ Some machine configurations provide additional directives.
 @ignore
 * Lsym::                        @code{.lsym @var{symbol}, @var{expression}}
 @end ignore
+
 * Macro::			@code{.macro @var{name} @var{args}}@dots{}
 * MRI::				@code{.mri @var{val}}
 * Nolist::                      @code{.nolist}
@@ -3255,15 +3263,18 @@ Some machine configurations provide additional directives.
 * PopSection::                  @code{.popsection}
 * Previous::                    @code{.previous}
 @end ifset
+
 * Print::			@code{.print @var{string}}
 @ifset ELF
 * Protected::                   @code{.protected @var{names}}
 @end ifset
+
 * Psize::                       @code{.psize @var{lines}, @var{columns}}
 * Purgem::			@code{.purgem @var{name}}
 @ifset ELF
 * PushSection::                 @code{.pushsection @var{name}}
 @end ifset
+
 * Quad::                        @code{.quad @var{bignums}}
 * Rept::			@code{.rept @var{count}}
 * Sbttl::                       @code{.sbttl "@var{subheading}"}
@@ -3271,6 +3282,7 @@ Some machine configurations provide additional directives.
 * Scl::                         @code{.scl @var{class}}
 * Section::                     @code{.section @var{name}, @var{subsection}}
 @end ifset
+
 * Set::                         @code{.set @var{symbol}, @var{expression}}
 * Short::                       @code{.short @var{expressions}}
 * Single::                      @code{.single @var{flonums}}
@@ -3281,15 +3293,18 @@ Some machine configurations provide additional directives.
 @ifset have-stabs
 * Stab::                        @code{.stabd, .stabn, .stabs}
 @end ifset
+
 * String::                      @code{.string "@var{str}"}
 * Struct::			@code{.struct @var{expression}}
 @ifset ELF
 * SubSection::                  @code{.subsection}
 * Symver::                      @code{.symver @var{name},@var{name2@@nodename}}
 @end ifset
+
 @ifset COFF
 * Tag::                         @code{.tag @var{structname}}
 @end ifset
+
 * Text::                        @code{.text @var{subsection}}
 * Title::                       @code{.title "@var{heading}"}
 * Type::                        @code{.type <@var{int} | @var{name} , @var{type description}>}
@@ -3297,12 +3312,14 @@ Some machine configurations provide additional directives.
 @ifset COFF
 * Val::                         @code{.val @var{addr}}
 @end ifset
+
 @ifset ELF
 * Version::                     @code{.version "@var{string}"}
 * VTableEntry::                 @code{.vtable_entry @var{table}, @var{offset}}
 * VTableInherit::               @code{.vtable_inherit @var{child}, @var{parent}}
 * Weak::                        @code{.weak @var{names}}
 @end ifset
+
 * Word::                        @code{.word @var{expressions}}
 * Deprecated::                  Deprecated Directives
 @end menu
