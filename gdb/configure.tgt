@@ -108,13 +108,7 @@ m32r-*-*)		gdb_target=m32r ;;
 
 m68hc11*-*-*|m6811*-*-*)	gdb_target=m68hc11 ;;
 
-# OBSOLETE m68000-*-sunos3*)	gdb_target=sun2os3 ;;
-# OBSOLETE m68000-*-sunos4*)	gdb_target=sun2os4 ;;
-
-# OBSOLETE m68*-bull-sysv*)	gdb_target=dpx2 ;;
-# OBSOLETE m68*-att-*)		gdb_target=3b1 ;;
 m68*-cisco*-*)		gdb_target=cisco ;;
-# OBSOLETE m68*-motorola-*)	gdb_target=delta68 ;;
 m68*-netx-*)		gdb_target=vxworks68 ;;
 m68*-tandem-*)		gdb_target=st2000 ;;
 m68*-*-aout*)		gdb_target=monitor ;;
@@ -123,12 +117,8 @@ m68*-*-elf*)		gdb_target=monitor ;;
 m68*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
-# OBSOLETE m68*-*-lynxos*)		gdb_target=m68klynx ;;
 m68*-*-netbsd*)		gdb_target=nbsdaout ;;
 m68*-*-os68k*)		gdb_target=os68k ;;
-# OBSOLETE m68*-*-sunos3*)		gdb_target=sun3os3 ;;
-# OBSOLETE m68*-*-sunos4*)		gdb_target=sun3os4 ;;
-# OBSOLETE m68*-*-sysv4*)		gdb_target=m68kv4 ;;
 m68*-*-uclinux*)	gdb_target=monitor ;;
 m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 
@@ -141,7 +131,6 @@ mips*-*-linux*)		gdb_target=linux
 			build_gdbserver=yes
 			;;
 mips*-*-netbsd*)	gdb_target=nbsd ;;
-# OBSOLETE mips*-*-sysv4*)		gdb_target=mipsv4 ;;
 mips*-*-vxworks*)       gdb_target=vxmips ;;
 mips*-*-*)		gdb_target=embed ;;
 

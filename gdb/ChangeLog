@@ -1,5 +1,46 @@
 2004-04-04  Andrew Cagney  <cagney@redhat.com>
 
+	* config/mips/xm-riscos.h: Delete.
+	* config/mips/xm-mipsv4.h, config/mips/xm-mips.h: Delete.
+	* config/mips/tm-mipsv4.h, config/mips/riscos.mh: Delete.
+	* config/mips/nm-riscos.h, config/mips/nm-news-mips.h: Delete.
+	* config/mips/nm-mips.h, config/mips/news-mips.mh: Delete.
+	* config/mips/news-mips.mh, config/m68k/tm-m68kv4.h: Delete.
+	* config/mips/decstation.mh, config/mips/littlemips.mh: Delete.
+	* config/mips/mipsv4.mt, config/m68k/tm-sun3.h: Delete.
+	* config/m68k/xm-sun3os4.h, config/m68k/xm-sun3.h: Delete.
+	* config/m68k/xm-sun2.h, config/m68k/xm-m68kv4.h: Delete.
+	* config/m68k/xm-dpx2.h, config/m68k/xm-delta68.h: Delete.
+	* config/m68k/xm-3b1.h, config/m68k/tm-sun3os4.h: Delete.
+	* config/m68k/tm-m68klynx.h, config/m68k/tm-dpx2.h: Delete.
+	* config/m68k/tm-delta68.h, config/m68k/tm-3b1.h: Delete.
+	* config/m68k/sun3os4.mt, config/m68k/nm-sysv4.h: Delete.
+	* config/m68k/nm-sun3.h, config/m68k/sun3os4.mh: Delete.
+	* config/m68k/sun2os3.mh, config/m68k/nm-sun2.h: Delete.
+	* config/m68k/nm-m68klynx.h, config/m68k/sun3os3.mt: Delete.
+	* config/m68k/nm-dpx2.h, config/m68k/sun2os3.mt: Delete.
+	* config/m68k/dpx2.mh, config/m68k/sun3os3.mh: Delete.
+	* config/m68k/sun2os4.mh, config/m68k/nm-delta68.h: Delete.
+	* config/m68k/m68kv4.mt, config/m68k/m68klynx.mt: Delete.
+	* config/m68k/3b1.mt, config/m68k/m68klynx.mh: Delete.
+	* config/m68k/m68kv4.mh, config/m68k/sun2os4.mt: Delete.
+	* config/m68k/tm-sun2os4.h, config/m68k/3b1.mh: Delete.
+	* config/m68k/dpx2.mt, config/m68k/delta68.mt: Delete.
+	* config/m68k/tm-sun2.h, config/m68k/delta68.mh: Delete.
+	
+	* configure.tgt: Remove m68000-*-sunos3*, m68000-*-sunos4*,
+	m68*-bull-sysv*, m68*-att-*, m68*-motorola-*, m68*-*-lynxos*,
+	m68*-*-sunos3*, m68*-*-sunos4*, m68*-*-sysv4*, mips*-*-sysv4*.
+	* configure.host: Remove m680[01]0-sun-sunos3*,
+	m680[01]0-sun-sunos4*, m68*-att-*, m68*-bull*-sysv*,
+	m68*-*-lynxos*, m68*-*-sysv4*, m68*-motorola-*, m68*-sun-sunos3*,
+	m68*-sun-sunos4*, m68*-sun-*, mips-dec-*, mips-little-*,
+	mips-sony-*, mips-*-mach3*, mips-*-sysv4*, mips-*-sysv*,
+	mips-*-riscos*.
+	* NEWS: Mention removed systems.
+
+2004-04-04  Andrew Cagney  <cagney@redhat.com>
+
 	GDB 6.1 release created from 6.1 branch.
 
 2004-04-04  Andrew Cagney  <cagney@redhat.com>

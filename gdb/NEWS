@@ -3,6 +3,20 @@
 
 *** Changes since GDB 6.1:
 
+* REMOVED configurations and files
+
+Sun 3, running SunOS 3				m68*-*-sunos3*
+Sun 3, running SunOS 4				m68*-*-sunos4*
+Sun 2, running SunOS 3				m68000-*-sunos3*
+Sun 2, running SunOS 4				m68000-*-sunos4*
+Motorola 680x0 running LynxOS			m68*-*-lynxos*
+AT&T 3b1/Unix pc				m68*-att-*
+Bull DPX2 (68k, System V release 3)		m68*-bull-sysv*
+decstation					mips-dec-* mips-little-*
+riscos						mips-*-riscos* mips-*-sysv*
+sonymips					mips-sony-*
+sysv					mips*-*-sysv4* (IRIX 5/6 not included)
+
 *** Changes in GDB 6.1:
 
 * Removed --with-mmalloc
