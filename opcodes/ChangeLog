@@ -1,4 +1,14 @@
-start-sanitize-5900
+Thu Jul 10 12:56:10 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mips-opc.c (mips_builtin_opcodes): If an insn uses single
+	precision FP, mark it as such.  Likewise for double precision
+	FP.  Mark ISA1 insns.  Consolidate duplicate opcodes where
+	possible.
+start-sanitize-r5900
+	(mips_builtin_opcodes): Remove non-existant r5900 instructions
+end-sanitize-r5900
+
+start-sanitize-r5900
 Thu Jun 26 16:20:27 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mips-opc.c (mips_builtin_opcodes): Add "pinteh", "pexeh" and
