@@ -860,6 +860,7 @@ static void s_cprestore PARAMS ((int));
 static void s_cpreturn PARAMS ((int));
 static void s_gpvalue PARAMS ((int));
 static void s_gpword PARAMS ((int));
+static void s_gpdword PARAMS ((int));
 static void s_cpadd PARAMS ((int));
 static void s_insn PARAMS ((int));
 static void md_obj_begin PARAMS ((void));
@@ -961,6 +962,7 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"cpreturn", s_cpreturn, 0},
   {"gpvalue", s_gpvalue, 0},
   {"gpword", s_gpword, 0},
+  {"gpdword", s_gpdword, 0},
   {"cpadd", s_cpadd, 0},
   {"insn", s_insn, 0},
 
@@ -11105,6 +11107,9 @@ md_apply_fix3 (fixP, valP, seg)
   /* We are not done if this is a composite relocation to set up gp.  */
   if (fixP->fx_addsy == NULL && ! fixP->fx_pcrel
       && !(fixP->fx_r_type == BFD_RELOC_MIPS_SUB
+	   || (fixP->fx_r_type == BFD_RELOC_64
+	       && (previous_fx_r_type == BFD_RELOC_GPREL32
+		   || previous_fx_r_type == BFD_RELOC_GPREL16))
 	   || (previous_fx_r_type == BFD_RELOC_MIPS_SUB
 	       && (fixP->fx_r_type == BFD_RELOC_HI16_S
 		   || fixP->fx_r_type == BFD_RELOC_LO16))))
@@ -12303,6 +12308,50 @@ s_gpword (ignore)
   demand_empty_rest_of_line ();
 }
 
+static void
+s_gpdword (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  symbolS *label;
+  expressionS ex;
+  char *p;
+
+  /* When not generating PIC code, this is treated as .dword.  */
+  if (mips_pic != SVR4_PIC)
+    {
+      s_cons (3);
+      return;
+    }
+
+  label = insn_labels != NULL ? insn_labels->label : NULL;
+  mips_emit_delays (true);
+  if (auto_align)
+    mips_align (3, 0, label);
+  mips_clear_insn_labels ();
+
+  expression (&ex);
+
+  if (ex.X_op != O_symbol || ex.X_add_number != 0)
+    {
+      as_bad (_("Unsupported use of .gpdword"));
+      ignore_rest_of_line ();
+    }
+
+  p = frag_more (8);
+  md_number_to_chars (p, (valueT) 0, 8);
+  fix_new_exp (frag_now, p - frag_now->fr_literal, 8, &ex, false,
+	       BFD_RELOC_GPREL32);
+
+  /* GPREL32 composed with 64 gives a 64-bit GP offset.  */
+  ex.X_op = O_absent;
+  ex.X_add_symbol = 0;
+  ex.X_add_number = 0;
+  fix_new_exp (frag_now, p - frag_now->fr_literal, 8, &ex, false,
+	       BFD_RELOC_64);
+
+  demand_empty_rest_of_line ();
+}
+
 /* Handle the .cpadd pseudo-op.  This is used when dealing with switch
    tables in SVR4 PIC code.  */
 
@@ -12313,9 +12362,8 @@ s_cpadd (ignore)
   int icnt = 0;
   int reg;
 
-  /* This is ignored when not generating SVR4 PIC code or if this is NewABI
-     code.  */
-  if (mips_pic != SVR4_PIC || HAVE_NEWABI)
+  /* This is ignored when not generating SVR4 PIC code.  */
+  if (mips_pic != SVR4_PIC)
     {
       s_ignore (0);
       return;

@@ -1,3 +1,12 @@
+2002-10-13  Eric Christopher  <echristo@redhat.com>, Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mips.c (s_gpdword): New function.
+	(mips_pseudo_table): Add .gpdword.
+	(mips_need_elf_addend_fixup): never for NEWABI.
+	(md_apply_fix3): Don't mark BFD_RELOC64 after GPREL16 or
+	GPREL32 as done.
+	(s_cpadd): Generate .cpadd on NEWABI.
+
 2002-10-12  Elias Athanasopoulos  <eathan@otenet.gr>
 
 	* config/tc-ppc.c (ppc_cleanup): Make 'i' unsigned int.
