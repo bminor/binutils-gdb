@@ -145,6 +145,10 @@ gld${EMULATION_NAME}_after_open ()
 {
   struct bfd_elf_link_needed_list *needed, *l;
 
+  /* We only need to worry about this when doing a final link.  */
+  if (link_info.relocateable || link_info.shared)
+    return;
+
   /* Get the list of files which appear in DT_NEEDED entries in
      dynamic objects included in the link (often there will be none).
      For each such file, we want to track down the corresponding
