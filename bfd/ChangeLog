@@ -17,6 +17,9 @@ Thu Nov  3 18:19:13 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	(machine_type, case bfd_arch_vax): Set *unknown to false.  Patch
 	from John David Anglin <dave@hiauly1.hia.nrc.ca>.
 
+	* configure.in (tb): Rename ns32knetbsd_vec to pc532netbsd_vec,
+	since that's what it's called.
+
 Wed Nov  2 15:24:51 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* archive.c (normalize): Change to take a BFD as an argument.
