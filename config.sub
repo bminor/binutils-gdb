@@ -125,14 +125,6 @@ case $basic_machine in
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
-# start-sanitize-life
-	life-*) ;;
-	life)
-		basic_machine=life-philips
-		os=-none
-		;;
-# end-sanitize-life
-
 # start-sanitize-v9
 	sparc64-*) ;;
 	hal-32 | hal32)
@@ -378,7 +370,7 @@ case $basic_machine in
 		os=-newsos
 		;;
 	st2000)
-		basic_machine=m68kmote-tandem
+		basic_machine=m68k-tandem
 		;;
 	decstation-dec | decstation | decstation-3100 | pmax | pmin | dec3100 | decstatn)
 		basic_machine=mips-dec

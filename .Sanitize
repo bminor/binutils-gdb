@@ -109,30 +109,6 @@ else
 	done
 fi
 
-echo Looking for signs of \"life\"...
-
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
-if ( echo $* | grep keep\-life > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-life $i > /dev/null) ; then
-			echo Keeping life alive in $i
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-life $i > /dev/null) ; then
-			echo Beating the \"life\" out of $i...
-			cp $i new
-			sed '/start\-sanitize\-life/,/end-\sanitize\-life/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 for i in * ; do
 	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
 		echo Some mentions of Sanitize are still left in $i!
