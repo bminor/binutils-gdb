@@ -351,11 +351,11 @@ if test "${enable_gdbtk}" = "yes"; then
 
 	   # Include some libraries that Tcl and Tk want.
 	   if test "${enable_ide}" = "yes"; then	
-	      TCL_LIBS='$(LIBIDE) $(IDE) $(ITCL) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
-	      CONFIG_DEPS='$(LIBIDE) $(IDE_DEPS) $(ITCL_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
+	      TCL_LIBS='$(LIBIDE) $(LIBGUI) $(IDE) $(ITCL) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	      CONFIG_DEPS='$(LIBIDE) $(LIBGUI) $(IDE_DEPS) $(ITCL_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
 	   else
-	      TCL_LIBS='$(LIBIDE) $(ITCL) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
-	      CONFIG_DEPS='$(LIBIDE) $(ITCL_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
+	      TCL_LIBS='$(LIBGUI) $(ITCL) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	      CONFIG_DEPS='$(LIBGUI) $(ITCL_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
 	   fi
 	   # Yes, the ordering seems wrong here.  But it isn't.
 	   # TK_LIBS is the list of libraries that need to be linked
