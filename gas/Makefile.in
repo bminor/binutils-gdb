@@ -361,7 +361,7 @@ TARG_CPU_DEP_mips    = $(srcdir)/../include/opcode/mips.h subsegs.h  \
 TARG_CPU_DEP_ns32k   =
 TARG_CPU_DEP_ppc     = subsegs.h
 TARG_CPU_DEP_sh      = $(srcdir)/../opcodes/sh-opc.h subsegs.h
-TARG_CPU_DEP_sparc   = subsegs.h
+TARG_CPU_DEP_sparc   = subsegs.h $(srcdir)/../include/opcode/sparc.h
 TARG_CPU_DEP_tahoe   =
 TARG_CPU_DEP_vax     =
 TARG_CPU_DEP_w65     = $(srcdir)/../opcodes/w65-opc.h subsegs.h
@@ -441,7 +441,7 @@ itbl-lex.o: itbl-lex.c itbl-parse.h
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) itbl-lex.c
 
 itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
-	$(YACC) -d $(YACCFLAGS) $(srcdir)/itbl-parse.y
+	$(BISON) -d $(BISONFLAGS) $(srcdir)/itbl-parse.y
 	mv -f y.tab.c itbl-parse.c
 	mv -f y.tab.h itbl-parse.h
 
