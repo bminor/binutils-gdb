@@ -696,7 +696,6 @@ static struct
 typedef void (*vbyte_func) PARAMS ((int, char *, char *));
 
 /* Forward declarations:  */
-static int ar_is_in_integer_unit PARAMS ((int regnum));
 static void set_section PARAMS ((char *name));
 static unsigned int set_regstack PARAMS ((unsigned int, unsigned int,
 					  unsigned int, unsigned int));
@@ -908,19 +907,22 @@ static unsigned int get_saved_prologue_count PARAMS ((unsigned long));
 static void save_prologue_count PARAMS ((unsigned long, unsigned int));
 static void free_saved_prologue_counts PARAMS ((void));
 
-/* Determine if application register REGNUM resides in the integer
+/* Determine if application register REGNUM resides only in the integer
    unit (as opposed to the memory unit).  */
 static int
-ar_is_in_integer_unit (reg)
-     int reg;
+ar_is_only_in_integer_unit (int reg)
 {
   reg -= REG_AR;
+  return reg >= 64 && reg <= 111;
+}
 
-  return (reg == 64	/* pfs */
-	  || reg == 65	/* lc */
-	  || reg == 66	/* ec */
-	  /* ??? ias accepts and puts these in the integer unit.  */
-	  || (reg >= 112 && reg <= 127));
+/* Determine if application register REGNUM resides only in the memory 
+   unit (as opposed to the integer unit).  */
+static int
+ar_is_only_in_memory_unit (int reg)
+{
+  reg -= REG_AR;
+  return reg >= 0 && reg <= 47;
 }
 
 /* Switch to section NAME and create section if necessary.  It's
@@ -3447,7 +3449,8 @@ generate_unwind_image (const segT text_seg)
       unwind.info = expr_build_dot ();
       
       frag_var (rs_machine_dependent, size, size, 0, 0,
-		(offsetT) unwind.personality_routine, (char *) list);
+		(offsetT) (long) unwind.personality_routine,
+		(char *) list);
 
       /* Add the personality address to the image.  */
       if (unwind.personality_routine != 0)
@@ -10021,17 +10024,48 @@ md_assemble (str)
 	    rop = 1;
 	  else
 	    abort ();
-	  if (CURR_SLOT.opnd[rop].X_op == O_register
-	      && ar_is_in_integer_unit (CURR_SLOT.opnd[rop].X_add_number))
-	    mnemonic = "mov.i";
+	  if (CURR_SLOT.opnd[rop].X_op == O_register)
+	    {
+	      if (ar_is_only_in_integer_unit (CURR_SLOT.opnd[rop].X_add_number))
+		mnemonic = "mov.i";
+	      else
+		mnemonic = "mov.m";
+	    }
 	  else
-	    mnemonic = "mov.m";
+	    abort ();
 	  ia64_free_opcode (idesc);
 	  idesc = ia64_find_opcode (mnemonic);
 	  while (idesc != NULL
 		 && (idesc->operands[0] != opnd1
 		     || idesc->operands[1] != opnd2))
 	    idesc = get_next_opcode (idesc);
+	}
+    }
+  else if (strcmp (idesc->name, "mov.i") == 0
+	   || strcmp (idesc->name, "mov.m") == 0)
+    {
+      enum ia64_opnd opnd1, opnd2;
+      int rop;
+      
+      opnd1 = idesc->operands[0];
+      opnd2 = idesc->operands[1];
+      if (opnd1 == IA64_OPND_AR3)
+	rop = 0;
+      else if (opnd2 == IA64_OPND_AR3)
+	rop = 1;
+      else
+	abort ();
+      if (CURR_SLOT.opnd[rop].X_op == O_register)
+	{
+	  char unit = 'a';
+	  if (ar_is_only_in_integer_unit (CURR_SLOT.opnd[rop].X_add_number))
+	    unit = 'i';
+	  else if (ar_is_only_in_memory_unit (CURR_SLOT.opnd[rop].X_add_number))
+	    unit = 'm';
+	  if (unit != 'a' && unit != idesc->name [4])
+	    as_bad ("AR %d cannot be accessed by %c-unit",
+		    (int) (CURR_SLOT.opnd[rop].X_add_number - REG_AR),
+		    TOUPPER (unit));
 	}
     }
 

@@ -1,3 +1,7 @@
+2004-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/regs.d: Updated.
+
 2004-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/ia64/ia64.exp: Run invalid-ar.

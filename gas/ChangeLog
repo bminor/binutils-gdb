@@ -1,3 +1,12 @@
+2004-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-ia64.c (ar_is_in_integer_unit): Removed.
+	(ar_is_only_in_integer_unit): New.
+	(ar_is_only_in_memory_unit): New.
+	(generate_unwind_image): Silence gcc on 32bit host.
+	(md_assemble): Use ar_is_only_in_integer_unit instead of
+	ar_is_in_integer_unit. Check AR access.
+
 2004-05-27  Peter Barada  <peter@the-baradas.com>
 
 	* config/tc-m68k.c (md_begin): Sort the opcode table into
