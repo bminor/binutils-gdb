@@ -90,7 +90,19 @@ cli_interpreter_display_prompt (void *data, char *new_prompt)
 int
 cli_interpreter_exec (void *data, char *command_str)
 {
-  return gdb_execute_command (cli_uiout, command_str, 0);
+  int result;
+  struct ui_file *old_stream;
+
+  /* gdb_stdout could change between the time cli_uiout was initialized
+     and now. Since we're probably using a different interpreter which has
+     a new ui_file for gdb_stdout, use that one instead of the default.
+  
+     It is important that it gets reset everytime, since the user could
+     set gdb to use a different interpreter. */
+  old_stream = cli_out_set_stream (cli_uiout, gdb_stdout);
+  result = gdb_execute_command (cli_uiout, command_str, 0);
+  cli_out_set_stream (cli_uiout, old_stream);
+  return result;
 }
 
 /* standard gdb initialization hook */
@@ -107,6 +119,7 @@ _initialize_cli_interp (void)
     cli_interpreter_display_prompt /* prompt_proc */
   };
 
+  /* Create a default uiout builder for the CLI. */
   cli_uiout = cli_out_new (gdb_stdout);
   cli_interp = gdb_new_interpreter (GDB_INTERPRETER_CONSOLE, NULL, cli_uiout,
 				    &procs);
