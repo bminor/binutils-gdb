@@ -449,7 +449,7 @@ op tab[] =
   },
 
   /* sh4 */
-  { "", "", "fsca", "1111nnn011111101",
+  { "", "", "fsca", "1111eeee11111101",
     "if (FPSCR_PR)",
     "  RAISE_EXCEPTION (SIGILL);",
     "else",
@@ -1950,128 +1950,100 @@ gengastab ()
 
 }
 
-/* Convert a string of 4 binary digits into an int */
-
-static
-int
-bton (s)
-     char *s;
-
-{
-  int n = 0;
-  int v = 8;
-  while (v)
-    {
-      if (*s == '1')
-	n |= v;
-      v >>= 1;
-      s++;
-    }
-  return n;
-}
-
 static unsigned char table[1 << 16];
 
-/* Take an opcode expand all varying fields in it out and fill all the
-  right entries in 'table' with the opcode index*/
+/* Take an opcode, expand all varying fields in it out and fill all the
+   right entries in 'table' with the opcode index.  */
 
 static void
-expand_opcode (shift, val, i, s)
-     int shift;
+expand_opcode (val, i, s)
      int val;
      int i;
      char *s;
 {
-  int j;
-
   if (*s == 0)
     {
       table[val] = i;
     }
   else
     {
+      int j = 0, m = 0;
+
       switch (s[0])
 	{
-
+	default:
+	  fprintf (stderr, "expand_opcode: illegal char '%c'\n", s[0]);
+	  exit (1);
 	case '0':
 	case '1':
-	  {
-	    int m, mv;
-
-	    if (s[1] - '0' > 1U || !s[2] || ! s[3])
-	      expand_opcode (shift - 1, val + s[0] - '0', i, s + 1);
-	    val |= bton (s) << shift;
-	    if (s[2] == '0' || s[2] == '1')
-	      expand_opcode (shift - 4, val, i, s + 4);
-	    else if (s[2] == 'N')
-	      for (j = 0; j < 4; j++)
-		expand_opcode (shift - 4, val | (j << shift), i, s + 4);
-	    else if (s[2] == 'x')
-	      for (j = 0; j < 4; j += 2)
-		for (m = 0; m < 32; m++)
-		  {
-		    /* Ignore illegal nopy */
-		    if ((m & 7) == 0 && m != 0)
-		      continue;
-		    mv = m & 3 | (m & 4) << 2 | (m & 8) << 3 | (m & 16) << 4;
-		    expand_opcode (shift - 4, val | mv | (j << shift), i,
-				   s + 4);
-		  }
-	    else if (s[2] == 'y')
-	      for (j = 0; j < 2; j++)
-		expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	    /* Consume an arbitrary number of ones and zeros.  */
+	    do {
+	      j = (j << 1) + (s[m++] - '0');
+	    } while (s[m] == '0' || s[m] == '1');
+	    expand_opcode ((val << m) | j, i, s + m);
 	    break;
-	  }
+
+	case 'N':	/* NN -- four-way fork */
+	  for (j = 0; j < 4; j++)
+	    expand_opcode ((val << 2) | j, i, s + 2);
+	  break;
+	case 'x':	/* xx -- 2-way fork */
+	  /* Cross-breeding with movy moved to separate function.  */
+	  for (j = 0; j < 4; j += 2)
+	    expand_opcode ((val << 2) | j, i, s + 2);
+	  break;
+	case 'y':	/* yy -- two-way fork */
+	  for (j = 0; j < 2; j++)
+	    expand_opcode ((val << 2) | j, i, s + 2);
+	  break;
+	case 'i':	/* eg. "i8*1" */
+	case '.':	/* "...." is a wildcard */
 	case 'n':
 	case 'm':
-	  {
-	    int digits = 1;
-	    while (s[digits] == s[0])
-	      digits++;
-	    for (j = 0; j < (1 << digits); j++)
-	      {
-		expand_opcode (shift - digits, val | (j << shift), i,
-			       s + digits);
-	      }
-	    break;
-	  }
+	  /* nnnn, mmmm, i#*#, .... -- 16-way fork.  */
+	  for (j = 0; j < 16; j++)
+	    expand_opcode ((val << 4) | j, i, s + 4);
+	  break;
+	case 'e':
+	  /* eeee -- even numbered register:
+	     8 way fork.  */
+	  for (j = 0; j < 15; j += 2)
+	    expand_opcode ((val << 4) | j, i, s + 4);
+	  break;
 	case 'M':
-	  /* A1, A0,X0,X1,Y0,Y1,M0,A1G,M1,M1G */
-	  for (j = 5; j < 16; j++)
-	    if (j != 6)
-	      expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	  /* A0, A1, X0, X1, Y0, Y1, M0, M1, A0G, A1G:
+	     MMMM -- 10-way fork */
+	  expand_opcode ((val << 4) | 5, i, s + 4);
+	  for (j = 7; j < 16; j++)
+	    expand_opcode ((val << 4) | j, i, s + 4);
 	  break;
 	case 'G':
-	  /* A1G, A0G: */
+	  /* A1G, A0G: 
+	     GGGG -- two-way fork */
 	  for (j = 13; j <= 15; j +=2)
-	    expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	    expand_opcode ((val << 4) | j, i, s + 4);
 	  break;
 	case 's':
+	  /* ssss -- 10-way fork */
 	  /* System registers mach, macl, pr: */
 	  for (j = 0; j < 3; j++)
-	    expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	    expand_opcode ((val << 4) | j, i, s + 4);
 	  /* System registers fpul, fpscr/dsr, a0, x0, x1, y0, y1: */
 	  for (j = 5; j < 12; j++)
-	    expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	    expand_opcode ((val << 4) | j, i, s + 4);
 	  break;
 	case 'X':
 	case 'a':
-	  val |= bton (s) << shift;
-	  for (j = 0; j < 16; j += 8)
-	    expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	  /* XX, aa -- two-way fork */
+	  for (j = 0; j < 4; j += 2)
+	    expand_opcode ((val << 2) | j, i, s + 2);
 	  break;
 	case 'Y':
 	case 'A':
-	  val |= bton (s) << shift;
-	  for (j = 0; j < 8; j += 4)
-	    expand_opcode (shift - 4, val | (j << shift), i, s + 4);
+	  /* YY, AA -- two-way fork */
+	  for (j = 0; j < 2; j++)
+	    expand_opcode ((val << 2) | j, i, s + 2);
 	  break;
-
-	default:
-	  for (j = 0; j < (1 << (shift + 4)); j++)
-	    {
-	      table[val | j] = i;
-	    }
 	}
     }
 }
@@ -2127,7 +2099,7 @@ filltable (p)
   for (; p->name; p++)
     {
       p->index = index++;
-      expand_opcode (12, 0, p->index, p->code);
+      expand_opcode (0, p->index, p->code);
     }
 }
 
@@ -2136,9 +2108,27 @@ filltable (p)
    processing insns (ppi) for code 0xf800 (ppi nopx nopy).  Copy the
    latter tag to represent all combinations of ppi with ddt.  */
 static void
-ppi_moves ()
+expand_ppi_movxy ()
 {
   int i;
+
+  for (i = 0xf000; i < 0xf400; i++)
+    if ((i & 3) == 0 && (i & 12) != 0 && table[i] != 0)
+      {
+	/* A movx insn, which needs to be filled out with the 
+	   corresponding movy insns.  This used to be done in
+	   expand_opcode.  */
+	int m, mv;
+
+	for (m = 0; m < 32; m++)
+	  {
+	    /* Ignore illegal nopy */
+	    if ((m & 7) == 0 && m != 0)
+	      continue;
+	    mv = m & 3 | (m & 4) << 2 | (m & 8) << 3 | (m & 16) << 4;
+	    table [i | mv] = table [i];
+	  }
+      }
 
   for (i = 0xf000; i < 0xf400; i++)
     if (table[i])
@@ -2179,7 +2169,8 @@ gensim_caselist (p)
 	      s += 4;
 	      break;
 	    case 'n':
-	      printf ("      int n = (iword >>8) & 0xf;\n");
+	    case 'e':
+	      printf ("      int n = (iword >> 8) & 0xf;\n");
 	      needn = 1;
 	      s += 4;
 	      break;
@@ -2202,7 +2193,7 @@ gensim_caselist (p)
 	    case 's':
 	    case 'M':
 	    case 'G':
-	      printf ("      int m = (iword >>4) & 0xf;\n");
+	      printf ("      int m = (iword >> 4) & 0xf;\n");
 	      s += 4;
 	      break;
 	    case 'X':
@@ -2618,7 +2609,7 @@ main (ac, av)
 
 	  memset (table, 0, sizeof table);
 	  filltable (movsxy_tab);
-	  ppi_moves ();
+	  expand_ppi_movxy ();
 	  dumptable ("sh_dsp_table", 1 << 12, 0xf000);
 
 	  memset (table, 0, sizeof table);
