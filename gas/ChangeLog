@@ -1,3 +1,7 @@
+2002-06-17  Catherine Moore <clm@redhat.com>
+
+        * config/obj-elf.h (TARGET_SYMBOL_FIELDS): Conditionally define.
+
 Mon Jun 17 16:29:58 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config/tc-sh.c (assemble_ppi): Initialize reg_n.

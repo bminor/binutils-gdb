@@ -1,5 +1,5 @@
 /* ELF object file format.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -86,7 +86,9 @@ struct elf_obj_sy
 #define ELF_TARGET_SYMBOL_FIELDS int local:1;
 
 /* Don't change this; change ELF_TARGET_SYMBOL_FIELDS instead.  */
+#ifndef TARGET_SYMBOL_FIELDS
 #define TARGET_SYMBOL_FIELDS ELF_TARGET_SYMBOL_FIELDS
+#endif
 
 /* #include "targ-cpu.h" */
 
