@@ -69,7 +69,20 @@ different; see the file gdb-5.3/gdb/config/djgpp/README for details.)
 `configure' can't determine your system type, specify one as its
 argument, e.g., `./configure sun4' or `./configure decstation'.
 
-   If you get compiler errors during this stage, see the `Reporting
+   Make sure that your 'configure' line ends in 'gdb-5.3/configure':
+
+      /berman/migchain/source/gdb-5.3/configure      # RIGHT
+      /berman/migchain/source/gdb-5.3/gdb/configure  # WRONG
+
+   The gdb package contains several subdirectories, such as 'gdb',
+'bfd', and 'readline'.  If your 'configure' line ends in
+'gdb-5.3/gdb/configure', then you are configuring only the gdb
+subdirectory, not the whole gdb package.  This leads to build errors
+such as:
+
+      make: *** No rule to make target `../bfd/bfd.h', needed by `gdb.o'.  Stop.
+
+   If you get other compiler errors during this stage, see the `Reporting
 Bugs' section below; there are a few known problems.
 
    GDB requires an ISO C (ANSI C) compiler.  If you do not have an ISO
@@ -449,38 +462,22 @@ Linux.
    There are a number of remote interfaces for talking to existing ROM
 monitors and other hardware:
 
-	remote-adapt.c	 AMD 29000 "Adapt"
 	remote-array.c   Array Tech RAID controller
 	remote-e7000.c	 Hitachi E7000 ICE
-	remote-eb.c	 AMD 29000 "EBMON"
-	remote-es.c	 Ericsson 1800 monitor
 	remote-est.c	 EST emulator
 	remote-hms.c	 Hitachi Micro Systems H8/300 monitor
 	remote-mips.c	 MIPS remote debugging protocol
-	remote-mm.c	 AMD 29000 "minimon"
-	remote-nindy.c   Intel 960 "Nindy"
-	remote-nrom.c	 NetROM ROM emulator
-	remote-os9k.c	 PC running OS/9000
 	remote-rdi.c	 ARM with Angel monitor
 	remote-rdp.c	 ARM with Demon monitor
 	remote-sds.c	 PowerPC SDS monitor
 	remote-sim.c	 Generalized simulator protocol
 	remote-st.c	 Tandem ST-2000 monitor
-	remote-udi.c	 AMD 29000 using the AMD "Universal Debug Interface"
 	remote-vx.c	 VxWorks realtime kernel
 
    Remote-vx.c and the vx-share subdirectory contain a remote
 interface for the VxWorks realtime kernel, which communicates over TCP
 using the Sun RPC library.  This would be a useful starting point for
 other remote- via-ethernet back ends.
-
-   Remote-udi.c and the 29k-share subdirectory contain a remote
-interface for AMD 29000 programs, which uses the AMD "Universal Debug
-Interface".  This allows GDB to talk to software simulators,
-emulators, and/or bare hardware boards, via network or serial
-interfaces.  Note that GDB only provides an interface that speaks UDI,
-not a complete solution.  You will need something on the other end
-that also speaks UDI.
 
 
 Reporting Bugs in GDB
@@ -512,7 +509,7 @@ Graphical interface to GDB -- X Windows, MS Windows
    Several graphical interfaces to GDB are available.  You should
 check:
 
-	http://www.gnu.org/software/gdb/gui/
+	http://www.gnu.org/software/gdb/links/
 
 for an up-to-date list.
 

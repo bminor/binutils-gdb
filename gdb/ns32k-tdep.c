@@ -1,6 +1,6 @@
 /* Target dependent code for the NS32000, for GDB.
    Copyright 1986, 1988, 1991, 1992, 1994, 1995, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,8 +26,8 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "target.h"
-
 #include "arch-utils.h"
+#include "osabi.h"
 
 #include "ns32k-tdep.h"
 #include "gdb_string.h"
@@ -186,7 +186,7 @@ umax_frame_num_args (struct frame_info *fi)
   int width;
 
   numargs = -1;
-  enter_addr = ns32k_get_enter_addr ((fi)->pc);
+  enter_addr = ns32k_get_enter_addr (get_frame_pc (fi));
   if (enter_addr > 0)
     {
       pc = ((enter_addr == 1)
@@ -308,10 +308,10 @@ ns32k_frame_chain (struct frame_info *frame)
      FP value, and that address is saved at the previous FP value as a
      4-byte word.  */
 
-  if (inside_entry_file (frame->pc))
+  if (inside_entry_file (get_frame_pc (frame)))
     return 0;
 
-  return (read_memory_integer (frame->frame, 4));
+  return (read_memory_integer (get_frame_base (frame), 4));
 }
 
 
@@ -325,9 +325,9 @@ ns32k_sigtramp_saved_pc (struct frame_info *frame)
 
   buf = alloca (ptrbytes);
   /* Get sigcontext address, it is the third parameter on the stack.  */
-  if (frame->next)
+  if (get_next_frame (frame))
     sigcontext_addr = read_memory_typed_address
-      (FRAME_ARGS_ADDRESS (frame->next) + FRAME_ARGS_SKIP + sigcontext_offs,
+      (FRAME_ARGS_ADDRESS (get_next_frame (frame)) + FRAME_ARGS_SKIP + sigcontext_offs,
        builtin_type_void_data_ptr);
   else
     sigcontext_addr = read_memory_typed_address
@@ -345,14 +345,14 @@ ns32k_frame_saved_pc (struct frame_info *frame)
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return (ns32k_sigtramp_saved_pc (frame)); /* XXXJRT */
 
-  return (read_memory_integer (frame->frame + 4, 4));
+  return (read_memory_integer (get_frame_base (frame) + 4, 4));
 }
 
 static CORE_ADDR
 ns32k_frame_args_address (struct frame_info *frame)
 {
-  if (ns32k_get_enter_addr (frame->pc) > 1)
-    return (frame->frame);
+  if (ns32k_get_enter_addr (get_frame_pc (frame)) > 1)
+    return (get_frame_base (frame));
 
   return (read_register (SP_REGNUM) - 4);
 }
@@ -360,7 +360,7 @@ ns32k_frame_args_address (struct frame_info *frame)
 static CORE_ADDR
 ns32k_frame_locals_address (struct frame_info *frame)
 {
-  return (frame->frame);
+  return (get_frame_base (frame));
 }
 
 /* Code to initialize the addresses of the saved registers of frame described
@@ -375,33 +375,33 @@ ns32k_frame_init_saved_regs (struct frame_info *frame)
   int localcount;
   CORE_ADDR enter_addr, next_addr;
 
-  if (frame->saved_regs)
+  if (get_frame_saved_regs (frame))
     return;
 
   frame_saved_regs_zalloc (frame);
 
-  enter_addr = ns32k_get_enter_addr (frame->pc);
+  enter_addr = ns32k_get_enter_addr (get_frame_pc (frame));
   if (enter_addr > 1)
     {
       regmask = read_memory_integer (enter_addr + 1, 1) & 0xff;
       localcount = ns32k_localcount (enter_addr);
-      next_addr = frame->frame + localcount;
+      next_addr = get_frame_base (frame) + localcount;
 
       for (regnum = 0; regnum < 8; regnum++)
 	{
           if (regmask & (1 << regnum))
-	    frame->saved_regs[regnum] = next_addr -= 4;
+	    get_frame_saved_regs (frame)[regnum] = next_addr -= 4;
 	}
 
-      frame->saved_regs[SP_REGNUM] = frame->frame + 4;
-      frame->saved_regs[PC_REGNUM] = frame->frame + 4;
-      frame->saved_regs[FP_REGNUM] = read_memory_integer (frame->frame, 4);
+      get_frame_saved_regs (frame)[SP_REGNUM] = get_frame_base (frame) + 4;
+      get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 4;
+      get_frame_saved_regs (frame)[FP_REGNUM] = read_memory_integer (get_frame_base (frame), 4);
     }
   else if (enter_addr == 1)
     {
       CORE_ADDR sp = read_register (SP_REGNUM);
-      frame->saved_regs[PC_REGNUM] = sp;
-      frame->saved_regs[SP_REGNUM] = sp + 4;
+      get_frame_saved_regs (frame)[PC_REGNUM] = sp;
+      get_frame_saved_regs (frame)[SP_REGNUM] = sp + 4;
     }
 }
 
@@ -428,13 +428,13 @@ ns32k_pop_frame (void)
   CORE_ADDR fp;
   int regnum;
 
-  fp = frame->frame;
+  fp = get_frame_base (frame);
   FRAME_INIT_SAVED_REGS (frame);
 
   for (regnum = 0; regnum < 8; regnum++)
-    if (frame->saved_regs[regnum])
+    if (get_frame_saved_regs (frame)[regnum])
       write_register (regnum,
-		      read_memory_integer (frame->saved_regs[regnum], 4));
+		      read_memory_integer (get_frame_saved_regs (frame)[regnum], 4));
 
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
@@ -536,35 +536,18 @@ ns32k_gdbarch_init_32382 (struct gdbarch *gdbarch)
 static struct gdbarch *
 ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* Try to determine the OS ABI of the object we are loading.  */
-  if (info.abfd != NULL)
-    {
-      osabi = gdbarch_lookup_osabi (info.abfd);
-    }
+  /* If there is already a candidate, use it.  */
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
 
-  /* Find a candidate among extant architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      /* Make sure the OS ABI selection matches.  */
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->osabi == osabi)
-	return arches->gdbarch;
-    }
-
-  tdep = xmalloc (sizeof (struct gdbarch_tdep));
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch = gdbarch_alloc (&info, NULL);
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
-
-  tdep->osabi = osabi;
 
   /* Register info */
   ns32k_gdbarch_init_32082 (gdbarch);
@@ -590,7 +573,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                    generic_frameless_function_invocation_not);
   
   set_gdbarch_frame_chain (gdbarch, ns32k_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, ns32k_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, ns32k_frame_args_address);
@@ -631,27 +613,15 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   return (gdbarch);
-}
-
-static void
-ns32k_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  if (tdep == NULL)
-    return;
-
-  fprintf_unfiltered (file, "ns32k_dump_tdep: OS ABI = %s\n",
-		      gdbarch_osabi_name (tdep->osabi));
 }
 
 void
 _initialize_ns32k_tdep (void)
 {
-  gdbarch_register (bfd_arch_ns32k, ns32k_gdbarch_init, ns32k_dump_tdep);
+  gdbarch_register (bfd_arch_ns32k, ns32k_gdbarch_init, NULL);
 
   tm_print_insn = print_insn_ns32k;
 }

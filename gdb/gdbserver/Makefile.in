@@ -228,11 +228,6 @@ version.c: Makefile
 # will remove them.
 MAKEOVERRIDES=
 
-## This is ugly, but I don't want GNU make to put these variables in
-## the environment.  Older makes will see this as a set of targets
-## with no dependencies and no actions.
-# OBSOLETE unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
-
 gdb_proc_service_h = $(srcdir)/../gdb_proc_service.h $(srcdir)/../gregset.h
 regdat_sh = $(srcdir)/../regformats/regdat.sh
 regdef_h = $(srcdir)/../regformats/regdef.h

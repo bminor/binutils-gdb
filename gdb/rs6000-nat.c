@@ -143,8 +143,7 @@ static void fetch_core_registers (char *, unsigned int, int, CORE_ADDR);
 
 static void exec_one_dummy_insn (void);
 
-extern void
-fixup_breakpoints (CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta);
+extern void fixup_breakpoints (CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta);
 
 /* Given REGNO, a gdb register number, return the corresponding
    number suitable for use as a ptrace() parameter.  Return -1 if
@@ -685,7 +684,7 @@ objfile_symbol_add (void *arg)
 {
   struct objfile *obj = (struct objfile *) arg;
 
-  syms_from_objfile (obj, NULL, 0, 0);
+  syms_from_objfile (obj, NULL, 0, 0, 0, 0);
   new_symfile_objfile (obj, 0, 0);
   return 1;
 }

@@ -1,7 +1,8 @@
 /* Symbol table definitions for GDB.
-   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -98,13 +99,6 @@ struct general_symbol_info
       const char *demangled_name;
     }
     objc_specific;
-#if 0
-/* OBSOLETE struct chill_specific        *//* For Chill */
-    /* OBSOLETE   { */
-    /* OBSOLETE     char *demangled_name; */
-    /* OBSOLETE   } */
-    /* OBSOLETE chill_specific; */
-#endif
   }
   language_specific;
 
@@ -166,9 +160,15 @@ extern void symbol_init_language_specific (struct general_symbol_info *symbol,
 					   enum language language);
 
 #define SYMBOL_INIT_DEMANGLED_NAME(symbol,obstack) \
-  (symbol_init_demangled_name (&symbol->ginfo, (obstack)))
+  (symbol_init_demangled_name (&(symbol)->ginfo, (obstack)))
 extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
 					struct obstack *obstack);
+
+#define SYMBOL_SET_NAMES(symbol,name,len,objfile) \
+  symbol_set_names (&(symbol)->ginfo, name, len, objfile)
+extern void symbol_set_names (struct general_symbol_info *symbol,
+			      const char *name, int len,
+			      struct objfile *objfile);
 
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL. */
@@ -190,9 +190,6 @@ extern const char *symbol_demangled_name (const struct general_symbol_info
    might be mangled).  */
 
 #define SYMBOL_LINKAGE_NAME(symbol)	SYMBOL_NAME (symbol)
-
-/* OBSOLETE #define SYMBOL_CHILL_DEMANGLED_NAME(symbol) */
-/* OBSOLETE (symbol)->ginfo.language_specific.chill_specific.demangled_name */
 
 #define SYMBOL_OBJC_DEMANGLED_NAME(symbol)				\
    (symbol)->ginfo.language_specific.objc_specific.demangled_name
@@ -994,8 +991,8 @@ extern struct symbol *find_pc_sect_function (CORE_ADDR, asection *);
 
 /* lookup function from address, return name, start addr and end addr */
 
-extern int
-find_pc_partial_function (CORE_ADDR, char **, CORE_ADDR *, CORE_ADDR *);
+extern int find_pc_partial_function (CORE_ADDR, char **, CORE_ADDR *,
+				     CORE_ADDR *);
 
 extern void clear_pc_function_cache (void);
 
@@ -1179,8 +1176,8 @@ extern struct symtab_and_line find_pc_sect_line (CORE_ADDR, asection *, int);
 
 extern int find_line_pc (struct symtab *, int, CORE_ADDR *);
 
-extern int
-find_line_pc_range (struct symtab_and_line, CORE_ADDR *, CORE_ADDR *);
+extern int find_line_pc_range (struct symtab_and_line, CORE_ADDR *,
+			       CORE_ADDR *);
 
 extern void resolve_sal_pc (struct symtab_and_line *);
 

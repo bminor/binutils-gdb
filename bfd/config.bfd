@@ -374,6 +374,9 @@ case "${targ}" in
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386coff_vec
     ;;
+  i[3456]86-*-aros*)
+    targ_defvec=bfd_elf32_i386_vec
+    ;;
   i[3456]86-*-chorus*)
     targ_defvec=bfd_elf32_i386_vec
     ;;
@@ -551,6 +554,10 @@ case "${targ}" in
 
   ip2k-*-elf)
     targ_defvec=bfd_elf32_ip2k_vec
+    ;;
+
+  iq2000-*-elf)
+    targ_defvec=bfd_elf32_iq2000_vec
     ;;
 
   m32r-*-*)
@@ -805,6 +812,10 @@ case "${targ}" in
 
   mn10300-*-*)
     targ_defvec=bfd_elf32_mn10300_vec
+    ;;
+
+  msp430-*-*)
+    targ_defvec=bfd_elf32_msp430_vec
     ;;
 
   ns32k-pc532-mach* | ns32k-pc532-ux*)

@@ -1,7 +1,8 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
    Written by Fred Fish at Cygnus Support.
 
    This file is part of GDB.
@@ -346,10 +347,10 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 		    /* Looks like a compiler-generated label.  Skip
 		       it.  The assembler should be skipping these (to
 		       keep executables small), but apparently with
-		       gcc on the (OBSOLETE) delta m88k SVR4, it
-		       loses.  So to have us check too should be
-		       harmless (but I encourage people to fix this in
-		       the assembler instead of adding checks here).  */
+		       gcc on the (deleted) delta m88k SVR4, it loses.
+		       So to have us check too should be harmless (but
+		       I encourage people to fix this in the assembler
+		       instead of adding checks here).  */
 		    continue;
 		  else
 		    {
@@ -590,8 +591,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
       if (str_sect)
 	elfstab_build_psymtabs (objfile,
 				mainline,
-				ei.stabsect->filepos,
-				bfd_section_size (abfd, ei.stabsect),
+				ei.stabsect,
 				str_sect->filepos,
 				bfd_section_size (abfd, str_sect));
     }

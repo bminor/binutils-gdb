@@ -1,6 +1,6 @@
 /* BFD back-end data structures for ELF files.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002 Free Software Foundation, Inc.
+   2002, 2003 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -80,6 +80,8 @@ typedef struct
 } elf_symbol_type;
 
 struct elf_strtab_hash;
+struct got_entry;
+struct plt_entry;
 
 /* ELF linker hash table entries.  */
 
@@ -146,23 +148,23 @@ struct elf_link_hash_entry
 
   /* If this symbol requires an entry in the global offset table, the
      processor specific backend uses this field to track usage and
-     final offset.  We use a union and two names primarily to document
-     the intent of any particular piece of code.  The field should be
-     used as a count until size_dynamic_sections, at which point the
-     contents of the .got is fixed.  Afterward, if this field is -1,
-     then the symbol does not require a global offset table entry.  */
-  union
+     final offset.  Two schemes are supported:  The first assumes that
+     a symbol may only have one GOT entry, and uses REFCOUNT until
+     size_dynamic_sections, at which point the contents of the .got is
+     fixed.  Afterward, if OFFSET is -1, then the symbol does not
+     require a global offset table entry.  The second scheme allows
+     multiple GOT entries per symbol, managed via a linked list
+     pointed to by GLIST.  */
+  union gotplt_union
     {
       bfd_signed_vma refcount;
       bfd_vma offset;
+      struct got_entry *glist;
+      struct plt_entry *plist;
     } got;
 
   /* Same, but tracks a procedure linkage table entry.  */
-  union
-    {
-      bfd_signed_vma refcount;
-      bfd_vma offset;
-    } plt;
+  union gotplt_union plt;
 
   /* Symbol size.  */
   bfd_size_type size;
@@ -227,16 +229,6 @@ struct elf_link_loaded_list
 {
   struct elf_link_loaded_list *next;
   bfd *abfd;
-};
-
-enum elf_link_info_type
-{
-  ELF_INFO_TYPE_NONE,
-  ELF_INFO_TYPE_STABS,
-  ELF_INFO_TYPE_MERGE,
-  ELF_INFO_TYPE_EH_FRAME,
-  ELF_INFO_TYPE_JUST_SYMS,
-  ELF_INFO_TYPE_LAST
 };
 
 /* Structures used by the eh_frame optimization code.  */
@@ -333,9 +325,13 @@ struct elf_link_hash_table
 
   /* The value to use when initialising got.refcount/offset and
      plt.refcount/offset in an elf_link_hash_entry.  Set to zero when
-     the values are refcounts.  Set to -1 in size_dynamic_sections
-     when the values may be offsets.  */
-  bfd_signed_vma init_refcount;
+     the values are refcounts.  Set to init_offset in
+     size_dynamic_sections when the values may be offsets.  */
+  union gotplt_union init_refcount;
+
+  /* The value to use for got.refcount/offset and plt.refcount/offset
+     when the values may be offsets.  Normally (bfd_vma) -1.  */
+  union gotplt_union init_offset;
 
   /* The number of symbols found in the link which must be put into
      the .dynsym section.  */
@@ -941,13 +937,6 @@ struct bfd_elf_section_data
   /* The number of relocations currently assigned to REL_HDR2.  */
   unsigned int rel_count2;
 
-  /* A pointer to a linked list tracking dynamic relocs copied for
-     local symbols.  */
-  PTR local_dynrel;
-
-  /* A pointer to the bfd section used for dynamic relocs.  */
-  asection *sreloc;
-
   /* The ELF section number of this section.  Only used for an output
      file.  */
   int this_idx;
@@ -960,6 +949,12 @@ struct bfd_elf_section_data
      REL_HDR2 if any.  Only used for an output file.  */
   int rel_idx2;
 
+  /* Used by the backend linker when generating a shared library to
+     record the dynamic symbol index for a section symbol
+     corresponding to this section.  A value of 0 means that there is
+     no dynamic symbol for this section.  */
+  int dynindx;
+
   /* Used by the backend linker to store the symbol hash table entries
      associated with relocs against global symbols.  */
   struct elf_link_hash_entry **rel_hashes;
@@ -969,17 +964,12 @@ struct bfd_elf_section_data
      pointer may be NULL.  It is used by the backend linker.  */
   Elf_Internal_Rela *relocs;
 
-  /* Used by the backend linker when generating a shared library to
-     record the dynamic symbol index for a section symbol
-     corresponding to this section.  A value of 0 means that there is
-     no dynamic symbol for this section.  */
-  long dynindx;
+  /* A pointer to a linked list tracking dynamic relocs copied for
+     local symbols.  */
+  PTR local_dynrel;
 
-  /* A pointer used for various section optimizations.  */
-  PTR sec_info;
-
-  /* Type of that information.  */
-  enum elf_link_info_type sec_info_type;
+  /* A pointer to the bfd section used for dynamic relocs.  */
+  asection *sreloc;
 
   union {
     /* Group name, if this section is a member of a group.  */
@@ -993,28 +983,21 @@ struct bfd_elf_section_data
      the linker.  */
   asection *next_in_group;
 
-  /* A pointer available for the processor specific ELF backend.  */
-  PTR tdata;
-
-  /* Nonzero if this section uses RELA relocations, rather than REL.  */
-  unsigned int use_rela_p:1;
-
-  /* Nonzero when a group is COMDAT.  */
-  unsigned int linkonce_p:1;
+  /* A pointer used for various section optimizations.  */
+  PTR sec_info;
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
 #define elf_group_name(sec)    (elf_section_data(sec)->group.name)
 #define elf_group_id(sec)      (elf_section_data(sec)->group.id)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
-#define elf_linkonce_p(sec)    (elf_section_data(sec)->linkonce_p)
 
 /* Return TRUE if section has been discarded.  */
-#define elf_discarded_section(sec)					\
-  (!bfd_is_abs_section(sec)						\
-   && bfd_is_abs_section((sec)->output_section)				\
-   && elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_MERGE	\
-   && elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
+#define elf_discarded_section(sec)				\
+  (!bfd_is_abs_section (sec)					\
+   && bfd_is_abs_section ((sec)->output_section)		\
+   && sec->sec_info_type != ELF_INFO_TYPE_MERGE			\
+   && sec->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
 
 #define get_elf_backend_data(abfd) \
   ((struct elf_backend_data *) (abfd)->xvec->backend_data)
@@ -1122,17 +1105,14 @@ struct elf_obj_tdata
      minus the sh_info field of the symbol table header.  */
   struct elf_link_hash_entry **sym_hashes;
 
-  /* A mapping from local symbols to offsets into the global offset
-     table, used when linking.  This is indexed by the symbol index.
-     Like for the globals, we use a union and two names primarily to
-     document the intent of any particular piece of code.  The field
-     should be used as a count until size_dynamic_sections, at which
-     point the contents of the .got is fixed.  Afterward, if an entry
-     is -1, then the symbol does not require a global offset table entry.  */
+  /* Track usage and final offsets of GOT entries for local symbols.
+     This array is indexed by symbol index.  Elements are used
+     identically to "got" in struct elf_link_hash_entry.  */
   union
     {
       bfd_signed_vma *refcounts;
       bfd_vma *offsets;
+      struct got_entry **ents;
     } local_got;
 
   /* A mapping from local symbols to offsets into the various linker
@@ -1239,6 +1219,7 @@ struct elf_obj_tdata
 #define elf_sym_hashes(bfd)	(elf_tdata(bfd) -> sym_hashes)
 #define elf_local_got_refcounts(bfd) (elf_tdata(bfd) -> local_got.refcounts)
 #define elf_local_got_offsets(bfd) (elf_tdata(bfd) -> local_got.offsets)
+#define elf_local_got_ents(bfd) (elf_tdata(bfd) -> local_got.ents)
 #define elf_local_ptr_offsets(bfd) (elf_tdata(bfd) -> linker_section_pointers)
 #define elf_dt_name(bfd)	(elf_tdata(bfd) -> dt_name)
 #define elf_dt_soname(bfd)	(elf_tdata(bfd) -> dt_soname)
@@ -1276,6 +1257,8 @@ extern char *bfd_elf_get_str_section
 extern Elf_Internal_Sym *bfd_elf_get_elf_syms
   PARAMS ((bfd *, Elf_Internal_Shdr *, size_t, size_t,
 	   Elf_Internal_Sym *, PTR, Elf_External_Sym_Shndx *));
+extern const char *bfd_elf_local_sym_name
+  PARAMS ((bfd *, Elf_Internal_Sym *));
 
 extern bfd_boolean _bfd_elf_copy_private_bfd_data
   PARAMS ((bfd *, bfd *));

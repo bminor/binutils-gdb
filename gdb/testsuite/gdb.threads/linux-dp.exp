@@ -1,4 +1,4 @@
-# Copyright 1999, 2001, 2002 Free Software Foundation, Inc.
+# Copyright 1999, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ set testfile "linux-dp"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug libs=-lpthread}] != ""} {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    return -1
 }
 
 gdb_start

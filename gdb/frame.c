@@ -1,7 +1,7 @@
 /* Cache and manage frames for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,9 +31,17 @@
 #include "builtin-regs.h"
 #include "gdb_obstack.h"
 #include "dummy-frame.h"
+#include "sentinel-frame.h"
 #include "gdbcore.h"
 #include "annotate.h"
 #include "language.h"
+#include "frame-unwind.h"
+#include "command.h"
+#include "gdbcmd.h"
+
+/* Flag to indicate whether backtraces should stop at main.  */
+
+static int backtrace_below_main;
 
 /* Return a frame uniq ID that can be used to, later, re-find the
    frame.  */
@@ -127,7 +135,7 @@ frame_pc_unwind (struct frame_info *frame)
 {
   if (!frame->pc_unwind_cache_p)
     {
-      frame->pc_unwind_cache = frame->pc_unwind (frame, &frame->unwind_cache);
+      frame->pc_unwind_cache = frame->unwind->pc (frame, &frame->unwind_cache);
       frame->pc_unwind_cache_p = 1;
     }
   return frame->pc_unwind_cache;
@@ -138,13 +146,24 @@ frame_id_unwind (struct frame_info *frame)
 {
   if (!frame->id_unwind_cache_p)
     {
-      frame->id_unwind_cache =
-	frame->id_unwind (frame, &frame->unwind_cache);
+      frame->unwind->id (frame, &frame->unwind_cache, &frame->id_unwind_cache);
       frame->id_unwind_cache_p = 1;
     }
   return frame->id_unwind_cache;
 }
 
+void
+frame_pop (struct frame_info *frame)
+{
+  /* FIXME: cagney/2003-01-18: There is probably a chicken-egg problem
+     with passing in current_regcache.  The pop function needs to be
+     written carefully so as to not overwrite registers whose [old]
+     values are needed to restore other registers.  Instead, this code
+     should pass in a scratch cache and, as a second step, restore the
+     registers using that.  */
+  frame->unwind->pop (frame, &frame->unwind_cache, current_regcache);
+  flush_cached_frames ();
+}
 
 void
 frame_register_unwind (struct frame_info *frame, int regnum,
@@ -161,33 +180,15 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   gdb_assert (realnump != NULL);
   /* gdb_assert (bufferp != NULL); */
 
-  /* NOTE: cagney/2002-04-14: It would be nice if, instead of a
-     special case, there was always an inner frame dedicated to the
-     hardware registers.  Unfortunatly, there is too much unwind code
-     around that looks up/down the frame chain while making the
-     assumption that each frame level is using the same unwind code.  */
-
-  if (frame == NULL)
-    {
-      /* We're in the inner-most frame, get the value direct from the
-	 register cache.  */
-      *optimizedp = 0;
-      *lvalp = lval_register;
-      /* ULGH!  Code uses the offset into the raw register byte array
-         as a way of identifying a register.  */
-      *addrp = REGISTER_BYTE (regnum);
-      /* Should this code test ``register_cached (regnum) < 0'' and do
-         something like set realnum to -1 when the register isn't
-         available?  */
-      *realnump = regnum;
-      if (bufferp)
-	deprecated_read_register_gen (regnum, bufferp);
-      return;
-    }
+  /* NOTE: cagney/2002-11-27: A program trying to unwind a NULL frame
+     is broken.  There is always a frame.  If there, for some reason,
+     isn't, there is some pretty busted code as it should have
+     detected the problem before calling here.  */
+  gdb_assert (frame != NULL);
 
   /* Ask this frame to unwind its register.  */
-  frame->register_unwind (frame, &frame->unwind_cache, regnum,
-			  optimizedp, lvalp, addrp, realnump, bufferp);
+  frame->unwind->reg (frame, &frame->unwind_cache, regnum,
+		      optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 void
@@ -229,38 +230,30 @@ frame_register (struct frame_info *frame, int regnum,
       return;
     }
 
-  /* Reached the the bottom (youngest, inner most) of the frame chain
-     (youngest, inner most) frame, go direct to the hardware register
-     cache (do not pass go, do not try to cache the value, ...).  The
-     unwound value would have been cached in frame->next but that
-     doesn't exist.  This doesn't matter as the hardware register
-     cache is stopping any unnecessary accesses to the target.  */
+  /* Obtain the register value by unwinding the register from the next
+     (more inner frame).  */
+  gdb_assert (frame != NULL && frame->next != NULL);
+  frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
+			 realnump, bufferp);
+}
 
-  /* NOTE: cagney/2002-04-14: It would be nice if, instead of a
-     special case, there was always an inner frame dedicated to the
-     hardware registers.  Unfortunatly, there is too much unwind code
-     around that looks up/down the frame chain while making the
-     assumption that each frame level is using the same unwind code.  */
-
-  if (frame == NULL)
-    frame_register_unwind (NULL, regnum, optimizedp, lvalp, addrp, realnump,
-			   bufferp);
-  else
-    frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
-			   realnump, bufferp);
+void
+frame_unwind_register (struct frame_info *frame, int regnum, void *buf)
+{
+  int optimized;
+  CORE_ADDR addr;
+  int realnum;
+  enum lval_type lval;
+  frame_register_unwind (frame, regnum, &optimized, &lval, &addr,
+			 &realnum, buf);
 }
 
 void
 frame_unwind_signed_register (struct frame_info *frame, int regnum,
 			      LONGEST *val)
 {
-  int optimized;
-  CORE_ADDR addr;
-  int realnum;
-  enum lval_type lval;
   void *buf = alloca (MAX_REGISTER_RAW_SIZE);
-  frame_register_unwind (frame, regnum, &optimized, &lval, &addr,
-			 &realnum, buf);
+  frame_unwind_register (frame, regnum, buf);
   (*val) = extract_signed_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
 }
 
@@ -268,14 +261,16 @@ void
 frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
 				ULONGEST *val)
 {
-  int optimized;
-  CORE_ADDR addr;
-  int realnum;
-  enum lval_type lval;
   void *buf = alloca (MAX_REGISTER_RAW_SIZE);
-  frame_register_unwind (frame, regnum, &optimized, &lval, &addr,
-			 &realnum, buf);
+  frame_unwind_register (frame, regnum, buf);
   (*val) = extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+}
+
+void
+frame_read_register (struct frame_info *frame, int regnum, void *buf)
+{
+  gdb_assert (frame != NULL && frame->next != NULL);
+  frame_unwind_register (frame->next, regnum, buf);
 }
 
 void
@@ -299,17 +294,17 @@ frame_read_unsigned_register (struct frame_info *frame, int regnum,
      tests like ``if get_next_frame() == NULL'' and instead just rely
      on recursive frame calls (like the below code) when manipulating
      a frame chain.  */
-  gdb_assert (frame != NULL);
-  frame_unwind_unsigned_register (get_next_frame (frame), regnum, val);
+  gdb_assert (frame != NULL && frame->next != NULL);
+  frame_unwind_unsigned_register (frame->next, regnum, val);
 }
 
 void
 frame_read_signed_register (struct frame_info *frame, int regnum,
 			    LONGEST *val)
 {
-  /* See note in frame_read_unsigned_register().  */
-  gdb_assert (frame != NULL);
-  frame_unwind_signed_register (get_next_frame (frame), regnum, val);
+  /* See note above in frame_read_unsigned_register().  */
+  gdb_assert (frame != NULL && frame->next != NULL);
+  frame_unwind_signed_register (frame->next, regnum, val);
 }
 
 static void
@@ -337,25 +332,9 @@ generic_unwind_get_saved_register (char *raw_buffer,
   if (addrp == NULL)
     addrp = &addrx;
 
-  /* Reached the the bottom (youngest, inner most) of the frame chain
-     (youngest, inner most) frame, go direct to the hardware register
-     cache (do not pass go, do not try to cache the value, ...).  The
-     unwound value would have been cached in frame->next but that
-     doesn't exist.  This doesn't matter as the hardware register
-     cache is stopping any unnecessary accesses to the target.  */
-
-  /* NOTE: cagney/2002-04-14: It would be nice if, instead of a
-     special case, there was always an inner frame dedicated to the
-     hardware registers.  Unfortunatly, there is too much unwind code
-     around that looks up/down the frame chain while making the
-     assumption that each frame level is using the same unwind code.  */
-
-  if (frame == NULL)
-    frame_register_unwind (NULL, regnum, optimizedp, lvalp, addrp, &realnumx,
-			   raw_buffer);
-  else
-    frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
-			   &realnumx, raw_buffer);
+  gdb_assert (frame != NULL && frame->next != NULL);
+  frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
+			 &realnumx, raw_buffer);
 }
 
 void
@@ -414,6 +393,9 @@ frame_map_name_to_regnum (const char *name, int len)
 {
   int i;
 
+  if (len < 0)
+    len = strlen (name);
+
   /* Search register name space. */
   for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
     if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))
@@ -445,6 +427,32 @@ frame_map_regnum_to_name (int regnum)
   return builtin_reg_map_regnum_to_name (regnum);
 }
 
+/* Create a sentinel frame.  */
+
+struct frame_info *
+create_sentinel_frame (struct regcache *regcache)
+{
+  struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  frame->type = NORMAL_FRAME;
+  frame->level = -1;
+  /* Explicitly initialize the sentinel frame's cache.  Provide it
+     with the underlying regcache.  In the future additional
+     information, such as the frame's thread will be added.  */
+  frame->unwind_cache = sentinel_frame_cache (regcache);
+  /* For the moment there is only one sentinel frame implementation.  */
+  frame->unwind = sentinel_frame_unwind;
+  /* Link this frame back to itself.  The frame is self referential
+     (the unwound PC is the same as the pc), so make it so.  */
+  frame->next = frame;
+  /* Always unwind the PC as part of creating this frame.  This
+     ensures that the frame's PC points at something valid.  */
+  /* FIXME: cagney/2003-01-10: Problem here.  Unwinding a sentinel
+     frame's PC may require information such as the frame's thread's
+     stop reason.  Is it possible to get to that?  */
+  frame->pc = frame_pc_unwind (frame);
+  return frame;
+}
+
 /* Info about the innermost stack frame (contents of FP register) */
 
 static struct frame_info *current_frame;
@@ -456,17 +464,18 @@ static struct frame_info *current_frame;
 static struct obstack frame_cache_obstack;
 
 void *
-frame_obstack_alloc (unsigned long size)
+frame_obstack_zalloc (unsigned long size)
 {
-  return obstack_alloc (&frame_cache_obstack, size);
+  void *data = obstack_alloc (&frame_cache_obstack, size);
+  memset (data, 0, size);
+  return data;
 }
 
 CORE_ADDR *
 frame_saved_regs_zalloc (struct frame_info *fi)
 {
   fi->saved_regs = (CORE_ADDR *)
-    frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
-  memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
+    frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
   return fi->saved_regs;
 }
 
@@ -476,17 +485,43 @@ get_frame_saved_regs (struct frame_info *fi)
   return fi->saved_regs;
 }
 
-/* Return the innermost (currently executing) stack frame.  */
+/* Return the innermost (currently executing) stack frame.  This is
+   split into two functions.  The function unwind_to_current_frame()
+   is wrapped in catch exceptions so that, even when the unwind of the
+   sentinel frame fails, the function still returns a stack frame.  */
+
+static int
+unwind_to_current_frame (struct ui_out *ui_out, void *args)
+{
+  struct frame_info *frame = get_prev_frame (args);
+  /* A sentinel frame can fail to unwind, eg, because it's PC value
+     lands in somewhere like start.  */
+  if (frame == NULL)
+    return 1;
+  current_frame = frame;
+  return 0;
+}
 
 struct frame_info *
 get_current_frame (void)
 {
+  if (!target_has_stack)
+    error ("No stack.");
+  if (!target_has_registers)
+    error ("No registers.");
+  if (!target_has_memory)
+    error ("No memory.");
   if (current_frame == NULL)
     {
-      if (target_has_stack)
-	current_frame = create_new_frame (read_fp (), read_pc ());
-      else
-	error ("No stack.");
+      struct frame_info *sentinel_frame =
+	create_sentinel_frame (current_regcache);
+      if (catch_exceptions (uiout, unwind_to_current_frame, sentinel_frame,
+			    NULL, RETURN_MASK_ERROR) != 0)
+	{
+	  /* Oops! Fake a current frame?  Is this useful?  It has a PC
+             of zero, for instance.  */
+	  current_frame = sentinel_frame;
+	}
     }
   return current_frame;
 }
@@ -569,12 +604,16 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
   gdb_assert (!(DEPRECATED_USE_GENERIC_DUMMY_FRAMES
 		&& (get_frame_type (frame) == DUMMY_FRAME)));
 
+  /* Only (older) architectures that implement the
+     FRAME_INIT_SAVED_REGS method should be using this function.  */
+  gdb_assert (FRAME_INIT_SAVED_REGS_P ());
+
   /* Load the saved_regs register cache.  */
-  if (frame->saved_regs == NULL)
+  if (get_frame_saved_regs (frame) == NULL)
     FRAME_INIT_SAVED_REGS (frame);
 
-  if (frame->saved_regs != NULL
-      && frame->saved_regs[regnum] != 0)
+  if (get_frame_saved_regs (frame) != NULL
+      && get_frame_saved_regs (frame)[regnum] != 0)
     {
       if (regnum == SP_REGNUM)
 	{
@@ -585,7 +624,7 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 	  *realnump = -1;
 	  if (bufferp != NULL)
 	    store_address (bufferp, REGISTER_RAW_SIZE (regnum),
-			   frame->saved_regs[regnum]);
+			   get_frame_saved_regs (frame)[regnum]);
 	}
       else
 	{
@@ -593,7 +632,7 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
              a local copy of its value.  */
 	  *optimizedp = 0;
 	  *lvalp = lval_memory;
-	  *addrp = frame->saved_regs[regnum];
+	  *addrp = get_frame_saved_regs (frame)[regnum];
 	  *realnump = -1;
 	  if (bufferp != NULL)
 	    {
@@ -605,21 +644,20 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 		{
 		  int sizeof_cache = ((NUM_REGS + NUM_PSEUDO_REGS)
 				      * sizeof (void *));
-		  regs = frame_obstack_alloc (sizeof_cache);
-		  memset (regs, 0, sizeof_cache);
+		  regs = frame_obstack_zalloc (sizeof_cache);
 		  (*cache) = regs;
 		}
 	      if (regs[regnum] == NULL)
 		{
 		  regs[regnum]
-		    = frame_obstack_alloc (REGISTER_RAW_SIZE (regnum));
-		  read_memory (frame->saved_regs[regnum], regs[regnum],
+		    = frame_obstack_zalloc (REGISTER_RAW_SIZE (regnum));
+		  read_memory (get_frame_saved_regs (frame)[regnum], regs[regnum],
 			       REGISTER_RAW_SIZE (regnum));
 		}
 	      memcpy (bufferp, regs[regnum], REGISTER_RAW_SIZE (regnum));
 #else
 	      /* Read the value in from memory.  */
-	      read_memory (frame->saved_regs[regnum], bufferp,
+	      read_memory (get_frame_saved_regs (frame)[regnum], bufferp,
 			   REGISTER_RAW_SIZE (regnum));
 #endif
 	    }
@@ -628,36 +666,32 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
     }
 
   /* No luck, assume this and the next frame have the same register
-     value.  If a value is needed, pass the request on down the chain;
-     otherwise just return an indication that the value is in the same
-     register as the next frame.  */
-  if (bufferp == NULL)
-    {
-      *optimizedp = 0;
-      *lvalp = lval_register;
-      *addrp = 0;
-      *realnump = regnum;
-    }
-  else
-    {
-      frame_register_unwind (frame->next, regnum, optimizedp, lvalp, addrp,
-			     realnump, bufferp);
-    }
+     value.  Pass the request down the frame chain to the next frame.
+     Hopefully that will find the register's location, either in a
+     register or in memory.  */
+  frame_register (frame, regnum, optimizedp, lvalp, addrp, realnump,
+		  bufferp);
 }
 
 static CORE_ADDR
 frame_saved_regs_pc_unwind (struct frame_info *frame, void **cache)
 {
+  gdb_assert (FRAME_SAVED_PC_P ());
   return FRAME_SAVED_PC (frame);
 }
 	
-static struct frame_id
-frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache)
+static void
+frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
+			    struct frame_id *id)
 {
   int fromleaf;
-  struct frame_id id;
+  CORE_ADDR base;
+  CORE_ADDR pc;
 
-  if (next_frame->next == NULL)
+  /* Start out by assuming it's NULL.  */
+  (*id) = null_frame_id;
+
+  if (frame_relative_level (next_frame) <= 0)
     /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
        the frame chain, not just the inner most frame!  The generic,
        per-architecture, frame code should handle this and the below
@@ -673,7 +707,7 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache)
     /* FIXME: 2002-11-09: There isn't any reason to special case this
        edge condition.  Instead the per-architecture code should hande
        it locally.  */
-    id.base = get_frame_base (next_frame);
+    base = get_frame_base (next_frame);
   else
     {
       /* Two macros defined in tm.h specify the machine-dependent
@@ -691,28 +725,39 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache)
          this to after the ffi test; I'd rather have backtraces from
          start go curfluy than have an abort called from main not show
          main.  */
-      id.base = FRAME_CHAIN (next_frame);
+      gdb_assert (FRAME_CHAIN_P ());
+      base = FRAME_CHAIN (next_frame);
 
-      /* FIXME: cagney/2002-06-08: There should be two tests here.
-         The first would check for a valid frame chain based on a user
-         selectable policy.  The default being ``stop at main'' (as
-         implemented by generic_func_frame_chain_valid()).  Other
-         policies would be available - stop at NULL, ....  The second
-         test, if provided by the target architecture, would check for
-         more exotic cases - most target architectures wouldn't bother
-         with this second case.  */
-      if (!FRAME_CHAIN_VALID (id.base, next_frame))
-	return null_frame_id;
+      if (!frame_chain_valid (base, next_frame))
+	return;
     }
-  if (id.base == 0)
-    return null_frame_id;
+  if (base == 0)
+    return;
 
   /* FIXME: cagney/2002-06-08: This should probably return the frame's
      function and not the PC (a.k.a. resume address).  */
-  id.pc = frame_pc_unwind (next_frame);
-  return id;
+  pc = frame_pc_unwind (next_frame);
+  id->pc = pc;
+  id->base = base;
 }
 	
+static void
+frame_saved_regs_pop (struct frame_info *fi, void **cache,
+		      struct regcache *regcache)
+{
+  gdb_assert (POP_FRAME_P ());
+  POP_FRAME;
+}
+
+const struct frame_unwind trad_frame_unwinder = {
+  frame_saved_regs_pop,
+  frame_saved_regs_pc_unwind,
+  frame_saved_regs_id_unwind,
+  frame_saved_regs_register_unwind
+};
+const struct frame_unwind *trad_frame_unwind = &trad_frame_unwinder;
+
+
 /* Function: get_saved_register
    Find register number REGNUM relative to FRAME and put its (raw,
    target format) contents in *RAW_BUFFER.  
@@ -746,6 +791,8 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
   if (!target_has_registers)
     error ("No registers.");
 
+  gdb_assert (FRAME_INIT_SAVED_REGS_P ());
+
   /* Normal systems don't optimize out things with register numbers.  */
   if (optimized != NULL)
     *optimized = 0;
@@ -758,44 +805,50 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
      the current frame itself: otherwise, we would be getting the
      previous frame's registers which were saved by the current frame.  */
 
-  while (frame && ((frame = frame->next) != NULL))
+  if (frame != NULL)
     {
-      if (get_frame_type (frame) == DUMMY_FRAME)
+      for (frame = get_next_frame (frame);
+	   frame_relative_level (frame) >= 0;
+	   frame = get_next_frame (frame))
 	{
-	  if (lval)		/* found it in a CALL_DUMMY frame */
-	    *lval = not_lval;
-	  if (raw_buffer)
-	    /* FIXME: cagney/2002-06-26: This should be via the
-	       gdbarch_register_read() method so that it, on the fly,
-	       constructs either a raw or pseudo register from the raw
-	       register cache.  */
-	    regcache_raw_read (generic_find_dummy_frame (frame->pc,
-							 frame->frame),
-			       regnum, raw_buffer);
-	  return;
-	}
-
-      FRAME_INIT_SAVED_REGS (frame);
-      if (frame->saved_regs != NULL
-	  && frame->saved_regs[regnum] != 0)
-	{
-	  if (lval)		/* found it saved on the stack */
-	    *lval = lval_memory;
-	  if (regnum == SP_REGNUM)
+	  if (get_frame_type (frame) == DUMMY_FRAME)
 	    {
-	      if (raw_buffer)	/* SP register treated specially */
-		store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			       frame->saved_regs[regnum]);
-	    }
-	  else
-	    {
-	      if (addrp)	/* any other register */
-		*addrp = frame->saved_regs[regnum];
+	      if (lval)		/* found it in a CALL_DUMMY frame */
+		*lval = not_lval;
 	      if (raw_buffer)
-		read_memory (frame->saved_regs[regnum], raw_buffer,
-			     REGISTER_RAW_SIZE (regnum));
+		/* FIXME: cagney/2002-06-26: This should be via the
+		   gdbarch_register_read() method so that it, on the
+		   fly, constructs either a raw or pseudo register
+		   from the raw register cache.  */
+		regcache_raw_read
+		  (generic_find_dummy_frame (get_frame_pc (frame),
+					     get_frame_base (frame)),
+		   regnum, raw_buffer);
+	      return;
 	    }
-	  return;
+
+	  FRAME_INIT_SAVED_REGS (frame);
+	  if (get_frame_saved_regs (frame) != NULL
+	      && get_frame_saved_regs (frame)[regnum] != 0)
+	    {
+	      if (lval)		/* found it saved on the stack */
+		*lval = lval_memory;
+	      if (regnum == SP_REGNUM)
+		{
+		  if (raw_buffer)	/* SP register treated specially */
+		    store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
+				   get_frame_saved_regs (frame)[regnum]);
+		}
+	      else
+		{
+		  if (addrp)	/* any other register */
+		    *addrp = get_frame_saved_regs (frame)[regnum];
+		  if (raw_buffer)
+		    read_memory (get_frame_saved_regs (frame)[regnum], raw_buffer,
+				 REGISTER_RAW_SIZE (regnum));
+		}
+	      return;
+	    }
 	}
     }
 
@@ -810,39 +863,26 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
     deprecated_read_register_gen (regnum, raw_buffer);
 }
 
-/* Using the PC, select a mechanism for unwinding a frame returning
-   the previous frame.  The register unwind function should, on
-   demand, initialize the ->context object.  */
+/* Determine the frame's type based on its PC.  */
 
-static void
-set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
-		  frame_register_unwind_ftype **unwind_register,
-		  frame_pc_unwind_ftype **unwind_pc,
-		  frame_id_unwind_ftype **unwind_id)
+static enum frame_type
+frame_type_from_pc (CORE_ADDR pc)
 {
-  if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-    {
-      /* Still need to set this to something.  The ``info frame'' code
-	 calls this function to find out where the saved registers are.
-	 Hopefully this is robust enough to stop any core dumps and
-	 return vaguely correct values..  */
-      *unwind_register = frame_saved_regs_register_unwind;
-      *unwind_pc = frame_saved_regs_pc_unwind;
-      *unwind_id = frame_saved_regs_id_unwind;
-    }
-  else if (DEPRECATED_PC_IN_CALL_DUMMY_P ()
-	   ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
-	   : pc_in_dummy_frame (pc))
-    {
-      *unwind_register = dummy_frame_register_unwind;
-      *unwind_pc = dummy_frame_pc_unwind;
-      *unwind_id = dummy_frame_id_unwind;
-    }
+  /* FIXME: cagney/2002-11-24: Can't yet directly call
+     pc_in_dummy_frame() as some architectures don't set
+     PC_IN_CALL_DUMMY() to generic_pc_in_call_dummy() (remember the
+     latter is implemented by simply calling pc_in_dummy_frame).  */
+  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
+      && DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
+    return DUMMY_FRAME;
   else
     {
-      *unwind_register = frame_saved_regs_register_unwind;
-      *unwind_pc = frame_saved_regs_pc_unwind;
-      *unwind_id = frame_saved_regs_id_unwind;
+      char *name;
+      find_pc_partial_function (pc, &name, NULL, NULL);
+      if (PC_IN_SIGTRAMP (pc, name))
+	return SIGTRAMP_FRAME;
+      else
+	return NORMAL_FRAME;
     }
 }
 
@@ -853,59 +893,34 @@ struct frame_info *
 create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 {
   struct frame_info *fi;
-  enum frame_type type;
 
-  fi = (struct frame_info *)
-    obstack_alloc (&frame_cache_obstack,
-		   sizeof (struct frame_info));
-
-  /* Zero all fields by default.  */
-  memset (fi, 0, sizeof (struct frame_info));
+  fi = frame_obstack_zalloc (sizeof (struct frame_info));
 
   fi->frame = addr;
   fi->pc = pc;
-  /* NOTE: cagney/2002-11-18: The code segments, found in
-     create_new_frame and get_prev_frame(), that initializes the
-     frames type is subtly different.  The latter only updates ->type
-     when it encounters a SIGTRAMP_FRAME or DUMMY_FRAME.  This stops
-     get_prev_frame() overriding the frame's type when the INIT code
-     has previously set it.  This is really somewhat bogus.  The
-     initialization, as seen in create_new_frame(), should occur
-     before the INIT function has been called.  */
-  if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && (DEPRECATED_PC_IN_CALL_DUMMY_P ()
-	  ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
-	  : pc_in_dummy_frame (pc)))
-    /* NOTE: cagney/2002-11-11: Does this even occure?  */
-    type = DUMMY_FRAME;
-  else
-    {
-      char *name;
-      find_pc_partial_function (pc, &name, NULL, NULL);
-      if (PC_IN_SIGTRAMP (fi->pc, name))
-	type = SIGTRAMP_FRAME;
-      else
-	type = NORMAL_FRAME;
-    }
-  fi->type = type;
+  fi->next = create_sentinel_frame (current_regcache);
+  fi->type = frame_type_from_pc (pc);
 
   if (INIT_EXTRA_FRAME_INFO_P ())
     INIT_EXTRA_FRAME_INFO (0, fi);
 
   /* Select/initialize an unwind function.  */
-  set_unwind_by_pc (fi->pc, fi->frame, &fi->register_unwind,
-		    &fi->pc_unwind, &fi->id_unwind);
+  fi->unwind = frame_unwind_find_by_pc (current_gdbarch, fi->pc);
 
   return fi;
 }
 
 /* Return the frame that FRAME calls (NULL if FRAME is the innermost
-   frame).  */
+   frame).  Be careful to not fall off the bottom of the frame chain
+   and onto the sentinel frame.  */
 
 struct frame_info *
 get_next_frame (struct frame_info *frame)
 {
-  return frame->next;
+  if (frame->level > 0)
+    return frame->next;
+  else
+    return NULL;
 }
 
 /* Flush the entire frame cache.  */
@@ -936,43 +951,19 @@ reinit_frame_cache (void)
     }
 }
 
-/* Return a structure containing various interesting information
-   about the frame that called NEXT_FRAME.  Returns NULL
-   if there is no such frame.  */
+/* Create the previous frame using the deprecated methods
+   INIT_EXTRA_INFO, INIT_FRAME_PC and INIT_FRAME_PC_FIRST.  */
 
-struct frame_info *
-get_prev_frame (struct frame_info *next_frame)
+static struct frame_info *
+legacy_get_prev_frame (struct frame_info *next_frame)
 {
   CORE_ADDR address = 0;
   struct frame_info *prev;
   int fromleaf;
 
-  /* Return the inner-most frame, when the caller passes in NULL.  */
-  /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
-     caller should have previously obtained a valid frame using
-     get_selected_frame() and then called this code - only possibility
-     I can think of is code behaving badly.  */
-  if (next_frame == NULL)
-    {
-      /* NOTE: cagney/2002-11-09: There was a code segment here that
-	 would error out when CURRENT_FRAME was NULL.  The comment
-	 that went with it made the claim ...
-
-	 ``This screws value_of_variable, which just wants a nice
-	 clean NULL return from block_innermost_frame if there are no
-	 frames.  I don't think I've ever seen this message happen
-	 otherwise.  And returning NULL here is a perfectly legitimate
-	 thing to do.''
-
-         Per the above, this code shouldn't even be called with a NULL
-         NEXT_FRAME.  */
-      return current_frame;
-    }
-
-  /* Only try to do the unwind once.  */
-  if (next_frame->prev_p)
-    return next_frame->prev;
-  next_frame->prev_p = 1;
+  /* This code only works on normal frames.  A sentinel frame, where
+     the level is -1, should never reach this code.  */
+  gdb_assert (next_frame->level >= 0);
 
   /* On some machines it is possible to call a function without
      setting up a stack frame for it.  On these machines, we
@@ -983,7 +974,7 @@ get_prev_frame (struct frame_info *next_frame)
   /* Still don't want to worry about this except on the innermost
      frame.  This macro will set FROMLEAF if NEXT_FRAME is a frameless
      function invocation.  */
-  if (next_frame->next == NULL)
+  if (next_frame->level == 0)
     /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
        the frame chain, not just the inner most frame!  The generic,
        per-architecture, frame code should handle this and the below
@@ -1017,27 +1008,17 @@ get_prev_frame (struct frame_info *next_frame)
          this to after the ffi test; I'd rather have backtraces from
          start go curfluy than have an abort called from main not show
          main.  */
+      gdb_assert (FRAME_CHAIN_P ());
       address = FRAME_CHAIN (next_frame);
 
-      /* FIXME: cagney/2002-06-08: There should be two tests here.
-         The first would check for a valid frame chain based on a user
-         selectable policy.  The default being ``stop at main'' (as
-         implemented by generic_func_frame_chain_valid()).  Other
-         policies would be available - stop at NULL, ....  The second
-         test, if provided by the target architecture, would check for
-         more exotic cases - most target architectures wouldn't bother
-         with this second case.  */
-      if (!FRAME_CHAIN_VALID (address, next_frame))
+      if (!frame_chain_valid (address, next_frame))
 	return 0;
     }
   if (address == 0)
     return 0;
 
   /* Create an initially zero previous frame.  */
-  prev = (struct frame_info *)
-    obstack_alloc (&frame_cache_obstack,
-		   sizeof (struct frame_info));
-  memset (prev, 0, sizeof (struct frame_info));
+  prev = frame_obstack_zalloc (sizeof (struct frame_info));
 
   /* Link it in.  */
   next_frame->prev = prev;
@@ -1148,8 +1129,7 @@ get_prev_frame (struct frame_info *next_frame)
      (and probably other architectural information).  The PC lets you
      check things like the debug info at that point (dwarf2cfi?) and
      use that to decide how the frame should be unwound.  */
-  set_unwind_by_pc (prev->pc, prev->frame, &prev->register_unwind,
-		    &prev->pc_unwind, &prev->id_unwind);
+  prev->unwind = frame_unwind_find_by_pc (current_gdbarch, prev->pc);
 
   /* NOTE: cagney/2002-11-18: The code segments, found in
      create_new_frame and get_prev_frame(), that initializes the
@@ -1185,6 +1165,163 @@ get_prev_frame (struct frame_info *next_frame)
     }
 
   return prev;
+}
+
+/* Return a structure containing various interesting information
+   about the frame that called NEXT_FRAME.  Returns NULL
+   if there is no such frame.  */
+
+struct frame_info *
+get_prev_frame (struct frame_info *next_frame)
+{
+  struct frame_info *prev_frame;
+
+  /* Return the inner-most frame, when the caller passes in NULL.  */
+  /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
+     caller should have previously obtained a valid frame using
+     get_selected_frame() and then called this code - only possibility
+     I can think of is code behaving badly.
+
+     NOTE: cagney/2003-01-10: Talk about code behaving badly.  Check
+     block_innermost_frame().  It does the sequence: frame = NULL;
+     while (1) { frame = get_prev_frame (frame); .... }.  Ulgh!  Why
+     it couldn't be written better, I don't know.
+
+     NOTE: cagney/2003-01-11: I suspect what is happening is
+     block_innermost_frame() is, when the target has no state
+     (registers, memory, ...), still calling this function.  The
+     assumption being that this function will return NULL indicating
+     that a frame isn't possible, rather than checking that the target
+     has state and then calling get_current_frame() and
+     get_prev_frame().  This is a guess mind.  */
+  if (next_frame == NULL)
+    {
+      /* NOTE: cagney/2002-11-09: There was a code segment here that
+	 would error out when CURRENT_FRAME was NULL.  The comment
+	 that went with it made the claim ...
+
+	 ``This screws value_of_variable, which just wants a nice
+	 clean NULL return from block_innermost_frame if there are no
+	 frames.  I don't think I've ever seen this message happen
+	 otherwise.  And returning NULL here is a perfectly legitimate
+	 thing to do.''
+
+         Per the above, this code shouldn't even be called with a NULL
+         NEXT_FRAME.  */
+      return current_frame;
+    }
+
+  /* There is always a frame.  If this assertion fails, suspect that
+     something should be calling get_selected_frame() or
+     get_current_frame().  */
+  gdb_assert (next_frame != NULL);
+
+  if (next_frame->level >= 0
+      && !backtrace_below_main
+      && inside_main_func (get_frame_pc (next_frame)))
+    /* Don't unwind past main(), bug always unwind the sentinel frame.
+       Note, this is done _before_ the frame has been marked as
+       previously unwound.  That way if the user later decides to
+       allow unwinds past main(), that just happens.  */
+    return NULL;
+
+  /* Only try to do the unwind once.  */
+  if (next_frame->prev_p)
+    return next_frame->prev;
+  next_frame->prev_p = 1;
+
+  /* If we're inside the entry file, it isn't valid.  */
+  /* NOTE: drow/2002-12-25: should there be a way to disable this
+     check?  It assumes a single small entry file, and the way some
+     debug readers (e.g.  dbxread) figure out which object is the
+     entry file is somewhat hokey.  */
+  /* NOTE: cagney/2003-01-10: If there is a way of disabling this test
+     then it should probably be moved to before the ->prev_p test,
+     above.  */
+  if (inside_entry_file (get_frame_pc (next_frame)))
+      return NULL;
+
+  /* If any of the old frame initialization methods are around, use
+     the legacy get_prev_frame method.  Just don't try to unwind a
+     sentinel frame using that method - it doesn't work.  All sentinal
+     frames use the new unwind code.  */
+  if ((DEPRECATED_INIT_FRAME_PC_P ()
+       || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
+       || INIT_EXTRA_FRAME_INFO_P ()
+       || FRAME_CHAIN_P ())
+      && next_frame->level >= 0)
+    return legacy_get_prev_frame (next_frame);
+
+  /* Allocate the new frame but do not wire it in to the frame chain.
+     Some (bad) code in INIT_FRAME_EXTRA_INFO tries to look along
+     frame->next to pull some fancy tricks (of course such code is, by
+     definition, recursive).  Try to prevent it.
+
+     There is no reason to worry about memory leaks, should the
+     remainder of the function fail.  The allocated memory will be
+     quickly reclaimed when the frame cache is flushed, and the `we've
+     been here before' check above will stop repeated memory
+     allocation calls.  */
+  prev_frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  prev_frame->level = next_frame->level + 1;
+
+  /* Try to unwind the PC.  If that doesn't work, assume we've reached
+     the oldest frame and simply return.  Is there a better sentinal
+     value?  The unwound PC value is then used to initialize the new
+     previous frame's type.
+
+     Note that the pc-unwind is intentionally performed before the
+     frame chain.  This is ok since, for old targets, both
+     frame_pc_unwind (nee, FRAME_SAVED_PC) and FRAME_CHAIN()) assume
+     NEXT_FRAME's data structures have already been initialized (using
+     INIT_EXTRA_FRAME_INFO) and hence the call order doesn't matter.
+
+     By unwinding the PC first, it becomes possible to, in the case of
+     a dummy frame, avoid also unwinding the frame ID.  This is
+     because (well ignoring the PPC) a dummy frame can be located
+     using NEXT_FRAME's frame ID.  */
+
+  prev_frame->pc = frame_pc_unwind (next_frame);
+  if (prev_frame->pc == 0)
+    /* The allocated PREV_FRAME will be reclaimed when the frame
+       obstack is next purged.  */
+    return NULL;
+  prev_frame->type = frame_type_from_pc (prev_frame->pc);
+
+  /* Set the unwind functions based on that identified PC.  */
+  prev_frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
+						prev_frame->pc);
+
+  /* FIXME: cagney/2003-01-13: A dummy frame doesn't need to unwind
+     the frame ID because the frame ID comes from the previous frame.
+     The other frames do though.  True?  */
+  {
+    /* FIXME: cagney/2002-12-18: Instead of this hack, should just
+       save the frame ID directly.  */
+    struct frame_id id = frame_id_unwind (next_frame);
+    if (!frame_id_p (id))
+      return NULL;
+    prev_frame->frame = id.base;
+  }
+
+  /* Link it in.  */
+  next_frame->prev = prev_frame;
+  prev_frame->next = next_frame;
+
+  /* FIXME: cagney/2002-01-19: This call will go away.  Instead of
+     initializing extra info, all frames will use the frame_cache
+     (passed to the unwind functions) to store additional frame info.
+     Unfortunatly legacy targets can't use legacy_get_prev_frame() to
+     unwind the sentinel frame and, consequently, are forced to take
+     this code path and rely on the below call to INIT_EXTR_FRAME_INFO
+     to initialize the inner-most frame.  */
+  if (INIT_EXTRA_FRAME_INFO_P ())
+    {
+      gdb_assert (prev_frame->level == 0);
+      INIT_EXTRA_FRAME_INFO (0, prev_frame);
+    }
+
+  return prev_frame;
 }
 
 CORE_ADDR
@@ -1266,7 +1403,7 @@ deprecated_get_frame_saved_regs (struct frame_info *frame,
   if (frame->saved_regs == NULL)
     {
       frame->saved_regs = (CORE_ADDR *)
-	frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
+	frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
     }
   if (saved_regs_addr == NULL)
     {
@@ -1291,8 +1428,7 @@ get_frame_extra_info (struct frame_info *fi)
 struct frame_extra_info *
 frame_extra_info_zalloc (struct frame_info *fi, long size)
 {
-  fi->extra_info = frame_obstack_alloc (size);
-  memset (fi->extra_info, 0, size);
+  fi->extra_info = frame_obstack_zalloc (size);
   return fi->extra_info;
 }
 
@@ -1300,6 +1436,7 @@ void
 deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
 {
   /* See comment in "frame.h".  */
+  gdb_assert (frame->next != NULL);
   frame->pc = pc;
 }
 
@@ -1311,7 +1448,92 @@ deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
 }
 
 void
+deprecated_set_frame_saved_regs_hack (struct frame_info *frame,
+				      CORE_ADDR *saved_regs)
+{
+  frame->saved_regs = saved_regs;
+}
+
+void
+deprecated_set_frame_extra_info_hack (struct frame_info *frame,
+				      struct frame_extra_info *extra_info)
+{
+  frame->extra_info = extra_info;
+}
+
+void
+deprecated_set_frame_next_hack (struct frame_info *fi,
+				struct frame_info *next)
+{
+  fi->next = next;
+}
+
+void
+deprecated_set_frame_prev_hack (struct frame_info *fi,
+				struct frame_info *prev)
+{
+  fi->prev = prev;
+}
+
+struct context *
+deprecated_get_frame_context (struct frame_info *fi)
+{
+  return fi->context;
+}
+
+void
+deprecated_set_frame_context (struct frame_info *fi,
+			      struct context *context)
+{
+  fi->context = context;
+}
+
+struct frame_info *
+deprecated_frame_xmalloc (void)
+{
+  struct frame_info *frame = XMALLOC (struct frame_info);
+  memset (frame, 0, sizeof (struct frame_info));
+  return frame;
+}
+
+struct frame_info *
+deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
+				       long sizeof_extra_info)
+{
+  struct frame_info *frame = deprecated_frame_xmalloc ();
+  make_cleanup (xfree, frame);
+  if (sizeof_saved_regs > 0)
+    {
+      frame->saved_regs = xcalloc (1, sizeof_saved_regs);
+      make_cleanup (xfree, frame->saved_regs);
+    }
+  if (sizeof_extra_info > 0)
+    {
+      frame->extra_info = xcalloc (1, sizeof_extra_info);
+      make_cleanup (xfree, frame->extra_info);
+    }
+  return frame;
+}
+
+void
 _initialize_frame (void)
 {
   obstack_init (&frame_cache_obstack);
+
+  /* FIXME: cagney/2003-01-19: This command needs a rename.  Suggest
+     `set backtrace {past,beyond,...}-main'.  Also suggest adding `set
+     backtrace ...-start' to control backtraces past start.  The
+     problem with `below' is that it stops the `up' command.  */
+
+  add_setshow_boolean_cmd ("backtrace-below-main", class_obscure,
+			   &backtrace_below_main, "\
+Set whether backtraces should continue past \"main\".\n\
+Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
+the backtrace at \"main\".  Set this variable if you need to see the rest\n\
+of the stack trace.", "\
+Show whether backtraces should continue past \"main\".\n\
+Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
+the backtrace at \"main\".  Set this variable if you need to see the rest\n\
+of the stack trace.",
+			   NULL, NULL, &setlist, &showlist);
 }

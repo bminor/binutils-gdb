@@ -1,4 +1,4 @@
-# Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2001, 2002
+# Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2001, 2002, 2003
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -349,7 +349,6 @@ proc test_print_mi_members {} {
     # For now, accept gdb's behavior as an expected failure if it
     # simply prints either member correctly.
 
-    if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
     send_gdb "print g_D.A::a\n"
     gdb_expect {	
 	-re "warning: A ambiguous; using D::C::A. Use a cast to disambiguate.$nl\\$\[0-9\]* = 15$nl$gdb_prompt $" {
@@ -359,10 +358,10 @@ proc test_print_mi_members {} {
 	    pass "print g_D.A::a (using B)"
 	}
 	-re ".* = 15$nl$gdb_prompt $" {
-	    fail "print g_D.A::a (FIXME)"
+	    kfail "gdb/68" "print g_D.A::a"
 	}
 	-re ".* = 11$nl$gdb_prompt $" {
-	    fail "print g_D.A::a (FIXME)"
+	    kfail "gdb/68" "print g_D.A::a"
 	}
 	-re ".*$gdb_prompt $" { fail "print g_D.A::a" }
 	timeout { fail "print g_D.A::a (timeout)" ; return }
@@ -372,7 +371,6 @@ proc test_print_mi_members {} {
     # For now, accept gdb's behavior as an expected failure if it
     # simply prints either member correctly.
 
-    if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
     send_gdb "print g_D.A::x\n"
     gdb_expect {
 	-re "warning: A ambiguous; using D::C::A. Use a cast to disambiguate.$nl\\$\[0-9\]* = 16$nl$gdb_prompt $" {
@@ -382,10 +380,10 @@ proc test_print_mi_members {} {
 	    pass "print g_D.A::x (using B)"
 	}
 	-re ".* = 16$nl$gdb_prompt $" {
-	    fail "print g_D.A::x (FIXME)"
+	    kfail "gdb/68" "print g_D.A::x"
 	}
 	-re ".* = 12$nl$gdb_prompt $" {
-	    fail "print g_D.A::x (FIXME)"
+	    kfail "gdb/68" "print g_D.A::x"
 	}
 	-re ".*$gdb_prompt $" { fail "print g_D.A::x" }
 	timeout { fail "print g_D.A::x (timeout)" ; return }
@@ -411,14 +409,13 @@ proc test_print_mi_members {} {
     # For now, accept gdb's behavior as an expected failure if it
     # simply prints either member correctly.
 
-    setup_xfail "*-*-*"
     send_gdb "print g_E.A::a\n"
     gdb_expect {
 	-re ".* = 21$nl$gdb_prompt $" {
-	    fail "print g_E.A::a (FIXME)"
+	    kfail "gdb/68" "print g_E.A::a"
 	}
 	-re ".* = 25$nl$gdb_prompt $" {
-	    fail "print g_E.A::a (FIXME)"
+	    kfail "gdb/68" "print g_E.A::a"
 	}
 	-re ".*$gdb_prompt $" { fail "print g_E.A::a" }
 	timeout { fail "print g_E.A::a (timeout)" ; return }
@@ -428,7 +425,6 @@ proc test_print_mi_members {} {
     # For now, accept gdb's behavior as an expected failure if it
     # simply prints either member correctly.
 
-    if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
     send_gdb "print g_E.A::x\n"
     gdb_expect {
 	-re "warning: A ambiguous; using E::D::C::A. Use a cast to disambiguate.$nl\\$\[0-9\]* = 26$nl$gdb_prompt $" {
@@ -438,10 +434,10 @@ proc test_print_mi_members {} {
 	    pass "print g_E.A::x (using B)"
 	}
 	-re ".* = 26$nl$gdb_prompt $" {
-	    fail "print g_E.A::x (FIXME)"
+	    kfail "gdb/68" "print g_E.A::x"
 	}
 	-re ".* = 22$nl$gdb_prompt $" {
-	    fail "print g_E.A::x (FIXME)"
+	    kfail "gdb/68" "print g_E.A::x"
 	}
 	-re ".*$gdb_prompt $" { fail "print g_E.A::x" }
 	timeout { fail "print g_E.A::x (timeout)" ; return }

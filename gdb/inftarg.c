@@ -1,7 +1,8 @@
 /* Target-vector operations for controlling Unix child processes, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 
-   2000, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
+   2000, 2002, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.
 
    ## Contains temporary hacks..
@@ -35,6 +36,7 @@
 #include <fcntl.h>
 
 #include "gdb_wait.h"
+#include "inflow.h"
 
 extern struct symtab_and_line *child_enable_exception_callback (enum
 								exception_event_kind,
@@ -511,8 +513,6 @@ child_can_run (void)
 static void
 child_stop (void)
 {
-  extern pid_t inferior_process_group;
-
   kill (-inferior_process_group, SIGINT);
 }
 
@@ -649,7 +649,8 @@ _initialize_inftarg (void)
 #define PROC_NAME_FMT "/proc/%05d"
 #endif
   sprintf (procname, PROC_NAME_FMT, getpid ());
-  if ((fd = open (procname, O_RDONLY)) >= 0)
+  fd = open (procname, O_RDONLY);
+  if (fd >= 0)
     {
       close (fd);
       return;

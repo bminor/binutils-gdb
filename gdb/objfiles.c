@@ -1,7 +1,7 @@
 /* GDB routines for manipulating objfiles.
 
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -40,6 +40,7 @@
 #include <fcntl.h>
 #include "gdb_obstack.h"
 #include "gdb_string.h"
+#include "hashtab.h"
 
 #include "breakpoint.h"
 #include "dictionary.h"
@@ -54,11 +55,11 @@ static int open_existing_mapped_file (char *, long, int);
 
 static int open_mapped_file (char *filename, long mtime, int flags);
 
-static PTR map_to_file (int);
+static void *map_to_file (int);
 
 #endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
-static void add_to_objfile_sections (bfd *, sec_ptr, PTR);
+static void add_to_objfile_sections (bfd *, sec_ptr, void *);
 
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info. */
@@ -84,7 +85,7 @@ int mapped_symbol_files;	/* Try to use mapped symbol files */
    the end of the table (objfile->sections_end). */
 
 static void
-add_to_objfile_sections (bfd *abfd, sec_ptr asect, PTR objfile_p_char)
+add_to_objfile_sections (bfd *abfd, sec_ptr asect, void *objfile_p_char)
 {
   struct objfile *objfile = (struct objfile *) objfile_p_char;
   struct obj_section section;
@@ -151,6 +152,15 @@ build_objfile_section_table (struct objfile *objfile)
    OBJF_SHARED are simply copied through to the new objfile flags
    member. */
 
+/* NOTE: carlton/2003-02-04: This function is called with args NULL, 0
+   by jv-lang.c, to create an artificial objfile used to hold
+   information about dynamically-loaded Java classes.  Unfortunately,
+   that branch of this function doesn't get tested very frequently, so
+   it's prone to breakage.  (E.g. at one time the name was set to NULL
+   in that situation, which broke a loop over all names in the dynamic
+   library loader.)  If you change this function, please try to leave
+   things in a consistent state even if abfd is NULL.  */
+
 struct objfile *
 allocate_objfile (bfd *abfd, int flags)
 {
@@ -180,7 +190,7 @@ allocate_objfile (bfd *abfd, int flags)
 			     flags);
       if (fd >= 0)
 	{
-	  PTR md;
+	  void *md;
 
 	  if ((md = map_to_file (fd)) == NULL)
 	    {
@@ -193,6 +203,11 @@ allocate_objfile (bfd *abfd, int flags)
 	      objfile->md = md;
 	      objfile->mmfd = fd;
 	      /* Update pointers to functions to *our* copies */
+	      if (objfile->demangled_names_hash)
+		htab_set_functions_ex
+		  (objfile->demangled_names_hash, htab_hash_string,
+		   (int (*) (const void *, const void *)) streq, NULL,
+		   objfile->md, xmcalloc, xmfree);
 	      obstack_chunkfun (&objfile->psymbol_cache.cache, xmmalloc);
 	      obstack_freefun (&objfile->psymbol_cache.cache, xmfree);
 	      obstack_chunkfun (&objfile->macro_cache.cache, xmmalloc);
@@ -341,6 +356,7 @@ allocate_objfile (bfd *abfd, int flags)
   return (objfile);
 }
 
+
 /* Create the terminating entry of OBJFILE's minimal symbol table.
    If OBJFILE->msymbols is zero, allocate a single entry from
    OBJFILE->symbol_obstack; otherwise, just initialize
@@ -364,6 +380,31 @@ terminate_minimal_symbol_table (struct objfile *objfile)
     MSYMBOL_TYPE (m) = mst_unknown;
     SYMBOL_INIT_LANGUAGE_SPECIFIC (m, language_unknown);
   }
+}
+
+
+/* Put one object file before a specified on in the global list.
+   This can be used to make sure an object file is destroyed before
+   another when using ALL_OBJFILES_SAFE to free all objfiles. */
+void
+put_objfile_before (struct objfile *objfile, struct objfile *before_this)
+{
+  struct objfile **objp;
+
+  unlink_objfile (objfile);
+  
+  for (objp = &object_files; *objp != NULL; objp = &((*objp)->next))
+    {
+      if (*objp == before_this)
+	{
+	  objfile->next = *objp;
+	  *objp = objfile;
+	  return;
+	}
+    }
+  
+  internal_error (__FILE__, __LINE__,
+		  "put_objfile_before: before objfile not in list");
 }
 
 /* Put OBJFILE at the front of the list.  */
@@ -438,6 +479,18 @@ unlink_objfile (struct objfile *objfile)
 void
 free_objfile (struct objfile *objfile)
 {
+  if (objfile->separate_debug_objfile)
+    {
+      free_objfile (objfile->separate_debug_objfile);
+    }
+  
+  if (objfile->separate_debug_objfile_backlink)
+    {
+      /* We freed the separate debug file, make sure the base objfile
+	 doesn't reference it.  */
+      objfile->separate_debug_objfile_backlink->separate_debug_objfile = NULL;
+    }
+  
   /* First do any symbol file specific actions required when we are
      finished with a particular symbol file.  Note that if the objfile
      is using reusable symbol information (via mmalloc) then each of
@@ -519,6 +572,8 @@ free_objfile (struct objfile *objfile)
       /* Free the obstacks for non-reusable objfiles */
       bcache_xfree (objfile->psymbol_cache);
       bcache_xfree (objfile->macro_cache);
+      if (objfile->demangled_names_hash)
+	htab_delete (objfile->demangled_names_hash);
       obstack_free (&objfile->psymbol_obstack, 0);
       obstack_free (&objfile->symbol_obstack, 0);
       obstack_free (&objfile->type_obstack, 0);
@@ -933,13 +988,13 @@ open_mapped_file (char *filename, long mtime, int flags)
   return (fd);
 }
 
-static PTR
+static void *
 map_to_file (int fd)
 {
-  PTR md;
+  void *md;
   CORE_ADDR mapto;
 
-  md = mmalloc_attach (fd, (PTR) 0);
+  md = mmalloc_attach (fd, 0);
   if (md != NULL)
     {
       mapto = (CORE_ADDR) mmalloc_getkey (md, 1);
@@ -952,7 +1007,7 @@ map_to_file (int fd)
       else if (mapto != (CORE_ADDR) NULL)
 	{
 	  /* This mapping file needs to be remapped at "mapto" */
-	  md = mmalloc_attach (fd, (PTR) mapto);
+	  md = mmalloc_attach (fd, mapto);
 	}
       else
 	{
@@ -964,10 +1019,10 @@ map_to_file (int fd)
 	         address selected by mmap, we must truncate it before trying
 	         to do an attach at the address we want. */
 	      ftruncate (fd, 0);
-	      md = mmalloc_attach (fd, (PTR) mapto);
+	      md = mmalloc_attach (fd, mapto);
 	      if (md != NULL)
 		{
-		  mmalloc_setkey (md, 1, (PTR) mapto);
+		  mmalloc_setkey (md, 1, mapto);
 		}
 	    }
 	}

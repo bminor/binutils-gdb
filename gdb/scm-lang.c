@@ -1,6 +1,7 @@
 /* Scheme/Guile language support routines for GDB, the GNU debugger.
-   Copyright 1995, 1996, 1998, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1995, 1996, 1998, 2000, 2001, 2002, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -87,7 +88,7 @@ scm_get_field (LONGEST svalue, int index)
    or Boolean (CONTEXT == TYPE_CODE_BOOL).  */
 
 LONGEST
-scm_unpack (struct type *type, char *valaddr, enum type_code context)
+scm_unpack (struct type *type, const char *valaddr, enum type_code context)
 {
   if (is_scmvalue_type (type))
     {

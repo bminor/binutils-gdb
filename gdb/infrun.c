@@ -2,7 +2,7 @@
    process.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -66,7 +66,7 @@ static int restore_selected_frame (void *);
 
 static void build_infrun (void);
 
-static int follow_fork ();
+static int follow_fork (void);
 
 static void set_schedlock_func (char *args, int from_tty,
 				struct cmd_list_element *c);
@@ -377,7 +377,7 @@ static const char *follow_fork_mode_string = follow_fork_mode_parent;
 
 
 static int
-follow_fork ()
+follow_fork (void)
 {
   const char *follow_mode = follow_fork_mode_string;
   int follow_child = (follow_mode == follow_fork_mode_child);
@@ -1172,7 +1172,7 @@ context_switch (struct execution_control_state *ecs)
 void
 handle_inferior_event (struct execution_control_state *ecs)
 {
-  CORE_ADDR tmp;
+  CORE_ADDR real_stop_pc;
   int stepped_after_stopped_by_watchpoint;
   int sw_single_step_trap_p = 0;
 
@@ -2407,19 +2407,19 @@ process_event_stop_test:
          function.  That's what tells us (a) whether we want to step
          into it at all, and (b) what prologue we want to run to
          the end of, if we do step into it.  */
-      tmp = SKIP_TRAMPOLINE_CODE (stop_pc);
-      if (tmp != 0)
-	ecs->stop_func_start = tmp;
+      real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
+      if (real_stop_pc != 0)
+	ecs->stop_func_start = real_stop_pc;
       else
 	{
-	  tmp = DYNAMIC_TRAMPOLINE_NEXTPC (stop_pc);
-	  if (tmp)
+	  real_stop_pc = DYNAMIC_TRAMPOLINE_NEXTPC (stop_pc);
+	  if (real_stop_pc)
 	    {
 	      struct symtab_and_line xxx;
 	      /* Why isn't this s_a_l called "sr_sal", like all of the
 	         other s_a_l's where this code is duplicated?  */
 	      init_sal (&xxx);	/* initialize to zeroes */
-	      xxx.pc = tmp;
+	      xxx.pc = real_stop_pc;
 	      xxx.section = find_pc_overlay (xxx.pc);
 	      check_for_old_step_resume_breakpoint ();
 	      step_resume_breakpoint =
@@ -2482,19 +2482,17 @@ process_event_stop_test:
      we want to proceed through the trampoline when stepping.  */
   if (IN_SOLIB_RETURN_TRAMPOLINE (stop_pc, ecs->stop_func_name))
     {
-      CORE_ADDR tmp;
-
       /* Determine where this trampoline returns.  */
-      tmp = SKIP_TRAMPOLINE_CODE (stop_pc);
+      real_stop_pc = SKIP_TRAMPOLINE_CODE (stop_pc);
 
       /* Only proceed through if we know where it's going.  */
-      if (tmp)
+      if (real_stop_pc)
 	{
 	  /* And put the step-breakpoint there and go until there. */
 	  struct symtab_and_line sr_sal;
 
 	  init_sal (&sr_sal);	/* initialize to zeroes */
-	  sr_sal.pc = tmp;
+	  sr_sal.pc = real_stop_pc;
 	  sr_sal.section = find_pc_overlay (sr_sal.pc);
 	  /* Do not specify what the fp should be when we stop
 	     since on some machines the prologue
@@ -3093,7 +3091,7 @@ normal_stop (void)
 	     LOCATION: Print only location
 	     SRC_AND_LOC: Print location and source line */
 	  if (do_frame_printing)
-	    show_and_print_stack_frame (deprecated_selected_frame, -1, source_flag);
+	    print_stack_frame (deprecated_selected_frame, -1, source_flag);
 
 	  /* Display the auto-display expressions.  */
 	  do_displays ();
@@ -3109,10 +3107,10 @@ normal_stop (void)
 
   if (stop_stack_dummy)
     {
-      /* Pop the empty frame that contains the stack dummy.
-         POP_FRAME ends with a setting of the current frame, so we
-         can use that next. */
-      POP_FRAME;
+      /* Pop the empty frame that contains the stack dummy.  POP_FRAME
+         ends with a setting of the current frame, so we can use that
+         next. */
+      frame_pop (get_current_frame ());
       /* Set stop_pc to what it was before we called the function.
          Can't rely on restore_inferior_status because that only gets
          called if we don't stop in the called function.  */

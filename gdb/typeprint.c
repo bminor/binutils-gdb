@@ -1,6 +1,7 @@
 /* Language independent support for printing types for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1998, 1999,
-   2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1998,
+   1999, 2000, 2001, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -66,15 +67,15 @@ typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
       fprintf_filtered (stream, "typedef ");
       type_print (type, "", stream, 0);
       if (TYPE_NAME ((SYMBOL_TYPE (new))) == 0
-	  || !STREQ (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_NAME (new)))
+	  || strcmp (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_NAME (new)) != 0)
 	fprintf_filtered (stream, " %s", SYMBOL_PRINT_NAME (new));
       break;
 #endif
 #ifdef _LANG_m2
     case language_m2:
       fprintf_filtered (stream, "TYPE ");
-      if (!TYPE_NAME (SYMBOL_TYPE (new)) ||
-	  !STREQ (TYPE_NAME (SYMBOL_TYPE (new)), SYMBOL_NAME (new)))
+      if (!TYPE_NAME (SYMBOL_TYPE (new))
+	  || strcmp (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_NAME (new)) != 0)
 	fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new));
       else
 	fprintf_filtered (stream, "<builtin> = ");
@@ -87,17 +88,6 @@ typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
       fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new));
       type_print (type, "", stream, 0);
       break;
-#endif
-#ifdef _LANG_chill /* OBSOLETE */
-      /* OBSOLETE case language_chill: */
-      /* OBSOLETE   fprintf_filtered (stream, "SYNMODE "); */
-      /* OBSOLETE   if (!TYPE_NAME (SYMBOL_TYPE (new)) || */
-      /* OBSOLETE       !STREQ (TYPE_NAME (SYMBOL_TYPE (new)), SYMBOL_NAME (new))) */
-      /* OBSOLETE     fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new)); */
-      /* OBSOLETE   else */
-      /* OBSOLETE     fprintf_filtered (stream, "<builtin> = "); */
-      /* OBSOLETE   type_print (type, "", stream, 0); */
-      /* OBSOLETE   break; */
 #endif
     default:
       error ("Language not supported.");

@@ -51,6 +51,9 @@ static asection *elf_s390_gc_mark_hook
 static bfd_boolean elf_s390_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
+struct elf_s390_link_hash_entry;
+static void elf_s390_adjust_gotplt
+  PARAMS ((struct elf_s390_link_hash_entry *));
 static bfd_boolean elf_s390_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static bfd_boolean allocate_dynrelocs
@@ -69,10 +72,22 @@ static enum elf_reloc_type_class elf_s390_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
 static bfd_boolean elf_s390_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+static bfd_boolean elf_s390_mkobject
+  PARAMS ((bfd *));
 static bfd_boolean elf_s390_object_p
   PARAMS ((bfd *));
 static bfd_boolean elf_s390_grok_prstatus
   PARAMS ((bfd *, Elf_Internal_Note *));
+static int elf_s390_tls_transition
+  PARAMS ((struct bfd_link_info *, int, int));
+static bfd_reloc_status_type s390_tls_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_vma dtpoff_base
+  PARAMS ((struct bfd_link_info *));
+static bfd_vma tpoff
+  PARAMS ((struct bfd_link_info *, bfd_vma));
+static void invalid_tls_insn
+  PARAMS ((bfd *, asection *, Elf_Internal_Rela *));
 
 #include "elf/s390.h"
 
@@ -94,28 +109,105 @@ static reloc_howto_type elf_howto_table[] =
 	 0,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  HOWTO(R_390_8,         0, 0,  8, FALSE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_8",       FALSE, 0,0x000000ff, FALSE),
-  HOWTO(R_390_12,        0, 1, 12, FALSE, 0, complain_overflow_dont, bfd_elf_generic_reloc, "R_390_12",      FALSE, 0,0x00000fff, FALSE),
-  HOWTO(R_390_16,        0, 1, 16, FALSE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_16",      FALSE, 0,0x0000ffff, FALSE),
-  HOWTO(R_390_32,        0, 2, 32, FALSE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_32",      FALSE, 0,0xffffffff, FALSE),
-  HOWTO(R_390_PC32,	 0, 2, 32,  TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_PC32",    FALSE, 0,0xffffffff,  TRUE),
-  HOWTO(R_390_GOT12,	 0, 1, 12, FALSE, 0, complain_overflow_dont, bfd_elf_generic_reloc, "R_390_GOT12",   FALSE, 0,0x00000fff, FALSE),
-  HOWTO(R_390_GOT32,	 0, 2, 32, FALSE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_GOT32",   FALSE, 0,0xffffffff, FALSE),
-  HOWTO(R_390_PLT32,	 0, 2, 32,  TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_PLT32",   FALSE, 0,0xffffffff,  TRUE),
-  HOWTO(R_390_COPY,      0, 2, 32, FALSE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_COPY",    FALSE, 0,0xffffffff, FALSE),
-  HOWTO(R_390_GLOB_DAT,  0, 2, 32, FALSE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_GLOB_DAT",FALSE, 0,0xffffffff, FALSE),
-  HOWTO(R_390_JMP_SLOT,  0, 2, 32, FALSE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_JMP_SLOT",FALSE, 0,0xffffffff, FALSE),
-  HOWTO(R_390_RELATIVE,  0, 2, 32,  TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_RELATIVE",FALSE, 0,0xffffffff, FALSE),
-  HOWTO(R_390_GOTOFF,    0, 2, 32, FALSE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_GOTOFF",  FALSE, 0,0xffffffff, FALSE),
-  HOWTO(R_390_GOTPC,     0, 2, 32,  TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_GOTPC",   FALSE, 0,0xffffffff,  TRUE),
-  HOWTO(R_390_GOT16,     0, 1, 16, FALSE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_GOT16",   FALSE, 0,0x0000ffff, FALSE),
-  HOWTO(R_390_PC16,      0, 1, 16,  TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_PC16",    FALSE, 0,0x0000ffff,  TRUE),
-  HOWTO(R_390_PC16DBL,   1, 1, 16,  TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_PC16DBL", FALSE, 0,0x0000ffff,  TRUE),
-  HOWTO(R_390_PLT16DBL,  1, 1, 16,  TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_PLT16DBL", FALSE, 0,0x0000ffff,  TRUE),
-  HOWTO(R_390_PC32DBL,	 1, 2, 32,  TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_PC32DBL", FALSE, 0,0xffffffff,  TRUE),
-  HOWTO(R_390_PLT32DBL,	 1, 2, 32,  TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_PLT32DBL", FALSE, 0,0xffffffff,  TRUE),
-  HOWTO(R_390_GOTPCDBL,  1, 2, 32,  TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_GOTPCDBL", FALSE, 0,0xffffffff,  TRUE),
-  HOWTO(R_390_GOTENT,	 1, 2, 32,  TRUE, 0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_390_GOTENT",   FALSE, 0,0xffffffff,  TRUE),
+  HOWTO(R_390_8,         0, 0,  8, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_8",        FALSE, 0,0x000000ff, FALSE),
+  HOWTO(R_390_12,        0, 1, 12, FALSE, 0, complain_overflow_dont,
+	bfd_elf_generic_reloc, "R_390_12",       FALSE, 0,0x00000fff, FALSE),
+  HOWTO(R_390_16,        0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_16",       FALSE, 0,0x0000ffff, FALSE),
+  HOWTO(R_390_32,        0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_32",       FALSE, 0,0xffffffff, FALSE),
+  HOWTO(R_390_PC32,	 0, 2, 32,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PC32",     FALSE, 0,0xffffffff, TRUE),
+  HOWTO(R_390_GOT12,	 0, 1, 12, FALSE, 0, complain_overflow_dont,
+	bfd_elf_generic_reloc, "R_390_GOT12",    FALSE, 0,0x00000fff, FALSE),
+  HOWTO(R_390_GOT32,	 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOT32",    FALSE, 0,0xffffffff, FALSE),
+  HOWTO(R_390_PLT32,	 0, 2, 32,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PLT32",    FALSE, 0,0xffffffff, TRUE),
+  HOWTO(R_390_COPY,      0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_COPY",     FALSE, 0,0xffffffff, FALSE),
+  HOWTO(R_390_GLOB_DAT,  0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GLOB_DAT", FALSE, 0,0xffffffff, FALSE),
+  HOWTO(R_390_JMP_SLOT,  0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_JMP_SLOT", FALSE, 0,0xffffffff, FALSE),
+  HOWTO(R_390_RELATIVE,  0, 2, 32,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_RELATIVE", FALSE, 0,0xffffffff, FALSE),
+  HOWTO(R_390_GOTOFF32,  0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOTOFF32", FALSE, 0,0xffffffff, FALSE),
+  HOWTO(R_390_GOTPC,     0, 2, 32,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOTPC",    FALSE, 0,0xffffffff, TRUE),
+  HOWTO(R_390_GOT16,     0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOT16",    FALSE, 0,0x0000ffff, FALSE),
+  HOWTO(R_390_PC16,      0, 1, 16,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PC16",     FALSE, 0,0x0000ffff, TRUE),
+  HOWTO(R_390_PC16DBL,   1, 1, 16,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PC16DBL",  FALSE, 0,0x0000ffff, TRUE),
+  HOWTO(R_390_PLT16DBL,  1, 1, 16,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PLT16DBL", FALSE, 0,0x0000ffff, TRUE),
+  HOWTO(R_390_PC32DBL,	 1, 2, 32,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PC32DBL",  FALSE, 0,0xffffffff, TRUE),
+  HOWTO(R_390_PLT32DBL,	 1, 2, 32,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PLT32DBL", FALSE, 0,0xffffffff, TRUE),
+  HOWTO(R_390_GOTPCDBL,  1, 2, 32,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOTPCDBL", FALSE, 0,0xffffffff, TRUE),
+  EMPTY_HOWTO (R_390_64),	/* Empty entry for R_390_64.  */
+  EMPTY_HOWTO (R_390_PC64),	/* Empty entry for R_390_PC64.  */
+  EMPTY_HOWTO (R_390_GOT64),	/* Empty entry for R_390_GOT64.  */
+  EMPTY_HOWTO (R_390_PLT64),	/* Empty entry for R_390_PLT64.  */
+  HOWTO(R_390_GOTENT,	 1, 2, 32,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOTENT",   FALSE, 0,0xffffffff, TRUE),
+  HOWTO(R_390_GOTOFF16,  0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOTOFF16", FALSE, 0,0x0000ffff, FALSE),
+  EMPTY_HOWTO (R_390_GOTOFF64),	/* Empty entry for R_390_GOTOFF64.  */
+  HOWTO(R_390_GOTPLT12,  0, 1, 12, FALSE, 0, complain_overflow_dont,
+	bfd_elf_generic_reloc, "R_390_GOTPLT12", FALSE, 0,0x00000fff, FALSE),
+  HOWTO(R_390_GOTPLT16,  0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOTPLT16", FALSE, 0,0x0000ffff, FALSE),
+  HOWTO(R_390_GOTPLT32,  0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOTPLT32", FALSE, 0,0xffffffff, FALSE),
+  EMPTY_HOWTO (R_390_GOTPLT64),	/* Empty entry for R_390_GOTPLT64.  */
+  HOWTO(R_390_GOTPLTENT, 1, 2, 32,  TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_GOTPLTENT",FALSE, 0,0xffffffff, TRUE),
+  HOWTO(R_390_PLTOFF16,  0, 1, 16, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PLTOFF16", FALSE, 0,0x0000ffff, FALSE),
+  HOWTO(R_390_PLTOFF32,  0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_PLTOFF32", FALSE, 0,0xffffffff, FALSE),
+  EMPTY_HOWTO (R_390_PLTOFF64),	/* Empty entry for R_390_PLTOFF64.  */
+  HOWTO(R_390_TLS_LOAD, 0, 0, 0, FALSE, 0, complain_overflow_dont,
+	s390_tls_reloc, "R_390_TLS_LOAD", FALSE, 0, 0, FALSE),
+  HOWTO(R_390_TLS_GDCALL, 0, 0, 0, FALSE, 0, complain_overflow_dont,
+	s390_tls_reloc, "R_390_TLS_GDCALL", FALSE, 0, 0, FALSE),
+  HOWTO(R_390_TLS_LDCALL, 0, 0, 0, FALSE, 0, complain_overflow_dont,
+	s390_tls_reloc, "R_390_TLS_LDCALL", FALSE, 0, 0, FALSE),
+  HOWTO(R_390_TLS_GD32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_TLS_GD32", FALSE, 0, 0xffffffff, FALSE),
+  EMPTY_HOWTO (R_390_TLS_GD64),	/* Empty entry for R_390_TLS_GD64.  */
+  HOWTO(R_390_TLS_GOTIE12, 0, 1, 12, FALSE, 0, complain_overflow_dont,
+	bfd_elf_generic_reloc, "R_390_TLS_GOTIE12", FALSE, 0, 0x00000fff, FALSE),
+  HOWTO(R_390_TLS_GOTIE32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_TLS_GOTIE32", FALSE, 0, 0xffffffff, FALSE),
+  EMPTY_HOWTO (R_390_TLS_GOTIE64),	/* Empty entry for R_390_TLS_GOTIE64.  */
+  HOWTO(R_390_TLS_LDM32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_TLS_LDM32", FALSE, 0, 0xffffffff, FALSE),
+  EMPTY_HOWTO (R_390_TLS_LDM64),	/* Empty entry for R_390_TLS_LDM64.  */
+  HOWTO(R_390_TLS_IE32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_TLS_IE32", FALSE, 0, 0xffffffff, FALSE),
+  EMPTY_HOWTO (R_390_TLS_IE64),	/* Empty entry for R_390_TLS_IE64.  */
+  HOWTO(R_390_TLS_IEENT, 1, 2, 32, TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_TLS_IEENT", FALSE, 0, 0xffffffff, TRUE),
+  HOWTO(R_390_TLS_LE32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_TLS_LE32", FALSE, 0, 0xffffffff, FALSE),
+  EMPTY_HOWTO (R_390_TLS_LE64),	/* Empty entry for R_390_TLS_LE64.  */
+  HOWTO(R_390_TLS_LDO32, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_TLS_LDO32", FALSE, 0, 0xffffffff, FALSE),
+  EMPTY_HOWTO (R_390_TLS_LDO64),	/* Empty entry for R_390_TLS_LDO64.  */
+  HOWTO(R_390_TLS_DTPMOD, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_TLS_DTPMOD", FALSE, 0, 0xffffffff, FALSE),
+  HOWTO(R_390_TLS_DTPOFF, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_TLS_DTPOFF", FALSE, 0, 0xffffffff, FALSE),
+  HOWTO(R_390_TLS_TPOFF, 0, 2, 32, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_390_TLS_TPOFF", FALSE, 0, 0xffffffff, FALSE),
 };
 
 /* GNU extension to record C++ vtable hierarchy.  */
@@ -160,7 +252,7 @@ elf_s390_reloc_type_lookup (abfd, code)
     case BFD_RELOC_390_RELATIVE:
       return &elf_howto_table[(int) R_390_RELATIVE];
     case BFD_RELOC_32_GOTOFF:
-      return &elf_howto_table[(int) R_390_GOTOFF];
+      return &elf_howto_table[(int) R_390_GOTOFF32];
     case BFD_RELOC_390_GOTPC:
       return &elf_howto_table[(int) R_390_GOTPC];
     case BFD_RELOC_390_GOT16:
@@ -179,6 +271,48 @@ elf_s390_reloc_type_lookup (abfd, code)
       return &elf_howto_table[(int) R_390_GOTPCDBL];
     case BFD_RELOC_390_GOTENT:
       return &elf_howto_table[(int) R_390_GOTENT];
+    case BFD_RELOC_16_GOTOFF:
+      return &elf_howto_table[(int) R_390_GOTOFF16];
+    case BFD_RELOC_390_GOTPLT12:
+      return &elf_howto_table[(int) R_390_GOTPLT12];
+    case BFD_RELOC_390_GOTPLT16:
+      return &elf_howto_table[(int) R_390_GOTPLT16];
+    case BFD_RELOC_390_GOTPLT32:
+      return &elf_howto_table[(int) R_390_GOTPLT32];
+    case BFD_RELOC_390_GOTPLTENT:
+      return &elf_howto_table[(int) R_390_GOTPLTENT];
+    case BFD_RELOC_390_PLTOFF16:
+      return &elf_howto_table[(int) R_390_PLTOFF16];
+    case BFD_RELOC_390_PLTOFF32:
+      return &elf_howto_table[(int) R_390_PLTOFF32];
+    case BFD_RELOC_390_TLS_LOAD:
+      return &elf_howto_table[(int) R_390_TLS_LOAD];
+    case BFD_RELOC_390_TLS_GDCALL:
+      return &elf_howto_table[(int) R_390_TLS_GDCALL];
+    case BFD_RELOC_390_TLS_LDCALL:
+      return &elf_howto_table[(int) R_390_TLS_LDCALL];
+    case BFD_RELOC_390_TLS_GD32:
+      return &elf_howto_table[(int) R_390_TLS_GD32];
+    case BFD_RELOC_390_TLS_GOTIE12:
+      return &elf_howto_table[(int) R_390_TLS_GOTIE12];
+    case BFD_RELOC_390_TLS_GOTIE32:
+      return &elf_howto_table[(int) R_390_TLS_GOTIE32];
+    case BFD_RELOC_390_TLS_LDM32:
+      return &elf_howto_table[(int) R_390_TLS_LDM32];
+    case BFD_RELOC_390_TLS_IE32:
+      return &elf_howto_table[(int) R_390_TLS_IE32];
+    case BFD_RELOC_390_TLS_IEENT:
+      return &elf_howto_table[(int) R_390_TLS_IEENT];
+    case BFD_RELOC_390_TLS_LE32:
+      return &elf_howto_table[(int) R_390_TLS_LE32];
+    case BFD_RELOC_390_TLS_LDO32:
+      return &elf_howto_table[(int) R_390_TLS_LDO32];
+    case BFD_RELOC_390_TLS_DTPMOD:
+      return &elf_howto_table[(int) R_390_TLS_DTPMOD];
+    case BFD_RELOC_390_TLS_DTPOFF:
+      return &elf_howto_table[(int) R_390_TLS_DTPOFF];
+    case BFD_RELOC_390_TLS_TPOFF:
+      return &elf_howto_table[(int) R_390_TLS_TPOFF];
     case BFD_RELOC_VTABLE_INHERIT:
       return &elf32_s390_vtinherit_howto;
     case BFD_RELOC_VTABLE_ENTRY:
@@ -212,6 +346,23 @@ elf_s390_info_to_howto (abfd, cache_ptr, dst)
       BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_390_max);
       cache_ptr->howto = &elf_howto_table[ELF32_R_TYPE(dst->r_info)];
     }
+}
+
+/* A relocation function which doesn't do anything.  */
+static bfd_reloc_status_type
+s390_tls_reloc (abfd, reloc_entry, symbol, data, input_section,
+                      output_bfd, error_message)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     arelent *reloc_entry;
+     asymbol *symbol ATTRIBUTE_UNUSED;
+     PTR data ATTRIBUTE_UNUSED;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message ATTRIBUTE_UNUSED;
+{
+  if (output_bfd)
+    reloc_entry->address += input_section->output_offset;
+  return bfd_reloc_ok;
 }
 
 static bfd_boolean
@@ -413,7 +564,61 @@ struct elf_s390_link_hash_entry
 
   /* Track dynamic relocs copied for this symbol.  */
   struct elf_s390_dyn_relocs *dyn_relocs;
+
+  /* Number of GOTPLT references for a function.  */
+  bfd_signed_vma gotplt_refcount;
+
+#define GOT_UNKNOWN	0
+#define GOT_NORMAL	1
+#define GOT_TLS_GD	2
+#define GOT_TLS_IE	3
+#define GOT_TLS_IE_NLT	4
+  unsigned char tls_type;
 };
+
+#define elf_s390_hash_entry(ent) \
+  ((struct elf_s390_link_hash_entry *)(ent))
+
+struct elf_s390_obj_tdata
+{
+  struct elf_obj_tdata root;
+
+  /* tls_type for each local got entry.  */
+  char *local_got_tls_type;
+};
+
+#define elf_s390_tdata(abfd) \
+  ((struct elf_s390_obj_tdata *) (abfd)->tdata.any)
+
+#define elf_s390_local_got_tls_type(abfd) \
+  (elf_s390_tdata (abfd)->local_got_tls_type)
+
+static bfd_boolean
+elf_s390_mkobject (abfd)
+     bfd *abfd;
+{
+  bfd_size_type amt = sizeof (struct elf_s390_obj_tdata);
+  abfd->tdata.any = bfd_zalloc (abfd, amt);
+  if (abfd->tdata.any == NULL)
+    return FALSE;
+  return TRUE;
+}
+
+static bfd_boolean
+elf_s390_object_p (abfd)
+     bfd *abfd;
+{
+  /* Allocate our special target data.  */
+  struct elf_s390_obj_tdata *new_tdata;
+  bfd_size_type amt = sizeof (struct elf_s390_obj_tdata);
+  new_tdata = bfd_zalloc (abfd, amt);
+  if (new_tdata == NULL)
+    return FALSE;
+  new_tdata->root = *abfd->tdata.elf_obj_data;
+  abfd->tdata.any = new_tdata;
+  /* Set the right machine number for an s390 elf32 file.  */
+  return bfd_default_set_arch_mach (abfd, bfd_arch_s390, bfd_mach_s390_31);
+}
 
 /* s390 ELF linker hash table.  */
 
@@ -429,6 +634,11 @@ struct elf_s390_link_hash_table
   asection *srelplt;
   asection *sdynbss;
   asection *srelbss;
+
+  union {
+    bfd_signed_vma refcount;
+    bfd_vma offset;
+  } tls_ldm_got;
 
   /* Small local sym to section mapping cache.  */
   struct sym_sec_cache sym_sec;
@@ -465,6 +675,8 @@ link_hash_newfunc (entry, table, string)
 
       eh = (struct elf_s390_link_hash_entry *) entry;
       eh->dyn_relocs = NULL;
+      eh->gotplt_refcount = 0;
+      eh->tls_type = GOT_UNKNOWN;
     }
 
   return entry;
@@ -496,6 +708,7 @@ elf_s390_link_hash_table_create (abfd)
   ret->srelplt = NULL;
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
+  ret->tls_ldm_got.refcount = 0;
   ret->sym_sec.abfd = NULL;
 
   return &ret->elf.root;
@@ -608,7 +821,41 @@ elf_s390_copy_indirect_symbol (bed, dir, ind)
       eind->dyn_relocs = NULL;
     }
 
+  if (ind->root.type == bfd_link_hash_indirect
+      && dir->got.refcount <= 0)
+    {
+      edir->tls_type = eind->tls_type;
+      eind->tls_type = GOT_UNKNOWN;
+    }
+
   _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+}
+
+static int
+elf_s390_tls_transition (info, r_type, is_local)
+     struct bfd_link_info *info;
+     int r_type;
+     int is_local;
+{
+  if (info->shared)
+    return r_type;
+
+  switch (r_type)
+    {
+    case R_390_TLS_GD32:
+    case R_390_TLS_IE32:
+      if (is_local)
+	return R_390_TLS_LE32;
+      return R_390_TLS_IE32;
+    case R_390_TLS_GOTIE32:
+      if (is_local)
+	return R_390_TLS_LE32;
+      return R_390_TLS_GOTIE32;
+    case R_390_TLS_LDM32:
+      return R_390_TLS_LE32;
+    }
+
+  return r_type;
 }
 
 /* Look through the relocs for a section during the first phase, and
@@ -628,6 +875,8 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
+  bfd_signed_vma *local_got_refcounts;
+  int tls_type, old_tls_type;
 
   if (info->relocateable)
     return TRUE;
@@ -635,12 +884,14 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
   htab = elf_s390_hash_table (info);
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
+  local_got_refcounts = elf_local_got_refcounts (abfd);
 
   sreloc = NULL;
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
+      unsigned int r_type;
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
 
@@ -659,40 +910,45 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
       else
 	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-      switch (ELF32_R_TYPE (rel->r_info))
+      /* Create got section and local_got_refcounts array if they
+	 are needed.  */
+      r_type = elf_s390_tls_transition (info,
+					ELF32_R_TYPE (rel->r_info),
+					h == NULL);
+      switch (r_type)
 	{
 	case R_390_GOT12:
-        case R_390_GOT16:
+	case R_390_GOT16:
 	case R_390_GOT32:
 	case R_390_GOTENT:
-	  /* This symbol requires a global offset table entry.  */
-	  if (h != NULL)
+	case R_390_GOTPLT12:
+	case R_390_GOTPLT16:
+	case R_390_GOTPLT32:
+	case R_390_GOTPLTENT:
+	case R_390_TLS_GD32:
+	case R_390_TLS_GOTIE12:
+	case R_390_TLS_GOTIE32:
+	case R_390_TLS_IEENT:
+	case R_390_TLS_IE32:
+	case R_390_TLS_LDM32:
+	  if (h == NULL
+	      && local_got_refcounts == NULL)
 	    {
-	      h->got.refcount += 1;
-	    }
-	  else
-	    {
-	      bfd_signed_vma *local_got_refcounts;
-
-     	      /* This is a global offset table entry for a local symbol.  */
-	      local_got_refcounts = elf_local_got_refcounts (abfd);
+	      bfd_size_type size;
+	      
+	      size = symtab_hdr->sh_info;
+	      size *= (sizeof (bfd_signed_vma) + sizeof(char));
+	      local_got_refcounts = ((bfd_signed_vma *)
+				     bfd_zalloc (abfd, size));
 	      if (local_got_refcounts == NULL)
-		{
-		  bfd_size_type size;
-
-		  size = symtab_hdr->sh_info;
-		  size *= sizeof (bfd_signed_vma);
-		  local_got_refcounts = ((bfd_signed_vma *)
-					 bfd_zalloc (abfd, size));
-		  if (local_got_refcounts == NULL)
-		    return FALSE;
-		  elf_local_got_refcounts (abfd) = local_got_refcounts;
-		}
-	      local_got_refcounts[r_symndx] += 1;
+		return FALSE;
+	      elf_local_got_refcounts (abfd) = local_got_refcounts;
+	      elf_s390_local_got_tls_type (abfd)
+		= (char *) (local_got_refcounts + symtab_hdr->sh_info);
 	    }
-	  /* Fall through */
-
-	case R_390_GOTOFF:
+	  /* Fall through.  */
+	case R_390_GOTOFF16:
+	case R_390_GOTOFF32:
 	case R_390_GOTPC:
 	case R_390_GOTPCDBL:
 	  if (htab->sgot == NULL)
@@ -702,11 +958,22 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	      if (!create_got_section (htab->elf.dynobj, info))
 		return FALSE;
 	    }
+	}
+
+      switch (r_type)
+	{
+	case R_390_GOTOFF16:
+	case R_390_GOTOFF32:
+	case R_390_GOTPC:
+	case R_390_GOTPCDBL:
+	  /* Got is created, nothing to be done.  */
 	  break;
 
         case R_390_PLT16DBL:
         case R_390_PLT32DBL:
 	case R_390_PLT32:
+	case R_390_PLTOFF16:
+	case R_390_PLTOFF32:
 	  /* This symbol requires a procedure linkage table entry.  We
              actually build the entry in adjust_dynamic_symbol,
              because this might be a case of linking PIC code which is
@@ -716,12 +983,117 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 
 	  /* If this is a local symbol, we resolve it directly without
              creating a procedure linkage table entry.  */
-	  if (h == NULL)
-	    continue;
-
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
-	  h->plt.refcount += 1;
+	  if (h != NULL)
+	    {
+	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	      h->plt.refcount += 1;
+	    }
 	  break;
+
+	case R_390_GOTPLT12:
+	case R_390_GOTPLT16:
+	case R_390_GOTPLT32:
+	case R_390_GOTPLTENT:
+	  /* This symbol requires either a procedure linkage table entry
+	     or an entry in the local got. We actually build the entry
+	     in adjust_dynamic_symbol because whether this is really a
+	     global reference can change and with it the fact if we have
+	     to create a plt entry or a local got entry. To be able to
+	     make a once global symbol a local one we have to keep track
+	     of the number of gotplt references that exist for this
+	     symbol.  */
+	  if (h != NULL)
+	    {
+	      ((struct elf_s390_link_hash_entry *) h)->gotplt_refcount++;
+	      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	      h->plt.refcount += 1;
+	    }
+	  else
+	    local_got_refcounts[r_symndx] += 1;
+	  break;
+
+	case R_390_TLS_LDM32:
+	  htab->tls_ldm_got.refcount += 1;
+	  break;
+
+	case R_390_TLS_IE32:
+	case R_390_TLS_GOTIE12:
+	case R_390_TLS_GOTIE32:
+	case R_390_TLS_IEENT:
+	  if (info->shared)
+	    info->flags |= DF_STATIC_TLS;
+	  /* Fall through */
+
+	case R_390_GOT12:
+        case R_390_GOT16:
+	case R_390_GOT32:
+	case R_390_GOTENT:
+	case R_390_TLS_GD32:
+	  /* This symbol requires a global offset table entry.  */
+	  switch (r_type)
+	    {
+	    default:
+	    case R_390_GOT12:
+	    case R_390_GOT16:
+	    case R_390_GOT32:
+	    case R_390_GOTENT:
+	      tls_type = GOT_NORMAL;
+	      break;
+	    case R_390_TLS_GD32:
+	      tls_type = GOT_TLS_GD;
+	      break;
+	    case R_390_TLS_IE32:
+	    case R_390_TLS_GOTIE32:
+	      tls_type = GOT_TLS_IE;
+	      break;
+	    case R_390_TLS_GOTIE12:
+	    case R_390_TLS_IEENT:
+	      tls_type = GOT_TLS_IE_NLT;
+	      break;
+	    }
+
+	  if (h != NULL)
+	    {
+	      h->got.refcount += 1;
+	      old_tls_type = elf_s390_hash_entry(h)->tls_type;
+	    }
+	  else
+	    {
+	      local_got_refcounts[r_symndx] += 1;
+	      old_tls_type = elf_s390_local_got_tls_type (abfd) [r_symndx];
+	    }
+	  /* If a TLS symbol is accessed using IE at least once,
+	     there is no point to use dynamic model for it.  */
+	  if (old_tls_type != tls_type && old_tls_type != GOT_UNKNOWN)
+	    {
+	      if (old_tls_type == GOT_NORMAL || tls_type == GOT_NORMAL)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s: `%s' accessed both as normal and thread local symbol"),
+		     bfd_archive_filename (abfd), h->root.root.string);
+		  return FALSE;
+		}
+	      if (old_tls_type > tls_type)
+		tls_type = old_tls_type;
+	    }
+
+	  if (old_tls_type != tls_type)
+	    {
+	      if (h != NULL)
+		elf_s390_hash_entry (h)->tls_type = tls_type;
+	      else
+		elf_s390_local_got_tls_type (abfd) [r_symndx] = tls_type;
+	    }
+
+	  if (r_type != R_390_TLS_IE32)
+	    break;
+	  /* Fall through */
+
+	case R_390_TLS_LE32:
+	  if (!info->shared)
+	    break;
+	  info->flags |= DF_STATIC_TLS;
+	  /* Fall through */	    
 
         case R_390_8:
         case R_390_16:
@@ -955,6 +1327,7 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
   unsigned long r_symndx;
+  int r_type;
   struct elf_link_hash_entry *h;
 
   elf_section_data (sec)->local_dynrel = NULL;
@@ -965,84 +1338,151 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
-    switch (ELF32_R_TYPE (rel->r_info))
-      {
-      case R_390_GOT12:
-      case R_390_GOT16:
-      case R_390_GOT32:
-      case R_390_GOTOFF:
-      case R_390_GOTPC:
-      case R_390_GOTPCDBL:
-      case R_390_GOTENT:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->got.refcount > 0)
-	      h->got.refcount -= 1;
-	  }
-	else if (local_got_refcounts != NULL)
-	  {
-	    if (local_got_refcounts[r_symndx] > 0)
-	      local_got_refcounts[r_symndx] -= 1;
-	  }
-	break;
+    {
+      r_symndx = ELF32_R_SYM (rel->r_info);
 
-      case R_390_8:
-      case R_390_12:
-      case R_390_16:
-      case R_390_32:
-      case R_390_PC16:
-      case R_390_PC16DBL:
-      case R_390_PC32DBL:
-      case R_390_PC32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    struct elf_s390_link_hash_entry *eh;
-	    struct elf_s390_dyn_relocs **pp;
-	    struct elf_s390_dyn_relocs *p;
+      if (r_symndx < symtab_hdr->sh_info)
+	h = NULL;
+      else
+	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+      r_type = elf_s390_tls_transition (info,
+					ELF32_R_TYPE (rel->r_info),
+					r_symndx >= symtab_hdr->sh_info);
+      switch (r_type)
+	{
+	case R_390_TLS_LDM32:
+	  if (elf_s390_hash_table (info)->tls_ldm_got.refcount > 0)
+	    elf_s390_hash_table (info)->tls_ldm_got.refcount -= 1;
+	  break;
 
-	    if (!info->shared && h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
+	case R_390_TLS_GD32:
+	case R_390_TLS_IE32:
+	case R_390_TLS_GOTIE12:
+	case R_390_TLS_GOTIE32:
+	case R_390_TLS_IEENT:
+	case R_390_GOT12:
+	case R_390_GOT16:
+	case R_390_GOT32:
+	case R_390_GOTOFF16:
+	case R_390_GOTOFF32:
+	case R_390_GOTPC:
+	case R_390_GOTPCDBL:
+	case R_390_GOTENT:
+	  if (h != NULL)
+	    {
+	      if (h->got.refcount > 0)
+		h->got.refcount -= 1;
+	    }
+	  else if (local_got_refcounts != NULL)
+	    {
+	      if (local_got_refcounts[r_symndx] > 0)
+		local_got_refcounts[r_symndx] -= 1;
+	    }
+	  if (r_type != R_390_TLS_IE32)
+	    break;
+	  /* Fall through */
+	  
+	case R_390_TLS_LE32:
+	  if (!info->shared)
+	    break;
+	  /* Fall through */
 
-	    eh = (struct elf_s390_link_hash_entry *) h;
+	case R_390_8:
+	case R_390_12:
+	case R_390_16:
+	case R_390_32:
+	case R_390_PC16:
+	case R_390_PC16DBL:
+	case R_390_PC32DBL:
+	case R_390_PC32:
+	  if (h != NULL)
+	    {
+	      struct elf_s390_link_hash_entry *eh;
+	      struct elf_s390_dyn_relocs **pp;
+	      struct elf_s390_dyn_relocs *p;
+	      
+	      if (!info->shared && h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+	      
+	      eh = (struct elf_s390_link_hash_entry *) h;
+	      
+	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+		if (p->sec == sec)
+		  {
+		    if (ELF32_R_TYPE (rel->r_info) == R_390_PC16
+			|| ELF32_R_TYPE (rel->r_info) == R_390_PC16DBL
+			|| ELF32_R_TYPE (rel->r_info) == R_390_PC32DBL
+			|| ELF32_R_TYPE (rel->r_info) == R_390_PC32)
+		      p->pc_count -= 1;
+		    p->count -= 1;
+		    if (p->count == 0)
+		      *pp = p->next;
+		    break;
+		  }
+	    }
+	  break;
+	  
+	case R_390_PLT16DBL:
+	case R_390_PLT32DBL:
+	case R_390_PLT32:
+	case R_390_PLTOFF16:
+	case R_390_PLTOFF32:
+	  if (h != NULL)
+	    {
+	      if (h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+	    }
+	  break;
 
-	    for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	      if (p->sec == sec)
+	case R_390_GOTPLT12:
+	case R_390_GOTPLT16:
+	case R_390_GOTPLT32:
+	case R_390_GOTPLTENT:
+	  if (h != NULL)
+	    {
+	      if (h->plt.refcount > 0)
 		{
-		  if (ELF32_R_TYPE (rel->r_info) == R_390_PC16
-		      || ELF32_R_TYPE (rel->r_info) == R_390_PC16DBL
-		      || ELF32_R_TYPE (rel->r_info) == R_390_PC32DBL
-		      || ELF32_R_TYPE (rel->r_info) == R_390_PC32)
-		    p->pc_count -= 1;
-		  p->count -= 1;
-		  if (p->count == 0)
-		    *pp = p->next;
-		  break;
+		  ((struct elf_s390_link_hash_entry *) h)->gotplt_refcount--;
+		  h->plt.refcount -= 1;
 		}
-	  }
-	break;
+	    }
+	  else if (local_got_refcounts != NULL)
+	    {
+	      if (local_got_refcounts[r_symndx] > 0)
+		local_got_refcounts[r_symndx] -= 1;
+	    }
+	  break;
 
-      case R_390_PLT16DBL:
-      case R_390_PLT32DBL:
-      case R_390_PLT32:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->plt.refcount > 0)
-	      h->plt.refcount -= 1;
-	  }
-	break;
-
-      default:
-	break;
-      }
+	default:
+	  break;
+	}
+    }
 
   return TRUE;
+}
+
+/* Make sure we emit a GOT entry if the symbol was supposed to have a PLT
+   entry but we found we will not create any.  Called when we find we will
+   not have any PLT for this symbol, by for example
+   elf_s390_adjust_dynamic_symbol when we're doing a proper dynamic link,
+   or elf_s390_size_dynamic_sections if no dynamic sections will be
+   created (we're only linking static objects).  */
+
+static void
+elf_s390_adjust_gotplt (h)
+     struct elf_s390_link_hash_entry *h;
+{
+  if (h->elf.root.type == bfd_link_hash_warning)
+    h = (struct elf_s390_link_hash_entry *) h->elf.root.u.i.link;
+
+  if (h->gotplt_refcount <= 0)
+    return;
+
+  /* We simply add the number of gotplt references to the number
+   * of got references for this symbol.  */
+  h->elf.got.refcount += h->gotplt_refcount;
+  h->gotplt_refcount = -1;
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
@@ -1082,6 +1522,7 @@ elf_s390_adjust_dynamic_symbol (info, h)
 	     linkage table, and we can just do a PC32 reloc instead.  */
 	  h->plt.offset = (bfd_vma) -1;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+	  elf_s390_adjust_gotplt((struct elf_s390_link_hash_entry *) h);
 	}
 
       return TRUE;
@@ -1218,6 +1659,9 @@ allocate_dynrelocs (h, inf)
     return TRUE;
 
   if (h->root.type == bfd_link_hash_warning)
+    /* When warning symbols are created, they **replace** the "real"
+       entry in the hash table, thus we never get to see the real
+       symbol in a hash traversal.  So look at it now.  */
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   info = (struct bfd_link_info *) inf;
@@ -1272,18 +1716,41 @@ allocate_dynrelocs (h, inf)
 	{
  	  h->plt.offset = (bfd_vma) -1;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+	  elf_s390_adjust_gotplt((struct elf_s390_link_hash_entry *) h);
 	}
     }
   else
     {
       h->plt.offset = (bfd_vma) -1;
       h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+      elf_s390_adjust_gotplt((struct elf_s390_link_hash_entry *) h);
     }
 
-  if (h->got.refcount > 0)
+  /* If R_390_TLS_{IE32,GOTIE32,GOTIE12,IEENT} symbol is now local to
+     the binary, we can optimize a bit. IE32 and GOTIE32 get converted
+     to R_390_TLS_LE32 requiring no TLS entry. For GOTIE12 and IEENT
+     we can save the dynamic TLS relocation.  */
+  if (h->got.refcount > 0
+      && !info->shared
+      && h->dynindx == -1
+      && elf_s390_hash_entry(h)->tls_type >= GOT_TLS_IE)
     {
+      if (elf_s390_hash_entry(h)->tls_type == GOT_TLS_IE_NLT)
+	/* For the GOTIE access without a literal pool entry the offset has
+	   to be stored somewhere. The immediate value in the instruction
+	   is not bit enough so the value is stored in the got.  */
+	{
+	  h->got.offset = htab->sgot->_raw_size;
+	  htab->sgot->_raw_size += GOT_ENTRY_SIZE;
+	}
+      else
+	h->got.offset = (bfd_vma) -1;
+    }
+  else if (h->got.refcount > 0)
+   {
       asection *s;
       bfd_boolean dyn;
+      int tls_type = elf_s390_hash_entry(h)->tls_type;
 
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -1297,8 +1764,18 @@ allocate_dynrelocs (h, inf)
       s = htab->sgot;
       h->got.offset = s->_raw_size;
       s->_raw_size += GOT_ENTRY_SIZE;
+      /* R_390_TLS_GD32 needs 2 consecutive GOT slots.  */
+      if (tls_type == GOT_TLS_GD)
+	s->_raw_size += GOT_ENTRY_SIZE;
       dyn = htab->elf.dynamic_sections_created;
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
+      /* R_390_TLS_IE32 needs one dynamic relocation,
+	 R_390_TLS_GD32 needs one if local symbol and two if global.  */
+      if ((tls_type == GOT_TLS_GD && h->dynindx == -1)
+	  || tls_type >= GOT_TLS_IE)
+	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
+      else if (tls_type == GOT_TLS_GD)
+	htab->srelgot->_raw_size += 2 * sizeof (Elf32_External_Rela);
+      else if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
 	htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
     }
   else
@@ -1444,6 +1921,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
     {
       bfd_signed_vma *local_got;
       bfd_signed_vma *end_local_got;
+      char *local_tls_type;
       bfd_size_type locsymcount;
       Elf_Internal_Shdr *symtab_hdr;
       asection *srela;
@@ -1485,14 +1963,17 @@ elf_s390_size_dynamic_sections (output_bfd, info)
       symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
       locsymcount = symtab_hdr->sh_info;
       end_local_got = local_got + locsymcount;
+      local_tls_type = elf_s390_local_got_tls_type (ibfd);
       s = htab->sgot;
       srela = htab->srelgot;
-      for (; local_got < end_local_got; ++local_got)
+      for (; local_got < end_local_got; ++local_got, ++local_tls_type)
 	{
 	  if (*local_got > 0)
 	    {
 	      *local_got = s->_raw_size;
 	      s->_raw_size += GOT_ENTRY_SIZE;
+	      if (*local_tls_type == GOT_TLS_GD)
+		s->_raw_size += GOT_ENTRY_SIZE;
 	      if (info->shared)
 		srela->_raw_size += sizeof (Elf32_External_Rela);
 	    }
@@ -1500,6 +1981,17 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	    *local_got = (bfd_vma) -1;
 	}
     }
+
+  if (htab->tls_ldm_got.refcount > 0)
+    {
+      /* Allocate 2 got entries and 1 dynamic reloc for R_390_TLS_LDM32
+	 relocs.  */
+      htab->tls_ldm_got.offset = htab->sgot->_raw_size;
+      htab->sgot->_raw_size += 2 * GOT_ENTRY_SIZE;
+      htab->srelgot->_raw_size += sizeof (Elf32_External_Rela);
+    }
+  else
+    htab->tls_ldm_got.offset = -1;
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
@@ -1611,6 +2103,58 @@ elf_s390_size_dynamic_sections (output_bfd, info)
   return TRUE;
 }
 
+/* Return the base VMA address which should be subtracted from real addresses
+   when resolving @dtpoff relocation.
+   This is PT_TLS segment p_vaddr.  */
+
+static bfd_vma
+dtpoff_base (info)
+     struct bfd_link_info *info;
+{
+  /* If tls_segment is NULL, we should have signalled an error already.  */
+  if (elf_hash_table (info)->tls_segment == NULL)
+    return 0;
+  return elf_hash_table (info)->tls_segment->start;
+}
+
+/* Return the relocation value for @tpoff relocation
+   if STT_TLS virtual address is ADDRESS.  */
+
+static bfd_vma
+tpoff (info, address)
+     struct bfd_link_info *info;
+     bfd_vma address;
+{
+  struct elf_link_tls_segment *tls_segment
+    = elf_hash_table (info)->tls_segment;
+
+  /* If tls_segment is NULL, we should have signalled an error already.  */
+  if (tls_segment == NULL)
+    return 0;
+  return (align_power (tls_segment->size, tls_segment->align)
+	  + tls_segment->start - address);
+}
+
+/* Complain if TLS instruction relocation is against an invalid
+   instruction.  */
+
+static void
+invalid_tls_insn (input_bfd, input_section, rel)
+     bfd *input_bfd;
+     asection *input_section;
+     Elf_Internal_Rela *rel;
+{
+  reloc_howto_type *howto;
+
+  howto = elf_howto_table + ELF32_R_TYPE (rel->r_info);
+  (*_bfd_error_handler)
+    (_("%s(%s+0x%lx): invalid instruction for TLS relocation %s"),
+     bfd_archive_filename (input_bfd),
+     bfd_get_section_name (input_bfd, input_section),
+     (long) rel->r_offset,
+     howto->name);
+}
+
 /* Relocate a 390 ELF section.  */
 
 static bfd_boolean
@@ -1644,7 +2188,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; rel++)
     {
-      int r_type;
+      unsigned int r_type;
       reloc_howto_type *howto;
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
@@ -1654,12 +2198,13 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_vma relocation;
       bfd_boolean unresolved_reloc;
       bfd_reloc_status_type r;
+      int tls_type;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type == (int) R_390_GNU_VTINHERIT
           || r_type == (int) R_390_GNU_VTENTRY)
         continue;
-      if (r_type < 0 || r_type >= (int) R_390_max)
+      if (r_type >= (int) R_390_max)
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
@@ -1667,6 +2212,8 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
       howto = elf_howto_table + r_type;
       r_symndx = ELF32_R_SYM (rel->r_info);
+
+      /* This is a final link.  */
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -1723,6 +2270,39 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
       switch (r_type)
 	{
+	case R_390_GOTPLT12:
+	case R_390_GOTPLT16:
+	case R_390_GOTPLT32:
+	case R_390_GOTPLTENT:
+	  /* There are three cases for a GOTPLT relocation. 1) The
+	     relocation is against the jump slot entry of a plt that
+	     will get emitted to the output file. 2) The relocation
+	     is against the jump slot of a plt entry that has been
+	     removed. elf_s390_adjust_gotplt has created a GOT entry
+	     as replacement. 3) The relocation is against a local symbol.
+	     Cases 2) and 3) are the same as the GOT relocation code
+	     so we just have to test for case 1 and fall through for
+	     the other two.  */
+	  if (h != NULL && h->plt.offset != (bfd_vma) -1)
+	    {
+	      bfd_vma plt_index;
+
+	      /* Calc. index no.
+		 Current offset - size first entry / entry size.  */
+	      plt_index = (h->plt.offset - PLT_FIRST_ENTRY_SIZE) /
+		PLT_ENTRY_SIZE;
+	      
+	      /* Offset in GOT is PLT index plus GOT headers(3) times 4,
+		 addr & GOT addr.  */
+	      relocation = (plt_index + 3) * GOT_ENTRY_SIZE;
+	      unresolved_reloc = FALSE;
+
+	      if (r_type == R_390_GOTPLTENT)
+		relocation += htab->sgot->output_section->vma;
+	      break;
+	    }
+	  /* Fall through.  */
+
         case R_390_GOT12:
         case R_390_GOT16:
         case R_390_GOT32:
@@ -1821,12 +2401,14 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	   * between the start of the GOT and the symbols entry. We
 	   * add the vma of the GOT to get the correct value.
 	   */
-	  if (r_type == R_390_GOTENT)
+	  if (   r_type == R_390_GOTENT
+	      || r_type == R_390_GOTPLTENT)
 	    relocation += htab->sgot->output_section->vma;
 
           break;
 
-        case R_390_GOTOFF:
+	case R_390_GOTOFF16:
+        case R_390_GOTOFF32:
           /* Relocation is relative to the start of the global offset
              table.  */
 
@@ -1868,6 +2450,28 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
           relocation = (htab->splt->output_section->vma
                         + htab->splt->output_offset
                         + h->plt.offset);
+	  unresolved_reloc = FALSE;
+          break;
+
+	case R_390_PLTOFF16:
+	case R_390_PLTOFF32:
+          /* Relocation is to the entry for this symbol in the
+             procedure linkage table relative to the start of the GOT.  */
+
+	  /* For local symbols or if we didn't make a PLT entry for
+	     this symbol resolve the symbol directly.  */
+          if (   h == NULL
+	      || h->plt.offset == (bfd_vma) -1
+	      || htab->splt == NULL)
+	    {
+	      relocation -= htab->sgot->output_section->vma;
+	      break;
+	    }
+
+          relocation = (htab->splt->output_section->vma
+                        + htab->splt->output_offset
+                        + h->plt.offset
+			- htab->sgot->output_section->vma);
 	  unresolved_reloc = FALSE;
           break;
 
@@ -1968,6 +2572,330 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
                 continue;
             }
 	  break;
+
+	  /* Relocations for tls literal pool entries.  */
+	case R_390_TLS_IE32:
+	  if (info->shared)
+	    {
+	      Elf_Internal_Rela outrel;
+	      asection *sreloc;
+	      bfd_byte *loc;
+
+	      outrel.r_offset = rel->r_offset
+				+ input_section->output_section->vma
+				+ input_section->output_offset;
+	      outrel.r_info = ELF32_R_INFO (0, R_390_RELATIVE);
+	      sreloc = elf_section_data (input_section)->sreloc;
+	      if (sreloc == NULL)
+		abort ();
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
+	      bfd_elf32_swap_reloc_out (output_bfd, &outrel, loc);
+	    }
+	  /* Fall through */
+
+	case R_390_TLS_GD32:
+	case R_390_TLS_GOTIE32:
+	  r_type = elf_s390_tls_transition (info, r_type, h == NULL);
+	  tls_type = GOT_UNKNOWN;
+	  if (h == NULL && local_got_offsets)
+	    tls_type = elf_s390_local_got_tls_type (input_bfd) [r_symndx];
+	  else if (h != NULL)
+	    {
+	      tls_type = elf_s390_hash_entry(h)->tls_type;
+	      if (!info->shared && h->dynindx == -1 && tls_type >= GOT_TLS_IE)
+		r_type = R_390_TLS_LE32;
+	    }
+	  if (r_type == R_390_TLS_GD32 && tls_type >= GOT_TLS_IE)
+	    r_type = R_390_TLS_IE32;
+
+	  if (r_type == R_390_TLS_LE32)
+	    {
+	      /* This relocation gets optimized away by the local exec
+		 access optimization.  */
+	      BFD_ASSERT (! unresolved_reloc);
+	      bfd_put_32 (output_bfd, -tpoff (info, relocation),
+			  contents + rel->r_offset);
+	      continue;
+	    }
+
+	  if (htab->sgot == NULL)
+	    abort ();
+
+	  if (h != NULL)
+	    off = h->got.offset;
+	  else
+	    {
+	      if (local_got_offsets == NULL)
+		abort ();
+
+	      off = local_got_offsets[r_symndx];
+	    }
+
+	emit_tls_relocs:
+
+	  if ((off & 1) != 0)
+	    off &= ~1;
+          else
+	    {
+	      Elf_Internal_Rela outrel;
+	      bfd_byte *loc;
+	      int dr_type, indx;
+
+	      if (htab->srelgot == NULL)
+		abort ();
+
+	      outrel.r_offset = (htab->sgot->output_section->vma
+				 + htab->sgot->output_offset + off);
+
+	      indx = h && h->dynindx != -1 ? h->dynindx : 0;
+	      if (r_type == R_390_TLS_GD32)
+		dr_type = R_390_TLS_DTPMOD;
+	      else
+		dr_type = R_390_TLS_TPOFF;
+	      if (dr_type == R_390_TLS_TPOFF && indx == 0)
+		outrel.r_addend = relocation - dtpoff_base (info);
+	      else
+		outrel.r_addend = 0;
+	      outrel.r_info = ELF32_R_INFO (indx, dr_type);
+	      loc = htab->srelgot->contents;
+	      loc += htab->srelgot->reloc_count++
+		* sizeof (Elf32_External_Rela);
+	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
+
+	      if (r_type == R_390_TLS_GD32)
+		{
+		  if (indx == 0)
+		    {
+	    	      BFD_ASSERT (! unresolved_reloc);
+		      bfd_put_32 (output_bfd,
+				  relocation - dtpoff_base (info),
+				  htab->sgot->contents + off + GOT_ENTRY_SIZE);
+		    }
+		  else
+		    {
+		      outrel.r_info = ELF32_R_INFO (indx, R_390_TLS_DTPOFF);
+		      outrel.r_offset += GOT_ENTRY_SIZE;
+		      outrel.r_addend = 0;
+		      htab->srelgot->reloc_count++;
+		      loc += sizeof (Elf32_External_Rela);
+		      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
+		    }
+		}
+
+	      if (h != NULL)
+		h->got.offset |= 1;
+	      else
+		local_got_offsets[r_symndx] |= 1;
+	    }
+
+	  if (off >= (bfd_vma) -2)
+	    abort ();
+	  if (r_type == ELF32_R_TYPE (rel->r_info))
+	    {
+	      relocation = htab->sgot->output_offset + off;
+	      if (r_type == R_390_TLS_IE32 || r_type == R_390_TLS_IEENT)
+		relocation += htab->sgot->output_section->vma;
+	      unresolved_reloc = FALSE;
+	    }
+	  else
+	    {
+	      bfd_put_32 (output_bfd, htab->sgot->output_offset + off,
+			  contents + rel->r_offset);
+	      continue;
+	    }
+	  break;
+
+	case R_390_TLS_GOTIE12:
+	case R_390_TLS_IEENT:
+	  if (h == NULL)
+	    {
+	      if (local_got_offsets == NULL)
+		abort();
+	      off = local_got_offsets[r_symndx];
+	      if (info->shared)
+		goto emit_tls_relocs;
+	    }
+	  else
+	    {
+	      off = h->got.offset;
+	      tls_type = elf_s390_hash_entry(h)->tls_type;
+	      if (info->shared || h->dynindx != -1 || tls_type < GOT_TLS_IE)
+		goto emit_tls_relocs;
+	    }
+
+	  if (htab->sgot == NULL)
+	    abort ();
+
+	  BFD_ASSERT (! unresolved_reloc);
+	  bfd_put_32 (output_bfd, -tpoff (info, relocation),
+		      htab->sgot->contents + off);
+	  relocation = htab->sgot->output_offset + off;
+	  if (r_type == R_390_TLS_IEENT)
+	    relocation += htab->sgot->output_section->vma;
+	  unresolved_reloc = FALSE;
+	  break;
+
+	case R_390_TLS_LDM32:
+	  if (! info->shared)
+	    /* The literal pool entry this relocation refers to gets ignored
+	       by the optimized code of the local exec model. Do nothing
+	       and the value will turn out zero.  */
+	    continue;
+
+	  if (htab->sgot == NULL)
+	    abort ();
+
+	  off = htab->tls_ldm_got.offset;
+	  if (off & 1)
+	    off &= ~1;
+	  else
+	    {
+	      Elf_Internal_Rela outrel;
+	      bfd_byte *loc;
+
+	      if (htab->srelgot == NULL)
+		abort ();
+
+	      outrel.r_offset = (htab->sgot->output_section->vma
+				 + htab->sgot->output_offset + off);
+
+	      bfd_put_32 (output_bfd, 0,
+			  htab->sgot->contents + off + GOT_ENTRY_SIZE);
+	      outrel.r_info = ELF32_R_INFO (0, R_390_TLS_DTPMOD);
+	      outrel.r_addend = 0;
+	      loc = htab->srelgot->contents;
+	      loc += htab->srelgot->reloc_count++
+		* sizeof (Elf32_External_Rela);
+	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
+	      htab->tls_ldm_got.offset |= 1;
+	    }
+	  relocation = htab->sgot->output_offset + off;
+	  unresolved_reloc = FALSE;	  
+	  break;
+
+	case R_390_TLS_LE32:
+	  if (info->shared)
+	    {
+	      /* Linking a shared library with non-fpic code requires
+		 a R_390_TLS_TPOFF relocation.  */
+	      Elf_Internal_Rela outrel;
+	      asection *sreloc;
+	      bfd_byte *loc;
+	      int indx;
+
+	      outrel.r_offset = rel->r_offset
+				+ input_section->output_section->vma
+				+ input_section->output_offset;
+	      if (h != NULL && h->dynindx != -1)
+		indx = h->dynindx;
+	      else
+		indx = 0;
+	      outrel.r_info = ELF32_R_INFO (indx, R_390_TLS_TPOFF);
+	      if (indx == 0)
+		outrel.r_addend = relocation - dtpoff_base (info);
+	      else
+		outrel.r_addend = 0;
+	      sreloc = elf_section_data (input_section)->sreloc;
+	      if (sreloc == NULL)
+		abort ();
+	      loc = sreloc->contents;
+	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
+	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
+	    }
+	  else
+	    {
+	      BFD_ASSERT (! unresolved_reloc);
+	      bfd_put_32 (output_bfd, -tpoff (info, relocation),
+			  contents + rel->r_offset);
+	    }
+	  continue;
+
+	case R_390_TLS_LDO32:
+	  if (info->shared || (input_section->flags & SEC_CODE) == 0)
+	    relocation -= dtpoff_base (info);
+	  else
+	    /* When converting LDO to LE, we must negate.  */
+	    relocation = -tpoff (info, relocation);
+	  break;
+
+	  /* Relocations for tls instructions.  */
+	case R_390_TLS_LOAD:
+	case R_390_TLS_GDCALL:
+	case R_390_TLS_LDCALL:
+	  tls_type = GOT_UNKNOWN;
+	  if (h == NULL && local_got_offsets)
+	    tls_type = elf_s390_local_got_tls_type (input_bfd) [r_symndx];
+	  else if (h != NULL)
+	    tls_type = elf_s390_hash_entry(h)->tls_type;
+
+	  if (tls_type == GOT_TLS_GD)
+	    continue;
+
+	  if (r_type == R_390_TLS_LOAD)
+	    {
+	      if (!info->shared && (h == NULL || h->dynindx == -1))
+		{
+		  /* IE->LE transition. Four valid cases:
+		     l %rx,0(0,%ry)    -> lr %rx,%ry + bcr 0,0
+		     l %rx,0(%ry,0)    -> lr %rx,%ry + bcr 0,0
+		     l %rx,0(%ry,%r12) -> lr %rx,%ry + bcr 0,0
+		     l %rx,0(%r12,%ry) -> lr %rx,%ry + bcr 0,0 */
+		  unsigned int insn, ry;
+
+		  insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		  ry = 0;
+		  if ((insn & 0xff00f000) == 0x58000000)
+		    /* l %rx,0(%ry,0) -> lr %rx,%ry + bcr 0,0  */
+		    ry = (insn & 0x000f0000);
+		  else if ((insn & 0xff0f0000) == 0x58000000)
+		    /* l %rx,0(0,%ry) -> lr %rx,%ry + bcr 0,0  */
+		    ry = (insn & 0x0000f000) << 4;
+		  else if ((insn & 0xff00f000) == 0x5800c000)
+		    /* l %rx,0(%ry,%r12) -> lr %rx,%ry + bcr 0,0  */
+		    ry = (insn & 0x000f0000);
+		  else if ((insn & 0xff0f0000) == 0x580c0000)
+		    /* l %rx,0(%r12,%ry) -> lr %rx,%ry + bcr 0,0  */
+		    ry = (insn & 0x0000f000) << 4;
+		  else
+		    invalid_tls_insn (input_bfd, input_section, rel);
+		  insn = 0x18000700 | (insn & 0x00f00000) | ry;
+		  bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
+		}
+	    }
+	  else if (r_type == R_390_TLS_GDCALL)
+	    {
+	      unsigned int insn;
+
+	      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      if ((insn & 0xff000fff) != 0x4d000000)
+		invalid_tls_insn (input_bfd, input_section, rel);
+	      if (!info->shared && (h == NULL || h->dynindx == -1))
+		/* GD->LE transition.
+		   bas %r14,0(%rx,%r13) -> bc 0,0  */
+		insn = 0x47000000;
+	      else
+		/* GD->IE transition.
+		   bas %r14,0(%rx,%r13) -> l %r2,0(%r2,%r12)  */
+		insn = 0x5822c000;
+	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
+	    }
+	  else if (r_type == R_390_TLS_LDCALL)
+	    {
+	      if (!info->shared)
+		{
+		  unsigned int insn;
+
+		  insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		  if ((insn & 0xff000fff) != 0x4d000000)
+		    invalid_tls_insn (input_bfd, input_section, rel);
+		  /* LD->LE transition.
+		     bas %r14,0(%rx,%r13) -> bc 0,0  */
+		  insn = 0x47000000;
+		  bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
+		}
+	    }
+	  continue;
 
 	default:
 	  break;
@@ -2183,7 +3111,10 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
     }
 
-  if (h->got.offset != (bfd_vma) -1)
+  if (h->got.offset != (bfd_vma) -1
+      && elf_s390_hash_entry(h)->tls_type != GOT_TLS_GD
+      && elf_s390_hash_entry(h)->tls_type != GOT_TLS_IE
+      && elf_s390_hash_entry(h)->tls_type != GOT_TLS_IE_NLT)
     {
       Elf_Internal_Rela rela;
       bfd_byte *loc;
@@ -2400,13 +3331,6 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
 }
 
 static bfd_boolean
-elf_s390_object_p (abfd)
-     bfd *abfd;
-{
-  return bfd_default_set_arch_mach (abfd, bfd_arch_s390, bfd_mach_s390_31);
-}
-
-static bfd_boolean
 elf_s390_grok_prstatus (abfd, note)
      bfd * abfd;
      Elf_Internal_Note * note;
@@ -2473,6 +3397,7 @@ elf_s390_grok_prstatus (abfd, note)
 #define elf_backend_reloc_type_class	      elf_s390_reloc_type_class
 #define elf_backend_grok_prstatus	      elf_s390_grok_prstatus
 
+#define bfd_elf32_mkobject		elf_s390_mkobject
 #define elf_backend_object_p            elf_s390_object_p
 
 #include "elf32-target.h"

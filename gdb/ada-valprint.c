@@ -66,7 +66,7 @@ static void val_print_packed_array_elements (struct type *, char *valaddr,
 
 static void adjust_type_signedness (struct type *);
 
-static int ada_val_print_stub (PTR args0);
+static int ada_val_print_stub (void *args0);
 
 static int ada_val_print_1 (struct type *, char *, int, CORE_ADDR,
 			    struct ui_file *, int, int, int,
@@ -512,7 +512,7 @@ ada_val_print (struct type *type, char *valaddr0, int embedded_offset,
 /* Helper for ada_val_print; used as argument to catch_errors to
    unmarshal the arguments to ada_val_print_1, which does the work. */
 static int
-ada_val_print_stub (PTR args0)
+ada_val_print_stub (void * args0)
 {
   struct ada_val_print_args *argsp = (struct ada_val_print_args *) args0;
   return ada_val_print_1 (argsp->type, argsp->valaddr0,

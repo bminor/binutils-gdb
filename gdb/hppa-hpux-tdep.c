@@ -19,11 +19,79 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "arch-utils.h"
+#include "gdbcore.h"
 #include "osabi.h"
 
 /* Forward declarations.  */
 extern void _initialize_hppa_hpux_tdep (void);
 extern initialize_file_ftype _initialize_hppa_hpux_tdep;
+
+/* FIXME: brobecker 2002-12-25.  The following functions will eventually
+   become static, after the multiarching conversion is done.  */
+int hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name);
+void hppa_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi,
+                                           CORE_ADDR *tmp);
+void hppa_hpux_frame_base_before_sigtramp (struct frame_info *fi,
+                                           CORE_ADDR *tmp);
+void hppa_hpux_frame_find_saved_regs_in_sigtramp
+      (struct frame_info *fi, struct frame_saved_regs *fsr);
+
+int
+hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name)
+{
+  /* Actually, for a PA running HPUX the kernel calls the signal handler
+     without an intermediate trampoline.  Luckily the kernel always sets
+     the return pointer for the signal handler to point to _sigreturn.  */
+  return (name && (strcmp ("_sigreturn", name) == 0));
+}
+
+/* For hppa_hpux_frame_saved_pc_in_sigtramp, 
+   hppa_hpux_frame_base_before_sigtramp and
+   hppa_hpux_frame_find_saved_regs_in_sigtramp:
+
+   The signal context structure pointer is always saved at the base
+   of the frame which "calls" the signal handler.  We only want to find
+   the hardware save state structure, which lives 10 32bit words into
+   sigcontext structure.
+
+   Within the hardware save state structure, registers are found in the
+   same order as the register numbers in GDB.
+
+   At one time we peeked at %r31 rather than the PC queues to determine
+   what instruction took the fault.  This was done on purpose, but I don't
+   remember why.  Looking at the PC queues is really the right way, and
+   I don't remember why that didn't work when this code was originally
+   written.  */
+
+void
+hppa_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi, CORE_ADDR *tmp)
+{
+  *tmp = read_memory_integer (fi->frame + (43 * 4), 4);
+}
+
+void
+hppa_hpux_frame_base_before_sigtramp (struct frame_info *fi,
+                                      CORE_ADDR *tmp)
+{
+  *tmp = read_memory_integer (fi->frame + (40 * 4), 4);
+}
+
+void
+hppa_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
+                                             struct frame_saved_regs *fsr)
+{
+  int i;
+  const CORE_ADDR tmp = (fi)->frame + (10 * 4);
+
+  for (i = 0; i < NUM_REGS; i++)
+    {
+      if (i == SP_REGNUM)
+	(fsr)->regs[SP_REGNUM] = read_memory_integer (tmp + SP_REGNUM * 4, 4);
+      else
+	(fsr)->regs[i] = tmp + i * 4;
+    }
+}
+
 
 static void
 hppa_hpux_som_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)

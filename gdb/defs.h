@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTR_FORMAT confuses indent, avoid running it for now */
 /* Basic, host-specific, and target-specific definitions for GDB.
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002
+   1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -169,6 +169,9 @@ extern int xdb_commands;
 /* enable dbx commands if set */
 extern int dbx_commands;
 
+/* System root path, used to find libraries etc.  */
+extern char *gdb_sysroot;
+
 extern int quit_flag;
 extern int immediate_quit;
 extern int sevenbit_strings;
@@ -207,7 +210,6 @@ enum language
     language_cplus,		/* C++ */
     language_objc,		/* Objective-C */
     language_java,		/* Java */
-    /* OBSOLETE language_chill,	*/	/* Chill */
     language_fortran,		/* Fortran */
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
@@ -243,8 +245,8 @@ enum auto_boolean
 struct cleanup
   {
     struct cleanup *next;
-    void (*function) (PTR);
-    PTR arg;
+    void (*function) (void *);
+    void *arg;
   };
 
 
@@ -298,10 +300,6 @@ extern int inside_entry_file (CORE_ADDR addr);
 
 extern int inside_main_func (CORE_ADDR pc);
 
-/* OBSOLETE From ch-lang.c, for the moment. (FIXME) */
-
-/* OBSOLETE extern char *chill_demangle (const char *); */
-
 /* From utils.c */
 
 extern void initialize_utils (void);
@@ -309,6 +307,8 @@ extern void initialize_utils (void);
 extern void notice_quit (void);
 
 extern int strcmp_iw (const char *, const char *);
+
+extern int streq (const char *, const char *);
 
 extern int subset_compare (char *, char *);
 
@@ -376,11 +376,11 @@ extern int query (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern void init_page_info (void);
 
-extern CORE_ADDR host_pointer_to_address (void *ptr);
-extern void *address_to_host_pointer (CORE_ADDR addr);
-
 extern char *gdb_realpath (const char *);
 extern char *xfullpath (const char *);
+
+extern unsigned long gnu_debuglink_crc32 (unsigned long crc,
+                                          unsigned char *buf, size_t len);
 
 /* From demangle.c */
 
@@ -969,7 +969,7 @@ extern int catch_exceptions (struct ui_out *uiout,
 
    This function is superseeded by catch_exceptions().  */
 
-typedef int (catch_errors_ftype) (PTR);
+typedef int (catch_errors_ftype) (void *);
 extern int catch_errors (catch_errors_ftype *, void *, char *, return_mask);
 
 /* Template to catch_errors() that wraps calls to command
@@ -981,6 +981,39 @@ extern int catch_command_errors (catch_command_errors_ftype *func, char *command
 extern void warning (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern void vwarning (const char *, va_list args);
+
+/* List of known OS ABIs.  If you change this, make sure to update the
+   table in osabi.c.  */
+enum gdb_osabi
+{
+  GDB_OSABI_UNINITIALIZED = -1, /* For struct gdbarch_info.  */
+
+  GDB_OSABI_UNKNOWN = 0,	/* keep this zero */
+
+  GDB_OSABI_SVR4,
+  GDB_OSABI_HURD,
+  GDB_OSABI_SOLARIS,
+  GDB_OSABI_OSF1,
+  GDB_OSABI_LINUX,
+  GDB_OSABI_FREEBSD_AOUT,
+  GDB_OSABI_FREEBSD_ELF,
+  GDB_OSABI_NETBSD_AOUT,
+  GDB_OSABI_NETBSD_ELF,
+  GDB_OSABI_WINCE,
+  GDB_OSABI_GO32,
+  GDB_OSABI_NETWARE,
+  GDB_OSABI_IRIX,
+  GDB_OSABI_LYNXOS,
+  GDB_OSABI_INTERIX,
+  GDB_OSABI_HPUX_ELF,
+  GDB_OSABI_HPUX_SOM,
+
+  GDB_OSABI_ARM_EABI_V1,
+  GDB_OSABI_ARM_EABI_V2,
+  GDB_OSABI_ARM_APCS,
+
+  GDB_OSABI_INVALID		/* keep this last */
+};
 
 /* Global functions from other, non-gdb GNU thingies.
    Libiberty thingies are no longer declared here.  We include libiberty.h
@@ -1083,11 +1116,11 @@ extern LONGEST extract_signed_integer (const void *, int);
 
 extern ULONGEST extract_unsigned_integer (const void *, int);
 
-extern int extract_long_unsigned_integer (void *, int, LONGEST *);
+extern int extract_long_unsigned_integer (const void *, int, LONGEST *);
 
-extern CORE_ADDR extract_address (void *, int);
+extern CORE_ADDR extract_address (const void *, int);
 
-extern CORE_ADDR extract_typed_address (void *buf, struct type *type);
+extern CORE_ADDR extract_typed_address (const void *buf, struct type *type);
 
 extern void store_signed_integer (void *, int, LONGEST);
 

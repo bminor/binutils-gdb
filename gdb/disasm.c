@@ -1,5 +1,6 @@
 /* Disassemble support for GDB.
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -66,7 +67,7 @@ gdb_dis_asm_read_memory (bfd_vma memaddr, bfd_byte * myaddr,
 }
 
 static int
-compare_lines (const PTR mle1p, const PTR mle2p)
+compare_lines (const void *mle1p, const void *mle2p)
 {
   struct dis_line_entry *mle1, *mle2;
   int val;
@@ -96,6 +97,7 @@ dump_insns (struct ui_out *uiout, disassemble_info * di,
   char *name = NULL;
   int offset;
   int line;
+  struct cleanup *ui_out_chain;
 
   for (pc = low; pc < high;)
     {
@@ -107,7 +109,7 @@ dump_insns (struct ui_out *uiout, disassemble_info * di,
 	  else
 	    num_displayed++;
 	}
-      ui_out_tuple_begin (uiout, NULL);
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_core_addr (uiout, "address", pc);
 
       if (!build_address_symbolic (pc, 0, &name, &offset, &filename,
@@ -130,7 +132,7 @@ dump_insns (struct ui_out *uiout, disassemble_info * di,
       pc += TARGET_PRINT_INSN (pc, di);
       ui_out_field_stream (uiout, "inst", stb);
       ui_file_rewind (stb->stream);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
     }
   return num_displayed;
@@ -156,6 +158,7 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
   int next_line = 0;
   CORE_ADDR pc;
   int num_displayed = 0;
+  struct cleanup *ui_out_chain;
 
   mle = (struct dis_line_entry *) alloca (nlines
 					  * sizeof (struct dis_line_entry));
@@ -209,11 +212,14 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
      they have been emitted before), followed by the assembly code
      for that line.  */
 
-  ui_out_list_begin (uiout, "asm_insns");
+  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
 
   for (i = 0; i < newlines; i++)
     {
+      struct cleanup *ui_out_tuple_chain = NULL;
+      struct cleanup *ui_out_list_chain = NULL;
       int close_list = 1;
+      
       /* Print out everything from next_line to the current line.  */
       if (mle[i].line >= next_line)
 	{
@@ -222,7 +228,9 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 	      /* Just one line to print. */
 	      if (next_line == mle[i].line)
 		{
-		  ui_out_tuple_begin (uiout, "src_and_asm_line");
+		  ui_out_tuple_chain
+		    = make_cleanup_ui_out_tuple_begin_end (uiout,
+							   "src_and_asm_line");
 		  print_source_lines (symtab, next_line, mle[i].line + 1, 0);
 		}
 	      else
@@ -230,27 +238,38 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 		  /* Several source lines w/o asm instructions associated. */
 		  for (; next_line < mle[i].line; next_line++)
 		    {
-		      ui_out_tuple_begin (uiout, "src_and_asm_line");
+		      struct cleanup *ui_out_list_chain_line;
+		      struct cleanup *ui_out_tuple_chain_line;
+		      
+		      ui_out_tuple_chain_line
+			= make_cleanup_ui_out_tuple_begin_end (uiout,
+							       "src_and_asm_line");
 		      print_source_lines (symtab, next_line, next_line + 1,
 					  0);
-		      ui_out_list_begin (uiout, "line_asm_insn");
-		      ui_out_list_end (uiout);
-		      ui_out_tuple_end (uiout);
+		      ui_out_list_chain_line
+			= make_cleanup_ui_out_list_begin_end (uiout,
+							      "line_asm_insn");
+		      do_cleanups (ui_out_list_chain_line);
+		      do_cleanups (ui_out_tuple_chain_line);
 		    }
 		  /* Print the last line and leave list open for
 		     asm instructions to be added. */
-		  ui_out_tuple_begin (uiout, "src_and_asm_line");
+		  ui_out_tuple_chain
+		    = make_cleanup_ui_out_tuple_begin_end (uiout,
+							   "src_and_asm_line");
 		  print_source_lines (symtab, next_line, mle[i].line + 1, 0);
 		}
 	    }
 	  else
 	    {
-	      ui_out_tuple_begin (uiout, "src_and_asm_line");
+	      ui_out_tuple_chain
+		= make_cleanup_ui_out_tuple_begin_end (uiout, "src_and_asm_line");
 	      print_source_lines (symtab, mle[i].line, mle[i].line + 1, 0);
 	    }
 
 	  next_line = mle[i].line + 1;
-	  ui_out_list_begin (uiout, "line_asm_insn");
+	  ui_out_list_chain
+	    = make_cleanup_ui_out_list_begin_end (uiout, "line_asm_insn");
 	  /* Don't close the list if the lines are not in order. */
 	  if (i < (newlines - 1) && mle[i + 1].line <= mle[i].line)
 	    close_list = 0;
@@ -260,8 +279,8 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 				   how_many, stb);
       if (close_list)
 	{
-	  ui_out_list_end (uiout);
-	  ui_out_tuple_end (uiout);
+	  do_cleanups (ui_out_list_chain);
+	  do_cleanups (ui_out_tuple_chain);
 	  ui_out_text (uiout, "\n");
 	  close_list = 0;
 	}
@@ -269,7 +288,7 @@ do_mixed_source_and_assembly (struct ui_out *uiout,
 	if (num_displayed >= how_many)
 	  break;
     }
-  ui_out_list_end (uiout);
+  do_cleanups (ui_out_chain);
 }
 
 
@@ -279,12 +298,13 @@ do_assembly_only (struct ui_out *uiout, disassemble_info * di,
 		  int how_many, struct ui_stream *stb)
 {
   int num_displayed = 0;
+  struct cleanup *ui_out_chain;
 
-  ui_out_list_begin (uiout, "asm_insns");
+  ui_out_chain = make_cleanup_ui_out_list_begin_end (uiout, "asm_insns");
 
   num_displayed = dump_insns (uiout, di, low, high, how_many, stb);
 
-  ui_out_list_end (uiout);
+  do_cleanups (ui_out_chain);
 }
 
 void

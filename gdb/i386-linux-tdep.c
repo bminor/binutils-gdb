@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux running on i386's, for GDB.
 
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,6 +33,8 @@
 #include "objfiles.h"
 
 #include "solib-svr4.h"		/* For struct link_map_offsets.  */
+
+#include "osabi.h"
 
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
@@ -245,16 +247,16 @@ i386_linux_sigcontext_addr (struct frame_info *frame)
 {
   CORE_ADDR pc;
 
-  pc = i386_linux_sigtramp_start (frame->pc);
+  pc = i386_linux_sigtramp_start (get_frame_pc (frame));
   if (pc)
     {
       CORE_ADDR sp;
 
-      if (frame->next)
+      if (get_next_frame (frame))
 	/* If this isn't the top frame, the next frame must be for the
 	   signal handler itself.  The sigcontext structure lives on
 	   the stack, right after the signum argument.  */
-	return frame->next->frame + 12;
+	return get_frame_base (get_next_frame (frame)) + 12;
 
       /* This is the top frame.  We'll have to find the address of the
 	 sigcontext structure by looking at the stack pointer.  Keep
@@ -262,20 +264,21 @@ i386_linux_sigcontext_addr (struct frame_info *frame)
 	 "pop %eax".  If the PC is at this instruction, adjust the
 	 returned value accordingly.  */
       sp = read_register (SP_REGNUM);
-      if (pc == frame->pc)
+      if (pc == get_frame_pc (frame))
 	return sp + 4;
       return sp;
     }
 
-  pc = i386_linux_rt_sigtramp_start (frame->pc);
+  pc = i386_linux_rt_sigtramp_start (get_frame_pc (frame));
   if (pc)
     {
-      if (frame->next)
+      if (get_next_frame (frame))
 	/* If this isn't the top frame, the next frame must be for the
 	   signal handler itself.  The sigcontext structure is part of
 	   the user context.  A pointer to the user context is passed
 	   as the third argument to the signal handler.  */
-	return read_memory_integer (frame->next->frame + 16, 4) + 20;
+	return read_memory_integer (get_frame_base (get_next_frame (frame))
+				    + 16, 4) + 20;
 
       /* This is the top frame.  Again, use the stack pointer to find
 	 the address of the sigcontext structure.  */

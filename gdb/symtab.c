@@ -1,8 +1,8 @@
 /* Symbol table lookup for the GNU debugger, GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -42,6 +42,8 @@
 #include "source.h"
 #include "filenames.h"		/* for FILENAME_CMP */
 #include "dictionary.h"
+
+#include "hashtab.h"
 
 #include "gdb_obstack.h"
 
@@ -456,10 +458,6 @@ symbol_init_language_specific (struct general_symbol_info *gsymbol,
     {
       gsymbol->language_specific.objc_specific.demangled_name = NULL;
     }
-  /* OBSOLETE else if (SYMBOL_LANGUAGE (symbol) == language_chill) */
-  /* OBSOLETE   { */
-  /* OBSOLETE     SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL; */
-  /* OBSOLETE   } */
   else
     {
       memset (&gsymbol->language_specific, 0,
@@ -467,22 +465,35 @@ symbol_init_language_specific (struct general_symbol_info *gsymbol,
     }
 }
 
-/* Initialize a symbol's mangled name.  */
+/* Functions to initialize a symbol's mangled name.  */
 
-/* Try to initialize the demangled name for a symbol, based on the
+/* Create the hash table used for demangled names.  Each hash entry is
+   a pair of strings; one for the mangled name and one for the demangled
+   name.  The entry is hashed via just the mangled name.  */
+
+static void
+create_demangled_names_hash (struct objfile *objfile)
+{
+  /* Choose 256 as the starting size of the hash table, somewhat arbitrarily.
+     The hash table code will round this up to the next prime number. 
+     Choosing a much larger table size wastes memory, and saves only about
+     1% in symbol reading.  */
+
+  objfile->demangled_names_hash = htab_create_alloc_ex
+    (256, htab_hash_string, (int (*) (const void *, const void *)) streq,
+     NULL, objfile->md, xmcalloc, xmfree);
+}
+
+/* Try to determine the demangled name for a symbol, based on the
    language of that symbol.  If the language is set to language_auto,
    it will attempt to find any demangling algorithm that works and
-   then set the language appropriately.  If no demangling of any kind
-   is found, the language is set back to language_unknown, so we can
-   avoid doing this work again the next time we encounter the symbol.
-   Any required space to store the name is obtained from the specified
-   obstack. */
+   then set the language appropriately.  The returned name is allocated
+   by the demangler and should be xfree'd.  */
 
-void
-symbol_init_demangled_name (struct general_symbol_info *gsymbol,
-			    struct obstack *obstack)
+static char *
+symbol_find_demangled_name (struct general_symbol_info *gsymbol,
+			    const char *mangled)
 {
-  const char *mangled = gsymbol->name;
   char *demangled = NULL;
 
   if (gsymbol->language == language_unknown)
@@ -490,55 +501,118 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
   if (gsymbol->language == language_cplus
       || gsymbol->language == language_auto)
     {
-      demangled = cplus_demangle (gsymbol->name, DMGL_PARAMS | DMGL_ANSI);
+      demangled =
+        cplus_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
       if (demangled != NULL)
 	{
 	  gsymbol->language = language_cplus;
-	  gsymbol->language_specific.cplus_specific.demangled_name =
-	    obsavestring (demangled, strlen (demangled), obstack);
-	  xfree (demangled);
-	}
-      else
-	{
-	  gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+	  return demangled;
 	}
     }
   if (gsymbol->language == language_java)
     {
       demangled =
-	cplus_demangle (gsymbol->name, DMGL_PARAMS | DMGL_ANSI | DMGL_JAVA);
+        cplus_demangle (mangled,
+                        DMGL_PARAMS | DMGL_ANSI | DMGL_JAVA);
       if (demangled != NULL)
 	{
 	  gsymbol->language = language_java;
-	  gsymbol->language_specific.cplus_specific.demangled_name =
-	    obsavestring (demangled, strlen (demangled), obstack);
+	  return demangled;
+	}
+    }
+  return NULL;
+}
+
+/* Set both the mangled and demangled (if any) names for GSYMBOL based on
+   NAME and LEN.  The hash table corresponding to OBJFILE is used, and the
+   memory comes from that objfile's symbol_obstack.  NAME is copied, so the
+   pointer can be discarded after calling this function.  */
+
+void
+symbol_set_names (struct general_symbol_info *gsymbol,
+		  const char *name, int len, struct objfile *objfile)
+{
+  char **slot;
+  const char *tmpname;
+
+  if (objfile->demangled_names_hash == NULL)
+    create_demangled_names_hash (objfile);
+
+  /* The stabs reader generally provides names that are not NULL-terminated;
+     most of the other readers don't do this, so we can just use the given
+     copy.  */
+  if (name[len] != 0)
+    {
+      char *alloc_name = alloca (len + 1);
+      memcpy (alloc_name, name, len);
+      alloc_name[len] = 0;
+      tmpname = alloc_name;
+    }
+  else
+    tmpname = name;
+
+  slot = (char **) htab_find_slot (objfile->demangled_names_hash, tmpname, INSERT);
+
+  /* If this name is not in the hash table, add it.  */
+  if (*slot == NULL)
+    {
+      char *demangled_name = symbol_find_demangled_name (gsymbol, tmpname);
+      int demangled_len = demangled_name ? strlen (demangled_name) : 0;
+
+      /* If there is a demangled name, place it right after the mangled name.
+	 Otherwise, just place a second zero byte after the end of the mangled
+	 name.  */
+      *slot = obstack_alloc (&objfile->symbol_obstack,
+			     len + demangled_len + 2);
+      memcpy (*slot, tmpname, len + 1);
+      if (demangled_name)
+	{
+	  memcpy (*slot + len + 1, demangled_name, demangled_len + 1);
+	  xfree (demangled_name);
+	}
+      else
+	(*slot)[len + 1] = 0;
+    }
+
+  gsymbol->name = *slot;
+  if ((*slot)[len + 1])
+    gsymbol->language_specific.cplus_specific.demangled_name
+      = &(*slot)[len + 1];
+  else
+    gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+}
+
+/* Initialize the demangled name of GSYMBOL if possible.  Any required space
+   to store the name is obtained from the specified obstack.  The function
+   symbol_set_names, above, should be used instead where possible for more
+   efficient memory usage.  */
+
+void
+symbol_init_demangled_name (struct general_symbol_info *gsymbol,
+                            struct obstack *obstack)
+{
+  char *mangled = gsymbol->name;
+  char *demangled = NULL;
+
+  demangled = symbol_find_demangled_name (gsymbol, mangled);
+  if (gsymbol->language == language_cplus
+      || gsymbol->language == language_java)
+    {
+      if (demangled)
+	{
+	  gsymbol->language_specific.cplus_specific.demangled_name
+	    = obsavestring (demangled, strlen (demangled), obstack);
 	  xfree (demangled);
 	}
       else
-	{
-	  gsymbol->language_specific.cplus_specific.demangled_name = NULL;
-	}
+	gsymbol->language_specific.cplus_specific.demangled_name = NULL;
     }
-#if 0
-  /* OBSOLETE if (demangled == NULL */
-  /* OBSOLETE     && (gsymbol->language == language_chill */
-  /* OBSOLETE         || gsymbol->language == language_auto)) */
-  /* OBSOLETE   { */
-  /* OBSOLETE     demangled = */
-  /* OBSOLETE       chill_demangle (gsymbol->name); */
-  /* OBSOLETE     if (demangled != NULL) */
-  /* OBSOLETE       { */
-  /* OBSOLETE         gsymbol->language = language_chill; */
-  /* OBSOLETE         gsymbol->language_specific.chill_specific.demangled_name = */
-  /* OBSOLETE           obsavestring (demangled, strlen (demangled), obstack); */
-  /* OBSOLETE         xfree (demangled); */
-  /* OBSOLETE       } */
-  /* OBSOLETE     else */
-  /* OBSOLETE       { */
-  /* OBSOLETE         gsymbol->language_specific.chill_specific.demangled_name = NULL; */
-  /* OBSOLETE       } */
-  /* OBSOLETE   } */
-#endif
+  else
+    {
+      /* Unknown language; just clean up quietly.  */
+      if (demangled)
+	xfree (demangled);
+    }
 }
 
 
@@ -556,9 +630,6 @@ symbol_demangled_name (const struct general_symbol_info *gsymbol)
 
   else 
     return NULL;
-
-  /* OBSOLETE (SYMBOL_LANGUAGE (symbol) == language_chill */
-  /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */
 }
 
 /* Initialize the structure fields to zero values.  */
@@ -781,11 +852,11 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
    attractive to put in some QUIT's (though I'm not really sure
    whether it can run long enough to be really important).  But there
    are a few calls for which it would appear to be bad news to quit
-   out of here: find_proc_desc in alpha-tdep.c and mips-tdep.c, and
-   nindy_frame_chain_valid in nindy-tdep.c.  (Note that there is C++
-   code below which can error(), but that probably doesn't affect
-   these calls since they are looking for a known variable and thus
-   can probably assume it will never hit the C++ code).  */
+   out of here: find_proc_desc in alpha-tdep.c and mips-tdep.c.  (Note
+   that there is C++ code below which can error(), but that probably
+   doesn't affect these calls since they are looking for a known
+   variable and thus can probably assume it will never hit the C++
+   code).  */
 
 /* NOTE: carlton/2002-12-23: I'm updating this to no longer demangle
    names on demand.  I hope that I've tracked down everywhere in GDB
@@ -2103,9 +2174,11 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
          the first line, prev will not be set.  */
 
       /* Is this file's best line closer than the best in the other files?
-         If so, record this file, and its best line, as best so far.  */
+         If so, record this file, and its best line, as best so far.  Don't
+         save prev if it represents the end of a function (i.e. line number
+         0) instead of a real line.  */
 
-      if (prev && (!best || prev->pc > best->pc))
+      if (prev && prev->line && (!best || prev->pc > best->pc))
 	{
 	  best = prev;
 	  best_symtab = s;

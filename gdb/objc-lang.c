@@ -152,8 +152,7 @@ lookup_objc_class (char *classname)
     function = find_function_in_inferior("objc_lookup_class");
   else
     {
-      complaint (&symfile_complaints, "no way to lookup Objective-C classes",
-		 0);
+      complaint (&symfile_complaints, "no way to lookup Objective-C classes");
       return 0;
     }
 
@@ -180,8 +179,7 @@ lookup_child_selector (char *selname)
     function = find_function_in_inferior("sel_get_any_uid");
   else
     {
-      complaint (&symfile_complaints, "no way to lookup Objective-C selectors",
-		 0);
+      complaint (&symfile_complaints, "no way to lookup Objective-C selectors");
       return 0;
     }
 

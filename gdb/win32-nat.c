@@ -1,6 +1,6 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
 
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free
    Software Foundation, Inc.
 
    Contributed by Cygnus Solutions, A Red Hat Company.
@@ -124,7 +124,6 @@ static DEBUG_EVENT current_event;	/* The current debug event from
 static HANDLE current_process_handle;	/* Currently executing process */
 static thread_info *current_thread;	/* Info on currently selected thread */
 static DWORD main_thread_id;		/* Thread ID of the main thread */
-static pid_t cygwin_pid;		/* pid of cygwin process */
 
 /* Counts of things. */
 static int exception_count = 0;
@@ -383,7 +382,7 @@ static void
 do_child_store_inferior_registers (int r)
 {
   if (r >= 0)
-    deprecated_read_register_gen (r, ((char *) &current_thread->context) + mappings[r]);
+    regcache_collect (r, ((char *) &current_thread->context) + mappings[r]);
   else
     {
       for (r = 0; r < NUM_REGS; r++)
@@ -751,11 +750,66 @@ child_clear_solibs (void)
   max_dll_name_len = sizeof ("DLL Name") - 1;
 }
 
+/* Get the loaded address of all sections, given that .text was loaded
+   at text_load. Assumes that all sections are subject to the same
+   relocation offset. Returns NULL if problems occur or if the
+   sections were not relocated. */
+
+static struct section_addr_info *
+get_relocated_section_addrs (bfd *abfd, CORE_ADDR text_load)
+{
+  struct section_addr_info *result = NULL;
+  int section_count = bfd_count_sections (abfd);
+  asection *text_section = bfd_get_section_by_name (abfd, ".text");
+  CORE_ADDR text_vma;
+
+  if (!text_section)
+    {
+      /* Couldn't get the .text section. Weird. */
+    }
+
+  else if (text_load == (text_vma = bfd_get_section_vma (abfd, text_section)))
+    {
+      /* DLL wasn't relocated. */
+    }
+
+  else
+    {
+      /* Figure out all sections' loaded addresses. The offset here is
+	 such that taking a bfd_get_section_vma() result and adding
+	 offset will give the real load address of the section. */
+
+      CORE_ADDR offset = text_load - text_vma;
+
+      struct section_table *table_start = NULL;
+      struct section_table *table_end = NULL;
+      struct section_table *iter = NULL;
+
+      build_section_table (abfd, &table_start, &table_end);
+
+      for (iter = table_start; iter < table_end; ++iter)
+	{
+	  /* Relocated addresses. */
+	  iter->addr += offset;
+	  iter->endaddr += offset;
+	}
+
+      result = build_section_addr_info_from_section_table (table_start,
+							   table_end);
+
+      xfree (table_start);
+    }
+
+  return result;
+}
+
 /* Add DLL symbol information. */
 static struct objfile *
 solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
 {
-  struct section_addr_info section_addrs;
+  struct section_addr_info *section_addrs_ptr = NULL;
+  static struct objfile *result = NULL;
+  bfd *abfd = NULL;
 
   /* The symbols in a dll are offset by 0x1000, which is the
      the offset from 0 of the first byte in an image - because
@@ -764,10 +818,46 @@ solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
   if (!name || !name[0])
     return NULL;
 
-  memset (&section_addrs, 0, sizeof (section_addrs));
-  section_addrs.other[0].name = ".text";
-  section_addrs.other[0].addr = load_addr;
-  return safe_symbol_file_add (name, from_tty, &section_addrs, 0, OBJF_SHARED);
+  abfd = bfd_openr (name, "pei-i386");
+
+  if (!abfd)
+    {
+      /* pei failed - try pe */
+      abfd = bfd_openr (name, "pe-i386");
+    }
+
+  if (abfd)
+    {
+      if (bfd_check_format (abfd, bfd_object))
+	{
+	  section_addrs_ptr = get_relocated_section_addrs (abfd, load_addr);
+	}
+
+      bfd_close (abfd);
+    }
+
+  if (section_addrs_ptr)
+    {
+      result = safe_symbol_file_add (name, from_tty, section_addrs_ptr,
+				     0, OBJF_SHARED);
+
+      free_section_addr_info (section_addrs_ptr);
+    }
+
+  else
+    {
+      /* Fallback on handling just the .text section. */
+      struct section_addr_info section_addrs;
+
+      memset (&section_addrs, 0, sizeof (section_addrs));
+      section_addrs.other[0].name = ".text";
+      section_addrs.other[0].addr = load_addr;
+
+      result = safe_symbol_file_add (name, from_tty, &section_addrs,
+				     0, OBJF_SHARED);
+    }
+
+  return result;
 }
 
 /* Load DLL symbol info. */
@@ -850,10 +940,10 @@ display_selector (HANDLE thread, DWORD sel)
       int base, limit;
       printf_filtered ("0x%03lx: ", sel);
       if (!info.HighWord.Bits.Pres)
-        {
-          puts_filtered ("Segment not present\n");
-          return 0;
-        }
+	{
+	  puts_filtered ("Segment not present\n");
+	  return 0;
+	}
       base = (info.HighWord.Bits.BaseHi << 24) +
 	     (info.HighWord.Bits.BaseMid << 16)
 	     + info.BaseLow;
@@ -862,46 +952,46 @@ display_selector (HANDLE thread, DWORD sel)
        limit = (limit << 12) | 0xfff;
       printf_filtered ("base=0x%08x limit=0x%08x", base, limit);
       if (info.HighWord.Bits.Default_Big)
-        puts_filtered(" 32-bit ");
+	puts_filtered(" 32-bit ");
       else
-        puts_filtered(" 16-bit ");
+	puts_filtered(" 16-bit ");
       switch ((info.HighWord.Bits.Type & 0xf) >> 1)
 	{
 	case 0:
-          puts_filtered ("Data (Read-Only, Exp-up");
-          break;
+	  puts_filtered ("Data (Read-Only, Exp-up");
+	  break;
 	case 1:
-          puts_filtered ("Data (Read/Write, Exp-up");
-          break;
+	  puts_filtered ("Data (Read/Write, Exp-up");
+	  break;
 	case 2:
-          puts_filtered ("Unused segment (");
-          break;
+	  puts_filtered ("Unused segment (");
+	  break;
 	case 3:
-          puts_filtered ("Data (Read/Write, Exp-down");
-          break;
+	  puts_filtered ("Data (Read/Write, Exp-down");
+	  break;
 	case 4:
-          puts_filtered ("Code (Exec-Only, N.Conf");
-          break;
+	  puts_filtered ("Code (Exec-Only, N.Conf");
+	  break;
 	case 5:
-          puts_filtered ("Code (Exec/Read, N.Conf");
+	  puts_filtered ("Code (Exec/Read, N.Conf");
 	  break;
 	case 6:
-          puts_filtered ("Code (Exec-Only, Conf");
+	  puts_filtered ("Code (Exec-Only, Conf");
 	  break;
 	case 7:
-          puts_filtered ("Code (Exec/Read, Conf");
+	  puts_filtered ("Code (Exec/Read, Conf");
 	  break;
 	default:
 	  printf_filtered ("Unknown type 0x%x",info.HighWord.Bits.Type);
 	}
       if ((info.HighWord.Bits.Type & 0x1) == 0)
-        puts_filtered(", N.Acc");
+	puts_filtered(", N.Acc");
       puts_filtered (")\n");
       if ((info.HighWord.Bits.Type & 0x10) == 0)
 	puts_filtered("System selector ");
       printf_filtered ("Priviledge level = %d. ", info.HighWord.Bits.Dpl);
       if (info.HighWord.Bits.Granularity)
-        puts_filtered ("Page granular.\n");
+	puts_filtered ("Page granular.\n");
       else
 	puts_filtered ("Byte granular.\n");
       return 1;
@@ -926,22 +1016,22 @@ display_selectors (char * args, int from_tty)
 
       puts_filtered ("Selector $cs\n");
       display_selector (current_thread->h,
-        current_thread->context.SegCs);
+	current_thread->context.SegCs);
       puts_filtered ("Selector $ds\n");
       display_selector (current_thread->h,
-        current_thread->context.SegDs);
+	current_thread->context.SegDs);
       puts_filtered ("Selector $es\n");
       display_selector (current_thread->h,
-        current_thread->context.SegEs);
+	current_thread->context.SegEs);
       puts_filtered ("Selector $ss\n");
       display_selector (current_thread->h,
-        current_thread->context.SegSs);
+	current_thread->context.SegSs);
       puts_filtered ("Selector $fs\n");
       display_selector (current_thread->h,
 	current_thread->context.SegFs);
       puts_filtered ("Selector $gs\n");
       display_selector (current_thread->h,
-        current_thread->context.SegGs);
+	current_thread->context.SegGs);
     }
   else
     {
@@ -1374,6 +1464,83 @@ has_detach_ability (void)
   return 0;
 }
 
+/* Try to set or remove a user privilege to the current process.  Return -1
+   if that fails, the previous setting of that privilege otherwise.
+
+   This code is copied from the Cygwin source code and rearranged to allow
+   dynamically loading of the needed symbols from advapi32 which is only
+   available on NT/2K/XP. */
+static int
+set_process_privilege (const char *privilege, BOOL enable)
+{
+  static HMODULE advapi32 = NULL;
+  static BOOL WINAPI (*OpenProcessToken)(HANDLE, DWORD, PHANDLE);
+  static BOOL WINAPI (*LookupPrivilegeValue)(LPCSTR, LPCSTR, PLUID);
+  static BOOL WINAPI (*AdjustTokenPrivileges)(HANDLE, BOOL, PTOKEN_PRIVILEGES,
+					      DWORD, PTOKEN_PRIVILEGES, PDWORD);
+
+  HANDLE token_hdl = NULL;
+  LUID restore_priv;
+  TOKEN_PRIVILEGES new_priv, orig_priv;
+  int ret = -1;
+  DWORD size;
+
+  if (GetVersion () >= 0x80000000)  /* No security availbale on 9x/Me */
+    return 0;
+
+  if (!advapi32)
+    {
+      if (!(advapi32 = LoadLibrary ("advapi32.dll")))
+	goto out;
+      if (!OpenProcessToken)
+	OpenProcessToken = GetProcAddress (advapi32, "OpenProcessToken");
+      if (!LookupPrivilegeValue)
+	LookupPrivilegeValue = GetProcAddress (advapi32,
+					       "LookupPrivilegeValueA");
+      if (!AdjustTokenPrivileges)
+	AdjustTokenPrivileges = GetProcAddress (advapi32,
+						"AdjustTokenPrivileges");
+      if (!OpenProcessToken || !LookupPrivilegeValue || !AdjustTokenPrivileges)
+	{
+	  advapi32 = NULL;
+	  goto out;
+	}
+    }
+
+  if (!OpenProcessToken (GetCurrentProcess (),
+			 TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES,
+			 &token_hdl))
+    goto out;
+
+  if (!LookupPrivilegeValue (NULL, privilege, &restore_priv))
+    goto out;
+
+  new_priv.PrivilegeCount = 1;
+  new_priv.Privileges[0].Luid = restore_priv;
+  new_priv.Privileges[0].Attributes = enable ? SE_PRIVILEGE_ENABLED : 0;
+
+  if (!AdjustTokenPrivileges (token_hdl, FALSE, &new_priv,
+			      sizeof orig_priv, &orig_priv, &size))
+    goto out;
+#if 0
+  /* Disabled, otherwise every `attach' in an unprivileged user session
+     would raise the "Failed to get SE_DEBUG_NAME privilege" warning in
+     child_attach(). */
+  /* AdjustTokenPrivileges returns TRUE even if the privilege could not
+     be enabled. GetLastError () returns an correct error code, though. */
+  if (enable && GetLastError () == ERROR_NOT_ALL_ASSIGNED)
+    goto out;
+#endif
+
+  ret = orig_priv.Privileges[0].Attributes == SE_PRIVILEGE_ENABLED ? 1 : 0;
+
+out:
+  if (token_hdl)
+    CloseHandle (token_hdl);
+
+  return ret;
+}
+
 /* Attach to process PID, then initialize for debugging it.  */
 static void
 child_attach (char *args, int from_tty)
@@ -1384,12 +1551,28 @@ child_attach (char *args, int from_tty)
   if (!args)
     error_no_arg ("process-id to attach");
 
-  pid = strtoul (args, 0, 0);
+  if (set_process_privilege (SE_DEBUG_NAME, TRUE) < 0)
+    {
+      printf_unfiltered ("Warning: Failed to get SE_DEBUG_NAME privilege\n");
+      printf_unfiltered ("This can cause attach to fail on Windows NT/2K/XP\n");
+    }
+
+  pid = strtoul (args, 0, 0);		/* Windows pid */
+
   ok = DebugActiveProcess (pid);
   saw_create = 0;
 
   if (!ok)
+    {
+      /* Try fall back to Cygwin pid */
+      pid = cygwin_internal (CW_CYGWIN_PID_TO_WINPID, pid);
+
+      if (pid > 0)
+	ok = DebugActiveProcess (pid);
+
+      if (!ok)
     error ("Can't attach to process.");
+    }
 
   if (has_detach_ability ())
     {
@@ -1923,11 +2106,11 @@ _initialize_win32_nat (void)
   add_info_alias ("sharedlibrary", "dll", 1);
 
   add_prefix_cmd ("w32", class_info, info_w32_command,
-                  "Print information specific to Win32 debugging.",
-                  &info_w32_cmdlist, "info w32 ", 0, &infolist);
+		  "Print information specific to Win32 debugging.",
+		  &info_w32_cmdlist, "info w32 ", 0, &infolist);
 
   add_cmd ("selector", class_info, display_selectors,
-           "Display selectors infos.",
+	   "Display selectors infos.",
 	   &info_w32_cmdlist);
 
   add_target (&child_ops);

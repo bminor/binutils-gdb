@@ -203,10 +203,10 @@ struct breakpoint
     /* Number assigned to distinguish breakpoints.  */
     int number;
 
-    /* Address to break at.
-       Note that zero is a perfectly valid code address on some
-       platforms (for example, the mn10200 and mn10300 simulators).
-       NULL is not a special value for this field.  */
+    /* Address to break at.  Note that zero is a perfectly valid code
+       address on some platforms (for example, the OBSOLETE mn10200
+       and mn10300 simulators).  NULL is not a special value for this
+       field.  */
     CORE_ADDR address;
 
     /* Line number of this address.  */
@@ -534,7 +534,7 @@ extern int deprecated_frame_in_dummy (struct frame_info *);
 
 extern int breakpoint_thread_match (CORE_ADDR, ptid_t);
 
-extern void until_break_command (char *, int);
+extern void until_break_command (char *, int, int);
 
 extern void breakpoint_re_set (void);
 

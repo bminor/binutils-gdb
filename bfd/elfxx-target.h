@@ -1,6 +1,6 @@
 /* Target definitions for NN-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -53,7 +53,9 @@
 #define bfd_elfNN_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
 #endif
 #define bfd_elfNN_make_empty_symbol	_bfd_elf_make_empty_symbol
+#ifndef bfd_elfNN_new_section_hook
 #define bfd_elfNN_new_section_hook	_bfd_elf_new_section_hook
+#endif
 #define bfd_elfNN_set_arch_mach		_bfd_elf_set_arch_mach
 #ifndef bfd_elfNN_set_section_contents
 #define bfd_elfNN_set_section_contents	_bfd_elf_set_section_contents

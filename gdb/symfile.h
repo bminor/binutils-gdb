@@ -1,6 +1,6 @@
 /* Definitions for reading symbol files into GDB.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -136,12 +136,12 @@ struct sym_fns
 /* The default version of sym_fns.sym_offsets for readers that don't
    do anything special.  */
 
-extern void
-default_symfile_offsets (struct objfile *objfile, struct section_addr_info *);
+extern void default_symfile_offsets (struct objfile *objfile,
+				     struct section_addr_info *);
 
 
-extern void
-extend_psymbol_list (struct psymbol_allocation_list *, struct objfile *);
+extern void extend_psymbol_list (struct psymbol_allocation_list *,
+				 struct objfile *);
 
 /* Add any kind of symbol to a psymbol_allocation_list. */
 
@@ -174,8 +174,10 @@ extern void add_symtab_fns (struct sym_fns *);
 
 extern void init_entry_point_info (struct objfile *);
 
-extern void
-syms_from_objfile (struct objfile *, struct section_addr_info *, int, int);
+extern void syms_from_objfile (struct objfile *,
+                               struct section_addr_info *, 
+                               struct section_offsets *, int,
+                               int, int);
 
 extern void new_symfile_objfile (struct objfile *, int, int);
 
@@ -192,8 +194,7 @@ build_section_addr_info_from_section_table (const struct section_table *start,
 
 /* Free all memory allocated by build_section_addr_info_from_section_table. */
 
-extern void
-free_section_addr_info (struct section_addr_info *);
+extern void free_section_addr_info (struct section_addr_info *);
 
 
 extern struct partial_symtab *start_psymtab_common (struct objfile *,
@@ -246,7 +247,7 @@ extern struct partial_symtab *allocate_psymtab (char *, struct objfile *);
 
 extern void discard_psymtab (struct partial_symtab *);
 
-extern void find_lowest_section (bfd *, asection *, PTR);
+extern void find_lowest_section (bfd *, asection *, void *);
 
 extern bfd *symfile_bfd_open (char *);
 
@@ -292,6 +293,9 @@ extern void symbol_file_add_main (char *args, int from_tty);
 
 /* Clear GDB symbol tables. */
 extern void symbol_file_clear (int from_tty);
+
+extern bfd_byte *symfile_relocate_debug_section (bfd *abfd, asection *sectp,
+						 bfd_byte *buf);
 
 /* From dwarfread.c */
 

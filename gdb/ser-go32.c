@@ -356,8 +356,8 @@ dos_comisr (int irq)
 #define ISRNAME(x) dos_comisr##x
 #define ISR(x) static void ISRNAME(x)(void) {dos_comisr(x);}
 
-ISR (0) ISR (1) ISR (2) ISR (3)
-ISR (4) ISR (5) ISR (6) ISR (7)
+ISR (0) ISR (1) ISR (2) ISR (3) /* OK */
+ISR (4) ISR (5) ISR (6) ISR (7) /* OK */
 
 typedef void (*isr_t) (void);
 

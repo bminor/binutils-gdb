@@ -880,6 +880,9 @@ bfd_make_writable PARAMS ((bfd *abfd));
 bfd_boolean
 bfd_make_readable PARAMS ((bfd *abfd));
 
+char *
+bfd_follow_gnu_debuglink PARAMS ((bfd *abfd, const char *dir));
+
 /* Extracted from libbfd.c.  */
 
 /* Byte swapping macros for user section data.  */
@@ -1258,9 +1261,34 @@ typedef struct sec
   /* A mark flag used by some linker backends for garbage collection.  */
   unsigned int gc_mark : 1;
 
-  /* Used by the ELF code to mark sections which have been allocated
-     to segments.  */
+  /* The following flags are used by the ELF linker. */
+
+  /* Mark sections which have been allocated to segments.  */
   unsigned int segment_mark : 1;
+
+  /* Type of sec_info information.  */
+  unsigned int sec_info_type:3;
+#define ELF_INFO_TYPE_NONE      0
+#define ELF_INFO_TYPE_STABS     1
+#define ELF_INFO_TYPE_MERGE     2
+#define ELF_INFO_TYPE_EH_FRAME  3
+#define ELF_INFO_TYPE_JUST_SYMS 4
+
+  /* Nonzero if this section uses RELA relocations, rather than REL.  */
+  unsigned int use_rela_p:1;
+
+  /* Bits used by various backends.  */
+  unsigned int has_tls_reloc:1;
+
+  /* Usused bits.  */
+  unsigned int flag11:1;
+  unsigned int flag12:1;
+  unsigned int flag13:1;
+  unsigned int flag14:1;
+  unsigned int flag15:1;
+  unsigned int flag16:4;
+  unsigned int flag20:4;
+  unsigned int flag24:8;
 
   /* End of internal packed boolean fields.  */
 
@@ -1572,6 +1600,7 @@ enum bfd_architecture
 #define bfd_mach_mips5                 5
 #define bfd_mach_mips_sb1              12310201 /* octal 'SB', 01 */
 #define bfd_mach_mipsisa32             32
+#define bfd_mach_mipsisa32r2           33
 #define bfd_mach_mipsisa64             64
   bfd_arch_i386,      /* Intel 386 */
 #define bfd_mach_i386_i386 1
@@ -1639,6 +1668,7 @@ enum bfd_architecture
 #define bfd_mach_sh            1
 #define bfd_mach_sh2        0x20
 #define bfd_mach_sh_dsp     0x2d
+#define bfd_mach_sh2e       0x2e
 #define bfd_mach_sh3        0x30
 #define bfd_mach_sh3_dsp    0x3d
 #define bfd_mach_sh3e       0x3e
@@ -1698,6 +1728,9 @@ enum bfd_architecture
   bfd_arch_ip2k,      /* Ubicom IP2K microcontrollers. */
 #define bfd_mach_ip2022        1
 #define bfd_mach_ip2022ext     2
+ bfd_arch_iq2000,     /* Vitesse IQ2000.  */
+#define bfd_mach_iq2000        1
+#define bfd_mach_iq10          2
   bfd_arch_pj,
   bfd_arch_avr,       /* Atmel AVR microcontrollers.  */
 #define bfd_mach_avr1          1
@@ -1713,6 +1746,20 @@ enum bfd_architecture
   bfd_arch_mmix,      /* Donald Knuth's educational processor.  */
   bfd_arch_xstormy16,
 #define bfd_mach_xstormy16     1
+  bfd_arch_msp430,    /* Texas Instruments MSP430 architecture.  */
+#define bfd_mach_msp110         110
+#define bfd_mach_msp11          11
+#define bfd_mach_msp12          12
+#define bfd_mach_msp13          13
+#define bfd_mach_msp14          14
+#define bfd_mach_msp41          41
+#define bfd_mach_msp31          31
+#define bfd_mach_msp32          32
+#define bfd_mach_msp33          33
+#define bfd_mach_msp43          43
+#define bfd_mach_msp44          44
+#define bfd_mach_msp15          15
+#define bfd_mach_msp16          16  
   bfd_arch_last
   };
 
@@ -2144,6 +2191,32 @@ relocation types already defined.  */
 /* SPARC little endian relocation  */
   BFD_RELOC_SPARC_REV32,
 
+/* SPARC TLS relocations  */
+  BFD_RELOC_SPARC_TLS_GD_HI22,
+  BFD_RELOC_SPARC_TLS_GD_LO10,
+  BFD_RELOC_SPARC_TLS_GD_ADD,
+  BFD_RELOC_SPARC_TLS_GD_CALL,
+  BFD_RELOC_SPARC_TLS_LDM_HI22,
+  BFD_RELOC_SPARC_TLS_LDM_LO10,
+  BFD_RELOC_SPARC_TLS_LDM_ADD,
+  BFD_RELOC_SPARC_TLS_LDM_CALL,
+  BFD_RELOC_SPARC_TLS_LDO_HIX22,
+  BFD_RELOC_SPARC_TLS_LDO_LOX10,
+  BFD_RELOC_SPARC_TLS_LDO_ADD,
+  BFD_RELOC_SPARC_TLS_IE_HI22,
+  BFD_RELOC_SPARC_TLS_IE_LO10,
+  BFD_RELOC_SPARC_TLS_IE_LD,
+  BFD_RELOC_SPARC_TLS_IE_LDX,
+  BFD_RELOC_SPARC_TLS_IE_ADD,
+  BFD_RELOC_SPARC_TLS_LE_HIX22,
+  BFD_RELOC_SPARC_TLS_LE_LOX10,
+  BFD_RELOC_SPARC_TLS_DTPMOD32,
+  BFD_RELOC_SPARC_TLS_DTPMOD64,
+  BFD_RELOC_SPARC_TLS_DTPOFF32,
+  BFD_RELOC_SPARC_TLS_DTPOFF64,
+  BFD_RELOC_SPARC_TLS_TPOFF32,
+  BFD_RELOC_SPARC_TLS_TPOFF64,
+
 /* Alpha ECOFF and ELF relocations.  Some of these treat the symbol or
 "addend" in some special way.
 For GPDISP_HI16 ("gpdisp") relocations, the symbol is ignored when
@@ -2414,6 +2487,48 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_PPC64_TOC16_LO_DS,
   BFD_RELOC_PPC64_PLTGOT16_DS,
   BFD_RELOC_PPC64_PLTGOT16_LO_DS,
+
+/* PowerPC and PowerPC64 thread-local storage relocations.  */
+  BFD_RELOC_PPC_TLS,
+  BFD_RELOC_PPC_DTPMOD,
+  BFD_RELOC_PPC_TPREL16,
+  BFD_RELOC_PPC_TPREL16_LO,
+  BFD_RELOC_PPC_TPREL16_HI,
+  BFD_RELOC_PPC_TPREL16_HA,
+  BFD_RELOC_PPC_TPREL,
+  BFD_RELOC_PPC_DTPREL16,
+  BFD_RELOC_PPC_DTPREL16_LO,
+  BFD_RELOC_PPC_DTPREL16_HI,
+  BFD_RELOC_PPC_DTPREL16_HA,
+  BFD_RELOC_PPC_DTPREL,
+  BFD_RELOC_PPC_GOT_TLSGD16,
+  BFD_RELOC_PPC_GOT_TLSGD16_LO,
+  BFD_RELOC_PPC_GOT_TLSGD16_HI,
+  BFD_RELOC_PPC_GOT_TLSGD16_HA,
+  BFD_RELOC_PPC_GOT_TLSLD16,
+  BFD_RELOC_PPC_GOT_TLSLD16_LO,
+  BFD_RELOC_PPC_GOT_TLSLD16_HI,
+  BFD_RELOC_PPC_GOT_TLSLD16_HA,
+  BFD_RELOC_PPC_GOT_TPREL16,
+  BFD_RELOC_PPC_GOT_TPREL16_LO,
+  BFD_RELOC_PPC_GOT_TPREL16_HI,
+  BFD_RELOC_PPC_GOT_TPREL16_HA,
+  BFD_RELOC_PPC_GOT_DTPREL16,
+  BFD_RELOC_PPC_GOT_DTPREL16_LO,
+  BFD_RELOC_PPC_GOT_DTPREL16_HI,
+  BFD_RELOC_PPC_GOT_DTPREL16_HA,
+  BFD_RELOC_PPC64_TPREL16_DS,
+  BFD_RELOC_PPC64_TPREL16_LO_DS,
+  BFD_RELOC_PPC64_TPREL16_HIGHER,
+  BFD_RELOC_PPC64_TPREL16_HIGHERA,
+  BFD_RELOC_PPC64_TPREL16_HIGHEST,
+  BFD_RELOC_PPC64_TPREL16_HIGHESTA,
+  BFD_RELOC_PPC64_DTPREL16_DS,
+  BFD_RELOC_PPC64_DTPREL16_LO_DS,
+  BFD_RELOC_PPC64_DTPREL16_HIGHER,
+  BFD_RELOC_PPC64_DTPREL16_HIGHERA,
+  BFD_RELOC_PPC64_DTPREL16_HIGHEST,
+  BFD_RELOC_PPC64_DTPREL16_HIGHESTA,
 
 /* IBM 370/390 relocations  */
   BFD_RELOC_I370_D12,
@@ -2978,6 +3093,55 @@ into 22 bits.  */
 /* 32 bit rel. offset to GOT entry.  */
   BFD_RELOC_390_GOTENT,
 
+/* 64 bit offset to GOT.  */
+  BFD_RELOC_390_GOTOFF64,
+
+/* 12-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT12,
+
+/* 16-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT16,
+
+/* 32-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT32,
+
+/* 64-bit offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLT64,
+
+/* 32-bit rel. offset to symbol-entry within GOT, with PLT handling.  */
+  BFD_RELOC_390_GOTPLTENT,
+
+/* 16-bit rel. offset from the GOT to a PLT entry.  */
+  BFD_RELOC_390_PLTOFF16,
+
+/* 32-bit rel. offset from the GOT to a PLT entry.  */
+  BFD_RELOC_390_PLTOFF32,
+
+/* 64-bit rel. offset from the GOT to a PLT entry.  */
+  BFD_RELOC_390_PLTOFF64,
+
+/* s390 tls relocations.  */
+  BFD_RELOC_390_TLS_LOAD,
+  BFD_RELOC_390_TLS_GDCALL,
+  BFD_RELOC_390_TLS_LDCALL,
+  BFD_RELOC_390_TLS_GD32,
+  BFD_RELOC_390_TLS_GD64,
+  BFD_RELOC_390_TLS_GOTIE12,
+  BFD_RELOC_390_TLS_GOTIE32,
+  BFD_RELOC_390_TLS_GOTIE64,
+  BFD_RELOC_390_TLS_LDM32,
+  BFD_RELOC_390_TLS_LDM64,
+  BFD_RELOC_390_TLS_IE32,
+  BFD_RELOC_390_TLS_IE64,
+  BFD_RELOC_390_TLS_IEENT,
+  BFD_RELOC_390_TLS_LE32,
+  BFD_RELOC_390_TLS_LE64,
+  BFD_RELOC_390_TLS_LDO32,
+  BFD_RELOC_390_TLS_LDO64,
+  BFD_RELOC_390_TLS_DTPMOD,
+  BFD_RELOC_390_TLS_DTPOFF,
+  BFD_RELOC_390_TLS_TPOFF,
+
 /* Scenix IP2K - 9-bit register number / data address  */
   BFD_RELOC_IP2K_FR9,
 
@@ -3246,6 +3410,18 @@ to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
   BFD_RELOC_VAX_GLOB_DAT,
   BFD_RELOC_VAX_JMP_SLOT,
   BFD_RELOC_VAX_RELATIVE,
+
+/* msp430 specific relocation codes  */
+  BFD_RELOC_MSP430_10_PCREL,
+  BFD_RELOC_MSP430_16_PCREL,
+  BFD_RELOC_MSP430_16,
+  BFD_RELOC_MSP430_16_PCREL_BYTE,
+  BFD_RELOC_MSP430_16_BYTE,
+
+/* IQ2000 Relocations.  */
+  BFD_RELOC_IQ2000_OFFSET_16,
+  BFD_RELOC_IQ2000_OFFSET_21,
+  BFD_RELOC_IQ2000_UHI16,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *
@@ -3430,6 +3606,9 @@ bfd_copy_private_symbol_data PARAMS ((bfd *ibfd, asymbol *isym, bfd *obfd, asymb
 /* Extracted from bfd.c.  */
 struct _bfd
 {
+  /* A unique identifier of the BFD  */
+  unsigned int id;
+
   /* The filename the application opened the BFD with.  */
   const char *filename;
 

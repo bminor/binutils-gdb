@@ -1,5 +1,5 @@
 /* Target-dependent code for Atmel AVR, for GDB.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -322,7 +322,7 @@ avr_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
 }
 
 static CORE_ADDR
-avr_pointer_to_address (struct type *type, void *buf)
+avr_pointer_to_address (struct type *type, const void *buf)
 {
   CORE_ADDR addr = extract_address (buf, TYPE_LENGTH (type));
 
@@ -469,15 +469,15 @@ avr_scan_prologue (struct frame_info *fi)
   unsigned char prologue[AVR_MAX_PROLOGUE_SIZE];
   int vpc = 0;
 
-  fi->extra_info->framereg = AVR_SP_REGNUM;
+  get_frame_extra_info (fi)->framereg = AVR_SP_REGNUM;
 
   if (find_pc_partial_function
-      (fi->pc, &name, &prologue_start, &prologue_end))
+      (get_frame_pc (fi), &name, &prologue_start, &prologue_end))
     {
       struct symtab_and_line sal = find_pc_line (prologue_start, 0);
 
       if (sal.line == 0)	/* no line info, use current PC */
-	prologue_end = fi->pc;
+	prologue_end = get_frame_pc (fi);
       else if (sal.end < prologue_end)	/* next line begins after fn end */
 	prologue_end = sal.end;	/* (probably means no prologue)  */
     }
@@ -486,12 +486,12 @@ avr_scan_prologue (struct frame_info *fi)
     /* 19 pushes, an add, and "mv fp,sp" */
     prologue_end = prologue_start + AVR_MAX_PROLOGUE_SIZE;
 
-  prologue_end = min (prologue_end, fi->pc);
+  prologue_end = min (prologue_end, get_frame_pc (fi));
 
   /* Search the prologue looking for instructions that set up the
      frame pointer, adjust the stack pointer, and save registers.  */
 
-  fi->extra_info->framesize = 0;
+  get_frame_extra_info (fi)->framesize = 0;
   prologue_len = prologue_end - prologue_start;
   read_memory (prologue_start, prologue, prologue_len);
 
@@ -509,7 +509,7 @@ avr_scan_prologue (struct frame_info *fi)
 	0xcd, 0xbf		/* out __SP_L__,r28 */
       };
 
-      fi->extra_info->framereg = AVR_FP_REGNUM;
+      get_frame_extra_info (fi)->framereg = AVR_FP_REGNUM;
       insn = EXTRACT_INSN (&prologue[vpc]);
       /* ldi r28,lo8(<RAM_ADDR> - <LOCALS_SIZE>) */
       if ((insn & 0xf0f0) == 0xe0c0)
@@ -522,9 +522,9 @@ avr_scan_prologue (struct frame_info *fi)
 	      locals |= ((insn & 0xf) | ((insn & 0x0f00) >> 4)) << 8;
 	      if (memcmp (prologue + vpc + 4, img, sizeof (img)) == 0)
 		{
-		  fi->frame = locals;
+		  deprecated_update_frame_base_hack (fi, locals);
 
-		  fi->extra_info->is_main = 1;
+		  get_frame_extra_info (fi)->is_main = 1;
 		  return;
 		}
 	    }
@@ -593,17 +593,17 @@ avr_scan_prologue (struct frame_info *fi)
       if (num_pushes)
 	{
 	  int from;
-	  fi->saved_regs[AVR_FP_REGNUM + 1] = num_pushes;
+	  get_frame_saved_regs (fi)[AVR_FP_REGNUM + 1] = num_pushes;
 	  if (num_pushes >= 2)
-	    fi->saved_regs[AVR_FP_REGNUM] = num_pushes - 1;
+	    get_frame_saved_regs (fi)[AVR_FP_REGNUM] = num_pushes - 1;
 	  i = 0;
 	  for (from = AVR_LAST_PUSHED_REGNUM + 1 - (num_pushes - 2);
 	       from <= AVR_LAST_PUSHED_REGNUM; ++from)
-	    fi->saved_regs[from] = ++i;
+	    get_frame_saved_regs (fi)[from] = ++i;
 	}
-      fi->extra_info->locals_size = loc_size;
-      fi->extra_info->framesize = loc_size + num_pushes;
-      fi->extra_info->framereg = AVR_FP_REGNUM;
+      get_frame_extra_info (fi)->locals_size = loc_size;
+      get_frame_extra_info (fi)->framesize = loc_size + num_pushes;
+      get_frame_extra_info (fi)->framereg = AVR_FP_REGNUM;
       return;
     }
 
@@ -622,16 +622,16 @@ avr_scan_prologue (struct frame_info *fi)
       if (memcmp (prologue, img, sizeof (img)) == 0)
 	{
 	  vpc += sizeof (img);
-	  fi->saved_regs[0] = 2;
-	  fi->saved_regs[1] = 1;
-	  fi->extra_info->framesize += 3;
+	  get_frame_saved_regs (fi)[0] = 2;
+	  get_frame_saved_regs (fi)[1] = 1;
+	  get_frame_extra_info (fi)->framesize += 3;
 	}
       else if (memcmp (img + 1, prologue, sizeof (img) - 1) == 0)
 	{
 	  vpc += sizeof (img) - 1;
-	  fi->saved_regs[0] = 2;
-	  fi->saved_regs[1] = 1;
-	  fi->extra_info->framesize += 3;
+	  get_frame_saved_regs (fi)[0] = 2;
+	  get_frame_saved_regs (fi)[1] = 1;
+	  get_frame_extra_info (fi)->framesize += 3;
 	}
     }
 
@@ -645,8 +645,8 @@ avr_scan_prologue (struct frame_info *fi)
 	{
 	  /* Bits 4-9 contain a mask for registers R0-R32. */
 	  regno = (insn & 0x1f0) >> 4;
-	  ++fi->extra_info->framesize;
-	  fi->saved_regs[regno] = fi->extra_info->framesize;
+	  ++get_frame_extra_info (fi)->framesize;
+	  get_frame_saved_regs (fi)[regno] = get_frame_extra_info (fi)->framesize;
 	  scan_stage = 1;
 	}
       else
@@ -669,7 +669,7 @@ avr_scan_prologue (struct frame_info *fi)
       if (memcmp (prologue + vpc, img, sizeof (img)) == 0)
 	{
 	  vpc += 4;
-	  fi->extra_info->framereg = AVR_FP_REGNUM;
+	  get_frame_extra_info (fi)->framereg = AVR_FP_REGNUM;
 	  scan_stage = 2;
 	}
     }
@@ -718,8 +718,8 @@ avr_scan_prologue (struct frame_info *fi)
 	}
       else
 	return;
-      fi->extra_info->locals_size = locals_size;
-      fi->extra_info->framesize += locals_size;
+      get_frame_extra_info (fi)->locals_size = locals_size;
+      get_frame_extra_info (fi)->framesize += locals_size;
     }
 }
 
@@ -734,38 +734,41 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   int reg;
 
-  if (fi->next)
-    fi->pc = FRAME_SAVED_PC (fi->next);
+  if (get_next_frame (fi))
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
 
-  fi->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   frame_saved_regs_zalloc (fi);
 
-  fi->extra_info->return_pc = 0;
-  fi->extra_info->args_pointer = 0;
-  fi->extra_info->locals_size = 0;
-  fi->extra_info->framereg = 0;
-  fi->extra_info->framesize = 0;
-  fi->extra_info->is_main = 0;
+  get_frame_extra_info (fi)->return_pc = 0;
+  get_frame_extra_info (fi)->args_pointer = 0;
+  get_frame_extra_info (fi)->locals_size = 0;
+  get_frame_extra_info (fi)->framereg = 0;
+  get_frame_extra_info (fi)->framesize = 0;
+  get_frame_extra_info (fi)->is_main = 0;
 
   avr_scan_prologue (fi);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				   get_frame_base (fi)))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
-						  AVR_PC_REGNUM);
+      deprecated_update_frame_base_hack (fi, deprecated_read_register_dummy (get_frame_pc (fi), get_frame_base (fi),
+									     AVR_PC_REGNUM));
     }
-  else if (!fi->next)		/* this is the innermost frame? */
-    fi->frame = read_register (fi->extra_info->framereg);
-  else if (fi->extra_info->is_main != 1)	/* not the innermost frame, not `main' */
+  else if (!get_next_frame (fi))
+    /* this is the innermost frame? */
+    deprecated_update_frame_base_hack (fi, read_register (get_frame_extra_info (fi)->framereg));
+  else if (get_frame_extra_info (fi)->is_main != 1)
+    /* not the innermost frame, not `main' */
     /* If we have an next frame,  the callee saved it. */
     {
-      struct frame_info *next_fi = fi->next;
-      if (fi->extra_info->framereg == AVR_SP_REGNUM)
-	fi->frame =
-	  next_fi->frame + 2 /* ret addr */  + next_fi->extra_info->framesize;
+      struct frame_info *next_fi = get_next_frame (fi);
+      if (get_frame_extra_info (fi)->framereg == AVR_SP_REGNUM)
+	deprecated_update_frame_base_hack (fi, (get_frame_base (next_fi)
+						+ 2 /* ret addr */
+						+ get_frame_extra_info (next_fi)->framesize));
       /* FIXME: I don't analyse va_args functions  */
       else
 	{
@@ -774,50 +777,51 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	  unsigned int fp_low, fp_high;
 
 	  /* Scan all frames */
-	  for (; next_fi; next_fi = next_fi->next)
+	  for (; next_fi; next_fi = get_next_frame (next_fi))
 	    {
 	      /* look for saved AVR_FP_REGNUM */
-	      if (next_fi->saved_regs[AVR_FP_REGNUM] && !fp)
-		fp = next_fi->saved_regs[AVR_FP_REGNUM];
+	      if (get_frame_saved_regs (next_fi)[AVR_FP_REGNUM] && !fp)
+		fp = get_frame_saved_regs (next_fi)[AVR_FP_REGNUM];
 	      /* look for saved AVR_FP_REGNUM + 1 */
-	      if (next_fi->saved_regs[AVR_FP_REGNUM + 1] && !fp1)
-		fp1 = next_fi->saved_regs[AVR_FP_REGNUM + 1];
+	      if (get_frame_saved_regs (next_fi)[AVR_FP_REGNUM + 1] && !fp1)
+		fp1 = get_frame_saved_regs (next_fi)[AVR_FP_REGNUM + 1];
 	    }
 	  fp_low = (fp ? read_memory_unsigned_integer (avr_make_saddr (fp), 1)
 		    : read_register (AVR_FP_REGNUM)) & 0xff;
 	  fp_high =
 	    (fp1 ? read_memory_unsigned_integer (avr_make_saddr (fp1), 1) :
 	     read_register (AVR_FP_REGNUM + 1)) & 0xff;
-	  fi->frame = fp_low | (fp_high << 8);
+	  deprecated_update_frame_base_hack (fi, fp_low | (fp_high << 8));
 	}
     }
 
   /* TRoth: Do we want to do this if we are in main? I don't think we should
      since return_pc makes no sense when we are in main. */
 
-  if ((fi->pc) && (fi->extra_info->is_main == 0))	/* We are not in CALL_DUMMY */
+  if ((get_frame_pc (fi)) && (get_frame_extra_info (fi)->is_main == 0))
+    /* We are not in CALL_DUMMY */
     {
       CORE_ADDR addr;
       int i;
 
-      addr = fi->frame + fi->extra_info->framesize + 1;
+      addr = get_frame_base (fi) + get_frame_extra_info (fi)->framesize + 1;
 
       /* Return address in stack in different endianness */
 
-      fi->extra_info->return_pc =
+      get_frame_extra_info (fi)->return_pc =
 	read_memory_unsigned_integer (avr_make_saddr (addr), 1) << 8;
-      fi->extra_info->return_pc |=
+      get_frame_extra_info (fi)->return_pc |=
 	read_memory_unsigned_integer (avr_make_saddr (addr + 1), 1);
 
       /* This return address in words,
          must be converted to the bytes address */
-      fi->extra_info->return_pc *= 2;
+      get_frame_extra_info (fi)->return_pc *= 2;
 
       /* Resolve a pushed registers addresses */
       for (i = 0; i < NUM_REGS; i++)
 	{
-	  if (fi->saved_regs[i])
-	    fi->saved_regs[i] = addr - fi->saved_regs[i];
+	  if (get_frame_saved_regs (fi)[i])
+	    get_frame_saved_regs (fi)[i] = addr - get_frame_saved_regs (fi)[i];
 	}
     }
 }
@@ -833,7 +837,9 @@ avr_pop_frame (void)
   CORE_ADDR saddr;
   struct frame_info *frame = get_current_frame ();
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
     {
       generic_pop_dummy_frame ();
     }
@@ -845,18 +851,18 @@ avr_pop_frame (void)
 	{
 	  /* Don't forget AVR_SP_REGNUM in a frame_saved_regs struct is the
 	     actual value we want, not the address of the value we want.  */
-	  if (frame->saved_regs[regnum] && regnum != AVR_SP_REGNUM)
+	  if (get_frame_saved_regs (frame)[regnum] && regnum != AVR_SP_REGNUM)
 	    {
-	      saddr = avr_make_saddr (frame->saved_regs[regnum]);
+	      saddr = avr_make_saddr (get_frame_saved_regs (frame)[regnum]);
 	      write_register (regnum,
 			      read_memory_unsigned_integer (saddr, 1));
 	    }
-	  else if (frame->saved_regs[regnum] && regnum == AVR_SP_REGNUM)
-	    write_register (regnum, frame->frame + 2);
+	  else if (get_frame_saved_regs (frame)[regnum] && regnum == AVR_SP_REGNUM)
+	    write_register (regnum, get_frame_base (frame) + 2);
 	}
 
       /* Don't forget the update the PC too!  */
-      write_pc (frame->extra_info->return_pc);
+      write_pc (get_frame_extra_info (frame)->return_pc);
     }
   flush_cached_frames ();
 }
@@ -866,11 +872,14 @@ avr_pop_frame (void)
 static CORE_ADDR
 avr_frame_saved_pc (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
-    return deprecated_read_register_dummy (frame->pc, frame->frame,
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
+    return deprecated_read_register_dummy (get_frame_pc (frame),
+					   get_frame_base (frame),
 					   AVR_PC_REGNUM);
   else
-    return frame->extra_info->return_pc;
+    return get_frame_extra_info (frame)->return_pc;
 }
 
 static CORE_ADDR
@@ -1017,7 +1026,7 @@ avr_skip_prologue (CORE_ADDR pc)
 static CORE_ADDR
 avr_frame_address (struct frame_info *fi)
 {
-  return avr_make_saddr (fi->frame);
+  return avr_make_saddr (get_frame_base (fi));
 }
 
 /* Given a GDB frame, determine the address of the calling function's
@@ -1031,16 +1040,19 @@ avr_frame_address (struct frame_info *fi)
 static CORE_ADDR
 avr_frame_chain (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
     {
       /* initialize the return_pc now */
-      frame->extra_info->return_pc
-	= deprecated_read_register_dummy (frame->pc, frame->frame,
+      get_frame_extra_info (frame)->return_pc
+	= deprecated_read_register_dummy (get_frame_pc (frame),
+					  get_frame_base (frame),
 					  AVR_PC_REGNUM);
-      return frame->frame;
+      return get_frame_base (frame);
     }
-  return (frame->extra_info->is_main ? 0
-	  : frame->frame + frame->extra_info->framesize + 2 /* ret addr */ );
+  return (get_frame_extra_info (frame)->is_main ? 0
+	  : get_frame_base (frame) + get_frame_extra_info (frame)->framesize + 2 /* ret addr */ );
 }
 
 /* Store the address of the place in which to copy the structure the
@@ -1263,7 +1275,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);	/* ??? */
   set_gdbarch_frame_chain (gdbarch, avr_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, avr_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, avr_frame_address);
   set_gdbarch_frame_locals_address (gdbarch, avr_frame_address);

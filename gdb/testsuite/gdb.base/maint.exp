@@ -449,7 +449,7 @@ set timeout $oldtimeout
 
 send_gdb "help maint\n"
 gdb_expect  {
-        -re "Commands for use by GDB maintainers\\..*Includes commands to dump specific internal GDB structures in.*a human readable form, to cause GDB to deliberately dump core,.*to test internal functions such as the C.. demangler, etc\\..*List of maintenance subcommands:.*maintenance check-symtabs.*maintenance demangle.*(maintenance dump-me.*)?maintenance info.*maintenance internal-error.*maintenance print.*maintenance set.*maintenance show.*maintenance space.*maintenance time.*Type.*help maintenance.*followed by maintenance subcommand name for full documentation\\..*Command name abbreviations are allowed if unambiguous\\..*$gdb_prompt $"\
+        -re "Commands for use by GDB maintainers\\..*Includes commands to dump specific internal GDB structures in.*a human readable form, to cause GDB to deliberately dump core,.*to test internal functions such as the C../ObjC demangler, etc\\..*List of maintenance subcommands:.*maintenance check-symtabs.*maintenance demangle.*(maintenance dump-me.*)?maintenance info.*maintenance internal-error.*maintenance print.*maintenance set.*maintenance show.*maintenance space.*maintenance time.*Type.*help maintenance.*followed by maintenance subcommand name for full documentation\\..*Command name abbreviations are allowed if unambiguous\\..*$gdb_prompt $"\
  { pass "help maint" }
         -re ".*$gdb_prompt $"       { fail "help maint" }
         timeout         { fail "(timeout) help maint" }
@@ -482,7 +482,7 @@ gdb_expect  {
 
 send_gdb "help maint demangle\n"
 gdb_expect  {
-        -re "Demangle a C\\+\\+ mangled name\\.\r\nCall internal GDB demangler routine to demangle a C\\+\\+ link name\r\nand prints the result\\..*$gdb_prompt $"\
+        -re "Demangle a C\\+\\+/ObjC mangled name\\.\r\nCall internal GDB demangler routine to demangle a C\\+\\+ link name\r\nand prints the result\\..*$gdb_prompt $"\
                         { pass "help maint demangle" }
         -re ".*$gdb_prompt $"       { fail "help maint demangle" }
         timeout         { fail "(timeout) help maint demangle" }
@@ -617,7 +617,7 @@ gdb_expect  {
 
 send_gdb "help maint\n"
 gdb_expect  {
-        -re "Commands for use by GDB maintainers\\.\[\r\n\]+Includes commands to dump specific internal GDB structures in\[\r\n\]+a human readable form, to cause GDB to deliberately dump core,\[\r\n\]+to test internal functions such as the C\\+\\+ demangler, etc\\..*Type.*help maintenance.*followed by maintenance subcommand name for full documentation\\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\\..*$gdb_prompt $"\
+        -re "Commands for use by GDB maintainers\\.\[\r\n\]+Includes commands to dump specific internal GDB structures in\[\r\n\]+a human readable form, to cause GDB to deliberately dump core,\[\r\n\]+to test internal functions such as the C\\+\\+/ObjC demangler, etc\\..*Type.*help maintenance.*followed by maintenance subcommand name for full documentation\\.\[\r\n\]+Command name abbreviations are allowed if unambiguous\\..*$gdb_prompt $"\
                         { pass "help maint" }
         -re ".*$gdb_prompt $"       { fail "help maint" }
         timeout         { fail "(timeout) help maint" }

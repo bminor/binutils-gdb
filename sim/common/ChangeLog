@@ -1,3 +1,7 @@
+2003-01-08  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* run.c (usage): Fix typos.
+
 2002-11-27  Richard Sandiford  <rsandifo@redhat.com>
 
 	* sim-fpu.c (sim_fpu_inv): Use sim_fpu_div.

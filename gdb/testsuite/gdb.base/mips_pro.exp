@@ -1,4 +1,4 @@
-#   Copyright 1997, 1999 Free Software Foundation, Inc.
+# Copyright 1997, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ set prms_id 0
 set bug_id 0
 
 set testfile mips_pro
-set srcfile ${srcdir}/$subdir/${testfile}.c
+set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 # Create and source the file that provides information about the compiler
@@ -38,11 +38,11 @@ if [get_compiler_info ${binfile}] {
 # This test must be compiled with -O2 if using gcc.
 
 if {$gcc_compiled} then {
-    if  { [gdb_compile "${srcfile}" "${binfile}" executable {debug additional_flags=-O2}] != "" } {
+    if  { [gdb_compile "${srcdir}/$subdir/${srcfile}" "${binfile}" executable {debug additional_flags=-O2}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
     }
 } else {
-    if  { [gdb_compile "${srcfile}" "${binfile}" executable {debug}] != "" } {
+    if  { [gdb_compile "${srcdir}/$subdir/${srcfile}" "${binfile}" executable {debug}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
     }
 }

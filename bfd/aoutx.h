@@ -800,6 +800,7 @@ NAME(aout,machine_type) (arch, machine, unknown)
 	case bfd_mach_mips12000:
 	case bfd_mach_mips16:
 	case bfd_mach_mipsisa32:
+	case bfd_mach_mipsisa32r2:
 	case bfd_mach_mips5:
 	case bfd_mach_mipsisa64:
 	case bfd_mach_mips_sb1:

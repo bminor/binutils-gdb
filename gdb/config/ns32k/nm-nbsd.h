@@ -25,10 +25,6 @@
 /* Get generic NetBSD native definitions. */
 #include "config/nm-nbsd.h"
 
-#if 0
-#define FLOAT_INFO	{ extern ns32k_float_info(); ns32k_float_info(); }
-#endif
-
 #define REGISTER_U_ADDR(addr, blockend, regno) \
 	(addr) = ns32k_register_u_addr ((blockend),(regno));
 

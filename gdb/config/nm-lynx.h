@@ -1,6 +1,7 @@
 /* Native-dependent definitions for LynxOS.
-   Copyright 1993, 1994, 1995, 1996, 1999, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1996, 1999, 2000, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -41,8 +42,6 @@
    the core file of the register values.  */
 
 #define KERNEL_U_ADDR USRSTACK
-
-#undef FLOAT_INFO		/* No float info yet */
 
 /* As of LynxOS 2.2.2 (beta 8/15/94), this is int.  Previous versions seem to
    have had no prototype, so I'm not sure why GDB used to define this to

@@ -1,6 +1,7 @@
 /* HP SOM Shared library declarations for GDB, the GNU Debugger.
-   Copyright 1992, 1994, 1995, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1992, 1994, 1995, 1998, 1999, 2000, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,8 +37,8 @@ extern void som_solib_add (char *, int, struct target_ops *, int);
 
 extern CORE_ADDR som_solib_get_got_by_pc (CORE_ADDR);
 
-extern int
-som_solib_section_offsets (struct objfile *, struct section_offsets *);
+extern int som_solib_section_offsets (struct objfile *,
+				      struct section_offsets *);
 
 /* Function to be called when the inferior starts up, to discover the names
    of shared libraries that are dynamically linked, the base addresses to

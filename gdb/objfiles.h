@@ -1,7 +1,7 @@
 /* Definitions for symbol file management in GDB.
 
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +27,7 @@
 #include "symfile.h"		/* For struct psymbol_allocation_list */
 
 struct bcache;
+struct htab;
 
 /* This structure maintains information on a per-objfile basis about the
    "entry point" of the objfile, and the scope within which the entry point
@@ -238,7 +239,8 @@ struct objfile
 
     struct objfile *next;
 
-    /* The object file's name.  Malloc'd; free it if you free this struct.  */
+    /* The object file's name, tilde-expanded and absolute.
+       Malloc'd; free it if you free this struct.  */
 
     char *name;
 
@@ -285,6 +287,13 @@ struct objfile
     struct bcache *psymbol_cache;	/* Byte cache for partial syms */
     struct bcache *macro_cache;          /* Byte cache for macros */
 
+    /* Hash table for mapping symbol names to demangled names.  Each
+       entry in the hash table is actually two consecutive strings,
+       both null-terminated; the first one is a mangled or linkage
+       name, and the second is the demangled name or just a zero byte
+       if the name doesn't demangle.  */
+    struct htab *demangled_names_hash;
+
     /* Vectors of all partial symbols read in from file.  The actual data
        is stored in the psymbol_obstack. */
 
@@ -328,7 +337,7 @@ struct objfile
        the memory mapped malloc() package to manage storage for this objfile's
        data.  NULL if we are not. */
 
-    PTR md;
+    void *md;
 
     /* The file descriptor that was used to obtain the mmalloc descriptor
        for this objfile.  If we call mmalloc_detach with the malloc descriptor
@@ -359,7 +368,7 @@ struct objfile
        typically a pointer to malloc'd memory.  The symbol reader's finish
        function is responsible for freeing the memory thusly allocated.  */
 
-    PTR sym_private;
+    void *sym_private;
 
     /* Hook for target-architecture-specific information.  This must
        point to memory allocated on one of the obstacks in this objfile,
@@ -414,6 +423,15 @@ struct objfile
     ExportEntry *export_list;
     int export_list_size;
 
+    /* Link to objfile that contains the debug symbols for this one.
+       One is loaded if this file has an debug link to an existing
+       debug file with the right checksum */
+    struct objfile *separate_debug_objfile;
+
+    /* If this is a separate debug object, this is used as a link to the
+       actual executable objfile. */
+    struct objfile *separate_debug_objfile_backlink;
+    
     /* Place to stash various statistics about this objfile */
       OBJSTATS;
   };
@@ -506,6 +524,8 @@ extern struct objfile *allocate_objfile (bfd *, int);
 extern int build_objfile_section_table (struct objfile *);
 
 extern void terminate_minimal_symbol_table (struct objfile *objfile);
+
+extern void put_objfile_before (struct objfile *, struct objfile *);
 
 extern void objfile_to_front (struct objfile *);
 

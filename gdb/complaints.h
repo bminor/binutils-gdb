@@ -50,42 +50,4 @@ extern void clear_complaints (struct complaints **complaints,
 			      int less_verbose, int noisy);
 
 
-/* Deprecated interfaces to keep the old code working (until it is all
-   converted to the above).  Existing code such as:
-
-     struct deprecated_complaint msg = { "msg 0x%08x[sic]", 0, 0 };
-     deprecated_complain (&msg, addr);
-
-   should be replaced by either the new call (for the singular case):
-
-     complaint (&symtab_complaints, "msg 0x%s", paddr (addr));
-
-   or with a wrapper function (for the many-of case):
-
-     msg_complaint (CORE_ADDR addr)
-     { complaint (&symtab_complaints, "msg 0x%s", paddr (addr)); }
-     ...
-     msg_complaint (addr);
-
-   Yes, the typo is intentional.  The motivation behind this interface
-   change is to eliminate all possibility of this problem re-occurring
-   (it has occurred in the past and no one is sure that it isn't
-   present now).
-
-   Support for complaining about things in the symbol file that aren't
-   catastrophic.
-
-   Each such thing gets a counter.  The first time we have the problem,
-   during a symbol read, we report it.  At the end of symbol reading,
-   if verbose, we report how many of each problem we had.  */
-
-struct deprecated_complaint
-{
-  const char *message;
-  unsigned counter_ignored;
-  struct deprecated_complaint *next_ignored;
-};
-
-extern void complain (struct deprecated_complaint *, ...);
-
 #endif /* !defined (COMPLAINTS_H) */

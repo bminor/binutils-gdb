@@ -1,6 +1,8 @@
 /* Abstraction of GNU v2 abi.
+
+   Copyright 2001, 2003 Free Software Foundation, Inc.
+
    Contributed by Daniel Berlin <dberlin@redhat.com>
-   Copyright 2001 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -329,8 +331,8 @@ vb_match (struct type *type, int index, struct type *basetype)
 
   if (TYPE_NAME (basetype) != NULL
       && TYPE_NAME (TYPE_TARGET_TYPE (fieldtype)) != NULL
-      && STREQ (TYPE_NAME (basetype),
-		TYPE_NAME (TYPE_TARGET_TYPE (fieldtype))))
+      && strcmp (TYPE_NAME (basetype),
+		 TYPE_NAME (TYPE_TARGET_TYPE (fieldtype))) == 0)
     return 1;
   return 0;
 }

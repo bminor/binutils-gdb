@@ -1,5 +1,7 @@
 /* MI Command Set - environment commands.
-   Copyright 2002 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003 Free Software Foundation, Inc.
+
    Contributed by Red Hat Inc.
 
    This file is part of GDB.
@@ -19,9 +21,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include <string.h>
-#include <sys/stat.h>
-
 #include "defs.h"
 #include "inferior.h"
 #include "value.h"
@@ -34,6 +33,9 @@
 #include "command.h"
 #include "ui-out.h"
 #include "top.h"
+
+#include "gdb_string.h"
+#include "gdb_stat.h"
 
 static void env_cli_command (const char *cli, char *args);
 static void env_mod_path (char *dirname, char **which_path);

@@ -4552,8 +4552,8 @@ const struct powerpc_macro powerpc_macros[] = {
 
 { "extlwi",  4,   PPCCOM,	"rlwinm %0,%1,%3,0,(%2)-1" },
 { "extlwi.", 4,   PPCCOM,	"rlwinm. %0,%1,%3,0,(%2)-1" },
-{ "extrwi",  4,   PPCCOM,	"rlwinm %0,%1,(%2)+(%3),32-(%2),31" },
-{ "extrwi.", 4,   PPCCOM,	"rlwinm. %0,%1,(%2)+(%3),32-(%2),31" },
+{ "extrwi",  4,   PPCCOM,	"rlwinm %0,%1,((%2)+(%3))&((%2)+(%3)<>32),32-(%2),31" },
+{ "extrwi.", 4,   PPCCOM,	"rlwinm. %0,%1,((%2)+(%3))&((%2)+(%3)<>32),32-(%2),31" },
 { "inslwi",  4,   PPCCOM,	"rlwimi %0,%1,(-(%3)!31)&((%3)|31),%3,(%2)+(%3)-1" },
 { "inslwi.", 4,   PPCCOM,	"rlwimi. %0,%1,(-(%3)!31)&((%3)|31),%3,(%2)+(%3)-1"},
 { "insrwi",  4,   PPCCOM,	"rlwimi %0,%1,32-((%2)+(%3)),%3,(%2)+(%3)-1" },

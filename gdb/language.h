@@ -1,6 +1,8 @@
 /* Source-language-related definitions for GDB.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2003 Free
+   Software Foundation, Inc.
+
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
 
@@ -35,7 +37,6 @@ struct expression;
 /* #include "lang_def.h" */
 #define	_LANG_c
 #define	_LANG_m2
-/* OBSOLETE #define	_LANG_chill */
 #define  _LANG_fortran
 #define  _LANG_pascal
 

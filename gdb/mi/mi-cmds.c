@@ -1,5 +1,7 @@
-/* MI Command Set.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+/* MI Command Set for GDB, the GNU debugger.
+
+   Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -88,6 +90,7 @@ struct mi_cmd mi_cmds[] =
   {"gdb-show", "show %s", 0},
   {"gdb-source", 0, 0},
   {"gdb-version", "show version", 0},
+  {"interpreter-exec", 0, 0, mi_cmd_interpreter_exec},
   {"kod-info", 0, 0},
   {"kod-list", 0, 0},
   {"kod-list-object-types", 0, 0},

@@ -66,7 +66,7 @@ static void sds_fetch_registers (int);
 
 static void sds_resume (ptid_t, int, enum target_signal);
 
-static int sds_start_remote (PTR);
+static int sds_start_remote (void *);
 
 static void sds_open (char *, int);
 
@@ -160,7 +160,7 @@ sds_close (int quitting)
 /* Stub for catch_errors.  */
 
 static int
-sds_start_remote (PTR dummy)
+sds_start_remote (void *dummy)
 {
   int c;
   unsigned char buf[200];

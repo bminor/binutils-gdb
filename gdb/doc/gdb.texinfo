@@ -1,6 +1,6 @@
 \input texinfo      @c -*-texinfo-*-
 @c Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-@c 1999, 2000, 2001, 2002
+@c 1999, 2000, 2001, 2002, 2003
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header
@@ -54,7 +54,7 @@ of @cite{Debugging with @value{GDBN}: the @sc{gnu} Source-Level Debugger}
 for @value{GDBN} Version @value{GDBVN}.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,@*
-              1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+              1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -87,7 +87,7 @@ development.''
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-1996, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+1996, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 59 Temple Place - Suite 330, @*
@@ -118,7 +118,7 @@ This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 This is the @value{EDITION} Edition, @value{DATE}, for @value{GDBN} Version
 @value{GDBVN}.
 
-Copyright (C) 1988-2002 Free Software Foundation, Inc.
+Copyright (C) 1988-2003 Free Software Foundation, Inc.
 
 @menu
 * Summary::                     Summary of @value{GDBN}
@@ -146,6 +146,7 @@ Copyright (C) 1988-2002 Free Software Foundation, Inc.
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
 * TUI::                         @value{GDBN} Text User Interface
+* Interpreters::		Command Interpreters
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
 * Annotations::                 @value{GDBN}'s annotation interface.
 * GDB/MI::                      @value{GDBN}'s Machine Interface.
@@ -197,12 +198,9 @@ You can use @value{GDBN} to debug programs written in C and C++.
 For more information, see @ref{Support,,Supported languages}.
 For more information, see @ref{C,,C and C++}.
 
-@c OBSOLETE @cindex Chill
 @cindex Modula-2
-Support for Modula-2
-@c OBSOLETE and Chill
-is partial.  For information on Modula-2, see @ref{Modula-2,,Modula-2}.
-@c OBSOLETE For information on Chill, see @ref{Chill}.
+Support for Modula-2 is partial.  For information on Modula-2, see
+@ref{Modula-2,,Modula-2}.
 
 @cindex Pascal
 Debugging Pascal programs which use sets, subranges, file variables, or
@@ -374,7 +372,7 @@ Henkel-Wallace, Rich Pixley, Steve Chamberlain, and John Gilmore.
 David Johnson wrote the original COFF support; Pace Willison did
 the original support for encapsulated COFF.
 
-Brent Benson of Harris Computer Systems contributed DWARF2 support.
+Brent Benson of Harris Computer Systems contributed DWARF 2 support.
 
 Adam de Boor and Bradley Davis contributed the ISI Optimum V support.
 Per Bothner, Noboyuki Hikichi, and Alessandro Forin contributed MIPS
@@ -1127,6 +1125,7 @@ Do not use this option if you run @value{GDBN} from Emacs
 Use the interpreter @var{interp} for interface with the controlling
 program or device.  This option is meant to be set by programs which
 communicate with @value{GDBN} using it as a back end.
+@xref{Interpreters, , Command Interpreters}.
 
 @samp{--interpreter=mi} (or @samp{--interpreter=mi2}) causes
 @value{GDBN} to use the current @dfn{@sc{gdb/mi} interface}
@@ -3465,8 +3464,35 @@ argument.
 Continue running your program until either the specified location is
 reached, or the current stack frame returns.  @var{location} is any of
 the forms of argument acceptable to @code{break} (@pxref{Set Breaks,
-,Setting breakpoints}).  This form of the command uses breakpoints,
-and hence is quicker than @code{until} without an argument.
+,Setting breakpoints}).  This form of the command uses breakpoints, and
+hence is quicker than @code{until} without an argument.  The specified
+location is actually reached only if it is in the current frame.  This
+implies that @code{until} can be used to skip over recursive function
+invocations.  For instance in the code below, if the current location is
+line @code{96}, issuing @code{until 99} will execute the program up to
+line @code{99} in the same invocation of factorial, i.e. after the inner
+invocations have returned.
+
+@smallexample
+94	int factorial (int value)
+95	@{
+96	    if (value > 1) @{
+97            value *= factorial (value - 1);
+98	    @}
+99	    return (value);
+100     @}
+@end smallexample
+
+
+@kindex advance @var{location}
+@itemx advance @var{location}
+Continue running the program up to the given location.  An argument is
+required, anything of the same form as arguments for the @code{break}
+command.  Execution will also stop upon exit from the current stack
+frame.  This command is similar to @code{until}, but @code{advance} will
+not skip over recursive function calls, and the target location doesn't
+have to be in the same frame as the current one.
+
 
 @kindex stepi
 @kindex si @r{(@code{stepi})}
@@ -3859,6 +3885,29 @@ Here is an example of a backtrace.  It was made with the command
 The display for frame zero does not begin with a program counter
 value, indicating that your program has stopped at the beginning of the
 code for line @code{993} of @code{builtin.c}.
+
+@kindex set backtrace-below-main
+@kindex show backtrace-below-main
+
+Most programs have a standard entry point---a place where system libraries
+and startup code transition into user code.  For C this is @code{main}.
+When @value{GDBN} finds the entry function in a backtrace it will terminate
+the backtrace, to avoid tracing into highly system-specific (and generally
+uninteresting) code.  If you need to examine the startup code, then you can
+change this behavior.
+
+@table @code
+@item set backtrace-below-main off
+Backtraces will stop when they encounter the user entry point.  This is the
+default.
+
+@item set backtrace-below-main
+@itemx set backtrace-below-main on
+Backtraces will continue past the user entry point to the top of the stack.
+
+@item show backtrace-below-main
+Display the current backtrace policy.
+@end table
 
 @node Selection
 @section Selecting a frame
@@ -4664,13 +4713,12 @@ No symbol "foo" in current context.
 
 To solve such problems, either recompile without optimizations, or use a
 different debug info format, if the compiler supports several such
-formats.  For example, @value{NGCC}, the @sc{gnu} C/C@t{++} compiler usually
-supports the @samp{-gstabs} option.  @samp{-gstabs} produces debug info
-in a format that is superior to formats such as COFF.  You may be able
-to use DWARF2 (@samp{-gdwarf-2}), which is also an effective form for
-debug info.  See @ref{Debugging Options,,Options for Debugging Your
-Program or @sc{gnu} CC, gcc.info, Using @sc{gnu} CC}, for more
-information.
+formats.  For example, @value{NGCC}, the @sc{gnu} C/C@t{++} compiler
+usually supports the @option{-gstabs+} option.  @option{-gstabs+}
+produces debug info in a format that is superior to formats such as
+COFF.  You may be able to use DWARF 2 (@option{-gdwarf-2}), which is also
+an effective form for debug info.  @xref{Debugging Options,,Options
+for Debugging Your Program or @sc{gnu} CC, gcc.info, Using @sc{gnu} CC}.
 
 
 @node Arrays
@@ -7454,11 +7502,6 @@ C@t{++} source file
 @itemx .F
 Fortran source file
 
-@c OBSOLETE @item .ch
-@c OBSOLETE @itemx .c186
-@c OBSOLETE @itemx .c286
-@c OBSOLETE CHILL source file
-
 @item .mod
 Modula-2 source file
 
@@ -7730,9 +7773,7 @@ being set automatically by @value{GDBN}.
 @node Support
 @section Supported languages
 
-@value{GDBN} supports C, C@t{++}, Fortran, Java, 
-@c OBSOLETE Chill,
-assembly, and Modula-2.
+@value{GDBN} supports C, C@t{++}, Fortran, Java, assembly, and Modula-2.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
@@ -7751,7 +7792,6 @@ language reference or tutorial.
 @menu
 * C::           C and C@t{++}
 * Modula-2::    Modula-2
-@c OBSOLETE * Chill::        Chill
 @end menu
 
 @node C
@@ -7773,11 +7813,12 @@ effectively, you must compile your C@t{++} programs with a supported
 C@t{++} compiler, such as @sc{gnu} @code{g++}, or the HP ANSI C@t{++}
 compiler (@code{aCC}).
 
-For best results when using @sc{gnu} C@t{++}, use the stabs debugging
-format.  You can select that format explicitly with the @code{g++}
-command-line options @samp{-gstabs} or @samp{-gstabs+}.  See
-@ref{Debugging Options,,Options for Debugging Your Program or @sc{gnu}
-CC, gcc.info, Using @sc{gnu} CC}, for more information.
+For best results when using @sc{gnu} C@t{++}, use the DWARF 2 debugging
+format; if it doesn't work on your system, try the stabs+ debugging
+format.  You can select those formats explicitly with the @code{g++}
+command-line options @option{-gdwarf-2} and @option{-gstabs+}.
+@xref{Debugging Options,,Options for Debugging Your Program or @sc{gnu}
+CC, gcc.info, Using @sc{gnu} CC}.
 
 @menu
 * C Operators::                 C and C@t{++} operators
@@ -8023,28 +8064,21 @@ and @samp{@{&"hi", &"there", &"fred"@}} is a three-element array of pointers.
 @cindex expressions in C@t{++}
 @value{GDBN} expression handling can interpret most C@t{++} expressions.
 
-@cindex C@t{++} support, not in @sc{coff}
-@cindex @sc{coff} versus C@t{++}
-@cindex C@t{++} and object formats
-@cindex object formats and C@t{++}
-@cindex a.out and C@t{++}
-@cindex @sc{ecoff} and C@t{++}
-@cindex @sc{xcoff} and C@t{++}
-@cindex @sc{elf}/stabs and C@t{++}
-@cindex @sc{elf}/@sc{dwarf} and C@t{++}
-@c FIXME!! GDB may eventually be able to debug C++ using DWARF; check
-@c periodically whether this has happened...
+@cindex debugging C@t{++} programs
+@cindex C@t{++} compilers
+@cindex debug formats and C@t{++}
+@cindex @value{NGCC} and C@t{++}
 @quotation
 @emph{Warning:} @value{GDBN} can only debug C@t{++} code if you use the
-proper compiler.  Typically, C@t{++} debugging depends on the use of
-additional debugging information in the symbol table, and thus requires
-special support.  In particular, if your compiler generates a.out, MIPS
-@sc{ecoff}, RS/6000 @sc{xcoff}, or @sc{elf} with stabs extensions to the
-symbol table, these facilities are all available.  (With @sc{gnu} CC,
-you can use the @samp{-gstabs} option to request stabs debugging
-extensions explicitly.)  Where the object code format is standard
-@sc{coff} or @sc{dwarf} in @sc{elf}, on the other hand, most of the C@t{++}
-support in @value{GDBN} does @emph{not} work.
+proper compiler and the proper debug format.  Currently, @value{GDBN}
+works best when debugging C@t{++} code that is compiled with
+@value{NGCC} 2.95.3 or with @value{NGCC} 3.1 or newer, using the options
+@option{-gdwarf-2} or @option{-gstabs+}.  DWARF 2 is preferred over
+stabs+.  Most configurations of @value{NGCC} emit either DWARF 2 or
+stabs+ as their default debug format, so you usually don't need to
+specify a debug format explicitly.  Other compilers and/or debug formats
+are likely to work badly or not at all when using @value{GDBN} to debug
+C@t{++} code.
 @end quotation
 
 @enumerate
@@ -8717,505 +8751,6 @@ address can be specified by an integral constant, the construct
 In @value{GDBN} scripts, the Modula-2 inequality operator @code{#} is
 interpreted as the beginning of a comment.  Use @code{<>} instead.
 
-@c OBSOLETE @node Chill
-@c OBSOLETE @subsection Chill
-@c OBSOLETE 
-@c OBSOLETE The extensions made to @value{GDBN} to support Chill only support output
-@c OBSOLETE from the @sc{gnu} Chill compiler.  Other Chill compilers are not currently
-@c OBSOLETE supported, and attempting to debug executables produced by them is most
-@c OBSOLETE likely to give an error as @value{GDBN} reads in the executable's symbol
-@c OBSOLETE table.
-@c OBSOLETE 
-@c OBSOLETE @c This used to say "... following Chill related topics ...", but since
-@c OBSOLETE @c menus are not shown in the printed manual, it would look awkward.
-@c OBSOLETE This section covers the Chill related topics and the features
-@c OBSOLETE of @value{GDBN} which support these topics.
-@c OBSOLETE 
-@c OBSOLETE @menu
-@c OBSOLETE * How modes are displayed::        How modes are displayed
-@c OBSOLETE * Locations::                        Locations and their accesses
-@c OBSOLETE * Values and their Operations:: Values and their Operations
-@c OBSOLETE * Chill type and range checks::
-@c OBSOLETE * Chill defaults::
-@c OBSOLETE @end menu
-@c OBSOLETE 
-@c OBSOLETE @node How modes are displayed
-@c OBSOLETE @subsubsection How modes are displayed
-@c OBSOLETE 
-@c OBSOLETE The Chill Datatype- (Mode) support of @value{GDBN} is directly related
-@c OBSOLETE with the functionality of the @sc{gnu} Chill compiler, and therefore deviates
-@c OBSOLETE slightly from the standard specification of the Chill language. The
-@c OBSOLETE provided modes are:
-@c OBSOLETE 
-@c OBSOLETE @c FIXME: this @table's contents effectively disable @code by using @r
-@c OBSOLETE @c on every @item.  So why does it need @code?
-@c OBSOLETE @table @code
-@c OBSOLETE @item @r{@emph{Discrete modes:}}
-@c OBSOLETE @itemize @bullet
-@c OBSOLETE @item
-@c OBSOLETE @emph{Integer Modes} which are predefined by @code{BYTE, UBYTE, INT,
-@c OBSOLETE UINT, LONG, ULONG},
-@c OBSOLETE @item
-@c OBSOLETE @emph{Boolean Mode} which is predefined by @code{BOOL},
-@c OBSOLETE @item
-@c OBSOLETE @emph{Character Mode} which is predefined by @code{CHAR},
-@c OBSOLETE @item
-@c OBSOLETE @emph{Set Mode} which is displayed by the keyword @code{SET}.
-@c OBSOLETE @smallexample
-@c OBSOLETE (@value{GDBP}) ptype x
-@c OBSOLETE type = SET (karli = 10, susi = 20, fritzi = 100)
-@c OBSOLETE @end smallexample
-@c OBSOLETE If the type is an unnumbered set the set element values are omitted.
-@c OBSOLETE @item
-@c OBSOLETE @emph{Range Mode} which is displayed by
-@c OBSOLETE @smallexample
-@c OBSOLETE @code{type = <basemode>(<lower bound> : <upper bound>)}
-@c OBSOLETE @end smallexample
-@c OBSOLETE where @code{<lower bound>, <upper bound>} can be of any discrete literal
-@c OBSOLETE expression (e.g. set element names).
-@c OBSOLETE @end itemize
-@c OBSOLETE 
-@c OBSOLETE @item @r{@emph{Powerset Mode:}}
-@c OBSOLETE A Powerset Mode is displayed by the keyword @code{POWERSET} followed by
-@c OBSOLETE the member mode of the powerset.  The member mode can be any discrete mode.
-@c OBSOLETE @smallexample
-@c OBSOLETE (@value{GDBP}) ptype x
-@c OBSOLETE type = POWERSET SET (egon, hugo, otto)
-@c OBSOLETE @end smallexample
-@c OBSOLETE 
-@c OBSOLETE @item @r{@emph{Reference Modes:}}
-@c OBSOLETE @itemize @bullet
-@c OBSOLETE @item
-@c OBSOLETE @emph{Bound Reference Mode} which is displayed by the keyword @code{REF}
-@c OBSOLETE followed by the mode name to which the reference is bound.
-@c OBSOLETE @item
-@c OBSOLETE @emph{Free Reference Mode} which is displayed by the keyword @code{PTR}.
-@c OBSOLETE @end itemize
-@c OBSOLETE 
-@c OBSOLETE @item @r{@emph{Procedure mode}}
-@c OBSOLETE The procedure mode is displayed by @code{type = PROC(<parameter list>)
-@c OBSOLETE <return mode> EXCEPTIONS (<exception list>)}. The @code{<parameter
-@c OBSOLETE list>} is a list of the parameter modes.  @code{<return mode>} indicates
-@c OBSOLETE the mode of the result of the procedure if any.  The exceptionlist lists
-@c OBSOLETE all possible exceptions which can be raised by the procedure.
-@c OBSOLETE 
-@c OBSOLETE @ignore
-@c OBSOLETE @item @r{@emph{Instance mode}}
-@c OBSOLETE The instance mode is represented by a structure, which has a static
-@c OBSOLETE type, and is therefore not really of interest.
-@c OBSOLETE @end ignore
-@c OBSOLETE 
-@c OBSOLETE @item @r{@emph{Synchronization Modes:}}
-@c OBSOLETE @itemize @bullet
-@c OBSOLETE @item
-@c OBSOLETE @emph{Event Mode} which is displayed by
-@c OBSOLETE @smallexample
-@c OBSOLETE @code{EVENT (<event length>)}
-@c OBSOLETE @end smallexample
-@c OBSOLETE where @code{(<event length>)} is optional.
-@c OBSOLETE @item
-@c OBSOLETE @emph{Buffer Mode} which is displayed by
-@c OBSOLETE @smallexample
-@c OBSOLETE @code{BUFFER (<buffer length>)<buffer element mode>}
-@c OBSOLETE @end smallexample
-@c OBSOLETE where @code{(<buffer length>)} is optional.
-@c OBSOLETE @end itemize
-@c OBSOLETE 
-@c OBSOLETE @item @r{@emph{Timing Modes:}}
-@c OBSOLETE @itemize @bullet
-@c OBSOLETE @item
-@c OBSOLETE @emph{Duration Mode} which is predefined by @code{DURATION}
-@c OBSOLETE @item
-@c OBSOLETE @emph{Absolute Time Mode} which is predefined by @code{TIME}
-@c OBSOLETE @end itemize
-@c OBSOLETE 
-@c OBSOLETE @item @r{@emph{Real Modes:}}
-@c OBSOLETE Real Modes are predefined with @code{REAL} and @code{LONG_REAL}.
-@c OBSOLETE 
-@c OBSOLETE @item @r{@emph{String Modes:}}
-@c OBSOLETE @itemize @bullet
-@c OBSOLETE @item
-@c OBSOLETE @emph{Character String Mode} which is displayed by
-@c OBSOLETE @smallexample
-@c OBSOLETE @code{CHARS(<string length>)}
-@c OBSOLETE @end smallexample
-@c OBSOLETE followed by the keyword @code{VARYING} if the String Mode is a varying
-@c OBSOLETE mode
-@c OBSOLETE @item
-@c OBSOLETE @emph{Bit String Mode} which is displayed by
-@c OBSOLETE @smallexample
-@c OBSOLETE @code{BOOLS(<string
-@c OBSOLETE length>)}
-@c OBSOLETE @end smallexample
-@c OBSOLETE @end itemize
-@c OBSOLETE 
-@c OBSOLETE @item @r{@emph{Array Mode:}}
-@c OBSOLETE The Array Mode is displayed by the keyword @code{ARRAY(<range>)}
-@c OBSOLETE followed by the element mode (which may in turn be an array mode).
-@c OBSOLETE @smallexample
-@c OBSOLETE (@value{GDBP}) ptype x
-@c OBSOLETE type = ARRAY (1:42)
-@c OBSOLETE           ARRAY (1:20)
-@c OBSOLETE              SET (karli = 10, susi = 20, fritzi = 100)
-@c OBSOLETE @end smallexample
-@c OBSOLETE 
-@c OBSOLETE @item @r{@emph{Structure Mode}}
-@c OBSOLETE The Structure mode is displayed by the keyword @code{STRUCT(<field
-@c OBSOLETE list>)}.  The @code{<field list>} consists of names and modes of fields
-@c OBSOLETE of the structure.  Variant structures have the keyword @code{CASE <field>
-@c OBSOLETE OF <variant fields> ESAC} in their field list.  Since the current version
-@c OBSOLETE of the GNU Chill compiler doesn't implement tag processing (no runtime
-@c OBSOLETE checks of variant fields, and therefore no debugging info), the output
-@c OBSOLETE always displays all variant fields.
-@c OBSOLETE @smallexample
-@c OBSOLETE (@value{GDBP}) ptype str
-@c OBSOLETE type = STRUCT (
-@c OBSOLETE     as x,
-@c OBSOLETE     bs x,
-@c OBSOLETE     CASE bs OF
-@c OBSOLETE     (karli):
-@c OBSOLETE         cs a
-@c OBSOLETE     (ott):
-@c OBSOLETE         ds x
-@c OBSOLETE     ESAC
-@c OBSOLETE )
-@c OBSOLETE @end smallexample
-@c OBSOLETE @end table
-@c OBSOLETE 
-@c OBSOLETE @node Locations
-@c OBSOLETE @subsubsection Locations and their accesses
-@c OBSOLETE 
-@c OBSOLETE A location in Chill is an object which can contain values.
-@c OBSOLETE 
-@c OBSOLETE A value of a location is generally accessed by the (declared) name of
-@c OBSOLETE the location.  The output conforms to the specification of values in
-@c OBSOLETE Chill programs.  How values are specified
-@c OBSOLETE is the topic of the next section, @ref{Values and their Operations}.
-@c OBSOLETE 
-@c OBSOLETE The pseudo-location @code{RESULT} (or @code{result}) can be used to
-@c OBSOLETE display or change the result of a currently-active procedure:
-@c OBSOLETE 
-@c OBSOLETE @smallexample
-@c OBSOLETE set result := EXPR
-@c OBSOLETE @end smallexample
-@c OBSOLETE 
-@c OBSOLETE @noindent
-@c OBSOLETE This does the same as the Chill action @code{RESULT EXPR} (which
-@c OBSOLETE is not available in @value{GDBN}).
-@c OBSOLETE 
-@c OBSOLETE Values of reference mode locations are printed by @code{PTR(<hex
-@c OBSOLETE value>)} in case of a free reference mode, and by @code{(REF <reference
-@c OBSOLETE mode>) (<hex-value>)} in case of a bound reference.  @code{<hex value>}
-@c OBSOLETE represents the address where the reference points to.  To access the
-@c OBSOLETE value of the location referenced by the pointer, use the dereference
-@c OBSOLETE operator @samp{->}.
-@c OBSOLETE 
-@c OBSOLETE Values of procedure mode locations are displayed by
-@c OBSOLETE @smallexample
-@c OBSOLETE @code{@{ PROC
-@c OBSOLETE (<argument modes> ) <return mode> @} <address> <name of procedure
-@c OBSOLETE location>}
-@c OBSOLETE @end smallexample
-@c OBSOLETE @code{<argument modes>} is a list of modes according to the parameter
-@c OBSOLETE specification of the procedure and @code{<address>} shows the address of
-@c OBSOLETE the entry point.
-@c OBSOLETE 
-@c OBSOLETE @ignore
-@c OBSOLETE Locations of instance modes are displayed just like a structure with two
-@c OBSOLETE fields specifying the @emph{process type} and the @emph{copy number} of
-@c OBSOLETE the investigated instance location@footnote{This comes from the current
-@c OBSOLETE implementation of instances.  They are implemented as a structure (no
-@c OBSOLETE na).  The output should be something like @code{[<name of the process>;
-@c OBSOLETE <instance number>]}.}.  The field names are @code{__proc_type} and
-@c OBSOLETE @code{__proc_copy}.
-@c OBSOLETE 
-@c OBSOLETE Locations of synchronization modes are displayed like a structure with
-@c OBSOLETE the field name @code{__event_data} in case of a event mode location, and
-@c OBSOLETE like a structure with the field @code{__buffer_data} in case of a buffer
-@c OBSOLETE mode location (refer to previous paragraph).
-@c OBSOLETE 
-@c OBSOLETE Structure Mode locations are printed by @code{[.<field name>: <value>,
-@c OBSOLETE ...]}.  The @code{<field name>} corresponds to the structure mode
-@c OBSOLETE definition and the layout of @code{<value>} varies depending of the mode
-@c OBSOLETE of the field.  If the investigated structure mode location is of variant
-@c OBSOLETE structure mode, the variant parts of the structure are enclosed in curled
-@c OBSOLETE braces (@samp{@{@}}).  Fields enclosed by @samp{@{,@}} are residing
-@c OBSOLETE on the same memory location and represent the current values of the
-@c OBSOLETE memory location in their specific modes.  Since no tag processing is done
-@c OBSOLETE all variants are displayed. A variant field is printed by
-@c OBSOLETE @code{(<variant name>) = .<field name>: <value>}.  (who implements the
-@c OBSOLETE stuff ???)
-@c OBSOLETE @smallexample
-@c OBSOLETE (@value{GDBP}) print str1 $4 = [.as: 0, .bs: karli, .<TAG>: { (karli) =
-@c OBSOLETE [.cs: []], (susi) = [.ds: susi]}]
-@c OBSOLETE @end smallexample
-@c OBSOLETE @end ignore
-@c OBSOLETE 
-@c OBSOLETE Substructures of string mode-, array mode- or structure mode-values
-@c OBSOLETE (e.g. array slices, fields of structure locations) are accessed using
-@c OBSOLETE certain operations which are described in the next section, @ref{Values
-@c OBSOLETE and their Operations}.
-@c OBSOLETE 
-@c OBSOLETE A location value may be interpreted as having a different mode using the
-@c OBSOLETE location conversion.  This mode conversion is written as @code{<mode
-@c OBSOLETE name>(<location>)}.  The user has to consider that the sizes of the modes
-@c OBSOLETE have to be equal otherwise an error occurs.  Furthermore, no range
-@c OBSOLETE checking of the location against the destination mode is performed, and
-@c OBSOLETE therefore the result can be quite confusing.
-@c OBSOLETE 
-@c OBSOLETE @smallexample
-@c OBSOLETE (@value{GDBP}) print int (s(3 up 4)) XXX TO be filled in !! XXX
-@c OBSOLETE @end smallexample
-@c OBSOLETE 
-@c OBSOLETE @node Values and their Operations
-@c OBSOLETE @subsubsection Values and their Operations
-@c OBSOLETE 
-@c OBSOLETE Values are used to alter locations, to investigate complex structures in
-@c OBSOLETE more detail or to filter relevant information out of a large amount of
-@c OBSOLETE data.  There are several (mode dependent) operations defined which enable
-@c OBSOLETE such investigations.  These operations are not only applicable to
-@c OBSOLETE constant values but also to locations, which can become quite useful
-@c OBSOLETE when debugging complex structures.  During parsing the command line
-@c OBSOLETE (e.g. evaluating an expression) @value{GDBN} treats location names as
-@c OBSOLETE the values behind these locations.
-@c OBSOLETE 
-@c OBSOLETE This section describes how values have to be specified and which
-@c OBSOLETE operations are legal to be used with such values.
-@c OBSOLETE 
-@c OBSOLETE @table @code
-@c OBSOLETE @item Literal Values
-@c OBSOLETE Literal values are specified in the same manner as in @sc{gnu} Chill programs.
-@c OBSOLETE For detailed specification refer to the @sc{gnu} Chill implementation Manual
-@c OBSOLETE chapter 1.5.
-@c OBSOLETE @c FIXME: if the Chill Manual is a Texinfo documents, the above should
-@c OBSOLETE @c be converted to a @ref.
-@c OBSOLETE 
-@c OBSOLETE @ignore
-@c OBSOLETE @itemize @bullet
-@c OBSOLETE @item
-@c OBSOLETE @emph{Integer Literals} are specified in the same manner as in Chill
-@c OBSOLETE programs (refer to the Chill Standard z200/88 chpt 5.2.4.2)
-@c OBSOLETE @item
-@c OBSOLETE @emph{Boolean Literals} are defined by @code{TRUE} and @code{FALSE}.
-@c OBSOLETE @item
-@c OBSOLETE @emph{Character Literals} are defined by @code{'<character>'}. (e.g.
-@c OBSOLETE @code{'M'})
-@c OBSOLETE @item
-@c OBSOLETE @emph{Set Literals} are defined by a name which was specified in a set
-@c OBSOLETE mode.  The value delivered by a Set Literal is the set value.  This is
-@c OBSOLETE comparable to an enumeration in C/C@t{++} language.
-@c OBSOLETE @item
-@c OBSOLETE @emph{Emptiness Literal} is predefined by @code{NULL}.  The value of the
-@c OBSOLETE emptiness literal delivers either the empty reference value, the empty
-@c OBSOLETE procedure value or the empty instance value.
-@c OBSOLETE 
-@c OBSOLETE @item
-@c OBSOLETE @emph{Character String Literals} are defined by a sequence of characters
-@c OBSOLETE enclosed in single- or double quotes.  If a single- or double quote has
-@c OBSOLETE to be part of the string literal it has to be stuffed (specified twice).
-@c OBSOLETE @item
-@c OBSOLETE @emph{Bitstring Literals} are specified in the same manner as in Chill
-@c OBSOLETE programs (refer z200/88 chpt 5.2.4.8).
-@c OBSOLETE @item
-@c OBSOLETE @emph{Floating point literals} are specified in the same manner as in
-@c OBSOLETE (gnu-)Chill programs (refer @sc{gnu} Chill implementation Manual chapter 1.5).
-@c OBSOLETE @end itemize
-@c OBSOLETE @end ignore
-@c OBSOLETE 
-@c OBSOLETE @item Tuple Values
-@c OBSOLETE A tuple is specified by @code{<mode name>[<tuple>]}, where @code{<mode
-@c OBSOLETE name>} can be omitted if the mode of the tuple is unambiguous.  This
-@c OBSOLETE unambiguity is derived from the context of a evaluated expression.
-@c OBSOLETE @code{<tuple>} can be one of the following:
-@c OBSOLETE 
-@c OBSOLETE @itemize @bullet
-@c OBSOLETE @item @emph{Powerset Tuple}
-@c OBSOLETE @item @emph{Array Tuple}
-@c OBSOLETE @item @emph{Structure Tuple}
-@c OBSOLETE Powerset tuples, array tuples and structure tuples are specified in the
-@c OBSOLETE same manner as in Chill programs refer to z200/88 chpt 5.2.5.
-@c OBSOLETE @end itemize
-@c OBSOLETE 
-@c OBSOLETE @item String Element Value
-@c OBSOLETE A string element value is specified by
-@c OBSOLETE @smallexample
-@c OBSOLETE @code{<string value>(<index>)}
-@c OBSOLETE @end smallexample
-@c OBSOLETE where @code{<index>} is a integer expression.  It delivers a character
-@c OBSOLETE value which is equivalent to the character indexed by @code{<index>} in
-@c OBSOLETE the string.
-@c OBSOLETE 
-@c OBSOLETE @item String Slice Value
-@c OBSOLETE A string slice value is specified by @code{<string value>(<slice
-@c OBSOLETE spec>)}, where @code{<slice spec>} can be either a range of integer
-@c OBSOLETE expressions or specified by @code{<start expr> up <size>}.
-@c OBSOLETE @code{<size>} denotes the number of elements which the slice contains.
-@c OBSOLETE The delivered value is a string value, which is part of the specified
-@c OBSOLETE string.
-@c OBSOLETE 
-@c OBSOLETE @item Array Element Values
-@c OBSOLETE An array element value is specified by @code{<array value>(<expr>)} and
-@c OBSOLETE delivers a array element value of the mode of the specified array.
-@c OBSOLETE 
-@c OBSOLETE @item Array Slice Values
-@c OBSOLETE An array slice is specified by @code{<array value>(<slice spec>)}, where
-@c OBSOLETE @code{<slice spec>} can be either a range specified by expressions or by
-@c OBSOLETE @code{<start expr> up <size>}.  @code{<size>} denotes the number of
-@c OBSOLETE arrayelements the slice contains.  The delivered value is an array value
-@c OBSOLETE which is part of the specified array.
-@c OBSOLETE 
-@c OBSOLETE @item Structure Field Values
-@c OBSOLETE A structure field value is derived by @code{<structure value>.<field
-@c OBSOLETE name>}, where @code{<field name>} indicates the name of a field specified
-@c OBSOLETE in the mode definition of the structure.  The mode of the delivered value
-@c OBSOLETE corresponds to this mode definition in the structure definition.
-@c OBSOLETE 
-@c OBSOLETE @item Procedure Call Value
-@c OBSOLETE The procedure call value is derived from the return value of the
-@c OBSOLETE procedure@footnote{If a procedure call is used for instance in an
-@c OBSOLETE expression, then this procedure is called with all its side
-@c OBSOLETE effects.  This can lead to confusing results if used carelessly.}.
-@c OBSOLETE 
-@c OBSOLETE Values of duration mode locations are represented by @code{ULONG} literals.
-@c OBSOLETE 
-@c OBSOLETE Values of time mode locations appear as
-@c OBSOLETE @smallexample
-@c OBSOLETE @code{TIME(<secs>:<nsecs>)}
-@c OBSOLETE @end smallexample
-@c OBSOLETE 
-@c OBSOLETE 
-@c OBSOLETE @ignore
-@c OBSOLETE This is not implemented yet:
-@c OBSOLETE @item Built-in Value
-@c OBSOLETE @noindent
-@c OBSOLETE The following built in functions are provided:
-@c OBSOLETE 
-@c OBSOLETE @table @code
-@c OBSOLETE @item @code{ADDR()}
-@c OBSOLETE @item @code{NUM()}
-@c OBSOLETE @item @code{PRED()}
-@c OBSOLETE @item @code{SUCC()}
-@c OBSOLETE @item @code{ABS()}
-@c OBSOLETE @item @code{CARD()}
-@c OBSOLETE @item @code{MAX()}
-@c OBSOLETE @item @code{MIN()}
-@c OBSOLETE @item @code{SIZE()}
-@c OBSOLETE @item @code{UPPER()}
-@c OBSOLETE @item @code{LOWER()}
-@c OBSOLETE @item @code{LENGTH()}
-@c OBSOLETE @item @code{SIN()}
-@c OBSOLETE @item @code{COS()}
-@c OBSOLETE @item @code{TAN()}
-@c OBSOLETE @item @code{ARCSIN()}
-@c OBSOLETE @item @code{ARCCOS()}
-@c OBSOLETE @item @code{ARCTAN()}
-@c OBSOLETE @item @code{EXP()}
-@c OBSOLETE @item @code{LN()}
-@c OBSOLETE @item @code{LOG()}
-@c OBSOLETE @item @code{SQRT()}
-@c OBSOLETE @end table
-@c OBSOLETE 
-@c OBSOLETE For a detailed description refer to the GNU Chill implementation manual
-@c OBSOLETE chapter 1.6.
-@c OBSOLETE @end ignore
-@c OBSOLETE 
-@c OBSOLETE @item Zero-adic Operator Value
-@c OBSOLETE The zero-adic operator value is derived from the instance value for the
-@c OBSOLETE current active process.
-@c OBSOLETE 
-@c OBSOLETE @item Expression Values
-@c OBSOLETE The value delivered by an expression is the result of the evaluation of
-@c OBSOLETE the specified expression.  If there are error conditions (mode
-@c OBSOLETE incompatibility, etc.) the evaluation of expressions is aborted with a
-@c OBSOLETE corresponding error message.  Expressions may be parenthesised which
-@c OBSOLETE causes the evaluation of this expression before any other expression
-@c OBSOLETE which uses the result of the parenthesised expression.  The following
-@c OBSOLETE operators are supported by @value{GDBN}:
-@c OBSOLETE 
-@c OBSOLETE @table @code
-@c OBSOLETE @item @code{OR, ORIF, XOR}
-@c OBSOLETE @itemx @code{AND, ANDIF}
-@c OBSOLETE @itemx @code{NOT}
-@c OBSOLETE Logical operators defined over operands of boolean mode.
-@c OBSOLETE 
-@c OBSOLETE @item @code{=, /=}
-@c OBSOLETE Equality and inequality operators defined over all modes.
-@c OBSOLETE 
-@c OBSOLETE @item @code{>, >=}
-@c OBSOLETE @itemx @code{<, <=}
-@c OBSOLETE Relational operators defined over predefined modes.
-@c OBSOLETE 
-@c OBSOLETE @item @code{+, -}
-@c OBSOLETE @itemx @code{*, /, MOD, REM}
-@c OBSOLETE Arithmetic operators defined over predefined modes.
-@c OBSOLETE 
-@c OBSOLETE @item @code{-}
-@c OBSOLETE Change sign operator.
-@c OBSOLETE 
-@c OBSOLETE @item @code{//}
-@c OBSOLETE String concatenation operator.
-@c OBSOLETE 
-@c OBSOLETE @item @code{()}
-@c OBSOLETE String repetition operator.
-@c OBSOLETE 
-@c OBSOLETE @item @code{->}
-@c OBSOLETE Referenced location operator which can be used either to take the
-@c OBSOLETE address of a location (@code{->loc}), or to dereference a reference
-@c OBSOLETE location (@code{loc->}).
-@c OBSOLETE 
-@c OBSOLETE @item @code{OR, XOR}
-@c OBSOLETE @itemx @code{AND}
-@c OBSOLETE @itemx @code{NOT}
-@c OBSOLETE Powerset and bitstring operators.
-@c OBSOLETE 
-@c OBSOLETE @item @code{>, >=}
-@c OBSOLETE @itemx @code{<, <=}
-@c OBSOLETE Powerset inclusion operators.
-@c OBSOLETE 
-@c OBSOLETE @item @code{IN}
-@c OBSOLETE Membership operator.
-@c OBSOLETE @end table
-@c OBSOLETE @end table
-@c OBSOLETE 
-@c OBSOLETE @node Chill type and range checks
-@c OBSOLETE @subsubsection Chill type and range checks
-@c OBSOLETE 
-@c OBSOLETE @value{GDBN} considers two Chill variables mode equivalent if the sizes
-@c OBSOLETE of the two modes are equal.  This rule applies recursively to more
-@c OBSOLETE complex datatypes which means that complex modes are treated
-@c OBSOLETE equivalent if all element modes (which also can be complex modes like
-@c OBSOLETE structures, arrays, etc.) have the same size.
-@c OBSOLETE 
-@c OBSOLETE Range checking is done on all mathematical operations, assignment, array
-@c OBSOLETE index bounds and all built in procedures.
-@c OBSOLETE 
-@c OBSOLETE Strong type checks are forced using the @value{GDBN} command @code{set
-@c OBSOLETE check strong}.  This enforces strong type and range checks on all
-@c OBSOLETE operations where Chill constructs are used (expressions, built in
-@c OBSOLETE functions, etc.) in respect to the semantics as defined in the z.200
-@c OBSOLETE language specification.
-@c OBSOLETE 
-@c OBSOLETE All checks can be disabled by the @value{GDBN} command @code{set check
-@c OBSOLETE off}.
-@c OBSOLETE 
-@c OBSOLETE @ignore
-@c OBSOLETE @c Deviations from the Chill Standard Z200/88
-@c OBSOLETE see last paragraph ?
-@c OBSOLETE @end ignore
-@c OBSOLETE 
-@c OBSOLETE @node Chill defaults
-@c OBSOLETE @subsubsection Chill defaults
-@c OBSOLETE 
-@c OBSOLETE If type and range checking are set automatically by @value{GDBN}, they
-@c OBSOLETE both default to @code{on} whenever the working language changes to
-@c OBSOLETE Chill.  This happens regardless of whether you or @value{GDBN}
-@c OBSOLETE selected the working language.
-@c OBSOLETE 
-@c OBSOLETE If you allow @value{GDBN} to set the language automatically, then entering
-@c OBSOLETE code compiled from a file whose name ends with @file{.ch} sets the
-@c OBSOLETE working language to Chill.  @xref{Automatically, ,Having @value{GDBN} set
-@c OBSOLETE the language automatically}, for further details.
-
 @node Symbols
 @chapter Examining the Symbol Table
 
@@ -9802,6 +9337,7 @@ program.  To debug a core dump of a previous run, you must also tell
 
 @menu
 * Files::                       Commands to specify files
+* Separate Debug Files::        Debugging information in separate files
 * Symbol Errors::               Errors reading symbol files
 @end menu
 
@@ -10205,6 +9741,233 @@ Mb).
 @item show auto-solib-limit
 Display the current autoloading size threshold, in megabytes.
 @end table
+
+Shared libraries are also supported in many cross or remote debugging
+configurations.  A copy of the target's libraries need to be present on the
+host system; they need to be the same as the target libraries, although the
+copies on the target can be stripped as long as the copies on the host are
+not.
+
+You need to tell @value{GDBN} where the target libraries are, so that it can
+load the correct copies---otherwise, it may try to load the host's libraries.
+@value{GDBN} has two variables to specify the search directories for target
+libraries.
+
+@table @code
+@kindex set solib-absolute-prefix
+@item set solib-absolute-prefix @var{path}
+If this variable is set, @var{path} will be used as a prefix for any
+absolute shared library paths; many runtime loaders store the absolute
+paths to the shared library in the target program's memory.  If you use
+@samp{solib-absolute-prefix} to find shared libraries, they need to be laid
+out in the same way that they are on the target, with e.g.@: a
+@file{/usr/lib} hierarchy under @var{path}.
+
+You can set the default value of @samp{solib-absolute-prefix} by using the
+configure-time @samp{--with-sysroot} option.
+
+@kindex show solib-absolute-prefix
+@item show solib-absolute-prefix
+Display the current shared library prefix.
+
+@kindex set solib-search-path
+@item set solib-search-path @var{path}
+If this variable is set, @var{path} is a colon-separated list of directories
+to search for shared libraries.  @samp{solib-search-path} is used after
+@samp{solib-absolute-prefix} fails to locate the library, or if the path to
+the library is relative instead of absolute.  If you want to use
+@samp{solib-search-path} instead of @samp{solib-absolute-prefix}, be sure to
+set @samp{solib-absolute-prefix} to a nonexistant directory to prevent
+@value{GDBN} from finding your host's libraries.
+
+@kindex show solib-search-path
+@item show solib-search-path
+Display the current shared library search path.
+@end table
+
+
+@node Separate Debug Files
+@section Debugging Information in Separate Files
+@cindex separate debugging information files
+@cindex debugging information in separate files
+@cindex @file{.debug} subdirectories
+@cindex debugging information directory, global
+@cindex global debugging information directory
+
+@value{GDBN} allows you to put a program's debugging information in a
+file separate from the executable itself, in a way that allows
+@value{GDBN} to find and load the debugging information automatically.
+Since debugging information can be very large --- sometimes larger
+than the executable code itself --- some systems distribute debugging
+information for their executables in separate files, which users can
+install only when they need to debug a problem.
+
+If an executable's debugging information has been extracted to a
+separate file, the executable should contain a @dfn{debug link} giving
+the name of the debugging information file (with no directory
+components), and a checksum of its contents.  (The exact form of a
+debug link is described below.)  If the full name of the directory
+containing the executable is @var{execdir}, and the executable has a
+debug link that specifies the name @var{debugfile}, then @value{GDBN}
+will automatically search for the debugging information file in three
+places:
+
+@itemize @bullet
+@item
+the directory containing the executable file (that is, it will look
+for a file named @file{@var{execdir}/@var{debugfile}},
+@item
+a subdirectory of that directory named @file{.debug} (that is, the
+file @file{@var{execdir}/.debug/@var{debugfile}}, and
+@item
+a subdirectory of the global debug file directory that includes the
+executable's full path, and the name from the link (that is, the file
+@file{@var{globaldebugdir}/@var{execdir}/@var{debugfile}}, where
+@var{globaldebugdir} is the global debug file directory, and
+@var{execdir} has been turned into a relative path).
+@end itemize
+@noindent
+@value{GDBN} checks under each of these names for a debugging
+information file whose checksum matches that given in the link, and
+reads the debugging information from the first one it finds.
+
+So, for example, if you ask @value{GDBN} to debug @file{/usr/bin/ls},
+which has a link containing the name @file{ls.debug}, and the global
+debug directory is @file{/usr/lib/debug}, then @value{GDBN} will look
+for debug information in @file{/usr/bin/ls.debug},
+@file{/usr/bin/.debug/ls.debug}, and
+@file{/usr/lib/debug/usr/bin/ls.debug}.
+
+You can set the global debugging info directory's name, and view the
+name @value{GDBN} is currently using.
+
+@table @code
+
+@kindex set debug-file-directory
+@item set debug-file-directory @var{directory}
+Set the directory which @value{GDBN} searches for separate debugging
+information files to @var{directory}.
+
+@kindex show debug-file-directory
+@item show debug-file-directory
+Show the directory @value{GDBN} searches for separate debugging
+information files.
+
+@end table
+
+@cindex @code{.gnu_debuglink} sections
+@cindex debug links
+A debug link is a special section of the executable file named
+@code{.gnu_debuglink}.  The section must contain:
+
+@itemize
+@item
+A filename, with any leading directory components removed, followed by
+a zero byte,
+@item
+zero to three bytes of padding, as needed to reach the next four-byte
+boundary within the section, and
+@item
+a four-byte CRC checksum, stored in the same endianness used for the
+executable file itself.  The checksum is computed on the debugging
+information file's full contents by the function given below, passing
+zero as the @var{crc} argument.
+@end itemize
+
+Any executable file format can carry a debug link, as long as it can
+contain a section named @code{.gnu_debuglink} with the contents
+described above.
+
+The debugging information file itself should be an ordinary
+executable, containing a full set of linker symbols, sections, and
+debugging information.  The sections of the debugging information file
+should have the same names, addresses and sizes as the original file,
+but they need not contain any data --- much like a @code{.bss} section
+in an ordinary executable.
+
+As of December 2002, there is no standard GNU utility to produce
+separated executable / debugging information file pairs.  Ulrich
+Drepper's @file{elfutils} package, starting with version 0.53,
+contains a version of the @code{strip} command such that the command
+@kbd{strip foo -f foo.debug} removes the debugging information from
+the executable file @file{foo}, places it in the file
+@file{foo.debug}, and leaves behind a debug link in @file{foo}.
+
+Since there are many different ways to compute CRC's (different
+polynomials, reversals, byte ordering, etc.), the simplest way to
+describe the CRC used in @code{.gnu_debuglink} sections is to give the
+complete code for a function that computes it:
+
+@kindex @code{gnu_debuglink_crc32}
+@smallexample
+unsigned long
+gnu_debuglink_crc32 (unsigned long crc,
+                     unsigned char *buf, size_t len)
+@{
+  static const unsigned long crc32_table[256] =
+    @{
+      0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419,
+      0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4,
+      0xe0d5e91e, 0x97d2d988, 0x09b64c2b, 0x7eb17cbd, 0xe7b82d07,
+      0x90bf1d91, 0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de,
+      0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7, 0x136c9856,
+      0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x14015c4f, 0x63066cd9,
+      0xfa0f3d63, 0x8d080df5, 0x3b6e20c8, 0x4c69105e, 0xd56041e4,
+      0xa2677172, 0x3c03e4d1, 0x4b04d447, 0xd20d85fd, 0xa50ab56b,
+      0x35b5a8fa, 0x42b2986c, 0xdbbbc9d6, 0xacbcf940, 0x32d86ce3,
+      0x45df5c75, 0xdcd60dcf, 0xabd13d59, 0x26d930ac, 0x51de003a,
+      0xc8d75180, 0xbfd06116, 0x21b4f4b5, 0x56b3c423, 0xcfba9599,
+      0xb8bda50f, 0x2802b89e, 0x5f058808, 0xc60cd9b2, 0xb10be924,
+      0x2f6f7c87, 0x58684c11, 0xc1611dab, 0xb6662d3d, 0x76dc4190,
+      0x01db7106, 0x98d220bc, 0xefd5102a, 0x71b18589, 0x06b6b51f,
+      0x9fbfe4a5, 0xe8b8d433, 0x7807c9a2, 0x0f00f934, 0x9609a88e,
+      0xe10e9818, 0x7f6a0dbb, 0x086d3d2d, 0x91646c97, 0xe6635c01,
+      0x6b6b51f4, 0x1c6c6162, 0x856530d8, 0xf262004e, 0x6c0695ed,
+      0x1b01a57b, 0x8208f4c1, 0xf50fc457, 0x65b0d9c6, 0x12b7e950,
+      0x8bbeb8ea, 0xfcb9887c, 0x62dd1ddf, 0x15da2d49, 0x8cd37cf3,
+      0xfbd44c65, 0x4db26158, 0x3ab551ce, 0xa3bc0074, 0xd4bb30e2,
+      0x4adfa541, 0x3dd895d7, 0xa4d1c46d, 0xd3d6f4fb, 0x4369e96a,
+      0x346ed9fc, 0xad678846, 0xda60b8d0, 0x44042d73, 0x33031de5,
+      0xaa0a4c5f, 0xdd0d7cc9, 0x5005713c, 0x270241aa, 0xbe0b1010,
+      0xc90c2086, 0x5768b525, 0x206f85b3, 0xb966d409, 0xce61e49f,
+      0x5edef90e, 0x29d9c998, 0xb0d09822, 0xc7d7a8b4, 0x59b33d17,
+      0x2eb40d81, 0xb7bd5c3b, 0xc0ba6cad, 0xedb88320, 0x9abfb3b6,
+      0x03b6e20c, 0x74b1d29a, 0xead54739, 0x9dd277af, 0x04db2615,
+      0x73dc1683, 0xe3630b12, 0x94643b84, 0x0d6d6a3e, 0x7a6a5aa8,
+      0xe40ecf0b, 0x9309ff9d, 0x0a00ae27, 0x7d079eb1, 0xf00f9344,
+      0x8708a3d2, 0x1e01f268, 0x6906c2fe, 0xf762575d, 0x806567cb,
+      0x196c3671, 0x6e6b06e7, 0xfed41b76, 0x89d32be0, 0x10da7a5a,
+      0x67dd4acc, 0xf9b9df6f, 0x8ebeeff9, 0x17b7be43, 0x60b08ed5,
+      0xd6d6a3e8, 0xa1d1937e, 0x38d8c2c4, 0x4fdff252, 0xd1bb67f1,
+      0xa6bc5767, 0x3fb506dd, 0x48b2364b, 0xd80d2bda, 0xaf0a1b4c,
+      0x36034af6, 0x41047a60, 0xdf60efc3, 0xa867df55, 0x316e8eef,
+      0x4669be79, 0xcb61b38c, 0xbc66831a, 0x256fd2a0, 0x5268e236,
+      0xcc0c7795, 0xbb0b4703, 0x220216b9, 0x5505262f, 0xc5ba3bbe,
+      0xb2bd0b28, 0x2bb45a92, 0x5cb36a04, 0xc2d7ffa7, 0xb5d0cf31,
+      0x2cd99e8b, 0x5bdeae1d, 0x9b64c2b0, 0xec63f226, 0x756aa39c,
+      0x026d930a, 0x9c0906a9, 0xeb0e363f, 0x72076785, 0x05005713,
+      0x95bf4a82, 0xe2b87a14, 0x7bb12bae, 0x0cb61b38, 0x92d28e9b,
+      0xe5d5be0d, 0x7cdcefb7, 0x0bdbdf21, 0x86d3d2d4, 0xf1d4e242,
+      0x68ddb3f8, 0x1fda836e, 0x81be16cd, 0xf6b9265b, 0x6fb077e1,
+      0x18b74777, 0x88085ae6, 0xff0f6a70, 0x66063bca, 0x11010b5c,
+      0x8f659eff, 0xf862ae69, 0x616bffd3, 0x166ccf45, 0xa00ae278,
+      0xd70dd2ee, 0x4e048354, 0x3903b3c2, 0xa7672661, 0xd06016f7,
+      0x4969474d, 0x3e6e77db, 0xaed16a4a, 0xd9d65adc, 0x40df0b66,
+      0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
+      0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605,
+      0xcdd70693, 0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8,
+      0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b,
+      0x2d02ef8d
+    @};
+  unsigned char *end;
+
+  crc = ~crc & 0xffffffff;
+  for (end = buf + len; buf < end; ++buf)
+    crc = crc32_table[(crc ^ *buf) & 0xff] ^ (crc >> 8);
+  return ~crc & 0xffffffff;;
+@}
+@end smallexample
+
 
 @node Symbol Errors
 @section Errors reading symbol files
@@ -11646,10 +11409,8 @@ configurations.
 * ARM::                         ARM
 * H8/300::                      Hitachi H8/300
 * H8/500::                      Hitachi H8/500
-* i960::                        Intel i960
 * M32R/D::                      Mitsubishi M32R/D
 * M68K::                        Motorola M68K
-@c OBSOLETE * M88K::                        Motorola M88K
 * MIPS Embedded::               MIPS Embedded
 * OpenRISC 1000::               OpenRisc 1000
 * PA::                          HP PA Embedded
@@ -11901,128 +11662,6 @@ memory}.  The accepted values for @var{mod} are @code{small},
 
 @end table
 
-@node i960
-@subsection Intel i960
-
-@table @code
-
-@kindex target mon960
-@item target mon960 @var{dev}
-MON960 monitor for Intel i960.
-
-@kindex target nindy
-@item target nindy @var{devicename}
-An Intel 960 board controlled by a Nindy Monitor.  @var{devicename} is
-the name of the serial device to use for the connection, e.g.
-@file{/dev/ttya}.
-
-@end table
-
-@cindex Nindy
-@cindex i960
-@dfn{Nindy} is a ROM Monitor program for Intel 960 target systems.  When
-@value{GDBN} is configured to control a remote Intel 960 using Nindy, you can
-tell @value{GDBN} how to connect to the 960 in several ways:
-
-@itemize @bullet
-@item
-Through command line options specifying serial port, version of the
-Nindy protocol, and communications speed;
-
-@item
-By responding to a prompt on startup;
-
-@item
-By using the @code{target} command at any point during your @value{GDBN}
-session.  @xref{Target Commands, ,Commands for managing targets}.
-
-@end itemize
-
-@cindex download to Nindy-960
-With the Nindy interface to an Intel 960 board, @code{load}
-downloads @var{filename} to the 960 as well as adding its symbols in
-@value{GDBN}.
-
-@menu
-* Nindy Startup::               Startup with Nindy
-* Nindy Options::               Options for Nindy
-* Nindy Reset::                 Nindy reset command
-@end menu
-
-@node Nindy Startup
-@subsubsection Startup with Nindy
-
-If you simply start @code{@value{GDBP}} without using any command-line
-options, you are prompted for what serial port to use, @emph{before} you
-reach the ordinary @value{GDBN} prompt:
-
-@smallexample
-Attach /dev/ttyNN -- specify NN, or "quit" to quit:
-@end smallexample
-
-@noindent
-Respond to the prompt with whatever suffix (after @samp{/dev/tty})
-identifies the serial port you want to use.  You can, if you choose,
-simply start up with no Nindy connection by responding to the prompt
-with an empty line.  If you do this and later wish to attach to Nindy,
-use @code{target} (@pxref{Target Commands, ,Commands for managing targets}).
-
-@node Nindy Options
-@subsubsection Options for Nindy
-
-These are the startup options for beginning your @value{GDBN} session with a
-Nindy-960 board attached:
-
-@table @code
-@item -r @var{port}
-Specify the serial port name of a serial interface to be used to connect
-to the target system.  This option is only available when @value{GDBN} is
-configured for the Intel 960 target architecture.  You may specify
-@var{port} as any of: a full pathname (e.g. @samp{-r /dev/ttya}), a
-device name in @file{/dev} (e.g. @samp{-r ttya}), or simply the unique
-suffix for a specific @code{tty} (e.g. @samp{-r a}).
-
-@item -O
-(An uppercase letter ``O'', not a zero.)  Specify that @value{GDBN} should use
-the ``old'' Nindy monitor protocol to connect to the target system.
-This option is only available when @value{GDBN} is configured for the Intel 960
-target architecture.
-
-@quotation
-@emph{Warning:} if you specify @samp{-O}, but are actually trying to
-connect to a target system that expects the newer protocol, the connection
-fails, appearing to be a speed mismatch.  @value{GDBN} repeatedly
-attempts to reconnect at several different line speeds.  You can abort
-this process with an interrupt.
-@end quotation
-
-@item -brk
-Specify that @value{GDBN} should first send a @code{BREAK} signal to the target
-system, in an attempt to reset it, before connecting to a Nindy target.
-
-@quotation
-@emph{Warning:} Many target systems do not have the hardware that this
-requires; it only works with a few boards.
-@end quotation
-@end table
-
-The standard @samp{-b} option controls the line speed used on the serial
-port.
-
-@c @group
-@node Nindy Reset
-@subsubsection Nindy reset command
-
-@table @code
-@item reset
-@kindex reset
-For a Nindy target, this command sends a ``break'' to the remote target
-system; this is only useful if the target has been equipped with a
-circuit to perform a hard reset (or some other interesting action) when
-a break is detected.
-@end table
-@c @end group
-
 @node M32R/D
 @subsection Mitsubishi M32R/D
 
@@ -12064,19 +11703,6 @@ ROM 68K monitor, running on an M68K IDP board.
 
 @end table
 
-If @value{GDBN} is configured with @code{m68*-ericsson-*}, it will
-instead have only a single special target command:
-
-@table @code
-
-@kindex target es1800
-@item target es1800 @var{dev}
-ES-1800 emulator for M68K.
-
-@end table
-
-[context?]
-
 @table @code
 
 @kindex target rombug
@@ -12084,17 +11710,6 @@ ES-1800 emulator for M68K.
 ROMBUG ROM monitor for OS/9000.
 
 @end table
-
-@c OBSOLETE @node M88K
-@c OBSOLETE @subsection M88K
-@c OBSOLETE 
-@c OBSOLETE @table @code
-@c OBSOLETE 
-@c OBSOLETE @kindex target bug
-@c OBSOLETE @item target bug @var{dev}
-@c OBSOLETE BUG monitor, running on a MVME187 (m88k) board.
-@c OBSOLETE 
-@c OBSOLETE @end table
 
 @node MIPS Embedded
 @subsection MIPS Embedded
@@ -12333,7 +11948,7 @@ Set acquisition qualifier for HW trace.
 Set HW trace stopping criteria.
 
 @kindex htrace record
-@item htrace record @var{[data]*}
+@item htrace record [@var{data}]*
 Selects the data to be recorded, when qualifier is met and HW trace was
 triggered.
 
@@ -12344,14 +11959,14 @@ triggered.
 Enables/disables the HW trace.
 
 @kindex htrace rewind
-@item htrace rewind @var{[filename]}
+@item htrace rewind [@var{filename}]
 Clears currently recorded trace data.
 
 If filename is specified, new trace file is made and any newly collected data
 will be written there.
 
 @kindex htrace print
-@item htrace print @var{[start [len]]}
+@item htrace print [@var{start} [@var{len}]]
 Prints trace buffer, using current record configuration.
 
 @kindex htrace mode continuous
@@ -12778,6 +12393,7 @@ described here.
 * History::                     Command history
 * Screen Size::                 Screen size
 * Numbers::                     Numbers
+* ABI::                         Configuring the current ABI
 * Messages/Warnings::           Optional warnings and messages
 * Debugging Output::            Optional messages about internal happenings
 @end menu
@@ -13022,6 +12638,63 @@ Display the current default base for numeric input.
 @kindex show output-radix
 @item show output-radix
 Display the current default base for numeric display.
+@end table
+
+@node ABI
+@section Configuring the current ABI
+
+@value{GDBN} can determine the @dfn{ABI} (Application Binary Interface) of your
+application automatically.  However, sometimes you need to override its
+conclusions.  Use these commands to manage @value{GDBN}'s view of the
+current ABI.
+
+@cindex OS ABI
+@kindex set osabi
+@kindex show osabi
+
+One @value{GDBN} configuration can debug binaries for multiple operating
+system targets, either via remote debugging or native emulation. 
+@value{GDBN} will autodetect the @dfn{OS ABI} (Operating System ABI) in use,
+but you can override its conclusion using the @code{set osabi} command.
+One example where this is useful is in debugging of binaries which use
+an alternate C library (e.g.@: @sc{uClibc} for @sc{gnu}/Linux) which does
+not have the same identifying marks that the standard C library for your
+platform provides.
+
+@table @code
+@item show osabi
+Show the OS ABI currently in use.
+
+@item set osabi
+With no argument, show the list of registered available OS ABI's.
+
+@item set osabi @var{abi}
+Set the current OS ABI to @var{abi}.
+@end table
+
+@cindex float promotion
+@kindex set coerce-float-to-double
+
+Generally, the way that an argument of type @code{float} is passed to a
+function depends on whether the function is prototyped.  For a prototyped
+(i.e.@: ANSI/ISO style) function, @code{float} arguments are passed unchanged,
+according to the architecture's convention for @code{float}.  For unprototyped
+(i.e.@: K&R style) functions, @code{float} arguments are first promoted to type
+@code{double} and then passed.
+
+Unfortunately, some forms of debug information do not reliably indicate whether
+a function is prototyped.  If @value{GDBN} calls a function that is not marked
+as prototyped, it consults @kbd{set coerce-float-to-double}.
+
+@table @code
+@item set coerce-float-to-double
+@itemx set coerce-float-to-double on
+Arguments of type @code{float} will be promoted to @code{double} when passed
+to an unprototyped function.  This is the default setting.
+
+@item set coerce-float-to-double off
+Arguments of type @code{float} will be passed directly to unprototyped
+functions.
 @end table
 
 @node Messages/Warnings
@@ -13541,6 +13214,69 @@ The only backslash-escape sequences that you can use in the format
 string are the simple ones that consist of backslash followed by a
 letter.
 @end table
+
+@node Interpreters
+@chapter Command Interpreters
+@cindex command interpreters
+
+@value{GDBN} supports multiple command interpreters, and some command
+infrastructure to allow users or user interface writers to switch
+between interpreters or run commands in other interpreters.
+
+@value{GDBN} currently supports two command interpreters, the console
+interpreter (sometimes called the command-line interpreter or @sc{cli})
+and the machine interface interpreter (or @sc{gdb/mi}).  This manual
+describes both of these interfaces in great detail.
+
+By default, @value{GDBN} will start with the console interpreter.
+However, the user may choose to start @value{GDBN} with another
+interpreter by specifying the @option{-i} or @option{--interpreter}
+startup options.  Defined interpreters include:
+
+@table @code
+@item console
+@cindex console interpreter
+The traditional console or command-line interpreter.  This is the most often
+used interpreter with @value{GDBN}. With no interpreter specified at runtime,
+@value{GDBN} will use this interpreter.
+
+@item mi
+@cindex mi interpreter
+The newest @sc{gdb/mi} interface (currently @code{mi2}).  Used primarily
+by programs wishing to use @value{GDBN} as a backend for a debugger GUI
+or an IDE.  For more information, see @ref{GDB/MI, ,The @sc{gdb/mi}
+Interface}.
+
+@item mi2
+@cindex mi2 interpreter
+The current @sc{gdb/mi} interface.
+
+@item mi1
+@cindex mi1 interpreter
+The @sc{gdb/mi} interface included in @value{GDBN} 5.1, 5.2, and 5.3.
+
+@end table
+
+@cindex invoke another interpreter
+The interpreter being used by @value{GDBN} may not be dynamically
+switched at runtime.  Although possible, this could lead to a very
+precarious situation.  Consider an IDE using @sc{gdb/mi}.  If a user
+enters the command "interpreter-set console" in a console view,
+@value{GDBN} would switch to using the console interpreter, rendering
+the IDE inoperable!
+
+@kindex interpreter-exec
+Although you may only choose a single interpreter at startup, you may execute
+commands in any interpreter from the current interpreter using the appropriate
+command.  If you are running the console interpreter, simply use the
+@code{interpreter-exec} command:
+
+@smallexample
+interpreter-exec mi "-data-list-register-names"
+@end smallexample
+
+@sc{gdb/mi} has a similar command, although it is only available in versions of
+@value{GDBN} which support @sc{gdb/mi} version 2 (or greater).
 
 @node TUI
 @chapter @value{GDBN} Text User Interface
@@ -14456,6 +14192,7 @@ Then give @file{gdb.dvi} to your @sc{dvi} printing program.
 @appendix Installing @value{GDBN}
 @cindex configuring @value{GDBN}
 @cindex installation
+@cindex configuring @value{GDBN}, and source tree subdirectories
 
 @value{GDBN} comes with a @code{configure} script that automates the process
 of preparing @value{GDBN} for installation; you can then use @code{make} to
@@ -14546,19 +14283,15 @@ directories for multiple libraries or programs, such as the
 creates configuration files for every directory level underneath (unless
 you tell it not to, with the @samp{--norecursion} option).
 
-You can run the @code{configure} script from any of the
-subordinate directories in the @value{GDBN} distribution if you only want to
-configure that subdirectory, but be sure to specify a path to it.
-
-For example, with version @value{GDBVN}, type the following to configure only
-the @code{bfd} subdirectory:
-
-@smallexample
-@group
-cd gdb-@value{GDBVN}/bfd
-../configure @var{host}
-@end group
-@end smallexample
+You should run the @code{configure} script from the top directory in the
+source tree, the @file{gdb-@var{version-number}} directory.  If you run
+@code{configure} from one of the subdirectories, you will configure only
+that subdirectory.  That is usually not what you want.  In particular,
+if you run the first @code{configure} from the @file{gdb} subdirectory
+of the @file{gdb-@var{version-number}} directory, you will omit the
+configuration of @file{bfd}, @file{readline}, and other sibling
+directories of the @file{gdb} subdirectory.  This leads to build errors
+about missing include files such as @file{bfd/bfd.h}.
 
 You can install @code{@value{GDBP}} anywhere; it has no hardwired paths.
 However, you should make sure that the shell on your path (named by
@@ -14610,6 +14343,12 @@ directory, it creates a tree for the binaries with the same structure
 the example, you'd find the Sun 4 library @file{libiberty.a} in the
 directory @file{gdb-sun4/libiberty}, and @value{GDBN} itself in
 @file{gdb-sun4/gdb}.
+
+Make sure that your path to the @file{configure} script has just one
+instance of @file{gdb} in it.  If your path to @file{configure} looks
+like @file{../gdb-@value{GDBVN}/gdb/configure}, you are configuring only
+one subdirectory of @value{GDBN}, not the whole package.  This leads to
+build errors about missing include files such as @file{bfd/bfd.h}.
 
 One popular reason to build several @value{GDBN} configurations in separate
 directories is to configure @value{GDBN} for cross-compiling (where
@@ -14814,17 +14553,57 @@ warning message.
 @kindex maint print registers
 @kindex maint print raw-registers
 @kindex maint print cooked-registers
+@kindex maint print register-groups
 @item maint print registers
 @itemx maint print raw-registers
 @itemx maint print cooked-registers
+@itemx maint print register-groups
 Print @value{GDBN}'s internal register data structures.
 
-The command @samp{maint print raw-registers} includes the contents of
-the raw register cache; and the command @samp{maint print
-cooked-registers} includes the (cooked) value of all registers.
-@xref{Registers,, Registers, gdbint, @value{GDBN} Internals}.
+The command @code{maint print raw-registers} includes the contents of
+the raw register cache; the command @code{maint print cooked-registers}
+includes the (cooked) value of all registers; and the command
+@code{maint print register-groups} includes the groups that each
+register is a member of.  @xref{Registers,, Registers, gdbint,
+@value{GDBN} Internals}.
 
 Takes an optional file parameter.
+
+@kindex maint print reggroups
+@item maint print reggroups
+Print @value{GDBN}'s internal register group data structures.
+
+Takes an optional file parameter.
+
+@smallexample
+(gdb) @kbd{maint print reggroups}
+ Group      Type      
+ general    user      
+ float      user      
+ all        user      
+ vector     user      
+ system     user      
+ save       internal  
+ restore    internal  
+@end smallexample
+
+@kindex maint set profile
+@kindex maint show profile
+@cindex profiling GDB
+@item maint set profile
+@itemx maint show profile
+Control profiling of @value{GDBN}.
+
+Profiling will be disabled until you use the @samp{maint set profile}
+command to enable it.  When you enable profiling, the system will begin
+collecting timing and execution count data; when you disable profiling or
+exit @value{GDBN}, the results will be written to a log file.  Remember that
+if you use profiling, @value{GDBN} will overwrite the profiling log file
+(often called @file{gmon.out}).  If you have a record of important profiling
+data in a @file{gmon.out} file, be sure to move it to a safe location.
+
+Configuring with @samp{--enable-profiling} arranges for @value{GDBN} to be
+compiled with the @samp{-pg} compiler option. 
 
 @end table
 

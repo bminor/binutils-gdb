@@ -1,5 +1,5 @@
 /* Target-dependent code for the Fujitsu FR-V, for GDB, the GNU Debugger.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -793,8 +793,7 @@ frv_saved_pc_after_call (struct frame_info *frame)
 static void
 frv_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
-  frame->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (frame, sizeof (struct frame_extra_info));
   frame->extra_info->fp_to_callers_sp_offset = 0;
   frame->extra_info->lr_saved_on_stack = 0;
 }
@@ -1083,7 +1082,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, frv_saved_pc_after_call);
 
   set_gdbarch_frame_chain (gdbarch, frv_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, frv_frame_saved_pc);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, frv_frame_init_saved_regs);
@@ -1097,8 +1095,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_coerce_float_to_double (gdbarch, 
-				      standard_coerce_float_to_double);
   set_gdbarch_push_arguments (gdbarch, frv_push_arguments);
   set_gdbarch_push_return_address (gdbarch, frv_push_return_address);
   set_gdbarch_pop_frame (gdbarch, frv_pop_frame);

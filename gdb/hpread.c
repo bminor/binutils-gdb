@@ -1,5 +1,5 @@
 /* Read hp debug symbols and convert to internal format, for GDB.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -87,23 +87,6 @@ struct hpread_symfile_info
 #define WITHIN_FUNCTION(o)      (HPUX_SYMFILE_INFO(o)->within_function)
 #define CURRENT_FUNCTION_VALUE(o) (HPUX_SYMFILE_INFO(o)->current_function_value)
 
-/* Given the native debug symbol SYM, set NAMEP to the name associated
-   with the debug symbol.  Note we may be called with a debug symbol which
-   has no associated name, in that case we return an empty string.
-
-   Also note we "know" that the name for any symbol is always in the
-   same place.  Hence we don't have to conditionalize on the symbol type.  */
-#define SET_NAMESTRING(SYM, NAMEP, OBJFILE) \
-  if (! hpread_has_name ((SYM)->dblock.kind)) \
-    *NAMEP = ""; \
-  else if (((unsigned)(SYM)->dsfile.name) >= VT_SIZE (OBJFILE)) \
-    { \
-      complaint (&symfile_complaints, "bad string table offset in symbol %d", \
-		 (char *) symnum); \
-      *NAMEP = ""; \
-    } \
-  else \
-    *NAMEP = (SYM)->dsfile.name + VT (OBJFILE)
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
@@ -154,6 +137,9 @@ lbrac_mismatch_complaint (int arg1)
 #define USE_PXDB           1
 
 /* Forward procedure declarations */
+
+static void set_namestring (union dnttentry *sym, char **namep,
+                            struct objfile *objfile);
 
 void hpread_symfile_init (struct objfile *);
 
@@ -302,6 +288,28 @@ trans_lang (enum hp_language in_lang)
 
 static char main_string[] = "main";
 
+
+/* Given the native debug symbol SYM, set NAMEP to the name associated
+   with the debug symbol.  Note we may be called with a debug symbol which
+   has no associated name, in that case we return an empty string.  */
+
+static void
+set_namestring (union dnttentry *sym, char **namep, struct objfile *objfile)
+{
+  /* Note that we "know" that the name for any symbol is always in the same
+     place.  Hence we don't have to conditionalize on the symbol type.  */
+  if (! hpread_has_name (sym->dblock.kind))
+    *namep = "";
+  else if ((unsigned) sym->dsfile.name >= VT_SIZE (objfile))
+    {
+      complaint (&symfile_complaints, "bad string table offset in symbol %d",
+		 symnum);
+      *namep = "";
+    }
+  else
+    *namep = sym->dsfile.name + VT (objfile);
+}
+
 /* Call PXDB to process our file.
 
    Approach copied from DDE's "dbgk_run_pxdb".  Note: we
@@ -1656,7 +1664,7 @@ hpread_symfile_init (struct objfile *objfile)
   asection *vt_section, *slt_section, *lntt_section, *gntt_section;
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_private = (PTR)
+  objfile->sym_private =
     xmmalloc (objfile->md, sizeof (struct hpread_symfile_info));
   memset (objfile->sym_private, 0, sizeof (struct hpread_symfile_info));
 
@@ -1917,7 +1925,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 
 		/* A source file of some kind.  Note this may simply
 		   be an included file.  */
-		SET_NAMESTRING (dn_bufp, &namestring, objfile);
+		set_namestring (dn_bufp, &namestring, objfile);
 
 		/* Check if this is the source file we are already working
 		   with.  */
@@ -1951,7 +1959,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 			psymtab_include_list = (char **)
 			  alloca ((includes_allocated *= 2) *
 				  sizeof (char *));
-			memcpy ((PTR) psymtab_include_list, (PTR) orig,
+			memcpy (psymtab_include_list, orig,
 				includes_used * sizeof (char *));
 		      }
 		    continue;
@@ -2022,7 +2030,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 		}
 
 	      /* Now begin a new module and a new psymtab for it */
-	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
+	      set_namestring (dn_bufp, &namestring, objfile);
 	      valu = hpread_get_textlow (i, hp_symnum, objfile, symcount);
 	      valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 	      if (!pst)
@@ -2048,7 +2056,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 		texthigh = valu;
 	      valu = dn_bufp->dfunc.lowaddr +
 		ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
+	      set_namestring (dn_bufp, &namestring, objfile);
 	      if (dn_bufp->dfunc.global)
 		add_psymbol_to_list (namestring, strlen (namestring),
 				     VAR_NAMESPACE, LOC_BLOCK,
@@ -2069,7 +2077,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 		texthigh = valu;
 	      valu = dn_bufp->ddocfunc.lowaddr +
 		ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
+	      set_namestring (dn_bufp, &namestring, objfile);
 	      if (dn_bufp->ddocfunc.global)
 		add_psymbol_to_list (namestring, strlen (namestring),
 				     VAR_NAMESPACE, LOC_BLOCK,
@@ -2143,7 +2151,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 		else
 		  storage = LOC_UNDEF;
 
-		SET_NAMESTRING (dn_bufp, &namestring, objfile);
+		set_namestring (dn_bufp, &namestring, objfile);
 		if (!pst)
 		  {
 		    pst = hpread_start_psymtab (objfile,
@@ -2227,7 +2235,7 @@ hpread_build_psymtabs (struct objfile *objfile, int mainline)
 	    case DNTT_TYPE_MEMENUM:
 	    case DNTT_TYPE_CONST:
 	      /* Constants and members of enumerated types.  */
-	      SET_NAMESTRING (dn_bufp, &namestring, objfile);
+	      set_namestring (dn_bufp, &namestring, objfile);
 	      if (!pst)
 		{
 		  pst = hpread_start_psymtab (objfile,
@@ -2826,8 +2834,8 @@ hpread_expand_symtab (struct objfile *objfile, int sym_offset, int sym_size,
       if (dn_bufp->dblock.extension)
 	continue;
 
-      /* Yow!  We call SET_NAMESTRING on things without names!  */
-      SET_NAMESTRING (dn_bufp, &namestring, objfile);
+      /* Yow!  We call set_namestring on things without names!  */
+      set_namestring (dn_bufp, &namestring, objfile);
 
       hpread_process_one_debug_symbol (dn_bufp, namestring, section_offsets,
 				       objfile, text_offset, text_size,
@@ -5232,7 +5240,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 
       /* Stack must be empty now.  */
       if (context_stack_depth != 0)
-	lbrac_unmatched_complaint ((char *) symnum);
+	lbrac_unmatched_complaint (symnum);
       new = push_context (0, valu);
 
       /* Built a type for the function. This includes processing
@@ -5240,6 +5248,11 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
        */
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       SYMBOL_TYPE (sym) = hpread_read_function_type (hp_type, dn_bufp, objfile, 1);
+
+      /* All functions in C++ have prototypes.  For C we don't have enough
+         information in the debug info.  */
+      if (SYMBOL_LANGUAGE (sym) == language_cplus)
+	TYPE_FLAGS (SYMBOL_TYPE (sym)) |= TYPE_FLAG_PROTOTYPED;
 
       /* The "SYMBOL_NAME" field is expected to be the mangled name
        * (if any), which we get from the "alias" field of the SOM record
@@ -5350,7 +5363,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
       CURRENT_FUNCTION_VALUE (objfile) = valu;
       /* Stack must be empty now.  */
       if (context_stack_depth != 0)
-	lbrac_unmatched_complaint ((char *) symnum);
+	lbrac_unmatched_complaint (symnum);
       new = push_context (0, valu);
 
       /* Built a type for the function. This includes processing
@@ -5578,7 +5591,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	      new = pop_context ();
 	      desc = dn_bufp->dend.beginscope.dnttp.index;
 	      if (desc != new->depth)
-		lbrac_mismatch_complaint ((char *) symnum);
+		lbrac_mismatch_complaint (symnum);
 
 	      /* Make a block for the local symbols within.  */
 	      finish_block (new->name, &local_symbols, new->old_blocks,

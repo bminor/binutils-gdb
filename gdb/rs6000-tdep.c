@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002
+   1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -34,6 +34,7 @@
 #include "doublest.h"
 #include "value.h"
 #include "parser-defs.h"
+#include "osabi.h"
 
 #include "libbfd.h"		/* for bfd_default_set_arch_mach */
 #include "coff/internal.h"	/* for libcoff.h */
@@ -1855,17 +1856,6 @@ rs6000_register_virtual_type (int n)
     }
 }
 
-/* For the PowerPC, it appears that the debug info marks float parameters as
-   floats regardless of whether the function is prototyped, but the actual
-   values are always passed in as doubles.  Tell gdb to always assume that
-   floats are passed as doubles and then converted in the callee.  */
-
-static int
-rs6000_coerce_float_to_double (struct type *formal, struct type *actual)
-{
-  return 1;
-}
-
 /* Return whether register N requires conversion when moving from raw format
    to virtual format.
 
@@ -2668,7 +2658,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   unsigned long mach;
   bfd abfd;
   int sysv_abi;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
   asection *sect;
 
   from_xcoff_exec = info.abfd && info.abfd->format == bfd_object &&
@@ -2678,9 +2667,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     bfd_get_flavour (info.abfd) == bfd_target_elf_flavour;
 
   sysv_abi = info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour;
-
-  if (info.abfd)
-    osabi = gdbarch_lookup_osabi (info.abfd);
 
   /* Check word size.  If INFO is from a binary file, infer it from
      that, else choose a likely default.  */
@@ -2716,7 +2702,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
          meaningful, because 64-bit CPUs can run in 32-bit mode.  So, perform
          separate word size check.  */
       tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->wordsize == wordsize && tdep->osabi == osabi)
+      if (tdep && tdep->wordsize == wordsize)
 	return arches->gdbarch;
     }
 
@@ -2742,7 +2728,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   tdep->wordsize = wordsize;
-  tdep->osabi = osabi;
 
   /* For e500 executables, the apuinfo section is of help here.  Such
      section contains the identifier and revision number of each
@@ -2906,7 +2891,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
-  set_gdbarch_coerce_float_to_double (gdbarch, rs6000_coerce_float_to_double);
 
   set_gdbarch_register_convertible (gdbarch, rs6000_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
@@ -2944,8 +2928,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_use_struct_convention (gdbarch,
 				       generic_use_struct_convention);
 
-  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
-
   set_gdbarch_frameless_function_invocation (gdbarch,
                                          rs6000_frameless_function_invocation);
   set_gdbarch_frame_chain (gdbarch, rs6000_frame_chain);
@@ -2970,7 +2952,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }
@@ -2983,8 +2965,7 @@ rs6000_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  fprintf_unfiltered (file, "rs6000_dump_tdep: OS ABI = %s\n",
-		      gdbarch_osabi_name (tdep->osabi));
+  /* FIXME: Dump gdbarch_tdep.  */
 }
 
 static struct cmd_list_element *info_powerpc_cmdlist = NULL;

@@ -1,5 +1,6 @@
 /* Header file for GDB command decoding library.
-   Copyright 2000 Free Software Foundation, Inc.
+
+   Copyright 2000, 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,8 +20,9 @@
 #if !defined (CLI_DECODE_H)
 #define CLI_DECODE_H 1
 
-#include "gdb_regex.h"		/* Needed by apropos_cmd.  */
 #include "command.h"
+
+struct re_pattern_buffer;
 
 #if 0
 /* FIXME: cagney/2002-03-17: Once cmd_type() has been removed, ``enum

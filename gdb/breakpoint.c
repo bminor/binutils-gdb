@@ -1,7 +1,7 @@
 /* Everything about breakpoints, for GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -75,7 +75,7 @@ static void map_breakpoint_numbers (char *, void (*)(struct breakpoint *));
 
 static void ignore_command (char *, int);
 
-static int breakpoint_re_set_one (PTR);
+static int breakpoint_re_set_one (void *);
 
 static void clear_command (char *, int);
 
@@ -110,9 +110,9 @@ static void breakpoint_1 (int, int);
 
 static bpstat bpstat_alloc (struct breakpoint *, bpstat);
 
-static int breakpoint_cond_eval (PTR);
+static int breakpoint_cond_eval (void *);
 
-static void cleanup_executing_breakpoints (PTR);
+static void cleanup_executing_breakpoints (void *);
 
 static void commands_command (char *, int);
 
@@ -142,9 +142,9 @@ typedef struct
   }
 args_for_catchpoint_enable;
 
-static int watchpoint_check (PTR);
+static int watchpoint_check (void *);
 
-static int cover_target_enable_exception_callback (PTR);
+static int cover_target_enable_exception_callback (void *);
 
 static void maintenance_info_breakpoints (char *, int);
 
@@ -737,9 +737,11 @@ insert_breakpoints (void)
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
-    if (b->enable_state == bp_permanent)
-      /* Permanent breakpoints cannot be inserted or removed.  */
+    /* Permanent breakpoints cannot be inserted or removed.  Disabled
+       breakpoints should not be inserted.  */
+    if (b->enable_state != bp_enabled)
       continue;
+
     if ((b->type == bp_watchpoint
 	 || b->type == bp_hardware_watchpoint
 	 || b->type == bp_read_watchpoint
@@ -761,9 +763,6 @@ insert_breakpoints (void)
 	&& b->type != bp_catch_exec
 	&& b->type != bp_catch_throw
 	&& b->type != bp_catch_catch
-	&& b->enable_state != bp_disabled
-	&& b->enable_state != bp_shlib_disabled
-	&& b->enable_state != bp_call_disabled
 	&& !b->inserted
 	&& !b->duplicate)
       {
@@ -882,9 +881,6 @@ insert_breakpoints (void)
 	  return_val = val;	/* remember failure */
       }
     else if (ep_is_exception_catchpoint (b)
-	     && b->enable_state != bp_disabled
-	     && b->enable_state != bp_shlib_disabled
-	     && b->enable_state != bp_call_disabled
 	     && !b->inserted
 	     && !b->duplicate)
 
@@ -942,7 +938,6 @@ insert_breakpoints (void)
     else if ((b->type == bp_hardware_watchpoint ||
 	      b->type == bp_read_watchpoint ||
 	      b->type == bp_access_watchpoint)
-	     && b->enable_state == bp_enabled
 	     && b->disposition != disp_del_at_next_stop
 	     && !b->inserted
 	     && !b->duplicate)
@@ -1061,7 +1056,6 @@ insert_breakpoints (void)
     else if ((b->type == bp_catch_fork
 	      || b->type == bp_catch_vfork
 	      || b->type == bp_catch_exec)
-	     && b->enable_state == bp_enabled
 	     && !b->inserted
 	     && !b->duplicate)
       {
@@ -1246,8 +1240,8 @@ update_breakpoints_after_exec (void)
        automagically.  Certainly on HP-UX that's true.
 
        Jim Blandy <jimb@redhat.com>: Actually, zero is a perfectly
-       valid code address on some platforms (like the mn10200 and
-       mn10300 simulators).  We shouldn't assign any special
+       valid code address on some platforms (like the OBSOLETE mn10200
+       and mn10300 simulators).  We shouldn't assign any special
        interpretation to a breakpoint with a zero address.  And in
        fact, GDB doesn't --- I can't see what that comment above is
        talking about.  As far as I can tell, setting the address of a
@@ -1924,7 +1918,7 @@ bpstat_clear_actions (bpstat bs)
 /* Stub for cleaning up our state if we error-out of a breakpoint command */
 /* ARGSUSED */
 static void
-cleanup_executing_breakpoints (PTR ignore)
+cleanup_executing_breakpoints (void *ignore)
 {
   executing_breakpoint_commands = 0;
 }
@@ -2010,7 +2004,7 @@ top:
 static enum print_stop_action
 print_it_typical (bpstat bs)
 {
-  struct cleanup *old_chain;
+  struct cleanup *old_chain, *ui_out_chain;
   struct ui_stream *stb;
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -2171,14 +2165,14 @@ print_it_typical (bpstat bs)
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "watchpoint-trigger");
 	  mention (bs->breakpoint_at);
-	  ui_out_tuple_begin (uiout, "value");
+	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
 	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "old", stb);
 	  ui_out_text (uiout, "\nNew value = ");
 	  value_print (bs->breakpoint_at->val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "new", stb);
-	  ui_out_tuple_end (uiout);
+	  do_cleanups (ui_out_chain);
 	  ui_out_text (uiout, "\n");
 	  value_free (bs->old_val);
 	  bs->old_val = NULL;
@@ -2191,11 +2185,11 @@ print_it_typical (bpstat bs)
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "reason", "read-watchpoint-trigger");
       mention (bs->breakpoint_at);
-      ui_out_tuple_begin (uiout, "value");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       ui_out_text (uiout, "\nValue = ");
       value_print (bs->breakpoint_at->val, stb->stream, 0, Val_pretty_default);
       ui_out_field_stream (uiout, "value", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
       return PRINT_UNKNOWN;
       break;
@@ -2207,7 +2201,7 @@ print_it_typical (bpstat bs)
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
 	  mention (bs->breakpoint_at);
-	  ui_out_tuple_begin (uiout, "value");
+	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
 	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "old", stb);
@@ -2220,12 +2214,12 @@ print_it_typical (bpstat bs)
 	  mention (bs->breakpoint_at);
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
-	  ui_out_tuple_begin (uiout, "value");
+	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nValue = ");
 	}
       value_print (bs->breakpoint_at->val, stb->stream, 0,Val_pretty_default);
       ui_out_field_stream (uiout, "new", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
       return PRINT_UNKNOWN;
       break;
@@ -2339,7 +2333,7 @@ bpstat_print (bpstat bs)
    make it pass through catch_errors.  */
 
 static int
-breakpoint_cond_eval (PTR exp)
+breakpoint_cond_eval (void *exp)
 {
   struct value *mark = value_mark ();
   int i = !value_true (evaluate_expression ((struct expression *) exp));
@@ -2379,7 +2373,7 @@ bpstat_alloc (struct breakpoint *b, bpstat cbs /* Current "bs" value */ )
 /* Check watchpoint condition.  */
 
 static int
-watchpoint_check (PTR p)
+watchpoint_check (void *p)
 {
   bpstat bs = (bpstat) p;
   struct breakpoint *b;
@@ -3237,9 +3231,10 @@ print_one_breakpoint (struct breakpoint *b,
   char wrap_indent[80];
   struct ui_stream *stb = ui_out_stream_new (uiout);
   struct cleanup *old_chain = make_cleanup_ui_out_stream_delete (stb);
+  struct cleanup *bkpt_chain;
 
   annotate_record ();
-  ui_out_tuple_begin (uiout, "bkpt");
+  bkpt_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "bkpt");
 
   /* 1 */
   annotate_field (0);
@@ -3477,12 +3472,14 @@ print_one_breakpoint (struct breakpoint *b,
   
   if ((l = b->commands))
     {
+      struct cleanup *script_chain;
+
       annotate_field (9);
-      ui_out_tuple_begin (uiout, "script");
+      script_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "script");
       print_command_lines (uiout, l, 4);
-      ui_out_tuple_end (uiout);
+      do_cleanups (script_chain);
     }
-  ui_out_tuple_end (uiout);
+  do_cleanups (bkpt_chain);
   do_cleanups (old_chain);
 }
 
@@ -3550,6 +3547,7 @@ breakpoint_1 (int bnum, int allflag)
   register struct breakpoint *b;
   CORE_ADDR last_addr = (CORE_ADDR) -1;
   int nr_printable_breakpoints;
+  struct cleanup *bkpttbl_chain;
   
   /* Compute the number of rows in the table. */
   nr_printable_breakpoints = 0;
@@ -3562,9 +3560,13 @@ breakpoint_1 (int bnum, int allflag)
       }
 
   if (addressprint)
-    ui_out_table_begin (uiout, 6, nr_printable_breakpoints, "BreakpointTable");
+    bkpttbl_chain 
+      = make_cleanup_ui_out_table_begin_end (uiout, 6, nr_printable_breakpoints,
+                                             "BreakpointTable");
   else
-    ui_out_table_begin (uiout, 5, nr_printable_breakpoints, "BreakpointTable");
+    bkpttbl_chain 
+      = make_cleanup_ui_out_table_begin_end (uiout, 5, nr_printable_breakpoints,
+                                             "BreakpointTable");
 
   if (nr_printable_breakpoints > 0)
     annotate_breakpoints_headers ();
@@ -3606,7 +3608,7 @@ breakpoint_1 (int bnum, int allflag)
 	  print_one_breakpoint (b, &last_addr);
       }
   
-  ui_out_table_end (uiout);
+  do_cleanups (bkpttbl_chain);
 
   if (nr_printable_breakpoints == 0)
     {
@@ -4398,7 +4400,7 @@ static void
 mention (struct breakpoint *b)
 {
   int say_where = 0;
-  struct cleanup *old_chain;
+  struct cleanup *old_chain, *ui_out_chain;
   struct ui_stream *stb;
 
   stb = ui_out_stream_new (uiout);
@@ -4420,39 +4422,39 @@ mention (struct breakpoint *b)
       break;
     case bp_watchpoint:
       ui_out_text (uiout, "Watchpoint ");
-      ui_out_tuple_begin (uiout, "wpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_hardware_watchpoint:
       ui_out_text (uiout, "Hardware watchpoint ");
-      ui_out_tuple_begin (uiout, "wpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_read_watchpoint:
       ui_out_text (uiout, "Hardware read watchpoint ");
-      ui_out_tuple_begin (uiout, "hw-rwpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-rwpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_access_watchpoint:
       ui_out_text (uiout, "Hardware access (read/write) watchpoint ");
-      ui_out_tuple_begin (uiout, "hw-awpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-awpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_breakpoint:
       if (ui_out_is_mi_like_p (uiout))
@@ -5584,7 +5586,7 @@ until_break_command_continuation (struct continuation_arg *arg)
 
 /* ARGSUSED */
 void
-until_break_command (char *arg, int from_tty)
+until_break_command (char *arg, int from_tty, int anywhere)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -5617,9 +5619,16 @@ until_break_command (char *arg, int from_tty)
 
   resolve_sal_pc (&sal);
 
-  breakpoint = 
-    set_momentary_breakpoint (sal,get_frame_id (deprecated_selected_frame),
-			      bp_until);
+  if (anywhere)
+    /* If the user told us to continue until a specified location,
+       we don't specify a frame at which we need to stop.  */
+    breakpoint = set_momentary_breakpoint (sal, null_frame_id, bp_until);
+  else
+    /* Otherwise, specify the current frame, because we want to stop only
+       at the very same frame.  */
+    breakpoint = set_momentary_breakpoint (sal,
+					   get_frame_id (deprecated_selected_frame),
+					   bp_until);
 
   if (!event_loop_p || !target_can_async_p ())
     old_chain = make_cleanup_delete_breakpoint (breakpoint);
@@ -5647,8 +5656,8 @@ until_break_command (char *arg, int from_tty)
       add_continuation (until_break_command_continuation, arg1);
     }
 
-  /* Keep within the current frame */
-
+  /* Keep within the current frame, or in frames called by the current
+     one.  */
   if (prev_frame)
     {
       sal = find_pc_line (get_frame_pc (prev_frame), 0);
@@ -5667,7 +5676,7 @@ until_break_command (char *arg, int from_tty)
   if (!event_loop_p || !target_can_async_p ())
     do_cleanups (old_chain);
 }
-
+
 #if 0
 /* These aren't used; I don't konw what they were for.  */
 /* Set a breakpoint at the catch clause for NAME.  */
@@ -6233,7 +6242,7 @@ catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
    inside a catch_errors */
 
 static int
-cover_target_enable_exception_callback (PTR arg)
+cover_target_enable_exception_callback (void *arg)
 {
   args_for_catchpoint_enable *args = arg;
   struct symtab_and_line *sal;
@@ -6910,7 +6919,7 @@ delete_command (char *arg, int from_tty)
    Unused in this case.  */
 
 static int
-breakpoint_re_set_one (PTR bint)
+breakpoint_re_set_one (void *bint)
 {
   /* get past catch_errs */
   struct breakpoint *b = (struct breakpoint *) bint;
@@ -7051,7 +7060,7 @@ breakpoint_re_set_one (PTR bint)
 	value_free (b->val);
       b->val = evaluate_expression (b->exp);
       release_value (b->val);
-      if (VALUE_LAZY (b->val))
+      if (VALUE_LAZY (b->val) && b->enable_state == bp_enabled)
 	value_fetch_lazy (b->val);
 
       if (b->cond_string != NULL)

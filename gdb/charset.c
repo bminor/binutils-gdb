@@ -1,5 +1,6 @@
 /* Character set conversion support for GDB.
-   Copyright 2001 Free Software Foundation, Inc.
+
+   Copyright 2001, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,7 +25,7 @@
 #include "gdb_assert.h"
 
 #include <stddef.h>
-#include <string.h>
+#include "gdb_string.h"
 #include <ctype.h>
 
 #ifdef HAVE_ICONV
@@ -442,7 +443,7 @@ cached_iconv_convert (struct cached_iconv *ci, int from_char, int *to_char)
 
 
 static void
-register_iconv_charsets ()
+register_iconv_charsets (void)
 {
   /* Here we should check whether various character sets were
      recognized by the local iconv implementation.
@@ -479,7 +480,7 @@ cached_iconv_convert (struct cached_iconv *ci, int from_char, int *to_char)
 }
 
 static void
-register_iconv_charsets ()
+register_iconv_charsets (void)
 {
 }
 
@@ -1016,7 +1017,7 @@ set_host_charset (const char *charset)
 
 
 const char *
-host_charset ()
+host_charset (void)
 {
   return current_host_charset->name;
 }
@@ -1032,7 +1033,7 @@ set_target_charset (const char *charset)
 
 
 const char *
-target_charset ()
+target_charset (void)
 {
   return current_target_charset->name;
 }

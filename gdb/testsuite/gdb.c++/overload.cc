@@ -45,6 +45,11 @@ int overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
 
 };
 
+int intToChar (char c)
+{
+  return 297;
+}
+
 void marker1()
 {}
 
@@ -97,6 +102,8 @@ int main ()
        breakpoint();
     #endif
 
+    // Verify that intToChar should work:
+    intToChar(1);
 
     marker1();
     XXX::marker2();

@@ -1,6 +1,6 @@
 /* Target definitions for GDB on a Motorola 680x0 running SVR4.
    (Commodore Amiga with amix or Atari TT with ASV)
-   Copyright 1991, 1994, 1995, 1996, 1998, 1999, 2000
+   Copyright 1991, 1994, 1995, 1996, 1998, 1999, 2000, 2003
    Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support (fnf@cygint)
 
@@ -29,10 +29,6 @@
 /* How much to decrement the PC after a trap.  Depends on kernel. */
 
 #define DECR_PC_AFTER_BREAK 0	/* No decrement required */
-
-/* Use the alternate method of determining valid frame chains. */
-
-#define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)
 
 #include "config/tm-sysv4.h"
 #include "m68k/tm-m68k.h"

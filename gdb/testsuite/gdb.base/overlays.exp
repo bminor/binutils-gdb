@@ -1,4 +1,4 @@
-#   Copyright 1997, 1998, 2002 Free Software Foundation, Inc.
+# Copyright 1997, 1998, 2001, 2002, 2003 Free Software Foundation, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -41,29 +41,25 @@ if [istarget "d10v-*-*"] then {
 
 set testfile "overlays"
 set binfile ${objdir}/${subdir}/${testfile}
-set srcfile ${srcdir}/${subdir}/${testfile}.c
-set foo     ${srcdir}/${subdir}/foo.c
-set bar     ${srcdir}/${subdir}/bar.c
-set baz     ${srcdir}/${subdir}/baz.c
-set grbx    ${srcdir}/${subdir}/grbx.c
+set srcfile ${testfile}.c
 
-if {[gdb_compile "${srcfile}" "${testfile}.o" object {debug}] != ""} then {
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${testfile}.o" object {debug}] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 if {[gdb_compile "${srcdir}/${subdir}/ovlymgr.c" ovlymgr.o object {debug}] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
-if {[gdb_compile "${foo}" foo.o object {debug} ] != ""} then {
+if {[gdb_compile "${srcdir}/${subdir}/foo.c" foo.o object {debug} ] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-if {[gdb_compile "${bar}" bar.o object {debug}] != ""} then {
+if {[gdb_compile "${srcdir}/${subdir}/bar.c" bar.o object {debug}] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
-if {[gdb_compile "${baz}" baz.o object {debug}] != ""} then {
+if {[gdb_compile "${srcdir}/${subdir}/baz.c" baz.o object {debug}] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
-if {[gdb_compile "${grbx}" grbx.o object {debug}] != ""} then {
+if {[gdb_compile "${srcdir}/${subdir}/grbx.c" grbx.o object {debug}] != ""} then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 if  {[gdb_compile "${testfile}.o ovlymgr.o foo.o bar.o baz.o grbx.o" ${binfile} executable "ldscript=-Wl,-T$linker_script"] != "" } {

@@ -1,5 +1,5 @@
 /* Target-dependent code for NetBSD/Alpha.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -24,6 +24,7 @@
 #include "frame.h"
 #include "regcache.h"
 #include "value.h"
+#include "osabi.h"
 
 #include "solib-svr4.h"
 

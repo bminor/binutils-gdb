@@ -1,5 +1,5 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -35,6 +35,7 @@
 #include "regcache.h"
 #include "doublest.h"
 #include "arch-utils.h"
+#include "osabi.h"
 
 #include "elf-bfd.h"
 
@@ -288,7 +289,7 @@ alpha_register_name (int regno)
     "f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
     "f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
     "f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "fpcr",
-    "pc",   "vfp",
+    "pc",   "vfp",  "unique",
   };
 
   if (regno < 0)
@@ -390,18 +391,18 @@ alpha_find_saved_regs (struct frame_info *frame)
       for (ireg = 0; ireg < 32; ireg++)
 	{
 	  reg_position = sigcontext_addr + SIGFRAME_REGSAVE_OFF + ireg * 8;
-	  frame->saved_regs[ireg] = reg_position;
+	  get_frame_saved_regs (frame)[ireg] = reg_position;
 	}
       for (ireg = 0; ireg < 32; ireg++)
 	{
 	  reg_position = sigcontext_addr + SIGFRAME_FPREGSAVE_OFF + ireg * 8;
-	  frame->saved_regs[FP0_REGNUM + ireg] = reg_position;
+	  get_frame_saved_regs (frame)[FP0_REGNUM + ireg] = reg_position;
 	}
-      frame->saved_regs[PC_REGNUM] = sigcontext_addr + SIGFRAME_PC_OFF;
+      get_frame_saved_regs (frame)[PC_REGNUM] = sigcontext_addr + SIGFRAME_PC_OFF;
       return;
     }
 
-  proc_desc = frame->extra_info->proc_desc;
+  proc_desc = get_frame_extra_info (frame)->proc_desc;
   if (proc_desc == NULL)
     /* I'm not sure how/whether this can happen.  Normally when we can't
        find a proc_desc, we "synthesize" one using heuristic_proc_desc
@@ -411,7 +412,7 @@ alpha_find_saved_regs (struct frame_info *frame)
   /* Fill in the offsets for the registers which gen_mask says
      were saved.  */
 
-  reg_position = frame->frame + PROC_REG_OFFSET (proc_desc);
+  reg_position = get_frame_base (frame) + PROC_REG_OFFSET (proc_desc);
   mask = PROC_REG_MASK (proc_desc);
 
   returnreg = PROC_PC_REG (proc_desc);
@@ -420,7 +421,7 @@ alpha_find_saved_regs (struct frame_info *frame)
      register number.  */
   if (mask & (1 << returnreg))
     {
-      frame->saved_regs[returnreg] = reg_position;
+      get_frame_saved_regs (frame)[returnreg] = reg_position;
       reg_position += 8;
       mask &= ~(1 << returnreg);	/* Clear bit for RA so we
 					   don't save again later. */
@@ -429,57 +430,57 @@ alpha_find_saved_regs (struct frame_info *frame)
   for (ireg = 0; ireg <= 31; ++ireg)
     if (mask & (1 << ireg))
       {
-	frame->saved_regs[ireg] = reg_position;
+	get_frame_saved_regs (frame)[ireg] = reg_position;
 	reg_position += 8;
       }
 
   /* Fill in the offsets for the registers which float_mask says
      were saved.  */
 
-  reg_position = frame->frame + PROC_FREG_OFFSET (proc_desc);
+  reg_position = get_frame_base (frame) + PROC_FREG_OFFSET (proc_desc);
   mask = PROC_FREG_MASK (proc_desc);
 
   for (ireg = 0; ireg <= 31; ++ireg)
     if (mask & (1 << ireg))
       {
-	frame->saved_regs[FP0_REGNUM + ireg] = reg_position;
+	get_frame_saved_regs (frame)[FP0_REGNUM + ireg] = reg_position;
 	reg_position += 8;
       }
 
-  frame->saved_regs[PC_REGNUM] = frame->saved_regs[returnreg];
+  get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_saved_regs (frame)[returnreg];
 }
 
 static void
 alpha_frame_init_saved_regs (struct frame_info *fi)
 {
-  if (fi->saved_regs == NULL)
+  if (get_frame_saved_regs (fi) == NULL)
     alpha_find_saved_regs (fi);
-  fi->saved_regs[SP_REGNUM] = fi->frame;
+  get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi);
 }
 
 static CORE_ADDR
 alpha_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
   return (fromleaf ? SAVED_PC_AFTER_CALL (get_next_frame (prev)) 
-	  : get_next_frame (prev) ? FRAME_SAVED_PC (prev->next)
+	  : get_next_frame (prev) ? FRAME_SAVED_PC (get_next_frame (prev))
 	  : read_pc ());
 }
 
 static CORE_ADDR
 read_next_frame_reg (struct frame_info *fi, int regno)
 {
-  for (; fi; fi = fi->next)
+  for (; fi; fi = get_next_frame (fi))
     {
       /* We have to get the saved sp from the sigcontext
          if it is a signal handler frame.  */
       if (regno == SP_REGNUM && !(get_frame_type (fi) == SIGTRAMP_FRAME))
-	return fi->frame;
+	return get_frame_base (fi);
       else
 	{
-	  if (fi->saved_regs == NULL)
+	  if (get_frame_saved_regs (fi) == NULL)
 	    alpha_find_saved_regs (fi);
-	  if (fi->saved_regs[regno])
-	    return read_memory_integer (fi->saved_regs[regno], 8);
+	  if (get_frame_saved_regs (fi)[regno])
+	    return read_memory_integer (get_frame_saved_regs (fi)[regno], 8);
 	}
     }
   return read_register (regno);
@@ -488,14 +489,15 @@ read_next_frame_reg (struct frame_info *fi, int regno)
 static CORE_ADDR
 alpha_frame_saved_pc (struct frame_info *frame)
 {
-  alpha_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
+  alpha_extra_func_info_t proc_desc = get_frame_extra_info (frame)->proc_desc;
   /* We have to get the saved pc from the sigcontext
      if it is a signal handler frame.  */
-  int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME) ? PC_REGNUM
-                                           : frame->extra_info->pc_reg;
+  int pcreg = ((get_frame_type (frame) == SIGTRAMP_FRAME)
+	       ? PC_REGNUM
+	       : get_frame_extra_info (frame)->pc_reg);
 
   if (proc_desc && PROC_DESC_IS_DUMMY (proc_desc))
-    return read_memory_integer (frame->frame - 8, 8);
+    return read_memory_integer  (get_frame_base (frame) - 8, 8);
 
   return read_next_frame_reg (frame, pcreg);
 }
@@ -503,7 +505,7 @@ alpha_frame_saved_pc (struct frame_info *frame)
 static CORE_ADDR
 alpha_saved_pc_after_call (struct frame_info *frame)
 {
-  CORE_ADDR pc = frame->pc;
+  CORE_ADDR pc = get_frame_pc (frame);
   CORE_ADDR tmp;
   alpha_extra_func_info_t proc_desc;
   int pcreg;
@@ -513,7 +515,7 @@ alpha_saved_pc_after_call (struct frame_info *frame)
   if (tmp != 0)
     pc = tmp;
 
-  proc_desc = find_proc_desc (pc, frame->next);
+  proc_desc = find_proc_desc (pc, get_next_frame (frame));
   pcreg = proc_desc ? PROC_PC_REG (proc_desc) : ALPHA_RA_REGNUM;
 
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
@@ -968,12 +970,12 @@ void
 alpha_print_extra_frame_info (struct frame_info *fi)
 {
   if (fi
-      && fi->extra_info
-      && fi->extra_info->proc_desc
-      && fi->extra_info->proc_desc->pdr.framereg < NUM_REGS)
+      && get_frame_extra_info (fi)
+      && get_frame_extra_info (fi)->proc_desc
+      && get_frame_extra_info (fi)->proc_desc->pdr.framereg < NUM_REGS)
     printf_filtered (" frame pointer is at %s+%s\n",
-		     REGISTER_NAME (fi->extra_info->proc_desc->pdr.framereg),
-		     paddr_d (fi->extra_info->proc_desc->pdr.frameoffset));
+		     REGISTER_NAME (get_frame_extra_info (fi)->proc_desc->pdr.framereg),
+		     paddr_d (get_frame_extra_info (fi)->proc_desc->pdr.frameoffset));
 }
 
 static void
@@ -981,39 +983,42 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   /* Use proc_desc calculated in frame_chain */
   alpha_extra_func_info_t proc_desc =
-  frame->next ? cached_proc_desc : find_proc_desc (frame->pc, frame->next);
+    get_next_frame (frame)
+    ? cached_proc_desc
+    : find_proc_desc (get_frame_pc (frame), get_next_frame (frame));
 
-  frame->extra_info = (struct frame_extra_info *)
-    frame_obstack_alloc (sizeof (struct frame_extra_info));
+  frame_extra_info_zalloc (frame, sizeof (struct frame_extra_info));
 
-  frame->saved_regs = NULL;
-  frame->extra_info->localoff = 0;
-  frame->extra_info->pc_reg = ALPHA_RA_REGNUM;
-  frame->extra_info->proc_desc = proc_desc == &temp_proc_desc ? 0 : proc_desc;
+  /* NOTE: cagney/2003-01-03: No need to set saved_regs to NULL,
+     always NULL by default.  */
+  /* frame->saved_regs = NULL; */
+  get_frame_extra_info (frame)->localoff = 0;
+  get_frame_extra_info (frame)->pc_reg = ALPHA_RA_REGNUM;
+  get_frame_extra_info (frame)->proc_desc = proc_desc == &temp_proc_desc ? 0 : proc_desc;
   if (proc_desc)
     {
       /* Get the locals offset and the saved pc register from the
          procedure descriptor, they are valid even if we are in the
          middle of the prologue.  */
-      frame->extra_info->localoff = PROC_LOCALOFF (proc_desc);
-      frame->extra_info->pc_reg = PROC_PC_REG (proc_desc);
+      get_frame_extra_info (frame)->localoff = PROC_LOCALOFF (proc_desc);
+      get_frame_extra_info (frame)->pc_reg = PROC_PC_REG (proc_desc);
 
       /* Fixup frame-pointer - only needed for top frame */
 
       /* Fetch the frame pointer for a dummy frame from the procedure
          descriptor.  */
       if (PROC_DESC_IS_DUMMY (proc_desc))
-	frame->frame = (CORE_ADDR) PROC_DUMMY_FRAME (proc_desc);
+	deprecated_update_frame_base_hack (frame, (CORE_ADDR) PROC_DUMMY_FRAME (proc_desc));
 
       /* This may not be quite right, if proc has a real frame register.
          Get the value of the frame relative sp, procedure might have been
          interrupted by a signal at it's very start.  */
-      else if (frame->pc == PROC_LOW_ADDR (proc_desc)
+      else if (get_frame_pc (frame) == PROC_LOW_ADDR (proc_desc)
 	       && !alpha_proc_desc_is_dyn_sigtramp (proc_desc))
-	frame->frame = read_next_frame_reg (frame->next, SP_REGNUM);
+	deprecated_update_frame_base_hack (frame, read_next_frame_reg (get_next_frame (frame), SP_REGNUM));
       else
-	frame->frame = read_next_frame_reg (frame->next, PROC_FRAME_REG (proc_desc))
-	  + PROC_FRAME_OFFSET (proc_desc);
+	deprecated_update_frame_base_hack (frame, read_next_frame_reg (get_next_frame (frame), PROC_FRAME_REG (proc_desc))
+					   + PROC_FRAME_OFFSET (proc_desc));
 
       if (proc_desc == &temp_proc_desc)
 	{
@@ -1026,16 +1031,15 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 	  /* FIXME: cagney/2002-11-18: This problem will go away once
              frame.c:get_prev_frame() is modified to set the frame's
              type before calling functions like this.  */
-	  find_pc_partial_function (frame->pc, &name,
+	  find_pc_partial_function (get_frame_pc (frame), &name,
 				    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-	  if (!PC_IN_SIGTRAMP (frame->pc, name))
+	  if (!PC_IN_SIGTRAMP (get_frame_pc (frame), name))
 	    {
-	      frame->saved_regs = (CORE_ADDR *)
-		frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
-	      memcpy (frame->saved_regs, temp_saved_regs,
+	      frame_saved_regs_zalloc (frame);
+	      memcpy (get_frame_saved_regs (frame), temp_saved_regs,
 	              SIZEOF_FRAME_SAVED_REGS);
-	      frame->saved_regs[PC_REGNUM]
-		= frame->saved_regs[ALPHA_RA_REGNUM];
+	      get_frame_saved_regs (frame)[PC_REGNUM]
+		= get_frame_saved_regs (frame)[ALPHA_RA_REGNUM];
 	    }
 	}
     }
@@ -1044,13 +1048,13 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 static CORE_ADDR
 alpha_frame_locals_address (struct frame_info *fi)
 {
-  return (fi->frame - fi->extra_info->localoff);
+  return (get_frame_base (fi) - get_frame_extra_info (fi)->localoff);
 }
 
 static CORE_ADDR
 alpha_frame_args_address (struct frame_info *fi)
 {
-  return (fi->frame - (ALPHA_NUM_ARG_REGS * 8));
+  return (get_frame_base (fi) - (ALPHA_NUM_ARG_REGS * 8));
 }
 
 /* ALPHA stack frames are almost impenetrable.  When execution stops,
@@ -1290,33 +1294,33 @@ alpha_pop_frame (void)
 {
   register int regnum;
   struct frame_info *frame = get_current_frame ();
-  CORE_ADDR new_sp = frame->frame;
+  CORE_ADDR new_sp = get_frame_base (frame);
 
-  alpha_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
+  alpha_extra_func_info_t proc_desc = get_frame_extra_info (frame)->proc_desc;
 
   /* we need proc_desc to know how to restore the registers;
      if it is NULL, construct (a temporary) one */
   if (proc_desc == NULL)
-    proc_desc = find_proc_desc (frame->pc, frame->next);
+    proc_desc = find_proc_desc (get_frame_pc (frame), get_next_frame (frame));
 
   /* Question: should we copy this proc_desc and save it in
      frame->proc_desc?  If we do, who will free it?
      For now, we don't save a copy... */
 
   write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
-  if (frame->saved_regs == NULL)
+  if (get_frame_saved_regs (frame) == NULL)
     alpha_find_saved_regs (frame);
   if (proc_desc)
     {
       for (regnum = 32; --regnum >= 0;)
 	if (PROC_REG_MASK (proc_desc) & (1 << regnum))
 	  write_register (regnum,
-			  read_memory_integer (frame->saved_regs[regnum],
+			  read_memory_integer (get_frame_saved_regs (frame)[regnum],
 					       8));
       for (regnum = 32; --regnum >= 0;)
 	if (PROC_FREG_MASK (proc_desc) & (1 << regnum))
 	  write_register (regnum + FP0_REGNUM,
-	   read_memory_integer (frame->saved_regs[regnum + FP0_REGNUM], 8));
+	   read_memory_integer (get_frame_saved_regs (frame)[regnum + FP0_REGNUM], 8));
     }
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();
@@ -1770,36 +1774,22 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* Try to determine the ABI of the object we are loading.  */
-
-  if (info.abfd != NULL)
+  if (info.abfd != NULL && info.osabi == GDB_OSABI_UNKNOWN)
     {
-      osabi = gdbarch_lookup_osabi (info.abfd);
-      if (osabi == GDB_OSABI_UNKNOWN)
-	{
-	  /* If it's an ECOFF file, assume it's OSF/1.  */
-	  if (bfd_get_flavour (info.abfd) == bfd_target_ecoff_flavour)
-	    osabi = GDB_OSABI_OSF1;
-	}
+      /* If it's an ECOFF file, assume it's OSF/1.  */
+      if (bfd_get_flavour (info.abfd) == bfd_target_ecoff_flavour)
+	info.osabi = GDB_OSABI_OSF1;
     }
 
   /* Find a candidate among extant architectures.  */
-  for (arches = gdbarch_list_lookup_by_info (arches, &info);
-       arches != NULL;
-       arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    {
-      /* Make sure the ABI selection matches.  */
-      tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->osabi == osabi)
-	return arches->gdbarch;
-    }
+  arches = gdbarch_list_lookup_by_info (arches, &info);
+  if (arches != NULL)
+    return arches->gdbarch;
 
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
-
-  tdep->osabi = osabi;
 
   /* Lowest text address.  This is used by heuristic_proc_start() to
      decide when to stop looking.  */
@@ -1856,7 +1846,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, alpha_saved_pc_after_call);
 
   set_gdbarch_frame_chain (gdbarch, alpha_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, alpha_frame_saved_pc);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, alpha_frame_init_saved_regs);
@@ -1903,10 +1892,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
-  /* Floats are always passed as doubles.  */
-  set_gdbarch_coerce_float_to_double (gdbarch,
-                                      standard_coerce_float_to_double);
-
   set_gdbarch_breakpoint_from_pc (gdbarch, alpha_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 4);
 
@@ -1914,7 +1899,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  gdbarch_init_osabi (info, gdbarch, osabi);
+  gdbarch_init_osabi (info, gdbarch);
 
   /* Now that we have tuned the configuration, set a few final things
      based on what the OS ABI has told us.  */
@@ -1932,9 +1917,6 @@ alpha_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 
   if (tdep == NULL)
     return;
-
-  fprintf_unfiltered (file, "alpha_dump_tdep: OS ABI = %s\n",
-		      gdbarch_osabi_name (tdep->osabi));
 
   fprintf_unfiltered (file,
                       "alpha_dump_tdep: vm_min_address = 0x%lx\n",

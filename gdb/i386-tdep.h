@@ -1,5 +1,5 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 2001, 2002
+   Copyright 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -21,8 +21,6 @@
 
 #ifndef I386_TDEP_H
 #define I386_TDEP_H
-
-#include "osabi.h"
 
 /* GDB's i386 target supports both the 32-bit Intel Architecture
    (IA-32) and the 64-bit AMD x86-64 architecture.  Internally it uses
@@ -53,9 +51,6 @@ enum struct_return
 /* i386 architecture specific information.  */
 struct gdbarch_tdep
 {
-  /* ABI.  */
-  enum gdb_osabi osabi;
-
   /* Number of SSE registers.  */
   int num_xmm_regs;
 

@@ -1,5 +1,5 @@
 /* Support for GDB maintenance commands.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2002
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
@@ -151,7 +151,17 @@ maintenance_demangle (char *args, int from_tty)
     }
   else
     {
-      demangled = cplus_demangle (args, DMGL_ANSI | DMGL_PARAMS);
+      switch (current_language->la_language)
+	{
+	case language_objc:
+	  /* Commented out until ObjC handling is enabled. */
+	  /* demangled = objc_demangle (args); */
+	  /* break; */
+	case language_cplus:
+	default:
+	  demangled = cplus_demangle (args, DMGL_ANSI | DMGL_PARAMS);
+	  break;
+	}
       if (demangled != NULL)
 	{
 	  printf_unfiltered ("%s\n", demangled);
@@ -629,16 +639,60 @@ maintenance_show_cmd (char *args, int from_tty)
   cmd_show_list (maintenance_show_cmdlist, from_tty, "");
 }
 
-#ifdef NOTYET
 /* Profiling support.  */
 
 static int maintenance_profile_p;
 
+#if defined (HAVE_MONSTARTUP) && defined (HAVE__MCLEANUP)
+
+static int profiling_state;
+
+static void
+mcleanup_wrapper (void)
+{
+  extern void _mcleanup (void);
+
+  if (profiling_state)
+    _mcleanup ();
+}
+
 static void
 maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *c)
 {
-  maintenance_profile_p = 0;
-  warning ("\"maintenance set profile\" command not supported.\n");
+  if (maintenance_profile_p == profiling_state)
+    return;
+
+  profiling_state = maintenance_profile_p;
+
+  if (maintenance_profile_p)
+    {
+      static int profiling_initialized;
+
+      extern void monstartup (unsigned long, unsigned long);
+      extern char _etext;
+      extern int main();
+
+      if (!profiling_initialized)
+	{
+	  atexit (mcleanup_wrapper);
+	  profiling_initialized = 1;
+	}
+
+      /* "main" is now always the first function in the text segment, so use
+	 its address for monstartup.  */
+      monstartup ((unsigned long) &main, (unsigned long) &_etext);
+    }
+  else
+    {
+      extern void _mcleanup (void);
+      _mcleanup ();
+    }
+}
+#else
+static void
+maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *c)
+{
+  error ("Profiling support is not available on this system.");
 }
 #endif
 
@@ -651,7 +705,7 @@ _initialize_maint_cmds (void)
 		  "Commands for use by GDB maintainers.\n\
 Includes commands to dump specific internal GDB structures in\n\
 a human readable form, to cause GDB to deliberately dump core,\n\
-to test internal functions such as the C++ demangler, etc.",
+to test internal functions such as the C++/ObjC demangler, etc.",
 		  &maintenancelist, "maintenance ", 0,
 		  &cmdlist);
 
@@ -713,7 +767,7 @@ Cause GDB to behave as if an internal warning was reported.",
 	   &maintenancelist);
 
   add_cmd ("demangle", class_maintenance, maintenance_demangle,
-	   "Demangle a C++ mangled name.\n\
+	   "Demangle a C++/ObjC mangled name.\n\
 Call internal GDB demangler routine to demangle a C++ link name\n\
 and prints the result.",
 	   &maintenancelist);
@@ -797,16 +851,12 @@ passes without a response from the target, an error occurs.", &setlist),
 		      &showlist);
 
 
-#ifdef NOTYET
-  /* FIXME: cagney/2002-06-15: A patch implementing profiling is
-     pending, this just sets up the framework.  */
-  tmpcmd = add_setshow_boolean_cmd ("profile", class_maintenance,
-				    var_boolean, &maintenance_profile_p, "\
-Set internal profiling.\n\
-When enabled GDB is profiled.", "\
-Show internal profiling.\n",
-				    maintenance_set_profile_cmd, NULL,
-				    &maintenance_set_cmdlist,
-				    &maintenance_show_cmdlist);
-#endif
+  add_setshow_boolean_cmd ("profile", class_maintenance,
+			   &maintenance_profile_p,
+			   "Set internal profiling.\n"
+			   "When enabled GDB is profiled.",
+			   "Show internal profiling.\n",
+			   maintenance_set_profile_cmd, NULL,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 }

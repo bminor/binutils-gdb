@@ -83,8 +83,9 @@ void sim_set_simcache_size PARAMS ((int));
 #define HIGH_BYTE(x) (((x) >> 8) & 0xff)
 #define P(X,Y) ((X << 8) | Y)
 
-#define BUILDSR()   cpu.ccr = (I << 7) | (UI << 6)| (H<<5) | (U<<4) | \
-                              (N << 3) | (Z << 2) | (V<<1) | C;
+#define BUILDSR()					\
+  cpu.ccr = ((I << 7) | (UI << 6) | (H << 5) | (U << 4)	\
+	     | (N << 3) | (Z << 2) | (V << 1) | C);
 
 #define BUILDEXR()	    \
   if (h8300smode) cpu.exr = (trace<<7) | intMask;
@@ -99,17 +100,19 @@ void sim_set_simcache_size PARAMS ((int));
   ui = ((cpu.ccr >> 6) & 1);\
   intMaskBit = (cpu.ccr >> 7) & 1;
 
-#define GETEXR()	    \
-  if (h8300smode) { \
-    trace = (cpu.exr >> 7) & 1;\
-    intMask = cpu.exr & 7; }
+#define GETEXR()				\
+  if (h8300smode)				\
+    {						\
+      trace = (cpu.exr >> 7) & 1;		\
+      intMask = cpu.exr & 7;			\
+    }
 
 #ifdef __CHAR_IS_SIGNED__
 #define SEXTCHAR(x) ((char) (x))
 #endif
 
 #ifndef SEXTCHAR
-#define SEXTCHAR(x) ((x & 0x80) ? (x | ~0xff): x & 0xff)
+#define SEXTCHAR(x) ((x & 0x80) ? (x | ~0xff) : x & 0xff)
 #endif
 
 #define UEXTCHAR(x) ((x) & 0xff)
@@ -124,19 +127,19 @@ int h8300smode = 0;
 static int memory_size;
 
 static int
-get_now ()
+get_now (void)
 {
   return time (0);	/* WinXX HAS UNIX like 'time', so why not using it? */
 }
 
 static int
-now_persec ()
+now_persec (void)
 {
   return 1;
 }
 
 static int
-bitfrom (x)
+bitfrom (int x)
 {
   switch (x & SIZE)
     {
@@ -152,7 +155,7 @@ bitfrom (x)
 }
 
 static unsigned int
-lvalue (x, rn)
+lvalue (int x, int rn)
 {
   switch (x / 4)
     {
@@ -172,11 +175,7 @@ lvalue (x, rn)
 }
 
 static unsigned int
-decode (addr, data, dst)
-     int addr;
-     unsigned char *data;
-     decoded_inst *dst;
-
+decode (int addr, unsigned char *data, decoded_inst *dst)
 {
   int rs = 0;
   int rd = 0;
@@ -478,7 +477,7 @@ decode (addr, data, dst)
 }
 
 static void
-compile (pc)
+compile (int pc)
 {
   int idx;
 
@@ -547,9 +546,8 @@ static unsigned int *lreg[18];
 #define SET_MEMORY_B(x,y) \
   (x < memory_size ? (cpu.memory[(x)] = y) : (cpu.eightbit[x & 0xff] = y))
 
-int
-fetch (arg, n)
-     ea_type *arg;
+static int
+fetch (ea_type *arg)
 {
   int rn = arg->reg;
   int abs = arg->literal;
@@ -631,9 +629,7 @@ fetch (arg, n)
 
 
 static void
-store (arg, n)
-     ea_type *arg;
-     int n;
+store (ea_type *arg, int n)
 {
   int rn = arg->reg;
   int abs = arg->literal;
@@ -707,7 +703,7 @@ static union
 littleendian;
 
 static void
-init_pointers ()
+init_pointers (void)
 {
   static int init;
 
@@ -757,6 +753,7 @@ init_pointers ()
 		}
 	      p++;
 	    }
+	  wreg[i] = wreg[i + 8] = 0;
 	  while (q < u)
 	    {
 	      if (*q == 0x2233)
@@ -769,6 +766,8 @@ init_pointers ()
 		}
 	      q++;
 	    }
+	  if (wreg[i] == 0 || wreg[i + 8] == 0)
+	    abort ();
 	  cpu.regs[i] = 0;
 	  lreg[i] = &cpu.regs[i];
 	}
@@ -782,11 +781,7 @@ init_pointers ()
 }
 
 static void
-control_c (sig, code, scp, addr)
-     int sig;
-     int code;
-     char *scp;
-     char *addr;
+control_c (int sig)
 {
   cpu.state = SIM_STATE_STOPPED;
   cpu.exception = SIGINT;
@@ -802,10 +797,7 @@ control_c (sig, code, scp, addr)
 #define I (intMaskBit != 0)
 
 static int
-mop (code, bsize, sign)
-     decoded_inst *code;
-     int bsize;
-     int sign;
+mop (decoded_inst *code, int bsize, int sign)
 {
   int multiplier;
   int multiplicand;
@@ -935,8 +927,7 @@ case O (name, SB):				\
 }
 
 int
-sim_stop (sd)
-     SIM_DESC sd;
+sim_stop (SIM_DESC sd)
 {
   cpu.state = SIM_STATE_STOPPED;
   cpu.exception = SIGINT;
@@ -966,8 +957,7 @@ sim_stop (sd)
 #define TICK_REGNUM     13
 
 void
-sim_resume (sd, step, siggnal)
-     SIM_DESC sd;
+sim_resume (SIM_DESC sd, int step, int siggnal)
 {
   static int init1;
   int cycles = 0;
@@ -1022,15 +1012,15 @@ sim_resume (sd, step, siggnal)
 
 
 #define ALUOP(STORE, NAME, HOW) \
-    case O (NAME,SB):  HOW; if (STORE)goto alu8;else goto just_flags_alu8;  \
-    case O (NAME, SW): HOW; if (STORE)goto alu16;else goto just_flags_alu16; \
-    case O (NAME,SL):  HOW; if (STORE)goto alu32;else goto just_flags_alu32;
+    case O (NAME, SB): HOW; if (STORE) goto alu8;  else goto just_flags_alu8;  \
+    case O (NAME, SW): HOW; if (STORE) goto alu16; else goto just_flags_alu16; \
+    case O (NAME, SL): HOW; if (STORE) goto alu32; else goto just_flags_alu32;
 
 
-#define LOGOP(NAME, HOW) \
-    case O (NAME,SB): HOW; goto log8;\
-    case O (NAME, SW): HOW; goto log16;\
-    case O (NAME,SL): HOW; goto log32;
+#define LOGOP(NAME, HOW)			\
+    case O (NAME, SB): HOW; goto log8;		\
+    case O (NAME, SW): HOW; goto log16;		\
+    case O (NAME, SL): HOW; goto log32;
 
 
 
@@ -1140,32 +1130,36 @@ sim_resume (sd, step, siggnal)
 
 	case O (O_EEPMOV, SB):
 	case O (O_EEPMOV, SW):
-	  if (h8300hmode||h8300smode)
+	  if (h8300hmode || h8300smode)
 	    {
-	      register unsigned char *_src,*_dst;
-	      unsigned int count = (code->opcode == O(O_EEPMOV, SW))?cpu.regs[R4_REGNUM]&0xffff:
-		cpu.regs[R4_REGNUM]&0xff;
+	      register unsigned char *_src, *_dst;
+	      unsigned int count = ((code->opcode == O (O_EEPMOV, SW))
+				    ? cpu.regs[R4_REGNUM] & 0xffff
+				    : cpu.regs[R4_REGNUM] & 0xff);
 
-	      _src = cpu.regs[R5_REGNUM] < memory_size ? cpu.memory+cpu.regs[R5_REGNUM] :
-		cpu.eightbit + (cpu.regs[R5_REGNUM] & 0xff);
-	      if ((_src+count)>=(cpu.memory+memory_size))
+	      _src = (cpu.regs[R5_REGNUM] < memory_size
+		      ? cpu.memory + cpu.regs[R5_REGNUM]
+		      : cpu.eightbit + (cpu.regs[R5_REGNUM] & 0xff));
+	      if ((_src + count) >= (cpu.memory + memory_size))
 		{
-		  if ((_src+count)>=(cpu.eightbit+0x100))
+		  if ((_src + count) >= (cpu.eightbit + 0x100))
 		    goto illegal;
 		}
-	      _dst = cpu.regs[R6_REGNUM] < memory_size ? cpu.memory+cpu.regs[R6_REGNUM] :
-	           				       	      cpu.eightbit + (cpu.regs[R6_REGNUM] & 0xff);
-	      if ((_dst+count)>=(cpu.memory+memory_size))
+	      _dst = (cpu.regs[R6_REGNUM] < memory_size
+		      ? cpu.memory + cpu.regs[R6_REGNUM]
+		      : cpu.eightbit + (cpu.regs[R6_REGNUM] & 0xff));
+	      if ((_dst + count) >= (cpu.memory + memory_size))
 		{
-		  if ((_dst+count)>=(cpu.eightbit+0x100))
+		  if ((_dst + count) >= (cpu.eightbit + 0x100))
 		    goto illegal;
 		}
-	      memcpy(_dst,_src,count);
+	      memcpy (_dst, _src, count);
 
-	      cpu.regs[R5_REGNUM]+=count;
-	      cpu.regs[R6_REGNUM]+=count;
-	      cpu.regs[R4_REGNUM]&=(code->opcode == O(O_EEPMOV, SW))?(~0xffff):(~0xff);
-	      cycles += 2*count;
+	      cpu.regs[R5_REGNUM] += count;
+	      cpu.regs[R6_REGNUM] += count;
+	      cpu.regs[R4_REGNUM] &= ((code->opcode == O (O_EEPMOV, SW))
+				      ? (~0xffff) : (~0xff));
+	      cycles += 2 * count;
 	      goto next;
 	    }
 	  goto illegal;
@@ -1514,7 +1508,7 @@ sim_resume (sd, step, siggnal)
 	  OBITOP (O_BIAND, 1, 0, c = !(ea & m) && C);
 	  OBITOP (O_BOR, 1, 0, c = (ea & m) || C);
 	  OBITOP (O_BIOR, 1, 0, c = !(ea & m) || C);
-	  OBITOP (O_BXOR, 1, 0, c = (ea & m) != C);
+	  OBITOP (O_BXOR, 1, 0, c = ((ea & m) != 0) != C);
 	  OBITOP (O_BIXOR, 1, 0, c = !(ea & m) != C);
 
 #define MOP(bsize, signed)			\
@@ -1548,7 +1542,7 @@ sim_resume (sd, step, siggnal)
 	      goto illegal;
 	    }
 	  res = fetch (&code->src);
-	  store (&code->src,res|0x80);
+	  store (&code->src, res | 0x80);
 	  goto just_flags_log8;
 
 	case O (O_DIVU, SB):
@@ -1615,7 +1609,7 @@ sim_resume (sd, step, siggnal)
 	    goto next;
 	  }
 	case O (O_EXTS, SW):
-	  rd = GET_B_REG (code->src.reg + 8) & 0xff; /* Yes, src, not dst.  */
+	  rd = GET_W_REG (code->src.reg) & 0xff; /* Yes, src, not dst.  */
 	  ea = rd & 0x80 ? -256 : 0;
 	  res = rd + ea;
 	  goto log16;
@@ -1625,7 +1619,7 @@ sim_resume (sd, step, siggnal)
 	  res = rd + ea;
 	  goto log32;
 	case O (O_EXTU, SW):
-	  rd = GET_B_REG (code->src.reg + 8) & 0xff;
+	  rd = GET_W_REG (code->src.reg) & 0xff;
 	  ea = 0;
 	  res = rd + ea;
 	  goto log16;
@@ -1673,7 +1667,7 @@ sim_resume (sd, step, siggnal)
 	  goto next;
 
 	default:
-        illegal:
+	illegal:
 	  cpu.state = SIM_STATE_STOPPED;
 	  cpu.exception = SIGILL;
 	  goto end;
@@ -1880,19 +1874,14 @@ sim_resume (sd, step, siggnal)
 }
 
 int
-sim_trace (sd)
-     SIM_DESC sd;
+sim_trace (SIM_DESC sd)
 {
   /* FIXME: Unfinished.  */
   abort ();
 }
 
 int
-sim_write (sd, addr, buffer, size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     unsigned char *buffer;
-     int size;
+sim_write (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 {
   int i;
 
@@ -1913,11 +1902,7 @@ sim_write (sd, addr, buffer, size)
 }
 
 int
-sim_read (sd, addr, buffer, size)
-     SIM_DESC sd;
-     SIM_ADDR addr;
-     unsigned char *buffer;
-     int size;
+sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 {
   init_pointers ();
   if (addr < 0)
@@ -1931,11 +1916,7 @@ sim_read (sd, addr, buffer, size)
 
 
 int
-sim_store_register (sd, rn, value, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *value;
-     int length;
+sim_store_register (SIM_DESC sd, int rn, unsigned char *value, int length)
 {
   int longval;
   int shortval;
@@ -1984,18 +1965,14 @@ sim_store_register (sd, rn, value, length)
 }
 
 int
-sim_fetch_register (sd, rn, buf, length)
-     SIM_DESC sd;
-     int rn;
-     unsigned char *buf;
-     int length;
+sim_fetch_register (SIM_DESC sd, int rn, unsigned char *buf, int length)
 {
   int v;
   int longreg = 0;
 
   init_pointers ();
 
-  if (!h8300smode && rn >=EXR_REGNUM)
+  if (!h8300smode && rn >= EXR_REGNUM)
     rn++;
   switch (rn)
     {
@@ -2049,10 +2026,7 @@ sim_fetch_register (sd, rn, buf, length)
 }
 
 void
-sim_stop_reason (sd, reason, sigrc)
-     SIM_DESC sd;
-     enum sim_stop *reason;
-     int *sigrc;
+sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
 #if 0 /* FIXME: This should work but we can't use it.
 	 grep for SLEEP above.  */
@@ -2072,14 +2046,13 @@ sim_stop_reason (sd, reason, sigrc)
 /* FIXME: Rename to sim_set_mem_size.  */
 
 void
-sim_size (n)
-     int n;
+sim_size (int n)
 {
   /* Memory size is fixed.  */
 }
 
 void
-sim_set_simcache_size (n)
+sim_set_simcache_size (int n)
 {
   if (cpu.cache)
     free (cpu.cache);
@@ -2092,9 +2065,7 @@ sim_set_simcache_size (n)
 
 
 void
-sim_info (sd, verbose)
-     SIM_DESC sd;
-     int verbose;
+sim_info (SIM_DESC sd, int verbose)
 {
   double timetaken = (double) cpu.ticks / (double) now_persec ();
   double virttime = cpu.cycles / 10.0e6;
@@ -2142,8 +2113,7 @@ sim_info (sd, verbose)
    FLAG is non-zero for the H8/300H.  */
 
 void
-set_h8300h (h_flag, s_flag)
-     int h_flag, s_flag;
+set_h8300h (int h_flag, int s_flag)
 {
   /* FIXME: Much of the code in sim_load can be moved to sim_open.
      This function being replaced by a sim_open:ARGV configuration
@@ -2153,11 +2123,10 @@ set_h8300h (h_flag, s_flag)
 }
 
 SIM_DESC
-sim_open (kind, ptr, abfd, argv)
-     SIM_OPEN_KIND kind;
-     struct host_callback_struct *ptr;
-     struct _bfd *abfd;
-     char **argv;
+sim_open (SIM_OPEN_KIND kind, 
+	  struct host_callback_struct *ptr, 
+	  struct _bfd *abfd, 
+	  char **argv)
 {
   /* FIXME: Much of the code in sim_load can be moved here.  */
 
@@ -2169,9 +2138,7 @@ sim_open (kind, ptr, abfd, argv)
 }
 
 void
-sim_close (sd, quitting)
-     SIM_DESC sd;
-     int quitting;
+sim_close (SIM_DESC sd, int quitting)
 {
   /* Nothing to do.  */
 }
@@ -2179,11 +2146,7 @@ sim_close (sd, quitting)
 /* Called by gdb to load a program into memory.  */
 
 SIM_RC
-sim_load (sd, prog, abfd, from_tty)
-     SIM_DESC sd;
-     char *prog;
-     bfd *abfd;
-     int from_tty;
+sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 {
   bfd *prog_bfd;
 
@@ -2265,11 +2228,7 @@ sim_load (sd, prog, abfd, from_tty)
 }
 
 SIM_RC
-sim_create_inferior (sd, abfd, argv, env)
-     SIM_DESC sd;
-     struct _bfd *abfd;
-     char **argv;
-     char **env;
+sim_create_inferior (SIM_DESC sd, struct _bfd *abfd, char **argv, char **env)
 {
   if (abfd != NULL)
     cpu.pc = bfd_get_start_address (abfd);
@@ -2279,17 +2238,14 @@ sim_create_inferior (sd, abfd, argv, env)
 }
 
 void
-sim_do_command (sd, cmd)
-     SIM_DESC sd;
-     char *cmd;
+sim_do_command (SIM_DESC sd, char *cmd)
 {
   (*sim_callback->printf_filtered) (sim_callback,
 				    "This simulator does not accept any commands.\n");
 }
 
 void
-sim_set_callbacks (ptr)
-     struct host_callback_struct *ptr;
+sim_set_callbacks (struct host_callback_struct *ptr)
 {
   sim_callback = ptr;
 }

@@ -80,7 +80,7 @@ struct print_symbol_args
     struct ui_file *outfile;
   };
 
-static int print_symbol (PTR);
+static int print_symbol (void *);
 
 static void free_symtab_block (struct objfile *, struct block *);
 
@@ -102,16 +102,16 @@ free_symtab_block (struct objfile *objfile, struct block *b)
 	   sym = dict_iterator_next (&iter))
 	{
 	  xmfree (objfile->md, SYMBOL_NAME (prev_sym));
-	  xmfree (objfile->md, (PTR) prev_sym);
+	  xmfree (objfile->md, prev_sym);
 	  prev_sym = sym;
 	}
 
       xmfree (objfile->md, SYMBOL_NAME (prev_sym));
-      xmfree (objfile->md, (PTR) prev_sym);
+      xmfree (objfile->md, prev_sym);
     }
 
   dict_free (BLOCK_DICT (b));
-  xmfree (objfile->md, (PTR) b);
+  xmfree (objfile->md, b);
 }
 
 /* Free all the storage associated with the struct symtab <- S.
@@ -145,7 +145,7 @@ free_symtab (register struct symtab *s)
       for (i = 0; i < n; i++)
 	free_symtab_block (s->objfile, BLOCKVECTOR_BLOCK (bv, i));
       /* Free the blockvector itself.  */
-      xmfree (s->objfile->md, (PTR) bv);
+      xmfree (s->objfile->md, bv);
       /* Also free the linetable.  */
 
     case free_linetable:
@@ -153,7 +153,7 @@ free_symtab (register struct symtab *s)
          or by some other symtab, except for our linetable.
          Free that now.  */
       if (LINETABLE (s))
-	xmfree (s->objfile->md, (PTR) LINETABLE (s));
+	xmfree (s->objfile->md, LINETABLE (s));
       break;
     }
 
@@ -163,12 +163,12 @@ free_symtab (register struct symtab *s)
 
   /* Free source-related stuff */
   if (s->line_charpos != NULL)
-    xmfree (s->objfile->md, (PTR) s->line_charpos);
+    xmfree (s->objfile->md, s->line_charpos);
   if (s->fullname != NULL)
     xmfree (s->objfile->md, s->fullname);
   if (s->debugformat != NULL)
     xmfree (s->objfile->md, s->debugformat);
-  xmfree (s->objfile->md, (PTR) s);
+  xmfree (s->objfile->md, s);
 }
 
 void
@@ -378,7 +378,7 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
 			"  Full symtab was read (at ");
       gdb_print_host_address (psymtab->symtab, outfile);
       fprintf_filtered (outfile, " by function at ");
-      gdb_print_host_address ((PTR) psymtab->read_symtab, outfile);
+      gdb_print_host_address (psymtab->read_symtab, outfile);
       fprintf_filtered (outfile, ")\n");
     }
 
@@ -583,7 +583,7 @@ Arguments missing: an output file name and an optional symbol file name");
    1 for success.  */
 
 static int
-print_symbol (PTR args)
+print_symbol (void *args)
 {
   struct symbol *symbol = ((struct print_symbol_args *) args)->symbol;
   int depth = ((struct print_symbol_args *) args)->depth;

@@ -1,7 +1,7 @@
 /* Definitions for dealing with stack frames, for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,10 @@
 #define FRAME_H 1
 
 struct symtab_and_line;
+struct frame_unwind;
+
+/* The traditional frame unwinder.  */
+extern const struct frame_unwind *trad_frame_unwind;
 
 /* The frame object.  */
 
@@ -259,6 +263,9 @@ extern void frame_register_unwind (struct frame_info *frame, int regnum,
 /* NOTE: cagney/2002-09-13: Return void as one day these functions may
    be changed to return an indication that the read succeeded.  */
 
+extern void frame_unwind_register (struct frame_info *frame,
+				   int regnum, void *buf);
+
 extern void frame_unwind_signed_register (struct frame_info *frame,
 					  int regnum, LONGEST *val);
 
@@ -279,6 +286,9 @@ extern void frame_register (struct frame_info *frame, int regnum,
 /* NOTE: cagney/2002-09-13: Return void as one day these functions may
    be changed to return an indication that the read succeeded.  */
 
+extern void frame_read_register (struct frame_info *frame, int regnum,
+				 void *buf);
+
 extern void frame_read_signed_register (struct frame_info *frame,
 					int regnum, LONGEST *val);
 
@@ -287,9 +297,10 @@ extern void frame_read_unsigned_register (struct frame_info *frame,
 
 /* Map between a frame register number and its name.  A frame register
    space is a superset of the cooked register space --- it also
-   includes builtin registers.  */
+   includes builtin registers.  If NAMELEN is negative, use the NAME's
+   length when doing the comparison.  */
 
-extern int frame_map_name_to_regnum (const char *name, int strlen);
+extern int frame_map_name_to_regnum (const char *name, int namelen);
 extern const char *frame_map_regnum_to_name (int regnum);
 
 /* Unwind the PC.  Strictly speaking return the resume address of the
@@ -302,41 +313,9 @@ extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
    caller's frame.  */
 extern struct frame_id frame_id_unwind (struct frame_info *frame);
 
-
-/* Return the location (and possibly value) of REGNUM for the previous
-   (older, up) frame.  All parameters except VALUEP can be assumed to
-   be non NULL.  When VALUEP is NULL, just the location of the
-   register should be returned.
-
-   UNWIND_CACHE is provided as mechanism for implementing a per-frame
-   local cache.  It's initial value being NULL.  Memory for that cache
-   should be allocated using frame_obstack_alloc().
-
-   Register window architectures (eg SPARC) should note that REGNUM
-   identifies the register for the previous frame.  For instance, a
-   request for the value of "o1" for the previous frame would be found
-   in the register "i1" in this FRAME.  */
-
-typedef void (frame_register_unwind_ftype) (struct frame_info *frame,
-					    void **unwind_cache,
-					    int regnum,
-					    int *optimized,
-					    enum lval_type *lvalp,
-					    CORE_ADDR *addrp,
-					    int *realnump,
-					    void *valuep);
-
-/* Same as for registers above, but return the address at which the
-   calling frame would resume.  */
-
-typedef CORE_ADDR (frame_pc_unwind_ftype) (struct frame_info *frame,
-					   void **unwind_cache);
-
-/* Same as for registers above, but return the ID of the frame that
-   called this one.  */
-
-typedef struct frame_id (frame_id_unwind_ftype) (struct frame_info *frame,
-						 void **unwind_cache);
+/* Discard the specified frame.  Restoring the registers to the state
+   of the caller.  */
+extern void frame_pop (struct frame_info *frame);
 
 /* Describe the saved registers of a frame.  */
 
@@ -413,7 +392,7 @@ struct frame_info
 
     /* Anything extra for this structure that may have been defined
        in the machine dependent files. */
-    /* Allocated by frame_obstack_alloc () which is called /
+    /* Allocated by frame_extra_info_zalloc () which is called /
        initialized by INIT_EXTRA_FRAME_INFO */
     struct frame_extra_info *extra_info;
 
@@ -425,18 +404,14 @@ struct frame_info
        better all agree as to the contents.  */
     void *unwind_cache;
 
-    /* See description above.  The previous frame's registers.  */
-    frame_register_unwind_ftype *register_unwind;
+    /* The frame's unwinder.  */
+    const struct frame_unwind *unwind;
 
-    /* See description above.  The previous frame's resume address.
-       Save the previous PC in a local cache.  */
-    frame_pc_unwind_ftype *pc_unwind;
+    /* Cached copy of the previous frame's resume address.  */
     int pc_unwind_cache_p;
     CORE_ADDR pc_unwind_cache;
 
-    /* See description above.  The previous frame's resume address.
-       Save the previous PC in a local cache.  */
-    frame_id_unwind_ftype *id_unwind;
+    /* Cached copy of the previous frame's ID.  */
     int id_unwind_cache_p;
     struct frame_id id_unwind_cache;
 
@@ -472,23 +447,19 @@ enum print_what
 #define SIZEOF_FRAME_SAVED_REGS \
         (sizeof (CORE_ADDR) * (NUM_REGS+NUM_PSEUDO_REGS))
 
-extern void *frame_obstack_alloc (unsigned long size);
+/* Allocate zero initialized memory from the frame cache obstack.
+   Appendices to the frame info (such as the unwind cache) should
+   allocate memory using this method.  */
 
-/* Define a default FRAME_CHAIN_VALID, in the form that is suitable for most
-   targets.  If FRAME_CHAIN_VALID returns zero it means that the given frame
-   is the outermost one and has no caller.
+extern void *frame_obstack_zalloc (unsigned long size);
+#define FRAME_OBSTACK_ZALLOC(TYPE) ((TYPE *) frame_obstack_zalloc (sizeof (TYPE)))
 
-   XXXX - both default and alternate frame_chain_valid functions are
-   deprecated.  New code should use dummy frames and one of the
-   generic functions. */
+/* If FRAME_CHAIN_VALID returns zero it means that the given frame
+   is the outermost one and has no caller.  */
 
-extern int file_frame_chain_valid (CORE_ADDR, struct frame_info *);
-extern int func_frame_chain_valid (CORE_ADDR, struct frame_info *);
-extern int nonnull_frame_chain_valid (CORE_ADDR, struct frame_info *);
-extern int generic_file_frame_chain_valid (CORE_ADDR, struct frame_info *);
-extern int generic_func_frame_chain_valid (CORE_ADDR, struct frame_info *);
+extern int frame_chain_valid (CORE_ADDR, struct frame_info *);
+
 extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
-
 
 
 #ifdef FRAME_FIND_SAVED_REGS
@@ -551,8 +522,6 @@ extern void show_and_print_stack_frame (struct frame_info *fi, int level,
 
 extern void print_stack_frame (struct frame_info *, int, int);
 
-extern void print_only_stack_frame (struct frame_info *, int, int);
-
 extern void show_stack_frame (struct frame_info *);
 
 extern void print_frame_info (struct frame_info *, int, int, int);
@@ -599,6 +568,16 @@ extern void get_saved_register (char *raw_buffer, int *optimized,
 				CORE_ADDR * addrp,
 				struct frame_info *frame,
 				int regnum, enum lval_type *lval);
+
+/* FIXME: cagney/2003-02-02: Should be deprecated or replaced with a
+   function called frame_read_register_p().  This slightly weird (and
+   older) variant of frame_read_register() returns zero (indicating
+   the register is unavailable) if either: the register isn't cached;
+   or the register has been optimized out.  Problem is, neither check
+   is exactly correct.  A register can't be optimized out (it may not
+   have been saved as part of a function call); The fact that a
+   register isn't in the register cache doesn't mean that the register
+   isn't available (it could have been fetched from memory).  */
 
 extern int frame_register_read (struct frame_info *frame, int regnum,
 				void *buf);
@@ -673,5 +652,53 @@ extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
    from the outset.  */
 extern void deprecated_update_frame_base_hack (struct frame_info *frame,
 					       CORE_ADDR base);
+
+/* FIXME: cagney/2003-01-04: Explicitly set the frame's saved_regs
+   and/or extra_info.  Target code is allocating a fake frame and than
+   initializing that to get around the problem of, when creating the
+   inner most frame, there is no where to cache information such as
+   the prologue analysis.  This is fixed by the new unwind mechanism -
+   even the inner most frame has somewhere to store things like the
+   prolog analysis (or at least will once the frame overhaul is
+   finished).  */
+extern void deprecated_set_frame_saved_regs_hack (struct frame_info *frame,
+						  CORE_ADDR *saved_regs);
+extern void deprecated_set_frame_extra_info_hack (struct frame_info *frame,
+						  struct frame_extra_info *extra_info);
+
+/* FIXME: cagney/2003-01-04: Allocate a frame from the heap (rather
+   than the frame obstack).  Targets do this as a way of saving the
+   prologue analysis from the inner most frame before that frame has
+   been created.  By always creating a frame, this problem goes away.  */
+extern struct frame_info *deprecated_frame_xmalloc (void);
+
+/* FIXME: cagney/2003-01-05: Allocate a frame, along with the
+   saved_regs and extra_info.  Set up cleanups for all three.  Same as
+   for deprecated_frame_xmalloc, targets are calling this when
+   creating a scratch `struct frame_info'.  The frame overhaul makes
+   this unnecessary since all frame queries are parameterized with a
+   common cache parameter and a frame.  */
+extern struct frame_info *deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
+								 long sizeof_extra_info);
+
+/* FIXME: cagney/2003-01-07: These are just nasty.  Code shouldn't be
+   doing this.  I suspect it dates back to the days when every field
+   of an allocated structure was explicitly initialized.  */
+extern void deprecated_set_frame_next_hack (struct frame_info *fi,
+					    struct frame_info *next);
+extern void deprecated_set_frame_prev_hack (struct frame_info *fi,
+					    struct frame_info *prev);
+
+/* FIXME: cagney/2003-01-07: Instead of the dwarf2cfi having its own
+   dedicated `struct frame_info . context' field, the code should use
+   the per frame `unwind_cache' that is passed to the
+   frame_pc_unwind(), frame_register_unwind() and frame_id_unwind()
+   methods.
+
+   See "dummy-frame.c" for an example of how a cfi-frame object can be
+   implemented using this.  */
+extern struct context *deprecated_get_frame_context (struct frame_info *fi);
+extern void deprecated_set_frame_context (struct frame_info *fi,
+					  struct context *context);
 
 #endif /* !defined (FRAME_H)  */

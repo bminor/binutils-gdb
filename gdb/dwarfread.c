@@ -1,7 +1,8 @@
 /* DWARF debugging format support for GDB.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
    Written by Fred Fish at Cygnus Support.  Portions based on dbxread.c,
    mipsread.c, coffread.c, and dwarfread.c from a Data General SVR4 gdb port.
 
@@ -20,6 +21,46 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+/*
+   If you are looking for DWARF-2 support, you are in the wrong file.
+   Go look in dwarf2read.c.  This file is for the original DWARF.
+
+   DWARF (also known as DWARF-1) is headed for obsoletion.
+
+   In gcc 3.2.1, these targets prefer dwarf-1:
+
+     i[34567]86-sequent-ptx4*   # TD-R2
+     i[34567]86-sequent-sysv4*  # TD-R2
+     i[34567]86-dg-dgux*        # obsolete in gcc 3.2.1, to be removed in 3.3
+     m88k-dg-dgux*              # TD-R2
+     mips-sni-sysv4             # TD-R2
+     sparc-hal-solaris2*        # TD-R2
+
+    Configurations marked with "# TD-R2" are on Zach Weinberg's list
+    of "Target Deprecation, Round 2".  This is a candidate list of
+    targets to be deprecated in gcc 3.3 and removed in gcc 3.4.
+
+      http://gcc.gnu.org/ml/gcc/2002-12/msg00702.html
+
+    gcc 2.95.3 had many configurations which prefer dwarf-1.
+    We may have to support dwarf-1 as long as we support gcc 2.95.3.
+    This could use more analysis.
+
+    DG/UX (Data General Unix) used dwarf-1 for its native format.
+    DG/UX uses gcc for its system C compiler, but they have their
+    own linker and their own debuggers.
+
+    Takis Psarogiannakopoulos has a complete gnu toolchain for DG/UX
+    with gcc 2.95.3, gdb 5.1, and debug formats of dwarf-2 and stabs.
+    For more info, see PR gdb/979 and PR gdb/1013; also:
+
+      http://sources.redhat.com/ml/gdb/2003-02/msg00074.html
+
+    There may be non-gcc compilers that still emit dwarf-1.
+
+    -- chastain 2003-02-04
+*/
 
 /*
 
@@ -107,10 +148,6 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 #ifndef LCC_PRODUCER
 #define LCC_PRODUCER "NCR C/C++"
 #endif
-
-/* OBSOLETE #ifndef CHILL_PRODUCER */
-/* OBSOLETE #define CHILL_PRODUCER "GNU Chill " */
-/* OBSOLETE #endif */
 
 /* Flags to target_to_host() that tell whether or not the data object is
    expected to be signed.  Used, for example, when fetching a signed
@@ -363,7 +400,7 @@ static const struct language_defn *cu_language_defn;
 /* Forward declarations of static functions so we don't have to worry
    about ordering within this file.  */
 
-static void free_utypes (PTR);
+static void free_utypes (void *);
 
 static int attribute_size (unsigned int);
 
@@ -373,19 +410,19 @@ static void add_enum_psymbol (struct dieinfo *, struct objfile *);
 
 static void handle_producer (char *);
 
-static void
-read_file_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_file_scope (struct dieinfo *, char *, char *,
+			     struct objfile *);
 
-static void
-read_func_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_func_scope (struct dieinfo *, char *, char *,
+			     struct objfile *);
 
-static void
-read_lexical_block_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_lexical_block_scope (struct dieinfo *, char *, char *,
+				      struct objfile *);
 
 static void scan_partial_symbols (char *, char *, struct objfile *);
 
-static void
-scan_compilation_units (char *, char *, file_ptr, file_ptr, struct objfile *);
+static void scan_compilation_units (char *, char *, file_ptr, file_ptr,
+				    struct objfile *);
 
 static void add_partial_symbol (struct dieinfo *, struct objfile *);
 
@@ -401,8 +438,8 @@ static void read_ofile_symtab (struct partial_symtab *);
 
 static void process_dies (char *, char *, struct objfile *);
 
-static void
-read_structure_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_structure_scope (struct dieinfo *, char *, char *,
+				  struct objfile *);
 
 static struct type *decode_array_element_type (char *);
 
@@ -416,8 +453,8 @@ static void read_tag_string_type (struct dieinfo *dip);
 
 static void read_subroutine_type (struct dieinfo *, char *, char *);
 
-static void
-read_enumeration (struct dieinfo *, char *, char *, struct objfile *);
+static void read_enumeration (struct dieinfo *, char *, char *,
+			      struct objfile *);
 
 static struct type *struct_type (struct dieinfo *, char *, char *,
 				 struct objfile *);
@@ -444,8 +481,8 @@ static struct type *alloc_utype (DIE_REF, struct type *);
 
 static struct symbol *new_symbol (struct dieinfo *, struct objfile *);
 
-static void
-synthesize_typedef (struct dieinfo *, struct objfile *, struct type *);
+static void synthesize_typedef (struct dieinfo *, struct objfile *,
+				struct type *);
 
 static int locval (struct dieinfo *);
 
@@ -543,9 +580,6 @@ set_cu_language (struct dieinfo *dip)
     case LANG_C_PLUS_PLUS:
       cu_language = language_cplus;
       break;
-      /* OBSOLETE case LANG_CHILL: */
-      /* OBSOLETE   cu_language = language_chill; */
-      /* OBSOLETE   break; */
     case LANG_MODULA2:
       cu_language = language_m2;
       break;
@@ -778,7 +812,7 @@ alloc_utype (DIE_REF die_ref, struct type *utypep)
 
    SYNOPSIS
 
-   static void free_utypes (PTR dummy)
+   static void free_utypes (void *dummy)
 
    DESCRIPTION
 
@@ -788,7 +822,7 @@ alloc_utype (DIE_REF die_ref, struct type *utypep)
  */
 
 static void
-free_utypes (PTR dummy)
+free_utypes (void *dummy)
 {
   xfree (utypes);
   utypes = NULL;
@@ -1760,7 +1794,6 @@ handle_producer (char *producer)
     {
       processing_gcc_compilation =
 	STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER));
-      /* OBSOLETE || STREQN (producer, CHILL_PRODUCER, strlen (CHILL_PRODUCER)); */
     }
 
   /* Select a demangling style if we can identify the producer and if
@@ -2219,7 +2252,7 @@ read_ofile_symtab (struct partial_symtab *pst)
   if (LNFOFF (pst))
     {
       if (bfd_seek (abfd, LNFOFF (pst), SEEK_SET) ||
-	  (bfd_bread ((PTR) lnsizedata, sizeof (lnsizedata), abfd)
+	  (bfd_bread (lnsizedata, sizeof (lnsizedata), abfd)
 	   != sizeof (lnsizedata)))
 	{
 	  error ("can't read DWARF line number table size");
@@ -2786,8 +2819,6 @@ new_symbol (struct dieinfo *dip, struct objfile *objfile)
 					     sizeof (struct symbol));
       OBJSTAT (objfile, n_syms++);
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = create_name (dip->at_name,
-				       &objfile->symbol_obstack);
       /* default assumptions */
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       SYMBOL_CLASS (sym) = LOC_STATIC;
@@ -2799,7 +2830,7 @@ new_symbol (struct dieinfo *dip, struct objfile *objfile)
          C++ symbol lookups by a factor of about 20. */
 
       SYMBOL_LANGUAGE (sym) = cu_language;
-      SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
+      SYMBOL_SET_NAMES (sym, dip->at_name, strlen (dip->at_name), objfile);
       switch (dip->die_tag)
 	{
 	case TAG_label:

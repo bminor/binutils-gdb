@@ -1,7 +1,7 @@
 /* Multi-process/thread control for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
 
@@ -261,11 +261,12 @@ do_captured_list_thread_ids (struct ui_out *uiout,
 {
   struct thread_info *tp;
   int num = 0;
+  struct cleanup *cleanup_chain;
 
   prune_threads ();
   target_find_new_threads ();
 
-  ui_out_tuple_begin (uiout, "thread-ids");
+  cleanup_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "thread-ids");
 
   for (tp = thread_list; tp; tp = tp->next)
     {
@@ -273,7 +274,7 @@ do_captured_list_thread_ids (struct ui_out *uiout,
       ui_out_field_int (uiout, "thread-id", tp->num);
     }
 
-  ui_out_tuple_end (uiout);
+  do_cleanups (cleanup_chain);
   ui_out_field_int (uiout, "number-of-threads", num);
   return GDB_RC_OK;
 }
@@ -457,7 +458,7 @@ info_threads_command (char *arg, int from_tty)
 
       switch_to_thread (tp->ptid);
       if (deprecated_selected_frame)
-	print_only_stack_frame (deprecated_selected_frame, -1, 0);
+	print_stack_frame (deprecated_selected_frame, -1, 0);
       else
 	printf_filtered ("[No stack.]\n");
     }

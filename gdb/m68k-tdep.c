@@ -1,5 +1,6 @@
 /* Target dependent code for the Motorola 68000 series.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
+   2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -257,9 +258,9 @@ static CORE_ADDR
 m68k_frame_chain (struct frame_info *thisframe)
 {
   if (get_frame_type (thisframe) == SIGTRAMP_FRAME)
-    return thisframe->frame;
-  else if (!inside_entry_file (thisframe->pc))
-    return read_memory_unsigned_integer (thisframe->frame, 4);
+    return get_frame_base (thisframe);
+  else if (!inside_entry_file (get_frame_pc (thisframe)))
+    return read_memory_unsigned_integer (get_frame_base (thisframe), 4);
   else
     return 0;
 }
@@ -282,15 +283,15 @@ m68k_frame_saved_pc (struct frame_info *frame)
 {
   if (get_frame_type (frame) == SIGTRAMP_FRAME)
     {
-      if (frame->next)
-	return read_memory_unsigned_integer (frame->next->frame
+      if (get_next_frame (frame))
+	return read_memory_unsigned_integer (get_frame_base (get_next_frame (frame))
 					     + SIG_PC_FP_OFFSET, 4);
       else
 	return read_memory_unsigned_integer (read_register (SP_REGNUM)
 					     + SIG_PC_FP_OFFSET - 8, 4);
     }
   else
-    return read_memory_unsigned_integer (frame->frame + 4, 4);
+    return read_memory_unsigned_integer (get_frame_base (frame) + 4, 4);
 }
 
 
@@ -331,17 +332,17 @@ delta68_frame_args_address (struct frame_info *frame_info)
   /* we assume here that the only frameless functions are the system calls
      or other functions who do not put anything on the stack. */
   if (get_frame_type (frame_info) == SIGTRAMP_FRAME)
-    return frame_info->frame + 12;
+    return get_frame_base (frame_info) + 12;
   else if (frameless_look_for_prologue (frame_info))
     {
       /* Check for an interrupted system call */
-      if (frame_info->next && (get_frame_type (frame_info->next) == SIGTRAMP_FRAME))
-	return frame_info->next->frame + 16;
+      if (get_next_frame (frame_info) && (get_frame_type (get_next_frame (frame_info)) == SIGTRAMP_FRAME))
+	return get_frame_base (get_next_frame (frame_info)) + 16;
       else
-	return frame_info->frame + 4;
+	return get_frame_base (frame_info) + 4;
     }
   else
-    return frame_info->frame;
+    return get_frame_base (frame_info);
 }
 
 CORE_ADDR
@@ -478,25 +479,25 @@ m68k_pop_frame (void)
   m68k_frame_init_saved_regs (frame);
   for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--)
     {
-      if (frame->saved_regs[regnum])
+      if (get_frame_saved_regs (frame)[regnum])
 	{
-	  read_memory (frame->saved_regs[regnum], raw_buffer, 12);
+	  read_memory (get_frame_saved_regs (frame)[regnum], raw_buffer, 12);
 	  deprecated_write_register_bytes (REGISTER_BYTE (regnum), raw_buffer,
 					   12);
 	}
     }
   for (regnum = FP_REGNUM - 1; regnum >= 0; regnum--)
     {
-      if (frame->saved_regs[regnum])
+      if (get_frame_saved_regs (frame)[regnum])
 	{
 	  write_register (regnum,
-			  read_memory_integer (frame->saved_regs[regnum], 4));
+			  read_memory_integer (get_frame_saved_regs (frame)[regnum], 4));
 	}
     }
-  if (frame->saved_regs[PS_REGNUM])
+  if (get_frame_saved_regs (frame)[PS_REGNUM])
     {
       write_register (PS_REGNUM,
-		      read_memory_integer (frame->saved_regs[PS_REGNUM], 4));
+		      read_memory_integer (get_frame_saved_regs (frame)[PS_REGNUM], 4));
     }
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
@@ -588,19 +589,19 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 
   /* First possible address for a pc in a call dummy for this frame.  */
   CORE_ADDR possible_call_dummy_start =
-    frame_info->frame - 28 - FP_REGNUM * 4 - 4 - 8 * 12;
+    get_frame_base (frame_info) - 28 - FP_REGNUM * 4 - 4 - 8 * 12;
 
   int nextinsn;
 
-  if (frame_info->saved_regs)
+  if (get_frame_saved_regs (frame_info))
     return;
 
   frame_saved_regs_zalloc (frame_info);
 
-  memset (frame_info->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
+  memset (get_frame_saved_regs (frame_info), 0, SIZEOF_FRAME_SAVED_REGS);
 
-  if (frame_info->pc >= possible_call_dummy_start
-      && frame_info->pc <= frame_info->frame)
+  if (get_frame_pc (frame_info) >= possible_call_dummy_start
+      && get_frame_pc (frame_info) <= get_frame_base (frame_info))
     {
 
       /* It is a call dummy.  We could just stop now, since we know
@@ -608,12 +609,12 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
          to parse the "prologue" which is part of the call dummy.
          This is needlessly complex and confusing.  FIXME.  */
 
-      next_addr = frame_info->frame;
+      next_addr = get_frame_base (frame_info);
       pc = possible_call_dummy_start;
     }
   else
     {
-      pc = get_pc_function_start (frame_info->pc);
+      pc = get_pc_function_start (get_frame_pc (frame_info));
 
       nextinsn = read_memory_unsigned_integer (pc, 2);
       if (P_PEA_FP == nextinsn
@@ -621,7 +622,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	{
 	  /* pea %fp
 	     move.l %sp, %fp */
-	  next_addr = frame_info->frame;
+	  next_addr = get_frame_base (frame_info);
 	  pc += 4;
 	}
       else if (P_LINKL_FP == nextinsn)
@@ -629,7 +630,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	/* Find the address above the saved   
 	   regs using the amount of storage from the link instruction.  */
 	{
-	  next_addr = frame_info->frame + read_memory_integer (pc + 2, 4);
+	  next_addr = get_frame_base (frame_info) + read_memory_integer (pc + 2, 4);
 	  pc += 6;
 	}
       else if (P_LINKW_FP == nextinsn)
@@ -637,7 +638,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	/* Find the address above the saved   
 	   regs using the amount of storage from the link instruction.  */
 	{
-	  next_addr = frame_info->frame + read_memory_integer (pc + 2, 2);
+	  next_addr = get_frame_base (frame_info) + read_memory_integer (pc + 2, 2);
 	  pc += 4;
 	}
       else
@@ -658,7 +659,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	  /* Regmask's low bit is for register fp7, the first pushed */
 	  for (regnum = FP0_REGNUM + 8; --regnum >= FP0_REGNUM; regmask >>= 1)
 	    if (regmask & 1)
-	      frame_info->saved_regs[regnum] = (next_addr -= 12);
+	      get_frame_saved_regs (frame_info)[regnum] = (next_addr -= 12);
 	  pc += 4;
 	}
       /* fmovemx to (fp + displacement) */
@@ -666,12 +667,12 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	{
 	  register CORE_ADDR addr;
 
-	  addr = frame_info->frame + read_memory_integer (pc + 4, 2);
+	  addr = get_frame_base (frame_info) + read_memory_integer (pc + 4, 2);
 	  /* Regmask's low bit is for register fp7, the first pushed */
 	  for (regnum = FP0_REGNUM + 8; --regnum >= FP0_REGNUM; regmask >>= 1)
 	    if (regmask & 1)
 	      {
-		frame_info->saved_regs[regnum] = addr;
+		get_frame_saved_regs (frame_info)[regnum] = addr;
 		addr += 12;
 	      }
 	  pc += 6;
@@ -683,7 +684,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	  for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)
 	    if (regmask & 1)
 	      {
-		frame_info->saved_regs[regnum] = next_addr;
+		get_frame_saved_regs (frame_info)[regnum] = next_addr;
 		next_addr += 4;
 	      }
 	  pc += 4;
@@ -693,12 +694,12 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	{
 	  register CORE_ADDR addr;
 
-	  addr = frame_info->frame + read_memory_integer (pc + 4, 2);
+	  addr = get_frame_base (frame_info) + read_memory_integer (pc + 4, 2);
 	  /* Regmask's low bit is for register 0, the first written */
 	  for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)
 	    if (regmask & 1)
 	      {
-		frame_info->saved_regs[regnum] = addr;
+		get_frame_saved_regs (frame_info)[regnum] = addr;
 		addr += 4;
 	      }
 	  pc += 6;
@@ -709,14 +710,14 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	  /* Regmask's low bit is for register 15, the first pushed */
 	  for (regnum = 16; --regnum >= 0; regmask >>= 1)
 	    if (regmask & 1)
-	      frame_info->saved_regs[regnum] = (next_addr -= 4);
+	      get_frame_saved_regs (frame_info)[regnum] = (next_addr -= 4);
 	  pc += 4;
 	}
       /* movl r,-(sp) */
       else if (0x2f00 == (0xfff0 & nextinsn))
 	{
 	  regnum = 0xf & nextinsn;
-	  frame_info->saved_regs[regnum] = (next_addr -= 4);
+	  get_frame_saved_regs (frame_info)[regnum] = (next_addr -= 4);
 	  pc += 2;
 	}
       /* fmovemx to index of sp */
@@ -726,7 +727,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 	  for (regnum = FP0_REGNUM + 8; --regnum >= FP0_REGNUM; regmask >>= 1)
 	    if (regmask & 1)
 	      {
-		frame_info->saved_regs[regnum] = next_addr;
+		get_frame_saved_regs (frame_info)[regnum] = next_addr;
 		next_addr += 12;
 	      }
 	  pc += 10;
@@ -734,16 +735,16 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
       /* clrw -(sp); movw ccr,-(sp) */
       else if (0x4267 == nextinsn && 0x42e7 == regmask)
 	{
-	  frame_info->saved_regs[PS_REGNUM] = (next_addr -= 4);
+	  get_frame_saved_regs (frame_info)[PS_REGNUM] = (next_addr -= 4);
 	  pc += 4;
 	}
       else
 	break;
     }
 lose:;
-  frame_info->saved_regs[SP_REGNUM] = (frame_info)->frame + 8;
-  frame_info->saved_regs[FP_REGNUM] = (frame_info)->frame;
-  frame_info->saved_regs[PC_REGNUM] = (frame_info)->frame + 4;
+  get_frame_saved_regs (frame_info)[SP_REGNUM] = get_frame_base (frame_info) + 8;
+  get_frame_saved_regs (frame_info)[FP_REGNUM] = get_frame_base (frame_info);
+  get_frame_saved_regs (frame_info)[PC_REGNUM] = get_frame_base (frame_info) + 4;
 #ifdef SIG_SP_FP_OFFSET
   /* Adjust saved SP_REGNUM for fake _sigtramp frames.  */
   if ((get_frame_type (frame_info) == SIGTRAMP_FRAME) && frame_info->next)
@@ -1010,7 +1011,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_return_value (gdbarch, m68k_store_return_value);
 
   set_gdbarch_frame_chain (gdbarch, m68k_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
   set_gdbarch_frame_saved_pc (gdbarch, m68k_frame_saved_pc);
   set_gdbarch_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
   set_gdbarch_frameless_function_invocation (gdbarch,

@@ -1,3 +1,13 @@
+2003-01-09  Michael Chastain  <mec@shout.net>
+
+	From Chet Ramey, <chet@po.cwru.edu>, the readline maintainer:
+	* display.c: Fix perverse screen refresh with UTF-8.
+
+2003-01-08  Chris Demetriou  <cgd@broadcom.com>
+
+	* config.guess: Update to 2003-01-03 version.
+	* config.sub: Update to 2003-01-03 version.
+
 2002-12-16  Christopher Faylor  <cgf@redhat.com>
 
 	* configure.in: Remove --enable-shared option.  It shouldn't be used

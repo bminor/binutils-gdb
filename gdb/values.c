@@ -1,7 +1,8 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
+
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2002.
-   Free Software Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2002, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -406,7 +407,7 @@ lookup_internalvar (char *name)
   register struct internalvar *var;
 
   for (var = internalvars; var; var = var->next)
-    if (STREQ (var->name, name))
+    if (strcmp (var->name, name) == 0)
       return var;
 
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
@@ -423,11 +424,6 @@ value_of_internalvar (struct internalvar *var)
 {
   struct value *val;
 
-#ifdef IS_TRAPPED_INTERNALVAR
-  if (IS_TRAPPED_INTERNALVAR (var->name))
-    return VALUE_OF_TRAPPED_INTERNALVAR (var);
-#endif
-
   val = value_copy (var->value);
   if (VALUE_LAZY (val))
     value_fetch_lazy (val);
@@ -442,11 +438,6 @@ set_internalvar_component (struct internalvar *var, int offset, int bitpos,
 {
   register char *addr = VALUE_CONTENTS (var->value) + offset;
 
-#ifdef IS_TRAPPED_INTERNALVAR
-  if (IS_TRAPPED_INTERNALVAR (var->name))
-    SET_TRAPPED_INTERNALVAR (var, newval, bitpos, bitsize, offset);
-#endif
-
   if (bitsize)
     modify_field (addr, value_as_long (newval),
 		  bitpos, bitsize);
@@ -458,11 +449,6 @@ void
 set_internalvar (struct internalvar *var, struct value *val)
 {
   struct value *newval;
-
-#ifdef IS_TRAPPED_INTERNALVAR
-  if (IS_TRAPPED_INTERNALVAR (var->name))
-    SET_TRAPPED_INTERNALVAR (var, val, 0, 0, 0);
-#endif
 
   newval = value_copy (val);
   newval->modifiable = 1;
@@ -517,10 +503,6 @@ show_convenience (char *ignore, int from_tty)
 
   for (var = internalvars; var; var = var->next)
     {
-#ifdef IS_TRAPPED_INTERNALVAR
-      if (IS_TRAPPED_INTERNALVAR (var->name))
-	continue;
-#endif
       if (!varseen)
 	{
 	  varseen = 1;
@@ -680,7 +662,7 @@ value_as_address (struct value *val)
    to an INT (or some size).  After all, it is only an offset.  */
 
 LONGEST
-unpack_long (struct type *type, char *valaddr)
+unpack_long (struct type *type, const char *valaddr)
 {
   register enum type_code code = TYPE_CODE (type);
   register int len = TYPE_LENGTH (type);
@@ -729,7 +711,7 @@ unpack_long (struct type *type, char *valaddr)
    format, result is in host format.  */
 
 DOUBLEST
-unpack_double (struct type *type, char *valaddr, int *invp)
+unpack_double (struct type *type, const char *valaddr, int *invp)
 {
   enum type_code code;
   int len;
@@ -786,7 +768,7 @@ unpack_double (struct type *type, char *valaddr, int *invp)
    to an INT (or some size).  After all, it is only an offset.  */
 
 CORE_ADDR
-unpack_pointer (struct type *type, char *valaddr)
+unpack_pointer (struct type *type, const char *valaddr)
 {
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
@@ -1039,7 +1021,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *ty
    If the field is signed, we also do sign extension. */
 
 LONGEST
-unpack_field_as_long (struct type *type, char *valaddr, int fieldno)
+unpack_field_as_long (struct type *type, const char *valaddr, int fieldno)
 {
   ULONGEST val;
   ULONGEST valmask;

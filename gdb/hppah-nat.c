@@ -189,7 +189,7 @@ store_inferior_registers (int regno)
 static void
 fetch_register (int regno)
 {
-  char buf[MAX_REGISTER_RAW_SIZE];
+  char *buf = alloca (max_register_size (current_gdbarch));
   unsigned int addr, len, offset;
   int i;
 
@@ -1334,7 +1334,7 @@ child_pid_to_exec_file (int pid)
   int name_index;
   int i;
   ptid_t saved_inferior_ptid;
-  boolean done;
+  int done;
 
 #ifdef PT_GET_PROCESS_PATHNAME
   /* As of 10.x HP-UX, there's an explicit request to get the pathname. */

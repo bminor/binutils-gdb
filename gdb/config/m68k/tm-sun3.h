@@ -78,7 +78,7 @@
 #define GET_LONGJMP_TARGET(ADDR) m68k_get_longjmp_target(ADDR)
 
 /* If sun3 pcc says that a parameter is a short, it's a short.  */
-#define BELIEVE_PCC_PROMOTION_TYPE
+#define BELIEVE_PCC_PROMOTION_TYPE 1
 
 /* Can't define BELIEVE_PCC_PROMOTION for SunOS /bin/cc of SunOS 4.1.1.
    Apparently Sun fixed this for the sparc but not the sun3.  */

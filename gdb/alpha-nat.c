@@ -1,5 +1,5 @@
 /* Low level Alpha interface, for GDB when running native.
-   Copyright 1993, 1995, 1996, 1998, 1999, 2000, 2001
+   Copyright 1993, 1995, 1996, 1998, 1999, 2000, 2001, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -149,25 +149,36 @@ fetch_elf_core_registers (char *core_reg_sect, unsigned core_reg_size,
       memset (&deprecated_registers[REGISTER_BYTE (ALPHA_ZERO_REGNUM)], 0, 8);
       memset (&deprecated_register_valid[ALPHA_V0_REGNUM], 1, 32);
       deprecated_register_valid[PC_REGNUM] = 1;
+
+      if (core_reg_size >= 33 * 8)
+	{
+	  memcpy (&deprecated_registers[REGISTER_BYTE (ALPHA_UNIQUE_REGNUM)],
+		  core_reg_sect + 32 * 8, 8);
+	  deprecated_register_valid[ALPHA_UNIQUE_REGNUM] = 1;
+	}
     }
 }
 
 
 /* Map gdb internal register number to a ptrace ``address''.
-   These ``addresses'' are defined in <sys/ptrace.h> */
+   These ``addresses'' are defined in <sys/ptrace.h>, with
+   the exception of ALPHA_UNIQUE_PTRACE_ADDR.  */
 
-#define REGISTER_PTRACE_ADDR(regno) \
-   (regno < FP0_REGNUM ? 	GPR_BASE + (regno) \
-  : regno == PC_REGNUM ?	PC	\
-  : regno >= FP0_REGNUM ?	FPR_BASE + ((regno) - FP0_REGNUM) \
-  : 0)
-
-/* Return the ptrace ``address'' of register REGNO. */
+#ifndef ALPHA_UNIQUE_PTRACE_ADDR
+#define ALPHA_UNIQUE_PTRACE_ADDR 0
+#endif
 
 CORE_ADDR
 register_addr (int regno, CORE_ADDR blockend)
 {
-  return REGISTER_PTRACE_ADDR (regno);
+  if (regno == PC_REGNUM)
+    return PC;
+  if (regno == ALPHA_UNIQUE_REGNUM)
+    return ALPHA_UNIQUE_PTRACE_ADDR;
+  if (regno < FP0_REGNUM)
+    return GPR_BASE + regno;
+  else
+    return FPR_BASE + regno - FP0_REGNUM;
 }
 
 int

@@ -1,3 +1,131 @@
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	descrption of IS_TRAPPED_INTERNALVAR.
+
+	From Keith Seitz <keiths@redhat.com>:
+	* gdb.texinfo (Interpreters): New chapter.  Refer the command-line
+	option "-i"/"--interpreter" to this chapter.  Include index
+	entries.
+
+2003-02-04  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.texinfo (C@t{++}): Recommend DWARF 2, then stabs+.
+	(Variables): Recommend stabs+ and DWARF 2.
+	(C plus plus expressions): Correct info about
+	compiler versions, debug formats.
+	(Contributors): Change 'DWARF2' to 'DWARF 2'.
+	PR symtab/874.
+
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of ADDITIONAL_OPTIONS, ADDITIONAL_OPTION_CASES,
+	ADDITIONAL_OPTION_HANDLER, and ADDITIONAL_OPTION_HELP, and
+	BEFORE_MAIN_LOOP_HOOK, and DBX_PARM_SYMBOL_CLASS along with
+	references to nindy and i960.
+	* gdb.texinfo (i960): Delete all references to i960 and nindy.
+
+2003-02-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	FLOAT_INFO.
+
+2003-01-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* stabs.texinfo (Member Type Descriptor): Clarify description of
+	`@'.  Suggested by Ben Hutchings.
+
+2003-01-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (M68K): Delete reference to es1800.
+
+2003-01-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document `maint print
+	reggroups' and `maint print register-groups'.
+	* gdbint.texinfo (Target Architecture Definition): Document
+	register_reggroup_p.
+
+2003-01-23  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Separate Debug Files): New section.
+
+2003-01-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Maintenance Commands): Add "maint set profile"
+	and "maint show profile".
+
+2003-01-16  Michael Chastain  <mec@shout.net>
+
+	* gdb.texinfo (Installing GDB): Warn against
+	".../gdb-VERSION/gdb/configure".
+	(Separate Objdir): Likewise.
+
+2003-01-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	definition of PRINT_REGISTER_HOOK.
+
+2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
+
+	(OpenRISC 1000): Fix formatting of command names.
+
+2003-01-15  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.texinfo (Continuing and Stepping): Add new command
+	'advance'. Clarify behavior of 'until'.
+
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Files): Document solib-absolute-prefix and
+	solib-search-path.
+
+2003-01-09  Michael Chastain  <mec@shout.net>
+
+	* gdbint.texinfo (Configuring @value{GDBN} for Release): Delete.
+	(Create a Release): Add new instructions for new @file{src-release}.
+	Document existing instructions for @file{Makefile.in} as
+	being for @value{GDBN} 5.3.1 or earlier.
+
+2003-01-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Mention
+	frame_saved_regs_zalloc and frame_extra_info_zalloc as the way to
+	allocate memory.
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Controlling GDB): Add @kindex for
+	"show osabi".
+	(Backtraces): Add @kindex's for backtrace-below-main.
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Controlling GDB): Document "set osabi".
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Backtraces): Document "set backtrace-below-main".
+	* gdbint.texinfo (FRAME_CHAIN_VALID): Update documentation.
+
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Controlling GDB): Add ABI section.  Document
+	"set coerce-float-to-double".
+	* gdbint.texinfo (COERCE_FLOAT_TO_DOUBLE): Remove documentation.
+
+2003-01-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* stabs.texinfo: Remove obsolete text.
+	* gdbint.texinfo: Ditto.
+	* gdb.texinfo: Ditto.
+
+2002-12-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Update
+	description of gdbarch_register_osabi.
+
 2002-12-20  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* agentexpr.texi: Fix typos.

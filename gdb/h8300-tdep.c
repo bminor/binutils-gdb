@@ -1,7 +1,7 @@
 /* Target-machine dependent code for Hitachi H8/300, for GDB.
 
    Copyright 1988, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -440,11 +440,11 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
     }
 
   /* The args are always reffed based from the stack pointer */
-  fi->extra_info->args_pointer = after_prolog_fp;
+  get_frame_extra_info (fi)->args_pointer = after_prolog_fp;
   /* Locals are always reffed based from the fp */
-  fi->extra_info->locals_pointer = after_prolog_fp;
+  get_frame_extra_info (fi)->locals_pointer = after_prolog_fp;
   /* The PC is at a known place */
-  fi->extra_info->from_pc =
+  get_frame_extra_info (fi)->from_pc =
     read_memory_unsigned_integer (after_prolog_fp + BINWORD, BINWORD);
 
   /* Rememeber any others too */
@@ -464,18 +464,19 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR func_addr, func_end;
 
-  if (!fi->saved_regs)
+  if (!get_frame_saved_regs (fi))
     {
       frame_saved_regs_zalloc (fi);
 
       /* Find the beginning of this function, so we can analyze its
 	 prologue. */
-      if (find_pc_partial_function (fi->pc, NULL, &func_addr, &func_end))
+      if (find_pc_partial_function (get_frame_pc (fi), NULL, &func_addr, &func_end))
         {
 	  struct symtab_and_line sal = find_pc_line (func_addr, 0);
-	  CORE_ADDR limit = (sal.end && sal.end < fi->pc) ? sal.end : fi->pc;
+	  CORE_ADDR limit = (sal.end && sal.end < get_frame_pc (fi)) ? sal.end : get_frame_pc (fi);
 	  /* This will fill in fields in fi. */
-	  h8300_examine_prologue (func_addr, limit, fi->frame, fi->saved_regs, fi);
+	  h8300_examine_prologue (func_addr, limit, get_frame_base (fi),
+				  get_frame_saved_regs (fi), fi);
 	}
       /* Else we're out of luck (can't debug completely stripped code). 
 	 FIXME. */
@@ -493,14 +494,17 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
 static CORE_ADDR
 h8300_frame_chain (struct frame_info *thisframe)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (thisframe->pc, thisframe->frame, thisframe->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (thisframe),
+				   get_frame_base (thisframe),
+				   get_frame_base (thisframe)))
     {				/* initialize the from_pc now */
-      thisframe->extra_info->from_pc =
-	deprecated_read_register_dummy (thisframe->pc, thisframe->frame,
+      get_frame_extra_info (thisframe)->from_pc =
+	deprecated_read_register_dummy (get_frame_pc (thisframe),
+					get_frame_base (thisframe),
 					E_PC_REGNUM);
-      return thisframe->frame;
+      return get_frame_base (thisframe);
     }
-  return thisframe->saved_regs[E_SP_REGNUM];
+  return get_frame_saved_regs (thisframe)[E_SP_REGNUM];
 }
 
 /* Return the saved PC from this frame.
@@ -511,28 +515,30 @@ h8300_frame_chain (struct frame_info *thisframe)
 static CORE_ADDR
 h8300_frame_saved_pc (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
-    return deprecated_read_register_dummy (frame->pc, frame->frame,
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
+    return deprecated_read_register_dummy (get_frame_pc (frame),
+					   get_frame_base (frame),
 					   E_PC_REGNUM);
   else
-    return frame->extra_info->from_pc;
+    return get_frame_extra_info (frame)->from_pc;
 }
 
 static void
 h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  if (!fi->extra_info)
+  if (!get_frame_extra_info (fi))
     {
-      fi->extra_info = (struct frame_extra_info *)
-        frame_obstack_alloc (sizeof (struct frame_extra_info));
-      fi->extra_info->from_pc = 0;
-      fi->extra_info->args_pointer = 0;		/* Unknown */
-      fi->extra_info->locals_pointer = 0;	/* Unknown */
+      frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
+      get_frame_extra_info (fi)->from_pc = 0;
+      get_frame_extra_info (fi)->args_pointer = 0;		/* Unknown */
+      get_frame_extra_info (fi)->locals_pointer = 0;	/* Unknown */
       
-      if (!fi->pc)
+      if (!get_frame_pc (fi))
         {
-	  if (fi->next)
-	    fi->pc = h8300_frame_saved_pc (fi->next);
+	  if (get_next_frame (fi))
+	    deprecated_update_frame_pc_hack (fi, h8300_frame_saved_pc (get_next_frame (fi)));
 	}
       h8300_frame_init_saved_regs (fi);
     }
@@ -541,9 +547,10 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static CORE_ADDR
 h8300_frame_locals_address (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				   get_frame_base (fi)))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
-  return fi->extra_info->locals_pointer;
+  return get_frame_extra_info (fi)->locals_pointer;
 }
 
 /* Return the address of the argument block for the frame
@@ -552,9 +559,10 @@ h8300_frame_locals_address (struct frame_info *fi)
 static CORE_ADDR
 h8300_frame_args_address (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
+				   get_frame_base (fi)))
     return (CORE_ADDR) 0;	/* Not sure what else to do... */
-  return fi->extra_info->args_pointer;
+  return get_frame_extra_info (fi)->args_pointer;
 }
 
 /* Round N up or down to the nearest multiple of UNIT.
@@ -747,7 +755,9 @@ h8300_pop_frame (void)
   unsigned regno;
   struct frame_info *frame = get_current_frame ();
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
+				   get_frame_base (frame),
+				   get_frame_base (frame)))
     {
       generic_pop_dummy_frame ();
     }
@@ -757,16 +767,16 @@ h8300_pop_frame (void)
 	{
 	  /* Don't forget E_SP_REGNUM is a frame_saved_regs struct is the
 	     actual value we want, not the address of the value we want.  */
-	  if (frame->saved_regs[regno] && regno != E_SP_REGNUM)
+	  if (get_frame_saved_regs (frame)[regno] && regno != E_SP_REGNUM)
 	    write_register (regno,
-			    read_memory_integer (frame->saved_regs[regno],
+			    read_memory_integer (get_frame_saved_regs (frame)[regno],
 			    			 BINWORD));
-	  else if (frame->saved_regs[regno] && regno == E_SP_REGNUM)
-	    write_register (regno, frame->frame + 2 * BINWORD);
+	  else if (get_frame_saved_regs (frame)[regno] && regno == E_SP_REGNUM)
+	    write_register (regno, get_frame_base (frame) + 2 * BINWORD);
 	}
 
       /* Don't forget to update the PC too!  */
-      write_register (E_PC_REGNUM, frame->extra_info->from_pc);
+      write_register (E_PC_REGNUM, get_frame_extra_info (frame)->from_pc);
     }
   flush_cached_frames ();
 }
@@ -1114,7 +1124,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, h8300_saved_pc_after_call);
   set_gdbarch_frame_saved_pc (gdbarch, h8300_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, h8300_skip_prologue);
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_frame_args_address (gdbarch, h8300_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, h8300_frame_locals_address);
 
@@ -1134,9 +1143,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     frameless_look_for_prologue);
-
-  /* W/o prototype, coerce float args to double. */
-  /* set_gdbarch_coerce_float_to_double (gdbarch, standard_coerce_float_to_double); */
 
   /*
    * Call Dummies

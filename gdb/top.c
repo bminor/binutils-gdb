@@ -1,7 +1,7 @@
 /* Top level stuff for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1357,7 +1357,7 @@ print_gdb_version (struct ui_file *stream)
 
   /* Second line is a copyright notice. */
 
-  fprintf_filtered (stream, "Copyright 2002 Free Software Foundation, Inc.\n");
+  fprintf_filtered (stream, "Copyright 2003 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on
@@ -2124,19 +2124,4 @@ gdb_init (char *argv0)
      it wants GDB to revert to the CLI, it should clear init_ui_hook. */
   if (init_ui_hook)
     init_ui_hook (argv0);
-
-  /* Install the default UI */
-  if (!init_ui_hook)
-    {
-      uiout = cli_out_new (gdb_stdout);
-
-      /* All the interpreters should have had a look at things by now.
-	 Initialize the selected interpreter. */
-      if (interpreter_p)
-	{
-	  fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
-			      interpreter_p);
-	  exit (1);
-	}
-    }
 }

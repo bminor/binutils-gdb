@@ -174,7 +174,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_XSTORMY16_REL_12",	/* name */
-	 TRUE,			/* partial_inplace */
+	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x0fff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */

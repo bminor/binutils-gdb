@@ -1,22 +1,22 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -41,9 +41,9 @@ static struct bfd_hash_entry *link_hash_newfunc
 static struct bfd_link_hash_table *elf_i386_link_hash_table_create
   PARAMS ((bfd *));
 static bfd_boolean create_got_section
-  PARAMS((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static bfd_boolean elf_i386_create_dynamic_sections
-  PARAMS((bfd *, struct bfd_link_info *));
+  PARAMS ((bfd *, struct bfd_link_info *));
 static void elf_i386_copy_indirect_symbol
   PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
 	   struct elf_link_hash_entry *));
@@ -51,9 +51,9 @@ static int elf_i386_tls_transition
   PARAMS ((struct bfd_link_info *, int, int));
 
 static bfd_boolean elf_i386_mkobject
-  PARAMS((bfd *));
+  PARAMS ((bfd *));
 static bfd_boolean elf_i386_object_p
-  PARAMS((bfd *));
+  PARAMS ((bfd *));
 static bfd_boolean elf_i386_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
@@ -88,7 +88,7 @@ static enum elf_reloc_type_class elf_i386_reloc_type_class
 static bfd_boolean elf_i386_finish_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
 
-#define USE_REL	1		/* 386 uses REL relocations instead of RELA */
+#define USE_REL	1		/* 386 uses REL relocations instead of RELA.  */
 
 #include "elf/i386.h"
 
@@ -3423,11 +3423,8 @@ elf_i386_post_process_headers (abfd, link_info)
 }
 
 #undef	elf_backend_post_process_headers
-#define	elf_backend_post_process_headers      elf_i386_post_process_headers
-
-#define	elf32_bed			elf32_i386_fbsd_bed
+#define	elf_backend_post_process_headers	elf_i386_post_process_headers
+#undef	elf32_bed
+#define	elf32_bed				elf32_i386_fbsd_bed
 
 #include "elf32-target.h"
-
-#undef	elf_backend_post_process_headers
-#undef	elf32_bed

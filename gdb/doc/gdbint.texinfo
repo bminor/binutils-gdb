@@ -8,7 +8,7 @@
 
 @ifinfo
 This file documents the internals of the GNU debugger @value{GDBN}.
-Copyright 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,2002
+Copyright 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,2002,2003
    Free Software Foundation, Inc.
 Contributed by Cygnus Solutions.  Written by John Gilmore.
 Second Edition by Stan Shebs.
@@ -50,8 +50,8 @@ Software Foundation raise funds for GNU development.''
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001, 2002
-   Free Software Foundation, Inc.
+Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,
+   2002, 2003  Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -1841,7 +1841,6 @@ The file @file{mdebugread.c} implements reading for this format.
 DWARF 1 is a debugging format that was originally designed to be
 used with ELF in SVR4 systems.
 
-@c OBSOLETE CHILL_PRODUCER
 @c GCC_PRODUCER
 @c GPLUS_PRODUCER
 @c LCC_PRODUCER
@@ -2296,9 +2295,8 @@ always linked in.)
 
 @item USG
 Means that System V (prior to SVR4) include files are in use.  (FIXME:
-This symbol is abused in @file{infrun.c}, @file{regex.c},
-@file{remote-nindy.c}, and @file{utils.c} for other things, at the
-moment.)
+This symbol is abused in @file{infrun.c}, @file{regex.c}, and
+@file{utils.c} for other things, at the moment.)
 
 @item lint
 Define this to help placate @code{lint} in some situations.
@@ -2424,9 +2422,12 @@ Here are the functions that make up the OS ABI framework:
 Return the name of the OS ABI corresponding to @var{osabi}.
 @end deftypefun
 
-@deftypefun void gdbarch_register_osabi (enum bfd_architecture @var{arch}, enum gdb_osabi @var{osabi}, void (*@var{init_osabi})(struct gdbarch_info @var{info}, struct gdbarch *@var{gdbarch}))
+@deftypefun void gdbarch_register_osabi (enum bfd_architecture @var{arch}, unsigned long @var{machine}, enum gdb_osabi @var{osabi}, void (*@var{init_osabi})(struct gdbarch_info @var{info}, struct gdbarch *@var{gdbarch}))
 Register the OS ABI handler specified by @var{init_osabi} for the
-architecture/OS ABI pair specified by @var{arch} and @var{osabi}.
+architecture, machine type and OS ABI specified by @var{arch},
+@var{machine} and @var{osabi}.  In most cases, a value of zero for the
+machine type, which implies the architecture's default machine type,
+will suffice.
 @end deftypefun
 
 @deftypefun void gdbarch_register_osabi_sniffer (enum bfd_architecture @var{arch}, enum bfd_flavour @var{flavour}, enum gdb_osabi (*@var{sniffer})(bfd *@var{abfd}))
@@ -2911,18 +2912,6 @@ machine.
 
 @table @code
 
-@item ADDITIONAL_OPTIONS
-@itemx ADDITIONAL_OPTION_CASES
-@itemx ADDITIONAL_OPTION_HANDLER
-@itemx ADDITIONAL_OPTION_HELP
-@findex ADDITIONAL_OPTION_HELP
-@findex ADDITIONAL_OPTION_HANDLER
-@findex ADDITIONAL_OPTION_CASES
-@findex ADDITIONAL_OPTIONS
-These are a set of macros that allow the addition of additional command
-line options to @value{GDBN}.  They are currently used only for the unsupported
-i960 Nindy target, and should not be used in any other configuration.
-
 @item ADDR_BITS_REMOVE (addr)
 @findex ADDR_BITS_REMOVE
 If a raw machine instruction address includes any bits that are not
@@ -2987,16 +2976,6 @@ Store in @var{buf} a pointer of type @var{type} representing the address
 This macro may safely assume that @var{type} is either a pointer or a
 C@t{++} reference type.
 @xref{Target Architecture Definition, , Pointers Are Not Always Addresses}.
-
-@item BEFORE_MAIN_LOOP_HOOK
-@findex BEFORE_MAIN_LOOP_HOOK
-Define this to expand into any code that you want to execute before the
-main loop starts.  Although this is not, strictly speaking, a target
-conditional, that is how it is currently being used.  Note that if a
-configuration were to define it one way for a host and a different way
-for the target, @value{GDBN} will probably not compile, let alone run
-correctly.  This macro is currently used only for the unsupported i960 Nindy
-target, and should not be used in any other configuration.
 
 @item BELIEVE_PCC_PROMOTION
 @findex BELIEVE_PCC_PROMOTION
@@ -3142,61 +3121,11 @@ and to cancel any deferred stores.
 
 Currently only implemented correctly for native Sparc configurations?
 
-@item COERCE_FLOAT_TO_DOUBLE (@var{formal}, @var{actual})
-@findex COERCE_FLOAT_TO_DOUBLE
-@cindex promotion to @code{double}
-@cindex @code{float} arguments
-@cindex prototyped functions, passing arguments to
-@cindex passing arguments to prototyped functions
-Return non-zero if GDB should promote @code{float} values to
-@code{double} when calling a non-prototyped function.  The argument
-@var{actual} is the type of the value we want to pass to the function.
-The argument @var{formal} is the type of this argument, as it appears in
-the function's definition.  Note that @var{formal} may be zero if we
-have no debugging information for the function, or if we're passing more
-arguments than are officially declared (for example, varargs).  This
-macro is never invoked if the function definitely has a prototype.
-
-How you should pass arguments to a function depends on whether it was
-defined in K&R style or prototype style.  If you define a function using
-the K&R syntax that takes a @code{float} argument, then callers must
-pass that argument as a @code{double}.  If you define the function using
-the prototype syntax, then you must pass the argument as a @code{float},
-with no promotion.
-
-Unfortunately, on certain older platforms, the debug info doesn't
-indicate reliably how each function was defined.  A function type's
-@code{TYPE_FLAG_PROTOTYPED} flag may be unset, even if the function was
-defined in prototype style.  When calling a function whose
-@code{TYPE_FLAG_PROTOTYPED} flag is unset, GDB consults the
-@code{COERCE_FLOAT_TO_DOUBLE} macro to decide what to do.
-
-@findex standard_coerce_float_to_double
-For modern targets, it is proper to assume that, if the prototype flag
-is unset, that can be trusted: @code{float} arguments should be promoted
-to @code{double}.  You should use the function
-@code{standard_coerce_float_to_double} to get this behavior.
-
-@findex default_coerce_float_to_double
-For some older targets, if the prototype flag is unset, that doesn't
-tell us anything.  So we guess that, if we don't have a type for the
-formal parameter (@i{i.e.}, the first argument to
-@code{COERCE_FLOAT_TO_DOUBLE} is null), then we should promote it;
-otherwise, we should leave it alone.  The function
-@code{default_coerce_float_to_double} provides this behavior; it is the
-default value, for compatibility with older configurations.
-
 @item int CONVERT_REGISTER_P(@var{regnum})
 @findex CONVERT_REGISTER_P
 Return non-zero if register @var{regnum} can represent data values in a
 non-standard form.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
-
-@item DBX_PARM_SYMBOL_CLASS
-@findex DBX_PARM_SYMBOL_CLASS
-Hook for the @code{SYMBOL_CLASS} of a parameter when decoding DBX symbol
-information.  In the i960, parameters can be stored as locals or as
-args, depending on the type of the debug record.
 
 @item DECR_PC_AFTER_BREAK
 @findex DECR_PC_AFTER_BREAK
@@ -3274,10 +3203,6 @@ If not defined, @code{EXTRACT_RETURN_VALUE} is used.
 @findex EXTRACT_STRUCT_VALUE_ADDRESS_P
 Predicate for @code{EXTRACT_STRUCT_VALUE_ADDRESS}.
 
-@item FLOAT_INFO
-@findex FLOAT_INFO
-Deprecated in favor of @code{PRINT_FLOAT_INFO}.
-
 @item FP_REGNUM
 @findex FP_REGNUM
 If the virtual frame pointer is kept in a register, then define this
@@ -3319,34 +3244,19 @@ Given @var{frame}, return a pointer to the calling frame.
 
 @item FRAME_CHAIN_VALID(@var{chain}, @var{thisframe})
 @findex FRAME_CHAIN_VALID
-Define this to be an expression that returns zero if the given frame is
-an outermost frame, with no caller, and nonzero otherwise.  Several
-common definitions are available:
-
-@itemize @bullet
-@item
-@code{file_frame_chain_valid} is nonzero if the chain pointer is nonzero
-and given frame's PC is not inside the startup file (such as
-@file{crt0.o}).
-
-@item
-@code{func_frame_chain_valid} is nonzero if the chain
-pointer is nonzero and the given frame's PC is not in @code{main} or a
-known entry point function (such as @code{_start}).
-
-@item
-@code{generic_file_frame_chain_valid} and
-@code{generic_func_frame_chain_valid} are equivalent implementations for
-targets using generic dummy frames.
-@end itemize
+Define this to be an expression that returns zero if the given frame is an
+outermost frame, with no caller, and nonzero otherwise.  Most normal
+situations can be handled without defining this macro, including @code{NULL}
+chain pointers, dummy frames, and frames whose PC values are inside the
+startup file (e.g.@: @file{crt0.o}), inside @code{main}, or inside
+@code{_start}.
 
 @item FRAME_INIT_SAVED_REGS(@var{frame})
 @findex FRAME_INIT_SAVED_REGS
 See @file{frame.h}.  Determines the address of all registers in the
 current stack frame storing each in @code{frame->saved_regs}.  Space for
 @code{frame->saved_regs} shall be allocated by
-@code{FRAME_INIT_SAVED_REGS} using either
-@code{frame_saved_regs_zalloc} or @code{frame_obstack_alloc}.
+@code{FRAME_INIT_SAVED_REGS} using @code{frame_saved_regs_zalloc}.
 
 @code{FRAME_FIND_SAVED_REGS} and @code{EXTRA_FRAME_INFO} are deprecated.
 
@@ -3451,7 +3361,7 @@ routine that handles inter-space procedure calls on PA-RISC.
 @findex INIT_EXTRA_FRAME_INFO
 If additional information about the frame is required this should be
 stored in @code{frame->extra_info}.  Space for @code{frame->extra_info}
-is allocated using @code{frame_obstack_alloc}.
+is allocated using @code{frame_extra_info_zalloc}.
 
 @item DEPRECATED_INIT_FRAME_PC (@var{fromleaf}, @var{prev})
 @findex DEPRECATED_INIT_FRAME_PC
@@ -3527,13 +3437,6 @@ method like @code{INTEGER_TO_ADDRESS} certainly makes it possible for
 @xref{Target Architecture Definition, , Pointers Are Not Always
 Addresses}.
 
-@item IS_TRAPPED_INTERNALVAR (@var{name})
-@findex IS_TRAPPED_INTERNALVAR
-This is an ugly hook to allow the specification of special actions that
-should occur as a side-effect of setting the value of a variable
-internal to @value{GDBN}.  Currently only used by the h8500.  Note that this
-could be either a host or target conditional.
-
 @item NEED_TEXT_START_END
 @findex NEED_TEXT_START_END
 Define this if @value{GDBN} should determine the start and end addresses of the
@@ -3566,6 +3469,28 @@ Convert the raw contents of register @var{regnum} into a value of type
 Return the raw size of @var{reg}; defaults to the size of the register's
 virtual type.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
+
+@item register_reggroup_p (@var{gdbarch}, @var{regnum}, @var{reggroup})
+@findex register_reggroup_p
+@cindex register groups
+Return non-zero if register @var{regnum} is a member of the register
+group @var{reggroup}.
+
+By default, registers are grouped as follows:
+
+@table @code
+@item float_reggroup
+Any register with a valid name and a floating-point type.
+@item vector_reggroup
+Any register with a valid name and a vector type.
+@item general_reggroup
+Any register with a valid name and a type other than vector or
+floating-point.  @samp{float_reggroup}.
+@item save_reggroup
+@itemx restore_reggroup
+@itemx all_reggroup
+Any register with a valid name.
+@end table
 
 @item REGISTER_VIRTUAL_SIZE (@var{reg})
 @findex REGISTER_VIRTUAL_SIZE
@@ -3709,11 +3634,6 @@ The number of the ``next program counter'' register, if defined.
 If non-zero, round arguments to a boundary of this many bits before
 pushing them on the stack.
 
-@item PRINT_REGISTER_HOOK (@var{regno})
-@findex PRINT_REGISTER_HOOK
-If defined, this must be a function that prints the contents of the
-given register to standard output.
-
 @item PRINT_TYPELESS_INTEGER
 @findex PRINT_TYPELESS_INTEGER
 This is an obscure substitute for @code{print_longest} that seems to
@@ -3778,10 +3698,6 @@ for parameters/results have been allocated on the stack.
 @findex SDB_REG_TO_REGNUM
 Define this to convert sdb register numbers into @value{GDBN} regnums.  If not
 defined, no conversion will be done.
-
-@c OBSOLETE @item SHIFT_INST_REGS
-@c OBSOLETE @findex SHIFT_INST_REGS
-@c OBSOLETE (Only used for m88k targets.)
 
 @item SKIP_PERMANENT_BREAKPOINT
 @findex SKIP_PERMANENT_BREAKPOINT
@@ -5457,62 +5373,6 @@ target-dependent @file{.h} and @file{.c} files used for your
 configuration.
 @end itemize
 
-@section Configuring @value{GDBN} for Release
-
-@cindex preparing a release
-@cindex making a distribution tarball
-From the top level directory (containing @file{gdb}, @file{bfd},
-@file{libiberty}, and so on):
-
-@smallexample
-make -f Makefile.in gdb.tar.gz
-@end smallexample
-
-@noindent
-This will properly configure, clean, rebuild any files that are
-distributed pre-built (e.g. @file{c-exp.tab.c} or @file{refcard.ps}),
-and will then make a tarfile.  (If the top level directory has already
-been configured, you can just do @code{make gdb.tar.gz} instead.)
-
-This procedure requires:
-
-@itemize @bullet
-
-@item 
-symbolic links;
-
-@item
-@code{makeinfo} (texinfo2 level);
-
-@item
-@TeX{};
-
-@item
-@code{dvips};
-
-@item
-@code{yacc} or @code{bison}.
-@end itemize
-
-@noindent
-@dots{} and the usual slew of utilities (@code{sed}, @code{tar}, etc.).
-
-@subheading TEMPORARY RELEASE PROCEDURE FOR DOCUMENTATION
-
-@file{gdb.texinfo} is currently marked up using the texinfo-2 macros,
-which are not yet a default for anything (but we have to start using
-them sometime).
-
-For making paper, the only thing this implies is the right generation of
-@file{texinfo.tex} needs to be included in the distribution.
-
-For making info files, however, rather than duplicating the texinfo2
-distribution, generate @file{gdb-all.texinfo} locally, and include the
-files @file{gdb.info*} in the distribution.  Note the plural;
-@code{makeinfo} will split the document into one overall file and five
-or so included files.
-
-
 @node Releasing GDB
 
 @chapter Releasing @value{GDBN}
@@ -6044,6 +5904,17 @@ $  ( cd  dejagnu/src/dejagnu && autoconf )
 @subsubheading Do the dirty work
 
 This is identical to the process used to create the daily snapshot.
+
+@smallexample
+$  for m in gdb insight
+do
+( cd $m/src && gmake -f src-release $m.tar )
+done
+$  ( m=dejagnu; cd $m/src && gmake -f src-release $m.tar.bz2 )
+@end smallexample
+
+If the top level source directory does not have @file{src-release}
+(@value{GDBN} version 5.3.1 or earlier), try these commands instead:
 
 @smallexample
 $  for m in gdb insight

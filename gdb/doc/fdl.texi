@@ -197,9 +197,9 @@ J. Preserve the network location, if any, given in the Document for
    You may omit a network location for a work that was published at
    least four years before the Document itself, or if the original
    publisher of the version it refers to gives permission.@*
-K. In any section entitled ``Acknowledgments'' or ``Dedications'',
+K. In any section entitled ``Acknowledgements'' or ``Dedications'',
    preserve the section's title, and preserve in the section all the
-   substance and tone of each of the contributor acknowledgments
+   substance and tone of each of the contributor acknowledgements
    and/or dedications given therein.@*
 L. Preserve all the Invariant Sections of the Document,
    unaltered in their text and in their titles.  Section numbers
@@ -257,7 +257,7 @@ Invariant Sections in the license notice of the combined work.
 
 In the combination, you must combine any sections entitled ``History''
 in the various original documents, forming one section entitled
-``History''; likewise combine any sections entitled ``Acknowledgments'',
+``History''; likewise combine any sections entitled ``Acknowledgements'',
 and any sections entitled ``Dedications.''  You must delete all sections
 entitled ``Endorsements.''
 @sp 1

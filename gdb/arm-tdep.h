@@ -1,5 +1,5 @@
 /* Common target dependent code for GDB on ARM systems.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,8 +17,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
-
-#include "osabi.h"
 
 /* Register numbers of various important registers.  Note that some of
    these values are "real" register numbers, and correspond to the
@@ -124,8 +122,6 @@ enum arm_float_model
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
-  enum gdb_osabi osabi;		/* OS/ABI of inferior.  */
-
   enum arm_float_model fp_model; /* Floating point calling conventions.  */
 
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 

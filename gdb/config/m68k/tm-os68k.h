@@ -1,5 +1,5 @@
 /* Parameters for execution on VxWorks m68k's, for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1998 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1998, 2003 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB.
@@ -37,11 +37,3 @@
 
 #undef	FRAME_CHAIN
 #define FRAME_CHAIN(thisframe) ((thisframe)->frame? read_memory_integer ((thisframe)->frame, 4): 0)
-
-/* If the chain pointer is zero (either because the saved value fetched
-   by FRAME_CHAIN was zero, or because the current FP was zero so FRAME_CHAIN
-   never fetched anything), we are at the top of the stack.  */
-/* We are guaranteed to have a zero frame pointer at bottom of stack, too. */
-
-#undef FRAME_CHAIN_VALID
-#define FRAME_CHAIN_VALID(chain, thisframe) nonnull_frame_chain_valid (chain, thisframe)

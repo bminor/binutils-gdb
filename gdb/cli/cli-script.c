@@ -1093,7 +1093,7 @@ define_command (char *comname, int from_tty)
 
   /* Look it up, and verify that we got an exact match.  */
   c = lookup_cmd (&tem, cmdlist, "", -1, 1);
-  if (c && !STREQ (comname, c->name))
+  if (c && strcmp (comname, c->name) != 0)
     c = 0;
 
   if (c)
@@ -1126,7 +1126,7 @@ define_command (char *comname, int from_tty)
       /* Look up cmd it hooks, and verify that we got an exact match.  */
       tem = comname + hook_name_size;
       hookc = lookup_cmd (&tem, cmdlist, "", -1, 0);
-      if (hookc && !STREQ (comname + hook_name_size, hookc->name))
+      if (hookc && strcmp (comname + hook_name_size, hookc->name) != 0)
 	hookc = 0;
       if (!hookc)
 	{
@@ -1228,7 +1228,7 @@ struct source_cleanup_lines_args
 };
 
 static void
-source_cleanup_lines (PTR args)
+source_cleanup_lines (void *args)
 {
   struct source_cleanup_lines_args *p =
   (struct source_cleanup_lines_args *) args;

@@ -289,13 +289,13 @@ v850ice_wndproc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	  result = TRUE;
 	  break;
 	case STATE_CHANGE_STEPI:
-	  if (!catch_errors ((catch_errors_ftype *) ice_stepi, (PTR) (int) lParam, "",
+	  if (!catch_errors ((catch_errors_ftype *) ice_stepi, (int) lParam, "",
 			     RETURN_MASK_ALL))
 	    printf_unfiltered ("stepi errored\n");
 	  result = TRUE;
 	  break;
 	case STATE_CHANGE_NEXTI:
-	  if (!catch_errors ((catch_errors_ftype *) ice_nexti, (PTR) (int) lParam, "",
+	  if (!catch_errors ((catch_errors_ftype *) ice_nexti, (int) lParam, "",
 			     RETURN_MASK_ALL))
 	    printf_unfiltered ("nexti errored\n");
 	  result = TRUE;

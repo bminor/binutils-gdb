@@ -1,7 +1,8 @@
 /* Variables that describe the inferior process running under GDB:
    Where it is, why it stopped, and how to step it.
-   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -185,11 +186,12 @@ extern CORE_ADDR read_fp (void);
 
 extern CORE_ADDR generic_target_read_fp (void);
 
-extern CORE_ADDR unsigned_pointer_to_address (struct type *type, void *buf);
+extern CORE_ADDR unsigned_pointer_to_address (struct type *type, const void *buf);
 
 extern void unsigned_address_to_pointer (struct type *type, void *buf,
 					 CORE_ADDR addr);
-extern CORE_ADDR signed_pointer_to_address (struct type *type, void *buf);
+extern CORE_ADDR signed_pointer_to_address (struct type *type,
+					    const void *buf);
 extern void address_to_signed_pointer (struct type *type, void *buf,
 				       CORE_ADDR addr);
 
@@ -416,8 +418,6 @@ extern int attach_flag;
 
 /* Possible values for CALL_DUMMY_LOCATION.  */
 #define ON_STACK 1
-#define BEFORE_TEXT_END 2
-#define AFTER_TEXT_END 3
 #define AT_ENTRY_POINT 4
 
 #if !defined (CALL_DUMMY_ADDRESS)
@@ -474,24 +474,6 @@ extern int attach_flag;
 
 
 /* Are we in a call dummy? */
-
-/* NOTE: cagney/2002-11-24: Targets need to both switch to generic
-   dummy frames, and use generic_pc_in_call_dummy().  The generic
-   version should be able to handle all cases since that code works by
-   saving the address of the dummy's breakpoint (where ever it is).  */
-
-extern int deprecated_pc_in_call_dummy_before_text_end (CORE_ADDR pc,
-							CORE_ADDR sp,
-							CORE_ADDR frame_address);
-
-/* NOTE: cagney/2002-11-24: Targets need to both switch to generic
-   dummy frames, and use generic_pc_in_call_dummy().  The generic
-   version should be able to handle all cases since that code works by
-   saving the address of the dummy's breakpoint (where ever it is).  */
-
-extern int deprecated_pc_in_call_dummy_after_text_end (CORE_ADDR pc,
-						       CORE_ADDR sp,
-						       CORE_ADDR frame_address);
 
 /* NOTE: cagney/2002-11-24: Targets need to both switch to generic
    dummy frames, and use generic_pc_in_call_dummy().  The generic

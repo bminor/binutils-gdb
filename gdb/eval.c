@@ -1,7 +1,8 @@
 /* Evaluate expressions for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -186,7 +187,7 @@ get_label (register struct expression *exp, int *pos)
     return NULL;
 }
 
-/* This function evaluates tuples (in (OBSOLETE) Chill) or
+/* This function evaluates tuples (in (the deleted) Chill) or
    brace-initializers (in C/C++) for structure types.  */
 
 static struct value *
@@ -326,10 +327,11 @@ evaluate_struct_tuple (struct value *struct_val,
 }
 
 /* Recursive helper function for setting elements of array tuples for
-   (OBSOLETE) Chill.  The target is ARRAY (which has bounds LOW_BOUND
-   to HIGH_BOUND); the element value is ELEMENT; EXP, POS and NOSIDE
-   are as usual.  Evaluates index expresions and sets the specified
-   element(s) of ARRAY to ELEMENT.  Returns last index value.  */
+   (the deleted) Chill.  The target is ARRAY (which has bounds
+   LOW_BOUND to HIGH_BOUND); the element value is ELEMENT; EXP, POS
+   and NOSIDE are as usual.  Evaluates index expresions and sets the
+   specified element(s) of ARRAY to ELEMENT.  Returns last index
+   value.  */
 
 static LONGEST
 init_array_element (struct value *array, struct value *element,

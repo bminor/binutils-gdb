@@ -3,11 +3,24 @@
 
 *** Changes since GDB 5.3:
 
+* d10v `regs' command deprecated
+
+The `info registers' command has been updated so that it displays the
+registers using a format identical to the old `regs' command.
+
+* Profiling support
+
+A new command, "maint set profile on/off", has been added.  This command can
+be used to enable or disable profiling while running GDB, to profile a
+session or a set of commands.  In addition there is a new configure switch,
+"--enable-profiling", which will cause GDB to be compiled with profiling
+data, for more informative profiling results.
+
 * Default MI syntax changed to "mi2".
 
 The default MI (machine interface) syntax, enabled by the command line
 option "-i=mi", has been changed to "mi2".  The previous MI syntax,
-"mi1", can be enabled by sepcifying the option "-i=mi1".
+"mi1", can be enabled by specifying the option "-i=mi1".
 
 Support for the original "mi0" syntax (included in GDB 5.0) has been
 removed.
@@ -17,9 +30,34 @@ Fix for gdb/672: update changelist is now output in mi list format.
 Fix for gdb/702: a -var-assign that updates the value now shows up
                  in a subsequent -var-update.
 
+* OBSOLETE configurations and files
+
+Configurations that have been declared obsolete in this release have
+been commented out.  Unless there is activity to revive these
+configurations, the next release of GDB will have their sources
+permanently REMOVED.
+
+Mitsubishi M32R/D w/simulator			m32r-*-elf*
+Z8000 simulator		  		z8k-zilog-none 	  or z8ksim
+Matsushita MN10200 w/simulator			mn10200-*-*
+H8/500 simulator 			h8500-hitachi-hms or h8500hms
+
 * REMOVED configurations and files
 
 V850EA ISA				
+Motorola Delta 88000 running Sys V		m88k-motorola-sysv  or  delta88
+IBM AIX PS/2					i[3456]86-*-aix
+i386 running Mach 3.0				i[3456]86-*-mach3*
+i386 running Mach				i[3456]86-*-mach*
+i386 running OSF/1				i[3456]86-*osf1mk*
+HP/Apollo 68k Family				m68*-apollo*-sysv*,
+						m68*-apollo*-bsd*,
+						m68*-hp-bsd*, m68*-hp-hpux*
+Argonaut Risc Chip (ARC)			arc-*-*
+Mitsubishi D30V					d30v-*-*
+Fujitsu FR30					fr30-*-elf*
+OS/9000						i[34]86-*-os9k
+I960 with MON960				i960-*-coff
 
 * MIPS $fp behavior changed
 

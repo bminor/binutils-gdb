@@ -5,16 +5,8 @@ EXECUTABLES = ambiguous annota2 anon-union cplusfuncs cttiadd \
 	derivation inherit local member-ptr method misc \
         overload ovldbreak ref-typ ref-typ2 templates userdef virtfunc namespace ref-types
 
-all: 
-	@echo "Nothing to be done for all..."
-
-info:
-install-info:
-dvi:
-install:
-uninstall: force
-installcheck:
-check:
+all info install-info dvi install uninstall installcheck check:
+	@echo "Nothing to be done for $@..."
 
 clean mostlyclean:
 	-rm -f *~ *.o *.ci
@@ -22,6 +14,3 @@ clean mostlyclean:
 
 distclean maintainer-clean realclean: clean
 	-rm -f Makefile config.status config.log
-
-Makefile: $(srcdir)/Makefile.in $(srcdir)/configure.in
-	$(SHELL) ./config.status --recheck

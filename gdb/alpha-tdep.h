@@ -1,5 +1,5 @@
 /* Common target dependent code for GDB on Alpha systems.
-   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2002 Free
+   Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2002, 2003 Free
    Software Foundation, Inc.
 
    This file is part of GDB.
@@ -22,15 +22,13 @@
 #ifndef ALPHA_TDEP_H
 #define ALPHA_TDEP_H
 
-#include "osabi.h"
-
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places;  REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
 #define ALPHA_REGISTER_SIZE 8
 
 /* Number of machine registers.  */
-#define ALPHA_NUM_REGS 66
+#define ALPHA_NUM_REGS 67
 
 /* Total amount of space needed to store our copies of the machine's
    register state.  */
@@ -63,6 +61,7 @@
 #define ALPHA_FPCR_REGNUM   63  /* Floating point control register */
 #define ALPHA_PC_REGNUM     64  /* Contains program counter */
 #define ALPHA_FP_REGNUM     65  /* Virtual frame pointer */
+#define ALPHA_UNIQUE_REGNUM 66	/* PAL_rduniq value */
 
 /* The alpha has two different virtual pointers for arguments and locals.
    
@@ -81,8 +80,6 @@
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
-  enum gdb_osabi osabi;		/* OS/ABI of inferior.  */
-
   CORE_ADDR vm_min_address;	/* used by heuristic_proc_start */
 
   /* If PC is inside a dynamically-generated signal trampoline function

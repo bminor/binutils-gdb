@@ -2,7 +2,7 @@
    functions and pc values.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -37,41 +37,12 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "dummy-frame.h"
+#include "command.h"
+#include "gdbcmd.h"
 
 /* Prototypes for exported functions. */
 
 void _initialize_blockframe (void);
-
-/* A default FRAME_CHAIN_VALID, in the form that is suitable for most
-   targets.  If FRAME_CHAIN_VALID returns zero it means that the given
-   frame is the outermost one and has no caller. */
-
-int
-file_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
-{
-  return ((chain) != 0
-	  && !inside_entry_file (frame_pc_unwind (thisframe)));
-}
-
-/* Use the alternate method of avoiding running up off the end of the
-   frame chain or following frames back into the startup code.  See
-   the comments in objfiles.h. */
-
-int
-func_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
-{
-  return ((chain) != 0
-	  && !inside_main_func (get_frame_pc (thisframe))
-	  && !inside_entry_func (get_frame_pc (thisframe)));
-}
-
-/* A very simple method of determining a valid frame */
-
-int
-nonnull_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
-{
-  return ((chain) != 0);
-}
 
 /* Is ADDR inside the startup file?  Note that if your machine
    has a way to detect the bottom of the stack, there is no need
@@ -637,24 +608,6 @@ block_innermost_frame (const struct block *block)
    below is for infrun.c, which may give the macro a pc without that
    subtracted out.  */
 
-extern CORE_ADDR text_end;
-
-int
-deprecated_pc_in_call_dummy_before_text_end (CORE_ADDR pc, CORE_ADDR sp,
-					     CORE_ADDR frame_address)
-{
-  return ((pc) >= text_end - CALL_DUMMY_LENGTH
-	  && (pc) <= text_end + DECR_PC_AFTER_BREAK);
-}
-
-int
-deprecated_pc_in_call_dummy_after_text_end (CORE_ADDR pc, CORE_ADDR sp,
-					    CORE_ADDR frame_address)
-{
-  return ((pc) >= text_end
-	  && (pc) <= text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK);
-}
-
 /* Is the PC in a call dummy?  SP and FRAME_ADDRESS are the bottom and
    top of the stack frame which we are checking, where "bottom" and
    "top" refer to some section of memory which contains the code for
@@ -690,34 +643,42 @@ deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
 	  && (pc) <= (CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK));
 }
 
-
 /* Function: frame_chain_valid 
    Returns true for a user frame or a call_function_by_hand dummy frame,
-   and false for the CRT0 start-up frame.  Purpose is to terminate backtrace */
+   and false for the CRT0 start-up frame.  Purpose is to terminate backtrace.  */
 
 int
-generic_file_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
+frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame_pc_unwind (fi), fp, fp))
-    return 1;			/* don't prune CALL_DUMMY frames */
-  else				/* fall back to default algorithm (see frame.h) */
-    return (fp != 0
-	    && (INNER_THAN (get_frame_base (fi), fp)
-		|| get_frame_base (fi) == fp)
-	    && !inside_entry_file (frame_pc_unwind (fi)));
-}
-
-int
-generic_func_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
-{
+  /* Don't prune CALL_DUMMY frames.  */
   if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
       && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
-    return 1;			/* don't prune CALL_DUMMY frames */
-  else				/* fall back to default algorithm (see frame.h) */
-    return (fp != 0
-	    && (INNER_THAN (get_frame_base (fi), fp)
-		|| get_frame_base (fi) == fp)
-	    && !inside_main_func (get_frame_pc (fi))
-	    && !inside_entry_func (get_frame_pc (fi)));
-}
+    return 1;
 
+  /* If the new frame pointer is zero, then it isn't valid.  */
+  if (fp == 0)
+    return 0;
+  
+  /* If the new frame would be inside (younger than) the previous frame,
+     then it isn't valid.  */
+  if (INNER_THAN (fp, get_frame_base (fi)))
+    return 0;
+  
+  /* If we're already inside the entry function for the main objfile, then it
+     isn't valid.  */
+  if (inside_entry_func (get_frame_pc (fi)))
+    return 0;
+
+  /* If we're inside the entry file, it isn't valid.  */
+  /* NOTE/drow 2002-12-25: should there be a way to disable this check?  It
+     assumes a single small entry file, and the way some debug readers (e.g.
+     dbxread) figure out which object is the entry file is somewhat hokey.  */
+  if (inside_entry_file (frame_pc_unwind (fi)))
+      return 0;
+
+  /* If the architecture has a custom FRAME_CHAIN_VALID, call it now.  */
+  if (FRAME_CHAIN_VALID_P ())
+    return FRAME_CHAIN_VALID (fp, fi);
+
+  return 1;
+}

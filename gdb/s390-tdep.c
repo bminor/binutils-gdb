@@ -1,6 +1,6 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
@@ -285,12 +285,12 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
   save_link_regidx = subtract_sp_regidx = 0;
   if (fextra_info)
     {
-      if (fi && fi->frame)
+      if (fi && get_frame_base (fi))
 	{
-          orig_sp = fi->frame;
+          orig_sp = get_frame_base (fi);
           if (! init_extra_info && fextra_info->initialised)
             orig_sp += fextra_info->stack_bought;
-	  saved_regs = fi->saved_regs;
+	  saved_regs = get_frame_saved_regs (fi);
 	}
       if (init_extra_info || !fextra_info->initialised)
 	{
@@ -316,18 +316,19 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
       if (instr[0] == S390_SYSCALL_OPCODE && test_pc == pc)
 	{
 	  good_prologue = 1;
-	  if (saved_regs && fextra_info && fi->next && fi->next->extra_info
-	      && fi->next->extra_info->sigcontext)
+	  if (saved_regs && fextra_info && get_next_frame (fi)
+	      && get_frame_extra_info (get_next_frame (fi))
+	      && get_frame_extra_info (get_next_frame (fi))->sigcontext)
 	    {
 	      /* We are backtracing from a signal handler */
-	      save_reg_addr = fi->next->extra_info->sigcontext +
+	      save_reg_addr = get_frame_extra_info (get_next_frame (fi))->sigcontext +
 		REGISTER_BYTE (S390_GP0_REGNUM);
 	      for (regidx = 0; regidx < S390_NUM_GPRS; regidx++)
 		{
 		  saved_regs[S390_GP0_REGNUM + regidx] = save_reg_addr;
 		  save_reg_addr += S390_GPR_SIZE;
 		}
-	      save_reg_addr = fi->next->extra_info->sigcontext +
+	      save_reg_addr = get_frame_extra_info (get_next_frame (fi))->sigcontext +
 		(GDB_TARGET_IS_ESAME ? S390X_SIGREGS_FP0_OFFSET :
 		 S390_SIGREGS_FP0_OFFSET);
 	      for (regidx = 0; regidx < S390_NUM_FPRS; regidx++)
@@ -771,10 +772,10 @@ s390_function_start (struct frame_info *fi)
 {
   CORE_ADDR function_start = 0;
 
-  if (fi->extra_info && fi->extra_info->initialised)
-    function_start = fi->extra_info->function_start;
-  else if (fi->pc)
-    function_start = get_pc_function_start (fi->pc);
+  if (get_frame_extra_info (fi) && get_frame_extra_info (fi)->initialised)
+    function_start = get_frame_extra_info (fi)->function_start;
+  else if (get_frame_pc (fi))
+    function_start = get_pc_function_start (get_frame_pc (fi));
   return function_start;
 }
 
@@ -787,14 +788,14 @@ s390_frameless_function_invocation (struct frame_info *fi)
   struct frame_extra_info fextra_info, *fextra_info_ptr;
   int frameless = 0;
 
-  if (fi->next == NULL)		/* no may be frameless */
+  if (get_next_frame (fi) == NULL)		/* no may be frameless */
     {
-      if (fi->extra_info)
-	fextra_info_ptr = fi->extra_info;
+      if (get_frame_extra_info (fi))
+	fextra_info_ptr = get_frame_extra_info (fi);
       else
 	{
 	  fextra_info_ptr = &fextra_info;
-	  s390_get_frame_info (s390_sniff_pc_function_start (fi->pc, fi),
+	  s390_get_frame_info (s390_sniff_pc_function_start (get_frame_pc (fi), fi),
 			       fextra_info_ptr, fi, 1);
 	}
       frameless = ((fextra_info_ptr->stack_bought == 0));
@@ -829,11 +830,10 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
       if (sighandler_fi)
 	{
 	  if (s390_frameless_function_invocation (sighandler_fi))
-	    orig_sp = sighandler_fi->frame;
+	    orig_sp = get_frame_base (sighandler_fi);
 	  else
 	    orig_sp = ADDR_BITS_REMOVE ((CORE_ADDR)
-					read_memory_integer (sighandler_fi->
-							     frame,
+					read_memory_integer (get_frame_base (sighandler_fi),
 							     S390_GPR_SIZE));
 	  if (orig_sp && sigcaller_pc)
 	    {
@@ -904,12 +904,12 @@ s390_init_frame_pc_first (int next_fromleaf, struct frame_info *fi)
 void
 s390_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
-  fi->extra_info = frame_obstack_alloc (sizeof (struct frame_extra_info));
-  if (fi->pc)
-    s390_get_frame_info (s390_sniff_pc_function_start (fi->pc, fi),
-			 fi->extra_info, fi, 1);
+  frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
+  if (get_frame_pc (fi))
+    s390_get_frame_info (s390_sniff_pc_function_start (get_frame_pc (fi), fi),
+			 get_frame_extra_info (fi), fi, 1);
   else
-    s390_memset_extra_info (fi->extra_info);
+    s390_memset_extra_info (get_frame_extra_info (fi));
 }
 
 /* If saved registers of frame FI are not known yet, read and cache them.
@@ -922,17 +922,19 @@ s390_frame_init_saved_regs (struct frame_info *fi)
 
   int quick;
 
-  if (fi->saved_regs == NULL)
+  if (get_frame_saved_regs (fi) == NULL)
     {
       /* zalloc memsets the saved regs */
       frame_saved_regs_zalloc (fi);
-      if (fi->pc)
+      if (get_frame_pc (fi))
 	{
-	  quick = (fi->extra_info && fi->extra_info->initialised
-		   && fi->extra_info->good_prologue);
-	  s390_get_frame_info (quick ? fi->extra_info->function_start :
-			       s390_sniff_pc_function_start (fi->pc, fi),
-			       fi->extra_info, fi, !quick);
+	  quick = (get_frame_extra_info (fi)
+		   && get_frame_extra_info (fi)->initialised
+		   && get_frame_extra_info (fi)->good_prologue);
+	  s390_get_frame_info (quick
+			       ? get_frame_extra_info (fi)->function_start
+			       : s390_sniff_pc_function_start (get_frame_pc (fi), fi),
+			       get_frame_extra_info (fi), fi, !quick);
 	}
     }
 }
@@ -944,33 +946,35 @@ s390_frame_args_address (struct frame_info *fi)
 {
 
   /* Apparently gdb already knows gdb_args_offset itself */
-  return fi->frame;
+  return get_frame_base (fi);
 }
 
 
 static CORE_ADDR
 s390_frame_saved_pc_nofix (struct frame_info *fi)
 {
-  if (fi->extra_info && fi->extra_info->saved_pc_valid)
-    return fi->extra_info->saved_pc;
+  if (get_frame_extra_info (fi) && get_frame_extra_info (fi)->saved_pc_valid)
+    return get_frame_extra_info (fi)->saved_pc;
 
-  if (deprecated_generic_find_dummy_frame (fi->pc, fi->frame))
-    return deprecated_read_register_dummy (fi->pc, fi->frame, S390_PC_REGNUM);
+  if (deprecated_generic_find_dummy_frame (get_frame_pc (fi),
+					   get_frame_base (fi)))
+    return deprecated_read_register_dummy (get_frame_pc (fi),
+					   get_frame_base (fi), S390_PC_REGNUM);
 
   s390_frame_init_saved_regs (fi);
-  if (fi->extra_info)
+  if (get_frame_extra_info (fi))
     {
-      fi->extra_info->saved_pc_valid = 1;
-      if (fi->extra_info->good_prologue
-          && fi->saved_regs[S390_RETADDR_REGNUM])
-        fi->extra_info->saved_pc
+      get_frame_extra_info (fi)->saved_pc_valid = 1;
+      if (get_frame_extra_info (fi)->good_prologue
+          && get_frame_saved_regs (fi)[S390_RETADDR_REGNUM])
+        get_frame_extra_info (fi)->saved_pc
           = ADDR_BITS_REMOVE (read_memory_integer
-                              (fi->saved_regs[S390_RETADDR_REGNUM],
+                              (get_frame_saved_regs (fi)[S390_RETADDR_REGNUM],
                                S390_GPR_SIZE));
       else
-        fi->extra_info->saved_pc
+        get_frame_extra_info (fi)->saved_pc
           = ADDR_BITS_REMOVE (read_register (S390_RETADDR_REGNUM));
-      return fi->extra_info->saved_pc;
+      return get_frame_extra_info (fi)->saved_pc;
     }
   return 0;
 }
@@ -980,19 +984,20 @@ s390_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR saved_pc = 0, sig_pc;
 
-  if (fi->extra_info && fi->extra_info->sig_fixed_saved_pc_valid)
-    return fi->extra_info->sig_fixed_saved_pc;
+  if (get_frame_extra_info (fi)
+      && get_frame_extra_info (fi)->sig_fixed_saved_pc_valid)
+    return get_frame_extra_info (fi)->sig_fixed_saved_pc;
   saved_pc = s390_frame_saved_pc_nofix (fi);
 
-  if (fi->extra_info)
+  if (get_frame_extra_info (fi))
     {
-      fi->extra_info->sig_fixed_saved_pc_valid = 1;
+      get_frame_extra_info (fi)->sig_fixed_saved_pc_valid = 1;
       if (saved_pc)
 	{
 	  if (s390_is_sigreturn (saved_pc, fi, NULL, &sig_pc))
 	    saved_pc = sig_pc;
 	}
-      fi->extra_info->sig_fixed_saved_pc = saved_pc;
+      get_frame_extra_info (fi)->sig_fixed_saved_pc = saved_pc;
     }
   return saved_pc;
 }
@@ -1008,8 +1013,10 @@ s390_frame_chain (struct frame_info *thisframe)
 {
   CORE_ADDR prev_fp = 0;
 
-  if (deprecated_generic_find_dummy_frame (thisframe->pc, thisframe->frame))
-    return deprecated_read_register_dummy (thisframe->pc, thisframe->frame,
+  if (deprecated_generic_find_dummy_frame (get_frame_pc (thisframe),
+					   get_frame_base (thisframe)))
+    return deprecated_read_register_dummy (get_frame_pc (thisframe),
+					   get_frame_base (thisframe),
 					   S390_SP_REGNUM);
   else
     {
@@ -1018,7 +1025,7 @@ s390_frame_chain (struct frame_info *thisframe)
       struct frame_extra_info prev_fextra_info;
 
       memset (&prev_fextra_info, 0, sizeof (prev_fextra_info));
-      if (thisframe->pc)
+      if (get_frame_pc (thisframe))
 	{
 	  CORE_ADDR saved_pc, sig_pc;
 
@@ -1042,28 +1049,28 @@ s390_frame_chain (struct frame_info *thisframe)
 							 frame_pointer_saved_pc
 							 ? 11 : 15)),
 					 S390_GPR_SIZE);
-	  thisframe->extra_info->sigcontext = sregs;
+	  get_frame_extra_info (thisframe)->sigcontext = sregs;
 	}
       else
 	{
-	  if (thisframe->saved_regs)
+	  if (get_frame_saved_regs (thisframe))
 	    {
 	      int regno;
 
               if (prev_fextra_info.frame_pointer_saved_pc
-                  && thisframe->saved_regs[S390_FRAME_REGNUM])
+                  && get_frame_saved_regs (thisframe)[S390_FRAME_REGNUM])
                 regno = S390_FRAME_REGNUM;
               else
                 regno = S390_SP_REGNUM;
 
-	      if (thisframe->saved_regs[regno])
+	      if (get_frame_saved_regs (thisframe)[regno])
                 {
                   /* The SP's entry of `saved_regs' is special.  */
                   if (regno == S390_SP_REGNUM)
-                    prev_fp = thisframe->saved_regs[regno];
+                    prev_fp = get_frame_saved_regs (thisframe)[regno];
                   else
                     prev_fp =
-                      read_memory_integer (thisframe->saved_regs[regno],
+                      read_memory_integer (get_frame_saved_regs (thisframe)[regno],
                                            S390_GPR_SIZE);
                 }
 	    }
@@ -1217,14 +1224,14 @@ s390_pop_frame_regular (struct frame_info *frame)
   write_register (S390_PC_REGNUM, FRAME_SAVED_PC (frame));
 
   /* Restore any saved registers.  */
-  if (frame->saved_regs)
+  if (get_frame_saved_regs (frame))
     {
       for (regnum = 0; regnum < NUM_REGS; regnum++)
-        if (frame->saved_regs[regnum] != 0)
+        if (get_frame_saved_regs (frame)[regnum] != 0)
           {
             ULONGEST value;
             
-            value = read_memory_unsigned_integer (frame->saved_regs[regnum],
+            value = read_memory_unsigned_integer (get_frame_saved_regs (frame)[regnum],
                                                   REGISTER_RAW_SIZE (regnum));
             write_register (regnum, value);
           }
@@ -1232,7 +1239,7 @@ s390_pop_frame_regular (struct frame_info *frame)
       /* Actually cut back the stack.  Remember that the SP's element of
          saved_regs is the old SP itself, not the address at which it is
          saved.  */
-      write_register (S390_SP_REGNUM, frame->saved_regs[S390_SP_REGNUM]);
+      write_register (S390_SP_REGNUM, get_frame_saved_regs (frame)[S390_SP_REGNUM]);
     }
 
   /* Throw away any cached frame information.  */
@@ -1741,6 +1748,37 @@ s390_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
   return sp;
 }
 
+static int
+s390_address_class_type_flags (int byte_size, int dwarf2_addr_class)
+{
+  if (byte_size == 4)
+    return TYPE_FLAG_ADDRESS_CLASS_1;
+  else
+    return 0;
+}
+
+static const char *
+s390_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags)
+{
+  if (type_flags & TYPE_FLAG_ADDRESS_CLASS_1)
+    return "mode32";
+  else
+    return NULL;
+}
+
+int
+s390_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name,
+				       int *type_flags_ptr)
+{
+  if (strcmp (name, "mode32") == 0)
+    {
+      *type_flags_ptr = TYPE_FLAG_ADDRESS_CLASS_1;
+      return 1;
+    }
+  else
+    return 0;
+}
+
 struct gdbarch *
 s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -1815,7 +1853,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_cannot_fetch_register (gdbarch, s390_cannot_fetch_register);
   set_gdbarch_cannot_store_register (gdbarch, s390_cannot_fetch_register);
   set_gdbarch_use_struct_convention (gdbarch, s390_use_struct_convention);
-  set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_register_name (gdbarch, s390_register_name);
   set_gdbarch_stab_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
@@ -1840,8 +1877,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sizeof_call_dummy_words (gdbarch,
                                        sizeof (s390_call_dummy_words));
   set_gdbarch_call_dummy_words (gdbarch, s390_call_dummy_words);
-  set_gdbarch_coerce_float_to_double (gdbarch,
-                                      standard_coerce_float_to_double);
 
   switch (info.bfd_arch_info->mach)
     {
@@ -1865,6 +1900,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_register_bytes (gdbarch, S390X_REGISTER_BYTES);
+      set_gdbarch_address_class_type_flags (gdbarch,
+                                            s390_address_class_type_flags);
+      set_gdbarch_address_class_type_flags_to_name (gdbarch,
+                                                    s390_address_class_type_flags_to_name);
+      set_gdbarch_address_class_name_to_type_flags (gdbarch,
+                                                    s390_address_class_name_to_type_flags);
       break;
     }
 
