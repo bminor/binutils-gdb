@@ -67,12 +67,14 @@ struct rs6000_framedata
     int saved_gpr;		/* smallest # of saved gpr */
     int saved_fpr;		/* smallest # of saved fpr */
     int saved_vr;               /* smallest # of saved vr */
+    int saved_ev;               /* smallest # of saved ev */
     int alloca_reg;		/* alloca register number (frame ptr) */
     char frameless;		/* true if frameless functions. */
     char nosavedpc;		/* true if pc not saved. */
     int gpr_offset;		/* offset of saved gprs from prev sp */
     int fpr_offset;		/* offset of saved fprs from prev sp */
     int vr_offset;              /* offset of saved vrs from prev sp */
+    int ev_offset;              /* offset of saved evs from prev sp */
     int lr_offset;		/* offset of saved lr */
     int cr_offset;		/* offset of saved cr */
     int vrsave_offset;          /* offset of saved vrsave register */
@@ -359,11 +361,13 @@ rs6000_software_single_step (enum target_signal signal,
    - saved_gpr is the number of the first saved gpr.
    - saved_fpr is the number of the first saved fpr.
    - saved_vr is the number of the first saved vr.
+   - saved_ev is the number of the first saved ev.
    - alloca_reg is the number of the register used for alloca() handling.
    Otherwise -1.
    - gpr_offset is the offset of the first saved gpr from the previous frame.
    - fpr_offset is the offset of the first saved fpr from the previous frame.
    - vr_offset is the offset of the first saved vr from the previous frame.
+   - ev_offset is the offset of the first saved ev from the previous frame.
    - lr_offset is the offset of the saved lr
    - cr_offset is the offset of the saved cr
    - vrsave_offset is the offset of the saved vrsave register
@@ -441,13 +445,16 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
   int lr_reg = -1;
   int cr_reg = -1;
   int vr_reg = -1;
+  int ev_reg = -1;
+  long ev_offset = 0;
   int vrsave_reg = -1;
   int reg;
   int framep = 0;
   int minimal_toc_loaded = 0;
   int prev_insn_was_prologue_insn = 1;
   int num_skip_non_prologue_insns = 0;
-
+  const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (current_gdbarch);
+  
   /* Attempt to find the end of the prologue when no limit is specified.
      Note that refine_prologue_limit() has been written so that it may
      be used to "refine" the limits of non-zero PC values too, but this
@@ -467,6 +474,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
   fdata->saved_gpr = -1;
   fdata->saved_fpr = -1;
   fdata->saved_vr = -1;
+  fdata->saved_ev = -1;
   fdata->alloca_reg = -1;
   fdata->frameless = 1;
   fdata->nosavedpc = 1;
@@ -533,7 +541,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	}
       else if ((op & 0xffff0000) == 0x60000000)
         {
-	  			/* nop */
+	  /* nop */
 	  /* Allow nops in the prologue, but do not consider them to
 	     be part of the prologue unless followed by other prologue
 	     instructions. */
@@ -647,7 +655,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
       else if ((op & 0xfc0007fe) == 0x7c000378 &&	/* mr(.)  Rx,Ry */
                (((op >> 21) & 31) >= 3) &&              /* R3 >= Ry >= R10 */
                (((op >> 21) & 31) <= 10) &&
-               (((op >> 16) & 31) >= fdata->saved_gpr)) /* Rx: local var reg */
+               ((long) ((op >> 16) & 31) >= fdata->saved_gpr)) /* Rx: local var reg */
 	{
 	  continue;
 
@@ -728,7 +736,9 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	 in a pair of insns to save the vector registers on the
 	 stack.  */
       /* 001110 00000 00000 iiii iiii iiii iiii  */
-      else if ((op & 0xffff0000) == 0x38000000)    /* li r0, SIMM */
+      /* 001110 01110 00000 iiii iiii iiii iiii  */
+      else if ((op & 0xffff0000) == 0x38000000         /* li r0, SIMM */
+               || (op & 0xffff0000) == 0x39c00000)     /* li r14, SIMM */
 	{
 	  li_found_pc = pc;
 	  vr_saved_offset = SIGNED_SHORT (op);
@@ -754,6 +764,104 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	    }
 	}
       /* End AltiVec related instructions.  */
+
+      /* Start BookE related instructions.  */
+      /* Store gen register S at (r31+uimm).
+         Any register less than r13 is volatile, so we don't care.  */
+      /* 000100 sssss 11111 iiiii 01100100001 */
+      else if (arch_info->mach == bfd_mach_ppc_e500
+	       && (op & 0xfc1f07ff) == 0x101f0321)    /* evstdd Rs,uimm(R31) */
+	{
+          if ((op & 0x03e00000) >= 0x01a00000)	/* Rs >= r13 */
+	    {
+              unsigned int imm;
+	      ev_reg = GET_SRC_REG (op);
+              imm = (op >> 11) & 0x1f;
+	      ev_offset = imm * 8;
+	      /* If this is the first vector reg to be saved, or if
+		 it has a lower number than others previously seen,
+		 reupdate the frame info.  */
+	      if (fdata->saved_ev == -1 || fdata->saved_ev > ev_reg)
+		{
+		  fdata->saved_ev = ev_reg;
+		  fdata->ev_offset = ev_offset + offset;
+		}
+	    }
+          continue;
+        }
+      /* Store gen register rS at (r1+rB).  */
+      /* 000100 sssss 00001 bbbbb 01100100000 */
+      else if (arch_info->mach == bfd_mach_ppc_e500
+	       && (op & 0xffe007ff) == 0x13e00320)     /* evstddx RS,R1,Rb */
+	{
+          if (pc == (li_found_pc + 4))
+            {
+              ev_reg = GET_SRC_REG (op);
+	      /* If this is the first vector reg to be saved, or if
+                 it has a lower number than others previously seen,
+                 reupdate the frame info.  */
+              /* We know the contents of rB from the previous instruction.  */
+	      if (fdata->saved_ev == -1 || fdata->saved_ev > ev_reg)
+		{
+                  fdata->saved_ev = ev_reg;
+                  fdata->ev_offset = vr_saved_offset + offset;
+		}
+	      vr_saved_offset = -1;
+	      ev_reg = -1;
+	      li_found_pc = 0;
+            }
+          continue;
+        }
+      /* Store gen register r31 at (rA+uimm).  */
+      /* 000100 11111 aaaaa iiiii 01100100001 */
+      else if (arch_info->mach == bfd_mach_ppc_e500
+	       && (op & 0xffe007ff) == 0x13e00321)   /* evstdd R31,Ra,UIMM */
+        {
+          /* Wwe know that the source register is 31 already, but
+             it can't hurt to compute it.  */
+	  ev_reg = GET_SRC_REG (op);
+          ev_offset = ((op >> 11) & 0x1f) * 8;
+	  /* If this is the first vector reg to be saved, or if
+	     it has a lower number than others previously seen,
+	     reupdate the frame info.  */
+	  if (fdata->saved_ev == -1 || fdata->saved_ev > ev_reg)
+	    {
+	      fdata->saved_ev = ev_reg;
+	      fdata->ev_offset = ev_offset + offset;
+	    }
+
+	  continue;
+      	}
+      /* Store gen register S at (r31+r0).
+         Store param on stack when offset from SP bigger than 4 bytes.  */
+      /* 000100 sssss 11111 00000 01100100000 */
+      else if (arch_info->mach == bfd_mach_ppc_e500
+	       && (op & 0xfc1fffff) == 0x101f0320)     /* evstddx Rs,R31,R0 */
+	{
+          if (pc == (li_found_pc + 4))
+            {
+              if ((op & 0x03e00000) >= 0x01a00000)
+		{
+		  ev_reg = GET_SRC_REG (op);
+		  /* If this is the first vector reg to be saved, or if
+		     it has a lower number than others previously seen,
+		     reupdate the frame info.  */
+                  /* We know the contents of r0 from the previous
+                     instruction.  */
+		  if (fdata->saved_ev == -1 || fdata->saved_ev > ev_reg)
+		    {
+		      fdata->saved_ev = ev_reg;
+		      fdata->ev_offset = vr_saved_offset + offset;
+		    }
+		  ev_reg = -1;
+		}
+	      vr_saved_offset = -1;
+	      li_found_pc = 0;
+	      continue;
+            }
+	}
+      /* End BookE related instructions.  */
+
       else
 	{
 	  /* Not a recognized prologue instruction.
@@ -1141,6 +1249,62 @@ ppc_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 
 /* Extract a function return value of type TYPE from raw register array
    REGBUF, and copy that return value into VALBUF in virtual format.  */
+static void
+e500_extract_return_value (struct type *valtype, struct regcache *regbuf, char *valbuf)
+{
+  int offset = 0;
+  int vallen = TYPE_LENGTH (valtype);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
+      && vallen == 8
+      && TYPE_VECTOR (valtype))
+    {
+      regcache_raw_read (regbuf, tdep->ppc_ev0_regnum + 3, valbuf);
+    }
+  else
+    {
+      /* Return value is copied starting from r3.  Note that r3 for us
+         is a pseudo register.  */
+      int offset = 0;
+      int return_regnum = tdep->ppc_gp0_regnum + 3;
+      int reg_size = REGISTER_RAW_SIZE (return_regnum);
+      int reg_part_size;
+      char *val_buffer;
+      int copied = 0;
+      int i = 0;
+
+      /* Compute where we will start storing the value from.  */ 
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+        {
+	  if (vallen <= reg_size)
+	    offset = reg_size - vallen;
+	  else
+	    offset = reg_size + (reg_size - vallen);
+        }
+
+      /* How big does the local buffer need to be?  */
+      if (vallen <= reg_size)
+	val_buffer = alloca (reg_size);
+      else
+	val_buffer = alloca (vallen);
+
+      /* Read all we need into our private buffer.  We copy it in
+         chunks that are as long as one register, never shorter, even
+         if the value is smaller than the register.  */
+      while (copied < vallen)
+        {
+          reg_part_size = REGISTER_RAW_SIZE (return_regnum + i);
+	  /* It is a pseudo/cooked register.  */
+          regcache_cooked_read (regbuf, return_regnum + i,
+				val_buffer + copied);
+          copied += reg_part_size;
+          i++;
+        }
+      /* Put the stuff in the return buffer.  */
+      memcpy (valbuf, val_buffer + offset, vallen);
+    }
+}
 
 static void
 rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
@@ -1394,9 +1558,11 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   if (fdatap->saved_fpr == 0
       && fdatap->saved_gpr == 0
       && fdatap->saved_vr == 0
+      && fdatap->saved_ev == 0
       && fdatap->lr_offset == 0
       && fdatap->cr_offset == 0
-      && fdatap->vr_offset == 0)
+      && fdatap->vr_offset == 0
+      && fdatap->ev_offset == 0)
     frame_addr = 0;
   else
     /* NOTE: cagney/2002-04-14: The ->frame points to the inner-most
@@ -1447,6 +1613,23 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
 	      fi->saved_regs[tdep->ppc_vr0_regnum + i] = vr_addr;
 	      vr_addr += REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
 	    }
+	}
+    }
+
+  /* if != -1, fdatap->saved_ev is the smallest number of saved_ev.
+	All vr's from saved_ev to ev31 are saved. ?????	*/
+  if (tdep->ppc_ev0_regnum != -1 && tdep->ppc_ev31_regnum != -1)
+    {
+      if (fdatap->saved_ev >= 0)
+	{
+	  int i;
+	  CORE_ADDR ev_addr = frame_addr + fdatap->ev_offset;
+	  for (i = fdatap->saved_ev; i < 32; i++)
+	    {
+	      fi->saved_regs[tdep->ppc_ev0_regnum + i] = ev_addr;
+              fi->saved_regs[tdep->ppc_gp0_regnum + i] = ev_addr + 4;
+	      ev_addr += REGISTER_RAW_SIZE (tdep->ppc_ev0_regnum);
+            }
 	}
     }
 
@@ -1801,6 +1984,27 @@ rs6000_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
+static void
+e500_store_return_value (struct type *type, char *valbuf)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  /* Everything is returned in GPR3 and up.  */
+  int copied = 0;
+  int i = 0;
+  int len = TYPE_LENGTH (type);
+  while (copied < len)
+    {
+      int regnum = gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3 + i;
+      int reg_size = REGISTER_RAW_SIZE (regnum);
+      char *reg_val_buf = alloca (reg_size);
+
+      memcpy (reg_val_buf, valbuf + copied, reg_size);
+      copied += reg_size;
+      write_register_gen (regnum, reg_val_buf);
+      i++;
+    }
+}
 
 static void
 rs6000_store_return_value (struct type *type, char *valbuf)
@@ -2553,6 +2757,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 1);
   set_gdbarch_fp_regnum (gdbarch, 1);
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+					       rs6000_extract_return_value);
+  set_gdbarch_store_return_value (gdbarch, rs6000_store_return_value);
 
   if (v->arch == bfd_arch_powerpc)
     switch (v->mach)
@@ -2586,6 +2793,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         set_gdbarch_dwarf2_reg_to_regnum (gdbarch, e500_dwarf2_reg_to_regnum);
         set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
         set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
+        set_gdbarch_extract_return_value (gdbarch, e500_extract_return_value);
+        set_gdbarch_store_return_value (gdbarch, e500_store_return_value);
 	break;
       default:
 	tdep->ppc_vr0_regnum = -1;
@@ -2667,9 +2876,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
   set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_stab_reg_to_regnum);
-
-  set_gdbarch_deprecated_extract_return_value (gdbarch, rs6000_extract_return_value);
-  
   /* Note: kevinb/2002-04-12: I'm not convinced that rs6000_push_arguments()
      is correct for the SysV ABI when the wordsize is 8, but I'm also
      fairly certain that ppc_sysv_abi_push_arguments() will give even
@@ -2683,7 +2889,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_push_arguments (gdbarch, rs6000_push_arguments);
 
   set_gdbarch_store_struct_return (gdbarch, rs6000_store_struct_return);
-  set_gdbarch_store_return_value (gdbarch, rs6000_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
   set_gdbarch_pop_frame (gdbarch, rs6000_pop_frame);
 

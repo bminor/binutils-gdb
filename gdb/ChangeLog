@@ -1,5 +1,19 @@
 2002-08-22  Elena Zannoni  <ezannoni@redhat.com>
 
+	* rs6000-tdep.c (struct rs6000_framedata): Add saved_ev and
+	ev_offset fields.
+	(skip_prologue): Add support for BookE/e500 instructions.
+	(e500_extract_return_value): New function.
+	(frame_get_saved_regs): Add support for saving ev registers and
+	pseudo gpr's.
+	(e500_store_return_value): New function.
+	(rs6000_gdbarch_init): Move up default intializations of
+	deprecated_extract_return_value and store_return_value.  Overwrite
+	init of store_return_value with e500 specific version.
+	Set extract_return_value for e500.
+	
+2002-08-22  Elena Zannoni  <ezannoni@redhat.com>
+
 	* blockframe.c (generic_call_dummy_register_unwind): Use
 	regcache_cooked_read to catch cases in which the variable is
 	stored in a pseudo register.
