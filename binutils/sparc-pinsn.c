@@ -180,32 +180,34 @@ memcpy(&insn,buffer, sizeof (insn));
 
 	    if (opcode->args[0] != ',')
 	      fputs (" ", stream);
-	    for (s = opcode->args; *s != '\0'; ++s) {
-		while (*s == ',') {
-			fputs (",", stream);
-			++s;
+	    for (s = opcode->args; *s != '\0'; ++s)
+	      {
+		while (*s == ',')
+		  {
+		    fputs (",", stream);
+		    ++s;
 
-			switch (*s) {
-			case 'a':
-				fputs ("a", stream);
-				++s;
-				continue;
+		    switch (*s) {
+		    case 'a':
+		      fputs ("a", stream);
+		      ++s;
+		      continue;
 #ifndef NO_V9
-			case 'N':
-				fputs("pn", stream);
-				++s;
-				continue;
+		    case 'N':
+		      fputs("pn", stream);
+		      ++s;
+		      continue;
 
-			case 'T':
-				fputs("pt", stream);
-				++s;
-				continue;
-#endif /* NO_V9 */
+		    case 'T':
+		      fputs("pt", stream);
+		      ++s;
+		      continue;
+#endif				/* NO_V9 */
 
-			default:
-				break;
-			} /* switch on arg */
-		} /* while there are comma started args */
+		    default:
+		      break;
+		    }		/* switch on arg */
+		  }		/* while there are comma started args */
 
 		fputs (" ", stream);
 			
@@ -268,7 +270,7 @@ memcpy(&insn,buffer, sizeof (insn));
 
 		  case 'h':
 		    fprintf (stream, "%%hi(%#x)",
-				      (unsigned int) insn.imm22 << 10);
+			     (unsigned int) insn.imm22 << 10);
 		    break;
 
 		  case 'i':
@@ -279,7 +281,7 @@ memcpy(&insn,buffer, sizeof (insn));
 
 		      /* Check to see whether we have a 1+i, and take
 			 note of that fact.
-
+			 
 			 Note: because of the way we sort the table,
 			 we will be matching 1+i rather than i+1,
 			 so it is OK to assume that i is after +,
@@ -309,21 +311,21 @@ memcpy(&insn,buffer, sizeof (insn));
 				   stream);
 		    break;
 
-	    case 'Y':
+		  case 'Y':
 		    fputs ("%amr", stream);
 		    break;
 
-#endif /* NO_V9 */
+#endif				/* NO_V9 */
 
-	    case 'M':
+		  case 'M':
 		    fprintf(stream, "%%asr%d", insn.rs1);
 		    break;
 		    
-	    case 'm':
+		  case 'm':
 		    fprintf(stream, "%%asr%d", insn.rd);
 		    break;
 		    
-	    case 'L':
+		  case 'L':
 		    print_address ((bfd_vma) memaddr + insn.disp30 * 4,
 				   stream);
 		    break;
@@ -333,7 +335,7 @@ memcpy(&insn,buffer, sizeof (insn));
 		      /* Special case for `unimp'.  Don't try to turn
 			 it's operand into a function offset.  */
 		      fprintf (stream, "%#x",
-					(unsigned) (((int) insn.disp22 << 10) >> 10));
+			       (unsigned) (((int) insn.disp22 << 10) >> 10));
 		    else
 		      /* We cannot trust the compiler to sign-extend
 			 when extracting the bitfield, hence the shifts.  */
