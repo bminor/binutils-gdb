@@ -1,3 +1,8 @@
+Fri Oct 30 15:14:49 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * dllwrap.c: change all references to cygwin32_ to cygwin_,
+	change Cygwin target def to CYGWIN.
+
 Wed Oct 28 10:31:19 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* objdump.c (disassemble_data): Replace 'unsigned long' with
