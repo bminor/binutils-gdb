@@ -382,11 +382,16 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 
   /* If sigtramp is in the u area, it counts as a function (especially
      important for step_1).  */
-  if (SIGTRAMP_START_P ()
+  /* NOTE: cagney/2004-03-16: Determining if the PC is in a signal
+     trampoline typically depends on the detailed analysis of dynamic
+     information obtained from the inferior yet this function is
+     expected to work using static information obtained from the
+     symbol table.  */
+  if (DEPRECATED_SIGTRAMP_START_P ()
       && DEPRECATED_PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
     {
-      cache_pc_function_low = SIGTRAMP_START (mapped_pc);
-      cache_pc_function_high = SIGTRAMP_END (mapped_pc);
+      cache_pc_function_low = DEPRECATED_SIGTRAMP_START (mapped_pc);
+      cache_pc_function_high = DEPRECATED_SIGTRAMP_END (mapped_pc);
       cache_pc_function_name = "<sigtramp>";
       cache_pc_function_section = section;
       goto return_cached_value;

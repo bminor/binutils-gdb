@@ -115,8 +115,8 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386bsd_pc_in_sigtramp);
 
   /* Allow the recognition of sigtramps as a function named <sigtramp>.  */
-  set_gdbarch_sigtramp_start (gdbarch, i386bsd_sigtramp_start);
-  set_gdbarch_sigtramp_end (gdbarch, i386bsd_sigtramp_end);
+  set_gdbarch_deprecated_sigtramp_start (gdbarch, i386bsd_sigtramp_start);
+  set_gdbarch_deprecated_sigtramp_end (gdbarch, i386bsd_sigtramp_end);
 
   /* Assume SunOS-style shared libraries.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch,

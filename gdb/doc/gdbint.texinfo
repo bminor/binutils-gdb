@@ -3411,10 +3411,10 @@ The epilogue of a function is defined as the part of a function where
 the stack frame of the function already has been destroyed up to the
 final `return from function call' instruction.
 
-@item SIGTRAMP_START (@var{pc})
-@findex SIGTRAMP_START
-@itemx SIGTRAMP_END (@var{pc})
-@findex SIGTRAMP_END
+@item DEPRECATED_SIGTRAMP_START (@var{pc})
+@findex DEPRECATED_SIGTRAMP_START
+@itemx DEPRECATED_SIGTRAMP_END (@var{pc})
+@findex DEPRECATED_SIGTRAMP_END
 Define these to be the start and end address of the @code{sigtramp} for the
 given @var{pc}.  On machines where the address is just a compile time
 constant, the macro expansion will typically just ignore the supplied

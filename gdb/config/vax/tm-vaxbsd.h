@@ -29,7 +29,7 @@
 /* On the VAX, sigtramp is in the u area.  Can't check the exact
    addresses because for cross-debugging we don't have VAX include
    files around.  This should be close enough.  */
-#define SIGTRAMP_START(pc)	STACK_END_ADDR
-#define SIGTRAMP_END(pc)	0x80000000
+#define DEPRECATED_SIGTRAMP_START(pc)	STACK_END_ADDR
+#define DEPRECATED_SIGTRAMP_END(pc)	0x80000000
 
 #endif /* TM_VAXBSD_H */

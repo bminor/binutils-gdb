@@ -216,8 +216,8 @@ i386obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigtramp_start = i386obsd_sigtramp_start_addr;
   tdep->sigtramp_end = i386obsd_sigtramp_end_addr;
   set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, i386obsd_pc_in_sigtramp);
-  set_gdbarch_sigtramp_start (gdbarch, i386obsd_sigtramp_start);
-  set_gdbarch_sigtramp_end (gdbarch, i386obsd_sigtramp_end);
+  set_gdbarch_deprecated_sigtramp_start (gdbarch, i386obsd_sigtramp_start);
+  set_gdbarch_deprecated_sigtramp_end (gdbarch, i386obsd_sigtramp_end);
 
   /* OpenBSD has a `struct sigcontext' that's different from the
      original 4.3 BSD.  */

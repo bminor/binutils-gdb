@@ -1,3 +1,17 @@
+2004-03-23  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (SIGTRAMP_START, SIGTRAMP_END): Deprecate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* i386obsd-tdep.c (i386obsd_init_abi): Update.
+	* i386nbsd-tdep.c (i386nbsd_init_abi): Update.
+	* i386bsd-tdep.c (i386bsd_init_abi): Update.
+	* config/vax/tm-vaxbsd.h (DEPRECATED_SIGTRAMP_END) 
+	(DEPRECATED_SIGTRAMP_START): Update.
+	* config/m68k/tm-nbsd.h (DEPRECATED_SIGTRAMP_END) 
+	(DEPRECATED_SIGTRAMP_START): Update.
+	* blockframe.c (find_pc_sect_partial_function): Update.
+	* arch-utils.c (legacy_pc_in_sigtramp): Update.
+
 2004-03-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* remote.c (remote_open_1): Reopen the exec file and reread symbols

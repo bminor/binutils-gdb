@@ -723,32 +723,12 @@ f:2:IN_SOLIB_CALL_TRAMPOLINE:int:in_solib_call_trampoline:CORE_ADDR pc, char *na
 # Some systems also have trampoline code for returning from shared libs.
 f:2:IN_SOLIB_RETURN_TRAMPOLINE:int:in_solib_return_trampoline:CORE_ADDR pc, char *name:pc, name:::generic_in_solib_return_trampoline::0
 
-# Sigtramp is a routine that the kernel calls (which then calls the
-# signal handler).  On most machines it is a library routine that is
-# linked into the executable.
-#
-# This macro, given a program counter value and the name of the
-# function in which that PC resides (which can be null if the name is
-# not known), returns nonzero if the PC and name show that we are in
-# sigtramp.
-#
-# On most machines just see if the name is sigtramp (and if we have
-# no name, assume we are not in sigtramp).
-#
-# FIXME: cagney/2002-04-21: The function find_pc_partial_function
-# calls find_pc_sect_partial_function() which calls
-# DEPRECATED_PC_IN_SIGTRAMP.  This means DEPRECATED_PC_IN_SIGTRAMP
-# function can't be implemented by doing its own local NAME lookup.
-#
-# FIXME: cagney/2002-04-21: DEPRECATED_PC_IN_SIGTRAMP is something of
-# a mess.  Some code also depends on SIGTRAMP_START and SIGTRAMP_END
-# but other does not.
-#
-# NOTE: cagney/2004-03-16: DEPRECATED_PC_IN_SIGTRAMP has been made
-# obsolete by signal trampoline frame unwind sniffers.
+# NOTE: cagney/2004-03-23: DEPRECATED_SIGTRAMP_START,
+# DEPRECATED_SIGTRAMP_END, and DEPRECATED_PC_IN_SIGTRAMP have all been
+# superseeded by signal trampoline frame sniffers.
 F::DEPRECATED_PC_IN_SIGTRAMP:int:deprecated_pc_in_sigtramp:CORE_ADDR pc, char *name:pc, name:::legacy_pc_in_sigtramp
-F:2:SIGTRAMP_START:CORE_ADDR:sigtramp_start:CORE_ADDR pc:pc
-F:2:SIGTRAMP_END:CORE_ADDR:sigtramp_end:CORE_ADDR pc:pc
+F:2:DEPRECATED_SIGTRAMP_START:CORE_ADDR:deprecated_sigtramp_start:CORE_ADDR pc:pc
+F:2:DEPRECATED_SIGTRAMP_END:CORE_ADDR:deprecated_sigtramp_end:CORE_ADDR pc:pc
 # A target might have problems with watchpoints as soon as the stack
 # frame of the current function has been destroyed.  This mostly happens
 # as the first action in a funtion's epilogue.  in_function_epilogue_p()

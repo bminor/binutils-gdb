@@ -1,6 +1,11 @@
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Deprecate
+	references to SIGTRAMP_START and SIGTRAMP_END.
+
+2004-03-23  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Deprecate
 	references to PC_IN_SIGTRAMP.
 
 2004-03-19  Andrew Cagney  <cagney@redhat.com>
