@@ -1,3 +1,32 @@
+Fri Oct 11 13:03:02 1991  Per Bothner  (bothner at cygnus.com)
+
+	* coffcode.h: Moved ALIGN macro to libbfd.h. Removed i960_align.
+	* libbfd.h: Moved ALIGN macro here.
+	* bout.c (b_out_callback): Replace i960_align by align_power.
+
+	* libaout.h (struct aoutdata):  Added fields page_size,
+	segment_size and exec_bytes_size.  These help generic code
+	(in aoutx.h and libaout.h) to figure out where to align
+	the various segments in a demand paged file.
+	* libaout.h (WRITE_HEADER):  Use new (struct aoutdata) fields
+	to decide if the exec header counts in a_text (text segment size).
+	Also, assume D_PAGED flag is set; don't set it here.
+	* bout.c (b_out_callback): Add initialization of
+	adata fields page_size, segment_size, and exec_bytes_size.
+	* host-aout.c (NAME(host_aout, callback) and
+	NAME(host_aout,mkobject): Ditto.
+	* i386aout.c (aout386_callback) and new aout386_mkobject): Ditto.
+	* newos3.c (newsos3_callback) and new newsos_mkobject): Ditto.
+	* aoutf1.c (sunos4_callback) and new sunos_mkobject): Ditto.
+	* aoutx.h (NAME(aout,some_aout_object_p)): Don't subtract
+	EXEC_BYTES_SIZE from the a_test size; this is only appropriate
+	for some systems (mainly sunos), so do it in the callback instead.
+	Same routine: Add stuff to the THIS_IS_ONLY_DOCUMENTATION comment.
+	* aoutx.h (NAME(aout,set_section_contents): Change the way
+	filepos and size of sections are carried out to support
+	older styles of demand paged executables.
+	
+
 Fri Oct 11 12:33:36 1991  Steve Chamberlain  (steve at cygnus.com)
 
 	* bfd-in.h: Added more macros to COFF_SWAP_TABLE.
