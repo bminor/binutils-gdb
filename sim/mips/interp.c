@@ -494,6 +494,8 @@ sim_open (args)
     s[1] = 0x00000000;
     if (((float)4.01102924346923828125 != *(float *)s) || ((double)523.2939453125 != *(double *)s)) {
       fprintf(stderr,"The host executing the simulator does not seem to have IEEE 754-1985 std FP\n");
+      fprintf(stderr,"*(float *)s = %f (4.01102924346923828125)\n",*(float *)s);
+      fprintf(stderr,"*(double *)s = %f (523.2939453125)\n",*(double *)s);
       exit(1);
     }
   }
@@ -814,7 +816,7 @@ sim_close (quitting)
 #endif /* TRACE */
 
   if (membank)
-   cfree(membank);
+   free(membank); /* cfree not available on all hosts */
   membank = NULL;
 
   return;
@@ -2912,13 +2914,21 @@ Convert(rm,op,from,to)
         /* Round result to nearest representable value. When two
            representable values are equally near, round to the value
            that has a least significant bit of zero (i.e. is even). */
+#if defined(sun)
         tmp = (float)anint((double)tmp);
+#else
+        /* TODO: Provide round-to-nearest */
+#endif
         break;
 
        case FP_RM_TOZERO:
         /* Round result to the value closest to, and not greater in
            magnitude than, the result. */
+#if defined(sun)
         tmp = (float)aint((double)tmp);
+#else
+        /* TODO: Provide round-to-zero */
+#endif
         break;
 
        case FP_RM_TOPINF:
@@ -2960,11 +2970,19 @@ Convert(rm,op,from,to)
 
       switch (rm) {
        case FP_RM_NEAREST:
+#if defined(sun)
         tmp = anint(*(double *)&tmp);
+#else
+        /* TODO: Provide round-to-nearest */
+#endif
         break;
 
        case FP_RM_TOZERO:
+#if defined(sun)
         tmp = aint(*(double *)&tmp);
+#else
+        /* TODO: Provide round-to-zero */
+#endif
         break;
 
        case FP_RM_TOPINF:
