@@ -4,6 +4,40 @@ Wed Mar 25 13:44:18 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(expr_build_unary,expr_build_binary): Add prototypes.
 	* expr.c (expr_build_uconstant): New function.
 	(expr_build_unary,expr_build_binary): New functions.
+start-sanitize-sky
+	* config/tc-dvp.h (md_estimate_size_before_relax): Delete.
+	(md_convert_frag): Delete.
+	(TC_FIX_TYPE): New fields wl,cl,user_value;
+	* config/tc-dvp.c (insert_mpg_marker): New argument ignore.
+	All callers updated.
+	(insert_unpack_marker): New function.
+	(insert_file): New argument insert_marker_arg.  All callers updated.
+	(gif_user_value): New static local.
+	(vif_data_start,vif_data_end): New static locals.
+	(mpgloc_sym,unpackloc_sym): New static locals.
+	(cur_varlen_frag,cur_varlen_insn,cur_varlen_value): Delete.
+	(cur_opcode,cur_operand): New static locals.
+	(endmpg_caller): New enum.
+	(md_pseudo_table): Pass ENDMPG_USER to s_endmpg.
+	(md_begin): Initialize mpgloc_sym, unpackloc_sym.
+	(dvp_fixup): New members user_value,wl,cl;
+	(assemble_vif): Rewrite.
+	(assemble_gif): Tweak name of data start label.
+	(assemble_one_insn): Allow special parser to punt and call the
+	normal expression parser.  Set cur_opcode,cur_operand for md_operand.
+	(md_operand): Handle '*' value for mpgloc,unpackloc.
+	(md_estimate_size_before_relax): New function.
+	(dvp_relax_frag,md_convert_frag): New functions.
+	(md_pcrel_from_section): Handle end data label for variable length
+	vif insns.
+	(md_apply_fix3): Handle count field for variable length vif insns.
+	Handle address field for mpg,unpack.
+	(eval_expr): Initialize user_value,wl,cl fields of the fixup.
+	(cur_vif_insn_length): Delete.
+	(vif_length_value): New function.
+	(install_vif_length): Don't perform logical->physical conversion here.
+	(s_enddirect,s_endmpg,s_endunpack): Rewrite.
+end-sanitize-sky
 
 Wed Mar 25 13:10:42 1998  Bruno Haible  <bruno@linuix.mathematik.uni-karlsruhe.de>
 
