@@ -1,5 +1,5 @@
 /* tc-h8500.c -- Assemble code for the Hitachi H8/500
-   Copyright (C) 1993, 1998 Free Software Foundation.
+   Copyright (C) 1993, 94, 95, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -14,8 +14,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 /*
   Written By Steve Chamberlain
@@ -1253,34 +1254,11 @@ md_show_usage (stream)
 {
 }
 
-int md_short_jump_size;
-
 void
 tc_aout_fix_to_chars ()
 {
   printf (_("call to tc_aout_fix_to_chars \n"));
   abort ();
-}
-
-void
-md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr;
-     addressT to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal (_("failed sanity check."));
-}
-
-void
-md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr, to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal (_("failed sanity check."));
 }
 
 static
@@ -1479,8 +1457,6 @@ md_apply_fix (fixP, val)
 
     }
 }
-
-int md_long_jump_size;
 
 /*
 called just before address relaxation, return the length

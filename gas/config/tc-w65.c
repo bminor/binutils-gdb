@@ -1,5 +1,4 @@
 /* tc-w65.c -- Assemble code for the W65816
-
    Copyright (C) 1995, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
@@ -15,8 +14,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 /*
    Written By Steve Chamberlain
@@ -877,36 +877,12 @@ md_parse_option (c,a)
   return 1;
 }
 
-int md_short_jump_size;
-
 void
 tc_Nout_fix_to_chars ()
 {
   printf (_("call to tc_Nout_fix_to_chars \n"));
   abort ();
 }
-
-void
-md_create_short_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
-     char *ptr;
-     addressT from_Nddr;
-     addressT to_Nddr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal (_("failed sanity check."));
-}
-
-void
-md_create_long_jump (ptr, from_Nddr, to_Nddr, frag, to_symbol)
-     char *ptr;
-     addressT from_Nddr, to_Nddr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal (_("failed sanity check."));
-}
-
 
 /*
 called after relaxing, change the frags so they know how big they are
@@ -1083,8 +1059,6 @@ md_apply_fix (fixP, val)
       abort ();
     }
 }
-
-int md_long_jump_size;
 
 /* Put number into target byte order */
 

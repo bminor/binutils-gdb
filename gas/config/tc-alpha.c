@@ -1,5 +1,5 @@
 /* tc-alpha.c - Processor-specific code for the DEC Alpha AXP CPU.
-   Copyright (C) 1989, 93, 94, 95, 96, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1989, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
    Contributed by Carnegie Mellon University, 1993.
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
@@ -203,8 +203,6 @@ static void s_alpha_text PARAMS ((int));
 static void s_alpha_data PARAMS ((int));
 #ifndef OBJ_ELF
 static void s_alpha_comm PARAMS ((int));
-#endif
-#if defined (OBJ_ECOFF) || defined (OBJ_EVAX)
 static void s_alpha_rdata PARAMS ((int));
 #endif
 #ifdef OBJ_ECOFF
@@ -212,6 +210,7 @@ static void s_alpha_sdata PARAMS ((int));
 #endif
 #ifdef OBJ_ELF
 static void s_alpha_section PARAMS ((int));
+static void s_alpha_prologue PARAMS ((int));
 #endif
 #ifdef OBJ_EVAX
 static void s_alpha_section PARAMS ((int));
@@ -234,11 +233,6 @@ static void alpha_align PARAMS ((int, char *, symbolS *, int));
 
 /* Generic assembler global variables which must be defined by all
    targets.  */
-
-/* These are exported to relaxing code, even though we don't do any
-   relaxing on this processor currently.  */
-int md_short_jump_size = 4;
-int md_long_jump_size = 4;
 
 /* Characters which always start a comment.  */
 const char comment_chars[] = "#";
@@ -3486,6 +3480,36 @@ s_alpha_section (ignore)
   alpha_current_align = 0;
 }
 
+static void
+s_alpha_prologue (ignore)
+     int ignore;
+{
+  symbolS *sym;
+  int arg;
+
+  arg = get_absolute_expression ();
+  demand_empty_rest_of_line ();
+
+  sym = ecoff_get_cur_proc_sym ();
+  know (sym != NULL);
+
+  switch (arg)
+    {
+      case 0: /* No PV required.  */
+	S_SET_OTHER (sym, STO_ALPHA_NOPV);
+	break;
+      case 1: /* Std GP load.  */
+	S_SET_OTHER (sym, STO_ALPHA_STD_GPLOAD);
+	break;
+      case 2: /* Non-std use of PV.  */
+	break;
+
+      default:
+	as_bad (_("Invalid argument %d to .prologue."), arg);
+	break;
+    }  
+}
+
 #endif
 
 #ifdef OBJ_EVAX
@@ -3513,18 +3537,6 @@ s_alpha_section (secid)
   alpha_insn_label = NULL;
   alpha_auto_align_on = 1;
   alpha_current_align = 0;
-}
-
-
-/* .prologue */
-
-static void
-s_alpha_prologue (ignore)
-     int ignore;
-{
-  demand_empty_rest_of_line ();
-
-  return;
 }
 
 
@@ -4346,6 +4358,11 @@ const pseudo_typeS md_pseudo_table[] =
   { "ctors", s_alpha_section, 4},
   { "dtors", s_alpha_section, 5},
 #endif
+#ifdef OBJ_ELF
+  {"prologue", s_alpha_prologue, 0},
+#else
+  {"prologue", s_ignore, 0},
+#endif
   {"gprel32", s_alpha_gprel32, 0},
   {"t_floating", s_alpha_float_cons, 'd'},
   {"s_floating", s_alpha_float_cons, 'f'},
@@ -4360,7 +4377,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"livereg", s_ignore, 0},
   {"base", s_alpha_base, 0},		/*??*/
   {"option", s_ignore, 0},
-  {"prologue", s_ignore, 0},
   {"aent", s_ignore, 0},
   {"ugen", s_ignore, 0},
   {"eflag", s_ignore, 0},

@@ -1,5 +1,6 @@
 /* tc-a29k.c -- Assemble for the AMD 29000.
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 1998
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -14,8 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 /* John Gilmore has reorganized this module somewhat, to make it easier
    to convert it to new machines' assemblers as desired.  There was too
@@ -77,8 +79,6 @@ md_pseudo_table[] =
   {NULL, 0, 0},
 };
 
-int md_short_jump_size = 4;
-int md_long_jump_size = 4;
 #if defined(BFD_HEADERS)
 #ifdef RELSZ
 const int md_reloc_size = RELSZ;	/* Coff headers */
@@ -924,35 +924,12 @@ tc_coff_fix2rtype (fixP)
 
 /* should never be called for 29k */
 void
-md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr, to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal (_("a29k_create_short_jmp\n"));
-}
-
-/* should never be called for 29k */
-void
 md_convert_frag (headers, seg, fragP)
      object_headers *headers;
      segT seg;
      register fragS *fragP;
 {
   as_fatal (_("a29k_convert_frag\n"));
-}
-
-/* should never be called for 29k */
-void
-md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr;
-     addressT from_addr;
-     addressT to_addr;
-     fragS *frag;
-     symbolS *to_symbol;
-{
-  as_fatal (_("a29k_create_long_jump\n"));
 }
 
 /* should never be called for a29k */

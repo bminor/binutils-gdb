@@ -1,3 +1,33 @@
+Fri May 29 18:13:12 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-a29k.h (WORKING_DOT_WORD): Define.
+	* config/tc-alpha.h (WORKING_DOT_WORD): Define.
+	* config/tc-arm.h (WORKING_DOT_WORD): Define.
+	* config/tc-h8300.h (WORKING_DOT_WORD): Define.
+	* config/tc-h8500.h (WORKING_DOT_WORD): Define.
+	* config/tc-hppa.h (WORKING_DOT_WORD): Define.
+	* config/tc-i860.h (WORKING_DOT_WORD): Define.
+	* config/tc-i960.h (WORKING_DOT_WORD): Define.
+	* config/tc-tic30.h (WORKING_DOT_WORD): Define.
+	* config/tc-w65.h (WORKING_DOT_WORD): Define.
+	* config/tc-z8k.h (WORKING_DOT_WORD): Define.
+	* config/tc-a29k.c: Don't define md_short_jump_size,
+ 	md_long_jump_size, md_create_short_jump or md_create_long_jump.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-alpha.h: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-h8500.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-i860.c: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sparc.h: Likewise.
+	* config/tc-tic30.c: Likewise.
+	* config/tc-w65.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+
 Fri May 29 16:03:26 1998  Pat Rankin  <rankin@eql.caltech.edu>
 
 	* config/tc-vax.c (_): Delete this macro used for placeholder

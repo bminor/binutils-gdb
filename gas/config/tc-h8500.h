@@ -1,5 +1,5 @@
 /* This file is tc-h8500.h
-   Copyright (C) 1993, 95, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1993, 95, 97, 1998 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -22,6 +22,8 @@
 #define TC_H8500
 
 #define TARGET_BYTES_BIG_ENDIAN 1
+
+#define WORKING_DOT_WORD
 
 /* This macro translates between an internal fix and an coff reloc type */
 #define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype(fixP)
