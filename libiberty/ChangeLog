@@ -1,3 +1,7 @@
+2000-09-25  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* md5.c: #include "ansidecl.h".
+
 2000-09-14  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* splay-tree.c: #include <stdio.h>.
