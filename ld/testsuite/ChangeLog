@@ -1,3 +1,8 @@
+2003-06-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-srec/srec.exp (run_srec_test): Remove powerpc64 xfails, and
+	xfail for hppa duplicated elsewhere.
+
 2003-06-10  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* ld-mips-elf/rel32-n32.d: Force big endian assembly.
@@ -291,7 +296,7 @@
 	* ld-m68hc11/bug-3331.s: New file.
 
 2003-04-25  Nick Clifton <nickc@redhat.com>
-            J"orn Rennecke <joern.rennecke@superh.com>
+	    J"orn Rennecke <joern.rennecke@superh.com>
 
 	* lib/ld-lib.exp (big_or_little_endian): Also check for -mb and -ml.
 
@@ -382,18 +387,18 @@
 
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
-        * ld-elf/merge.d: xfail xtensa-*-*.
-        * ld-scripts/crossref.exp: Add -mtext-section-literals to CFLAGS
-        for Xtensa targets.
-        * ld-srec/srec.exp: Add -no-relax flag for Xtensa targets.
-        * ld-xtensa/coalesce1.s: New file.
-        * ld-xtensa/coalesce2.s: Likewise.
-        * ld-xtensa/coalesce.exp: Likewise.
-        * ld-xtensa/coalesce.t: Likewise.
-        * ld-xtensa/lcall1.s: Likewise.
-        * ld-xtensa/lcall2.s: Likewise.
-        * ld-xtensa/lcall.exp: Likewise.
-        * ld-xtensa/lcall.t: Likewise.
+	* ld-elf/merge.d: xfail xtensa-*-*.
+	* ld-scripts/crossref.exp: Add -mtext-section-literals to CFLAGS
+	for Xtensa targets.
+	* ld-srec/srec.exp: Add -no-relax flag for Xtensa targets.
+	* ld-xtensa/coalesce1.s: New file.
+	* ld-xtensa/coalesce2.s: Likewise.
+	* ld-xtensa/coalesce.exp: Likewise.
+	* ld-xtensa/coalesce.t: Likewise.
+	* ld-xtensa/lcall1.s: Likewise.
+	* ld-xtensa/lcall2.s: Likewise.
+	* ld-xtensa/lcall.exp: Likewise.
+	* ld-xtensa/lcall.t: Likewise.
 
 2003-03-25  Alexandre Oliva  <aoliva@redhat.com>
 
