@@ -237,7 +237,7 @@ value_nsstring (char *ptr, int len)
 /* Objective-C name demangling.  */
 
 char *
-objc_demangle (const char *mangled)
+objc_demangle (const char *mangled, int options)
 {
   char *demangled, *cp;
 
@@ -700,6 +700,7 @@ const struct language_defn objc_language_defn = {
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   objc_skip_trampoline, 	/* Language specific skip_trampoline */
+  objc_demangle,		/* Language specific symbol demangler */
   {"",     "",    "",  ""},	/* Binary format info */
   {"0%lo",  "0",   "o", ""},	/* Octal format info */
   {"%ld",   "",    "d", ""},	/* Decimal format info */

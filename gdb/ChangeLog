@@ -1,3 +1,24 @@
+2003-04-01  Adam Fedor  <fedor@gnu.org>
+
+	* Makefile.in (c_lang.o, jv_lang.o, language.o): Add $(demangle_h).
+	* language.h (struct language_defn): Add la_demangle.
+	(language_demangle): Declare.
+	* language.c (language_demangle): New function.
+	(unk_lang_demangle): Likewise.
+	(unknown_language_defn, auto_language_defn, local_language_defn):
+        Add ukn_lang_demangle.
+	* ada-lang.c (ada_language_defn): Add NULL for la_demangle element.
+        * f-lang.c, m2-lang.c, p-lang.c, scm-lang.c: Likewise.
+	* c-lang.c (c_language_defn, asm_language_defn): Likewise.
+	(cplus_language_defn): Add cplus_demangle for la_demangle element.
+	* jv-lang.c (java_demangle): New function
+	(java_language_defn): Use it for la_demangle element.
+        * objc-lang.c (objc_demangle): Add options argument
+        (objc_language_defn): Use objc_demangle for la_demangle element.
+	* maint.c (maintenance_demangle): Replace switch with
+	call to language_demangle.
+	* utils.c (fprintf_symbol_filtered): Likewise.
+
 2003-04-01  Andrew Cagney  <cagney@redhat.com>
 
 	* printcmd.c (print_frame_nameless_args): Delete #ifdef

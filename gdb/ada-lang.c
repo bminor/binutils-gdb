@@ -8081,6 +8081,7 @@ const struct language_defn ada_language_defn = {
   ada_val_print,		/* Print a value using appropriate syntax */
   ada_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
 #if 0
   {"8#%lo#", "8#", "o", "#"},	/* Octal format info */

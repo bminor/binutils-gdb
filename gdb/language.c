@@ -44,6 +44,7 @@
 #include "target.h"
 #include "parser-defs.h"
 #include "jv-lang.h"
+#include "demangle.h"
 
 extern void _initialize_language (void);
 
@@ -1361,6 +1362,21 @@ skip_language_trampoline (CORE_ADDR pc)
   return 0;
 }
 
+/* Return demangled language symbol, or NULL.  
+   FIXME: Options are only useful for certain languages and ignored
+   by others, so it would be better to remove them here and have a
+   more flexible demangler for the languages that need it.  
+   FIXME: Sometimes the demangler is invoked when we don't know the
+   language, so we can't use this everywhere.  */
+char *
+language_demangle (const struct language_defn *current_language, 
+				const char *mangled, int options)
+{
+  if (current_language != NULL && current_language->la_demangle)
+    return current_language->la_demangle (mangled, options);
+  return NULL;
+}
+
 
 /* Define the language that is no language.  */
 
@@ -1428,6 +1444,13 @@ static CORE_ADDR unk_lang_trampoline (CORE_ADDR pc)
   return 0;
 }
 
+/* Unknown languages just use the cplus demangler.  */
+static char *unk_lang_demangle (const char *mangled, int options)
+{
+  return cplus_demangle (mangled, options);
+}
+
+
 static struct type **const (unknown_builtin_types[]) =
 {
   0
@@ -1456,6 +1479,7 @@ const struct language_defn unknown_language_defn =
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
+  unk_lang_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -1487,6 +1511,7 @@ const struct language_defn auto_language_defn =
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
+  unk_lang_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -1517,6 +1542,7 @@ const struct language_defn local_language_defn =
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
+  unk_lang_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */

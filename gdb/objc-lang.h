@@ -41,7 +41,7 @@ extern int c_value_print (struct value *, struct ui_file *,
 extern CORE_ADDR lookup_objc_class     (char *classname);
 extern int       lookup_child_selector (char *methodname);
 
-extern char *objc_demangle (const char *mangled);
+extern char *objc_demangle (const char *mangled, int options);
 
 extern int find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc);
 
