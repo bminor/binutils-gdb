@@ -1,3 +1,8 @@
+2002-09-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elfcode.h (elf_slurp_reloc_table_from_section): Check
+	correct relocation count.
+
 2002-09-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	* bfd-in.h (bfd_get_dynamic_symcount): Define.

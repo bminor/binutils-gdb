@@ -1377,6 +1377,7 @@ elf_slurp_reloc_table_from_section (abfd, asect, rel_hdr, reloc_count,
   arelent *relent;
   unsigned int i;
   int entsize;
+  long symcount;
 
   allocated = (PTR) bfd_malloc (rel_hdr->sh_size);
   if (allocated == NULL)
@@ -1419,9 +1420,14 @@ elf_slurp_reloc_table_from_section (abfd, asect, rel_hdr, reloc_count,
       else
 	relent->address = rela.r_offset - asect->vma;
 
+      if (dynamic)
+	symcount = bfd_get_dynamic_symcount (abfd);
+      else
+	symcount = bfd_get_symcount (abfd);
+
       if (ELF_R_SYM (rela.r_info) == 0)
 	relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
-      else if (ELF_R_SYM (rela.r_info) > bfd_get_dynamic_symcount (abfd))
+      else if (ELF_R_SYM (rela.r_info) > symcount)
 	{
 	  (*_bfd_error_handler)
 	    (_("%s(%s): relocation %d has invalid symbol index %ld"),
