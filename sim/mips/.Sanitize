@@ -46,11 +46,11 @@ else
         lose_these_too="${sky_files} ${lose_these_too}"
 fi
 
-vr5400_files="mdmx.igen"
-if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
-        keep_these_too="${vr5400_files} ${keep_these_too}"
+cygnus_files="mdmx.igen"
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+        keep_these_too="${cygnus_files} ${keep_these_too}"
 else
-        lose_these_too="${vr5400_files} ${lose_these_too}"
+        lose_these_too="${cygnus_files} ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
@@ -206,24 +206,24 @@ else
 fi
 
 
-vr5400_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc mdmx.igen vr.igen"
+cygnus_files="ChangeLog configure configure.in sim-main.h interp.c gencode.c mips.igen mips.dc mdmx.igen vr.igen"
 
-if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
-	for i in $vr5400_files ; do
-		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then
+if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
+	for i in $cygnus_files ; do
+		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Keeping vr5400 stuff in $i
+				echo Keeping cygnus stuff in $i
 			fi
 		fi
 	done
 else
 	for i in * ; do
-		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then
+		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"vr5400\" from $i...
+				echo Removing traces of \"cygnus\" from $i...
 			fi
 			cp $i new
-			sed '/start\-sanitize\-vr5400/,/end-\sanitize\-vr5400/d' < $i > new
+			sed '/start\-sanitize\-cygnus/,/end-\sanitize\-cygnus/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
@@ -267,7 +267,7 @@ fi
 
 vrXXXX_files="vr.igen"
 
-if ( echo $* | grep keep\-vr > /dev/null ) ; then
+if ( echo $* | grep keep\-vr > /dev/null ) || ( echo $* | grep keep\-cygnus > /dev/null ) ; then
 	for i in $vrXXXX_files ; do
 		if test ! -d $i && (grep sanitize-vrXXXX $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then

@@ -322,12 +322,12 @@ Sun Nov 23 17:12:58 1997  Andrew Cagney  <cagney@b1.cygnus.com>
  	assembly-language" command.  Replaced by generic "set
  	architecture". Set initial machine using bfd_lookup_arch.
 
-start-sanitize-vr5400
+start-sanitize-cygnus
 Sun Nov 23 16:23:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.tgt (gdb_target): Treat vr5400 as a vr5000.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 Fri Nov 21 19:43:23 1997  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* valops.c (call_function_by_hand): If the function has a

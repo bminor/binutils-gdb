@@ -486,7 +486,7 @@ else
 				echo Removing traces of \"cygnus\" from $i...
 			fi
 			cp $i new
-			sed '/start\-sanitize\-cygnus/,/end-\sanitize\-cygnus/d' < $i > new
+			sed '/start\-sanitize\-cygnus/,/end\-sanitize\-cygnus/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...

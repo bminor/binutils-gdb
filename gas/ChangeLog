@@ -1,3 +1,8 @@
+Mon Aug 10 15:39:56 1998  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-alpha.c (tc_gen_reloc): Bias WEAK symbols just as
+	we do for EXTERN.
+
 Mon Aug 10 15:06:18 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (d30v_align): Always perform alignment request,
@@ -1489,12 +1494,12 @@ Wed Apr 15 10:35:59 1998  Frank Ch. Eigler <fche@cygnus.com>
 	VCALLMSR instruction.
  
 end-sanitize-r5900
-start-sanitize-vr5400
+start-sanitize-cygnus
 Wed Apr 15 07:06:04 1998  Catherine Moore  <clm@cygnus.com>
  
         * config/tc-mips.c (hilo_interlocks): Remove VR5400.
  
-end-sanitize-vr5400
+end-sanitize-cygnus
 Wed Apr 15 07:06:04 1998  Catherine Moore  <clm@cygnus.com>
 
         * config/tc-mips.c (hilo_interlocks): Remove 4300.

@@ -176,11 +176,11 @@ mips64*vr4100*-*-elf*)	gdb_target=vr4xxx ;;
 mips64*vr5000*el-*-elf*)	gdb_target=vr5000el ;;
 mips64*vr5000*-*-elf*)	gdb_target=vr5000
 		configdirs="${configdirs} gdbserver" ;;
-# start-sanitize-vr5400
+# start-sanitize-cygnus
 mips64*vr5400*el-*-elf*)	gdb_target=vr5000el ;;
 mips64*vr5400*-*-elf*)	gdb_target=vr5000
 		configdirs="${configdirs} gdbserver" ;;
-# end-sanitize-vr5400
+# end-sanitize-cygnus
 # start-sanitize-sky
 mips64*r5900*-sky-elf*)	gdb_target=txvu ;;
 # end-sanitize-sky

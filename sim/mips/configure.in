@@ -167,18 +167,18 @@ case "${target}" in
 			sim_igen_machine="-M mipsIV,vr4320 -G gen-multi-sim=mipsIV"
 # end-sanitize-vr4320
 			;;
-# start-sanitize-vr5400
+# start-sanitize-cygnus
   mips64vr54*-*-*)	sim_default_gen=IGEN
 			sim_use_gen=IGEN
 			sim_igen_machine="-M vr5000,vr5400 -G gen-multi-sim=vr5400"
 			;;
-# end-sanitize-vr5400
+# end-sanitize-cygnus
   mips64vr5*-*-*)	sim_default_gen=IGEN
 			sim_use_gen=IGEN
 			sim_igen_machine="-M vr5000"
-# start-sanitize-vr5400
+# start-sanitize-cygnus
 			sim_igen_machine="-M vr5000,vr5400 -G gen-multi-sim=vr5000"
-# end-sanitize-vr5400
+# end-sanitize-cygnus
 			;;
 mips64vr4100-*-*)       echo "NOTE: mips64vr4100 still uses gencode"
 			sim_default_gen=M16
