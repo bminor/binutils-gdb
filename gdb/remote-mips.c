@@ -526,7 +526,7 @@ fputc_readable (int ch, struct ui_file *file)
    ^x notation or in hex.  */
 
 static void
-fputs_readable (char *string, struct ui_file *file)
+fputs_readable (const char *string, struct ui_file *file)
 {
   int c;
 
@@ -540,9 +540,9 @@ fputs_readable (char *string, struct ui_file *file)
  */
 
 int
-mips_expect_timeout (char *string, int timeout)
+mips_expect_timeout (const char *string, int timeout)
 {
-  char *p = string;
+  const char *p = string;
 
   if (remote_debug)
     {
@@ -596,7 +596,7 @@ mips_expect_timeout (char *string, int timeout)
  */
 
 int
-mips_expect (char *string)
+mips_expect (const char *string)
 {
   return mips_expect_timeout (string, 2);
 }
@@ -1499,7 +1499,8 @@ mips_initialize (void)
 /* Open a connection to the remote board.  */
 static void
 common_open (struct target_ops *ops, char *name, int from_tty,
-	     enum mips_monitor_type new_monitor, char *new_monitor_prompt)
+	     enum mips_monitor_type new_monitor,
+	     const char *new_monitor_prompt)
 {
   char *ptype;
   char *serial_port_name;
