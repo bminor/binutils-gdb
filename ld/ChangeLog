@@ -1,3 +1,11 @@
+Sat Jan  1 10:53:35 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* scripttempl/aout.sc: Pad .text to DATA_ALIGNMENT if relocating;
+	needed for i386mach.
+
+	* emulparams/i386mach.sh (SEGMENT_SIZE): Fix again.
+	(PAGE_SIZE): Don't define; not used.
+
 Fri Dec 31 16:12:06 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldgram.y (yyerror): Make argument const char *, and actually
