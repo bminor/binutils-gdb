@@ -1,3 +1,9 @@
+2004-12-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-hpux-tdep.c (child_enable_exception_callback): Use XMALLOC.
+	(hppa_hpux_sigtramp_frame_unwind_cache): Use ARRAY_SIZE.
+	(hppa_hpux_init_abi): Reformat long line.
+
 2004-12-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-hpux-tdep.c: Include "regset.h".

@@ -999,11 +999,9 @@ child_enable_exception_callback (enum exception_event_kind kind, int enable)
       error ("Request to enable unknown or unsupported exception event.");
     }
 
-  /* Copy break address into new sal struct, malloc'ing if needed. */
+  /* Copy break address into new sal struct, malloc'ing if needed.  */
   if (!break_callback_sal)
-    {
-      break_callback_sal = (struct symtab_and_line *) xmalloc (sizeof (struct symtab_and_line));
-    }
+    break_callback_sal = XMALLOC (struct symtab_and_line);
   init_sal (break_callback_sal);
   break_callback_sal->symtab = NULL;
   break_callback_sal->pc = eh_break_addr;
@@ -1171,9 +1169,7 @@ hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
       off += incr;
     }
 
-  for (i = 0; 
-       i < sizeof(hppa_hpux_tramp_reg) / sizeof(hppa_hpux_tramp_reg[0]);
-       i++)
+  for (i = 0; ARRAY_SIZE (hppa_hpux_tramp_reg); i++)
     {
       if (hppa_hpux_tramp_reg[i] > 0)
         info->saved_regs[hppa_hpux_tramp_reg[i]].addr = off + szoff;
@@ -1666,8 +1662,8 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->unwind_adjust_stub = hppa_hpux_unwind_adjust_stub;
 
-  set_gdbarch_in_solib_return_trampoline (gdbarch,
-					  hppa_hpux_in_solib_return_trampoline);
+  set_gdbarch_in_solib_return_trampoline
+    (gdbarch, hppa_hpux_in_solib_return_trampoline);
   set_gdbarch_skip_trampoline_code (gdbarch, hppa_hpux_skip_trampoline_code);
 
   set_gdbarch_push_dummy_code (gdbarch, hppa_hpux_push_dummy_code);
