@@ -1,10 +1,6 @@
 #include "ansidecl.h"
 #include "opcode/v850.h"
 
-/* TODO:
-
-   * All sld instructions will need special insert/extrat code. */
-
 /* Local insertion and extraction functions.  */
 static unsigned long insert_d9 PARAMS ((unsigned long, long, const char **));
 static long extract_d9 PARAMS ((unsigned long, int *));
@@ -13,6 +9,10 @@ static long extract_d22 PARAMS ((unsigned long, int *));
 static unsigned long insert_d16_15 PARAMS ((unsigned long, long,
 					    const char **));
 static long extract_d16_15 PARAMS ((unsigned long, int *));
+static unsigned long insert_d8_7 PARAMS ((unsigned long, long, const char **));
+static long extract_d8_7 PARAMS ((unsigned long, int *));
+static unsigned long insert_d8_6 PARAMS ((unsigned long, long, const char **));
+static long extract_d8_6 PARAMS ((unsigned long, int *));
 
 /* regular opcode */
 #define OP(x)		((x & 0x3f) << 5)
@@ -54,11 +54,11 @@ const struct v850_operand v850_operands[] = {
   { 16, 16, 0, 0, V850_OPERAND_SIGNED }, 
 
 /* The signed DISP7 field in a format 4 insn. */
-#define D7S	(I16+1)
-  { 7, 0, 0, 0, V850_OPERAND_SIGNED },
+#define D7	(I16+1)
+  { 7, 0, 0, 0, 0},
 
 /* The DISP9 field in a format 3 insn. */
-#define D9	(D7S+1)
+#define D9	(D7+1)
   { 9, 0, insert_d9, extract_d9, V850_OPERAND_SIGNED },
 
 /* The DISP16 field in a format 6 insn. */
@@ -77,12 +77,16 @@ const struct v850_operand v850_operands[] = {
 /* The 4 bit condition code in a setf instruction */
   { 4, 0, 0, 0, V850_OPERAND_CC },
 
-/* The unsigned DISP8 field in a format 4 insn. */
-#define D8	(CCCC+1)
-  { 8, 0, 0, 0, 0 },
+/* The unsigned DISP8_7 field in a format 4 insn. */
+#define D8_7	(CCCC+1)
+  { 8, 0, insert_d8_7, extract_d8_7, 0 },
+
+/* The unsigned DISP8_6 field in a format 4 insn. */
+#define D8_6	(D8_7+1)
+  { 8, 0, insert_d8_6, extract_d8_6, 0 },
 
 /* System register operands.  */
-#define SR1	(D8+1)
+#define SR1	(D8_6+1)
   { 5, 0, 0, 0, V850_OPERAND_SRG },
 
 /* EP Register.  */
@@ -114,10 +118,12 @@ const struct v850_operand v850_operands[] = {
 #define IF3	{D9}
 
 /* 16-bit load/store instruction (Format IV) */
-#define IF4A	{D7S, EP, R2}
-#define IF4B	{R2, D7S, EP}
-#define IF4C	{D8, EP, R2}
-#define IF4D	{R2, D8, EP}
+#define IF4A	{D7, EP, R2}
+#define IF4B	{R2, D7, EP}
+#define IF4C	{D8_7, EP, R2}
+#define IF4D	{R2, D8_7, EP}
+#define IF4E	{D8_6, EP, R2}
+#define IF4F	{R2, D8_6, EP}
 
 /* Jump instruction (Format V) */
 #define IF5	{D22}
@@ -160,11 +166,11 @@ const struct v850_operand v850_operands[] = {
 const struct v850_opcode v850_opcodes[] = {
 /* load/store instructions */
 { "sld.b",	one(0x0300),		one(0x0780),	IF4A, 2 },
-{ "sld.h",	one(0x0400),		one(0x0780),	IF4A, 2 },
-{ "sld.w",	one(0x0500),		one(0x0781),	IF4A, 2 },
+{ "sld.h",	one(0x0400),		one(0x0780),	IF4C, 2 },
+{ "sld.w",	one(0x0500),		one(0x0781),	IF4E, 2 },
 { "sst.b",	one(0x0380),		one(0x0780),	IF4B, 2 },
 { "sst.h",	one(0x0480),		one(0x0780),	IF4D, 2 },
-{ "sst.w",	one(0x0501),		one(0x0781),	IF4D, 2 },
+{ "sst.w",	one(0x0501),		one(0x0781),	IF4F, 2 },
 
 { "ld.b",	two(0x0700,0x0000),	two (0x07e0,0x0000),	IF7C, 4 },
 { "ld.h",	two(0x0720,0x0000),	two (0x07e0,0x0001),	IF7A, 4 },
@@ -332,7 +338,7 @@ insert_d16_15 (insn, value, errmsg)
     *errmsg = "value out of range";
 
   if ((value % 2) != 0)
-    *errmsg = "load/store at odd offset";
+    *errmsg = "load/store half/word at odd offset";
 
   return (insn | ((value & 0xfffe) << 16));
 }
@@ -345,4 +351,58 @@ extract_d16_15 (insn, invalid)
   int ret = ((insn & 0xfffe0000) >> 16);
 
   return ((ret << 16) >> 16);
+}
+
+static unsigned long
+insert_d8_7 (insn, value, errmsg)
+     unsigned long insn;
+     long value;
+     const char **errmsg;
+{
+  if (value > 0xff || value < 0)
+    *errmsg = "short load/store half value out of range";
+
+  if ((value % 2) != 0)
+    *errmsg = "short load/store half at odd offset";
+
+  value >>= 1;
+
+  return (insn | (value & 0x7f));
+}
+
+static long
+extract_d8_7 (insn, invalid)
+     unsigned long insn;
+     int *invalid;
+{
+  int ret = (insn & 0x7f);
+
+  return ret << 1;
+}
+
+static unsigned long
+insert_d8_6 (insn, value, errmsg)
+     unsigned long insn;
+     long value;
+     const char **errmsg;
+{
+  if (value > 0xff || value < 0)
+    *errmsg = "short load/store word value out of range";
+
+  if ((value % 4) != 0)
+    *errmsg = "short load/store word at odd offset";
+
+  value >>= 1;
+
+  return (insn | (value & 0x7e));
+}
+
+static long
+extract_d8_6 (insn, invalid)
+     unsigned long insn;
+     int *invalid;
+{
+  int ret = (insn & 0x7e);
+
+  return ret << 1;
 }

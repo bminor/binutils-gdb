@@ -1,6 +1,17 @@
 start-sanitize-v850
 Sat Aug 31 01:27:26 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-opc.c (insert_d8_7, extract_d8_7): New functions.
+	(insert_d8_6, extract_d8_6): New functions.
+	(v850_operands): Rename D7S to D7; operand for D7 is unsigned.
+	Rename D8 to D8_7, use {insert,extract}_d8_7 routines.
+	Add D8_6.
+	(IF4A, IF4B): Use "D7" instead of "D7S".
+	(IF4C, IF4D): Use "D8_7" instead of "D8".
+	(IF4E, IF4F): New.  Use "D8_6".
+	(v850_opcodes): Use IF4A/IF4B for sld.b/sst.b.  Use IF4C/IF4D for
+	sld.h/sst.h.  Use IF4E/IF4F for sld.w/sst.w.
+
 	* v850-opc.c (insert_d16_15, extract_d16_15): New functions.
 	(v850_operands): Change D16 to D16_15, use special insert/extract
 	routines.  New new D16 that uses the generic insert/extract code.
