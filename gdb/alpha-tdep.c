@@ -57,7 +57,7 @@ alpha_register_name (int regno)
     "f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
     "f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
     "f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "fpcr",
-    "pc",   "vfp",  "unique",
+    "pc",   "",     "unique"
   };
 
   if (regno < 0)
@@ -70,13 +70,13 @@ alpha_register_name (int regno)
 static int
 alpha_cannot_fetch_register (int regno)
 {
-  return (regno == ALPHA_FP_REGNUM || regno == ALPHA_ZERO_REGNUM);
+  return regno == ALPHA_ZERO_REGNUM;
 }
 
 static int
 alpha_cannot_store_register (int regno)
 {
-  return (regno == ALPHA_FP_REGNUM || regno == ALPHA_ZERO_REGNUM);
+  return regno == ALPHA_ZERO_REGNUM;
 }
 
 static int

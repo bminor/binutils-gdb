@@ -1,3 +1,13 @@
+2003-06-01  Richard Henderson  <rth@redhat.com>
+
+        * alpha-tdep.h (ALPHA_FP_REGNUM): Remove.
+        * alpha-tdep.c (alpha_register_name): Remove vfp entry.
+        (alpha_cannot_fetch_register): Remove ALPHA_FP_REGNUM.
+        (alpha_cannot_store_register): Likewise.
+        * alphabsd-nat.c (fetch_inferior_registers): Don't set FP_REGNUM.
+        * alpha-nat.c (supply_gregset): Likewise.
+        * alphanbsd-tdep.c (fetch_core_registers): Likewise.
+
 2003-06-01  Andrew Cagney  <cagney@redhat.com>
 
 	* infcall.c (call_function_by_hand): Update comment on
