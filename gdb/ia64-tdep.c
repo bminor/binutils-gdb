@@ -432,7 +432,7 @@ replace_bit_field (char *bundle, long long val, int from, int len)
    and instruction bundle */
 
 static long long
-slotN_contents (unsigned char *bundle, int slotnum)
+slotN_contents (char *bundle, int slotnum)
 {
   return extract_bit_field (bundle, 5+41*slotnum, 41);
 }
@@ -440,7 +440,7 @@ slotN_contents (unsigned char *bundle, int slotnum)
 /* Store an instruction in an instruction bundle */
 
 static void
-replace_slotN_contents (unsigned char *bundle, long long instr, int slotnum)
+replace_slotN_contents (char *bundle, long long instr, int slotnum)
 {
   replace_bit_field (bundle, instr, 5+41*slotnum, 41);
 }
@@ -1165,7 +1165,7 @@ ia64_get_saved_register (char *raw_buffer,
     }
   else if (IA64_PR0_REGNUM <= regnum && regnum <= IA64_PR63_REGNUM)
     {
-      char pr_raw_buffer[MAX_REGISTER_RAW_SIZE];
+      char *pr_raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
       int  pr_optim;
       enum lval_type pr_lval;
       CORE_ADDR pr_addr;
@@ -1188,7 +1188,7 @@ ia64_get_saved_register (char *raw_buffer,
     }
   else if (IA64_NAT0_REGNUM <= regnum && regnum <= IA64_NAT31_REGNUM)
     {
-      char unat_raw_buffer[MAX_REGISTER_RAW_SIZE];
+      char *unat_raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
       int  unat_optim;
       enum lval_type unat_lval;
       CORE_ADDR unat_addr;

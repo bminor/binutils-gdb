@@ -1,5 +1,12 @@
 2001-03-26  Kevin Buettner  <kevinb@redhat.com>
 
+	* ia64-tdep.c (slotN_contents, replace_slotN_contents): Change
+	type of ``bundle'' from unsigned char * to char *.
+	(ia64_get_saved_register): Use alloca() to allocate register
+	buffers.
+
+2001-03-26  Kevin Buettner  <kevinb@redhat.com>
+
 	* proc-utils.h (procfs_ctl_t): New typedef.
 	* proc-api.c (write_with_trace): Change type of ``opcode'' from
 	long to procfs_ctl_t.  Don't assume that the target has defined
