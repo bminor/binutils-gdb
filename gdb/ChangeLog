@@ -1,5 +1,12 @@
 Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
 
+	* utils.c: Add warning_setup() and warning().  Warning() behaves
+	the same as error() except that it returns normally rather than
+	jumping back to command level.  Modules that don't want to call
+	warning() for some reason, but want to produce their own warnings,
+	can call warning_setup() to ensure compatibility with the way
+	warning() and error() deal with the terminal.
+
 	* symtab.c: Make internal errors produce more useful messages.
 
 	* tm-68k.h: Move code that is duplicated in almost every single
