@@ -712,7 +712,10 @@ case "${target}" in
     noconfigdirs="$noconfigdirs emacs emacs19 target-libgloss"
     ;;
   mn10200-*-*)
-    noconfigdirs="$noconfigdirs target-libgloss"
+    noconfigdirs="$noconfigdirs"
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-libstub target-cygmon"
+    fi
     ;;
   mn10300-*-*)
     noconfigdirs="$noconfigdirs"

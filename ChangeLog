@@ -1,3 +1,11 @@
+Tue Jun 23 22:42:32 1998  Mark Alexander  <marka@cygnus.com>
+
+	* configure.in: Add cygmon and libstub support for mn10200.
+
+Mon Jun 15 14:53:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (grep): Grep no longer depends on libiberty.
+
 Fri Jun 12 14:03:34 1998  Syd Polk  <spolk@cygnus.com>
 
 	* Makefile.in: all-snavigator needs all-libgui.
