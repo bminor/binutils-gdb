@@ -1,3 +1,10 @@
+2003-01-09  Michael Chastain  <mec@shout.net>
+
+	* gdbint.texinfo (Configuring @value{GDBN} for Release): Delete.
+	(Create a Release): Add new instructions for new @file{src-release}.
+	Document existing instructions for @file{Makefile.in} as
+	being for @value{GDBN} 5.3.1 or earlier.
+
 2003-01-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Mention

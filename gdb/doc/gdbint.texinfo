@@ -5396,62 +5396,6 @@ target-dependent @file{.h} and @file{.c} files used for your
 configuration.
 @end itemize
 
-@section Configuring @value{GDBN} for Release
-
-@cindex preparing a release
-@cindex making a distribution tarball
-From the top level directory (containing @file{gdb}, @file{bfd},
-@file{libiberty}, and so on):
-
-@smallexample
-make -f Makefile.in gdb.tar.gz
-@end smallexample
-
-@noindent
-This will properly configure, clean, rebuild any files that are
-distributed pre-built (e.g. @file{c-exp.tab.c} or @file{refcard.ps}),
-and will then make a tarfile.  (If the top level directory has already
-been configured, you can just do @code{make gdb.tar.gz} instead.)
-
-This procedure requires:
-
-@itemize @bullet
-
-@item 
-symbolic links;
-
-@item
-@code{makeinfo} (texinfo2 level);
-
-@item
-@TeX{};
-
-@item
-@code{dvips};
-
-@item
-@code{yacc} or @code{bison}.
-@end itemize
-
-@noindent
-@dots{} and the usual slew of utilities (@code{sed}, @code{tar}, etc.).
-
-@subheading TEMPORARY RELEASE PROCEDURE FOR DOCUMENTATION
-
-@file{gdb.texinfo} is currently marked up using the texinfo-2 macros,
-which are not yet a default for anything (but we have to start using
-them sometime).
-
-For making paper, the only thing this implies is the right generation of
-@file{texinfo.tex} needs to be included in the distribution.
-
-For making info files, however, rather than duplicating the texinfo2
-distribution, generate @file{gdb-all.texinfo} locally, and include the
-files @file{gdb.info*} in the distribution.  Note the plural;
-@code{makeinfo} will split the document into one overall file and five
-or so included files.
-
-
 @node Releasing GDB
 
 @chapter Releasing @value{GDBN}
@@ -5983,6 +5927,17 @@ $  ( cd  dejagnu/src/dejagnu && autoconf )
 @subsubheading Do the dirty work
 
 This is identical to the process used to create the daily snapshot.
+
+@smallexample
+$  for m in gdb insight
+do
+( cd $m/src && gmake -f src-release $m.tar )
+done
+$  ( m=dejagnu; cd $m/src && gmake -f src-release $m.tar.bz2 )
+@end smallexample
+
+If the top level source directory does not have @file{src-release}
+(@value{GDBN} version 5.3.1 or earlier), try these commands instead:
 
 @smallexample
 $  for m in gdb insight
