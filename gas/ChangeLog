@@ -1,5 +1,8 @@
 Wed Jul  5 12:01:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-coff.c (obj_coff_line): Call listing_source_line, in
+	both BFD_ASSEMBLER and non BFD_ASSEMBLER versions of the function.
+
 	* symbols.c (S_SET_EXTERNAL): Warn if symbol is weak.
 	(S_CLEAR_EXTERNAL): Likewise.
 	(S_SET_WEAK): Warn if symbol is global.

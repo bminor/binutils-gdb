@@ -772,6 +772,16 @@ obj_coff_line (ignore)
   SA_SET_SYM_LNNO (def_symbol_in_progress, coff_line_base);
 
   demand_empty_rest_of_line ();
+
+#ifndef NO_LISTING
+  if (strcmp (".bf", S_GET_NAME (def_symbol_in_progress)) == 0)
+    {
+      extern int listing;
+
+      if (listing)
+	listing_source_line ((unsigned int) coff_line_base);
+    }
+#endif
 }
 
 static void
@@ -2267,7 +2277,7 @@ obj_coff_line (ignore)
 #ifndef NO_LISTING
       {
 	extern int listing;
-	if (listing && 0)
+	if (listing)
 	  {
 	    listing_source_line ((unsigned int) line_base);
 	  }
