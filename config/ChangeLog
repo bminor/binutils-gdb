@@ -1,3 +1,65 @@
+Thu Sep 14 08:20:04 1995  Fred Fish  <fnf@cygnus.com>
+
+	* mh-hp300 (CC): Add "CC = cc -Wp,-H256000" to avoid
+	"too much defining" errors from the HPUX compiler.
+
+Thu Aug 17 17:28:56 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	* mh-hp300 (RANLIB): Use "ar ts", in case GNU ar was used and
+	didn't build a symbol table.
+
+Thu Jun 22 17:47:24 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-mh-mpw (CC): Define ANSI_PROTOTYPES.
+
+Mon Apr 10 12:29:48 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-mh-mpw (EXTRALIBS): Always link in Math.o, CSANELIB.o,
+        and ToolLibs.o.
+
+	* mpw-mh-mpw (CC): Define ALMOST_STDC.
+	(CFLAGS): Remove ALMOST_STDC, -mc68881.
+	(LDFLAGS): add -w.
+
+	* mpw-mh-mpw (CFLAGS): Add -b option to put strings at the ends of
+	functions.
+
+	* mpw-mh-mpw: New file, host makefile definitions for MPW.
+
+Fri Mar 31 11:35:17 1995  Jason Molenda (crash@phydeaux.cygnus.com)
+
+	* mt-netware: New file.
+
+Mon Mar 13 12:31:29 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mh-hpux8: New file.
+	* mh-hpux: Use X11R5 rather than X11R4.
+
+Thu Feb  9 11:04:13 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mh-linux (SYSV): Don't define.
+	(RANLIB): Don't define.
+
+Wed Jan 11 16:29:34 1995  Jason Merrill  <jason@phydeaux.cygnus.com>
+
+	* m?-*pic (LIBCXXFLAGS): Add -fno-implicit-templates.
+
+Thu Nov  3 17:27:19 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* mh-irix4 (CC): Increase maximum string length.
+
+	* mh-sco (CC): Define away const, it doesn't work right; elements
+	of arrays of ptr-to-const are considered const themselves.
+
+Sat Jul 16 12:17:49 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mh-cxux: New file, from Bob Rusk (rrusk@mail.csd.harris.com).
+
+Sat Jun  4 17:22:12 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* mh-ncrsvr43:  New file from Tom McConnell
+	<tmcconne@sedona.intel.com>.
+
 Thu May 19 00:32:11 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* mh-hpux (CC): Add -Wp,-H256000 to avoid "too much defining"
