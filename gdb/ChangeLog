@@ -1,3 +1,26 @@
+Fri Jan 20 15:23:55 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* expression.h (OP_LABELED):  New operator, for Chill
+	labeled structre tuples.
+	* ch-exp.y (tuple_element, named_record_element, tuple_elements):
+	New non-terminals, to handle labeled structure tuples.
+	(tuple):  Re-define using tuple_elements.
+	* eval.c (evaluate_labeled_field_init):  New function, to handle
+	initialization of structure fields, possibly using OP_LABELED.
+	(evaluate_subexp):  Use it.
+	* expprint.c (print_subexp case):  For OP_ARRAY, use Chill syntax
+	for Chill.  Handled OP_LABELED.
+	* parse.c (length_of_subexp, prefixify_subexp):  Handle OP_LABELED.
+
+	* eval.c (evaluate_subexp):  Handle Chill Powerset tuples.
+	* valarith.c (value_bit_index):  Just treat bitstring as represented
+	by an array of bytes.  Alignment is handled by compiler. 
+
+Wed Jan 18 19:00:29 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* h8300-tdep.c (gdb_print_insn_h8300): Fix typo (&info -> info).
+	* sh-tdep.c (gdb_print_insn_sh): Ditto.
+
 Wed Jan 18 11:25:43 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* remote-os9k.c (rombug_open): Fix a bug in exception handling

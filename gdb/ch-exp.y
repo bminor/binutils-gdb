@@ -374,6 +374,8 @@ expression_list	:	expression
 			{
 			  arglist_len++;
 			}
+		;
+
 
 /* Z.200, 5.2.1 */
 
@@ -533,9 +535,35 @@ literal		:	INTEGER_LITERAL
 
 /* Z.200, 5.2.5 */
 
+tuple_element	:	expression
+		|	named_record_element
+		;
+
+named_record_element:	FIELD_NAME ',' named_record_element
+			{ write_exp_elt_opcode (OP_LABELED);
+			  write_exp_string ($1);
+			  write_exp_elt_opcode (OP_LABELED);
+			}
+		|	FIELD_NAME ':' expression	
+			{ write_exp_elt_opcode (OP_LABELED);
+			  write_exp_string ($1);
+			  write_exp_elt_opcode (OP_LABELED);
+			}
+		;
+
+tuple_elements	:	tuple_element
+			{
+			  arglist_len = 1;
+			}
+		|	tuple_elements ',' tuple_element
+			{
+			  arglist_len++;
+			}
+		;
+
 tuple	:	'['
 			{ start_arglist (); }
-		expression_list ']'
+		tuple_elements ']'
 			{
 			  write_exp_elt_opcode (OP_ARRAY);
 			  write_exp_elt_longcst ((LONGEST) 0);
@@ -545,7 +573,7 @@ tuple	:	'['
 		|
 		mode_name '['
 			{ start_arglist (); }
-		expression_list ']'
+		tuple_elements ']'
 			{
 			  write_exp_elt_opcode (OP_ARRAY);
 			  write_exp_elt_longcst ((LONGEST) 0);

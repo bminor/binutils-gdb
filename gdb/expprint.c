@@ -28,15 +28,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Prototypes for local functions */
 
 static void
-print_subexp PARAMS ((struct expression *, int *, FILE *, enum precedence));
+print_subexp PARAMS ((struct expression *, int *, GDB_FILE *, enum precedence));
 
 static void
-print_simple_m2_func PARAMS ((char *, struct expression *, int *, FILE *));
+print_simple_m2_func PARAMS ((char *, struct expression *, int *, GDB_FILE *));
 
 void
 print_expression (exp, stream)
      struct expression *exp;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   int pc = 0;
   print_subexp (exp, &pc, stream, PREC_NULL);
@@ -51,7 +51,7 @@ static void
 print_subexp (exp, pos, stream, prec)
      register struct expression *exp;
      register int *pos;
-     FILE *stream;
+     GDB_FILE *stream;
      enum precedence prec;
 {
   register unsigned tem;
@@ -61,11 +61,11 @@ print_subexp (exp, pos, stream, prec)
   register char *op_str;
   int assign_modify = 0;
   enum exp_opcode opcode;
-  enum precedence myprec;
+  enum precedence myprec = PREC_NULL;
   /* Set to 1 for a right-associative operator.  */
-  int assoc;
-  value val;
-  char *tempstr;
+  int assoc = 0;
+  value_ptr val;
+  char *tempstr = NULL;
 
   op_print_tab = exp->language_defn->la_op_print_tab;
   pc = (*pos)++;
@@ -99,8 +99,19 @@ print_subexp (exp, pos, stream, prec)
       return;
 
     case OP_VAR_VALUE:
-      (*pos) += 2;
-      fputs_filtered (SYMBOL_SOURCE_NAME (exp->elts[pc + 1].symbol), stream);
+      {
+	struct block *b;
+	(*pos) += 3;
+	b = exp->elts[pc + 1].block;
+	if (b != NULL
+	    && BLOCK_FUNCTION (b) != NULL
+	    && SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)) != NULL)
+	  {
+	    fputs_filtered (SYMBOL_SOURCE_NAME (BLOCK_FUNCTION (b)), stream);
+	    fputs_filtered ("::", stream);
+	  }
+	fputs_filtered (SYMBOL_SOURCE_NAME (exp->elts[pc + 2].symbol), stream);
+      }
       return;
 
     case OP_LAST:
@@ -198,7 +209,8 @@ print_subexp (exp, pos, stream, prec)
 	}
       else
 	{
-	  fputs_filtered (" {", stream);
+	  int is_chill = exp->language_defn->la_language == language_chill;
+	  fputs_filtered (is_chill ? " [" : " {", stream);
 	  for (tem = 0; tem < nargs; tem++)
 	    {
 	      if (tem != 0)
@@ -207,8 +219,35 @@ print_subexp (exp, pos, stream, prec)
 		}
 	      print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
 	    }
-	  fputs_filtered ("}", stream);
+	  fputs_filtered (is_chill ? "]" : "}", stream);
 	}
+      return;
+
+    case OP_LABELED:
+      tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
+
+      if (exp->language_defn->la_language == language_chill)
+	{
+	  fputs_filtered (".", stream);
+	  fputs_filtered (&exp->elts[pc + 2].string, stream);
+	  fputs_filtered (exp->elts[*pos].opcode == OP_LABELED ? ", "
+			  : ": ",
+			  stream);
+	}
+      else
+	{
+	  /* Gcc support both these syntaxes.  Unsure which is preferred.  */
+#if 1
+	  fputs_filtered (&exp->elts[pc + 2].string, stream);
+	  fputs_filtered (": ", stream);
+#else
+	  fputs_filtered (".", stream);
+	  fputs_filtered (&exp->elts[pc + 2].string, stream);
+	  fputs_filtered ("=", stream);
+#endif
+	}
+      print_subexp (exp, pos, stream, PREC_SUFFIX);
       return;
 
     case TERNOP_COND:
@@ -329,23 +368,23 @@ print_subexp (exp, pos, stream, prec)
       (*pos) += 2;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fprintf (stream, " [");
+      fprintf_unfiltered (stream, " [");
       for (tem = 0; tem < nargs; tem++)
 	{
 	  if (tem != 0)
-	    fprintf (stream, ", ");
+	    fprintf_unfiltered (stream, ", ");
 	  print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
 	}
-      fprintf (stream, "]");
+      fprintf_unfiltered (stream, "]");
       return;
 
     case BINOP_VAL:
       (*pos)+=2;
-      fprintf(stream,"VAL(");
+      fprintf_unfiltered(stream,"VAL(");
       type_print(exp->elts[pc+1].type,"",stream,0);
-      fprintf(stream,",");
+      fprintf_unfiltered(stream,",");
       print_subexp(exp,pos,stream,PREC_PREFIX);
-      fprintf(stream,")");
+      fprintf_unfiltered(stream,")");
       return;
 
     case UNOP_CAP:
@@ -415,9 +454,18 @@ print_subexp (exp, pos, stream, prec)
     fputs_filtered ("(", stream);
   if ((int) opcode > (int) BINOP_END)
     {
-      /* Unary prefix operator.  */
-      fputs_filtered (op_str, stream);
-      print_subexp (exp, pos, stream, PREC_PREFIX);
+      if (assoc)
+	{
+	  /* Unary postfix operator.  */
+	  print_subexp (exp, pos, stream, PREC_SUFFIX);
+	  fputs_filtered (op_str, stream);
+	}
+      else
+	{
+	  /* Unary prefix operator.  */
+	  fputs_filtered (op_str, stream);
+	  print_subexp (exp, pos, stream, PREC_PREFIX);
+	}
     }
   else
     {
@@ -455,11 +503,11 @@ print_simple_m2_func(s,exp,pos,stream)
    char *s;
    register struct expression *exp;
    register int *pos;
-   FILE *stream;
+   GDB_FILE *stream;
 {
-   fprintf(stream,"%s(",s);
+   fprintf_unfiltered(stream,"%s(",s);
    print_subexp(exp,pos,stream,PREC_PREFIX);
-   fprintf(stream,")");
+   fprintf_unfiltered(stream,")");
 }
    
 /* Return the operator corresponding to opcode OP as
@@ -487,7 +535,7 @@ op_string(op)
 void
 dump_expression (exp, stream, note)
      struct expression *exp;
-     FILE *stream;
+     GDB_FILE *stream;
      char *note;
 {
   int elt;
@@ -495,7 +543,9 @@ dump_expression (exp, stream, note)
   char *eltscan;
   int eltsize;
 
-  fprintf_filtered (stream, "Dump of expression @ 0x%x, %s:\n", exp, note);
+  fprintf_filtered (stream, "Dump of expression @ ");
+  gdb_print_address (exp, stream);
+  fprintf_filtered (stream, ", %s:\n", note);
   fprintf_filtered (stream, "\tLanguage %s, %d elements, %d bytes each.\n",
 		    exp->language_defn->la_name, exp -> nelts,
 		    sizeof (union exp_element));
@@ -586,10 +636,11 @@ dump_expression (exp, stream, note)
 	  case OP_THIS: opcode_name = "OP_THIS"; break;
 	  case OP_SCOPE: opcode_name = "OP_SCOPE"; break;
 	  case OP_TYPE: opcode_name = "OP_TYPE"; break;
+	  case OP_LABELED: opcode_name = "OP_LABELED"; break;
 	}
       fprintf_filtered (stream, "%20s  ", opcode_name);
       fprintf_filtered (stream,
-#if defined (LONG_LONG)
+#if defined (PRINTF_HAS_LONG_LONG)
 			"%ll16x  ",
 #else
 			"%l16x  ",

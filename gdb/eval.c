@@ -152,6 +152,77 @@ evaluate_type (exp)
   return evaluate_subexp (NULL_TYPE, exp, &pc, EVAL_AVOID_SIDE_EFFECTS);
 }
 
+/* Helper function called by evaluate_subexp to initialize a field
+   a structure from a tuple in Chill.  This is recursive, to handle
+   more than one field name labels.
+
+   STRUCT_VAL is the structure value we are constructing.
+   (*FIELDNOP) is the field to set, if there is no label.
+   It is set to the field following this one.
+   EXP, POS, and NOSIDE are as for evaluate_subexp.
+
+   This function does not handle variant records.  FIXME */
+
+static value_ptr
+evaluate_labeled_field_init (struct_val, fieldnop, exp, pos, noside)
+     value_ptr struct_val;
+     int *fieldnop;
+     register struct expression *exp;
+     register int *pos;
+     enum noside noside;
+{
+  int fieldno = *fieldnop;
+  value_ptr val;
+  int bitpos, bitsize;
+  char *addr;
+  struct type *struct_type = VALUE_TYPE (struct_val);
+  if (exp->elts[*pos].opcode == OP_LABELED)
+    {
+      int pc = (*pos)++;
+      char *name = &exp->elts[pc + 2].string;
+      int tem = longest_to_int (exp->elts[pc + 1].longconst);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
+      for (fieldno = 0; ; fieldno++)
+	{
+	  if (fieldno >= TYPE_NFIELDS (struct_type))
+	    error ("there is no field named %s", name);
+	  if (STREQ (TYPE_FIELD_NAME (struct_type, fieldno), name))
+	    break;
+	}
+      *fieldnop = fieldno;
+      val = evaluate_labeled_field_init (struct_val, fieldnop,
+					 exp, pos, noside);
+    }
+  else
+    {
+      fieldno = (*fieldnop)++;
+      if (fieldno >= TYPE_NFIELDS (struct_type))
+	error ("too many initializers");
+      val = evaluate_subexp (TYPE_FIELD_TYPE (struct_type, fieldno),
+			     exp, pos, noside);
+    }
+
+  /* Assign val to field fieldno. */
+  if (VALUE_TYPE (val) != TYPE_FIELD_TYPE (struct_type, fieldno))
+    val = value_cast (TYPE_FIELD_TYPE (struct_type, fieldno), val);
+#if 1
+  bitsize = TYPE_FIELD_BITSIZE (struct_type, fieldno);
+  bitpos = TYPE_FIELD_BITPOS (struct_type, fieldno);
+  addr = VALUE_CONTENTS (struct_val);
+  addr += bitpos / 8;
+  if (bitsize)
+    modify_field (addr, value_as_long (val),
+		  bitpos % 8, bitsize);
+  else
+    memcpy (addr, VALUE_CONTENTS (val),
+	    TYPE_LENGTH (VALUE_TYPE (val)));
+#else
+  value_assign (value_primitive_field (struct_val, 0, fieldno, struct_type),
+		val);
+#endif
+  return val;
+}
+
 static value_ptr
 evaluate_subexp (expect_type, exp, pos, noside)
      struct type *expect_type;
@@ -181,8 +252,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
      implement it).  CHILL has the tuple stuff; I don't know enough
      about CHILL to know whether expected types is the way to do it.
      FORTRAN I don't know.  */
-  if (current_language->la_language != language_cplus
-      && current_language->la_language != language_chill)
+  if (exp->language_defn->la_language != language_cplus
+      && exp->language_defn->la_language != language_chill)
     expect_type = NULL_TYPE;
 
   pc = (*pos)++;
@@ -288,33 +359,11 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  && TYPE_CODE (expect_type) == TYPE_CODE_STRUCT)
 	{
 	  value_ptr rec = allocate_value (expect_type);
-	  if (TYPE_NFIELDS (expect_type) != nargs)
-	    error ("wrong number of initialiers for structure type");
+	  int fieldno = 0;
+	  memset (VALUE_CONTENTS_RAW (rec), '\0',
+		  TYPE_LENGTH (expect_type) / TARGET_CHAR_BIT);
 	  for (tem = 0; tem < nargs; tem++)
-	    {
-	      struct type *field_type = TYPE_FIELD_TYPE (expect_type, tem);
-	      value_ptr field_val = evaluate_subexp (field_type,
-						     exp, pos, noside);
-	      int bitsize, bitpos;
-	      char *addr;
-	      if (VALUE_TYPE (field_val) != field_type)
-		field_val = value_cast (field_type, field_val);
-#if 1
-	      bitsize = TYPE_FIELD_BITSIZE (expect_type, tem);
-	      bitpos = TYPE_FIELD_BITPOS (expect_type, tem);
-	      addr = VALUE_CONTENTS (rec);
-	      addr += bitpos / 8;
-	      if (bitsize)
-		modify_field (addr, value_as_long (field_val),
-			      bitpos % 8, bitsize);
-	      else
-		memcpy (addr, VALUE_CONTENTS (field_val),
-			TYPE_LENGTH (VALUE_TYPE (field_val)));
-#else
-	      value_assign (value_primitive_field (rec, 0, tem, expect_type),
-			    field_val);
-#endif
-	    }
+	    evaluate_labeled_field_init (rec, &fieldno, exp, pos, noside);
 	  return rec;
 	}
 
@@ -339,6 +388,33 @@ evaluate_subexp (expect_type, exp, pos, noside)
 		      element_size);
 	    }
 	  return rec;
+	}
+
+      if (expect_type != NULL_TYPE && noside != EVAL_SKIP
+	  && TYPE_CODE (expect_type) == TYPE_CODE_SET)
+	{
+	  value_ptr set = allocate_value (expect_type);
+	  struct type *element_type = TYPE_INDEX_TYPE (expect_type);
+	  int low_bound = TYPE_LOW_BOUND (element_type);
+	  int high_bound = TYPE_HIGH_BOUND (element_type);
+	  char *valaddr = VALUE_CONTENTS_RAW (set);
+	  memset (valaddr, '\0', TYPE_LENGTH (expect_type) / TARGET_CHAR_BIT);
+	  for (tem = 0; tem < nargs; tem++)
+	    {
+	      value_ptr element_val = evaluate_subexp (element_type,
+						       exp, pos, noside);
+	      /* FIXME check that element_val has appropriate type. */
+	      LONGEST element = value_as_long (element_val);
+	      int bit_index;
+	      if (element < low_bound || element > high_bound)
+		error ("POWERSET tuple element out of range");
+	      element -= low_bound;
+	      bit_index = (unsigned) element % TARGET_CHAR_BIT;
+	      if (BITS_BIG_ENDIAN)
+		bit_index = TARGET_CHAR_BIT - 1 - bit_index;
+	      valaddr [(unsigned) element / TARGET_CHAR_BIT] |= 1 << bit_index;
+	    }
+	  return set;
 	}
 
       argvec = (value_ptr *) alloca (sizeof (value_ptr) * nargs);

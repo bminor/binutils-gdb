@@ -510,6 +510,7 @@ length_of_subexp (expr, endpos)
       args = 1;
       break;
 
+    case OP_LABELED:
     case STRUCTOP_STRUCT:
     case STRUCTOP_PTR:
       args = 1;
@@ -653,6 +654,7 @@ prefixify_subexp (inexpr, outexpr, inend, outbeg)
 
     case STRUCTOP_STRUCT:
     case STRUCTOP_PTR:
+    case OP_LABELED:
       args = 1;
       /* fall through */
     case OP_M2_STRING:
