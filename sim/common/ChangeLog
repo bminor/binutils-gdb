@@ -1,5 +1,7 @@
 Thu Apr 17 02:25:11 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* sim-utils.c (sim_copy_argv, sim_analyze_program): New functions.
+
 	* sim-options.c, sim-options.h: New files.
 	* sim-config.h (WITH_DEBUG): Provide default value of zero.
 	* Make-common.in (nrun.o): Add rules for.
