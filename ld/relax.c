@@ -193,12 +193,13 @@ boolean
 DEFUN(relax_section,(this_ptr),
       lang_statement_union_type **this_ptr)
 {
-
+  extern lang_input_statement_type *script_file;
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
   if (!(i->owner->flags & BFD_IS_RELAXABLE)) 
   {
-    einfo("%B: not assembled with -linkrelax\n", i->owner);    
+    if (i->owner != script_file->the_bfd)
+     einfo("%B: not assembled with -linkrelax\n", i->owner);    
   }
 
   return bfd_relax_section(i->owner, i, is->ifile->asymbols);
