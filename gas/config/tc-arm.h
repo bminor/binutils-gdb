@@ -215,6 +215,8 @@ void armelf_frob_symbol PARAMS ((symbolS *, int *));
 #define DWARF2_LINE_MIN_INSN_LENGTH 2
 #endif
 
+#define MAX_MEM_FOR_RS_ALIGN_CODE 31
+
 /* For frags in code sections we need to record whether they contain
    ARM code or THUMB code.  This is that if they have to be aligned,
    they can contain the correct type of no-op instruction.  */

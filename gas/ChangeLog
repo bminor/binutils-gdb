@@ -1,3 +1,10 @@
+2001-05-06  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-arm.h (MAX_MEM_FOR_RS_ALIGN_CODE): Define.
+	* config/tc-arm.c (arm_handle_align): Do not insert more than
+	MAX_MEM_FOR_RS_ALIGN_CODE bytes.
+	(arm_frag_align_code): Use MAX_MEM_FOR_RS_ALIGN_CODE.
+
 2001-05-03  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* Makefile.am (TARG_ENV_HFILES): Add te-hppa64.h and te-hppalinux64.h.

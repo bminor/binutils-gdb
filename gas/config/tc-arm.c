@@ -8796,8 +8796,8 @@ s_arm_elf_cons (nbytes)
    of an rs_align_code fragment.  */
 
 void
-arm_handle_align (fragp)
-     fragS *fragp;
+arm_handle_align (fragP)
+     fragS *fragP;
 {
   static char const arm_noop[4] = { 0x00, 0x00, 0xa0, 0xe1 };
   static char const thumb_noop[2] = { 0xc0, 0x46 };
@@ -8808,14 +8808,17 @@ arm_handle_align (fragp)
   char * p;
   const char * noop;
   
-  if (fragp->fr_type != rs_align_code)
+  if (fragP->fr_type != rs_align_code)
     return;
 
-  bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
-  p = fragp->fr_literal + fragp->fr_fix;
+  bytes = fragP->fr_next->fr_address - fragP->fr_address - fragP->fr_fix;
+  p = fragP->fr_literal + fragP->fr_fix;
   fix = 0;
   
-  if (fragp->tc_frag_data)
+  if (bytes > MAX_MEM_FOR_RS_ALIGN_CODE)
+    bytes = MAX_MEM_FOR_RS_ALIGN_CODE;
+  
+  if (fragP->tc_frag_data)
     {
       if (target_big_endian)
 	noop = thumb_bigend_noop;
@@ -8848,8 +8851,8 @@ arm_handle_align (fragp)
       fix += noop_size;
     }
   
-  fragp->fr_fix += fix;
-  fragp->fr_var = noop_size;
+  fragP->fr_fix += fix;
+  fragP->fr_var = noop_size;
 }
 
 /* Called from md_do_align.  Used to create an alignment
@@ -8864,11 +8867,11 @@ arm_frag_align_code (n, max)
 
   /* We assume that there will never be a requirment
      to support alignments greater than 32 bytes.  */
-  if (max > 31)
+  if (max > MAX_MEM_FOR_RS_ALIGN_CODE)
     as_fatal (_("alignments greater than 32 bytes not supported in .text sections."));
   
   p = frag_var (rs_align_code,
-		31,
+		MAX_MEM_FOR_RS_ALIGN_CODE,
 		1,
 		(relax_substateT) max,
 		(symbolS *) NULL,
@@ -8881,9 +8884,9 @@ arm_frag_align_code (n, max)
 /* Perform target specific initialisation of a frag.  */
 
 void
-arm_init_frag (fragp)
-     fragS *fragp;
+arm_init_frag (fragP)
+     fragS *fragP;
 {
   /* Record whether this frag is in an ARM or a THUMB area.  */
-  fragp->tc_frag_data = thumb_mode;
+  fragP->tc_frag_data = thumb_mode;
 }
