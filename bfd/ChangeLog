@@ -1,3 +1,15 @@
+Thu Mar 21 13:54:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffcode.h (coff_compute_section_file_positions): If not
+	producing a final executable, don't consider sofar when aligning
+	the section to the correct size.
+
+Wed Mar 20 16:53:12 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffcode.h (coff_add_missing_symbols): Ifdef out.
+	(coff_write_object_contents): Don't call coff_add_missing_symbols.
+	* coffgen.c (coff_section_symbol): Ifdef out.
+
 Mon Mar 18 12:54:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_gprel32_reloc): Initialize gp if
