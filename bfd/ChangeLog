@@ -1,3 +1,16 @@
+1999-12-17  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-i386.c (i3coff_object_p): Delete.
+	(i386coff_vec): Replace reference to i3coff_object_p with a
+	reference to coff_object_p.
+
+	* coff-mcore.c (pe_object_p): Delete.
+
+	* peicode.h (pe_bfd_object_p): New function: Detect the
+	presence of a PE format COFF object file.  Also detect and
+	warn about the presence of LINK6 format Image Library Format
+	object files.
+	
 1999-12-16  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c (NUM_ELEM): New macro.
