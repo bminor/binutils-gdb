@@ -2067,6 +2067,9 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    This function does the same stuff as value_being_returned in values.c, but
    gets the value from the stack rather than from the buffer where all the
    registers were saved when the function called completed. */
+/* FIXME: cagney/2003-09-27: This function is no longer needed.  The
+   inferior function call code now directly handles the case described
+   above.  */
 struct value *
 hppa_value_returned_from_stack (struct type *valtype, CORE_ADDR addr)
 {
@@ -5040,6 +5043,10 @@ hppa_extract_struct_value_address (char *regbuf)
      the address size is equal to the size of an int* _on the host_...
      One possible implementation that crossed my mind is to use
      extract_address.  */
+  /* FIXME: cagney/2003-09-27: This function can probably go.  ELZ
+     writes: We cannot assume on the pa that r28 still contains the
+     address of the returned structure. Usually this will be
+     overwritten by the callee.  */
   return (*(int *)(regbuf + DEPRECATED_REGISTER_BYTE (28)));
 }
 

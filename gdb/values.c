@@ -1216,6 +1216,12 @@ value_from_double (struct type *type, DOUBLEST num)
    0 when it is using the value returning conventions (this often
    means returning pointer to where structure is vs. returning value). */
 
+/* FIXME: cagney/2003-09-27: Should move the "struct return
+   convention" code to the only call site in print_return_value that
+   needs it.  This function can then be renamed to
+   "register_value_being_returned" and with the "struct_return"
+   parameter dropped.  */
+
 struct value *
 value_being_returned (struct type *valtype, struct regcache *retbuf,
 		      int struct_return)

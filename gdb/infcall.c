@@ -1076,6 +1076,8 @@ the function call).", name);
      address of the returned structure. Usually this will be
      overwritten by the callee.  I don't know about other
      architectures, so I defined this macro */
+  /* FIXME: cagney/2003-09-27: This is no longer needed.  The problem
+     is now handled directly be by the code below.  */
 #ifdef DEPRECATED_VALUE_RETURNED_FROM_STACK
   if (struct_return)
     {
@@ -1083,23 +1085,28 @@ the function call).", name);
       return DEPRECATED_VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
     }
 #endif
-  /* NOTE: cagney/2002-09-10: Only when the stack has been correctly
-     aligned (using frame_align()) do we can trust STRUCT_ADDR and
-     fetch the return value direct from the stack.  This lack of trust
-     comes about because legacy targets have a nasty habit of
-     silently, and local to PUSH_ARGUMENTS(), moving STRUCT_ADDR.  For
-     such targets, just hope that value_being_returned() can find the
-     adjusted value.  */
-  if (struct_return && gdbarch_frame_align_p (current_gdbarch))
+  if (struct_return)
     {
+      /* NOTE: cagney/2003-09-27: This assumes that PUSH_DUMMY_CALL
+	 has correctly stored STRUCT_ADDR in the target.  In the past
+	 that hasn't been the case, the old MIPS PUSH_ARGUMENTS
+	 (PUSH_DUMMY_CALL precursor) would silently move the location
+	 of the struct return value making STRUCT_ADDR bogus.  If
+	 you're seeing problems with values being returned using the
+	 "struct return convention", check that PUSH_DUMMY_CALL isn't
+	 playing tricks.  */
       struct value *retval = value_at (value_type, struct_addr, NULL);
       do_cleanups (retbuf_cleanup);
       return retval;
     }
   else
     {
-      struct value *retval = value_being_returned (value_type, retbuf,
-						   struct_return);
+      /* This call to value_being_returned is never made when the
+         function uses "struct return convention".  Hence, pass "0"
+         instead of STRUCT_RETURN.  Besides, VALUE_TYPE, in
+         combination with RETURN_VALUE() (nee USE_STRUCT_CONVENTION)
+         can be used to re-construct the value of STRUCT_RETURN. */
+      struct value *retval = value_being_returned (value_type, retbuf, 0);
       do_cleanups (retbuf_cleanup);
       return retval;
     }

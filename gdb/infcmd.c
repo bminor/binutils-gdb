@@ -1070,7 +1070,7 @@ print_return_value (int structure_return, struct type *value_type)
 
   if (!structure_return)
     {
-      value = value_being_returned (value_type, stop_registers, structure_return);
+      value = value_being_returned (value_type, stop_registers, 0);
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
@@ -1081,6 +1081,18 @@ print_return_value (int structure_return, struct type *value_type)
     }
   else
     {
+      /* FIXME: 2003-09-27: This code block should be handling the
+         "use struct convention" case, and not the function
+         value_being_returned.  This would allow the dramatic
+         simplification of value_being_returned (perhaphs renamed to
+         register_value_being_returned).  */
+      /* FIXME: 2003-09-27: When returning from a nested inferior
+         function call, it's possible (with no help from the
+         architecture vector) to locate and return/print a "struct
+         return" value.  This is just a more complicated case of what
+         is already being done in in the inferior function call code.
+         In fact, when inferior function calls are made async, this
+         will likely be made the norm.  */
       /* We cannot determine the contents of the structure because
 	 it is on the stack, and we don't know where, since we did not
 	 initiate the call, as opposed to the call_function_by_hand case */
@@ -1091,7 +1103,7 @@ print_return_value (int structure_return, struct type *value_type)
       ui_out_text (uiout, ".");
       ui_out_text (uiout, " Cannot determine contents\n");
 #else
-      value = value_being_returned (value_type, stop_registers, structure_return);
+      value = value_being_returned (value_type, stop_registers, 1);
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));

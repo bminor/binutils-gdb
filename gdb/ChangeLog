@@ -1,3 +1,14 @@
+2003-10-01  Andrew Cagney  <cagney@redhat.com>
+
+	* infcall.c (call_function_by_hand): When STRUCT_RETURN, always
+	use STRUCT_ADDR.  When not using "struct return convention", pass
+	"0" to "value_being_returned".  Add FIXMEs.
+	* infcmd.c (print_return_value): Pass an explicit 0/1 to
+	value_being_returned.  Add comments.
+	* values.c (value_being_returned): Add fixme.
+	* hppa-tdep.c (hppa_extract_struct_value_address): Add FIXME.
+	(hppa_value_returned_from_stack): Add FIXME.
+
 2003-09-30  David Carlton  <carlton@kealia.com>
 
 	* dwarf2read.c (struct die_info): Add 'parent' field; replace
