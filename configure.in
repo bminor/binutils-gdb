@@ -662,6 +662,7 @@ case "${target}" in
   # CYGNUS LOCAL d30v
   d30v-*-*)
     ;;
+  # CYGNUS LOCAL fr30
   fr30-*-elf*)
     if [ x${is_cross_compiler} != xno ] ; then
 	   target_configdirs="${target_configdirs} target-bsp target-libstub target-cygmon"
@@ -906,14 +907,12 @@ case "${target}" in
   v850-*-*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
-# start-sanitize-v850e
-  v850e-*-*)
+  v850e-*-*) # CYGNUS LOCAL v850e
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
   v850ea-*-*)
     noconfigdirs="$noconfigdirs target-libgloss"
-    ;;
-# end-sanitize-v850e
+    ;;       # END CYGNUS LOCAL
   vax-*-vms)
     noconfigdirs="$noconfigdirs bfd binutils gdb ld target-newlib opcodes target-libgloss"
     ;;

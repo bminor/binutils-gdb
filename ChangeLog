@@ -1,3 +1,10 @@
+Mon Jan 18 13:59:20 1999  Christopher Faylor <cgf@cygnus.com>
+
+	* Makefile.in: Remove unneeded all-target-libio from
+	from all-target-winsup target since it is now unneeded.
+	Add all-target-libtermcap in its place since it is now
+	needed.
+
 Wed Dec 30 20:34:52 1998  Christopher Faylor <cgf@cygnus.com>
 
 	* configure.in: makefile stub for cygwin target is probably
@@ -1340,7 +1347,6 @@ Tue Aug 19 01:41:32 1997  Jason Merrill  <jason@yorick.cygnus.com>
 	* Makefile.in (BISON): Add -L flag.
 	(YACC): Likewise.
 
-start-sanitize-v850e
 Mon Aug 18 11:30:50 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in (noconfigdirs): Add support for v850e target. 
@@ -1353,7 +1359,6 @@ Mon Aug 18 11:30:50 1997  Nick Clifton  <nickc@cygnus.com>
 	
 	* config.sub (maybe_os): Add support for v850ea target.
 
-end-sanitize-v850e
 Mon Aug 18 09:24:06 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* config.sub: Add mipstx39.  Delete r3900.
