@@ -1,3 +1,13 @@
+2004-10-07  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* gas/crx/cop_insn.s: New file.
+	* gas/crx/cop_insn.d: Likewise.
+	* gas/crx/load_stor_insn.s: Move Co-processor insns to a separate
+	test.
+	* gas/crx/misc_insn.s: Likewise.
+	* gas/crx/load_stor_insn.d: Regenerate.
+	* gas/crx/misc_insn.d: Likewise.
+
 2004-10-06  Aldy Hernandez  <aldyh@redhat.com>
 
 	* gas/ppc/e500.s: Add double-precision instructions.

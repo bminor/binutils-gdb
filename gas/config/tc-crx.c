@@ -1724,7 +1724,7 @@ static int
 get_cinv_parameters (char * operand)
 {
   char *p = operand;
-  int d_used = 0, i_used = 0, u_used = 0;
+  int d_used = 0, i_used = 0, u_used = 0, b_used = 0;
 
   while (*++p != ']')
     {
@@ -1737,11 +1737,14 @@ get_cinv_parameters (char * operand)
 	i_used = 1;
       else if (*p == 'u')
 	u_used = 1;
+      else if (*p == 'b')
+	b_used = 1;
       else
 	as_bad (_("Illegal `cinv' parameter: `%c'"), *p);
     }
 
-  return ((d_used ? 4 : 0)
+  return ((b_used ? 8 : 0)
+	+ (d_used ? 4 : 0)
 	+ (i_used ? 2 : 0)
 	+ (u_used ? 1 : 0));
 }
@@ -2374,12 +2377,22 @@ preprocess_reglist (char *param, int *allocated)
 
       strncpy (reg_name, regP, paramP - regP);
 
+      /* Coprocessor register c<N>.  */
       if (IS_INSN_TYPE (COP_REG_INS))
         {
           if ((cr = get_copregister (reg_name)) == nullcopregister)
 	    as_bad (_("Illegal register `%s' in cop-register list"), reg_name);
 	  mask_reg (getreg_image (cr - c0), &mask);
         }
+      /* Coprocessor Special register cs<N>.  */
+      else if (IS_INSN_TYPE (COPS_REG_INS))
+        {
+          if ((cr = get_copregister (reg_name)) == nullcopregister)
+	    as_bad (_("Illegal register `%s' in cop-special-register list"), 
+		      reg_name);
+	  mask_reg (getreg_image (cr - cs0), &mask);
+        }
+      /* General purpose register r<N>.  */
       else
         {
           if ((r = get_register (reg_name)) == nullregister)

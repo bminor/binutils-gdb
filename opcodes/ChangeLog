@@ -1,3 +1,12 @@
+2004-10-07  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* crx-opc.c (crx_instruction): Support Co-processor insns.
+	* crx-dis.c (COP_ARG_TYPE): New enum for CO-Processor arguments.
+	(getregliststring): Change function to use the above enum.
+	(print_arg): Handle CO-Processor insns.
+	(crx_cinvs): Add 'b' option to invalidate the branch-target
+	cache.
+
 2004-10-06  Aldy Hernandez  <aldyh@redhat.com>
 
 	* ppc-opc.c (powerpc_opcodes): Add efscfd, efdabs, efdnabs,

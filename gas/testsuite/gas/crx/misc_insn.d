@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#name: load_stor_insn
+#name: misc_insn
 
 .*: +file format .*
 
@@ -213,48 +213,21 @@ Disassembly of section .text:
 0000010c <cntlsd>:
  10c:	08 30 2c ae 	cntlsd	r2, r12
 
-00000110 <mtpr>:
- 110:	09 30 10 00 	mtpr	r0, hi
+00000110 <excp>:
+ 110:	f8 ff       	excp	bpt
+ 112:	f5 ff       	excp	svc
 
-00000114 <mfpr>:
- 114:	0a 30 05 11 	mfpr	lo, r5
- 118:	0a 30 0a 90 	mfpr	uhi, r10
+00000114 <ram>:
+ 114:	61 3e ec 21 	ram	\$0x18, \$0x9, \$0x1, r14, r12
 
-0000011c <mtcr>:
- 11c:	1f 30 1e 30 	mtcr	\$0xf, r1, c14
+00000118 <rim>:
+ 118:	fd 3e 21 ee 	rim	\$0x1f, \$0xf, \$0xe, r2, r1
 
-00000120 <mfcr>:
- 120:	13 30 72 31 	mfcr	\$0x3, c7, r2
+0000011c <rotb>:
+ 11c:	f1 fd       	rotb	\$0x7, r1
 
-00000124 <mtcsr>:
- 124:	12 30 51 32 	mtcsr	\$0x2, r5, cs1
+0000011e <rotw>:
+ 11e:	d3 b9       	rotw	\$0xd, r3
 
-00000128 <mfcsr>:
- 128:	11 30 ce 33 	mfcsr	\$0x1, cs12, r14
-
-0000012c <bcop>:
- 12c:	13 30 48 77 	bcop	\$0x7, \$0x3, \*\+0x90
- 130:	1c 31 fa 76 	bcop	\$0x6, \$0xc, \*\-0xbcdfe
- 134:	01 19 
-
-00000136 <excp>:
- 136:	f8 ff       	excp	bpt
- 138:	f5 ff       	excp	svc
-
-0000013a <cinv>:
- 13a:	10 30 07 00 	cinv	\[d,i,u\]
-
-0000013e <ram>:
- 13e:	61 3e ec 21 	ram	\$0x18, \$0x9, \$0x1, r14, r12
-
-00000142 <rim>:
- 142:	fd 3e 21 ee 	rim	\$0x1f, \$0xf, \$0xe, r2, r1
-
-00000146 <rotb>:
- 146:	f1 fd       	rotb	\$0x7, r1
-
-00000148 <rotw>:
- 148:	d3 b9       	rotw	\$0xd, r3
-
-0000014a <rotd>:
- 14a:	08 30 b2 f1 	rotd	\$0x1b, r2
+00000120 <rotd>:
+ 120:	08 30 b2 f1 	rotd	\$0x1b, r2

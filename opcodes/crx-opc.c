@@ -488,39 +488,55 @@ const inst crx_instruction[] =
 
   BR_INST ("bal",   0x307, 0x317, 0),
 
-  /* Decrement and Branch instructions */
+  /* Decrement and Branch instructions.  */
   BR_INST ("dbnzb", 0x304, 0x314, DCR_BRANCH_INS),
   BR_INST ("dbnzw", 0x305, 0x315, DCR_BRANCH_INS),
   BR_INST ("dbnzd", 0x306, 0x316, DCR_BRANCH_INS),
 
-  /* Jump and link instructions */
+  /* Jump and link instructions.  */
   REG1_INST ("jal",    0xFF8),
   REG2_INST ("jal",    0x37),
   REG2_INST ("jalid",  0x33),
 
-  /* opc12 c4 opc12 r mask16 */
-  {"loadmcr", 3, 0x3110300, 4,	COP_REG_INS | REG_LIST | FMT_5, {{i4,16}, {regr,0}, {i16,0}}},
-  {"stormcr", 3, 0x3110301, 4,	COP_REG_INS | REG_LIST | FMT_5, {{i4,16}, {regr,0}, {i16,0}}},
+/* Create a CO-processor instruction.  */
+#define  COP_INST(NAME, OPC, TYPE, REG1, REG2) \
+  /* opc12 c4 opc8 REG1 REG2 */		       \
+  {NAME,  2, 0x301030+OPC,  8, TYPE | FMT_2, {{i4,16}, {REG1,4}, {REG2,0}}}
 
-  /* esc16 r procreg */
-  {"mtpr",    2, 0x3009,  16, 0, {{regr8,8}, {regr8,0}}},
-  /* esc16 procreg r */
-  {"mfpr",    2, 0x300A,  16, 0, {{regr8,8}, {regr8,0}}},
-  /* opc12 c4 opc8 r copreg */
-  {"mtcr",    2, 0x301030,  8, COP_REG_INS | FMT_2, {{i4,16}, {regr,4}, {copregr,0}}},
-  /* opc12 c4 opc8 copreg r */
-  {"mfcr",    2, 0x301031,  8, COP_REG_INS | FMT_2, {{i4,16}, {copregr,4}, {regr,0}}},
-  /* opc12 c4 opc8 r copsreg */
-  {"mtcsr",   2, 0x301032,  8, COP_REG_INS | FMT_2, {{i4,16}, {regr,4}, {copsregr,0}}},
-  /* opc12 c4 opc8 copsreg r */
-  {"mfcsr",   2, 0x301033,  8, COP_REG_INS | FMT_2, {{i4,16}, {copsregr,4}, {regr,0}}},
+  COP_INST ("mtcr",   0, COP_REG_INS,	regr,	  copregr),
+  COP_INST ("mfcr",   1, COP_REG_INS,	copregr,  regr),
+  COP_INST ("mtcsr",  2, COPS_REG_INS,	regr,	  copsregr),
+  COP_INST ("mfcsr",  3, COPS_REG_INS,	copsregr, regr),
+  COP_INST ("ldcr",   4, COP_REG_INS,	regr,	  copregr),
+  COP_INST ("stcr",   5, COP_REG_INS,	regr,	  copregr),
+  COP_INST ("ldcsr",  6, COPS_REG_INS,	regr,	  copsregr),
+  COP_INST ("stcsr",  7, COPS_REG_INS,	regr,	  copsregr),
 
-  /* CO-processor extensions */
+/* Create a memory-related CO-processor instruction.  */
+#define  COPMEM_INST(NAME, OPC, TYPE) \
+  /* opc12 c4 opc12 r mask16 */	      \
+  {NAME,  3, 0x3110300+OPC,  4, TYPE | REG_LIST | FMT_5, {{i4,16}, {regr,0}, {i16,0}}}
+
+  COPMEM_INST("loadmcr",  0,  COP_REG_INS),
+  COPMEM_INST("stormcr",  1,  COP_REG_INS),
+  COPMEM_INST("loadmcsr", 2,  COPS_REG_INS),
+  COPMEM_INST("stormcsr", 3,  COPS_REG_INS),
+
+  /* CO-processor extensions.  */
   /* opc12 c4 opc4 i4 disps9 */
   {"bcop",    2, 0x30107, 12, COP_BRANCH_INS | FMT_4, {{i4,16}, {i4,8}, {d9,0}}},
   /* opc12 c4 opc4 i4 disps25 */
   {"bcop",    3, 0x31107, 12, COP_BRANCH_INS | FMT_4, {{i4,16}, {i4,8}, {d25,0}}},
+  /* opc12 c4 opc4 cpdo r r */
+  {"cpdop",   2, 0x3010B, 12, COP_REG_INS | FMT_4, {{i4,16}, {i4,8}, {regr,4}, {regr,0}}},
+  /* opc12 c4 opc4 cpdo r r cpdo16 */
+  {"cpdop",   3, 0x3110B, 12, COP_REG_INS | FMT_4, {{i4,16}, {i4,8}, {regr,4}, {regr,0}, {i16,0}}},
+  /* esc16 r procreg */
+  {"mtpr",    2, 0x3009,  16, 0, {{regr8,8}, {regr8,0}}},
+  /* esc16 procreg r */
+  {"mfpr",    2, 0x300A,  16, 0, {{regr8,8}, {regr8,0}}},
 
+  /* Miscellaneous.  */
   /* opc12 i4 */
   {"excp",    1, 0xFFF,	20, 0, {{i4,16}}},
   /* opc28 i4 */

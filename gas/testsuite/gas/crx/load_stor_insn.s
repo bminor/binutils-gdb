@@ -108,11 +108,3 @@ stord r14, -0657(r15,r7,1)
 stord $0xf, 05(r10)+
 stord $0x0, -034(r11)+
 
-# CO-processor registers
-	.global loadmcr
-loadmcr:
-loadmcr $3, r1, {c2,c3,c5}
-
-	.global stormcr
-stormcr:
-stormcr $15, ra, {c10,c9,c7,c4}

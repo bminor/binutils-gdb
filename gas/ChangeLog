@@ -1,3 +1,10 @@
+2004-10-07  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* config/tc-crx.c (preprocess_reglist): Handle Co-processor
+	Special registers. 
+	(get_cinv_parameters): Add 'b' option to invalidate the
+	branch-target cache.
+
 2004-10-05  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (unwind): New variable.

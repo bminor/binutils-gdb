@@ -141,10 +141,3 @@ Disassembly of section .text:
  182:	af 36 05 a0 	stord	\$0xf, 0x5\(r10\)\+
  186:	a0 36 e4 bf 	stord	\$0x0, 0xfe4\(r11\)\+
 
-0000018a <loadmcr>:
- 18a:	13 31 01 30 	loadmcr	\$0x3, r1, {c2,c3,c5}
- 18e:	2c 00 
-
-00000190 <stormcr>:
- 190:	1f 31 1e 30 	stormcr	\$0xf, r14, {c4,c7,c9,c10}
- 194:	90 06 

@@ -284,44 +284,10 @@ subqd r0 , r10
 cntlsd:
 cntlsd r2 , r12
 
-	.global mtpr
-mtpr:
-mtpr r0 , hi
-
-	.global mfpr
-mfpr:
-mfpr lo , r5
-mfpr uhi , r10
-
-	.global mtcr
-mtcr:
-mtcr $0xf, r1, c14
-
-	.global mfcr
-mfcr:
-mfcr $3, c7, r2
-
-	.global mtcsr
-mtcsr:
-mtcsr $0x2, r5, cs1
-
-	.global mfcsr
-mfcsr:
-mfcsr $01, cs12, ra
-
-	.global bcop
-bcop:
-bcop $7, $3, 0x90
-bcop $6, $12, -0xbcdfe
-
 	.global excp
 excp:
 excp BPT
 excp svc
-
-	.global cinv
-cinv:
-cinv [i,d,u]
 
 	.global ram
 ram:
