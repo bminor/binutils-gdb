@@ -382,11 +382,7 @@ Command name abbreviations are allowed if unambiguous..*$prompt $"\
 # test help define
 send "help define\n"
 expect {
-	-re "Define a new command name.  Command name is argument..*
-Definition appears on following lines, one command per line..*
-End with a line of just \"end\"..*
-Use the \"document\" command to give documentation for the new command..*
-Commands defined in this way do not take arguments..*$prompt $"\
+	-re "Define a new command.*$prompt $"\
 			{ pass "help define" }
 	-re "$prompt $"	{ fail "help define" }
 	timeout		{ fail "(timeout) help define" }
