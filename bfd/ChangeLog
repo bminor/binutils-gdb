@@ -1,3 +1,10 @@
+Wed Jun  8 23:57:34 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aoutx.h (aout_get_external_symbols): Don't try to read the
+	strings if there are no symbols.
+	(aout_link_write_other_symbol): Use the output section when
+	working out the type.
+
 Tue Jun  7 13:25:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (assign_section_numbers): Put shstrtab, symtab and
