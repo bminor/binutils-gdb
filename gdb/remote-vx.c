@@ -338,7 +338,7 @@ net_wait (RDB_EVENT *pEvent)
 
   memset ((char *) pEvent, '\0', sizeof (RDB_EVENT));
 
-  pid = PIDGET inferior_ptid);
+  pid = PIDGET (inferior_ptid);
   status = net_clnt_call (PROCESS_WAIT, xdr_int, &pid, xdr_RDB_EVENT,
 			  pEvent);
 
