@@ -77,10 +77,9 @@ This document describes the GNU stabs debugging format in a.out files.
 Appendixes:
 * Example2.c::                  Source code for extended example
 * Example2.s::                  Assembly code for extended example
-* Stab types:: 			Table A: Symbol types from stabs
-* Assembler types:: 		Table B: Symbol types from assembler and linker
-* Symbol Descriptors:: 		Table C
-* Type Descriptors:: 		Table D
+* Stab Types:: 			Symbol types in a.out files
+* Symbol Descriptors:: 		Table of Symbol Descriptors
+* Type Descriptors:: 		Table of Symbol Descriptors
 * Expanded reference::          Reference information by stab type
 * Questions::                   Questions and anomolies
 * xcoff-differences::           Differences between GNU stabs in a.out
@@ -184,12 +183,8 @@ type of stab this is (or whether it @emph{is} a stab, as opposed to an
 ordinary symbol).  Each possible type number defines a different stab
 type.  The stab type further defines the exact interpretation of, and
 possible values for, any remaining @code{"@var{string}"}, @var{desc}, or
-@var{value} fields present in the stab.  Table A (@pxref{Stab
-types,,Table A: Symbol types from stabs}) lists in numeric order the
-possible type field values for stab directives.  The reference section
-that follows Table A describes the meaning of the fields for each stab
-type in detail.  The examples that follow this overview introduce the
-stab types in terms of the source code elements they describe.
+@var{value} fields present in the stab.  @xref{Stab Types}, for a list
+in numeric order of the possible type field values for stab directives.
 
 For @code{.stabs} the @code{"@var{string}"} field holds the meat of the
 debugging information.  The generally unstructured nature of this field
@@ -1150,7 +1145,7 @@ type definitions.  Type 21 is pointer to type 2 (char) and argv (type 20) is
 pointer to type 21.
  
 @node Types
-@chapter Type definitions
+@chapter Type Definitions
 
 Now let's look at some variable definitions involving complex types.
 This involves understanding better how types are described.  In the
@@ -1313,10 +1308,11 @@ IEEE 64-bit (double precision) floating point format.
 @item 3 (NF_COMPLEX)
 @item 4 (NF_COMPLEX16)
 @item 5 (NF_COMPLEX32)
-These are for complex numbers.  A comment in
-@file{include/aout/stab_gnu.h} describes them as Fortran complex, double
-complex, and complex*16, respectively, but what does that mean?  (i.e.
-Single precision?  Double precison?).
+@c "GDB source" really means @file{include/aout/stab_gnu.h}, but trying
+@c to put that here got an overfull hbox.
+These are for complex numbers.  A comment in the GDB source describes
+them as Fortran complex, double complex, and complex*16, respectively,
+but what does that mean?  (i.e.  Single precision?  Double precison?).
 
 @item 6 (NF_LDOUBLE)
 Long double.  It would be cleaner to define a different code for every
@@ -1611,14 +1607,13 @@ through version 4.9) doesn't support any kind of index type other than a
 range anyway; I'm not sure about dbx.
 
 It is well established, and widely used, that the type of the index,
-unlike most types found in the stabs, is merely a type definition
-(@pxref{Type Definitions}), not type information (@pxref{Stabs Format})
-(that is, it need not start with @var{type-number}@code{=} if it is
-defining a new type).  According to a comment in GDB, this is also true
-of the type of the array elements; it gives @samp{ar1;1;10;ar1;1;10;4}
-as a legitimate way to express a two dimensional array.  According to
-AIX documentation, the element type must be type information.  GDB
-accepts either.
+unlike most types found in the stabs, is merely a type definition, not
+type information (@pxref{Stabs Format}) (that is, it need not start with
+@var{type-number}@code{=} if it is defining a new type).  According to a
+comment in GDB, this is also true of the type of the array elements; it
+gives @samp{ar1;1;10;ar1;1;10;4} as a legitimate way to express a two
+dimensional array.  According to AIX documentation, the element type
+must be type information.  GDB accepts either.
 
 The type of the index is often a range type, expressed as the letter r
 and some parameters.  It defines the size of the array.  In the example
@@ -2530,8 +2525,10 @@ class.  This is preceeded by `~%' and followed by a final semi-colon.
         N_LSYM,NIL,NIL,NIL
 @end display
 
+@c FIXME: bogus line break.
 @example
-.stabs "A:t20=s8Adat:1,0,32;$vf20:21=*22=ar1;0;1;17,32;A_virt::23=##1;:i;2A*-2147483647;20;;;~%20;",128,0,0,0
+.stabs "A:t20=s8Adat:1,0,32;$vf20:21=*22=ar1;0;1;17,32;
+	A_virt::23=##1;:i;2A*-2147483647;20;;;~%20;",128,0,0,0
 @end example
 
 @node Inheritence
@@ -2890,104 +2887,211 @@ description in the class stab shows this ordering.
 137     .common _g_an_s,20,"bss"
 @end example
 
-@node Stab types
-@appendix Table A: Symbol types from stabs
+@node Stab Types
+@appendix Values for the Stab Type Field
 
-Table A lists stab types sorted by type number.  Stab type numbers are
-32 and greater.  This is the full list of stab numbers, including stab
-types that are used in languages other than C.
+These are all the possible values for the stab type field, for
+@code{a.out} files.  This does not apply to XCOFF.
 
-The #define names for these stab types are defined in:
-devo/include/aout/stab.def 
+The following types are used by the linker and assembler; there is
+nothing stabs-specific about them.  Since this document does not attempt
+to describe aspects of object file format other than the debugging
+format, no details are given.
 
-@smallexample
-type   type     #define   used to describe
-dec    hex      name      source program feature
-------------------------------------------------
-32     0x20     N_GYSM    global symbol
-34     0X22     N_FNAME   function name (for BSD Fortran)
-36     0x24     N_FUN     function name or text segment variable for C
-38     0x26     N_STSYM   static symbol (data segment w/internal linkage)
-40     0x28     N_LCSYM   .lcomm symbol(BSS-seg variable w/internal linkage)
-42     0x2a     N_MAIN    Name of main routine (not used in C)
-48     0x30     N_PC      global symbol (for Pascal)
-50     0x32     N_NSYMS   number of symbols (according to Ultrix V4.0)
-52     0x34     N_NOMAP   no DST map for sym (according to Ultrix V4.0)
-64     0x40     N_RSYM    register variable
-66     0x42     N_M2C     Modula-2 compilation unit
-68     0x44     N_SLINE   line number in text segment
-70     0x46     N_DSLINE  line number in data segment
+@c Try to get most of these to fit on a single line.
+@iftex
+@tableindent=1.5in
+@end iftex
 
-72     0x48     N_BSLINE  line number in bss segment
-72     0x48     N_BROWS   Sun source code browser, path to .cb file
+@table @code
+@item 0x0     N_UNDF           
+Undefined symbol
 
-74     0x4a     N_DEFD    GNU Modula2 definition module dependency
+@item 0x2     N_ABS            
+File scope absolute symbol
 
-80     0x50     N_EHDECL  GNU C++ exception variable
-80     0x50     N_MOD2    Modula2 info "for imc" (according to Ultrix V4.0)
+@item 0x3     N_ABS | N_EXT    
+External absolute symbol
 
-84     0x54     N_CATCH   GNU C++ "catch" clause
-96     0x60     N_SSYM    structure of union element
-100    0x64     N_SO      path and name of source file 
-128    0x80     N_LSYM    automatic var in the stack 
-                          (also used for type desc.)
-130    0x82     N_BINCL   beginning of an include file (Sun only)
-132    0x84     N_SOL     Name of sub-source (#include) file.
-160    0xa0     N_PSYM    parameter variable
-162    0xa2     N_EINCL   end of an include file
-164    0xa4     N_ENTRY   alternate entry point
-192    0xc0     N_LBRAC   beginning of a lexical block
-194    0xc2     N_EXCL    place holder for a deleted include file
-196    0xc4     N_SCOPE   modula2 scope information (Sun linker)
-224    0xe0     N_RBRAC   end of a lexical block
-226    0xe2     N_BCOMM   begin named common block
-228    0xe4     N_ECOMM   end named common block
-232    0xe8     N_ECOML   end common (local name)
+@item 0x4     N_TEXT           
+File scope text symbol
 
-       << used on Gould systems for non-base registers syms >>
-240    0xf0     N_NBTEXT  ??
-242    0xf2     N_NBDATA  ??
-244    0xf4     N_NBBSS   ??
-246    0xf6     N_NBSTS   ??
-248    0xf8     N_NBLCS   ??
-@end smallexample
+@item 0x5     N_TEXT | N_EXT   
+External text symbol
 
-@node Assembler types
-@appendix Table B: Symbol types from assembler and linker
+@item 0x6     N_DATA           
+File scope data symbol
 
-Table B shows the types of symbol table entries that hold assembler
-and linker symbols.  Since this document does not attempt to describe
-aspects of object file format other than the debugging format, no
-details are given.
+@item 0x7     N_DATA | N_EXT   
+External data symbol
 
-@smallexample
-hex     symbolic
-n_type  name             used to describe
-----------------------------------
-0x0     N_UNDF           undefined symbol
-0x2     N_ABS            file scope absolute symbol
-0x3     N_ABS | N_EXT    external absolute symbol
-0x4     N_TEXT           file scope text symbol
-0x5     N_TEXT | N_EXT   external text symbol
-0x6     N_DATA           file scope data symbol
-0x7     N_DATA | N_EXT   external data symbol
-0x8     N_BSS            file scope BSS symbol
-0x9     N_BSS | N_EXT    external BSS symbol
+@item 0x8     N_BSS            
+File scope BSS symbol
 
-0x0c    N_FN_SEQ         Same as N_FN, for Sequent compilers
-0x0a	N_INDR	         Symbol is indirected to another symbol
-0x12    N_COMM           common sym -- visable after shared lib dynamic link
-0x14	N_SETA	         Absolute set element
-0x16	N_SETT	         Text segment set element
-0x18	N_SETD	         Data segment set element
-0x1a	N_SETB	         BSS segment set element
-0x1c	N_SETV	         Pointer to set vector
-0x1e	N_WARNING        Print a warning message during linking
-0x1f    N_FN             file name of a .o file
-@end smallexample
+@item 0x9     N_BSS | N_EXT    
+External BSS symbol
+
+@item 0x0c    N_FN_SEQ         
+Same as N_FN, for Sequent compilers
+
+@item 0x0a	N_INDR	         
+Symbol is indirected to another symbol
+
+@item 0x12    N_COMM           
+Common sym -- visable after shared lib dynamic link
+
+@item 0x14	N_SETA	         
+Absolute set element
+
+@item 0x16	N_SETT	         
+Text segment set element
+
+@item 0x18	N_SETD
+Data segment set element
+
+@item 0x1a	N_SETB	         
+BSS segment set element
+
+@item 0x1c	N_SETV	         
+Pointer to set vector
+
+@item 0x1e	N_WARNING        
+Print a warning message during linking
+
+@item 0x1f    N_FN             
+File name of a .o file
+@end table
+
+The following symbol types indicate that this is a stab.  This is the
+full list of stab numbers, including stab types that are used in
+languages other than C.
+
+@table @code
+@item 0x20     N_GSYM
+Global symbol, @xref{N_GSYM}.
+
+@item 0x22     N_FNAME
+Function name (for BSD Fortran), @xref{N_FNAME}.
+
+@item 0x24     N_FUN     
+Function name or text segment variable for C, @xref{N_FUN}.
+
+@item 0x26     N_STSYM   
+Static symbol (data segment variable with internal linkage), @xref{N_STSYM}.
+
+@item 0x28     N_LCSYM   
+.lcomm symbol (BSS segment variable with internal linkage), @xref{N_LCSYM}.
+
+@item 0x2a     N_MAIN    
+Name of main routine (not used in C), @xref{N_MAIN}.
+
+@item 0x30     N_PC      
+Global symbol (for Pascal), @xref{N_PC}.
+
+@item 0x32     N_NSYMS   
+Number of symbols (according to Ultrix V4.0), @xref{N_NSYMS}.
+
+@item 0x34     N_NOMAP   
+No DST map for sym (according to Ultrix V4.0), @xref{N_NOMAP}.
+
+@item 0x40     N_RSYM    
+Register variable, @xref{N_RSYM}.
+
+@item 0x42     N_M2C     
+Modula-2 compilation unit, @xref{N_M2C}.
+
+@item 0x44     N_SLINE   
+Line number in text segment, @xref{Line Numbers}.
+
+@item 0x46     N_DSLINE  
+Line number in data segment, @xref{Line Numbers}.
+
+@item 0x48     N_BSLINE  
+Line number in bss segment, @xref{Line Numbers}.
+
+@item 0x48     N_BROWS   
+Sun source code browser, path to .cb file, @xref{N_BROWS}.
+
+@item 0x4a     N_DEFD    
+Gnu Modula2 definition module dependency, @xref{N_DEFD}.
+
+@item 0x50     N_EHDECL  
+Gnu C++ exception variable, @xref{N_EHDECL}.
+
+@item 0x50     N_MOD2    
+Modula2 info "for imc" (according to Ultrix V4.0), @xref{N_MOD2}.
+
+@item 0x54     N_CATCH   
+Gnu C++ "catch" clause, @xref{N_CATCH}.
+
+@item 0x60     N_SSYM    
+Structure of union element, @xref{N_SSYM}.
+
+@item 0x64     N_SO      
+Path and name of source file , @xref{Source Files}.
+
+@item 0x80     N_LSYM    
+Automatic var in the stack or type definition, @xref{N_LSYM}, @xref{Typedefs}.
+
+@item 0x82     N_BINCL   
+Beginning of an include file (Sun only), @xref{Source Files}.
+
+@item 0x84     N_SOL     
+Name of sub-source (#include) file., @xref{Source Files}.
+
+@item 0xa0     N_PSYM    
+Parameter variable, @xref{Parameters}.
+
+@item 0xa2     N_EINCL   
+End of an include file, @xref{Source Files}.
+
+@item 0xa4     N_ENTRY   
+Alternate entry point, @xref{N_ENTRY}.
+
+@item 0xc0     N_LBRAC   
+Beginning of a lexical block, @xref{N_LBRAC}.
+
+@item 0xc2     N_EXCL    
+Place holder for a deleted include file, @xref{Source Files}.
+
+@item 0xc4     N_SCOPE   
+Modula2 scope information (Sun linker), @xref{N_SCOPE}.
+
+@item 0xe0     N_RBRAC   
+End of a lexical block, @xref{N_RBRAC}.
+
+@item 0xe2     N_BCOMM   
+Begin named common block, @xref{N_BCOMM}.
+
+@item 0xe4     N_ECOMM   
+End named common block, @xref{N_ECOMM}.
+
+@item 0xe8     N_ECOML   
+End common (local name), @xref{N_ECOML}.
+
+@item 0xf0     N_NBTEXT  
+<< used on Gould systems for non-base registers syms >>, @xref{Gould}.
+
+@item 0xf2     N_NBDATA  
+<< used on Gould systems for non-base registers syms >>, @xref{Gould}.
+
+@item 0xf4     N_NBBSS
+<< used on Gould systems for non-base registers syms >>, @xref{Gould}.
+
+@item 0xf6     N_NBSTS   
+<< used on Gould systems for non-base registers syms >>, @xref{Gould}.
+
+@item 0xf8     N_NBLCS   
+<< used on Gould systems for non-base registers syms >>, @xref{Gould}.
+@end table
+
+@c Restore the default table indent
+@iftex
+@tableindent=.8in
+@end iftex
 
 @node Symbol Descriptors
-@appendix Table C: Symbol descriptors
+@appendix Table of Symbol Descriptors
 
 @c Please keep this alphabetical
 @table @code
@@ -3093,7 +3197,7 @@ Function return variable, @xref{Parameters}.
 @end table
 
 @node Type Descriptors
-@appendix Table D: Type Descriptors 
+@appendix Table of Type Descriptors
 
 @table @code
 @item @var{digit}
@@ -3212,10 +3316,12 @@ gstring, @xref{Strings}.
 @node Expanded reference
 @appendix Expanded reference by stab type.
 
-@c FIXME: For most types this should be much shorter and much sweeter,
-@c see N_PSYM or N_SO for an example.  
+@c FIXME: This appendix should go away, see N_PSYM or N_SO for an example.
 
-@c FIXME: It probably should be merged with Tables A and B.
+For a full list of stab types, and cross-references to where they are
+described, @xref{Stab Types}.  This appendix just duplicates certain
+information from the main body of this document; eventually the
+information will all be in one place.
 
 Format of an entry:
   
@@ -3245,24 +3351,15 @@ Finally, any further information.
 * N_NOMAP::     No DST map
 * N_RSYM::      Register variable
 * N_M2C::       Modula-2 compilation unit
-* N_SLINE: Line Numbers.     Line number in text segment
-* N_DSLINE: Line Numbers.    Line number in data segment
-* N_BSLINE: Line Numbers.    Line number in bss segment
 * N_BROWS::     Path to .cb file for Sun source code browser
 * N_DEFD::      GNU Modula2 definition module dependency
 * N_EHDECL::    GNU C++ exception variable
 * N_MOD2::      Modula2 information "for imc"
 * N_CATCH::     GNU C++ "catch" clause
 * N_SSYM::      Structure or union element
-* N_SO: Source Files.        Source file 
 * N_LSYM::      Automatic variable
-* N_BINCL: Source Files.     Beginning of include file
-* N_SOL: Source Files.       Name of include file
-* N_PSYM: Parameters.        Parameter variable
-* N_EINCL: Source Files.     End of include file
 * N_ENTRY::     Alternate entry point
 * N_LBRAC::     Beginning of lexical block
-* N_EXCL: Source Files.      Deleted include file
 * N_SCOPE::     Modula2 scope information (Sun only)
 * N_RBRAC::     End of lexical block
 * N_BCOMM::     Begin named common block
