@@ -1,5 +1,10 @@
 2004-01-05  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
+	* doc/as.texinfo: Let texi2pod parse asconfig.texi and
+	gasver.texi.  Remove duplicate symbol definitions for texi2pod.
+
+2004-01-05  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
 	* Makefile.am (Makefile): Move the dependency on
 	$(BFDDIR)/configure.in to...
 	(CONFIG_STATUS_DEPENDENCIES): ... here.
