@@ -146,25 +146,6 @@ ar_emul_aix5_replace (after_bfd, file_name, verbose)
 			       "aix5coff64-rs6000", FALSE);
 }
 
-bfd_boolean
-ar_emul_aix_create (abfd_out, archive_file_name, file_name)
-     bfd **abfd_out;
-     char *archive_file_name;
-     char *file_name ATTRIBUTE_UNUSED;
-{
-  char *target = "aixcoff-rs6000";
-
-  /* Create an empty archive.  */
-  *abfd_out = bfd_openw (archive_file_name, target);
-
-  if (*abfd_out == NULL)
-    bfd_fatal (archive_file_name);
-
-  /* set to small or big format.  */
-  /* not done.  */
-  return TRUE;
-}
-
 static bfd_boolean
 ar_emul_aix_parse_arg (arg)
      char *arg;

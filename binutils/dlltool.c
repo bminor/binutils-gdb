@@ -3634,21 +3634,21 @@ mcore_elf_gen_out_file (void)
   ptr = & fnames;
 
   ds = dyn_string_new (100);
-  dyn_string_append (ds, "-r ");
+  dyn_string_append_cstr (ds, "-r ");
 
   if (mcore_elf_linker_flags != NULL)
-    dyn_string_append (ds, mcore_elf_linker_flags);
+    dyn_string_append_cstr (ds, mcore_elf_linker_flags);
 
   while (ptr->next != NULL)
     {
-      dyn_string_append (ds, ptr->filename);
-      dyn_string_append (ds, " ");
+      dyn_string_append_cstr (ds, ptr->filename);
+      dyn_string_append_cstr (ds, " ");
 
       ptr = ptr->next;
     }
 
-  dyn_string_append (ds, "-o ");
-  dyn_string_append (ds, MCORE_ELF_TMP_OBJ);
+  dyn_string_append_cstr (ds, "-o ");
+  dyn_string_append_cstr (ds, MCORE_ELF_TMP_OBJ);
 
   if (mcore_elf_linker == NULL)
     mcore_elf_linker = deduce_name ("ld");
@@ -3661,25 +3661,25 @@ mcore_elf_gen_out_file (void)
      Do this by recursively invoking dlltool...  */
   ds = dyn_string_new (100);
 
-  dyn_string_append (ds, "-S ");
-  dyn_string_append (ds, as_name);
+  dyn_string_append_cstr (ds, "-S ");
+  dyn_string_append_cstr (ds, as_name);
 
-  dyn_string_append (ds, " -e ");
-  dyn_string_append (ds, MCORE_ELF_TMP_EXP);
-  dyn_string_append (ds, " -l ");
-  dyn_string_append (ds, MCORE_ELF_TMP_LIB);
-  dyn_string_append (ds, " " );
-  dyn_string_append (ds, MCORE_ELF_TMP_OBJ);
+  dyn_string_append_cstr (ds, " -e ");
+  dyn_string_append_cstr (ds, MCORE_ELF_TMP_EXP);
+  dyn_string_append_cstr (ds, " -l ");
+  dyn_string_append_cstr (ds, MCORE_ELF_TMP_LIB);
+  dyn_string_append_cstr (ds, " " );
+  dyn_string_append_cstr (ds, MCORE_ELF_TMP_OBJ);
 
   if (verbose)
-    dyn_string_append (ds, " -v");
+    dyn_string_append_cstr (ds, " -v");
 
   if (dontdeltemps)
     {
-      dyn_string_append (ds, " -n");
+      dyn_string_append_cstr (ds, " -n");
 
       if (dontdeltemps > 1)
-	dyn_string_append (ds, " -n");
+	dyn_string_append_cstr (ds, " -n");
     }
 
   /* XXX - FIME: ought to check/copy other command line options as well.  */
@@ -3690,17 +3690,17 @@ mcore_elf_gen_out_file (void)
   /* Step four. Feed the .exp and object files to ld -shared to create the dll.  */
   ds = dyn_string_new (100);
 
-  dyn_string_append (ds, "-shared ");
+  dyn_string_append_cstr (ds, "-shared ");
 
   if (mcore_elf_linker_flags)
-    dyn_string_append (ds, mcore_elf_linker_flags);
+    dyn_string_append_cstr (ds, mcore_elf_linker_flags);
 
-  dyn_string_append (ds, " ");
-  dyn_string_append (ds, MCORE_ELF_TMP_EXP);
-  dyn_string_append (ds, " ");
-  dyn_string_append (ds, MCORE_ELF_TMP_OBJ);
-  dyn_string_append (ds, " -o ");
-  dyn_string_append (ds, mcore_elf_out_file);
+  dyn_string_append_cstr (ds, " ");
+  dyn_string_append_cstr (ds, MCORE_ELF_TMP_EXP);
+  dyn_string_append_cstr (ds, " ");
+  dyn_string_append_cstr (ds, MCORE_ELF_TMP_OBJ);
+  dyn_string_append_cstr (ds, " -o ");
+  dyn_string_append_cstr (ds, mcore_elf_out_file);
 
   run (mcore_elf_linker, ds->s);
 

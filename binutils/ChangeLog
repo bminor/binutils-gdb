@@ -1,3 +1,10 @@
+2002-12-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* dlltool.c (mcore_elf_gen_out_file): Replace all occurrences of
+	dyn_string_append with dyn_string_append_cstr.
+
+	* emul_aix.c (ar_emul_aix_create): Remove unused function.
+
 2002-12-10  James Cownie <jcownie@etnus.com>
 
 	* readelf.h (get_TAG_name, get_AT_name,
