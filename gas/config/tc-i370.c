@@ -30,7 +30,7 @@
 
 #include <stdio.h>
 #include "as.h"
-#include "c=ctype.h"
+#include "safe-ctype.h"
 #include "subsegs.h"
 #include "struc-symbol.h"
 

@@ -1,3 +1,7 @@
+2001-09-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i370.c: Fix typo in last change.
+
 2001-09-19  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* doc/as.texinfo (Symbol Names): Improve documentation on local
