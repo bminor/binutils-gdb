@@ -62,68 +62,46 @@ coff_arm_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   if (output_bfd == (bfd *) NULL)
     return bfd_reloc_continue;
 
-  if (bfd_is_com_section (symbol->section))
-    {
-      /* We are relocating a common symbol.  The current value in the
-	 object file is ORIG + OFFSET, where ORIG is the value of the
-	 common symbol as seen by the object file when it was compiled
-	 (this may be zero if the symbol was undefined) and OFFSET is
-	 the offset into the common symbol (normally zero, but may be
-	 non-zero when referring to a field in a common structure).
-	 ORIG is the negative of reloc_entry->addend, which is set by
-	 the CALC_ADDEND macro below.  We want to replace the value in
-	 the object file with NEW + OFFSET, where NEW is the value of
-	 the common symbol which we are going to put in the final
-	 object file.  NEW is symbol->value.  */
-      diff = symbol->value + reloc_entry->addend;
-    }
-  else
-    {
-      /* For some reason bfd_perform_relocation always effectively
-	 ignores the addend for a COFF target when producing
-	 relocateable output.  This seems to be always wrong for 386
-	 COFF, so we handle the addend here instead.  */
-      diff = reloc_entry->addend;
-    }
+  diff = reloc_entry->addend;
 
 #define DOIT(x) \
   x = ((x & ~howto->dst_mask) | (((x & howto->src_mask) + diff) & howto->dst_mask))
 
-  if (diff != 0)
-    {
-      reloc_howto_type *howto = reloc_entry->howto;
-      unsigned char *addr = (unsigned char *) data + reloc_entry->address;
+    if (diff != 0)
+      {
+	reloc_howto_type *howto = reloc_entry->howto;
+	unsigned char *addr = (unsigned char *) data + reloc_entry->address;
 
-      switch (howto->size)
-	{
-	case 0:
+	switch (howto->size)
 	  {
-	    char x = bfd_get_8 (abfd, addr);
-	    DOIT (x);
-	    bfd_put_8 (abfd, x, addr);
-	  }
-	  break;
+	  case 0:
+	    {
+	      char x = bfd_get_8 (abfd, addr);
+	      DOIT (x);
+	      bfd_put_8 (abfd, x, addr);
+	    }
+	    break;
 
-	case 1:
-	  {
-	    short x = bfd_get_16 (abfd, addr);
-	    DOIT (x);
-	    bfd_put_16 (abfd, x, addr);
-	  }
-	  break;
+	  case 1:
+	    {
+	      short x = bfd_get_16 (abfd, addr);
+	      DOIT (x);
+	      bfd_put_16 (abfd, x, addr);
+	    }
+	    break;
 
-	case 2:
-	  {
-	    long x = bfd_get_32 (abfd, addr);
-	    DOIT (x);
-	    bfd_put_32 (abfd, x, addr);
-	  }
-	  break;
+	  case 2:
+	    {
+	      long x = bfd_get_32 (abfd, addr);
+	      DOIT (x);
+	      bfd_put_32 (abfd, x, addr);
+	    }
+	    break;
 
-	default:
-	  abort ();
-	}
-    }
+	  default:
+	    abort ();
+	  }
+      }
 
   /* Now let bfd_perform_relocation finish everything up.  */
   return bfd_reloc_continue;
@@ -420,11 +398,7 @@ arm_reloc_type_lookup(abfd,code)
 #define coff_bfd_reloc_type_lookup arm_reloc_type_lookup
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
-/* The page size is a guess based on ELF.  */
 #define COFF_PAGE_SIZE 0x1000
-
-
-
 /* Turn a howto into a reloc  nunmber */
 
 #define SELECT_RELOC(x,howto) { x.r_type = howto->type; }
@@ -432,28 +406,10 @@ arm_reloc_type_lookup(abfd,code)
 #define ARM 1			/* Customize coffcode.h */
 
 
-/* On SCO Unix 3.2.2 the native assembler generates two .data
-   sections.  We handle that by renaming the second one to .data2.  It
-   does no harm to do this for any arm COFF target.  */
-#define TWO_DATA_SECS
-
-/* For arm COFF a STYP_NOLOAD | STYP_BSS section is part of a shared
-   library.  On some other COFF targets STYP_BSS is normally
-   STYP_NOLOAD.  */
-#define BSS_NOLOAD_IS_SHARED_LIBRARY
-
-
 /* We use the special COFF backend linker.  */
 #define coff_relocate_section _bfd_coff_generic_relocate_section
 
 #include "coffcode.h"
-
-static const bfd_target *
-i3coff_object_p(a)
-     bfd *a;
-{
-  return coff_object_p(a);
-}
 
 #ifdef TARGET_LITTLE_SYM
 const bfd_target TARGET_LITTLE_SYM =
@@ -485,8 +441,8 @@ const bfd_target TARGET_LITTLE_SYM =
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
 /* Note that we allow an object file to be treated as a core file as well. */
-    {_bfd_dummy_target, i3coff_object_p, /* bfd_check_format */
-       bfd_generic_archive_p, i3coff_object_p},
+    {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
+       bfd_generic_archive_p, coff_object_p},
     {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
        bfd_false},
     {bfd_false, coff_write_object_contents, /* bfd_write_contents */
@@ -536,8 +492,8 @@ const bfd_target TARGET_BIG_SYM =
      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* hdrs */
 
 /* Note that we allow an object file to be treated as a core file as well. */
-    {_bfd_dummy_target, i3coff_object_p, /* bfd_check_format */
-       bfd_generic_archive_p, i3coff_object_p},
+    {_bfd_dummy_target, coff_object_p, /* bfd_check_format */
+       bfd_generic_archive_p, coff_object_p},
     {bfd_false, coff_mkobject, _bfd_generic_mkarchive, /* bfd_set_format */
        bfd_false},
     {bfd_false, coff_write_object_contents, /* bfd_write_contents */

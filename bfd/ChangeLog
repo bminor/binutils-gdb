@@ -1,5 +1,22 @@
+Thu Aug 31 08:00:14 1995  steve chamberlain  <sac@slash.cygnus.com>
+	
+	* coff-arm.c (coff_arm_reloc): Fix common size problem.
+	(i3coff_object_p): Delete.
+
+Wed Aug 30 20:41:27 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* coff-arm.c (deletemeacoff_arm_reloc): Deleted.
+	(arm26): Not partial inplace.
+	* coffcode.h (coff_compute_section_file_positions): Don't
+	do page aligning if COFF_PAGE_SIZE isn't defined.
+	* coffswap.h (coff_swap_scnhdr_in): Update image base correctly.
+
 Tue Aug 29 13:50:21 1995  steve chamberlain  <sac@slash.cygnus.com>
 
+	* coffcode.h (coff_compute_section_file_positions):
+	Compile even if COFF_PAGE_SIZE isn't defined.
+	* cofflink.c (_bfd_coff_generate_reloc_section): Write
+	base file info as rvas.
 	* coff-arm.c (coff_rtype_to_howto): Deal with reloc 11.
 	* coffcode.h (coff_write_object_contents): Remove #if0ed code
 	Only remove empty sections in PE inmage files.
