@@ -137,7 +137,6 @@ proc gdb_exit {} {
     if $verbose>1 then {
 	send_user "Quitting $GDB $GDBFLAGS\n"
     }
-    close
 }
 
 #

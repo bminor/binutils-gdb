@@ -1,3 +1,8 @@
+Fri Jul  2 10:48:03 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/mips-gdb.exp (gdb_exit): Removed close statement which is
+	no longer needed.
+
 Fri Jul  2 09:08:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t06/signals.exp: Add test for sparc bug with do_save_insn.
