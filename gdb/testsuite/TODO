@@ -186,6 +186,14 @@ watchpoint.exp, signals.exp, etc.
 Test that the copyright year in the startup message matches the
 current year (would produce a single spurious FAIL on old GDB's, but
 probably still a good idea).
+
+Test that prologue recognition, backtrace, printing locals, etc.,
+still work in the presence of large frames (the point being that at
+some point immediate fields in RISC instructions will overflow and
+prologues will need to look different.  For sparc, the immediate field
+is 13 bits (signed), so I believe the threshold would be 4K bytes in a
+frame).
+
 
 (this is for editing this file with GNU emacs)
 Local Variables:
