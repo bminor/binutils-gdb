@@ -1,3 +1,18 @@
+Thu Mar 26 12:00:35 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk.c (gdbtk_fputs): Insert fencepost.
+	(gdb_loc): Correct pc calculation.
+	(gdb_immediate_command): Return if a load is in progress.
+	(gdb_cmd): Return if a load is in progress.
+	(target_stop_wrapper): New function.
+	(gdb_stop): Call target_stop_wrapper.
+	(x_event): Add fencepost and optimize load cancel check.
+	(gdbtk_start_timer): Set up structs only once.
+	(gdbtk_stop_timer): Just use preset structs to set timer parameters.
+	(gdb_loadfile): If file cannot be loaded, return error message.
+	(gdb_loadfile): Add space before tab so that lines without
+	a '-' can later be changed to have one.
+
 Wed Mar 25 14:08:51 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdbtk.c (gdbtk_pre_add_symbol): Use Tcl_merge to form Tcl commands.

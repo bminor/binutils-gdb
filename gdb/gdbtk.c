@@ -89,6 +89,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #endif
 
 static int load_in_progress = 0;
+static int in_fputs = 0;
 
 int gdbtk_load_hash PARAMS ((char *, unsigned long));
 int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
@@ -318,22 +319,22 @@ gdbtk_fputs (ptr, stream)
      const char *ptr;
      FILE *stream;
 {
+  char *merge[2], *command;
+  in_fputs = 1;
+
   if (result_ptr)
     Tcl_DStringAppend (result_ptr, (char *) ptr, -1);
   else if (error_string_ptr != NULL && stream == gdb_stderr)
     Tcl_DStringAppend (error_string_ptr, (char *) ptr, -1);
   else
     {
-      Tcl_DString str;
-
-      Tcl_DStringInit (&str);
-
-      Tcl_DStringAppend (&str, "gdbtk_tcl_fputs", -1);
-      Tcl_DStringAppendElement (&str, (char *)ptr);
-
-      Tcl_Eval (interp, Tcl_DStringValue (&str)); 
-      Tcl_DStringFree (&str);
+      merge[0] = "gdbtk_tcl_fputs";
+      merge[1] = (char *)ptr;
+      command = Tcl_Merge (2, merge);
+      Tcl_Eval (interp, command);
+      Tcl_Free (command);
     }
+  in_fputs = 0;
 }
 
 static int
@@ -677,11 +678,12 @@ gdb_loc (clientData, interp, argc, argv)
 
       if (sals.nelts != 1)
 	error ("Ambiguous line spec");
+
+      pc = sal.pc;
     }
   else
     error ("wrong # args");
 
-  pc = sal.pc;
   if (sal.symtab)
     Tcl_DStringAppendElement (result_ptr, sal.symtab->filename);
   else
@@ -1075,7 +1077,7 @@ gdb_immediate_command (clientData, interp, argc, argv)
   if (argc != 2)
     error ("wrong # args");
 
-  if (running_now)
+  if (running_now || load_in_progress)
     return TCL_OK;
 
   Tcl_DStringAppend (result_ptr, "", -1);
@@ -1106,7 +1108,7 @@ gdb_cmd (clientData, interp, argc, argv)
   if (argc != 2)
     error ("wrong # args");
 
-  if (running_now)
+  if (running_now || load_in_progress)
     return TCL_OK;
 
   /* for the load instruction (and possibly others later) we
@@ -1370,6 +1372,14 @@ gdb_listfuncs (clientData, interp, argc, argv)
 }
 
 static int
+target_stop_wrapper (args)
+  char * args;
+{
+  target_stop ();
+  return 1;
+}
+
+static int
 gdb_stop (clientData, interp, argc, argv)
      ClientData clientData;
      Tcl_Interp *interp;
@@ -1377,7 +1387,10 @@ gdb_stop (clientData, interp, argc, argv)
      char *argv[];
 {
   if (target_stop)
-    target_stop ();
+    {
+      catch_errors (target_stop_wrapper, NULL, "",
+                    RETURN_MASK_ALL);
+    }
   else
     quit_flag = 1; /* hope something sees this */
 
@@ -1751,19 +1764,27 @@ static void
 x_event (signo)
      int signo;
 {
+  static int in_x_event = 0;
+  static Tcl_Obj *varname = NULL;
+
+  if (in_x_event || in_fputs)
+    return; 
+
+  in_x_event = 1;
+
   /* Process pending events */
   while (Tcl_DoOneEvent (TCL_DONT_WAIT|TCL_ALL_EVENTS) != 0)
     ;
 
-
-  /* If we are doing a download, see if the download should be
-     cancelled.  FIXME: We should use a better variable name.  */
   if (load_in_progress)
     {
-      char *val;
-
-      val = Tcl_GetVar (interp, "download_cancel_ok", TCL_GLOBAL_ONLY);
-      if (val != NULL && atoi (val))
+      int val;
+      if (varname == NULL)
+	{
+	  Tcl_Obj *varnamestrobj = Tcl_NewStringObj("download_cancel_ok",-1);
+	  varname = Tcl_ObjGetVar2(interp,varnamestrobj,NULL,TCL_GLOBAL_ONLY);
+	}
+      if ((Tcl_GetIntFromObj(interp,varname,&val) == TCL_OK) && val)
 	{
 	  quit_flag = 1;
 #ifdef REQUEST_QUIT
@@ -1774,6 +1795,7 @@ x_event (signo)
 #endif
 	}
     }
+  in_x_event = 0;
 }
 
 #ifdef __CYGWIN32__
@@ -1782,55 +1804,51 @@ x_event (signo)
    messages.  FIXME: It would be better to not poll, but to instead
    rewrite the target_wait routines to serve as input sources.
    Unfortunately, that will be a lot of work.  */
+static sigset_t nullsigmask;
+static struct sigaction act1, act2;
+static struct itimerval it_on, it_off;
 
 static void
 gdbtk_start_timer ()
 {
-  sigset_t nullsigmask;
-  struct sigaction action;
-  struct itimerval it;
+  static int first = 1;
+  /*TclDebug ("Starting timer....");*/  
+  if (first)
+    {
+      /* first time called, set up all the structs */
+      first = 0;
+      sigemptyset (&nullsigmask);
 
-  /*TclDebug ("Starting timer....");*/
-  sigemptyset (&nullsigmask);
+      act1.sa_handler = x_event;
+      act1.sa_mask = nullsigmask;
+      act1.sa_flags = 0;
 
-  action.sa_handler = x_event;
-  action.sa_mask = nullsigmask;
-  action.sa_flags = 0;
-  sigaction (SIGALRM, &action, NULL);
+      act2.sa_handler = SIG_IGN;
+      act2.sa_mask = nullsigmask;
+      act2.sa_flags = 0;
 
-  it.it_interval.tv_sec = 0;
-  /* Check for messages twice a second.  */
-  it.it_interval.tv_usec = 500 * 1000;
-  it.it_value.tv_sec = 0;
-  it.it_value.tv_usec = 500 * 1000;
+      it_on.it_interval.tv_sec = 0;
+      it_on.it_interval.tv_usec = 500000; /* .5 sec */
+      it_on.it_value.tv_sec = 0;
+      it_on.it_value.tv_usec = 500000;
 
-  setitimer (ITIMER_REAL, &it, NULL);
-
+      it_off.it_interval.tv_sec = 0;
+      it_off.it_interval.tv_usec = 0;
+      it_off.it_value.tv_sec = 0;
+      it_off.it_value.tv_usec = 0;
+    }
+  sigaction (SIGALRM, &act1, NULL);
+  setitimer (ITIMER_REAL, &it_on, NULL);
   gdbtk_timer_going = 1;
 }
 
 static void
 gdbtk_stop_timer ()
 {
-  sigset_t nullsigmask;
-  struct sigaction action;
-  struct itimerval it;
-
   gdbtk_timer_going = 0;
-  
   /*TclDebug ("Stopping timer.");*/
-  sigemptyset (&nullsigmask);
-
-  action.sa_handler = SIG_IGN;
-  action.sa_mask = nullsigmask;
-  action.sa_flags = 0;
-  sigaction (SIGALRM, &action, NULL);
-
-  it.it_interval.tv_sec = 0;
-  it.it_interval.tv_usec = 0;
-  it.it_value.tv_sec = 0;
-  it.it_value.tv_usec = 0;
-  setitimer (ITIMER_REAL, &it, NULL);
+  setitimer (ITIMER_REAL, &it_off, NULL);
+  sigaction (SIGALRM, &act2, NULL);
 }
 
 #endif
@@ -1976,6 +1994,10 @@ gdbtk_init ( argv0 )
   /* First init tcl and tk. */
   Tcl_FindExecutable (argv0); 
   interp = Tcl_CreateInterp ();
+
+#ifdef TCL_MEM_DEBUG
+  Tcl_InitMemory (interp);
+#endif
 
   if (!interp)
     error ("Tcl_CreateInterp failed");
@@ -3079,6 +3101,8 @@ gdb_loadfile (clientData, interp, objc, objv)
   symtab = full_lookup_symtab (file);
   if (!symtab)
     {
+      sprintf(msg, "File not found");
+      Tcl_SetStringObj ( Tcl_GetObjResult (interp), msg, -1);      
       fclose (fp);
       return TCL_ERROR;
     }
@@ -3145,14 +3169,14 @@ gdb_loadfile (clientData, interp, objc, objv)
 	  if (ltable[ln >> 3] & (1 << (ln % 8)))
 	    a[0]->length = sprintf (buf,"%s insert end {-\t%d} break_tag", widget, ln);
 	  else
-	    a[0]->length = sprintf (buf,"%s insert end {\t%d} \"\"", widget, ln);
+	    a[0]->length = sprintf (buf,"%s insert end { \t%d} \"\"", widget, ln);
 	}
       else
 	{
 	  if (ltable[ln >> 3] & (1 << (ln % 8)))
 	   a[0]->length = sprintf (buf,"%s insert end {-\t} break_tag", widget);
 	  else
-	   a[0]->length = sprintf (buf,"%s insert end {\t} \"\"", widget);
+	   a[0]->length = sprintf (buf,"%s insert end { \t} \"\"", widget);
 	}
       b[0]->length = strlen(b[0]->bytes);
       Tcl_SetListObj(a[1],2,b);
