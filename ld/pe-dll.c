@@ -26,6 +26,7 @@
 #include "libiberty.h"
 #include "safe-ctype.h"
 
+#include <stdint.h>
 #include <time.h>
 
 #include "ld.h"
@@ -917,8 +918,8 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   int s, hint;
   unsigned char *edirectory;
-  unsigned long *eaddresses;
-  unsigned long *enameptrs;
+  uint32_t *eaddresses;
+  uint32_t *enameptrs;
   unsigned short *eordinals;
   unsigned char *enamestr;
   time_t now;
@@ -929,7 +930,7 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 
   /* Note use of array pointer math here.  */
   edirectory = edata_d;
-  eaddresses = (unsigned long *) (edata_d + 40);
+  eaddresses = (uint32_t *) (edata_d + 40);
   enameptrs = eaddresses + export_table_size;
   eordinals = (unsigned short *) (enameptrs + count_exported_byname);
   enamestr = (char *) (eordinals + count_exported_byname);
@@ -2257,6 +2258,9 @@ pe_dll_generate_implib (def_file *def, const char *impfilename)
       char *internal = def->exports[i].internal_name;
       bfd *n;
 
+      /* Don't add PRIVATE entries to import lib.  */ 	
+      if (pe_def_file->exports[i].flag_private)
+	continue;
       def->exports[i].internal_name = def->exports[i].name;
       n = make_one (def->exports + i, outarch);
       n->next = head;

@@ -1,3 +1,8 @@
+2004-03-08  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* pe-dll.c (pe_dll_generate_implib): Skip sections marked as
+	private when building implib.
+
 2004-03-05  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldlang.c (lang_add_section): Don't force SEC_LOAD on
