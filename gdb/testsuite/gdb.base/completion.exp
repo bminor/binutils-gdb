@@ -470,19 +470,28 @@ gdb_expect {
 
 send_gdb "p b-a\t"
 sleep 1
-gdb_expect  {
-        -re "^p b-a\\\x07$"\
-            { send_gdb "\n"
-              gdb_expect {
-                      -re "No symbol \"b\" in current context\\..*$gdb_prompt $"\
-                                        { pass "complete 'p b-a'"}
-                      -re ".*$gdb_prompt $" { fail "complete 'p b-a'"}
-                      timeout           {fail "(timeout) complete 'p b-a'"}
-                     }
+gdb_expect {
+    -re "^p b-a\\\x07$" {
+        send_gdb "\n"
+        gdb_expect {
+            -re "No symbol \"b\" in current context\\..*$gdb_prompt $" {
+                pass "complete 'p b-a'"
             }
-        -re ".*$gdb_prompt $"       { fail "complete 'p b-a'" }
-        timeout         { fail "(timeout) complete 'p b-a'" }
+            -re ".*$gdb_prompt $" {
+                fail "complete 'p b-a'"
+            }
+            timeout {
+                fail "(timeout) complete 'p b-a'"
+            }
         }
+    }
+    -re ".*$gdb_prompt $" {
+        fail "complete 'p b-a'"
+    }
+    timeout {
+        fail "(timeout) complete 'p b-a'"
+    }
+}
 
 send_gdb "p b-a\t"
 sleep 1

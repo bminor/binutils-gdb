@@ -1,3 +1,7 @@
+2001-12-04  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/completion.exp: Clarify indentation.
+
 2001-12-03  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.asm/s390.inc (gdbasm_datavar): Use `.long' to create `int'
