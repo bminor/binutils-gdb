@@ -315,6 +315,17 @@ extract_17 (word)
                       (word & 0x1) << 16, 17) << 2;
 }
 
+static int
+extract_22 (word)
+     unsigned word;
+{
+  return sign_extend (GET_FIELD (word, 19, 28) |
+                      GET_FIELD (word, 29, 29) << 10 |
+                      GET_FIELD (word, 11, 15) << 11 |
+                      GET_FIELD (word, 6, 10) << 16 |
+                      (word & 0x1) << 21, 22) << 2;
+}
+
 /* Print one instruction.  */
 int
 print_insn_hppa (memaddr, info)
@@ -925,7 +936,6 @@ print_insn_hppa (memaddr, info)
                 case 'J':
                   fput_const (extract_14 (insn), info);
                   break;
-
 
 		case '#':
 		  {

@@ -1,5 +1,7 @@
 Sun Sep 19 10:41:27 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* hppa-dis.c (extract_22): New function.
+
 	* hppa-dis.c (print_insn_hppa): Handle 'J', 'K', and 'cc'.
 
 	* hppa-dis.c (print_insn_hppa): Handle 'fe' and 'cJ'.
