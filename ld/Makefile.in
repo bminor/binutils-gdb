@@ -58,8 +58,8 @@ LD_PROG	= ld.new
 # A sed pattern to translate .sc to .scu:
 SED_MAKE_RELOC_WITH_CONSTRUCTORS=\
   -e "/If relocating/,/End if relocating/d" \
-  -e "/=/s/[_a-z.]* *= .*//g" \
-  -e '/>/s/} *> *[a-z]*/}/' \
+  -e "/=/s/[_a-zA-Z.]* *= .*//g" \
+  -e '/>/s/} *> *[a-zA-Z]*/}/' \
   -e "/text/s/[.]text .*:/.text :/" \
   -e "/data/s/[.]data .*:/.data :/"
 # A sed pattern to translate .scu to .scr:

@@ -134,8 +134,7 @@ static char *gld<target>_get_script()
       config.build_constructors == true) {
     return gld<target>_script_option_Ur;
   }
-  if (config.relocateable_output == true ||
-      config.magic_demand_paged == false) {
+  if (config.relocateable_output == true) {
     return gld<target>_script_option_r;
   }
 	

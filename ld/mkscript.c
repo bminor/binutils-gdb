@@ -8,14 +8,12 @@ main()
   printf("/* Generated through mkscript */\n");
   printf("\"{ \\\n");
   while (ch != EOF) {
-    if (ch == '\"') {
+    if (ch == '\"' || ch == '\\' || ch == '\'') {
       putchar('\\');
-      putchar('\"');
+      putchar(ch);
     }
-else { if (ch == '\n') {
-      putchar(' ');
-      putchar('\\');
-    }
+    else { if (ch == '\n')
+      fputs("\\n\\", stdout);
     putchar(ch);
      }
     ch = getchar();

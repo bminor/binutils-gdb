@@ -1,3 +1,18 @@
+Fri Oct 11 13:51:54 1991  Per Bothner  (bothner at cygnus.com)
+
+	* ldmain.c (main): Make config.magic_demand_paged be true
+	by default.  Don't the WP_TEXT and D_PAGED flags of
+	output_bfd here; it's too late, so set it when output_bfd
+	is created (in ldlang.c).  Also fix setting of EXEC_P flag
+	* ldlang.c (ldlang_open_output):  Set output_bfd->flags here.
+	* ldlang.c: Remove some duplicate extern declarations.
+	* ldgram.y: Fixes to -N and -n options.
+	* Makefile.in:  Recognize upper case letters in sed script
+	to remove assignments from script files.
+	* ldtemplate:  Don't assukme that -N or -n options
+	imply use of -r script.
+	* mkscript.c:  Tweaking to correctly handle \n and \\ in input.
+
 Fri Oct 11 10:29:27 1991  Steve Chamberlain  (steve at cygnus.com)
 
 	* ldtemplate: include bfd.h before sysdep.h.
