@@ -1,3 +1,8 @@
+2003-10-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Modify versioned
+	symbol string in place.
+
 2003-10-30  Jim Blandy  <jimb@redhat.com>
 
 	* cpu-rs6000.c (rs6000_compatible): Check the correct arch_info

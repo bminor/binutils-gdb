@@ -353,9 +353,8 @@ _bfd_elf_link_record_dynamic_symbol (struct bfd_link_info *info,
   if (h->dynindx == -1)
     {
       struct elf_strtab_hash *dynstr;
-      char *p, *alc;
+      char *p;
       const char *name;
-      bfd_boolean copy;
       bfd_size_type indx;
 
       /* XXX: The ABI draft says the linker must turn hidden and
@@ -393,28 +392,18 @@ _bfd_elf_link_record_dynamic_symbol (struct bfd_link_info *info,
 	 table.  */
       name = h->root.root.string;
       p = strchr (name, ELF_VER_CHR);
-      if (p == NULL)
-	{
-	  alc = NULL;
-	  copy = FALSE;
-	}
-      else
-	{
-	  size_t len = p - name + 1;
+      if (p != NULL)
+	/* We know that the p points into writable memory.  In fact,
+	   there are only a few symbols that have read-only names, being
+	   those like _GLOBAL_OFFSET_TABLE_ that are created specially
+	   by the backends.  Most symbols will have names pointing into
+	   an ELF string table read from a file, or to objalloc memory.  */
+	*p = 0;
 
-	  alc = bfd_malloc (len);
-	  if (alc == NULL)
-	    return FALSE;
-	  memcpy (alc, name, len - 1);
-	  alc[len - 1] = '\0';
-	  name = alc;
-	  copy = TRUE;
-	}
+      indx = _bfd_elf_strtab_add (dynstr, name, p != NULL);
 
-      indx = _bfd_elf_strtab_add (dynstr, name, copy);
-
-      if (alc != NULL)
-	free (alc);
+      if (p != NULL)
+	*p = ELF_VER_CHR;
 
       if (indx == (bfd_size_type) -1)
 	return FALSE;
