@@ -88,7 +88,7 @@ cp_canonicalize_string (const char *string)
 
   ret = cp_comp_to_string (ret_comp, len);
 
-  cp_v3_d_free_info (di);
+  xfree (di);
 
   return ret;
 }
@@ -99,7 +99,7 @@ char *
 class_name_from_physname (const char *physname)
 {
   struct d_info *di;
-  char *demangled_name, *ret;
+  char *demangled_name = NULL, *ret;
   struct d_comp *ret_comp, *prev_comp;
   int done;
 
@@ -154,8 +154,9 @@ class_name_from_physname (const char *physname)
       ret = cp_comp_to_string (prev_comp, 10);
     }
 
-  cp_v3_d_free_info (di);
-  xfree (demangled_name);
+  xfree (di);
+  if (demangled_name)
+    xfree (demangled_name);
   return ret;
 }
 
@@ -165,7 +166,7 @@ char *
 method_name_from_physname (const char *physname)
 {
   struct d_info *di;
-  char *demangled_name, *ret;
+  char *demangled_name = NULL, *ret;
   struct d_comp *ret_comp;
   int done;
 
@@ -210,8 +211,9 @@ method_name_from_physname (const char *physname)
     /* The ten is completely arbitrary; we don't have a good estimate.  */
     ret = cp_comp_to_string (ret_comp, 10);
 
-  cp_v3_d_free_info (di);
-  xfree (demangled_name);
+  xfree (di);
+  if (demangled_name)
+    xfree (demangled_name);
   return ret;
 }
 

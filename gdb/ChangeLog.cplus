@@ -1,3 +1,23 @@
+2004-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cp-names.y: Don't include "cp-demangle.h".  Convert all references
+	to d_info, d_comp, and D_COMP_* to demangle_info, demangle_component,
+	and DEMANGLE_COMPONENT_*.  Convert all calls to cp_v3_d_* functions
+	to new wrapper functions.  Add precedences for VOID and ')'.
+	(struct demangle_info): New type.
+	(d_grab, d_left, d_right): New macros.
+	(fill_comp, make_empty, make_operator, make_dtor, make_builtin_type)
+	(make_name): New wrapper functions.
+	(function_args): Remove D_PRINT_VOID test.
+	(function_arglist): Handle '(' VOID ')'.
+	(allocate_info): New function.
+	(demangled_name_to_comp): Use it.  Call free.
+	(mangled_name_to_comp): Use cplus_demangle_v3_components.
+	(cp_print, main): Use fputs instead of puts.
+	* cp-support.c (cp_canonicalize_string, class_name_from_physname)
+	(method_name_from_physname): Remove calls to cp_v3_d_free_info.
+	Test demangled_name before freeing it.
+
 2004-01-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cp-names.y (orig_lexptr): New variable.
