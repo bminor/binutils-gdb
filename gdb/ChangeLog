@@ -1,5 +1,22 @@
 2002-06-28  Andrew Cagney  <ac131313@redhat.com>
 
+	* blockframe.c (generic_find_dummy_frame): Change return type to
+	``struct regcache''.
+	(struct dummy_frame): Replace field ``registers'' with regcache, a
+	struct regcache object.
+	(generic_find_dummy_frame): Update.
+	(generic_push_dummy_frame): Update.  Use regcache_xfree,
+	regcache_xmalloc and regcache_cpy.
+	(generic_pop_dummy_frame): Update.  Use regcache_cpy and
+	regcache_xfree.
+	(deprecated_generic_find_dummy_frame): Update.
+	(generic_read_register_dummy): Update.  Use
+	regcache_read_as_address.
+	(generic_call_dummy_register_unwind): Update.  Use regcache_read.
+	(generic_get_saved_register): Update.  Use regcache_read.
+
+2002-06-28  Andrew Cagney  <ac131313@redhat.com>
+
 	* Makefile.in (objfiles_h): Add $(bcache_h).
 	* objfiles.h: Include "bcache.h".
 
