@@ -487,7 +487,7 @@ NTSOBS = standalone.o
 
 NTSSTART = kdb-start.o
 
-SUBDIRS = doc testsuite nlm
+SUBDIRS = doc testsuite nlm mswin
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c f-exp.tab.c m2-exp.tab.c
@@ -582,7 +582,9 @@ init.c: $(OBS) $(TSOBS)
 	@rm -f init.c-tmp
 	@echo '/* Do not modify this file.  */' >init.c-tmp
 	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
-	@echo 'void initialize_all_files () {' >>init.c-tmp
+	@echo '#include "ansidecl.h"' >>init.c-tmp
+	@echo 'extern void initialize_all_files PARAMS ((void));' >>init.c-tmp
+	@echo 'void initialize_all_files PARAMS ((void)) {' >>init.c-tmp
 	@for i in $(OBS) $(TSOBS); do \
 	  filename=`echo $$i | sed \
 	    -e '/^Onindy.o/d' \
@@ -601,7 +603,7 @@ init.c: $(OBS) $(TSOBS)
 	  case $$filename in \
 	    "") ;; \
 	    *) sed <$(srcdir)/$$filename >>init.c-tmp -n \
-	    -e '/^_initialize_[a-z_0-9A-Z]* *(/s/^\([a-z_0-9A-Z]*\).*/  {extern void \1 (); \1 ();}/p' ; ;; \
+	    -e '/^_initialize_[a-z_0-9A-Z]* *(/s/^\([a-z_0-9A-Z]*\).*/  {extern void \1 PARAMS ((void)); \1 ();}/p' ; ;; \
 	  esac ; \
 	done
 	@echo '}' >>init.c-tmp
@@ -619,6 +621,9 @@ nlm:	force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
 
 libgdb:	libgdb-files $(LIBGDB_OBS)
+
+mswin/libwingdb.a: force
+	rootme=`pwd`; export rootme; $(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=mswin subdir_do
 
 # libproc is not listed here because all-libproc is a dependency of all-gui,
 # not all-gdb, and thus might be built after us.
@@ -1405,6 +1410,9 @@ remote-vx29k.o: remote-vx29k.c $(wait_h) complaints.h $(defs_h) $(gdbcmd_h) \
         $(gdbcore_h) $(inferior_h) target.h vx-share/dbgRpcLib.h \
         vx-share/ptrace.h vx-share/xdr_ld.h vx-share/xdr_ptrace.h \
         vx-share/xdr_rdb.h gdb_string.h
+
+remote-wiggler.o: remote-wiggler.c $(wait_h) complaints.h $(defs_h) \
+	$(gdbcmd_h) $(gdbcore_h) $(inferior_h) target.h
 
 remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(remote_utils_h) gdb_string.h

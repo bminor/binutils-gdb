@@ -38,11 +38,16 @@ static serial_t scb_base;
 /* Non-NULL gives filename which contains a recording of the remote session,
    suitable for playback by gdbserver. */
 
-char *serial_logfile = NULL;
-FILE *serial_logfp = NULL;
+static char *serial_logfile = NULL;
+static FILE *serial_logfp = NULL;
 
 static struct serial_ops *serial_interface_lookup PARAMS ((char *));
-static void serial_logchar PARAMS ((int));
+static void serial_logchar PARAMS ((int ch, int timeout));
+static char logbase_hex[] = "hex";
+static char logbase_octal[] = "octal";
+static char logbase_ascii[] = "ascii";
+static char *logbase_enums[] = {logbase_hex, logbase_octal, logbase_ascii, NULL};
+static char *serial_logbase = logbase_ascii;
 
 
 static int serial_reading = 0;
@@ -52,6 +57,9 @@ void
 serial_log_command (cmd)
      const char *cmd;
 {
+  if (!serial_logfp)
+    return;
+
   if (serial_reading || serial_writing)
     {
       fputc_unfiltered ('\n', serial_logfp);
@@ -64,21 +72,50 @@ serial_log_command (cmd)
   fflush (serial_logfp);
 }
 
+/* Define bogus char to represent a BREAK.  Should be careful to choose a value
+   that can't be confused with a normal char, or an error code.  */
+#define SERIAL_BREAK 1235
+
 static void
-serial_logchar (ch)
+serial_logchar (ch, timeout)
      int ch;
+     int timeout;
 {
+  if (serial_logbase != logbase_ascii)
+    fputc_unfiltered (' ', serial_logfp);
+
   switch (ch)
     {
-    case '\\':	fputs_unfiltered ("\\\\", serial_logfp); break;	
-    case '\b':	fputs_unfiltered ("\\b", serial_logfp); break;	
-    case '\f':	fputs_unfiltered ("\\f", serial_logfp); break;	
-    case '\n':	fputs_unfiltered ("\\n", serial_logfp); break;	
-    case '\r':	fputs_unfiltered ("\\r", serial_logfp); break;	
-    case '\t':	fputs_unfiltered ("\\t", serial_logfp); break;	
-    case '\v':	fputs_unfiltered ("\\v", serial_logfp); break;	
-    default:	fprintf_unfiltered (serial_logfp, isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF); break;
-    }
+    case SERIAL_TIMEOUT:
+      fprintf_unfiltered (serial_logfp, "<Timeout: %d seconds>", timeout);
+      return;
+    case SERIAL_ERROR:
+      fprintf_unfiltered (serial_logfp, "<Error: %s>", safe_strerror (errno));
+      return;
+    case SERIAL_EOF:
+      fputs_unfiltered ("<Eof>", serial_logfp);
+      return;
+    case SERIAL_BREAK:
+      fputs_unfiltered ("<Break>", serial_logfp);
+      return;
+    default:
+      if (serial_logbase == logbase_hex)
+	fprintf_unfiltered (serial_logfp, "%02x", ch & 0xff);
+      else if (serial_logbase == logbase_octal)
+	fprintf_unfiltered (serial_logfp, "%03o", ch & 0xff);
+      else
+	switch (ch)
+	  {
+	  case '\\':	fputs_unfiltered ("\\\\", serial_logfp); break;	
+	  case '\b':	fputs_unfiltered ("\\b", serial_logfp); break;	
+	  case '\f':	fputs_unfiltered ("\\f", serial_logfp); break;	
+	  case '\n':	fputs_unfiltered ("\\n", serial_logfp); break;	
+	  case '\r':	fputs_unfiltered ("\\r", serial_logfp); break;	
+	  case '\t':	fputs_unfiltered ("\\t", serial_logfp); break;	
+	  case '\v':	fputs_unfiltered ("\\v", serial_logfp); break;	
+	  default:	fprintf_unfiltered (serial_logfp, isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF); break;
+	  }
+	}
 }
 
 int
@@ -98,13 +135,12 @@ serial_write (scb, str, len)
 	}
       if (!serial_writing)
 	{
-	  serial_logchar ('w');
-	  serial_logchar (' ');
+	  fputs_unfiltered ("w ", serial_logfp);
 	  serial_writing = 1;
 	}
       for (count = 0; count < len; count++)
 	{
-	  serial_logchar (str[count]);
+	  serial_logchar (str[count] & 0xff, 0);
 	}
       /* Make sure that the log file is as up-to-date as possible,
 	 in case we are getting ready to dump core or something. */
@@ -130,16 +166,39 @@ serial_readchar (scb, timeout)
 	}
       if (!serial_reading)
 	{
-	  serial_logchar ('r');
-	  serial_logchar (' ');
+	  fputs_unfiltered ("r ", serial_logfp);
 	  serial_reading = 1;
 	}
-      serial_logchar (ch);
+      serial_logchar (ch, timeout);
       /* Make sure that the log file is as up-to-date as possible,
 	 in case we are getting ready to dump core or something. */
       fflush (serial_logfp);
     }
   return (ch);
+}
+
+int
+serial_send_break (scb)
+     serial_t scb;
+{
+  if (serial_logfp != NULL)
+    {
+      if (serial_reading)
+	{
+	  fputc_unfiltered ('\n', serial_logfp);
+	  serial_reading = 0;
+	}
+      if (!serial_writing)
+	{
+	  fputs_unfiltered ("w ", serial_logfp);
+	  serial_writing = 1;
+	}
+      serial_logchar (SERIAL_BREAK, 0);
+      /* Make sure that the log file is as up-to-date as possible,
+	 in case we are getting ready to dump core or something. */
+      fflush (serial_logfp);
+    }
+  return (scb -> ops -> send_break (scb));
 }
 
 static struct serial_ops *
@@ -471,6 +530,8 @@ serial_printf (va_alist)
 void
 _initialize_serial ()
 {
+  struct cmd_list_element *cmd;
+
 #if 0
   add_com ("connect", class_obscure, connect_command,
 	   "Connect the terminal directly up to the command monitor.\n\
@@ -484,4 +545,10 @@ This file is used to record the remote session for future playback\n\
 by gdbserver.", &setlist),
 		     &showlist);
 
+  add_show_from_set (add_set_enum_cmd ("remotelogbase", no_class,
+				       logbase_enums,
+				       (char *)&serial_logbase,
+				       "Set ...",
+				       &setlist),
+			   &showlist);
 }

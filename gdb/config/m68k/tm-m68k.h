@@ -57,6 +57,10 @@ extern void m68k_find_saved_regs PARAMS ((struct frame_info *, struct frame_save
 
 #define INNER_THAN <
 
+/* Stack must be kept short aligned when doing function calls.  */
+
+#define STACK_ALIGN(ADDR) (((ADDR) + 1) & ~1)
+
 /* Sequence of bytes for breakpoint instruction.
    This is a TRAP instruction.  The last 4 bits (0xf below) is the
    vector.  Systems which don't use 0xf should define BPT_VECTOR

@@ -1171,7 +1171,6 @@ execute_command (p, from_tty)
   register enum language flang;
   static int warned = 0;
   /* FIXME: These should really be in an appropriate header file */
-  extern FILE *serial_logfp;
   extern void serial_log_command PARAMS ((const char *));
 
   free_all_values ();
@@ -1180,8 +1179,7 @@ execute_command (p, from_tty)
   if (p == NULL)
       return;
 
-  if (serial_logfp != NULL)
-    serial_log_command (p);
+  serial_log_command (p);
 
   while (*p == ' ' || *p == '\t') p++;
   if (*p)
