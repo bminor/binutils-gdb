@@ -437,11 +437,12 @@ omitted from this list, we would like to add your names!
 @end quotation
 
 So that they may not regard their long labor as thankless, we
-particularly thank those who shepherded GDB through major releases: John
-Gilmore (all releases of _GDBN__ 4); Jim Kingdon (releases 3.9, 3.5,
-3.4, 3.3); and Randy Smith (releases 3.2, 3.1, 3.0).  As major
-maintainer of GDB for some period, each contributed significantly to the
-structure, stability, and capabilities of the entire debugger.
+particularly thank those who shepherded GDB through major releases: Stu
+Grossman and John Gilmore (release 4.4), John Gilmore (releases 4.3, 4.2,
+4.1, 4.0, and 3.9); Jim Kingdon (releases 3.5, 3.4, 3.3); and Randy
+Smith (releases 3.2, 3.1, 3.0).  As major maintainer of GDB for some
+period, each contributed significantly to the structure, stability, and
+capabilities of the entire debugger.
 
 Richard Stallman, assisted at various times by Pete TerMaat, Chris
 Hanson, and Richard Mlynarik, handled releases through 2.8.
