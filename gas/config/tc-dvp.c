@@ -28,6 +28,9 @@
 #include "opcode/dvp.h"
 #include "elf/mips.h"
 
+static long parse_dma_ild_autocount ();
+static long parse_dma_ptr_autocount ();
+
 static void insert_operand 
      PARAMS ((dvp_cpu, const dvp_opcode *, const dvp_operand *, int,
 	      DVP_INSN *, offsetT, const char **));
@@ -600,16 +603,32 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 	      if (*str == '\0')
 		break;
 
+#if 0
 	      /* Is this the special DMA count operand? */
 	      if( operand->flags & DVP_OPERAND_DMA_COUNT)
-		  dvp_dma_operand_count( 0);
+		  dvp_dma_operand_autocount( 0);
 	      if( (operand->flags & DVP_OPERAND_DMA_COUNT) && *str == '*')
 	      {
 		  /* Yes, it is!
 		  Remember that we must compute the length later
 		  when the dma-block label (second operand) is known. */
-		  ++*pstr;
-		  dvp_dma_operand_count( 1);
+		  ++str;
+		  dvp_dma_operand_autocount( 1);
+	      }
+#endif
+
+	      if( operand->flags & DVP_OPERAND_DMA_ILD_AUTOCOUNT)
+	      {
+		  errmsg = 0;
+		  value = parse_dma_ild_autocount( opcode, operand, mods, insn_buf, &str, &errmsg);
+		  if( errmsg) break;
+	      }
+
+	      if( operand->flags & DVP_OPERAND_DMA_PTR_AUTOCOUNT)
+	      {
+		  errmsg = 0;
+		  value = parse_dma_ptr_autocount( opcode, operand, mods, insn_buf, &str, &errmsg);
+		  if( errmsg) break;
 	      }
 
 	      /* Parse the operand.  */
@@ -1009,6 +1028,109 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
+/*
+Compute the auto-count value for a DMA tag with inline data.
+*/
+static long
+parse_dma_ild_autocount( opcode, operand, mods, insn_buf, pstr, errmsg)
+    const dvp_opcode *opcode;
+    const dvp_operand *operand;
+    int mods;
+    DVP_INSN *insn_buf;
+    char **pstr;
+    const char **errmsg;
+{
+    char *start = *pstr;
+    char *end = start;
+    long retval;
+
+#if 0
+	/* FIXME: unfinished */
+	evaluate the operand as an expression
+	store the value to the count field
+	compute the length as _$EndDma-.
+#endif
+
+    *pstr = end;
+    return 0;
+}
+
+/* Scan a symbol and return a pointer to one past the end. */
+#define issymchar(ch) (isalnum(ch) || ch == '_')
+static char *
+scan_symbol( sym)
+    char *sym;
+{
+    while( *sym && issymchar( *sym))
+        ++sym;
+    return sym;
+}
+
+/*
+Compute the auto-count value for a DMA tag with out-of-line data.
+*/
+static long
+parse_dma_ptr_autocount( opcode, operand, mods, insn_buf, pstr, errmsg)
+    const dvp_opcode *opcode;
+    const dvp_operand *operand;
+    int mods;
+    DVP_INSN *insn_buf;
+    char **pstr;
+    const char **errmsg;
+{
+    char *start = *pstr;
+    char *end = start;
+    long retval;
+
+    /* Data reference must be a .DmaData label. */
+    struct symbol *label, *label2;
+    char *name, *name2;
+    int len;
+    long count;
+
+    label = label2 = 0;
+    if( is_name_beginner( *start) )
+    {
+	char c;
+
+	end = scan_symbol( start);
+	c = *end;
+	*end = 0;
+	label = symbol_find( start);
+	*end = c;
+    }
+    if( label )
+    {
+	name = S_GET_NAME( label);
+	len = strlen( name) + 1;
+	name2 = xmalloc( len + 2);
+	name2[ 0] = '_';
+	name2[ 1] = '$';
+	memcpy( name2+2, name, len);	/* copy original name & \0 */
+	label2 = symbol_find( name2);
+	free( name2);
+    }
+    if( label == 0 || label2 == 0 )
+    {
+	*errmsg = "2nd operand must be a .DmaData label";
+	return 0;
+    }
+
+    /* The second operand's value is the value of "symbol". */
+    retval = S_GET_VALUE( label);
+
+    /* The computed count value is val(symbol2) - val(symbol). */
+    count = S_GET_VALUE( label2) - retval;
+
+    /* Store the count field. */
+    count &= 0x0000ffff;
+    insn_buf[ 4] &= 0xffff0000;
+    insn_buf[ 4] |= count & 0x0000ffff;
+
+    *pstr = end;
+    return retval;
+}
+
 /* Install length LEN, in bytes, in the pke insn at BUF.
    The bytes in BUF are in target order.  */
 
@@ -1178,7 +1300,7 @@ insert_operand_final (cpu, operand, mods, insn_buf, val, file, line)
 }
 
 static void
-  s_dmadata( type)
+s_dmadata( type)
     int type;
 {
     static short state = 0;
@@ -1233,12 +1355,12 @@ static void
 	demand_empty_rest_of_line();
 
 	/*
-	*"label" points to beginning of block
+	* "label" points to beginning of block
 	* Create a name for the final label like _$<name>
 	*/
 	prevName = label->bsym->name;
 	temp = strlen( prevName) + 1;
-	name = malloc( temp + 2);
+	name = xmalloc( temp + 2);
 	name[ 0] = '_';
 	name[ 1] = '$';
 	memcpy( name+2, prevName, temp);    /* copy original name & \0 */
