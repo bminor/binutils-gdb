@@ -307,9 +307,6 @@ proc test_with_self {} {
 	}
     }
 
-    # This one fails on Solaris (for some versions of gdb) because you
-    # can't next over library functions
-    setup_xfail "sparc-sun-solaris2" 1817
     set next_ok 1
     set need_to_step_over_cmdsize 1
     set description "next over SET_TOP_LEVEL call"
