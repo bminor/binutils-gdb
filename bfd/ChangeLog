@@ -1,3 +1,37 @@
+2003-07-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (bfd_elf64_mkobject): Define.
+	(struct ppc64_elf_obj_tdata): New.
+	(ppc64_elf_tdata, ppc64_tlsld_got): Define.
+	(ppc64_elf_mkobject): New function.
+	(struct got_entry): Add "owner".  Move "tls_type".
+	(struct ppc_link_hash_table): Delete "relgot", "tlsld_got".
+	(ppc64_elf_init_stub_bfd): New function.
+	(create_got_section): Create header .got in dynobj.  Create .got
+	and .rela.got in each bfd.  Stash pointers in ppc64_elf_obj_tdata.
+	(ppc64_elf_create_dynamic_sections): Don't call create_got_section.
+	Look for dynobj .got, and test it.
+	(ppc64_elf_copy_indirect_symbol): Adjust for changed got.
+	(update_local_sym_info): Likewise.
+	(ppc64_elf_check_relocs): Likewise.
+	(ppc64_elf_gc_sweep_hook): Likewise.
+	(ppc64_elf_tls_optimize): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(ppc64_elf_size_dynamic_sections): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	(ppc64_elf_next_toc_section): Update comment.
+	(toc_adjusting_stub_needed): Remove unneeded cast.
+	(ppc64_elf_build_stubs): Check for stub sections in stub bfd by
+	testing section flags.
+	(ppc64_elf_build_stubs): Likewise.
+	(ppc64_elf_size_stubs): Likewise.  Remove stub_bfd param.
+	(ppc64_elf_finish_dynamic_sections): Write out got sections.
+	(func_desc_adjust): Copy over dynamic info for undef weaks.
+	* elf64-ppc.h (ppc64_elf_init_stub_bfd): Declare.
+	(ppc64_elf_size_stubs): Update prototype.
+	* elflink.h (elf_link_sort_relocs): Use link_orders to find reldyn
+	input sections rather than scanning dynobj.
+
 2003-07-09  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elfxx-mips.c (mips_elf_link_hash_entry): Remove min_dyn_reloc_index.

@@ -3029,8 +3029,7 @@ elf_link_sort_relocs (abfd, info, psec)
      struct bfd_link_info *info;
      asection **psec;
 {
-  bfd *dynobj = elf_hash_table (info)->dynobj;
-  asection *reldyn, *o;
+  asection *reldyn;
   bfd_size_type count, size;
   size_t i, ret, sort_elt, ext_size;
   bfd_byte *sort, *s_non_relative, *p;
@@ -3039,6 +3038,7 @@ elf_link_sort_relocs (abfd, info, psec)
   int i2e = bed->s->int_rels_per_ext_rel;
   void (*swap_in) PARAMS ((bfd *, const bfd_byte *, Elf_Internal_Rela *));
   void (*swap_out) PARAMS ((bfd *, const Elf_Internal_Rela *, bfd_byte *));
+  struct bfd_link_order *lo;
 
   reldyn = bfd_get_section_by_name (abfd, ".rela.dyn");
   if (reldyn == NULL || reldyn->_raw_size == 0)
@@ -3059,11 +3059,12 @@ elf_link_sort_relocs (abfd, info, psec)
   count = reldyn->_raw_size / ext_size;
 
   size = 0;
-  for (o = dynobj->sections; o != NULL; o = o->next)
-    if ((o->flags & (SEC_HAS_CONTENTS|SEC_LINKER_CREATED))
-	== (SEC_HAS_CONTENTS|SEC_LINKER_CREATED)
-	&& o->output_section == reldyn)
-      size += o->_raw_size;
+  for (lo = reldyn->link_order_head; lo != NULL; lo = lo->next)
+    if (lo->type == bfd_indirect_link_order)
+      {
+	asection *o = lo->u.indirect.section;
+	size += o->_raw_size;
+      }
 
   if (size != reldyn->_raw_size)
     return 0;
@@ -3079,12 +3080,11 @@ elf_link_sort_relocs (abfd, info, psec)
       return 0;
     }
 
-  for (o = dynobj->sections; o != NULL; o = o->next)
-    if ((o->flags & (SEC_HAS_CONTENTS|SEC_LINKER_CREATED))
-	== (SEC_HAS_CONTENTS|SEC_LINKER_CREATED)
-	&& o->output_section == reldyn)
+  for (lo = reldyn->link_order_head; lo != NULL; lo = lo->next)
+    if (lo->type == bfd_indirect_link_order)
       {
 	bfd_byte *erel, *erelend;
+	asection *o = lo->u.indirect.section;
 
 	erel = o->contents;
 	erelend = o->contents + o->_raw_size;
@@ -3121,12 +3121,11 @@ elf_link_sort_relocs (abfd, info, psec)
 
   qsort (s_non_relative, (size_t) count - ret, sort_elt, elf_link_sort_cmp2);
 
-  for (o = dynobj->sections; o != NULL; o = o->next)
-    if ((o->flags & (SEC_HAS_CONTENTS|SEC_LINKER_CREATED))
-	== (SEC_HAS_CONTENTS|SEC_LINKER_CREATED)
-	&& o->output_section == reldyn)
+  for (lo = reldyn->link_order_head; lo != NULL; lo = lo->next)
+    if (lo->type == bfd_indirect_link_order)
       {
 	bfd_byte *erel, *erelend;
+	asection *o = lo->u.indirect.section;
 
 	erel = o->contents;
 	erelend = o->contents + o->_raw_size;
