@@ -2736,6 +2736,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       break;
 
     case R_ARM_THM_PC11:
+    case R_ARM_THM_PC9:
       /* Thumb B (branch) instruction).  */
       {
 	bfd_signed_vma relocation;

@@ -1,5 +1,9 @@
 2005-02-10  Paul Brook  <paul@codesourcery.com>
 
+	* elf32-arm.c (elf32_arm_final_link_relocate): Handle R_ARM_THM_PC9.
+
+2005-02-10  Paul Brook  <paul@codesourcery.com>
+
 	* elflink.c (bfd_elf_record_link_assignment): Make hidden and internal
 	symbols local.
 	(elf_link_renumber_hash_table_dynsyms): Ignore local symbols.
