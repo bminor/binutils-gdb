@@ -165,3 +165,11 @@ printf_filtered (va_alist)
   vfprintf (stdout, format, args);
   va_end (args);
 }
+
+int
+sim_callback_write_stdout (arg, len)
+     char *arg;
+     int len;
+{
+  return write (1, arg, len);
+}

@@ -506,7 +506,10 @@ trap (i, regs, memory, maskl, maskw, little_endian)
 	    regs[0] = read (regs[5], ptr (regs[6]), regs[7]);
 	    break;
 	  case SYS_write:
-	    regs[0] = write (regs[5], ptr (regs[6]), regs[7]);
+	    if (regs[5] == 1)
+	      regs[0] = sim_callback_write_stdout (ptr(regs[6]), regs[7]);
+	    else
+	      regs[0] = write (regs[5], ptr (regs[6]), regs[7]);
 	    break;
 	  case SYS_lseek:
 	    regs[0] = lseek (regs[5], regs[6], regs[7]);
