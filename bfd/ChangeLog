@@ -1,5 +1,9 @@
 Wed Jun 26 16:29:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ecoff.c (_bfd_ecoff_archive_p): Check the first object file in
+	an archive if it has a map.  If the object file has the wrong
+	xvec, reject it.
+
 	* coff-alpha.c (alpha_adjust_reloc_in): Set the addend for a
 	BRADDR, SREL16, SREL32, or SREL64 reloc against an external
 	symbol.
