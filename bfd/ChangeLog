@@ -1,3 +1,8 @@
+Fri Oct 30 16:13:52 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ieee.c (ieee_slurp_sections): make a private copy of the
+	section's name before truncating it.
+
 Thu Oct 29 08:30:50 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* hppa.c: add symbol_leading_char entry in transfer vec
