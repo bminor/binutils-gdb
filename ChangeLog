@@ -1,3 +1,10 @@
+Wed Oct 18 15:53:56 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* winsup. New directory.
+	* Makefile.in: Build winsup.
+	* configure.in: Winsup is configured when target is win32.
+	Can only build win32 target GDB when native.
+	
 Mon Oct 16 09:42:31 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* config.guess: Recognize HP model 819 machines as having
