@@ -17,6 +17,14 @@
 
 Do-first:
 
+arc_files="arc.h"
+
+if ( echo $* | grep keep\-arc > /dev/null ) ; then
+	keep_these_too="${arc_files} ${keep_these_too}"
+else
+	lose_these_too="${arc_files} ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -37,7 +45,7 @@ Things-to-lose:
 
 Do-last:
 
-arc_files="common.h"
+arc_files="ChangeLog common.h"
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
 		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
