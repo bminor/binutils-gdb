@@ -319,6 +319,12 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
     return false;
   *sym_hash = h;
 
+  /* For merging, we only care about real symbols.  */
+
+  while (h->root.type == bfd_link_hash_indirect
+	 || h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
   /* If we just created the symbol, mark it as being an ELF symbol.
      Other than that, there is nothing to do--there is no merge issue
      with a newly defined symbol--so we just return.  */
@@ -328,12 +334,6 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
       h->elf_link_hash_flags &=~ ELF_LINK_NON_ELF;
       return true;
     }
-
-  /* For merging, we only care about real symbols.  */
-
-  while (h->root.type == bfd_link_hash_indirect
-	 || h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   /* OLDBFD is a BFD associated with the existing symbol.  */
 
