@@ -45,7 +45,7 @@ if ![file exists $binfile] then {
 	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
 	gdb_test "whatis top" "<(text variable|function), no debug info>"
 	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
-	gdb_test "ptype top" "int \\(\\)"
+	gdb_test "ptype top" "int \\((|<non-float parameter>)\\)"
 
 	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
 	gdb_test "p middle" \
@@ -53,7 +53,7 @@ if ![file exists $binfile] then {
 	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
 	gdb_test "whatis middle" "<(text variable|function), no debug info>"
 	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
-	gdb_test "ptype middle" "int \\(\\)"
+	gdb_test "ptype middle" "int \\((|<non-float parameter>)\\)"
 
 	gdb_test "p dataglobal" "= 3"
 	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"

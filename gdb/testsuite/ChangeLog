@@ -1,3 +1,8 @@
+Thu Mar 16 16:27:07 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/nodebug.exp: It is OK if GDB thinks top and middle have
+	one argument of type "<non-float parameter>".
+
 Wed Mar 15 15:54:56 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* config/rom68k.exp:  New file to support Motorola IDP board.
