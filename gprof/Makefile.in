@@ -56,7 +56,7 @@ LDFLAGS=
 HLDFLAGS = @HLDFLAGS@
 HLDENV = @HLDENV@
 .c.o:
-	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd -DMACHINE_H=\"$(MY_TARGET).h\" $(TCFLAGS) $(HCFLAGS) $<
+	$(CC) -c -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd -DMACHINE_H=\"$(MY_TARGET).h\" $(TCFLAGS) $(HCFLAGS) $(CFLAGS) $<
 
 all:	$(GEN_FILES) $(PROG)
 
@@ -104,7 +104,7 @@ install: all
 	$(INSTALL_XFORM1) $(srcdir)/gprof.1 $(man1dir)/gprof.1
 
 gprof:	$(OBJS) $(LIBDEPS)
-	$(HLDENV) $(CC) -o $(PROG) $(CFLAGS) $(HLDFLAGS) $(LDFLAGS) $(OBJS) $(LIBS)
+	$(HLDENV) $(CC) -o $(PROG) $(HLDFLAGS) $(LDFLAGS) $(CFLAGS) $(OBJS) $(LIBS)
 
 mostlyclean:
 	-rm -f *.o core gprof nohup.out \
