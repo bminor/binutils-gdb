@@ -46,6 +46,7 @@ bignum-copy.c
 bignum.h
 cond.c
 config
+configdos.bat
 configure.in
 debug.c
 expr.c
@@ -63,6 +64,7 @@ input-file.c
 input-file.h
 input-scrub.c
 make-gas.com
+makefile.dos
 messages.c
 obj.h
 objdump.c
@@ -90,7 +92,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.4  1991/12/09 11:58:44  tiemann
+# Revision 1.5  1991/12/12 03:28:12  sac
+# Added makefile.dos configure.dos
+#
+# Revision 1.4  1991/12/09  11:58:44  tiemann
 # Keep a.out.gnu.h.
 #
 # Revision 1.3  1991/10/10  11:58:04  rich
