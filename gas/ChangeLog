@@ -1,5 +1,10 @@
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (append_insn): Remove now-redundant nops != 0
+	check from branch delay code.  Remove unnecessary check for branches.
+
+2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (dummy_opcode): Delete.
 	(nop_insn, mips16_nop_insn): New variables.
 	(NOP_INSN): New macro.
