@@ -1,5 +1,12 @@
 2004-03-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-nat.c: s/regno/regnum/g.
+	(fetch_inferior_registers): Use I386_ST0_REGNUM instead of
+	FP0_REGNUM.
+	(store_inferior_registers): Likewise.
+
+2004-03-16  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386bsd-nat.c (fill_fpregset): Call i387_collect_fsave instead
 	of i387_fill_fsave.
 	(store_inferior_registers): Call i387_collect_fsave and

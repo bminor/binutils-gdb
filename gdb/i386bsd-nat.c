@@ -54,17 +54,17 @@ typedef struct fpreg fpregset_t;
 
 /* Registers we shouldn't try to fetch.  */
 #undef CANNOT_FETCH_REGISTER
-#define CANNOT_FETCH_REGISTER(regno) cannot_fetch_register (regno)
+#define CANNOT_FETCH_REGISTER(regnum) cannot_fetch_register (regnum)
 
 /* Registers we shouldn't try to store.  */
 #undef CANNOT_STORE_REGISTER
-#define CANNOT_STORE_REGISTER(regno) cannot_fetch_register (regno)
+#define CANNOT_STORE_REGISTER(regnum) cannot_fetch_register (regnum)
 
 /* Offset to the gregset_t location where REG is stored.  */
 #define REG_OFFSET(reg) offsetof (gregset_t, reg)
 
-/* At reg_offset[REGNO] you'll find the offset to the gregset_t
-   location where the GDB register REGNO is stored.  Unsupported
+/* At reg_offset[REGNUM] you'll find the offset to the gregset_t
+   location where the GDB register REGNUM is stored.  Unsupported
    registers are marked with `-1'.  */
 static int reg_offset[] =
 {
@@ -94,11 +94,11 @@ static int reg_offset[] =
 #endif
 };
 
-#define REG_ADDR(regset, regno) ((char *) (regset) + reg_offset[regno])
+#define REG_ADDR(regset, regnum) ((char *) (regset) + reg_offset[regnum])
 
 /* Macro to determine if a register is fetched with PT_GETREGS.  */
-#define GETREGS_SUPPLIES(regno) \
-  ((0 <= (regno) && (regno) <= 15))
+#define GETREGS_SUPPLIES(regnum) \
+  ((0 <= (regnum) && (regnum) <= 15))
 
 #ifdef HAVE_PT_GETXMMREGS
 /* Set to 1 if the kernel supports PT_GETXMMREGS.  Initialized to -1
@@ -106,12 +106,12 @@ static int reg_offset[] =
 static int have_ptrace_xmmregs = -1;
 #endif
 
-/* Return nonzero if we shouldn't try to fetch register REGNO.  */
+/* Return nonzero if we shouldn't try to fetch register REGNUM.  */
 
 static int
-cannot_fetch_register (int regno)
+cannot_fetch_register (int regnum)
 {
-  return (reg_offset[regno] == -1);
+  return (reg_offset[regnum] == -1);
 }
 
 
@@ -134,17 +134,17 @@ supply_gregset (gregset_t *gregsetp)
     }
 }
 
-/* Fill register REGNO (if it is a general-purpose register) in
-   *GREGSETPS with the value in GDB's register array.  If REGNO is -1,
+/* Fill register REGNUM (if it is a general-purpose register) in
+   *GREGSETPS with the value in GDB's register array.  If REGNUM is -1,
    do this for all registers.  */
 
 void
-fill_gregset (gregset_t *gregsetp, int regno)
+fill_gregset (gregset_t *gregsetp, int regnum)
 {
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
-    if ((regno == -1 || regno == i) && ! CANNOT_STORE_REGISTER (i))
+    if ((regnum == -1 || regnum == i) && ! CANNOT_STORE_REGISTER (i))
       regcache_collect (i, REG_ADDR (gregsetp, i));
 }
 
@@ -159,23 +159,23 @@ supply_fpregset (fpregset_t *fpregsetp)
   i387_supply_fsave (current_regcache, -1, fpregsetp);
 }
 
-/* Fill register REGNO (if it is a floating-point register) in
-   *FPREGSETP with the value in GDB's register array.  If REGNO is -1,
-   do this for all registers.  */
+/* Fill register REGNUM (if it is a floating-point register) in
+   *FPREGSETP with the value in GDB's register array.  If REGNUM is
+   -1, do this for all registers.  */
 
 void
-fill_fpregset (fpregset_t *fpregsetp, int regno)
+fill_fpregset (fpregset_t *fpregsetp, int regnum)
 {
-  i387_collect_fsave (current_regcache, regno, fpregsetp);
+  i387_collect_fsave (current_regcache, regnum, fpregsetp);
 }
 
-/* Fetch register REGNO from the inferior.  If REGNO is -1, do this
+/* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating point registers).  */
 
 void
-fetch_inferior_registers (int regno)
+fetch_inferior_registers (int regnum)
 {
-  if (regno == -1 || GETREGS_SUPPLIES (regno))
+  if (regnum == -1 || GETREGS_SUPPLIES (regnum))
     {
       gregset_t gregs;
 
@@ -184,11 +184,11 @@ fetch_inferior_registers (int regno)
 	perror_with_name ("Couldn't get registers");
 
       supply_gregset (&gregs);
-      if (regno != -1)
+      if (regnum != -1)
 	return;
     }
 
-  if (regno == -1 || regno >= FP0_REGNUM)
+  if (regnum == -1 || regnum >= I386_ST0_REGNUM)
     {
       fpregset_t fpregs;
 #ifdef HAVE_PT_GETXMMREGS
@@ -219,13 +219,13 @@ fetch_inferior_registers (int regno)
     }
 }
 
-/* Store register REGNO back into the inferior.  If REGNO is -1, do
+/* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers (including the floating point registers).  */
 
 void
-store_inferior_registers (int regno)
+store_inferior_registers (int regnum)
 {
-  if (regno == -1 || GETREGS_SUPPLIES (regno))
+  if (regnum == -1 || GETREGS_SUPPLIES (regnum))
     {
       gregset_t gregs;
 
@@ -233,17 +233,17 @@ store_inferior_registers (int regno)
                   (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
         perror_with_name ("Couldn't get registers");
 
-      fill_gregset (&gregs, regno);
+      fill_gregset (&gregs, regnum);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 	          (PTRACE_ARG3_TYPE) &gregs, 0) == -1)
         perror_with_name ("Couldn't write registers");
 
-      if (regno != -1)
+      if (regnum != -1)
 	return;
     }
 
-  if (regno == -1 || regno >= FP0_REGNUM)
+  if (regnum == -1 || regnum >= I386_ST0_REGNUM)
     {
       fpregset_t fpregs;
 #ifdef HAVE_PT_GETXMMREGS
@@ -255,7 +255,7 @@ store_inferior_registers (int regno)
 	{
 	  have_ptrace_xmmregs = 1;
 
-	  i387_collect_fxsave (current_regcache, regno, xmmregs);
+	  i387_collect_fxsave (current_regcache, regnum, xmmregs);
 
 	  if (ptrace (PT_SETXMMREGS, PIDGET (inferior_ptid),
 		      (PTRACE_ARG3_TYPE) xmmregs, 0) == -1)
@@ -269,7 +269,7 @@ store_inferior_registers (int regno)
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	    perror_with_name ("Couldn't get floating point status");
 
-          i387_collect_fsave (current_regcache, regno, &fpregs);
+          i387_collect_fsave (current_regcache, regnum, &fpregs);
 
           if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
@@ -360,13 +360,13 @@ i386bsd_dr_get_status (void)
 
 /* Support for the user struct.  */
 
-/* Return the address register REGNO.  BLOCKEND is the value of
+/* Return the address register REGNUM.  BLOCKEND is the value of
    u.u_ar0, which should point to the registers.  */
 
 CORE_ADDR
-register_u_addr (CORE_ADDR blockend, int regno)
+register_u_addr (CORE_ADDR blockend, int regnum)
 {
-  return (CORE_ADDR) REG_ADDR (blockend, regno);
+  return (CORE_ADDR) REG_ADDR (blockend, regnum);
 }
 
 #include <sys/param.h>
