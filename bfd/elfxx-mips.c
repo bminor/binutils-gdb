@@ -809,7 +809,6 @@ _bfd_mips_elf_read_ecoff_info (bfd *abfd, asection *section,
 #undef READ
 
   debug->fdr = NULL;
-  debug->adjust = NULL;
 
   return TRUE;
 

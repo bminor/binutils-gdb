@@ -4526,7 +4526,6 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
 {
   asection *input_section;
   bfd *input_bfd;
-  struct ecoff_section_tdata *section_tdata;
   bfd_size_type raw_size;
   bfd_size_type cooked_size;
   bfd_byte *contents = NULL;
@@ -4542,7 +4541,6 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
 
   input_section = link_order->u.indirect.section;
   input_bfd = input_section->owner;
-  section_tdata = ecoff_section_data (input_bfd, input_section);
 
   raw_size = input_section->_raw_size;
   cooked_size = input_section->_cooked_size;
@@ -4560,39 +4558,24 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
   if (contents == NULL && amt != 0)
     goto error_return;
 
-  /* If we are relaxing, the contents may have already been read into
-     memory, in which case we copy them into our new buffer.  We don't
-     simply reuse the old buffer in case cooked_size > raw_size.  */
-  if (section_tdata != (struct ecoff_section_tdata *) NULL
-      && section_tdata->contents != (bfd_byte *) NULL)
-    memcpy (contents, section_tdata->contents, (size_t) raw_size);
-  else
-    {
-      if (! bfd_get_section_contents (input_bfd, input_section,
-				      (PTR) contents,
-				      (file_ptr) 0, raw_size))
-	goto error_return;
-    }
+  if (! bfd_get_section_contents (input_bfd, input_section,
+				  (PTR) contents,
+				  (file_ptr) 0, raw_size))
+    goto error_return;
 
   /* Get the relocs.  If we are relaxing MIPS code, they will already
      have been read in.  Otherwise, we read them in now.  */
   external_reloc_size = ecoff_backend (input_bfd)->external_reloc_size;
   external_relocs_size = external_reloc_size * input_section->reloc_count;
 
-  if (section_tdata != (struct ecoff_section_tdata *) NULL
-      && section_tdata->external_relocs != NULL)
-    external_relocs = section_tdata->external_relocs;
-  else
-    {
-      external_relocs = (PTR) bfd_malloc (external_relocs_size);
-      if (external_relocs == NULL && external_relocs_size != 0)
-	goto error_return;
+  external_relocs = (PTR) bfd_malloc (external_relocs_size);
+  if (external_relocs == NULL && external_relocs_size != 0)
+    goto error_return;
 
-      if (bfd_seek (input_bfd, input_section->rel_filepos, SEEK_SET) != 0
-	  || (bfd_bread (external_relocs, external_relocs_size, input_bfd)
-	      != external_relocs_size))
-	goto error_return;
-    }
+  if (bfd_seek (input_bfd, input_section->rel_filepos, SEEK_SET) != 0
+      || (bfd_bread (external_relocs, external_relocs_size, input_bfd)
+	  != external_relocs_size))
+    goto error_return;
 
   /* Relocate the section contents.  */
   if (! ((*ecoff_backend (input_bfd)->relocate_section)
@@ -4625,14 +4608,14 @@ ecoff_indirect_link_order (output_bfd, info, output_section, link_order)
 
   if (contents != NULL)
     free (contents);
-  if (external_relocs != NULL && section_tdata == NULL)
+  if (external_relocs != NULL)
     free (external_relocs);
   return TRUE;
 
  error_return:
   if (contents != NULL)
     free (contents);
-  if (external_relocs != NULL && section_tdata == NULL)
+  if (external_relocs != NULL)
     free (external_relocs);
   return FALSE;
 }

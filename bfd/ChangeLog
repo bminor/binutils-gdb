@@ -1,5 +1,35 @@
 2004-04-23  Chris Demetriou  <cgd@broadcom.com>
 
+	* coff-mips.c (mips_relhi_reloc, mips_rello_reloc)
+	(mips_switch_reloc, mips_read_relocs, mips_relax_section)
+	(mips_relax_pcrel16, PCREL16_EXPANSION_ADJUSTMENT): Remove.
+	(mips_relocate_hi): Remove now-unused 'adjust' and 'pcrel' arguments,
+	and update comments to reflect current usage.
+	(mips_howto_table): Remove entries for MIPS_R_RELHI, MIPS_R_RELLO,
+	and MIPS_R_SWITCH, as well as several empty entries.  Update comment
+	for MIPS_R_PCREL16.
+	(mips_ecoff_swap_reloc_in, mips_ecoff_swap_reloc_out)
+	(mips_adjust_reloc_out, mips_bfd_reloc_type_lookup): Remove support
+	for MIPS_R_SWITCH, MIPS_R_RELLO, and MIPS_R_RELHI relocations.
+	(mips_adjust_reloc_in): Likewise, adjust maximum accepted relocation
+	type number to be MIPS_R_PCREL16.
+	(mips_relocate_section): Remove support for link-time relaxation
+	of branches used by embedded-PIC.  Remove support for MIPS_R_SWITCH,
+	MIPS_R_RELLO, and MIPS_R_RELHI relocations.
+	(_bfd_ecoff_bfd_relax_section): Redefine to bfd_generic_relax_section.
+	* ecoff.c (ecoff_indirect_link_order): Remove support for link-time
+	relaxation of branches used by embedded-PIC.
+	* ecofflink.c (bfd_ecoff_debug_accumulate): Likewise.
+	* libecoff.h (struct ecoff_section_tdata): Remove embedded-PIC
+	related members, update comment.
+	* pe-mips.c: Remove disabled (commented-out and #if 0'd)
+	code related to embedded-PIC.
+	* elfxx-mips.c (_bfd_mips_elf_read_ecoff_info): Remove
+	initialization of now-removed 'adjust' member of
+	'struct ecoff_debug_info'.
+
+2004-04-23  Chris Demetriou  <cgd@broadcom.com>
+
 	* elfxx-mips.c (mips_elf_get_global_gotsym_index): Remove.
 
 2004-04-21  Philip Blundell  <pb@nexus.co.uk>
