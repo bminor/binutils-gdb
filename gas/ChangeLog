@@ -1,3 +1,8 @@
+Mon Feb 12 10:07:33 1996  David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* ecoff.c (ecoff_directive_weakext): Fixed so that whitespace
+	*really* is permissible before the comma.
+
 Mon Feb 12 00:12:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-sh.c (sh_do_align): Align to a 2 byte boundary before
