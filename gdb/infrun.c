@@ -3429,7 +3429,8 @@ The same program may be running in another process.\n");
          bpstat_print() contains the logic deciding in detail
          what to print, based on the event(s) that just occurred. */
 
-      if (stop_print_frame)
+      if (stop_print_frame
+	  && selected_frame)
 	{
 	  int bpstat_ret;
 	  int source_flag;

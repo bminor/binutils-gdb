@@ -1,3 +1,9 @@
+Tue Feb 29 17:33:49 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Wed, 23 Feb 2000 Fernando Nasser <fnasser@redhat.com>:
+	* stack.c (backtrace_command_1), infrun.c (normal_stop): Check
+ 	that the target's stack was valid.
+
 Tue Feb 29 15:14:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-02-22 Stephane Carrez <stcarrez@worldnet.fr>:
