@@ -2762,14 +2762,14 @@ extern void set_gdbarch_address_class_type_flags (struct gdbarch *gdbarch, gdbar
 
 extern int gdbarch_address_class_type_flags_to_name_p (struct gdbarch *gdbarch);
 
-typedef char * (gdbarch_address_class_type_flags_to_name_ftype) (struct gdbarch *gdbarch, int type_flags);
-extern char * gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags);
+typedef const char * (gdbarch_address_class_type_flags_to_name_ftype) (struct gdbarch *gdbarch, int type_flags);
+extern const char * gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags);
 extern void set_gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, gdbarch_address_class_type_flags_to_name_ftype *address_class_type_flags_to_name);
 
 extern int gdbarch_address_class_name_to_type_flags_p (struct gdbarch *gdbarch);
 
-typedef int (gdbarch_address_class_name_to_type_flags_ftype) (struct gdbarch *gdbarch, char *name, int *type_flags_ptr);
-extern int gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, char *name, int *type_flags_ptr);
+typedef int (gdbarch_address_class_name_to_type_flags_ftype) (struct gdbarch *gdbarch, const char *name, int *type_flags_ptr);
+extern int gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name, int *type_flags_ptr);
 extern void set_gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, gdbarch_address_class_name_to_type_flags_ftype *address_class_name_to_type_flags);
 
 /* Is a register in a group */

@@ -416,7 +416,7 @@ address_space_name_to_int (char *space_identifier)
 /* Identify address space identifier by integer flag as defined in 
    gdbtypes.h -- return the string version of the adress space name. */
 
-extern char *
+const char *
 address_space_int_to_name (int space_flag)
 {
   struct gdbarch *gdbarch = current_gdbarch;

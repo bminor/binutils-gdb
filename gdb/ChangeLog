@@ -1,3 +1,14 @@
+2002-12-11  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdbarch.sh (ADDRESS_CLASS_TYPE_FLAGS_TO_NAME)
+	(ADDRESS_CLASS_NAME_TO_TYPE_FLAGS): Use ``const char *'' instead of
+	``char *'' for return and parameter types.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* gdbtypes.h, gdbtypes.c (address_space_int_to_name): Change
+	return type from ``char *'' to ``const char *''.
+	* c-typeprint.c (c_type_print_modifier): Make ``address_space_id''
+	const.
+
 2002-12-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c: Include "dummy-frame.h".
