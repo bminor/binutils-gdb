@@ -977,7 +977,6 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
       LDSYMLEN(pst) = capping_symbol_offset - LDSYMOFF(pst);
   pst->texthigh = capping_text;
 
-/* FIXME, do the N_OBJ symbols fix this?  */
   /* Under Solaris, the N_SO symbols always have a value of 0,
      instead of the usual address of the .o file.  Therefore,
      we have to do some tricks to fill in texthigh and textlow.
@@ -1001,7 +1000,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
      down the partial_symtab_list filling in previous texthighs that
      are still unknown.  */
 
-  if (last_function_name) {
+  if (pst->texthigh == 0 && last_function_name) {
     char *p;
     int n;
     struct minimal_symbol *minsym;
@@ -1045,9 +1044,14 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
   if (pst->textlow == 0)
     pst->textlow = pst->texthigh;
 
+  /* If we know our own starting text address, then walk through all other
+     psymtabs for this objfile, and if any didn't know their ending text
+     address, set it to our starting address.  Take care to not set our
+     own ending address to our starting address, nor to set addresses on
+     `dependency' files that have both textlow and texthigh zero.  */
   if (pst->textlow) {
     ALL_OBJFILE_PSYMTABS (objfile, p1) {
-      if (p1->texthigh == 0) {
+      if (p1->texthigh == 0  && p1->textlow != 0 && p1 != pst) {
 	p1->texthigh = pst->textlow;
 	/* if this file has only data, then make textlow match texthigh */
 	if (p1->textlow == 0)
@@ -1724,8 +1728,12 @@ process_one_symbol (type, desc, valu, name, offset, objfile)
 	define_symbol (valu, name, desc, type, objfile);
       break;
 
-    case N_OBJ: /* 2 useless types from Solaris */
-    case N_OPT:
+    /* The following symbol types can be ignored.  */
+    case N_OBJ:			/* Solaris 2:  Object file dir and name */
+    case N_OPT:			/* Solaris 2:  Optimization level? */
+    /*   N_UNDF: 		   Solaris 2:  file separator mark */
+    /*   N_UNDF: -- we will never encounter it, since we only process one
+		    file's symbols at once.  */
       break;
       
     /* The following symbol types we don't know how to process.  Handle

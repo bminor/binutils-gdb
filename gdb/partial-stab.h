@@ -137,8 +137,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	case N_UNDF:
 #ifdef DBXREAD_ONLY
 	  if (processing_acc_compilation && bufp->n_strx == 1) {
-	    /* deal with relative offsets in the string table
-	       used in ELF+STAB under Solaris */
+	    /* Deal with relative offsets in the string table
+	       used in ELF+STAB under Solaris.  If we want to use the
+	       n_strx field, which contains the name of the file,
+	       we must adjust file_string_table_offset *before* calling
+	       SET_NAMESTRING().  */
 	    past_first_source_file = 1;
 	    file_string_table_offset = next_file_string_table_offset;
 	    next_file_string_table_offset =
@@ -315,22 +318,28 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  switch (p[1])
 	    {
 	    case 'T':
-	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
-				   STRUCT_NAMESPACE, LOC_TYPEDEF,
-				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
-	      if (p[2] == 't')
+	      if (p != namestring)	/* a name is there, not just :T... */
 		{
-		  /* Also a typedef with the same name.  */
 		  ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
-				       VAR_NAMESPACE, LOC_TYPEDEF,
+				       STRUCT_NAMESPACE, LOC_TYPEDEF,
 				       objfile->static_psymbols, CUR_SYMBOL_VALUE);
-		  p += 1;
+		  if (p[2] == 't')
+		    {
+		      /* Also a typedef with the same name.  */
+		      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+					   VAR_NAMESPACE, LOC_TYPEDEF,
+					   objfile->static_psymbols, CUR_SYMBOL_VALUE);
+		      p += 1;
+		    }
 		}
 	      goto check_enum;
 	    case 't':
-	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
-				   VAR_NAMESPACE, LOC_TYPEDEF,
-				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
+	      if (p != namestring)	/* a name is there, not just :T... */
+		{
+		  ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+				       VAR_NAMESPACE, LOC_TYPEDEF,
+				       objfile->static_psymbols, CUR_SYMBOL_VALUE);
+		}
 	    check_enum:
 	      /* If this is an enumerated type, we need to
 		 add all the enum constants to the partial symbol
