@@ -226,7 +226,7 @@ proc gdb_start {} {
 }
 
 proc gdb_exit { } {
-    default_gdb_exit
+    catch default_gdb_exit
 }
 
 # These only need to be uncommented for debugging test cases. They exist
