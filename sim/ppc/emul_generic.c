@@ -290,6 +290,11 @@ emul_add_tree_options(device *tree,
 			 model_name[WITH_DEFAULT_MODEL]);
   device_tree_add_parsed(tree, "/openprom/options/model-issue %d",
 			 MODEL_ISSUE_IGNORE);
+
+  /* useful options */
+  /* FIXME - need to check the OpenBoot powerpc bindings to see if
+     this is still used and if so what it should be */
+  device_tree_add_parsed(tree, "/options/load-base 0x80000");
 }
 
 INLINE_EMUL_GENERIC void
@@ -297,6 +302,11 @@ emul_add_tree_hardware(device *root)
 {
   int i;
   int nr_cpus = device_find_integer_property(root, "/openprom/options/smp");
+
+  /* sanity check the number of processors */
+  if (nr_cpus > MAX_NR_PROCESSORS)
+    error("Specified number of processors (%d) exceeds the number configured (%d).\n",
+	  nr_cpus, MAX_NR_PROCESSORS);
 
   /* add some memory */
   if (device_tree_find_device(root, "/memory") == NULL) {
@@ -315,21 +325,29 @@ emul_add_tree_hardware(device *root)
   /* a fake eeprom - need to be able to write to it */
   device_tree_add_parsed(root, "/openprom/memory@0xfff00000/reg { 0xfff00000 0x3000");
 
+
   /* A local bus containing basic devices */
   device_tree_add_parsed(root, "/iobus@0xf0000000/reg { 0xf0000000 0x0f000000");
+
+  /* NVRAM with clock */
   device_tree_add_parsed(root, "/iobus/nvram@0x0/reg   { 0 0x1000");
-  device_tree_add_parsed(root, "/iobus/nvram/timezone 600");
+  device_tree_add_parsed(root, "/iobus/nvram/timezone 0");
 
   /* the debugging pal. Wire interrupts up directly */
   device_tree_add_parsed(root, "/iobus/pal@0x0x1000/reg  { 0x1000 32");
   for (i = 0; i < nr_cpus; i++) {
-    device_tree_add_parsed(root, "/iobus/pal > %d int /cpus/cpu@%d", i, i);
+    device_tree_add_parsed(root, "/iobus/pal > int%d int /cpus/cpu@%d", i, i);
   }
+
+  /* a disk containing zero's */
+  device_tree_add_parsed(root, "/iobus/disk@0x2000/reg { 0x2000 0x1000");
+  device_tree_add_parsed(root, "/iobus/disk/file \"/dev/zero");
 
   /* chosen etc */
   device_tree_add_parsed(root, "/chosen/stdin */iobus/pal");
   device_tree_add_parsed(root, "/chosen/stdout !/chosen/stdin");
   device_tree_add_parsed(root, "/chosen/memory */memory");
+  device_tree_add_parsed(root, "/chosen/disk */iobus/disk");
 }
 
 #endif /* _EMUL_GENERIC_C_ */

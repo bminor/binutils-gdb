@@ -1,3 +1,255 @@
+Sun Jul 21 21:18:05 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* gen-semantics.c: Make the my_index variable a macro MY_INDEX.
+
+	* ppc-instructions: Adjust so that references are to MY_INDEX and
+        not my_index.
+
+Sun Jul 21 21:18:05 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* gen-idecode.c: Output the complete run_until_stop function
+        instead of just the code to handle a single instruction issue.
+	* : Have the generated idecode.c include inline.c (instead of psim.c).
+
+	* std-config.h: Change psim.c so that it isn't inlined (as this is
+        no longer needed).
+
+	* psim.c (run_until_stop): Delete the old run_until_stop function
+        instead calling the idecode_run and idecode_run_until_stop
+        functions that gen-idecode.c is now creating.
+
+Sun Jul 21 21:18:05 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* dgen.c: Maintenance - update to use new features found in lf.c.
+
+	* filter_filename.c (filter_filename): Maintenance - make the
+        string constant.
+
+Sun Jul 21 21:18:05 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* debug.c (TRACE, ITRACE, DTRACE): Have GCC instead of CPP
+        eliminate trace statements.
+
+	* debug.c: Change trace format so that it is consistent
+        (file:line-nr) with CC's error output.
+
+	* gen-itable.c (itable_c_insn): Add the source file name and
+        source line number to the instruction's informational entry.
+
+	* debug.c (ITRACE): Use the itable (and my_index) to get the
+        current instructions name and source line number.
+
+	* gen-semantics.c, gen-icache.c: Adjust generated ITRACE calls to
+        match new interface.
+
+	* emul_bugapi.c (emul_bugapi_instruction_call): Adjust
+        corresponding call to ITRACE so that it still matches.
+
+	* idecode_expression.h (ALU_END, CR0_COMPARE): Use TRACE instead
+        of ITRACE.  The CPP line directives would have previously set the
+        line-nr and file name so ITRACE isn't needed.
+
+Sun Jul 21 21:18:05 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* gen-idecode.c (print_jump_until_stop_body): New function and
+        idecode generation option.  Instead of generating and calling
+        separate functions containing the semantic and icache code
+        generate a single monolythic function and use goto's (and GCC's
+        indirect jump) to move between code blocks.
+
+	* Makefile.in: Add sim_jump flag to those passed to igen.
+
+	* configure.in: New option --enable-sim-jump (default disabled)
+
+	* ppc-instructions: Eliminate any uses of labels and goto's.
+        These result in duplicate declarations when a single flat function
+        is being create.
+
+	* ppc-opcode-jump: New file.  Set of opcode rules useful when
+        testing jumping idecodes.
+
+Sun Jul 21 21:18:05 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* gen-idecode.c: Optionally include the semantic code for an
+        instruction in the function that is doing the decoding.
+
+	* igen.c: Add option (-C) to generate semantics in the instruction
+        decode functions.
+
+	* configure.in (--enable-sim-icache): Accept an option list such
+        as 1024,define.  Add a new choice to the list - semantic - which
+        will cause igen to generate instruction decode functions that
+        include the corresponding semantic code.
+
+Sun Jul 21 21:18:05 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* configure.in: New option --enable-sim-line-nr (default enabled).
+        Enable/disable the inclusion of CPP line directives in the
+        generated files.  Such directives refer back to the source files
+        used when generating the simulator code.
+
+	* Makefile.in (sim_line_nr): Pass to igen.
+
+Sun Jul 21 21:18:05 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* igen.c (main): Revamp the options so that more letters are
+        available.
+
+	* configure.in: Adjust to match igen's revamped options
+
+Sun Jul 21 21:18:05 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* Makefile.in (pk.h, hw.h): Rewrite depenencies for hw.h (etc) so
+        that they use the same technique as igen (ie a dummy targets
+        tmp-pk and tmp-hw are created).
+
+Mon Jun 24 22:28:00 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* Makefile.in (BUILD_CFLAGS): Include WARNING_CFLAGS.
+
+Wed Jun 19 21:45:28 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* ld-cache.[hc], ld-decode.[hc], ld-insn.[hc]: New files. Separate
+        out the loading of each of the tables from the rest of igen.
+	* Makefile.in: Adjust.
+	* igen.c: Adjust.
+
+	* gen-icache.[hc], gen-idecode.[hc], gen-itable.[hc],
+        gen-model.[hc], gen-semantics.[hc]: New files. Separate out the
+        code creating each separate set of generated files.
+	* Makefile.in: Adjust.
+	* igen.c: Adjust.
+
+	* gen-support.[ch]: New files. Output the support functions (found
+        in the ppc-instructions file) into a separate file.
+	* Makefile.in: Add.
+	* inline.h, inline.c: Add.
+	* std-config.h: Add.
+
+	* ld-cache.c: Re-design the cache table format.
+	* ppc-cache-rules: Update to new format.
+
+	* ld-decode.c: Re-design the decode table format.
+	* ppc-opcode-simple: Update to new format
+	* ppc-opcode-complex: Ditto
+	* ppc-opcode-flat: Ditto
+
+	* filter.h, filter.c: New files. Separate the opcode filter table
+        reading code from the rest of igen.c.  Re-design the filter so that
+	it works inclusivly not exclusivly.
+	* igen.c: Remove the opcode filter table loading code.
+	* Makefile.in (filter.o): Adjust
+	* configure.in: Adjust filter flag so that default includes 32bit
+	and floating point.
+	* ppc-instructions: Clean up filter fields so that only in use
+        entries are specifed (ie delete `be').
+
+	* misc.c (name2i, i2name): New function.  Map between a string and
+        an integer value.
+
+Mon Jun 17 20:08:03 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* sim_calls.c (sim_close): If simulator not created, skip printing
+        of run information.
+
+Mon Jun 17 20:08:03 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* registers.c (register_description): Typo, insns not insn.
+
+	* ppc-instructions (model_get_number_of_stalls): New model function,
+	returns number of stalls for the specified processor.
+	* psim.c (psim_read_register): Add call to new function
+	model_get_number_of_stalls().
+
+	* ppc-instructions (model_get_number_of_cycles): New model function,
+	returns number of stalls for the specified processor.
+	* psim.c (psim_read_register): Add call to new function
+	model_get_number_of_cycles().
+
+Fri Jun 14 00:11:56 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* device_table.h: Don't pass the parent device into a devices
+        create function.  This makes the create function consistent with
+        the documentation.
+	* device.c (device_template_create_device): Ditto
+	* hw_pal.c (hw_pal_create): Ditto
+	* hw_core.c (hw_core_create): Ditto
+	* hw_vm.c (hw_vm_create): Ditto
+	* hw_disk.c (hw_disk_create): Ditto
+	* hw_nvram.c (hw_nvram_create): Ditto
+	* hw_memory.c (hw_memory_create): Ditto
+	* hw_cpu.c (hw_cpu_create): Ditto.
+
+	* device.c (split_find_device): Allow a null initial parent device.
+	(device_template_create_device): Ditto.
+
+	* device.c (device_create_from): Make local (static) only used
+        within device.c.
+	* device_table.h: typedef device_callbacks moved here (from
+        device.h) where it belongs.
+
+	* hw_core.c: New file. Implements just the core device using the
+        core object.
+
+	* corefile.c: Moved all core device functions into the new
+        hw_core.c file. core_device_create() disapears.
+
+	* psim.c (psim_tree): Use device_tree_add_parsed() to create the
+        core device.
+
+Thu Jun 13 00:09:29 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* hw_init.c: Correct typo in comment.
+
+	* corefile.c (core_init): Remove any remaining references to a
+        default map.
+	(core_map_find_mapping): Ditto.
+
+Wed Jun 12 22:30:32 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* corefile.c (core_init): Make function global so that other
+        devices are able to use the full core object.
+
+	* corefile.c (core_create, core_from_device): Break core_create
+        into two functions.  The first creates a core object, the second
+        returns the core object associated with a core device.
+
+	* corefile.c (core_device_create): Use core_create to make the
+        core object.
+
+	* psim.c (psim_create): Use core_from_device() instead of
+        core_create().
+
+	* device.c (device_template_create_device): Make static as only
+        needed by functions internal to device.c.
+
+Fri Jun  7 23:47:18 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* ppc-opcode-test-2: Remove description of fields.
+	* ppc-opcode-complex: Ditto
+	* ppc-opcode-flat: Ditto
+	* ppc-opcode-simple: Ditto
+	* ppc-opcode-stupid: Ditto
+	* ppc-opcode-test-1: Ditto
+	* ppc-cache-rules: Ditto
+
+	* igen.c: Add description of files as a comment at the front.
+
+Wed Jun 26 12:50:33 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in: Check for whether the termios and termio
+	structures are really defined, and whether or not, they define the
+	c_line field.
+	* configure: Regenerate.
+
+	* Makefile.in ({,TERMIO_}CFLAGS): Add TERMIO_CFLAGS options set by
+	configure.
+
+	* emul_unix.c: Various changes to allow for building on systems
+	with different termio and termios structures.  If host has both
+	termio and termios, just use termios.  No longer include
+	sys/ioctl.h.
+
 Wed Jun 26 12:26:55 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
         * Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir,
@@ -6,6 +258,13 @@ Wed Jun 26 12:26:55 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
         * configure.in (AC_PREREQ): autoconf 2.5 or higher.
         (AC_PROG_INSTALL): Added.
         * configure: Rebuilt.
+
+Wed Jun  5 23:53:42 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* corefile.h: Rewrite documentation so that it can be extracted and
+        converted into texinfo (and hence ready for translation into html,
+        tex or nroff).
+	* device.h: Ditto
 
 Thu Jun  6 09:52:37 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 

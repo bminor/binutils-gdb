@@ -287,6 +287,15 @@ extern int current_model_issue;
 			     ? WITH_MODEL_ISSUE	\
 			     : current_model_issue)
 
+/* Whether or not input/output just uses stdio, or uses printf_filtered for
+   output, and polling input for input.  */
+#define DONT_USE_STDIO			0
+#define DO_USE_STDIO			1
+
+#ifndef WITH_STDIO
+#define WITH_STDIO			DONT_USE_STDIO
+#endif
+
 /* INLINE CODE SELECTION:
 
    GCC -O3 attempts to inline any function or procedure in scope.  The
@@ -308,18 +317,30 @@ extern int current_model_issue;
    The following additional values are `bit fields' and can be
    combined.
 
-      1  Include the C file for the module into the file being compiled
+      REVEAL_MODULE:
+
+         Include the C file for the module into the file being compiled
          but do not make the functions within the module inline.
 
 	 While of no apparent benefit, this makes it possible for the
 	 included module, when compiled to inline its calls to what
 	 would otherwize be external functions.
 
-      2  Make external functions within the module `inline'.  Thus if
+      INLINE_MODULE:
+
+         Make external functions within the module `inline'.  Thus if
          the module is included into a file being compiled, calls to
 	 its funtions can be eliminated. 2 implies 1.
 
-      4  Make internal (static) functions within the module `inline'.
+      INLINE_LOCALS:
+
+         Make internal (static) functions within the module `inline'.
+
+   The following abreviations are available:
+
+      INCLUDE_MODULE == (REVEAL_MODULE | INLINE_MODULE)
+
+      ALL_INLINE == (REVEAL_MODULE | INLINE_MODULE | INLINE_LOCALS)
 
    In addition to this, modules have been put into two categories.
 
@@ -401,7 +422,7 @@ extern int current_model_issue;
 
    REALITY CHECK:
 
-   This is not for the faint hearted.  I've seen GCC get up to 200mb
+   This is not for the faint hearted.  I've seen GCC get up to 500mb
    trying to compile what this can create.
 
    Some of the modules do not yet implement the WITH_INLINE_STATIC
@@ -432,6 +453,18 @@ extern int current_model_issue;
 #define INLINE /*inline*/
 #endif
 #endif
+
+/* Your compilers pass parameters in registers reserved word */
+
+#if !defined REGPARM
+#if (defined(i386) || defined(i486) || defined(i586) || defined(__i386__) || defined(__i486__) || defined(__i586__)) && WITH_REGPARM
+#define REGPARM __attribute__((__regparm__(WITH_REGPARM)))
+#else
+#define REGPARM
+#endif
+#endif
+
+
 
 /* Default prefix for static functions */
 
@@ -513,14 +546,10 @@ extern int current_model_issue;
    real hardware instead of RAM.
 
    Also, most of the functions in devices.c are always called through
-   a jump table.
-
-   There seems to be some problem with making either device_tree or
-   devices inline.  It reports the message: device_tree_find_node()
-   not a leaf */
+   a jump table. */
 
 #ifndef DEVICE_INLINE
-#define DEVICE_INLINE			DEFAULT_INLINE
+#define DEVICE_INLINE			INLINE_LOCALS
 #endif
 
 /* Code called whenever information on a Special Purpose Register is
@@ -546,11 +575,21 @@ extern int current_model_issue;
 #define SEMANTICS_INLINE		DEFAULT_INLINE
 #endif
 
-/* Code to decode an instruction. Normally called on every instruction
-   cycle */
+/* When using the instruction cache, code to decode an instruction and
+   install it into the cache.  Normally called when ever there is a
+   miss in the instruction cache. */
 
-#ifndef IDECODE_INLINE
-#define IDECODE_INLINE			DEFAULT_INLINE
+#ifndef ICACHE_INLINE
+#define ICACHE_INLINE			DEFAULT_INLINE
+#endif
+
+/* General functions called by semantics functions but part of the
+   instruction table.  Although called by the semantic functions the
+   frequency of calls is low.  Consequently the need to inline this
+   code is reduced. */
+
+#ifndef SUPPORT_INLINE
+#define SUPPORT_INLINE			INLINE_LOCALS
 #endif
 
 /* Model specific code used in simulating functional units.  Note, it actaully
@@ -559,7 +598,7 @@ extern int current_model_issue;
    of the code, which is not friendly to the cache.  */
 
 #ifndef MODEL_INLINE
-#define	MODEL_INLINE			DEFAULT_INLINE
+#define	MODEL_INLINE			(DEFAULT_INLINE & ~INLINE_MODULE)
 #endif
 
 /* Code to print out what options we were compiled with.  Because this
@@ -568,11 +607,24 @@ extern int current_model_issue;
    routines will be pulled in twice.  */
 
 #ifndef OPTIONS_INLINE
-#define OPTIONS_INLINE			DEFAULT_INLINE
+#define OPTIONS_INLINE			MODEL_INLINE
 #endif
 
-/* Code to emulate os or rom compatibility.  Called on the rare
-   occasion that the OS or ROM code is being emulated. */
+/* idecode acts as the hub of the system, everything else is imported
+   into this file */
+
+#ifndef IDECOCE_INLINE
+#define IDECODE_INLINE			INLINE_LOCALS
+#endif
+
+/* psim, isn't actually inlined */
+
+#ifndef PSIM_INLINE
+#define PSIM_INLINE			INLINE_LOCALS
+#endif
+
+/* Code to emulate os or rom compatibility.  This code is called via a
+   table and hence there is little benefit in making it inline */
 
 #ifndef OS_EMUL_INLINE
 #define OS_EMUL_INLINE			0

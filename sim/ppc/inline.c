@@ -22,76 +22,77 @@
 #ifndef _INLINE_C_
 #define _INLINE_C_
 
-#if BITS_INLINE
+#include "config.h"
+#include "ppc-config.h"
+
+#include "inline.h"
+
+#if (BITS_INLINE & INCLUDE_MODULE)
 #include "bits.c"
 #endif
 
-#if SIM_ENDIAN_INLINE
+#if (SIM_ENDIAN_INLINE & INCLUDE_MODULE)
 #include "sim-endian.c"
 #endif
 
-#if ICACHE_INLINE
+#if (ICACHE_INLINE & INCLUDE_MODULE)
 #include "icache.c"
 #endif
 
-#if CORE_INLINE
+#if (CORE_INLINE & INCLUDE_MODULE)
 #include "corefile.c"
 #endif
 
-#if VM_INLINE
+#if (VM_INLINE & INCLUDE_MODULE)
 #include "vm.c"
 #endif
 
-#if CPU_INLINE
-#include "cpu.c"
-#endif
-
-#if EVENTS_INLINE
+#if (EVENTS_INLINE & INCLUDE_MODULE)
 #include "events.c"
 #endif
 
-#if MODEL_INLINE
+#if (MODEL_INLINE & INCLUDE_MODULE)
 #include "model.c"
 #endif
 
-#if OPTIONS_INLINE
+#if (OPTIONS_INLINE & INCLUDE_MODULE)
 #include "options.c"
 #endif
 
-#if FUNCTION_UNIT_INLINE
-#include "function_unit.c"
-#endif
-
-#if MON_INLINE
+#if (MON_INLINE & INCLUDE_MODULE)
 #include "mon.c"
 #endif
 
-#if REGISTERS_INLINE
+#if (REGISTERS_INLINE & INCLUDE_MODULE)
 #include "registers.c"
 #endif
 
-#if INTERRUPTS_INLINE
+#if (INTERRUPTS_INLINE & INCLUDE_MODULE)
 #include "interrupts.c"
 #endif
 
-#if DEVICE_TREE_INLINE
-#include "device_tree.c"
+#if (DEVICE_INLINE & INCLUDE_MODULE)
+#include "device.c"
 #endif
 
-#if DEVICES_INLINE
-#include "devices.c"
-#endif
-
-#if SPREG_INLINE
+#if (SPREG_INLINE & INCLUDE_MODULE)
 #include "spreg.c"
 #endif
 
-#if SEMANTICS_INLINE
+#if (SEMANTICS_INLINE & INCLUDE_MODULE)
 #include "semantics.c"
 #endif
 
-#if IDECODE_INLINE
+#if (IDECODE_INLINE & INCLUDE_MODULE)
 #include "idecode.c"
+#endif
+
+#if (SUPPORT_INLINE & INCLUDE_MODULE)
+#include "support.c"
+#endif
+
+#if (OS_EMUL_INLINE & INCLUDE_MODULE)
+#include "os_emul.c"
 #endif
 
 #endif

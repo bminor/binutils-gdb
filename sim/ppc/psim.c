@@ -22,7 +22,10 @@
 #ifndef _PSIM_C_
 #define _PSIM_C_
 
-#include "inline.c"
+#include "cpu.h" /* includes psim.h */
+#include "idecode.h"
+#include "options.h"
+
 
 #include <stdio.h>
 #include <ctype.h>
@@ -33,10 +36,6 @@
 
 #include <setjmp.h>
 
-#include "cpu.h" /* includes psim.h */
-#include "idecode.h"
-#include "options.h"
-
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -44,6 +43,7 @@
 #include <strings.h>
 #endif
 #endif
+
 
 #include "bfd.h"
 
@@ -87,7 +87,7 @@ INLINE_PSIM\
 (device *)
 psim_tree(void)
 {
-  device *root = core_device_create();
+  device *root = device_tree_add_parsed(NULL, "core");
   device_tree_add_parsed(root, "/aliases");
   device_tree_add_parsed(root, "/options");
   device_tree_add_parsed(root, "/chosen");
@@ -245,7 +245,8 @@ psim_options(device *root,
     argp += 1;
   }
   /* force the trace node to (re)process its options */
-  device_init_data(device_tree_find_device(root, "/openprom/trace"), NULL);
+  device_ioctl(device_tree_find_device(root, "/openprom/trace"), NULL, 0);
+
   /* return where the options end */
   return argv + argp;
 }
@@ -345,7 +346,7 @@ psim_create(const char *file_name,
   /* create things */
   system = ZALLOC(psim);
   system->events = event_queue_create();
-  system->memory = core_create(root);
+  system->memory = core_from_device(root);
   system->monitor = mon_create();
   system->nr_cpus = nr_cpus;
   system->os_emulation = os_emulation;
@@ -373,7 +374,7 @@ psim_create(const char *file_name,
 
 /* allow the simulation to stop/restart abnormaly */
 
-STATIC_INLINE_PSIM\
+INLINE_PSIM\
 (void)
 psim_set_halt_and_restart(psim *system,
 			  void *halt_jmp_buf,
@@ -383,7 +384,7 @@ psim_set_halt_and_restart(psim *system,
   system->path_to_restart = restart_jmp_buf;
 }
 
-STATIC_INLINE_PSIM\
+INLINE_PSIM\
 (void)
 psim_clear_halt_and_restart(psim *system)
 {
@@ -416,6 +417,20 @@ psim_halt(psim *system,
   system->halt_status.program_counter =
     cpu_get_program_counter(system->processors[current_cpu]);
   longjmp(*(jmp_buf*)(system->path_to_halt), current_cpu + 1);
+}
+
+INLINE_PSIM\
+(int)
+psim_last_cpu(psim *system)
+{
+  return system->last_cpu;
+}
+
+INLINE_PSIM\
+(int)
+psim_nr_cpus(psim *system)
+{
+  return system->nr_cpus;
 }
 
 INLINE_PSIM\
@@ -463,7 +478,8 @@ psim_init(psim *system)
 
   /* scrub the monitor */
   mon_init(system->monitor, system->nr_cpus);
-  os_emul_init(system->os_emulation, system->nr_cpus);
+
+  /* trash any pending events */
   event_queue_init(system->events);
 
   /* scrub all the cpus */
@@ -473,6 +489,9 @@ psim_init(psim *system)
   /* init all the devices (which updates the cpus) */
   device_tree_init(system->devices, system);
 
+  /* and the emulation (which needs an initialized device tree) */
+  os_emul_init(system->os_emulation, system->nr_cpus);
+
   /* now sync each cpu against the initialized state of its registers */
   for (cpu_nr = 0; cpu_nr < system->nr_cpus; cpu_nr++) {
     cpu_synchronize_context(system->processors[cpu_nr]);
@@ -480,7 +499,7 @@ psim_init(psim *system)
   }
 
   /* force loop to restart */
-  system->last_cpu = system->nr_cpus - 1;
+  system->last_cpu = -1; /* when incremented will become 0 - first CPU */
 }
 
 INLINE_PSIM\
@@ -497,7 +516,6 @@ psim_stack(psim *system,
     unsigned_word stack_pointer;
     psim_read_register(system, 0, &stack_pointer, "sp", cooked_transfer);
     device_ioctl(stack_device,
-		 system,
 		 NULL, /*cpu*/
 		 0, /*cia*/
 		 stack_pointer,
@@ -508,219 +526,6 @@ psim_stack(psim *system,
 
 
 
-/* EXECUTE REAL CODE: 
-
-   Unfortunatly, there are multiple cases to consider vis:
-
-   	<icache> X <smp> X <events> X <keep-running-flag> X ...
-
-   Consequently this function is written in multiple different ways */
-
-STATIC_INLINE_PSIM\
-(void)
-run_until_stop(psim *system,
-	       volatile int *keep_running)
-{
-  jmp_buf halt;
-  jmp_buf restart;
-#if WITH_IDECODE_CACHE_SIZE
-  int cpu_nr;
-  for (cpu_nr = 0; cpu_nr < system->nr_cpus; cpu_nr++)
-    cpu_flush_icache(system->processors[cpu_nr]);
-#endif
-  psim_set_halt_and_restart(system, &halt, &restart);
-
-#if (!WITH_IDECODE_CACHE_SIZE && WITH_SMP == 0)
-
-  /* CASE 1: No instruction cache and no SMP.
-
-     In this case, we can take advantage of the fact that the current
-     instruction address does not need to be returned to the cpu
-     object after every execution of an instruction.  Instead it only
-     needs to be saved when either A. the main loop exits or B. a
-     cpu-{halt,restart} call forces the loop to be re-entered.  The
-     later functions always save the current cpu instruction
-     address. */
-
-  if (!setjmp(halt)) {
-    do {
-      if (!setjmp(restart)) {
-	cpu *const processor = system->processors[0];
-	unsigned_word cia = cpu_get_program_counter(processor);
-	do {
-	  if (WITH_EVENTS) {
-	    if (event_queue_tick(system->events)) {
-	      cpu_set_program_counter(processor, cia);
-	      event_queue_process(system->events);
-	      cia = cpu_get_program_counter(processor);
-	    }
-	  }
-	  {
-	    instruction_word const instruction
-	      = vm_instruction_map_read(cpu_instruction_map(processor),
-					processor, cia);
-	    cia = idecode_issue(processor, instruction, cia);
-	  }
-	} while (keep_running == NULL || *keep_running);
-	cpu_set_program_counter(processor, cia);
-      }
-    } while(keep_running == NULL || *keep_running);
-  }
-#endif
-
-
-#if (WITH_IDECODE_CACHE_SIZE && WITH_SMP == 0)
-
-  /* CASE 2: Instruction case but no SMP
-
-     Here, the additional complexity comes from there being two
-     different cache implementations.  A simple function address cache
-     or a full cracked instruction cache */
-
-  if (!setjmp(halt)) {
-    do {
-      if (!setjmp(restart)) {
-	cpu *const processor = system->processors[0];
-	unsigned_word cia = cpu_get_program_counter(processor);
-	do {
-	  if (WITH_EVENTS)
-	    if (event_queue_tick(system->events)) {
-	      cpu_set_program_counter(processor, cia);
-	      event_queue_process(system->events);
-	      cia = cpu_get_program_counter(processor);
-	    }
-	  { 
-	    idecode_cache *const cache_entry = cpu_icache_entry(processor,
-								cia);
-	    if (cache_entry->address == cia) {
-	      idecode_semantic *const semantic = cache_entry->semantic;
-	      cia = semantic(processor, cache_entry, cia);
-	    }
-	    else {
-	      instruction_word const instruction
-		= vm_instruction_map_read(cpu_instruction_map(processor),
-					  processor,
-					  cia);
-	      idecode_semantic *const semantic = idecode(processor,
-							 instruction,
-							 cia,
-							 cache_entry);
-
-	      if (WITH_MON != 0)
-		mon_event(mon_event_icache_miss, processor, cia);
-	      cache_entry->address = cia;
-	      cache_entry->semantic = semantic;
-	      cia = semantic(processor, cache_entry, cia);
-	    }
-	  }
-	} while (keep_running == NULL || *keep_running);
-	cpu_set_program_counter(processor, cia);
-      }
-    } while(keep_running == NULL || *keep_running);
-  }
-#endif
-
-
-#if (!WITH_IDECODE_CACHE_SIZE && WITH_SMP > 0)
-
-  /* CASE 3: No ICACHE but SMP
-
-     The complexity here comes from needing to correctly restart the
-     system when it is aborted.  In particular if cpu0 requests a
-     restart, the next cpu is still cpu1.  Cpu0 being restarted after
-     all the other CPU's and the event queue have been processed */
-
-  if (!setjmp(halt)) {
-    int first_cpu = setjmp(restart);
-    if (first_cpu == 0)
-      first_cpu = system->last_cpu + 1;
-    do {
-      int current_cpu;
-      for (current_cpu = first_cpu, first_cpu = 0;
-	   current_cpu < system->nr_cpus + (WITH_EVENTS ? 1 : 0);
-	   current_cpu++) {
-	if (WITH_EVENTS && current_cpu == system->nr_cpus) {
-	  if (event_queue_tick(system->events))
-	    event_queue_process(system->events);
-	}
-	else {
-	  cpu *const processor = system->processors[current_cpu];
-	  unsigned_word const cia = cpu_get_program_counter(processor);
-	  instruction_word instruction =
-	    vm_instruction_map_read(cpu_instruction_map(processor),
-				    processor,
-				    cia);
-	  cpu_set_program_counter(processor,
-				  idecode_issue(processor, instruction, cia));
-	}
-	if (!(keep_running == NULL || *keep_running)) {
-	  system->last_cpu = current_cpu;
-	  break;
-	}
-      }
-    } while (keep_running == NULL || *keep_running);
-  }
-#endif
-
-#if (WITH_IDECODE_CACHE_SIZE && WITH_SMP > 0)
-
-  /* CASE 4: ICACHE and SMP ...
-
-     This time, everything goes wrong.  Need to restart loops
-     correctly, need to save the program counter and finally need to
-     keep track of each processors current address! */
-
-  if (!setjmp(halt)) {
-    int first_cpu = setjmp(restart);
-    if (!first_cpu)
-      first_cpu = system->last_cpu + 1;
-    do {
-      int current_cpu;
-      for (current_cpu = first_cpu, first_cpu = 0;
-	   current_cpu < system->nr_cpus + (WITH_EVENTS ? 1 : 0);
-	   current_cpu++) {
-	if (WITH_EVENTS && current_cpu == system->nr_cpus) {
-	  if (event_queue_tick(system->events))
-	    event_queue_process(system->events);
-	}
-	else {
-	  cpu *processor = system->processors[current_cpu];
-	  unsigned_word const cia = cpu_get_program_counter(processor);
-	  idecode_cache *cache_entry = cpu_icache_entry(processor, cia);
-	  if (cache_entry->address == cia) {
-	    idecode_semantic *semantic = cache_entry->semantic;
-	    cpu_set_program_counter(processor,
-				    semantic(processor, cache_entry, cia));
-	  }
-	  else {
-	    instruction_word instruction =
-	      vm_instruction_map_read(cpu_instruction_map(processor),
-				      processor,
-				      cia);
-	    idecode_semantic *semantic = idecode(processor,
-						 instruction,
-						 cia,
-						 cache_entry);
-
-	    if (WITH_MON != 0)
-	      mon_event(mon_event_icache_miss, system->processors[current_cpu], cia);
-	    cache_entry->address = cia;
-	    cache_entry->semantic = semantic;
-	    cpu_set_program_counter(processor,
-				    semantic(processor, cache_entry, cia));
-	  }
-	}
-	if (!(keep_running == NULL || *keep_running))
-	  break;
-      }
-    } while (keep_running == NULL || *keep_running);
-  }
-#endif
-
-  psim_clear_halt_and_restart(system);
-}
-
-
 /* SIMULATE INSTRUCTIONS, various different ways of achieving the same
    thing */
 
@@ -729,14 +534,16 @@ INLINE_PSIM\
 psim_step(psim *system)
 {
   volatile int keep_running = 0;
-  run_until_stop(system, &keep_running);
+  idecode_run_until_stop(system, &keep_running,
+			 system->events, system->processors, system->nr_cpus);
 }
 
 INLINE_PSIM\
 (void)
 psim_run(psim *system)
 {
-  run_until_stop(system, NULL);
+  idecode_run(system,
+	      system->events, system->processors, system->nr_cpus);
 }
 
 INLINE_PSIM\
@@ -744,7 +551,8 @@ INLINE_PSIM\
 psim_run_until_stop(psim *system,
 		    volatile int *keep_running)
 {
-  run_until_stop(system, keep_running);
+  idecode_run_until_stop(system, keep_running,
+			 system->events, system->processors, system->nr_cpus);
 }
 
 
@@ -804,6 +612,23 @@ psim_read_register(psim *system,
 
   case reg_msr:
     *(msreg*)cooked_buf = cpu_registers(processor)->msr;
+    break;
+
+  case reg_insns:
+    *(unsigned_word*)cooked_buf = mon_get_number_of_insns(system->monitor,
+							  which_cpu);
+    break;
+
+  case reg_stalls:
+    if (cpu_model(processor) == NULL)
+      error("$stalls only valid if processor unit model enabled (-I)\n");
+    *(unsigned_word*)cooked_buf = model_get_number_of_stalls(cpu_model(processor));
+    break;
+
+  case reg_cycles:
+    if (cpu_model(processor) == NULL)
+      error("$cycles only valid if processor unit model enabled (-I)\n");
+    *(unsigned_word*)cooked_buf = model_get_number_of_cycles(cpu_model(processor));
     break;
 
   default:

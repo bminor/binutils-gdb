@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -86,8 +86,8 @@
        else \
          XER &= (~xer_carry); */ \
   } \
-  ITRACE(trace_alu, (" Result = %ld (0x%lx), XER = %ld\n", \
-		     (long)alu_result, (long)alu_result, (long)XER)); \
+  TRACE(trace_alu, (" Result = %ld (0x%lx), XER = %ld\n", \
+                    (long)alu_result, (long)alu_result, (long)XER)); \
   /* Update the Result Conditions if needed */ \
   CR0_COMPARE(alu_result, 0, Rc); \
   /* assign targ same */ \
@@ -281,9 +281,9 @@ do { \
 do { \
   if (Rc) { \
     CR_COMPARE(0, LHS, RHS); \
-    ITRACE(trace_alu, \
-	   ("CR=0x%08lx, LHS=%ld, RHS=%ld\n", \
-	    (unsigned long)CR, (long)LHS, (long)RHS)); \
+    TRACE(trace_alu, \
+	  ("CR=0x%08lx, LHS=%ld, RHS=%ld\n", \
+	   (unsigned long)CR, (long)LHS, (long)RHS)); \
   } \
 } while (0)
 

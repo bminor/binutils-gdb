@@ -27,17 +27,11 @@
 #endif
 
 #include "device_table.h"
-#include "cpu.h"
 
+#include "cpu.h"
 
 #include <stdio.h>
 #include <fcntl.h>
-
-#if 0
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-#endif
 
 #ifdef HAVE_STRING_H
 #include <string.h>
@@ -59,31 +53,65 @@
 #define WITH_STDIO DO_USE_STDIO
 #endif
 
-/* Device:
+/* DEVICE
    
-   pal@<address>
+   pal - glue logic device containing assorted junk
    
-   
-   Description:
+   DESCRIPTION
    
    Typical hardware dependant hack.  This device allows the firmware
    to gain access to all the things the firmware needs (but the OS
-   doesn't).  All registers are little endian (byte 0 is the least
-   significant) and must be accessed correctly aligned.
+   doesn't).
+
+   The pal contains the following registers.  Except for the interrupt
+   level register, each of the below is 8 bytes in size and must be
+   accessed using correct alignment.  For 16 and 32 bit accesses the
+   bytes not directed to the register are ignored:
    
-   <address> + 0: write - halts simulation with exit code byte[0].
+   |0	reset register (write)
+   |4	processor id register (read)
+   |8	interrupt port (write)
+   |9	interrupt level (write)
+   |12	processor count register (read)
+   |16	tty input fifo register (read)
+   |20	tty input status register (read)
+   |24	tty output fifo register (write)
+   |28	tty output status register (read)
+
+   Reset register (write) halts the simulator exiting with the
+   value written.
    
-   <address> + 4: read - processor nr in byte[0].
+   Processor id register (read) returns the processor number (0
+   .. N-1) of the processor performing the read.
    
-   <address> + 8: write - send interrupt message to port byte[0] with
-   value byte[1].
+   The interrupt registers should be accessed as a pair (using a 16 or
+   32 bit store).  The low byte specifies the interrupt port while the
+   high byte specifies the level to drive that port at.  By
+   convention, the pal's interrupt ports (int0, int1, ...) are wired
+   up to the corresponding processor's level sensative external
+   interrupt pin.  Eg: A two byte write to address 8 of 0x0102
+   (big-endian) will result in processor 2's external interrupt pin to
+   be asserted.
+
+   Processor count register (read) returns the total number of
+   processors active in the current simulation.
+
+   TTY input fifo register (read), if the TTY input status register
+   indicates a character is available by being nonzero, returns the
+   next available character from the pal's tty input port.
+
+   Similarly, the TTY output fifo register (write), if the TTY output
+   status register indicates the output fifo is not full by being
+   nonzero, outputs the character written to the tty's output port.
+
+   PROPERTIES
    
-   <address> + 12: read - nr processors in byte[0].
-   
-   
-   Properties:
-   
-   NONE. */
+   reg = <address> <size> (required)
+
+   Specify the address (within the parent bus) that this device is to
+   live.
+
+   */
 
 
 enum {
@@ -259,13 +287,6 @@ hw_pal_io_write_buffer_callback(device *me,
 
 
 /* instances of the hw_pal device */
-static void *
-hw_pal_instance_create_callback(device *me,
-				const char *args)
-{
-  /* make life easier, attach the hw_pal data to the instance */
-  return device_data(me);
-}
 
 static void
 hw_pal_instance_delete_callback(device_instance *instance)
@@ -306,26 +327,45 @@ hw_pal_instance_write_callback(device_instance *instance,
   return i;
 }
 
+static const device_instance_callbacks hw_pal_instance_callbacks = {
+  hw_pal_instance_delete_callback,
+  hw_pal_instance_read_callback,
+  hw_pal_instance_write_callback,
+};
+
+static device_instance *
+hw_pal_create_instance(device *me,
+		       const char *path,
+		       const char *args)
+{
+  return device_create_instance_from(me, NULL,
+				     device_data(me),
+				     path, args,
+				     &hw_pal_instance_callbacks);
+}
+
+static const device_interrupt_port_descriptor hw_pal_interrupt_ports[] = {
+  { "int", 0, MAX_NR_PROCESSORS },
+  { NULL }
+};
+
+
 static device_callbacks const hw_pal_callbacks = {
   { generic_device_init_address, },
   { NULL, }, /* address */
   { hw_pal_io_read_buffer_callback,
       hw_pal_io_write_buffer_callback, },
   { NULL, }, /* DMA */
-  { NULL, }, /* interrupt */
+  { NULL, NULL, hw_pal_interrupt_ports }, /* interrupt */
   { NULL, }, /* unit */
-  { hw_pal_instance_create_callback,
-      hw_pal_instance_delete_callback,
-      hw_pal_instance_read_callback,
-      hw_pal_instance_write_callback, },
+  hw_pal_create_instance,
 };
 
 
 static void *
 hw_pal_create(const char *name,
 	      const device_unit *unit_address,
-	      const char *args,
-	      device *parent)
+	      const char *args)
 {
   /* create the descriptor */
   hw_pal_device *hw_pal = ZALLOC(hw_pal_device);

@@ -1,7 +1,8 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.3)dnl
+AC_PREREQ(2.5)dnl
 AC_INIT(Makefile.in)
 
+AC_PROG_INSTALL
 AC_PROG_CC
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.
@@ -33,6 +34,17 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_warnings" != x""; then
   echo "Setting warning flags = $sim_warnings" 6>&1
 fi],[sim_warnings=""])dnl
+
+AC_ARG_ENABLE(sim-line-nr,
+[  --enable-sim-line-nr=opts		Generate extra CPP code that references source rather than generated code],
+[case "${enableval}" in
+  yes)	sim_line_nr="";;
+  no)	sim_line_nr="-L";;
+  *)	AC_MSG_ERROR("--enable-sim-line-nr does not take a value"); sim_line_nr="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_line_nr" != x""; then
+  echo "Setting warning flags = $sim_line_nr" 6>&1
+fi],[sim_line-nr=""])dnl
 
 AC_ARG_ENABLE(sim-config,
 [  --enable-sim-config=file		Override default config file],
@@ -91,15 +103,29 @@ fi])dnl
 AC_ARG_ENABLE(sim-duplicate,
 [  --enable-sim-duplicate		Expand (duplicate) semantic functions.],
 [case "${enableval}" in
-  yes)	sim_dup="-e";;
+  yes)	sim_dup="-E";;
   no)	sim_dup="";;
   *)	AC_MSG_ERROR("--enable-sim-duplicate does not take a value"); sim_dup="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_dup" != x""; then
   echo "Setting duplicate flags = $sim_dup" 6>&1
-fi],[sim_dup="-e"
+fi],[sim_dup="-E"
 if test x"$silent" != x"yes"; then
   echo "Setting duplicate flags = $sim_dup" 6>&1
+fi])dnl
+
+AC_ARG_ENABLE(sim-jump,
+[  --enable-sim-jump		Jump between semantic code (instead of call/return).],
+[case "${enableval}" in
+  yes)	sim_jump="-J";;
+  no)	sim_jump="";;
+  *)	AC_MSG_ERROR("--enable-sim-jump does not take a value"); sim_jump="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_jump" != x""; then
+  echo "Setting jump flag = $sim_jump" 6>&1
+fi],[sim_jump="-E"
+if test x"$silent" != x"yes"; then
+  echo "Setting jump flag = $sim_jump" 6>&1
 fi])dnl
 
 AC_ARG_ENABLE(sim-filter,
@@ -107,11 +133,11 @@ AC_ARG_ENABLE(sim-filter,
 [case "${enableval}" in
   yes)	AC_MSG_ERROR("--enable-sim-filter must be specified with a rule to filter or no"); sim_filter="";;
   no)	sim_filter="";;
-  *)	sim_filter="-f $enableval";;
+  *)	sim_filter="-F $enableval";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_filter" != x""; then
   echo "Setting filter flags = $sim_filter" 6>&1
-fi],[sim_filter="-f 64"
+fi],[sim_filter="-F 32,f"
 if test x"$silent" != x"yes"; then
   echo "Setting filter flags = $sim_filter" 6>&1
 fi])dnl
@@ -120,16 +146,25 @@ AC_ARG_ENABLE(sim-icache,
 [  --enable-sim-icache=size		Specify instruction cache size.],
 icache=""
 [case "${enableval}" in
-  yes)		sim_icache="-r 1024"; icache="1024";;
-  define)	sim_icache="-r 1024 -R"; icache="1024";;
+  yes)		icache="1024"; sim_icache="-I $icache";;
   no)		sim_icache="";;
-  *)		sim_icache="-r ${enableval}"; icache="${enableval}";;
+  *) icache=1024
+     sim_icache="-"
+     for x in `echo "${enableval}" | sed -e "s/,/ /g"`; do
+       case "$x" in
+         define)	sim_icache="${sim_icache}R";;
+         semantic)	sim_icache="${sim_icache}C";;
+	 0*|1*|2*|3*|4*|5*|6*|7*|8*|9*)	icache=$x;;
+         *)		AC_MSG_ERROR("Unknown value $x for --enable-sim-icache"); sim_icache="";;
+       esac
+     done
+     sim_icache="${sim_icache}I $icache";;
 esac
 if test x"$silent" != x"yes" && test x"$icache" != x""; then
-  echo "Setting instruction cache size to $icache"
-fi],[sim_icache="-r 1024"
+  echo "Setting instruction cache size to $icache ($sim_icache)"
+fi],[sim_icache="-CI 1024"
 if test x"$silent" != x"yes"; then
-  echo "Setting instruction cache size to 1024"
+  echo "Setting instruction cache size to 1024 ($sim_icache)"
 fi])dnl
 
 AC_ARG_ENABLE(sim-inline,
@@ -219,13 +254,13 @@ fi])dnl
 AC_ARG_ENABLE(sim-smp,
 [  --enable-sim-smp=n			Specify number of processors to configure for.],
 [case "${enableval}" in
-  yes)	sim_smp="-DWITH_SMP=5";;
-  no)	sim_smp="-DWITH_SMP=0";;
-  *)	sim_smp="-DWITH_SMP=$enableval";;
+  yes)	sim_smp="-DWITH_SMP=5" ; sim_igen_smp="-N 5";;
+  no)	sim_smp="-DWITH_SMP=0" ; sim_igen_smp="-N 0";;
+  *)	sim_smp="-DWITH_SMP=$enableval" ; sim_igen_smp="-N $enableval";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_smp" != x""; then
   echo "Setting smp flags = $sim_smp" 6>&1
-fi],[sim_smp="-DWITH_SMP=5"
+fi],[sim_smp="-DWITH_SMP=5" ; sim_igen_smp="-N 5"
 if test x"$silent" != x"yes"; then
   echo "Setting smp flags = $sim_smp" 6>&1
 fi])dnl
@@ -500,10 +535,12 @@ AC_SUBST(AR)
 AC_PROG_RANLIB
 AC_SUBST(sim_cflags)
 AC_SUBST(sim_warnings)
+AC_SUBST(sim_line_nr)
 AC_SUBST(sim_config)
 AC_SUBST(sim_opcode)
 AC_SUBST(sim_switch)
 AC_SUBST(sim_dup)
+AC_SUBST(sim_jump)
 AC_SUBST(sim_filter)
 AC_SUBST(sim_icache)
 AC_SUBST(sim_inline)
@@ -512,6 +549,7 @@ AC_SUBST(sim_endian)
 AC_SUBST(sim_xor_endian)
 AC_SUBST(sim_hostendian)
 AC_SUBST(sim_smp)
+AC_SUBST(sim_igen_smp)
 AC_SUBST(sim_bitsize)
 AC_SUBST(sim_hostbitsize)
 AC_SUBST(sim_env)

@@ -1,6 +1,6 @@
 /*  This file is part of the program psim.
 
-    Copyright (C) 1994-1995, Andrew Cagney <cagney@highland.com.au>
+    Copyright (C) 1994-1996, Andrew Cagney <cagney@highland.com.au>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#include "cpu.h"
 #include "psim.h"
 #include "options.h"
 
@@ -41,8 +40,6 @@
 
 #include "../../gdb/defs.h"
 
-#include "devices.h"
-
 #include "../../gdb/remote-sim.h"
 #include "../../gdb/callback.h"
 
@@ -50,79 +47,30 @@
 /* Structures used by the simulator, for gdb just have static structures */
 
 static psim *simulator;
-static char *register_names[] = REGISTER_NAMES;
-static int print_info = 0;
+static device *root_device;
+static const char *register_names[] = REGISTER_NAMES;
 
 void
 sim_open (char *args)
 {
+  /* Note: The simulation is not created by sim_open() because
+     complete information is not yet available */
   /* trace the call */
   TRACE(trace_gdb, ("sim_open(args=%s) called\n", args ? args : "(null)"));
 
+  if (root_device != NULL)
+    printf_filtered("Warning - re-open of simulator leaks memory\n");
+  root_device = psim_tree();
+  simulator = NULL;
+
   if (args) {
     char **argv = buildargv(args);
-    int argp = 0;
-    int argc;
-    for (argc = 0; argv[argc]; argc++);
-
-    while (argp < argc) {
-      if (*argv[argp] != '-')
-	error ("Argument is not an option '%s'", argv[argp]);
-
-      else {
-	/* check arguments -- note, main.c also contains argument processing
-	   code for the standalone emulator.  */
-	char *p = argv[argp] + 1;
-	while (*p != '\0') {
-	  switch (*p) {
-	  default:
-	    printf_filtered("Usage:\n\ttarget sim [ -t <trace-option> ] [-m model] [-i] [-I]\n");
-	    trace_usage();
-	    error ("");
-	    break;
-	  case 't':
-	    if (p[1])
-	      trace_option(p+1);
-	    else {
-	      argp += 1;
-	      if (argv[argp] == NULL)
-		error("Missing <trace> option for -t\n");
-	      else
-		trace_option(argv[argp]);
-	    }
-	    break;
-	  case 'm':
-	    if (p[1])
-	      model_set(p+1);
-	    else {
-	      argp += 1;
-	      if (argv[argp] == NULL)
-		error("Missing <trace> option for -t\n");
-	      else
-		model_set(argv[argp]);
-	    }
-	    break;
-	  case 'i':
-	    print_info = 1;
-	    break;
-	  case 'I':
-	    current_model_issue = MODEL_ISSUE_PROCESS;
-	    print_info = 2;
-	    break;
-	  }
-	  p += 1;
-	}
-      }
-      argp += 1;
-    }
+    psim_options(root_device, argv);
+    freeargv(argv);
   }
 
   if (ppc_trace[trace_opts])
     print_options ();
-
-  /* do something */
-  TRACE(trace_tbd, ("sim_open() - TBD - should parse the arguments\n"));
-  TRACE(trace_tbd, ("sim_open() - TBD - can not create simulator here as do not have description of it\n"));
 }
 
 
@@ -130,10 +78,8 @@ void
 sim_close (int quitting)
 {
   TRACE(trace_gdb, ("sim_close(quitting=%d) called\n", quitting));
-  if (print_info)
-    psim_print_info (simulator, print_info);
-
-  /* nothing to do */
+  if (ppc_trace[trace_print_info] && simulator != NULL)
+    psim_print_info (simulator, ppc_trace[trace_print_info]);
 }
 
 
@@ -151,7 +97,7 @@ sim_load (char *prog, int from_tty)
 
   /* create the simulator */
   TRACE(trace_gdb, ("sim_load() - first time, create the simulator\n"));
-  simulator = psim_create(argv[0]);
+  simulator = psim_create(argv[0], root_device);
 
   /* bring in all the data section */
   psim_init(simulator);
@@ -323,9 +269,15 @@ sim_resume (int step, int siggnal)
 }
 
 void
-sim_do_command(char *cmd)
+sim_do_command (char *cmd)
 {
-  TRACE(trace_gdb, ("sim_do_commands(cmd=%s) called\n", cmd));
+  TRACE(trace_gdb, ("sim_do_commands(cmd=%s) called\n",
+		    cmd ? cmd : "(null)"));
+  if (cmd) {
+    char **argv = buildargv(cmd);
+    psim_options(root_device, argv);
+    freeargv(argv);
+  }
 }
 
 void
@@ -349,4 +301,9 @@ zalloc(long size)
 void zfree(void *data)
 {
   mfree(NULL, data);
+}
+
+void flush_stdoutput(void)
+{
+  gdb_flush (gdb_stdout);
 }

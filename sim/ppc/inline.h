@@ -22,154 +22,447 @@
 #ifndef _INLINE_H_
 #define _INLINE_H_
 
-#if SIM_ENDIAN_INLINE
-#if SIM_ENDIAN_INLINE == 2
-#define INLINE_SIM_ENDIAN static INLINE
+
+#define STATIC(TYPE) static TYPE
+
+
+/* sim_endian is always inlined */
+
+#if !defined(_SIM_ENDIAN_C_) && (SIM_ENDIAN_INLINE & INCLUDE_MODULE)
+# if (SIM_ENDIAN_INLINE & INLINE_MODULE)
+#  define INLINE_SIM_ENDIAN(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_SIM_ENDIAN(TYPE) static TYPE UNUSED
+# else
+#  define INLINE_SIM_ENDIAN(TYPE) static TYPE UNUSED
+#  define EXTERN_SIM_ENDIAN(TYPE) static TYPE UNUSED
+# endif
 #else
-#define INLINE_SIM_ENDIAN static
-#endif
+# define INLINE_SIM_ENDIAN(TYPE) TYPE
+# define EXTERN_SIM_ENDIAN(TYPE) TYPE
 #endif
 
-#if ICACHE_INLINE
-#if ICACHE_INLINE == 2
-#define INLINE_ICACHE static INLINE
+#if (SIM_ENDIAN_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_SIM_ENDIAN(TYPE) static INLINE TYPE
 #else
-#define INLINE_ICACHE static
-#endif
+# define STATIC_INLINE_SIM_ENDIAN(TYPE) static TYPE
 #endif
 
-#if CORE_INLINE
-#if CORE_INLINE == 2
-#define INLINE_CORE static INLINE
+
+/* bits is always inlined */
+
+#if !defined(_BITS_C_) && (BITS_INLINE & INCLUDE_MODULE)
+# if (BITS_INLINE & INLINE_MODULE)
+#  define INLINE_BITS(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_BITS(TYPE) static TYPE UNUSED
+# else
+#  define INLINE_BITS(TYPE) static TYPE UNUSED
+#  define EXTERN_BITS(TYPE) static TYPE UNUSED
+# endif
 #else
-#define INLINE_CORE static
-#endif
+# define INLINE_BITS(TYPE) TYPE
+# define EXTERN_BITS(TYPE) TYPE
 #endif
 
-#if VM_INLINE
-#if VM_INLINE == 2
-#define INLINE_VM static INLINE
+#if (BITS_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_BITS(TYPE) static INLINE TYPE
 #else
-#define INLINE_VM static
-#endif
+# define STATIC_INLINE_BITS(TYPE) static TYPE
 #endif
 
-#if CPU_INLINE
-#if CPU_INLINE == 2
-#define INLINE_CPU static INLINE
+
+/* core is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_CORE_C_) && (CORE_INLINE & INCLUDE_MODULE)
+# if (CORE_INLINE & INLINE_MODULE)
+#  define INLINE_CORE(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_CORE(TYPE) static TYPE UNUSED
 #else
-#define INLINE_CPU static
+#  define INLINE_CORE(TYPE) static TYPE UNUSED
+#  define EXTERN_CORE(TYPE) static TYPE UNUSED
 #endif
+#else
+# define INLINE_CORE(TYPE) TYPE
+# define EXTERN_CORE(TYPE) TYPE
 #endif
 
-#if MODEL_INLINE
-#if MODEL_INLINE == 2
-#define INLINE_MODEL static INLINE
+#if (CORE_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_CORE(TYPE) static INLINE TYPE
 #else
-#define INLINE_MODEL static
-#endif
-#define STATIC_MODEL static
-#define EXTERN_MODEL static
+# define STATIC_INLINE_CORE(TYPE) static TYPE
 #endif
 
-#if BITS_INLINE
-#if BITS_INLINE == 2
-#define INLINE_BITS static INLINE
+
+/* vm is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_VM_C_) && (VM_INLINE & INCLUDE_MODULE)
+# if (VM_INLINE & INLINE_MODULE)
+#  define INLINE_VM(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_VM(TYPE) static TYPE UNUSED
 #else
-#define INLINE_BITS static
+#  define INLINE_VM(TYPE) static TYPE UNUSED
+#  define EXTERN_VM(TYPE) static TYPE UNUSED
 #endif
+#else
+# define INLINE_VM(TYPE) TYPE
+# define EXTERN_VM(TYPE) TYPE
 #endif
 
-#if EVENTS_INLINE
-#if EVENTS_INLINE == 2
-#define INLINE_EVENTS static INLINE
+#if (VM_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_VM(TYPE) static INLINE TYPE
 #else
-#define INLINE_EVENTS static
-#endif
+# define STATIC_INLINE_VM(TYPE) static TYPE
 #endif
 
-#if MON_INLINE
-#if MON_INLINE == 2
-#define INLINE_MON static INLINE
+
+/* cpu is always inlined */
+
+#if !defined(_CPU_C_) && (CPU_INLINE & INCLUDE_MODULE)
+# if (CPU_INLINE & INLINE_MODULE)
+#  define INLINE_CPU(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_CPU(TYPE) static TYPE UNUSED
 #else
-#define INLINE_MON static
+#  define INLINE_CPU(TYPE) static TYPE UNUSED
+#  define EXTERN_CPU(TYPE) static TYPE UNUSED
 #endif
+#else
+# define INLINE_CPU(TYPE) TYPE
+# define EXTERN_CPU(TYPE) TYPE
 #endif
 
-#if REGISTERS_INLINE
-#if REGISTERS_INLINE == 2
-#define INLINE_REGISTERS static INLINE
+#if (CPU_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_CPU(TYPE) static INLINE TYPE
 #else
-#define INLINE_REGISTERS static
-#endif
+# define STATIC_INLINE_CPU(TYPE) static TYPE
 #endif
 
-#if INTERRUPTS_INLINE
-#if INTERRUPTS_INLINE == 2
-#define INLINE_INTERRUPTS static INLINE
+
+/* model is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_MODEL_C_) && (MODEL_INLINE & INCLUDE_MODULE)
+# if (MODEL_INLINE & INLINE_MODULE)
+#  define INLINE_MODEL(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_MODEL(TYPE) static TYPE UNUSED
 #else
-#define INLINE_INTERRUPTS static
+#  define INLINE_MODEL(TYPE) static TYPE UNUSED
+#  define EXTERN_MODEL(TYPE) static TYPE UNUSED
 #endif
+#else
+# define INLINE_MODEL(TYPE) TYPE
+# define EXTERN_MODEL(TYPE) TYPE
 #endif
 
-#if DEVICE_TREE_INLINE
-#if DEVICE_TREE_INLINE == 2
-#define INLINE_DEVICE_TREE static INLINE
+#if (MODEL_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_MODEL(TYPE) static INLINE TYPE
 #else
-#define INLINE_DEVICE_TREE static
-#endif
+# define STATIC_INLINE_MODEL(TYPE) static TYPE
 #endif
 
-#if DEVICES_INLINE
-#if DEVICES_INLINE == 2
-#define INLINE_DEVICES static INLINE
+
+/* events is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_EVENTS_C_) && (EVENTS_INLINE & INCLUDE_MODULE)
+# if (EVENTS_INLINE & INLINE_MODULE)
+#  define INLINE_EVENTS(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_EVENTS(TYPE) static TYPE UNUSED
 #else
-#define INLINE_DEVICES static
+#  define INLINE_EVENTS(TYPE) static TYPE UNUSED
+#  define EXTERN_EVENTS(TYPE) static TYPE UNUSED
 #endif
-#define STATIC_DEVICES static
+#else
+# define INLINE_EVENTS(TYPE) TYPE
+# define EXTERN_EVENTS(TYPE) TYPE
 #endif
 
-#if SPREG_INLINE
-#if SPREG_INLINE == 2
-#define INLINE_SPREG static INLINE
+#if (EVENTS_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_EVENTS(TYPE) static INLINE TYPE
 #else
-#define INLINE_SPREG static
-#endif
+# define STATIC_INLINE_EVENTS(TYPE) static TYPE
 #endif
 
-#if SEMANTICS_INLINE && !defined(_SEMANTICS_C_)
-#if SEMANTICS_INLINE == 2
-#define INLINE_SEMANTICS static INLINE
+
+/* mon is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_MON_C_) && (MON_INLINE & INCLUDE_MODULE)
+# if (MON_INLINE & INLINE_MODULE)
+#  define INLINE_MON(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_MON(TYPE) static TYPE UNUSED
 #else
-#define INLINE_SEMANTICS static
+#  define INLINE_MON(TYPE) static TYPE UNUSED
+#  define EXTERN_MON(TYPE) static TYPE UNUSED
 #endif
-#define STATIC_SEMANTICS static
+#else
+# define INLINE_MON(TYPE) TYPE
+# define EXTERN_MON(TYPE) TYPE
 #endif
 
-#if IDECODE_INLINE
-#if IDECODE_INLINE == 2
-#define INLINE_IDECODE static INLINE
+#if (MON_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_MON(TYPE) static INLINE TYPE
 #else
-#define INLINE_IDECODE static
-#endif
-#define STATIC_IDECODE static
+# define STATIC_INLINE_MON(TYPE) static TYPE
 #endif
 
-#if FUNCTION_UNIT_INLINE
-#if FUNCTION_UNIT_INLINE == 2
-#define INLINE_FUNCTION_UNIT static INLINE
+
+/* registers is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_REGISTERS_C_) && (REGISTERS_INLINE & INCLUDE_MODULE)
+# if (REGISTERS_INLINE & INLINE_MODULE)
+#  define INLINE_REGISTERS(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_REGISTERS(TYPE) static TYPE UNUSED
 #else
-#define INLINE_FUNCTION_UNIT static
+#  define INLINE_REGISTERS(TYPE) static TYPE UNUSED
+#  define EXTERN_REGISTERS(TYPE) static TYPE UNUSED
 #endif
+#else
+# define INLINE_REGISTERS(TYPE) TYPE
+# define EXTERN_REGISTERS(TYPE) TYPE
 #endif
 
-#if OPTIONS_INLINE
-#if OPTIONS_INLINE == 2
-#define INLINE_OPTIONS static INLINE
+#if (REGISTERS_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_REGISTERS(TYPE) static INLINE TYPE
 #else
-#define INLINE_OPTIONS static
-#endif
+# define STATIC_INLINE_REGISTERS(TYPE) static TYPE
 #endif
 
+
+/* interrupts is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_INTERRUPTS_C_) && (INTERRUPTS_INLINE & INCLUDE_MODULE)
+# if (INTERRUPTS_INLINE & INLINE_MODULE)
+#  define INLINE_INTERRUPTS(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_INTERRUPTS(TYPE) static TYPE UNUSED
+#else
+#  define INLINE_INTERRUPTS(TYPE) static TYPE UNUSED
+#  define EXTERN_INTERRUPTS(TYPE) static TYPE UNUSED
+#endif
+#else
+# define INLINE_INTERRUPTS(TYPE) TYPE
+# define EXTERN_INTERRUPTS(TYPE) TYPE
+#endif
+
+#if (INTERRUPTS_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_INTERRUPTS(TYPE) static INLINE TYPE
+#else
+# define STATIC_INLINE_INTERRUPTS(TYPE) static TYPE
+#endif
+
+
+/* device is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_DEVICE_C_) && (DEVICE_INLINE & INCLUDE_MODULE)
+# if (DEVICE_INLINE & INLINE_MODULE)
+#  define INLINE_DEVICE(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_DEVICE(TYPE) static TYPE UNUSED
+#else
+#  define INLINE_DEVICE(TYPE) static TYPE UNUSED
+#  define EXTERN_DEVICE(TYPE) static TYPE UNUSED
+#endif
+#else
+# define INLINE_DEVICE(TYPE) TYPE
+# define EXTERN_DEVICE(TYPE) TYPE
+#endif
+
+#if (DEVICE_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_DEVICE(TYPE) static INLINE TYPE
+#else
+# define STATIC_INLINE_DEVICE(TYPE) static TYPE
+#endif
+
+
+/* spreg is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_SPREG_C_) && (SPREG_INLINE & INCLUDE_MODULE)
+# if (SPREG_INLINE & INLINE_MODULE)
+#  define INLINE_SPREG(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_SPREG(TYPE) static TYPE UNUSED
+#else
+#  define INLINE_SPREG(TYPE) static TYPE UNUSED
+#  define EXTERN_SPREG(TYPE) static TYPE UNUSED
+#endif
+#else
+# define INLINE_SPREG(TYPE) TYPE
+# define EXTERN_SPREG(TYPE) TYPE
+#endif
+
+#if (SPREG_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_SPREG(TYPE) static INLINE TYPE
+#else
+# define STATIC_INLINE_SPREG(TYPE) static TYPE
+#endif
+
+
+/* semantics is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_SEMANTICS_C_) && (SEMANTICS_INLINE & INCLUDE_MODULE)
+# if (SEMANTICS_INLINE & INLINE_MODULE)
+#  define INLINE_SEMANTICS(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_SEMANTICS(TYPE) static TYPE UNUSED REGPARM
+#else
+#  define INLINE_SEMANTICS(TYPE) static TYPE UNUSED REGPARM
+#  define EXTERN_SEMANTICS(TYPE) static TYPE UNUSED REGPARM
+#endif
+#else
+# define INLINE_SEMANTICS(TYPE) TYPE REGPARM
+# define EXTERN_SEMANTICS(TYPE) TYPE REGPARM
+#endif
+
+#if (SEMANTICS_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_SEMANTICS(TYPE) static INLINE TYPE
+#else
+# define STATIC_INLINE_SEMANTICS(TYPE) static TYPE REGPARM
+#endif
+
+
+/* idecode is actually not inlined */
+
+#if defined(_INLINE_C_) && !defined(_IDECODE_C_) && (IDECODE_INLINE & INCLUDE_MODULE)
+# if (IDECODE_INLINE & INLINE_MODULE)
+#  define INLINE_IDECODE(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_IDECODE(TYPE) static TYPE UNUSED REGPARM
+#else
+#  define INLINE_IDECODE(TYPE) static TYPE UNUSED REGPARM
+#  define EXTERN_IDECODE(TYPE) static TYPE UNUSED REGPARM
+#endif
+#else
+# define INLINE_IDECODE(TYPE) TYPE REGPARM
+# define EXTERN_IDECODE(TYPE) TYPE REGPARM
+#endif
+
+#if (IDECODE_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_IDECODE(TYPE) static INLINE TYPE
+#else
+# define STATIC_INLINE_IDECODE(TYPE) static TYPE REGPARM
+#endif
+
+
+/* icache is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_ICACHE_C_) && (ICACHE_INLINE & INCLUDE_MODULE)
+# if (ICACHE_INLINE & INLINE_MODULE)
+#  define INLINE_ICACHE(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_ICACHE(TYPE) static TYPE UNUSED REGPARM
+#else
+#  define INLINE_ICACHE(TYPE) static TYPE UNUSED REGPARM
+#  define EXTERN_ICACHE(TYPE) static TYPE UNUSED REGPARM
+#endif
+#else
+# define INLINE_ICACHE(TYPE) TYPE REGPARM
+# define EXTERN_ICACHE(TYPE) TYPE REGPARM
+#endif
+
+#if (ICACHE_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_ICACHE(TYPE) static INLINE TYPE
+#else
+# define STATIC_INLINE_ICACHE(TYPE) static TYPE REGPARM
+#endif
+
+
+/* support is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_SUPPORT_C_) && (SUPPORT_INLINE & INCLUDE_MODULE)
+# if (SUPPORT_INLINE & INLINE_MODULE)
+#  define INLINE_SUPPORT(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_SUPPORT(TYPE) static TYPE UNUSED REGPARM
+#else
+#  define INLINE_SUPPORT(TYPE) static TYPE UNUSED REGPARM
+#  define EXTERN_SUPPORT(TYPE) static TYPE UNUSED REGPARM
+#endif
+#else
+# define INLINE_SUPPORT(TYPE) TYPE REGPARM
+# define EXTERN_SUPPORT(TYPE) TYPE REGPARM
+#endif
+
+#if (SUPPORT_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_SUPPORT(TYPE) static INLINE TYPE
+#else
+# define STATIC_INLINE_SUPPORT(TYPE) static TYPE REGPARM
+#endif
+
+
+/* options is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_OPTIONS_C_) && (OPTIONS_INLINE & INCLUDE_MODULE)
+# if (OPTIONS_INLINE & INLINE_MODULE)
+#  define INLINE_OPTIONS(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_OPTIONS(TYPE) static TYPE UNUSED
+#else
+#  define INLINE_OPTIONS(TYPE) static TYPE UNUSED
+#  define EXTERN_OPTIONS(TYPE) static TYPE UNUSED
+#endif
+#else
+# define INLINE_OPTIONS(TYPE) TYPE
+# define EXTERN_OPTIONS(TYPE) TYPE
+#endif
+
+#if (OPTIONS_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_OPTIONS(TYPE) static INLINE TYPE
+#else
+# define STATIC_INLINE_OPTIONS(TYPE) static TYPE
+#endif
+
+
+/* os_emul is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_OS_EMUL_C_) && (OS_EMUL_INLINE & INCLUDE_MODULE)
+# if (OS_EMUL_INLINE & INLINE_MODULE)
+#  define INLINE_OS_EMUL(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_OS_EMUL(TYPE) static TYPE UNUSED
+#else
+#  define INLINE_OS_EMUL(TYPE) static TYPE UNUSED
+#  define EXTERN_OS_EMUL(TYPE) static TYPE UNUSED
+#endif
+#else
+# define INLINE_OS_EMUL(TYPE) TYPE
+# define EXTERN_OS_EMUL(TYPE) TYPE
+#endif
+
+#if (OS_EMUL_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_OS_EMUL(TYPE) static INLINE TYPE
+#else
+# define STATIC_INLINE_OS_EMUL(TYPE) static TYPE
+#endif
+
+
+/* psim is actually not inlined */
+
+#if defined(_INLINE_C_) && !defined(_PSIM_C_) && (PSIM_INLINE & INCLUDE_MODULE)
+# if (PSIM_INLINE & INLINE_MODULE)
+#  define INLINE_PSIM(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_PSIM(TYPE) static TYPE UNUSED
+#else
+#  define INLINE_PSIM(TYPE) static TYPE UNUSED
+#  define EXTERN_PSIM(TYPE) static TYPE UNUSED
+#endif
+#else
+# define INLINE_PSIM(TYPE) TYPE
+# define EXTERN_PSIM(TYPE) TYPE
+#endif
+
+#if (PSIM_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_PSIM(TYPE) static INLINE TYPE
+#else
+# define STATIC_INLINE_PSIM(TYPE) static TYPE
+#endif
+
+
+/* cap is inlined with inline.c */
+
+#if defined(_INLINE_C_) && !defined(_CAP_C_) && (CAP_INLINE & INCLUDE_MODULE)
+# if (CAP_INLINE & INLINE_MODULE)
+#  define INLINE_CAP(TYPE) static INLINE TYPE UNUSED
+#  define EXTERN_CAP(TYPE) static TYPE UNUSED
+#else
+#  define INLINE_CAP(TYPE) static TYPE UNUSED
+#  define EXTERN_CAP(TYPE) static TYPE UNUSED
+#endif
+#else
+# define INLINE_CAP(TYPE) TYPE
+# define EXTERN_CAP(TYPE) TYPE
+#endif
+
+#if (CAP_INLINE & INLINE_LOCALS)
+# define STATIC_INLINE_CAP(TYPE) static INLINE TYPE
+#else
+# define STATIC_INLINE_CAP(TYPE) static TYPE
+#endif
 
 #endif
