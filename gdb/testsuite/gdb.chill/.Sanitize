@@ -56,6 +56,8 @@ pr-6632.exp
 pr-8134.exp
 pr-8136.ch
 pr-8136.exp
+pr-8405.ch
+pr-8405.exp
 result.ch
 result.exp
 string.ch
