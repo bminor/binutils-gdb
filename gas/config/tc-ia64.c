@@ -24,7 +24,6 @@
 
   - optional operands
   - directives:
-	.alias
 	.eb
 	.estate
 	.lb
@@ -164,6 +163,11 @@ static void ia64_float_to_chars_littleendian
   PARAMS ((char *, LITTLENUM_TYPE *, int));
 static void (*ia64_float_to_chars)
   PARAMS ((char *, LITTLENUM_TYPE *, int));
+
+static struct hash_control *alias_hash;
+static struct hash_control *alias_name_hash;
+static struct hash_control *secalias_hash;
+static struct hash_control *secalias_name_hash;
 
 /* Characters which always start a comment.  */
 const char comment_chars[] = "";
@@ -4384,13 +4388,6 @@ dot_psr (dummy)
 }
 
 static void
-dot_alias (dummy)
-     int dummy ATTRIBUTE_UNUSED;
-{
-  as_bad (".alias not implemented yet");
-}
-
-static void
 dot_ln (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
@@ -4935,6 +4932,7 @@ const pseudo_typeS md_pseudo_table[] =
     { "msb", dot_byteorder, 1 },
     { "psr", dot_psr, 0 },
     { "alias", dot_alias, 0 },
+    { "secalias", dot_alias, 1 },
     { "ln", dot_ln, 0 },		/* source line info (for debugging) */
 
     { "xdata1", dot_xdata, 1 },
@@ -6577,6 +6575,11 @@ md_begin ()
   /* Make sure fucntion pointers get initialized.  */
   target_big_endian = -1;
   dot_byteorder (TARGET_BYTES_BIG_ENDIAN);
+
+  alias_hash = hash_new ();
+  alias_name_hash = hash_new ();
+  secalias_hash = hash_new ();
+  secalias_name_hash = hash_new ();
 
   pseudo_func[FUNC_DTP_MODULE].u.sym =
     symbol_new (".<dtpmod>", undefined_section, FUNC_DTP_MODULE,
@@ -10736,4 +10739,170 @@ ia64_check_label (symbolS *label)
       S_SET_EXTERNAL (label);
       input_line_pointer++;
     }
+}
+
+/* Used to remember where .alias and .secalias directives are seen. We
+   will rename symbol and section names when we are about to output
+   the relocatable file.  */
+struct alias
+{
+  char *file;		/* The file where the directive is seen.  */
+  unsigned int line;	/* The line number the directive is at.  */
+  const char *name;	/* The orignale name of the symbol.  */
+};
+
+/* Called for .alias and .secalias directives. If SECTION is 1, it is
+   .secalias. Otherwise, it is .alias.  */
+static void
+dot_alias (int section)
+{
+  char *name, *alias;
+  char delim;
+  char *end_name;
+  int len;
+  const char *error_string;
+  struct alias *h;
+  const char *a;
+  struct hash_control *ahash, *nhash;
+  const char *kind;
+
+  name = input_line_pointer;
+  delim = get_symbol_end ();
+  end_name = input_line_pointer;
+  *end_name = delim;
+
+  if (name == end_name)
+    {
+      as_bad (_("expected symbol name"));
+      discard_rest_of_line ();
+      return;
+    }
+
+  SKIP_WHITESPACE ();
+
+  if (*input_line_pointer != ',')
+    {
+      *end_name = 0;
+      as_bad (_("expected comma after \"%s\""), name);
+      *end_name = delim;
+      ignore_rest_of_line ();
+      return;
+    }
+
+  input_line_pointer++;
+  *end_name = 0;
+
+  /* We call demand_copy_C_string to check if alias string is valid.
+     There should be a closing `"' and no `\0' in the string.  */
+  alias = demand_copy_C_string (&len);
+  if (alias == NULL)
+    {
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* Make a copy of name string.  */
+  len = strlen (name) + 1;
+  obstack_grow (&notes, name, len);
+  name = obstack_finish (&notes);
+
+  if (section)
+    {
+      kind = "section";
+      ahash = secalias_hash;
+      nhash = secalias_name_hash;
+    }
+  else
+    {
+      kind = "symbol";
+      ahash = alias_hash;
+      nhash = alias_name_hash;
+    }
+
+  /* Check if alias has been used before.  */
+  h = (struct alias *) hash_find (ahash, alias);
+  if (h)
+    {
+      if (strcmp (h->name, name))
+	as_bad (_("`%s' is already the alias of %s `%s'"),
+		alias, kind, h->name);
+      goto out;
+    }
+
+  /* Check if name already has an alias.  */
+  a = (const char *) hash_find (nhash, name);
+  if (a)
+    {
+      if (strcmp (a, alias))
+	as_bad (_("%s `%s' already has an alias `%s'"), kind, name, a);
+      goto out;
+    }
+
+  h = (struct alias *) xmalloc (sizeof (struct alias));
+  as_where (&h->file, &h->line);
+  h->name = name;
+  
+  error_string = hash_jam (ahash, alias, (PTR) h);
+  if (error_string)
+    {
+      as_fatal (_("inserting \"%s\" into %s alias hash table failed: %s"),
+		alias, kind, error_string);
+      goto out;
+    }
+
+  error_string = hash_jam (nhash, name, (PTR) alias);
+  if (error_string)
+    {
+      as_fatal (_("inserting \"%s\" into %s name hash table failed: %s"),
+		alias, kind, error_string);
+out:
+      obstack_free (&notes, name);
+      obstack_free (&notes, alias);
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+/* It renames the original symbol name to its alias.  */
+static void
+do_alias (const char *alias, PTR value)
+{
+  struct alias *h = (struct alias *) value;
+  symbolS *sym = symbol_find (h->name);
+
+  if (sym == NULL)
+    as_warn_where (h->file, h->line,
+		   _("symbol `%s' aliased to `%s' is not used"),
+		   h->name, alias);
+    else
+      S_SET_NAME (sym, (char *) alias);
+}
+
+/* Called from write_object_file.  */
+void
+ia64_adjust_symtab (void)
+{
+  hash_traverse (alias_hash, do_alias);
+}
+
+/* It renames the original section name to its alias.  */
+static void
+do_secalias (const char *alias, PTR value)
+{
+  struct alias *h = (struct alias *) value;
+  segT sec = bfd_get_section_by_name (stdoutput, h->name);
+
+  if (sec == NULL)
+    as_warn_where (h->file, h->line,
+		   _("section `%s' aliased to `%s' is not used"),
+		   h->name, alias);
+  else
+    sec->name = alias;
+}
+
+/* Called from write_object_file.  */
+void
+ia64_frob_file (void)
+{
+  hash_traverse (secalias_hash, do_secalias);
 }

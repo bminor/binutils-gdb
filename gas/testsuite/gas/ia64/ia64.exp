@@ -48,4 +48,5 @@ if [istarget "ia64-*"] then {
     run_dump_test "global"
     run_dump_test "secname"
     run_dump_test "unwind"
+    run_dump_test "alias"
 }

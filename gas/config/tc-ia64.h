@@ -48,6 +48,12 @@ struct ia64_segment_info_type
 
 #define TC_SEGMENT_INFO_TYPE		struct ia64_segment_info_type
 
+extern void ia64_adjust_symtab PARAMS ((void));
+#define tc_adjust_symtab()	ia64_adjust_symtab ()
+
+extern void ia64_frob_file PARAMS ((void));
+#define tc_frob_file()		ia64_frob_file ()
+
 /* We need to set the default object file format in ia64_init and not in
    md_begin.  This is because parse_args is called before md_begin, and we
    do not want md_begin to wipe out the flag settings set by options parsed in

@@ -1,3 +1,24 @@
+2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
+
+	* config/tc-ia64.c (alias_hash): New.
+	(alias_name_hash): New.
+	(secalias_hash): New.
+	(secalias_name_hash): New.
+	(md_pseudo_table): Add "secalias".
+	(md_begin): Initialize alias_hash, alias_name_hash,
+	secalias_hash and secalias_name_hash.
+	(struct alias): New.
+	(dot_alias): Implement .alias and .secalias directives.
+	(do_alias): New.
+	(ia64_adjust_symtab): New.
+	(do_secalias): New.
+	(ia64_frob_file): New.
+
+	* config/tc-ia64.h (ia64_adjust_symtab): New.
+	(tc_adjust_symtab): Defined.
+	(ia64_frob_file): New.
+	(tc_frob_file): Defined.
+
 2003-05-07  Dmitry Diky  <diwil@mail.ru>
 
 	* tc-msp430.c: Add missing lines to known cpus list.

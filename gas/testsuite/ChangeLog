@@ -1,3 +1,10 @@
+2003-05-07  H.J. Lu <hongjiu.lu@intel.com>
+
+	* gas/ia64/ia64.exp: Add alias.
+
+	* gas/ia64/alias.s: New. 
+	* gas/ia64/alias.d: Likewise.
+
 2003-05-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/mips/abs.d, gas/mips/add.d, gas/mips/and.d,
