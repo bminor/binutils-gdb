@@ -1,3 +1,9 @@
+2005-03-31  Jerome Guitton  <guitton@gnat.com>
+
+	* configure.in: Check for basename.
+	* configure: Regenerate.
+	* config.in: Ditto.
+
 2005-03-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (SEG_Fixup): New.
