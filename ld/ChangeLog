@@ -1,3 +1,32 @@
+Fri Oct 27 17:59:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/aix.em: Include ldctor.h.
+	(gld${EMULATION_NAME}_after_open): New static function.
+	(gld${EMULATION_NAME}_before_allocation): Call find_relocs.
+	(gld${EMULATION_NAME}_find_relocs): New static function.
+	(gld${EMULATION_NAME}_find_exp_assignment): New static function.
+	(ld_${EMULATION_NAME}_emulation): Use new after_open function.
+	* scripttempl/aix.sc: Use CONSTRUCTORS in .data.
+	* ldctor.c (struct set_info): Move definition into ldctor.h.
+	(struct set_element): Likewise.
+	(sets): Make non-static.
+	(ldctor_add_set_entry): Add name parameter.  Save it in the new
+	set element.
+	(ldctor_build_sets): Avoid being called twice.  Pass set element
+	name to lang_add_reloc.
+	* ldctor.h (struct set_info): Move definition here from ldctor.c.
+	(struct set_element): Likewise.  Add new field name.
+	(sets): Declare.
+	(ldctor_add_set_entry): Declare new name parameter.
+	* ldwrite.c (build_link_order): Don't insist that either name or
+	section be NULL in a lang_reloc_statement.
+	* ldmain.c (add_to_set): Pass NULL to ldctor_add_new_set_entry for
+	new name parameter.
+	(constructor_callback): Pass name to ldctor_add_new_set_entry for
+	new name parameter.
+	
+	* ldmisc.c (demangle): Fix indentation.  Remove a leading period.
+
 Thu Oct 26 22:22:49 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: Add PowerMac target support, generate config.h.

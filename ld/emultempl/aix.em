@@ -41,12 +41,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldmisc.h"
 #include "ldexp.h"
 #include "ldlang.h"
+#include "ldctor.h"
 
 static void gld${EMULATION_NAME}_before_parse PARAMS ((void));
 static int gld${EMULATION_NAME}_parse_args PARAMS ((int, char **));
+static void gld${EMULATION_NAME}_after_open PARAMS ((void));
 static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
 static void gld${EMULATION_NAME}_read_file PARAMS ((const char *, boolean));
 static void gld${EMULATION_NAME}_free PARAMS ((PTR));
+static void gld${EMULATION_NAME}_find_relocs
+  PARAMS ((lang_statement_union_type *));
+static void gld${EMULATION_NAME}_find_exp_assignment PARAMS ((etree_type *));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 
 /* The file alignment required for each section.  */
@@ -313,6 +318,48 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
   return 1;
 }
 
+/* This is called after the input files have been opened.  */
+
+static void
+gld${EMULATION_NAME}_after_open ()
+{
+  boolean r;
+  struct set_info *p;
+
+  /* Call ldctor_build_sets, after pretending that this is a
+     relocateable link.  We do this because AIX requires relocation
+     entries for all references to symbols, even in a final
+     executable.  */
+  r = link_info.relocateable;
+  link_info.relocateable = true;
+  ldctor_build_sets ();
+  link_info.relocateable = r;
+
+  /* For each set, record the size, so that the XCOFF backend can
+     output the correct csect length.  */
+  for (p = sets; p != (struct set_info *) NULL; p = p->next)
+    {
+      bfd_size_type size;
+
+      /* If the symbol is defined, we may have been invoked from
+	 collect, and the sets may already have been built, so we do
+	 not do anything.  */
+      if (p->h->type == bfd_link_hash_defined
+	  || p->h->type == bfd_link_hash_defweak)
+	continue;
+
+      if (p->reloc != BFD_RELOC_CTOR)
+	{
+	  /* Handle this if we need to.  */
+	  abort ();
+	}
+
+      size = (p->count + 2) * 4;
+      if (! bfd_xcoff_link_record_set (output_bfd, &link_info, p->h, size))
+	einfo ("%F%P: bfd_xcoff_link_record_set failed: %E\n");
+    }
+}
+
 /* This is called after the sections have been attached to output
    sections, but before any sizes or addresses have been set.  */
 
@@ -327,6 +374,12 @@ gld${EMULATION_NAME}_before_allocation ()
     gld${EMULATION_NAME}_read_file (fl->name, true);
   for (fl = export_files; fl != NULL; fl = fl->next)
     gld${EMULATION_NAME}_read_file (fl->name, false);
+
+  /* Track down all relocations called for by the linker script (these
+     are typically constructor/destructor entries created by
+     CONSTRUCTORS) and let the backend know it will need to create
+     .loader relocs for them.  */
+  lang_for_each_statement (gld${EMULATION_NAME}_find_relocs);
 
   /* We need to build LIBPATH from the -L arguments.  If any -rpath
      arguments were used, though, we use -rpath instead, as a GNU
@@ -592,6 +645,76 @@ gld${EMULATION_NAME}_free (p)
   free (p);
 }
 
+/* This is called by the before_allocation routine via
+   lang_for_each_statement.  It looks for relocations and assignments
+   to symbols.  */
+
+static void
+gld${EMULATION_NAME}_find_relocs (s)
+     lang_statement_union_type *s;
+{
+  if (s->header.type == lang_reloc_statement_enum)
+    {
+      lang_reloc_statement_type *rs;
+
+      rs = &s->reloc_statement;
+      if (rs->name == NULL)
+	einfo ("%F%P: only relocations against symbols are permitted\n");
+      if (! bfd_xcoff_link_count_reloc (output_bfd, &link_info, rs->name))
+	einfo ("%F%P: bfd_xcoff_link_count_reloc failed: %E\n");
+    }
+
+  if (s->header.type == lang_assignment_statement_enum)
+    gld${EMULATION_NAME}_find_exp_assignment (s->assignment_statement.exp);
+}
+
+/* Look through an expression for an assignment statement.  */
+
+static void
+gld${EMULATION_NAME}_find_exp_assignment (exp)
+     etree_type *exp;
+{
+  struct bfd_link_hash_entry *h;
+
+  switch (exp->type.node_class)
+    {
+    case etree_provide:
+      h = bfd_link_hash_lookup (link_info.hash, exp->assign.dst,
+				false, false, false);
+      if (h == NULL)
+	break;
+      /* Fall through.  */
+    case etree_assign:
+      if (strcmp (exp->assign.dst, ".") != 0)
+	{
+	  if (! bfd_xcoff_record_link_assignment (output_bfd, &link_info,
+						  exp->assign.dst))
+	    einfo ("%P%F: failed to record assignment to %s: %E\n",
+		   exp->assign.dst);
+	}
+      gld${EMULATION_NAME}_find_exp_assignment (exp->assign.src);
+      break;
+
+    case etree_binary:
+      gld${EMULATION_NAME}_find_exp_assignment (exp->binary.lhs);
+      gld${EMULATION_NAME}_find_exp_assignment (exp->binary.rhs);
+      break;
+
+    case etree_trinary:
+      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.cond);
+      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.lhs);
+      gld${EMULATION_NAME}_find_exp_assignment (exp->trinary.rhs);
+      break;
+
+    case etree_unary:
+      gld${EMULATION_NAME}_find_exp_assignment (exp->unary.child);
+      break;
+
+    default:
+      break;
+    }
+}
+
 static char *
 gld${EMULATION_NAME}_get_script(isfile)
      int *isfile;
@@ -652,7 +775,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   syslib_default,
   hll_default,
   after_parse_default,
-  after_open_default,
+  gld${EMULATION_NAME}_after_open,
   after_allocation_default,
   set_output_arch_default,
   ldemul_default_target,
