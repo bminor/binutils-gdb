@@ -1,3 +1,89 @@
+Wed May 20 08:18:18 1992  Ken Raeburn  (Raeburn@Cygnus.COM)
+
+	* section.c (bfd_*_symbol, bfd_*_section): Initialize statically.
+	Make the symbols unmodifiable.
+	(bfd_section_init): Deleted.
+	* init.c (bfd_init): Don't call bfd_section_init.
+
+	* section.c (bfd_set_section_contents): Ensure that range to be
+	written is within section boundaries.
+	(bfd_get_section_contents): Likewise.  Don't bother dispatching if
+	size is zero.
+
+	* libbfd.c (bfd_xmalloc): Text of error message should be const.
+
+	* coff-i960.c (howto_table): Deleted.
+	(howto_rellong, howto_iprmed, howto_optcall): New vars;
+	interesting entries from old howto_table.
+	(RTYPE2HOWTO): Adjusted to use switch.
+	(coff_i960_reloc_type_lookup): New function.
+
+	* coffcode.h (coff_new_section_hook): Allocate storage for aux
+	records for section symbol.
+	(make_abs_section): Unused; deleted.
+	(renumber_symbols): Re-order symbols so undefined symbols come
+	last, as COFF format desires.
+	(coff_write_symbol): Put C_FILE symbols in debug section always.
+	(coff_section_symbol): New function; creates a symbol with the
+	same name as a section, and sets up aux records for it.
+	(coff_add_missing_symbols): New function; adds section symbols to
+	symbol table if they aren't there already.  Should someday also
+	add a dummy C_FILE symbol if none is present.
+	(coff_write_object_contents): Add missing symbols before preparing
+	symbol table to be written.
+	(coff_slurp_reloc_table): Verify that symbol indices read in are
+	in a reasonable range.
+	* libcoff-in.h (struct coff_tdata): New field conv_table_size.
+	(obj_conv_table_size): Accessor macro.
+
+	* bout.c (b_out_reloc_type_lookup): New function.  Handles three
+	reloc types on i960.
+
+	* bfd-in.h (bfd_get_section_name): New macro.  Like
+	bfd_section_name, but returns rvalue, not lvalue.
+	(bfd_get_section_vma, bfd_get_section_alignment): Similar.
+	(bfd_get_section_flags): Now returns rvalue.
+
+	* reloc.c (enum bfd_reloc_code_real): Add several new values, some
+	general, some specific to sparc or i960.
+
+	* aoutx.h (set_section_contents): Set VMA for each section based
+	on previous section.  If text section VMA doesn't appear to have
+	been set, make a best guess from the type of file.
+
+	* aout-target.h (MY_reloc_howto_type_lookup): Define as zero if
+	not defined.
+	(MY(vec)): Initialize reloc_type_lookup field.
+
+	* aoutx.h (howto_table_*): Export as aout_#_*_howto_table.
+	(bfd_error_trap, bfd_error_vector): Extern, not common.
+
+	* aoutf1.h (sunos4_reloc_type_lookup): New function.  Handles a
+	few types of relocs for sparc; will need enhancement.
+
+	* bout.c (callj_callback): Use DEFUN macro in definition.
+	* coff-i960.c (optcall_callback): Likewise.
+
+	* targets.c (bfd_target): Added fields reloc_type_lookup and
+	_bfd_make_debug_symbol.  Also minor comment changes.
+	* syms.c (bfd_make_debug_symbol): New dispatching macro.
+	* reloc.c (bfd_reloc_type_lookup): Take a BFD ptr as arg rather
+	than arch info, and dispatch with BFD_SEND.  Callers changed.
+	* archures.c (struct bfd_arch_info): Deleted field
+	reloc_type_lookup.
+	* cpu-*.c: Don't initialize that field.
+
+	* bfd-in.h (enum bfd_error): Add new value "bad_value".
+	* bfd.c (bfd_errmsgs): Now const; added entry for bad_value.
+	(bfd_errmsg): Now returns ptr to const.
+	* bfd-in.h (bfd_errmsg): Fix prototype.
+
+	* cache.c (BFD_CACHE_MAX_OPEN): Fix typo in doc.
+	* reloc.c (bfd_generic_relax_section): Ditto.
+
+	* section.c (Section Output doc): Improve description of use of
+	output_section and output_offset.
+
 Tue May 19 23:42:10 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
 
 	* sco-core.c: new file from net.
