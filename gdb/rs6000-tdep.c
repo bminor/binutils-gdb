@@ -1032,6 +1032,13 @@ rs6000_fix_call_dummy (char *dummyname, CORE_ADDR pc, CORE_ADDR fun,
     }
 }
 
+/* All the ABI's require 16 byte alignment.  */
+static CORE_ADDR
+rs6000_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  return (addr & -16);
+}
+
 /* Pass the arguments in either registers, or in the stack. In RS/6000,
    the first eight words of the argument list (that might be less than
    eight parameters if some parameters occupy more than one word) are
@@ -1362,13 +1369,6 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 	      TYPE_LENGTH (valtype));
     }
 }
-
-/* Keep structure return address in this variable.
-   FIXME:  This is a horrid kludge which should not be allowed to continue
-   living.  This only allows a single nested call to a structure-returning
-   function.  Come on, guys!  -- gnu@cygnus.com, Aug 92  */
-
-static CORE_ADDR rs6000_struct_return_address;
 
 /* Return whether handle_inferior_event() should proceed through code
    starting at PC in function NAME when stepping.
@@ -1989,18 +1989,12 @@ rs6000_stab_reg_to_regnum (int num)
 }
 
 /* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function.
-
-   In RS/6000, struct return addresses are passed as an extra parameter in r3.
-   In function return, callee is not responsible of returning this address
-   back.  Since gdb needs to find it, we will store in a designated variable
-   `rs6000_struct_return_address'.  */
+   subroutine will return.  */
 
 static void
 rs6000_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (3, addr);
-  rs6000_struct_return_address = addr;
 }
 
 /* Write into appropriate registers a function return value
@@ -2058,9 +2052,20 @@ rs6000_store_return_value (struct type *type, char *valbuf)
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 static CORE_ADDR
-rs6000_extract_struct_value_address (char *regbuf)
+rs6000_extract_struct_value_address (struct regcache *regcache)
 {
-  return rs6000_struct_return_address;
+  /* FIXME: cagney/2002-09-26: PR gdb/724: When making an inferior
+     function call GDB knows the address of the struct return value
+     and hence, should not need to call this function.  Unfortunately,
+     the current hand_function_call() code only saves the most recent
+     struct address leading to occasional calls.  The code should
+     instead maintain a stack of such addresses (in the dummy frame
+     object).  */
+  /* NOTE: cagney/2002-09-26: Return 0 which indicates that we've
+     really got no idea where the return value is being stored.  While
+     r3, on function entry, contained the address it will have since
+     been reused (scratch) and hence wouldn't be valid */
+  return 0;
 }
 
 /* Return whether PC is in a dummy function call.
@@ -2887,6 +2892,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
   set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
+  set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_push_return_address (gdbarch, ppc_push_return_address);
@@ -2910,7 +2916,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_push_arguments (gdbarch, rs6000_push_arguments);
 
   set_gdbarch_store_struct_return (gdbarch, rs6000_store_struct_return);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
+  set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
   set_gdbarch_pop_frame (gdbarch, rs6000_pop_frame);
 
   set_gdbarch_skip_prologue (gdbarch, rs6000_skip_prologue);

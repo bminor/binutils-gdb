@@ -1,5 +1,15 @@
 2002-09-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* rs6000-tdep.c (rs6000_extract_struct_value_address): Return 0.
+	(rs6000_struct_return_address): Delete variable.
+	(rs6000_store_struct_return): Update.
+	(rs6000_gdbarch_init): Set extract_struct_value_address instead of
+	deprecated_extract_struct_value_address.
+	(rs6000_frame_align): New function.
+	(rs6000_gdbarch_init): Set frame_align.
+
+2002-09-26  Andrew Cagney  <ac131313@redhat.com>
+
 	From Grace Sainsbury <graces@redhat.com>:
 	* Makefile.in (gdbtk-main.o): New target.
 	(gdb.o): New target.
