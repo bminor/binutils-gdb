@@ -534,7 +534,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	buildsym.c c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	coffread.c \
 	complaints.c completer.c corefile.c cp-valprint.c dbxread.c \
-	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
+	demangle.c dictionary.c dwarfread.c \
+	dwarf2read.c elfread.c environ.c eval.c \
 	event-loop.c event-top.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
 	findvar.c regcache.c gdbarch.c arch-utils.c gdbtypes.c osabi.c \
@@ -636,6 +637,7 @@ dcache_h = dcache.h
 defs_h = defs.h $(config_h) $(gdb_locale_h) $(gdb_signals_h) $(ansidecl_h) \
 	$(libiberty_h) $(progress_h) $(bfd_h) $(tui_h) $(ui_file_h) $(xm_h) \
 	$(nm_h) $(tm_h) $(fopen_same_h) $(gdbarch_h) $(arch_utils_h)
+dictionary_h = dictionary.h
 doublest_h = doublest.h $(floatformat_h)
 dst_h = dst.h
 dwarf2cfi_h = dwarf2cfi.h
@@ -825,7 +827,7 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
-	charset.o \
+	charset.o dictionary.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o linespec.o infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \
@@ -1555,7 +1557,7 @@ buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(complaints_h) \
 	$(gdb_string_h) $(expression_h) $(language_h) $(bcache_h) \
 	$(filenames_h) $(macrotab_h) $(demangle_h) $(buildsym_h) \
-	$(stabsread_h)
+	$(stabsread_h) $(dictionary_h)
 builtin-regs.o: builtin-regs.c $(defs_h) $(builtin_regs_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(gdb_assert_h)
 c-lang.o: c-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
@@ -1630,6 +1632,8 @@ dcache.o: dcache.c $(defs_h) $(dcache_h) $(gdbcmd_h) $(gdb_string_h) \
 delta68-nat.o: delta68-nat.c $(defs_h)
 demangle.o: demangle.c $(defs_h) $(command_h) $(gdbcmd_h) $(demangle_h) \
 	$(gdb_string_h)
+dictionary.o: dictionary.c $(defs_h) $(dictionary_h) $(gdb_obstack_h) \
+	$(symtab_h) $(buildsym_h) $(gdb_assert_h)
 dink32-rom.o: dink32-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(symfile_h) $(inferior_h) $(regcache_h)
 doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) \
@@ -1816,7 +1820,7 @@ irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 jv-lang.o: jv-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(gdbtypes_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdb_string_h) $(value_h) $(c_lang_h) \
-	$(jv_lang_h) $(gdbcore_h)
+	$(jv_lang_h) $(gdbcore_h) $(dictionary_h)
 jv-typeprint.o: jv-typeprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(demangle_h) $(jv_lang_h) $(gdb_string_h) $(typeprint_h) \
 	$(c_lang_h) $(cp_abi_h)
@@ -1898,7 +1902,7 @@ mdebugread.o: mdebugread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(stabsread_h) $(complaints_h) $(demangle_h) $(gdb_assert_h) \
 	$(coff_sym_h) $(coff_symconst_h) $(gdb_stat_h) $(gdb_string_h) \
 	$(bfd_h) $(coff_ecoff_h) $(libaout_h) $(aout_aout64_h) \
-	$(aout_stab_gnu_h) $(expression_h) $(language_h)
+	$(aout_stab_gnu_h) $(expression_h) $(language_h) $(dictionary_h)
 mem-break.o: mem-break.c $(defs_h) $(symtab_h) $(breakpoint_h) $(inferior_h) \
 	$(target_h)
 memattr.o: memattr.c $(defs_h) $(command_h) $(gdbcmd_h) $(memattr_h) \
@@ -2588,5 +2592,10 @@ xdr_ptrace.o: vx-share/xdr_ptrace.c $(defs_h) vx-share/vxTypes.h \
 xdr_rdb.o: vx-share/xdr_rdb.c $(defs_h) vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/xdr_rdb.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_rdb.c
+
+
+# Compiles and then runs a subset of the tests.
+carlton: all
+	cd testsuite; ./carlton_runtest
 
 ### end of the gdb Makefile.in.

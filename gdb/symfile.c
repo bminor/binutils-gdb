@@ -1955,7 +1955,7 @@ deduce_language_from_filename (char *filename)
    symtab->blockvector
    symtab->dirname
    symtab->free_code
-   symtab->free_ptr
+   symtab->free_func
    possibly free_named_symtabs (symtab->filename);
  */
 

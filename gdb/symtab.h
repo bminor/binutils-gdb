@@ -25,6 +25,7 @@
 
 /* Opaque declarations.  */
 struct obstack;
+struct dictionary;
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
@@ -373,6 +374,10 @@ struct block
 
   struct block *superblock;
 
+  /* This is used to store the symbols in the block.  */
+
+  struct dictionary *dict;
+
   /* Version of GCC used to compile the function corresponding
      to this block, or 0 if not compiled with GCC.  When possible,
      GCC should be compatible with the native compiler, or if that
@@ -418,6 +423,7 @@ struct block
 #define BLOCK_END(bl)		(bl)->endaddr
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
+#define BLOCK_DICT(bl)		(bl)->dict
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
 #define BLOCK_HASHTABLE(bl)	(bl)->hashtable
 
@@ -868,10 +874,13 @@ struct symtab
   }
   free_code;
 
-  /* Pointer to one block of storage to be freed, if nonzero.  */
-  /* This is IN ADDITION to the action indicated by free_code.  */
+  /* A function to call to free space, if necessary.  This is IN
+     ADDITION to the action indicated by free_code.  */
 
-  char *free_ptr;
+  /* NOTE: carlton/2002-09-20: This is currently only used by
+     jv-lang.c.  */
+
+  void (*free_func)(struct symtab *symtab);
 
   /* Total number of lines found in source file.  */
 

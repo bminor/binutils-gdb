@@ -53,6 +53,7 @@
 #include "complaints.h"
 #include "demangle.h"
 #include "gdb_assert.h"
+#include "dictionary.h"
 
 /* These are needed if the tm.h file does not contain the necessary
    mips specific definitions.  */
@@ -336,9 +337,9 @@ static struct symbol *new_symbol (char *);
 
 static struct type *new_type (char *);
 
-static struct block *new_block (int);
+static struct block *new_block (void);
 
-static struct symtab *new_symtab (char *, int, int, struct objfile *);
+static struct symtab *new_symtab (char *, int, struct objfile *);
 
 static struct linetable *new_linetable (int);
 
@@ -349,8 +350,6 @@ static struct type *parse_type (int, union aux_ext *, unsigned int, int *,
 
 static struct symbol *mylookup_symbol (char *, struct block *, namespace_enum,
 				       enum address_class);
-
-static struct block *shrink_block (struct block *, struct symtab *);
 
 static void sort_blocks (struct symtab *);
 
@@ -535,7 +534,6 @@ static struct parse_stack
 
     int blocktype;
 
-    int maxsyms;		/* Max symbols in this block. */
     struct type *cur_type;	/* Type we parse fields for. */
     int cur_field;		/* Field number in cur_type. */
     CORE_ADDR procadr;		/* Start addres of this procedure */
@@ -849,7 +847,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       SYMBOL_TYPE (s) = lookup_function_type (t);
 
       /* Create and enter a new lexical context */
-      b = new_block (top_stack->maxsyms);
+      b = new_block ();
       SYMBOL_BLOCK_VALUE (s) = b;
       BLOCK_FUNCTION (b) = s;
       BLOCK_START (b) = BLOCK_END (b) = sh->value;
@@ -1160,7 +1158,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	}
 
       top_stack->blocktype = stBlock;
-      b = new_block (top_stack->maxsyms);
+      b = new_block ();
       BLOCK_START (b) = sh->value + top_stack->procadr;
       BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
       top_stack->cur_block = b;
@@ -1180,7 +1178,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  /* Finished with procedure */
 	  struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
 	  struct mips_extra_func_info *e;
-	  struct block *b;
+	  struct block *b = top_stack->cur_block;
 	  struct type *ftype = top_stack->cur_type;
 	  int i;
 
@@ -1199,9 +1197,6 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  e->numargs = top_stack->numargs;
 	  e->pdr.framereg = -1;
 	  add_symbol (s, top_stack->cur_block);
-
-	  /* Reallocate symbols, saving memory */
-	  b = shrink_block (top_stack->cur_block, top_stack->cur_st);
 
 	  /* f77 emits proc-level with address bounds==[0,0],
 	     So look for such child blocks, and patch them.  */
@@ -1257,7 +1252,6 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	     displacement from the procedure`s start address of the
 	     end of this block. */
 	  BLOCK_END (top_stack->cur_block) = sh->value + top_stack->procadr;
-	  shrink_block (top_stack->cur_block, top_stack->cur_st);
 	}
       else if (sh->sc == scText && top_stack->blocktype == stNil)
 	{
@@ -1938,7 +1932,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
       SYMBOL_TYPE (s) = lookup_function_type (mdebug_type_int);
       add_symbol (s, top_stack->cur_block);
       /* Wont have symbols for this one */
-      b = new_block (2);
+      b = new_block ();
       SYMBOL_BLOCK_VALUE (s) = b;
       BLOCK_FUNCTION (b) = s;
       BLOCK_START (b) = pr->adr;
@@ -4015,17 +4009,15 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 
       /* How many symbols will we need */
       /* FIXME, this does not count enum values. */
-      f_max = pst->n_global_syms + pst->n_static_syms;
       if (fh == 0)
 	{
 	  maxlines = 0;
-	  st = new_symtab ("unknown", f_max, 0, pst->objfile);
+	  st = new_symtab ("unknown", 0, pst->objfile);
 	}
       else
 	{
-	  f_max += fh->csym + fh->cpd;
 	  maxlines = 2 * fh->cline;
-	  st = new_symtab (pst->filename, 2 * f_max, maxlines, pst->objfile);
+	  st = new_symtab (pst->filename, maxlines, pst->objfile);
 
 	  /* The proper language was already determined when building
 	     the psymtab, use it.  */
@@ -4045,7 +4037,6 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
       BLOCK_START (top_stack->cur_block) = pst->textlow;
       BLOCK_END (top_stack->cur_block) = 0;
       top_stack->blocktype = stFile;
-      top_stack->maxsyms = 2 * f_max;
       top_stack->cur_type = 0;
       top_stack->procadr = 0;
       top_stack->numargs = 0;
@@ -4129,10 +4120,6 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
       top_stack->cur_block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (top_stack->cur_st),
 						GLOBAL_BLOCK);
       top_stack->blocktype = stFile;
-      top_stack->maxsyms
-	= (debug_info->symbolic_header.isymMax
-	   + debug_info->symbolic_header.ipdMax
-	   + debug_info->symbolic_header.iextMax);
 
       ext_ptr = PST_PRIVATE (pst)->extern_tab;
       for (i = PST_PRIVATE (pst)->extern_count; --i >= 0; ext_ptr++)
@@ -4421,40 +4408,41 @@ mylookup_symbol (char *name, register struct block *block,
 }
 
 
-/* Add a new symbol S to a block B.
-   Infrequently, we will need to reallocate the block to make it bigger.
-   We only detect this case when adding to top_stack->cur_block, since
-   that's the only time we know how big the block is.  FIXME.  */
+/* Add a new symbol S to a block B.  */
 
 static void
 add_symbol (struct symbol *s, struct block *b)
 {
   int nsyms = BLOCK_NSYMS (b)++;
-  struct block *origb;
+  struct block *newb;
   struct parse_stack *stackp;
 
-  if (b == top_stack->cur_block &&
-      nsyms >= top_stack->maxsyms)
-    {
-      complain (&block_overflow_complaint, SYMBOL_NAME (s));
-      /* In this case shrink_block is actually grow_block, since
-         BLOCK_NSYMS(b) is larger than its current size.  */
-      origb = b;
-      b = shrink_block (top_stack->cur_block, top_stack->cur_st);
+  newb = dict_add_symbol_block (BLOCK_DICT (b), s);
 
+  /* Update all the pointers to b that we can find.  */
+  if (newb != b)
+    {
+      int i;
+      struct blockvector *bv = BLOCKVECTOR (top_stack->cur_st);
+
+      if (BLOCK_FUNCTION (newb)
+	  && SYMBOL_BLOCK_VALUE (BLOCK_FUNCTION (newb)) == b)
+	SYMBOL_BLOCK_VALUE (BLOCK_FUNCTION (newb)) = newb;
+      for (i = 0; i < BLOCKVECTOR_NBLOCKS (bv); i++)
+	if (BLOCKVECTOR_BLOCK (bv, i) == b)
+	  BLOCKVECTOR_BLOCK (bv, i) = newb;
+	else if (BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, i)) == b)
+	  BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, i)) = newb;
       /* Now run through the stack replacing pointers to the
-         original block.  shrink_block has already done this
-         for the blockvector and BLOCK_FUNCTION.  */
+         original block.  */
       for (stackp = top_stack; stackp; stackp = stackp->next)
 	{
-	  if (stackp->cur_block == origb)
+	  if (stackp->cur_block == b)
 	    {
-	      stackp->cur_block = b;
-	      stackp->maxsyms = BLOCK_NSYMS (b);
+	      stackp->cur_block = newb;
 	    }
 	}
     }
-  BLOCK_SYM (b, nsyms) = s;
 }
 
 /* Add a new block B to a symtab S */
@@ -4577,21 +4565,24 @@ sort_blocks (struct symtab *s)
 /* Constructor/restructor/destructor procedures */
 
 /* Allocate a new symtab for NAME.  Needs an estimate of how many symbols
-   MAXSYMS and linenumbers MAXLINES we'll put in it */
+   and linenumbers MAXLINES we'll put in it */
 
 static struct symtab *
-new_symtab (char *name, int maxsyms, int maxlines, struct objfile *objfile)
+new_symtab (char *name, int maxlines, struct objfile *objfile)
 {
   struct symtab *s = allocate_symtab (name, objfile);
+  struct block *global_block;
+  struct block *static_block;
 
   LINETABLE (s) = new_linetable (maxlines);
 
   /* All symtabs must have at least two blocks */
   BLOCKVECTOR (s) = new_bvect (2);
-  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK) = new_block (maxsyms);
-  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK) = new_block (maxsyms);
-  BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)) =
-    BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
+  global_block = new_block ();
+  static_block = new_block ();
+  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK) = global_block;
+  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK) = static_block;
+  BLOCK_SUPERBLOCK (static_block) = global_block;
 
   s->free_code = free_linetable;
   s->debugformat = obsavestring ("ECOFF", 5,
@@ -4673,48 +4664,15 @@ new_bvect (int nblocks)
   return bv;
 }
 
-/* Allocate and zero a new block of MAXSYMS symbols */
+/* Allocate and zero a new block.  Set its BLOCK_DICT.  */
 
 static struct block *
-new_block (int maxsyms)
+new_block (void)
 {
-  int size = sizeof (struct block) + (maxsyms - 1) * sizeof (struct symbol *);
+  struct block *retval = xzalloc (sizeof (struct block));
+  BLOCK_DICT (retval) = dict_create_block_expandable (retval);
 
-  return (struct block *) xzalloc (size);
-}
-
-/* Ooops, too big. Shrink block B in symtab S to its minimal size.
-   Shrink_block can also be used by add_symbol to grow a block.  */
-
-static struct block *
-shrink_block (struct block *b, struct symtab *s)
-{
-  struct block *new;
-  struct blockvector *bv = BLOCKVECTOR (s);
-  int i;
-
-  /* Just reallocate it and fix references to the old one */
-
-  new = (struct block *) xrealloc ((void *) b,
-				   (sizeof (struct block)
-				    + ((BLOCK_NSYMS (b) - 1)
-				       * sizeof (struct symbol *))));
-
-  /* FIXME: Not worth hashing this block as it's built.  */
-  /* All callers should have created the block with new_block (), which
-     would mean it was not previously hashed.  Make sure.  */
-  gdb_assert (BLOCK_HASHTABLE (new) == 0);
-
-  /* Should chase pointers to old one.  Fortunately, that`s just
-     the block`s function and inferior blocks */
-  if (BLOCK_FUNCTION (new) && SYMBOL_BLOCK_VALUE (BLOCK_FUNCTION (new)) == b)
-    SYMBOL_BLOCK_VALUE (BLOCK_FUNCTION (new)) = new;
-  for (i = 0; i < BLOCKVECTOR_NBLOCKS (bv); i++)
-    if (BLOCKVECTOR_BLOCK (bv, i) == b)
-      BLOCKVECTOR_BLOCK (bv, i) = new;
-    else if (BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, i)) == b)
-      BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, i)) = new;
-  return new;
+  return retval;
 }
 
 /* Create a new symbol with printname NAME */
@@ -4842,7 +4800,7 @@ fixup_sigtramp (void)
   TYPE_TARGET_TYPE (SYMBOL_TYPE (s)) = mdebug_type_void;
 
   /* Need a block to allocate MIPS_EFI_SYMBOL_NAME in */
-  b = new_block (1);
+  b = new_block ();
   SYMBOL_BLOCK_VALUE (s) = b;
   BLOCK_START (b) = sigtramp_address;
   BLOCK_END (b) = sigtramp_end;

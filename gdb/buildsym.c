@@ -41,6 +41,7 @@
 #include "filenames.h"		/* For DOSish file names */
 #include "macrotab.h"
 #include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
+#include "dictionary.h"
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
 /**/
@@ -294,6 +295,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   BLOCK_END (block) = end;
   /* Superblock filled in when containing block is made */
   BLOCK_SUPERBLOCK (block) = NULL;
+  BLOCK_DICT (block) = dict_create_block (block);
 
   BLOCK_GCC_COMPILED (block) = processing_gcc_compilation;
 
@@ -1012,7 +1014,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	      symtab->dirname = NULL;
 	    }
 	  symtab->free_code = free_linetable;
-	  symtab->free_ptr = NULL;
+	  symtab->free_func = NULL;
 
 	  /* Use whatever language we have been using for this
 	     subfile, not the one that was deduced in allocate_symtab

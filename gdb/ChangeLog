@@ -1,3 +1,45 @@
+2002-09-20  David Carlton  <carlton@math.stanford.edu>
+
+	* jv-lang.c (get_java_class_symtab): Use xmalloc to allocate
+	GLOBAL_BLOCK rather than xmmalloc.
+	(free_class_block): Use xfree rather than xmfree.
+	* mdebugread.c: #include "dictionary.h"
+	(new_block): Remove argument.  Initialize BLOCK_DICT.
+	(parse_symbol): Update call to new_block.
+	(new_symtab): Ditto.
+	(fixup_sigtramp): Ditto.
+	Delete MAXSYMS member of struct parse_stack.
+	(psymtab_to_symtab_1): Don't set maxsyms.
+	(new_symtab): Remove maxsyms argument.
+	(psymtab_to_symtab_1): Update call to new_symtab.
+	(shrink_block): Delete function.
+	(add_symbol): Add symbols via dict_add_symbol_block.
+	* jv-lang.c (add_class_symtab_symbol): Add symbols via
+	dict_add_symbol_block.
+	Delete variable class_symtab_space.
+	* Makefile.in (jv-lang.o): Add dictionary_h.
+	* jv-lang.c: #include "dictionary.h"
+	* symmisc.c (free_symtab): Call free_func rather than freeing free_ptr.
+	* jv-lang.c (get_java_class_symtab): Initialize free_func rather
+	than free_ptr.
+	(free_class_block): New function.
+	(add_class_symtab_symbol): Delete reference to free_ptr.
+	* buildsym.c (end_symtab): Initialize free_func rather than free_ptr.
+	* symtab.h (struct symtab): Replace free_ptr by free_func.
+	* jv-lang.c (get_java_class_symtab): Add DICT_BLOCK assignments.
+	* Makefile.in (buildsym.o): Add dictionary_h.
+	* buildsym.c (finish_block): Initialize BLOCK_DICT (block).
+	#include "dictionary.h"
+	* symtab.h (struct block): Add 'dict' member.
+	(BLOCK_DICT): New macro.
+	* dictionary.c: New file.
+	* dictionary.h: New file.
+	* Makefile.in (SFILES): Add dictionary.c
+	(dictionary_h): New variable.
+	(COMMON_OBS): Add dictionary.o.
+	(dictionary.o): New rule.
+	(carlton): New rule.
+
 2002-09-18  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.h: Delete BLOCK_SHOULD_SORT.

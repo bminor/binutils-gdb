@@ -33,6 +33,7 @@
 #include "c-lang.h"
 #include "jv-lang.h"
 #include "gdbcore.h"
+#include "dictionary.h"
 #include <ctype.h>
 
 struct type *java_int_type;
@@ -83,9 +84,7 @@ get_dynamics_objfile (void)
 
 static struct symtab *class_symtab = NULL;
 
-/* Maximum number of class in class_symtab before relocation is needed. */
-
-static int class_symtab_space;
+static void free_class_block (struct symtab *symtab);
 
 static struct symtab *
 get_java_class_symtab (void)
@@ -111,17 +110,16 @@ get_java_class_symtab (void)
       BLOCK_END (bl) = 0;
       BLOCK_FUNCTION (bl) = NULL;
       BLOCK_SUPERBLOCK (bl) = NULL;
+      BLOCK_DICT (bl) = dict_create_block (bl);
       BLOCK_GCC_COMPILED (bl) = 0;
       BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
 
       /* Allocate GLOBAL_BLOCK.  This has to be relocatable. */
-      class_symtab_space = 128;
-      bl = xmmalloc (objfile->md,
-		     sizeof (struct block)
-		     + ((class_symtab_space - 1) * sizeof (struct symbol *)));
+      bl = xmalloc (sizeof (struct block));
       *bl = *BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+      BLOCK_DICT (bl) = dict_create_block_expandable (bl);
       BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
-      class_symtab->free_ptr = (char *) bl;
+      class_symtab->free_func = free_class_block;
     }
   return class_symtab;
 }
@@ -131,20 +129,10 @@ add_class_symtab_symbol (struct symbol *sym)
 {
   struct symtab *symtab = get_java_class_symtab ();
   struct blockvector *bv = BLOCKVECTOR (symtab);
-  struct block *bl = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-  if (BLOCK_NSYMS (bl) >= class_symtab_space)
-    {
-      /* Need to re-allocate. */
-      class_symtab_space *= 2;
-      bl = xmrealloc (symtab->objfile->md, bl,
-		      sizeof (struct block)
-		      + ((class_symtab_space - 1) * sizeof (struct symbol *)));
-      class_symtab->free_ptr = (char *) bl;
-      BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
-    }
-
-  BLOCK_SYM (bl, BLOCK_NSYMS (bl)) = sym;
-  BLOCK_NSYMS (bl) = BLOCK_NSYMS (bl) + 1;
+  BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)
+    = dict_add_symbol_block (BLOCK_DICT (BLOCKVECTOR_BLOCK (bv,
+							    GLOBAL_BLOCK)),
+			     sym);
 }
 
 static struct symbol *add_class_symbol (struct type *type, CORE_ADDR addr);
@@ -164,6 +152,17 @@ add_class_symbol (struct type *type, CORE_ADDR addr)
   SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
   SYMBOL_VALUE_ADDRESS (sym) = addr;
   return sym;
+}
+
+/* Free the dynamic symbols block.  */
+static void
+free_class_block (struct symtab *symtab)
+{
+  struct blockvector *bv = BLOCKVECTOR (symtab);
+  struct block *bl = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+
+  dict_free (BLOCK_DICT (bl));
+  xfree (bl);
 }
 #endif
 

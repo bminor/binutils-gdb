@@ -138,7 +138,7 @@ free_symtab (register struct symtab *s)
       /* Also free the linetable.  */
 
     case free_linetable:
-      /* Everything will be freed either by our `free_ptr'
+      /* Everything will be freed either by our `free_func'
          or by some other symtab, except for our linetable.
          Free that now.  */
       if (LINETABLE (s))
@@ -146,9 +146,9 @@ free_symtab (register struct symtab *s)
       break;
     }
 
-  /* If there is a single block of memory to free, free it.  */
-  if (s->free_ptr != NULL)
-    xmfree (s->objfile->md, s->free_ptr);
+  /* If there is other memory to free, free it.  */
+  if (s->free_func != NULL)
+    s->free_func (s);
 
   /* Free source-related stuff */
   if (s->line_charpos != NULL)
