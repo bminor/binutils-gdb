@@ -1,3 +1,8 @@
+2003-09-05  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/frv/reloc1.[sd]: New test.
+	* gas/frv/allinsn.exp: Run it.
+
 2003-09-04  Nick Clifton  <nickc@redhat.com>
 
 	* gas/v850/v850e1.s: New test source file.

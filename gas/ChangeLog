@@ -1,3 +1,7 @@
+2003-09-05  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-frv.c (md_pcrel_from_section): Heed TC_FORCE_RELOCATION.
+
 2003-09-04  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-v850.c (set_machine): Accept v850e1 machine number.

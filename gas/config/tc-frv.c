@@ -1164,16 +1164,11 @@ md_convert_frag (abfd, sec, fragP)
 long
 md_pcrel_from_section (fixP, sec)
      fixS * fixP;
-     segT   sec;
+     segT   sec ATTRIBUTE_UNUSED;
 {
-  if (fixP->fx_addsy != (symbolS *) NULL
-      && (! S_IS_DEFINED (fixP->fx_addsy)
-	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
-    {
-      /* The symbol is undefined (or is defined but not in this section).
-	 Let the linker figure it out.  */
-      return 0;
-    }
+  /* Make no adjustment for relocations that will be written out.  */
+  if (TC_FORCE_RELOCATION (fixP))
+    return 0;
 
   return (fixP->fx_frag->fr_address + fixP->fx_where) & ~1;
 }
