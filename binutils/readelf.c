@@ -473,7 +473,7 @@ print_vma (vma, mode)
 	  printf ("%lx", vma);
 #else
 	  if (_bfd_int64_high (vma))
-	    printf ("%lx%lx", _bfd_int64_high (vma), _bfd_int64_low (vma));
+	    printf ("%lx%8.8lx", _bfd_int64_high (vma), _bfd_int64_low (vma));
 	  else
 	    printf ("%lx", _bfd_int64_low (vma));
 #endif

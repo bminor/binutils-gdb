@@ -1,3 +1,7 @@
+2001-09-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (print_vma): Print 8 digits of low hex value.
+
 2001-09-24  Andreas Jaeger  <aj@suse.de>
 
 	* nlmconv.c: Fix warnings about unused attributes and function
