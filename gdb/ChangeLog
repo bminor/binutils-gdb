@@ -1,5 +1,10 @@
 2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* hppa-tdep.c (hppa_gdbarch_init): Set sizeof(long_double) to 128.
+	Document type sizes for hppa*-*-hpux* compilers available to me.
+
+2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* hppam3-nat.c: Delete obsolete file.
 	* hppab-nat.c: Delete obsolete file.
 	* Makefile.in: Remove references.
