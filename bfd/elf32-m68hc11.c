@@ -55,7 +55,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M68HC11_NONE",	/* name */
 	 false,			/* partial_inplace */
@@ -214,9 +214,51 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
 	 0,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  EMPTY_HOWTO (11),
-  EMPTY_HOWTO (12),
-  EMPTY_HOWTO (13),
+  /* A 24 bit relocation */
+  HOWTO (R_M68HC11_24,	        /* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 24,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_M68HC11_24",	/* name */
+	 false,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+  
+  /* A 16-bit low relocation */
+  HOWTO (R_M68HC11_LO16,        /* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_M68HC11_LO16",	/* name */
+	 false,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* A page relocation */
+  HOWTO (R_M68HC11_PAGE,        /* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_M68HC11_PAGE",	/* name */
+	 false,			/* partial_inplace */
+	 0x00ff,		/* src_mask */
+	 0x00ff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
   EMPTY_HOWTO (14),
   EMPTY_HOWTO (15),
   EMPTY_HOWTO (16),
@@ -276,6 +318,10 @@ static const struct m68hc11_reloc_map m68hc11_reloc_map[] = {
 
   {BFD_RELOC_VTABLE_INHERIT, R_M68HC11_GNU_VTINHERIT},
   {BFD_RELOC_VTABLE_ENTRY, R_M68HC11_GNU_VTENTRY},
+
+  {BFD_RELOC_M68HC11_LO16, R_M68HC11_LO16},
+  {BFD_RELOC_M68HC11_PAGE, R_M68HC11_PAGE},
+  {BFD_RELOC_M68HC11_24, R_M68HC11_24},
 
   {BFD_RELOC_M68HC11_RL_JUMP, R_M68HC11_RL_JUMP},
   {BFD_RELOC_M68HC11_RL_GROUP, R_M68HC11_RL_GROUP},
