@@ -5120,7 +5120,7 @@ pa_build_unwind_subspace (call_info)
   int i, reloc;
   char c, *p;
 
-  if (nowseg != text_section)
+  if (now_seg != text_section)
     return;
 
   if (bfd_get_arch_info (stdoutput)->bits_per_address == 32)
