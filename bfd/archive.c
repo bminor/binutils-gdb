@@ -28,7 +28,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ 
  * $Log$
- * Revision 1.1  1991/03/21 21:10:42  gumby
+ * Revision 1.2  1991/04/03 22:09:43  steve
+ * Various noise
+ *
+ * Revision 1.1.1.1  1991/03/21  21:10:42  gumby
+ * Back from Intel with Steve
+ *
+ * Revision 1.1  1991/03/21  21:10:42  gumby
  * Initial revision
  *
  * Revision 1.3  1991/03/16  05:55:25  rich
@@ -259,7 +265,7 @@ snarf_ar_hdr (abfd)
 
 	    namelen = 0;
 
-	    while (namelen < ar_maxnamelen(abfd) &&
+	    while (namelen < (unsigned)ar_maxnamelen(abfd) &&
 		   ( hdr.ar_name[namelen] != 0 &&
 		    hdr.ar_name[namelen] != ' ' &&
 		    hdr.ar_name[namelen] != ar_padchar(abfd))) {
@@ -903,7 +909,7 @@ _bfd_write_archive_contents (arch)
     
     BFD_SEND (arch, _bfd_truncate_arname,(arch, 
 					  current->filename,
-					  arch_hdr(current)));
+					 (char *) arch_hdr(current)));
 
       
     }
@@ -959,14 +965,16 @@ _bfd_write_archive_contents (arch)
 	return false;
       }
     if (bfd_seek (current, 0L, SEEK_SET) != 0L) goto syserr;
-    while (remaining) {
-      unsigned int amt = ((remaining <= DEFAULT_BUFFERSIZE) ? remaining :
-			  DEFAULT_BUFFERSIZE);
-
-      if (bfd_read (buffer, amt, 1, current) != amt) goto syserr;
-      if (bfd_write (buffer, amt, 1, arch)   != amt) goto syserr;
-      remaining -= amt;
-    }
+    while (remaining) 
+	{
+	  unsigned int amt = DEFAULT_BUFFERSIZE;
+	  if (amt > remaining) {
+	    amt = remaining;
+	  }
+	  if (bfd_read (buffer, amt, 1, current) != amt) goto syserr;
+	  if (bfd_write (buffer, amt, 1, arch)   != amt) goto syserr;
+	  remaining -= amt;
+	}
     if ((arelt_size (current) % 2) == 1) bfd_write ("\n", 1, 1, arch);
   }
 return true;
@@ -1003,52 +1011,49 @@ compute_and_write_armap (arch, elength)
        current != (bfd *)NULL;
        current = current->next, elt_no++) 
       {
-    if ((bfd_check_format (current, bfd_object) == true)
-	&& ((bfd_get_file_flags (current) & HAS_SYMS))) {
-      asymbol **syms;
-      unsigned int storage;
-      unsigned int symcount;
-      unsigned int src_count;
+	if ((bfd_check_format (current, bfd_object) == true)
+	    && ((bfd_get_file_flags (current) & HAS_SYMS))) {
+	  asymbol **syms;
+	  unsigned int storage;
+	  unsigned int symcount;
+	  unsigned int src_count;
 
-      storage = get_symtab_upper_bound (current);
-      if (storage == 0) {
-      nosymz:
-	fprintf (stderr, "%s: Symflags set but there are none?\n",
-		 bfd_get_filename (current));
-	exit (1);
-      }
-      syms = (asymbol **) zalloc (storage);
-      if (syms == NULL) {
-	bfd_error = no_memory;	/* FIXME -- memory leak */
-	return false;
-      }
-      symcount = bfd_canonicalize_symtab (current, syms);
-      if (symcount == 0) goto nosymz;
+	  storage = get_symtab_upper_bound (current);
+	  if (storage != 0) {
 
-      /* Now map over all the symbols, picking out the ones we want */
-      for (src_count = 0; src_count <symcount; src_count++) {
-	flagword flags = (syms[src_count])->flags;
-	if ((flags & BSF_GLOBAL) ||
-	    (flags & BSF_FORT_COMM)) {
+	    syms = (asymbol **) zalloc (storage);
+	    if (syms == NULL) {
+	      bfd_error = no_memory; /* FIXME -- memory leak */
+	      return false;
+	    }
+	    symcount = bfd_canonicalize_symtab (current, syms);
 
-	  /* This symbol will go into the archive header */
-	  if (orl_count == orl_max) 
-	      {
-	    orl_max *= 2;
-	    map = (struct orl *) realloc ((char *) map,
-					  orl_max * sizeof (struct orl));
+
+	    /* Now map over all the symbols, picking out the ones we want */
+	    for (src_count = 0; src_count <symcount; src_count++) {
+	      flagword flags = (syms[src_count])->flags;
+	      if ((flags & BSF_GLOBAL) ||
+		  (flags & BSF_FORT_COMM)) {
+
+		/* This symbol will go into the archive header */
+		if (orl_count == orl_max) 
+		    {
+		      orl_max *= 2;
+		      map = (struct orl *) realloc ((char *) map,
+						    orl_max * sizeof (struct orl));
+		    }
+
+		(map[orl_count]).name = &((syms[src_count])->name);
+		(map[orl_count]).pos = elt_no;
+		(map[orl_count]).namidx = stridx;
+
+		stridx += strlen ((syms[src_count])->name) + 1;
+		++orl_count;
+	      }
+	    }
 	  }
-
-	  (map[orl_count]).name = &((syms[src_count])->name);
-	  (map[orl_count]).pos = elt_no;
-	  (map[orl_count]).namidx = stridx;
-
-	  stridx += strlen ((syms[src_count])->name) + 1;
-	  ++orl_count;
 	}
       }
-    }
-  }
   /* OK, now we have collected all the data, let's write them out */
   if (!BFD_SEND (arch, write_armap,
 		 (arch, elength, map, orl_count, stridx))) {
