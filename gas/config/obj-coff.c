@@ -1239,6 +1239,8 @@ obj_coff_section (ignore)
 		 bfd_section_name (stdoutput, sec),
 		 bfd_errmsg (bfd_get_error ()));
     }
+
+  demand_empty_rest_of_line ();
 }
 
 void
@@ -3285,11 +3287,8 @@ obj_coff_section (ignore)
      int ignore;
 {
   /* Strip out the section name */
-  char *section_name;
-  char *section_name_end;
+  char *section_name, *name;
   char c;
-  int argp;
-  unsigned int len;
   unsigned int exp;
   long flags;
 
@@ -3310,26 +3309,21 @@ obj_coff_section (ignore)
 
   section_name = input_line_pointer;
   c = get_symbol_end ();
-  section_name_end = input_line_pointer;
 
-  len = section_name_end - section_name;
-  input_line_pointer++;
-  SKIP_WHITESPACE ();
+  name = xmalloc (input_line_pointer - section_name + 1);
+  strcpy (name, section_name);
 
-  argp = 0;
-  if (c == ',')
-    argp = 1;
-  else if (*input_line_pointer == ',')
-    {
-      argp = 1;
-      ++input_line_pointer;
-      SKIP_WHITESPACE ();
-    }
+  *input_line_pointer = c;
 
   exp = 0;
   flags = 0;
-  if (argp)
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == ',')
     {
+      ++input_line_pointer;
+      SKIP_WHITESPACE ();
+
       if (*input_line_pointer != '"')
 	exp = get_absolute_expression ();
       else
@@ -3360,11 +3354,11 @@ obj_coff_section (ignore)
 	}
     }
 
-  subseg_new (section_name, (subsegT) exp);
+  subseg_new (name, (subsegT) exp);
 
   segment_info[now_seg].scnhdr.s_flags |= flags;
 
-  *section_name_end = c;
+  demand_empty_rest_of_line ();
 }
 
 

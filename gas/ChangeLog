@@ -1,3 +1,10 @@
+Wed Apr 24 11:28:38 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-coff.c (obj_coff_section): BFD_ASSEMBLER version:
+	call demand_empty_rest_of_line.  Non BFD_ASSEMBLER version:
+	correct handling of input line pointer, and call
+	demand_empty_rest_of_line.
+
 Mon Apr 22 18:02:37 1996  Doug Evans  <dje@blues.cygnus.com>
 
 	* config/tc-sparc.c (in_bitfield_range): New static function.
