@@ -27,63 +27,13 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+binutils.all
 config
 configure.in
 lib
-nm.all
 
 # are executed as a /bin/sh shell script after everything else is
 # done.
 
 Do-last:
 
-echo Thawing away the \"chill\"...
-
-# Don't try to clean directories here, as the 'mv' command will fail.
-# Also, grep fails on NFS mounted directories.
-if ( echo $* | grep keep\-chill > /dev/null ) ; then
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
-			echo Keeping chill stuff in $i
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-chill $i > /dev/null) ; then
-			echo Thawing the \"chill\" out of $i...
-			cp $i new
-			sed '/start\-sanitize\-chill/,/end-\sanitize\-chill/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				echo Caching $i in .Recover...
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-	echo Thawing the \"chill\" out of configure.in...
-	cp configure.in new
-	sed -e '
-	  s/gdb.t30//g
-	  s/gdb.t31//g
-	' < configure.in > new
-	if [ -n "${safe}" -a ! -f .Recover/configure.in ] ; then
-		echo Caching configure.in in .Recover...
-		mv configure.in .Recover
-	fi
-	mv new configure.in
-	echo Thawing the \"chill\" out of Makefile.in...
-	cp Makefile.in new
-	sed -e '
-	  /CHILL=/d
-	  /CHILLFLAGS=/d
-	  s/gdb.t30//g
-	  s/gdb.t31//g
-	' < Makefile.in > new
-	if [ -n "${safe}" -a ! -f .Recover/Makefile.in ] ; then
-		echo Caching Makefile.in in .Recover...
-		mv Makefile.in .Recover
-	fi
-	mv new Makefile.in
-fi
-
-# eof
