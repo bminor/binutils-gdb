@@ -326,7 +326,6 @@ md_atof (type, litP, sizeP)
   LITTLENUM_TYPE   words [MAX_LITTLENUMS];
   LITTLENUM_TYPE  *wordP;
   char *           t;
-  char *           atof_ieee PARAMS ((char *, int, LITTLENUM_TYPE *));
 
   switch (type)
     {

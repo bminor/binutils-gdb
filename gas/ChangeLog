@@ -1,3 +1,10 @@
+2003-11-19  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* config/tc-arc.c: Remove a local prototype of atof_ieee.
+	* config/tc-ip2k.c: Likewise.
+	* config/tc-iq2000.c: Likewise.
+	* config/tc-tic30.c: Remove a comment.
+
 2003-11-19  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xg_emit_insn): Include "dwarf2dbg.h" and add

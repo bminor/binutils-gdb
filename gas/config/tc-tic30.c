@@ -1637,7 +1637,6 @@ md_atof (what_statement_type, literalP, sizeP)
   char *token;
   char keepval;
   unsigned long value;
-  /*  char *atof_ieee (); */
   float float_value;
   debug ("In md_atof()\n");
   debug ("precision = %c\n", what_statement_type);
