@@ -201,6 +201,34 @@ else
 	done
 fi
 
+vr5400_files="tc-mips.c"
+if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
+	for i in $vr5400_files ; do
+		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping vr5400 stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"vr5400\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-vr5400/,/end\-sanitize\-vr5400/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 tx19_files="tc-mips.c"
 
 if ( echo $* | grep keep\-tx19 > /dev/null ) ; then

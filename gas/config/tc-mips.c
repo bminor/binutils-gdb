@@ -203,11 +203,16 @@ static int mips_4010 = -1;
 /* Whether the 4100 MADD16 and DMADD16 are permitted. */
 static int mips_4100 = -1;
 
+/* start-sanitize-vr5400 */
+/* Whether NEC vr5400 instructions are permitted. */
+static int mips_5400 = -1;
+
+/* end-sanitize-vr5400 */
 /* start-sanitize-r5900 */
 /* Whether Toshiba r5900 instructions are permitted. */
 static int mips_5900 = -1;
-/* end-sanitize-r5900 */
 
+/* end-sanitize-r5900 */
 /* Whether Toshiba r3900 instructions are permitted. */
 static int mips_3900 = -1;
 
@@ -642,6 +647,8 @@ static void s_mipsend PARAMS ((int));
 static void s_file PARAMS ((int));
 static void s_mips_stab PARAMS ((int));
 static int mips16_extended_frag PARAMS ((fragS *, asection *, long));
+
+static int validate_mips_insn PARAMS ((const struct mips_opcode *));
 
 /* Pseudo-op table.
 
@@ -788,6 +795,7 @@ md_begin ()
   boolean ok = false;
   register const char *retval = NULL;
   register unsigned int i = 0;
+  int broken = 0;
 
   if (mips_opts.isa == -1)
     {
@@ -896,6 +904,18 @@ md_begin ()
 	  if (mips_cpu == -1)
 	    mips_cpu = 5000;
 	}
+      /* start-sanitize-vr5400 */
+      else if (strcmp (cpu, "r5400") == 0
+	       || strcmp (cpu, "mips64r5400") == 0
+               || strcmp (cpu, "mips64r5400el") == 0)
+	{
+	  mips_opts.isa = 4;
+	  if (mips_cpu == -1)
+	    mips_cpu = 5400;
+          if (mips_5400 == -1)
+            mips_5400 = 1;
+	}
+      /* end-sanitize-vr5400 */
       /* start-sanitize-r5900 */
       else if (strcmp (cpu, "r5900") == 0
 	       || strcmp (cpu, "mips64r5900") == 0
@@ -955,11 +975,16 @@ md_begin ()
   if (mips_4100 < 0)
     mips_4100 = 0;
 
+  /* start-sanitize-vr5400 */
+  if (mips_5400 < 0)
+    mips_5400 = 0;
+
+  /* end-sanitize-vr5400 */
   /* start-sanitize-r5900 */
   if (mips_5900 < 0)
     mips_5900 = 0;
-  /* end-sanitize-r5900 */
 
+  /* end-sanitize-r5900 */
   if (mips_3900 < 0)
     mips_3900 = 0;
   
@@ -997,17 +1022,15 @@ md_begin ()
 	{
 	  fprintf (stderr, "internal error: can't hash `%s': %s\n",
 		   mips_opcodes[i].name, retval);
+	  /* Probably a memory allocation problem?  Give up now.  */
 	  as_fatal ("Broken assembler.  No assembly attempted.");
 	}
       do
 	{
-	  if (mips_opcodes[i].pinfo != INSN_MACRO
-	      && ((mips_opcodes[i].match & mips_opcodes[i].mask)
-		  != mips_opcodes[i].match))
+	  if (mips_opcodes[i].pinfo != INSN_MACRO)
 	    {
-	      fprintf (stderr, "internal error: bad opcode: `%s' \"%s\"\n",
-		       mips_opcodes[i].name, mips_opcodes[i].args);
-	      as_fatal ("Broken assembler.  No assembly attempted.");
+	      if (!validate_mips_insn (&mips_opcodes[i]))
+		broken = 1;
 	    }
 	  ++i;
 	}
@@ -1023,20 +1046,26 @@ md_begin ()
 
       retval = hash_insert (mips16_op_hash, name, (PTR) &mips16_opcodes[i]);
       if (retval != NULL)
-	as_fatal ("internal error: can't hash `%s': %s\n",
+	as_fatal ("internal: can't hash `%s': %s",
 		  mips16_opcodes[i].name, retval);
       do
 	{
 	  if (mips16_opcodes[i].pinfo != INSN_MACRO
 	      && ((mips16_opcodes[i].match & mips16_opcodes[i].mask)
 		  != mips16_opcodes[i].match))
-	    as_fatal ("internal error: bad opcode: `%s' \"%s\"\n",
-		      mips16_opcodes[i].name, mips16_opcodes[i].args);
+	    {
+	      fprintf (stderr, "internal error: bad mips16 opcode: %s %s\n",
+		       mips16_opcodes[i].name, mips16_opcodes[i].args);
+	      broken = 1;
+	    }
 	  ++i;
 	}
       while (i < bfd_mips16_num_opcodes
 	     && strcmp (mips16_opcodes[i].name, name) == 0);
     }
+
+  if (broken)
+    as_fatal ("Broken assembler.  No assembly attempted.");
 
   /* We add all the general register names to the symbol table.  This
      helps us detect invalid uses of them.  */
@@ -2392,6 +2421,10 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	      || (mips_5900
 		  && (insn.insn_mo->membership & INSN_5900) != 0)
 	      /* end-sanitize-r5900 */
+	      /* start-sanitize-vr5400 */
+	      || (mips_5400
+		  && (insn.insn_mo->membership & INSN_5400) != 0)
+	      /* end-sanitize-vr5400 */
 	      || (mips_3900
 		  && (insn.insn_mo->membership & INSN_3900) != 0))
 	  /* start-sanitize-r5900 */
@@ -6568,6 +6601,107 @@ mips16_macro (ip)
     }
 }
 
+/* For consistency checking, verify that all bits are specified either
+   by the match/mask part of the instruction definition, or by the
+   operand list.  */
+static int
+validate_mips_insn (opc)
+     const struct mips_opcode *opc;
+{
+  const char *p = opc->args;
+  char c;
+  unsigned long used_bits = opc->mask;
+
+  if ((used_bits & opc->match) != opc->match)
+    {
+      as_bad ("internal: bad mips opcode (mask error): %s %s",
+	      opc->name, opc->args);
+      return 0;
+    }
+#define USE_BITS(mask,shift)	(used_bits |= ((mask) << (shift)))
+  while (*p)
+    switch (c = *p++)
+      {
+      case ',': break;
+      case '(': break;
+      case ')': break;
+      case '<': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
+      case '>':	USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
+      case 'A': break;
+      case 'B':	USE_BITS (OP_MASK_SYSCALL,	OP_SH_SYSCALL);	break;
+      case 'C':	USE_BITS (OP_MASK_COPZ,		OP_SH_COPZ);	break;
+      case 'D':	USE_BITS (OP_MASK_FD,		OP_SH_FD);	break;
+      case 'E':	USE_BITS (OP_MASK_RT,		OP_SH_RT);	break;
+      case 'F': break;
+      case 'G':	USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
+      case 'I': break;
+      case 'L': break;
+      case 'M':	USE_BITS (OP_MASK_CCC,		OP_SH_CCC);	break;
+      case 'N':	USE_BITS (OP_MASK_BCC,		OP_SH_BCC);	break;
+      case 'R':	USE_BITS (OP_MASK_FR,		OP_SH_FR);	break;
+      case 'S':	USE_BITS (OP_MASK_FS,		OP_SH_FS);	break;
+      case 'T':	USE_BITS (OP_MASK_FT,		OP_SH_FT);	break;
+      case 'V':	USE_BITS (OP_MASK_FS,		OP_SH_FS);	break;
+      case 'W':	USE_BITS (OP_MASK_FT,		OP_SH_FT);	break;
+      case 'a':	USE_BITS (OP_MASK_TARGET,	OP_SH_TARGET);	break;
+      case 'b':	USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
+      case 'c':	USE_BITS (OP_MASK_CODE,		OP_SH_CODE);	break;
+      case 'd':	USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
+      case 'f': break;
+      case 'h':	USE_BITS (OP_MASK_PREFX,	OP_SH_PREFX);	break;
+      case 'i':	USE_BITS (OP_MASK_IMMEDIATE,	OP_SH_IMMEDIATE); break;
+      case 'j':	USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
+      case 'k':	USE_BITS (OP_MASK_CACHE,	OP_SH_CACHE);	break;
+      case 'l': break;
+      case 'o': USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
+      case 'p':	USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
+      case 'r': USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
+      case 's':	USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
+      case 't':	USE_BITS (OP_MASK_RT,		OP_SH_RT);	break;
+      case 'u':	USE_BITS (OP_MASK_IMMEDIATE,	OP_SH_IMMEDIATE); break;
+      case 'v':	USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
+      case 'w':	USE_BITS (OP_MASK_RT,		OP_SH_RT);	break;
+      case 'x': break;
+      case 'z': break;
+	/* start-sanitize-vr5400 */
+      case 'P': USE_BITS (OP_MASK_PERFREG,	OP_SH_PERFREG);	break;
+      case 'e': USE_BITS (OP_MASK_VECBYTE,	OP_SH_VECBYTE);	break;
+      case '%': USE_BITS (OP_MASK_VECALIGN,	OP_SH_VECALIGN); break;
+      case '[': break;
+      case ']': break;
+	/* end-sanitize-vr5400 */
+      default:
+	as_bad ("internal: bad mips opcode (unknown operand type `%c'): %s %s",
+		c, opc->name, opc->args);
+	return 0;
+      }
+#undef USE_BITS
+  /* Some of the trapping instructions (break, t*, sdbbp) have "code"
+     fields that cannot currently be set by assembly code.  Ignore them
+     for now.  */
+  if (opc->pinfo & INSN_TRAP)
+    {
+      static const char *const trap_insns[] = {
+	"break", "sdbbp",
+	"teq", "tge", "tgeu", "tlt", "tltu", "tne",
+      };
+      int i;
+      for (i = sizeof(trap_insns)/sizeof(trap_insns[0]) - 1; i >= 0; i--)
+	if (!strcmp (trap_insns[i], opc->name))
+	  {
+	    used_bits |= 0xffc0;
+	    break;
+	  }
+    }
+  if (used_bits != 0xffffffff)
+    {
+      as_bad ("internal: bad mips opcode (bits 0x%lx undefined): %s %s",
+	      ~used_bits & 0xffffffff, opc->name, opc->args);
+      return 0;
+    }
+  return 1;
+}
+
 /* This routine assembles an instruction into its binary format.  As a
    side effect, it sets one of the global variables imm_reloc or
    offset_reloc to the type of relocation to do if one of the operands
@@ -6630,6 +6764,9 @@ mips_ip (str, ip)
 	       /* start-sanitize-r5900 */
 	       || (mips_5900 && (insn->membership & INSN_5900) != 0)
 	       /* end-sanitize-r5900 */
+	       /* start-sanitize-vr5400 */
+	       || (mips_5400 && (insn->membership & INSN_5400) != 0)
+	       /* end-sanitize-vr5400 */
 	       || (mips_3900 && (insn->membership & INSN_3900) != 0))
 	{
 	  ok = true;
@@ -6710,6 +6847,10 @@ mips_ip (str, ip)
 		return;
 
 	    case ')':		/* these must match exactly */
+	      /* start-sanitize-vr5400 */
+	    case '[':
+	    case ']':
+	      /* end-sanitize-vr5400 */
 	      if (*s++ == *args)
 		continue;
 	      break;
@@ -8393,6 +8534,13 @@ struct option md_longopts[] = {
   {"no-m1900", no_argument, NULL, OPTION_NO_M3900},
   /* end-sanitize-tx19 */
 
+  /* start-sanitize-vr5400 */
+#define OPTION_M5400 (OPTION_MD_BASE + 28)
+  {"m5400", no_argument, NULL, OPTION_M5400},
+#define OPTION_NO_M5400 (OPTION_MD_BASE + 29)
+  {"no-m5400", no_argument, NULL, OPTION_NO_M5400},
+
+  /* end-sanitize-vr5400 */
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
 #define OPTION_XGOT (OPTION_MD_BASE + 19)
@@ -8571,6 +8719,10 @@ md_parse_option (c, arg)
 		    || strcmp (p, "5k") == 0
 		    || strcmp (p, "5K") == 0)
 		  mips_cpu = 5000;
+                /* start-sanitize-vr5400 */
+                else if (strcmp (p, "5400") == 0)
+                  mips_cpu = 5400;
+                /* end-sanitize-vr5400 */
                 /* start-sanitize-r5900 */
                 else if (strcmp (p, "5900") == 0)
                   mips_cpu = 5900;
@@ -8646,6 +8798,16 @@ md_parse_option (c, arg)
       break;
       /* end-sanitize-r5900 */
 
+      /* start-sanitize-vr5400 */
+    case OPTION_M5400:
+      mips_5400 = 1;
+      break;
+
+    case OPTION_NO_M5400:
+      mips_5400 = 0;
+      break;
+
+      /* end-sanitize-vr5400 */
     case OPTION_M3900:
       mips_3900 = 1;
       break;

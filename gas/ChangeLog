@@ -1,3 +1,20 @@
+Fri Oct 31 18:19:55 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+start-sanitize-vr5400
+	* config/tc-mips.c (mips_5400): New variable.
+	(md_begin, md_parse_option): Handle 5400 options/names.
+	(macro_build, mips_ip): Check for 5400-specific instructions.
+	(md_longopts, OPTION_M5400, OPTION_NO_M5400): More command-line
+	support for 5400.
+
+end-sanitize-vr5400
+	* config/tc-mips.c (validate_mips_insn): New function, checks
+	match versus mask bits, and also verifies that all bits to be
+	output are actually specified somewhere.
+	(md_begin): Call it for 32-bit instructions, instead of doing
+	match/mask check here.  In case of failure, print a message, but
+	check the rest of the opcode table before exiting.
+
 Thu Oct 30 13:46:20 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_apply_fix3): Fix thumb ADR pseudo op.  Patch
