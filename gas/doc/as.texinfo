@@ -156,7 +156,7 @@ into another language, under the above conditions for modified versions.
 @node Top
 @top Using @value{AS}
 
-This file is a user guide to the GNU assembler @code{@value{AS}}.
+This file is a user guide to the @sc{gnu} assembler @code{@value{AS}}.
 @ifclear GENERIC
 This version of the file describes @code{@value{AS}} configured to generate
 code for @value{TARGET} architectures.
@@ -178,7 +178,7 @@ code for @value{TARGET} architectures.
 @node Overview
 @chapter Overview
 @iftex
-This manual is a user guide to the GNU assembler @code{@value{AS}}.
+This manual is a user guide to the @sc{gnu} assembler @code{@value{AS}}.
 @ifclear GENERIC
 This version of the manual describes @code{@value{AS}} configured to generate
 code for @value{TARGET} architectures.
@@ -466,7 +466,7 @@ For information on the Z8000 machine instruction set, see @cite{Z8000 CPU Techni
 Throughout this manual, we assume that you are running @dfn{GNU},
 the portable operating system from the @dfn{Free Software
 Foundation, Inc.}.  This restricts our attention to certain kinds of
-computer (in particular, the kinds of computers that GNU can run on);
+computer (in particular, the kinds of computers that @sc{gnu} can run on);
 once this assumption is granted examples and definitions need less
 qualification.
 
@@ -488,12 +488,12 @@ computer-readable series of instructions.  Different versions of
 @node GNU Assembler
 @section @value{AS}, the GNU Assembler
 
-GNU @code{as} is really a family of assemblers.
+@sc{gnu} @code{as} is really a family of assemblers.
 @ifclear GENERIC
 This manual describes @code{@value{AS}}, a member of that family which is
 configured for the @value{TARGET} architectures.
 @end ifclear
-If you use (or have used) the GNU assembler on one architecture, you
+If you use (or have used) the @sc{gnu} assembler on one architecture, you
 should find a fairly similar environment when you use it on another
 architecture.  Each version has much in common with the others,
 including object file formats, most assembler directives (often called
@@ -501,7 +501,7 @@ including object file formats, most assembler directives (often called
 
 @cindex purpose of @sc{gnu} @code{@value{AS}}
 @code{@value{AS}} is primarily intended to assemble the output of the
-GNU C compiler @code{@value{GCC}} for use by the linker
+@sc{gnu} C compiler @code{@value{GCC}} for use by the linker
 @code{@value{LD}}.  Nevertheless, we've tried to make @code{@value{AS}}
 assemble correctly everything that other assemblers for the same
 machine would assemble.
@@ -524,7 +524,7 @@ program in one pass of the source file.  This has a subtle impact on the
 @section Object File Formats
 
 @cindex object file format
-The GNU assembler can be configured to produce several alternative
+The @sc{gnu} assembler can be configured to produce several alternative
 object file formats.  For the most part, this does not affect how you
 write assembly language programs; but directives for debugging symbols
 are typically different in different file formats.  @xref{Symbol
@@ -572,7 +572,7 @@ the letter is important.   All options are optional.
 
 Some options expect exactly one file name to follow them.  The file
 name may either immediately follow the option's letter (compatible
-with older assemblers) or it may be the next command argument (GNU
+with older assemblers) or it may be the next command argument (@sc{gnu}
 standard).  These two command lines are equivalent:
 
 @smallexample
@@ -724,7 +724,7 @@ because many of them aren't supposed to happen.
 
 @cindex options, all versions of @code{@value{AS}}
 This chapter describes command-line options available in @emph{all}
-versions of the GNU assembler; @pxref{Machine Dependencies}, for options specific
+versions of the @sc{gnu} assembler; @pxref{Machine Dependencies}, for options specific
 @ifclear GENERIC
 to the @value{TARGET}.
 @end ifclear
@@ -732,7 +732,7 @@ to the @value{TARGET}.
 to particular machine architectures.
 @end ifset
 
-If you are invoking @code{@value{AS}} via the GNU C compiler (version 2), you
+If you are invoking @code{@value{AS}} via the @sc{gnu} C compiler (version 2), you
 can use the @samp{-Wa} option to pass arguments through to the
 assembler.  The assembler arguments must be separated from each other
 (and the @samp{-Wa}) by commas.  For example:
@@ -747,7 +747,7 @@ and assembly source.
 
 Usually you do not need to use this @samp{-Wa} mechanism, since many compiler
 command-line options are automatically passed to the assembler by the compiler.
-(You can call the GNU compiler driver with the @samp{-v} option to see
+(You can call the @sc{gnu} compiler driver with the @samp{-v} option to see
 precisely what options it passes to each compilation pass, including the
 assembler.)
 
@@ -855,7 +855,7 @@ specified (left to right) on the command line.
 @kindex -K
 @ifclear DIFF-TBL-KLUGE
 On the @value{TARGET} family, this option is allowed, but has no effect.  It is
-permitted for compatibility with the GNU assembler on other platforms,
+permitted for compatibility with the @sc{gnu} assembler on other platforms,
 where it can be used to warn when the assembler alters the machine code
 generated for @samp{.word} directives in difference tables.  The @value{TARGET}
 family does not have the addressing limitations that sometimes lead to this
@@ -1891,7 +1891,7 @@ linked program:       |  |TTT|ttttt|  |dddd|DDD|00000|
 @end smallexample
 @c TEXI2ROFF-KILL
 @end ifinfo
-@c FIXME make sure no page breaks inside figure!!
+@need 5000
 @tex
 
 \line{\it Partial program \#1: \hfil}
@@ -2170,7 +2170,7 @@ definition of a local label, write @samp{@b{N}f}---where @b{N} gives you
 a choice of 10 forward references.  The @samp{b} stands for
 ``backwards'' and the @samp{f} stands for ``forwards''.
 
-Local symbols are not emitted by the current GNU C compiler.
+Local symbols are not emitted by the current @sc{gnu} C compiler.
 
 There is no restriction on how you can use these labels, but
 remember that at any point in the assembly you can refer to at most
@@ -2604,7 +2604,7 @@ All assembler directives have names that begin with a period (@samp{.}).
 The rest of the name is letters, usually in lower case.
 
 This chapter discusses directives that are available regardless of the
-target machine configuration for the GNU assembler.
+target machine configuration for the @sc{gnu} assembler.
 @ifset GENERIC
 Some machine configurations provide additional directives.
 @xref{Machine Dependencies}.
@@ -3543,7 +3543,7 @@ On the AMD 29K, this directive is ignored; it is accepted for
 compatibility with other AMD 29K assemblers.
 
 @quotation
-@emph{Warning:} In most versions of the GNU assembler, the directive
+@emph{Warning:} In most versions of the @sc{gnu} assembler, the directive
 @code{.space} has the effect of @code{.block}  @xref{Machine Dependencies}.
 @end quotation
 @end ifset
@@ -3893,7 +3893,7 @@ These are obsolete options used to debug old assemblers.
 This option expects a number following the @samp{-d}.  Like options
 that expect filenames, the number may immediately follow the
 @samp{-d} (old standard) or constitute the whole of the command line
-argument that follows @samp{-d} (GNU standard).
+argument that follows @samp{-d} (@sc{gnu} standard).
 
 @item @code{-V} (Virtualize Interpass Temporary File)
 @cindex @code{-V}, redundant on VAX
@@ -4285,7 +4285,7 @@ This directive emits @var{size} bytes, each of value @var{fill}.  Both
 @var{size} and @var{fill} are absolute expressions.  If the comma
 and @var{fill} are omitted, @var{fill} is assumed to be zero.
 
-In other versions of the GNU assembler, this directive is called
+In other versions of the @sc{gnu} assembler, this directive is called
 @samp{.space}.
 @end table
 
@@ -4301,7 +4301,7 @@ This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
 @quotation
-@emph{Warning:} in other versions of the GNU assembler, @code{.file} is
+@emph{Warning:} in other versions of the @sc{gnu} assembler, @code{.file} is
 used for the directive called @code{.app-file} in the AMD 29K support.
 @end quotation
 
@@ -4500,8 +4500,8 @@ with other development tools.
 H8/300:
 
 @table @code
-@item .h300h
 @cindex H8/300H, assembling for
+@item .h300h
 Recognize and emit additional instructions for the H8/300H variant, and
 also make @code{.int} emit 32-bit numbers rather than the usual (16-bit)
 for the H8/300 family.
@@ -4991,7 +4991,7 @@ mov[:g] sz ea,rd
 
 @node HPPA Notes
 @section Notes
-As a back end for GNU CC @code{@value{AS}} has been throughly tested and should
+As a back end for @sc{gnu} @sc{cc} @code{@value{AS}} has been throughly tested and should
 work extremely well.  We have tested it only minimally on hand written assembly
 code and no one has tested it much on the assembly output from the HP
 compilers.
@@ -5592,6 +5592,7 @@ to one of the labels illustrated above.
 @end example
 @c TEXI2ROFF-KILL
 @end ifinfo
+@need 2000
 @tex
 \vskip 1pc
 \line{\leftskip=0pt\hskip\tableindent
@@ -5604,7 +5605,7 @@ to one of the labels illustrated above.
 The first word of the header is used to locate multiple branch tables,
 since each object file may contain one. Normally the links are
 maintained with a call to an initialization routine, placed at the
-beginning of each function in the file.  The GNU C compiler
+beginning of each function in the file.  The @sc{gnu} C compiler
 generates these calls automatically when you give it a @samp{-b} option.
 For further details, see the documentation of @samp{gbr960}.
 
@@ -7226,7 +7227,7 @@ When assembling for @sc{ecoff}, the assembler uses the @code{$gp} (@code{$28})
 register to form the address of a ``small object''.  Any object in the
 @code{.sdata} or @code{.sbss} sections is considered ``small'' in this sense.
 For external objects, or for objects in the @code{.bss} section, you can use
-the @sc{gcc} @samp{-G} option to control the size of objects addressed via
+the @code{@value{GCC}} @samp{-G} option to control the size of objects addressed via
 @code{$gp}; the default value is 8, meaning that a reference to any object
 eight bytes or smaller uses @code{$gp}.  Passing @samp{-G 0} to
 @code{@value{AS}} prevents it from using the @code{$gp} register on the basis
@@ -7288,7 +7289,7 @@ it is not meant as a slight.  We just don't know about it.  Send mail to the
 maintainer, and we'll correct the situation.  Currently (January 1994), the
 maintainer is Ken Raeburn (email address @code{raeburn@@cygnus.com}).
 
-Dean Elsner wrote the original GNU assembler for the VAX.@footnote{Any more
+Dean Elsner wrote the original @sc{gnu} assembler for the VAX.@footnote{Any more
 details?}
 
 Jay Fenlason maintained GAS for a while, adding support for GDB-specific debug
