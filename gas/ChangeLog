@@ -1,5 +1,8 @@
 Tue Jan 28 15:27:28 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (md_convert_frag): If the user explicitly
+	requested an extended opcode, pass warn as true to mips16_immed.
+
 	* config/tc-mips.c (mips16_ip): Handle a missing expression like
 	an explicit 0, so that explicitly extended instructions work
 	correctly.

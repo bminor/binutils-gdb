@@ -9753,8 +9753,9 @@ md_convert_frag (abfd, asec, fragp)
       else
 	insn = bfd_getl16 (buf);
 
-      mips16_immed (fragp->fr_file, fragp->fr_line, type, val, false, small,
-		    ext, &insn, &use_extend, &extend);
+      mips16_immed (fragp->fr_file, fragp->fr_line, type, val,
+		    RELAX_MIPS16_USER_EXT (fragp->fr_subtype),
+		    small, ext, &insn, &use_extend, &extend);
 
       if (use_extend)
 	{
