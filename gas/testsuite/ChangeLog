@@ -1,3 +1,9 @@
+2003-06-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* gas/mips/elf-rel-got-n32.d: Remove special handling for n32 ABI.
+	* gas/mips/elf-rel-xgot-n32.d: Likewise.
+	* gas/mips/jal-newabi.d: Likewise.
+
 2003-06-21  Christian Groessler  <chris@groessler.org>
 
 	* gas/z8k: New directory.

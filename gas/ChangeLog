@@ -1,3 +1,9 @@
+2003-06-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (ADDRESS_ADD_INSN,ADDRESS_ADDI_INSN): Remove
+	special handling for n32 ABI.
+	(macro): Likewise.
+
 2003-06-19  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (s_cpsetup,s_cprestore,s_cpreturn): Revert

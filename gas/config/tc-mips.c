@@ -300,15 +300,14 @@ static int mips_32bitmode = 0;
 #define HAVE_64BIT_ADDRESS_CONSTANTS (HAVE_64BIT_ADDRESSES \
 				      || HAVE_64BIT_GPRS)
 
-/* Addresses are loaded in different ways, depending on the address
-   size in use and the ABI.  N32_ABI uses additions with overflow
-   checking, this allows to catch code generation errors which would
-   distort the proper sign extension of the 64-bit wide registers.  */
+/* Addresses are loaded in different ways, depending on the address size
+   in use.  The n32 ABI Documentation also mandates the use of additions
+   with overflow checking, but existing implementations don't follow it.  */
 #define ADDRESS_ADD_INSN						\
-   (HAVE_32BIT_ADDRESSES ? (HAVE_NEWABI ? "add" : "addu") : "daddu")
+   (HAVE_32BIT_ADDRESSES ? "addu" : "daddu")
 
 #define ADDRESS_ADDI_INSN						\
-   (HAVE_32BIT_ADDRESSES ? (HAVE_NEWABI ? "addi" : "addiu") : "daddiu")
+   (HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu")
 
 #define ADDRESS_LOAD_INSN						\
    (HAVE_32BIT_ADDRESSES ? "lw" : "ld")
@@ -4851,8 +4850,7 @@ macro (ip)
 	  && offset_expr.X_add_number < 0x8000)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       (dbl || HAVE_64BIT_ADDRESSES) ? "daddiu" :
-		       HAVE_NEWABI ? "addi" : "addiu",
+		       (dbl || HAVE_64BIT_ADDRESSES) ? "daddiu" : "addiu",
 		       "t,r,j", treg, sreg, (int) BFD_RELOC_LO16);
 	  return;
 	}
@@ -5618,8 +5616,7 @@ macro (ip)
 	  char *s;
 
 	  if (mips_pic == EMBEDDED_PIC || mips_pic == NO_PIC)
-	    s = (dbl || HAVE_64BIT_ADDRESSES) ? "daddu" :
-	      HAVE_NEWABI ? "add" : "addu";
+	    s = (dbl || HAVE_64BIT_ADDRESSES) ? "daddu" : "addu";
 	  else
 	    s = ADDRESS_ADD_INSN;
 
@@ -6063,7 +6060,7 @@ macro (ip)
           macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
                        ((bfd_arch_bits_per_address (stdoutput) == 32
                          || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
-                        ? HAVE_NEWABI ? "add" : "addu" : "daddu"),
+                        ? "addu" : "daddu"),
                        "d,v,t", tempreg, tempreg, breg);
           macro_build ((char *) NULL, &icnt, &offset_expr, s, fmt, treg,
                        (int) BFD_RELOC_PCREL_LO16, tempreg);
