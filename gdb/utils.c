@@ -1301,7 +1301,7 @@ vfprintf_unfiltered (stream, format, args)
      char *format;
      va_list args;
 {
-  vfprintf_maybe_filtered (stream, format, args, 0);
+  vfprintf (stream, format, args);
 }
 
 void
@@ -1317,7 +1317,7 @@ vprintf_unfiltered (format, args)
      char *format;
      va_list args;
 {
-  vfprintf_maybe_filtered (gdb_stdout, format, args, 0);
+  vfprintf (gdb_stdout, format, args);
 }
 
 /* VARARGS */
