@@ -220,7 +220,7 @@ full_filename(symtab)
 }
 
 /* Tell the energize kernel how high the stack is so that frame numbers (which
-   are relative to the current stack height make sense.
+   are relative to the current stack height) make sense.
 
    Calculate the number of frames on the stack, and the number of subroutine
    invocations that haven't changed since the last call to this routine.  The
@@ -305,17 +305,51 @@ send_stack_info()
   stack_info_valid = 1;
 }
 
+/* Tell the Energize server about the file and line # that corresponds to pc,
+   and which stack frame level that pc corresponds to. */
+
+static void
+send_location(pc, frame_level)
+     CORE_ADDR pc;
+     int frame_level;
+{
+  char *funcname, *filename;
+  struct symtab_and_line sal;
+  struct symbol *symbol;
+
+  sal = find_pc_line(pc, 0);
+  symbol = find_pc_function(pc);
+
+  funcname = symbol ? symbol->name : "";
+  filename = full_filename(sal.symtab);
+
+  send_stack_info();
+
+  CVWriteStackFrameInfo(conn,
+			instance_id,
+			sal.line,
+			CFileLinePos,
+			frame_level,
+			funcname,
+			filename,
+			""	/* XXX ? transcript */
+			);
+  if (filename)
+    free(filename);
+}
+
 /* Tell the kernel where we are in the program, and what the stack looks like.
    */
 
 static void
 send_status()
-{
-  static int linecount = 48;
-  struct symtab_and_line sal;
+{ 
+  char *funcname;
   struct symbol *symbol;
-  char *funcname, *filename;
   static int sent_prog_inst = 0;
+
+  symbol = find_pc_function(stop_pc);
+  funcname = symbol ? symbol->name : "";
 
   if (!has_run)
     return;
@@ -329,12 +363,6 @@ send_status()
       return;
     }
 
-  sal = find_pc_line(stop_pc, 0);
-  symbol = find_pc_function(stop_pc);
-
-  funcname = symbol ? symbol->name : "";
-  filename = full_filename(sal.symtab);
-
   if (!sent_prog_inst)
     {
       sent_prog_inst = 1;
@@ -347,17 +375,8 @@ send_status()
 				 );
     }
 
-  send_stack_info();
-
-  CVWriteStackFrameInfo(conn,
-			instance_id,
-			sal.line,
-			CFileLinePos,
-			0,	/* XXX - frame # */
-			funcname,
-			filename,
-			""	/* XXX ? transcript */
-			);
+  send_location(stop_pc,
+		selected_frame_level); /* Had better be 0! */
 
   CVWriteProgramStoppedInfo(conn,
 			    instance_id,
@@ -367,8 +386,6 @@ send_status()
 			    ""	/* XXX ? transcript */
 			    );
 
-  if (filename)
-    free(filename);
 }
 
 /* Call this to output annotated function names.  Names will be demangled if
@@ -391,7 +408,10 @@ energize_annotate_function(funcname, arg_mode, level)
       demangled_name = cplus_demangle(funcname, arg_mode);
 
       if (demangled_name)
-	funcname = demangled_name;
+	{
+	  funcname = demangled_name;
+	  printf_filtered("'");
+	}
     }
 
   send_stack_info();
@@ -404,7 +424,10 @@ energize_annotate_function(funcname, arg_mode, level)
 			    funcname);
 
   if (demangled_name)
-    free(demangled_name);
+    {
+      free(demangled_name);
+      printf_filtered("'");
+    }
 }
 
 /* Call this just prior to printing out the name & value of a variable.  This
@@ -790,6 +813,7 @@ energize_ignore_breakpoint(b)
 
 /* Open up a pty and its associated tty.  Return the fd of the tty. */
 
+#ifndef NCR486
 static void
 getpty()
 {
@@ -810,7 +834,11 @@ getpty()
 	continue;
       sprintf(dev, "/dev/tty%c%x", n/16 + 'p', n%16);
       ttyfd = open(dev, O_RDWR);
-      if (ttyfd < 0) {close(ptyfd); continue;}
+      if (ttyfd < 0)
+	{
+	  close(ptyfd);
+	  continue;
+	}
 
       /* Setup pty for non-blocking I/O.  Also make it give us a SIGIO when
 	 there's data available.  */
@@ -830,6 +858,75 @@ getpty()
 
   error ("getpty: can't get a pty\n");
 }
+#endif
+/* Alternate getpty for NCRs */
+
+#ifdef NCR486 /* LTL */
+#define MAX_PTM_TRY 16
+#define MAX_GRANTPT_TRY 4
+static void
+getpty()
+{
+  char *slavename;
+  extern char *ptsname();
+  int j, i;
+  int n, mfd, sfd;
+  struct termios termios;
+
+  /* Number of pseudo-terms is tuneable(16 - 255). System default is 16. */
+  for (i = 0; i < MAX_PTM_TRY; i++)
+    {
+      mfd = open("/dev/ptmx", O_RDWR); /* get the master */
+
+      if (mfd < 0)
+	continue;
+
+      if (grantpt(mfd) < 0)	/* get a slave */
+	for (j = 0; j < MAX_GRANTPT_TRY; j++)
+	  if (grantpt(mfd) == 0 )
+	    {
+	      close(mfd);
+	      continue;
+	    }
+
+      if (unlockpt(mfd) < 0)
+	{			/* unlock the slave so he can be opened */
+	  close(mfd);
+	  continue;
+	}
+
+      slavename = ptsname(mfd); /* get the slave device name */
+      if (!slavename)
+	{
+	  close(mfd);
+	  continue;
+	}
+
+      sfd = open(slavename, O_RDWR);
+
+      if (sfd < 0)
+	{
+	  close(mfd);
+	  continue;
+	}
+
+      /* setup mty for non-blocking I/O.  Also make it give us a SIGIO
+	 when there's data availabe. */
+      n = fcntl(mfd, F_GETFL, 0);
+      fcntl(mfd, F_SETFL, n | O_NDELAY | O_SYNC);
+      fcntl(mfd, F_SETOWN,getpid());
+  
+      tcgetattr(sfd, &termios);
+      termios.c_oflag &= ~OPOST;	/* no post-processing */
+      tcsetattr(sfd, TCSANOW, &termios);
+
+      inferior_pty=mfd;
+      inferior_tty=sfd;
+      return;
+    }
+  error ("getpty: can't get a pts\n");
+} 
+#endif
 
 /* Examine a protocol packet from the driver. */
 
@@ -1332,6 +1429,9 @@ energize_initialize(energize_id, execarg)
   /* Setup for I/O interrupts when appropriate. */
 
   n = fcntl(kerfd, F_GETFL, 0);
+#ifdef NCR486...
+  O_SYNC
+#endif
   fcntl(kerfd, F_SETFL, n|FASYNC);
   fcntl(kerfd, F_SETOWN, getpid());
 
@@ -1432,6 +1532,11 @@ energize_call_command(cmdblk, arg, from_tty)
   else
     (*cmdblk->function.cfunc)(arg, from_tty);
 
+  if (strcmp(cmdblk->name, "up") == 0
+      || strcmp(cmdblk->name, "down") == 0
+      || strcmp(cmdblk->name, "frame") == 0)
+    send_location(get_frame_info(selected_frame)->pc,
+		  selected_frame_level);
   print_prompt();
 }
 

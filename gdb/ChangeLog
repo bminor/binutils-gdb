@@ -1,3 +1,11 @@
+Mon Sep 14 19:20:43 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* energize.c (send_location):  New routine to consolidate all
+	places where we must notify kernel of where the given pc is.
+	(cplus_demangle):  Put single-quotes around demangled names.
+	(energize_call_command):  Call send_location() after doing up,
+	down, and frame commands.
+
 Fri Sep 11 18:28:28 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* doc/gdb.texinfo, doc/gdbinv-m.m4.in, doc/gdbinv-s.m4.in: first
