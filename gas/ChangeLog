@@ -1,3 +1,9 @@
+2001-08-28  Philip Blundell  <philb@gnu.org>
+
+	* configure.in (sh-*-coff*, sh-*-rtems*): Set bfd_gas to yes.
+	Patch from Joel Sherril <joel.sherrill@OARcorp.com>
+	* configure: Regenerate.
+
 2001-07-21  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-m68k.c (md_pseudo_table) [OBJ_ELF]: Add .file and
