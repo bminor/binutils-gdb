@@ -1,5 +1,7 @@
 2004-06-13  Andrew Cagney  <cagney@gnu.org>
 
+	* values.c (generic_use_struct_convention): Don't check gcc_p.
+
 	* gdbarch.sh (DEPRECATED_MAX_REGISTER_RAW_SIZE)
 	(DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE): Delete.
 	* gdbarch.h, gdbarch.c: Regenerate.

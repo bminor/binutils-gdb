@@ -1217,15 +1217,16 @@ value_from_double (struct type *type, DOUBLEST num)
    2.0-2.3.3.  This is somewhat unfortunate, but changing gcc2_compiled
    would cause more chaos than dealing with some struct returns being
    handled wrong.  */
+/* NOTE: cagney/2004-06-13: Deleted check for "gcc_p".  GCC 1.x is
+   dead.  */
 
 int
 generic_use_struct_convention (int gcc_p, struct type *value_type)
 {
-  return !((gcc_p == 1)
-	   && (TYPE_LENGTH (value_type) == 1
-	       || TYPE_LENGTH (value_type) == 2
-	       || TYPE_LENGTH (value_type) == 4
-	       || TYPE_LENGTH (value_type) == 8));
+  return !(TYPE_LENGTH (value_type) == 1
+	   || TYPE_LENGTH (value_type) == 2
+	   || TYPE_LENGTH (value_type) == 4
+	   || TYPE_LENGTH (value_type) == 8);
 }
 
 /* Return true if the function returning the specified type is using
