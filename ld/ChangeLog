@@ -1,5 +1,15 @@
-start-sanitize-d30v
 Tue Dec  9 15:28:17 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* Makefile.am: Add Oct 23 changes to Makefile.in here.
+
+	* Makefile.{am,in}: (ALL_EMULATIONS): Add ed10velf.o.
+
+start-sanitize-d30v
+	* Makefile.{am,in}: (ALL_EMULATIONS): Add etic80coff.o.
+end-sanitize-tic80
+
+start-sanitize-d30v
+	* Makefile.{am,in}: (ALL_EMULATIONS): Add ed30velf.o.
 
 	* emulparams/d30velf.sh (STACK_START_ADDR): Top of default
 	stack.
@@ -18,8 +28,8 @@ Tue Dec  9 15:28:17 1997  Michael Meissner  <meissner@cygnus.com>
 	(.data{,1}/.strings/.rodata{,1}): Put in ${DATA_MEMORY} memory
 	region.
 	(.bss): Put in ${BSS_MEMORY} memory region.
-
 end-sanitize-d30v
+
 Tue Dec  2 10:14:47 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.tgt (targ_extra_emuls): Add support for Thumb target.
