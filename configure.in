@@ -76,6 +76,7 @@ target_libs="target-libiberty \
 		${start-sanitize-java}
 		target-libjava \
 		target-boehm-gc \
+		target-qthreads \
 		${end-sanitize-java}
 		target-libg++"
 
