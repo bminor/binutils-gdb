@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "serial.h"
 
 /* External data declarations */
 extern int stop_soon_quietly;	/* for wait_for_inferior */
@@ -48,6 +49,9 @@ static int hms_clear_breakpoints ();
 extern struct target_ops hms_ops;
 
 static int quiet = 1;
+
+
+serial_t desc;
 
 /***********************************************************************/
 /* Caching stuff stolen from remote-nindy.c  */
@@ -232,7 +236,7 @@ static const char *dev_name;
    starts.  */
 
 int is_open = 0;
-int 
+int
 check_open ()
 {
   if (!is_open)
@@ -251,9 +255,9 @@ readchar ()
 {
   int buf;
 
-  buf = serial_readchar (timeout);
+  buf = SERIAL_READCHAR (desc, timeout);
 
-  if (buf < 0)
+  if (buf == SERIAL_TIMEOUT)
     error ("Timeout reading from remote system.");
 
   if (!quiet)
@@ -267,8 +271,8 @@ readchar_nofail ()
 {
   int buf;
 
-  buf = serial_readchar (timeout);
-  if (buf < 0)
+  buf = SERIAL_READCHAR (desc, timeout);
+  if (buf == SERIAL_TIMEOUT)
     buf = 0;
   if (!quiet)
     printf ("%c", buf);
@@ -541,7 +545,7 @@ is_baudrate_right ()
 
   while (1)
     {
-      ok = serial_readchar (timeout);
+      ok = SERIAL_READCHAR (desc, timeout);
       if (ok < 0)
 	break;
     }
@@ -557,35 +561,16 @@ is_baudrate_right ()
 static void
 set_rate ()
 {
-  if (!serial_setbaudrate (baudrate))
+  if (!SERIAL_SETBAUDRATE (desc, baudrate))
     error ("Can't set baudrate");
 }
 
-static void
-get_baudrate_right ()
-{
-#if 0
-  while (!is_baudrate_right ())
-    {
-      baudrate = serial_nextbaudrate (baudrate);
-      if (baudrate == 0)
-	{
-	  printf_filtered ("Board not yet in sync\n");
-	  break;
-	}
-      printf_filtered ("Board not responding, trying %d baud\n", baudrate);
-      QUIT;
-      serial_setbaudrate (baudrate);
-    }
-#endif
-}
 
 static void
 hms_open (name, from_tty)
      char *name;
      int from_tty;
 {
-
   unsigned int prl;
   char *p;
 
@@ -595,19 +580,18 @@ hms_open (name, from_tty)
     }
   if (is_open)
     hms_close (0);
-  if (name && strlen (name))
-    dev_name = strdup (name);
-  if (!serial_open (dev_name))
+  dev_name = strdup (name);
+
+  if (!(desc = SERIAL_OPEN (dev_name)))
     perror_with_name ((char *) dev_name);
-  serial_raw ();
+
+  SERIAL_RAW (desc);
   is_open = 1;
 
   dcache_init ();
 
-  get_baudrate_right ();
-
   /* Hello?  Are you there?  */
-  serial_write ("\r", 1);
+  SERIAL_WRITE (desc, "\r", 1);
   expect_prompt ();
 
   /* Clear any break points */
@@ -625,10 +609,11 @@ hms_close (quitting)
   /* Clear any break points */
   hms_clear_breakpoints ();
   sleep (1);			/* Let any output make it all the way back */
-  if (is_open) {
-    serial_write ("R\r", 2);
-    serial_close ();
-  }
+  if (is_open)
+    {
+      SERIAL_WRITE (desc, "R\r", 2);
+      SERIAL_CLOSE (desc);
+    }
   is_open = 0;
 }
 
@@ -799,7 +784,7 @@ get_reg_name (regno)
 }
 
 /* Read the remote registers.  */
-static int 
+static int
 gethex (length, start, ok)
      unsigned int length;
      char *start;
@@ -849,7 +834,6 @@ timed_read (buf, n, timeout)
 
     }
   return i;
-
 }
 
 hms_write (a, l)
@@ -857,7 +841,7 @@ hms_write (a, l)
 {
   int i;
 
-  serial_write (a, l);
+  SERIAL_WRITE (desc, a, l);
 
   if (!quiet)
     for (i = 0; i < l; i++)
@@ -937,8 +921,6 @@ static void
 hms_store_register (regno)
      int regno;
 {
-
-  /* printf("hms_store_register() called.\n"); fflush(stdout); /* */
   if (regno == -1)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
@@ -1217,7 +1199,7 @@ hms_read_inferior_memory (memaddr, myaddr, len)
 
 	}
     }
-  expect("emory>");
+  expect ("emory>");
   hms_write_cr (" ");
   expect_prompt ();
   return len;
@@ -1386,13 +1368,11 @@ hms_speed (s)
       int newrate = atoi (s);
       int which = 0;
 
-      if (!serial_setbaudrate (newrate))
+      if (SERIAL_SETBAUDRATE (desc, newrate))
 	error ("Can't use %d baud\n", newrate);
 
       printf_filtered ("Checking target is in sync\n");
 
-      get_baudrate_right ();
-      baudrate = newrate;
       printf_filtered ("Sending commands to set target to %d\n",
 		       baudrate);
 

@@ -241,7 +241,7 @@ sparclite*-*-*)		gdb_target=sparclite ;;
 tahoe-*-*)		gdb_target=tahoe ;;
 vax-*-*)		gdb_target=vax ;;
 
-z8k-unknown-sim)	gdb_target=z8ksim ;;
+z8k-*-sim)		gdb_target=z8ksim ;;
 esac
 
 if [ ! -f ${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt ]; then

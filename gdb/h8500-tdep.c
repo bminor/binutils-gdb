@@ -659,7 +659,7 @@ h8500_is_trapped_internalvar (name)
     return 0;
 }
 
-PTR
+value
 h8500_value_of_trapped_internalvar (var)
      struct internalvar *var;
 {
