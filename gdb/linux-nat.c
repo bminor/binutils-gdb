@@ -1,6 +1,6 @@
 /* GNU/Linux native-dependent code common to multiple platforms.
 
-   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -293,8 +293,11 @@ linux_supports_tracevforkdone (int pid)
 void
 linux_enable_event_reporting (ptid_t ptid)
 {
-  int pid = ptid_get_pid (ptid);
+  int pid = ptid_get_lwp (ptid);
   int options;
+
+  if (pid == 0)
+    pid = ptid_get_pid (ptid);
 
   if (! linux_supports_tracefork (pid))
     return;
@@ -340,7 +343,9 @@ child_follow_fork (int follow_child)
 
   get_last_target_status (&last_ptid, &last_status);
   has_vforked = (last_status.kind == TARGET_WAITKIND_VFORKED);
-  parent_pid = ptid_get_pid (last_ptid);
+  parent_pid = ptid_get_lwp (last_ptid);
+  if (parent_pid == 0)
+    parent_pid = ptid_get_pid (last_ptid);
   child_pid = last_status.value.related_pid;
 
   if (! follow_child)

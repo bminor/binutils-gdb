@@ -1,3 +1,8 @@
+2005-03-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-nat.c (linux_supports_tracevforkdone, child_follow_fork):
+	Use LWP IDs.
+
 2005-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2loc.c (loclist_read_variable): Set optimized_out
