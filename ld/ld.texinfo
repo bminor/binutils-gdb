@@ -18,7 +18,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the @sc{gnu} linker LD version @value{VERSION}.
 
-Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -2235,13 +2235,15 @@ include all input @samp{.text} sections, you would write:
 *(.text)
 @end smallexample
 @noindent
-Here the @samp{*} is a wildcard which matches any file name.  To exclude a file
-from matching the file name wildcard, EXCLUDE_FILE may be used to match all files
-except the one specified by EXCLUDE_FILE.  For example:
+Here the @samp{*} is a wildcard which matches any file name.  To exclude a list
+of files from matching the file name wildcard, EXCLUDE_FILE may be used to
+match all files except the ones specified in the EXCLUDE_FILE list.  For
+example:
 @smallexample
-(*(EXCLUDE_FILE (*crtend.o) .ctors))
+(*(EXCLUDE_FILE (*crtend.o, *otherfile.o) .ctors))
 @end smallexample
-will cause all .ctors sections from all files except crtend.o to be included.
+will cause all .ctors sections from all files except crtend.o and otherfile.o
+to be included.
 
 There are two ways to include more than one section:
 @smallexample

@@ -1,3 +1,16 @@
+Wed Jan  5 08:02:12 2000  Catherine Moore  <clm@cygnus.com>
+
+	* ld.h (wildcard_spec):  Change exclude_name to exclude_name_list.
+	(name_list): New.
+	* ld.texinfo (EXCLUDE_FILE): Update documentation.
+	* ldgram.y (wildcard_spec): Support a list of excluded_files.
+	(exclude_name_list): New.
+	ldlang.c (walk_wild_section): Support list of excluded files.
+	(print_wild_statement): Likewise.
+	(lang_add_wild): Likewise.
+	* ldlang.h (lang_wild_statement_type): Likewise.
+	* scripttempl/elf.sc (OTHER_EXCLUDE_FILES): Support.
+	
 2000-01-04  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* pe-dll.c (pe_dll_warn_dup_exports): New variable.

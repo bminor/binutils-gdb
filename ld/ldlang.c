@@ -1,5 +1,5 @@
 /* Linker command language support.
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -213,17 +213,21 @@ walk_wild_section (ptr, section, file, callback, data)
      void *data;
 {
   /* Don't process sections from files which were excluded. */
-  if (ptr->exclude_filename != NULL)
+  if (ptr->exclude_filename_list != NULL)
     {
-      boolean match;
+      struct name_list *list_tmp;
+      for (list_tmp = ptr->exclude_filename_list; list_tmp; list_tmp = list_tmp->next)
+        {
+	  boolean match;
 
-      if (wildcardp (ptr->exclude_filename))
-         match = fnmatch (ptr->exclude_filename, file->filename, 0) == 0 ? true : false;
-      else
-         match = strcmp (ptr->exclude_filename, file->filename) == 0 ? true : false;
+	  if (wildcardp (list_tmp->name))
+	    match = fnmatch (list_tmp->name, file->filename, 0) == 0 ? true : false;
+	  else
+	    match = strcmp (list_tmp->name, file->filename) == 0 ? true : false;
 
-      if (match)
-        return;
+	  if (match)
+	    return;
+	}
     }
 
   if (file->just_syms_flag == false)
@@ -2360,9 +2364,15 @@ print_wild_statement (w, os)
 
   if (w->filenames_sorted)
     minfo ("SORT(");
-  if (w->exclude_filename != NULL)
-    minfo ("EXCLUDE_FILE ( %s )", w->exclude_filename);
-  if (w->filename != NULL)
+  if (w->exclude_filename_list != NULL)
+    {
+      name_list *tmp;
+      minfo ("EXCLUDE_FILE ( %s", w->exclude_filename_list->name);
+      for (tmp=w->exclude_filename_list->next; tmp; tmp = tmp->next)
+        minfo (", %s", tmp->name);
+      minfo (")");
+     }
+   if (w->filename != NULL)
     minfo ("%s", w->filename);
   else
     minfo ("*");
@@ -4029,13 +4039,13 @@ lang_process ()
 
 void
 lang_add_wild (section_name, sections_sorted, filename, filenames_sorted,
-	       keep_sections, exclude_filename)
+	       keep_sections, exclude_filename_list)
      const char *const section_name;
      boolean sections_sorted;
      const char *const filename;
      boolean filenames_sorted;
      boolean keep_sections;
-     const char *exclude_filename;
+     struct name_list *exclude_filename_list;
 {
   lang_wild_statement_type *new = new_stat (lang_wild_statement,
 					    stat_ptr);
@@ -4053,7 +4063,7 @@ lang_add_wild (section_name, sections_sorted, filename, filenames_sorted,
   new->filename = filename;
   new->filenames_sorted = filenames_sorted;
   new->keep_sections = keep_sections;
-  new->exclude_filename = exclude_filename;
+  new->exclude_filename_list = exclude_filename_list;
   lang_list_init (&new->children);
 }
 

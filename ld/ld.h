@@ -1,5 +1,5 @@
 /* ld.h -- general linker header file
-   Copyright (C) 1991, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1991, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -56,13 +56,20 @@
    discarded.  */
 #define DISCARD_SECTION_NAME "/DISCARD/"
 
+/* A file name list */
+typedef struct name_list
+{
+   const char *name;
+   struct name_list *next;
+} name_list;
+
 /* A wildcard specification.  This is only used in ldgram.y, but it
    winds up in ldgram.h, so we need to define it outside.  */
 
 struct wildcard_spec
 {
   const char *name;
-  const char *exclude_name;
+  struct name_list *exclude_name_list;
   boolean sorted;
 };
 

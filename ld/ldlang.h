@@ -1,5 +1,5 @@
 /* ldlang.h - linker command language support
-   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    
    This file is part of GLD, the Gnu Linker.
@@ -283,7 +283,7 @@ typedef struct lang_wild_statement_struct
   const char *filename;
   boolean filenames_sorted;
   boolean keep_sections;
-  const char *exclude_filename;
+  struct name_list *exclude_filename_list;
   lang_statement_list_type children;
 } lang_wild_statement_type;
 
@@ -401,7 +401,7 @@ extern void lang_section_start PARAMS ((const char *, union etree_union *));
 extern void lang_add_entry PARAMS ((const char *, boolean));
 extern void lang_add_target PARAMS ((const char *));
 extern void lang_add_wild
-  PARAMS ((const char *, boolean, const char *, boolean, boolean, const char *));
+  PARAMS ((const char *, boolean, const char *, boolean, boolean, name_list *));
 extern void lang_add_map PARAMS ((const char *));
 extern void lang_add_fill PARAMS ((int));
 extern lang_assignment_statement_type * lang_add_assignment PARAMS ((union etree_union *));

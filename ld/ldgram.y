@@ -1,5 +1,5 @@
 /* A YACC grammer to parse a superset of the AT&T linker scripting languaue.
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
@@ -70,6 +70,7 @@ static int error_index;
   char *name;
   const char *cname;
   struct wildcard_spec wildcard;
+  struct name_list *name_list;
   int token;
   union etree_union *etree;
   struct phdr_info
@@ -89,6 +90,7 @@ static int error_index;
 %type <etree> exp opt_exp_with_type mustbe_exp opt_at phdr_type phdr_val
 %type <etree> opt_exp_without_type
 %type <integer> fill_opt
+%type <name_list> exclude_name_list
 %type <name> memspec_opt casesymlist
 %type <cname> wildcard_name
 %type <wildcard> wildcard_spec
@@ -392,28 +394,49 @@ wildcard_spec:
 			{
 			  $$.name = $1;
 			  $$.sorted = false;
-			  $$.exclude_name = NULL;
+			  $$.exclude_name_list = NULL;
 			}
-	| 	EXCLUDE_FILE '(' wildcard_name ')' wildcard_name
+	| 	EXCLUDE_FILE '(' exclude_name_list ')' wildcard_name
 			{
 			  $$.name = $5;
 			  $$.sorted = false;
-			  $$.exclude_name = $3;
+			  $$.exclude_name_list = $3;
 			}
 	|	SORT '(' wildcard_name ')'
 			{
 			  $$.name = $3;
 			  $$.sorted = true;
-			  $$.exclude_name = NULL;
+			  $$.exclude_name_list = NULL;
 			}
-	|	SORT '(' EXCLUDE_FILE '(' wildcard_name ')' wildcard_name ')'
+	|	SORT '(' EXCLUDE_FILE '(' exclude_name_list ')' wildcard_name ')'
 			{
 			  $$.name = $7;
 			  $$.sorted = true;
-			  $$.exclude_name = $5;
+			  $$.exclude_name_list = $5;
 			}
 	;
 
+
+
+exclude_name_list:
+		exclude_name_list ',' wildcard_name
+			{
+			  struct name_list *tmp;
+			  tmp = (struct name_list *) xmalloc (sizeof *tmp);
+			  tmp->name = $3;
+			  tmp->next = $1;
+			  $$ = tmp;	
+			}
+	|
+		wildcard_name
+			{
+			  struct name_list *tmp;
+			  tmp = (struct name_list *) xmalloc (sizeof *tmp);
+			  tmp->name = $1;
+			  tmp->next = NULL;
+			  $$ = tmp;
+			}
+	;
 
 file_NAME_list:
 		wildcard_spec
@@ -421,14 +444,14 @@ file_NAME_list:
 			  lang_add_wild ($1.name, $1.sorted,
 					 current_file.name,
 					 current_file.sorted,
-					 ldgram_had_keep, $1.exclude_name);
+					 ldgram_had_keep, $1.exclude_name_list);
 			}
 	|	file_NAME_list opt_comma wildcard_spec
 			{
 			  lang_add_wild ($3.name, $3.sorted,
 					 current_file.name,
 					 current_file.sorted,
-					 ldgram_had_keep, $3.exclude_name);
+					 ldgram_had_keep, $3.exclude_name_list);
 			}
 	;
 
