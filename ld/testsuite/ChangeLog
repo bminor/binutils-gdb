@@ -1,3 +1,22 @@
+Wed Jul  1 10:51:46 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-undefined/undefined.exp: arm and thumb PE toolchains now pass
+	these tests.
+
+Fri Jun 19 17:12:52 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/weak.exp: New test.
+	* ld-scripts/weak.t: New file.
+	* ld-scripts/weak1.s: New file.
+	* ld-scripts/weak2.s: New file.
+
+Tue Jun 16 12:40:38 1998  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* ld-elfvers/vers.exp: Run tests on powerpc ELF targets.
+	* ld-shared/shared.exp: Likewise.
+	* ld-elfvers/vers1.dsym: Allow for .sdata.
+	* ld-srec/srec.exp: Add setup_xfails for PowerPC Linux.
+
 Fri May 29 15:02:50 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-srec/srec.exp: Add xfails for powerpc*-*-eabi.
