@@ -1,3 +1,9 @@
+1999-09-06  Donn Terry  <donn@interix.com>
+
+	* nm.c (print_symbol_info_bsd): Check for 'w' as well as 'U'.
+	(print_symbol_info_sysv): Likewise.
+	(print_symbol_info_posix): Likewise.
+
 1999-09-04  Steve Chamberlain  <sac@pobox.com>
 
 	* readelf.c: Include "elf/pj.h".
