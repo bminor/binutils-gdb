@@ -1,3 +1,7 @@
+Sun Jun 20 20:58:02 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
+
+	* Makefile.in: Undo 15 June change.
+
 Wed Jun 16 12:54:53 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
     
 	* gmon.h, gprof.h: structs of chars used to hold external
