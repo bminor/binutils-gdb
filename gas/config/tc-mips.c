@@ -12194,8 +12194,8 @@ md_estimate_size_before_relax (fragp, segtype)
 		&& !linkonce
 #ifdef OBJ_ELF
 		/* A global or weak symbol is treated as external.  */
-	  	&& (OUTPUT_FLAVOR == bfd_target_elf_flavour
-		    && ! (S_IS_EXTERN (sym) || S_IS_WEAK (sym)))
+	  	&& (OUTPUT_FLAVOR != bfd_target_elf_flavour
+		    || (! S_IS_EXTERN (sym) && ! S_IS_WEAK (sym)))
 #endif
 		);
     }
