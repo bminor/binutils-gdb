@@ -454,10 +454,8 @@ md_begin ()
   if (! ok)
     as_warn ("Could not set architecture and machine");
 
-  if ((op_hash = hash_new ()) == NULL)
-    {
-      as_fatal ("Virtual memory exhausted");
-    }
+  op_hash = hash_new ();
+
   for (i = 0; i < NUMOPCODES;)
     {
       const char *name = mips_opcodes[i].name;
@@ -545,7 +543,7 @@ md_begin ()
 }
 
 void
-md_end ()
+md_mips_end ()
 {
 #ifndef ECOFF_DEBUGGING
   md_obj_end ();
@@ -3892,9 +3890,9 @@ mips_ip (str, ip)
 			}
 		      else
 			goto notreg;
-		      if (regno == AT && ! mips_noat)
-			as_warn ("Used $at without \".set noat\"");
 		    }
+		  if (regno == AT && ! mips_noat)
+		    as_warn ("Used $at without \".set noat\"");
 		  c = *args;
 		  if (*s == ' ')
 		    s++;
@@ -4446,64 +4444,12 @@ md_number_to_chars (buf, val, n)
   switch (byte_order)
     {
     case LITTLE_ENDIAN:
-      switch (n)
-	{
-	case 8:
-	  *buf++ = val;
-	  val >>= 8;
-	  *buf++ = val;
-	  val >>= 8;
-	  *buf++ = val;
-	  val >>= 8;
-	  *buf++ = val;
-	  val >>= 8;
-	  /* FALLTHROUGH */
-	case 4:
-	  *buf++ = val;
-	  val >>= 8;
-	  *buf++ = val;
-	  val >>= 8;
-	  /* FALLTHROUGH */
-	case 2:
-	  *buf++ = val;
-	  val >>= 8;
-	  /* FALLTHROUGH */
-	case 1:
-	  *buf = val;
-	  return;
-
-	default:
-	  internalError ();
-	}
+      number_to_chars_littleendian (buf, val, n);
+      break;
 
     case BIG_ENDIAN:
-      switch (n)
-	{
-	case 8:
-	  {
-	    valueT hi;
-
-	    hi = val;
-	    hi >>= 16;
-	    hi >>= 16;
-	    md_number_to_chars (buf, hi, 4);
-	    buf += 4;
-	  }
-	  /* FALLTHROUGH */
-	case 4:
-	  *buf++ = val >> 24;
-	  *buf++ = val >> 16;
-	  /* FALLTHROUGH */
-	case 2:
-	  *buf++ = val >> 8;
-	  /* FALLTHROUGH */
-	case 1:
-	  *buf = val;
-	  return;
-
-	default:
-	  internalError ();
-	}
+      number_to_chars_bigendian (buf, val, n);
+      break;
 
     default:
       internalError ();
