@@ -1,3 +1,8 @@
+2002-09-17  Andrew Cagney  <ac131313@redhat.com>
+
+	* arch-utils.c (legacy_virtual_frame_pointer): If FP_REGNUM is
+	invalid, return SP_REGNUM.
+
 2002-09-17  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (mips_pop_frame): Read saved values of floating
