@@ -459,13 +459,11 @@ Tue Sep 15 15:14:45 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-opc.h,m32r-opc.c: Add bbpc,bbpsw support.
 
-start-sanitize-nortel-ppc750
 1998-09-09  Michael Meissner  <meissner@cygnus.com>
 
 	* ppc-opc.c (powerpc_opcodes): Add support for PowerPC 750 move
 	to/from SPRs.
 
-end-sanitize-nortel-ppc750
 Fri Sep  4 19:42:59 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-dis.c (print_insn_big_arm): Detect Thumb symbols in elf
