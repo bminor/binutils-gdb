@@ -9184,6 +9184,8 @@ mips16_extended_frag (fragp, sec, stretch)
 	  return 1;
 	}
     }
+  else if (symsec != absolute_section && sec != NULL)
+    as_bad_where (fragp->fr_file, fragp->fr_line, "unsupported relocation");
 
   if ((val & ((1 << op->shift) - 1)) != 0
       || val < (mintiny << op->shift)

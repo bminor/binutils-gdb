@@ -1,3 +1,8 @@
+Tue Dec 10 11:37:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (mips16_extended_frag): Give an error for an
+	attempt to use a non absolute symbol in an extending frag.
+
 Mon Dec  9 16:48:20 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10200.c: Flesh out assembler support for MN10200.
