@@ -265,6 +265,8 @@ i386_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_START_OFFSET 0  /* Start execution at beginning of dummy */
 
+#define CALL_DUMMY_BREAKPOINT_OFFSET 5
+
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 

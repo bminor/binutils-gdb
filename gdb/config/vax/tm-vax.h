@@ -321,6 +321,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define CALL_DUMMY_START_OFFSET 0  /* Start execution at beginning of dummy */
 
+#define CALL_DUMMY_BREAKPOINT_OFFSET 7
+
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 

@@ -319,6 +319,8 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 #define CALL_DUMMY_START_OFFSET 12
 
+#define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + (12 * 4))
+
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
