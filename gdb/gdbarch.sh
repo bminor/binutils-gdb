@@ -196,7 +196,6 @@ do
 	# An optional indicator for any predicte to wrap around the
 	# print member code.
 
-	#   # -> Wrap print up in ``#ifdef MACRO''
 	#   exp -> Wrap print up in ``if (${print_p}) ...
 	#   ``'' -> No predicate
 
@@ -269,8 +268,8 @@ v:1:CALL_DUMMY_STACK_ADJUST_P:int:call_dummy_stack_adjust_p::::0:-1::0x%08lx
 v:2:CALL_DUMMY_STACK_ADJUST:int:call_dummy_stack_adjust::::0::gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0:0x%08lx::CALL_DUMMY_STACK_ADJUST_P
 f:2:FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p::0:0
 #
-v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion::::0:::::#
-v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type::::0:::::#
+v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion::::0:::::
+v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type::::0:::::
 f:2:COERCE_FLOAT_TO_DOUBLE:int:coerce_float_to_double:struct type *formal, struct type *actual:formal, actual:::default_coerce_float_to_double:0
 f:1:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval::generic_get_saved_register:0
 #
@@ -1126,6 +1125,7 @@ gdbarch_dump (void)
 EOF
 function_list | while do_read # eval read $read
 do
+    echo "#ifdef ${macro}"
     if class_is_function_p
     then
 	echo "  fprintf_unfiltered (gdb_stdlog,"
@@ -1133,14 +1133,7 @@ do
 	echo "                      (long) current_gdbarch->${function}"
 	echo "                      /*${macro} ()*/);"
     else
-	if [ "${print_p}" = "#" ]
-	then
-	  echo "#ifdef ${macro}"
-	  echo "  fprintf_unfiltered (gdb_stdlog,"
-	  echo "                      \"gdbarch_update: ${macro} = ${fmt}\\n\","
-	  echo "                      ${print});"
-	  echo "#endif"
-	elif [ "${print_p}" ]
+	if [ "${print_p}" ]
 	then
 	  echo "  if (${print_p})"
 	  echo "    fprintf_unfiltered (gdb_stdlog,"
@@ -1152,8 +1145,14 @@ do
 	  echo "                      ${print});"
 	fi
     fi
+    echo "#endif"
 done
-echo "}"
+cat <<EOF
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: GDB_MULTI_ARCH = %d\\n",
+                      GDB_MULTI_ARCH);
+}
+EOF
 
 
 # GET/SET
