@@ -93,24 +93,15 @@ else
 	done
 fi
 
-if ( echo $* | grep keep\-29k > /dev/null ) ; then
-	echo Keeping 29k in amdcoff.c and Makefile.in and targets.c
-else
-	echo Sanitizing 29k in amdcoff.c and Makefile.in and targets.c
-	rm -f amdcoff.c
-	rm -f new
-	sed -e 's/ amdcoff.[co] / /g' <Makefile.in >new
-	mv new Makefile.in
-	sed -e '/a29kcoff/d' <targets.c >new
-	mv new targets.c
-fi
-
 echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.17  1991/08/22 20:23:12  steve
+# Revision 1.18  1991/08/29 00:35:06  gnu
+# paperwork handled for AMD Coff.
+#
+# Revision 1.17  1991/08/22  20:23:12  steve
 # *** empty log message ***
 #
 # Revision 1.16  1991/08/22  07:31:21  gnu
