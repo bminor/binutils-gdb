@@ -19,6 +19,7 @@ start-sanitize-v8plus
 end-sanitize-v8plus
 	Add v9a support.
 start-sanitize-v8plus
+	(sparc_compatible): New function.
 	* elf32-sparc.h: #include "elf/sparc.h".
 	(elf32_sparc_set_private_flags, elf32_sparc_copy_private_bfd_data,
 	elf32_sparc_merge_private_bfd_data, elf32_sparc_object_p,
