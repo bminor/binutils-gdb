@@ -657,7 +657,7 @@ case "${target}" in
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
   mn10300-*-*)
-    noconfigdirs="$noconfigdirs target-libgloss"
+    noconfigdirs="$noconfigdirs"
     ;;
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
