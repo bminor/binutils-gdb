@@ -34,8 +34,6 @@
    NetBSD/sparc64 overlaps with M_MIPS1.  */
 #define M_SPARC64_OPENBSD	M_MIPS1
 
-/* FIXME: On NetBSD/sparc CORE_FPU_OFFSET should be (sizeof (struct trapframe)).  */
-
 struct netbsd_core_struct
 {
   struct core core;
@@ -63,7 +61,7 @@ netbsd_core_file_p (abfd)
 {
   int i, val;
   file_ptr offset;
-  asection *asect, *asect2;
+  asection *asect;
   struct core core;
   struct coreseg coreseg;
   bfd_size_type amt = sizeof core;
@@ -143,24 +141,6 @@ netbsd_core_file_p (abfd)
       asect->alignment_power = 2;
 
       offset += coreseg.c_size;
-
-#ifdef CORE_FPU_OFFSET
-      switch (CORE_GETFLAG (coreseg))
-	{
-	case CORE_CPU:
-	  /* Hackish...  */
-	  asect->_raw_size = CORE_FPU_OFFSET;
-	  asect2 = bfd_make_section_anyway (abfd, ".reg2");
-	  if (asect2 == NULL)
-	    goto punt;
-	  asect2->_raw_size = coreseg.c_size - CORE_FPU_OFFSET;
-	  asect2->vma = 0;
-	  asect2->filepos = asect->filepos + CORE_FPU_OFFSET;
-	  asect2->alignment_power = 2;
-	  asect2->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
-	  break;
-	}
-#endif
     }
 
  /* Set architecture from machine ID.  */
