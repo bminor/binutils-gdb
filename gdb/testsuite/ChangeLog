@@ -1,3 +1,8 @@
+2004-11-11  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.threads/threadapply.exp: New test.
+	* gdb.threads/threadapply.c: New file.
+
 2004-11-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/savedregs.exp: Correct pattern used for sigtramp
