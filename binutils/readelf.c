@@ -945,7 +945,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 		  _bfd_int64_low (info));
 #else
 	  printf (do_wide
-		  ? "%16.16lx  %16.16lx ",
+		  ? "%16.16lx  %16.16lx "
 		  : "%12.12lx  %12.12lx ",
 		  offset, info);
 #endif
