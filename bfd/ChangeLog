@@ -1,5 +1,10 @@
 Mon Aug 15 12:16:56 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* elfcode.h (bfd_section_from_shdr): If a SHT_SYMTAB section in a
+	shared object has SHF_ALLOC set, create a BFD section for it.
+	(elf_section_from_bfd_section): There may be a BFD section for a
+	SHT_SYMTAB section.
+
 	* coffcode.h (styp_to_sec_flags): Add name argument.  If no flags
 	are recognized, chose section flags based on the name.
 	(bfd_coff_backend_data): _bfd_styp_to_sec_flags_hook field: Add

@@ -546,6 +546,18 @@ bfd_section_from_shdr (abfd, shindex)
       elf_tdata (abfd)->symtab_hdr = *hdr;
       elf_elfsections (abfd)[shindex] = &elf_tdata (abfd)->symtab_hdr;
       abfd->flags |= HAS_SYMS;
+
+      /* Sometimes a shared object will map in the symbol table.  If
+         SHF_ALLOC is set, and this is a shared object, then we also
+         treat this section as a BFD section.  We can not base the
+         decision purely on SHF_ALLOC, because that flag is sometimes
+         set in a relocateable object file, which would confuse the
+         linker.  */
+      if ((hdr->sh_flags & SHF_ALLOC) != 0
+	  && (abfd->flags & DYNAMIC) != 0
+	  && ! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+	return false;
+
       return true;
 
     case SHT_DYNSYM:		/* A dynamic symbol table */
@@ -2586,6 +2598,7 @@ elf_section_from_bfd_section (abfd, asect)
 	case SHT_HASH:
 	case SHT_DYNAMIC:
 	case SHT_DYNSYM:
+	case SHT_SYMTAB:
 	  if (hdr->rawdata)
 	    {
 	      if (((struct sec *) (hdr->rawdata)) == asect)
