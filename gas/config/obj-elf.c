@@ -1,6 +1,6 @@
 /* ELF object file format
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -290,9 +290,10 @@ elf_common (is_common)
   char *name;
   char c;
   char *p;
-  int temp, size;
+  offsetT temp, size, sign;
   symbolS *symbolP;
   int have_align;
+  expressionS exp;
 
   if (flag_mri && is_common)
     {
@@ -313,13 +314,15 @@ elf_common (is_common)
       return NULL;
     }
   input_line_pointer++;		/* skip ',' */
-  if ((temp = get_absolute_expression ()) < 0)
+  temp = get_absolute_expr (&exp);
+  sign = (offsetT) 1 << (stdoutput->arch_info->bits_per_address - 1);
+  size = temp & ((sign << 1) - 1);
+  if (temp != size || !exp.X_unsigned)
     {
-      as_bad (_(".COMMon length (%d.) <0! Ignored."), temp);
+      as_bad (_(".COMMon length (%ld) out of range, ignored."), (long) temp);
       ignore_rest_of_line ();
       return NULL;
     }
-  size = temp;
   *p = 0;
   symbolP = symbol_find_or_make (name);
   *p = c;
@@ -333,8 +336,9 @@ elf_common (is_common)
     {
       if (S_GET_VALUE (symbolP) != (valueT) size)
 	{
-	  as_warn (_("length of .comm \"%s\" is already %ld; not changed to %d"),
-		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
+	  as_warn (_("length of .comm \"%s\" is already %ld; not changed to %ld"),
+		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP),
+		   (long) size);
 	}
     }
   know (symbolP->sy_frag == &zero_address_frag);
@@ -352,8 +356,8 @@ elf_common (is_common)
 	temp = 0;
       else
 	{
-	  temp = get_absolute_expression ();
-	  if (temp < 0)
+	  temp = get_absolute_expr (&exp);
+	  if (!exp.X_unsigned)
 	    {
 	      temp = 0;
 	      as_warn (_("common alignment negative; 0 assumed"));

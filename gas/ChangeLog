@@ -1,3 +1,12 @@
+2003-01-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* read.c (get_absolute_expr): New, split out from..
+	(get_absolute_expression): ..here.
+	* read.h (get_absolute_expr): Declare.
+	* config/obj-elf.c (elf_common): Use offsetT for "temp" and "size".
+	Trim size to arch bits_per_address, and test for negative input
+	via get_absolute_expr.
+
 2003-01-07  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-xstormy16.c (md_cgen_lookup_reloc): Adjust value based

@@ -1,6 +1,6 @@
 /* read.c - read a source file -
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -4802,18 +4802,25 @@ get_known_segmented_expression (expP)
 }
 
 offsetT
+get_absolute_expr (exp)
+     expressionS *exp;
+{
+  expression (exp);
+  if (exp->X_op != O_constant)
+    {
+      if (exp->X_op != O_absent)
+	as_bad (_("bad or irreducible absolute expression"));
+      exp->X_add_number = 0;
+    }
+  return exp->X_add_number;
+}
+
+offsetT
 get_absolute_expression ()
 {
   expressionS exp;
 
-  expression (&exp);
-  if (exp.X_op != O_constant)
-    {
-      if (exp.X_op != O_absent)
-	as_bad (_("bad or irreducible absolute expression"));
-      exp.X_add_number = 0;
-    }
-  return exp.X_add_number;
+  return get_absolute_expr (&exp);
 }
 
 char				/* Return terminator.  */
