@@ -1,0 +1,48 @@
+# Script fragment to build MPW GAS.
+
+Set BuildTarget "none"
+
+Loop
+	Break If {#} == 0
+	If "{1}" =~ /--srcdir/
+		Set srcdir "{2}"
+		Shift 1
+	Else If "{1}" =~ /--topdir/
+		Set topsrcdir "{2}"
+		Shift 1
+	Else If "{1}" =~ /--prefix/
+		Set prefix "{2}"
+		Shift 1
+	Else If "{1}" =~ /-v/
+		Set verify 1
+		Set verifystr "-v"
+		Shift 1
+	Else
+		If "{BuildTarget}" =~ /none/
+			Set BuildTarget "{1}"
+		Else
+			Echo Only one build target allowed, ignoring "{1}"
+		End If
+	End If
+	Shift 1
+End Loop
+
+Set libsubdir "{libdir}"gcc-lib:"{target_canonical}":"{version}":
+
+If "{BuildTarget}" =~ /all/
+	Echo "Set Echo 1" >all.makeout
+	Make >>all.makeout
+	all.makeout
+	Delete all.makeout
+Else If "{BuildTarget}" =~ /install/
+	If "`Exists "{prefix}"`" == ""
+		Echo "{prefix}" does not exist, cannot install anything
+		Exit 1
+	End If
+	If "`Exists "{bindir}"`" == ""
+		NewFolder "{bindir}"
+	End If
+	Duplicate -y :as.new "{bindir}"as
+Else
+	Echo {BuildTarget} not a valid build target
+End If

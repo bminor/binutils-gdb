@@ -1,3 +1,11 @@
+Tue Jan 25 10:49:31 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-config.in (varargs.h, sys/*.h): Don't create when
+	configuring.
+	(host.h): Create with forward-include.
+	* mpw-make.in (CFLAGS): Add -w flag.
+	* mpw-build.in: New file, build script fragment.
+
 Fri Jan  7 11:18:48 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-make.in: Replace 8-bit chars with their names.
