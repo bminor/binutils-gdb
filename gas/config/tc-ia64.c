@@ -219,6 +219,7 @@ static struct
 	fixup[2];			/* at most two fixups per insn */
 	struct ia64_opcode *idesc;
 	struct label_fix *label_fixups;
+	struct label_fix *tag_fixups;
 	struct unw_rec_list *unwind_record;	/* Unwind directive.  */
 	expressionS opnd[6];
 	char *src_file;
@@ -897,8 +898,17 @@ ia64_flush_insns ()
       symbol_set_frag (lfix->sym, frag_now);
     }
   CURR_SLOT.label_fixups = 0;
+  for (lfix = CURR_SLOT.tag_fixups; lfix; lfix = lfix->next)
+    {
+      S_SET_VALUE (lfix->sym, frag_now_fix ());
+      symbol_set_frag (lfix->sym, frag_now);
+    }
+  CURR_SLOT.tag_fixups = 0;
 
   subseg_set (saved_seg, saved_subseg);
+
+  if (md.qp.X_op == O_register)
+    as_bad ("qualifying predicate not followed by instruction");
 }
 
 void
@@ -5476,7 +5486,7 @@ emit_one_bundle ()
 	{
 	  bfd_vma addr;
 
-	  addr = frag_now->fr_address + frag_now_fix () - 16 + 1 * i;
+	  addr = frag_now->fr_address + frag_now_fix () - 16 + i;
 	  dwarf2_gen_line_info (addr, &md.slot[curr].debug_line);
 	}
 
@@ -5502,6 +5512,12 @@ emit_one_bundle ()
       for (lfix = md.slot[curr].label_fixups; lfix; lfix = lfix->next)
 	{
 	  S_SET_VALUE (lfix->sym, frag_now_fix () - 16);
+	  symbol_set_frag (lfix->sym, frag_now);
+	}
+      /* and fix up the tags also.  */
+      for (lfix = md.slot[curr].tag_fixups; lfix; lfix = lfix->next)
+	{
+	  S_SET_VALUE (lfix->sym, frag_now_fix () - 16 + i);
 	  symbol_set_frag (lfix->sym, frag_now);
 	}
 
@@ -5962,6 +5978,8 @@ ia64_end_of_source ()
 void
 ia64_start_line ()
 {
+  if (md.qp.X_op == O_register)
+    as_bad ("qualifying predicate not followed by instruction");
   md.qp.X_op = O_absent;
 
   if (ignore_input ())
@@ -5975,6 +5993,10 @@ ia64_start_line ()
 	insn_group_break (1, 0, 0);
     }
 }
+
+/* This is a hook for ia64_frob_label, so that it can distinguish tags from
+   labels.  */
+static int defining_tag = 0;
 
 int
 ia64_unrecognized_line (ch)
@@ -6046,6 +6068,44 @@ ia64_unrecognized_line (ch)
       demand_empty_rest_of_line ();
       return 1;
 
+    case '[':
+      {
+	char *s;
+	char c;
+	symbolS *tag;
+
+	if (md.qp.X_op == O_register)
+	  {
+	    as_bad ("Tag must come before qualifying predicate.");
+	    return 0;
+	  }
+	s = input_line_pointer;
+	c = get_symbol_end ();
+	if (c != ':')
+	  {
+	    /* Put ':' back for error messages' sake.  */
+	    *input_line_pointer++ = ':';
+	    as_bad ("Expected ':'");
+	    return 0;
+	  }
+	defining_tag = 1;
+	tag = colon (s);
+	defining_tag = 0;
+	/* Put ':' back for error messages' sake.  */
+	*input_line_pointer++ = ':';
+	if (*input_line_pointer++ != ']')
+	  {
+	    as_bad ("Expected ']'");
+	    return 0;
+	  }
+	if (! tag)
+	  {
+	    as_bad ("Tag name expected");
+	    return 0;
+	  }
+	return 1;
+      }
+
     default:
       break;
     }
@@ -6059,6 +6119,18 @@ ia64_frob_label (sym)
      struct symbol *sym;
 {
   struct label_fix *fix;
+
+  /* Tags need special handling since they are not bundle breaks like
+     labels.  */
+  if (defining_tag)
+    {
+      fix = obstack_alloc (&notes, sizeof (*fix));
+      fix->sym = sym;
+      fix->next = CURR_SLOT.tag_fixups;
+      CURR_SLOT.tag_fixups = fix;
+
+      return;
+    }
 
   if (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
     {
@@ -8768,7 +8840,10 @@ md_assemble (str)
 
   qp_regno = 0;
   if (md.qp.X_op == O_register)
-    qp_regno = md.qp.X_add_number - REG_P;
+    {
+      qp_regno = md.qp.X_add_number - REG_P;
+      md.qp.X_op = O_absent;
+    }
 
   flags = idesc->flags;
 

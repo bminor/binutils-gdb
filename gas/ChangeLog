@@ -1,3 +1,16 @@
+2000-10-31  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-ia64.c (struct md): New field tag_fixups.
+	(ia64_flush_insns): Handle tag_fixups.  Error if dangling
+	qualifying predicate.
+	(emit_one_bundle): Delete spurious multiplication by one.  Handle
+	tag_fixups.
+	(ia64_start_line): Error if dangling qualifying predicate.
+	(defining_tag): New static variable.
+	(ia64_unrecognized_line, case '['): Parse tags.
+	(ia64_frob_label): Create tag_fixups.
+	(md_assemble): Reset md.qp.X_op after using it.
+	
 2000-10-31  Kaz Kojima <kkojima@rr.iij4u.or.jp>
 
 	* config/tc-sh.c (md_apply_fix [BFD_RELOC_SH_PCDISP12BY2]): Allow 4094.
