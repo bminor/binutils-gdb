@@ -167,14 +167,16 @@ cp_is_vtbl_ptr_type(type)
      struct type *type;
 {
   char *typename = type_name_no_tag (type);
-/* WAS this and from 4.10, it changed to __vtbl_ptr_type **
-  static const char vtbl_ptr_name[] =
+  /* This was what it was for gcc 2.4.5 and earlier.  */
+  static const char vtbl_ptr_name_old[] =
     { CPLUS_MARKER,'v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
-*/
+  /* It was changed to this after 2.4.5.  */
   static const char vtbl_ptr_name[] =
     { '_','_','v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
 
-  return (typename != NULL && STREQ(typename, vtbl_ptr_name));
+  return (typename != NULL
+	  && (STREQ (typename, vtbl_ptr_name)
+	      || STREQ (typename, vtbl_ptr_name_old)));
 }
 
 /* Return truth value for the assertion that TYPE is of the type

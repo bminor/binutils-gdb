@@ -1,3 +1,14 @@
+Thu Sep 30 11:30:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* cp-valprint.c (cp_is_vtbl_ptr_type): Continue to accept old form.
+
+Thu Sep 30 11:25:55 1993  Kung Hsu  (kung@cygnus.com)
+
+	* cp-valprint.c (cp_is_vtbl_ptr_type):
+	change vtable field name to __vtbl (pr2695).
+
+	* symtab.c (gdb_mangle_name): fix a bug, to get mangled name right.
+
 Wed Sep 29 18:34:22 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in:  Add deps for i386lynx-nat.o and i386lynx-tdep.o to
