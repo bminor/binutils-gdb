@@ -124,7 +124,8 @@ READLINE_CFLAGS = -I$(READLINE_SRC)
 OPCODES = ./../opcodes/libopcodes.a
 # Where are the other opcode tables which only have header file
 # versions?
-OPCODES_CFLAGS = -I$(INCLUDE_DIR)/opcode
+OP_INCLUDE = $(INCLUDE_DIR)/opcode
+OPCODES_CFLAGS = -I$(OP_INCLUDE)
 
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
@@ -440,7 +441,7 @@ gdb.z:gdb.1
 	nroff -man $(srcdir)/gdb.1 | col -b > gdb.t 
 	pack gdb.t ; rm -f gdb.t
 	mv gdb.t.z gdb.z
-	
+
 # Traditionally "install" depends on "all".  But it may be useful
 # not to; for example, if the user has made some trivial change to a 
 # source file and doesn't care about rebuilding or just wants to save the
@@ -500,7 +501,7 @@ rapp: $(RAPP_OBS)
 	rm -f rapp_init.c
 	$(srcdir)/munch $(MUNCH_DEFINE) $(RAPP_OBS) > rapp_init.c
 	$(CC-LD) $(LDFLAGS) -o $@ rapp_init.c $(RAPP_OBS)
-	
+
 config.status:
 	@echo "You must configure gdb.  Look at the README file for details."
 	@false
@@ -1248,7 +1249,7 @@ symfile.o: symfile.c $(breakpoint_h) complaints.h $(defs_h) \
 
 symm-tdep.o: symm-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)	
 symm-xdep.o: symm-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
-	
+
 symmisc.o: symmisc.c $(bfd_h) $(breakpoint_h) $(command_h) $(defs_h) \
 	$(expression_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
 	$(symtab_h) 
@@ -1276,9 +1277,9 @@ utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
 
 valarith.o: valarith.c $(bfd_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h)
-	
+
 valops.o: valops.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
-	
+
 valprint.o: valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
 	$(value_h)

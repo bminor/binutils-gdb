@@ -1,3 +1,17 @@
+Thu Jun 24 13:26:04 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* Makefile.in (OP_INCLUDE): define.
+	  (OPCODE_CFLAGS): use OP_INCLUDE.
+
+	* config/i386/ncr3000.mh, config/i386/i386v4.mh,
+	config/i386/i386sol2.mh, config/m68k/hp300hpux.mh,
+	config/m68k/amix.mh, config/mips/irix[34].mh,
+	config/m88k/delta88.mh, config/sparc/sun4sol2.mh (ALLOCA,
+	ALLOCA1): macros removed.
+
+	* config/mips/decstation.mh, config/rs6000/rs6000.mh
+	(MMALLOC_LIB): renamed to MMALLOC.
+
 Wed Jun 23 00:25:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* partial-stab.h: Consolidate case statements for N_LSYM and N_FUN.
@@ -10,7 +24,7 @@ Wed Jun 23 15:04:54 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 	  for makefile variables references.  dropped leading ./ in file
 	  references.  Drop $(srcdir)/ prefix on all dependencies.
 	  Inserted contents of alldeps.mak and depend.
-	  (INCLUDE_CFLAGS): erdefined as new macro for getting libiberty's
+	  (INCLUDE_CFLAGS): defined as new macro for getting libiberty's
 	  include directory into the compilation line.
 	  (GDB_CFLAGS): new macro to take up the semantic previously held
 	  by INCLUDE_CFLAGS.
