@@ -1652,6 +1652,7 @@ AC_CHECK_HEADERS(wctype.h)
 AC_CHECK_HEADERS(wchar.h)
 AC_CHECK_HEADERS(langinfo.h)
 
+AC_CHECK_FUNC(mbrtowc, AC_DEFINE(HAVE_MBRTOWC))
 AC_CHECK_FUNC(mbsrtowcs, AC_DEFINE(HAVE_MBSRTOWCS))
 AC_CHECK_FUNC(wcwidth, have_wcwidth=yes)
 if test "$have_wcwidth" = yes; then
