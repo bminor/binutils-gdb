@@ -1,3 +1,8 @@
+1999-08-27  Jim Wilson  <wilson@cygnus.com>
+
+	* readelf.c (display_debug_lines, case DW_LNS_const_add_pc): Multiply
+	adv by info.li_min_insn_length. 
+
 1999-08-26  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* readelf.c (get_sparc64_dynamic_type): New function.

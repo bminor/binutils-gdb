@@ -4381,7 +4381,8 @@ display_debug_lines (section, start, file)
 	      break;
 	      
 	    case DW_LNS_const_add_pc:
-	      adv = (255 - info.li_opcode_base) / info.li_line_range;
+	      adv = (((255 - info.li_opcode_base) / info.li_line_range)
+		     * info.li_min_insn_length);
 	      state_machine_regs.address += adv;
 	      printf (_("  Advance PC by constant %d to 0x%lx\n"), adv,
 		      state_machine_regs.address);
