@@ -1,3 +1,8 @@
+2001-06-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* infrun.c, breakpoint.c: Use strncmp as the "mi" test.  Allow,
+	"mi", "mi0" and "mi1".
+
 2001-06-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh: Generate an error when conflicting macro

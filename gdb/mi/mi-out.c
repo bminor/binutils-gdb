@@ -33,6 +33,7 @@ struct ui_out_data
   {
     int suppress_field_separator;
     int first_header;
+    int mi_version;
     struct ui_file *buffer;
   };
 
@@ -379,11 +380,12 @@ mi_out_put (struct ui_out *uiout,
 /* initalize private members at startup */
 
 struct ui_out *
-mi_out_new (void)
+mi_out_new (int mi_version)
 {
   int flags = 0;
   struct ui_out_data *data = XMALLOC (struct ui_out_data);
   data->suppress_field_separator = 0;
+  data->mi_version = mi_version;
   /* FIXME: This code should be using a ``string_file'' and not the
      TUI buffer hack. */
   data->buffer = mem_fileopen ();

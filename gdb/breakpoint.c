@@ -1889,7 +1889,7 @@ print_it_typical (bpstat bs)
 #ifdef UI_OUT
       annotate_breakpoint (bs->breakpoint_at->number);
       ui_out_text (uiout, "\nBreakpoint ");
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+      if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
 	ui_out_field_string (uiout, "reason", "breakpoint-hit");
       ui_out_field_int (uiout, "bkptno", bs->breakpoint_at->number);
       ui_out_text (uiout, ", ");
@@ -2034,7 +2034,7 @@ print_it_typical (bpstat bs)
 	{
 	  annotate_watchpoint (bs->breakpoint_at->number);
 #ifdef UI_OUT
-	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+	  if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
 	    ui_out_field_string (uiout, "reason", "watchpoint-trigger");
 	  mention (bs->breakpoint_at);
 	  ui_out_tuple_begin (uiout, "value");
@@ -2064,7 +2064,7 @@ print_it_typical (bpstat bs)
 
     case bp_read_watchpoint:
 #ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+      if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
 	ui_out_field_string (uiout, "reason", "read-watchpoint-trigger");
       mention (bs->breakpoint_at);
       ui_out_tuple_begin (uiout, "value");
@@ -2088,7 +2088,7 @@ print_it_typical (bpstat bs)
       if (bs->old_val != NULL)     
 	{
 	  annotate_watchpoint (bs->breakpoint_at->number);
-	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+	  if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
 	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
 	  mention (bs->breakpoint_at);
 	  ui_out_tuple_begin (uiout, "value");
@@ -2102,7 +2102,7 @@ print_it_typical (bpstat bs)
       else 
 	{
 	  mention (bs->breakpoint_at);
-	  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+	  if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
 	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
 	  ui_out_tuple_begin (uiout, "value");
 	  ui_out_text (uiout, "\nValue = ");
@@ -2139,7 +2139,7 @@ print_it_typical (bpstat bs)
 
     case bp_finish:
 #ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+      if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
 	ui_out_field_string (uiout, "reason", "function-finished");
 #endif
       return PRINT_UNKNOWN;
@@ -2147,7 +2147,7 @@ print_it_typical (bpstat bs)
 
     case bp_until:
 #ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+      if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
 	ui_out_field_string (uiout, "reason", "location-reached");
 #endif
       return PRINT_UNKNOWN;
@@ -2354,7 +2354,7 @@ watchpoint_check (PTR p)
 	 will be deleted already. So we have no choice but print the
 	 information here. */
 #ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+      if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
 	ui_out_field_string (uiout, "reason", "watchpoint-scope");
       ui_out_text (uiout, "\nWatchpoint ");
       ui_out_field_int (uiout, "wpnum", bs->breakpoint_at->number);
@@ -3476,7 +3476,7 @@ print_one_breakpoint (struct breakpoint *b,
 #ifdef UI_OUT
   /* Output the count also if it is zero, but only if this is
      mi. FIXME: Should have a better test for this. */
-  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+  if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
     if (show_breakpoint_hit_counts && b->hit_count == 0)
       ui_out_field_int (uiout, "times", b->hit_count);
 #endif
@@ -4476,7 +4476,7 @@ mention (struct breakpoint *b)
 #endif
     case bp_breakpoint:
 #ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+      if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
 	{
 	  say_where = 0;
 	  break;
@@ -4487,7 +4487,7 @@ mention (struct breakpoint *b)
       break;
     case bp_hardware_breakpoint:
 #ifdef UI_OUT
-      if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+      if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
 	{
 	  say_where = 0;
 	  break;
@@ -4550,7 +4550,7 @@ mention (struct breakpoint *b)
   do_cleanups (old_chain);
 #endif
 #ifdef UI_OUT
-  if (interpreter_p && strcmp (interpreter_p, "mi") == 0)
+  if (interpreter_p && strncmp (interpreter_p, "mi", 2) == 0)
     return;
 #endif
   printf_filtered ("\n");

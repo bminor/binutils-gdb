@@ -1,3 +1,17 @@
+2001-06-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-basics.exp, mi-break.exp, mi-console.exp, mi-disassemble.exp,
+	mi-eval.exp, mi-hack-cli.exp, mi-read-memory.exp, mi-regs.exp,
+	mi-return.exp, mi-simplerun.exp, mi-stack.exp, mi-stepi.exp,
+	mi-until.exp, mi-var-block.exp, mi-var-child.exp, mi-var-cmd.exp,
+	mi-var-display.exp, mi-watch.exp, mi0-basics.exp, mi0-break.exp,
+	mi0-console.exp, mi0-disassemble.exp, mi0-eval.exp,
+	mi0-hack-cli.exp, mi0-read-memory.exp, mi0-regs.exp,
+	mi0-return.exp, mi0-simplerun.exp, mi0-stack.exp, mi0-stepi.exp,
+	mi0-until.exp, mi0-var-block.exp, mi0-var-child.exp,
+	mi0-var-cmd.exp, mi0-var-display.exp, mi0-watch.exp: Use MIFLAGS
+	to explictly select an interpreter.
+
 2001-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	MI0 was the never enabled MI interface included in GDB 5.0.

@@ -1351,7 +1351,7 @@ mi_load_progress (const char *section_name,
   static char *previous_sect_name = NULL;
   int new_section;
 
-  if (!interpreter_p || strcmp (interpreter_p, "mi") != 0)
+  if (!interpreter_p || strncmp (interpreter_p, "mi", 2) != 0)
     return;
 
   update_threshold.tv_sec = 0;
@@ -1409,7 +1409,7 @@ mi_load_progress (const char *section_name,
 }
 
 static void
-mi_command_loop (void)
+mi_command_loop (int mi_version)
 {
   /* HACK: Force stdout/stderr to point at the console.  This avoids
      any potential side effects caused by legacy code that is still
@@ -1425,7 +1425,7 @@ mi_command_loop (void)
 
   /* HACK: Poke the ui_out table directly.  Should we be creating a
      mi_out object wired up to the above gdb_stdout / gdb_stderr? */
-  uiout = mi_out_new ();
+  uiout = mi_out_new (mi_version);
 
   /* HACK: Override any other interpreter hooks.  We need to create a
      real event table and pass in that. */
@@ -1465,6 +1465,18 @@ mi_command_loop (void)
 }
 
 static void
+mi0_command_loop (void)
+{
+  mi_command_loop (0);
+}
+
+static void
+mi1_command_loop (void)
+{
+  mi_command_loop (1);
+}
+
+static void
 setup_architecture_data (void)
 {
   /* don't trust REGISTER_BYTES to be zero. */
@@ -1482,24 +1494,30 @@ mi_init_ui (char *arg0)
 void
 _initialize_mi_main (void)
 {
+  if (interpreter_p == NULL)
+    return;
+
   /* If we're _the_ interpreter, take control. */
-  if (interpreter_p
-      && strcmp (interpreter_p, "mi") == 0)
+  if (strcmp (interpreter_p, "mi0") == 0)
+    command_loop_hook = mi0_command_loop;
+  else if (strcmp (interpreter_p, "mi") == 0
+	   || strcmp (interpreter_p, "mi1") == 0)
+    command_loop_hook = mi1_command_loop;
+  else
+    return;
+
+  init_ui_hook = mi_init_ui;
+  setup_architecture_data ();
+  register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
+  register_gdbarch_swap (NULL, 0, setup_architecture_data);
+  if (event_loop_p)
     {
-      init_ui_hook = mi_init_ui;
-      command_loop_hook = mi_command_loop;
-      setup_architecture_data ();
-      register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
-      register_gdbarch_swap (NULL, 0, setup_architecture_data);
-      if (event_loop_p)
-	{
-	  /* These overwrite some of the initialization done in
-	     _intialize_event_loop. */
-	  call_readline = gdb_readline2;
-	  input_handler = mi_execute_command_wrapper;
-	  add_file_handler (input_fd, stdin_event_handler, 0);
-	  async_command_editing_p = 0;
-	}
+      /* These overwrite some of the initialization done in
+	 _intialize_event_loop. */
+      call_readline = gdb_readline2;
+      input_handler = mi_execute_command_wrapper;
+      add_file_handler (input_fd, stdin_event_handler, 0);
+      async_command_editing_p = 0;
     }
   /* FIXME: Should we notify main that we are here as a possible
      interpreter? */

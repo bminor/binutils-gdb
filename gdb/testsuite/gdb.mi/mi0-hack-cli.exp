@@ -21,6 +21,7 @@
 # Some basic checks for the CLI.
 
 load_lib mi-support.exp
+set MIFLAGS "-i=mi0"
 
 gdb_exit
 if [mi_gdb_start] {

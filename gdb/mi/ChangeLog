@@ -1,3 +1,14 @@
+2001-06-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c: Use strncmp as the "mi" test.  Allow "mi", "mi0" and
+	"mi1".
+	(mi_command_loop): Add parameter mi_version, pass to mi_out_new.
+	(mi1_command_loop, mi0_command_loop): New functions.
+	(_initialize_mi_main): Recognize "mi", "mi0" and "mi1".
+	* mi-out.c (mi_out_new): Add parameter mi_version.
+	(struct ui_out_data): Add field mi_version.
+	* mi-out.h (mi_out_new): Update.
+
 2001-06-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbmi.texinfo (GDB/MI Output Syntax): Add tuples and lists to
