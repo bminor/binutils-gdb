@@ -1,3 +1,13 @@
+Fri Mar 27 19:31:36 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* Makefile.in: Removed t-pke1 testcase.  Remove previous "make -k"
+ 	kludge previously in place for known-wrong test cases.
+
+	* t-pke1.*: Removed obsolete testcase.
+	
+	* ts[sv]*.trc: Updated test cases from new SCEI spec for PKE
+ 	unpack operation.
+
 Fri Mar 20 17:41:07 1998  Jim Lemke <jlemke@cygnus.com>
 
 	* t-dma.c: Created file of DMAC unit tests.

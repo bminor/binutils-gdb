@@ -77,7 +77,6 @@ C_GEN = perl $(srcdir)/c_gen.pl
 
 TESTS = \
 	t-dma.ok \
-	t-pke1.vif0ok \
 	t-pke2.vif1ok \
 	t-pke3.ok \
 	t-pke4.vif0ok \
@@ -107,8 +106,8 @@ TESTS = \
 	tsv432_1.ok
 
 
-check: sanity 
-	-$(MAKE) -k $(TESTS)
+check: sanity $(TESTS)
+
 sanity:
 	@eval echo AS_FOR_TARGET = $(AS_FOR_TARGET)
 	@eval echo LD_FOR_TARGET = $(LD_FOR_TARGET)
