@@ -1,3 +1,16 @@
+1999-09-10  Ian Lance Taylor  <ian@zembu.com>
+
+	* ecoff.c (bfd_debug_section): Update initialization for new
+	comdat_info field.
+	(_bfd_ecoff_styp_to_sec_flags): Add section parameter.
+	* libecoff.h (_bfd_ecoff_styp_to_sec_flags): Update declaration.
+
+1999-09-10  H.J. Lu  <hjl@gnu.org>
+
+	* coff-alpha.c (alpha_ecoff_backend_data): Initialize the new
+	_bfd_filnmlen field.
+	* coff-mips.c (mips_ecoff_backend_data): Likewise.
+
 Fri Sep 10 00:35:14 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.h (elf_hppa_final_link_relocate): Create .opd entries

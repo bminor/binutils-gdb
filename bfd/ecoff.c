@@ -74,9 +74,20 @@ static unsigned int ecoff_armap_hash PARAMS ((CONST char *s,
 
 static asection bfd_debug_section =
 {
-  "*DEBUG*", 0, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, 0, NULL, NULL,
-   0, 0, 0, 0, NULL, NULL, NULL, 0, 0, 0, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL
+  /* name,   index, next, flags, set_vma, reloc_done, linker_mark, gc_mark */
+  "*DEBUG*", 0,     0,    0,     0,       0,          0,           0,
+  /* vma, lma, _cooked_size, _raw_size, output_offset, output_section, */
+  0,      0,   0,            0,         0,             NULL,
+  /* alig, reloc..., orel..., reloc_count, filepos, rel_..., line_... */
+  0,       0,        0,       0,           0,       0, 	   0,
+  /* userdata, contents, lineno, lineno_count */
+  0,           0,        0,      0,
+  /* comdat_info, moving_line_filepos, target_index, used_by_bfd,  */
+  NULL,           0,                   0,            0,
+  /* cons, owner, symbol */
+  0,       0,     (struct symbol_cache_entry *) NULL,
+  /* symbol_ptr_ptr,                   link_order_head, ..._tail */
+  (struct symbol_cache_entry **) NULL, NULL,            NULL
 };
 
 /* Create an ECOFF object.  */
@@ -354,10 +365,11 @@ ecoff_sec_to_styp_flags (name, flags)
 
 /*ARGSUSED*/
 flagword
-_bfd_ecoff_styp_to_sec_flags (abfd, hdr, name)
+_bfd_ecoff_styp_to_sec_flags (abfd, hdr, name, section)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR hdr;
      const char *name ATTRIBUTE_UNUSED;
+     asection *section ATTRIBUTE_UNUSED;
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
   long styp_flags = internal_s->s_flags;
