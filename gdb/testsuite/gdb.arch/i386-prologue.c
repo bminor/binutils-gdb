@@ -33,12 +33,25 @@ void jump_at_beginning (void);
 int
 main (void)
 {
+  standard ();
   gdb1253 ();
   gdb1718 ();
   gdb1338 ();
   jump_at_beginning ();
   return 0;
 }
+
+/* A normal prologue.  */
+
+asm(".text\n"
+    "    .align 8\n"
+    SYMBOL (standard) ":\n"
+    "    pushl %ebp\n"
+    "    movl  %esp, %ebp\n"
+    "    pushl %edi\n"
+    "    int   $0x03\n"
+    "    leave\n"
+    "    ret\n");
 
 /* Relevant part of the prologue from symtab/1253.  */
 

@@ -61,6 +61,18 @@ if ![runto_main] then {
     gdb_suppress_tests
 }
 
+# Testcase for standard prologue.
+
+gdb_test "continue" "Program received signal SIGTRAP.*" "continue to standard"
+
+gdb_test "backtrace 10" \
+	"#0\[ \t\]*$hex in standard.*\r\n#1\[ \t\]*$hex in main.*" \
+	"backtrace in standard"
+
+gdb_test "info frame" \
+	".*Saved registers:.*ebp at.*edi at.*eip at.*" \
+	"saved registers in standard"
+
 # Testcase from symtab/1253.
 
 gdb_test "continue" "Program received signal SIGTRAP.*" "continue to gdb1253"
