@@ -2360,13 +2360,7 @@ OP_6E1F ()
 void
 OP_6A01 ()
 {
-  trace_input ("st2w", OP_DREG, OP_POSTDEC, OP_VOID);
-  if ( OP[1] == 15 )
-    {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
-      State.exception = SIGILL;
-      return;
-    }
+  trace_input ("st2w", OP_DREG, OP_POSTINC, OP_VOID);
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
   INC_ADDR (State.regs[OP[1]],4);
@@ -2377,7 +2371,13 @@ OP_6A01 ()
 void
 OP_6E01 ()
 {
-  trace_input ("st2w", OP_DREG, OP_POSTINC, OP_VOID);
+  trace_input ("st2w", OP_DREG, OP_POSTDEC, OP_VOID);
+  if ( OP[1] == 15 )
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: cannot post-decrement register r15 (SP).\n");
+      State.exception = SIGILL;
+      return;
+    }
   SW (State.regs[OP[1]],   State.regs[OP[0]]);
   SW (State.regs[OP[1]]+2, State.regs[OP[0]+1]);
   INC_ADDR (State.regs[OP[1]],-4);

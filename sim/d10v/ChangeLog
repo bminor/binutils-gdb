@@ -1,3 +1,10 @@
+Mon Oct 13 10:55:07 1997  Fred Fish  <cygnus.com>
+
+	* simops.c (OP_6A01): Change OP_POSTDEC to OP_POSTINC and move
+	exception generation code to OP_6E01.
+	(OP_6E01): Change OP_POSTINC to OP_POSTDEC and insert exception
+	generation code.
+
 Sat Oct 11 09:02:08 1997  Fred Fish  <fnf@cygnus.com>
 
 	* simops.c (OP_6401): postdecrement on r15 is OK, remove exception.
