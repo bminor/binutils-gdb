@@ -1,5 +1,47 @@
 2001-09-26  Andrew Cagney  <ac131313@redhat.com>
 
+	From 2001-07-09 D.J. Barrow <djbarrow@de.ibm.com>:
+
+	* s390-nat.c: New file Added for S/390 31 & 64 bit target.
+	* s390-tdep.c: Likewise.
+	* config/s390/nm-linux.h: Likewise.	 
+	* config/s390/s390x.mt: Likewise.
+	* config/s390/tm-linux.h : Likewise.  
+	* config/s390/xm-linux.h: Likewise
+	* config/s390/s390.mh: Likewise.
+	* config/s390/s390.mt: Likewise.
+	* config/s390/tm-s390.h: Likewise.
+        * config.in Added definitions for S/390 31 & 64 bit target.
+	* configure.host: Likewise.
+	* configure.in: Likewise.
+	* configure.tgt: Likewise.
+
+        * gdbarch.sh: Fixed CALL_DUMMY_BREAKPOINT_OFFSET to check
+	CALL_DUMMY_BREAKPOINT_OFFSET_P.
+
+	* config/tm-sysv4.h: Made SKIP_TRAMPOLINE_CODE multiarch
+	compatible.
+	
+        * signals.c: Fixed so that the gdbserver could build it to use
+	target_signal_to_host & target_signal_from_host gdbserver was very
+	broken & had a severe fixme wrt signals.
+
+	* gdbserver/Makefile.in: Made makefile go to parent directory for
+	source files (so as to build signal.c).
+	* gdbserver/low-linux.c: Added s390 32/64 bit support Fixed
+	assumption that PTRACE_XFER_TYPE was an int added
+	CANNOT_FETCH_REGISTER & CANNOT_STORE_REGISTER macros.  Fixed
+	fetch_inferior_registers etc. to work with s390 floating point
+	regs.
+	* gdbserver/server.c: Added target signal remapping FIXME.
+	* gdbserver/remote-utils: Likewise.
+
+	And also:
+	* defs.h: When GDBSERVER undef GDB_MULTI_ARCH.
+	* gdbarch.c: Regenerate.
+	
+2001-09-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* CONTRIBUTE: Update.
 
 2001-09-24  Orjan Friberg  <orjanf@axis.com>
