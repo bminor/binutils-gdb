@@ -1,3 +1,20 @@
+2002-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/all/gas.exp (forward references): Don't test c30.
+	* gas/d30v/guard-debug.d: Use -gstabs rather than -g.
+	* gas/elf/ehopt0.s: Don't use "$" in labels.
+	* gas/ieee-fp/x930509a.exp: Don't test c30.
+	* gas/m68hc11/malis.d: Adjust -I so that test runs when not building
+	in source dir.
+	* gas/mri/mri.exp: Don't run on "m68hc*".
+	* gas/sh/basic.exp (do_fp): Match LE too.
+	(pcrel-coff): Run this version for "sh*-pe*" and rename "sh*-hms" to
+	"sh*-rtems".
+	* gas/sh/pcrel-coff.d: Add -EB to objdump flags.
+	* gas/vtable/vtable.exp: Don't run on linuxecoff.  setup_xfail in
+	preference to not running on ELF targets that might one day pass.
+	Add more xfails.  Add more targets to the REL list.
+
 2002-08-14  H.J. Lu <hjl@gnu.org>
 
 	* gas/mips/elempic.d: Treat "addiu" and "daddiu" as equivalent

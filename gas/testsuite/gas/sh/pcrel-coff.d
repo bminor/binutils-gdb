@@ -1,5 +1,5 @@
 #as: -big
-#objdump: -d
+#objdump: -d -EB
 #name: PC-relative loads
 
 .*:     file format .*sh.*

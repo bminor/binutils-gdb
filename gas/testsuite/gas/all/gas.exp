@@ -89,13 +89,12 @@ proc do_930509a {} {
 # must not be resolved by the assembler.
 # C54x assembler (for compatibility) does not allow differences between
 # forward references
-if { ![istarget hppa*-*-*] && ![istarget *c54x*-*-*] } then {
+# C30 counts a four byte offset as a difference of one.
+if { ![istarget hppa*-*-*]
+     && ![istarget *c30*-*-*] && ![istarget *c54x*-*-*] } then {
     # the vax fails because VMS can apparently actually handle this
     # case in relocs, so gas doesn't handle it itself.
-    setup_xfail "vax*-*-vms*"
-    setup_xfail "mn10300*-*-*"
-    setup_xfail "mn10200*-*-*"
-    setup_xfail "h8300*-*-elf*"
+    setup_xfail "h8300*-*-elf*" "mn10200*-*-*" "mn10300*-*-*" "vax*-*-vms*"
     do_930509a
 }
 

@@ -1,6 +1,6 @@
 #objdump: -ldr
 #name: D30V debug (-g) test
-#as: -g
+#as: -gstabs
 
 .*: +file format elf32-d30v
 

@@ -1,5 +1,5 @@
 #objdump: -d --prefix-addresses
-#as: -m68hc11 --mri -I../testsuite/gas/m68hc11/
+#as: -m68hc11 --mri -I$srcdir/$subdir
 #name: Motorola Assembly Language Input Standard
 
 # Test compliance with MALIS
