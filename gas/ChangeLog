@@ -1,3 +1,27 @@
+Thu Nov  2 23:07:57 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (m68k_ip): Handle new 'W' place, meaning a
+	signed word.
+	(install_operand): Likewise.
+
+	* config/obj-elf.c (ecoff_debug_pseudo_table): Add "extern".
+
+Wed Nov  1 15:17:02 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
+
+	* configure.in (m88k-motorola-sysv*): New target.
+	* configure: Rebuild.
+	* config/te-delta88.h: New file.
+	* config/obj-coff.c (write_object_file): Use md_do_align if it is
+	defined.
+	* config/tc-m88k.h (SUB_SEGMENT_ALIGN): Define.
+	(md_do_align): Define.
+	* config/tc-m88k.c: Include "subsegs.h".
+	(m88k_do_align): New function.
+
+	* config/te-delta.h (STRIP_UNDERSCORE): Don't define.
+	(COFF_NOLOAD_PROBLEM): Define.
+	(LOCAL_LABELS_DOLLAR, LOCAL_LABELS_FB): Define.
+
 Wed Nov  1 16:07:43 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* config/tc-i386.c (md_assemble): For a jump instruction with
@@ -317,7 +341,7 @@ Wed Oct  4 14:03:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 Tue Oct  3 12:18:19 1995  Ian Lance Taylor  <ian@cygnus.com>
 
-	* config/tc-m68k.c (isbyte): Accept all values from -65536 to
+	* config/tc-m68k.c (isword): Accept all values from -65536 to
 	+65535,	so ~VAL will not be rejected.
 
 	* cond.c (s_endif): Call demand_empty_rest_of_line.  In MRI mode,
