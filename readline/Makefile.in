@@ -39,7 +39,7 @@ READLINE_DEFINES = $(TYPES) -DVI_MODE
 MINUS_G=-g
 DEBUG_FLAGS = $(MINUS_G)
 LDFLAGS = $(DEBUG_FLAGS) 
-CFLAGS = $(DEBUG_FLAGS) $(SYSV) -I.
+CFLAGS = $(DEBUG_FLAGS) $(USG) -I.
 
 # A good alternative is gcc -traditional.
 #CC = gcc -traditional

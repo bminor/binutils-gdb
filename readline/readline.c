@@ -119,7 +119,7 @@ struct passwd *getpwuid (), *getpwent ();
 
 /* #define HACK_TERMCAP_MOTION */
 
-#if defined (_POSIX_VERSION) || defined (USGr3)
+#if defined (_POSIX_VERSION) || defined (USGr3) || defined (USGr4)
 #  include <dirent.h>
 #  define direct dirent
 #  if defined (_POSIX_VERSION)
