@@ -1261,3 +1261,26 @@ bfd_generic_is_local_label_name (abfd, name)
   return (name[0] == locals_prefix);
 }
 
+/*  Can be used from / for bfd_merge_private_bfd_data to check that
+    endianness matches between input and output file.  Returns
+    true for a match, otherwise returns false and emits an error.  */
+boolean
+_bfd_generic_verify_endian_match (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  if (ibfd->xvec->byteorder != obfd->xvec->byteorder
+      && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
+    {
+      (*_bfd_error_handler)
+	("%s: compiled for a %s endian system and target is %s endian",
+	 bfd_get_filename (ibfd),
+	 bfd_big_endian (ibfd) ? "big" : "little",
+	 bfd_big_endian (obfd) ? "big" : "little");
+
+      bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
+
+  return true;
+}

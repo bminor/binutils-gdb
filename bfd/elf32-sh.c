@@ -2050,6 +2050,8 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 #define elf_backend_relocate_section	sh_elf_relocate_section
 #define bfd_elf32_bfd_get_relocated_section_contents \
 					sh_elf_get_relocated_section_contents
+#define bfd_elf32_bfd_merge_private_bfd_data \
+					_bfd_generic_verify_endian_match
 
 #define elf_backend_gc_mark_hook        sh_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook       sh_elf_gc_sweep_hook

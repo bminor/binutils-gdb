@@ -1,3 +1,13 @@
+Fri Jun  4 02:29:34 1999  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* libbfd.c (_bfd_generic_verify_endian_match): New function.
+	* libbfd-in.h (_bfd_generic_verify_endian_match): Declare.
+	* libbfd.h: Regenerate.
+	* coff-sh.c (sh_merge_private_data): Delete.
+	(coff_bfd_merge_private_bfd_data): Change to
+	_bfd_generic_verify_endian_match.
+	(elf32-sh.c): bfd_elf32_bfd_merge_private_bfd_data: Define.
+
 1999-06-03  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elf32-arm.h: Fix typo: change ELF_MAXPAGE_SIZE to ELF_MAXPAGESIZE.

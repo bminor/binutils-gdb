@@ -479,6 +479,9 @@ extern bfd_size_type _bfd_stringtab_add
 
 /* Write out a string table.  */
 extern boolean _bfd_stringtab_emit PARAMS ((bfd *, struct bfd_strtab_hash *));
+
+/* Check that endianness of input and output file match.  */
+extern boolean _bfd_generic_verify_endian_match PARAMS ((bfd *, bfd *));
 
 /* Macros to tell if bfds are read or write enabled.
 

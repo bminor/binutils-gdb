@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static bfd_reloc_status_type sh_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static long get_symbol_value PARAMS ((asymbol *));
-static boolean sh_merge_private_data PARAMS ((bfd *, bfd *));
 static boolean sh_relax_section
   PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
 static boolean sh_relax_delete_bytes
@@ -442,31 +441,7 @@ sh_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   return bfd_reloc_ok;
 }
 
-/* This routine checks for linking big and little endian objects
-   together.  */
-
-static boolean
-sh_merge_private_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
-{
-  if (ibfd->xvec->byteorder != obfd->xvec->byteorder
-      && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
-    {
-      (*_bfd_error_handler)
-	("%s: compiled for a %s endian system and target is %s endian",
-	 bfd_get_filename (ibfd),
-	 bfd_big_endian (ibfd) ? "big" : "little",
-	 bfd_big_endian (obfd) ? "big" : "little");
-
-      bfd_set_error (bfd_error_wrong_format);
-      return false;
-    }
-
-  return true;
-}
-
-#define coff_bfd_merge_private_bfd_data sh_merge_private_data
+#define coff_bfd_merge_private_bfd_data _bfd_generic_verify_endian_match
 
 /* We can do relaxing.  */
 #define coff_bfd_relax_section sh_relax_section
