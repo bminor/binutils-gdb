@@ -1,3 +1,10 @@
+Fri Jan 16 11:30:37 1998  Richard Henderson  <rth@cygnus.com>
+
+	* tc-m68k.c (m68k_ip): Remove absl->reglst MRI hack.
+	(crack_operand): Add reg->reglst MRI hack.
+	(r_seg): Put reglst symbols in reg_section.
+	(m68k_frob_symbol): Frob reglst symbols into absolute_section.
+
 start-sanitize-sh4
 Thu Jan 15 14:19:01 1998  Richard Henderson  <rth@cygnus.com>
 
