@@ -6,6 +6,9 @@ Wed Mar 25 10:41:35 1998  Richard Henderson  <rth@cygnus.com>
 
 Wed Mar 25 11:19:28 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* cpu-v850.c: Include <ctype.h>.
+	(scan): Case isdigit argument to unsigned char.
+
 	From Yan Meroth <YAN.MEROTH@st.com>:
 	* ihex.c (ihex_scan): Add extbase variable so that getting an
  	extended linear address record does not ignore any previous
