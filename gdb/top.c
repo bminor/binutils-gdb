@@ -3573,6 +3573,7 @@ init_main ()
 
   add_cmd ("architecture", class_support, set_architecture,
 	   "Set architecture of target.", &setlist);
+  add_alias_cmd ("processor", "architecture", class_support, 1, &setlist);
   add_cmd ("architecture", class_support, show_architecture,
 	   "Show architecture of target.", &showlist);
   add_cmd ("architecture", class_support, info_architecture,

@@ -1,3 +1,8 @@
+Mon Sep  1 11:21:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.c (init_main): Add ``set processor'' as an alias for ``set
+ 	architecture''.
+
 Sat Aug 30 13:44:48 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/sparc/sparclite.mt: Removed simulator references (erc32
