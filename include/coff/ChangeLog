@@ -1,3 +1,13 @@
+Mon Jun  8 20:13:33 1992  John Gilmore  (gnu at cygnus.com)
+
+	* ecoff-ext.h, mips.h:  Use unsigned chars everywhere.
+	(Suggested by Antti Miettinen.)
+
+Tue Apr 14 15:18:44 1992  John Gilmore  (gnu at cygnus.com)
+
+	* sym.h:  Add comments.
+	* symconst.h:  Merge with Fred's changes.
+
 Tue Apr 14 14:30:05 1992  Fred Fish  (fnf@cygnus.com)
 
 	* symconst.h:  Pick up SGI defines for stStruct, stUnion, stEnum,

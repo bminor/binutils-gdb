@@ -27,56 +27,56 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* File header as a set of bytes */
 
 struct hdr_ext {
-	char 	h_magic[2];
-	char	h_vstamp[2];
-	char	h_ilineMax[4];
-	char	h_cbLine[4];
-	char	h_cbLineOffset[4];
-	char	h_idnMax[4];
-	char	h_cbDnOffset[4];
-	char	h_ipdMax[4];
-	char	h_cbPdOffset[4];
-	char	h_isymMax[4];
-	char	h_cbSymOffset[4];
-	char	h_ioptMax[4];
-	char	h_cbOptOffset[4];
-	char	h_iauxMax[4];
-	char	h_cbAuxOffset[4];
-	char	h_issMax[4];
-	char	h_cbSsOffset[4];
-	char	h_issExtMax[4];
-	char	h_cbSsExtOffset[4];
-	char	h_ifdMax[4];
-	char	h_cbFdOffset[4];
-	char	h_crfd[4];
-	char	h_cbRfdOffset[4];
-	char	h_iextMax[4];
-	char	h_cbExtOffset[4];
+	unsigned char 	h_magic[2];
+	unsigned char	h_vstamp[2];
+	unsigned char	h_ilineMax[4];
+	unsigned char	h_cbLine[4];
+	unsigned char	h_cbLineOffset[4];
+	unsigned char	h_idnMax[4];
+	unsigned char	h_cbDnOffset[4];
+	unsigned char	h_ipdMax[4];
+	unsigned char	h_cbPdOffset[4];
+	unsigned char	h_isymMax[4];
+	unsigned char	h_cbSymOffset[4];
+	unsigned char	h_ioptMax[4];
+	unsigned char	h_cbOptOffset[4];
+	unsigned char	h_iauxMax[4];
+	unsigned char	h_cbAuxOffset[4];
+	unsigned char	h_issMax[4];
+	unsigned char	h_cbSsOffset[4];
+	unsigned char	h_issExtMax[4];
+	unsigned char	h_cbSsExtOffset[4];
+	unsigned char	h_ifdMax[4];
+	unsigned char	h_cbFdOffset[4];
+	unsigned char	h_crfd[4];
+	unsigned char	h_cbRfdOffset[4];
+	unsigned char	h_iextMax[4];
+	unsigned char	h_cbExtOffset[4];
 };
 
 /* File descriptor external record */
 
 struct fdr_ext {
-	char	f_adr[4];
-	char	f_rss[4];
-	char	f_issBase[4];
-	char	f_cbSs[4];
-	char	f_isymBase[4];
-	char	f_csym[4];
-	char	f_ilineBase[4];
-	char	f_cline[4];
-	char	f_ioptBase[4];
-	char	f_copt[4];
-	char	f_ipdFirst[2];
-	char	f_cpd[2];
-	char	f_iauxBase[4];
-	char	f_caux[4];
-	char	f_rfdBase[4];
-	char	f_crfd[4];
-	char	f_bits1[1];
-	char	f_bits2[3];
-	char	f_cbLineOffset[4];
-	char	f_cbLine[4];
+	unsigned char	f_adr[4];
+	unsigned char	f_rss[4];
+	unsigned char	f_issBase[4];
+	unsigned char	f_cbSs[4];
+	unsigned char	f_isymBase[4];
+	unsigned char	f_csym[4];
+	unsigned char	f_ilineBase[4];
+	unsigned char	f_cline[4];
+	unsigned char	f_ioptBase[4];
+	unsigned char	f_copt[4];
+	unsigned char	f_ipdFirst[2];
+	unsigned char	f_cpd[2];
+	unsigned char	f_iauxBase[4];
+	unsigned char	f_caux[4];
+	unsigned char	f_rfdBase[4];
+	unsigned char	f_crfd[4];
+	unsigned char	f_bits1[1];
+	unsigned char	f_bits2[3];
+	unsigned char	f_cbLineOffset[4];
+	unsigned char	f_cbLine[4];
 };
 
 #define	FDR_BITS1_LANG_BIG		0xF8
@@ -104,37 +104,37 @@ struct fdr_ext {
 /* Procedure descriptor external record */
 
 struct pdr_ext {
-	char	p_adr[4];
-	char	p_isym[4];
-	char	p_iline[4];
-	char	p_regmask[4];
-	char	p_regoffset[4];
-	char	p_iopt[4];
-	char	p_fregmask[4];
-	char	p_fregoffset[4];
-	char	p_frameoffset[4];
-	char	p_framereg[2];
-	char	p_pcreg[2];
-	char	p_lnLow[4];
-	char	p_lnHigh[4];
-	char	p_cbLineOffset[4];
+	unsigned char	p_adr[4];
+	unsigned char	p_isym[4];
+	unsigned char	p_iline[4];
+	unsigned char	p_regmask[4];
+	unsigned char	p_regoffset[4];
+	unsigned char	p_iopt[4];
+	unsigned char	p_fregmask[4];
+	unsigned char	p_fregoffset[4];
+	unsigned char	p_frameoffset[4];
+	unsigned char	p_framereg[2];
+	unsigned char	p_pcreg[2];
+	unsigned char	p_lnLow[4];
+	unsigned char	p_lnHigh[4];
+	unsigned char	p_cbLineOffset[4];
 };
 
 /* Line numbers */
 
 struct line_ext {
-	char	l_line[4];
+	unsigned char	l_line[4];
 };
 
 /* Symbol external record */
 
 struct sym_ext {
-	char	s_iss[4];
-	char	s_value[4];
-	char	s_bits1[1];
-	char	s_bits2[1];
-	char	s_bits3[1];
-	char	s_bits4[1];
+	unsigned char	s_iss[4];
+	unsigned char	s_value[4];
+	unsigned char	s_bits1[1];
+	unsigned char	s_bits2[1];
+	unsigned char	s_bits3[1];
+	unsigned char	s_bits4[1];
 };
 
 #define	SYM_BITS1_ST_BIG		0xFC
@@ -169,9 +169,9 @@ struct sym_ext {
 /* External symbol external record */
 
 struct ext_ext {
-	char	es_bits1[1];
-	char	es_bits2[1];
-	char	es_ifd[2];
+	unsigned char	es_bits1[1];
+	unsigned char	es_bits2[1];
+	unsigned char	es_ifd[2];
 	struct	sym_ext es_asym;
 };
 
@@ -187,10 +187,10 @@ struct ext_ext {
 /* Type information external record */
 
 struct tir_ext {
-	char	t_bits1[1];
-	char	t_tq45[1];
-	char	t_tq01[1];
-	char	t_tq23[1];
+	unsigned char	t_bits1[1];
+	unsigned char	t_tq45[1];
+	unsigned char	t_tq01[1];
+	unsigned char	t_tq23[1];
 };
 
 #define	TIR_BITS1_FBITFIELD_BIG		0x80
@@ -235,7 +235,7 @@ struct tir_ext {
 /* Relative symbol external record */
 
 struct rndx_ext {
-	char	r_bits[4];
+	unsigned char	r_bits[4];
 };
 
 #define	RNDX_BITS0_RFD_SH_LEFT_BIG	4
@@ -260,8 +260,8 @@ struct rndx_ext {
 /* Dense numbers external record */
 
 struct dnr_ext {
-	char	d_rfd[4];
-	char	d_index[4];
+	unsigned char	d_rfd[4];
+	unsigned char	d_index[4];
 };
 
 /* Auxliliary symbol information external record */
@@ -269,12 +269,12 @@ struct dnr_ext {
 union aux_ext {
 	struct tir_ext	a_ti;
 	struct rndx_ext	a_rndx;
-	char	a_dnLow[4];
-	char	a_dnHigh[4];
-	char	a_isym[4];
-	char	a_iss[4];
-	char	a_width[4];
-	char	a_count[4];
+	unsigned char	a_dnLow[4];
+	unsigned char	a_dnHigh[4];
+	unsigned char	a_isym[4];
+	unsigned char	a_iss[4];
+	unsigned char	a_width[4];
+	unsigned char	a_count[4];
 };
 
 /* FIXME!  These are copied from ../bfd/libbfd.h */
@@ -297,5 +297,5 @@ PROTO (bfd_vma, _do_getl32, (unsigned char *addr));
 /* Relative file descriptor */
 
 struct rfd_ext {
-  char	rfd[4];
+  unsigned char	rfd[4];
 };
