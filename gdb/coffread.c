@@ -27,6 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "buildsym.h"
+#include "gdb-stabs.h"
 #include "complaints.h"
 #include <obstack.h>
 
@@ -37,6 +38,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libbfd.h"		/* FIXME secret internal data from BFD */
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
 #include "libcoff.h"		/* FIXME secret internal data from BFD */
+
+struct coff_symfile_info {
+  asection *text_sect;		/* Text section accessor */
+  int symcount;			/* How many symbols are there in the file */
+  char *stringtab;		/* The actual string table */
+  int stringtab_size;		/* Its size */
+  file_ptr symtab_offset;	/* Offset in file to symbol table */
+  int symbol_size;		/* Bytes in a single symbol */
+  struct stab_section_info *stab_section_info; 	/* section starting points
+				   of the original .o files before linking. */
+
+  asection *stabsect;		/* Section pointer for .stab section */
+  asection *stabstrsect;		/* Section pointer for .stab section */
+  asection *stabindexsect;	/* Section pointer for .stab.index section */
+  char *stabstrdata;
+
+  file_ptr min_lineno_offset;		/* Where in file lowest line#s are */
+  file_ptr max_lineno_offset;		/* 1+last byte of line#s in file */
+};
 
 /* Translate an external name string into a user-visible name.  */
 #define	EXTERNAL_NAME(string, abfd) \
@@ -268,6 +288,39 @@ static struct type **
 coff_lookup_type PARAMS ((int));
 
 
+static void
+coff_locate_sections PARAMS ((bfd *, asection *, PTR));
+
+/* We are called once per section from coff_symfile_read.  We
+   need to examine each section we are passed, check to see
+   if it is something we are interested in processing, and
+   if so, stash away some access information for the section.
+
+   FIXME:  The section names should not be hardwired strings. */
+
+static void
+coff_locate_sections (ignore_abfd, sectp, csip)
+     bfd *ignore_abfd;
+     asection *sectp;
+     PTR csip;
+{
+  register struct coff_symfile_info *csi;
+
+  csi = (struct coff_symfile_info *) csip;
+  if (STREQ (sectp->name, ".stab"))
+    {
+      csi->stabsect = sectp;
+    }
+  else if (STREQ (sectp->name, ".stabstr"))
+    {
+      csi->stabstrsect = sectp;
+    }
+  else if (STREQ (sectp->name, ".stab.index"))
+    {
+      csi->stabindexsect = sectp;
+    }
+}
+
 /* Look up a coff type-number index.  Return the address of the slot
    where the type for that index is stored.
    The type-number is in INDEX. 
@@ -318,8 +371,6 @@ coff_alloc_type (index)
   return type;
 }
 
-/* Manage the vector of line numbers.  FIXME:  Use record_line instead.  */
-
 static void
 coff_record_line (line, pc)
      int line;
@@ -459,32 +510,29 @@ record_minimal_symbol (name, address, type)
 
    The ultimate result is a new symtab (or, FIXME, eventually a psymtab).  */
 
-struct coff_symfile_info {
-  file_ptr min_lineno_offset;		/* Where in file lowest line#s are */
-  file_ptr max_lineno_offset;		/* 1+last byte of line#s in file */
-};
-
 static int text_bfd_scnum;
 
 static void
 coff_symfile_init (objfile)
      struct objfile *objfile;
 {
-  asection	*section;
+  asection	*section, *strsection;
   bfd *abfd = objfile->obfd;
 
   /* Allocate struct to keep track of the symfile */
   objfile -> sym_private = xmmalloc (objfile -> md,
 				     sizeof (struct coff_symfile_info));
 
+  memset (objfile->sym_private, 0, sizeof (struct coff_symfile_info));
+
   init_entry_point_info (objfile);
 
   /* Save the section number for the text section */
-  section = bfd_get_section_by_name(abfd,".text");
+  section = bfd_get_section_by_name (abfd, ".text");
   if (section)
     text_bfd_scnum = section->index;
   else
-    text_bfd_scnum = -1; 
+    text_bfd_scnum = -1;
 }
 
 /* This function is called for every section; it finds the outer limits
@@ -550,6 +598,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
   int symtab_offset;
   int stringtab_offset;
   struct cleanup *back_to;
+  int stabsize, stabstrsize;
 
   info = (struct coff_symfile_info *) objfile -> sym_private;
   symfile_bfd = abfd;			/* Kludge for swap routines */
@@ -583,7 +632,7 @@ coff_symfile_read (objfile, section_offsets, mainline)
   /* Read the line number table, all at once.  */
   info->min_lineno_offset = 0;
   info->max_lineno_offset = 0;
-  bfd_map_over_sections (abfd, find_linenos, (PTR)info);
+  bfd_map_over_sections (abfd, find_linenos, (PTR) info);
 
   make_cleanup (free_linetab, 0);
   val = init_lineno (desc, info->min_lineno_offset, 
@@ -615,6 +664,23 @@ coff_symfile_read (objfile, section_offsets, mainline)
 
   install_minimal_symbols (objfile);
 
+  bfd_map_over_sections (abfd, coff_locate_sections, (PTR) info);
+
+  if (info->stabsect)
+    {
+      /* dubious */
+      fseek ((FILE *) abfd->iostream, abfd->where, 0);
+
+      stabsize = bfd_section_size (abfd, info->stabsect);
+      stabstrsize = bfd_section_size (abfd, info->stabstrsect);
+
+      coffstab_build_psymtabs (objfile,
+			       section_offsets,
+			       mainline,
+			       info->stabsect->filepos, stabsize,
+			       info->stabstrsect->filepos, stabstrsize);
+    }
+
   do_cleanups (back_to);
 }
 
@@ -622,7 +688,6 @@ static void
 coff_new_init (ignore)
      struct objfile *ignore;
 {
-	/* Nothin' to do */
 }
 
 /* Perform any local cleanups required when we are done with a particular
@@ -1960,16 +2025,23 @@ coff_read_enum_type (index, length, lastsym)
   return type;
 }
 
-/* Fake up support for relocating symbol addresses.  FIXME.  */
-
-struct section_offsets coff_symfile_faker = {{0}};
-
 struct section_offsets *
 coff_symfile_offsets (objfile, addr)
      struct objfile *objfile;
      CORE_ADDR addr;
 {
-  return &coff_symfile_faker;
+  struct section_offsets *section_offsets;
+  int i;
+ 
+  section_offsets = (struct section_offsets *)
+    obstack_alloc (&objfile -> psymbol_obstack,
+		   sizeof (struct section_offsets) +
+		          sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
+
+  for (i = 0; i < SECT_OFF_MAX; i++)
+    ANOFFSET (section_offsets, i) = addr;
+  
+  return section_offsets;
 }
 
 /* Register our ability to parse symbols for coff BFD files */

@@ -1,3 +1,18 @@
+Tue Sep 28 18:39:37 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* configure.in: Rename ...-lynx* to ...-lynxos*.
+	Add m68*-*-lynxos* configuration.
+	* dbxread.c (coffstab_build_psymtabs): New function,
+	interfaces coffread.c to dbxread functions.
+	* coffread.c (coff_symfile_info):  Expand to include
+	dbx_symfile_info slots.
+	(coff_symfile_init): Init coff_symfile_info struct.
+	(coff_locate_sections): New functions, finds the stab and stabstr
+	sections.
+	(coff_symfile_read): Call coffstab_build_psymtabs if a stab
+	section is present.
+	(coff_section_offsets): Replace fake version with real offsets.
+
 Tue Sep 28 18:00:50 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infcmd.c (run_stack_dummy): Set the frame in the bp_call_dummy
@@ -11,7 +26,7 @@ Tue Sep 28 17:53:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	* config/i386/i386v4.mt (TDEPFILES): Move solib.o from here...
 	* config/i386/i386v4.mh (NATDEPFILES): ...to here.
 	* config/i386/nm-i386v4.h: Include nm-sysv4.h.
-	* config/m68k/amix.mt (TDEPFIES): Move solib.o from here...
+	* config/m68k/amix.mt (TDEPFILES): Move solib.o from here...
 	* config/m68k/amix.mh (NATDEPFILES): ...to here.
 
 Tue Sep 28 09:45:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)

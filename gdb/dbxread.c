@@ -2056,6 +2056,83 @@ copy_pending (beg, endi, end)
   return new;
 }
 
+/* Scan and build partial symbols for an coff symbol file.
+   The coff file has already been processed to get its minimal symbols.
+
+   This routine is the equivalent of dbx_symfile_init and dbx_symfile_read
+   rolled into one.
+
+   OBJFILE is the object file we are reading symbols from.
+   ADDR is the address relative to which the symbols are (e.g.
+   the base address of the text segment).
+   MAINLINE is true if we are reading the main symbol
+   table (as opposed to a shared lib or dynamically loaded file).
+   STABOFFSET and STABSIZE define the location in OBJFILE where the .stab
+   section exists.
+   STABSTROFFSET and STABSTRSIZE define the location in OBJFILE where the
+   .stabstr section exists.
+
+   This routine is mostly copied from dbx_symfile_init and dbx_symfile_read,
+   adjusted for coff details. */
+
+void
+coffstab_build_psymtabs (objfile, section_offsets, mainline, 
+			       staboffset, stabsize,
+			       stabstroffset, stabstrsize)
+      struct objfile *objfile;
+      struct section_offsets *section_offsets;
+      int mainline;
+      file_ptr staboffset;
+      unsigned int stabsize;
+      file_ptr stabstroffset;
+      unsigned int stabstrsize;
+{
+  int val;
+  bfd *sym_bfd = objfile->obfd;
+  char *name = bfd_get_filename (sym_bfd);
+  struct dbx_symfile_info *info;
+
+  /* There is already a dbx_symfile_info allocated by our caller.
+     It might even contain some info from the coff symtab to help us.  */
+  info = (struct dbx_symfile_info *) objfile->sym_private;
+
+  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
+  if (!DBX_TEXT_SECT (objfile))
+    error ("Can't find .text section in symbol file");
+
+#define	COFF_STABS_SYMBOL_SIZE	12	/* XXX FIXME XXX */
+  DBX_SYMBOL_SIZE    (objfile) = COFF_STABS_SYMBOL_SIZE;
+  DBX_SYMCOUNT       (objfile) = stabsize / DBX_SYMBOL_SIZE (objfile);
+  DBX_STRINGTAB_SIZE (objfile) = stabstrsize;
+  DBX_SYMTAB_OFFSET  (objfile) = staboffset;
+  
+  if (stabstrsize > bfd_get_size (sym_bfd))
+    error ("ridiculous string table size: %d bytes", stabstrsize);
+  DBX_STRINGTAB (objfile) = (char *)
+    obstack_alloc (&objfile->psymbol_obstack, stabstrsize+1);
+
+  /* Now read in the string table in one big gulp.  */
+
+  val = bfd_seek (sym_bfd, stabstroffset, SEEK_SET);
+  if (val < 0)
+    perror_with_name (name);
+  val = bfd_read (DBX_STRINGTAB (objfile), stabstrsize, 1, sym_bfd);
+  if (val != stabstrsize)
+    perror_with_name (name);
+
+  stabsread_new_init ();
+  buildsym_new_init ();
+  free_header_files ();
+  init_header_files ();
+
+  processing_acc_compilation = 1;
+
+  /* In a coff file, we've already installed the minimal symbols that came
+     from the coff (non-stab) symbol table, so always act like an
+     incremental load here. */
+  dbx_symfile_read (objfile, section_offsets, 0);
+}
+
 /* Scan and build partial symbols for an ELF symbol file.
    This ELF file has already been processed to get its minimal symbols,
    and any DWARF symbols that were in it.
