@@ -347,7 +347,7 @@ captured_main (void *data)
 extern int gdbtk_test (char *);
 	      if (!gdbtk_test (optarg))
 		{
-		  fprintf_unfiltered (gdb_stderr, "%s: unable to load tclcommand file \"%s\"",
+		  fprintf_unfiltered (gdb_stderr, _("%s: unable to load tclcommand file \"%s\""),
 				      argv[0], optarg);
 		  exit (1);
 		}
@@ -393,7 +393,7 @@ extern int gdbtk_test (char *);
 
 		fprintf_unfiltered
 		  (gdb_stderr,
-		   "warning: could not set baud rate to `%s'.\n", optarg);
+		   _("warning: could not set baud rate to `%s'.\n"), optarg);
 	      else
 		baud_rate = i;
 	    }
@@ -410,7 +410,7 @@ extern int gdbtk_test (char *);
 
 		fprintf_unfiltered
 		  (gdb_stderr,
-		 "warning: could not set timeout limit to `%s'.\n", optarg);
+		 _("warning: could not set timeout limit to `%s'.\n"), optarg);
 	      else
 		remote_timeout = i;
 	    }
@@ -421,7 +421,7 @@ extern int gdbtk_test (char *);
 #endif
 	  case '?':
 	    fprintf_unfiltered (gdb_stderr,
-			"Use `%s --help' for a complete list of options.\n",
+			_("Use `%s --help' for a complete list of options.\n"),
 				argv[0]);
 	    exit (1);
 	  }
@@ -452,7 +452,7 @@ extern int gdbtk_test (char *);
 	if (optind >= argc)
 	  {
 	    fprintf_unfiltered (gdb_stderr,
-				"%s: `--args' specified but no program specified\n",
+				_("%s: `--args' specified but no program specified\n"),
 				argv[0]);
 	    exit (1);
 	  }
@@ -479,7 +479,7 @@ extern int gdbtk_test (char *);
 	      break;
 	    case 3:
 	      fprintf_unfiltered (gdb_stderr,
-				  "Excess command line arguments ignored. (%s%s)\n",
+				  _("Excess command line arguments ignored. (%s%s)\n"),
 				  argv[optind], (optind == argc - 1) ? "" : " ...");
 	      break;
 	    }
@@ -524,7 +524,7 @@ extern int gdbtk_test (char *);
   quit_pre_print = error_pre_print;
 
   /* We may get more than one warning, don't double space all of them... */
-  warning_pre_print = "\nwarning: ";
+  warning_pre_print = _("\nwarning: ");
 
   /* Read and execute $HOME/.gdbinit file, if it exists.  This is done
      *before* all the command line arguments are processed; it sets
@@ -592,7 +592,7 @@ extern int gdbtk_test (char *);
     printf_filtered ("\n");
   error_pre_print = "\n";
   quit_pre_print = error_pre_print;
-  warning_pre_print = "\nwarning: ";
+  warning_pre_print = _("\nwarning: ");
 
   if (corearg != NULL)
     {
@@ -622,7 +622,7 @@ extern int gdbtk_test (char *);
   /* Error messages should no longer be distinguished with extra output. */
   error_pre_print = NULL;
   quit_pre_print = NULL;
-  warning_pre_print = "warning: ";
+  warning_pre_print = _("warning: ");
 
   /* Read the .gdbinit file in the current directory, *if* it isn't
      the same as the $HOME/.gdbinit file (it should exist, also).  */
@@ -681,7 +681,7 @@ extern int gdbtk_test (char *);
     {
       long init_time = get_run_time () - time_at_startup;
 
-      printf_unfiltered ("Startup time: %ld.%06ld\n",
+      printf_unfiltered (_("Startup time: %ld.%06ld\n"),
 			 init_time / 1000000, init_time % 1000000);
     }
 
@@ -691,7 +691,7 @@ extern int gdbtk_test (char *);
       extern char **environ;
       char *lim = (char *) sbrk (0);
 
-      printf_unfiltered ("Startup size: data size %ld\n",
+      printf_unfiltered (_("Startup size: data size %ld\n"),
 			 (long) (lim - (char *) &environ));
 #endif
     }
@@ -752,69 +752,69 @@ main (int argc, char **argv)
 static void
 print_gdb_help (struct ui_file *stream)
 {
-  fputs_unfiltered ("\
+  fputs_unfiltered (_("\
 This is the GNU debugger.  Usage:\n\n\
     gdb [options] [executable-file [core-file or process-id]]\n\
     gdb [options] --args executable-file [inferior-arguments ...]\n\n\
 Options:\n\n\
-", stream);
-  fputs_unfiltered ("\
+"), stream);
+  fputs_unfiltered (_("\
   --args             Arguments after executable-file are passed to inferior\n\
-", stream);
-  fputs_unfiltered ("\
+"), stream);
+  fputs_unfiltered (_("\
   --[no]async        Enable (disable) asynchronous version of CLI\n\
-", stream);
-  fputs_unfiltered ("\
+"), stream);
+  fputs_unfiltered (_("\
   -b BAUDRATE        Set serial port baud rate used for remote debugging.\n\
   --batch            Exit after processing options.\n\
   --cd=DIR           Change current directory to DIR.\n\
   --command=FILE     Execute GDB commands from FILE.\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
   --pid=PID          Attach to running process PID.\n\
-", stream);
-  fputs_unfiltered ("\
+"), stream);
+  fputs_unfiltered (_("\
   --dbx              DBX compatibility mode.\n\
   --directory=DIR    Search for source files in DIR.\n\
   --epoch            Output information used by epoch emacs-GDB interface.\n\
   --exec=EXECFILE    Use EXECFILE as the executable.\n\
   --fullname         Output information used by emacs-GDB interface.\n\
   --help             Print this message.\n\
-", stream);
-  fputs_unfiltered ("\
+"), stream);
+  fputs_unfiltered (_("\
   --interpreter=INTERP\n\
                      Select a specific interpreter / user interface\n\
-", stream);
-  fputs_unfiltered ("\
+"), stream);
+  fputs_unfiltered (_("\
   --mapped           Use mapped symbol files if supported on this system.\n\
   --nw		     Do not use a window interface.\n\
-  --nx               Do not read ", stream);
+  --nx               Do not read "), stream);
   fputs_unfiltered (gdbinit, stream);
-  fputs_unfiltered (" file.\n\
+  fputs_unfiltered (_(" file.\n\
   --quiet            Do not print version number on startup.\n\
   --readnow          Fully read symbol files on first access.\n\
-", stream);
-  fputs_unfiltered ("\
+"), stream);
+  fputs_unfiltered (_("\
   --se=FILE          Use FILE as symbol file and executable file.\n\
   --symbols=SYMFILE  Read symbols from SYMFILE.\n\
   --tty=TTY          Use TTY for input/output by the program being debugged.\n\
-", stream);
+"), stream);
 #if defined(TUI)
-  fputs_unfiltered ("\
+  fputs_unfiltered (_("\
   --tui              Use a terminal user interface.\n\
-", stream);
+"), stream);
 #endif
-  fputs_unfiltered ("\
+  fputs_unfiltered (_("\
   --version          Print version information and then exit.\n\
   -w                 Use a window interface.\n\
   --write            Set writing into executable and core files.\n\
   --xdb              XDB compatibility mode.\n\
-", stream);
+"), stream);
 #ifdef ADDITIONAL_OPTION_HELP
   fputs_unfiltered (ADDITIONAL_OPTION_HELP, stream);
 #endif
-  fputs_unfiltered ("\n\
+  fputs_unfiltered (_("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\
 Report bugs to \"bug-gdb@gnu.org\".\
-", stream);
+"), stream);
 }
