@@ -1,3 +1,8 @@
+2002-03-19  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* elflink.h (NAME(bfd_elf,record_link_assignment)): Don't set
+	STT_NOTYPE symbols to STT_OBJECT.
+
 Mon Mar 18 17:38:03 CET 2002  Jan Hubicka  <jh@suse.cz>
 
 	* cpu-i386.c (bfd_x86_64_arch): Rename to "i386:x86-64"

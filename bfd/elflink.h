@@ -2795,10 +2795,6 @@ NAME(bfd_elf,record_link_assignment) (output_bfd, info, name, provide)
 
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
 
-  /* When possible, keep the original type of the symbol.  */
-  if (h->type == STT_NOTYPE)
-    h->type = STT_OBJECT;
-
   if (((h->elf_link_hash_flags & (ELF_LINK_HASH_DEF_DYNAMIC
 				  | ELF_LINK_HASH_REF_DYNAMIC)) != 0
        || info->shared)
