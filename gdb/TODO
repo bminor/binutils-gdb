@@ -28,6 +28,17 @@ disappearance of user.h).
 
 --
 
+The BFD directory requires bug-fixed AUTOMAKE et.al.
+
+AUTOMAKE 1.4 incorrectly set the TEXINPUTS environment variable.  It
+contained the full path to texinfo.tex when it should have only
+contained the directory.  The bug has been fixed in the current
+AUTOMAKE sources.  Automake snapshots can be found in:
+	ftp://sourceware.cygnus.com/pub/gdb/snapshots
+and	ftp://sourceware.cygnus.com/pub/binutils
+
+--
+
 gdb-cvs fails to build on freebsd-elf
 http://sourceware.cygnus.com/ml/gdb/2000-04/msg00004.html
 
