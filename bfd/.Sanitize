@@ -94,6 +94,7 @@ cofflink.c
 coffswap.h
 config
 config.bfd
+configure
 configure.bat
 configure.host
 configure.in
@@ -283,7 +284,7 @@ else
 	done
 fi
 
-arc_files="ChangeLog Makefile.in archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elfcode.h libbfd.h"
+arc_files="ChangeLog Makefile.in archures.c reloc.c targets.c config.bfd configure.in configure bfd-in2.h elf.c libbfd.h"
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
 		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
