@@ -1,3 +1,9 @@
+Mon Feb 24 11:24:57 1998  Richard Henderson  <rth@cygnus.com>
+
+        * Makefile.in (BISON): Don't even pretend to use yacc.
+        (c-exp.tab.o): Use bison -o to use a unique intermediate file.
+        (jv-exp.tab.o, f-exp.tab.o, m2-exp.tab.o): Likewise.
+
 Tue Feb 24 03:32:59 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.c (gdbsim_fetch_register): Don't abort when the
