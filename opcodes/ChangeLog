@@ -1,8 +1,13 @@
+Sat Mar 14 23:47:14 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* m32r-opc.h: Regenerate.
+
 start-sanitize-sky
 Thu Mar 12 09:18:54 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* dvp-opc.c (print_dest1): Print dest spec again.
 	(print_vfreg,print_accdest): Likewise.
+	(vif_unpack_len): Round result up to word boundary.
 
 end-sanitize-sky
 start-sanitize-vr4320
