@@ -1,5 +1,8 @@
 Tue Feb 10 14:43:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Change -linux* to -linux-gnu*.
+	* configure: Rebuild.
+
 	* app.c (do_scrub_begin): Treat \r as whitespace.
 
 start-sanitize-m32rx
