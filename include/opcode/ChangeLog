@@ -1,3 +1,9 @@
+Mon Mar 30 10:25:54 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386.h (i386_optab): Change second operand constraint of `mov
+	sreg,reg|mem' instruction from Reg16|Mem to WordReg|WordMem to
+	allow legal instructions such as `movl %gs,%esi'
+
 Fri Mar 27 18:30:52 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* h8300.h: Various changes to fully bracket initializers.

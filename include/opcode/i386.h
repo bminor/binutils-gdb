@@ -1,5 +1,5 @@
 /* i386-opcode.h -- Intel 80386 opcode table
-   Copyright 1989, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation.
+   Copyright 1989, 91, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation.
 
 This file is part of GAS, the GNU Assembler, and GDB, the GNU Debugger.
 
@@ -32,7 +32,11 @@ static const template i386_optab[] = {
 { "mov", 2, 0x88, _, DW|Modrm, { Reg, Reg|Mem, 0 } },
 { "mov", 2, 0xb0, _, ShortFormW, { Imm, Reg, 0 } },
 { "mov", 2, 0xc6, _,  W|Modrm,  { Imm, Reg|Mem, 0 } },
-{ "mov", 2, 0x8c, _, D|Modrm,  { SReg3|SReg2, Reg16|Mem, 0 } },
+/* The next instruction accepts WordReg so that `movl %gs,%esi' can be
+   used to move a segment register to a 32 bit register without using
+   a size prefix, which works although Intel does not document it.  I
+   think it clobbers the upper 16 bits in the 32 bit register.  */
+{ "mov", 2, 0x8c, _, D|Modrm,  { SReg3|SReg2, WordReg|WordMem, 0 } },
 /* move to/from control debug registers */
 { "mov", 2, 0x0f20, _, D|Modrm, { Control, Reg32, 0} },
 { "mov", 2, 0x0f21, _, D|Modrm, { Debug, Reg32, 0} },
@@ -464,8 +468,8 @@ static const template i386_optab[] = {
 /* protection control */
 {"arpl", 2, 0x63, _, Modrm, { Reg16, Reg16|Mem, 0} },
 {"lar", 2, 0x0f02, _, Modrm|ReverseRegRegmem, { WordReg|Mem, WordReg, 0} },
-{"lgdt", 1, 0x0f01, 2, Modrm, { Mem, 0, 0} },
-{"lidt", 1, 0x0f01, 3, Modrm, { Mem, 0, 0} },
+{"lgdt", 1, 0x0f01, 2, Modrm|LinearAddress, { Mem, 0, 0} },
+{"lidt", 1, 0x0f01, 3, Modrm|LinearAddress, { Mem, 0, 0} },
 {"lldt", 1, 0x0f00, 2, Modrm, { WordReg|Mem, 0, 0} },
 {"lmsw", 1, 0x0f01, 6, Modrm, { WordReg|Mem, 0, 0} },
 {"lsl", 2, 0x0f03, _, Modrm|ReverseRegRegmem, { WordReg|Mem, WordReg, 0} },
@@ -943,9 +947,9 @@ static const seg_entry *const two_byte_segment_defaults[] = {
   /* mode 0 */
   &ds, &ds, &ds, &ds, &ss, &ds, &ds, &ds,
   /* mode 1 */
-  &ds, &ds, &ds, &ds, &ss, &ds, &ds, &ds,
+  &ds, &ds, &ds, &ds, &ss, &ss, &ds, &ds,
   /* mode 2 */
-  &ds, &ds, &ds, &ds, &ss, &ds, &ds, &ds,
+  &ds, &ds, &ds, &ds, &ss, &ss, &ds, &ds,
   /* mode 3 --- not a memory reference; never referenced */
 };
 
