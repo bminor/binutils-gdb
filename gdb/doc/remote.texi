@@ -168,14 +168,18 @@ It may be identical to @code{putchar} for your target system; a
 different name is used to allow you to distinguish the two if you wish.
 @end table
 
+@cindex control C, and remote debugging
+@cindex interrupting remote targets
 If you want @value{GDBN} to be able to stop your program while it is
 running, you need to use an interrupt-driven serial driver, and arrange
-for it to stop when it receives a control C character (getting it to
-return the proper status to GDB probably requires changes to the
-standard stub; one quick and dirty way is to just execute a breakpoint
-instruction.  @value{GDBN} will return a SIGTRAP instead of a SIGINT).
-That is the character which @value{GDBN} uses to tell the remote system
-to stop.
+for it to stop when it receives a @code{^C} (@samp{\003}, the control-C
+character).  That is the character which @value{GDBN} uses to tell the
+remote system to stop.
+
+Getting the debugging target to return the proper status to @value{GDBN}
+probably requires changes to the standard stub; one quick and dirty way
+is to just execute a breakpoint instruction (the ``dirty'' part is that
+@value{GDBN} reports a @code{SIGTRAP} instead of a @code{SIGINT}).
 
 Other routines you need to supply are:
 
@@ -444,19 +448,24 @@ that @value{GDBN} itself does.  In fact, a system that can run
 because it is a much smaller program than @value{GDBN} itself.  It is
 also easier to port than all of @value{GDBN}, so you may be able to get
 started more quickly on a new system by using @code{gdbserver}.
+Finally, if you develop code for real-time systems, you may find that
+the tradeoffs involved in real-time operation make it more convenient to
+do as much development work as possible on another system, for example
+by cross-compiling.  You can use @code{gdbserver} to make a similar
+choice for debugging.
 
 @value{GDBN} and @code{gdbserver} communicate via either a serial line
 or a TCP connection, using the standard @value{GDBN} remote serial
 protocol.
 
 @table @emph
-@item On the target,
+@item On the target machine,
 you need to have a copy of the program you want to debug.
 @code{gdbserver} does not need your program's symbol table, so you can
 strip the program if necessary to save space.  @value{GDBN} on the host
 system does all the symbol handling.
 
-To use the server, you must tell it how to communicate with @value{GDB};
+To use the server, you must tell it how to communicate with @value{GDBN};
 the name of your program; and the arguments for your program.  The
 syntax is:
 
@@ -465,7 +474,7 @@ target> gdbserver @var{comm} @var{program} [ @var{args} @dots{} ]
 @end smallexample
 
 @var{comm} is either a device name (to use a serial line) or a TCP
-hostname and portnumber.  For example, to debug emacs with the argument
+hostname and portnumber.  For example, to debug Emacs with the argument
 @samp{foo.txt} and communicate with @value{GDBN} over the serial port
 @file{/dev/com1}:
 
@@ -488,20 +497,22 @@ TCP.  The @samp{host:2345} argument means that @code{gdbserver} is to
 expect a TCP connection from machine @samp{host} to local TCP port 2345.
 (Currently, the @samp{host} part is ignored.)  You can choose any number
 you want for the port number as long as it does not conflict with any
-TCP ports already in use on the target system.@footnote{If you choose a
-port number that conflicts with another service, @code{gdbserver} prints
-an error message and exits.} You must use the same port number with the
-host @value{GDBN} @code{target remote} command.
+TCP ports already in use on the target system (for example, @code{23} is
+reserved for @code{telnet}).@footnote{If you choose a port number that
+conflicts with another service, @code{gdbserver} prints an error message
+and exits.} You must use the same port number with the host @value{GDBN}
+@code{target remote} command.
 
-@item On the host,
-you need an unstripped copy of your program, since
-@value{GDBN} needs symbols and debugging information.  Start up
-@value{GDBN} as usual, using the name of the local copy of your program
-as the first argument.  (You may also need the
-@samp{--baud} option if the serial line is running at anything other than 9600 bps.)
-After that, use @code{target remote} to establish communications with @code{gdbserver}.  Its argument is either
-a device name (usually a serial device, like @file{/dev/ttyb}), or a TCP
-port descriptof in the form @code{@var{host}:@var{PORT}}.  For example:
+@item On the @value{GDBN} host machine,
+you need an unstripped copy of your program, since @value{GDBN} needs
+symbols and debugging information.  Start up @value{GDBN} as usual,
+using the name of the local copy of your program as the first argument.
+(You may also need the @w{@samp{--baud}} option if the serial line is
+running at anything other than 9600 bps.)  After that, use @code{target
+remote} to establish communications with @code{gdbserver}.  Its argument
+is either a device name (usually a serial device, like
+@file{/dev/ttyb}), or a TCP port descriptor in the form
+@code{@var{host}:@var{PORT}}.  For example:
 
 @smallexample
 (@value{GDBP}) target remote /dev/ttyb
@@ -515,7 +526,7 @@ communicates with the server via serial line @file{/dev/ttyb}, and
 @end smallexample
 
 @noindent
-communicates via a TCP connection to port 2345 on host @file{the-target}.
+communicates via a TCP connection to port 2345 on host @w{@file{the-target}}.
 For TCP connections, you must start up @code{gdbserver} prior to using
 the @code{target remote} command.  Otherwise you may get an error whose
 text depends on the host system, but which usually looks something like
@@ -1177,6 +1188,11 @@ development board as a ``normal exit'' of your program.
 MIPS board attached to a serial line.  This is available when
 you configure @value{GDBN} with @samp{--target=mips-idt-ecoff}.
 
+@noindent
+Use these @value{GDBN} commands to specify the connection to your target board:
+
+@table @code
+@item target mips @var{port}
 @kindex target mips @var{port}
 To run a program on the board, start up @code{@value{GDBP}} with the
 name of your program as the argument.  To connect to the board, use the
@@ -1185,19 +1201,62 @@ the serial port connected to the board.  If the program has not already
 been downloaded to the board, you may use the @code{load} command to
 download it.  You can then use all the usual @value{GDBN} commands.
 
-You can also specify @var{port} as a TCP connection (for instance, to a
-serial line managed by a terminal concentrator), using the syntax
-@code{@var{hostname}:@var{portnumber}}.
+For example, this sequence connects to the target board through a serial
+port, and loads and runs a program called @var{prog} through the
+debugger:
 
+@example
+host$ @value{GDBP} @var{prog}
+GDB is free software and @dots{}
+(gdb) target mips /dev/ttyb
+(gdb) load @var{prog}
+(gdb) run
+@end example
+
+@item target mips @var{hostname}:@var{portnumber}
+On some @value{GDBN} host configurations, you can specify a TCP
+connection (for instance, to a serial line managed by a terminal
+concentrator) instead of a serial port, using the syntax
+@samp{@var{hostname}:@var{portnumber}}.
+@end table
+
+@noindent
+@value{GDBN} also supports these special commands for MIPS targets:
+
+@table @code
+@item set mipsfpu off
+@itemx show mipsfpu
+@kindex set mipsfpu off
+@kindex show mipsfpu
+@cindex MIPS remote floating point
+@cindex floating point, MIPS remote
+If your target board does not support the MIPS floating point
+coprocessor, you should use the command @samp{set mipsfpu off} (if you
+need this, you may wish to put the command in your @value{GDBINIT}
+file).  This tells @value{GDBN} how to find the return value of
+functions which return floating point values.  It also allows
+@value{GDBN} to avoid saving the floating point registers when calling
+functions on the board.  (As usual, you can inquire about the
+@code{mipsfpu} variable with @samp{show mipsfpu}.)
+
+@item set remotedebug @var{n}
+@itemx show remotedebug
+@kindex set remotedebug
+@kindex show remotedebug
 @cindex @code{remotedebug}, MIPS protocol
+@cindex MIPS @code{remotedebug} protocol
 @c FIXME! For this to be useful, you must know something about the MIPS
 @c FIXME...protocol.  Where is it described?
 You can see some debugging information about communications with the board
-by setting the @code{remotedebug} variable.  If you set it to 1 using
-@samp{set remotedebug 1} every packet will be displayed.  If you set it
-to 2 every character will be displayed.  You can check the current value
+by setting the @code{remotedebug} variable.  If you set it to @code{1} using
+@samp{set remotedebug 1}, every packet is displayed.  If you set it
+to @code{2}, every character is displayed.  You can check the current value
 at any time with the command @samp{show remotedebug}.
 
+@item set timeout @var{seconds}
+@itemx set retransmit-timeout @var{seconds}
+@itemx show timeout
+@itemx show retransmit-timeout
 @cindex @code{timeout}, MIPS protocol
 @cindex @code{retransmit-timeout}, MIPS protocol
 @kindex set timeout
@@ -1212,16 +1271,7 @@ retransmit-timeout @var{seconds}} command.  The default is 3 seconds.
 You can inspect both values with @code{show timeout} and @code{show
 retransmit-timeout}.  (These commands are @emph{only} available when
 @value{GDBN} is configured for @samp{--target=mips-idt-ecoff}.)
-
-@kindex set mipsfpu off
-@cindex MIPS remote floating point
-@cindex floating point, MIPS remote
-If your target board does not support the MIPS floating point
-coprocessor, you should use the command @samp{set mipsfpu off} (you may
-wish to put this in your @value{GDBINIT} file).  This tells @value{GDBN}
-how to find the return value of functions which return floating point
-values.  It also allows @value{GDBN} to avoid saving the floating point
-registers when calling functions on the board.
+@end table
 @end ifset
 
 @ifset SIMS

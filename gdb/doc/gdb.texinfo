@@ -209,19 +209,16 @@ effects of one bug and go on to learn about another.
 
 @ifclear CONLY
 You can use @value{GDBN} to debug programs written in C or C++.  For
-more information, @xref{C}.
+more information, see @ref{C,,C and C++}.
 
 @ifset MOD2
-@c I use "MOD2" as a "miscellaneous languages" flag here.  According to
-@c a comment in all-cfg.texi, there should be separate flags for chill
-@c and Pascal, but that seems kind of silly since we only mention them
-@c in passing--IMHO the manual should be configurable as little as we
-@c can get away with -kingdon.
+@c "MOD2" used as a "miscellaneous languages" flag here.
+@c This is acceptable while there is no real doc for Chill and Pascal.
 Support for Modula-2 and Chill is partial.  For information on Modula-2,
-@xref{Modula-2}; there is no further documentation on Chill yet.
+see @ref{Modula-2,,Modula-2}; there is no further documentation on Chill yet.
 
-Pascal programs which use sets, subranges, file variables, or nested
-functions will not currently work.  @value{GDBN} does not support
+Debugging pascal programs which use sets, subranges, file variables, or nested
+functions does not currently work.  @value{GDBN} does not support
 entering expressions, printing values, etc. using Pascal syntax.
 @end ifset
 @ifset FORTRAN
@@ -417,6 +414,9 @@ of your program, and the latter refer to the state of GDB itself.
 @item Shared Libraries
 GDB 4 can debug programs and core files that use SunOS, SVR4, or IBM RS/6000
 shared libraries.
+
+@item Threads
+On some systems, GDB 4 has facilities to debug multi-thread programs.
 
 @item Reference Card
 GDB 4 has a reference card.  @xref{Formatting Documentation,,Formatting
@@ -1828,7 +1828,7 @@ address space (that is, they can all examine and modify the same
 variables).  On the other hand, each thread has its own registers and
 execution stack, and perhaps private memory.
 
-@value{GDBN} provides several facilities for debugging multi-thread
+@value{GDBN} provides these facilities for debugging multi-thread
 programs:
 
 @itemize @bullet
@@ -1870,10 +1870,10 @@ program information from the perspective of the current thread.
 @c included GDB's numeric thread handle, so you could just go to that
 @c thread without first checking `info threads'.
 Whenever @value{GDBN} detects a new thread in your program, it displays
-the system's identification for it with a message in the form @samp{[New
-@var{systag}]}.  @var{systag} is a thread identifier whose form varies
-depending on the particular system.  For example, on LynxOS, you might
-see
+the target system's identification for the thread with a message in the
+form @samp{[New @var{systag}]}.  @var{systag} is a thread identifier
+whose form varies depending on the particular system.  For example, on
+LynxOS, you might see
 
 @example
 [New process 35 thread 27]
@@ -1904,9 +1904,9 @@ Display a summary of all threads currently in your
 program.  @value{GDBN} displays for each thread (in this order):
 
 @enumerate
-@item the @value{GDBN} thread number
+@item the thread number assigned by @value{GDBN}
 
-@item the system's @var{systag} thread identifier
+@item the target system's thread identifier (@var{systag})
 
 @item the current stack frame summary for that thread
 @end enumerate
@@ -1929,6 +1929,7 @@ For example,
 
 @table @code
 @item thread @var{threadno}
+@kindex thread @var{threadno}
 Make thread number @var{threadno} the current thread.  The command
 argument @var{threadno} is the internal @value{GDBN} thread number, as
 shown in the first field of the @samp{info threads} display.
@@ -1960,6 +1961,9 @@ thread.
 @xref{Thread Stops,,Stopping and starting multi-thread programs}, for
 more information about how @value{GDBN} behaves when you stop and start
 programs with multiple threads.
+
+@xref{Set Watchpoints,,Setting watchpoints}, for information about
+watchpoints in programs with multiple threads.
 @end ifclear
 
 @node Stopping
@@ -3045,23 +3049,28 @@ programs with multiple threads}), you can choose whether to set
 breakpoints on all threads, or on a particular thread.
 
 @table @code
-@cindex br
+@cindex breakpoints and threads
+@cindex thread breakpoints
 @kindex break @dots{} thread @var{threadno}
 @item break @var{linespec} thread @var{threadno}
 @itemx break @var{linespec} thread @var{threadno} if @dots{}
 Use the qualifier @samp{thread @var{threadno}} with a breakpoint command
 to specify that you only want @value{GDBN} to stop the program when a
-particular thread reaches this breakpoint.  @var{threadno} is one of
-GDB's numeric thread identifiers, shown in the first column of
-the @samp{info threads} display.
-
-You can use the @code{thread} qualifier on conditional breakpoints as
-well; in this case, place @samp{thread @var{threadno}} before the
-breakpoint condition.
+particular thread reaches this breakpoint.  @var{threadno} is one of the
+numeric thread identifiers assigned by @value{GDBN}, shown in the first
+column of the @samp{info threads} display.
 
 If you do not specify @samp{thread @var{threadno}} when you set a
 breakpoint, the breakpoint applies to @emph{all} threads of your
 program.
+
+You can use the @code{thread} qualifier on conditional breakpoints as
+well; in this case, place @samp{thread @var{threadno}} before the
+breakpoint condition, like this:
+
+@smallexample
+(gdb) break frik.c:13 thread 28 if bartab > lim
+@end smallexample
 @end table
 
 @cindex stopped threads
@@ -3079,11 +3088,12 @@ executing.  @emph{This is true even when single-stepping} with commands
 like @code{step} or @code{next}.  
 
 In particular, @value{GDBN} cannot single-step all threads in lockstep.
-Since thread scheduling is up to your host operating system, rather than
-controlled by @value{GDBN}, other threads may execute more than one
-statement while the current thread completes a single step.
-Moreover, in general other threads stop in the middle of a statement,
-rather than at a clean statement boundary, when the program stops.
+Since thread scheduling is up to your debugging target's operating
+system (not controlled by @value{GDBN}), other threads may
+execute more than one statement while the current thread completes a
+single step.  Moreover, in general other threads stop in the middle of a
+statement, rather than at a clean statement boundary, when the program
+stops.
 
 You might even find your program stopped in another thread after
 continuing or even single-stepping.  This happens whenever some other
@@ -5242,14 +5252,15 @@ together.
 @kindex g++
 @cindex GNU C++
 The C++ debugging facilities are jointly implemented by the GNU C++
-compiler and @value{GDBN}.  Therefore, to debug your C++ code effectively,
-you must compile your C++ programs with the GNU C++ compiler,
-@code{g++}.  Also, you must be using the stabs debugging format; see the
-documentation for the GNU C++ compiler for more information on how to
-select that format.
+compiler and @value{GDBN}.  Therefore, to debug your C++ code
+effectively, you must compile your C++ programs with the GNU C++
+compiler, @code{g++}.
 
-In particular, cfront based compilers such as Sun's C++ are not fully
-supported.
+For best results when debugging C++ programs, use the stabs debugging
+format.  You can select that format explicitly with the @code{g++}
+command-line options @samp{-gstabs} or @samp{-gstabs+}.  See
+@ref{Debugging Options,,Options for Debugging Your Program or GNU CC,
+gcc.info, Using GNU CC}, for more information.
 @end ifclear
 @ifset CONLY
 @node C
@@ -6821,9 +6832,10 @@ target is @dots{}}''
 @end ifset
 
 The file is loaded at whatever address is specified in the executable.
-For some object file formats, like a.out, the object file format fixes
-the address and so it won't necessarily match the address you gave to
-the linker.
+For some object file formats, you can specify the load address when you
+link the program; for other formats, like a.out, the object file format
+specifies a fixed address.
+@c FIXME! This would be a good place for an xref to the GNU linker doc.
 
 @ifset VXWORKS
 On VxWorks, @code{load} will dynamically link @var{filename} on the

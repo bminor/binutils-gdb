@@ -1,3 +1,19 @@
+Sun Nov 28 18:06:25 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo (New Features): mention threads.
+	(Summary, C): fix xrefs in newly contributed text.
+	(Threads): index entries, clarifications, example
+	(passim): minor typos fixed, phrasing improvements
+
+	* remote.texi (Bootstrapping): rephrase text on ^C and add index
+	entries; (Server): explain use of gdbserver w/real-time systems,
+	add example of conflicting TCP port; (MIPS Remote) break up
+	running text into table, highlighting commands, and add example.
+	
+Wed Nov 24 14:15:56 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* refcard.tex: avoid bad linebreaks even when REFEDITS=psrc.sed
+
 Fri Nov 12 16:10:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Nested Symbols): New node.
