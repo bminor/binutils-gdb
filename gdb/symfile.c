@@ -48,6 +48,7 @@
 #include "readline/readline.h"
 #include "gdb_assert.h"
 #include "block.h"
+#include "observer.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -2013,7 +2014,13 @@ reread_symbols (void)
     }
 
   if (reread_one)
-    clear_symtab_users ();
+    {
+      clear_symtab_users ();
+      /* At least one objfile has changed, so we can consider that
+         the executable we're debugging has changed too.  */
+      observer_notify_executable_changed (NULL);
+    }
+      
 }
 
 

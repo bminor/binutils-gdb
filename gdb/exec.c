@@ -32,6 +32,7 @@
 #include "completer.h"
 #include "value.h"
 #include "exec.h"
+#include "observer.h"
 
 #include <fcntl.h>
 #include "readline/readline.h"
@@ -276,6 +277,7 @@ exec_file_attach (char *filename, int from_tty)
 	(*deprecated_exec_file_display_hook) (filename);
     }
   bfd_cache_close_all ();
+  observer_notify_executable_changed (NULL);
 }
 
 /*  Process the first arg in ARGS as the new exec file.

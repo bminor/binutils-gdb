@@ -83,6 +83,13 @@ The inferior has stopped for real.
 The target's register contents have changed.
 @end deftypefun
 
+@deftypefun void executable_changed (void *@var{unused_args})
+The executable being debugged by GDB has changed: The user decided
+to debug a different program, or the program he was debugging has
+been modified since being loaded by the debugger (by being recompiled,
+for instance).
+@end deftypefun
+
 @deftypefun void inferior_created (struct target_ops *@var{objfile}, int @var{from_tty})
 @value{GDBN} has just connected to an inferior.  For @samp{run},
 @value{GDBN} calls this observer while the inferior is still stopped

@@ -55,6 +55,7 @@
 #include "gdb_stat.h"
 #include <ctype.h>
 #include "cp-abi.h"
+#include "observer.h"
 
 /* Prototypes for local functions */
 
@@ -4092,15 +4093,59 @@ set_main_name (const char *name)
     }
 }
 
+/* Deduce the name of the main procedure, and set NAME_OF_MAIN
+   accordingly.  */
+
+static void
+find_main_name (void)
+{
+  char *new_main_name;
+
+  /* Try to see if the main procedure is in Ada.  */
+  /* FIXME: brobecker/2005-03-07: Another way of doing this would
+     be to add a new method in the language vector, and call this
+     method for each language until one of them returns a non-empty
+     name.  This would allow us to remove this hard-coded call to
+     an Ada function.  It is not clear that this is a better approach
+     at this point, because all methods need to be written in a way
+     such that false positives never be returned. For instance, it is
+     important that a method does not return a wrong name for the main
+     procedure if the main procedure is actually written in a different
+     language.  It is easy to guaranty this with Ada, since we use a
+     special symbol generated only when the main in Ada to find the name
+     of the main procedure. It is difficult however to see how this can
+     be guarantied for languages such as C, for instance.  This suggests
+     that order of call for these methods becomes important, which means
+     a more complicated approach.  */
+  new_main_name = ada_main_name ();
+  if (new_main_name != NULL)
+    { 
+      set_main_name (new_main_name);
+      return;
+    }
+
+  /* The languages above didn't identify the name of the main procedure.
+     Fallback to "main".  */
+  set_main_name ("main");
+}
+
 char *
 main_name (void)
 {
-  if (name_of_main != NULL)
-    return name_of_main;
-  else
-    return "main";
+  if (name_of_main == NULL)
+    find_main_name ();
+
+  return name_of_main;
 }
 
+/* Handle ``executable_changed'' events for the symtab module.  */
+
+static void
+symtab_observer_executable_changed (void *unused)
+{
+  /* NAME_OF_MAIN may no longer be the same, so reset it for now.  */
+  set_main_name (NULL);
+}
 
 void
 _initialize_symtab (void)
@@ -4143,4 +4188,6 @@ All global and static variable names, or those matching REGEXP."));
   /* Initialize the one built-in type that isn't language dependent... */
   builtin_type_error = init_type (TYPE_CODE_ERROR, 0, 0,
 				  "<unknown type>", (struct objfile *) NULL);
+
+  observer_attach_executable_changed (symtab_observer_executable_changed);
 }

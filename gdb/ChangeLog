@@ -1,3 +1,20 @@
+2005-03-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* doc/observer.texi (executable_changed): New observer.
+	* symtab.c: Include "observer.h".
+	(find_main_name): New function.
+	(main_name): If name_of_main is unset, then compute it
+	using find_main_name.
+	(symtab_observer_executable_changed): New function.
+	(_initialize_symtab): Attach executable_changed observer.
+	* exec.c: Include "observer.h".
+	(exec_file_attach): Emit executable_changed notification.
+	* symfile.c: Include "observer.h".
+	(reread_symbols): Send an executable_changed if appropriate.
+	* Makefile.in (exec.o): Add dependency on observer.h.
+	(symfile.o): Likewise.
+	(symtab.o): Likewise.
+
 2005-03-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* findvar.c (read_var_value): Don't allocate V when it will not
