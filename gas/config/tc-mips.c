@@ -14080,7 +14080,6 @@ s_mips_end (x)
      int x ATTRIBUTE_UNUSED;
 {
   symbolS *p;
-  int maybe_text;
 
   /* Following functions need their own .frame and .cprestore directives.  */
   mips_frame_reg_valid = 0;
@@ -14094,19 +14093,7 @@ s_mips_end (x)
   else
     p = NULL;
 
-#ifdef BFD_ASSEMBLER
-  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
-    maybe_text = 1;
-  else
-    maybe_text = 0;
-#else
-  if (now_seg != data_section && now_seg != bss_section)
-    maybe_text = 1;
-  else
-    maybe_text = 0;
-#endif
-
-  if (!maybe_text)
+  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) == 0)
     as_warn (_(".end not in text section"));
 
   if (!cur_proc_ptr)
@@ -14178,7 +14165,6 @@ s_mips_ent (aent)
      int aent;
 {
   symbolS *symbolP;
-  int maybe_text;
 
   symbolP = get_symbol ();
   if (*input_line_pointer == ',')
@@ -14188,19 +14174,7 @@ s_mips_ent (aent)
       || *input_line_pointer == '-')
     get_number ();
 
-#ifdef BFD_ASSEMBLER
-  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
-    maybe_text = 1;
-  else
-    maybe_text = 0;
-#else
-  if (now_seg != data_section && now_seg != bss_section)
-    maybe_text = 1;
-  else
-    maybe_text = 0;
-#endif
-
-  if (!maybe_text)
+  if ((bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) == 0)
     as_warn (_(".ent or .aent not in text section."));
 
   if (!aent && cur_proc_ptr)

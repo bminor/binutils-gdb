@@ -1,3 +1,8 @@
+2003-03-09  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (s_mips_end): Remove !BFD_ASSEMBLER case.
+	(s_mips_ent): Likewise.
+
 2003-03-04  Dmitry Diky  <diwil@mail.ru>
 
 	* config/tc-msp430.c (mcu_types): Add recently announced x1122
