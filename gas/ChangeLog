@@ -1,3 +1,8 @@
+2001-03-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* config/tc-m68hc11.c (md_pseudo_table): Recognize xrefb to comply
+	with 'Motorola specification for assembly language input standard'.
+
 2001-03-17  Richard Henderson  <rth@redhat.com>
 
 	* dwarf2dbg.c (user_filenum, user_filenum_allocated): Remove.
