@@ -7465,9 +7465,9 @@ struct option md_longopts[] = {
 #define OPTION_NO_M4100 (OPTION_MD_BASE + 18)
   {"no-m4100", no_argument, NULL, OPTION_NO_M4100},
 #define OPTION_MIPS16 (OPTION_MD_BASE + 22)
-  {"mips-16", no_argument, NULL, OPTION_MIPS16},
+  {"mips16", no_argument, NULL, OPTION_MIPS16},
 #define OPTION_NO_MIPS16 (OPTION_MD_BASE + 23)
-  {"no-mips-16", no_argument, NULL, OPTION_NO_MIPS16},
+  {"no-mips16", no_argument, NULL, OPTION_NO_MIPS16},
 
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
@@ -8672,6 +8672,12 @@ s_mipsset (x)
     {
       mips_nobopt = 1;
     }
+  else if (strcmp (name, "mips16") == 0
+	   || strcmp (name, "MIPS-16") == 0)
+    mips16 = 1;
+  else if (strcmp (name, "nomips16") == 0
+	   || strcmp (name, "noMIPS-16") == 0)
+    mips16 = 0;
   else if (strncmp (name, "mips", 4) == 0)
     {
       int isa;
@@ -8686,10 +8692,6 @@ s_mipsset (x)
       else
 	mips_isa = isa;
     }
-  else if (strcmp (name, "MIPS-16") == 0)
-    mips16 = 1;
-  else if (strcmp (name, "noMIPS-16") == 0)
-    mips16 = 0;
   else if (strcmp (name, "autoextend") == 0)
     mips16_autoextend = 1;
   else if (strcmp (name, "noautoextend") == 0)
@@ -8922,8 +8924,8 @@ md_section_align (seg, addr)
   /* We don't need to align ELF sections to the full alignment.
      However, Irix 5 may prefer that we align them at least to a 16
      byte boundary.  */
-  if (align > 16)
-    align = 16;
+  if (align > 4)
+    align = 4;
 #endif
 
   return ((addr + (1 << align) - 1) & (-1 << align));

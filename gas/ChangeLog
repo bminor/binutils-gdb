@@ -1,3 +1,9 @@
+Wed Dec  4 13:00:07 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (md_longopts): Rename mips-16 to mips16, and
+	no-mips-16 to no-mips16.
+	(s_mipsset): Accept .set mips16 and .set nomips16.
+
 Wed Dec  4 10:35:33 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (ppc_elf_suffix): Take expressionS pointer
