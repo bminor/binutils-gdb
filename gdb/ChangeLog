@@ -1,3 +1,8 @@
+2003-08-12  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (deprecated_frame_xmalloc): Use XMALLOC, instead of
+	FRAME_OBSTACK_ZALLOC.
+
 2003-08-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* i386-tdep.c (i386_gdbarch_init): Enable default support for
