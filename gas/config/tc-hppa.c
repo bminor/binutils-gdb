@@ -4766,9 +4766,17 @@ pa_type_args (symbolP, is_export)
   else if (strncasecmp (input_line_pointer, "code", 4) == 0)
     {
       input_line_pointer += 4;
-      if (is_export && (symbolP->bsym->flags & BSF_FUNCTION))
+      /* IMPORTing/EXPORTing CODE types for functions is meaningless for SOM,
+	 instead one should be IMPORTing/EXPORTing ENTRY types.
+
+	 Complain if one tries to EXPORT a CODE type since that's never
+	 done.  Both GCC and HP C still try to IMPORT CODE types, so
+	 silently fix them to be ENTRY types.  */
+      if (symbolP->bsym->flags & BSF_FUNCTION)
 	{
-	  as_tsktsk ("Using ENTRY rather than CODE in export directive for %s", symbolP->bsym->name);
+	  if (is_export)
+	    as_tsktsk ("Using ENTRY rather than CODE in export directive for %s", symbolP->bsym->name);
+
 	  symbolP->bsym->flags |= BSF_FUNCTION;
 	  type = SYMBOL_TYPE_ENTRY;
 	}

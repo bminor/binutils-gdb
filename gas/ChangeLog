@@ -1,3 +1,9 @@
+Thu Nov 11 15:49:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_type_args): For .import statements,
+	silently ignore attempt	to change the symbol type for a function
+	from ST_ENTRY to ST_CODE on .import
+
 Wed Nov 10 16:19:13 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* write.h (fixS): Rename fx_callj field to fx_tcbit.
