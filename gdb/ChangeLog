@@ -1,3 +1,9 @@
+2003-08-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lin-lwp.c (wait_lwp): New function, copied from
+	stop_wait_callback.  Clean up.
+	(stop_wait_callback): Use wait_lwp.
+
 2003-08-28  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (gdb_print_insn_mips): Set the disassembler's

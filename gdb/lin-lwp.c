@@ -585,6 +585,77 @@ kill_lwp (int lwpid, int signo)
   return kill (lwpid, signo);
 }
 
+/* Wait for LP to stop.  Returns the wait status, or 0 if the LWP has
+   exited.  */
+
+static int
+wait_lwp (struct lwp_info *lp)
+{
+  pid_t pid;
+  int status;
+  int thread_dead = 0;
+
+  gdb_assert (!lp->stopped);
+  gdb_assert (lp->status == 0);
+
+  pid = waitpid (GET_LWP (lp->ptid), &status, 0);
+  if (pid == -1 && errno == ECHILD)
+    {
+      pid = waitpid (GET_LWP (lp->ptid), &status, __WCLONE);
+      if (pid == -1 && errno == ECHILD)
+	{
+	  /* The thread has previously exited.  We need to delete it now
+	     because in the case of NPTL threads, there won't be an
+	     exit event unless it is the main thread.  */
+	  thread_dead = 1;
+	  if (debug_lin_lwp)
+	    fprintf_unfiltered (gdb_stdlog, "WL: %s vanished.\n",
+				target_pid_to_str (lp->ptid));
+	}
+    }
+
+  if (!thread_dead)
+    {
+      gdb_assert (pid == GET_LWP (lp->ptid));
+
+      if (debug_lin_lwp)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "WL: waitpid %s received %s\n",
+			      target_pid_to_str (lp->ptid),
+			      status_to_str (status));
+	}
+    }
+
+  /* Check if the thread has exited.  */
+  if (WIFEXITED (status) || WIFSIGNALED (status))
+    {
+      thread_dead = 1;
+      if (debug_lin_lwp)
+	fprintf_unfiltered (gdb_stdlog, "WL: %s exited.\n",
+			    target_pid_to_str (lp->ptid));
+    }
+
+  if (thread_dead)
+    {
+      if (in_thread_list (lp->ptid))
+	{
+	  /* Core GDB cannot deal with us deleting the current thread.  */
+	  if (!ptid_equal (lp->ptid, inferior_ptid))
+	    delete_thread (lp->ptid);
+	  printf_unfiltered ("[%s exited]\n",
+			     target_pid_to_str (lp->ptid));
+	}
+
+      delete_lwp (lp->ptid);
+      return 0;
+    }
+
+  gdb_assert (WIFSTOPPED (status));
+
+  return status;
+}
+
 /* Send a SIGSTOP to LP.  */
 
 static int
@@ -627,86 +698,11 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
   if (!lp->stopped && lp->signalled)
     {
-      pid_t pid;
       int status;
 
-      gdb_assert (lp->status == 0);
-
-      pid = waitpid (GET_LWP (lp->ptid), &status, 0);
-      if (pid == -1 && errno == ECHILD)
-	{
-	  pid = waitpid (GET_LWP (lp->ptid), &status, __WCLONE);
-	  if (pid == -1 && errno == ECHILD)
-	    {
-	      /* The thread has previously exited.  We need to delete it now
-	         because in the case of nptl threads, there won't be an
-	         exit event unless it is the main thread.  */
-	      if (debug_lin_lwp)
-		fprintf_unfiltered (gdb_stdlog,
-				    "SWC: %s exited.\n",
-				    target_pid_to_str (lp->ptid));
-	      delete_lwp (lp->ptid);
-	      return 0;
-	    }
-	}
-
-      gdb_assert (pid == GET_LWP (lp->ptid));
-
-      if (debug_lin_lwp)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "SWC: waitpid %s received %s\n",
-			      target_pid_to_str (lp->ptid),
-			      status_to_str (status));
-	}
-
-      /* Check if the thread has exited.  */
-      if (WIFEXITED (status) || WIFSIGNALED (status))
-	{
-	  gdb_assert (num_lwps > 1);
-
-	  if (in_thread_list (lp->ptid))
-	    {
-	      /* Core GDB cannot deal with us deleting the current
-	         thread.  */
-	      if (!ptid_equal (lp->ptid, inferior_ptid))
-		delete_thread (lp->ptid);
-	      printf_unfiltered ("[%s exited]\n",
-				 target_pid_to_str (lp->ptid));
-	    }
-	  if (debug_lin_lwp)
-	    fprintf_unfiltered (gdb_stdlog,
-				"SWC: %s exited.\n",
-				target_pid_to_str (lp->ptid));
-
-	  delete_lwp (lp->ptid);
-	  return 0;
-	}
-
-      /* Check if the current LWP has previously exited.  For nptl threads,
-         there is no exit signal issued for LWPs that are not the
-         main thread so we should check whenever the thread is stopped.  */
-      if (!lin_lwp_thread_alive (lp->ptid))
-	{
-	  if (in_thread_list (lp->ptid))
-	    {
-	      /* Core GDB cannot deal with us deleting the current
-	         thread.  */
-	      if (!ptid_equal (lp->ptid, inferior_ptid))
-		delete_thread (lp->ptid);
-	      printf_unfiltered ("[%s exited]\n",
-				 target_pid_to_str (lp->ptid));
-	    }
-	  if (debug_lin_lwp)
-	    fprintf_unfiltered (gdb_stdlog,
-				"SWC: %s already exited.\n",
-				target_pid_to_str (lp->ptid));
-
-	  delete_lwp (lp->ptid);
-	  return 0;
-	}
-
-      gdb_assert (WIFSTOPPED (status));
+      status = wait_lwp (lp);
+      if (status == 0)
+	return 0;
 
       /* Ignore any signals in FLUSH_MASK.  */
       if (flush_mask && sigismember (flush_mask, WSTOPSIG (status)))
