@@ -139,25 +139,30 @@ proc simple_diff { file_1 file_2 } {
 	}
     }
     close $file_b
-    
+
     for { set i 0 } { $i < [llength $list_a] } { incr i } {
 	set line_a [lindex $list_a $i]
 	set line_b [lindex $list_b $i]
-	
+
 	verbose "\t$file_1: $i: $line_a\n" 3
 	verbose "\t$file_2: $i: $line_b\n" 3
 	if [string compare $line_a $line_b] then {
-	    fail "Test: $target"
-	    set differences 1	
-	    
 	    verbose "\t$file_1: $i: $line_a\n" 1
 	    verbose "\t$file_2: $i: $line_b\n" 1
-	    
+
 	    send_log "\t$file_1: $i: $line_a\n"
 	    send_log "\t$file_2: $i: $line_b\n"
+
+	    fail "Test: $target"
+	    return
 	}
     }
     
+    if { [llength $list_a] != [llength $list_b] } {
+	fail "Test: $target"
+	return
+    }
+
     if $differences<1 then {
 	pass "Test: $target"
     }
