@@ -1,5 +1,8 @@
 2003-07-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* ppc-opc.c: Convert to C90, removing unnecessary prototypes and
+	casts.  Formatting.
+
 	* ppc-opc.c: Remove PARAMS from prototypes.
 	(FXM4): Define.
 	(insert_fxm): New function, used by both FXM and FXM4.
