@@ -1,3 +1,8 @@
+Sat Feb  6 10:25:47 1993  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Brief documentation for longjmp support,
+	from an email msg by Stu.
+
 Fri Feb  5 14:10:15 1993  John Gilmore  (gnu@cygnus.com)
 
 	* stabs.texinfo:  Fix description of floating point "range"
