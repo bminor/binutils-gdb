@@ -1,6 +1,6 @@
 Fri May 13 11:15:12 1994  Bill Cox  (bill@rtl.cygnus.com)
 
-	* Makefile.in (sysdep.h): Copy Ian's version of this from
+	* Makefile.in (stmp-bfd.h): Copy Ian's version of this from
 	  progressive/bfd/Makefile.in.
 
 Fri May 13 10:43:51 1994  Bill Cox  (bill@rtl.cygnus.com)
