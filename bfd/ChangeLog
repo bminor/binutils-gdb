@@ -1,3 +1,11 @@
+Tue Apr 16 13:44:08 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c (bfd_coff_get_syment): New function.
+	(bfd_coff_get_auxent): New function.
+	* bfd-in.h (bfd_coff_get_syment): Declare.
+	(bfd_coff_get_auxent): Declare.
+	* bfd-in2.h: Rebuild.
+
 Mon Apr 15 19:06:59 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (struct mips_hi16): Define.

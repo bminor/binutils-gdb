@@ -1794,6 +1794,78 @@ coff_get_symbol_info (abfd, symbol, ret)
     }
 }
 
+/* Return the COFF syment for a symbol.  */
+
+boolean
+bfd_coff_get_syment (abfd, symbol, psyment)
+     bfd *abfd;
+     asymbol *symbol;
+     struct internal_syment *psyment;
+{
+  coff_symbol_type *csym;
+
+  csym = coff_symbol_from (abfd, symbol);
+  if (csym == NULL || csym->native == NULL)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
+
+  *psyment = csym->native->u.syment;
+
+  if (csym->native->fix_value)
+    psyment->n_value = ((combined_entry_type *) psyment->n_value
+			- obj_raw_syments (abfd));
+
+  /* FIXME: We should handle fix_line here.  */
+
+  return true;
+}
+
+/* Return the COFF auxent for a symbol.  */
+
+boolean
+bfd_coff_get_auxent (abfd, symbol, indx, pauxent)
+     bfd *abfd;
+     asymbol *symbol;
+     int indx;
+     union internal_auxent *pauxent;
+{
+  coff_symbol_type *csym;
+  combined_entry_type *ent;
+
+  csym = coff_symbol_from (abfd, symbol);
+
+  if (csym == NULL
+      || csym->native == NULL
+      || indx >= csym->native->u.syment.n_numaux)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
+
+  ent = csym->native + indx + 1;
+
+  *pauxent = ent->u.auxent;
+
+  if (ent->fix_tag)
+    pauxent->x_sym.x_tagndx.l =
+      ((combined_entry_type *) pauxent->x_sym.x_tagndx.p
+       - obj_raw_syments (abfd));
+
+  if (ent->fix_end)
+    pauxent->x_sym.x_fcnary.x_fcn.x_endndx.l =
+      ((combined_entry_type *) pauxent->x_sym.x_fcnary.x_fcn.x_endndx.p
+       - obj_raw_syments (abfd));
+
+  if (ent->fix_scnlen)
+    pauxent->x_csect.x_scnlen.l =
+      ((combined_entry_type *) pauxent->x_csect.x_scnlen.p
+       - obj_raw_syments (abfd));
+
+  return true;
+}
+
 /* Print out information about COFF symbol.  */
 
 void
