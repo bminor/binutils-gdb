@@ -281,14 +281,14 @@ insert_deplist(int count, unsigned short *deps)
   for (i=0;i < count;i++)
     set[deps[i]] = 1;
   count = 0;
-  for (i=0;i < sizeof(set);i++)
+  for (i=0;i < (int)sizeof(set);i++)
     if (set[i])
       ++count;
 
   list = tmalloc(struct deplist);
   list->len = count;
   list->deps = (unsigned short *)malloc (sizeof(unsigned short) * count);
-  for (i=0, count=0;i < sizeof(set);i++)
+  for (i=0, count=0;i < (int)sizeof(set);i++)
     {
       if (set[i])
         {
@@ -1459,6 +1459,8 @@ print_dependency_table ()
               (int)rdeps[i]->mode, (int)rdeps[i]->semantics, regindex);
       if (rdeps[i]->semantics == IA64_DVS_OTHER)
         printf ("\"%s\", ", rdeps[i]->extra);
+      else
+	printf ("NULL, ");
       printf("},\n");
     }
   printf ("};\n\n");
@@ -2395,7 +2397,7 @@ collapse_redundant_completers ()
 int
 insert_opcode_dependencies (opc, cmp)
      struct ia64_opcode *opc;
-     struct completer_entry *cmp;
+     struct completer_entry *cmp ATTRIBUTE_UNUSED;
 {
   /* note all resources which point to this opcode.  rfi has the most chks
      (79) and cmpxchng has the most regs (54) so 100 here should be enough */
@@ -2701,12 +2703,14 @@ print_main_table ()
   printf ("static const struct ia64_main_table\nmain_table[] = {\n");
   while (ptr != NULL)
     {
-      printf ("  { %d, %d, %d, 0x%llxull, 0x%llxull, { %d, %d, %d, %d, %d }, 0x%x, %d, },\n",
+      printf ("  { %d, %d, %d, 0x",
 	      ptr->name->num,
 	      ptr->opcode->type,
-	      ptr->opcode->num_outputs,
-	      ptr->opcode->opcode,
-	      ptr->opcode->mask,
+	      ptr->opcode->num_outputs);
+      fprintf_vma (stdout, ptr->opcode->opcode);
+      printf ("ull, 0x");
+      fprintf_vma (stdout, ptr->opcode->mask);
+      printf ("ull, { %d, %d, %d, %d, %d }, 0x%x, %d, },\n",
 	      ptr->opcode->operands[0],
 	      ptr->opcode->operands[1],
 	      ptr->opcode->operands[2],
@@ -2735,7 +2739,9 @@ shrink (table)
 }
 
 int
-main (int argc, char **argv)
+main (argc, argv)
+     int argc;
+     char **argv ATTRIBUTE_UNUSED;
 {
   if (argc > 1)
     {

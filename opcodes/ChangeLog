@@ -1,3 +1,15 @@
+2000-12-12  Jim Wilson  <wilson@redhat.com>
+
+	* ia64-dis.c (print_insn_ia64): Cast away const on ia64_free_opcode
+	argument.
+	* ia64_gen.c (insert_deplist): Cast sizeof result to int.
+	(print_dependency_table): Print NULL if semantics field not set.
+	(insert_opcode_dependencies): Mark cmp parameter as unused.
+	(print_main_table): Use fprintf_vma to print long long fields.
+	(main): Mark argv paramter as unused.  Convert to old style definition.
+	* ia64-opc.c (ia64_find_dependency): Cast sizeof result to int.
+	* ia64-asmtab.c: Regnerate.
+
 2000-12-09  Nick Clifton  <nickc@redhat.com>
 
 	* m32r-dis.c (print_insn): Prevent re-read of instruction from

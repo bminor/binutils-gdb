@@ -740,7 +740,8 @@ ia64_find_dependency (index)
 {
   index = DEP(index);
 
-  if (index < 0 || index >= sizeof(dependencies) / sizeof(dependencies[0]))
+  if (index < 0
+      || index >= (int)(sizeof(dependencies) / sizeof(dependencies[0])))
     return NULL;
 
   return &dependencies[index];

@@ -39,6 +39,7 @@
    md_parse_args.  */
 
 #define HOST_SPECIAL_INIT ia64_init
+extern void ia64_init PARAMS ((int, char **));
 
 #define TARGET_FORMAT ia64_target_format()
 extern const char *ia64_target_format PARAMS ((void));

@@ -1504,7 +1504,7 @@ get_dyn_sym_info (ia64_info, h, abfd, rel, create)
       len += 10;	/* %p slop */
 
       addr_name = alloca (len);
-      sprintf (addr_name, "%p:%lx", abfd, ELFNN_R_SYM (rel->r_info));
+      sprintf (addr_name, "%p:%lx", (void *) abfd, ELFNN_R_SYM (rel->r_info));
 
       /* Collect the canonical entry data for this address.  */
       loc_h = elfNN_ia64_local_hash_lookup (&ia64_info->loc_hash_table,

@@ -1,3 +1,7 @@
+2000-12-12  Jim Wilson  <wilson@redhat.com>
+
+	*  elfxx-ia64.c (get_dyn_sym_info): Cast %p argument to void *.
+
 2000-12-08  Mark Salter  <msalter@redhat.com>
 
 	* binary.c (binary_set_section_contents): Ignore sections

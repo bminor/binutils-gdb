@@ -1,3 +1,8 @@
+2000-12-12  Jim Wilson  <wilson@redhat.com>
+
+	* gas/ia64/dv-imply.d, gas/ia64/dv-mutex.d, gas/ia64/dv-safe.d,
+	gas/ia64/dv-srlz.d, gas/ia64/opc-m.d: Update.
+
 2000-12-12  Nick Clifton  <nickc@redhat.com>
 
 	* gas/vtable/vtable.exp: Fix formatting.
