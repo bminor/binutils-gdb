@@ -284,11 +284,22 @@ static reloc_howto_type howto_table[] =
       cache_ptr->addend += asect->vma;				\
   }
 
+/* For aix386, define a variable to track the number of sections discarded
+   during a strip. */
+
+#if defined(_AIX) && defined(_I386)
+#define USE_DISCARDED_SECTIONS_COUNT
+int discarded_sections_count = 0;
+#endif
+ 
 #include "coffcode.h"
 
-bfd_target *i3coff_object_p(a)
-bfd *a ;
-{ return coff_object_p(a); }
+static bfd_target *
+i3coff_object_p(a)
+     bfd *a;
+{
+  return coff_object_p(a);
+}
 
 bfd_target
 #ifdef TARGET_SYM

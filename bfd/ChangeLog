@@ -1,5 +1,7 @@
 Wed Oct 13 14:28:17 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* coff-i386.c (i3coff_object_p): Now static.
+
 	* Makefile.in: Updated dependencies.
 	(.dep, .dep1, dep.sed): New targets, to make "make dep" work
 	better.
