@@ -1,5 +1,13 @@
 2002-11-06  Andrew Cagney  <ac131313@redhat.com>
 
+	* valops.c (value_assign): Merge lval_register case into
+	lval_reg_frame_relative.  Use frame_register and
+	regcache_cooked_write instead of get_saved_register and
+	write_register_bytes.  After flushing the register cache, try to
+	re-select the selected frame.
+
+2002-11-06  Andrew Cagney  <ac131313@redhat.com>
+
 	* regcache.h (deprecated_register_valid): Rename register_valid.
 	* regcache.c: Update.
 	* ia64-aix-nat.c: Update.
