@@ -1,4 +1,7 @@
-/* Copyright (C) 1990 Free Software Foundation, Inc.
+/* Definitions to make GDB run on a mips box under 4.3bsd.
+   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Contributed by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin
+   and by Alessandro Forin(af@cs.cmu.edu) at CMU
 
 This file is part of GDB.
 
@@ -16,6 +19,12 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#if !defined (HOST_BYTE_ORDER)
 #define HOST_BYTE_ORDER BIG_ENDIAN
+#endif
 
-#include "mips/xm-mips.h"
+/* Get rid of any system-imposed stack limit if possible */
+
+#define	SET_STACK_LIMIT_HUGE
+
+#define	MEM_FNS_DECLARED

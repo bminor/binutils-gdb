@@ -74,7 +74,7 @@ mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix3)		gdb_host=irix3 ;;
 mips-sgi-irix4*)	gdb_host=irix4 ;;
-mips-sony-*)		gdb_host=bigmips ;;
+mips-sony-*)		gdb_host=news-mips ;;
 
 none-*-*)		gdb_host=none ;;
 
