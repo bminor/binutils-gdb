@@ -2941,17 +2941,6 @@ _initialize_arm_tdep (void)
   set_cmd_sfunc (new_set, set_disassembly_style_sfunc);
   deprecated_add_show_from_set (new_set, &showarmcmdlist);
 
-  add_setshow_cmd_full ("apcs32", no_class,
-			var_boolean, (char *) &arm_apcs_32, "\
-Set usage of ARM 32-bit mode.", "\
-Show usage of ARM 32-bit mode.", "\
-Determine the usage of ARM 32-bit mode.", "\
-Usage of ARM 32-bit mode is %s.",
-			NULL, NULL,
-			&setlist, &showlist, &new_set, &new_show);
-  deprecate_cmd (new_set, "set arm apcs32");
-  deprecate_cmd (new_show, "show arm apcs32");
-
   add_setshow_boolean_cmd ("apcs32", no_class, &arm_apcs_32, "\
 Set usage of ARM 32-bit mode.", "\
 Show usage of ARM 32-bit mode.", "\
