@@ -4404,6 +4404,7 @@ Table}.
 * Registers::                   Registers
 * Floating Point Hardware::     Floating point hardware
 * Memory Region Attributes::    Memory region attributes
+* Dump/Restore Files::          Copy between memory and a file
 @end menu
 
 @node Expressions
@@ -5567,7 +5568,7 @@ the ARM and x86 machines.
 @end table
 
 @node Memory Region Attributes
-@section Memory Region Attributes 
+@section Memory region attributes 
 @cindex memory region attributes
 
 @dfn{Memory region attributes} allow you to describe special handling 
@@ -5696,6 +5697,82 @@ Disable @value{GDBN} from caching target memory.  This is the default.
 @c @item verify
 @c @item noverify (default)
 @c @end table
+
+@node Dump/Restore Files
+@section Copy between memory and a file
+@cindex dump/restore files
+@cindex append data to a file
+@cindex dump data to a file
+@cindex restore data from a file
+@kindex dump
+@kindex append
+@kindex restore
+
+The commands @code{dump}, @code{append}, and @code{restore} are used
+for copying data between target memory and a file.  Data is written
+into a file using @code{dump} or @code{append}, and restored from a 
+file into memory by using @code{restore}.  Files may be binary, srec,
+intel hex, or tekhex (but only binary files can be appended).
+
+@table @code
+@kindex dump binary 
+@kindex append binary 
+@item dump binary memory @var{filename} @var{start_addr} @var{end_addr}
+Dump contents of memory from @var{start_addr} to @var{end_addr} into 
+raw binary format file @var{filename}.
+
+@item append binary memory @var{filename} @var{start_addr} @var{end_addr}
+Append contents of memory from @var{start_addr} to @var{end_addr} to
+raw binary format file @var{filename}.
+
+@item dump binary value @var{filename} @var{expression}
+Dump value of @var{expression} into raw binary format file @var{filename}.
+
+@item append binary memory @var{filename} @var{expression}
+Append value of @var{expression} to raw binary format file @var{filename}.
+
+@kindex dump ihex 
+@item dump ihex memory @var{filename} @var{start_addr} @var{end_addr}
+Dump contents of memory from @var{start_addr} to @var{end_addr} into 
+intel hex format file @var{filename}.
+
+@item dump ihex value @var{filename} @var{expression}
+Dump value of @var{expression} into intel hex format file @var{filename}.
+
+@kindex dump srec 
+@item dump srec memory @var{filename} @var{start_addr} @var{end_addr}
+Dump contents of memory from @var{start_addr} to @var{end_addr} into 
+srec format file @var{filename}.
+
+@item dump srec value @var{filename} @var{expression}
+Dump value of @var{expression} into srec format file @var{filename}.
+
+@kindex dump tekhex 
+@item dump tekhex memory @var{filename} @var{start_addr} @var{end_addr}
+Dump contents of memory from @var{start_addr} to @var{end_addr} into 
+tekhex format file @var{filename}.
+
+@item dump tekhex value @var{filename} @var{expression}
+Dump value of @var{expression} into tekhex format file @var{filename}.
+
+@item restore @var{filename} @var{[binary]} @var{bias} @var{start} @var{end}
+Restore the contents of file @var{filename} into memory.  The @code{restore}
+command can automatically recognize any known bfd file format, except for
+raw binary.  To restore a raw binary file you must use the optional argument
+@var{binary} after the filename.
+
+If @var{bias} is non-zero, its value will be added to the addresses 
+contained in the file.  Binary files always start at address zero, so
+they will be restored at address @var{bias}.  Other bfd files have
+a built-in location; they will be restored at offset @var{bias}
+from that location.
+
+If @var{start} and/or @var{end} are non-zero, then only data between
+file offset @var{start} and file offset @var{end} will be restored.
+These offsets are relative to the addresses in the file, before 
+the @var{bias} argument is applied.
+
+@end table
 
 @node Tracepoints
 @chapter Tracepoints
