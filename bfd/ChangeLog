@@ -1,3 +1,8 @@
+Fri Feb 25 18:39:26 2000  Rodney Brown (RodneyBrown@pmsc.com)
+
+	* som.c (SOM_HOWTO): Define.
+	(som_hppa_howto_table): Use it.
+
 2000-02-25  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
 
 	* config.bfd: Enable 64 bit support for GNU/Linux/sparc.

@@ -784,6 +784,9 @@ static const int comp3_opcodes[] =
 #define R_COMMENT 0xdd
 #endif
 
+#define SOM_HOWTO(TYPE, NAME)	\
+  HOWTO(TYPE, 0, 0, 32, false, 0, 0, hppa_som_reloc, NAME, false, 0, 0, false)
+
 static reloc_howto_type som_hppa_howto_table[] =
 {
   {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
