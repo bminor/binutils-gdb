@@ -1,7 +1,8 @@
 start-sanitize-v850
 Fri Aug 23 00:27:01 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* v850-opc.c (v850_opcodes): Fix thinko in "jmp" opcode.
+	* v850-opc.c (v850_opcodes): Fix thinko in "jmp" opcode.  Fix
+	same thinko in "trap" opcode.
 
 	* v850-opc.c (v850_opcodes): Add initializer for size field
 	on all opcodes.
