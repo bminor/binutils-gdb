@@ -79,6 +79,7 @@ thread1 (void *arg)
       common_routine (1);
       sleep(1);
     }
+  return (void *) 0;
 }
 
 static void *
@@ -96,9 +97,10 @@ thread2 (void * arg)
       sleep(1);
     }
   sleep(100);
+  return (void *) 0;
 }
 
-int
+void
 foo (a, b, c)
      int a, b, c;
 {

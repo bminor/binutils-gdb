@@ -1,3 +1,9 @@
+2002-02-24  Michael Chastain  <mec@shout.net>
+
+	* gdb.threads/pthreads.c (thread1): Add a return statement.
+	(thread2): Likewise.
+	(foo): Likewise.
+
 2002-02-23  Michael Chastain  <mec@shout.net>
 
 	* gdb.threads/linux-dp.c (philosopher): Add a return statement
