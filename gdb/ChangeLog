@@ -1,5 +1,12 @@
 2004-05-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_supply_gregset): Adjust comment.
+	(i386_collect_gregset): New function.
+	(i386_supply_fpregset): Adjust comment.
+	(i386_collect_fpregset): New function.
+	(i386_regset_from_core_section): Use i386_collect_gregset and
+	i386_collect_fpregset.
+
 	* hppa-tdep.c (hppa_frame_prev_register_helper): Reimplement to
 	handle VALUEP being null.
 

@@ -1608,9 +1608,9 @@ i386_value_to_register (struct frame_info *frame, int regnum,
     }
 }
 
-/* Supply register REGNUM from the general-purpose register set REGSET
-   to register cache REGCACHE.  If REGNUM is -1, do this for all
-   registers in REGSET.  */
+/* Supply register REGNUM from the buffer specified by GREGS and LEN
+   in the general-purpose register set REGSET to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 void
 i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
@@ -1630,9 +1630,33 @@ i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
     }
 }
 
-/* Supply register REGNUM from the floating-point register set REGSET
-   to register cache REGCACHE.  If REGNUM is -1, do this for all
-   registers in REGSET.  */
+/* Collect register REGNUM from the register cache REGCACHE and store
+   it in the buffer specified by GREGS and LEN as described by the
+   general-purpose register set REGSET.  If REGNUM is -1, do this for
+   all registers in REGSET.  */
+
+void
+i386_collect_gregset (const struct regset *regset,
+		      const struct regcache *regcache,
+		      int regnum, void *gregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
+  char *regs = gregs;
+  int i;
+
+  gdb_assert (len == tdep->sizeof_gregset);
+
+  for (i = 0; i < tdep->gregset_num_regs; i++)
+    {
+      if ((regnum == i || regnum == -1)
+	  && tdep->gregset_reg_offset[i] != -1)
+	regcache_raw_collect (regcache, i, regs + tdep->gregset_reg_offset[i]);
+    }
+}
+
+/* Supply register REGNUM from the buffer specified by FPREGS and LEN
+   in the floating-point register set REGSET to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 static void
 i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
@@ -1650,6 +1674,27 @@ i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
   i387_supply_fsave (regcache, regnum, fpregs);
 }
 
+/* Supply register REGNUM from the buffer specified by FPREGS and LEN
+   in the floating-point register set REGSET to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
+
+static void
+i386_collect_fpregset (const struct regset *regset,
+		       const struct regcache *regcache,
+		       int regnum, void *fpregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
+
+  if (len == I387_SIZEOF_FXSAVE)
+    {
+      i387_collect_fxsave (regcache, regnum, fpregs);
+      return;
+    }
+
+  gdb_assert (len == tdep->sizeof_fpregset);
+  i387_collect_fsave (regcache, regnum, fpregs);
+}
+
 /* Return the appropriate register set for the core section identified
    by SECT_NAME and SECT_SIZE.  */
 
@@ -1662,7 +1707,8 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
   if (strcmp (sect_name, ".reg") == 0 && sect_size == tdep->sizeof_gregset)
     {
       if (tdep->gregset == NULL)
-        tdep->gregset = regset_alloc (gdbarch, i386_supply_gregset, NULL);
+	tdep->gregset = regset_alloc (gdbarch, i386_supply_gregset,
+				      i386_collect_gregset);
       return tdep->gregset;
     }
 
@@ -1671,7 +1717,8 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
 	  && sect_size == I387_SIZEOF_FXSAVE))
     {
       if (tdep->fpregset == NULL)
-        tdep->fpregset = regset_alloc (gdbarch, i386_supply_fpregset, NULL);
+	tdep->fpregset = regset_alloc (gdbarch, i386_supply_fpregset,
+				       i386_collect_fpregset);
       return tdep->fpregset;
     }
 
