@@ -1,7 +1,19 @@
 Mon Feb 10 16:40:47 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* config/vx.exp: Use hostname instead of netport.
+
+	* config/vxworks.exp: New file.
+
+	* gdb.base/a2-run.exp: Change vxworks cases to use gdb_spawn_id.
+
+	* config/monitor.exp(gdb_target_monitor): Look for a prompt from
+ 	gdb before assuming everything worked. Send a ^C if a timeout
+	occurs.
+
 	* lib/gdb.exp(gdb_test): Check the result of send_gdb. Use
 	$gdb_spawn_id directly.
+	(gdb_run_cmd): Try _start as well as start. Use the target feature
+	gdb,start_symbol as the symbol to start from when jumping.
 
 Mon Feb 10 11:26:59 1997  Jeffrey A Law  (law@cygnus.com)
 
