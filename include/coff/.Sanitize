@@ -27,6 +27,7 @@ Things-to-keep:
 ChangeLog
 alpha.h
 a29k.h
+apollo.h
 ecoff.h
 h8300.h
 h8500.h
