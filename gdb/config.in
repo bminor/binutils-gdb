@@ -416,6 +416,9 @@
 /* Name of this package.  */
 #undef PACKAGE
 
+/* Global directory for separate debug files.  */
+#undef DEBUGDIR
+
 /* Define to BFD's default architecture.  */
 #undef DEFAULT_BFD_ARCH
 

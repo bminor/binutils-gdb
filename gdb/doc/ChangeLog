@@ -1,3 +1,7 @@
+2003-01-23  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Separate Debug Files): New section.
+
 2003-01-22  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.texinfo (Maintenance Commands): Add "maint set profile"

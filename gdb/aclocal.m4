@@ -1,6 +1,6 @@
-dnl aclocal.m4 generated automatically by aclocal 1.4-p5
+dnl aclocal.m4 generated automatically by aclocal 1.4
 
-dnl Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+dnl Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -936,12 +936,27 @@ AC_BEFORE([$0], [AC_TRY_RUN])dnl
 AC_DEFINE([_GNU_SOURCE])
 ])
 
+dnl written by Guido Draheim <guidod@gmx.de>, original by Alexandre Oliva 
+dnl Version 1.3 (2001/03/02)
+dnl source http://www.gnu.org/software/ac-archive/Miscellaneous/ac_define_dir.html
+
+AC_DEFUN([AC_DEFINE_DIR], [
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo [$]$2`
+  ac_define_dir=`eval echo [$]ac_define_dir`
+  ifelse($3, ,
+    AC_DEFINE_UNQUOTED($1, "$ac_define_dir"),
+    AC_DEFINE_UNQUOTED($1, "$ac_define_dir", $3))
+])
+
+
 # Add --enable-maintainer-mode option to configure.
 # From Jim Meyering
 
 # serial 1
 
-AC_DEFUN([AM_MAINTAINER_MODE],
+AC_DEFUN(AM_MAINTAINER_MODE,
 [AC_MSG_CHECKING([whether to enable maintainer-specific portions of Makefiles])
   dnl maintainer-mode is disabled by default
   AC_ARG_ENABLE(maintainer-mode,
@@ -958,7 +973,7 @@ AC_DEFUN([AM_MAINTAINER_MODE],
 
 # Define a conditional.
 
-AC_DEFUN([AM_CONDITIONAL],
+AC_DEFUN(AM_CONDITIONAL,
 [AC_SUBST($1_TRUE)
 AC_SUBST($1_FALSE)
 if $2; then
