@@ -1,3 +1,10 @@
+2004-10-05  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/arm.exp: Add unwind table test.  Recognise
+	arm-symbian-symbianelf and arm-none-eabi.
+	* gas/arm/unwind.s: New file.
+	* gas/arm/unwind.d: New file.
+
 2004-10-01  Bill Farmer  <Bill@the-farmers.freeserve.co.uk>
 
 	* gas/pdp11/opcode.d: Fix sob opcode value.
