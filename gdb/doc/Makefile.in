@@ -208,7 +208,11 @@ gdb.info: gdb-${CONFIG}.texi
 # gdb manual suitable for [tn]roff -mm
 # '@noindent's removed due to texi2roff-2 mm bug; if yours is newer, 
 #   try leaving them in
-gdb.mm: gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
+# ditto special treatment of @ftable in rluser.texinfo
+gdb.mm: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
+	sed -e 's/^@ftable/@table/g' \
+		-e 's/^@end ftable/@end table/g' \
+		${READLINE_DIR}/doc/rluser.texinfo > rluser.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
@@ -222,9 +226,13 @@ gdb.mm: gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
 	$(TEXI2ROFF) -mm | \
 	sed -e 's/---/\\(em/g' \
 	>gdb.mm 
+	rm rluser.texinfo
 
 # gdb manual suitable for [gtn]roff -me
-gdb.me: gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
+gdb.me: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
+	sed -e 's/^@ftable/@table/g' \
+		-e 's/^@end ftable/@end table/g' \
+		${READLINE_DIR}/doc/rluser.texinfo > rluser.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
@@ -237,9 +245,13 @@ gdb.me: gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
 	$(TEXI2ROFF) -me | \
 	sed -e 's/---/\\(em/g' \
 	>gdb.me 
+	rm rluser.texinfo
 
 # gdb manual suitable for [gtn]roff -ms
-gdb.ms: gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
+gdb.ms: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
+	sed -e 's/^@ftable/@table/g' \
+		-e 's/^@end ftable/@end table/g' \
+		${READLINE_DIR}/doc/rluser.texinfo > rluser.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
@@ -252,6 +264,7 @@ gdb.ms: gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
 	$(TEXI2ROFF) -ms | \
 	sed -e 's/---/\\(em/g' \
 	>gdb.ms 
+	rm rluser.texinfo
 
 # GDB INTERNALS MANUAL: TeX dvi file
 gdbint.dvi : gdbint.texinfo
