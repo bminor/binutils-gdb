@@ -1,3 +1,11 @@
+2003-11-25  Asgari Jinia  <asgarij@kpitcummins.com>
+
+	* gas/h8300/multiples.s : Add instructions for H8s.
+	* gas/h8300/h8300.exp (do_h8300s_multiple) : Add more test
+	conditions for instructions for H8s.
+	* gas/h8300/t01_mov.s: Correct illegal ldm/stm register pairings.
+	* gas/h8300/t01_mov.exp: Update expected results.
+
 2003-11-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/divide.s: New.

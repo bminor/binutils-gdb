@@ -598,14 +598,16 @@ get_operand (char **ptr, struct h8_op *op, int direction)
       low = src[2] - '0';
       high = src[6] - '0';
 
-      if (high == low)
+       /* Check register pair's validity as per tech note TN-H8*-193A/E
+	  from Renesas for H8S and H8SX hardware manual.  */
+      if (   !(low == 0 && (high == 1 || high == 2 || high == 3))
+          && !(low == 1 && (high == 2 || high == 3 || high == 4) && SXmode)
+          && !(low == 2 && (high == 3 || ((high == 4 || high == 5) && SXmode)))
+          && !(low == 3 && (high == 4 || high == 5 || high == 6) && SXmode)
+          && !(low == 4 && (high == 5 || high == 6))
+          && !(low == 5 && (high == 6 || high == 7) && SXmode)
+          && !(low == 6 && high == 7 && SXmode))
 	as_bad (_("Invalid register list for ldm/stm\n"));
-
-      if (high < low)
-	as_bad (_("Invalid register list for ldm/stm\n"));
-
-      if (high - low > 3)
-	as_bad (_("Invalid register list for ldm/stm)\n"));
 
       /* Even sicker.  We encode two registers into op->reg.  One
 	 for the low register to save, the other for the high
@@ -1923,6 +1925,27 @@ md_assemble (char *str)
 
   *op_end = c;
   prev_instruction = instruction;
+
+  /* Now we have operands from instruction.
+     Let's check them out for ldm and stm.  */
+  if (OP_KIND (instruction->opcode->how) == O_LDM)
+    {
+      /* The first operand must be @er7+, and the
+	 second operand must be a register pair.  */
+      if ((operand[0].mode != RSINC)
+           || (operand[0].reg != 7)
+           || ((operand[1].reg & 0x80000000) == 0))
+	as_bad (_("invalid operand in ldm"));
+    }
+  else if (OP_KIND (instruction->opcode->how) == O_STM)
+    {
+      /* The first operand must be a register pair,
+	 and the second operand must be @-er7.  */
+      if (((operand[0].reg & 0x80000000) == 0)
+            || (operand[1].mode != RDDEC)
+            || (operand[1].reg != 7))
+	as_bad (_("invalid operand in stm"));
+    }
 
   size = SN;
   if (dot)

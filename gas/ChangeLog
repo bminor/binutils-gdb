@@ -1,3 +1,10 @@
+2003-11-25  Asgari Jinia  <asgarij@kpitcummins.com>
+
+	* config/tc-h8300.c (md_assemble): Check operands validity for
+	ldm/stm.
+	(get_operand): Check register pair's validity as per technical
+	note TN-H8*-193A/E from Renesas for H8s and for H8Sx manual.
+
 2003-11-24  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* listing.c: Convert to ISO-C.
