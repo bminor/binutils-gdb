@@ -33,5 +33,7 @@ if { ![istarget hppa*-*-*] || [istarget *-*-linux*]} {
     setup_xfail sh*-*-*
     setup_xfail z8k*-*-*
     setup_xfail h8300*-*-*
+    # FIXME: Due to difference in what "consecutive octets" means.
+    setup_xfail *c54x*-*-*
     run_dump_test strings
 }

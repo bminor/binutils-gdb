@@ -25,22 +25,14 @@
 #include "opcode/tic54x.h"
 #include "coff/tic54x.h"
 
-typedef struct _instruction {
-  int parallel;
-  template *tm;
-  partemplate *ptm;
-} instruction;
-
-static int has_lkaddr PARAMS ((unsigned short, template *));
-static int get_insn_size PARAMS ((unsigned short, instruction *));
-static int get_instruction PARAMS ((disassemble_info *, bfd_vma,
-                                    unsigned short, instruction *));
-static int print_instruction PARAMS ((disassemble_info *, bfd_vma,
-                                      unsigned short, char *,
-                                      enum optype [], int, int));
-static int print_parallel_instruction PARAMS ((disassemble_info *, bfd_vma,
-                                               unsigned short, partemplate *,
-                                               int));
+static int has_lkaddr (unsigned short, const template *);
+static int get_insn_size (unsigned short, const template *);
+static int print_instruction (disassemble_info *, bfd_vma,
+                              unsigned short, const char *,
+                              const enum optype [], int, int);
+static int print_parallel_instruction (disassemble_info *, bfd_vma,
+                                       unsigned short, 
+                                       const template *, int);
 static int sprint_dual_address (disassemble_info *,char [],
                                 unsigned short);
 static int sprint_indirect_address (disassemble_info *,char [],
@@ -52,14 +44,12 @@ static int sprint_condition (disassemble_info *,char *,unsigned short);
 static int sprint_cc2 (disassemble_info *,char *,unsigned short);
 
 int
-print_insn_tic54x (memaddr, info)
-  bfd_vma memaddr;
-  disassemble_info *info;
+print_insn_tic54x (bfd_vma memaddr, disassemble_info *info)
 {
   bfd_byte opbuf[2];
   unsigned short opcode;
   int status, size;
-  instruction insn;
+  const template* tm;
 
   status = (*info->read_memory_func) (memaddr, opbuf, 2, info);
   if (status != 0)
@@ -69,26 +59,24 @@ print_insn_tic54x (memaddr, info)
   }
 
   opcode = bfd_getl16 (opbuf);
-  if (!get_instruction (info, memaddr, opcode, &insn))
-      return -1;
+  tm = tic54x_get_insn (info, memaddr, opcode, &size);
 
-  size = get_insn_size (opcode, &insn);
   info->bytes_per_line = 2;
   info->bytes_per_chunk = 2;
   info->octets_per_byte = 2;
   info->display_endian = BFD_ENDIAN_LITTLE;
 
-  if (insn.parallel)
+  if (tm->flags & FL_PAR)
   {
-    if (!print_parallel_instruction (info, memaddr, opcode, insn.ptm, size))
+    if (!print_parallel_instruction (info, memaddr, opcode, tm, size))
       return -1;
   }
   else
   {
     if (!print_instruction (info, memaddr, opcode,
-                            (char *) insn.tm->name,
-                            insn.tm->operand_types,
-                            size, (insn.tm->flags & FL_EXT)))
+                            (char *) tm->name,
+                            tm->operand_types,
+                            size, (tm->flags & FL_EXT)))
       return -1;
   }
 
@@ -96,33 +84,28 @@ print_insn_tic54x (memaddr, info)
 }
 
 static int
-has_lkaddr (opcode, tm)
-  unsigned short opcode;
-  template *tm;
+has_lkaddr (unsigned short memdata, const template *tm)
 {
-  return (IS_LKADDR (opcode)
+  return (IS_LKADDR (memdata)
 	  && (OPTYPE (tm->operand_types[0]) == OP_Smem
 	      || OPTYPE (tm->operand_types[1]) == OP_Smem
 	      || OPTYPE (tm->operand_types[2]) == OP_Smem
-	      || OPTYPE (tm->operand_types[1]) == OP_Sind));
+	      || OPTYPE (tm->operand_types[1]) == OP_Sind
+              || OPTYPE (tm->operand_types[0]) == OP_Lmem
+              || OPTYPE (tm->operand_types[1]) == OP_Lmem));
 }
 
 /* always returns 1 (whether an insn template was found) since we provide an
    "unknown instruction" template */
-static int
-get_instruction (info, addr, opcode, insn)
-  disassemble_info *info;
-  bfd_vma addr;
-  unsigned short opcode;
-  instruction *insn;
+const template*
+tic54x_get_insn (disassemble_info *info, bfd_vma addr, 
+                 unsigned short memdata, int *size)
 {
-  template * tm;
-  partemplate * ptm;
+  const template *tm = NULL;
 
-  insn->parallel = 0;
-  for (tm = (template *) tic54x_optab; tm->name; tm++)
+  for (tm = tic54x_optab; tm->name; tm++)
   {
-    if (tm->opcode == (opcode & tm->mask))
+    if (tm->opcode == (memdata & tm->mask))
     {
       /* a few opcodes span two words */
       if (tm->flags & FL_EXT)
@@ -130,54 +113,52 @@ get_instruction (info, addr, opcode, insn)
           /* if lk addressing is used, the second half of the opcode gets
              pushed one word later */
           bfd_byte opbuf[2];
-          bfd_vma addr2 = addr + 1 + has_lkaddr (opcode, tm);
+          bfd_vma addr2 = addr + 1 + has_lkaddr (memdata, tm);
           int status = (*info->read_memory_func) (addr2, opbuf, 2, info);
+          // FIXME handle errors
           if (status == 0)
             {
-              unsigned short opcode2 = bfd_getl16 (opbuf);
-              if (tm->opcode2 == (opcode2 & tm->mask2))
+              unsigned short data2 = bfd_getl16 (opbuf);
+              if (tm->opcode2 == (data2 & tm->mask2))
                 {
-                  insn->tm = tm;
-                  return 1;
+                  if (size) *size = get_insn_size (memdata, tm);
+                  return tm;
                 }
             }
         }
       else
         {
-          insn->tm = tm;
-          return 1;
+          if (size) *size = get_insn_size (memdata, tm);
+          return tm;
         }
     }
   }
-  for (ptm = (partemplate *) tic54x_paroptab; ptm->name; ptm++)
+  for (tm = (template *) tic54x_paroptab; tm->name; tm++)
   {
-    if (ptm->opcode == (opcode & ptm->mask))
+    if (tm->opcode == (memdata & tm->mask))
     {
-      insn->parallel = 1;
-      insn->ptm = ptm;
-      return 1;
+      if (size) *size = get_insn_size (memdata, tm);
+      return tm;
     }
   }
 
-  insn->tm = (template *) &tic54x_unknown_opcode;
-  return 1;
+  if (size) *size = 1;
+  return &tic54x_unknown_opcode;
 }
 
 static int
-get_insn_size (opcode, insn)
-  unsigned short opcode;
-  instruction *insn;
+get_insn_size (unsigned short memdata, const template *insn)
 {
   int size;
 
-  if (insn->parallel)
+  if (insn->flags & FL_PAR)
     {
       /* only non-parallel instructions support lk addressing */
-      size = insn->ptm->words;
+      size = insn->words;
     }
   else
     {
-      size = insn->tm->words + has_lkaddr (opcode, insn->tm);
+      size = insn->words + has_lkaddr (memdata, insn);
     }
 
   return size;
@@ -188,8 +169,8 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
   disassemble_info *info;
   bfd_vma memaddr;
   unsigned short opcode;
-  char *tm_name;
-  enum optype tm_operands[];
+  const char *tm_name;
+  const enum optype tm_operands[];
   int size;
   int ext;
 {
@@ -486,7 +467,7 @@ print_parallel_instruction (info, memaddr, opcode, ptm, size)
   disassemble_info *info;
   bfd_vma memaddr;
   unsigned short opcode;
-  partemplate *ptm;
+  const template *ptm;
   int size;
 {
   print_instruction (info, memaddr, opcode,
@@ -541,7 +522,7 @@ sprint_direct_address (info, buf, opcode)
   unsigned short opcode;
 {
   /* FIXME -- look up relocation if available */
-  return sprintf (buf, "0x??%02x", (int) (opcode & 0x7F));
+  return sprintf (buf, "DP+0x%02x", (int) (opcode & 0x7F));
 }
 
 static int

@@ -1,3 +1,11 @@
+2001-11-11  Timothy Wall  <twall@alum.mit.edu>
+
+	* tic54x-dis.c: Use revised opcode structure.  Export opcode
+	template lookup.
+	(has_lkaddr): Don't forget about Lmem insns.
+	* tic54x-opc.c: Add emulation trap.  Parallel table now uses
+	standard opcode templates.
+	
 2001-11-13  Zack Weinberg <zack@codesourcery.com>
 
 	* i386-dis.c (grps): Change "sldt", "str", and "smsw" entries

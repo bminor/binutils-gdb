@@ -53,4 +53,5 @@ Disassembly of section .text:
    10080:	f881.*
    10081:	0080.*
 .*10080: ARELEXT.*
+	...
 

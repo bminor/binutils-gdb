@@ -1,5 +1,9 @@
-2001-11-12  * Steven J. Hill <sjhill@realitydiluted.com>
+2001-11-13  Timothy Wall  <twall@alum.mit.edu>
+	* MAINTAINERS: Add self as tic54x maintainer.  This target
+	includes the IBM C54XDSP clone.
 
+2001-11-12  * Steven J. Hill <sjhill@realitydiluted.com>
+	
 	* bucomm.c (make_tempname): Use mkstemp in place of mktemp.
 
 2001-11-09  Jeffrey A Law  (law@cygnus.com)
@@ -923,7 +927,7 @@
 
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
-	* MAINTAINERS: Add Jˆrn Rennecke and self as SH maintainers.
+	* MAINTAINERS: Add JÅˆrn Rennecke and self as SH maintainers.
 	Change sourceware.cygnus.com to sources.redhat.com.
 	Fix typo for "amongst".
 

@@ -1,3 +1,11 @@
+2001-11-11  Timothy Wall  <twall@alum.mit.edu>
+
+	* write.c (relax_segment): Convert symbol address into an octet
+	offset prior to adding to the frag address, which is an octet
+	offset.   Add comments to that effect.
+	* config/tc-tic54x.c: Fix bugs causing tests to fail.
+	* config/tc-tic54x.h: Ditch PARAMS macro.
+	
 2001-11-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-elf.c (obj_elf_version): Ensure terminating NUL is

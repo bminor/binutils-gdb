@@ -1,3 +1,18 @@
+2001-11-11  Timothy Wall  <twall@alum.mit.edu>
+
+	* gas/tic54x/sections.[sd]: Check for named, initialized sections
+	defaulting to CODE and DATA.
+	* gas/tic54x/align.[sd]: While breaking compatibility with TI's
+	assembler, the difference is not worth the effort to fix.  We'd
+	prefer the assembler *not* fill the section alignment.
+	* gas/tic54x/all-opcodes.d: Verify Lmem opcodes have proper
+	length. 
+	* gas/tic54x/labels.s: Document differences from TI tools.
+	* gas/tic54x/extaddr.d: Match output.
+	* gas/all/gas.exp: On c54x targets, don't do any tests that use
+	p2align. 
+	* gas/macros/macros.exp: Expect failure matching use of .ascii.
+	
 2001-11-12  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* gas/mips/mips.exp: Change naming of some conditionals to reflect
@@ -60,6 +75,7 @@
 
 	* gas/mmix: New testsuite directory.
 
+>>>>>>> 1.244
 2001-10-24  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/ld-empic.d: Remove extra whitespace at beginning of

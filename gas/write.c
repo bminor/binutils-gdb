@@ -2430,7 +2430,12 @@ relax_segment (segment_frag_root, segment)
 		      know (!(S_GET_SEGMENT (symbolP) == SEG_ABSOLUTE)
 			    || (symbolP->sy_frag == &zero_address_frag));
 #endif
-		      target += S_GET_VALUE (symbolP);
+                      /* Convert from an actual address to an octet offset
+                         into the section.  Here it is assumed that the
+                         section's VMA is zero, and can omit subtracting it
+                         from the symbol's value to get the address offset.  */
+                      know (S_GET_SECTION (symbolP)->vma == 0);
+		      target += S_GET_VALUE (symbolP) * OCTETS_PER_BYTE;
 		    }
 
 		  know (fragP->fr_next);
