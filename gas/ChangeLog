@@ -1,5 +1,9 @@
 Wed Mar 16 17:11:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-coffbfd.c (adjust_stab_section): Initialize
+	stabstrseg to SEG_UNKNOWN, not -1.  After loop, check whether it
+	is not SEG_UNKNOWN rather than checking whether it is >= 0.
+
 	* config/tc-mips.c (mips_align): Take new argument, label, and use
 	it instead of global insn_label.
 	(s_align, s_cons, s_float_cons, s_gpword): Save insn_label before

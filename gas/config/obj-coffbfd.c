@@ -2680,7 +2680,7 @@ adjust_stab_section(abfd, seg)
      bfd *abfd;
      segT seg;
 {
-  segT stabstrseg = -1;
+  segT stabstrseg = SEG_UNKNOWN;
   char *secname, *name, *name2;
   char *p = NULL;
   int i, strsz = 0, nsyms;
@@ -2704,7 +2704,7 @@ adjust_stab_section(abfd, seg)
     }
 
   /* If we found the section, get its size. */
-  if (stabstrseg >= 0)
+  if (stabstrseg != SEG_UNKNOWN)
     strsz = size_section (abfd, stabstrseg);
 
   nsyms = size_section (abfd, seg) / 12 - 1;
