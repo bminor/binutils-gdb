@@ -1,3 +1,8 @@
+2003-12-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* solib.h (SOLIB_UNLOADED_LIBRARY_PATHNAME): Define as "" instead
+	of (0).
+
 2003-12-11  Dhananjay Deshpande  <dhananjayd@kpitcummins.com>
 
 	* MAINTAINERS (write after approval): Add myself.

@@ -149,7 +149,7 @@ extern void solib_create_inferior_hook (void);	/* solib.c */
  */
 
 #define SOLIB_UNLOADED_LIBRARY_PATHNAME(pid) \
-(0)
+""
 
 /* This function returns TRUE if pc is the address of an instruction that
    lies within the dynamic linker (such as the event hook, or the dld
