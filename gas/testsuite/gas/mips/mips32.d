@@ -1,4 +1,4 @@
-#objdump: -dr --prefix-addresses --show-raw-insn -mmips:mipsisa32
+#objdump: -dr --prefix-addresses --show-raw-insn -mmips:isa32
 #name: MIPS MIPS32 instructions
 #as: -mips32
 

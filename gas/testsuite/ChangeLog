@@ -1,7 +1,7 @@
 2001-09-07  Eric Christopher  <echristo@redhat.com>
 
-	* gas/mips/mips64.d: Change to use mipsisa64.
-	* gas/mips/mips32.d: Change to use mipsisa32.
+	* gas/mips/mips64.d: Change to use isa64.
+	* gas/mips/mips32.d: Change to use isa32.
 
 2001-09-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
