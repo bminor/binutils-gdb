@@ -38,8 +38,9 @@ configdirs="doc testsuite"
 gas_host=generic
 
 case "${host}" in
-
   a29k-*-*)			gas_host=a29k		;;
+
+  alpha-*-osf*)			gas_host=ansi		;;
 
   hppa*-hp-hpux*)		gas_host=hppahpux	;;
   hppa*-hp-bsd*)		gas_host=hppabsd	;;
