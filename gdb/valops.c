@@ -1408,11 +1408,21 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
   int i;
   value v;
   static int name_matched = 0;
+  char dem_opname[64];
 
   check_stub_type (type);
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
     {
       char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
+      if (strncmp(t_field_name, "__", 2)==0 ||
+	strncmp(t_field_name, "op", 2)==0 ||
+	strncmp(t_field_name, "type", 4)==0 )
+	{
+	  if (cplus_demangle_opname(t_field_name, dem_opname, DMGL_ANSI))
+	    t_field_name = dem_opname;
+	  else if (cplus_demangle_opname(t_field_name, dem_opname, 0))
+	    t_field_name = dem_opname; 
+	}
       if (t_field_name && STREQ (t_field_name, name))
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (type, i) - 1;
