@@ -167,6 +167,10 @@ extern int i386_frameless_signal_p (struct frame_info *frame);
 /* Return the name of register REG.  */
 extern char const *i386_register_name (int reg);
 
+/* Return non-zero if REGNUM is a member of the specified group.  */
+extern int i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+				     struct reggroup *group);
+
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
 

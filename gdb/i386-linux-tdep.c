@@ -25,6 +25,7 @@
 #include "value.h"
 #include "regcache.h"
 #include "inferior.h"
+#include "reggroups.h"
 
 /* For i386_linux_skip_solib_resolver.  */
 #include "symtab.h"
@@ -47,6 +48,20 @@ i386_linux_register_name (int reg)
 
   return i386_register_name (reg);
 }
+
+/* Return non-zero, when the register is in the corresponding register
+   group.  Put the LINUX_ORIG_EAX register in the system group.  */
+static int
+i386_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+				struct reggroup *group)
+{
+  if (regnum == I386_LINUX_ORIG_EAX_REGNUM)
+    return (group == system_reggroup
+	    || group == save_reggroup
+	    || group == restore_reggroup);
+  return i386_register_reggroup_p (gdbarch, regnum, group);
+}
+
 
 /* Recognizing signal handler frames.  */
 
@@ -442,6 +457,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_write_pc (gdbarch, i386_linux_write_pc);
   set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS + 1);
   set_gdbarch_register_name (gdbarch, i386_linux_register_name);
+  set_gdbarch_register_reggroup_p (gdbarch, i386_linux_register_reggroup_p);
   set_gdbarch_register_bytes (gdbarch, I386_SSE_SIZEOF_REGS + 4);
 
   tdep->jb_pc_offset = 20;	/* From <bits/setjmp.h>.  */

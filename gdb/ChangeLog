@@ -1,3 +1,19 @@
+2002-11-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* i386-linux-tdep.c: Include "reggroups.h".
+	(i386_linux_register_reggroup_p): New function.
+	(i386_linux_init_abi): Set register_reggroup_p to
+	i386_linux_register_reggroup_p.
+	* i386-tdep.h (i386_register_reggroup_p): Declare.
+	* i386-tdep.c: Include "reggroups.h".
+	(i386_init_reggroups): New function.
+	(i386_add_reggroups): New function.
+	(i386_register_reggroup_p): New function.
+	(i386_sse_reggroup, i386_mmx_reggroup): New variables.
+	(_initialize_i386_tdep): Call i386_init_reggroups.
+	(i386_gdbarch_init): Set register_reggroup_p and add in the i386
+	specific reggroups.
+
 2002-11-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* infptrace.c (child_xfer_memory): Make use of the new PT_IO
