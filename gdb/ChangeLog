@@ -1,3 +1,25 @@
+Wed Nov 20 19:09:16 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* infcmd.c (do_registers_info): Call val_print with the
+	virtual buf instead of the raw buf.  Needed for REGISTER_CONVERT 
+	to work with non-floating point regs.
+
+start-sanitize-d10v
+	* d10v-tdep.c (d10v_skip_prologue): If we have line debugging 
+	information, then the end of the prologue should the first 
+	assembly instruction of the first source line.
+	
+	* values.c (value_from_longest): Put in D10V call to 
+	fix up address pointers.
+
+	* config/d10v/tm-d10v.h (REGISTER_VIRTUAL_SIZE): Modified.
+	(REGISTER_VIRTUAL_TYPE): Modified for PC_REGNUM and SP_REGNUM.
+	(REGISTER_CONVERTIBLE): Make PC and SP convertible.
+	(REGISTER_CONVERT_TO_VIRTUAL): Define.
+	(REGISTER_CONVERT_TO_RAW): Define.
+	(D10V_MAKE_DADDR): Define.
+	(D10V_MAKE_IADDR): Define.
+end-sanitize-d10v
 Wed Nov 20 16:15:15 1996  Geoffrey Noer  <noer@cygnus.com>
 
         * config/i386/cygwin32.mh: add MMALLOC_CFLAGS = -I$(MMALLOC_SRC)

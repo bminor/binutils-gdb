@@ -1259,6 +1259,14 @@ value_from_longest (type, num)
     case TYPE_CODE_PTR:
       /* This assumes that all pointers of a given length
 	 have the same form.  */
+
+/* start-sanitize-d10v */
+#ifdef GDB_TARGET_IS_D10V
+      /* D10V function pointers need adjusted */
+      if (TYPE_TARGET_TYPE(type) && TYPE_CODE(TYPE_TARGET_TYPE(type)) == TYPE_CODE_FUNC)
+	num = D10V_MAKE_IADDR (num);
+#endif
+/* end-sanitize-d10v */
       store_address (VALUE_CONTENTS_RAW (val), len, (CORE_ADDR) num);
       break;
 

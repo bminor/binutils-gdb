@@ -123,7 +123,18 @@ d10v_skip_prologue (pc)
 {
   unsigned long op;
   unsigned short op1, op2;
+  CORE_ADDR func_addr, func_end;
+  struct symtab_and_line sal;
 
+  /* If we have line debugging information, then the end of the */
+  /* prologue should the first assembly instruction of  the first source line */
+  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    {
+      sal = find_pc_line (func_addr, 0);
+      if (sal.end < func_end)
+	return sal.end;
+    }
+  
   if (target_read_memory (pc, (char *)&op, 4))
     return pc;			/* Can't access it -- assume no prologue. */
 
