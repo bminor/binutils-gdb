@@ -7,8 +7,26 @@ srctrigger=gprof.c
 srcname="gprof"
 
 # per-host:
+case "${host_cpu}" in
+sparc*)	my_host=sparc ;;
+i386*)	my_host=i386 ;;
+esac
+
+host_makefile_frag=config/mh-${my_host}
+if [ ! -f ${srcdir}/${host_makefile_frag} ] ; then
+	host_makefile_frag=
+fi
 
 # per-target:
+case "${target_cpu}" in
+sparc*)	my_target=sparc ;;
+i386*)	my_target=i386 ;;
+esac
+
+target_makefile_frag=config/mt-${my_target}
+if [ ! -f ${srcdir}/${target_makefile_frag} ] ; then
+	target_makefile_frag=
+fi
 
 files=
 links=

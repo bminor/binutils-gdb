@@ -319,16 +319,16 @@ gettextspace( abfd )
     return;
   }
 
-  textspace = (u_char *) malloc( texsec->size );
+  textspace = (u_char *) malloc( texsec->_cooked_size );
 
   if ( textspace == 0 ) {
     fprintf( stderr , "%s: ran out room for %d bytes of text space:  " ,
-	    whoami , texsec->size);
+	    whoami , texsec->_cooked_size);
     fprintf( stderr , "can't do -c\n" );
     return;
   }
   bfd_get_section_contents (abfd, texsec, textspace, texsec->filepos, 
-			    texsec->size);
+			    texsec->_cooked_size);
 }
 /*
  *	information from a gmon.out file is in two parts:
