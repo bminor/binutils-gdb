@@ -1,3 +1,11 @@
+Fri Oct  4 11:41:39 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* Makefile.in: Remove explicit dependencies for mn10200 and
+	mn10300 files.
+	(ALL_MACHINE_CFILES): Add cpu-mn10200.c and cpu-mn10300.c.
+	(BFD32_BACKENDS_CFILES): Add elf32-mn10200.c and elf32-mn10300.c
+	(dependencies): Rebuilt.
+
 Thu Oct  3 16:57:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cofflink.c (coff_link_add_symbols): Set obj_coff_keep_syms

@@ -159,6 +159,8 @@ ALL_MACHINES_CFILES = \
 	cpu-m68k.c \
 	cpu-m88k.c \
 	cpu-mips.c \
+	cpu-mn10200.c \
+	cpu-mn10300.c \
 	cpu-ns32k.c \
 	cpu-powerpc.c \
 	cpu-rs6000.c \
@@ -319,6 +321,8 @@ BFD32_BACKENDS_CFILES = \
 	elf32-m68k.c \
 	elf32-m88k.c \
 	elf32-mips.c \
+	elf32-mn10200.c \
+	elf32-mn10300.c \
 	elf32-ppc.c \
 	elf32-sh.c \
 	elf32-sparc.c \
@@ -853,14 +857,6 @@ elf32-m32r.o: elf32-m32r.c elf-bfd.h $(INCDIR)/elf/common.h \
   elf32-target.h
 end-sanitize-m32r:
 
-elf32-mn10200.o: elf32-mn10200.c elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  elf32-target.h
-
-elf32-mn10300.o: elf32-mn10300.c elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  elf32-target.h
-
 start-sanitize-v850:
 cpu-v850.o: cpu-v850.c
 elf32-v850.o: elf32-v850.c $(INCDIR)/bfdlink.h elf-bfd.h \
@@ -922,6 +918,8 @@ cpu-i960.o: cpu-i960.c
 cpu-m68k.o: cpu-m68k.c
 cpu-m88k.o: cpu-m88k.c
 cpu-mips.o: cpu-mips.c
+cpu-mn10200.o: cpu-mn10200.c
+cpu-mn10300.o: cpu-mn10300.c
 cpu-ns32k.o: cpu-ns32k.c ns32k.h
 cpu-powerpc.o: cpu-powerpc.c
 cpu-rs6000.o: cpu-rs6000.c
@@ -1045,6 +1043,12 @@ elf32-mips.o: elf32-mips.c $(INCDIR)/bfdlink.h genlink.h \
   $(INCDIR)/coff/symconst.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/mips.h ecoffswap.h \
   elf32-target.h
+elf32-mn10200.o: elf32-mn10200.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  elf32-target.h
+elf32-mn10300.o: elf32-mn10300.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  elf32-target.h
 elf32-ppc.o: elf32-ppc.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/ppc.h elf32-target.h
@@ -1066,7 +1070,7 @@ hp300hpux.o: hp300hpux.c $(INCDIR)/aout/hp300hpux.h \
   aoutx.h $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h \
   aout-target.h
-som.o: som.c
+som.o: som.c som.h ../bfd/sysdep.h libhppa.h
 i386aout.o: i386aout.c $(INCDIR)/aout/aout64.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
