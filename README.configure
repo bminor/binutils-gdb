@@ -2,7 +2,7 @@
 
 		   On Configuring Development Tools
 
-	 Last Mod Sat Apr 13 19:45:44 PDT 1991, by rich@sendai
+	 Last Mod Mon Apr 15 10:25:59 PDT 1991, by rich@sendai
 
 
 INTRO
@@ -395,9 +395,10 @@ Simple Cross Environments:
     gcc-a29k.  Remember that this is a native build.  Gcc-a29k is a
     collection of native programs intended to run on your sun4.
     That's what stage3 builds, programs for your sun4.  Gcc-a29k
-    presents an a29k development environment that builds programs
+    represents an a29k development environment that builds programs
     intended to run on an a29k.  But, remember, gcc-a29k runs on your
-    sun4.
+    sun4.  Programs built with gcc-a29k will run on your sun4 only
+    with the help of an appropriate software emulator.
 
     Building gcc-a29k is also a bootstrap but of a slightly different
     sort.  We call gcc-a29k a simple cross environment and using
@@ -406,58 +407,112 @@ Simple Cross Environments:
     cross development environments.
 
 
+Crossing Into Targets:
+
+	configure a29k +target=a29k
+
+    will configure the tools such that when compiled in an a29k
+    development environment, the resulting development environment can
+    be used to create programs intended for an a29k.  Again, this does
+    not necessarily mean that the new development environment can be
+    run on an a29k.  That would depend on the development environment
+    used to build these tools.
+
+    If you've been following along this walk through, then you've
+    already built an a29k environment, namely gcc-a29k.  Let's pretend
+    you use gcc-a29k to build the current configuration.
+
+    Gcc-a29k builds programs intended for the a29k so the new
+    development environment will be intended for use on an a29k.  That
+    is, this new gcc consists of programs that are foreign to your
+    sun4.  They cannot be run on your sun4.
+
+    The process of building this configuration is another a bootstrap.
+    This bootstrap is also a cross to a29k.  Because this type of
+    build is both a bootstrap and a cross to a29k, it is sometimes
+    referred to as a "cross into" a29k.  This new development
+    environment isn't really a cross development environment at all.
+    It is intended to run on an a29k to produce programs for an a29k.
+    You'll remember that this makes it, by definition, an a29k native
+    compiler.  "Crossing into" has been introduced here not because it
+    is a type of cross development environment, but because it is
+    frequently confused one.  The process is "a cross" but the
+    resulting development environment is a native development
+    environment.
+
+    You could not have built this configuration with stage3, because
+    stage3 doesn't provide an a29k environment.  Instead it provides a
+    sun4 environment.
+
+    If you happen to have an a29k lying around, you could now use
+    this fresh development environment on the a29k to three stage
+    these tools all over again.  This process would look just like it
+    did when we built the native sun4 development environment because
+    we would be building another native development environment, this
+    one on a29k.
+
+    
+The Three Party Cross:
+
+    So far you've seen that our development environment source must be
+    configured for a specific host and for a specific target.  You've
+    also seen that the resulting development environment depends on
+    the development environment used in the build process.
+
+    When all four match identically, that is, the configured host, the
+    configured target, the environment presented by the development
+    environment used in the build, and the machine on which the
+    resulting development environment is intended to run, then the new
+    development environment will be a native development environment.
+
+    When all four match except the configured host, then we can assume
+    that the development environment used in the build is some form of
+    library emulation.
+
+    When all four match except for the configured target, then the
+    resulting development environment will be a simple cross
+    development environment.
+
+    When all four match except for the host on which the development
+    environment used in the build runs, the build process is a "cross
+    into" and the resulting development environment will be native to
+    some other machine.
+
+    Most of the other permutations do exist in some form, but only one
+    more is interesting to the current discussion.
+
+	configure a29k +target=sun3
+
+    will configure the tools such that when compiled in an a29k
+    development environment, the resulting development environment can
+    be used to create programs intended for a sun3.  Again, this does
+    not necessarily mean that the new development environment can be
+    run on an a29k.  That would depend on the development environment
+    used to build these tools.
+
+    If you are still following along, then you have two a29k
+    development environments, the native development environment that
+    runs on a29k, and the simple cross that runs on your sun4.  If you
+    use the a29k native development environment on the a29k, you will
+    be doing the same thing we did a while back, namely building a
+    simple cross from a29k to sun3.  Let's pretend that instead, you
+    use gcc-a29k, the simple cross development environment that runs
+    on sun4 but produces programs for a29k.
+
+    The resulting development environment will run on a29k because
+    that's what gcc-a29k builds, a29k programs.  This development
+    environment will produce programs for a sun3 because that is how
+    it was configured.  This means that the resulting development
+    environment is a simple cross.
+
+    There really isn't a common name for this process because very few
+    development environments are capable of being configured this
+    extensively.  For the sake of discussion, let's call this process
+    a "three party cross".
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    if configured for host sun4 and target sun4, this implies that we
-    will compile on a sun4 to create a sun4 compilation environment.
-    If configured for host sun3 and target a29k, this implies that we
-    will compile on a sun3 to create an a29k compilation environment.
-
-    Host sun3 only implies that the source will be compiled on a sun3.
-    In fact, it need not be actually compiled on a sun3.  If the
-    appropriate native development tools, header files, libraries, and
-    operating system support were available on a foobox, then source
-    configured for a sun3 could be compiled on a foobox, resulting in
-    a development environment for, using the previous example
-    host+target pair, "a29k" on the foobox.  Similarly, if the
-    appropriate cross development tools, header files, and libraries
-    were available on a dec3100, then source configured for host sun3
-    could be cross compiled to create an a29k development environment
-    intended to be run on a sun3.
-
-
-Usage:
+FINAL NOTES
+-----------
 
 Gdb's config has features not yet present in the uniform configuration
 scheme described here.  For this reason, configuration of gdb must
@@ -470,22 +525,21 @@ By "configures", I mean that links, Makefile, .gdbinit, and
 config.status are built.  Configuration is always done from the source
 directory.
 
-* "./configure name" configures this directory, perhaps
-  recursively, for a single host+target pair where the host and target
-  are both "name".  If a previous configuration existed, it will be
+* "./configure name" configures this directory, perhaps recursively,
+  for a single host+target pair where the host and target are both
+  "name".  If a previous configuration existed, it will be
   overwritten.
 
-* "./configure +host=hostname targetname" configures this
-  directory, perhaps recursively, for a single host+target pair where
-  the host is hostname and target is targetname.  If a previous
-  configuration existed, it will be overwritten.
+* "./configure hostname +target=targetname" configures this directory,
+  perhaps recursively, for a single host+target pair where the host is
+  hostname and target is targetname.  If a previous configuration
+  existed, it will be overwritten.
 
-* "./configure +forcesubdirs +host=hostname targetname" creates
-  a subdirectories Host-hostname and
-  Host-hostname/Target-targetname and configures
-  Host-hostname/Target-targetname.  For now, makes should be
-  done from Host-hostname/Target-targetname.  "./configure +f
-  name" works as expected.  That is, it creates Host-name and
+* "./configure +forcesubdirs hostname +target=targetname" creates a
+  subdirectories Host-hostname and Host-hostname/Target-targetname and
+  configures Host-hostname/Target-targetname.  For now, makes should
+  be done from Host-hostname/Target-targetname.  "./configure +f name"
+  works as expected.  That is, it creates Host-name and
   Host-name/Target-name and configures the latter.
 
 
@@ -501,8 +555,8 @@ The Makefile is created by prepending some variable definitions to a
 Makefile template called Makefile.in and then inserting host and
 target specific Makefile fragments.  The variables are set based on
 the chosen host+target pair and build style, that is, if you use
-subdirectories or not.  The host and target specific Makefile
-may or may not exist.  If fragments 
+subdirectories or not.  The host and target specific Makefile may or
+may not exist.  If fragments
 
 * Makefiles can be editted directly, but those changes will eventually
   be lost.  Changes intended to be permanent for a specific host

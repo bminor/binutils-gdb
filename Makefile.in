@@ -1,7 +1,7 @@
 #
 # Makefile for directory with subdirs to build.
 #
-# Last Mod Sat Apr 13 02:43:05 PDT 1991, by rich@cygint.cygnus.com
+# Last Mod Mon Apr 15 13:57:46 PDT 1991, by rich@sendai
 #
 
 # $Id$
@@ -92,11 +92,14 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 	(cd $(srcdir) ; \
 		./configure +destdir=$(destdir) +norecurse \
 		 `if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
-		+host=$(host) $(target))
+		$(host) +target=$(target))
 
 #
 # $Log$
-# Revision 1.7  1991/04/13 13:06:16  tiemann
+# Revision 1.8  1991/04/15 23:43:45  rich
+# Now handles multiple hosts and targets.
+#
+# Revision 1.7  1991/04/13  13:06:16  tiemann
 # Don't depend `install' on `all'.  Actually, the way things work, all
 # depends on things being incrementally installed, and install depends
 # on everything happening in a topological fashion.

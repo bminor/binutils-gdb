@@ -6,3 +6,8 @@
 configdirs="bfd binutils ld gas gnulib gcc clib"
 srctrigger=README.configure
 srcname="gnu development package"
+
+# per-host:
+
+# per-target:
+

@@ -46,7 +46,6 @@ symbolic_link='ln -s'
 
 # clear some things potentially inherited from environment.
 ansi=
-defaulttargets=
 destdir=
 fatal=
 hostsubdir=
@@ -215,7 +214,7 @@ if [ -n "${template}" ] ; then
 			-e '/^##### /  r configure.tgt' \
 			${template} >> configure
 
-		rm -f configure.com configure.tgt configure.hst
+		rm -f configure.top configure.bot
 	else
 		echo Warning: no configure.in in `pwd`
 		cat ${template} >> configure
@@ -258,9 +257,8 @@ fi
 
 for host in ${hosts} ; do
 	# Default other arg
-	if [ -z "${targets}" -o -n "${defaulttargets}" ] ; then
+	if [ -z "${targets}" ] ; then
 		targets=${host}
-		defaulttargets=true
 	fi
 
 #### configure.in per-host parts come in here.
@@ -485,71 +483,44 @@ for configdir in ${configdirs} ; do
 	specifics=
 	commons=
 
-	if [ -n "${defaulttargets}" ] ; then
-		for host in ${hosts} ; do
-			if [ -d ${configdir}.${host} ] ; then
-				newspecifics="${specifics} ${host}"
-				specifics=${newspecifics}
-			else
-				newcommons="${commons} ${host}"
-				commons=${newcommons}
-			fi # if target specific
-		done # for each host
+	for target in ${targets} ; do
+		# check for target specific dir override
+		if [ -d ${configdir}.${target} ] ; then
+			newspecifics="${specifics} ${target}"
+			specifics=${newspecifics}
+		else
+			newcommons="${commons} +target=${target}"
+			commons=${newcommons}
+		fi
 
-		if [ -n "${commons}" ] ; then
-			(cd ${configdir} ;
-				./configure ${commons} ${verbose} ${forcesubdirs} ${removing}) \
+	done
+
+	if [ -n "${verbose}" ] ; then
+		echo "	"commons=\"${commons}\"
+		echo "	"specifics=\"${specifics}\"
+	fi
+
+	if [ -n "${commons}" ] ; then
+		(cd ${configdir} ;
+			./configure ${host} ${verbose} ${forcesubdirs} ${removing} ${commons}) \
+			| sed 's/^/	/'
+	fi
+
+	if [ -n "${specifics}" ] ; then
+		for target in ${specifics} ; do
+			echo Configuring target specific directory ${configdir}.${target}...
+			(cd ${configdir}.${target} ;
+				./configure ${host} ${verbose} ${forcesubdirs} ${removing} "+target=${target}") \
 				| sed 's/^/	/'
-		fi # if any common hosts
-
-		if [ -n "${specifics}" ] ; then
-			for host in ${specifics} ; do
-				echo Configuring target specific directory ${configdir}.${host}...
-				(cd ${configdir}.${host} ;
-					./configure ${host} ${verbose} ${forcesubdirs} ${removing}) \
-					| sed 's/^/	/'
-			done # for host in specifics
-		fi # if there are any specifics
-	else
-
-		for target in ${targets} ; do
-			if [ -d ${configdir}.${target} ] ; then
-				newspecifics="${specifics} ${target}"
-				specifics=${newspecifics}
-			else
-				newcommons="${commons} +target=${target}"
-				commons=${newcommons}
-			fi
-
-		done # check for target specific dir override
-
-		if [ -n "${verbose}" ] ; then
-			echo "	"commons=\"${commons}\"
-			echo "	"specifics=\"${specifics}\"
-		fi # if verbose
-
-		if [ -n "${commons}" ] ; then
-			(cd ${configdir} ;
-				./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} ${commons}) \
-				| sed 's/^/	/'
-		fi # if any commons
-
-		if [ -n "${specifics}" ] ; then
-			for target in ${specifics} ; do
-				echo Configuring target specific directory ${configdir}.${target}...
-				(cd ${configdir}.${target} ;
-					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} "+target=${target}") \
-					| sed 's/^/	/'
-			done
-		fi # if any specifics
-	fi # not default targets
+		done
+	fi
 done
 
 exit 0
 
 #
 # $Log$
-# Revision 1.6  1991/04/15 23:43:41  rich
+# Revision 1.2  1991/04/15 23:46:48  rich
 # Now handles multiple hosts and targets.
 #
 # Revision 1.4  1991/04/13  02:11:03  rich
