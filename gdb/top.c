@@ -182,7 +182,10 @@ static void stop_sig (int);
 /* Hooks for alternate command interfaces.  */
 
 /* Called after most modules have been initialized, but before taking users
-   command file.  */
+   command file.
+
+   If the UI fails to initialize and it wants GDB to continue
+   using the default UI, then it should clear this hook before returning. */
 
 void (*init_ui_hook) (char *argv0);
 
@@ -2034,6 +2037,11 @@ gdb_init (char *argv0)
   set_language (language_c);
   expected_language = current_language;		/* don't warn about the change.  */
 
+  /* Allow another UI to initialize. If the UI fails to initialize, and
+     it wants GDB to revert to the CLI, it should clear init_ui_hook. */
+  if (init_ui_hook)
+    init_ui_hook (argv0);
+
 #ifdef UI_OUT
   /* Install the default UI */
   if (!init_ui_hook)
@@ -2050,7 +2058,4 @@ gdb_init (char *argv0)
 	}
     }
 #endif
-
-  if (init_ui_hook)
-    init_ui_hook (argv0);
 }

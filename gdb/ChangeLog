@@ -1,3 +1,8 @@
+2001-11-20  Keith Seitz  <keiths@redhat.com>
+
+	* top.c (gdb_init): Call init_ui_hook before initializing
+	the default UI.
+
 2001-11-19  Elena Zannoni  <ezannoni@redhat.com>
 
 	* config/powerpc/nm-linux.h (ppc_register_u_addr): Add extern 
