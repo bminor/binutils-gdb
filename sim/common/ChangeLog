@@ -1,6 +1,7 @@
 Tue Oct 21 18:37:57 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* nrun.c (main): Remove useless test of name != NULL.
+	Exit if bfd_openr fails.  Call bfd_check_format after bfd_openr.
 
 Tue Oct 21 10:42:38 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
