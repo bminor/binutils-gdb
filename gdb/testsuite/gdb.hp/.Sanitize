@@ -49,6 +49,7 @@ foll-fork.c
 foll-fork.exp
 foll-vfork.c
 foll-vfork.exp
+gen-so-thresh.c
 hwwatchbus.c
 hwwatchbus.exp
 inherit-hp.exp
@@ -68,6 +69,10 @@ reg-test.s
 run-hp.c
 sized-enum.c
 sized-enum.exp
+so-thresh.exp
+so-thresh.linkopts
+so-thresh.mk
+so-thresh.sh
 start-stop.c
 start-stop.exp
 sum.c
