@@ -229,10 +229,12 @@ gdb_set_interpreter (struct gdb_interpreter *interp)
     {
       do_all_continuations ();
       ui_out_flush (uiout);
-      if (current_interpreter->procs.suspend_proc &&
-	  !current_interpreter->procs.suspend_proc (current_interpreter->data))
+      if (current_interpreter->procs.suspend_proc
+	  && !current_interpreter->procs.suspend_proc (current_interpreter->
+						       data))
 	{
-	  error ("Could not suspend interpreter \"%s\"\n", current_interpreter->name);
+	  error ("Could not suspend interpreter \"%s\"\n",
+		 current_interpreter->name);
 	}
     }
   else
@@ -244,7 +246,8 @@ gdb_set_interpreter (struct gdb_interpreter *interp)
 
   /* We use interpreter_p for the "set interpreter" variable, so we need
      to make sure we have a malloc'ed copy for the set command to free. */
-  if (interpreter_p != NULL && strcmp (current_interpreter->name, interpreter_p) != 0)
+  if (interpreter_p != NULL
+      && strcmp (current_interpreter->name, interpreter_p) != 0)
     {
       xfree (interpreter_p);
 
@@ -433,7 +436,8 @@ interpreter_do_one_event ()
   if (current_interpreter->procs.do_one_event_proc == NULL)
     return 0;
 
-  return current_interpreter->procs.do_one_event_proc (current_interpreter->data);
+  return current_interpreter->procs.do_one_event_proc (current_interpreter->
+						       data);
 }
 
 /* A convenience routine that nulls out all the

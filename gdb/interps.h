@@ -60,7 +60,9 @@ extern int gdb_interpreter_display_prompt (char *new_prompt);
 extern int gdb_interpreter_set_quiet (struct gdb_interpreter *interp,
 				      int quiet);
 extern int gdb_interpreter_is_quiet (struct gdb_interpreter *interp);
-extern struct gdb_interpreter_procs *gdb_interpreter_get_procs (struct gdb_interpreter *interp);
+extern struct gdb_interpreter_procs *gdb_interpreter_get_procs (struct
+								gdb_interpreter
+								*interp);
 extern void *gdb_interpreter_get_data (struct gdb_interpreter *interp);
 extern int interpreter_do_one_event ();
 
