@@ -1,3 +1,11 @@
+Fri Jan 31 15:21:02 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10200.c (md_relax_table): Add entries to allow
+	jmp -> bra relaxing.
+	(md_convert_frag): Handle jmp->bra relaxing.
+	(md_assemble): Handle jmp->bra relaxing.
+	(md_estimate_size_before_relax): Likewise.
+
 Fri Jan 31 13:15:05 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (i386_align_code): Add comments explaining the

@@ -62,8 +62,12 @@ const relax_typeS md_relax_table[] = {
   {0x7f, -0x80, 3, 4},
   {0x7fff, -0x8000, 6, 5},
   {0x7fffff, -0x8000000, 8, 0},
-  /* jmp/jsr relaxing, could have a bra variant too! */
+  /* jsr relaxing */
   {0x7fff, -0x8000, 3, 7},
+  {0x7fffff, -0x8000000, 5, 0},
+  /* jmp relaxing */
+  {0x7f, -0x80, 2, 9},
+  {0x7fff, -0x8000, 3, 10},
   {0x7fffff, -0x8000000, 5, 0},
 
 };
@@ -667,20 +671,37 @@ md_convert_frag (abfd, sec, fragP)
   else if (fragP->fr_subtype == 7)
     {
       int offset = fragP->fr_fix;
-      int opcode = fragP->fr_literal[offset] & 0xff;
+      fragP->fr_literal[offset] = 0xf4;
+      fragP->fr_literal[offset + 1] = 0xe1;
 
-      if (opcode == 0xfc)
-	{
-	  fragP->fr_literal[offset] = 0xf4;
-	  fragP->fr_literal[offset + 1] = 0xe0;
-	}
-      else if (opcode == 0xfd)
-	{
-	  fragP->fr_literal[offset] = 0xf4;
-	  fragP->fr_literal[offset + 1] = 0xe1;
-	}
-      else
-	abort ();
+      fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
+	       fragP->fr_offset + 2, 1, BFD_RELOC_24_PCREL);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 5;
+    }
+  else if (fragP->fr_subtype == 8)
+    {
+      fragP->fr_literal[fragP->fr_fix] = 0xea;
+      fix_new (fragP, fragP->fr_fix + 1, 1, fragP->fr_symbol,
+	       fragP->fr_offset + 1, 1, BFD_RELOC_8_PCREL);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 2;
+    }
+  else if (fragP->fr_subtype == 9)
+    {
+      int offset = fragP->fr_fix;
+      fragP->fr_literal[offset] = 0xfc;
+
+      fix_new (fragP, fragP->fr_fix + 1, 4, fragP->fr_symbol,
+	       fragP->fr_offset + 1, 1, BFD_RELOC_16_PCREL);
+      fragP->fr_var = 0;
+      fragP->fr_fix += 3;
+    }
+  else if (fragP->fr_subtype == 10)
+    {
+      int offset = fragP->fr_fix;
+      fragP->fr_literal[offset] = 0xf4;
+      fragP->fr_literal[offset + 1] = 0xe0;
 
       fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
 	       fragP->fr_offset + 2, 1, BFD_RELOC_24_PCREL);
@@ -1019,13 +1040,19 @@ keep_going:
     {
       int type;
 
-      if (size == 2)
+      /* bCC */
+      if (size == 2 && opcode->opcode != 0xfc0000)
 	type = 0;
-      else if (size == 3
-	       && opcode->opcode != 0xfd0000 && opcode->opcode != 0xfc0000)
-	type = 3;
-      else
+      /* jsr */
+      else if (size == 3 && opcode->opcode == 0xfd0000)
 	type = 6;
+      /* jmp */
+      else if (size == 3 && opcode->opcode == 0xfc0000)
+	type = 8;
+      /* bCCx */
+      else
+	type = 3;
+
       f = frag_var (rs_machine_dependent, 8, 8 - size, type,
 		    fixups[0].exp.X_add_symbol,
 		    fixups[0].exp.X_add_number,
@@ -1208,8 +1235,17 @@ md_estimate_size_before_relax (fragp, seg)
 	  fragp->fr_subtype = 7;
 	  return 5;
 	}
+      return 3;
     }
-  return 3;
+  if (fragp->fr_subtype == 8)
+    {
+      if (!S_IS_DEFINED (fragp->fr_symbol))
+	{
+	  fragp->fr_subtype = 10;
+	  return 5;
+	}
+      return 2;
+    }
 } 
 
 long
