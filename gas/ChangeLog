@@ -1,3 +1,8 @@
+2002-04-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.c: Formatting fixes, add missing space in error
+	message.
+
 2002-04-24  Christian Groessler <chris@groessler.org>
 
 	* config/tc-z8k.c (build_bytes): Add support for new cases:
@@ -38,7 +43,7 @@
 	* config/tc-s390.c (tc_s390_fix_adjustable): Prevent adjustments to
 	symbols in merge sections.
 
-2002-04-16  Alan Modra  <alan@weed.local>
+2002-04-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* as.c (main): Don't reference _bfd_chunksize.
 

@@ -2208,15 +2208,15 @@ process_suffix ()
 
   /* For movzx and movsx, need to check the register type.  */
   if (intel_syntax
-      && (i.tm.base_opcode == 0xfb6 || i.tm.base_opcode == 0xfbe))
-    if (i.suffix && i.suffix == BYTE_MNEM_SUFFIX)
-      {
-	unsigned int prefix = DATA_PREFIX_OPCODE;
+      && (i.tm.base_opcode == 0xfb6 || i.tm.base_opcode == 0xfbe)
+      && i.suffix == BYTE_MNEM_SUFFIX)
+    {
+      unsigned int prefix = DATA_PREFIX_OPCODE;
 
-	if ((i.op[1].regs->reg_type & Reg16) != 0)
-	  if (!add_prefix (prefix))
-	    return 0;
-      }
+      if ((i.op[1].regs->reg_type & Reg16) != 0)
+	if (!add_prefix (prefix))
+	  return 0;
+    }
 
   if (i.suffix && i.suffix != BYTE_MNEM_SUFFIX)
     {
@@ -2228,6 +2228,7 @@ process_suffix ()
 	  else
 	    i.tm.base_opcode |= 1;
 	}
+
       /* Now select between word & dword operations via the operand
 	 size prefix, except for instructions that will ignore this
 	 prefix anyway.  */
@@ -2309,7 +2310,7 @@ check_byte_reg ()
 	  if (flag_code == CODE_64BIT
 	      && (i.tm.operand_types[op] & InOutPortReg) == 0)
 	    {
-	      as_bad (_("Incorrect register `%%%s' used with`%c' suffix"),
+	      as_bad (_("Incorrect register `%%%s' used with `%c' suffix"),
 		      i.op[op].regs->reg_name,
 		      i.suffix);
 	      return 0;
@@ -2368,7 +2369,7 @@ check_long_reg ()
 	   lowering is more complicated.  */
 	if (flag_code == CODE_64BIT)
 	  {
-	    as_bad (_("Incorrect register `%%%s' used with`%c' suffix"),
+	    as_bad (_("Incorrect register `%%%s' used with `%c' suffix"),
 		    i.op[op].regs->reg_name,
 		    i.suffix);
 	    return 0;
@@ -2385,7 +2386,7 @@ check_long_reg ()
     else if ((i.types[op] & Reg64) != 0
 	     && (i.tm.operand_types[op] & (Reg32 | Acc)) != 0)
       {
-	as_bad (_("Incorrect register `%%%s' used with`%c' suffix"),
+	as_bad (_("Incorrect register `%%%s' used with `%c' suffix"),
 		i.op[op].regs->reg_name,
 		i.suffix);
 	return 0;
@@ -2417,7 +2418,7 @@ check_qword_reg ()
       {
 	/* Prohibit these changes in the 64bit mode, since the
 	   lowering is more complicated.  */
-	as_bad (_("Incorrect register `%%%s' used with`%c' suffix"),
+	as_bad (_("Incorrect register `%%%s' used with `%c' suffix"),
 		i.op[op].regs->reg_name,
 		i.suffix);
 	return 0;
@@ -2450,7 +2451,7 @@ check_word_reg ()
 	   lowering is more complicated.  */
 	if (flag_code == CODE_64BIT)
 	  {
-	    as_bad (_("Incorrect register `%%%s' used with`%c' suffix"),
+	    as_bad (_("Incorrect register `%%%s' used with `%c' suffix"),
 		    i.op[op].regs->reg_name,
 		    i.suffix);
 	    return 0;
