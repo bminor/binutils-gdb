@@ -142,7 +142,6 @@ TARGETS = \
 	$(NATIVE) \
 	i960-vxworks \
 	m68k-aout	m68k-vxworks
-#	sh-hms		# doesn't work
 CC = cc 
 #CFLAGS = +Obb2000
 CFLAGS = -g
