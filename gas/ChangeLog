@@ -1,3 +1,17 @@
+2002-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (struct literal_pool): Add fields to allow
+	multiple literal pools to be maintained.
+	(find_literal_pool): New function.
+	(find_or_make_literal_pool): New function.
+	(add_to_literal_pool): Use find_or_make_literal_pool.
+        (arm_s_text, arm_s_data, arm_s_section): Remove - no longer
+	needed.
+	(s_ltorg): Use find_literal_pool.
+	(arm_cleanup): Dump all literal pools.
+        * doc/c-arm.texi: Document new behaviour of only dumping literal
+	pools upon request.
+
 2002-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_set_cpu): Use PPC_OPCODE_64 as the default

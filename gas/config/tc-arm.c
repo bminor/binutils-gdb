@@ -2061,9 +2061,6 @@ static void s_code PARAMS ((int));
 static void s_force_thumb PARAMS ((int));
 static void s_thumb_func PARAMS ((int));
 static void s_thumb_set PARAMS ((int));
-static void arm_s_text PARAMS ((int));
-static void arm_s_data PARAMS ((int));
-static void arm_s_section PARAMS ((int));
 #ifdef OBJ_ELF
 static void s_arm_elf_cons PARAMS ((int));
 #endif
@@ -2085,17 +2082,10 @@ const pseudo_typeS md_pseudo_table[] =
   { "even",        s_even,        0 },
   { "ltorg",       s_ltorg,       0 },
   { "pool",        s_ltorg,       0 },
-  /* Allow for the effect of section changes.  */
-  { "text",        arm_s_text,    0 },
-  { "data",        arm_s_data,    0 },
-  { "section",     arm_s_section, 0 },
-  { "section.s",   arm_s_section, 0 },
-  { "sect",        arm_s_section, 0 },
-  { "sect.s",      arm_s_section, 0 },
 #ifdef OBJ_ELF
   { "word",        s_arm_elf_cons, 4 },
   { "long",        s_arm_elf_cons, 4 },
-  { "file",        dwarf2_directive_file, 0 },
+  { "file",        (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
   { "loc",         dwarf2_directive_loc,  0 },
 #else
   { "word",        cons, 4},
@@ -2125,73 +2115,130 @@ static int arm_parse_fpu PARAMS ((char *));
 symbolS *  last_label_seen;
 static int label_is_thumb_function_name = false;
 
-/* Literal stuff.  */
+/* Literal Pool stuff.  */
 
 #define MAX_LITERAL_POOL_SIZE 1024
 
-typedef struct literalS
+/* Literal pool structure.  Held on a per-section
+   and per-sub-section basis.  */
+typedef struct literal_pool
 {
-  struct expressionS exp;
-  struct arm_it *    inst;
-} literalT;
+  expressionS    literals [MAX_LITERAL_POOL_SIZE];
+  unsigned int   next_free_entry;
+  unsigned int   id;
+  symbolS *      symbol;
+  segT           section;
+  subsegT        sub_section;
+  struct literal_pool * next;  
+} literal_pool;
 
-literalT literals[MAX_LITERAL_POOL_SIZE];
+/* Pointer to a linked list of literal pools.  */
+literal_pool * list_of_pools = NULL;
 
-/* Next free entry in the pool.  */
-int next_literal_pool_place = 0;
+static literal_pool * find_literal_pool PARAMS ((void));
+static literal_pool * find_or_make_literal_pool PARAMS ((void));
 
-/* Next literal pool number.  */
-int lit_pool_num = 1;
+static literal_pool *
+find_literal_pool ()
+{
+  literal_pool * pool;
 
-symbolS * current_poolP = NULL;
+  for (pool = list_of_pools; pool != NULL; pool = pool->next)
+    {
+      if (pool->section == now_seg
+	  && pool->sub_section == now_subseg)
+	break;
+    }
 
+  return pool;
+}
+
+static literal_pool *
+find_or_make_literal_pool ()
+{
+  /* Next literal pool ID number.  */
+  static unsigned int latest_pool_num = 1;
+  literal_pool *      pool;
+
+  pool = find_literal_pool ();
+
+  if (pool == NULL)
+    {
+      /* Create a new pool.  */
+      pool = (literal_pool *) xmalloc (sizeof (* pool));
+      if (! pool)
+	return NULL;
+
+      pool->next_free_entry = 0;
+      pool->section         = now_seg;
+      pool->sub_section     = now_subseg;
+      pool->next            = list_of_pools;
+      pool->symbol          = NULL;
+
+      /* Add it to the list.  */
+      list_of_pools = pool;
+    }
+
+  /* New pools, and emptied pools, will have a NULL symbol.  */
+  if (pool->symbol == NULL)
+    {
+      pool->symbol = symbol_create (FAKE_LABEL_NAME, undefined_section,
+				    (valueT) 0, &zero_address_frag);
+      pool->id = latest_pool_num ++;
+    }
+
+  /* Done.  */
+  return pool;
+}
+
+/* Add the literal in the global 'inst'
+   structure to the relevent literal pool.  */
 static int
 add_to_lit_pool ()
 {
-  int lit_count = 0;
+  literal_pool * pool;  
+  unsigned int entry;
 
-  if (current_poolP == NULL)
-    current_poolP = symbol_create (FAKE_LABEL_NAME, undefined_section,
-				   (valueT) 0, &zero_address_frag);
+  pool = find_or_make_literal_pool ();
 
-  /* Check if this literal value is already in the pool:  */
-  while (lit_count < next_literal_pool_place)
+  /* Check if this literal value is already in the pool.  */
+  for (entry = 0; entry < pool->next_free_entry; entry ++)
     {
-      if (literals[lit_count].exp.X_op == inst.reloc.exp.X_op
-	  && inst.reloc.exp.X_op == O_constant
-	  && (literals[lit_count].exp.X_add_number
+      if ((pool->literals[entry].X_op == inst.reloc.exp.X_op)
+	  && (inst.reloc.exp.X_op == O_constant)
+	  && (pool->literals[entry].X_add_number
 	      == inst.reloc.exp.X_add_number)
-	  && literals[lit_count].exp.X_unsigned == inst.reloc.exp.X_unsigned)
+	  && (pool->literals[entry].X_unsigned
+	      == inst.reloc.exp.X_unsigned))
 	break;
 
-      if (literals[lit_count].exp.X_op == inst.reloc.exp.X_op
-	  && inst.reloc.exp.X_op == O_symbol
-	  && (literals[lit_count].exp.X_add_number
+      if ((pool->literals[entry].X_op == inst.reloc.exp.X_op)
+          && (inst.reloc.exp.X_op == O_symbol)
+          && (pool->literals[entry].X_add_number
 	      == inst.reloc.exp.X_add_number)
-	  && (literals[lit_count].exp.X_add_symbol
+          && (pool->literals[entry].X_add_symbol
 	      == inst.reloc.exp.X_add_symbol)
-	  && (literals[lit_count].exp.X_op_symbol
+          && (pool->literals[entry].X_op_symbol
 	      == inst.reloc.exp.X_op_symbol))
-	break;
-
-      lit_count++;
+        break;
     }
 
-  if (lit_count == next_literal_pool_place) /* New entry.  */
+  /* Do we need to create a new entry?  */
+  if (entry == pool->next_free_entry)
     {
-      if (next_literal_pool_place >= MAX_LITERAL_POOL_SIZE)
+      if (entry >= MAX_LITERAL_POOL_SIZE)
 	{
-	  inst.error = _("literal pool overflow");
+	  inst.error = _("Literal Pool Overflow");
 	  return FAIL;
 	}
 
-      literals[next_literal_pool_place].exp = inst.reloc.exp;
-      lit_count = next_literal_pool_place++;
+      pool->literals[entry] = inst.reloc.exp;
+      pool->next_free_entry += 1;
     }
 
-  inst.reloc.exp.X_op = O_symbol;
-  inst.reloc.exp.X_add_number = (lit_count) * 4 - 8;
-  inst.reloc.exp.X_add_symbol = current_poolP;
+  inst.reloc.exp.X_op         = O_symbol;
+  inst.reloc.exp.X_add_number = (entry) * 4 - 8;
+  inst.reloc.exp.X_add_symbol = pool->symbol;
 
   return SUCCESS;
 }
@@ -2353,10 +2400,14 @@ static void
 s_ltorg (ignored)
      int ignored ATTRIBUTE_UNUSED;
 {
-  int lit_count = 0;
+  unsigned int entry;
+  literal_pool * pool;
   char sym_name[20];
 
-  if (current_poolP == NULL)
+  pool = find_literal_pool ();
+  if (pool == NULL
+      || pool->symbol == NULL
+      || pool->next_free_entry == 0)
     return;
 
   /* Align pool as you have word accesses.
@@ -2366,24 +2417,25 @@ s_ltorg (ignored)
 
   record_alignment (now_seg, 2);
 
-  sprintf (sym_name, "$$lit_\002%x", lit_pool_num++);
+  sprintf (sym_name, "$$lit_\002%x", pool->id);
 
-  symbol_locate (current_poolP, sym_name, now_seg,
+  symbol_locate (pool->symbol, sym_name, now_seg,
 		 (valueT) frag_now_fix (), frag_now);
-  symbol_table_insert (current_poolP);
+  symbol_table_insert (pool->symbol);
 
-  ARM_SET_THUMB (current_poolP, thumb_mode);
+  ARM_SET_THUMB (pool->symbol, thumb_mode);
 
 #if defined OBJ_COFF || defined OBJ_ELF
-  ARM_SET_INTERWORK (current_poolP, support_interwork);
+  ARM_SET_INTERWORK (pool->symbol, support_interwork);
 #endif
 
-  while (lit_count < next_literal_pool_place)
+  for (entry = 0; entry < pool->next_free_entry; entry ++)
     /* First output the expression in the instruction to the pool.  */
-    emit_expr (&(literals[lit_count++].exp), 4); /* .word  */
+    emit_expr (&(pool->literals[entry]), 4); /* .word  */
 
-  next_literal_pool_place = 0;
-  current_poolP = NULL;
+  /* Mark the pool as empty.  */
+  pool->next_free_entry = 0;
+  pool->symbol = NULL;
 }
 
 /* Same as s_align_ptwo but align 0 => align 2.  */
@@ -2547,55 +2599,6 @@ s_thumb_set (equiv)
   ARM_SET_THUMB (symbolP, 1);
 #if defined OBJ_ELF || defined OBJ_COFF
   ARM_SET_INTERWORK (symbolP, support_interwork);
-#endif
-}
-
-/* If we change section we must dump the literal pool first.  */
-
-static void
-arm_s_text (ignore)
-     int ignore;
-{
-  if (now_seg != text_section)
-    s_ltorg (0);
-
-#ifdef OBJ_ELF
-  obj_elf_text (ignore);
-#else
-  s_text (ignore);
-#endif
-}
-
-static void
-arm_s_data (ignore)
-     int ignore;
-{
-  if (flag_readonly_data_in_text)
-    {
-      if (now_seg != text_section)
-	s_ltorg (0);
-    }
-  else if (now_seg != data_section)
-    s_ltorg (0);
-
-#ifdef OBJ_ELF
-  obj_elf_data (ignore);
-#else
-  s_data (ignore);
-#endif
-}
-
-static void
-arm_s_section (ignore)
-     int ignore;
-{
-  s_ltorg (0);
-
-#ifdef OBJ_ELF
-  obj_elf_section (ignore);
-#endif
-#ifdef OBJ_COFF
-  obj_coff_section (ignore);
 #endif
 }
 
@@ -10254,10 +10257,10 @@ tc_gen_reloc (section, fixp)
 
     case BFD_RELOC_ARM_LITERAL:
     case BFD_RELOC_ARM_HWLITERAL:
-      /* If this is called then the a literal has been referenced across
-	 a section boundary - possibly due to an implicit dump.  */
+      /* If this is called then the a literal has
+	 been referenced across a section boundary.  */
       as_bad_where (fixp->fx_file, fixp->fx_line,
-		    _("literal referenced across section boundary (Implicit dump?)"));
+		    _("Literal referenced across section boundary"));	
       return NULL;
 
 #ifdef OBJ_ELF
@@ -10504,8 +10507,9 @@ md_assemble (str)
 	      -k			 Generate PIC code
 	      -mthumb			 Start in Thumb mode
 	      -mthumb-interwork		 Code supports ARM/Thumb interworking
+	      -mimplicit-litpool-dump    Dump literal pool on section change
 
-      For now we will also provide support for
+      For now we will also provide support for:
 
 	      -mapcs-32			 32-bit Program counter
 	      -mapcs-26			 26-bit Program counter
@@ -11210,12 +11214,14 @@ cons_fix_new_arm (frag, where, size, exp)
 void
 arm_cleanup ()
 {
-  if (current_poolP == NULL)
-    return;
+  literal_pool * pool;
 
-  /* Put it at the end of text section.  */
-  subseg_set (text_section, 0);
-  s_ltorg (0);
+  for (pool = list_of_pools; pool; pool = pool->next)
+    {
+      /* Put it at the end of the relevent section.  */
+      subseg_set (pool->section, pool->sub_section);
+      s_ltorg (0);
+    }
 }
 
 void

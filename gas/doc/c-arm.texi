@@ -340,6 +340,14 @@ way that the @code{.thumb_func} directive does.
 This directive causes the current contents of the literal pool to be
 dumped into the current section (which is assumed to be the .text
 section) at the current location (aligned to a word boundary).
+@code{GAS} maintains a separate literal pool for each section and each
+sub-section.  The @code{.ltorg} directive will only affect the literal
+pool of the current section and sub-section.  At the end of assembly
+all remaining, un-empty literal pools will automatically be dumped.
+
+Note - older versions of @code{GAS} would dump the current literal
+pool any time a section change occurred.  This is no longer done, since
+it prevents accurate control of the placement of literal pools.
 
 @cindex @code{.pool} directive, ARM
 @item .pool
