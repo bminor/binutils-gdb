@@ -143,6 +143,7 @@ BFD32_BACKENDS = \
 	coff-m68k.o \
 	coff-m88k.o \
 	coff-mips.o \
+	coff-pmac.o \
 	coff-rs6000.o \
 	coff-sh.o \
 	coff-sparc.o \
@@ -203,7 +204,8 @@ BFD32_BACKENDS = \
 	stab-syms.o \
 	sunos.o \
 	tekhex.o \
-	versados.o
+	versados.o \
+	xcofflink.o
 
 # The .o files needed by all of the 64 bit vectors that are configured into
 # target_vector in targets.c if configured with --enable-targets=all
@@ -249,8 +251,7 @@ FLAGS_TO_PASS = \
 	"MAKEINFO=$(MAKEINFO)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
-	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-	"BISON=$(BISON)"
+	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)"
 
 ALL_CFLAGS=@HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) $(CFLAGS)
 .c.o:
@@ -261,8 +262,8 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 archures.c coff-i386.c coff-go32.c aout64.c aout32.c sunos.c demo64.c \
 	 coff-i960.c srec.c binary.c tekhex.c oasys.c ieee.c aout0.c \
 	 ecoff.c ecofflink.c coff-m68k.c coff-u68k.c coff-apollo.c \
-	 coff-a29k.c coff-rs6000.c coff-sparc.c coffgen.c format.c \
-	 section.c core.c syms.c stab-syms.c reloc.c init.c \
+	 coff-a29k.c coff-pmac.c coff-rs6000.c coff-sparc.c coffgen.c \
+	 format.c section.c core.c syms.c stab-syms.c reloc.c init.c \
 	 coff-m88k.c coff-mips.c coff-sh.c trad-core.c cisco-core.c newsos3.c \
 	 i386aout.c i386linux.c i386mach3.c i386netbsd.c i386os9k.c \
 	 bout.c aout-adobe.c coff-we32k.c coff-w65.c \
@@ -280,7 +281,8 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 sparclynx.c cf-sparclynx.c aix386-core.c hpux-core.c \
 	 irix-core.c lynx-core.c osf-core.c hash.c linker.c cofflink.c \
 	 m68knetbsd.c ns32knetbsd.c sparcnetbsd.c pe-i386.c pei-i386.c \
-	 versados.c coff-arm.c pe-arm.c pei-arm.c pe-ppc.c pei-ppc.c
+	 versados.c coff-arm.c pe-arm.c pei-arm.c pe-ppc.c pei-ppc.c \
+	 xcofflink.c
 
 HFILES = aout-target.h aoutf1.h aoutx.h coffcode.h \
 	 coffswap.h ecoffswap.h elf32-hppa.h elf32-target.h elf64-target.h \
@@ -622,6 +624,9 @@ coff-apollo.o: coff-apollo.c $(INCDIR)/coff/apollo.h \
   coffcode.h coffswap.h
 coff-a29k.o: coff-a29k.c $(INCDIR)/coff/a29k.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
+coff-pmac.o: coff-pmac.c coff-rs6000.c $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/rs6000.h libcoff.h $(INCDIR)/bfdlink.h \
+  coffcode.h coffswap.h
 coff-rs6000.o: coff-rs6000.c $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/rs6000.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
@@ -818,7 +823,7 @@ sparcnetbsd.o: sparcnetbsd.c netbsd.h libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 pe-i386.o: pe-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h coffswap.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h
 pei-i386.o: pei-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h
@@ -827,13 +832,17 @@ coff-arm.o: coff-arm.c $(INCDIR)/coff/arm.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 pe-arm.o: pe-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h coffswap.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h
 pei-arm.o: pei-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h
-pe-ppc.o: pe-ppc.c $(INCDIR)/coff/powerpc.h $(INCDIR)/coff/internal.h \
-  libcoff.h $(INCDIR)/bfdlink.h coffcode.h peicode.h
-pei-ppc.o: pe-ppc.c $(INCDIR)/coff/powerpc.h $(INCDIR)/coff/internal.h \
-  libcoff.h $(INCDIR)/bfdlink.h coffcode.h peicode.h
+pe-ppc.o: pe-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+pei-ppc.o: pei-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+xcofflink.o: xcofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
+  libcoff.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY

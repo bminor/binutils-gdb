@@ -1,5 +1,7 @@
 Wed Oct 25 11:32:54 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in: Rebuild dependencies.
+
 	* sunos.c (bfd_sunos_record_link_assignment): Don't do anything if
 	output_bfd is not SunOS.
 	(bfd_sunos_size_dynamic_sections): Likewise.  Don't scan relocs of
