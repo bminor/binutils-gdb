@@ -70,6 +70,9 @@ host_tools="${host_tools} cgen"
 target_libs="target-libiberty \
 		target-libgloss \
 		target-newlib \
+		${start-sanitize-dsp}
+		target-libdsp \
+		${end-sanitize-dsp}
 		target-libio \
 		target-librx \
 		target-libstdc++ \

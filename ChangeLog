@@ -1,3 +1,50 @@
+start-sanitize-dsp
+Fri Sep 25 18:07:32 1998  Jeff Johnston  <jjohnstn@cygnus.com>
+
+	* configure.in (target_libs): Added target-libdsp.
+	* Makefile.in (TARGET_CONFIGDIRS): Added libdsp as target.
+
+end-sanitize-dsp	
+start-sanitize-ide
+Thu Sep 10 12:37:03 1998  Drew Moseley  <dmoseley@cygnus.com>
+
+	* Makefile.in (install-foundry): Added creation of
+	builddate file to the install-foundry target.
+
+end-sanitize-ide
+Fri Aug 28 12:28:26 1998  Per Bothner  <bothner@cygnus.com>
+
+	* mdata-sh:  Imported.  Needed for automake support.
+
+start-sanitize-java
+Fri Aug 21 13:33:13 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in (target_libs): Added target-qthreads.
+	* Makefile.in (ALL_TARGET_MODULES): Added qthreads.
+	(CONFIGURE_TARGET_MODULES): Likewise.
+	(CHECK_TARGET_MODULES): Likewise.
+	(INSTALL_TARGET_MODULES): Likewise.
+	(CLEAN_TARGET_MODULES): Likewise.
+	(all-target-qthreads): New target.
+	(configure-target-libjava): Depend on configure-target-qthreads.
+	(all-target-libjava): Depend on all-target-qthreads.
+
+end-sanitize-java
+Thu Aug 13 12:49:29 1998  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.in (taz): Try "chmod -R og=u ." before 
+	"chmod og=u `find . -print`".
+
+start-sanitize-armelf
+Fri Jul 31 09:38:33 1998  Catherine Moore  <clm@cygnus.com>
+
+        * configure.in: Add arm-elf and thumb-elf support.
+
+end-sanitize-armelf
+Mon Jul 27 16:23:58 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in: Undo previous patch.
+
 Fri Jul 24 19:55:24 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Makefile.in (INSTALL_TARGET): Move EXTRA_TARGET_HOST_INSTALL_MODULES
@@ -558,12 +605,12 @@ Tue Dec 23 12:45:50 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config.guess: HP 9000/803 is a PA1.1 machine.
 
-start-sanitize-vr5400
+start-sanitize-cygnus
 Mon Dec 22 11:27:12 1997  Jeffrey A Law  (law@cygnus.com)
 
         * config.sub (mips64vr5xxx-elf): Handle.  Treat as mips64vr5000-elf.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 
 Sun Dec 21 16:53:12 1997  H.J. Lu  (hjl@gnu.ai.mit.edu)
 
@@ -710,12 +757,12 @@ Mon Oct 27 12:03:53 1997  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* Makefile.in: check-target-libio depends on all-target-libstdc++.
 
-start-sanitize-vr5400
+start-sanitize-cygnus
 Wed Oct 22 14:05:29 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config.sub (maybe_os): Add mips64vr5400.
 
-end-sanitize-vr5400
+end-sanitize-cygnus
 Mon Oct 20 15:28:49 1997  Klaus K"ampf  <kkaempf@progis.de>
 
 	* makefile.vms: Fix to work with DEC C.
