@@ -287,7 +287,12 @@ struct minimal_symbol
       mst_text,			/* Generally executable instructions */
       mst_data,			/* Generally initialized data */
       mst_bss,			/* Generally uninitialized data */
-      mst_abs			/* Generally absolute (nonrelocatable) */
+      mst_abs,			/* Generally absolute (nonrelocatable) */
+      /* For the mst_file* types, the names are only guaranteed to be unique
+	 within a given .o file.  */
+      mst_file_text,		/* Static version of mst_text */
+      mst_file_data,		/* Static version of mst_data */
+      mst_file_bss		/* Static version of mst_bss */
     } type;
 
 };
@@ -563,12 +568,18 @@ struct symbol
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg.regno
 
-/* This currently fails because some symbols are not being initialized
-   to zero on allocation, and no code is currently setting this value.
-   Basereg handling will probably change significantly in the next release.
-   FIXME -fnf */
+/* If we want to do baseregs using this approach we should have a
+   LOC_BASEREG (and LOC_BASEREG_ARG) rather than changing the meaning
+   of LOC_LOCAL, LOC_ARG, etc. based on SYMBOL_BASEREG_VALID.  But
+   this approach provides just a small fraction of the expressiveness
+   of a DWARF location, so it does less than we might want.  On the
+   other hand, it may do more than we need; FRAME_LOCALS_ADDRESS,
+   LOC_REGPARM_ADDR, and similar things seem to handle most of the
+   cases which actually come up.  */
 
 #if 0
+/* This currently fails because some symbols are not being initialized
+   to zero on allocation, and no code is currently setting this value.  */
 #define SYMBOL_BASEREG_VALID(symbol) (symbol)->aux_value.basereg.regno_valid
 #else
 #define SYMBOL_BASEREG_VALID(symbol) 0
@@ -1092,9 +1103,6 @@ extern char **make_symbol_completion_list PARAMS ((char *, char *));
 
 /* symtab.c */
 
-extern void
-clear_symtab_users_once PARAMS ((void));
-
 extern struct partial_symtab *
 find_main_psymtab PARAMS ((void));
 
@@ -1104,6 +1112,9 @@ extern struct blockvector *
 blockvector_for_pc PARAMS ((CORE_ADDR, int *));
 
 /* symfile.c */
+
+extern void
+clear_symtab_users PARAMS ((void));
 
 extern enum language
 deduce_language_from_filename PARAMS ((char *));

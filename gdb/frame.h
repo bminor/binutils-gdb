@@ -160,6 +160,10 @@ struct frame_saved_regs
    on a machine for which gdb has not been configured to support such
    access, report the failure to support this access mode. */
 
+/* FIXME: Code using this should be using get_saved_register, and a
+   basereg number should just be an ordinary register number.  There
+   is no reason for this to be machine-specific.  */
+
 #if !defined (FRAME_GET_BASEREG_VALUE)
 
 #define FRAME_GET_BASEREG_VALUE(frame, regno) \
