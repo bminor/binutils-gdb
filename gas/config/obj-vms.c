@@ -101,6 +101,15 @@ static struct input_file *file_root = (struct input_file *) NULL;
 
 
 /*
+ * Styles of PSECTS (program sections) that we generate; just shorthand
+ * to avoid lists of section attributes.  Used by VMS_Psect_Spec().
+ */
+enum ps_type
+{
+  ps_TEXT, ps_DATA, ps_COMMON, ps_CONST
+};
+
+/*
  * This enum is used to keep track of the various types of variables that
  * may be present.
  */
@@ -342,7 +351,7 @@ static int forward_reference PARAMS ((char *));
 static int final_forward_reference PARAMS ((struct VMS_DBG_Symbol *));
 static int VMS_typedef_parse PARAMS ((char *));
 static int hash_string PARAMS ((const char *));
-static int VMS_Psect_Spec PARAMS ((const char *,int,const char *,
+static int VMS_Psect_Spec PARAMS ((const char *,int,enum ps_type,
 				   struct VMS_Symbol *));
 static int VMS_Initialized_Data_Size PARAMS ((symbolS *,int));
 
@@ -410,7 +419,7 @@ static void vms_build_DST PARAMS ((unsigned));
  *  use with VMS.
  */
 
-char const_flag = IN_DEFAULT_SECTION;
+unsigned char const_flag = IN_DEFAULT_SECTION;
 
 static void
 s_const (arg)
@@ -3835,7 +3844,7 @@ static int
 VMS_Psect_Spec (Name, Size, Type, vsp)
      const char *Name;
      int Size;
-     const char *Type;
+     enum ps_type Type;
      struct VMS_Symbol *vsp;
 {
   char Local[32];
@@ -3844,45 +3853,31 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
   /*
    *	Generate the appropriate PSECT flags given the PSECT type
    */
-  if (strcmp (Type, "COMMON") == 0)
+  switch (Type)
     {
-      /*
-       *	Common block psects are:  PIC,OVR,REL,GBL,SHR,RD,WRT
-       */
-      Psect_Attributes = (GPS_S_M_PIC | GPS_S_M_OVR | GPS_S_M_REL | GPS_S_M_GBL |
-			  GPS_S_M_SHR | GPS_S_M_RD | GPS_S_M_WRT);
-    }
-  else if (strcmp (Type, "CONST") == 0)
-    {
-      /*
-       *	Common block psects are:  PIC,OVR,REL,GBL,SHR,RD
-       */
-      Psect_Attributes = (GPS_S_M_PIC | GPS_S_M_OVR | GPS_S_M_REL | GPS_S_M_GBL |
-			  GPS_S_M_SHR | GPS_S_M_RD);
-    }
-  else if (strcmp (Type, "DATA") == 0)
-    {
-      /*
-       *	The Data psects are PIC,REL,RD,WRT
-       */
-      Psect_Attributes =
-	(GPS_S_M_PIC | GPS_S_M_REL | GPS_S_M_RD | GPS_S_M_WRT);
-    }
-  else if (strcmp (Type, "TEXT") == 0)
-    {
-      /*
-       *	The Text psects are PIC,REL,SHR,EXE,RD
-       */
-      Psect_Attributes =
-	(GPS_S_M_PIC | GPS_S_M_REL | GPS_S_M_SHR |
-	 GPS_S_M_EXE | GPS_S_M_RD);
-    }
-  else
-    {
-      /*
-       *	Error: Unknown psect type
-       */
-      error ("Unknown VMS psect type");
+    case ps_TEXT:
+      /* Text psects are PIC,noOVR,REL,noGBL,SHR,EXE,RD,noWRT. */
+      Psect_Attributes = (GPS_S_M_PIC|GPS_S_M_REL|GPS_S_M_SHR|GPS_S_M_EXE
+			  |GPS_S_M_RD);
+      break;
+    case ps_DATA:
+      /* Data psects are PIC,noOVR,REL,noGBL,noSHR,noEXE,RD,WRT. */
+      Psect_Attributes = (GPS_S_M_PIC|GPS_S_M_REL|GPS_S_M_RD|GPS_S_M_WRT);
+      break;
+    case ps_COMMON:
+      /* Common block psects are:  PIC,OVR,REL,GBL,SHR,noEXE,RD,WRT. */
+      Psect_Attributes = (GPS_S_M_PIC|GPS_S_M_OVR|GPS_S_M_REL|GPS_S_M_GBL
+			  |GPS_S_M_SHR|GPS_S_M_RD|GPS_S_M_WRT);
+      break;
+    case ps_CONST:
+      /* Const data psects are:  PIC,OVR,REL,GBL,SHR,noEXE,RD,noWRT. */
+      Psect_Attributes = (GPS_S_M_PIC|GPS_S_M_OVR|GPS_S_M_REL|GPS_S_M_GBL
+			  |GPS_S_M_SHR|GPS_S_M_RD);
+      break;
+    default:
+      /* impossible */
+      error ("Unknown VMS psect type (%ld)", (long) Type);
+      break;
     }
   /*
    *	Modify the psect attributes according to any attribute string
@@ -5051,7 +5046,7 @@ global_symbol_directory (text_siz, data_siz)
 	  /* Make the psect for this data.  */
 	  Globalref = VMS_Psect_Spec (S_GET_NAME (sp),
 				      vsp->Size,
-				      S_GET_OTHER (sp) ? "CONST" : "COMMON",
+				      S_GET_OTHER (sp) ? ps_CONST : ps_COMMON,
 				      vsp);
 	  if (Globalref)
 	    Psect_Number--;
@@ -5094,7 +5089,7 @@ global_symbol_directory (text_siz, data_siz)
 	  /* Make its psect.  */
 	  Globalref = VMS_Psect_Spec (S_GET_NAME (sp),
 				      vsp->Size,
-				      S_GET_OTHER (sp) ? "CONST" : "COMMON",
+				      S_GET_OTHER (sp) ? ps_CONST : ps_COMMON,
 				      vsp);
 	  if (Globalref)
 	    Psect_Number--;
@@ -5605,14 +5600,14 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
    *	Define the Text Psect
    */
   Text_Psect = Psect_Number++;
-  VMS_Psect_Spec ("$code", text_siz, "TEXT", 0);
+  VMS_Psect_Spec ("$code", text_siz, ps_TEXT, 0);
   /*
    *	Define the BSS Psect
    */
   if (bss_siz > 0)
     {
       Bss_Psect = Psect_Number++;
-      VMS_Psect_Spec ("$uninitialized_data", bss_siz, "DATA", 0);
+      VMS_Psect_Spec ("$uninitialized_data", bss_siz, ps_DATA, 0);
     }
   /*
    * Define symbols to the linker.
@@ -5624,7 +5619,7 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
   if (data_siz > 0 && Local_Initd_Data_Size > 0)
     {
       Data_Psect = Psect_Number++;
-      VMS_Psect_Spec ("$data", Local_Initd_Data_Size, "DATA", 0);
+      VMS_Psect_Spec ("$data", Local_Initd_Data_Size, ps_DATA, 0);
       /*
        * Local initialized data (N_DATA) symbols need to be updated to the
        * proper value of Data_Psect now that it's actually been defined.

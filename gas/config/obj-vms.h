@@ -35,7 +35,7 @@ to the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1
    data section.  By and large they are identical, but we set a no-write
    bit for psects in the const section.  */
 
-extern char const_flag;
+extern unsigned char const_flag;
 
 /* This is overloaded onto const_flag, for convenience.  It's used to flag
    dummy labels like "gcc2_compiled."  which occur before the first .text
@@ -81,27 +81,21 @@ typedef struct
     struct exec header;		/* a.out header */
     long string_table_size;	/* names + '\0' + sizeof(int) */
   }
-
 object_headers;
 
 /* A single entry in the symbol table
+ * (this started as a clone of bout.h's nlist, but much was unneeded).
  */
 struct nlist
   {
-    union
-      {
-	char *n_name;
-	struct nlist *n_next;
-	long n_strx;		/* Index into string table	*/
-      }
-    n_un;
+    char *n_name;
     unsigned char n_type;	/* See below				*/
-    char n_other;		/* Used in i80960 support -- see below	*/
-    short n_desc;
-    unsigned long n_value;
+    unsigned char n_other;	/* used for const_flag and "default section" */
+    unsigned	: 16;		/* padding for alignment */
+    int n_desc;			/* source line number for N_SLINE stabs */
   };
 
-/* Legal values of n_type
+/* Legal values of n_type (see aout/stab.def for the majority of the codes).
  */
 #define N_UNDF	0		/* Undefined symbol	*/
 #define N_ABS	2		/* Absolute symbol	*/
@@ -156,9 +150,9 @@ typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 
 /* Accessors */
 /* The name of the symbol */
-#define S_GET_NAME(s)		((s)->sy_symbol.n_un.n_name)
+#define S_GET_NAME(s)		((s)->sy_symbol.n_name)
 /* The pointer to the string table */
-#define S_GET_OFFSET(s)		((s)->sy_symbol.n_un.n_strx)
+#define S_GET_OFFSET(s)		((s)->sy_name_offset)
 /* The raw type of the symbol */
 #define S_GET_RAW_TYPE(s)		((s)->sy_symbol.n_type)
 /* The type of the symbol */
@@ -179,9 +173,9 @@ typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 /* The symbol is not external */
 #define S_CLEAR_EXTERNAL(s)	((s)->sy_symbol.n_type &= ~N_EXT)
 /* Set the name of the symbol */
-#define S_SET_NAME(s,v)		((s)->sy_symbol.n_un.n_name = (v))
+#define S_SET_NAME(s,v)		((s)->sy_symbol.n_name = (v))
 /* Set the offset in the string table */
-#define S_SET_OFFSET(s,v)	((s)->sy_symbol.n_un.n_strx = (v))
+#define S_SET_OFFSET(s,v)	((s)->sy_name_offset = (v))
 /* Set the n_other expression value */
 #define S_SET_OTHER(s,v)	((s)->sy_symbol.n_other = (v))
 /* Set the n_desc expression value */
