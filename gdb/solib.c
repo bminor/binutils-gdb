@@ -809,6 +809,18 @@ sharedlibrary_command (char *args, int from_tty)
   solib_add (args, from_tty, (struct target_ops *) 0);
 }
 
+/* LOCAL FUNCTION
+
+   no_shared_libraries -- handle command to explicitly discard symbols
+   from shared libraries.
+
+   DESCRIPTION
+
+   Implements the command "nosharedlibrary", which discards symbols
+   that have been auto-loaded from shared libraries.  Symbols from
+   shared libraries that were added by explicit request of the user
+   are not discarded.  Also called from remote.c.  */
+
 void
 no_shared_libraries (char *ignored, int from_tty)
 {

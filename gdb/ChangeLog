@@ -1,5 +1,6 @@
 2001-05-14  Michael Snyder  <msnyder@redhat.com>
 
+	* solib.c, solib.h: Add comment for function no_shared_libraries.
 	* remote.c (remote_write_bytes): Set nr_bytes to return value of
 	bin2hex.
 	
