@@ -28,6 +28,10 @@ start-sanitize-rce
 	* config/tc-rce.h: Declare md_relax_table here, and define
 	TC_GENERIC_RELAX_TABLE to expand to it.
 end-sanitize-rce
+	* doc/internals.texi: Describe TC_GENERIC_RELAX_TABLE and
+	WORKING_DOT_WORD.  Mention md_*_jump_size (but description needs
+	to be fleshed out later).  Note m68k PCINDEX mode has been checked
+	in.
 
 Mon Apr 10 15:57:42 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
