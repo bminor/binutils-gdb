@@ -1,3 +1,12 @@
+Fri Oct  8 14:15:39 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* config.sub: Accept linux*coff and linux*elf as operating
+	systems.
+
+Thu Oct  7 12:57:19 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config.sub: Recognize mips64, and mips3 as an alias for it.
+
 Wed Oct  6 13:54:21 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* configure.in: Remove alpha-dec-osf*, no longer necessary now that
