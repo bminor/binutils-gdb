@@ -599,3 +599,19 @@ eb000000001c rllg RSE_R "rotate left single logical 64" esame
 eb000000001d rll RSE_R "rotate left single logical 32" esame
 b278 stcke S "store clock extended" esame
 b2a5 tre RRE "translate extended" esame
+eb000000008e mvclu RSE_R "move long unicode" esame
+e9 pka SS_L "pack ascii" esame
+e1 pku SS_L "pack unicode" esame
+b993 troo RRE "translate one to one" esame
+b992 trot RRE "translate one to two" esame
+b991 trto RRE "translate two to one" esame
+b990 trtt RRE "translate two to two" esame
+ea unpka SS_L "unpack ascii" esame
+e2 unpku SS_L "unpack unicode" esame
+b358 thder RRE "convert short bfp to long hfp" esame
+b359 thdr RRE "convert long bfp to long hfp" esame
+b350 tbedr RRF_M "convert long hfp to short bfp" esame
+b351 tbdr RRF_M "convert long hfp to long bfp" esame
+b374 lzer RRE_R "load short zero" esame
+b375 lzdr RRE_R "load long zero" esame
+b376 lzxr RRE_R "load extended zero" esame

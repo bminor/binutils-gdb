@@ -1,3 +1,8 @@
+2001-03-16  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* s390-opc.c: Add new opcodes.  Smooth out formatting.
+	* s390-opc.txt: Add new opcodes.
+	
 2001-03-06  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c (print_insn_thumb): Compute destination address
