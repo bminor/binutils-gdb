@@ -442,10 +442,10 @@ read_word (CORE_ADDR from, int *to, int arch64)
    to debugger memory starting at MYADDR.  Copy to inferior if
    WRITE is nonzero.
 
-   Returns the length copied, which is either the LEN argument or zero.
-   This xfer function does not do partial moves, since child_ops
-   doesn't allow memory operations to cross below us in the target stack
-   anyway.  */
+   Returns the length copied, which is either the LEN argument or
+   zero.  This xfer function does not do partial moves, since
+   deprecated_child_ops doesn't allow memory operations to cross below
+   us in the target stack anyway.  */
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,

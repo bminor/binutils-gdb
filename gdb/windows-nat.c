@@ -1439,7 +1439,7 @@ do_initial_child_stuff (DWORD pid)
     dr[i] = 0;
   current_event.dwProcessId = pid;
   memset (&current_event, 0, sizeof (current_event));
-  push_target (&child_ops);
+  push_target (&deprecated_child_ops);
   child_init_thread_list ();
   disable_breakpoints_in_shlibs (1);
   child_clear_solibs ();
@@ -1651,7 +1651,7 @@ child_detach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
   inferior_ptid = null_ptid;
-  unpush_target (&child_ops);
+  unpush_target (&deprecated_child_ops);
 }
 
 char *
@@ -1901,7 +1901,7 @@ child_mourn_inferior (void)
 {
   (void) child_continue (DBG_CONTINUE, -1);
   i386_cleanup_dregs();
-  unpush_target (&child_ops);
+  unpush_target (&deprecated_child_ops);
   generic_mourn_inferior ();
 }
 
@@ -2068,43 +2068,43 @@ child_close (int x)
 static void
 init_child_ops (void)
 {
-  child_ops.to_shortname = "child";
-  child_ops.to_longname = "Win32 child process";
-  child_ops.to_doc = "Win32 child process (started by the \"run\" command).";
-  child_ops.to_open = child_open;
-  child_ops.to_close = child_close;
-  child_ops.to_attach = child_attach;
-  child_ops.to_detach = child_detach;
-  child_ops.to_resume = child_resume;
-  child_ops.to_wait = child_wait;
-  child_ops.to_fetch_registers = child_fetch_inferior_registers;
-  child_ops.to_store_registers = child_store_inferior_registers;
-  child_ops.to_prepare_to_store = child_prepare_to_store;
-  child_ops.to_xfer_memory = child_xfer_memory;
-  child_ops.to_files_info = child_files_info;
-  child_ops.to_insert_breakpoint = memory_insert_breakpoint;
-  child_ops.to_remove_breakpoint = memory_remove_breakpoint;
-  child_ops.to_terminal_init = terminal_init_inferior;
-  child_ops.to_terminal_inferior = terminal_inferior;
-  child_ops.to_terminal_ours_for_output = terminal_ours_for_output;
-  child_ops.to_terminal_ours = terminal_ours;
-  child_ops.to_terminal_save_ours = terminal_save_ours;
-  child_ops.to_terminal_info = child_terminal_info;
-  child_ops.to_kill = child_kill_inferior;
-  child_ops.to_create_inferior = child_create_inferior;
-  child_ops.to_mourn_inferior = child_mourn_inferior;
-  child_ops.to_can_run = child_can_run;
-  child_ops.to_thread_alive = win32_child_thread_alive;
-  child_ops.to_pid_to_str = cygwin_pid_to_str;
-  child_ops.to_stop = child_stop;
-  child_ops.to_stratum = process_stratum;
-  child_ops.to_has_all_memory = 1;
-  child_ops.to_has_memory = 1;
-  child_ops.to_has_stack = 1;
-  child_ops.to_has_registers = 1;
-  child_ops.to_has_execution = 1;
-  child_ops.to_magic = OPS_MAGIC;
-  child_ops.to_pid_to_exec_file = child_pid_to_exec_file;
+  deprecated_child_ops.to_shortname = "child";
+  deprecated_child_ops.to_longname = "Win32 child process";
+  deprecated_child_ops.to_doc = "Win32 child process (started by the \"run\" command).";
+  deprecated_child_ops.to_open = child_open;
+  deprecated_child_ops.to_close = child_close;
+  deprecated_child_ops.to_attach = child_attach;
+  deprecated_child_ops.to_detach = child_detach;
+  deprecated_child_ops.to_resume = child_resume;
+  deprecated_child_ops.to_wait = child_wait;
+  deprecated_child_ops.to_fetch_registers = child_fetch_inferior_registers;
+  deprecated_child_ops.to_store_registers = child_store_inferior_registers;
+  deprecated_child_ops.to_prepare_to_store = child_prepare_to_store;
+  deprecated_child_ops.to_xfer_memory = child_xfer_memory;
+  deprecated_child_ops.to_files_info = child_files_info;
+  deprecated_child_ops.to_insert_breakpoint = memory_insert_breakpoint;
+  deprecated_child_ops.to_remove_breakpoint = memory_remove_breakpoint;
+  deprecated_child_ops.to_terminal_init = terminal_init_inferior;
+  deprecated_child_ops.to_terminal_inferior = terminal_inferior;
+  deprecated_child_ops.to_terminal_ours_for_output = terminal_ours_for_output;
+  deprecated_child_ops.to_terminal_ours = terminal_ours;
+  deprecated_child_ops.to_terminal_save_ours = terminal_save_ours;
+  deprecated_child_ops.to_terminal_info = child_terminal_info;
+  deprecated_child_ops.to_kill = child_kill_inferior;
+  deprecated_child_ops.to_create_inferior = child_create_inferior;
+  deprecated_child_ops.to_mourn_inferior = child_mourn_inferior;
+  deprecated_child_ops.to_can_run = child_can_run;
+  deprecated_child_ops.to_thread_alive = win32_child_thread_alive;
+  deprecated_child_ops.to_pid_to_str = cygwin_pid_to_str;
+  deprecated_child_ops.to_stop = child_stop;
+  deprecated_child_ops.to_stratum = process_stratum;
+  deprecated_child_ops.to_has_all_memory = 1;
+  deprecated_child_ops.to_has_memory = 1;
+  deprecated_child_ops.to_has_stack = 1;
+  deprecated_child_ops.to_has_registers = 1;
+  deprecated_child_ops.to_has_execution = 1;
+  deprecated_child_ops.to_magic = OPS_MAGIC;
+  deprecated_child_ops.to_pid_to_exec_file = child_pid_to_exec_file;
 }
 
 void
@@ -2180,7 +2180,7 @@ _initialize_win32_nat (void)
 	   "Display selectors infos.",
 	   &info_w32_cmdlist);
 
-  add_target (&child_ops);
+  add_target (&deprecated_child_ops);
 }
 
 /* Hardware watchpoint support, adapted from go32-nat.c code.  */

@@ -398,7 +398,7 @@ child_follow_fork (int follow_child)
 	target_detach (NULL, 0);
 
       inferior_ptid = pid_to_ptid (child_pid);
-      push_target (&child_ops);
+      push_target (&deprecated_child_ops);
 
       /* Reset breakpoints in the child as appropriate.  */
       follow_inferior_reset_breakpoints ();
@@ -850,7 +850,7 @@ linux_nat_attach (char *args, int from_tty)
 
   /* FIXME: We should probably accept a list of process id's, and
      attach all of them.  */
-  child_ops.to_attach (args, from_tty);
+  deprecated_child_ops.to_attach (args, from_tty);
 
   /* Add the initial process as the first LWP to the list.  */
   lp = add_lwp (BUILD_LWP (GET_PID (inferior_ptid), GET_PID (inferior_ptid)));
@@ -960,7 +960,7 @@ linux_nat_detach (char *args, int from_tty)
   sigemptyset (&blocked_mask);
 
   inferior_ptid = pid_to_ptid (GET_PID (inferior_ptid));
-  child_ops.to_detach (args, from_tty);
+  deprecated_child_ops.to_detach (args, from_tty);
 }
 
 /* Resume LP.  */
@@ -2247,7 +2247,7 @@ static void
 linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
 			 int from_tty)
 {
-  child_ops.to_create_inferior (exec_file, allargs, env, from_tty);
+  deprecated_child_ops.to_create_inferior (exec_file, allargs, env, from_tty);
 }
 
 static void
@@ -2262,7 +2262,7 @@ linux_nat_mourn_inferior (void)
   sigprocmask (SIG_SETMASK, &normal_mask, NULL);
   sigemptyset (&blocked_mask);
 
-  child_ops.to_mourn_inferior ();
+  deprecated_child_ops.to_mourn_inferior ();
 }
 
 static int

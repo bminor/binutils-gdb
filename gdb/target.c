@@ -163,7 +163,7 @@ static void debug_to_stop (void);
    wierd and mysterious ways.  Putting the variable here lets those
    wierd and mysterious ways keep building while they are being
    converted to the inferior inheritance structure.  */
-struct target_ops child_ops;
+struct target_ops deprecated_child_ops;
 
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the 

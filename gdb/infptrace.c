@@ -403,8 +403,8 @@ store_inferior_registers (int regnum)
 
    Returns the length copied, which is either the LEN argument or
    zero.  This xfer function does not do partial moves, since
-   child_ops doesn't allow memory operations to cross below us in the
-   target stack anyway.  */
+   deprecated_child_ops doesn't allow memory operations to cross below
+   us in the target stack anyway.  */
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,

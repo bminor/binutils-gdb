@@ -105,8 +105,8 @@ struct pd_thread {
 
 static struct target_ops aix_thread_ops;
 
-/* Copy of the target over which ops is pushed.  
-   This is more convenient than a pointer to child_ops or core_ops,
+/* Copy of the target over which ops is pushed.  This is more
+   convenient than a pointer to deprecated_child_ops or core_ops,
    because they lack current_target's default callbacks.  */
 
 static struct target_ops base_target;
