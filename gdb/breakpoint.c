@@ -4948,6 +4948,10 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	       be copied too.  */
 	    if (pending_bp->commands)
 	      b->commands = copy_command_lines (pending_bp->commands);
+	    
+	    /* We have to copy over the ignore_count and thread as well.  */
+	    b->ignore_count = pending_bp->ignore_count;
+	    b->thread = pending_bp->thread;
 	  }
 	mention (b);
       }

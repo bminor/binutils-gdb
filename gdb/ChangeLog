@@ -1,3 +1,9 @@
+2004-05-05  Jim Ingham  <jingham@apple.com>
+	
+	* breakpoint.c (create_breakpoints): Copy the ignore count and
+	thread id over from the pended breakpoint to the actual
+	breakpoint.
+	
 2004-05-05  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (PARM_BOUNDARY): Delete.
