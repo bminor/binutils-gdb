@@ -1,5 +1,10 @@
 2004-05-17  Daniel Jacobowitz  <dan@debian.org>
 
+	* configure.in: Mark unreleased for post-2.15 snapshots.
+	* configure: Regenerate.
+
+2004-05-17  Daniel Jacobowitz  <dan@debian.org>
+
 	* configure.in: Bump version to 2.15.  Mark as released.
 	* configure: Regenerate.
 
