@@ -1284,7 +1284,7 @@ define_symbol (valu, string, desc, type, objfile)
 	   scan them now.  */
         while (*p == ';') {
           p++;
-          read_type (&p);
+          read_type (&p, objfile);
 	}
       }
 
