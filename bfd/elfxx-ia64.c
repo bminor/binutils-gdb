@@ -2300,36 +2300,6 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
       sec->_raw_size = strlen (ELF_DYNAMIC_INTERPRETER) + 1;
     }
 
-  /* DT_INIT and DT_FINI get function descriptors not raw code addresses.
-     Force their symbols to have pltoff entries so we can use those.  */
-  if (ia64_info->root.dynamic_sections_created)
-    {
-      struct elf_link_hash_entry *h;
-      struct elfNN_ia64_dyn_sym_info *dyn_i;
- 
-      if (info->init_function
-	  && (h = elf_link_hash_lookup (elf_hash_table (info), 
-					info->init_function, false,
-					false, false))
-          && (h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
-                                        | ELF_LINK_HASH_DEF_REGULAR)) != 0)
-        {
-	  dyn_i = get_dyn_sym_info (ia64_info, h, output_bfd, NULL, true);
-	  dyn_i->want_pltoff = 1;
-        }
-
-      if (info->fini_function
-	  && (h = elf_link_hash_lookup (elf_hash_table (info), 
-					info->fini_function, false,
-					false, false))
-          && (h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
-                                        | ELF_LINK_HASH_DEF_REGULAR)) != 0)
-        {
-	  dyn_i = get_dyn_sym_info (ia64_info, h, output_bfd, NULL, true);
-	  dyn_i->want_pltoff = 1;
-        }
-    }
-
   /* Allocate the GOT entries.  */
 
   if (ia64_info->got_sec)
@@ -3106,48 +3076,6 @@ elfNN_ia64_final_link (abfd, info)
 	}
 
       _bfd_set_gp_value (abfd, gp_val);
-    }
-
-  /* Tricky bits.  DT_INIT and DT_FINI use a pltoff entry, which is
-     normally initialized in finish_dynamic_sections.  Except that
-     we need all non-plt pltoff entries to be initialized before
-     finish_dynamic_symbols.  This because the array of relocations
-     used for plt entries (aka DT_JMPREL) begins after all the 
-     non-plt pltoff relocations.  If the order gets confused, we
-     munge either the array or the array base.  */
-  if (ia64_info->root.dynamic_sections_created)
-    {
-      struct elf_link_hash_entry *h;
-      struct elfNN_ia64_dyn_sym_info *dyn_i;
-      bfd_vma addr;
- 
-      if (info->init_function
-	  && (h = elf_link_hash_lookup (elf_hash_table (info), 
-					info->init_function, false,
-					false, false))
-          && (h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
-                                        | ELF_LINK_HASH_DEF_REGULAR)) != 0)
-        {
-	  dyn_i = get_dyn_sym_info (ia64_info, h, NULL, NULL, false);
-	  addr = (h->root.u.def.section->output_section->vma
-		  + h->root.u.def.section->output_offset
-		  + h->root.u.def.value);
-	  (void) set_pltoff_entry (abfd, info, dyn_i, addr, false);
-        }
-
-      if (info->fini_function
-	  && (h = elf_link_hash_lookup (elf_hash_table (info), 
-					info->fini_function, false,
-					false, false))
-          && (h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
-                                        | ELF_LINK_HASH_DEF_REGULAR)) != 0)
-        {
-	  dyn_i = get_dyn_sym_info (ia64_info, h, NULL, NULL, false);
-	  addr = (h->root.u.def.section->output_section->vma
-		  + h->root.u.def.section->output_offset
-		  + h->root.u.def.value);
-	  (void) set_pltoff_entry (abfd, info, dyn_i, addr, false);
-        }
     }
 
   /* If we're producing a final executable, we need to sort the contents
@@ -3954,25 +3882,6 @@ elfNN_ia64_finish_dynamic_sections (abfd, info)
 	      dyn.d_un.d_val -= (ia64_info->minplt_entries
 				 * sizeof (ElfNN_External_Rela));
 	      break;
-
-	    case DT_INIT:
-	    case DT_FINI:
-	      {
-		struct elf_link_hash_entry *h;
-		struct elfNN_ia64_dyn_sym_info *dyn_i;
-		const char *which;
- 
-		if (dyn.d_tag == DT_INIT)
-		  which = info->init_function;
-		else
-		  which = info->fini_function;
-
-		h = elf_link_hash_lookup (elf_hash_table (info), which,
-					  false, false, false);
-		dyn_i = get_dyn_sym_info (ia64_info, h, NULL, NULL, false);
-		dyn.d_un.d_ptr = set_pltoff_entry (abfd, info, dyn_i,
-						   dyn.d_un.d_ptr, 0);
-	      }
 	    }
 
 	  bfd_elfNN_swap_dyn_out (abfd, &dyn, dyncon);

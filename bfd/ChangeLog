@@ -1,3 +1,11 @@
+2000-11-17  H.J. Lu  <hjl@gnu.org>
+
+	* elfxx-ia64.c (elfNN_ia64_size_dynamic_sections): Don't create
+	pltoff entries for DT_INIT and DT_FINI.
+	(elfNN_ia64_final_link): Don't set DT_INIT/FINI entries.
+	(elfNN_ia64_finish_dynamic_sections): Don't fill in DT_INIT/FINI
+	entries.
+
 2000-11-16  Richard Henderson  <rth@redhat.com>
 
 	* elfxx-ia64.c (elfNN_ia64_check_relocs): Handle IPLT relocs.
