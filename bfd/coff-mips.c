@@ -1,5 +1,5 @@
 /* BFD back-end for MIPS Extended-Coff files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
@@ -910,7 +910,7 @@ mips_gprel_reloc (abfd,
     reloc_entry->address += input_section->output_offset;
 
   /* Make sure it fit in 16 bits.  */
-  if (val >= 0x8000 && val < 0xffff8000)
+  if ((long) val >= 0x8000 || (long) val < -0x8000)
     return bfd_reloc_overflow;
 
   return bfd_reloc_ok;

@@ -1,3 +1,12 @@
+2000-04-11  Alan Modra  <alan@linuxcare.com.au>
+
+	* coff-mips.c (mips_gprel_reloc): Test for 16 bit range using
+	signed quantites.
+	* elf32-mips.c (gprel16_with_gp): Likewise.
+	* elf32-hppa.c (elf32_hppa_bfd_final_link_relocate): Test range
+	here using -0x40000, not (int)0xfffc0000.
+	(elf32_hppa_size_of_stub): Likewise.
+
 2000-04-11  Timothy Wall  <twall@cygnus.com>
 
 	* coff-tic54x.c: Now builds with all targets.
@@ -6105,7 +6114,7 @@ Mon Feb 23 19:31:19 1998  Ian Lance Taylor  <ian@cygnus.com>
 1998-02-23 15:53  Richard Henderson  <rth@cygnus.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): A pc-relative
-	relocation against a now-local symbol should not have a dynamic
+	relocation against a non-local symbol should not have a dynamic
 	relocation.
 
 Mon Feb 23 16:17:08 1998  Ian Lance Taylor  <ian@cygnus.com>

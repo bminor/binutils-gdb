@@ -1520,7 +1520,7 @@ gprel16_with_gp (abfd, symbol, reloc_entry, input_section, relocateable, data,
     reloc_entry->address += input_section->output_offset;
 
   /* Make sure it fit in 16 bits.  */
-  if (val >= 0x8000 && val < 0xffff8000)
+  if ((long) val >= 0x8000 || (long) val < -0x8000)
     return bfd_reloc_overflow;
 
   return bfd_reloc_ok;
