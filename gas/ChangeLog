@@ -1,3 +1,14 @@
+Mon Oct 19 12:35:43 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.c (gas_cgen_finish_insn): Update handling of CGEN_INT_INSN_P.
+	* cgen.h (gas_cgen_finish_insn): Update prototype.
+	* config/tc-m32r.c (m32r_insn): CGEN_INT_INSN -> CGEN_INT_INSN_P.
+	cgen_insn_t -> CGEN_INSN_INT.
+	(make_parallel): Update handling of CGEN_INT_INSN_P.
+	(assemble_parallel_insn): Ditto.
+	(target_make_parallel): New function.
+	(md_assemble): Use it.
+
 Mon Oct 19 13:16:12 1998  Catherine Moore  <clm@cygnus.com>
 
         * config/tc-m32r.c (m32r_force_relocation):  Fix typo.
