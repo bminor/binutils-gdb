@@ -1,3 +1,19 @@
+Thu May 20 11:42:06 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* mipsbsd.sc-sh: Renamed from aout-mipsbsd.sc-sh.
+	* mipsbsd.sh (EMULATION_NAME): Use new file name.
+
+Tue May 18 17:10:24 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (LDDISTSTUFF): Remove ld.mm since we can't build it
+	properly right now.
+
+	* Version 2.2 released.
+
+Mon May 17 15:37:28 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* ldver.c (ldversion): Bump version number to 2.2.
+
 Mon May 17 12:44:31 1993  Per Bothner  (bothner@cygnus.com)
 
 	* NEWS:  New file.
