@@ -615,7 +615,6 @@ get_dynamic_type (type)
 	    case EM_MIPS:
 	    case EM_MIPS_RS4_BE:
 	      result = get_mips_dynamic_type (type);
-	  default:
 	    }
 
 	  if (result == NULL)

@@ -1,3 +1,8 @@
+Fri Jul 24 16:28:57 1998  Jeff Holcomb  <jeffh@cygnus.com>
+
+	* readelf.c (get_dynamic_type): Remove empty default from switch
+	statement.
+
 Fri Jul 24 16:28:12 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (install-exec-local): Don't remove the file before
