@@ -1,5 +1,9 @@
 2002-02-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Add x86-64 target.
+
+2002-02-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* memattr.c (mem_command): Eliminate ``true'' and ``false''.
 	* osfsolib.c (solib_map_sections): Ditto.
 	* irix5-nat.c (solib_map_sections): Ditto.
