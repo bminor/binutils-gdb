@@ -1235,6 +1235,7 @@ find_opcode (opcode, myops)
 	      int flags = d10v_operands[next_opcode->operands[opnum]].flags;
 	      if (flags & OPERAND_ADDR)
 		bits += 2;
+	      
 	      if (myops[opnum].X_op == O_constant)
 		{
 		  if (!check_range (myops[opnum].X_add_number, bits, flags))
@@ -1242,19 +1243,39 @@ find_opcode (opcode, myops)
 		}
 	      else
 		{
-		  fragS *f;
-		  long value;
-		  /* calculate the current address by running through the previous frags */
-		  /* and adding our current offset */
-		  for (value = 0, f = frchain_now->frch_root; f; f = f->fr_next)
-		    value += f->fr_fix + f->fr_offset;
+		  fragS * sym_frag;
+		  fragS * f;
+		  unsigned long current_position;
+		  unsigned long symbol_position;
+		  unsigned long value;
+		  boolean found_symbol;
+		  
+		  /* Calculate the address of the current instruction
+		     and the address of the symbol.  Do this by summing
+		     the offsets of previous frags until we reach the
+		     frag containing the symbol, and the current frag.  */
+		  sym_frag = symbol_get_frag (myops[opnum].X_add_symbol);
+		  found_symbol = false;
 
+		  current_position = obstack_next_free (&frchain_now->frch_obstack) - frag_now->fr_literal;
+		  symbol_position = S_GET_VALUE (myops[opnum].X_add_symbol);
+		  
+		  for (f = frchain_now->frch_root; f; f = f->fr_next)
+		    {
+		      current_position += f->fr_fix + f->fr_offset;
+		      
+		      if (f == sym_frag)
+			found_symbol = true;
+		      
+		      if (! found_symbol)
+			symbol_position += f->fr_fix + f->fr_offset;
+		    }
+
+		  value = symbol_position;
+		  
 		  if (flags & OPERAND_ADDR)
-		    value = S_GET_VALUE(myops[opnum].X_add_symbol) - value -
-		      (obstack_next_free(&frchain_now->frch_obstack) - frag_now->fr_literal);
-		  else
-		    value += S_GET_VALUE(myops[opnum].X_add_symbol);
-
+		    value -= current_position;
+		  
 		  if (AT_WORD_P (&myops[opnum]))
 		    {
 		      if (bits > 4)
@@ -1653,7 +1674,7 @@ d10v_fix_adjustable (fixP)
 
 int
 d10v_force_relocation (fixp)
-      struct fix *fixp;
+      fixS *fixp;
 {
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)

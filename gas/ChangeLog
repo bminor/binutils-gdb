@@ -7,6 +7,11 @@
 
 	* config/tc-d10v.c (md_apply_fix3): Add paren around &&.
 
+2000-04-12  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d10v.c (find_opcode): Correctly calculate position of
+	symbol in frag chain.
+
 2000-04-10  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c (fits_in_signed_byte): Change arg to offsetT.
