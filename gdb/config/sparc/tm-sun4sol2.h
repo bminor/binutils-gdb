@@ -64,3 +64,6 @@ get_longjmp_target PARAMS ((CORE_ADDR *));
 #define N_SO_ADDRESS_MAYBE_MISSING
 
 #define FAULTED_USE_SIGINFO
+
+/* Enable handling of shared libraries for a.out executables.  */
+#define HANDLE_SVR4_EXEC_EMULATORS
