@@ -810,8 +810,7 @@ elf_link_add_object_symbols (abfd, info)
 	     reference or definition we just found.  Keep a count of
 	     the number of dynamic symbols we find.  A dynamic symbol
 	     is one which is referenced or defined by both a regular
-	     object and a shared object, or one which is referenced or
-	     defined by more than one shared object.  */
+	     object and a shared object.  */
 	  old_flags = h->elf_link_hash_flags;
 	  dynsym = false;
 	  if (! dynamic)
@@ -834,8 +833,8 @@ elf_link_add_object_symbols (abfd, info)
 	      if ((old_flags & (ELF_LINK_HASH_DEF_REGULAR
 				| ELF_LINK_HASH_REF_REGULAR)) != 0
 		  || (h->weakdef != NULL
-		      && (old_flags & (ELF_LINK_HASH_DEF_DYNAMIC
-				       | ELF_LINK_HASH_REF_DYNAMIC)) != 0))
+		      && ! new_weakdef
+		      && h->weakdef->dynindx != -1))
 		dynsym = true;
 	    }
 
@@ -909,6 +908,18 @@ elf_link_add_object_symbols (abfd, info)
 		  && h->dynindx == -1)
 		{
 		  if (! _bfd_elf_link_record_dynamic_symbol (info, h))
+		    goto error_return;
+		}
+
+	      /* If the real definition is in the list of dynamic
+                 symbols, make sure the weak definition is put there
+                 as well.  If we don't do this, then the dynamic
+                 loader might not merge the entries for the real
+                 definition and the weak definition.  */
+	      if (h->dynindx != -1
+		  && hlook->dynindx == -1)
+		{
+		  if (! _bfd_elf_link_record_dynamic_symbol (info, hlook))
 		    goto error_return;
 		}
 

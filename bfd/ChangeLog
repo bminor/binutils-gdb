@@ -5,6 +5,11 @@ Thu Dec 12 15:07:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Thu Dec 12 14:55:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elflink.h (elf_link_add_object_symbols): Only add a weak
+	symbol if the real definition is in the dynamic symbol table.
+	After finding the real definition, then, if it is dynamic, add the
+	weak symbol to the dynamic symbol table.
+
 	* coff-aux.c (coff_m68k_aux_link_add_one_symbol): Make static.
 
 	* ppcboot.c (ppcboot_set_arch_mach): Don't define; it's a
