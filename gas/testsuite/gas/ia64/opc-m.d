@@ -1285,7 +1285,7 @@ Disassembly of section \.text:
     1a96:	f0 ff 1f 00 00 00 	            break\.m 0x1ffff
     1a9c:	00 00 00 20       	            nop\.b 0x0
     1aa0:	18 00 00 00 01 00 	\[MMB\]       nop\.m 0x0
-    1aa6:	f0 ff 1f 00 00 00 	            break\.m 0x1ffff
+    1aa6:	f0 ff 1f 02 00 00 	            nop\.m 0x1ffff
     1aac:	00 00 00 20       	            nop\.b 0x0
     1ab0:	18 20 18 0a 38 04 	\[MMB\]       probe\.r r4=r5,r6
     1ab6:	40 30 14 72 08 00 	            probe\.w r4=r5,r6
@@ -1323,6 +1323,36 @@ Disassembly of section \.text:
     1b60:	18 20 00 0a 1a 04 	\[MMB\]       thash r4=r5
     1b66:	40 00 14 36 08 00 	            ttag r4=r5
     1b6c:	00 00 00 20       	            nop\.b 0x0
-    1b70:	19 20 00 0a 1e 04 	\[MMB\]       tpa r4=r5
+    1b70:	18 20 00 0a 1e 04 	\[MMB\]       tpa r4=r5
     1b76:	40 00 14 3e 08 00 	            tak r4=r5
-    1b7c:	00 00 00 20       	            nop\.b 0x0;;
+    1b7c:	00 00 00 20       	            nop\.b 0x0
+    1b80:	18 00 00 80 01 00 	\[MMB\]       hint\.m 0x0
+    1b86:	00 00 00 03 00 00 	            hint\.m 0x0
+    1b8c:	00 00 00 20       	            nop\.b 0x0
+    1b90:	18 f8 ff 8f 01 00 	\[MMB\]       hint\.m 0x1ffff
+    1b96:	40 30 14 02 22 00 	            cmp8xchg16\.acq r4=\[r5\],r6,ar\.csd,ar\.ccv
+    1b9c:	00 00 00 20       	            nop\.b 0x0
+    1ba0:	18 20 18 0a 03 11 	\[MMB\]       cmp8xchg16\.acq\.nt1 r4=\[r5\],r6,ar\.csd,ar\.ccv
+    1ba6:	40 30 14 0e 22 00 	            cmp8xchg16\.acq\.nta r4=\[r5\],r6,ar\.csd,ar\.ccv
+    1bac:	00 00 00 20       	            nop\.b 0x0
+    1bb0:	18 20 18 0a 21 11 	\[MMB\]       cmp8xchg16\.rel r4=\[r5\],r6,ar\.csd,ar\.ccv
+    1bb6:	40 30 14 46 22 00 	            cmp8xchg16\.rel\.nt1 r4=\[r5\],r6,ar\.csd,ar\.ccv
+    1bbc:	00 00 00 20       	            nop\.b 0x0
+    1bc0:	18 20 18 0a 27 11 	\[MMB\]       cmp8xchg16\.rel\.nta r4=\[r5\],r6,ar\.csd,ar\.ccv
+    1bc6:	00 00 10 60 0c 00 	            fc\.i r4
+    1bcc:	00 00 00 20       	            nop\.b 0x0
+    1bd0:	18 20 00 0a 41 11 	\[MMB\]       ld16 r4,ar\.csd=\[r5\]
+    1bd6:	40 00 14 86 22 00 	            ld16\.nt1 r4,ar\.csd=\[r5\]
+    1bdc:	00 00 00 20       	            nop\.b 0x0
+    1be0:	18 20 00 0a 47 11 	\[MMB\]       ld16\.nta r4,ar\.csd=\[r5\]
+    1be6:	40 00 14 c2 22 00 	            ld16\.acq r4,ar\.csd=\[r5\]
+    1bec:	00 00 00 20       	            nop\.b 0x0
+    1bf0:	18 20 00 0a 63 11 	\[MMB\]       ld16\.acq\.nt1 r4,ar\.csd=\[r5\]
+    1bf6:	40 00 14 ce 22 00 	            ld16\.acq\.nta r4,ar\.csd=\[r5\]
+    1bfc:	00 00 00 20       	            nop\.b 0x0
+    1c00:	18 00 14 08 81 11 	\[MMB\]       st16 \[r4\]=r5,ar\.csd
+    1c06:	00 28 10 0e 23 00 	            st16\.nta \[r4\]=r5,ar\.csd
+    1c0c:	00 00 00 20       	            nop\.b 0x0
+    1c10:	19 00 14 08 a1 11 	\[MMB\]       st16\.rel \[r4\]=r5,ar\.csd
+    1c16:	00 28 10 4e 23 00 	            st16\.rel\.nta \[r4\]=r5,ar\.csd
+    1c1c:	00 00 00 20       	            nop\.b 0x0;;

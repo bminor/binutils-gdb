@@ -1,7 +1,6 @@
 .text
 	.type _start,@function
 _start:
-
 	ld1 r4 = [r5]
 	ld1 r4 = [r5], r6
 	ld1 r4 = [r5], -256
@@ -976,7 +975,7 @@ _start:
 	break.m 0x1ffff
 
 	nop.m 0
-	break.m 0x1ffff
+	nop.m 0x1ffff
 
 	probe.r r4 = r5, r6
 	probe.w r4 = r5, r6
@@ -1007,3 +1006,32 @@ _start:
 	tpa r4 = r5
 	tak r4 = r5
 
+	# instructions added by SDM2.1:
+
+	hint.m 0
+	hint.m @pause
+	hint.m 0x1ffff
+
+	cmp8xchg16.acq r4 = [r5], r6, ar25, ar.ccv
+	cmp8xchg16.acq.nt1 r4 = [r5], r6, ar.csd, ar.ccv
+	cmp8xchg16.acq.nta r4 = [r5], r6, ar.csd, ar.ccv
+
+	cmp8xchg16.rel r4 = [r5], r6, ar.csd, ar.ccv
+	cmp8xchg16.rel.nt1 r4 = [r5], r6, ar.csd, ar.ccv
+	cmp8xchg16.rel.nta r4 = [r5], r6, ar.csd, ar.ccv
+
+	fc.i r4
+
+	ld16 r4, ar25 = [r5]
+	ld16.nt1 r4, ar.csd = [r5]
+	ld16.nta r4, ar.csd = [r5]
+
+	ld16.acq r4, ar25 = [r5]
+	ld16.acq.nt1 r4, ar.csd = [r5]
+	ld16.acq.nta r4, ar.csd = [r5]
+
+	st16 [r4] = r5, ar25
+	st16.nta [r4] = r5, ar.csd
+
+	st16.rel [r4] = r5, ar.csd
+	st16.rel.nta [r4] = r5, ar.csd

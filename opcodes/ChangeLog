@@ -1,3 +1,24 @@
+2002-12-04  David Mosberger  <davidm@hpl.hp.com>
+
+	* ia64-opc-d.c (ia64_opcodes_d): Add "hint" instruction.
+	* ia64-opc-b.c: Add "hint.b" instruction.
+	* ia64-opc-f.c: Add "hint.f" instruction.
+	* ia64-opc-i.c: Add "hint.i" instruction.
+	* ia64-opc-m.c: Add "hint.m", "fc.i", "ld16", "st16", and
+	"cmp8xchg16" instructions.
+	* ia64-opc-x.c: Add "hint.x" instruction.
+
+	* ia64-opc.h (AR_CSD): New macro.
+
+	* ia64-ic.tbl: Update according to SDM2.1.
+	* ia64-raw.tbl: Ditto.
+	* ia64-waw.tbl: Ditto.
+
+	* ia64-gen.c (in_iclass): Handle "hint" like "nop".
+	(lookup_regindex): Recognize AR[FCR], AR[EFLAG], AR[CSD],
+	AR[SSD], AR[CFLG], AR[FSR], AR[FIR], and AR[FDR].
+	* ia64-asmtab.c: Regenerate.
+	
 2002-11-25  Aldy Hernandez  <aldyh@redhat.com>
 
 	* ppc-opc.c: Remove evmwlssf, evmwlssfa, evmwlsmf, evmwlsmfa,

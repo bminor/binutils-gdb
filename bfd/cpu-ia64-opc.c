@@ -418,6 +418,7 @@ const struct ia64_operand elf64_ia64_operands[IA64_OPND_COUNT] =
   {
     /* constants: */
     { CST, ins_const, ext_const, "NIL",		{{ 0, 0}}, 0, "<none>" },
+    { CST, ins_const, ext_const, "ar.csd",	{{ 0, 0}}, 0, "ar.csd" },
     { CST, ins_const, ext_const, "ar.ccv",	{{ 0, 0}}, 0, "ar.ccv" },
     { CST, ins_const, ext_const, "ar.pfs",	{{ 0, 0}}, 0, "ar.pfs" },
     { CST, ins_const, ext_const, "1",		{{ 0, 0}}, 0, "1" },

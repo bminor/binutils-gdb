@@ -1,3 +1,7 @@
+2002-12-04  David Mosberger  <davidm@hpl.hp.com>
+
+	* cpu-ia64-opc.c: Add operand constant "ar.csd".
+
 2002-12-04  H.J. Lu <hjl@gnu.org>
 
 	* elfxx-ia64.c (get_local_sym_hash): Use section ID instead of

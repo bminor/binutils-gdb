@@ -86,6 +86,8 @@
 #define OpX3(a,b)		(bOp (a) | bX3 (b)), (mOp | mX3)
 #define OpX3X6(a,b,c)		(bOp (a) | bX3 (b) | bX6(c)), \
 				(mOp | mX3 | mX6)
+#define OpX3X6Yb(a,b,c,d)	(bOp (a) | bX3 (b) | bX6(c) | bYb(d)), \
+				(mOp | mX3 | mX6 | mYb)
 #define OpX3XbIhWh(a,b,c,d,e) \
   (bOp (a) | bX3 (b) | bXb (c) | bIh (d) | bWh (e)), \
   (mOp | mX3 | mXb | mIh | mWh)
@@ -102,7 +104,8 @@ struct ia64_opcode ia64_opcodes_i[] =
     /* I-type instruction encodings (sorted according to major opcode).  */
 
     {"break.i",	I0, OpX3X6 (0, 0, 0x00), {IMMU21}, X_IN_MLX, 0, NULL},
-    {"nop.i",	I0, OpX3X6 (0, 0, 0x01), {IMMU21}, X_IN_MLX, 0, NULL},
+    {"nop.i",	I0, OpX3X6Yb (0, 0, 0x01, 0), {IMMU21}, X_IN_MLX, 0, NULL},
+    {"hint.i",	I0, OpX3X6Yb (0, 0, 0x01, 1), {IMMU21}, X_IN_MLX, 0, NULL},
     {"chk.s.i",	I0, OpX3 (0, 1), {R2, TGT25b}, EMPTY},
 
     {"mov", I, OpX3XbIhWhTag13 (0, 7, 0, 0, 1, 0), {B1, R2}, PSEUDO, 0, NULL},

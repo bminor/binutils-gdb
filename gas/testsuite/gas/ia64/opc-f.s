@@ -605,3 +605,8 @@ _start:
 	break.f 0
 	nop.f 0;;
 
+	# instructions added by SDM2.1:
+
+	hint.f 0
+	hint.f @pause
+	hint.f 0x1ffff

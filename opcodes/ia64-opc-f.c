@@ -36,6 +36,7 @@
 #define bXb(x)	(((ia64_insn) ((x) & 0x1)) << 33)
 #define bX2(x)	(((ia64_insn) ((x) & 0x3)) << 34)
 #define bX6(x)	(((ia64_insn) ((x) & 0x3f)) << 27)
+#define bY(x)	(((ia64_insn) ((x) & 0x1)) << 26)
 
 #define mF2	bF2 (-1)
 #define mF4	bF4 (-1)
@@ -48,6 +49,7 @@
 #define mXb	bXb (-1)
 #define mX2	bX2 (-1)
 #define mX6	bX6 (-1)
+#define mY	bY (-1)
 
 #define OpXa(a,b)	(bOp (a) | bXa (b)), (mOp | mXa)
 #define OpXaSf(a,b,c)	(bOp (a) | bXa (b) | bSf (c)), (mOp | mXa | mSf)
@@ -69,6 +71,8 @@
 	(bOp (a) | bXb (b) | bQ (c) | bSf (d)), (mOp | mXb | mQ | mSf)
 #define OpXbX6(a,b,c) \
 	(bOp (a) | bXb (b) | bX6 (c)), (mOp | mXb | mX6)
+#define OpXbX6Y(a,b,c,d) \
+	(bOp (a) | bXb (b) | bX6 (c) | bY (d)), (mOp | mXb | mX6 | mY)
 #define OpXbX6F2(a,b,c,d) \
 	(bOp (a) | bXb (b) | bX6 (c) | bF2 (d)), (mOp | mXb | mX6 | mF2)
 #define OpXbX6Sf(a,b,c,d) \
@@ -177,7 +181,8 @@ struct ia64_opcode ia64_opcodes_f[] =
     {"fchkf.s3",	f0, OpXbX6Sf (0, 0, 0x08, 3), {TGT25}, EMPTY},
 
     {"break.f",		f0, OpXbX6 (0, 0, 0x00), {IMMU21}, EMPTY},
-    {"nop.f",		f0, OpXbX6 (0, 0, 0x01), {IMMU21}, EMPTY},
+    {"nop.f",		f0, OpXbX6Y (0, 0, 0x01, 0), {IMMU21}, EMPTY},
+    {"hint.f",		f0, OpXbX6Y (0, 0, 0x01, 1), {IMMU21}, EMPTY},
 
     {"fprcpa.s0",	f2, OpXbQSf (1, 1, 0, 0), {F1, P2, F2, F3}, EMPTY},
     {"fprcpa",		f2, OpXbQSf (1, 1, 0, 0), {F1, P2, F2, F3}, PSEUDO, 0, NULL},

@@ -1012,3 +1012,9 @@ Disassembly of section .text:
     2be0:	17 00 00 00 00 08 	\[BBB\]       nop\.b 0x0
     2be6:	00 00 00 00 10 00 	            nop\.b 0x0
     2bec:	00 00 40 00       	            epc;;
+    2bf0:	16 f8 ff 0f 00 00 	\[BBB\]       break\.b 0x1ffff
+    2bf6:	00 00 00 02 10 e0 	            hint\.b 0x0
+    2bfc:	ff 3f 04 20       	            hint\.b 0x1ffff
+    2c00:	1d 00 00 00 01 00 	\[MFB\]       nop\.m 0x0
+    2c06:	00 00 00 02 00 e0 	            nop\.f 0x0
+    2c0c:	ff 3f 00 20       	            nop\.b 0x1ffff;;

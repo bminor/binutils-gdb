@@ -23,7 +23,16 @@ Disassembly of section .text:
   4e:	00 60 04 00 
   52:	00 00 01 c0 ff ff 	\[MLX\]       nop\.m 0x0
   58:	ff ff 7f 80 f0 f7 	            movl r4=0xffffffffffffffff
-  5e:	ff 6f 05 00 
+  5e:	ff 6f 04 00 
   62:	00 00 01 80 90 78 	\[MLX\]       nop\.m 0x0
-  68:	56 34 12 80 f0 76 	            movl r4=0x1234567890abcdef;;
-  6e:	6d 66 00 00 
+  68:	56 34 12 80 f0 76 	            movl r4=0x1234567890abcdef
+  6e:	6d 66 04 00 
+  72:	00 00 01 00 00 00 	\[MLX\]       nop\.m 0x0
+  78:	00 00 00 00 00 00 	            hint\.x 0x0
+  7e:	06 00 04 00 
+  82:	00 00 01 00 00 00 	\[MLX\]       nop\.m 0x0
+  88:	00 00 00 00 00 00 	            hint\.x 0x0
+  8e:	06 00 05 00 
+  92:	00 00 01 c0 ff ff 	\[MLX\]       nop\.m 0x0
+  98:	ff ff 7f e0 ff ff 	            hint\.x 0x3fffffffffffffff;;
+  9e:	07 08 00 00 

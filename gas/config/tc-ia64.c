@@ -519,6 +519,9 @@ pseudo_func[] =
 
     { "natval",	PSEUDO_FUNC_CONST, { 0x100 } }, /* old usage */
 
+    /* hint constants: */
+    { "pause",	PSEUDO_FUNC_CONST, { 0x0 } },
+
     /* unwind-related constants:  */
     { "svr4",	PSEUDO_FUNC_CONST, { 0 } },
     { "hpux",	PSEUDO_FUNC_CONST, { 1 } },
@@ -5032,6 +5035,11 @@ operand_match (idesc, index, e)
 	return OPERAND_MATCH;
       break;
 
+    case IA64_OPND_AR_CSD:
+      if (e->X_op == O_register && e->X_add_number == REG_AR + 25)
+	return OPERAND_MATCH;
+      break;
+
     case IA64_OPND_AR_PFS:
       if (e->X_op == O_register && e->X_add_number == REG_AR + 64)
 	return OPERAND_MATCH;
@@ -6156,10 +6164,11 @@ emit_one_bundle ()
 	}
       required_unit = ia64_templ_desc[template].exec_unit[i];
 
-      /* resolve dynamic opcodes such as "break" and "nop":  */
+      /* resolve dynamic opcodes such as "break", "hint", and "nop":  */
       if (idesc->type == IA64_TYPE_DYN)
 	{
 	  if ((strcmp (idesc->name, "nop") == 0)
+	      || (strcmp (idesc->name, "hint") == 0)
 	      || (strcmp (idesc->name, "break") == 0))
 	    insn_unit = required_unit;
 	  else if (strcmp (idesc->name, "chk.s") == 0)

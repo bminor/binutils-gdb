@@ -1,3 +1,16 @@
+2002-12-04  David Mosberger  <davidm@hpl.hp.com>
+
+	* gas/ia64/opc-b.d: Update for instructions added by SDM2.1.
+	* gas/ia64/opc-b.s: Ditto.
+	* gas/ia64/opc-f.d: Ditto.
+	* gas/ia64/opc-f.s: Ditto.
+	* gas/ia64/opc-i.d: Ditto.
+	* gas/ia64/opc-i.s: Ditto.
+	* gas/ia64/opc-m.d: Ditto.
+	* gas/ia64/opc-m.s: Ditto.
+	* gas/ia64/opc-x.d: Ditto.
+	* gas/ia64/opc-x.s: Ditto.
+
 2002-12-03  Richard Henderson  <rth@redhat.com>
 
 	* gas/ia64/ldxmov-1.[ds]: New.

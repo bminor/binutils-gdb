@@ -33,6 +33,8 @@
 #define bX4(x)		(((ia64_insn) ((x) & 0xf)) << 27)
 #define bX6a(x)		(((ia64_insn) ((x) & 0x3f)) << 30)
 #define bX6b(x)		(((ia64_insn) ((x) & 0x3f)) << 27)
+#define bX7(x)		(((ia64_insn) ((x) & 0x1)) << 36)	/* note: alias for bM() */
+#define bY(x)		(((ia64_insn) ((x) & 0x1)) << 26)
 #define bHint(x)	(((ia64_insn) ((x) & 0x3)) << 28)
 
 #define mM	bM (-1)
@@ -42,15 +44,21 @@
 #define mX4	bX4 (-1)
 #define mX6a	bX6a (-1)
 #define mX6b	bX6b (-1)
+#define mX7	bX7 (-1)
+#define mY	bY (-1)
 #define mHint	bHint (-1)
 
 #define OpX3(a,b) 		(bOp (a) | bX3 (b)), (mOp | mX3)
 #define OpX3X6b(a,b,c) 		(bOp (a) | bX3 (b) | bX6b (c)), \
 				(mOp | mX3 | mX6b)
+#define OpX3X6bX7(a,b,c,d)	(bOp (a) | bX3 (b) | bX6b (c) | bX7 (d)), \
+				(mOp | mX3 | mX6b | mX7)
 #define OpX3X4(a,b,c)	 	(bOp (a) | bX3 (b) | bX4 (c)), \
 				(mOp | mX3 | mX4)
 #define OpX3X4X2(a,b,c,d) 	(bOp (a) | bX3 (b) | bX4 (c) | bX2 (d)), \
 				(mOp | mX3 | mX4 | mX2)
+#define OpX3X4X2Y(a,b,c,d,e) 	(bOp (a) | bX3 (b) | bX4 (c) | bX2 (d) | bY (e)), \
+				(mOp | mX3 | mX4 | mX2 | mY)
 #define OpX6aHint(a,b,c) 	(bOp (a) | bX6a (b) | bHint (c)), \
 				(mOp | mX6a | mHint)
 #define OpXX6aHint(a,b,c,d) 	(bOp (a) | bX (b) | bX6a (c) | bHint (d)), \
@@ -88,7 +96,8 @@ struct ia64_opcode ia64_opcodes_m[] =
     {"mov.m",		M, OpX3X4X2 (0, 0, 8, 2), {AR3, IMM8}, EMPTY},
 
     {"break.m",		M0, OpX3X4X2 (0, 0, 0, 0), {IMMU21}, EMPTY},
-    {"nop.m",		M0, OpX3X4X2 (0, 0, 1, 0), {IMMU21}, EMPTY},
+    {"nop.m",		M0, OpX3X4X2Y (0, 0, 1, 0, 0), {IMMU21}, EMPTY},
+    {"hint.m",		M0, OpX3X4X2Y (0, 0, 1, 0, 1), {IMMU21}, EMPTY},
 
     {"sum",		M0, OpX3X4 (0, 0, 4), {IMMU24}, EMPTY},
     {"rum",		M0, OpX3X4 (0, 0, 5), {IMMU24}, EMPTY},
@@ -149,7 +158,8 @@ struct ia64_opcode ia64_opcodes_m[] =
     {"chk.s.m",	M0, OpX3 (1, 1), {R2, TGT25b}, EMPTY},
     {"chk.s",	M0, OpX3 (1, 3), {F2, TGT25b}, EMPTY},
 
-    {"fc",	M0, OpX3X6b (1, 0, 0x30), {R3}, EMPTY},
+    {"fc",	M0, OpX3X6bX7 (1, 0, 0x30, 0), {R3}, EMPTY},
+    {"fc.i",	M0, OpX3X6bX7 (1, 0, 0x30, 1), {R3}, EMPTY},
     {"ptc.e",	M0, OpX3X6b (1, 0, 0x34), {R3}, PRIV, 0, NULL},
 
     /* integer load */
@@ -165,6 +175,9 @@ struct ia64_opcode ia64_opcodes_m[] =
     {"ld8",		M, OpMXX6aHint (4, 0, 0, 0x03, 0), {R1, MR3}, EMPTY},
     {"ld8.nt1",		M, OpMXX6aHint (4, 0, 0, 0x03, 1), {R1, MR3}, EMPTY},
     {"ld8.nta",		M, OpMXX6aHint (4, 0, 0, 0x03, 3), {R1, MR3}, EMPTY},
+    {"ld16",		M2, OpMXX6aHint (4, 0, 1, 0x28, 0), {R1, AR_CSD, MR3}, EMPTY},
+    {"ld16.nt1",	M2, OpMXX6aHint (4, 0, 1, 0x28, 1), {R1, AR_CSD, MR3}, EMPTY},
+    {"ld16.nta",	M2, OpMXX6aHint (4, 0, 1, 0x28, 3), {R1, AR_CSD, MR3}, EMPTY},
     {"ld1.s",		M, OpMXX6aHint (4, 0, 0, 0x04, 0), {R1, MR3}, EMPTY},
     {"ld1.s.nt1",	M, OpMXX6aHint (4, 0, 0, 0x04, 1), {R1, MR3}, EMPTY},
     {"ld1.s.nta",	M, OpMXX6aHint (4, 0, 0, 0x04, 3), {R1, MR3}, EMPTY},
@@ -225,6 +238,9 @@ struct ia64_opcode ia64_opcodes_m[] =
     {"ld8.acq",		M, OpMXX6aHint (4, 0, 0, 0x17, 0), {R1, MR3}, EMPTY},
     {"ld8.acq.nt1",	M, OpMXX6aHint (4, 0, 0, 0x17, 1), {R1, MR3}, EMPTY},
     {"ld8.acq.nta",	M, OpMXX6aHint (4, 0, 0, 0x17, 3), {R1, MR3}, EMPTY},
+    {"ld16.acq",	M2, OpMXX6aHint (4, 0, 1, 0x2c, 0), {R1, AR_CSD, MR3}, EMPTY},
+    {"ld16.acq.nt1",	M2, OpMXX6aHint (4, 0, 1, 0x2c, 1), {R1, AR_CSD, MR3}, EMPTY},
+    {"ld16.acq.nta",	M2, OpMXX6aHint (4, 0, 1, 0x2c, 3), {R1, AR_CSD, MR3}, EMPTY},
     {"ld8.fill",	M, OpMXX6aHint (4, 0, 0, 0x1b, 0), {R1, MR3}, EMPTY},
     {"ld8.fill.nt1",	M, OpMXX6aHint (4, 0, 0, 0x1b, 1), {R1, MR3}, EMPTY},
     {"ld8.fill.nta",	M, OpMXX6aHint (4, 0, 0, 0x1b, 3), {R1, MR3}, EMPTY},
@@ -392,6 +408,8 @@ struct ia64_opcode ia64_opcodes_m[] =
     {"st4.nta",		M, OpMXX6aHint (4, 0, 0, 0x32, 3), {MR3, R2}, EMPTY},
     {"st8",		M, OpMXX6aHint (4, 0, 0, 0x33, 0), {MR3, R2}, EMPTY},
     {"st8.nta",		M, OpMXX6aHint (4, 0, 0, 0x33, 3), {MR3, R2}, EMPTY},
+    {"st16",		M, OpMXX6aHint (4, 0, 1, 0x30, 0), {MR3, R2, AR_CSD}, EMPTY},
+    {"st16.nta",	M, OpMXX6aHint (4, 0, 1, 0x30, 3), {MR3, R2, AR_CSD}, EMPTY},
     {"st1.rel",		M, OpMXX6aHint (4, 0, 0, 0x34, 0), {MR3, R2}, EMPTY},
     {"st1.rel.nta",	M, OpMXX6aHint (4, 0, 0, 0x34, 3), {MR3, R2}, EMPTY},
     {"st2.rel",		M, OpMXX6aHint (4, 0, 0, 0x35, 0), {MR3, R2}, EMPTY},
@@ -400,10 +418,13 @@ struct ia64_opcode ia64_opcodes_m[] =
     {"st4.rel.nta",	M, OpMXX6aHint (4, 0, 0, 0x36, 3), {MR3, R2}, EMPTY},
     {"st8.rel",		M, OpMXX6aHint (4, 0, 0, 0x37, 0), {MR3, R2}, EMPTY},
     {"st8.rel.nta",	M, OpMXX6aHint (4, 0, 0, 0x37, 3), {MR3, R2}, EMPTY},
+    {"st16.rel",	M, OpMXX6aHint (4, 0, 1, 0x34, 0), {MR3, R2, AR_CSD}, EMPTY},
+    {"st16.rel.nta",	M, OpMXX6aHint (4, 0, 1, 0x34, 3), {MR3, R2, AR_CSD}, EMPTY},
     {"st8.spill",	M, OpMXX6aHint (4, 0, 0, 0x3b, 0), {MR3, R2}, EMPTY},
     {"st8.spill.nta",	M, OpMXX6aHint (4, 0, 0, 0x3b, 3), {MR3, R2}, EMPTY},
 
 #define CMPXCHG(c,h)	M, OpMXX6aHint (4, 0, 1, c, h), {R1, MR3, R2, AR_CCV}, EMPTY
+#define CMPXCHG16(c,h)	M, OpMXX6aHint (4, 0, 1, c, h), {R1, MR3, R2, AR_CSD, AR_CCV}, EMPTY
     {"cmpxchg1.acq",		CMPXCHG (0x00, 0)},
     {"cmpxchg1.acq.nt1",	CMPXCHG (0x00, 1)},
     {"cmpxchg1.acq.nta",	CMPXCHG (0x00, 3)},
@@ -416,6 +437,9 @@ struct ia64_opcode ia64_opcodes_m[] =
     {"cmpxchg8.acq",		CMPXCHG (0x03, 0)},
     {"cmpxchg8.acq.nt1",	CMPXCHG (0x03, 1)},
     {"cmpxchg8.acq.nta",	CMPXCHG (0x03, 3)},
+    {"cmp8xchg16.acq",		CMPXCHG16 (0x20, 0)},
+    {"cmp8xchg16.acq.nt1",	CMPXCHG16 (0x20, 1)},
+    {"cmp8xchg16.acq.nta",	CMPXCHG16 (0x20, 3)},
     {"cmpxchg1.rel",		CMPXCHG (0x04, 0)},
     {"cmpxchg1.rel.nt1",	CMPXCHG (0x04, 1)},
     {"cmpxchg1.rel.nta",	CMPXCHG (0x04, 3)},
@@ -428,7 +452,11 @@ struct ia64_opcode ia64_opcodes_m[] =
     {"cmpxchg8.rel",		CMPXCHG (0x07, 0)},
     {"cmpxchg8.rel.nt1",	CMPXCHG (0x07, 1)},
     {"cmpxchg8.rel.nta",	CMPXCHG (0x07, 3)},
+    {"cmp8xchg16.rel",		CMPXCHG16 (0x24, 0)},
+    {"cmp8xchg16.rel.nt1",	CMPXCHG16 (0x24, 1)},
+    {"cmp8xchg16.rel.nta",	CMPXCHG16 (0x24, 3)},
 #undef CMPXCHG
+#undef CMPXCHG16
     {"xchg1",		  M, OpMXX6aHint (4, 0, 1, 0x08, 0), {R1, MR3, R2}, EMPTY},
     {"xchg1.nt1",	  M, OpMXX6aHint (4, 0, 1, 0x08, 1), {R1, MR3, R2}, EMPTY},
     {"xchg1.nta",	  M, OpMXX6aHint (4, 0, 1, 0x08, 3), {R1, MR3, R2}, EMPTY},
