@@ -1603,8 +1603,6 @@ init_page_info (void)
       chars_per_line = 80;
 
 #if !defined (_WIN32)
-      /* No termcap under MPW, although might be cool to do something
-         by looking at worksheet or console window sizes. */
       /* Initialize the screen height and width from termcap.  */
       {
 	char *termtype = getenv ("TERM");
@@ -1640,7 +1638,7 @@ init_page_info (void)
 	      }
 	  }
       }
-#endif /* MPW */
+#endif
 
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
 

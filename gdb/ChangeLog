@@ -1,5 +1,13 @@
 2003-02-04  Andrew Cagney  <ac131313@redhat.com>
 
+	* values.c: Delete code conditional on IS_TRAPPED_INTERNALVAR.
+	* TODO: Delete reference to IS_TRAPPED_INTERNALVAR.
+
+	* utils.c (init_page_info): Delete reference to MPW in comments.
+	* main.c (captured_main): Delete #ifdef MPW.
+
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* NEWS: Note that the m32r-*-elf* is obsolete. 
 	* monitor.c (monitor_expect): Obsolete reference to m32r.
 	* configure.tgt: Mark m32r-*-elf* as obsolete.

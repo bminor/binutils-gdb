@@ -167,11 +167,6 @@ captured_main (void *data)
 
   START_PROGRESS (argv[0], 0);
 
-#ifdef MPW
-  /* Do all Mac-specific setup. */
-  mac_init ();
-#endif /* MPW */
-
   /* This needs to happen before the first use of malloc.  */
   init_malloc (NULL);
 
