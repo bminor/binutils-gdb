@@ -47,7 +47,6 @@ armcoff.sc
 delta68.sc
 ebmon29k.sc
 elf.sc
-elfarm.sc
 elfd10v.sc
 elfd30v.sc
 elfppc.sc
