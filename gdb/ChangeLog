@@ -1,3 +1,9 @@
+2004-10-13  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-tdep.c (rs6000_push_dummy_call): Replace references to
+	``deprecated_registers'' with equivalent code.  Use gdb_assert()
+	instead of explicit test and print statement.
+
 2004-10-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-nat.c: Include "inf-ptrace.h".
