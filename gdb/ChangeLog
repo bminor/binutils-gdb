@@ -1,3 +1,9 @@
+start-sanitize-tx49
+Wed Oct 29 17:45:43 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* configure.tgt: Add tx49 configury based on 4300.
+
+end-sanitize-tx49
 Wed Oct 29 15:53:24 1997  David Taylor  <taylor@texas.cygnus.com>
 
 	* solib.c (solib_break_names): add entry for Solaris 2.6 run
