@@ -1,3 +1,7 @@
+Thu May  6 21:08:55 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* solib.c (clear_solib): Don't close bfd if it is NULL.
+
 Thu May  6 20:55:35 1993  Fred Fish  (fnf@cygnus.com)
 
 	* core.c (dis_asm_read_memory):  Cast second arg of
