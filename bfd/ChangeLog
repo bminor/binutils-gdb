@@ -1,3 +1,8 @@
+2001-03-07  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Fix handling of
+	some relocation values.
+
 2001-03-06  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Clear bit zero

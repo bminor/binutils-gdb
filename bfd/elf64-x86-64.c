@@ -1194,7 +1194,41 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      sec = h->root.u.def.section;
-	      if (sec->output_section == NULL)
+	      if (r_type == R_X86_64_GOTPCREL
+		  || (r_type = R_X86_64_PLT32
+		      && splt != NULL
+		      && h->plt.offset != (bfd_vma) -1)
+		  || (r_type = R_X86_64_GOT32
+		      && elf_hash_table (info)->dynamic_sections_created
+		      && (!info->shared
+			  || (! info->symbolic && h->dynindx != -1)
+			  || (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
+		  || (info->shared
+		      && ((! info->symbolic && h->dynindx != -1)
+			  || (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
+		      && ( r_type == R_X86_64_8 ||
+			   r_type == R_X86_64_16 ||
+                           r_type == R_X86_64_32 ||
+			   r_type == R_X86_64_64 ||
+                           r_type == R_X86_64_PC16 ||
+			   r_type == R_X86_64_PC32)
+                      && ((input_section->flags & SEC_ALLOC) != 0
+                          /* DWARF will emit R_X86_64_32 relocations in its
+                             sections against symbols defined externally
+                             in shared libraries.  We can't do anything
+                             with them here.  */
+                          || ((input_section->flags & SEC_DEBUGGING) != 0
+			      && (h->elf_link_hash_flags
+				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))))
+		{
+		  /* In these cases, we don't need the relocation
+                     value.  We check specially because in some
+                     obscure cases sec->output_section will be NULL.  */
+		  relocation = 0;
+		}
+	      else if (sec->output_section == NULL)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
