@@ -1,5 +1,7 @@
 Tue Jul 13 11:15:15 1993  Fred Fish  (fnf@cygnus.com)
 
+	* elfread.c:  Remove notice about file still being under
+	construction.
 	* Makefile.in (ultra3-xdep.o, umax-xdep.o):  Add missing ')'.
 
 Mon Jul 12 17:46:35 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)

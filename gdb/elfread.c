@@ -18,20 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/************************************************************************
- *									*
- *				NOTICE					*
- *									*
- * This file is still under construction.  When it is complete, this	*
- * notice will be removed.  Until then, direct any questions or changes	*
- * to Fred Fish at Cygnus Support (fnf@cygnus.com)			*
- *									* 
- * FIXME	Still needs support for shared libraries.		*
- * FIXME	Still needs support for core files.			*
- * FIXME	The ".debug" and ".line" section names are hardwired.	*
- *									*
- ************************************************************************/
-
 #include "defs.h"
 #include "bfd.h"
 #include "libbfd.h"		/* For bfd_elf_find_section */
