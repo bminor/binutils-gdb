@@ -1,3 +1,11 @@
+1999-06-03  Nick Clifton  <nickc@cygnus.com>
+
+	* elfxx-target.h (ELF_MAXPAGESIZE): Default to 0x1000 not 1.
+
+1999-06-03  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf32-arm.h: Fix typo: change ELF_MAXPAGE_SIZE to ELF_MAXPAGESIZE.
+
 Fri Jun  4 10:05:11 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* elf.c (elf_fake_sections): Undo change of 1999-05-10.

@@ -1144,13 +1144,14 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 				      sreloc->contents)
 				     + sreloc->reloc_count));
 	  ++sreloc->reloc_count;
-
+	  
 	  /* If this reloc is against an external symbol, we do not want to
 	     fiddle with the addend.  Otherwise, we need to include the symbol
 	     value so that it becomes an addend for the dynamic reloc. */
 	  if (! relocate)
 	    return bfd_reloc_ok;
 
+	  
 	  return _bfd_final_link_relocate (howto, input_bfd, input_section,
 					   contents, rel->r_offset, value,
 					   (bfd_vma) 0);
@@ -1223,7 +1224,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 		    value -= 8;
 		}
 	    }
-
+	  
 	  value >>= howto->rightshift;
 	  value &= howto->dst_mask;
 	  value |= (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
@@ -1334,11 +1335,11 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	relocation -= (input_section->output_section->vma
 		       + input_section->output_offset
 		       + rel->r_offset);
-
+	
 	if (! globals->no_pipeline_knowledge)
 	  {
 	    Elf_Internal_Ehdr * i_ehdrp; /* Elf file header, internal form */
-
+	    
 	    i_ehdrp = elf_elfheader (input_bfd);
 
 	    /* Previous versions of this code also used to add in the pipline
@@ -1400,7 +1401,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       BFD_ASSERT (sgot != NULL);
       if (sgot == NULL)
         return bfd_reloc_notsupported;
-
+      
       /* Note that sgot->output_offset is not involved in this
          calculation.  We always want the start of .got.  If we
          define _GLOBAL_OFFSET_TABLE in a different way, as is
@@ -1505,7 +1506,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
 	  value = sgot->output_offset + off;
 	}
-
+      
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
       				       contents, rel->r_offset, value,
       				       (bfd_vma) 0);
@@ -2111,12 +2112,12 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
   bfd *                         dynobj;
   asection * sgot, *srelgot, *sreloc;
   bfd_vma * local_got_offsets;
-
+  
   if (info->relocateable)
     return true;
-
+  
   sgot = srelgot = sreloc = NULL;
-
+  
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (abfd);
 
@@ -2125,19 +2126,19 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
   sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
   if (!elf_bad_symtab (abfd))
     sym_hashes_end -= symtab_hdr->sh_info;
-
+  
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
       struct elf_link_hash_entry *h;
       unsigned long r_symndx;
-
+      
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
         h = NULL;
       else
         h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-
+      
       /* Some relocs require a global offset table.  */
       if (dynobj == NULL)
 	{
@@ -2171,7 +2172,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 	        && (h != NULL || info->shared))
 	      {
 	        srelgot = bfd_get_section_by_name (dynobj, ".rel.got");
-
+		
 	        /* If no got relocation section, make one and initialize.  */
 	        if (srelgot == NULL)
 		  {
@@ -2356,7 +2357,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
           if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return false;
           break;
-
+	  
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_ARM_GNU_VTENTRY:
