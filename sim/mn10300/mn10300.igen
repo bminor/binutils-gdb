@@ -1822,7 +1822,7 @@
   if ( AM1 == AN0 )
     {
       //    op_B000 ();
-      genericCmp(EXTEND8 (IMEM8_IMMED (cia, 1)),
+      genericCmp(IMEM8_IMMED (cia, 1),
 		 State.regs[REG_A0 + AN0]);
       nia = cia + 2;
     }
