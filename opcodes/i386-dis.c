@@ -91,6 +91,10 @@ static void OP_EM (int, int);
 static void OP_EX (int, int);
 static void OP_MS (int, int);
 static void OP_XS (int, int);
+static void OP_M (int, int);
+static void OP_0fae (int, int);
+static void OP_0f07 (int, int);
+static void NOP_Fixup (int, int);
 static void OP_3DNowSuffix (int, int);
 static void OP_SIMD_Suffix (int, int);
 static void SIMD_Fixup (int, int);
@@ -198,8 +202,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define indirEv OP_indirE, v_mode
 #define Ew OP_E, w_mode
 #define Ma OP_E, v_mode
-#define M OP_E, 0		/* lea, lgdt, etc. */
-#define Mp OP_E, 0		/* 32 or 48 bit memory operand for LDS, LES etc */
+#define M OP_M, 0		/* lea, lgdt, etc. */
+#define Mp OP_M, 0		/* 32 or 48 bit memory operand for LDS, LES etc */
 #define Gb OP_G, b_mode
 #define Gv OP_G, v_mode
 #define Gd OP_G, d_mode
@@ -292,7 +296,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EX OP_EX, v_mode
 #define MS OP_MS, v_mode
 #define XS OP_XS, v_mode
-#define None OP_E, 0
 #define OPSUF OP_3DNowSuffix, 0
 #define OPSIMD OP_SIMD_Suffix, 0
 
@@ -364,7 +367,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define USE_GROUPS 2
 #define USE_PREFIX_USER_TABLE 3
 #define X86_64_SPECIAL 4
-#define PADLOCK_SPECIAL 5
 
 #define FLOAT	  NULL, NULL, FLOATCODE, NULL, 0, NULL, 0
 
@@ -392,6 +394,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define GRP14	  NULL, NULL, USE_GROUPS, NULL, 21, NULL, 0
 #define GRPAMD	  NULL, NULL, USE_GROUPS, NULL, 22, NULL, 0
 #define GRPPLOCK  NULL, NULL, USE_GROUPS, NULL, 23, NULL, 0
+#define GRPPADLCK NULL, NULL, USE_GROUPS, NULL, 24, NULL, 0
 
 #define PREGRP0   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  0, NULL, 0
 #define PREGRP1   NULL, NULL, USE_PREFIX_USER_TABLE, NULL,  1, NULL, 0
@@ -428,8 +431,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREGRP32  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 32, NULL, 0
 
 #define X86_64_0  NULL, NULL, X86_64_SPECIAL, NULL,  0, NULL, 0
-
-#define PADLOCK_0  NULL, NULL, PADLOCK_SPECIAL, NULL,  0, NULL, 0
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
 
@@ -637,8 +638,7 @@ static const struct dis386 dis386[] = {
   { "movQ",		Sw, Ev, XX },
   { "popU",		Ev, XX, XX },
   /* 90 */
-  { "nop",		XX, XX, XX },
-  /* FIXME: NOP with REPz prefix is called PAUSE.  */
+  { "nop",		NOP_Fixup, 0, XX, XX },
   { "xchgS",		RMeCX, eAX, XX },
   { "xchgS",		RMeDX, eAX, XX },
   { "xchgS",		RMeBX, eAX, XX },
@@ -954,7 +954,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "shldS",		Ev, Gv, Ib },
   { "shldS",		Ev, Gv, CL },
   { "(bad)",		XX, XX, XX },
-  { PADLOCK_0 },
+  { GRPPADLCK },
   /* a8 */
   { "pushT",		gs, XX, XX },
   { "popT",		gs, XX, XX },
@@ -1092,7 +1092,7 @@ static const unsigned char twobyte_has_modrm[256] = {
   /* 70 */ 1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1, /* 7f */
   /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
   /* 90 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 9f */
-  /* a0 */ 0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1, /* af */
+  /* a0 */ 0,0,0,1,1,1,0,1,0,0,0,1,1,1,1,1, /* af */
   /* b0 */ 1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1, /* bf */
   /* c0 */ 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0, /* cf */
   /* d0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* df */
@@ -1430,9 +1430,9 @@ static const struct dis386 grps[][8] = {
     { "ldmxcsr", Ev, XX, XX },
     { "stmxcsr", Ev, XX, XX },
     { "(bad)",	XX, XX, XX },
-    { "lfence", None, XX, XX },
-    { "mfence", None, XX, XX },
-    { "clflush", None, XX, XX },
+    { "lfence", OP_0fae, 0, XX, XX },
+    { "mfence", OP_0fae, 0, XX, XX },
+    { "clflush", OP_0fae, 0, XX, XX },
   },
   /* GRP14 */
   {
@@ -1466,6 +1466,17 @@ static const struct dis386 grps[][8] = {
     { "xcryptofb", XX, XX, XX },
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
+  },
+  /* GRPPADLCK */
+  {
+    { "xstorerng", OP_0f07, 0, XX, XX },
+    { "xcryptecb", OP_0f07, 0, XX, XX },
+    { "xcryptcbc", OP_0f07, 0, XX, XX },
+    { "(bad)",	   OP_0f07, 0, XX, XX },
+    { "xcryptcfb", OP_0f07, 0, XX, XX },
+    { "xcryptofb", OP_0f07, 0, XX, XX },
+    { "(bad)",	   OP_0f07, 0, XX, XX },
+    { "(bad)",	   OP_0f07, 0, XX, XX },
   }
 };
 
@@ -1707,19 +1718,6 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { "arpl", Ew, Gw, XX },
     { "movs{||lq|xd}", Gv, Ed, XX },
-  },
-};
-
-static const struct dis386 padlock_table[][8] = {
-  {
-    { "xstorerng", XX, XX, XX },
-    { "xcryptecb", XX, XX, XX },
-    { "xcryptcbc", XX, XX, XX },
-    { "(bad)", XX, XX, XX },
-    { "xcryptcfb", XX, XX, XX },
-    { "xcryptofb", XX, XX, XX },
-    { "(bad)", XX, XX, XX },
-    { "(bad)", XX, XX, XX },
   },
 };
 
@@ -2219,12 +2217,6 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
 	    case X86_64_SPECIAL:
 	      dp = &x86_64_table[dp->bytemode2][mode_64bit];
-	      break;
-
-	    case PADLOCK_SPECIAL:
-	      FETCH_DATA (info, codep + 1);
-	      index = (*codep++ >> 3) & 0x07;
-	      dp = &padlock_table[dp->bytemode2][index];
 	      break;
 
 	    default:
@@ -3069,17 +3061,6 @@ OP_E (int bytemode, int sizeflag)
 	  used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 0:
-	  if (codep[-2] == 0xAE && codep[-1] == 0xF8)
-	    /* sfence */
-	    strcpy (obuf + strlen (obuf) - sizeof ("clflush") + 1, "sfence");
-	  else if (codep[-2] == 0xAE && codep[-1] == 0xF0)
-	    /* mfence */
-	    ;
-	  else if (codep[-2] == 0xAE && codep[-1] == 0xe8)
-	    /* lfence */
-	    ;
-	  else
-	    BadOp ();	/* bad sfence,lea,lds,les,lfs,lgs,lss modrm */
 	  break;
 	default:
 	  oappend (INTERNAL_DISASSEMBLER_ERROR);
@@ -3980,6 +3961,55 @@ OP_XS (int bytemode, int sizeflag)
     OP_EX (bytemode, sizeflag);
   else
     BadOp ();
+}
+
+static void
+OP_M (int bytemode, int sizeflag)
+{
+  if (mod == 3)
+    BadOp ();	/* bad lea,lds,les,lfs,lgs,lss modrm */
+  else
+    OP_E (bytemode, sizeflag);
+}
+
+static void
+OP_0f07 (int bytemode, int sizeflag)
+{
+  if (mod != 3 || rm != 0)
+    BadOp ();
+  else
+    OP_E (bytemode, sizeflag);
+}
+
+static void
+OP_0fae (int bytemode, int sizeflag)
+{
+  if (mod == 3)
+    {
+      if (reg == 7)
+	strcpy (obuf + strlen (obuf) - sizeof ("clflush") + 1, "sfence");
+
+      if (reg < 5 || rm != 0)
+	{
+	  BadOp ();	/* bad sfence, mfence, or lfence */
+	  return;
+	}
+    }
+  else if (reg != 7)
+    {
+      BadOp ();		/* bad clflush */
+      return;
+    }
+
+  OP_E (bytemode, sizeflag);
+}
+
+static void
+NOP_Fixup (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+{
+  /* NOP with REPZ prefix is called PAUSE.  */
+  if (prefixes == PREFIX_REPZ)
+    strcpy (obuf, "pause");
 }
 
 static const char *const Suffix3DNow[] = {

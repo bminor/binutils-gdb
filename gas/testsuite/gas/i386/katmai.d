@@ -165,7 +165,7 @@ Disassembly of section .text:
  246:	90 [ 	]*nop    
  247:	90 [ 	]*nop    
  248:	65 [ 	]*gs
- 249:	0f [ 	]*clflush.*\(bad\).*
+ 249:	0f [ 	]*sfence.*\(bad\).*
  24a:	ae [ 	]*scas   %es:\(%edi\),%al
  24b:	ff 00 [ 	]*incl   \(%eax\)
  24d:	00 00 [ 	]*add    %al,\(%eax\)
