@@ -1,3 +1,13 @@
+Wed Mar 15 04:11:14 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/whatis.exp: Remove xfails for printing char vs.
+	unsigned char; the bug (PR 1821) is fixed.
+
+	* gdb.base/scope.exp: Remove xfails for PRs 1843 and 1868.
+
+	* gdb.base/scope.exp (test_at_localscopes): Call pass for
+	successful tests--makes xfailing them work right.
+
 Tue Mar 14 07:39:19 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* lib/gdb.exp (gdb_test): Between $pattern and $prompt, expect
