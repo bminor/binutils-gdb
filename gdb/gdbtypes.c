@@ -3067,6 +3067,7 @@ _initialize_gdbtypes (void)
   builtin_type_i387_ext =
     init_type (TYPE_CODE_FLT, floatformat_i387_ext.totalsize / 8,
 	       0, "builtin_type_i387_ext", NULL);
+  TYPE_FLOATFORMAT (builtin_type_i387_ext) = &floatformat_i387_ext;
   builtin_type_m68881_ext =
     init_type (TYPE_CODE_FLT, floatformat_m68881_ext.totalsize / 8,
 	       0, "builtin_type_m68881_ext", NULL);
