@@ -1,3 +1,8 @@
+Fri Jan  3 14:20:05 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* mn10300-tdep.c (mn10300_push_arguments): rewrote
+	also removed code elsewhere that made use of RP_REGNUM
+
 Tue Dec 31 15:19:32 1996  Geoffrey Noer  <noer@cygnus.com>
 
         * config/mn10300/tm-mn10300.h: more small register fixes

@@ -1,5 +1,5 @@
-/* Target-dependent code for the NEC MN10300 for GDB, the GNU debugger.
-   Copyright 1996, Free Software Foundation, Inc.
+/* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
+   Copyright 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -15,9 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
-
-/* Contributed by Geoffrey Noer, noer@cygnus.com */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -47,36 +45,259 @@ struct prologue_info
   struct pifsr *pifsrs;
 };
 
+static CORE_ADDR mn10300_scan_prologue PARAMS ((CORE_ADDR pc, 
+					     struct prologue_info *fs));
+
+/* Function: scan_prologue
+   Scan the prologue of the function that contains PC, and record what
+   we find in PI.  PI->fsr must be zeroed by the called.  Returns the
+   pc after the prologue.  Note that the addresses saved in pi->fsr
+   are actually just frame relative (negative offsets from the frame
+   pointer).  This is because we don't know the actual value of the
+   frame pointer yet.  In some circumstances, the frame pointer can't
+   be determined till after we have scanned the prologue.  */
+
 static CORE_ADDR
 mn10300_scan_prologue (pc, pi)
      CORE_ADDR pc;
      struct prologue_info *pi;
 {
+  CORE_ADDR func_addr, prologue_end, current_pc;
+  struct pifsr *pifsr;
+  int fp_used;
+
+  printf("mn10300_scan_prologue start\n");
+
+  /* First, figure out the bounds of the prologue so that we can limit the
+     search to something reasonable.  */
+
+  if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
+    {
+      struct symtab_and_line sal;
+
+      sal = find_pc_line (func_addr, 0);
+
+      if (func_addr == entry_point_address ())
+	pi->start_function = 1;
+      else
+	pi->start_function = 0;
+
+#if 0
+      if (sal.line == 0)
+	prologue_end = pc;
+      else
+	prologue_end = sal.end;
+#else
+      prologue_end = pc;
+#endif
+    }
+  else
+    {				/* We're in the boondocks */
+      func_addr = pc - 100;
+      prologue_end = pc;
+    }
+
+  prologue_end = min (prologue_end, pc);
+
+  /* Now, search the prologue looking for instructions that setup fp, save
+     rp, adjust sp and such.  We also record the frame offset of any saved
+     registers. */ 
+
+  pi->frameoffset = 0;
+  pi->framereg = SP_REGNUM;
+  fp_used = 0;
+  pifsr = pi->pifsrs;
+
+  for (current_pc = func_addr; current_pc < prologue_end; current_pc += 2)
+    {
+      int insn;
+
+      insn = read_memory_unsigned_integer (current_pc, 2);
+
+      if ((insn & 0x07c0) == 0x0780 /* jarl or jr */
+	  || (insn & 0xffe0) == 0x0060 /* jmp */
+	  || (insn & 0x0780) == 0x0580)	/* branch */
+	break;			/* Ran into end of prologue */
+      if ((insn & 0xffe0) == ((SP_REGNUM << 11) | 0x0240)) /* add <imm>,sp */
+	pi->frameoffset = ((insn & 0x1f) ^ 0x10) - 0x10;
+      else if (insn == ((SP_REGNUM << 11) | 0x0600 | SP_REGNUM)) /* addi <imm>,sp,sp */
+	pi->frameoffset = read_memory_integer (current_pc + 2, 2);
+      else if (insn == ((FP_REGNUM << 11) | 0x0000 | 12)) /* mov r12,fp */
+	{
+	  fp_used = 1;
+	  pi->framereg = FP_REGNUM;
+	}
+      else if ((insn & 0x07ff) == (0x0760 | SP_REGNUM)	/* st.w <reg>,<offset>[sp] */
+	       || (fp_used
+		   && (insn & 0x07ff) == (0x0760 | FP_REGNUM))) /* st.w <reg>,<offset>[fp] */
+	if (pifsr)
+	  {
+	    pifsr->framereg = insn & 0x1f;
+	    pifsr->reg = (insn >> 11) & 0x1f; /* Extract <reg> */
+
+	    pifsr->offset = read_memory_integer (current_pc + 2, 2) & ~1;
+
+	    pifsr++;
+	  }
+
+      if ((insn & 0x0780) >= 0x0600) /* Four byte instruction? */
+	current_pc += 2;
+    }
+
+  if (pifsr)
+    pifsr->framereg = 0;	/* Tie off last entry */
+
+  printf("mn10300_scan_prologue end \n");
+
+  return current_pc;
 }
+
+/* Function: init_extra_frame_info
+   Setup the frame's frame pointer, pc, and frame addresses for saved
+   registers.  Most of the work is done in scan_prologue().
+
+   Note that when we are called for the last frame (currently active frame),
+   that fi->pc and fi->frame will already be setup.  However, fi->frame will
+   be valid only if this routine uses FP.  For previous frames, fi-frame will
+   always be correct (since that is derived from mn10300_frame_chain ()).
+
+   We can be called with the PC in the call dummy under two circumstances.
+   First, during normal backtracing, second, while figuring out the frame
+   pointer just prior to calling the target function (see run_stack_dummy).  */
 
 void
 mn10300_init_extra_frame_info (fi)
      struct frame_info *fi;
 {
+  struct prologue_info pi;
+  struct pifsr pifsrs[NUM_REGS + 1], *pifsr;
+  int reg;
+
+  printf("mn10300_init_extra_frame_info start\n");
+
+  if (fi->next)
+    fi->pc = FRAME_SAVED_PC (fi->next);
+
+  memset (fi->fsr.regs, '\000', sizeof fi->fsr.regs);
+
+  /* The call dummy doesn't save any registers on the stack, so we can return
+     now.  */
+  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+      return;
+
+  pi.pifsrs = pifsrs;
+
+  mn10300_scan_prologue (fi->pc, &pi);
+
+  if (!fi->next && pi.framereg == SP_REGNUM)
+    fi->frame = read_register (pi.framereg) - pi.frameoffset;
+
+  for (pifsr = pifsrs; pifsr->framereg; pifsr++)
+    {
+      fi->fsr.regs[pifsr->reg] = pifsr->offset + fi->frame;
+
+      if (pifsr->framereg == SP_REGNUM)
+	fi->fsr.regs[pifsr->reg] += pi.frameoffset;
+    }
+
+  printf("mn10300_init_extra_frame_info end\n");
 }
+
+/* Function: frame_chain
+   Figure out the frame prior to FI.  Unfortunately, this involves
+   scanning the prologue of the caller, which will also be done
+   shortly by mn10300_init_extra_frame_info.  For the dummy frame, we
+   just return the stack pointer that was in use at the time the
+   function call was made.  */
 
 CORE_ADDR
 mn10300_frame_chain (fi)
      struct frame_info *fi;
 {
+  struct prologue_info pi;
+  CORE_ADDR callers_pc, fp;
+
+  printf("mn10300_frame_chain start\n"); 
+
+  /* First, find out who called us */
+  callers_pc = FRAME_SAVED_PC (fi);
+  /* If caller is a call-dummy, then our FP bears no relation to his FP! */
+  fp = mn10300_find_callers_reg (fi, FP_REGNUM);
+  if (PC_IN_CALL_DUMMY(callers_pc, fp, fp))
+    return fp;	/* caller is call-dummy: return oldest value of FP */
+
+  /* Caller is NOT a call-dummy, so everything else should just work.
+     Even if THIS frame is a call-dummy! */
+  pi.pifsrs = NULL;
+
+  mn10300_scan_prologue (callers_pc, &pi);
+
+  printf("mn10300_frame_chain end\n"); 
+
+  if (pi.start_function)
+    return 0;			/* Don't chain beyond the start function */
+
+  if (pi.framereg == FP_REGNUM)
+    return mn10300_find_callers_reg (fi, pi.framereg);
+
+  return fi->frame - pi.frameoffset;
 }
+
+/* Function: find_callers_reg
+   Find REGNUM on the stack.  Otherwise, it's in an active register.
+   One thing we might want to do here is to check REGNUM against the
+   clobber mask, and somehow flag it as invalid if it isn't saved on
+   the stack somewhere.  This would provide a graceful failure mode
+   when trying to get the value of caller-saves registers for an inner
+   frame.  */
 
 CORE_ADDR
 mn10300_find_callers_reg (fi, regnum)
      struct frame_info *fi;
      int regnum;
 {
+  printf("mn10300_find_callers_reg\n"); 
+
+  for (; fi; fi = fi->next)
+    if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+      return generic_read_register_dummy (fi->pc, fi->frame, regnum);
+    else if (fi->fsr.regs[regnum] != 0)
+      return read_memory_unsigned_integer (fi->fsr.regs[regnum], 
+					   REGISTER_RAW_SIZE(regnum));
+
+  return read_register (regnum);
 }
+
+/* Function: skip_prologue
+   Return the address of the first code past the prologue of the function.  */
 
 CORE_ADDR
 mn10300_skip_prologue (pc)
      CORE_ADDR pc;
 {
+  CORE_ADDR func_addr, func_end;
+
+  printf("mn10300_skip_prologue\n"); 
+
+  /* See what the symbol table says */
+
+  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    {
+      struct symtab_and_line sal;
+
+      sal = find_pc_line (func_addr, 0);
+
+      if (sal.line != 0 && sal.end < func_end)
+	return sal.end;
+      else
+	/* Either there's no line info, or the line after the prologue is after
+	   the end of the function.  In this case, there probably isn't a
+	   prologue.  */
+	return pc;
+    }
+
+/* We can't find the start of this function, so there's nothing we can do. */
+  return pc;
 }
 
 /* Function: pop_frame
@@ -87,7 +308,34 @@ void
 mn10300_pop_frame (frame)
      struct frame_info *frame;
 {
+  int regnum;
+
+  printf("mn10300_pop_frame start\n"); 
+
+  if (PC_IN_CALL_DUMMY(frame->pc, frame->frame, frame->frame))
+    generic_pop_dummy_frame ();
+  else
+    {
+      write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
+
+      for (regnum = 0; regnum < NUM_REGS; regnum++)
+	if (frame->fsr.regs[regnum] != 0)
+	  write_register (regnum,
+			  read_memory_unsigned_integer (frame->fsr.regs[regnum],
+							REGISTER_RAW_SIZE(regnum)));
+
+      write_register (SP_REGNUM, FRAME_FP (frame));
+    }
+
+  flush_cached_frames ();
+
+  printf("mn10300_pop_frame end\n"); 
 }
+
+/* Function: push_arguments
+   Setup arguments for a call to the target.  Arguments go in
+   order on the stack.
+*/
 
 CORE_ADDR
 mn10300_push_arguments (nargs, args, sp, struct_return, struct_addr)
@@ -97,19 +345,89 @@ mn10300_push_arguments (nargs, args, sp, struct_return, struct_addr)
      unsigned char struct_return;
      CORE_ADDR struct_addr;
 {
+  int argnum = 0;
+  int len = 0;
+  int stack_offset = 0;  /* copy args to this offset onto stack */
+
+  printf("mn10300_push_arguments start\n"); 
+
+  /* First, just for safety, make sure stack is aligned */
+  sp &= ~3;
+
+  /* Now make space on the stack for the args. */
+  for (argnum = 0; argnum < nargs; argnum++)
+    len += ((TYPE_LENGTH(VALUE_TYPE(args[argnum])) + 3) & ~3);
+
+  sp -= len;
+
+  /* Push all arguments onto the stack. */
+  for (argnum = 0; argnum < nargs; argnum++)
+    {
+      int len;
+      char *val;
+
+      if (TYPE_CODE (VALUE_TYPE (*args)) == TYPE_CODE_STRUCT
+	  && TYPE_LENGTH (VALUE_TYPE (*args)) > 8)
+	{
+	  /* for now, pretend structs aren't special */
+          len = TYPE_LENGTH (VALUE_TYPE (*args));
+          val = (char *)VALUE_CONTENTS (*args);
+	}
+      else
+	{
+	  len = TYPE_LENGTH (VALUE_TYPE (*args));
+	  val = (char *)VALUE_CONTENTS (*args);
+	}
+
+      while (len > 0)
+	{
+	  write_memory (sp + stack_offset, val, 4);
+
+	  len -= 4;
+	  val += 4;
+	  stack_offset += 4;
+	}
+      args++;
+    }
+
+  printf("mn10300_push_arguments end\n"); 
+
+  return sp;
 }
 
+/* Function: push_return_address (pc)
+   Set up the return address for the inferior function call.
+   Needed for targets where we don't actually execute a JSR/BSR instruction */
+ 
 CORE_ADDR
 mn10300_push_return_address (pc, sp)
      CORE_ADDR pc;
      CORE_ADDR sp;
 {
+  printf("mn10300_push_return_address\n"); 
+
+  /* write_register (RP_REGNUM, CALL_DUMMY_ADDRESS ()); */
+  return sp;
 }
  
+/* Function: frame_saved_pc 
+   Find the caller of this frame.  We do this by seeing if RP_REGNUM
+   is saved in the stack anywhere, otherwise we get it from the
+   registers.  If the inner frame is a dummy frame, return its PC
+   instead of RP, because that's where "caller" of the dummy-frame
+   will be found.  */
+
 CORE_ADDR
 mn10300_frame_saved_pc (fi)
      struct frame_info *fi;
 {
+  printf("mn10300_frame_saved_pc\n"); 
+
+/*  if (PC_IN_CALL_DUMMY(fi->pc, fi->frame, fi->frame)) */
+    return generic_read_register_dummy(fi->pc, fi->frame, PC_REGNUM);
+/*  else
+    return mn10300_find_callers_reg (fi, RP_REGNUM);
+*/
 }
 
 void
@@ -121,9 +439,18 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
      int regnum;
      enum lval_type *lval;
 {
+  printf("get_saved_register\n"); 
+
   generic_get_saved_register (raw_buffer, optimized, addrp, 
 			      frame, regnum, lval);
 }
+
+/* Function: fix_call_dummy
+   Pokes the callee function's address into the CALL_DUMMY assembly stub.
+   Assumes that the CALL_DUMMY looks like this:
+	jarl <offset24>, r31
+	trap
+   */
 
 int
 mn10300_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
@@ -135,10 +462,26 @@ mn10300_fix_call_dummy (dummy, sp, fun, nargs, args, type, gcc_p)
      struct type *type;
      int gcc_p;
 {
+  long offset24;
+
+  printf("mn10300_fix_call_dummy start\n"); 
+
+  offset24 = (long) fun - (long) entry_point_address ();
+  offset24 &= 0x3fffff;
+  offset24 |= 0xff800000;	/* jarl <offset24>, r31 */
+
+  store_unsigned_integer ((unsigned int *)&dummy[2], 2, offset24 & 0xffff);
+  store_unsigned_integer ((unsigned int *)&dummy[0], 2, offset24 >> 16);
+
+  printf("mn10300_fix_call_dummy end\n"); 
+
+  return 0;
 }
 
 void
 _initialize_mn10300_tdep ()
 {
+  printf("_initialize_mn10300_tdep\n"); 
+
   tm_print_insn = print_insn_mn10300;
 }
