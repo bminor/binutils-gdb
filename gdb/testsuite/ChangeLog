@@ -1,3 +1,8 @@
+2004-02-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/chng-syms.exp: Anchor exit pattern.  Allow
+	a breakpoint at exit.
+
 2004-02-27  Fred Fish  <fnf@redhat.com>
 
 	* gdb.base/chng-syms.exp: Add expect condition to match failing
