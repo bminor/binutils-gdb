@@ -1,5 +1,13 @@
 2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* alpha-tdep.c: Update copyright years.
+	(alpha_next_pc): New function.
+	(alpha_software_single_step): Ditto.
+	* config/alpha/tm-alpha.h: Add prototype for
+	alpha_software_single_step.
+
+2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* alphabsd-nat.c: Update copyright years.
 	(fill_gregset): Use regcache_collect.
 	(fill_fpregset): Likewise.

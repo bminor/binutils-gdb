@@ -1,5 +1,5 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1384,6 +1384,115 @@ alpha_call_dummy_address (void)
     return 0;
   else
     return SYMBOL_VALUE_ADDRESS (sym) + 4;
+}
+
+/* alpha_software_single_step() is called just before we want to resume
+   the inferior, if we want to single-step it but there is no hardware
+   or kernel single-step support (NetBSD on Alpha, for example).  We find
+   the target of the coming instruction and breakpoint it.
+
+   single_step is also called just after the inferior stops.  If we had
+   set up a simulated single-step, we undo our damage.  */
+
+static CORE_ADDR
+alpha_next_pc (CORE_ADDR pc)
+{
+  unsigned int insn;
+  unsigned int op;
+  int offset;
+  LONGEST rav;
+
+  insn = read_memory_unsigned_integer (pc, sizeof (insn));
+
+  /* Opcode is top 6 bits. */
+  op = (insn >> 26) & 0x3f;
+
+  if (op == 0x1a)
+    {
+      /* Jump format: target PC is:
+	 RB & ~3  */
+      return (read_register ((insn >> 16) & 0x1f) & ~3);
+    }
+
+  if ((op & 0x30) == 0x30)
+    {
+      /* Branch format: target PC is:
+	 (new PC) + (4 * sext(displacement))  */
+      if (op == 0x30 ||		/* BR */
+	  op == 0x34)		/* BSR */
+	{
+ branch_taken:
+          offset = (insn & 0x001fffff);
+	  if (offset & 0x00100000)
+	    offset  |= 0xffe00000;
+	  offset *= 4;
+	  return (pc + 4 + offset);
+	}
+
+      /* Need to determine if branch is taken; read RA.  */
+      rav = (LONGEST) read_register ((insn >> 21) & 0x1f);
+      switch (op)
+	{
+	case 0x38:		/* BLBC */
+	  if ((rav & 1) == 0)
+	    goto branch_taken;
+	  break;
+	case 0x3c:		/* BLBS */
+	  if (rav & 1)
+	    goto branch_taken;
+	  break;
+	case 0x39:		/* BEQ */
+	  if (rav == 0)
+	    goto branch_taken;
+	  break;
+	case 0x3d:		/* BNE */
+	  if (rav != 0)
+	    goto branch_taken;
+	  break;
+	case 0x3a:		/* BLT */
+	  if (rav < 0)
+	    goto branch_taken;
+	  break;
+	case 0x3b:		/* BLE */
+	  if (rav <= 0)
+	    goto branch_taken;
+	  break;
+	case 0x3f:		/* BGT */
+	  if (rav > 0)
+	    goto branch_taken;
+	  break;
+	case 0x3e:		/* BGE */
+	  if (rav >= 0)
+	    goto branch_taken;
+	  break;
+	}
+    }
+
+  /* Not a branch or branch not taken; target PC is:
+     pc + 4  */
+  return (pc + 4);
+}
+
+void
+alpha_software_single_step (enum target_signal sig, int insert_breakpoints_p)
+{
+  static CORE_ADDR next_pc;
+  typedef char binsn_quantum[BREAKPOINT_MAX];
+  static binsn_quantum break_mem;
+  CORE_ADDR pc;
+
+  if (insert_breakpoints_p)
+    {
+      pc = read_pc ();
+      next_pc = alpha_next_pc (pc);
+
+      target_insert_breakpoint (next_pc, break_mem);
+    }
+  else
+    {
+      target_remove_breakpoint (next_pc, break_mem);
+      write_pc (next_pc);
+    }
 }
 
 void
