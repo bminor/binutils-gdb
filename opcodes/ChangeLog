@@ -1,6 +1,9 @@
 start-sanitize-v850
 Fri Aug 23 00:27:01 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-opc.c (v850_operands): Define EP operand.
+	(IF4A, IF4B, IF4C, IF4D): Use EP.
+
 	* v850-opc.c (v850_opcodes): Fix opcode numbers for "mov"
 	with immediate operand, "movhi".  Tweak "ldsr".
 

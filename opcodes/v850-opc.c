@@ -74,7 +74,11 @@ const struct v850_operand v850_operands[] = {
 
 /* System register operands.  */
 #define SR1	(D8+1)
-  { 5, 0, 0, 0, V850_OPERAND_SRG }
+  { 5, 0, 0, 0, V850_OPERAND_SRG },
+
+/* EP Register.  */
+#define EP	(SR1+1)
+  { 0, 0, 0, 0, V850_OPERAND_EP }
 } ; 
 
 
@@ -88,10 +92,10 @@ const struct v850_operand v850_operands[] = {
 #define IF3	{D9}
 
 /* 16-bit load/store instruction (Format IV) */
-#define IF4A	{D7S, R1, R2}
-#define IF4B	{R2, D7S, R1}
-#define IF4C	{D8, R1, R2}
-#define IF4D	{R2, D8, R1}
+#define IF4A	{D7S, EP, R2}
+#define IF4B	{R2, D7S, EP}
+#define IF4C	{D8, EP, R2}
+#define IF4D	{R2, D8, EP}
 
 /* Jump instruction (Format V) */
 #define IF5	{D22}
