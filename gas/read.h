@@ -1,5 +1,6 @@
 /* read.h - of read.c
-   Copyright (C) 1986, 90, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1986, 90, 92, 93, 94, 95, 96, 1997
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -58,6 +59,11 @@ extern const char comment_chars[];
 extern const char line_comment_chars[];
 extern const char line_separator_chars[];
 
+/* Table of -I directories.  */
+extern char **include_dirs;
+extern int include_dir_count;
+extern int include_dir_maxlen;
+
 /* The offset in the absolute section.  */
 extern addressT abs_section_offset;
 
@@ -102,7 +108,10 @@ extern void read_a_source_file PARAMS ((char *name));
 extern void read_begin PARAMS ((void));
 extern void read_print_statistics PARAMS ((FILE *));
 extern int sizeof_leb128 PARAMS ((valueT, int sign));
+extern void stabs_generate_asm_file PARAMS ((void));
 extern void stabs_generate_asm_lineno PARAMS ((void));
+extern void stabs_generate_asm_func PARAMS ((const char *, const char *));
+extern void stabs_generate_asm_endfunc PARAMS ((const char *, const char *));
 
 extern void s_abort PARAMS ((int));
 extern void s_align_bytes PARAMS ((int arg));
@@ -119,6 +128,7 @@ extern void s_err PARAMS ((int));
 extern void s_fail PARAMS ((int));
 extern void s_fill PARAMS ((int));
 extern void s_float_space PARAMS ((int mult));
+extern void s_func PARAMS ((int));
 extern void s_globl PARAMS ((int arg));
 extern void s_if PARAMS ((int arg));
 extern void s_ifc PARAMS ((int arg));
@@ -128,6 +138,7 @@ extern void s_ignore PARAMS ((int arg));
 extern void s_include PARAMS ((int arg));
 extern void s_irp PARAMS ((int arg));
 extern void s_lcomm PARAMS ((int needs_align));
+extern void s_lcomm_bytes PARAMS ((int needs_align));
 extern void s_leb128 PARAMS ((int sign));
 extern void s_linkonce PARAMS ((int));
 extern void s_lsym PARAMS ((int));

@@ -296,6 +296,7 @@ static const pseudo_typeS potable[] =
   {"elsec", s_else, 0},
   {"end", s_end, 0},
   {"endc", s_endif, 0},
+  {"endfunc", s_func, 1},
   {"endif", s_endif, 0},
 /* endef */
   {"equ", s_set, 0},
@@ -311,6 +312,7 @@ static const pseudo_typeS potable[] =
   {"fill", s_fill, 0},
   {"float", float_cons, 'f'},
   {"format", s_ignore, 0},
+  {"func", s_func, 0},
   {"global", s_globl, 0},
   {"globl", s_globl, 0},
   {"hword", cons, 2},
@@ -4871,7 +4873,7 @@ add_include_dir (path)
   if (i > include_dir_maxlen)
     include_dir_maxlen = i;
 }				/* add_include_dir() */
-
+
 /* Output debugging information to denote the source file.  */
 
 static void
@@ -4912,6 +4914,75 @@ generate_lineno_debug ()
 #endif
 }
 
+/* Output debugging information to mark a function entry point or end point.
+   END_P is zero for .func, and non-zero for .endfunc.  */
+
+void
+s_func (end_p)
+     int end_p;
+{
+  /* Record the current function so that we can issue an error message for
+     misplaced .func,.endfunc, and also so that .endfunc needs no
+     arguments.  */
+  static char *current_name;
+  static char *current_label;
+
+  if (end_p)
+    {
+      if (current_name == NULL)
+	{
+	  as_bad (_("missing .func"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      if (debug_type == DEBUG_STABS)
+	stabs_generate_asm_endfunc (current_name, current_label);
+
+      current_name = current_label = NULL;
+    }
+  else /* ! end_p */
+    {
+      char *name,*label;
+      char delim1,delim2;
+
+      if (current_name != NULL)
+	{
+	  as_bad (_(".endfunc missing for previous .func"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      name = input_line_pointer;
+      delim1 = get_symbol_end ();
+      name = xstrdup (name);
+      *input_line_pointer = delim1;
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer != ',')
+	{
+	  /* Missing entry point, use function's name.  */
+	  label = name;
+	}
+      else
+	{
+	  ++input_line_pointer;
+	  SKIP_WHITESPACE ();
+	  label = input_line_pointer;
+	  delim2 = get_symbol_end ();
+	  label = xstrdup (label);
+	  *input_line_pointer = delim2;
+	}
+
+      if (debug_type == DEBUG_STABS)
+	stabs_generate_asm_func (name, label);
+
+      current_name = name;
+      current_label = label;
+    }
+
+  demand_empty_rest_of_line ();
+}
+
 void 
 s_ignore (arg)
      int arg;
