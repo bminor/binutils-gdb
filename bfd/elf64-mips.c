@@ -1,5 +1,5 @@
 /* MIPS-specific support for 64-bit ELF
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 1997 Free Software Foundation, Inc.
    Ian Lance Taylor, Cygnus Support
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -66,7 +66,7 @@ static long mips_elf64_get_reloc_upper_bound PARAMS ((bfd *, asection *));
 static boolean mips_elf64_slurp_one_reloc_table
   PARAMS ((bfd *, asection *, asymbol **, const Elf_Internal_Shdr *));
 static boolean mips_elf64_slurp_reloc_table
-  PARAMS ((bfd *, asection *, asymbol **));
+  PARAMS ((bfd *, asection *, asymbol **, boolean));
 static void mips_elf64_write_relocs PARAMS ((bfd *, asection *, PTR));
 static boolean mips_elf64_section_from_shdr
   PARAMS ((bfd *, Elf_Internal_Shdr *, char *));
@@ -80,6 +80,8 @@ static boolean mips_elf64_write_armap
 
 enum mips_elf64_reloc_type
 {
+#if 0
+  /* These are now in elf/mips.h.  */
   R_MIPS_NONE = 0,
   R_MIPS_16 = 1,
   R_MIPS_32 = 2,
@@ -98,6 +100,7 @@ enum mips_elf64_reloc_type
   R_MIPS_CALL16 = 11,
   R_MIPS_CALL = 11,
   R_MIPS_GPREL32 = 12,
+#endif
   R_MIPS_SHIFT5 = 16,
   R_MIPS_SHIFT6 = 17,
   R_MIPS_64 = 18,
@@ -1230,7 +1233,7 @@ mips_elf64_swap_reloca_in (abfd, src, dst)
   dst->r_type3 = bfd_h_get_8 (abfd, (bfd_byte *) src->r_type3);
   dst->r_type2 = bfd_h_get_8 (abfd, (bfd_byte *) src->r_type2);
   dst->r_type = bfd_h_get_8 (abfd, (bfd_byte *) src->r_type);
-  dst->r_addend = bfd_h_get_64 (abfd, (bfd_byte *) src->r_addend);
+  dst->r_addend = bfd_h_get_signed_64 (abfd, (bfd_byte *) src->r_addend);
 }
 
 #if 0
@@ -1269,7 +1272,7 @@ mips_elf64_swap_reloca_out (abfd, src, dst)
   bfd_h_put_8 (abfd, src->r_type3, (bfd_byte *) dst->r_type3);
   bfd_h_put_8 (abfd, src->r_type2, (bfd_byte *) dst->r_type2);
   bfd_h_put_8 (abfd, src->r_type, (bfd_byte *) dst->r_type);
-  bfd_h_put_64 (abfd, src->r_offset, (bfd_byte *) dst->r_offset);
+  bfd_h_put_64 (abfd, src->r_addend, (bfd_byte *) dst->r_addend);
 }
 
 /* A mapping from BFD reloc types to MIPS ELF reloc types.  */

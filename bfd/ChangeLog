@@ -1,3 +1,8 @@
+Wed Jul 22 13:46:51 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf64-mips.c (mips_elf64_reloc_type): Copy Ulrich's elf32-mips.c
+	temporary patch over to elf64-mips.c as well.
+
 1998-07-21  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elf32-mips.c (reloc_type): Temporarily disable definition of
