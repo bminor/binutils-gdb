@@ -1,5 +1,8 @@
 Thu Mar  2 05:31:34 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.disasm/hppa.exp (all_fpu_comparison_tests): Only
+	disassemble 8, not 16, instructions for part 4.
+
 	* config/vx-gdb.exp (gdb_start): Use \030, not \CX.  tcl doesn't
 	support the latter anymore.
 
