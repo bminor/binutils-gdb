@@ -119,6 +119,7 @@ static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable */
 static char *pe_out_def_filename = NULL;
 static char *pe_implib_filename = NULL;
 static int pe_enable_auto_image_base = 0;
+static char *pe_dll_search_prefix = NULL;
 #endif
 
 extern const char *output_filename;
@@ -172,6 +173,7 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_IMP_COMPAT		(OPTION_WARN_DUPLICATE_EXPORTS + 1)
 #define OPTION_ENABLE_AUTO_IMAGE_BASE	(OPTION_IMP_COMPAT + 1)
 #define OPTION_DISABLE_AUTO_IMAGE_BASE	(OPTION_ENABLE_AUTO_IMAGE_BASE + 1)
+#define OPTION_DLL_SEARCH_PREFIX		(OPTION_DISABLE_AUTO_IMAGE_BASE + 1)
 
 static struct option longopts[] =
 {
@@ -208,6 +210,7 @@ static struct option longopts[] =
   {"compat-implib", no_argument, NULL, OPTION_IMP_COMPAT},
   {"enable-auto-image-base", no_argument, NULL, OPTION_ENABLE_AUTO_IMAGE_BASE},
   {"disable-auto-image-base", no_argument, NULL, OPTION_DISABLE_AUTO_IMAGE_BASE},
+  {"dll-search-prefix", required_argument, NULL, OPTION_DLL_SEARCH_PREFIX},
 #endif
   {NULL, no_argument, NULL, 0}
 };
@@ -290,6 +293,9 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --enable-auto-image-base           Automatically choose image base for DLLs\n"));
   fprintf (file, _("                                       unless user specifies one\n"));
   fprintf (file, _("  --disable-auto-image-base          Do not auto-choose image base. (default)\n"));
+  fprintf (file, _("  --dll-search-prefix=<string>       When linking dynamically to a dll witout an\n"));
+  fprintf (file, _("                                       importlib, use <string><basename>.dll \n"));
+  fprintf (file, _("                                       in preference to lib<basename>.dll \n"));
 #endif
 }
 
@@ -553,6 +559,9 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       break;
     case OPTION_DISABLE_AUTO_IMAGE_BASE:
       pe_enable_auto_image_base = 0;
+      break;
+    case OPTION_DLL_SEARCH_PREFIX:
+      pe_dll_search_prefix = xstrdup( optarg );
       break;
 #endif
     }
@@ -1452,6 +1461,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
   string = (char *) xmalloc (strlen (search->name)
                              + strlen (filename) 
                              + sizeof "/lib.a.dll"
+                             + ( pe_dll_search_prefix ? strlen (pe_dll_search_prefix) : 0 )
                              + 1);
 
   /* Try "libfoo.dll.a" first (preferred explicit import library for dll's */
@@ -1478,19 +1488,44 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
              take precedence over dll's) */
           sprintf (string, "%s/lib%s.a", search->name, filename);
           if (! ldfile_try_open_bfd (string, entry))
-	    {
-              /* Try "libfoo.dll" (preferred dll name) */
-              sprintf (string, "%s/lib%s.dll", search->name, filename);
-              if (! ldfile_try_open_bfd (string, entry))
-                {
-                  /* Finally, try "foo.dll" (alternate dll name) */
-                  sprintf (string, "%s/%s.dll", search->name, filename);
+            {
+
+              if ( pe_dll_search_prefix )
+                {  
+                  /* Try "<prefix>foo.dll" (preferred dll name, if specified) */
+                  sprintf (string, "%s/%s%s.dll", search->name, pe_dll_search_prefix, filename);
                   if (! ldfile_try_open_bfd (string, entry))
                     {
-                      free (string);
-                      return false;
+                      /* Try "libfoo.dll" (default preferred dll name) */
+                      sprintf (string, "%s/lib%s.dll", search->name, filename);
+                      if (! ldfile_try_open_bfd (string, entry))
+                        {
+                          /* Finally, try "foo.dll" (alternate dll name) */
+                          sprintf (string, "%s/%s.dll", search->name, filename);
+                          if (! ldfile_try_open_bfd (string, entry))
+                            {
+                              free (string);
+                              return false;
+                            }
+                        }
                     }
                 }
+              else /* pe_dll_search_prefix not specified */
+                {
+                  /* Try "libfoo.dll" (preferred dll name) */
+                  sprintf (string, "%s/lib%s.dll", search->name, filename);
+                  if (! ldfile_try_open_bfd (string, entry))
+                    {
+                      /* Finally, try "foo.dll" (alternate dll name) */
+                      sprintf (string, "%s/%s.dll", search->name, filename);
+                      if (! ldfile_try_open_bfd (string, entry))
+                        {
+                          free (string);
+                          return false;
+                        }
+                    }
+                } /* if (pe_dll_search_prefix) */
+					 
             }
         }
     }

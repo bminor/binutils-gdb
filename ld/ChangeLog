@@ -1,3 +1,14 @@
+2000-10-12  Charles Wilson  <cwilson@ece.gatech.edu>
+  
+	* emultempl/pe.em (pe_dll_search_prefix): New variable,
+	(longopts): New --dll-search-prefix option.
+	(gld_${EMULATION_NAME}_list_options): Document.
+	(gld_${EMULATION_NAME}_parse_args): Handle.
+	(gld_${EMULATION_NAME}_open_dynamic_archive): When linking
+	dynamically, search for a dll named '<prefix><basename>.dll'
+	in preference to 'lib<basename>.dll' if --dll-search-prefix
+	is specified.
+
 2000-10-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* ldlang.c (section_already_linked): Set kept_section instead of
