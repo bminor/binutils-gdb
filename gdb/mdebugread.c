@@ -2375,12 +2375,17 @@ parse_partial_symbols (objfile, section_offsets)
 		     still able to find the PROGRAM name via the partial
 		     symbol table, and the MAIN__ symbol via the minimal
 		     symbol table.  */
-		  ADD_PSYMBOL_TO_LIST (name, strlen (name),
-				       VAR_NAMESPACE, LOC_BLOCK,
-				       (sh.st == stProc)
-					 ? objfile->global_psymbols
-					 : objfile->static_psymbols,
-				       sh.value, psymtab_language, objfile);
+		  if (sh.st == stProc)
+		    ADD_PSYMBOL_TO_LIST (name, strlen (name),
+					 VAR_NAMESPACE, LOC_BLOCK,
+					 objfile->global_psymbols,
+					 sh.value, psymtab_language, objfile);
+		  else
+		    ADD_PSYMBOL_TO_LIST (name, strlen (name),
+					 VAR_NAMESPACE, LOC_BLOCK,
+					 objfile->static_psymbols,
+					 sh.value, psymtab_language, objfile);
+
 		  /* Skip over procedure to next one. */
 		  if (sh.index >= hdr->iauxMax)
 		    {

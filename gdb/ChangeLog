@@ -1,3 +1,17 @@
+Thu Mar 10 08:52:38 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* symfile.h (ADD_PSYMBOL_VT_TO_LIST): Don't put a semicolon after
+	while (0).  That defeats the whole purpose of using do . . . while (0).
+	* mdebugread.c (parse_partial_symbols): Don't use ?: expression as
+	list for ADD_PSYMBOL_TO_LIST; the macro takes its address and
+	using a ?: expression as an lvalue is not portable.
+
+	* stabsread.c (define_symbol): If REG_STRUCT_HAS_ADDR, also
+	convert a LOC_ARG to a LOC_REF_ARG.  Update code which combines
+	'p' and 'r' symbol descriptors into a single symbol to look for a
+	LOC_REF_ARG.
+	* README, config/sparc/tm-sparc.h: Update comments.
+
 Wed Mar  9 21:43:24 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mdebugread.c (parse_type):  Do not complain for types with
