@@ -637,6 +637,9 @@ gdbcmd_h =	gdbcmd.h $(command_h) $(ui_out_h)
 gdbcore_h =	gdbcore.h $(bfd_h)
 gdbthread_h =	gdbthread.h $(breakpoint_h)
 gdbtypes_h =	gdbtypes.h
+i386_tdep_h =	i386-tdep.h
+i386_linux_tdep_h = i386-linux-tdep.h
+i387_tdep_h =	i387-tdep.h
 inf_loop_h =  	inf-loop.h
 inferior_h =	inferior.h $(breakpoint_h)
 language_h =	language.h
@@ -1677,7 +1680,8 @@ i386v-nat.o: i386v-nat.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(language_h) $(target_h)
 
 i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
-	$(symtab_h) $(symfile_h) $(objfiles_h) $(regcache_h)
+	$(symtab_h) $(symfile_h) $(objfiles_h) $(regcache_h) \
+	$(i386_linux_tdep_h) $(i386_tdep_h) $(i387_tdep_h)
 
 i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h)

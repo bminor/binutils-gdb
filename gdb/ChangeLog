@@ -1,3 +1,11 @@
+2002-06-14  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (i386_linux_tdep_h): Define.
+	(i386_tdep_h, i387_tdep_h): Define.
+	(i386-linux-nat.o): Add $(i386_linux_tdep_h),
+	$(i386_tdep_h) and $(i387_tdep_h).
+	* i386-linux-nat.c: Include "i386-linux-tdep.h".
+
 2002-06-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386.h (START_INFERIOR_TRAPS_EXPECTED): Removed.

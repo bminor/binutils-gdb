@@ -62,6 +62,9 @@
 /* Defines for XMM0_REGNUM etc. */
 #include "i386-tdep.h"
 
+/* Defines I386_LINUX_ORIG_EAX_REGNUM.  */
+#include "i386-linux-tdep.h"
+
 /* Prototypes for local functions.  */
 static void dummy_sse_values (void);
 
