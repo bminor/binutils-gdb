@@ -23,6 +23,7 @@
 #include "as.h"
 #include "subsegs.h"     
 #include "opcode/mn10300.h"
+#include "dwarf2dbg.h"
 
 /* Structure to hold information about predefined registers.  */
 struct reg_name
@@ -30,6 +31,8 @@ struct reg_name
   const char *name;
   int value;
 };
+
+struct dwarf2_line_info debug_line;
 
 /* Generic assembler global variables which must be defined by all targets. */
 
@@ -118,6 +121,8 @@ size_t md_longopts_size = sizeof(md_longopts);
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
+  { "file", dwarf2_directive_file },
+  { "loc", dwarf2_directive_loc },
   { "am30",	set_arch_mach,		AM30 },
   { "am33",	set_arch_mach,		AM33 },
   { "mn10300",	set_arch_mach,		MN103 },
@@ -1745,6 +1750,21 @@ keep_going:
 	    }
 	}
     }
+
+  if (debug_type == DEBUG_DWARF2)
+    {
+      bfd_vma addr;
+
+      /* First update the notion of the current source line.  */
+      dwarf2_where (&debug_line);
+
+      /* We want the offset of the start of this instruction within the
+         the current frag.  */
+      addr = frag_now->fr_address + frag_now_fix () - size;
+
+      /* And record the information.  */
+      dwarf2_gen_line_info (addr, &debug_line);
+    }
 }
 
 
@@ -1998,4 +2018,11 @@ set_arch_mach (mach)
     as_warn (_("could not set architecture and machine"));
 
   current_machine = mach;
+}
+
+void
+mn10300_finalize ()
+{
+  if (debug_type == DEBUG_DWARF2)
+    dwarf2_finish ();
 }

@@ -1,3 +1,12 @@
+2000-05-12  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* config/tc-mn10300.h (md_end): Define.
+	(mn10300_finalize): Declare.
+	* config/tc-mn10300.c: Include dwarf2dbg.h.
+	(debug_line): Define.
+	(md_assemble): Generate dwarf2 line info.
+	(mn10300_finalize): New function.  Finalize dwarf2 info.
+
 2000-05-11  Ulf Carlsson  <ulfc@engr.sgi.com>
 
 	* config/tc-mips.c (md_estimate_size_before_relax): Use the

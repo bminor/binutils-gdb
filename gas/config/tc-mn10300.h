@@ -1,5 +1,5 @@
 /* tc-mn10300.h -- Header file for tc-mn10300.c.
-   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 2000 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -48,3 +48,6 @@
 /* We do relaxing in the assembler as well as the linker.  */
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
+
+#define md_end() mn10300_finalize ()
+void mn10300_finalize PARAMS ((void));
