@@ -1,13 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) YEAR Free Software Foundation, Inc.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-07-11 13:56+0930\n"
+"POT-Creation-Date: 2003-07-17 14:54+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -89,13 +88,13 @@ msgid "Address 0x%x is out of bounds.\n"
 msgstr ""
 
 #: fr30-asm.c:323 frv-asm.c:626 ip2k-asm.c:574 iq2000-asm.c:460 m32r-asm.c:325
-#: openrisc-asm.c:261 xstormy16-asm.c:284
+#: openrisc-asm.c:244 xstormy16-asm.c:284
 #, c-format
 msgid "Unrecognized field %d while parsing.\n"
 msgstr ""
 
 #: fr30-asm.c:373 frv-asm.c:676 ip2k-asm.c:624 iq2000-asm.c:510 m32r-asm.c:375
-#: openrisc-asm.c:311 xstormy16-asm.c:334
+#: openrisc-asm.c:294 xstormy16-asm.c:334
 msgid "missing mnemonic in syntax string"
 msgstr ""
 
@@ -104,42 +103,42 @@ msgstr ""
 #: frv-asm.c:816 frv-asm.c:903 frv-asm.c:1005 ip2k-asm.c:760 ip2k-asm.c:764
 #: ip2k-asm.c:851 ip2k-asm.c:953 iq2000-asm.c:646 iq2000-asm.c:650
 #: iq2000-asm.c:737 iq2000-asm.c:839 m32r-asm.c:511 m32r-asm.c:515
-#: m32r-asm.c:602 m32r-asm.c:704 openrisc-asm.c:447 openrisc-asm.c:451
-#: openrisc-asm.c:538 openrisc-asm.c:640 xstormy16-asm.c:470
+#: m32r-asm.c:602 m32r-asm.c:704 openrisc-asm.c:430 openrisc-asm.c:434
+#: openrisc-asm.c:521 openrisc-asm.c:623 xstormy16-asm.c:470
 #: xstormy16-asm.c:474 xstormy16-asm.c:561 xstormy16-asm.c:663
 msgid "unrecognized instruction"
 msgstr ""
 
 #: fr30-asm.c:556 frv-asm.c:859 ip2k-asm.c:807 iq2000-asm.c:693 m32r-asm.c:558
-#: openrisc-asm.c:494 xstormy16-asm.c:517
+#: openrisc-asm.c:477 xstormy16-asm.c:517
 #, c-format
 msgid "syntax error (expected char `%c', found `%c')"
 msgstr ""
 
 #: fr30-asm.c:566 frv-asm.c:869 ip2k-asm.c:817 iq2000-asm.c:703 m32r-asm.c:568
-#: openrisc-asm.c:504 xstormy16-asm.c:527
+#: openrisc-asm.c:487 xstormy16-asm.c:527
 #, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
 msgstr ""
 
 #: fr30-asm.c:594 frv-asm.c:897 ip2k-asm.c:845 iq2000-asm.c:731 m32r-asm.c:596
-#: openrisc-asm.c:532 xstormy16-asm.c:555
+#: openrisc-asm.c:515 xstormy16-asm.c:555
 msgid "junk at end of line"
 msgstr ""
 
 #: fr30-asm.c:701 frv-asm.c:1004 ip2k-asm.c:952 iq2000-asm.c:838
-#: m32r-asm.c:703 openrisc-asm.c:639 xstormy16-asm.c:662
+#: m32r-asm.c:703 openrisc-asm.c:622 xstormy16-asm.c:662
 msgid "unrecognized form of instruction"
 msgstr ""
 
 #: fr30-asm.c:713 frv-asm.c:1016 ip2k-asm.c:964 iq2000-asm.c:850
-#: m32r-asm.c:715 openrisc-asm.c:651 xstormy16-asm.c:674
+#: m32r-asm.c:715 openrisc-asm.c:634 xstormy16-asm.c:674
 #, c-format
 msgid "bad instruction `%.50s...'"
 msgstr ""
 
 #: fr30-asm.c:716 frv-asm.c:1019 ip2k-asm.c:967 iq2000-asm.c:853
-#: m32r-asm.c:718 openrisc-asm.c:654 xstormy16-asm.c:677
+#: m32r-asm.c:718 openrisc-asm.c:637 xstormy16-asm.c:677
 #, c-format
 msgid "bad instruction `%.50s'"
 msgstr ""
@@ -405,7 +404,6 @@ msgid "21-bit offset out of range"
 msgstr ""
 
 #: iq2000-asm.c:205 iq2000-asm.c:235 iq2000-asm.c:272 iq2000-asm.c:305
-#: openrisc-asm.c:96 openrisc-asm.c:155
 msgid "missing `)'"
 msgstr ""
 
@@ -439,47 +437,47 @@ msgstr ""
 msgid "# <dis error: %08x>"
 msgstr ""
 
-#: mips-dis.c:699
+#: mips-dis.c:703
 msgid "# internal error, incomplete extension sequence (+)"
 msgstr ""
 
-#: mips-dis.c:742
+#: mips-dis.c:746
 #, c-format
 msgid "# internal error, undefined extension sequence (+%c)"
 msgstr ""
 
-#: mips-dis.c:1000
+#: mips-dis.c:1004
 #, c-format
 msgid "# internal error, undefined modifier(%c)"
 msgstr ""
 
-#: mips-dis.c:1751
+#: mips-dis.c:1755
 #, c-format
 msgid "# internal disassembler error, unrecognised modifier (%c)"
 msgstr ""
 
-#: mips-dis.c:1763
+#: mips-dis.c:1767
 msgid ""
 "\n"
 "The following MIPS specific disassembler options are supported for use\n"
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: mips-dis.c:1767
+#: mips-dis.c:1771
 msgid ""
 "\n"
 "  gpr-names=ABI            Print GPR names according to  specified ABI.\n"
 "                           Default: based on binary being disassembled.\n"
 msgstr ""
 
-#: mips-dis.c:1771
+#: mips-dis.c:1775
 msgid ""
 "\n"
 "  fpr-names=ABI            Print FPR names according to specified ABI.\n"
 "                           Default: numeric.\n"
 msgstr ""
 
-#: mips-dis.c:1775
+#: mips-dis.c:1779
 msgid ""
 "\n"
 "  cp0-names=ARCH           Print CP0 register names according to\n"
@@ -487,7 +485,7 @@ msgid ""
 "                           Default: based on binary being disassembled.\n"
 msgstr ""
 
-#: mips-dis.c:1780
+#: mips-dis.c:1784
 msgid ""
 "\n"
 "  hwr-names=ARCH           Print HWR names according to specified \n"
@@ -495,32 +493,32 @@ msgid ""
 "                           Default: based on binary being disassembled.\n"
 msgstr ""
 
-#: mips-dis.c:1785
+#: mips-dis.c:1789
 msgid ""
 "\n"
 "  reg-names=ABI            Print GPR and FPR names according to\n"
 "                           specified ABI.\n"
 msgstr ""
 
-#: mips-dis.c:1789
+#: mips-dis.c:1793
 msgid ""
 "\n"
 "  reg-names=ARCH           Print CP0 register and HWR names according to\n"
 "                           specified architecture.\n"
 msgstr ""
 
-#: mips-dis.c:1793
+#: mips-dis.c:1797
 msgid ""
 "\n"
 "  For the options above, the following values are supported for \"ABI\":\n"
 "   "
 msgstr ""
 
-#: mips-dis.c:1798 mips-dis.c:1806 mips-dis.c:1808
+#: mips-dis.c:1802 mips-dis.c:1810 mips-dis.c:1812
 msgid "\n"
 msgstr ""
 
-#: mips-dis.c:1800
+#: mips-dis.c:1804
 msgid ""
 "\n"
 "  For the options above, The following values are supported for \"ARCH\":\n"

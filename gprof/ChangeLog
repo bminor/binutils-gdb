@@ -1,3 +1,7 @@
+2003-07-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: New Spanish translation.
+
 2003-07-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/gprof.pot: Regenerate.

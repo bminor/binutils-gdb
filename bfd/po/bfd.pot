@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-07-14 11:24+0100\n"
+"POT-Creation-Date: 2003-07-17 14:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -691,7 +691,7 @@ msgstr ""
 #. Ignore init flag - it may not be set, despite the flags field
 #. containing valid data.
 #: elf32-arm.h:2443 elf32-cris.c:2975 elf32-m68hc1x.c:1459 elf32-m68k.c:397
-#: elf32-vax.c:546 elfxx-mips.c:9238
+#: elf32-vax.c:546 elfxx-mips.c:9240
 #, c-format
 msgid "private flags = %lx:"
 msgstr ""
@@ -973,7 +973,7 @@ msgid "unsupported relocation between data/insn address spaces"
 msgstr ""
 
 #: elf32-iq2000.c:907 elf32-m68hc1x.c:1431 elf32-ppc.c:2175 elf64-sparc.c:3072
-#: elfxx-mips.c:9195
+#: elfxx-mips.c:9197
 #, c-format
 msgid "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
 msgstr ""
@@ -982,8 +982,8 @@ msgstr ""
 msgid "SDA relocation when _SDA_BASE_ not defined"
 msgstr ""
 
-#: elf32-ia64.c:3958 elf32-m32r.c:1018 elf64-alpha.c:4279 elf64-alpha.c:4407
-#: elf64-ia64.c:3958
+#: elf32-ia64.c:3817 elf32-m32r.c:1018 elf64-alpha.c:4279 elf64-alpha.c:4407
+#: elf64-ia64.c:3817
 #, c-format
 msgid "%s: unknown relocation type %d"
 msgstr ""
@@ -1430,7 +1430,7 @@ msgstr ""
 msgid "%s: warning: %s relocation to 0x%x from %s section"
 msgstr ""
 
-#: elf32-ia64.c:2450 elf32-xstormy16.c:462 elf64-ia64.c:2450
+#: elf32-ia64.c:2326 elf32-xstormy16.c:462 elf64-ia64.c:2326
 msgid "non-zero addend in @fptr reloc"
 msgstr ""
 
@@ -1879,122 +1879,122 @@ msgstr ""
 msgid "%s: CALL16 reloc at 0x%lx not against global symbol"
 msgstr ""
 
-#: elfxx-mips.c:8692
+#: elfxx-mips.c:8693
 #, c-format
 msgid "%s: illegal section name `%s'"
 msgstr ""
 
-#: elfxx-mips.c:9025
+#: elfxx-mips.c:9027
 #, c-format
 msgid "%s: endianness incompatible with that of the selected emulation"
 msgstr ""
 
-#: elfxx-mips.c:9037
+#: elfxx-mips.c:9039
 #, c-format
 msgid "%s: ABI is incompatible with that of the selected emulation"
 msgstr ""
 
-#: elfxx-mips.c:9104
+#: elfxx-mips.c:9106
 #, c-format
 msgid "%s: warning: linking PIC files with non-PIC files"
 msgstr ""
 
-#: elfxx-mips.c:9121
+#: elfxx-mips.c:9123
 #, c-format
 msgid "%s: linking 32-bit code with 64-bit code"
 msgstr ""
 
-#: elfxx-mips.c:9149
+#: elfxx-mips.c:9151
 #, c-format
 msgid "%s: linking %s module with previous %s modules"
 msgstr ""
 
-#: elfxx-mips.c:9172
+#: elfxx-mips.c:9174
 #, c-format
 msgid "%s: ABI mismatch: linking %s module with previous %s modules"
 msgstr ""
 
-#: elfxx-mips.c:9241
+#: elfxx-mips.c:9243
 msgid " [abi=O32]"
 msgstr ""
 
-#: elfxx-mips.c:9243
+#: elfxx-mips.c:9245
 msgid " [abi=O64]"
 msgstr ""
 
-#: elfxx-mips.c:9245
+#: elfxx-mips.c:9247
 msgid " [abi=EABI32]"
 msgstr ""
 
-#: elfxx-mips.c:9247
+#: elfxx-mips.c:9249
 msgid " [abi=EABI64]"
 msgstr ""
 
-#: elfxx-mips.c:9249
+#: elfxx-mips.c:9251
 msgid " [abi unknown]"
 msgstr ""
 
-#: elfxx-mips.c:9251
+#: elfxx-mips.c:9253
 msgid " [abi=N32]"
 msgstr ""
 
-#: elfxx-mips.c:9253
+#: elfxx-mips.c:9255
 msgid " [abi=64]"
 msgstr ""
 
-#: elfxx-mips.c:9255
+#: elfxx-mips.c:9257
 msgid " [no abi set]"
 msgstr ""
 
-#: elfxx-mips.c:9258
+#: elfxx-mips.c:9260
 msgid " [mips1]"
 msgstr ""
 
-#: elfxx-mips.c:9260
+#: elfxx-mips.c:9262
 msgid " [mips2]"
 msgstr ""
 
-#: elfxx-mips.c:9262
+#: elfxx-mips.c:9264
 msgid " [mips3]"
 msgstr ""
 
-#: elfxx-mips.c:9264
+#: elfxx-mips.c:9266
 msgid " [mips4]"
 msgstr ""
 
-#: elfxx-mips.c:9266
+#: elfxx-mips.c:9268
 msgid " [mips5]"
 msgstr ""
 
-#: elfxx-mips.c:9268
+#: elfxx-mips.c:9270
 msgid " [mips32]"
 msgstr ""
 
-#: elfxx-mips.c:9270
+#: elfxx-mips.c:9272
 msgid " [mips64]"
 msgstr ""
 
-#: elfxx-mips.c:9272
+#: elfxx-mips.c:9274
 msgid " [mips32r2]"
 msgstr ""
 
-#: elfxx-mips.c:9274
+#: elfxx-mips.c:9276
 msgid " [unknown ISA]"
 msgstr ""
 
-#: elfxx-mips.c:9277
+#: elfxx-mips.c:9279
 msgid " [mdmx]"
 msgstr ""
 
-#: elfxx-mips.c:9280
+#: elfxx-mips.c:9282
 msgid " [mips16]"
 msgstr ""
 
-#: elfxx-mips.c:9283
+#: elfxx-mips.c:9285
 msgid " [32bitmode]"
 msgstr ""
 
-#: elfxx-mips.c:9285
+#: elfxx-mips.c:9287
 msgid " [not 32bitmode]"
 msgstr ""
 
@@ -2642,75 +2642,75 @@ msgstr ""
 msgid "%s: loader reloc in read-only section %s"
 msgstr ""
 
-#: elf32-ia64.c:2392 elf64-ia64.c:2392
+#: elf32-ia64.c:2271 elf64-ia64.c:2271
 msgid "@pltoff reloc against local symbol"
 msgstr ""
 
-#: elf32-ia64.c:3804 elf64-ia64.c:3804
+#: elf32-ia64.c:3663 elf64-ia64.c:3663
 #, c-format
 msgid "%s: short data segment overflowed (0x%lx >= 0x400000)"
 msgstr ""
 
-#: elf32-ia64.c:3815 elf64-ia64.c:3815
+#: elf32-ia64.c:3674 elf64-ia64.c:3674
 #, c-format
 msgid "%s: __gp does not cover short data segment"
 msgstr ""
 
-#: elf32-ia64.c:4131 elf64-ia64.c:4131
+#: elf32-ia64.c:3986 elf64-ia64.c:3986
 #, c-format
 msgid "%s: linking non-pic code in a shared library"
 msgstr ""
 
-#: elf32-ia64.c:4164 elf64-ia64.c:4164
+#: elf32-ia64.c:4017 elf64-ia64.c:4017
 #, c-format
 msgid "%s: @gprel relocation against dynamic symbol %s"
 msgstr ""
 
-#: elf32-ia64.c:4224 elf64-ia64.c:4224
+#: elf32-ia64.c:4077 elf64-ia64.c:4077
 #, c-format
 msgid "%s: linking non-pic code in a position independent executable"
 msgstr ""
 
-#: elf32-ia64.c:4363 elf64-ia64.c:4363
+#: elf32-ia64.c:4214 elf64-ia64.c:4214
 #, c-format
 msgid "%s: @internal branch to dynamic symbol %s"
 msgstr ""
 
-#: elf32-ia64.c:4365 elf64-ia64.c:4365
+#: elf32-ia64.c:4216 elf64-ia64.c:4216
 #, c-format
 msgid "%s: speculation fixup to dynamic symbol %s"
 msgstr ""
 
-#: elf32-ia64.c:4367 elf64-ia64.c:4367
+#: elf32-ia64.c:4218 elf64-ia64.c:4218
 #, c-format
 msgid "%s: @pcrel relocation against dynamic symbol %s"
 msgstr ""
 
-#: elf32-ia64.c:4579 elf64-ia64.c:4579
+#: elf32-ia64.c:4430 elf64-ia64.c:4430
 msgid "unsupported reloc"
 msgstr ""
 
-#: elf32-ia64.c:4858 elf64-ia64.c:4858
+#: elf32-ia64.c:4709 elf64-ia64.c:4709
 #, c-format
 msgid "%s: linking trap-on-NULL-dereference with non-trapping files"
 msgstr ""
 
-#: elf32-ia64.c:4867 elf64-ia64.c:4867
+#: elf32-ia64.c:4718 elf64-ia64.c:4718
 #, c-format
 msgid "%s: linking big-endian files with little-endian files"
 msgstr ""
 
-#: elf32-ia64.c:4876 elf64-ia64.c:4876
+#: elf32-ia64.c:4727 elf64-ia64.c:4727
 #, c-format
 msgid "%s: linking 64-bit files with 32-bit files"
 msgstr ""
 
-#: elf32-ia64.c:4885 elf64-ia64.c:4885
+#: elf32-ia64.c:4736 elf64-ia64.c:4736
 #, c-format
 msgid "%s: linking constant-gp files with non-constant-gp files"
 msgstr ""
 
-#: elf32-ia64.c:4895 elf64-ia64.c:4895
+#: elf32-ia64.c:4746 elf64-ia64.c:4746
 #, c-format
 msgid "%s: linking auto-pic files with non-auto-pic files"
 msgstr ""

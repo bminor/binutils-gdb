@@ -5099,14 +5099,12 @@ msgid "  -mip2022               restrict to IP2022 insns \n"
 msgstr "  -mip2022               yalnız IP2022 işlemlerini kullanır\n"
 
 #: config/tc-ip2k.c:127
-#, fuzzy
 msgid "  -mip2022ext            permit extended IP2022 insn\n"
-msgstr "  -m32rx                  genişletilmiş m32rx işlem kümesini destekler\n"
+msgstr "  -mip2022ext            genişletilmiş IP2022 işlemlerine izin verir\n"
 
 #: config/tc-ip2k.c:248
-#, fuzzy
 msgid "md_pcrel_from\n"
-msgstr "md_convert_frag\n"
+msgstr "md_pcrel_from\n"
 
 #. Pretend that we do not recognise this option.
 #: config/tc-m32r.c:233
@@ -5263,7 +5261,7 @@ msgid "Unmatched high/shigh reloc"
 msgstr "Eşlenmemiş high/shigh yerdeğişimi"
 
 #: config/tc-m68hc11.c:372
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Motorola 68HC11/68HC12/68HCS12 options:\n"
 "  -m68hc11 | -m68hc12 |\n"
@@ -5282,8 +5280,13 @@ msgid ""
 "  --generate-example      generate an example of each instruction\n"
 "                          (used for testing)\n"
 msgstr ""
-"Motorola 68HC11/68HC12 seçenekleri:\n"
-"  -m68hc11 | -m68hc12     işlemciyi belirler [öntanımlı %s]\n"
+"Motorola 68HC11/68HC12/68HCS12 seçenekleri:\n"
+"  -m68hc11 | -m68hc12 |\n"
+"  -m68hcs12               işlemciyi belirler [öntanımlı %s]\n"
+"  -mshort                 16 bit tamsayı ABI kullanır (öntanımlı)\n"
+"  -mlong                  32 bit tamsayı ABI kullanır\n"
+"  -mshort-double          32 bit double ABI kullanır\n"
+"  -mlong-double           64 bit double ABI kullanır (öntanımlı)\n"
 "  --force-long-branchs    göreli dalları hep kesin hale getirir\n"
 "  -S,--short-branchs      göreli konum kapsam dışı olduğu zaman göreli\n"
 "                          dalları kesin hale getirmez.\n"
@@ -5558,14 +5561,13 @@ msgid "Invalid operand for `%s'"
 msgstr "`%s' için geçersiz işlenen"
 
 #: config/tc-m68hc11.c:2670
-#, fuzzy, c-format
+#, c-format
 msgid "Invalid mode: %s\n"
-msgstr "Geçersiz işlenenler: %s"
+msgstr "Geçersiz kip: %s\n"
 
 #: config/tc-m68hc11.c:2732
-#, fuzzy
 msgid "bad .relax format"
-msgstr "hatalı .uses biçemi"
+msgstr "hatalı .relax biçemi"
 
 #: config/tc-m68hc11.c:2779
 #, c-format
@@ -5785,7 +5787,7 @@ msgstr "İç Hata: %s hash'lenemedi: %s"
 
 #: config/tc-m68k.c:3948
 msgid "architecture not yet selected: defaulting to 68020"
-msgstr ""
+msgstr "mimari seçilmemiş: 68020 varsayılıyor"
 
 #: config/tc-m68k.c:3997
 #, c-format
@@ -6091,9 +6093,9 @@ msgid "operand must be a constant"
 msgstr "işlenen sabit olmalı"
 
 #: config/tc-mcore.c:839
-#, fuzzy, c-format
+#, c-format
 msgid "operand must be absolute in range %u..%u, not %ld"
-msgstr "işlenen, %3$d değil, %1$d..%2$d aralığında kesin olmalı"
+msgstr "işlenen, %3$ld değil, %1$u..%2$u aralığında kesin olmalı"
 
 #: config/tc-mcore.c:875
 msgid "operand must be a multiple of 4"
@@ -6257,24 +6259,24 @@ msgid "unknown"
 msgstr "bilinmeyen"
 
 #: config/tc-mcore.c:2073
-#, fuzzy, c-format
+#, c-format
 msgid "odd distance branch (0x%lx bytes)"
-msgstr "tek sayılı uzaklık dalı (0x%x bayt)"
+msgstr "tek sayılı uzaklık dalı (0x%lx bayt)"
 
 #: config/tc-mcore.c:2077
-#, fuzzy, c-format
+#, c-format
 msgid "pcrel for branch to %s too far (0x%lx)"
-msgstr "%s'ye dal için pcrel fazla uzak (0x%x)"
+msgstr "%s'ye dal için pcrel fazla uzak (0x%lx)"
 
 #: config/tc-mcore.c:2096
-#, fuzzy, c-format
+#, c-format
 msgid "pcrel for lrw/jmpi/jsri to %s too far (0x%lx)"
-msgstr "%s'ye lrw/jmpi/jsri için pcrel fazla uzak (0x%x)"
+msgstr "%s'ye lrw/jmpi/jsri için pcrel fazla uzak (0x%lx)"
 
 #: config/tc-mcore.c:2107
-#, fuzzy, c-format
+#, c-format
 msgid "pcrel for loopt too far (0x%lx)"
-msgstr "loopt için pcrel fazla uzak (0x%x)"
+msgstr "loopt için pcrel fazla uzak (0x%lx)"
 
 #: config/tc-mcore.c:2336
 #, c-format
@@ -6396,9 +6398,8 @@ msgid "la used to load 64-bit address"
 msgstr "la 64 bit adres yüklemekte kullanıldı"
 
 #: config/tc-mips.c:4999 config/tc-mips.c:5352
-#, fuzzy
 msgid "PIC code offset overflow (max 32 signed bits)"
-msgstr "PIC kodu görece taşması (maksimum 16 signed bit)"
+msgstr "PIC kodu görece taşması (maksimum 32 signed bit)"
 
 #: config/tc-mips.c:5418
 msgid "MIPS PIC call to register other than $25"
@@ -6419,15 +6420,13 @@ msgid "opcode not supported on this processor"
 msgstr "bu işlemcide bu opkod desteklenmiyor"
 
 #: config/tc-mips.c:5969
-#, fuzzy
 msgid "load/store address overflow (max 32 bits)"
-msgstr "PIC kodu görece taşması (maksimum 16 signed bit)"
+msgstr "adres yükle/sakla taşması (maksimum 32 bit)"
 
 #: config/tc-mips.c:7083 config/tc-mips.c:7116 config/tc-mips.c:7166
 #: config/tc-mips.c:7198
-#, fuzzy
 msgid "Improper rotate count"
-msgstr "Geçersiz kaydırma miktarı (%lu)"
+msgstr "Geçersiz döndürme sayısı"
 
 #: config/tc-mips.c:7259
 #, c-format
@@ -6452,9 +6451,9 @@ msgid "internal: bad mips opcode (mask error): %s %s"
 msgstr "iç hata: hatalı mips opkodu (maske hatası): %s %s"
 
 #: config/tc-mips.c:8029 config/tc-mips.c:8360
-#, fuzzy, c-format
+#, c-format
 msgid "internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"
-msgstr "iç hata: hatalı mips opkodu (bilinmeyen işlenen türü `%c'): %s %s"
+msgstr "iç hata: hatalı mips opkodu (bilinmeyen genişletilmiş işlenen türü `+%c'): %s %s"
 
 #: config/tc-mips.c:8090
 #, c-format
@@ -6472,19 +6471,19 @@ msgid "opcode not supported on this processor: %s (%s)"
 msgstr "opkod bu işlemcide desteklenmiyor: %s (%s)"
 
 #: config/tc-mips.c:8292
-#, fuzzy, c-format
+#, c-format
 msgid "Improper position (%lu)"
-msgstr "Geçersiz kaydırma miktarı (%lu)"
+msgstr "Geçersiz yer (%lu)"
 
 #: config/tc-mips.c:8318
 #, c-format
 msgid "Improper insert size (%lu, position %lu)"
-msgstr ""
+msgstr "Geçersiz ekleme boyu (%lu, yer %lu)"
 
 #: config/tc-mips.c:8344
 #, c-format
 msgid "Improper extract size (%lu, position %lu)"
-msgstr ""
+msgstr "Geçersiz çıkarma boyu (%lu, yer %lu)"
 
 #: config/tc-mips.c:8378
 #, c-format
@@ -6570,9 +6569,8 @@ msgid "Can't use floating point insn in this section"
 msgstr "Bu bölümde kayan noktalı işlem kullanılamaz"
 
 #: config/tc-mips.c:9100
-#, fuzzy
 msgid "expression out of range"
-msgstr "İfade kapsam dışı, 0 kullanıldı"
+msgstr "İfade kapsam dışı"
 
 #: config/tc-mips.c:9140
 msgid "lui expression not in range 0..65535"
@@ -6588,9 +6586,9 @@ msgid "invalid coprocessor sub-selection value (0-7)"
 msgstr "hatalı yardımcı işlemci alt seçim değeri (0-7)"
 
 #: config/tc-mips.c:9201 config/tc-mips.c:9218
-#, fuzzy, c-format
+#, c-format
 msgid "bad byte vector index (%ld)"
-msgstr "göreli konum (%ld) için hatalı şimdiki değer"
+msgstr "hatalı bayt vektör indeksi (%ld)"
 
 #: config/tc-mips.c:9229
 #, c-format
@@ -6631,9 +6629,9 @@ msgid "operand value out of range for instruction"
 msgstr "işlenen değeri işlem için kapsam dışı"
 
 #: config/tc-mips.c:10340
-#, fuzzy, c-format
+#, c-format
 msgid "A different %s was already specified, is now %s"
-msgstr "Farklı bir -mcpu= zaten belirtilmişti, şimdi -mcpu=%s oldu"
+msgstr "Farklı bir %s zaten belirtilmişti, şimdi %s oldu"
 
 #: config/tc-mips.c:10501
 msgid "-G may not be used with embedded PIC code"
@@ -6691,20 +6689,19 @@ msgstr "-G bu ayarlarda desteklenmiyor."
 #: config/tc-mips.c:10743
 #, c-format
 msgid "-%s conflicts with the other architecture options, which imply -%s"
-msgstr ""
+msgstr "-%s, -%s gerektiren diğer mimari seçenekleri ile çelişiyor"
 
 #: config/tc-mips.c:10774
-#, fuzzy
 msgid "-mgp64 used with a 32-bit processor"
-msgstr "dla 32 bit yazmaç yüklemekte kullanıldı"
+msgstr "32 bitlik işlemci ile -mgp64 kullanılmış"
 
 #: config/tc-mips.c:10776
 msgid "-mgp32 used with a 64-bit ABI"
-msgstr ""
+msgstr "64 bit ABI ile -mgp32 kullanılmış"
 
 #: config/tc-mips.c:10778
 msgid "-mgp64 used with a 32-bit ABI"
-msgstr ""
+msgstr "32 bit ABI ile -mgp64 kullanılmış"
 
 #: config/tc-mips.c:10808
 msgid "trap exception not supported at ISA 1"
@@ -6716,18 +6713,16 @@ msgid "Unmatched %%hi reloc"
 msgstr "Eşleşmeyen %%hi yerdeğişimi"
 
 #: config/tc-mips.c:11048
-#, fuzzy
 msgid "Cannot branch to undefined symbol."
-msgstr "Tanımsız sembollü bra veya bsr."
+msgstr "Tanımsız sembole dallanılamaz."
 
 #: config/tc-mips.c:11055
-#, fuzzy
 msgid "Cannot branch to symbol in another section."
-msgstr "Değişik bölümlerdeki semboller birbirinden çıkartılamaz %s %s"
+msgstr "Değişik bölümdeki sembole dallanılamaz."
 
 #: config/tc-mips.c:11064
 msgid "Pretending global symbol used as branch target is local."
-msgstr ""
+msgstr "Dal hedefi olarak kullanılan global sembol, yerel gibi değerlendirildi."
 
 #: config/tc-mips.c:11229
 msgid "Invalid PC relative reloc"
@@ -6791,9 +6786,9 @@ msgid "`noreorder' must be set before `nomacro'"
 msgstr "`nomacro'dan önce `noreorder' atanmalı"
 
 #: config/tc-mips.c:11988
-#, fuzzy, c-format
+#, c-format
 msgid "unknown architecture %s"
-msgstr "`%s' mimarisi bilinmiyor\n"
+msgstr "`%s' mimarisi bilinmiyor"
 
 #: config/tc-mips.c:11996 config/tc-mips.c:12017
 #, c-format
@@ -6822,9 +6817,8 @@ msgid "Unsupported use of .gpword"
 msgstr ".gpword'un desteklenmeyen kullanımı"
 
 #: config/tc-mips.c:12408
-#, fuzzy
 msgid "Unsupported use of .gpdword"
-msgstr ".gpword'un desteklenmeyen kullanımı"
+msgstr ".gpdword'un desteklenmeyen kullanımı"
 
 #: config/tc-mips.c:12543
 msgid "expected `$'"
@@ -6863,7 +6857,7 @@ msgstr "Bu nesne dosya biçeminde %s yerdeğişimi gösterilemez"
 
 #: config/tc-mips.c:13429
 msgid "relaxed out-of-range branch into a jump"
-msgstr ""
+msgstr "kapsam dışı dal, sıçrama olarak esnetildi"
 
 #: config/tc-mips.c:13902
 msgid "missing .end at end of assembly"
@@ -6937,7 +6931,6 @@ msgstr ""
 "                    yazmacı ile izin verir [öntanımlı 8]\n"
 
 #: config/tc-mips.c:14478
-#, fuzzy
 msgid ""
 "-mips1\t\t\tgenerate MIPS ISA I instructions\n"
 "-mips2\t\t\tgenerate MIPS ISA II instructions\n"
@@ -6955,6 +6948,7 @@ msgstr ""
 "-mips4              MIPS ISA IV işlemleri üretir\n"
 "-mips5              MIPS ISA V işlemleri üretir\n"
 "-mips32             MIPS32 ISA işlemleri üretir\n"
+"-mips32r2           2. Sürüm MIPS32 ISA işlemleri üretir\n"
 "-mips64             MIPS64 ISA işlemleri üretir\n"
 "-march=İŞL/-mtune=İŞL      İŞL işlemcisi için kod üretir. İŞL seçenekleri:\n"
 
@@ -7294,9 +7288,9 @@ msgid "junk at end of line: `%s'"
 msgstr "satır sonunda bozukluk: `%s'"
 
 #: config/tc-mn10200.c:1242 write.c:2691
-#, fuzzy, c-format
+#, c-format
 msgid "can't resolve `%s' {%s section} - `%s' {%s section}"
-msgstr "%s bölümü için bölüm bayrakları atanamadı"
+msgstr "`%s' çözümlenemedi {%s bölümü} - `%s' {%s bölümü}"
 
 #: config/tc-mn10200.c:1347 config/tc-mn10300.c:2589 config/tc-ppc.c:1426
 #: config/tc-v850.c:1607
@@ -7332,14 +7326,13 @@ msgid "Bad relocation fixup type (%d)"
 msgstr "Hatalı yerdeğişim düzeltme türü (%d)"
 
 #: config/tc-msp430.c:170
-#, fuzzy
 msgid "Known MCU names:\n"
-msgstr "Bilinen MCU adları:"
+msgstr "Bilinen MCU adları:\n"
 
 #: config/tc-msp430.c:173
 #, c-format
 msgid "\t %s\n"
-msgstr ""
+msgstr "\t %s\n"
 
 #: config/tc-msp430.c:183
 msgid ""
@@ -7362,126 +7355,138 @@ msgid ""
 "                  msp430x435  msp430x436  msp430x437\n"
 "                  msp430x447  msp430x448  msp430x449\n"
 msgstr ""
+"MSP430 seçenekleri:\n"
+"  -mmcu=[msp430-adı] mikrokontrolör türü seçer\n"
+"                  msp430x110  msp430x112\n"
+"                  msp430x1101 msp430x1111\n"
+"                  msp430x1121 msp430x1122 msp430x1132\n"
+"                  msp430x122  msp430x123\n"
+"                  msp430x1222 msp430x1232\n"
+"                  msp430x133  msp430x135\n"
+"                  msp430x1331 msp430x1351\n"
+"                  msp430x147  msp430x148  msp430x149\n"
+"                  msp430x155  msp430x156  msp430x157\n"
+"                  msp430x167  msp430x168  msp430x169\n"
+"                  msp430x311  msp430x312  msp430x313  msp430x314  msp430x315\n"
+"                  msp430x323  msp430x325\n"
+"                  msp430x336  msp430x337\n"
+"                  msp430x412  msp430x413\n"
+"                  msp430x435  msp430x436  msp430x437\n"
+"                  msp430x447  msp430x448  msp430x449\n"
 
 #: config/tc-msp430.c:263
-#, fuzzy, c-format
+#, c-format
 msgid "redefinition of mcu type %s' to %s'"
 msgstr "mcu türü `%s'den `%s'ye yeniden tanımlandı"
 
 #: config/tc-msp430.c:496
-#, fuzzy, c-format
+#, c-format
 msgid "instruction %s requires %d operand(s)"
-msgstr "'%s' işlemi uzak kip adreslemesi gerektiriyor"
+msgstr "'%s' işlemi için %d işlenen gerekli"
 
 #: config/tc-msp430.c:743
 #, c-format
 msgid "Even number required. Rounded to %d"
-msgstr ""
+msgstr "Çift sayı gerekli. %d'ye yuvarlandı"
 
 #: config/tc-msp430.c:754
-#, fuzzy, c-format
+#, c-format
 msgid "Wrong displacement  %d"
-msgstr "%x'da tek sayılı sıçrama"
+msgstr "Yanlış yerdeğiştirme  %d"
 
 #: config/tc-msp430.c:771
-#, fuzzy
 msgid "instruction requires label sans '$'"
-msgstr "%s işlemi kesin ifade gerektirir"
+msgstr "işlem, '$' içermeyen etiket gerektirir"
 
 #: config/tc-msp430.c:777
-#, fuzzy
 msgid "instruction requires label or value in range -511:512"
-msgstr "%s işlemi kesin ifade gerektirir"
+msgstr "işlem etiket veya -511:512 aralığında değer gerektirir"
 
 #: config/tc-msp430.c:783
-#, fuzzy
 msgid "instruction requires label"
-msgstr "%s işlemi kesin ifade gerektirir"
+msgstr "işlem etiket gerektirir"
 
 #: config/tc-msp430.c:789
-#, fuzzy
 msgid "Ilegal instruction or not implmented opcode."
-msgstr "İşlem yok veya eksik opkod."
+msgstr "Geçersiz işlem veya eksik opkod."
 
 #: config/tc-msp430.c:817
 #, c-format
 msgid "Internal bug. Try to use 0(r%d) instead of @r%d"
-msgstr ""
+msgstr "İç hata. @r%2$d yerine 0(r%1$d) kullanmayı deneyin"
 
 #: config/tc-msp430.c:827
 msgid "this addressing mode is not applicable for destination operand"
-msgstr ""
+msgstr "bu adresleme kipi hedef işlenen için geçerli değil"
 
 #: config/tc-msp430.c:944
-#, fuzzy, c-format
+#, c-format
 msgid "value %ld out of range. Use #lo() or #hi()"
-msgstr "\"%s\" işleneni aralık dışı (1 veya 2 kullanın)"
+msgstr "%ld değeri aralık dışı #lo() veya #hi() kullanın"
 
 #: config/tc-msp430.c:1040
 #, c-format
 msgid "unknown expression in operand %s. use #llo() #lhi() #hlo() #hhi() "
-msgstr ""
+msgstr "%s işleneninde bilinmeyen ifade. #llo() #lhi() #hlo() #hhi() kullanın"
 
 #: config/tc-msp430.c:1090 config/tc-msp430.c:1304
-#, fuzzy, c-format
+#, c-format
 msgid "unknown operand %s"
-msgstr "bilinmeyen opkod %s"
+msgstr "bilinmeyen işlenen %s"
 
 #: config/tc-msp430.c:1111 config/tc-msp430.c:1242
-#, fuzzy, c-format
+#, c-format
 msgid "value out of range: %d"
-msgstr "değer aralık dışı"
+msgstr "değer aralık dışı: %d"
 
 #: config/tc-msp430.c:1120 config/tc-msp430.c:1259
-#, fuzzy, c-format
+#, c-format
 msgid "unknown expression in operand %s"
-msgstr "İşlenende geçersiz ifade"
+msgstr "%s işleneninde bilinmeyen ifade"
 
 #: config/tc-msp430.c:1134 config/tc-msp430.c:1141
-#, fuzzy, c-format
+#, c-format
 msgid "unknown addressing mode %s"
-msgstr "bilinmeyen koşul: %s"
+msgstr "bilinmeyen adresleme kipi %s"
 
 #: config/tc-msp430.c:1149
-#, fuzzy, c-format
+#, c-format
 msgid "Bad register name r%s"
-msgstr "hatalı yazmaç ismi `%s'"
+msgstr "Hatalı yazmaç ismi r%s"
 
 #: config/tc-msp430.c:1161
 #, c-format
 msgid "MSP430 does not have %d registers"
-msgstr ""
+msgstr "MSP430'da %d yazmaç yok"
 
 #: config/tc-msp430.c:1181
-#, fuzzy
 msgid "')' required"
-msgstr "`)' gerekli"
+msgstr "')' gerekli"
 
 #: config/tc-msp430.c:1194
 #, c-format
 msgid "unknown operator %s. Did you mean X(Rn) or #[hl][hl][oi](CONST) ?"
-msgstr ""
+msgstr "bilinmeyen işlemimi %s. X(Rn) veya #[hl][hl][oi](CONST) mı kastettiniz?"
 
 #: config/tc-msp430.c:1203
 #, c-format
 msgid "unknown operator (r%s substituded as a register name"
-msgstr ""
+msgstr "bilinmeyen işlemimi (r%s yazmaç adı olarak kullanıldı"
 
 #: config/tc-msp430.c:1215 config/tc-msp430.c:1226
-#, fuzzy, c-format
+#, c-format
 msgid "unknown operator %s"
-msgstr "Bilinmeyen operatör"
+msgstr "bilinmeyen işlemimi %s"
 
 #: config/tc-msp430.c:1220
-#, fuzzy
 msgid "r2 should not be used in indexed addressing mode"
-msgstr "Dış adresleme kipinde geçersiz sözdizimi"
+msgstr "r2 indeksli adresleme kipinde kullanılmamalı"
 
 #. Unreachable.
 #: config/tc-msp430.c:1321
-#, fuzzy, c-format
+#, c-format
 msgid "unknown addressing mode for operand %s"
-msgstr "Bilinmeyen yerdeğişim işleneni: !%s"
+msgstr "%s işleneni için bilinmeyen adresleme kipi"
 
 #: config/tc-ns32k.c:449
 msgid "Invalid syntax in PC-relative addressing mode"
@@ -7610,46 +7615,45 @@ msgid "Can't hash %s: %s"
 msgstr "%s hash'lenemedi: %s"
 
 #: config/tc-ns32k.c:1740
-#, fuzzy, c-format
+#, c-format
 msgid "value of %ld out of byte displacement range."
-msgstr "Değer 16 bit aralığının dışında."
+msgstr "%ld'nin değeri, bayt yerdeğişim aralığının dışında."
 
 #: config/tc-ns32k.c:1749
-#, fuzzy, c-format
+#, c-format
 msgid "value of %ld out of word displacement range."
-msgstr "Çift word yerdeğişimi kapsam dışı"
+msgstr "%ld'nin değeri word yerdeğişimi aralığının dışında."
 
 #: config/tc-ns32k.c:1763
-#, fuzzy, c-format
+#, c-format
 msgid "value of %ld out of double word displacement range."
-msgstr "Çift word yerdeğişimi kapsam dışı"
+msgstr "%ld'nin değeri double word yerdeğişimi aralığının dışında."
 
 #: config/tc-ns32k.c:1783
-#, fuzzy, c-format
+#, c-format
 msgid "Internal logic error.  line %d, file \"%s\""
-msgstr "İç mantıksal hata. Satır %s, dosya \"%s\""
+msgstr "İç mantıksal hata. Satır %d, dosya \"%s\""
 
 #: config/tc-ns32k.c:1831
-#, fuzzy, c-format
+#, c-format
 msgid "Internal logic error. line %d, file \"%s\""
-msgstr "İç mantıksal hata. Satır %s, dosya \"%s\""
+msgstr "İç mantıksal hata. Satır %d, dosya \"%s\""
 
 #: config/tc-ns32k.c:1936
 msgid "Bit field out of range"
 msgstr "Bit alanı kapsam dışı"
 
 #: config/tc-ns32k.c:2183
-#, fuzzy, c-format
+#, c-format
 msgid "invalid architecture option -m%s, ignored"
-msgstr "geçersiz yapı seçeneği -m%s"
+msgstr "geçersiz yapı seçeneği -m%s, yoksayıldı"
 
 #: config/tc-ns32k.c:2196
 #, c-format
 msgid "invalid default displacement size \"%s\". Defaulting to %d."
-msgstr ""
+msgstr "geçersiz öntanımlı yerdeğişim boyu \"%s\". %d varsayılıyor."
 
 #: config/tc-ns32k.c:2213
-#, fuzzy
 msgid ""
 "NS32K options:\n"
 "-m32032 | -m32532\tselect variant of NS32K architecture\n"
@@ -7657,6 +7661,7 @@ msgid ""
 msgstr ""
 "NS32K seçenekleri:\n"
 "-m32032 | -m32532\tNS32K yapısının alt türlerini belirtir\n"
+"--disp-size-default=<1|2|4>\n"
 
 #: config/tc-ns32k.c:2397
 #, c-format
@@ -7749,9 +7754,9 @@ msgid "estimate size\n"
 msgstr "boyut tahmini\n"
 
 #: config/tc-ppc.c:879
-#, fuzzy, c-format
+#, c-format
 msgid "%s unsupported"
-msgstr "rva desteklenmiyor"
+msgstr "%s desteklenmiyor"
 
 #: config/tc-ppc.c:1029 config/tc-s390.c:414 config/tc-s390.c:421
 #, c-format
@@ -7773,9 +7778,20 @@ msgid ""
 "-m7400, -m7410, -m7450, -m7455\n"
 "\t\t\tgenerate code For PowerPC 7400/7410/7450/7455\n"
 msgstr ""
+"PowerPC seçenekleri:\n"
+"-a32\t\t\tELF32/XCOFF32 üretir\n"
+"-a64\t\t\tELF64/XCOFF64 üretir\n"
+"-u\t\t\tyoksayılır\n"
+"-mpwrx, -mpwr2\t\tPOWER/2 (RIOS2) için kod üretir\n"
+"-mpwr\t\t\tPOWER (RIOS1) için kod üretir\n"
+"-m601\t\t\tPowerPC 601 için kod üretir\n"
+"-mppc, -mppc32, -m603, -m604\n"
+"\t\t\tPowerPC 603/604 için kod üretir\n"
+"-m403, -m405\t\tPowerPC 403/405 için kod üretir\n"
+"-m7400, -m7410, -m7450, -m7455\n"
+"\t\t\tPowerPC 7400/7410/7450/7455 için kod üretir\n"
 
 #: config/tc-ppc.c:1079
-#, fuzzy
 msgid ""
 "-mppc64, -m620\t\tgenerate code for PowerPC 620/625/630\n"
 "-mppc64bridge\t\tgenerate code for PowerPC 64, including bridge insns\n"
@@ -7785,25 +7801,13 @@ msgid ""
 "-mcom\t\t\tgenerate code Power/PowerPC common instructions\n"
 "-many\t\t\tgenerate code for any architecture (PWR/PWRX/PPC)\n"
 msgstr ""
-"PowerPC seçenekleri:\n"
-"-u\t\t\tyoksayıldı\n"
-"-mpwrx, -mpwr2\t\tIBM POWER/2 (RIOS2) için kod üretir\n"
-"-mpwr\t\t\tIBM POWER (RIOS1) için kod üretir\n"
-"-m601\t\t\tMotorola PowerPC 601 için kod üretir\n"
-"-mppc, -mppc32, -m603, -m604\n"
-"\t\t\tPowerPC 603/604 için kod üretir\n"
-"-m403, -m405\t\tPowerPC 403/405 için kod üretir\n"
-"-m7400, -m7410, -m7450, -m7455\n"
-"\t\t\tPowerPC 7400/7410/7450/7455 için kod üretir\n"
-"-mppc64, -m620\t\tPowerPC 620 için kod üretir\n"
-"-mppc64bridge\t\tPowerPC 64 için, köprü işlemlerini içeren kod üretir\n"
+"-mppc64, -m620\t\tPowerPC 620/625/630 için kod üretir\n"
+"-mppc64bridge\t\tPowerPC 64 için kod üretir, bridge işlemleri dahil\n"
 "-mbooke64\t\t64-bit PowerPC BookE için kod üretir\n"
-"-mbooke, -mbooke32\t32-bit PowerPC BookE için kod üretir\n"
-"-mpower4\t\tPower4 için kod üretir\n"
-"-maltivec\t\tAltiVec için kod üretir-mcom\t\t\tPower/PowerPC ortak işlemleri içeren kod üretir\n"
-"-many\t\t\tBütün yapılar için kod üretir (PWR/PWRX/PPC)\n"
-"-mregnames\t\tYazmaçlar için sembolik isme izin verir\n"
-"-mno-regnames\t\tYazmaçlar için sembolik isme izin vermez\n"
+"-mbooke, mbooke32\t32-bit PowerPC BookE için kod üretir\n"
+"-mpower4\t\tPower4 mimarisi için kod üretir\n"
+"-mcom\t\t\tPower/PowerPC ortak işlemleri için kod üretir\n"
+"-many\t\t\tBütün mimariler (PWR/PWRX/PPC) için kod üretir\n"
 
 #: config/tc-ppc.c:1087
 msgid ""
@@ -7813,9 +7817,13 @@ msgid ""
 "-mregnames\t\tAllow symbolic names for registers\n"
 "-mno-regnames\t\tDo not allow symbolic names for registers\n"
 msgstr ""
+"-maltivec\t\tAltiVec için kod üretir\n"
+"-me500, -me500x2\tMotorola e500 temeli için kod üretir\n"
+"-mspe\t\t\tMotorola SPE işlemleri için kod üretir\n"
+"-mregnames\t\tYazmaçlarda sembolik isimlere izin verir\n"
+"-mno-regnames\t\tYazmaçlarda sembolik isimlere izin vermez\n"
 
 #: config/tc-ppc.c:1094
-#, fuzzy
 msgid ""
 "-mrelocatable\t\tsupport for GCC's -mrelocatble option\n"
 "-mrelocatable-lib\tsupport for GCC's -mrelocatble-lib option\n"
@@ -8301,7 +8309,6 @@ msgid "Invalid combination: --isa=SHcompact with --abi=64"
 msgstr "Geçersiz birleşim: --isa=SHcompact ve --abi=64"
 
 #: config/tc-sh.c:2718
-#, fuzzy
 msgid ""
 "SH options:\n"
 "-little\t\t\tgenerate little endian code\n"
@@ -8813,14 +8820,14 @@ msgid "Illegal operands: %%%s requires arguments in ()"
 msgstr "Geçersiz işlenen: %%%s, () içinde argüman istiyor"
 
 #: config/tc-sparc.c:1846
-#, fuzzy, c-format
+#, c-format
 msgid "Illegal operands: %%%s cannot be used together with other relocs in the insn ()"
-msgstr "Geçersiz işlenen: %%%s, () içinde argüman istiyor"
+msgstr "Geçersiz işlenen: %%%s, () işlemindeki başka yerdeğişimlerle beraber kullanılamaz"
 
 #: config/tc-sparc.c:1857
 #, c-format
 msgid "Illegal operands: %%%s can be only used with call __tls_get_addr"
-msgstr ""
+msgstr "Geçersiz işlenen: %%%s ancak __tls_get_addr çağrısı ile beraber kullanılabilir"
 
 #: config/tc-sparc.c:2064
 msgid "detected global register use not covered by .register pseudo-op"
@@ -8856,9 +8863,8 @@ msgid ": PC-relative operand can't be a constant"
 msgstr ": PC göreli işlenen sabit olamaz"
 
 #: config/tc-sparc.c:2472
-#, fuzzy
 msgid ": TLS operand can't be a constant"
-msgstr ": PC göreli işlenen sabit olamaz"
+msgstr ": TLS işleneni sabit olamaz"
 
 #: config/tc-sparc.c:2505
 msgid ": invalid ASI name"
@@ -8945,9 +8951,9 @@ msgid "Expected comma after symbol-name"
 msgstr "Sembol adından sonra virgül beklendi"
 
 #: config/tc-sparc.c:3788 read.c:1392
-#, fuzzy, c-format
+#, c-format
 msgid ".COMMon length (%lu) out of range ignored"
-msgstr ".COMM ortak uzunluğu (%ld) < 0 yoksayıldı"
+msgstr ".COMM ortak uzunluğu (%lu) kapsam dışı, yoksayıldı"
 
 #: config/tc-sparc.c:3807 config/tc-v850.c:266
 #, c-format
@@ -8978,9 +8984,9 @@ msgid "Illegal operands: %%r_plt in %d-byte data field"
 msgstr "Geçersiz işlenenler: %d-bayt veri alanında %%r_plt"
 
 #: config/tc-sparc.c:4320
-#, fuzzy, c-format
+#, c-format
 msgid "Illegal operands: %%r_tls_dtpoff in %d-byte data field"
-msgstr "Geçersiz işlenenler: %d-bayt veri alanında %%r_plt"
+msgstr "Geçersiz işlenenler: %d-bayt veri alanında %%r_tls_dtpoff"
 
 #: config/tc-sparc.c:4357
 #, c-format
@@ -9690,9 +9696,9 @@ msgid "internal error:%s:%d: %s\n"
 msgstr "iç hata:%s:%d: %s\n"
 
 #: config/tc-tic80.c:29
-#, fuzzy, c-format
+#, c-format
 msgid "internal error:%s:%d: %s %ld\n"
-msgstr "iç hata:%s:%d: %s %d\n"
+msgstr "iç hata:%s:%d: %s %ld\n"
 
 #: config/tc-tic80.c:89
 msgid "Relaxation is a luxury we can't afford"
@@ -9828,9 +9834,8 @@ msgid "  -mv850any                 The code is generic, despite any processor sp
 msgstr "  -mv850any                 İşlemciye özgü işlemlere rağmen kod genel amaçlı\n"
 
 #: config/tc-v850.c:1160
-#, fuzzy
 msgid "  -mrelax                   Enable relaxation\n"
-msgstr "  -relax                 bağlayıcı tarafından gevşetilebilen kod üretir\n"
+msgstr "  -mrelax                 bağlayıcı tarafından gevşetilebilen kod üretir\n"
 
 #: config/tc-v850.c:1173 config/tc-v850.c:1208
 #, c-format
@@ -10147,146 +10152,137 @@ msgid "internal error: can't install fix for reloc type %d (`%s')"
 msgstr "iç hata: %d yerdeğişim türünün düzeltmesi kurulamadı (`%s')"
 
 #: config/tc-xtensa.c:929
-#, fuzzy
 msgid "'--density' option not supported in this Xtensa configuration"
-msgstr "-G bu ayarlarda desteklenmiyor."
+msgstr "'--density' seçeneği bu Xtensa ayarlarında desteklenmiyor"
 
 #: config/tc-xtensa.c:1030
 msgid "'--literal-section-name' is deprecated; use '--rename-section .literal=NEWNAME'"
-msgstr ""
+msgstr "'--literal-section-name' eski; '--rename-section .literal=YENİAD' kullanın"
 
 #: config/tc-xtensa.c:1036
 msgid "'--text-section-name' is deprecated; use '--rename-section .text=NEWNAME'"
-msgstr ""
+msgstr "'--text-section-name' eski; '--rename-section .text=YENİİSİM' kullanın"
 
 #: config/tc-xtensa.c:1042
 msgid "'--data-section-name' is deprecated; use '--rename-section .data=NEWNAME'"
-msgstr ""
+msgstr "'--data-section-name' eski; '--rename-section .data=YENİİSİM' kullanın"
 
 #: config/tc-xtensa.c:1048
 msgid "'--bss-section-name' is deprecated; use '--rename-section .bss=NEWNAME'"
-msgstr ""
+msgstr "'--bss-section-name' eski; '--rename-section .bss=YENİİSİM' kullanın"
 
 #: config/tc-xtensa.c:1186
-#, fuzzy
 msgid "unmatched end directive"
-msgstr "içiçe .ent yönergeleri"
+msgstr "eşleşmeyen end yönergesi"
 
 #: config/tc-xtensa.c:1215
-#, fuzzy
 msgid ".begin directive with no matching .end directive"
-msgstr "öncesinde .ent yönergesi olmaksızın .begin yönergesi"
+msgstr "eşleşen .end yönergesi olmaksızın .begin yönergesi"
 
 #: config/tc-xtensa.c:1259
-#, fuzzy, c-format
+#, c-format
 msgid "directive %s can't be negated"
-msgstr "`%s' seçeneği olumsuzlanamaz"
+msgstr "`%s' yönergesi olumsuzlanamaz"
 
 #: config/tc-xtensa.c:1265
-#, fuzzy
 msgid "unknown directive"
-msgstr "Bilinmeyen bölüm yönergesi"
+msgstr "bilinmeyen yönerge"
 
 #: config/tc-xtensa.c:1300
 msgid "cannot set literal_prefix inside literal fragment"
-msgstr ""
+msgstr "literal parça içerisinde literal_prefix atanamaz"
 
 #: config/tc-xtensa.c:1337 config/tc-xtensa.c:1371
-#, fuzzy
 msgid "Xtensa density option not supported; ignored"
-msgstr "-R seçeneği bu hedef için desteklenmiyor."
+msgstr "Xtensa yoğunluk seçeneği desteklenmiyor; yoksayıldı"
 
 #: config/tc-xtensa.c:1383
 #, c-format
 msgid "does not match begin %s%s at %s:%d"
-msgstr ""
+msgstr "%3$s:%4$d adresinde begin %1$s%2$s ile eşleşmiyor"
 
 #: config/tc-xtensa.c:1429
 msgid ".literal_position inside literal directive; ignoring"
-msgstr ""
+msgstr "literal yönerge içinde .literal_position; yoksayıldı"
 
 #: config/tc-xtensa.c:1480
-#, fuzzy
 msgid "expected comma or colon after symbol name; rest of line ignored"
-msgstr "sembol isminden sonra virgül beklendi: satırın gerisi yoksayıldı."
+msgstr "sembol adından sonra virgül veya noktalıvirgül beklendi; satırın gerisi yoksayıldı"
 
 #: config/tc-xtensa.c:1655 config/tc-xtensa.c:1672
-#, fuzzy, c-format
+#, c-format
 msgid "bad register name: %s"
-msgstr "hatalı yazmaç ismi `%s'"
+msgstr "hatalı yazmaç ismi: %s"
 
 #: config/tc-xtensa.c:1661
-#, fuzzy, c-format
+#, c-format
 msgid "bad register number: %s"
-msgstr "Hatalı yazmaç numarası"
+msgstr "hatalı yazmaç numarası: %s"
 
 #: config/tc-xtensa.c:1724
-#, fuzzy
 msgid "register number out of range"
-msgstr "yazmaç kapsam dışı"
+msgstr "yazmaç numarası kapsam dışı"
 
 #: config/tc-xtensa.c:1836
-#, fuzzy
 msgid "too many arguments"
-msgstr "çok fazla yere bağımlı argüman"
+msgstr "çok fazla argüman"
 
 #: config/tc-xtensa.c:1922
 #, c-format
 msgid "not enough operands (%d) for '%s'; expected %d"
-msgstr ""
+msgstr "'%2$s' için yeterli işlenen (%1$d) yok; %3$d beklendi"
 
 #: config/tc-xtensa.c:1929
-#, fuzzy, c-format
+#, c-format
 msgid "too many operands (%d) for '%s'; expected %d"
-msgstr "Çok fazla işlenen: %s"
+msgstr "'%2$s' için çok fazla işlenen (%1$d) var; %3$d beklendi"
 
 #: config/tc-xtensa.c:1973
-#, fuzzy, c-format
+#, c-format
 msgid "register number for `%s' is not a constant"
-msgstr "işlemin ikinci işleneni sabit değil\n"
+msgstr "`%s' için yazmaç sayısı sabit değil"
 
 #: config/tc-xtensa.c:1978
-#, fuzzy, c-format
+#, c-format
 msgid "register number (%ld) for `%s' is out of range"
-msgstr "r%d yazmacı kapsam dışı"
+msgstr "`%2$s' için yazmaç numarası (%1$ld) kapsam dışı"
 
 #: config/tc-xtensa.c:2464
-#, fuzzy, c-format
+#, c-format
 msgid "operand %d not properly aligned for '%s'"
-msgstr "Alan doğru hizalanmamış [%d] (%d)."
+msgstr "'%2$s' için %1$d işleneni doğru hizalanmamış"
 
 #: config/tc-xtensa.c:2469
-#, fuzzy, c-format
+#, c-format
 msgid "operand %d not in immediate table for '%s'"
-msgstr "işlenen şimdiki değil"
+msgstr "'%2$s' için %1$d işleneni şimdiki tablosunda değil"
 
 #: config/tc-xtensa.c:2474
-#, fuzzy, c-format
+#, c-format
 msgid "operand %d too large for '%s'"
-msgstr "şimdiki işlenen fazla büyük"
+msgstr "'%2$s' için %1$d işleneni fazla büyük"
 
 #: config/tc-xtensa.c:2479
 #, c-format
 msgid "operand %d too small for '%s'"
-msgstr ""
+msgstr "'%2$s' için %1$d işleneni çok küçük"
 
 #: config/tc-xtensa.c:2484
-#, fuzzy, c-format
+#, c-format
 msgid "operand %d is invalid for '%s'"
-msgstr "`%s' için sonek veya işlenenler geçersiz"
+msgstr "'%2$s' için %1$d işleneni geçersiz"
 
 #: config/tc-xtensa.c:3716
 msgid "INSTR_LABEL_DEF not supported yet"
-msgstr ""
+msgstr "INSTR_LABEL_DEF henüz desteklenmiyor"
 
 #: config/tc-xtensa.c:3745
 msgid "can't handle generation of literal/labels yet"
-msgstr ""
+msgstr "literal/etiketlerin üretimi henüz desteklenmiyor"
 
 #: config/tc-xtensa.c:3749
-#, fuzzy
 msgid "can't handle undefined OP TYPE"
-msgstr "ifade işlenemedi"
+msgstr "tanımlanmamış OP TYPE henüz desteklenmiyor"
 
 #: config/tc-xtensa.c:3810
 #, c-format
