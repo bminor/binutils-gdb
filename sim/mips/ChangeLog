@@ -1,3 +1,7 @@
+Wed Apr 23 17:32:19 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* tconfig.in (SIM_HAVE_BIENDIAN): Define.
+
 Mon Apr 21 17:16:13 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* gencode.c (build_instruction): DIV instructions: check 
