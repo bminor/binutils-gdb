@@ -1,5 +1,9 @@
 2002-08-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* gas/vax/quad.exp: Use quad_elf.s for ELF targets.
+	* gas/vax/quad.s: Align
+	* gas/vax/quad_elf.s: New version of quad.s with %reg.
+
 	* gas/sparc/sparc.exp (sparc_elf_setup): New.
 	Use it to xfail for non-ELF targets.
 
