@@ -306,7 +306,7 @@ normalize (file, abfd)
 
 /* Remove any output file.  This is only called via xatexit.  */
 
-static char *output_filename = NULL;
+static const char *output_filename = NULL;
 static FILE *output_file = NULL;
 static bfd *output_bfd = NULL;
 
@@ -699,6 +699,9 @@ open_inarch (archive_filename, file)
 	  || ! bfd_set_format (arch, bfd_archive)
 	  || ! bfd_close (arch))
 	bfd_fatal (archive_filename);
+
+      /* If we die creating a new archive, don't leave it around.  */
+      output_filename = archive_filename;
     }
 
   arch = bfd_openr (archive_filename, target);

@@ -1,3 +1,9 @@
+1999-09-12  Donn Terry  <donn@interix.com>
+
+	* ar.c (output_filename): Make const.
+	(open_inarch): If creating a new empty archive, set
+	output_filename.
+
 1999-09-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* ar.c (full_pathname): New static variable.
