@@ -31,6 +31,7 @@ extern char *xmalloc (), *xrealloc ();
 static char *xmalloc (), *xrealloc ();
 #endif
 
+#include "sysdep.h"
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/file.h>
@@ -42,8 +43,6 @@ static char *xmalloc (), *xrealloc ();
 #else
 #  if defined (sparc) || defined (HAVE_ALLOCA_H)
 #    include <alloca.h>
-#  else
-extern char *alloca ();
 #  endif /* sparc || HAVE_ALLOCA_H */
 #endif /* !__GNU_C__ */
 
