@@ -175,6 +175,7 @@ i386mach3.c
 i386msdos.c
 i386os9k.c
 ieee.c
+ihex.c
 init.c
 irix-core.c
 libaout.h

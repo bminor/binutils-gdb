@@ -1928,6 +1928,7 @@ struct _bfd
       struct ieee_data_struct *ieee_data;
       struct ieee_ar_data_struct *ieee_ar_data;
       struct srec_data_struct *srec_data;
+      struct ihex_data_struct *ihex_data;
       struct tekhex_data_struct *tekhex_data;
       struct elf_obj_tdata *elf_obj_data;
       struct nlm_obj_tdata *nlm_obj_data;
@@ -2164,6 +2165,7 @@ enum bfd_flavour {
   bfd_target_oasys_flavour,
   bfd_target_tekhex_flavour,
   bfd_target_srec_flavour,
+  bfd_target_ihex_flavour,
   bfd_target_som_flavour,
   bfd_target_os9k_flavour,
   bfd_target_versados_flavour,

@@ -145,6 +145,7 @@ DESCRIPTION
 .  bfd_target_oasys_flavour,
 .  bfd_target_tekhex_flavour,
 .  bfd_target_srec_flavour,
+.  bfd_target_ihex_flavour,
 .  bfd_target_som_flavour,
 .  bfd_target_os9k_flavour,
 .  bfd_target_versados_flavour,
@@ -567,6 +568,9 @@ extern const bfd_target symbolsrec_vec;
 /* binary is always included.  */
 extern const bfd_target binary_vec;
 
+/* ihex is always included.  */
+extern const bfd_target ihex_vec;
+
 /* All of the xvecs for core files.  */
 extern const bfd_target aix386_core_vec;
 extern const bfd_target cisco_core_vec;
@@ -749,6 +753,8 @@ const bfd_target * const bfd_target_vector[] = {
 	&tekhex_vec,
 /* Likewise for binary output.  */
 	&binary_vec,
+/* Likewise for ihex.  */
+	&ihex_vec,
 
 /* Add any required traditional-core-file-handler.  */
 

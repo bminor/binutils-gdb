@@ -1,5 +1,17 @@
 Fri Dec  1 14:46:51 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* srec.c (srec_scan): Set lma as well as vma.
+
+	* ihex.c: New file; support for Intel Hex format.
+	* targets.c (enum bfd_flavour): Add bfd_target_ihex_flavour.
+	(ihex_vec): Declare.
+	(bfd_target_vector): Always include ihex_vec.
+	* bfd.c (struct _bfd): Add ihex_data field to tdata union.
+	* Makefile.in: Rebuild dependencies.
+	(BFD_LIBS): Add ihex.o
+	(BFD_LIBS_CFILES): Add ihex.c.
+	* bfd-in2.h: Rebuild.
+
 	* elf.c (assign_file_positions_for_segments): Sort the sections in
 	each segment.
 	(get_program_header_size): Return the right size if segment_map is
