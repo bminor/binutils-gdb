@@ -1,4 +1,12 @@
+Wed May  5 15:16:33 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* gdb/config/pa/tm-hppa.h (ABOUT_TO_RETURN): Handle a return
+	which nullifies the following instruction.  (From law@cs.utah.edu).
+
 Tue May  4 12:11:38 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* infptrace.c [FIVE_ARG_PTRACE]: Define ptrace to call_ptrace and
+	pass the 5th arg there, rather than using an ANSI C-specific macro.
 
 	* Makefile.in (depend): Don't include ${CC} command for *.tab.c.
 
