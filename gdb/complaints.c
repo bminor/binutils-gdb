@@ -250,7 +250,7 @@ internal_complaint (struct complaints **complaints, const char *file,
 }
 
 void
-complain (struct complaint *complaint, ...)
+complain (struct deprecated_complaint *complaint, ...)
 {
   va_list args;
   va_start (args, complaint);

@@ -1,6 +1,7 @@
 /* Parameters for execution on a z8000 series machine.
-   Copyright 1992, 1993, 1994, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1992, 1993, 1994, 1998, 1999, 2000, 2001, 2002 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -276,9 +277,9 @@ int sim_z8001_mode;
 
 #define NO_STD_REGS
 
-extern void z8k_print_register_hook (int regno);
-#define	PRINT_REGISTER_HOOK(regno) z8k_print_register_hook(regno)
-
+extern void z8k_do_registers_info (int regnum, int all);
+#define DEPRECATED_DO_REGISTERS_INFO(REGNUM,ALL) \
+	z8k_do_registers_info (REGNUM, ALL)
 
 extern void z8k_set_pointer_size (int newsize);
 #define INIT_EXTRA_SYMTAB_INFO \

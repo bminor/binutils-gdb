@@ -1,5 +1,6 @@
 /* ARC-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1997, 1999, 2001 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1997, 1999, 2001, 2002
+   Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -39,7 +40,7 @@ static bfd_reloc_status_type arc_elf_b22_pcrel
 /* Try to minimize the amount of space occupied by relocation tables
    on the ROM (not that the ROM won't be swamped by other ELF overhead).  */
 
-#define USE_REL
+#define USE_REL	1
 
 static reloc_howto_type elf_arc_howto_table[] =
 {

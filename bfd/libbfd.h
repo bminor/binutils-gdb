@@ -572,6 +572,9 @@ extern bfd *bfd_last_cache;
 extern const bfd_target * const *bfd_target_vector;
 extern const bfd_target *bfd_default_vector[];
 
+/* List of associated target vectors.  */
+extern const bfd_target * const *bfd_associated_vector;
+
 /* Functions shared by the ECOFF and MIPS ELF backends, which have no
    other common header files.  */
 
@@ -1005,6 +1008,14 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_SH_IMM_HI16",
   "BFD_RELOC_SH_IMM_HI16_PCREL",
   "BFD_RELOC_SH_PT_16",
+  "BFD_RELOC_SH_TLS_GD_32",
+  "BFD_RELOC_SH_TLS_LD_32",
+  "BFD_RELOC_SH_TLS_LDO_32",
+  "BFD_RELOC_SH_TLS_IE_32",
+  "BFD_RELOC_SH_TLS_LE_32",
+  "BFD_RELOC_SH_TLS_DTPMOD32",
+  "BFD_RELOC_SH_TLS_DTPOFF32",
+  "BFD_RELOC_SH_TLS_TPOFF32",
   "BFD_RELOC_THUMB_PCREL_BRANCH9",
   "BFD_RELOC_THUMB_PCREL_BRANCH12",
   "BFD_RELOC_THUMB_PCREL_BRANCH23",

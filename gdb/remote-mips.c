@@ -3443,7 +3443,7 @@ mips_load (char *file, int from_tty)
       /* Work around problem where PMON monitor updates the PC after a load
          to a different value than GDB thinks it has. The following ensures
          that the write_pc() WILL update the PC value: */
-      register_valid[PC_REGNUM] = 0;
+      deprecated_register_valid[PC_REGNUM] = 0;
     }
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));

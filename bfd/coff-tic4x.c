@@ -123,20 +123,20 @@ tic4x_relocation (abfd, reloc_entry, symbol, data, input_section,
 
 reloc_howto_type tic4x_howto_table[] = 
 {
-    HOWTO(R_RELWORD,	 0,  2, 16, false, 0, complain_overflow_signed, tic4x_relocation, "RELWORD",   true, 0x0000ffff, 0x0000ffff, false),
+    HOWTO(R_RELWORD,	 0,  2, 16, false, 0, complain_overflow_signed,   tic4x_relocation, "RELWORD",   true, 0x0000ffff, 0x0000ffff, false),
     HOWTO(R_REL24,	 0,  2, 24, false, 0, complain_overflow_bitfield, tic4x_relocation, "REL24",     true, 0x00ffffff, 0x00ffffff, false),
-    HOWTO(R_RELLONG,	 0,  2, 32, false, 0, complain_overflow_dont, tic4x_relocation, "RELLONG",   true, 0xffffffff, 0xffffffff, false),
-    HOWTO(R_PCRWORD,	 0,  2, 16, true,  0, complain_overflow_signed, tic4x_relocation, "PCRWORD",   true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_PCR24,	 0,  2, 24, true,  0, complain_overflow_signed, tic4x_relocation, "PCR24",     true, 0x00ffffff, 0x00ffffff, false),
-    HOWTO(R_PARTLS16,	 0,  2, 16, false, 0, complain_overflow_dont,   tic4x_relocation, "PARTLS16",  true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_PARTMS8,	16,  2, 16, false, 0, complain_overflow_dont,   tic4x_relocation, "PARTMS8",   true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_RELWORD,	 0,  2, 16, false, 0, complain_overflow_signed, tic4x_relocation, "ARELWORD",  true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_REL24,	 0,  2, 24, false, 0, complain_overflow_signed, tic4x_relocation, "AREL24",    true, 0x00ffffff, 0x00ffffff, false),
-    HOWTO(R_RELLONG,	 0,  2, 32, false, 0, complain_overflow_signed, tic4x_relocation, "ARELLONG",  true, 0xffffffff, 0xffffffff, false),
-    HOWTO(R_PCRWORD,	 0,  2, 16, true,  0, complain_overflow_signed, tic4x_relocation, "APCRWORD",  true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_PCR24,	 0,  2, 24, true,  0, complain_overflow_signed, tic4x_relocation, "APCR24",    true, 0x00ffffff, 0x00ffffff, false),
-    HOWTO(R_PARTLS16,	 0,  2, 16, false, 0, complain_overflow_dont,   tic4x_relocation, "APARTLS16", true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO(R_PARTMS8,	16,  2, 16, false, 0, complain_overflow_dont,   tic4x_relocation, "APARTMS8",  true, 0x0000ffff, 0x0000ffff, false),
+    HOWTO(R_RELLONG,	 0,  2, 32, false, 0, complain_overflow_dont,     tic4x_relocation, "RELLONG",   true, 0xffffffff, 0xffffffff, false),
+    HOWTO(R_PCRWORD,	 0,  2, 16, true,  0, complain_overflow_signed,   tic4x_relocation, "PCRWORD",   true, 0x0000ffff, 0x0000ffff, false),
+    HOWTO(R_PCR24,	 0,  2, 24, true,  0, complain_overflow_signed,   tic4x_relocation, "PCR24",     true, 0x00ffffff, 0x00ffffff, false),
+    HOWTO(R_PARTLS16,	 0,  2, 16, false, 0, complain_overflow_dont,     tic4x_relocation, "PARTLS16",  true, 0x0000ffff, 0x0000ffff, false),
+    HOWTO(R_PARTMS8,	16,  2, 16, false, 0, complain_overflow_dont,     tic4x_relocation, "PARTMS8",   true, 0x0000ffff, 0x0000ffff, false),
+    HOWTO(R_RELWORD,	 0,  2, 16, false, 0, complain_overflow_signed,   tic4x_relocation, "ARELWORD",  true, 0x0000ffff, 0x0000ffff, false),
+    HOWTO(R_REL24,	 0,  2, 24, false, 0, complain_overflow_signed,   tic4x_relocation, "AREL24",    true, 0x00ffffff, 0x00ffffff, false),
+    HOWTO(R_RELLONG,	 0,  2, 32, false, 0, complain_overflow_signed,   tic4x_relocation, "ARELLONG",  true, 0xffffffff, 0xffffffff, false),
+    HOWTO(R_PCRWORD,	 0,  2, 16, true,  0, complain_overflow_signed,   tic4x_relocation, "APCRWORD",  true, 0x0000ffff, 0x0000ffff, false),
+    HOWTO(R_PCR24,	 0,  2, 24, true,  0, complain_overflow_signed,   tic4x_relocation, "APCR24",    true, 0x00ffffff, 0x00ffffff, false),
+    HOWTO(R_PARTLS16,	 0,  2, 16, false, 0, complain_overflow_dont,     tic4x_relocation, "APARTLS16", true, 0x0000ffff, 0x0000ffff, false),
+    HOWTO(R_PARTMS8,	16,  2, 16, false, 0, complain_overflow_dont,     tic4x_relocation, "APARTMS8",  true, 0x0000ffff, 0x0000ffff, false),
 };
 #define HOWTO_SIZE (sizeof(tic4x_howto_table) / sizeof(tic4x_howto_table[0]))
 

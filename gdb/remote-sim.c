@@ -361,7 +361,7 @@ gdbsim_store_register (int regno)
     {
       char tmp[MAX_REGISTER_RAW_SIZE];
       int nr_bytes;
-      read_register_gen (regno, tmp);
+      deprecated_read_register_gen (regno, tmp);
       nr_bytes = sim_store_register (gdbsim_desc,
 				     REGISTER_SIM_REGNO (regno),
 				     tmp, REGISTER_RAW_SIZE (regno));
@@ -897,14 +897,9 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_doc = "Use the compiled-in simulator.";
   gdbsim_ops.to_open = gdbsim_open;
   gdbsim_ops.to_close = gdbsim_close;
-  gdbsim_ops.to_attach = NULL;
-  gdbsim_ops.to_post_attach = NULL;
-  gdbsim_ops.to_require_attach = NULL;
   gdbsim_ops.to_detach = gdbsim_detach;
-  gdbsim_ops.to_require_detach = NULL;
   gdbsim_ops.to_resume = gdbsim_resume;
   gdbsim_ops.to_wait = gdbsim_wait;
-  gdbsim_ops.to_post_wait = NULL;
   gdbsim_ops.to_fetch_registers = gdbsim_fetch_register;
   gdbsim_ops.to_store_registers = gdbsim_store_register;
   gdbsim_ops.to_prepare_to_store = gdbsim_prepare_to_store;
@@ -912,47 +907,17 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_files_info = gdbsim_files_info;
   gdbsim_ops.to_insert_breakpoint = gdbsim_insert_breakpoint;
   gdbsim_ops.to_remove_breakpoint = gdbsim_remove_breakpoint;
-  gdbsim_ops.to_terminal_init = NULL;
-  gdbsim_ops.to_terminal_inferior = NULL;
-  gdbsim_ops.to_terminal_ours_for_output = NULL;
-  gdbsim_ops.to_terminal_ours = NULL;
-  gdbsim_ops.to_terminal_info = NULL;
   gdbsim_ops.to_kill = gdbsim_kill;
   gdbsim_ops.to_load = gdbsim_load;
-  gdbsim_ops.to_lookup_symbol = NULL;
   gdbsim_ops.to_create_inferior = gdbsim_create_inferior;
-  gdbsim_ops.to_post_startup_inferior = NULL;
-  gdbsim_ops.to_acknowledge_created_inferior = NULL;
-  gdbsim_ops.to_clone_and_follow_inferior = NULL;
-  gdbsim_ops.to_post_follow_inferior_by_clone = NULL;
-  gdbsim_ops.to_insert_fork_catchpoint = NULL;
-  gdbsim_ops.to_remove_fork_catchpoint = NULL;
-  gdbsim_ops.to_insert_vfork_catchpoint = NULL;
-  gdbsim_ops.to_remove_vfork_catchpoint = NULL;
-  gdbsim_ops.to_has_forked = NULL;
-  gdbsim_ops.to_has_vforked = NULL;
-  gdbsim_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  gdbsim_ops.to_post_follow_vfork = NULL;
-  gdbsim_ops.to_insert_exec_catchpoint = NULL;
-  gdbsim_ops.to_remove_exec_catchpoint = NULL;
-  gdbsim_ops.to_has_execd = NULL;
-  gdbsim_ops.to_reported_exec_events_per_exec_call = NULL;
-  gdbsim_ops.to_has_exited = NULL;
   gdbsim_ops.to_mourn_inferior = gdbsim_mourn_inferior;
-  gdbsim_ops.to_can_run = 0;
-  gdbsim_ops.to_notice_signals = 0;
-  gdbsim_ops.to_thread_alive = 0;
   gdbsim_ops.to_stop = gdbsim_stop;
-  gdbsim_ops.to_pid_to_exec_file = NULL;
   gdbsim_ops.to_stratum = process_stratum;
-  gdbsim_ops.DONT_USE = NULL;
   gdbsim_ops.to_has_all_memory = 1;
   gdbsim_ops.to_has_memory = 1;
   gdbsim_ops.to_has_stack = 1;
   gdbsim_ops.to_has_registers = 1;
   gdbsim_ops.to_has_execution = 1;
-  gdbsim_ops.to_sections = NULL;
-  gdbsim_ops.to_sections_end = NULL;
   gdbsim_ops.to_magic = OPS_MAGIC;
 
 #ifdef TARGET_REDEFINE_DEFAULT_OPS

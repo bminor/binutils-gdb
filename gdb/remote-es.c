@@ -623,7 +623,7 @@ es1800_fetch_register (int regno)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = (fromhex (p[k * 2 + 1]) * 16) + fromhex (p[k * 2 + 2]);
+	  deprecated_registers[r++] = (fromhex (p[k * 2 + 1]) * 16) + fromhex (p[k * 2 + 2]);
 	}
     }
   else
@@ -666,7 +666,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = (fromhex (p[i + 0]) * 16) + fromhex (p[i + 1]);
+	  deprecated_registers[r++] = (fromhex (p[i + 0]) * 16) + fromhex (p[i + 1]);
 	  i += 2;
 	}
     }
@@ -685,7 +685,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = (fromhex (p[i + 0])) * 16 + fromhex (p[i + 1]);
+	  deprecated_registers[r++] = (fromhex (p[i + 0])) * 16 + fromhex (p[i + 1]);
 	  i += 2;
 	}
     }
@@ -725,7 +725,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
+	  deprecated_registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
 	}
 
       p = SR_buf;
@@ -735,7 +735,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] =
+	  deprecated_registers[r++] =
 	    fromhex (SR_buf[k * 2 + 1]) * 16 + fromhex (SR_buf[k * 2 + 2]);
 	}
       send_with_reply ("PC", buf, sizeof (buf));
@@ -746,7 +746,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
+	  deprecated_registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
 	}
     }
   else
@@ -771,7 +771,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
+	  deprecated_registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
 	}
 
       /* fetch STATUS */
@@ -783,7 +783,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] =
+	  deprecated_registers[r++] =
 	    fromhex (SR_buf[k * 2 + 1]) * 16 + fromhex (SR_buf[k * 2 + 2]);
 	}
 
@@ -797,7 +797,7 @@ es1800_fetch_registers (void)
 	    {
 	      error ("Emulator reply is too short: %s", buf);
 	    }
-	  registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
+	  deprecated_registers[r++] = fromhex (buf[k * 2 + 1]) * 16 + fromhex (buf[k * 2 + 2]);
 	}
     }
 }
@@ -827,7 +827,7 @@ es1800_store_register (int regno)
   int k;
   unsigned char *r;
 
-  r = (unsigned char *) registers;
+  r = (unsigned char *) deprecated_registers;
 
   if (regno == -1)		/* write all registers */
     {
@@ -1981,61 +1981,17 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   es1800_ops.to_open = es1800_open;
   es1800_ops.to_close = es1800_close;
   es1800_ops.to_attach = es1800_attach;
-  es1800_ops.to_post_attach = NULL;
-  es1800_ops.to_require_attach = NULL;
   es1800_ops.to_detach = es1800_detach;
-  es1800_ops.to_require_detach = NULL;
   es1800_ops.to_resume = es1800_resume;
-  es1800_ops.to_wait = NULL;
-  es1800_ops.to_post_wait = NULL;
-  es1800_ops.to_fetch_registers = NULL;
-  es1800_ops.to_store_registers = NULL;
   es1800_ops.to_prepare_to_store = es1800_prepare_to_store;
   es1800_ops.to_xfer_memory = es1800_xfer_inferior_memory;
   es1800_ops.to_files_info = es1800_files_info;
   es1800_ops.to_insert_breakpoint = es1800_insert_breakpoint;
   es1800_ops.to_remove_breakpoint = es1800_remove_breakpoint;
-  es1800_ops.to_terminal_init = NULL;
-  es1800_ops.to_terminal_inferior = NULL;
-  es1800_ops.to_terminal_ours_for_output = NULL;
-  es1800_ops.to_terminal_ours = NULL;
-  es1800_ops.to_terminal_info = NULL;
-  es1800_ops.to_kill = NULL;
   es1800_ops.to_load = es1800_load;
-  es1800_ops.to_lookup_symbol = NULL;
   es1800_ops.to_create_inferior = es1800_create_inferior;
-  es1800_ops.to_post_startup_inferior = NULL;
-  es1800_ops.to_acknowledge_created_inferior = NULL;
-  es1800_ops.to_clone_and_follow_inferior = NULL;
-  es1800_ops.to_post_follow_inferior_by_clone = NULL;
-  es1800_ops.to_insert_fork_catchpoint = NULL;
-  es1800_ops.to_remove_fork_catchpoint = NULL;
-  es1800_ops.to_insert_vfork_catchpoint = NULL;
-  es1800_ops.to_remove_vfork_catchpoint = NULL;
-  es1800_ops.to_has_forked = NULL;
-  es1800_ops.to_has_vforked = NULL;
-  es1800_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  es1800_ops.to_post_follow_vfork = NULL;
-  es1800_ops.to_insert_exec_catchpoint = NULL;
-  es1800_ops.to_remove_exec_catchpoint = NULL;
-  es1800_ops.to_has_execd = NULL;
-  es1800_ops.to_reported_exec_events_per_exec_call = NULL;
-  es1800_ops.to_has_exited = NULL;
-  es1800_ops.to_mourn_inferior = NULL;
-  es1800_ops.to_can_run = 0;
-  es1800_ops.to_notice_signals = 0;
-  es1800_ops.to_thread_alive = 0;
-  es1800_ops.to_stop = 0;
-  es1800_ops.to_pid_to_exec_file = NULL;
   es1800_ops.to_stratum = core_stratum;
-  es1800_ops.DONT_USE = 0;
-  es1800_ops.to_has_all_memory = 0;
   es1800_ops.to_has_memory = 1;
-  es1800_ops.to_has_stack = 0;
-  es1800_ops.to_has_registers = 0;
-  es1800_ops.to_has_execution = 0;
-  es1800_ops.to_sections = NULL;
-  es1800_ops.to_sections_end = NULL;
   es1800_ops.to_magic = OPS_MAGIC;
 }
 
@@ -2051,15 +2007,10 @@ init_es1800_child_ops (void)
   es1800_child_ops.to_doc = "Remote debugging on the es1800 emulator via a serial line.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).";
   es1800_child_ops.to_open = es1800_child_open;
-  es1800_child_ops.to_close = NULL;
   es1800_child_ops.to_attach = es1800_attach;
-  es1800_child_ops.to_post_attach = NULL;
-  es1800_child_ops.to_require_attach = NULL;
   es1800_child_ops.to_detach = es1800_child_detach;
-  es1800_child_ops.to_require_detach = NULL;
   es1800_child_ops.to_resume = es1800_resume;
   es1800_child_ops.to_wait = es1800_wait;
-  es1800_child_ops.to_post_wait = NULL;
   es1800_child_ops.to_fetch_registers = es1800_fetch_register;
   es1800_child_ops.to_store_registers = es1800_store_register;
   es1800_child_ops.to_prepare_to_store = es1800_prepare_to_store;
@@ -2067,47 +2018,16 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   es1800_child_ops.to_files_info = es1800_files_info;
   es1800_child_ops.to_insert_breakpoint = es1800_insert_breakpoint;
   es1800_child_ops.to_remove_breakpoint = es1800_remove_breakpoint;
-  es1800_child_ops.to_terminal_init = NULL;
-  es1800_child_ops.to_terminal_inferior = NULL;
-  es1800_child_ops.to_terminal_ours_for_output = NULL;
-  es1800_child_ops.to_terminal_ours = NULL;
-  es1800_child_ops.to_terminal_info = NULL;
   es1800_child_ops.to_kill = es1800_kill;
   es1800_child_ops.to_load = es1800_load;
-  es1800_child_ops.to_lookup_symbol = NULL;
   es1800_child_ops.to_create_inferior = es1800_create_inferior;
-  es1800_child_ops.to_post_startup_inferior = NULL;
-  es1800_child_ops.to_acknowledge_created_inferior = NULL;
-  es1800_child_ops.to_clone_and_follow_inferior = NULL;
-  es1800_child_ops.to_post_follow_inferior_by_clone = NULL;
-  es1800_child_ops.to_insert_fork_catchpoint = NULL;
-  es1800_child_ops.to_remove_fork_catchpoint = NULL;
-  es1800_child_ops.to_insert_vfork_catchpoint = NULL;
-  es1800_child_ops.to_remove_vfork_catchpoint = NULL;
-  es1800_child_ops.to_has_forked = NULL;
-  es1800_child_ops.to_has_vforked = NULL;
-  es1800_child_ops.to_can_follow_vfork_prior_to_exec = NULL;
-  es1800_child_ops.to_post_follow_vfork = NULL;
-  es1800_child_ops.to_insert_exec_catchpoint = NULL;
-  es1800_child_ops.to_remove_exec_catchpoint = NULL;
-  es1800_child_ops.to_has_execd = NULL;
-  es1800_child_ops.to_reported_exec_events_per_exec_call = NULL;
-  es1800_child_ops.to_has_exited = NULL;
   es1800_child_ops.to_mourn_inferior = es1800_mourn_inferior;
-  es1800_child_ops.to_can_run = 0;
-  es1800_child_ops.to_notice_signals = 0;
-  es1800_child_ops.to_thread_alive = 0;
-  es1800_child_ops.to_stop = 0;
-  es1800_child_ops.to_pid_to_exec_file = NULL;
   es1800_child_ops.to_stratum = process_stratum;
-  es1800_child_ops.DONT_USE = 0;
   es1800_child_ops.to_has_all_memory = 1;
   es1800_child_ops.to_has_memory = 1;
   es1800_child_ops.to_has_stack = 1;
   es1800_child_ops.to_has_registers = 1;
   es1800_child_ops.to_has_execution = 1;
-  es1800_child_ops.to_sections = NULL;
-  es1800_child_ops.to_sections_end = NULL;
   es1800_child_ops.to_magic = OPS_MAGIC;
 }
 

@@ -32,10 +32,10 @@
 #include "regcache.h"
 
 #define RF(dst, src) \
-	memcpy(&registers[REGISTER_BYTE(dst)], &src, sizeof(src))
+	memcpy(&deprecated_registers[REGISTER_BYTE(dst)], &src, sizeof(src))
 
 #define RS(src, dst) \
-	memcpy(&dst, &registers[REGISTER_BYTE(src)], sizeof(dst))
+	memcpy(&dst, &deprecated_registers[REGISTER_BYTE(src)], sizeof(dst))
 
 void
 fetch_inferior_registers (int regno)
@@ -71,7 +71,7 @@ fetch_inferior_registers (int regno)
   RF (LP0_REGNUM + 3, inferior_fpregisters.r_freg[3]);
   RF (LP0_REGNUM + 5, inferior_fpregisters.r_freg[5]);
   RF (LP0_REGNUM + 7, inferior_fpregisters.r_freg[7]);
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 void
@@ -164,7 +164,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   RF (LP0_REGNUM + 3, core_reg->freg.r_freg[3]);
   RF (LP0_REGNUM + 5, core_reg->freg.r_freg[5]);
   RF (LP0_REGNUM + 7, core_reg->freg.r_freg[7]);
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 /* Register that we are able to handle ns32knbsd core file formats.
@@ -237,7 +237,7 @@ fetch_kcore_registers (struct pcb *pcb)
   RF (LP0_REGNUM + 3, pcb->pcb_freg[3]);
   RF (LP0_REGNUM + 5, pcb->pcb_freg[5]);
   RF (LP0_REGNUM + 7, pcb->pcb_freg[7]);
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 #endif /* FETCH_KCORE_REGISTERS */
 

@@ -32,6 +32,7 @@
 #include "objfiles.h"
 #include "target.h"
 #include "regcache.h"
+#include "solib-svr4.h"
 
 #ifndef LIBTHREAD_DB_SO
 #define LIBTHREAD_DB_SO "libthread_db.so.1"
@@ -107,6 +108,11 @@ static td_err_e (*td_thr_setfpregs_p) (const td_thrhandle_t *th,
 static td_err_e (*td_thr_setgregs_p) (const td_thrhandle_t *th,
 				      prgregset_t gregs);
 static td_err_e (*td_thr_event_enable_p) (const td_thrhandle_t *th, int event);
+
+static td_err_e (*td_thr_tls_get_addr_p) (const td_thrhandle_t *th,
+                                          void *map_address,
+                                          size_t offset,
+                                          void **address);
 
 /* Location of the thread creation event breakpoint.  The code at this
    location in the child process will be called by the pthread library
@@ -348,6 +354,7 @@ thread_db_load (void)
   td_ta_set_event_p = dlsym (handle, "td_ta_set_event");
   td_ta_event_getmsg_p = dlsym (handle, "td_ta_event_getmsg");
   td_thr_event_enable_p = dlsym (handle, "td_thr_event_enable");
+  td_thr_tls_get_addr_p = dlsym (handle, "td_thr_tls_get_addr");
 
   return 1;
 }
@@ -829,7 +836,7 @@ thread_db_store_registers (int regno)
     {
       char raw[MAX_REGISTER_RAW_SIZE];
 
-      read_register_gen (regno, raw);
+      deprecated_read_register_gen (regno, raw);
       thread_db_fetch_registers (-1);
       supply_register (regno, raw);
     }
@@ -1003,6 +1010,97 @@ thread_db_pid_to_str (ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
+/* Get the address of the thread local variable in OBJFILE which is
+   stored at OFFSET within the thread local storage for thread PTID.  */
+
+static CORE_ADDR
+thread_db_get_thread_local_address (ptid_t ptid, struct objfile *objfile,
+                                    CORE_ADDR offset)
+{
+  if (is_thread (ptid))
+    {
+      int objfile_is_library = (objfile->flags & OBJF_SHARED);
+      td_err_e err;
+      td_thrhandle_t th;
+      void *address;
+      CORE_ADDR lm;
+
+      /* glibc doesn't provide the needed interface.  */
+      if (! td_thr_tls_get_addr_p)
+        error ("Cannot find thread-local variables in this thread library.");
+
+      /* Get the address of the link map for this objfile.  */
+      lm = svr4_fetch_objfile_link_map (objfile);
+
+      /* Whoops, we couldn't find one. Bail out.  */
+      if (!lm)
+        {
+          if (objfile_is_library)
+            error ("Cannot find shared library `%s' link_map in dynamic"
+		   " linker's module list", objfile->name);
+	  else
+            error ("Cannot find executable file `%s' link_map in dynamic"
+		   " linker's module list", objfile->name);
+	}
+
+      /* Get info about the thread.  */
+      err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (ptid), &th);
+      if (err != TD_OK)
+	error ("Cannot find thread %ld: %s",
+	       (long) GET_THREAD (ptid), thread_db_err_str (err));
+      
+      /* Finally, get the address of the variable.  */
+      err = td_thr_tls_get_addr_p (&th, (void *) lm, offset, &address);
+
+#ifdef THREAD_DB_HAS_TD_NOTALLOC
+      /* The memory hasn't been allocated, yet.  */
+      if (err == TD_NOTALLOC)
+        {
+          /* Now, if libthread_db provided the initialization image's
+             address, we *could* try to build a non-lvalue value from
+             the initialization image.  */
+          if (objfile_is_library)
+            error ("The inferior has not yet allocated storage for"
+                   " thread-local variables in\n"
+                   "the shared library `%s'\n"
+                   "for the thread %ld",
+		   objfile->name, (long) GET_THREAD (ptid));
+          else
+            error ("The inferior has not yet allocated storage for"
+                   " thread-local variables in\n"
+                   "the executable `%s'\n"
+                   "for the thread %ld",
+		   objfile->name, (long) GET_THREAD (ptid));
+	}
+#endif
+
+      /* Something else went wrong.  */
+      if (err != TD_OK)
+	{
+	  if (objfile_is_library)
+	    error ("Cannot find thread-local storage for thread %ld, "
+		   "shared library %s:\n%s",
+		   (long) GET_THREAD (ptid),
+		   objfile->name,
+		   thread_db_err_str (err));
+	  else
+	    error ("Cannot find thread-local storage for thread %ld, "
+		   "executable file %s:\n%s",
+		   (long) GET_THREAD (ptid),
+		   objfile->name,
+		   thread_db_err_str (err));
+	}
+
+      /* Cast assuming host == target.  Joy.  */
+      return (CORE_ADDR) address;
+    }
+
+  if (target_beneath->to_get_thread_local_address)
+    return target_beneath->to_get_thread_local_address (ptid, objfile, offset);
+
+  error ("Cannot find thread-local values on this target.");
+}
+
 static void
 init_thread_db_ops (void)
 {
@@ -1025,6 +1123,8 @@ init_thread_db_ops (void)
   thread_db_ops.to_pid_to_str = thread_db_pid_to_str;
   thread_db_ops.to_stratum = thread_stratum;
   thread_db_ops.to_has_thread_control = tc_schedlock;
+  thread_db_ops.to_get_thread_local_address
+    = thread_db_get_thread_local_address;
   thread_db_ops.to_magic = OPS_MAGIC;
 }
 

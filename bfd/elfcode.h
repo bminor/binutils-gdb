@@ -505,16 +505,6 @@ elf_file_p (x_ehdrp)
 	  && (x_ehdrp->e_ident[EI_MAG3] == ELFMAG3));
 }
 
-struct bfd_preserve
-{
-  const struct bfd_arch_info *arch_info;
-  struct elf_obj_tdata *tdata;
-  struct bfd_hash_table section_htab;
-  struct sec *sections;
-  struct sec **section_tail;
-  unsigned int section_count;
-};
-
 /* Check to see if the file associated with ABFD matches the target vector
    that ABFD points to.
 
@@ -536,11 +526,10 @@ elf_object_p (abfd)
   char *shstrtab;		/* Internal copy of section header stringtab */
   struct elf_backend_data *ebd;
   struct bfd_preserve preserve;
-  struct elf_obj_tdata *new_tdata = NULL;
   asection *s;
   bfd_size_type amt;
 
-  preserve.arch_info = abfd->arch_info;
+  preserve.marker = NULL;
 
   /* Read in the ELF header in external format.  */
 
@@ -584,23 +573,13 @@ elf_object_p (abfd)
      the tdata pointer in the bfd.  */
 
   amt = sizeof (struct elf_obj_tdata);
-  new_tdata = (struct elf_obj_tdata *) bfd_zalloc (abfd, amt);
-  if (new_tdata == NULL)
+  preserve.marker = bfd_zalloc (abfd, amt);
+  if (preserve.marker == NULL)
     goto got_no_match;
-  preserve.tdata = elf_tdata (abfd);
-  elf_tdata (abfd) = new_tdata;
+  if (!bfd_preserve_save (abfd, &preserve))
+    goto got_no_match;
 
-  /* Clear section information, since there might be a recognized bfd that
-     we now check if we can replace, and we don't want to append to it.  */
-  preserve.sections = abfd->sections;
-  preserve.section_tail = abfd->section_tail;
-  preserve.section_count = abfd->section_count;
-  preserve.section_htab = abfd->section_htab;
-  abfd->sections = NULL;
-  abfd->section_tail = &abfd->sections;
-  abfd->section_count = 0;
-  if (!bfd_hash_table_init (&abfd->section_htab, bfd_section_hash_newfunc))
-    goto got_no_match;
+  elf_tdata (abfd) = preserve.marker;
 
   /* Now that we know the byte order, swap in the rest of the header */
   i_ehdrp = elf_elfheader (abfd);
@@ -633,8 +612,10 @@ elf_object_p (abfd)
   /* Check that the ELF e_machine field matches what this particular
      BFD format expects.  */
   if (ebd->elf_machine_code != i_ehdrp->e_machine
-      && (ebd->elf_machine_alt1 == 0 || i_ehdrp->e_machine != ebd->elf_machine_alt1)
-      && (ebd->elf_machine_alt2 == 0 || i_ehdrp->e_machine != ebd->elf_machine_alt2))
+      && (ebd->elf_machine_alt1 == 0
+	  || i_ehdrp->e_machine != ebd->elf_machine_alt1)
+      && (ebd->elf_machine_alt2 == 0
+	  || i_ehdrp->e_machine != ebd->elf_machine_alt2))
     {
       const bfd_target * const *target_ptr;
 
@@ -844,11 +825,8 @@ elf_object_p (abfd)
 	}
     }
 
-  /* It would be nice to be able to free more memory here, eg. old
-     elf_elfsections, old tdata, but that's not possible since these
-     blocks are sitting inside obj_alloc'd memory.  */
-  bfd_hash_table_free (&preserve.section_htab);
-  return (abfd->xvec);
+  bfd_preserve_finish (abfd, &preserve);
+  return abfd->xvec;
 
  got_wrong_format_error:
   /* There is way too much undoing of half-known state here.  The caller,
@@ -863,18 +841,8 @@ elf_object_p (abfd)
   bfd_set_error (bfd_error_wrong_format);
 
  got_no_match:
-  abfd->arch_info = preserve.arch_info;
-  if (new_tdata != NULL)
-    {
-      /* bfd_release frees all memory more recently bfd_alloc'd than
-	 its arg, as well as its arg.  */
-      bfd_release (abfd, new_tdata);
-      elf_tdata (abfd) = preserve.tdata;
-      abfd->section_htab = preserve.section_htab;
-      abfd->sections = preserve.sections;
-      abfd->section_tail = preserve.section_tail;
-      abfd->section_count = preserve.section_count;
-    }
+  if (preserve.marker != NULL)
+    bfd_preserve_restore (abfd, &preserve);
   return NULL;
 }
 

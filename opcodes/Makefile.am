@@ -403,7 +403,7 @@ ia64-gen.o: ia64-gen.c ia64-opc.c ia64-opc-a.c ia64-opc-b.c ia64-opc-f.c \
   ia64-opc-i.c ia64-opc-m.c ia64-opc-d.c ia64-opc.h
 
 ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
-	here=`pwd`; cd $(srcdir); $$here/ia64-gen > ia64-asmtab.c
+	./ia64-gen --srcdir $(srcdir) > $(srcdir)/ia64-asmtab.c
 
 s390-mkopc: s390-mkopc.c
 	$(CC_FOR_BUILD) -o s390-mkopc $(srcdir)/s390-mkopc.c
@@ -587,8 +587,8 @@ ia64-opc.lo: ia64-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
   sysdep.h config.h ia64-asmtab.h $(INCDIR)/opcode/ia64.h \
   $(BFD_H) $(INCDIR)/symcat.h ia64-asmtab.c
 ia64-gen.lo: ia64-gen.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/safe-ctype.h sysdep.h config.h ia64-opc.h \
-  $(INCDIR)/opcode/ia64.h $(BFD_H) $(INCDIR)/symcat.h \
+  $(INCDIR)/safe-ctype.h sysdep.h config.h $(INCDIR)/getopt.h \
+  ia64-opc.h $(INCDIR)/opcode/ia64.h $(BFD_H) $(INCDIR)/symcat.h \
   ia64-opc-a.c ia64-opc-i.c ia64-opc-m.c ia64-opc-b.c \
   ia64-opc-f.c ia64-opc-x.c ia64-opc-d.c
 ia64-asmtab.lo: ia64-asmtab.c

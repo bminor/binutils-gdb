@@ -68,11 +68,11 @@
       {									\
 	char raw_buf[REGISTER_RAW_SIZE (FP0_REGNUM)];			\
 	REGISTER_CONVERT_TO_RAW (TYPE, FP0_REGNUM, VALBUF, raw_buf);	\
-	write_register_bytes (REGISTER_BYTE (FP0_REGNUM),		\
+	deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM),		\
 			      raw_buf, REGISTER_RAW_SIZE (FP0_REGNUM)); \
       }									\
   else									\
-    write_register_bytes ((TYPE_CODE(TYPE) == TYPE_CODE_PTR ? 8 * 4 : 0), \
+    deprecated_write_register_bytes ((TYPE_CODE(TYPE) == TYPE_CODE_PTR ? 8 * 4 : 0), \
 			  VALBUF, TYPE_LENGTH (TYPE))
 
 /* Return number of args passed to a frame.

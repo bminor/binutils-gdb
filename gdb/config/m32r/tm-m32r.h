@@ -146,7 +146,7 @@ extern CORE_ADDR m32r_frame_saved_pc (struct frame_info *);
 
 /* mvs_check  DEPRECATED_STORE_RETURN_VALUE */
 #define DEPRECATED_STORE_RETURN_VALUE(TYPE, VALBUF) \
-  write_register_bytes(REGISTER_BYTE (V0_REGNUM) + \
+  deprecated_write_register_bytes(REGISTER_BYTE (V0_REGNUM) + \
 		       ((TYPE_LENGTH (TYPE) > 4 ? 8:4) - TYPE_LENGTH (TYPE)),\
 		       (VALBUF), TYPE_LENGTH (TYPE));
 
@@ -221,7 +221,7 @@ extern CORE_ADDR m32r_push_arguments (int nargs,
 /* override the standard get_saved_register function with 
    one that takes account of generic CALL_DUMMY frames */
 #define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-     generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+     deprecated_generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 
 #define USE_GENERIC_DUMMY_FRAMES 1

@@ -64,15 +64,15 @@
     {									\
       char raw_buffer[REGISTER_RAW_SIZE (FP0_REGNUM)];			\
       REGISTER_CONVERT_TO_RAW (TYPE, FP0_REGNUM, VALBUF, raw_buffer);	\
-      write_register_bytes (REGISTER_BYTE (FP0_REGNUM),			\
+      deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM),			\
 			    raw_buffer, TYPE_LENGTH (TYPE));		\
     }									\
   else									\
     {									\
       if (TYPE_CODE (TYPE) == TYPE_CODE_PTR)				\
-	write_register_bytes (REGISTER_BYTE (A0_REGNUM), VALBUF,	\
+	deprecated_write_register_bytes (REGISTER_BYTE (A0_REGNUM), VALBUF,	\
 			      TYPE_LENGTH (TYPE));			\
-      write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE));		\
+      deprecated_write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE));		\
     }									\
 }
 

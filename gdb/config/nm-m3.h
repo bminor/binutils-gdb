@@ -77,7 +77,7 @@ extern int must_suspend_thread;
 
 /* Before storing, we need to read all the registers.  */
 
-#define CHILD_PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)
+#define CHILD_PREPARE_TO_STORE() deprecated_read_register_bytes (0, NULL, REGISTER_BYTES)
 
 /* Check if the inferior exists */
 #define MACH_ERROR_NO_INFERIOR \

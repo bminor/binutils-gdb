@@ -1658,6 +1658,7 @@ ppc64_elf_merge_private_bfd_data (ibfd, obfd)
 {
   /* Check if we have the same endianess.  */
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
+      && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
       && obfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN)
     {
       const char *msg;
@@ -1785,19 +1786,19 @@ struct ppc_dyn_relocs
    ppc_stub_plt_branch:
    Similar to the above, but a 24 bit branch in the stub section won't
    reach its destination.
-   .	addis	%r12,%r2,xxx@ha
-   .	ld	%r11,xxx@l(%r12)
+   .	addis	%r12,%r2,xxx@toc@ha
+   .	ld	%r11,xxx@toc@l(%r12)
    .	mtctr	%r11
    .	bctr
 
    ppc_stub_plt_call:
    Used to call a function in a shared library.
-   .	addis	%r12,%r2,xxx@ha
+   .	addis	%r12,%r2,xxx@toc@ha
    .	std	%r2,40(%r1)
-   .	ld	%r11,xxx+0@l(%r12)
-   .	ld	%r2,xxx+8@l(%r12)
+   .	ld	%r11,xxx+0@toc@l(%r12)
+   .	ld	%r2,xxx+8@toc@l(%r12)
    .	mtctr	%r11
-   .	ld	%r11,xxx+16@l(%r12)
+   .	ld	%r11,xxx+16@toc@l(%r12)
    .	bctr
 */
 
@@ -1971,8 +1972,6 @@ static boolean ppc64_elf_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static void ppc64_elf_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
-static boolean edit_opd
-  PARAMS ((bfd *, struct bfd_link_info *));
 static boolean allocate_dynrelocs
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean readonly_dynrelocs
@@ -3166,6 +3165,7 @@ func_desc_adjust (h, inf)
 	{
 	  bfd *abfd;
 	  asymbol *newsym;
+	  struct bfd_link_hash_entry *bh;
 
 	  abfd = h->root.u.undef.abfd;
 	  newsym = bfd_make_empty_symbol (abfd);
@@ -3176,13 +3176,14 @@ func_desc_adjust (h, inf)
 	  if (h->root.type == bfd_link_hash_undefweak)
 	    newsym->flags |= BSF_WEAK;
 
+	  bh = &fdh->root;
 	  if ( !(_bfd_generic_link_add_one_symbol
 		 (info, abfd, newsym->name, newsym->flags,
-		  newsym->section, newsym->value, NULL, false, false,
-		  (struct bfd_link_hash_entry **) &fdh)))
+		  newsym->section, newsym->value, NULL, false, false, &bh)))
 	    {
 	      return false;
 	    }
+	  fdh = (struct elf_link_hash_entry *) bh;
 	  fdh->elf_link_hash_flags &= ~ELF_LINK_NON_ELF;
 	}
 
@@ -3536,8 +3537,8 @@ ppc64_elf_hide_symbol (info, h, force_local)
     }
 }
 
-static boolean
-edit_opd (obfd, info)
+boolean
+ppc64_elf_edit_opd (obfd, info)
      bfd *obfd;
      struct bfd_link_info *info;
 {
@@ -3554,6 +3555,7 @@ edit_opd (obfd, info)
       Elf_Internal_Sym *local_syms;
       struct elf_link_hash_entry **sym_hashes;
       bfd_vma offset;
+      bfd_size_type amt;
       long *adjust;
       boolean need_edit;
 
@@ -3561,9 +3563,16 @@ edit_opd (obfd, info)
       if (sec == NULL)
 	continue;
 
+      amt = sec->_raw_size * sizeof (long) / 24;
       adjust = (long *) elf_section_data (sec)->tdata;
-      BFD_ASSERT (adjust != NULL);
-      memset (adjust, 0, (size_t) sec->_raw_size * sizeof (long) / 24);
+      if (adjust == NULL)
+	{
+	  /* Must be a ld -r link.  ie. check_relocs hasn't been
+	     called.  */
+	  adjust = (long *) bfd_zalloc (obfd, amt);
+	  elf_section_data (sec)->tdata = adjust;
+	}
+      memset (adjust, 0, (size_t) amt);
 
       if (sec->output_section == bfd_abs_section_ptr)
 	continue;
@@ -3675,12 +3684,16 @@ edit_opd (obfd, info)
 	      break;
 	    }
 
-	  if (sym_sec->output_section == bfd_abs_section_ptr)
-	    {
-	      /* OK, we've found a function that's excluded from the
-		 link.  */
-	      need_edit = true;
-	    }
+	  /* opd entries are always for functions defined in the
+	     current input bfd.  If the symbol isn't defined in the
+	     input bfd, then we won't be using the function in this
+	     bfd;  It must be defined in a linkonce section in another
+	     bfd, or is weak.  It's also possible that we are
+	     discarding the function due to a linker script /DISCARD/,
+	     which we test for via the output_section.  */
+	  if (sym_sec->owner != ibfd
+	      || sym_sec->output_section == bfd_abs_section_ptr)
+	    need_edit = true;
 
 	  offset += 24;
 	}
@@ -3754,21 +3767,37 @@ edit_opd (obfd, info)
 							      sym->st_shndx);
 		    }
 
-		  skip = sym_sec->output_section == bfd_abs_section_ptr;
+		  skip = (sym_sec->owner != ibfd
+			  || sym_sec->output_section == bfd_abs_section_ptr);
 		  if (skip)
 		    {
-		      if (h != NULL)
+		      if (h != NULL && sym_sec->owner == ibfd)
 			{
 			  /* Arrange for the function descriptor sym
 			     to be dropped.  */
-			  struct elf_link_hash_entry *fdh;
+			  struct ppc_link_hash_entry *fdh;
 			  struct ppc_link_hash_entry *fh;
 
 			  fh = (struct ppc_link_hash_entry *) h;
-			  BFD_ASSERT (fh->is_func);
-			  fdh = fh->oh;
-			  fdh->root.u.def.value = 0;
-			  fdh->root.u.def.section = sym_sec;
+			  fdh = (struct ppc_link_hash_entry *) fh->oh;
+			  if (fdh == NULL)
+			    {
+			      const char *fd_name;
+			      struct ppc_link_hash_table *htab;
+
+			      fd_name = h->root.root.string + 1;
+			      htab = ppc_hash_table (info);
+			      fdh = (struct ppc_link_hash_entry *)
+				elf_link_hash_lookup (&htab->elf, fd_name,
+						      false, false, false);
+			      fdh->is_func_descriptor = 1;
+			      fdh->oh = &fh->elf;
+			      fh->is_func = 1;
+			      fh->oh = &fdh->elf;
+			    }
+
+			  fdh->elf.root.u.def.value = 0;
+			  fdh->elf.root.u.def.section = sym_sec;
 			}
 		    }
 		  else
@@ -3781,13 +3810,28 @@ edit_opd (obfd, info)
 			     to this location in the opd section.
 			     We've checked above that opd relocs are
 			     ordered.  */
-			  struct elf_link_hash_entry *fdh;
+			  struct ppc_link_hash_entry *fdh;
 			  struct ppc_link_hash_entry *fh;
 
 			  fh = (struct ppc_link_hash_entry *) h;
-			  BFD_ASSERT (fh->is_func);
-			  fdh = fh->oh;
-			  fdh->root.u.def.value = wptr - sec->contents;
+			  fdh = (struct ppc_link_hash_entry *) fh->oh;
+			  if (fdh == NULL)
+			    {
+			      const char *fd_name;
+			      struct ppc_link_hash_table *htab;
+
+			      fd_name = h->root.root.string + 1;
+			      htab = ppc_hash_table (info);
+			      fdh = (struct ppc_link_hash_entry *)
+				elf_link_hash_lookup (&htab->elf, fd_name,
+						      false, false, false);
+			      fdh->is_func_descriptor = 1;
+			      fdh->oh = &fh->elf;
+			      fh->is_func = 1;
+			      fh->oh = &fdh->elf;
+			    }
+
+			  fdh->elf.root.u.def.value = wptr - sec->contents;
 			}
 		      else
 			{
@@ -3797,8 +3841,7 @@ edit_opd (obfd, info)
 			     for the function descriptor sym which we
 			     don't have at the moment.  So keep an
 			     array of adjustments.  */ 
-			  adjust[(rel->r_offset + wptr - rptr) / 24]
-			    = wptr - rptr;
+			  adjust[rel->r_offset / 24] = wptr - rptr;
 			}
 
 		      if (wptr != rptr)
@@ -4137,9 +4180,6 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 	    *local_got = (bfd_vma) -1;
 	}
     }
-
-  if (!edit_opd (output_bfd, info))
-    return false;
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
@@ -5161,6 +5201,7 @@ ppc64_elf_build_stubs (info)
 	    }
 	  bfd_put_32 (htab->sglink->owner,
 		      B_DOT | ((htab->sglink->contents - p) & 0x3fffffc), p);
+	  indx++;
 	  p += 4;
 	}
       htab->sglink->_cooked_size = p - htab->sglink->contents;

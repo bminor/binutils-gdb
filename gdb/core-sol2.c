@@ -94,15 +94,19 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 	  struct regs *gregs = (struct regs *) core_reg_sect;
 
 	  /* G0 *always* holds 0.  */
-	  *(int *) &registers[REGISTER_BYTE (0)] = 0;
+	  *(int *) &deprecated_registers[REGISTER_BYTE (0)] = 0;
 
 	  /* The globals and output registers.  */
-	  memcpy (&registers[REGISTER_BYTE (G1_REGNUM)], &gregs->r_g1,
-		  15 * REGISTER_RAW_SIZE (G1_REGNUM));
-	  *(int *) &registers[REGISTER_BYTE (PS_REGNUM)] = gregs->r_ps;
-	  *(int *) &registers[REGISTER_BYTE (PC_REGNUM)] = gregs->r_pc;
-	  *(int *) &registers[REGISTER_BYTE (NPC_REGNUM)] = gregs->r_npc;
-	  *(int *) &registers[REGISTER_BYTE (Y_REGNUM)] = gregs->r_y;
+	  memcpy (&deprecated_registers[REGISTER_BYTE (G1_REGNUM)],
+		  &gregs->r_g1, 15 * REGISTER_RAW_SIZE (G1_REGNUM));
+	  *(int *) &deprecated_registers[REGISTER_BYTE (PS_REGNUM)]
+	    = gregs->r_ps;
+	  *(int *) &deprecated_registers[REGISTER_BYTE (PC_REGNUM)]
+	    = gregs->r_pc;
+	  *(int *) &deprecated_registers[REGISTER_BYTE (NPC_REGNUM)]
+	    = gregs->r_npc;
+	  *(int *) &deprecated_registers[REGISTER_BYTE (Y_REGNUM)]
+	    = gregs->r_y;
 
 	  /* My best guess at where to get the locals and input
 	     registers is exactly where they usually are, right above
@@ -112,9 +116,9 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 	  {
 	    int sp;
 
-	    sp = *(int *) &registers[REGISTER_BYTE (SP_REGNUM)];
+	    sp = *(int *) &deprecated_registers[REGISTER_BYTE (SP_REGNUM)];
 	    if (0 != target_read_memory (sp,
-				      &registers[REGISTER_BYTE (L0_REGNUM)],
+					 &deprecated_registers[REGISTER_BYTE (L0_REGNUM)],
 					 16 * REGISTER_RAW_SIZE (L0_REGNUM)))
 	      {
 		warning ("couldn't read input and local registers from core file\n");
@@ -163,10 +167,10 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 	{
 	  struct fpu *fpuregs = (struct fpu *) core_reg_sect;
 
-	  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &fpuregs->fpu_fr,
-		  sizeof (fpuregs->fpu_fr));
-	  memcpy (&registers[REGISTER_BYTE (FPS_REGNUM)], &fpuregs->fpu_fsr,
-		  sizeof (FPU_FSR_TYPE));
+	  memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+		  &fpuregs->fpu_fr, sizeof (fpuregs->fpu_fr));
+	  memcpy (&deprecated_registers[REGISTER_BYTE (FPS_REGNUM)],
+		  &fpuregs->fpu_fsr, sizeof (FPU_FSR_TYPE));
 	}
       else
 	{

@@ -129,52 +129,52 @@ struct symloc
 
 /* FIXME: Shouldn't this stuff be in a .h file somewhere?  */
 /* Complaints about the symbols we have encountered.  */
-extern struct complaint string_table_offset_complaint;
-extern struct complaint lbrac_unmatched_complaint;
-extern struct complaint lbrac_mismatch_complaint;
+extern struct deprecated_complaint string_table_offset_complaint;
+extern struct deprecated_complaint lbrac_unmatched_complaint;
+extern struct deprecated_complaint lbrac_mismatch_complaint;
 
-static struct complaint hpread_unhandled_end_common_complaint =
+static struct deprecated_complaint hpread_unhandled_end_common_complaint =
 {
   "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON/DNTT_TYPE_END.\n", 0, 0
 };
 
-static struct complaint hpread_unhandled_type_complaint =
+static struct deprecated_complaint hpread_unhandled_type_complaint =
 {
   "hpread_type_translate: unhandled type code.", 0, 0
 };
 
-static struct complaint hpread_struct_complaint =
+static struct deprecated_complaint hpread_struct_complaint =
 {
   "hpread_read_struct_type: expected SVAR type...", 0, 0
 };
 
-static struct complaint hpread_array_complaint =
+static struct deprecated_complaint hpread_array_complaint =
 {
   "error in hpread_array_type.", 0, 0
 };
 
-static struct complaint hpread_type_lookup_complaint =
+static struct deprecated_complaint hpread_type_lookup_complaint =
 {
   "error in hpread_type_lookup().", 0, 0
 };
 
 
-static struct complaint hpread_unexpected_end_complaint =
+static struct deprecated_complaint hpread_unexpected_end_complaint =
 {
   "internal error in hp-symtab-read.c: Unexpected DNTT_TYPE_END kind.", 0, 0
 };
 
-static struct complaint hpread_tagdef_complaint =
+static struct deprecated_complaint hpread_tagdef_complaint =
 {
   "error processing class tagdef", 0, 0
 };
 
-static struct complaint hpread_unhandled_common_complaint =
+static struct deprecated_complaint hpread_unhandled_common_complaint =
 {
   "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_COMMON.", 0, 0
 };
 
-static struct complaint hpread_unhandled_blockdata_complaint =
+static struct deprecated_complaint hpread_unhandled_blockdata_complaint =
 {
   "unhandled symbol in hp-symtab-read.c: DNTT_TYPE_BLOCKDATA.", 0, 0
 };
@@ -3186,6 +3186,7 @@ hpread_read_enum_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
 	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (xsym);
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
+	  TYPE_FIELD_STATIC_KIND (type, n) = 0;
 	}
       if (syms == osyms)
 	break;
@@ -3347,6 +3348,7 @@ hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  TYPE_FIELD_TYPE (type, n) = SYMBOL_TYPE (xsym);
 	  TYPE_FIELD_ARTIFICIAL (type, n) = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
+	  TYPE_FIELD_STATIC_KIND (type, n) = 0;
 	}
     }
   /* Mark it as having been processed */
@@ -3520,6 +3522,7 @@ hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  TYPE_FIELD_TYPE (type, n) = SYMBOL_TYPE (xsym);
 	  TYPE_FIELD_ARTIFICIAL (type, n) = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
+	  TYPE_FIELD_STATIC_KIND (type, n) = 0;
 	}
     }
 
@@ -3704,6 +3707,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	  list = new;
 
 	  FIELD_BITSIZE (list->field) = 0;
+	  FIELD_STATIC_KIND (list->field) = 0;
 
 	  /* The "classname" field is actually a DNTT pointer to the base class */
 	  baseclass = hpread_type_lookup (parentp->dinheritance.classname,
@@ -4101,6 +4105,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	      list->field.name = VT (objfile) + fn_fieldp->dsvar.name;
 	      FIELD_BITPOS (list->field) = 0;	/* FIXME is this always true? */
 	      FIELD_BITSIZE (list->field) = 0;	/* use length from type */
+	      FIELD_STATIC_KIND (list->field) = 0;
 	      memtype = hpread_type_lookup (fn_fieldp->dsvar.type, objfile);
 	      list->field.type = memtype;
 	      list->attributes = 0;
@@ -4120,6 +4125,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	      list->field.name = VT (objfile) + fn_fieldp->ddvar.name;
 	      FIELD_BITPOS (list->field) = 0;	/* FIXME is this always true? */
 	      FIELD_BITSIZE (list->field) = 0;	/* use length from type */
+	      FIELD_STATIC_KIND (list->field) = 0;
 	      memtype = hpread_type_lookup (fn_fieldp->ddvar.type, objfile);
 	      list->field.type = memtype;
 	      list->attributes = 0;
@@ -4168,6 +4174,7 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 
 
 	  /* A FIELD by itself (without a GENFIELD) can also be a static member */
+	  FIELD_STATIC_KIND (list->field) = 0;
 	  if (fieldp->dfield.staticmem)
 	    {
 	      FIELD_BITPOS (list->field) = -1;
@@ -5742,7 +5749,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	{
 	  /* Thread-local variable.
 	   */
-	  SYMBOL_CLASS (sym) = LOC_THREAD_LOCAL_STATIC;
+	  SYMBOL_CLASS (sym) = LOC_HP_THREAD_LOCAL_STATIC;
 	  SYMBOL_BASEREG (sym) = CR27_REGNUM;
 
 	  if (objfile->flags & OBJF_SHARED)

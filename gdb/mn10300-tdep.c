@@ -139,9 +139,11 @@ static void
 mn10300_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    write_register_bytes (REGISTER_BYTE (4), valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (4), valbuf,
+				     TYPE_LENGTH (type));
   else
-    write_register_bytes (REGISTER_BYTE (0), valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (0), valbuf,
+				     TYPE_LENGTH (type));
 }
 
 static struct frame_info *analyze_dummy_frame (CORE_ADDR, CORE_ADDR);
@@ -1148,7 +1150,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_virtual_size (gdbarch, mn10300_register_virtual_size);
   set_gdbarch_register_virtual_type (gdbarch, mn10300_register_virtual_type);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, mn10300_dwarf2_reg_to_regnum);
-  set_gdbarch_do_registers_info (gdbarch, mn10300_do_registers_info);
+  set_gdbarch_deprecated_do_registers_info (gdbarch, mn10300_do_registers_info);
   set_gdbarch_sp_regnum (gdbarch, 8);
   set_gdbarch_pc_regnum (gdbarch, 9);
   set_gdbarch_fp_regnum (gdbarch, 31);

@@ -467,7 +467,7 @@ fetch_register (int regno)
 {
   if (regno < FP0_REGNUM)
     supply_register (regno, (char *) &a_tss + regno_mapping[regno].tss_ofs);
-  else if (FP_REGNUM_P (regno) || FPC_REGNUM_P (regno))
+  else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
     i387_supply_register (regno, (char *) &npx);
   else
     internal_error (__FILE__, __LINE__,
@@ -492,7 +492,7 @@ store_register (int regno)
 {
   if (regno < FP0_REGNUM)
     regcache_collect (regno, (char *) &a_tss + regno_mapping[regno].tss_ofs);
-  else if (FP_REGNUM_P (regno) || FPC_REGNUM_P (regno))
+  else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
     i387_fill_fsave ((char *) &npx, regno);
   else
     internal_error (__FILE__, __LINE__,

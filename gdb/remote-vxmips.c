@@ -30,7 +30,7 @@
 #include "gdbcore.h"
 #include "command.h"
 #include "symtab.h"
-#include "symfile.h"		/* for struct complaint */
+#include "symfile.h"
 #include "regcache.h"
 
 #include "gdb_string.h"
@@ -103,18 +103,19 @@ vx_read_register (int regno)
 
   /* Copy the general registers.  */
 
-  bcopy (&mips_greg_packet[MIPS_R_GP0], &registers[0], 32 * MIPS_GREG_SIZE);
+  bcopy (&mips_greg_packet[MIPS_R_GP0], &deprecated_registers[0],
+	 32 * MIPS_GREG_SIZE);
 
   /* Copy SR, LO, HI, and PC.  */
 
   bcopy (&mips_greg_packet[MIPS_R_SR],
-	 &registers[REGISTER_BYTE (PS_REGNUM)], MIPS_GREG_SIZE);
+	 &deprecated_registers[REGISTER_BYTE (PS_REGNUM)], MIPS_GREG_SIZE);
   bcopy (&mips_greg_packet[MIPS_R_LO],
-	 &registers[REGISTER_BYTE (LO_REGNUM)], MIPS_GREG_SIZE);
+	 &deprecated_registers[REGISTER_BYTE (LO_REGNUM)], MIPS_GREG_SIZE);
   bcopy (&mips_greg_packet[MIPS_R_HI],
-	 &registers[REGISTER_BYTE (HI_REGNUM)], MIPS_GREG_SIZE);
+	 &deprecated_registers[REGISTER_BYTE (HI_REGNUM)], MIPS_GREG_SIZE);
   bcopy (&mips_greg_packet[MIPS_R_PC],
-	 &registers[REGISTER_BYTE (PC_REGNUM)], MIPS_GREG_SIZE);
+	 &deprecated_registers[REGISTER_BYTE (PC_REGNUM)], MIPS_GREG_SIZE);
 
   /* If the target has floating point registers, fetch them.
      Otherwise, zero the floating point register values in
@@ -129,26 +130,26 @@ vx_read_register (int regno)
       /* Copy the floating point registers.  */
 
       bcopy (&mips_fpreg_packet[MIPS_R_FP0],
-	     &registers[REGISTER_BYTE (FP0_REGNUM)],
+	     &deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	     REGISTER_RAW_SIZE (FP0_REGNUM) * 32);
 
       /* Copy the floating point control/status register (fpcsr).  */
 
       bcopy (&mips_fpreg_packet[MIPS_R_FPCSR],
-	     &registers[REGISTER_BYTE (FCRCS_REGNUM)],
+	     &deprecated_registers[REGISTER_BYTE (FCRCS_REGNUM)],
 	     REGISTER_RAW_SIZE (FCRCS_REGNUM));
     }
   else
     {
-      bzero ((char *) &registers[REGISTER_BYTE (FP0_REGNUM)],
+      bzero ((char *) &deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	     REGISTER_RAW_SIZE (FP0_REGNUM) * 32);
-      bzero ((char *) &registers[REGISTER_BYTE (FCRCS_REGNUM)],
+      bzero ((char *) &deprecated_registers[REGISTER_BYTE (FCRCS_REGNUM)],
 	     REGISTER_RAW_SIZE (FCRCS_REGNUM));
     }
 
   /* Mark the register cache valid.  */
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 /* Store a register or registers into the VxWorks target.
@@ -162,17 +163,18 @@ vx_write_register (int regno)
 
   /* Store general registers.  */
 
-  bcopy (&registers[0], &mips_greg_packet[MIPS_R_GP0], 32 * MIPS_GREG_SIZE);
+  bcopy (&deprecated_registers[0], &mips_greg_packet[MIPS_R_GP0],
+	 32 * MIPS_GREG_SIZE);
 
   /* Copy SR, LO, HI, and PC.  */
 
-  bcopy (&registers[REGISTER_BYTE (PS_REGNUM)],
+  bcopy (&deprecated_registers[REGISTER_BYTE (PS_REGNUM)],
 	 &mips_greg_packet[MIPS_R_SR], MIPS_GREG_SIZE);
-  bcopy (&registers[REGISTER_BYTE (LO_REGNUM)],
+  bcopy (&deprecated_registers[REGISTER_BYTE (LO_REGNUM)],
 	 &mips_greg_packet[MIPS_R_LO], MIPS_GREG_SIZE);
-  bcopy (&registers[REGISTER_BYTE (HI_REGNUM)],
+  bcopy (&deprecated_registers[REGISTER_BYTE (HI_REGNUM)],
 	 &mips_greg_packet[MIPS_R_HI], MIPS_GREG_SIZE);
-  bcopy (&registers[REGISTER_BYTE (PC_REGNUM)],
+  bcopy (&deprecated_registers[REGISTER_BYTE (PC_REGNUM)],
 	 &mips_greg_packet[MIPS_R_PC], MIPS_GREG_SIZE);
 
   net_write_registers (mips_greg_packet, MIPS_GREG_PLEN, PTRACE_SETREGS);
@@ -183,13 +185,13 @@ vx_write_register (int regno)
     {
       /* Copy the floating point data registers.  */
 
-      bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)],
+      bcopy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	     &mips_fpreg_packet[MIPS_R_FP0],
 	     REGISTER_RAW_SIZE (FP0_REGNUM) * 32);
 
       /* Copy the floating point control/status register (fpcsr).  */
 
-      bcopy (&registers[REGISTER_BYTE (FCRCS_REGNUM)],
+      bcopy (&deprecated_registers[REGISTER_BYTE (FCRCS_REGNUM)],
 	     &mips_fpreg_packet[MIPS_R_FPCSR],
 	     REGISTER_RAW_SIZE (FCRCS_REGNUM));
 

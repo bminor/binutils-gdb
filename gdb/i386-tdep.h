@@ -113,11 +113,10 @@ struct gdbarch_tdep
 /* FPU opcode, bottom eleven bits.  */
 #define FOP_REGNUM	(FPC_REGNUM + 7)
 
-/* Return non-zero if N corresponds to a FPU data registers.  */
-#define FP_REGNUM_P(n)	(FP0_REGNUM && FP0_REGNUM <= (n) && (n) < FPC_REGNUM)
-
-/* Return non-zero if N corresponds to a FPU control register.  */
-#define FPC_REGNUM_P(n)	(FPC_REGNUM <= (n) && (n) < XMM0_REGNUM)
+/* Return non-zero if REGNUM matches the FP register and the FP
+   register set is active.  */
+extern int i386_fp_regnum_p (int regnum);
+extern int i386_fpc_regnum_p (int regnum);
 
 /* SSE registers.  */
 
@@ -128,17 +127,18 @@ struct gdbarch_tdep
 #define MXCSR_REGNUM \
   (XMM0_REGNUM + gdbarch_tdep (current_gdbarch)->num_xmm_regs)
 
-/* Return non-zero if N corresponds to a SSE data register.  */
-#define SSE_REGNUM_P(n) (XMM0_REGNUM <= (n) && (n) < MXCSR_REGNUM)
+/* Return non-zero if REGNUM matches the SSE register and the SSE
+   register set is active.  */
+extern int i386_sse_regnum_p (int regnum);
+extern int i386_mxcsr_regnum_p (int regnum);
 
 /* FIXME: kettenis/2001-11-24: Obsolete macro's.  */
 #define FCS_REGNUM FISEG_REGNUM
 #define FCOFF_REGNUM FIOFF_REGNUM
 #define FDS_REGNUM FOSEG_REGNUM
 #define FDOFF_REGNUM FOOFF_REGNUM
-#define IS_FP_REGNUM(n) FP_REGNUM_P (n)
-#define IS_FPU_CTRL_REGNUM(n) FPC_REGNUM_P (n)
-#define IS_SSE_REGNUM(n) SSE_REGNUM_P (n)
+#define IS_FP_REGNUM(n) i386_fp_regnum_p (n)
+#define IS_SSE_REGNUM(n) i386_sse_regnum_p (n)
 
 #define I386_NUM_GREGS	16
 #define I386_NUM_FREGS	16
@@ -162,9 +162,14 @@ struct gdbarch_tdep
 
 /* Functions exported from i386-tdep.c.  */
 extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
+extern int i386_frameless_signal_p (struct frame_info *frame);
 
 /* Return the name of register REG.  */
 extern char const *i386_register_name (int reg);
+
+/* Return non-zero if REGNUM is a member of the specified group.  */
+extern int i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+				     struct reggroup *group);
 
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);

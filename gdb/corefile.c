@@ -356,6 +356,14 @@ read_memory_string (CORE_ADDR memaddr, char *buffer, int max_len)
     }
 }
 
+CORE_ADDR
+read_memory_typed_address (CORE_ADDR addr, struct type *type)
+{
+  char *buf = alloca (TYPE_LENGTH (type));
+  read_memory (addr, buf, TYPE_LENGTH (type));
+  return extract_typed_address (buf, type);
+}
+
 /* Same as target_write_memory, but report an error if can't write.  */
 void
 write_memory (CORE_ADDR memaddr, char *myaddr, int len)

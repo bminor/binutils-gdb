@@ -36,7 +36,7 @@ int remote_mips_remove_watchpoint (CORE_ADDR addr, int len, int type);
 
 /* We need to remove watchpoints when stepping, else we hit them again! */
 
-#define HAVE_NONSTEPPABLE_WATCHPOINT
+#define HAVE_NONSTEPPABLE_WATCHPOINT 1
 
 int remote_mips_stopped_by_watchpoint (void);
 #define STOPPED_BY_WATCHPOINT(w) remote_mips_stopped_by_watchpoint ()

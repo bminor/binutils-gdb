@@ -54,16 +54,16 @@ struct elfinfo
 
 /* Various things we might complain about... */
 
-struct complaint section_info_complaint =
+struct deprecated_complaint section_info_complaint =
 {"elf/stab section information %s without a preceding file symbol", 0, 0};
 
-struct complaint section_info_dup_complaint =
+struct deprecated_complaint section_info_dup_complaint =
 {"duplicated elf/stab section information for %s", 0, 0};
 
-struct complaint stab_info_mismatch_complaint =
+struct deprecated_complaint stab_info_mismatch_complaint =
 {"elf/stab section information missing for %s", 0, 0};
 
-struct complaint stab_info_questionable_complaint =
+struct deprecated_complaint stab_info_questionable_complaint =
 {"elf/stab section information questionable for %s", 0, 0};
 
 static void free_elfinfo (void *);

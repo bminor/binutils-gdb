@@ -1,3 +1,43 @@
+2002-11-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (mi_cmd_data_write_register_values): Use
+	deprecated_write_register_bytes instead of write_register_bytes.
+
+2002-11-11  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdbmi.texinfo (-var-assign): Add comments about interaction
+	with -var-update and add an example.  Part of fix for gdb/702.
+
+2002-11-08  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-main.c (mi_command_loop): Initialize raw_stdout and gdb_stdout 
+	only if mi version is <= 1.
+	(mi_init_ui): Initialize raw_stdout and gdb_stdout if mi version 
+	is > 1 so startup message is treated as console output.  This is 
+	part of fix for PR gdb/604.
+
+2002-11-06  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-cmd-var.c (mi_cmd_var_create): Change the function used to 
+	parse the frame addr from parse_and_eval_address() to 
+	string_to_core_addr().  This is a fix for PR gdb/494.
+
+2002-10-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-cmd-var.c: Change all remaining occurrences of ui_out_tuple_begin 
+	to make_cleanup_ui_out_tuple_begin_end.  Change all remaining 
+	occurrences of ui_out_list_begin to make_cleanup_ui_out_list_begin_end.
+	Use do_cleanups instead of ui_out_list_end or ui_out_tuple_end.  This 
+	is a fix for PR gdb/680.
+	* mi-cmd-stack.c: Ditto.
+	* mi-main.c: Ditto.
+
+2002-10-22  Keith Seitz  <keiths@redhat.com>
+
+	* mi-main.c (mi_cmd_thread_select): Only return MI_CMD_CAUGHT_ERROR
+	when we really did catch an error(). If we got GDB_RC_FAIL, return
+	MI_CMD_ERROR instead.
+
 2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdbmi.texinfo: Fix examples that show frames to remove

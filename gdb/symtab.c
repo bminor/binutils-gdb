@@ -50,11 +50,6 @@
 #include <ctype.h>
 #include "cp-abi.h"
 
-/* Prototype for one function in parser-defs.h,
-   instead of including that entire file. */
-
-extern char *find_template_name_end (char *);
-
 /* Prototypes for local functions */
 
 static void completion_list_add_name (char *, char *, int, char *, char *);
@@ -88,6 +83,25 @@ static struct symbol *lookup_symbol_aux (const char *name,
 					 int *is_a_field_of_this,
 					 struct symtab **symtab);
 
+static struct symbol *lookup_symbol_aux_local (const char *name,
+					       const char *mangled_name,
+					       const struct block *block,
+					       const namespace_enum namespace,
+					       struct symtab **symtab);
+
+static
+struct symbol *lookup_symbol_aux_symtabs (int block_index,
+					  const char *name,
+					  const char *mangled_name,
+					  const namespace_enum namespace,
+					  struct symtab **symtab);
+
+static
+struct symbol *lookup_symbol_aux_psymtabs (int block_index,
+					   const char *name,
+					   const char *mangled_name,
+					   const namespace_enum namespace,
+					   struct symtab **symtab);
 
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
@@ -120,19 +134,6 @@ struct type *builtin_type_error;
    value_of_this. */
 
 const struct block *block_found;
-
-/* While the C++ support is still in flux, issue a possibly helpful hint on
-   using the new command completion feature on single quoted demangled C++
-   symbols.  Remove when loose ends are cleaned up.   FIXME -fnf */
-
-static void
-cplusplus_hint (char *name)
-{
-  while (*name == '\'')
-    name++;
-  printf_filtered ("Hint: try '%s<TAB> or '%s<ESC-?>\n", name, name);
-  printf_filtered ("(Note leading single quote.)\n");
-}
 
 /* Check for a symtab of a specific name; first in symtabs, then in
    psymtabs.  *If* there is no '/' in the name, a match after a '/'
@@ -385,6 +386,33 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
 }
 
 
+/* Initialize the language dependent portion of a symbol
+   depending upon the language for the symbol. */
+void
+symbol_init_language_specific (struct general_symbol_info *gsymbol,
+			       enum language language)
+{
+  gsymbol->language = language;
+  if (gsymbol->language == language_cplus
+      || gsymbol->language == language_java)
+    {
+      gsymbol->language_specific.cplus_specific.demangled_name = NULL;
+    }
+  else if (gsymbol->language == language_objc)
+    {
+      gsymbol->language_specific.objc_specific.demangled_name = NULL;
+    }
+  /* OBSOLETE else if (SYMBOL_LANGUAGE (symbol) == language_chill) */
+  /* OBSOLETE   { */
+  /* OBSOLETE     SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL; */
+  /* OBSOLETE   } */
+  else
+    {
+      memset (&gsymbol->language_specific, 0,
+	      sizeof (gsymbol->language_specific));
+    }
+}
+
 /* Initialize a symbol's mangled name.  */
 
 /* Try to initialize the demangled name for a symbol, based on the
@@ -461,7 +489,35 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
 #endif
 }
 
+/* Return the demangled name for a symbol based on the language for
+   that symbol.  If no demangled name exists, return NULL. */
+char *
+symbol_demangled_name (struct general_symbol_info *gsymbol)
+{
+  if (gsymbol->language == language_cplus
+      || gsymbol->language == language_java)
+    return gsymbol->language_specific.cplus_specific.demangled_name;
 
+  else if (gsymbol->language == language_objc)
+    return gsymbol->language_specific.objc_specific.demangled_name;
+
+  else 
+    return NULL;
+
+  /* OBSOLETE (SYMBOL_LANGUAGE (symbol) == language_chill */
+  /* OBSOLETE ? SYMBOL_CHILL_DEMANGLED_NAME (symbol) */
+}
+
+/* Initialize the structure fields to zero values.  */
+void
+init_sal (struct symtab_and_line *sal)
+{
+  sal->symtab = 0;
+  sal->section = 0;
+  sal->line = 0;
+  sal->pc = 0;
+  sal->end = 0;
+}
 
 
 
@@ -729,43 +785,22 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 		   const struct block *block, const namespace_enum namespace,
 		   int *is_a_field_of_this, struct symtab **symtab)
 {
-  register struct symbol *sym;
-  register struct symtab *s = NULL;
-  register struct partial_symtab *ps;
-  register struct blockvector *bv;
-  register struct objfile *objfile = NULL;
-  register struct block *b;
-  register struct minimal_symbol *msymbol;
-
+  struct symbol *sym;
+  struct symtab *s = NULL;
+  struct blockvector *bv;
+  struct minimal_symbol *msymbol;
 
   /* Search specified block and its superiors.  */
 
-  while (block != 0)
-    {
-      sym = lookup_block_symbol (block, name, mangled_name, namespace);
-      if (sym)
-	{
-	  block_found = block;
-	  if (symtab != NULL)
-	    {
-	      /* Search the list of symtabs for one which contains the
-	         address of the start of this block.  */
-	      ALL_SYMTABS (objfile, s)
-	      {
-		bv = BLOCKVECTOR (s);
-		b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-		if (BLOCK_START (b) <= BLOCK_START (block)
-		    && BLOCK_END (b) > BLOCK_START (block))
-		  goto found;
-	      }
-	    found:
-	      *symtab = s;
-	    }
+  sym = lookup_symbol_aux_local (name, mangled_name, block, namespace,
+				 symtab);
+  if (sym != NULL)
+    return sym;
 
-	  return fixup_symbol_section (sym, objfile);
-	}
-      block = BLOCK_SUPERBLOCK (block);
-    }
+#if 0
+  /* NOTE: carlton/2002-11-05: At the time that this code was
+     #ifdeffed out, the value of 'block' was always NULL at this
+     point, hence the bemused comments below.  */
 
   /* FIXME: this code is never executed--block is always NULL at this
      point.  What is it trying to do, anyway?  We already should have
@@ -806,7 +841,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	  }
       }
     }
-
+#endif /* 0 */
 
   /* C++: If requested to do so by the caller, 
      check to see if NAME is a field of `this'. */
@@ -829,19 +864,10 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      of the desired name as a global, then do psymtab-to-symtab
      conversion on the fly and return the found symbol. */
 
-  ALL_SYMTABS (objfile, s)
-  {
-    bv = BLOCKVECTOR (s);
-    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-    sym = lookup_block_symbol (block, name, mangled_name, namespace);
-    if (sym)
-      {
-	block_found = block;
-	if (symtab != NULL)
-	  *symtab = s;
-	return fixup_symbol_section (sym, objfile);
-      }
-  }
+  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, mangled_name,
+				   namespace, symtab);
+  if (sym != NULL)
+    return sym;
 
 #ifndef HPUXHPPA
 
@@ -892,7 +918,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
 	      if (symtab != NULL)
 		*symtab = s;
-	      return fixup_symbol_section (sym, objfile);
+	      return fixup_symbol_section (sym, s->objfile);
 	    }
 	  else if (MSYMBOL_TYPE (msymbol) != mst_text
 		   && MSYMBOL_TYPE (msymbol) != mst_file_text
@@ -900,7 +926,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	    {
 	      /* This is a mangled variable, look it up by its
 	         mangled name.  */
-	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name, block,
+	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name, NULL,
 					namespace, is_a_field_of_this, symtab);
 	    }
 	  /* There are no debug symbols for this file, or we are looking
@@ -911,84 +937,26 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
 #endif
 
-  ALL_PSYMTABS (objfile, ps)
-  {
-    if (!ps->readin && lookup_partial_symbol (ps, name, 1, namespace))
-      {
-	s = PSYMTAB_TO_SYMTAB (ps);
-	bv = BLOCKVECTOR (s);
-	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	if (!sym)
-	  {
-	    /* This shouldn't be necessary, but as a last resort
-	     * try looking in the statics even though the psymtab
-	     * claimed the symbol was global. It's possible that
-	     * the psymtab gets it wrong in some cases.
-	     */
-	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	    if (!sym)
-	      error ("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
-%s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>).",
-		     name, ps->filename, name, name);
-	  }
-	if (symtab != NULL)
-	  *symtab = s;
-	return fixup_symbol_section (sym, objfile);
-      }
-  }
+  sym = lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, mangled_name,
+				    namespace, symtab);
+  if (sym != NULL)
+    return sym;
 
-  /* Now search all static file-level symbols.
-     Not strictly correct, but more useful than an error.
-     Do the symtabs first, then check the psymtabs.
-     If a psymtab indicates the existence
-     of the desired name as a file-level static, then do psymtab-to-symtab
+  /* Now search all static file-level symbols.  Not strictly correct,
+     but more useful than an error.  Do the symtabs first, then check
+     the psymtabs.  If a psymtab indicates the existence of the
+     desired name as a file-level static, then do psymtab-to-symtab
      conversion on the fly and return the found symbol. */
 
-  ALL_SYMTABS (objfile, s)
-  {
-    bv = BLOCKVECTOR (s);
-    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-    sym = lookup_block_symbol (block, name, mangled_name, namespace);
-    if (sym)
-      {
-	block_found = block;
-	if (symtab != NULL)
-	  *symtab = s;
-	return fixup_symbol_section (sym, objfile);
-      }
-  }
-
-  ALL_PSYMTABS (objfile, ps)
-  {
-    if (!ps->readin && lookup_partial_symbol (ps, name, 0, namespace))
-      {
-	s = PSYMTAB_TO_SYMTAB (ps);
-	bv = BLOCKVECTOR (s);
-	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	if (!sym)
-	  {
-	    /* This shouldn't be necessary, but as a last resort
-	     * try looking in the globals even though the psymtab
-	     * claimed the symbol was static. It's possible that
-	     * the psymtab gets it wrong in some cases.
-	     */
-	    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	    if (!sym)
-	      error ("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n\
-%s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>).",
-		     name, ps->filename, name, name);
-	  }
-	if (symtab != NULL)
-	  *symtab = s;
-	return fixup_symbol_section (sym, objfile);
-      }
-  }
+  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, mangled_name,
+				   namespace, symtab);
+  if (sym != NULL)
+    return sym;
+  
+  sym = lookup_symbol_aux_psymtabs (STATIC_BLOCK, name, mangled_name,
+				    namespace, symtab);
+  if (sym != NULL)
+    return sym;
 
 #ifdef HPUXHPPA
 
@@ -1083,7 +1051,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 		   && !STREQ (name, SYMBOL_NAME (msymbol)))
 	    {
 	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name,
-					block, namespace, is_a_field_of_this,
+					NULL, namespace, is_a_field_of_this,
 					symtab);
 	    }
 	}
@@ -1093,9 +1061,147 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
   if (symtab != NULL)
     *symtab = NULL;
-  return 0;
+  return NULL;
 }
-								
+
+/* Check to see if the symbol is defined in BLOCK or its
+   superiors.  */
+
+static struct symbol *
+lookup_symbol_aux_local (const char *name, const char *mangled_name,
+			 const struct block *block,
+			 const namespace_enum namespace,
+			 struct symtab **symtab)
+{
+  struct symbol *sym;
+  struct objfile *objfile = NULL;
+  struct blockvector *bv;
+  struct block *b;
+  struct symtab *s = NULL;
+  
+  while (block != 0)
+    {
+      sym = lookup_block_symbol (block, name, mangled_name, namespace);
+      if (sym)
+	{
+	  block_found = block;
+	  if (symtab != NULL)
+	    {
+	      /* Search the list of symtabs for one which contains the
+	         address of the start of this block.  */
+	      ALL_SYMTABS (objfile, s)
+	      {
+		bv = BLOCKVECTOR (s);
+		b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+		if (BLOCK_START (b) <= BLOCK_START (block)
+		    && BLOCK_END (b) > BLOCK_START (block))
+		  goto found;
+	      }
+	    found:
+	      *symtab = s;
+	    }
+
+	  return fixup_symbol_section (sym, objfile);
+	}
+      block = BLOCK_SUPERBLOCK (block);
+    }
+
+  return NULL;
+}
+
+/* Check to see if the symbol is defined in one of the symtabs.
+   BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
+   depending on whether or not we want to search global symbols or
+   static symbols.  */
+
+static struct symbol *
+lookup_symbol_aux_symtabs (int block_index,
+			   const char *name, const char *mangled_name,
+			   const namespace_enum namespace,
+			   struct symtab **symtab)
+{
+  struct symbol *sym;
+  struct objfile *objfile;
+  struct blockvector *bv;
+  const struct block *block;
+  struct symtab *s;
+
+  ALL_SYMTABS (objfile, s)
+  {
+    bv = BLOCKVECTOR (s);
+    block = BLOCKVECTOR_BLOCK (bv, block_index);
+    sym = lookup_block_symbol (block, name, mangled_name, namespace);
+    if (sym)
+      {
+	block_found = block;
+	if (symtab != NULL)
+	  *symtab = s;
+	return fixup_symbol_section (sym, objfile);
+      }
+  }
+
+  return NULL;
+}
+
+/* Check to see if the symbol is defined in one of the partial
+   symtabs.  BLOCK_INDEX should be either GLOBAL_BLOCK or
+   STATIC_BLOCK, depending on whether or not we want to search global
+   symbols or static symbols.  */
+
+static struct symbol *
+lookup_symbol_aux_psymtabs (int block_index, const char *name,
+			    const char *mangled_name,
+			    const namespace_enum namespace,
+			    struct symtab **symtab)
+{
+  struct symbol *sym;
+  struct objfile *objfile;
+  struct blockvector *bv;
+  const struct block *block;
+  struct partial_symtab *ps;
+  struct symtab *s;
+  const int psymtab_index = (block_index == GLOBAL_BLOCK ? 1 : 0);
+
+  ALL_PSYMTABS (objfile, ps)
+  {
+    if (!ps->readin
+	&& lookup_partial_symbol (ps, name, psymtab_index, namespace))
+      {
+	s = PSYMTAB_TO_SYMTAB (ps);
+	bv = BLOCKVECTOR (s);
+	block = BLOCKVECTOR_BLOCK (bv, block_index);
+	sym = lookup_block_symbol (block, name, mangled_name, namespace);
+	if (!sym)
+	  {
+	    /* This shouldn't be necessary, but as a last resort try
+	       looking in the statics even though the psymtab claimed
+	       the symbol was global, or vice-versa. It's possible
+	       that the psymtab gets it wrong in some cases.  */
+
+	    /* FIXME: carlton/2002-09-30: Should we really do that?
+	       If that happens, isn't it likely to be a GDB error, in
+	       which case we should fix the GDB error rather than
+	       silently dealing with it here?  So I'd vote for
+	       removing the check for the symbol in the other
+	       block.  */
+	    block = BLOCKVECTOR_BLOCK (bv,
+				       block_index == GLOBAL_BLOCK ?
+				       STATIC_BLOCK : GLOBAL_BLOCK);
+	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
+	    if (!sym)
+	      error ("Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>).",
+		     block_index == GLOBAL_BLOCK ? "global" : "static",
+		     name, ps->filename, name, name);
+	  }
+	if (symtab != NULL)
+	  *symtab = s;
+	return fixup_symbol_section (sym, objfile);
+      }
+  }
+
+  return NULL;
+}
+
 /* Look, in partial_symtab PST, for symbol NAME.  Check the global
    symbols if GLOBAL, the static symbols if not */
 
@@ -1655,94 +1761,6 @@ find_pc_symtab (CORE_ADDR pc)
 }
 
 
-#if 0
-
-/* Find the closest symbol value (of any sort -- function or variable)
-   for a given address value.  Slow but complete.  (currently unused,
-   mainly because it is too slow.  We could fix it if each symtab and
-   psymtab had contained in it the addresses ranges of each of its
-   sections, which also would be required to make things like "info
-   line *0x2345" cause psymtabs to be converted to symtabs).  */
-
-struct symbol *
-find_addr_symbol (CORE_ADDR addr, struct symtab **symtabp, CORE_ADDR *symaddrp)
-{
-  struct symtab *symtab, *best_symtab;
-  struct objfile *objfile;
-  register int bot, top;
-  register struct symbol *sym;
-  register CORE_ADDR sym_addr;
-  struct block *block;
-  int blocknum;
-
-  /* Info on best symbol seen so far */
-
-  register CORE_ADDR best_sym_addr = 0;
-  struct symbol *best_sym = 0;
-
-  /* FIXME -- we should pull in all the psymtabs, too!  */
-  ALL_SYMTABS (objfile, symtab)
-  {
-    /* Search the global and static blocks in this symtab for
-       the closest symbol-address to the desired address.  */
-
-    for (blocknum = GLOBAL_BLOCK; blocknum <= STATIC_BLOCK; blocknum++)
-      {
-	QUIT;
-	block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), blocknum);
-	ALL_BLOCK_SYMBOLS (block, bot, sym)
-	  {
-	    switch (SYMBOL_CLASS (sym))
-	      {
-	      case LOC_STATIC:
-	      case LOC_LABEL:
-		sym_addr = SYMBOL_VALUE_ADDRESS (sym);
-		break;
-
-	      case LOC_INDIRECT:
-		sym_addr = SYMBOL_VALUE_ADDRESS (sym);
-		/* An indirect symbol really lives at *sym_addr,
-		 * so an indirection needs to be done.
-		 * However, I am leaving this commented out because it's
-		 * expensive, and it's possible that symbolization
-		 * could be done without an active process (in
-		 * case this read_memory will fail). RT
-		 sym_addr = read_memory_unsigned_integer
-		 (sym_addr, TARGET_PTR_BIT / TARGET_CHAR_BIT);
-		 */
-		break;
-
-	      case LOC_BLOCK:
-		sym_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-		break;
-
-	      default:
-		continue;
-	      }
-
-	    if (sym_addr <= addr)
-	      if (sym_addr > best_sym_addr)
-		{
-		  /* Quit if we found an exact match.  */
-		  best_sym = sym;
-		  best_sym_addr = sym_addr;
-		  best_symtab = symtab;
-		  if (sym_addr == addr)
-		    goto done;
-		}
-	  }
-      }
-  }
-
-done:
-  if (symtabp)
-    *symtabp = best_symtab;
-  if (symaddrp)
-    *symaddrp = best_sym_addr;
-  return best_sym;
-}
-#endif /* 0 */
-
 /* Find the source file and line number for a given PC value and SECTION.
    Return a structure containing a symtab pointer, a line number,
    and a pc range for the entire source line.
@@ -1797,7 +1815,7 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
      But what we want is the statement containing the instruction.
      Fudge the pc to make sure we get that.  */
 
-  INIT_SAL (&val);		/* initialize to zeroes */
+  init_sal (&val);		/* initialize to zeroes */
 
   /* It's tempting to assume that, if we can't find debugging info for
      any function enclosing PC, that we shouldn't search for line
@@ -2952,30 +2970,6 @@ print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
 
       printf_filtered (";\n");
     }
-  else
-    {
-#if 0
-      /* Tiemann says: "info methods was never implemented."  */
-      char *demangled_name;
-      c_type_print_base (TYPE_FN_FIELD_TYPE (t, block),
-			 gdb_stdout, 0, 0);
-      c_type_print_varspec_prefix (TYPE_FN_FIELD_TYPE (t, block),
-				   gdb_stdout, 0);
-      if (TYPE_FN_FIELD_STUB (t, block))
-	check_stub_method (TYPE_DOMAIN_TYPE (type), j, block);
-      demangled_name =
-	cplus_demangle (TYPE_FN_FIELD_PHYSNAME (t, block),
-			DMGL_ANSI | DMGL_PARAMS);
-      if (demangled_name == NULL)
-	fprintf_filtered (stream, "<badly mangled name %s>",
-			  TYPE_FN_FIELD_PHYSNAME (t, block));
-      else
-	{
-	  fputs_filtered (demangled_name, stream);
-	  xfree (demangled_name);
-	}
-#endif
-    }
 }
 
 /* This help function for symtab_symbol_info() prints information
@@ -3068,15 +3062,6 @@ types_info (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, TYPES_NAMESPACE, from_tty);
 }
-
-#if 0
-/* Tiemann says: "info methods was never implemented."  */
-static void
-methods_info (char *regexp)
-{
-  symtab_symbol_info (regexp, METHODS_NAMESPACE, 0, from_tty);
-}
-#endif /* 0 */
 
 /* Breakpoint all functions matching regular expression. */
 
@@ -4037,13 +4022,6 @@ _initialize_symtab (void)
   add_info ("types", types_info,
 	    "All type names, or those matching REGEXP.");
 
-#if 0
-  add_info ("methods", methods_info,
-	    "All method names, or those matching REGEXP::REGEXP.\n\
-If the class qualifier is omitted, it is assumed to be the current scope.\n\
-If the first REGEXP is omitted, then all methods matching the second REGEXP\n\
-are listed.");
-#endif
   add_info ("sources", sources_info,
 	    "Source files in the program.");
 

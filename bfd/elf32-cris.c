@@ -1022,7 +1022,8 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		BFD_ASSERT (off != (bfd_vma) -1);
 
 		if (!elf_hash_table (info)->dynamic_sections_created
-		    || (! info->shared && h->dynindx == -1)
+		    || (! info->shared
+			&& (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
 		    || (info->shared
 			&& (info->symbolic || h->dynindx == -1)
 			&& (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))

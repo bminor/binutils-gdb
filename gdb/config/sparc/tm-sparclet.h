@@ -121,14 +121,16 @@ enum {
 #define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
   {                                                                    \
     /* Other values are returned in register %o0.  */                  \
-    write_register_bytes (REGISTER_BYTE (O0_REGNUM), (VALBUF),         \
+    deprecated_write_register_bytes (REGISTER_BYTE (O0_REGNUM), (VALBUF),         \
 			  TYPE_LENGTH (TYPE));                         \
   }
 
 #endif /* GDB_MULTI_ARCH */
 
-#undef PRINT_REGISTER_HOOK
-#define PRINT_REGISTER_HOOK(regno)
+extern void sparclet_do_registers_info (int regnum, int all);
+#undef DEPRECATED_DO_REGISTERS_INFO
+#define DEPRECATED_DO_REGISTERS_INFO(REGNUM,ALL) sparclet_do_registers_info (REGNUM, ALL)
+
 
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
    comment in <machine/setjmp.h>! */

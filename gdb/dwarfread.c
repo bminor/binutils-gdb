@@ -62,112 +62,112 @@
 
 /* Complaints that can be issued during DWARF debug info reading. */
 
-struct complaint no_bfd_get_N =
+struct deprecated_complaint no_bfd_get_N =
 {
   "DIE @ 0x%x \"%s\", no bfd support for %d byte data object", 0, 0
 };
 
-struct complaint malformed_die =
+struct deprecated_complaint malformed_die =
 {
   "DIE @ 0x%x \"%s\", malformed DIE, bad length (%d bytes)", 0, 0
 };
 
-struct complaint bad_die_ref =
+struct deprecated_complaint bad_die_ref =
 {
   "DIE @ 0x%x \"%s\", reference to DIE (0x%x) outside compilation unit", 0, 0
 };
 
-struct complaint unknown_attribute_form =
+struct deprecated_complaint unknown_attribute_form =
 {
   "DIE @ 0x%x \"%s\", unknown attribute form (0x%x)", 0, 0
 };
 
-struct complaint unknown_attribute_length =
+struct deprecated_complaint unknown_attribute_length =
 {
   "DIE @ 0x%x \"%s\", unknown attribute length, skipped remaining attributes", 0, 0
 };
 
-struct complaint unexpected_fund_type =
+struct deprecated_complaint unexpected_fund_type =
 {
   "DIE @ 0x%x \"%s\", unexpected fundamental type 0x%x", 0, 0
 };
 
-struct complaint unknown_type_modifier =
+struct deprecated_complaint unknown_type_modifier =
 {
   "DIE @ 0x%x \"%s\", unknown type modifier %u", 0, 0
 };
 
-struct complaint volatile_ignored =
+struct deprecated_complaint volatile_ignored =
 {
   "DIE @ 0x%x \"%s\", type modifier 'volatile' ignored", 0, 0
 };
 
-struct complaint const_ignored =
+struct deprecated_complaint const_ignored =
 {
   "DIE @ 0x%x \"%s\", type modifier 'const' ignored", 0, 0
 };
 
-struct complaint botched_modified_type =
+struct deprecated_complaint botched_modified_type =
 {
   "DIE @ 0x%x \"%s\", botched modified type decoding (mtype 0x%x)", 0, 0
 };
 
-struct complaint op_deref2 =
+struct deprecated_complaint op_deref2 =
 {
   "DIE @ 0x%x \"%s\", OP_DEREF2 address 0x%x not handled", 0, 0
 };
 
-struct complaint op_deref4 =
+struct deprecated_complaint op_deref4 =
 {
   "DIE @ 0x%x \"%s\", OP_DEREF4 address 0x%x not handled", 0, 0
 };
 
-struct complaint basereg_not_handled =
+struct deprecated_complaint basereg_not_handled =
 {
   "DIE @ 0x%x \"%s\", BASEREG %d not handled", 0, 0
 };
 
-struct complaint dup_user_type_allocation =
+struct deprecated_complaint dup_user_type_allocation =
 {
   "DIE @ 0x%x \"%s\", internal error: duplicate user type allocation", 0, 0
 };
 
-struct complaint dup_user_type_definition =
+struct deprecated_complaint dup_user_type_definition =
 {
   "DIE @ 0x%x \"%s\", internal error: duplicate user type definition", 0, 0
 };
 
-struct complaint missing_tag =
+struct deprecated_complaint missing_tag =
 {
   "DIE @ 0x%x \"%s\", missing class, structure, or union tag", 0, 0
 };
 
-struct complaint bad_array_element_type =
+struct deprecated_complaint bad_array_element_type =
 {
   "DIE @ 0x%x \"%s\", bad array element type attribute 0x%x", 0, 0
 };
 
-struct complaint subscript_data_items =
+struct deprecated_complaint subscript_data_items =
 {
   "DIE @ 0x%x \"%s\", can't decode subscript data items", 0, 0
 };
 
-struct complaint unhandled_array_subscript_format =
+struct deprecated_complaint unhandled_array_subscript_format =
 {
   "DIE @ 0x%x \"%s\", array subscript format 0x%x not handled yet", 0, 0
 };
 
-struct complaint unknown_array_subscript_format =
+struct deprecated_complaint unknown_array_subscript_format =
 {
   "DIE @ 0x%x \"%s\", unknown array subscript format %x", 0, 0
 };
 
-struct complaint not_row_major =
+struct deprecated_complaint not_row_major =
 {
   "DIE @ 0x%x \"%s\", array not row major; not handled correctly", 0, 0
 };
 
-struct complaint missing_at_name =
+struct deprecated_complaint missing_at_name =
 {
   "DIE @ 0x%x, AT_name tag missing", 0, 0
 };
@@ -1027,6 +1027,7 @@ struct_type (struct dieinfo *dip, char *thisdie, char *enddie,
 			  &objfile->type_obstack);
 	  FIELD_TYPE (list->field) = decode_die_type (&mbr);
 	  FIELD_BITPOS (list->field) = 8 * locval (&mbr);
+	  FIELD_STATIC_KIND (list->field) = 0;
 	  /* Handle bit fields. */
 	  FIELD_BITSIZE (list->field) = mbr.at_bit_size;
 	  if (BITS_BIG_ENDIAN)
@@ -1694,6 +1695,7 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
 	  list = new;
 	  FIELD_TYPE (list->field) = NULL;
 	  FIELD_BITSIZE (list->field) = 0;
+	  FIELD_STATIC_KIND (list->field) = 0;
 	  FIELD_BITPOS (list->field) =
 	    target_to_host (scan, TARGET_FT_LONG_SIZE (objfile), GET_SIGNED,
 			    objfile);

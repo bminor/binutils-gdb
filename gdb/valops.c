@@ -630,132 +630,120 @@ value_assign (struct value *toval, struct value *fromval)
       }
       break;
 
-    case lval_register:
-      if (VALUE_BITSIZE (toval))
-	{
-	  char buffer[sizeof (LONGEST)];
-	  int len =
-		REGISTER_RAW_SIZE (VALUE_REGNO (toval)) - VALUE_OFFSET (toval);
-
-	  if (len > (int) sizeof (LONGEST))
-	    error ("Can't handle bitfields in registers larger than %d bits.",
-		   (int) sizeof (LONGEST) * HOST_CHAR_BIT);
-
-	  if (VALUE_BITPOS (toval) + VALUE_BITSIZE (toval)
-	      > len * HOST_CHAR_BIT)
-	    /* Getting this right would involve being very careful about
-	       byte order.  */
-	    error ("Can't assign to bitfields that cross register "
-		   "boundaries.");
-
-	  read_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-			       buffer, len);
-	  modify_field (buffer, value_as_long (fromval),
-			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
-	  write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-				buffer, len);
-	}
-      else if (use_buffer)
-	write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-			      raw_buffer, use_buffer);
-      else
-	{
-	  /* Do any conversion necessary when storing this type to more
-	     than one register.  */
-#ifdef REGISTER_CONVERT_FROM_TYPE
-	  memcpy (raw_buffer, VALUE_CONTENTS (fromval), TYPE_LENGTH (type));
-	  REGISTER_CONVERT_FROM_TYPE (VALUE_REGNO (toval), type, raw_buffer);
-	  write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-				raw_buffer, TYPE_LENGTH (type));
-#else
-	  write_register_bytes (VALUE_ADDRESS (toval) + VALUE_OFFSET (toval),
-			      VALUE_CONTENTS (fromval), TYPE_LENGTH (type));
-#endif
-	}
-
-      target_changed_event ();
-
-      /* Assigning to the stack pointer, frame pointer, and other
-         (architecture and calling convention specific) registers may
-         cause the frame cache to be out of date.  We just do this
-         on all assignments to registers for simplicity; I doubt the slowdown
-         matters.  */
-      reinit_frame_cache ();
-      break;
-
     case lval_reg_frame_relative:
+    case lval_register:
       {
+	struct frame_id old_frame;
 	/* value is stored in a series of registers in the frame
 	   specified by the structure.  Copy that value out, modify
 	   it, and copy it back in.  */
-	int amount_to_copy = (VALUE_BITSIZE (toval) ? 1 : TYPE_LENGTH (type));
-	int reg_size = REGISTER_RAW_SIZE (VALUE_FRAME_REGNUM (toval));
-	int byte_offset = VALUE_OFFSET (toval) % reg_size;
-	int reg_offset = VALUE_OFFSET (toval) / reg_size;
 	int amount_copied;
-
-	/* Make the buffer large enough in all cases.  */
-	/* FIXME (alloca): Not safe for very large data types. */
-	char *buffer = (char *) alloca (amount_to_copy
-					+ sizeof (LONGEST)
-					+ MAX_REGISTER_RAW_SIZE);
-
+	int amount_to_copy;
+	char *buffer;
+	int value_reg;
+	int reg_offset;
+	int byte_offset;
 	int regno;
 	struct frame_info *frame;
 
+	/* Since modifying a register can trash the frame chain, we
+           save the old frame and then restore the new frame
+           afterwards.  */
+	get_frame_id (selected_frame, &old_frame);
+
 	/* Figure out which frame this is in currently.  */
-	for (frame = get_current_frame ();
-	     frame && FRAME_FP (frame) != VALUE_FRAME (toval);
-	     frame = get_prev_frame (frame))
-	  ;
+	if (VALUE_LVAL (toval) == lval_register)
+	  {
+	    frame = get_current_frame ();
+	    value_reg = VALUE_REGNO (toval);
+	  }
+	else
+	  {
+	    for (frame = get_current_frame ();
+		 frame && FRAME_FP (frame) != VALUE_FRAME (toval);
+		 frame = get_prev_frame (frame))
+	      ;
+	    value_reg = VALUE_FRAME_REGNUM (toval);
+	  }
 
 	if (!frame)
 	  error ("Value being assigned to is no longer active.");
 
-	amount_to_copy += (reg_size - amount_to_copy % reg_size);
+	/* Locate the first register that falls in the value that
+           needs to be transfered.  Compute the offset of the value in
+           that register.  */
+	{
+	  int offset;
+	  for (reg_offset = value_reg, offset = 0;
+	       offset + REGISTER_RAW_SIZE (reg_offset) <= VALUE_OFFSET (toval);
+	       reg_offset++);
+	  byte_offset = VALUE_OFFSET (toval) - offset;
+	}
 
-	/* Copy it out.  */
-	for ((regno = VALUE_FRAME_REGNUM (toval) + reg_offset,
-	      amount_copied = 0);
+	/* Compute the number of register aligned values that need to
+           be copied.  */
+	if (VALUE_BITSIZE (toval))
+	  amount_to_copy = byte_offset + 1;
+	else
+	  amount_to_copy = byte_offset + TYPE_LENGTH (type);
+
+	/* And a bounce buffer.  Be slightly over generous.  */
+	buffer = (char *) alloca (amount_to_copy
+				  + MAX_REGISTER_RAW_SIZE);
+
+	/* Copy it in.  */
+	for (regno = reg_offset, amount_copied = 0;
 	     amount_copied < amount_to_copy;
-	     amount_copied += reg_size, regno++)
+	     amount_copied += REGISTER_RAW_SIZE (regno), regno++)
 	  {
-	    get_saved_register (buffer + amount_copied,
-				(int *) NULL, (CORE_ADDR *) NULL,
-				frame, regno, (enum lval_type *) NULL);
+	    frame_register_read (frame, regno, buffer + amount_copied);
 	  }
-
+	
 	/* Modify what needs to be modified.  */
 	if (VALUE_BITSIZE (toval))
-	  modify_field (buffer + byte_offset,
-			value_as_long (fromval),
-			VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
+	  {
+	    modify_field (buffer + byte_offset,
+			  value_as_long (fromval),
+			  VALUE_BITPOS (toval), VALUE_BITSIZE (toval));
+	  }
 	else if (use_buffer)
-	  memcpy (buffer + byte_offset, raw_buffer, use_buffer);
+	  {
+	    memcpy (buffer + VALUE_OFFSET (toval), raw_buffer, use_buffer);
+	  }
 	else
-	  memcpy (buffer + byte_offset, VALUE_CONTENTS (fromval),
-		  TYPE_LENGTH (type));
+	  {
+	    memcpy (buffer + byte_offset, VALUE_CONTENTS (fromval),
+		    TYPE_LENGTH (type));
+	    /* Do any conversion necessary when storing this type to
+	       more than one register.  */
+#ifdef REGISTER_CONVERT_FROM_TYPE
+	    REGISTER_CONVERT_FROM_TYPE (value_reg, type,
+					(buffer + byte_offset));
+#endif
+	  }
 
-	/* Copy it back.  */
-	for ((regno = VALUE_FRAME_REGNUM (toval) + reg_offset,
-	      amount_copied = 0);
+	/* Copy it out.  */
+	for (regno = reg_offset, amount_copied = 0;
 	     amount_copied < amount_to_copy;
-	     amount_copied += reg_size, regno++)
+	     amount_copied += REGISTER_RAW_SIZE (regno), regno++)
 	  {
 	    enum lval_type lval;
 	    CORE_ADDR addr;
 	    int optim;
-
+	    int realnum;
+	    
 	    /* Just find out where to put it.  */
-	    get_saved_register ((char *) NULL,
-				&optim, &addr, frame, regno, &lval);
-
+	    frame_register (frame, regno, &optim, &lval, &addr, &realnum,
+			    NULL);
+	    
 	    if (optim)
 	      error ("Attempt to assign to a value that was optimized out.");
 	    if (lval == lval_memory)
-	      write_memory (addr, buffer + amount_copied, reg_size);
+	      write_memory (addr, buffer + amount_copied,
+			    REGISTER_RAW_SIZE (regno));
 	    else if (lval == lval_register)
-	      write_register_bytes (addr, buffer + amount_copied, reg_size);
+	      regcache_cooked_write (current_regcache, realnum,
+				     (buffer + amount_copied));
 	    else
 	      error ("Attempt to assign to an unmodifiable value.");
 	  }
@@ -763,10 +751,31 @@ value_assign (struct value *toval, struct value *fromval)
 	if (register_changed_hook)
 	  register_changed_hook (-1);
 	target_changed_event ();
+
+	/* Assigning to the stack pointer, frame pointer, and other
+	   (architecture and calling convention specific) registers
+	   may cause the frame cache to be out of date.  We just do
+	   this on all assignments to registers for simplicity; I
+	   doubt the slowdown matters.  */
+	reinit_frame_cache ();
+
+	/* Having destoroyed the frame cache, restore the selected
+           frame.  */
+	/* FIXME: cagney/2002-11-02: There has to be a better way of
+           doing this.  Instead of constantly saving/restoring the
+           frame.  Why not create a get_selected_frame() function
+           that, having saved the selected frame's ID can
+           automatically re-find the previously selected frame
+           automatically.  */
+	{
+	  struct frame_info *fi = frame_find_by_id (old_frame);
+	  if (fi != NULL)
+	    select_frame (fi);
+	}
       }
       break;
-
-
+      
+      
     default:
       error ("Left operand of assignment is not an lvalue.");
     }
@@ -3306,18 +3315,17 @@ value_full_object (struct value *argp, struct type *rtype, int xfull, int xtop,
 
 
 
-/* C++: return the value of the class instance variable, if one exists.
+/* Return the value of the local variable, if one exists.
    Flag COMPLAIN signals an error if the request is made in an
    inappropriate context.  */
 
 struct value *
-value_of_this (int complain)
+value_of_local (const char *name, int complain)
 {
   struct symbol *func, *sym;
   struct block *b;
   int i;
-  static const char funny_this[] = "this";
-  struct value *this;
+  struct value * ret;
 
   if (selected_frame == 0)
     {
@@ -3331,7 +3339,7 @@ value_of_this (int complain)
   if (!func)
     {
       if (complain)
-	error ("no `this' in nameless context");
+	error ("no `%s' in nameless context", name);
       else
 	return 0;
     }
@@ -3341,26 +3349,39 @@ value_of_this (int complain)
   if (i <= 0)
     {
       if (complain)
-	error ("no args, no `this'");
+	error ("no args, no `%s'", name);
       else
 	return 0;
     }
 
   /* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
      symbol instead of the LOC_ARG one (if both exist).  */
-  sym = lookup_block_symbol (b, funny_this, NULL, VAR_NAMESPACE);
+  sym = lookup_block_symbol (b, name, NULL, VAR_NAMESPACE);
   if (sym == NULL)
     {
       if (complain)
-	error ("current stack frame not in method");
+	error ("current stack frame does not contain a variable named `%s'", name);
       else
 	return NULL;
     }
 
-  this = read_var_value (sym, selected_frame);
-  if (this == 0 && complain)
-    error ("`this' argument at unknown address");
-  return this;
+  ret = read_var_value (sym, selected_frame);
+  if (ret == 0 && complain)
+    error ("`%s' argument unreadable", name);
+  return ret;
+}
+
+/* C++/Objective-C: return the value of the class instance variable,
+   if one exists.  Flag COMPLAIN signals an error if the request is
+   made in an inappropriate context.  */
+
+struct value *
+value_of_this (int complain)
+{
+  if (current_language->la_language == language_objc)
+    return value_of_local ("self", complain);
+  else
+    return value_of_local ("this", complain);
 }
 
 /* Create a slice (sub-string, sub-array) of ARRAY, that is LENGTH elements

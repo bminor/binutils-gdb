@@ -299,16 +299,16 @@ sort_symtab_syms (register struct symtab *s)
    may be part of a larger string and we are only saving a substring. */
 
 char *
-obsavestring (char *ptr, int size, struct obstack *obstackp)
+obsavestring (const char *ptr, int size, struct obstack *obstackp)
 {
   register char *p = (char *) obstack_alloc (obstackp, size + 1);
   /* Open-coded memcpy--saves function call time.  These strings are usually
      short.  FIXME: Is this really still true with a compiler that can
      inline memcpy? */
   {
-    register char *p1 = ptr;
+    register const char *p1 = ptr;
     register char *p2 = p;
-    char *end = ptr + size;
+    const char *end = ptr + size;
     while (p1 != end)
       *p2++ = *p1++;
   }
@@ -1952,6 +1952,7 @@ init_filename_language_table (void)
       /* OBSOLETE add_filename_language (".ch", language_chill); */
       /* OBSOLETE add_filename_language (".c186", language_chill); */
       /* OBSOLETE add_filename_language (".c286", language_chill); */
+      add_filename_language (".m", language_objc);
       add_filename_language (".f", language_fortran);
       add_filename_language (".F", language_fortran);
       add_filename_language (".s", language_asm);

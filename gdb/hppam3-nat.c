@@ -113,15 +113,15 @@ store_inferior_registers (int regno)
    */
   if (regno > 0 && regno < NUM_REGS)
     {
-      memcpy (&state[regno], &registers[REGISTER_BYTE (regno)],
+      memcpy (&state[regno], &deprecated_registers[REGISTER_BYTE (regno)],
 	      REGISTER_RAW_SIZE (regno));
     }
   else
     {
       for (index = 0; index < NUM_REGS; index++)
-	memcpy (&state[index], &registers[REGISTER_BYTE (index)],
+	memcpy (&state[index], &deprecated_registers[REGISTER_BYTE (index)],
 		REGISTER_RAW_SIZE (index));
-/*      state[index] = registers[REGISTER_BYTE (index)]; */
+/*      state[index] = deprecated_registers[REGISTER_BYTE (index)]; */
 
     }
 

@@ -382,6 +382,7 @@ vms_object_p (abfd)
   const struct bfd_target *target_vector = 0;
   const bfd_arch_info_type *arch = 0;
   PTR tdata_save = abfd->tdata.any;
+  bfd_vma saddr_save = bfd_get_start_address (abfd);
 
 #if VMS_DEBUG
   vms_debug (1, "vms_object_p(%p)\n", abfd);
@@ -519,6 +520,7 @@ vms_object_p (abfd)
   if (abfd->tdata.any != tdata_save && abfd->tdata.any != NULL)
     bfd_release (abfd, abfd->tdata.any);
   abfd->tdata.any = tdata_save;
+  bfd_set_start_address (abfd, saddr_save);
   return NULL;
 }
 

@@ -4,21 +4,21 @@
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 SECTION
@@ -645,7 +645,8 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
   reloc_target_output_section = symbol->section->output_section;
 
   /* Convert input-section-relative symbol value to absolute.  */
-  if (output_bfd && ! howto->partial_inplace)
+  if ((output_bfd && ! howto->partial_inplace)
+      || reloc_target_output_section == NULL)
     output_base = 0;
   else
     output_base = reloc_target_output_section->vma;
@@ -2575,6 +2576,22 @@ ENUMX
   BFD_RELOC_SH_IMM_HI16_PCREL
 ENUMX
   BFD_RELOC_SH_PT_16
+ENUMX
+  BFD_RELOC_SH_TLS_GD_32
+ENUMX
+  BFD_RELOC_SH_TLS_LD_32
+ENUMX
+  BFD_RELOC_SH_TLS_LDO_32
+ENUMX
+  BFD_RELOC_SH_TLS_IE_32
+ENUMX
+  BFD_RELOC_SH_TLS_LE_32
+ENUMX
+  BFD_RELOC_SH_TLS_DTPMOD32
+ENUMX
+  BFD_RELOC_SH_TLS_DTPOFF32
+ENUMX
+  BFD_RELOC_SH_TLS_TPOFF32
 ENUMDOC
   Hitachi SH relocs.  Not all of these appear in object files.
 
@@ -3685,7 +3702,7 @@ const char *
 bfd_get_reloc_code_name (code)
      bfd_reloc_code_real_type code;
 {
-  if (code > BFD_RELOC_UNUSED)
+  if ((int) code > (int) BFD_RELOC_UNUSED)
     return 0;
   return bfd_reloc_code_real_names[(int)code];
 }
@@ -3813,7 +3830,7 @@ bfd_generic_get_relocated_section_contents (abfd, link_info, link_order, data,
 
   /* We're not relaxing the section, so just copy the size info.  */
   input_section->_cooked_size = input_section->_raw_size;
-  input_section->reloc_done = true;
+  input_section->reloc_done = (unsigned int) true;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,

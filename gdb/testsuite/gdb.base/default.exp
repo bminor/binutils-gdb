@@ -636,9 +636,9 @@ gdb_test "show print address" "Printing of addresses is on." "show print address
 #test show print array
 gdb_test "show print array" "Prettyprinting of arrays is on." "show print array"
 #test show print asm-demangle
-gdb_test "show print asm-demangle" "Demangling of C\[+\]+ names in disassembly listings is on." "show print asm-demangle"
+gdb_test "show print asm-demangle" "Demangling of C\[+\]+/ObjC names in disassembly listings is on." "show print asm-demangle"
 #test show print demangle
-gdb_test "show print demangle" "Demangling of encoded C\[+\]+ names when displaying symbols is on." "show print demangle"
+gdb_test "show print demangle" "Demangling of encoded C\[+\]+/ObjC names when displaying symbols is on." "show print demangle"
 #test show print elements
 gdb_test "show print elements" "Limit on string chars or array elements to print is 200." "show print elements"
 #test show print object

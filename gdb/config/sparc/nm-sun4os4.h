@@ -30,7 +30,7 @@
 
 /* Before storing, we need to read all the registers.  */
 
-#define CHILD_PREPARE_TO_STORE() read_register_bytes (0, NULL, REGISTER_BYTES)
+#define CHILD_PREPARE_TO_STORE() deprecated_read_register_bytes (0, NULL, REGISTER_BYTES)
 
 /* Return sizeof user struct to callers in less machine dependent routines */
 

@@ -390,9 +390,9 @@ gdb_test "help set print address" "Set printing of addresses\." "help set print 
 # test help set print array
 gdb_test "help set print array" "Set prettyprinting of arrays\." "help set print array"
 # test help set print asm-demangle
-gdb_test "help set print asm-demangle" "Set demangling of C\[+\]+ names in disassembly listings\." "help set print asm-demangle"
+gdb_test "help set print asm-demangle" "Set demangling of C\[+\]+/ObjC names in disassembly listings\." "help set print asm-demangle"
 # test help set print demangle
-gdb_test "help set print demangle" "Set demangling of encoded C\[+\]+ names when displaying symbols\." "help set print demangle"
+gdb_test "help set print demangle" "Set demangling of encoded C\[+\]+/ObjC names when displaying symbols\." "help set print demangle"
 # test help set print elements
 gdb_test "help set print elements" "Set limit on string chars or array elements to print\.\[\r\n\]+\"set print elements 0\" causes there to be no limit\." "help set print elements"
 # test help set print object
@@ -482,9 +482,9 @@ gdb_test "help show print address" "Show printing of addresses\." "help show pri
 # test help show print array
 gdb_test "help show print array" "Show prettyprinting of arrays\." "help show print array"
 # test help show print asm-demangle
-gdb_test "help show print asm-demangle" "Show demangling of C\[+\]+ names in disassembly listings\." "help show print asm-demangle"
+gdb_test "help show print asm-demangle" "Show demangling of C\[+\]+/ObjC names in disassembly listings\." "help show print asm-demangle"
 # test help show print demangle
-gdb_test "help show print demangle" "Show demangling of encoded C\[+\]+ names when displaying symbols\." "help show print demangle"
+gdb_test "help show print demangle" "Show demangling of encoded C\[+\]+/ObjC names when displaying symbols\." "help show print demangle"
 # test help show print elements
 gdb_test "help show print elements" "Show limit on string chars or array elements to print\.\[\r\n\]+\"set print elements 0\" causes there to be no limit\." "help show print elements"
 # test help show print object

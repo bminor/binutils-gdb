@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM new abi option.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -27,7 +27,7 @@
 #define NUM_ELEM(a)  (sizeof (a) / (sizeof (a)[0]))
 #endif
 
-#define USE_REL
+#define USE_REL	1
 
 #define TARGET_LITTLE_SYM               bfd_elf32_littlearm_vec
 #define TARGET_LITTLE_NAME              "elf32-littlearm"
@@ -749,6 +749,4 @@ elf32_arm_nabi_grok_psinfo (abfd, note)
 #define elf_backend_grok_prstatus	elf32_arm_nabi_grok_prstatus
 #define elf_backend_grok_psinfo		elf32_arm_nabi_grok_psinfo
 
-#ifndef ELFARM_NABI_C_INCLUDED
 #include "elf32-arm.h"
-#endif

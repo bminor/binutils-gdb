@@ -161,20 +161,12 @@ cp_print_class_method (char *valaddr,
     }
 }
 
-/* This was what it was for gcc 2.4.5 and earlier.  */
-static const char vtbl_ptr_name_old[] =
-{
-  CPLUS_MARKER, 'v', 't', 'b', 'l', '_', 'p', 't', 'r', '_', 
-  't', 'y', 'p', 'e', 0
-};
-
-/* It was changed to this after 2.4.5.  */
+/* GCC versions after 2.4.5 use this.  */
 const char vtbl_ptr_name[] = "__vtbl_ptr_type";
 
-/* HP aCC uses different names */
+/* HP aCC uses different names.  */
 const char hpacc_vtbl_ptr_name[] = "__vfp";
 const char hpacc_vtbl_ptr_type_name[] = "__vftyp";
-
 
 /* Return truth value for assertion that TYPE is of the type
    "pointer to virtual function".  */
@@ -184,9 +176,7 @@ cp_is_vtbl_ptr_type (struct type *type)
 {
   char *typename = type_name_no_tag (type);
 
-  return (typename != NULL
-	  && (STREQ (typename, vtbl_ptr_name)
-	      || STREQ (typename, vtbl_ptr_name_old)));
+  return (typename != NULL && !strcmp (typename, vtbl_ptr_name));
 }
 
 /* Return truth value for the assertion that TYPE is of the type

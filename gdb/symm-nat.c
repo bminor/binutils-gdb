@@ -68,29 +68,29 @@ store_inferior_registers (int regno)
      to the registers array to solve this properly.  */
   mptrace (XPT_RREGS, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) & regs, 0);
 
-  regs.pr_eax = *(int *) &registers[REGISTER_BYTE (0)];
-  regs.pr_ebx = *(int *) &registers[REGISTER_BYTE (5)];
-  regs.pr_ecx = *(int *) &registers[REGISTER_BYTE (2)];
-  regs.pr_edx = *(int *) &registers[REGISTER_BYTE (1)];
-  regs.pr_esi = *(int *) &registers[REGISTER_BYTE (6)];
-  regs.pr_edi = *(int *) &registers[REGISTER_BYTE (7)];
-  regs.pr_esp = *(int *) &registers[REGISTER_BYTE (14)];
-  regs.pr_ebp = *(int *) &registers[REGISTER_BYTE (15)];
-  regs.pr_eip = *(int *) &registers[REGISTER_BYTE (16)];
-  regs.pr_flags = *(int *) &registers[REGISTER_BYTE (17)];
+  regs.pr_eax = *(int *) &deprecated_registers[REGISTER_BYTE (0)];
+  regs.pr_ebx = *(int *) &deprecated_registers[REGISTER_BYTE (5)];
+  regs.pr_ecx = *(int *) &deprecated_registers[REGISTER_BYTE (2)];
+  regs.pr_edx = *(int *) &deprecated_registers[REGISTER_BYTE (1)];
+  regs.pr_esi = *(int *) &deprecated_registers[REGISTER_BYTE (6)];
+  regs.pr_edi = *(int *) &deprecated_registers[REGISTER_BYTE (7)];
+  regs.pr_esp = *(int *) &deprecated_registers[REGISTER_BYTE (14)];
+  regs.pr_ebp = *(int *) &deprecated_registers[REGISTER_BYTE (15)];
+  regs.pr_eip = *(int *) &deprecated_registers[REGISTER_BYTE (16)];
+  regs.pr_flags = *(int *) &deprecated_registers[REGISTER_BYTE (17)];
   for (i = 0; i < 31; i++)
     {
       regs.pr_fpa.fpa_regs[i] =
-	*(int *) &registers[REGISTER_BYTE (FP1_REGNUM + i)];
+	*(int *) &deprecated_registers[REGISTER_BYTE (FP1_REGNUM + i)];
     }
-  memcpy (regs.pr_fpu.fpu_stack[0], &registers[REGISTER_BYTE (ST0_REGNUM)], 10);
-  memcpy (regs.pr_fpu.fpu_stack[1], &registers[REGISTER_BYTE (ST1_REGNUM)], 10);
-  memcpy (regs.pr_fpu.fpu_stack[2], &registers[REGISTER_BYTE (ST2_REGNUM)], 10);
-  memcpy (regs.pr_fpu.fpu_stack[3], &registers[REGISTER_BYTE (ST3_REGNUM)], 10);
-  memcpy (regs.pr_fpu.fpu_stack[4], &registers[REGISTER_BYTE (ST4_REGNUM)], 10);
-  memcpy (regs.pr_fpu.fpu_stack[5], &registers[REGISTER_BYTE (ST5_REGNUM)], 10);
-  memcpy (regs.pr_fpu.fpu_stack[6], &registers[REGISTER_BYTE (ST6_REGNUM)], 10);
-  memcpy (regs.pr_fpu.fpu_stack[7], &registers[REGISTER_BYTE (ST7_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[0], &deprecated_registers[REGISTER_BYTE (ST0_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[1], &deprecated_registers[REGISTER_BYTE (ST1_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[2], &deprecated_registers[REGISTER_BYTE (ST2_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[3], &deprecated_registers[REGISTER_BYTE (ST3_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[4], &deprecated_registers[REGISTER_BYTE (ST4_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[5], &deprecated_registers[REGISTER_BYTE (ST5_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[6], &deprecated_registers[REGISTER_BYTE (ST6_REGNUM)], 10);
+  memcpy (regs.pr_fpu.fpu_stack[7], &deprecated_registers[REGISTER_BYTE (ST7_REGNUM)], 10);
   mptrace (XPT_WREGS, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) & regs, 0);
 }
 
@@ -100,32 +100,32 @@ fetch_inferior_registers (int regno)
   int i;
   struct pt_regset regs;
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 
   mptrace (XPT_RREGS, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) & regs, 0);
-  *(int *) &registers[REGISTER_BYTE (EAX_REGNUM)] = regs.pr_eax;
-  *(int *) &registers[REGISTER_BYTE (EBX_REGNUM)] = regs.pr_ebx;
-  *(int *) &registers[REGISTER_BYTE (ECX_REGNUM)] = regs.pr_ecx;
-  *(int *) &registers[REGISTER_BYTE (EDX_REGNUM)] = regs.pr_edx;
-  *(int *) &registers[REGISTER_BYTE (ESI_REGNUM)] = regs.pr_esi;
-  *(int *) &registers[REGISTER_BYTE (EDI_REGNUM)] = regs.pr_edi;
-  *(int *) &registers[REGISTER_BYTE (EBP_REGNUM)] = regs.pr_ebp;
-  *(int *) &registers[REGISTER_BYTE (ESP_REGNUM)] = regs.pr_esp;
-  *(int *) &registers[REGISTER_BYTE (EIP_REGNUM)] = regs.pr_eip;
-  *(int *) &registers[REGISTER_BYTE (EFLAGS_REGNUM)] = regs.pr_flags;
+  *(int *) &deprecated_registers[REGISTER_BYTE (EAX_REGNUM)] = regs.pr_eax;
+  *(int *) &rdeprecated_egisters[REGISTER_BYTE (EBX_REGNUM)] = regs.pr_ebx;
+  *(int *) &deprecated_registers[REGISTER_BYTE (ECX_REGNUM)] = regs.pr_ecx;
+  *(int *) &deprecated_registers[REGISTER_BYTE (EDX_REGNUM)] = regs.pr_edx;
+  *(int *) &deprecated_registers[REGISTER_BYTE (ESI_REGNUM)] = regs.pr_esi;
+  *(int *) &deprecated_registers[REGISTER_BYTE (EDI_REGNUM)] = regs.pr_edi;
+  *(int *) &deprecated_registers[REGISTER_BYTE (EBP_REGNUM)] = regs.pr_ebp;
+  *(int *) &deprecated_registers[REGISTER_BYTE (ESP_REGNUM)] = regs.pr_esp;
+  *(int *) &deprecated_registers[REGISTER_BYTE (EIP_REGNUM)] = regs.pr_eip;
+  *(int *) &deprecated_registers[REGISTER_BYTE (EFLAGS_REGNUM)] = regs.pr_flags;
   for (i = 0; i < FPA_NREGS; i++)
     {
-      *(int *) &registers[REGISTER_BYTE (FP1_REGNUM + i)] =
+      *(int *) &deprecated_registers[REGISTER_BYTE (FP1_REGNUM + i)] =
 	regs.pr_fpa.fpa_regs[i];
     }
-  memcpy (&registers[REGISTER_BYTE (ST0_REGNUM)], regs.pr_fpu.fpu_stack[0], 10);
-  memcpy (&registers[REGISTER_BYTE (ST1_REGNUM)], regs.pr_fpu.fpu_stack[1], 10);
-  memcpy (&registers[REGISTER_BYTE (ST2_REGNUM)], regs.pr_fpu.fpu_stack[2], 10);
-  memcpy (&registers[REGISTER_BYTE (ST3_REGNUM)], regs.pr_fpu.fpu_stack[3], 10);
-  memcpy (&registers[REGISTER_BYTE (ST4_REGNUM)], regs.pr_fpu.fpu_stack[4], 10);
-  memcpy (&registers[REGISTER_BYTE (ST5_REGNUM)], regs.pr_fpu.fpu_stack[5], 10);
-  memcpy (&registers[REGISTER_BYTE (ST6_REGNUM)], regs.pr_fpu.fpu_stack[6], 10);
-  memcpy (&registers[REGISTER_BYTE (ST7_REGNUM)], regs.pr_fpu.fpu_stack[7], 10);
+  memcpy (&deprecated_registers[REGISTER_BYTE (ST0_REGNUM)], regs.pr_fpu.fpu_stack[0], 10);
+  memcpy (&deprecated_registers[REGISTER_BYTE (ST1_REGNUM)], regs.pr_fpu.fpu_stack[1], 10);
+  memcpy (&deprecated_registers[REGISTER_BYTE (ST2_REGNUM)], regs.pr_fpu.fpu_stack[2], 10);
+  memcpy (&deprecated_registers[REGISTER_BYTE (ST3_REGNUM)], regs.pr_fpu.fpu_stack[3], 10);
+  memcpy (&deprecated_registers[REGISTER_BYTE (ST4_REGNUM)], regs.pr_fpu.fpu_stack[4], 10);
+  memcpy (&deprecated_registers[REGISTER_BYTE (ST5_REGNUM)], regs.pr_fpu.fpu_stack[5], 10);
+  memcpy (&deprecated_registers[REGISTER_BYTE (ST6_REGNUM)], regs.pr_fpu.fpu_stack[6], 10);
+  memcpy (&deprecated_registers[REGISTER_BYTE (ST7_REGNUM)], regs.pr_fpu.fpu_stack[7], 10);
 }
 
 /* FIXME:  This should be merged with i387-tdep.c as well. */

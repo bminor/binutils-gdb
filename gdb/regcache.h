@@ -94,29 +94,14 @@ extern void regcache_collect (int regnum, void *buf);
 
 /* The register's ``offset''.
 
-   NOTE: cagney/2002-08-17: The ``struct value'' and expression
-   evaluator treat the register cache as a large liner buffer.
-   Instead of reading/writing a register using its register number,
-   the code read/writes registers by specifying their offset into the
-   buffer and a number of bytes.  The code also assumes that these
-   byte read/writes can cross register boundaries, adjacent registers
-   treated as a contiguous set of bytes.
-
-   The below map that model onto the real register cache.  New code
-   should go out of their way to avoid using these interfaces.
-
-   FIXME: cagney/2002-08-17: The ``struct value'' and expression
-   evaluator should be fixed.  Instead of using the { offset, length }
-   pair to describe a value within one or more registers, the code
-   should use a chain of { regnum, offset, len } tripples.  */
+   FIXME: cagney/2002-11-07: The get_saved_register() function, when
+   specifying the real location of a register, does so using that
+   registers offset in the register cache.  That offset is then used
+   by valops.c to determine the location of the register.  The code
+   should instead use the register's number and a location expression
+   to describe a value spread across multiple registers or memory.  */
 
 extern int register_offset_hack (struct gdbarch *gdbarch, int regnum);
-extern void regcache_cooked_read_using_offset_hack (struct regcache *regcache,
-						    int offset, int len,
-						    void *buf);
-extern void regcache_cooked_write_using_offset_hack (struct regcache *regcache,
-						     int offset, int len,
-						     const void *buf);
 
 
 /* The type of a register.  This function is slightly more efficient
@@ -144,16 +129,15 @@ extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 extern int max_register_size (struct gdbarch *gdbarch);
 
 
-/* DEPRECATED: Character array containing an image of the inferior
-   programs' registers for the most recently referenced thread. */
+/* Save/restore a register cache.  The registers saved/restored is
+   determined by the save_reggroup and restore_reggroup (although you
+   can't restore a register that wasn't saved as well :-).  You can
+   only save to a read-only cache (default from regcache_xmalloc())
+   from a live cache and you can only restore from a read-only cache
+   to a live cache.  */
 
-extern char *registers;
-
-/* DEPRECATED: Character array containing the current state of each
-   register (unavailable<0, invalid=0, valid>0) for the most recently
-   referenced thread. */
-
-extern signed char *register_valid;
+extern void regcache_save (struct regcache *dst, struct regcache *src);
+extern void regcache_restore (struct regcache *dst, struct regcache *src);
 
 /* Copy/duplicate the contents of a register cache.  By default, the
    operation is pass-through.  Writes to DST and reads from SRC will
@@ -169,26 +153,59 @@ extern struct regcache *regcache_dup_no_passthrough (struct regcache *regcache);
 extern void regcache_cpy (struct regcache *dest, struct regcache *src);
 extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache *src);
 
+/* NOTE: cagney/2002-11-02: The below have been superseded by the
+   regcache_cooked_*() functions found above, and the frame_*()
+   functions found in "frame.h".  Take care though, often more than a
+   simple substitution is required when updating the code.  The
+   change, as far as practical, should avoid adding references to
+   global variables (e.g., current_regcache, current_frame,
+   current_gdbarch or selected_frame) and instead refer to the FRAME
+   or REGCACHE that has been passed into the containing function as
+   parameters.  Consequently, the change typically involves modifying
+   the containing function so that it takes a FRAME or REGCACHE
+   parameter.  In the case of an architecture vector method, there
+   should already be a non-deprecated variant that is parameterized
+   with FRAME or REGCACHE.  */
+
 extern char *deprecated_grub_regcache_for_registers (struct regcache *);
 extern char *deprecated_grub_regcache_for_register_valid (struct regcache *);
+extern void deprecated_read_register_gen (int regnum, char *myaddr);
+extern void deprecated_write_register_gen (int regnum, char *myaddr);
+extern void deprecated_read_register_bytes (int regbyte, char *myaddr,
+					    int len);
+extern void deprecated_write_register_bytes (int regbyte, char *myaddr,
+					     int len);
+
+/* Character array containing the current state of each register
+   (unavailable<0, invalid=0, valid>0) for the most recently
+   referenced thread.  This global is often found in close proximity
+   to code that is directly manipulating the deprecated_registers[]
+   array.  In such cases, it should be possible to replace the lot
+   with a call to supply_register().  If you find yourself in dire
+   straits, still needing access to the cache status bit, the
+   regcache_valid_p() and set_register_cached() functions are
+   available.  */
+extern signed char *deprecated_register_valid;
+
+/* Character array containing an image of the inferior programs'
+   registers for the most recently referenced thread.
+
+   NOTE: cagney/2002-11-14: Target side code should be using
+   supply_register() and/or regcache_collect() while architecture side
+   code should use the more generic regcache methods.  */
+
+extern char *deprecated_registers;
+
+/* NOTE: cagney/2002-11-05: This function, and its co-conspirator
+   deprecated_registers[], have been superseeded by supply_register().  */
+extern void deprecated_registers_fetched (void);
 
 extern int register_cached (int regnum);
 
 extern void set_register_cached (int regnum, int state);
 
-extern void register_changed (int regnum);
-
 extern void registers_changed (void);
 
-extern void registers_fetched (void);
-
-extern void read_register_bytes (int regbyte, char *myaddr, int len);
-
-extern void read_register_gen (int regnum, char *myaddr);
-
-extern void write_register_gen (int regnum, char *myaddr);
-
-extern void write_register_bytes (int regbyte, char *myaddr, int len);
 
 /* Rename to read_unsigned_register()? */
 extern ULONGEST read_register (int regnum);

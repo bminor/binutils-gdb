@@ -30,7 +30,7 @@
 #include "gdbcore.h"
 #include "command.h"
 #include "symtab.h"
-#include "symfile.h"		/* for struct complaint */
+#include "symfile.h"
 #include "regcache.h"
 
 #include "gdb_string.h"
@@ -92,18 +92,19 @@ vx_read_register (int regno)
      as defined in "tm-sparc.h".  */
 
   bcopy (&sparc_greg_packet[SPARC_R_G0],
-	 &registers[REGISTER_BYTE (G0_REGNUM)], 32 * SPARC_GREG_SIZE);
+	 &deprecated_registers[REGISTER_BYTE (G0_REGNUM)],
+	 32 * SPARC_GREG_SIZE);
   bcopy (&sparc_greg_packet[SPARC_R_Y],
-	 &registers[REGISTER_BYTE (Y_REGNUM)], 6 * SPARC_GREG_SIZE);
+	 &deprecated_registers[REGISTER_BYTE (Y_REGNUM)], 6 * SPARC_GREG_SIZE);
 
   /* Now write the local and in registers to the register window
      spill area in the frame.  VxWorks does not do this for the
      active frame automatically; it greatly simplifies debugging
      (FRAME_FIND_SAVED_REGS, in particular, depends on this).  */
 
-  sp = extract_address (&registers[REGISTER_BYTE (SP_REGNUM)],
+  sp = extract_address (&deprecated_registers[REGISTER_BYTE (SP_REGNUM)],
 			REGISTER_RAW_SIZE (SP_REGNUM));
-  write_memory (sp, &registers[REGISTER_BYTE (L0_REGNUM)],
+  write_memory (sp, &deprecated_registers[REGISTER_BYTE (L0_REGNUM)],
 		16 * REGISTER_RAW_SIZE (L0_REGNUM));
 
   /* If the target has floating point registers, fetch them.
@@ -116,19 +117,23 @@ vx_read_register (int regno)
       net_read_registers (sparc_fpreg_packet, SPARC_FPREG_PLEN,
 			  PTRACE_GETFPREGS);
       bcopy (&sparc_fpreg_packet[SPARC_R_FP0],
-	     &registers[REGISTER_BYTE (FP0_REGNUM)], 32 * SPARC_FPREG_SIZE);
+	     &deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+	     32 * SPARC_FPREG_SIZE);
       bcopy (&sparc_fpreg_packet[SPARC_R_FSR],
-	     &registers[REGISTER_BYTE (FPS_REGNUM)], 1 * SPARC_FPREG_SIZE);
+	     &deprecated_registers[REGISTER_BYTE (FPS_REGNUM)],
+	     1 * SPARC_FPREG_SIZE);
     }
   else
     {
-      bzero (&registers[REGISTER_BYTE (FP0_REGNUM)], 32 * SPARC_FPREG_SIZE);
-      bzero (&registers[REGISTER_BYTE (FPS_REGNUM)], 1 * SPARC_FPREG_SIZE);
+      bzero (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
+	     32 * SPARC_FPREG_SIZE);
+      bzero (&deprecated_registers[REGISTER_BYTE (FPS_REGNUM)],
+	     1 * SPARC_FPREG_SIZE);
     }
 
   /* Mark the register cache valid.  */
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 /* Store a register or registers into the VxWorks target.
@@ -160,9 +165,9 @@ vx_write_register (int regno)
     }
   if (in_gp_regs)
     {
-      bcopy (&registers[REGISTER_BYTE (G0_REGNUM)],
+      bcopy (&deprecated_registers[REGISTER_BYTE (G0_REGNUM)],
 	     &sparc_greg_packet[SPARC_R_G0], 32 * SPARC_GREG_SIZE);
-      bcopy (&registers[REGISTER_BYTE (Y_REGNUM)],
+      bcopy (&deprecated_registers[REGISTER_BYTE (Y_REGNUM)],
 	     &sparc_greg_packet[SPARC_R_Y], 6 * SPARC_GREG_SIZE);
 
       net_write_registers (sparc_greg_packet, SPARC_GREG_PLEN, PTRACE_SETREGS);
@@ -172,9 +177,9 @@ vx_write_register (int regno)
 
       if (regno < 0 || (L0_REGNUM <= regno && regno <= I7_REGNUM))
 	{
-	  sp = extract_address (&registers[REGISTER_BYTE (SP_REGNUM)],
+	  sp = extract_address (&deprecated_registers[REGISTER_BYTE (SP_REGNUM)],
 				REGISTER_RAW_SIZE (SP_REGNUM));
-	  write_memory (sp, &registers[REGISTER_BYTE (L0_REGNUM)],
+	  write_memory (sp, &deprecated_registers[REGISTER_BYTE (L0_REGNUM)],
 			16 * REGISTER_RAW_SIZE (L0_REGNUM));
 	}
     }
@@ -183,9 +188,9 @@ vx_write_register (int regno)
 
   if (in_fp_regs && target_has_fp)
     {
-      bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)],
+      bcopy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
 	     &sparc_fpreg_packet[SPARC_R_FP0], 32 * SPARC_FPREG_SIZE);
-      bcopy (&registers[REGISTER_BYTE (FPS_REGNUM)],
+      bcopy (&deprecated_registers[REGISTER_BYTE (FPS_REGNUM)],
 	     &sparc_fpreg_packet[SPARC_R_FSR], 1 * SPARC_FPREG_SIZE);
 
       net_write_registers (sparc_fpreg_packet, SPARC_FPREG_PLEN,

@@ -199,30 +199,31 @@ bfd_coff_reloc16_relax_section (abfd, input_section, link_info, again)
       shrinks = (unsigned *) bfd_zmalloc (amt);
 
       /* Loop until nothing changes in this section.  */
-      do {
-	arelent **parent;
-	unsigned int i;
-	long j;
+      do
+	{
+	  arelent **parent;
+	  unsigned int i;
+	  long j;
 
-	another_pass = 0;
+	  another_pass = 0;
 
-	for (i = 0, parent = reloc_vector; *parent; parent++, i++)
-	  {
-	    /* Let the target/machine dependent code examine each reloc
-	       in this section and attempt to shrink it.  */
-	    shrink = bfd_coff_reloc16_estimate (abfd, input_section, *parent,
-						shrinks[i], link_info);
+	  for (i = 0, parent = reloc_vector; *parent; parent++, i++)
+	    {
+	      /* Let the target/machine dependent code examine each reloc
+		 in this section and attempt to shrink it.  */
+	      shrink = bfd_coff_reloc16_estimate (abfd, input_section, *parent,
+						  shrinks[i], link_info);
 
-	    /* If it shrunk, note it in the shrinks array and set up for
-	       another pass.  */
-	    if (shrink != shrinks[i])
-	      {
-	        another_pass = 1;
-		for (j = i + 1; j <= reloc_count; j++)
-		  shrinks[j] += shrink - shrinks[i];
-	      }
-	  }
-      }
+	      /* If it shrunk, note it in the shrinks array and set up for
+		 another pass.  */
+	      if (shrink != shrinks[i])
+		{
+		  another_pass = 1;
+		  for (j = i + 1; j <= reloc_count; j++)
+		    shrinks[j] += shrink - shrinks[i];
+		}
+	    }
+	}
       while (another_pass);
 
       shrink = shrinks[reloc_count];
@@ -235,12 +236,12 @@ bfd_coff_reloc16_relax_section (abfd, input_section, link_info, again)
 }
 
 bfd_byte *
-bfd_coff_reloc16_get_relocated_section_contents(in_abfd,
-						link_info,
-						link_order,
-						data,
-						relocateable,
-						symbols)
+bfd_coff_reloc16_get_relocated_section_contents (in_abfd,
+						 link_info,
+						 link_order,
+						 data,
+						 relocateable,
+						 symbols)
      bfd *in_abfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
@@ -266,11 +267,11 @@ bfd_coff_reloc16_get_relocated_section_contents(in_abfd,
 						       symbols);
 
   /* Read in the section.  */
-  if (!bfd_get_section_contents(input_bfd,
-				input_section,
-				data,
-				(bfd_vma) 0,
-				input_section->_raw_size))
+  if (!bfd_get_section_contents (input_bfd,
+				 input_section,
+				 data,
+				 (bfd_vma) 0,
+				 input_section->_raw_size))
     return NULL;
 
   reloc_vector = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);

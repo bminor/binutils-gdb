@@ -41,10 +41,8 @@ print_engine_issue_prefix_hook (lf *file)
 {
   lf_printf (file, "\n");
   lf_indent_suppress (file);
-  lf_printf (file, "#if defined (%sENGINE_ISSUE_PREFIX_HOOK)\n",
-	     options.module.global.prefix.l);
-  lf_printf (file, "%sENGINE_ISSUE_PREFIX_HOOK();\n",
-	     options.module.global.prefix.l);
+  lf_printf (file, "#if defined (ENGINE_ISSUE_PREFIX_HOOK)\n");
+  lf_printf (file, "ENGINE_ISSUE_PREFIX_HOOK();\n");
   lf_indent_suppress (file);
   lf_printf (file, "#endif\n");
   lf_printf (file, "\n");
@@ -55,10 +53,8 @@ print_engine_issue_postfix_hook (lf *file)
 {
   lf_printf (file, "\n");
   lf_indent_suppress (file);
-  lf_printf (file, "#if defined (%sENGINE_ISSUE_POSTFIX_HOOK)\n",
-	     options.module.global.prefix.l);
-  lf_printf (file, "%sENGINE_ISSUE_POSTFIX_HOOK();\n",
-	     options.module.global.prefix.l);
+  lf_printf (file, "#if defined (ENGINE_ISSUE_POSTFIX_HOOK)\n");
+  lf_printf (file, "ENGINE_ISSUE_POSTFIX_HOOK();\n");
   lf_indent_suppress (file);
   lf_printf (file, "#endif\n");
   lf_printf (file, "\n");

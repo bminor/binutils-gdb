@@ -74,11 +74,11 @@ struct objc_method {
 
 /* Complaints about ObjC classes, selectors, etc.  */
 
-static struct complaint noclass_lookup_complaint = {
+static struct deprecated_complaint noclass_lookup_complaint = {
   "no way to lookup Objective-C classes", 0, 0
 };
 
-static struct complaint nosel_lookup_complaint = {
+static struct deprecated_complaint nosel_lookup_complaint = {
   "no way to lookup Objective-C selectors", 0, 0
 };
 
@@ -1320,8 +1320,8 @@ find_methods (struct symtab *symtab, char type,
 	continue;
 
       if (symtab)
-	if ((SYMBOL_VALUE_ADDRESS (msymbol) <  block->startaddr) ||
-	    (SYMBOL_VALUE_ADDRESS (msymbol) >= block->endaddr))
+	if ((SYMBOL_VALUE_ADDRESS (msymbol) <  BLOCK_START (block)) ||
+	    (SYMBOL_VALUE_ADDRESS (msymbol) >= BLOCK_END (block)))
 	  /* Not in the specified symtab.  */
 	  continue;
 

@@ -1150,8 +1150,8 @@ s390_store_return_value (struct type *valtype, char *valbuf)
     {
       if (TYPE_LENGTH (valtype) == 4
           || TYPE_LENGTH (valtype) == 8)
-        write_register_bytes (REGISTER_BYTE (S390_FP0_REGNUM), valbuf,
-                              TYPE_LENGTH (valtype));
+        deprecated_write_register_bytes (REGISTER_BYTE (S390_FP0_REGNUM),
+					 valbuf, TYPE_LENGTH (valtype));
       else
         error ("GDB is unable to return `long double' values "
                "on this architecture.");
@@ -1161,8 +1161,8 @@ s390_store_return_value (struct type *valtype, char *valbuf)
       value =
 	s390_promote_integer_argument (valtype, valbuf, reg_buff, &arglen);
       /* Everything else is returned in GPR2 and up. */
-      write_register_bytes (REGISTER_BYTE (S390_GP0_REGNUM + 2), value,
-			    arglen);
+      deprecated_write_register_bytes (REGISTER_BYTE (S390_GP0_REGNUM + 2),
+				       value, arglen);
     }
 }
 static int
@@ -1575,9 +1575,9 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
           {
             /* When we store a single-precision value in an FP register,
                it occupies the leftmost bits.  */
-            write_register_bytes (REGISTER_BYTE (S390_FP0_REGNUM + fr),
-                                  VALUE_CONTENTS (arg),
-                                  TYPE_LENGTH (type));
+            deprecated_write_register_bytes (REGISTER_BYTE (S390_FP0_REGNUM + fr),
+					     VALUE_CONTENTS (arg),
+					     TYPE_LENGTH (type));
             fr += 2;
           }
         else if (is_simple_arg (type)
@@ -1595,10 +1595,10 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
         else if (is_double_arg (type)
                  && gr <= 5)
           {
-            write_register_gen (S390_GP0_REGNUM + gr,
-                                VALUE_CONTENTS (arg));
-            write_register_gen (S390_GP0_REGNUM + gr + 1,
-                                VALUE_CONTENTS (arg) + 4);
+            deprecated_write_register_gen (S390_GP0_REGNUM + gr,
+					   VALUE_CONTENTS (arg));
+            deprecated_write_register_gen (S390_GP0_REGNUM + gr + 1,
+					   VALUE_CONTENTS (arg) + 4);
             gr += 2;
           }
         else

@@ -466,7 +466,7 @@ get_core_registers (int regno)
   get_core_register_section (".reg2", 2, "floating-point", 0);
   get_core_register_section (".reg-xfp", 3, "extended floating-point", 0);
 
-  registers_fetched ();
+  deprecated_registers_fetched ();
 }
 
 static void

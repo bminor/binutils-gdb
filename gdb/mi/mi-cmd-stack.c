@@ -45,6 +45,7 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
   int frame_low;
   int frame_high;
   int i;
+  struct cleanup *cleanup_stack;
   struct frame_info *fi;
 
   if (!target_has_stack)
@@ -76,7 +77,7 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
   if (fi == NULL)
     error ("mi_cmd_stack_list_frames: Not enough frames in stack.");
 
-  ui_out_list_begin (uiout, "stack");
+  cleanup_stack = make_cleanup_ui_out_list_begin_end (uiout, "stack");
 
   /* Now let;s print the frames up to frame_high, or until there are
      frames in the stack. */
@@ -95,7 +96,7 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
 			0 /* args */ );
     }
 
-  ui_out_list_end (uiout);
+  do_cleanups (cleanup_stack);
   if (i < frame_high)
     error ("mi_cmd_stack_list_frames: Not enough frames in stack.");
 
@@ -155,6 +156,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
   int frame_high;
   int i;
   struct frame_info *fi;
+  struct cleanup *cleanup_stack_args;
 
   if (argc < 1 || argc > 3 || argc == 2)
     error ("mi_cmd_stack_list_args: Usage: PRINT_VALUES [FRAME_LOW FRAME_HIGH]");
@@ -182,7 +184,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
   if (fi == NULL)
     error ("mi_cmd_stack_list_args: Not enough frames in stack.");
 
-  ui_out_list_begin (uiout, "stack-args");
+  cleanup_stack_args = make_cleanup_ui_out_list_begin_end (uiout, "stack-args");
 
   /* Now let's print the frames up to frame_high, or until there are
      frames in the stack. */
@@ -190,14 +192,15 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
        fi && (i <= frame_high || frame_high == -1);
        i++, fi = get_prev_frame (fi))
     {
+      struct cleanup *cleanup_frame;
       QUIT;
-      ui_out_tuple_begin (uiout, "frame");
+      cleanup_frame = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
       ui_out_field_int (uiout, "level", i);
       list_args_or_locals (0, atoi (argv[0]), fi);
-      ui_out_tuple_end (uiout);
+      do_cleanups (cleanup_frame);
     }
 
-  ui_out_list_end (uiout);
+  do_cleanups (cleanup_stack_args);
   if (i < frame_high)
     error ("mi_cmd_stack_list_args: Not enough frames in stack.");
 
@@ -214,13 +217,14 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
   struct block *block;
   struct symbol *sym;
   int i, nsyms;
+  struct cleanup *cleanup_list;
   static struct ui_stream *stb = NULL;
 
   stb = ui_out_stream_new (uiout);
 
   block = get_frame_block (fi, 0);
 
-  ui_out_list_begin (uiout, locals ? "locals" : "args");
+  cleanup_list = make_cleanup_ui_out_list_begin_end (uiout, locals ? "locals" : "args");
 
   while (block != 0)
     {
@@ -262,8 +266,10 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	    }
 	  if (print_me)
 	    {
+	      struct cleanup *cleanup_tuple = NULL;
 	      if (values)
-		ui_out_tuple_begin (uiout, NULL);
+		cleanup_tuple = 
+		  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	      ui_out_field_string (uiout, "name", SYMBOL_NAME (sym));
 
 	      if (values)
@@ -278,7 +284,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 		    sym2 = sym;
 		  print_variable_value (sym2, fi, stb->stream);
 		  ui_out_field_stream (uiout, "value", stb);
-		  ui_out_tuple_end (uiout);
+		  do_cleanups (cleanup_tuple);
 		}
 	    }
 	}
@@ -287,7 +293,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
       else
 	block = BLOCK_SUPERBLOCK (block);
     }
-  ui_out_list_end (uiout);
+  do_cleanups (cleanup_list);
   ui_out_stream_delete (stb);
 }
 

@@ -59,7 +59,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  (*gregsetp)[regi] = *(greg_t *) & registers[REGISTER_BYTE (regi)];
+	  (*gregsetp)[regi] = *(greg_t *) & deprecated_registers[REGISTER_BYTE (regi)];
 	}
     }
 }

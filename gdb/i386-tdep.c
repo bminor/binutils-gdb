@@ -37,6 +37,7 @@
 #include "doublest.h"
 #include "value.h"
 #include "gdb_assert.h"
+#include "reggroups.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -70,9 +71,41 @@ static const int mmx_num_regs = (sizeof (i386_mmx_names)
 #define MM0_REGNUM (NUM_REGS)
 
 static int
-mmx_regnum_p (int reg)
+i386_mmx_regnum_p (int reg)
 {
   return (reg >= MM0_REGNUM && reg < MM0_REGNUM + mmx_num_regs);
+}
+
+/* FP register?  */
+
+int
+i386_fp_regnum_p (int regnum)
+{
+  return (regnum < NUM_REGS
+	  && (FP0_REGNUM && FP0_REGNUM <= (regnum) && (regnum) < FPC_REGNUM));
+}
+
+int
+i386_fpc_regnum_p (int regnum)
+{
+  return (regnum < NUM_REGS
+	  && (FPC_REGNUM <= (regnum) && (regnum) < XMM0_REGNUM));
+}
+
+/* SSE register?  */
+
+int
+i386_sse_regnum_p (int regnum)
+{
+  return (regnum < NUM_REGS
+	  && (XMM0_REGNUM <= (regnum) && (regnum) < MXCSR_REGNUM));
+}
+
+int
+i386_mxcsr_regnum_p (int regnum)
+{
+  return (regnum < NUM_REGS
+	  && (regnum == MXCSR_REGNUM));
 }
 
 /* Return the name of register REG.  */
@@ -82,7 +115,7 @@ i386_register_name (int reg)
 {
   if (reg < 0)
     return NULL;
-  if (mmx_regnum_p (reg))
+  if (i386_mmx_regnum_p (reg))
     return i386_mmx_names[reg - MM0_REGNUM];
   if (reg >= sizeof (i386_register_names) / sizeof (*i386_register_names))
     return NULL;
@@ -462,7 +495,7 @@ i386_get_frame_setup (CORE_ADDR pc)
 /* Return non-zero if we're dealing with a frameless signal, that is,
    a signal trampoline invoked from a frameless function.  */
 
-static int
+int
 i386_frameless_signal_p (struct frame_info *frame)
 {
   return (frame->next && frame->next->signal_handler_caller
@@ -535,8 +568,12 @@ static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
   if (PC_IN_CALL_DUMMY (frame->pc, 0, 0))
-    return deprecated_read_register_dummy (frame->pc, frame->frame,
-					   PC_REGNUM);
+    {
+      ULONGEST pc;
+
+      frame_unwind_unsigned_register (frame, PC_REGNUM, &pc);
+      return pc;
+    }
 
   if (frame->signal_handler_caller)
     return i386_sigtramp_saved_pc (frame);
@@ -834,7 +871,7 @@ i386_do_pop_frame (struct frame_info *frame)
       if (addr)
 	{
 	  read_memory (addr, regbuf, REGISTER_RAW_SIZE (regnum));
-	  write_register_gen (regnum, regbuf);
+	  deprecated_write_register_gen (regnum, regbuf);
 	}
     }
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
@@ -1039,25 +1076,17 @@ i386_store_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR.  */
+/* Extract from REGCACHE, which contains the (raw) register state, the
+   address in which a function should return its structure value, as a
+   CORE_ADDR.  */
 
 static CORE_ADDR
 i386_extract_struct_value_address (struct regcache *regcache)
 {
-  /* NOTE: cagney/2002-08-12: Replaced a call to
-     regcache_raw_read_as_address() with a call to
-     regcache_cooked_read_unsigned().  The old, ...as_address function
-     was eventually calling extract_unsigned_integer (via
-     extract_address) to unpack the registers value.  The below is
-     doing an unsigned extract so that it is functionally equivalent.
-     The read needs to be cooked as, otherwise, it will never
-     correctly return the value of a register in the [NUM_REGS
-     .. NUM_REGS+NUM_PSEUDO_REGS) range.  */
-  ULONGEST val;
-  regcache_cooked_read_unsigned (regcache, LOW_RETURN_REGNUM, &val);
-  return val;
+  ULONGEST addr;
+
+  regcache_raw_read_unsigned (regcache, LOW_RETURN_REGNUM, &addr);
+  return addr;
 }
 
 
@@ -1102,13 +1131,13 @@ i386_register_virtual_type (int regnum)
   if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
     return lookup_pointer_type (builtin_type_void);
 
-  if (FP_REGNUM_P (regnum))
+  if (i386_fp_regnum_p (regnum))
     return builtin_type_i387_ext;
 
-  if (SSE_REGNUM_P (regnum))
+  if (i386_sse_regnum_p (regnum))
     return builtin_type_vec128i;
 
-  if (mmx_regnum_p (regnum))
+  if (i386_mmx_regnum_p (regnum))
     return builtin_type_vec64i;
 
   return builtin_type_int;
@@ -1135,7 +1164,7 @@ static void
 i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int regnum, void *buf)
 {
-  if (mmx_regnum_p (regnum))
+  if (i386_mmx_regnum_p (regnum))
     {
       char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
       int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
@@ -1151,7 +1180,7 @@ static void
 i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int regnum, const void *buf)
 {
-  if (mmx_regnum_p (regnum))
+  if (i386_mmx_regnum_p (regnum))
     {
       char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
       int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
@@ -1175,7 +1204,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 static int
 i386_register_convertible (int regnum)
 {
-  return FP_REGNUM_P (regnum);
+  return i386_fp_regnum_p (regnum);
 }
 
 /* Convert data from raw format for register REGNUM in buffer FROM to
@@ -1185,7 +1214,7 @@ static void
 i386_register_convert_to_virtual (int regnum, struct type *type,
 				  char *from, char *to)
 {
-  gdb_assert (FP_REGNUM_P (regnum));
+  gdb_assert (i386_fp_regnum_p (regnum));
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -1208,7 +1237,7 @@ static void
 i386_register_convert_to_raw (struct type *type, int regnum,
 			      char *from, char *to)
 {
-  gdb_assert (FP_REGNUM_P (regnum));
+  gdb_assert (i386_fp_regnum_p (regnum));
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -1415,6 +1444,56 @@ i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
+/* i386 register groups.  In addition to the normal groups, add "mmx"
+   and "sse".  */
+
+static struct reggroup *i386_sse_reggroup;
+static struct reggroup *i386_mmx_reggroup;
+
+static void
+i386_init_reggroups (void)
+{
+  i386_sse_reggroup = reggroup_new ("sse", USER_REGGROUP);
+  i386_mmx_reggroup = reggroup_new ("mmx", USER_REGGROUP);
+}
+
+static void
+i386_add_reggroups (struct gdbarch *gdbarch)
+{
+  reggroup_add (gdbarch, i386_sse_reggroup);
+  reggroup_add (gdbarch, i386_mmx_reggroup);
+  reggroup_add (gdbarch, general_reggroup);
+  reggroup_add (gdbarch, float_reggroup);
+  reggroup_add (gdbarch, all_reggroup);
+  reggroup_add (gdbarch, save_reggroup);
+  reggroup_add (gdbarch, restore_reggroup);
+  reggroup_add (gdbarch, vector_reggroup);
+  reggroup_add (gdbarch, system_reggroup);
+}
+
+int
+i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+			  struct reggroup *group)
+{
+  int sse_regnum_p = (i386_sse_regnum_p (regnum)
+		      || i386_mxcsr_regnum_p (regnum));
+  int fp_regnum_p = (i386_fp_regnum_p (regnum)
+		     || i386_fpc_regnum_p (regnum));
+  int mmx_regnum_p = (i386_mmx_regnum_p (regnum));
+  if (group == i386_mmx_reggroup)
+    return mmx_regnum_p;
+  if (group == i386_sse_reggroup)
+    return sse_regnum_p;
+  if (group == vector_reggroup)
+    return (mmx_regnum_p || sse_regnum_p);
+  if (group == float_reggroup)
+    return fp_regnum_p;
+  if (group == general_reggroup)
+    return (!fp_regnum_p && !mmx_regnum_p && !sse_regnum_p);
+  return default_register_reggroup_p (gdbarch, regnum, group);
+}
+
+
 static struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -1573,6 +1652,10 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_print_insn (gdbarch, i386_print_insn);
 
+  /* Add the i386 register groups.  */
+  i386_add_reggroups (gdbarch);
+  set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
+
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
 
@@ -1643,4 +1726,7 @@ are \"default\", \"pcc\" and \"reg\", and the default value is \"default\".",
 			  i386_go32_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETWARE,
 			  i386_nw_init_abi);
+
+  /* Initialize the i386 specific register groups.  */
+  i386_init_reggroups ();
 }

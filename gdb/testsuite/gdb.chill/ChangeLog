@@ -1,3 +1,8 @@
+2002-11-09  Klee Dienes   <kdienes@apple.com>
+
+	* chexp.exp: Mark as obsolete.
+	* pr-5016.exp: Remove stray trailing newline.
+	
 2002-08-01  Andrew Cagney  <cagney@redhat.com>
 
 	* builtins.exp, callch.exp, chillvars.exp: Make files obsolete.

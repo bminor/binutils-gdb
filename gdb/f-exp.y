@@ -241,9 +241,11 @@ exp     :       '(' exp ')'
 /* Expressions, not including the comma operator.  */
 exp	:	'*' exp    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_IND); }
+	;
 
 exp	:	'&' exp    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_ADDR); }
+	;
 
 exp	:	'-' exp    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_NEG); }
@@ -283,6 +285,7 @@ arglist	:	exp
 
 arglist :      substring
                         { arglist_len = 2;}
+	;
    
 arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 			{ arglist_len++; }

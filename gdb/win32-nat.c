@@ -383,7 +383,7 @@ static void
 do_child_store_inferior_registers (int r)
 {
   if (r >= 0)
-    read_register_gen (r, ((char *) &current_thread->context) + mappings[r]);
+    deprecated_read_register_gen (r, ((char *) &current_thread->context) + mappings[r]);
   else
     {
       for (r = 0; r < NUM_REGS; r++)
@@ -1828,24 +1828,18 @@ init_child_ops (void)
   child_ops.to_terminal_save_ours = terminal_save_ours;
   child_ops.to_terminal_info = child_terminal_info;
   child_ops.to_kill = child_kill_inferior;
-  child_ops.to_load = 0;
-  child_ops.to_lookup_symbol = 0;
   child_ops.to_create_inferior = child_create_inferior;
   child_ops.to_mourn_inferior = child_mourn_inferior;
   child_ops.to_can_run = child_can_run;
-  child_ops.to_notice_signals = 0;
   child_ops.to_thread_alive = win32_child_thread_alive;
   child_ops.to_pid_to_str = cygwin_pid_to_str;
   child_ops.to_stop = child_stop;
   child_ops.to_stratum = process_stratum;
-  child_ops.DONT_USE = 0;
   child_ops.to_has_all_memory = 1;
   child_ops.to_has_memory = 1;
   child_ops.to_has_stack = 1;
   child_ops.to_has_registers = 1;
   child_ops.to_has_execution = 1;
-  child_ops.to_sections = 0;
-  child_ops.to_sections_end = 0;
   child_ops.to_magic = OPS_MAGIC;
 }
 

@@ -77,19 +77,19 @@ fill_gregset (gregset_t *gregsetp, int regno)
   /* same FIXME as above wrt 32 */
   for (regi = 0; regi < 32; regi++)
     if ((regno == -1) || (regno == regi))
-      *(regp + regi) = *(greg_t *) & registers[REGISTER_BYTE (regi)];
+      *(regp + regi) = *(greg_t *) & deprecated_registers[REGISTER_BYTE (regi)];
 
   if ((regno == -1) || (regno == PC_REGNUM))
-    gregsetp->gp_pc = *(greg_t *) & registers[REGISTER_BYTE (PC_REGNUM)];
+    gregsetp->gp_pc = *(greg_t *) & deprecated_registers[REGISTER_BYTE (PC_REGNUM)];
 
   if ((regno == -1) || (regno == CAUSE_REGNUM))
-    gregsetp->gp_cause = *(greg_t *) & registers[REGISTER_BYTE (CAUSE_REGNUM)];
+    gregsetp->gp_cause = *(greg_t *) & deprecated_registers[REGISTER_BYTE (CAUSE_REGNUM)];
 
   if ((regno == -1) || (regno == HI_REGNUM))
-    gregsetp->gp_mdhi = *(greg_t *) & registers[REGISTER_BYTE (HI_REGNUM)];
+    gregsetp->gp_mdhi = *(greg_t *) & deprecated_registers[REGISTER_BYTE (HI_REGNUM)];
 
   if ((regno == -1) || (regno == LO_REGNUM))
-    gregsetp->gp_mdlo = *(greg_t *) & registers[REGISTER_BYTE (LO_REGNUM)];
+    gregsetp->gp_mdlo = *(greg_t *) & deprecated_registers[REGISTER_BYTE (LO_REGNUM)];
 }
 
 /*
@@ -127,14 +127,14 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  from = (char *) &registers[REGISTER_BYTE (regi)];
+	  from = (char *) &deprecated_registers[REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
 	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
 
   if ((regno == -1) || (regno == FCRCS_REGNUM))
-    fpregsetp->fp_csr = *(unsigned *) &registers[REGISTER_BYTE (FCRCS_REGNUM)];
+    fpregsetp->fp_csr = *(unsigned *) &deprecated_registers[REGISTER_BYTE (FCRCS_REGNUM)];
 }
 
 
@@ -184,7 +184,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       return;
     }
 
-  memcpy ((char *) registers, core_reg_sect, core_reg_size);
+  memcpy ((char *) deprecated_registers, core_reg_sect, core_reg_size);
 }
 
 

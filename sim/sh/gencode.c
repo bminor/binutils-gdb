@@ -577,7 +577,7 @@ op tab[] =
   },
 
   { "", "nm", "mac.l @<REG_M>+,@<REG_N>+", "0000nnnnmmmm1111",
-    "trap (255,R0,memory,maskl,maskw, endianw);",
+    "trap (255, R0, PC, memory, maskl, maskw, endianw);",
     "/* FIXME: mac.l support */",
   },
 
@@ -951,8 +951,7 @@ op tab[] =
   },
 
   { "", "", "sleep", "0000000000011011",
-    "nip = PC;",
-    "trap (0xc3, R0, memory, maskl, maskw, endianw);",
+    "nip += trap (0xc3, R0, PC, memory, maskl, maskw, endianw);",
   },
 
   { "n", "", "stc <CREG_M>,<REG_N>", "0000nnnnmmmm0010",
@@ -1029,37 +1028,25 @@ op tab[] =
   },
 
   { "0", "", "trapa #<imm>", "11000011i8*1....", 
-#if 0
-    /* SH-[12] */
     "long imm = 0xff & i;",
-    "if (i==0xc3)",
-    "  PC-=2;",
-    "if (i<20||i==34||i==0xc3)",
-    "  trap(i,R,memory,maskl,maskw,endianw);",
+    "if (i < 20 || i == 33 || i == 34 || i == 0xc3)",
+    "  nip += trap (i, R, PC, memory, maskl, maskw,endianw);",
+#if 0
     "else {",
+    /* SH-[12] */
     "  R[15]-=4;",
-    "  WLAT(R[15],GET_SR());",
+    "  WLAT (R[15], GET_SR());",
     "  R[15]-=4;",
-    "  WLAT(R[15],PC+2);",
-    "  PC=RLAT(VBR+(imm<<2))-2;",
-    "}",
+    "  WLAT (R[15], PH2T (PC + 2));",
 #else
-    "if (i == 0xc3)",
-    "  {",
-    "    nip = PC;",
-    "    trap (i, R, memory, maskl, maskw,endianw);",
-    "  }",
-    "else if (i < 20 || i==34 || i==0xc3)",
-    "  trap (i, R, memory, maskl, maskw,endianw);",
     "else if (!SR_BL) {",
-    "  /* FIXME: TRA = (imm << 2); */",
     "  SSR = GET_SR();",
     "  SPC = PH2T (PC + 2);",
     "  SET_SR (GET_SR() | SR_MASK_MD | SR_MASK_BL | SR_MASK_RB);",
     "  /* FIXME: EXPEVT = 0x00000160; */",
-    "  SET_NIP (PT2H (VBR + 0x00000100));",
-    "}",
 #endif
+    "  SET_NIP (PT2H (RLAT (VBR + (imm<<2))));",
+    "}",
   },
 
   { "", "mn", "tst <REG_M>,<REG_N>", "0010nnnnmmmm1000",

@@ -264,29 +264,29 @@ call_dummy
 #define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
   { \
     if (TYPE_CODE (TYPE) == TYPE_CODE_FLT && !SOFT_FLOAT) \
-      write_register_bytes \
+      deprecated_write_register_bytes \
 	      (REGISTER_BYTE (FP4_REGNUM) + \
               (REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
               (VALBUF), \
 	      TYPE_LENGTH (TYPE)); \
     else if (is_integral_type(TYPE) || SOFT_FLOAT)   \
-       write_register_bytes \
+       deprecated_write_register_bytes \
               (REGISTER_BYTE (28) + \
                  (REGISTER_SIZE - TYPE_LENGTH (TYPE)), \
                (VALBUF), \
                TYPE_LENGTH (TYPE)); \
     else if (TYPE_LENGTH (TYPE) <= 8)   \
-       write_register_bytes \
+       deprecated_write_register_bytes \
              ( REGISTER_BYTE (28), \
                (VALBUF), \
                TYPE_LENGTH (TYPE)); \
     else if (TYPE_LENGTH (TYPE) <= 16)   \
       { \
-        write_register_bytes \
+        deprecated_write_register_bytes \
                (REGISTER_BYTE (28), \
                 (VALBUF), \
                 8); \
-        write_register_bytes \
+        deprecated_write_register_bytes \
                (REGISTER_BYTE (29), \
                 ((char *) VALBUF + 8), \
                 TYPE_LENGTH (TYPE) - 8); \

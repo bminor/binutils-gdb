@@ -1545,7 +1545,7 @@ alpha_store_return_value (struct type *valtype, char *valbuf)
   else
     memcpy (raw_buffer, valbuf, length);
 
-  write_register_bytes (REGISTER_BYTE (regnum), raw_buffer, length);
+  deprecated_write_register_bytes (REGISTER_BYTE (regnum), raw_buffer, length);
 }
 
 /* Just like reinit_frame_cache, but with the right arguments to be

@@ -495,55 +495,6 @@ print_insn (memaddr, info, arch)
 				 reg_dst_table[(buffer[0] & 7)]);
 	}
 
-      /* M6811_OP_BITMASK and M6811_OP_JUMP_REL must be treated separately
-         and in that order.  The brset/brclr insn have a bitmask and then
-         a relative branch offset.  */
-      if (format & M6811_OP_BITMASK)
-	{
-	  status = read_memory (memaddr + pos, &buffer[0], 1, info);
-	  if (status != 0)
-	    {
-	      return status;
-	    }
-	  pos++;
-	  (*info->fprintf_func) (info->stream, " #$%02x%s",
-				 buffer[0] & 0x0FF,
-				 (format & M6811_OP_JUMP_REL ? " " : ""));
-	  format &= ~M6811_OP_BITMASK;
-	}
-      if (format & M6811_OP_JUMP_REL)
-	{
-	  int val;
-
-	  status = read_memory (memaddr + pos, &buffer[0], 1, info);
-	  if (status != 0)
-	    {
-	      return status;
-	    }
-
-	  pos++;
-	  val = (buffer[0] & 0x80) ? buffer[0] | 0xFFFFFF00 : buffer[0];
-	  (*info->print_address_func) (memaddr + pos + val, info);
-	  format &= ~M6811_OP_JUMP_REL;
-	}
-      else if (format & M6812_OP_JUMP_REL16)
-	{
-	  int val;
-
-	  status = read_memory (memaddr + pos, &buffer[0], 2, info);
-	  if (status != 0)
-	    {
-	      return status;
-	    }
-
-	  pos += 2;
-	  val = ((buffer[0] << 8) | (buffer[1] & 0x0FF));
-	  if (val & 0x8000)
-	    val |= 0xffff0000;
-
-	  (*info->print_address_func) (memaddr + pos + val, info);
-	  format &= ~M6812_OP_JUMP_REL16;
-	}
       if (format & (M6811_OP_IMM16 | M6811_OP_IND16))
 	{
 	  int val;
@@ -639,6 +590,56 @@ print_insn (memaddr, info, arch)
 	  val = ((buffer[0] << 8) | (buffer[1] & 0x0FF));
 	  val &= 0x0FFFF;
 	  (*info->print_address_func) (val, info);
+	}
+
+      /* M6811_OP_BITMASK and M6811_OP_JUMP_REL must be treated separately
+         and in that order.  The brset/brclr insn have a bitmask and then
+         a relative branch offset.  */
+      if (format & M6811_OP_BITMASK)
+	{
+	  status = read_memory (memaddr + pos, &buffer[0], 1, info);
+	  if (status != 0)
+	    {
+	      return status;
+	    }
+	  pos++;
+	  (*info->fprintf_func) (info->stream, " #$%02x%s",
+				 buffer[0] & 0x0FF,
+				 (format & M6811_OP_JUMP_REL ? " " : ""));
+	  format &= ~M6811_OP_BITMASK;
+	}
+      if (format & M6811_OP_JUMP_REL)
+	{
+	  int val;
+
+	  status = read_memory (memaddr + pos, &buffer[0], 1, info);
+	  if (status != 0)
+	    {
+	      return status;
+	    }
+
+	  pos++;
+	  val = (buffer[0] & 0x80) ? buffer[0] | 0xFFFFFF00 : buffer[0];
+	  (*info->print_address_func) (memaddr + pos + val, info);
+	  format &= ~M6811_OP_JUMP_REL;
+	}
+      else if (format & M6812_OP_JUMP_REL16)
+	{
+	  int val;
+
+	  status = read_memory (memaddr + pos, &buffer[0], 2, info);
+	  if (status != 0)
+	    {
+	      return status;
+	    }
+
+	  pos += 2;
+	  val = ((buffer[0] << 8) | (buffer[1] & 0x0FF));
+	  if (val & 0x8000)
+	    val |= 0xffff0000;
+
+	  (*info->print_address_func) (memaddr + pos + val, info);
+	  format &= ~M6812_OP_JUMP_REL16;
 	}
 
       if (format & M6812_OP_PAGE)

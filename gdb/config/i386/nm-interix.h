@@ -1,7 +1,7 @@
-/* SuperH SH64 specific support for 32-bit NetBSD
-   Copyright 2002 Free Software Foundation, Inc.
+/* Native-dependent definitions for Intel 386 running Interix, for GDB.
+   Copyright 1986, 1987, 1989, 1992, 1996 Free Software Foundation, Inc.
 
-This file is part of BFD, the Binary File Descriptor library.
+This file is part of GDB.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,13 +17,19 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#define TARGET_BIG_SYM		bfd_elf32_sh64nbsd_vec
-#define TARGET_BIG_NAME		"elf32-sh64-nbsd"
-#define TARGET_LITTLE_SYM	bfd_elf32_sh64lnbsd_vec
-#define TARGET_LITTLE_NAME	"elf32-sh64l-nbsd"
-#define ELF_ARCH		bfd_arch_sh
-#define ELF_MACHINE_CODE	EM_SH
-#define ELF_MAXPAGESIZE		0x10000
-#define elf_symbol_leading_char	0
+#ifndef NM_INTERIX_H
+#define NM_INTERIX_H
 
-#include "elf32-sh64.c"
+/* Be shared lib aware.  */
+#include "solib.h"
+
+/* submodes of USE_PROC_FS.  */
+#define UNIXWARE
+
+/* It's ALMOST coff; bfd does the same thing. Mostly used in coffread.c.  */
+#define COFF_IMAGE_WITH_PE
+
+/* Turn on our own child_pid_to_exec_file.  */
+#define CHILD_PID_TO_EXEC_FILE
+
+#endif /* NM_INTERIX_H */

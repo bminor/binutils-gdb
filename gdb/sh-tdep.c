@@ -1874,7 +1874,7 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
   if (addrp)
     *addrp = REGISTER_BYTE (live_regnum);
   if (raw_buffer)
-    read_register_gen (live_regnum, raw_buffer);
+    deprecated_read_register_gen (live_regnum, raw_buffer);
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -2223,7 +2223,8 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      if (float_arg_index <= tdep->FLOAT_ARGLAST_REGNUM)
 		{
 		  /* Goes in FR0...FR11 */
-		  write_register_gen (FP0_REGNUM + float_arg_index, val);
+		  deprecated_write_register_gen (FP0_REGNUM + float_arg_index,
+						 val);
 		  fp_args[float_arg_index] = 1;
 		  /* Skip the corresponding general argument register. */
 		  int_argreg ++;
@@ -2266,7 +2267,7 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		       call the gdbarch function to do register
 		       writes, and that will properly know how to deal
 		       with pseudoregs. */
-		    write_register_gen (regnum, val);
+		    deprecated_write_register_gen (regnum, val);
 		    fp_args[double_arg_index] = 1;
 		    fp_args[double_arg_index + 1] = 1;
 		    /* Skip the corresponding general argument register. */
@@ -2472,20 +2473,20 @@ sh_default_store_return_value (struct type *type, char *valbuf)
 		valbuf, TYPE_LENGTH (type));
       else
 	memcpy (buf, valbuf, TYPE_LENGTH (type));
-      write_register_bytes (REGISTER_BYTE (R0_REGNUM), buf, 
-			    REGISTER_RAW_SIZE (R0_REGNUM));
+      deprecated_write_register_bytes (REGISTER_BYTE (R0_REGNUM), buf, 
+				       REGISTER_RAW_SIZE (R0_REGNUM));
     }
   else
-    write_register_bytes (REGISTER_BYTE (R0_REGNUM), valbuf, 
-			  TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (R0_REGNUM), valbuf, 
+				     TYPE_LENGTH (type));
 }
 
 static void
 sh3e_sh4_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT) 
-    write_register_bytes (REGISTER_BYTE (FP0_REGNUM), 
-			  valbuf, TYPE_LENGTH (type));
+    deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM), 
+				     valbuf, TYPE_LENGTH (type));
   else
     sh_default_store_return_value (type, valbuf);
 }
@@ -2501,7 +2502,7 @@ sh64_store_return_value (struct type *type, char *valbuf)
       if (len == 4)
 	{
 	  /* Return value stored in FP0_REGNUM */
-	  write_register_gen (FP0_REGNUM, valbuf);
+	  deprecated_write_register_gen (FP0_REGNUM, valbuf);
 	}
       if (len == 8)
 	{
@@ -2524,10 +2525,10 @@ sh64_store_return_value (struct type *type, char *valbuf)
 	    offset = REGISTER_RAW_SIZE (return_register) - len;
 
 	  memcpy (buf + offset, valbuf, len);
-	  write_register_gen (return_register, buf);
+	  deprecated_write_register_gen (return_register, buf);
 	}
       else
-	write_register_gen (return_register, valbuf);
+	deprecated_write_register_gen (return_register, valbuf);
     }
 }
 
@@ -4289,10 +4290,10 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, 16);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, SH_DEFAULT_NUM_REGS * 4);
-  set_gdbarch_do_registers_info (gdbarch, sh_do_registers_info);
+  set_gdbarch_deprecated_do_registers_info (gdbarch, sh_do_registers_info);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
   set_gdbarch_frame_chain (gdbarch, sh_frame_chain);
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_init_extra_frame_info (gdbarch, sh_init_extra_frame_info);
   set_gdbarch_deprecated_extract_return_value (gdbarch, sh_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, sh_push_arguments);
@@ -4516,7 +4517,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_pseudo_register_read (gdbarch, sh64_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch, sh64_pseudo_register_write);
 
-      set_gdbarch_do_registers_info (gdbarch, sh64_do_registers_info);
+      set_gdbarch_deprecated_do_registers_info (gdbarch, sh64_do_registers_info);
       set_gdbarch_frame_init_saved_regs (gdbarch, sh64_nofp_frame_init_saved_regs);
       set_gdbarch_breakpoint_from_pc (gdbarch, sh_sh64_breakpoint_from_pc);
       set_gdbarch_init_extra_frame_info (gdbarch, sh64_init_extra_frame_info);

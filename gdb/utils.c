@@ -153,13 +153,13 @@ int quit_flag;
 
 int immediate_quit;
 
-/* Nonzero means that encoded C++ names should be printed out in their
-   C++ form rather than raw.  */
+/* Nonzero means that encoded C++/ObjC names should be printed out in their
+   C++/ObjC form rather than raw.  */
 
 int demangle = 1;
 
-/* Nonzero means that encoded C++ names should be printed out in their
-   C++ form even in assembler language displays.  If this is set, but
+/* Nonzero means that encoded C++/ObjC names should be printed out in their
+   C++/ObjC form even in assembler language displays.  If this is set, but
    DEMANGLE is zero, names are printed raw, i.e. DEMANGLE controls.  */
 
 int asm_demangle = 0;
@@ -1817,6 +1817,51 @@ wrap_here (char *indent)
     }
 }
 
+/* Print input string to gdb_stdout, filtered, with wrap, 
+   arranging strings in columns of n chars. String can be
+   right or left justified in the column.  Never prints 
+   trailing spaces.  String should never be longer than
+   width.  FIXME: this could be useful for the EXAMINE 
+   command, which currently doesn't tabulate very well */
+
+void
+puts_filtered_tabular (char *string, int width, int right)
+{
+  int spaces = 0;
+  int stringlen;
+  char *spacebuf;
+
+  gdb_assert (chars_per_line > 0);
+  if (chars_per_line == UINT_MAX)
+    {
+      fputs_filtered (string, gdb_stdout);
+      fputs_filtered ("\n", gdb_stdout);
+      return;
+    }
+
+  if (((chars_printed - 1) / width + 2) * width >= chars_per_line)
+    fputs_filtered ("\n", gdb_stdout);
+
+  if (width >= chars_per_line)
+    width = chars_per_line - 1;
+
+  stringlen = strlen (string);
+
+  if (chars_printed > 0)
+    spaces = width - (chars_printed - 1) % width - 1;
+  if (right)
+    spaces += width - stringlen;
+
+  spacebuf = alloca (spaces + 1);
+  spacebuf[spaces] = '\0';
+  while (spaces--)
+    spacebuf[spaces] = ' ';
+
+  fputs_filtered (spacebuf, gdb_stdout);
+  fputs_filtered (string, gdb_stdout);
+}
+
+
 /* Ensure that whatever gets printed next, using the filtered output
    commands, starts at the beginning of the line.  I.E. if there is
    any pending output for the current line, flush it and start a new
@@ -2244,7 +2289,7 @@ print_spaces_filtered (int n, struct ui_file *stream)
   fputs_filtered (n_spaces (n), stream);
 }
 
-/* C++ demangler stuff.  */
+/* C++/ObjC demangler stuff.  */
 
 /* fprintf_symbol_filtered attempts to demangle NAME, a symbol in language
    LANG, using demangling args ARG_MODE, and print it filtered to STREAM.
@@ -2274,6 +2319,10 @@ fprintf_symbol_filtered (struct ui_file *stream, char *name, enum language lang,
 	    case language_java:
 	      demangled = cplus_demangle (name, arg_mode | DMGL_JAVA);
 	      break;
+	    case language_objc:
+	      /* Commented out until ObjC handling is enabled.  */
+	      /*demangled = objc_demangle (name);*/
+	      /*break;*/
 #if 0
 	      /* OBSOLETE case language_chill: */
 	      /* OBSOLETE   demangled = chill_demangle (name); */
@@ -2393,7 +2442,7 @@ initialize_utils (void)
   add_show_from_set
     (add_set_cmd ("demangle", class_support, var_boolean,
 		  (char *) &demangle,
-	     "Set demangling of encoded C++ names when displaying symbols.",
+	     "Set demangling of encoded C++/ObjC names when displaying symbols.",
 		  &setprintlist),
      &showprintlist);
 
@@ -2421,7 +2470,7 @@ initialize_utils (void)
   add_show_from_set
     (add_set_cmd ("asm-demangle", class_support, var_boolean,
 		  (char *) &asm_demangle,
-		  "Set demangling of C++ names in disassembly listings.",
+		  "Set demangling of C++/ObjC names in disassembly listings.",
 		  &setprintlist),
      &showprintlist);
 }
@@ -2655,31 +2704,73 @@ string_to_core_addr (const char *my_string)
 char *
 gdb_realpath (const char *filename)
 {
+  /* Method 1: The system has a compile time upper bound on a filename
+     path.  Use that and realpath() to canonicalize the name.  This is
+     the most common case.  Note that, if there isn't a compile time
+     upper bound, you want to avoid realpath() at all costs.  */
 #if defined(HAVE_REALPATH)
+  {
 # if defined (PATH_MAX)
-  char buf[PATH_MAX];
+    char buf[PATH_MAX];
 #  define USE_REALPATH
 # elif defined (MAXPATHLEN)
-  char buf[MAXPATHLEN];
+    char buf[MAXPATHLEN];
 #  define USE_REALPATH
-# elif defined (HAVE_UNISTD_H) && defined(HAVE_ALLOCA)
-  char *buf = alloca ((size_t)pathconf ("/", _PC_PATH_MAX));
-#  define USE_REALPATH
+# endif
+# if defined (USE_REALPATH)
+    const char *rp = realpath (filename, buf);
+    if (rp == NULL)
+      rp = filename;
+    return xstrdup (rp);
+  }
 # endif
 #endif /* HAVE_REALPATH */
 
-#if defined(USE_REALPATH)
-  char *rp = realpath (filename, buf);
-  return xstrdup (rp ? rp : filename);
-#elif defined(HAVE_CANONICALIZE_FILE_NAME)
-  char *rp = canonicalize_file_name (filename);
-  if (rp == NULL)
-    return xstrdup (filename);
-  else
-    return rp;
-#else
-  return xstrdup (filename);
+  /* Method 2: The host system (i.e., GNU) has the function
+     canonicalize_file_name() which malloc's a chunk of memory and
+     returns that, use that.  */
+#if defined(HAVE_CANONICALIZE_FILE_NAME)
+  {
+    char *rp = canonicalize_file_name (filename);
+    if (rp == NULL)
+      return xstrdup (filename);
+    else
+      return rp;
+  }
 #endif
+
+  /* FIXME: cagney/2002-11-13:
+
+     Method 2a: Use realpath() with a NULL buffer.  Some systems, due
+     to the problems described in in method 3, have modified their
+     realpath() implementation so that it will allocate a buffer when
+     NULL is passed in.  Before this can be used, though, some sort of
+     configure time test would need to be added.  Otherwize the code
+     will likely core dump.  */
+
+  /* Method 3: Now we're getting desperate!  The system doesn't have a
+     compile time buffer size and no alternative function.  Query the
+     OS, using pathconf(), for the buffer limit.  Care is needed
+     though, some systems do not limit PATH_MAX (return -1 for
+     pathconf()) making it impossible to pass a correctly sized buffer
+     to realpath() (it could always overflow).  On those systems, we
+     skip this.  */
+#if defined (HAVE_REALPATH) && defined (HAVE_UNISTD_H) && defined(HAVE_ALLOCA)
+  {
+    /* Find out the max path size.  */
+    long path_max = pathconf ("/", _PC_PATH_MAX);
+    if (path_max > 0)
+      {
+	/* PATH_MAX is bounded.  */
+	char *buf = alloca (path_max);
+	char *rp = realpath (filename, buf);
+	return xstrdup (rp ? rp : filename);
+      }
+  }
+#endif
+
+  /* This system is a lost cause, just dup the buffer.  */
+  return xstrdup (filename);
 }
 
 /* Return a copy of FILENAME, with its directory prefix canonicalized

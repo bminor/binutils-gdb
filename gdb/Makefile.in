@@ -55,6 +55,8 @@ INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
+DESTDIR =
+
 AR = @AR@
 AR_FLAGS = qv
 RANLIB = @RANLIB@
@@ -535,7 +537,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	charset.c cli-out.c coffread.c complaints.c completer.c corefile.c \
 	cp-abi.c cp-support.c cp-valprint.c \
-	dbxread.c demangle.c disasm.c doublest.c dwarfread.c dwarf2read.c \
+	dbxread.c demangle.c disasm.c doublest.c \
+	dummy-frame.c dwarfread.c dwarf2read.c \
 	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c frame.c \
 	gdbarch.c arch-utils.c gdbtypes.c gnu-v2-abi.c gnu-v3-abi.c \
@@ -550,7 +553,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	nlmread.c \
 	objfiles.c osabi.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
-	regcache.c remote.c \
+	regcache.c reggroups.c remote.c \
 	scm-exp.c scm-lang.c scm-valprint.c serial.c ser-unix.c source.c \
 	stabsread.c stack.c std-regs.c symfile.c symmisc.c symtab.c \
 	target.c thread.c top.c tracepoint.c typeprint.c \
@@ -640,6 +643,7 @@ defs_h = defs.h $(config_h) $(gdb_locale_h) $(gdb_signals_h) $(ansidecl_h) \
 disasm_h = disasm.h
 doublest_h = doublest.h $(floatformat_h)
 dst_h = dst.h
+dummy_frame_h = dummy-frame.h
 dwarf2cfi_h = dwarf2cfi.h
 environ_h = environ.h
 event_loop_h = event-loop.h
@@ -698,6 +702,7 @@ ppc_tdep_h = ppc-tdep.h $(osabi_h)
 ppcnbsd_tdep_h = ppcnbsd-tdep.h
 proc_utils_h = proc-utils.h
 regcache_h = regcache.h
+reggroups_h = reggroups.h
 remote_utils_h = remote-utils.h $(target_h)
 remote_h = remote.h
 scm_lang_h = scm-lang.h $(scm_tags_h)
@@ -828,7 +833,7 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
-	charset.o disasm.o \
+	charset.o disasm.o dummy-frame.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o linespec.o infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \
@@ -854,7 +859,8 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	nlmread.o serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
 	frame.o doublest.o \
-	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o
+	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
+	reggroups.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
@@ -918,9 +924,12 @@ install-only: $(CONFIG_INSTALL)
 		  true ; \
 		fi ; \
 		$(srcdir)/../mkinstalldirs $(bindir) ; \
-		$(INSTALL_PROGRAM) gdb$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
-		$(srcdir)/../mkinstalldirs $(man1dir) ; \
-		$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
+		$(INSTALL_PROGRAM) gdb$(EXEEXT) \
+			$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
+		$(srcdir)/../mkinstalldirs \
+			$(DESTDIR)$(man1dir) ; \
+		$(INSTALL_DATA) $(srcdir)/gdb.1 \
+			$(DESTDIR)$(man1dir)/$$transformed_name.1
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 uninstall: force $(CONFIG_UNINSTALL)
@@ -1530,7 +1539,8 @@ ax-general.o: ax-general.c $(defs_h) $(ax_h) $(value_h) $(gdb_string_h)
 bcache.o: bcache.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(gdb_string_h)
 blockframe.o: blockframe.c $(defs_h) $(symtab_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(frame_h) $(gdbcore_h) $(value_h) $(target_h) \
-	$(inferior_h) $(annotate_h) $(regcache_h) $(gdb_assert_h)
+	$(inferior_h) $(annotate_h) $(regcache_h) $(gdb_assert_h) \
+	$(dummy_frame_h)
 breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcore_h) $(gdbcmd_h) $(value_h) \
 	$(command_h) $(inferior_h) $(gdbthread_h) $(target_h) $(language_h) \
@@ -1625,6 +1635,8 @@ doublest.o: doublest.c $(defs_h) $(doublest_h) $(floatformat_h) \
 dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h)
 dsrec.o: dsrec.c $(defs_h) $(serial_h) $(srec_h)
 # OBSOLETE dstread.o: dstread.c
+dummy-frame.o: dummy-frame.c $(defs_h) $(dummy_frame_h) $(regcache_h) \
+	$(frame_h) $(inferior_h) $(gdb_assert_h)
 dve3900-rom.o: dve3900-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(inferior_h) $(command_h) $(gdb_string_h) $(regcache_h)
 dwarf2cfi.o: dwarf2cfi.c $(defs_h) $(gdbcore_h) $(symtab_h) $(symfile_h) \
@@ -1674,7 +1686,8 @@ fork-child.o: fork-child.c $(defs_h) $(gdb_string_h) $(frame_h) \
 	$(terminal_h) $(gdbthread_h) $(command_h)
 # OBSOLETE fr30-tdep.o: fr30-tdep.c
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
-	$(regcache_h) $(gdb_assert_h)
+	$(regcache_h) $(gdb_assert_h) $(gdb_obstack_h) $(dummy_frame_h) \
+	$(gdbcore_h) $(annotate_h)
 frv-tdep.o: frv-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h)
 gcore.o: gcore.c $(defs_h) $(cli_decode_h) $(inferior_h) $(gdbcore_h) \
@@ -1685,7 +1698,7 @@ gdbarch.o: gdbarch.c $(defs_h) $(arch_utils_h) $(gdbcmd_h) $(inferior_h) \
 	$(gdb_string_h) $(symtab_h) $(frame_h) $(inferior_h) $(breakpoint_h) \
 	$(gdb_wait_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) $(gdbthread_h) \
 	$(annotate_h) $(symfile_h) $(value_h) $(symcat_h) $(floatformat_h) \
-	$(gdb_assert_h) $(gdb_string_h) $(gdb_events_h)
+	$(gdb_assert_h) $(gdb_string_h) $(gdb_events_h) $(reggroups_h)
 gdbtypes.o: gdbtypes.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(expression_h) \
 	$(language_h) $(target_h) $(value_h) $(demangle_h) $(complaints_h) \
@@ -1715,7 +1728,7 @@ hpacc-abi.o: hpacc-abi.c $(defs_h) $(value_h) $(gdb_regex_h) $(gdb_string_h) \
 hppa-tdep.o: hppa-tdep.c $(defs_h) $(frame_h) $(bfd_h) $(inferior_h) \
 	$(value_h) $(regcache_h) $(completer_h) $(symtab_h) $(a_out_encap_h) \
 	$(gdb_stat_h) $(gdb_wait_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) \
-	$(symfile_h) $(objfiles_h)
+	$(symfile_h) $(objfiles_h) $(language_h)
 hppab-nat.o: hppab-nat.c $(defs_h) $(inferior_h) $(target_h) $(regcache_h)
 hppah-nat.o: hppah-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(gdb_wait_h) $(regcache_h)
@@ -1760,8 +1773,10 @@ i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(regcache_h) $(arch_utils_h) $(i386_tdep_h) $(i387_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h)
 i386obsd-nat.o: i386obsd-nat.c $(defs_h)
+i386obsd-tdep.o: i386obsd-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
+	$(regcache_h) $(i386_tdep_h) $(i387_tdep_h)
 i386v-nat.o: i386v-nat.c $(defs_h) $(frame_h) $(inferior_h) $(language_h) \
-	$(gdbcore_h) $(gdb_stat_h) $(floatformat_h) $(target_h)
+	$(gdbcore_h) $(gdb_stat_h) $(floatformat_h) $(target_h) $(i386_tdep_h)
 i386v4-nat.o: i386v4-nat.c $(defs_h) $(value_h) $(inferior_h) $(regcache_h) \
 	$(i386_tdep_h) $(i387_tdep_h) $(gregset_h)
 i387-tdep.o: i387-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(language_h) \
@@ -1822,7 +1837,7 @@ lin-lwp.o: lin-lwp.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) \
 	$(gdbthread_h) $(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h)
 linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(demangle_h) $(value_h) $(completer_h) \
-	$(cp_abi_h) $(source_h)
+	$(cp_abi_h) $(source_h) $(parser_defs_h)
 linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gregset_h) $(gdbcore_h) $(gdbthread_h) $(elf_bfd_h) \
 	$(cli_decode_h) $(gdb_string_h)
@@ -1867,7 +1882,7 @@ macrocmd.o: macrocmd.c $(defs_h) $(macrotab_h) $(macroexp_h) $(macroscope_h) \
 macroexp.o: macroexp.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(macrotab_h) \
 	$(macroexp_h) $(gdb_assert_h)
 macroscope.o: macroscope.c $(defs_h) $(macroscope_h) $(symtab_h) $(target_h) \
-	$(frame_h) $(inferior_h) $(source_h)
+	$(frame_h) $(inferior_h) $(source_h) $(complaints_h)
 macrotab.o: macrotab.c $(defs_h) $(gdb_obstack_h) $(splay_tree_h) \
 	$(symtab_h) $(symfile_h) $(objfiles_h) $(macrotab_h) $(gdb_assert_h) \
 	$(bcache_h) $(complaints_h)
@@ -2001,8 +2016,10 @@ procfs.o: procfs.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 ptx4-nat.o: ptx4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h) \
 	$(gregset_h)
 regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
-	$(gdbcmd_h) $(regcache_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(gdbcmd_h)
+	$(gdbcmd_h) $(regcache_h) $(reggroups_h) $(gdb_assert_h) \
+	$(gdb_string_h) $(gdbcmd_h)
+reggroups.o: reggroups.c $(defs_h) $(reggroups_h) $(gdbtypes_h) \
+	$(gdb_assert_h) $(regcache_h) $(command_h) $(gdbcmd_h)
 remote-array.o: remote-array.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(gdb_string_h) $(command_h) $(serial_h) $(monitor_h) \
 	$(remote_utils_h) $(inferior_h) $(version_h) $(regcache_h)
@@ -2129,7 +2146,8 @@ solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) $(solib_svr4_h)
 solib-osf.o: solib-osf.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(target_h) $(inferior_h) $(solist_h)
 solib-sunos.o: solib-sunos.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(gdbcore_h) $(inferior_h) $(solist_h)
+	$(symfile_h) $(objfiles_h) $(gdbcore_h) $(inferior_h) $(solist_h) \
+	$(bcache_h) $(regcache_h)
 solib-svr4.o: solib-svr4.c $(defs_h) $(elf_external_h) $(elf_common_h) \
 	$(elf_mips_h) $(symtab_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdbcore_h) $(target_h) $(inferior_h) $(solist_h) $(solib_svr4_h)
@@ -2341,21 +2359,26 @@ install-gdbtk:
 	else \
 	  true ; \
 	fi ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir)
-	$(INSTALL_PROGRAM) insight$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY) ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(libdir)/insight$(GDBTK_VERSION) ; \
-	$(INSTALL_DATA) $(srcdir)/gdbtk/plugins/plugins.tcl $(libdir)/insight$(GDBTK_VERSION)/plugins.tcl ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir); \
+	$(INSTALL_PROGRAM) insight$(EXEEXT) \
+		$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs \
-		$(GDBTK_LIBRARY)/images \
-		$(GDBTK_LIBRARY)/images2 ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY)/help \
-		$(GDBTK_LIBRARY)/help/images \
-		$(GDBTK_LIBRARY)/help/trace ; \
+		$(DESTDIR)$(GDBTK_LIBRARY) ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs \
+		$(DESTDIR)$(libdir)/insight$(GDBTK_VERSION) ; \
+	$(INSTALL_DATA) $(srcdir)/gdbtk/plugins/plugins.tcl \
+		$(DESTDIR)$(libdir)/insight$(GDBTK_VERSION)/plugins.tcl ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs \
+		$(DESTDIR)$(GDBTK_LIBRARY)/images \
+		$(DESTDIR)$(GDBTK_LIBRARY)/images2 ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs \
+		$(DESTDIR)$(GDBTK_LIBRARY)/help \
+		$(DESTDIR)$(GDBTK_LIBRARY)/help/images \
+		$(DESTDIR)$(GDBTK_LIBRARY)/help/trace ; \
 	cd $(srcdir)/gdbtk/library ; \
 	for i in *.tcl *.itcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
 	  do \
-		$(INSTALL_DATA) $$i $(GDBTK_LIBRARY)/$$i ; \
+		$(INSTALL_DATA) $$i $(DESTDIR)$(GDBTK_LIBRARY)/$$i ; \
 	  done ;
 
 uninstall-gdbtk:
@@ -2366,8 +2389,8 @@ uninstall-gdbtk:
 	else \
 		true ; \
 	fi ; \
-	rm -f $(bindir)/$$transformed_name$(EXEEXT) ; \
-	rm -rf $(GDBTK_LIBRARY)
+	rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
+	rm -rf $(DESTDIR)$(GDBTK_LIBRARY)
 
 clean-gdbtk:
 	rm -f insight$(EXEEXT)

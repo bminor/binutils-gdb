@@ -4,21 +4,21 @@
    Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -147,11 +147,11 @@ DESCRIPTION
 .#define bfd_mach_mipsisa32             32
 .#define bfd_mach_mipsisa64             64
 .  bfd_arch_i386,      {* Intel 386 *}
-.#define bfd_mach_i386_i386 0
-.#define bfd_mach_i386_i8086 1
-.#define bfd_mach_i386_i386_intel_syntax 2
-.#define bfd_mach_x86_64 3
-.#define bfd_mach_x86_64_intel_syntax 4
+.#define bfd_mach_i386_i386 1
+.#define bfd_mach_i386_i8086 2
+.#define bfd_mach_i386_i386_intel_syntax 3
+.#define bfd_mach_x86_64 64
+.#define bfd_mach_x86_64_intel_syntax 65
 .  bfd_arch_we32k,     {* AT&T WE32xxx *}
 .  bfd_arch_tahoe,     {* CCI/Harris Tahoe *}
 .  bfd_arch_i860,      {* Intel 860 *}
@@ -160,6 +160,7 @@ DESCRIPTION
 .  bfd_arch_alliant,   {* Alliant *}
 .  bfd_arch_convex,    {* Convex *}
 .  bfd_arch_m88k,      {* Motorola 88xxx *}
+.  bfd_arch_m98k,      {* Motorola 98xxx *}
 .  bfd_arch_pyramid,   {* Pyramid Technology *}
 .  bfd_arch_h8300,     {* Hitachi H8/300 *}
 .#define bfd_mach_h8300   1
@@ -167,8 +168,8 @@ DESCRIPTION
 .#define bfd_mach_h8300s  3
 .  bfd_arch_pdp11,     {* DEC PDP-11 *}
 .  bfd_arch_powerpc,   {* PowerPC *}
-.#define bfd_mach_ppc		0
-.#define bfd_mach_ppc64		1
+.#define bfd_mach_ppc		32
+.#define bfd_mach_ppc64		64
 .#define bfd_mach_ppc_403	403
 .#define bfd_mach_ppc_403gc	4030
 .#define bfd_mach_ppc_505	505
@@ -187,13 +188,13 @@ DESCRIPTION
 .#define bfd_mach_ppc_7400	7400
 .#define bfd_mach_ppc_e500      500
 .  bfd_arch_rs6000,    {* IBM RS/6000 *}
-.#define bfd_mach_rs6k		0
+.#define bfd_mach_rs6k		6000
 .#define bfd_mach_rs6k_rs1	6001
 .#define bfd_mach_rs6k_rsc	6003
 .#define bfd_mach_rs6k_rs2	6002
 .  bfd_arch_hppa,      {* HP PA RISC *}
 .  bfd_arch_d10v,      {* Mitsubishi D10V *}
-.#define bfd_mach_d10v		0
+.#define bfd_mach_d10v		1
 .#define bfd_mach_d10v_ts2	2
 .#define bfd_mach_d10v_ts3	3
 .  bfd_arch_d30v,      {* Mitsubishi D30V *}
@@ -205,7 +206,7 @@ DESCRIPTION
 .#define bfd_mach_z8002		2
 .  bfd_arch_h8500,     {* Hitachi H8/500 *}
 .  bfd_arch_sh,        {* Hitachi SH *}
-.#define bfd_mach_sh            0
+.#define bfd_mach_sh            1
 .#define bfd_mach_sh2        0x20
 .#define bfd_mach_sh_dsp     0x2d
 .#define bfd_mach_sh3        0x30
@@ -237,15 +238,15 @@ DESCRIPTION
 .  bfd_arch_tic54x,    {* Texas Instruments TMS320C54X *}
 .  bfd_arch_tic80,     {* TI TMS320c80 (MVP) *}
 .  bfd_arch_v850,      {* NEC V850 *}
-.#define bfd_mach_v850          0
+.#define bfd_mach_v850          1
 .#define bfd_mach_v850e 	'E'
 .  bfd_arch_arc,       {* ARC Cores *}
-.#define bfd_mach_arc_5         0
-.#define bfd_mach_arc_6         1
-.#define bfd_mach_arc_7         2
-.#define bfd_mach_arc_8         3
+.#define bfd_mach_arc_5         5
+.#define bfd_mach_arc_6         6
+.#define bfd_mach_arc_7         7
+.#define bfd_mach_arc_8         8
 .  bfd_arch_m32r,      {* Mitsubishi M32R/D *}
-.#define bfd_mach_m32r		0 {* For backwards compatibility.  *}
+.#define bfd_mach_m32r		1 {* For backwards compatibility.  *}
 .#define bfd_mach_m32rx		'x'
 .  bfd_arch_mn10200,   {* Matsushita MN10200 *}
 .  bfd_arch_mn10300,   {* Matsushita MN10300 *}
@@ -254,19 +255,19 @@ DESCRIPTION
 .  bfd_arch_fr30,
 .#define bfd_mach_fr30		0x46523330
 .  bfd_arch_frv,
-.#define bfd_mach_frv		0
-.#define bfd_mach_frvsimple	1
+.#define bfd_mach_frv		1
+.#define bfd_mach_frvsimple	2
 .#define bfd_mach_fr300		300
 .#define bfd_mach_fr400		400
 .#define bfd_mach_frvtomcat	499	{* fr500 prototype *}
 .#define bfd_mach_fr500		500
 .  bfd_arch_mcore,
 .  bfd_arch_ia64,      {* HP/Intel ia64 *}
-.#define bfd_mach_ia64_elf64	0
-.#define bfd_mach_ia64_elf32	1
+.#define bfd_mach_ia64_elf64	64
+.#define bfd_mach_ia64_elf32	32
 .  bfd_arch_ip2k,      {* Ubicom IP2K microcontrollers. *}
-.#define bfd_mach_ip2022	0
-.#define bfd_mach_ip2022ext	1
+.#define bfd_mach_ip2022	1
+.#define bfd_mach_ip2022ext	2
 .  bfd_arch_pj,
 .  bfd_arch_avr,       {* Atmel AVR microcontrollers.  *}
 .#define bfd_mach_avr1		1
@@ -276,12 +277,12 @@ DESCRIPTION
 .#define bfd_mach_avr5		5
 .  bfd_arch_cris,      {* Axis CRIS *}
 .  bfd_arch_s390,      {* IBM s390 *}
-.#define bfd_mach_s390_31       0
-.#define bfd_mach_s390_64       1
+.#define bfd_mach_s390_31       31
+.#define bfd_mach_s390_64       64
 .  bfd_arch_openrisc,  {* OpenRISC *}
 .  bfd_arch_mmix,      {* Donald Knuth's educational processor.  *}
 .  bfd_arch_xstormy16,
-.#define bfd_mach_xstormy16	0
+.#define bfd_mach_xstormy16	1
 .  bfd_arch_last
 .  };
 */

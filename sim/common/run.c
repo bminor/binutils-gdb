@@ -156,7 +156,7 @@ main (ac, av)
            target.  */
 	operating_p = 1;
 	break;
-#endif SIM_HAVE_ENVIRONMENT
+#endif
 #ifdef SIM_HAVE_PROFILE
       case 'p':
 	sim_set_profile (atoi (optarg));

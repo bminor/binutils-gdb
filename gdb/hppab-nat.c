@@ -118,7 +118,7 @@ store_inferior_registers (int regno)
       errno = 0;
       if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
 	{
-	  scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
+	  scratch = *(int *) &deprecated_registers[REGISTER_BYTE (regno)] | 0x3;
 	  ptrace (PT_WUREGS, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) regaddr,
 		  scratch);
 	  if (errno != 0)
@@ -135,7 +135,7 @@ store_inferior_registers (int regno)
 	    errno = 0;
 	    ptrace (PT_WUREGS, PIDGET (inferior_ptid),
 	            (PTRACE_ARG3_TYPE) regaddr,
-		    *(int *) &registers[REGISTER_BYTE (regno) + i]);
+		    *(int *) &deprecated_registers[REGISTER_BYTE (regno) + i]);
 	    if (errno != 0)
 	      {
 		/* Warning, not error, in case we are attached; sometimes the

@@ -904,9 +904,10 @@ frv_store_return_value (struct type *type, char *valbuf)
   int reg8_offset = frv_register_byte (8);
 
   if (length <= 4)
-    write_register_bytes (reg8_offset + (4 - length), valbuf, length);
+    deprecated_write_register_bytes (reg8_offset + (4 - length), valbuf,
+				     length);
   else if (length == 8)
-    write_register_bytes (reg8_offset, valbuf, length);
+    deprecated_write_register_bytes (reg8_offset, valbuf, length);
   else
     internal_error (__FILE__, __LINE__,
                     "Don't know how to return a %d-byte value.", length);

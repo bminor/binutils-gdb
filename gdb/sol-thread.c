@@ -648,7 +648,8 @@ sol_thread_store_registers (int regno)
     {				/* Not writing all the regs */
       /* save new register value */
       char* old_value = (char*) alloca (REGISTER_SIZE);
-      memcpy (old_value, &registers[REGISTER_BYTE (regno)], REGISTER_SIZE);
+      memcpy (old_value, &deprecated_registers[REGISTER_BYTE (regno)],
+	      REGISTER_SIZE);
 
       val = p_td_thr_getgregs (&thandle, gregset);
       if (val != TD_OK)
@@ -660,7 +661,8 @@ sol_thread_store_registers (int regno)
 	       td_err_string (val));
 
       /* restore new register value */
-      memcpy (&registers[REGISTER_BYTE (regno)], old_value, REGISTER_SIZE);
+      memcpy (&deprecated_registers[REGISTER_BYTE (regno)], old_value,
+	      REGISTER_SIZE);
 
 #if 0
 /* thread_db doesn't seem to handle this right */
@@ -1540,7 +1542,6 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_longname = "Solaris threads and pthread.";
   sol_thread_ops.to_doc = "Solaris threads and pthread support.";
   sol_thread_ops.to_open = sol_thread_open;
-  sol_thread_ops.to_close = 0;
   sol_thread_ops.to_attach = sol_thread_attach;
   sol_thread_ops.to_detach = sol_thread_detach;
   sol_thread_ops.to_resume = sol_thread_resume;
@@ -1559,8 +1560,6 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_terminal_save_ours = terminal_save_ours;
   sol_thread_ops.to_terminal_info = child_terminal_info;
   sol_thread_ops.to_kill = sol_thread_kill_inferior;
-  sol_thread_ops.to_load = 0;
-  sol_thread_ops.to_lookup_symbol = 0;
   sol_thread_ops.to_create_inferior = sol_thread_create_inferior;
   sol_thread_ops.to_mourn_inferior = sol_thread_mourn_inferior;
   sol_thread_ops.to_can_run = sol_thread_can_run;
@@ -1576,8 +1575,6 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_has_registers = 1;
   sol_thread_ops.to_has_execution = 1;
   sol_thread_ops.to_has_thread_control = tc_none;
-  sol_thread_ops.to_sections = 0;
-  sol_thread_ops.to_sections_end = 0;
   sol_thread_ops.to_find_memory_regions = sol_find_memory_regions;
   sol_thread_ops.to_make_corefile_notes = sol_make_note_section;
   sol_thread_ops.to_magic = OPS_MAGIC;
@@ -1594,30 +1591,16 @@ init_sol_core_ops (void)
   sol_core_ops.to_close = sol_core_close;
   sol_core_ops.to_attach = sol_thread_attach;
   sol_core_ops.to_detach = sol_core_detach;
-  /* sol_core_ops.to_resume  = 0; */
-  /* sol_core_ops.to_wait  = 0;  */
   sol_core_ops.to_fetch_registers = sol_thread_fetch_registers;
-  /* sol_core_ops.to_store_registers  = 0; */
-  /* sol_core_ops.to_prepare_to_store  = 0; */
   sol_core_ops.to_xfer_memory = sol_thread_xfer_memory;
   sol_core_ops.to_files_info = sol_core_files_info;
   sol_core_ops.to_insert_breakpoint = ignore;
   sol_core_ops.to_remove_breakpoint = ignore;
-  /* sol_core_ops.to_terminal_init  = 0; */
-  /* sol_core_ops.to_terminal_inferior  = 0; */
-  /* sol_core_ops.to_terminal_ours_for_output  = 0; */
-  /* sol_core_ops.to_terminal_ours  = 0; */
-  /* sol_core_ops.to_terminal_info  = 0; */
-  /* sol_core_ops.to_kill  = 0; */
-  /* sol_core_ops.to_load  = 0; */
-  /* sol_core_ops.to_lookup_symbol  = 0; */
   sol_core_ops.to_create_inferior = sol_thread_create_inferior;
   sol_core_ops.to_stratum = core_stratum;
-  sol_core_ops.to_has_all_memory = 0;
   sol_core_ops.to_has_memory = 1;
   sol_core_ops.to_has_stack = 1;
   sol_core_ops.to_has_registers = 1;
-  sol_core_ops.to_has_execution = 0;
   sol_core_ops.to_has_thread_control = tc_none;
   sol_core_ops.to_thread_alive = sol_thread_alive;
   sol_core_ops.to_pid_to_str = solaris_pid_to_str;
@@ -1626,8 +1609,6 @@ init_sol_core_ops (void)
      <n> in procinfo list" where <n> is the pid of the process that produced
      the core file.  Disable it for now. */
   /* sol_core_ops.to_find_new_threads = sol_find_new_threads; */
-  sol_core_ops.to_sections = 0;
-  sol_core_ops.to_sections_end = 0;
   sol_core_ops.to_magic = OPS_MAGIC;
 }
 

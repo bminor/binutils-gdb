@@ -52,13 +52,13 @@ powerpc_dialect(info)
 	  || strcmp (info->disassembler_options, "booke32") == 0
 	  || strcmp (info->disassembler_options, "booke64") == 0))
     dialect |= PPC_OPCODE_BOOKE | PPC_OPCODE_BOOKE64;
-  else 
+  else
     if ((info->mach == bfd_mach_ppc_e500)
-        || (info->disassembler_options
+	|| (info->disassembler_options
 	&& (   strcmp (info->disassembler_options, "e500") == 0
 	    || strcmp (info->disassembler_options, "e500x2") == 0)))
       {
-        dialect |= PPC_OPCODE_BOOKE
+	dialect |= PPC_OPCODE_BOOKE
 	  | PPC_OPCODE_SPE | PPC_OPCODE_ISEL
 	  | PPC_OPCODE_EFS | PPC_OPCODE_BRLOCK
 	  | PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK
@@ -66,7 +66,7 @@ powerpc_dialect(info)
 	/* efs* and AltiVec conflict.  */
 	dialect &= ~PPC_OPCODE_ALTIVEC;
       }
-  else 
+  else
     if (info->disassembler_options
 	&& (strcmp (info->disassembler_options, "efs") == 0))
       {
@@ -177,7 +177,7 @@ print_insn_powerpc (memaddr, info, bigendian, dialect)
 	continue;
 
       if ((dialect & PPC_OPCODE_EFS) && (opcode->flags & PPC_OPCODE_ALTIVEC))
-        continue;
+	continue;
 
       /* Make two passes over the operands.  First see if any of them
 	 have extraction functions, and, if they do, make sure the
@@ -262,14 +262,9 @@ print_insn_powerpc (memaddr, info, bigendian, dialect)
 
 		  cr = value >> 2;
 		  if (cr != 0)
-		    (*info->fprintf_func) (info->stream, "4*cr%d", cr);
+		    (*info->fprintf_func) (info->stream, "4*cr%d+", cr);
 		  cc = value & 3;
-		  if (cc != 0)
-		    {
-		      if (cr != 0)
-			(*info->fprintf_func) (info->stream, "+");
-		      (*info->fprintf_func) (info->stream, "%s", cbnames[cc]);
-		    }
+		  (*info->fprintf_func) (info->stream, "%s", cbnames[cc]);
 		}
 	    }
 
@@ -304,7 +299,7 @@ print_ppc_disassembler_options (FILE * stream)
   fprintf (stream, "\n\
 The following PPC specific disassembler options are supported for use with\n\
 the -M switch:\n");
-  
+
   fprintf (stream, "  booke|booke32|booke64    Disassemble the BookE instructions\n");
   fprintf (stream, "  e500|e500x2              Disassemble the e500 instructions\n");
   fprintf (stream, "  efs                      Disassemble the EFS instructions\n");

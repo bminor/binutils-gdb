@@ -161,7 +161,7 @@ store_inferior_register (register int regno, register unsigned int regaddr)
 	{
 	  store_inferior_register_1
 	    (regno, regaddr,
-	     (*(int *) &registers[(REGISTER_BYTE (regno)) + i]));
+	     (*(int *) &deprecated_registers[(REGISTER_BYTE (regno)) + i]));
 	  regaddr += sizeof (int);
 	}
     }

@@ -278,6 +278,11 @@ proc do_constvar_tests {} {
     gdb_test "print *locust" " = 70"
     local_compiler_xfail_check
     gdb_test "ptype locust" "type = double \\* const"
+
+    local_compiler_xfail_check
+    gdb_test "ptype crass" "type = struct crass \{\[\r\n\]+\[\ \t\]+char \\* const ptr;\[\r\n\]+\}"
+    local_compiler_xfail_check
+    gdb_test "ptype crisp" "type = struct crisp \{\[\r\n\]+\[\ \t\]+char \\* const \\*ptr;\[\r\n\]+\}"
 }
 
 do_constvar_tests
