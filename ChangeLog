@@ -1,3 +1,10 @@
+Sat Mar 26 11:25:48 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* configure: Make unrecognized options give nonfatal warnings
+	instead of fatal errors, and pass them to any subdirectory
+	configures in case they recognize them.
+	Make --x equivalent to --with-x.
+
 Fri Mar 25 21:52:10 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* configure: Add --enable-* options.  Clean up usage message and

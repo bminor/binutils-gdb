@@ -3,7 +3,7 @@
 ### WARNING: this file contains embedded tabs.  Do not run untabify on this file.
 
 # Configuration script
-#   Copyright (C) 1988, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+# Copyright (C) 1988, 90, 91, 92, 93, 94 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 # Please email any bugs, comments, and/or additions to this file to:
 # configure@cygnus.com
@@ -60,6 +60,7 @@ host_alias=NOHOST
 host_makefile_frag=
 moveifchange=
 norecursion=
+other_options=
 package_makefile_frag=
 prefix=/usr/local
 progname=
@@ -260,13 +261,14 @@ do
 		eval $withopt=no
 		withoutoptions="$withoutoptions $option"
 		;;
-	--x)	;;
+	--x)	with_x=yes
+		withoptions="$withoptions --with-x"
+		;;
 	--*)
-		exec 1>&2
-		echo
-		echo "Unrecognized option: \"$orig_option\"".
-		echo
-		fatal=yes
+		echo "Warning: Unrecognized option: \"$orig_option\"". >&2
+		# Pass the option to any configure scripts in subdirectories
+		# in case they recognize it.
+		other_options="$other_options $orig_option"
 		;;
 	*)
 		case $undefs in
@@ -929,7 +931,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 			if [ ! -z "${recprog}" ] ; then
 	                        if eval ${config_shell} ${recprog} ${verbose} ${buildopt} --host=${host_alias} --target=${target_alias} \
         	                        ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-                	                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${enableoptions} ${removing} ${redirect} ; then
+                	                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${enableoptions} ${removing} ${other_options} ${redirect} ; then
 	                                true
         	                else
 					echo Configure in `pwd` failed, exiting. 1>&2
