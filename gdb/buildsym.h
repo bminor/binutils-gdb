@@ -1,5 +1,5 @@
 /* Build symbol tables in GDB's internal format.
-   Copyright (C) 1986-1996 Free Software Foundation, Inc.
+   Copyright 1986-1993, 1996-1999 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -22,46 +22,47 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This module provides definitions used for creating and adding to
    the symbol table.  These routines are called from various symbol-
-   file-reading routines.  
+   file-reading routines.
 
    They originated in dbxread.c of gdb-4.2, and were split out to
    make xcoffread.c more maintainable by sharing code.
 
-   Variables declared in this file can be defined by #define-ing
-   the name EXTERN to null.  It is used to declare variables that
-   are normally extern, but which get defined in a single module
-   using this technique.  */
+   Variables declared in this file can be defined by #define-ing the
+   name EXTERN to null.  It is used to declare variables that are
+   normally extern, but which get defined in a single module using
+   this technique.  */
 
 #ifndef EXTERN
 #define	EXTERN extern
 #endif
 
-#define HASHSIZE 127	/* Size of things hashed via hashname() */
+#define HASHSIZE 127		/* Size of things hashed via
+				   hashname() */
 
-/* Name of source file whose symbol data we are now processing.
-   This comes from a symbol of type N_SO. */
+/* Name of source file whose symbol data we are now processing.  This
+   comes from a symbol of type N_SO. */
 
 EXTERN char *last_source_file;
 
-/* Core address of start of text of current source file.
-   This too comes from the N_SO symbol. */
+/* Core address of start of text of current source file.  This too
+   comes from the N_SO symbol. */
 
 EXTERN CORE_ADDR last_source_start_addr;
 
-/* The list of sub-source-files within the current individual compilation.
-   Each file gets its own symtab with its own linetable and associated info,
-   but they all share one blockvector.  */
+/* The list of sub-source-files within the current individual
+   compilation.  Each file gets its own symtab with its own linetable
+   and associated info, but they all share one blockvector.  */
 
 struct subfile
-{
-  struct subfile *next;
-  char *name;
-  char *dirname;
-  struct linetable *line_vector;
-  int line_vector_length;
-  enum language language;
-  char *debugformat;
-};
+  {
+    struct subfile *next;
+    char *name;
+    char *dirname;
+    struct linetable *line_vector;
+    int line_vector_length;
+    enum language language;
+    char *debugformat;
+  };
 
 EXTERN struct subfile *subfiles;
 
@@ -82,11 +83,11 @@ EXTERN unsigned char processing_acc_compilation;
 
 /* elz: added this flag to know when a block is compiled with HP
    compilers (cc, aCC). This is necessary because of the macro
-   COERCE_FLOAT_TO_DOUBLE defined in tm_hppa.h, which causes
-   a coercion of float to double to always occur in parameter passing
-   for a function called by gdb (see the function value_arg_coerce in 
-   valops.c). This is necessary only if the target
-   was compiled with gcc, not with HP compilers or with g++ */
+   COERCE_FLOAT_TO_DOUBLE defined in tm_hppa.h, which causes a
+   coercion of float to double to always occur in parameter passing
+   for a function called by gdb (see the function value_arg_coerce in
+   valops.c). This is necessary only if the target was compiled with
+   gcc, not with HP compilers or with g++ */
 
 EXTERN unsigned char processing_hp_compilation;
 
@@ -94,63 +95,71 @@ EXTERN unsigned char processing_hp_compilation;
 
 EXTERN unsigned int symnum;
 
-/* Record the symbols defined for each context in a list.
-   We don't create a struct block for the context until we
-   know how long to make it.  */
+/* Record the symbols defined for each context in a list.  We don't
+   create a struct block for the context until we know how long to
+   make it.  */
 
 #define PENDINGSIZE 100
 
 struct pending
-{
-  struct pending *next;
-  int nsyms;
-  struct symbol *symbol[PENDINGSIZE];
-};
+  {
+    struct pending *next;
+    int nsyms;
+    struct symbol *symbol[PENDINGSIZE];
+  };
 
 /* Here are the three lists that symbols are put on.  */
 
-EXTERN struct pending *file_symbols;	/* static at top level, and types */
+/* static at top level, and types */
 
-EXTERN struct pending *global_symbols;	/* global functions and variables */
+EXTERN struct pending *file_symbols;
 
-EXTERN struct pending *local_symbols;	/* everything local to lexic context */
+/* global functions and variables */
 
-EXTERN struct pending *param_symbols;	/* func params local to lexic context */
+EXTERN struct pending *global_symbols;
 
-/* Stack representing unclosed lexical contexts
-   (that will become blocks, eventually).  */
+/* everything local to lexical context */
+
+EXTERN struct pending *local_symbols;
+
+/* func params local to lexical  context */
+
+EXTERN struct pending *param_symbols;
+
+/* Stack representing unclosed lexical contexts (that will become
+   blocks, eventually).  */
 
 struct context_stack
-{
-  /* Outer locals at the time we entered */
+  {
+    /* Outer locals at the time we entered */
 
-  struct pending *locals;
+    struct pending *locals;
 
-  /* Pending func params at the time we entered */
+    /* Pending func params at the time we entered */
 
-  struct pending *params;
+    struct pending *params;
 
-  /* Pointer into blocklist as of entry */
+    /* Pointer into blocklist as of entry */
 
-  struct pending_block *old_blocks;
+    struct pending_block *old_blocks;
 
-  /* Name of function, if any, defining context*/
+    /* Name of function, if any, defining context */
 
-  struct symbol *name;
+    struct symbol *name;
 
-  /* PC where this context starts */
+    /* PC where this context starts */
 
-  CORE_ADDR start_addr;
+    CORE_ADDR start_addr;
 
-  /* Temp slot for exception handling. */
+    /* Temp slot for exception handling. */
 
-  CORE_ADDR end_addr;
+    CORE_ADDR end_addr;
 
-  /* For error-checking matching push/pop */
+    /* For error-checking matching push/pop */
 
-  int depth;
+    int depth;
 
-};
+  };
 
 EXTERN struct context_stack *context_stack;
 
@@ -162,14 +171,14 @@ EXTERN int context_stack_depth;
 
 EXTERN int context_stack_size;
 
-/* Macro "function" for popping contexts from the stack.  Pushing is done
-   by a real function, push_context.  This returns a pointer to a struct
-   context_stack.  */
+/* Macro "function" for popping contexts from the stack.  Pushing is
+   done by a real function, push_context.  This returns a pointer to a
+   struct context_stack.  */
 
 #define	pop_context() (&context_stack[--context_stack_depth]);
 
-/* Nonzero if within a function (so symbols should be local,
-   if nothing says specifically).  */
+/* Nonzero if within a function (so symbols should be local, if
+   nothing says specifically).  */
 
 EXTERN int within_function;
 
@@ -177,24 +186,24 @@ EXTERN int within_function;
    This is used at the end to make the blockvector.  */
 
 struct pending_block
-{
-  struct pending_block *next;
-  struct block *block;
-};
+  {
+    struct pending_block *next;
+    struct block *block;
+  };
 
 /* Pointer to the head of a linked list of symbol blocks which have
-   already been finalized (lexical contexts already closed) and which are
-   just waiting to be built into a blockvector when finalizing the
+   already been finalized (lexical contexts already closed) and which
+   are just waiting to be built into a blockvector when finalizing the
    associated symtab. */
 
 EXTERN struct pending_block *pending_blocks;
-
 
+
 struct subfile_stack
-{
-  struct subfile_stack *next;
-  char *name;
-};
+  {
+    struct subfile_stack *next;
+    char *name;
+  };
 
 EXTERN struct subfile_stack *subfile_stack;
 
@@ -205,11 +214,10 @@ EXTERN struct subfile_stack *subfile_stack;
 EXTERN char *(*next_symbol_text_func) PARAMS ((struct objfile *));
 
 /* Vector of types defined so far, indexed by their type numbers.
-   Used for both stabs and coff.
-   (In newer sun systems, dbx uses a pair of numbers in parens,
-    as in "(SUBFILENUM,NUMWITHINSUBFILE)".  Then these numbers must be
-    translated through the type_translations hash table to get
-    the index into the type vector.)  */
+   Used for both stabs and coff.  (In newer sun systems, dbx uses a
+   pair of numbers in parens, as in "(SUBFILENUM,NUMWITHINSUBFILE)".
+   Then these numbers must be translated through the type_translations
+   hash table to get the index into the type vector.)  */
 
 EXTERN struct type **type_vector;
 
@@ -217,8 +225,8 @@ EXTERN struct type **type_vector;
 
 EXTERN int type_vector_length;
 
-/* Initial size of type vector.  Is realloc'd larger if needed,
-   and realloc'd down to the size actually used, when completed.  */
+/* Initial size of type vector.  Is realloc'd larger if needed, and
+   realloc'd down to the size actually used, when completed.  */
 
 #define	INITIAL_TYPE_VECTOR_LENGTH	160
 
@@ -226,7 +234,7 @@ extern void
 add_symbol_to_list PARAMS ((struct symbol *, struct pending **));
 
 extern struct symbol *
-find_symbol_in_list PARAMS ((struct pending *, char *, int));
+  find_symbol_in_list PARAMS ((struct pending *, char *, int));
 
 extern void
 finish_block PARAMS ((struct symbol *, struct pending **,
@@ -240,16 +248,16 @@ extern void
 start_subfile PARAMS ((char *, char *));
 
 extern void
-patch_subfile_names PARAMS ((struct subfile *subfile, char *name));
+patch_subfile_names PARAMS ((struct subfile * subfile, char *name));
 
 extern void
 push_subfile PARAMS ((void));
 
 extern char *
-pop_subfile PARAMS ((void));
+  pop_subfile PARAMS ((void));
 
 extern struct symtab *
-end_symtab PARAMS ((CORE_ADDR, struct objfile *, int));
+  end_symtab PARAMS ((CORE_ADDR, struct objfile *, int));
 
 extern void
 scan_file_globals PARAMS ((struct objfile *));
@@ -261,7 +269,7 @@ extern void
 buildsym_init PARAMS ((void));
 
 extern struct context_stack *
-push_context PARAMS ((int, CORE_ADDR));
+  push_context PARAMS ((int, CORE_ADDR));
 
 extern void
 record_line PARAMS ((struct subfile *, int, CORE_ADDR));
@@ -276,13 +284,15 @@ extern void
 free_pending_blocks PARAMS ((void));
 
 /* FIXME: Note that this is used only in buildsym.c and dstread.c,
-   which should be fixed to not need direct access to make_blockvector. */
+   which should be fixed to not need direct access to
+   make_blockvector. */
 
 extern struct blockvector *
-make_blockvector PARAMS ((struct objfile *));
+  make_blockvector PARAMS ((struct objfile *));
 
 /* FIXME: Note that this is used only in buildsym.c and dstread.c,
-   which should be fixed to not need direct access to record_pending_block. */
+   which should be fixed to not need direct access to
+   record_pending_block. */
 
 extern void
 record_pending_block PARAMS ((struct objfile *, struct block *,
@@ -296,4 +306,4 @@ merge_symbol_lists PARAMS ((struct pending **, struct pending **));
 
 #undef EXTERN
 
-#endif	/* defined (BUILDSYM_H) */
+#endif /* defined (BUILDSYM_H) */
