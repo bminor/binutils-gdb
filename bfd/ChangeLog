@@ -7041,13 +7041,6 @@ Sat Nov  4 12:23:26 1995  Fred Fish  <fnf@cygnus.com>
 	* makefile.dos (OBJS): Change core.o to corefile.o
 	* Makefile.in (CFILES, BFD_LIBS): Use corefile.c instead of core.c
 
-start-sanitize-gm
-Sat Nov  4 10:16:54 1995  Stu Grossman  (grossman@cygnus.com)
-
-	* config.bfd (mips*-*-magic*):  Add bfd_elf32_bigmips_vec to
-	targ_selvecs to allow debugging under Irix-5 native.
-
-end-sanitize-gm
 Fri Nov  3 15:54:59 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (xcoff_link_add_symbols): Rename local variable sub
@@ -7231,13 +7224,6 @@ Fri Oct 27 14:42:15 1995  Niklas Hallqvist  <niklas@appli.se>
 
 	* hosts/mipsnbsd.h: New file.
 
-start-sanitize-gm
-Fri Oct 27 09:41:51 1995  Stu Grossman  (grossman@cygnus.com)
-
-	* config.bfd:  Add config stuff for mips*-*-magic* to set
-	targ_defvec to ecoff_big_vec.
-
-end-sanitize-gm
 Thu Oct 26 14:16:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c: Numerous changes to get closer to a working XCOFF
