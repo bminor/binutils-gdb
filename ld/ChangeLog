@@ -1,3 +1,9 @@
+2004-06-15  Jakub Jelinek  <jakub@redhat.com>
+
+	* scripttempl/elf.sc: Readd KEEP and .gcc_except_table.* to
+	.gcc_except_table output sections lost accidentally with
+	-z relro patch.
+
 2004-06-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldwrite.c (build_link_order): Use bfd_get_section_size
