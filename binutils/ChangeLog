@@ -1,6 +1,7 @@
 Fri Apr  4 13:28:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
-	* Makefile.in (distclean): Remove site.exp and site.bak.
+	* Makefile.in (distclean): Remove site.exp and site.bak.  Remove
+	everything that clean removes.
 
 Thu Apr  3 13:18:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 
