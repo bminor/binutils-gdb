@@ -1,3 +1,9 @@
+Thu Oct  5 20:17:30 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* config/tc-alpha.c (alpha_align): Only fill with a no-op pattern
+	if alignment stricter than 4 bytes is requested; in that case,
+	align to a 4-byte boundary first.
+
 Wed Oct  4 16:17:02 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* config/tc-ppc.c (parse_toc_entry): New function to parse [toc]
