@@ -1,4 +1,18 @@
 start-sanitize-d10v
+Thu Aug 15 13:11:46 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d10v.h: Add some additional defines to support the
+ 	assembler in determining which operations can be done in parallel.
+
+end-sanitize-d10v	
+Tue Aug  6 11:13:22 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* h8300.h (SN): Define.
+	(eepmov.b): Renamed from "eepmov"
+	(nop, bpt, rte, rts, sleep, clrmac): These have no size associated
+	with them.
+
+start-sanitize-d10v
 Fri Jul 26 11:47:10 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d10v.h (OPERAND_SHIFT): New operand flag.
