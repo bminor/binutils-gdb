@@ -93,6 +93,13 @@ struct elf_backend_data
   void (*elf_info_to_howto_rel) PARAMS ((bfd *, arelent *,
 					 Elf_Internal_Rel *));
 
+  /* A function to determine whether a symbol is global when
+     partitioning the symbol table into local and global symbols.
+     This should be NULL for most targets, in which case the correct
+     thing will be done.  MIPS ELF, at least on the Irix 5, has
+     special requirements.  */
+  boolean (*elf_backend_sym_is_global) PARAMS ((bfd *, asymbol *));
+
   /* The remaining functions are hooks which are called only if they
      are not NULL.  */
 
@@ -140,6 +147,10 @@ struct elf_backend_data
      ELF section *RETVAL should be set to the SHN_xxxx index.  */
   boolean (*elf_backend_section_from_bfd_section)
     PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *retval));
+
+  /* A function to do any final processing needed for the ELF file
+     before writing it out.  */
+  void (*elf_backend_final_write_processing) PARAMS ((bfd *));
 
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
