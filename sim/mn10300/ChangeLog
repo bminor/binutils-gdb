@@ -1,3 +1,7 @@
+Mon Feb 23 09:44:38 1998  Mark Alexander  <marka@cygnus.com>
+
+	* Makefile.in: Get header files from libgloss/mn10300/sys.
+
 Sun Feb 22 16:02:24 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: Include sim-types.h.
