@@ -1,3 +1,16 @@
+2002-01-21  Elena Zannoni  <ezannoni@redhat.com>
+
+	* sh-tdep.c (sh_fp_frame_init_saved_regs, sh_push_arguments,
+	sh_generic_show_regs, sh3_show_regs, sh3e_show_regs,
+	sh3_dsp_show_regs, sh4_show_regs, sh_dsp_show_regs,
+	sh_sh4_register_byte, sh_sh4_register_raw_size,
+	sh_sh3e_register_virtual_type, sh_sh4_register_virtual_type,
+	sh_sh4_register_convertible, sh_sh4_register_convert_to_virtual,
+	sh_sh4_register_convert_to_raw, sh_fetch_pseudo_register,
+	sh_store_pseudo_register, sh_do_pseudo_register): Call
+	gdbarch_tdep() just once, assign result to variable and use that,
+	instead of calling the function several times.
+
 2002-01-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* go32-nat.c (fetch_register): Use FP_REGNUM_P and FPC_REGNUM_P
