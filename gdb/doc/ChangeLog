@@ -1,5 +1,8 @@
 Wed May 26 00:26:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabs.texinfo (Arrays): Talk about type definition vs. type
+	information.
+
 	* stabs.texinfo (Builtin Type Descriptors): Talk about omitting
 	the trailing semicolon.
 

@@ -1610,6 +1610,16 @@ type is a range type, the extra semicolon can be omitted.  GDB (at least
 through version 4.9) doesn't support any kind of index type other than a
 range anyway; I'm not sure about dbx.
 
+It is well established, and widely used, that the type of the index,
+unlike most types found in the stabs, is merely a type definition
+(@pxref{Type Definitions}), not type information (@pxref{Stabs Format})
+(that is, it need not start with @var{type-number}@code{=} if it is
+defining a new type).  According to a comment in GDB, this is also true
+of the type of the array elements; it gives @samp{ar1;1;10;ar1;1;10;4}
+as a legitimate way to express a two dimensional array.  According to
+AIX documentation, the element type must be type information.  GDB
+accepts either.
+
 The type of the index is often a range type, expressed as the letter r
 and some parameters.  It defines the size of the array.  In the example
 below, the range @code{r1;0;2;} defines an index type which is a
