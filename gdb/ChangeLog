@@ -1,3 +1,13 @@
+2002-08-23  Donn Terry  <dterry@microsoft.com>
+
+	* proc-api.c (rw_table): Do not include a row for PCDSTOP if the
+	corresponding macro is not defined. Likewise for PCNICE, PCSHOLD
+	and PCUNKILL.
+	(write_with_trace): Conditionalize out the switch branch handling
+	PCSHOLD if the corresponding macro is not defined. Likewise for
+	PRSABORT and PRSTOP.
+	This change will be needed by the Interix port.
+
 2002-08-22  Elena Zannoni  <ezannoni@redhat.com>
 
 	* rs6000-tdep.c (struct rs6000_framedata): Add saved_ev and

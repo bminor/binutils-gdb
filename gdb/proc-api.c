@@ -397,9 +397,13 @@ static struct trans rw_table[] = {
 #ifdef PCCSIG			/* solaris */
   { PCCSIG,   "PCCSIG",   "clear current signal" },
 #endif
+#ifdef PCDSTOP			/* solaris */
   { PCDSTOP,  "PCDSTOP",  "post stop request" },
+#endif
   { PCKILL,   "PCKILL",   "post a signal" },
+#ifdef PCNICE			/* solaris */
   { PCNICE,   "PCNICE",   "set nice priority" },
+#endif
 #ifdef PCREAD			/* solaris */
   { PCREAD,   "PCREAD",   "read from the address space" },
   { PCWRITE,  "PCWRITE",  "write to the address space" },
@@ -419,7 +423,9 @@ static struct trans rw_table[] = {
   { PCSEXIT,  "PCSEXIT",  "set traced syscall exit  set" },
   { PCSFAULT, "PCSFAULT", "set traced fault set" },
   { PCSFPREG, "PCSFPREG", "set floating point registers" },
+#ifdef PCHOLD			/* solaris */
   { PCSHOLD,  "PCSHOLD",  "set signal mask" },
+#endif
   { PCSREG,   "PCSREG",   "set general registers" },
   { PCSSIG,   "PCSSIG",   "set current signal" },
   { PCSTOP,   "PCSTOP",   "post stop request and wait" },
@@ -433,7 +439,9 @@ static struct trans rw_table[] = {
 #ifdef PCTWSTOP			/* solaris */
   { PCTWSTOP, "PCTWSTOP", "wait for stop, with timeout arg" },
 #endif
+#ifdef PCUNKILL			/* solaris */
   { PCUNKILL, "PCUNKILL", "delete a pending signal" },
+#endif
 #ifdef PCUNSET			/* solaris */
   { PCUNSET,  "PCUNSET",  "unset modes" },
 #endif
@@ -518,12 +526,14 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 	proc_prettyfprint_syscalls (procfs_file ? procfs_file : stdout,
 				    (sysset_t *) &arg[1], 0);
 	break;
+#ifdef PCSHOLD
       case PCSHOLD:
 	fprintf (procfs_file ? procfs_file : stdout, 
 		 "write (PCSHOLD) ");
 	proc_prettyfprint_signalset (procfs_file ? procfs_file : stdout,
 				     (sigset_t *) &arg[1], 0);
 	break;
+#endif
       case PCSSIG:
 	fprintf (procfs_file ? procfs_file : stdout, 
 		 "write (PCSSIG) ");
@@ -542,10 +552,14 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 	  fprintf (procfs_file ? procfs_file : stdout, "clearFlt ");
 	if (arg[1] & PRSTEP)
 	  fprintf (procfs_file ? procfs_file : stdout, "step ");
+#ifdef PRSABORT
 	if (arg[1] & PRSABORT)
 	  fprintf (procfs_file ? procfs_file : stdout, "syscallAbort ");
+#endif
+#ifdef PRSTOP
 	if (arg[1] & PRSTOP)
 	  fprintf (procfs_file ? procfs_file : stdout, "stopReq ");
+#endif
 	  
 	fprintf (procfs_file ? procfs_file : stdout, "\n");
 	break;
