@@ -4,6 +4,12 @@
 #								   #
 ####################################################################
 
+srcdir = .
+destdir = /usr/local
+
+#### host and target dependent Makefile fragments come in here.
+##
+
 # Here is a rule for making .o files from .c files that doesn't force
 # the type of the machine (like -sun3) into the flags.
 .c.o:
@@ -11,8 +17,8 @@
 
 # Destination installation directory.  The libraries are copied to DESTDIR
 # when you do a `make install', and the header files to INCDIR/readline/*.h.
-DESTDIR = /usr/local/lib
-INCDIR = /usr/local/include
+DESTDIR = $(destdir)/lib
+INCDIR = $(destdir)/include
 
 # Define TYPES as -DVOID_SIGHANDLER if your operating system uses
 # a return type of "void" for signal handlers.
@@ -38,12 +44,13 @@ CFLAGS = $(DEBUG_FLAGS) $(SYSV) -I.
 # A good alternative is gcc -traditional.
 #CC = gcc -traditional
 CC = cc
-RANLIB = /usr/bin/ranlib
+RANLIB = /bin/ranlib
 AR = ar
+AR_FLAGS = clq
 RM = rm
 CP = cp
 
-LOCAL_INCLUDES = -I../
+LOCAL_INCLUDES = -I$(srcdir)/../
 
 CSOURCES = readline.c history.c funmap.c keymaps.c vi_mode.c \
 	   emacs_keymap.c vi_keymap.c
@@ -60,12 +67,14 @@ THINGS_TO_TAR = $(SOURCES) $(SUPPORT)
 
 ##########################################################################
 
+STAGESTUFF = *.o *.a *.log *.cp *.tp *.vr *.fn *.aux *.pg *.toc
+
 all: libreadline.a
 
 libreadline.a:	readline.o history.o funmap.o keymaps.o
 		$(RM) -f libreadline.a
-		$(AR) clq libreadline.a readline.o history.o funmap.o keymaps.o
-		-if [ -f $(RANLIB) ]; then $(RANLIB) libreadline.a; fi
+		$(AR) $(AR_FLAGS) libreadline.a readline.o history.o funmap.o keymaps.o
+		$(RANLIB) libreadline.a
 
 readline.o:	readline.h chardefs.h  keymaps.h history.h readline.c vi_mode.c
 history.o:	history.c history.h
@@ -95,9 +104,45 @@ includes:
 		fi
 		$(CP) readline.h keymaps.h chardefs.h $(INCDIR)/readline/
 clean:
-		rm -f *.o *.a *.log *.cp *.tp *.vr *.fn *.aux *.pg *.toc
+		rm -f $(STAGESTUFF)
 
 $(DESTDIR)/libreadline.a: libreadline.a
 		-mv $(DESTDIR)/libreadline.a $(DESTDIR)/libreadline.old
 		cp libreadline.a $(DESTDIR)/libreadline.a
 		$(RANLIB) -t $(DESTDIR)/libreadline.a
+
+# Copy the object files from a particular stage into a subdirectory.
+stage1: force
+	-mkdir stage1
+	-mv $(STAGESTUFF) stage1
+
+stage2: force
+	-mkdir stage2
+	-mv $(STAGESTUFF) stage2
+
+stage3: force
+	-mkdir stage3
+	-mv $(STAGESTUFF) stage3
+
+de-stage1: force
+	- (cd stage1 ; mv -f * ..)
+	- rmdir stage1
+
+de-stage2: force
+	- (cd stage2 ; mv -f * ..)
+	- rmdir stage2
+
+de-stage3: force
+	- (cd stage3 ; mv -f * ..)
+	- rmdir stage3
+
+force:
+
+# with the gnu make, this is done automatically.
+
+Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
+	(cd $(srcdir) ; \
+		./configure +destdir=$(destdir) +norecurse \
+		 `if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		$(host) +target=$(target))
+
