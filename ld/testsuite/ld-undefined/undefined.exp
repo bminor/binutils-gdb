@@ -69,19 +69,10 @@ checkund $mu $testund
 #setup_xfail "arm*-*-pe*"
 #setup_xfail "thumb*-*-pe*"
 
-# Just doesn't work for PA ELF.  No clue why.
-setup_xfail "hppa*-*-*elf*"
-
 set mf "tmpdir/undefined.o* In function `function':"
 checkund $mf $testfn
 
-if [is_elf_format] {
-    
-    # Just doesn't work for PA ELF.  No clue why.
-    setup_xfail "hppa*-*-*"
-    
-} else {
-
+if ![is_elf_format] {
     # COFF SH gets this test wrong--it reports line 10, because although
     # the jump is at line 9, the function address, and the reloc, is
     # stored at the end of the function.

@@ -1,12 +1,12 @@
 	.file	"x.c"
-.globl bss
+	.globl bss
 	.section	.bss,"aw",%nobits
 	.p2align 12
 	.type	bss,%object
 	.size	bss,4096
 bss:
 	.zero	4096
-.globl tbss
+	.globl tbss
 	.section	.tbss,"awT",%nobits
 	.p2align 12
 	.type	tbss,%object

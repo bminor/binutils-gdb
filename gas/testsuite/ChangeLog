@@ -1,15 +1,19 @@
+2005-03-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/elf/section5.s: Don't start directives in first column.
+
 2005-03-14  Eric Christopher  <echristo@redhat.com>
 
-        * gas/cfi/cfi-mips-1.d, gas/cfi/cfi-mips-1.s: New dump test.
-        * gas/cfi/cfi.exp: Run it.
-        * gas/cfi/cfi-common-1.d: Update.
-        * gas/cfi/cfi-common-2.d: Ditto.
-        * gas/cfi/cfi-common-3.d: Ditto.
-        * gas/cfi/cfi-common-4.d: Ditto.
+	* gas/cfi/cfi-mips-1.d, gas/cfi/cfi-mips-1.s: New dump test.
+	* gas/cfi/cfi.exp: Run it.
+	* gas/cfi/cfi-common-1.d: Update.
+	* gas/cfi/cfi-common-2.d: Ditto.
+	* gas/cfi/cfi-common-3.d: Ditto.
+	* gas/cfi/cfi-common-4.d: Ditto.
 
 2005-03-10  Aldy Hernandez  <aldyh@redhat.com>
 
-        * gas/ppc/e500.d: Fix encoding of efscfd.
+	* gas/ppc/e500.d: Fix encoding of efscfd.
 
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
@@ -102,7 +106,7 @@
 2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
 	* gas/arc/extensions.s: Add tests for extcoreregister
-	* gas/arc/extensions.d: Likewise.  
+	* gas/arc/extensions.d: Likewise.
 	* gas/arc/warn.s: Warnings for readonly core registers
 	accessed .
 	* gas/arc/warn.d:Likewise.
@@ -114,8 +118,8 @@
 
 2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
-	* gas/arc/ld.s:Add checks for short immediates with ld
-	* gas/arc/ld.d:Likewise. 
+	* gas/arc/ld.s: Add checks for short immediates with ld.
+	* gas/arc/ld.d: Likewise.
 
 2005-03-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
