@@ -31,7 +31,7 @@
 #include "gdb_string.h"
 
 #include <sys/param.h>
-#ifndef	NO_SYS_FILE
+#ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
 #include "gdb_stat.h"

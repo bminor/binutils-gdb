@@ -2134,9 +2134,6 @@ The default name of @value{GDBN}'s initialization file (normally
 @item NO_STD_REGS
 This macro is deprecated.
 
-@item NO_SYS_FILE
-Define this if your system does not have a @code{<sys/file.h>}.
-
 @item SIGWINCH_HANDLER
 If your host defines @code{SIGWINCH}, you can define this to be the name
 of a function to be called if @code{SIGWINCH} is received.
@@ -4404,12 +4401,6 @@ needs to know this so that it can subtract this address from absolute
 addresses in the upage, that are obtained via ptrace or from core files.
 On systems that don't need this value, set it to zero.
 
-@item KERNEL_U_ADDR_BSD
-@findex KERNEL_U_ADDR_BSD
-Define this to cause @value{GDBN} to determine the address of @code{u} at
-runtime, by using Berkeley-style @code{nlist} on the kernel's image in
-the root directory.
-
 @item KERNEL_U_ADDR_HPUX
 @findex KERNEL_U_ADDR_HPUX
 Define this to cause @value{GDBN} to determine the address of @code{u} at
@@ -4426,10 +4417,6 @@ user that another process may be running with the same executable.
 Defines the format for the name of a @file{/proc} device.  Should be
 defined in @file{nm.h} @emph{only} in order to override the default
 definition in @file{procfs.c}.
-
-@item PTRACE_FP_BUG
-@findex PTRACE_FP_BUG
-See @file{mach386-xdep.c}.
 
 @item PTRACE_ARG3_TYPE
 @findex PTRACE_ARG3_TYPE

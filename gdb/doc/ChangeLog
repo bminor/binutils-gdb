@@ -1,3 +1,10 @@
+2004-08-05  Mark Kettenis  <kettenis@chello.nl>
+
+	* gdbint.texinfo (Host Definition): Delete description of
+	NO_SYS_FILE.
+	(Native Debugging): Delete description of KERNEL_U_ADDR_BSD and
+	PTRACE_FP_BUG.
+
 2004-08-05  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete

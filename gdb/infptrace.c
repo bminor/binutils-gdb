@@ -77,7 +77,7 @@
 #endif
 
 #include "gdbcore.h"
-#ifndef	NO_SYS_FILE
+#ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
 #if 0
@@ -89,9 +89,6 @@
 
 #if !defined (FETCH_INFERIOR_REGISTERS)
 #include <sys/user.h>		/* Probably need to poke the user structure */
-#if defined (KERNEL_U_ADDR_BSD)
-#include <a.out.h>		/* For struct nlist */
-#endif /* KERNEL_U_ADDR_BSD.  */
 #endif /* !FETCH_INFERIOR_REGISTERS */
 
 #if !defined (CHILD_XFER_MEMORY)
@@ -103,7 +100,6 @@ static void fetch_register (int);
 static void store_register (int);
 #endif
 
-void _initialize_kernel_u_addr (void);
 void _initialize_infptrace (void);
 
 
@@ -321,29 +317,6 @@ detach (int signal)
 #ifndef PTRACE_XFER_TYPE
 #define PTRACE_XFER_TYPE int
 #endif
-
-/* KERNEL_U_ADDR is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-#if defined (KERNEL_U_ADDR_BSD) && !defined (FETCH_INFERIOR_REGISTERS)
-/* Get kernel_u_addr using BSD-style nlist().  */
-CORE_ADDR kernel_u_addr;
-#endif /* KERNEL_U_ADDR_BSD.  */
-
-void
-_initialize_kernel_u_addr (void)
-{
-#if defined (KERNEL_U_ADDR_BSD) && !defined (FETCH_INFERIOR_REGISTERS)
-  struct nlist names[2];
-
-  names[0].n_un.n_name = "_u";
-  names[1].n_un.n_name = NULL;
-  if (nlist ("/vmunix", names) == 0)
-    kernel_u_addr = names[0].n_value;
-  else
-    internal_error (__FILE__, __LINE__,
-		    "Unable to get kernel u area address.");
-#endif /* KERNEL_U_ADDR_BSD.  */
-}
 
 #if !defined (FETCH_INFERIOR_REGISTERS)
 

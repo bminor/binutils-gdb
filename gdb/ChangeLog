@@ -1,3 +1,14 @@
+2004-08-05  Mark Kettenis  <kettenis@chello.nl>
+
+	* infptrace.c: Include <sys/file.h> if HAVE_SYS_FILE_H instead of
+	!NO_SYS_FILE.
+	[KERNEL_U_ADDR_BSD]: Don't include <a.out.h>.
+	[KERNEL_U_ADDR_BSD] (kernel_u_addr): Remove variable.
+	(_initialize_kernel_u_addr): Remove prototype and function.
+	* infttrace.c: Include <sys/file.h> if HAVE_SYS_FILE_H instead of
+	!NO_SYS_FILE.
+	* xcoffread.c: Likewise.
+
 2004-08-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* vax-nat.c: New file.

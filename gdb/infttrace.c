@@ -119,7 +119,7 @@
 #endif
 
 #include "gdbcore.h"
-#ifndef	NO_SYS_FILE
+#ifdef	HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
 
