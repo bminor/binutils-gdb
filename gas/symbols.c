@@ -66,6 +66,7 @@ static long dollar_label_instance PARAMS ((long));
 static long fb_label_instance PARAMS ((long));
 
 static void print_binary PARAMS ((FILE *, const char *, expressionS *));
+static void report_op_error PARAMS ((symbolS *, symbolS *, symbolS *));
 
 /* Return a pointer to a new symbol.  Die if we can't make a new
    symbol.  Fill in the symbol's values.  Add symbol to end of symbol
@@ -837,6 +838,63 @@ verify_symbol_chain_2 (sym)
   verify_symbol_chain (p, n);
 }
 
+static void
+report_op_error (symp, left, right)
+     symbolS *symp;
+     symbolS *left, *right;
+{
+  char *file;
+  unsigned int line;
+  segT seg_left = S_GET_SEGMENT (left);
+  segT seg_right = right ? S_GET_SEGMENT (right) : 0;
+  
+  if (expr_symbol_where (symp, &file, &line))
+    {
+      if (seg_left == undefined_section)
+	as_bad_where (file, line,
+		      _("undefined symbol `%s' in operation"),
+		      S_GET_NAME (left));
+      if (seg_right == undefined_section)
+	as_bad_where (file, line,
+		      _("undefined symbol `%s' in operation"),
+		      S_GET_NAME (right));
+      if (seg_left != undefined_section
+	  && seg_right != undefined_section)
+	{
+	  if (right)
+	    as_bad_where (file, line,
+			  _("invalid sections for operation on `%s' and `%s'"),
+			  S_GET_NAME (left), S_GET_NAME (right));
+	  else
+	    as_bad_where (file, line,
+			  _("invalid section for operation on `%s'"),
+			  S_GET_NAME (left));
+	}
+      
+    }
+  else
+    {
+      if (seg_left == undefined_section)
+	as_bad (_("undefined symbol `%s' in operation setting `%s'"),
+		S_GET_NAME (left), S_GET_NAME (symp));
+      if (seg_right == undefined_section)
+	as_bad (_("undefined symbol `%s' in operation setting `%s'"),
+		S_GET_NAME (right), S_GET_NAME (symp));
+      if (seg_left != undefined_section
+	  && seg_right != undefined_section)
+	{
+	  if (right)
+	    as_bad_where (file, line,
+			  _("invalid sections for operation on `%s' and `%s' setting `%s'"),
+			  S_GET_NAME (left), S_GET_NAME (right), S_GET_NAME (symp));
+	  else
+	    as_bad_where (file, line,
+			  _("invalid section for operation on `%s' setting `%s'"),
+			  S_GET_NAME (left), S_GET_NAME (symp));
+	}
+    }
+}
+
 /* Resolve the value of a symbol.  This is called during the final
    pass over the symbol table to resolve any symbols with complex
    values.  */
@@ -1002,6 +1060,17 @@ resolve_symbol_value (symp)
 	  left = resolve_symbol_value (add_symbol);
 	  seg_left = S_GET_SEGMENT (add_symbol);
 
+	  /* By reducing these to the relevant dyadic operator, we get
+	     	!S -> S == 0 	permitted on anything,
+		-S -> 0 - S 	only permitted on absolute
+		~S -> S ^ ~0 	only permitted on absolute  */
+	  if (op != O_logical_not && seg_left != absolute_section
+	      && finalize_syms)
+	    report_op_error (symp, add_symbol, NULL);
+	    
+	  if (final_seg == expr_section || final_seg == undefined_section)
+	    final_seg = absolute_section;
+	  
 	  if (op == O_uminus)
 	    left = -left;
 	  else if (op == O_logical_not)
@@ -1010,8 +1079,6 @@ resolve_symbol_value (symp)
 	    left = ~left;
 
 	  final_val += left + symp->sy_frag->fr_address;
-	  if (final_seg == expr_section || final_seg == undefined_section)
-	    final_seg = seg_left;
 
 	  resolved = symbol_resolved_p (add_symbol);
 	  break;
@@ -1077,57 +1144,19 @@ resolve_symbol_value (symp)
 
 	     Don't emit messages unless we're finalizing the symbol value,
 	     otherwise we may get the same message multiple times.  */
-	  if ((op == O_eq || op == O_ne)
-	      || ((op == O_subtract
-		   || op == O_lt || op == O_le || op == O_ge || op == O_gt)
-		  && seg_left == seg_right
-		  && (seg_left != undefined_section
-		      || add_symbol == op_symbol))
-	      || (seg_left == absolute_section
-		  && seg_right == absolute_section))
-	    {
-	      if (final_seg == expr_section || final_seg == undefined_section)
-		final_seg = absolute_section;
-	    }
-	  else if (finalize_syms)
-	    {
-	      char *file;
-	      unsigned int line;
-
-	      if (expr_symbol_where (symp, &file, &line))
-		{
-		  if (seg_left == undefined_section)
-		    as_bad_where (file, line,
-				  _("undefined symbol `%s' in operation"),
-				  S_GET_NAME (symp->sy_value.X_add_symbol));
-		  if (seg_right == undefined_section)
-		    as_bad_where (file, line,
-				  _("undefined symbol `%s' in operation"),
-				  S_GET_NAME (symp->sy_value.X_op_symbol));
-		  if (seg_left != undefined_section
-		      && seg_right != undefined_section)
-		    as_bad_where (file, line,
-				  _("invalid section for operation"));
-		}
-	      else
-		{
-		  if (seg_left == undefined_section)
-		    as_bad (_("undefined symbol `%s' in operation setting `%s'"),
-			    S_GET_NAME (symp->sy_value.X_add_symbol),
-			    S_GET_NAME (symp));
-		  if (seg_right == undefined_section)
-		    as_bad (_("undefined symbol `%s' in operation setting `%s'"),
-			    S_GET_NAME (symp->sy_value.X_op_symbol),
-			    S_GET_NAME (symp));
-		  if (seg_left != undefined_section
-		      && seg_right != undefined_section)
-		    as_bad (_("invalid section for operation setting `%s'"),
-			    S_GET_NAME (symp));
-		}
-	      /* Prevent the error propagating.  */
-	      if (final_seg == expr_section || final_seg == undefined_section)
-		final_seg = absolute_section;
-	    }
+	  if (finalize_syms
+	      && !(seg_left == absolute_section
+		   && seg_right == absolute_section)
+	      && !(op == O_eq || op == O_ne)
+	      && !((op == O_subtract
+		    || op == O_lt || op == O_le || op == O_ge || op == O_gt)
+		   && seg_left == seg_right
+		   && (seg_left != undefined_section
+		       || add_symbol == op_symbol)))
+	    report_op_error (symp, add_symbol, op_symbol);
+	  
+	  if (final_seg == expr_section || final_seg == undefined_section)
+	    final_seg = absolute_section;
 
 	  /* Check for division by zero.  */
 	  if ((op == O_divide || op == O_modulus) && right == 0)
