@@ -1,3 +1,12 @@
+Fri Oct  2 22:04:42 1992  John Gilmore  (gnu@cygnus.com)
+
+	* am29k-tdep.c (_initialize_29k):  Make it possible for the
+	user to set and query the address where function calls into the
+	inferior write a small scratch routine.  `set call_scratch_address'
+	* inferior.h (PC_IN_CALL_DUMMY):  Fix fencepost error.
+	* remote.c (remote_prepare_to_store): Only fetch regs if they are
+	not already cached validly.
+
 Thu Oct  1 14:36:42 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Rs6000 native support.

@@ -417,7 +417,7 @@ remote_wait (status)
   unsigned char *p;
   int i;
   long regno;
-  unsigned char regs[MAX_REGISTER_RAW_SIZE];
+  char regs[MAX_REGISTER_RAW_SIZE];
 
   WSETEXIT ((*status), 0);
 
@@ -505,7 +505,8 @@ remote_fetch_registers (regno)
 static void 
 remote_prepare_to_store ()
 {
-  remote_fetch_registers (-1);
+  /* Make sure the entire registers array is valid.  */
+  read_register_bytes (0, (char *)NULL, REGISTER_BYTES);
 }
 
 /* Store the remote registers from the contents of the block REGISTERS. 
@@ -1068,6 +1069,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   NULL,				/* to_lookup_symbol */
   NULL,				/* to_create_inferior */
   NULL,				/* to_mourn_inferior */
+  0,				/* to_can_run */
   process_stratum,		/* to_stratum */
   NULL,				/* to_next */
   1,				/* to_has_all_memory */

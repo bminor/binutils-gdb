@@ -153,7 +153,7 @@ terminal_inferior PARAMS ((void));
 extern void
 terminal_init_inferior PARAMS ((void));
 
-/* From infptrace.c or procfs.c */
+/* From infptrace.c */
 
 extern int
 attach PARAMS ((int));
@@ -173,24 +173,18 @@ call_ptrace PARAMS ((int, int, PTRACE_ARG3_TYPE, int));
 
 /* From procfs.c */
 
-#ifdef USE_PROC_FS
-
 extern int
 proc_iterate_over_mappings PARAMS ((int (*) (int, CORE_ADDR)));
-
-extern int
-proc_wait PARAMS ((int *));
-
-extern void
-inferior_proc_init PARAMS ((int));
 
 extern void
 proc_signal_handling_change PARAMS ((void));
 
-extern void
-proc_set_exec_trap PARAMS ((void));
+/* From fork-child.c */
 
-#endif
+extern void
+fork_inferior PARAMS ((char *, char *, char **,
+		       void (*) (void),
+		       void (*) (int)));
 
 /* From inflow.c */
 
@@ -326,13 +320,13 @@ extern int attach_flag;
 extern CORE_ADDR text_end;
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
   ((pc) >= text_end - CALL_DUMMY_LENGTH         \
-   && (pc) < text_end + DECR_PC_AFTER_BREAK)
+   && (pc) <= text_end + DECR_PC_AFTER_BREAK)
 #else /* Not before text_end.  */
 #if CALL_DUMMY_LOCATION == AFTER_TEXT_END
 extern CORE_ADDR text_end;
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
   ((pc) >= text_end   \
-   && (pc) < text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK)
+   && (pc) <= text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK)
 #else /* On stack.  */
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
   ((sp) INNER_THAN (pc) && (pc) INNER_THAN (frame_address))

@@ -810,6 +810,8 @@ reginv_com (args, fromtty)
 void
 _initialize_29k()
 {
+  extern CORE_ADDR text_end;
+
   add_com ("reginv ", class_obscure, reginv_com, 
         "Invalidate gdb's internal register cache.");
 
@@ -820,5 +822,13 @@ _initialize_29k()
 		  "Set top address in memory of the register stack.\n\
 Attempts to access registers saved above this address will be ignored\n\
 or will produce the value -1.", &setlist),
+     &showlist);
+
+  /* FIXME, there should be a way to make a CORE_ADDR variable settable. */
+  add_show_from_set
+    (add_set_cmd ("call_scratch_address", class_support, var_uinteger,
+		  (char *)&text_end,
+"Set address in memory where small amounts of RAM can be used when\n\
+making function calls into the inferior.", &setlist),
      &showlist);
 }
