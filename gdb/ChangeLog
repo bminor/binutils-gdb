@@ -1,3 +1,15 @@
+Fri Jul  4 14:49:33 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* source.c (OPEN_MODE, FDOPEN_MODE): Define; value depends upon
+	whether CRLF_SOURCE_FILES is defined.
+	(open_source_file): Use OPEN_MODE with open and openp.
+	(print_source_lines): Use FDOPEN_MODE with fdopen.  If
+	CRLF_SOURCE_FILES is defined, ignore \r characters.
+	(forward_search_command): Use FDOPEN_MODE with fdopen.
+	(reverse_search_command): Likewise.
+	* config/i386/xm-cygwin32.h (CRLF_SOURCE_FILES): Define.
+	(LSEEK_NOT_LINEAR): Don't define.
+
 Thu Jul  3 17:41:46 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* mips-tdep.c (mips_extract_return_value): align 4-byte float

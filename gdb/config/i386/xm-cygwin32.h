@@ -1,5 +1,5 @@
 /* Definitions for hosting on WIN32, for GDB.
-   Copyright 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -32,5 +32,5 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    So disable immediate_quit inside request_quit */
 #define REQUEST_QUIT 
 
-/* Define this lseek(n) != nth byte of file */
-#define LSEEK_NOT_LINEAR
+/* Define this if source files use \r\n rather than just \n.  */
+#define CRLF_SOURCE_FILES
