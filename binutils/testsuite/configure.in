@@ -17,7 +17,8 @@ case "${target}" in
        i[345]86-*-aout) target_makefile_frag=config/mt-i386-aout ;;
        *-*-lynx*)      target_makefile_frag=config/mt-lynx ;;
        *-*-vxworks)    target_makefile_frag=config/mt-vxworks ;;
-       m68k-*-*)       target_makefile_frag=config/mt-m68k ;;
+       m68k*-*-aout*)  target_makefile_frag=config/mt-m68k ;;
+       m68k*-*-coff*)  target_makefile_frag=config/mt-m68k ;;
        i960-*-nindy)   target_makefile_frag=config/mt-i960-nindy ;;
        a29k-*-udi)     target_makefile_frag=config/mt-a29k-udi ;;
        sparclite*-*-*) target_makefile_frag=config/mt-slite ;;
