@@ -1,3 +1,8 @@
+2004-02-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Run stabs tests on *BSD.
+	* configure: Regenerated.
+
 2004-02-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/bigcore.exp: Bail out on *BSD instead of only NetBSD.
