@@ -59,21 +59,16 @@ struct internal_filehdr
 
 
 /* Mips magics */
-#define MIPSEBMAGIC 0x160
-#define MIPSELMAGIC 0x161
-#define  SMIPSEBMAGIC	0x6001
-#define  SMIPSELMAGIC	0x162 /*0x6201*/ 
-#define  MIPSEBUMAGIC	0x0180
-#define  MIPSELUMAGIC	0x0182
+#define MIPS_MAGIC_1 0x0180
+#define MIPS_MAGIC_2 0x0162
+#define MIPS_MAGIC_3 0x0160
 
 
 
-#define ECOFFBADMAG(x) (((x).f_magic!=MIPSEBMAGIC) &&\
-			((x).f_magic!=MIPSELMAGIC) &&\
-			((x).f_magic!=SMIPSEBMAGIC) &&\
-			((x).f_magic!=SMIPSELMAGIC) &&\
-			((x).f_magic!=MIPSEBUMAGIC) &&\
-			((x).f_magic!=MIPSELUMAGIC))
+#define ECOFFBADMAG(x) (((x).f_magic!=MIPS_MAGIC_1) && \
+			((x).f_magic!=MIPS_MAGIC_2) &&\
+			((x).f_magic!=MIPS_MAGIC_3))
+
 
 /** i80960 Magic Numbers
 */

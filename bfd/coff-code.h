@@ -453,6 +453,7 @@ DEFUN(make_a_section_from_file,(abfd, hdr),
     return_section->lineno_count = hdr->s_nlnno;
     return_section->userdata = NULL;
     return_section->next = (asection *) NULL;
+    return_section->flags = 0;
     if ((hdr->s_flags & STYP_TEXT) || (hdr->s_flags & STYP_DATA))
 	return_section->flags = (SEC_LOAD | SEC_ALLOC);
     else if (hdr->s_flags & STYP_BSS)
@@ -523,18 +524,14 @@ DEFUN(coff_real_object_p,(abfd, nscns, internal_f, internal_a),
   abfd->obj_machine = 0;
   switch (internal_f->f_magic) {
 #ifdef MIPS
-#ifdef MIPSEBMAGIC
-  case  SMIPSEBMAGIC:
-  case  SMIPSELMAGIC:
-  case  MIPSEBUMAGIC:
-  case  MIPSELUMAGIC:
-  case MIPSEBMAGIC:
-  case MIPSELMAGIC:
+case  MIPS_MAGIC_1:
+case  MIPS_MAGIC_2:
+case  MIPS_MAGIC_3:
     abfd->obj_arch = bfd_arch_mips;
     abfd->obj_machine = 0;
     break;
 #endif
-#endif
+
 #ifdef MC68MAGIC
   case MC68MAGIC:
   case M68MAGIC:
@@ -1318,7 +1315,12 @@ unsigned       *magicp,
 	}
 	break;
 #endif
-	
+#ifdef MIPS
+      case bfd_arch_mips:
+	  *magicp = MIPS_MAGIC_2;
+	return true;
+	break;
+#endif
 #ifdef MC68MAGIC
       case bfd_arch_m68k:
 	*magicp = MC68MAGIC;
@@ -1609,10 +1611,8 @@ bfd            *abfd)
     { int   magic = 0;
       int   flags = 0;
       coff_set_flags(abfd, &magic, &flags);
-      internal_f.f_flags |= flags;
       internal_f.f_magic = magic;
       internal_f.f_flags = flags;
-
 
       /* ...and the "opt"hdr... */
 
@@ -1653,7 +1653,7 @@ bfd            *abfd)
     {
       FILHDR buff;
       swap_filehdr_out(abfd, &internal_f, &buff);
-      bfd_write((PTR) &internal_f, 1, FILHSZ, abfd);
+      bfd_write((PTR) &buff, 1, FILHSZ, abfd);
     }
   if (abfd->flags & EXEC_P) {
     AOUTHDR buff;

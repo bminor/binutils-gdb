@@ -7,7 +7,7 @@ Mon May 13 10:03:29 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 	(swap_filehdr) delete. Changed all the usage of bfd_h_put_x.
 	(swap_aouthdr_in, swap_aouthdr_out) add. (swap_aouthdr) delete.
 	(coff_real_object_p) cleaned up, added MIPS. (coff_object_p)
-	cleaned up. (coff_write_object_contents) cleaned up.
+	cleaned up. (coff_write_object_contents) cleaned up. 
 
 	* ecoff.c: Totally different. Now supports ecoff fully.
 
