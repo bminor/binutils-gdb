@@ -1395,6 +1395,7 @@ ALLDEPFILES = \
 	mips-irix-tdep.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
+	mips64obsd-nat.c mips64obsd-tdep.c \
 	nbsd-tdep.c \
 	ns32k-tdep.c solib-osf.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
@@ -2225,6 +2226,10 @@ mem-break.o: mem-break.c $(defs_h) $(symtab_h) $(breakpoint_h) $(inferior_h) \
 	$(target_h)
 minsyms.o: minsyms.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
 	$(symfile_h) $(objfiles_h) $(demangle_h) $(value_h) $(cp_abi_h)
+mips64obsd-nat.o: mips64obsd-tdep.c $(defs_h) $(inferior_h) $(regcache_h) \
+	$(target_h) $(inf_ptrace_h)
+mips64obsd-tdep.o: mips64obsd-tdep.c $(defs_h) $(osabi_h) $(regcache_h) \
+	$(regset_h) $(gdb_string_h) $(mips_tdep_h) $(solib_svr4_h)
 mips-irix-tdep.o: mips-irix-tdep.c $(defs_h) $(osabi_h) $(elf_bfd_h)
 mips-linux-nat.o: mips-linux-nat.c $(defs_h) $(mips_tdep_h)
 mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
