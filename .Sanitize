@@ -42,6 +42,7 @@ Things-to-keep:
 .cvsignore
 COPYING
 COPYING.LIB
+COPYING.NEWLIB
 CYGNUS
 ChangeLog
 Makefile.in
