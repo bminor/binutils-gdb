@@ -77,7 +77,7 @@ case "${target}" in
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//;s/tk//'`
     ;;
   hppa*-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//;s/bfd//;s/gdb//'`
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
     ;;
   *-*-solaris2)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
