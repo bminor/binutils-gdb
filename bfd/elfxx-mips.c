@@ -345,7 +345,7 @@ static bfd_reloc_status_type mips_elf_calculate_relocation
   PARAMS ((bfd *, bfd *, asection *, struct bfd_link_info *,
 	   const Elf_Internal_Rela *, bfd_vma, reloc_howto_type *,
 	   Elf_Internal_Sym *, asection **, bfd_vma *, const char **,
-	   boolean *));
+	   boolean *, boolean));
 static bfd_vma mips_elf_obtain_contents
   PARAMS ((reloc_howto_type *, const Elf_Internal_Rela *, bfd *, bfd_byte *));
 static boolean mips_elf_perform_relocation
@@ -2006,7 +2006,7 @@ static bfd_reloc_status_type
 mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 			       relocation, addend, howto, local_syms,
 			       local_sections, valuep, namep,
-			       require_jalxp)
+			       require_jalxp, save_addend)
      bfd *abfd;
      bfd *input_bfd;
      asection *input_section;
@@ -2019,6 +2019,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
      bfd_vma *valuep;
      const char **namep;
      boolean *require_jalxp;
+     boolean save_addend;
 {
   /* The eventual value we will return.  */
   bfd_vma value;
@@ -2043,7 +2044,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
   struct mips_elf_link_hash_entry *h = NULL;
   /* True if the symbol referred to by this relocation is a local
      symbol.  */
-  boolean local_p;
+  boolean local_p, was_local_p;
   /* True if the symbol referred to by this relocation is "_gp_disp".  */
   boolean gp_disp_p = false;
   Elf_Internal_Shdr *symtab_hdr;
@@ -2071,6 +2072,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   local_p = mips_elf_local_relocation_p (input_bfd, relocation,
 					 local_sections, false);
+  was_local_p = local_p;
   if (! elf_bad_symtab (input_bfd))
     extsymoff = symtab_hdr->sh_info;
   else
@@ -2458,10 +2460,19 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 	 order.  We don't need to do anything special here; the
 	 differences are handled in mips_elf_perform_relocation.  */
     case R_MIPS_GPREL16:
-      if (local_p)
-	value = mips_elf_sign_extend (addend, 16) + symbol + gp0 - gp;
-      else
-	value = mips_elf_sign_extend (addend, 16) + symbol - gp;
+      /* Only sign-extend the addend if it was extracted from the
+	 instruction.  If the addend was separate, leave it alone,
+	 otherwise we may lose significant bits.  */
+      if (howto->partial_inplace)
+	addend = mips_elf_sign_extend (addend, 16);
+      value = symbol + addend - gp;
+      /* If the symbol was local, any earlier relocatable links will
+	 have adjusted its addend with the gp offset, so compensate
+	 for that now.  Don't do it for symbols forced local in this
+	 link, though, since they won't have had the gp offset applied
+	 to them before.  */
+      if (was_local_p)
+	value += gp0;
       overflowed_p = mips_elf_overflow_p (value, 16);
       break;
 
@@ -2494,7 +2505,9 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       break;
 
     case R_MIPS_GPREL32:
-      value = (addend + symbol + gp0 - gp) & howto->dst_mask;
+      value = (addend + symbol + gp0 - gp);
+      if (!save_addend)
+	value &= howto->dst_mask;
       break;
 
     case R_MIPS_PC16:
@@ -5251,7 +5264,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					     input_section, info, rel,
 					     addend, howto, local_syms,
 					     local_sections, &value,
-					     &name, &require_jalx))
+					     &name, &require_jalx,
+					     use_saved_addend_p))
 	{
 	case bfd_reloc_continue:
 	  /* There's nothing to do.  */

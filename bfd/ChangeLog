@@ -1,3 +1,14 @@
+2002-10-13  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Take
+	save_addend argument.  Don't apply the 32-bit mask to a
+	GPREL32 value if it's to be used in another relocation.  Don't
+	use forced-check computation of local_p to decide whether to
+	add gp0 to GPREL16 value.  Don't use only the lowest 16 bits
+	of the addend of a non-in-place GPREL16 relocation.
+	(_bfd_mips_elf_relocate_section): Pass use_saved_addend_p to
+	mips_elf_calculate_relocation().
+
 2002-10-12  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* elf32-m68hc11.c (m68hc11_elf_relax_section): Don't treat relocs
