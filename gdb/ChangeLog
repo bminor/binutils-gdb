@@ -1,5 +1,8 @@
 Sat Jan 14 11:18:11 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
+	* infcmd.c (signal_command): For "signal 0", pass (CORE_ADDR)-1,
+	not stop_pc, to proceed.
+
 	* eval.c (evaluate_subexp): Clear expect_type except for C++ and CHILL.
 
 Fri Jan 13 17:52:57 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>

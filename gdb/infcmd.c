@@ -492,7 +492,11 @@ signal_command (signum_exp, from_tty)
     }
 
   clear_proceed_status ();
-  proceed (stop_pc, oursig, 0);
+  /* "signal 0" should not get stuck if we are stopped at a breakpoint.
+     FIXME: Neither should "signal foo" but when I tried passing
+     (CORE_ADDR)-1 unconditionally I got a testsuite failure which I haven't
+     tried to track down yet.  */
+  proceed (oursig == TARGET_SIGNAL_0 ? (CORE_ADDR) -1 : stop_pc, oursig, 0);
 }
 
 /* Call breakpoint_auto_delete on the current contents of the bpstat
