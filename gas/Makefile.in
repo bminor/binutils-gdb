@@ -140,6 +140,7 @@ CPU_TYPES = \
 	i386 \
 	i860 \
 	i960 \
+	m32r \
 	m68k \
 	m88k \
 	mips \
@@ -220,6 +221,7 @@ CFILES = \
 	as.c \
 	atof-generic.c \
 	bignum-copy.c \
+	cgen.c \
 	cond.c \
 	ecoff.c \
 	expr.c \
@@ -282,6 +284,7 @@ TARGET_CPU_CFILES = \
 	config/tc-i386.c \
 	config/tc-i860.c \
 	config/tc-i960.c \
+	config/tc-m32r.c \
 	config/tc-m68k.c \
 	config/tc-m88k.c \
 	config/tc-mips.c \
@@ -307,6 +310,7 @@ TARGET_CPU_HFILES = \
 	config/tc-i386.h \
 	config/tc-i860.h \
 	config/tc-i960.h \
+	config/tc-m32r.h \
 	config/tc-m68k.h \
 	config/tc-m88k.h \
 	config/tc-mips.h \
@@ -398,6 +402,7 @@ OBJS = \
 	as.o \
 	atof-generic.o \
 	bignum-copy.o \
+	cgen.o \
 	cond.o \
 	expr.o \
 	flonum-konst.o \
@@ -659,7 +664,7 @@ clean mostlyclean: clean-here
 # Like clean but also delete the links made to configure gas.
 
 DISTCLEAN_HERE = config.status Makefile targ-env.h targ-cpu.h obj-format.h \
-	TAGS itbl-cpu.h site.exp site.bak \
+	TAGS itbl-cpu.h cgen-opc.h site.exp site.bak \
 	config-stamp config.h conf config.log config.cache .gdbinit \
 	testsuite/Makefile testsuite/config.status
 
@@ -815,6 +820,7 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	echo '' > obj-format.h; \
 	echo '' > targ-env.h; \
 	echo '' > itbl-cpu.h; \
+	echo '' > cgen-opc.h; \
 	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
 	$(DEP) -f .dep -DBFD_ASSEMBLER -I. -I.. -I$(srcdir) -I../../bfd $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $?
 	mv -f .depdir/.dep .dep1
@@ -832,6 +838,7 @@ DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	      echo '#include "obj-'"$${o}"'.h"' > obj-format.h; \
 	      echo '#include "te-generic.h"' > targ-env.h; \
 	      echo '' > itbl-cpu.h; \
+	      echo '' > cgen-opc.h; \
 	      rm -f dummy.c; \
 	      cp $(srcdir)/config/tc-$${c}.c dummy.c; \
 	      echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > .dep; \
@@ -977,6 +984,7 @@ as.o: as.c subsegs.h $(INCDIR)/obstack.h output-file.h \
   sb.h macro.h
 atof-generic.o: atof-generic.c
 bignum-copy.o: bignum-copy.c
+cgen.o: cgen.c cgen-opc.h subsegs.h $(INCDIR)/obstack.h
 cond.o: cond.c $(INCDIR)/obstack.h
 ecoff.o: ecoff.c
 expr.o: expr.c $(INCDIR)/obstack.h
@@ -988,7 +996,6 @@ gasp.o: gasp.c sb.h macro.h
 hash.o: hash.c
 input-file.o: input-file.c input-file.h
 input-scrub.o: input-scrub.c input-file.h sb.h
-itbl-ops.o: itbl-ops.c itbl-ops.h
 listing.o: listing.c input-file.h subsegs.h
 literal.o: literal.c subsegs.h $(INCDIR)/obstack.h
 macro.o: macro.c sb.h macro.h
@@ -1100,6 +1107,13 @@ TCDEP_i960_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i960.h $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/i960.h
+TCDEP_m32r_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m32r.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  subsegs.h $(INCDIR)/obstack.h cgen-opc.h
+TCDEP_m32r_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h subsegs.h \
+  $(INCDIR)/obstack.h cgen-opc.h
 TCDEP_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/obstack.h \
   subsegs.h $(INCDIR)/opcode/m68k.h $(srcdir)/config/m68k-parse.h
@@ -1320,6 +1334,13 @@ OBJDEP_i960_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i960.h subsegs.h \
   $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
+OBJDEP_m32r_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m32r.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/obstack.h subsegs.h
+OBJDEP_m32r_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h subsegs.h \
+  $(INCDIR)/obstack.h $(INCDIR)/aout/aout64.h
 OBJDEP_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/obstack.h
@@ -1516,6 +1537,11 @@ DEP_i960_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-i960.h \
 DEP_i960_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i960.h
+DEP_m32r_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m32r.h \
+  $(INCDIR)/coff/internal.h $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h
+DEP_m32r_elf = $(srcdir)/config/obj-elf.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(srcdir)/config/tc-m32r.h
 DEP_m68k_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-m68k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_m68k_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-m68k.h \

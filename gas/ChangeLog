@@ -1,3 +1,26 @@
+Fri Apr  4 16:10:02 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-m32r.[ch]: New files.
+	* cgen.c: New file.
+	* Makefile.in (CPU_TYPES): Add m32r.
+	(CFILES): Add cgen.c.
+	(TARGET_CPU_CFILES): Add tc-m32r.c.
+	(TARGET_CPU_HFILES): Add tc-m32r.h.
+	(OBJS): Add cgen.o.
+	(DISTCLEAN_HERE): Add cgen-opc.h.
+	(.dep1,.tcdep): Create empty cgen-opc.h.
+	(cgen.o): Add dependencies.
+	(dependencies): Regenerate.
+	* as.h (struct frag): New member fr_targ.
+	(fr_pcrel_adjust,fr_bsr): Move into union fr_targ.ns32k.
+	* conf.in (USING_CGEN): New macro.
+	* configure.in (m32r-*-*): Add entry for.
+	* configure: Regenerate.
+	* write.c (relax_frag): fr_pcrel_adjust renamed to
+	fr_targ.ns32k.pcrel_adjust.
+	* config/tc-ns32k.c (*): Likewise.
+	fr_bsr renamed to fr_targ.ns32k.bsr.
+
 Fri Apr  4 13:26:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-hppa.h (TC_EOL_IN_INSN): Check explicitly for '!',

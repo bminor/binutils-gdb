@@ -112,6 +112,26 @@ static fixS *fix_new_internal PARAMS ((fragS *, int where, int size,
 static long fixup_segment PARAMS ((fixS * fixP, segT this_segment_type));
 #endif
 static relax_addressT relax_align PARAMS ((relax_addressT addr, int align));
+#if defined (BFD_ASSEMBLER) || ! defined (BFD)
+static fragS *chain_frchains_together_1 PARAMS ((segT, struct frchain *));
+#endif
+#ifdef BFD_ASSEMBLER
+static void chain_frchains_together PARAMS ((bfd *, segT, PTR));
+static void cvt_frag_to_fill PARAMS ((segT, fragS *));
+static void relax_and_size_seg PARAMS ((bfd *, asection *, PTR));
+static void adjust_reloc_syms PARAMS ((bfd *, asection *, PTR));
+static void write_relocs PARAMS ((bfd *, asection *, PTR));
+static void write_contents PARAMS ((bfd *, asection *, PTR));
+static void set_symtab PARAMS ((void));
+#endif
+#if defined (BFD_ASSEMBLER) || (! defined (BFD) && ! defined (OBJ_AOUT))
+static void merge_data_into_text PARAMS ((void));
+#endif
+#if ! defined (BFD_ASSEMBLER) && ! defined (BFD)
+static void cvt_frag_to_fill PARAMS ((object_headers *, segT, fragS *));
+static void remove_subsegs PARAMS ((frchainS *, int, fragS **, fragS **));
+static void relax_and_size_all_segments PARAMS ((void));
+#endif
 
 /*
  *			fix_new()
@@ -260,7 +280,6 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
       /* This comes up when _GLOBAL_OFFSET_TABLE_+(.-L0) is read, if
 	 the difference expression cannot immediately be reduced.  */
       {
-	extern symbolS *make_expr_symbol ();
 	symbolS *stmp = make_expr_symbol (exp);
 	exp->X_op = O_symbol;
 	exp->X_op_symbol = 0;
@@ -431,7 +450,7 @@ chain_frchains_together (abfd, section, xxx)
 
 #if !defined (BFD) && !defined (BFD_ASSEMBLER)
 
-void
+static void
 remove_subsegs (head, seg, root, last)
      frchainS *head;
      int seg;
@@ -1866,11 +1885,14 @@ write_object_file ()
 
 #ifdef TC_GENERIC_RELAX_TABLE
 
+static int is_dnrange PARAMS ((fragS *, fragS *));
+static long relax_frag PARAMS ((fragS *, long));
+
 /* Subroutines of relax_segment.  */
 static int
 is_dnrange (f1, f2)
-     struct frag *f1;
-     struct frag *f2;
+     fragS *f1;
+     fragS *f2;
 {
   for (; f1; f1 = f1->fr_next)
     if (f1->fr_next == f2)
@@ -1880,7 +1902,7 @@ is_dnrange (f1, f2)
 
 /* Relax a fragment by scanning TC_GENERIC_RELAX_TABLE.  */
 
-long
+static long
 relax_frag (fragP, stretch)
      fragS *fragP;
      long stretch;
@@ -1941,7 +1963,7 @@ relax_frag (fragP, stretch)
 /*#else*/
   /* This machine doesn't want to use pcrel_adjust.
      In that case, pcrel_adjust should be zero.  */
-/*  assert (fragP->fr_pcrel_adjust == 0);*/
+/*  assert (fragP->fr_targ.ns32k.pcrel_adjust == 0);*/
 #endif
 #ifdef md_prepare_relax_scan /* formerly called M68K_AIM_KLUDGE */
   md_prepare_relax_scan (fragP, address, aim, this_state, this_type);
@@ -2712,7 +2734,6 @@ write_print_statistics (file)
 
 /* for debugging */
 extern int indent_level;
-extern void print_symbol_value_1 ();
 
 void
 print_fixup (fixp)

@@ -189,6 +189,8 @@ changequote([,])dnl
       i960-*-vxworks5.*)    fmt=coff em=ic960 targ=ic960coff ;;
       i960-*-vxworks*)      fmt=bout ;;
 
+      m32r-*-*)		    fmt=elf bfd_gas=yes ;;
+
       m68k-*-vxworks* | m68k-ericsson-ose | m68k-*-sunos*)
 			    fmt=aout em=sun3 ;;
       m68k-motorola-sysv*)  fmt=coff targ=m68kcoff em=delta ;;
@@ -365,6 +367,17 @@ changequote([,])dnl
     esac
 
     case ${cpu_type} in
+      m32r)
+	case ${extra_objects} in
+	*cgen.o*) ;;
+	*) extra_objects="$extra_objects cgen.o"
+	   extra_files=../opcodes/${cpu_type}-opc.h
+	   extra_links=cgen-opc.h
+	   AC_DEFINE(USING_CGEN)
+	   ;;
+	esac
+	;;
+
       m68k)
 	case ${extra_objects} in
 	*m68k-parse.o*) ;;

@@ -65,6 +65,9 @@
 #undef SPARC_V9
 #undef SPARC_ARCH64
 
+/* Defined if using CGEN.  */
+#undef USING_CGEN
+
 /* Needed only for some configurations that can produce multiple output
    formats.  */
 #undef DEFAULT_EMULATION
