@@ -1905,7 +1905,8 @@ mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(mipsnbsd_tdep_h)
 mipsnbsd-tdep.o: mipsnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
-	$(target_h) $(value_h) $(osabi_h) $(mipsnbsd_tdep_h) $(solib_svr4_h)
+	$(target_h) $(value_h) $(osabi_h) $(mipsnbsd_tdep_h) $(solib_svr4_h) \
+	nbsd-tdep.h
 mipsread.o: mipsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(buildsym_h) $(stabsread_h) \
 	$(coff_sym_h) $(coff_internal_h) $(coff_ecoff_h) $(libcoff_h) \
@@ -1924,7 +1925,7 @@ mon960-rom.o: mon960-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 monitor.o: monitor.c $(defs_h) $(gdbcore_h) $(target_h) $(gdb_string_h) \
 	$(command_h) $(serial_h) $(monitor_h) $(gdbcmd_h) $(inferior_h) \
 	$(gdb_regex_h) $(srec_h) $(regcache_h)
-nbsd-tdep.o: nbsd-tdep.c $(defs_h) $(solib_svr4_h)
+nbsd-tdep.o: nbsd-tdep.c $(defs_h) $(gdb_string_h) $(solib_svr4_h)
 nindy-tdep.o: nindy-tdep.c $(defs_h) $(symtab_h) $(frame_h) $(gdbcore_h)
 nlmread.o: nlmread.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(buildsym_h) $(stabsread_h)

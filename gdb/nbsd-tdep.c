@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdb_string.h"
 #include "solib-svr4.h"
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
@@ -95,4 +96,14 @@ nbsd_lp64_solib_svr4_fetch_link_map_offsets (void)
     }
 
   return lmp;
+}
+
+int
+nbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
+{
+  /* Check for libc-provided signal trampoline.  All such trampolines
+     have function names which begin with "__sigtramp".  */
+
+  return (func_name != NULL
+	  && strncmp (func_name, "__sigtramp", 10) == 0);
 }
