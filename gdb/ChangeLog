@@ -1,5 +1,40 @@
 2003-04-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2expr.c (dwarf2_read_address): Renamed from read_address;
+	made non-static.
+	(execute_stack_op): All callers updated.
+	* dwarf2expr.h: Add prototype for dwarf2_read_address.
+	* dwarf2loc.c (find_location_expression): New function.
+	(dwarf_expr_frame_base): Call it.
+	(dwarf2_evaluate_loc_desc): Handle 0-length location expressions.
+	(dwarf2_tracepoint_var_ref): New function, broken out from
+	locexpr_tracepoint_var_ref.
+	(locexpr_tracepoint_var_ref): Call dwarf2_tracepoint_var_ref.
+	Make static.
+	(loclist_read_variable, loclist_read_needs_frame): New functions.
+	(loclist_describe_location, loclist_tracepoint_var_ref): New
+	functions.
+	(dwarf2_loclist_funcs): New struct location_funcs.
+	* dwarf2loc.h (struct dwarf2_loclist_baton): New type.
+	(struct dwarf2_locexpr_baton): Add comments.
+	(dwarf2_loclist_funcs): New extern.
+	* dwarf2read.c (struct comp_unit_head): Remove DIE member, add
+	base_address and base_known.
+	(dwarf_loc_buffer): New variable.
+	(struct dwarf2_pinfo): Add dwarf_loc_buffer and dwarf_loc_size.
+	(DWARF_LOC_BUFFER, DWARF_LOC_SIZE): New macros.
+	(dwarf2_has_info): Initialize dwarf_loc_offset.
+	(dwarf2_build_psymtabs): Read in .debug_loc.
+	(dwarf2_build_psymtabs_hard): Use DWARF_LOC_BUFFER and
+	DWARF_LOC_SIZE.
+	(psymtab_to_symtab_1): Likewise.  Move base address calculation
+	here, from...
+	(dwarf2_get_pc_bounds): ... here.  Use the base address from
+	cu_header.
+	(dwarf2_symbol_mark_computed): Handle location lists.
+
+2003-04-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* minsyms.c (install_minimal_symbols): Only switch to gnu-v3 mode
 	if the linkage name demangled successfully.
 

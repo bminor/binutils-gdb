@@ -99,5 +99,7 @@ unsigned char *read_uleb128 (unsigned char *buf, unsigned char *buf_end,
 			     ULONGEST * r);
 unsigned char *read_sleb128 (unsigned char *buf, unsigned char *buf_end,
 			     LONGEST * r);
+CORE_ADDR dwarf2_read_address (unsigned char *buf, unsigned char *buf_end,
+			       int *bytes_read);
 
 #endif

@@ -170,13 +170,13 @@ read_sleb128 (unsigned char *buf, unsigned char *buf_end, LONGEST * r)
    BUF_END.  The address is returned, and *BYTES_READ is set to the
    number of bytes read from BUF.  */
 
-static CORE_ADDR
-read_address (unsigned char *buf, unsigned char *buf_end, int *bytes_read)
+CORE_ADDR
+dwarf2_read_address (unsigned char *buf, unsigned char *buf_end, int *bytes_read)
 {
   CORE_ADDR result;
 
   if (buf_end - buf < TARGET_ADDR_BIT / TARGET_CHAR_BIT)
-    error ("read_address: Corrupted DWARF expression.");
+    error ("dwarf2_read_address: Corrupted DWARF expression.");
 
   *bytes_read = TARGET_ADDR_BIT / TARGET_CHAR_BIT;
   result = extract_address (buf, TARGET_ADDR_BIT / TARGET_CHAR_BIT);
@@ -277,7 +277,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	  break;
 
 	case DW_OP_addr:
-	  result = read_address (op_ptr, op_end, &bytes_read);
+	  result = dwarf2_read_address (op_ptr, op_end, &bytes_read);
 	  op_ptr += bytes_read;
 	  break;
 
@@ -467,9 +467,10 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 
 		(ctx->read_mem) (ctx->baton, buf, result,
 				 TARGET_ADDR_BIT / TARGET_CHAR_BIT);
-		result = read_address (buf,
-				       buf + TARGET_ADDR_BIT / TARGET_CHAR_BIT,
-				       &bytes_read);
+		result = dwarf2_read_address (buf,
+					      buf + (TARGET_ADDR_BIT
+						     / TARGET_CHAR_BIT),
+					      &bytes_read);
 	      }
 	    result = result + offset;
 	    ctx->stack_len = before_stack_len;
@@ -528,9 +529,10 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 
 		(ctx->read_mem) (ctx->baton, buf, result,
 				 TARGET_ADDR_BIT / TARGET_CHAR_BIT);
-		result = read_address (buf,
-				       buf + TARGET_ADDR_BIT / TARGET_CHAR_BIT,
-				       &bytes_read);
+		result = dwarf2_read_address (buf,
+					      buf + (TARGET_ADDR_BIT
+						     / TARGET_CHAR_BIT),
+					      &bytes_read);
 	      }
 	      break;
 
@@ -540,9 +542,10 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 		int bytes_read;
 
 		(ctx->read_mem) (ctx->baton, buf, result, *op_ptr++);
-		result = read_address (buf,
-				       buf + TARGET_ADDR_BIT / TARGET_CHAR_BIT,
-				       &bytes_read);
+		result = dwarf2_read_address (buf,
+					      buf + (TARGET_ADDR_BIT
+						     / TARGET_CHAR_BIT),
+					      &bytes_read);
 	      }
 	      break;
 
