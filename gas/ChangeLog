@@ -1,3 +1,13 @@
+Wed Jan 31 14:03:17 1996  Richard Henderson  <rth@tamu.edu>
+
+	* configure.in (m68*-apple-aux*): New target.
+	* config/te-aux.h: New file.
+	* config/obj-coff.c (compare_external_relocs): New static function
+	if TE_AUX.
+	(do_relocs_for): Sort relocs if TE_AUX.
+	(fixup_segment): If TE_AUX, store common symbol value in segment.
+	* config/tc-m68k.h (TARGET_FORMAT): Define if TE_AUX.
+
 Wed Jan 31 12:24:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (s_mips_globl): Set BSF_OBJECT if it is not

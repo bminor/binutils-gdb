@@ -1,5 +1,5 @@
 /* coff object file format
-   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 1996
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -1594,6 +1594,25 @@ count_entries_in_chain (idx)
   return nrelocs;
 }
 
+#ifdef TE_AUX
+
+static int compare_external_relocs PARAMS ((const PTR, const PTR));
+
+/* AUX's ld expects relocations to be sorted */
+static int
+compare_external_relocs (x, y)
+     const PTR x;
+     const PTR y;
+{
+  struct external_reloc *a = (struct external_reloc *) x;
+  struct external_reloc *b = (struct external_reloc *) y;
+  bfd_vma aadr = bfd_getb32 (a->r_vaddr);
+  bfd_vma badr = bfd_getb32 (b->r_vaddr);
+  return (aadr < badr ? -1 : badr < aadr ? 1 : 0);
+}
+
+#endif
+
 /* output all the relocations for a section */
 void
 do_relocs_for (abfd, h, file_cursor)
@@ -1653,6 +1672,10 @@ do_relocs_for (abfd, h, file_cursor)
 		      intr.r_offset = 0;
 #endif
 
+		      while (S_GET_SEGMENT (symbol_ptr) == undefined_section
+			     && symbol_ptr->sy_value.X_op == O_symbol)
+			symbol_ptr = symbol_ptr->sy_value.X_add_symbol;
+
 		      /* Turn the segment of the symbol into an offset.  */
 		      if (symbol_ptr)
 			{
@@ -1696,6 +1719,12 @@ do_relocs_for (abfd, h, file_cursor)
 
 		  fix_ptr = fix_ptr->fx_next;
 		}
+
+#ifdef TE_AUX
+	      /* Sort the reloc table */
+	      qsort ((PTR) external_reloc_vec, nrelocs,
+		     sizeof (struct external_reloc), compare_external_relocs);
+#endif
 
 	      /* Write out the reloc table */
 	      bfd_write ((PTR) external_reloc_vec, 1, external_reloc_size,
@@ -3053,7 +3082,7 @@ write_object_file ()
 
       /* I think the section alignment is only used on the i960; the
 	 i960 needs it, and it should do no harm on other targets.  */
-      segment_info[i].scnhdr.s_align = section_alignment[i];
+      segment_info[i].scnhdr.s_align = 1 << section_alignment[i];
 
       if (i == SEG_E0)
 	H_SET_TEXT_SIZE (&headers, size);
@@ -3882,7 +3911,7 @@ fixup_segment (segP, this_segment_type)
 		      continue;
 		    }		/* COBR */
 #endif /* TC_I960 */
-#if (defined (TC_I386) || defined (TE_LYNX)) && !defined(TE_PE)
+#if (defined (TC_I386) || defined (TE_LYNX) || defined (TE_AUX)) && !defined(TE_PE)
 		  /* 386 COFF uses a peculiar format in which the
 		     value of a common symbol is stored in the .text
 		     segment (I've checked this on SVR3.2 and SCO
