@@ -58,6 +58,7 @@ cat <<EOF
       d1 = m32rx_decode (current_cpu, pc, insn);
       abufs[0].insn = insn;
       abufs[0].idesc = d1;
+      abufs[0].addr = pc; /* FIXME: wip */
       icount = 1;
     }
   else
@@ -68,6 +69,7 @@ cat <<EOF
 	  d1 = m32rx_decode (current_cpu, pc, insn >> 16);
 	  abufs[0].insn = insn;
 	  abufs[0].idesc = d1;
+	  abufs[0].addr = pc; /* FIXME: wip */
 	  icount = 1;
 	}
       else
@@ -77,9 +79,11 @@ cat <<EOF
 	      d1 = m32rx_decode (current_cpu, pc, insn >> 16);
 	      abufs[0].insn = insn >> 16;
 	      abufs[0].idesc = d1;
-	      d2 = m32rx_decode (current_cpu, pc, insn & 0x7fff);
+	      abufs[0].addr = pc; /* FIXME: wip */
+	      d2 = m32rx_decode (current_cpu, pc + 2, insn & 0x7fff);
 	      abufs[1].insn = insn & 0x7fff;
 	      abufs[1].idesc = d2;
+	      abufs[1].addr = pc + 2; /* FIXME: wip */
 	      icount = 2;
 	    }
 	  else
@@ -87,6 +91,7 @@ cat <<EOF
 	      d1 = m32rx_decode (current_cpu, pc, insn >> 16);
 	      abufs[0].insn = insn >> 16;
 	      abufs[0].idesc = d1;
+	      abufs[0].addr = pc; /* FIXME: wip */
 	      icount = 1;
 	    }
 	}
@@ -130,9 +135,11 @@ cat <<EOF
     }
 #endif
 
+  m32r_model_init_insn_cycles (current_cpu, 1);
   TRACE_INSN_INIT (current_cpu, 1);
   TRACE_INSN (current_cpu, d1->opcode, sem_arg, CPU (h_pc));
   new_pc = (*d1->sem_full) (current_cpu, sem_arg, par_exec);
+  m32r_model_update_insn_cycles (current_cpu, icount == 1);
   TRACE_INSN_FINI (current_cpu, icount == 1);
 
   /* The result of the semantic fn is one of:
@@ -164,10 +171,12 @@ cat <<EOF
 
 	  ++sem_arg;
 	  ++par_exec;
+	  m32r_model_init_insn_cycles (current_cpu, 0);
 	  TRACE_INSN_INIT (current_cpu, 0);
 	  TRACE_INSN (current_cpu, d2->opcode, sem_arg, CPU (h_pc) + 2);
 	  /* pc2 isn't used.  It's assigned a value for debugging.  */
 	  pc2 = (*d2->sem_full) (current_cpu, sem_arg, par_exec);
+	  m32r_model_update_insn_cycles (current_cpu, 1);
 	  TRACE_INSN_FINI (current_cpu, 1);
 
 	  if (NEW_PC_BRANCH_P (new_pc))
@@ -175,6 +184,9 @@ cat <<EOF
 	  else
 	    CPU (h_pc) += 4;
 	}
+
+      /* Update count of parallel insns executed.  */
+      PROFILE_COUNT_PARINSNS (current_cpu);
     }
   else if (NEW_PC_BRANCH_P (new_pc))
     CPU (h_pc) = new_pc;

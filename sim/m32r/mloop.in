@@ -1,0 +1,187 @@
+# Simulator main loop for m32r. -*- C -*-
+# Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+#
+# This file is part of the GNU Simulators.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+# Syntax:
+# /bin/sh mainloop.in init|support|{full,fast}-{extract,exec}-{scache,noscache}
+
+# ??? After a few more ports are done, revisit.
+# Will eventually need to machine generate a lot of this.
+
+case "x$1" in
+
+xsupport)
+
+cat <<EOF
+
+static INLINE void
+extract16 (SIM_CPU *current_cpu, PCADDR pc, insn_t insn,
+	   SCACHE *sc, int fast_p)
+{
+  const IDESC *d = @cpu@_decode (current_cpu, pc, insn);
+  (*d->extract) (current_cpu, pc, insn, &sc->argbuf);
+  if (fast_p)
+    {
+#if WITH_SEM_SWITCH_FAST
+#ifdef __GNUC__
+      sc->semantic.sem_case = d->sem_fast_lab;
+#else
+      sc->semantic.sem_case = d->num;
+#endif
+#else
+      sc->semantic.sem_fast = d->sem_fast;
+#endif
+    }
+  else
+    {
+      sc->semantic.sem_full = d->sem_full;
+    }
+  sc->argbuf.idesc = d;
+  sc->next = pc + 2;
+}
+
+static INLINE void
+extract32 (SIM_CPU *current_cpu, PCADDR pc, insn_t insn,
+	   SCACHE *sc, int fast_p)
+{
+  const IDESC *d = @cpu@_decode (current_cpu, pc, (USI) insn >> 16);
+  (*d->extract) (current_cpu, pc, insn, &sc->argbuf);
+  if (fast_p)
+    {
+#if WITH_SEM_SWITCH_FAST
+#ifdef __GNUC__
+      sc->semantic.sem_case = d->sem_fast_lab;
+#else
+      sc->semantic.sem_case = d->num;
+#endif
+#else
+      sc->semantic.sem_fast_fn = d->sem_fast;
+#endif
+    }
+  else
+    {
+      sc->semantic.sem_full = d->sem_full;
+    }
+  sc->argbuf.idesc = d;
+  sc->next = pc + 4;
+}
+
+static INLINE PCADDR
+execute (SIM_CPU *current_cpu, SCACHE *sc, int fast_p)
+{
+  PCADDR pc;
+
+  if (fast_p)
+    {
+#if WITH_SCACHE && ! WITH_SEM_SWITCH_FAST
+      pc = (*sc->semantic.sem_fast) (current_cpu, sc);
+#else
+#if 0
+      pc = (*sc->semantic.sem_full) (current_cpu, &sc->argbuf);
+#else
+      pc = (*sc->semantic.sem_full) (current_cpu, sc);
+#endif
+#endif
+    }
+  else
+    {
+      m32r_model_init_insn_cycles (current_cpu, 1);
+      TRACE_INSN_INIT (current_cpu, 1);
+      TRACE_INSN (current_cpu, sc->argbuf.idesc->opcode, (const struct argbuf *) &sc->argbuf, sc->argbuf.addr);
+#if 0
+      pc = (*sc->semantic.sem_full) (current_cpu, &sc->argbuf);
+#else
+      pc = (*sc->semantic.sem_full) (current_cpu, sc);
+#endif
+      m32r_model_update_insn_cycles (current_cpu, 1);
+      TRACE_INSN_FINI (current_cpu, 1);
+    }
+
+  return pc;
+}
+
+EOF
+
+;;
+
+xinit)
+
+cat <<EOF
+/*xxxinit*/
+EOF
+
+;;
+
+xfull-extract-* | xfast-extract-*)
+
+cat <<EOF
+{
+  PCADDR pc = CPU (h_pc);
+
+  if ((pc & 3) != 0)
+    {
+      /* This only occurs when single stepping.
+	 The test is unnecessary otherwise, but the cost is teensy,
+	 compared with decoding/extraction.  */
+      UHI insn = GETIMEMUHI (current_cpu, pc);
+      extract16 (current_cpu, pc, insn & 0x7fff, sc, FAST_P);
+    }
+  else
+    {
+      USI insn = GETIMEMUSI (current_cpu, pc);
+      if ((SI) insn < 0)
+	{
+	  extract32 (current_cpu, pc, insn, sc, FAST_P);
+	}
+      else
+	{
+	  extract16 (current_cpu, pc, insn >> 16, sc, FAST_P);
+	  extract16 (current_cpu, pc + 2, insn & 0x7fff, sc + 1, FAST_P);
+	  /* The m32r doesn't support parallel execution.  */
+	  if ((insn & 0x8000) != 0
+	      && (insn & 0x7fff) != 0x7000) /* parallel nops are ok */
+	    sim_engine_illegal_insn (current_cpu, pc);
+	}
+    }
+}
+EOF
+
+;;
+
+xfull-exec-* | xfast-exec-*)
+
+cat <<EOF
+{
+#if WITH_SCACHE && FAST_P && WITH_SEM_SWITCH_FAST
+#define DEFINE_SWITCH
+#include "sem-switch.c"
+#else
+  PCADDR new_pc = execute (current_cpu, sc, FAST_P);
+  CPU (h_pc) = new_pc;
+#endif
+}
+EOF
+
+;;
+
+*)
+  echo "Invalid argument to mainloop.in: $1" >&2
+  exit 1
+  ;;
+
+esac
