@@ -493,10 +493,25 @@ signal_command (signum_exp, from_tty)
   if (!signum_exp)
     error_no_arg ("signal number");
 
-  signum = parse_and_eval_address (signum_exp);
+  /* It would be even slicker to make signal names be valid expressions,
+     (the type could be "enum $signal" or some such), then the user could
+     assign them to convenience variables.  */
+  signum = strtosigno (signum_exp);
+
+  if (signum == 0)
+    /* Not found as a name, try it as an expression.  */
+    signum = parse_and_eval_address (signum_exp);
 
   if (from_tty)
-    printf_filtered ("Continuing with signal %d.\n", signum);
+    {
+      char *signame = strsigno (signum);
+      printf_filtered ("Continuing with signal ");
+      if (signame == NULL || signum == 0)
+	printf_filtered ("%d.\n", signum);
+      else
+	/* Do we need to print the number as well as the name?  */
+	printf_filtered ("%s (%d).\n", signame, signum);
+    }
 
   clear_proceed_status ();
   proceed (stop_pc, signum, 0);
@@ -730,12 +745,19 @@ program_info (args, from_tty)
 	  num = bpstat_num (&bs);
 	}
     }
-  else if (stop_signal) {
+  else if (stop_signal)
+    {
 #ifdef PRINT_RANDOM_SIGNAL
-    PRINT_RANDOM_SIGNAL (stop_signal);
+      PRINT_RANDOM_SIGNAL (stop_signal);
 #else
-    printf_filtered ("It stopped with signal %d (%s).\n",
-		     stop_signal, safe_strsignal (stop_signal));
+      char *signame = strsigno (stop_signal);
+      printf_filtered ("It stopped with signal ");
+      if (signame == NULL)
+	printf_filtered ("%d", stop_signal);
+      else
+	/* Do we need to print the number as well as the name?  */
+	printf_filtered ("%s (%d)", signame, stop_signal);
+      printf_filtered (", %s.\n", safe_strsignal (stop_signal));
 #endif
   }
 
@@ -890,8 +912,9 @@ path_command (dirname, from_tty)
     path_info ((char *)NULL, from_tty);
 }
 
-/* XXX - This routine is getting awfully cluttered with #if's.  It's probably
-   time to turn this into target_read_pc.  Ditto for write_pc.  */
+/* This routine is getting awfully cluttered with #if's.  It's probably
+   time to turn this into READ_PC and define it in the tm.h file.
+   Ditto for write_pc.  */
 
 CORE_ADDR
 read_pc ()
@@ -903,8 +926,8 @@ read_pc ()
     return read_register(31) & ~0x3; /* User PC is here when in sys call */
   return read_register (PC_REGNUM) & ~0x3;
 #else
-#ifdef GDB_TARGET_IS_H8500
-  return (read_register (SEG_C_REGNUM) << 16) | read_register (PC_REGNUM);
+#ifdef TARGET_READ_PC
+  return TARGET_READ_PC ();
 #else
   return ADDR_BITS_REMOVE ((CORE_ADDR) read_register (PC_REGNUM));
 #endif
@@ -915,6 +938,9 @@ void
 write_pc (val)
      CORE_ADDR val;
 {
+#ifdef TARGET_WRITE_PC
+  TARGET_WRITE_PC (val);
+#else
   write_register (PC_REGNUM, (long) val);
 #ifdef NPC_REGNUM
   write_register (NPC_REGNUM, (long) val + 4);
@@ -922,10 +948,53 @@ write_pc (val)
   write_register (NNPC_REGNUM, (long) val + 8);
 #endif
 #endif
-#ifdef GDB_TARGET_IS_H8500
-  write_register (SEG_C_REGNUM, val >> 16);
 #endif
   pc_changed = 0;
+}
+
+/* Cope with strage ways of getting to the stack and frame pointers */
+
+CORE_ADDR
+read_sp ()
+{
+#ifdef TARGET_READ_SP
+  return TARGET_READ_SP ();
+#else
+  return read_register (SP_REGNUM);
+#endif
+}
+
+void
+write_sp (val)
+     CORE_ADDR val;
+{
+#ifdef TARGET_WRITE_SP
+  TARGET_WRITE_SP (val);
+#else
+  write_register (SP_REGNUM, val);
+#endif
+}
+
+
+CORE_ADDR
+read_fp ()
+{
+#ifdef TARGET_READ_FP
+  return TARGET_READ_FP ();
+#else
+  return read_register (FP_REGNUM);
+#endif
+}
+
+void
+write_fp (val)
+     CORE_ADDR val;
+{
+#ifdef TARGET_WRITE_FP
+  TARGET_WRITE_FP (val);
+#else
+  write_register (FP_REGNUM, val);
+#endif
 }
 
 const char * const reg_names[] = REGISTER_NAMES;
@@ -1294,8 +1363,9 @@ for an address to start at.");
 
   add_com ("continue", class_run, continue_command,
 	   "Continue program being debugged, after signal or breakpoint.\n\
-If proceeding from breakpoint, a number N may be used as an argument:\n\
-then the same breakpoint won't break until the Nth time it is reached.");
+If proceeding from breakpoint, a number N may be used as an argument,\n\
+which means to set the ignore count of that breakpoint to N - 1 (so that\n\
+the breakpoint won't break until the Nth time it is reached).");
   add_com_alias ("c", "cont", class_run, 1);
   add_com_alias ("fg", "cont", class_run, 1);
 

@@ -809,7 +809,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	xcoffexec.c xcoffread.c xcoffsolib.c z8k-tdep.c
 
 ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
-	config/a29k/tm-ultra3.h config/a29k/xm-ultra3.h config/arm/tm-arm.h \
+	config/a29k/tm-ultra3.h config/a29k/xm-ultra3.h \
+	config/alpha/xm-alpha.h config/arm/tm-arm.h \
 	config/arm/xm-arm.h config/convex/tm-convex.h \
 	config/convex/xm-convex.h config/gould/tm-np1.h config/gould/tm-pn.h \
 	config/gould/xm-np1.h config/gould/xm-pn.h config/h8300/tm-h8300.h \
@@ -856,7 +857,8 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/ns32k/nm-umax.h config/ns32k/tm-merlin.h config/ns32k/tm-umax.h \
 	config/ns32k/xm-merlin.h config/ns32k/xm-umax.h config/pa/nm-hppab.h \
 	config/pa/nm-hppah.h config/pa/tm-hppab.h config/pa/tm-hppah.h \
-	config/pa/xm-hppab.h config/pa/xm-hppah.h config/pyr/tm-pyr.h \
+	config/pa/xm-hppab.h config/pa/xm-hppah.h config/pa/xm-pa.h \
+	config/pyr/tm-pyr.h \
 	config/pyr/xm-pyr.h config/romp/xm-rtbsd.h config/rs6000/nm-rs6000.h \
 	config/rs6000/tm-rs6000.h config/rs6000/xm-rs6000.h config/sh/tm-sh.h \
 	config/sparc/nm-sun4os4.h config/sparc/tm-sparclite.h \
@@ -869,6 +871,7 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 
 ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/a29k/a29k.mt config/a29k/ultra3.mh config/a29k/ultra3.mt \
+	config/alpha/alpha-osf1.mh \
 	config/arm/arm.mh config/arm/arm.mt config/convex/convex.mh \
 	config/convex/convex.mt config/gould/np1.mh config/gould/np1.mt \
 	config/gould/pn.mh config/gould/pn.mt config/h8300/h8300hms.mt \

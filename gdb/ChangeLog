@@ -1,3 +1,11 @@
+Tue Jul  6 11:51:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (ALLPARAM): Add config/{alpha/xm-alpha.h,pa/xm-pa.h}.
+	(ALLCONFIG): Add config/alpha/alpha-osf1.mh.
+
+	* infcmd.c (_initialize_infcmd): In docstring for "continue",
+	describe argument as setting ignore count.
+
 Sun Jul  4 15:04:47 1993  Doug Evans  (dje@cygnus.com)
 
 	* h8300-tdep.c (examine_prologue): Fix call to
