@@ -1532,7 +1532,7 @@ extern bfd_boolean _bfd_elf_discard_section_eh_frame
 extern bfd_boolean _bfd_elf_discard_section_eh_frame_hdr
   (bfd *, struct bfd_link_info *);
 extern bfd_vma _bfd_elf_eh_frame_section_offset
-  (bfd *, asection *, bfd_vma);
+  (bfd *, struct bfd_link_info *, asection *, bfd_vma);
 extern bfd_boolean _bfd_elf_write_section_eh_frame
   (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
 extern bfd_boolean _bfd_elf_write_section_eh_frame_hdr

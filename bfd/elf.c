@@ -7746,7 +7746,7 @@ _bfd_elf_rel_local_sym (bfd *abfd,
 
 bfd_vma
 _bfd_elf_section_offset (bfd *abfd,
-			 struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			 struct bfd_link_info *info,
 			 asection *sec,
 			 bfd_vma offset)
 {
@@ -7756,7 +7756,7 @@ _bfd_elf_section_offset (bfd *abfd,
       return _bfd_stab_section_offset (sec, elf_section_data (sec)->sec_info,
 				       offset);
     case ELF_INFO_TYPE_EH_FRAME:
-      return _bfd_elf_eh_frame_section_offset (abfd, sec, offset);
+      return _bfd_elf_eh_frame_section_offset (abfd, info, sec, offset);
     default:
       return offset;
     }

@@ -713,10 +713,13 @@ _bfd_elf_maybe_strip_eh_frame_hdr (struct bfd_link_info *info)
 
 bfd_vma
 _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
+				  struct bfd_link_info *info,
 				  asection *sec,
 				  bfd_vma offset)
 {
   struct eh_frame_sec_info *sec_info;
+  struct elf_link_hash_table *htab;
+  struct eh_frame_hdr_info *hdr_info;
   unsigned int lo, hi, mid;
 
   if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
@@ -725,6 +728,11 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (offset >= sec->rawsize)
     return offset - sec->rawsize + sec->size;
+
+  htab = elf_hash_table (info);
+  hdr_info = &htab->eh_info;
+  if (hdr_info->offsets_adjusted)
+    offset += sec->output_offset;
 
   lo = 0;
   hi = sec_info->count;
@@ -751,7 +759,9 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
      relocation against FDE's initial_location field.  */
   if (!sec_info->entry[mid].cie
       && sec_info->entry[mid].cie_inf->make_relative
-      && offset == sec_info->entry[mid].offset + 8)
+      && offset == sec_info->entry[mid].offset + 8
+      && (sec_info->entry[mid].cie_inf->need_relative
+	  || !hdr_info->offsets_adjusted))
     {
       sec_info->entry[mid].cie_inf->need_relative = 1;
       return (bfd_vma) -2;
@@ -762,12 +772,16 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (!sec_info->entry[mid].cie
       && sec_info->entry[mid].cie_inf->make_lsda_relative
       && (offset == (sec_info->entry[mid].offset + 8
-		     + sec_info->entry[mid].lsda_offset)))
+		     + sec_info->entry[mid].lsda_offset))
+      && (sec_info->entry[mid].cie_inf->need_lsda_relative
+	  || !hdr_info->offsets_adjusted))
     {
       sec_info->entry[mid].cie_inf->need_lsda_relative = 1;
       return (bfd_vma) -2;
     }
 
+  if (hdr_info->offsets_adjusted)
+    offset -= sec->output_offset;
   return (offset + sec_info->entry[mid].new_offset
 	  - sec_info->entry[mid].offset);
 }
