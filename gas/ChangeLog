@@ -1,3 +1,9 @@
+2000-12-12  Nick Clifton  <nickc@redhat.com>
+
+	* cgen.h: Fix formatting.
+	* input-scrub.c: Fix formatting.
+	* macro.c: Fix formatting.
+
 Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 
 	* tc-i386.c (md_assemble): Refuse 's' and 'l' suffixes in the intel
