@@ -1,5 +1,8 @@
 Fri Sep 20 12:27:55 1991  Stu Grossman  (grossman at cygnus.com)
 
+	* mipsread.c (parse_lines):  Deal with negative extended line
+	offsets correctly.
+
 	* c-exp.y, m2-exp.y:  #define yyerrflag and yynerrs to avoid
 	global symbol conflicts.
 
