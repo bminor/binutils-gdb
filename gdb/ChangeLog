@@ -1,3 +1,9 @@
+2003-09-17  Andrew Cagney  <cagney@redhat.com>
+
+	* ppcnbsd-tdep.c (ppcnbsd_use_struct_convention): New function.
+	(ppcnbsd_init_abi): Set "use_struct_convention" to
+	"ppcnbsd_use_struct_convention".
+
 2003-09-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbarch.sh (DEPRECATED_REG_STRUCT_HAS_ADDR): Add comment.
