@@ -765,6 +765,27 @@ solib_create_inferior_hook (void)
   TARGET_SO_SOLIB_CREATE_INFERIOR_HOOK ();
 }
 
+/* GLOBAL FUNCTION
+
+   in_solib_dynsym_resolve_code -- check to see if an address is in
+                                   dynamic loader's dynamic symbol
+				   resolution code
+
+   SYNOPSIS
+
+   int in_solib_dynsym_resolve_code (CORE_ADDR pc)
+
+   DESCRIPTION
+
+   Determine if PC is in the dynamic linker's symbol resolution
+   code.  Return 1 if so, 0 otherwise.
+*/
+
+int
+in_solib_dynsym_resolve_code (CORE_ADDR pc)
+{
+  return TARGET_SO_IN_DYNSYM_RESOLVE_CODE (pc);
+}
 
 /*
 

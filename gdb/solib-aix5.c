@@ -409,9 +409,8 @@ static CORE_ADDR interp_text_sect_high;
 static CORE_ADDR interp_plt_sect_low;
 static CORE_ADDR interp_plt_sect_high;
 
-/* FIXME: Does this belong here?  (If it does, it ought to be renamed.) */
-int
-in_svr4_dynsym_resolve_code (CORE_ADDR pc)
+static int
+aix5_in_dynsym_resolve_code (CORE_ADDR pc)
 {
   return ((pc >= interp_text_sect_low && pc < interp_text_sect_high)
 	  || (pc >= interp_plt_sect_low && pc < interp_plt_sect_high)
@@ -496,7 +495,7 @@ enable_break (void)
       load_addr = read_pc () - tmp_bfd->start_address;
 
       /* Record the relocated start and end address of the dynamic linker
-         text and plt section for in_aix5_dynsym_resolve_code.  */
+         text and plt section for aix5_in_dynsym_resolve_code.  */
       interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
       if (interp_sect)
 	{
@@ -792,6 +791,7 @@ _initialize_aix5_solib (void)
   aix5_so_ops.special_symbol_handling = aix5_special_symbol_handling;
   aix5_so_ops.current_sos = aix5_current_sos;
   aix5_so_ops.open_symbol_file_object = open_symbol_file_object;
+  aix5_so_ops.in_dynsym_resolve_code = aix5_in_dynsym_resolve_code;
 
   native_find_global_pointer = aix5_find_global_pointer;
   aix5_find_gate_addresses_hook = aix5_find_gate_addresses;
@@ -799,4 +799,3 @@ _initialize_aix5_solib (void)
   /* FIXME: Don't do this here.  *_gdbarch_init() should set so_ops. */
   current_target_so_ops = &aix5_so_ops;
 }
-

@@ -89,6 +89,10 @@ struct target_so_ops
 
     /* Find, open, and read the symbols for the main executable.  */
     int (*open_symbol_file_object) (void *from_ttyp);
+
+    /* Determine if PC lies in the dynamic symbol resolution code of
+       the run time loader */
+    int (*in_dynsym_resolve_code) (CORE_ADDR pc);
   };
 
 void free_so (struct so_list *so);
@@ -110,3 +114,5 @@ extern struct target_so_ops *current_target_so_ops;
 #define TARGET_SO_CURRENT_SOS (current_target_so_ops->current_sos)
 #define TARGET_SO_OPEN_SYMBOL_FILE_OBJECT \
   (current_target_so_ops->open_symbol_file_object)
+#define TARGET_SO_IN_DYNSYM_RESOLVE_CODE \
+  (current_target_so_ops->in_dynsym_resolve_code)

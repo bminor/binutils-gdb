@@ -1085,24 +1085,28 @@ match_main (char *soname)
 }
 
 
-#ifdef SVR4_SHARED_LIBS
-
 /* Return 1 if PC lies in the dynamic symbol resolution code of the
    SVR4 run time loader.  */
-
+#ifdef SVR4_SHARED_LIBS
 static CORE_ADDR interp_text_sect_low;
 static CORE_ADDR interp_text_sect_high;
 static CORE_ADDR interp_plt_sect_low;
 static CORE_ADDR interp_plt_sect_high;
 
-int
-in_svr4_dynsym_resolve_code (CORE_ADDR pc)
+static int
+svr4_in_dynsym_resolve_code (CORE_ADDR pc)
 {
   return ((pc >= interp_text_sect_low && pc < interp_text_sect_high)
 	  || (pc >= interp_plt_sect_low && pc < interp_plt_sect_high)
 	  || in_plt_section (pc, NULL));
 }
-#endif
+#else /* !SVR4_SHARED_LIBS */
+static int
+svr4_in_dynsym_resolve_code (CORE_ADDR pc)
+{
+  return 0;
+}
+#endif /* SVR4_SHARED_LIBS */
 
 /*
 
@@ -1303,7 +1307,7 @@ enable_break (void)
       load_addr = read_pc () - tmp_bfd->start_address;
 
       /* Record the relocated start and end address of the dynamic linker
-         text and plt section for in_svr4_dynsym_resolve_code.  */
+         text and plt section for svr4_in_dynsym_resolve_code.  */
       interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
       if (interp_sect)
 	{
@@ -1694,6 +1698,8 @@ _initialize_svr4_solib (void)
   svr4_so_ops.special_symbol_handling = svr4_special_symbol_handling;
   svr4_so_ops.current_sos = svr4_current_sos;
   svr4_so_ops.open_symbol_file_object = open_symbol_file_object;
+  svr4_so_ops.open_symbol_file_object = open_symbol_file_object;
+  svr4_so_ops.in_dynsym_resolve_code = svr4_in_dynsym_resolve_code;
 
   /* FIXME: Don't do this here.  *_gdbarch_init() should set so_ops. */
   current_target_so_ops = &svr4_so_ops;

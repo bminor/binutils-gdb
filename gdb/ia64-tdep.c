@@ -76,9 +76,9 @@ typedef enum instruction_type
 
 #define BUNDLE_LEN 16
 
-extern void _initialize_ia64_tdep (void);
-
+/* FIXME: These extern declarations should go in ia64-tdep.h.  */
 extern CORE_ADDR ia64_linux_sigcontext_register_address (CORE_ADDR, int);
+extern CORE_ADDR ia64_aix_sigcontext_register_address (CORE_ADDR, int);
 
 static gdbarch_init_ftype ia64_gdbarch_init;
 
@@ -1970,8 +1970,16 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->os_ident = os_ident;
 
+
+  /* Set the method of obtaining the sigcontext addresses at which
+     registers are saved.  The method of checking to see if
+     native_find_global_pointer is nonzero to indicate that we're
+     on AIX is kind of hokey, but I can't think of a better way
+     to do it.  */
   if (os_ident == ELFOSABI_LINUX)
     tdep->sigcontext_register_address = ia64_linux_sigcontext_register_address;
+  else if (native_find_global_pointer != 0)
+    tdep->sigcontext_register_address = ia64_aix_sigcontext_register_address;
   else
     tdep->sigcontext_register_address = 0;
 
