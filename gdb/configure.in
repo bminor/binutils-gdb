@@ -66,7 +66,12 @@ dnl See if compiler supports "long long" type.
 
 AC_MSG_CHECKING(for long long support in compiler)
 AC_CACHE_VAL(gdb_cv_c_long_long,
-[AC_TRY_COMPILE(, [long long foo;],
+[AC_TRY_COMPILE(, [
+long long foo;
+void bar ()
+{
+  switch (foo & 2) { case 0: return; }
+}],
 gdb_cv_c_long_long=yes, gdb_cv_c_long_long=no)])
 AC_MSG_RESULT($gdb_cv_c_long_long)
 if test $gdb_cv_c_long_long = yes; then

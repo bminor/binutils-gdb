@@ -1,3 +1,9 @@
+Mon Jul 29 21:13:20 1996  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in: Expand "long long" test to include code that triggers
+	known problem on HPUX with native compiler.
+	(configure): Regenerated.
+
 Mon Jul 29 18:12:27 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* somsolib.c (som_solib_create_inferior_hook): Don't
