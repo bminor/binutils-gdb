@@ -1,5 +1,28 @@
 2000-03-05  Mark Kettenis  <kettenis@gnu.org>
 
+	Allow GDB to run on Linux 2.0 again.
+	* config.in: Add HAVE_PTRACE_GETREGS.
+	* configure.in: Check if <sys/ptrace.h> defines PTRACE_GETREGS.
+	* configure: Regenerated.
+	* config/i386/nm-linux.h (CANNOT_FETCH_REGISTER,
+	CANNOT_STORE_REGISTER): New defines.
+	* i386-linux-nat.c (have_ptrace_getregs): New variable.
+	(PTRACE_XFER_TYPE, CANNOT_FETCH_REGISTER, fetch_register,
+	old_fetch_inferior_registers, CANNOT_STORE_REGISTER,
+	store_register, old_store_inferior_registers): Copied over from
+	`inptrace.c' as a temporary measure.
+	(fetch_regs, store_regs, fetch_fpregs, store_fpregs):
+	Conditionalize on HAVE_PTRACE_GETREGS.  Define stubs if
+	HAVE_PTRACE_GETREGS isn't defined.
+	(fetch_regs): Reset `have_ptrace_getregs' if ptrace call fails
+	with EIO.
+	(fetch_inferior_registers, store_inferior_registers): Fall back on
+	the method use in `infptrace.c' (by calling
+	old_fetch_inferior_registers and old_store_inferior_registers) if
+	`have_ptrace_getregs' isn't set.
+
+2000-03-05  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386-linux-nat.c: Use elf_gregset_t and elf_fpregset_t instead
 	of gregset_t and fpregset_t.  Those are the only names that are
 	guaranteed to specify the right types for all supported Linux
