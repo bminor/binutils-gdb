@@ -1,3 +1,13 @@
+2004-11-10  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa32_register_name, hppa64_register_name): Make static.
+	(hppa32_push_dummy_call, hppa64_push_dummy_call): Likewise.
+	(hppa_fetch_pointer_argument): Likewise.
+	(hppa_frame_cache): Use safe_frame_unwind_memory instead of 
+	deprecated_read_memory_nobpt.
+	(_initialize_hppa_tdep): Replace deprecated_add_show_from_set/
+	add_set_cmd sequence with add_setshow_boolean_cmd.
+
 2004-11-09  Andrew Cagney  <cagney@gnu.org>
 
 	GDB 6.3 released from GDB 6.3 branch.

@@ -632,7 +632,7 @@ hppa_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 
 /* Return the name of a register.  */
 
-const char *
+static const char *
 hppa32_register_name (int i)
 {
   static char *names[] = {
@@ -675,7 +675,7 @@ hppa32_register_name (int i)
     return names[i];
 }
 
-const char *
+static const char *
 hppa64_register_name (int i)
 {
   static char *names[] = {
@@ -720,7 +720,7 @@ hppa64_register_name (int i)
    We simply allocate the appropriate amount of stack space and put
    arguments into their proper slots.  */
    
-CORE_ADDR
+static CORE_ADDR
 hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			struct regcache *regcache, CORE_ADDR bp_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
@@ -892,7 +892,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
    This ABI also requires that the caller provide an argument pointer
    to the callee, so we do that too.  */
    
-CORE_ADDR
+static CORE_ADDR
 hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			struct regcache *regcache, CORE_ADDR bp_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
@@ -1653,8 +1653,16 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
       {
 	int reg;
 	char buf4[4];
-	long status = deprecated_read_memory_nobpt (pc, buf4, sizeof buf4);
-	long inst = extract_unsigned_integer (buf4, sizeof buf4);
+	long inst;
+
+	if (!safe_frame_unwind_memory (next_frame, pc, buf4, 
+				       sizeof buf4)) 
+	  {
+	    error ("Cannot read instruction at 0x%s\n", paddr_nz (pc));
+	    return (*this_cache);
+	  }
+
+	inst = extract_unsigned_integer (buf4, sizeof buf4);
 
 	/* Note the interesting effects of this instruction.  */
 	frame_size += prologue_inst_adjust_sp (inst);
@@ -2339,7 +2347,7 @@ hppa_smash_text_address (CORE_ADDR addr)
 }
 
 /* Get the ith function argument for the current function.  */
-CORE_ADDR
+static CORE_ADDR
 hppa_fetch_pointer_argument (struct frame_info *frame, int argi, 
 			     struct type *type)
 {
@@ -2627,9 +2635,11 @@ be no argument or the argument must be a depth.\n"), NULL);
 be no argument or the argument must be a depth.\n"), NULL);
 
   /* Debug this files internals. */
-  deprecated_add_show_from_set
-    (add_set_cmd ("hppa", class_maintenance, var_zinteger,
-		  &hppa_debug, "Set hppa debugging.\n\
-When non-zero, hppa specific debugging is enabled.", &setdebuglist),
-     &showdebuglist);
+  add_setshow_boolean_cmd ("hppa", class_maintenance, &hppa_debug, "\
+Set whether hppa target specific debugging information should be displayed.", "\
+Show whether hppa target specific debugging information is displayed.", "\
+This flag controls whether hppa target specific debugging information is\n\
+displayed.  This information is particularly useful for debugging frame\n\
+unwinding problems.", "hppa debug flag is %s.",
+			   NULL, NULL, &setdebuglist, &showdebuglist);
 }
