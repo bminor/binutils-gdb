@@ -1,3 +1,9 @@
+Tue Sep 20 11:34:27 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* coffread.c (init_stringtab): When copying length to stringtab,
+	use target format, not host format, since that is what the rest of
+	the code assumes.
+
 Mon Sep 19 15:48:10 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* Makefile.in: Removed prelude.o, i386-nlmstub.o, nlmstub.o,

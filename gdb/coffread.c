@@ -1085,7 +1085,9 @@ init_stringtab (abfd, offset)
     return 0;
 
   stringtab = (char *) xmalloc (length);
-  memcpy (stringtab, &length, sizeof length);
+  /* This is in target format (probably not very useful, and not currently
+     used), not host format.  */
+  memcpy (stringtab, lengthbuf, sizeof lengthbuf);
   if (length == sizeof length)		/* Empty table -- just the count */
     return 0;
 
@@ -1113,6 +1115,8 @@ getsymname (symbol_entry)
 
   if (symbol_entry->_n._n_n._n_zeroes == 0)
     {
+      /* FIXME: Probably should be detecting corrupt symbol files by
+	 seeing whether offset points to within the stringtab.  */
       result = stringtab + symbol_entry->_n._n_n._n_offset;
     }
   else
