@@ -40,7 +40,11 @@ struct elf_backend_data {
   void (*elf_info_to_howto) PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
   enum bfd_architecture arch;
 
-  /* WTF?? */
+  /* @@ I really don't think this should be here.  I don't know what
+     global_sym is supposed to be used for, but I doubt it's something
+     that would be considered global, e.g., if you've got a program
+     reading and writing many BFDs.  My hunch is that it's specific to
+     the output BFD.  If not, put a comment here explaining why.  */
   elf_symbol_type *global_sym;
 };
 
