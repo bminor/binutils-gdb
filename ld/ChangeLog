@@ -1,3 +1,7 @@
+Fri Feb  2 16:50:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Regenerate.
+
 Thu Feb  1 10:50:46 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emulparams/elf_i386.sh (TEXT_START_ADDR): Change to 0x8048000,

@@ -1,3 +1,7 @@
+Fri Feb  2 16:48:55 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Regenerate.
+
 Thu Feb  1 09:38:18 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* configure.in (i[3-6]86-*-win32): Becomes i[3-6]86-*-cygwin32.
