@@ -3,8 +3,10 @@
 @V@/bfd/ChangeLog-9495 @V@/bfd/ChangeLog.9495
 @V@/bfd/ChangeLog-9697 @V@/bfd/ChangeLog.9697
 @V@/bfd/ChangeLog-9899 @V@/bfd/ChangeLog.9899
-@V@/bfd/coff-tic54x.c @V@/bfd/coff-tc54x.c
-@V@/bfd/coff-tic80.c @V@/bfd/coff-tc80.c
+@V@/bfd/coff-tic30.c @V@/bfd/cofftic30.c
+@V@/bfd/coff-tic4x.c @V@/bfd/cofftic40.c
+@V@/bfd/coff-tic54x.c @V@/bfd/cofftic54x.c
+@V@/bfd/coff-tic80.c @V@/bfd/cofftic80.c
 @V@/bfd/cpu-ia64-opc.c @V@/bfd/cpuia64-opc.c
 @V@/bfd/cpu-m68hc11.c @V@/bfd/cm68hc11.c
 @V@/bfd/cpu-m68hc12.c @V@/bfd/cm68hc12.c
