@@ -107,10 +107,12 @@ do
 	-rm | +rm)
 		removing=${arg}
 		;;
-#	-srcdir=* | +srcdir=* | +srcdi=* | +srcd=* | +src=* | +sr=* | +s=*)
+	-site=* | +site=* | +sit=* | +si=*)
+		site=`echo ${arg} | sed 's/[+-]s[a-z]*=//'`
+		;;
+#	-srcdir=* | +srcdir=* | +srcdi=* | +srcd=* | +src=* | +sr=*)
 #		srcdir=`echo ${arg} | sed 's/[+-]s[a-z]*=//'`
 #		;;
-
 	-subdirs | +su*)
 		subdirs=${arg}
 		;;
@@ -422,6 +424,17 @@ for host in ${hosts} ; do
 				mv Makefile.tem ${Makefile}
 			fi
 
+			# Conditionalize the makefile for this site.
+			if [ -n "${site}" ] ; then
+				site_makefile_frag=smake-${site}
+
+				if [ -f ${srcdir}/${site_makefile_frag} ] ; then
+					(echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" ; 
+						sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" ${Makefile}) > Makefile.tem
+					mv Makefile.tem ${Makefile}
+				fi
+			fi
+
 			# set srcdir
 			sed "s@^srcdir = \.@srcdir = ${srcdir}@" ${Makefile} > Makefile.tem
 			mv Makefile.tem ${Makefile}
@@ -440,14 +453,14 @@ for host in ${hosts} ; do
 			sed "s:^NONSUBDIRS =.*$:NONSUBDIRS = ${noconfigdirs}:" ${Makefile} > Makefile.tem
 			mv Makefile.tem ${Makefile}
 
+			# remove any form feeds.
+			sed -e "s///" ${Makefile} > Makefile.tem
+			mv Makefile.tem ${Makefile}
+
 			using=
 			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
 				using=" using \"${host_makefile_frag}\""
 			fi
-
-			# remove any form feeds.
-			sed -e "s///" ${Makefile} > Makefile.tem
-			mv Makefile.tem ${Makefile}
 
 			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
 				if [ -z "${using}" ] ; then
@@ -459,8 +472,18 @@ for host in ${hosts} ; do
 				andusing=${using}
 			fi
 
+			if [ -f ${srcdir}/${site_makefile_frag} ] ; then
+				if [ -z "${andusing}" ] ; then
+					andandusing=" using \"${site_makefile_frag}\""
+				else
+					andandusing="${andusing} and \"${site_makefile_frag}\""
+				fi
+			else
+				andandusing=${using}
+			fi
+
 			if [ -n "${verbose}" -o -z "${recurring}" ] ; then
-				echo "Created \"${Makefile}\"" in `pwd`${andusing}.
+				echo "Created \"${Makefile}\"" in `pwd`${andandusing}.
 			fi
 
 			if [ -f ./configure.pos ] ; then
@@ -528,7 +551,10 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.45  1991/10/02 06:15:13  rich
+# Revision 1.46  1991/10/02 06:29:53  rich
+# Added +site=foo option for naming site specific Makefile fragments.
+#
+# Revision 1.45  1991/10/02  06:15:13  rich
 # Removed +f option.  Used to stand for +forcesubdirs which is now
 # called +subdirs.
 #
