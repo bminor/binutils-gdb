@@ -7,6 +7,11 @@ Mon Feb 17 07:13:27 1992  Fred Fish  (fnf at cygnus.com)
 	When creating a new user defined type, check to see if a partial
 	type already exists, and if so, bash it to fit.
 
+Fri Feb 14 19:00:17 1992  John Gilmore  (gnu at cygnus.com)
+
+	* coffread.c (decode_base_type):  Pass long, not union.
+	Fix by Eric Valette, ev@chorus.fr.
+
 Thu Feb 13 17:14:28 1992  Fred Fish  (fnf at cygnus.com)
 
 	* elfread.c (elf_symtab_read):  Fix code to correctly track

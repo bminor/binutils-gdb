@@ -1795,7 +1795,7 @@ decode_base_type (cs, c_type, aux)
 	    type = coff_alloc_type (cs->c_symnum);
 	    TYPE_CODE (type) = TYPE_CODE_STRUCT;
 	    TYPE_NAME (type) = concat ("struct ", "<opaque>", NULL);
-	    TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
+	    INIT_CPLUS_SPECIFIC(type);
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_FIELDS (type) = 0;
 	    TYPE_NFIELDS (type) = 0;
@@ -1804,7 +1804,7 @@ decode_base_type (cs, c_type, aux)
 	  {
 	    type = read_struct_type (cs->c_symnum,
 				    aux->x_sym.x_misc.x_lnsz.x_size,
-				    aux->x_sym.x_fcnary.x_fcn.x_endndx);
+				    aux->x_sym.x_fcnary.x_fcn.x_endndx.l);
 	  }
 	return type;
 
@@ -1814,7 +1814,7 @@ decode_base_type (cs, c_type, aux)
 	    /* anonymous union type */
 	    type = coff_alloc_type (cs->c_symnum);
 	    TYPE_NAME (type) = concat ("union ", "<opaque>", NULL);
-	    TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
+	    INIT_CPLUS_SPECIFIC(type);
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_FIELDS (type) = 0;
@@ -1824,7 +1824,7 @@ decode_base_type (cs, c_type, aux)
 	  {
 	    type = read_struct_type (cs->c_symnum,
 				    aux->x_sym.x_misc.x_lnsz.x_size,
-				    aux->x_sym.x_fcnary.x_fcn.x_endndx);
+				    aux->x_sym.x_fcnary.x_fcn.x_endndx.l);
 	  }
 	TYPE_CODE (type) = TYPE_CODE_UNION;
 	return type;
@@ -1832,7 +1832,7 @@ decode_base_type (cs, c_type, aux)
       case T_ENUM:
 	return read_enum_type (cs->c_symnum,
 				    aux->x_sym.x_misc.x_lnsz.x_size,
-				    aux->x_sym.x_fcnary.x_fcn.x_endndx);
+				    aux->x_sym.x_fcnary.x_fcn.x_endndx.l);
 
       case T_MOE:
 	/* shouldn't show up here */
@@ -1890,7 +1890,7 @@ read_struct_type (index, length, lastsym)
 
   type = coff_alloc_type (index);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
-  TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
+  INIT_CPLUS_SPECIFIC(type);
   TYPE_LENGTH (type) = length;
 
   while (!done && symnum < lastsym && symnum < nlist_nsyms_global)
@@ -2019,8 +2019,7 @@ read_enum_type (index, length, lastsym)
 
   /* Now fill in the fields of the type-structure.  */
 
-  /* FIXME: Should be sizeof (int) on target, not host.  */
-  TYPE_LENGTH (type) = sizeof (int);
+  TYPE_LENGTH (type) =  TARGET_INT_BIT / TARGET_CHAR_BIT;
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)
