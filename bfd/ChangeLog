@@ -1,3 +1,8 @@
+Thu Jan 11 11:23:30 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-m68k.c (howto_table): Change src_mask to 0 for all
+	relocation entries.
+
 Tue Jan  9 15:22:53 1996  David Mosberger-Tang  <davidm@azstarnet.com>
 
 	* coff-alpha.c (alpha_relocate_section): During final link, allow
