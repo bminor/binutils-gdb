@@ -1,3 +1,8 @@
+2005-03-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-dis.c (powerpc_dialect): Don't set PPC_OPCODE_ALTIVEC when
+	BOOKE.
+
 2005-03-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/es.po: Commit new Spanish translation.
