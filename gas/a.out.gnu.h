@@ -173,7 +173,8 @@ struct nlist {
    to satisfy requests for the indirect symbol, but not vice versa.
    If the other symbol does not have a definition, libraries will
    be searched to find a definition.  */
-#define N_INDR 0xa
+
+/*#define N_INDR 0xa*/
 
 /* The following symbols refer to set elements.
    All the N_SET[ATDB] symbols with the same name form one set.
