@@ -116,6 +116,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    
    
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
@@ -123,7 +124,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "wait.h"
 
-#include <stdio.h>
 #include <signal.h>
 
 /* unistd.h is needed to #define X_OK */
@@ -842,6 +842,9 @@ wait_for_inferior ()
 	  if (IN_SIGTRAMP (stop_pc, stop_func_name)
 	      && !IN_SIGTRAMP (prev_pc, prev_func_name))
 	    {
+	      /* This code is needed at least in the following case:
+		 The user types "next" and then a signal arrives (before
+		 the "next" is done).  */
 	      /* We've just taken a signal; go until we are back to
 		 the point where we took it and one more.  */
 	      step_resume_break_address = prev_pc;
@@ -1083,6 +1086,11 @@ Further execution is probably impossible.\n");
 	  if (access (exec_file, X_OK) != 0)
 	    printf ("The file \"%s\" is not executable.\n", exec_file);
 	  else
+	    /* I don't think we should ever get here.
+	       wait_for_inferior now ignores SIGSEGV's which happen in
+	       the shell (since the Bourne shell (/bin/sh) has some
+	       rather, er, uh, *unorthodox* memory management
+	       involving catching SIGSEGV).  */
 	    printf ("\
 You have just encountered a bug in \"sh\".  GDB starts your program\n\
 by running \"sh\" with a command to exec your program.\n\
@@ -1343,14 +1351,24 @@ restore_inferior_status (inf_status)
 
   bcopy (inf_status->stop_registers, stop_registers, REGISTER_BYTES);
 
-  if (inf_status->restore_stack_info)
+  /* The inferior can be gone if the user types "print exit(0)"
+     (and perhaps other times).  */
+  if (have_inferior_p() && inf_status->restore_stack_info)
     {
       fid = find_relative_frame (get_current_frame (),
 				 &level);
-      
-      if (FRAME_FP (fid) != inf_status->selected_frame_address ||
+
+      if (fid == 0 ||
+	  FRAME_FP (fid) != inf_status->selected_frame_address ||
 	  level != 0)
 	{
+	  /* I'm not sure this error message is a good idea.  I have
+	     only seen it occur after "Can't continue previously
+	     requested operation" (we get called from do_cleanups), in
+	     which case it just adds insult to injury (one confusing
+	     error message after another.  Besides which, does the
+	     user really care if we can't restore the previously
+	     selected frame?  */
 	  fprintf (stderr, "Unable to restore previously selected frame.\n");
 	  select_frame (get_current_frame (), 0);
 	  return;

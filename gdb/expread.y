@@ -27,13 +27,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    come first in the result.  */
    
 %{
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
 #include "frame.h"
 #include "expression.h"
 
-#include <stdio.h>
 #include <a.out.h>
 
 static struct expression *expout;
@@ -1283,7 +1283,8 @@ yylex ()
 
   if (!(c == '_' || c == '$'
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
-    error ("Invalid token in expression.");
+    /* We must have come across a bad character (e.g. ';').  */
+    error ("Invalid character '%c' in expression.", c);
 
   /* It's a name.  See how long it is.  */
   namelen = 0;

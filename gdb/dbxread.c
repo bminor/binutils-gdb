@@ -17,6 +17,18 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* Symbol read-in occurs in two phases:
+   1.  A scan (read_dbx_symtab()) of the entire executable, whose sole
+       purpose is to make a list of symbols (partial symbol table)
+       which will cause symbols
+       to be read in if referenced.  This scan happens when the
+       "symbol-file" command is given (symbol_file_command()).
+   2.  Full read-in of symbols.  (psymtab_to_symtab()).  This happens
+       when a symbol in a file for which symbols have not yet been
+       read in is referenced.
+   2a.  The "add-file" command.  Similar to #2.  */
+
+#include <stdio.h>
 #include "param.h"
 
 #ifdef READ_DBX_FORMAT
@@ -110,7 +122,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif /* not __GNU_STAB__ */
 #endif /* NO_GNU_STABS */
 
-#include <stdio.h>
 #include <obstack.h>
 #include <sys/param.h>
 #include <sys/file.h>
@@ -466,6 +477,10 @@ static int undef_types_allocated, undef_types_length;
 #define HASH_OFFSET 0
 #endif
 
+#if 0
+/* I'm not sure why this is here.  To debug bugs which cause
+   an infinite loop of allocations, I suppose.  In any event,
+   dumping core when out of memory isn't usually right.  */
 static int
 xxmalloc (n)
 {
@@ -477,6 +492,9 @@ xxmalloc (n)
     }
   return v;
 }
+#else /* not 0 */
+#define xxmalloc xmalloc
+#endif /* not 0 */
 
 /* Make a copy of the string at PTR with SIZE characters in the symbol obstack
    (and add a null character at the end in the copy).
@@ -1634,7 +1652,7 @@ symbol_file_command (name, from_tty)
   if (val < 0)
     perror_with_name (name);
   if (stat (name, &statbuf) == -1)
-    error ("internal: error in stat of already open file.");
+    perror_with_name (name);
   READ_STRING_TABLE_SIZE (buffer);
   if (buffer >= 0 && buffer < statbuf.st_size)
     {
@@ -2096,14 +2114,18 @@ read_dbx_symtab (desc, stringtab, stringtab_size, nlistlen, inclink,
 #ifdef N_NBTEXT
 	case N_NBTEXT:
 #endif
-#ifdef OFILE_FN_FLAGGED
+
+	  /* We need to be able to deal with both N_FN or N_TEXT,
+	     because we have no way of knowing whether the sys-supplied ld
+	     or GNU ld was used to make the executable.  */
+/* #ifdef OFILE_FN_FLAGGED */
 #if ! (N_FN & N_EXT)
 	case N_FN:
 #endif
 	case N_FN | N_EXT:
-#else
+/* #else */
 	case N_TEXT:
-#endif
+/* #endif */
 	  SET_NAMESTRING();
 	  if ((namestring[0] == '-' && namestring[1] == 'l')
 	      || (namestring [(nsl = strlen (namestring)) - 1] == 'o'
@@ -2131,6 +2153,8 @@ read_dbx_symtab (desc, stringtab, stringtab_size, nlistlen, inclink,
 	    }
 	  continue;
 
+#if 0
+	  /* See comments at N_FN above.  */
 #ifdef OFILE_FN_FLAGGED
 	case N_TEXT:
 #else
@@ -2139,6 +2163,7 @@ read_dbx_symtab (desc, stringtab, stringtab_size, nlistlen, inclink,
 #endif
 	case N_FN | N_EXT:
 #endif
+#endif /* 0 */
 	case N_UNDF:
 	case N_UNDF | N_EXT:
 	case N_ABS:
@@ -2866,7 +2891,8 @@ psymtab_to_symtab(pst)
 	}
 
       /* Open symbol file and read in string table */
-      stat (name, &statbuf);
+      if (stat (name, &statbuf) < 0)
+	perror_with_name (name);
       desc = open(name, O_RDONLY, 0); /* symbol_file_command
 					 guarrantees that the symbol file name
 					 will be absolute, so there is no
@@ -3267,13 +3293,16 @@ process_one_symbol (type, desc, value, name)
       if (desc != new->depth)
 	error ("Invalid symbol data: N_LBRAC/N_RBRAC symbol mismatch, symtab pos %d.", symnum);
 
+      /* Some native compilers put the variable decls inside of an
+         LBRAC/RBRAC block.  This macro should be nonzero if this
+	 is true.  DESC is N_DESC from the N_RBRAC symbol.  */
+#if !defined (VARIABLES_INSIDE_BLOCK)
+#define VARIABLES_INSIDE_BLOCK(desc) 0
+#endif
+
       /* Can only use new->locals as local symbols here if we're in
          gcc or on a machine that puts them before the lbrack.  */
-      /* Some native compilers put the variable decls inside of an
-         LBRAC/RBRAC block.  */
-#ifdef VARIABLES_INSIDE_BLOCK
-      if (processing_gcc_compilation)
-#endif
+      if (!VARIABLES_INSIDE_BLOCK(desc))
 	local_symbols = new->locals;
 
       /* If this is not the outermost LBRAC...RBRAC pair in the
@@ -3285,11 +3314,8 @@ process_one_symbol (type, desc, value, name)
 	 to be attached to the function's own block.  However, if
 	 it is so, we need to indicate that we just moved outside
 	 of the function.  */
-#ifdef VARIABLES_INSIDE_BLOCK
-      if (local_symbols && context_stack_depth > processing_gcc_compilation)
-#else
-      if (local_symbols && context_stack_depth > 1)
-#endif
+      if (local_symbols
+	  && context_stack_depth > !VARIABLES_INSIDE_BLOCK(desc))
 	{
 	  /* Muzzle a compiler bug that makes end < start.  */
 	  if (new->start_addr > value)
@@ -3303,11 +3329,9 @@ process_one_symbol (type, desc, value, name)
 	{
 	  within_function = 0;
 	}
-#ifdef VARIABLES_INSIDE_BLOCK
-      /* gcc: normal.  pcc: now pop locals of block just finished.  */
-      if (!processing_gcc_compilation)
+      if (VARIABLES_INSIDE_BLOCK(desc))
+	/* Now pop locals of block just finished.  */
 	local_symbols = new->locals;
-#endif
       break;
 
     case N_FN | N_EXT:
@@ -3386,8 +3410,8 @@ process_one_symbol (type, desc, value, name)
 	bzero (sym, sizeof *sym);
 	SYMBOL_NAME (sym) = savestring (name, strlen (name));
 	SYMBOL_CLASS (sym) = LOC_BLOCK;
-	SYMBOL_NAMESPACE (sym) = (enum namespace)
-	  copy_pending (local_symbols, common_block_i, common_block);
+	SYMBOL_NAMESPACE (sym) = (enum namespace)((long)
+	  copy_pending (local_symbols, common_block_i, common_block));
 	i = hashname (SYMBOL_NAME (sym));
 	SYMBOL_VALUE (sym) = (int) global_sym_chain[i];
 	global_sym_chain[i] = sym;
@@ -3673,7 +3697,8 @@ add_file_command (arg_string)
   val = lseek (desc, STRING_TABLE_OFFSET, 0);
   if (val < 0)
     perror_with_name (name);
-  stat (name, &statbuf);
+  if (stat (name, &statbuf) < 0)
+    perror_with_name (name);
   READ_STRING_TABLE_SIZE (buffer);
   if (buffer >= 0 && buffer < statbuf.st_size)
     {
@@ -4059,6 +4084,17 @@ define_symbol (value, string, desc)
       add_symbol_to_list (sym, &local_symbols);
       break;
 
+    case 'X':
+      /* This is used by Sun FORTRAN for "function result value".
+	 Sun claims ("dbx and dbxtool interfaces", 2nd ed)
+	 that Pascal uses it too, but when I tried it Pascal used
+	 "x:3" (local symbol) instead.  */
+      SYMBOL_CLASS (sym) = LOC_LOCAL;
+      SYMBOL_VALUE (sym) = value;
+      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      add_symbol_to_list (sym, &local_symbols);
+      break;
+
     default:
       error ("Invalid symbol data: unknown symbol-type code `%c' at symtab pos %d.", deftype, symnum);
     }
@@ -4233,6 +4269,12 @@ read_type (pp)
 	  /* Set the pointer ahead of the name which we just read.  */
 	  *pp = from;
 	
+#if 0
+	  /* The following hack is clearly wrong, because it doesn't
+	     check whether we are in a baseclass.  I tried to reproduce
+	     the case that it is trying to fix, but I couldn't get
+	     g++ to put out a cross reference to a basetype.  Perhaps
+	     it doesn't do it anymore.  */
 	  /* Note: for C++, the cross reference may be to a base type which
 	     has not yet been seen.  In this case, we skip to the comma,
 	     which will mark the end of the base class name.  (The ':'
@@ -4242,6 +4284,7 @@ read_type (pp)
 	  from = (char *) index (*pp, ',');
 	  if (from)
 	    *pp = from;
+#endif /* 0 */
 	}
 
 	/* Now check to see whether the type has already been declared.  */
@@ -4476,7 +4519,6 @@ read_struct_type (pp, type)
 
   register struct next_fnfieldlist *mainlist = 0;
   int nfn_fields = 0;
-  struct type *baseclass = NULL;
   int read_possible_virtual_info = 0;
 
   if (TYPE_MAIN_VARIANT (type) == 0)
@@ -4549,9 +4591,27 @@ read_struct_type (pp, type)
 	      error ("Invalid symbol data: bad visibility format at symtab pos %d.",
 		     symnum);
 	    }
+
+	  /* Offset of the portion of the object corresponding to
+	     this baseclass.  Always zero in the absence of
+	     multiple inheritance.  */
 	  offset = read_number (pp, ',');
 	  baseclass = read_type (pp);
 	  *pp += 1;		/* skip trailing ';' */
+
+	  if (offset != 0)
+	    {
+	      static int error_printed = 0;
+
+	      if (!error_printed)
+		{
+		  fprintf (stderr, 
+"\nWarning:  GDB has limited understanding of multiple inheritance...");
+		  error_printed = 1;
+		}
+	      offset = 0;
+	    }
+
 	  baseclass_vec[i] = lookup_basetype_type (baseclass, offset, via_virtual, via_public);
 
           /* Since lookup_basetype_type can copy the type,
@@ -4601,12 +4661,12 @@ read_struct_type (pp, type)
       new->next = list;
       list = new;
 
-      /* Read the data.  */
+      /* Get the field name.  */
       p = *pp;
       while (*p != ':') p++;
       list->field.name = obsavestring (*pp, p - *pp);
 
-      /* C++: Check to see if we have hit the methods yet. */
+      /* C++: Check to see if we have hit the methods yet.  */
       if (p[1] == ':')
 	break;
 
@@ -4857,8 +4917,13 @@ Therefore GDB will not know about your class variables.\n\
 
   TYPE_NFN_FIELDS (type) = nfn_fields;
   TYPE_NFN_FIELDS_TOTAL (type) = nfn_fields;
-  if (baseclass)
-    TYPE_NFN_FIELDS_TOTAL (type) += TYPE_NFN_FIELDS_TOTAL (baseclass);
+
+  {
+    int i;
+    for (i = 1; i <= TYPE_N_BASECLASSES (type); ++i)
+      TYPE_NFN_FIELDS_TOTAL (type) +=
+	TYPE_NFN_FIELDS_TOTAL (TYPE_BASECLASS (type, i));
+  }
 
   TYPE_FN_FIELDLISTS (type) =
     (struct fn_fieldlist *) obstack_alloc (symbol_obstack,

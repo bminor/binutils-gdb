@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
 #include "param.h"
@@ -26,7 +27,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 #endif
 
-#include <stdio.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/file.h>
@@ -370,12 +370,14 @@ find_source_lines (s, desc)
   int *line_charpos = (int *) xmalloc (lines_allocated * sizeof (int));
   extern int exec_mtime;
 
-  fstat (desc, &st);
+  if (fstat (desc, &st) < 0)
+    perror_with_name (s->filename);
   if (get_exec_file (0) != 0 && exec_mtime < st.st_mtime)
     printf ("Source file is more recent than executable.\n");
 
   data = (char *) alloca (st.st_size);
-  myread (desc, data, st.st_size);
+  if (myread (desc, data, st.st_size) < 0)
+    perror_with_name (s->filename);
   end = data + st.st_size;
   p = data;
   line_charpos[0] = 0;
@@ -525,8 +527,8 @@ print_source_lines (s, line, stopline, noerror)
   if (line < 1 || line > s->nlines)
     {
       close (desc);
-      error ("Line number out of range; %s has %d lines.",
-	     s->filename, s->nlines);
+      error ("Line number %d out of range; %s has %d lines.",
+	     line, s->filename, s->nlines);
     }
 
   if (lseek (desc, s->line_charpos[line - 1], 0) < 0)

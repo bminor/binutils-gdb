@@ -1,5 +1,5 @@
 /* Convex stuff for GDB.
-   Copyright (C) 1989 Free Software Foundation, Inc.
+   Copyright (C) 1990 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "command.h"
@@ -26,7 +27,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "wait.h"
 
-#include <stdio.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <a.out.h>
@@ -220,7 +220,6 @@ extern int exec_mtime;
 
 /* Virtual addresses of bounds of the two areas of memory in the core file.
    NB: These variables are set to plausible but useless values on convex.  */
-   
 
 extern CORE_ADDR data_start;
 extern CORE_ADDR data_end;
@@ -718,6 +717,7 @@ thread_continue (thread, step, signal)
    running; we will do a real wait, the thread will do something, and
    we will return that.  */
 
+pid_t
 wait (w)
     union wait *w;
 {
@@ -1774,13 +1774,12 @@ comm_registers_info (arg)
 
   if (arg)
     {
-      if (sscanf (arg, "0x%x", &regnum) == 1)
+      if (sscanf (arg, "0x%x", &regnum) == 1
+	  || sscanf (argc, "%d", &regnum) == 1)
 	{
 	  if (regnum > 0)
 	    regnum &= ~0x8000;
 	}
-      else if (sscanf (arg, "%d", &regnum) == 1)  
-	;
       else if (sscanf (arg, "$c%d", &regnum) == 1)
 	;
       else if (sscanf (arg, "$C%d", &regnum) == 1)
@@ -1861,7 +1860,6 @@ psw_info (arg)
     };
 
   long psw;
-
   struct pswbit *p;
 
   if (arg)
@@ -1948,4 +1946,3 @@ set parallel on     normal mode, parallel execution on random available CPUs\n\
 	   &cmdlist);
 
 }
-      

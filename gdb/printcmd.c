@@ -1233,7 +1233,9 @@ print_frame_args (func, fi, num, stream)
   register int last_regparm = 0;
   register struct symbol *lastsym, *sym, *nextsym;
   register value val;
-  CORE_ADDR highest_offset = 0;
+  /* Offset of stack argument that is at the highest offset.
+     -1 if we haven't come to a stack argument yet.  */
+  CORE_ADDR highest_offset = (CORE_ADDR) -1;
   register CORE_ADDR addr = FRAME_ARGS_ADDRESS (fi);
 
   if (func)
@@ -1273,10 +1275,12 @@ print_frame_args (func, fi, num, stream)
 	  current_offset
 	    = (((current_offset + sizeof (int) - 1) / sizeof (int))
 	       * sizeof (int));
-	  
-	  if ((current_offset
-	      + (arg_size - sizeof (int) + 3) / (sizeof (int)))
-	      > highest_offset)
+
+	  /* If this is the highest offset seen yet, set highest_offset.  */
+	  if (highest_offset == (CORE_ADDR)-1
+	      || ((current_offset
+		   + (arg_size - sizeof (int) + 3) / (sizeof (int)))
+		  > highest_offset))
 	    highest_offset = current_offset;
 	}
 
@@ -1284,6 +1288,32 @@ print_frame_args (func, fi, num, stream)
 	fprintf_filtered (stream, ", ");
       fputs_filtered (SYMBOL_NAME (sym), stream);
       fputs_filtered ("=", stream);
+
+/* Nonzero if a LOC_ARG which is a struct is useless.  */
+#if !defined (STRUCT_ARG_SYM_GARBAGE)
+#define STRUCT_ARG_SYM_GARBAGE(gcc_p) 0
+#endif
+
+      if (STRUCT_ARG_SYM_GARBAGE (b->gcc_compile_flag)
+	  && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
+	  && SYMBOL_CLASS (sym) == LOC_ARG)
+	{
+	  /* Try looking up that name.  SunOS4 puts out a usable
+	     symbol as a local variable (in addition to the one
+	     for the arg).  */
+	  struct symbol *sym2 =
+	    lookup_symbol (SYMBOL_NAME (sym), b, VAR_NAMESPACE, 0);
+
+	  if (sym2 != NULL)
+	    val = value_of_variable (sym2);
+	  else
+	    {
+	      fputs_filtered ("?", stream);
+	      first = 0;
+	      continue;
+	    }
+	}
+
       value_print (val, stream, 0, Val_no_prettyprint);
       first = 0;
     }
@@ -1292,7 +1322,8 @@ print_frame_args (func, fi, num, stream)
      enough about the stack to find them.  */
   if (num != -1)
     {
-      if (i && num * sizeof (int) + FRAME_ARGS_SKIP > highest_offset)
+      if (highest_offset != (CORE_ADDR) -1
+	  && num * sizeof (int) + FRAME_ARGS_SKIP > highest_offset)
 	print_frame_nameless_args (addr,
 				   highest_offset + sizeof (int),
 				   num * sizeof (int) + FRAME_ARGS_SKIP,

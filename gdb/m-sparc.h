@@ -42,6 +42,18 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define READ_DBX_FORMAT
 
+/* When passing a structure to a function, Sun cc passes the address
+   in a register, not the structure itself.  It (under SunOS4) creates
+   two symbols, so we get a LOC_ARG saying the address is on the stack
+   (a lie, and a serious one since we don't know which register to
+   use), and a LOC_REGISTER saying that the struct is in a register
+   (sort of a lie, but fixable with REG_STRUCT_HAS_ADDR).
+
+   This still doesn't work if the argument is not one passed in a
+   register (i.e. it's the 7th or later argument).  */
+#define REG_STRUCT_HAS_ADDR(gcc_p) (!gcc_p)
+#define STRUCT_ARG_SYM_GARBAGE(gcc_p) (!gcc_p)
+
 /* If Pcc says that a parameter is a short, it's a short.  This is
    because the parameter does get passed in in a register as an int,
    but pcc puts it onto the stack frame as a short (not nailing
@@ -240,14 +252,31 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy (((int *)(REGBUF))+8, (VALBUF), TYPE_LENGTH (TYPE))
+#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)	      \
+  {      	       	       	       	       	       	       	           \
+    if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)		       		   \
+      {							       		   \
+	bcopy (((int *)(REGBUF))+FP0_REGNUM,		       		   \
+	       (VALBUF), TYPE_LENGTH(TYPE));		       		   \
+      }							       		   \
+    else						       		   \
+      bcopy (((int *)(REGBUF))+8, (VALBUF), TYPE_LENGTH (TYPE));           \
+  }
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */
 /* On sparc, values are returned in register %o0.  */
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (REGISTER_BYTE (8), VALBUF, TYPE_LENGTH (TYPE))
+  {    	       	       	       	       	       	       	       	       	     \
+    if (TYPE_CODE (TYPE) = TYPE_CODE_FLT)				     \
+      /* Floating-point values are returned in the register pair */          \
+      /* formed by %f0 and %f1 (doubles are, anyway).  */                    \
+      write_register_bytes (REGISTER_BYTE (FP0_REGNUM), (VALBUF),	     \
+			    TYPE_LENGTH (TYPE));			     \
+    else								     \
+      /* Other values are returned in register %o0.  */                      \
+      write_register_bytes (REGISTER_BYTE (8), VALBUF, TYPE_LENGTH (TYPE));  \
+  }
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,

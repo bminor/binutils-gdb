@@ -180,7 +180,8 @@ get_frame_info (frame)
 }
 
 /* Return a structure containing various interesting information
-   about the frame that called NEXT_FRAME.  */
+   about the frame that called NEXT_FRAME.  Returns NULL
+   if there is no such frame.  */
 
 struct frame_info *
 get_prev_frame_info (next_frame)
@@ -302,9 +303,19 @@ get_frame_block (frame)
      FRAME frame;
 {
   struct frame_info *fi;
+  CORE_ADDR pc;
 
   fi = get_frame_info (frame);
-  return block_for_pc (fi->pc);
+
+  pc = fi->pc;
+  if (fi->next_frame != 0)
+    /* We are not in the innermost frame.  We need to subtract one to
+       get the correct block, in case the call instruction was the
+       last instruction of the block.  If there are any machines on
+       which the saved pc does not point to after the call insn, we
+       probably want to make fi->pc point after the call insn anyway.  */
+    --pc;
+  return block_for_pc (pc);
 }
 
 struct block *
@@ -431,15 +442,9 @@ find_pc_function (pc)
 /* Finds the "function" (text symbol) that is smaller than PC
    but greatest of all of the potential text symbols.  Sets
    *NAME and/or *ADDRESS conditionally if that pointer is non-zero.
-   Returns 0 if it couldn't find anything, 1 if it did.
-
-   Note that there are several possible responses:
-   * Set *NAME and *ADDRESS to nonzero values and return 0
-   * Set *NAME and *ADDRESS to zero and return 0
-   * Don't set *NAME and *ADDRESS and return 1
-   (I don't know whether it *should* work this way, but I'd rather
-   document it than risk breaking code
-   which depends on this behavior).  */
+   Returns 0 if it couldn't find anything, 1 if it did.  On a zero
+   return, *NAME and *ADDRESS are always set to zero.  On a 1 return,
+   *NAME and *ADDRESS contain real information.  */
 
 int
 find_pc_partial_function (pc, name, address)
@@ -462,6 +467,7 @@ find_pc_partial_function (pc, name, address)
 	  f = find_pc_function (pc);
 	  if (!f)
 	    {
+	    return_error:
 	      /* No availible symbol.  */
 	      if (name != 0)
 		*name = 0;
@@ -473,7 +479,8 @@ find_pc_partial_function (pc, name, address)
 	  if (name)
 	    *name = SYMBOL_NAME (f);
 	  if (address)
-	    *address = SYMBOL_VALUE (f);
+	    *address = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
+	  return 1;
 	}
 
       /* Get the information from a combination of the pst
@@ -484,20 +491,18 @@ find_pc_partial_function (pc, name, address)
 
       if (!psb && miscfunc == -1)
 	{
-	  if (address != 0)
-	    *address = 0;
-	  if (name != 0)
-	    *name = 0;
-	  return 0;
+	  goto return_error;
 	}
       if (!psb
 	  || (miscfunc != -1
-	      && SYMBOL_VALUE(psb) < misc_function_vector[miscfunc].address))
+	      && (SYMBOL_VALUE(psb)
+		  < misc_function_vector[miscfunc].address)))
 	{
 	  if (address)
 	    *address = misc_function_vector[miscfunc].address;
 	  if (name)
 	    *name = misc_function_vector[miscfunc].name;
+	  return 1;
 	}
       else
 	{
@@ -505,6 +510,7 @@ find_pc_partial_function (pc, name, address)
 	    *address = SYMBOL_VALUE (psb);
 	  if (name)
 	    *name = SYMBOL_NAME (psb);
+	  return 1;
 	}
     }
   else
@@ -512,13 +518,13 @@ find_pc_partial_function (pc, name, address)
     {
       miscfunc = find_pc_misc_function (pc);
       if (miscfunc == -1)
-	return 0;
+	goto return_error;
       if (address)
 	*address = misc_function_vector[miscfunc].address;
       if (name)
 	*name = misc_function_vector[miscfunc].name;
+      return 1;
     }
-  return 1;
 }
 
 /* Find the misc function whose address is the largest

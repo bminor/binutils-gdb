@@ -19,13 +19,13 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
 #include "inferior.h"
 #include "obstack.h"
 
-#include <stdio.h>
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <sys/user.h>
@@ -700,10 +700,12 @@ exec_file_command (filename, from_tty)
 	if (read_aout_hdr (execchan, &exec_aouthdr, aout_hdrsize) < 0)
 	  error ("\"%s\": can't read optional aouthdr", execfile);
 
-	if (read_section_hdr (execchan, _TEXT, &text_hdr, num_sections) < 0)
+	if (read_section_hdr (execchan, _TEXT, &text_hdr, num_sections,
+			      aout_hdrsize) < 0)
 	  error ("\"%s\": can't read text section header", execfile);
 
-	if (read_section_hdr (execchan, _DATA, &data_hdr, num_sections) < 0)
+	if (read_section_hdr (execchan, _DATA, &data_hdr, num_sections,
+			      aout_hdrsize) < 0)
 	  error ("\"%s\": can't read data section header", execfile);
 
 	text_start = exec_aouthdr.text_start;

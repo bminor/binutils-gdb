@@ -795,28 +795,31 @@ convert_from_68881 (from, to)
       *to = 0.0;
       return;
     }
+  else
+    {
 #ifdef HPUX_ASM
-  asm ("mov.l 8(%a6),%a0");
-  asm ("mov.l 12(%a6),%a1");
-  asm ("fmove.x (%a0),%fp0");
-  asm ("fmove.d %fp0,(%a1)");
+      asm ("mov.l 8(%a6),%a0");
+      asm ("mov.l 12(%a6),%a1");
+      asm ("fmove.x (%a0),%fp0");
+      asm ("fmove.d %fp0,(%a1)");
 #else /* not HPUX_ASM */
 #if 0
-  asm ("movl a6@(8),a0");
-  asm ("movl a6@(12),a1");
-  asm ("fmovex a0@,fp0");
-  asm ("fmoved fp0,a1@");
+      asm ("movl a6@(8),a0");
+      asm ("movl a6@(12),a1");
+      asm ("fmovex a0@,fp0");
+      asm ("fmoved fp0,a1@");
 #else
-  /* Hand-assemble those insns since some assemblers lose
-     and some have different syntax.  */
-  asm (".word 020156");
-  asm (".word 8");
-  asm (".word 021156");
-  asm (".word 12");
-  asm (".long 0xf2104800");
-  asm (".long 0xf2117400");
+      /* Hand-assemble those insns since some assemblers lose
+	 and some have different syntax.  */
+      asm (".word 020156");
+      asm (".word 8");
+      asm (".word 021156");
+      asm (".word 12");
+      asm (".long 0xf2104800");
+      asm (".long 0xf2117400");
 #endif
 #endif /* not HPUX_ASM */
+    }
 }
 
 /* The converse: convert the double *FROM to an extended float
@@ -828,27 +831,30 @@ convert_to_68881 (from, to)
 {
   if (!have_fpu)
       return;
+  else
+    {
 #ifdef HPUX_ASM
-  asm ("mov.l 8(%a6),%a0");
-  asm ("mov.l 12(%a6),%a1");
-  asm ("fmove.d (%a0),%fp0");
-  asm ("fmove.x %fp0,(%a1)");
+      asm ("mov.l 8(%a6),%a0");
+      asm ("mov.l 12(%a6),%a1");
+      asm ("fmove.d (%a0),%fp0");
+      asm ("fmove.x %fp0,(%a1)");
 #else /* not HPUX_ASM */
 #if 0
-  asm ("movl a6@(8),a0");
-  asm ("movl a6@(12),a1");
-  asm ("fmoved a0@,fp0");
-  asm ("fmovex fp0,a1@");
+      asm ("movl a6@(8),a0");
+      asm ("movl a6@(12),a1");
+      asm ("fmoved a0@,fp0");
+      asm ("fmovex fp0,a1@");
 #else
-  /* Hand-assemble those insns since some assemblers lose.  */
-  asm (".word 020156");
-  asm (".word 8");
-  asm (".word 021156");
-  asm (".word 12");
-  asm (".long 0xf2105400");
-  asm (".long 0xf2116800");
+      /* Hand-assemble those insns since some assemblers lose.  */
+      asm (".word 020156");
+      asm (".word 8");
+      asm (".word 021156");
+      asm (".word 12");
+      asm (".long 0xf2105400");
+      asm (".long 0xf2116800");
 #endif
 #endif /* not HPUX_ASM */
+    }
 }
 
 static jmp_buf	fpu_check;

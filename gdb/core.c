@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "frame.h"  /* required by inferior.h */
@@ -39,7 +40,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define N_MAGIC(exec) ((exec).a_magic)
 #endif
 #endif
-#include <stdio.h>
 #include <signal.h>
 #include <sys/param.h>
 #include <sys/dir.h>
@@ -97,6 +97,12 @@ CORE_ADDR data_start;
 CORE_ADDR data_end;
 CORE_ADDR stack_start;
 CORE_ADDR stack_end;
+
+#if defined (REG_STACK_SEGMENT)
+/* Start and end of the register stack segment.  */
+CORE_ADDR reg_stack_start;
+CORE_ADDR reg_stack_end;
+#endif /* REG_STACK_SEGMENT */
 
 /* Virtual addresses of bounds of two areas of memory in the exec file.
    Note that the data area in the exec file is used only when there is no core file.  */
@@ -188,7 +194,11 @@ validate_files ()
     {
       struct stat st_core;
 
-      fstat (corechan, &st_core);
+      if (fstat (corechan, &st_core) < 0)
+	/* It might be a good idea to print an error message.
+	   On the other hand, if the user tries to *do* anything with
+	   the core file, (s)he'll find out soon enough.  */
+	return;
 
       if (N_MAGIC (core_aouthdr) != 0
 	  && bcmp (&core_aouthdr, &exec_aouthdr, sizeof core_aouthdr))
@@ -368,6 +378,18 @@ xfer_core_file (memaddr, myaddr, len)
 	  xferfile = &corefile;
 	  xferchan = corechan;
 	}
+#ifdef REG_STACK_SEGMENT
+      /* Pyramids have an extra segment in the virtual address space
+         for the (control) stack of register-window frames */
+      else if (memaddr >= reg_stack_start && memaddr < reg_stack_end)
+	{
+	  i = min (len, reg_stack_end - memaddr);
+	  fileptr = memaddr - reg_stack_start + reg_stack_offset;
+	  xferfile = &corefile;
+	  xferchan = corechan;
+	}
+#endif /* REG_STACK_SEGMENT */
+
       else if (corechan < 0
 	       && memaddr >= exec_data_start && memaddr < exec_data_end)
 	{
@@ -404,7 +426,15 @@ xfer_core_file (memaddr, myaddr, len)
 	     stack, set i to do the rest of the operation now.  */
 	  i = len;
 	}
+#ifdef REG_STACK_SEGMENT
+      else if (memaddr >= reg_stack_end && reg_stack_end != 0)
+	{
+	  i = min (len, reg_stack_start - memaddr);
+	}
+      else if (memaddr >= stack_end && memaddr < reg_stack_start)
+#else /* no REG_STACK_SEGMENT.  */
       else if (memaddr >= stack_end && stack_end != 0)
+#endif /* no REG_STACK_SEGMENT.  */
 	{
 	  /* Since there is nothing at higher addresses than
 	     the stack, set i to do the rest of the operation now.  */

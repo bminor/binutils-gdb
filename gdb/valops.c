@@ -534,6 +534,9 @@ call_function (function, nargs, args)
   save_inferior_status (&inf_status, 1);
   old_chain = make_cleanup (restore_inferior_status, &inf_status);
 
+  /* PUSH_DUMMY_FRAME is responsible for saving the inferior registers
+     (and POP_FRAME for restoring them).  (At least on most machines)
+     they are saved on the stack in the inferior.  */
   PUSH_DUMMY_FRAME;
 
   old_sp = sp = read_register (SP_REGNUM);
@@ -872,7 +875,7 @@ value_struct_elt (arg1, args, name, static_memfuncp, err)
 	}
 
       if (found == 0)
-	error ("there is no field named %s", name);
+	error ("There is no field named %s.", name);
       return 0;
     }
 
@@ -1008,11 +1011,7 @@ check_field (arg1, name)
   /* Follow pointers until we get to a non-pointer.  */
 
   while (TYPE_CODE (t) == TYPE_CODE_PTR || TYPE_CODE (t) == TYPE_CODE_REF)
-    {
-      arg1 = value_ind (arg1);
-      COERCE_ARRAY (arg1);
-      t = VALUE_TYPE (arg1);
-    }
+    t = TYPE_TARGET_TYPE (t);
 
   if (TYPE_CODE (t) == TYPE_CODE_MEMBER)
     error ("not implemented: member type in check_field");
@@ -1037,7 +1036,6 @@ check_field (arg1, name)
 	break;
 
       t = TYPE_BASECLASS (t, 1);
-      VALUE_TYPE (arg1) = t;	/* side effect! */
     }
 
   /* C++: If it was not found as a data field, then try to

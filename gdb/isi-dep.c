@@ -18,6 +18,7 @@ In other words, go ahead and share GDB, but don't try to stop
 anyone else from sharing it farther.  Help stamp out software hoarding!
 */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
@@ -27,7 +28,6 @@ anyone else from sharing it farther.  Help stamp out software hoarding!
 #include <sys/types.h>
 #endif
 
-#include <stdio.h>
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <signal.h>
@@ -568,10 +568,12 @@ exec_file_command (filename, from_tty)
 	if (read_aout_hdr (execchan, &exec_aouthdr, aout_hdrsize) < 0)
 	  error ("\"%s\": can't read optional aouthdr", execfile);
 
-	if (read_section_hdr (execchan, _TEXT, &text_hdr, num_sections) < 0)
+	if (read_section_hdr (execchan, _TEXT, &text_hdr, num_sections,
+			      aout_hdrsize) < 0)
 	  error ("\"%s\": can't read text section header", execfile);
 
-	if (read_section_hdr (execchan, _DATA, &data_hdr, num_sections) < 0)
+	if (read_section_hdr (execchan, _DATA, &data_hdr, num_sections,
+			      aout_hdrsize) < 0)
 	  error ("\"%s\": can't read data section header", execfile);
 
 	text_start = exec_aouthdr.text_start;

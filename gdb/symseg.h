@@ -286,7 +286,12 @@ struct type
   /* If this type has a base class, put it here.
      If this type is a pointer type, the chain of member pointer
      types goes here.
-     Unused otherwise.  */
+     Unused otherwise.
+     
+     Contrary to all maxims of C style and common sense, the baseclasses
+     are indexed from 1 to N_BASECLASSES rather than 0 to N_BASECLASSES-1
+     (i.e. BASECLASSES points to one *before* the first element of
+     the array).  */
   struct type **baseclasses;
 };
 
@@ -444,7 +449,10 @@ struct partial_symbol
   /* Address class (for info_symbols) */
   enum address_class class;
   /* Value (only used for static functions currently).  Done this
-     way so that we can use the struct symbol macros.  */
+     way so that we can use the struct symbol macros.
+     Note that the address of a function is SYMBOL_VALUE (pst)
+     in a partial symbol table, but BLOCK_START (SYMBOL_BLOCK_VALUE (st))
+     in a symbol table.  */
   union
     {
       long value;

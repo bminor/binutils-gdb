@@ -35,7 +35,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Get rid of any system-imposed stack limit if possible.  */
 
-/* #define SET_STACK_LIMIT_HUGE */
+#define SET_STACK_LIMIT_HUGE
 
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
@@ -56,17 +56,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BELIEVE_PCC_PROMOTION 1
 
 /* Symbol types to ignore.  */
-
-#if defined (N_MONPT)
+/* 0xc4 is N_MONPT.  Use the numeric value for the benefit of people
+   with (rather) old OS's.  */
 #define IGNORE_SYMBOL(TYPE) \
     (((TYPE) & ~N_EXT) == N_TBSS       \
      || ((TYPE) & ~N_EXT) == N_TDATA   \
-     || ((TYPE) & ~N_EXT) == N_MONPT)
-#else /* no N_MONPT */
-#define IGNORE_SYMBOL(TYPE) \
-    (((TYPE) & ~N_EXT) == N_TBSS       \
-     || ((TYPE) & ~N_EXT) == N_TDATA)
-#endif /* no N_MONPT */
+     || ((TYPE) & ~N_EXT) == 0xc4)
 
 /* Use SIGCONT rather than SIGTSTP because convex Unix occasionally
    turkeys SIGTSTP.  I think.  */
@@ -341,10 +336,13 @@ extern struct value *value_of_trapped_internalvar ();
 
 #define PRINT_TYPELESS_INTEGER decout
 
-/* Specify that variables for a particular lexical context are listed
-   after the beginning LBRAC instead of before in the executables list
-   of symbols.  */
-#define VARIABLES_INSIDE_BLOCK
+/* For the native compiler, variables for a particular lexical context
+   are listed after the beginning LBRAC instead of before in the
+   executables list of symbols.  Using "gcc_compiled." to distinguish
+   between GCC and native compiler doesn't work on Convex because the
+   linker sorts the symbols to put "gcc_compiled." in the wrong place.
+   desc is nonzero for native, zero for gcc.   */
+#define VARIABLES_INSIDE_BLOCK(desc) (desc != 0)
 
 /* Pcc occaisionally puts an SO where there should be an SOL.   */
 #define PCC_SOL_BROKEN

@@ -18,12 +18,12 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
 #include "inferior.h"
 
-#include <stdio.h>
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <sys/user.h>
@@ -175,16 +175,23 @@ store_inferior_registers (regno)
   else
     {
       bcopy (registers, &inferior_registers, 16 * 4);
+#ifdef FP0_REGNUM
       bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
 	     sizeof inferior_fp_registers.fps_regs);
+#endif
       inferior_registers.r_ps = *(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
       inferior_registers.r_pc = *(int *)&registers[REGISTER_BYTE (PC_REGNUM)];
+
+#ifdef FP0_REGNUM
       bcopy (&registers[REGISTER_BYTE (FPC_REGNUM)],
 	     &inferior_fp_registers.fps_control,
 	     sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
+#endif
 
       ptrace (PTRACE_SETREGS, inferior_pid, &inferior_registers);
+#if FP0_REGNUM
       ptrace (PTRACE_SETFPREGS, inferior_pid, &inferior_fp_registers);
+#endif
     }
 }
 
@@ -548,10 +555,12 @@ exec_file_command (filename, from_tty)
 	if (read_aout_hdr (execchan, &exec_aouthdr, aout_hdrsize) < 0)
 	  error ("\"%s\": can't read optional aouthdr", execfile);
 
-	if (read_section_hdr (execchan, _TEXT, &text_hdr, num_sections) < 0)
+	if (read_section_hdr (execchan, _TEXT, &text_hdr, num_sections,
+			      aout_hdrsize) < 0)
 	  error ("\"%s\": can't read text section header", execfile);
 
-	if (read_section_hdr (execchan, _DATA, &data_hdr, num_sections) < 0)
+	if (read_section_hdr (execchan, _DATA, &data_hdr, num_sections,
+			      aout_hdrsize) < 0)
 	  error ("\"%s\": can't read data section header", execfile);
 
 	text_start = exec_aouthdr.text_start;

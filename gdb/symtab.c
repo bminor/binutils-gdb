@@ -17,11 +17,11 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
 #include "param.h"
 
-#include <stdio.h>
 #include <obstack.h>
 #include <assert.h>
 
@@ -1802,6 +1802,9 @@ decode_line_spec (string, funfirstline)
   return sals;
 }
 
+/* Given a list of NELTS symbols in sym_arr (with corresponding
+   mangled names in physnames), return a list of lines to operate on
+   (ask user if necessary).  */
 struct symtabs_and_lines
 decode_line_2 (argptr, sym_arr, physnames, nelts, funfirstline)
      char **argptr;
@@ -2130,8 +2133,8 @@ list_symbols (regexp, class)
 		      }
 		    else
 		      {
-			char buf[1024];
 # if 0
+			char buf[1024];
 			type_print_base (TYPE_FN_FIELD_TYPE(t, i), stdout, 0, 0); 
 			type_print_varspec_prefix (TYPE_FN_FIELD_TYPE(t, i), stdout, 0); 
 			sprintf (buf, " %s::", TYPE_NAME (t));
@@ -2166,12 +2169,15 @@ types_info (regexp)
   list_symbols (regexp, 2);
 }
 
+#if 0
+/* Tiemann says: "info methods was never implemented."  */
 static void
 methods_info (regexp)
      char *regexp;
 {
   list_symbols (regexp, 3);
 }
+#endif /* 0 */
 
 /* Call sort_block_syms to sort alphabetically the symbols of one block.  */
 
@@ -2393,11 +2399,13 @@ _initialize_symtab ()
 	    "All function names, or those matching REGEXP.");
   add_info ("types", types_info,
 	    "All types names, or those matching REGEXP.");
+#if 0
   add_info ("methods", methods_info,
 	    "All method names, or those matching REGEXP::REGEXP.\n\
 If the class qualifier is ommited, it is assumed to be the current scope.\n\
 If the first REGEXP is ommited, then all methods matching the second REGEXP\n\
 are listed.");
+#endif
   add_info ("sources", sources_info,
 	    "Source files in the program.");
 

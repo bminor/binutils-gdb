@@ -20,6 +20,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #ifdef COFF_FORMAT
@@ -31,7 +32,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #include <a.out.h>
-#include <stdio.h>
 #include <obstack.h>
 #include <sys/param.h>
 #include <sys/file.h>
@@ -762,7 +762,8 @@ symbol_file_command (name)
   num_sections = file_hdr.f_nscns;
   symtab_offset = file_hdr.f_symptr;
 
-  if (read_section_hdr (desc, _TEXT, &text_hdr, num_sections) < 0)
+  if (read_section_hdr (desc, _TEXT, &text_hdr, num_sections,
+			file_hdr.f_opthdr) < 0)
     error ("\"%s\": can't read text section header", name);
 
   /* Read the line number table, all at once.  */
@@ -865,7 +866,9 @@ read_coff_symtab (desc, nsyms)
 
   int num_object_files = 0;
   int next_file_symnum = -1;
-  char *filestring;
+
+  /* Name of the current file.  */
+  char *filestring = "";
   int depth;
   int fcn_first_line;
   int fcn_last_line;
@@ -1151,15 +1154,22 @@ read_aout_hdr (chan, aout_hdr, size)
   return 0;
 }
 
-read_section_hdr (chan, section_name, section_hdr, nsects)
+/* Read a section header.  OPTIONAL_HEADER_SIZE is the size of the
+   optional header (normally f_opthdr from the file header).
+
+   Return nonnegative for success, -1 for failure.  */
+int
+read_section_hdr (chan, section_name, section_hdr, nsects,
+                  optional_header_size)
     register int chan;
     register char *section_name;
     SCNHDR *section_hdr;
     register int nsects;
+    int optional_header_size;
 {
   register int i;
 
-  if (lseek (chan, FILHSZ + sizeof (AOUTHDR), 0) < 0)
+  if (lseek (chan, FILHSZ + optional_header_size, 0) < 0)
     return -1;
 
   for (i = 0; i < nsects; i++)

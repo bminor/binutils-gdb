@@ -2850,6 +2850,8 @@ Print all data types that are defined in the program.
 Print all data types that are defined in the program whose names
 contain a match for regular expression @var{regexp}.
 
+@ignore
+This was never implemented.
 @item info methods
 @itemx info methods @var{regexp}
 @kindex info methods
@@ -2860,6 +2862,7 @@ C++ classes provide a large number of methods.  Thus, the output
 from the @samp{ptype} command can be overwhelming and hard to use.  The
 @samp{info-methods} command filters the methods, printing only those
 which match the regular-expression @var{regexp}.
+@end ignore
 
 @item printsyms @var{filename}
 @kindex printsyms
@@ -3328,8 +3331,20 @@ Execute one instruction, like the GDB @samp{stepi} command.
 Execute until exit from the selected stack frame, like the GDB
 @samp{finish} command.
 
-@item C-c C-c
+@item M-c
+@comment C-c C-p in emacs 19
 Continue execution of the program, like the GDB @samp{cont} command.
+
+@item M-u
+@comment C-c C-u in emacs 19
+Go up the number of frames indicated by the numeric argument
+(@pxref{Arguments, , Numeric Arguments, emacs, The GNU Emacs Manual}),
+like the GDB @samp{up} command.@refill
+
+@item M-d
+@comment C-c C-d in emacs 19
+Go down the number of frames indicated by the numeric argument, like the
+GDB @samp{down} command.
 @end table
 
 In any source file, the Emacs command @kbd{C-x SPC} (@code{gdb-break})

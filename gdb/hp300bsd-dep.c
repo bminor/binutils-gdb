@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
@@ -26,13 +27,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/types.h>
 #endif
 
-#include <stdio.h>
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <signal.h>
-#include <sys/user.h>
 #include <sys/ioctl.h>
-#include <fcntl.h>
+/* #include <fcntl.h>  Can we live without this?  */
 
 #ifdef COFF_ENCAPSULATE
 #include "a.out.encap.h"
@@ -42,9 +41,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef N_SET_MAGIC
 #define N_SET_MAGIC(exec, val) ((exec).a_magic = (val))
 #endif
+
+#include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/ptrace.h>
+
+CORE_ADDR kernel_u_addr;
 
 extern int errno;
 
@@ -200,9 +203,17 @@ read_inferior_memory (memaddr, myaddr, len)
   for (i = 0; i < count; i++, addr += sizeof (int))
     {
       errno = 0;
+#if 0
+  /* This is now done by read_memory, because when this function did it,
+     reading a byte or short int hardware port read whole longs, causing
+     serious side effects
+     such as bus errors and unexpected hardware operation.  This would
+     also be a problem with ptrace if the inferior process could read
+     or write hardware registers, but that's not usually the case.  */
       if (remote_debugging)
 	buffer[i] = remote_fetch_word (addr);
       else
+#endif
 	buffer[i] = ptrace (PT_READ_I, inferior_pid, addr, 0);
       if (errno)
 	return errno;
@@ -275,11 +286,6 @@ write_inferior_memory (memaddr, myaddr, len)
 /* Work with core dump and executable files, for GDB. 
    This code would be in core.c if it weren't machine-dependent. */
 
-/* Recognize COFF format systems because a.out.h defines AOUTHDR.  */
-#ifdef AOUTHDR
-#define COFF_FORMAT
-#endif
-
 #ifndef N_TXTADDR
 #define N_TXTADDR(hdr) 0
 #endif /* no N_TXTADDR */
@@ -296,7 +302,9 @@ write_inferior_memory (memaddr, myaddr, len)
 #endif
 
 #ifndef COFF_FORMAT
+#ifndef AOUTHDR
 #define AOUTHDR struct exec
+#endif
 #endif
 
 extern char *sys_siglist[];
@@ -413,18 +421,30 @@ core_file_command (filename, from_tty)
       {
 	struct user u;
 
-	int reg_offset;
+	unsigned int reg_offset;
 
 	val = myread (corechan, &u, sizeof u);
 	if (val < 0)
-	  perror_with_name (filename);
+	  perror_with_name ("Not a core file: reading upage");
+	if (val != sizeof u)
+	  error ("Not a core file: could only read %d bytes", val);
+
+	/* We are depending on exec_file_command having been called
+	   previously to set exec_data_start.  Since the executable
+	   and the core file share the same text segment, the address
+	   of the data segment will be the same in both.  */
 	data_start = exec_data_start;
 
 	data_end = data_start + NBPG * u.u_dsize;
 	stack_start = stack_end - NBPG * u.u_ssize;
 	data_offset = NBPG * UPAGES;
 	stack_offset = NBPG * (UPAGES + u.u_dsize);
-	reg_offset = (int) u.u_ar0 - KERNEL_U_ADDR;
+
+	/* Some machines put an absolute address in here and some put
+	   the offset in the upage of the regs.  */
+	reg_offset = (int) u.u_ar0;
+	if (reg_offset > NBPG * UPAGES)
+	  reg_offset -= KERNEL_U_ADDR;
 
 	/* I don't know where to find this info.
 	   So, for now, mark it as not available.  */
@@ -441,12 +461,17 @@ core_file_command (filename, from_tty)
 	      char buf[MAX_REGISTER_RAW_SIZE];
 
 	      val = lseek (corechan, register_addr (regno, reg_offset), 0);
-	      if (val < 0)
-		perror_with_name (filename);
+	      if (val < 0
+		  || (val = myread (corechan, buf, sizeof buf)) < 0)
+		{
+		  char * buffer = (char *) alloca (strlen (reg_names[regno])
+						   + 30);
+		  strcpy (buffer, "Reading register ");
+		  strcat (buffer, reg_names[regno]);
+						   
+		  perror_with_name (buffer);
+		}
 
- 	      val = myread (corechan, buf, sizeof buf);
-	      if (val < 0)
-		perror_with_name (filename);
 	      supply_register (regno, buf);
 	    }
 	}
@@ -515,10 +540,12 @@ exec_file_command (filename, from_tty)
 	if (read_aout_hdr (execchan, &exec_aouthdr, aout_hdrsize) < 0)
 	  error ("\"%s\": can't read optional aouthdr", execfile);
 
-	if (read_section_hdr (execchan, _TEXT, &text_hdr, num_sections) < 0)
+	if (read_section_hdr (execchan, _TEXT, &text_hdr, num_sections,
+			      aout_hdrsize) < 0)
 	  error ("\"%s\": can't read text section header", execfile);
 
-	if (read_section_hdr (execchan, _DATA, &data_hdr, num_sections) < 0)
+	if (read_section_hdr (execchan, _DATA, &data_hdr, num_sections,
+			      aout_hdrsize) < 0)
 	  error ("\"%s\": can't read data section header", execfile);
 
 	text_start = exec_aouthdr.text_start;
@@ -568,4 +595,18 @@ exec_file_command (filename, from_tty)
   /* Tell display code (if any) about the changed file name.  */
   if (exec_file_display_hook)
     (*exec_file_display_hook) (filename);
+}
+
+void
+_initialize_hp300bsd_dep ()
+{
+  struct nlist names[2];
+
+  /* Get the address of the u area.  */
+  names[0].n_un.n_name = "_u";
+  names[1].n_un.n_name = NULL;
+  if (nlist ("/vmunix", names) == 0)
+    kernel_u_addr = names[0].n_value;
+  else
+    kernel_u_addr = 0x00917000;
 }

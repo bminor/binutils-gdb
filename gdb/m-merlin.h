@@ -21,6 +21,14 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ns16000
 #endif
 
+/* This machine doesn't have the siginterrupt call.  */
+#define NO_SIGINTERRUPT
+
+/* Under Utek, a ptrace'd process can be the only active process for
+   an executable.  Therefore instead of /bin/sh use gdb-sh (which should
+   just be a copy of /bin/sh which is world readable and writeable).  */
+#define SHELL_FILE "/usr/local/lib/gdb-sh"
+
 /* Define the bit, byte, and word ordering of the machine.  */
 /* #define BITS_BIG_ENDIAN */
 /* #define BYTES_BIG_ENDIAN */

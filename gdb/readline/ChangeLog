@@ -1,9 +1,22 @@
+Thu Feb  8 01:04:00 1990  Jim Kingdon  (kingdon at pogo.ai.mit.edu)
+
+	* Makefile (the *other* libreadline.a): Uncomment out ranlib line.
+
+Thu Feb  1 17:50:22 1990  Jim Kingdon  (kingdon at pogo.ai.mit.edu)
+
+	* Makefile (libreadline.a): Uncomment out ranlib line.
+
+Sun Nov 26 16:29:11 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* readline.c (rl_deprep_terminal): Only restore local_mode_flags
+	if they had been set.
+
 Thu Oct 19 17:18:40 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
 
 	* Move vi_doing_insert from vi_mode.c to readline.c
 
 	* readline.c: Move compare_strings before its use.
-	Remove definitions.
+	Remove declarations.
 
 	* readline.c: Move defining_kbd_macro above rl_dispatch.
 	(rl_dispatch): Remove "extern int defining_kbd_macro".

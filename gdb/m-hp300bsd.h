@@ -76,7 +76,18 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
 
-#define KERNEL_U_ADDR 0x00917000
+#define KERNEL_U_ADDR kernel_u_addr
+
+/* Same as offsetof macro from stddef.h (which 4.3BSD doesn't have).  */
+#define my_offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
+
+/* On the HP300, sigtramp is in the u area.  Gak!  User struct is not
+   mapped to the same virtual address in user/kernel address space
+   (hence STACK_END_ADDR as opposed to KERNEL_U_ADDR).  */
+#define IN_SIGTRAMP(pc, name) \
+  ((pc) >= STACK_END_ADDR + my_offsetof (struct user, u_pcb.pcb_sigc[0])   \
+   && (pc) < STACK_END_ADDR + my_offsetof (struct user, u_pcb.pcb_sigc[12]) \
+   )
 
 /* Address of end of stack space.  */
 

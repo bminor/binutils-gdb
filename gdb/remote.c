@@ -66,6 +66,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	kill req	k
 */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
@@ -78,7 +79,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 #endif
 
-#include <stdio.h>
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/file.h>

@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "command.h"
 #include "param.h"
@@ -27,7 +28,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #include <sys/file.h>
-#include <stdio.h>
 #include <setjmp.h>
 #include <signal.h>
 #include <sys/param.h>
@@ -239,6 +239,12 @@ main (argc, argv, envp)
   int batch = 0;
   register int i;
 
+#if defined (ALIGN_STACK_ON_STARTUP)
+  i = (int) &count & 0x3;
+  if (i != 0)
+    alloca (4 - i);
+#endif
+
   quit_flag = 0;
   linesize = 100;
   line = (char *) xmalloc (linesize);
@@ -276,7 +282,38 @@ main (argc, argv, envp)
 	frame_file_full_name = 1;
       else if (!strcmp (argv[i], "-xgdb_verbose"))
 	xgdb_verbose = 1;
+      /* -help: print a summary of command line switches.  */
+      else if (!strcmp (argv[i], "-help"))
+	{
+	  fputs ("\
+This is GDB, the GNU debugger.  Use the command\n\
+    gdb [options] [executable [core-file]]\n\
+to enter the debugger.\n\
+\n\
+Options available are:\n\
+  -help             Print this message.\n\
+  -quiet            Do not print version number on startup.\n\
+  -fullname         Output information used by emacs-GDB interface.\n\
+  -batch            Exit after processing options.\n\
+  -nx               Do not read .gdbinit file.\n\
+  -tty TTY          Use TTY for input/output by the program being debugged.\n\
+  -cd DIR           Change current directory to DIR.\n\
+  -directory DIR    Search for source files in DIR.\n\
+  -command FILE     Execute GDB commands from FILE.\n\
+  -symbols SYMFILE  Read symbols from SYMFILE.\n\
+  -exec EXECFILE    Use EXECFILE as the executable.\n\
+  -se FILE          Use FILE as symbol file and executable file.\n\
+  -core COREFILE    Analyze the core dump COREFILE.\n\
+\n\
+For more information, type \"help\" from within GDB, or consult the\n\
+GDB manual (available as on-line info or a printed manual).\n", stderr);
+	  /* Exiting after printing this message seems like
+	     the most useful thing to do.  */
+	  exit (0);
+	}
       else if (argv[i][0] == '-')
+	/* Other options take arguments, so don't confuse an
+	   argument with an option.  */
 	i++;
     }
 
@@ -307,7 +344,8 @@ main (argc, argv, envp)
 	  if (!strcmp (arg, "-q") || !strcmp (arg, "-nx")
 	      || !strcmp (arg, "-quiet") || !strcmp (arg, "-batch")
 	      || !strcmp (arg, "-fullname") || !strcmp (arg, "-nw")
-	      || !strcmp (arg, "-xgdb_verbose"))
+	      || !strcmp (arg, "-xgdb_verbose")
+	      || !strcmp (arg, "-help"))
 	    /* Already processed above */
 	    continue;
 
@@ -348,35 +386,6 @@ main (argc, argv, envp)
 	      else if (!strcmp (arg, "-t") || !strcmp (arg, "-tty"))
 		tty_command (argv[i], 0);
 
-	      /* -help: print a summary of command line switches.  */
-	      else if (!strcmp (arg, "-help"))
-		{
-		  fputs ("\
-This is GDB, the GNU debugger.  Use the command\n\
-    gdb [options] [executable [core-file]]\n\
-to enter the debugger.\n\
-\n\
-Options available are:\n\
-  -help             Print this message.\n\
-  -quiet            Do not print version number on startup.\n\
-  -fullname         Output information used by emacs-GDB interface.\n\
-  -batch            Exit after processing options.\n\
-  -nx               Do not read .gdbinit file.\n\
-  -tty TTY          Use TTY for input/output by the program being debugged.\n\
-  -cd DIR           Change current directory to DIR.\n\
-  -directory DIR    Search for source files in DIR.\n\
-  -command FILE     Execute GDB commands from FILE.\n\
-  -symbols SYMFILE  Read symbols from SYMFILE.\n\
-  -exec EXECFILE    Use EXECFILE as the executable.\n\
-  -se FILE          Use FILE as symbol file and executable file.\n\
-  -core COREFILE    Analyze the core dump COREFILE.\n\
-\n\
-For more information, type \"help\" from within GDB, or consult the\n\
-GDB manual (available as on-line info or a printed manual).\n", stderr);
-		  /* Exiting after printing this message seems like
-		     the most useful thing to do.  */
-		  exit (0);
-		}
 	      else
 		error ("Unknown command-line switch: \"%s\"\n", arg);
 	    }

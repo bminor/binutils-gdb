@@ -17,12 +17,12 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
 #include "inferior.h"
 
-#include <stdio.h>
 #define WOPR
 #include <sys/param.h>
 #include <sys/dir.h>
@@ -50,6 +50,39 @@ int request, pid, arg3, arg4;
 {
   return ptrace (request, pid, arg3, arg4);
 }
+
+#ifdef ATTACH_DETACH
+
+extern int attach_flag ;
+
+/* Start debugging the process whose number is PID.  */
+
+attach (pid)
+     int pid;
+{
+  errno = 0;
+  ptrace (PT_ATTACH, pid, 0, 0);
+  if (errno)
+    perror_with_name ("ptrace");
+  attach_flag = 1;
+  return pid;
+}
+
+/* Stop debugging the process whose number is PID
+   and continue it with signal number SIGNAL.
+   SIGNAL = 0 means just continue it.  */
+
+void
+detach (signal)
+     int signal;
+{
+  errno = 0;
+  ptrace (PT_DETACH, inferior_pid, 1, signal);
+  if (errno)
+    perror_with_name ("ptrace");
+  attach_flag = 0;
+}
+#endif /* ATTACH_DETACH */
 
 kill_inferior ()
 {
@@ -610,10 +643,12 @@ exec_file_command (filename, from_tty)
 	if (read_aout_hdr (execchan, &exec_aouthdr, aout_hdrsize) < 0)
 	  error ("\"%s\": can't read optional aouthdr", execfile);
 
-	if (read_section_hdr (execchan, _TEXT, &text_hdr, num_sections) < 0)
+	if (read_section_hdr (execchan, _TEXT, &text_hdr, num_sections,
+			      aout_hdrsize) < 0)
 	  error ("\"%s\": can't read text section header", execfile);
 
-	if (read_section_hdr (execchan, _DATA, &data_hdr, num_sections) < 0)
+	if (read_section_hdr (execchan, _DATA, &data_hdr, num_sections,
+			      aout_hdrsize) < 0)
 	  error ("\"%s\": can't read data section header", execfile);
 
 	text_start = exec_aouthdr.text_start;

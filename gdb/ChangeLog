@@ -1,6 +1,254 @@
+Thu Feb  8 01:11:55 1990  Jim Kingdon  (kingdon at pogo.ai.mit.edu)
+
+	* GDB 3.5 released.
+
+	* version.c: Change version number to 3.5
+
+Tue Feb  6 15:58:06 1990  Jim Kingdon  (kingdon at pogo.ai.mit.edu)
+
+	* m-hp9k320.h: define ATTACH_DETACH.
+	hp9k320-dep.c [ATTACH_DETACH]: New code.
+
+Thu Feb  1 17:43:00 1990  Jim Kingdon  (kingdon at pogo.ai.mit.edu)
+
+	* valprint.c (is_nan, val_print): Use char * not void *.
+
+	* symmisc.c (print_symbol): Print newline after label.
+
+Tue Jan 30 15:35:52 1990  Jim Kingdon  (kingdon at albert.ai.mit.edu)
+
+	* Makefile.dist (READLINE): Add {readline,history}.texinfo.
+
+	* m-merlin.h: Put in clarifying comments about SHELL_FILE.
+	config.gdb (merlin): Explain about /usr/local/lib/gdb-sh.
+
+Sat Jan 27 02:30:27 1990  Jim Kingdon  (kingdon at pogo.ai.mit.edu)
+
+	* version.c: Change version number to 3.5alpha.1.
+
+	* dbxread.c (process_one_symbol): Compare context_stack_depth
+	with !VARIABLES_INSIDE_BLOCK, not VARIABLES_INSIDE_BLOCK.
+
+Fri Jan 26 01:21:51 1990  Jim Kingdon  (kingdon at mole.ai.mit.edu)
+
+	* main.c [ALIGN_STACK_ON_STARTUP]: New code.
+	m-i386.h: Define ALIGN_STACK_ON_STARTUP.
+
+	* m-merlin.h (NO_SIGINTERRUPT, SHELL_FILE): Define.
+
+	* umax-dep.c (exec_file_command): Add commas to call to
+	read_section_hdr.
+
+Tue Jan 23 15:49:47 1990  Jim Kingdon  (kingdon at pogo.ai.mit.edu)
+
+	* dbxread.c (define_symbol): Deal with deftype 'X'.
+
+	* convex-dep.c (wait): Make it pid_t.
+
+	* convex-dep.c (comm_registers_info): accept decimal comm register
+	specification, as "i comm 32768".
+
+	* dbxread.c (process_one_symbol): Make VARIABLES_INSIDE_BLOCK
+	macro say by itself where variables are.  Pass it desc.
+	m-convex.h (VARIABLES_INSIDE_BLOCK): Nonzero for native compiler.
+
+	* m-convex.h (SET_STACK_LIMIT_HUGE): Define.
+	(IGNORE_SYMBOL): Take out #ifdef N_MONPT and put in 0xc4.
+
+Fri Jan 19 20:04:15 1990  Jim Kingdon  (kingdon at albert.ai.mit.edu)
+
+	* printcmd.c (print_frame_args): Always set highest_offset to
+	current_offset when former is -1.
+
+	* dbxread.c (read_struct_type): Print nice error message
+	when encountering multiple inheritance.
+
+Thu Jan 18 13:43:30 1990  Jim Kingdon  (kingdon at mole.ai.mit.edu)
+
+	* dbxread.c (read_dbx_symtab): Always treat N_FN as a potential
+	source for a x.o or -lx symbol, ignoring OFILE_FN_FLAGGED.
+
+	* printcmd.c (print_frame_args): Cast -1 to (CORE_ADDR).
+
+	* hp300bsd-dep.c (_initialize_hp300_dep): Get kernel_u_addr.
+	m-hp300bsd.h (KERNEL_U_ADDR): Use kernel_u_addr.
+
+	* infcmd.c (run_command): #if 0 out call to
+	breakpoint_clear_ignore_counts.
+
+Thu Jan 11 12:58:12 1990  Jim Kingdon  (kingdon at mole)
+
+	* printcmd.c (print_frame_args) [STRUCT_ARG_SYM_GARBAGE]:
+	Try looking up name of var before giving up & printing '?'.
+
+Wed Jan 10 14:00:14 1990  Jim Kingdon  (kingdon at pogo)
+
+	* many files: Move stdio.h before param.h.
+
+	* sun3-dep.c (store_inferior_registers): Only try to write FP
+	regs #ifdef FP0_REGNUM.
+
+Mon Jan  8 17:56:15 1990  Jim Kingdon  (kingdon at pogo)
+
+	* symtab.c: #if 0 out "info methods" code.
+
+Sat Jan  6 12:33:04 1990  Jim Kingdon  (kingdon at pogo)
+
+	* dbxread.c (read_struct_type): Set TYPE_NFN_FIELDS_TOTAL
+	from all baseclasses; remove vestigial variable baseclass.
+
+	* findvar.c (read_var_value): Check REG_STRUCT_HAS_ADDR.
+	printcmd.c (print_frame_args):  Check STRUCT_ARG_SYM_GARBAGE.
+	m-sparc.h: Define REG_STRUCT_HAS_ADDR and STRUCT_ARG_SYM_GARBAGE.
+
+	* blockframe.c (get_frame_block): Subtract one from pc if not
+	innermost frame.
+
+Fri Dec 29 15:26:33 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* printcmd.c (print_frame_args): check highest_offset != -1, not i.
+
+Thu Dec 28 16:21:02 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* valops.c (value_struct_elt): Clean up error msg.
+
+	* breakpoint.c (describe_other_breakpoints):
+	Delete extra space before "also set at" and add period at end.
+
+Tue Dec 19 10:28:42 1989  Jim Kingdon  (kingdon at pogo)
+
+	* source.c (print_source_lines): Tell user which line number
+	was out of range when printing error message.
+
+Sun Dec 17 14:14:09 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* blockframe.c (find_pc_partial_function): Use
+	BLOCK_START (SYMBOL_BLOCK_VALUE (f)) instead of
+	SYMBOL_VALUE (f) to get start of function.
+
+	* dbxread.c: Make xxmalloc just a #define for xmalloc.
+
+Thu Dec 14 16:13:16 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* m68k-opcode.h (fseq & following fp instructions):
+	Change @ to $.
+
+Fri Dec  8 19:06:44 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* breakpoint.c (breakpoint_clear_ignore_counts): New function.
+	infcmd.c (run_command): Call it.
+
+Wed Dec  6 15:03:38 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* valprint.c: Change it so "array-max 0" means there is
+	no limit.
+
+	* expread.y (yylex): Change error message "invalid token in
+	expression" to "invalid character '%c' in expression".
+
+Mon Dec  4 16:12:54 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* blockframe.c (find_pc_partial_function): Always return 1
+	for success, 0 for failure, and set *NAME and *ADDRESS to
+	match the return value.
+
+	* dbxread.c (symbol_file_command): Use perror_with_name on
+	error from stat.
+	(psymtab_to_symtab, add_file_command),
+	core.c (validate_files), source.c (find_source_lines),
+	default-dep.c (exec_file_command): Check for errors from stat,
+	fstat, and myread.
+
+Fri Dec  1 05:16:42 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* valops.c (check_field): When following pointers, just get
+	their types; don't call value_ind.
+	
+Thu Nov 30 14:45:29 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* config.gdb (pyr): New machine.
+	core.c [REG_STACK_SEGMENT]: New code.
+	dbxread.c (process_one_symbol): Cast return from copy_pending
+	to long before casting to enum namespace.
+	infrun.c: Split registers_info into DO_REGISTERS_INFO
+	and registers_info.
+	m-pyr.h, pyr-{dep.c,opcode.h,pinsn.c}: New files.
+
+	* hp300bsd-dep.c: Stay in sync with default-dep.c.
+
+	* m-hp300bsd.h (IN_SIGTRAMP): Define.
+
+Mon Nov 27 23:48:21 1989  Jim Kingdon  (kingdon at apple-gunkies.ai.mit.edu)
+
+	* m-sparc.h (EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE):
+	Return floating point values in %f0.
+
+Tue Nov 21 00:34:46 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* dbxread.c (read_type): #if 0 out code which skips to
+	comma following x-ref.
+
+Sat Nov 18 20:10:54 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* valprint.c (val_print): Undo changes of Nov 11 & 16.
+	(print_string): Add parameter force_ellipses.
+	(val_print): Pass force_ellipses true when we stop fetching string
+	before we get to the end, else pass false.
+
+Thu Nov 16 11:59:50 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* infrun.c (restore_inferior_status): Don't try to restore
+	selected frame if the inferior no longer exists.
+
+	* valprint.c (val_print): Rewrite string printing code not to
+	call print_string.
+
+	* Makefile.dist (clean): Remove xgdb and xgdb.o.
+
+Tue Nov 14 12:41:47 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* Makefile.dist (XGDB, bindir, xbindir, install, all): New stuff.
+
+Sat Nov 11 15:29:38 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* valprint.c (val_print): chars_to_get: New variable.
+
+Thu Nov  9 12:31:47 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* main.c (main): Process "-help" as a switch that doesn't
+	take an argument.
+
+Wed Nov  8 13:07:02 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* Makefile.dist (gdb.tar.Z): Add "else true".
+
+Tue Nov  7 12:25:14 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* infrun.c (restore_inferior_status): Don't dereference fid if NULL.
+
+	* config.gdb (sun3, sun4): Accept "sun3" and "sun4".
+
+Mon Nov  6 09:49:23 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
+
+	* Makefile.dist (Makefile): Move comments after commands.
+
+	* *-dep.c [READ_COFF_SYMTAB]: Pass optional header size to
+	read_section_hdr().
+
+	* inflow.c: Include <fcntl.h> regardless of USG.
+
+	* coffread.c (read_section_hdr): Add optional_header_size.
+	(symbol_file_command): Pass optional header size to
+	read_section_hdr().
+	(read_coff_symtab): Initialize filestring.
+
+	* version.c: Change version to 3.4.xxx.
+
+	* GDB 3.4 released.
+
 Sun Nov  5 11:39:01 1989  Jim Kingdon  (kingdon at hobbes.ai.mit.edu)
 
-	* version.c: Change version to 3.4
+	* version.c: Change version to 3.4.
 
 	* symtab.c (decode_line_1): Only skip past "struct" if it
 	is there.

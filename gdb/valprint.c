@@ -23,10 +23,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "value.h"
 
-/* Maximum number of chars to print for a string pointer value
-   or vector contents.  */
+/* GNU software is only expected to run on systems with 32-bit integers.  */
+#define UINT_MAX 0xffffffff
 
-static int print_max;
+/* Maximum number of chars to print for a string pointer value
+   or vector contents, or UINT_MAX for no limit.  */
+
+static unsigned int print_max;
 
 static void type_print_varspec_suffix ();
 static void type_print_varspec_prefix ();
@@ -45,13 +48,15 @@ char **float_type_table;
 
 /* Print the character string STRING, printing at most LENGTH characters.
    Printing stops early if the number hits print_max; repeat counts
-   are printed as appropriate.  */
+   are printed as appropriate.  Print ellipses at the end if we
+   had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.  */
 
 void
-print_string (stream, string, length)
+print_string (stream, string, length, force_ellipses)
      FILE *stream;
      char *string;
      unsigned int length;
+     int force_ellipses;
 {
   register unsigned int i;
   unsigned int things_printed = 0;
@@ -118,8 +123,7 @@ print_string (stream, string, length)
   if (in_quotes)
     fputs_filtered ("\"", stream);
 
-  /* Print ellipses if we stopped before printing LENGTH characters.  */
-  if (i < length)
+  if (force_ellipses || i < length)
     fputs_filtered ("...", stream);
 }
 
@@ -149,7 +153,7 @@ value_print (val, stream, format, pretty)
       /* Print arrays of characters using string syntax.  */
       if (typelen == 1 && TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT
 	  && format == 0)
-	print_string (stream, VALUE_CONTENTS (val), n);
+	print_string (stream, VALUE_CONTENTS (val), n, 0);
       else
 	{
 	  unsigned int things_printed = 0;
@@ -292,7 +296,7 @@ val_print (type, valaddr, address, stream, format,
 	  /* For an array of chars, print with string syntax.  */
 	  if (eltlen == 1 && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && format == 0)
-	    print_string (stream, valaddr, len);
+	    print_string (stream, valaddr, len, 0);
 	  else
 	    {
 	      unsigned int things_printed = 0;
@@ -478,7 +482,9 @@ val_print (type, valaddr, address, stream, format,
 	      && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && format == 0
 	      && unpack_long (type, valaddr) != 0
-	      && print_max)
+	      /* If print_max is UINT_MAX, the alloca below will fail.
+	         In that case don't try to print the string.  */
+	      && print_max < UINT_MAX)
 	    {
 	      fprintf_filtered (stream, " ");
 
@@ -497,6 +503,16 @@ val_print (type, valaddr, address, stream, format,
 		  int out_of_bounds = 0;
 		  char *string = (char *) alloca (print_max);
 
+		  /* If the loop ends by us hitting print_max characters,
+		     we need to have elipses at the end.  */
+		  int force_ellipses = 1;
+
+		  /* This loop only fetches print_max characters, even
+		     though print_string might want to print more
+		     (with repeated characters).  This is so that
+		     we don't spend forever fetching if we print
+		     a long string consisting of the same character
+		     repeated.  */
 		  while (i < print_max)
 		    {
 		      QUIT;
@@ -504,19 +520,23 @@ val_print (type, valaddr, address, stream, format,
 				       + i, &c, 1))
 			{
 			  out_of_bounds = 1;
+			  force_ellipses = 0;
 			  break;
 			}
 		      else if (c == '\0')
-			break;
+			{
+			  force_ellipses = 0;
+			  break;
+			}
 		      else
 			string[i++] = c;
 		    }
 
 		  if (i != 0)
-		    print_string (stream, string, i);
+		    print_string (stream, string, i, force_ellipses);
 		  if (out_of_bounds)
 		    fprintf_filtered (stream,
-				      "*** <Address 0x%x out of bounds>",
+				      " <Address 0x%x out of bounds>",
 				      (*(int *) valaddr) + i);
 		}
 
@@ -699,7 +719,7 @@ val_print (type, valaddr, address, stream, format,
 	  break;
 	}
 #ifdef IEEE_FLOAT
-      if (is_nan ((void *) valaddr, TYPE_LENGTH (type)))
+      if (is_nan ((char *) valaddr, TYPE_LENGTH (type)))
 	{
 	  fprintf_filtered (stream, "NaN");
 	  break;
@@ -735,7 +755,7 @@ val_print (type, valaddr, address, stream, format,
 
 int
 is_nan (fp, len)
-     void *fp;
+     char *fp;
      int len;
 {
   int lowhalf, highhalf;
@@ -1276,6 +1296,8 @@ set_maximum_command (arg)
 {
   if (!arg) error_no_arg ("value for maximum elements to print");
   print_max = parse_and_eval_address (arg);
+  if (print_max == 0)
+    print_max = UINT_MAX;
 }
 
 static void
@@ -1304,8 +1326,12 @@ format_info (arg, from_tty)
 	  prettyprint ? "on" : "off");
   printf ("Printing of unions interior to structures is %s.\n",
 	  unionprint ? "on" : "off");
-  printf ("The maximum number of array elements printed is %d.\n",
-	  print_max);
+  if (print_max == UINT_MAX)
+    printf_filtered
+      ("There is no maximum number of array elements printed.\n");
+  else
+    printf_filtered
+      ("The maximum number of array elements printed is %d.\n", print_max);
 }
 
 extern struct cmd_list_element *setlist;
@@ -1314,7 +1340,8 @@ void
 _initialize_valprint ()
 {
   add_cmd ("array-max", class_vars, set_maximum_command,
-	   "Set NUMBER as limit on string chars or array elements to print.",
+	   "Set NUMBER as limit on string chars or array elements to print.\n\
+\"set array-max 0\" causes there to be no limit.",
 	   &setlist);
 
   add_cmd ("prettyprint", class_support, set_prettyprint_command,

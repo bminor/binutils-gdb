@@ -22,6 +22,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FPU
 
 /* There is a bug which can cause alloca to fail to allocate large
-   areas of memory one time in every 4096 (we think).  Hard to reproduce
-   so it will be hard to detect when this bug is fixed.  */
+   areas of memory one time in every 4096 (we think).  */
+/* chase@orc.olivetti.com says that 4 megabyte alloca's consistently fail,
+   even though the stack limit (SET_STACK_LIMIT_HUGE) has been set
+   to 250 megabytes.  */
 #define BROKEN_LARGE_ALLOCA

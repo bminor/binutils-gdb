@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
@@ -25,7 +26,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "environ.h"
 #include "value.h"
 
-#include <stdio.h>
 #include <signal.h>
 #include <sys/param.h>
 
@@ -107,6 +107,7 @@ struct environ *inferior_environ;
 
 CORE_ADDR read_pc ();
 struct command_line *get_breakpoint_commands ();
+void breakpoint_clear_ignore_counts ();
 
 
 int
@@ -159,6 +160,18 @@ Start it from the beginning? "))
 	error ("Program not restarted.");
       kill_inferior ();
     }
+
+#if 0
+  /* On the other hand, some users want to do
+	 break open
+	 ignore 1 40
+	 run
+     So it's not clear what is best.  */
+
+  /* It is confusing to the user for ignore counts to stick around
+     from previous runs of the inferior.  So clear them.  */
+  breakpoint_clear_ignore_counts ();
+#endif
 
   exec_file = (char *) get_exec_file (1);
 
@@ -765,33 +778,22 @@ write_pc (val)
 
 char *reg_names[] = REGISTER_NAMES;
 
-static void
-registers_info (addr_exp)
-     char *addr_exp;
+/* Print out the machine register regnum. If regnum is -1,
+   print all registers.
+   For most machines, having all_registers_info() print the
+   register(s) one per line is good enough. If a different format
+   is required, (eg, for SPARC or Pyramid 90x, which both have
+   lots of regs), or there is an existing convention for showing
+   all the registers, define the macro DO_REGISTERS_INFO(regnum)
+   to provide that format.  */  
+#if !defined (DO_REGISTERS_INFO)
+#define DO_REGISTERS_INFO(regnum) do_registers_info(regnum)
+static void do_registers_info (regnum)
+     int regnum;
 {
   register int i;
-  int regnum;
 
-  if (!have_inferior_p () && !have_core_file_p ())
-    error ("No inferior or core file");
-
-  if (addr_exp)
-    {
-      if (*addr_exp >= '0' && *addr_exp <= '9')
-	regnum = atoi (addr_exp);
-      else
-	{
-	  register char *p = addr_exp;
-	  if (p[0] == '$')
-	    p++;
-	  for (regnum = 0; regnum < NUM_REGS; regnum++)
-	    if (!strcmp (p, reg_names[regnum]))
-	      break;
-	  if (regnum == NUM_REGS)
-	    error ("%s: invalid register name.", addr_exp);
-	}
-    }
-  else
+  if (regnum == -1)
     printf_filtered (
       "Register       Contents (relative to selected stack frame)\n\n");
 
@@ -801,7 +803,7 @@ registers_info (addr_exp)
       unsigned char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
       REGISTER_TYPE val;
 
-      if (addr_exp != 0 && i != regnum)
+      if (regnum != -1 && i != regnum)
 	continue;
 
       /* Get the data in raw format, then convert also to virtual format.  */
@@ -851,6 +853,38 @@ registers_info (addr_exp)
 	}
       printf_filtered ("\n");
     }
+}
+#endif /* no DO_REGISTERS_INFO.  */
+
+static void
+registers_info (addr_exp)
+     char *addr_exp;
+{
+  int regnum;
+
+  if (!have_inferior_p () && !have_core_file_p ())
+    error ("No inferior or core file");
+
+  if (addr_exp)
+    {
+      if (*addr_exp >= '0' && *addr_exp <= '9')
+	regnum = atoi (addr_exp);
+      else
+	{
+	  register char *p = addr_exp;
+	  if (p[0] == '$')
+	    p++;
+	  for (regnum = 0; regnum < NUM_REGS; regnum++)
+	    if (!strcmp (p, reg_names[regnum]))
+	      break;
+	  if (regnum == NUM_REGS)
+	    error ("%s: invalid register name.", addr_exp);
+	}
+    }
+  else
+    regnum = -1;
+
+  DO_REGISTERS_INFO(regnum);
 }
 
 #ifdef ATTACH_DETACH

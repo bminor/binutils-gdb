@@ -1,12 +1,17 @@
 /* This file should be run through the C preprocessor by config.gdb
    to produce the Makefile.  */
 
-/* System V:
- If your system has a broken alloca(), define ALLOCA & ALLOCA1 below.
- Also, if you compile gdb with a compiler which uses the coff
- encapsulation feature (this is a function of the compiler used, NOT
- of the m-?.h file selected by config.gdb), you must make sure that
- the GNU nm is the one that is used by munch. */
+/* Define this to xgdb if you want to compile xgdb as well as gdb.  */
+XGDB=
+/* Place to install binaries.  */
+bindir=/usr/local/bin
+/* Place to install X binaries.  */
+xbindir=$(bindir)
+
+/* System V: If you compile gdb with a compiler which uses the coff
+   encapsulation feature (this is a function of the compiler used, NOT
+   of the m-?.h file selected by config.gdb), you must make sure that
+   the GNU nm is the one that is used by munch.  */
 
 /* If you are compiling with GCC, make sure that either 1) You use the
  -traditional flag, or 2) You have the fixed include files where GCC
@@ -105,7 +110,7 @@ MUNCH_DEFINE = ${SYSV_DEFINE}
 TERMCAP = -ltermcap
 
 /* M_CLIBS, if defined, has system-dependent libs
- For example, -lPW for System V */
+ For example, -lPW for System V to get alloca().  */
 #ifndef M_CLIBS
 #define M_CLIBS
 #endif
@@ -123,23 +128,24 @@ SFILES = blockframe.c breakpoint.c dbxread.c coffread.c command.c core.c \
 
 DEPFILES = umax-dep.c gould-dep.c default-dep.c sun3-dep.c \
 	   sparc-dep.c hp9k320-dep.c hp300bsd-dep.c news-dep.c i386-dep.c \
-	   symmetry-dep.c convex-dep.c altos-dep.c isi-dep.c
+	   symmetry-dep.c convex-dep.c altos-dep.c isi-dep.c pyr-dep.c
 
 PINSNS = gld-pinsn.c i386-pinsn.c sparc-pinsn.c vax-pinsn.c m68k-pinsn.c \
-	 ns32k-pinsn.c convex-pinsn.c
+	 ns32k-pinsn.c convex-pinsn.c pyr-pinsn.c
 
 HFILES = command.h defs.h environ.h expression.h frame.h getpagesize.h \
 	 inferior.h symseg.h symtab.h value.h wait.h \
 	 a.out.encap.h a.out.gnu.h stab.gnu.h 
 
 OPCODES = m68k-opcode.h pn-opcode.h sparc-opcode.h npl-opcode.h vax-opcode.h \
-	  ns32k-opcode.h convex-opcode.h
+	  ns32k-opcode.h convex-opcode.h pyr-opcode.h
 
 MFILES = m-hp9k320.h m-hp300bsd.h m-i386.h m-i386gas.h \
   m-i386-sv32.h m-i386g-sv32.h m-isi.h m-merlin.h \
   m-altos.h m-news.h m-newsos3.h m-npl.h m-pn.h \
   m-sparc.h m-sun2.h m-sun3.h m-sun2os4.h \
-  m-sun3os4.h m-sun4os4.h m-umax.h m-vax.h m-symmetry.h m-convex.h
+  m-sun3os4.h m-sun4os4.h m-umax.h m-vax.h m-symmetry.h m-convex.h \
+  m-pyr.h
 
 /* This list of files really shouldn't be in this makefile, but I can't think
    of any good way to get the readline makefile to tell us what files
@@ -148,6 +154,7 @@ READLINE = readline.c history.c funmap.c \
   emacs_keymap.c vi_keymap.c vi_mode.c keymaps.c \
   readline.h history.h keymaps.h chardefs.h \
   inc-readline.texinfo inc-history.texinfo \
+  readline.texinfo history.texinfo \
   Makefile ChangeLog
 
 REMOTE_EXAMPLES = remote-sa.m68k.shar remote-multi.shar
@@ -193,6 +200,16 @@ MD=M_MAKEDEFINE
 	${CC} -c ${CFLAGS} $< */
 TARGET_ARCH=
 
+all: gdb $(XGDB)
+
+install: gdb $(XGDB)
+	cp gdb $(bindir)/gdb.new
+	mv $(bindir)/gdb.new $(bindir)/gdb
+	-if [ "$(XGDB)" = xgdb ]; then \
+		cp xgdb $(xbindir)/xgdb.new; \
+		mv $(xbindir)/xgdb.new $(xbindir)xgdb; \
+	fi
+
 gdb : $(OBS) $(TSOBS) ${ADD_DEPS} ${RL_LIB}
 	rm -f init.c
 	./munch ${MUNCH_DEFINE} $(OBS) $(TSOBS) > init.c
@@ -206,11 +223,11 @@ gdb1 : gdb
 
 Makefile : Makefile.dist
 	cp Makefile.dist tmp.c
+	$(CC) -E >Makefile tmp.c $(MD) "-DM_MAKEDEFINE=$(MD)"
+	-rm tmp.c
 /* This did not work-- -Usparc became "-Usparc" became "-Usparc.
    Or something like that.  */
 /*	$(CC) -E >Makefile tmp.c $(MD) "-DM_MAKEDEFINE=\"$(MD)\"" */
-	$(CC) -E >Makefile tmp.c $(MD) "-DM_MAKEDEFINE=$(MD)"
-	-rm tmp.c
 
 xgdb : $(OBS) $(TSOBS) xgdb.o ${ADD_DEPS} ${RL_LIB}
 	rm -f init.c
@@ -251,12 +268,13 @@ gdb.tar: ${TARFILES}
    overwrite it.  compress -f is not what we want, because we do want
    to know if compress would not make it smaller.  */
 gdb.tar.Z: gdb.tar
-	if [ -f gdb.tar.Z ]; then rm -f gdb.tar.Z; fi
+	if [ -f gdb.tar.Z ]; then rm -f gdb.tar.Z; else true; fi
 	compress gdb.tar
 
 clean:
 	rm -f ${OBS} ${TSOBS} ${NTSOBS} ${OBSTACK} ${REGEX} ${GNU_MALLOC}
 	rm -f init.c init.o
+	rm -f xgdb.o xgdb
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]
 	cd readline ; make clean

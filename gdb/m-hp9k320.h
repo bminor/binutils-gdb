@@ -258,6 +258,10 @@ read_memory_integer (read_register (SP_REGNUM), 4)
      : (&u.u_pcb.pcb_mc68881[FMC68881_C + ((regno) - FPC_REGNUM)])))	\
    - ((char *) (& u)))
 
+/* Do implement the attach and detach commands.  */
+
+#define ATTACH_DETACH
+
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 

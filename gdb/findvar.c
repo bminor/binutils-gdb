@@ -283,11 +283,19 @@ read_var_value (var, frame)
       addr = val;
       break;
 
+/* Nonzero if a struct which is located in a register or a LOC_ARG
+   really contains
+   the address of the struct, not the struct itself.  GCC_P is nonzero
+   if the function was compiled with GCC.  */
+#if !defined (REG_STRUCT_HAS_ADDR)
+#define REG_STRUCT_HAS_ADDR(gcc_p) 0
+#endif
+
     case LOC_ARG:
       fi = get_frame_info (frame);
       addr = val + FRAME_ARGS_ADDRESS (fi);
       break;
-    
+      
     case LOC_REF_ARG:
       fi = get_frame_info (frame);
       addr = val + FRAME_ARGS_ADDRESS (fi);
@@ -308,8 +316,17 @@ read_var_value (var, frame)
 
     case LOC_REGISTER:
     case LOC_REGPARM:
-      v = value_from_register (type, val, frame);
-      return v;
+      {
+	struct block *b = get_frame_block (frame);
+
+	v = value_from_register (type, val, frame);
+
+	if (REG_STRUCT_HAS_ADDR(b->gcc_compile_flag)
+	    && TYPE_CODE (type) == TYPE_CODE_STRUCT)
+	  addr = *(CORE_ADDR *)VALUE_CONTENTS (v);
+	else
+	  return v;
+      }
     }
 
   read_memory (addr, VALUE_CONTENTS (v), len);

@@ -456,7 +456,7 @@ print_symbol (symbol, depth, outfile)
   print_spaces (depth, outfile);
   if (SYMBOL_NAMESPACE (symbol) == LABEL_NAMESPACE)
     {
-      fprintf (outfile, "label %s at 0x%x", SYMBOL_NAME (symbol),
+      fprintf (outfile, "label %s at 0x%x\n", SYMBOL_NAME (symbol),
 	       SYMBOL_VALUE (symbol));
       return;
     }

@@ -21,15 +21,33 @@ struct exec
 
 /* these go in the N_MACHTYPE field */
 enum machine_type {
+#if defined (M_OLDSUN2)
+  M__OLDSUN2 = M_OLDSUN2,
+#else
   M_OLDSUN2 = 0,
+#endif
+#if defined (M_68010)
+  M__68010 = M_68010,
+#else
   M_68010 = 1,
+#endif
+#if defined (M_68020)
+  M__68020 = M_68020,
+#else
   M_68020 = 2,
+#endif
+#if defined (M_SPARC)
+  M__SPARC = M_SPARC
+#else
   M_SPARC = 3,
+#endif
   /* skip a bunch so we don't run into any of sun's numbers */
   M_386 = 100,
 };
 
+#if !defined (N_MAGIC)
 #define N_MAGIC(exec) ((exec).a_info & 0xffff)
+#endif
 #define N_MACHTYPE(exec) ((enum machine_type)(((exec).a_info >> 16) & 0xff))
 #define N_FLAGS(exec) (((exec).a_info >> 24) & 0xff)
 #define N_SET_INFO(exec, magic, type, flags) \
@@ -54,9 +72,11 @@ enum machine_type {
 /* Code indicating demand-paged executable.  */
 #define ZMAGIC 0413
 
+#if !defined (N_BADMAG)
 #define N_BADMAG(x)					\
  (N_MAGIC(x) != OMAGIC && N_MAGIC(x) != NMAGIC		\
   && N_MAGIC(x) != ZMAGIC)
+#endif
 
 #define _N_BADMAG(x)					\
  (N_MAGIC(x) != OMAGIC && N_MAGIC(x) != NMAGIC		\
@@ -64,26 +84,40 @@ enum machine_type {
 
 #define _N_HDROFF(x) (1024 - sizeof (struct exec))
 
+#if !defined (N_TXTOFF)
 #define N_TXTOFF(x) \
  (N_MAGIC(x) == ZMAGIC ? _N_HDROFF((x)) + sizeof (struct exec) : sizeof (struct exec))
+#endif
 
+#if !defined (N_DATOFF)
 #define N_DATOFF(x) (N_TXTOFF(x) + (x).a_text)
+#endif
 
+#if !defined (N_TRELOFF)
 #define N_TRELOFF(x) (N_DATOFF(x) + (x).a_data)
+#endif
 
+#if !defined (N_DRELOFF)
 #define N_DRELOFF(x) (N_TRELOFF(x) + (x).a_trsize)
+#endif
 
+#if !defined (N_SYMOFF)
 #define N_SYMOFF(x) (N_DRELOFF(x) + (x).a_drsize)
+#endif
 
+#if !defined (N_STROFF)
 #define N_STROFF(x) (N_SYMOFF(x) + (x).a_syms)
+#endif
 
 /* Address of text segment in memory after it is loaded.  */
+#if !defined (N_TXTADDR)
 #define N_TXTADDR(x) 0
+#endif
 
 /* Address of data segment in memory after it is loaded.
    Note that it is up to you to define SEGMENT_SIZE
    on machines not listed here.  */
-#ifdef vax
+#if defined(vax) || defined(hp300) || defined(pyr)
 #define SEGMENT_SIZE page_size
 #endif
 #ifdef	sony
@@ -104,8 +138,11 @@ enum machine_type {
 #endif
 
 /* Address of bss segment in memory after it is loaded.  */
+#if !defined (N_BSSADDR)
 #define N_BSSADDR(x) (N_DATADDR(x) + (x).a_data)
+#endif
 
+#if !defined (N_NLIST_DECLARED)
 struct nlist {
   union {
     char *n_name;
@@ -117,17 +154,36 @@ struct nlist {
   short n_desc;
   unsigned long n_value;
 };
+#endif /* no N_NLIST_DECLARED.  */
 
+#if !defined (N_UNDF)
 #define N_UNDF 0
+#endif
+#if !defined (N_ABS)
 #define N_ABS 2
+#endif
+#if !defined (N_TEXT)
 #define N_TEXT 4
+#endif
+#if !defined (N_DATA)
 #define N_DATA 6
+#endif
+#if !defined (N_BSS)
 #define N_BSS 8
+#endif
+#if !defined (N_FN)
 #define N_FN 15
+#endif
 
+#if !defined (N_EXT)
 #define N_EXT 1
+#endif
+#if !defined (N_TYPE)
 #define N_TYPE 036
+#endif
+#if !defined (N_STAB)
 #define N_STAB 0340
+#endif
 
 /* The following type indicates the definition of a symbol as being
    an indirect reference to another symbol.  The other symbol
@@ -159,6 +215,7 @@ struct nlist {
 /* This is output from LD.  */
 #define N_SETV	0x1C		/* Pointer to set vector in data area.  */
 
+#if !defined (N_RELOCATION_INFO_DECLARED)
 /* This structure describes a single relocation to be performed.
    The text-relocation section of the file is a vector of these structures,
    all of which apply to the text section.
@@ -188,6 +245,7 @@ struct relocation_info
      it is desirable to clear them.  */
   unsigned int r_pad:4;
 };
+#endif /* no N_RELOCATION_INFO_DECLARED.  */
 
 
 #endif /* __A_OUT_GNU_H__ */

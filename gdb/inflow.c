@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
@@ -24,10 +25,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #ifdef USG
 #include <sys/types.h>
-#include <fcntl.h>
 #endif
 
-#include <stdio.h>
+/* Some USG-esque systems (some of which are BSD-esque enough so that USG
+   is not defined) want this header, and it won't do any harm.  */
+#include <fcntl.h>
+
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <signal.h>

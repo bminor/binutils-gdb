@@ -19,6 +19,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Original version was contributed by Derek Beatty, 30 June 87.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
@@ -32,7 +33,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <X11/Box.h>
 #include <X11/VPaned.h>
 
-#include <stdio.h>
 
 /*#define	XtNfunction	"function"*/
 

@@ -70,12 +70,26 @@ sun3)
 		machine=sun3os3
 		os=""
 		;;
+	*)
+# Arguably, the default should be sun3os4, but in that case we'd want
+# to change the list of machine types given by "config.gdb" so it
+# doesn't list "sun3 sun3os4".
+		machine=sun3os3
+		os=""
+		;;
 	esac
 	;;
 sparc|sun4)
 	case $os in
 	os4|sunos4)
 		machine=sun4os4
+		os=""
+		;;
+	*)
+# Arguably, the default should be sun4os4, but in that case we'd want
+# to change the list of machine types given by "config.gdb" so it
+# doesn't list "sun4 sun4os4".
+		machine=sun4os3
 		os=""
 		;;
 	esac
@@ -120,6 +134,11 @@ altosgas)
 	depfile=altos-dep.c
 	opcodefile=m68k-opcode.h
 	;;
+pyramid)
+	echo
+	echo "Note that GDB on Pyramids only works with GCC."
+	echo
+	;;
 vax)
 	echo
 # The following types of /bin/cc failures have been observed:
@@ -147,7 +166,6 @@ hp9k320)
 	opcodefile=m68k-opcode.h
 	;;
 hp300bsd)
-# Not sure what makefile editing (if any) is necessary for this machine.
 	pinsnfile=m68k-pinsn.c
 	opcodefile=m68k-opcode.h
 	;;
@@ -197,6 +215,15 @@ i386g-sv32)
 	opcodefile=m-i386.h
 	;;
 merlin)
+	echo ""
+	echo "To install GDB on this machine you must copy /bin/sh"
+	echo "to /usr/local/lib/gdb-sh, and make it world readable"
+	echo "and writeable.  For example:"
+	echo "    cp /bin/sh /usr/local/lib/gdb-sh"
+	echo "    chmod ogu+rw /usr/local/lib/gdb-sh"
+	echo "If you want to put it somewhere other than /usr/local/lib,"
+	echo "edit the definition of SHELL_FILE in m-merlin.h"
+	echo ""
 	pinsnfile=ns32k-pinsn.c
 	opcodefile=ns32k-opcode.h
 	;;
@@ -228,6 +255,9 @@ sun2os2|sun2-os2)
 	;;	
 sun2os4|sun2-os4)
 # Compile GDB without shared libraries so that it can be run on itself.
+# -Bstatic is the right flag for cc.
+# For gcc, -Bstatic is (probably) a no-op, and -g (which is specified by
+#  Makefile.dist prevents use of shared libraries).
 	makedefine=-DM_CFLAGS=-Bstatic
 	echo
 	echo "Make sure to compile any program on which you want to run gdb"

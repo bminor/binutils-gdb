@@ -2078,7 +2078,8 @@ rl_deprep_terminal ()
   int tty = fileno (rl_instream);
 
 #if defined (TIOCLGET) && defined (LPASS8)
-  ioctl (tty, TIOCLSET, &local_mode_flags);
+  if ((the_ttybuff.sg_flags & (ODDP | EVENP)) == (ODDP | EVENP))
+     ioctl (tty, TIOCLSET, &local_mode_flags);
 #endif
 
 #ifdef TIOCSLTC

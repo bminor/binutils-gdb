@@ -17,13 +17,13 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
 #include "param.h"
 #include "expression.h"
 #include "value.h"
 
-#include <stdio.h>
 
 /* These codes indicate operator precedences, least tightly binding first.  */
 /* Adding 1 to a precedence value is done for binary operators,

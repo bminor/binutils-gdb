@@ -40,13 +40,13 @@
 
 #line 29 "expread.y"
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
 #include "frame.h"
 #include "expression.h"
 
-#include <stdio.h>
 #include <a.out.h>
 
 static struct expression *expout;
@@ -137,7 +137,7 @@ typedef union
 #ifndef YYLTYPE
 typedef
   struct yyltype
-    {
+ {
       int timestamp;
       int first_line;
       int first_column;
@@ -145,7 +145,7 @@ typedef
       int last_column;
       char *text;
    }
-  yyltype;
+ yyltype;
 
 #define YYLTYPE yyltype
 #endif
@@ -197,7 +197,8 @@ static const char yytranslate[] = {     0,
     50,    51,    52
 };
 
-static const short yyrline[] = {     0,
+#if YYDEBUG != 0
+static const short yyrline[] = { 0,
    190,   194,   195,   200,   203,   206,   210,   214,   218,   222,
    226,   230,   234,   238,   244,   248,   254,   258,   262,   266,
    272,   275,   279,   283,   289,   295,   301,   305,   309,   313,
@@ -220,6 +221,7 @@ static const char * const yytname[] = {     0,
 "DECREMENT","ARROW","'.'","'['","'('","'!'","'~'","']'","')'","'{'",
 "'}'","':'","start"
 };
+#endif
 
 static const short yyr1[] = {     0,
     63,    64,    64,    65,    65,    65,    65,    65,    65,    65,
@@ -548,9 +550,6 @@ yyparse()
 				/*  routines				*/
 
   int yylen;
-  void yyerror();
-  void bcopy();
-  int yylex();
 
 #if YYDEBUG != 0
   if (yydebug)
@@ -582,9 +581,7 @@ yynewstate:
       /* Give user a chance to reallocate the stack */
       /* Use copies of these so that the &'s don't force the real ones into memory. */
       YYSTYPE *yyvs1 = yyvs;
-#if defined(yyoverflow) || defined(YYLSP_NEEDED)
       YYLTYPE *yyls1 = yyls;
-#endif
       short *yyss1 = yyss;
 
       /* Get the current used size of the three stacks, in elements.  */
@@ -639,6 +636,7 @@ yynewstate:
 
 /* Do appropriate processing given the current state.  */
 /* Read a lookahead token if we need one and don't already have one.  */
+yyresume:
 
   /* First try to decide what to do without reference to lookahead token.  */
 
@@ -1402,7 +1400,7 @@ case 104:
     break;}
 }
    /* the action file gets copied in in place of this dollarsign */
-#line 331 "bison.simple"
+#line 327 "bison.simple"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -2030,7 +2028,8 @@ yylex ()
 
   if (!(c == '_' || c == '$'
 	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
-    error ("Invalid token in expression.");
+    /* We must have come across a bad character (e.g. ';').  */
+    error ("Invalid character '%c' in expression.", c);
 
   /* It's a name.  See how long it is.  */
   namelen = 0;

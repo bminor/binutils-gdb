@@ -17,12 +17,11 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
 #include "frame.h"
-
-#include <stdio.h>
 
 /* This is the sequence of bytes we insert for a breakpoint.  */
 
@@ -527,7 +526,7 @@ describe_other_breakpoints (pc)
 		    (b->enable == disabled) ? " (disabled)" : "",
 		    (others > 1) ? "," : ((others == 1) ? " and" : ""));
 	  }
-      printf (" also set at pc 0x%x\n", pc);
+      printf ("also set at pc 0x%x.\n", pc);
     }
 }
 
@@ -1042,6 +1041,16 @@ set_ignore_count (bptnum, count, from_tty)
       }
 
   error ("No breakpoint number %d.", bptnum);
+}
+
+/* Clear the ignore counts of all breakpoints.  */
+void
+breakpoint_clear_ignore_counts ()
+{
+  struct breakpoint *b;
+
+  ALL_BREAKPOINTS (b)
+    b->ignore_count = 0;
 }
 
 /* Command to set ignore-count of breakpoint N to COUNT.  */

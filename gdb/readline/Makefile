@@ -65,7 +65,7 @@ all: libreadline.a
 libreadline.a:	readline.o history.o funmap.o keymaps.o
 		$(RM) -f libreadline.a
 		$(AR) clq libreadline.a readline.o history.o funmap.o keymaps.o
-#		if [ -f $(RANLIB) ]; then $(RANLIB) libreadline.a; fi
+		if [ -f $(RANLIB) ]; then $(RANLIB) libreadline.a; fi
 
 readline.o:	readline.h chardefs.h  keymaps.h history.h readline.c vi_mode.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(READLINE_DEFINES) \
@@ -111,4 +111,4 @@ clean:
 $(DESTDIR)/libreadline.a: libreadline.a
 		-mv $(DESTDIR)/libreadline.a $(DESTDIR)/libreadline.old
 		cp libreadline.a $(DESTDIR)/libreadline.a
-#		$(RANLIB) -t $(DESTDIR)/libreadline.a
+		$(RANLIB) -t $(DESTDIR)/libreadline.a
