@@ -1,5 +1,10 @@
 2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
 
+       * gdb.base/completion.exp: Remove reduntant completion test
+       on filename.
+
+2003-08-07  Elena Zannoni  <ezannoni@redhat.com>
+
         * gdb.base/attach.exp, gdb.base/detach.exp, gdb.base/gcore.exp,
         gdb.mi/mi-basics.exp, gdb.threads/gcore-thread.exp,
         gdb.trace/save-trace.exp: Make sure that full pathnames are
