@@ -1,3 +1,8 @@
+2001-11-30  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c (mappings): Correct position of XMM registers,
+	based on FXSAVE instruction structure.
+
 2001-12-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* jv-lang.c (get_java_class_symtab): Use xmmalloc instead of

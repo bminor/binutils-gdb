@@ -179,16 +179,16 @@ static const int mappings[] =
   context_offset (FloatSave.ErrorSelector)
 #ifdef HAVE_SSE_REGS
   /* XMM0-7 */ ,
-  context_offset (ExtendedRegisters[0*16]),
-  context_offset (ExtendedRegisters[1*16]),
-  context_offset (ExtendedRegisters[2*16]),
-  context_offset (ExtendedRegisters[3*16]),
-  context_offset (ExtendedRegisters[4*16]),
-  context_offset (ExtendedRegisters[5*16]),
-  context_offset (ExtendedRegisters[6*16]),
-  context_offset (ExtendedRegisters[7*16]),
-  /* MXCSR untested */
-  context_offset (ExtendedRegisters[8*16])
+  context_offset (ExtendedRegisters[10*16]),
+  context_offset (ExtendedRegisters[11*16]),
+  context_offset (ExtendedRegisters[12*16]),
+  context_offset (ExtendedRegisters[13*16]),
+  context_offset (ExtendedRegisters[14*16]),
+  context_offset (ExtendedRegisters[15*16]),
+  context_offset (ExtendedRegisters[16*16]),
+  context_offset (ExtendedRegisters[17*16]),
+  /* MXCSR */
+  context_offset (ExtendedRegisters[24])
 #endif
 };
 
