@@ -1,3 +1,7 @@
+2004-07-08  Bob Rossi  <bob@brasko.net>
+
+	* symtab.c (lookup_symtab): check return value of symtab_to_fullname
+
 2004-07-06  Jeff Johnston <jjohnstn@redhat.com>
 
 	* language.h (struct_language_defn): Add new function pointer:

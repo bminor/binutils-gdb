@@ -181,21 +181,25 @@ got_symtab:
     
     if (full_path != NULL)
       {
-	const char *fp = symtab_to_fullname (s);
-	if (FILENAME_CMP (full_path, fp) == 0)
-	  {
-	    return s;
-	  }
+        const char *fp = symtab_to_fullname (s);
+        if (fp != NULL && FILENAME_CMP (full_path, fp) == 0)
+          {
+            return s;
+          }
       }
 
     if (real_path != NULL)
       {
-	char *rp = gdb_realpath (symtab_to_fullname (s));
-        make_cleanup (xfree, rp);
-	if (FILENAME_CMP (real_path, rp) == 0)
-	  {
-	    return s;
-	  }
+        char *fullname = symtab_to_fullname (s);
+        if (fullname != NULL)
+          {
+            char *rp = gdb_realpath (fullname);
+            make_cleanup (xfree, rp);
+            if (FILENAME_CMP (real_path, rp) == 0)
+              {
+                return s;
+              }
+          }
       }
   }
 
