@@ -1,3 +1,7 @@
+Sat Jan  9 21:29:32 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* coffgen.c:  #include seclet.h.
+
 Sat Jan  9 19:48:14 1993  Stu Grossman  (grossman at cygnus.com)
 
 	* hppa.c (hppa_object_setup):  Get rid of all knowledge of stabs

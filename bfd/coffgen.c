@@ -39,6 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "coff/internal.h"
+#include "seclet.h"
 #include "libcoff.h"
 
 static asection bfd_debug_section = { "*DEBUG*" };
