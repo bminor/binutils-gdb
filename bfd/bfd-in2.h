@@ -1396,18 +1396,18 @@ typedef struct sec
 #define BFD_IND_SECTION_NAME "*IND*"
 
 /* The absolute section.  */
-extern const asection bfd_abs_section;
+extern asection bfd_abs_section;
 #define bfd_abs_section_ptr ((asection *) &bfd_abs_section)
 #define bfd_is_abs_section(sec) ((sec) == bfd_abs_section_ptr)
 /* Pointer to the undefined section.  */
-extern const asection bfd_und_section;
+extern asection bfd_und_section;
 #define bfd_und_section_ptr ((asection *) &bfd_und_section)
 #define bfd_is_und_section(sec) ((sec) == bfd_und_section_ptr)
 /* Pointer to the common section.  */
-extern const asection bfd_com_section;
+extern asection bfd_com_section;
 #define bfd_com_section_ptr ((asection *) &bfd_com_section)
 /* Pointer to the indirect section.  */
-extern const asection bfd_ind_section;
+extern asection bfd_ind_section;
 #define bfd_ind_section_ptr ((asection *) &bfd_ind_section)
 #define bfd_is_ind_section(sec) ((sec) == bfd_ind_section_ptr)
 

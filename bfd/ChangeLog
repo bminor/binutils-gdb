@@ -1,5 +1,9 @@
 2003-07-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* bfd-in2.h: Regenerated.
+
+2003-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf-bfd.h (bfd_elf_special_section): New.
 	(elf_backend_data): Add special_sections, a pointer to
 	bfd_elf_special_section.
