@@ -1,3 +1,4 @@
+#include <ansidecl.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/dg_c_generics.h>

@@ -1,3 +1,4 @@
+#include <ansidecl.h>
 #include <fcntl.h>
 #include <errno.h>
 extern int errno;		/* <errno.h> forgets to do this... */

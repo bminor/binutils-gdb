@@ -1,6 +1,6 @@
 /* Host definition file for Sun-4 running with gcc, using "long long"
    for addresses, to handle 64-bit target systems. */
-
+#include <ansidecl.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>

@@ -1,5 +1,6 @@
 /* Host configuration file for Interactive Unix 3.2 */
 /* From Minh Tran-Le <TRANLE@INTELLICORP.COM>.  */
+#include <ansidecl.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
