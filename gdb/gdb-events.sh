@@ -419,11 +419,14 @@ function_list | while eval read $read
 do
   case "${class}" in
     "f" )
-      echo "struct ${function}"
-      echo "  {"
-      echo "    `echo ${formal} | tr '[,]' '[;]'`;"
-      echo "  };"
-      echo ""
+      if test ${actual}
+      then
+        echo "struct ${function}"
+        echo "  {"
+        echo "    `echo ${formal} | tr '[,]' '[;]'`;"
+        echo "  };"
+        echo ""
+      fi
       ;;
   esac
 done
@@ -441,7 +444,10 @@ function_list | while eval read $read
 do
   case "${class}" in
     "f" )
-      echo "        struct ${function} ${function};"
+      if test ${actual}
+      then
+        echo "        struct ${function} ${function};"
+      fi
       ;;
   esac
 done
@@ -517,15 +523,20 @@ do
   case "${class}" in
     "f" )
       echo "        case ${function}:"
-      echo "          vector->${function}"
-      sep="            ("
-      ass=""
-      for arg in `echo ${actual} | tr '[,]' '[:]' | tr -d '[ ]'`; do
-        ass="${ass}${sep}event->data.${function}.${arg}"
-	sep=",
-             "
-      done
-      echo "${ass});"
+      if test ${actual}
+      then
+        echo "          vector->${function}"
+        sep="            ("
+        ass=""
+        for arg in `echo ${actual} | tr '[,]' '[:]' | tr -d '[ ]'`; do
+          ass="${ass}${sep}event->data.${function}.${arg}"
+	  sep=",
+               "
+        done
+        echo "${ass});"
+      else
+        echo "          vector->${function} ();"
+      fi
       echo "          break;"
       ;;
   esac
