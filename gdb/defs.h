@@ -650,7 +650,11 @@ extern void free_command_lines (struct command_line **);
 struct continuation_arg
   {
     struct continuation_arg *next;
-    void *data;
+    union continuation_data {
+      void *pointer;
+      int   integer;
+      long  longint;
+    } data;
   };
 
 struct continuation

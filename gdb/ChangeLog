@@ -1,3 +1,16 @@
+2000-03-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* defs.h (struct continuation_arg): make 'data' a union, to avoid
+	casting problems when int and pointer are not the  same size.
+	* event-top.c (command_handler): use data as a union.
+	(command_line_handler_continuation): ditto.
+	* infcmd.c (step_1_continuation): use data as a union.  Re-indent.
+	(step_once): ditto.  (finish_command_continuation): ditto.
+	(finish_command): ditto.  
+	* breakpoint.c (until_break_command): use data as a union.
+	(until_break_command_continuation): ditto.
+	* utils.c (add_intermediate_continuation): fix typo in comment.
+
 Thu Mar 30 12:09:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.h, gdbarch.c: Re-indent.  Remove FIXMEs.

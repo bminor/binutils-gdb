@@ -525,8 +525,8 @@ command_handler (char *command)
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
       arg1->next = arg2;
       arg2->next = NULL;
-      arg1->data = (void *) time_at_cmd_start;
-      arg2->data = (void *) space_at_cmd_start;
+      arg1->data.integer = time_at_cmd_start;
+      arg2->data.integer = space_at_cmd_start;
       add_continuation (command_line_handler_continuation, arg1);
     }
 
@@ -572,8 +572,8 @@ command_line_handler_continuation (struct continuation_arg *arg)
   extern int display_time;
   extern int display_space;
 
-  long time_at_cmd_start = (long) arg->data;
-  long space_at_cmd_start = (long) arg->next->data;
+  long time_at_cmd_start  = arg->data.longint;
+  long space_at_cmd_start = arg->next->data.longint;
 
   bpstat_do_actions (&stop_bpstat);
   /*do_cleanups (old_chain); *//*?????FIXME????? */

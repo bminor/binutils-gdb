@@ -5708,7 +5708,7 @@ until_break_command_continuation (struct continuation_arg *arg)
 {
   struct cleanup *cleanups;
 
-  cleanups = (struct cleanup *) arg->data;
+  cleanups = (struct cleanup *) arg->data.pointer;
   do_exec_cleanups (cleanups);
 }
 
@@ -5772,8 +5772,8 @@ until_break_command (arg, from_tty)
          the exec_cleanup_chain. */
       arg1 =
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg1->next = NULL;
-      arg1->data = (PTR) old_chain;
+      arg1->next         = NULL;
+      arg1->data.pointer = old_chain;
 
       add_continuation (until_break_command_continuation, arg1);
     }

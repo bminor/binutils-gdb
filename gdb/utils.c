@@ -456,7 +456,7 @@ discard_all_continuations ()
     }
 }
 
-/* Add a continuation to the continuation list, the gloabl list
+/* Add a continuation to the continuation list, the global list
    intermediate_continuation. The new continuation will be added at the front.*/
 void
 add_intermediate_continuation (continuation_hook, arg_list)
