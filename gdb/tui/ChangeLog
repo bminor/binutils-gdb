@@ -1,5 +1,14 @@
 2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiStack.c (tuiSetLocatorContent): Remove.
+	(tuiUpdateLocatorInfoFromFrame): Remove.
+	(tui_set_locator_info): Allocate the content buffer if necessary.
+	(tui_set_locator_filename): Call tui_set_locator_info directly.
+	(tuiShowFrameInfo): Likewise and use find_pc_line instead of
+	find_pc_symtab.
+
+2002-08-25  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiSourceWin.c (tuiDisplayMainFunction): Update to use
 	tuiUpdateLocatorFilename.
 	* tuiStack.c (tuiSetLocatorInfo): Make it static.
