@@ -5549,7 +5549,7 @@ echo "configure:5545: checking for HPUX/OSF thread support" >&5
 #define HAVE_HPUX_THREAD_SUPPORT 1
 EOF
 
-            CONFIG_OBS="${CONFIG_OJS} hpux-thread.o"
+            CONFIG_OBS="${CONFIG_OBS} hpux-thread.o"
             CONFIG_SRCS="${CONFIG_SRCS} hpux-thread.c"
          else
             echo "$ac_t""no (suppressed because you are not using GCC)" 1>&6
@@ -7232,7 +7232,7 @@ fi
 	     TIX_DEPS="${TIX_BUILD_LOCATION}/${TIX_LIB_FILE}"
            fi
 
-           ENABLE_CFLAGS="$ENABLE_CFLAGS -DGDBTK"
+           ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
 	   # Tcl/Tk 8.1 require -fwritable strings.  I don't
            # know whether 8.2 will or not, but I bet it will.
            # I don't have to worry about 7.x since we don't support it.
@@ -7245,16 +7245,17 @@ fi
 
 	   # Include some libraries that Tcl and Tk want.
 	   TCL_LIBS='$(LIBGUI) $(ITCL) $(ITK) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
-	   CONFIG_DEPS='$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
 	   # Yes, the ordering seems wrong here.  But it isn't.
 	   # TK_LIBS is the list of libraries that need to be linked
 	   # after Tcl/Tk.  Note that this isn't put into LIBS.  If it
 	   # were in LIBS then any link tests after this point would
 	   # try to include things like `$(LIBGUI)', which wouldn't work.
 	   GDBTKLIBS="${TCL_LIBS} ${TK_LIBS}"
-	   CONFIG_SRCS="${CONFIG_SRCS} gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c"
-	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o gdbtk-cmds.o gdbtk-hooks.o gdbtk-varobj.o gdbtk-wrapper.o"
-	   CONFIG_INITS="${CONFIG_INITS} gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c"
+
+           CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_GDBTK_OBS)"
+           CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_GDBTK_DEPS)"
+           CONFIG_SRCS="${CONFIG_SRCS} \$(SUBDIR_GDBTK_SRCS)"
+           CONFIG_INITS="${CONFIG_INITS} \$(SUBDIR_GDBTK_INITS)"
 	   CONFIG_ALL="${CONFIG_ALL} \$(SUBDIR_GDBTK_ALL)"
 	   CONFIG_CLEAN="${CONFIG_CLEAN} \$(SUBDIR_GDBTK_CLEAN)"
 	   CONFIG_INSTALL="${CONFIG_INSTALL} \$(SUBDIR_GDBTK_INSTALL)"
@@ -7286,7 +7287,7 @@ fi
 # Uses ac_ vars as temps to allow command line to override cache and checks.
 # --without-x overrides everything else, but does not touch the cache.
 echo $ac_n "checking for X""... $ac_c" 1>&6
-echo "configure:7290: checking for X" >&5
+echo "configure:7291: checking for X" >&5
 
 # Check whether --with-x or --without-x was given.
 if test "${with_x+set}" = set; then
@@ -7348,12 +7349,12 @@ if test "$ac_x_includes" = NO; then
 
   # First, try using that file with no special directory specified.
 cat > conftest.$ac_ext <<EOF
-#line 7352 "configure"
+#line 7353 "configure"
 #include "confdefs.h"
 #include <$x_direct_test_include>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:7357: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:7358: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -7422,14 +7423,14 @@ if test "$ac_x_libraries" = NO; then
   ac_save_LIBS="$LIBS"
   LIBS="-l$x_direct_test_library $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 7426 "configure"
+#line 7427 "configure"
 #include "confdefs.h"
 
 int main() {
 ${x_direct_test_function}()
 ; return 0; }
 EOF
-if { (eval echo configure:7433: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:7434: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   LIBS="$ac_save_LIBS"
 # We can link X programs with no special library path.
@@ -7768,7 +7769,7 @@ fi
 
 
 echo $ac_n "checking whether ln -s works""... $ac_c" 1>&6
-echo "configure:7772: checking whether ln -s works" >&5
+echo "configure:7773: checking whether ln -s works" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_LN_S'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7792,12 +7793,12 @@ fi
 
 
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:7796: checking for Cygwin environment" >&5
+echo "configure:7797: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'ac_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 7801 "configure"
+#line 7802 "configure"
 #include "confdefs.h"
 
 int main() {
@@ -7808,7 +7809,7 @@ int main() {
 return __CYGWIN__;
 ; return 0; }
 EOF
-if { (eval echo configure:7812: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:7813: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_cygwin=yes
 else
@@ -7825,19 +7826,19 @@ echo "$ac_t""$ac_cv_cygwin" 1>&6
 CYGWIN=
 test "$ac_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for mingw32 environment""... $ac_c" 1>&6
-echo "configure:7829: checking for mingw32 environment" >&5
+echo "configure:7830: checking for mingw32 environment" >&5
 if eval "test \"`echo '$''{'ac_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 7834 "configure"
+#line 7835 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:7841: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:7842: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_mingw32=yes
 else
@@ -7856,7 +7857,7 @@ test "$ac_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:7860: checking for executable suffix" >&5
+echo "configure:7861: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'ac_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -7866,7 +7867,7 @@ else
   rm -f conftest*
   echo 'int main () { return 0; }' > conftest.$ac_ext
   ac_cv_exeext=
-  if { (eval echo configure:7870: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  if { (eval echo configure:7871: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
       *.c | *.o | *.obj | *.ilk | *.pdb) ;;

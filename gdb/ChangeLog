@@ -1,3 +1,12 @@
+2000-12-11  Fernando Nasser  <fnasser@redhat.com>
+
+        * Makefile.in (SUBDIR_GDBTK_OBS, SUBDIR_GDBTK_SRCS,
+	SUBDIR_GDBTK_DEPS, SUBDIR_GDBTK_INITS, SUBDIR_GDBTK_LDFLAGS,
+	SUBDIR_GDBTK_CFLAGS): New macros.  For gdbtk subdir.
+	* configure.in: Fix typo.  It is CONFIG_OBS not CONFIG_OJS.
+	Use the SUBDIR_GDBTK_* macros instead of hard coded file names.
+	* configure: Regenerate.
+
 2000-12-11  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
 	* blockframe.c (get_prev_frame): Zero all fields of prev by

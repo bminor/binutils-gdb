@@ -140,7 +140,7 @@ INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
 SUBDIR_CLI_OBS = \
 	cli-decode.o cli-script.o cli-cmds.o cli-setshow.o
 SUBDIR_CLI_SRCS = \
-	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c  cli/cli-setshow.c
+	cli/cli-decode.c cli/cli-script.c cli/cli-cmds.c cli/cli-setshow.c
 SUBDIR_CLI_DEPS =
 SUBDIR_CLI_INITS =
 SUBDIR_CLI_LDFLAGS=
@@ -166,7 +166,7 @@ SUBDIR_MI_SRCS = \
 	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c
 SUBDIR_MI_DEPS =
 SUBDIR_MI_INITS = \
-	mi/mi-cmds.c mi/mi-parse.c mi/mi-main.c
+	mi/mi-cmds.c mi/mi-parse.c mi/mi-main.c mi/mi-out.c
 SUBDIR_MI_LDFLAGS=
 SUBDIR_MI_CFLAGS= \
 	-DUI_OUT=1
@@ -259,6 +259,18 @@ WIN32LDAPP = @WIN32LDAPP@
 LIBGUI = @LIBGUI@
 GUI_CFLAGS_X = @GUI_CFLAGS_X@
 IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
+
+SUBDIR_GDBTK_OBS = \
+	gdbtk.o gdbtk-cmds.o gdbtk-hooks.o gdbtk-varobj.o gdbtk-wrapper.o
+SUBDIR_GDBTK_SRCS = \
+	gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-cmds.c \
+	gdbtk/generic/gdbtk-hooks.c gdbtk/generic/gdbtk-varobj.c \
+	gdbtk/generic/gdbtk-wrapper.c
+SUBDIR_GDBTK_DEPS = \
+	$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)
+SUBDIR_GDBTK_INITS = gdbtk/generic/gdbtk.c
+SUBDIR_GDBTK_LDFLAGS=
+SUBDIR_GDBTK_CFLAGS= -DGDBTK
 SUBDIR_GDBTK_ALL= all-gdbtk
 SUBDIR_GDBTK_CLEAN= clean-gdbtk
 SUBDIR_GDBTK_INSTALL= install-gdbtk

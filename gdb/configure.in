@@ -407,7 +407,7 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
          if test "$GCC" = "yes" ; then
             AC_MSG_RESULT(yes)
             AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT)
-            CONFIG_OBS="${CONFIG_OJS} hpux-thread.o"
+            CONFIG_OBS="${CONFIG_OBS} hpux-thread.o"
             CONFIG_SRCS="${CONFIG_SRCS} hpux-thread.c"
          else
             AC_MSG_RESULT(no (suppressed because you are not using GCC))
@@ -873,7 +873,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	     TIX_DEPS="${TIX_BUILD_LOCATION}/${TIX_LIB_FILE}"
            fi
 
-           ENABLE_CFLAGS="$ENABLE_CFLAGS -DGDBTK"
+           ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
 	   # Tcl/Tk 8.1 require -fwritable strings.  I don't
            # know whether 8.2 will or not, but I bet it will.
            # I don't have to worry about 7.x since we don't support it.
@@ -886,16 +886,17 @@ if test "${enable_gdbtk}" = "yes"; then
 
 	   # Include some libraries that Tcl and Tk want.
 	   TCL_LIBS='$(LIBGUI) $(ITCL) $(ITK) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
-	   CONFIG_DEPS='$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
 	   # Yes, the ordering seems wrong here.  But it isn't.
 	   # TK_LIBS is the list of libraries that need to be linked
 	   # after Tcl/Tk.  Note that this isn't put into LIBS.  If it
 	   # were in LIBS then any link tests after this point would
 	   # try to include things like `$(LIBGUI)', which wouldn't work.
 	   GDBTKLIBS="${TCL_LIBS} ${TK_LIBS}"
-	   CONFIG_SRCS="${CONFIG_SRCS} gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c"
-	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o gdbtk-cmds.o gdbtk-hooks.o gdbtk-varobj.o gdbtk-wrapper.o"
-	   CONFIG_INITS="${CONFIG_INITS} gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-cmds.c gdbtk/generic/gdbtk-hooks.c gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c"
+
+           CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_GDBTK_OBS)"
+           CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_GDBTK_DEPS)"
+           CONFIG_SRCS="${CONFIG_SRCS} \$(SUBDIR_GDBTK_SRCS)"
+           CONFIG_INITS="${CONFIG_INITS} \$(SUBDIR_GDBTK_INITS)"
 	   CONFIG_ALL="${CONFIG_ALL} \$(SUBDIR_GDBTK_ALL)"
 	   CONFIG_CLEAN="${CONFIG_CLEAN} \$(SUBDIR_GDBTK_CLEAN)"
 	   CONFIG_INSTALL="${CONFIG_INSTALL} \$(SUBDIR_GDBTK_INSTALL)"
