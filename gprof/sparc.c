@@ -27,6 +27,8 @@
      */
 #define	CALL	(0xc0000000)
 
+void sparc_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
+
 void
 sparc_find_call (parent, p_lowpc, p_highpc)
      Sym *parent;

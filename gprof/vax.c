@@ -53,6 +53,12 @@ struct modebyte
 Sym indirectchild;
 
 
+static operandenum vax_operandmode PARAMS ((struct modebyte *));
+static char *vax_operandname PARAMS ((operandenum));
+static long vax_operandlength PARAMS ((struct modebyte *));
+static bfd_vma vax_reladdr PARAMS ((struct modebyte *));
+void vax_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
+
 static operandenum
 vax_operandmode (modep)
      struct modebyte *modep;

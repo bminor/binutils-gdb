@@ -46,6 +46,11 @@ typedef enum tahoe_opermodes tahoe_operandenum;
  */
 Sym indirectchild;
 
+tahoe_operandenum tahoe_operandmode PARAMS ((unsigned char *));
+char *tahoe_operandname PARAMS ((tahoe_operandenum));
+long tahoe_operandlength PARAMS ((unsigned char *));
+bfd_vma tahoe_reladdr PARAMS ((char *));
+void tahoe_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
 
 tahoe_operandenum
 tahoe_operandmode (modep)

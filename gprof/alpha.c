@@ -62,6 +62,7 @@ alpha_Instruction;
 
 static Sym indirect_child;
 
+void alpha_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
 
 /*
  * On the Alpha we can only detect PC relative calls, which are

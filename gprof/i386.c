@@ -22,9 +22,12 @@
 #include "hist.h"
 #include "symtab.h"
 
+int i386_iscall PARAMS ((unsigned char *));
+void i386_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
 
 int
-DEFUN (i386_iscall, (ip), unsigned char *ip)
+i386_iscall (ip)
+     unsigned char *ip;
 {
   if (*ip == 0xe8)
     return 1;
