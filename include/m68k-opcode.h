@@ -1,4 +1,4 @@
-/* Opcode table for m680[01234]0/m6888[12].
+/* Opcode table for m680[01234]0/m6888[12]/m68851.
    Copyright (C) 1989, 1991 Free Software Foundation.
 
 This file is part of GDB, the GNU Debugger and GAS, the GNU Assembler.
@@ -17,29 +17,37 @@ You should have received a copy of the GNU General Public License
 along with GDB or GAS; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-enum m68k_architecture {
-	ARCH_68000 = 0,
-	ARCH_68010,
-	ARCH_68020,
-	ARCH_68030,
-	ARCH_68040,
-};
+/* These are used as bit flags for arch below. */
 
-static char *architecture_pname[] = {
-	"68000",
-	"68010",
-	"68020",
-	"68030",
-	"68040",
-	NULL,
-};
+enum m68k_architecture {
+	m68000 = 0x01,
+	m68008 = m68000, /* synonym for -m68000.  otherwise unused. */
+	m68010 = 0x02,
+	m68020 = 0x04,
+	m68030 = 0x08,
+	m68040 = 0x10,
+	m68881 = 0x20,
+	m68882 = m68881, /* synonym for -m68881.  otherwise unused. */
+	m68851 = 0x40,
+
+ /* handy aliases */
+	m68020up = (m68020 | m68030 | m68040),
+	m68010up = (m68010 | m68020up),
+	m68000up = (m68000 | m68010up),
+
+	mfloat = (m68881 | m68882 | m68040),
+	mmmu   = (m68851 | m68030 | m68040),
+}; /* enum m68k_architecture */
+
+ /* note that differences in addressing modes that aren't distinguished
+    in the following table are handled explicitly by gas. */
 
 struct m68k_opcode {
-	char *name;
-	unsigned long opcode;
-	unsigned long match;
-	char *args;
-	enum m68k_architecture arch;
+  char *name;
+  unsigned long opcode;
+  unsigned long  match;
+  char *args;
+  enum m68k_architecture arch;
 };
 
 /* We store four bytes of opcode for all opcodes because that
@@ -58,6 +66,7 @@ struct m68k_opcode {
 /* Kinds of operands:
    D  data register only.  Stored as 3 bits.
    A  address register only.  Stored as 3 bits.
+   a  address register indirect only.  Stored as 3 bits.
    R  either kind of register.  Stored as 4 bits.
    F  floating point coprocessor register only.   Stored as 3 bits.
    O  an offset (or width): immediate data 0-31 or data register.
@@ -95,14 +104,26 @@ struct m68k_opcode {
 
    J  Misc register for movec instruction, stored in 'j' format.
 	Possible values:
-	000	SFC	Source Function Code reg
-	001	DFC	Data Function Code reg
-	002	CACR	Cache Control Register
-	800	USP	User Stack Pointer
-	801	VBR	Vector Base reg
-	802	CAAR	Cache Address Register
-	803	MSP	Master Stack Pointer
-	804	ISP	Interrupt Stack Pointer
+	0x000	SFC	Source Function Code reg	[40, 30, 20, 10]
+	0x001	DFC	Data Function Code reg		[40, 30, 20, 10]
+	0x002	CACR	Cache Control Register		[40, 30, 20]
+	0x800	USP	User Stack Pointer		[40, 30, 20, 10]
+	0x801	VBR	Vector Base reg			[40, 30, 20, 10]
+	0x802	CAAR	Cache Address Register		[    30, 20]
+	0x803	MSP	Master Stack Pointer		[40, 30, 20]
+	0x804	ISP	Interrupt Stack Pointer		[40, 30, 20]
+	0x003	TC	MMU Translation Control		[40]
+	0x004	ITT0	Instruction Transparent
+				Translation reg 0	[40]
+	0x005	ITT1	Instruction Transparent
+				Translation reg 1	[40]
+	0x006	DTT0	Data Transparent
+				Translation reg 0	[40]
+	0x007	DTT1	Data Transparent
+				Translation reg 1	[40]
+	0x805	MMUSR	MMU Status reg			[40]
+	0x806	URP	User Root Pointer		[40]
+	0x807	SRP	Supervisor Root Pointer		[40]
 
     L  Register list of the type d0-d7/a0-a7 etc.
        (New!  Improved!  Can also hold fp0-fp7, as well!)
@@ -111,6 +132,11 @@ struct m68k_opcode {
 
     l  Register list like L, but with all the bits reversed.
        Used for going the other way. . .
+
+    c  cache identifier which may be "nc" for no cache, "ic"
+       for instruction cache, "dc" for data cache, or "bc"
+       for both caches.  Used in cinv and cpush.  Always
+       stored in position "d".
 
  They are all stored as 6 bits using an address mode and a register number;
  they differ in which addressing modes they match.
@@ -178,7 +204,7 @@ struct m68k_opcode {
    D  store in both place 1 and place 3; for divul and divsl.
    B  first word, low byte, for branch displacements
    W  second word (entire), for branch displacements
-   L  second and third words (entire), for branch displacements
+   L  second and third words (entire), for branch displacements (also overloaded for move16)
    b  second word, low byte
    w  second word (entire) [variable word/long branch offset for dbra]
    l  second and third word (entire)
@@ -220,1528 +246,1736 @@ struct m68k_opcode {
  */
 struct m68k_opcode m68k_opcodes[] =
 {
-{"abcd",	one(0140400),		one(0170770), "DsDd", ARCH_68000 },
-{"abcd",	one(0140410),		one(0170770), "-s-d", ARCH_68000 },
+{"abcd",	one(0140400),		one(0170770), "DsDd", m68000up },
+{"abcd",	one(0140410),		one(0170770), "-s-d", m68000up },
 
 		/* Add instructions */
-{"addal",	one(0150700),		one(0170700), "*lAd", ARCH_68000 },
-{"addaw",	one(0150300),		one(0170700), "*wAd", ARCH_68000 },
-{"addib",	one(0003000),		one(0177700), "#b$b", ARCH_68000 },
-{"addil",	one(0003200),		one(0177700), "#l$l", ARCH_68000 },
-{"addiw",	one(0003100),		one(0177700), "#w$w", ARCH_68000 },
-{"addqb",	one(0050000),		one(0170700), "Qd$b", ARCH_68000 },
-{"addql",	one(0050200),		one(0170700), "Qd%l", ARCH_68000 },
-{"addqw",	one(0050100),		one(0170700), "Qd%w", ARCH_68000 },
+{"addal",	one(0150700),		one(0170700), "*lAd", m68000up },
+{"addaw",	one(0150300),		one(0170700), "*wAd", m68000up },
+{"addib",	one(0003000),		one(0177700), "#b$b", m68000up },
+{"addil",	one(0003200),		one(0177700), "#l$l", m68000up },
+{"addiw",	one(0003100),		one(0177700), "#w$w", m68000up },
+{"addqb",	one(0050000),		one(0170700), "Qd$b", m68000up },
+{"addql",	one(0050200),		one(0170700), "Qd%l", m68000up },
+{"addqw",	one(0050100),		one(0170700), "Qd%w", m68000up },
 
-{"addb",	one(0050000),		one(0170700),		"Qd$b"},	/* addq written as add */
-{"addb",	one(0003000),		one(0177700),		"#b$b"},	/* addi written as add */
-{"addb",	one(0150000),		one(0170700),		";bDd"},	/* addb <ea>,	Dd */
-{"addb",	one(0150400),		one(0170700),		"Dd~b"},	/* addb Dd,	<ea> */
+{"addb",	one(0050000),		one(0170700), "Qd$b", m68000up },	/* addq written as add */
+{"addb",	one(0003000),		one(0177700), "#b$b", m68000up },	/* addi written as add */
+{"addb",	one(0150000),		one(0170700), ";bDd", m68000up },	/* addb <ea>,	Dd */
+{"addb",	one(0150400),		one(0170700), "Dd~b", m68000up },	/* addb Dd,	<ea> */
 
-{"addw",	one(0050100),		one(0170700),		"Qd%w"},	/* addq written as add */
-{"addw",	one(0003100),		one(0177700),		"#w$w"},	/* addi written as add */
-{"addw",	one(0150300),		one(0170700),		"*wAd"},	/* adda written as add */
-{"addw",	one(0150100),		one(0170700),		"*wDd"},	/* addw <ea>,	Dd */
-{"addw",	one(0150500),		one(0170700),		"Dd~w"},	/* addw Dd,	<ea> */
+{"addw",	one(0050100),		one(0170700), "Qd%w", m68000up },	/* addq written as add */
+{"addw",	one(0003100),		one(0177700), "#w$w", m68000up },	/* addi written as add */
+{"addw",	one(0150300),		one(0170700), "*wAd", m68000up },	/* adda written as add */
+{"addw",	one(0150100),		one(0170700), "*wDd", m68000up },	/* addw <ea>,	Dd */
+{"addw",	one(0150500),		one(0170700), "Dd~w", m68000up },	/* addw Dd,	<ea> */
 
-{"addl",	one(0050200),		one(0170700),		"Qd%l"},	/* addq written as add */
-{"addl",	one(0003200),		one(0177700),		"#l$l"},	/* addi written as add */
-{"addl",	one(0150700),		one(0170700),		"*lAd"},	/* adda written as add */
-{"addl",	one(0150200),		one(0170700),		"*lDd"},	/* addl <ea>,	Dd */
-{"addl",	one(0150600),		one(0170700),		"Dd~l"},	/* addl Dd,	<ea> */
+{"addl",	one(0050200),		one(0170700), "Qd%l", m68000up },	/* addq written as add */
+{"addl",	one(0003200),		one(0177700), "#l$l", m68000up },	/* addi written as add */
+{"addl",	one(0150700),		one(0170700), "*lAd", m68000up },	/* adda written as add */
+{"addl",	one(0150200),		one(0170700), "*lDd", m68000up },	/* addl <ea>,	Dd */
+{"addl",	one(0150600),		one(0170700), "Dd~l", m68000up },	/* addl Dd,	<ea> */
 
-{"addxb",	one(0150400),		one(0170770),		"DsDd"},
-{"addxb",	one(0150410),		one(0170770),		"-s-d"},
-{"addxl",	one(0150600),		one(0170770),		"DsDd"},
-{"addxl",	one(0150610),		one(0170770),		"-s-d"},
-{"addxw",	one(0150500),		one(0170770),		"DsDd"},
-{"addxw",	one(0150510),		one(0170770),		"-s-d"},
+{"addxb",	one(0150400),		one(0170770), "DsDd", m68000up },
+{"addxb",	one(0150410),		one(0170770), "-s-d", m68000up },
+{"addxl",	one(0150600),		one(0170770), "DsDd", m68000up },
+{"addxl",	one(0150610),		one(0170770), "-s-d", m68000up },
+{"addxw",	one(0150500),		one(0170770), "DsDd", m68000up },
+{"addxw",	one(0150510),		one(0170770), "-s-d", m68000up },
 
-{"andib",	one(0001000),		one(0177700),		"#b$b"},
-{"andib",	one(0001074),		one(0177777),		"#bCb"},	/* andi to ccr */
-{"andiw",	one(0001100),		one(0177700),		"#w$w"},
-{"andiw",	one(0001174),		one(0177777),		"#wSw"},	/* andi to sr */
-{"andil",	one(0001200),		one(0177700),		"#l$l"},
+{"andib",	one(0001000),		one(0177700), "#b$b", m68000up },
+{"andib",	one(0001074),		one(0177777), "#bCb", m68000up },	/* andi to ccr */
+{"andiw",	one(0001100),		one(0177700), "#w$w", m68000up },
+{"andiw",	one(0001174),		one(0177777), "#wSw", m68000up },	/* andi to sr */
+{"andil",	one(0001200),		one(0177700), "#l$l", m68000up },
 
-{"andb",	one(0001000),		one(0177700),		"#b$b"},	/* andi written as or */
-{"andb",	one(0001074),		one(0177777),		"#bCb"},	/* andi to ccr */
-{"andb",	one(0140000),		one(0170700),		";bDd"},	/* memory to register */
-{"andb",	one(0140400),		one(0170700),		"Dd~b"},	/* register to memory */
-{"andw",	one(0001100),		one(0177700),		"#w$w"},	/* andi written as or */
-{"andw",	one(0001174),		one(0177777),		"#wSw"},	/* andi to sr */
-{"andw",	one(0140100),		one(0170700),		";wDd"},	/* memory to register */
-{"andw",	one(0140500),		one(0170700),		"Dd~w"},	/* register to memory */
-{"andl",	one(0001200),		one(0177700),		"#l$l"},	/* andi written as or */
-{"andl",	one(0140200),		one(0170700),		";lDd"},	/* memory to register */
-{"andl",	one(0140600),		one(0170700),		"Dd~l"},	/* register to memory */
+{"andb",	one(0001000),		one(0177700), "#b$b", m68000up },	/* andi written as or */
+{"andb",	one(0001074),		one(0177777), "#bCb", m68000up },	/* andi to ccr */
+{"andb",	one(0140000),		one(0170700), ";bDd", m68000up },	/* memory to register */
+{"andb",	one(0140400),		one(0170700), "Dd~b", m68000up },	/* register to memory */
+{"andw",	one(0001100),		one(0177700), "#w$w", m68000up },	/* andi written as or */
+{"andw",	one(0001174),		one(0177777), "#wSw", m68000up },	/* andi to sr */
+{"andw",	one(0140100),		one(0170700), ";wDd", m68000up },	/* memory to register */
+{"andw",	one(0140500),		one(0170700), "Dd~w", m68000up },	/* register to memory */
+{"andl",	one(0001200),		one(0177700), "#l$l", m68000up },	/* andi written as or */
+{"andl",	one(0140200),		one(0170700), ";lDd", m68000up },	/* memory to register */
+{"andl",	one(0140600),		one(0170700), "Dd~l", m68000up },	/* register to memory */
 
-{"aslb",	one(0160400),		one(0170770),		"QdDs"},
-{"aslb",	one(0160440),		one(0170770),		"DdDs"},
-{"asll",	one(0160600),		one(0170770),		"QdDs"},
-{"asll",	one(0160640),		one(0170770),		"DdDs"},
-{"aslw",	one(0160500),		one(0170770),		"QdDs"},
-{"aslw",	one(0160540),		one(0170770),		"DdDs"},
-{"aslw",	one(0160700),		one(0177700),		"~s"},	/* Shift memory */
-{"asrb",	one(0160000),		one(0170770),		"QdDs"},
-{"asrb",	one(0160040),		one(0170770),		"DdDs"},
-{"asrl",	one(0160200),		one(0170770),		"QdDs"},
-{"asrl",	one(0160240),		one(0170770),		"DdDs"},
-{"asrw",	one(0160100),		one(0170770),		"QdDs"},
-{"asrw",	one(0160140),		one(0170770),		"DdDs"},
-{"asrw",	one(0160300),		one(0177700),		"~s"},	/* Shift memory */
+{"aslb",	one(0160400),		one(0170770), "QdDs", m68000up },
+{"aslb",	one(0160440),		one(0170770), "DdDs", m68000up },
+{"asll",	one(0160600),		one(0170770), "QdDs", m68000up },
+{"asll",	one(0160640),		one(0170770), "DdDs", m68000up },
+{"aslw",	one(0160500),		one(0170770), "QdDs", m68000up },
+{"aslw",	one(0160540),		one(0170770), "DdDs", m68000up },
+{"aslw",	one(0160700),		one(0177700), "~s",   m68000up },	/* Shift memory */
+{"asrb",	one(0160000),		one(0170770), "QdDs", m68000up },
+{"asrb",	one(0160040),		one(0170770), "DdDs", m68000up },
+{"asrl",	one(0160200),		one(0170770), "QdDs", m68000up },
+{"asrl",	one(0160240),		one(0170770), "DdDs", m68000up },
+{"asrw",	one(0160100),		one(0170770), "QdDs", m68000up },
+{"asrw",	one(0160140),		one(0170770), "DdDs", m68000up },
+{"asrw",	one(0160300),		one(0177700), "~s",   m68000up },	/* Shift memory */
 
 /* Fixed-size branches with 16-bit offsets */
 
-{"bhi",		one(0061000),		one(0177777),		"BW"},
-{"bls",		one(0061400),		one(0177777),		"BW"},
-{"bcc",		one(0062000),		one(0177777),		"BW"},
-{"jfnlt",		one(0062000),		one(0177777),		"BW"},
-{"bcs",		one(0062400),		one(0177777),		"BW"},
-{"bne",		one(0063000),		one(0177777),		"BW"},
-{"beq",		one(0063400),		one(0177777),		"BW"},
-{"bvc",		one(0064000),		one(0177777),		"BW"},
-{"bvs",		one(0064400),		one(0177777),		"BW"},
-{"bpl",		one(0065000),		one(0177777),		"BW"},
-{"bmi",		one(0065400),		one(0177777),		"BW"},
-{"bge",		one(0066000),		one(0177777),		"BW"},
-{"blt",		one(0066400),		one(0177777),		"BW"},
-{"bgt",		one(0067000),		one(0177777),		"BW"},
-{"ble",		one(0067400),		one(0177777),		"BW"},
-{"jfngt",		one(0067400),		one(0177777),		"BW"},
-{"bra",		one(0060000),		one(0177777),		"BW"},
-{"bsr",		one(0060400),		one(0177777),		"BW"},
+{"bhi",		one(0061000),		one(0177777), "BW", m68000up },
+{"bls",		one(0061400),		one(0177777), "BW", m68000up },
+{"bcc",		one(0062000),		one(0177777), "BW", m68000up },
+{"jfnlt",	one(0062000),		one(0177777), "BW", m68000up }, /* apparently a sun alias */
+{"bcs",		one(0062400),		one(0177777), "BW", m68000up },
+{"bne",		one(0063000),		one(0177777), "BW", m68000up },
+{"beq",		one(0063400),		one(0177777), "BW", m68000up },
+{"bvc",		one(0064000),		one(0177777), "BW", m68000up },
+{"bvs",		one(0064400),		one(0177777), "BW", m68000up },
+{"bpl",		one(0065000),		one(0177777), "BW", m68000up },
+{"bmi",		one(0065400),		one(0177777), "BW", m68000up },
+{"bge",		one(0066000),		one(0177777), "BW", m68000up },
+{"blt",		one(0066400),		one(0177777), "BW", m68000up },
+{"bgt",		one(0067000),		one(0177777), "BW", m68000up },
+{"ble",		one(0067400),		one(0177777), "BW", m68000up },
+{"jfngt",	one(0067400),		one(0177777), "BW", m68000up }, /* apparently a sun alias */
+{"bra",		one(0060000),		one(0177777), "BW", m68000up },
+{"bsr",		one(0060400),		one(0177777), "BW", m68000up },
 
 /* Fixed-size branches with short (byte) offsets */
 
-{"bhis",	one(0061000),		one(0177400),		"BB"},
-{"blss",	one(0061400),		one(0177400),		"BB"},
-{"bccs",	one(0062000),		one(0177400),		"BB"},
-{"bcss",	one(0062400),		one(0177400),		"BB"},
-{"bnes",	one(0063000),		one(0177400),		"BB"},
-{"beqs",	one(0063400),		one(0177400),		"BB"},
-{"jfeq",	one(0063400),		one(0177400),		"BB"},
-{"bvcs",	one(0064000),		one(0177400),		"BB"},
-{"bvss",	one(0064400),		one(0177400),		"BB"},
-{"bpls",	one(0065000),		one(0177400),		"BB"},
-{"bmis",	one(0065400),		one(0177400),		"BB"},
-{"bges",	one(0066000),		one(0177400),		"BB"},
-{"blts",	one(0066400),		one(0177400),		"BB"},
-{"bgts",	one(0067000),		one(0177400),		"BB"},
-{"bles",	one(0067400),		one(0177400),		"BB"},
-{"bras",	one(0060000),		one(0177400),		"BB"},
-{"bsrs",	one(0060400),		one(0177400),		"BB"},
+{"bhis",	one(0061000),		one(0177400), "BB", m68000up },
+{"blss",	one(0061400),		one(0177400), "BB", m68000up },
+{"bccs",	one(0062000),		one(0177400), "BB", m68000up },
+{"bcss",	one(0062400),		one(0177400), "BB", m68000up },
+{"bnes",	one(0063000),		one(0177400), "BB", m68000up },
+{"beqs",	one(0063400),		one(0177400), "BB", m68000up },
+{"jfeq",	one(0063400),		one(0177400), "BB", m68000up }, /* apparently a sun alias */
+{"bvcs",	one(0064000),		one(0177400), "BB", m68000up },
+{"bvss",	one(0064400),		one(0177400), "BB", m68000up },
+{"bpls",	one(0065000),		one(0177400), "BB", m68000up },
+{"bmis",	one(0065400),		one(0177400), "BB", m68000up },
+{"bges",	one(0066000),		one(0177400), "BB", m68000up },
+{"blts",	one(0066400),		one(0177400), "BB", m68000up },
+{"bgts",	one(0067000),		one(0177400), "BB", m68000up },
+{"bles",	one(0067400),		one(0177400), "BB", m68000up },
+{"bras",	one(0060000),		one(0177400), "BB", m68000up },
+{"bsrs",	one(0060400),		one(0177400), "BB", m68000up },
 
 /* Fixed-size branches with long (32-bit) offsets */
 
-{"bhil",	one(0061377),		one(0177777),		"BL"},
-{"blsl",	one(0061777),		one(0177777),		"BL"},
-{"bccl",	one(0062377),		one(0177777),		"BL"},
-{"bcsl",	one(0062777),		one(0177777),		"BL"},
-{"bnel",	one(0063377),		one(0177777),		"BL"},
-{"beql",	one(0063777),		one(0177777),		"BL"},
-{"bvcl",	one(0064377),		one(0177777),		"BL"},
-{"bvsl",	one(0064777),		one(0177777),		"BL"},
-{"bpll",	one(0065377),		one(0177777),		"BL"},
-{"bmil",	one(0065777),		one(0177777),		"BL"},
-{"bgel",	one(0066377),		one(0177777),		"BL"},
-{"bltl",	one(0066777),		one(0177777),		"BL"},
-{"bgtl",	one(0067377),		one(0177777),		"BL"},
-{"blel",	one(0067777),		one(0177777),		"BL"},
-{"bral",	one(0060377),		one(0177777),		"BL"},
-{"bsrl",	one(0060777),		one(0177777),		"BL"},
+{"bhil",	one(0061377),		one(0177777), "BL", m68020up },
+{"blsl",	one(0061777),		one(0177777), "BL", m68020up },
+{"bccl",	one(0062377),		one(0177777), "BL", m68020up },
+{"bcsl",	one(0062777),		one(0177777), "BL", m68020up },
+{"bnel",	one(0063377),		one(0177777), "BL", m68020up },
+{"beql",	one(0063777),		one(0177777), "BL", m68020up },
+{"bvcl",	one(0064377),		one(0177777), "BL", m68020up },
+{"bvsl",	one(0064777),		one(0177777), "BL", m68020up },
+{"bpll",	one(0065377),		one(0177777), "BL", m68020up },
+{"bmil",	one(0065777),		one(0177777), "BL", m68020up },
+{"bgel",	one(0066377),		one(0177777), "BL", m68020up },
+{"bltl",	one(0066777),		one(0177777), "BL", m68020up },
+{"bgtl",	one(0067377),		one(0177777), "BL", m68020up },
+{"blel",	one(0067777),		one(0177777), "BL", m68020up },
+{"bral",	one(0060377),		one(0177777), "BL", m68020up },
+{"bsrl",	one(0060777),		one(0177777), "BL", m68020up },
 
 /* We now return you to our regularly scheduled instruction set */
 
-{"bchg",	one(0000500),		one(0170700),		"Dd$s"},
-{"bchg",	one(0004100),		one(0177700),		"#b$s"},
-{"bclr",	one(0000600),		one(0170700),		"Dd$s"},
-{"bclr",	one(0004200),		one(0177700),		"#b$s"},
-{"bfchg",	two(0165300, 0),	two(0177700, 0170000),	"?sO2O3"},
-{"bfclr",	two(0166300, 0),	two(0177700, 0170000),	"?sO2O3"},
-{"bfexts",	two(0165700, 0),	two(0177700, 0100000),	"/sO2O3D1"},
-{"bfextu",	two(0164700, 0),	two(0177700, 0100000),	"/sO2O3D1"},
-{"bfffo",	two(0166700, 0),	two(0177700, 0100000),	"/sO2O3D1"},
-{"bfins",	two(0167700, 0),	two(0177700, 0100000),	"D1?sO2O3"},
-{"bfset",	two(0167300, 0),	two(0177700, 0170000),	"?sO2O3"},
-{"bftst",	two(0164300, 0),	two(0177700, 0170000),	"/sO2O3"},
-{"bset",	one(0000700),		one(0170700),		"Dd$s"},
-{"bset",	one(0004300),		one(0177700),		"#b$s"},
-{"btst",	one(0000400),		one(0170700),		"Dd@s"},
-{"btst",	one(0004000),		one(0177700),		"#b@s"},
+{"bchg",	one(0000500),		one(0170700),		"Dd$s", m68000up },
+{"bchg",	one(0004100),		one(0177700),		"#b$s", m68000up },
+{"bclr",	one(0000600),		one(0170700),		"Dd$s", m68000up },
+{"bclr",	one(0004200),		one(0177700),		"#b$s", m68000up },
 
-{"bkpt",	one(0044110),		one(0177770),		"Qs"},
+{"bfchg",	two(0165300, 0),	two(0177700, 0170000),	"?sO2O3",   m68020up },
+{"bfclr",	two(0166300, 0),	two(0177700, 0170000),	"?sO2O3",   m68020up },
+{"bfexts",	two(0165700, 0),	two(0177700, 0100000),	"/sO2O3D1", m68020up },
+{"bfextu",	two(0164700, 0),	two(0177700, 0100000),	"/sO2O3D1", m68020up },
+{"bfffo",	two(0166700, 0),	two(0177700, 0100000),	"/sO2O3D1", m68020up },
+{"bfins",	two(0167700, 0),	two(0177700, 0100000),	"D1?sO2O3", m68020up },
+{"bfset",	two(0167300, 0),	two(0177700, 0170000),	"?sO2O3",   m68020up },
+{"bftst",	two(0164300, 0),	two(0177700, 0170000),	"/sO2O3",   m68020up },
+{"bkpt",	one(0044110),		one(0177770),		"Qs",       m68020up },
 
-{"callm",	one(0003300),		one(0177700),		"#b!s"},
-{"cas2l",	two(0007374, 0),	two(0177777, 0107070),	"D3D6D2D5R1R4"}, /* JF FOO this is really a 3 word ins */
-{"cas2w",	two(0006374, 0),	two(0177777, 0107070),	"D3D6D2D5R1R4"}, /* JF ditto */
-{"casb",	two(0005300, 0),	two(0177700, 0177070),	"D3D2~s"},
-{"casl",	two(0007300, 0),	two(0177700, 0177070),	"D3D2~s"},
-{"casw",	two(0006300, 0),	two(0177700, 0177070),	"D3D2~s"},
+{"bset",	one(0000700),		one(0170700),		"Dd$s", m68000up },
+{"bset",	one(0004300),		one(0177700),		"#b$s", m68000up },
+{"btst",	one(0000400),		one(0170700),		"Dd@s", m68000up },
+{"btst",	one(0004000),		one(0177700),		"#b@s", m68000up },
+
+
+{"callm",	one(0003300),		one(0177700),		"#b!s", m68020 },
+
+{"cas2l",	two(0007374, 0),	two(0177777, 0107070),	"D3D6D2D5R1R4", m68020up }, /* JF FOO really a 3 word ins */
+{"cas2w",	two(0006374, 0),	two(0177777, 0107070),	"D3D6D2D5R1R4", m68020up }, /* JF ditto */
+{"casb",	two(0005300, 0),	two(0177700, 0177070),	"D3D2~s", m68020up },
+{"casl",	two(0007300, 0),	two(0177700, 0177070),	"D3D2~s", m68020up },
+{"casw",	two(0006300, 0),	two(0177700, 0177070),	"D3D2~s", m68020up },
 
 /*  {"chk",	one(0040600),		one(0170700),		";wDd"}, JF FOO this looks wrong */
-{"chk2b",	two(0000300, 0004000),	two(0177700, 07777),	"!sR1"},
-{"chk2l",	two(0002300, 0004000),	two(0177700, 07777),	"!sR1"},
-{"chk2w",	two(0001300, 0004000),	two(0177700, 07777),	"!sR1"},
-{"chkl",	one(0040400),		one(0170700),		";lDd"},
-{"chkw",	one(0040600),		one(0170700),		";wDd"},
-{"clrb",	one(0041000),		one(0177700),		"$s"},
-{"clrl",	one(0041200),		one(0177700),		"$s"},
-{"clrw",	one(0041100),		one(0177700),		"$s"},
+{"chk2b",	two(0000300, 0004000),	two(0177700, 07777),	"!sR1", m68020up },
+{"chk2l",	two(0002300, 0004000),	two(0177700, 07777),	"!sR1", m68020up },
+{"chk2w",	two(0001300, 0004000),	two(0177700, 07777),	"!sR1", m68020up },
+{"chkl",	one(0040400),		one(0170700),		";lDd", m68000up },
+{"chkw",	one(0040600),		one(0170700),		";wDd", m68000up },
 
-{"cmp2b",	two(0000300, 0),	two(0177700, 07777),	"!sR1"},
-{"cmp2l",	two(0002300, 0),	two(0177700, 07777),	"!sR1"},
-{"cmp2w",	two(0001300, 0),	two(0177700, 07777),	"!sR1"},
-{"cmpal",	one(0130700),		one(0170700),		"*lAd"},
-{"cmpaw",	one(0130300),		one(0170700),		"*wAd"},
-{"cmpib",	one(0006000),		one(0177700),		"#b;b"},
-{"cmpil",	one(0006200),		one(0177700),		"#l;l"},
-{"cmpiw",	one(0006100),		one(0177700),		"#w;w"},
-{"cmpb",	one(0006000),		one(0177700),		"#b;b"},	/* cmpi written as cmp */
-{"cmpb",	one(0130000),		one(0170700),		";bDd"},
-{"cmpw",	one(0006100),		one(0177700),		"#w;w"},
-{"cmpw",	one(0130100),		one(0170700),		"*wDd"},
-{"cmpw",	one(0130300),		one(0170700),		"*wAd"},	/* cmpa written as cmp */
-{"cmpl",	one(0006200),		one(0177700),		"#l;l"},
-{"cmpl",	one(0130200),		one(0170700),		"*lDd"},
-{"cmpl",	one(0130700),		one(0170700),		"*lAd"},
-{"cmpmb",	one(0130410),		one(0170770),		"+s+d"},
-{"cmpml",	one(0130610),		one(0170770),		"+s+d"},
-{"cmpmw",	one(0130510),		one(0170770),		"+s+d"},
+#define SCOPE_LINE (0x1 << 3)
+#define SCOPE_PAGE (0x2 << 3)
+#define SCOPE_ALL  (0x3 << 3)
 
-{"dbcc",	one(0052310),		one(0177770),		"DsBw"},
-{"dbcs",	one(0052710),		one(0177770),		"DsBw"},
-{"dbeq",	one(0053710),		one(0177770),		"DsBw"},
-{"dbf",		one(0050710),		one(0177770),		"DsBw"},
-{"dbge",	one(0056310),		one(0177770),		"DsBw"},
-{"dbgt",	one(0057310),		one(0177770),		"DsBw"},
-{"dbhi",	one(0051310),		one(0177770),		"DsBw"},
-{"dble",	one(0057710),		one(0177770),		"DsBw"},
-{"dbls",	one(0051710),		one(0177770),		"DsBw"},
-{"dblt",	one(0056710),		one(0177770),		"DsBw"},
-{"dbmi",	one(0055710),		one(0177770),		"DsBw"},
-{"dbne",	one(0053310),		one(0177770),		"DsBw"},
-{"dbpl",	one(0055310),		one(0177770),		"DsBw"},
-{"dbra",	one(0050710),		one(0177770),		"DsBw"},
-{"dbt",		one(0050310),		one(0177770),		"DsBw"},
-{"dbvc",	one(0054310),		one(0177770),		"DsBw"},
-{"dbvs",	one(0054710),		one(0177770),		"DsBw"},
+{"cinva",	one(0xf400|SCOPE_ALL),  one(0xff20), "ce",   m68040 },
+{"cinvl",	one(0xf400|SCOPE_LINE), one(0xff20), "ceas", m68040 },
+{"cinvp",	one(0xf400|SCOPE_PAGE), one(0xff20), "ceas", m68040 },
 
-{"divsl",	two(0046100, 0006000),	two(0177700, 0107770),	";lD3D1"},
-{"divsl",	two(0046100, 0004000),	two(0177700, 0107770),	";lDD"},
-{"divsll",	two(0046100, 0004000),	two(0177700, 0107770),	";lD3D1"},
-{"divsw",	one(0100700),		one(0170700),		";wDd"},
-{"divs",	one(0100700),		one(0170700),		";wDd"},
-{"divul",	two(0046100, 0002000),	two(0177700, 0107770),	";lD3D1"},
-{"divul",	two(0046100, 0000000),	two(0177700, 0107770),	";lDD"},
-{"divull",	two(0046100, 0000000),	two(0177700, 0107770),	";lD3D1"},
-{"divuw",	one(0100300),		one(0170700),		";wDd"},
-{"divu",	one(0100300),		one(0170700),		";wDd"},
-{"eorb",	one(0005000),		one(0177700),		"#b$s"},	/* eori written as or */
-{"eorb",	one(0005074),		one(0177777),		"#bCs"},	/* eori to ccr */
-{"eorb",	one(0130400),		one(0170700),		"Dd$s"},	/* register to memory */
-{"eorib",	one(0005000),		one(0177700),		"#b$s"},
-{"eorib",	one(0005074),		one(0177777),		"#bCs"},	/* eori to ccr */
-{"eoril",	one(0005200),		one(0177700),		"#l$s"},
-{"eoriw",	one(0005100),		one(0177700),		"#w$s"},
-{"eoriw",	one(0005174),		one(0177777),		"#wSs"},	/* eori to sr */
-{"eorl",	one(0005200),		one(0177700),		"#l$s"},
-{"eorl",	one(0130600),		one(0170700),		"Dd$s"},
-{"eorw",	one(0005100),		one(0177700),		"#w$s"},
-{"eorw",	one(0005174),		one(0177777),		"#wSs"},	/* eori to sr */
-{"eorw",	one(0130500),		one(0170700),		"Dd$s"},
+{"cpusha",	one(0xf420|SCOPE_ALL),  one(0xff20), "ce",   m68040 },
+{"cpushl",	one(0xf420|SCOPE_LINE), one(0xff20), "ceas", m68040 },
+{"cpushp",	one(0xf420|SCOPE_PAGE), one(0xff20), "ceas", m68040 },
 
-{"exg",		one(0140500),		one(0170770),		"DdDs"},
-{"exg",		one(0140510),		one(0170770),		"AdAs"},
-{"exg",		one(0140610),		one(0170770),		"DdAs"},
-{"exg",		one(0140610),		one(0170770),		"AsDd"},
+#undef SCOPE_LINE
+#undef SCOPE_PAGE
+#undef SCOPE_ALL
 
-{"extw",	one(0044200),		one(0177770),		"Ds"},
-{"extl",	one(0044300),		one(0177770),		"Ds"},
-{"extbl",	one(0044700),		one(0177770),		"Ds"},
-{"extb.l",	one(0044700),		one(0177770),		"Ds"},	/* Not sure we should support this one*/
+{"clrb",	one(0041000),		one(0177700),		"$s", m68000up },
+{"clrl",	one(0041200),		one(0177700),		"$s", m68000up },
+{"clrw",	one(0041100),		one(0177700),		"$s", m68000up },
 
-{"illegal",	one(0045374),		one(0177777),		""},
-{"jmp",		one(0047300),		one(0177700),		"!s"},
-{"jsr",		one(0047200),		one(0177700),		"!s"},
-{"lea",		one(0040700),		one(0170700),		"!sAd"},
-{"linkw",	one(0047120),		one(0177770),		"As#w"},
-{"linkl",	one(0044010),		one(0177770),		"As#l"},
-{"link",	one(0047120),		one(0177770),		"As#w"},
-{"link",	one(0044010),		one(0177770),		"As#l"},
+{"cmp2b",	two(0000300, 0),	two(0177700, 07777),	"!sR1", m68020up },
+{"cmp2l",	two(0002300, 0),	two(0177700, 07777),	"!sR1", m68020up },
+{"cmp2w",	two(0001300, 0),	two(0177700, 07777),	"!sR1", m68020up },
+{"cmpal",	one(0130700),		one(0170700),		"*lAd", m68000up },
+{"cmpaw",	one(0130300),		one(0170700),		"*wAd", m68000up },
+{"cmpib",	one(0006000),		one(0177700),		"#b;b", m68000up },
+{"cmpil",	one(0006200),		one(0177700),		"#l;l", m68000up },
+{"cmpiw",	one(0006100),		one(0177700),		"#w;w", m68000up },
+{"cmpb",	one(0006000),		one(0177700),		"#b;b", m68000up },	/* cmpi written as cmp */
+{"cmpb",	one(0130000),		one(0170700),		";bDd", m68000up },
+{"cmpw",	one(0006100),		one(0177700),		"#w;w", m68000up },
+{"cmpw",	one(0130100),		one(0170700),		"*wDd", m68000up },
+{"cmpw",	one(0130300),		one(0170700),		"*wAd", m68000up },	/* cmpa written as cmp */
+{"cmpl",	one(0006200),		one(0177700),		"#l;l", m68000up },
+{"cmpl",	one(0130200),		one(0170700),		"*lDd", m68000up },
+{"cmpl",	one(0130700),		one(0170700),		"*lAd", m68000up },
+{"cmpmb",	one(0130410),		one(0170770),		"+s+d", m68000up },
+{"cmpml",	one(0130610),		one(0170770),		"+s+d", m68000up },
+{"cmpmw",	one(0130510),		one(0170770),		"+s+d", m68000up },
 
-{"lslb",	one(0160410),		one(0170770),		"QdDs"},	/* lsrb #Q,	Ds */
-{"lslb",	one(0160450),		one(0170770),		"DdDs"},	/* lsrb Dd,	Ds */
-{"lslw",	one(0160510),		one(0170770),		"QdDs"},	/* lsrb #Q,	Ds */
-{"lslw",	one(0160550),		one(0170770),		"DdDs"},	/* lsrb Dd,	Ds */
-{"lslw",	one(0161700),		one(0177700),		"~s"},	/* Shift memory */
-{"lsll",	one(0160610),		one(0170770),		"QdDs"},	/* lsrb #Q,	Ds */
-{"lsll",	one(0160650),		one(0170770),		"DdDs"},	/* lsrb Dd,	Ds */
+{"dbcc",	one(0052310),		one(0177770),		"DsBw", m68000up },
+{"dbcs",	one(0052710),		one(0177770),		"DsBw", m68000up },
+{"dbeq",	one(0053710),		one(0177770),		"DsBw", m68000up },
+{"dbf",		one(0050710),		one(0177770),		"DsBw", m68000up },
+{"dbge",	one(0056310),		one(0177770),		"DsBw", m68000up },
+{"dbgt",	one(0057310),		one(0177770),		"DsBw", m68000up },
+{"dbhi",	one(0051310),		one(0177770),		"DsBw", m68000up },
+{"dble",	one(0057710),		one(0177770),		"DsBw", m68000up },
+{"dbls",	one(0051710),		one(0177770),		"DsBw", m68000up },
+{"dblt",	one(0056710),		one(0177770),		"DsBw", m68000up },
+{"dbmi",	one(0055710),		one(0177770),		"DsBw", m68000up },
+{"dbne",	one(0053310),		one(0177770),		"DsBw", m68000up },
+{"dbpl",	one(0055310),		one(0177770),		"DsBw", m68000up },
+{"dbra",	one(0050710),		one(0177770),		"DsBw", m68000up },
+{"dbt",		one(0050310),		one(0177770),		"DsBw", m68000up },
+{"dbvc",	one(0054310),		one(0177770),		"DsBw", m68000up },
+{"dbvs",	one(0054710),		one(0177770),		"DsBw", m68000up },
 
-{"lsrb",	one(0160010),		one(0170770),		"QdDs"} /* lsrb #Q,	Ds */,
-{"lsrb",	one(0160050),		one(0170770),		"DdDs"},	/* lsrb Dd,	Ds */
-{"lsrl",	one(0160210),		one(0170770),		"QdDs"},	/* lsrb #Q,	Ds */
-{"lsrl",	one(0160250),		one(0170770),		"DdDs"},	/* lsrb #Q,	Ds */
-{"lsrw",	one(0160110),		one(0170770),		"QdDs"},	/* lsrb #Q,	Ds */
-{"lsrw",	one(0160150),		one(0170770),		"DdDs"},	/* lsrb #Q,	Ds */
-{"lsrw",	one(0161300),		one(0177700),		"~s"},	/* Shift memory */
+{"divsl",	two(0046100, 0006000),	two(0177700, 0107770),	";lD3D1", m68020up },
+{"divsl",	two(0046100, 0004000),	two(0177700, 0107770),	";lDD", m68020up },
+{"divsll",	two(0046100, 0004000),	two(0177700, 0107770),	";lD3D1", m68020up },
+{"divsw",	one(0100700),		one(0170700),		";wDd", m68000up },
+{"divs",	one(0100700),		one(0170700),		";wDd", m68000up },
+{"divul",	two(0046100, 0002000),	two(0177700, 0107770),	";lD3D1", m68020up },
+{"divul",	two(0046100, 0000000),	two(0177700, 0107770),	";lDD", m68020up },
+{"divull",	two(0046100, 0000000),	two(0177700, 0107770),	";lD3D1", m68020up },
+{"divuw",	one(0100300),		one(0170700),		";wDd", m68000up },
+{"divu",	one(0100300),		one(0170700),		";wDd", m68000up },
+{"eorb",	one(0005000),		one(0177700),		"#b$s", m68000up },	/* eori written as or */
+{"eorb",	one(0005074),		one(0177777),		"#bCs", m68000up },	/* eori to ccr */
+{"eorb",	one(0130400),		one(0170700),		"Dd$s", m68000up },	/* register to memory */
+{"eorib",	one(0005000),		one(0177700),		"#b$s", m68000up },
+{"eorib",	one(0005074),		one(0177777),		"#bCs", m68000up },	/* eori to ccr */
+{"eoril",	one(0005200),		one(0177700),		"#l$s", m68000up },
+{"eoriw",	one(0005100),		one(0177700),		"#w$s", m68000up },
+{"eoriw",	one(0005174),		one(0177777),		"#wSs", m68000up },	/* eori to sr */
+{"eorl",	one(0005200),		one(0177700),		"#l$s", m68000up },
+{"eorl",	one(0130600),		one(0170700),		"Dd$s", m68000up },
+{"eorw",	one(0005100),		one(0177700),		"#w$s", m68000up },
+{"eorw",	one(0005174),		one(0177777),		"#wSs", m68000up },	/* eori to sr */
+{"eorw",	one(0130500),		one(0170700),		"Dd$s", m68000up },
 
-{"moveal",	one(0020100),		one(0170700),		"*lAd"},
-{"moveaw",	one(0030100),		one(0170700),		"*wAd"},
-{"moveb",	one(0010000),		one(0170000),		";b$d"},	/* move */
-{"movel",	one(0070000),		one(0170400),		"MsDd"},	/* moveq written as move */
-{"movel",	one(0020000),		one(0170000),		"*l$d"},
-{"movel",	one(0020100),		one(0170700),		"*lAd"},
-{"movel",	one(0047140),		one(0177770),		"AsUd"},	/* move to USP */
-{"movel",	one(0047150),		one(0177770),		"UdAs"},	/* move from USP */
+{"exg",		one(0140500),		one(0170770),		"DdDs", m68000up },
+{"exg",		one(0140510),		one(0170770),		"AdAs", m68000up },
+{"exg",		one(0140610),		one(0170770),		"DdAs", m68000up },
+{"exg",		one(0140610),		one(0170770),		"AsDd", m68000up },
 
-{"movec",	one(0047173),		one(0177777),		"R1Jj"},
-{"movec",	one(0047173),		one(0177777),		"R1#j"},
-{"movec",	one(0047172),		one(0177777),		"JjR1"},
-{"movec",	one(0047172),		one(0177777),		"#jR1"},
+{"extw",	one(0044200),		one(0177770),		"Ds", m68000up },
+{"extl",	one(0044300),		one(0177770),		"Ds", m68000up },
+{"extbl",	one(0044700),		one(0177770),		"Ds", m68020up },
+{"extb.l",	one(0044700),		one(0177770),		"Ds", m68020up }, /* Not sure we should support this one */
 
-/* JF added these next four for the assembler */
-{"moveml",	one(0044300),		one(0177700),		"Lw&s"},	/* movem reg to mem. */
-{"moveml",	one(0044340),		one(0177770),		"lw-s"},	/* movem reg to autodecrement. */
-{"moveml",	one(0046300),		one(0177700),		"!sLw"},	/* movem mem to reg. */
-{"moveml",	one(0046330),		one(0177770),		"+sLw"},	/* movem autoinc to reg. */
+/* float stuff starts here */
+{"fabsb",	two(0xF000, 0x5818),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fabsd",	two(0xF000, 0x5418),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fabsl",	two(0xF000, 0x4018),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fabsp",	two(0xF000, 0x4C18),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fabss",	two(0xF000, 0x4418),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fabsw",	two(0xF000, 0x5018),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fabsx",	two(0xF000, 0x0018),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fabsx",	two(0xF000, 0x4818),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fabsx",	two(0xF000, 0x0018),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"moveml",	one(0044300),		one(0177700),		"#w&s"},	/* movem reg to mem. */
-{"moveml",	one(0044340),		one(0177770),		"#w-s"},	/* movem reg to autodecrement. */
-{"moveml",	one(0046300),		one(0177700),		"!s#w"},	/* movem mem to reg. */
-{"moveml",	one(0046330),		one(0177770),		"+s#w"},	/* movem autoinc to reg. */
+/* FIXME-NOW: The '040 book that I have claims that these should be
+   coded exactly like fadd.  In fact, the table of opmodes calls them
+   fadd, fsadd, fdadd.  That can't be right.  If someone can give me the
+   right encoding, I'll fix it.  By induction, I *think* the right
+   encoding is 38 & 3c, but I'm not sure.
 
-/* JF added these next four for the assembler */
-{"movemw",	one(0044200),		one(0177700),		"Lw&s"},	/* movem reg to mem. */
-{"movemw",	one(0044240),		one(0177770),		"lw-s"},	/* movem reg to autodecrement. */
-{"movemw",	one(0046200),		one(0177700),		"!sLw"},	/* movem mem to reg. */
-{"movemw",	one(0046230),		one(0177770),		"+sLw"},	/* movem autoinc to reg. */
+   in the mean time, if you know the encoding for the opmode field, you
+   can replace all of the "38),"'s and "3c),"'s below with the corrected
+   values and these guys should then just work.  xoxorich. 31Aug91 */
 
-{"movemw",	one(0044200),		one(0177700),		"#w&s"},	/* movem reg to mem. */
-{"movemw",	one(0044240),		one(0177770),		"#w-s"},	/* movem reg to autodecrement. */
-{"movemw",	one(0046200),		one(0177700),		"!s#w"},	/* movem mem to reg. */
-{"movemw",	one(0046230),		one(0177770),		"+s#w"},	/* movem autoinc to reg. */
+#ifdef comment
+{"fsabsb",	two(0xF000, 0x5838),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fsabsd",	two(0xF000, 0x5438),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fsabsl",	two(0xF000, 0x4038),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fsabsp",	two(0xF000, 0x4C38),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fsabss",	two(0xF000, 0x4438),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fsabsw",	two(0xF000, 0x5038),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fsabsx",	two(0xF000, 0x0038),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fsabsx",	two(0xF000, 0x4838),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+{"fsabsx",	two(0xF000, 0x0038),	two(0xF1C0, 0xE07F),	"IiFt",   m68040 },
 
-{"movepl",	one(0000510),		one(0170770),		"dsDd"},	/* memory to register */
-{"movepl",	one(0000710),		one(0170770),		"Ddds"},	/* register to memory */
-{"movepw",	one(0000410),		one(0170770),		"dsDd"},	/* memory to register */
-{"movepw",	one(0000610),		one(0170770),		"Ddds"},	/* register to memory */
-{"moveq",	one(0070000),		one(0170400),		"MsDd"},
-{"movew",	one(0030000),		one(0170000),		"*w$d"},
-{"movew",	one(0030100),		one(0170700),		"*wAd"},	/* movea,	written as move */
-{"movew",	one(0040300),		one(0177700),		"Ss$s"},	/* Move from sr */
-{"movew",	one(0041300),		one(0177700),		"Cs$s"},	/* Move from ccr */
-{"movew",	one(0042300),		one(0177700),		";wCd"},	/* move to ccr */
-{"movew",	one(0043300),		one(0177700),		";wSd"},	/* move to sr */
+{"fdabsb",	two(0xF000, 0x583c),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040},
+{"fdabsd",	two(0xF000, 0x543c),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040},
+{"fdabsl",	two(0xF000, 0x403c),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040},
+{"fdabsp",	two(0xF000, 0x4C3c),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040},
+{"fdabss",	two(0xF000, 0x443c),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040},
+{"fdabsw",	two(0xF000, 0x503c),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040},
+{"fdabsx",	two(0xF000, 0x003c),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040},
+{"fdabsx",	two(0xF000, 0x483c),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040},
+{"fdabsx",	two(0xF000, 0x003c),	two(0xF1C0, 0xE07F),	"IiFt",   m68040},
+#endif /* comment */
 
-{"movesb",	two(0007000, 0),	two(0177700, 07777),	"~sR1"},	 /* moves from memory */
-{"movesb",	two(0007000, 04000),	two(0177700, 07777),	"R1~s"},	 /* moves to memory */
-{"movesl",	two(0007200, 0),	two(0177700, 07777),	"~sR1"},	 /* moves from memory */
-{"movesl",	two(0007200, 04000),	two(0177700, 07777),	"R1~s"},	 /* moves to memory */
-{"movesw",	two(0007100, 0),	two(0177700, 07777),	"~sR1"},	 /* moves from memory */
-{"movesw",	two(0007100, 04000),	two(0177700, 07777),	"R1~s"},	 /* moves to memory */
+{"facosb",	two(0xF000, 0x581C),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"facosd",	two(0xF000, 0x541C),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"facosl",	two(0xF000, 0x401C),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"facosp",	two(0xF000, 0x4C1C),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"facoss",	two(0xF000, 0x441C),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"facosw",	two(0xF000, 0x501C),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"facosx",	two(0xF000, 0x001C),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"facosx",	two(0xF000, 0x481C),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"facosx",	two(0xF000, 0x001C),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"mulsl",	two(0046000, 004000),	two(0177700, 0107770),	";lD1"},
-{"mulsl",	two(0046000, 006000),	two(0177700, 0107770),	";lD3D1"},
-{"mulsw",	one(0140700),		one(0170700),		";wDd"},
-{"muls",	one(0140700),		one(0170700),		";wDd"},
-{"mulul",	two(0046000, 000000),	two(0177700, 0107770),	";lD1"},
-{"mulul",	two(0046000, 002000),	two(0177700, 0107770),	";lD3D1"},
-{"muluw",	one(0140300),		one(0170700),		";wDd"},
-{"mulu",	one(0140300),		one(0170700),		";wDd"},
-{"nbcd",	one(0044000),		one(0177700),		"$s"},
-{"negb",	one(0042000),		one(0177700),		"$s"},
-{"negl",	one(0042200),		one(0177700),		"$s"},
-{"negw",	one(0042100),		one(0177700),		"$s"},
-{"negxb",	one(0040000),		one(0177700),		"$s"},
-{"negxl",	one(0040200),		one(0177700),		"$s"},
-{"negxw",	one(0040100),		one(0177700),		"$s"},
-{"nop",		one(0047161),		one(0177777),		""},
-{"notb",	one(0043000),		one(0177700),		"$s"},
-{"notl",	one(0043200),		one(0177700),		"$s"},
-{"notw",	one(0043100),		one(0177700),		"$s"},
+{"faddb",	two(0xF000, 0x5822),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"faddd",	two(0xF000, 0x5422),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"faddl",	two(0xF000, 0x4022),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"faddp",	two(0xF000, 0x4C22),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fadds",	two(0xF000, 0x4422),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"faddw",	two(0xF000, 0x5022),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"faddx",	two(0xF000, 0x0022),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"faddx",	two(0xF000, 0x4822),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+/* {"faddx",	two(0xF000, 0x0022),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat }, JF removed */
 
-{"orb",		one(0000000),		one(0177700),		"#b$s"},	/* ori written as or */
-{"orb",		one(0000074),		one(0177777),		"#bCs"},	/* ori to ccr */
-{"orb",		one(0100000),		one(0170700),		";bDd"},	/* memory to register */
-{"orb",		one(0100400),		one(0170700),		"Dd~s"},	/* register to memory */
-{"orib",	one(0000000),		one(0177700),		"#b$s"},
-{"orib",	one(0000074),		one(0177777),		"#bCs"},	/* ori to ccr */
-{"oril",	one(0000200),		one(0177700),		"#l$s"},
-{"oriw",	one(0000100),		one(0177700),		"#w$s"},
-{"oriw",	one(0000174),		one(0177777),		"#wSs"},	/* ori to sr */
-{"orl",		one(0000200),		one(0177700),		"#l$s"},
-{"orl",		one(0100200),		one(0170700),		";lDd"},	/* memory to register */
-{"orl",		one(0100600),		one(0170700),		"Dd~s"},	/* register to memory */
-{"orw",		one(0000100),		one(0177700),		"#w$s"},
-{"orw",		one(0000174),		one(0177777),		"#wSs"},	/* ori to sr */
-{"orw",		one(0100100),		one(0170700),		";wDd"},	/* memory to register */
-{"orw",		one(0100500),		one(0170700),		"Dd~s"},	/* register to memory */
+{"fsaddb",	two(0xF000, 0x5832),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fsaddd",	two(0xF000, 0x5432),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fsaddl",	two(0xF000, 0x4032),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fsaddp",	two(0xF000, 0x4C32),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fsadds",	two(0xF000, 0x4432),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fsaddw",	two(0xF000, 0x5032),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fsaddx",	two(0xF000, 0x0032),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fsaddx",	two(0xF000, 0x4832),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+/* {"fsaddx",	two(0xF000, 0x0032),	two(0xF1C0, 0xE07F),	"IiFt", m68040 }, JF removed */
 
-{"pack",	one(0100500),		one(0170770),		"DsDd#w"},	/* pack Ds,	Dd,	#w */
-{"pack",	one(0100510),		one(0170770),		"-s-d#w"},	/* pack -(As),	-(Ad),	#w */
-{"pea",		one(0044100),		one(0177700),		"!s"},
-{"reset",	one(0047160),		one(0177777),		""},
+{"fdaddb",	two(0xF000, 0x5836),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fdaddd",	two(0xF000, 0x5436),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fdaddl",	two(0xF000, 0x4036),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fdaddp",	two(0xF000, 0x4C36),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fdadds",	two(0xF000, 0x4436),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fdaddw",	two(0xF000, 0x5036),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fdaddx",	two(0xF000, 0x0036),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fdaddx",	two(0xF000, 0x4836),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+/* {"faddx",	two(0xF000, 0x0036),	two(0xF1C0, 0xE07F),	"IiFt", m68040 }, JF removed */
 
-{"rolb",	one(0160430),		one(0170770),		"QdDs"},	/* rorb #Q,	Ds */
-{"rolb",	one(0160470),		one(0170770),		"DdDs"},	/* rorb Dd,	Ds */
-{"roll",	one(0160630),		one(0170770),		"QdDs"},	/* rorb #Q,	Ds */
-{"roll",	one(0160670),		one(0170770),		"DdDs"},	/* rorb Dd,	Ds */
-{"rolw",	one(0160530),		one(0170770),		"QdDs"},	/* rorb #Q,	Ds */
-{"rolw",	one(0160570),		one(0170770),		"DdDs"},	/* rorb Dd,	Ds */
-{"rolw",	one(0163700),		one(0177700),		"~s"},	/* Rotate memory */
-{"rorb",	one(0160030),		one(0170770),		"QdDs"},	/* rorb #Q,	Ds */
-{"rorb",	one(0160070),		one(0170770),		"DdDs"},	/* rorb Dd,	Ds */
-{"rorl",	one(0160230),		one(0170770),		"QdDs"},	/* rorb #Q,	Ds */
-{"rorl",	one(0160270),		one(0170770),		"DdDs"},	/* rorb Dd,	Ds */
-{"rorw",	one(0160130),		one(0170770),		"QdDs"},	/* rorb #Q,	Ds */
-{"rorw",	one(0160170),		one(0170770),		"DdDs"},	/* rorb Dd,	Ds */
-{"rorw",	one(0163300),		one(0177700),		"~s"},	/* Rotate memory */
+{"fasinb",	two(0xF000, 0x580C),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fasind",	two(0xF000, 0x540C),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fasinl",	two(0xF000, 0x400C),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fasinp",	two(0xF000, 0x4C0C),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fasins",	two(0xF000, 0x440C),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fasinw",	two(0xF000, 0x500C),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fasinx",	two(0xF000, 0x000C),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fasinx",	two(0xF000, 0x480C),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fasinx",	two(0xF000, 0x000C),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"roxlb",	one(0160420),		one(0170770),		"QdDs"},	/* roxrb #Q,	Ds */
-{"roxlb",	one(0160460),		one(0170770),		"DdDs"},	/* roxrb Dd,	Ds */
-{"roxll",	one(0160620),		one(0170770),		"QdDs"},	/* roxrb #Q,	Ds */
-{"roxll",	one(0160660),		one(0170770),		"DdDs"},	/* roxrb Dd,	Ds */
-{"roxlw",	one(0160520),		one(0170770),		"QdDs"},	/* roxrb #Q,	Ds */
-{"roxlw",	one(0160560),		one(0170770),		"DdDs"},	/* roxrb Dd,	Ds */
-{"roxlw",	one(0162700),		one(0177700),		"~s"},	/* Rotate memory */
-{"roxrb",	one(0160020),		one(0170770),		"QdDs"},	/* roxrb #Q,	Ds */
-{"roxrb",	one(0160060),		one(0170770),		"DdDs"},	/* roxrb Dd,	Ds */
-{"roxrl",	one(0160220),		one(0170770),		"QdDs"},	/* roxrb #Q,	Ds */
-{"roxrl",	one(0160260),		one(0170770),		"DdDs"},	/* roxrb Dd,	Ds */
-{"roxrw",	one(0160120),		one(0170770),		"QdDs"},	/* roxrb #Q,	Ds */
-{"roxrw",	one(0160160),		one(0170770),		"DdDs"},	/* roxrb Dd,	Ds */
-{"roxrw",	one(0162300),		one(0177700),		"~s"},	/* Rotate memory */
+{"fatanb",	two(0xF000, 0x580A),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fatand",	two(0xF000, 0x540A),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fatanl",	two(0xF000, 0x400A),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fatanp",	two(0xF000, 0x4C0A),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fatans",	two(0xF000, 0x440A),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fatanw",	two(0xF000, 0x500A),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fatanx",	two(0xF000, 0x000A),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fatanx",	two(0xF000, 0x480A),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fatanx",	two(0xF000, 0x000A),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"rtd",		one(0047164),		one(0177777),		"#w"},
-{"rte",		one(0047163),		one(0177777),		""},
-{"rtm",		one(0003300),		one(0177760),		"Rs"},
-{"rtr",		one(0047167),		one(0177777),		""},
-{"rts",		one(0047165),		one(0177777),		""},
-
-{"scc",		one(0052300),		one(0177700),		"$s"},
-{"scs",		one(0052700),		one(0177700),		"$s"},
-{"seq",		one(0053700),		one(0177700),		"$s"},
-{"sf",		one(0050700),		one(0177700),		"$s"},
-{"sge",		one(0056300),		one(0177700),		"$s"},
-{"sfge",		one(0056300),		one(0177700),		"$s"},
-{"sgt",		one(0057300),		one(0177700),		"$s"},
-{"sfgt",		one(0057300),		one(0177700),		"$s"},
-{"shi",		one(0051300),		one(0177700),		"$s"},
-{"sle",		one(0057700),		one(0177700),		"$s"},
-{"sfle",		one(0057700),		one(0177700),		"$s"},
-{"sls",		one(0051700),		one(0177700),		"$s"},
-{"slt",		one(0056700),		one(0177700),		"$s"},
-{"sflt",		one(0056700),		one(0177700),		"$s"},
-{"smi",		one(0055700),		one(0177700),		"$s"},
-{"sne",		one(0053300),		one(0177700),		"$s"},
-{"sfneq",		one(0053300),		one(0177700),		"$s"},
-{"spl",		one(0055300),		one(0177700),		"$s"},
-{"st",		one(0050300),		one(0177700),		"$s"},
-{"svc",		one(0054300),		one(0177700),		"$s"},
-{"svs",		one(0054700),		one(0177700),		"$s"},
-
-{"sbcd",	one(0100400),		one(0170770),		"DsDd"},
-{"sbcd",	one(0100410),		one(0170770),		"-s-d"},
-{"stop",	one(0047162),		one(0177777),		"#w"},
-
-{"subal",	one(0110700),		one(0170700),		"*lAd"},
-{"subaw",	one(0110300),		one(0170700),		"*wAd"},
-{"subb",	one(0050400),		one(0170700),		"Qd%s"},	/* subq written as sub */
-{"subb",	one(0002000),		one(0177700),		"#b$s"},	/* subi written as sub */
-{"subb",	one(0110000),		one(0170700),		";bDd"},	/* subb ? ?,	Dd */
-{"subb",	one(0110400),		one(0170700),		"Dd~s"},	/* subb Dd,	? ? */
-{"subib",	one(0002000),		one(0177700),		"#b$s"},
-{"subil",	one(0002200),		one(0177700),		"#l$s"},
-{"subiw",	one(0002100),		one(0177700),		"#w$s"},
-{"subl",	one(0050600),		one(0170700),		"Qd%s"},
-{"subl",	one(0002200),		one(0177700),		"#l$s"},
-{"subl",	one(0110700),		one(0170700),		"*lAd"},
-{"subl",	one(0110200),		one(0170700),		"*lDd"},
-{"subl",	one(0110600),		one(0170700),		"Dd~s"},
-{"subqb",	one(0050400),		one(0170700),		"Qd%s"},
-{"subql",	one(0050600),		one(0170700),		"Qd%s"},
-{"subqw",	one(0050500),		one(0170700),		"Qd%s"},
-{"subw",	one(0050500),		one(0170700),		"Qd%s"},
-{"subw",	one(0002100),		one(0177700),		"#w$s"},
-{"subw",	one(0110100),		one(0170700),		"*wDd"},
-{"subw",	one(0110300),		one(0170700),		"*wAd"},	/* suba written as sub */
-{"subw",	one(0110500),		one(0170700),		"Dd~s"},
-{"subxb",	one(0110400),		one(0170770),		"DsDd"},	/* subxb Ds,	Dd */
-{"subxb",	one(0110410),		one(0170770),		"-s-d"},	/* subxb -(As),	-(Ad) */
-{"subxl",	one(0110600),		one(0170770),		"DsDd"},
-{"subxl",	one(0110610),		one(0170770),		"-s-d"},
-{"subxw",	one(0110500),		one(0170770),		"DsDd"},
-{"subxw",	one(0110510),		one(0170770),		"-s-d"},
-
-{"swap",	one(0044100),		one(0177770),		"Ds"},
-	
-{"tas",		one(0045300),		one(0177700),		"$s"},
-{"trap",	one(0047100),		one(0177760),		"Ts"},
-
-{"trapcc",	one(0052374),		one(0177777),		""},
-{"trapcs",	one(0052774),		one(0177777),		""},
-{"trapeq",	one(0053774),		one(0177777),		""},
-{"trapf",	one(0050774),		one(0177777),		""},
-{"trapge",	one(0056374),		one(0177777),		""},
-{"trapgt",	one(0057374),		one(0177777),		""},
-{"traphi",	one(0051374),		one(0177777),		""},
-{"traple",	one(0057774),		one(0177777),		""},
-{"trapls",	one(0051774),		one(0177777),		""},
-{"traplt",	one(0056774),		one(0177777),		""},
-{"trapmi",	one(0055774),		one(0177777),		""},
-{"trapne",	one(0053374),		one(0177777),		""},
-{"trappl",	one(0055374),		one(0177777),		""},
-{"trapt",	one(0050374),		one(0177777),		""},
-{"trapvc",	one(0054374),		one(0177777),		""},
-{"trapvs",	one(0054774),		one(0177777),		""},
-
-{"trapcc.w",	one(0052372),		one(0177777),		""},
-{"trapcs.w",	one(0052772),		one(0177777),		""},
-{"trapeq.w",	one(0053772),		one(0177777),		""},
-{"trapf.w",	one(0050772),		one(0177777),		""},
-{"trapge.w",	one(0056372),		one(0177777),		""},
-{"trapgt.w",	one(0057372),		one(0177777),		""},
-{"traphi.w",	one(0051372),		one(0177777),		""},
-{"traple.w",	one(0057772),		one(0177777),		""},
-{"trapls.w",	one(0051772),		one(0177777),		""},
-{"traplt.w",	one(0056772),		one(0177777),		""},
-{"trapmi.w",	one(0055772),		one(0177777),		""},
-{"trapne.w",	one(0053372),		one(0177777),		""},
-{"trappl.w",	one(0055372),		one(0177777),		""},
-{"trapt.w",	one(0050372),		one(0177777),		""},
-{"trapvc.w",	one(0054372),		one(0177777),		""},
-{"trapvs.w",	one(0054772),		one(0177777),		""},
-
-{"trapcc.l",	one(0052373),		one(0177777),		""},
-{"trapcs.l",	one(0052773),		one(0177777),		""},
-{"trapeq.l",	one(0053773),		one(0177777),		""},
-{"trapf.l",	one(0050773),		one(0177777),		""},
-{"trapge.l",	one(0056373),		one(0177777),		""},
-{"trapgt.l",	one(0057373),		one(0177777),		""},
-{"traphi.l",	one(0051373),		one(0177777),		""},
-{"traple.l",	one(0057773),		one(0177777),		""},
-{"trapls.l",	one(0051773),		one(0177777),		""},
-{"traplt.l",	one(0056773),		one(0177777),		""},
-{"trapmi.l",	one(0055773),		one(0177777),		""},
-{"trapne.l",	one(0053373),		one(0177777),		""},
-{"trappl.l",	one(0055373),		one(0177777),		""},
-{"trapt.l",	one(0050373),		one(0177777),		""},
-{"trapvc.l",	one(0054373),		one(0177777),		""},
-{"trapvs.l",	one(0054773),		one(0177777),		""},
-
-{"trapv",	one(0047166),		one(0177777),		""},
-
-{"tstb",	one(0045000),		one(0177700),		";b"},
-{"tstw",	one(0045100),		one(0177700),		"*w"},
-{"tstl",	one(0045200),		one(0177700),		"*l"},
-
-{"unlk",	one(0047130),		one(0177770),		"As"},
-{"unpk",	one(0100600),		one(0170770),		"DsDd#w"},
-{"unpk",	one(0100610),		one(0170770),		"-s-d#w"},
-	/* JF floating pt stuff moved down here */
-
-{"fabsb",	two(0xF000, 0x5818),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fabsd",	two(0xF000, 0x5418),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fabsl",	two(0xF000, 0x4018),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fabsp",	two(0xF000, 0x4C18),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fabss",	two(0xF000, 0x4418),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fabsw",	two(0xF000, 0x5018),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fabsx",	two(0xF000, 0x0018),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fabsx",	two(0xF000, 0x4818),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fabsx",	two(0xF000, 0x0018),	two(0xF1C0, 0xE07F),	"IiFt"},
-
-{"facosb",	two(0xF000, 0x581C),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"facosd",	two(0xF000, 0x541C),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"facosl",	two(0xF000, 0x401C),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"facosp",	two(0xF000, 0x4C1C),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"facoss",	two(0xF000, 0x441C),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"facosw",	two(0xF000, 0x501C),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"facosx",	two(0xF000, 0x001C),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"facosx",	two(0xF000, 0x481C),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"facosx",	two(0xF000, 0x001C),	two(0xF1C0, 0xE07F),	"IiFt"},
-
-{"faddb",	two(0xF000, 0x5822),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"faddd",	two(0xF000, 0x5422),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"faddl",	two(0xF000, 0x4022),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"faddp",	two(0xF000, 0x4C22),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fadds",	two(0xF000, 0x4422),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"faddw",	two(0xF000, 0x5022),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"faddx",	two(0xF000, 0x0022),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"faddx",	two(0xF000, 0x4822),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-/* {"faddx",	two(0xF000, 0x0022),	two(0xF1C0, 0xE07F),	"IiFt"}, JF removed */
-
-{"fasinb",	two(0xF000, 0x580C),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fasind",	two(0xF000, 0x540C),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fasinl",	two(0xF000, 0x400C),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fasinp",	two(0xF000, 0x4C0C),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fasins",	two(0xF000, 0x440C),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fasinw",	two(0xF000, 0x500C),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fasinx",	two(0xF000, 0x000C),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fasinx",	two(0xF000, 0x480C),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fasinx",	two(0xF000, 0x000C),	two(0xF1C0, 0xE07F),	"IiFt"},
-
-{"fatanb",	two(0xF000, 0x580A),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fatand",	two(0xF000, 0x540A),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fatanl",	two(0xF000, 0x400A),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fatanp",	two(0xF000, 0x4C0A),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fatans",	two(0xF000, 0x440A),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fatanw",	two(0xF000, 0x500A),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fatanx",	two(0xF000, 0x000A),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fatanx",	two(0xF000, 0x480A),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fatanx",	two(0xF000, 0x000A),	two(0xF1C0, 0xE07F),	"IiFt"},
-
-{"fatanhb",	two(0xF000, 0x580D),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fatanhd",	two(0xF000, 0x540D),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fatanhl",	two(0xF000, 0x400D),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fatanhp",	two(0xF000, 0x4C0D),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fatanhs",	two(0xF000, 0x440D),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fatanhw",	two(0xF000, 0x500D),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fatanhx",	two(0xF000, 0x000D),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fatanhx",	two(0xF000, 0x480D),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fatanhx",	two(0xF000, 0x000D),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fatanhb",	two(0xF000, 0x580D),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fatanhd",	two(0xF000, 0x540D),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fatanhl",	two(0xF000, 0x400D),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fatanhp",	two(0xF000, 0x4C0D),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fatanhs",	two(0xF000, 0x440D),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fatanhw",	two(0xF000, 0x500D),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fatanhx",	two(0xF000, 0x000D),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fatanhx",	two(0xF000, 0x480D),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fatanhx",	two(0xF000, 0x000D),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
 /* Fixed-size Float branches */
 
-{"fbeq",	one(0xF081),		one(0xF1BF),		"IdBW"},
-{"fbf",		one(0xF080),		one(0xF1BF),		"IdBW"},
-{"fbge",	one(0xF093),		one(0xF1BF),		"IdBW"},
-{"fbgl",	one(0xF096),		one(0xF1BF),		"IdBW"},
-{"fbgle",	one(0xF097),		one(0xF1BF),		"IdBW"},
-{"fbgt",	one(0xF092),		one(0xF1BF),		"IdBW"},
-{"fble",	one(0xF095),		one(0xF1BF),		"IdBW"},
-{"fblt",	one(0xF094),		one(0xF1BF),		"IdBW"},
-{"fbne",	one(0xF08E),		one(0xF1BF),		"IdBW"},
-{"fbnge",	one(0xF09C),		one(0xF1BF),		"IdBW"},
-{"fbngl",	one(0xF099),		one(0xF1BF),		"IdBW"},
-{"fbngle",	one(0xF098),		one(0xF1BF),		"IdBW"},
-{"fbngt",	one(0xF09D),		one(0xF1BF),		"IdBW"},
-{"fbnle",	one(0xF09A),		one(0xF1BF),		"IdBW"},
-{"fbnlt",	one(0xF09B),		one(0xF1BF),		"IdBW"},
-{"fboge",	one(0xF083),		one(0xF1BF),		"IdBW"},
-{"fbogl",	one(0xF086),		one(0xF1BF),		"IdBW"},
-{"fbogt",	one(0xF082),		one(0xF1BF),		"IdBW"},
-{"fbole",	one(0xF085),		one(0xF1BF),		"IdBW"},
-{"fbolt",	one(0xF084),		one(0xF1BF),		"IdBW"},
-{"fbor",	one(0xF087),		one(0xF1BF),		"IdBW"},
-{"fbseq",	one(0xF091),		one(0xF1BF),		"IdBW"},
-{"fbsf",	one(0xF090),		one(0xF1BF),		"IdBW"},
-{"fbsne",	one(0xF09E),		one(0xF1BF),		"IdBW"},
-{"fbst",	one(0xF09F),		one(0xF1BF),		"IdBW"},
-{"fbt",		one(0xF08F),		one(0xF1BF),		"IdBW"},
-{"fbueq",	one(0xF089),		one(0xF1BF),		"IdBW"},
-{"fbuge",	one(0xF08B),		one(0xF1BF),		"IdBW"},
-{"fbugt",	one(0xF08A),		one(0xF1BF),		"IdBW"},
-{"fbule",	one(0xF08D),		one(0xF1BF),		"IdBW"},
-{"fbult",	one(0xF08C),		one(0xF1BF),		"IdBW"},
-{"fbun",	one(0xF088),		one(0xF1BF),		"IdBW"},
+{"fbeq",	one(0xF081),		one(0xF1BF),		"IdBW", mfloat },
+{"fbf",		one(0xF080),		one(0xF1BF),		"IdBW", mfloat },
+{"fbge",	one(0xF093),		one(0xF1BF),		"IdBW", mfloat },
+{"fbgl",	one(0xF096),		one(0xF1BF),		"IdBW", mfloat },
+{"fbgle",	one(0xF097),		one(0xF1BF),		"IdBW", mfloat },
+{"fbgt",	one(0xF092),		one(0xF1BF),		"IdBW", mfloat },
+{"fble",	one(0xF095),		one(0xF1BF),		"IdBW", mfloat },
+{"fblt",	one(0xF094),		one(0xF1BF),		"IdBW", mfloat },
+{"fbne",	one(0xF08E),		one(0xF1BF),		"IdBW", mfloat },
+{"fbnge",	one(0xF09C),		one(0xF1BF),		"IdBW", mfloat },
+{"fbngl",	one(0xF099),		one(0xF1BF),		"IdBW", mfloat },
+{"fbngle",	one(0xF098),		one(0xF1BF),		"IdBW", mfloat },
+{"fbngt",	one(0xF09D),		one(0xF1BF),		"IdBW", mfloat },
+{"fbnle",	one(0xF09A),		one(0xF1BF),		"IdBW", mfloat },
+{"fbnlt",	one(0xF09B),		one(0xF1BF),		"IdBW", mfloat },
+{"fboge",	one(0xF083),		one(0xF1BF),		"IdBW", mfloat },
+{"fbogl",	one(0xF086),		one(0xF1BF),		"IdBW", mfloat },
+{"fbogt",	one(0xF082),		one(0xF1BF),		"IdBW", mfloat },
+{"fbole",	one(0xF085),		one(0xF1BF),		"IdBW", mfloat },
+{"fbolt",	one(0xF084),		one(0xF1BF),		"IdBW", mfloat },
+{"fbor",	one(0xF087),		one(0xF1BF),		"IdBW", mfloat },
+{"fbseq",	one(0xF091),		one(0xF1BF),		"IdBW", mfloat },
+{"fbsf",	one(0xF090),		one(0xF1BF),		"IdBW", mfloat },
+{"fbsne",	one(0xF09E),		one(0xF1BF),		"IdBW", mfloat },
+{"fbst",	one(0xF09F),		one(0xF1BF),		"IdBW", mfloat },
+{"fbt",		one(0xF08F),		one(0xF1BF),		"IdBW", mfloat },
+{"fbueq",	one(0xF089),		one(0xF1BF),		"IdBW", mfloat },
+{"fbuge",	one(0xF08B),		one(0xF1BF),		"IdBW", mfloat },
+{"fbugt",	one(0xF08A),		one(0xF1BF),		"IdBW", mfloat },
+{"fbule",	one(0xF08D),		one(0xF1BF),		"IdBW", mfloat },
+{"fbult",	one(0xF08C),		one(0xF1BF),		"IdBW", mfloat },
+{"fbun",	one(0xF088),		one(0xF1BF),		"IdBW", mfloat },
 
 /* Float branches -- long (32-bit) displacements */
 
-{"fbeql",	one(0xF081),		one(0xF1BF),		"IdBC"},
-{"fbfl",	one(0xF080),		one(0xF1BF),		"IdBC"},
-{"fbgel",	one(0xF093),		one(0xF1BF),		"IdBC"},
-{"fbgll",	one(0xF096),		one(0xF1BF),		"IdBC"},
-{"fbglel",	one(0xF097),		one(0xF1BF),		"IdBC"},
-{"fbgtl",	one(0xF092),		one(0xF1BF),		"IdBC"},
-{"fblel",	one(0xF095),		one(0xF1BF),		"IdBC"},
-{"fbltl",	one(0xF094),		one(0xF1BF),		"IdBC"},
-{"fbnel",	one(0xF08E),		one(0xF1BF),		"IdBC"},
-{"fbngel",	one(0xF09C),		one(0xF1BF),		"IdBC"},
-{"fbngll",	one(0xF099),		one(0xF1BF),		"IdBC"},
-{"fbnglel",	one(0xF098),		one(0xF1BF),		"IdBC"},
-{"fbngtl",	one(0xF09D),		one(0xF1BF),		"IdBC"},
-{"fbnlel",	one(0xF09A),		one(0xF1BF),		"IdBC"},
-{"fbnltl",	one(0xF09B),		one(0xF1BF),		"IdBC"},
-{"fbogel",	one(0xF083),		one(0xF1BF),		"IdBC"},
-{"fbogll",	one(0xF086),		one(0xF1BF),		"IdBC"},
-{"fbogtl",	one(0xF082),		one(0xF1BF),		"IdBC"},
-{"fbolel",	one(0xF085),		one(0xF1BF),		"IdBC"},
-{"fboltl",	one(0xF084),		one(0xF1BF),		"IdBC"},
-{"fborl",	one(0xF087),		one(0xF1BF),		"IdBC"},
-{"fbseql",	one(0xF091),		one(0xF1BF),		"IdBC"},
-{"fbsfl",	one(0xF090),		one(0xF1BF),		"IdBC"},
-{"fbsnel",	one(0xF09E),		one(0xF1BF),		"IdBC"},
-{"fbstl",	one(0xF09F),		one(0xF1BF),		"IdBC"},
-{"fbtl",	one(0xF08F),		one(0xF1BF),		"IdBC"},
-{"fbueql",	one(0xF089),		one(0xF1BF),		"IdBC"},
-{"fbugel",	one(0xF08B),		one(0xF1BF),		"IdBC"},
-{"fbugtl",	one(0xF08A),		one(0xF1BF),		"IdBC"},
-{"fbulel",	one(0xF08D),		one(0xF1BF),		"IdBC"},
-{"fbultl",	one(0xF08C),		one(0xF1BF),		"IdBC"},
-{"fbunl",	one(0xF088),		one(0xF1BF),		"IdBC"},
+{"fbeql",	one(0xF081),		one(0xF1BF),		"IdBC", mfloat },
+{"fbfl",	one(0xF080),		one(0xF1BF),		"IdBC", mfloat },
+{"fbgel",	one(0xF093),		one(0xF1BF),		"IdBC", mfloat },
+{"fbgll",	one(0xF096),		one(0xF1BF),		"IdBC", mfloat },
+{"fbglel",	one(0xF097),		one(0xF1BF),		"IdBC", mfloat },
+{"fbgtl",	one(0xF092),		one(0xF1BF),		"IdBC", mfloat },
+{"fblel",	one(0xF095),		one(0xF1BF),		"IdBC", mfloat },
+{"fbltl",	one(0xF094),		one(0xF1BF),		"IdBC", mfloat },
+{"fbnel",	one(0xF08E),		one(0xF1BF),		"IdBC", mfloat },
+{"fbngel",	one(0xF09C),		one(0xF1BF),		"IdBC", mfloat },
+{"fbngll",	one(0xF099),		one(0xF1BF),		"IdBC", mfloat },
+{"fbnglel",	one(0xF098),		one(0xF1BF),		"IdBC", mfloat },
+{"fbngtl",	one(0xF09D),		one(0xF1BF),		"IdBC", mfloat },
+{"fbnlel",	one(0xF09A),		one(0xF1BF),		"IdBC", mfloat },
+{"fbnltl",	one(0xF09B),		one(0xF1BF),		"IdBC", mfloat },
+{"fbogel",	one(0xF083),		one(0xF1BF),		"IdBC", mfloat },
+{"fbogll",	one(0xF086),		one(0xF1BF),		"IdBC", mfloat },
+{"fbogtl",	one(0xF082),		one(0xF1BF),		"IdBC", mfloat },
+{"fbolel",	one(0xF085),		one(0xF1BF),		"IdBC", mfloat },
+{"fboltl",	one(0xF084),		one(0xF1BF),		"IdBC", mfloat },
+{"fborl",	one(0xF087),		one(0xF1BF),		"IdBC", mfloat },
+{"fbseql",	one(0xF091),		one(0xF1BF),		"IdBC", mfloat },
+{"fbsfl",	one(0xF090),		one(0xF1BF),		"IdBC", mfloat },
+{"fbsnel",	one(0xF09E),		one(0xF1BF),		"IdBC", mfloat },
+{"fbstl",	one(0xF09F),		one(0xF1BF),		"IdBC", mfloat },
+{"fbtl",	one(0xF08F),		one(0xF1BF),		"IdBC", mfloat },
+{"fbueql",	one(0xF089),		one(0xF1BF),		"IdBC", mfloat },
+{"fbugel",	one(0xF08B),		one(0xF1BF),		"IdBC", mfloat },
+{"fbugtl",	one(0xF08A),		one(0xF1BF),		"IdBC", mfloat },
+{"fbulel",	one(0xF08D),		one(0xF1BF),		"IdBC", mfloat },
+{"fbultl",	one(0xF08C),		one(0xF1BF),		"IdBC", mfloat },
+{"fbunl",	one(0xF088),		one(0xF1BF),		"IdBC", mfloat },
 
-{"fcmpb",	two(0xF000, 0x5838),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fcmpd",	two(0xF000, 0x5438),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fcmpl",	two(0xF000, 0x4038),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fcmpp",	two(0xF000, 0x4C38),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fcmps",	two(0xF000, 0x4438),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fcmpw",	two(0xF000, 0x5038),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fcmpx",	two(0xF000, 0x0038),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fcmpx",	two(0xF000, 0x4838),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-/* {"fcmpx",	two(0xF000, 0x0038),	two(0xF1C0, 0xE07F),	"IiFt"}, JF removed */
+{"fcmpb",	two(0xF000, 0x5838),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fcmpd",	two(0xF000, 0x5438),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fcmpl",	two(0xF000, 0x4038),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fcmpp",	two(0xF000, 0x4C38),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fcmps",	two(0xF000, 0x4438),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fcmpw",	two(0xF000, 0x5038),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fcmpx",	two(0xF000, 0x0038),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fcmpx",	two(0xF000, 0x4838),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+/* {"fcmpx",	two(0xF000, 0x0038),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat }, JF removed */
 
-{"fcosb",	two(0xF000, 0x581D),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fcosd",	two(0xF000, 0x541D),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fcosl",	two(0xF000, 0x401D),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fcosp",	two(0xF000, 0x4C1D),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fcoss",	two(0xF000, 0x441D),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fcosw",	two(0xF000, 0x501D),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fcosx",	two(0xF000, 0x001D),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fcosx",	two(0xF000, 0x481D),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fcosx",	two(0xF000, 0x001D),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fcosb",	two(0xF000, 0x581D),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fcosd",	two(0xF000, 0x541D),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fcosl",	two(0xF000, 0x401D),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fcosp",	two(0xF000, 0x4C1D),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fcoss",	two(0xF000, 0x441D),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fcosw",	two(0xF000, 0x501D),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fcosx",	two(0xF000, 0x001D),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fcosx",	two(0xF000, 0x481D),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fcosx",	two(0xF000, 0x001D),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"fcoshb",	two(0xF000, 0x5819),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fcoshd",	two(0xF000, 0x5419),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fcoshl",	two(0xF000, 0x4019),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fcoshp",	two(0xF000, 0x4C19),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fcoshs",	two(0xF000, 0x4419),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fcoshw",	two(0xF000, 0x5019),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fcoshx",	two(0xF000, 0x0019),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fcoshx",	two(0xF000, 0x4819),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fcoshx",	two(0xF000, 0x0019),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fcoshb",	two(0xF000, 0x5819),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fcoshd",	two(0xF000, 0x5419),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fcoshl",	two(0xF000, 0x4019),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fcoshp",	two(0xF000, 0x4C19),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fcoshs",	two(0xF000, 0x4419),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fcoshw",	two(0xF000, 0x5019),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fcoshx",	two(0xF000, 0x0019),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fcoshx",	two(0xF000, 0x4819),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fcoshx",	two(0xF000, 0x0019),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"fdbeq",	two(0xF048, 0x0001),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbf",	two(0xF048, 0x0000),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbge",	two(0xF048, 0x0013),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbgl",	two(0xF048, 0x0016),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbgle",	two(0xF048, 0x0017),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbgt",	two(0xF048, 0x0012),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdble",	two(0xF048, 0x0015),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdblt",	two(0xF048, 0x0014),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbne",	two(0xF048, 0x000E),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbnge",	two(0xF048, 0x001C),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbngl",	two(0xF048, 0x0019),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbngle",	two(0xF048, 0x0018),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbngt",	two(0xF048, 0x001D),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbnle",	two(0xF048, 0x001A),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbnlt",	two(0xF048, 0x001B),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdboge",	two(0xF048, 0x0003),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbogl",	two(0xF048, 0x0006),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbogt",	two(0xF048, 0x0002),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbole",	two(0xF048, 0x0005),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbolt",	two(0xF048, 0x0004),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbor",	two(0xF048, 0x0007),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbseq",	two(0xF048, 0x0011),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbsf",	two(0xF048, 0x0010),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbsne",	two(0xF048, 0x001E),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbst",	two(0xF048, 0x001F),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbt",	two(0xF048, 0x000F),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbueq",	two(0xF048, 0x0009),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbuge",	two(0xF048, 0x000B),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbugt",	two(0xF048, 0x000A),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbule",	two(0xF048, 0x000D),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbult",	two(0xF048, 0x000C),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
-{"fdbun",	two(0xF048, 0x0008),	two(0xF1F8, 0xFFFF),	"IiDsBw"},
+{"fdbeq",	two(0xF048, 0x0001),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbf",	two(0xF048, 0x0000),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbge",	two(0xF048, 0x0013),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbgl",	two(0xF048, 0x0016),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbgle",	two(0xF048, 0x0017),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbgt",	two(0xF048, 0x0012),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdble",	two(0xF048, 0x0015),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdblt",	two(0xF048, 0x0014),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbne",	two(0xF048, 0x000E),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbnge",	two(0xF048, 0x001C),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbngl",	two(0xF048, 0x0019),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbngle",	two(0xF048, 0x0018),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbngt",	two(0xF048, 0x001D),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbnle",	two(0xF048, 0x001A),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbnlt",	two(0xF048, 0x001B),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdboge",	two(0xF048, 0x0003),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbogl",	two(0xF048, 0x0006),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbogt",	two(0xF048, 0x0002),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbole",	two(0xF048, 0x0005),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbolt",	two(0xF048, 0x0004),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbor",	two(0xF048, 0x0007),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbseq",	two(0xF048, 0x0011),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbsf",	two(0xF048, 0x0010),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbsne",	two(0xF048, 0x001E),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbst",	two(0xF048, 0x001F),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbt",	two(0xF048, 0x000F),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbueq",	two(0xF048, 0x0009),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbuge",	two(0xF048, 0x000B),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbugt",	two(0xF048, 0x000A),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbule",	two(0xF048, 0x000D),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbult",	two(0xF048, 0x000C),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
+{"fdbun",	two(0xF048, 0x0008),	two(0xF1F8, 0xFFFF),	"IiDsBw", mfloat },
 
-{"fdivb",	two(0xF000, 0x5820),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fdivd",	two(0xF000, 0x5420),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fdivl",	two(0xF000, 0x4020),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fdivp",	two(0xF000, 0x4C20),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fdivs",	two(0xF000, 0x4420),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fdivw",	two(0xF000, 0x5020),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fdivx",	two(0xF000, 0x0020),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fdivx",	two(0xF000, 0x4820),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-/* {"fdivx",	two(0xF000, 0x0020),	two(0xF1C0, 0xE07F),	"IiFt"}, JF */
+{"fdivb",	two(0xF000, 0x5820),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fdivd",	two(0xF000, 0x5420),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fdivl",	two(0xF000, 0x4020),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fdivp",	two(0xF000, 0x4C20),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fdivs",	two(0xF000, 0x4420),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fdivw",	two(0xF000, 0x5020),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fdivx",	two(0xF000, 0x0020),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fdivx",	two(0xF000, 0x4820),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+/* {"fdivx",	two(0xF000, 0x0020),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat }, JF */
 
-{"fetoxb",	two(0xF000, 0x5810),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fetoxd",	two(0xF000, 0x5410),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fetoxl",	two(0xF000, 0x4010),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fetoxp",	two(0xF000, 0x4C10),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fetoxs",	two(0xF000, 0x4410),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fetoxw",	two(0xF000, 0x5010),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fetoxx",	two(0xF000, 0x0010),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fetoxx",	two(0xF000, 0x4810),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fetoxx",	two(0xF000, 0x0010),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fsdivb",	two(0xF000, 0x5830),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fsdivd",	two(0xF000, 0x5430),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fsdivl",	two(0xF000, 0x4030),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fsdivp",	two(0xF000, 0x4C30),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fsdivs",	two(0xF000, 0x4430),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fsdivw",	two(0xF000, 0x5030),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fsdivx",	two(0xF000, 0x0030),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fsdivx",	two(0xF000, 0x4830),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+/* {"fsdivx",	two(0xF000, 0x0030),	two(0xF1C0, 0xE07F),	"IiFt",   m68040 }, JF */
 
-{"fetoxm1b",	two(0xF000, 0x5808),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fetoxm1d",	two(0xF000, 0x5408),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fetoxm1l",	two(0xF000, 0x4008),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fetoxm1p",	two(0xF000, 0x4C08),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fetoxm1s",	two(0xF000, 0x4408),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fetoxm1w",	two(0xF000, 0x5008),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fetoxm1x",	two(0xF000, 0x0008),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fetoxm1x",	two(0xF000, 0x4808),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fetoxm1x",	two(0xF000, 0x0008),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fddivb",	two(0xF000, 0x5834),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fddivd",	two(0xF000, 0x5434),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fddivl",	two(0xF000, 0x4034),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fddivp",	two(0xF000, 0x4C34),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fddivs",	two(0xF000, 0x4434),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fddivw",	two(0xF000, 0x5034),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fddivx",	two(0xF000, 0x0034),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fddivx",	two(0xF000, 0x4834),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+/* {"fddivx",	two(0xF000, 0x0034),	two(0xF1C0, 0xE07F),	"IiFt",   m68040 }, JF */
 
-{"fgetexpb",	two(0xF000, 0x581E),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fgetexpd",	two(0xF000, 0x541E),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fgetexpl",	two(0xF000, 0x401E),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fgetexpp",	two(0xF000, 0x4C1E),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fgetexps",	two(0xF000, 0x441E),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fgetexpw",	two(0xF000, 0x501E),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fgetexpx",	two(0xF000, 0x001E),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fgetexpx",	two(0xF000, 0x481E),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fgetexpx",	two(0xF000, 0x001E),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fetoxb",	two(0xF000, 0x5810),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fetoxd",	two(0xF000, 0x5410),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fetoxl",	two(0xF000, 0x4010),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fetoxp",	two(0xF000, 0x4C10),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fetoxs",	two(0xF000, 0x4410),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fetoxw",	two(0xF000, 0x5010),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fetoxx",	two(0xF000, 0x0010),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fetoxx",	two(0xF000, 0x4810),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fetoxx",	two(0xF000, 0x0010),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"fgetmanb",	two(0xF000, 0x581F),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fgetmand",	two(0xF000, 0x541F),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fgetmanl",	two(0xF000, 0x401F),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fgetmanp",	two(0xF000, 0x4C1F),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fgetmans",	two(0xF000, 0x441F),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fgetmanw",	two(0xF000, 0x501F),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fgetmanx",	two(0xF000, 0x001F),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fgetmanx",	two(0xF000, 0x481F),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fgetmanx",	two(0xF000, 0x001F),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fetoxm1b",	two(0xF000, 0x5808),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fetoxm1d",	two(0xF000, 0x5408),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fetoxm1l",	two(0xF000, 0x4008),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fetoxm1p",	two(0xF000, 0x4C08),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fetoxm1s",	two(0xF000, 0x4408),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fetoxm1w",	two(0xF000, 0x5008),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fetoxm1x",	two(0xF000, 0x0008),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fetoxm1x",	two(0xF000, 0x4808),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fetoxm1x",	two(0xF000, 0x0008),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"fintb",	two(0xF000, 0x5801),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fintd",	two(0xF000, 0x5401),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fintl",	two(0xF000, 0x4001),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fintp",	two(0xF000, 0x4C01),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fints",	two(0xF000, 0x4401),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fintw",	two(0xF000, 0x5001),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fintx",	two(0xF000, 0x0001),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fintx",	two(0xF000, 0x4801),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fintx",	two(0xF000, 0x0001),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fgetexpb",	two(0xF000, 0x581E),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fgetexpd",	two(0xF000, 0x541E),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fgetexpl",	two(0xF000, 0x401E),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fgetexpp",	two(0xF000, 0x4C1E),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fgetexps",	two(0xF000, 0x441E),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fgetexpw",	two(0xF000, 0x501E),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fgetexpx",	two(0xF000, 0x001E),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fgetexpx",	two(0xF000, 0x481E),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fgetexpx",	two(0xF000, 0x001E),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"fintrzb",	two(0xF000, 0x5803),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fintrzd",	two(0xF000, 0x5403),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fintrzl",	two(0xF000, 0x4003),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fintrzp",	two(0xF000, 0x4C03),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fintrzs",	two(0xF000, 0x4403),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fintrzw",	two(0xF000, 0x5003),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fintrzx",	two(0xF000, 0x0003),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fintrzx",	two(0xF000, 0x4803),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fintrzx",	two(0xF000, 0x0003),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fgetmanb",	two(0xF000, 0x581F),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fgetmand",	two(0xF000, 0x541F),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fgetmanl",	two(0xF000, 0x401F),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fgetmanp",	two(0xF000, 0x4C1F),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fgetmans",	two(0xF000, 0x441F),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fgetmanw",	two(0xF000, 0x501F),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fgetmanx",	two(0xF000, 0x001F),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fgetmanx",	two(0xF000, 0x481F),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fgetmanx",	two(0xF000, 0x001F),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"flog10b",	two(0xF000, 0x5815),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"flog10d",	two(0xF000, 0x5415),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"flog10l",	two(0xF000, 0x4015),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"flog10p",	two(0xF000, 0x4C15),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"flog10s",	two(0xF000, 0x4415),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"flog10w",	two(0xF000, 0x5015),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"flog10x",	two(0xF000, 0x0015),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"flog10x",	two(0xF000, 0x4815),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"flog10x",	two(0xF000, 0x0015),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fintb",	two(0xF000, 0x5801),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fintd",	two(0xF000, 0x5401),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fintl",	two(0xF000, 0x4001),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fintp",	two(0xF000, 0x4C01),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fints",	two(0xF000, 0x4401),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fintw",	two(0xF000, 0x5001),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fintx",	two(0xF000, 0x0001),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fintx",	two(0xF000, 0x4801),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fintx",	two(0xF000, 0x0001),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"flog2b",	two(0xF000, 0x5816),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"flog2d",	two(0xF000, 0x5416),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"flog2l",	two(0xF000, 0x4016),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"flog2p",	two(0xF000, 0x4C16),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"flog2s",	two(0xF000, 0x4416),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"flog2w",	two(0xF000, 0x5016),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"flog2x",	two(0xF000, 0x0016),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"flog2x",	two(0xF000, 0x4816),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"flog2x",	two(0xF000, 0x0016),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fintrzb",	two(0xF000, 0x5803),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fintrzd",	two(0xF000, 0x5403),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fintrzl",	two(0xF000, 0x4003),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fintrzp",	two(0xF000, 0x4C03),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fintrzs",	two(0xF000, 0x4403),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fintrzw",	two(0xF000, 0x5003),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fintrzx",	two(0xF000, 0x0003),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fintrzx",	two(0xF000, 0x4803),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fintrzx",	two(0xF000, 0x0003),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"flognb",	two(0xF000, 0x5814),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"flognd",	two(0xF000, 0x5414),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"flognl",	two(0xF000, 0x4014),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"flognp",	two(0xF000, 0x4C14),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"flogns",	two(0xF000, 0x4414),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"flognw",	two(0xF000, 0x5014),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"flognx",	two(0xF000, 0x0014),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"flognx",	two(0xF000, 0x4814),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"flognx",	two(0xF000, 0x0014),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"flog10b",	two(0xF000, 0x5815),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"flog10d",	two(0xF000, 0x5415),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"flog10l",	two(0xF000, 0x4015),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"flog10p",	two(0xF000, 0x4C15),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"flog10s",	two(0xF000, 0x4415),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"flog10w",	two(0xF000, 0x5015),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"flog10x",	two(0xF000, 0x0015),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"flog10x",	two(0xF000, 0x4815),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"flog10x",	two(0xF000, 0x0015),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"flognp1b",	two(0xF000, 0x5806),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"flognp1d",	two(0xF000, 0x5406),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"flognp1l",	two(0xF000, 0x4006),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"flognp1p",	two(0xF000, 0x4C06),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"flognp1s",	two(0xF000, 0x4406),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"flognp1w",	two(0xF000, 0x5006),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"flognp1x",	two(0xF000, 0x0006),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"flognp1x",	two(0xF000, 0x4806),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"flognp1x",	two(0xF000, 0x0006),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"flog2b",	two(0xF000, 0x5816),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"flog2d",	two(0xF000, 0x5416),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"flog2l",	two(0xF000, 0x4016),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"flog2p",	two(0xF000, 0x4C16),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"flog2s",	two(0xF000, 0x4416),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"flog2w",	two(0xF000, 0x5016),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"flog2x",	two(0xF000, 0x0016),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"flog2x",	two(0xF000, 0x4816),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"flog2x",	two(0xF000, 0x0016),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"fmodb",	two(0xF000, 0x5821),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fmodd",	two(0xF000, 0x5421),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fmodl",	two(0xF000, 0x4021),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fmodp",	two(0xF000, 0x4C21),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fmods",	two(0xF000, 0x4421),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fmodw",	two(0xF000, 0x5021),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fmodx",	two(0xF000, 0x0021),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fmodx",	two(0xF000, 0x4821),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-/* {"fmodx",	two(0xF000, 0x0021),	two(0xF1C0, 0xE07F),	"IiFt"}, JF */
+{"flognb",	two(0xF000, 0x5814),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"flognd",	two(0xF000, 0x5414),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"flognl",	two(0xF000, 0x4014),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"flognp",	two(0xF000, 0x4C14),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"flogns",	two(0xF000, 0x4414),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"flognw",	two(0xF000, 0x5014),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"flognx",	two(0xF000, 0x0014),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"flognx",	two(0xF000, 0x4814),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"flognx",	two(0xF000, 0x0014),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"fmoveb",	two(0xF000, 0x5800),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},		/* fmove from <ea> to fp<n> */
-{"fmoveb",	two(0xF000, 0x7800),	two(0xF1C0, 0xFC7F),	"IiF7@b"},		/* fmove from fp<n> to <ea> */
-{"fmoved",	two(0xF000, 0x5400),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},		/* fmove from <ea> to fp<n> */
-{"fmoved",	two(0xF000, 0x7400),	two(0xF1C0, 0xFC7F),	"IiF7@F"},		/* fmove from fp<n> to <ea> */
-{"fmovel",	two(0xF000, 0x4000),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},		/* fmove from <ea> to fp<n> */
-{"fmovel",	two(0xF000, 0x6000),	two(0xF1C0, 0xFC7F),	"IiF7@l"},		/* fmove from fp<n> to <ea> */
+{"flognp1b",	two(0xF000, 0x5806),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"flognp1d",	two(0xF000, 0x5406),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"flognp1l",	two(0xF000, 0x4006),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"flognp1p",	two(0xF000, 0x4C06),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"flognp1s",	two(0xF000, 0x4406),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"flognp1w",	two(0xF000, 0x5006),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"flognp1x",	two(0xF000, 0x0006),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"flognp1x",	two(0xF000, 0x4806),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"flognp1x",	two(0xF000, 0x0006),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
+
+{"fmodb",	two(0xF000, 0x5821),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fmodd",	two(0xF000, 0x5421),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fmodl",	two(0xF000, 0x4021),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fmodp",	two(0xF000, 0x4C21),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fmods",	two(0xF000, 0x4421),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fmodw",	two(0xF000, 0x5021),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fmodx",	two(0xF000, 0x0021),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fmodx",	two(0xF000, 0x4821),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+/* {"fmodx",	two(0xF000, 0x0021),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat }, JF */
+
+{"fmoveb",	two(0xF000, 0x5800),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },		/* fmove from <ea> to fp<n> */
+{"fmoveb",	two(0xF000, 0x7800),	two(0xF1C0, 0xFC7F),	"IiF7@b", mfloat },		/* fmove from fp<n> to <ea> */
+{"fmoved",	two(0xF000, 0x5400),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },		/* fmove from <ea> to fp<n> */
+{"fmoved",	two(0xF000, 0x7400),	two(0xF1C0, 0xFC7F),	"IiF7@F", mfloat },		/* fmove from fp<n> to <ea> */
+{"fmovel",	two(0xF000, 0x4000),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },		/* fmove from <ea> to fp<n> */
+{"fmovel",	two(0xF000, 0x6000),	two(0xF1C0, 0xFC7F),	"IiF7@l", mfloat },		/* fmove from fp<n> to <ea> */
 /* Warning:  The addressing modes on these are probably not right:
    esp, Areg direct is only allowed for FPI */
 		/* fmove.l from/to system control registers: */
-{"fmovel",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s"},
-{"fmovel",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*ls8"},
+{"fmovel",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s", mfloat },
+{"fmovel",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*ls8", mfloat },
 
-/* {"fmovel",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s"},
-{"fmovel",	two(0xF000, 0x8000),	two(0xF2C0, 0xE3FF),	"Ii*ss8"}, */
+/* {"fmovel",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s", mfloat },
+{"fmovel",	two(0xF000, 0x8000),	two(0xF2C0, 0xE3FF),	"Ii*ss8", mfloat }, */
 
-{"fmovep",	two(0xF000, 0x4C00),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},		/* fmove from <ea> to fp<n> */
-{"fmovep",	two(0xF000, 0x6C00),	two(0xF1C0, 0xFC00),	"IiF7@pkC"},		/* fmove.p with k-factors: */
-{"fmovep",	two(0xF000, 0x7C00),	two(0xF1C0, 0xFC0F),	"IiF7@pDk"},		/* fmove.p with k-factors: */
+{"fmovep",	two(0xF000, 0x4C00),	two(0xF1C0, 0xFC7F),	"Ii;pF7",   mfloat },		/* fmove from <ea> to fp<n> */
+{"fmovep",	two(0xF000, 0x6C00),	two(0xF1C0, 0xFC00),	"IiF7@pkC", mfloat },		/* fmove.p with k-factors: */
+{"fmovep",	two(0xF000, 0x7C00),	two(0xF1C0, 0xFC0F),	"IiF7@pDk", mfloat },		/* fmove.p with k-factors: */
 
-{"fmoves",	two(0xF000, 0x4400),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},		/* fmove from <ea> to fp<n> */
-{"fmoves",	two(0xF000, 0x6400),	two(0xF1C0, 0xFC7F),	"IiF7@f"},		/* fmove from fp<n> to <ea> */
-{"fmovew",	two(0xF000, 0x5000),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},		/* fmove from <ea> to fp<n> */
-{"fmovew",	two(0xF000, 0x7000),	two(0xF1C0, 0xFC7F),	"IiF7@w"},		/* fmove from fp<n> to <ea> */
-{"fmovex",	two(0xF000, 0x0000),	two(0xF1C0, 0xE07F),	"IiF8F7"},		/* fmove from <ea> to fp<n> */
-{"fmovex",	two(0xF000, 0x4800),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},		/* fmove from <ea> to fp<n> */
-{"fmovex",	two(0xF000, 0x6800),	two(0xF1C0, 0xFC7F),	"IiF7@x"},		/* fmove from fp<n> to <ea> */
-/* JF removed {"fmovex",	two(0xF000, 0x0000),	two(0xF1C0, 0xE07F),	"IiFt"},		/ * fmove from <ea> to fp<n> */
+{"fmoves",	two(0xF000, 0x4400),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },		/* fmove from <ea> to fp<n> */
+{"fmoves",	two(0xF000, 0x6400),	two(0xF1C0, 0xFC7F),	"IiF7@f", mfloat },		/* fmove from fp<n> to <ea> */
+{"fmovew",	two(0xF000, 0x5000),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },		/* fmove from <ea> to fp<n> */
+{"fmovew",	two(0xF000, 0x7000),	two(0xF1C0, 0xFC7F),	"IiF7@w", mfloat },		/* fmove from fp<n> to <ea> */
+{"fmovex",	two(0xF000, 0x0000),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },		/* fmove from <ea> to fp<n> */
+{"fmovex",	two(0xF000, 0x4800),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },		/* fmove from <ea> to fp<n> */
+{"fmovex",	two(0xF000, 0x6800),	two(0xF1C0, 0xFC7F),	"IiF7@x", mfloat },		/* fmove from fp<n> to <ea> */
+/* JF removed {"fmovex",	two(0xF000, 0x0000),	two(0xF1C0, 0xE07F),	"IiFt", mfloat }, / * fmove from <ea> to fp<n> */
 
-{"fmovecrx",	two(0xF000, 0x5C00),	two(0xF1FF, 0xFC00),	"Ii#CF7"},		/* fmovecr.x #ccc,	FPn */
-{"fmovecr",	two(0xF000, 0x5C00),	two(0xF1FF, 0xFC00),	"Ii#CF7"},
+{"fsmoveb",	two(0xF000, 0x5800),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fsmoved",	two(0xF000, 0x5400),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fsmovel",	two(0xF000, 0x4000),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fsmoves",	two(0xF000, 0x4400),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fsmovew",	two(0xF000, 0x5000),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fsmovex",	two(0xF000, 0x0000),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fsmovex",	two(0xF000, 0x4800),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 }, /* fmove from <ea> to fp<n> */
+/* JF removed {"fsmovex",	two(0xF000, 0x0000),	two(0xF1C0, 0xE07F),	"IiFt", m68040 }, / * fmove from <ea> to fp<n> */
+
+{"fdmoveb",	two(0xF000, 0x5800),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fdmoved",	two(0xF000, 0x5400),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fdmovel",	two(0xF000, 0x4000),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fdmoves",	two(0xF000, 0x4400),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fdmovew",	two(0xF000, 0x5000),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fdmovex",	two(0xF000, 0x0000),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 }, /* fmove from <ea> to fp<n> */
+{"fdmovex",	two(0xF000, 0x4800),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 }, /* fmove from <ea> to fp<n> */
+/* JF removed {"fdmovex",	two(0xF000, 0x0000),	two(0xF1C0, 0xE07F),	"IiFt", m68040 }, / * fmove from <ea> to fp<n> */
+
+{"fmovecrx",	two(0xF000, 0x5C00),	two(0xF1FF, 0xFC00),	"Ii#CF7", mfloat },		/* fmovecr.x #ccc, FPn */
+{"fmovecr",	two(0xF000, 0x5C00),	two(0xF1FF, 0xFC00),	"Ii#CF7", mfloat },
 
 /* Other fmovemx.  */
-{"fmovemx", two(0xF000, 0xF800), two(0xF1C0, 0xFF8F), "IiDk&s"}, /* fmovem.x: reg to control,	static and dynamic: */
-{"fmovemx", two(0xF000, 0xD800), two(0xF1C0, 0xFF8F), "Ii&sDk"}, /* fmovem.x from control to reg, static and dynamic: */
+{"fmovemx", two(0xF000, 0xF800), two(0xF1C0, 0xFF8F), "IiDk&s", mfloat }, /* reg to control,	static and dynamic: */
+{"fmovemx", two(0xF000, 0xD800), two(0xF1C0, 0xFF8F), "Ii&sDk", mfloat }, /* from control to reg, static and dynamic: */
 
-{"fmovemx", two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Idl3&s"}, /* fmovem.x to control, static and dynamic: */
-{"fmovemx", two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Id#3&s"}, /* fmovem.x to control, static and dynamic: */
+{"fmovemx", two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Idl3&s", mfloat }, /* to control, static and dynamic: */
+{"fmovemx", two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Id#3&s", mfloat }, /* to control, static and dynamic: */
 
-{"fmovemx", two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id&sl3"}, /* fmovem.x from control, static and dynamic: */
-{"fmovemx", two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id&s#3"}, /* fmovem.x from control, static and dynamic: */
+{"fmovemx", two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id&sl3", mfloat }, /* from control, static and dynamic: */
+{"fmovemx", two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id&s#3", mfloat }, /* from control, static and dynamic: */
 
-{"fmovemx", two(0xF020, 0xE800), two(0xF1F8, 0xFF8F), "IiDk-s"}, /* fmovem.x: reg to autodecrement, static and dynamic */
-{"fmovemx", two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "IdL3-s"}, /* fmovem.x to autodecrement, static and dynamic */
-{"fmovemx", two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "Id#3-s"}, /* fmovem.x to autodecrement, static and dynamic */
+{"fmovemx", two(0xF020, 0xE800), two(0xF1F8, 0xFF8F), "IiDk-s", mfloat }, /* reg to autodecrement, static and dynamic */
+{"fmovemx", two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "IdL3-s", mfloat }, /* to autodecrement, static and dynamic */
+{"fmovemx", two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "Id#3-s", mfloat }, /* to autodecrement, static and dynamic */
 
-{"fmovemx", two(0xF018, 0xD800), two(0xF1F8, 0xFF8F), "Ii+sDk"}, /* fmovem.x from autoincrement to reg, static and dynamic: */
-{"fmovemx", two(0xF018, 0xD000), two(0xF1F8, 0xFF00), "Id+sl3"}, /* fmovem.x from autoincrement, static and dynamic: */
-{"fmovemx", two(0xF018, 0xD000), two(0xF1F8, 0xFF00), "Id+s#3"}, /* fmovem.x from autoincrement, static and dynamic: */
+{"fmovemx", two(0xF018, 0xD800), two(0xF1F8, 0xFF8F), "Ii+sDk", mfloat }, /* from autoinc to reg, static and dynamic: */
+{"fmovemx", two(0xF018, 0xD000), two(0xF1F8, 0xFF00), "Id+sl3", mfloat }, /* from autoincrement, static and dynamic: */
+{"fmovemx", two(0xF018, 0xD000), two(0xF1F8, 0xFF00), "Id+s#3", mfloat }, /* from autoincrement, static and dynamic: */
 
-{"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"IiL8@s"},
-{"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Ii#8@s"},
-{"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s"},
+{"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"IiL8@s", mfloat },
+{"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Ii#8@s", mfloat },
+{"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s", mfloat },
 
-{"fmoveml",	two(0xF000, 0x8000),	two(0xF2C0, 0xE3FF),	"Ii*sL8"},
-{"fmoveml",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*s#8"},
-{"fmoveml",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*ss8"},
+{"fmoveml",	two(0xF000, 0x8000),	two(0xF2C0, 0xE3FF),	"Ii*sL8", mfloat },
+{"fmoveml",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*s#8", mfloat },
+{"fmoveml",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*ss8", mfloat },
 
 /* fmovemx with register lists */
-{"fmovem",	two(0xF020, 0xE000),	two(0xF1F8, 0xFF00),	"IdL3-s"},		/* fmovem.x to autodecrement,	static and dynamic */
-{"fmovem",	two(0xF000, 0xF000),	two(0xF1C0, 0xFF00),	"Idl3&s"},		/* fmovem.x to control,	static and dynamic: */
-{"fmovem",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+sl3"},		/* fmovem.x from autoincrement,	static and dynamic: */
-{"fmovem",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id&sl3"},		/* fmovem.x from control,	static and dynamic: */
+{"fmovem",	two(0xF020, 0xE000),	two(0xF1F8, 0xFF00),	"IdL3-s", mfloat }, /* to autodec, static & dynamic */
+{"fmovem",	two(0xF000, 0xF000),	two(0xF1C0, 0xFF00),	"Idl3&s", mfloat }, /* to control, static and dynamic */
+{"fmovem",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+sl3", mfloat }, /* from autoinc, static & dynamic */
+{"fmovem",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id&sl3", mfloat }, /* from control, static and dynamic */
 
 	/* Alternate mnemonics for GNU as and GNU CC */
-{"fmovem",	two(0xF020, 0xE000),	two(0xF1F8, 0xFF00),	"Id#3-s"},		/* fmovem.x to autodecrement,	static and dynamic */
-{"fmovem",	two(0xF020, 0xE800),	two(0xF1F8, 0xFF8F),	"IiDk-s"},		/* fmovem.x to autodecrement,	static and dynamic */
+{"fmovem",	two(0xF020, 0xE000),	two(0xF1F8, 0xFF00),	"Id#3-s", mfloat }, /* to autodecrement, static and dynamic */
+{"fmovem",	two(0xF020, 0xE800),	two(0xF1F8, 0xFF8F),	"IiDk-s", mfloat }, /* to autodecrement, static and dynamic */
 
-{"fmovem",	two(0xF000, 0xF000),	two(0xF1C0, 0xFF00),	"Id#3&s"},		/* fmovem.x to control,	static and dynamic: */
-{"fmovem",	two(0xF000, 0xF800),	two(0xF1C0, 0xFF8F),	"IiDk&s"},		/* fmovem.x to control,	static and dynamic: */
+{"fmovem",	two(0xF000, 0xF000),	two(0xF1C0, 0xFF00),	"Id#3&s", mfloat }, /* to control, static and dynamic: */
+{"fmovem",	two(0xF000, 0xF800),	two(0xF1C0, 0xFF8F),	"IiDk&s", mfloat }, /* to control, static and dynamic: */
 
-{"fmovem",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+s#3"},		/* fmovem.x from autoincrement,	static and dynamic: */
-{"fmovem",	two(0xF018, 0xD800),	two(0xF1F8, 0xFF8F),	"Ii+sDk"},		/* fmovem.x from autoincrement,	static and dynamic: */
+{"fmovem",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+s#3", mfloat }, /* from autoincrement, static and dynamic: */
+{"fmovem",	two(0xF018, 0xD800),	two(0xF1F8, 0xFF8F),	"Ii+sDk", mfloat }, /* from autoincrement, static and dynamic: */
   
-{"fmovem",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id&s#3"},		/* fmovem.x from control,	static and dynamic: */
-{"fmovem",	two(0xF000, 0xD800),	two(0xF1C0, 0xFF8F),	"Ii&sDk"},		/* fmovem.x from control,	static and dynamic: */
+{"fmovem",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id&s#3", mfloat }, /* from control, static and dynamic: */
+{"fmovem",	two(0xF000, 0xD800),	two(0xF1C0, 0xFF8F),	"Ii&sDk", mfloat }, /* from control, static and dynamic: */
 
 /* fmoveml a FP-control register */
-{"fmovem",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s"},
-{"fmovem",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*ss8"},
+{"fmovem",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Iis8@s", mfloat },
+{"fmovem",	two(0xF000, 0x8000),	two(0xF1C0, 0xE3FF),	"Ii*ss8", mfloat },
 
 /* fmoveml a FP-control reglist */
-{"fmovem",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"IiL8@s"},
-{"fmovem",	two(0xF000, 0x8000),	two(0xF2C0, 0xE3FF),	"Ii*sL8"},
+{"fmovem",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"IiL8@s", mfloat },
+{"fmovem",	two(0xF000, 0x8000),	two(0xF2C0, 0xE3FF),	"Ii*sL8", mfloat },
 
-{"fmulb",	two(0xF000, 0x5823),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fmuld",	two(0xF000, 0x5423),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fmull",	two(0xF000, 0x4023),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fmulp",	two(0xF000, 0x4C23),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fmuls",	two(0xF000, 0x4423),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fmulw",	two(0xF000, 0x5023),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fmulx",	two(0xF000, 0x0023),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fmulx",	two(0xF000, 0x4823),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-/* {"fmulx",	two(0xF000, 0x0023),	two(0xF1C0, 0xE07F),	"IiFt"}, JF */
+{"fmulb",	two(0xF000, 0x5823),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fmuld",	two(0xF000, 0x5423),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fmull",	two(0xF000, 0x4023),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fmulp",	two(0xF000, 0x4C23),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fmuls",	two(0xF000, 0x4423),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fmulw",	two(0xF000, 0x5023),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fmulx",	two(0xF000, 0x0023),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fmulx",	two(0xF000, 0x4823),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+/* {"fmulx",	two(0xF000, 0x0023),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat }, JF */
 
-{"fnegb",	two(0xF000, 0x581A),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fnegd",	two(0xF000, 0x541A),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fnegl",	two(0xF000, 0x401A),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fnegp",	two(0xF000, 0x4C1A),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fnegs",	two(0xF000, 0x441A),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fnegw",	two(0xF000, 0x501A),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fnegx",	two(0xF000, 0x001A),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fnegx",	two(0xF000, 0x481A),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fnegx",	two(0xF000, 0x001A),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fsmulb",	two(0xF000, 0x5833),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fsmuld",	two(0xF000, 0x5433),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fsmull",	two(0xF000, 0x4033),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fsmulp",	two(0xF000, 0x4C33),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fsmuls",	two(0xF000, 0x4433),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fsmulw",	two(0xF000, 0x5033),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fsmulx",	two(0xF000, 0x0033),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fsmulx",	two(0xF000, 0x4833),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+/* {"fsmulx",	two(0xF000, 0x0033),	two(0xF1C0, 0xE07F),	"IiFt",   m68040 }, JF */
 
-{"fnop",	two(0xF280, 0x0000),	two(0xFFFF, 0xFFFF),	"Ii"},
+{"fdmulb",	two(0xF000, 0x5837),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fdmuld",	two(0xF000, 0x5437),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fdmull",	two(0xF000, 0x4037),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fdmulp",	two(0xF000, 0x4C37),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fdmuls",	two(0xF000, 0x4437),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fdmulw",	two(0xF000, 0x5037),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fdmulx",	two(0xF000, 0x0037),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fdmulx",	two(0xF000, 0x4837),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+/* {"dfmulx",	two(0xF000, 0x0037),	two(0xF1C0, 0xE07F),	"IiFt",   m68040 }, JF */
 
-{"fremb",	two(0xF000, 0x5825),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fremd",	two(0xF000, 0x5425),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"freml",	two(0xF000, 0x4025),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fremp",	two(0xF000, 0x4C25),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"frems",	two(0xF000, 0x4425),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fremw",	two(0xF000, 0x5025),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fremx",	two(0xF000, 0x0025),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fremx",	two(0xF000, 0x4825),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-/* {"fremx",	two(0xF000, 0x0025),	two(0xF1C0, 0xE07F),	"IiFt"}, JF */
+{"fnegb",	two(0xF000, 0x581A),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fnegd",	two(0xF000, 0x541A),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fnegl",	two(0xF000, 0x401A),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fnegp",	two(0xF000, 0x4C1A),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fnegs",	two(0xF000, 0x441A),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fnegw",	two(0xF000, 0x501A),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fnegx",	two(0xF000, 0x001A),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fnegx",	two(0xF000, 0x481A),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fnegx",	two(0xF000, 0x001A),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"frestore",	one(0xF140),		one(0xF1C0),		"Id&s"},
-{"frestore",	one(0xF158),		one(0xF1F8),		"Id+s"},
-{"fsave",	one(0xF100),		one(0xF1C0),		"Id&s"},
-{"fsave",	one(0xF120),		one(0xF1F8),		"Id-s"},
+{"fsnegb",	two(0xF000, 0x585A),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fsnegd",	two(0xF000, 0x545A),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fsnegl",	two(0xF000, 0x405A),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fsnegp",	two(0xF000, 0x4C5A),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fsnegs",	two(0xF000, 0x445A),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fsnegw",	two(0xF000, 0x505A),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fsnegx",	two(0xF000, 0x005A),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fsnegx",	two(0xF000, 0x485A),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+{"fsnegx",	two(0xF000, 0x005A),	two(0xF1C0, 0xE07F),	"IiFt",   m68040 },
 
-{"fsincosb",	two(0xF000, 0x5830),	two(0xF1C0, 0xFC78),	"Ii;bF3F7"},
-{"fsincosd",	two(0xF000, 0x5430),	two(0xF1C0, 0xFC78),	"Ii;FF3F7"},
-{"fsincosl",	two(0xF000, 0x4030),	two(0xF1C0, 0xFC78),	"Ii;lF3F7"},
-{"fsincosp",	two(0xF000, 0x4C30),	two(0xF1C0, 0xFC78),	"Ii;pF3F7"},
-{"fsincoss",	two(0xF000, 0x4430),	two(0xF1C0, 0xFC78),	"Ii;fF3F7"},
-{"fsincosw",	two(0xF000, 0x5030),	two(0xF1C0, 0xFC78),	"Ii;wF3F7"},
-{"fsincosx",	two(0xF000, 0x0030),	two(0xF1C0, 0xE078),	"IiF8F3F7"},
-{"fsincosx",	two(0xF000, 0x4830),	two(0xF1C0, 0xFC78),	"Ii;xF3F7"},
+{"fdnegb",	two(0xF000, 0x585E),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fdnegd",	two(0xF000, 0x545E),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fdnegl",	two(0xF000, 0x405E),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fdnegp",	two(0xF000, 0x4C5E),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fdnegs",	two(0xF000, 0x445E),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fdnegw",	two(0xF000, 0x505E),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fdnegx",	two(0xF000, 0x005E),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fdnegx",	two(0xF000, 0x485E),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+{"fdnegx",	two(0xF000, 0x005E),	two(0xF1C0, 0xE07F),	"IiFt",   m68040 },
 
-{"fscaleb",	two(0xF000, 0x5826),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fscaled",	two(0xF000, 0x5426),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fscalel",	two(0xF000, 0x4026),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fscalep",	two(0xF000, 0x4C26),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fscales",	two(0xF000, 0x4426),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fscalew",	two(0xF000, 0x5026),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fscalex",	two(0xF000, 0x0026),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fscalex",	two(0xF000, 0x4826),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-/* {"fscalex",	two(0xF000, 0x0026),	two(0xF1C0, 0xE07F),	"IiFt"}, JF */
+{"fnop",	two(0xF280, 0x0000),	two(0xFFFF, 0xFFFF),	"Ii", mfloat },
+
+{"fremb",	two(0xF000, 0x5825),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fremd",	two(0xF000, 0x5425),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"freml",	two(0xF000, 0x4025),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fremp",	two(0xF000, 0x4C25),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"frems",	two(0xF000, 0x4425),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fremw",	two(0xF000, 0x5025),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fremx",	two(0xF000, 0x0025),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fremx",	two(0xF000, 0x4825),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+/* {"fremx",	two(0xF000, 0x0025),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat }, JF */
+
+{"frestore",	one(0xF140),		one(0xF1C0),		"Id&s", mfloat },
+{"frestore",	one(0xF158),		one(0xF1F8),		"Id+s", mfloat },
+{"fsave",	one(0xF100),		one(0xF1C0),		"Id&s", mfloat },
+{"fsave",	one(0xF120),		one(0xF1F8),		"Id-s", mfloat },
+
+{"fscaleb",	two(0xF000, 0x5826),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fscaled",	two(0xF000, 0x5426),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fscalel",	two(0xF000, 0x4026),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fscalep",	two(0xF000, 0x4C26),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fscales",	two(0xF000, 0x4426),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fscalew",	two(0xF000, 0x5026),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fscalex",	two(0xF000, 0x0026),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fscalex",	two(0xF000, 0x4826),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+/* {"fscalex",	two(0xF000, 0x0026),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat }, JF */
 
 /* $ is necessary to prevent the assembler from using PC-relative.
    If @ were used, "label: fseq label" could produce "ftrapeq",
    because "label" became "pc@label".  */
-{"fseq",	two(0xF040, 0x0001),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsf",		two(0xF040, 0x0000),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsge",	two(0xF040, 0x0013),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsgl",	two(0xF040, 0x0016),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsgle",	two(0xF040, 0x0017),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsgt",	two(0xF040, 0x0012),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsle",	two(0xF040, 0x0015),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fslt",	two(0xF040, 0x0014),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsne",	two(0xF040, 0x000E),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsnge",	two(0xF040, 0x001C),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsngl",	two(0xF040, 0x0019),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsngle",	two(0xF040, 0x0018),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsngt",	two(0xF040, 0x001D),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsnle",	two(0xF040, 0x001A),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsnlt",	two(0xF040, 0x001B),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsoge",	two(0xF040, 0x0003),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsogl",	two(0xF040, 0x0006),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsogt",	two(0xF040, 0x0002),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsole",	two(0xF040, 0x0005),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsolt",	two(0xF040, 0x0004),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsor",	two(0xF040, 0x0007),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsseq",	two(0xF040, 0x0011),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fssf",	two(0xF040, 0x0010),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fssne",	two(0xF040, 0x001E),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsst",	two(0xF040, 0x001F),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fst",		two(0xF040, 0x000F),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsueq",	two(0xF040, 0x0009),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsuge",	two(0xF040, 0x000B),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsugt",	two(0xF040, 0x000A),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsule",	two(0xF040, 0x000D),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsult",	two(0xF040, 0x000C),	two(0xF1C0, 0xFFFF),	"Ii$s"},
-{"fsun",	two(0xF040, 0x0008),	two(0xF1C0, 0xFFFF),	"Ii$s"},
+{"fseq",	two(0xF040, 0x0001),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsf",		two(0xF040, 0x0000),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsge",	two(0xF040, 0x0013),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsgl",	two(0xF040, 0x0016),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsgle",	two(0xF040, 0x0017),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsgt",	two(0xF040, 0x0012),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsle",	two(0xF040, 0x0015),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fslt",	two(0xF040, 0x0014),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsne",	two(0xF040, 0x000E),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsnge",	two(0xF040, 0x001C),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsngl",	two(0xF040, 0x0019),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsngle",	two(0xF040, 0x0018),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsngt",	two(0xF040, 0x001D),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsnle",	two(0xF040, 0x001A),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsnlt",	two(0xF040, 0x001B),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsoge",	two(0xF040, 0x0003),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsogl",	two(0xF040, 0x0006),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsogt",	two(0xF040, 0x0002),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsole",	two(0xF040, 0x0005),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsolt",	two(0xF040, 0x0004),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsor",	two(0xF040, 0x0007),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsseq",	two(0xF040, 0x0011),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fssf",	two(0xF040, 0x0010),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fssne",	two(0xF040, 0x001E),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsst",	two(0xF040, 0x001F),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fst",		two(0xF040, 0x000F),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsueq",	two(0xF040, 0x0009),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsuge",	two(0xF040, 0x000B),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsugt",	two(0xF040, 0x000A),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsule",	two(0xF040, 0x000D),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsult",	two(0xF040, 0x000C),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
+{"fsun",	two(0xF040, 0x0008),	two(0xF1C0, 0xFFFF),	"Ii$s", mfloat },
 
-{"fsgldivb",	two(0xF000, 0x5824),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fsgldivd",	two(0xF000, 0x5424),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fsgldivl",	two(0xF000, 0x4024),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fsgldivp",	two(0xF000, 0x4C24),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fsgldivs",	two(0xF000, 0x4424),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fsgldivw",	two(0xF000, 0x5024),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fsgldivx",	two(0xF000, 0x0024),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fsgldivx",	two(0xF000, 0x4824),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fsgldivx",	two(0xF000, 0x0024),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fsgldivb",	two(0xF000, 0x5824),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fsgldivd",	two(0xF000, 0x5424),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fsgldivl",	two(0xF000, 0x4024),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fsgldivp",	two(0xF000, 0x4C24),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fsgldivs",	two(0xF000, 0x4424),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fsgldivw",	two(0xF000, 0x5024),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fsgldivx",	two(0xF000, 0x0024),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fsgldivx",	two(0xF000, 0x4824),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fsgldivx",	two(0xF000, 0x0024),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"fsglmulb",	two(0xF000, 0x5827),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fsglmuld",	two(0xF000, 0x5427),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fsglmull",	two(0xF000, 0x4027),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fsglmulp",	two(0xF000, 0x4C27),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fsglmuls",	two(0xF000, 0x4427),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fsglmulw",	two(0xF000, 0x5027),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fsglmulx",	two(0xF000, 0x0027),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fsglmulx",	two(0xF000, 0x4827),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fsglmulx",	two(0xF000, 0x0027),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fsglmulb",	two(0xF000, 0x5827),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fsglmuld",	two(0xF000, 0x5427),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fsglmull",	two(0xF000, 0x4027),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fsglmulp",	two(0xF000, 0x4C27),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fsglmuls",	two(0xF000, 0x4427),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fsglmulw",	two(0xF000, 0x5027),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fsglmulx",	two(0xF000, 0x0027),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fsglmulx",	two(0xF000, 0x4827),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fsglmulx",	two(0xF000, 0x0027),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"fsinb",	two(0xF000, 0x580E),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fsind",	two(0xF000, 0x540E),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fsinl",	two(0xF000, 0x400E),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fsinp",	two(0xF000, 0x4C0E),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fsins",	two(0xF000, 0x440E),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fsinw",	two(0xF000, 0x500E),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fsinx",	two(0xF000, 0x000E),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fsinx",	two(0xF000, 0x480E),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fsinx",	two(0xF000, 0x000E),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fsinb",	two(0xF000, 0x580E),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fsind",	two(0xF000, 0x540E),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fsinl",	two(0xF000, 0x400E),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fsinp",	two(0xF000, 0x4C0E),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fsins",	two(0xF000, 0x440E),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fsinw",	two(0xF000, 0x500E),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fsinx",	two(0xF000, 0x000E),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fsinx",	two(0xF000, 0x480E),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fsinx",	two(0xF000, 0x000E),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"fsinhb",	two(0xF000, 0x5802),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fsinhd",	two(0xF000, 0x5402),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fsinhl",	two(0xF000, 0x4002),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fsinhp",	two(0xF000, 0x4C02),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fsinhs",	two(0xF000, 0x4402),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fsinhw",	two(0xF000, 0x5002),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fsinhx",	two(0xF000, 0x0002),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fsinhx",	two(0xF000, 0x4802),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fsinhx",	two(0xF000, 0x0002),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fsinhb",	two(0xF000, 0x5802),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fsinhd",	two(0xF000, 0x5402),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fsinhl",	two(0xF000, 0x4002),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fsinhp",	two(0xF000, 0x4C02),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fsinhs",	two(0xF000, 0x4402),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fsinhw",	two(0xF000, 0x5002),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fsinhx",	two(0xF000, 0x0002),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fsinhx",	two(0xF000, 0x4802),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fsinhx",	two(0xF000, 0x0002),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"fsqrtb",	two(0xF000, 0x5804),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fsqrtd",	two(0xF000, 0x5404),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fsqrtl",	two(0xF000, 0x4004),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fsqrtp",	two(0xF000, 0x4C04),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fsqrts",	two(0xF000, 0x4404),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fsqrtw",	two(0xF000, 0x5004),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fsqrtx",	two(0xF000, 0x0004),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fsqrtx",	two(0xF000, 0x4804),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fsqrtx",	two(0xF000, 0x0004),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fsincosb",	two(0xF000, 0x5830),	two(0xF1C0, 0xFC78),	"Ii;bF3F7", mfloat },
+{"fsincosd",	two(0xF000, 0x5430),	two(0xF1C0, 0xFC78),	"Ii;FF3F7", mfloat },
+{"fsincosl",	two(0xF000, 0x4030),	two(0xF1C0, 0xFC78),	"Ii;lF3F7", mfloat },
+{"fsincosp",	two(0xF000, 0x4C30),	two(0xF1C0, 0xFC78),	"Ii;pF3F7", mfloat },
+{"fsincoss",	two(0xF000, 0x4430),	two(0xF1C0, 0xFC78),	"Ii;fF3F7", mfloat },
+{"fsincosw",	two(0xF000, 0x5030),	two(0xF1C0, 0xFC78),	"Ii;wF3F7", mfloat },
+{"fsincosx",	two(0xF000, 0x0030),	two(0xF1C0, 0xE078),	"IiF8F3F7", mfloat },
+{"fsincosx",	two(0xF000, 0x4830),	two(0xF1C0, 0xFC78),	"Ii;xF3F7", mfloat },
 
-{"fsubb",	two(0xF000, 0x5828),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"fsubd",	two(0xF000, 0x5428),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"fsubl",	two(0xF000, 0x4028),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"fsubp",	two(0xF000, 0x4C28),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"fsubs",	two(0xF000, 0x4428),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"fsubw",	two(0xF000, 0x5028),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"fsubx",	two(0xF000, 0x0028),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"fsubx",	two(0xF000, 0x4828),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"fsubx",	two(0xF000, 0x0028),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fsqrtb",	two(0xF000, 0x5804),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fsqrtd",	two(0xF000, 0x5404),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fsqrtl",	two(0xF000, 0x4004),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fsqrtp",	two(0xF000, 0x4C04),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fsqrts",	two(0xF000, 0x4404),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fsqrtw",	two(0xF000, 0x5004),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fsqrtx",	two(0xF000, 0x0004),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fsqrtx",	two(0xF000, 0x4804),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fsqrtx",	two(0xF000, 0x0004),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"ftanb",	two(0xF000, 0x580F),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"ftand",	two(0xF000, 0x540F),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"ftanl",	two(0xF000, 0x400F),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"ftanp",	two(0xF000, 0x4C0F),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"ftans",	two(0xF000, 0x440F),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"ftanw",	two(0xF000, 0x500F),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"ftanx",	two(0xF000, 0x000F),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"ftanx",	two(0xF000, 0x480F),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"ftanx",	two(0xF000, 0x000F),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fssqrtb",	two(0xF000, 0x5841),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fssqrtd",	two(0xF000, 0x5441),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fssqrtl",	two(0xF000, 0x4041),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fssqrtp",	two(0xF000, 0x4C41),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fssqrts",	two(0xF000, 0x4441),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fssqrtw",	two(0xF000, 0x5041),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fssqrtx",	two(0xF000, 0x0041),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fssqrtx",	two(0xF000, 0x4841),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+{"fssqrtx",	two(0xF000, 0x0041),	two(0xF1C0, 0xE07F),	"IiFt",   m68040 },
 
-{"ftanhb",	two(0xF000, 0x5809),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"ftanhd",	two(0xF000, 0x5409),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"ftanhl",	two(0xF000, 0x4009),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"ftanhp",	two(0xF000, 0x4C09),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"ftanhs",	two(0xF000, 0x4409),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"ftanhw",	two(0xF000, 0x5009),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"ftanhx",	two(0xF000, 0x0009),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"ftanhx",	two(0xF000, 0x4809),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"ftanhx",	two(0xF000, 0x0009),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fdsqrtb",	two(0xF000, 0x5845),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fdsqrtd",	two(0xF000, 0x5445),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fdsqrtl",	two(0xF000, 0x4045),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fdsqrtp",	two(0xF000, 0x4C45),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fdsqrts",	two(0xF000, 0x4445),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fdsqrtw",	two(0xF000, 0x5045),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fdsqrtx",	two(0xF000, 0x0045),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fdsqrtx",	two(0xF000, 0x4845),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+{"fdsqrtx",	two(0xF000, 0x0045),	two(0xF1C0, 0xE07F),	"IiFt",   m68040 },
 
-{"ftentoxb",	two(0xF000, 0x5812),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"ftentoxd",	two(0xF000, 0x5412),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"ftentoxl",	two(0xF000, 0x4012),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"ftentoxp",	two(0xF000, 0x4C12),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"ftentoxs",	two(0xF000, 0x4412),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"ftentoxw",	two(0xF000, 0x5012),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"ftentoxx",	two(0xF000, 0x0012),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"ftentoxx",	two(0xF000, 0x4812),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"ftentoxx",	two(0xF000, 0x0012),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"fsubb",	two(0xF000, 0x5828),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"fsubd",	two(0xF000, 0x5428),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"fsubl",	two(0xF000, 0x4028),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"fsubp",	two(0xF000, 0x4C28),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"fsubs",	two(0xF000, 0x4428),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"fsubw",	two(0xF000, 0x5028),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"fsubx",	two(0xF000, 0x0028),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"fsubx",	two(0xF000, 0x4828),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"fsubx",	two(0xF000, 0x0028),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
-{"ftrapeq",	two(0xF07C, 0x0001),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapf",	two(0xF07C, 0x0000),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapge",	two(0xF07C, 0x0013),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapgl",	two(0xF07C, 0x0016),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapgle",	two(0xF07C, 0x0017),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapgt",	two(0xF07C, 0x0012),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftraple",	two(0xF07C, 0x0015),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftraplt",	two(0xF07C, 0x0014),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapne",	two(0xF07C, 0x000E),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapnge",	two(0xF07C, 0x001C),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapngl",	two(0xF07C, 0x0019),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapngle",	two(0xF07C, 0x0018),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapngt",	two(0xF07C, 0x001D),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapnle",	two(0xF07C, 0x001A),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapnlt",	two(0xF07C, 0x001B),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapoge",	two(0xF07C, 0x0003),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapogl",	two(0xF07C, 0x0006),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapogt",	two(0xF07C, 0x0002),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapole",	two(0xF07C, 0x0005),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapolt",	two(0xF07C, 0x0004),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapor",	two(0xF07C, 0x0007),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapseq",	two(0xF07C, 0x0011),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapsf",	two(0xF07C, 0x0010),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapsne",	two(0xF07C, 0x001E),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapst",	two(0xF07C, 0x001F),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapt",	two(0xF07C, 0x000F),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapueq",	two(0xF07C, 0x0009),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapuge",	two(0xF07C, 0x000B),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapugt",	two(0xF07C, 0x000A),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapule",	two(0xF07C, 0x000D),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapult",	two(0xF07C, 0x000C),	two(0xF1FF, 0xFFFF),	"Ii"},
-{"ftrapun",	two(0xF07C, 0x0008),	two(0xF1FF, 0xFFFF),	"Ii"},
+{"fssubb",	two(0xF000, 0x5838),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fssubd",	two(0xF000, 0x5438),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fssubl",	two(0xF000, 0x4038),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fssubp",	two(0xF000, 0x4C38),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fssubs",	two(0xF000, 0x4438),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fssubw",	two(0xF000, 0x5038),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fssubx",	two(0xF000, 0x0038),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fssubx",	two(0xF000, 0x4838),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+{"fssubx",	two(0xF000, 0x0038),	two(0xF1C0, 0xE07F),	"IiFt",   m68040 },
+
+{"fdsubb",	two(0xF000, 0x583c),	two(0xF1C0, 0xFC7F),	"Ii;bF7", m68040 },
+{"fdsubd",	two(0xF000, 0x543c),	two(0xF1C0, 0xFC7F),	"Ii;FF7", m68040 },
+{"fdsubl",	two(0xF000, 0x403c),	two(0xF1C0, 0xFC7F),	"Ii;lF7", m68040 },
+{"fdsubp",	two(0xF000, 0x4C3c),	two(0xF1C0, 0xFC7F),	"Ii;pF7", m68040 },
+{"fdsubs",	two(0xF000, 0x443c),	two(0xF1C0, 0xFC7F),	"Ii;fF7", m68040 },
+{"fdsubw",	two(0xF000, 0x503c),	two(0xF1C0, 0xFC7F),	"Ii;wF7", m68040 },
+{"fdsubx",	two(0xF000, 0x003c),	two(0xF1C0, 0xE07F),	"IiF8F7", m68040 },
+{"fdsubx",	two(0xF000, 0x483c),	two(0xF1C0, 0xFC7F),	"Ii;xF7", m68040 },
+{"fdsubx",	two(0xF000, 0x003c),	two(0xF1C0, 0xE07F),	"IiFt",   m68040 },
+
+{"ftanb",	two(0xF000, 0x580F),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"ftand",	two(0xF000, 0x540F),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"ftanl",	two(0xF000, 0x400F),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"ftanp",	two(0xF000, 0x4C0F),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"ftans",	two(0xF000, 0x440F),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"ftanw",	two(0xF000, 0x500F),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"ftanx",	two(0xF000, 0x000F),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"ftanx",	two(0xF000, 0x480F),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"ftanx",	two(0xF000, 0x000F),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
+
+{"ftanhb",	two(0xF000, 0x5809),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"ftanhd",	two(0xF000, 0x5409),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"ftanhl",	two(0xF000, 0x4009),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"ftanhp",	two(0xF000, 0x4C09),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"ftanhs",	two(0xF000, 0x4409),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"ftanhw",	two(0xF000, 0x5009),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"ftanhx",	two(0xF000, 0x0009),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"ftanhx",	two(0xF000, 0x4809),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"ftanhx",	two(0xF000, 0x0009),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
+
+{"ftentoxb",	two(0xF000, 0x5812),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"ftentoxd",	two(0xF000, 0x5412),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"ftentoxl",	two(0xF000, 0x4012),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"ftentoxp",	two(0xF000, 0x4C12),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"ftentoxs",	two(0xF000, 0x4412),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"ftentoxw",	two(0xF000, 0x5012),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"ftentoxx",	two(0xF000, 0x0012),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"ftentoxx",	two(0xF000, 0x4812),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"ftentoxx",	two(0xF000, 0x0012),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
+
+{"ftrapeq",	two(0xF07C, 0x0001),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapf",	two(0xF07C, 0x0000),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapge",	two(0xF07C, 0x0013),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapgl",	two(0xF07C, 0x0016),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapgle",	two(0xF07C, 0x0017),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapgt",	two(0xF07C, 0x0012),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftraple",	two(0xF07C, 0x0015),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftraplt",	two(0xF07C, 0x0014),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapne",	two(0xF07C, 0x000E),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapnge",	two(0xF07C, 0x001C),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapngl",	two(0xF07C, 0x0019),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapngle",	two(0xF07C, 0x0018),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapngt",	two(0xF07C, 0x001D),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapnle",	two(0xF07C, 0x001A),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapnlt",	two(0xF07C, 0x001B),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapoge",	two(0xF07C, 0x0003),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapogl",	two(0xF07C, 0x0006),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapogt",	two(0xF07C, 0x0002),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapole",	two(0xF07C, 0x0005),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapolt",	two(0xF07C, 0x0004),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapor",	two(0xF07C, 0x0007),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapseq",	two(0xF07C, 0x0011),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapsf",	two(0xF07C, 0x0010),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapsne",	two(0xF07C, 0x001E),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapst",	two(0xF07C, 0x001F),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapt",	two(0xF07C, 0x000F),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapueq",	two(0xF07C, 0x0009),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapuge",	two(0xF07C, 0x000B),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapugt",	two(0xF07C, 0x000A),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapule",	two(0xF07C, 0x000D),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapult",	two(0xF07C, 0x000C),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
+{"ftrapun",	two(0xF07C, 0x0008),	two(0xF1FF, 0xFFFF),	"Ii", mfloat },
         
-{"ftrapeqw",	two(0xF07A, 0x0001),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapfw",	two(0xF07A, 0x0000),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapgew",	two(0xF07A, 0x0013),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapglw",	two(0xF07A, 0x0016),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapglew",	two(0xF07A, 0x0017),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapgtw",	two(0xF07A, 0x0012),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftraplew",	two(0xF07A, 0x0015),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapltw",	two(0xF07A, 0x0014),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapnew",	two(0xF07A, 0x000E),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapngew",	two(0xF07A, 0x001C),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapnglw",	two(0xF07A, 0x0019),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapnglew",	two(0xF07A, 0x0018),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapngtw",	two(0xF07A, 0x001D),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapnlew",	two(0xF07A, 0x001A),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapnltw",	two(0xF07A, 0x001B),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapogew",	two(0xF07A, 0x0003),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapoglw",	two(0xF07A, 0x0006),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapogtw",	two(0xF07A, 0x0002),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapolew",	two(0xF07A, 0x0005),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapoltw",	two(0xF07A, 0x0004),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftraporw",	two(0xF07A, 0x0007),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapseqw",	two(0xF07A, 0x0011),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapsfw",	two(0xF07A, 0x0010),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapsnew",	two(0xF07A, 0x001E),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapstw",	two(0xF07A, 0x001F),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftraptw",	two(0xF07A, 0x000F),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapueqw",	two(0xF07A, 0x0009),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapugew",	two(0xF07A, 0x000B),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapugtw",	two(0xF07A, 0x000A),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapulew",	two(0xF07A, 0x000D),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapultw",	two(0xF07A, 0x000C),	two(0xF1FF, 0xFFFF),	"Ii^w"},
-{"ftrapunw",	two(0xF07A, 0x0008),	two(0xF1FF, 0xFFFF),	"Ii^w"},
+{"ftrapeqw",	two(0xF07A, 0x0001),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapfw",	two(0xF07A, 0x0000),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapgew",	two(0xF07A, 0x0013),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapglw",	two(0xF07A, 0x0016),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapglew",	two(0xF07A, 0x0017),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapgtw",	two(0xF07A, 0x0012),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftraplew",	two(0xF07A, 0x0015),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapltw",	two(0xF07A, 0x0014),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapnew",	two(0xF07A, 0x000E),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapngew",	two(0xF07A, 0x001C),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapnglw",	two(0xF07A, 0x0019),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapnglew",	two(0xF07A, 0x0018),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapngtw",	two(0xF07A, 0x001D),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapnlew",	two(0xF07A, 0x001A),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapnltw",	two(0xF07A, 0x001B),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapogew",	two(0xF07A, 0x0003),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapoglw",	two(0xF07A, 0x0006),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapogtw",	two(0xF07A, 0x0002),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapolew",	two(0xF07A, 0x0005),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapoltw",	two(0xF07A, 0x0004),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftraporw",	two(0xF07A, 0x0007),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapseqw",	two(0xF07A, 0x0011),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapsfw",	two(0xF07A, 0x0010),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapsnew",	two(0xF07A, 0x001E),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapstw",	two(0xF07A, 0x001F),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftraptw",	two(0xF07A, 0x000F),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapueqw",	two(0xF07A, 0x0009),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapugew",	two(0xF07A, 0x000B),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapugtw",	two(0xF07A, 0x000A),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapulew",	two(0xF07A, 0x000D),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapultw",	two(0xF07A, 0x000C),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
+{"ftrapunw",	two(0xF07A, 0x0008),	two(0xF1FF, 0xFFFF),	"Ii^w", mfloat },
 
-{"ftrapeql",	two(0xF07B, 0x0001),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapfl",	two(0xF07B, 0x0000),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapgel",	two(0xF07B, 0x0013),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapgll",	two(0xF07B, 0x0016),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapglel",	two(0xF07B, 0x0017),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapgtl",	two(0xF07B, 0x0012),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftraplel",	two(0xF07B, 0x0015),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapltl",	two(0xF07B, 0x0014),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapnel",	two(0xF07B, 0x000E),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapngel",	two(0xF07B, 0x001C),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapngll",	two(0xF07B, 0x0019),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapnglel",	two(0xF07B, 0x0018),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapngtl",	two(0xF07B, 0x001D),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapnlel",	two(0xF07B, 0x001A),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapnltl",	two(0xF07B, 0x001B),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapogel",	two(0xF07B, 0x0003),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapogll",	two(0xF07B, 0x0006),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapogtl",	two(0xF07B, 0x0002),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapolel",	two(0xF07B, 0x0005),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapoltl",	two(0xF07B, 0x0004),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftraporl",	two(0xF07B, 0x0007),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapseql",	two(0xF07B, 0x0011),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapsfl",	two(0xF07B, 0x0010),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapsnel",	two(0xF07B, 0x001E),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapstl",	two(0xF07B, 0x001F),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftraptl",	two(0xF07B, 0x000F),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapueql",	two(0xF07B, 0x0009),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapugel",	two(0xF07B, 0x000B),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapugtl",	two(0xF07B, 0x000A),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapulel",	two(0xF07B, 0x000D),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapultl",	two(0xF07B, 0x000C),	two(0xF1FF, 0xFFFF),	"Ii^l"},
-{"ftrapunl",	two(0xF07B, 0x0008),	two(0xF1FF, 0xFFFF),	"Ii^l"},
+{"ftrapeql",	two(0xF07B, 0x0001),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapfl",	two(0xF07B, 0x0000),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapgel",	two(0xF07B, 0x0013),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapgll",	two(0xF07B, 0x0016),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapglel",	two(0xF07B, 0x0017),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapgtl",	two(0xF07B, 0x0012),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftraplel",	two(0xF07B, 0x0015),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapltl",	two(0xF07B, 0x0014),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapnel",	two(0xF07B, 0x000E),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapngel",	two(0xF07B, 0x001C),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapngll",	two(0xF07B, 0x0019),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapnglel",	two(0xF07B, 0x0018),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapngtl",	two(0xF07B, 0x001D),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapnlel",	two(0xF07B, 0x001A),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapnltl",	two(0xF07B, 0x001B),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapogel",	two(0xF07B, 0x0003),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapogll",	two(0xF07B, 0x0006),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapogtl",	two(0xF07B, 0x0002),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapolel",	two(0xF07B, 0x0005),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapoltl",	two(0xF07B, 0x0004),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftraporl",	two(0xF07B, 0x0007),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapseql",	two(0xF07B, 0x0011),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapsfl",	two(0xF07B, 0x0010),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapsnel",	two(0xF07B, 0x001E),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapstl",	two(0xF07B, 0x001F),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftraptl",	two(0xF07B, 0x000F),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapueql",	two(0xF07B, 0x0009),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapugel",	two(0xF07B, 0x000B),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapugtl",	two(0xF07B, 0x000A),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapulel",	two(0xF07B, 0x000D),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapultl",	two(0xF07B, 0x000C),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
+{"ftrapunl",	two(0xF07B, 0x0008),	two(0xF1FF, 0xFFFF),	"Ii^l", mfloat },
 
-{"ftstb",	two(0xF000, 0x583A),	two(0xF1C0, 0xFC7F),	"Ii;b"},
-{"ftstd",	two(0xF000, 0x543A),	two(0xF1C0, 0xFC7F),	"Ii;F"},
-{"ftstl",	two(0xF000, 0x403A),	two(0xF1C0, 0xFC7F),	"Ii;l"},
-{"ftstp",	two(0xF000, 0x4C3A),	two(0xF1C0, 0xFC7F),	"Ii;p"},
-{"ftsts",	two(0xF000, 0x443A),	two(0xF1C0, 0xFC7F),	"Ii;f"},
-{"ftstw",	two(0xF000, 0x503A),	two(0xF1C0, 0xFC7F),	"Ii;w"},
-{"ftstx",	two(0xF000, 0x003A),	two(0xF1C0, 0xE07F),	"IiF8"},
-{"ftstx",	two(0xF000, 0x483A),	two(0xF1C0, 0xFC7F),	"Ii;x"},
+{"ftstb",	two(0xF000, 0x583A),	two(0xF1C0, 0xFC7F),	"Ii;b", mfloat },
+{"ftstd",	two(0xF000, 0x543A),	two(0xF1C0, 0xFC7F),	"Ii;F", mfloat },
+{"ftstl",	two(0xF000, 0x403A),	two(0xF1C0, 0xFC7F),	"Ii;l", mfloat },
+{"ftstp",	two(0xF000, 0x4C3A),	two(0xF1C0, 0xFC7F),	"Ii;p", mfloat },
+{"ftsts",	two(0xF000, 0x443A),	two(0xF1C0, 0xFC7F),	"Ii;f", mfloat },
+{"ftstw",	two(0xF000, 0x503A),	two(0xF1C0, 0xFC7F),	"Ii;w", mfloat },
+{"ftstx",	two(0xF000, 0x003A),	two(0xF1C0, 0xE07F),	"IiF8", mfloat },
+{"ftstx",	two(0xF000, 0x483A),	two(0xF1C0, 0xFC7F),	"Ii;x", mfloat },
 
-{"ftwotoxb",	two(0xF000, 0x5811),	two(0xF1C0, 0xFC7F),	"Ii;bF7"},
-{"ftwotoxd",	two(0xF000, 0x5411),	two(0xF1C0, 0xFC7F),	"Ii;FF7"},
-{"ftwotoxl",	two(0xF000, 0x4011),	two(0xF1C0, 0xFC7F),	"Ii;lF7"},
-{"ftwotoxp",	two(0xF000, 0x4C11),	two(0xF1C0, 0xFC7F),	"Ii;pF7"},
-{"ftwotoxs",	two(0xF000, 0x4411),	two(0xF1C0, 0xFC7F),	"Ii;fF7"},
-{"ftwotoxw",	two(0xF000, 0x5011),	two(0xF1C0, 0xFC7F),	"Ii;wF7"},
-{"ftwotoxx",	two(0xF000, 0x0011),	two(0xF1C0, 0xE07F),	"IiF8F7"},
-{"ftwotoxx",	two(0xF000, 0x4811),	two(0xF1C0, 0xFC7F),	"Ii;xF7"},
-{"ftwotoxx",	two(0xF000, 0x0011),	two(0xF1C0, 0xE07F),	"IiFt"},
+{"ftwotoxb",	two(0xF000, 0x5811),	two(0xF1C0, 0xFC7F),	"Ii;bF7", mfloat },
+{"ftwotoxd",	two(0xF000, 0x5411),	two(0xF1C0, 0xFC7F),	"Ii;FF7", mfloat },
+{"ftwotoxl",	two(0xF000, 0x4011),	two(0xF1C0, 0xFC7F),	"Ii;lF7", mfloat },
+{"ftwotoxp",	two(0xF000, 0x4C11),	two(0xF1C0, 0xFC7F),	"Ii;pF7", mfloat },
+{"ftwotoxs",	two(0xF000, 0x4411),	two(0xF1C0, 0xFC7F),	"Ii;fF7", mfloat },
+{"ftwotoxw",	two(0xF000, 0x5011),	two(0xF1C0, 0xFC7F),	"Ii;wF7", mfloat },
+{"ftwotoxx",	two(0xF000, 0x0011),	two(0xF1C0, 0xE07F),	"IiF8F7", mfloat },
+{"ftwotoxx",	two(0xF000, 0x4811),	two(0xF1C0, 0xFC7F),	"Ii;xF7", mfloat },
+{"ftwotoxx",	two(0xF000, 0x0011),	two(0xF1C0, 0xE07F),	"IiFt",   mfloat },
 
 /* Variable-sized float branches */
 
-{"fjeq",	one(0xF081),		one(0xF1FF),		"IdBc"},
-{"fjf",		one(0xF080),		one(0xF1FF),		"IdBc"},
-{"fjge",	one(0xF093),		one(0xF1FF),		"IdBc"},
-{"fjgl",	one(0xF096),		one(0xF1FF),		"IdBc"},
-{"fjgle",	one(0xF097),		one(0xF1FF),		"IdBc"},
-{"fjgt",	one(0xF092),		one(0xF1FF),		"IdBc"},
-{"fjle",	one(0xF095),		one(0xF1FF),		"IdBc"},
-{"fjlt",	one(0xF094),		one(0xF1FF),		"IdBc"},
-{"fjne",	one(0xF08E),		one(0xF1FF),		"IdBc"},
-{"fjnge",	one(0xF09C),		one(0xF1FF),		"IdBc"},
-{"fjngl",	one(0xF099),		one(0xF1FF),		"IdBc"},
-{"fjngle",	one(0xF098),		one(0xF1FF),		"IdBc"},
-{"fjngt",	one(0xF09D),		one(0xF1FF),		"IdBc"},
-{"fjnle",	one(0xF09A),		one(0xF1FF),		"IdBc"},
-{"fjnlt",	one(0xF09B),		one(0xF1FF),		"IdBc"},
-{"fjoge",	one(0xF083),		one(0xF1FF),		"IdBc"},
-{"fjogl",	one(0xF086),		one(0xF1FF),		"IdBc"},
-{"fjogt",	one(0xF082),		one(0xF1FF),		"IdBc"},
-{"fjole",	one(0xF085),		one(0xF1FF),		"IdBc"},
-{"fjolt",	one(0xF084),		one(0xF1FF),		"IdBc"},
-{"fjor",	one(0xF087),		one(0xF1FF),		"IdBc"},
-{"fjseq",	one(0xF091),		one(0xF1FF),		"IdBc"},
-{"fjsf",	one(0xF090),		one(0xF1FF),		"IdBc"},
-{"fjsne",	one(0xF09E),		one(0xF1FF),		"IdBc"},
-{"fjst",	one(0xF09F),		one(0xF1FF),		"IdBc"},
-{"fjt",		one(0xF08F),		one(0xF1FF),		"IdBc"},
-{"fjueq",	one(0xF089),		one(0xF1FF),		"IdBc"},
-{"fjuge",	one(0xF08B),		one(0xF1FF),		"IdBc"},
-{"fjugt",	one(0xF08A),		one(0xF1FF),		"IdBc"},
-{"fjule",	one(0xF08D),		one(0xF1FF),		"IdBc"},
-{"fjult",	one(0xF08C),		one(0xF1FF),		"IdBc"},
-{"fjun",	one(0xF088),		one(0xF1FF),		"IdBc"},
+{"fjeq",	one(0xF081),		one(0xF1FF),		"IdBc", mfloat },
+{"fjf",		one(0xF080),		one(0xF1FF),		"IdBc", mfloat },
+{"fjge",	one(0xF093),		one(0xF1FF),		"IdBc", mfloat },
+{"fjgl",	one(0xF096),		one(0xF1FF),		"IdBc", mfloat },
+{"fjgle",	one(0xF097),		one(0xF1FF),		"IdBc", mfloat },
+{"fjgt",	one(0xF092),		one(0xF1FF),		"IdBc", mfloat },
+{"fjle",	one(0xF095),		one(0xF1FF),		"IdBc", mfloat },
+{"fjlt",	one(0xF094),		one(0xF1FF),		"IdBc", mfloat },
+{"fjne",	one(0xF08E),		one(0xF1FF),		"IdBc", mfloat },
+{"fjnge",	one(0xF09C),		one(0xF1FF),		"IdBc", mfloat },
+{"fjngl",	one(0xF099),		one(0xF1FF),		"IdBc", mfloat },
+{"fjngle",	one(0xF098),		one(0xF1FF),		"IdBc", mfloat },
+{"fjngt",	one(0xF09D),		one(0xF1FF),		"IdBc", mfloat },
+{"fjnle",	one(0xF09A),		one(0xF1FF),		"IdBc", mfloat },
+{"fjnlt",	one(0xF09B),		one(0xF1FF),		"IdBc", mfloat },
+{"fjoge",	one(0xF083),		one(0xF1FF),		"IdBc", mfloat },
+{"fjogl",	one(0xF086),		one(0xF1FF),		"IdBc", mfloat },
+{"fjogt",	one(0xF082),		one(0xF1FF),		"IdBc", mfloat },
+{"fjole",	one(0xF085),		one(0xF1FF),		"IdBc", mfloat },
+{"fjolt",	one(0xF084),		one(0xF1FF),		"IdBc", mfloat },
+{"fjor",	one(0xF087),		one(0xF1FF),		"IdBc", mfloat },
+{"fjseq",	one(0xF091),		one(0xF1FF),		"IdBc", mfloat },
+{"fjsf",	one(0xF090),		one(0xF1FF),		"IdBc", mfloat },
+{"fjsne",	one(0xF09E),		one(0xF1FF),		"IdBc", mfloat },
+{"fjst",	one(0xF09F),		one(0xF1FF),		"IdBc", mfloat },
+{"fjt",		one(0xF08F),		one(0xF1FF),		"IdBc", mfloat },
+{"fjueq",	one(0xF089),		one(0xF1FF),		"IdBc", mfloat },
+{"fjuge",	one(0xF08B),		one(0xF1FF),		"IdBc", mfloat },
+{"fjugt",	one(0xF08A),		one(0xF1FF),		"IdBc", mfloat },
+{"fjule",	one(0xF08D),		one(0xF1FF),		"IdBc", mfloat },
+{"fjult",	one(0xF08C),		one(0xF1FF),		"IdBc", mfloat },
+{"fjun",	one(0xF088),		one(0xF1FF),		"IdBc", mfloat },
+/* float stuff ends here */
+
+{"illegal",	one(0045374),		one(0177777),		"",     m68000up },
+{"jmp",		one(0047300),		one(0177700),		"!s",   m68000up },
+{"jsr",		one(0047200),		one(0177700),		"!s",   m68000up },
+{"lea",		one(0040700),		one(0170700),		"!sAd", m68000up },
+{"linkw",	one(0047120),		one(0177770),		"As#w", m68000up },
+{"linkl",	one(0044010),		one(0177770),		"As#l", m68000up },
+{"link",	one(0047120),		one(0177770),		"As#w", m68000up },
+{"link",	one(0044010),		one(0177770),		"As#l", m68000up },
+
+{"lslb",	one(0160410),		one(0170770),		"QdDs", m68000up },	/* lsrb #Q,	Ds */
+{"lslb",	one(0160450),		one(0170770),		"DdDs", m68000up },	/* lsrb Dd,	Ds */
+{"lslw",	one(0160510),		one(0170770),		"QdDs", m68000up },	/* lsrb #Q,	Ds */
+{"lslw",	one(0160550),		one(0170770),		"DdDs", m68000up },	/* lsrb Dd,	Ds */
+{"lslw",	one(0161700),		one(0177700),		"~s",   m68000up },	/* Shift memory */
+{"lsll",	one(0160610),		one(0170770),		"QdDs", m68000up },	/* lsrb #Q,	Ds */
+{"lsll",	one(0160650),		one(0170770),		"DdDs", m68000up },	/* lsrb Dd,	Ds */
+
+{"lsrb",	one(0160010),		one(0170770),		"QdDs", m68000up }, /* lsrb #Q,	Ds */
+{"lsrb",	one(0160050),		one(0170770),		"DdDs", m68000up },	/* lsrb Dd,	Ds */
+{"lsrl",	one(0160210),		one(0170770),		"QdDs", m68000up },	/* lsrb #Q,	Ds */
+{"lsrl",	one(0160250),		one(0170770),		"DdDs", m68000up },	/* lsrb #Q,	Ds */
+{"lsrw",	one(0160110),		one(0170770),		"QdDs", m68000up },	/* lsrb #Q,	Ds */
+{"lsrw",	one(0160150),		one(0170770),		"DdDs", m68000up },	/* lsrb #Q,	Ds */
+{"lsrw",	one(0161300),		one(0177700),		"~s",   m68000up },	/* Shift memory */
+
+{"moveal",	one(0020100),		one(0170700),		"*lAd", m68000up },
+{"moveaw",	one(0030100),		one(0170700),		"*wAd", m68000up },
+{"moveb",	one(0010000),		one(0170000),		";b$d", m68000up },	/* move */
+{"movel",	one(0070000),		one(0170400),		"MsDd", m68000up },	/* moveq written as move */
+{"movel",	one(0020000),		one(0170000),		"*l$d", m68000up },
+{"movel",	one(0020100),		one(0170700),		"*lAd", m68000up },
+{"movel",	one(0047140),		one(0177770),		"AsUd", m68000up },	/* move to USP */
+{"movel",	one(0047150),		one(0177770),		"UdAs", m68000up },	/* move from USP */
+
+{"movec",	one(0047173),		one(0177777),		"R1Jj", m68010up },
+{"movec",	one(0047173),		one(0177777),		"R1#j", m68010up },
+{"movec",	one(0047172),		one(0177777),		"JjR1", m68010up },
+{"movec",	one(0047172),		one(0177777),		"#jR1", m68010up },
+
+/* JF added these next four for the assembler */
+{"moveml",	one(0044300),		one(0177700),		"Lw&s", m68000up },	/* movem reg to mem. */
+{"moveml",	one(0044340),		one(0177770),		"lw-s", m68000up },	/* movem reg to autodecrement. */
+{"moveml",	one(0046300),		one(0177700),		"!sLw", m68000up },	/* movem mem to reg. */
+{"moveml",	one(0046330),		one(0177770),		"+sLw", m68000up },	/* movem autoinc to reg. */
+
+{"moveml",	one(0044300),		one(0177700),		"#w&s", m68000up },	/* movem reg to mem. */
+{"moveml",	one(0044340),		one(0177770),		"#w-s", m68000up },	/* movem reg to autodecrement. */
+{"moveml",	one(0046300),		one(0177700),		"!s#w", m68000up },	/* movem mem to reg. */
+{"moveml",	one(0046330),		one(0177770),		"+s#w", m68000up },	/* movem autoinc to reg. */
+
+/* JF added these next four for the assembler */
+{"movemw",	one(0044200),		one(0177700),		"Lw&s", m68000up },	/* movem reg to mem. */
+{"movemw",	one(0044240),		one(0177770),		"lw-s", m68000up },	/* movem reg to autodecrement. */
+{"movemw",	one(0046200),		one(0177700),		"!sLw", m68000up },	/* movem mem to reg. */
+{"movemw",	one(0046230),		one(0177770),		"+sLw", m68000up },	/* movem autoinc to reg. */
+
+{"movemw",	one(0044200),		one(0177700),		"#w&s", m68000up },	/* movem reg to mem. */
+{"movemw",	one(0044240),		one(0177770),		"#w-s", m68000up },	/* movem reg to autodecrement. */
+{"movemw",	one(0046200),		one(0177700),		"!s#w", m68000up },	/* movem mem to reg. */
+{"movemw",	one(0046230),		one(0177770),		"+s#w", m68000up },	/* movem autoinc to reg. */
+
+{"movepl",	one(0000510),		one(0170770),		"dsDd", m68000up },	/* memory to register */
+{"movepl",	one(0000710),		one(0170770),		"Ddds", m68000up },	/* register to memory */
+{"movepw",	one(0000410),		one(0170770),		"dsDd", m68000up },	/* memory to register */
+{"movepw",	one(0000610),		one(0170770),		"Ddds", m68000up },	/* register to memory */
+{"moveq",	one(0070000),		one(0170400),		"MsDd", m68000up },
+{"movew",	one(0030000),		one(0170000),		"*w$d", m68000up },
+{"movew",	one(0030100),		one(0170700),		"*wAd", m68000up },	/* movea,	written as move */
+{"movew",	one(0040300),		one(0177700),		"Ss$s", m68000up },	/* Move from sr */
+{"movew",	one(0041300),		one(0177700),		"Cs$s", m68000up },	/* Move from ccr */
+{"movew",	one(0042300),		one(0177700),		";wCd", m68000up },	/* move to ccr */
+{"movew",	one(0043300),		one(0177700),		";wSd", m68000up },	/* move to sr */
+
+{"movesb",	two(0007000, 0),	two(0177700, 07777),	"~sR1", m68010up },	 /* moves from memory */
+{"movesb",	two(0007000, 04000),	two(0177700, 07777),	"R1~s", m68010up },	 /* moves to memory */
+{"movesl",	two(0007200, 0),	two(0177700, 07777),	"~sR1", m68010up },	 /* moves from memory */
+{"movesl",	two(0007200, 04000),	two(0177700, 07777),	"R1~s", m68010up },	 /* moves to memory */
+{"movesw",	two(0007100, 0),	two(0177700, 07777),	"~sR1", m68010up },	 /* moves from memory */
+{"movesw",	two(0007100, 04000),	two(0177700, 07777),	"R1~s", m68010up },	 /* moves to memory */
+
+{"move16",	two(0xf620, 0x8000),	two(0xfff8, 0x8fff),	"+s+1", m68040 },
+{"move16",	one(0xf600),	one(0xfff8),	"+s_L", m68040 },
+{"move16",	one(0xf608),	one(0xfff8),	"_L+s", m68040 },
+{"move16",	one(0xf610),	one(0xfff8),	"as_L", m68040 },
+{"move16",	one(0xf618),	one(0xfff8),	"_Las", m68040 },
+
+{"mulsl",	two(0046000, 004000),	two(0177700, 0107770),	";lD1", m68000up },
+{"mulsl",	two(0046000, 006000),	two(0177700, 0107770),	";lD3D1", m68000up },
+{"mulsw",	one(0140700),		one(0170700),		";wDd", m68000up },
+{"muls",	one(0140700),		one(0170700),		";wDd", m68000up },
+{"mulul",	two(0046000, 000000),	two(0177700, 0107770),	";lD1", m68000up },
+{"mulul",	two(0046000, 002000),	two(0177700, 0107770),	";lD3D1", m68000up },
+{"muluw",	one(0140300),		one(0170700),		";wDd", m68000up },
+{"mulu",	one(0140300),		one(0170700),		";wDd", m68000up },
+{"nbcd",	one(0044000),		one(0177700),		"$s", m68000up },
+{"negb",	one(0042000),		one(0177700),		"$s", m68000up },
+{"negl",	one(0042200),		one(0177700),		"$s", m68000up },
+{"negw",	one(0042100),		one(0177700),		"$s", m68000up },
+{"negxb",	one(0040000),		one(0177700),		"$s", m68000up },
+{"negxl",	one(0040200),		one(0177700),		"$s", m68000up },
+{"negxw",	one(0040100),		one(0177700),		"$s", m68000up },
+{"nop",		one(0047161),		one(0177777),		"", m68000up },
+{"notb",	one(0043000),		one(0177700),		"$s", m68000up },
+{"notl",	one(0043200),		one(0177700),		"$s", m68000up },
+{"notw",	one(0043100),		one(0177700),		"$s", m68000up },
+
+{"orb",		one(0000000),		one(0177700),		"#b$s", m68000up },	/* ori written as or */
+{"orb",		one(0000074),		one(0177777),		"#bCs", m68000up },	/* ori to ccr */
+{"orb",		one(0100000),		one(0170700),		";bDd", m68000up },	/* memory to register */
+{"orb",		one(0100400),		one(0170700),		"Dd~s", m68000up },	/* register to memory */
+{"orib",	one(0000000),		one(0177700),		"#b$s", m68000up },
+{"orib",	one(0000074),		one(0177777),		"#bCs", m68000up },	/* ori to ccr */
+{"oril",	one(0000200),		one(0177700),		"#l$s", m68000up },
+{"oriw",	one(0000100),		one(0177700),		"#w$s", m68000up },
+{"oriw",	one(0000174),		one(0177777),		"#wSs", m68000up },	/* ori to sr */
+{"orl",		one(0000200),		one(0177700),		"#l$s", m68000up },
+{"orl",		one(0100200),		one(0170700),		";lDd", m68000up },	/* memory to register */
+{"orl",		one(0100600),		one(0170700),		"Dd~s", m68000up },	/* register to memory */
+{"orw",		one(0000100),		one(0177700),		"#w$s", m68000up },
+{"orw",		one(0000174),		one(0177777),		"#wSs", m68000up },	/* ori to sr */
+{"orw",		one(0100100),		one(0170700),		";wDd", m68000up },	/* memory to register */
+{"orw",		one(0100500),		one(0170700),		"Dd~s", m68000up },	/* register to memory */
+
+{"pack",	one(0100500),		one(0170770),		"DsDd#w", m68020up },	/* pack Ds,	Dd,	#w */
+{"pack",	one(0100510),		one(0170770),		"-s-d#w", m68020up },	/* pack -(As),	-(Ad),	#w */
+
+#ifndef NO_68851
+{"pbac",	one(0xf0c7),		one(0xffbf),		"Bc", m68851 },
+{"pbacw",	one(0xf087),		one(0xffbf),		"Bc", m68851 },
+{"pbas",	one(0xf0c6),		one(0xffbf),		"Bc", m68851 },
+{"pbasw",	one(0xf086),		one(0xffbf),		"Bc", m68851 },
+{"pbbc",	one(0xf0c1),		one(0xffbf),		"Bc", m68851 },
+{"pbbcw",	one(0xf081),		one(0xffbf),		"Bc", m68851 },
+{"pbbs",	one(0xf0c0),		one(0xffbf),		"Bc", m68851 },
+{"pbbsw",	one(0xf080),		one(0xffbf),		"Bc", m68851 },
+{"pbcc",	one(0xf0cf),		one(0xffbf),		"Bc", m68851 },
+{"pbccw",	one(0xf08f),		one(0xffbf),		"Bc", m68851 },
+{"pbcs",	one(0xf0ce),		one(0xffbf),		"Bc", m68851 },
+{"pbcsw",	one(0xf08e),		one(0xffbf),		"Bc", m68851 },
+{"pbgc",	one(0xf0cd),		one(0xffbf),		"Bc", m68851 },
+{"pbgcw",	one(0xf08d),		one(0xffbf),		"Bc", m68851 },
+{"pbgs",	one(0xf0cc),		one(0xffbf),		"Bc", m68851 },
+{"pbgsw",	one(0xf08c),		one(0xffbf),		"Bc", m68851 },
+{"pbic",	one(0xf0cb),		one(0xffbf),		"Bc", m68851 },
+{"pbicw",	one(0xf08b),		one(0xffbf),		"Bc", m68851 },
+{"pbis",	one(0xf0ca),		one(0xffbf),		"Bc", m68851 },
+{"pbisw",	one(0xf08a),		one(0xffbf),		"Bc", m68851 },
+{"pblc",	one(0xf0c3),		one(0xffbf),		"Bc", m68851 },
+{"pblcw",	one(0xf083),		one(0xffbf),		"Bc", m68851 },
+{"pbls",	one(0xf0c2),		one(0xffbf),		"Bc", m68851 },
+{"pblsw",	one(0xf082),		one(0xffbf),		"Bc", m68851 },
+{"pbsc",	one(0xf0c5),		one(0xffbf),		"Bc", m68851 },
+{"pbscw",	one(0xf085),		one(0xffbf),		"Bc", m68851 },
+{"pbss",	one(0xf0c4),		one(0xffbf),		"Bc", m68851 },
+{"pbssw",	one(0xf084),		one(0xffbf),		"Bc", m68851 },
+{"pbwc",	one(0xf0c9),		one(0xffbf),		"Bc", m68851 },
+{"pbwcw",	one(0xf089),		one(0xffbf),		"Bc", m68851 },
+{"pbws",	one(0xf0c8),		one(0xffbf),		"Bc", m68851 },
+{"pbwsw",	one(0xf088),		one(0xffbf),		"Bc", m68851 },
+
+{"pdbac",	two(0xf048, 0x0007),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbas",	two(0xf048, 0x0006),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbbc",	two(0xf048, 0x0001),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbbs",	two(0xf048, 0x0000),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbcc",	two(0xf048, 0x000f),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbcs",	two(0xf048, 0x000e),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbgc",	two(0xf048, 0x000d),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbgs",	two(0xf048, 0x000c),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbic",	two(0xf048, 0x000b),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbis",	two(0xf048, 0x000a),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdblc",	two(0xf048, 0x0003),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbls",	two(0xf048, 0x0002),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbsc",	two(0xf048, 0x0005),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbss",	two(0xf048, 0x0004),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbwc",	two(0xf048, 0x0009),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+{"pdbws",	two(0xf048, 0x0008),	two(0xfff8, 0xffff),	"DsBw", m68851 },
+
+{"pea",		one(0044100),		one(0177700),		"!s", m68000 },
+
+{"pflusha",	two(0xf000, 0x2400),	two(0xffff, 0xffff),	"",		m68030 | m68851 },
+{"pflusha",	one(0xf510),		one(0xfff8), 		"",		m68040 },
+
+{"pflush",	two(0xf000, 0x3010),	two(0xffc0, 0xfe10),	"T3T9",		m68030 | m68851 },
+{"pflush",	two(0xf000, 0x3810),	two(0xffc0, 0xfe10),	"T3T9&s",	m68030 | m68851 },
+{"pflush",	two(0xf000, 0x3008),	two(0xffc0, 0xfe18),	"D3T9",		m68030 | m68851 },
+{"pflush",	two(0xf000, 0x3808),	two(0xffc0, 0xfe18),	"D3T9&s",	m68030 | m68851 },
+{"pflush",	two(0xf000, 0x3000),	two(0xffc0, 0xfe1e),	"f3T9",		m68030 | m68851 },
+{"pflush",	two(0xf000, 0x3800),	two(0xffc0, 0xfe1e),	"f3T9&s",	m68030 | m68851 },
+{"pflush",	one(0xf500),		one(0xfff8), 		"As",		m68040 },
+
+{"pflushan",	one(0xf518),		one(0xfff8),		"",		m68040 },
+{"pflushn",	one(0xf508),		one(0xfff8),		"As",		m68040 },
+
+{"pflushr",	two(0xf000, 0xa000),	two(0xffc0, 0xffff),	"|s",		m68851 },
+
+{"pflushs",	two(0xf000, 0x3410),	two(0xfff8, 0xfe10),	"T3T9",		m68851 },
+{"pflushs",	two(0xf000, 0x3c10),	two(0xfff8, 0xfe00),	"T3T9&s",	m68851 },
+{"pflushs",	two(0xf000, 0x3408),	two(0xfff8, 0xfe18),	"D3T9",		m68851 },
+{"pflushs",	two(0xf000, 0x3c08),	two(0xfff8, 0xfe18),	"D3T9&s",	m68851 },
+{"pflushs",	two(0xf000, 0x3400),	two(0xfff8, 0xfe1e),	"f3T9",		m68851 },
+{"pflushs",	two(0xf000, 0x3c00),	two(0xfff8, 0xfe1e),	"f3T9&s",	m68851 },
+
+{"ploadr",	two(0xf000, 0x2210),	two(0xffc0, 0xfff0),	"T3&s",	m68030 | m68851 },
+{"ploadr",	two(0xf000, 0x2208),	two(0xffc0, 0xfff8),	"D3&s",	m68030 | m68851 },
+{"ploadr",	two(0xf000, 0x2200),	two(0xffc0, 0xfffe),	"f3&s",	m68030 | m68851 },
+{"ploadw",	two(0xf000, 0x2010),	two(0xffc0, 0xfff0),	"T3&s",	m68030 | m68851 },
+{"ploadw",	two(0xf000, 0x2008),	two(0xffc0, 0xfff8),	"D3&s",	m68030 | m68851 },
+{"ploadw",	two(0xf000, 0x2000),	two(0xffc0, 0xfffe),	"f3&s",	m68030 | m68851 },
+
+/* TC, CRP, DRP, SRP, CAL, VAL, SCC, AC */
+{"pmove",	two(0xf000, 0x4000),	two(0xffc0, 0xe3ff),	"*sP8",	m68030 | m68851 },
+{"pmove",	two(0xf000, 0x4200),	two(0xffc0, 0xe3ff),	"P8%s",	m68030 | m68851 },
+{"pmove",	two(0xf000, 0x4000),	two(0xffc0, 0xe3ff),	"|sW8",	m68030 | m68851 },
+{"pmove",	two(0xf000, 0x4200),	two(0xffc0, 0xe3ff),	"W8~s",	m68030 | m68851 },
+
+/* BADx, BACx */
+{"pmove",	two(0xf000, 0x6200),	two(0xffc0, 0xe3e3),	"*sX3",	m68030 | m68851 },
+{"pmove",	two(0xf000, 0x6000),	two(0xffc0, 0xe3e3),	"X3%s",	m68030 | m68851 },
+
+/* PSR, PCSR */
+/* {"pmove",	two(0xf000, 0x6100),	two(oxffc0, oxffff),	"*sZ8",	m68030 | m68851 }, */
+{"pmove",	two(0xf000, 0x6000),	two(0xffc0, 0xffff),	"*sY8",	m68030 | m68851 },
+{"pmove",	two(0xf000, 0x6200),	two(0xffc0, 0xffff),	"Y8%s",	m68030 | m68851 },
+{"pmove",	two(0xf000, 0x6600),	two(0xffc0, 0xffff),	"Z8%s",	m68030 | m68851 },
+
+{"prestore",	one(0xf140),		one(0xffc0),		"&s", m68851 },
+{"prestore",	one(0xf158),		one(0xfff8),		"+s", m68851 },
+{"psave",	one(0xf100),		one(0xffc0),		"&s", m68851 },
+{"psave",	one(0xf100),		one(0xffc0),		"+s", m68851 },
+
+{"psac",	two(0xf040, 0x0007),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"psas",	two(0xf040, 0x0006),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"psbc",	two(0xf040, 0x0001),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"psbs",	two(0xf040, 0x0000),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"pscc",	two(0xf040, 0x000f),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"pscs",	two(0xf040, 0x000e),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"psgc",	two(0xf040, 0x000d),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"psgs",	two(0xf040, 0x000c),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"psic",	two(0xf040, 0x000b),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"psis",	two(0xf040, 0x000a),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"pslc",	two(0xf040, 0x0003),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"psls",	two(0xf040, 0x0002),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"pssc",	two(0xf040, 0x0005),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"psss",	two(0xf040, 0x0004),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"pswc",	two(0xf040, 0x0009),	two(0xffc0, 0xffff),	"@s", m68851 },
+{"psws",	two(0xf040, 0x0008),	two(0xffc0, 0xffff),	"@s", m68851 },
+
+{"ptestr",	two(0xf000, 0x8210),	two(0xffc0, 0xe3f0),	"T3&sQ8",	m68030 | m68851 },
+{"ptestr",	two(0xf000, 0x8310),	two(0xffc0, 0xe310),	"T3&sQ8A9",	m68030 | m68851 },
+{"ptestr",	two(0xf000, 0x8208),	two(0xffc0, 0xe3f8),	"D3&sQ8",	m68030 | m68851 },
+{"ptestr",	two(0xf000, 0x8308),	two(0xffc0, 0xe318),	"D3&sQ8A9",	m68030 | m68851 },
+{"ptestr",	two(0xf000, 0x8200),	two(0xffc0, 0xe3fe),	"f3&sQ8",	m68030 | m68851 },
+{"ptestr",	two(0xf000, 0x8300),	two(0xffc0, 0xe31e),	"f3&sQ8A9",	m68030 | m68851 },
+
+{"ptestr",	one(0xf568),		one(0xfff8),		"As",		m68040 },
+
+{"ptestw",	two(0xf000, 0x8010),	two(0xffc0, 0xe3f0),	"T3&sQ8",	m68030 | m68851 },
+{"ptestw",	two(0xf000, 0x8110),	two(0xffc0, 0xe310),	"T3&sQ8A9",	m68030 | m68851 },
+{"ptestw",	two(0xf000, 0x8008),	two(0xffc0, 0xe3f8),	"D3&sQ8",	m68030 | m68851 },
+{"ptestw",	two(0xf000, 0x8108),	two(0xffc0, 0xe318),	"D3&sQ8A9",	m68030 | m68851 },
+{"ptestw",	two(0xf000, 0x8000),	two(0xffc0, 0xe3fe),	"f3&sQ8",	m68030 | m68851 },
+{"ptestw",	two(0xf000, 0x8100),	two(0xffc0, 0xe31e),	"f3&sQ8A9",	m68030 | m68851 },
+
+{"ptestw",	one(0xf548),		one(0xfff8),		"As",		m68040 },
+
+{"ptrapacw",	two(0xf07a, 0x0007),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapacl",	two(0xf07b, 0x0007),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapac",	two(0xf07c, 0x0007),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapasw",	two(0xf07a, 0x0006),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapasl",	two(0xf07b, 0x0006),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapas",	two(0xf07c, 0x0006),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapbcw",	two(0xf07a, 0x0001),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapbcl",	two(0xf07b, 0x0001),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapbc",	two(0xf07c, 0x0001),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapbsw",	two(0xf07a, 0x0000),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapbsl",	two(0xf07b, 0x0000),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapbs",	two(0xf07c, 0x0000),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapccw",	two(0xf07a, 0x000f),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapccl",	two(0xf07b, 0x000f),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapcc",	two(0xf07c, 0x000f),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapcsw",	two(0xf07a, 0x000e),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapcsl",	two(0xf07b, 0x000e),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapcs",	two(0xf07c, 0x000e),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapgcw",	two(0xf07a, 0x000d),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapgcl",	two(0xf07b, 0x000d),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapgc",	two(0xf07c, 0x000d),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapgsw",	two(0xf07a, 0x000c),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapgsl",	two(0xf07b, 0x000c),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapgs",	two(0xf07c, 0x000c),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapicw",	two(0xf07a, 0x000b),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapicl",	two(0xf07b, 0x000b),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapic",	two(0xf07c, 0x000b),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapisw",	two(0xf07a, 0x000a),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapisl",	two(0xf07b, 0x000a),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapis",	two(0xf07c, 0x000a),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptraplcw",	two(0xf07a, 0x0003),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptraplcl",	two(0xf07b, 0x0003),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptraplc",	two(0xf07c, 0x0003),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptraplsw",	two(0xf07a, 0x0002),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptraplsl",	two(0xf07b, 0x0002),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapls",	two(0xf07c, 0x0002),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapscw",	two(0xf07a, 0x0005),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapscl",	two(0xf07b, 0x0005),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapsc",	two(0xf07c, 0x0005),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapssw",	two(0xf07a, 0x0004),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapssl",	two(0xf07b, 0x0004),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapss",	two(0xf07c, 0x0004),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapwcw",	two(0xf07a, 0x0009),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapwcl",	two(0xf07b, 0x0009),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapwc",	two(0xf07c, 0x0009),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"ptrapwsw",	two(0xf07a, 0x0008),	two(0xffff, 0xffff),	"#w", m68851 },
+{"ptrapwsl",	two(0xf07b, 0x0008),	two(0xffff, 0xffff),	"#l", m68851 },
+{"ptrapws",	two(0xf07c, 0x0008),	two(0xffff, 0xffff),	"",   m68851 },
+
+{"pvalid",	two(0xf000, 0x2800),	two(0xffc0, 0xffff),	"Vs&s", m68851 },
+{"pvalid",	two(0xf000, 0x2c00),	two(0xffc0, 0xfff8),	"A3&s", m68851 },
+
+#endif /* NO_68851 */
+
+{"reset",	one(0047160),		one(0177777),		"", m68000up },
+
+{"rolb",	one(0160430),		one(0170770),		"QdDs", m68000up },	/* rorb #Q,	Ds */
+{"rolb",	one(0160470),		one(0170770),		"DdDs", m68000up },	/* rorb Dd,	Ds */
+{"roll",	one(0160630),		one(0170770),		"QdDs", m68000up },	/* rorb #Q,	Ds */
+{"roll",	one(0160670),		one(0170770),		"DdDs", m68000up },	/* rorb Dd,	Ds */
+{"rolw",	one(0160530),		one(0170770),		"QdDs", m68000up },	/* rorb #Q,	Ds */
+{"rolw",	one(0160570),		one(0170770),		"DdDs", m68000up },	/* rorb Dd,	Ds */
+{"rolw",	one(0163700),		one(0177700),		"~s",   m68000up },	/* Rotate memory */
+{"rorb",	one(0160030),		one(0170770),		"QdDs", m68000up },	/* rorb #Q,	Ds */
+{"rorb",	one(0160070),		one(0170770),		"DdDs", m68000up },	/* rorb Dd,	Ds */
+{"rorl",	one(0160230),		one(0170770),		"QdDs", m68000up },	/* rorb #Q,	Ds */
+{"rorl",	one(0160270),		one(0170770),		"DdDs", m68000up },	/* rorb Dd,	Ds */
+{"rorw",	one(0160130),		one(0170770),		"QdDs", m68000up },	/* rorb #Q,	Ds */
+{"rorw",	one(0160170),		one(0170770),		"DdDs", m68000up },	/* rorb Dd,	Ds */
+{"rorw",	one(0163300),		one(0177700),		"~s",   m68000up },	/* Rotate memory */
+
+{"roxlb",	one(0160420),		one(0170770),		"QdDs", m68000up },	/* roxrb #Q,	Ds */
+{"roxlb",	one(0160460),		one(0170770),		"DdDs", m68000up },	/* roxrb Dd,	Ds */
+{"roxll",	one(0160620),		one(0170770),		"QdDs", m68000up },	/* roxrb #Q,	Ds */
+{"roxll",	one(0160660),		one(0170770),		"DdDs", m68000up },	/* roxrb Dd,	Ds */
+{"roxlw",	one(0160520),		one(0170770),		"QdDs", m68000up },	/* roxrb #Q,	Ds */
+{"roxlw",	one(0160560),		one(0170770),		"DdDs", m68000up },	/* roxrb Dd,	Ds */
+{"roxlw",	one(0162700),		one(0177700),		"~s",   m68000up },	/* Rotate memory */
+{"roxrb",	one(0160020),		one(0170770),		"QdDs", m68000up },	/* roxrb #Q,	Ds */
+{"roxrb",	one(0160060),		one(0170770),		"DdDs", m68000up },	/* roxrb Dd,	Ds */
+{"roxrl",	one(0160220),		one(0170770),		"QdDs", m68000up },	/* roxrb #Q,	Ds */
+{"roxrl",	one(0160260),		one(0170770),		"DdDs", m68000up },	/* roxrb Dd,	Ds */
+{"roxrw",	one(0160120),		one(0170770),		"QdDs", m68000up },	/* roxrb #Q,	Ds */
+{"roxrw",	one(0160160),		one(0170770),		"DdDs", m68000up },	/* roxrb Dd,	Ds */
+{"roxrw",	one(0162300),		one(0177700),		"~s",   m68000up },	/* Rotate memory */
+
+{"rtd",		one(0047164),		one(0177777),		"#w", m68010up },
+{"rte",		one(0047163),		one(0177777),		"",   m68000up },
+{"rtm",		one(0003300),		one(0177760),		"Rs", m68020 },
+{"rtr",		one(0047167),		one(0177777),		"",   m68000up },
+{"rts",		one(0047165),		one(0177777),		"",   m68000up },
+
+{"sbcd",	one(0100400),		one(0170770),		"DsDd", m68000up },
+{"sbcd",	one(0100410),		one(0170770),		"-s-d", m68000up },
+
+{"scc",		one(0052300),		one(0177700),		"$s", m68000up },
+{"scs",		one(0052700),		one(0177700),		"$s", m68000up },
+{"seq",		one(0053700),		one(0177700),		"$s", m68000up },
+{"sf",		one(0050700),		one(0177700),		"$s", m68000up },
+{"sge",		one(0056300),		one(0177700),		"$s", m68000up },
+{"sfge",	one(0056300),		one(0177700),		"$s", m68000up },
+{"sgt",		one(0057300),		one(0177700),		"$s", m68000up },
+{"sfgt",	one(0057300),		one(0177700),		"$s", m68000up },
+{"shi",		one(0051300),		one(0177700),		"$s", m68000up },
+{"sle",		one(0057700),		one(0177700),		"$s", m68000up },
+{"sfle",	one(0057700),		one(0177700),		"$s", m68000up },
+{"sls",		one(0051700),		one(0177700),		"$s", m68000up },
+{"slt",		one(0056700),		one(0177700),		"$s", m68000up },
+{"sflt",	one(0056700),		one(0177700),		"$s", m68000up },
+{"smi",		one(0055700),		one(0177700),		"$s", m68000up },
+{"sne",		one(0053300),		one(0177700),		"$s", m68000up },
+{"sfneq",	one(0053300),		one(0177700),		"$s", m68000up },
+{"spl",		one(0055300),		one(0177700),		"$s", m68000up },
+{"st",		one(0050300),		one(0177700),		"$s", m68000up },
+{"svc",		one(0054300),		one(0177700),		"$s", m68000up },
+{"svs",		one(0054700),		one(0177700),		"$s", m68000up },
+
+{"stop",	one(0047162),		one(0177777),		"#w", m68000up },
+
+{"subal",	one(0110700),		one(0170700),		"*lAd", m68000up },
+{"subaw",	one(0110300),		one(0170700),		"*wAd", m68000up },
+{"subb",	one(0050400),		one(0170700),		"Qd%s", m68000up },	/* subq written as sub */
+{"subb",	one(0002000),		one(0177700),		"#b$s", m68000up },	/* subi written as sub */
+{"subb",	one(0110000),		one(0170700),		";bDd", m68000up },	/* subb ? ?,	Dd */
+{"subb",	one(0110400),		one(0170700),		"Dd~s", m68000up },	/* subb Dd,	? ? */
+{"subib",	one(0002000),		one(0177700),		"#b$s", m68000up },
+{"subil",	one(0002200),		one(0177700),		"#l$s", m68000up },
+{"subiw",	one(0002100),		one(0177700),		"#w$s", m68000up },
+{"subl",	one(0050600),		one(0170700),		"Qd%s", m68000up },
+{"subl",	one(0002200),		one(0177700),		"#l$s", m68000up },
+{"subl",	one(0110700),		one(0170700),		"*lAd", m68000up },
+{"subl",	one(0110200),		one(0170700),		"*lDd", m68000up },
+{"subl",	one(0110600),		one(0170700),		"Dd~s", m68000up },
+{"subqb",	one(0050400),		one(0170700),		"Qd%s", m68000up },
+{"subql",	one(0050600),		one(0170700),		"Qd%s", m68000up },
+{"subqw",	one(0050500),		one(0170700),		"Qd%s", m68000up },
+{"subw",	one(0050500),		one(0170700),		"Qd%s", m68000up },
+{"subw",	one(0002100),		one(0177700),		"#w$s", m68000up },
+{"subw",	one(0110100),		one(0170700),		"*wDd", m68000up },
+{"subw",	one(0110300),		one(0170700),		"*wAd", m68000up },	/* suba written as sub */
+{"subw",	one(0110500),		one(0170700),		"Dd~s", m68000up },
+{"subxb",	one(0110400),		one(0170770),		"DsDd", m68000up },	/* subxb Ds,	Dd */
+{"subxb",	one(0110410),		one(0170770),		"-s-d", m68000up },	/* subxb -(As),	-(Ad) */
+{"subxl",	one(0110600),		one(0170770),		"DsDd", m68000up },
+{"subxl",	one(0110610),		one(0170770),		"-s-d", m68000up },
+{"subxw",	one(0110500),		one(0170770),		"DsDd", m68000up },
+{"subxw",	one(0110510),		one(0170770),		"-s-d", m68000up },
+
+{"swap",	one(0044100),		one(0177770),		"Ds", m68000up },
+	
+{"tas",		one(0045300),		one(0177700),		"$s", m68000up },
+{"trap",	one(0047100),		one(0177760),		"Ts", m68000up },
+
+{"trapcc",	one(0052374),		one(0177777),		"", m68020up },
+{"trapcs",	one(0052774),		one(0177777),		"", m68020up },
+{"trapeq",	one(0053774),		one(0177777),		"", m68020up },
+{"trapf",	one(0050774),		one(0177777),		"", m68020up },
+{"trapge",	one(0056374),		one(0177777),		"", m68020up },
+{"trapgt",	one(0057374),		one(0177777),		"", m68020up },
+{"traphi",	one(0051374),		one(0177777),		"", m68020up },
+{"traple",	one(0057774),		one(0177777),		"", m68020up },
+{"trapls",	one(0051774),		one(0177777),		"", m68020up },
+{"traplt",	one(0056774),		one(0177777),		"", m68020up },
+{"trapmi",	one(0055774),		one(0177777),		"", m68020up },
+{"trapne",	one(0053374),		one(0177777),		"", m68020up },
+{"trappl",	one(0055374),		one(0177777),		"", m68020up },
+{"trapt",	one(0050374),		one(0177777),		"", m68020up },
+{"trapvc",	one(0054374),		one(0177777),		"", m68020up },
+{"trapvs",	one(0054774),		one(0177777),		"", m68020up },
+
+{"trapcc.w",	one(0052372),		one(0177777),		"", m68020up },
+{"trapcs.w",	one(0052772),		one(0177777),		"", m68020up },
+{"trapeq.w",	one(0053772),		one(0177777),		"", m68020up },
+{"trapf.w",	one(0050772),		one(0177777),		"", m68020up },
+{"trapge.w",	one(0056372),		one(0177777),		"", m68020up },
+{"trapgt.w",	one(0057372),		one(0177777),		"", m68020up },
+{"traphi.w",	one(0051372),		one(0177777),		"", m68020up },
+{"traple.w",	one(0057772),		one(0177777),		"", m68020up },
+{"trapls.w",	one(0051772),		one(0177777),		"", m68020up },
+{"traplt.w",	one(0056772),		one(0177777),		"", m68020up },
+{"trapmi.w",	one(0055772),		one(0177777),		"", m68020up },
+{"trapne.w",	one(0053372),		one(0177777),		"", m68020up },
+{"trappl.w",	one(0055372),		one(0177777),		"", m68020up },
+{"trapt.w",	one(0050372),		one(0177777),		"", m68020up },
+{"trapvc.w",	one(0054372),		one(0177777),		"", m68020up },
+{"trapvs.w",	one(0054772),		one(0177777),		"", m68020up },
+
+{"trapcc.l",	one(0052373),		one(0177777),		"", m68020up },
+{"trapcs.l",	one(0052773),		one(0177777),		"", m68020up },
+{"trapeq.l",	one(0053773),		one(0177777),		"", m68020up },
+{"trapf.l",	one(0050773),		one(0177777),		"", m68020up },
+{"trapge.l",	one(0056373),		one(0177777),		"", m68020up },
+{"trapgt.l",	one(0057373),		one(0177777),		"", m68020up },
+{"traphi.l",	one(0051373),		one(0177777),		"", m68020up },
+{"traple.l",	one(0057773),		one(0177777),		"", m68020up },
+{"trapls.l",	one(0051773),		one(0177777),		"", m68020up },
+{"traplt.l",	one(0056773),		one(0177777),		"", m68020up },
+{"trapmi.l",	one(0055773),		one(0177777),		"", m68020up },
+{"trapne.l",	one(0053373),		one(0177777),		"", m68020up },
+{"trappl.l",	one(0055373),		one(0177777),		"", m68020up },
+{"trapt.l",	one(0050373),		one(0177777),		"", m68020up },
+{"trapvc.l",	one(0054373),		one(0177777),		"", m68020up },
+{"trapvs.l",	one(0054773),		one(0177777),		"", m68020up },
+
+{"trapv",	one(0047166),		one(0177777),		"", m68000up },
+
+{"tstb",	one(0045000),		one(0177700),		";b", m68000up },
+{"tstw",	one(0045100),		one(0177700),		"*w", m68000up },
+{"tstl",	one(0045200),		one(0177700),		"*l", m68000up },
+
+{"unlk",	one(0047130),		one(0177770),		"As", m68000up },
+{"unpk",	one(0100600),		one(0170770),		"DsDd#w", m68020up },
+{"unpk",	one(0100610),		one(0170770),		"-s-d#w", m68020up },
 
 /* Variable-sized branches */
 
-{"jbsr",	one(0060400),		one(0177400),		"Bg"},
-{"jbsr",	one(0047200),		one(0177700),		"!s"},
-{"jra",		one(0060000),		one(0177400),		"Bg"},
-{"jra",		one(0047300),		one(0177700),		"!s"},
-  
-{"jhi",		one(0061000),		one(0177400),		"Bg"},
-{"jls",		one(0061400),		one(0177400),		"Bg"},
-{"jcc",		one(0062000),		one(0177400),		"Bg"},
-{"jcs",		one(0062400),		one(0177400),		"Bg"},
-{"jne",		one(0063000),		one(0177400),		"Bg"},
-{"jeq",		one(0063400),		one(0177400),		"Bg"},
-{"jvc",		one(0064000),		one(0177400),		"Bg"},
-{"jvs",		one(0064400),		one(0177400),		"Bg"},
-{"jpl",		one(0065000),		one(0177400),		"Bg"},
-{"jmi",		one(0065400),		one(0177400),		"Bg"},
-{"jge",		one(0066000),		one(0177400),		"Bg"},
-{"jlt",		one(0066400),		one(0177400),		"Bg"},
-{"jgt",		one(0067000),		one(0177400),		"Bg"},
-{"jle",		one(0067400),		one(0177400),		"Bg"},
+{"jbsr",	one(0060400),		one(0177400),		"Bg", m68000up },
+{"jbsr",	one(0047200),		one(0177700),		"!s", m68000up },
+{"jra",		one(0060000),		one(0177400),		"Bg", m68000up },
+{"jra",		one(0047300),		one(0177700),		"!s", m68000up },
 
-{"movql",	one(0070000),		one(0170400),		"MsDd"},
-{"moveql",	one(0070000),		one(0170400),		"MsDd"},
-{"moval",	one(0020100),		one(0170700),		"*lAd"},
-{"movaw",	one(0030100),		one(0170700),		"*wAd"},
-{"movb",	one(0010000),		one(0170000),		";b$d"},	/* mov */
-{"movl",	one(0070000),		one(0170400),		"MsDd"},	/* movq written as mov */
-{"movl",	one(0020000),		one(0170000),		"*l$d"},
-{"movl",	one(0020100),		one(0170700),		"*lAd"},
-{"movl",	one(0047140),		one(0177770),		"AsUd"},	/* mov to USP */
-{"movl",	one(0047150),		one(0177770),		"UdAs"},	/* mov from USP */
-{"movc",	one(0047173),		one(0177777),		"R1Jj"},
-{"movc",	one(0047173),		one(0177777),		"R1#j"},
-{"movc",	one(0047172),		one(0177777),		"JjR1"},
-{"movc",	one(0047172),		one(0177777),		"#jR1"},
-{"movml",	one(0044300),		one(0177700),		"#w&s"},	/* movm reg to mem. */
-{"movml",	one(0044340),		one(0177770),		"#w-s"},	/* movm reg to autodecrement. */
-{"movml",	one(0046300),		one(0177700),		"!s#w"},	/* movm mem to reg. */
-{"movml",	one(0046330),		one(0177770),		"+s#w"},	/* movm autoinc to reg. */
-{"movml",	one(0044300),		one(0177700),		"Lw&s"},	/* movm reg to mem. */
-{"movml",	one(0044340),		one(0177770),		"lw-s"},	/* movm reg to autodecrement. */
-{"movml",	one(0046300),		one(0177700),		"!sLw"},	/* movm mem to reg. */
-{"movml",	one(0046330),		one(0177770),		"+sLw"},	/* movm autoinc to reg. */
-{"movmw",	one(0044200),		one(0177700),		"#w&s"},	/* movm reg to mem. */
-{"movmw",	one(0044240),		one(0177770),		"#w-s"},	/* movm reg to autodecrement. */
-{"movmw",	one(0046200),		one(0177700),		"!s#w"},	/* movm mem to reg. */
-{"movmw",	one(0046230),		one(0177770),		"+s#w"},	/* movm autoinc to reg. */
-{"movmw",	one(0044200),		one(0177700),		"Lw&s"},	/* movm reg to mem. */
-{"movmw",	one(0044240),		one(0177770),		"lw-s"},	/* movm reg to autodecrement. */
-{"movmw",	one(0046200),		one(0177700),		"!sLw"},	/* movm mem to reg. */
-{"movmw",	one(0046230),		one(0177770),		"+sLw"},	/* movm autoinc to reg. */
-{"movpl",	one(0000510),		one(0170770),		"dsDd"},	/* memory to register */
-{"movpl",	one(0000710),		one(0170770),		"Ddds"},	/* register to memory */
-{"movpw",	one(0000410),		one(0170770),		"dsDd"},	/* memory to register */
-{"movpw",	one(0000610),		one(0170770),		"Ddds"},	/* register to memory */
-{"movq",	one(0070000),		one(0170400),		"MsDd"},
-{"movw",	one(0030000),		one(0170000),		"*w$d"},
-{"movw",	one(0030100),		one(0170700),		"*wAd"},	/* mova,	written as mov */
-{"movw",	one(0040300),		one(0177700),		"Ss$s"},	/* Move from sr */
-{"movw",	one(0041300),		one(0177700),		"Cs$s"},	/* Move from ccr */
-{"movw",	one(0042300),		one(0177700),		";wCd"},	/* mov to ccr */
-{"movw",	one(0043300),		one(0177700),		";wSd"},	/* mov to sr */
+{"jhi",		one(0061000),		one(0177400),		"Bg", m68000up },
+{"jls",		one(0061400),		one(0177400),		"Bg", m68000up },
+{"jcc",		one(0062000),		one(0177400),		"Bg", m68000up },
+{"jcs",		one(0062400),		one(0177400),		"Bg", m68000up },
+{"jne",		one(0063000),		one(0177400),		"Bg", m68000up },
+{"jeq",		one(0063400),		one(0177400),		"Bg", m68000up },
+{"jvc",		one(0064000),		one(0177400),		"Bg", m68000up },
+{"jvs",		one(0064400),		one(0177400),		"Bg", m68000up },
+{"jpl",		one(0065000),		one(0177400),		"Bg", m68000up },
+{"jmi",		one(0065400),		one(0177400),		"Bg", m68000up },
+{"jge",		one(0066000),		one(0177400),		"Bg", m68000up },
+{"jlt",		one(0066400),		one(0177400),		"Bg", m68000up },
+{"jgt",		one(0067000),		one(0177400),		"Bg", m68000up },
+{"jle",		one(0067400),		one(0177400),		"Bg", m68000up },
 
-{"movsb",	two(0007000, 0),	two(0177700, 07777),	"~sR1"},
-{"movsb",	two(0007000, 04000),	two(0177700, 07777),	"R1~s"},
-{"movsl",	two(0007200, 0),	two(0177700, 07777),	"~sR1"},
-{"movsl",	two(0007200, 04000),	two(0177700, 07777),	"R1~s"},
-{"movsw",	two(0007100, 0),	two(0177700, 07777),	"~sR1"},
-{"movsw",	two(0007100, 04000),	two(0177700, 07777),	"R1~s"},
+/* aliases */
 
-#ifdef m68851
- /* name */	/* opcode */		/* match */		/* args */
+{"movql",	one(0070000),		one(0170400),		"MsDd", m68000up },
+{"moveql",	one(0070000),		one(0170400),		"MsDd", m68000up },
+{"moval",	one(0020100),		one(0170700),		"*lAd", m68000up },
+{"movaw",	one(0030100),		one(0170700),		"*wAd", m68000up },
+{"movb",	one(0010000),		one(0170000),		";b$d", m68000up },	/* mov */
+{"movl",	one(0070000),		one(0170400),		"MsDd", m68000up },	/* movq written as mov */
+{"movl",	one(0020000),		one(0170000),		"*l$d", m68000up },
+{"movl",	one(0020100),		one(0170700),		"*lAd", m68000up },
+{"movl",	one(0047140),		one(0177770),		"AsUd", m68000up },	/* mov to USP */
+{"movl",	one(0047150),		one(0177770),		"UdAs", m68000up },	/* mov from USP */
+{"movc",	one(0047173),		one(0177777),		"R1Jj", m68010up },
+{"movc",	one(0047173),		one(0177777),		"R1#j", m68010up },
+{"movc",	one(0047172),		one(0177777),		"JjR1", m68010up },
+{"movc",	one(0047172),		one(0177777),		"#jR1", m68010up },
+{"movml",	one(0044300),		one(0177700),		"#w&s", m68000up },	/* movm reg to mem. */
+{"movml",	one(0044340),		one(0177770),		"#w-s", m68000up },	/* movm reg to autodecrement. */
+{"movml",	one(0046300),		one(0177700),		"!s#w", m68000up },	/* movm mem to reg. */
+{"movml",	one(0046330),		one(0177770),		"+s#w", m68000up },	/* movm autoinc to reg. */
+{"movml",	one(0044300),		one(0177700),		"Lw&s", m68000up },	/* movm reg to mem. */
+{"movml",	one(0044340),		one(0177770),		"lw-s", m68000up },	/* movm reg to autodecrement. */
+{"movml",	one(0046300),		one(0177700),		"!sLw", m68000up },	/* movm mem to reg. */
+{"movml",	one(0046330),		one(0177770),		"+sLw", m68000up },	/* movm autoinc to reg. */
+{"movmw",	one(0044200),		one(0177700),		"#w&s", m68000up },	/* movm reg to mem. */
+{"movmw",	one(0044240),		one(0177770),		"#w-s", m68000up },	/* movm reg to autodecrement. */
+{"movmw",	one(0046200),		one(0177700),		"!s#w", m68000up },	/* movm mem to reg. */
+{"movmw",	one(0046230),		one(0177770),		"+s#w", m68000up },	/* movm autoinc to reg. */
+{"movmw",	one(0044200),		one(0177700),		"Lw&s", m68000up },	/* movm reg to mem. */
+{"movmw",	one(0044240),		one(0177770),		"lw-s", m68000up },	/* movm reg to autodecrement. */
+{"movmw",	one(0046200),		one(0177700),		"!sLw", m68000up },	/* movm mem to reg. */
+{"movmw",	one(0046230),		one(0177770),		"+sLw", m68000up },	/* movm autoinc to reg. */
+{"movpl",	one(0000510),		one(0170770),		"dsDd", m68000up },	/* memory to register */
+{"movpl",	one(0000710),		one(0170770),		"Ddds", m68000up },	/* register to memory */
+{"movpw",	one(0000410),		one(0170770),		"dsDd", m68000up },	/* memory to register */
+{"movpw",	one(0000610),		one(0170770),		"Ddds", m68000up },	/* register to memory */
+{"movq",	one(0070000),		one(0170400),		"MsDd", m68000up },
+{"movw",	one(0030000),		one(0170000),		"*w$d", m68000up },
+{"movw",	one(0030100),		one(0170700),		"*wAd", m68000up },	/* mova,	written as mov */
+{"movw",	one(0040300),		one(0177700),		"Ss$s", m68000up },	/* Move from sr */
+{"movw",	one(0041300),		one(0177700),		"Cs$s", m68000up },	/* Move from ccr */
+{"movw",	one(0042300),		one(0177700),		";wCd", m68000up },	/* mov to ccr */
+{"movw",	one(0043300),		one(0177700),		";wSd", m68000up },	/* mov to sr */
 
-{"pbac",	one(0xf0c7),		one(0xffbf),		"Bc"},
-{"pbacw",	one(0xf087),		one(0xffbf),		"Bc"},
-{"pbas",	one(0xf0c6),		one(0xffbf),		"Bc"},
-{"pbasw",	one(0xf086),		one(0xffbf),		"Bc"},
-{"pbbc",	one(0xf0c1),		one(0xffbf),		"Bc"},
-{"pbbcw",	one(0xf081),		one(0xffbf),		"Bc"},
-{"pbbs",	one(0xf0c0),		one(0xffbf),		"Bc"},
-{"pbbsw",	one(0xf080),		one(0xffbf),		"Bc"},
-{"pbcc",	one(0xf0cf),		one(0xffbf),		"Bc"},
-{"pbccw",	one(0xf08f),		one(0xffbf),		"Bc"},
-{"pbcs",	one(0xf0ce),		one(0xffbf),		"Bc"},
-{"pbcsw",	one(0xf08e),		one(0xffbf),		"Bc"},
-{"pbgc",	one(0xf0cd),		one(0xffbf),		"Bc"},
-{"pbgcw",	one(0xf08d),		one(0xffbf),		"Bc"},
-{"pbgs",	one(0xf0cc),		one(0xffbf),		"Bc"},
-{"pbgsw",	one(0xf08c),		one(0xffbf),		"Bc"},
-{"pbic",	one(0xf0cb),		one(0xffbf),		"Bc"},
-{"pbicw",	one(0xf08b),		one(0xffbf),		"Bc"},
-{"pbis",	one(0xf0ca),		one(0xffbf),		"Bc"},
-{"pbisw",	one(0xf08a),		one(0xffbf),		"Bc"},
-{"pblc",	one(0xf0c3),		one(0xffbf),		"Bc"},
-{"pblcw",	one(0xf083),		one(0xffbf),		"Bc"},
-{"pbls",	one(0xf0c2),		one(0xffbf),		"Bc"},
-{"pblsw",	one(0xf082),		one(0xffbf),		"Bc"},
-{"pbsc",	one(0xf0c5),		one(0xffbf),		"Bc"},
-{"pbscw",	one(0xf085),		one(0xffbf),		"Bc"},
-{"pbss",	one(0xf0c4),		one(0xffbf),		"Bc"},
-{"pbssw",	one(0xf084),		one(0xffbf),		"Bc"},
-{"pbwc",	one(0xf0c9),		one(0xffbf),		"Bc"},
-{"pbwcw",	one(0xf089),		one(0xffbf),		"Bc"},
-{"pbws",	one(0xf0c8),		one(0xffbf),		"Bc"},
-{"pbwsw",	one(0xf088),		one(0xffbf),		"Bc"},
-
-
-{"pdbac",	two(0xf048, 0x0007),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbas",	two(0xf048, 0x0006),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbbc",	two(0xf048, 0x0001),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbbs",	two(0xf048, 0x0000),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbcc",	two(0xf048, 0x000f),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbcs",	two(0xf048, 0x000e),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbgc",	two(0xf048, 0x000d),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbgs",	two(0xf048, 0x000c),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbic",	two(0xf048, 0x000b),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbis",	two(0xf048, 0x000a),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdblc",	two(0xf048, 0x0003),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbls",	two(0xf048, 0x0002),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbsc",	two(0xf048, 0x0005),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbss",	two(0xf048, 0x0004),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbwc",	two(0xf048, 0x0009),	two(0xfff8, 0xffff),	"DsBw"},
-{"pdbws",	two(0xf048, 0x0008),	two(0xfff8, 0xffff),	"DsBw"},
-
-{"pflusha",	two(0xf000, 0x2400),	two(0xffff, 0xffff),	"" },
-
-{"pflush",	two(0xf000, 0x3010),	two(0xffc0, 0xfe10),	"T3T9" },
-{"pflush",	two(0xf000, 0x3810),	two(0xffc0, 0xfe10),	"T3T9&s" },
-{"pflush",	two(0xf000, 0x3008),	two(0xffc0, 0xfe18),	"D3T9" },
-{"pflush",	two(0xf000, 0x3808),	two(0xffc0, 0xfe18),	"D3T9&s" },
-{"pflush",	two(0xf000, 0x3000),	two(0xffc0, 0xfe1e),	"f3T9" },
-{"pflush",	two(0xf000, 0x3800),	two(0xffc0, 0xfe1e),	"f3T9&s" },
-
-{"pflushs",	two(0xf000, 0x3410),	two(0xfff8, 0xfe10),	"T3T9" },
-{"pflushs",	two(0xf000, 0x3c10),	two(0xfff8, 0xfe00),	"T3T9&s" },
-{"pflushs",	two(0xf000, 0x3408),	two(0xfff8, 0xfe18),	"D3T9" },
-{"pflushs",	two(0xf000, 0x3c08),	two(0xfff8, 0xfe18),	"D3T9&s" },
-{"pflushs",	two(0xf000, 0x3400),	two(0xfff8, 0xfe1e),	"f3T9" },
-{"pflushs",	two(0xf000, 0x3c00),	two(0xfff8, 0xfe1e),	"f3T9&s"},
-
-{"pflushr",	two(0xf000, 0xa000),	two(0xffc0, 0xffff),	"|s" },
-
-{"ploadr",	two(0xf000, 0x2210),	two(0xffc0, 0xfff0),	"T3&s" },
-{"ploadr",	two(0xf000, 0x2208),	two(0xffc0, 0xfff8),	"D3&s" },
-{"ploadr",	two(0xf000, 0x2200),	two(0xffc0, 0xfffe),	"f3&s" },
-{"ploadw",	two(0xf000, 0x2010),	two(0xffc0, 0xfff0),	"T3&s" },
-{"ploadw",	two(0xf000, 0x2008),	two(0xffc0, 0xfff8),	"D3&s" },
-{"ploadw",	two(0xf000, 0x2000),	two(0xffc0, 0xfffe),	"f3&s" },
-
-/* TC, CRP, DRP, SRP, CAL, VAL, SCC, AC */
-{"pmove",	two(0xf000, 0x4000),	two(0xffc0, 0xe3ff),	"*sP8" },
-{"pmove",	two(0xf000, 0x4200),	two(0xffc0, 0xe3ff),	"P8%s" },
-{"pmove",	two(0xf000, 0x4000),	two(0xffc0, 0xe3ff),	"|sW8" },
-{"pmove",	two(0xf000, 0x4200),	two(0xffc0, 0xe3ff),	"W8~s" },
-
-/* BADx, BACx */
-{"pmove",	two(0xf000, 0x6200),	two(0xffc0, 0xe3e3),	"*sX3" },
-{"pmove",	two(0xf000, 0x6000),	two(0xffc0, 0xe3e3),	"X3%s" },
-
-/* PSR, PCSR */
-/* {"pmove",	two(0xf000, 0x6100),	two(oxffc0, oxffff),	"*sZ8" }, */
-{"pmove",	two(0xf000, 0x6000),	two(0xffc0, 0xffff),	"*sY8" },
-{"pmove",	two(0xf000, 0x6200),	two(0xffc0, 0xffff),	"Y8%s" },
-{"pmove",	two(0xf000, 0x6600),	two(0xffc0, 0xffff),	"Z8%s" },
-
-{"prestore",	one(0xf140),		one(0xffc0),		"&s"},
-{"prestore",	one(0xf158),		one(0xfff8),		"+s"},
-{"psave",	one(0xf100),		one(0xffc0),		"&s"},
-{"psave",	one(0xf100),		one(0xffc0),		"+s"},
-
-{"psac",	two(0xf040, 0x0007),	two(0xffc0, 0xffff),	"@s"},
-{"psas",	two(0xf040, 0x0006),	two(0xffc0, 0xffff),	"@s"},
-{"psbc",	two(0xf040, 0x0001),	two(0xffc0, 0xffff),	"@s"},
-{"psbs",	two(0xf040, 0x0000),	two(0xffc0, 0xffff),	"@s"},
-{"pscc",	two(0xf040, 0x000f),	two(0xffc0, 0xffff),	"@s"},
-{"pscs",	two(0xf040, 0x000e),	two(0xffc0, 0xffff),	"@s"},
-{"psgc",	two(0xf040, 0x000d),	two(0xffc0, 0xffff),	"@s"},
-{"psgs",	two(0xf040, 0x000c),	two(0xffc0, 0xffff),	"@s"},
-{"psic",	two(0xf040, 0x000b),	two(0xffc0, 0xffff),	"@s"},
-{"psis",	two(0xf040, 0x000a),	two(0xffc0, 0xffff),	"@s"},
-{"pslc",	two(0xf040, 0x0003),	two(0xffc0, 0xffff),	"@s"},
-{"psls",	two(0xf040, 0x0002),	two(0xffc0, 0xffff),	"@s"},
-{"pssc",	two(0xf040, 0x0005),	two(0xffc0, 0xffff),	"@s"},
-{"psss",	two(0xf040, 0x0004),	two(0xffc0, 0xffff),	"@s"},
-{"pswc",	two(0xf040, 0x0009),	two(0xffc0, 0xffff),	"@s"},
-{"psws",	two(0xf040, 0x0008),	two(0xffc0, 0xffff),	"@s"},
-
-{"ptestr",	two(0xf000, 0x8210),	two(0xffc0, 0xe3f0),	"T3&sQ8" },
-{"ptestr",	two(0xf000, 0x8310),	two(0xffc0, 0xe310),	"T3&sQ8A9" },
-{"ptestr",	two(0xf000, 0x8208),	two(0xffc0, 0xe3f8),	"D3&sQ8" },
-{"ptestr",	two(0xf000, 0x8308),	two(0xffc0, 0xe318),	"D3&sQ8A9" },
-{"ptestr",	two(0xf000, 0x8200),	two(0xffc0, 0xe3fe),	"f3&sQ8" },
-{"ptestr",	two(0xf000, 0x8300),	two(0xffc0, 0xe31e),	"f3&sQ8A9" },
-
-{"ptestw",	two(0xf000, 0x8010),	two(0xffc0, 0xe3f0),	"T3&sQ8" },
-{"ptestw",	two(0xf000, 0x8110),	two(0xffc0, 0xe310),	"T3&sQ8A9" },
-{"ptestw",	two(0xf000, 0x8008),	two(0xffc0, 0xe3f8),	"D3&sQ8" },
-{"ptestw",	two(0xf000, 0x8108),	two(0xffc0, 0xe318),	"D3&sQ8A9" },
-{"ptestw",	two(0xf000, 0x8000),	two(0xffc0, 0xe3fe),	"f3&sQ8" },
-{"ptestw",	two(0xf000, 0x8100),	two(0xffc0, 0xe31e),	"f3&sQ8A9" },
-
-{"ptrapacw",	two(0xf07a, 0x0007),	two(0xffff, 0xffff),	"#w"},
-{"ptrapacl",	two(0xf07b, 0x0007),	two(0xffff, 0xffff),	"#l"},
-{"ptrapac",	two(0xf07c, 0x0007),	two(0xffff, 0xffff),	""},
-
-{"ptrapasw",	two(0xf07a, 0x0006),	two(0xffff, 0xffff),	"#w"},
-{"ptrapasl",	two(0xf07b, 0x0006),	two(0xffff, 0xffff),	"#l"},
-{"ptrapas",	two(0xf07c, 0x0006),	two(0xffff, 0xffff),	""},
-
-{"ptrapbcw",	two(0xf07a, 0x0001),	two(0xffff, 0xffff),	"#w"},
-{"ptrapbcl",	two(0xf07b, 0x0001),	two(0xffff, 0xffff),	"#l"},
-{"ptrapbc",	two(0xf07c, 0x0001),	two(0xffff, 0xffff),	""},
-
-{"ptrapbsw",	two(0xf07a, 0x0000),	two(0xffff, 0xffff),	"#w"},
-{"ptrapbsl",	two(0xf07b, 0x0000),	two(0xffff, 0xffff),	"#l"},
-{"ptrapbs",	two(0xf07c, 0x0000),	two(0xffff, 0xffff),	""},
-
-{"ptrapccw",	two(0xf07a, 0x000f),	two(0xffff, 0xffff),	"#w"},
-{"ptrapccl",	two(0xf07b, 0x000f),	two(0xffff, 0xffff),	"#l"},
-{"ptrapcc",	two(0xf07c, 0x000f),	two(0xffff, 0xffff),	""},
-
-{"ptrapcsw",	two(0xf07a, 0x000e),	two(0xffff, 0xffff),	"#w"},
-{"ptrapcsl",	two(0xf07b, 0x000e),	two(0xffff, 0xffff),	"#l"},
-{"ptrapcs",	two(0xf07c, 0x000e),	two(0xffff, 0xffff),	""},
-
-{"ptrapgcw",	two(0xf07a, 0x000d),	two(0xffff, 0xffff),	"#w"},
-{"ptrapgcl",	two(0xf07b, 0x000d),	two(0xffff, 0xffff),	"#l"},
-{"ptrapgc",	two(0xf07c, 0x000d),	two(0xffff, 0xffff),	""},
-
-{"ptrapgsw",	two(0xf07a, 0x000c),	two(0xffff, 0xffff),	"#w"},
-{"ptrapgsl",	two(0xf07b, 0x000c),	two(0xffff, 0xffff),	"#l"},
-{"ptrapgs",	two(0xf07c, 0x000c),	two(0xffff, 0xffff),	""},
-
-{"ptrapicw",	two(0xf07a, 0x000b),	two(0xffff, 0xffff),	"#w"},
-{"ptrapicl",	two(0xf07b, 0x000b),	two(0xffff, 0xffff),	"#l"},
-{"ptrapic",	two(0xf07c, 0x000b),	two(0xffff, 0xffff),	""},
-
-{"ptrapisw",	two(0xf07a, 0x000a),	two(0xffff, 0xffff),	"#w"},
-{"ptrapisl",	two(0xf07b, 0x000a),	two(0xffff, 0xffff),	"#l"},
-{"ptrapis",	two(0xf07c, 0x000a),	two(0xffff, 0xffff),	""},
-
-{"ptraplcw",	two(0xf07a, 0x0003),	two(0xffff, 0xffff),	"#w"},
-{"ptraplcl",	two(0xf07b, 0x0003),	two(0xffff, 0xffff),	"#l"},
-{"ptraplc",	two(0xf07c, 0x0003),	two(0xffff, 0xffff),	""},
-
-{"ptraplsw",	two(0xf07a, 0x0002),	two(0xffff, 0xffff),	"#w"},
-{"ptraplsl",	two(0xf07b, 0x0002),	two(0xffff, 0xffff),	"#l"},
-{"ptrapls",	two(0xf07c, 0x0002),	two(0xffff, 0xffff),	""},
-
-{"ptrapscw",	two(0xf07a, 0x0005),	two(0xffff, 0xffff),	"#w"},
-{"ptrapscl",	two(0xf07b, 0x0005),	two(0xffff, 0xffff),	"#l"},
-{"ptrapsc",	two(0xf07c, 0x0005),	two(0xffff, 0xffff),	""},
-
-{"ptrapssw",	two(0xf07a, 0x0004),	two(0xffff, 0xffff),	"#w"},
-{"ptrapssl",	two(0xf07b, 0x0004),	two(0xffff, 0xffff),	"#l"},
-{"ptrapss",	two(0xf07c, 0x0004),	two(0xffff, 0xffff),	""},
-
-{"ptrapwcw",	two(0xf07a, 0x0009),	two(0xffff, 0xffff),	"#w"},
-{"ptrapwcl",	two(0xf07b, 0x0009),	two(0xffff, 0xffff),	"#l"},
-{"ptrapwc",	two(0xf07c, 0x0009),	two(0xffff, 0xffff),	""},
-
-{"ptrapwsw",	two(0xf07a, 0x0008),	two(0xffff, 0xffff),	"#w"},
-{"ptrapwsl",	two(0xf07b, 0x0008),	two(0xffff, 0xffff),	"#l"},
-{"ptrapws",	two(0xf07c, 0x0008),	two(0xffff, 0xffff),	""},
-
-{"pvalid",	two(0xf000, 0x2800),	two(0xffc0, 0xffff),	"Vs&s"},
-{"pvalid",	two(0xf000, 0x2c00),	two(0xffc0, 0xfff8),	"A3&s" },
-
-#endif /* m68851 */
+{"movsb",	two(0007000, 0),	two(0177700, 07777),	"~sR1", m68010up },
+{"movsb",	two(0007000, 04000),	two(0177700, 07777),	"R1~s", m68010up },
+{"movsl",	two(0007200, 0),	two(0177700, 07777),	"~sR1", m68010up },
+{"movsl",	two(0007200, 04000),	two(0177700, 07777),	"R1~s", m68010up },
+{"movsw",	two(0007100, 0),	two(0177700, 07777),	"~sR1", m68010up },
+{"movsw",	two(0007100, 04000),	two(0177700, 07777),	"R1~s", m68010up },
 
 };
 
