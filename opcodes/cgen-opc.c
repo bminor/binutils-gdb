@@ -374,30 +374,7 @@ cgen_get_insn_value (cd, buf, length)
      unsigned char *buf;
      int length;
 {
-  CGEN_INSN_INT value;
-
-  switch (length)
-    {
-    case 8:
-      value = *buf;
-      break;
-    case 16:
-      if (cd->insn_endian == CGEN_ENDIAN_BIG)
-	value = bfd_getb16 (buf);
-      else
-	value = bfd_getl16 (buf);
-      break;
-    case 32:
-      if (cd->insn_endian == CGEN_ENDIAN_BIG)
-	value = bfd_getb32 (buf);
-      else
-	value = bfd_getl32 (buf);
-      break;
-    default:
-      abort ();
-    }
-
-  return value;
+  bfd_get_bits (buf, length, cd->insn_endian == CGEN_ENDIAN_BIG);
 }
 
 /* Cover function to store an insn value properly byteswapped.  */
@@ -409,26 +386,8 @@ cgen_put_insn_value (cd, buf, length, value)
      int length;
      CGEN_INSN_INT value;
 {
-  switch (length)
-    {
-    case 8:
-      buf[0] = value;
-      break;
-    case 16:
-      if (cd->insn_endian == CGEN_ENDIAN_BIG)
-	bfd_putb16 (value, buf);
-      else
-	bfd_putl16 (value, buf);
-      break;
-    case 32:
-      if (cd->insn_endian == CGEN_ENDIAN_BIG)
-	bfd_putb32 (value, buf);
-      else
-	bfd_putl32 (value, buf);
-      break;
-    default:
-      abort ();
-    }
+  bfd_put_bits ((bfd_vma) value, buf, length,
+		cd->insn_endian == CGEN_ENDIAN_BIG);
 }
 
 /* Look up instruction INSN_*_VALUE and extract its fields.

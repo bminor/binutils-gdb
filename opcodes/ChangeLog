@@ -1,3 +1,14 @@
+2001-01-02  Richard Sandiford  <rsandifo@redhat.com>
+
+	* cgen-dis.c (hash_insn_array): Use bfd_put_bits().
+	(hash_insn_list): Likewise
+	* cgen-ibld.in (insert_1): Use bfd_put_bits() and bfd_get_bits().
+	(extract_1): Use bfd_get_bits().
+	(extract_normal): Apply sign extension to both extraction
+	methods.
+	* cgen-opc.c (cgen_get_insn_value): Use bfd_get_bits()
+	(cgen_put_insn_value): Use bfd_put_bits()
+
 2000-12-28  Frank Ch. Eigler  <fche@redhat.com>
 
 	* cgen-asm.in (parse_insn_normal): Print better error message for
