@@ -1,3 +1,8 @@
+Fri Sep 27 14:48:15 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* infrun.c (wait_for_inferior):  Update current_line and
+	current_symtab when stepping continues in the middle of a new line.
+
 Fri Sep 27 10:25:30 1996  Fred Fish  <fnf@cygnus.com>
 
 	* top.c (print_gdb_version): Rewrote to comply with new GNU coding
