@@ -1395,54 +1395,55 @@ remote_rdp_attach(args, from_tty)
   
 /* Define the target subroutine names */
 
-struct target_ops remote_rdp_ops =
+struct target_ops remote_rdp_ops ;
+
+static void init_remote_rdp_ops(void)
 {
-  "rdp",			/* to_shortname */
-  /* to_longname */
-  "Remote Target using the RDProtocol",
-  /* to_doc */
-  "Use a remote ARM system which uses the ARM Remote Debugging Protocol",
-  remote_rdp_open,		/* to_open */
-  remote_rdp_close,		/* to_close */
-  remote_rdp_attach,		/* to_attach */
-  NULL,				/* to_detach */
-  remote_rdp_resume,		/* to_resume */
-  remote_rdp_wait,		/* to_wait */
-  remote_rdp_fetch_register,	/* to_fetch_registers */
-  remote_rdp_store_register,	/* to_store_registers */
-  remote_rdp_prepare_to_store,	/* to_prepare_to_store */
-  remote_rdp_xfer_inferior_memory,	/* to_xfer_memory */
-  remote_rdp_files_info,	/* to_files_info */
-  remote_rdp_insert_breakpoint,	/* to_insert_breakpoint */
-  remote_rdp_remove_breakpoint,	/* to_remove_breakpoint */
-  NULL,				/* to_terminal_init */
-  NULL,				/* to_terminal_inferior */
-  NULL,				/* to_terminal_ours_for_output */
-  NULL,				/* to_terminal_ours */
-  NULL,				/* to_terminal_info */
-  remote_rdp_kill,		/* to_kill */
-  generic_load,			/* to_load */
-  NULL,				/* to_lookup_symbol */
-  remote_rdp_create_inferior,	/* to_create_inferior */
-  generic_mourn_inferior,	/* to_mourn_inferior */
-  remote_rdp_can_run,		/* to_can_run */
-  0,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  0,				/* to_stop */
-  process_stratum,		/* to_stratum */
-  NULL,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  NULL,				/* sections */
-  NULL,				/* sections_end */
-  OPS_MAGIC,			/* to_magic */
-};
+  remote_rdp_ops.to_shortname =   "rdp";
+  remote_rdp_ops.to_longname =   "Remote Target using the RDProtocol";
+  remote_rdp_ops.to_doc =   "Use a remote ARM system which uses the ARM Remote Debugging Protocol";
+  remote_rdp_ops.to_open =   remote_rdp_open;	
+  remote_rdp_ops.to_close =   remote_rdp_close;	
+  remote_rdp_ops.to_attach =   remote_rdp_attach;
+  remote_rdp_ops.to_detach =   NULL;		
+  remote_rdp_ops.to_resume =   remote_rdp_resume;
+  remote_rdp_ops.to_wait  =   remote_rdp_wait;	
+  remote_rdp_ops.to_fetch_registers  =   remote_rdp_fetch_register;
+  remote_rdp_ops.to_store_registers  =   remote_rdp_store_register;
+  remote_rdp_ops.to_prepare_to_store =   remote_rdp_prepare_to_store;
+  remote_rdp_ops.to_xfer_memory  =   remote_rdp_xfer_inferior_memory;
+  remote_rdp_ops.to_files_info  =   remote_rdp_files_info;
+  remote_rdp_ops.to_insert_breakpoint =   remote_rdp_insert_breakpoint;
+  remote_rdp_ops.to_remove_breakpoint =   remote_rdp_remove_breakpoint;
+  remote_rdp_ops.to_terminal_init  =   NULL;		
+  remote_rdp_ops.to_terminal_inferior =   NULL;		
+  remote_rdp_ops.to_terminal_ours_for_output =   NULL;
+  remote_rdp_ops.to_terminal_ours  =   NULL;	
+  remote_rdp_ops.to_terminal_info  =   NULL;	
+  remote_rdp_ops.to_kill  =   remote_rdp_kill;	
+  remote_rdp_ops.to_load  =   generic_load;	
+  remote_rdp_ops.to_lookup_symbol =   NULL;				
+  remote_rdp_ops.to_create_inferior =   remote_rdp_create_inferior;
+  remote_rdp_ops.to_mourn_inferior =   generic_mourn_inferior;
+  remote_rdp_ops.to_can_run  =   remote_rdp_can_run;
+  remote_rdp_ops.to_notice_signals =   0;	
+  remote_rdp_ops.to_thread_alive  =   0;	
+  remote_rdp_ops.to_stop  =   0;		
+  remote_rdp_ops.to_stratum =   process_stratum;
+  remote_rdp_ops.DONT_USE =   NULL;		
+  remote_rdp_ops.to_has_all_memory =   1;	
+  remote_rdp_ops.to_has_memory =   1;		
+  remote_rdp_ops.to_has_stack =   1;		
+  remote_rdp_ops.to_has_registers =   1;	
+  remote_rdp_ops.to_has_execution =   1;	
+  remote_rdp_ops.to_sections =   NULL;		
+  remote_rdp_ops.to_sections_end =   NULL;
+  remote_rdp_ops.to_magic =   OPS_MAGIC;
+}
 
 void
 _initialize_remote_rdp ()
 {
+  init_remote_rdp_ops() ;
   add_target (&remote_rdp_ops);
 }

@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "remote-utils.h"
 
+
 extern int sleep();
 
 /* External data declarations */
@@ -960,35 +961,56 @@ bug_clear_breakpoints ()
   return(0);
 }
 
-struct target_ops bug_ops =
-{
-  "bug", "Remote BUG monitor",
-  "Use the mvme187 board running the BUG monitor connected by a serial line.",
+struct target_ops bug_ops ;
 
-  bug_open, gr_close,
-  0, gr_detach, bug_resume, bug_wait,	/* attach */
-  bug_fetch_register, bug_store_register,
-  gr_prepare_to_store,
-  bug_xfer_memory,
-  gr_files_info,
-  bug_insert_breakpoint, bug_remove_breakpoint,	/* Breakpoints */
-  0, 0, 0, 0, 0,		/* Terminal handling */
-  gr_kill,			/* FIXME, kill */
-  bug_load,
-  0,				/* lookup_symbol */
-  gr_create_inferior,		/* create_inferior */
-  gr_mourn,			/* mourn_inferior FIXME */
-  0,				/* can_run */
-  0,				/* notice_signals */
-  process_stratum, 0,		/* next */
-  1, 1, 1, 1, 1,		/* all mem, mem, stack, regs, exec */
-  0, 0,				/* Section pointers */
-  OPS_MAGIC,			/* Always the last thing */
-};
+static void init_bug_ops(void)
+{
+  bug_ops.to_shortname =   "bug"; "Remote BUG monitor",
+				    bug_ops.to_longname =   "Use the mvme187 board running the BUG monitor connected by a serial line.";
+  bug_ops.to_doc =   " ";
+  bug_ops.to_open =   bug_open;
+  bug_ops.to_close =   gr_close;
+  bug_ops.to_attach =   0;
+  bug_ops.to_detach =   gr_detach;
+  bug_ops.to_resume =   bug_resume;
+  bug_ops.to_wait  =   bug_wait;
+  bug_ops.to_fetch_registers  =   bug_fetch_register;
+  bug_ops.to_store_registers  =   bug_store_register;
+  bug_ops.to_prepare_to_store =   gr_prepare_to_store;
+  bug_ops.to_xfer_memory  =   bug_xfer_memory;
+  bug_ops.to_files_info  =   gr_files_info;
+  bug_ops.to_insert_breakpoint =   bug_insert_breakpoint;
+  bug_ops.to_remove_breakpoint =   bug_remove_breakpoint;
+  bug_ops.to_terminal_init  =   0;
+  bug_ops.to_terminal_inferior =   0;
+  bug_ops.to_terminal_ours_for_output =   0;
+  bug_ops.to_terminal_ours  =   0;
+  bug_ops.to_terminal_info  =   0;		
+  bug_ops.to_kill  =   gr_kill;			
+  bug_ops.to_load  =   bug_load;
+  bug_ops.to_lookup_symbol =   0;			
+  bug_ops.to_create_inferior =   gr_create_inferior;	
+  bug_ops.to_mourn_inferior =   gr_mourn;		
+  bug_ops.to_can_run  =   0;				
+  bug_ops.to_notice_signals =   0;			
+  bug_ops.to_thread_alive  =  0 ;
+  bug_ops.to_stop  =   0;
+  bug_ops.to_stratum =   process_stratum ;
+  bug_ops.DONT_USE =   0;
+  bug_ops.to_has_all_memory =   1;
+  bug_ops.to_has_memory =   1;
+  bug_ops.to_has_stack =   1;	
+  bug_ops.to_has_registers =   0;
+  bug_ops.to_has_execution =   0;			
+  bug_ops.to_sections =   0 ;
+  bug_ops.to_sections_end = 0 ;
+  bug_ops.to_magic = OPS_MAGIC;			/* Always the last thing */
+} /* init_bug_ops */
 
 void
 _initialize_remote_bug ()
 {
+  init_bug_ops() ;
   add_target (&bug_ops);
 
   add_show_from_set

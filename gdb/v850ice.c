@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbthread.h"
 #endif
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <windows.h> 
 
 /* Prototypes for local functions */
 
@@ -72,6 +72,8 @@ static int v850ice_insert_breakpoint PARAMS ((CORE_ADDR, char *));
 static int v850ice_remove_breakpoint PARAMS ((CORE_ADDR, char *));
 
 static int ice_open = 0;
+
+static struct target_ops v850ice_ops ;	
 
 #ifndef EXPORT
 #define EXPORT __declspec(dllexport)
@@ -151,7 +153,6 @@ EXPORT long __stdcall GdbCallBack (void);
 #define StatHardBreak	10  /* hit hardware breakpoint */
 #define StatFailure	11  /* an error occured in the last run/single */
 
-extern struct target_ops v850ice_ops;	/* Forward decl */
 
 /*   "pir", "tkcw", "chcw", "adtre" */
 
@@ -501,51 +502,54 @@ v850ice_mourn ()
 
 /* Define the target subroutine names */
 
-struct target_ops v850ice_ops = {
-  "ice",			/* to_shortname */
-  "NEC V850 ICE interface",	/* to_longname */
-  "Debug a system controlled by a NEC 850 ICE.", /* to_doc */
-  v850ice_open,			/* to_open */
-  v850ice_close,		/* to_close */
-  NULL,				/* to_attach */
-  v850ice_detach,		/* to_detach */
-  v850ice_resume,		/* to_resume */
-  v850ice_wait,			/* to_wait */
-  v850ice_fetch_registers,	/* to_fetch_registers */
-  v850ice_store_registers,	/* to_store_registers */
-  v850ice_prepare_to_store,	/* to_prepare_to_store */
-  v850ice_xfer_memory,		/* to_xfer_memory */
-  v850ice_files_info,		/* to_files_info */
-  v850ice_insert_breakpoint,	/* to_insert_breakpoint */
-  v850ice_remove_breakpoint,	/* to_remove_breakpoint */
-  NULL,				/* to_terminal_init */
-  NULL,				/* to_terminal_inferior */
-  NULL,				/* to_terminal_ours_for_output */
-  NULL,				/* to_terminal_ours */
-  NULL,				/* to_terminal_info */
-  v850ice_kill,			/* to_kill */
-  generic_load,			/* to_load */
-  NULL,				/* to_lookup_symbol */
-  NULL,				/* to_create_inferior */
-  v850ice_mourn,		/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0,				/* to_notice_signals */
-  NULL,				/* to_thread_alive */
-  0,				/* to_stop */
-  process_stratum,		/* to_stratum */
-  NULL,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  NULL,				/* sections */
-  NULL,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+
+static void init_850ice_ops(void)
+{
+  v850ice_ops.to_shortname   =   "ice";		
+  v850ice_ops.to_longname    =   "NEC V850 ICE interface";
+  v850ice_ops.to_doc         =   "Debug a system controlled by a NEC 850 ICE.";
+  v850ice_ops.to_open        =   v850ice_open;		
+  v850ice_ops.to_close       =   v850ice_close;	
+  v850ice_ops.to_attach      =   NULL;		
+  v850ice_ops.to_detach      =   v850ice_detach;	
+  v850ice_ops.to_resume      =   v850ice_resume;	
+  v850ice_ops.to_wait        =   v850ice_wait;	
+  v850ice_ops.to_fetch_registers  =   v850ice_fetch_registers;
+  v850ice_ops.to_store_registers  =   v850ice_store_registers;
+  v850ice_ops.to_prepare_to_store =   v850ice_prepare_to_store;
+  v850ice_ops.to_xfer_memory =   v850ice_xfer_memory;	
+  v850ice_ops.to_files_info  =   v850ice_files_info;	
+  v850ice_ops.to_insert_breakpoint =   v850ice_insert_breakpoint;
+  v850ice_ops.to_remove_breakpoint =   v850ice_remove_breakpoint;
+  v850ice_ops.to_terminal_init    =   NULL;		
+  v850ice_ops.to_terminal_inferior =   NULL;		
+  v850ice_ops.to_terminal_ours_for_output =   NULL;	
+  v850ice_ops.to_terminal_ours   =   NULL;		
+  v850ice_ops.to_terminal_info   =   NULL;		
+  v850ice_ops.to_kill            =   v850ice_kill;		
+  v850ice_ops.to_load            =   generic_load;		
+  v850ice_ops.to_lookup_symbol   =   NULL;		
+  v850ice_ops.to_create_inferior =   NULL;		
+  v850ice_ops.to_mourn_inferior  =   v850ice_mourn;
+  v850ice_ops.to_can_run         =   0;		
+  v850ice_ops.to_notice_signals  =   0;		
+  v850ice_ops.to_thread_alive    =    NULL;	
+  v850ice_ops.to_stop            =   0;			
+  v850ice_ops.to_stratum         =   process_stratum;	
+  v850ice_ops.DONT_USE           =   NULL;		
+  v850ice_ops.to_has_all_memory  =   1;		
+  v850ice_ops.to_has_memory      =   1;		
+  v850ice_ops.to_has_stack       =   1;		
+  v850ice_ops.to_has_registers   =   1;		
+  v850ice_ops.to_has_execution   =   1;		
+  v850ice_ops.to_sections        =   NULL;		
+  v850ice_ops.to_sections_end    =   NULL;		
+  v850ice_ops.to_magic           =   OPS_MAGIC	;
+}
 
 void
 _initialize_v850ice ()
 {
+  init_850ice_ops() ;
   add_target (&v850ice_ops);
 }

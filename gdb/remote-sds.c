@@ -1121,50 +1121,51 @@ sds_remove_breakpoint (addr, contents_cache)
 
 /* Define the target operations vector. */
 
-static struct target_ops sds_ops =
+static struct target_ops sds_ops ;
+
+static void init_sds_ops(void)
 {
-  "sds",			/* to_shortname */
-  "Remote serial target with SDS protocol",	/* to_longname */
-  "Use a remote computer via a serial line, using the SDS protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
-  sds_open,			/* to_open */
-  sds_close,			/* to_close */
-  NULL,				/* to_attach */
-  sds_detach,			/* to_detach */
-  sds_resume,			/* to_resume */
-  sds_wait,			/* to_wait */
-  sds_fetch_registers,		/* to_fetch_registers */
-  sds_store_registers,		/* to_store_registers */
-  sds_prepare_to_store,		/* to_prepare_to_store */
-  sds_xfer_memory,		/* to_xfer_memory */
-  sds_files_info,		/* to_files_info */
-  sds_insert_breakpoint,	/* to_insert_breakpoint */
-  sds_remove_breakpoint,	/* to_remove_breakpoint */
-  NULL,				/* to_terminal_init */
-  NULL,				/* to_terminal_inferior */
-  NULL,				/* to_terminal_ours_for_output */
-  NULL,				/* to_terminal_ours */
-  NULL,				/* to_terminal_info */
-  sds_kill,			/* to_kill */
-  sds_load,			/* to_load */
-  NULL,				/* to_lookup_symbol */
-  sds_create_inferior,		/* to_create_inferior */
-  sds_mourn,			/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  0,				/* to_stop */
-  process_stratum,		/* to_stratum */
-  NULL,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  NULL,				/* sections */
-  NULL,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+  sds_ops.to_shortname =   "sds";
+  sds_ops.to_longname =   "Remote serial target with SDS protocol";
+  sds_ops.to_doc =   "Use a remote computer via a serial line; using the SDS protocol.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).", 
+    sds_ops.to_open =   sds_open;	
+  sds_ops.to_close =   sds_close;	
+  sds_ops.to_attach =   NULL;		
+  sds_ops.to_detach =   sds_detach;	
+  sds_ops.to_resume =   sds_resume;	
+  sds_ops.to_wait  =   sds_wait;	
+  sds_ops.to_fetch_registers  =   sds_fetch_registers;
+  sds_ops.to_store_registers  =   sds_store_registers;	
+  sds_ops.to_prepare_to_store =   sds_prepare_to_store;	
+  sds_ops.to_xfer_memory  =   sds_xfer_memory;	
+  sds_ops.to_files_info  =   sds_files_info;	
+  sds_ops.to_insert_breakpoint =   sds_insert_breakpoint;
+  sds_ops.to_remove_breakpoint =   sds_remove_breakpoint;
+  sds_ops.to_terminal_init  =   NULL;		
+  sds_ops.to_terminal_inferior =   NULL;	
+  sds_ops.to_terminal_ours_for_output =   NULL;	
+  sds_ops.to_terminal_ours  =   NULL;	
+  sds_ops.to_terminal_info  =   NULL;	
+  sds_ops.to_kill  =   sds_kill;	
+  sds_ops.to_load  =   sds_load;	
+  sds_ops.to_lookup_symbol =   NULL;			
+  sds_ops.to_create_inferior =   sds_create_inferior;
+  sds_ops.to_mourn_inferior =   sds_mourn;
+  sds_ops.to_can_run  =   0;		
+  sds_ops.to_notice_signals =   0;	
+  sds_ops.to_thread_alive  =   0;	
+  sds_ops.to_stop  =   0;		
+  sds_ops.to_stratum =   process_stratum;
+  sds_ops.DONT_USE =   NULL;		
+  sds_ops.to_has_all_memory =   1;
+  sds_ops.to_has_memory =   1;	
+  sds_ops.to_has_stack =   1;				/* to_has_stack */
+  sds_ops.to_has_registers =   1;  sds_ops.to_has_execution =   1;
+  sds_ops.to_sections =   NULL;	
+  sds_ops.to_sections_end =   NULL;
+  sds_ops.to_magic =   OPS_MAGIC ;
+}
 
 /* Put a command string, in args, out to the monitor and display the
    reply message.  */
@@ -1202,6 +1203,7 @@ sds_command (args, from_tty)
 void
 _initialize_remote_sds ()
 {
+  init_sds_ops() ;
   add_target (&sds_ops);
 
   add_show_from_set (add_set_cmd ("sdstimeout", no_class,

@@ -29,6 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	o - I can't get 19200 baud rate to work. 
    7/91 o - Freeze mode tracing can be done on a 29050.  */
 
+
+
 #include "defs.h"
 #include "gdb_string.h"
 #include "inferior.h"
@@ -41,6 +43,40 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "terminal.h"
 #include "target.h"
 #include "gdbcore.h"
+
+/* This processor is getting rusty but I am trying to keep it
+   up to date at least with data structure changes.
+   Activate this block to compile just this file.
+   */
+#define COMPILE_CHECK 0
+#if COMPILE_CHECK
+#define Q_REGNUM 0
+#define VAB_REGNUM 0
+#define CPS_REGNUM 0
+#define IPA_REGNUM 0
+#define IPB_REGNUM 0
+#define GR1_REGNUM 0
+#define LR0_REGNUM 0
+#define IPC_REGNUM 0
+#define CR_REGNUM 0
+#define BP_REGNUM 0
+#define FC_REGNUM 0
+#define INTE_REGNUM 0
+#define EXO_REGNUM 0
+#define GR96_REGNUM 0
+#define NPC_REGNUM
+#define FPE_REGNUM 0
+#define PC2_REGNUM 0
+#define FPS_REGNUM 0
+#define ALU_REGNUM 0
+#define LRU_REGNUM 0
+#define TERMINAL int
+#define RAW 1
+#define ANYP 1
+extern int a29k_freeze_mode ;
+extern int processor_type ;
+extern char * processor_name ;
+#endif
 
 /* External data declarations */
 extern int stop_soon_quietly;           /* for wait_for_inferior */
@@ -85,6 +121,7 @@ rawmode(desc, turnon)
 int	desc;
 int	turnon;
 {
+  
   TERMINAL sg;
 
   if (desc < 0)
@@ -511,6 +548,7 @@ the baud rate, and the name of the program to run on the remote system.");
   if (adapt_desc < 0)
     perror_with_name (dev_name);
   ioctl (adapt_desc, TIOCGETP, &sg);
+#if ! defined(COMPILE_CHECK) 
 #ifdef HAVE_TERMIO
   sg.c_cc[VMIN] = 0;		/* read with timeout.  */
   sg.c_cc[VTIME] = timeout * 10;
@@ -525,7 +563,7 @@ the baud rate, and the name of the program to run on the remote system.");
 
   ioctl (adapt_desc, TIOCSETP, &sg);
   adapt_stream = fdopen (adapt_desc, "r+");
-
+#endif /* compile_check */
   push_target (&adapt_ops);
 
 #ifndef HAVE_TERMIO
@@ -1325,34 +1363,55 @@ adapt_com (args, fromtty)
 
 /* Define the target subroutine names */
 
-struct target_ops adapt_ops = {
-	"adapt", "Remote AMD `Adapt' target",
-	"Remote debug an AMD 290*0 using an `Adapt' monitor via RS232",
-	adapt_open, adapt_close, 
-	adapt_attach, adapt_detach, adapt_resume, adapt_wait,
-	adapt_fetch_register, adapt_store_register,
-	adapt_prepare_to_store,
-	adapt_xfer_inferior_memory, 
-	adapt_files_info,
-	adapt_insert_breakpoint, adapt_remove_breakpoint, /* Breakpoints */
-	0, 0, 0, 0, 0,		/* Terminal handling */
-	adapt_kill, 		/* FIXME, kill */
-	adapt_load, 
-	0, 			/* lookup_symbol */
-	adapt_create_inferior, 	/* create_inferior */ 
-	adapt_mourn, 		/* mourn_inferior FIXME */
-	0, /* can_run */
-	0, /* notice_signals */
-	0,			/* to_stop */
-	process_stratum, 0, /* next */
-	1, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
-	0,0,		/* Section pointers */
-	OPS_MAGIC,		/* Always the last thing */
-};
+struct target_ops adapt_ops ;
+static void init_adapt_ops(void)
+{
+  adapt_ops.to_shortname = 	"adapt";
+  adapt_ops.to_longname = 	"Remote AMD `Adapt' target";
+  adapt_ops.to_doc = 	"Remote debug an AMD 290*0 using an `Adapt' monitor via RS232";
+  adapt_ops.to_open = 	adapt_open;
+  adapt_ops.to_close = 	adapt_close;
+  adapt_ops.to_attach = adapt_attach;
+  adapt_ops.to_detach = adapt_detach;
+  adapt_ops.to_resume = adapt_resume;
+  adapt_ops.to_wait  = 	adapt_wait;
+  adapt_ops.to_fetch_registers  = adapt_fetch_register;
+  adapt_ops.to_store_registers  = adapt_store_register;
+  adapt_ops.to_prepare_to_store = adapt_prepare_to_store;
+  adapt_ops.to_xfer_memory  = 	adapt_xfer_inferior_memory;
+  adapt_ops.to_files_info  = 	adapt_files_info;
+  adapt_ops.to_insert_breakpoint = adapt_insert_breakpoint;
+  adapt_ops.to_remove_breakpoint = adapt_remove_breakpoint; 
+  adapt_ops.to_terminal_init  = 	0;
+  adapt_ops.to_terminal_inferior = 	0;
+  adapt_ops.to_terminal_ours_for_output = 	0;
+  adapt_ops.to_terminal_ours  = 	0;
+  adapt_ops.to_terminal_info  = 	0;
+  adapt_ops.to_kill  = 	adapt_kill; 		
+  adapt_ops.to_load  = 	adapt_load;
+  adapt_ops.to_lookup_symbol = 	0; 		
+  adapt_ops.to_create_inferior =  adapt_create_inferior; 	
+  adapt_ops.to_mourn_inferior =   adapt_mourn; 		
+  adapt_ops.to_can_run  = 	0; 
+  adapt_ops.to_notice_signals = 	0;
+  adapt_ops.to_thread_alive  = 	0;
+  adapt_ops.to_stop  = 	0 ; /* process_stratum; */
+  adapt_ops.to_stratum = 	0; 
+  adapt_ops.DONT_USE = 	0 ;
+  adapt_ops.to_has_all_memory = 	1;
+  adapt_ops.to_has_memory = 	1;
+  adapt_ops.to_has_stack = 	1;
+  adapt_ops.to_has_registers = 	1;
+  adapt_ops.to_has_execution = 	0;
+  adapt_ops.to_sections = 	0;
+  adapt_ops.to_sections_end = 	0 ;
+  adapt_ops.to_magic = 	OPS_MAGIC; 
+} /* init_adapt_ops */
 
 void
 _initialize_remote_adapt ()
 {
+  init_adapt_ops() ;
   add_target (&adapt_ops);
   add_com ("adapt <command>", class_obscure, adapt_com,
  	"Send a command to the AMD Adapt remote monitor.");

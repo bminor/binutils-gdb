@@ -1320,33 +1320,50 @@ hms_open (name, from_tty)
 
 /* Define the target subroutine names */
 
-struct target_ops hms_ops =
+struct target_ops hms_ops ;
+static void init_hms_ops(void)
 {
-  "hms", "Remote HMS monitor",
-  "Use the H8 evaluation board running the HMS monitor connected\n\
-by a serial line.",
-
-  hms_open, hms_close,
-  0, hms_detach, hms_resume, hms_wait,	/* attach */
-  hms_fetch_register, hms_store_register,
-  hms_prepare_to_store,
-  hms_xfer_inferior_memory,
-  hms_files_info,
-  hms_insert_breakpoint, hms_remove_breakpoint,		/* Breakpoints */
-  0, 0, 0, 0, 0,		/* Terminal handling */
-  hms_kill,			/* FIXME, kill */
-  generic_load,
-  0,				/* lookup_symbol */
-  hms_create_inferior,		/* create_inferior */
-  hms_mourn,			/* mourn_inferior FIXME */
-  0,				/* can_run */
-  0,				/* notice_signals */
-  0,				/* to_thread_alive */
-  0,				/* to_stop */
-  process_stratum, 0,		/* next */
-  1, 1, 1, 1, 1,		/* all mem, mem, stack, regs, exec */
-  0, 0,				/* Section pointers */
-  OPS_MAGIC,			/* Always the last thing */
+  hms_ops.to_shortname =   "hms";
+  hms_ops.to_longname =   "Remote HMS monitor";
+  hms_ops.to_doc =   "Use the H8 evaluation board running the HMS monitor connected\n\
+by a serial line.";
+  hms_ops.to_open =   hms_open;
+  hms_ops.to_close =   hms_close;
+  hms_ops.to_attach =   0;
+  hms_ops.to_detach =   hms_detach;
+  hms_ops.to_resume =   hms_resume;
+  hms_ops.to_wait  =   hms_wait;
+  hms_ops.to_fetch_registers  =   hms_fetch_register;
+  hms_ops.to_store_registers  =   hms_store_register;
+  hms_ops.to_prepare_to_store =   hms_prepare_to_store;
+  hms_ops.to_xfer_memory  =   hms_xfer_inferior_memory;
+  hms_ops.to_files_info  =   hms_files_info;
+  hms_ops.to_insert_breakpoint =   hms_insert_breakpoint;
+  hms_ops.to_remove_breakpoint =   hms_remove_breakpoint;
+  hms_ops.to_terminal_init  =   0;
+  hms_ops.to_terminal_inferior =   0;
+  hms_ops.to_terminal_ours_for_output =   0;
+  hms_ops.to_terminal_ours  =   0;
+  hms_ops.to_terminal_info  =   0;
+  hms_ops.to_kill  =   hms_kill;	
+  hms_ops.to_load  =   generic_load;
+  hms_ops.to_lookup_symbol =   0;
+  hms_ops.to_create_inferior =   hms_create_inferior;
+  hms_ops.to_mourn_inferior =   hms_mourn;
+  hms_ops.to_can_run  =   0;
+  hms_ops.to_notice_signals =   0;
+  hms_ops.to_thread_alive  =   0;
+  hms_ops.to_stop  =   0;			
+  hms_ops.to_stratum =   process_stratum;
+  hms_ops.DONT_USE =   0;	
+  hms_ops.to_has_all_memory =   1;
+  hms_ops.to_has_memory =   1;
+  hms_ops.to_has_stack =   1;
+  hms_ops.to_has_registers =   1;
+  hms_ops.to_has_execution =   1;
+  hms_ops.to_sections =   0;
+  hms_ops.to_sections_end =   0;			
+  hms_ops.to_magic =   OPS_MAGIC;		
 };
 
 hms_quiet ()			/* FIXME - this routine can be removed after Dec '94 */
@@ -1435,6 +1452,7 @@ remove_commands ()
 void
 _initialize_remote_hms ()
 {
+  init_hms_ops() ;
   add_target (&hms_ops);
 
   add_com ("hms <command>", class_obscure, hms_com,

@@ -924,53 +924,57 @@ rdi_error_signal (err)
 
 /* Define the target operations structure.  */
 
-struct target_ops arm_rdi_ops = {
-  "rdi",			/* to_shortname */
-  "ARM RDI",			/* to_longname */
-  "Use a remote ARM-based computer, via the RDI library.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
-  arm_rdi_open,			/* to_open */
-  arm_rdi_close,		/* to_close */
-  NULL,				/* to_attach */
-  arm_rdi_detach,		/* to_detach */
-  arm_rdi_resume,		/* to_resume */
-  arm_rdi_wait,			/* to_wait */
-  arm_rdi_fetch_registers,	/* to_fetch_registers */
-  arm_rdi_store_registers,	/* to_store_registers */
-  arm_rdi_prepare_to_store,	/* to_prepare_to_store */
-  arm_rdi_xfer_memory,		/* to_xfer_memory */
-  arm_rdi_files_info,		/* to_files_info */
-  arm_rdi_insert_breakpoint,	/* to_insert_breakpoint */
-  arm_rdi_remove_breakpoint,	/* to_remove_breakpoint */
-  NULL,				/* to_terminal_init */
-  NULL,				/* to_terminal_inferior */
-  NULL,				/* to_terminal_ours_for_output */
-  NULL,				/* to_terminal_ours */
-  NULL,				/* to_terminal_info */
-  arm_rdi_kill,			/* to_kill */
-  generic_load,			/* to_load */
-  NULL,				/* to_lookup_symbol */
-  arm_rdi_create_inferior,	/* to_create_inferior */
-  arm_rdi_mourn_inferior,	/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  0,				/* to_stop */
-  process_stratum,		/* to_stratum */
-  NULL,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  NULL,				/* sections */
-  NULL,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+struct target_ops arm_rdi_ops ;
+
+static void init_rdi_ops(void)
+{
+  arm_rdi_ops.to_shortname =   "rdi";	
+  arm_rdi_ops.to_longname =   "ARM RDI";
+  arm_rdi_ops.to_doc =   "Use a remote ARM-based computer; via the RDI library.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya)." ; 
+  arm_rdi_ops.to_open =   arm_rdi_open;		
+  arm_rdi_ops.to_close =   arm_rdi_close;	
+  arm_rdi_ops.to_attach =   NULL;		
+  arm_rdi_ops.to_detach =   arm_rdi_detach;	
+  arm_rdi_ops.to_resume =   arm_rdi_resume;	
+  arm_rdi_ops.to_wait  =   arm_rdi_wait;	
+  arm_rdi_ops.to_fetch_registers  =   arm_rdi_fetch_registers;
+  arm_rdi_ops.to_store_registers  =   arm_rdi_store_registers;
+  arm_rdi_ops.to_prepare_to_store =   arm_rdi_prepare_to_store;
+  arm_rdi_ops.to_xfer_memory  =   arm_rdi_xfer_memory;
+  arm_rdi_ops.to_files_info  =   arm_rdi_files_info;
+  arm_rdi_ops.to_insert_breakpoint =   arm_rdi_insert_breakpoint;
+  arm_rdi_ops.to_remove_breakpoint =   arm_rdi_remove_breakpoint;	
+  arm_rdi_ops.to_terminal_init  =   NULL;		
+  arm_rdi_ops.to_terminal_inferior =   NULL;		
+  arm_rdi_ops.to_terminal_ours_for_output =   NULL;	
+  arm_rdi_ops.to_terminal_ours  =   NULL;		
+  arm_rdi_ops.to_terminal_info  =   NULL;		
+  arm_rdi_ops.to_kill  =   arm_rdi_kill;		
+  arm_rdi_ops.to_load  =   generic_load;		
+  arm_rdi_ops.to_lookup_symbol =   NULL;			
+  arm_rdi_ops.to_create_inferior =   arm_rdi_create_inferior;
+  arm_rdi_ops.to_mourn_inferior =   arm_rdi_mourn_inferior;
+  arm_rdi_ops.to_can_run  =   0;		
+  arm_rdi_ops.to_notice_signals =   0;		
+  arm_rdi_ops.to_thread_alive  =   0;		
+  arm_rdi_ops.to_stop  =   0;			
+  arm_rdi_ops.to_stratum =   process_stratum;
+  arm_rdi_ops.DONT_USE =   NULL;	
+  arm_rdi_ops.to_has_all_memory =   1;	
+  arm_rdi_ops.to_has_memory =   1;	
+  arm_rdi_ops.to_has_stack =   1;	
+  arm_rdi_ops.to_has_registers =   1;	
+  arm_rdi_ops.to_has_execution =   1;	
+  arm_rdi_ops.to_sections =   NULL;	
+  arm_rdi_ops.to_sections_end =   NULL;	
+  arm_rdi_ops.to_magic =   OPS_MAGIC ;	
+}
 
 void
 _initialize_remote_rdi ()
 {
+  init_rdi_ops() ;
   add_target (&arm_rdi_ops);
 }
 

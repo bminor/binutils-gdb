@@ -122,50 +122,52 @@ serial_t array_desc = NULL;
 extern char *tmp_mips_processor_type;
 extern int mips_set_processor_type();
 
-static struct target_ops array_ops = {
-  "array",			/* to_shortname */
-				/* to_longname */
-  "Debug using the standard GDB remote protocol for the Array Tech target.",
-				/* to_doc */
-  "Debug using the standard GDB remote protocol for the Array Tech target.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).",
-  array_open,			/* to_open */
-  array_close,			/* to_close */
-  NULL,				/* to_attach */
-  array_detach,			/* to_detach */
-  array_resume,			/* to_resume */
-  array_wait,			/* to_wait */
-  array_fetch_registers,	/* to_fetch_registers */
-  array_store_registers,	/* to_store_registers */
-  array_prepare_to_store,	/* to_prepare_to_store */
-  array_xfer_memory,		/* to_xfer_memory */
-  array_files_info,		/* to_files_info */
-  array_insert_breakpoint,	/* to_insert_breakpoint */
-  array_remove_breakpoint,	/* to_remove_breakpoint */
-  0,				/* to_terminal_init */
-  0,				/* to_terminal_inferior */
-  0,				/* to_terminal_ours_for_output */
-  0,				/* to_terminal_ours */
-  0,				/* to_terminal_info */
-  array_kill,			/* to_kill */
-  0,				/* to_load */
-  0,				/* to_lookup_symbol */
-  array_create_inferior,	/* to_create_inferior */
-  array_mourn_inferior,		/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0, 				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  0,                            /* to_stop */
-  process_stratum,		/* to_stratum */
-  0,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  0,				/* sections */
-  0,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
+static struct target_ops array_ops ;
+static void init_array_ops(void)
+{
+  array_ops.to_shortname =   "array";	
+  array_ops.to_longname = 		
+    "Debug using the standard GDB remote protocol for the Array Tech target.",
+    array_ops.to_doc = 			
+    "Debug using the standard GDB remote protocol for the Array Tech target.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya)." ;
+  array_ops.to_open =   array_open;	
+  array_ops.to_close =   array_close;	
+  array_ops.to_attach =   NULL;		
+  array_ops.to_detach =   array_detach;	
+  array_ops.to_resume =   array_resume;	
+  array_ops.to_wait  =   array_wait;	
+  array_ops.to_fetch_registers  =   array_fetch_registers;
+  array_ops.to_store_registers  =   array_store_registers;
+  array_ops.to_prepare_to_store =   array_prepare_to_store;
+  array_ops.to_xfer_memory  =   array_xfer_memory;		
+  array_ops.to_files_info  =   array_files_info;		
+  array_ops.to_insert_breakpoint =   array_insert_breakpoint;	
+  array_ops.to_remove_breakpoint =   array_remove_breakpoint;	
+  array_ops.to_terminal_init  =   0;				
+  array_ops.to_terminal_inferior =   0;				
+  array_ops.to_terminal_ours_for_output =   0;			
+  array_ops.to_terminal_ours  =   0;				
+  array_ops.to_terminal_info  =   0;				
+  array_ops.to_kill  =   array_kill;		
+  array_ops.to_load  =   0;			
+  array_ops.to_lookup_symbol =   0;		
+  array_ops.to_create_inferior =   array_create_inferior;	
+  array_ops.to_mourn_inferior =   array_mourn_inferior;		
+  array_ops.to_can_run  =   0;		
+  array_ops.to_notice_signals =   0; 	
+  array_ops.to_thread_alive  =   0;	
+  array_ops.to_stop  =   0;             
+  array_ops.to_stratum =   process_stratum;	
+  array_ops.DONT_USE =   0;			
+  array_ops.to_has_all_memory =   1;		
+  array_ops.to_has_memory =   1;		
+  array_ops.to_has_stack =   1;			
+  array_ops.to_has_registers =   1;		
+  array_ops.to_has_execution =   1;		
+  array_ops.to_sections =   0;			
+  array_ops.to_sections_end =   0;		
+  array_ops.to_magic =   OPS_MAGIC;		
 };
 
 /*
@@ -1462,5 +1464,6 @@ _initialize_remote_monitors ()
 void
 _initialize_array ()
 {
+  init_array_ops() ;
   add_target (&array_ops);
 }

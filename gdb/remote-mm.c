@@ -1585,36 +1585,58 @@ CORE_ADDR	*addr;
 
 /****************************************************************************/
 /* 
- *  Define the target subroutine names 
+ *  Define the target subroutine names
  */
-struct target_ops mm_ops = {
-        "minimon", "Remote AMD/Minimon target",
-	"Remote debug an AMD 290*0 using the MiniMon dbg core on the target",
-        mm_open, mm_close,
-        mm_attach, mm_detach, mm_resume, mm_wait,
-        mm_fetch_registers, mm_store_registers,
-        mm_prepare_to_store,
-        mm_xfer_inferior_memory,
-        mm_files_info,
-        mm_insert_breakpoint, mm_remove_breakpoint, /* Breakpoints */
-        0, 0, 0, 0, 0,          /* Terminal handling */
-        mm_kill,             	/* FIXME, kill */
-        mm_load, 
-        0,                      /* lookup_symbol */
-        mm_create_inferior,  /* create_inferior */
-        mm_mourn,            /* mourn_inferior FIXME */
-	0,			/* can_run */
-	0, /* notice_signals */
-	0,			/* to_stop */
-        process_stratum, 0, /* next */
-        1, 1, 1, 1, 1,  /* all mem, mem, stack, regs, exec */
-	0,0,		/* sections, sections_end */
-        OPS_MAGIC,              /* Always the last thing */
+struct target_ops mm_ops ;
+
+static void init_mm_ops(void)
+{
+  mm_ops.to_shortname =   "minimon";
+  mm_ops.to_longname =   "Remote AMD/Minimon target";
+  mm_ops.to_doc =   "Remote debug an AMD 290*0 using the MiniMon dbg core on the target";
+  mm_ops.to_open =   mm_open;
+  mm_ops.to_close =   mm_close;
+  mm_ops.to_attach =   mm_attach;
+  mm_ops.to_detach =   mm_detach;
+  mm_ops.to_resume =   mm_resume;
+  mm_ops.to_wait  =   mm_wait;
+  mm_ops.to_fetch_registers  =   mm_fetch_registers;
+  mm_ops.to_store_registers  =   mm_store_registers;
+  mm_ops.to_prepare_to_store =   mm_prepare_to_store;
+  mm_ops.to_xfer_memory  =   mm_xfer_inferior_memory;
+  mm_ops.to_files_info  =   mm_files_info;
+  mm_ops.to_insert_breakpoint =   mm_insert_breakpoint;
+  mm_ops.to_remove_breakpoint =   mm_remove_breakpoint;
+  mm_ops.to_terminal_init  =   0;
+  mm_ops.to_terminal_inferior =   0;
+  mm_ops.to_terminal_ours_for_output =   0;
+  mm_ops.to_terminal_ours  =   0;
+  mm_ops.to_terminal_info  =   0;        
+  mm_ops.to_kill  =   mm_kill;           
+  mm_ops.to_load  =   mm_load;
+  mm_ops.to_lookup_symbol =   0;           
+  mm_ops.to_create_inferior =   mm_create_inferior; 
+  mm_ops.to_mourn_inferior =   mm_mourn; 
+  mm_ops.to_can_run  =   0;	
+  mm_ops.to_notice_signals =   0;
+  mm_ops.to_thread_alive  =   0;
+  mm_ops.to_stop  =   0;		
+  mm_ops.to_stratum =   process_stratum;
+  mm_ops.DONT_USE =   0; 
+  mm_ops.to_has_all_memory =   1;
+  mm_ops.to_has_memory =   1;
+  mm_ops.to_has_stack =   1;
+  mm_ops.to_has_registers =   1;
+  mm_ops.to_has_execution =   1; 
+  mm_ops.to_sections =   0;
+  mm_ops.to_sections_end =   0;	
+  mm_ops.to_magic =   OPS_MAGIC;    
 };
 
 void
 _initialize_remote_mm()
 {
+  init_mm_ops() ;
   add_target (&mm_ops);
 }
 

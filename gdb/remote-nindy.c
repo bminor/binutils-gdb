@@ -766,42 +766,59 @@ nindy_before_main_loop ()
 
 /* Define the target subroutine names */
 
-struct target_ops nindy_ops = {
-	"nindy", "Remote serial target in i960 NINDY-specific protocol",
-	"Use a remote i960 system running NINDY connected by a serial line.\n\
+struct target_ops nindy_ops ;
+static void init_nindy_ops(void)
+{
+  nindy_ops.to_shortname =   "nindy"; "Remote serial target in i960 NINDY-specific protocol",
+					nindy_ops.to_longname =   "Use a remote i960 system running NINDY connected by a serial line.\n\
 Specify the name of the device the serial line is connected to.\n\
 The speed (baud rate), whether to use the old NINDY protocol,\n\
 and whether to send a break on startup, are controlled by options\n\
-specified when you started GDB.",
-	nindy_open, nindy_close,
-	0,
-	nindy_detach,
-	nindy_resume,
-	nindy_wait,
-	nindy_fetch_registers, nindy_store_registers,
-	nindy_prepare_to_store,
-	nindy_xfer_inferior_memory, nindy_files_info,
-	memory_insert_breakpoint,
-	memory_remove_breakpoint,
-	0, 0, 0, 0, 0,	/* Terminal crud */
-	nindy_kill,
-	nindy_load,
-	0, /* lookup_symbol */
-	nindy_create_inferior,
-	nindy_mourn_inferior,
-	0,		/* can_run */
-	0, /* notice_signals */
-	0,			/* to_thread_alive */
-	0,			/* to_stop */
-	process_stratum, 0, /* next */
-	1, 1, 1, 1, 1,	/* all mem, mem, stack, regs, exec */
-	0, 0,			/* Section pointers */
-	OPS_MAGIC,		/* Always the last thing */
-};
+specified when you started GDB." ;
+  nindy_ops.to_doc =   "";
+  nindy_ops.to_open =   nindy_open;
+  nindy_ops.to_close =   nindy_close;
+  nindy_ops.to_attach =   0;
+  nindy_ops.to_detach =   nindy_detach;
+  nindy_ops.to_resume =   nindy_resume;
+  nindy_ops.to_wait  =   nindy_wait;
+  nindy_ops.to_fetch_registers  =   nindy_fetch_registers;
+  nindy_ops.to_store_registers  =   nindy_store_registers;
+  nindy_ops.to_prepare_to_store =   nindy_prepare_to_store;
+  nindy_ops.to_xfer_memory  =   nindy_xfer_inferior_memory;
+  nindy_ops.to_files_info  =   nindy_files_info;
+  nindy_ops.to_insert_breakpoint =   memory_insert_breakpoint;
+  nindy_ops.to_remove_breakpoint =   memory_remove_breakpoint;
+  nindy_ops.to_terminal_init  =   0;
+  nindy_ops.to_terminal_inferior =   0;
+  nindy_ops.to_terminal_ours_for_output =   0;
+  nindy_ops.to_terminal_ours  =   0;
+  nindy_ops.to_terminal_info  =   0;	/* Terminal crud */
+  nindy_ops.to_kill  =   nindy_kill;
+  nindy_ops.to_load  =   nindy_load;
+  nindy_ops.to_lookup_symbol =   0; /* lookup_symbol */
+  nindy_ops.to_create_inferior =   nindy_create_inferior;
+  nindy_ops.to_mourn_inferior =   nindy_mourn_inferior;
+  nindy_ops.to_can_run  =   0;		/* can_run */
+  nindy_ops.to_notice_signals =   0; /* notice_signals */
+  nindy_ops.to_thread_alive  =   0;			/* to_thread_alive */
+  nindy_ops.to_stop  =   0;			/* to_stop */
+  nindy_ops.to_stratum =   process_stratum;
+  nindy_ops.DONT_USE =   0; /* next */
+  nindy_ops.to_has_all_memory =   1;
+  nindy_ops.to_has_memory =   1;
+  nindy_ops.to_has_stack =   1;
+  nindy_ops.to_has_registers =   1;
+  nindy_ops.to_has_execution =   1;	/* all mem, mem, stack, regs, exec */
+  nindy_ops.to_sections =   0;
+  nindy_ops.to_sections_end =   0;			/* Section pointers */
+  nindy_ops.to_magic =   OPS_MAGIC;		/* Always the last thing */
+}
 
 void
 _initialize_nindy ()
 {
+  init_nindy_ops() ;
   add_target (&nindy_ops);
   add_com ("reset", class_obscure, reset_command,
 	   "Send a 'break' to the remote target system.\n\

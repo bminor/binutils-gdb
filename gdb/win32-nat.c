@@ -886,54 +886,57 @@ child_close ()
   DEBUG_EVENTS (("gdb: child_close, inferior_pid=%d\n", inferior_pid));
 }
 
-struct target_ops child_ops =
+struct target_ops child_ops ;
+
+static void init_child_ops(void)
 {
-  "child",			/* to_shortname */
-  "Win32 child process",	/* to_longname */
-  "Win32 child process (started by the \"run\" command).",	/* to_doc */
-  child_open,			/* to_open */
-  child_close,			/* to_close */
-  child_attach,			/* to_attach */
-  child_detach,			/* to_detach */
-  child_resume,			/* to_resume */
-  child_wait,			/* to_wait */
-  child_fetch_inferior_registers,/* to_fetch_registers */
-  child_store_inferior_registers,/* to_store_registers */
-  child_prepare_to_store,	/* to_child_prepare_to_store */
-  child_xfer_memory,		/* to_xfer_memory */
-  child_files_info,		/* to_files_info */
-  memory_insert_breakpoint,	/* to_insert_breakpoint */
-  memory_remove_breakpoint,	/* to_remove_breakpoint */
-  terminal_init_inferior,	/* to_terminal_init */
-  terminal_inferior,		/* to_terminal_inferior */
-  terminal_ours_for_output,	/* to_terminal_ours_for_output */
-  terminal_ours,		/* to_terminal_ours */
-  child_terminal_info,		/* to_terminal_info */
-  child_kill_inferior,		/* to_kill */
-  0,				/* to_load */
-  0,				/* to_lookup_symbol */
-  child_create_inferior,	/* to_create_inferior */
-  child_mourn_inferior,		/* to_mourn_inferior */
-  child_can_run,		/* to_can_run */
-  0,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  child_stop,			/* to_stop */
-  process_stratum,		/* to_stratum */
-  0,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  0,				/* to_sections */
-  0,				/* to_sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+  child_ops.to_shortname =   "child";			
+  child_ops.to_longname =   "Win32 child process";
+  child_ops.to_doc =   "Win32 child process (started by the \"run\" command).";	
+  child_ops.to_open =   child_open;		
+  child_ops.to_close =   child_close;		
+  child_ops.to_attach =   child_attach;		
+  child_ops.to_detach =   child_detach;		
+  child_ops.to_resume =   child_resume;		
+  child_ops.to_wait  =   child_wait;		
+  child_ops.to_fetch_registers  =   child_fetch_inferior_registers;
+  child_ops.to_store_registers  =   child_store_inferior_registers;
+  child_ops.to_prepare_to_store =   child_prepare_to_store;	
+  child_ops.to_xfer_memory  =   child_xfer_memory;		
+  child_ops.to_files_info  =   child_files_info;		
+  child_ops.to_insert_breakpoint =   memory_insert_breakpoint;
+  child_ops.to_remove_breakpoint =   memory_remove_breakpoint;
+  child_ops.to_terminal_init  =   terminal_init_inferior;
+  child_ops.to_terminal_inferior =   terminal_inferior;	
+  child_ops.to_terminal_ours_for_output =   terminal_ours_for_output;
+  child_ops.to_terminal_ours  =   terminal_ours;	
+  child_ops.to_terminal_info  =   child_terminal_info;	
+  child_ops.to_kill  =   child_kill_inferior;	
+  child_ops.to_load  =   0;			
+  child_ops.to_lookup_symbol =   0;				
+  child_ops.to_create_inferior =   child_create_inferior;
+  child_ops.to_mourn_inferior =   child_mourn_inferior;	
+  child_ops.to_can_run  =   child_can_run;	
+  child_ops.to_notice_signals =   0;		
+  child_ops.to_thread_alive  =   0;		
+  child_ops.to_stop  =   child_stop;		
+  child_ops.to_stratum =   process_stratum;
+  child_ops.DONT_USE =   0;		
+  child_ops.to_has_all_memory =   1;	
+  child_ops.to_has_memory =   1;	
+  child_ops.to_has_stack =   1;		
+  child_ops.to_has_registers =   1;	
+  child_ops.to_has_execution =   1;	
+  child_ops.to_sections =   0;		
+  child_ops.to_sections_end =   0;	
+  child_ops.to_magic =   OPS_MAGIC;
+}
 
 void
 _initialize_inftarg ()
 {
   struct cmd_list_element *c;
+  init_child_ops() ;
 
   add_show_from_set
     (add_set_cmd ("new-console", class_support, var_boolean,

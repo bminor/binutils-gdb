@@ -860,53 +860,56 @@ sparclite_download (filename, from_tty)
 
 /* Define the target subroutine names */
 
-static struct target_ops sparclite_ops =
+static struct target_ops sparclite_ops ;
+
+static void init_sparclite_ops(void)
 {
-  "sparclite",			/* to_shortname */
-  "SPARClite remote target",	/* to_longname */
-  "Use a remote SPARClite target board via a serial line, using a gdb-specific protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
-  sparclite_open,		/* to_open */
-  sparclite_close,		/* to_close */
-  0,				/* to_attach */
-  0,				/* to_detach */
-  0,				/* to_resume */
-  0,				/* to_wait */
-  0,				/* to_fetch_registers */
-  0,				/* to_store_registers */
-  0,				/* to_prepare_to_store */
-  0,				/* to_xfer_memory */
-  0,				/* to_files_info */
-  0,				/* to_insert_breakpoint */
-  0,				/* to_remove_breakpoint */
-  0,				/* to_terminal_init */
-  0,				/* to_terminal_inferior */
-  0,				/* to_terminal_ours_for_output */
-  0,				/* to_terminal_ours */
-  0,				/* to_terminal_info */
-  0,				/* to_kill */
-  sparclite_download,		/* to_load */
-  0,				/* to_lookup_symbol */
-  0,				/* to_create_inferior */
-  0,				/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  0,				/* to_stop */
-  download_stratum,		/* to_stratum */
-  0,				/* to_next */
-  0,				/* to_has_all_memory */
-  0,				/* to_has_memory */
-  0,				/* to_has_stack */
-  0,				/* to_has_registers */
-  0,				/* to_has_execution */
-  0,				/* sections */
-  0,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-  };
+  sparclite_ops.to_shortname =   "sparclite";		
+  sparclite_ops.to_longname =   "SPARClite remote target";
+  sparclite_ops.to_doc =   "Use a remote SPARClite target board via a serial line; using a gdb-specific protocol.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";  
+  sparclite_ops.to_open =   sparclite_open;	
+  sparclite_ops.to_close =   sparclite_close;	
+  sparclite_ops.to_attach =   0;	
+  sparclite_ops.to_detach =   0;	
+  sparclite_ops.to_resume =   0;	
+  sparclite_ops.to_wait  =   0;		
+  sparclite_ops.to_fetch_registers  =   0;
+  sparclite_ops.to_store_registers  =   0;
+  sparclite_ops.to_prepare_to_store =   0;
+  sparclite_ops.to_xfer_memory  =   0;		
+  sparclite_ops.to_files_info  =   0;		
+  sparclite_ops.to_insert_breakpoint =   0;	
+  sparclite_ops.to_remove_breakpoint =   0;	
+  sparclite_ops.to_terminal_init  =   0;	
+  sparclite_ops.to_terminal_inferior =   0;	
+  sparclite_ops.to_terminal_ours_for_output =   0;
+  sparclite_ops.to_terminal_ours  =   0;		
+  sparclite_ops.to_terminal_info  =   0;		
+  sparclite_ops.to_kill  =   0;			
+  sparclite_ops.to_load  =   sparclite_download;
+  sparclite_ops.to_lookup_symbol =   0;		
+  sparclite_ops.to_create_inferior =   0;	
+  sparclite_ops.to_mourn_inferior =   0;	
+  sparclite_ops.to_can_run  =   0;		
+  sparclite_ops.to_notice_signals =   0;	
+  sparclite_ops.to_thread_alive  =   0;		
+  sparclite_ops.to_stop  =   0;			
+  sparclite_ops.to_stratum =   download_stratum;
+  sparclite_ops.DONT_USE =   0;			
+  sparclite_ops.to_has_all_memory =   0;	
+  sparclite_ops.to_has_memory =   0;		
+  sparclite_ops.to_has_stack =   0;		
+  sparclite_ops.to_has_registers =   0;		
+  sparclite_ops.to_has_execution =   0;		
+  sparclite_ops.to_sections =   0;		
+  sparclite_ops.to_sections_end =   0;		
+  sparclite_ops.to_magic =   OPS_MAGIC	;	
+} /* init_sparclite_ops */
 
 void
 _initialize_sparcl_tdep ()
 {
+  init_sparclite_ops() ;
   add_target (&sparclite_ops);
 }

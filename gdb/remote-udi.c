@@ -1621,18 +1621,21 @@ service_HIF(msg)
    The RS/6000 doesn't like "extern" followed by "static"; SunOS
    /bin/cc doesn't like "static" twice.  */
 
-struct target_ops udi_ops = {
-        "udi",
-	"Remote UDI connected TIP",
-	"Remote debug an AMD 29k using UDI socket connection to TIP process.\n\
+struct target_ops udi_ops ;
+
+static void init_udi_ops(void)
+{
+  udi_ops.to_shortname =         "udi";
+  udi_ops.to_longname = 	"Remote UDI connected TIP";
+  udi_ops.to_doc = 	"Remote debug an AMD 29k using UDI socket connection to TIP process.\n\
 Arguments are\n\
 `configuration-id AF_INET hostname port-number'\n\
-    To connect via the network, where hostname and port-number specify the\n\
-    host and port where you can connect via UDI.\n\
-    configuration-id is unused.\n\
+To connect via the network, where hostname and port-number specify the\n\
+host and port where you can connect via UDI.\n\
+configuration-id is unused.\n\
 \n\
 `configuration-id AF_UNIX socket-name tip-program'\n\
-    To connect using a local connection to the \"tip.exe\" program which is\n\
+To connect using a local connection to the \"tip.exe\" program which is\n\
     supplied by AMD.  If socket-name specifies an AF_UNIX socket then the\n\
     tip program must already be started; connect to it using that socket.\n\
     If not, start up tip-program, which should be the name of the tip\n\
@@ -1642,48 +1645,49 @@ Arguments are\n\
 `configuration-id'\n\
     Look up the configuration in ./udi_soc or /etc/udi_soc, which\n\
     are files containing lines in the above formats.  configuration-id is\n\
-    used to pick which line of the file to use.",
-        udi_open,
-	udi_close,
-        udi_attach,
-	udi_detach,
-	udi_resume,
-	udi_wait,
-        udi_fetch_registers,
-	udi_store_registers,
-        udi_prepare_to_store,
-        udi_xfer_inferior_memory,
-        udi_files_info,
-        udi_insert_breakpoint,
-	udi_remove_breakpoint,
-        0,			/* termial_init */
-	0,			/* terminal_inferior */
-	0,			/* terminal_ours_for_output */
-	0,			/* terminal_ours */
-	0,			/* terminal_info */
-        udi_kill,             	/* FIXME, kill */
-        udi_load,		/* to_load */
-        0,                      /* lookup_symbol */
-        udi_create_inferior,
-        udi_mourn,		/* mourn_inferior FIXME */
-	0,			/* can_run */
-	0,			/* notice_signals */
-	0,			/* to_thread_alive */
-        0,			/* to_stop */
-        process_stratum,
-	0,			/* next */
-        1,			/* has_all_memory */
-	1,			/* has_memory */
-	1,			/* has_stack */
-	1,			/* has_registers */
-	1,			/* has_execution */
-	0,			/* sections */
-	0,			/* sections_end */
-	OPS_MAGIC,		/* Always the last thing */
+    used to pick which line of the file to use." ;
+  udi_ops.to_open =         udi_open;
+  udi_ops.to_close = 	udi_close;
+  udi_ops.to_attach =         udi_attach;
+  udi_ops.to_detach = 	udi_detach;
+  udi_ops.to_resume = 	udi_resume;
+  udi_ops.to_wait  = 	udi_wait;
+  udi_ops.to_fetch_registers  =         udi_fetch_registers;
+  udi_ops.to_store_registers  = 	udi_store_registers;
+  udi_ops.to_prepare_to_store =         udi_prepare_to_store;
+  udi_ops.to_xfer_memory  =         udi_xfer_inferior_memory;
+  udi_ops.to_files_info  =         udi_files_info;
+  udi_ops.to_insert_breakpoint =         udi_insert_breakpoint;
+  udi_ops.to_remove_breakpoint = 	udi_remove_breakpoint;
+  udi_ops.to_terminal_init  =         0;		
+  udi_ops.to_terminal_inferior = 	0;		
+  udi_ops.to_terminal_ours_for_output = 	0;
+  udi_ops.to_terminal_ours  = 	0;	
+  udi_ops.to_terminal_info  = 	0;	
+  udi_ops.to_kill  =         udi_kill;  
+  udi_ops.to_load  =         udi_load;	
+  udi_ops.to_lookup_symbol =         0; 
+  udi_ops.to_create_inferior =         udi_create_inferior;
+  udi_ops.to_mourn_inferior =         udi_mourn;
+  udi_ops.to_can_run  = 	0;	
+  udi_ops.to_notice_signals = 	0;	
+  udi_ops.to_thread_alive  = 	0;	
+  udi_ops.to_stop  =         0;		
+  udi_ops.to_stratum =         process_stratum;
+  udi_ops.DONT_USE = 	0;		
+  udi_ops.to_has_all_memory =         1;
+  udi_ops.to_has_memory = 	1;	
+  udi_ops.to_has_stack = 	1;	
+  udi_ops.to_has_registers = 	1;	
+  udi_ops.to_has_execution = 	1;	
+  udi_ops.to_sections = 	0;	
+  udi_ops.to_sections_end = 	0;	
+  udi_ops.to_magic = 	OPS_MAGIC;
 };
 
 void
 _initialize_remote_udi ()
 {
+  init_udi_ops() ;
   add_target (&udi_ops);
 }

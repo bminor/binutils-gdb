@@ -915,52 +915,55 @@ simulator_command (args, from_tty)
 
 /* Define the target subroutine names */
 
-struct target_ops gdbsim_ops = {
-  "sim",			/* to_shortname */
-  "simulator",			/* to_longname */
-  "Use the compiled-in simulator.",  /* to_doc */
-  gdbsim_open,			/* to_open */
-  gdbsim_close,			/* to_close */
-  NULL,				/* to_attach */
-  gdbsim_detach,		/* to_detach */
-  gdbsim_resume,		/* to_resume */
-  gdbsim_wait,			/* to_wait */
-  gdbsim_fetch_register,	/* to_fetch_registers */
-  gdbsim_store_register,	/* to_store_registers */
-  gdbsim_prepare_to_store,	/* to_prepare_to_store */
-  gdbsim_xfer_inferior_memory,	/* to_xfer_memory */
-  gdbsim_files_info,		/* to_files_info */
-  gdbsim_insert_breakpoint,	/* to_insert_breakpoint */
-  gdbsim_remove_breakpoint,	/* to_remove_breakpoint */
-  NULL,				/* to_terminal_init */
-  NULL,				/* to_terminal_inferior */
-  NULL,				/* to_terminal_ours_for_output */
-  NULL,				/* to_terminal_ours */
-  NULL,				/* to_terminal_info */
-  gdbsim_kill,			/* to_kill */
-  gdbsim_load,			/* to_load */
-  NULL,				/* to_lookup_symbol */
-  gdbsim_create_inferior,	/* to_create_inferior */ 
-  gdbsim_mourn_inferior,	/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0,				/* to_notice_signals */
-  0,				/* to_thread_alive */
-  gdbsim_stop,			/* to_stop */
-  process_stratum,		/* to_stratum */
-  NULL,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  NULL,				/* sections */
-  NULL,				/* sections_end */
-  OPS_MAGIC,			/* to_magic */
-};
+struct target_ops gdbsim_ops ;
+static void init_gdbsim_ops(void)
+{
+  gdbsim_ops.to_shortname =   "sim";		
+  gdbsim_ops.to_longname =   "simulator";		
+  gdbsim_ops.to_doc =   "Use the compiled-in simulator.";  
+  gdbsim_ops.to_open =   gdbsim_open;		
+  gdbsim_ops.to_close =   gdbsim_close;		
+  gdbsim_ops.to_attach =   NULL;		
+  gdbsim_ops.to_detach =   gdbsim_detach;	
+  gdbsim_ops.to_resume =   gdbsim_resume;	
+  gdbsim_ops.to_wait  =   gdbsim_wait;		
+  gdbsim_ops.to_fetch_registers  =   gdbsim_fetch_register;
+  gdbsim_ops.to_store_registers  =   gdbsim_store_register;
+  gdbsim_ops.to_prepare_to_store =   gdbsim_prepare_to_store;
+  gdbsim_ops.to_xfer_memory  =   gdbsim_xfer_inferior_memory;
+  gdbsim_ops.to_files_info  =   gdbsim_files_info;	
+  gdbsim_ops.to_insert_breakpoint =   gdbsim_insert_breakpoint;
+  gdbsim_ops.to_remove_breakpoint =   gdbsim_remove_breakpoint;
+  gdbsim_ops.to_terminal_init  =   NULL;		
+  gdbsim_ops.to_terminal_inferior =   NULL;		
+  gdbsim_ops.to_terminal_ours_for_output =   NULL;
+  gdbsim_ops.to_terminal_ours  =   NULL;
+  gdbsim_ops.to_terminal_info  =   NULL;
+  gdbsim_ops.to_kill  =   gdbsim_kill;	
+  gdbsim_ops.to_load  =   gdbsim_load;	
+  gdbsim_ops.to_lookup_symbol =   NULL;	
+  gdbsim_ops.to_create_inferior =   gdbsim_create_inferior;
+  gdbsim_ops.to_mourn_inferior =   gdbsim_mourn_inferior;
+  gdbsim_ops.to_can_run  =   0;			
+  gdbsim_ops.to_notice_signals =   0;		
+  gdbsim_ops.to_thread_alive  =   0;		
+  gdbsim_ops.to_stop  =   gdbsim_stop;		
+  gdbsim_ops.to_stratum =   process_stratum;	
+  gdbsim_ops.DONT_USE =   NULL;		
+  gdbsim_ops.to_has_all_memory =   1;	
+  gdbsim_ops.to_has_memory =   1;	
+  gdbsim_ops.to_has_stack =   1;	
+  gdbsim_ops.to_has_registers =   1;	
+  gdbsim_ops.to_has_execution =   1;	
+  gdbsim_ops.to_sections =   NULL;	
+  gdbsim_ops.to_sections_end =   NULL;	
+  gdbsim_ops.to_magic =   OPS_MAGIC;	
+}
 
 void
 _initialize_remote_sim ()
 {
+  init_gdbsim_ops() ;
   add_target (&gdbsim_ops);
 
   add_com ("sim <command>", class_obscure, simulator_command,

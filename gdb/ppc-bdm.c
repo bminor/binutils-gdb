@@ -306,54 +306,58 @@ bdm_ppc_store_registers (regno)
 
 /* Define the target subroutine names */
 
-struct target_ops bdm_ppc_ops = {
-  "ocd",			/* to_shortname */
-  "Remote target with On-Chip Debugging",	/* to_longname */
-  "Use a remote target with On-Chip Debugging.  To use a target box,\n\
+struct target_ops bdm_ppc_ops ;
+
+static void init_bdm_ppc_ops(void)
+{
+  bdm_ppc_ops.to_shortname =   "ocd";		
+  bdm_ppc_ops.to_longname =   "Remote target with On-Chip Debugging";
+  bdm_ppc_ops.to_doc =   "Use a remote target with On-Chip Debugging.  To use a target box;\n\
 specify the serial device it is connected to (e.g. /dev/ttya).  To use\n\
 a wiggler, specify wiggler and then the port it is connected to\n\
-(e.g. wiggler lpt1).",	/* to_doc */
-  bdm_ppc_open,			/* to_open */
-  ocd_close,		/* to_close */
-  NULL,				/* to_attach */
-  ocd_detach,		/* to_detach */
-  ocd_resume,		/* to_resume */
-  bdm_ppc_wait,			/* to_wait */
-  bdm_ppc_fetch_registers,	/* to_fetch_registers */
-  bdm_ppc_store_registers,	/* to_store_registers */
-  ocd_prepare_to_store,	/* to_prepare_to_store */
-  ocd_xfer_memory,		/* to_xfer_memory */
-  ocd_files_info,		/* to_files_info */
-  ocd_insert_breakpoint,	/* to_insert_breakpoint */
-  ocd_remove_breakpoint,	/* to_remove_breakpoint */
-  NULL,				/* to_terminal_init */
-  NULL,				/* to_terminal_inferior */
-  NULL,				/* to_terminal_ours_for_output */
-  NULL,				/* to_terminal_ours */
-  NULL,				/* to_terminal_info */
-  ocd_kill,			/* to_kill */
-  ocd_load,			/* to_load */
-  NULL,				/* to_lookup_symbol */
-  ocd_create_inferior,	/* to_create_inferior */
-  ocd_mourn,		/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0,				/* to_notice_signals */
-  ocd_thread_alive,		/* to_thread_alive */
-  ocd_stop,			/* to_stop */
-  process_stratum,		/* to_stratum */
-  NULL,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  NULL,				/* sections */
-  NULL,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+(e.g. wiggler lpt1)." ;	/* to_doc */
+  bdm_ppc_ops.to_open =   bdm_ppc_open;	
+  bdm_ppc_ops.to_close =   ocd_close;	
+  bdm_ppc_ops.to_attach =   NULL;	
+  bdm_ppc_ops.to_detach =   ocd_detach;	
+  bdm_ppc_ops.to_resume =   ocd_resume;	
+  bdm_ppc_ops.to_wait  =   bdm_ppc_wait;
+  bdm_ppc_ops.to_fetch_registers  =   bdm_ppc_fetch_registers;
+  bdm_ppc_ops.to_store_registers  =   bdm_ppc_store_registers;
+  bdm_ppc_ops.to_prepare_to_store =   ocd_prepare_to_store;	
+  bdm_ppc_ops.to_xfer_memory  =   ocd_xfer_memory;		
+  bdm_ppc_ops.to_files_info  =   ocd_files_info;		
+  bdm_ppc_ops.to_insert_breakpoint =   ocd_insert_breakpoint;	
+  bdm_ppc_ops.to_remove_breakpoint =   ocd_remove_breakpoint;	
+  bdm_ppc_ops.to_terminal_init  =   NULL;			
+  bdm_ppc_ops.to_terminal_inferior =   NULL;			
+  bdm_ppc_ops.to_terminal_ours_for_output =   NULL;		
+  bdm_ppc_ops.to_terminal_ours  =   NULL;			
+  bdm_ppc_ops.to_terminal_info  =   NULL;			
+  bdm_ppc_ops.to_kill  =   ocd_kill;		
+  bdm_ppc_ops.to_load  =   ocd_load;		
+  bdm_ppc_ops.to_lookup_symbol =   NULL;	
+  bdm_ppc_ops.to_create_inferior =   ocd_create_inferior;
+  bdm_ppc_ops.to_mourn_inferior =   ocd_mourn;	
+  bdm_ppc_ops.to_can_run  =   0;		
+  bdm_ppc_ops.to_notice_signals =   0;		
+  bdm_ppc_ops.to_thread_alive  =   ocd_thread_alive;
+  bdm_ppc_ops.to_stop  =   ocd_stop;			
+  bdm_ppc_ops.to_stratum =   process_stratum;		
+  bdm_ppc_ops.DONT_USE =   NULL;			
+  bdm_ppc_ops.to_has_all_memory =   1;			
+  bdm_ppc_ops.to_has_memory =   1;			
+  bdm_ppc_ops.to_has_stack =   1;			
+  bdm_ppc_ops.to_has_registers =   1;			
+  bdm_ppc_ops.to_has_execution =   1;			
+  bdm_ppc_ops.to_sections =   NULL;			
+  bdm_ppc_ops.to_sections_end =   NULL;			
+  bdm_ppc_ops.to_magic =   OPS_MAGIC ;			
+} /* init_bdm_ppc_ops */
 
 void
 _initialize_bdm_ppc ()
 {
+  init_bdm_ppc_ops() ;
   add_target (&bdm_ppc_ops);
 }

@@ -1,3 +1,60 @@
+Thu May 21 13:14:25 1998  John Metzler  <jmetzler@cygnus.com>
+	* gnu-nat.c (init_gnu_ops): Initialization of target ops by assignment.
+	(_initialize_gnu_nat):      Call new init
+	* mac-nat.c (init_child_ops):          Ditto
+	(_initialize_mac_nat):                 Ditto
+	* monitor.c (init_base_monitor_ops):   Ditto
+	(_initialize_remote_monitors) :        Ditto
+	* ppc-bdm.c (init_bdm_ppc_ops):        Ditto
+	(_initialize_bdm_ppc):                 Ditto
+	* remote-adapt.c ( init_adapt_ops):    Ditto
+	(_initialize_remote_adapt):            Ditto
+	* remote-array.c (init_array_ops) :    Ditto
+	(_initialize_array):                   Ditto
+	* remote-bug (init_bug_ops) :          Ditto
+	(_initialize_remote_bug):              Ditto
+	* remote-e7000.c (init_e7000_ops):     Ditto
+	(_initialize_remote_e7000) :           Ditto
+	* remote-eb.c (init_eb_ops) :          Ditto
+	(_initialize_remote_eb) :              Ditto
+	*remote-es.c (init_es1800_ops) :       Ditto
+	(init_es1800_child_ops) :              Ditto
+	(_initialize_es1800) ;                 Ditto
+	*remote-hms.c (init_hms_ops):          Ditto
+	(_initialize_remote_hms) :             Ditto
+	* remote-mm.c (init_mm_ops):           Ditto
+	(_initialize_remote_mm) :              Ditto
+	* remote-nindy.c (init_nindy_ops):     Ditto
+	(_initialize_nindy):                   Ditto
+	* remote_nrom.c (init_nrom_ops) :      Ditto
+	(_initialize_remote_nrom) :            Ditto
+	*remote-os9k (init_rombug_ops) :       Ditto
+	(_initialize_remote_os9k) :            Ditto
+	*remote-rdi.c (init_rdi_ops) :         Ditto
+	(_initialize_remote_rdi) :             Ditto
+	* remote-rdp.c (init_remote_rdp_ops) : Ditto
+	(_initialize_remote_rdp) :             Ditto
+	* remote-sds.c (init_sds_ops) :        Ditto
+	(_initialize_remote_sds) :             Ditto
+	* remote-sim.c (init_gdbsim_ops) :     Ditto
+	(_initialize_remote_sim) :             Ditto
+	* remote-st.c (init_st2000_ops):       Ditto
+	(_initialize_remote_st2000):           Ditto
+	*remote-udi.c (init_udi_ops) :         Ditto
+	(_initialize_remote_udi) :             Ditto
+	* remote-vx.c (init_vx_ops) :          Ditto
+	(init_vx_run_ops) :                    Ditto
+	(_initialize_vx) :                     Ditto
+	* remote.c (init_remote_ops):          Ditto
+	(init_extended_remote_ops):            Ditto
+	(_initialize_remote):                  Ditto
+	* sparcl-tdep.c (init_sparclite_ops):  Ditto
+	(_initialize_sparcl_tdep):             Ditto
+	* v850ice.c (init_850ice_ops):         Ditto
+	(_initialize_v850ice):                 Ditto
+	*win32-nat.c: (init_child_ops):        Ditto
+	(_initialize_inftarg):                 Ditto
+
 Wed May 20 15:29:41 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* mips/tm-tx39.h (MIPS_DEFAULT_FPU_TYPE): Defined as MIPS_FPU_NONE.

@@ -67,7 +67,6 @@
 #include "notify_S.h"
 #include "process_reply_S.h"
 #include "msg_reply_S.h"
-
 #include "exc_request_U.h"
 #include "msg_U.h"
 
@@ -2341,49 +2340,52 @@ gnu_xfer_memory (memaddr, myaddr, len, write, target)
 extern void gnu_store_registers (int regno);
 extern void gnu_fetch_registers (int regno);
 
-struct target_ops gnu_ops = {
-  "GNU",			/* to_shortname */
-  "GNU Hurd process",		/* to_longname */
-  "GNU Hurd process",		/* to_doc */
-  gnu_open,			/* to_open */
-  0,				/* to_close */
-  gnu_attach,			/* to_attach */
-  gnu_detach,	 		/* to_detach */
-  gnu_resume,			/* to_resume */
-  gnu_wait,			/* to_wait */
-  gnu_fetch_registers,		/* to_fetch_registers */
-  gnu_store_registers,		/* to_store_registers */
-  gnu_prepare_to_store,		/* to_prepare_to_store */
-  gnu_xfer_memory,		/* to_xfer_memory */
-  0,				/* to_files_info */
-  memory_insert_breakpoint,	/* to_insert_breakpoint */
-  memory_remove_breakpoint,	/* to_remove_breakpoint */
-  gnu_terminal_init_inferior,	/* to_terminal_init */
-  terminal_inferior, 		/* to_terminal_inferior */
-  terminal_ours_for_output,	/* to_terminal_ours_for_output */
-  terminal_ours,		/* to_terminal_ours */
-  child_terminal_info,		/* to_terminal_info */
-  gnu_kill_inferior,		/* to_kill */
-  0,				/* to_load */
-  0,				/* to_lookup_symbol */
+struct target_ops gnu_ops ;
 
-  gnu_create_inferior,		/* to_create_inferior */
-  gnu_mourn_inferior,		/* to_mourn_inferior */
-  gnu_can_run,			/* to_can_run */
-  0,				/* to_notice_signals */
-  gnu_thread_alive,		/* to_thread_alive */
-  gnu_stop,			/* to_stop */
-  process_stratum,		/* to_stratum */
-  0,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  0,				/* sections */
-  0,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+static void
+init_gnu_ops(void)
+{
+  gnu_ops.to_shortname =   "GNU";		/* to_shortname */
+  gnu_ops.to_longname =   "GNU Hurd process";	/* to_longname */
+  gnu_ops.to_doc =   "GNU Hurd process";	/* to_doc */
+  gnu_ops.to_open =   gnu_open;			/* to_open */
+  gnu_ops.to_close =   0;			/* to_close */
+  gnu_ops.to_attach =   gnu_attach;		/* to_attach */
+  gnu_ops.to_detach =   gnu_detach;	 	/* to_detach */
+  gnu_ops.to_resume =   gnu_resume;		/* to_resume */
+  gnu_ops.to_wait  =   gnu_wait;		/* to_wait */
+  gnu_ops.to_fetch_registers  =   gnu_fetch_registers;	/* to_fetch_registers */
+  gnu_ops.to_store_registers  =   gnu_store_registers;	/* to_store_registers */
+  gnu_ops.to_prepare_to_store =   gnu_prepare_to_store;	/* to_prepare_to_store */
+  gnu_ops.to_xfer_memory  =   gnu_xfer_memory;	/* to_xfer_memory */
+  gnu_ops.to_files_info  =   0;			/* to_files_info */
+  gnu_ops.to_insert_breakpoint =   memory_insert_breakpoint;
+  gnu_ops.to_remove_breakpoint =   memory_remove_breakpoint;
+  gnu_ops.to_terminal_init  =   gnu_terminal_init_inferior;
+  gnu_ops.to_terminal_inferior =   terminal_inferior;
+  gnu_ops.to_terminal_ours_for_output =   terminal_ours_for_output;
+  gnu_ops.to_terminal_ours  =   terminal_ours;
+  gnu_ops.to_terminal_info  =   child_terminal_info;	
+  gnu_ops.to_kill  =   gnu_kill_inferior;	/* to_kill */
+  gnu_ops.to_load  =   0;			/* to_load */
+  gnu_ops.to_lookup_symbol =   0;		/* to_lookup_symbol */
+  gnu_ops.to_create_inferior =   gnu_create_inferior;	/* to_create_inferior */
+  gnu_ops.to_mourn_inferior =   gnu_mourn_inferior;	/* to_mourn_inferior */
+  gnu_ops.to_can_run  =   gnu_can_run;		/* to_can_run */
+  gnu_ops.to_notice_signals =   0;		/* to_notice_signals */
+  gnu_ops.to_thread_alive  =   gnu_thread_alive;/* to_thread_alive */
+  gnu_ops.to_stop  =   gnu_stop;		/* to_stop */
+  gnu_ops.to_stratum =   process_stratum;	/* to_stratum */
+  gnu_ops.DONT_USE =   0;			/* to_next */
+  gnu_ops.to_has_all_memory =   1;		/* to_has_all_memory */
+  gnu_ops.to_has_memory =   1;			/* to_has_memory */
+  gnu_ops.to_has_stack =   1;			/* to_has_stack */
+  gnu_ops.to_has_registers =   1;		/* to_has_registers */
+  gnu_ops.to_has_execution =   1;		/* to_has_execution */
+  gnu_ops.to_sections =   0;			/* sections */
+  gnu_ops.to_sections_end =   0;		/* sections_end */
+  gnu_ops.to_magic =   OPS_MAGIC ;		/* to_magic */
+} /* init_gnu_ops */
 
 /* Return printable description of proc.  */
 char *proc_string (struct proc *proc)
@@ -3132,9 +3134,8 @@ void
 _initialize_gnu_nat ()
 {
   proc_server = getproc ();
-
+  init_gnu_ops() ;
   add_target (&gnu_ops);
-
   add_task_commands ();
   add_thread_commands ();
 
