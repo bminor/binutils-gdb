@@ -1,3 +1,14 @@
+Wed Jan  3 01:30:41 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.stabs/weird.exp: Use ${target_triplet} to determine
+	which sed script to run.  Expect failure for v_comb test
+	on PA targets too.
+	
+Sat Dec 30 16:09:04 1995  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* gdb.base/corefile.exp: Remove "i*86-*-linux" xfail for
+ 	"print func2::coremaker_local" and for "backtrace in corefile.exp"
+
 Sat Dec 30 12:59:12 1995  Fred Fish  <fnf@cygnus.com>
 
 	* lib/gdb.exp: Fix typo and rewrite skip_chill_tests.
