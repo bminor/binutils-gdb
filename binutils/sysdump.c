@@ -1,5 +1,5 @@
 /* Sysroff object format dumper.
-   Copyright 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -55,10 +55,10 @@ static void module (void);
 static void show_usage (FILE *, int);
 
 extern char *getCHARS (unsigned char *, int *, int, int);
-extern int fillup (char *);
+extern int fillup (unsigned char *);
 extern barray getBARRAY (unsigned char *, int *, int, int);
 extern int getINT (unsigned char *, int *, int, int);
-extern int getBITS (char *, int *, int, int);
+extern int getBITS (unsigned char *, int *, int, int);
 extern void sysroff_swap_tr_in (void);
 extern void sysroff_print_tr_out (void);
 extern int main (int, char **);
@@ -121,7 +121,7 @@ dh (unsigned char *ptr, int size)
 }
 
 int
-fillup (char *ptr)
+fillup (unsigned char *ptr)
 {
   int size;
   int sum;
@@ -198,7 +198,7 @@ getINT (unsigned char *ptr, int *idx, int size, int max)
 }
 
 int
-getBITS (char *ptr, int *idx, int size, int max)
+getBITS (unsigned char *ptr, int *idx, int size, int max)
 {
   int byte = *idx / 8;
   int bit = *idx % 8;
@@ -265,7 +265,7 @@ pbarray (barray *y)
 void
 sysroff_swap_tr_in (void)
 {
-  char raw[255];
+  unsigned char raw[255];
 
   memset (raw, 0, 255);
   fillup (raw);

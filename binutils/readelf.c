@@ -4027,7 +4027,8 @@ process_section_groups (FILE *file)
       if (section->sh_type == SHT_GROUP)
 	{
 	  char *name = SECTION_NAME (section);
-	  char *group_name, *start, *indices;
+	  char *group_name;
+	  unsigned char *start, *indices;
 	  unsigned int entry, j, size;
 	  Elf_Internal_Shdr *sec;
 	  Elf_Internal_Sym *sym;
@@ -7011,7 +7012,7 @@ dump_section (Elf_Internal_Shdr *section, FILE *file)
 
 
 static unsigned long int
-read_leb128 (unsigned char *data, int *length_return, int sign)
+read_leb128 (unsigned char *data, unsigned int *length_return, int sign)
 {
   unsigned long int result = 0;
   unsigned int num_read = 0;
@@ -7075,7 +7076,7 @@ static int
 process_extended_line_op (unsigned char *data, int is_stmt, int pointer_size)
 {
   unsigned char op_code;
-  int bytes_read;
+  unsigned int bytes_read;
   unsigned int len;
   unsigned char *name;
   unsigned long adr;
@@ -7445,7 +7446,7 @@ process_abbrev_section (unsigned char *start, unsigned char *end)
 
   while (start < end)
     {
-      int bytes_read;
+      unsigned int bytes_read;
       unsigned long entry;
       unsigned long tag;
       unsigned long attribute;
@@ -7620,7 +7621,7 @@ decode_location_expression (unsigned char * data,
 			    unsigned long cu_offset)
 {
   unsigned op;
-  int bytes_read;
+  unsigned int bytes_read;
   unsigned long uvalue;
   unsigned char *end = data + length;
   int need_frame_base = 0;
@@ -7990,7 +7991,7 @@ read_and_display_attr_value (unsigned long attribute,
 {
   unsigned long uvalue = 0;
   unsigned char *block_start = NULL;
-  int bytes_read;
+  unsigned int bytes_read;
 
   switch (form)
     {
@@ -8729,7 +8730,7 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
       level = 0;
       while (tags < start)
 	{
-	  int bytes_read;
+	  unsigned int bytes_read;
 	  unsigned long abbrev_number;
 	  abbrev_entry *entry;
 	  abbrev_attr *attr;
@@ -9031,7 +9032,7 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	  while (*data != 0)
 	    {
 	      unsigned char *name;
-	      int bytes_read;
+	      unsigned int bytes_read;
 
 	      printf (_("  %d\t"), ++state_machine_regs.last_file_entry);
 	      name = data;
@@ -9058,7 +9059,7 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	{
 	  unsigned char op_code;
 	  int adv;
-	  int bytes_read;
+	  unsigned int bytes_read;
 
 	  op_code = *data++;
 
@@ -9306,7 +9307,7 @@ display_debug_macinfo (Elf_Internal_Shdr *section,
 	case DW_MACINFO_define:
 	  lineno = read_leb128 (curr, & bytes_read, 0);
 	  curr += bytes_read;
-	  string = curr;
+	  string = (char *) curr;
 	  curr += strlen (string) + 1;
 	  printf (_(" DW_MACINFO_define - lineno : %d macro : %s\n"),
 		  lineno, string);
@@ -9315,7 +9316,7 @@ display_debug_macinfo (Elf_Internal_Shdr *section,
 	case DW_MACINFO_undef:
 	  lineno = read_leb128 (curr, & bytes_read, 0);
 	  curr += bytes_read;
-	  string = curr;
+	  string = (char *) curr;
 	  curr += strlen (string) + 1;
 	  printf (_(" DW_MACINFO_undef - lineno : %d macro : %s\n"),
 		  lineno, string);
@@ -9327,7 +9328,7 @@ display_debug_macinfo (Elf_Internal_Shdr *section,
 
 	    constant = read_leb128 (curr, & bytes_read, 0);
 	    curr += bytes_read;
-	    string = curr;
+	    string = (char *) curr;
 	    curr += strlen (string) + 1;
 	    printf (_(" DW_MACINFO_vendor_ext - constant : %d string : %s\n"),
 		    constant, string);
@@ -10006,7 +10007,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
   Frame_Chunk *remembered_state = 0;
   Frame_Chunk *rs;
   int is_eh = streq (SECTION_NAME (section), ".eh_frame");
-  int length_return;
+  unsigned int length_return;
   int max_regs = 0;
 
   printf (_("The section %s contains:\n"), SECTION_NAME (section));
@@ -10074,8 +10075,8 @@ display_debug_frames (Elf_Internal_Shdr *section,
 
 	  version = *start++;
 
-	  fc->augmentation = start;
-	  start = strchr (start, '\0') + 1;
+	  fc->augmentation = (char *) start;
+	  start = (unsigned char *) strchr ((char *) start, '\0') + 1;
 
 	  if (fc->augmentation[0] == 'z')
 	    {
@@ -10151,7 +10152,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	  if (augmentation_data_len)
 	    {
 	      unsigned char *p, *q;
-	      p = fc->augmentation + 1;
+	      p = (unsigned char *) fc->augmentation + 1;
 	      q = augmentation_data;
 
 	      while (1)

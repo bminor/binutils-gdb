@@ -989,20 +989,20 @@ sysroff.h: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info
 	./sysinfo$(EXEEXT_FOR_BUILD) -d <$(srcdir)/sysroff.info >sysroff.h
 
 sysinfo$(EXEEXT_FOR_BUILD): sysinfo.o syslex.o
-	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o 
+	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o
 
-syslex.o: syslex.c sysinfo.h
+syslex.o:
 	if [ -r syslex.c ]; then \
-	  $(CC_FOR_BUILD) -c -I. $(CFLAGS)  syslex.c  ; \
+	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS)  syslex.c  ; \
 	else \
-	  $(CC_FOR_BUILD) -c -I. -I$(srcdir) $(CFLAGS) $(srcdir)/syslex.c ;\
+	  $(CC_FOR_BUILD) -c -I. -I$(srcdir) $(AM_CFLAGS) $(CFLAGS) $(srcdir)/syslex.c ;\
 	fi
 
-sysinfo.o: sysinfo.c
+sysinfo.o:
 	if [ -r sysinfo.c ]; then \
-	  $(CC_FOR_BUILD) -c -I. $(CFLAGS)  sysinfo.c  ; \
+	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS)  sysinfo.c  ; \
 	else \
-	  $(CC_FOR_BUILD) -c -I. $(CFLAGS) $(srcdir)/sysinfo.c ; \
+	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS) $(srcdir)/sysinfo.c ; \
 	fi
 
 # We need these for parallel make.
@@ -1012,10 +1012,10 @@ nlmheader.h: nlmheader.c
 rcparse.h: rcparse.c
 sysinfo.h: sysinfo.c
 
-dlltool.o:dlltool.c
+dlltool.o:
 	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/dlltool.c
 
-rescoff.o:rescoff.c
+rescoff.o:
 	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/rescoff.c
 
 # coff/sym.h and coff/ecoff.h won't be found by the automatic dependency
@@ -1283,7 +1283,7 @@ arlex.o: arlex.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
   arparse.h
 sysroff.o: sysroff.c
 sysinfo.o: sysinfo.c
-syslex.o: syslex.c sysinfo.h
+syslex.o: syslex.c config.h sysinfo.h
 defparse.o: defparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
   $(INCDIR)/fopen-same.h dlltool.h

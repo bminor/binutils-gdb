@@ -1,3 +1,17 @@
+2005-02-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (syslex.o, sysinfo.o): Pass AM_CFLAGS to compiler.
+	(syslex.o, sysinfo.o, dlltool.o, rescoff.o): Remove duplicate
+	dependencies.  Run "make dep-am".
+	* nlmconv.c: Warning fixes.
+	* readelf.c: Likewise.
+	* srconv.c: Likewise.
+	* sysdump.c: Likewise.
+	* sysinfo.y: Likewise.
+	* syslex.l: Likewise.  Use yyleng instead of strlen, memcpy instead
+	of strcpy.
+	* Makefile.in: Regenerate.
+
 2005-02-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objcopy.c (parse_flags): Replace SEC_SHARED with

@@ -1,6 +1,6 @@
 /* srconv.c -- Sysroff conversion program
-   Copyright 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+   2005 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -46,11 +46,11 @@ static int get_member_id (int);
 static int get_ordinary_id (int);
 static char *section_translate (char *);
 static char *strip_suffix (char *);
-static void checksum (FILE *, char *, int, int);
-static void writeINT (int, char *, int *, int, FILE *);
-static void writeBITS (int, char *, int *, int);
-static void writeBARRAY (barray, char *, int *, int, FILE *);
-static void writeCHARS (char *, char *, int *, int, FILE *);
+static void checksum (FILE *, unsigned char *, int, int);
+static void writeINT (int, unsigned char *, int *, int, FILE *);
+static void writeBITS (int, unsigned char *, int *, int);
+static void writeBARRAY (barray, unsigned char *, int *, int, FILE *);
+static void writeCHARS (char *, unsigned char *, int *, int, FILE *);
 static void wr_tr (void);
 static void wr_un (struct coff_ofile *, struct coff_sfile *, int, int);
 static void wr_hd (struct coff_ofile *);
@@ -158,7 +158,7 @@ strip_suffix (char *name)
 
 /* IT LEN stuff CS */
 static void
-checksum (FILE *file, char *ptr, int size, int code)
+checksum (FILE *file, unsigned char *ptr, int size, int code)
 {
   int j;
   int last;
@@ -181,7 +181,7 @@ checksum (FILE *file, char *ptr, int size, int code)
 
 
 static void
-writeINT (int n, char *ptr, int *idx, int size, FILE *file)
+writeINT (int n, unsigned char *ptr, int *idx, int size, FILE *file)
 {
   int byte = *idx / 8;
 
@@ -222,7 +222,7 @@ writeINT (int n, char *ptr, int *idx, int size, FILE *file)
 }
 
 static void
-writeBITS (int val, char *ptr, int *idx, int size)
+writeBITS (int val, unsigned char *ptr, int *idx, int size)
 {
   int byte = *idx / 8;
   int bit = *idx % 8;
@@ -239,8 +239,8 @@ writeBITS (int val, char *ptr, int *idx, int size)
 }
 
 static void
-writeBARRAY (barray data, char *ptr, int *idx, int size ATTRIBUTE_UNUSED,
-	     FILE *file)
+writeBARRAY (barray data, unsigned char *ptr, int *idx,
+	     int size ATTRIBUTE_UNUSED, FILE *file)
 {
   int i;
 
@@ -250,7 +250,7 @@ writeBARRAY (barray data, char *ptr, int *idx, int size ATTRIBUTE_UNUSED,
 }
 
 static void
-writeCHARS (char *string, char *ptr, int *idx, int size, FILE *file)
+writeCHARS (char *string, unsigned char *ptr, int *idx, int size, FILE *file)
 {
   int i = *idx / 8;
 
