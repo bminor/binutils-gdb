@@ -477,6 +477,10 @@ md_begin ()
 	if (isalpha (c) || c == '_' || c == '.' || isdigit (c))
 	  identifier_chars[c] = c;
 
+#ifdef LEX_AT
+	identifier_chars['@'] = '@';
+#endif
+
 	if (c == ' ' || c == '\t')
 	  space_chars[c] = c;
       }
@@ -2158,7 +2162,7 @@ i386_operand (operand_string)
 	  save_input_line_pointer = input_line_pointer;
 	  input_line_pointer = displacement_string_start;
 	  END_STRING_AND_SAVE (displacement_string_end);
-
+#ifndef LEX_AT
 	  {
 	    /*
 	     * We can have operands of the form
@@ -2196,7 +2200,7 @@ i386_operand (operand_string)
 	      input_line_pointer = tmpbuf;
 	    }
 	  }
-
+#endif
 	  exp_seg = expression (exp);
 
 #ifdef BFD_ASSEMBLER
@@ -2793,17 +2797,6 @@ md_undefined_symbol (name)
 	    return GOT_symbol;
 	  }
   return 0;
-}
-
-/* Parse an operand that is machine-specific.
-   We just return without modifying the expression if we have nothing
-   to do.  */
-
-/* ARGSUSED */
-void
-md_operand (expressionP)
-     expressionS *expressionP;
-{
 }
 
 /* Round up a section size to the appropriate boundary.  */

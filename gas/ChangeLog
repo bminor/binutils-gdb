@@ -1,3 +1,13 @@
+Wed Jun 28 17:33:13 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* config/obj-coff.c (fixup_segment): PE doens't use
+	the strange common symbol format that other 386s formats
+	do.
+	* config/tc-i386.c (md_begin): If LEX_AT defined then
+	'@' is in the set of identifiers.
+	(i386_operand): If LEX_AT, then don't look for @goto stuff.
+	* config/te-pe.h: Define LEX_AT.
+
 Wed Jun 28 17:49:59 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* doc/as.texinfo (H8/500 Floating Point): Indicate that IEEE FP

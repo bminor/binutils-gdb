@@ -2983,7 +2983,7 @@ write_object_file ()
 
   H_SET_FILE_MAGIC_NUMBER (&headers, COFF_MAGIC);
 #ifndef OBJ_COFF_OMIT_TIMESTAMP
-  H_SET_TIME_STAMP (&headers, (long)time((long*)0));
+  H_SET_TIME_STAMP (&headers, (long)time((time_t *)0));
 #else
   H_SET_TIME_STAMP (&headers, 0);
 #endif
@@ -3674,7 +3674,7 @@ fixup_segment (segP, this_segment_type)
 		      continue;
 		    }		/* COBR */
 #endif /* TC_I960 */
-#if defined (TC_I386) || defined (TE_LYNX)
+#if (defined (TC_I386) || defined (TE_LYNX)) && !defined(TE_PE)
 		  /* 386 COFF uses a peculiar format in which the
 		     value of a common symbol is stored in the .text
 		     segment (I've checked this on SVR3.2 and SCO
