@@ -1,3 +1,13 @@
+start-sanitize-sky
+Wed Jun 10 15:56:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/t-int.c: New file to test sky hardware
+	interrupts.
+	* sim/sky/t-int-handler.s: New file for null interrupt
+	handler.
+	* sim/sky/t-int.brn: New file to build new test.
+
+end-sanitize-sky
 Wed Jun 10 10:53:20 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim/m32r/addx.cgs: Add another test.
