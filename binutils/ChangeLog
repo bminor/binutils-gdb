@@ -1,3 +1,12 @@
+2001-07-11  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* doc/binutils.texi: Use @command{name} for commands;
+	use @option{-opt} for options; use @table @env for list of options;
+	remove spaces arround [ | ] in synopsis.
+
+	* doc/Makefile.am (POD2MAN): Use 'GNU Development Tools' for the
+	center title.
+
 2001-07-31  Nick Clifton  <nickc@cambridge.redhat.com>
 
         * objcopy.c: Fix formatting.

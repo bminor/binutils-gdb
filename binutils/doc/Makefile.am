@@ -10,7 +10,8 @@ MANCONF = -Dman
 
 TEXI2POD = perl $(top_srcdir)/../etc/texi2pod.pl
 
-POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
+POD2MAN = pod2man --center="GNU Development Tools" \
+	 --release="binutils-$(VERSION)" --section=1
 
 # List of man pages generated from binutils.texi
 man_MANS = \

@@ -185,7 +185,7 @@ ar -M [ <mri-script ]
 
 @c man begin DESCRIPTION ar
 
-The @sc{gnu} @code{ar} program creates, modifies, and extracts from
+The @sc{gnu} @command{ar} program creates, modifies, and extracts from
 archives.  An @dfn{archive} is a single file holding a collection of
 other files in a structure that makes it possible to retrieve
 the original individual files (called @dfn{members} of the archive).
@@ -195,59 +195,59 @@ group are preserved in the archive, and can be restored on
 extraction.  
 
 @cindex name length
-@sc{gnu} @code{ar} can maintain archives whose members have names of any
-length; however, depending on how @code{ar} is configured on your
+@sc{gnu} @command{ar} can maintain archives whose members have names of any
+length; however, depending on how @command{ar} is configured on your
 system, a limit on member-name length may be imposed for compatibility
 with archive formats maintained with other tools.  If it exists, the
 limit is often 15 characters (typical of formats related to a.out) or 16
 characters (typical of formats related to coff).
 
 @cindex libraries
-@code{ar} is considered a binary utility because archives of this sort
+@command{ar} is considered a binary utility because archives of this sort
 are most often used as @dfn{libraries} holding commonly needed
 subroutines.
 
 @cindex symbol index
-@code{ar} creates an index to the symbols defined in relocatable
+@command{ar} creates an index to the symbols defined in relocatable
 object modules in the archive when you specify the modifier @samp{s}.
-Once created, this index is updated in the archive whenever @code{ar}
+Once created, this index is updated in the archive whenever @command{ar}
 makes a change to its contents (save for the @samp{q} update operation).
 An archive with such an index speeds up linking to the library, and
 allows routines in the library to call each other without regard to
 their placement in the archive.
 
 You may use @samp{nm -s} or @samp{nm --print-armap} to list this index
-table.  If an archive lacks the table, another form of @code{ar} called
-@code{ranlib} can be used to add just the table.
+table.  If an archive lacks the table, another form of @command{ar} called
+@command{ranlib} can be used to add just the table.
 
-@cindex compatibility, @code{ar}
-@cindex @code{ar} compatibility
-@sc{gnu} @code{ar} is designed to be compatible with two different
+@cindex compatibility, @command{ar}
+@cindex @command{ar} compatibility
+@sc{gnu} @command{ar} is designed to be compatible with two different
 facilities.  You can control its activity using command-line options,
-like the different varieties of @code{ar} on Unix systems; or, if you
-specify the single command-line option @samp{-M}, you can control it
+like the different varieties of @command{ar} on Unix systems; or, if you
+specify the single command-line option @option{-M}, you can control it
 with a script supplied via standard input, like the MRI ``librarian''
 program.
 
 @c man end
 
 @menu
-* ar cmdline::                  Controlling @code{ar} on the command line
-* ar scripts::                  Controlling @code{ar} with a script
+* ar cmdline::                  Controlling @command{ar} on the command line
+* ar scripts::                  Controlling @command{ar} with a script
 @end menu
 
 @page
 @node ar cmdline
-@section Controlling @code{ar} on the command line
+@section Controlling @command{ar} on the command line
 
 @smallexample
 @c man begin SYNOPSIS ar
-ar [-X32_64] [-]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
+ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod} [@var{relpos}] [@var{count}]] @var{archive} [@var{member}@dots{}]
 @c man end
 @end smallexample
 
-@cindex Unix compatibility, @code{ar}
-When you use @code{ar} in the Unix style, @code{ar} insists on at least two
+@cindex Unix compatibility, @command{ar}
+When you use @command{ar} in the Unix style, @command{ar} insists on at least two
 arguments to execute: one keyletter specifying the @emph{operation}
 (optionally accompanied by other keyletters specifying
 @emph{modifiers}), and the archive name to act on.
@@ -257,7 +257,7 @@ specifying particular files to operate on.
 
 @c man begin OPTIONS ar
 
-@sc{gnu} @code{ar} allows you to mix the operation code @var{p} and modifier
+@sc{gnu} @command{ar} allows you to mix the operation code @var{p} and modifier
 flags @var{mod} in any order, within the first command-line argument.
 
 If you wish, you may begin the first command-line argument with a
@@ -267,14 +267,14 @@ dash.
 The @var{p} keyletter specifies what operation to execute; it may be
 any of the following, but you must specify only one of them:
 
-@table @code
+@table @samp
 @item d
 @cindex deleting from archive
 @emph{Delete} modules from the archive.  Specify the names of modules to
 be deleted as @var{member}@dots{}; the archive is untouched if you
 specify no files to delete.
 
-If you specify the @samp{v} modifier, @code{ar} lists each module
+If you specify the @samp{v} modifier, @command{ar} lists each module
 as it is deleted.
 
 @item m
@@ -307,11 +307,11 @@ printed.
 The modifiers @samp{a}, @samp{b}, and @samp{i} do @emph{not} affect this
 operation; new members are always placed at the end of the archive.
 
-The modifier @samp{v} makes @code{ar} list each file as it is appended.
+The modifier @samp{v} makes @command{ar} list each file as it is appended.
 
 Since the point of this operation is speed, the archive's symbol table
 index is not updated, even if it already existed; you can use @samp{ar s} or
-@code{ranlib} explicitly to update the symbol table index.
+@command{ranlib} explicitly to update the symbol table index.
 
 However, too many different systems assume quick append rebuilds the
 index, so GNU ar implements @code{q} as a synonym for @code{r}.
@@ -323,7 +323,7 @@ Insert the files @var{member}@dots{} into @var{archive} (with
 previously existing members are deleted if their names match those being
 added.
 
-If one of the files named in @var{member}@dots{} does not exist, @code{ar}
+If one of the files named in @var{member}@dots{} does not exist, @command{ar}
 displays an error message, and leaves undisturbed any existing members
 of the archive matching that name.
 
@@ -360,7 +360,7 @@ listing---in our example, @samp{ar t b.a}.
 @cindex extract from archive
 @emph{Extract} members (named @var{member}) from the archive.  You can
 use the @samp{v} modifier with this operation, to request that
-@code{ar} list each name as it extracts it.
+@command{ar} list each name as it extracts it.
 
 If you do not specify a @var{member}, all files in the archive
 are extracted.
@@ -370,7 +370,7 @@ are extracted.
 A number of modifiers (@var{mod}) may immediately follow the @var{p}
 keyletter, to specify variations on an operation's behavior:
 
-@table @code
+@table @samp
 @item a
 @cindex relative placement in archive
 Add new files @emph{after} an existing member of the
@@ -392,9 +392,9 @@ issued unless you specify in advance that you expect to create it, by
 using this modifier.
 
 @item f
-Truncate names in the archive.  @sc{gnu} @code{ar} will normally permit file
+Truncate names in the archive.  @sc{gnu} @command{ar} will normally permit file
 names of any length.  This will cause it to create archives which are
-not compatible with the native @code{ar} program on some systems.  If
+not compatible with the native @command{ar} program on some systems.  If
 this is a concern, the @samp{f} modifier may be used to truncate file
 names when putting them in the archive.
 
@@ -422,9 +422,9 @@ are stamped with the time of extraction.
 
 @item P
 Use the full path name when matching names in the archive.  @sc{gnu}
-@code{ar} can not create an archive with a full path name (such archives
+@command{ar} can not create an archive with a full path name (such archives
 are not POSIX complaint), but other archive creators can.  This option
-will cause @sc{gnu} @code{ar} to match file names using a complete path
+will cause @sc{gnu} @command{ar} to match file names using a complete path
 name, which can be convenient when extracting a single file from an
 archive created by another tool.
 
@@ -459,14 +459,14 @@ operations display additional information, such as filenames processed,
 when the modifier @samp{v} is appended.
 
 @item V
-This modifier shows the version number of @code{ar}.
+This modifier shows the version number of @command{ar}.
 @end table
 
-@code{ar} ignores an initial option spelt @code{-X32_64}, for
+@command{ar} ignores an initial option spelt @samp{-X32_64}, for
 compatibility with AIX.  The behaviour produced by this option is the
-default for GNU @code{ar}.  @code{ar} does not support any of the other
-@code{-X} options; in particular, it does not support @code{-X32}
-which is the default for AIX @code{ar}.
+default for GNU @command{ar}.  @command{ar} does not support any of the other
+@samp{-X} options; in particular, it does not support @option{-X32}
+which is the default for AIX @command{ar}.
 
 @c man end
 
@@ -477,30 +477,30 @@ nm(1), ranlib(1), and the Info entries for @file{binutils}.
 @end ignore
 
 @node ar scripts
-@section Controlling @code{ar} with a script
+@section Controlling @command{ar} with a script
 
 @smallexample
 ar -M [ <@var{script} ]
 @end smallexample
 
-@cindex MRI compatibility, @code{ar}
-@cindex scripts, @code{ar}
-If you use the single command-line option @samp{-M} with @code{ar}, you
+@cindex MRI compatibility, @command{ar}
+@cindex scripts, @command{ar}
+If you use the single command-line option @samp{-M} with @command{ar}, you
 can control its operation with a rudimentary command language.  This
-form of @code{ar} operates interactively if standard input is coming
-directly from a terminal.  During interactive use, @code{ar} prompts for
+form of @command{ar} operates interactively if standard input is coming
+directly from a terminal.  During interactive use, @command{ar} prompts for
 input (the prompt is @samp{AR >}), and continues executing even after
 errors.  If you redirect standard input to a script file, no prompts are
-issued, and @code{ar} abandons execution (with a nonzero exit code)
+issued, and @command{ar} abandons execution (with a nonzero exit code)
 on any error.
 
-The @code{ar} command language is @emph{not} designed to be equivalent
+The @command{ar} command language is @emph{not} designed to be equivalent
 to the command-line options; in fact, it provides somewhat less control
 over archives.  The only purpose of the command language is to ease the
-transition to @sc{gnu} @code{ar} for developers who already have scripts
+transition to @sc{gnu} @command{ar} for developers who already have scripts
 written for the MRI ``librarian'' program.
 
-The syntax for the @code{ar} command language is straightforward:
+The syntax for the @command{ar} command language is straightforward:
 @itemize @bullet
 @item
 commands are recognized in upper or lower case; for example, @code{LIST}
@@ -519,7 +519,7 @@ comments are allowed; text after either of the characters @samp{*}
 or @samp{;} is ignored.
 
 @item
-Whenever you use a list of names as part of the argument to an @code{ar}
+Whenever you use a list of names as part of the argument to an @command{ar}
 command, you can separate the individual names with either commas or
 blanks.  Commas are shown in the explanations below, for clarity.
 
@@ -529,8 +529,8 @@ at the end of a line, the text on the following line is considered part
 of the current command.
 @end itemize
 
-Here are the commands you can use in @code{ar} scripts, or when using
-@code{ar} interactively.  Three of them have special significance:
+Here are the commands you can use in @command{ar} scripts, or when using
+@command{ar} interactively.  Three of them have special significance:
 
 @code{OPEN} or @code{CREATE} specify a @dfn{current archive}, which is
 a temporary file required for most of the other commands.
@@ -581,11 +581,11 @@ output is off, output is like that of @samp{ar -t @var{archive}
 @samp{ar -tv @var{archive} @var{module}@dots{}}.
 
 Output normally goes to the standard output stream; however, if you
-specify @var{outputfile} as a final argument, @code{ar} directs the
+specify @var{outputfile} as a final argument, @command{ar} directs the
 output to that file.
 
 @item END
-Exit from @code{ar}, with a @code{0} exit code to indicate successful
+Exit from @command{ar}, with a @code{0} exit code to indicate successful
 completion.  This command does not save the output file; if you have
 changed the current archive since the last @code{SAVE} command, those
 changes are lost.
@@ -607,7 +607,7 @@ Requires prior use of @code{OPEN} or @code{CREATE}.
 @item LIST
 Display full contents of the current archive, in ``verbose'' style
 regardless of the state of @code{VERBOSE}.  The effect is like @samp{ar
-tv @var{archive}}.  (This single command is a @sc{gnu} @code{ar}
+tv @var{archive}}.  (This single command is a @sc{gnu} @command{ar}
 enhancement, rather than present for MRI compatibility.)
 
 Requires prior use of @code{OPEN} or @code{CREATE}.
@@ -644,7 +644,7 @@ Requires prior use of @code{OPEN} or @code{CREATE}.
 @chapter ld
 @cindex linker
 @kindex ld
-The @sc{gnu} linker @code{ld} is now described in a separate manual.
+The @sc{gnu} linker @command{ld} is now described in a separate manual.
 @xref{Top,, Overview,, Using LD: the @sc{gnu} linker}.
 @end iftex
 
@@ -657,24 +657,24 @@ The @sc{gnu} linker @code{ld} is now described in a separate manual.
 
 @smallexample
 @c man begin SYNOPSIS nm
-nm [ -a | --debug-syms ]  [ -g | --extern-only ]
-   [ -B ]  [ -C | --demangle[=@var{style}] ] [ -D | --dynamic ]
-   [ -s | --print-armap ]  [ -A | -o | --print-file-name ]
-   [ -n | -v | --numeric-sort ]  [ -p | --no-sort ]
-   [ -r | --reverse-sort ]  [ --size-sort ] [ -u | --undefined-only ]
-   [ -t @var{radix} | --radix=@var{radix} ] [ -P | --portability ]
-   [ --target=@var{bfdname} ] [ -f @var{format} | --format=@var{format} ]
-   [ --defined-only ] [-l | --line-numbers ]  [ --no-demangle ]
-   [ -V | --version ]  [ -X 32_64 ]  [ --help ]  [ @var{objfile}@dots{} ]
+nm [@option{-a}|@option{--debug-syms}] [@option{-g}|@option{--extern-only}]
+   [@option{-B}] [@option{-C}|@option{--demangle}[=@var{style}]] [@option{-D}|@option{--dynamic}]
+   [@option{-s}|@option{--print-armap}] [@option{-A}|@option{-o}|@option{--print-file-name}]
+   [@option{-n}|@option{-v}|@option{--numeric-sort}] [@option{-p}|@option{--no-sort}]
+   [@option{-r}|@option{--reverse-sort}] [@option{--size-sort}] [@option{-u}|@option{--undefined-only}]
+   [@option{-t} @var{radix}|@option{--radix=}@var{radix}] [@option{-P}|@option{--portability}]
+   [@option{--target=}@var{bfdname}] [@option{-f}@var{format}|@option{--format=}@var{format}]
+   [@option{--defined-only}] [@option{-l}|@option{--line-numbers}] [@option{--no-demangle}]
+   [@option{-V}|@option{--version}] [@option{-X 32_64}] [@option{--help}]  [@var{objfile}@dots{}]
 @c man end
 @end smallexample
 
 @c man begin DESCRIPTION nm
-@sc{gnu} @code{nm} lists the symbols from object files @var{objfile}@dots{}.
-If no object files are listed as arguments, @code{nm} assumes the file
+@sc{gnu} @command{nm} lists the symbols from object files @var{objfile}@dots{}.
+If no object files are listed as arguments, @command{nm} assumes the file
 @file{a.out}.
 
-For each symbol, @code{nm} shows:
+For each symbol, @command{nm} shows:
 
 @itemize @bullet
 @item
@@ -749,9 +749,11 @@ the value of the weak symbol becomes zero with no error.
 @item -
 The symbol is a stabs symbol in an a.out object file.  In this case, the
 next values printed are the stabs other field, the stabs desc field, and
-the stab type.  Stabs symbols are used to hold debugging information;
-for more information, see @ref{Top,Stabs,Stabs Overview,stabs.info, The
+the stab type.  Stabs symbols are used to hold debugging information.
+@ifclear man
+For more information, see @ref{Top,Stabs,Stabs Overview,stabs.info, The
 ``stabs'' debug format}.
+@end ifclear
 
 @item ?
 The symbol type is unknown, or object file format specific.
@@ -767,7 +769,7 @@ The symbol name.
 The long and short forms of options, shown here as alternatives, are
 equivalent.
 
-@table @code
+@table @env
 @item -A
 @itemx -o
 @itemx --print-file-name 
@@ -785,9 +787,9 @@ Display all symbols, even debugger-only symbols; normally these are not
 listed.
 
 @item -B
-@cindex @code{nm} format
-@cindex @code{nm} compatibility
-The same as @samp{--format=bsd} (for compatibility with the MIPS @code{nm}).
+@cindex @command{nm} format
+@cindex @command{nm} compatibility
+The same as @option{--format=bsd} (for compatibility with the MIPS @command{nm}).
 
 @item -C
 @itemx --demangle[=@var{style}]
@@ -811,8 +813,8 @@ libraries.
 
 @item -f @var{format}
 @itemx --format=@var{format}
-@cindex @code{nm} format
-@cindex @code{nm} compatibility
+@cindex @command{nm} format
+@cindex @command{nm} compatibility
 Use the output format @var{format}, which can be @code{bsd},
 @code{sysv}, or @code{posix}.  The default is @code{bsd}.
 Only the first character of @var{format} is significant; it can be
@@ -853,7 +855,7 @@ Equivalent to @samp{-f posix}.
 @itemx --print-armap
 @cindex symbol index, listing
 When listing symbols from archive members, include the index: a mapping
-(stored in the archive by @code{ar} or @code{ranlib}) of which modules
+(stored in the archive by @command{ar} or @command{ranlib}) of which modules
 contain definitions for which names.
 
 @item -r
@@ -889,16 +891,16 @@ Display only defined symbols for each object file.
 
 @item -V
 @itemx --version
-Show the version number of @code{nm} and exit.
+Show the version number of @command{nm} and exit.
 
 @item -X
 This option is ignored for compatibility with the AIX version of
-@code{nm}.  It takes one parameter which must be the string
-@code{32_64}.  The default mode of AIX @code{nm} corresponds
-to @code{-X 32}, which is not supported by @sc{gnu} @code{nm}.
+@command{nm}.  It takes one parameter which must be the string
+@option{32_64}.  The default mode of AIX @command{nm} corresponds
+to @option{-X 32}, which is not supported by @sc{gnu} @command{nm}.
 
 @item --help
-Show a summary of the options to @code{nm} and exit.
+Show a summary of the options to @command{nm} and exit.
 @end table
 
 @c man end
@@ -916,94 +918,98 @@ ar(1), objdump(1), ranlib(1), and the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS objcopy
-objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
-        [ -I @var{bfdname} | --input-target=@var{bfdname} ]
-        [ -O @var{bfdname} | --output-target=@var{bfdname} ]
-        [ -B @var{bfdarch} | --binary-architecture=@var{bfdarch} ]
-        [ -S | --strip-all ]  [ -g | --strip-debug ]
-        [ -K @var{symbolname} | --keep-symbol=@var{symbolname} ]
-        [ -N @var{symbolname} | --strip-symbol=@var{symbolname} ]
-        [ -G @var{symbolname} | --keep-global-symbol=@var{symbolname}]
-        [ -L @var{symbolname} | --localize-symbol=@var{symbolname} ]
-        [ -W @var{symbolname} | --weaken-symbol=@var{symbolname} ]
-        [ -x | --discard-all ]  [ -X | --discard-locals ]
-        [ -b @var{byte} | --byte=@var{byte} ]
-        [ -i @var{interleave} | --interleave=@var{interleave} ]
-        [ -j @var{sectionname} | --only-section=@var{sectionname} ]
-        [ -R @var{sectionname} | --remove-section=@var{sectionname} ]
-        [ -p | --preserve-dates ] [ --debugging ]
-        [ --gap-fill=@var{val} ] [ --pad-to=@var{address} ]
-        [ --set-start=@var{val} ] [ --adjust-start=@var{incr} ]
-        [ --change-addresses=@var{incr} ]
-        [ --change-section-address @var{section}@{=,+,-@}@var{val} ]
-        [ --change-section-lma @var{section}@{=,+,-@}@var{val} ]
-        [ --change-section-vma @var{section}@{=,+,-@}@var{val} ]
-        [ --change-warnings ] [ --no-change-warnings ]
-        [ --set-section-flags @var{section}=@var{flags} ]
-        [ --add-section @var{sectionname}=@var{filename} ]
-        [ --rename-section @var{oldname}=@var{newname}[,@var{flags}] ]
-        [ --change-leading-char ] [ --remove-leading-char ]
-        [ --srec-len=@var{ival} ] [ --srec-forceS3 ]
-        [ --redefine-sym @var{old}=@var{new} ] [ --weaken ]
-        [ --keep-symbols=@var{filename} ]
-        [ --strip-symbols=@var{filename} ]
-        [ --keep-global-symbols=@var{filename} ]
-        [ --localize-symbols=@var{filename} ]
-        [ --weaken-symbols=@var{filename} ]
-        [ -v | --verbose ] [ -V | --version ]  [ --help ]
+objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
+        [@option{-I} @var{bfdname}|@option{--input-target=}@var{bfdname}]
+        [@option{-O} @var{bfdname}|@option{--output-target=}@var{bfdname}]
+        [@option{-B} @var{bfdarch}|@option{--binary-architecture=}@var{bfdarch}]
+        [@option{-S}|@option{--strip-all}] [@option{-g}|@option{--strip-debug}]
+        [@option{-K} @var{symbolname}|@option{--keep-symbol=}@var{symbolname}]
+        [@option{-N} @var{symbolname}|@option{--strip-symbol=}@var{symbolname}]
+        [@option{-G} @var{symbolname}|@option{--keep-global-symbol=}@var{symbolname}]
+        [@option{-L} @var{symbolname}|@option{--localize-symbol=}@var{symbolname}]
+        [@option{-W} @var{symbolname}|@option{--weaken-symbol=}@var{symbolname}]
+        [@option{-x}|@option{--discard-all}] [@option{-X}|@option{--discard-locals}]
+        [@option{-b} @var{byte}|@option{--byte=}@var{byte}]
+        [@option{-i} @var{interleave}|@option{--interleave=}@var{interleave}]
+        [@option{-j} @var{sectionname}|@option{--only-section=}@var{sectionname}]
+        [@option{-R} @var{sectionname}|@option{--remove-section=}@var{sectionname}]
+        [@option{-p}|@option{--preserve-dates}]
+        [@option{--debugging}]
+        [@option{--gap-fill=}@var{val}] [@option{--pad-to=}@var{address}]
+        [@option{--set-start=}@var{val}] [@option{--adjust-start=}@var{incr}]
+        [@option{--change-addresses=}@var{incr}]
+        [@option{--change-section-address} @var{section}@{=,+,-@}@var{val}]
+        [@option{--change-section-lma} @var{section}@{=,+,-@}@var{val}]
+        [@option{--change-section-vma} @var{section}@{=,+,-@}@var{val}]
+        [@option{--change-warnings}] [@option{--no-change-warnings}]
+        [@option{--set-section-flags} @var{section}=@var{flags}]
+        [@option{--add-section} @var{sectionname}=@var{filename}]
+        [@option{--rename-section} @var{oldname}=@var{newname}[,@var{flags}]]
+        [@option{--change-leading-char} ] [@option{--remove-leading-char}]
+        [@option{--srec-len=}@var{ival} ] [@option{--srec-forceS3}]
+        [@option{--redefine-sym} @var{old}=@var{new} ]
+        [@option{--weaken}]
+        [@option{--keep-symbols=}@var{filename}]
+        [@option{--strip-symbols=}@var{filename}]
+        [@option{--keep-global-symbols=}@var{filename}]
+        [@option{--localize-symbols=}@var{filename}]
+        [@option{--weaken-symbols=}@var{filename}]
+        [@option{-v}|@option{--verbose}]
+        [@option{-V}|@option{--version}]  
+        [@option{--help}]
         @var{infile} [@var{outfile}]
 @c man end
 @end smallexample
 
 @c man begin DESCRIPTION objcopy
-The @sc{gnu} @code{objcopy} utility copies the contents of an object
-file to another.  @code{objcopy} uses the @sc{gnu} @sc{bfd} Library to
+The @sc{gnu} @command{objcopy} utility copies the contents of an object
+file to another.  @command{objcopy} uses the @sc{gnu} @sc{bfd} Library to
 read and write the object files.  It can write the destination object
 file in a format different from that of the source object file.  The
-exact behavior of @code{objcopy} is controlled by command-line options.
-Note that @code{objcopy} should be able to copy a fully linked file
+exact behavior of @command{objcopy} is controlled by command-line options.
+Note that @command{objcopy} should be able to copy a fully linked file
 between any two formats. However, copying a relocatable object file
 between any two formats may not work as expected.
 
-@code{objcopy} creates temporary files to do its translations and
-deletes them afterward.  @code{objcopy} uses @sc{bfd} to do all its
+@command{objcopy} creates temporary files to do its translations and
+deletes them afterward.  @command{objcopy} uses @sc{bfd} to do all its
 translation work; it has access to all the formats described in @sc{bfd}
 and thus is able to recognize most formats without being told
 explicitly.  @xref{BFD,,BFD,ld.info,Using LD}.
 
-@code{objcopy} can be used to generate S-records by using an output
+@command{objcopy} can be used to generate S-records by using an output
 target of @samp{srec} (e.g., use @samp{-O srec}).
 
-@code{objcopy} can be used to generate a raw binary file by using an
-output target of @samp{binary} (e.g., use @samp{-O binary}).  When
-@code{objcopy} generates a raw binary file, it will essentially produce
+@command{objcopy} can be used to generate a raw binary file by using an
+output target of @samp{binary} (e.g., use @option{-O binary}).  When
+@command{objcopy} generates a raw binary file, it will essentially produce
 a memory dump of the contents of the input object file.  All symbols and
 relocation information will be discarded.  The memory dump will start at
 the load address of the lowest section copied into the output file.
 
 When generating an S-record or a raw binary file, it may be helpful to
-use @samp{-S} to remove sections containing debugging information.  In
-some cases @samp{-R} will be useful to remove sections which contain
+use @option{-S} to remove sections containing debugging information.  In
+some cases @option{-R} will be useful to remove sections which contain
 information that is not needed by the binary file.
 
-Note - @code{objcopy} is not able to change the endianness of its input
+Note - @command{objcopy} is not able to change the endianness of its input
 files.  If the input format has an endianness, (some formats do not),
-@code{objcopy} can only copy the inputs into file formats that have the
+@command{objcopy} can only copy the inputs into file formats that have the
 same endianness or which have no endianness (eg @samp{srec}).
 
 @c man end
 
 @c man begin OPTIONS objcopy
 
-@table @code
+@table @env
 @item @var{infile}
 @itemx @var{outfile}
 The input and output files, respectively.
-If you do not specify @var{outfile}, @code{objcopy} creates a
+If you do not specify @var{outfile}, @command{objcopy} creates a
 temporary file and destructively renames the result with
 the name of @var{infile}.
 
-@item -I @var{bfdname}	
+@item -I @var{bfdname}
 @itemx --input-target=@var{bfdname}
 Consider the source file's object format to be @var{bfdname}, rather than
 attempting to deduce it.  @xref{Target Selection}, for more information.
@@ -1092,7 +1098,7 @@ Do not copy compiler-generated local symbols.
 @itemx --byte=@var{byte}
 Keep only every @var{byte}th byte of the input file (header data is not
 affected).  @var{byte} can be in the range from 0 to @var{interleave}-1,
-where @var{interleave} is given by the @samp{-i} or @samp{--interleave}
+where @var{interleave} is given by the @option{-i} or @option{--interleave}
 option, or the default of 4.  This option is useful for creating files
 to program @sc{rom}.  It is typically used with an @code{srec} output
 target.
@@ -1100,9 +1106,9 @@ target.
 @item -i @var{interleave}
 @itemx --interleave=@var{interleave}
 Only copy one out of every @var{interleave} bytes.  Select which byte to
-copy with the @var{-b} or @samp{--byte} option.  The default is 4.
-@code{objcopy} ignores this option if you do not specify either @samp{-b} or
-@samp{--byte}.
+copy with the @option{-b} or @option{--byte} option.  The default is 4.
+@command{objcopy} ignores this option if you do not specify either @option{-b} or
+@option{--byte}.
 
 @item -p
 @itemx --preserve-dates
@@ -1123,7 +1129,7 @@ space created with @var{val}.
 @item --pad-to @var{address}
 Pad the output file up to the load address @var{address}.  This is
 done by increasing the size of the last section.  The extra space is
-filled in with the value specified by @samp{--gap-fill} (default zero).
+filled in with the value specified by @option{--gap-fill} (default zero).
 
 @item --set-start @var{val}
 Set the start address of the new file to @var{val}.  Not all object file
@@ -1151,9 +1157,9 @@ that they are loaded at a different address, the program may fail.
 Set or change both the VMA address and the LMA address of the named
 @var{section}.  If @samp{=} is used, the section address is set to
 @var{val}.  Otherwise, @var{val} is added to or subtracted from the
-section address.  See the comments under @samp{--change-addresses},
+section address.  See the comments under @option{--change-addresses},
 above. If @var{section} does not exist in the input file, a warning will
-be issued, unless @samp{--no-change-warnings} is used.
+be issued, unless @option{--no-change-warnings} is used.
 
 @item --change-section-lma @var{section}@{=,+,-@}@var{val}
 @cindex changing section LMA
@@ -1164,9 +1170,9 @@ is the address of the section at program run time, but on some systems,
 especially those where a program is held in ROM, the two can be
 different.  If @samp{=} is used, the section address is set to
 @var{val}.  Otherwise, @var{val} is added to or subtracted from the
-section address.  See the comments under @samp{--change-addresses},
+section address.  See the comments under @option{--change-addresses},
 above.  If @var{section} does not exist in the input file, a warning
-will be issued, unless @samp{--no-change-warnings} is used.  
+will be issued, unless @option{--no-change-warnings} is used.  
 
 @item --change-section-vma @var{section}@{=,+,-@}@var{val}
 @cindex changing section VMA
@@ -1178,20 +1184,20 @@ memory, but on some systems, especially those where a program is held in
 ROM, the two can be different.  If @samp{=} is used, the section address
 is set to @var{val}.  Otherwise, @var{val} is added to or subtracted
 from the section address.  See the comments under
-@samp{--change-addresses}, above.  If @var{section} does not exist in
+@option{--change-addresses}, above.  If @var{section} does not exist in
 the input file, a warning will be issued, unless
-@samp{--no-change-warnings} is used.   
+@option{--no-change-warnings} is used.   
 
 @item --change-warnings
 @itemx --adjust-warnings
-If @samp{--change-section-address} or @samp{--change-section-lma} or
-@samp{--change-section-vma} is used, and the named section does not
+If @option{--change-section-address} or @option{--change-section-lma} or
+@option{--change-section-vma} is used, and the named section does not
 exist, issue a warning.  This is the default. 
 
 @item --no-change-warnings
 @itemx --no-adjust-warnings
-Do not issue a warning if @samp{--change-section-address} or
-@samp{--adjust-section-lma} or @samp{--adjust-section-vma} is used, even
+Do not issue a warning if @option{--change-section-address} or
+@option{--adjust-section-lma} or @option{--adjust-section-vma} is used, even
 if the named section does not exist. 
 
 @item --set-section-flags @var{section}=@var{flags}
@@ -1232,7 +1238,7 @@ data you could use the following command line to achieve it:
 @item --change-leading-char
 Some object file formats use special characters at the start of
 symbols.  The most common such character is underscore, which compilers
-often add before every symbol.  This option tells @code{objcopy} to
+often add before every symbol.  This option tells @command{objcopy} to
 change the leading character of every symbol when it converts between
 object file formats.  If the object file formats use the same leading
 character, this option has no effect.  Otherwise, it will add a
@@ -1246,7 +1252,7 @@ most common symbol leading character is underscore.  This option will
 remove a leading underscore from all global symbols.  This can be useful
 if you want to link together objects of different file formats with
 different conventions for symbol names.  This is different from
-@code{--change-leading-char} because it always changes the symbol name
+@option{--change-leading-char} because it always changes the symbol name
 when appropriate, regardless of the object file format of the output
 file.
 
@@ -1267,42 +1273,42 @@ source, and there are name collisions.
 @item --weaken
 Change all global symbols in the file to be weak.  This can be useful
 when building an object which will be linked against other objects using
-the @code{-R} option to the linker.  This option is only effective when
+the @option{-R} option to the linker.  This option is only effective when
 using an object file format which supports weak symbols.
 
 @item --keep-symbols=@var{filename}
-Apply @samp{--keep-symbol} option to each symbol listed in the file
+Apply @option{--keep-symbol} option to each symbol listed in the file
 @var{filename}.  @var{filename} is simply a flat file, with one symbol
 name per line.  Line comments may be introduced by the hash character.
 This option may be given more than once.
 
 @item --strip-symbols=@var{filename}
-Apply @samp{--strip-symbol} option to each symbol listed in the file
+Apply @option{--strip-symbol} option to each symbol listed in the file
 @var{filename}.  @var{filename} is simply a flat file, with one symbol
 name per line.  Line comments may be introduced by the hash character.
 This option may be given more than once.
 
 @item --keep-global-symbols=@var{filename}
-Apply @samp{--keep-global-symbol} option to each symbol listed in the
+Apply @option{--keep-global-symbol} option to each symbol listed in the
 file @var{filename}.  @var{filename} is simply a flat file, with one
 symbol name per line.  Line comments may be introduced by the hash
 character.  This option may be given more than once.
 
 @item --localize-symbols=@var{filename}
-Apply @samp{--localize-symbol} option to each symbol listed in the file
+Apply @option{--localize-symbol} option to each symbol listed in the file
 @var{filename}.  @var{filename} is simply a flat file, with one symbol
 name per line.  Line comments may be introduced by the hash character.
 This option may be given more than once.
 
 @item --weaken-symbols=@var{filename}
-Apply @samp{--weaken-symbol} option to each symbol listed in the file
+Apply @option{--weaken-symbol} option to each symbol listed in the file
 @var{filename}.  @var{filename} is simply a flat file, with one symbol
 name per line.  Line comments may be introduced by the hash character.
 This option may be given more than once.
 
 @item -V
 @itemx --version
-Show the version number of @code{objcopy}.
+Show the version number of @command{objcopy}.
 
 @item -v
 @itemx --verbose
@@ -1310,7 +1316,7 @@ Verbose output: list all object files modified.  In the case of
 archives, @samp{objcopy -V} lists all members of the archive.
 
 @item --help
-Show a summary of the options to @code{objcopy}.
+Show a summary of the options to @command{objcopy}.
 @end table
 
 @c man end
@@ -1331,53 +1337,53 @@ ld(1), objdump(1), and the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS objdump
-objdump [ -a | --archive-headers ] 
-        [ -b @var{bfdname} | --target=@var{bfdname} ] 
-        [ -C | --demangle[=@var{style}] ]
-        [ -d | --disassemble ]
-        [ -D | --disassemble-all ]
-        [ -z | --disassemble-zeroes ]
-        [ -EB | -EL | --endian=@{big | little @} ]
-        [ -f | --file-headers ]
-        [ --file-start-context ]
-        [ -g | --debugging ]
-        [ -h | --section-headers | --headers ]
-        [ -i | --info ]
-        [ -j @var{section} | --section=@var{section} ]
-        [ -l | --line-numbers ]
-        [ -S | --source ]
-        [ -m @var{machine} | --architecture=@var{machine} ]
-        [ -M @var{options} | --disassembler-options=@var{options}]
-        [ -p | --private-headers ]
-        [ -r | --reloc ]
-        [ -R | --dynamic-reloc ]
-        [ -s | --full-contents ]
-        [ -G | --stabs ]
-        [ -t | --syms ]
-        [ -T | --dynamic-syms ]
-        [ -x | --all-headers ]
-        [ -w | --wide ]
-        [ --start-address=@var{address} ]
-        [ --stop-address=@var{address} ]
-        [ --prefix-addresses]
-        [ --[no-]show-raw-insn ]
-        [ --adjust-vma=@var{offset} ]
-        [ -V | --version ]
-        [ -H | --help ]
+objdump [@option{-a}|@option{--archive-headers}]
+        [@option{-b} @var{bfdname}|@option{--target=@var{bfdname}}]
+        [@option{-C}|@option{--demangle}[=@var{style}] ]
+        [@option{-d}|@option{--disassemble}]
+        [@option{-D}|@option{--disassemble-all}]
+        [@option{-z}|@option{--disassemble-zeroes}]
+        [@option{-EB}|@option{-EL}|@option{--endian=}@{big | little @}]
+        [@option{-f}|@option{--file-headers}]
+        [@option{--file-start-context}]
+        [@option{-g}|@option{--debugging}]
+        [@option{-h}|@option{--section-headers}|@option{--headers}]
+        [@option{-i}|@option{--info}]
+        [@option{-j} @var{section}|@option{--section=}@var{section}]
+        [@option{-l}|@option{--line-numbers}]
+        [@option{-S}|@option{--source}]
+        [@option{-m} @var{machine}|@option{--architecture=}@var{machine}]
+        [@option{-M} @var{options}|@option{--disassembler-options=}@var{options}]
+        [@option{-p}|@option{--private-headers}]
+        [@option{-r}|@option{--reloc}]
+        [@option{-R}|@option{--dynamic-reloc}]
+        [@option{-s}|@option{--full-contents}]
+        [@option{-G}|@option{--stabs}]
+        [@option{-t}|@option{--syms}]
+        [@option{-T}|@option{--dynamic-syms}]
+        [@option{-x}|@option{--all-headers}]
+        [@option{-w}|@option{--wide}]
+        [@option{--start-address=}@var{address}]
+        [@option{--stop-address=}@var{address}]
+        [@option{--prefix-addresses}]
+        [@option{--[no-]show-raw-insn}]
+        [@option{--adjust-vma=}@var{offset}]
+        [@option{-V}|@option{--version}]
+        [@option{-H}|@option{--help}]
         @var{objfile}@dots{}
 @c man end
 @end smallexample
 
 @c man begin DESCRIPTION objdump
 
-@code{objdump} displays information about one or more object files.
+@command{objdump} displays information about one or more object files.
 The options control what particular information to display.  This
 information is mostly useful to programmers who are working on the
 compilation tools, as opposed to programmers who just want their
 program to compile and work.
 
 @var{objfile}@dots{} are the object files to be examined.  When you
-specify archives, @code{objdump} shows information on each of the member
+specify archives, @command{objdump} shows information on each of the member
 object files.
 
 @c man end
@@ -1386,9 +1392,9 @@ object files.
 
 The long and short forms of options, shown here as alternatives, are
 equivalent.  At least one option from the list
-@samp{-a,-d,-D,-f,-g,-G,-h,-H,-p,-r,-R,-S,-t,-T,-V,-x} must be given. 
+@option{-a,-d,-D,-f,-g,-G,-h,-H,-p,-r,-R,-S,-t,-T,-V,-x} must be given. 
 
-@table @code
+@table @env
 @item -a
 @itemx --archive-header
 @cindex archive headers
@@ -1418,10 +1424,10 @@ For example,
 objdump -b oasys -m vax -h fu.o
 @end example
 @noindent
-displays summary information from the section headers (@samp{-h}) of
-@file{fu.o}, which is explicitly identified (@samp{-m}) as a VAX object
+displays summary information from the section headers (@option{-h}) of
+@file{fu.o}, which is explicitly identified (@option{-m}) as a VAX object
 file in the format produced by Oasys compilers.  You can list the
-formats available with the @samp{-i} option.
+formats available with the @option{-i} option.
 @xref{Target Selection}, for more information.
 
 @item -C
@@ -1450,7 +1456,7 @@ expected to contain instructions.
 
 @item -D
 @itemx --disassemble-all
-Like @samp{-d}, but disassemble the contents of all sections, not just
+Like @option{-d}, but disassemble the contents of all sections, not just
 those expected to contain instructions.
 
 @item --prefix-addresses
@@ -1480,7 +1486,7 @@ each of the @var{objfile} files.
 @item --file-start-context
 @cindex source code context
 Specify that when displaying interlisted source code/disassembly
-(assumes '-S') from a file that has not yet been displayed, extend the
+(assumes @option{-S}) from a file that has not yet been displayed, extend the
 context to the start of the file.
 
 @item -h
@@ -1491,23 +1497,23 @@ Display summary information from the section headers of the
 object file.
 
 File segments may be relocated to nonstandard addresses, for example by
-using the @samp{-Ttext}, @samp{-Tdata}, or @samp{-Tbss} options to
-@code{ld}.  However, some object file formats, such as a.out, do not
+using the @option{-Ttext}, @option{-Tdata}, or @option{-Tbss} options to
+@command{ld}.  However, some object file formats, such as a.out, do not
 store the starting address of the file segments.  In those situations,
-although @code{ld} relocates the sections correctly, using @samp{objdump
+although @command{ld} relocates the sections correctly, using @samp{objdump
 -h} to list the file section headers cannot show the correct addresses.
 Instead, it shows the usual addresses, which are implicit for the
 target.
 
 @item --help
-Print a summary of the options to @code{objdump} and exit.
+Print a summary of the options to @command{objdump} and exit.
 
 @item -i
 @itemx --info
 @cindex architectures available
 @cindex object formats available
 Display a list showing all architectures and object formats available
-for specification with @samp{-b} or @samp{-m}.
+for specification with @option{-b} or @option{-m}.
 
 @item -j @var{name}
 @itemx --section=@var{name}
@@ -1519,7 +1525,7 @@ Display information only for section @var{name}.
 @cindex source filenames for object files
 Label the display (using debugging information) with the filename and
 source line numbers corresponding to the object code or relocs shown.
-Only useful with @samp{-d}, @samp{-D}, or @samp{-r}.
+Only useful with @option{-d}, @option{-D}, or @option{-r}.
 
 @item -m @var{machine}
 @itemx --architecture=@var{machine}
@@ -1528,7 +1534,7 @@ Only useful with @samp{-d}, @samp{-D}, or @samp{-r}.
 Specify the architecture to use when disassembling object files.  This
 can be useful when disassembling object files which do not describe
 architecture information, such as S-records.  You can list the available
-architectures with the @samp{-i} option.
+architectures with the @option{-i} option.
 
 @item -M @var{options}
 @itemx --disassembler-options=@var{options}
@@ -1537,21 +1543,21 @@ some targets.
 
 If the target is an ARM architecture then this switch can be used to
 select which register name set is used during disassembler.  Specifying
-@samp{-M reg-name-std} (the default) will select the register names as
+@option{-M reg-name-std} (the default) will select the register names as
 used in ARM's instruction set documentation, but with register 13 called
 'sp', register 14 called 'lr' and register 15 called 'pc'.  Specifying
-@samp{-M reg-names-apcs} will select the name set used by the ARM
-Procedure Call Standard, whilst specifying @samp{-M reg-names-raw} will
+@option{-M reg-names-apcs} will select the name set used by the ARM
+Procedure Call Standard, whilst specifying @option{-M reg-names-raw} will
 just use @samp{r} followed by the register number.
 
 There are also two variants on the APCS register naming scheme enabled
-by @samp{-M reg-names-atpcs} and @samp{-M reg-names-special-atpcs} which
-use the ARM/Thumb Procedure Call Standard naming conventions.  (Eiuther
-with the normal register name sor the special register names).
+by @option{-M reg-names-atpcs} and @option{-M reg-names-special-atpcs} which
+use the ARM/Thumb Procedure Call Standard naming conventions.  (Either
+with the normal register name or the special register names).
 
 This option can also be used for ARM architectures to force the
 disassembler to interpret all instructions as THUMB instructions by
-using the switch @samp{--disassembler-options=force-thumb}.  This can be
+using the switch @option{--disassembler-options=force-thumb}.  This can be
 useful when attempting to disassemble thumb code produced by other
 compilers.
 
@@ -1564,8 +1570,8 @@ object file formats, no additional information is printed.
 @item -r
 @itemx --reloc
 @cindex relocation entries, in object file
-Print the relocation entries of the file.  If used with @samp{-d} or
-@samp{-D}, the relocations are printed interspersed with the
+Print the relocation entries of the file.  If used with @option{-d} or
+@option{-D}, the relocations are printed interspersed with the
 disassembly.
 
 @item -R
@@ -1586,16 +1592,16 @@ Display the full contents of any sections requested.
 @cindex source disassembly
 @cindex disassembly, with source
 Display source code intermixed with disassembly, if possible.  Implies
-@samp{-d}.
+@option{-d}.
 
 @item --show-raw-insn
 When disassembling instructions, print the instruction in hex as well as
 in symbolic form.  This is the default except when
-@code{--prefix-addresses} is used.
+@option{--prefix-addresses} is used.
 
 @item --no-show-raw-insn
 When disassembling instructions, do not print the instruction bytes.
-This is the default when @code{--prefix-addresses} is used.
+This is the default when @option{--prefix-addresses} is used.
 
 @item -G
 @item --stabs
@@ -1608,7 +1614,7 @@ contents of the .stab and .stab.index and .stab.excl sections from an
 ELF file.  This is only useful on systems (such as Solaris 2.0) in which
 @code{.stab} debugging symbol-table entries are carried in an ELF
 section.  In most other file formats, debugging symbol-table entries are
-interleaved with linkage symbols, and are visible in the @samp{--syms}
+interleaved with linkage symbols, and are visible in the @option{--syms}
 output.
 @ifclear man
 For more information on stabs symbols, see @ref{Top,Stabs,Stabs
@@ -1618,12 +1624,12 @@ Overview,stabs.info, The ``stabs'' debug format}.
 @item --start-address=@var{address}
 @cindex start-address
 Start displaying data at the specified address.  This affects the output
-of the @code{-d}, @code{-r} and @code{-s} options.
+of the @option{-d}, @option{-r} and @option{-s} options.
 
 @item --stop-address=@var{address}
 @cindex stop-address
 Stop displaying data at the specified address.  This affects the output
-of the @code{-d}, @code{-r} and @code{-s} options.
+of the @option{-d}, @option{-r} and @option{-s} options.
 
 @item -t
 @itemx --syms
@@ -1637,18 +1643,18 @@ This is similar to the information provided by the @samp{nm} program.
 Print the dynamic symbol table entries of the file.  This is only
 meaningful for dynamic objects, such as certain types of shared
 libraries.  This is similar to the information provided by the @samp{nm}
-program when given the @samp{-D} (@samp{--dynamic}) option.
+program when given the @option{-D} (@option{--dynamic}) option.
 
 @item --version
-Print the version number of @code{objdump} and exit.
+Print the version number of @command{objdump} and exit.
 
 @item -x
 @itemx --all-header
 @cindex all header information, object file
 @cindex header information, all
 Display all available header information, including the symbol table and
-relocation entries.  Using @samp{-x} is equivalent to specifying all of
-@samp{-a -f -h -r -t}.
+relocation entries.  Using @option{-x} is equivalent to specifying all of
+@option{-a -f -h -r -t}.
 
 @item -w
 @itemx --wide
@@ -1675,13 +1681,13 @@ nm(1), readelf(1), and the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS ranlib
-ranlib [-vV] @var{archive}
+ranlib [@option{-vV}] @var{archive}
 @c man end
 @end smallexample
 
 @c man begin DESCRIPTION ranlib
 
-@code{ranlib} generates an index to the contents of an archive and
+@command{ranlib} generates an index to the contents of an archive and
 stores it in the archive.  The index lists each symbol defined by a
 member of an archive that is a relocatable object file.  
 
@@ -1691,19 +1697,19 @@ An archive with such an index speeds up linking to the library and
 allows routines in the library to call each other without regard to
 their placement in the archive.
 
-The @sc{gnu} @code{ranlib} program is another form of @sc{gnu} @code{ar}; running
-@code{ranlib} is completely equivalent to executing @samp{ar -s}.
+The @sc{gnu} @command{ranlib} program is another form of @sc{gnu} @command{ar}; running
+@command{ranlib} is completely equivalent to executing @samp{ar -s}.
 @xref{ar}.
 
 @c man end
 
 @c man begin OPTIONS ranlib
 
-@table @code
+@table @env
 @item -v
 @itemx -V
 @itemx --version
-Show the version number of @code{ranlib}.
+Show the version number of @command{ranlib}.
 @end table
 
 @c man end
@@ -1724,16 +1730,16 @@ ar(1), nm(1), and the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS size
-size [ -A | -B | --format=@var{compatibility} ]
-     [ --help ]  [ -d | -o | -x | --radix=@var{number} ]
-     [ --target=@var{bfdname} ]  [ -V | --version ]  
-     [ @var{objfile}@dots{} ]
+size [@option{-A}|@option{-B}|@option{--format=}@var{compatibility}]
+     [@option{--help}] [@option{-d}|@option{-o}|@option{-x}|@option{--radix=}@var{number}]
+     [@option{--target=}@var{bfdname}] [@option{-V}|@option{--version}]  
+     [@var{objfile}@dots{}]
 @c man end
 @end smallexample
 
 @c man begin DESCRIPTION size
 
-The @sc{gnu} @code{size} utility lists the section sizes---and the total
+The @sc{gnu} @command{size} utility lists the section sizes---and the total
 size---for each of the object or archive files @var{objfile} in its
 argument list.  By default, one line of output is generated for each
 object file or each module in an archive.
@@ -1747,22 +1753,22 @@ If none are specified, the file @code{a.out} will be used.
 
 The command line options have the following meanings:
 
-@table @code
+@table @env
 @item -A
 @itemx -B
 @itemx --format=@var{compatibility}
-@cindex @code{size} display format
+@cindex @command{size} display format
 Using one of these options, you can choose whether the output from @sc{gnu}
-@code{size} resembles output from System V @code{size} (using @samp{-A},
-or @samp{--format=sysv}), or Berkeley @code{size} (using @samp{-B}, or
-@samp{--format=berkeley}).  The default is the one-line format similar to
+@command{size} resembles output from System V @command{size} (using @option{-A},
+or @option{--format=sysv}), or Berkeley @command{size} (using @option{-B}, or
+@option{--format=berkeley}).  The default is the one-line format similar to
 Berkeley's.  
 @c Bonus for doc-source readers: you can also say --format=strange (or
 @c anything else that starts with 's') for sysv, and --format=boring (or
 @c anything else that starts with 'b') for Berkeley.
 
 Here is an example of the Berkeley (default) format of output from
-@code{size}: 
+@command{size}: 
 @smallexample
 $ size --format=Berkeley ranlib size
 text    data    bss     dec     hex     filename
@@ -1798,26 +1804,26 @@ Show a summary of acceptable arguments and options.
 @itemx -o
 @itemx -x
 @itemx --radix=@var{number}
-@cindex @code{size} number format
+@cindex @command{size} number format
 @cindex radix for section sizes
 Using one of these options, you can control whether the size of each
-section is given in decimal (@samp{-d}, or @samp{--radix=10}); octal
-(@samp{-o}, or @samp{--radix=8}); or hexadecimal (@samp{-x}, or
-@samp{--radix=16}).  In @samp{--radix=@var{number}}, only the three
+section is given in decimal (@option{-d}, or @option{--radix=10}); octal
+(@option{-o}, or @option{--radix=8}); or hexadecimal (@option{-x}, or
+@option{--radix=16}).  In @option{--radix=@var{number}}, only the three
 values (8, 10, 16) are supported.  The total size is always given in two
-radices; decimal and hexadecimal for @samp{-d} or @samp{-x} output, or
-octal and hexadecimal if you're using @samp{-o}.
+radices; decimal and hexadecimal for @option{-d} or @option{-x} output, or
+octal and hexadecimal if you're using @option{-o}.
 
 @item --target=@var{bfdname}
 @cindex object code format
 Specify that the object-code format for @var{objfile} is
-@var{bfdname}.  This option may not be necessary; @code{size} can
+@var{bfdname}.  This option may not be necessary; @command{size} can
 automatically recognize many formats.
 @xref{Target Selection}, for more information.
 
 @item -V
 @itemx --version
-Display the version number of @code{size}.
+Display the version number of @command{size}.
 @end table
 
 @c man end
@@ -1839,30 +1845,30 @@ ar(1), objdump(1), readelf(1), and the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS strings
-strings [-afov] [-@var{min-len}] [-n @var{min-len}] [-t @var{radix}] [-]
-        [--all] [--print-file-name] [--bytes=@var{min-len}]
-        [--radix=@var{radix}] [--target=@var{bfdname}]
-        [--help] [--version] @var{file}@dots{}
+strings [@option{-afov}] [@option{-}@var{min-len}] [@option{-n} @var{min-len}] [@option{-t} @var{radix}] [@option{-}]
+        [@option{--all}] [@option{--print-file-name}] [@option{--bytes=}@var{min-len}]
+        [@option{--radix=}@var{radix}] [@option{--target=}@var{bfdname}]
+        [@option{--help}] [@option{--version}] @var{file}@dots{}
 @c man end
 @end smallexample
 
 @c man begin DESCRIPTION strings
 
-For each @var{file} given, @sc{gnu} @code{strings} prints the printable
+For each @var{file} given, @sc{gnu} @command{strings} prints the printable
 character sequences that are at least 4 characters long (or the number
 given with the options below) and are followed by an unprintable
 character.  By default, it only prints the strings from the initialized
 and loaded sections of object files; for other types of files, it prints
 the strings from the whole file.
 
-@code{strings} is mainly useful for determining the contents of non-text
+@command{strings} is mainly useful for determining the contents of non-text
 files.
 
 @c man end
 
 @c man begin OPTIONS strings
 
-@table @code
+@table @env
 @item -a
 @itemx --all
 @itemx -
@@ -1883,7 +1889,7 @@ Print sequences of characters that are at least @var{min-len} characters
 long, instead of the default 4.
 
 @item -o
-Like @samp{-t o}.  Some other versions of @code{strings} have @samp{-o}
+Like @samp{-t o}.  Some other versions of @command{strings} have @option{-o}
 act like @samp{-t d} instead.  Since we can not be compatible with both
 ways, we simply chose one.
 
@@ -1924,34 +1930,34 @@ and the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS strip
-strip [ -F @var{bfdname} | --target=@var{bfdname} ]
-      [ -I @var{bfdname} | --input-target=@var{bfdname} ]
-      [ -O @var{bfdname} | --output-target=@var{bfdname} ]
-      [ -s | --strip-all ] [ -S | -g | --strip-debug ]
-      [ -K @var{symbolname} | --keep-symbol=@var{symbolname} ]
-      [ -N @var{symbolname} | --strip-symbol=@var{symbolname} ]
-      [ -x | --discard-all ] [ -X | --discard-locals ]
-      [ -R @var{sectionname} | --remove-section=@var{sectionname} ]
-      [ -o @var{file} ] [ -p | --preserve-dates ]
-      [ -v | --verbose ]  [ -V | --version ]  [ --help ]
+strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname} ]
+      [@option{-I} @var{bfdname} |@option{--input-target=}@var{bfdname} ]
+      [@option{-O} @var{bfdname} |@option{--output-target=}@var{bfdname} ]
+      [@option{-s}|@option{--strip-all}] [@option{-S}|@option{-g}|@option{--strip-debug}]
+      [@option{-K} @var{symbolname} |@option{--keep-symbol=}@var{symbolname} ]
+      [@option{-N} @var{symbolname} |@option{--strip-symbol=}@var{symbolname} ]
+      [@option{-x}|@option{--discard-all} ] [@option{-X} |@option{--discard-locals}]
+      [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname} ]
+      [@option{-o} @var{file} ] [@option{-p}|@option{--preserve-dates}]
+      [@option{-v} |@option{--verbose}]  [@option{-V}|@option{--version}] [@option{--help}]
       @var{objfile}@dots{}
 @c man end
 @end smallexample
 
 @c man begin DESCRIPTION strip
 
-@sc{gnu} @code{strip} discards all symbols from object files
+@sc{gnu} @command{strip} discards all symbols from object files
 @var{objfile}.  The list of object files may include archives.
 At least one object file must be given.
 
-@code{strip} modifies the files named in its argument,
+@command{strip} modifies the files named in its argument,
 rather than writing modified copies under different names.
 
 @c man end
 
 @c man begin OPTIONS strip
 
-@table @code
+@table @env
 @item -F @var{bfdname}
 @itemx --target=@var{bfdname}
 Treat the original @var{objfile} as a file with the object
@@ -1959,7 +1965,7 @@ code format @var{bfdname}, and rewrite it in the same format.
 @xref{Target Selection}, for more information.
 
 @item --help
-Show a summary of the options to @code{strip} and exit.
+Show a summary of the options to @command{strip} and exit.
 
 @item -I @var{bfdname}	
 @itemx --input-target=@var{bfdname}
@@ -1999,7 +2005,7 @@ be given more than once.
 @itemx --strip-symbol=@var{symbolname}
 Remove symbol @var{symbolname} from the source file. This option may be
 given more than once, and may be combined with strip options other than
-@code{-K}.
+@option{-K}.
 
 @item -o @var{file}
 Put the stripped output in @var{file}, rather than replacing the
@@ -2021,7 +2027,7 @@ Remove compiler-generated local symbols.
 
 @item -V
 @itemx --version
-Show the version number for @code{strip}.
+Show the version number for @command{strip}.
 
 @item -v
 @itemx --verbose
@@ -2047,11 +2053,11 @@ the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS cxxfilt
-c++filt [ -_ | --strip-underscores ]
-        [ -j | --java ]
-	[ -n | --no-strip-underscores ]
-        [ -s @var{format} | --format=@var{format} ]
-        [ --help ]  [ --version ]  [ @var{symbol}@dots{} ]
+c++filt [@option{-_}|@option{--strip-underscores}]
+        [@option{-j}|@option{--java}]
+        [@option{-n}|@option{--no-strip-underscores}]
+        [@option{-s} @var{format}|@option{--format=}@var{format}]
+        [@option{--help}]  [@option{--version}]  [@var{symbol}@dots{}]
 @c man end
 @end smallexample
 
@@ -2062,9 +2068,9 @@ The C++ and Java languages provides function overloading, which means
 that you can write many functions with the same name (providing each
 takes parameters of different types).  All C++ and Java function names
 are encoded into a low-level assembly label (this process is known as
-@dfn{mangling}). The @code{c++filt}
+@dfn{mangling}). The @command{c++filt}
 @footnote{MS-DOS does not allow @kbd{+} characters in file names, so on
-MS-DOS this program is named @code{cxxfilt}.}
+MS-DOS this program is named @command{cxxfilt}.}
 program does the inverse mapping: it decodes (@dfn{demangles}) low-level
 names into user-level names so that the linker can keep these overloaded
 functions from clashing.
@@ -2074,13 +2080,13 @@ dollars, or periods) seen in the input is a potential label.  If the
 label decodes into a C++ name, the C++ name replaces the low-level
 name in the output.
 
-You can use @code{c++filt} to decipher individual symbols:
+You can use @command{c++filt} to decipher individual symbols:
 
 @example
 c++filt @var{symbol}
 @end example
 
-If no @var{symbol} arguments are given, @code{c++filt} reads symbol
+If no @var{symbol} arguments are given, @command{c++filt} reads symbol
 names from the standard input and writes the demangled names to the
 standard output.  All results are printed on the standard output.
 
@@ -2088,13 +2094,13 @@ standard output.  All results are printed on the standard output.
 
 @c man begin OPTIONS cxxfilt
 
-@table @code
+@table @env
 @item -_
 @itemx --strip-underscores
 On some systems, both the C and C++ compilers put an underscore in front
 of every name.  For example, the C name @code{foo} gets the low-level
 name @code{_foo}.  This option removes the initial underscore.  Whether
-@code{c++filt} removes the underscore by default is target dependent.
+@command{c++filt} removes the underscore by default is target dependent.
 
 @item -j
 @itemx --java
@@ -2107,7 +2113,7 @@ Do not remove the initial underscore.
 
 @item -s @var{format}
 @itemx --format=@var{format}
-@sc{gnu} @code{nm} can decode three different methods of mangling, used by
+@sc{gnu} @command{nm} can decode three different methods of mangling, used by
 different C++ compilers.  The argument to this option selects which
 method it uses:
 
@@ -2127,10 +2133,10 @@ the one used by the @sc{gnu} compiler with the new ABI.
 @end table
 
 @item --help
-Print a summary of the options to @code{c++filt} and exit.
+Print a summary of the options to @command{c++filt} and exit.
 
 @item --version
-Print the version number of @code{c++filt} and exit.
+Print the version number of @command{c++filt} and exit.
 @end table
 
 @c man end
@@ -2142,7 +2148,7 @@ the Info entries for @file{binutils}.
 @end ignore
 
 @quotation
-@emph{Warning:} @code{c++filt} is a new utility, and the details of its
+@emph{Warning:} @command{c++filt} is a new utility, and the details of its
 user interface are subject to change in future releases.  In particular,
 a command-line option may be required in the the future to decode a name
 passed as an argument on the command line; in other words, 
@@ -2169,45 +2175,45 @@ c++filt @var{option} @var{symbol}
 
 @smallexample
 @c man begin SYNOPSIS addr2line
-addr2line [ -b @var{bfdname} | --target=@var{bfdname} ]
-          [ -C | --demangle[=@var{style} ]
-          [ -e @var{filename} | --exe=@var{filename} ]
-          [ -f | --functions ] [ -s | --basename ]
-          [ -H | --help ] [ -V | --version ]
-          [ addr addr ... ]
+addr2line [@option{-b} @var{bfdname}|@option{--target=}@var{bfdname}]
+          [@option{-C}|@option{--demangle}[=@var{style}]
+          [@option{-e} @var{filename}|@option{--exe=}@var{filename}]
+          [@option{-f}|@option{--functions}] [@option{-s}|@option{--basename}]
+          [@option{-H}|@option{--help}] [@option{-V}|@option{--version}]
+          [addr addr @dots{}]
 @c man end
 @end smallexample
 
 @c man begin DESCRIPTION addr2line
 
-@code{addr2line} translates program addresses into file names and line
+@command{addr2line} translates program addresses into file names and line
 numbers.  Given an address and an executable, it uses the debugging
 information in the executable to figure out which file name and line
 number are associated with a given address.
 
-The executable to use is specified with the @code{-e} option.  The
+The executable to use is specified with the @option{-e} option.  The
 default is the file @file{a.out}.
 
-@code{addr2line} has two modes of operation.
+@command{addr2line} has two modes of operation.
 
 In the first, hexadecimal addresses are specified on the command line,
-and @code{addr2line} displays the file name and line number for each
+and @command{addr2line} displays the file name and line number for each
 address.
 
-In the second, @code{addr2line} reads hexadecimal addresses from
+In the second, @command{addr2line} reads hexadecimal addresses from
 standard input, and prints the file name and line number for each
-address on standard output.  In this mode, @code{addr2line} may be used
+address on standard output.  In this mode, @command{addr2line} may be used
 in a pipe to convert dynamically chosen addresses.
 
 The format of the output is @samp{FILENAME:LINENO}.  The file name and
 line number for each address is printed on a separate line.  If the
-@code{-f} option is used, then each @samp{FILENAME:LINENO} line is
+@command{-f} option is used, then each @samp{FILENAME:LINENO} line is
 preceded by a @samp{FUNCTIONNAME} line which is the name of the function
 containing the address.
 
 If the file name or function name can not be determined,
-@code{addr2line} will print two question marks in their place.  If the
-line number can not be determined, @code{addr2line} will print 0.
+@command{addr2line} will print two question marks in their place.  If the
+line number can not be determined, @command{addr2line} will print 0.
 
 @c man end
 
@@ -2216,7 +2222,7 @@ line number can not be determined, @code{addr2line} will print 0.
 The long and short forms of options, shown here as alternatives, are
 equivalent.
 
-@table @code
+@table @env
 @item -b @var{bfdname}
 @itemx --target=@var{bfdname}
 @cindex object code format
@@ -2258,20 +2264,20 @@ Info entries for @file{binutils}.
 @node nlmconv
 @chapter nlmconv
 
-@code{nlmconv} converts a relocatable object file into a NetWare
+@command{nlmconv} converts a relocatable object file into a NetWare
 Loadable Module.
 
 @ignore
-@code{nlmconv} currently works with @samp{i386} object
+@command{nlmconv} currently works with @samp{i386} object
 files in @code{coff}, @sc{elf}, or @code{a.out} format, and @sc{SPARC}
 object files in @sc{elf}, or @code{a.out} format@footnote{
-@code{nlmconv} should work with any @samp{i386} or @sc{sparc} object
+@command{nlmconv} should work with any @samp{i386} or @sc{sparc} object
 format in the Binary File Descriptor library.  It has only been tested
 with the above formats.}.
 @end ignore
 
 @quotation
-@emph{Warning:} @code{nlmconv} is not always built as part of the binary
+@emph{Warning:} @command{nlmconv} is not always built as part of the binary
 utilities, since it is only useful for NLM targets.
 @end quotation
 
@@ -2279,49 +2285,49 @@ utilities, since it is only useful for NLM targets.
 
 @smallexample
 @c man begin SYNOPSIS nlmconv
-nlmconv [ -I @var{bfdname} | --input-target=@var{bfdname} ]
-        [ -O @var{bfdname} | --output-target=@var{bfdname} ]
-        [ -T @var{headerfile} | --header-file=@var{headerfile} ]
-        [ -d | --debug]  [ -l @var{linker} | --linker=@var{linker} ]
-        [ -h | --help ]  [ -V | --version ]
+nlmconv [@option{-I} @var{bfdname}|@option{--input-target=}@var{bfdname}]
+        [@option{-O} @var{bfdname}|@option{--output-target=}@var{bfdname}]
+        [@option{-T} @var{headerfile}|@option{--header-file=}@var{headerfile}]
+        [@option{-d}|@option{--debug}] [@option{-l} @var{linker}|@option{--linker=}@var{linker}]
+        [@option{-h}|@option{--help}] [@option{-V}|@option{--version}]
         @var{infile} @var{outfile}
 @c man end
 @end smallexample
 
 @c man begin DESCRIPTION nlmconv
 
-@code{nlmconv} converts the relocatable @samp{i386} object file
+@command{nlmconv} converts the relocatable @samp{i386} object file
 @var{infile} into the NetWare Loadable Module @var{outfile}, optionally
 reading @var{headerfile} for NLM header information.  For instructions
 on writing the NLM command file language used in header files, see the
 @samp{linkers} section, @samp{NLMLINK} in particular, of the @cite{NLM
 Development and Tools Overview}, which is part of the NLM Software
 Developer's Kit (``NLM SDK''), available from Novell, Inc.
-@code{nlmconv} uses the @sc{gnu} Binary File Descriptor library to read
+@command{nlmconv} uses the @sc{gnu} Binary File Descriptor library to read
 @var{infile};
 @ifclear man
 see @ref{BFD,,BFD,ld.info,Using LD}, for more information.
 @end ifclear
 
-@code{nlmconv} can perform a link step.  In other words, you can list
+@command{nlmconv} can perform a link step.  In other words, you can list
 more than one object file for input if you list them in the definitions
 file (rather than simply specifying one input file on the command line).
-In this case, @code{nlmconv} calls the linker for you.
+In this case, @command{nlmconv} calls the linker for you.
 
 @c man end
 
 @c man begin OPTIONS nlmconv
 
-@table @code
+@table @env
 @item -I @var{bfdname}
 @itemx --input-target=@var{bfdname}
-Object format of the input file.  @code{nlmconv} can usually determine
+Object format of the input file.  @command{nlmconv} can usually determine
 the format of a given file (so no default is necessary).
 @xref{Target Selection}, for more information.
 
 @item -O @var{bfdname}
 @itemx --output-target=@var{bfdname}
-Object format of the output file.  @code{nlmconv} infers the output
+Object format of the output file.  @command{nlmconv} infers the output
 format based on the input format, e.g. for a @samp{i386} input file the
 output format is @samp{nlm32-i386}.
 @xref{Target Selection}, for more information.
@@ -2336,7 +2342,7 @@ from Novell, Inc.
 
 @item -d
 @itemx --debug
-Displays (on standard error) the linker command line used by @code{nlmconv}.
+Displays (on standard error) the linker command line used by @command{nlmconv}.
 
 @item -l @var{linker}
 @itemx --linker=@var{linker}
@@ -2349,7 +2355,7 @@ Prints a usage summary.
 
 @item -V
 @itemx --version
-Prints the version number for @code{nlmconv}.
+Prints the version number for @command{nlmconv}.
 @end table
 
 @c man end
@@ -2363,10 +2369,10 @@ the Info entries for @file{binutils}.
 @node windres
 @chapter windres
 
-@code{windres} may be used to manipulate Windows resources.
+@command{windres} may be used to manipulate Windows resources.
 
 @quotation
-@emph{Warning:} @code{windres} is not always built as part of the binary
+@emph{Warning:} @command{windres} is not always built as part of the binary
 utilities, since it is only useful for Windows targets.
 @end quotation
 
@@ -2380,7 +2386,7 @@ windres [options] [input-file] [output-file]
 
 @c man begin DESCRIPTION windres
 
-@code{windres} reads resources from an input file and copies them into
+@command{windres} reads resources from an input file and copies them into
 an output file.  Either file may be in one of three formats:
 
 @table @code
@@ -2397,27 +2403,27 @@ A COFF object or executable.
 The exact description of these different formats is available in
 documentation from Microsoft.
 
-When @code{windres} converts from the @code{rc} format to the @code{res}
+When @command{windres} converts from the @code{rc} format to the @code{res}
 format, it is acting like the Windows Resource Compiler.  When
-@code{windres} converts from the @code{res} format to the @code{coff}
+@command{windres} converts from the @code{res} format to the @code{coff}
 format, it is acting like the Windows @code{CVTRES} program.
 
-When @code{windres} generates an @code{rc} file, the output is similar
+When @command{windres} generates an @code{rc} file, the output is similar
 but not identical to the format expected for the input.  When an input
 @code{rc} file refers to an external filename, an output @code{rc} file
 will instead include the file contents.
 
-If the input or output format is not specified, @code{windres} will
+If the input or output format is not specified, @command{windres} will
 guess based on the file name, or, for the input file, the file contents.
 A file with an extension of @file{.rc} will be treated as an @code{rc}
 file, a file with an extension of @file{.res} will be treated as a
 @code{res} file, and a file with an extension of @file{.o} or
 @file{.exe} will be treated as a @code{coff} file.
 
-If no output file is specified, @code{windres} will print the resources
+If no output file is specified, @command{windres} will print the resources
 in @code{rc} format to standard output.
 
-The normal use is for you to write an @code{rc} file, use @code{windres}
+The normal use is for you to write an @code{rc} file, use @command{windres}
 to convert it to a COFF object file, and then link the COFF file into
 your application.  This will make the resources described in the
 @code{rc} file available to Windows.
@@ -2426,58 +2432,60 @@ your application.  This will make the resources described in the
 
 @c man begin OPTIONS windres
 
-@table @code
+@table @env
 @item -i @var{filename}
 @itemx --input @var{filename}
 The name of the input file.  If this option is not used, then
-@code{windres} will use the first non-option argument as the input file
-name.  If there are no non-option arguments, then @code{windres} will
-read from standard input.  @code{windres} can not read a COFF file from
+@command{windres} will use the first non-option argument as the input file
+name.  If there are no non-option arguments, then @command{windres} will
+read from standard input.  @command{windres} can not read a COFF file from
 standard input.
 
 @item -o @var{filename}
 @itemx --output @var{filename}
 The name of the output file.  If this option is not used, then
-@code{windres} will use the first non-option argument, after any used
+@command{windres} will use the first non-option argument, after any used
 for the input file name, as the output file name.  If there is no
-non-option argument, then @code{windres} will write to standard output.
-@code{windres} can not write a COFF file to standard output.
+non-option argument, then @command{windres} will write to standard output.
+@command{windres} can not write a COFF file to standard output.
 
 @item -I @var{format}
 @itemx --input-format @var{format}
 The input format to read.  @var{format} may be @samp{res}, @samp{rc}, or
-@samp{coff}.  If no input format is specified, @code{windres} will
+@samp{coff}.  If no input format is specified, @command{windres} will
 guess, as described above.
 
 @item -O @var{format}
 @itemx --output-format @var{format}
 The output format to generate.  @var{format} may be @samp{res},
 @samp{rc}, or @samp{coff}.  If no output format is specified,
-@code{windres} will guess, as described above.
+@command{windres} will guess, as described above.
 
 @item -F @var{target}
 @itemx --target @var{target}
 Specify the BFD format to use for a COFF file as input or output.  This
-is a BFD target name; you can use the @code{--help} option to see a list
-of supported targets.  Normally @code{windres} will use the default
-format, which is the first one listed by the @code{--help} option.
+is a BFD target name; you can use the @option{--help} option to see a list
+of supported targets.  Normally @command{windres} will use the default
+format, which is the first one listed by the @option{--help} option.
+@ifclear man
 @ref{Target Selection}.
+@end ifclear
 
 @item --preprocessor @var{program}
-When @code{windres} reads an @code{rc} file, it runs it through the C
+When @command{windres} reads an @code{rc} file, it runs it through the C
 preprocessor first.  This option may be used to specify the preprocessor
 to use, including any leading arguments.  The default preprocessor
 argument is @code{gcc -E -xc-header -DRC_INVOKED}.
 
 @item --include-dir @var{directory}
 Specify an include directory to use when reading an @code{rc} file.
-@code{windres} will pass this to the preprocessor as an @code{-I}
-option.  @code{windres} will also search this directory when looking for
+@command{windres} will pass this to the preprocessor as an @option{-I}
+option.  @command{windres} will also search this directory when looking for
 files named in the @code{rc} file.
 
 @item -D @var{target}
 @itemx --define @var{sym}[=@var{val}]
-Specify a @code{-D} option to pass to the preprocessor when reading an
+Specify a @option{-D} option to pass to the preprocessor when reading an
 @code{rc} file.
 
 @item -v
@@ -2504,10 +2512,10 @@ This is the default behaviour.
 Prints a usage summary.
 
 @item --version
-Prints the version number for @code{windres}.
+Prints the version number for @command{windres}.
 
 @item --yydebug
-If @code{windres} is compiled with @code{YYDEBUG} defined as @code{1},
+If @command{windres} is compiled with @code{YYDEBUG} defined as @code{1},
 this will turn on parser debugging.
 @end table
 
@@ -2524,11 +2532,11 @@ the Info entries for @file{binutils}.
 @cindex DLL
 @kindex dlltool
 
-@code{dlltool} may be used to create the files needed to build and use
+@command{dlltool} may be used to create the files needed to build and use
 dynamic link libraries (DLLs).
 
 @quotation
-@emph{Warning:} @code{dlltool} is not always built as part of the binary
+@emph{Warning:} @command{dlltool} is not always built as part of the binary
 utilities, since it is only useful for those targets which support DLLs.
 @end quotation
 
@@ -2536,48 +2544,50 @@ utilities, since it is only useful for those targets which support DLLs.
 
 @smallexample
 @c man begin SYNOPSIS dlltool
-dlltool [-d|--input-def @var{def-file-name}]
-        [-b|--base-file @var{base-file-name}]
-        [-e|--output-exp @var{exports-file-name}]
-        [-z|--output-def @var{def-file-name}]
-        [-l|--output-lib @var{library-file-name}]        
-        [--export-all-symbols] [--no-export-all-symbols]
-        [--exclude-symbols @var{list}]
-        [--no-default-excludes]
-        [-S|--as @var{path-to-assembler}] [-f|--as-flags @var{options}]
-        [-D|--dllname @var{name}] [-m|--machine @var{machine}]
-        [-a|--add-indirect] [-U|--add-underscore] [-k|--kill-at]
-        [-A|--add-stdcall-alias]
-        [-x|--no-idata4] [-c|--no-idata5] [-i|--interwork]
-        [-n|--nodelete] [-v|--verbose] [-h|--help] [-V|--version]
+dlltool [@option{-d}|@option{--input-def} @var{def-file-name}]
+        [@option{-b}|@option{--base-file} @var{base-file-name}]
+        [@option{-e}|@option{--output-exp} @var{exports-file-name}]
+        [@option{-z}|@option{--output-def} @var{def-file-name}]
+        [@option{-l}|@option{--output-lib} @var{library-file-name}]        
+        [@option{--export-all-symbols}] [@option{--no-export-all-symbols}]
+        [@option{--exclude-symbols} @var{list}]
+        [@option{--no-default-excludes}]
+        [@option{-S}|@option{--as} @var{path-to-assembler}] [@option{-f}|@option{--as-flags} @var{options}]
+        [@option{-D}|@option{--dllname} @var{name}] [@option{-m}|@option{--machine} @var{machine}]
+        [@option{-a}|@option{--add-indirect}] [@option{-U}|@option{--add-underscore}] [@option{-k}|@option{--kill-at}]
+        [@option{-A}|@option{--add-stdcall-alias}]
+        [@option{-x}|@option{--no-idata4}] [@option{-c}|@option{--no-idata5}] [@option{-i}|@option{--interwork}]
+        [@option{-n}|@option{--nodelete}] [@option{-v}|@option{--verbose}] 
+        [@option{-h}|@option{--help}] [@option{-V}|@option{--version}]
         [object-file @dots{}]
 @c man end
 @end smallexample
 
 @c man begin DESCRIPTION dlltool
 
-@code{dlltool} reads its inputs, which can come from the @samp{-d} and
-@samp{-b} options as well as object files specified on the command
-line.  It then processes these inputs and if the @samp{-e} option has
-been specified it creates a exports file.  If the @samp{-l} option
-has been specified it creates a library file and if the @samp{-z} option
-has been specified it creates a def file.  Any or all of the -e, -l
-and -z options can be present in one invocation of dlltool.
+@command{dlltool} reads its inputs, which can come from the @option{-d} and
+@option{-b} options as well as object files specified on the command
+line.  It then processes these inputs and if the @option{-e} option has
+been specified it creates a exports file.  If the @option{-l} option
+has been specified it creates a library file and if the @option{-z} option
+has been specified it creates a def file.  Any or all of the @option{-e}, 
+@option{-l} and @option{-z} options can be present in one invocation of 
+dlltool.
 
 When creating a DLL, along with the source for the DLL, it is necessary
-to have three other files.  @code{dlltool} can help with the creation of
+to have three other files.  @command{dlltool} can help with the creation of
 these files.
 
 The first file is a @samp{.def} file which specifies which functions are
 exported from the DLL, which functions the DLL imports, and so on.  This
-is a text file and can be created by hand, or @code{dlltool} can be used
-to create it using the @samp{-z} option.  In this case @code{dlltool}
+is a text file and can be created by hand, or @command{dlltool} can be used
+to create it using the @option{-z} option.  In this case @command{dlltool}
 will scan the object files specified on its command line looking for
 those functions which have been specially marked as being exported and
 put entries for them in the .def file it creates.
 
 In order to mark a function as being exported from a DLL, it needs to
-have an @samp{-export:<name_of_function>} entry in the @samp{.drectve}
+have an @option{-export:<name_of_function>} entry in the @samp{.drectve}
 section of the object file.  This can be done in C by using the
 asm() operator:
 
@@ -2591,21 +2601,21 @@ asm() operator:
 The second file needed for DLL creation is an exports file.  This file
 is linked with the object files that make up the body of the DLL and it
 handles the interface between the DLL and the outside world.  This is a
-binary file and it can be created by giving the @samp{-e} option to
-@code{dlltool} when it is creating or reading in a .def file. 
+binary file and it can be created by giving the @option{-e} option to
+@command{dlltool} when it is creating or reading in a .def file. 
 
 The third file needed for DLL creation is the library file that programs
 will link with in order to access the functions in the DLL.  This file
-can be created by giving the @samp{-l} option to dlltool when it
+can be created by giving the @option{-l} option to dlltool when it
 is creating or reading in a .def file.
 
-@code{dlltool} builds the library file by hand, but it builds the
+@command{dlltool} builds the library file by hand, but it builds the
 exports file by creating temporary files containing assembler statements
-and then assembling these.  The @samp{-S} command line option can be
+and then assembling these.  The @option{-S} command line option can be
 used to specify the path to the assembler that dlltool will use,
-and the @samp{-f} option can be used to pass specific flags to that
-assembler.  The @samp{-n} can be used to prevent dlltool from deleting
-these temporary assembler files when it is done, and if @samp{-n} is
+and the @option{-f} option can be used to pass specific flags to that
+assembler.  The @option{-n} can be used to prevent dlltool from deleting
+these temporary assembler files when it is done, and if @option{-n} is
 specified twice then this will prevent dlltool from deleting the
 temporary object files it used to build the library.
 
@@ -2626,7 +2636,7 @@ that uses that DLL:
 
 The command line options have the following meanings:
 
-@table @code
+@table @env
 
 @item -d @var{filename}
 @itemx --input-def @var{filename}
@@ -2655,9 +2665,9 @@ Specifies the name of the library file to be created by dlltool.
 @item --export-all-symbols
 Treat all global and weak defined symbols found in the input object
 files as symbols to be exported.  There is a small list of symbols which
-are not exported by default; see the @code{--no-default-excludes}
+are not exported by default; see the @option{--no-default-excludes}
 option.  You may add to the list of symbols to not export by using the
-@code{--exclude-symbols} option.
+@option{--exclude-symbols} option.
 
 @item --no-export-all-symbols
 Only export symbols explicitly listed in an input .def file or in
@@ -2669,15 +2679,15 @@ attributes in the source code.
 Do not export the symbols in @var{list}.  This is a list of symbol names
 separated by comma or colon characters.  The symbol names should not
 contain a leading underscore.  This is only meaningful when
-@code{--export-all-symbols} is used.
+@option{--export-all-symbols} is used.
 
 @item --no-default-excludes
-When @code{--export-all-symbols} is used, it will by default avoid
+When @option{--export-all-symbols} is used, it will by default avoid
 exporting certain special symbols.  The current list of symbols to avoid
 exporting is @samp{DllMain@@12}, @samp{DllEntryPoint@@0},
-@samp{impure_ptr}.  You may use the @code{--no-default-excludes} option
+@samp{impure_ptr}.  You may use the @option{--no-default-excludes} option
 to go ahead and export these special symbols.  This is only meaningful
-when @code{--export-all-symbols} is used.
+when @option{--export-all-symbols} is used.
 
 @item -S @var{path}
 @itemx --as @var{path}
@@ -2688,7 +2698,7 @@ to create the exports file.
 @itemx --as-flags @var{switches}
 Specifies any specific command line switches to be passed to the
 assembler when building the exports file.  This option will work even if
-the @samp{-S} option is not used.  This option only takes one argument,
+the @option{-S} option is not used.  This option only takes one argument,
 and if it occurs more than once on the command line, then later
 occurrences will override earlier occurrences.  So if it is necessary to
 pass multiple switches to the assembler they should be enclosed in
@@ -2697,64 +2707,64 @@ double quotes.
 @item -D @var{name}
 @itemx --dll-name @var{name}
 Specifies the name to be stored in the .def file as the name of the DLL
-when the @samp{-e} option is used.  If this option is not present, then
-the filename given to the @samp{-e} option will be used as the name of
+when the @option{-e} option is used.  If this option is not present, then
+the filename given to the @option{-e} option will be used as the name of
 the DLL.
 
 @item -m @var{machine}
 @itemx -machine @var{machine}
 Specifies the type of machine for which the library file should be
-built.  @code{dlltool} has a built in default type, depending upon how
+built.  @command{dlltool} has a built in default type, depending upon how
 it was created, but this option can be used to override that.  This is
 normally only useful when creating DLLs for an ARM processor, when the
 contents of the DLL are actually encode using THUMB instructions.
 
 @item -a
 @itemx --add-indirect
-Specifies that when @code{dlltool} is creating the exports file it
+Specifies that when @command{dlltool} is creating the exports file it
 should add a section which allows the exported functions to be
 referenced without using the import library.  Whatever the hell that
 means! 
 
 @item -U
 @itemx --add-underscore
-Specifies that when @code{dlltool} is creating the exports file it
+Specifies that when @command{dlltool} is creating the exports file it
 should prepend an underscore to the names of the exported functions. 
 
 @item -k
 @itemx --kill-at
-Specifies that when @code{dlltool} is creating the exports file it
+Specifies that when @command{dlltool} is creating the exports file it
 should not append the string @samp{@@ <number>}.  These numbers are
 called ordinal numbers and they represent another way of accessing the
 function in a DLL, other than by name.
 
 @item -A
 @itemx --add-stdcall-alias
-Specifies that when @code{dlltool} is creating the exports file it
+Specifies that when @command{dlltool} is creating the exports file it
 should add aliases for stdcall symbols without @samp{@@ <number>}
 in addition to the symbols with @samp{@@ <number>}.
 
 @item -x
 @itemx --no-idata4
-Specifies that when @code{dlltool} is creating the exports and library
-files it should omit the .idata4 section.  This is for compatibility
+Specifies that when @command{dlltool} is creating the exports and library
+files it should omit the @code{.idata4} section.  This is for compatibility
 with certain operating systems.
 
 @item -c
 @itemx --no-idata5
-Specifies that when @code{dlltool} is creating the exports and library
-files it should omit the .idata5 section.  This is for compatibility
+Specifies that when @command{dlltool} is creating the exports and library
+files it should omit the @code{.idata5} section.  This is for compatibility
 with certain operating systems.
 
 @item -i
 @itemx --interwork
-Specifies that @code{dlltool} should mark the objects in the library
+Specifies that @command{dlltool} should mark the objects in the library
 file and exports file that it produces as supporting interworking
 between ARM and THUMB code.
 
 @item -n
 @itemx --nodelete
-Makes @code{dlltool} preserve the temporary assembler files it used to
+Makes @command{dlltool} preserve the temporary assembler files it used to
 create the exports file.  If this option is repeated then dlltool will
 also preserve the temporary object files it uses to create the library
 file. 
@@ -2791,34 +2801,34 @@ the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS readelf
-readelf [ -a | --all ] 
-        [ -h | --file-header]
-        [ -l | --program-headers | --segments]
-        [ -S | --section-headers | --sections]
-        [ -e | --headers]
-        [ -s | --syms | --symbols]
-        [ -n | --notes]
-        [ -r | --relocs]
-        [ -u | --unwind]
-        [ -d | --dynamic]
-        [ -V | --version-info]
-        [ -D | --use-dynamic]
-        [ -x <number> | --hex-dump=<number>]
-        [ -w[liaprmf] | --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames]]
-        [      --histogram]
-        [ -v | --version]
-        [ -H | --help]
+readelf [@option{-a}|@option{--all}] 
+        [@option{-h}|@option{--file-header}]
+        [@option{-l}|@option{--program-headers}|@option{--segments}]
+        [@option{-S}|@option{--section-headers}|@option{--sections}]
+        [@option{-e}|@option{--headers}]
+        [@option{-s}|@option{--syms}|@option{--symbols}]
+        [@option{-n}|@option{--notes}]
+        [@option{-r}|@option{--relocs}]
+        [@option{-u}|@option{--unwind}]
+        [@option{-d}|@option{--dynamic}]
+        [@option{-V}|@option{--version-info}]
+        [@option{-D}|@option{--use-dynamic}]
+        [@option{-x} <number>|@option{--hex-dump=}<number>]
+        [@option{-w[liaprmf]}|@option{--debug-dump}[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames]]
+        [@option{-histogram}]
+        [@option{-v}|@option{--version}]
+        [@option{-H}|@option{--help}]
         @var{elffile}@dots{}
 @c man end
 @end smallexample
 
 @c man begin DESCRIPTION readelf
 
-@code{readelf} displays information about one or more ELF format object
+@command{readelf} displays information about one or more ELF format object
 files.  The options control what particular information to display.
 
 @var{elffile}@dots{} are the object files to be examined.  At the
-moment, @code{readelf} does not support examining archives, nor does it
+moment, @command{readelf} does not support examining archives, nor does it
 support examing 64 bit ELF files.
 
 @c man end
@@ -2829,13 +2839,13 @@ The long and short forms of options, shown here as alternatives, are
 equivalent.  At least one option besides @samp{-v} or @samp{-H} must be
 given. 
 
-@table @code
+@table @env
 @item -a
 @itemx --all
-Equivalent to specifiying @samp{--file-header},
-@samp{--program-headers}, @samp{--sections}, @samp{--symbols},
-@samp{--relocs}, @samp{--dynamic}, @samp{--notes} and
-@samp{--version-info}. 
+Equivalent to specifiying @option{--file-header},
+@option{--program-headers}, @option{--sections}, @option{--symbols},
+@option{--relocs}, @option{--dynamic}, @option{--notes} and
+@option{--version-info}. 
 
 @item -h
 @itemx --file-header
@@ -2866,7 +2876,7 @@ Displays the entries in symbol table section of the file, if it has one.
 
 @item -e
 @itemx --headers
-Display all the headers in the file.  Equivalent to @samp{-h -l -S}.
+Display all the headers in the file.  Equivalent to @option{-h -l -S}.
 
 @item -n
 @itemx --notes
@@ -2897,7 +2907,7 @@ exist.
 
 @item -D
 @itemx --use-dynamic
-When displaying symbols, this option makes @code{readelf} use the
+When displaying symbols, this option makes @command{readelf} use the
 symbol table in the file's dynamic section, rather than the one in the
 symbols section.
 
@@ -2921,7 +2931,7 @@ Display the version number of readelf.
 
 @item -H
 @itemx --help
-Display the command line options understood by @code{readelf}.
+Display the command line options understood by @command{readelf}.
 
 @end table
 
@@ -2956,7 +2966,7 @@ listed later.
 
 The commands to list valid values only list the values for which the
 programs you are running were configured.  If they were configured with
-@samp{--enable-targets=all}, the commands list most of the available
+@option{--enable-targets=all}, the commands list most of the available
 values, but a few are left out; not all targets can be configured in at
 once because some of them can only be configured @dfn{native} (on hosts
 with the same type as the target system).
@@ -2991,13 +3001,13 @@ sources.
 Some sample configuration triplets are: @samp{m68k-hp-bsd},
 @samp{mips-dec-ultrix}, @samp{sparc-sun-sunos}.
 
-@subheading @code{objdump} Target
+@subheading @command{objdump} Target
 
 Ways to specify:
 
 @enumerate
 @item
-command line option: @samp{-b} or @samp{--target}
+command line option: @option{-b} or @option{--target}
 
 @item
 environment variable @code{GNUTARGET}
@@ -3006,13 +3016,13 @@ environment variable @code{GNUTARGET}
 deduced from the input file
 @end enumerate
 
-@subheading @code{objcopy} and @code{strip} Input Target
+@subheading @command{objcopy} and @command{strip} Input Target
 
 Ways to specify:
 
 @enumerate
 @item
-command line options: @samp{-I} or @samp{--input-target}, or @samp{-F} or @samp{--target}
+command line options: @option{-I} or @option{--input-target}, or @option{-F} or @option{--target}
 
 @item
 environment variable @code{GNUTARGET}
@@ -3021,16 +3031,16 @@ environment variable @code{GNUTARGET}
 deduced from the input file
 @end enumerate
 
-@subheading @code{objcopy} and @code{strip} Output Target
+@subheading @command{objcopy} and @command{strip} Output Target
 
 Ways to specify:
 
 @enumerate
 @item
-command line options: @samp{-O} or @samp{--output-target}, or @samp{-F} or @samp{--target}
+command line options: @option{-O} or @option{--output-target}, or @option{-F} or @option{--target}
 
 @item
-the input target (see ``@code{objcopy} and @code{strip} Input Target'' above)
+the input target (see ``@command{objcopy} and @command{strip} Input Target'' above)
 
 @item
 environment variable @code{GNUTARGET}
@@ -3039,13 +3049,13 @@ environment variable @code{GNUTARGET}
 deduced from the input file
 @end enumerate
 
-@subheading @code{nm}, @code{size}, and @code{strings} Target
+@subheading @command{nm}, @command{size}, and @command{strings} Target
 
 Ways to specify:
 
 @enumerate
 @item
-command line option: @samp{--target}
+command line option: @option{--target}
 
 @item
 environment variable @code{GNUTARGET}
@@ -3060,7 +3070,7 @@ Ways to specify:
 
 @enumerate
 @item
-command line option: @samp{-b} or @samp{--format}
+command line option: @option{-b} or @option{--format}
 (@pxref{Options,,Options,ld.info,Using LD})
 
 @item
@@ -3082,7 +3092,7 @@ Ways to specify:
 
 @enumerate
 @item
-command line option: @samp{-oformat}
+command line option: @option{-oformat}
 (@pxref{Options,,Options,ld.info,Using LD})
 
 @item
@@ -3105,19 +3115,19 @@ second column contains the relevant information).
 
 Sample values: @samp{m68k:68020}, @samp{mips:3000}, @samp{sparc}.
 
-@subheading @code{objdump} Architecture
+@subheading @command{objdump} Architecture
 
 Ways to specify:
 
 @enumerate
 @item
-command line option: @samp{-m} or @samp{--architecture}
+command line option: @option{-m} or @option{--architecture}
 
 @item
 deduced from the input file
 @end enumerate
 
-@subheading @code{objcopy}, @code{nm}, @code{size}, @code{strings} Architecture
+@subheading @command{objcopy}, @command{nm}, @command{size}, @command{strings} Architecture
 
 Ways to specify:
 
@@ -3176,7 +3186,7 @@ Ways to specify:
 
 @enumerate
 @item
-command line option: @samp{-m}
+command line option: @option{-m}
 (@pxref{Options,,Options,ld.info,Using LD})
 
 @item
@@ -3277,7 +3287,7 @@ To enable us to fix the bug, you should include all these things:
 @itemize @bullet
 @item
 The version of the utility.  Each utility announces it if you start it
-with the @samp{--version} argument.
+with the @option{--version} argument.
 
 Without this, we will not know whether there is any point in looking for
 the bug in the current version of the binary utilities.
@@ -3312,11 +3322,11 @@ sending very large files to it.  Making the files available for
 anonymous FTP is OK.
 
 If the source files were produced exclusively using @sc{gnu} programs
-(e.g., @code{gcc}, @code{gas}, and/or the @sc{gnu} @code{ld}), then it
+(e.g., @command{gcc}, @command{gas}, and/or the @sc{gnu} @command{ld}), then it
 may be OK to send the source files rather than the object files.  In
-this case, be sure to say exactly what version of @code{gcc}, or
+this case, be sure to say exactly what version of @command{gcc}, or
 whatever, was used to produce the object files.  Also say how
-@code{gcc}, or whatever, was configured.
+@command{gcc}, or whatever, was configured.
 
 @item
 A description of what behavior you observe that you believe is
@@ -3338,9 +3348,9 @@ to draw any conclusion from our observations.
 
 @item
 If you wish to suggest changes to the source, send us context diffs, as
-generated by @code{diff} with the @samp{-u}, @samp{-c}, or @samp{-p}
+generated by @command{diff} with the @option{-u}, @option{-c}, or @option{-p}
 option.  Always send diffs from the old file to the new file.  If you
-wish to discuss something in the @code{ld} source, refer to it by
+wish to discuss something in the @command{ld} source, refer to it by
 context, not by line number.
 
 The line numbers in our development sources will not match those in your
