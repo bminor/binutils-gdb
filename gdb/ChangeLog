@@ -1,5 +1,9 @@
 2003-10-02  Corinna Vinschen  <vinschen@redhat.com>
 
+	* sh-tdep.c: Running thru gdb_indent.sh.
+
+2003-10-02  Corinna Vinschen  <vinschen@redhat.com>
+
 	* sh-tdep.c (sh_justify_value_in_reg): New function.
 	(sh_stack_allocsize): Ditto.
 	(flt_argreg_array): New array used for floating point argument

@@ -77,15 +77,14 @@ struct sh_frame_cache
 static const char *
 sh_generic_register_name (int reg_nr)
 {
-  static char *register_names[] =
-  {
-    "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
-    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
-    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
+  static char *register_names[] = {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
     "fpul", "fpscr",
-    "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",
-    "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
-    "ssr",  "spc",
+    "fr0", "fr1", "fr2", "fr3", "fr4", "fr5", "fr6", "fr7",
+    "fr8", "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
+    "ssr", "spc",
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
   };
@@ -99,17 +98,16 @@ sh_generic_register_name (int reg_nr)
 static const char *
 sh_sh_register_name (int reg_nr)
 {
-  static char *register_names[] =
-  {
-    "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
-    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
-    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
-    "",     "",
-    "",     "",     "",     "",     "",     "",     "",     "",
-    "",     "",     "",     "",     "",     "",     "",     "",
-    "",     "",
-    "",     "",     "",     "",     "",     "",     "",     "",
-    "",     "",     "",     "",     "",     "",     "",     "",
+  static char *register_names[] = {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
+    "", "",
+    "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "",
+    "", "",
+    "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "",
   };
   if (reg_nr < 0)
     return NULL;
@@ -121,15 +119,14 @@ sh_sh_register_name (int reg_nr)
 static const char *
 sh_sh3_register_name (int reg_nr)
 {
-  static char *register_names[] =
-  {
-    "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
-    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
-    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
-    "",     "",
-    "",     "",     "",     "",     "",     "",     "",     "",
-    "",     "",     "",     "",     "",     "",     "",     "",
-    "ssr",  "spc",
+  static char *register_names[] = {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
+    "", "",
+    "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "",
+    "ssr", "spc",
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1"
   };
@@ -143,15 +140,14 @@ sh_sh3_register_name (int reg_nr)
 static const char *
 sh_sh3e_register_name (int reg_nr)
 {
-  static char *register_names[] =
-  {
-    "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
-    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
-    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
+  static char *register_names[] = {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
     "fpul", "fpscr",
-    "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",
-    "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
-    "ssr",  "spc",
+    "fr0", "fr1", "fr2", "fr3", "fr4", "fr5", "fr6", "fr7",
+    "fr8", "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
+    "ssr", "spc",
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
   };
@@ -165,15 +161,14 @@ sh_sh3e_register_name (int reg_nr)
 static const char *
 sh_sh2e_register_name (int reg_nr)
 {
-  static char *register_names[] =
-  {
-    "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
-    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
-    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
+  static char *register_names[] = {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
     "fpul", "fpscr",
-    "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",
-    "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
-    "",  "",
+    "fr0", "fr1", "fr2", "fr3", "fr4", "fr5", "fr6", "fr7",
+    "fr8", "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
+    "", "",
     "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "",
   };
@@ -187,17 +182,16 @@ sh_sh2e_register_name (int reg_nr)
 static const char *
 sh_sh_dsp_register_name (int reg_nr)
 {
-  static char *register_names[] =
-  {
-    "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
-    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
-    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
-    "",     "dsr",
-    "a0g",  "a0",   "a1g",  "a1",   "m0",   "m1",   "x0",   "x1",
-    "y0",   "y1",   "",     "",     "",     "",     "",     "mod",
-    "",     "",
-    "rs",   "re",   "",     "",     "",     "",     "",     "",
-    "",     "",     "",     "",     "",     "",     "",     "",
+  static char *register_names[] = {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
+    "", "dsr",
+    "a0g", "a0", "a1g", "a1", "m0", "m1", "x0", "x1",
+    "y0", "y1", "", "", "", "", "", "mod",
+    "", "",
+    "rs", "re", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", "",
   };
   if (reg_nr < 0)
     return NULL;
@@ -209,18 +203,17 @@ sh_sh_dsp_register_name (int reg_nr)
 static const char *
 sh_sh3_dsp_register_name (int reg_nr)
 {
-  static char *register_names[] =
-  {
-    "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
-    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
-    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
-    "",     "dsr",
-    "a0g",  "a0",   "a1g",  "a1",   "m0",   "m1",   "x0",   "x1",
-    "y0",   "y1",   "",     "",     "",     "",     "",     "mod",
-    "ssr",  "spc",
-    "rs",   "re",   "",     "",     "",     "",     "",     "",
-    "r0b",  "r1b",  "r2b",  "r3b",  "r4b",  "r5b",  "r6b",  "r7b"
-    "",     "",     "",     "",     "",     "",     "",     "",
+  static char *register_names[] = {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
+    "", "dsr",
+    "a0g", "a0", "a1g", "a1", "m0", "m1", "x0", "x1",
+    "y0", "y1", "", "", "", "", "", "mod",
+    "ssr", "spc",
+    "rs", "re", "", "", "", "", "", "",
+    "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b"
+      "", "", "", "", "", "", "", "",
   };
   if (reg_nr < 0)
     return NULL;
@@ -232,28 +225,27 @@ sh_sh3_dsp_register_name (int reg_nr)
 static const char *
 sh_sh4_register_name (int reg_nr)
 {
-  static char *register_names[] =
-  {
+  static char *register_names[] = {
     /* general registers 0-15 */
-    "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
-    "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
     /* 16 - 22 */
-    "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
     /* 23, 24 */
     "fpul", "fpscr",
     /* floating point registers 25 - 40 */
-    "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",
-    "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
+    "fr0", "fr1", "fr2", "fr3", "fr4", "fr5", "fr6", "fr7",
+    "fr8", "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
     /* 41, 42 */
-    "ssr",  "spc",
+    "ssr", "spc",
     /* bank 0 43 - 50 */
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
     /* bank 1 51 - 58 */
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
     /* double precision (pseudo) 59 - 66 */
-    "dr0",  "dr2",  "dr4",  "dr6",  "dr8",  "dr10", "dr12", "dr14",
+    "dr0", "dr2", "dr4", "dr6", "dr8", "dr10", "dr12", "dr14",
     /* vectors (pseudo) 67 - 70 */
-    "fv0",  "fv4",  "fv8",  "fv12",
+    "fv0", "fv4", "fv8", "fv12",
     /* FIXME: missing XF 71 - 86 */
     /* FIXME: missing XD 87 - 94 */
   };
@@ -268,8 +260,8 @@ static const unsigned char *
 sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   /* 0xc3c3 is trapa #c3, and it works in big and little endian modes */
-  static unsigned char breakpoint[] =  {0xc3, 0xc3};
-  
+  static unsigned char breakpoint[] = { 0xc3, 0xc3 };
+
   *lenptr = sizeof (breakpoint);
   return breakpoint;
 }
@@ -369,7 +361,7 @@ sh_push_dummy_code (struct gdbarch *gdbarch,
 
 /* Disassemble an instruction.  */
 static int
-gdb_print_insn_sh (bfd_vma memaddr, disassemble_info *info)
+gdb_print_insn_sh (bfd_vma memaddr, disassemble_info * info)
 {
   info->endian = TARGET_BYTE_ORDER;
   return print_insn_sh (memaddr, info);
@@ -378,7 +370,7 @@ gdb_print_insn_sh (bfd_vma memaddr, disassemble_info *info)
 static CORE_ADDR
 sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 		     struct sh_frame_cache *cache)
-{ 
+{
   ULONGEST inst;
   CORE_ADDR opc;
   int offset;
@@ -422,7 +414,7 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	  cache->sp_offset -= offset;
 	}
       else if (IS_MOVW_PCREL_TO_REG (inst))
-        {
+	{
 	  if (sav_reg < 0)
 	    {
 	      reg = GET_TARGET_REG (inst);
@@ -431,12 +423,12 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 		  sav_reg = reg;
 		  offset = (((inst & 0xff) ^ 0x80) - 0x80) << 1;
 		  sav_offset =
-		  	read_memory_integer (((pc + 4) & ~3) + offset, 2);
+		    read_memory_integer (((pc + 4) & ~3) + offset, 2);
 		}
 	    }
 	}
       else if (IS_MOVL_PCREL_TO_REG (inst))
-        {
+	{
 	  if (sav_reg < 0)
 	    {
 	      reg = (inst & 0x0f00) >> 8;
@@ -445,12 +437,12 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 		  sav_reg = reg;
 		  offset = (((inst & 0xff) ^ 0x80) - 0x80) << 1;
 		  sav_offset =
-		  	read_memory_integer (((pc + 4) & ~3) + offset, 4);
+		    read_memory_integer (((pc + 4) & ~3) + offset, 4);
 		}
 	    }
 	}
       else if (IS_SUB_REG_FROM_SP (inst))
-        {
+	{
 	  reg = GET_SOURCE_REG (inst);
 	  if (sav_reg > 0 && reg == sav_reg)
 	    {
@@ -470,7 +462,7 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	    }
 	}
       else if (IS_MOV_SP_FP (inst))
-        {
+	{
 	  if (!cache->uses_fp)
 	    cache->uses_fp = 1;
 	  /* At this point, only allow argument register moves to other
@@ -483,28 +475,28 @@ sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 	    {
 	      inst = read_memory_integer (pc, 2);
 	      if (IS_MOV_ARG_TO_IND_R14 (inst))
-	        {
+		{
 		  reg = GET_SOURCE_REG (inst);
 		  if (cache->sp_offset > 0)
-		  cache->saved_regs[reg] = cache->sp_offset;
+		    cache->saved_regs[reg] = cache->sp_offset;
 		}
 	      else if (IS_MOV_ARG_TO_IND_R14_WITH_DISP (inst))
-	        {
+		{
 		  reg = GET_SOURCE_REG (inst);
 		  offset = (inst & 0xf) * 4;
 		  if (cache->sp_offset > offset)
 		    cache->saved_regs[reg] = cache->sp_offset - offset;
 		}
 	      else if (IS_MOV_ARG_TO_REG (inst))
-	        continue;
+		continue;
 	      else
 		break;
 	    }
 	  break;
 	}
-#if 0 /* This used to just stop when it found an instruction that
-	 was not considered part of the prologue.  Now, we just
-	 keep going looking for likely instructions. */
+#if 0				/* This used to just stop when it found an instruction that
+				   was not considered part of the prologue.  Now, we just
+				   keep going looking for likely instructions. */
       else
 	break;
 #endif
@@ -574,7 +566,7 @@ sh_use_struct_convention (int gcc_p, struct type *type)
   int len = TYPE_LENGTH (type);
   int nelem = TYPE_NFIELDS (type);
   return ((len != 1 && len != 2 && len != 4 && len != 8) || nelem != 1) &&
-	  (len != 8 || TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) != 4);
+    (len != 8 || TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) != 4);
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -653,7 +645,7 @@ sh_justify_value_in_reg (struct value *val, int len)
 {
   static char valbuf[4];
 
-  memset (valbuf, 0, sizeof (valbuf)); 
+  memset (valbuf, 0, sizeof (valbuf));
   if (len < 4)
     {
       /* value gets right-justified in the register or stack word */
@@ -664,7 +656,7 @@ sh_justify_value_in_reg (struct value *val, int len)
       return valbuf;
     }
   return (char *) VALUE_CONTENTS (val);
-} 
+}
 
 /* Helper function to eval number of bytes to allocate on stack. */
 static CORE_ADDR
@@ -705,7 +697,8 @@ sh_next_flt_argreg (int len)
   int argreg;
 
   /* First search for the next free register. */
-  for (argreg = 0; argreg <= FLOAT_ARGLAST_REGNUM - FLOAT_ARG0_REGNUM; ++argreg)
+  for (argreg = 0; argreg <= FLOAT_ARGLAST_REGNUM - FLOAT_ARG0_REGNUM;
+       ++argreg)
     if (!flt_argreg_array[argreg])
       break;
 
@@ -717,12 +710,12 @@ sh_next_flt_argreg (int len)
     {
       /* Doubles are always starting in a even register number. */
       if (argreg & 1)
-        {
+	{
 	  flt_argreg_array[argreg] = 1;
 
 	  ++argreg;
 
-          /* No register left? */
+	  /* No register left? */
 	  if (argreg > FLOAT_ARGLAST_REGNUM - FLOAT_ARG0_REGNUM)
 	    return FLOAT_ARGLAST_REGNUM + 1;
 	}
@@ -740,11 +733,11 @@ sh_next_flt_argreg (int len)
 }
 
 static CORE_ADDR
-sh_push_dummy_call_fpu (struct gdbarch *gdbarch, 
+sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 			CORE_ADDR func_addr,
-			struct regcache *regcache, 
+			struct regcache *regcache,
 			CORE_ADDR bp_addr, int nargs,
-			struct value **args, 
+			struct value **args,
 			CORE_ADDR sp, int struct_return,
 			CORE_ADDR struct_addr)
 {
@@ -763,8 +756,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 
   if (struct_return)
     regcache_cooked_write_unsigned (regcache,
-				    STRUCT_RETURN_REGNUM,
-				    struct_addr);
+				    STRUCT_RETURN_REGNUM, struct_addr);
 
   /* make room on stack for args */
   sp -= sh_stack_allocsize (nargs, args);
@@ -785,19 +777,18 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
          This also differs in different ABIs. */
       pass_on_stack = 0;
       if (len > 16)
-        pass_on_stack = 1; /* Types bigger than 16 bytes are passed on stack. */
+	pass_on_stack = 1;	/* Types bigger than 16 bytes are passed on stack. */
 
       /* Find out the next register to use for a floating point value. */
       if (TYPE_CODE (type) == TYPE_CODE_FLT)
-        flt_argreg = sh_next_flt_argreg (len);
+	flt_argreg = sh_next_flt_argreg (len);
 
       while (len > 0)
 	{
-	  if ((TYPE_CODE (type) == TYPE_CODE_FLT 
+	  if ((TYPE_CODE (type) == TYPE_CODE_FLT
 	       && flt_argreg > FLOAT_ARGLAST_REGNUM)
-	      || argreg > ARGLAST_REGNUM
-	      || pass_on_stack)
-	    {                    
+	      || argreg > ARGLAST_REGNUM || pass_on_stack)
+	    {
 	      /* The remainder of the data goes entirely on the stack,
 	         4-byte aligned. */
 	      reg_size = (len + 3) & ~3;
@@ -837,12 +828,12 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-sh_push_dummy_call_nofpu (struct gdbarch *gdbarch, 
+sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
 			  CORE_ADDR func_addr,
-			  struct regcache *regcache, 
-			  CORE_ADDR bp_addr, 
-			  int nargs, struct value **args, 
-			  CORE_ADDR sp, int struct_return, 
+			  struct regcache *regcache,
+			  CORE_ADDR bp_addr,
+			  int nargs, struct value **args,
+			  CORE_ADDR sp, int struct_return,
 			  CORE_ADDR struct_addr)
 {
   int stack_offset = 0;
@@ -858,8 +849,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
 
   if (struct_return)
     regcache_cooked_write_unsigned (regcache,
-				    STRUCT_RETURN_REGNUM,
-				    struct_addr);
+				    STRUCT_RETURN_REGNUM, struct_addr);
 
   /* make room on stack for args */
   sp -= sh_stack_allocsize (nargs, args);
@@ -868,7 +858,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
      registers, and push the rest onto the stack.  There are 16 bytes
      in four registers available.  Loop thru args from first to last.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    { 
+    {
       type = VALUE_TYPE (args[argnum]);
       len = TYPE_LENGTH (type);
       val = sh_justify_value_in_reg (args[argnum], len);
@@ -876,15 +866,15 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
       while (len > 0)
 	{
 	  if (argreg > ARGLAST_REGNUM)
-	    {                   
+	    {
 	      /* The remainder of the data goes entirely on the stack,
 	         4-byte aligned. */
 	      reg_size = (len + 3) & ~3;
 	      write_memory (sp + stack_offset, val, reg_size);
-	      stack_offset += reg_size; 
+	      stack_offset += reg_size;
 	    }
 	  else if (argreg <= ARGLAST_REGNUM)
-	    {                   
+	    {
 	      /* there's room in a register */
 	      reg_size = register_size (gdbarch, argreg);
 	      regval = extract_unsigned_integer (val, reg_size);
@@ -918,7 +908,7 @@ sh_default_extract_return_value (struct type *type, struct regcache *regcache,
   int len = TYPE_LENGTH (type);
   int return_register = R0_REGNUM;
   int offset;
-  
+
   if (len <= 4)
     {
       ULONGEST c;
@@ -930,7 +920,7 @@ sh_default_extract_return_value (struct type *type, struct regcache *regcache,
     {
       int i, regnum = R0_REGNUM;
       for (i = 0; i < len; i += 4)
-	regcache_raw_read (regcache, regnum++, (char *)valbuf + i);
+	regcache_raw_read (regcache, regnum++, (char *) valbuf + i);
     }
   else
     error ("bad size for return value");
@@ -945,7 +935,7 @@ sh3e_sh4_extract_return_value (struct type *type, struct regcache *regcache,
       int len = TYPE_LENGTH (type);
       int i, regnum = FP0_REGNUM;
       for (i = 0; i < len; i += 4)
-	regcache_raw_read (regcache, regnum++, (char *)valbuf + i);
+	regcache_raw_read (regcache, regnum++, (char *) valbuf + i);
     }
   else
     sh_default_extract_return_value (type, regcache, valbuf);
@@ -973,7 +963,7 @@ sh_default_store_return_value (struct type *type, struct regcache *regcache,
     {
       int i, regnum = R0_REGNUM;
       for (i = 0; i < len; i += 4)
-        regcache_raw_write (regcache, regnum++, (char *)valbuf + i);
+	regcache_raw_write (regcache, regnum++, (char *) valbuf + i);
     }
 }
 
@@ -981,12 +971,12 @@ static void
 sh3e_sh4_store_return_value (struct type *type, struct regcache *regcache,
 			     const void *valbuf)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_FLT) 
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       int len = TYPE_LENGTH (type);
       int i, regnum = FP0_REGNUM;
       for (i = 0; i < len; i += 4)
-        regcache_raw_write (regcache, regnum++, (char *)valbuf + i);
+	regcache_raw_write (regcache, regnum++, (char *) valbuf + i);
     }
   else
     sh_default_store_return_value (type, regcache, valbuf);
@@ -1008,24 +998,17 @@ sh_generic_show_regs (void)
 		   (long) read_register (GBR_REGNUM),
 		   (long) read_register (VBR_REGNUM));
 
-  printf_filtered ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (0),
-		   (long) read_register (1),
-		   (long) read_register (2),
-		   (long) read_register (3),
-		   (long) read_register (4),
-		   (long) read_register (5),
-		   (long) read_register (6),
-		   (long) read_register (7));
+  printf_filtered
+    ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+     (long) read_register (0), (long) read_register (1),
+     (long) read_register (2), (long) read_register (3),
+     (long) read_register (4), (long) read_register (5),
+     (long) read_register (6), (long) read_register (7));
   printf_filtered ("R8-R15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (8),
-		   (long) read_register (9),
-		   (long) read_register (10),
-		   (long) read_register (11),
-		   (long) read_register (12),
-		   (long) read_register (13),
-		   (long) read_register (14),
-		   (long) read_register (15));
+		   (long) read_register (8), (long) read_register (9),
+		   (long) read_register (10), (long) read_register (11),
+		   (long) read_register (12), (long) read_register (13),
+		   (long) read_register (14), (long) read_register (15));
 }
 
 static void
@@ -1042,27 +1025,20 @@ sh3_show_regs (void)
 		   (long) read_register (GBR_REGNUM),
 		   (long) read_register (VBR_REGNUM));
   printf_filtered (" SSR=%08lx SPC=%08lx",
-	           (long) read_register (SSR_REGNUM),
+		   (long) read_register (SSR_REGNUM),
 		   (long) read_register (SPC_REGNUM));
 
-  printf_filtered ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (0),
-		   (long) read_register (1),
-		   (long) read_register (2),
-		   (long) read_register (3),
-		   (long) read_register (4),
-		   (long) read_register (5),
-		   (long) read_register (6),
-		   (long) read_register (7));
+  printf_filtered
+    ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+     (long) read_register (0), (long) read_register (1),
+     (long) read_register (2), (long) read_register (3),
+     (long) read_register (4), (long) read_register (5),
+     (long) read_register (6), (long) read_register (7));
   printf_filtered ("R8-R15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (8),
-		   (long) read_register (9),
-		   (long) read_register (10),
-		   (long) read_register (11),
-		   (long) read_register (12),
-		   (long) read_register (13),
-		   (long) read_register (14),
-		   (long) read_register (15));
+		   (long) read_register (8), (long) read_register (9),
+		   (long) read_register (10), (long) read_register (11),
+		   (long) read_register (12), (long) read_register (13),
+		   (long) read_register (14), (long) read_register (15));
 }
 
 
@@ -1080,46 +1056,23 @@ sh2e_show_regs (void)
 		   (long) read_register (GBR_REGNUM),
 		   (long) read_register (VBR_REGNUM));
   printf_filtered (" FPUL=%08lx FPSCR=%08lx",
-	  	   (long) read_register (FPUL_REGNUM),
-                   (long) read_register (FPSCR_REGNUM));
+		   (long) read_register (FPUL_REGNUM),
+		   (long) read_register (FPSCR_REGNUM));
 
-  printf_filtered ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (0),
-		   (long) read_register (1),
-		   (long) read_register (2),
-		   (long) read_register (3),
-		   (long) read_register (4),
-		   (long) read_register (5),
-		   (long) read_register (6),
-		   (long) read_register (7));
+  printf_filtered
+    ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+     (long) read_register (0), (long) read_register (1),
+     (long) read_register (2), (long) read_register (3),
+     (long) read_register (4), (long) read_register (5),
+     (long) read_register (6), (long) read_register (7));
   printf_filtered ("R8-R15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (8),
-		   (long) read_register (9),
-		   (long) read_register (10),
-		   (long) read_register (11),
-		   (long) read_register (12),
-		   (long) read_register (13),
-		   (long) read_register (14),
-		   (long) read_register (15));
+		   (long) read_register (8), (long) read_register (9),
+		   (long) read_register (10), (long) read_register (11),
+		   (long) read_register (12), (long) read_register (13),
+		   (long) read_register (14), (long) read_register (15));
 
-  printf_filtered (("FP0-FP7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
-		   (long) read_register (FP0_REGNUM + 0),
-		   (long) read_register (FP0_REGNUM + 1),
-		   (long) read_register (FP0_REGNUM + 2),
-		   (long) read_register (FP0_REGNUM + 3),
-		   (long) read_register (FP0_REGNUM + 4),
-		   (long) read_register (FP0_REGNUM + 5),
-		   (long) read_register (FP0_REGNUM + 6),
-		   (long) read_register (FP0_REGNUM + 7));
-  printf_filtered (("FP8-FP15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
-		   (long) read_register (FP0_REGNUM + 8),
-		   (long) read_register (FP0_REGNUM + 9),
-		   (long) read_register (FP0_REGNUM + 10),
-		   (long) read_register (FP0_REGNUM + 11),
-		   (long) read_register (FP0_REGNUM + 12),
-		   (long) read_register (FP0_REGNUM + 13),
-		   (long) read_register (FP0_REGNUM + 14),
-		   (long) read_register (FP0_REGNUM + 15));
+  printf_filtered (("FP0-FP7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"), (long) read_register (FP0_REGNUM + 0), (long) read_register (FP0_REGNUM + 1), (long) read_register (FP0_REGNUM + 2), (long) read_register (FP0_REGNUM + 3), (long) read_register (FP0_REGNUM + 4), (long) read_register (FP0_REGNUM + 5), (long) read_register (FP0_REGNUM + 6), (long) read_register (FP0_REGNUM + 7));
+  printf_filtered (("FP8-FP15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"), (long) read_register (FP0_REGNUM + 8), (long) read_register (FP0_REGNUM + 9), (long) read_register (FP0_REGNUM + 10), (long) read_register (FP0_REGNUM + 11), (long) read_register (FP0_REGNUM + 12), (long) read_register (FP0_REGNUM + 13), (long) read_register (FP0_REGNUM + 14), (long) read_register (FP0_REGNUM + 15));
 }
 
 static void
@@ -1142,43 +1095,20 @@ sh3e_show_regs (void)
 		   (long) read_register (FPUL_REGNUM),
 		   (long) read_register (FPSCR_REGNUM));
 
-  printf_filtered ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (0),
-		   (long) read_register (1),
-		   (long) read_register (2),
-		   (long) read_register (3),
-		   (long) read_register (4),
-		   (long) read_register (5),
-		   (long) read_register (6),
-		   (long) read_register (7));
+  printf_filtered
+    ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+     (long) read_register (0), (long) read_register (1),
+     (long) read_register (2), (long) read_register (3),
+     (long) read_register (4), (long) read_register (5),
+     (long) read_register (6), (long) read_register (7));
   printf_filtered ("R8-R15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (8),
-		   (long) read_register (9),
-		   (long) read_register (10),
-		   (long) read_register (11),
-		   (long) read_register (12),
-		   (long) read_register (13),
-		   (long) read_register (14),
-		   (long) read_register (15));
+		   (long) read_register (8), (long) read_register (9),
+		   (long) read_register (10), (long) read_register (11),
+		   (long) read_register (12), (long) read_register (13),
+		   (long) read_register (14), (long) read_register (15));
 
-  printf_filtered (("FP0-FP7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
-		   (long) read_register (FP0_REGNUM + 0),
-		   (long) read_register (FP0_REGNUM + 1),
-		   (long) read_register (FP0_REGNUM + 2),
-		   (long) read_register (FP0_REGNUM + 3),
-		   (long) read_register (FP0_REGNUM + 4),
-		   (long) read_register (FP0_REGNUM + 5),
-		   (long) read_register (FP0_REGNUM + 6),
-		   (long) read_register (FP0_REGNUM + 7));
-  printf_filtered (("FP8-FP15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
-		   (long) read_register (FP0_REGNUM + 8),
-		   (long) read_register (FP0_REGNUM + 9),
-		   (long) read_register (FP0_REGNUM + 10),
-		   (long) read_register (FP0_REGNUM + 11),
-		   (long) read_register (FP0_REGNUM + 12),
-		   (long) read_register (FP0_REGNUM + 13),
-		   (long) read_register (FP0_REGNUM + 14),
-		   (long) read_register (FP0_REGNUM + 15));
+  printf_filtered (("FP0-FP7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"), (long) read_register (FP0_REGNUM + 0), (long) read_register (FP0_REGNUM + 1), (long) read_register (FP0_REGNUM + 2), (long) read_register (FP0_REGNUM + 3), (long) read_register (FP0_REGNUM + 4), (long) read_register (FP0_REGNUM + 5), (long) read_register (FP0_REGNUM + 6), (long) read_register (FP0_REGNUM + 7));
+  printf_filtered (("FP8-FP15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"), (long) read_register (FP0_REGNUM + 8), (long) read_register (FP0_REGNUM + 9), (long) read_register (FP0_REGNUM + 10), (long) read_register (FP0_REGNUM + 11), (long) read_register (FP0_REGNUM + 12), (long) read_register (FP0_REGNUM + 13), (long) read_register (FP0_REGNUM + 14), (long) read_register (FP0_REGNUM + 15));
 }
 
 static void
@@ -1199,36 +1129,26 @@ sh3_dsp_show_regs (void)
 		   (long) read_register (SSR_REGNUM),
 		   (long) read_register (SPC_REGNUM));
 
-  printf_filtered (" DSR=%08lx", 
-		   (long) read_register (DSR_REGNUM));
+  printf_filtered (" DSR=%08lx", (long) read_register (DSR_REGNUM));
 
-  printf_filtered ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (0),
-		   (long) read_register (1),
-		   (long) read_register (2),
-		   (long) read_register (3),
-		   (long) read_register (4),
-		   (long) read_register (5),
-		   (long) read_register (6),
-		   (long) read_register (7));
+  printf_filtered
+    ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+     (long) read_register (0), (long) read_register (1),
+     (long) read_register (2), (long) read_register (3),
+     (long) read_register (4), (long) read_register (5),
+     (long) read_register (6), (long) read_register (7));
   printf_filtered ("R8-R15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (8),
-		   (long) read_register (9),
-		   (long) read_register (10),
-		   (long) read_register (11),
-		   (long) read_register (12),
-		   (long) read_register (13),
-		   (long) read_register (14),
-		   (long) read_register (15));
+		   (long) read_register (8), (long) read_register (9),
+		   (long) read_register (10), (long) read_register (11),
+		   (long) read_register (12), (long) read_register (13),
+		   (long) read_register (14), (long) read_register (15));
 
-  printf_filtered ("A0G=%02lx A0=%08lx M0=%08lx X0=%08lx Y0=%08lx RS=%08lx MOD=%08lx\n",
-		   (long) read_register (A0G_REGNUM) & 0xff,
-		   (long) read_register (A0_REGNUM),
-		   (long) read_register (M0_REGNUM),
-		   (long) read_register (X0_REGNUM),
-		   (long) read_register (Y0_REGNUM),
-		   (long) read_register (RS_REGNUM),
-		   (long) read_register (MOD_REGNUM));
+  printf_filtered
+    ("A0G=%02lx A0=%08lx M0=%08lx X0=%08lx Y0=%08lx RS=%08lx MOD=%08lx\n",
+     (long) read_register (A0G_REGNUM) & 0xff,
+     (long) read_register (A0_REGNUM), (long) read_register (M0_REGNUM),
+     (long) read_register (X0_REGNUM), (long) read_register (Y0_REGNUM),
+     (long) read_register (RS_REGNUM), (long) read_register (MOD_REGNUM));
   printf_filtered ("A1G=%02lx A1=%08lx M1=%08lx X1=%08lx Y1=%08lx RE=%08lx\n",
 		   (long) read_register (A1G_REGNUM) & 0xff,
 		   (long) read_register (A1_REGNUM),
@@ -1259,28 +1179,22 @@ sh4_show_regs (void)
 		   (long) read_register (FPUL_REGNUM),
 		   (long) read_register (FPSCR_REGNUM));
 
-  printf_filtered ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (0),
-		   (long) read_register (1),
-		   (long) read_register (2),
-		   (long) read_register (3),
-		   (long) read_register (4),
-		   (long) read_register (5),
-		   (long) read_register (6),
-		   (long) read_register (7));
+  printf_filtered
+    ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+     (long) read_register (0), (long) read_register (1),
+     (long) read_register (2), (long) read_register (3),
+     (long) read_register (4), (long) read_register (5),
+     (long) read_register (6), (long) read_register (7));
   printf_filtered ("R8-R15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (8),
-		   (long) read_register (9),
-		   (long) read_register (10),
-		   (long) read_register (11),
-		   (long) read_register (12),
-		   (long) read_register (13),
-		   (long) read_register (14),
-		   (long) read_register (15));
+		   (long) read_register (8), (long) read_register (9),
+		   (long) read_register (10), (long) read_register (11),
+		   (long) read_register (12), (long) read_register (13),
+		   (long) read_register (14), (long) read_register (15));
 
   printf_filtered ((pr
 		    ? "DR0-DR6  %08lx%08lx %08lx%08lx %08lx%08lx %08lx%08lx\n"
-		    : "FP0-FP7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
+		    :
+		    "FP0-FP7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
 		   (long) read_register (FP0_REGNUM + 0),
 		   (long) read_register (FP0_REGNUM + 1),
 		   (long) read_register (FP0_REGNUM + 2),
@@ -1289,9 +1203,9 @@ sh4_show_regs (void)
 		   (long) read_register (FP0_REGNUM + 5),
 		   (long) read_register (FP0_REGNUM + 6),
 		   (long) read_register (FP0_REGNUM + 7));
-  printf_filtered ((pr
-		    ? "DR8-DR14 %08lx%08lx %08lx%08lx %08lx%08lx %08lx%08lx\n"
-		    : "FP8-FP15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
+  printf_filtered ((pr ?
+		    "DR8-DR14 %08lx%08lx %08lx%08lx %08lx%08lx %08lx%08lx\n" :
+		    "FP8-FP15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n"),
 		   (long) read_register (FP0_REGNUM + 8),
 		   (long) read_register (FP0_REGNUM + 9),
 		   (long) read_register (FP0_REGNUM + 10),
@@ -1316,36 +1230,26 @@ sh_dsp_show_regs (void)
 		   (long) read_register (GBR_REGNUM),
 		   (long) read_register (VBR_REGNUM));
 
-  printf_filtered (" DSR=%08lx", 
-		   (long) read_register (DSR_REGNUM));
+  printf_filtered (" DSR=%08lx", (long) read_register (DSR_REGNUM));
 
-  printf_filtered ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (0),
-		   (long) read_register (1),
-		   (long) read_register (2),
-		   (long) read_register (3),
-		   (long) read_register (4),
-		   (long) read_register (5),
-		   (long) read_register (6),
-		   (long) read_register (7));
+  printf_filtered
+    ("\nR0-R7  %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
+     (long) read_register (0), (long) read_register (1),
+     (long) read_register (2), (long) read_register (3),
+     (long) read_register (4), (long) read_register (5),
+     (long) read_register (6), (long) read_register (7));
   printf_filtered ("R8-R15 %08lx %08lx %08lx %08lx %08lx %08lx %08lx %08lx\n",
-		   (long) read_register (8),
-		   (long) read_register (9),
-		   (long) read_register (10),
-		   (long) read_register (11),
-		   (long) read_register (12),
-		   (long) read_register (13),
-		   (long) read_register (14),
-		   (long) read_register (15));
+		   (long) read_register (8), (long) read_register (9),
+		   (long) read_register (10), (long) read_register (11),
+		   (long) read_register (12), (long) read_register (13),
+		   (long) read_register (14), (long) read_register (15));
 
-  printf_filtered ("A0G=%02lx A0=%08lx M0=%08lx X0=%08lx Y0=%08lx RS=%08lx MOD=%08lx\n",
-		   (long) read_register (A0G_REGNUM) & 0xff,
-		   (long) read_register (A0_REGNUM),
-		   (long) read_register (M0_REGNUM),
-		   (long) read_register (X0_REGNUM),
-		   (long) read_register (Y0_REGNUM),
-		   (long) read_register (RS_REGNUM),
-		   (long) read_register (MOD_REGNUM));
+  printf_filtered
+    ("A0G=%02lx A0=%08lx M0=%08lx X0=%08lx Y0=%08lx RS=%08lx MOD=%08lx\n",
+     (long) read_register (A0G_REGNUM) & 0xff,
+     (long) read_register (A0_REGNUM), (long) read_register (M0_REGNUM),
+     (long) read_register (X0_REGNUM), (long) read_register (Y0_REGNUM),
+     (long) read_register (RS_REGNUM), (long) read_register (MOD_REGNUM));
   printf_filtered ("A1G=%02lx A1=%08lx M1=%08lx X1=%08lx Y1=%08lx RE=%08lx\n",
 		   (long) read_register (A1G_REGNUM) & 0xff,
 		   (long) read_register (A1_REGNUM),
@@ -1359,7 +1263,7 @@ static void
 sh_show_regs_command (char *args, int from_tty)
 {
   if (sh_show_regs)
-    (*sh_show_regs)();
+    (*sh_show_regs) ();
 }
 
 /* Return the GDB type object for the "standard" data type
@@ -1368,8 +1272,7 @@ static struct type *
 sh_sh3e_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if ((reg_nr >= FP0_REGNUM
-       && (reg_nr <= FP_LAST_REGNUM)) 
-      || (reg_nr == FPUL_REGNUM))
+       && (reg_nr <= FP_LAST_REGNUM)) || (reg_nr == FPUL_REGNUM))
     return builtin_type_float;
   else
     return builtin_type_int;
@@ -1388,14 +1291,11 @@ static struct type *
 sh_sh4_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if ((reg_nr >= FP0_REGNUM
-       && (reg_nr <= FP_LAST_REGNUM)) 
-      || (reg_nr == FPUL_REGNUM))
+       && (reg_nr <= FP_LAST_REGNUM)) || (reg_nr == FPUL_REGNUM))
     return builtin_type_float;
-  else if (reg_nr >= DR0_REGNUM 
-	   && reg_nr <= DR_LAST_REGNUM)
+  else if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     return builtin_type_double;
-  else if  (reg_nr >= FV0_REGNUM 
-	   && reg_nr <= FV_LAST_REGNUM)
+  else if (reg_nr >= FV0_REGNUM && reg_nr <= FV_LAST_REGNUM)
     return sh_sh4_build_float_register_type (3);
   else
     return builtin_type_int;
@@ -1435,31 +1335,32 @@ sh_default_register_type (struct gdbarch *gdbarch, int reg_nr)
 
 static void
 sh_sh4_register_convert_to_virtual (int regnum, struct type *type,
-                                  char *from, char *to)
+				    char *from, char *to)
 {
-  if (regnum >= DR0_REGNUM 
-      && regnum <= DR_LAST_REGNUM)
+  if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
     {
       DOUBLEST val;
-      floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword, from, &val);
+      floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword,
+			       from, &val);
       store_typed_floating (to, type, val);
     }
   else
-    error ("sh_register_convert_to_virtual called with non DR register number");
+    error
+      ("sh_register_convert_to_virtual called with non DR register number");
 }
 
 static void
 sh_sh4_register_convert_to_raw (struct type *type, int regnum,
 				const void *from, void *to)
 {
-  if (regnum >= DR0_REGNUM 
-      && regnum <= DR_LAST_REGNUM)
+  if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
     {
       DOUBLEST val = extract_typed_floating (from, type);
-      floatformat_from_doublest (&floatformat_ieee_double_littlebyte_bigword, &val, to);
+      floatformat_from_doublest (&floatformat_ieee_double_littlebyte_bigword,
+				 &val, to);
     }
   else
-    error("sh_register_convert_to_raw called with non DR register number");
+    error ("sh_register_convert_to_raw called with non DR register number");
 }
 
 /* For vectors of 4 floating point registers. */
@@ -1468,8 +1369,7 @@ fv_reg_base_num (int fv_regnum)
 {
   int fp_regnum;
 
-  fp_regnum = FP0_REGNUM + 
-    (fv_regnum - FV0_REGNUM) * 4;
+  fp_regnum = FP0_REGNUM + (fv_regnum - FV0_REGNUM) * 4;
   return fp_regnum;
 }
 
@@ -1479,8 +1379,7 @@ dr_reg_base_num (int dr_regnum)
 {
   int fp_regnum;
 
-  fp_regnum = FP0_REGNUM + 
-    (dr_regnum - DR0_REGNUM) * 2;
+  fp_regnum = FP0_REGNUM + (dr_regnum - DR0_REGNUM) * 2;
   return fp_regnum;
 }
 
@@ -1491,32 +1390,33 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   int base_regnum, portion;
   char temp_buffer[MAX_REGISTER_SIZE];
 
-  if (reg_nr >= DR0_REGNUM 
-      && reg_nr <= DR_LAST_REGNUM)
+  if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     {
       base_regnum = dr_reg_base_num (reg_nr);
 
-      /* Build the value in the provided buffer. */ 
+      /* Build the value in the provided buffer. */
       /* Read the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
-	regcache_raw_read (regcache, base_regnum + portion, 
+	regcache_raw_read (regcache, base_regnum + portion,
 			   (temp_buffer
-			    + register_size (gdbarch, base_regnum) * portion));
+			    + register_size (gdbarch,
+					     base_regnum) * portion));
       /* We must pay attention to the endiannes. */
       sh_sh4_register_convert_to_virtual (reg_nr,
-					  gdbarch_register_type (gdbarch, reg_nr),
+					  gdbarch_register_type (gdbarch,
+								 reg_nr),
 					  temp_buffer, buffer);
     }
-  else if (reg_nr >= FV0_REGNUM 
-	   && reg_nr <= FV_LAST_REGNUM)
+  else if (reg_nr >= FV0_REGNUM && reg_nr <= FV_LAST_REGNUM)
     {
       base_regnum = fv_reg_base_num (reg_nr);
 
       /* Read the real regs for which this one is an alias.  */
       for (portion = 0; portion < 4; portion++)
-	regcache_raw_read (regcache, base_regnum + portion, 
+	regcache_raw_read (regcache, base_regnum + portion,
 			   ((char *) buffer
-			    + register_size (gdbarch, base_regnum) * portion));
+			    + register_size (gdbarch,
+					     base_regnum) * portion));
     }
 }
 
@@ -1527,23 +1427,22 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   int base_regnum, portion;
   char temp_buffer[MAX_REGISTER_SIZE];
 
-  if (reg_nr >= DR0_REGNUM
-      && reg_nr <= DR_LAST_REGNUM)
+  if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     {
       base_regnum = dr_reg_base_num (reg_nr);
 
       /* We must pay attention to the endiannes. */
-      sh_sh4_register_convert_to_raw (gdbarch_register_type (gdbarch, reg_nr), reg_nr,
-				      buffer, temp_buffer);
+      sh_sh4_register_convert_to_raw (gdbarch_register_type (gdbarch, reg_nr),
+				      reg_nr, buffer, temp_buffer);
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
-	regcache_raw_write (regcache, base_regnum + portion, 
+	regcache_raw_write (regcache, base_regnum + portion,
 			    (temp_buffer
-			     + register_size (gdbarch, base_regnum) * portion));
+			     + register_size (gdbarch,
+					      base_regnum) * portion));
     }
-  else if (reg_nr >= FV0_REGNUM
-	   && reg_nr <= FV_LAST_REGNUM)
+  else if (reg_nr >= FV0_REGNUM && reg_nr <= FV_LAST_REGNUM)
     {
       base_regnum = fv_reg_base_num (reg_nr);
 
@@ -1551,7 +1450,8 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 4; portion++)
 	regcache_raw_write (regcache, base_regnum + portion,
 			    ((char *) buffer
-			     + register_size (gdbarch, base_regnum) * portion));
+			     + register_size (gdbarch,
+					      base_regnum) * portion));
     }
 }
 
@@ -1561,12 +1461,12 @@ do_fv_register_info (struct gdbarch *gdbarch, struct ui_file *file,
 		     int fv_regnum)
 {
   int first_fp_reg_num = fv_reg_base_num (fv_regnum);
-  fprintf_filtered (file, "fv%d\t0x%08x\t0x%08x\t0x%08x\t0x%08x\n", 
-		     fv_regnum - FV0_REGNUM, 
-		     (int) read_register (first_fp_reg_num),
-		     (int) read_register (first_fp_reg_num + 1),
-		     (int) read_register (first_fp_reg_num + 2),
-		     (int) read_register (first_fp_reg_num + 3));
+  fprintf_filtered (file, "fv%d\t0x%08x\t0x%08x\t0x%08x\t0x%08x\n",
+		    fv_regnum - FV0_REGNUM,
+		    (int) read_register (first_fp_reg_num),
+		    (int) read_register (first_fp_reg_num + 1),
+		    (int) read_register (first_fp_reg_num + 2),
+		    (int) read_register (first_fp_reg_num + 3));
 }
 
 /* Double precision registers. */
@@ -1576,8 +1476,8 @@ do_dr_register_info (struct gdbarch *gdbarch, struct ui_file *file,
 {
   int first_fp_reg_num = dr_reg_base_num (dr_regnum);
 
-  fprintf_filtered (file, "dr%d\t0x%08x%08x\n", 
-		    dr_regnum - DR0_REGNUM, 
+  fprintf_filtered (file, "dr%d\t0x%08x%08x\n",
+		    dr_regnum - DR0_REGNUM,
 		    (int) read_register (first_fp_reg_num),
 		    (int) read_register (first_fp_reg_num + 1));
 }
@@ -1589,11 +1489,9 @@ sh_print_pseudo_register (struct gdbarch *gdbarch, struct ui_file *file,
   if (regnum < NUM_REGS || regnum >= NUM_REGS + NUM_PSEUDO_REGS)
     internal_error (__FILE__, __LINE__,
 		    "Invalid pseudo register number %d\n", regnum);
-  else if (regnum >= DR0_REGNUM
-	   && regnum <= DR_LAST_REGNUM)
+  else if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
     do_dr_register_info (gdbarch, file, regnum);
-  else if (regnum >= FV0_REGNUM
-	   && regnum <= FV_LAST_REGNUM)
+  else if (regnum >= FV0_REGNUM && regnum <= FV_LAST_REGNUM)
     do_fv_register_info (gdbarch, file, regnum);
 }
 
@@ -1601,7 +1499,7 @@ static void
 sh_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file, int regnum)
 {				/* do values for FP (float) regs */
   char *raw_buffer;
-  double flt;	/* double extracted from raw hex data */
+  double flt;			/* double extracted from raw hex data */
   int inv;
   int j;
 
@@ -1612,7 +1510,7 @@ sh_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file, int regnum)
   if (!frame_register_read (get_selected_frame (), regnum, raw_buffer))
     error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
 
-  /* Get the register as a number */ 
+  /* Get the register as a number */
   flt = unpack_double (builtin_type_float, raw_buffer, &inv);
 
   /* Print the name and some spaces. */
@@ -1648,7 +1546,7 @@ sh_do_register (struct gdbarch *gdbarch, struct ui_file *file, int regnum)
   /* Get the data in raw format.  */
   if (!frame_register_read (get_selected_frame (), regnum, raw_buffer))
     fprintf_filtered (file, "*value not available*\n");
-      
+
   val_print (gdbarch_register_type (gdbarch, regnum), raw_buffer, 0, 0,
 	     file, 'x', 1, 0, Val_pretty_default);
   fprintf_filtered (file, "\t");
@@ -1666,7 +1564,8 @@ sh_print_register (struct gdbarch *gdbarch, struct ui_file *file, int regnum)
 
   else if (regnum >= 0 && regnum < NUM_REGS)
     {
-      if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
+      if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) ==
+	  TYPE_CODE_FLT)
 	sh_do_fp_register (gdbarch, file, regnum);	/* FP regs */
       else
 	sh_do_register (gdbarch, file, regnum);	/* All other regs */
@@ -1699,18 +1598,19 @@ sh_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	     processor, so don't display anything.  */
 	  if (REGISTER_NAME (regnum) == NULL
 	      || *(REGISTER_NAME (regnum)) == '\0')
-	    { 
+	    {
 	      regnum++;
 	      continue;
 	    }
 
-	  if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
+	  if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) ==
+	      TYPE_CODE_FLT)
 	    {
 	      if (fpregs)
 		{
 		  /* true for "INFO ALL-REGISTERS" command */
 		  sh_do_fp_register (gdbarch, file, regnum);	/* FP regs */
-		  regnum ++;
+		  regnum++;
 		}
 	      else
 		regnum += (FP_LAST_REGNUM - FP0_REGNUM);	/* skip FP regs */
@@ -1754,24 +1654,24 @@ sh_linux_svr4_fetch_link_map_offsets (void)
       lmo.r_debug_size = 8;	/* 20 not actual size but all we need */
 
       lmo.r_map_offset = 4;
-      lmo.r_map_size   = 4;
+      lmo.r_map_size = 4;
 
       lmo.link_map_size = 20;	/* 552 not actual size but all we need */
 
       lmo.l_addr_offset = 0;
-      lmo.l_addr_size   = 4;
+      lmo.l_addr_size = 4;
 
       lmo.l_name_offset = 4;
-      lmo.l_name_size   = 4;
+      lmo.l_name_size = 4;
 
       lmo.l_next_offset = 12;
-      lmo.l_next_size   = 4;
+      lmo.l_next_size = 4;
 
       lmo.l_prev_offset = 16;
-      lmo.l_prev_size   = 4;
+      lmo.l_prev_size = 4;
     }
 
-    return lmp;
+  return lmp;
 }
 #endif /* SVR4_SHARED_LIBS */
 
@@ -1809,16 +1709,16 @@ sh_alloc_frame_cache (void)
 
   /* Frameless until proven otherwise.  */
   cache->uses_fp = 0;
-    
+
   /* Saved registers.  We initialize these to -1 since zero is a valid
      offset (that's where fp is supposed to be stored).  */
   for (i = 0; i < SH_NUM_REGS; i++)
     {
       cache->saved_regs[i] = -1;
     }
-  
+
   return cache;
-} 
+}
 
 static struct sh_frame_cache *
 sh_frame_cache (struct frame_info *next_frame, void **this_cache)
@@ -1846,7 +1746,7 @@ sh_frame_cache (struct frame_info *next_frame, void **this_cache)
   current_pc = frame_pc_unwind (next_frame);
   if (cache->pc != 0)
     sh_analyze_prologue (cache->pc, current_pc, cache);
-    
+
   if (!cache->uses_fp)
     {
       /* We didn't find a valid frame, which means that CACHE->base
@@ -1889,10 +1789,10 @@ sh_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       *addrp = 0;
       *realnump = -1;
       if (valuep)
-        {
-          /* Store the value.  */
-          store_unsigned_integer (valuep, 4, cache->saved_sp);
-        }
+	{
+	  /* Store the value.  */
+	  store_unsigned_integer (valuep, 4, cache->saved_sp);
+	}
       return;
     }
 
@@ -1909,22 +1809,22 @@ sh_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       *addrp = cache->saved_regs[regnum];
       *realnump = -1;
       if (valuep)
-        {
-          /* Read the value in from memory.  */
-          read_memory (*addrp, valuep,
-                       register_size (current_gdbarch, regnum));
-        }
+	{
+	  /* Read the value in from memory.  */
+	  read_memory (*addrp, valuep,
+		       register_size (current_gdbarch, regnum));
+	}
       return;
     }
 
   frame_register_unwind (next_frame, regnum,
-                         optimizedp, lvalp, addrp, realnump, valuep);
+			 optimizedp, lvalp, addrp, realnump, valuep);
 }
 
 static void
 sh_frame_this_id (struct frame_info *next_frame, void **this_cache,
-                    struct frame_id *this_id)
-{ 
+		  struct frame_id *this_id)
+{
   struct sh_frame_cache *cache = sh_frame_cache (next_frame, this_cache);
 
   /* This marks the outermost frame.  */
@@ -1932,10 +1832,9 @@ sh_frame_this_id (struct frame_info *next_frame, void **this_cache,
     return;
 
   *this_id = frame_id_build (cache->saved_sp, cache->pc);
-} 
+}
 
-static const struct frame_unwind sh_frame_unwind =
-{
+static const struct frame_unwind sh_frame_unwind = {
   NORMAL_FRAME,
   sh_frame_this_id,
   sh_frame_prev_register
@@ -1968,19 +1867,18 @@ sh_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
 static CORE_ADDR
 sh_frame_base_address (struct frame_info *next_frame, void **this_cache)
-{ 
+{
   struct sh_frame_cache *cache = sh_frame_cache (next_frame, this_cache);
-  
+
   return cache->base;
 }
-  
-static const struct frame_base sh_frame_base =
-{
+
+static const struct frame_base sh_frame_base = {
   &sh_frame_unwind,
   sh_frame_base_address,
   sh_frame_base_address,
   sh_frame_base_address
-};  
+};
 
 /* The epilogue is defined here as the area at the end of a function,
    either on the `ret' instruction itself or after an instruction which
@@ -1995,41 +1893,41 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
       ULONGEST inst;
       /* The sh epilogue is max. 14 bytes long.  Give another 14 bytes
          for a nop and some fixed data (e.g. big offsets) which are
-	 unfortunately also treated as part of the function (which
-	 means, they are below func_end. */
+         unfortunately also treated as part of the function (which
+         means, they are below func_end. */
       CORE_ADDR addr = func_end - 28;
       if (addr < func_addr + 4)
-        addr = func_addr + 4;
+	addr = func_addr + 4;
       if (pc < addr)
 	return 0;
 
       /* First search forward until hitting an rts. */
       while (addr < func_end
-             && !IS_RTS (read_memory_unsigned_integer (addr, 2)))
+	     && !IS_RTS (read_memory_unsigned_integer (addr, 2)))
 	addr += 2;
       if (addr >= func_end)
-        return 0;
+	return 0;
 
       /* At this point we should find a mov.l @r15+,r14 instruction,
          either before or after the rts.  If not, then the function has
-	 probably no "normal" epilogue and we bail out here. */
+         probably no "normal" epilogue and we bail out here. */
       inst = read_memory_unsigned_integer (addr - 2, 2);
       if (IS_RESTORE_FP (read_memory_unsigned_integer (addr - 2, 2)))
-        addr -= 2;
+	addr -= 2;
       else if (!IS_RESTORE_FP (read_memory_unsigned_integer (addr + 2, 2)))
 	return 0;
 
       /* Step over possible lds.l @r15+,pr. */
       inst = read_memory_unsigned_integer (addr - 2, 2);
       if (IS_LDS (inst))
-        {
+	{
 	  addr -= 2;
 	  inst = read_memory_unsigned_integer (addr - 2, 2);
 	}
 
       /* Step over possible mov r14,r15. */
       if (IS_MOV_FP_SP (inst))
-        {
+	{
 	  addr -= 2;
 	  inst = read_memory_unsigned_integer (addr - 2, 2);
 	}
@@ -2037,7 +1935,7 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
       /* Now check for FP adjustments, using add #imm,r14 or add rX, r14
          instructions. */
       while (addr > func_addr + 4
-             && (IS_ADD_REG_TO_FP (inst) || IS_ADD_IMM_FP (inst)))
+	     && (IS_ADD_REG_TO_FP (inst) || IS_ADD_IMM_FP (inst)))
 	{
 	  addr -= 2;
 	  inst = read_memory_unsigned_integer (addr - 2, 2);
@@ -2059,33 +1957,33 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   sh_show_regs = sh_generic_show_regs;
   switch (info.bfd_arch_info->mach)
     {
-      case bfd_mach_sh2e:
-	sh_show_regs = sh2e_show_regs;
-	break;
-      case bfd_mach_sh_dsp:
-	sh_show_regs = sh_dsp_show_regs;
-	break;
+    case bfd_mach_sh2e:
+      sh_show_regs = sh2e_show_regs;
+      break;
+    case bfd_mach_sh_dsp:
+      sh_show_regs = sh_dsp_show_regs;
+      break;
 
-      case bfd_mach_sh3:
-	sh_show_regs = sh3_show_regs;
-	break;
+    case bfd_mach_sh3:
+      sh_show_regs = sh3_show_regs;
+      break;
 
-      case bfd_mach_sh3e:
-	sh_show_regs = sh3e_show_regs;
-	break;
+    case bfd_mach_sh3e:
+      sh_show_regs = sh3e_show_regs;
+      break;
 
-      case bfd_mach_sh3_dsp:
-	sh_show_regs = sh3_dsp_show_regs;
-	break;
+    case bfd_mach_sh3_dsp:
+      sh_show_regs = sh3_dsp_show_regs;
+      break;
 
-      case bfd_mach_sh4:
-	sh_show_regs = sh4_show_regs;
-	break;
+    case bfd_mach_sh4:
+      sh_show_regs = sh4_show_regs;
+      break;
 
-      case bfd_mach_sh5:
-	sh_show_regs = sh64_show_regs;
-	/* SH5 is handled entirely in sh64-tdep.c */
-	return sh64_gdbarch_init (info, arches);
+    case bfd_mach_sh5:
+      sh_show_regs = sh64_show_regs;
+      /* SH5 is handled entirely in sh64-tdep.c */
+      return sh64_gdbarch_init (info, arches);
     }
 
   /* If there is already a candidate, use it.  */
@@ -2148,8 +2046,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_dummy_id (gdbarch, sh_unwind_dummy_id);
   frame_base_set_default (gdbarch, &sh_frame_base);
 
-  set_gdbarch_in_function_epilogue_p (gdbarch,
-				      sh_in_function_epilogue_p);
+  set_gdbarch_in_function_epilogue_p (gdbarch, sh_in_function_epilogue_p);
 
   switch (info.bfd_arch_info->mach)
     {
@@ -2159,7 +2056,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
     case bfd_mach_sh2:
       set_gdbarch_register_name (gdbarch, sh_sh_register_name);
-      break;      
+      break;
 
     case bfd_mach_sh2e:
       /* doubles on sh2e and sh3e are actually 4 byte. */
@@ -2169,7 +2066,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_type (gdbarch, sh_sh3e_register_type);
       set_gdbarch_fp0_regnum (gdbarch, 25);
       set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
+      set_gdbarch_extract_return_value (gdbarch,
+					sh3e_sh4_extract_return_value);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       break;
 
@@ -2190,7 +2088,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_type (gdbarch, sh_sh3e_register_type);
       set_gdbarch_fp0_regnum (gdbarch, 25);
       set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
+      set_gdbarch_extract_return_value (gdbarch,
+					sh3e_sh4_extract_return_value);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       break;
 
@@ -2207,7 +2106,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_pseudo_register_read (gdbarch, sh_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch, sh_pseudo_register_write);
       set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
-      set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
+      set_gdbarch_extract_return_value (gdbarch,
+					sh3e_sh4_extract_return_value);
       set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       break;
 
@@ -2225,13 +2125,13 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-extern initialize_file_ftype _initialize_sh_tdep; /* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_sh_tdep;	/* -Wmissing-prototypes */
 
 void
 _initialize_sh_tdep (void)
 {
   struct cmd_list_element *c;
-  
+
   gdbarch_register (bfd_arch_sh, sh_gdbarch_init, NULL);
 
   add_com ("regs", class_vars, sh_show_regs_command, "Print all registers");
