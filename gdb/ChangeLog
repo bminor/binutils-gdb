@@ -1,3 +1,10 @@
+2001-07-16  Nick Duffek  <nsd@redhat.com>
+
+	* remote.c (init_remote_ops, init_remote_cisco_ops,
+	init_remote_async_ops): Set to_pid_to_str and
+	to_extra_thread_info correctly and in the same order as declared
+	in target.h.
+
 2001-07-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote.c: Revert below.  Included more than intended.
