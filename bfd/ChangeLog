@@ -1,3 +1,12 @@
+start-sanitize-v850e
+Mon Aug 25 10:04:35 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.in: Add rule to build cpu-v850e.lo object file.
+start-sanitize-v850eq
+	* Makefile.in: Add rule to build cpu-v850eq.lo object file.
+end-sanitize-v850eq
+end-sanitize-v850e
+
 Mon Aug 25 12:08:13 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aout-target.h (MY(vec)): Add SEC_CODE and SEC_DATA to section
