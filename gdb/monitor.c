@@ -353,6 +353,7 @@ monitor_expect (string, buf, buflen)
   char *p = string;
   int obuflen = buflen;
   int c;
+  extern struct target_ops *targ_ops;
 
   immediate_quit = 1;
   while (1)
@@ -392,6 +393,11 @@ monitor_expect (string, buf, buflen)
 	      else
 		return 0;
 	    }
+	}
+      else if ((c == '\021' || c == '\023') &&
+	       (strcmp(targ_ops->to_shortname, "m32r") == 0))
+	{ /* m32r monitor emits random DC1/DC3 chars */
+	  continue;
 	}
       else
 	{
@@ -954,11 +960,11 @@ monitor_fetch_register (regno)
 
 static void monitor_dump_regs ()
 {
+  char buf[1024];
+  int resp_len;
+
   if (current_monitor->dump_registers)
     {
-      char buf[200];
-      int resp_len;
-
       monitor_printf (current_monitor->dump_registers);
       resp_len = monitor_expect_prompt (buf, sizeof (buf));
       parse_register_dump (buf, resp_len);
@@ -1004,7 +1010,10 @@ monitor_store_register (regno)
 
  /* send the register deposit command */
 
-  monitor_printf (current_monitor->setreg.cmd, name, val);
+  if (current_monitor->flags & MO_REGISTER_VALUE_FIRST)
+    monitor_printf (current_monitor->setreg.cmd, val, name);
+  else
+    monitor_printf (current_monitor->setreg.cmd, name, val);
 
 /* It's possible that there are actually some monitors out there that
    will prompt you when you set a register.  In that case, you may
@@ -1080,12 +1089,16 @@ monitor_write_memory (memaddr, myaddr, len)
 	}
     }
 
+#if 0
+  /* Can't actually use long longs if VAL is an int (nice idea, though).  */
   if ((memaddr & 0x7) == 0 && len >= 8 && current_monitor->setmem.cmdll)
     {
       len = 8;
       cmd = current_monitor->setmem.cmdll;
     }
-  else if ((memaddr & 0x3) == 0 && len >= 4 && current_monitor->setmem.cmdl)
+  else
+#endif
+  if ((memaddr & 0x3) == 0 && len >= 4 && current_monitor->setmem.cmdl)
     {
       len = 4;
       cmd = current_monitor->setmem.cmdl;
@@ -1128,12 +1141,18 @@ monitor_read_memory_single (memaddr, myaddr, len)
   char *cmd;
   int i;
 
+#if 0
+  /* Can't actually use long longs (nice idea, though).  In fact, the
+     call to strtoul below will fail if it tries to convert a value
+     that's too big to fit in a long.  */
   if ((memaddr & 0x7) == 0 && len >= 8 && current_monitor->getmem.cmdll)
     {
       len = 8;
       cmd = current_monitor->getmem.cmdll;
     }
-  else if ((memaddr & 0x3) == 0 && len >= 4 && current_monitor->getmem.cmdl)
+  else
+#endif
+  if ((memaddr & 0x3) == 0 && len >= 4 && current_monitor->getmem.cmdl)
     {
       len = 4;
       cmd = current_monitor->getmem.cmdl;

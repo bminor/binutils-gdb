@@ -93,17 +93,24 @@ m32r_scan_prologue (fi, fsr)
   /* this code essentially duplicates skip_prologue, 
      but we need the start address below.  */
 
+  if (fsr)
+    memset (fsr->regs, '\000', sizeof fsr->regs);
+
   if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
     {
       sal = find_pc_line (prologue_start, 0);
 
       if (sal.line == 0)		/* no line info, use current PC */
-	prologue_end = fi->pc;
+	if (prologue_start != entry_point_address ())
+	  prologue_end = fi->pc;
+	else
+	  return 0;			/* _start has no frame or prologue */
       else if (sal.end < prologue_end)	/* next line begins after fn end */
 	prologue_end = sal.end;		/* (probably means no prologue)  */
     }
   else
-    prologue_end = prologue_start + 100; /* We're in the boondocks */
+    prologue_end = prologue_start + 48; /* We're in the boondocks: allow for */
+					/* 16 pushes, an add, and "mv fp,sp" */
 
   prologue_end = min (prologue_end, fi->pc);
 
@@ -111,26 +118,39 @@ m32r_scan_prologue (fi, fsr)
      rp (and other regs), adjust sp and such. */ 
 
   framesize = 0;
-  memset (fsr->regs, '\000', sizeof fsr->regs);
-
   for (current_pc = prologue_start; current_pc < prologue_end; current_pc += 2)
     {
       int insn;
       int regno;
 
       insn = read_memory_unsigned_integer (current_pc, 2);
-      if (insn & 0x80)				/* Four byte instruction? */
+      if (insn & 0x8000)			/* Four byte instruction? */
 	current_pc += 2;
 
       if ((insn & 0xf0ff) == 0x207f) {		/* st reg, @-sp */
 	framesize += 4;
 	regno = ((insn >> 8) & 0xf);
-	fsr->regs[regno] = framesize;
+	if (fsr)				/* save_regs offset */
+	  fsr->regs[regno] = framesize;
       }
-      else if ((insn >> 8) == 0x4f)  {		/* addi sp */
-	framesize += -((char) (insn & 0xff));	/* offset  */
+      else if ((insn >> 8) == 0x4f)  		/* addi sp, xx */
+	/* add 8 bit sign-extended offset */
+	framesize += -((char) (insn & 0xff));
+      else if (insn == 0x8faf)			/* add3 sp, sp, xxxx */
+	/* add 16 bit sign-extended offset */
+	framesize += -((short) read_memory_unsigned_integer (current_pc, 2));
+      else if (((insn >> 8) == 0xe4) &&	    /* ld24 r4, xxxxxx ;  sub sp, r4 */
+	       read_memory_unsigned_integer (current_pc + 2, 2) == 0x0f24)
+	{ /* subtract 24 bit sign-extended negative-offset */
+	  insn = read_memory_unsigned_integer (current_pc - 2, 4);
+	  if (insn & 0x00800000)	/* sign extend */
+	    insn  |= 0xff000000;	/* negative */
+	  else
+	    insn  &= 0x00ffffff;	/* positive */
+	  framesize += insn;
+	}
+      else if (insn == 0x1d8f)			/* mv fp, sp */
 	break;					/* end of stack adjustments */
-      }
     }
   return framesize;
 }
@@ -152,11 +172,13 @@ m32r_init_extra_frame_info (fi)
     fi->pc = FRAME_SAVED_PC (fi->next);
 
   framesize = m32r_scan_prologue (fi, &fi->fsr);
-
+#if 0
   if (PC_IN_CALL_DUMMY (fi->pc, NULL, NULL))
     fi->frame = dummy_frame_stack->sp;
-  else if (!fi->next)
-    fi->frame = read_register (SP_REGNUM);
+  else 
+#endif
+    if (!fi->next)
+      fi->frame = read_register (SP_REGNUM);
 
   for (reg = 0; reg < NUM_REGS; reg++)
     if (fi->fsr.regs[reg] != 0)
@@ -208,11 +230,19 @@ m32r_frame_chain (fi)
      struct frame_info *fi;
 {
   CORE_ADDR saved_fp = fi->fsr.regs[FP_REGNUM];
+  CORE_ADDR fn_start, fn_end;
 
-  if (saved_fp == 0)
-    return 0;		/* frameless assembly language fn (such as _start) */
-
-  return read_memory_integer (saved_fp, 4);
+  if (saved_fp != 0)
+    return read_memory_integer (saved_fp, 4);
+  else {
+    if (find_pc_partial_function (fi->pc, 0, &fn_start, &fn_end))
+      if (fn_start == entry_point_address ())
+	return 0;		/* in _start fn, don't chain further */
+      else
+	return read_register (FP_REGNUM);
+    else			/* in the woods, what to do? */
+      return 0;			/* for now, play it safe and give up... */
+  }
 }
 
 /* All we do here is record SP and FP on the call dummy stack */
@@ -240,9 +270,13 @@ int
 m32r_pc_in_call_dummy (pc)
      CORE_ADDR pc;
 {
+#if 0
   return dummy_frame_stack
 	 && pc >= CALL_DUMMY_ADDRESS ()
 	 && pc <= CALL_DUMMY_ADDRESS () + DECR_PC_AFTER_BREAK;
+#else
+  return 0;
+#endif
 }
 
 /* Discard from the stack the innermost frame,

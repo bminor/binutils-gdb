@@ -1,4 +1,14 @@
 start-sanitize-m32r
+Thu Oct 31 16:37:17 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* m32r-tdep.c: Improved frame_chain and fn prologue analysis.
+	* configure.tgt: Add entry for m32r target.
+	* monitor.h:   Add a flag to tell monitor_store_register to use
+			(val, regno) instead of (regno, val).
+	* monitor.c:   Make monitor_store_register honor the above flag.
+			Make monitor_exp ignore DC1/DC3 for m32r.
+			Increase buf size in monitor_dump_regs.
+
 Wed Oct 30 18:14:14 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* m32r-tdep.c, m32r-rom.c: New files.

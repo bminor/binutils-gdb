@@ -164,6 +164,10 @@ struct monitor_ops
 
 #define MO_NO_ECHO_ON_SETMEM 0x800
 
+/* If set, then register store command expects value BEFORE regname */
+
+#define MO_REGISTER_VALUE_FIRST 0x1000
+
 #define SREC_SIZE 160
 
 extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops,

@@ -110,6 +110,10 @@ i960-*-elf*)		gdb_target=mon960 ;;
 i960-*-nindy*)		gdb_target=nindy960 ;;
 i960-*-vxworks*)	gdb_target=vxworks960 ;;
 
+# start-sanitize-m32r
+m32r-*-elf*)		gdb_target=m32r ;;
+# end-sanitize-m32r
+
 m68000-*-sunos3*)	gdb_target=sun2os3 ;;
 m68000-*-sunos4*)	gdb_target=sun2os4 ;;
 
