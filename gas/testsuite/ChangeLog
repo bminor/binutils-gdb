@@ -1,3 +1,10 @@
+2002-11-01  H.J. Lu <hjl@gnu.org>
+
+	* gas/i386/i386.exp: Add "sub".
+
+	* gas/i386/sub.d: New.
+	* gas/i386/sub.s: New.
+
 2002-10-22  H.J. Lu <hjl@gnu.org>
 
 	* gas/mips/branch-misc-2.d: Updated.
