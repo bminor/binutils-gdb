@@ -29,6 +29,7 @@ Usage: gdb_mbuild.sh [ <options> ... ] <srcdir> <builddir>
    -j <makejobs>  Run <makejobs> in parallel.  Passed to make.
 	          On a single cpu machine, 2 is recommended.
    -k             Keep going.  Do not stop after the first build fails.
+   --keep         Keep builds.  Do not remove each build when finished.
    -e <regexp>    Regular expression for selecting the targets to build.
    -f             Force rebuild.  Even rebuild previously built directories.
    -v             Be more (and more, and more) verbose.
@@ -53,6 +54,7 @@ keepgoing=
 force=false
 targexp=""
 verbose=0
+keep=false
 while test $# -gt 0
 do
     case "$1" in
@@ -71,6 +73,9 @@ do
     -k )
 	# Should we soldier on after the first build fails?
 	keepgoing=-k
+	;;
+    --keep )
+        keep=true
 	;;
     -e )
 	# A regular expression for selecting targets
@@ -261,8 +266,13 @@ do
 
     if test ! -x gdb/gdb -a ! -x gdb/gdb.exe
     then
+	# Iff the build fails remove the final build target so that
+	# the follow-on code knows things failed.  Stops the follow-on
+	# code thinking that a failed rebuild succedded (executable
+	# left around from previous build).
 	echo ... ${make} ${keepgoing} ${makejobs} ${target}
-	${make} ${keepgoing} ${makejobs} all-gdb 2>&1 | log 1 Build.log
+	( ${make} ${keepgoing} ${makejobs} all-gdb || rm -f gdb/gdb gdb/gdb.exe
+	) 2>&1 | log 1 Build.log
     fi
     fail "compile failed" ! -x gdb/gdb -a ! -x gdb/gdb.exe
  
@@ -284,7 +294,6 @@ EOF
     # Create a sed script that cleans up the output from GDB.
     rm -f mbuild.sed
     touch mbuild.sed || exit 1
-
     # Rules to replace <0xNNNN> with the corresponding function's
     # name.
     sed -n -e '/<0x0*>/d' -e 's/^.*<0x\([0-9a-f]*\)>.*$/0x\1/p' Gdb.log \
@@ -295,18 +304,25 @@ EOF
 	test ${verbose} -gt 0 && echo "${addr} ${func}" 1>&2
 	echo "s/<${addr}>/<${func}>/g"
     done >> mbuild.sed
-
     # Rules to strip the leading paths off of file names.
     echo 's/"\/.*\/gdb\//"gdb\//g' >> mbuild.sed
+    # Run the script
+    sed -f mbuild.sed Gdb.log > Mbuild.log
 
     # Replace the build directory with a file as semaphore that stops
     # a rebuild. (should the logs be saved?)
 
     cd ${builddir}
-    rm -f ${target}.tmp
-    sed -f ${target}/mbuild.sed ${target}/Gdb.log > ${target}.tmp
-    rm -rf ${target}
-    mv ${target}.tmp ${target}
+
+    if ${keep}
+    then
+	:
+    else
+	rm -f ${target}.tmp
+	mv ${target}/Mbuild.log ${target}.tmp
+	rm -rf ${target}
+	mv ${target}.tmp ${target}
+    fi
 
     # Success!
     echo ... ${target} built
