@@ -624,6 +624,7 @@ static struct
   /* TRUE if processing unwind directives in a prologue region.  */
   int prologue;
   int prologue_mask;
+  unsigned int prologue_count;	/* number of .prologues seen so far */
 } unwind;
 
 typedef void (*vbyte_func) PARAMS ((int, char *, char *));
@@ -3047,7 +3048,7 @@ dot_restore (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e1, e2;
-  unsigned long ecount = 0;
+  unsigned long ecount;	/* # of _additional_ regions to pop */
   int sep;
 
   sep = parse_operand (&e1);
@@ -3060,14 +3061,21 @@ dot_restore (dummy)
   if (sep == ',')
     {
       parse_operand (&e2);
-      if (e1.X_op != O_constant)
+      if (e2.X_op != O_constant || e2.X_add_number < 0)
 	{
-	  as_bad ("Second operand to .restore must be constant");
+	  as_bad ("Second operand to .restore must be a constant >= 0");
 	  return;
 	}
-      ecount = e1.X_op;
+      ecount = e2.X_add_number;
     }
+  else
+    ecount = unwind.prologue_count - 1;
   add_unwind_entry (output_epilogue (ecount));
+
+  if (ecount < unwind.prologue_count)
+    unwind.prologue_count -= ecount + 1;
+  else
+    unwind.prologue_count = 0;
 }
 
 static void
@@ -3710,6 +3718,7 @@ dot_proc (dummy)
   demand_empty_rest_of_line ();
   ia64_do_align (16);
 
+  unwind.prologue_count = 0;
   unwind.list = unwind.tail = unwind.current_entry = NULL;
   unwind.personality_routine = 0;
 }
@@ -3764,6 +3773,7 @@ dot_prologue (dummy)
 
   unwind.prologue = 1;
   unwind.prologue_mask = mask;
+  ++unwind.prologue_count;
 }
 
 static void
