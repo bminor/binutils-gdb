@@ -262,6 +262,14 @@ bfd_elf_mkobject (abfd)
   return true;
 }
 
+boolean
+bfd_elf_mkcorefile (abfd)
+     bfd * abfd;
+{
+  /* I think this can be done just like an object file. */
+  return bfd_elf_mkobject (abfd);
+}
+
 char *
 bfd_elf_get_str_section (abfd, shindex)
      bfd * abfd;
@@ -391,22 +399,33 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
       Elf_Internal_Phdr *phdr;
       unsigned int i;
 
-      /* Look through the phdrs to see if we need to adjust the lma.  */
+      /* Look through the phdrs to see if we need to adjust the lma.
+         If all the p_paddr fields are zero, we ignore them, since
+         some ELF linkers produce such output.  */
       phdr = elf_tdata (abfd)->phdr;
       for (i = 0; i < elf_elfheader (abfd)->e_phnum; i++, phdr++)
 	{
-	  if (phdr->p_type == PT_LOAD
-	      && phdr->p_paddr != 0
-	      && phdr->p_vaddr != phdr->p_paddr
-	      && phdr->p_vaddr <= hdr->sh_addr
-	      && phdr->p_vaddr + phdr->p_memsz >= hdr->sh_addr + hdr->sh_size
-	      && ((flags & SEC_LOAD) == 0
-		  || (phdr->p_offset <= (bfd_vma) hdr->sh_offset
-		      && (phdr->p_offset + phdr->p_filesz
-			  >= hdr->sh_offset + hdr->sh_size))))
+	  if (phdr->p_paddr != 0)
+	    break;
+	}
+      if (i < elf_elfheader (abfd)->e_phnum)
+	{
+	  phdr = elf_tdata (abfd)->phdr;
+	  for (i = 0; i < elf_elfheader (abfd)->e_phnum; i++, phdr++)
 	    {
-	      newsect->lma += phdr->p_paddr - phdr->p_vaddr;
-	      break;
+	      if (phdr->p_type == PT_LOAD
+		  && phdr->p_vaddr != phdr->p_paddr
+		  && phdr->p_vaddr <= hdr->sh_addr
+		  && (phdr->p_vaddr + phdr->p_memsz
+		      >= hdr->sh_addr + hdr->sh_size)
+		  && ((flags & SEC_LOAD) == 0
+		      || (phdr->p_offset <= (bfd_vma) hdr->sh_offset
+			  && (phdr->p_offset + phdr->p_filesz
+			      >= hdr->sh_offset + hdr->sh_size))))
+		{
+		  newsect->lma += phdr->p_paddr - phdr->p_vaddr;
+		  break;
+		}
 	    }
 	}
     }
@@ -2586,7 +2605,7 @@ assign_file_positions_for_segments (abfd)
 	  p->p_memsz += alloc * bed->s->sizeof_phdr;
 	}
 
-      if (p->p_type == PT_LOAD)
+      if (p->p_type == PT_LOAD || p->p_type == PT_NOTE)
 	{
 	  if (! m->includes_filehdr && ! m->includes_phdrs)
 	    p->p_offset = off;
@@ -2685,13 +2704,34 @@ assign_file_positions_for_segments (abfd)
 		voff += sec->_raw_size;
 	    }
 
-	  p->p_memsz += sec->_raw_size;
+	  if (p->p_type == PT_NOTE)
+	    {
+	      if (i == 0)	/* the actual "note" segment */
+		{		/* this one actually contains everything. */
+		  sec->filepos = off;
+		  p->p_filesz = sec->_raw_size;
+		  off += sec->_raw_size;
+		  voff = off;
+		}
+	      else	/* fake sections -- don't need to be written */
+		{
+		  sec->filepos = 0;
+		  sec->_raw_size = 0;
+		  flags = sec->flags = 0;	/* no contents */
+		}
+	      p->p_memsz = 0;
+	      p->p_align = 1;
+	    }
+	  else
+	    {
+	      p->p_memsz += sec->_raw_size;
 
-	  if ((flags & SEC_LOAD) != 0)
-	    p->p_filesz += sec->_raw_size;
+	      if ((flags & SEC_LOAD) != 0)
+		p->p_filesz += sec->_raw_size;
 
-	  if (align > p->p_align)
-	    p->p_align = align;
+	      if (align > p->p_align)
+		p->p_align = align;
+	    }
 
 	  if (! m->p_flags_valid)
 	    {
@@ -2851,7 +2891,8 @@ assign_file_positions_except_relocs (abfd)
   file_ptr off;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
-  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
+  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0 &&
+      abfd->format != bfd_core)
     {
       Elf_Internal_Shdr **hdrpp;
       unsigned int i;
@@ -2975,6 +3016,8 @@ prep_headers (abfd)
     i_ehdrp->e_type = ET_DYN;
   else if ((abfd->flags & EXEC_P) != 0)
     i_ehdrp->e_type = ET_EXEC;
+  else if (bfd_get_format (abfd) == bfd_core)
+    i_ehdrp->e_type = ET_CORE;
   else
     i_ehdrp->e_type = ET_REL;
 
@@ -3019,11 +3062,9 @@ prep_headers (abfd)
     case bfd_arch_d10v:
       i_ehdrp->e_machine = EM_CYGNUS_D10V;
       break;
-/* start-sanitize-d30v */
     case bfd_arch_d30v:
       i_ehdrp->e_machine = EM_CYGNUS_D30V;
       break;
-/* end-sanitize-d30v */
     case bfd_arch_v850:
       switch (bfd_get_mach (abfd))
 	{
@@ -3034,6 +3075,11 @@ prep_headers (abfd)
    case bfd_arch_arc:
       i_ehdrp->e_machine = EM_CYGNUS_ARC;
       break;
+/* start-sanitize-armelf */
+   case bfd_arch_arm:
+      i_ehdrp->e_machine = EM_ARM;
+      break;
+/* end-sanitize-armelf */
     case bfd_arch_m32r:
       i_ehdrp->e_machine = EM_CYGNUS_M32R;
       break;
@@ -3174,6 +3220,13 @@ _bfd_elf_write_object_contents (abfd)
   return bed->s->write_shdrs_and_ehdr (abfd);
 }
 
+boolean
+_bfd_elf_write_corefile_contents (abfd)
+     bfd *abfd;
+{
+  /* Hopefully this can be done just like an object file. */
+  return _bfd_elf_write_object_contents (abfd);
+}
 /* given a section, search the header to find them... */
 int
 _bfd_elf_section_from_bfd_section (abfd, asect)
@@ -3290,7 +3343,7 @@ copy_private_bfd_data (ibfd, obfd)
   Elf_Internal_Phdr *p;
   unsigned int i;
   unsigned int num_segments;
-  unsigned int phdr_included = false;
+  boolean phdr_included = false;
   
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -3311,10 +3364,18 @@ copy_private_bfd_data (ibfd, obfd)
 	   && (   ((addr) + (len)) <= ((bottom) + (phdr)->p_memsz)	\
 	       || ((addr) + (len)) <= ((bottom) + (phdr)->p_filesz)))
 
+  /* Special case: corefile "NOTE" section containing regs, prpsinfo etc. */
+
+#define IS_COREFILE_NOTE(p, s)                                               \
+	    (p->p_type == PT_NOTE &&                                         \
+	     s->vma == 0 && s->lma == 0 && s->_cooked_size == 0 &&           \
+	     (bfd_vma) s->filepos >= p->p_offset &&                          \
+	     (bfd_vma) s->filepos + s->_raw_size <= p->p_offset + p->p_filesz)
+
   /* The complicated case when p_vaddr is 0 is to handle the Solaris
      linker, which generates a PT_INTERP section with p_vaddr and
      p_memsz set to 0.  */
-	    
+
 #define IS_SOLARIS_PT_INTERP(p, s)					\
 	    (p->p_vaddr == 0						\
 	     && p->p_filesz > 0						\
@@ -3324,7 +3385,6 @@ copy_private_bfd_data (ibfd, obfd)
 	     && ((bfd_vma) s->filepos + s->_raw_size			\
 		     <= p->p_offset + p->p_filesz))
 
-	    
   /* Scan through the segments specified in the program header
      of the input BFD.  */
   for (i = 0, p = elf_tdata (ibfd)->phdr; i < num_segments; i++, p++)
@@ -3338,17 +3398,22 @@ copy_private_bfd_data (ibfd, obfd)
       bfd_vma suggested_lma;
       unsigned int j;
 
-      /* For each section in the input BFD, decide if it should be included
-	 in the current segment.  A section will be included if it is within
-	 the address space of the segment, and it is an allocated segment,
-	 and there is an output section associated with it. */
+      /* For each section in the input BFD, decide if it should be
+	 included in the current segment.  A section will be included
+	 if it is within the address space of the segment, and it is
+	 an allocated segment, and there is an output section
+	 associated with it.  */
       csecs = 0;
       for (s = ibfd->sections; s != NULL; s = s->next)
-	if ((IS_CONTAINED_BY (s->vma, s->_raw_size, p->p_vaddr, p)
-	     || IS_SOLARIS_PT_INTERP (p, s))
-	    && (s->flags & SEC_ALLOC) != 0
-	    && s->output_section != NULL)
-	  ++csecs;
+	if (s->output_section != NULL)
+	  {
+	    if ((IS_CONTAINED_BY (s->vma, s->_raw_size, p->p_vaddr, p) ||
+		 IS_SOLARIS_PT_INTERP (p, s)) &&
+		(s->flags & SEC_ALLOC) != 0)
+	      ++csecs;
+	    else if (IS_COREFILE_NOTE (p, s))
+	      ++csecs;
+	  }
 
       /* Allocate a segment map big enough to contain all of the
 	 sections we have selected.  */
@@ -3373,13 +3438,15 @@ copy_private_bfd_data (ibfd, obfd)
       m->includes_filehdr = (p->p_offset == 0
 			     && p->p_filesz >= iehdr->e_ehsize);
 
-      if (! phdr_included)
+      if (! phdr_included || p->p_type != PT_LOAD)
 	{
-	  phdr_included = m->includes_phdrs =
+	  m->includes_phdrs =
 	    (p->p_offset <= (bfd_vma) iehdr->e_phoff
 	     && (p->p_offset + p->p_filesz
 		 >= ((bfd_vma) iehdr->e_phoff
 		     + iehdr->e_phnum * iehdr->e_phentsize)));
+	  if (p->p_type == PT_LOAD && m->includes_phdrs)
+	    phdr_included = true;
 	}
 
       if (csecs == 0)
@@ -3447,9 +3514,10 @@ copy_private_bfd_data (ibfd, obfd)
 	{
 	  os = s->output_section;
 	  
-	  if ((IS_CONTAINED_BY (s->vma, s->_raw_size, p->p_vaddr, p)
-	       || IS_SOLARIS_PT_INTERP (p, s))
-	      && (s->flags & SEC_ALLOC) != 0
+	  if ((((IS_CONTAINED_BY (s->vma, s->_raw_size, p->p_vaddr, p)
+		 || IS_SOLARIS_PT_INTERP (p, s))
+		&& (s->flags & SEC_ALLOC) != 0) 
+	       || IS_COREFILE_NOTE (p, s))
 	      && os != NULL)
 	    {
 	      sections[j++] = s;
@@ -3472,7 +3540,8 @@ copy_private_bfd_data (ibfd, obfd)
 
 	      /* Match up the physical address of the segment with the
 		 LMA address of the output section.  */
-	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p))
+	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p) ||
+		  IS_COREFILE_NOTE (p, s))
 		{
 		  if (matching_lma == 0)
 		    matching_lma = os->lma;
@@ -3544,7 +3613,8 @@ copy_private_bfd_data (ibfd, obfd)
 	      
 	      os = s->output_section;
 	      
-	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p))
+	      if (IS_CONTAINED_BY (os->lma, os->_raw_size, m->p_paddr, p) ||
+		  IS_COREFILE_NOTE (p, s))
 		{
 		  if (m->count == 0)
 		    {
@@ -3661,7 +3731,7 @@ copy_private_bfd_data (ibfd, obfd)
   
 #undef IS_CONTAINED_BY
 #undef IS_SOLARIS_PT_INTERP
-  
+#undef IS_COREFILE_NOTE
   return true;
 }
 
@@ -4478,6 +4548,7 @@ _bfd_elf_find_nearest_line (abfd,
 	case STT_FILE:
 	  filename = bfd_asymbol_name (&q->symbol);
 	  break;
+	case STT_NOTYPE:
 	case STT_FUNC:
 	  if (q->symbol.section == section
 	      && q->symbol.value >= low_func

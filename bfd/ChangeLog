@@ -1,3 +1,25 @@
+Wed Aug 19 15:43:26 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* elfcode.h (elf_object_p): Reject files of header type ET_CORE
+	(core files are treated differently than object files).
+	* elf-bfd.h (_bfd_elf_write_corefile_contents, 
+	bfd_elf_mkcorefile): declare.
+	* elfxx-target.h (_bfd_elf_write_corefile_contents, 
+	bfd_elf_mkcorefile): add to bfd_target vector.
+	* elfcore.h (elf_core_file_p): save the program header table, 
+	and set the bfd architecture from the elf file header.
+	* elf.c (bfd_elf_mkcorefile): new function.
+	(_bfd_elf_write_corefile_contents): new function.
+	(assign_file_positions_for_segments): add cases for handling
+	PT_NOTE segments.  (assign_file_positions_except_relocs):
+	core files should be handled the same as exec files.
+	(prep_headers): identify core files as type ET_CORE.
+	(copy_private_bfd_data): identify the sections belonging to
+	the PT_NOTE segment.
+	
+	* elf32-sparc.c (elf32_sparc_final_write_processing):
+	add break statement to default case.
+	
 1998-08-19  Vladimir N. Makarov  <vmakarov@cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Check that output
