@@ -913,10 +913,10 @@ typedef struct
         ((coff_backend_info (abfd)->_bfd_coff_symname_in_debug) (abfd, sym))
 
 #define bfd_coff_force_symnames_in_strings(abfd)\
-    	(coff_backend_info (abfd)->_bfd_coff_force_symnames_in_strings)
+       (coff_backend_info (abfd)->_bfd_coff_force_symnames_in_strings)
 
 #define bfd_coff_debug_string_prefix_length(abfd)\
-    	(coff_backend_info (abfd)->_bfd_coff_debug_string_prefix_length)
+       (coff_backend_info (abfd)->_bfd_coff_debug_string_prefix_length)
 
 #define bfd_coff_print_aux(abfd, file, base, symbol, aux, indaux)\
         ((coff_backend_info (abfd)->_bfd_coff_print_aux)\
