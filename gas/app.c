@@ -1171,6 +1171,10 @@ do_scrub_chars (get, tostart, tolen)
 	  if ((symver_state != NULL) && (*symver_state == 0))
 	    goto de_fault;
 #endif
+#ifdef WARN_COMMENTS
+	  if (!found_comment)
+	    as_where (&found_comment_file, &found_comment);
+#endif
 	  do
 	    {
 	      ch = GET ();

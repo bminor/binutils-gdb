@@ -521,6 +521,10 @@ read_a_source_file (name)
   register int temp;
   pseudo_typeS *pop;
 
+#ifdef WARN_COMMENTS
+  found_comment = 0;
+#endif
+
   buffer = input_scrub_new_file (name);
 
   listing_file (name);
@@ -1082,6 +1086,13 @@ read_a_source_file (name)
 #endif
   /* Close the input file.  */
   input_scrub_close ();
+#ifdef WARN_COMMENTS
+  {
+    if (warn_comment && found_comment)
+      as_warn_where (found_comment_file, found_comment,
+		     "first comment found here");
+  }
+#endif
 }
 
 /* For most MRI pseudo-ops, the line actually ends at the first

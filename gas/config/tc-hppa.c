@@ -4345,12 +4345,23 @@ md_estimate_size_before_relax (fragP, segment)
 }
 
 #ifdef OBJ_ELF
+# ifdef WARN_COMMENTS
+const char *md_shortopts = "Vc";
+# else
 const char *md_shortopts = "V";
+# endif
 #else
+# ifdef WARN_COMMENTS
+const char *md_shortopts = "c";
+# else
 const char *md_shortopts = "";
+# endif
 #endif
 
 struct option md_longopts[] = {
+#ifdef WARN_COMMENTS
+  {"warn-comment", no_argument, NULL, 'c'},
+#endif
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -4370,6 +4381,11 @@ md_parse_option (c, arg)
       print_version_id ();
       break;
 #endif
+#ifdef WARN_COMMENTS
+    case 'c':
+      warn_comment = 1;
+      break;
+#endif
     }
 
   return 1;
@@ -4379,6 +4395,14 @@ void
 md_show_usage (stream)
      FILE *stream ATTRIBUTE_UNUSED;
 {
+#ifdef OBJ_ELF
+  fprintf (stream, _("\
+  -Q                      ignored\n"));
+#endif
+#ifdef WARN_COMMENTS
+  fprintf (stream, _("\
+  -c                      print a warning if a comment is found\n"));
+#endif
 }
 
 /* We have no need to default values of symbols.  */

@@ -61,6 +61,15 @@
 #define TARGET_FORMAT "som"
 #endif
 
+#ifdef TE_LINUX
+/* Define to compile in an extra assembler option, -c, which enables a
+   warning (once per file) when a comment is encountered.
+   The hppa comment char is a `;' which tends to occur in random C asm
+   statements.  A semicolon is a line separator for most assemblers.
+   It's hard to find these lurking semicolons.  Thus...  */
+#define WARN_COMMENTS 1
+#endif
+
 /* FIXME.  Why oh why aren't these defined somewhere globally?  */
 #ifndef FALSE
 #define FALSE   (0)

@@ -640,6 +640,12 @@ COMMON int flag_m68k_mri;
 #define flag_m68k_mri 0
 #endif
 
+#ifdef WARN_COMMENTS
+COMMON int warn_comment;
+COMMON unsigned int found_comment;
+COMMON char *found_comment_file;
+#endif
+
 #ifndef NUMBERS_WITH_SUFFIX
 #define NUMBERS_WITH_SUFFIX 0
 #endif
