@@ -99,11 +99,7 @@ enum type_code
 
 #define TYPE_FLAG_STUB		(1 << 2)
 
-/* This type is a fundamental type in the current source language. */
 
-#define TYPE_FLAG_FUND_TYPE	(1 << 3)
-
-   
 struct type
 {
 

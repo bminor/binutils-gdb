@@ -1236,23 +1236,23 @@ _initialize_m2_exp ()
   /* Modula-2 "pervasive" types.  NOTE:  these can be redefined!!! */
   builtin_type_m2_int =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_FUND_TYPE,
+	       0,
 	       "INTEGER", (struct objfile *) NULL);
   builtin_type_m2_card =
     init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
+	       TYPE_FLAG_UNSIGNED,
 	       "CARDINAL", (struct objfile *) NULL);
   builtin_type_m2_real =
     init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_FUND_TYPE,
+	       0,
 	       "REAL", (struct objfile *) NULL);
   builtin_type_m2_char =
     init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
+	       TYPE_FLAG_UNSIGNED,
 	       "CHAR", (struct objfile *) NULL);
   builtin_type_m2_bool =
     init_type (TYPE_CODE_BOOL, TARGET_INT_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_FUND_TYPE | TYPE_FLAG_UNSIGNED,
+	       TYPE_FLAG_UNSIGNED,
 	       "BOOLEAN", (struct objfile *) NULL);
 
   TYPE_NFIELDS(builtin_type_m2_bool) = 2;

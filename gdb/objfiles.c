@@ -34,11 +34,22 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Prototypes for local functions */
 
+#if !defined(NO_MMALLOC) && defined(HAVE_MMAP)
+
+static int
+open_existing_mapped_file PARAMS ((char *, long, int));
+
 static int
 open_mapped_file PARAMS ((char *filename, long mtime, int mapped));
 
 static CORE_ADDR
 map_to_address PARAMS ((void));
+
+#endif  /* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
+
+/* Message to be printed before the error message, when an error occurs.  */
+
+extern char *error_pre_print;
 
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info. */
@@ -359,6 +370,57 @@ have_minimal_symbols ()
   return 0;
 }
 
+#if !defined(NO_MMALLOC) && defined(HAVE_MMAP)
+
+/* Given the name of a mapped symbol file in SYMSFILENAME, and the timestamp
+   of the corresponding symbol file in MTIME, try to open an existing file
+   with the name SYMSFILENAME and verify it is more recent than the base
+   file by checking it's timestamp against MTIME.
+
+   If SYMSFILENAME does not exist (or can't be stat'd), simply returns -1.
+
+   If SYMSFILENAME does exist, but is out of date, we check to see if the
+   user has specified creation of a mapped file.  If so, we don't issue
+   any warning message because we will be creating a new mapped file anyway,
+   overwriting the old one.  If not, then we issue a warning message so that
+   the user will know why we aren't using this existing mapped symbol file.
+   In either case, we return -1.
+
+   If SYMSFILENAME does exist and is not out of date, but can't be opened for
+   some reason, then prints an appropriate system error message and returns -1.
+
+   Otherwise, returns the open file descriptor.  */
+
+static int
+open_existing_mapped_file (symsfilename, mtime, mapped)
+     char *symsfilename;
+     long mtime;
+     int mapped;
+{
+  int fd = -1;
+  struct stat sbuf;
+
+  if (stat (symsfilename, &sbuf) == 0)
+    {
+      if (sbuf.st_mtime < mtime)
+	{
+	  if (!mapped)
+	    {
+	      warning ("mapped symbol file `%s' is out of date", symsfilename);
+	    }
+	}
+      else if ((fd = open (symsfilename, O_RDWR)) < 0)
+	{
+	  if (error_pre_print)
+	    {
+	      printf (error_pre_print);
+	    }
+	  print_sys_errmsg (symsfilename, errno);
+	}
+    }
+  return (fd);
+}
+
 /* Look for a mapped symbol file that corresponds to FILENAME and is more
    recent than MTIME.  If MAPPED is nonzero, the user has asked that gdb
    use a mapped symbol file for this file, so create a new one if one does
@@ -369,7 +431,19 @@ have_minimal_symbols ()
 
    This routine is responsible for implementing the policy that generates
    the name of the mapped symbol file from the name of a file containing
-   symbols that gdb would like to read. */
+   symbols that gdb would like to read.  Currently this policy is to append
+   ".syms" to the name of the file.
+
+   This routine is also responsible for implementing the policy that
+   determines where the mapped symbol file is found (the search path).
+   This policy is that when reading an existing mapped file, a file of
+   the correct name in the current directory takes precedence over a
+   file of the correct name in the same directory as the symbol file.
+   When creating a new mapped file, it is always created in the current
+   directory.  This helps to minimize the chances of a user unknowingly
+   creating big mapped files in places like /bin and /usr/local/bin, and
+   allows a local copy to override a manually installed global copy (in
+   /bin for example).  */
 
 static int
 open_mapped_file (filename, mtime, mapped)
@@ -378,53 +452,44 @@ open_mapped_file (filename, mtime, mapped)
      int mapped;
 {
   int fd;
-  char *symfilename;
-  struct stat sbuf;
+  char *symsfilename;
 
-  /* For now, all we do is look in the local directory for a file with
-     the name of the base file and an extension of ".syms" */
+  /* First try to open an existing file in the current directory, and
+     then try the directory where the symbol file is located. */
 
-  symfilename = concat ("./", basename (filename), ".syms", (char *) NULL);
-
-  /* Check to see if the desired file already exists and is more recent than
-     the corresponding base file (specified by the passed MTIME parameter).
-     The open will fail if the file does not already exist. */
-
-  if ((fd = open (symfilename, O_RDWR)) >= 0)
+  symsfilename = concat ("./", basename (filename), ".syms", (char *) NULL);
+  if ((fd = open_existing_mapped_file (symsfilename, mtime, mapped)) < 0)
     {
-      if (fstat (fd, &sbuf) != 0)
-	{
-	  (void) close (fd);
-	  perror_with_name (symfilename);
-	}
-      else if (sbuf.st_mtime > mtime)
-	{
-	  return (fd);
-	}
-      else
-	{
-	  (void) close (fd);
-	  fd = -1;
-	}
+      free (symsfilename);
+      symsfilename = concat (filename, ".syms", (char *) NULL);
+      fd = open_existing_mapped_file (symsfilename, mtime, mapped);
     }
 
-  /* Either the file does not already exist, or the base file has changed
-     since it was created.  In either case, if the user has specified use of
-     a mapped file, then create a new mapped file, truncating any existing
-     one.
-
-     In the case where there is an existing file, but it is out of date, and
-     the user did not specify mapped, the existing file is just silently
-     ignored.  Perhaps we should warn about this case (FIXME?).
+  /* If we don't have an open file by now, then either the file does not
+     already exist, or the base file has changed since it was created.  In
+     either case, if the user has specified use of a mapped file, then
+     create a new mapped file, truncating any existing one.  If we can't
+     create one, print a system error message saying why we can't.
 
      By default the file is rw for everyone, with the user's umask taking
      care of turning off the permissions the user wants off. */
 
-  if (mapped)
+  if ((fd < 0) && mapped)
     {
-      fd = open (symfilename, O_RDWR | O_CREAT | O_TRUNC, 0666);
+      free (symsfilename);
+      symsfilename = concat ("./", basename (filename), ".syms",
+			     (char *) NULL);
+      if ((fd = open (symsfilename, O_RDWR | O_CREAT | O_TRUNC, 0666)) < 0)
+	{
+	  if (error_pre_print)
+	    {
+	      printf (error_pre_print);
+	    }
+	  print_sys_errmsg (symsfilename, errno);
+	}
     }
 
+  free (symsfilename);
   return (fd);
 }
 
@@ -472,3 +537,6 @@ map_to_address ()
 #endif
 
 }
+
+#endif	/* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
+
