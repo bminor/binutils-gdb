@@ -79,10 +79,7 @@ DEFUN(rel,(abfd, seclet, output_section, data, relocateable),
       PTR data AND
       boolean relocateable)
 {
-
-  if (output_section->flags & SEC_HAS_CONTENTS 
-      && !(output_section->flags & SEC_NEVER_LOAD)
-      && (output_section->flags & SEC_LOAD)
+  if ((output_section->flags & SEC_HAS_CONTENTS) != 0
       && seclet->size)
   {
     data = (PTR) bfd_get_relocated_section_contents(abfd, seclet, data,

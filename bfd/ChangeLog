@@ -1,5 +1,21 @@
 Mon Apr  5 12:07:12 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* coffcode.h (styp_to_sec_flags): Set SEC_SHARED_LIBRARY for a
+	STYP_NOLOAD | STYP_BSS section.  Don't set SEC_NEVER_LOAD for a
+	STYP_INFO section.
+	(coff_compute_section_file_positions): Force vma and lma of _LIB
+	section to be zero.
+	(coff_set_section_contents): Count number of entries in new lma
+	field, not in vma.
+	* coffgen.c (make_a_section_from_file): Force lineno_count of
+	SEC_SHARED_LIBRARY section to be zero, since it is non-zero on the
+	SCO 3.2v4 shared library.
+	* seclet.c (rel): Copy over any section with contents, not just
+	loadable sections.
+
+	* coff-mips.c (ecoff_make_empty_symbol): Zero out newly allocated
+	symbol.
+
 	* coff-i386.c (coff_i386_reloc): New function, to generate
 	relocateable output correctly.
 	(howto_table): Use coff_i386_reloc for all reloc types.
