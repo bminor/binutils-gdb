@@ -90,7 +90,7 @@ in any case.
 @end menu
 
 @node Readline Bare Essentials, Readline Movement Commands, Readline Interaction, Readline Interaction
-@appendixsubsec Readline Bare Essentials
+@appendixsubsec Bare Essentials
 
 In order to enter characters into the line, simply type them.  The typed
 character appears where the cursor was, and then the cursor moves one
@@ -127,7 +127,7 @@ empty line.
 @end table
 
 @node Readline Movement Commands, Readline Killing Commands, Readline Bare Essentials, Readline Interaction
-@appendixsubsec Readline Movement Commands
+@appendixsubsec Movement Commands
 
 
 The above table describes the most basic possible keystrokes that you need
@@ -154,7 +154,7 @@ forward a word.  It is a loose convention that control keystrokes
 operate on characters while meta keystrokes operate on words.
 
 @node Readline Killing Commands, Readline Arguments, Readline Movement Commands, Readline Interaction
-@appendixsubsec Readline Killing Commands
+@appendixsubsec Killing Commands
 
 @dfn{Killing} text means to delete the text from the line, but to save
 it away for later use, usually by @dfn{yanking} it back into the line.
@@ -201,7 +201,7 @@ typed line is available to be yanked back later, when you are typing
 another line.
 
 @node Readline Arguments, , Readline Killing Commands, Readline Interaction
-@appendixsubsec Readline Arguments
+@appendixsubsec Arguments
 
 You can pass numeric arguments to Readline commands.  Sometimes the
 argument acts as a repeat count, other times it is the @i{sign} of the
@@ -282,7 +282,7 @@ Control-u:	universal-argument
 @end menu
 
 @node Commands For Moving, Commands For History, Readline Init Syntax, Readline Init Syntax
-@appendixsubsubsec Commands For Moving
+@appendixsubsubsec Moving
 @table @code
 @item beginning-of-line (C-a)
 Move to the start of the current line.
