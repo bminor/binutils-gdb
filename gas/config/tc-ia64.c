@@ -898,9 +898,10 @@ static void process_unw_records PARAMS ((unw_rec_list *, vbyte_func));
 static int calc_record_size PARAMS ((unw_rec_list *));
 static void set_imask PARAMS ((unw_rec_list *, unsigned long, unsigned long, unsigned int));
 static unsigned long slot_index PARAMS ((unsigned long, fragS *,
-					 unsigned long, fragS *));
+					 unsigned long, fragS *,
+					 int));
 static unw_rec_list *optimize_unw_records PARAMS ((unw_rec_list *));
-static void fixup_unw_records PARAMS ((unw_rec_list *));
+static void fixup_unw_records PARAMS ((unw_rec_list *, int));
 static int convert_expr_to_ab_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
 static int convert_expr_to_xy_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
 static void generate_unwind_image PARAMS ((const char *));
@@ -2612,14 +2613,16 @@ set_imask (region, regmask, t, type)
 
 /* Return the number of instruction slots from FIRST_ADDR to SLOT_ADDR.
    SLOT_FRAG is the frag containing SLOT_ADDR, and FIRST_FRAG is the frag
-   containing FIRST_ADDR.  */
+   containing FIRST_ADDR.  If BEFORE_RELAX, then we use worst-case estimates
+   for frag sizes.  */
 
 unsigned long
-slot_index (slot_addr, slot_frag, first_addr, first_frag)
+slot_index (slot_addr, slot_frag, first_addr, first_frag, before_relax)
      unsigned long slot_addr;
      fragS *slot_frag;
      unsigned long first_addr;
      fragS *first_frag;
+     int before_relax;
 {
   unsigned long index = 0;
 
@@ -2634,10 +2637,10 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag)
     {
       unsigned long start_addr = (unsigned long) &first_frag->fr_literal;
 
-      if (finalize_syms)
+      if (! before_relax)
 	{
-	  /* We can get the final addresses only after relaxation is
-	     done. */
+	  /* We can get the final addresses only during and after
+	     relaxation.  */
 	  if (first_frag->fr_next && first_frag->fr_next->fr_address)
 	    index += 3 * ((first_frag->fr_next->fr_address
 			   - first_frag->fr_address
@@ -2716,8 +2719,9 @@ optimize_unw_records (list)
    within each record to generate an image.  */
 
 static void
-fixup_unw_records (list)
+fixup_unw_records (list, before_relax)
      unw_rec_list *list;
+     int before_relax;
 {
   unw_rec_list *ptr, *region = 0;
   unsigned long first_addr = 0, rlen = 0, t;
@@ -2728,7 +2732,7 @@ fixup_unw_records (list)
       if (ptr->slot_number == SLOT_NUM_NOT_SET)
 	as_bad (" Insn slot not set in unwind record.");
       t = slot_index (ptr->slot_number, ptr->slot_frag,
-		      first_addr, first_frag);
+		      first_addr, first_frag, before_relax);
       switch (ptr->r.type)
 	{
 	case prologue:
@@ -2752,7 +2756,8 @@ fixup_unw_records (list)
 		  last_frag = last->slot_frag;
 		  break;
 		}
-	    size = slot_index (last_addr, last_frag, first_addr, first_frag);
+	    size = slot_index (last_addr, last_frag, first_addr, first_frag,
+			       before_relax);
 	    rlen = ptr->r.record.r.rlen = size;
 	    if (ptr->r.type == body)
 	      /* End of region.  */
@@ -2852,6 +2857,35 @@ fixup_unw_records (list)
     }
 }
 
+/* Estimate the size of a frag before relaxing.  We only have one type of frag
+   to handle here, which is the unwind info frag.  */
+
+int
+ia64_estimate_size_before_relax (fragS *frag,
+				 asection *segtype ATTRIBUTE_UNUSED)
+{
+  unw_rec_list *list;
+  int len, size, pad;
+
+  /* ??? This code is identical to the first part of ia64_convert_frag.  */
+  list = (unw_rec_list *) frag->fr_opcode;
+  fixup_unw_records (list, 0);
+
+  len = calc_record_size (list);
+  /* pad to pointer-size boundary.  */
+  pad = len % md.pointer_size;
+  if (pad != 0)
+    len += md.pointer_size - pad;
+  /* Add 8 for the header + a pointer for the personality offset.  */
+  size = len + 8 + md.pointer_size;
+
+  /* fr_var carries the max_chars that we created the fragment with.
+     We must, of course, have allocated enough memory earlier.  */
+  assert (frag->fr_var >= size);
+
+  return frag->fr_fix + size;
+}
+
 /* This function converts a rs_machine_dependent variant frag into a
   normal fill frag with the unwind image from the the record list.  */
 void
@@ -2861,8 +2895,9 @@ ia64_convert_frag (fragS *frag)
   int len, size, pad;
   valueT flag_value;
 
+  /* ??? This code is identical to ia64_estimate_size_before_relax.  */
   list = (unw_rec_list *) frag->fr_opcode;
-  fixup_unw_records (list);
+  fixup_unw_records (list, 0);
 
   len = calc_record_size (list);
   /* pad to pointer-size boundary.  */
@@ -3286,7 +3321,7 @@ generate_unwind_image (text_name)
 
   /* Generate the unwind record.  */
   list = optimize_unw_records (unwind.list);
-  fixup_unw_records (list);
+  fixup_unw_records (list, 1);
   size = calc_record_size (list);
 
   if (size > 0 || unwind.force_unwind_entry)

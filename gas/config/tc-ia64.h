@@ -115,6 +115,7 @@ extern void ia64_handle_align PARAMS ((fragS *f));
 extern void ia64_after_parse_args PARAMS ((void));
 extern void ia64_dwarf2_emit_offset PARAMS ((symbolS *, unsigned int));
 extern void ia64_check_label PARAMS ((symbolS *));
+extern int ia64_estimate_size_before_relax (fragS *, asection *);
 extern void ia64_convert_frag (fragS *);
 
 #define md_end()       			ia64_end_of_source ()
@@ -138,7 +139,7 @@ extern void ia64_convert_frag (fragS *);
 #define md_create_short_jump(p,f,t,fr,s) \
 					as_fatal ("ia64_create_short_jump")
 #define md_estimate_size_before_relax(f,s) \
-					(f)->fr_var
+					ia64_estimate_size_before_relax(f,s)
 #define md_elf_section_letter		ia64_elf_section_letter
 #define md_elf_section_flags		ia64_elf_section_flags
 #define TC_FIX_TYPE			struct ia64_fix

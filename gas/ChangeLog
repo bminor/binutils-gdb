@@ -1,3 +1,14 @@
+2004-02-20  James E Wilson  <wilson@specifixinc.com>
+
+	* config/tc-ia64.c (slot_index): New arg before_relax.  Use instead of
+	finalize_syms.
+	(fixup_unw_records): New arg before_relax.  Pass to slot_index.
+	(ia64_estimate_size_before_relax): New.
+	(ia64_convert_frag): Pass 0 to fixup_unw_records.  Add comment.
+	(generate_unwind_image): Pass 1 to fixup_unw_records.
+	* config/tc-ia64.h (ia64_estimate_size_before_relax): Declare.
+	(md_estimate_size_before_relax): Call ia64_estimate_size_before_relax.
+
 2004-02-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* stabs.c (generate_asm_file): Avoid warning about use of
