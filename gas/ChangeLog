@@ -1,3 +1,8 @@
+2000-04-14  Matthew Green  <mrg@cygnus.com>
+	
+	* configure.in: Add NetBSD/sparc ELF and NetBSD/sparc64 support.
+	* configure: Regenerate.
+
 2000-06-09  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (cons_fix_new_arm): Assign correct reloc value
