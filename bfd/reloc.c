@@ -616,7 +616,8 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
 	  reloc_entry->address += input_section->output_offset;
 
 	  /* WTF?? */
-	  if (abfd->xvec->flavour == bfd_target_coff_flavour) 
+	  if (abfd->xvec->flavour == bfd_target_coff_flavour
+	      && strcmp (abfd->xvec->name, "aixcoff-rs6000") != 0)
 	    {
 #if 1
 	      /* For m68k-coff, the addend was being subtracted twice during
@@ -1054,13 +1055,23 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
 			       &~ ((bfd_vma) -1 >> howto->rightshift)));
 	}
 
-      /* Add in the value from the object file, shifted down so that
-	 it is a straight number.  */
+      /* Get the value from the object file.  */
       add = x & howto->src_mask;
-      if ((add & (((~ howto->src_mask) >> 1) & howto->src_mask)) == 0)
-	signed_add = add;
-      else
-	signed_add = add | ((bfd_vma) -1 &~ howto->src_mask);
+
+      /* Get the value from the object file with an appropriate sign.
+	 The expression involving howto->src_mask isolates the upper
+	 bit of src_mask.  If that bit is set in the value we are
+	 adding, it is negative, and we subtract out that number times
+	 two.  If src_mask includes the highest possible bit, then we
+	 can not get the upper bit, but that does not matter since
+	 signed_add needs no adjustment to become negative in that
+	 case.  */
+      signed_add = add;
+      if ((add & (((~ howto->src_mask) >> 1) & howto->src_mask)) != 0)
+	signed_add -= (((~ howto->src_mask) >> 1) & howto->src_mask) << 1;
+
+      /* Add the value from the object file, shifted so that it is a
+	 straight number.  */
       if (howto->bitpos == 0)
 	{
 	  check += add;
@@ -1069,10 +1080,14 @@ _bfd_relocate_contents (howto, input_bfd, relocation, location)
       else
 	{
 	  check += add >> howto->bitpos;
+
+	  /* For the signed case we use ADD, rather than SIGNED_ADD,
+	     to avoid warnings from SVR4 cc.  This is OK since we
+	     explictly handle the sign bits.  */
 	  if (signed_add >= 0)
-	    signed_check += signed_add >> howto->bitpos;
+	    signed_check += add >> howto->bitpos;
 	  else
-	    signed_check += ((signed_add >> howto->bitpos)
+	    signed_check += ((add >> howto->bitpos)
 			     | ((bfd_vma) -1
 				&~ ((bfd_vma) -1 >> howto->bitpos)));
 	}
@@ -1446,6 +1461,15 @@ CODE_FRAGMENT
 .  BFD_RELOC_386_RELATIVE,
 .  BFD_RELOC_386_GOTOFF,
 .  BFD_RELOC_386_GOTPC,
+.
+.  {* PowerPC/POWER (RS/6000) relocs.  *}
+.  {* 26 bit relative branch.  Low two bits must be zero.  High 24
+.     bits installed in bits 6 through 29 of instruction.  *}
+.  BFD_RELOC_PPC_B26,
+.  {* 26 bit absolute branch, like BFD_RELOC_PPC_B26 but absolute.  *}
+.  BFD_RELOC_PPC_BA26,
+.  {* 16 bit TOC relative reference.  *}
+.  BFD_RELOC_PPC_TOC16,
 .
 .  {* this must be the highest numeric value *}
 .  BFD_RELOC_UNUSED
