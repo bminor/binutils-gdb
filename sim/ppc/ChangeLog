@@ -1,3 +1,11 @@
+Tue Apr 15 14:57:18 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL): Set to @INSTALL@.
+	(INSTALL_XFORM, INSTALL_XFORM1): Remove.
+	(install): Depend upon installdirs.  Use $(program_transform_name)
+	directly, rather than using $(INSTALL_XFORM).
+	(installdirs): New target.
+
 Fri Apr  4 17:54:36 1997  Jim Wilson  <wilson@cygnus.com>
 
 	* Makefile.in (tmp-hw, tmp-pk): Use for loop to eliminate duplicates
