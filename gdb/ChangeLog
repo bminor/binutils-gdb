@@ -1,3 +1,8 @@
+2003-02-25  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* infptrace.c (detach): Do not flag error if ptrace detach fails
+	and errno is set to ESRCH.
+
 2003-02-24  Andrew Cagney  <cagney@redhat.com>
 
 	* infptrace.c (udot_info): Change type of udot_off to long.  Use
