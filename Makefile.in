@@ -14,7 +14,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #
 
 srcdir = .
@@ -1046,6 +1046,7 @@ Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
 # distribution (perhaps it would be better to include it anyway).
 DEVO_SUPPORT= README Makefile.in configure configure.in \
 	config.guess config.sub config move-if-change \
+	mpw-README mpw-build.in mpw-config.in mpw-configure \
 	COPYING COPYING.LIB install.sh
 
 # Files in devo/etc used in any net release.
@@ -1176,7 +1177,7 @@ gnats.tar.gz: $(DIST_SUPPORT) $(GNATS_SUPPORT_DIRS) gnats
 		SUPPORT_FILES="$(GNATS_SUPPORT_DIRS)"
 
 .PHONY: gdb.tar.gz
-GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline sim
+GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline sim utils
 gdb.tar.gz: $(DIST_SUPPORT) $(GDB_SUPPORT_DIRS) gdb
 	$(MAKE) -f Makefile.in taz TOOL=gdb \
 		SUPPORT_FILES="$(GDB_SUPPORT_DIRS)"

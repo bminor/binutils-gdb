@@ -1,3 +1,28 @@
+Fri Aug  4 13:04:36 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (GDB_SUPPORT_DIRS): Add utils.
+	(DEVO_SUPPORT): Add mpw-README, mpw-build.in, mpw-config.h and
+	mpw-configure.
+
+Wed Aug  2 16:32:40 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in (appdirs): Use =, not ==, in test expression when
+	trying to build the text to print in the warning message for
+	Solaris users.
+
+Mon Jul 31 09:56:18 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* cfg-ml-com.in (z8k-*-coff): Add 'std' multilib build.
+
+Fri Jul 28 00:16:31 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* config.guess: Recognize lynx-2.3.
+
+Thu Jul 27 15:47:59 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* config.sub (z8ksim): Deleted
+	(z8k-*-coff): New, this is the one true name of the target.
+
 Thu Jul 27 14:33:33 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* cfg-ml-pos.in (dotdot): Work around SunOS sed bug.
