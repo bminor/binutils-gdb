@@ -471,6 +471,7 @@ static int mips_elf_bfd2got_entry_eq PARAMS ((const PTR, const PTR));
 static int mips_elf_make_got_per_bfd PARAMS ((void **, void *));
 static int mips_elf_merge_gots PARAMS ((void **, void *));
 static int mips_elf_set_global_got_offset PARAMS ((void**, void *));
+static int mips_elf_set_no_stub PARAMS ((void **, void *));
 static int mips_elf_resolve_final_got_entry PARAMS ((void**, void *));
 static void mips_elf_resolve_final_got_entries
   PARAMS ((struct mips_got_info *));
@@ -2338,10 +2339,6 @@ mips_elf_set_global_got_offset (entryp, p)
 	  BFD_ASSERT (g->global_gotsym == NULL);
 
 	  entry->gotidx = arg->value * (long) g->assigned_gotno++;
-	  /* We can't do lazy update of GOT entries for
-	     non-primary GOTs since the PLT entries don't use the
-	     right offsets, so punt at it for now.  */
-	  entry->d.h->no_fn_stub = TRUE;
 	  if (arg->info->shared
 	      || (elf_hash_table (arg->info)->dynamic_sections_created
 		  && ((entry->d.h->root.elf_link_hash_flags
@@ -2353,6 +2350,23 @@ mips_elf_set_global_got_offset (entryp, p)
       else
 	entry->d.h->root.got.offset = arg->value;
     }
+
+  return 1;
+}
+
+/* Mark any global symbols referenced in the GOT we are iterating over
+   as inelligible for lazy resolution stubs.  */
+static int
+mips_elf_set_no_stub (entryp, p)
+     void **entryp;
+     void *p ATTRIBUTE_UNUSED;
+{
+  struct mips_got_entry *entry = (struct mips_got_entry *)*entryp;
+
+  if (entry->abfd != NULL
+      && entry->symndx == -1
+      && entry->d.h->root.dynindx != -1)
+    entry->d.h->no_fn_stub = TRUE;
 
   return 1;
 }
@@ -2624,6 +2638,11 @@ mips_elf_multi_got (abfd, info, g, got, pages)
       g->next = gg->next;
       gg->next = g;
       g = gn;
+
+      /* Mark global symbols in every non-primary GOT as ineligible for
+	 stubs.  */
+      if (g)
+	htab_traverse (g->got_entries, mips_elf_set_no_stub, NULL);
     }
   while (g);
 
@@ -6660,28 +6679,14 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
   if (g->next && h->dynindx != -1)
     {
       struct mips_got_entry e, *p;
+      bfd_vma entry;
       bfd_vma offset;
-      bfd_vma value;
-      Elf_Internal_Rela rel[3];
-      bfd_vma addend = 0;
 
       gg = g;
 
       e.abfd = output_bfd;
       e.symndx = -1;
       e.d.h = (struct mips_elf_link_hash_entry *)h;
-
-      if (info->shared
-	  || h->root.type == bfd_link_hash_undefined
-	  || h->root.type == bfd_link_hash_undefweak)
-	value = 0;
-      else if (sym->st_value)
-	value = sym->st_value;
-      else
-	value = h->root.u.def.value;
-
-      memset (rel, 0, sizeof (rel));
-      rel[0].r_info = ELF_R_INFO (output_bfd, 0, R_MIPS_REL32);
 
       for (g = g->next; g->next != gg; g = g->next)
 	{
@@ -6690,22 +6695,37 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 							   &e)))
 	    {
 	      offset = p->gotidx;
-	      rel[0].r_offset = rel[1].r_offset = rel[2].r_offset = offset;
+	      if (info->shared
+		  || (elf_hash_table (info)->dynamic_sections_created
+		      && p->d.h != NULL
+		      && ((p->d.h->root.elf_link_hash_flags
+			   & ELF_LINK_HASH_DEF_DYNAMIC) != 0)
+		      && ((p->d.h->root.elf_link_hash_flags
+			   & ELF_LINK_HASH_DEF_REGULAR) == 0)))
+		{
+		  /* Create an R_MIPS_REL32 relocation for this entry.  Due to
+		     the various compatibility problems, it's easier to mock
+		     up an R_MIPS_32 or R_MIPS_64 relocation and leave
+		     mips_elf_create_dynamic_relocation to calculate the
+		     appropriate addend.  */
+		  Elf_Internal_Rela rel[3];
 
-	      MIPS_ELF_PUT_WORD (output_bfd, value, sgot->contents + offset);
+		  memset (rel, 0, sizeof (rel));
+		  if (ABI_64_P (output_bfd))
+		    rel[0].r_info = ELF_R_INFO (output_bfd, 0, R_MIPS_64);
+		  else
+		    rel[0].r_info = ELF_R_INFO (output_bfd, 0, R_MIPS_32);
+		  rel[0].r_offset = rel[1].r_offset = rel[2].r_offset = offset;
 
-	      if ((info->shared
-		   || (elf_hash_table (info)->dynamic_sections_created
-		       && p->d.h != NULL
-		       && ((p->d.h->root.elf_link_hash_flags
-			    & ELF_LINK_HASH_DEF_DYNAMIC) != 0)
-		       && ((p->d.h->root.elf_link_hash_flags
-			    & ELF_LINK_HASH_DEF_REGULAR) == 0)))
-		  && ! (mips_elf_create_dynamic_relocation
-			(output_bfd, info, rel,
-			 e.d.h, NULL, value, &addend, sgot)))
-		return FALSE;
-	      BFD_ASSERT (addend == 0);
+		  entry = 0;
+		  if (! (mips_elf_create_dynamic_relocation
+			 (output_bfd, info, rel,
+			  e.d.h, NULL, sym->st_value, &entry, sgot)))
+		    return FALSE;
+		}
+	      else
+		entry = sym->st_value;
+	      MIPS_ELF_PUT_WORD (output_bfd, entry, sgot->contents + offset);
 	    }
 	}
     }

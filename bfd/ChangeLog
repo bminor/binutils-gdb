@@ -1,3 +1,14 @@
+2003-11-26  Daniel Jacobowitz  <drow@mvista.com>
+            Richard Sandiford  <rsandifo@redhat.com>
+
+	* elfxx-mips.c (mips_elf_set_global_got_offset): Don't set no_fn_stub.
+	(mips_elf_set_no_stub): New function.
+	(mips_elf_multi_got): Call it.
+	(_bfd_mips_elf_finish_dynamic_symbol): If a relocation is needed for
+	a secondary GOT entry, create an R_MIPS_32 or R_MIPS_64 relocation and
+	use mips_elf_create_dynamic_relocation to deal with any compatibility
+	issues.  Store the adjusted addend in the GOT slot.
+
 2003-11-25  Mattias Engdegård  <mattias@virtutech.se>
 
 	* stabs.c (_bfd_link_section_stabs): Skip N_EXCL stabs when
