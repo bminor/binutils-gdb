@@ -4989,7 +4989,8 @@ no longer relevant or simply wrong.  Secondly since it removes any
 history associated with the file (effectively clearing the slate) the
 developer has a much freer hand when it comes to fixing broken files.}
 
-@section Before the branch
+
+@section Before the Branch
 
 The most important objective at this stage is to find and fix simple
 changes that become a pain to track once the branch is created.  For
@@ -4997,34 +4998,17 @@ instance, configuration problems that stop @value{GDBN} from even
 building.  If you can't get the problem fixed, document it in the
 @file{gdb/PROBLEMS} file.
 
-@subheading Organize and announce the schedule.
+@subheading Prompt for @file{gdb/NEWS}
 
-The following is a possible schedule.  It is based on the rule-of-thumb
-that everything on the Internet takes a week.  You may want to even
-increase those times further since an analysis of the actual data
-strongly suggests that the below is far to aggressive.
+People always forget.  Send a post reminding them but also if you know
+something interesting happened add it yourself.  The @code{schedule}
+script will mention this in its e-mail.
 
-@itemize @bullet
-@item
-announce it
-@item
-wait a week
-@item
-announce branch date
-@item
-wait a week
-@item
-Cut the branch
-@item
-wait a week
-@item
-start enjoying all the fun
-@end itemize
+@subheading Review @file{gdb/README}
 
-As an aside, the branch tag name is probably regrettable vis:
-@smallexample
-gdb_N_M-YYYY-MM-DD-@{branch,branchpoint@}
-@end smallexample
+Grab one of the nightly snapshots and then walk through the
+@file{gdb/README} looking for anything that can be improved.  The
+@code{schedule} script will mention this in its e-mail.
 
 @subheading Refresh any imported files.
 
@@ -5034,27 +5018,28 @@ A number of files are taken from external repositories.  They include:
 @item
 @file{texinfo/texinfo.tex}
 @item
-@file{config.guess} et.@: al.@: 
+@file{config.guess} et.@: al.@: (see the top-level @file{MAINTAINERS}
+file)
+@item
+@file{etc/standards.texi}, @file{etc/make-stds.texi}
 @end itemize
-
-and should be refreshed.
-
-@subheading Prompt for @file{gdb/NEWS}
-
-People always forget.  Send a post reminding them but also if you know
-something interesting happened add it your self.
-
-@subheading Review @file{gdb/README}
-
-Grab one of the nightly snapshots and then walk through the
-@file{gdb/README} looking for anything that can be improved.
 
 @subheading Check the ARI
 
-ARI is an @code{awk} script (Awk Regression Indicator?) that checks for a
-number of errors and coding conventions.  The checks include things like
-using @code{malloc} instead of @code{xmalloc} and file naming problems.
-There shouldn't be any regressions.
+@uref{http://sources.redhat.com/gdb/ari,,A.R.I.} is an @code{awk} script
+(Awk Regression Index ;-) that checks for a number of errors and coding
+conventions.  The checks include things like using @code{malloc} instead
+of @code{xmalloc} and file naming problems.  There shouldn't be any
+regressions.
+
+@subsection Review the bug data base
+
+Close anything obviously fixed.
+
+@subsection Check all cross targets build
+
+The targets are listed in @file{gdb/MAINTAINERS}.
+
 
 @section Cut the branch
 
