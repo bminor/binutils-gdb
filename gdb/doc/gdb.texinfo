@@ -5,13 +5,6 @@ _dnl__ Copyright (c) 1988 1989 1990 1991 Free Software Foundation, Inc.
 @c $Id$
 @c THIS MANUAL REQUIRES TEXINFO-2 macros and info-makers to format properly.
 @c
-@c NOTE: this manual is marked up for preprocessing with a collection
-@c of m4 macros called "pretex.m4".  If you see <_if__> and <_fi__>
-@c scattered around the source, you have the full source before
-@c preprocessing; if you don't, you have the source configured for
-@c _HOST__ architectures (and you can of course get the full source,
-@c with all configurations, from wherever you got this).
-
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
@@ -21,6 +14,9 @@ END-INFO-DIR-ENTRY
 @end ifinfo
 
 _if__(0)
+
+NOTE: this manual is marked up for preprocessing with a collection
+of m4 macros called "pretex.m4".
 
 THIS IS THE SOURCE PRIOR TO PREPROCESSING.  The full source needs to
 be run through m4 before either tex- or info- formatting: for example,
@@ -3243,7 +3239,10 @@ referring to that name has unpredictable effects.  If you wish, you can
 specify a variable in a particular file, using the colon-colon notation:
 
 @cindex colon-colon
+@iftex
+@c info can't cope with a :: index entry, but why deprive hard copy readers?
 @kindex ::
+@end iftex
 @example
 @var{file}::@var{variable}
 @end example
@@ -7339,8 +7338,9 @@ ARCHITECTURE  VENDOR                     OS prefix
 @end tex                                              
 @c END TEXI2ROFF-KILL
 @quotation
-@emph{Warning:} Many combinations of architecture, vendor, and OS are
-untested.
+@emph{Warning:} @code{configure} can represent a very large number of
+combinations of architecture, vendor, and OS.  There is by no means
+support available for all possible combinations!
 @end quotation
 
 The @code{configure} script accompanying _GDBN__ _GDB_VN__ does not provide
@@ -7923,11 +7923,12 @@ Public License instead of this License.
 \centerline{\fontname\tenrm,}
 \centerline{with headings in {\bf\fontname\tenbf}}
 \centerline{and examples in {\tt\fontname\tentt}.}
-\centerline{{\it\fontname\tenit\/} and}
+\centerline{{\it\fontname\tenit\/},}
+\centerline{{\bf\fontname\tenbf}, and}
 \centerline{{\sl\fontname\tensl\/}}
 \centerline{are used for emphasis.}\vfill}
 \page\colophon
-% Blame: pesch@cygnus.com, 28mar91.
+% Blame: pesch@cygnus.com, 1991.
 @end tex
 
 @contents
