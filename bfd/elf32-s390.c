@@ -1679,44 +1679,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      sec = h->root.u.def.section;
-	      if (r_type == R_390_GOTPC
-		  || ((r_type == R_390_PLT16DBL
-                       || r_type == R_390_PLT32)
-		      && htab->splt != NULL
-		      && h->plt.offset != (bfd_vma) -1)
-		  || ((r_type == R_390_GOT12
-                       || r_type == R_390_GOT16
-                       || r_type == R_390_GOT32)
-		      && elf_hash_table (info)->dynamic_sections_created
-		      && (! info->shared
-			  || (! info->symbolic && h->dynindx != -1)
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0))
-		  || (info->shared
-		      && ((! info->symbolic && h->dynindx != -1)
-			  || (h->elf_link_hash_flags
-			      & ELF_LINK_HASH_DEF_REGULAR) == 0)
-		      && (r_type == R_390_8
-			  || r_type == R_390_16
-                          || r_type == R_390_32
-                          || r_type == R_390_PC16
-                          || r_type == R_390_PC16DBL
-                          || r_type == R_390_PC32)
-                      && ((input_section->flags & SEC_ALLOC) != 0
-                          /* DWARF will emit R_390_32 relocations in its
-                             sections against symbols defined externally
-                             in shared libraries.  We can't do anything
-                             with them here.  */
-                          || ((input_section->flags & SEC_DEBUGGING) != 0
-			      && (h->elf_link_hash_flags
-				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))))
-		{
-		  /* In these cases, we don't need the relocation
-                     value.  We check specially because in some
-                     obscure cases sec->output_section will be NULL.  */
-		  relocation = 0;
-		}
-	      else if (sec->output_section == NULL)
+	      if (sec->output_section == NULL)
 		{
 		  /* Set a flag that will be cleared later if we find a
 		     relocation value for this symbol.  output_section
@@ -1963,7 +1926,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
                 {
 		  relocate = false;
                   outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
-		  outrel.r_addend = relocation + rel->r_addend;
+		  outrel.r_addend = rel->r_addend;
                 }
               else
                 {

@@ -1,3 +1,9 @@
+2001-11-14  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* elf32-s390.c (elf_s390_relocate_section): Use the "unresolved_reloc"
+	scheme to get rid of an ugly complicated test. 
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+
 2001-11-14  Andreas Jaeger  <aj@suse.de>
 
 	* cpu-i386.c (bfd_x86_64_arch_intel_syntax,bfd_x86_64_arch): Use
