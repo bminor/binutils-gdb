@@ -1,3 +1,11 @@
+2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	* emulparams/armelf_linux.sh (COMMONPAGESIZE): Set to 4KB.
+	* emulparams/elf32bmip.sh (COMMONPAGESIZE): Likewise.
+	* emulparams/elf32bmipn32.sh (COMMONPAGESIZE): Likewise.
+	* emulparams/elf32btsmipn32.sh (COMMONPAGESIZE): Likewise.
+	* emulparams/shlelf_linux.sh (COMMONPAGESIZE): Likewise.
+
 2004-02-05  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/pe.em (_after_open): Fix typo in previous delta.
