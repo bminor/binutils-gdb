@@ -1,3 +1,9 @@
+2002-02-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure: Regenerate.
+	* objcopy.c: Update copyright date.
+	* doc/Makefile.in: Regenerate.
+
 2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
 
 	* nlmconv.c: Back out localtime PARAMS change.
