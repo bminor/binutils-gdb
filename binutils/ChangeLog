@@ -1,3 +1,8 @@
+2000-07-01  Alexander Aganichev <AAganichev@hypercom.com>
+
+	* stabs.c (parse_stab_type): Divide size in bits by 8 as binutils
+	struct debug_type stores size in bytes.
+
 2000-07-01  Alan Modra  <alan@linuxcare.com.au>
 
 	* Makefile.am (DEP): Fix 2000-06-22.  grep after running dep.sed
