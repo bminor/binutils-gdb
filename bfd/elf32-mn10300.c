@@ -52,7 +52,7 @@ enum reloc_type
 
 static reloc_howto_type elf_mn10300_howto_table[] =
 {
-  /* */
+  /* Dummy relocation.  Does nothing.  */
   HOWTO (R_MN10300_NONE,
 	 0,
 	 2,
@@ -66,6 +66,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0,
 	 0,
 	 false),
+  /* Standard 32 bit reloc.  */
   HOWTO (R_MN10300_32,
 	 0,
 	 2,
@@ -79,6 +80,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xffffffff,
 	 0xffffffff,
 	 false),
+  /* Standard 16 bit reloc.  */
   HOWTO (R_MN10300_16,
 	 0,
 	 1,
@@ -92,6 +94,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xffff,
 	 0xffff,
 	 false),
+  /* Standard 8 bit reloc.  */
   HOWTO (R_MN10300_8,
 	 0,
 	 0,
@@ -105,6 +108,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xff,
 	 0xff,
 	 false),
+  /* Standard 32 bit reloc, except it explicitly writes big-endian format.  */
   HOWTO (R_MN10300_32B,
 	 0,
 	 2,
@@ -118,6 +122,7 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xffffffff,
 	 0xffffffff,
 	 false),
+  /* Standard 16 bit reloc, except it explicitly writes big-endian format.  */
   HOWTO (R_MN10300_16B,
 	 0,
 	 1,
@@ -131,6 +136,8 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xffff,
 	 0xffff,
 	 false),
+  /* Simple 32bit pc-relative reloc with a 1 byte adjustment
+     to get the pc-relative offset correct.  */
   HOWTO (R_MN10300_PCREL32_1BYTE,
 	 0,
 	 2,
@@ -144,6 +151,8 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xffffffff,
 	 0xffffffff,
 	 false),
+  /* Simple 16bit pc-relative reloc with a 1 byte adjustment
+     to get the pc-relative offset correct.  */
   HOWTO (R_MN10300_PCREL16_1BYTE,
 	 0,
 	 1,
@@ -157,6 +166,8 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xffff,
 	 0xffff,
 	 false),
+  /* Simple 8 pc-relative reloc with a 1 byte adjustment
+     to get the pc-relative offset correct.  */
   HOWTO (R_MN10300_PCREL8_1BYTE,
 	 0,
 	 0,
@@ -170,6 +181,8 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xff,
 	 0xff,
 	 true),
+  /* Simple 32 pc-relative reloc with a 2 byte adjustment
+     to get the pc-relative offset correct.  */
   HOWTO (R_MN10300_PCREL32_2BYTE,
 	 0,
 	 2,
@@ -183,6 +196,8 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xffffffff,
 	 0xffffffff,
 	 true),
+  /* Simple 16 pc-relative reloc with a 2 byte adjustment
+     to get the pc-relative offset correct.  */
   HOWTO (R_MN10300_PCREL16_2BYTE,
 	 0,
 	 1,
@@ -283,7 +298,7 @@ bfd_elf32_mn10300_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 
   /* We handle final linking of some relocs ourselves.  */
     {
-      long relocation, insn;
+      long relocation;
 
       /* Is the address of the relocation really within the section?  */
       if (reloc->address > isection->_cooked_size)
