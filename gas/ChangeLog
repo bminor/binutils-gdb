@@ -1,5 +1,12 @@
 Mon May 22 20:03:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* ecoff.c (ecoff_stab): Add extra leading argument, for 4 May
+	change.
+	* ecoff.h (ecoff_stab): Fix declaration.
+	* obj.h (format_ops.process_stab): Include prototype.
+	* config/obj-elf.h (OBJ_PROCESS_STAB): Pass through seg argument.
+	* config/obj-ecoff.h (OBJ_PROCESS_STAB): Ditto.
+
 	* config/e-mipself.c (mipself): New emulation mode, doesn't change
 	endianness from configured default.
 	* config/e-mipsecoff.c (mipsecoff): Ditto.
