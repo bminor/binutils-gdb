@@ -1,3 +1,9 @@
+Thu Jul 28 12:54:07 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* gdb.base/configure.in: Look for makefile fragments in ../config.
+	  Recognize i386-*-netware.
+	* gdb.c++/configure.in: Likewise.
+
 Mon Jul 25 23:48:50 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/corefile.exp:  Change `else if' to `elseif', which is
@@ -6,7 +12,7 @@ Mon Jul 25 23:48:50 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 Mon Jul 25 15:35:56 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* gdb.base/opaque.exp: use runto instead of messing around with
-	  breakpoints.
+	  breakpoints.  Simplify by using gdb_test.
 
 	* gdb.base/bitfields.exp: restart between tests on netware targets
 	  because breakpoints aren't relocated after target death.  Run
