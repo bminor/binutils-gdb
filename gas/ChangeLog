@@ -1,5 +1,32 @@
 2005-01-31  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (unwind): Remove proc_end (now an automatic
+	variable in dot_endp). Add body and insn. Make prologue,
+	prologue_mask, body, and insn bitfields.
+	(fixup_unw_records): Remove spurious new-lines from end of diagnostic
+	messages.
+	(in_procedure, in_prologue, in_body): New.
+	(dot_fframe, dot_vframe, dot_vframesp, dot_vframepsp, dot_save,
+	dot_restore, dot_restorereg, dot_restorereg_p, dot_handlerdata,
+	dot_unwentry, dot_altrp, dot_savemem, dot_saveg, dot_savef, dot_saveb,
+	dot_savegf, dot_spill, dot_spillreg, dot_spillmem, dot_spillreg_p,
+	dot_spillmem_p, dot_label_state, dot_copy_state, dot_unwabi,
+	dot_personality): Use the appropriate one of the above.
+	(dot_proc): Clear unwind.proc_start; set to current location only if
+	none of the entry points were valid. Check for non-zero-length entry
+	point names. Check that entry points aren't defined, yet. Clear
+	unwind.prologue, unwind.body, and unwind.insn.
+	(dot_body): Call in_procedure. Check that first directive in procedure
+	had no insns emitted before. Set unwind.body.
+	(dot_prologue): Call in_procedure. Check that not already in prologue.
+	Check that first directive in procedure had no insns emitted before.
+	Clear unwind.body.
+	(dot_endp): Call in_procedure. Declare proc_end. Check for non-zero-
+	length entry point names. Check that entry points became defined.
+	(md_assemble): Set unwind.insn once unwind.proc_start is defined.
+
+2005-01-31  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (emit_one_bundle): Snapshot manual bundling state
 	before actually using it. Don't generate an error in manual bundling
 	mode when looking at an insn requiring slot 2 but not yet at slot 2.

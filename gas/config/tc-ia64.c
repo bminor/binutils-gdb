@@ -684,7 +684,6 @@ static struct
 
   /* These are used to create the unwind table entry for this function.  */
   symbolS *proc_start;
-  symbolS *proc_end;
   symbolS *info;		/* pointer to unwind info */
   symbolS *personality_routine;
   segT saved_text_seg;
@@ -692,8 +691,10 @@ static struct
   unsigned int force_unwind_entry : 1;	/* force generation of unwind entry? */
 
   /* TRUE if processing unwind directives in a prologue region.  */
-  int prologue;
-  int prologue_mask;
+  unsigned int prologue : 1;
+  unsigned int prologue_mask : 4;
+  unsigned int body : 1;
+  unsigned int insn : 1;
   unsigned int prologue_count;	/* number of .prologues seen so far */
   /* Prologue counts at previous .label_state directives.  */
   struct label_prologue_count * saved_prologue_counts;
@@ -2785,7 +2786,7 @@ fixup_unw_records (list, before_relax)
 	case frgr_mem:
 	  if (!region)
 	    {
-	      as_bad ("frgr_mem record before region record!\n");
+	      as_bad ("frgr_mem record before region record!");
 	      return;
 	    }
 	  region->r.record.r.mask.fr_mem |= ptr->r.record.p.frmask;
@@ -2796,7 +2797,7 @@ fixup_unw_records (list, before_relax)
 	case fr_mem:
 	  if (!region)
 	    {
-	      as_bad ("fr_mem record before region record!\n");
+	      as_bad ("fr_mem record before region record!");
 	      return;
 	    }
 	  region->r.record.r.mask.fr_mem |= ptr->r.record.p.rmask;
@@ -2805,7 +2806,7 @@ fixup_unw_records (list, before_relax)
 	case gr_mem:
 	  if (!region)
 	    {
-	      as_bad ("gr_mem record before region record!\n");
+	      as_bad ("gr_mem record before region record!");
 	      return;
 	    }
 	  region->r.record.r.mask.gr_mem |= ptr->r.record.p.rmask;
@@ -2814,7 +2815,7 @@ fixup_unw_records (list, before_relax)
 	case br_mem:
 	  if (!region)
 	    {
-	      as_bad ("br_mem record before region record!\n");
+	      as_bad ("br_mem record before region record!");
 	      return;
 	    }
 	  region->r.record.r.mask.br_mem |= ptr->r.record.p.brmask;
@@ -2824,7 +2825,7 @@ fixup_unw_records (list, before_relax)
 	case gr_gr:
 	  if (!region)
 	    {
-	      as_bad ("gr_gr record before region record!\n");
+	      as_bad ("gr_gr record before region record!");
 	      return;
 	    }
 	  set_imask (region, ptr->r.record.p.grmask, t, 2);
@@ -2832,7 +2833,7 @@ fixup_unw_records (list, before_relax)
 	case br_gr:
 	  if (!region)
 	    {
-	      as_bad ("br_gr record before region record!\n");
+	      as_bad ("br_gr record before region record!");
 	      return;
 	    }
 	  set_imask (region, ptr->r.record.p.brmask, t, 3);
@@ -3067,6 +3068,43 @@ dot_special_section (which)
   set_section ((char *) special_section_name[which]);
 }
 
+static int
+in_procedure (const char *directive)
+{
+  if (unwind.proc_start
+      && (!unwind.saved_text_seg || strcmp (directive, "endp") == 0))
+    return 1;
+  as_bad (".%s outside of procedure", directive);
+  ignore_rest_of_line ();
+  return 0;
+}
+
+static int
+in_prologue (const char *directive)
+{
+  if (in_procedure (directive))
+    {
+      if (unwind.prologue)
+	return 1;
+      as_bad (".%s outside of prologue", directive);
+      ignore_rest_of_line ();
+    }
+  return 0;
+}
+
+static int
+in_body (const char *directive)
+{
+  if (in_procedure (directive))
+    {
+      if (unwind.body)
+	return 1;
+      as_bad (".%s outside of body region", directive);
+      ignore_rest_of_line ();
+    }
+  return 0;
+}
+
 static void
 add_unwind_entry (ptr)
      unw_rec_list *ptr;
@@ -3088,6 +3126,9 @@ dot_fframe (dummy)
 {
   expressionS e;
 
+  if (!in_prologue ("fframe"))
+    return;
+
   parse_operand (&e);
 
   if (e.X_op != O_constant)
@@ -3102,6 +3143,9 @@ dot_vframe (dummy)
 {
   expressionS e;
   unsigned reg;
+
+  if (!in_prologue ("vframe"))
+    return;
 
   parse_operand (&e);
   reg = e.X_add_number - REG_GR;
@@ -3121,6 +3165,9 @@ dot_vframesp (dummy)
 {
   expressionS e;
 
+  if (!in_prologue ("vframesp"))
+    return;
+
   parse_operand (&e);
   if (e.X_op == O_constant)
     {
@@ -3136,6 +3183,9 @@ dot_vframepsp (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
+
+  if (!in_prologue ("vframepsp"))
+    return;
 
   parse_operand (&e);
   if (e.X_op == O_constant)
@@ -3154,6 +3204,9 @@ dot_save (dummy)
   expressionS e1, e2;
   int sep;
   int reg1, reg2;
+
+  if (!in_prologue ("save"))
+    return;
 
   sep = parse_operand (&e1);
   if (sep != ',')
@@ -3232,6 +3285,9 @@ dot_restore (dummy)
   unsigned long ecount;	/* # of _additional_ regions to pop */
   int sep;
 
+  if (!in_body ("restore"))
+    return;
+
   sep = parse_operand (&e1);
   if (e1.X_op != O_register || e1.X_add_number != REG_GR + 12)
     {
@@ -3274,6 +3330,9 @@ dot_restorereg (dummy)
   unsigned int ab, reg;
   expressionS e;
 
+  if (!in_procedure ("restorereg"))
+    return;
+
   parse_operand (&e);
 
   if (!convert_expr_to_ab_reg (&e, &ab, &reg))
@@ -3291,6 +3350,9 @@ dot_restorereg_p (dummy)
   unsigned int qp, ab, reg;
   expressionS e1, e2;
   int sep;
+
+  if (!in_procedure ("restorereg.p"))
+    return;
 
   sep = parse_operand (&e1);
   if (sep != ',')
@@ -3525,6 +3587,8 @@ static void
 dot_handlerdata (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
+  if (!in_procedure ("handlerdata"))
+    return;
   unwind.force_unwind_entry = 1;
 
   /* Remember which segment we're in so we can switch back after .endp */
@@ -3542,6 +3606,8 @@ static void
 dot_unwentry (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
+  if (!in_procedure ("unwentry"))
+    return;
   unwind.force_unwind_entry = 1;
   demand_empty_rest_of_line ();
 }
@@ -3552,6 +3618,9 @@ dot_altrp (dummy)
 {
   expressionS e;
   unsigned reg;
+
+  if (!in_prologue ("altrp"))
+    return;
 
   parse_operand (&e);
   reg = e.X_add_number - REG_BR;
@@ -3568,6 +3637,9 @@ dot_savemem (psprel)
   expressionS e1, e2;
   int sep;
   int reg1, val;
+
+  if (!in_prologue (psprel ? "savepsp" : "savesp"))
+    return;
 
   sep = parse_operand (&e1);
   if (sep != ',')
@@ -3661,6 +3733,10 @@ dot_saveg (dummy)
 {
   expressionS e1, e2;
   int sep;
+
+  if (!in_prologue ("save.g"))
+    return;
+
   sep = parse_operand (&e1);
   if (sep == ',')
     parse_operand (&e2);
@@ -3689,6 +3765,10 @@ dot_savef (dummy)
 {
   expressionS e1;
   int sep;
+
+  if (!in_prologue ("save.f"))
+    return;
+
   sep = parse_operand (&e1);
 
   if (e1.X_op != O_constant)
@@ -3705,6 +3785,9 @@ dot_saveb (dummy)
   unsigned int reg;
   unsigned char sep;
   int brmask;
+
+  if (!in_prologue ("save.b"))
+    return;
 
   sep = parse_operand (&e1);
   if (e1.X_op != O_constant)
@@ -3738,6 +3821,10 @@ dot_savegf (dummy)
 {
   expressionS e1, e2;
   int sep;
+
+  if (!in_prologue ("save.gf"))
+    return;
+
   sep = parse_operand (&e1);
   if (sep == ',')
     parse_operand (&e2);
@@ -3759,6 +3846,9 @@ dot_spill (dummy)
   expressionS e;
   unsigned char sep;
 
+  if (!in_prologue ("spill"))
+    return;
+
   sep = parse_operand (&e);
   if (!is_end_of_line[sep] && !is_it_end_of_statement ())
     demand_empty_rest_of_line ();
@@ -3775,6 +3865,9 @@ dot_spillreg (dummy)
 {
   int sep, ab, xy, reg, treg;
   expressionS e1, e2;
+
+  if (!in_procedure ("spillreg"))
+    return;
 
   sep = parse_operand (&e1);
   if (sep != ',')
@@ -3806,6 +3899,9 @@ dot_spillmem (psprel)
 {
   expressionS e1, e2;
   int sep, ab, reg;
+
+  if (!in_procedure ("spillmem"))
+    return;
 
   sep = parse_operand (&e1);
   if (sep != ',')
@@ -3843,6 +3939,9 @@ dot_spillreg_p (dummy)
   int sep, ab, xy, reg, treg;
   expressionS e1, e2, e3;
   unsigned int qp;
+
+  if (!in_procedure ("spillreg.p"))
+    return;
 
   sep = parse_operand (&e1);
   if (sep != ',')
@@ -3890,6 +3989,9 @@ dot_spillmem_p (psprel)
   expressionS e1, e2, e3;
   int sep, ab, reg;
   unsigned int qp;
+
+  if (!in_procedure ("spillmem.p"))
+    return;
 
   sep = parse_operand (&e1);
   if (sep != ',')
@@ -3996,6 +4098,9 @@ dot_label_state (dummy)
 {
   expressionS e;
 
+  if (!in_body ("label_state"))
+    return;
+
   parse_operand (&e);
   if (e.X_op != O_constant)
     {
@@ -4011,6 +4116,9 @@ dot_copy_state (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
+
+  if (!in_body ("copy_state"))
+    return;
 
   parse_operand (&e);
   if (e.X_op != O_constant)
@@ -4028,6 +4136,9 @@ dot_unwabi (dummy)
 {
   expressionS e1, e2;
   unsigned char sep;
+
+  if (!in_procedure ("unwabi"))
+    return;
 
   sep = parse_operand (&e1);
   if (sep != ',')
@@ -4059,6 +4170,8 @@ dot_personality (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
   char *name, *p, c;
+  if (!in_procedure ("personality"))
+    return;
   SKIP_WHITESPACE ();
   name = input_line_pointer;
   c = get_symbol_end ();
@@ -4077,7 +4190,7 @@ dot_proc (dummy)
   char *name, *p, c;
   symbolS *sym;
 
-  unwind.proc_start = expr_build_dot ();
+  unwind.proc_start = 0;
   /* Parse names of main and alternate entry points and mark them as
      function symbols:  */
   while (1)
@@ -4086,22 +4199,34 @@ dot_proc (dummy)
       name = input_line_pointer;
       c = get_symbol_end ();
       p = input_line_pointer;
-      sym = symbol_find_or_make (name);
-      if (unwind.proc_start == 0)
+      if (!*name)
+	as_bad ("Empty argument of .proc");
+      else
 	{
-	  unwind.proc_start = sym;
+	  sym = symbol_find_or_make (name);
+	  if (S_IS_DEFINED (sym))
+	    as_bad ("`%s' was already defined", name);
+	  else if (unwind.proc_start == 0)
+	    {
+	      unwind.proc_start = sym;
+	    }
+	  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 	}
-      symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
       *p = c;
       SKIP_WHITESPACE ();
       if (*input_line_pointer != ',')
 	break;
       ++input_line_pointer;
     }
+  if (unwind.proc_start == 0)
+    unwind.proc_start = expr_build_dot ();
   demand_empty_rest_of_line ();
   ia64_do_align (16);
 
+  unwind.prologue = 0;
   unwind.prologue_count = 0;
+  unwind.body = 0;
+  unwind.insn = 0;
   unwind.list = unwind.tail = unwind.current_entry = NULL;
   unwind.personality_routine = 0;
 }
@@ -4110,8 +4235,14 @@ static void
 dot_body (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
+  if (!in_procedure ("body"))
+    return;
+  if (!unwind.prologue && !unwind.body && unwind.insn)
+    as_warn ("Initial .body should precede any instructions");
+
   unwind.prologue = 0;
   unwind.prologue_mask = 0;
+  unwind.body = 1;
 
   add_unwind_entry (output_body ());
   demand_empty_rest_of_line ();
@@ -4123,6 +4254,17 @@ dot_prologue (dummy)
 {
   unsigned char sep;
   int mask = 0, grsave = 0;
+
+  if (!in_procedure ("prologue"))
+    return;
+  if (unwind.prologue)
+    {
+      as_bad (".prologue within prologue");
+      ignore_rest_of_line ();
+      return;
+    }
+  if (!unwind.body && unwind.insn)
+    as_warn ("Initial .prologue should precede any instructions");
 
   if (!is_it_end_of_statement ())
     {
@@ -4156,6 +4298,7 @@ dot_prologue (dummy)
 
   unwind.prologue = 1;
   unwind.prologue_mask = mask;
+  unwind.body = 0;
   ++unwind.prologue_count;
 }
 
@@ -4171,6 +4314,9 @@ dot_endp (dummy)
   subsegT saved_subseg;
   char *name, *p, c;
   symbolS *sym;
+
+  if (!in_procedure ("endp"))
+    return;
 
   if (unwind.saved_text_seg)
     {
@@ -4192,8 +4338,10 @@ dot_endp (dummy)
 
   if (unwind.info || unwind.force_unwind_entry)
     {
+      symbolS *proc_end;
+
       subseg_set (md.last_text_seg, 0);
-      unwind.proc_end = expr_build_dot ();
+      proc_end = expr_build_dot ();
 
       start_unwind_section (saved_seg, SPECIAL_SECTION_UNWIND, 0);
 
@@ -4217,7 +4365,7 @@ dot_endp (dummy)
       e.X_op = O_pseudo_fixup;
       e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
       e.X_add_number = 0;
-      e.X_add_symbol = unwind.proc_end;
+      e.X_add_symbol = proc_end;
       ia64_cons_fix_new (frag_now, where + bytes_per_address,
 			 bytes_per_address, &e);
 
@@ -4247,32 +4395,39 @@ dot_endp (dummy)
       name = input_line_pointer;
       c = get_symbol_end ();
       p = input_line_pointer;
-      sym = symbol_find (name);
-      if (sym && unwind.proc_start
-	  && (symbol_get_bfdsym (sym)->flags & BSF_FUNCTION)
-	  && S_GET_SIZE (sym) == 0 && symbol_get_obj (sym)->size == NULL)
+      if (!*name)
+	as_bad ("Empty argument of .endp");
+      else
 	{
-	  fragS *fr = symbol_get_frag (unwind.proc_start);
-	  fragS *frag = symbol_get_frag (sym);
-
-	  /* Check whether the function label is at or beyond last
-	     .proc directive.  */
-	  while (fr && fr != frag)
-	    fr = fr->fr_next;
-	  if (fr)
+	  sym = symbol_find (name);
+	  if (!sym || !S_IS_DEFINED (sym))
+	    as_bad ("`%s' was not defined within procedure", name);
+	  else if (unwind.proc_start
+	      && (symbol_get_bfdsym (sym)->flags & BSF_FUNCTION)
+	      && S_GET_SIZE (sym) == 0 && symbol_get_obj (sym)->size == NULL)
 	    {
-	      if (frag == frag_now && SEG_NORMAL (now_seg))
-		S_SET_SIZE (sym, frag_now_fix () - S_GET_VALUE (sym));
-	      else
+	      fragS *fr = symbol_get_frag (unwind.proc_start);
+	      fragS *frag = symbol_get_frag (sym);
+
+	      /* Check whether the function label is at or beyond last
+		 .proc directive.  */
+	      while (fr && fr != frag)
+		fr = fr->fr_next;
+	      if (fr)
 		{
-		  symbol_get_obj (sym)->size =
-		    (expressionS *) xmalloc (sizeof (expressionS));
-		  symbol_get_obj (sym)->size->X_op = O_subtract;
-		  symbol_get_obj (sym)->size->X_add_symbol
-		    = symbol_new (FAKE_LABEL_NAME, now_seg,
-				  frag_now_fix (), frag_now);
-		  symbol_get_obj (sym)->size->X_op_symbol = sym;
-		  symbol_get_obj (sym)->size->X_add_number = 0;
+		  if (frag == frag_now && SEG_NORMAL (now_seg))
+		    S_SET_SIZE (sym, frag_now_fix () - S_GET_VALUE (sym));
+		  else
+		    {
+		      symbol_get_obj (sym)->size =
+			(expressionS *) xmalloc (sizeof (expressionS));
+		      symbol_get_obj (sym)->size->X_op = O_subtract;
+		      symbol_get_obj (sym)->size->X_add_symbol
+			= symbol_new (FAKE_LABEL_NAME, now_seg,
+				      frag_now_fix (), frag_now);
+		      symbol_get_obj (sym)->size->X_op_symbol = sym;
+		      symbol_get_obj (sym)->size->X_add_number = 0;
+		    }
 		}
 	    }
 	}
@@ -4283,7 +4438,7 @@ dot_endp (dummy)
       ++input_line_pointer;
     }
   demand_empty_rest_of_line ();
-  unwind.proc_start = unwind.proc_end = unwind.info = 0;
+  unwind.proc_start = unwind.info = 0;
 }
 
 static void
@@ -10213,6 +10368,8 @@ md_assemble (str)
       CURR_SLOT.unwind_record = unwind.current_entry;
       unwind.current_entry = NULL;
     }
+  if (unwind.proc_start && S_IS_DEFINED (unwind.proc_start))
+    unwind.insn = 1;
 
   /* Check for dependency violations.  */
   if (md.detect_dv)
