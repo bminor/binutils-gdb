@@ -93,7 +93,7 @@ into another language, under the above conditions for modified versions.
 @sp 1
 @subtitle Edition @value{EDITION}, for @value{GDBN} version @value{GDBVN}
 @subtitle @value{DATE}
-@author Richard M. Stallman and Roland H. Pesch
+@author Richard M. Stallman and Cygnus Support
 @page
 @tex
 {\parskip=0pt
@@ -5885,7 +5885,7 @@ further details.
 @ifset MOD2
 @c Type checking is (a) primarily motivated by Modula-2, and (b)
 @c unimplemented.  If (b) changes, it might make sense to let this node
-@c appear even if Mod-2 does not, but meanwhile ignore it.  pesch 16jul93.
+@c appear even if Mod-2 does not, but meanwhile ignore it. roland 16jul93.
 @node C Checks
 @subsubsection C and C++ type and range checks
 @cindex C and C++ checks
@@ -6746,7 +6746,7 @@ freely store an integer value into a pointer variable or vice versa,
 and you can convert any structure to any other structure that is the
 same length or shorter.
 @comment FIXME: how do structs align/pad in these conversions?
-@comment        /pesch@cygnus.com 18dec1990
+@comment        /doc@cygnus.com 18dec1990
 
 To store values into arbitrary places in memory, use the @samp{@{@dots{}@}}
 construct to generate a value of specified type at a specified address
@@ -8455,7 +8455,7 @@ delete lines from the text, the line numbers that @value{GDBN} knows cease
 to correspond properly with the code.
 
 @c The following dropped because Epoch is nonstandard.  Reactivate
-@c if/when v19 does something similar. ---pesch@cygnus.com 19dec1990
+@c if/when v19 does something similar. ---doc@cygnus.com 19dec1990
 @ignore
 @kindex Emacs Epoch environment
 @kindex Epoch
@@ -9263,7 +9263,7 @@ options that affect @value{GDBN} or its supporting libraries.
 \centerline{{\sl\fontname\tensl\/}}
 \centerline{are used for emphasis.}\vfill}
 \page\colophon
-% Blame: pesch@cygnus.com, 1991.
+% Blame: doc@cygnus.com, 1991.
 @end tex
 
 @contents

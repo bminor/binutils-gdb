@@ -777,7 +777,7 @@ bps, no parity, eight data bits, one stop bit, and no ``retry'' action;
 you must match the communications parameters when establishing the Unix
 end of the connection as well.
 @c FIXME: Who knows what this "no retry action" crud from the DOS manual may
-@c       mean?  It's optional; leave it out? ---pesch@cygnus.com, 25feb91 
+@c       mean?  It's optional; leave it out? ---doc@cygnus.com, 25feb91 
 
 To give control of the PC to the Unix side of the serial line, type
 the following at the DOS console:
@@ -819,7 +819,7 @@ system table @file{/etc/remote}.
 @c for character size.  Taken from stty maybe...?  John points out tip
 @c can set these as internal variables, eg ~s parity=none; man stty
 @c suggests that it *might* work to stty these options with stdin or
-@c stdout redirected... ---pesch@cygnus.com, 25feb91
+@c stdout redirected... ---doc@cygnus.com, 25feb91
 
 @kindex EBMON
 Using the @code{tip} or @code{cu} connection, change the DOS working
@@ -892,7 +892,7 @@ Now you can use the @code{target} command:
 target amd-eb /dev/ttya 9600 MYFOO
 @c FIXME: test above 'target amd-eb' as spelled, with caps!  caps are meant to
 @c emphasize that this is the name as seen by DOS (since I think DOS is
-@c single-minded about case of letters).  ---pesch@cygnus.com, 25feb91
+@c single-minded about case of letters).  ---doc@cygnus.com, 25feb91
 @end example
 
 @noindent

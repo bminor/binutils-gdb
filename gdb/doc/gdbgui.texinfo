@@ -96,7 +96,7 @@ into another language, under the above conditions for modified versions.
 \hfill (Send bugs and comments on @value{GDBN} to bug-gdb\@prep.ai.mit.edu.)\par
 \hfill {\it Debugging with @value{GDBN}}\par
 \hfill \TeX{}info \texinfoversion\par
-\hfill pesch\@cygnus.com\par
+\hfill doc\@cygnus.com\par
 }
 @end tex
 
