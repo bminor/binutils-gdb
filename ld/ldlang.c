@@ -1135,7 +1135,7 @@ print_output_section_statement (output_section_statement)
   }
   else
   {
-    fprintf (config.map_file, "No attached output section");
+    fprintf (config.map_file, " (no attached output section)");
   }
   print_nl ();
   if (output_section_statement->load_base)
@@ -1912,11 +1912,15 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 	case lang_output_section_statement_enum:
 	  {
 	    lang_output_section_statement_type *os =
-	    &(s->output_section_statement);
+	      &(s->output_section_statement);
 
-	    dot = os->bfd_section->vma;
-	    (void) lang_do_assignments (os->children.head, os, os->fill, dot);
-	    dot = os->bfd_section->vma + os->bfd_section->_raw_size;
+	    if (os->bfd_section != NULL)
+	      {
+		dot = os->bfd_section->vma;
+		(void) lang_do_assignments (os->children.head, os,
+					    os->fill, dot);
+		dot = os->bfd_section->vma + os->bfd_section->_raw_size;
+	      }
 	  }
 	  break;
 	case lang_wild_statement_enum:
