@@ -1,0 +1,1308 @@
+This is Info file ./gdb.info, produced by Makeinfo version 1.68 from
+the input file gdb.texinfo.
+
+START-INFO-DIR-ENTRY
+* Gdb: (gdb).                     The GNU debugger.
+END-INFO-DIR-ENTRY
+   This file documents the GNU debugger GDB.
+
+   This is the Seventh Edition, February 1999, of `Debugging with GDB:
+the GNU Source-Level Debugger' for GDB Version 4.18.
+
+   Copyright (C) 1988-1999 Free Software Foundation, Inc.
+
+   Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+   Permission is granted to copy and distribute modified versions of
+this manual under the conditions for verbatim copying, provided also
+that the entire resulting derived work is distributed under the terms
+of a permission notice identical to this one.
+
+   Permission is granted to copy and distribute translations of this
+manual into another language, under the above conditions for modified
+versions.
+
+
+File: gdb.info,  Node: Emacs,  Next: GDB Bugs,  Prev: Sequences,  Up: Top
+
+Using GDB under GNU Emacs
+*************************
+
+   A special interface allows you to use GNU Emacs to view (and edit)
+the source files for the program you are debugging with GDB.
+
+   To use this interface, use the command `M-x gdb' in Emacs.  Give the
+executable file you want to debug as an argument.  This command starts
+GDB as a subprocess of Emacs, with input and output through a newly
+created Emacs buffer.
+
+   Using GDB under Emacs is just like using GDB normally except for two
+things:
+
+   * All "terminal" input and output goes through the Emacs buffer.
+
+   This applies both to GDB commands and their output, and to the input
+and output done by the program you are debugging.
+
+   This is useful because it means that you can copy the text of
+previous commands and input them again; you can even use parts of the
+output in this way.
+
+   All the facilities of Emacs' Shell mode are available for interacting
+with your program.  In particular, you can send signals the usual
+way--for example, `C-c C-c' for an interrupt, `C-c C-z' for a stop.
+
+   * GDB displays source code through Emacs.
+
+   Each time GDB displays a stack frame, Emacs automatically finds the
+source file for that frame and puts an arrow (`=>') at the left margin
+of the current line.  Emacs uses a separate buffer for source display,
+and splits the screen to show both your GDB session and the source.
+
+   Explicit GDB `list' or search commands still produce output as
+usual, but you probably have no reason to use them from Emacs.
+
+     *Warning:* If the directory where your program resides is not your
+     current directory, it can be easy to confuse Emacs about the
+     location of the source files, in which case the auxiliary display
+     buffer does not appear to show your source.  GDB can find programs
+     by searching your environment's `PATH' variable, so the GDB input
+     and output session proceeds normally; but Emacs does not get
+     enough information back from GDB to locate the source files in
+     this situation.  To avoid this problem, either start GDB mode from
+     the directory where your program resides, or specify an absolute
+     file name when prompted for the `M-x gdb' argument.
+
+     A similar confusion can result if you use the GDB `file' command to
+     switch to debugging a program in some other location, from an
+     existing GDB buffer in Emacs.
+
+   By default, `M-x gdb' calls the program called `gdb'.  If you need
+to call GDB by a different name (for example, if you keep several
+configurations around, with different names) you can set the Emacs
+variable `gdb-command-name'; for example,
+
+     (setq gdb-command-name "mygdb")
+
+(preceded by `ESC ESC', or typed in the `*scratch*' buffer, or in your
+`.emacs' file) makes Emacs call the program named "`mygdb'" instead.
+
+   In the GDB I/O buffer, you can use these special Emacs commands in
+addition to the standard Shell mode commands:
+
+`C-h m'
+     Describe the features of Emacs' GDB Mode.
+
+`M-s'
+     Execute to another source line, like the GDB `step' command; also
+     update the display window to show the current file and location.
+
+`M-n'
+     Execute to next source line in this function, skipping all function
+     calls, like the GDB `next' command.  Then update the display window
+     to show the current file and location.
+
+`M-i'
+     Execute one instruction, like the GDB `stepi' command; update
+     display window accordingly.
+
+`M-x gdb-nexti'
+     Execute to next instruction, using the GDB `nexti' command; update
+     display window accordingly.
+
+`C-c C-f'
+     Execute until exit from the selected stack frame, like the GDB
+     `finish' command.
+
+`M-c'
+     Continue execution of your program, like the GDB `continue'
+     command.
+
+     *Warning:* In Emacs v19, this command is `C-c C-p'.
+
+`M-u'
+     Go up the number of frames indicated by the numeric argument
+     (*note Numeric Arguments: (Emacs)Arguments.), like the GDB `up'
+     command.
+
+     *Warning:* In Emacs v19, this command is `C-c C-u'.
+
+`M-d'
+     Go down the number of frames indicated by the numeric argument,
+     like the GDB `down' command.
+
+     *Warning:* In Emacs v19, this command is `C-c C-d'.
+
+`C-x &'
+     Read the number where the cursor is positioned, and insert it at
+     the end of the GDB I/O buffer.  For example, if you wish to
+     disassemble code around an address that was displayed earlier,
+     type `disassemble'; then move the cursor to the address display,
+     and pick up the argument for `disassemble' by typing `C-x &'.
+
+     You can customize this further by defining elements of the list
+     `gdb-print-command'; once it is defined, you can format or
+     otherwise process numbers picked up by `C-x &' before they are
+     inserted.  A numeric argument to `C-x &' indicates that you wish
+     special formatting, and also acts as an index to pick an element
+     of the list.  If the list element is a string, the number to be
+     inserted is formatted using the Emacs function `format'; otherwise
+     the number is passed as an argument to the corresponding list
+     element.
+
+   In any source file, the Emacs command `C-x SPC' (`gdb-break') tells
+GDB to set a breakpoint on the source line point is on.
+
+   If you accidentally delete the source-display buffer, an easy way to
+get it back is to type the command `f' in the GDB buffer, to request a
+frame display; when you run under Emacs, this recreates the source
+buffer if necessary to show you the context of the current frame.
+
+   The source files displayed in Emacs are in ordinary Emacs buffers
+which are visiting the source files in the usual way.  You can edit the
+files with these buffers if you wish; but keep in mind that GDB
+communicates with Emacs in terms of line numbers.  If you add or delete
+lines from the text, the line numbers that GDB knows cease to
+correspond properly with the code.
+
+
+File: gdb.info,  Node: GDB Bugs,  Next: Formatting Documentation,  Prev: Emacs,  Up: Top
+
+Reporting Bugs in GDB
+*********************
+
+   Your bug reports play an essential role in making GDB reliable.
+
+   Reporting a bug may help you by bringing a solution to your problem,
+or it may not.  But in any case the principal function of a bug report
+is to help the entire community by making the next version of GDB work
+better.  Bug reports are your contribution to the maintenance of GDB.
+
+   In order for a bug report to serve its purpose, you must include the
+information that enables us to fix the bug.
+
+* Menu:
+
+* Bug Criteria::                Have you found a bug?
+* Bug Reporting::               How to report bugs
+
+
+File: gdb.info,  Node: Bug Criteria,  Next: Bug Reporting,  Prev: GDB Bugs,  Up: GDB Bugs
+
+Have you found a bug?
+=====================
+
+   If you are not sure whether you have found a bug, here are some
+guidelines:
+
+   * If the debugger gets a fatal signal, for any input whatever, that
+     is a GDB bug.  Reliable debuggers never crash.
+
+   * If GDB produces an error message for valid input, that is a bug.
+     (Note that if you're cross debugging, the problem may also be
+     somewhere in the connection to the target.)
+
+   * If GDB does not produce an error message for invalid input, that
+     is a bug.  However, you should note that your idea of "invalid
+     input" might be our idea of "an extension" or "support for
+     traditional practice".
+
+   * If you are an experienced user of debugging tools, your suggestions
+     for improvement of GDB are welcome in any case.
+
+
+File: gdb.info,  Node: Bug Reporting,  Prev: Bug Criteria,  Up: GDB Bugs
+
+How to report bugs
+==================
+
+   A number of companies and individuals offer support for GNU products.
+If you obtained GDB from a support organization, we recommend you
+contact that organization first.
+
+   You can find contact information for many support companies and
+individuals in the file `etc/SERVICE' in the GNU Emacs distribution.
+
+   In any event, we also recommend that you send bug reports for GDB to
+this addresses:
+
+     bug-gdb@prep.ai.mit.edu
+
+   *Do not send bug reports to `info-gdb', or to `help-gdb', or to any
+newsgroups.* Most users of GDB do not want to receive bug reports.
+Those that do have arranged to receive `bug-gdb'.
+
+   The mailing list `bug-gdb' has a newsgroup `gnu.gdb.bug' which
+serves as a repeater.  The mailing list and the newsgroup carry exactly
+the same messages.  Often people think of posting bug reports to the
+newsgroup instead of mailing them.  This appears to work, but it has one
+problem which can be crucial: a newsgroup posting often lacks a mail
+path back to the sender.  Thus, if we need to ask for more information,
+we may be unable to reach you.  For this reason, it is better to send
+bug reports to the mailing list.
+
+   As a last resort, send bug reports on paper to:
+
+     GNU Debugger Bugs
+     Free Software Foundation Inc.
+     59 Temple Place - Suite 330
+     Boston, MA 02111-1307
+     USA
+
+   The fundamental principle of reporting bugs usefully is this:
+*report all the facts*.  If you are not sure whether to state a fact or
+leave it out, state it!
+
+   Often people omit facts because they think they know what causes the
+problem and assume that some details do not matter.  Thus, you might
+assume that the name of the variable you use in an example does not
+matter.  Well, probably it does not, but one cannot be sure.  Perhaps
+the bug is a stray memory reference which happens to fetch from the
+location where that name is stored in memory; perhaps, if the name were
+different, the contents of that location would fool the debugger into
+doing the right thing despite the bug.  Play it safe and give a
+specific, complete example.  That is the easiest thing for you to do,
+and the most helpful.
+
+   Keep in mind that the purpose of a bug report is to enable us to fix
+the bug.  It may be that the bug has been reported previously, but
+neither you nor we can know that unless your bug report is complete and
+self-contained.
+
+   Sometimes people give a few sketchy facts and ask, "Does this ring a
+bell?"  Those bug reports are useless, and we urge everyone to *refuse
+to respond to them* except to chide the sender to report bugs properly.
+
+   To enable us to fix the bug, you should include all these things:
+
+   * The version of GDB.  GDB announces it if you start with no
+     arguments; you can also print it at any time using `show version'.
+
+     Without this, we will not know whether there is any point in
+     looking for the bug in the current version of GDB.
+
+   * The type of machine you are using, and the operating system name
+     and version number.
+
+  1. What compiler (and its version) was used to compile GDB--e.g.
+     "gcc-2.8.1".
+
+   * What compiler (and its version) was used to compile the program
+     you are debugging--e.g.  "gcc-2.8.1", or "HP92453-01 A.10.32.03 HP
+     C Compiler".  For GCC, you can say `gcc --version' to get this
+     information; for other compilers, see the documentation for those
+     compilers.
+
+   * The command arguments you gave the compiler to compile your
+     example and observe the bug.  For example, did you use `-O'?  To
+     guarantee you will not omit something important, list them all.  A
+     copy of the Makefile (or the output from make) is sufficient.
+
+     If we were to try to guess the arguments, we would probably guess
+     wrong and then we might not encounter the bug.
+
+   * A complete input script, and all necessary source files, that will
+     reproduce the bug.
+
+   * A description of what behavior you observe that you believe is
+     incorrect.  For example, "It gets a fatal signal."
+
+     Of course, if the bug is that GDB gets a fatal signal, then we
+     will certainly notice it.  But if the bug is incorrect output, we
+     might not notice unless it is glaringly wrong.  You might as well
+     not give us a chance to make a mistake.
+
+     Even if the problem you experience is a fatal signal, you should
+     still say so explicitly.  Suppose something strange is going on,
+     such as, your copy of GDB is out of synch, or you have encountered
+     a bug in the C library on your system.  (This has happened!)  Your
+     copy might crash and ours would not.  If you told us to expect a
+     crash, then when ours fails to crash, we would know that the bug
+     was not happening for us.  If you had not told us to expect a
+     crash, then we would not be able to draw any conclusion from our
+     observations.
+
+  2. If you wish to suggest changes to the GDB source, send us context
+     diffs.  If you even discuss something in the GDB source, refer to
+     it by context, not by line number.
+
+     The line numbers in our development sources will not match those
+     in your sources.  Your line numbers would convey no useful
+     information to us.
+
+   Here are some things that are not necessary:
+
+   * A description of the envelope of the bug.
+
+     Often people who encounter a bug spend a lot of time investigating
+     which changes to the input file will make the bug go away and which
+     changes will not affect it.
+
+     This is often time consuming and not very useful, because the way
+     we will find the bug is by running a single example under the
+     debugger with breakpoints, not by pure deduction from a series of
+     examples.  We recommend that you save your time for something else.
+
+     Of course, if you can find a simpler example to report *instead*
+     of the original one, that is a convenience for us.  Errors in the
+     output will be easier to spot, running under the debugger will take
+     less time, and so on.
+
+     However, simplification is not vital; if you do not want to do
+     this, report the bug anyway and send us the entire test case you
+     used.
+
+   * A patch for the bug.
+
+     A patch for the bug does help us if it is a good one.  But do not
+     omit the necessary information, such as the test case, on the
+     assumption that a patch is all we need.  We might see problems
+     with your patch and decide to fix the problem another way, or we
+     might not understand it at all.
+
+     Sometimes with a program as complicated as GDB it is very hard to
+     construct an example that will make the program follow a certain
+     path through the code.  If you do not send us the example, we will
+     not be able to construct one, so we will not be able to verify
+     that the bug is fixed.
+
+     And if we cannot understand what bug you are trying to fix, or why
+     your patch should be an improvement, we will not install it.  A
+     test case will help us to understand.
+
+   * A guess about what the bug is or what it depends on.
+
+     Such guesses are usually wrong.  Even we cannot guess right about
+     such things without first using the debugger to find the facts.
+
+
+File: gdb.info,  Node: Command Line Editing,  Next: Using History Interactively,  Prev: Formatting Documentation,  Up: Top
+
+Command Line Editing
+********************
+
+   This chapter describes the basic features of the GNU command line
+editing interface.
+
+* Menu:
+
+* Introduction and Notation::	Notation used in this text.
+* Readline Interaction::	The minimum set of commands for editing a line.
+* Readline Init File::		Customizing Readline from a user's view.
+* Bindable Readline Commands::	A description of most of the Readline commands
+				available for binding
+* Readline vi Mode::		A short description of how to make Readline
+				behave like the vi editor.
+
+
+File: gdb.info,  Node: Introduction and Notation,  Next: Readline Interaction,  Up: Command Line Editing
+
+Introduction to Line Editing
+============================
+
+   The following paragraphs describe the notation used to represent
+keystrokes.
+
+   The text <C-k> is read as `Control-K' and describes the character
+produced when the <k> key is pressed while the Control key is depressed.
+
+   The text <M-k> is read as `Meta-K' and describes the character
+produced when the meta key (if you have one) is depressed, and the <k>
+key is pressed.  If you do not have a meta key, the identical keystroke
+can be generated by typing <ESC> first, and then typing <k>.  Either
+process is known as "metafying" the <k> key.
+
+   The text <M-C-k> is read as `Meta-Control-k' and describes the
+character produced by "metafying" <C-k>.
+
+   In addition, several keys have their own names.  Specifically,
+<DEL>, <ESC>, <LFD>, <SPC>, <RET>, and <TAB> all stand for themselves
+when seen in this text, or in an init file (*note Readline Init
+File::.).
+
+
+File: gdb.info,  Node: Readline Interaction,  Next: Readline Init File,  Prev: Introduction and Notation,  Up: Command Line Editing
+
+Readline Interaction
+====================
+
+   Often during an interactive session you type in a long line of text,
+only to notice that the first word on the line is misspelled.  The
+Readline library gives you a set of commands for manipulating the text
+as you type it in, allowing you to just fix your typo, and not forcing
+you to retype the majority of the line.  Using these editing commands,
+you move the cursor to the place that needs correction, and delete or
+insert the text of the corrections.  Then, when you are satisfied with
+the line, you simply press <RETURN>.  You do not have to be at the end
+of the line to press <RETURN>; the entire line is accepted regardless
+of the location of the cursor within the line.
+
+* Menu:
+
+* Readline Bare Essentials::	The least you need to know about Readline.
+* Readline Movement Commands::	Moving about the input line.
+* Readline Killing Commands::	How to delete text, and how to get it back!
+* Readline Arguments::		Giving numeric arguments to commands.
+* Searching::			Searching through previous lines.
+
+
+File: gdb.info,  Node: Readline Bare Essentials,  Next: Readline Movement Commands,  Up: Readline Interaction
+
+Readline Bare Essentials
+------------------------
+
+   In order to enter characters into the line, simply type them.  The
+typed character appears where the cursor was, and then the cursor moves
+one space to the right.  If you mistype a character, you can use your
+erase character to back up and delete the mistyped character.
+
+   Sometimes you may miss typing a character that you wanted to type,
+and not notice your error until you have typed several other
+characters.  In that case, you can type <C-b> to move the cursor to the
+left, and then correct your mistake.  Afterwards, you can move the
+cursor to the right with <C-f>.
+
+   When you add text in the middle of a line, you will notice that
+characters to the right of the cursor are `pushed over' to make room
+for the text that you have inserted.  Likewise, when you delete text
+behind the cursor, characters to the right of the cursor are `pulled
+back' to fill in the blank space created by the removal of the text.  A
+list of the basic bare essentials for editing the text of an input line
+follows.
+
+<C-b>
+     Move back one character.
+
+<C-f>
+     Move forward one character.
+
+<DEL>
+     Delete the character to the left of the cursor.
+
+<C-d>
+     Delete the character underneath the cursor.
+
+Printing characters
+     Insert the character into the line at the cursor.
+
+<C-_>
+     Undo the last editing command.  You can undo all the way back to an
+     empty line.
+
+
+File: gdb.info,  Node: Readline Movement Commands,  Next: Readline Killing Commands,  Prev: Readline Bare Essentials,  Up: Readline Interaction
+
+Readline Movement Commands
+--------------------------
+
+   The above table describes the most basic possible keystrokes that
+you need in order to do editing of the input line.  For your
+convenience, many other commands have been added in addition to <C-b>,
+<C-f>, <C-d>, and <DEL>.  Here are some commands for moving more rapidly
+about the line.
+
+<C-a>
+     Move to the start of the line.
+
+<C-e>
+     Move to the end of the line.
+
+<M-f>
+     Move forward a word, where a word is composed of letters and
+     digits.
+
+<M-b>
+     Move backward a word.
+
+<C-l>
+     Clear the screen, reprinting the current line at the top.
+
+   Notice how <C-f> moves forward a character, while <M-f> moves
+forward a word.  It is a loose convention that control keystrokes
+operate on characters while meta keystrokes operate on words.
+
+
+File: gdb.info,  Node: Readline Killing Commands,  Next: Readline Arguments,  Prev: Readline Movement Commands,  Up: Readline Interaction
+
+Readline Killing Commands
+-------------------------
+
+   "Killing" text means to delete the text from the line, but to save
+it away for later use, usually by "yanking" (re-inserting) it back into
+the line.  If the description for a command says that it `kills' text,
+then you can be sure that you can get the text back in a different (or
+the same) place later.
+
+   When you use a kill command, the text is saved in a "kill-ring".
+Any number of consecutive kills save all of the killed text together, so
+that when you yank it back, you get it all.  The kill ring is not line
+specific; the text that you killed on a previously typed line is
+available to be yanked back later, when you are typing another line.
+
+   Here is the list of commands for killing text.
+
+<C-k>
+     Kill the text from the current cursor position to the end of the
+     line.
+
+<M-d>
+     Kill from the cursor to the end of the current word, or if between
+     words, to the end of the next word.
+
+<M-DEL>
+     Kill from the cursor the start of the previous word, or if between
+     words, to the start of the previous word.
+
+<C-w>
+     Kill from the cursor to the previous whitespace.  This is
+     different than <M-DEL> because the word boundaries differ.
+
+   Here is how to "yank" the text back into the line.  Yanking means to
+copy the most-recently-killed text from the kill buffer.
+
+<C-y>
+     Yank the most recently killed text back into the buffer at the
+     cursor.
+
+<M-y>
+     Rotate the kill-ring, and yank the new top.  You can only do this
+     if the prior command is <C-y> or <M-y>.
+
+
+File: gdb.info,  Node: Readline Arguments,  Next: Searching,  Prev: Readline Killing Commands,  Up: Readline Interaction
+
+Readline Arguments
+------------------
+
+   You can pass numeric arguments to Readline commands.  Sometimes the
+argument acts as a repeat count, other times it is the sign of the
+argument that is significant.  If you pass a negative argument to a
+command which normally acts in a forward direction, that command will
+act in a backward direction.  For example, to kill text back to the
+start of the line, you might type `M-- C-k'.
+
+   The general way to pass numeric arguments to a command is to type
+meta digits before the command.  If the first `digit' typed is a minus
+sign (<->), then the sign of the argument will be negative.  Once you
+have typed one meta digit to get the argument started, you can type the
+remainder of the digits, and then the command.  For example, to give
+the <C-d> command an argument of 10, you could type `M-1 0 C-d'.
+
+
+File: gdb.info,  Node: Searching,  Prev: Readline Arguments,  Up: Readline Interaction
+
+Searching for Commands in the History
+-------------------------------------
+
+   Readline provides commands for searching through the command history
+for lines containing a specified string.  There are two search modes:
+INCREMENTAL and NON-INCREMENTAL.
+
+   Incremental searches begin before the user has finished typing the
+search string.  As each character of the search string is typed,
+Readline displays the next entry from the history matching the string
+typed so far.  An incremental search requires only as many characters
+as needed to find the desired history entry.  The <ESC> character is
+used to terminate an incremental search.  <C-j> will also terminate the
+search.  <C-g> will abort an incremental search and restore the
+original line.  When the search is terminated, the history entry
+containing the search string becomes the current line.  To find other
+matching entries in the history list, type <C-s> or <C-r> as
+appropriate.  This will search backward or forward in the history for
+the next entry matching the search string typed so far.  Any other key
+sequence bound to a Readline command will terminate the search and
+execute that command.  For instance, a <RET> will terminate the search
+and accept the line, thereby executing the command from the history
+list.
+
+   Non-incremental searches read the entire search string before
+starting to search for matching history lines.  The search string may be
+typed by the user or be part of the contents of the current line.
+
+
+File: gdb.info,  Node: Readline Init File,  Next: Bindable Readline Commands,  Prev: Readline Interaction,  Up: Command Line Editing
+
+Readline Init File
+==================
+
+   Although the Readline library comes with a set of `emacs'-like
+keybindings installed by default, it is possible to use a different set
+of keybindings.  Any user can customize programs that use Readline by
+putting commands in an "inputrc" file in his home directory.  The name
+of this file is taken from the value of the environment variable
+`INPUTRC'.  If that variable is unset, the default is `~/.inputrc'.
+
+   When a program which uses the Readline library starts up, the init
+file is read, and the key bindings are set.
+
+   In addition, the `C-x C-r' command re-reads this init file, thus
+incorporating any changes that you might have made to it.
+
+* Menu:
+
+* Readline Init File Syntax::	Syntax for the commands in the inputrc file.
+
+* Conditional Init Constructs::	Conditional key bindings in the inputrc file.
+
+* Sample Init File::		An example inputrc file.
+
+
+File: gdb.info,  Node: Readline Init File Syntax,  Next: Conditional Init Constructs,  Up: Readline Init File
+
+Readline Init File Syntax
+-------------------------
+
+   There are only a few basic constructs allowed in the Readline init
+file.  Blank lines are ignored.  Lines beginning with a `#' are
+comments.  Lines beginning with a `$' indicate conditional constructs
+(*note Conditional Init Constructs::.).  Other lines denote variable
+settings and key bindings.
+
+Variable Settings
+     You can modify the run-time behavior of Readline by altering the
+     values of variables in Readline using the `set' command within the
+     init file.  Here is how to change from the default Emacs-like key
+     binding to use `vi' line editing commands:
+
+          set editing-mode vi
+
+     A great deal of run-time behavior is changeable with the following
+     variables.
+
+    `bell-style'
+          Controls what happens when Readline wants to ring the
+          terminal bell.  If set to `none', Readline never rings the
+          bell.  If set to `visible', Readline uses a visible bell if
+          one is available.  If set to `audible' (the default),
+          Readline attempts to ring the terminal's bell.
+
+    `comment-begin'
+          The string to insert at the beginning of the line when the
+          `insert-comment' command is executed.  The default value is
+          `"#"'.
+
+    `completion-ignore-case'
+          If set to `on', Readline performs filename matching and
+          completion in a case-insensitive fashion.  The default value
+          is `off'.
+
+    `completion-query-items'
+          The number of possible completions that determines when the
+          user is asked whether he wants to see the list of
+          possibilities.  If the number of possible completions is
+          greater than this value, Readline will ask the user whether
+          or not he wishes to view them; otherwise, they are simply
+          listed.  The default limit is `100'.
+
+    `convert-meta'
+          If set to `on', Readline will convert characters with the
+          eighth bit set to an ASCII key sequence by stripping the
+          eighth bit and prepending an <ESC> character, converting them
+          to a meta-prefixed key sequence.  The default value is `on'.
+
+    `disable-completion'
+          If set to `On', Readline will inhibit word completion.
+          Completion  characters will be inserted into the line as if
+          they had been mapped to `self-insert'.  The default is `off'.
+
+    `editing-mode'
+          The `editing-mode' variable controls which default set of key
+          bindings is used.  By default, Readline starts up in Emacs
+          editing mode, where the keystrokes are most similar to Emacs.
+          This variable can be set to either `emacs' or `vi'.
+
+    `enable-keypad'
+          When set to `on', Readline will try to enable the application
+          keypad when it is called.  Some systems need this to enable
+          the arrow keys.  The default is `off'.
+
+    `expand-tilde'
+          If set to `on', tilde expansion is performed when Readline
+          attempts word completion.  The default is `off'.
+
+    `horizontal-scroll-mode'
+          This variable can be set to either `on' or `off'.  Setting it
+          to `on' means that the text of the lines being edited will
+          scroll horizontally on a single screen line when they are
+          longer than the width of the screen, instead of wrapping onto
+          a new screen line.  By default, this variable is set to `off'.
+
+    `keymap'
+          Sets Readline's idea of the current keymap for key binding
+          commands.  Acceptable `keymap' names are `emacs',
+          `emacs-standard', `emacs-meta', `emacs-ctlx', `vi',
+          `vi-command', and `vi-insert'.  `vi' is equivalent to
+          `vi-command'; `emacs' is equivalent to `emacs-standard'.  The
+          default value is `emacs'.  The value of the `editing-mode'
+          variable also affects the default keymap.
+
+    `mark-directories'
+          If set to `on', completed directory names have a slash
+          appended.  The default is `on'.
+
+    `mark-modified-lines'
+          This variable, when set to `on', causes Readline to display an
+          asterisk (`*') at the start of history lines which have been
+          modified.  This variable is `off' by default.
+
+    `input-meta'
+          If set to `on', Readline will enable eight-bit input (it will
+          not strip the eighth bit from the characters it reads),
+          regardless of what the terminal claims it can support.  The
+          default value is `off'.  The name `meta-flag' is a synonym
+          for this variable.
+
+    `output-meta'
+          If set to `on', Readline will display characters with the
+          eighth bit set directly rather than as a meta-prefixed escape
+          sequence.  The default is `off'.
+
+    `print-completions-horizontally'
+          If set to `on', Readline will display completions with matches
+          sorted horizontally in alphabetical order, rather than down
+          the screen.  The default is `off'.
+
+    `show-all-if-ambiguous'
+          This alters the default behavior of the completion functions.
+          If set to `on', words which have more than one possible
+          completion cause the matches to be listed immediately instead
+          of ringing the bell.  The default value is `off'.
+
+    `visible-stats'
+          If set to `on', a character denoting a file's type is
+          appended to the filename when listing possible completions.
+          The default is `off'.
+
+Key Bindings
+     The syntax for controlling key bindings in the init file is
+     simple.  First you have to know the name of the command that you
+     want to change.  The following sections contain tables of the
+     command name, the default keybinding, if any, and a short
+     description of what the command does.
+
+     Once you know the name of the command, simply place the name of
+     the key you wish to bind the command to, a colon, and then the
+     name of the command on a line in the init file.  The name of the
+     key can be expressed in different ways, depending on which is most
+     comfortable for you.
+
+    KEYNAME: FUNCTION-NAME or MACRO
+          KEYNAME is the name of a key spelled out in English.  For
+          example:
+               Control-u: universal-argument
+               Meta-Rubout: backward-kill-word
+               Control-o: "> output"
+
+          In the above example, <C-u> is bound to the function
+          `universal-argument', and <C-o> is bound to run the macro
+          expressed on the right hand side (that is, to insert the text
+          `> output' into the line).
+
+    "KEYSEQ": FUNCTION-NAME or MACRO
+          KEYSEQ differs from KEYNAME above in that strings denoting an
+          entire key sequence can be specified, by placing the key
+          sequence in double quotes.  Some GNU Emacs style key escapes
+          can be used, as in the following example, but the special
+          character names are not recognized.
+
+               "\C-u": universal-argument
+               "\C-x\C-r": re-read-init-file
+               "\e[11~": "Function Key 1"
+
+          In the above example, <C-u> is bound to the function
+          `universal-argument' (just as it was in the first example),
+          `<C-x> <C-r>' is bound to the function `re-read-init-file',
+          and `<ESC> <[> <1> <1> <~>' is bound to insert the text
+          `Function Key 1'.
+
+     The following GNU Emacs style escape sequences are available when
+     specifying key sequences:
+
+    `\C-'
+          control prefix
+
+    `\M-'
+          meta prefix
+
+    `\e'
+          an escape character
+
+    `\\'
+          backslash
+
+    `\"'
+          <">
+
+    `\''
+          <'>
+
+     In addition to the GNU Emacs style escape sequences, a second set
+     of backslash escapes is available:
+
+    `\a'
+          alert (bell)
+
+    `\b'
+          backspace
+
+    `\d'
+          delete
+
+    `\f'
+          form feed
+
+    `\n'
+          newline
+
+    `\r'
+          carriage return
+
+    `\t'
+          horizontal tab
+
+    `\v'
+          vertical tab
+
+    `\NNN'
+          the character whose ASCII code is the octal value NNN (one to
+          three digits)
+
+    `\xNNN'
+          the character whose ASCII code is the hexadecimal value NNN
+          (one to three digits)
+
+     When entering the text of a macro, single or double quotes must be
+     used to indicate a macro definition.  Unquoted text is assumed to
+     be a function name.  In the macro body, the backslash escapes
+     described above are expanded.  Backslash will quote any other
+     character in the macro text, including `"' and `''.  For example,
+     the following binding will make `C-x \' insert a single `\' into
+     the line:
+          "\C-x\\": "\\"
+
+
+File: gdb.info,  Node: Conditional Init Constructs,  Next: Sample Init File,  Prev: Readline Init File Syntax,  Up: Readline Init File
+
+Conditional Init Constructs
+---------------------------
+
+   Readline implements a facility similar in spirit to the conditional
+compilation features of the C preprocessor which allows key bindings
+and variable settings to be performed as the result of tests.  There
+are four parser directives used.
+
+`$if'
+     The `$if' construct allows bindings to be made based on the
+     editing mode, the terminal being used, or the application using
+     Readline.  The text of the test extends to the end of the line; no
+     characters are required to isolate it.
+
+    `mode'
+          The `mode=' form of the `$if' directive is used to test
+          whether Readline is in `emacs' or `vi' mode.  This may be
+          used in conjunction with the `set keymap' command, for
+          instance, to set bindings in the `emacs-standard' and
+          `emacs-ctlx' keymaps only if Readline is starting out in
+          `emacs' mode.
+
+    `term'
+          The `term=' form may be used to include terminal-specific key
+          bindings, perhaps to bind the key sequences output by the
+          terminal's function keys.  The word on the right side of the
+          `=' is tested against both the full name of the terminal and
+          the portion of the terminal name before the first `-'.  This
+          allows `sun' to match both `sun' and `sun-cmd', for instance.
+
+    `application'
+          The APPLICATION construct is used to include
+          application-specific settings.  Each program using the
+          Readline library sets the APPLICATION NAME, and you can test
+          for it.  This could be used to bind key sequences to
+          functions useful for a specific program.  For instance, the
+          following command adds a key sequence that quotes the current
+          or previous word in Bash:
+               $if Bash
+               # Quote the current or previous word
+               "\C-xq": "\eb\"\ef\""
+               $endif
+
+`$endif'
+     This command, as seen in the previous example, terminates an `$if'
+     command.
+
+`$else'
+     Commands in this branch of the `$if' directive are executed if the
+     test fails.
+
+`$include'
+     This directive takes a single filename as an argument and reads
+     commands and bindings from that file.
+          $include /etc/inputrc
+
+
+File: gdb.info,  Node: Sample Init File,  Prev: Conditional Init Constructs,  Up: Readline Init File
+
+Sample Init File
+----------------
+
+   Here is an example of an inputrc file.  This illustrates key
+binding, variable assignment, and conditional syntax.
+
+
+     # This file controls the behaviour of line input editing for
+     # programs that use the Gnu Readline library.  Existing programs
+     # include FTP, Bash, and Gdb.
+     #
+     # You can re-read the inputrc file with C-x C-r.
+     # Lines beginning with '#' are comments.
+     #
+     # First, include any systemwide bindings and variable assignments from
+     # /etc/Inputrc
+     $include /etc/Inputrc
+     
+     #
+     # Set various bindings for emacs mode.
+     
+     set editing-mode emacs
+     
+     $if mode=emacs
+     
+     Meta-Control-h:	backward-kill-word	Text after the function name is ignored
+     
+     #
+     # Arrow keys in keypad mode
+     #
+     #"\M-OD":        backward-char
+     #"\M-OC":        forward-char
+     #"\M-OA":        previous-history
+     #"\M-OB":        next-history
+     #
+     # Arrow keys in ANSI mode
+     #
+     "\M-[D":        backward-char
+     "\M-[C":        forward-char
+     "\M-[A":        previous-history
+     "\M-[B":        next-history
+     #
+     # Arrow keys in 8 bit keypad mode
+     #
+     #"\M-\C-OD":       backward-char
+     #"\M-\C-OC":       forward-char
+     #"\M-\C-OA":       previous-history
+     #"\M-\C-OB":       next-history
+     #
+     # Arrow keys in 8 bit ANSI mode
+     #
+     #"\M-\C-[D":       backward-char
+     #"\M-\C-[C":       forward-char
+     #"\M-\C-[A":       previous-history
+     #"\M-\C-[B":       next-history
+     
+     C-q: quoted-insert
+     
+     $endif
+     
+     # An old-style binding.  This happens to be the default.
+     TAB: complete
+     
+     # Macros that are convenient for shell interaction
+     $if Bash
+     # edit the path
+     "\C-xp": "PATH=${PATH}\e\C-e\C-a\ef\C-f"
+     # prepare to type a quoted word -- insert open and close double quotes
+     # and move to just after the open quote
+     "\C-x\"": "\"\"\C-b"
+     # insert a backslash (testing backslash escapes in sequences and macros)
+     "\C-x\\": "\\"
+     # Quote the current or previous word
+     "\C-xq": "\eb\"\ef\""
+     # Add a binding to refresh the line, which is unbound
+     "\C-xr": redraw-current-line
+     # Edit variable on current line.
+     "\M-\C-v": "\C-a\C-k$\C-y\M-\C-e\C-a\C-y="
+     $endif
+     
+     # use a visible bell if one is available
+     set bell-style visible
+     
+     # don't strip characters to 7 bits when reading
+     set input-meta on
+     
+     # allow iso-latin1 characters to be inserted rather than converted to
+     # prefix-meta sequences
+     set convert-meta off
+     
+     # display characters with the eighth bit set directly rather than
+     # as meta-prefixed characters
+     set output-meta on
+     
+     # if there are more than 150 possible completions for a word, ask the
+     # user if he wants to see all of them
+     set completion-query-items 150
+     
+     # For FTP
+     $if Ftp
+     "\C-xg": "get \M-?"
+     "\C-xt": "put \M-?"
+     "\M-.": yank-last-arg
+     $endif
+
+
+File: gdb.info,  Node: Bindable Readline Commands,  Next: Readline vi Mode,  Prev: Readline Init File,  Up: Command Line Editing
+
+Bindable Readline Commands
+==========================
+
+* Menu:
+
+* Commands For Moving::		Moving about the line.
+* Commands For History::	Getting at previous lines.
+* Commands For Text::		Commands for changing text.
+* Commands For Killing::	Commands for killing and yanking.
+* Numeric Arguments::		Specifying numeric arguments, repeat counts.
+* Commands For Completion::	Getting Readline to do the typing for you.
+* Keyboard Macros::		Saving and re-executing typed characters
+* Miscellaneous Commands::	Other miscellaneous commands.
+
+   This section describes Readline commands that may be bound to key
+sequences.
+
+
+File: gdb.info,  Node: Commands For Moving,  Next: Commands For History,  Up: Bindable Readline Commands
+
+Commands For Moving
+-------------------
+
+`beginning-of-line (C-a)'
+     Move to the start of the current line.
+
+`end-of-line (C-e)'
+     Move to the end of the line.
+
+`forward-char (C-f)'
+     Move forward a character.
+
+`backward-char (C-b)'
+     Move back a character.
+
+`forward-word (M-f)'
+     Move forward to the end of the next word.  Words are composed of
+     letters and digits.
+
+`backward-word (M-b)'
+     Move back to the start of this, or the previous, word.  Words are
+     composed of letters and digits.
+
+`clear-screen (C-l)'
+     Clear the screen and redraw the current line, leaving the current
+     line at the top of the screen.
+
+`redraw-current-line ()'
+     Refresh the current line.  By default, this is unbound.
+
+
+File: gdb.info,  Node: Commands For History,  Next: Commands For Text,  Prev: Commands For Moving,  Up: Bindable Readline Commands
+
+Commands For Manipulating The History
+-------------------------------------
+
+`accept-line (Newline, Return)'
+     Accept the line regardless of where the cursor is.  If this line is
+     non-empty, add it to the history list.  If this line was a history
+     line, then restore the history line to its original state.
+
+`previous-history (C-p)'
+     Move `up' through the history list.
+
+`next-history (C-n)'
+     Move `down' through the history list.
+
+`beginning-of-history (M-<)'
+     Move to the first line in the history.
+
+`end-of-history (M->)'
+     Move to the end of the input history, i.e., the line currently
+     being entered.
+
+`reverse-search-history (C-r)'
+     Search backward starting at the current line and moving `up'
+     through the history as necessary.  This is an incremental search.
+
+`forward-search-history (C-s)'
+     Search forward starting at the current line and moving `down'
+     through the the history as necessary.  This is an incremental
+     search.
+
+`non-incremental-reverse-search-history (M-p)'
+     Search backward starting at the current line and moving `up'
+     through the history as necessary using a non-incremental search
+     for a string supplied by the user.
+
+`non-incremental-forward-search-history (M-n)'
+     Search forward starting at the current line and moving `down'
+     through the the history as necessary using a non-incremental search
+     for a string supplied by the user.
+
+`history-search-forward ()'
+     Search forward through the history for the string of characters
+     between the start of the current line and the current cursor
+     position (the POINT).  This is a non-incremental search.  By
+     default, this command is unbound.
+
+`history-search-backward ()'
+     Search backward through the history for the string of characters
+     between the start of the current line and the point.  This is a
+     non-incremental search.  By default, this command is unbound.
+
+`yank-nth-arg (M-C-y)'
+     Insert the first argument to the previous command (usually the
+     second word on the previous line).  With an argument N, insert the
+     Nth word from the previous command (the words in the previous
+     command begin with word 0).  A negative argument inserts the Nth
+     word from the end of the previous command.
+
+`yank-last-arg (M-., M-_)'
+     Insert last argument to the previous command (the last word of the
+     previous history entry).  With an argument, behave exactly like
+     `yank-nth-arg'.  Successive calls to `yank-last-arg' move back
+     through the history list, inserting the last argument of each line
+     in turn.
+
+
+File: gdb.info,  Node: Commands For Text,  Next: Commands For Killing,  Prev: Commands For History,  Up: Bindable Readline Commands
+
+Commands For Changing Text
+--------------------------
+
+`delete-char (C-d)'
+     Delete the character under the cursor.  If the cursor is at the
+     beginning of the line, there are no characters in the line, and
+     the last character typed was not bound to `delete-char', then
+     return `EOF'.
+
+`backward-delete-char (Rubout)'
+     Delete the character behind the cursor.  A numeric argument means
+     to kill the characters instead of deleting them.
+
+`quoted-insert (C-q, C-v)'
+     Add the next character typed to the line verbatim.  This is how to
+     insert key sequences like <C-q>, for example.
+
+`tab-insert (M-TAB)'
+     Insert a tab character.
+
+`self-insert (a, b, A, 1, !, ...)'
+     Insert yourself.
+
+`transpose-chars (C-t)'
+     Drag the character before the cursor forward over the character at
+     the cursor, moving the cursor forward as well.  If the insertion
+     point is at the end of the line, then this transposes the last two
+     characters of the line.  Negative arguments don't work.
+
+`transpose-words (M-t)'
+     Drag the word behind the cursor past the word in front of the
+     cursor moving the cursor over that word as well.
+
+`upcase-word (M-u)'
+     Uppercase the current (or following) word.  With a negative
+     argument, uppercase the previous word, but do not move the cursor.
+
+`downcase-word (M-l)'
+     Lowercase the current (or following) word.  With a negative
+     argument, lowercase the previous word, but do not move the cursor.
+
+`capitalize-word (M-c)'
+     Capitalize the current (or following) word.  With a negative
+     argument, capitalize the previous word, but do not move the cursor.
+
+
+File: gdb.info,  Node: Commands For Killing,  Next: Numeric Arguments,  Prev: Commands For Text,  Up: Bindable Readline Commands
+
+Killing And Yanking
+-------------------
+
+`kill-line (C-k)'
+     Kill the text from the current cursor position to the end of the
+     line.
+
+`backward-kill-line (C-x Rubout)'
+     Kill backward to the beginning of the line.
+
+`unix-line-discard (C-u)'
+     Kill backward from the cursor to the beginning of the current line.
+     The killed text is saved on the kill-ring.
+
+`kill-whole-line ()'
+     Kill all characters on the current line, no matter where the
+     cursor is.  By default, this is unbound.
+
+`kill-word (M-d)'
+     Kill from the cursor to the end of the current word, or if between
+     words, to the end of the next word.  Word boundaries are the same
+     as `forward-word'.
+
+`backward-kill-word (M-DEL)'
+     Kill the word behind the cursor.  Word boundaries are the same as
+     `backward-word'.
+
+`unix-word-rubout (C-w)'
+     Kill the word behind the cursor, using white space as a word
+     boundary.  The killed text is saved on the kill-ring.
+
+`delete-horizontal-space ()'
+     Delete all spaces and tabs around point.  By default, this is
+     unbound.
+
+`kill-region ()'
+     Kill the text between the point and the *mark* (saved cursor
+     position).  This text is referred to as the REGION.  By default,
+     this command is unbound.
+
+`copy-region-as-kill ()'
+     Copy the text in the region to the kill buffer, so it can be yanked
+     right away.  By default, this command is unbound.
+
+`copy-backward-word ()'
+     Copy the word before point to the kill buffer.  The word
+     boundaries are the same as `backward-word'.  By default, this
+     command is unbound.
+
+`copy-forward-word ()'
+     Copy the word following point to the kill buffer.  The word
+     boundaries are the same as `forward-word'.  By default, this
+     command is unbound.
+
+`yank (C-y)'
+     Yank the top of the kill ring into the buffer at the current
+     cursor position.
+
+`yank-pop (M-y)'
+     Rotate the kill-ring, and yank the new top.  You can only do this
+     if the prior command is yank or yank-pop.
+
+
+File: gdb.info,  Node: Numeric Arguments,  Next: Commands For Completion,  Prev: Commands For Killing,  Up: Bindable Readline Commands
+
+Specifying Numeric Arguments
+----------------------------
+
+`digit-argument (M-0, M-1, ... M--)'
+     Add this digit to the argument already accumulating, or start a new
+     argument.  <M-> starts a negative argument.
+
+`universal-argument ()'
+     This is another way to specify an argument.  If this command is
+     followed by one or more digits, optionally with a leading minus
+     sign, those digits define the argument.  If the command is
+     followed by digits, executing `universal-argument' again ends the
+     numeric argument, but is otherwise ignored.  As a special case, if
+     this command is immediately followed by a character that is
+     neither a digit or minus sign, the argument count for the next
+     command is multiplied by four.  The argument count is initially
+     one, so executing this function the first time makes the argument
+     count four, a second time makes the argument count sixteen, and so
+     on.  By default, this is not bound to a key.
+
