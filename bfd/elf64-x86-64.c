@@ -173,18 +173,18 @@ elf64_x86_64_info_to_howto (abfd, cache_ptr, dst)
 
 static const bfd_byte elf64_x86_64_plt0_entry[PLT_ENTRY_SIZE] =
 {
-  0xff, 0xb3, 8, 0, 0, 0,	/* pushq GOT+8(%rip) */
-  0xff, 0xa3, 16, 0, 0, 0,	/* jmp GOT+16(%rip) */
-  0, 0, 0, 0			/* pad out to 16 bytes.	 */
+  0xff, 0x35, 8, 0, 0, 0,	/* pushq GOT+8(%rip)  */
+  0xff, 0x25, 16, 0, 0, 0,	/* jmpq *GOT+16(%rip) */
+  0x90, 0x90, 0x90, 0x90	/* pad out to 16 bytes with nops.  */
 };
 
 /* Subsequent entries in a procedure linkage table look like this.  */
 
 static const bfd_byte elf64_x86_64_plt_entry[PLT_ENTRY_SIZE] =
 {
-  0xff, 0xa3,	/* jmp *name@GOTPC(%rip) */
+  0xff, 0x25,	/* jmpq *name@GOTPC(%rip) */
   0, 0, 0, 0,	/* replaced with offset to this symbol in .got.	 */
-  0x68,	/* pushq immediate */
+  0x68,		/* pushq immediate */
   0, 0, 0, 0,	/* replaced with index into relocation table.  */
   0xe9,		/* jmp relative */
   0, 0, 0, 0	/* replaced with offset to start of .plt0.  */
@@ -1664,13 +1664,26 @@ elf64_x86_64_finish_dynamic_symbol (output_bfd, info, h, sym)
       /* Insert the relocation positions of the plt section.  The magic
 	 numbers at the end of the statements are the positions of the
 	 relocations in the plt section.  */
-      bfd_put_64 (output_bfd, got_offset, splt->contents + h->plt.offset + 2);
-      bfd_put_64 (output_bfd, plt_index * sizeof (Elf64_External_Rela),
+      /* Put offset for jmp *name@GOTPCREL(%rip), since the
+	 instruction uses 6 bytes, subtract this value.  */
+      bfd_put_32 (output_bfd,
+		      (sgot->output_section->vma
+		       + sgot->output_offset
+		       + got_offset
+		       - splt->output_section->vma
+		       - splt->output_offset
+		       - h->plt.offset
+		       - 6),
+		  splt->contents + h->plt.offset + 2);
+      /* Put relocation index.  */
+      bfd_put_32 (output_bfd, plt_index,
 		  splt->contents + h->plt.offset + 7);
-      bfd_put_64 (output_bfd, - (h->plt.offset + PLT_ENTRY_SIZE),
+      /* Put offset for jmp .PLT0.  */
+      bfd_put_32 (output_bfd, - (h->plt.offset + PLT_ENTRY_SIZE),
 		  splt->contents + h->plt.offset + 12);
 
-      /* Fill in the entry in the global offset table.	*/
+      /* Fill in the entry in the global offset table, initially this
+	 points to the pushq instruction in the PLT which is at offset 6.  */
       bfd_put_64 (output_bfd, (splt->output_section->vma + splt->output_offset
 			       + h->plt.offset + 6),
 		  sgot->contents + got_offset);
@@ -1747,6 +1760,8 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 
   dynobj = elf_hash_table (info)->dynobj;
 
+  sgot = bfd_get_section_by_name (dynobj, ".got.plt");
+  BFD_ASSERT (sgot != NULL);
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 
   if (elf_hash_table (info)->dynamic_sections_created)
@@ -1816,7 +1831,29 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
       BFD_ASSERT (splt != NULL);
       if (splt->_raw_size > 0)
 	{
+	  /* Fill in the first entry in the procedure linkage table.  */
 	  memcpy (splt->contents, elf64_x86_64_plt0_entry, PLT_ENTRY_SIZE);
+	  /* Add offset for pushq GOT+8(%rip), since the instruction
+	     uses 6 bytes subtract this value.  */
+	  bfd_put_32 (output_bfd,
+		      (sgot->output_section->vma
+		       + sgot->output_offset
+		       + 8
+		       - splt->output_section->vma
+		       - splt->output_offset
+		       - 6),
+		      splt->contents + 2);
+	  /* Add offset for jmp *GOT+16(%rip). The 12 is the offset to
+	     the end of the instruction.  */
+	  bfd_put_32 (output_bfd,
+		      (sgot->output_section->vma
+		       + sgot->output_offset
+		       + 16
+		       - splt->output_section->vma
+		       - splt->output_offset
+		       - 12),
+		      splt->contents + 8);
+
 	}
 
       elf_section_data (splt->output_section)->this_hdr.sh_entsize =
@@ -1825,8 +1862,6 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 
   /* Set the first entry in the global offset table to the address of
      the dynamic section.  */
-  sgot = bfd_get_section_by_name (dynobj, ".got.plt");
-  BFD_ASSERT (sgot != NULL);
   if (sgot->_raw_size > 0)
     {
       if (sdyn == NULL)
@@ -1835,7 +1870,7 @@ elf64_x86_64_finish_dynamic_sections (output_bfd, info)
 	bfd_put_64 (output_bfd,
 		    sdyn->output_section->vma + sdyn->output_offset,
 		    sgot->contents);
-      /* Write GOT[1] and GOT[2], needed for the linker.  */
+      /* Write GOT[1] and GOT[2], needed for the dynamic linker.  */
       bfd_put_64 (output_bfd, (bfd_vma) 0, sgot->contents + GOT_ENTRY_SIZE);
       bfd_put_64 (output_bfd, (bfd_vma) 0, sgot->contents + GOT_ENTRY_SIZE*2);
     }

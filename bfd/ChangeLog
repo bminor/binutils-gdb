@@ -1,3 +1,10 @@
+2001-04-19  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_plt0_entry): Fix instructions.
+	(elf64_x86_64_plt_entry): Likewise.
+	(elf64_x86_64_finish_dynamic_sections): Fix PLT0 generation.
+	(elf64_x86_64_finish_dynamic_symbol): Fix PLT generation.
+
 2001-04-17  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c: Tweak comments related to dynamic linking.
@@ -12,7 +19,7 @@
 	(elf_cris_size_dynamic_sections): Iterate over
 	elf_cris_discard_excess_program_dynamics when not creating shared
 	library.
- 	(elf_cris_discard_excess_dso_dynamics): Renamed from
+	(elf_cris_discard_excess_dso_dynamics): Renamed from
 	elf_cris_discard_copies.  Correct typo, s/Rel/Rela/.
 	(elf_cris_discard_excess_program_dynamics): New.
 
@@ -83,7 +90,7 @@
 
 	* configure.in (bfd_elf64_tradbigmips_vec): New. Traditional
 	64bit big endian MIPS ELF target.
-	(bfd_elf64_tradlittlemips_vec): New. Traditional 64bit little 
+	(bfd_elf64_tradlittlemips_vec): New. Traditional 64bit little
 	endian MIPS ELF target.
 	* configure: Regenerated.
 
@@ -272,7 +279,7 @@
 
 	* Most files: Update copyright notices using Perl script created
 	by Kevin Buettner <kevinb@redhat.com>.
-	
+
 2001-03-07  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Conditionalise
