@@ -2609,7 +2609,7 @@ size_input_section (this_ptr, output_section_statement, fill, dot, relax)
 }
 
 #define IGNORE_SECTION(bfd, s) \
-  (((bfd_get_section_flags (bfd, s) & (SEC_ALLOC | SEC_LOAD)) == 0) \
+  (((bfd_get_section_flags (bfd, s) & (SEC_ALLOC | SEC_LOAD)) != (SEC_ALLOC | SEC_LOAD)) \
    || bfd_section_size (bfd, s) == 0)
 
 /* Check to see if any allocated sections overlap with other allocated

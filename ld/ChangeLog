@@ -1,3 +1,8 @@
+1999-11-24  Nick Clifton  <nickc@cygnus.com>
+
+	* ldlang.c (IGNORE_SECTION): Section must have both ALLOC and LOAD
+	attributes in order to be checked.
+
 1999-11-22  Nick Clifton  <nickc@cygnus.com>
 
 	* ldlang.c (lang_check_section_addresses): Fix test to determine
