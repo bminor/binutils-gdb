@@ -1,3 +1,8 @@
+2001-11-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/i386/embed.mt (TM_FILE): Set to tm-i386.h.
+	* config/i386/tm-embed.h: Delete.
+
 2001-11-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (distclean): Explicitly delete Makefile et.al. in
