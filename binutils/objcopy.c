@@ -2399,46 +2399,42 @@ copy_main (argc, argv)
 	case OPTION_RENAME_SECTION:
 	  {
 	    flagword flags;
-	    const char * s;
-	    char * old_name;
-	    char * new_name;
+	    const char *eq, *fl;
+	    char *old_name;
+	    char *new_name;
 	    unsigned int len;
 
-	    s = strchr (optarg, '=');
-	    if (s == NULL)
+	    eq = strchr (optarg, '=');
+	    if (eq == NULL)
 	      fatal (_("bad format for %s"), "--rename-section");
 
-	    len = s - optarg;
+	    len = eq - optarg;
 	    if (len == 0)
-	      fatal (_("no old name is %s"), "--rename-section");
+	      fatal (_("bad format for %s"), "--rename-section");
 
 	    old_name = (char *) xmalloc (len + 1);
 	    strncpy (old_name, optarg, len);
 	    old_name[len] = 0;
 
-	    s = strchr (optarg + len, ',');
-	    if (s)
+	    eq++;
+	    fl = strchr (eq, ',');
+	    if (fl)
 	      {
-		unsigned int new_len;
-
-		flags = parse_flags (s + 1);
-		new_len = s - (optarg + len);
-		if (new_len == 0)
-		  fatal (_("no new name in %s"), "--rename-section");
-		new_name = (char *) xmalloc (new_len + 1);
-		strncpy (new_name, optarg + len, new_len);
-		new_name [new_len] = 0;
+		flags = parse_flags (fl + 1);
+		len = fl - eq;
 	      }
 	    else
 	      {
-		s = optarg + len;
-		len = strlen (s);
-		if (len == 0)
-		  fatal (_("no new name in %s"), "--rename-section");
-		new_name = (char *) xmalloc (len + 1);
-		strcpy (new_name, s);
 		flags = -1;
+		len = strlen (eq);
 	      }
+
+	    if (len == 0)
+	      fatal (_("bad format for %s"), "--rename-section");
+
+	    new_name = (char *) xmalloc (len + 1);
+	    strncpy (new_name, eq, len);
+	    new_name[len] = 0;
 
 	    add_section_rename (old_name, new_name, flags);
 	  }

@@ -1,3 +1,8 @@
+2001-09-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* objcopy.c (copy_main): Correct rename-section string parsing.
+	Consolidate new_name parsing, and error messages.
+
 2001-09-18  Bruno Haible  <haible@clisp.cons.org>
 
 	* addr2line.c: Don't include <ctype.h>.
