@@ -56,6 +56,7 @@ if ![runto_main] then {
 
 send_gdb "x 0\n"
 gdb_expect {
+    -re "0x0:.*Cannot access memory at address 0x0.*$gdb_prompt $" { }
     -re "0x0:.*Error accessing memory address 0x0.*$gdb_prompt $" { }
     -re ".*$gdb_prompt $" {
 	untested "Memory at address 0 is possibly executable"

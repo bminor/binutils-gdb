@@ -1,3 +1,8 @@
+2004-01-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/gdb1476.exp: Accept alternat pattern for failed memory
+	read at address 0.  This fixes PR testsuite/1504.
+
 2004-01-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/gdbserver.exp (gdbserver_gdb_load): Rename from gdb_load.
