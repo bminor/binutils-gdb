@@ -45,6 +45,7 @@ configure
 configure.in
 d10v-elf
 d30v-elf
+fr30-elf
 lib
 m32r-elf
 mips64el-elf
