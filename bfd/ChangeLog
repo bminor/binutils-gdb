@@ -7,6 +7,9 @@ Wed Oct 12 16:46:43 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 Wed Oct 12 11:54:37 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* ecoff.c (ecoff_set_symbol_info): Mark local stProc or stLabel
+	symbols as BSF_DEBUGGING.
+
 	* rs6000-core.c (rs6000coff_core_file_matches_executable_p): Make
 	str1 and str2 const pointers.
 
