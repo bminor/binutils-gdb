@@ -98,8 +98,8 @@ struct elf_link_hash_entry
   /* If this symbol requires an entry in the global offset table, the
      processor specific backend uses this field to track usage and
      final offset.  We use a union and two names primarily to document
-     the intent of any particular piece of code.  The field should be 
-     used as a count until size_dynamic_sections, at which point the 
+     the intent of any particular piece of code.  The field should be
+     used as a count until size_dynamic_sections, at which point the
      contents of the .got is fixed.  Afterward, if this field is -1,
      then the symbol does not require a global offset table entry.  */
   union
@@ -146,6 +146,9 @@ struct elf_link_hash_entry
 
   /* Symbol st_other value.  */
   unsigned char other;
+
+  /* Hash value of the name computed using the ELF hash function.  */
+  unsigned long elf_hash_value;
 
   /* Some flags; legal values follow.  */
   unsigned short elf_link_hash_flags;
@@ -315,7 +318,7 @@ struct elf_backend_data
 
    /* A function to set the type of the info field.  Processor-specific
      types should be handled here. */
-  int (*elf_backend_get_symbol_type) PARAMS (( Elf_Internal_Sym *)); 
+  int (*elf_backend_get_symbol_type) PARAMS (( Elf_Internal_Sym *, int)); 
  
   /* A function to do additional processing on the ELF section header
      just before writing it out.  This is used to set the flags and
@@ -647,10 +650,21 @@ struct elf_obj_tdata
   unsigned int strtab_section, dynsymtab_section;
   unsigned int dynversym_section, dynverdef_section, dynverref_section;
   file_ptr next_file_pos;
+#if 0
+  /* we don't need these inside bfd anymore, and I think
+     these weren't used outside bfd. */
   void *prstatus;			/* The raw /proc prstatus structure */
   void *prpsinfo;			/* The raw /proc prpsinfo structure */
+#endif
   bfd_vma gp;				/* The gp value (MIPS only, for now) */
   unsigned int gp_size;			/* The gp size (MIPS only, for now) */
+
+  /* Information grabbed from an elf core file. */
+  int core_signal;
+  int core_pid;
+  int core_lwpid;
+  char* core_program;
+  char* core_command;
 
   /* This is set to true if the object was created by the backend
      linker.  */
@@ -668,7 +682,7 @@ struct elf_obj_tdata
      should be used as a count until size_dynamic_sections, at which
      point the contents of the .got is fixed.  Afterward, if an entry
      is -1, then the symbol does not require a global offset table entry. */
-  union 
+  union
     {
       bfd_signed_vma *refcounts;
       bfd_vma *offsets;
@@ -706,6 +720,9 @@ struct elf_obj_tdata
      wasting the memory just for the infrequently called
      find_nearest_line.  */
   struct mips_elf_find_line *find_line_info;
+
+  /* A place to stash dwarf1 info for this bfd. */
+  struct dwarf1_debug *dwarf1_find_line_info;
 
   /* A place to stash dwarf2 info for this bfd. */
   struct dwarf2_debug *dwarf2_find_line_info;
