@@ -1,3 +1,17 @@
+Mon May  4 17:12:06 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/sr3.cc (__get_eh_context): New function.
+
+Tue Apr  7 12:50:17 1998  Manfred Hollstein  <manfred@s-direktnet.de>
+
+	* ld-cdtest/cdtest-foo.h (class Foo): Declare len to be static to
+	avoid compiler warning.
+	* ld-srec/sr3.cc (class Foo): Likewise.
+
+Tue Feb 10 16:42:40 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/sr3.cc (__get_dynamic_handler_chain): New function.
+
 Mon Feb  2 14:17:48 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-scripts/phdrs.exp: Adjust phdrs_regexp for a 64 bit target.
