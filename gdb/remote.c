@@ -581,16 +581,16 @@ remote_wait (status)
 	      objfile_relocate (symfile_objfile, offs);
 	      {
 		struct obj_section *s;
-		bfd *bfd;
+		bfd *abfd;
 
-		bfd = symfile_objfile->obfd;
+		abfd = symfile_objfile->obfd;
 
 		for (s = symfile_objfile->sections;
 		     s < symfile_objfile->sections_end; ++s)
 		  {
 		    flagword flags;
 
-		    flags = bfd_get_section_flags (bfd, s->sec_ptr);
+		    flags = bfd_get_section_flags (abfd, s->sec_ptr);
 
 		    if (flags & SEC_CODE)
 		      {
