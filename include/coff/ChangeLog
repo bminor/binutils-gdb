@@ -1,3 +1,13 @@
+start-sanitize-tic80
+Wed Jan 22 20:10:47 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h (TIC80MAGIC): Renamed to TIC80_AOUTHDR_MAGIC.
+
+Fri Dec 27 22:05:45 1996  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h: New file for TIc80 support.
+
+end-sanitize-tic80
 Thu Dec 19 16:18:11 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* arm.h (_LIT): Define.
