@@ -838,7 +838,19 @@ elf_i386_copy_indirect_symbol (bed, dir, ind)
       edir->tls_type = eind->tls_type;
       eind->tls_type = GOT_UNKNOWN;
     }
-  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+
+  if (ELIMINATE_COPY_RELOCS
+      && ind->root.type != bfd_link_hash_indirect
+      && (dir->elf_link_hash_flags & ELF_LINK_HASH_DYNAMIC_ADJUSTED) != 0)
+    /* If called to transfer flags for a weakdef during processing
+       of elf_adjust_dynamic_symbol, don't copy ELF_LINK_NON_GOT_REF.
+       We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
+    dir->elf_link_hash_flags |=
+      (ind->elf_link_hash_flags & (ELF_LINK_HASH_REF_DYNAMIC
+				   | ELF_LINK_HASH_REF_REGULAR
+				   | ELF_LINK_HASH_REF_REGULAR_NONWEAK));
+  else
+    _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
 static int

@@ -374,7 +374,9 @@ ppc_elf_copy_indirect_symbol (bed, dir, ind)
 
   edir->tls_mask |= eind->tls_mask;
 
-  if (ELIMINATE_COPY_RELOCS && ind->root.type != bfd_link_hash_indirect)
+  if (ELIMINATE_COPY_RELOCS
+      && ind->root.type != bfd_link_hash_indirect
+      && (dir->elf_link_hash_flags & ELF_LINK_HASH_DYNAMIC_ADJUSTED) != 0)
     /* If called to transfer flags for a weakdef during processing
        of elf_adjust_dynamic_symbol, don't copy ELF_LINK_NON_GOT_REF.
        We clear it ourselves for ELIMINATE_COPY_RELOCS.  */
