@@ -1877,21 +1877,10 @@ c4x_operands_match (inst, insn, check)
 	  if (operand->mode != M_DIRECT)
 	    break;
 	  if (exp->X_op == O_constant)
-	    {
-              if(exp->X_add_number <= 65535)
-                {
-                  /* Store only the 16 LSBs of the number.  */
-                  INSERTS (opcode, exp->X_add_number, 15, 0);
-                  continue;
-                }
-              else
-                {
-		  if (!check)
-                    as_bad ("Direct value of %ld is too large",
-                            (long) exp->X_add_number);
-		  ret = -1;
-		  continue;
-                }
+            {
+              /* Store only the 16 LSBs of the number.  */
+              INSERTS (opcode, exp->X_add_number, 15, 0);
+              continue;
 	    }
 	  else if (exp->X_op == O_symbol)
 	    {

@@ -1,3 +1,7 @@
+2002-11-25  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* config/tc-tic4x.c (c4x_operands_match): Bugfix in direct mode
+
 2002-11-21  Randolph Chung  <randolph@tausq.org>
 
 	* config/tc-hppa.h (tc_frob_symbol):  Frob undefined unused symbols
