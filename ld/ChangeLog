@@ -1,3 +1,8 @@
+2003-10-08  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ldexp.c (fold_name) <case DEFINED>: Set section of result to
+	abs_output_section.
+
 2003-10-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* emulparams/elf32xtensa.sh (OTHER_READONLY_SECTIONS,

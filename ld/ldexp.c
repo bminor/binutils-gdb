@@ -497,7 +497,7 @@ fold_name (etree_type *tree,
 			  && (h->type == bfd_link_hash_defined
 			      || h->type == bfd_link_hash_defweak
 			      || h->type == bfd_link_hash_common));
-	  result.section = 0;
+	  result.section = abs_output_section;
 	  result.valid_p = TRUE;
 	}
       break;
