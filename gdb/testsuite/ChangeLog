@@ -1,3 +1,8 @@
+2001-06-22  Michael Chastain  <chastain@redhat.com>
+
+	* gdb.base/arithmet.exp: Use gdb_test instead of send_gdb/gdb_expect.
+	This is operationally compatible with the previous version.
+
 2001-06-13  Jim Blandy  <jimb@redhat.com>
 
 	* lib/gdb.exp (gdb_test): Doc fix.
