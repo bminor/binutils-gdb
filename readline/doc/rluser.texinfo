@@ -156,10 +156,6 @@ operate on characters while meta keystrokes operate on words.
 @node Readline Killing Commands
 @subsection Readline Killing Commands
 
-The act of @dfn{cutting} text means to delete the text from the line, and
-to save away the deleted text for later use, just as if you had cut the
-text out of the line with a pair of scissors.  
-
 @dfn{Killing} text means to delete the text from the line, but to save
 it away for later use, usually by @dfn{yanking} it back into the line.
 If the description for a command says that it `kills' text, then you can
@@ -235,7 +231,7 @@ file is @file{~/.inputrc}.
 When a program which uses the Readline library starts up, the
 @file{~/.inputrc} file is read, and the keybindings are set.
 
-In addition, the @code{C-x C-r} command re-reads this init file, thus
+In addition, the @key{C-x C-r} command re-reads this init file, thus
 incorporating any changes that you might have made to it.
 
 @menu
@@ -314,8 +310,8 @@ Meta-Rubout: backward-kill-word
 Control-o: ">&output"
 @end example
 
-In the above example, @samp{C-u} is bound to the function
-@code{universal-argument}, and @samp{C-o} is bound to run the macro
+In the above example, @key{C-u} is bound to the function
+@code{universal-argument}, and @key{C-o} is bound to run the macro
 expressed on the right hand side (that is, to insert the text
 @samp{>&output} into the line).
 
@@ -331,10 +327,10 @@ following example:
 "\e[11~": "Function Key 1"
 @end example
 
-In the above example, @samp{C-u} is bound to the function
+In the above example, @key{C-u} is bound to the function
 @code{universal-argument} (just as it was in the first example),
-@samp{C-x C-r} is bound to the function @code{re-read-init-file}, and
-@samp{ESC [ 1 1 ~} is bound to insert the text @samp{Function Key 1}.
+@key{C-x C-r} is bound to the function @code{re-read-init-file}, and
+@key{ESC [ 1 1 ~} is bound to insert the text @samp{Function Key 1}.
 
 @end table
 @end table
@@ -352,25 +348,25 @@ In the above example, @samp{C-u} is bound to the function
 @node Commands For Moving
 @subsubsection Commands For Moving
 @ftable @code
-@item beginning-of-line (C-a)
+@item beginning-of-line (@key{C-a})
 Move to the start of the current line.
 
-@item end-of-line (C-e)
+@item end-of-line (@key{C-e})
 Move to the end of the line.
 
-@item forward-char (C-f)
+@item forward-char (@key{C-f})
 Move forward a character.
 
-@item backward-char (C-b)
+@item backward-char (@key{C-b})
 Move back a character.
 
-@item forward-word (M-f)
+@item forward-word (@key{M-f})
 Move forward to the end of the next word.
 
-@item backward-word (M-b)
+@item backward-word (@key{M-b})
 Move back to the start of this, or the previous, word.
 
-@item clear-screen (C-l)
+@item clear-screen (@key{C-l})
 Clear the screen leaving the current line at the top of the screen.
 
 @end ftable
@@ -384,23 +380,23 @@ Accept the line regardless of where the cursor is.  If this line is
 non-empty, add it to the history list.  If this line was a history
 line, then restore the history line to its original state.
 
-@item previous-history (C-p)
+@item previous-history (@key{C-p})
 Move `up' through the history list.
 
-@item next-history (C-n)
+@item next-history (@key{C-n})
 Move `down' through the history list.
 
-@item beginning-of-history (M-<)
+@item beginning-of-history (@key{M-<})
 Move to the first line in the history.
 
-@item end-of-history (M->)
+@item end-of-history (@key{M->})
 Move to the end of the input history, i.e., the line you are entering!
 
-@item reverse-search-history (C-r)
+@item reverse-search-history (@key{C-r})
 Search backward starting at the current line and moving `up' through
 the history as necessary.  This is an incremental search.
 
-@item forward-search-history (C-s)
+@item forward-search-history (@key{C-s})
 Search forward starting at the current line and moving `down' through
 the the history as neccessary.
 
@@ -410,43 +406,43 @@ the the history as neccessary.
 @subsubsection Commands For Changing Text
 
 @ftable @code
-@item delete-char (C-d)
+@item delete-char (@key{C-d})
 Delete the character under the cursor.  If the cursor is at the
 beginning of the line, and there are no characters in the line, and
-the last character typed was not C-d, then return EOF.
+the last character typed was not @key{C-d}, then return EOF.
 
 @item backward-delete-char (Rubout)
 Delete the character behind the cursor.  A numeric arg says to kill
 the characters instead of deleting them.
 
-@item quoted-insert (C-q, C-v)
+@item quoted-insert (@key{C-q}, @key{C-v})
 Add the next character that you type to the line verbatim.  This is
-how to insert things like C-q for example.
+how to insert things like @key{C-q} for example.
 
-@item tab-insert (M-TAB)
+@item tab-insert (@key{M-TAB})
 Insert a tab character.
 
 @item self-insert (a, b, A, 1, !, ...)
 Insert yourself.
 
-@item transpose-chars (C-t)
+@item transpose-chars (@key{C-t})
 Drag the character before point forward over the character at point.
 Point moves forward as well.  If point is at the end of the line, then
 transpose the two characters before point.  Negative args don't work.
 
-@item transpose-words (M-t)
+@item transpose-words (@key{M-t})
 Drag the word behind the cursor past the word in front of the cursor
 moving the cursor over that word as well.
 
-@item upcase-word (M-u)
+@item upcase-word (@key{M-u})
 Uppercase the current (or following) word.  With a negative argument,
 do the previous word, but do not move point.
 
-@item downcase-word (M-l)
+@item downcase-word (@key{M-l})
 Lowercase the current (or following) word.  With a negative argument,
 do the previous word, but do not move point.
 
-@item capitalize-word (M-c)
+@item capitalize-word (@key{M-c})
 Uppercase the current (or following) word.  With a negative argument,
 do the previous word, but do not move point.
 
@@ -457,32 +453,32 @@ do the previous word, but do not move point.
 
 @ftable @code
 
-@item kill-line (C-k)
+@item kill-line (@key{C-k})
 Kill the text from the current cursor position to the end of the line.
 
 @item backward-kill-line ()
 Kill backward to the beginning of the line.  This is normally unbound.
 
-@item kill-word (M-d)
+@item kill-word (@key{M-d})
 Kill from the cursor to the end of the current word, or if between
 words, to the end of the next word.
 
-@item backward-kill-word (M-DEL)
+@item backward-kill-word (@key{M-DEL})
 Kill the word behind the cursor.
 
-@item unix-line-discard (C-u)
-Do what C-u used to do in Unix line input.  We save the killed text on
+@item unix-line-discard (@key{C-u})
+Do what @key{C-u} used to do in Unix line input.  We save the killed text on
 the kill-ring, though.
 
-@item unix-word-rubout (C-w)
-Do what C-w used to do in Unix line input.  The killed text is saved
+@item unix-word-rubout (@key{C-w})
+Do what @key{C-w} used to do in Unix line input.  The killed text is saved
 on the kill-ring.  This is different than backward-kill-word because
 the word boundaries differ.
 
-@item yank (C-y)
+@item yank (@key{C-y})
 Yank the top of the kill ring into the buffer at point.
 
-@item yank-pop (M-y)
+@item yank-pop (@key{M-y})
 Rotate the kill-ring, and yank the new top.  You can only do this if
 the prior command is yank or yank-pop.
 @end ftable
@@ -491,12 +487,12 @@ the prior command is yank or yank-pop.
 @subsubsection Specifying Numeric Arguments
 @ftable @code
 
-@item digit-argument (M-0, M-1, ... M--)
+@item digit-argument (@key{M-0}, @key{M-1}, ... @key{M--})
 Add this digit to the argument already accumulating, or start a new
-argument.  M-- starts a negative argument.
+argument.  @key{M--} starts a negative argument.
 
 @item universal-argument ()
-Do what C-u does in emacs.  By default, this is not bound.
+Do what @key{C-u} does in emacs.  By default, this is not bound.
 @end ftable
 
 
@@ -520,25 +516,25 @@ List the possible completions of the text before point.
 @subsubsection Some Miscellaneous Commands
 @ftable @code
 
-@item re-read-init-file (C-x C-r)
+@item re-read-init-file (@key{C-x} @key{C-r})
 Read in the contents of your @file{~/.inputrc} file, and incorporate
 any bindings found there.
 
-@item abort (C-g)
+@item abort (@key{C-g})
 Ding!  Stops things.
 
-@item do-uppercase-version (M-a, M-b, ...)
+@item do-uppercase-version (@key{M-a}, @key{M-b}, ...)
 Run the command that is bound to your uppercase brother.
 
 @item prefix-meta (ESC)
 Make the next character that you type be metafied.  This is for people
-without a meta key.  Typing @samp{ESC f} is equivalent to typing
-@samp{M-f}.
+without a meta key.  Typing @key{ESC f} is equivalent to typing
+@key{M-f}.
 
-@item undo (C-_)
+@item undo (@key{C-_})
 Incremental undo, separately remembered for each line.
 
-@item revert-line (M-r)
+@item revert-line (@key{M-r})
 Undo all changes made to this line.  This is like typing the `undo'
 command enough times to get back to the beginning.
 @end ftable
@@ -550,7 +546,7 @@ While the Readline library does not have a full set of Vi editing
 functions, it does contain enough to allow simple editing of the line.
 
 In order to switch interactively between Emacs and Vi editing modes, use
-the command M-C-j (toggle-editing-mode).
+the command @key{M-C-j} (toggle-editing-mode).
 
 When you enter a line in Vi mode, you are already placed in `insertion'
 mode, as if you had typed an `i'.  Pressing @key{ESC} switches you into
