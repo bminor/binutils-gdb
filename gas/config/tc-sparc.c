@@ -1018,9 +1018,9 @@ sparc_ip (str)
 			}
 		      else
 			{
-			  if (num < 1 || 31 < num)
+			  if (num < 0 || 31 < num)
 			    {
-			      error_message = ": asr number must be between 1 and 31";
+			      error_message = ": asr number must be between 0 and 31";
 			      goto error;
 			    }
 			}
