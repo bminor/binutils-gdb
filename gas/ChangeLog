@@ -1,7 +1,8 @@
 2002-09-20  Nick Clifton  <nickc@redhat.com>
 
 	* symbols.c (colon): Do not allow symbols to be created in the
-	absolute section.
+	absolute section if WORKING_DOT_WORD is not defined and
+	new_broken_words would require a new frag to be created.
 
 2002-09-20  Alan Modra  <amodra@bigpond.net.au>
 
