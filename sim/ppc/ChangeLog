@@ -1,5 +1,35 @@
 Fri Nov 24 11:24:34 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* configure{,.in} (--enable-sim-icache): If argument is define,
+	add -R to flags passed to igen.
+
+	* igen.c (stdlib.h): Include if the system supplies one.
+	(semantics_use_cache_struct): New global for -R flag to say
+	semantics is to use the cache structure directly rather than
+	putting the values into local variables.
+	(first_undef, last_undef): New structures to remember names to
+	#undef if -R.
+	(lf_print_c_extraction): If -R and this is semantics, emit names
+	as #defines pointing to the cache structure, rather than loading
+	the values into local variables.
+	(lf_print_c_semantic_function): If -R, #undef all of the names
+	defined in lf_print_c_extraction.
+	(main): Recognize -R.
+
+	* idecode_fields.h (SPR_*): Redefine spr_* macros as SPR_* to
+	avoid a name confict if -R passed to igen.
+
+	* ppc-instructions (mfspr, mtspr): Rename spr field to SPR.
+	(model_data): Add field to count the various # of CRs that the
+	mtcrf instruction used.
+	(model_mon_info): Return structures counting the # of CRs that the
+	mtcrf instruction used.
+
+	* mon.c (mon_sort_instruction_names): New function to sort
+	instruction names alphabetically.
+	(mon_print_info): Call qsort with mon_sort_instruction_names to
+	sort instruction names.
+	
 	* debug.h (ITRACE): Make printf_filtered arguments type correct.
 	* idecode_expression.h (CR0_COMPARE): Ditto.
 	* psim.c (psim_read_register): Ditto.
