@@ -1089,22 +1089,8 @@ lang_add_section (lang_statement_list_type *ptr,
 		  lang_output_section_statement_type *output,
 		  lang_input_statement_type *file)
 {
-  flagword flags;
+  flagword flags = section->flags;
   bfd_boolean discard;
-
-  flags = bfd_get_section_flags (section->owner, section);
-
-  /* SEC_EXCLUDE is ignored when doing a relocatable link, except in
-     the special case of debug info.  (See bfd/stabs.c)  */
-  if (link_info.relocatable && (flags & SEC_DEBUGGING) == 0)
-    {
-      flags &= ~SEC_EXCLUDE;
-
-      /* Write the modified flag back, to simplify later linker
-	 code.  */
-      if (section->owner != NULL)
-	bfd_set_section_flags (section->owner, section, flags);
-    }
 
   /* Discard sections marked with SEC_EXCLUDE.  */
   discard = (flags & SEC_EXCLUDE) != 0;
@@ -1348,11 +1334,6 @@ output_section_callback (lang_wild_statement_type *ptr,
   /* Exclude sections that match UNIQUE_SECTION_LIST.  */
   if (unique_section_p (section))
     return;
-
-  /* If the wild pattern was marked KEEP, the member sections
-     should be as well.  */
-  if (ptr->keep_sections)
-    section->flags |= SEC_KEEP;
 
   before = wild_sort (ptr, sec, file, section);
 
@@ -4029,9 +4010,10 @@ lang_place_orphans (void)
 	         around for a sensible place for it to go.  */
 
 	      if (file->just_syms_flag)
-		{
-		  abort ();
-		}
+		abort ();
+
+	      if ((s->flags & SEC_EXCLUDE) != 0)
+		s->output_section = bfd_abs_section_ptr;
 	      else if (strcmp (s->name, "COMMON") == 0)
 		{
 		  /* This is a lonely common section which must have
@@ -4271,8 +4253,7 @@ lang_reset_memory_regions (void)
     o->_raw_size = 0;
 }
 
-/* If the wild pattern was marked KEEP, the member sections
-   should be as well.  */
+/* Worker for lang_gc_sections_1.  */
 
 static void
 gc_section_callback (lang_wild_statement_type *ptr,
@@ -4281,16 +4262,16 @@ gc_section_callback (lang_wild_statement_type *ptr,
 		     lang_input_statement_type *file ATTRIBUTE_UNUSED,
 		     void *data ATTRIBUTE_UNUSED)
 {
+  /* SEC_EXCLUDE is ignored when doing a relocatable link, except in
+     the special case of debug info.  (See bfd/stabs.c)
+     Twiddle the flag here, to simplify later linker code.  */
+  if (link_info.relocatable && (section->flags & SEC_DEBUGGING) == 0)
+    section->flags &= ~SEC_EXCLUDE;
+
+  /* If the wild pattern was marked KEEP, the member sections
+     should be as well.  */
   if (ptr->keep_sections)
     section->flags |= SEC_KEEP;
-}
-
-/* Handle a wild statement, marking it against GC.  */
-
-static void
-lang_gc_wild (lang_wild_statement_type *s)
-{
-  walk_wild (s, gc_section_callback, NULL);
 }
 
 /* Iterate over sections marking them against GC.  */
@@ -4303,7 +4284,7 @@ lang_gc_sections_1 (lang_statement_union_type *s)
       switch (s->header.type)
 	{
 	case lang_wild_statement_enum:
-	  lang_gc_wild (&s->wild_statement);
+	  walk_wild (&s->wild_statement, gc_section_callback, NULL);
 	  break;
 	case lang_constructors_statement_enum:
 	  lang_gc_sections_1 (constructor_list.head);
@@ -4347,7 +4328,8 @@ lang_gc_sections (void)
 	}
     }
 
-  bfd_gc_sections (output_bfd, &link_info);
+  if (command_line.gc_sections)
+    bfd_gc_sections (output_bfd, &link_info);
 }
 
 void
@@ -4395,8 +4377,7 @@ lang_process (void)
   ldctor_build_sets ();
 
   /* Remove unreferenced sections if asked to.  */
-  if (command_line.gc_sections)
-    lang_gc_sections ();
+  lang_gc_sections ();
 
   /* Size up the common data.  */
   lang_common ();

@@ -1,3 +1,16 @@
+2004-05-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_add_section): Don't twidlle SEC_EXCLUDE here.
+	(output_section_callback): Nor SEC_KEEP here.
+	(gc_section_callback): Twiddle SEC_EXCLUDE here.
+	(lang_gc_wild): Delete.  Fold into..
+	(lang_gc_sections_1): ..here.  Only call bfd_gc_sections when garbage
+	collecting.
+	(lang_process): Always call lang_gc_sections.
+	(lang_place_orphans): Handle SEC_EXCLUDE sections.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Remove
+	SEC_EXCLUDE code.
+
 2004-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Clear

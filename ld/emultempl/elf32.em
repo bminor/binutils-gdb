@@ -1182,16 +1182,6 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
 #define HAVE_SECTION(hold, name) \
 (hold.os != NULL || (hold.os = lang_output_section_find (name)) != NULL)
 
-  if (link_info.relocatable && (s->flags & SEC_DEBUGGING) == 0)
-    s->flags &= ~SEC_EXCLUDE;
-
-  if ((s->flags & SEC_EXCLUDE) != 0)
-    {
-      if (s->output_section == NULL)
-	s->output_section = bfd_abs_section_ptr;
-      return TRUE;
-    }
-
   place = NULL;
   if ((s->flags & SEC_ALLOC) == 0)
     ;
