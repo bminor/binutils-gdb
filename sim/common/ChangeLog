@@ -1,3 +1,8 @@
+2004-12-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* syscall.c (cb_syscall) <case CB_SYS_truncate>
+	<case CB_SYS_ftruncate>: New cases.
+
 2004-12-13  Hans-Peter Nilsson  <hp@axis.com>
 
 	* syscall.c (cb_syscall) <case CB_SYS_lstat>: New case.

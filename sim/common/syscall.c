@@ -400,6 +400,36 @@ cb_syscall (cb, sc)
       }
       break;
 
+    case CB_SYS_truncate :
+      {
+	char *path;
+	long len = sc->arg2;
+
+	errcode = get_path (cb, sc, sc->arg1, &path);
+	if (errcode != 0)
+	  {
+	    result = -1;
+	    errcode = EFAULT;
+	    goto FinishSyscall;
+	  }
+	result = (*cb->truncate) (cb, path, len);
+	free (path);
+	if (result < 0)
+	  goto ErrorFinish;
+      }
+      break;
+
+    case CB_SYS_ftruncate :
+      {
+	int fd = sc->arg1;
+	long len = sc->arg2;
+
+	result = (*cb->ftruncate) (cb, fd, len);
+	if (result < 0)
+	  goto ErrorFinish;
+      }
+      break;
+
     case CB_SYS_rename :
       {
 	char *path1, *path2;
