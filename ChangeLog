@@ -1,3 +1,11 @@
+Thu Mar 24 09:12:53 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* Makefile.in (NM_FOR_TARGET): Build tree version is now nm.new.
+
+Sun Mar 20 11:28:22 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* configure.in (hppa*-*-*): Enable binutils.
+
 Sat Mar 19 11:50:16 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.sub: Recognize cisco.
