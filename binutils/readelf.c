@@ -126,6 +126,19 @@ unsigned int		num_dump_sects = 0;
 #define DISASS_DUMP	(1 << 1)
 #define DEBUG_DUMP	(1 << 2)
 
+/* How to rpint a vma value.  */
+typedef enum print_mode
+{
+  HEX,
+  DEC,
+  DEC_5,
+  UNSIGNED,
+  PREFIX_HEX,
+  FULL_HEX,
+  LONG_HEX
+}
+print_mode;
+
 /* Forward declarations for dumb compilers.  */
 static void		  print_vma		      PARAMS ((bfd_vma, print_mode));
 static bfd_vma (*         byte_get)                   PARAMS ((unsigned char *, int));
@@ -380,18 +393,6 @@ byte_get_little_endian (field, size)
 }
 
 /* Print a VMA value.  */
-typedef enum print_mode
-{
-  HEX,
-  DEC,
-  DEC_5,
-  UNSIGNED,
-  PREFIX_HEX,
-  FULL_HEX,
-  LONG_HEX
-}
-print_mode;
-
 static void
 print_vma (vma, mode)
      bfd_vma vma;
