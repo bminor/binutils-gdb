@@ -1358,10 +1358,14 @@ hms_read_inferior_memory (memaddr, myaddr, len)
       char byte[16];
 
       buffer[0] = readchar ();
+      while (buffer[0] == '\r' 
+	     || buffer[0] == '\n')
+	buffer[0] = readchar ();
+
       if (buffer[0] == 'M')
 	break;
 
-      for (i = 1; i < 60; i++) {
+      for (i = 1; i < 50; i++) {
 	buffer[i] = readchar ();
       }
       /* sometimes we loose characters in the ascii representation of the 
@@ -1369,7 +1373,7 @@ hms_read_inferior_memory (memaddr, myaddr, len)
       i = readchar();
       while (i != '\n' && i != '\r')
 	i = readchar();	
-
+      
       /* Now parse the line */
 
       addr = gethex (4, buffer, &ok);

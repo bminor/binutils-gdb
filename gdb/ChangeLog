@@ -1,3 +1,8 @@
+Wed Sep 14 18:18:58 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* remote-hms.c (hms_read_inferior_memory):  Cope when
+	target sends both \r and \n.
+
 Wed Sep 14 17:14:57 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* remote-mips.c (mips_error): Place NORETURN macro correctly.
