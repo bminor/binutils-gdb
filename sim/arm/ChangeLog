@@ -1,3 +1,44 @@
+2001-04-18  matthew green  <mrg@redhat.com>
+
+	* armcopro.c (write_cp15_reg): Set CHANGEMODE if endianness changes.
+	(read_cp15_reg): Make non-static.
+	(XScale_cp15_LDC): Update for write_cp15_reg() change.
+	(XScale_cp15_MCR): Likewise.
+	(XScale_cp15_write_reg): Likewise.
+	(XScale_check_memacc): New function. Check for breakpoints being
+	activated by memory accesses.  Does not support the Branch Target
+	Buffer.
+	(XScale_set_fsr_far): New function. Set FSR and FAR for XScale.
+	(XScale_debug_moe): New function. Set the debug Method Of Entry,
+	if configured.
+	(write_cp14_reg): Reset count counter if requested.
+	* armdefs.h (struct ARMul_State): New members `LastTime' and
+	`CP14R0_CCD' used for the timer/counters.
+	(ARMul_CP13_R0_FIQ, ARMul_CP13_R0_IRQ, ARMul_CP13_R8_PMUS,
+	ARMul_CP14_R0_ENABLE, ARMul_CP14_R0_CLKRST, ARMul_CP14_R0_CCD,
+	ARMul_CP14_R0_INTEN0, ARMul_CP14_R0_INTEN1, ARMul_CP14_R0_INTEN2,
+	ARMul_CP14_R0_FLAG0, ARMul_CP14_R0_FLAG1, ARMul_CP14_R0_FLAG2,
+	ARMul_CP14_R10_MOE_IB, ARMul_CP14_R10_MOE_DB, ARMul_CP14_R10_MOE_BT,
+	ARMul_CP15_R1_ENDIAN, ARMul_CP15_R1_ALIGN, ARMul_CP15_R5_X,
+	ARMul_CP15_R5_ST_ALIGN, ARMul_CP15_R5_IMPRE, ARMul_CP15_R5_MMU_EXCPT,
+	ARMul_CP15_DBCON_M, ARMul_CP15_DBCON_E1, ARMul_CP15_DBCON_E0): New
+	defines for XScale registers.
+	(XScale_check_memacc, XScale_set_fsr_far, XScale_debug_moe): Prototype.
+	(ARMul_Emulate32, ARMul_Emulate26): Clean up function definition.
+	(ARMul_Emulate32): Handle the clock counter and hardware instruction
+	breakpoints.  Call XScale_set_fsr_far() for software breakpoints and
+	software interrupts.
+	(LoadMult): Call XScale_set_fsr_far() for data aborts.
+	(LoadSMult): Likewise.
+	(StoreMult): Likewise.
+	(StoreSMult): Likewise.
+	* armemu.h (write_cp15_reg): Update prototype.
+	* arminit.c (ARMul_NewState): Initialise CP14R0_CCD and LastTime.
+	(ARMul_Abort): If XScale, check for FIQ and IRQ being enabled in CP13
+	register 0.
+	* armvirt.c (GetWord): Call XScale_check_memacc().
+	(PutWord): Likewise.
+
 2001-03-20  Nick Clifton  <nickc@redhat.com>
 
 	* armvirt.c (ARMul_ReLoadInstr): Do not enable alignment checking

@@ -102,6 +102,9 @@ struct ARMul_State
   ARMul_CPWrites *CPWrite[16];	/* Write CP register */
   unsigned char *CPData[16];	/* Coprocessor data */
   unsigned char const *CPRegWords[16];	/* map of coprocessor register sizes */
+  unsigned long LastTime;	/* Value of last call to ARMul_Time() */
+  ARMword CP14R0_CCD;		/* used to count 64 clock cycles with CP14 R0 bit
+				   3 set */
 
   unsigned EventSet;		/* the number of events in the queue */
   unsigned long Now;		/* time to the nearest cycle */
@@ -342,6 +345,32 @@ extern ARMword ARMul_MemAccess (ARMul_State * state, ARMword, ARMword,
 #define ARMul_CANT 1
 #define ARMul_INC 3
 
+#define ARMul_CP13_R0_FIQ	0x1
+#define ARMul_CP13_R0_IRQ	0x2
+#define ARMul_CP13_R8_PMUS	0x1
+
+#define ARMul_CP14_R0_ENABLE	0x0001
+#define ARMul_CP14_R0_CLKRST	0x0004
+#define ARMul_CP14_R0_CCD	0x0008
+#define ARMul_CP14_R0_INTEN0	0x0010
+#define ARMul_CP14_R0_INTEN1	0x0020
+#define ARMul_CP14_R0_INTEN2	0x0040
+#define ARMul_CP14_R0_FLAG0	0x0100
+#define ARMul_CP14_R0_FLAG1	0x0200
+#define ARMul_CP14_R0_FLAG2	0x0400
+#define ARMul_CP14_R10_MOE_IB	0x0004
+#define ARMul_CP14_R10_MOE_DB	0x0008
+#define ARMul_CP14_R10_MOE_BT	0x000c
+#define ARMul_CP15_R1_ENDIAN	0x0080
+#define ARMul_CP15_R1_ALIGN	0x0002
+#define ARMul_CP15_R5_X		0x0400
+#define ARMul_CP15_R5_ST_ALIGN	0x0001
+#define ARMul_CP15_R5_IMPRE	0x0406
+#define ARMul_CP15_R5_MMU_EXCPT	0x0400
+#define ARMul_CP15_DBCON_M	0x0100
+#define ARMul_CP15_DBCON_E1	0x000c
+#define ARMul_CP15_DBCON_E0	0x0003
+
 extern unsigned ARMul_CoProInit (ARMul_State * state);
 extern void ARMul_CoProExit (ARMul_State * state);
 extern void ARMul_CoProAttach (ARMul_State * state, unsigned number,
@@ -351,6 +380,10 @@ extern void ARMul_CoProAttach (ARMul_State * state, unsigned number,
 			       ARMul_CDPs * cdp,
 			       ARMul_CPReads * read, ARMul_CPWrites * write);
 extern void ARMul_CoProDetach (ARMul_State * state, unsigned number);
+extern void XScale_check_memacc (ARMul_State * state, ARMword * address,
+				 int store);
+extern void XScale_set_fsr_far (ARMul_State * state, ARMword fsr, ARMword far);
+extern int XScale_debug_moe (ARMul_State * state, int moe);
 
 /***************************************************************************\
 *               Definitons of things in the host environment                *

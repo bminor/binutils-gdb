@@ -106,6 +106,9 @@ ARMul_NewState (void)
   state->OSptr = NULL;
   state->CommandLine = NULL;
 
+  state->CP14R0_CCD = -1;
+  state->LastTime = 0;
+
   state->EventSet = 0;
   state->Now = 0;
   state->EventPtr = (struct EventNode **) malloc ((unsigned) EVENTLISTSIZE *
@@ -299,10 +302,14 @@ ARMul_Abort (ARMul_State * state, ARMword vector)
       SETABORT (IBIT, SVC26MODE, isize);
       break;
     case ARMul_IRQV:		/* IRQ */
-      SETABORT (IBIT, state->prog32Sig ? IRQ32MODE : IRQ26MODE, esize);
+      if (!state->is_XScale
+	  || (state->CPRead[13](state, 0, 0) & ARMul_CP13_R0_IRQ))
+        SETABORT (IBIT, state->prog32Sig ? IRQ32MODE : IRQ26MODE, esize);
       break;
     case ARMul_FIQV:		/* FIQ */
-      SETABORT (INTBITS, state->prog32Sig ? FIQ32MODE : FIQ26MODE, esize);
+      if (!state->is_XScale
+	  || (state->CPRead[13](state, 0, 0) & ARMul_CP13_R0_FIQ))
+        SETABORT (INTBITS, state->prog32Sig ? FIQ32MODE : FIQ26MODE, esize);
       break;
     }
   if (ARMul_MODE32BIT)

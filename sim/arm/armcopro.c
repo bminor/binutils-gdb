@@ -246,6 +246,15 @@ write_cp15_reg (ARMul_State * state, unsigned reg, unsigned opcode_2, unsigned C
 	     BITS (31, 14) and BIT (10) write as zero, BITS (6, 3) write as one.  */
 	  value &= 0x00003b87;
 	  value |= 0x00000078;
+
+          /* Change the endianness if necessary */
+          if ((value & ARMul_CP15_R1_ENDIAN) !=
+	      (XScale_cp15_opcode_2_is_0_Regs [reg] & ARMul_CP15_R1_ENDIAN))
+	    {
+	      state->bigendSig = value & ARMul_CP15_R1_ENDIAN;
+	      /* Force ARMulator to notice these now.  */
+	      state->Emulate = CHANGEMODE;
+	    }
 	  break;
 
 	case 2: /* Translation Table Base.  */
@@ -444,6 +453,103 @@ XScale_cp15_write_reg (ARMul_State * state ATTRIBUTE_UNUSED,
   write_cp15_reg (state, reg, 0, 0, value);
   
   return TRUE;
+}
+
+/***************************************************************************\
+*        Check for special XScale memory access features                    *
+\***************************************************************************/
+void
+XScale_check_memacc (ARMul_State * state, ARMword * address, int store)
+{
+  ARMword dbcon, r0, r1;
+  int e1, e0;
+
+  if (!state->is_XScale)
+    return;
+
+  /* Check for PID-ification.
+     XXX BTB access support will require this test failing.  */
+  r0 = (read_cp15_reg (13, 0, 0) & 0xfe000000);
+  if (r0 && (*address & 0xfe000000) == 0)
+    *address |= r0;
+
+  /* Check alignment fault enable/disable.  */
+  if ((read_cp15_reg (1, 0, 0) & ARMul_CP15_R1_ALIGN) && (*address & 3))
+    ARMul_Abort (state, ARMul_DataAbortV);
+
+  if (XScale_debug_moe (state, -1))
+    return;
+
+  /* Check the data breakpoint registers.  */
+  dbcon = read_cp15_reg (14, 0, 4);
+  r0 = read_cp15_reg (14, 0, 0);
+  r1 = read_cp15_reg (14, 0, 3);
+  e0 = dbcon & ARMul_CP15_DBCON_E0;
+
+  if (dbcon & ARMul_CP15_DBCON_M)
+    {
+      /* r1 is a inverse mask.  */
+      if (e0 != 0 && ((store && e0 != 3) || (!store && e0 != 1))
+          && ((*address & ~r1) == (r0 & ~r1)))
+	{
+          XScale_debug_moe (state, ARMul_CP14_R10_MOE_DB);
+          ARMul_OSHandleSWI (state, SWI_Breakpoint);
+	}
+    }
+  else
+    {
+      if (e0 != 0 && ((store && e0 != 3) || (!store && e0 != 1))
+              && ((*address & ~3) == (r0 & ~3)))
+	{
+          XScale_debug_moe (state, ARMul_CP14_R10_MOE_DB);
+          ARMul_OSHandleSWI (state, SWI_Breakpoint);
+	}
+
+      e1 = (dbcon & ARMul_CP15_DBCON_E1) >> 2;
+      if (e1 != 0 && ((store && e1 != 3) || (!store && e1 != 1))
+              && ((*address & ~3) == (r1 & ~3)))
+	{
+          XScale_debug_moe (state, ARMul_CP14_R10_MOE_DB);
+          ARMul_OSHandleSWI (state, SWI_Breakpoint);
+	}
+    }
+}
+
+/***************************************************************************\
+*        Check set 
+\***************************************************************************/
+void
+XScale_set_fsr_far(ARMul_State * state, ARMword fsr, ARMword far)
+{
+  if (!state->is_XScale || (read_cp14_reg (10) & (1UL << 31)) == 0)
+    return;
+
+  write_cp15_reg (state, 5, 0, 0, fsr);
+  write_cp15_reg (state, 6, 0, 0, far);
+}
+
+/* Set the XScale debug `method of entry' if it is enabled.  */
+int
+XScale_debug_moe (ARMul_State * state, int moe)
+{
+  ARMword value;
+
+  if (!state->is_XScale)
+    return 1;
+
+  value = read_cp14_reg (10);
+  if (value & (1UL << 31))
+    {
+      if (moe != -1)
+	{
+          value &= ~0x1c;
+          value |= moe;
+	
+          write_cp14_reg (10, value);
+	}
+      return 1;
+    }
+  return 0;
 }
 
 /* Coprocessor 13:  Interrupt Controller and Bus Controller.  */
@@ -735,6 +841,10 @@ write_cp14_reg (unsigned reg, ARMword value)
     case 0: /* PMNC */
       /* Only BITS (27:12), BITS (10:8) and BITS (6:0) can be written.  */
       value &= 0x0ffff77f;
+
+      /* Reset the clock counter if necessary */
+      if (value & ARMul_CP14_R0_CLKRST)
+        XScale_cp14_Regs [1] = 0;
       break;
 
     case 4:

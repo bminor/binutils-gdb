@@ -529,6 +529,79 @@ ARMul_Emulate26 (register ARMul_State * state)
 	  break;
 	}			/* cc check */
 
+      /* Handle the Clock counter here.  */
+      if (state->is_XScale)
+	{
+	  ARMword cp14r0 = state->CPRead[14] (state, 0, 0);
+
+	  if (cp14r0 && ARMul_CP14_R0_ENABLE)
+	    {
+	      unsigned long newcycles, nowtime = ARMul_Time(state);
+
+	      newcycles = nowtime - state->LastTime;
+	      state->LastTime = nowtime;
+	      if (cp14r0 && ARMul_CP14_R0_CCD)
+	        {
+		  if (state->CP14R0_CCD == -1)
+		    state->CP14R0_CCD = newcycles;
+		  else
+		    state->CP14R0_CCD += newcycles;
+		  if (state->CP14R0_CCD >= 64)
+		    {
+		      newcycles = 0;
+		      while (state->CP14R0_CCD >= 64)
+		        state->CP14R0_CCD -= 64, newcycles++;
+		      goto check_PMUintr;
+		    }
+		}
+	      else
+		{
+		  ARMword cp14r1;
+		  int do_int = 0;
+
+		  state->CP14R0_CCD = -1;
+check_PMUintr:
+		  cp14r0 |= ARMul_CP14_R0_FLAG2;
+		  (void) state->CPWrite[14] (state, 0, cp14r0);
+
+		  cp14r1 = state->CPRead[14] (state, 1, 0);
+
+		  /* coded like this for portability */
+		  while (newcycles)
+		    {
+		      if (cp14r1 == 0xffffffff)
+			{
+			  cp14r1 = 0;
+			  do_int = 1;
+			}
+		      else
+			cp14r1++;
+			newcycles--;
+		    }
+		  (void) state->CPWrite[14] (state, 1, cp14r1);
+		  if (do_int && (cp14r0 & ARMul_CP14_R0_INTEN2))
+		    {
+		      if (state->CPRead[13] (state, 8, 0)
+			&& ARMul_CP13_R8_PMUS)
+		        ARMul_Abort (state, ARMul_FIQV);
+		      else
+		        ARMul_Abort (state, ARMul_IRQV);
+		    }
+		}
+	    }
+	}
+
+      /* Handle hardware instructions breakpoints here.  */
+      if (state->is_XScale)
+	{
+	  if ((pc | 3) == (read_cp15_reg (14, 0, 8) | 2)
+           || (pc | 3) == (read_cp15_reg (14, 0, 9) | 2))
+	    {
+	      if (XScale_debug_moe (state, ARMul_CP14_R10_MOE_IB))
+	        ARMul_OSHandleSWI (state, SWI_Breakpoint);
+	    }
+	}
+
 /***************************************************************************\
 *               Actual execution of instructions begins here                *
 \***************************************************************************/
@@ -1355,26 +1428,11 @@ ARMul_Emulate26 (register ARMul_State * state)
 			ARMul_OSHandleSWI (state, SWI_Breakpoint);
 		      else
 			{
-			  /* BKPT - normally this will cause an abort, but for the
-			     XScale if bit 31 in register 10 of coprocessor 14 is
-			     clear, then this is treated as a no-op.  */
-			  if (state->is_XScale)
-			    {
-			      if (read_cp14_reg (10) & (1UL << 31))
-				{
-				  ARMword value;
-				  
-				  value = read_cp14_reg (10);
-				  value &= ~0x1c;
-				  value |= 0xc;
-				  
-				  write_cp14_reg (10, value);
-				  write_cp15_reg (state, 5, 0, 0, 0x200);  /* Set FSR.  */
-				  write_cp15_reg (state, 6, 0, 0, pc);     /* Set FAR.  */
-				}
-			      else
-				break;
-			    }
+			/* BKPT - normally this will cause an abort, but on the
+			   XScale we must check the DCSR.  */
+			  XScale_set_fsr_far (state, ARMul_CP15_R5_MMU_EXCPT, pc);
+	                  if (!XScale_debug_moe (state, ARMul_CP14_R10_MOE_BT))
+			    break;
 			}
 
 		      /* Force the next instruction to be refetched.  */
@@ -3425,6 +3483,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 	      if (instr == ARMul_ABORTWORD && state->AbortAddr == pc)
 		{
 		  /* A prefetch abort.  */
+		  XScale_set_fsr_far (state, ARMul_CP15_R5_MMU_EXCPT, pc);
 		  ARMul_Abort (state, ARMul_PrefetchAbortV);
 		  break;
 		}
@@ -4295,6 +4354,7 @@ LoadMult (ARMul_State * state, ARMword instr, ARMword address, ARMword WBBase)
     state->Reg[temp++] = dest;
   else if (!state->Aborted)
     {
+      XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
       state->Aborted = ARMul_DataAbortV;
     }
 
@@ -4307,6 +4367,7 @@ LoadMult (ARMul_State * state, ARMword instr, ARMword address, ARMword WBBase)
 	  state->Reg[temp] = dest;
 	else if (!state->Aborted)
 	  {
+            XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
 	    state->Aborted = ARMul_DataAbortV;
 	  }
       }
@@ -4373,6 +4434,7 @@ LoadSMult (ARMul_State * state,
     state->Reg[temp++] = dest;
   else if (!state->Aborted)
     {
+      XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
       state->Aborted = ARMul_DataAbortV;
     }
 
@@ -4388,6 +4450,7 @@ LoadSMult (ARMul_State * state,
 	  state->Reg[temp] = dest;
 	else if (!state->Aborted)
 	  {
+            XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
 	    state->Aborted = ARMul_DataAbortV;
 	  }
       }
@@ -4489,6 +4552,7 @@ StoreMult (ARMul_State * state, ARMword instr,
 
   if (state->abortSig && !state->Aborted)
     {
+      XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
       state->Aborted = ARMul_DataAbortV;
     }
 
@@ -4504,6 +4568,7 @@ StoreMult (ARMul_State * state, ARMword instr,
 
 	if (state->abortSig && !state->Aborted)
 	  {
+            XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
 	    state->Aborted = ARMul_DataAbortV;
 	  }
       }
@@ -4585,6 +4650,7 @@ StoreSMult (ARMul_State * state,
 
   if (state->abortSig && !state->Aborted)
     {
+      XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
       state->Aborted = ARMul_DataAbortV;
     }
 
@@ -4599,6 +4665,7 @@ StoreSMult (ARMul_State * state,
 
 	if (state->abortSig && !state->Aborted)
 	  {
+            XScale_set_fsr_far(state, ARMul_CP15_R5_ST_ALIGN, address);
 	    state->Aborted = ARMul_DataAbortV;
 	  }
       }
