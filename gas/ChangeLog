@@ -1,3 +1,8 @@
+Thu Feb 17 09:29:37 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* messages.c (as_perror) [BFD_ASSEMBLER]: Use bfd_get_error and
+	bfd_set_error and new error names. 
+
 Tue Feb 15 20:23:20 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* configure.in: Support i960-vxworks versions > 5.0 as coff.
