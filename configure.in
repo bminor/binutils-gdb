@@ -301,16 +301,19 @@ esac
 
 
 case "${target}" in
+  *-*-netware)
+    noconfigdirs="$noconfigdirs libg++ libio librx newlib"
+    ;;
   alpha-dec-osf*)
     # ld works, but does not support shared libraries.  emacs doesn't
     # work.  newlib is not 64 bit ready.  I'm not sure about emacs19,
     # fileutils or grep.
     noconfigdirs="$noconfigdirs ld emacs emacs19 fileutils grep newlib"
-    ;;	
+    ;;
   alpha*-*-*)
     # newlib is not 64 bit ready
     noconfigdirs="$noconfigdirs newlib"
-    ;;    
+    ;;
   h8300*-*-* | \
   h8500-*-*)
     noconfigdirs="$noconfigdirs libg++ libio librx"
