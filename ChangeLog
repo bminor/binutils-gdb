@@ -1,3 +1,8 @@
+Sun Dec  1 00:18:59 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.in (mips*-sgi-irix6*):  Remove gdb and related
+	directories from noconfigdirs.
+
 Tue Nov 26 11:45:33 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* config.sub (basic_machine): added mips16 configuration
