@@ -485,7 +485,7 @@ fi
 # Don't add -Wall or -Wunused, they include -Wunused-parameter which
 # causes noise.
 build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
--Wformat -Wparentheses -Wpointer-arith"
+-Wformat -Wparentheses -Wpointer-arith -Wuninitialized"
 # Up for debate: -Wswitch -Wcomment -trigraphs -Wtrigraphs
 # -Wunused-function -Wunused-label -Wunused-variable -Wunused-value
 # -Wchar-subscripts -Wuninitialized -Wtraditional -Wshadow -Wcast-qual

@@ -1,8 +1,14 @@
+Tue May 23 20:47:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (build_warnings): Add -Wuninitialized.
+	* configure: Regenerate.
+
 Tue May 23 17:44:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From Mon May 8 14:49:51 2000 Andrew Cagney <cagney@b1.cygnus.com>
  	(gdb 5.0): From Michael Paddon <mmpp@esec.com.au>:
 	* configure.in (AC_CHECK_HEADERS): Check for <sys/user.h>.
+
 	* configure: Re-generate.
 	* proc-api.c: Only include <sys/user.h> when available.
 	(ioctl_table): Check that PIOCGETPR and PIOCGETU are defined.
