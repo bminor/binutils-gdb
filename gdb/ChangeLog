@@ -1,5 +1,20 @@
 2003-07-20  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* m68hc11-tdep.c (m68hc11_pseudo_register_read): Use 
+	regcache_cooked_read_unsigned instead of read_register.
+	(m68hc11_saved_pc_after_call): Likewise.
+	(m68hc11_pseudo_register_write): Use regcache_cooked_write_unsigned
+	instead of write_register.
+	(m68hc11_register_type): New function.
+	(m68hc11_register_virtual_type): Remove.
+	(m68hc11_store_return_value): Convert to use the regcache.
+	(m68hc11_extract_struct_value_address): Likewise.
+	(m68hc11_gdbarch_init): Remove deprecated ops for register to use
+	m68hc11_register_type; undeprecate store_return_value and
+	extract_struct_value_address.
+
+2003-07-20  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* m68hc11-tdep.c (m68hc11_extract_return_value): Use regcache_raw_read
 	and translate to use regcache.
 	(m68hc11_gdbarch_init): Undeprecate extract_return_value.
