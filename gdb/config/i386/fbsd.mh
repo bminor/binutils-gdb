@@ -1,5 +1,5 @@
-# Host: Intel 386 running NetBSD
+# Host: Intel 386 running FreeBSD
 XDEPFILES= 
 NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o coredep.o i386b-nat.o
-XM_FILE= xm-nbsd.h
-NAT_FILE= nm-nbsd.h
+XM_FILE= xm-i386bsd.h
+NAT_FILE= nm-fbsd.h

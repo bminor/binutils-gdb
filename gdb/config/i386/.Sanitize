@@ -23,6 +23,8 @@ Do-first:
 
 Things-to-keep:
 
+fbsd.mh
+fbsd.mt
 gdbserve.mt
 go32.mh
 i386aix.mh
@@ -62,6 +64,7 @@ nm-i386sco.h
 nm-i386sco4.h
 nm-i386v.h
 nm-i386v4.h
+nm-fbsd.h
 nm-linux.h
 nm-m3.h
 nm-nbsd.h

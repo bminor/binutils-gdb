@@ -1,3 +1,10 @@
+Tue Nov 29 13:40:25 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* config/i386/nbsd.mh (REGEX, REGEX1): No longer define.
+
+	* configure.in (i[345]86-*-freebsd*): New configuration.
+	* config/i386/{fbsd.mh,fbsd.mt,nm-fbsd.h}: New files.
+
 Tue Nov 29 12:23:25 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* top.c (read_next_line): Pass annotation suffix "commands"
