@@ -850,32 +850,24 @@ elf_hppa_final_link (abfd, info)
 {
   boolean retval;
 
-  /* Make sure we've got ourselves a suitable __gp value.  */
-  if (!info->relocateable)
+  if (! info->relocateable)
     {
       struct elf_link_hash_entry *gp;
-      bfd_vma gp_val = 0;
-      asection *os;
+      bfd_vma gp_val;
 
-      /* Find the .opd section.  __gp's value should be the same as
-	 the start of .PARISC.global section.  */
-      for (os = abfd->sections; os ; os = os->next)
-	{
-	  /* This would be cleaner if we marked sections with an attribute
-	     indicating they are short sections.  */
-	  if (strcmp (os->name, ".PARISC.global") == 0)
-	    break;
-	}
+      /* The linker script defines a value for __gp, we just need to
+	 install that value into magic place for the BFD.  */
+      gp = elf_link_hash_lookup (elf_hash_table (info), "__gp", false,
+				 false, false);
 
-      BFD_ASSERT (os != NULL)
+      /* Adjust the value of __gp as we may want to slide it into the
+	 .plt section so that the stubs can access PLT entries without
+	 using an addil sequence.  */
+      gp->root.u.def.value += elf64_hppa_hash_table (info)->gp_offset;
 
-      gp_val = (os->output_section->vma + os->output_offset);
-		   
-      gp = elf_link_hash_lookup (elf_hash_table (info), "__gp", true,
-				 true, false);
-      gp->root.type = bfd_link_hash_defined;
-      gp->root.u.def.section = os;
-      gp->root.u.def.value = 0;
+      gp_val = (gp->root.u.def.section->output_section->vma
+		+ gp->root.u.def.section->output_offset
+		+ gp->root.u.def.value);
       _bfd_set_gp_value (abfd, gp_val);
     }
 
@@ -1280,8 +1272,14 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	  }
 
 	/* We want the value of the DLT offset for this symbol, not
-	   the symbol's actual address.  */
-	value = dyn_h->dlt_offset + hppa_info->dlt_sec->output_offset;
+	   the symbol's actual address.  Note that __gp may not point
+	   to the start of the DLT, so we have to compute the absolute
+	   address, then subtract out the value of __gp.  */
+	value = (dyn_h->dlt_offset
+		 + hppa_info->dlt_sec->output_offset
+		 + hppa_info->dlt_sec->output_section->vma);
+	value -= _bfd_get_gp_value (output_bfd);
+
 
 	/* All DLTIND relocations are basically the same at this point,
 	   except that we need different field selectors for the 21bit
@@ -1382,8 +1380,13 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_PLTOFF16DF:
       {
 	/* We want the value of the PLT offset for this symbol, not
-	   the symbol's actual address.  */
-	value = dyn_h->plt_offset + hppa_info->plt_sec->output_offset;
+	   the symbol's actual address.  Note that __gp may not point
+	   to the start of the DLT, so we have to compute the absolute
+	   address, then subtract out the value of __gp.  */
+	value = (dyn_h->plt_offset
+		 + hppa_info->plt_sec->output_offset
+		 + hppa_info->plt_sec->output_section->vma);
+	value -= _bfd_get_gp_value (output_bfd);
 
 	/* All PLTOFF relocations are basically the same at this point,
 	   except that we need different field selectors for the 21bit
@@ -1424,8 +1427,13 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	  }
 
 	/* We want the value of the DLT offset for this symbol, not
-	   the symbol's actual address.  */
-	value = dyn_h->dlt_offset + hppa_info->dlt_sec->output_offset;
+	   the symbol's actual address.  Note that __gp may not point
+	   to the start of the DLT, so we have to compute the absolute
+	   address, then subtract out the value of __gp.  */
+	value = (dyn_h->dlt_offset
+		 + hppa_info->dlt_sec->output_offset
+		 + hppa_info->dlt_sec->output_section->vma);
+	value -= _bfd_get_gp_value (output_bfd);
 	bfd_put_32 (input_bfd, value, hit_data);
 	return bfd_reloc_ok;
       }
@@ -1453,8 +1461,13 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	  }
 
 	/* We want the value of the DLT offset for this symbol, not
-	   the symbol's actual address.  */
-	value = dyn_h->dlt_offset + hppa_info->dlt_sec->output_offset;
+	   the symbol's actual address.  Note that __gp may not point
+	   to the start of the DLT, so we have to compute the absolute
+	   address, then subtract out the value of __gp.  */
+	value = (dyn_h->dlt_offset
+		 + hppa_info->dlt_sec->output_offset
+		 + hppa_info->dlt_sec->output_section->vma);
+	value -= _bfd_get_gp_value (output_bfd);
 	bfd_put_64 (input_bfd, value, hit_data);
 	return bfd_reloc_ok;
       }
@@ -1477,9 +1490,14 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
       return bfd_reloc_ok;
 
     case R_PARISC_LTOFF64:
-      /* We want the value of the DLT offset for this symbol, not
-          the symbol's actual address.  */
-      value = dyn_h->dlt_offset + hppa_info->dlt_sec->output_offset;
+	/* We want the value of the DLT offset for this symbol, not
+	   the symbol's actual address.  Note that __gp may not point
+	   to the start of the DLT, so we have to compute the absolute
+	   address, then subtract out the value of __gp.  */
+      value = (dyn_h->dlt_offset
+	       + hppa_info->dlt_sec->output_offset
+	       + hppa_info->dlt_sec->output_section->vma);
+      value -= _bfd_get_gp_value (output_bfd);
 
       bfd_put_64 (input_bfd, value + addend, hit_data);
       return bfd_reloc_ok;
