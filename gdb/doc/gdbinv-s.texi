@@ -1067,6 +1067,13 @@ by setting the @code{remotedebug} variable.  If you set it to 1 using
 to 2 every character will be displayed.  You can check the current value
 at any time with the command @samp{show remotedebug}.
 
+@cindex @code{timeout}, MIPS protocol
+@cindex @code{retransmit-timeout}, MIPS protocol
+The timeout used while waiting for a packet is controlled by the
+@code{timeout} variable.  The default is 5 seconds.  The timeout used
+while waiting for an acknowledgement of a packet is controlled by the
+@code{retransmit-timeout} variable.  The default is 3 seconds.
+
 @kindex set mipsfpu off
 @cindex MIPS remote floating point
 @cindex floating point, MIPS remote
