@@ -1,3 +1,12 @@
+2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* coff-rs6000.c (xcoff_generate_rtinit): Silence uninitialized
+	variable warnings.
+	* elf32-sh.c (sh_elf_relax_section): Silence signed/unsigned
+	comparison warning.
+	* trad-core.c (trad_unix_core_file_p): Silence pointer/integer
+	cast warnings for the common case.
+
 2002-02-09  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_howto): Add R_ALPHA_BRSGP.
