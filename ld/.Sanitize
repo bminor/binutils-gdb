@@ -93,6 +93,7 @@ lnk960.sh
 m88kbcs.sc-sh
 m88kbcs.sh
 mri.c
+mri.h
 go32.sh
 mkscript.c
 news.sh
@@ -111,7 +112,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.35  1992/04/17 15:59:22  sac
+# Revision 1.36  1992/05/01 22:08:40  sac
+# Add mri.h
+#
+# Revision 1.35  1992/04/17  15:59:22  sac
 # 	* relax.c: added handling for new "padding" seclet type, used to
 # 	fill out gaps between section.
 # 	* ldgram.y, ldlex.l: now -defsym on the command line is done
