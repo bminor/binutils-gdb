@@ -1,3 +1,12 @@
+Mon Oct 16 12:59:01 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc-opc.c (whole file): Add flags for common/any support.
+
+Tue Oct 10 11:06:07 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (BISON): Remove macro.
+	(FLAGS_TO_PASS): Remove BISON.
+
 Fri Oct  6 16:26:45 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	Mon Sep 25 22:49:32 1995  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
