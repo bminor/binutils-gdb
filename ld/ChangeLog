@@ -1,3 +1,8 @@
+2002-10-21  Danny Smith  <dannysmith@users.sourceforeg.net>
+
+	* scripttempl/pe.sc (__RUNTIME_PSEUDO_RELOC_LIST__,
+	__RUNTIME_PSEUDO_RELOC_LIST_END__): Add only when relocating.
+
 2002-10-22  Alexandre Oliva  <aoliva@redhat.com>
 
 	* emulparams/elf32bmipn32-defs.sh: Set ELFSIZE according to
