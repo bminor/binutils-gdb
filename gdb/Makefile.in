@@ -1,5 +1,5 @@
 # Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-# 1999, 2000, 2001 Free Software Foundation, Inc.
+# 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -1333,6 +1333,12 @@ corefile.o: corefile.c $(dis_asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 
 corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(target_h) $(gdbthread_h) $(gdb_string_h) $(regcache_h)
+
+gcore.o: gcore.c $(defs_h) $(command_h) $(inferior_h) $(gdbcore_h) \
+	$(BFD_SRC)/elf-bfd.h $(symfile_h) $(objfiles_h) 
+
+linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(gregset_h) \
+	$(gdbcore_h) $(gdbthread_h) $(BFD_SRC)/elf-bfd.h 
 
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h)
 

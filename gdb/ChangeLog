@@ -1,5 +1,8 @@
 2002-01-10  Michael Snyder  <msnyder@redhat.com>
 
+	* Makefile.in: Add rules for gcore.o and linux-proc.o.
+	* gcore.c: Include cli/cli-decode.h instead of command.h.
+
 	* main.c (captured_main): Add new command line option "--pid".
 	If the second command line argument (following the symbol-file)
 	begins with a digit, try to attach to it before trying to open

@@ -19,7 +19,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "command.h"
+#include "cli/cli-decode.h"
 #include "inferior.h"
 #include "gdbcore.h"
 #include "elf-bfd.h"
