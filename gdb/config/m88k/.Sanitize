@@ -34,6 +34,7 @@ tm-delta88v4.h
 tm-m88k.h
 xm-delta88.h
 xm-delta88v4.h
+xm-dgux.h
 xm-m88k.h
 
 Things-to-lose:
