@@ -615,8 +615,130 @@ ppc_sysv_abi_push_arguments (nargs, args, sp, struct_return, struct_addr)
   return sp;
 }
 
-/* This version of ppc_linux_memory_remove_breakpoints handles the
-   case of self modifying code */
+/* ppc_linux_memory_remove_breakpoints attempts to remove a breakpoint
+   in much the same fashion as memory_remove_breakpoint in mem-break.c,
+   but is careful not to write back the previous contents if the code
+   in question has changed in between inserting the breakpoint and
+   removing it.
+
+   Here is the problem that we're trying to solve...
+
+   Once upon a time, before introducing this function to remove
+   breakpoints from the inferior, setting a breakpoint on a shared
+   library function prior to running the program would not work
+   properly.  In order to understand the problem, it is first
+   necessary to understand a little bit about dynamic linking on
+   this platform.
+
+   A call to a shared library function is accomplished via a bl
+   (branch-and-link) instruction whose branch target is an entry
+   in the procedure linkage table (PLT).  The PLT in the object
+   file is uninitialized.  To gdb, prior to running the program, the
+   entries in the PLT are all zeros.
+
+   Once the program starts running, the shared libraries are loaded
+   and the procedure linkage table is initialized, but the entries in
+   the table are not (necessarily) resolved.  Once a function is
+   actually called, the code in the PLT is hit and the function is
+   resolved.  In order to better illustrate this, an example is in
+   order; the following example is from the gdb testsuite.
+	    
+	We start the program shmain.
+
+	    [kev@arroyo testsuite]$ ../gdb gdb.base/shmain
+	    [...]
+
+	We place two breakpoints, one on shr1 and the other on main.
+
+	    (gdb) b shr1
+	    Breakpoint 1 at 0x100409d4
+	    (gdb) b main
+	    Breakpoint 2 at 0x100006a0: file gdb.base/shmain.c, line 44.
+
+	Examine the instruction (and the immediatly following instruction)
+	upon which the breakpoint was placed.  Note that the PLT entry
+	for shr1 contains zeros.
+
+	    (gdb) x/2i 0x100409d4
+	    0x100409d4 <shr1>:      .long 0x0
+	    0x100409d8 <shr1+4>:    .long 0x0
+
+	Now run 'til main.
+
+	    (gdb) r
+	    Starting program: gdb.base/shmain 
+	    Breakpoint 1 at 0xffaf790: file gdb.base/shr1.c, line 19.
+
+	    Breakpoint 2, main ()
+		at gdb.base/shmain.c:44
+	    44        g = 1;
+
+	Examine the PLT again.  Note that the loading of the shared
+	library has initialized the PLT to code which loads a constant
+	(which I think is an index into the GOT) into r11 and then
+	branchs a short distance to the code which actually does the
+	resolving.
+
+	    (gdb) x/2i 0x100409d4
+	    0x100409d4 <shr1>:      li      r11,4
+	    0x100409d8 <shr1+4>:    b       0x10040984 <sg+4>
+	    (gdb) c
+	    Continuing.
+
+	    Breakpoint 1, shr1 (x=1)
+		at gdb.base/shr1.c:19
+	    19        l = 1;
+
+	Now we've hit the breakpoint at shr1.  (The breakpoint was
+	reset from the PLT entry to the actual shr1 function after the
+	shared library was loaded.) Note that the PLT entry has been
+	resolved to contain a branch that takes us directly to shr1. 
+	(The real one, not the PLT entry.)
+
+	    (gdb) x/2i 0x100409d4
+	    0x100409d4 <shr1>:      b       0xffaf76c <shr1>
+	    0x100409d8 <shr1+4>:    b       0x10040984 <sg+4>
+
+   The thing to note here is that the PLT entry for shr1 has been
+   changed twice.
+
+   Now the problem should be obvious.  GDB places a breakpoint (a
+   trap instruction) on the zero value of the PLT entry for shr1. 
+   Later on, after the shared library had been loaded and the PLT
+   initialized, GDB gets a signal indicating this fact and attempts
+   (as it always does when it stops) to remove all the breakpoints.
+
+   The breakpoint removal was causing the former contents (a zero
+   word) to be written back to the now initialized PLT entry thus
+   destroying a portion of the initialization that had occurred only a
+   short time ago.  When execution continued, the zero word would be
+   executed as an instruction an an illegal instruction trap was
+   generated instead.  (0 is not a legal instruction.)
+
+   The fix for this problem was fairly straightforward.  The function
+   memory_remove_breakpoint from mem-break.c was copied to this file,
+   modified slightly, and renamed to ppc_linux_memory_remove_breakpoint.
+   In tm-linux.h, MEMORY_REMOVE_BREAKPOINT is defined to call this new
+   function.
+
+   The differences between ppc_linux_memory_remove_breakpoint () and
+   memory_remove_breakpoint () are minor.  All that the former does
+   that the latter does not is check to make sure that the breakpoint
+   location actually contains a breakpoint (trap instruction) prior
+   to attempting to write back the old contents.  If it does contain
+   a trap instruction, we allow the old contents to be written back. 
+   Otherwise, we silently do nothing.
+
+   The big question is whether memory_remove_breakpoint () should be
+   changed to have the same functionality.  The downside is that more
+   traffic is generated for remote targets since we'll have an extra
+   fetch of a memory word each time a breakpoint is removed.
+
+   For the time being, we'll leave this self-modifying-code-friendly
+   version in ppc-linux-tdep.c, but it ought to be migrated somewhere
+   else in the event that some other platform has similar needs with
+   regard to removing breakpoints in some potentially self modifying
+   code.  */
 int
 ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
