@@ -1,3 +1,19 @@
+2005-03-17  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xg_apply_tentative_value): Rename to
+	xg_apply_fix_value and return a value to indicate success.
+	(md_pcrel_from): Skip check of fx_done.  Return 0 if not PC-relative.
+	(xtensa_force_relocation): Remove checks for VTABLE relocs.
+	(xtensa_validate_fix_sub): New.
+	(xtensa_fix_adjustable): Remove check for external or weak symbols.
+	(tc_gen_reloc): Move code to handle difference of symbols and code to
+	apply tentative fix values to ...
+	(md_apply_fix3): ...here.  Enable standard overflow checks for simple
+	8, 16, and 32 bit relocations.  Apply fixes for slot-specific
+	relocations when linkrelax flag is not set.
+	* config/tc-xtensa.h (xtensa_validate_fix_sub): Add prototype.
+	(TC_FORCE_RELOCATION_SUB_SAME, TC_VALIDATE_FIX_SUB): Define.
+
 2005-03-17  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (i386_scale): Beautify error message.
