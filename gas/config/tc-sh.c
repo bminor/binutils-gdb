@@ -2474,14 +2474,14 @@ md_undefined_symbol (name)
 
 void
 tc_crawl_symbol_chain (headers)
-     object_headers *headers;
+     object_headers *headers ATTRIBUTE_UNUSED;
 {
   printf (_("call to tc_crawl_symbol_chain \n"));
 }
 
 void
 tc_headers_hook (headers)
-     object_headers *headers;
+     object_headers *headers ATTRIBUTE_UNUSED;
 {
   printf (_("call to tc_headers_hook \n"));
 }
@@ -2924,7 +2924,7 @@ md_convert_frag (headers, seg, fragP)
 #ifdef BFD_ASSEMBLER
      bfd *headers ATTRIBUTE_UNUSED;
 #else
-     object_headers *headers;
+     object_headers *headers ATTRIBUTE_UNUSED;
 #endif
      segT seg;
      fragS *fragP;
@@ -3680,6 +3680,16 @@ md_number_to_chars (ptr, use, nbytes)
     number_to_chars_bigendian (ptr, use, nbytes);
 }
 
+/* This version is used in obj-coff.c when not using BFD_ASSEMBLER.
+   eg for the sh-hms target.  */
+
+long
+md_pcrel_from (fixP)
+     fixS *fixP;
+{
+  return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address + 2;
+}
+
 long
 md_pcrel_from_section (fixP, sec)
      fixS *fixP;
@@ -3698,7 +3708,7 @@ md_pcrel_from_section (fixP, sec)
       return fixP->fx_subsy ? fixP->fx_where + fixP->fx_frag->fr_address : 0;
     }
 
-  return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address + 2;
+  return md_pcrel_from (fixP);
 }
 
 #ifdef OBJ_COFF
