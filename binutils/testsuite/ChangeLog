@@ -1,3 +1,8 @@
+2000-06-18  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objcopy.exp: Expect all arm variants to fail the
+	copying executable test.
+
 2000-06-14  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* binutils-all/readelf.exp (regexp_diff): Do not break when a

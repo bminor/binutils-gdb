@@ -473,7 +473,7 @@ proc copy_executable { prog flags test1 test2 } {
 	# mips_elf_sym_is_global.
 	setup_xfail "mips*-*-elf"
 
-	setup_xfail "arm*-*-coff"
+	setup_xfail "*arm*-*-coff"
 	setup_xfail "arm*-*-pe"
 	setup_xfail "thumb*-*-coff"
 	setup_xfail "thumb*-*-pe"
