@@ -860,7 +860,12 @@ xcoff_find_reloc (relocs, count, address)
   bfd_size_type min, max, this;
 
   if (count < 2)
-    return 0;
+    {
+      if (count == 1 && relocs[0].r_vaddr < address)
+	return 1;
+      else
+	return 0;
+    }
 
   min = 0;
   max = count;

@@ -4,6 +4,7 @@ Wed Nov  8 11:31:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 	Change all uses.
 	(xcoff_swap_ldhdr_in): New static function.
 	(xcoff_swap_ldsym_in): New static function.
+	(xcoff_find_reloc): Handle the case of a single reloc correctly.
 	(xcoff_link_add_symbols): If we just created a descriptor, pass it
 	to _bfd_generic_link_add_one_symbol, to save a hash lookup.
 	Handle XTY_ER/XMC_XO symbols correctly.
