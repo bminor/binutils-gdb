@@ -1,3 +1,10 @@
+2002-01-15  Michael Snyder  <msnyder@redhat.com>
+
+	* target.c: New command, "set trust-readonly-sections on".
+	(do_xfer_memory): Honor the suggestion to trust readonly sections
+	by reading them from the object file instead of from the target.
+	(initialize_targets): Register command "set trust-readonly-sections".
+
 2002-01-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* parse.c (target_map_name_to_register): Simplify, search regs and
