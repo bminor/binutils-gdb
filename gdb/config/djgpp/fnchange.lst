@@ -281,6 +281,8 @@
 @V@/gdb/tui/tuiSourceWin.h @V@/gdb/tui/tuiWinSource.h
 @V@/gdb/x86-64-linux-tdep.c @V@/gdb/x8664-ltdep.c
 @V@/gdb/x86-64-linux-nat.c @V@/gdb/x8664-lnat.c
+@V@/include/xtensa-isa-internal.h @V@/include/xt-internal.h
+@V@/include/xtensa-isa.h @V@/include/xt-isa.h
 @V@/intl/intlh.inst.in @V@/intl/intlh_inst.in
 @V@/intl/po2tbl.sed.in @V@/intl/po2tblsed.in
 @V@/itcl/itcl/itclConfig.sh.in @V@/itcl/itcl/itclConfig.sh-in
@@ -446,6 +448,9 @@
 @V@/sim/testsuite/d10v-elf/t-ae-st2w-ip.s @V@/sim/testsuite/d10v-elf/t-st2-ip.s
 @V@/sim/testsuite/d10v-elf/t-ae-st2w-is.s @V@/sim/testsuite/d10v-elf/t-st2-is.s
 @V@/sim/testsuite/d30v-elf/ls-ld4bhu.S @V@/sim/testsuite/d30v-elf/ls-ld4bu.S
+@V@/sim/testsuite/sim/arm/misaligned1.ms @V@/sim/testsuite/sim/arm/mis1.ms
+@V@/sim/testsuite/sim/arm/misaligned2.ms @V@/sim/testsuite/sim/arm/mis2.ms
+@V@/sim/testsuite/sim/arm/misaligned3.ms @V@/sim/testsuite/sim/arm/mis3.ms
 @V@/tcl/cygwin/tclConfig.sh.in @V@/tcl/cygwin/tclConfig.sh-in
 @V@/tcl/doc/ExprLongObj.3 @V@/tcl/doc/ExprLObj.3
 @V@/tcl/mac/tclMacBOAAppInit.c @V@/tcl/mac/tclBOAAppInit.c

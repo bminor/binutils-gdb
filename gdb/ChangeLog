@@ -1,3 +1,14 @@
+2003-05-11  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (mi-symbol-cmds.o): Rename mi-cmd-symbol.
+	* config/djgpp/fnchange.lst: Rename include/xtensa-isa-internal.h,
+	include/xtensa-isa.h, sim/testsuite/sim/arm/misaligned1.ms,
+	sim/testsuite/sim/arm/misaligned2.ms, and
+	sim/testsuite/sim/arm/misaligned3.ms.
+	* disasm.h (struct ui_file): Add opaque struct declaration.
+	* config/pa/tm-hppa64.h (struct type, struct frame_info): Ditto.
+	* frame.h (struct ui_file): Ditto.
+
 2003-05-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* value.h: Pretty print.

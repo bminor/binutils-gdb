@@ -1,3 +1,7 @@
+2003-05-11  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-symbol-cmds.c: Rename "mi-cmd-symbol.c", avoid 8.3 problem.
+
 2003-05-08  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-main.c (register_changed_p): Use MAX_REGISTER_SIZE instead of
