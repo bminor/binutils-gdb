@@ -1,3 +1,9 @@
+2002-12-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	* target.c (update_current_target): Don't inherit DONT_USE.
+	* target.h (struct target_ops): Remove DONT_USE.
+	(target_next): Remove macro.
+
 2002-12-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* ui-out.c (MAX_UI_OUT_LEVELS): Raise to 6.  Fixes PR cli/654.

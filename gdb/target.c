@@ -609,7 +609,6 @@ update_current_target (void)
       INHERIT (to_get_current_exception_event, t);
       INHERIT (to_pid_to_exec_file, t);
       INHERIT (to_stratum, t);
-      INHERIT (DONT_USE, t);
       INHERIT (to_has_all_memory, t);
       INHERIT (to_has_memory, t);
       INHERIT (to_has_stack, t);

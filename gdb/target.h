@@ -295,8 +295,6 @@ struct target_ops
     struct exception_event_record *(*to_get_current_exception_event) (void);
     char *(*to_pid_to_exec_file) (int pid);
     enum strata to_stratum;
-    struct target_ops
-     *DONT_USE;			/* formerly to_next */
     int to_has_all_memory;
     int to_has_memory;
     int to_has_stack;
@@ -779,11 +777,6 @@ extern void target_load (char *arg, int from_tty);
 
 #define target_get_current_exception_event() \
      (*current_target.to_get_current_exception_event) ()
-
-/* Pointer to next target in the chain, e.g. a core file and an exec file.  */
-
-#define	target_next \
-     (current_target.to_next)
 
 /* Does the target include all of memory, or only part of it?  This
    determines whether we look up the target chain for other parts of
