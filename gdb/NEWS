@@ -44,6 +44,7 @@ Fix for gdb/702: a -var-assign that updates the value now shows up
 * Multi-arched targets.
 
 HP/PA HPUX11, 32bit ABI (partial)	hppa*-*-hpux* except hppa*64*-*-hpux11*
+Mitsubishi M32R/D w/simulator			m32r-*-elf*
 
 * OBSOLETE configurations and files
 
@@ -52,7 +53,6 @@ been commented out.  Unless there is activity to revive these
 configurations, the next release of GDB will have their sources
 permanently REMOVED.
 
-Mitsubishi M32R/D w/simulator			m32r-*-elf*
 Z8000 simulator		  		z8k-zilog-none 	  or z8ksim
 Matsushita MN10200 w/simulator			mn10200-*-*
 H8/500 simulator 			h8500-hitachi-hms or h8500hms

@@ -1,3 +1,11 @@
+2003-08-01  Andrew Cagney  <cagney@redhat.com>
+
+	Import mainline multi-arch changes from Kei Sakamoto.
+	* gdb/NEWS: Mention that m32r is multi-arch.
+	* configure.tgt: Recognize m32r-*-*.
+	* config/m32r/m32r.mt: New file.
+	* m32r-rom.c, m32r-stub.c, m32r-tdep.c: Import
+
 2003-07-31  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.c (struct regcache_descr): Update comments on
