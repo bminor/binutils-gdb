@@ -1,3 +1,8 @@
+Mon Mar 23 18:10:57 1998  Ulrich Drepper  (drepper@cygnus.com)
+
+	* solib.c (solib_create_inferior_hook):  Rewrite previous
+	change to check the type of file via BFD.
+
 Mon Mar 23 13:52:28 1998  Ulrich Drepper  (drepper@cygnus.com) 
  
 	* breakpoint.c (breakpoint_re_set_one): Treat bp_shlib_events
