@@ -1,3 +1,8 @@
+2000-08-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* dbxread (dbx_symfile_read, process_later): Protoize.
+	* dsrec.c (load_srec): Protoize.
+
 2000-08-18  Andrew Cagney  <cagney@ops1.cygnus.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Check arches->gdbarch and not

@@ -549,9 +549,7 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
    table (as opposed to a shared lib or dynamically loaded file).  */
 
 static void
-dbx_symfile_read (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;		/* FIXME comments above */
+dbx_symfile_read (struct objfile *objfile, int mainline)
 {
   bfd *sym_bfd;
   int val;
@@ -813,10 +811,8 @@ static int cont_count = 0;
 /* Arrange for function F to be called with arguments SYM and P later
    in the stabs reading process.  */
 void
-process_later (sym, p, f)
-     struct symbol *sym;
-     char *p;
-     int (*f) (struct objfile *, struct symbol *, char *);
+process_later (struct symbol *sym, char *p,
+	       int (*f) (struct objfile *, struct symbol *, char *))
 {
 
   /* Allocate more space for the deferred list.  */
