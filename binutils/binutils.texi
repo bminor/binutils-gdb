@@ -633,28 +633,85 @@ The GNU linker @code{ld} is now described in a separate manual.
 
 @smallexample
 nm [ -a | --debug-syms ]  [ -g | --extern-only ]
-   [ -s | --print-armap ]  [ -o | --print-file-name ]  
-   [ -n | --numeric-sort ]  [ -p | --no-sort ]
+   [ -s | --print-armap ]  [ -A | -o | --print-file-name ]  
+   [ -n | -v | --numeric-sort ]  [ -p | --no-sort ]
    [ -r | --reverse-sort ]  [ -u | --undefined-only ]  
-   [ --target=@var{bfdname} ]
-   [ @var{objfile}@dots{} ]
+   [ -t @var{radix} | --radix=@var{radix} ] [ -P | --portability ]
+   [ --target=@var{bfdname} ] [ -f @var{format} | --format=@var{format} ]
+   [ -V | --version ] [ @var{objfile}@dots{} ]
 @end smallexample
 
 GNU @code{nm} lists the symbols from object files @var{objfile}@dots{}.
+If no object files are listed as arguments, @code{nm} assumes
+@file{a.out}.
+
+For each symbol, @code{nm} shows:
+
+@itemize @bullet
+@item
+The symbol value, in the radix selected by options (see below), or
+hexadecimal by default.
+
+@item
+The symbol type.  At least the following types are used; others are, as
+well, depending on the object file format.  If lowercase, the symbol is
+local; if uppercase, the symbol is global (external).
+
+@c Some more detail on exactly what these symbol types are used for
+@c would be nice.
+@table @code
+@item A
+Absolute.
+
+@item B
+BSS (uninitialized data).
+
+@item C
+Common.
+
+@item D
+Initialized data.
+
+@item I
+Indirect reference.
+
+@item T
+Text (program code).
+
+@item U
+Undefined.
+@end table
+
+@item
+The symbol name.
+@end itemize
 
 The long and short forms of options, shown here as alternatives, are
 equivalent.
 
 @table @code
-@item @var{objfile}@dots{}
-@kindex a.out
-Object files whose symbols are to be listed.  If no object files are
-listed as arguments, @code{nm} assumes @samp{a.out}.
+@item -A
+@itemx -o
+@itemx --print-file-name 
+@cindex input file name
+@cindex file name
+@cindex source file name
+Precede each symbol by the name of the input file (or archive element)
+in which it was found, rather than identifying the input file once only,
+before all of its symbols.
 
 @item -a
 @itemx --debug-syms 
 @cindex debugging symbols
-Display debugger-only symbols; normally these are not listed.
+Display all symbols, even debugger-only symbols; normally these are not
+listed.
+
+@item -f @var{format}
+@itemx --format=@var{format}
+Use the output format @var{format}, which can be @code{bsd},
+@code{sysv}, or @code{posix}.  The default is @code{bsd}.
+Only the first character of @var{format} is significant, it can be
+either upper or lower case.
 
 @item -g
 @itemx --extern-only 
@@ -664,10 +721,16 @@ Display only external symbols.
 @item -p
 @itemx --no-sort 
 @cindex sorting symbols
-Don't bother to sort the symbols in any order; just print them in the
-order encountered.
+Don't bother to sort the symbols in any order; print them in the order
+encountered.
+
+@item -P
+@itemx --portability
+Use the POSIX.2 standard output format instead of the default format.
+Equivalent to @samp{-f posix}.
 
 @item -n
+@itemx -v
 @itemx --numeric-sort 
 Sort symbols numerically by their addresses, rather than alphabetically
 by their names. 
@@ -679,26 +742,20 @@ When listing symbols from archive members, include the index: a mapping
 (stored in the archive by @code{ar} or @code{ranlib}) of which modules
 contain definitions for which names.
 
-@item -o
-@itemx --print-file-name 
-@cindex input file name
-@cindex file name
-@cindex source file name
-Precede each symbol by the name of the input file where it was found,
-rather than identifying the input file once only before all of its
-symbols. 
-
 @item -r
 @itemx --reverse-sort 
 Reverse the order of the sort (whether numeric or alphabetic); let the
 last come first.
 
+@item -t @var{radix}
+@itemx --radix=@var{radix}
+Use @var{radix} as the radix for printing the symbol values.  It must be
+@samp{d} for decimal, @samp{o} for octal, or @samp{x} for hexadecimal.
+
 @item --target=@var{bfdname}
-@c @item --target
 @cindex object code format
 Specify an object code format other than your system's default format.
 @xref{objdump}, for information on listing available formats.
-@c FIXME what *does* --target/no arg do?
 
 @item -u
 @itemx --undefined-only 
@@ -706,6 +763,9 @@ Specify an object code format other than your system's default format.
 @cindex undefined symbols
 Display only undefined symbols (those external to each object file).
 
+@item -V
+@itemx --version
+Show the version number of @code{nm}.
 @end table
 
 @node objdump, ranlib, nm, Top
