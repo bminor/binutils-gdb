@@ -1,3 +1,8 @@
+Thu Jan  1 18:04:51 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* scripttempl/h8300h.sc: Fix typo.
+	* scripttempl/h8300s.sc: Likewise.
+
 start-sanitize-sky
 Mon Dec 22 16:54:39 1997  Doug Evans  <devans@canuck.cygnus.com>
 
