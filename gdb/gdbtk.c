@@ -68,6 +68,30 @@ static int x_fd;		/* X network socket */
 
 static int disassemble_from_exec = -1;
 
+/* Supply malloc calls for tcl/tk.  */
+
+char *
+Tcl_Malloc (size)
+     unsigned int size;
+{
+  return xmalloc (size);
+}
+
+char *
+Tcl_Realloc (ptr, size)
+     char *ptr;
+     unsigned int size;
+{
+  return xrealloc (ptr, size);
+}
+
+void
+Tcl_Free(ptr)
+     char *ptr;
+{
+  free (ptr);
+}
+
 static void
 null_routine(arg)
      int arg;
