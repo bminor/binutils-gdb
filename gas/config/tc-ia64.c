@@ -2709,7 +2709,11 @@ fixup_unw_records (list)
 	    size = (slot_index (last_addr, last_frag, first_addr, first_frag)
 		    + dir_len);
 	    rlen = ptr->r.record.r.rlen = size;
-	    region = ptr;
+	    if (ptr->r.type == body)
+	      /* End of region.  */
+	      region = 0;
+	    else
+	      region = ptr;
 	    break;
 	  }
 	case epilogue:
@@ -3250,7 +3254,7 @@ generate_unwind_image (text_name)
   size = output_unw_records (unwind.list, (void **) &unw_rec);
   if (size % md.pointer_size != 0)
     as_bad ("Unwind record is not a multiple of %d bytes.", md.pointer_size);
-                      
+
   /* If there are unwind records, switch sections, and output the info.  */
   if (size != 0)
     {

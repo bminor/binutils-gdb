@@ -4459,7 +4459,7 @@ md_apply_fix3 (fixP, valP, seg)
       return;
     }
 
-  buf = fixP->fx_frag->fr_literal + fixP->fx_where;
+  buf = (unsigned char *) (fixP->fx_frag->fr_literal + fixP->fx_where);
   insn = bfd_get_32 (stdoutput, buf);
   fmt = bfd_hppa_insn2fmt (stdoutput, insn);
 
@@ -8398,13 +8398,8 @@ hppa_fix_adjustable (fixp)
     {
     /* Relocation types which use e_lrsel.  */
     case R_PARISC_DIR21L:
-    case R_PARISC_DLTIND21L:
     case R_PARISC_DLTREL21L:
     case R_PARISC_DPREL21L:
-    case R_PARISC_LTOFF_FPTR21L:
-    case R_PARISC_LTOFF_TP21L:
-    case R_PARISC_PCREL21L:
-    case R_PARISC_PLABEL21L:
     case R_PARISC_PLTOFF21L:
 
     /* Relocation types which use e_rrsel.  */
@@ -8412,24 +8407,15 @@ hppa_fix_adjustable (fixp)
     case R_PARISC_DIR14DR:
     case R_PARISC_DIR14WR:
     case R_PARISC_DIR17R:
-    case R_PARISC_DLTIND14R:
-    case R_PARISC_DLTIND14DR:
-    case R_PARISC_DLTIND14WR:
     case R_PARISC_DLTREL14R:
     case R_PARISC_DLTREL14DR:
     case R_PARISC_DLTREL14WR:
     case R_PARISC_DPREL14R:
     case R_PARISC_DPREL14DR:
     case R_PARISC_DPREL14WR:
-    case R_PARISC_PCREL14R:
-    case R_PARISC_PCREL17R:
-    case R_PARISC_PLABEL14R:
-    case R_PARISC_LTOFF_FPTR14R:
-    case R_PARISC_LTOFF_FPTR14DR:
-    case R_PARISC_LTOFF_FPTR14WR:
-    case R_PARISC_LTOFF_TP14R:
-    case R_PARISC_LTOFF_TP14DR:
-    case R_PARISC_LTOFF_TP14WR:
+    case R_PARISC_PLTOFF14R:
+    case R_PARISC_PLTOFF14DR:
+    case R_PARISC_PLTOFF14WR:
 
     /* Other types that we reject for reduction.  */
     case R_PARISC_GNU_VTENTRY:
