@@ -1,3 +1,7 @@
+Tue Nov 25 20:12:46 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* sim-io.c (sim_io_syscalls): Disable lseek.
+
 Tue Nov 25 00:12:38 1997  Doug Evans  <devans@seba.cygnus.com>
 
 	* gennltvals.sh: Generate syscall values for d30v.
