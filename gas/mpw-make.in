@@ -18,6 +18,10 @@ CFLAGS = -w -mc68020 -mc68881 -model far {CROSS} -d MPW -d TARGET_BYTES_BIG_ENDI
 .c.o  \Option-f .c
    {C}  {DepDir}{Default}.c {CFLAGS} {SymOptions} -s gas-{Default} -o {TargDir}{Default}.c.o
 
+prefix = usr:local:
+
+bindir = {prefix}bin:
+
 OBJECTS = \Option-d
 		"{o}"app.c.o \Option-d
 		"{o}"as.c.o \Option-d
@@ -93,3 +97,13 @@ as.new \Option-f\Option-f {OBJECTS} "{o}"obj-format.c.o "{o}"targ-cpu.c.o "{o}"a
 "{o}"write.c.o \Option-f "{s}"write.c {INCLUDES}
 "{o}"ecoff.c.o \Option-f "{s}"ecoff.c {INCLUDES}
 "{o}"xmalloc.c.o \Option-f "{s}"xmalloc.c {INCLUDES}
+
+install \Option-f
+	If "`Exists "{prefix}"`" == ""
+		Echo "{prefix}" does not exist, cannot install anything
+		Exit 1
+	End If
+	If "`Exists "{bindir}"`" == ""
+		NewFolder "{bindir}"
+	End If
+	Duplicate -y :as.new "{bindir}"as
