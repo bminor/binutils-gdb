@@ -431,7 +431,7 @@ make_argument (argument * a, int start_bits)
       a->constant = p.val;
       break;
 
-    case arg_icr:
+    case arg_idxr:
       a->scale = 0;
       total_size = a->size + 10;  /* sizeof(rbase + ridx + scl2) = 10.  */
       p = makelongparameter (allWords, inst_bit_size - total_size,
@@ -557,7 +557,7 @@ print_arg (argument *a, struct disassemble_info *info)
 	func (stream, "$0x%x", a->constant);
       break;
 
-    case arg_icr:
+    case arg_idxr:
       func (stream, "0x%x(%s,%s,%d)", a->constant, getregname (a->r),
 	    getregname (a->i_r), powerof2 (a->scale));
       break;

@@ -671,8 +671,8 @@ const operand_entry crx_optab[] =
   {16,	arg_cr,	    0},				      /* rbase_disps16 */
   {28,	arg_cr,	    0},				      /* rbase_disps28 */
   {32,	arg_cr,	    0},				      /* rbase_disps32 */
-  {6,	arg_icr,    0},				      /* rindex_disps6 */
-  {22,  arg_icr,    0},				      /* rindex_disps22 */
+  {6,	arg_idxr,   0},				      /* rindex_disps6 */
+  {22,  arg_idxr,   0},				      /* rindex_disps22 */
   {4,	arg_r,	    0},				      /* regr */
   {8,	arg_r,	    0},				      /* regr8 */
   {4,	arg_copr,   0},				      /* copregr */

@@ -1,3 +1,9 @@
+2004-11-05  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* crx-opc.c (crx_optab): Rename 'arg_icr' to 'arg_idxr' for Index register
+	mode.
+	* crx-dis.c: Likewise.
+
 2004-11-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	Generally, handle CRISv32.
