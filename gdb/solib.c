@@ -120,7 +120,7 @@ static CORE_ADDR
 solib_extract_address (void *memberp)
 {
   return extract_address (memberp, 
-			  bfd_elf_get_arch_size (exec_bfd) / 8);
+			  bfd_get_arch_size (exec_bfd) / 8);
 }
 
 #define SOLIB_EXTRACT_ADDRESS(MEMBER) \
@@ -199,7 +199,7 @@ LM_ADDR (so)
      struct so_list *so;
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
-  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+  if (bfd_get_arch_size (exec_bfd) == 32)
     return extract_address (&so->lm32.lm_addr, sizeof (so->lm32.lm_addr));
   else
 #endif
@@ -211,7 +211,7 @@ LM_NEXT (so)
      struct so_list *so;
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
-  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+  if (bfd_get_arch_size (exec_bfd) == 32)
     return extract_address (&so->lm32.lm_next, sizeof (so->lm32.lm_next));
   else
 #endif
@@ -223,7 +223,7 @@ LM_NAME (so)
      struct so_list *so;
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
-  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+  if (bfd_get_arch_size (exec_bfd) == 32)
     return extract_address (&so->lm32.lm_name, sizeof (so->lm32.lm_name));
   else
 #endif
@@ -244,7 +244,7 @@ LM_ADDR (so)
      struct so_list *so;
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
-  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+  if (bfd_get_arch_size (exec_bfd) == 32)
     return extract_address (&so->lm32.l_addr, sizeof (so->lm32.l_addr));
   else
 #endif
@@ -256,7 +256,7 @@ LM_NEXT (so)
      struct so_list *so;
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
-  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+  if (bfd_get_arch_size (exec_bfd) == 32)
     return extract_address (&so->lm32.l_next, sizeof (so->lm32.l_next));
   else
 #endif
@@ -268,7 +268,7 @@ LM_NAME (so)
      struct so_list *so;
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
-  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+  if (bfd_get_arch_size (exec_bfd) == 32)
     return extract_address (&so->lm32.l_name, sizeof (so->lm32.l_name));
   else
 #endif
@@ -280,7 +280,7 @@ IGNORE_FIRST_LINK_MAP_ENTRY (so)
      struct so_list *so;
 {
 #if defined (HAVE_STRUCT_LINK_MAP32)
-  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+  if (bfd_get_arch_size (exec_bfd) == 32)
     return (solib_extract_address (&(so) -> lm32.l_prev) == 0);
   else
 #endif
@@ -1037,7 +1037,7 @@ first_link_map_member (void)
 
 #else /* SVR4_SHARED_LIBS */
 #if defined (HAVE_STRUCT_LINK_MAP32)
-  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+  if (bfd_get_arch_size (exec_bfd) == 32)
     {
       read_memory (debug_base, (char *) &debug32_copy, 
 		   sizeof (struct r_debug32));
@@ -1099,7 +1099,7 @@ open_symbol_file_object (from_ttyp)
     return 0;	/* failed somehow... */
 
 #if defined (HAVE_STRUCT_LINK_MAP32)
-  if (bfd_elf_get_arch_size (exec_bfd) == 32)
+  if (bfd_get_arch_size (exec_bfd) == 32)
     {
       struct link_map32 lmcopy;
       /* Read from target memory to GDB.  */
@@ -1257,7 +1257,7 @@ current_sos (void)
       new->lmaddr = lm;
 
 #if defined (HAVE_STRUCT_LINK_MAP32)
-      if (bfd_elf_get_arch_size (exec_bfd) == 32)
+      if (bfd_get_arch_size (exec_bfd) == 32)
 	read_memory (lm, (char *) &(new->lm32), sizeof (struct link_map32));
       else
 #endif

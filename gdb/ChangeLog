@@ -1,3 +1,11 @@
+2000-08-30  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib.c (solib_extract_address, LM_ADDR, LM_NEXT, LM_NAME,
+	LM_ADDR, IGNORE_FIRST_LINK_MAP_ENTRY, first_link_map_member,
+	open_symbol_file_object, current_sos): Rename
+	bfd_elf_get_arch_size to bfd_get_arch_size().
+	* sol-thread.c (rw_common, ps_pdmodel): Likewise.
+
 2000-08-30  David Edelsohn  <dje@watson.ibm.com>
 
 	Patch applied by Kevin Buettner <kevinb@redhat.com>:
