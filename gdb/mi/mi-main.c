@@ -1272,6 +1272,7 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
       xasprintf (&run, "%s %s", mi, async_args);
       make_exec_cleanup (free, run);
       add_continuation (mi_exec_async_cli_cmd_continuation, NULL);
+      old_cleanups = NULL;
     }
   else
     {

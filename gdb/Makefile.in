@@ -2189,7 +2189,7 @@ mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(mi_cmds_h) \
 mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(top_h) $(mi_cmds_h) $(ui_out_h) \
 		$(mi_console_h) $(mi_getopt_h) $(event_loop_h) $(event_top_h) \
 		$(mi_getopt_h) $(regcache_h)
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/mi/mi-main.c
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-main.c
 mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(mi_out_h) $(ui_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c
 mi-console.o: $(srcdir)/mi/mi-console.c $(mi_out_h) $(defs_h)

@@ -1,3 +1,7 @@
+Thu May 10 16:26:47 2001  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (mi-main.o): Compile with -Werror.
+
 2001-05-10  Michael Snyder  <msnyder@redhat.com>
 
 	* remote.c (remote_open_1): Call no_shared_libraries, so that

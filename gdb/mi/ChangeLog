@@ -1,3 +1,8 @@
+Thu May 10 16:28:13 2001  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mi-main.c (mi_execute_async_cli_command): Always initialize
+ 	old_cleanups.
+
 2001-05-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-out.c (mi_begin, mi_end): Replace mi_list_begin and
