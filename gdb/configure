@@ -37,10 +37,12 @@ ac_help="$ac_help
   --with-tkinclude=DIR    Directory where tk private headers are"
 ac_help="$ac_help
   --with-x                use the X Window System"
+# start-sanitize-sky
 ac_help="$ac_help
   --with-sim-gpu2=DIR     Use GPU2 library under given DIR"
 ac_help="$ac_help
   --with-sim-funit=DIR    Use target FP lib under given DIR"
+# end-sanitize-sky
 ac_help="$ac_help
   --enable-shared         Use shared libraries"
 
