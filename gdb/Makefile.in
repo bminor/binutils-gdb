@@ -1047,6 +1047,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-tdep.c ns32km3-nat.c osfsolib.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
+	ppc-linux-nat.c ppc-linux-tdep.c \
 	procfs.c pyr-tdep.c pyr-xdep.c \
 	remote-adapt.c remote-array.c remote-bug.c remote-e7000.c remote-eb.c \
 	remote-es.c remote-hms.c remote-mips.c \
@@ -1520,6 +1521,12 @@ parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
 ppc-bdm.o: ppc-bdm.c $(defs_h) $(gdbcore_h) gdb_string.h $(frame_h) \
 	$(inferior_h) $(bfd_h) symfile.h target.h gdb_wait.h $(gdbcmd_h) \
 	objfiles.h gdb-stabs.h serial.h ocd.h
+
+ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdbcore_h) $(frame_h) \
+	$(inferior_h) target.h
+
+ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
+	target.h
 
 ppcbug-rom.o: ppcbug-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h

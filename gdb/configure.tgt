@@ -224,7 +224,7 @@ powerpc-*-netware*)	gdb_target=ppc-nw
 powerpc-*-aix*)		gdb_target=aix ;;
 powerpcle-*-cygwin*)	gdb_target=cygwin ;;
 powerpcle-*-solaris*)	gdb_target=solaris ;;
-powerpc-*-eabi* | powerpc-*-linux* | powerpc-*-sysv* | powerpc-*-elf*)
+powerpc-*-eabi* | powerpc-*-sysv* | powerpc-*-elf*)
 			if test -f ../sim/ppc/Makefile; then
 			  gdb_target=ppc-sim
 			else
@@ -236,6 +236,7 @@ powerpcle-*-eabi* | powerpcle-*-sysv* | powerpcle-*-elf*)
 			else
 			  gdb_target=ppcle-eabi
 			fi ;;
+powerpc-*-linux*)	gdb_target=linux ;;
 powerpc-*-vxworks*)	gdb_target=vxworks ;;
 
 # OBSOLETE pyramid-*-*)		gdb_target=pyramid ;;
