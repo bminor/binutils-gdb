@@ -73,15 +73,15 @@ typedef double DOUBLEST;
 #endif
 
 extern void floatformat_to_doublest (const struct floatformat *,
-				     char *, DOUBLEST *);
+				     const void *in, DOUBLEST *out);
 extern void floatformat_from_doublest (const struct floatformat *,
-				       DOUBLEST *, char *);
+				       const DOUBLEST *in, void *out);
 
 extern int floatformat_is_negative (const struct floatformat *, char *);
 extern int floatformat_is_nan (const struct floatformat *, char *);
 extern char *floatformat_mantissa (const struct floatformat *, char *);
 
-extern DOUBLEST extract_floating (void *, int);
+extern DOUBLEST extract_floating (const void *in, int);
 extern void store_floating (void *, int, DOUBLEST);
 
 #endif

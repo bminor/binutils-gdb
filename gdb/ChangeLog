@@ -1,3 +1,13 @@
+2001-08-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* doublest.h (store_floating, floatformat_to_doublest): Make IN
+	paramter a const void pointer.
+	(floatformat_from_doublest): Make IN const, Make OUT a void
+	pointer.
+	* doublest.c (floatformat_to_doublest): Update.
+	(floatformat_from_doublest): Update.
+	(extract_floating): Update.
+
 2001-07-31  Andrew Cagney  <ac131313@redhat.com>
 
 	* defs.h (HOST_FLOAT_FORMAT, HOST_DOUBLE_FORMAT)

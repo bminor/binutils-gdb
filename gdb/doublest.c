@@ -105,7 +105,8 @@ get_field (unsigned char *data, enum floatformat_byteorders order,
    Store the DOUBLEST in *TO.  */
 
 void
-floatformat_to_doublest (const struct floatformat *fmt, char *from,
+floatformat_to_doublest (const struct floatformat *fmt,
+			 const void *from,
 			 DOUBLEST *to)
 {
   unsigned char *ufrom = (unsigned char *) from;
@@ -325,8 +326,9 @@ ldfrexp (long double value, int *eptr)
    restrictions.  */
 
 void
-floatformat_from_doublest (CONST struct floatformat *fmt, DOUBLEST *from,
-			   char *to)
+floatformat_from_doublest (CONST struct floatformat *fmt,
+			   const DOUBLEST *from,
+			   void *to)
 {
   DOUBLEST dfrom;
   int exponent;
@@ -540,7 +542,7 @@ floatformat_mantissa (const struct floatformat *fmt, char *val)
    dirty work.  */
 
 DOUBLEST
-extract_floating (void *addr, int len)
+extract_floating (const void *addr, int len)
 {
   DOUBLEST dretval;
 
