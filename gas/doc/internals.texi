@@ -1274,12 +1274,14 @@ You may define this macro to indicate whether a fixup against a locally defined
 symbol should be adjusted to be against the section symbol.  It should return a
 non-zero value if the adjustment is acceptable.
 
-@item MD_PCREL_FROM_SECTION
+@item MD_PCREL_FROM_SECTION (@var{fixp}, @var{section})
 @cindex MD_PCREL_FROM_SECTION
-If you define this macro, it should return the offset between the address of a
-PC relative fixup and the position from which the PC relative adjustment should
-be made.  On many processors, the base of a PC relative instruction is the next
-instruction, so this macro would return the length of an instruction.
+If you define this macro, it should return the position from which the PC
+relative adjustment for a PC relative fixup should be made.  On many
+processors, the base of a PC relative instruction is the next instruction,
+so this macro would return the length of an instruction, plus the address of
+the PC relative fixup.  The latter can be calculated as
+@var{fixp}->fx_where + @var{fixp}->fx_frag->fr_address .
 
 @item md_pcrel_from
 @cindex md_pcrel_from
