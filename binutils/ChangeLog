@@ -1,3 +1,32 @@
+Sun Nov 17 23:40:59 1991  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in:  Bump to version 1.92.
+	* version.c, Makefile.in:  Get version string from Makefile.
+	* copy.c, is-strip.c, not-strip.c, maybe-strip.c, Makefile.in:
+	Make the same change that we earlier did for ar/ranlib:
+	Generate two different binaries for strip and copy and use
+	a global variable with different values to distinguish
+	ostrip from copy.  (-1 means to use argv[0] to decide,
+	so you can get the old behavior, but it is no longer the default).
+	* copy.c (copy_file):  Set EXEC_P of output bfd if input is so.
+	* copy.c (main):  If is_strip==-1, compare last 5 chars
+	of argv[0], not the whole path.
+	* copy.c (main): Return 0, not 1.
+	* copy.c (setup_sections):  Fix due to change in bfd_make_section
+	now failing if asked for a duplicate section.
+	* strip.c, ostrip.c:  Removed obsolete files.
+	* ar.c, not-ranlib.c, maybe-ranlib.c:
+	Change encoding of is_ranlib variable to be consistent
+	with is_strip for strip.copy (i.e -1 to means use argv[0]).
+
+Thu Nov 14 20:11:02 1991  Per Bothner  (bothner at cygnus.com)
+
+	* version.c (program_version): Update to version 1.92.
+
+Tue Nov 12 16:17:53 1991  Per Bothner  (bothner at cygnus.com)
+
+	* ar.c (get_pos_bfd):  Previous fix was missing a "break".
+
 Thu Nov  7 08:55:56 1991  Steve Chamberlain  (sac at cygnus.com)
 
 	* am29k-pinsn.c: Fixed bug in mtacc, dmac and fmac instruction

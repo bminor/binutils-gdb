@@ -32,6 +32,11 @@ static void     copy_sections();
 static boolean  strip;
 static boolean verbose;
 
+/* This flag distinguishes between strip and copy:
+   1 means this is 'strip'; 0 means this is 'copy'.
+   -1 means if we should use argv[0] to decide. */
+extern int is_strip;
+
 /* IMPORTS */
 extern char    *program_name;
 extern char *xmalloc();
@@ -134,7 +139,7 @@ bfd *obfd;
     sympp = (asymbol **) xmalloc(get_symtab_upper_bound(ibfd));
     symcount = bfd_canonicalize_symtab(ibfd, sympp);
 
-    bfd_set_symtab(obfd, sympp, strip == true ? 0 : symcount);
+    bfd_set_symtab(obfd, sympp, is_strip ? 0 : symcount);
     
     /*
       bfd mandates that all output sections be created and sizes set before
@@ -242,6 +247,8 @@ copy_file(input_filename, output_filename)
 
     copy_object(ibfd, obfd);
 
+    if (ibfd->flags & EXEC_P)
+	obfd->flags |= EXEC_P;
     if (!bfd_close(obfd))
       bfd_fatal(output_filename);
 
@@ -267,10 +274,14 @@ setup_sections(ibfd, isection, obfd)
 {
     sec_ptr         osection;
     char           *err;
-    osection = bfd_make_section(obfd, bfd_section_name(ibfd, isection));
+
+    osection = bfd_get_section_by_name(obfd, bfd_section_name(ibfd, isection));
     if (osection == NULL) {
-	err = "making";
-	goto loser;
+	osection = bfd_make_section(obfd, bfd_section_name(ibfd, isection));
+	if (osection == NULL) {
+	    err = "making";
+	    goto loser;
+	}
     }
 
     if (!bfd_set_section_size(obfd,
@@ -338,7 +349,7 @@ copy_sections(ibfd, isection, obfd)
   if (size == 0)
     return;
 
-  if (strip == true || get_reloc_upper_bound(ibfd, isection) == 0) 
+  if (is_strip || get_reloc_upper_bound(ibfd, isection) == 0) 
     {
       bfd_set_reloc(obfd, osection, (arelent **)NULL, 0);
     } 
@@ -375,8 +386,9 @@ main(argc, argv)
 
   bfd_init();
 
-  if (strcmp(program_name,"strip") == 0) {
-    strip = true;
+  if (is_strip < 0) {
+      i = strlen (program_name);
+      is_strip = (i >= 5 && strcmp(program_name+i-5,"strip"));
   }
 
   for (i = 1; i < argc; i++) 
@@ -391,7 +403,7 @@ main(argc, argv)
 	  input_target = output_target = argv[i];
 	  break;
 	case 'S':
-	  strip = true;
+	  is_strip = 1;
 	  break;
 	case 's':
 	  i++;
@@ -433,5 +445,5 @@ main(argc, argv)
   else {
     copy_file(input_filename, output_filename);
   }
-    return 1;
+  return 0;
 }

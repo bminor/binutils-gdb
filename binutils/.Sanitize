@@ -41,6 +41,9 @@ strip.1
 is-ranlib.c
 not-ranlib.c
 maybe-ranlib.c
+is-strip.c
+not-strip.c
+maybe-strip.c
 binutils.texi
 bucomm.c
 configure.in
@@ -53,12 +56,10 @@ i960-pinsn.c
 m68k-pinsn.c
 nm.c
 objdump.c
-ostrip.c
 ranlib.sh
 README
 size.c
 sparc-pinsn.c
-strip.c
 version.c
 
 Do-last:
@@ -68,7 +69,27 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.10  1991/11/15 23:34:33  pesch
+# Revision 1.11  1991/11/18 08:04:14  bothner
+# 	* Makefile.in:  Bump to version 1.92.
+# 	* version.c, Makefile.in:  Get version string from Makefile.
+# 	* copy.c, is-strip.c, not-strip.c, maybe-strip.c, Makefile.in:
+# 	Make the same change that we earlier did for ar/ranlib:
+# 	Generate two different binaries for strip and copy and use
+# 	a global variable with different values to distinguish
+# 	ostrip from copy.  (-1 means to use argv[0] to decide,
+# 	so you can get the old behavior, but it is no longer the default).
+# 	* copy.c (copy_file):  Set EXEC_P of output bfd if input is so.
+# 	* copy.c (main):  If is_strip==-1, compare last 5 chars
+# 	of argv[0], not the whole path.
+# 	* copy.c (main): Return 0, not 1.
+# 	* copy.c (setup_sections):  Fix due to change in bfd_make_section
+# 	now failing if asked for a duplicate section.
+# 	* strip.c, ostrip.c:  Removed obsolete files.
+# 	* ar.c, not-ranlib.c, maybe-ranlib.c:
+# 	Change encoding of is_ranlib variable to be consistent
+# 	with is_strip for strip.copy (i.e -1 to means use argv[0]).
+#
+# Revision 1.10  1991/11/15  23:34:33  pesch
 # .Sanitize: reflect someone's apocopation of binutils.texi[nfo] name
 # Makefile.in: improve texi2roff workarounds
 #
