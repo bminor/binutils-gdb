@@ -543,11 +543,4 @@ obj_emit_strings (where)
   return;
 }				/* obj_emit_strings() */
 
-/*
- * Local Variables:
- * comment-column: 0
- * fill-column: 131
- * End:
- */
-
 /* end of obj-bout.c */
