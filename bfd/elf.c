@@ -405,7 +405,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 
 /* Look up a symbol name.  */
 const char *
-bfd_elf_local_sym_name (bfd *abfd, Elf_Internal_Sym *isym)
+bfd_elf_sym_name (bfd *abfd, Elf_Internal_Sym *isym)
 {
   unsigned int iname = isym->st_name;
   unsigned int shindex = elf_tdata (abfd)->symtab_hdr.sh_link;
@@ -451,7 +451,7 @@ group_signature (bfd *abfd, Elf_Internal_Shdr *ghdr)
 			    &isym, esym, &eshndx) == NULL)
     return NULL;
 
-  return bfd_elf_local_sym_name (abfd, &isym);
+  return bfd_elf_sym_name (abfd, &isym);
 }
 
 /* Set next_in_group list pointer, and group name for NEWSECT.  */
