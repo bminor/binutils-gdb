@@ -1,3 +1,9 @@
+Fri Jan  6 16:39:40 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elfcode.h (elf_slurp_symbol_table): Don't set BSF_GLOBAL for an
+	undefined or common symbol.
+	(elf_link_add_object_symbols): Likewise.
+
 Wed Jan  4 14:14:05 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (bfd_section_from_som_symbol): Only return sections which

@@ -2801,7 +2801,9 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	      sym->symbol.flags |= BSF_LOCAL;
 	      break;
 	    case STB_GLOBAL:
-	      sym->symbol.flags |= BSF_GLOBAL;
+	      if (i_sym.st_shndx != SHN_UNDEF
+		  && i_sym.st_shndx != SHN_COMMON)
+		sym->symbol.flags |= BSF_GLOBAL;
 	      break;
 	    case STB_WEAK:
 	      sym->symbol.flags |= BSF_WEAK;
@@ -4202,7 +4204,13 @@ elf_link_add_object_symbols (abfd, info)
 	  continue;
 	}
       else if (bind == STB_GLOBAL)
-	flags = BSF_GLOBAL;
+	{
+	  if (sym.st_shndx != SHN_UNDEF
+	      && sym.st_shndx != SHN_COMMON)
+	    flags = BSF_GLOBAL;
+	  else
+	    flags = 0;
+	}
       else if (bind == STB_WEAK)
 	flags = BSF_WEAK;
       else
