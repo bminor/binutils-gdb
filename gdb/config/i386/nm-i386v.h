@@ -32,5 +32,13 @@
 #define REGISTER_U_ADDR(addr, blockend, regnum) \
   (addr) = register_u_addr ((blockend), (regnum))
 extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regnum);
+
+
+/* Number of traps that happen between exec'ing the shell to run an
+   inferior, and when we finally get to the inferior code.  This is 2
+   on most implementations.  Override here to 4.  */
+
+#undef START_INFERIOR_TRAPS_EXPECTED
+#define START_INFERIOR_TRAPS_EXPECTED 4
 
 #endif /* nm-i386v.h */
