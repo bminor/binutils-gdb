@@ -1,5 +1,12 @@
 2001-08-30  H.J. Lu  <hjl@gnu.org>
 
+	* elf32-mips.c (mips_elf_calculate_relocation): Revert the last
+	2 changes.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Allocate dynamic
+	relocations for weak definitions.
+
+2001-08-30  H.J. Lu  <hjl@gnu.org>
+
 	* Makefile.am (BFD32_BACKENDS): Add elf32-h8300.lo.
 	(BFD32_BACKENDS_CFILES): Add elf32-h8300.c.
 	* Makefile.in: Rebuild.

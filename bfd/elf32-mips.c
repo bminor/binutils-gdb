@@ -6332,10 +6332,8 @@ mips_elf_calculate_relocation (abfd,
       if ((info->shared
 	   || (elf_hash_table (info)->dynamic_sections_created
 	       && h != NULL
-	       && h->root.root.type != bfd_link_hash_undefweak
-	       && (h->root.root.type == bfd_link_hash_defweak
-		   || (h->root.elf_link_hash_flags
-		       & ELF_LINK_HASH_DEF_REGULAR) == 0)))
+	       && ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
+		   != 0)))
 	  && (input_section->flags & SEC_ALLOC) != 0)
 	{
 	  /* If we're creating a shared library, or this relocation is
@@ -8135,7 +8133,9 @@ _bfd_mips_elf_adjust_dynamic_symbol (info, h)
   hmips = (struct mips_elf_link_hash_entry *) h;
   if (! info->relocateable
       && hmips->possibly_dynamic_relocs != 0
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+      && (h->root.type == bfd_link_hash_defweak
+	  || (h->elf_link_hash_flags 
+	      & ELF_LINK_HASH_DEF_REGULAR) == 0))
     {
       mips_elf_allocate_dynamic_relocations (dynobj,
 					     hmips->possibly_dynamic_relocs);
