@@ -103,6 +103,7 @@ ose68.mt
 pc532mach.mt
 ppc-elf32.mt
 ppc-nw.mt
+ppcle-elf32.mt
 riscix.mt
 rtbsd.mh
 sa29200.mt

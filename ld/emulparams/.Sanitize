@@ -49,6 +49,7 @@ elf64_sparc.sh
 elf32bmip.sh
 elf32lmip.sh
 elf32ppc.sh
+elf32ppcle.sh
 elf_i386.sh
 gld960.sh
 gld960coff.sh

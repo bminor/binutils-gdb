@@ -1,3 +1,13 @@
+Tue May  9 17:19:57 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in: Add little endian PowerPC support.
+
+	* Makefile.in (ALL_EMULATIONS): Add eelf32ppcle.o.
+	(eelf32ppcle.c): Support for little endian PowerPC.
+
+	* config/ppcle-elf32.mt: New file for little endian PowerPC.
+	* emulparams/elf32ppcle.sh: Ditto.
+
 Wed May  3 12:56:32 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* ldlang.c (print_output_section_statement): Check

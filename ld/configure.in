@@ -124,8 +124,8 @@ case "${targ}" in
   z8k-*-sim | z8k-*-coff) ld_target=z8ksim ;;
   ns32k-pc532-mach)	ld_target=pc532mach ;;
   ns32k-pc532-netbsd*)  ld_target=ns32k-nbsd ;;
-  powerpc-*-elf*)	ld_target=ppc-elf32 ;;
-  powerpc-*-eabi*)	ld_target=ppc-elf32 ;;
+  powerpc-*-elf* | powerpc-*-eabi*)	ld_target=ppc-elf32 ;;
+  powerpcle-*-elf* | powerpcle-*-eabi*)	ld_target=ppcle-elf32 ;;
   powerpc-*-netware*)	ld_target=ppc-nw ;;
   w65-*-*)              ld_target=coff-w65 ;;
   *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;

@@ -195,12 +195,12 @@ LIBIBERTY = ../libiberty/libiberty.a
 
 
 ALL_EMULATIONS = ea29k.o ealpha.o ecoff_sparc.o eebmon29k.o \
-	eelf32_sparc.o eelf32bmip.o eelf32lmip.o eelf32ppc.o \
+	eelf32_sparc.o eelf32bmip.o eelf32lmip.o eelf32ppc.o eelf32ppcle.o \
 	eelf64_sparc.o eelf_i386.o egld960.o ego32.o eh8300.o \
 	eh8300h.o eh8500.o eh8500b.o eh8500c.o eh8500m.o eh8500s.o \
 	ehp300bsd.o ehp3hpux.o ehppaelf.o ei386aout.o ei386bsd.o \
 	ei386coff.o ei386go32.o ei386linux.o ei386lynx.o ei386mach.o \
-	ei386nbsd.o ei386nw.o elnk960.o em68kaout.o em68kcoff.o \
+	ei386nbsd.o ei386nw.o elnk960.o em68kaout.o em68kcoff.o em68kelf.o \
 	em68klynx.o em68knbsd.o em88kbcs.o emipsbig.o emipsbsd.o \
 	emipsidt.o emipsidtl.o emipslit.o enews.o ens32knbsd.o eppcnw.o \
 	eriscix.o esa29200.o eshl.o esh.o esparclynx.o esparcnbsd.o \
@@ -372,6 +372,9 @@ egld960coff.c: $(srcdir)/emulparams/gld960coff.sh \
 em68kcoff.c: $(srcdir)/emulparams/m68kcoff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m68kcoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68kcoff
+em68kelf.c: $(srcdir)/emulparams/m68kelf.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} m68kelf
 em68klynx.c: $(srcdir)/emulparams/m68klynx.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m68klynx.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68klynx
@@ -394,10 +397,10 @@ emipsbsd.c: $(srcdir)/emulparams/mipsbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mipsbsd.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipsbsd
 emipsidt.c: $(srcdir)/emulparams/mipsidt.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/mipsecoff.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipsidt
 emipsidtl.c: $(srcdir)/emulparams/mipsidtl.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/mipsecoff.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipsidtl
 eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -420,6 +423,9 @@ esparclynx.c: $(srcdir)/emulparams/sparclynx.sh \
 eelf32ppc.c: $(srcdir)/emulparams/elf32ppc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppc
+eelf32ppcle.c: $(srcdir)/emulparams/elf32ppcle.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ppcle
 eriscix.c: $(srcdir)/emulparams/riscix.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} riscix
@@ -440,6 +446,10 @@ epc532machaout.c: $(srcdir)/emulparams/pc532machaout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} pc532machaout
 
+ew65.c: $(srcdir)/emulparams/w65.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/w65.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} w65
+
 ei386nw.c:	$(srcdir)/emulparams/i386nw.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/nw.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386nw
@@ -459,11 +469,17 @@ ens32knbsd.c:	$(srcdir)/emulparams/ns32knbsd.sh \
 esparcnbsd.c:	$(srcdir)/emulparams/sparcnbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sparcnbsd
-# start-santize-rce
+
+# start-sanitize-arc
+earcelf.c: $(srcdir)/emulparams/arcelf.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} arcelf
+# end-sanitize-arc
+# start-sanitize-rce
 erce.c: $(srcdir)/emulparams/rce.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/rce.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} rce
-# end-santize-rce
+# end-sanitize-rce
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(EXTRALIBS)
@@ -522,7 +538,8 @@ check: site.exp
 	else true ; fi ; \
 	$(RUNTEST) --tool ld --srcdir $(srcdir)/testsuite $(RUNTESTFLAGS) \
 	  CC="$(CC_FOR_TARGET)" CFLAGS="$(CFLAGS)" \
-	  CXX="$(CXX_FOR_TARGET)" CXXFLAGS="$(CXXFLAGS)"
+	  CXX="$(CXX_FOR_TARGET)" CXXFLAGS="$(CXXFLAGS)" \
+	  CC_FOR_HOST="$(CC)" CFLAGS_FOR_HOST="$(CFLAGS)"
 
 installcheck:
 .PHONY: check installcheck
@@ -730,11 +747,8 @@ mostlyclean:
 	-rm -fr tmpdir
 clean: mostlyclean
 	-rm -f $(LD_PROG) configdoc.texi
-distclean:
-	-rm -fr Makefile config.status TAGS sysdep.h ldscripts site.exp site.bak \
-		$(STAGESTUFF) ld.?? ld.??s ld.toc ld.aux ld.log ldlex.[qp] \
-		$(LD_PROG) ld ld1 ld2 ld3 *.o y.output cdtest cdtest.out \
-		configdoc.texi tmpdir
+distclean: clean
+	-rm -rf Makefile config.status TAGS ldscripts site.exp site.bak
 realclean: clean distclean
 	-rm -f $(LDDISTSTUFF)
 
