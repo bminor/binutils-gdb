@@ -1,5 +1,11 @@
 2004-07-21  Andrew Cagney  <cagney@gnu.org>
 
+	* PROBLEMS: Mention breakpoints/1702.
+	* NEWS: For signal trampolines, cite s390 GNU/Linux as a system
+	that is known to work.
+
+2004-07-21  Andrew Cagney  <cagney@gnu.org>
+
 	* config/mips/tm-mips.h (DEPRECATED_IGNORE_HELPER_CALL): Deprecate.
 	* mips-tdep.c (mips_dump_tdep, mips_ignore_helper): Update.
 	* infrun.c (DEPRECATED_IGNORE_HELPER_CALL): Delete macro.
