@@ -1,5 +1,8 @@
 Thu May  6 16:39:50 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
+	* gdb.texinfo (Shell Commands): do not mention SHELL env var in
+	DOSHOST configuration of manual.
+
 	* gdb.texinfo (MIPS Stack): new node.
 
 	* all-config.texi (MIPS) new switch.

@@ -1036,11 +1036,10 @@ just use the @code{shell} command.
 @item shell @var{command string}
 @kindex shell
 @cindex shell escape
-Invoke a shell to execute @var{command string}.  If it exists, the
-environment variable @code{SHELL} is used for the name of the shell to
-run.
+Invoke a the standard shell to execute @var{command string}.
 @ifclear DOSHOST
-Otherwise @value{GDBN} uses @code{/bin/sh}.
+If it exists, the environment variable @code{SHELL} determines which
+shell to run.  Otherwise @value{GDBN} uses @code{/bin/sh}.
 @end ifclear
 @end table
 
