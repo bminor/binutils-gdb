@@ -1,3 +1,10 @@
+2003-05-08  J. Brobecker  <brobecker@gnat.com>
+
+	* defs.h (language): Add language_minimal enum value.
+	* c-lang.c (minimal_language_defn): New language definition.
+	(_initialize_c_language): Add the new minimal language to the list
+	of languages known to GDB.
+
 2003-05-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* frame.c (get_frame_type): Don't attempt to lazily initialize
