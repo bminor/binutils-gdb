@@ -1,3 +1,8 @@
+Fri Sep 10 17:40:35 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* alpha.c (external_aouthdr): Need four bytes of padding between
+	vstamp and tsize.
+
 Tue Sep  7 14:20:43 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.h (AUX_GET_ANY, AUX_PUT_ANY): Changed to reflect further
