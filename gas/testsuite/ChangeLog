@@ -1,3 +1,11 @@
+2001-05-24  H.J. Lu  <hjl@gnu.org>
+
+	* gas/arm/adrl.d: Support 64bit BFD.
+	* gas/arm/arm7t.d: Likewise.
+	* gas/arm/inst.d: Likewise.
+	* gas/arm/pic.d: Likewise.
+	* gas/arm/xscale.d: Likewise.
+
 2001-05-23  Alan Modra  <amodra@one.net.au>
 
 	* gas/elf/ehopt0.d: Tweak for bigendian targets.
