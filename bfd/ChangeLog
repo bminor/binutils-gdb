@@ -1,3 +1,8 @@
+Thu Oct 16 08:17:06 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* peicode.h (coff_swap_scnhdr_out,pr_print_idata): Fix mangled
+	patch.
+
 Wed Oct 15 13:45:10 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* peicode.h (pe_mkobject_hook): Set DLL flag.

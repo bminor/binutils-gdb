@@ -1163,16 +1163,8 @@ coff_swap_scnhdr_out (abfd, in, out)
 	       IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE ;
     else if (strncmp (scnhdr_int->s_name, ".drectve", 8) == 0)
       flags =  IMAGE_SCN_LNK_INFO | IMAGE_SCN_LNK_REMOVE ;
-#ifdef POWERPC_LE_PE
-    else if (strncmp (scnhdr_int->s_name, ".stabstr", 8) == 0)
-      {
-	flags =  IMAGE_SCN_LNK_INFO;
-      }
-    else if (strcmp (scnhdr_int->s_name, ".stab") == 0)
-      {
-	flags =  IMAGE_SCN_LNK_INFO;
-      }
-#endif
+    else if (strncmp (scnhdr_int->s_name, ".stab", 5) == 0)
+      flags |= IMAGE_SCN_LNK_INFO | IMAGE_SCN_MEM_DISCARDABLE;
     else
       flags = IMAGE_SCN_MEM_READ;
 
@@ -1237,8 +1229,6 @@ pe_print_idata(abfd, vfile)
 #ifdef POWERPC_LE_PE
   asection *rel_section = bfd_get_section_by_name (abfd, ".reldata");
 #endif
-    else if (strncmp (scnhdr_int->s_name, ".stab", 5) == 0)
-      flags |= IMAGE_SCN_LNK_INFO | IMAGE_SCN_MEM_DISCARDABLE;
 
   bfd_size_type datasize = 0;
   bfd_size_type i;
