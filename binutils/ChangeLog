@@ -1,3 +1,9 @@
+2001-06-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (dump_relocations): Print "bad symbol index" if
+	symtab == NULL with non-zero symtab_index.
+	(process_relocs): Don't bomb if reloc section has no symsec.
+
 2001-06-24  H.J. Lu  <hjl@gnu.org>
 
 	* objcopy.c (strip_main): Revert the change made on 2001-05-30

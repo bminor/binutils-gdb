@@ -964,31 +964,28 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
       if (symtab_index)
 	{
-	  if (symtab != NULL)
+	  if (symtab == NULL || symtab_index >= nsyms)
+	    printf (" bad symbol index: %08lx", (unsigned long) symtab_index);
+	  else
 	    {
-	      if (symtab_index >= nsyms)
-		printf (" bad symbol index: %08lx", (unsigned long) symtab_index);
+	      Elf_Internal_Sym * psym;
+
+	      psym = symtab + symtab_index;
+
+	      printf (" ");
+	      print_vma (psym->st_value, LONG_HEX);
+	      printf ("  ");
+
+	      if (psym->st_name == 0)
+		printf ("%-25.25s",
+			SECTION_NAME (section_headers + psym->st_shndx));
+	      else if (strtab == NULL)
+		printf (_("<string table index %3ld>"), psym->st_name);
 	      else
-		{
-		  Elf_Internal_Sym * psym;
+		printf ("%-25.25s", strtab + psym->st_name);
 
-		  psym = symtab + symtab_index;
-
-		  printf (" ");
-		  print_vma (psym->st_value, LONG_HEX);
-		  printf ("  ");
-
-		  if (psym->st_name == 0)
-		    printf ("%-25.25s",
-			    SECTION_NAME (section_headers + psym->st_shndx));
-		  else if (strtab == NULL)
-		    printf (_("<string table index %3ld>"), psym->st_name);
-		  else
-		    printf ("%-25.25s", strtab + psym->st_name);
-
-		  if (is_rela)
-		    printf (" + %lx", (unsigned long) relas [i].r_addend);
-		}
+	      if (is_rela)
+		printf (" + %lx", (unsigned long) relas [i].r_addend);
 	    }
 	}
       else if (is_rela)
@@ -3073,7 +3070,6 @@ process_relocs (file)
 	  if (rel_size)
 	    {
 	      Elf32_Internal_Shdr * strsec;
-	      Elf32_Internal_Shdr * symsec;
 	      Elf_Internal_Sym *    symtab;
 	      char *                strtab;
 	      int                   is_rela;
@@ -3089,25 +3085,34 @@ process_relocs (file)
 	      printf (_(" at offset 0x%lx contains %lu entries:\n"),
 		 rel_offset, (unsigned long) (rel_size / section->sh_entsize));
 
-	      symsec = section_headers + section->sh_link;
+	      symtab = NULL;
+	      strtab = NULL;
+	      nsyms = 0;
+	      if (section->sh_link)
+		{
+		  Elf32_Internal_Shdr * symsec;
 
-	      nsyms = symsec->sh_size / symsec->sh_entsize;
-	      symtab = GET_ELF_SYMBOLS (file, symsec->sh_offset, nsyms);
+		  symsec = section_headers + section->sh_link;
+		  nsyms = symsec->sh_size / symsec->sh_entsize;
+		  symtab = GET_ELF_SYMBOLS (file, symsec->sh_offset, nsyms);
 
-	      if (symtab == NULL)
-		continue;
+		  if (symtab == NULL)
+		    continue;
 
-	      strsec = section_headers + symsec->sh_link;
+		  strsec = section_headers + symsec->sh_link;
 
-	      GET_DATA_ALLOC (strsec->sh_offset, strsec->sh_size, strtab,
-			      char *, "string table");
-
+		  GET_DATA_ALLOC (strsec->sh_offset, strsec->sh_size, strtab,
+				  char *, "string table");
+		}
 	      is_rela = section->sh_type == SHT_RELA;
 
-	      dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela);
+	      dump_relocations (file, rel_offset, rel_size,
+				symtab, nsyms, strtab, is_rela);
 
-	      free (strtab);
-	      free (symtab);
+	      if (strtab)
+		free (strtab);
+	      if (symtab)
+		free (symtab);
 
 	      found = 1;
 	    }
