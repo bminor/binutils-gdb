@@ -45,6 +45,7 @@ i386bsd.sh
 i386coff.sh
 i386linux.sh
 i386lynx.sh
+i386mach.sh
 lnk960.sh
 m68kcoff.sh
 m68klynx.sh

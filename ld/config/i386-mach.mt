@@ -1,0 +1,1 @@
+EMUL=i386mach
