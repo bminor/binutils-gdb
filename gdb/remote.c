@@ -3629,8 +3629,7 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       /* Normal mode: Send target system values byte by byte, in
 	 increasing byte addresses.  Each byte is encoded as a two hex
 	 value.  */
-      bin2hex (myaddr, p, todo);
-      nr_bytes = todo;
+      nr_bytes = bin2hex (myaddr, p, todo);
       break;
     case PACKET_SUPPORT_UNKNOWN:
       internal_error (__FILE__, __LINE__,
