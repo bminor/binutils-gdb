@@ -57,7 +57,7 @@ static unsigned long elf_hppa_relocate_insn
            long, unsigned long, unsigned long, unsigned long));
 
 static boolean elf_hppa_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym,
+  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
 
 static boolean elf_hppa_final_link
@@ -750,7 +750,7 @@ elf_hppa_final_link (abfd, info)
   /* Make sure we've got ourselves a suitable __gp value.  */
   if (!info->relocateable)
     {
-      bfd_vma min_short_vma = (bfd_vma -1), max_short_vma = 0;
+      bfd_vma min_short_vma = (bfd_vma) -1, max_short_vma = 0;
       struct elf_link_hash_entry *gp;
       bfd_vma gp_val = 0;
       asection *os;
@@ -803,8 +803,8 @@ elf_hppa_final_link (abfd, info)
 	    gp_val = min_short_vma + 0x2000;
 
 	  /* If we're addressing stuff past the end, adjust back.  */
-	  if (gp_val > max_vma)
-	    gp_val = max_vma - 0x2000 + 8;
+	  if (gp_val > max_short_vma)
+	    gp_val = max_short_vma - 0x2000 + 8;
 
 	  /* If there was no __gp symbol, create one.  */
 	  if (!gp)
