@@ -1,5 +1,20 @@
 2003-12-18  Daniel Jacobowitz  <drow@mvista.com>
 
+	* cp-names.y (ext_name): Remove.
+	(colon_ext_only, ext_only_name): New non-terminals.
+	(colon_ext_name): Use colon_ext_only.
+	(declarator_1, direct_declarator_1): New non-terminals.
+	('('): Remove %right precedence.
+	(result): New non-terminal.
+	(start): Assign to $$.  Use declarator_1.  Handle functions
+	without return types.
+	(template_arg): Use start instead of colon_ext_name.
+	(yylex): Fix typo in "char" case.
+	(yyerror): Add newline.
+	(main): Behave like c++filt when started with no arguments.
+
+2003-12-18  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cp-names.y (basic_exp): Remove.
 	(function_arglist, declarator, abstract_declarator)
 	(direct_declarator, direct_abstract_declarator): Change type to

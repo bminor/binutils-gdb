@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    with include files (<malloc.h> and <stdlib.h> for example) just became
    too messy, particularly when such includes can be inserted at random
    times by the parser generator.  */
-   
+
 %{
 
 #include <stdio.h>
@@ -196,13 +196,16 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %}
 
 %type <comp> exp exp1 type start operator colon_name
-%type <comp> unqualified_name scope_id ext_name colon_ext_name
+%type <comp> unqualified_name scope_id colon_ext_name
 %type <comp> template template_arg
 %type <comp> builtin_type
 %type <comp> typespec typespec_2 array_indicator
+%type <comp> colon_ext_only ext_only_name
 
 %type <nested> abstract_declarator direct_abstract_declarator
 %type <nested> declarator direct_declarator function_arglist
+
+%type <nested> declarator_1 direct_declarator_1
 
 %type <nested> template_params function_args
 %type <nested> ptr_operator ptr_operator_seq
@@ -261,18 +264,35 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %left '+' '-'
 %left '*' '/' '%'
 %right UNARY INCREMENT DECREMENT
-%right ARROW '.' '[' '('
+
+/* We don't need a precedence for '(' in this reduced grammar, and it
+   can mask some unpleasant bugs, so disable it for now.  */
+
+%right ARROW '.' '[' /* '(' */
 %left COLONCOLON
 
 
 %%
 
-start		:	type
+result		:	start
 			{ result = $1; }
-		|	typespec_2 declarator
-			{ result = $2.comp;
+
+start		:	type
+			{ $$ = $1; }
+
+		/* Function with a return type.  declarator_1 is used to prevent
+		   ambiguity with the next rule.  */
+		|	typespec_2 declarator_1
+			{ $$ = $2.comp;
 			  *$2.last = $1;
 			}
+
+		/* Function without a return type.  We need to use typespec_2
+		   to prevent conflicts from qualifiers_opt.  Harmless.  */
+		|	typespec_2 function_arglist
+			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp); }
+		|	colon_ext_only function_arglist
+			{ $$ = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp); }
 		;
 
 operator	:	OPERATOR NEW
@@ -371,13 +391,16 @@ name		:	nested_name scope_id %prec NAME
 		|	scope_id %prec NAME
 		;
 
-colon_ext_name	:	ext_name
-		|	COLONCOLON ext_name
+colon_ext_name	:	colon_name
+		|	colon_ext_only
+		;
+
+colon_ext_only	:	ext_only_name
+		|	COLONCOLON ext_only_name
 			{ $$ = $2; }
 		;
 
-ext_name	:	name
-		|	nested_name unqualified_name
+ext_only_name	:	nested_name unqualified_name
 			{ $$ = $1.comp; d_right ($1.last) = $2; }
 		|	unqualified_name
 		;
@@ -414,9 +437,9 @@ template_params	:	template_arg
 /* Also an integral constant-expression of integral type, and a
    pointer to member (?) */
 template_arg	:	type
-		|	'&' colon_ext_name
+		|	'&' start
 			{ $$ = d_make_comp (di, D_COMP_REFERENCE, $2, NULL); }
-		|	'&' '(' colon_ext_name ')'
+		|	'&' '(' start ')'
 			{ $$ = d_make_comp (di, D_COMP_REFERENCE, $3, NULL); }
 		|	exp
 		;
@@ -672,6 +695,49 @@ direct_declarator
 			{ $$.comp = d_make_empty (di, D_COMP_TYPED_NAME);
 			  d_left ($$.comp) = $1;
 			  $$.last = &d_right ($$.comp);
+			}
+		;
+
+/* These are similar to declarator and direct_declarator except that they
+   do not permit ( colon_ext_name ), which is ambiguous with a function
+   argument list.  They also don't permit a few other forms with redundant
+   parentheses around the colon_ext_name; any colon_ext_name in parentheses
+   must be followed by an argument list or an array indicator, or preceded
+   by a pointer.  */
+declarator_1	:	ptr_operator declarator
+			{ $$.comp = $2.comp;
+			  $$.last = $1.last;
+			  *$2.last = $1.comp; }
+		|	colon_ext_name
+			{ $$.comp = d_make_empty (di, D_COMP_TYPED_NAME);
+			  d_left ($$.comp) = $1;
+			  $$.last = &d_right ($$.comp);
+			}
+		|	direct_declarator_1
+		;
+
+direct_declarator_1
+		:	'(' ptr_operator declarator ')'
+			{ $$.comp = $3.comp;
+			  $$.last = $2.last;
+			  *$3.last = $2.comp; }
+		|	direct_declarator_1 function_arglist
+			{ $$.comp = $1.comp;
+			  *$1.last = $2.comp;
+			  $$.last = $2.last;
+			}
+		|	direct_declarator_1 array_indicator
+			{ $$.comp = $1.comp;
+			  *$1.last = $2;
+			  $$.last = &d_left ($2);
+			}
+		|	colon_ext_name function_arglist
+			{ $$.comp = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2.comp);
+			  $$.last = $2.last;
+			}
+		|	colon_ext_name array_indicator
+			{ $$.comp = d_make_comp (di, D_COMP_TYPED_NAME, $1, $2);
+			  $$.last = &d_left ($2);
 			}
 		;
 
@@ -1761,7 +1827,7 @@ yylex ()
       if (strncmp (tokstart, "bool", 4) == 0)
 	return BOOL;
       if (strncmp (tokstart, "char", 4) == 0)
-	return BOOL;
+	return CHAR;
       if (strncmp (tokstart, "enum", 4) == 0)
 	return ENUM;
       if (strncmp (tokstart, "long", 4) == 0)
@@ -1790,23 +1856,51 @@ yyerror (msg)
   if (prev_lexptr)
     lexptr = prev_lexptr;
 
-  error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
+  error ("A %s in expression, near `%s'.\n", (msg ? msg : "error"), lexptr);
 }
 
 #ifdef TEST_CPNAMES
 
-int main(int argc, char **argv)
+int
+main (int argc, char **argv)
 {
   struct d_info myinfo;
   int err = 0;
-  char *str;
-
-  lexptr = argv[1];
-  d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, 2 * strlen (lexptr), &myinfo);
-  di = &myinfo;
-  yyparse ();
-  str = d_print (DMGL_PARAMS | DMGL_ANSI, result, &err);
-  printf ("Result is %s\n", str);
+  char *str, *str2;
+  char buf[65536];
+  
+  if (argv[1] == NULL)
+    while (fgets (buf, 65536, stdin) != NULL)
+      {
+	result = NULL;
+	buf[strlen (buf) - 1] = 0;
+	str2 = cplus_demangle (buf, DMGL_PARAMS | DMGL_ANSI);
+	lexptr = str2;
+	if (lexptr == NULL)
+	  {
+	    printf ("Demangling error\n");
+	    continue;
+	  }
+	d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, 2 * strlen (lexptr), &myinfo);
+	di = &myinfo;
+	if (yyparse () || result == NULL)
+	  continue;
+	str = d_print (DMGL_PARAMS | DMGL_ANSI, result, &err);
+	free (str2);
+	printf ("%s\n", str);
+	free (str);
+      }
+  else
+    {
+      lexptr = argv[1];
+      d_init_info (NULL, DMGL_PARAMS | DMGL_ANSI, 2 * strlen (lexptr), &myinfo);
+      di = &myinfo;
+      if (yyparse () || result == NULL)
+	return 0;
+      str = d_print (DMGL_PARAMS | DMGL_ANSI, result, &err);
+      printf ("%s\n", str);
+      free (str);
+    }
   return 0;
 }
 
