@@ -1,5 +1,8 @@
 Fri Nov 19 04:02:01 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* coffcode.h (coff_slurp_symbol_table): Print more verbose message
+	in the case of an unknown (or unhandled) storage class.
+
 	* config/i386-lynx.mt (TDEFINES): FPRINTF_ALREADY_DECLARED should
 	not be defined here, since it is a host attribute, not a target
 	one.
