@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 1991, 93, 94, 95, 97, 99, 2000
+#   Copyright 1991, 93, 94, 95, 97, 99, 2000, 2001
 #   Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
@@ -27,6 +27,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #include "ldctor.h"
 #include "elf32-hppa.h"
 
+static void hppaelf_after_parse PARAMS((void));
 static void hppaelf_create_output_section_statements PARAMS ((void));
 static void hppaelf_delete_padding_statements
   PARAMS ((lang_statement_list_type *));
@@ -48,6 +49,22 @@ static int multi_subspace = 0;
    one stub section.  A value of +/-1 indicates the bfd back-end
    should use a suitable default size.  */
 static bfd_signed_vma group_size = 1;
+
+/* Stops the linker merging .text sections on a relocatable link,
+   and adds millicode library to the list of input files.  */
+
+static void
+hppaelf_after_parse ()
+{
+  if (link_info.relocateable)
+    lang_add_unique (".text");
+#if 0 /* enable this once we split millicode stuff from libgcc */
+  else
+    lang_add_input_file ("milli",
+			 lang_input_file_is_l_enum,
+			 NULL);
+#endif
+}
 
 /* This is called before the input files are opened.  We create a new
    fake input file to hold the stub sections.  */
@@ -286,7 +303,7 @@ hppaelf_layaout_sections_again ()
 static void
 hppaelf_finish ()
 {
-  /* If generating a relocateable output file, then we don't
+  /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */
   if (link_info.relocateable)
     return;
@@ -399,5 +416,6 @@ PARSE_AND_LIST_ARGS_CASES='
 
 # Put these extra hppaelf routines in ld_${EMULATION_NAME}_emulation
 #
+LDEMUL_AFTER_PARSE=hppaelf_after_parse
 LDEMUL_FINISH=hppaelf_finish
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=hppaelf_create_output_section_statements

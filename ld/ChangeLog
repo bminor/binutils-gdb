@@ -1,5 +1,11 @@
 2001-01-14  Alan Modra  <alan@linuxcare.com.au>
 
+	* emultempl/hppaelf.em (hppaelf_after_parse): New function,
+	enabling search for libmilli.  On a relocatable link, make .text
+	sections unique.
+	(LDEMUL_AFTER_PARSE): Define.
+	(hppaelf_finish): Correct spelling of relocatable in comments.
+
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Don't
 	rummage through the script for sections on the unique list.
 	Correct length of strncmp for ".note".
@@ -9,6 +15,7 @@
 	(unique_section_p): New function.
 	(walk_wild_section): Don't match sections on unique_section_list.
 	(lang_add_unique): New function.
+	Correct spelling of relocatable in comments.
 
 	* ldlang.h (struct unique_sections): Declare.
 	(unique_section_list): Declare.
