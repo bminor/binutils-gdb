@@ -1,4 +1,26 @@
+Fri Oct 25 12:12:17 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (disassemble_bytes): Let the disassembler override the
+	number of bytes printed on a line.
+
 Thu Oct 24 16:42:10 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (prefix_addresses): New static variable.
+	(long_options): Add "prefix-addresses".
+	(compare_symbols): Sort BSF_FUNCTION symbols before other
+	symbols.
+	(find_symbol_for_address): New static function, broken out of
+	objdump_print_address.
+	(objdump_print_addr_with_sym): New static function, broken out of
+	objdump_print_address.
+	(objdump_print_address): Call new functions.
+	(disassemble_bytes): New static function, broken out of
+	disassemble_data.  Change disassembly format, unless
+	prefix_addresses is set.
+	(disassemble_data): Call disassemble_bytes.  Unless
+	prefix_addresses is set, disassemble in chunks headed by a
+	symbol.
+	* binutils.texi, objdump.1: Document --prefix-addresses.
 
 	* rddbg.c (read_section_stabs_debugging_info): Preserve the
 	backslash when concatenating multiple stabs strings.
