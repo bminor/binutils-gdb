@@ -1,5 +1,9 @@
 Wed Sep 24 11:30:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* doc/c-i386.texi (i386-Float): Remove incorrect assertion that
+	fn* instructions do not insert implicit fwait.  This was changed
+	Jan 29, 1996.
+
 	* config/m68k-parse.y (yylex): Permit an expression to be used for
 	the scale factor.
 
