@@ -520,15 +520,21 @@ dwarf_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* Save the register info in the cache.  */
   for (reg = 0; reg < fs->regs.num_regs; reg++)
     {
+      int regnum;
+
+      /* Skip the return address column.  */
+      if (reg == fs->retaddr_column)
+	continue;
+
       /* Use the GDB register number as index.  */
-      int regnum = DWARF2_REG_TO_REGNUM (reg);
+      regnum = DWARF2_REG_TO_REGNUM (reg);
 
       if (regnum >= 0 && regnum < num_regs)
 	cache->reg[regnum] = fs->regs.reg[reg];
     }
 
-  /* Make sure we have stored the return addess value.  */
-  if (cache->reg[PC_REGNUM].how == REG_UNSAVED)
+  /* Stored the location of the return addess.  */
+  if (fs->retaddr_column < fs->regs.num_regs)
     cache->reg[PC_REGNUM] = fs->regs.reg[fs->retaddr_column];
 
   do_cleanups (old_chain);

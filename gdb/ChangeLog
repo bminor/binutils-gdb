@@ -1,5 +1,8 @@
 2003-05-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* dwarf-frame.c (dwarf_frame_cache): Fix handling of return
+	address column.
+
 	* config/i386/x86-64linux.mh (NATDEPFILES): Fix typo.
 
 	* i386-tdep.c (i386_unwind_dummy_id): Use extract_unsigned_integer
