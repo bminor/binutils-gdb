@@ -1,3 +1,7 @@
+Fri May 10 15:43:33 PDT 1991  Roland Pesch (pesch at cygint.cygnus.com)
+	* infcmd.c: renamed "info path" to "show paths"
+        * gdbrc.tex: documented above.
+
 Sat May  4 11:11:07 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* Makefile.dist:  Roll VERSION to 3.95.
