@@ -1,3 +1,9 @@
+2004-01-23  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c: Update copyright.
+	(avr_iaddr_p): Delete unused function.
+	(avr_saddr_p): Delete unused function.
+
 2004-01-23  David Carlton  <carlton@kealia.com>
 
 	* symfile.c (reread_symbols): Clear objfile->cp_namespace_symtab.
