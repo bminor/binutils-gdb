@@ -411,6 +411,7 @@ boolean
 bfd_slurp_bsd_armap (abfd)
      bfd *abfd;
 {
+  int i;
   struct areltdata *mapdata;
   char nextname[17];
   unsigned int counter = 0;
@@ -450,7 +451,7 @@ bfd_slurp_bsd_armap (abfd)
 	  goto byebye;
       }
 
-      ardata->symdef_count = *raw_armap / sizeof (struct symdef);
+      ardata->symdef_count = bfd_h_get_32(abfd, raw_armap) / sizeof (struct symdef);
       ardata->cache = 0;
       rbase = raw_armap+1;
       ardata->symdefs = (carsym *) rbase;
@@ -458,7 +459,8 @@ bfd_slurp_bsd_armap (abfd)
 
       for (;counter < ardata->symdef_count; counter++) {
 	  struct symdef *sym = ((struct symdef *) rbase) + counter;
-	  sym->s.name = sym->s.string_offset + stringbase;
+	  sym->s.name = bfd_h_get_32(abfd, &(sym->s.string_offset)) + stringbase;
+	  sym->file_offset = bfd_h_get_32(abfd, &(sym->file_offset));
       }
   
       ardata->first_file_filepos = bfd_tell (abfd);
@@ -1068,7 +1070,7 @@ compute_and_write_armap (arch, elength)
 		    }
 
 		(map[orl_count]).name = (char **) &((syms[src_count])->name);
-		(map[orl_count]).pos = elt_no;
+		(map[orl_count]).pos = (file_ptr) current;
 		(map[orl_count]).namidx = stridx;
 
 		stridx += strlen ((syms[src_count])->name) + 1;
@@ -1089,9 +1091,6 @@ compute_and_write_armap (arch, elength)
   return true;
 }
 
-
- /* FIXME -- have to byte-swap this */
-
 boolean
 bsd_write_armap (arch, elength, map, orl_count, stridx)
      bfd *arch;
@@ -1105,7 +1104,7 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   unsigned int mapsize = stringsize + ranlibsize;
   file_ptr firstreal;
   bfd *current = arch->archive_head;
-  int last_eltno = 0;		/* last element arch seen */
+  bfd *last_elt = current;		/* last element arch seen */
   int temp;
   int count;
   struct ar_hdr hdr;
@@ -1120,36 +1119,37 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   stat (arch->filename, &statbuf);
   memset ((char *)(&hdr), 0, sizeof (struct ar_hdr));
   sprintf (hdr.ar_name, RANLIBMAG);
-  sprintf (hdr.ar_size, "%-10d", (int) mapsize);
   sprintf (hdr.ar_date, "%ld", statbuf.st_mtime);  
+  sprintf (hdr.ar_uid, "%d", getuid());
+  sprintf (hdr.ar_gid, "%d", getgid());
+  sprintf (hdr.ar_size, "%-10d", (int) mapsize);
   hdr.ar_fmag[0] = '`'; hdr.ar_fmag[1] = '\n';
   for (i = 0; i < sizeof (struct ar_hdr); i++)
     if (((char *)(&hdr))[i] == '\0') (((char *)(&hdr))[i]) = ' ';
   bfd_write ((char *)&hdr, 1, sizeof (struct ar_hdr), arch);
-
-  /* FIXME, this needs to be byte-swapped! */
-  temp = orl_count /* + 4 */;
+  bfd_h_put_32(arch, ranlibsize, &temp);
   bfd_write (&temp, 1, sizeof (temp), arch);
   
   for (count = 0; count < orl_count; count++) {
     struct symdef outs;
     struct symdef *outp = &outs;
     
-    if ((map[count]).pos != last_eltno) {
-      firstreal += arelt_size (current) + sizeof (struct ar_hdr);
-      firstreal += firstreal % 2;
-    last_eltno = (map[count]).pos;
-      current = current->next;
-    }
+    if (((bfd *)(map[count]).pos) != last_elt) {
+	    do {
+		    firstreal += arelt_size (current) + sizeof (struct ar_hdr);
+		    firstreal += firstreal % 2;
+		    current = current->next;
+	    } while (current != (bfd *)(map[count]).pos);
+    } /* if new archive element */
 
-    outs.s.string_offset = ((map[count]).namidx) +4;
-    outs.file_offset = firstreal;
+    last_elt = current;
+    bfd_h_put_32(arch, ((map[count]).namidx), &outs.s.string_offset);
+    bfd_h_put_32(arch, firstreal, &outs.file_offset);
     bfd_write ((char *)outp, 1, sizeof (outs), arch);
   }
 
   /* now write the strings themselves */
-  /* FIXME, this needs to be byte-swapped! */
-  temp = stridx + 4;
+  bfd_h_put_32(arch, stridx, &temp);
   bfd_write ((PTR)&temp, 1, sizeof (temp), arch);
   for (count = 0; count < orl_count; count++)
     bfd_write (*((map[count]).name), 1, strlen (*((map[count]).name))+1, arch);
