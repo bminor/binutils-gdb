@@ -65,6 +65,8 @@
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep (frag)
 #define NEED_FX_R_TYPE
 
+#define NOP_OPCODE              0x0c800000
+
 #define reloc_type 		int
 
 #define NO_RELOC 		0
@@ -84,7 +86,7 @@ extern int c4x_unrecognized_line PARAMS ((int));
 #define md_number_to_chars number_to_chars_littleendian
 
 extern int c4x_do_align PARAMS ((int, const char *, int, int));
-#define md_do_align(n,fill,len,max,l) if (c4x_do_align (n,fill,len,max)) goto l
+#define md_do_align(n,fill,len,max,label) if( c4x_do_align (n,fill,len,max) ) goto label;
 
 /* Start of line hook to remove parallel instruction operator || */
 extern void c4x_start_line PARAMS ((void));

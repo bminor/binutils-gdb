@@ -19,19 +19,35 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 59 Temple Place - Suite 330, 
    Boston, MA 02111-1307, USA.  */
+/*
+  TODOs:
+  ------
+  
+  o .align cannot handle fill-data larger than 0xFF/8-bits
 
+  o .align fills all section with NOP's when used regardless if has
+    been used in .text or .data. (However the .align is primarely
+    intended used in .text sections. If you require something else,
+    use .align <size>,0x00)
 
-/* Things not currently implemented:
-   > .usect if has symbol on previous line  
+  o .align: Implement a 'bu' insn if the number of nop's exeeds 4 within
+    the align frag. if(fragsize>4words) insert bu fragend+1 first. 
 
-   > .sym, .eos, .stag, .etag, .member
+  o .usect if has symbol on previous line not implemented
 
-   > Evaluation of constant floating point expressions (expr.c needs work!)
+  o .sym, .eos, .stag, .etag, .member not implemented
 
-   > Warnings issued if parallel load of same register
+  o Evaluation of constant floating point expressions (expr.c needs work!)
 
-   Note that this is primarily designed to handle the code generated
-   by GCC.  Anything else is a bonus!  */
+  o Warnings issued if parallel load of same register
+
+  o Support 'abc' constants?
+
+  o Support new opcodes and implement a silicon version switch (maybe -mpg)
+
+  o Disallow non-float registers in float instructions. Make as require
+    'fx' notation on floats, while 'rx' on the rest
+*/
 
 #include <stdio.h>
 #include <ctype.h>
@@ -101,148 +117,139 @@ c4x_insn_t;
 static c4x_insn_t the_insn;	/* Info about our instruction.  */
 static c4x_insn_t *insn = &the_insn;
 
-int c4x_gen_to_words
-    PARAMS ((FLONUM_TYPE, LITTLENUM_TYPE *, int ));
-char *c4x_atof
-    PARAMS ((char *, char, LITTLENUM_TYPE * ));
+static int c4x_gen_to_words
+  PARAMS ((FLONUM_TYPE, LITTLENUM_TYPE *, int ));
+static char *c4x_atof
+  PARAMS ((char *, char, LITTLENUM_TYPE * ));
 static void c4x_insert_reg
-    PARAMS ((char *, int ));
+  PARAMS ((char *, int ));
 static void c4x_insert_sym
-    PARAMS ((char *, int ));
+  PARAMS ((char *, int ));
 static char *c4x_expression
-    PARAMS ((char *, expressionS *));
+  PARAMS ((char *, expressionS *));
 static char *c4x_expression_abs
-    PARAMS ((char *, int *));
+  PARAMS ((char *, int *));
 static void c4x_emit_char
-    PARAMS ((char));
+  PARAMS ((char, int));
 static void c4x_seg_alloc
-    PARAMS ((char *, segT, int, symbolS *));
+  PARAMS ((char *, segT, int, symbolS *));
 static void c4x_asg
-    PARAMS ((int));
+  PARAMS ((int));
 static void c4x_bss
-    PARAMS ((int));
-void c4x_globl
-    PARAMS ((int));
+  PARAMS ((int));
+static void c4x_globl
+  PARAMS ((int));
 static void c4x_cons
-    PARAMS ((int));
+  PARAMS ((int));
+static void c4x_stringer
+  PARAMS ((int));
 static void c4x_eval
-    PARAMS ((int));
+  PARAMS ((int));
 static void c4x_newblock
-    PARAMS ((int));
+  PARAMS ((int));
 static void c4x_sect
-    PARAMS ((int));
+  PARAMS ((int));
 static void c4x_set
-    PARAMS ((int));
+  PARAMS ((int));
 static void c4x_usect
-    PARAMS ((int));
+  PARAMS ((int));
 static void c4x_version
-    PARAMS ((int));
+  PARAMS ((int));
 static void c4x_pseudo_ignore
-    PARAMS ((int));
+  PARAMS ((int));
 static void c4x_init_regtable
-    PARAMS ((void));
+  PARAMS ((void));
 static void c4x_init_symbols
-    PARAMS ((void));
+  PARAMS ((void));
 static int c4x_inst_insert
-    PARAMS ((c4x_inst_t *));
+  PARAMS ((c4x_inst_t *));
 static c4x_inst_t *c4x_inst_make
-    PARAMS ((char *, unsigned long, char *));
+  PARAMS ((char *, unsigned long, char *));
 static int c4x_inst_add
-    PARAMS ((c4x_inst_t *));
+  PARAMS ((c4x_inst_t *));
 void md_begin
-    PARAMS ((void));
+  PARAMS ((void));
 void c4x_end
-    PARAMS ((void));
+  PARAMS ((void));
 static int c4x_indirect_parse
-    PARAMS ((c4x_operand_t *, const c4x_indirect_t *));
-char *c4x_operand_parse
-    PARAMS ((char *, c4x_operand_t *));
+  PARAMS ((c4x_operand_t *, const c4x_indirect_t *));
+static char *c4x_operand_parse
+  PARAMS ((char *, c4x_operand_t *));
 static int c4x_operands_match
-    PARAMS ((c4x_inst_t *, c4x_insn_t *));
-void c4x_insn_output
-    PARAMS ((c4x_insn_t *));
-int c4x_operands_parse
-    PARAMS ((char *, c4x_operand_t *, int ));
+  PARAMS ((c4x_inst_t *, c4x_insn_t *));
+static void c4x_insn_output
+  PARAMS ((c4x_insn_t *));
+static int c4x_operands_parse
+  PARAMS ((char *, c4x_operand_t *, int ));
 void md_assemble
-    PARAMS ((char *));
+  PARAMS ((char *));
 void c4x_cleanup
-    PARAMS ((void));
+  PARAMS ((void));
 char *md_atof
-    PARAMS ((int, char *, int *));
+  PARAMS ((int, char *, int *));
 void md_apply_fix3
-    PARAMS ((fixS *, valueT *, segT ));
+  PARAMS ((fixS *, valueT *, segT ));
 void md_convert_frag
-    PARAMS ((bfd *, segT, fragS *));
+  PARAMS ((bfd *, segT, fragS *));
 void md_create_short_jump
-    PARAMS ((char *, addressT, addressT, fragS *, symbolS *));
+  PARAMS ((char *, addressT, addressT, fragS *, symbolS *));
 void md_create_long_jump
-    PARAMS ((char *, addressT, addressT, fragS *, symbolS *));
+  PARAMS ((char *, addressT, addressT, fragS *, symbolS *));
 int md_estimate_size_before_relax
-    PARAMS ((register fragS *, segT));
+  PARAMS ((register fragS *, segT));
 int md_parse_option
-    PARAMS ((int, char *));
+  PARAMS ((int, char *));
 void md_show_usage
-    PARAMS ((FILE *));
+  PARAMS ((FILE *));
 int c4x_unrecognized_line
-    PARAMS ((int));
+  PARAMS ((int));
 symbolS *md_undefined_symbol
-    PARAMS ((char *));
+  PARAMS ((char *));
 void md_operand
-    PARAMS ((expressionS *));
+  PARAMS ((expressionS *));
 valueT md_section_align
-    PARAMS ((segT, valueT));
+  PARAMS ((segT, valueT));
 static int c4x_pc_offset
-    PARAMS ((unsigned int));
+  PARAMS ((unsigned int));
 long md_pcrel_from
-    PARAMS ((fixS *));
+  PARAMS ((fixS *));
 int c4x_do_align
-    PARAMS ((int, const char *, int, int));
+  PARAMS ((int, const char *, int, int));
 void c4x_start_line
-    PARAMS ((void));
+  PARAMS ((void));
 arelent *tc_gen_reloc
-    PARAMS ((asection *, fixS *));
+  PARAMS ((asection *, fixS *));
 
 
 const pseudo_typeS
   md_pseudo_table[] =
 {
   {"align", s_align_bytes, 32},
-  {"ascii", c4x_cons, 1},
-  {"asciz", c4x_pseudo_ignore, 0},
+  {"ascii", c4x_stringer, 1},
+  {"asciz", c4x_stringer, 0},
   {"asg", c4x_asg, 0},
-  {"asect", c4x_pseudo_ignore, 0}, /* Absolute named section.  */
-  {"block", s_space, 0},
+  {"block", s_space, 4},
   {"byte", c4x_cons, 1},
   {"bss", c4x_bss, 0},
-  {"comm", c4x_bss, 0},
+  {"copy", s_include, 0},
   {"def", c4x_globl, 0},
-  {"endfunc", c4x_pseudo_ignore, 0},
-  {"eos", c4x_pseudo_ignore, 0},
-  {"etag", c4x_pseudo_ignore, 0},
   {"equ", c4x_set, 0},
   {"eval", c4x_eval, 0},
-  {"exitm", s_mexit, 0},
-  {"func", c4x_pseudo_ignore, 0},
   {"global", c4x_globl, 0},
   {"globl", c4x_globl, 0},
   {"hword", c4x_cons, 2},
   {"ieee", float_cons, 'i'},
-  {"int", c4x_cons, 4},		/* .int allocates 4 bytes.  */
-  {"length", c4x_pseudo_ignore, 0},
-  {"ldouble", float_cons, 'l'},
-  {"member", c4x_pseudo_ignore, 0},
+  {"int", c4x_cons, 4},		 /* .int allocates 4 bytes.  */
+  {"ldouble", float_cons, 'e'},
   {"newblock", c4x_newblock, 0},
-  {"ref", s_ignore, 0},		/* All undefined treated as external.  */
+  {"ref", s_ignore, 0},	         /* All undefined treated as external.  */
   {"set", c4x_set, 0},
-  {"sect", c4x_sect, 1},	/* Define named section.  */
+  {"sect", c4x_sect, 1},	 /* Define named section.  */
   {"space", s_space, 4},
-  {"stag", c4x_pseudo_ignore, 0},
-  {"string", c4x_pseudo_ignore, 0},
-  {"sym", c4x_pseudo_ignore, 0},
-  {"usect", c4x_usect, 0},	/* Reserve space in uninit. named sect.  */
+  {"string", c4x_stringer, 0},
+  {"usect", c4x_usect, 0},       /* Reserve space in uninit. named sect.  */
   {"version", c4x_version, 0},
-  {"width", c4x_pseudo_ignore, 0},
-  {"word", c4x_cons, 4},	/* .word allocates 4 bytes.  */
+  {"word", c4x_cons, 4},	 /* .word allocates 4 bytes.  */
   {"xdef", c4x_globl, 0},
   {NULL, 0, 0},
 };
@@ -288,14 +295,15 @@ const char FLT_CHARS[] = "fFilsS";
 extern FLONUM_TYPE generic_floating_point_number;
 
 /* Precision in LittleNums.  */
-#define MAX_PRECISION (2)
+#define MAX_PRECISION (4)       /* Its a bit overkill for us, but the code
+                                   reqires it... */
 #define S_PRECISION (1)		/* Short float constants 16-bit.  */
 #define F_PRECISION (2)		/* Float and double types 32-bit.  */
+#define E_PRECISION (4)         /* Extended precision, 64-bit (real 40-bit). */
 #define GUARD (2)
 
-
 /* Turn generic_floating_point_number into a real short/float/double.  */
-int
+static int
 c4x_gen_to_words (flonum, words, precision)
      FLONUM_TYPE flonum;
      LITTLENUM_TYPE *words;
@@ -310,9 +318,17 @@ c4x_gen_to_words (flonum, words, precision)
   unsigned int sfract;		/* Scaled fraction.  */
   unsigned int smant;		/* Scaled mantissa.  */
   unsigned int tmp;
+  unsigned int mover;           /* Mantissa overflow bits */
+  unsigned int rbit;            /* Round bit. */
   int shift;			/* Shift count.  */
 
-  /* Here is how a generic floating point number is stored using
+  /* NOTE: Svein Seldal <Svein.Seldal@solidas.com>
+     The code in this function is altered slightly to support floats
+     with 31-bits mantissas, thus the documentation below may be a
+     little bit inaccurate.
+     
+     By Michael P. Hayes <m.hayes@elec.canterbury.ac.nz>
+     Here is how a generic floating point number is stored using
      flonums (an extension of bignums) where p is a pointer to an
      array of LITTLENUMs.
 
@@ -440,31 +456,34 @@ c4x_gen_to_words (flonum, words, precision)
 
   if (precision != S_PRECISION)
     words[1] = 0x0000;
+  if (precision == E_PRECISION)
+    words[2] = words[3] = 0x0000;
 
-  /* 0.0e0 seen.  */
-  if (flonum.low > flonum.leader)
+  /* 0.0e0 or NaN seen.  */
+  if (flonum.low > flonum.leader  /* = 0.0e0 */
+      || flonum.sign == 0) /* = NaN */
     {
+      if(flonum.sign == 0)
+        as_bad ("Nan, using zero.");
       words[0] = 0x8000;
       return return_value;
     }
 
-  /* NaN:  We can't do much...  */
-  if (flonum.sign == 0)
-    {
-      as_bad ("Nan, using zero.");
-      words[0] = 0x8000;
-      return return_value;
-    }
-  else if (flonum.sign == 'P')
+  if (flonum.sign == 'P')
     {
       /* +INF:  Replace with maximum float.  */
       if (precision == S_PRECISION)
 	words[0] = 0x77ff;
-      else
+      else 
 	{
 	  words[0] = 0x7f7f;
 	  words[1] = 0xffff;
 	}
+      if (precision == E_PRECISION)
+        {
+          words[2] = 0x7fff;
+          words[3] = 0xffff;
+        }
       return return_value;
     }
   else if (flonum.sign == 'N')
@@ -472,8 +491,10 @@ c4x_gen_to_words (flonum, words, precision)
       /* -INF:  Replace with maximum float.  */
       if (precision == S_PRECISION)
 	words[0] = 0x7800;
-      else
-	words[0] = 0x7f80;
+      else 
+        words[0] = 0x7f80;
+      if (precision == E_PRECISION)
+        words[2] = 0x8000;
       return return_value;
     }
 
@@ -489,43 +510,64 @@ c4x_gen_to_words (flonum, words, precision)
   if (precision == S_PRECISION)	/* Allow 1 rounding bit.  */
     {
       exponent_bits = 4;
-      mantissa_bits = 12;	/* Include suppr. bit but not rounding bit.  */
+      mantissa_bits = 11;
     }
-  else
+  else if(precision == F_PRECISION)
     {
       exponent_bits = 8;
-      mantissa_bits = 24;
+      mantissa_bits = 23;
+    }
+  else /* E_PRECISION */
+    {
+      exponent_bits = 8;
+      mantissa_bits = 31;
     }
 
   shift = mantissa_bits - shift;
 
   smant = 0;
+  mover = 0;
+  rbit = 0;
+  /* Store the mantissa data into smant and the roundbit into rbit */
   for (p = flonum.leader; p >= flonum.low && shift > -16; p--)
     {
       tmp = shift >= 0 ? *p << shift : *p >> -shift;
+      rbit = shift < 0 ? ((*p >> (-shift-1)) & 0x1) : 0;
       smant |= tmp;
       shift -= 16;
     }
 
-  /* OK, we've got our scaled mantissa so let's round it up
-     and drop the rounding bit.  */
-  smant++;
-  smant >>= 1;
+  /* OK, we've got our scaled mantissa so let's round it up */
+  if(rbit)
+    {
+      /* If the mantissa is going to overflow when added, lets store
+         the extra bit in mover. -- A special case exists when
+         mantissa_bits is 31 (E_PRECISION). Then the first test cannot
+         be trusted, as result is host-dependent, thus the second
+         test. */
+      if( smant == ((unsigned)(1<<(mantissa_bits+1))-1)
+          || smant == (unsigned)-1 )  /* This is to catch E_PRECISION cases */
+        mover=1;
+      smant++;
+    }
+
+  /* Get the scaled one value */
+  sone = (1 << (mantissa_bits));
 
   /* The number may be unnormalised so renormalise it...  */
-  if (smant >> mantissa_bits)
+  if(mover)
     {
       smant >>= 1;
+      smant |= sone; /* Insert the bit from mover into smant */
       exponent++;
     }
 
   /* The binary point is now between bit positions 11 and 10 or 23 and 22,
      i.e., between mantissa_bits - 1 and mantissa_bits - 2 and the
      bit at mantissa_bits - 1 should be set.  */
-  if (!(smant >> (mantissa_bits - 1)))
-    abort ();			/* Ooops.  */
+  if (!(sone&smant))
+    abort ();                   /* Ooops.  */
 
-  sone = (1 << (mantissa_bits - 1));
   if (flonum.sign == '+')
     sfract = smant - sone;	/* smant - 1.0.  */
   else
@@ -537,7 +579,9 @@ c4x_gen_to_words (flonum, words, precision)
 	  sfract = 0;
 	}
       else
-	sfract = (sone << 1) - smant;	/* 2.0 - smant.  */
+        {
+          sfract = -smant & (sone-1);   /* 2.0 - smant.  */
+        }
       sfract |= sone;		/* Insert sign bit.  */
     }
 
@@ -546,21 +590,37 @@ c4x_gen_to_words (flonum, words, precision)
 
   /* Force exponent to fit in desired field width.  */
   exponent &= (1 << (exponent_bits)) - 1;
-  sfract |= exponent << mantissa_bits;
 
-  if (precision == S_PRECISION)
-    words[0] = sfract;
+  if (precision == E_PRECISION)
+    {
+      /* Map the float part first (100% equal format as F_PRECISION) */
+      words[0]  = exponent << (mantissa_bits+1-24);
+      words[0] |= sfract >> 24;
+      words[1]  = sfract >> 8;
+
+      /* Map the mantissa in the next */
+      words[2]  = sfract >> 16;
+      words[3]  = sfract & 0xffff;
+    }
   else
     {
-      words[0] = sfract >> 16;
-      words[1] = sfract & 0xffff;
+      /* Insert the exponent data into the word */
+      sfract |= exponent << (mantissa_bits+1);
+
+      if (precision == S_PRECISION)
+        words[0] = sfract;
+      else
+        {
+          words[0] = sfract >> 16;
+          words[1] = sfract & 0xffff;
+        }
     }
 
   return return_value;
 }
 
 /* Returns pointer past text consumed.  */
-char *
+static char *
 c4x_atof (str, what_kind, words)
      char *str;
      char what_kind;
@@ -604,6 +664,11 @@ c4x_atof (str, what_kind, words)
     case 'f':
     case 'F':
       precision = F_PRECISION;
+      break;
+
+    case 'E':
+    case 'e':
+      precision = E_PRECISION;
       break;
 
     default:
@@ -695,14 +760,15 @@ c4x_expression_abs (str, value)
 }
 
 static void 
-c4x_emit_char (c)
+c4x_emit_char (c,b)
      char c;
+     int b;
 {
   expressionS exp;
 
   exp.X_op = O_constant;
   exp.X_add_number = c;
-  emit_expr (&exp, 4);
+  emit_expr (&exp, b);
 }
 
 static void 
@@ -824,7 +890,7 @@ c4x_bss (x)
   demand_empty_rest_of_line ();
 }
 
-void
+static void
 c4x_globl (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
@@ -866,7 +932,7 @@ c4x_cons (bytes)
 	{
 	  input_line_pointer++;
 	  while (is_a_char (c = next_char_of_string ()))
-	    c4x_emit_char (c);
+	    c4x_emit_char (c, 4);
 	  know (input_line_pointer[-1] == '\"');
 	}
       else
@@ -892,6 +958,60 @@ c4x_cons (bytes)
 	}
     }
   while (*input_line_pointer++ == ',');
+
+  input_line_pointer--;		/* Put terminator back into stream.  */
+  demand_empty_rest_of_line ();
+}
+
+/* Handle .ascii, .asciz, .string */
+static void 
+c4x_stringer (append_zero)
+     int append_zero; /*ex: bytes */
+{
+  int bytes;
+  register unsigned int c;
+
+  bytes = 0;
+  do
+    {
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer == '"')
+	{
+	  input_line_pointer++;
+	  while (is_a_char (c = next_char_of_string ()))
+            {
+              c4x_emit_char (c, 1);
+              bytes++;
+            }
+
+          if (append_zero)
+            {
+              c4x_emit_char (c, 1);
+              bytes++;
+            }
+
+	  know (input_line_pointer[-1] == '\"');
+	}
+      else
+	{
+	  expressionS exp;
+
+	  input_line_pointer = c4x_expression (input_line_pointer, &exp);
+	  if (exp.X_op != O_constant)
+            {
+              as_bad("Non-constant symbols not allowed\n");
+              return;
+            }
+          exp.X_add_number &= 255; /* Limit numeber to 8-bit */
+	  emit_expr (&exp, 1);
+          bytes++;
+	}
+    }
+  while (*input_line_pointer++ == ',');
+
+  /* Fill out the rest of the expression with 0's to fill up a full word */
+  if ( bytes&0x3 )
+    c4x_emit_char (0, 4-(bytes&0x3));
 
   input_line_pointer--;		/* Put terminator back into stream.  */
   demand_empty_rest_of_line ();
@@ -1120,16 +1240,6 @@ c4x_version (x)
 }
 
 static void 
-c4x_pseudo_ignore (x)
-     int x ATTRIBUTE_UNUSED;
-{
-  /* We could print warning message here...  */
-
-  /* Ignore everything until end of line.  */
-  while (!is_end_of_line[(unsigned char) *input_line_pointer++]);
-}
-
-static void 
 c4x_init_regtable ()
 {
   unsigned int i;
@@ -1182,17 +1292,19 @@ c4x_init_symbols ()
   c4x_insert_sym (".BIGMODEL", c4x_big_model);
   c4x_insert_sym (".C30INTERRUPT", 0);
   c4x_insert_sym (".TMS320xx", c4x_cpu == 0 ? 40 : c4x_cpu);
-  c4x_insert_sym (".C3X", c4x_cpu == 30 || c4x_cpu == 31 || c4x_cpu == 32);
-  c4x_insert_sym (".C3x", c4x_cpu == 30 || c4x_cpu == 31 || c4x_cpu == 32);
+  c4x_insert_sym (".C3X", c4x_cpu == 30 || c4x_cpu == 31 || c4x_cpu == 32 || c4x_cpu == 33);
+  c4x_insert_sym (".C3x", c4x_cpu == 30 || c4x_cpu == 31 || c4x_cpu == 32 || c4x_cpu == 33);
   c4x_insert_sym (".C4X", c4x_cpu == 0 || c4x_cpu == 40 || c4x_cpu == 44);
   c4x_insert_sym (".C4x", c4x_cpu == 0 || c4x_cpu == 40 || c4x_cpu == 44);
   /* Do we need to have the following symbols also in lower case?  */
-  c4x_insert_sym (".TMS320C30", c4x_cpu == 30 || c4x_cpu == 31 || c4x_cpu == 32);
-  c4x_insert_sym (".tms320C30", c4x_cpu == 30 || c4x_cpu == 31 || c4x_cpu == 32);
+  c4x_insert_sym (".TMS320C30", c4x_cpu == 30 || c4x_cpu == 31 || c4x_cpu == 32 || c4x_cpu == 33);
+  c4x_insert_sym (".tms320C30", c4x_cpu == 30 || c4x_cpu == 31 || c4x_cpu == 32 || c4x_cpu == 33);
   c4x_insert_sym (".TMS320C31", c4x_cpu == 31);
   c4x_insert_sym (".tms320C31", c4x_cpu == 31);
   c4x_insert_sym (".TMS320C32", c4x_cpu == 32);
   c4x_insert_sym (".tms320C32", c4x_cpu == 32);
+  c4x_insert_sym (".TMS320C33", c4x_cpu == 33);
+  c4x_insert_sym (".tms320C33", c4x_cpu == 33);
   c4x_insert_sym (".TMS320C40", c4x_cpu == 40 || c4x_cpu == 44 || c4x_cpu == 0);
   c4x_insert_sym (".tms320C40", c4x_cpu == 40 || c4x_cpu == 44 || c4x_cpu == 0);
   c4x_insert_sym (".TMS320C44", c4x_cpu == 44);
@@ -1465,7 +1577,7 @@ c4x_indirect_parse (operand, indirect)
   return 1;
 }
 
-char *
+static char *
 c4x_operand_parse (s, operand)
      char *s;
      c4x_operand_t *operand;
@@ -2188,7 +2300,7 @@ c4x_operands_match (inst, insn)
     }
 }
 
-void 
+static void 
 c4x_insn_output (insn)
      c4x_insn_t *insn;
 {
@@ -2380,13 +2492,16 @@ md_atof (type, litP, sizeP)
       break;
 
     case 'i':			/* .ieee */
+    case 'I':
       prec = 2;
       ieee = 1;
+      type = 'f';  /* Rewrite type to be usable by atof_ieee() */
       break;
 
-    case 'l':			/* .ldouble */
+    case 'e':			/* .ldouble */
+    case 'E':
       prec = 4;			/* 2 32-bit words */
-      ieee = 1;
+      ieee = 0;
       break;
 
     default:
@@ -2404,10 +2519,21 @@ md_atof (type, litP, sizeP)
   t = litP;
   /* This loops outputs the LITTLENUMs in REVERSE order; in accord with
      little endian byte order.  */
-  for (wordP = words + prec - 1; prec--;)
+  /* SES: However it is required to put the words (32-bits) out in the
+     correct order, hence we write 2 and 2 littlenums in little endian
+     order, while we keep the original order on successive words. */
+  for(wordP = words; wordP<(words+prec) ; wordP+=2)
     {
-      md_number_to_chars (litP, (valueT) (*wordP--),
-			  sizeof (LITTLENUM_TYPE));
+      if (wordP<(words+prec-1)) /* Dump wordP[1] (if we have one) */
+        {
+          md_number_to_chars (litP, (valueT) (wordP[1]),
+                              sizeof (LITTLENUM_TYPE));
+          litP += sizeof (LITTLENUM_TYPE);
+        }
+
+      /* Dump wordP[0] */
+      md_number_to_chars (litP, (valueT) (wordP[0]),
+                          sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
   return 0;
@@ -2550,7 +2676,7 @@ md_show_usage (stream)
 {
   fputs ("\
 C[34]x options:\n\
--m30 | -m31 | -m32 | -m40 | -m44\n\
+-m30 | -m31 | -m32 | -m33 | -m40 | -m44\n\
 			specify variant of architecture\n\
 -b                      big memory model\n\
 -p                      pass arguments on stack\n\
@@ -2720,8 +2846,8 @@ md_pcrel_from (fixP)
     c4x_pc_offset (op);
 }
 
-/* This is probably not necessary, if we have played our cards right,
-   since everything should be already aligned on a 4-byte boundary.  */
+/* Fill the alignment area with NOP's on .text, unless fill-data
+   was specified. */
 int 
 c4x_do_align (alignment, fill, len, max)
      int alignment ATTRIBUTE_UNUSED;
@@ -2729,13 +2855,28 @@ c4x_do_align (alignment, fill, len, max)
      int len ATTRIBUTE_UNUSED;
      int max ATTRIBUTE_UNUSED;
 {
-  char *p;
+  unsigned long nop = NOP_OPCODE;
 
-  p = frag_var (rs_align, 1, 1, (relax_substateT) 0,
-		(symbolS *) 0, (long) 2, (char *) 0);
-
-  /* We could use frag_align_pattern (n, nop_pattern, sizeof (nop_pattern));
-     to fill with our 32-bit nop opcode.  */
+  /* Because we are talking lwords, not bytes, adjust aligment to do words */
+  alignment += 2;
+  
+  if (alignment != 0 && !need_pass_2)
+    {
+      if (fill == NULL)
+        {
+          /*if (subseg_text_p (now_seg))*/  /* FIXME: doesnt work for .text for some reason */
+          frag_align_pattern( alignment, (const char *)&nop, sizeof(nop), max);
+          return 1;
+          /*else
+            frag_align (alignment, 0, max);*/
+	}
+      else if (len <= 1)
+	frag_align (alignment, *fill, max);
+      else
+	frag_align_pattern (alignment, fill, len, max);
+    }
+  
+  /* Return 1 to skip the default aligment function */
   return 1;
 }
 

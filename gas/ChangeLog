@@ -1,3 +1,20 @@
+2002-11-11  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* config/tc-tic4x.c: Declare as many functions as possible as
+	static. Maintenance on the general indenting. Removed unnecessary
+	pseudo-ops and added new ones. Removed obsoleted c4x_pseudo_ignore
+	function. Add support for new DSP, TMS320VC33. Fix bug for
+	converting flonum constants.
+	(c4x_do_align): Add proper align handling. Setup align to insert
+	NOP's. 
+	(c4x_gen_to_words): Support for extended TI type floats.
+	(md_atof): Proper dumping of multiple-word littlenums.
+	(c4x_atof): Added support for extended TI type floats.
+	(c4x_stringer): Added new function to handle compact strings.
+	(c4x_emit_char): Added new function argument to handle custom
+	length inserts, like single-byte strings.
+	* config/tc-tic4x.h: Add proper align handling with NOP's.
+
 2002-11-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* macro.c (get_any_string): Correct logic for not going beyond end
