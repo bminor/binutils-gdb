@@ -248,8 +248,8 @@ AS_FOR_TARGET = ` \
   fi`
 
 LD_FOR_TARGET = ` \
-  if [ -f $$r/ld/ld.new ] ; then \
-    echo $$r/ld/ld.new ; \
+  if [ -f $$r/ld/ld-new ] ; then \
+    echo $$r/ld/ld-new ; \
   else \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(LD); \
@@ -1588,8 +1588,12 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	  ln -s ../../../texinfo/util/tex3patch	proto-toplev/texinfo/util ; \
 	else true; fi
 	chmod og=u `find . -print`
-	$(MAKE) -f Makefile.in do-tar-gz TOOL=$(TOOL) \
-		VER=`sed <$(TOOL)/Makefile.in -n 's/^VERSION *= *//p'`
+	if grep AM_INIT_AUTOMAKE $(TOOL)/configure.in >/dev/null 2>&1; then \
+	  ver=`sed < $(TOOL)/configure.in -n 's/AM_INIT_AUTOMAKE[^,]*, *\([^)]*\))/\1/p'`; \
+	else \
+	  ver=`sed <$(TOOL)/Makefile.in -n 's/^VERSION *= *//p'`; \
+	fi; \
+	$(MAKE) -f Makefile.in do-tar-gz TOOL=$(TOOL) VER=$$ver
 
 do-tar-gz:
 	echo "==> Making $(TOOL)-$(VER).tar.gz"
