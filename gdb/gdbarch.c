@@ -4264,7 +4264,7 @@ gdbarch_push_dummy_call_p (struct gdbarch *gdbarch)
 }
 
 CORE_ADDR
-gdbarch_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR dummy_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+gdbarch_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->push_dummy_call == 0)
@@ -4272,7 +4272,7 @@ gdbarch_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache, COR
                     "gdbarch: gdbarch_push_dummy_call invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_push_dummy_call called\n");
-  return gdbarch->push_dummy_call (gdbarch, regcache, dummy_addr, nargs, args, sp, struct_return, struct_addr);
+  return gdbarch->push_dummy_call (gdbarch, func_addr, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr);
 }
 
 void

@@ -1405,19 +1405,20 @@ pop_stack_item (struct stack_item *si)
    we should probably support some of them based on the selected ABI.  */
 
 static CORE_ADDR
-arm_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
-		     CORE_ADDR dummy_addr, int nargs, struct value **args,
-		     CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+arm_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+		     struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		     struct value **args, CORE_ADDR sp, int struct_return,
+		     CORE_ADDR struct_addr)
 {
   int argnum;
   int argreg;
   int nstack;
   struct stack_item *si = NULL;
 
-  /* Set the return address.  For the ARM, the return breakpoint is always
-     at DUMMY_ADDR.  */
+  /* Set the return address.  For the ARM, the return breakpoint is
+     always at BP_ADDR.  */
   /* XXX Fix for Thumb.  */
-  regcache_cooked_write_unsigned (regcache, ARM_LR_REGNUM, dummy_addr);
+  regcache_cooked_write_unsigned (regcache, ARM_LR_REGNUM, bp_addr);
 
   /* Walk through the list of args and determine how large a temporary
      stack is required.  Need to take care here as structs may be

@@ -568,7 +568,7 @@ F:2:INTEGER_TO_ADDRESS:CORE_ADDR:integer_to_address:struct type *type, void *buf
 f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::generic_return_value_on_stack_not::0
 # Replaced by PUSH_DUMMY_CALL
 F:2:DEPRECATED_PUSH_ARGUMENTS:CORE_ADDR:deprecated_push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr
-M::PUSH_DUMMY_CALL:CORE_ADDR:push_dummy_call:struct regcache *regcache, CORE_ADDR dummy_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:regcache, dummy_addr, nargs, args, sp, struct_return, struct_addr
+M::PUSH_DUMMY_CALL:CORE_ADDR:push_dummy_call:CORE_ADDR func_addr, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:func_addr, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr
 F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-:::0
 # NOTE: This can be handled directly in push_dummy_call.
 F:2:DEPRECATED_PUSH_RETURN_ADDRESS:CORE_ADDR:deprecated_push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0

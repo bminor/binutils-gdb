@@ -747,7 +747,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     /* When there is no push_dummy_call method, should this code
        simply error out.  That would the implementation of this method
        for all ABIs (which is probably a good thing).  */
-    sp = gdbarch_push_dummy_call (current_gdbarch, current_regcache,
+    sp = gdbarch_push_dummy_call (current_gdbarch, funaddr, current_regcache,
 				  bp_addr, nargs, args, sp, struct_return,
 				  struct_addr);
   else  if (DEPRECATED_PUSH_ARGUMENTS_P ())

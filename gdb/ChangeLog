@@ -1,3 +1,14 @@
+2003-05-31  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (PUSH_DUMMY_CALL): Add "func_addr" parameter.  Rename
+	"dummy_addr" to "bp_addr".
+	* infcall.c (call_function_by_hand): Pass "funaddr" to
+	gdbarch_push_dummy_call.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* i386-tdep.c (i386_push_dummy_call): Update.
+	* arm-tdep.c (arm_push_dummy_call): Update.
+	* d10v-tdep.c (d10v_push_dummy_call): Update.
+
 2003-05-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.h (x86_64_num_regs, x86_64_num_gregs): Remove

@@ -977,9 +977,10 @@ d10v_push_dummy_code (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-d10v_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
-		      CORE_ADDR dummy_addr, int nargs, struct value **args,
-		      CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+d10v_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+		      struct regcache *regcache, CORE_ADDR bp_addr,
+		      int nargs, struct value **args, CORE_ADDR sp, int struct_return,
+		      CORE_ADDR struct_addr)
 {
   int i;
   int regnum = ARG1_REGNUM;
@@ -987,9 +988,9 @@ d10v_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
   long val;
 
   /* Set the return address.  For the d10v, the return breakpoint is
-     always at DUMMY_ADDR.  */
+     always at BP_ADDR.  */
   regcache_cooked_write_unsigned (regcache, LR_REGNUM,
-				  d10v_convert_iaddr_to_raw (dummy_addr));
+				  d10v_convert_iaddr_to_raw (bp_addr));
 
   /* If STRUCT_RETURN is true, then the struct return address (in
      STRUCT_ADDR) will consume the first argument-passing register.
