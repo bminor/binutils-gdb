@@ -335,8 +335,20 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       break;
 
     case TYPE_CODE_BOOL:
-      /* Do something at least vaguely reasonable, for example if the
-	 language is set wrong.  */
+      format = format ? format : output_format;
+      if (format)
+	print_scalar_formatted (valaddr, type, format, 0, stream);
+      else
+	{
+	  val = unpack_long (type, valaddr);
+	  if (val == 0)
+	    fputs_filtered ("false", stream);
+	  else if (val == 1)
+	    fputs_filtered ("true", stream);
+	  else
+	    print_longest (stream, 'd', 0, val);
+	}
+      break;
 
     case TYPE_CODE_RANGE:
       /* FIXME: create_range_type does not set the unsigned bit in a

@@ -1855,7 +1855,8 @@ rs6000_builtin_type (typenum)
       rettype = init_type (TYPE_CODE_INT, 4, 0, "integer", NULL);
       break;
     case 16:
-      rettype = init_type (TYPE_CODE_BOOL, 4, 0, "boolean", NULL);
+      rettype = init_type (TYPE_CODE_BOOL, 4, TYPE_FLAG_UNSIGNED,
+			   "boolean", NULL);
       break;
     case 17:
       rettype = init_type (TYPE_CODE_FLT, 4, 0, "short real", NULL);
@@ -2458,6 +2459,7 @@ read_one_struct_field (fip, pp, p, type, objfile)
 	 and treat enums as if they had the width of ints.  */
 
       if (TYPE_CODE (fip -> list -> field.type) != TYPE_CODE_INT
+	  && TYPE_CODE (fip -> list -> field.type) != TYPE_CODE_BOOL
 	  && TYPE_CODE (fip -> list -> field.type) != TYPE_CODE_ENUM)
 	{
 	  fip -> list -> field.bitsize = 0;
