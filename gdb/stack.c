@@ -181,7 +181,7 @@ print_frame_info (fi, level, source, args)
       return;
     }
 
-  sal = find_pc_line (fi->pc, fi->next);
+  sal = find_pc_line (fi->pc, fi->next != NULL);
   func = find_pc_function (fi->pc);
   if (func)
     {
@@ -417,7 +417,7 @@ frame_info (addr_exp, from_tty)
     error ("Invalid frame specified.");
 
   fi = get_frame_info (frame);
-  sal = find_pc_line (fi->pc, fi->next);
+  sal = find_pc_line (fi->pc, fi->next != NULL);
   func = get_frame_function (frame);
   s = find_pc_symtab(fi->pc);
   if (func)
