@@ -2829,7 +2829,7 @@ s_syntax (ignore)
   {
     const char *operand;
     void (*fn) PARAMS ((void));
-  } syntax_table[] = 
+  } syntax_table[] =
     {{SYNTAX_ENFORCE_REG_PREFIX, cris_force_reg_prefix},
      {SYNTAX_RELAX_REG_PREFIX, cris_relax_reg_prefix},
      {SYNTAX_USER_SYM_LEADING_UNDERSCORE, cris_sym_leading_underscore},

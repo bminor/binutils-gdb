@@ -2458,7 +2458,7 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag)
 	    + ((slot_addr & 0x3) - (first_addr & 0x3)));
   return index;
 }
-  
+
 /* Given a complete record list, process any records which have
    unresolved fields, (ie length counts for a prologue).  After
    this has been run, all neccessary information should be available

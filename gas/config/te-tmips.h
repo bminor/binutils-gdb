@@ -18,8 +18,8 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/* This file is te-tmips.h and is intended to provide support for 
-   traditional mips targets like mips-dde-sysv4.2MP (Supermax ) , 
+/* This file is te-tmips.h and is intended to provide support for
+   traditional mips targets like mips-dde-sysv4.2MP (Supermax ) ,
    mips-sni-sysv4* (Sinix) etc. The base for this file is te-generic.h.
    Created by Koundinya.K < kk@ddeorg.soft.net > with the help of
    Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>.  */

@@ -6621,7 +6621,7 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
       str = original_case_string;
 #endif
       copy_of_str = str;
-      
+
       q += 4;
       skip_whitespace (q);
 

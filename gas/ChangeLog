@@ -1,3 +1,24 @@
+2000-11-14  Kazu Hirata  <kazu@hxi.com>
+
+	* config/aout_gnu.h: Fix formatting.
+	* config/atof-vax.c: Likewise.
+	* config/m68k-parse.h: Likewise.
+	* config/m88k-opcode.h: Likewise.
+	* config/obj-elf.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-cris.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/te-386bsd.h: Likewise.
+	* config/te-hppa.h: Likewise.
+	* config/te-nbsd.h: Likewise.
+	* config/te-ppcnw.h: Likewise.
+	* config/te-sparcaout.h: Likewise.
+	* config/te-tmips.h: Likewise.
+	* config/vax-inst.h: Likewise.
+	* config/vms-conf.h: Likewise.
+
 2000-11-14  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-alpha.c (s_alpha_prologue): Preserve visibility bits.

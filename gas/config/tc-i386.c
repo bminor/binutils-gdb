@@ -4186,7 +4186,6 @@ tc_coff_sizemachdep (frag)
 
    Initial production is 'expr'.
 
-
     addOp		+ | -
 
     alpha		[a-zA-Z]
@@ -4252,7 +4251,6 @@ tc_coff_sizemachdep (frag)
     			| DR0 | DR1 | DR2 | DR3 | DR6 | DR7
 			| TR3 | TR4 | TR5 | TR6 | TR7
 
-
     We simplify the grammar in obvious places (e.g., register parsing is
     done by calling parse_register) and eliminate immediate left recursion
     to implement a recursive-descent parser.
@@ -4301,7 +4299,7 @@ struct intel_parser_s
   {
     char *op_string;		/* The string being parsed.  */
     int got_a_float;		/* Whether the operand is a float.  */
-    int op_modifier;		/* Operand modifier. */
+    int op_modifier;		/* Operand modifier.  */
     int is_mem;			/* 1 if operand is memory reference.  */
     const reg_entry *reg;	/* Last register reference found.  */
     char *disp;			/* Displacement string being built.  */
@@ -4347,7 +4345,6 @@ static int intel_e09_1		PARAMS ((void));
 static int intel_e10		PARAMS ((void));
 static int intel_e10_1		PARAMS ((void));
 static int intel_e11		PARAMS ((void));
-
 
 static int
 i386_intel_operand (operand_string, got_a_float)
@@ -4418,7 +4415,6 @@ i386_intel_operand (operand_string, got_a_float)
   return ret;
 }
 
-
 /* expr	SHORT e05
    	| e05  */
 static int
@@ -4438,10 +4434,9 @@ intel_expr ()
     return intel_e05 ();
 }
 
-
 /* e05	e06 e05'
 
-   e05'	addOp e06 e05' 
+   e05'	addOp e06 e05'
 	| Empty  */
 static int
 intel_e05 ()
@@ -4464,8 +4459,7 @@ intel_e05_1 ()
   /* e05'  Empty  */
   else
     return 1;
-} 
-
+}
 
 /* e06	e09 e06'
 
@@ -4488,12 +4482,11 @@ intel_e06_1 ()
 
       return (intel_e09 () && intel_e06_1 ());
     }
-  
+
   /* e06'  Empty  */
-  else 
+  else
     return 1;
 }
-
 
 /* e09	OFFSET e10 e09'
    	| e10 e09'
@@ -4592,7 +4585,7 @@ intel_e10_1 ()
     {
       intel_match_token ('[');
       intel_parser.is_mem = 1;
-      
+
       /* Add a '+' to the displacement string if necessary.  */
       if (*intel_parser.disp != '\0')
 	strcat (intel_parser.disp, "+");
@@ -4605,7 +4598,6 @@ intel_e10_1 ()
     return 1;
 }
 
-
 /* e11	( expr )
    	| [ expr ]
 	| BYTE
@@ -4613,7 +4605,7 @@ intel_e10_1 ()
 	| DWORD
 	| QWORD
 	| XWORD
-	| $ 
+	| $
 	| .
 	| register
 	| id
@@ -4641,7 +4633,7 @@ intel_e11 ()
     {
       intel_match_token ('[');
       intel_parser.is_mem = 1;
-      
+
       /* Operands for jump/call inside brackets denote absolute addresses.  */
       if (current_templates->start->opcode_modifier & Jump
 	  || current_templates->start->opcode_modifier & JumpDword
@@ -4656,7 +4648,7 @@ intel_e11 ()
       return (intel_expr () && intel_match_token (']'));
     }
 
-  /* e11  BYTE 
+  /* e11  BYTE
 	  | WORD
 	  | DWORD
 	  | QWORD
@@ -4733,7 +4725,7 @@ intel_e11 ()
 	      return 0;
 	    }
 
-	  /* What follows must be a valid scale. */
+	  /* What follows must be a valid scale.  */
 	  if (intel_match_token ('*')
 	      && strchr ("01248", *cur_token.str))
 	    {
@@ -4776,7 +4768,7 @@ intel_e11 ()
 	 parsed as an immediate expression after we're done.  */
       else if (intel_parser.op_modifier == OFFSET_FLAT)
 	strcat (intel_parser.disp, reg->reg_name);
-	
+
       /* It's neither base nor index nor offset.  */
       else
 	{
@@ -4799,7 +4791,7 @@ intel_e11 ()
 
       return 1;
     }
-    
+
   /* e11  id  */
   else if (cur_token.code == T_ID)
     {
@@ -4855,7 +4847,7 @@ intel_e11 ()
 		  return 0;
 		}
 
-	      /* The constant is followed by `* reg', so it must be 
+	      /* The constant is followed by `* reg', so it must be
 		 a valid scale.  */
 	      if (strchr ("01248", *save_str))
 		{
@@ -4900,11 +4892,9 @@ intel_e11 ()
       return 1;
     }
 
-
   as_bad (_("Unrecognized token '%s'"), cur_token.str);
   return 0;
 }
-
 
 /* Match the given token against cur_token. If they match, read the next
    token from the operand string.  */
@@ -4924,7 +4914,6 @@ intel_match_token (code)
     }
 }
 
-
 /* Read a new token from intel_parser.op_string and store it in cur_token.  */
 static void
 intel_get_token ()
@@ -4937,7 +4926,7 @@ intel_get_token ()
   new_token.reg = NULL;
   new_token.str = NULL;
 
-  /* Free the memory allocated to the previous token and move 
+  /* Free the memory allocated to the previous token and move
      cur_token to prev_token.  */
   if (prev_token.str)
     free (prev_token.str);
@@ -4976,7 +4965,7 @@ intel_get_token ()
 
       /* Recognize special symbol names [0-9][bf].  */
       if (strlen (intel_parser.op_string) == 2
-	  && (intel_parser.op_string[1] == 'b' 
+	  && (intel_parser.op_string[1] == 'b'
 	      || intel_parser.op_string[1] == 'f'))
 	new_token.code = T_ID;
     }
@@ -5070,7 +5059,6 @@ intel_get_token ()
   cur_token = new_token;
 }
 
-
 /* Put cur_token back into the token stream and make cur_token point to
    prev_token.  */
 static void
@@ -5079,7 +5067,7 @@ intel_putback_token ()
   intel_parser.op_string -= strlen (cur_token.str);
   free (cur_token.str);
   cur_token = prev_token;
-  
+
   /* Forget prev_token.  */
   prev_token.code = T_NIL;
   prev_token.reg = NULL;

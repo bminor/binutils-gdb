@@ -1136,7 +1136,7 @@ obj_elf_symver (ignore)
       p = strchr (symbol_get_obj (sym)->versioned_name, ELF_VER_CHR);
       if (p)
 	rp = strrchr (p, ELF_VER_CHR);
-      if (!p || p [1] == '\0' || rp [1] == '\0') 
+      if (!p || p [1] == '\0' || rp [1] == '\0')
 	{
 	  as_bad (_("missing version name in `%s' for symbol `%s'"),
 		  symbol_get_obj (sym)->versioned_name,
@@ -1783,7 +1783,7 @@ elf_frob_file ()
 #endif
 }
 
-/* It removes any unneeded versioned symbols from the symbol table. */
+/* It removes any unneeded versioned symbols from the symbol table.  */
 
 void
 elf_frob_file_before_adjust ()

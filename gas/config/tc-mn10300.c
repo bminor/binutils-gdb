@@ -1927,7 +1927,6 @@ md_apply_fix3 (fixp, valuep, seg)
   else
     value = fixp->fx_offset;
 
-
   /* If the fix is relative to a symbol which is not defined, or not
      in the same segment as the fix, we cannot resolve it here.  */
   if (fixp->fx_addsy != NULL
