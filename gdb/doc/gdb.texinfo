@@ -1481,7 +1481,7 @@ short paragraph on how to use that command.
 
 @kindex apropos
 @item apropos @var{args}
-The @code{apropos @var{args}} command searches through all of the @value{GDBN}
+The @code{apropos} command searches through all of the @value{GDBN}
 commands, and their documentation, for the regular expression specified in
 @var{args}. It prints out all matches found. For example:
 
@@ -1587,11 +1587,15 @@ The version number is the same as the one announced when you start
 @value{GDBN}.
 
 @kindex show copying
+@kindex info copying
 @item show copying
+@itemx info copying
 Display information about permission for copying @value{GDBN}.
 
 @kindex show warranty
+@kindex info warranty
 @item show warranty
+@itemx info warranty
 Display the @sc{gnu} ``NO WARRANTY'' statement, or a warranty,
 if your version of @value{GDBN} comes with one.
 
@@ -2002,7 +2006,7 @@ for @value{GDBN} still comes from your terminal.
 This command attaches to a running process---one that was started
 outside @value{GDBN}.  (@code{info files} shows your active
 targets.)  The command takes as argument a process ID.  The usual way to
-find out the process-id of a Unix process is with the @code{ps} utility,
+find out the @var{process-id} of a Unix process is with the @code{ps} utility,
 or with the @samp{jobs -l} shell command.
 
 @code{attach} does not repeat if you press @key{RET} a second time after
@@ -2165,11 +2169,14 @@ Display a summary of all threads currently in your
 program.  @value{GDBN} displays for each thread (in this order):
 
 @enumerate
-@item the thread number assigned by @value{GDBN}
+@item
+the thread number assigned by @value{GDBN}
 
-@item the target system's thread identifier (@var{systag})
+@item
+the target system's thread identifier (@var{systag})
 
-@item the current stack frame summary for that thread
+@item
+the current stack frame summary for that thread
 @end enumerate
 
 @noindent
@@ -2409,12 +2416,12 @@ Breaks, ,Setting breakpoints}), to specify the place where your program
 should stop by line number, function name or exact address in the
 program.
 
-In HP-UX, SunOS 4.x, SVR4, and Alpha OSF/1 configurations, you can set
-breakpoints in shared libraries before the executable is run.  There is
-a minor limitation on HP-UX systems: you must wait until the executable
-is run in order to set breakpoints in shared library routines that are
-not called directly by the program (for example, routines that are
-arguments in a @code{pthread_create} call).
+On some systems, you can set breakpoints in shared libraries before
+the executable is run.  There is a minor limitation on HP-UX systems:
+you must wait until the executable is run in order to set breakpoints
+in shared library routines that are not called directly by the program
+(for example, routines that are arguments in a @code{pthread_create}
+call).
 
 @cindex watchpoints
 @cindex memory tracing
@@ -2566,7 +2573,7 @@ breakpoint requires hardware support and some target hardware may not
 have this support.  The main purpose of this is EPROM/ROM code
 debugging, so you can set a breakpoint at an instruction without
 changing the instruction.  This can be used with the new trap-generation
-provided by SPARClite DSU and some x86-based targets.  These targets
+provided by SPARClite DSU and most x86-based targets.  These targets
 will generate traps when a program accesses some data or instruction
 address that is assigned to the debug registers.  However the hardware
 breakpoint registers can take a limited number of breakpoints.  For
@@ -2766,17 +2773,18 @@ is written into by the program and its value changes.
 
 @kindex rwatch
 @item rwatch @var{expr}
-Set a watchpoint that will break when watch @var{expr} is read by the program.
+Set a watchpoint that will break when the value of @var{expr} is read
+by the program.
 
 @kindex awatch
 @item awatch @var{expr}
-Set a watchpoint that will break when @var{expr} is either read or written into
-by the program.
+Set a watchpoint that will break when @var{expr} is either read from
+or written into by the program.
 
 @kindex info watchpoints
 @item info watchpoints
 This command prints a list of watchpoints, breakpoints, and catchpoints;
-it is the same as @code{info break}.
+it is the same as @code{info break} (@pxref{Set Breaks}).
 @end table
 
 @value{GDBN} sets a @dfn{hardware watchpoint} if possible.  Hardware
@@ -3024,11 +3032,12 @@ breakpoint where your program just stopped.
 
 @item clear @var{function}
 @itemx clear @var{filename}:@var{function}
-Delete any breakpoints set at entry to the function @var{function}.
+Delete any breakpoints set at entry to the named @var{function}.
 
 @item clear @var{linenum}
 @itemx clear @var{filename}:@var{linenum}
-Delete any breakpoints set at or within the code of the specified line.
+Delete any breakpoints set at or within the code of the specified
+@var{linenum} of the specified @var{filename}.
 
 @cindex delete breakpoints
 @kindex delete
@@ -3098,6 +3107,7 @@ of these breakpoints immediately after stopping your program.
 @item enable @r{[}breakpoints@r{]} delete @var{range}@dots{}
 Enable the specified breakpoints to work once, then die.  @value{GDBN}
 deletes any of these breakpoints as soon as your program stops there.
+Breakpoints set by the @code{tbreak} command start out in this state.
 @end table
 
 @c FIXME: I think the following ``Except for [...] @code{tbreak}'' is
@@ -3602,6 +3612,7 @@ Contrast this with the @code{return} command (@pxref{Returning,
 
 @kindex until
 @kindex u @r{(@code{until})}
+@cindex run until specified location
 @item until
 @itemx u
 Continue running until a source line past the current line, in the
@@ -3673,8 +3684,8 @@ invocations have returned.
 
 @kindex advance @var{location}
 @itemx advance @var{location}
-Continue running the program up to the given location.  An argument is
-required, anything of the same form as arguments for the @code{break}
+Continue running the program up to the given @var{location}.  An argument is
+required, which should be of the same form as arguments for the @code{break}
 command.  Execution will also stop upon exit from the current stack
 frame.  This command is similar to @code{until}, but @code{advance} will
 not skip over recursive function calls, and the target location doesn't
@@ -3741,6 +3752,7 @@ You can change these settings with the @code{handle} command.
 
 @table @code
 @kindex info signals
+@kindex info handle
 @item info signals
 @itemx info handle
 Print a table of all the kinds of signals and how @value{GDBN} has been told to
@@ -4054,9 +4066,8 @@ to another without printing the frame.  This is the silent version of
 @node Backtrace
 @section Backtraces
 
-@cindex backtraces
-@cindex tracebacks
-@cindex stack traces
+@cindex traceback
+@cindex call stack traces
 A backtrace is a summary of how your program got where it is.  It shows one
 line per frame, for many frames, starting with the currently executing
 frame (frame zero), followed by its caller (frame one), and on up the
@@ -4531,7 +4542,6 @@ gdb @dots{}
 @node Search
 @section Searching source files
 @cindex searching source files
-@kindex reverse-search
 
 There are two commands for searching through the current source file for a
 regular expression.
@@ -4547,6 +4557,7 @@ starting with the one following the last line listed, for a match for
 synonym @samp{search @var{regexp}} or abbreviate the command name as
 @code{fo}.
 
+@kindex reverse-search
 @item reverse-search @var{regexp}
 The command @samp{reverse-search @var{regexp}} checks each line, starting
 with the one before the last line listed and going backward, for a match
@@ -4812,6 +4823,7 @@ Table}.
 * Core File Generation::        Cause a program dump its core
 * Character Sets::              Debugging programs that use a different
                                 character set than GDB does
+* Caching Remote Data::         Data caching for remote targets
 @end menu
 
 @node Expressions
@@ -5244,6 +5256,25 @@ the convenience variable @code{$__}.
 If the @code{x} command has a repeat count, the address and contents saved
 are from the last memory unit printed; this is not the same as the last
 address printed if several units were printed on the last line of output.
+
+@cindex remote memory comparison
+@cindex verify remote memory image
+When you are debugging a program running on a remote target machine
+(@pxref{Remote}), you may wish to verify the program's image in the
+remote machine's memory against the executable file you downloaded to
+the target.  The @code{compare-sections} command is provided for such
+situations.
+
+@table @code
+@kindex compare-sections
+@item compare-sections @r{[}@var{section-name}@r{]}
+Compare the data of a loadable section @var{section-name} in the
+executable file of the program being debugged with the same section in
+the remote machine's memory, and report any mismatches.  With no
+arguments, compares all loadable sections.  This command's
+availability depends on the target's support for the @code{"qCRC"}
+remote request.
+@end table
 
 @node Auto Display
 @section Automatic display
@@ -6027,29 +6058,31 @@ to enable, disable, or remove a memory region, you specify that number.
 @table @code
 @kindex mem
 @item mem @var{lower} @var{upper} @var{attributes}@dots{}
-Define memory region bounded by @var{lower} and @var{upper} with
-attributes @var{attributes}@dots{}.  Note that @var{upper} == 0 is a
-special case: it is treated as the the target's maximum memory address.
+Define a memory region bounded by @var{lower} and @var{upper} with
+attributes @var{attributes}@dots{}, and add it to the list of regions
+monitored by @value{GDBN}.  Note that @var{upper} == 0 is a special
+case: it is treated as the the target's maximum memory address.
 (0xffff on 16 bit targets, 0xffffffff on 32 bit targets, etc.)
 
 @kindex delete mem
 @item delete mem @var{nums}@dots{}
-Remove memory regions @var{nums}@dots{}.
+Remove memory regions @var{nums}@dots{} from the list of regions
+monitored by @value{GDBN}.
 
 @kindex disable mem
 @item disable mem @var{nums}@dots{}
-Disable memory regions @var{nums}@dots{}.
+Disable monitoring of memory regions @var{nums}@dots{}.
 A disabled memory region is not forgotten.
 It may be enabled again later.
 
 @kindex enable mem
 @item enable mem @var{nums}@dots{}
-Enable memory regions @var{nums}@dots{}.
+Enable monitoring of memory regions @var{nums}@dots{}.
 
 @kindex info mem
 @item info mem
 Print a table of all defined memory regions, with the following columns
-for each region.
+for each region:
 
 @table @emph
 @item Memory Region Number
@@ -6183,7 +6216,7 @@ form.
 @item append @r{[}binary@r{]} memory @var{filename} @var{start_addr} @var{end_addr}
 @itemx append @r{[}binary@r{]} value @var{filename} @var{expr}
 Append the contents of memory from @var{start_addr} to @var{end_addr},
-or the value of @var{expr}, to @var{filename}, in raw binary form.
+or the value of @var{expr}, to the file @var{filename}, in raw binary form.
 (@value{GDBN} can only append data to files in raw binary form.)
 
 @kindex restore
@@ -6480,6 +6513,38 @@ $10 = 78 '+'
 The @sc{ibm1047} character set uses the number 78 to encode the @samp{+}
 character.
 
+@node Caching Remote Data
+@section Caching Data of Remote Targets
+@cindex caching data of remote targets
+
+@value{GDBN} can cache data exchanged between the debugger and a
+remote target (@pxref{Remote}).  Such caching generally improves
+performance, because it reduces the overhead of the remote protocol by
+bundling memory reads and writes into large chunks.  Unfortunately,
+@value{GDBN} does not currently know anything about volatile
+registers, and thus data caching will produce incorrect results when
+volatile registers are in use.
+
+@table @code
+@kindex set remotecache
+@item set remotecache on
+@itemx set remotecache off
+Set caching state for remote targets.  When @code{ON}, use data
+caching.  By default, this option is @code{OFF}.
+
+@kindex show remotecache
+@item show remotecache
+Show the current state of data caching for remote targets.
+
+@kindex info dcache
+@item info dcache
+Print the information about the data cache performance.  The
+information displayed includes: the dcache width and depth; and for
+each cache line, how many times it was referenced, and its data and
+state (dirty, bad, ok, etc.).  This command is useful for debugging
+the data cache operation.
+@end table
+
 
 @node Macros
 @chapter C Preprocessor Macros
@@ -6524,6 +6589,7 @@ Show the results of expanding all preprocessor macro invocations in
 not parse the result, @var{expression} need not be a valid expression;
 it can be any string of tokens.
 
+@kindex macro exp1
 @item macro expand-once @var{expression}
 @itemx macro exp1 @var{expression}
 @cindex expand macro once
@@ -6570,6 +6636,10 @@ definitions provided with the @command{macro define} command, described
 above; it cannot remove definitions present in the program being
 debugged.
 
+@kindex macro list
+@item macro list
+@i{(This command is not yet implemented.)}  List all the macros
+defined using the @code{macro define} command.
 @end table
 
 @cindex macros, example of debugging with
@@ -6987,6 +7057,7 @@ You may abbreviate @code{while-stepping} as @code{ws} or
 
 @table @code
 @kindex info tracepoints
+@kindex info tp
 @cindex information about tracepoints
 @item info tracepoints @r{[}@var{num}@r{]}
 Display information about the tracepoint @var{num}.  If you don't specify
@@ -7906,9 +7977,9 @@ with a language explicitly:
 @kindex set extension-language
 @kindex info extensions
 @table @code
-@item set extension-language @var{.ext} @var{language}
-Set source files with extension @var{.ext} to be assumed to be in
-the source language @var{language}.
+@item set extension-language @var{ext} @var{language}
+Tell @value{GDBN} that source files with extension @var{ext} are to be
+assumed as written in the source language @var{language}.
 
 @item info extensions
 List all the filename extensions and the associated languages.
@@ -8097,6 +8168,7 @@ language reference or tutorial.
 @menu
 * C::                           C and C@t{++}
 * Objective-C::                 Objective-C
+* Fortran::                     Fortran
 * Modula-2::                    Modula-2
 * Ada::                         Ada
 @end menu
@@ -8714,7 +8786,21 @@ the description of an object.  However, this command may only work
 with certain Objective-C libraries that have a particular hook
 function, @code{_NSPrintForDebugger}, defined.
 
-@node Modula-2, Ada, Objective-C, Support
+@node Fortran
+@subsection Fortran
+@cindex Fortran-specific support in @value{GDBN}
+
+@table @code
+@cindex @code{COMMON} blocks, Fortran
+@kindex info common
+@item info common @r{[}@var{common-name}@r{]}
+This command prints the values contained in the Fortran @code{COMMON}
+block whose name is @var{common-name}.  With no argument, the names of
+all @code{COMMON} blocks visible at current program location are
+printed.
+@end table
+
+@node Modula-2
 @subsection Modula-2
 
 @cindex Modula-2, @value{GDBN} support
@@ -9618,12 +9704,13 @@ the type of @code{$}, the last value in the value history.
 @kindex info types
 @item info types @var{regexp}
 @itemx info types
-Print a brief description of all types whose names match @var{regexp}
-(or all types in your program, if you supply no argument).  Each
-complete typename is matched as though it were a complete line; thus,
-@samp{i type value} gives information on all types in your program whose
-names include the string @code{value}, but @samp{i type ^value$} gives
-information only on types whose complete name is @code{value}.
+Print a brief description of all types whose names match the regular
+expression @var{regexp} (or all types in your program, if you supply
+no argument).  Each complete typename is matched as though it were a
+complete line; thus, @samp{i type value} gives information on all
+types in your program whose names include the string @code{value}, but
+@samp{i type ^value$} gives information only on types whose complete
+name is @code{value}.
 
 This command differs from @code{ptype} in two ways: first, like
 @code{whatis}, it does not print a detailed description; second, it
@@ -9631,11 +9718,11 @@ lists all source files where a type is defined.
 
 @kindex info scope
 @cindex local variables
-@item info scope @var{addr}
+@item info scope @var{location}
 List all the variables local to a particular scope.  This command
-accepts a location---a function name, a source line, or an address
-preceded by a @samp{*}, and prints all the variables local to the
-scope defined by that location.  For example:
+accepts a @var{location} argument---a function name, a source line, or
+an address preceded by a @samp{*}, and prints all the variables local
+to the scope defined by that location.  For example:
 
 @smallexample
 (@value{GDBP}) @b{info scope command_line_handler}
@@ -10325,7 +10412,7 @@ symbol table.  It cannot be shared across multiple host platforms.
 @c files.
 
 @kindex core-file
-@item core-file @r{[} @var{filename} @r{]}
+@item core-file @r{[}@var{filename}@r{]}
 @itemx core
 Specify the whereabouts of a core dump file to be used as the ``contents
 of memory''.  Traditionally, core files contain only some parts of the
@@ -10402,21 +10489,28 @@ You can use the @samp{-mapped} and @samp{-readnow} options just as with
 the @code{symbol-file} command, to change how @value{GDBN} manages the symbol
 table information for @var{filename}.
 
-@kindex add-shared-symbol-file
-@item add-shared-symbol-file
-The @code{add-shared-symbol-file} command can be used only under Harris' CXUX
-operating system for the Motorola 88k.  @value{GDBN} automatically looks for
-shared libraries, however if @value{GDBN} does not find yours, you can run
-@code{add-shared-symbol-file}.  It takes no arguments.
+@kindex add-shared-symbol-files
+@kindex assf
+@item add-shared-symbol-files @var{library-file}
+@itemx assf @var{library-file}
+The @code{add-shared-symbol-files} command can currently be used only
+in the Cygwin build of @value{GDBN} on MS-Windows OS, where it is an
+alias for the @code{dll-symbols} command (@pxref{Cygwin Native}).
+@value{GDBN} automatically looks for shared libraries, however if
+@value{GDBN} does not find yours, you can invoke
+@code{add-shared-symbol-files}.  It takes one argument: the shared
+library's file name.  @code{assf} is a shorthand alias for
+@code{add-shared-symbol-files}.
 
 @kindex section
-@item section
-The @code{section} command changes the base address of section SECTION of
-the exec file to ADDR.  This can be used if the exec file does not contain
-section addresses, (such as in the a.out format), or when the addresses
-specified in the file itself are wrong.  Each section must be changed
-separately.  The @code{info files} command, described below, lists all
-the sections and their addresses.
+@item section @var{section} @var{addr}
+The @code{section} command changes the base address of the named
+@var{section} of the exec file to @var{addr}.  This can be used if the
+exec file does not contain section addresses, (such as in the
+@code{a.out} format), or when the addresses specified in the file
+itself are wrong.  Each section must be changed separately.  The
+@code{info files} command, described below, lists all the sections and
+their addresses.
 
 @kindex info files
 @kindex info target
@@ -10498,8 +10592,8 @@ as arguments.  @value{GDBN} always converts the file name to an absolute file
 name and remembers it that way.
 
 @cindex shared libraries
-@value{GDBN} supports HP-UX, SunOS, SVr4, Irix 5, and IBM RS/6000 shared
-libraries.
+@value{GDBN} supports GNU/Linux, MS-Windows, HP-UX, SunOS, SVr4, Irix
+5, and IBM RS/6000 shared libraries.
 
 @value{GDBN} automatically loads symbol definitions from shared libraries
 when you use the @code{run} command, or when you examine a core file.
@@ -11317,6 +11411,12 @@ the target is generally not resumed.  It will wait for @value{GDBN}
 (this instance or another one) to connect and continue debugging.  After
 the @code{disconnect} command, @value{GDBN} is again free to connect to
 another target.
+
+@cindex send command to remote monitor
+@kindex monitor
+@item monitor @var{cmd}
+This command allows you to send commands directly to the remote
+monitor.
 @end table
 
 @node Server
@@ -14019,6 +14119,7 @@ commands is marked by a line containing @code{end}.
 @kindex if
 @kindex else
 @item if
+@itemx else
 Takes a single argument, which is an expression to evaluate.
 It is followed by a series of commands that are executed
 only if the expression is true (nonzero).
@@ -18993,8 +19094,16 @@ is for no anntations, level 1 is for use when @value{GDBN} is run as a
 subprocess of @sc{gnu} Emacs, level 3 is the maximum annotation suitable
 for programs that control @value{GDBN}, and level 2 annotations have
 been made obsolete (@pxref{Limitations, , Limitations of the Annotation
-Interface, annotate, GDB's Obsolete Annotations}).  This chapter
-describes level 3 annotations.
+Interface, annotate, GDB's Obsolete Annotations}).
+
+@table @code
+@kindex set annotate
+@item set annotate @var{level}
+The @value{GDB} command @code{set annotate} sets the level of
+annotations to the specified @var{level}.
+@end table
+
+This chapter describes level 3 annotations.
 
 A simple example of starting up @value{GDBN} with annotations is:
 
@@ -19884,10 +19993,17 @@ needed for special purposes only.
 @cindex internal commands
 
 In addition to commands intended for @value{GDBN} users, @value{GDBN}
-includes a number of commands intended for @value{GDBN} developers.
-These commands are provided here for reference.
+includes a number of commands intended for @value{GDBN} developers,
+that are not documented elsewhere in this manual.  These commands are
+provided here for reference.
 
 @table @code
+@kindex maint agent
+@item maint agent @var{expression}
+Translate the given @var{expression} into remote agent bytecodes.
+This command is useful for debugging the Agent Expression mechanism
+(@pxref{Agent Expressions}).
+
 @kindex maint info breakpoints
 @item @anchor{maint info breakpoints}maint info breakpoints
 Using the same format as @samp{info breakpoints}, display both the
@@ -19921,16 +20037,52 @@ Shared library events.
 
 @end table
 
+@kindex maint check-symtabs
+@item maint check-symtabs
+Check the consistency of psymtabs and symtabs.
+
+@kindex maint cplus first_component
+@item maint cplus first_component @var{name}
+Print the first C@t{++} class/namespace component of @var{name}.
+
+@kindex maint cplus namespace
+@item maint cplus namespace
+Print the list of possible C@t{++} namespaces.
+
+@kindex maint demangle
+@item maint demangle @var{name}
+Demangle a C@t{++} or Objective-C manled @var{name}.
+
+@kindex maint deprecate
+@kindex maint undeprecate
+@cindex deprecated commands
+@item maint deprecate @var{command} @r{[}@var{replacement}@r{]}
+@itemx maint undeprecate @var{command}
+Deprecate or undeprecate the named @var{command}.  Deprecated commands
+cause @value{GDBN} to issue a warning when you use them.  The optional
+argument @var{replacement} says which newer command should be used in
+favor of the deprecated one; if it is given, @value{GDBN} will mention
+the replacement as part of the warning.
+
+@kindex maint dump-me
+@item maint dump-me
+Cause a fatal signal in the debugger and force it to dump its core.
+
 @kindex maint internal-error
 @kindex maint internal-warning
-@item maint internal-error
-@itemx maint internal-warning
+@item maint internal-error @r{[}@var{message-text}@r{]}
+@itemx maint internal-warning @r{[}@var{message-text}@r{]}
 Cause @value{GDBN} to call the internal function @code{internal_error}
 or @code{internal_warning} and hence behave as though an internal error
 or internal warning has been detected.  In addition to reporting the
 internal problem, these functions give the user the opportunity to
 either quit @value{GDBN} or create a core file of the current
 @value{GDBN} session.
+
+These commands take an optional parameter @var{message-text} that is
+used as the text of the error or warning message.
+
+Here's an example of using @code{indernal-error}:
 
 @smallexample
 (@value{GDBP}) @kbd{maint internal-error testing, 1, 2}
@@ -19942,8 +20094,18 @@ Create a core file? (y or n) @kbd{n}
 (@value{GDBP})
 @end smallexample
 
-Takes an optional parameter that is used as the text of the error or
-warning message.
+@kindex maint packet
+@item maint packet @var{text}
+If @value{GDBN} is talking to an inferior via the serial protocol,
+then this command sends the string @var{text} to the inferior, and
+displays the response packet.  @value{GDBN} supplies the initial
+@samp{$} character, the terminating @samp{#} character, and the
+checksum.
+
+@kindex maint print architecture
+@item maint print architecture @r{[}@var{file}@r{]}
+Print the entire architecture configuration.  The optional argument
+@var{file} names the file where the output goes.
 
 @kindex maint print dummy-frames
 @item maint print dummy-frames
@@ -19971,10 +20133,10 @@ Takes an optional file parameter.
 @kindex maint print raw-registers
 @kindex maint print cooked-registers
 @kindex maint print register-groups
-@item maint print registers
-@itemx maint print raw-registers
-@itemx maint print cooked-registers
-@itemx maint print register-groups
+@item maint print registers @r{[}@var{file}@r{]}
+@itemx maint print raw-registers @r{[}@var{file}@r{]}
+@itemx maint print cooked-registers @r{[}@var{file}@r{]}
+@itemx maint print register-groups @r{[}@var{file}@r{]}
 Print @value{GDBN}'s internal register data structures.
 
 The command @code{maint print raw-registers} includes the contents of
@@ -19984,13 +20146,16 @@ includes the (cooked) value of all registers; and the command
 register is a member of.  @xref{Registers,, Registers, gdbint,
 @value{GDBN} Internals}.
 
-Takes an optional file parameter.
+These commands take an optional parameter, a file name to which to
+write the information.
 
 @kindex maint print reggroups
-@item maint print reggroups
-Print @value{GDBN}'s internal register group data structures.
+@item maint print reggroups @r{[}@var{file}@r{]}
+Print @value{GDBN}'s internal register group data structures.  The
+optional argument @var{file} tells to what file to write the
+information.
 
-Takes an optional file parameter.
+The register groups info looks like this:
 
 @smallexample
 (@value{GDBP}) @kbd{maint print reggroups}
@@ -20003,6 +20168,57 @@ Takes an optional file parameter.
  save       internal
  restore    internal
 @end smallexample
+
+@kindex flushregs
+@item flushregs
+This command forces @value{GDBN} to flush its internal register cache.
+
+@kindex maint print objfiles
+@cindex info for known object files
+@item maint print objfiles
+Print a dump of all known object files.  For each object file, this
+command prints its name, address in memory, and all of its psymtabs
+and symtabs.
+
+@kindex maint print statistics
+@cindex bcache statistics
+@item maint print statistics
+This command prints, for each object file in the program, various data
+about that object file followed by the byte cache (@dfn{bcache})
+statistics for the object file.  The objfile data includes the number
+of minimal, partical, full, and stabs symbols, the number of types
+defined by the objfile, the number of as yet unexpanded psym tables,
+the number of line tables and string tables, and the amount of memory
+used by the various tables.  The bcache statistics include the counts,
+sizes, and counts of duplicates of all and unique objects, max,
+average, and median entry size, total memory used and its overhead and
+savings, and various measures of the hash table size and chain
+lengths.
+
+@kindex maint print type
+@cindex type chain of a data type
+@item maint print type @var{expr}
+Print the type chain for a type specified by @var{expr}.  The argument
+can be either a type name or a symbol.  If it is a symbol, the type of
+that symbol is described.  The type chain produced by this command is
+a recursive definition of the data type as stored in @value{GDBN}'s
+data structures, including its flags and contained types.
+
+@kindex maint set dwarf2 max-cache-age
+@kindex maint show dwarf2 max-cache-age
+@item maint set dwarf2 max-cache-age
+@itemx maint show dwarf2 max-cache-age
+Control the DWARF 2 compilation unit cache.
+
+@cindex DWARF 2 compilation units cache
+In object files with inter-compilation-unit references, such as those
+produced by the GCC option @samp{-feliminate-dwarf2-dups}, the DWARF 2
+reader needs to frequently refer to previously read compilation units.
+This setting controls how long a compilation unit will remain in the
+cache if it is not referenced.  A higher limit means that cached
+compilation units will be stored in memory longer, and more total
+memory will be used.  Setting it to zero disables caching, which will
+slow down @value{GDBN} startup, but reduce memory consumption.
 
 @kindex maint set profile
 @kindex maint show profile
@@ -20022,18 +20238,41 @@ data in a @file{gmon.out} file, be sure to move it to a safe location.
 Configuring with @samp{--enable-profiling} arranges for @value{GDBN} to be
 compiled with the @samp{-pg} compiler option.
 
-@kindex maint set dwarf2 max-cache-age
-@kindex maint show dwarf2 max-cache-age
-@item maint set dwarf2 max-cache-age
-@itemx maint show dwarf2 max-cache-age
-Control the DWARF 2 compilation unit cache.
+@kindex maint show-debug-regs
+@cindex x86 hardware debug registers
+@item maint show-debug-regs
+Control whether to show variables that mirror the x86 hardware debug
+registers.  Use @code{ON} to enable, @code{OFF} to disable.  If
+enabled, the debug registers values are shown when GDB inserts or
+removes a hardware breakpoint or watchpoint, and when the inferior
+triggers a hardware-assisted breakpoint or watchpoint.
 
-In object files with inter-compilation-unit references, such as those
-produced by the GCC option @samp{-feliminate-dwarf2-dups}, the DWARF 2
-reader needs to frequently refer to previously read compilation units.
-This setting controls how long a compilation unit will remain in the cache
-if it is not referenced.  Setting it to zero disables caching, which will
-slow down @value{GDBN} startup but reduce memory consumption.
+@kindex maint space
+@cindex memory used by commands
+@item maint space
+Control whether to display memory usage for each command.  If set to a
+nonzero value, @value{GDBN} will display how much memory each command
+took, following the command's own output.  This can also be requested
+by invoking @value{GDBN} with the @option{--statistics} command-line
+switch (@pxref{Mode Options}).
+
+@kindex maint time
+@cindex time of command execution
+@item maint time
+Control whether to display the execution time for each command.  If
+set to a nonzero value, @value{GDBN} will display how much time it
+took to execute each command, following the command's own output.
+This can also be requested by invoking @value{GDBN} with the
+@option{--statistics} command-line switch (@pxref{Mode Options}).
+
+@kindex maint translate-address
+@item maint translate-address @r{[}@var{section}@r{]} @var{addr}
+Find the symbol stored at the location specified by the address
+@var{addr} and an optional section name @var{section}.  If found,
+@value{GDBN} prints the name of the closest symbol and an offset from
+the symbol's location to the specified address.  This is similar to
+the @code{info address} command (@pxref{Symbols}), except that this
+command also allows to find symbols in other sections.
 
 @end table
 

@@ -1,3 +1,44 @@
+2005-04-02  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Files): Fix the name and documentation of
+	add-shared-symbol-files.  Document its alias assf.  Update the
+	list of OSs where GDB supports shared libraries.  Fix markup.
+	(Continuing and Stepping): Add reference to @var{location} in the
+	text.
+	(Dump/Restore Files): Fix reference to @{filename}.
+	(Help): Fix wording.
+	(Attach): Ditto.
+	(Set Watchpoints): Ditto.
+	(Backtrace): Remove redundant index entries.  Improve index
+	entries.
+	(Delete Breaks): Fix wording.
+	(Memory): Document the compare-sections command.
+	(Memory Region Attributes): Improve wording.
+	(Disabling): Improve wording.
+	(Fortran): New subsection.  Document the "info common" command.
+	(Help): Document aliases "info copying" and "info warranty".
+	(Caching Remote Data): New section.  Document the "set/show
+	remotecache" and "info dcache" commands.
+	(Show): Fix wording of the documentation of the "set
+	extension-language" command.
+	(Signals): Add index entry for "info handle".
+	(Memory Region Attributes): Fix punctuation.
+	(Symbols): Change the arg name to "location" and refer to it in
+	the text.  Fix wording of "info types" doc.
+	(Threads): Fix usage of @enumerate @item's.
+	(Listing Tracepoints): Add index entry for "info tp".
+	(Set Watchpoints): Add xref to "info break" description.
+	(Macros): Add an index entry for "macro exp1".  Document the
+	"macro list" command.
+	(Maintenance Commands): Document "flushregs", "maint agent",
+	"maint check-symtabs", "maint cplus", "maint demangle", "maint
+	deprecate", "maint undeprecate", "maint dump-me", "maint packet",
+	"maint print architecture", "maint print objfiles", "maint print
+	statistics", "maint print type", "maint show-debug-regs", "maint
+	space", "maint time", and "maint translate-address".
+	(Connecting): Document the "monitor" command.
+	(Annotations Overview): Describe the "set annotate" command.
+
 2005-04-01  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Set Watchpoints): Document can-use-hw-watchpoints.
