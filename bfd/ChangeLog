@@ -1,3 +1,7 @@
+2004-04-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-sparc.c (sparc64_elf_check_relocs): Fix thinko last change.
+
 2004-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Treat weak as strong only

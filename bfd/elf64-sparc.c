@@ -2027,8 +2027,9 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   else
     got_base = elf_hash_table (info)->hgot->root.u.def.value;
 
-  sgot = sreloc = NULL;
-  splt = bfd_get_section_by_name (dynobj, ".plt");
+  sgot = splt = sreloc = NULL;
+  if (dynobj != NULL)
+    splt = bfd_get_section_by_name (dynobj, ".plt");
 
   rel = relocs;
   relend = relocs + NUM_SHDR_ENTRIES (& elf_section_data (input_section)->rel_hdr);
