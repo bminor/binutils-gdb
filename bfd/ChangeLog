@@ -1,3 +1,8 @@
+Sun Sep 12 23:47:58 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.h (elf_hppa_final_link_relocate): Handle SECREL32.
+	Stub SEGREL32.  Return an error for any relocation not handled.
+
 1999-09-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* cofflink.c (coff_link_add_symbols): Look for special MSVC string

@@ -791,7 +791,7 @@ elf_hppa_remark_useless_dynamic_symbols (h, data)
      libraries contain reerences to undefined symbols.
 
      So we twiddle the flags associated with such symbols so that they
-     will not trigger the warning.  ?!? FIXME.  This is horribly fraglie.
+     will not trigger the warning.  ?!? FIXME.  This is horribly fragile.
 
      Ultimately we should have better controls over the generic ELF BFD
      linker code.  */
@@ -1530,16 +1530,19 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	return bfd_reloc_ok;
       }
 
+    case R_PARISC_SECREL32:
+      bfd_put_32 (input_bfd,
+		  (value + addend
+		   - sym_sec->output_section->vma),
+		  hit_data);
+      return bfd_reloc_ok;
+
+    case R_PARISC_SEGREL32:
+      return bfd_reloc_ok;
+
     /* Something we don't know how to handle.  */
     default:
-      /* ?!? This is temporary as we flesh out basic linker support, once
-	 the basic support is functional we will return the not_supported
-	 error conditional appropriately.  */
-#if 0
-	return bfd_reloc_not_supported;
-#else
-	return bfd_reloc_ok;
-#endif
+      return bfd_reloc_notsupported;
     }
 
   /* Update the instruction word.  */
