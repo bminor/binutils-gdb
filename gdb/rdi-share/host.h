@@ -29,6 +29,14 @@
 #  define offsetof(T, member)  ((char *)&(((T *)0)->member) - (char *)0)
 #endif
 
+/* If under Cygwin, provide backwards compatibility with older
+   Cygwin compilers that don't define the current cpp define. */
+#ifdef __CYGWIN32__
+#ifndef __CYGWIN__
+#define __CYGWIN__
+#endif
+#endif
+
 #ifdef unix                   /* A temporary sop to older compilers */
 #  ifndef __unix              /* (good for long-term portability?)  */
 #    define __unix    1
@@ -217,14 +225,6 @@ extern double strtod(const char *str, char **ptr);
 #  define HOST_ENDIAN_UNKNOWN
 #endif
 
-#endif
-
-/* If under Cygwin, provide backwards compatibility with older
-   Cygwin compilers that don't define the current cpp define. */
-#ifdef __CYGWIN32__
-#ifndef __CYGWIN__
-#define __CYGWIN__
-#endif
 #endif
 
 /* end of host.h */
