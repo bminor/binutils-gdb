@@ -340,7 +340,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
          negative number if a flat frame) to the sp.  FIXME: Does not
          handle large frames which will need more than one instruction
          to adjust the sp.  */
-      insn = fetch_instruction (prologue_start, 4);
+      insn = fetch_instruction (prologue_start);
       if (X_OP (insn) == 2 && X_RD (insn) == 14 && X_OP3 (insn) == 0
 	  && X_I (insn) && X_SIMM13 (insn) < 0)
 	{
