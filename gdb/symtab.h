@@ -1038,7 +1038,7 @@ extern struct symtabs_and_lines
 decode_line_spec_1 PARAMS ((char *, int));
 
 extern struct symtabs_and_lines
-decode_line_1 PARAMS ((char **, int, struct symtab *, int));
+decode_line_1 PARAMS ((char **, int, struct symtab *, int, char ***));
 
 /* Symmisc.c */
 

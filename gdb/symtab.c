@@ -51,8 +51,11 @@ find_methods PARAMS ((struct type *, char *, struct symbol **));
 static void
 completion_list_add_name PARAMS ((char *, char *, int, char *, char *));
 
+static void
+build_canonical_line_spec PARAMS ((struct symtab_and_line *, char *, char ***));
+
 static struct symtabs_and_lines
-decode_line_2 PARAMS ((struct symbol *[], int, int));
+decode_line_2 PARAMS ((struct symbol *[], int, int, char ***));
 
 static void
 rbreak_command PARAMS ((char *, int));
@@ -1434,6 +1437,46 @@ find_methods (t, name, sym_arr)
   return i1;
 }
 
+/* Helper function for decode_line_1.
+   Build a canonical line spec in CANONICAL if it is non-NULL and if
+   the SAL has a symtab.
+   If SYMNAME is non-NULL the canonical line spec is `filename:symname'.
+   If SYMNAME is NULL the line number from SAL is used and the canonical
+   line spec is `filename:linenum'.  */
+
+static void
+build_canonical_line_spec (sal, symname, canonical)
+     struct symtab_and_line *sal;
+     char *symname;
+     char ***canonical;
+{
+  char **canonical_arr;
+  char *canonical_name;
+  char *filename;
+  struct symtab *s = sal->symtab;
+
+  if (s == (struct symtab *)NULL
+      || s->filename == (char *)NULL
+      || canonical == (char ***)NULL)
+    return;
+ 
+  canonical_arr = (char **) xmalloc (sizeof (char *));
+  *canonical = canonical_arr;
+
+  filename = s->filename;
+  if (symname != NULL)
+    {
+      canonical_name = xmalloc (strlen (filename) + strlen (symname) + 2);
+      sprintf (canonical_name, "%s:%s", filename, symname);
+    }
+  else
+    {
+      canonical_name = xmalloc (strlen (filename) + 30);
+      sprintf (canonical_name, "%s:%d", filename, sal->line);
+    }
+  canonical_arr[0] = canonical_name;
+}
+
 /* Parse a string that specifies a line number.
    Pass the address of a char * variable; that variable will be
    advanced over the characters actually parsed.
@@ -1458,17 +1501,23 @@ find_methods (t, name, sym_arr)
    It defaults to current_source_symtab.
    DEFAULT_LINE specifies the line number to use for relative
    line numbers (that start with signs).  Defaults to current_source_line.
+   If CANONICAL is non-NULL, store an array of strings containing the canonical
+   line specs there if necessary. Currently overloaded member functions and
+   line numbers or static functions without a filename yield a canonical
+   line spec. The array and the line spec strings are allocated on the heap,
+   it is the callers responsibility to free them.
 
    Note that it is possible to return zero for the symtab
    if no file is validly specified.  Callers must check that.
    Also, the line number returned may be invalid.  */
 
 struct symtabs_and_lines
-decode_line_1 (argptr, funfirstline, default_symtab, default_line)
+decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
      char **argptr;
      int funfirstline;
      struct symtab *default_symtab;
      int default_line;
+     char ***canonical;
 {
   struct symtabs_and_lines values;
 #ifdef HPPA_COMPILER_BUG
@@ -1542,6 +1591,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
       values.nelts = 1;
       values.sals[0] = find_pc_line (pc, 0);
       values.sals[0].pc = pc;
+      build_canonical_line_spec (values.sals, NULL, canonical);
       return values;
     }
 
@@ -1668,7 +1718,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 		{
 		  /* There is more than one field with that name
 		     (overloaded).  Ask the user which one to use.  */
-		  return decode_line_2 (sym_arr, i1, funfirstline);
+		  return decode_line_2 (sym_arr, i1, funfirstline, canonical);
 		}
 	      else
 		{
@@ -1741,6 +1791,9 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
       /* We found a token consisting of all digits -- at least one digit.  */
       enum sign {none, plus, minus} sign = none;
 
+      /* We might need a canonical line spec if no file was specified.  */
+      int need_canonical = (s == 0) ? 1 : 0;
+
       /* This is where we need to make sure that we have good defaults.
 	 We must guarantee that this section of code is never executed
 	 when we are called with just a function name, since
@@ -1787,6 +1840,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
       values.sals = (struct symtab_and_line *)xmalloc (sizeof (struct symtab_and_line));
       values.sals[0] = val;
       values.nelts = 1;
+      if (need_canonical)
+	build_canonical_line_spec (values.sals, NULL, canonical);
       return values;
     }
 
@@ -1851,7 +1906,15 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	     SKIP_PROLOGUE".  */
 	  if (SYMBOL_LINE (sym) != 0)
 	    values.sals[0].line = SYMBOL_LINE (sym);
-	  
+
+	  /* We might need a canonical line spec if it is a static function.  */
+	  if (s == 0)
+	    {
+	      struct blockvector *bv = BLOCKVECTOR (sym_symtab);
+	      struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	      if (lookup_block_symbol (b, copy, VAR_NAMESPACE) != NULL)
+		build_canonical_line_spec (values.sals, copy, canonical);
+	    }
 	  return values;
 	}
       else if (SYMBOL_LINE (sym) != 0)
@@ -1904,20 +1967,24 @@ decode_line_spec (string, funfirstline)
   if (string == 0)
     error ("Empty line specification.");
   sals = decode_line_1 (&string, funfirstline,
-			current_source_symtab, current_source_line);
+			current_source_symtab, current_source_line,
+			(char ***)NULL);
   if (*string)
     error ("Junk at end of line specification: %s", string);
   return sals;
 }
 
-/* Given a list of NELTS symbols in sym_arr, return a list of lines to
-   operate on (ask user if necessary).  */
+/* Given a list of NELTS symbols in SYM_ARR, return a list of lines to
+   operate on (ask user if necessary).
+   If CANONICAL is non-NULL return a corresponding array of mangled names
+   as canonical line specs there.  */
 
 static struct symtabs_and_lines
-decode_line_2 (sym_arr, nelts, funfirstline)
+decode_line_2 (sym_arr, nelts, funfirstline, canonical)
      struct symbol *sym_arr[];
      int nelts;
      int funfirstline;
+     char ***canonical;
 {
   struct symtabs_and_lines values, return_values;
   register CORE_ADDR pc;
@@ -1925,9 +1992,20 @@ decode_line_2 (sym_arr, nelts, funfirstline)
   int i;
   char *prompt;
   char *symname;
+  struct cleanup *old_chain;
+  char **canonical_arr = (char **)NULL;
 
   values.sals = (struct symtab_and_line *) alloca (nelts * sizeof(struct symtab_and_line));
   return_values.sals = (struct symtab_and_line *) xmalloc (nelts * sizeof(struct symtab_and_line));
+  old_chain = make_cleanup (free, return_values.sals);
+
+  if (canonical)
+    {
+      canonical_arr = (char **) xmalloc (nelts * sizeof (char *));
+      make_cleanup (free, canonical_arr);
+      memset (canonical_arr, 0, nelts * sizeof (char *));
+      *canonical = canonical_arr;
+    }
 
   i = 0;
   printf("[0] cancel\n[1] all\n");
@@ -1959,7 +2037,7 @@ decode_line_2 (sym_arr, nelts, funfirstline)
 
   args = command_line_input ((char *) NULL, 0);
   
-  if (args == 0)
+  if (args == 0 || *args == 0)
     error_no_arg ("one or more choice numbers");
 
   i = 0;
@@ -1978,9 +2056,21 @@ decode_line_2 (sym_arr, nelts, funfirstline)
 	error ("cancelled");
       else if (num == 1)
 	{
+	  if (canonical_arr)
+	    {
+	      for (i = 0; i < nelts; i++)
+		{
+	          if (canonical_arr[i] == NULL)
+		    {
+		      symname = SYMBOL_NAME (sym_arr[i]);
+	              canonical_arr[i] = savestring (symname, strlen (symname));
+		    }
+		}
+	    }
 	  memcpy (return_values.sals, values.sals,
 		  (nelts * sizeof(struct symtab_and_line)));
 	  return_values.nelts = nelts;
+	  discard_cleanups (old_chain);
 	  return return_values;
 	}
 
@@ -1993,6 +2083,12 @@ decode_line_2 (sym_arr, nelts, funfirstline)
 	  num -= 2;
 	  if (values.sals[num].pc)
 	    {
+	      if (canonical_arr)
+		{
+		  symname = SYMBOL_NAME (sym_arr[num]);
+		  make_cleanup (free, symname);
+		  canonical_arr[i] = savestring (symname, strlen (symname));
+		}
 	      return_values.sals[i++] = values.sals[num];
 	      values.sals[num].pc = 0;
 	    }
@@ -2006,6 +2102,7 @@ decode_line_2 (sym_arr, nelts, funfirstline)
       while (*args == ' ' || *args == '\t') args++;
     }
   return_values.nelts = i;
+  discard_cleanups (old_chain);
   return return_values;
 }
 

@@ -1,3 +1,18 @@
+Sun Jul 18 23:11:28 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+			  and Jim Kingdon (kingdon@cygnus.com)
+
+	Make breakpoint_re_set_one work with overloaded member functions,
+	`b 123' and `b foo' if foo is a static function.
+	* symtab.c (decode_line_1, decode_line_2):  New argument `canonical'
+	to return canonical line specs if requested by the caller.
+	* breakpoint.c, source.c, symtab.c, symtab.h:  Change prototypes and
+	callers accordingly.
+	* symtab.c (build_canonical_line_spec):  New helper function which
+	constructs the canonical line spec.
+	* breakpoint.c (break_command_1):  Use canonical line spec instead
+	of command string as addr_string if necessary.
+	* source.c (line_info):  Fix storage leak.
+
 Sun Jul 18 15:22:45 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
 	* infptrace.c: Split out define of PT_KILL; Sequent defines PT_KILL
