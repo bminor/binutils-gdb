@@ -1,4 +1,13 @@
 2002-01-18  Richard Earnshaw  <rearnsha@arm.com>
+
+	* tc-arm.c (do_xsc_mia, do_xsc_mar, do_xsc_mra): Renamed from
+	do_mia, do_mar and do_mra respectively.
+	(do_mav_*): Renamed from do_c_*.
+	(mav_reg_required_here, mav_parse_offset): Renamed from
+	cirrus_reg_required_here and cirrus_parse_offset respectively.
+	(MAV_MODE?): Renamed from CIRRUS_MODE?.
+
+2002-01-18  Richard Earnshaw  <rearnsha@arm.com>
 	    Keith Walker  <keith.walker@arm.com>
 
 	* tc-arm.c (ARM_EXT_V5J, ARM_ARCH_V5TEJ): Define.

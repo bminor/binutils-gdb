@@ -619,7 +619,7 @@ static const struct reg_entry dn_table[] =
   {NULL, 0}
 };
 
-/* Cirrus DSP coprocessor registers.  */
+/* Maverick DSP coprocessor registers.  */
 static const struct reg_entry mav_mvf_table[] =
 {
   {"mvf0",  0},  {"mvf1",  1},  {"mvf2",  2},  {"mvf3",  3},
@@ -813,69 +813,69 @@ static void do_vfp_dp_sp_cvt	PARAMS ((char *));
 static void do_vfp_sp_dp_cvt	PARAMS ((char *));
 
 /* XScale.  */
-static void do_mia		PARAMS ((char *));
-static void do_mar		PARAMS ((char *));
-static void do_mra		PARAMS ((char *));
+static void do_xsc_mia		PARAMS ((char *));
+static void do_xsc_mar		PARAMS ((char *));
+static void do_xsc_mra		PARAMS ((char *));
 
 /* Maverick.  */
-static void do_c_binops		PARAMS ((char *, int, enum arm_reg_type,
+static void do_mav_binops	PARAMS ((char *, int, enum arm_reg_type,
 					 enum arm_reg_type));
-static void do_c_binops_1a	PARAMS ((char *));
-static void do_c_binops_1b	PARAMS ((char *));
-static void do_c_binops_1c	PARAMS ((char *));
-static void do_c_binops_1d	PARAMS ((char *));
-static void do_c_binops_1e	PARAMS ((char *));
-static void do_c_binops_1f	PARAMS ((char *));
-static void do_c_binops_1g	PARAMS ((char *));
-static void do_c_binops_1h	PARAMS ((char *));
-static void do_c_binops_1i	PARAMS ((char *));
-static void do_c_binops_1j	PARAMS ((char *));
-static void do_c_binops_1k	PARAMS ((char *));
-static void do_c_binops_1l	PARAMS ((char *));
-static void do_c_binops_1m	PARAMS ((char *));
-static void do_c_binops_1n	PARAMS ((char *));
-static void do_c_binops_1o	PARAMS ((char *));
-static void do_c_binops_2a	PARAMS ((char *));
-static void do_c_binops_2b	PARAMS ((char *));
-static void do_c_binops_2c	PARAMS ((char *));
-static void do_c_binops_3a	PARAMS ((char *));
-static void do_c_binops_3b	PARAMS ((char *));
-static void do_c_binops_3c	PARAMS ((char *));
-static void do_c_binops_3d	PARAMS ((char *));
-static void do_c_triple		PARAMS ((char *, int, enum arm_reg_type, 
+static void do_mav_binops_1a	PARAMS ((char *));
+static void do_mav_binops_1b	PARAMS ((char *));
+static void do_mav_binops_1c	PARAMS ((char *));
+static void do_mav_binops_1d	PARAMS ((char *));
+static void do_mav_binops_1e	PARAMS ((char *));
+static void do_mav_binops_1f	PARAMS ((char *));
+static void do_mav_binops_1g	PARAMS ((char *));
+static void do_mav_binops_1h	PARAMS ((char *));
+static void do_mav_binops_1i	PARAMS ((char *));
+static void do_mav_binops_1j	PARAMS ((char *));
+static void do_mav_binops_1k	PARAMS ((char *));
+static void do_mav_binops_1l	PARAMS ((char *));
+static void do_mav_binops_1m	PARAMS ((char *));
+static void do_mav_binops_1n	PARAMS ((char *));
+static void do_mav_binops_1o	PARAMS ((char *));
+static void do_mav_binops_2a	PARAMS ((char *));
+static void do_mav_binops_2b	PARAMS ((char *));
+static void do_mav_binops_2c	PARAMS ((char *));
+static void do_mav_binops_3a	PARAMS ((char *));
+static void do_mav_binops_3b	PARAMS ((char *));
+static void do_mav_binops_3c	PARAMS ((char *));
+static void do_mav_binops_3d	PARAMS ((char *));
+static void do_mav_triple	PARAMS ((char *, int, enum arm_reg_type, 
 					 enum arm_reg_type,
 					 enum arm_reg_type));
-static void do_c_triple_4a	PARAMS ((char *));
-static void do_c_triple_4b	PARAMS ((char *));
-static void do_c_triple_5a	PARAMS ((char *));
-static void do_c_triple_5b	PARAMS ((char *));
-static void do_c_triple_5c	PARAMS ((char *));
-static void do_c_triple_5d	PARAMS ((char *));
-static void do_c_triple_5e	PARAMS ((char *));
-static void do_c_triple_5f	PARAMS ((char *));
-static void do_c_triple_5g	PARAMS ((char *));
-static void do_c_triple_5h	PARAMS ((char *));
-static void do_c_quad		PARAMS ((char *, int, enum arm_reg_type, 
+static void do_mav_triple_4a	PARAMS ((char *));
+static void do_mav_triple_4b	PARAMS ((char *));
+static void do_mav_triple_5a	PARAMS ((char *));
+static void do_mav_triple_5b	PARAMS ((char *));
+static void do_mav_triple_5c	PARAMS ((char *));
+static void do_mav_triple_5d	PARAMS ((char *));
+static void do_mav_triple_5e	PARAMS ((char *));
+static void do_mav_triple_5f	PARAMS ((char *));
+static void do_mav_triple_5g	PARAMS ((char *));
+static void do_mav_triple_5h	PARAMS ((char *));
+static void do_mav_quad		PARAMS ((char *, int, enum arm_reg_type, 
 					 enum arm_reg_type,
 					 enum arm_reg_type,
 					 enum arm_reg_type));
-static void do_c_quad_6a	PARAMS ((char *));
-static void do_c_quad_6b	PARAMS ((char *));
-static void do_c_dspsc_1	PARAMS ((char *));
-static void do_c_dspsc_2	PARAMS ((char *));
-static void do_c_shift		PARAMS ((char *, enum arm_reg_type,
+static void do_mav_quad_6a	PARAMS ((char *));
+static void do_mav_quad_6b	PARAMS ((char *));
+static void do_mav_dspsc_1	PARAMS ((char *));
+static void do_mav_dspsc_2	PARAMS ((char *));
+static void do_mav_shift	PARAMS ((char *, enum arm_reg_type,
 					 enum arm_reg_type));
-static void do_c_shift_1	PARAMS ((char *));
-static void do_c_shift_2	PARAMS ((char *));
-static void do_c_ldst		PARAMS ((char *, enum arm_reg_type));
-static void do_c_ldst_1		PARAMS ((char *));
-static void do_c_ldst_2		PARAMS ((char *));
-static void do_c_ldst_3		PARAMS ((char *));
-static void do_c_ldst_4		PARAMS ((char *));
+static void do_mav_shift_1	PARAMS ((char *));
+static void do_mav_shift_2	PARAMS ((char *));
+static void do_mav_ldst		PARAMS ((char *, enum arm_reg_type));
+static void do_mav_ldst_1	PARAMS ((char *));
+static void do_mav_ldst_2	PARAMS ((char *));
+static void do_mav_ldst_3	PARAMS ((char *));
+static void do_mav_ldst_4	PARAMS ((char *));
 
-static int cirrus_reg_required_here	PARAMS ((char **, int,
+static int mav_reg_required_here	PARAMS ((char **, int,
 						 enum arm_reg_type));
-static int cirrus_parse_offset	PARAMS ((char **, int *));
+static int mav_parse_offset	PARAMS ((char **, int *));
 
 static void fix_new_arm		PARAMS ((fragS *, int, short, expressionS *,
 					 int, int));
@@ -943,22 +943,22 @@ static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
 #define INSN_SIZE       4
 
 /* "INSN<cond> X,Y" where X:bit12, Y:bit16.  */
-#define CIRRUS_MODE1	0x100c
+#define MAV_MODE1	0x100c
 
 /* "INSN<cond> X,Y" where X:bit16, Y:bit12.  */
-#define CIRRUS_MODE2	0x0c10
+#define MAV_MODE2	0x0c10
 
 /* "INSN<cond> X,Y" where X:0, Y:bit16.  */
-#define CIRRUS_MODE3	0x1000
+#define MAV_MODE3	0x1000
 
 /* "INSN<cond> X,Y,Z" where X:16, Y:0, Z:12.  */
-#define CIRRUS_MODE4	0x0c0010
+#define MAV_MODE4	0x0c0010
 
 /* "INSN<cond> X,Y,Z" where X:12, Y:16, Z:0.  */
-#define CIRRUS_MODE5	0x00100c
+#define MAV_MODE5	0x00100c
 
 /* "INSN<cond> W,X,Y,Z" where W:5, X:12, Y:16, Z:0.  */
-#define CIRRUS_MODE6	0x00100c05
+#define MAV_MODE6	0x00100c05
 
 struct asm_opcode
 {
@@ -1719,92 +1719,92 @@ static const struct asm_opcode insns[] =
   {"fmrrd",   0xec500b10, 5, FPU_VFP_EXT_V2,   do_vfp_reg2_from_dp},
 
   /* Intel XScale extensions to ARM V5 ISA.  (All use CP0).  */
-  {"mia",        0xee200010, 3,  ARM_CEXT_XSCALE,   do_mia},
-  {"miaph",      0xee280010, 5,  ARM_CEXT_XSCALE,   do_mia},
-  {"miabb",      0xee2c0010, 5,  ARM_CEXT_XSCALE,   do_mia},
-  {"miabt",      0xee2d0010, 5,  ARM_CEXT_XSCALE,   do_mia},
-  {"miatb",      0xee2e0010, 5,  ARM_CEXT_XSCALE,   do_mia},
-  {"miatt",      0xee2f0010, 5,  ARM_CEXT_XSCALE,   do_mia},
-  {"mar",        0xec400000, 3,  ARM_CEXT_XSCALE,   do_mar},
-  {"mra",        0xec500000, 3,  ARM_CEXT_XSCALE,   do_mra},
+  {"mia",        0xee200010, 3,  ARM_CEXT_XSCALE,   do_xsc_mia},
+  {"miaph",      0xee280010, 5,  ARM_CEXT_XSCALE,   do_xsc_mia},
+  {"miabb",      0xee2c0010, 5,  ARM_CEXT_XSCALE,   do_xsc_mia},
+  {"miabt",      0xee2d0010, 5,  ARM_CEXT_XSCALE,   do_xsc_mia},
+  {"miatb",      0xee2e0010, 5,  ARM_CEXT_XSCALE,   do_xsc_mia},
+  {"miatt",      0xee2f0010, 5,  ARM_CEXT_XSCALE,   do_xsc_mia},
+  {"mar",        0xec400000, 3,  ARM_CEXT_XSCALE,   do_xsc_mar},
+  {"mra",        0xec500000, 3,  ARM_CEXT_XSCALE,   do_xsc_mra},
 
-  /* Cirrus DSP instructions.  */
-  {"cfldrs",     0xec100400, 6,  ARM_CEXT_MAVERICK, do_c_ldst_1},
-  {"cfldrd",     0xec500400, 6,  ARM_CEXT_MAVERICK, do_c_ldst_2},
-  {"cfldr32",    0xec100500, 7,  ARM_CEXT_MAVERICK, do_c_ldst_3},
-  {"cfldr64",    0xec500500, 7,  ARM_CEXT_MAVERICK, do_c_ldst_4},
-  {"cfstrs",     0xec000400, 6,  ARM_CEXT_MAVERICK, do_c_ldst_1},
-  {"cfstrd",     0xec400400, 6,  ARM_CEXT_MAVERICK, do_c_ldst_2},
-  {"cfstr32",    0xec000500, 7,  ARM_CEXT_MAVERICK, do_c_ldst_3},
-  {"cfstr64",    0xec400500, 7,  ARM_CEXT_MAVERICK, do_c_ldst_4},
-  {"cfmvsr",     0xee000450, 6,  ARM_CEXT_MAVERICK, do_c_binops_2a},
-  {"cfmvrs",     0xee100450, 6,  ARM_CEXT_MAVERICK, do_c_binops_1a},
-  {"cfmvdlr",    0xee000410, 7,  ARM_CEXT_MAVERICK, do_c_binops_2b},
-  {"cfmvrdl",    0xee100410, 7,  ARM_CEXT_MAVERICK, do_c_binops_1b},
-  {"cfmvdhr",    0xee000430, 7,  ARM_CEXT_MAVERICK, do_c_binops_2b},
-  {"cfmvrdh",    0xee100430, 7,  ARM_CEXT_MAVERICK, do_c_binops_1b},
-  {"cfmv64lr",   0xee000510, 8,  ARM_CEXT_MAVERICK, do_c_binops_2c},
-  {"cfmvr64l",   0xee100510, 8,  ARM_CEXT_MAVERICK, do_c_binops_1c},
-  {"cfmv64hr",   0xee000530, 8,  ARM_CEXT_MAVERICK, do_c_binops_2c},
-  {"cfmvr64h",   0xee100530, 8,  ARM_CEXT_MAVERICK, do_c_binops_1c},
-  {"cfmval32",   0xee100610, 8,  ARM_CEXT_MAVERICK, do_c_binops_3a},
-  {"cfmv32al",   0xee000610, 8,  ARM_CEXT_MAVERICK, do_c_binops_3b},
-  {"cfmvam32",   0xee100630, 8,  ARM_CEXT_MAVERICK, do_c_binops_3a},
-  {"cfmv32am",   0xee000630, 8,  ARM_CEXT_MAVERICK, do_c_binops_3b},
-  {"cfmvah32",   0xee100650, 8,  ARM_CEXT_MAVERICK, do_c_binops_3a},
-  {"cfmv32ah",   0xee000650, 8,  ARM_CEXT_MAVERICK, do_c_binops_3b},
-  {"cfmva32",    0xee100670, 7,  ARM_CEXT_MAVERICK, do_c_binops_3a},
-  {"cfmv32a",    0xee000670, 7,  ARM_CEXT_MAVERICK, do_c_binops_3b},
-  {"cfmva64",    0xee100690, 7,  ARM_CEXT_MAVERICK, do_c_binops_3c},
-  {"cfmv64a",    0xee000690, 7,  ARM_CEXT_MAVERICK, do_c_binops_3d},
-  {"cfmvsc32",   0xee1006b0, 8,  ARM_CEXT_MAVERICK, do_c_dspsc_1},
-  {"cfmv32sc",   0xee0006b0, 8,  ARM_CEXT_MAVERICK, do_c_dspsc_2},
-  {"cfcpys",     0xee000400, 6,  ARM_CEXT_MAVERICK, do_c_binops_1d},
-  {"cfcpyd",     0xee000420, 6,  ARM_CEXT_MAVERICK, do_c_binops_1e},
-  {"cfcvtsd",    0xee000460, 7,  ARM_CEXT_MAVERICK, do_c_binops_1f},
-  {"cfcvtds",    0xee000440, 7,  ARM_CEXT_MAVERICK, do_c_binops_1g},
-  {"cfcvt32s",   0xee000480, 8,  ARM_CEXT_MAVERICK, do_c_binops_1h},
-  {"cfcvt32d",   0xee0004a0, 8,  ARM_CEXT_MAVERICK, do_c_binops_1i},
-  {"cfcvt64s",   0xee0004c0, 8,  ARM_CEXT_MAVERICK, do_c_binops_1j},
-  {"cfcvt64d",   0xee0004e0, 8,  ARM_CEXT_MAVERICK, do_c_binops_1k},
-  {"cfcvts32",   0xee100580, 8,  ARM_CEXT_MAVERICK, do_c_binops_1l},
-  {"cfcvtd32",   0xee1005a0, 8,  ARM_CEXT_MAVERICK, do_c_binops_1m},
-  {"cftruncs32", 0xee1005c0, 10, ARM_CEXT_MAVERICK, do_c_binops_1l},
-  {"cftruncd32", 0xee1005e0, 10, ARM_CEXT_MAVERICK, do_c_binops_1m},
-  {"cfrshl32",   0xee000550, 8,  ARM_CEXT_MAVERICK, do_c_triple_4a},
-  {"cfrshl64",   0xee000570, 8,  ARM_CEXT_MAVERICK, do_c_triple_4b},
-  {"cfsh32",     0xee000500, 6,  ARM_CEXT_MAVERICK, do_c_shift_1},
-  {"cfsh64",     0xee200500, 6,  ARM_CEXT_MAVERICK, do_c_shift_2},
-  {"cfcmps",     0xee100490, 6,  ARM_CEXT_MAVERICK, do_c_triple_5a},
-  {"cfcmpd",     0xee1004b0, 6,  ARM_CEXT_MAVERICK, do_c_triple_5b},
-  {"cfcmp32",    0xee100590, 7,  ARM_CEXT_MAVERICK, do_c_triple_5c},
-  {"cfcmp64",    0xee1005b0, 7,  ARM_CEXT_MAVERICK, do_c_triple_5d},
-  {"cfabss",     0xee300400, 6,  ARM_CEXT_MAVERICK, do_c_binops_1d},
-  {"cfabsd",     0xee300420, 6,  ARM_CEXT_MAVERICK, do_c_binops_1e},
-  {"cfnegs",     0xee300440, 6,  ARM_CEXT_MAVERICK, do_c_binops_1d},
-  {"cfnegd",     0xee300460, 6,  ARM_CEXT_MAVERICK, do_c_binops_1e},
-  {"cfadds",     0xee300480, 6,  ARM_CEXT_MAVERICK, do_c_triple_5e},
-  {"cfaddd",     0xee3004a0, 6,  ARM_CEXT_MAVERICK, do_c_triple_5f},
-  {"cfsubs",     0xee3004c0, 6,  ARM_CEXT_MAVERICK, do_c_triple_5e},
-  {"cfsubd",     0xee3004e0, 6,  ARM_CEXT_MAVERICK, do_c_triple_5f},
-  {"cfmuls",     0xee100400, 6,  ARM_CEXT_MAVERICK, do_c_triple_5e},
-  {"cfmuld",     0xee100420, 6,  ARM_CEXT_MAVERICK, do_c_triple_5f},
-  {"cfabs32",    0xee300500, 7,  ARM_CEXT_MAVERICK, do_c_binops_1n},
-  {"cfabs64",    0xee300520, 7,  ARM_CEXT_MAVERICK, do_c_binops_1o},
-  {"cfneg32",    0xee300540, 7,  ARM_CEXT_MAVERICK, do_c_binops_1n},
-  {"cfneg64",    0xee300560, 7,  ARM_CEXT_MAVERICK, do_c_binops_1o},
-  {"cfadd32",    0xee300580, 7,  ARM_CEXT_MAVERICK, do_c_triple_5g},
-  {"cfadd64",    0xee3005a0, 7,  ARM_CEXT_MAVERICK, do_c_triple_5h},
-  {"cfsub32",    0xee3005c0, 7,  ARM_CEXT_MAVERICK, do_c_triple_5g},
-  {"cfsub64",    0xee3005e0, 7,  ARM_CEXT_MAVERICK, do_c_triple_5h},
-  {"cfmul32",    0xee100500, 7,  ARM_CEXT_MAVERICK, do_c_triple_5g},
-  {"cfmul64",    0xee100520, 7,  ARM_CEXT_MAVERICK, do_c_triple_5h},
-  {"cfmac32",    0xee100540, 7,  ARM_CEXT_MAVERICK, do_c_triple_5g},
-  {"cfmsc32",    0xee100560, 7,  ARM_CEXT_MAVERICK, do_c_triple_5g},
-  {"cfmadd32",   0xee000600, 8,  ARM_CEXT_MAVERICK, do_c_quad_6a},
-  {"cfmsub32",   0xee100600, 8,  ARM_CEXT_MAVERICK, do_c_quad_6a},
-  {"cfmadda32",  0xee200600, 9,  ARM_CEXT_MAVERICK, do_c_quad_6b},
-  {"cfmsuba32",  0xee300600, 9,  ARM_CEXT_MAVERICK, do_c_quad_6b},
+  /* Cirrus Maverick instructions.  */
+  {"cfldrs",     0xec100400, 6,  ARM_CEXT_MAVERICK, do_mav_ldst_1},
+  {"cfldrd",     0xec500400, 6,  ARM_CEXT_MAVERICK, do_mav_ldst_2},
+  {"cfldr32",    0xec100500, 7,  ARM_CEXT_MAVERICK, do_mav_ldst_3},
+  {"cfldr64",    0xec500500, 7,  ARM_CEXT_MAVERICK, do_mav_ldst_4},
+  {"cfstrs",     0xec000400, 6,  ARM_CEXT_MAVERICK, do_mav_ldst_1},
+  {"cfstrd",     0xec400400, 6,  ARM_CEXT_MAVERICK, do_mav_ldst_2},
+  {"cfstr32",    0xec000500, 7,  ARM_CEXT_MAVERICK, do_mav_ldst_3},
+  {"cfstr64",    0xec400500, 7,  ARM_CEXT_MAVERICK, do_mav_ldst_4},
+  {"cfmvsr",     0xee000450, 6,  ARM_CEXT_MAVERICK, do_mav_binops_2a},
+  {"cfmvrs",     0xee100450, 6,  ARM_CEXT_MAVERICK, do_mav_binops_1a},
+  {"cfmvdlr",    0xee000410, 7,  ARM_CEXT_MAVERICK, do_mav_binops_2b},
+  {"cfmvrdl",    0xee100410, 7,  ARM_CEXT_MAVERICK, do_mav_binops_1b},
+  {"cfmvdhr",    0xee000430, 7,  ARM_CEXT_MAVERICK, do_mav_binops_2b},
+  {"cfmvrdh",    0xee100430, 7,  ARM_CEXT_MAVERICK, do_mav_binops_1b},
+  {"cfmv64lr",   0xee000510, 8,  ARM_CEXT_MAVERICK, do_mav_binops_2c},
+  {"cfmvr64l",   0xee100510, 8,  ARM_CEXT_MAVERICK, do_mav_binops_1c},
+  {"cfmv64hr",   0xee000530, 8,  ARM_CEXT_MAVERICK, do_mav_binops_2c},
+  {"cfmvr64h",   0xee100530, 8,  ARM_CEXT_MAVERICK, do_mav_binops_1c},
+  {"cfmval32",   0xee100610, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
+  {"cfmv32al",   0xee000610, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
+  {"cfmvam32",   0xee100630, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
+  {"cfmv32am",   0xee000630, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
+  {"cfmvah32",   0xee100650, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
+  {"cfmv32ah",   0xee000650, 8,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
+  {"cfmva32",    0xee100670, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3a},
+  {"cfmv32a",    0xee000670, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3b},
+  {"cfmva64",    0xee100690, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3c},
+  {"cfmv64a",    0xee000690, 7,  ARM_CEXT_MAVERICK, do_mav_binops_3d},
+  {"cfmvsc32",   0xee1006b0, 8,  ARM_CEXT_MAVERICK, do_mav_dspsc_1},
+  {"cfmv32sc",   0xee0006b0, 8,  ARM_CEXT_MAVERICK, do_mav_dspsc_2},
+  {"cfcpys",     0xee000400, 6,  ARM_CEXT_MAVERICK, do_mav_binops_1d},
+  {"cfcpyd",     0xee000420, 6,  ARM_CEXT_MAVERICK, do_mav_binops_1e},
+  {"cfcvtsd",    0xee000460, 7,  ARM_CEXT_MAVERICK, do_mav_binops_1f},
+  {"cfcvtds",    0xee000440, 7,  ARM_CEXT_MAVERICK, do_mav_binops_1g},
+  {"cfcvt32s",   0xee000480, 8,  ARM_CEXT_MAVERICK, do_mav_binops_1h},
+  {"cfcvt32d",   0xee0004a0, 8,  ARM_CEXT_MAVERICK, do_mav_binops_1i},
+  {"cfcvt64s",   0xee0004c0, 8,  ARM_CEXT_MAVERICK, do_mav_binops_1j},
+  {"cfcvt64d",   0xee0004e0, 8,  ARM_CEXT_MAVERICK, do_mav_binops_1k},
+  {"cfcvts32",   0xee100580, 8,  ARM_CEXT_MAVERICK, do_mav_binops_1l},
+  {"cfcvtd32",   0xee1005a0, 8,  ARM_CEXT_MAVERICK, do_mav_binops_1m},
+  {"cftruncs32", 0xee1005c0, 10, ARM_CEXT_MAVERICK, do_mav_binops_1l},
+  {"cftruncd32", 0xee1005e0, 10, ARM_CEXT_MAVERICK, do_mav_binops_1m},
+  {"cfrshl32",   0xee000550, 8,  ARM_CEXT_MAVERICK, do_mav_triple_4a},
+  {"cfrshl64",   0xee000570, 8,  ARM_CEXT_MAVERICK, do_mav_triple_4b},
+  {"cfsh32",     0xee000500, 6,  ARM_CEXT_MAVERICK, do_mav_shift_1},
+  {"cfsh64",     0xee200500, 6,  ARM_CEXT_MAVERICK, do_mav_shift_2},
+  {"cfcmps",     0xee100490, 6,  ARM_CEXT_MAVERICK, do_mav_triple_5a},
+  {"cfcmpd",     0xee1004b0, 6,  ARM_CEXT_MAVERICK, do_mav_triple_5b},
+  {"cfcmp32",    0xee100590, 7,  ARM_CEXT_MAVERICK, do_mav_triple_5c},
+  {"cfcmp64",    0xee1005b0, 7,  ARM_CEXT_MAVERICK, do_mav_triple_5d},
+  {"cfabss",     0xee300400, 6,  ARM_CEXT_MAVERICK, do_mav_binops_1d},
+  {"cfabsd",     0xee300420, 6,  ARM_CEXT_MAVERICK, do_mav_binops_1e},
+  {"cfnegs",     0xee300440, 6,  ARM_CEXT_MAVERICK, do_mav_binops_1d},
+  {"cfnegd",     0xee300460, 6,  ARM_CEXT_MAVERICK, do_mav_binops_1e},
+  {"cfadds",     0xee300480, 6,  ARM_CEXT_MAVERICK, do_mav_triple_5e},
+  {"cfaddd",     0xee3004a0, 6,  ARM_CEXT_MAVERICK, do_mav_triple_5f},
+  {"cfsubs",     0xee3004c0, 6,  ARM_CEXT_MAVERICK, do_mav_triple_5e},
+  {"cfsubd",     0xee3004e0, 6,  ARM_CEXT_MAVERICK, do_mav_triple_5f},
+  {"cfmuls",     0xee100400, 6,  ARM_CEXT_MAVERICK, do_mav_triple_5e},
+  {"cfmuld",     0xee100420, 6,  ARM_CEXT_MAVERICK, do_mav_triple_5f},
+  {"cfabs32",    0xee300500, 7,  ARM_CEXT_MAVERICK, do_mav_binops_1n},
+  {"cfabs64",    0xee300520, 7,  ARM_CEXT_MAVERICK, do_mav_binops_1o},
+  {"cfneg32",    0xee300540, 7,  ARM_CEXT_MAVERICK, do_mav_binops_1n},
+  {"cfneg64",    0xee300560, 7,  ARM_CEXT_MAVERICK, do_mav_binops_1o},
+  {"cfadd32",    0xee300580, 7,  ARM_CEXT_MAVERICK, do_mav_triple_5g},
+  {"cfadd64",    0xee3005a0, 7,  ARM_CEXT_MAVERICK, do_mav_triple_5h},
+  {"cfsub32",    0xee3005c0, 7,  ARM_CEXT_MAVERICK, do_mav_triple_5g},
+  {"cfsub64",    0xee3005e0, 7,  ARM_CEXT_MAVERICK, do_mav_triple_5h},
+  {"cfmul32",    0xee100500, 7,  ARM_CEXT_MAVERICK, do_mav_triple_5g},
+  {"cfmul64",    0xee100520, 7,  ARM_CEXT_MAVERICK, do_mav_triple_5h},
+  {"cfmac32",    0xee100540, 7,  ARM_CEXT_MAVERICK, do_mav_triple_5g},
+  {"cfmsc32",    0xee100560, 7,  ARM_CEXT_MAVERICK, do_mav_triple_5g},
+  {"cfmadd32",   0xee000600, 8,  ARM_CEXT_MAVERICK, do_mav_quad_6a},
+  {"cfmsub32",   0xee100600, 8,  ARM_CEXT_MAVERICK, do_mav_quad_6a},
+  {"cfmadda32",  0xee200600, 9,  ARM_CEXT_MAVERICK, do_mav_quad_6b},
+  {"cfmsuba32",  0xee300600, 9,  ARM_CEXT_MAVERICK, do_mav_quad_6b},
 };
 
 /* Defines for various bits that we will want to toggle.  */
@@ -4135,7 +4135,7 @@ do_bkpt (str)
      MIAxycc acc0,Rm,Rs.  */
 
 static void
-do_mia (str)
+do_xsc_mia (str)
      char * str;
 {
   int rs;
@@ -4165,7 +4165,7 @@ do_mia (str)
      MARcc   acc0,RdLo,RdHi.  */
 
 static void
-do_mar (str)
+do_xsc_mar (str)
      char * str;
 {
   int rdlo, rdhi;
@@ -4194,7 +4194,7 @@ do_mar (str)
      MRAcc   RdLo,RdHi,acc0.  */
 
 static void
-do_mra (str)
+do_xsc_mra (str)
      char * str;
 {
   int rdlo;
@@ -7909,7 +7909,7 @@ thumb_load_store (str, load_store, size)
    Returns the reg#, or FAIL.  */
 
 static int
-cirrus_reg_required_here (str, shift, regtype)
+mav_reg_required_here (str, shift, regtype)
      char ** str;
      int shift;
      enum arm_reg_type regtype;
@@ -7935,261 +7935,261 @@ cirrus_reg_required_here (str, shift, regtype)
   return FAIL;
 }
 
-/* Cirrus Instructions.  */
+/* Cirrus Maverick Instructions.  */
 
 /* Wrapper functions.  */
 
 static void
-do_c_binops_1a (str)
+do_mav_binops_1a (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_RN, REG_TYPE_MVF);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_RN, REG_TYPE_MVF);
 }
 
 static void
-do_c_binops_1b (str)
+do_mav_binops_1b (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_RN, REG_TYPE_MVD);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_RN, REG_TYPE_MVD);
 }
 
 static void
-do_c_binops_1c (str)
+do_mav_binops_1c (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_RN, REG_TYPE_MVDX);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_RN, REG_TYPE_MVDX);
 }
 
 static void
-do_c_binops_1d (str)
+do_mav_binops_1d (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVF, REG_TYPE_MVF);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVF, REG_TYPE_MVF);
 }
 
 static void
-do_c_binops_1e (str)
+do_mav_binops_1e (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVD, REG_TYPE_MVD);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVD, REG_TYPE_MVD);
 }
 
 static void
-do_c_binops_1f (str)
+do_mav_binops_1f (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVD, REG_TYPE_MVF);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVD, REG_TYPE_MVF);
 }
 
 static void
-do_c_binops_1g (str)
+do_mav_binops_1g (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVF, REG_TYPE_MVD);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVF, REG_TYPE_MVD);
 }
 
 static void
-do_c_binops_1h (str)
+do_mav_binops_1h (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVF, REG_TYPE_MVFX);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVF, REG_TYPE_MVFX);
 }
 
 static void
-do_c_binops_1i (str)
+do_mav_binops_1i (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVD, REG_TYPE_MVFX);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVD, REG_TYPE_MVFX);
 }
 
 static void
-do_c_binops_1j (str)
+do_mav_binops_1j (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVF, REG_TYPE_MVDX);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVF, REG_TYPE_MVDX);
 }
 
 static void
-do_c_binops_1k (str)
+do_mav_binops_1k (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVD, REG_TYPE_MVDX);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVD, REG_TYPE_MVDX);
 }
 
 static void
-do_c_binops_1l (str)
+do_mav_binops_1l (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVFX, REG_TYPE_MVF);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVFX, REG_TYPE_MVF);
 }
 
 static void
-do_c_binops_1m (str)
+do_mav_binops_1m (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVFX, REG_TYPE_MVD);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVFX, REG_TYPE_MVD);
 }
 
 static void
-do_c_binops_1n (str)
+do_mav_binops_1n (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVFX, REG_TYPE_MVFX);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVFX, REG_TYPE_MVFX);
 }
 
 static void
-do_c_binops_1o (str)
+do_mav_binops_1o (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVDX, REG_TYPE_MVDX);
+  do_mav_binops (str, MAV_MODE1, REG_TYPE_MVDX, REG_TYPE_MVDX);
 }
 
 static void
-do_c_binops_2a (str)
+do_mav_binops_2a (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE2, REG_TYPE_MVF, REG_TYPE_RN);
+  do_mav_binops (str, MAV_MODE2, REG_TYPE_MVF, REG_TYPE_RN);
 }
 
 static void
-do_c_binops_2b (str)
+do_mav_binops_2b (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE2, REG_TYPE_MVD, REG_TYPE_RN);
+  do_mav_binops (str, MAV_MODE2, REG_TYPE_MVD, REG_TYPE_RN);
 }
 
 static void
-do_c_binops_2c (str)
+do_mav_binops_2c (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE2, REG_TYPE_MVDX, REG_TYPE_RN);
+  do_mav_binops (str, MAV_MODE2, REG_TYPE_MVDX, REG_TYPE_RN);
 }
 
 static void
-do_c_binops_3a (str)
+do_mav_binops_3a (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE3, REG_TYPE_MVAX, REG_TYPE_MVFX);
+  do_mav_binops (str, MAV_MODE3, REG_TYPE_MVAX, REG_TYPE_MVFX);
 }
 
 static void
-do_c_binops_3b (str)
+do_mav_binops_3b (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE3, REG_TYPE_MVFX, REG_TYPE_MVAX);
+  do_mav_binops (str, MAV_MODE3, REG_TYPE_MVFX, REG_TYPE_MVAX);
 }
 
 static void
-do_c_binops_3c (str)
+do_mav_binops_3c (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE3, REG_TYPE_MVAX, REG_TYPE_MVDX);
+  do_mav_binops (str, MAV_MODE3, REG_TYPE_MVAX, REG_TYPE_MVDX);
 }
 
 static void
-do_c_binops_3d (str)
+do_mav_binops_3d (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE3, REG_TYPE_MVDX, REG_TYPE_MVAX);
+  do_mav_binops (str, MAV_MODE3, REG_TYPE_MVDX, REG_TYPE_MVAX);
 }
 
 static void
-do_c_triple_4a (str)
+do_mav_triple_4a (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE4, REG_TYPE_MVFX, REG_TYPE_MVFX, REG_TYPE_RN);
+  do_mav_triple (str, MAV_MODE4, REG_TYPE_MVFX, REG_TYPE_MVFX, REG_TYPE_RN);
 }
 
 static void
-do_c_triple_4b (str)
+do_mav_triple_4b (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE4, REG_TYPE_MVDX, REG_TYPE_MVDX, REG_TYPE_RN);
+  do_mav_triple (str, MAV_MODE4, REG_TYPE_MVDX, REG_TYPE_MVDX, REG_TYPE_RN);
 }
 
 static void
-do_c_triple_5a (str)
+do_mav_triple_5a (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_RN, REG_TYPE_MVF, REG_TYPE_MVF);
+  do_mav_triple (str, MAV_MODE5, REG_TYPE_RN, REG_TYPE_MVF, REG_TYPE_MVF);
 }
 
 static void
-do_c_triple_5b (str)
+do_mav_triple_5b (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_RN, REG_TYPE_MVD, REG_TYPE_MVD);
+  do_mav_triple (str, MAV_MODE5, REG_TYPE_RN, REG_TYPE_MVD, REG_TYPE_MVD);
 }
 
 static void
-do_c_triple_5c (str)
+do_mav_triple_5c (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_RN, REG_TYPE_MVFX, REG_TYPE_MVFX);
+  do_mav_triple (str, MAV_MODE5, REG_TYPE_RN, REG_TYPE_MVFX, REG_TYPE_MVFX);
 }
 
 static void
-do_c_triple_5d (str)
+do_mav_triple_5d (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_RN, REG_TYPE_MVDX, REG_TYPE_MVDX);
+  do_mav_triple (str, MAV_MODE5, REG_TYPE_RN, REG_TYPE_MVDX, REG_TYPE_MVDX);
 }
 
 static void
-do_c_triple_5e (str)
+do_mav_triple_5e (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_MVF, REG_TYPE_MVF, REG_TYPE_MVF);
+  do_mav_triple (str, MAV_MODE5, REG_TYPE_MVF, REG_TYPE_MVF, REG_TYPE_MVF);
 }
 
 static void
-do_c_triple_5f (str)
+do_mav_triple_5f (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_MVD, REG_TYPE_MVD, REG_TYPE_MVD);
+  do_mav_triple (str, MAV_MODE5, REG_TYPE_MVD, REG_TYPE_MVD, REG_TYPE_MVD);
 }
 
 static void
-do_c_triple_5g (str)
+do_mav_triple_5g (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_MVFX, REG_TYPE_MVFX, REG_TYPE_MVFX);
+  do_mav_triple (str, MAV_MODE5, REG_TYPE_MVFX, REG_TYPE_MVFX, REG_TYPE_MVFX);
 }
 
 static void
-do_c_triple_5h (str)
+do_mav_triple_5h (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_MVDX, REG_TYPE_MVDX, REG_TYPE_MVDX);
+  do_mav_triple (str, MAV_MODE5, REG_TYPE_MVDX, REG_TYPE_MVDX, REG_TYPE_MVDX);
 }
 
 static void
-do_c_quad_6a (str)
+do_mav_quad_6a (str)
      char * str;
 {
-  do_c_quad (str, CIRRUS_MODE6, REG_TYPE_MVAX, REG_TYPE_MVFX, REG_TYPE_MVFX,
+  do_mav_quad (str, MAV_MODE6, REG_TYPE_MVAX, REG_TYPE_MVFX, REG_TYPE_MVFX,
 	     REG_TYPE_MVFX);
 }
 
 static void
-do_c_quad_6b (str)
+do_mav_quad_6b (str)
      char * str;
 {
-  do_c_quad (str, CIRRUS_MODE6, REG_TYPE_MVAX, REG_TYPE_MVAX, REG_TYPE_MVFX,
+  do_mav_quad (str, MAV_MODE6, REG_TYPE_MVAX, REG_TYPE_MVAX, REG_TYPE_MVFX,
 	     REG_TYPE_MVFX);
 }
 
 /* cfmvsc32<cond> DSPSC,MVFX[15:0]. */
 static void
-do_c_dspsc_1 (str)
+do_mav_dspsc_1 (str)
      char * str;
 {
   skip_whitespace (str);
 
   /* cfmvsc32.  */
-  if (cirrus_reg_required_here (&str, -1, REG_TYPE_DSPSC) == FAIL
+  if (mav_reg_required_here (&str, -1, REG_TYPE_DSPSC) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, 16, REG_TYPE_MVFX) == FAIL)
+      || mav_reg_required_here (&str, 16, REG_TYPE_MVFX) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
@@ -8202,15 +8202,15 @@ do_c_dspsc_1 (str)
 
 /* cfmv32sc<cond> MVFX[15:0],DSPSC.  */
 static void
-do_c_dspsc_2 (str)
+do_mav_dspsc_2 (str)
      char * str;
 {
   skip_whitespace (str);
 
   /* cfmv32sc.  */
-  if (cirrus_reg_required_here (&str, 0, REG_TYPE_MVFX) == FAIL
+  if (mav_reg_required_here (&str, 0, REG_TYPE_MVFX) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, -1, REG_TYPE_DSPSC) == FAIL)
+      || mav_reg_required_here (&str, -1, REG_TYPE_DSPSC) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
@@ -8222,51 +8222,51 @@ do_c_dspsc_2 (str)
 }
 
 static void
-do_c_shift_1 (str)
+do_mav_shift_1 (str)
      char * str;
 {
-  do_c_shift (str, REG_TYPE_MVFX, REG_TYPE_MVFX);
+  do_mav_shift (str, REG_TYPE_MVFX, REG_TYPE_MVFX);
 }
 
 static void
-do_c_shift_2 (str)
+do_mav_shift_2 (str)
      char * str;
 {
-  do_c_shift (str, REG_TYPE_MVDX, REG_TYPE_MVDX);
+  do_mav_shift (str, REG_TYPE_MVDX, REG_TYPE_MVDX);
 }
 
 static void
-do_c_ldst_1 (str)
+do_mav_ldst_1 (str)
      char * str;
 {
-  do_c_ldst (str, REG_TYPE_MVF);
+  do_mav_ldst (str, REG_TYPE_MVF);
 }
 
 static void
-do_c_ldst_2 (str)
+do_mav_ldst_2 (str)
      char * str;
 {
-  do_c_ldst (str, REG_TYPE_MVD);
+  do_mav_ldst (str, REG_TYPE_MVD);
 }
 
 static void
-do_c_ldst_3 (str)
+do_mav_ldst_3 (str)
      char * str;
 {
-  do_c_ldst (str, REG_TYPE_MVFX);
+  do_mav_ldst (str, REG_TYPE_MVFX);
 }
 
 static void
-do_c_ldst_4 (str)
+do_mav_ldst_4 (str)
      char * str;
 {
-  do_c_ldst (str, REG_TYPE_MVDX);
+  do_mav_ldst (str, REG_TYPE_MVDX);
 }
 
 /* Isnsn like "foo X,Y".  */
 
 static void
-do_c_binops (str, mode, reg0, reg1)
+do_mav_binops (str, mode, reg0, reg1)
      char * str;
      int mode;
      enum arm_reg_type reg0;
@@ -8279,9 +8279,9 @@ do_c_binops (str, mode, reg0, reg1)
 
   skip_whitespace (str);
 
-  if (cirrus_reg_required_here (&str, shift0, reg0) == FAIL
+  if (mav_reg_required_here (&str, shift0, reg0) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift1, reg1) == FAIL)
+      || mav_reg_required_here (&str, shift1, reg1) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
@@ -8293,7 +8293,7 @@ do_c_binops (str, mode, reg0, reg1)
 /* Isnsn like "foo X,Y,Z".  */
 
 static void
-do_c_triple (str, mode, reg0, reg1, reg2)
+do_mav_triple (str, mode, reg0, reg1, reg2)
      char * str;
      int mode;
      enum arm_reg_type reg0;
@@ -8308,11 +8308,11 @@ do_c_triple (str, mode, reg0, reg1, reg2)
 
   skip_whitespace (str);
 
-  if (cirrus_reg_required_here (&str, shift0, reg0) == FAIL
+  if (mav_reg_required_here (&str, shift0, reg0) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift1, reg1) == FAIL
+      || mav_reg_required_here (&str, shift1, reg1) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift2, reg2) == FAIL)
+      || mav_reg_required_here (&str, shift2, reg2) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
@@ -8325,7 +8325,7 @@ do_c_triple (str, mode, reg0, reg1, reg2)
     where W=MVAX[0:3] and X,Y,Z=MVFX[0:15].  */
 
 static void
-do_c_quad (str, mode, reg0, reg1, reg2, reg3)
+do_mav_quad (str, mode, reg0, reg1, reg2, reg3)
      char * str;
      int mode;
      enum arm_reg_type reg0;
@@ -8342,13 +8342,13 @@ do_c_quad (str, mode, reg0, reg1, reg2, reg3)
 
   skip_whitespace (str);
 
-  if (cirrus_reg_required_here (&str, shift0, reg0) == FAIL
+  if (mav_reg_required_here (&str, shift0, reg0) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift1, reg1) == FAIL
+      || mav_reg_required_here (&str, shift1, reg1) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift2, reg2) == FAIL
+      || mav_reg_required_here (&str, shift2, reg2) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift3, reg3) == FAIL)
+      || mav_reg_required_here (&str, shift3, reg3) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
@@ -8357,12 +8357,12 @@ do_c_quad (str, mode, reg0, reg1, reg2, reg3)
     end_of_line (str);
 }
 
-/* Cirrus shift immediate instructions.
+/* Maverick shift immediate instructions.
    cfsh32<cond> MVFX[15:0],MVFX[15:0],Shift[6:0].
    cfsh64<cond> MVDX[15:0],MVDX[15:0],Shift[6:0].  */
 
 static void
-do_c_shift (str, reg0, reg1)
+do_mav_shift (str, reg0, reg1)
      char * str;
      enum arm_reg_type reg0;
      enum arm_reg_type reg1;
@@ -8374,9 +8374,9 @@ do_c_shift (str, reg0, reg1)
 
   error = 0;
 
-  if (cirrus_reg_required_here (&str, 12, reg0) == FAIL
+  if (mav_reg_required_here (&str, 12, reg0) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, 16, reg1) == FAIL
+      || mav_reg_required_here (&str, 16, reg1) == FAIL
       || skip_past_comma  (&str) == FAIL)
     {
       if (!inst.error)
@@ -8429,7 +8429,7 @@ do_c_shift (str, reg0, reg1)
 }
 
 static int
-cirrus_parse_offset (str, negative)
+mav_parse_offset (str, negative)
      char ** str;
      int *negative;
 {
@@ -8469,12 +8469,12 @@ cirrus_parse_offset (str, negative)
   return *negative ? -offset : offset;
 }
 
-/* Cirrus load/store instructions.
+/* Maverick load/store instructions.
   <insn><cond> CRd,[Rn,<offset>]{!}.
   <insn><cond> CRd,[Rn],<offset>.  */
 
 static void
-do_c_ldst (str, reg0)
+do_mav_ldst (str, reg0)
      char * str;
      enum arm_reg_type reg0;
 {
@@ -8482,7 +8482,7 @@ do_c_ldst (str, reg0)
 
   skip_whitespace (str);
 
-  if (cirrus_reg_required_here (&str, 12, reg0) == FAIL
+  if (mav_reg_required_here (&str, 12, reg0) == FAIL
       || skip_past_comma (&str) == FAIL
       || *str++ != '['
       || reg_required_here (&str, 16) == FAIL)
@@ -8493,7 +8493,7 @@ do_c_ldst (str, reg0)
       /* You are here: "<offset>]{!}".  */
       inst.instruction |= PRE_INDEX;
 
-      offset = cirrus_parse_offset (&str, &negative);
+      offset = mav_parse_offset (&str, &negative);
 
       if (inst.error)
 	return;
@@ -8520,7 +8520,7 @@ do_c_ldst (str, reg0)
 	}
 
       if (skip_past_comma (&str) == FAIL
-	  || (offset = cirrus_parse_offset (&str, &negative), inst.error))
+	  || (offset = mav_parse_offset (&str, &negative), inst.error))
 	goto fail_ldst;
 
       inst.instruction |= CP_T_WB; /* Post indexed, set bit W.  */
@@ -10522,7 +10522,6 @@ md_assemble (str)
               -m[arm]7[xx][t][[d]m]   Arm 7 processors
               -m[arm]8[10]            Arm 8 processors
               -m[arm]9[20][tdmi]      Arm 9 processors
-              -marm9e                 Allow Cirrus/DSP instructions
               -mstrongarm[110[0]]     StrongARM processors
               -mxscale                XScale processors
               -m[arm]v[2345[t[e]]]    Arm architectures
