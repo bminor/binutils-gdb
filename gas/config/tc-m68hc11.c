@@ -1495,7 +1495,7 @@ build_jump_insn (opcode, operands, nb_operands, jmp_mode)
 	  opcode = m68hc11_new_insn (2);
 	  number_to_chars_bigendian (opcode, code, 1);
 	  number_to_chars_bigendian (opcode + 1, 0, 1);
-	  frag_var (rs_machine_dependent, 1, 1,
+	  frag_var (rs_machine_dependent, 2, 1,
 		    ENCODE_RELAX (STATE_PC_RELATIVE, STATE_UNDF),
 		    operands[0].exp.X_add_symbol, (offsetT) n, opcode);
 	}
@@ -2046,20 +2046,28 @@ find (opc, operands, nb_operands)
 	    }
 	  if (mode & M6812_OP_REG)
 	    {
-	      if (i == 0 && format & M6812_OP_REG
-		  && operands[i].reg2 == REG_NONE)
+	      if (i == 0
+		  && (format & M6812_OP_REG)
+		  && (operands[i].reg2 == REG_NONE))
 		continue;
-	      if (i == 0 && format & M6812_OP_REG
-		  && format & M6812_OP_REG_2 && operands[i].reg2 != REG_NONE)
-		{
-		  continue;
-		}
-	      if (i == 0 && format & M6812_OP_D_IDX)
+	      if (i == 0
+		  && (format & M6812_OP_REG)
+		  && (format & M6812_OP_REG_2)
+		  && (operands[i].reg2 != REG_NONE))
 		continue;
-	      if (i == 0 && (format & M6812_OP_IDX)
+	      if (i == 0
+		  && (format & M6812_OP_IDX)
+		  && (operands[i].reg2 != REG_NONE))
+		continue;
+	      if (i == 0
+		  && (format & M6812_OP_D_IDX))
+		continue;
+	      if (i == 0
+		  && (format & M6812_OP_IDX)
 		  && (format & (M6812_OP_IND16_P2 | M6812_OP_IDX_P2)))
 		continue;
-	      if (i == 1 && format & M6812_OP_IDX_P2)
+	      if (i == 1
+		  && (format & M6812_OP_IDX_P2))
 		continue;
 	      break;
 	    }

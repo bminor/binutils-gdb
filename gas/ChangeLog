@@ -1,3 +1,11 @@
+2000-08-08  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* config/tc-m68hc11.c (build_jump_insn): Make sure the
+	2 bytes of the jump address are in the same frag.
+	(find): Accept 68hc12 register indirect modes.
+
+	* NEWS: Mention 68HC11 & 68HC12 support.
+	
 2000-08-07  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-ia64.c (unwind): Add prologue_mask member.

@@ -2,6 +2,8 @@
 
 Changes in 2.11:
 
+Support for Motorola 68HC11 and 68HC12.
+
 Support for Texas Instruments TMS320C54x (tic54x).
 
 Support for IA-64.
