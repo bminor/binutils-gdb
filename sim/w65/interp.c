@@ -18,9 +18,19 @@
 
 */
 
+#include "config.h"
+
+#include <stdio.h>
 #include <signal.h>
-#include "sysdep.h"
-#include <sys/times.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <sys/param.h>
 #include "bfd.h"
 #include "remote-sim.h"

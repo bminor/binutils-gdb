@@ -17,12 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-srcdir = .
+VPATH = @srcdir@
+srcdir = @srcdir@
 
-prefix = /usr/local
+prefix = @prefix@
+exec_prefix = @exec_prefix@
 
-program_transform_name =
-exec_prefix = $(prefix)
+host_alias = @host_alias@
+target_alias = @target_alias@
+program_transform_name = @program_transform_name@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
 tooldir = $(exec_prefix)/$(target_alias)
@@ -44,25 +47,26 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-INSTALL = `cd $(srcdir)/..;pwd`/install.sh -c
+INSTALL = `cd $(srcdir)/../..;pwd`/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) 
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
 INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 
-AR = ar
+AR = @AR@
 AR_FLAGS = qv
-CFLAGS = -g
+CC = @CC@
+CFLAGS = @CFLAGS@
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
-RANLIB = ranlib
+RANLIB = @RANLIB@
 BISONFLAGS = -d
 TEXI2ROFF=texi2roff
 MAKEOVERRIDES=
-CC_FOR_BUILD = $(CC)
-NM_FOR_TARGET = nm
-NM = $(NM_FOR_TARGET)
-SYMLINK = ln -s
+CC_FOR_BUILD = @CC_FOR_BUILD@
+
+HDEFINES = @HDEFINES@
+TDEFINES =
 
 # Comment these out if using lex.
 # Distribution version
@@ -71,9 +75,6 @@ SYMLINK = ln -s
 
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo
-
-#CC=gcc -Wall
-CC=cc
 
 # These should all be the same program too.
 RUN_PROG=run
@@ -99,28 +100,9 @@ ALL_CFLAGS = $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CFLAGS)
 .c.o:
 	$(CC) -c $(ALL_CFLAGS) $<
 
-#
-## Random definitions
-# Hopefully all these may be flushed once we get configuration down pat.
-
-# alloca only needed for systems which don't have it and when cc != gcc.
-# ALLOCA = alloca.o
-
-# nm tries to malloc enough space for the string table.  The old GNU malloc
-# rounds this up to a power of two (e.g. 5M becomes 8M), and so it might 
-# fail unnecessarily.  I've also seen some Unix malloc's fail, even when
-# there is enough memory.  So use the new GNU malloc.
-# MALLOC = gmalloc.o
-# Use this if the system malloc is good enough.
-MALLOC =
-
-# Use the GNU getopt unless you have problems with it.
-# The IRIS version could probably benefit from being assembled with
-# libmalloc rather than the ordinary malloc.
 LIBIBERTY = ../../libiberty/libiberty.a
 
 BFD = ../../bfd/libbfd.a
-OPCODES = ../../opcodes/libopcodes.a
 
 RUNTEST = runtest
 RUNTESTFLAGS = 
@@ -155,17 +137,16 @@ optable:gencode
 	./gencode -a >$(srcdir)/../../opcodes/w65-opc.h
 	
 gencode:gencode.c
-	$(CC) -o gencode $<
+	$(CC_FOR_BUILD) -o gencode $<
 
-case.o:case.c
-run.o:run.c
-interp.o:interp.c
+run.o:run.c config.h
+interp.o:interp.c config.h
 
 
 ######################################################################
 
 mostlyclean:
-	-rm -f *.o *~ \#* core binutils.?? binutils.??? case.c
+	-rm -f *.o *~ \#* core binutils.?? binutils.??? case.c config.log
 
 clean: mostlyclean
 	-rm -f $(PROGS) *.o *.a
@@ -173,7 +154,7 @@ clean: mostlyclean
 distclean:
 	-rm -f Makefile config.status sysdep.h *.o *~ \#* core y.* \
 		binutils.?? binutils.??s binutils.aux binutils.log binutils.toc gencode run
-	-rm -f $(PROGS) underscore.c
+	-rm -f $(PROGS) config.h stamp-h
 
 realclean: clean distclean
 	-rm -f $(DISTSTUFF) TAGS
@@ -242,8 +223,15 @@ make:
 	echo							>>Makefile ; \
 	sed "s/^#__$(HOST)__#//" < Makefile.old			>>Makefile
 
-Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
-	$(SHELL) ./config.status
+Makefile: Makefile.in config.status
+	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
+
+config.h: stamp-h ; @true
+stamp-h: config.in config.status
+	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
+
+config.status: configure
+	$(SHELL) ./config.status --recheck
 
 ### Local Variables: ***
 ### mode:fundamental ***

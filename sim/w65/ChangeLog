@@ -1,3 +1,21 @@
+Fri Sep  8 14:03:32 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Convert to use autoconf.
+	* configure: New file, built by autoconf.
+	* acconfig.h: New file.
+	* config.in: New file, built by autoheader.
+	* Makefile.in: Various changes for new configure script.  Also:
+	(INSTALL): Go up two levels, not one.
+	(ALLOCA, MALLOC, OPCODES): Remove.
+	(gencode): Use $(CC_FOR_BUILD).
+	(case.o): Remove.
+	(run.o, interp.o): Depend upon config.h.
+	* interp.c: Include "config.h".  Don't include "sysdep.h".
+	Include <stdlib.h>, <time.h>, and <unistd.h> if they exist.
+	* run.c: Include "config.h".  Don't include "sysdep.h".  Include
+	<stdlib.h> if it exists.  Include "getopt.h".  Declare printf if
+	necessary.
+
 Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Update all FSF addresses except those in COPYING* files.
