@@ -1,3 +1,29 @@
+2004-01-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	2003-11-28  Alexandre Oliva  <aoliva@redhat.com>
+	* emulparams/elf32frvfd.sh (EMBEDDED): Clear.
+	2003-11-05  Alexandre Oliva  <aoliva@redhat.com>
+	* emulparams/elf32frvfd.sh (STACK_ADDR): Unset.
+	(MAXPAGESIZE): Set to 64Kb.
+	(OTHER_READONLY_SECTIONS): Define __ROFIXUP_LIST__ and
+	__ROFIXUP_END__.  Don't map .rofixup.got any more.
+	* emulparams/elf32frv.sh (NOP): Set.
+	2003-10-31  Alexandre Oliva  <aoliva@redhat.com>
+	* configure.tgt: Add frv-*-*linux*.
+	2003-09-30  Alexandre Oliva  <aoliva@redhat.com>
+	* Makefile.am (ALL_EMULATIONS): Added eelf32frvfd.o.
+	(eelf32frvfd.c): New.
+	* configure.tgt <frv-*-*>: Added it to targ_extra_emuls.
+	* emulparams/elf32frv.sh: Reverted previous two patches.
+	* emulparams/elf32frvfd.sh: New.
+	* Makefile.in: Rebuilt.
+	2003-09-18  Alexandre Oliva  <aoliva@redhat.com>
+	* emulparams/elf32frv.sh (OTHER_READONLY_SECTIONS): Added
+	.rofixup.got to .rofixup.
+	2003-09-15  Alexandre Oliva  <aoliva@redhat.com>
+	* emulparams/elf32frv.sh (MAXPAGESIZE): Make it 256KiB, not 256B.
+	(TEMPLATE_NAME, GENERATE_SHLIB_SCRIPT): Set.
+
 2004-01-05  Jakub Jelinek  <jakub@redhat.com>
 
 	* emulparams/elf_s390.sh (NO_SMALL_DATA): Set to yes.

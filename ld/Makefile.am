@@ -353,6 +353,7 @@ ALL_EMULATIONS = \
 	evsta.o \
 	ew65.o \
 	ez8001.o \
+	  eelf32frvfd.o \
 	ez8002.o
 
 ALL_64_EMULATIONS = \
@@ -1434,6 +1435,10 @@ ez8001.c: $(srcdir)/emulparams/z8001.sh \
 ez8002.c: $(srcdir)/emulparams/z8002.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8000.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} z8002 "$(tdir_z8002)"
+eelf32frvfd.c: $(srcdir)/emulparams/elf32frvfd.sh \
+  $(srcdir)/emulparams/elf32frv.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32frvfd "$(tdir_frv)"
 
 # We need this for automake to use YLWRAP.
 EXTRA_ld_new_SOURCES = deffilep.y
