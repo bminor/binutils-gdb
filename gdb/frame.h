@@ -27,8 +27,9 @@ struct symtab_and_line;
 struct frame_unwind;
 struct block;
 
-/* The traditional frame unwinder.  */
-extern const struct frame_unwind *trad_frame_unwind;
+/* A legacy unwinder to prop up architectures using the old style
+   saved regs array.  */
+extern const struct frame_unwind *legacy_saved_regs_unwind;
 
 /* The frame object.  */
 
@@ -397,9 +398,9 @@ struct frame_info
        related unwind data.  */
     struct context *context;
 
-    /* Unwind cache shared between the unwind functions - they had
-       better all agree as to the contents.  */
-    void *unwind_cache;
+    /* Prologue cache shared between the unwind functions.  See
+       "frame-unwind.h" for more information.  */
+    void *prologue_cache;
 
     /* The frame's unwinder.  */
     const struct frame_unwind *unwind;

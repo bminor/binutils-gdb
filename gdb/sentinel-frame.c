@@ -45,13 +45,13 @@ sentinel_frame_cache (struct regcache *regcache)
 /* Here the register value is taken direct from the register cache.  */
 
 void
-sentinel_frame_register_unwind (struct frame_info *frame,
-				void **unwind_cache,
-				int regnum, int *optimized,
-				enum lval_type *lvalp, CORE_ADDR *addrp,
-				int *realnum, void *bufferp)
+sentinel_frame_prev_register (struct frame_info *next_frame,
+			      void **this_prologue_cache,
+			      int regnum, int *optimized,
+			      enum lval_type *lvalp, CORE_ADDR *addrp,
+			      int *realnum, void *bufferp)
 {
-  struct frame_unwind_cache *cache = *unwind_cache;
+  struct frame_unwind_cache *cache = *this_prologue_cache;
   /* Describe the register's location.  A reg-frame maps all registers
      onto the corresponding hardware register.  */
   *optimized = 0;
@@ -71,22 +71,20 @@ sentinel_frame_register_unwind (struct frame_info *frame,
 }
 
 void
-sentinel_frame_id_unwind (struct frame_info *frame,
-			  void **cache,
-			  struct frame_id *id)
+sentinel_frame_this_id (struct frame_info *next_frame,
+			void **this_prologue_cache,
+			struct frame_id *this_id)
 {
-  /* FIXME: cagney/2003-01-08: This should be using a per-architecture
-     method that doesn't suffer from DECR_PC_AFTER_BREAK problems.
-     Such a method would take unwind_cache, regcache and stop reason
-     parameters.  */
-  id->base = read_fp ();
-  id->pc = read_pc ();
+  /* The sentinel frame is used as a starting point for creating the
+     previous (inner most) frame.  That frame's THIS_ID method will be
+     called to determine the inner most frame's ID.  Not this one.  */
+  internal_error (__FILE__, __LINE__, "sentinel_frame_this_id called");
 }
 
 const struct frame_unwind sentinel_frame_unwinder =
 {
-  sentinel_frame_id_unwind,
-  sentinel_frame_register_unwind
+  sentinel_frame_this_id,
+  sentinel_frame_prev_register
 };
 
 const struct frame_unwind *const sentinel_frame_unwind = &sentinel_frame_unwinder;

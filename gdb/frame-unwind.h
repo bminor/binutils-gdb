@@ -47,42 +47,92 @@ extern const struct frame_unwind *frame_unwind_find_by_pc (struct gdbarch
 							   *gdbarch,
 							   CORE_ADDR pc);
 
-/* Return the location (and possibly value) of REGNUM for the previous
-   (older, up) frame.  All parameters except VALUEP can be assumed to
-   be non NULL.  When VALUEP is NULL, just the location of the
-   register should be returned.
+/* The following unwind functions assume a chain of frames forming the
+   sequence: (outer) prev <-> this <-> next (inner).  All the
+   functions are called with called with the next frame's `struct
+   frame_info' and and this frame's prologue cache.
 
-   UNWIND_CACHE is provided as mechanism for implementing a per-frame
-   local cache.  It's initial value being NULL.  Memory for that cache
-   should be allocated using frame_obstack_zalloc().
+   THIS frame's register values can be obtained by unwinding NEXT
+   frame's registers (a recursive operation).
 
-   Register window architectures (eg SPARC) should note that REGNUM
-   identifies the register for the previous frame.  For instance, a
-   request for the value of "o1" for the previous frame would be found
-   in the register "i1" in this FRAME.  */
+   THIS frame's prologue cache can be used to cache information such
+   as where this frame's prologue stores the previous frame's
+   registers.  */
 
-typedef void (frame_unwind_reg_ftype) (struct frame_info * frame,
-				       void **unwind_cache,
-				       int regnum,
-				       int *optimized,
-				       enum lval_type * lvalp,
-				       CORE_ADDR *addrp,
-				       int *realnump, void *valuep);
+/* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
+   use the NEXT frame, and its register unwind method, to determine
+   the frame ID of THIS frame.
 
-/* Same as for registers above, but return the ID of the frame that
-   called this one.  */
+   A frame ID provides an invariant that can be used to re-identify an
+   instance of a frame.  It is a combination of the frame's `base' and
+   the frame's function's code address.
 
-typedef void (frame_unwind_id_ftype) (struct frame_info * frame,
-				      void **unwind_cache,
-				      struct frame_id * id);
+   Traditionally, THIS frame's ID was determined by examining THIS
+   frame's function's prologue, and identifying the register/offset
+   used as THIS frame's base.
+
+   Example: An examination of THIS frame's prologue reveals that, on
+   entry, it saves the PC(+12), SP(+8), and R1(+4) registers
+   (decrementing the SP by 12).  Consequently, the frame ID's base can
+   be determined by adding 12 to the THIS frame's stack-pointer, and
+   the value of THIS frame's SP can be obtained by unwinding the NEXT
+   frame's SP.
+
+   THIS_PROLOGUE_CACHE can be used to share any prolog analysis data
+   with the other unwind methods.  Memory for that cache should be
+   allocated using frame_obstack_zalloc().  */
+
+typedef void (frame_this_id_ftype) (struct frame_info *next_frame,
+				    void **this_prologue_cache,
+				    struct frame_id *this_id);
+
+/* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
+   use the NEXT frame, and its register unwind method, to unwind THIS
+   frame's registers (returning the value of the specified register
+   REGNUM in the previous frame).
+
+   Traditionally, THIS frame's registers were unwound by examining
+   THIS frame's function's prologue and identifying which registers
+   that prolog code saved on the stack.
+
+   Example: An examination of THIS frame's prologue reveals that, on
+   entry, it saves the PC(+12), SP(+8), and R1(+4) registers
+   (decrementing the SP by 12).  Consequently, the value of the PC
+   register in the previous frame is found in memory at SP+12, and
+   THIS frame's SP can be obtained by unwinding the NEXT frame's SP.
+
+   Why not pass in THIS_FRAME?  By passing in NEXT frame and THIS
+   cache, the supplied parameters are consistent with the sibling
+   function THIS_ID.
+
+   Can the code call ``frame_register (get_prev_frame (NEXT_FRAME))''?
+   Won't the call frame_register (THIS_FRAME) be faster?  Well,
+   ignoring the possability that the previous frame does not yet
+   exist, the ``frame_register (FRAME)'' function is expanded to
+   ``frame_register_unwind (get_next_frame (FRAME)'' and hence that
+   call will expand to ``frame_register_unwind (get_next_frame
+   (get_prev_frame (NEXT_FRAME)))''.  Might as well call
+   ``frame_register_unwind (NEXT_FRAME)'' directly.
+
+   THIS_PROLOGUE_CACHE can be used to share any prolog analysis data
+   with the other unwind methods.  Memory for that cache should be
+   allocated using frame_obstack_zalloc().  */
+
+typedef void (frame_prev_register_ftype) (struct frame_info *next_frame,
+					  void **this_prologue_cache,
+					  int prev_regnum,
+					  int *optimized,
+					  enum lval_type * lvalp,
+					  CORE_ADDR *addrp,
+					  int *realnump, void *valuep);
 
 struct frame_unwind
 {
   /* Should the frame's type go here? */
   /* Should an attribute indicating the frame's address-in-block go
      here?  */
-  frame_unwind_id_ftype *id;
-  frame_unwind_reg_ftype *reg;
+  frame_this_id_ftype *this_id;
+  frame_prev_register_ftype *prev_register;
 };
 
 #endif

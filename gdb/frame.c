@@ -254,9 +254,12 @@ frame_register_unwind (struct frame_info *frame, int regnum,
      detected the problem before calling here.  */
   gdb_assert (frame != NULL);
 
-  /* Ask this frame to unwind its register.  */
-  frame->unwind->reg (frame, &frame->unwind_cache, regnum,
-		      optimizedp, lvalp, addrp, realnump, bufferp);
+  /* Ask this frame to unwind its register.  See comment in
+     "frame-unwind.h" for why NEXT frame and this unwind cace are
+     passed in.  */
+  frame->unwind->prev_register (frame->next, &frame->prologue_cache, regnum,
+				optimizedp, lvalp, addrp, realnump, bufferp);
+
 }
 
 void
@@ -490,7 +493,7 @@ create_sentinel_frame (struct regcache *regcache)
   /* Explicitly initialize the sentinel frame's cache.  Provide it
      with the underlying regcache.  In the future additional
      information, such as the frame's thread will be added.  */
-  frame->unwind_cache = sentinel_frame_cache (regcache);
+  frame->prologue_cache = sentinel_frame_cache (regcache);
   /* For the moment there is only one sentinel frame implementation.  */
   frame->unwind = sentinel_frame_unwind;
   /* Link this frame back to itself.  The frame is self referential
@@ -647,19 +650,20 @@ select_frame (struct frame_info *fi)
    most frame.  */
 
 static void
-frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
-				  int regnum, int *optimizedp,
-				  enum lval_type *lvalp, CORE_ADDR *addrp,
-				  int *realnump, void *bufferp)
+legacy_saved_regs_prev_register (struct frame_info *next_frame,
+				 void **this_prologue_cache,
+				 int regnum, int *optimizedp,
+				 enum lval_type *lvalp, CORE_ADDR *addrp,
+				 int *realnump, void *bufferp)
 {
-  /* There is always a frame at this point.  And THIS is the frame
-     we're interested in.  */
+  /* HACK: New code is passed the next frame and this cache.
+     Unfortunatly, old code expects this frame.  Since this is a
+     backward compatibility hack, cheat by walking one level along the
+     prologue chain to the frame the old code expects.
+
+     Do not try this at home.  Professional driver, closed course.  */
+  struct frame_info *frame = next_frame->prev;
   gdb_assert (frame != NULL);
-  /* If we're using generic dummy frames, we'd better not be in a call
-     dummy.  (generic_call_dummy_register_unwind ought to have been called
-     instead.)  */
-  gdb_assert (!(DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-		&& (get_frame_type (frame) == DUMMY_FRAME)));
 
   /* Only (older) architectures that implement the
      DEPRECATED_FRAME_INIT_SAVED_REGS method should be using this
@@ -697,13 +701,13 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
 #if 1
 	      /* Save each register value, as it is read in, in a
                  frame based cache.  */
-	      void **regs = (*cache);
+	      void **regs = (*this_prologue_cache);
 	      if (regs == NULL)
 		{
 		  int sizeof_cache = ((NUM_REGS + NUM_PSEUDO_REGS)
 				      * sizeof (void *));
 		  regs = frame_obstack_zalloc (sizeof_cache);
-		  (*cache) = regs;
+		  (*this_prologue_cache) = regs;
 		}
 	      if (regs[regnum] == NULL)
 		{
@@ -723,21 +727,32 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
       return;
     }
 
-  /* No luck, assume this and the next frame have the same register
-     value.  Pass the request down the frame chain to the next frame.
-     Hopefully that will find the register's location, either in a
-     register or in memory.  */
-  frame_register (frame, regnum, optimizedp, lvalp, addrp, realnump,
-		  bufferp);
+  /* No luck.  Assume this and the next frame have the same register
+     value.  Pass the unwind request down the frame chain to the next
+     frame.  Hopefully that frame will find the register's location.  */
+  frame_register_unwind (next_frame, regnum, optimizedp, lvalp, addrp,
+			 realnump, bufferp);
 }
 
 static void
-frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
-			    struct frame_id *id)
+legacy_saved_regs_this_id (struct frame_info *next_frame,
+			   void **this_prologue_cache,
+			   struct frame_id *id)
 {
   int fromleaf;
   CORE_ADDR base;
   CORE_ADDR pc;
+
+  if (frame_relative_level (next_frame) < 0)
+    {
+      /* FIXME: cagney/2003-03-14: We've got the extra special case of
+	 unwinding a sentinel frame, the PC of which is pointing at a
+	 stack dummy.  Fake up the dummy frame's ID using the same
+	 sequence as is found a traditional unwinder.  */
+      (*id).base = read_fp ();
+      (*id).pc = read_pc ();
+      return;
+    }
 
   /* Start out by assuming it's NULL.  */
   (*id) = null_frame_id;
@@ -792,15 +807,14 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
   id->base = base;
 }
 	
-const struct frame_unwind trad_frame_unwinder = {
-  frame_saved_regs_id_unwind,
-  frame_saved_regs_register_unwind
+const struct frame_unwind legacy_saved_regs_unwinder = {
+  legacy_saved_regs_this_id,
+  legacy_saved_regs_prev_register
 };
-const struct frame_unwind *trad_frame_unwind = &trad_frame_unwinder;
+const struct frame_unwind *legacy_saved_regs_unwind = &legacy_saved_regs_unwinder;
 
 
 /* Function: deprecated_generic_get_saved_register
-
    Find register number REGNUM relative to FRAME and put its (raw,
    target format) contents in *RAW_BUFFER.
 
@@ -1496,62 +1510,56 @@ get_prev_frame (struct frame_info *this_frame)
 						prev_frame->pc);
 
   /* Find the prev's frame's ID.  */
-  switch (prev_frame->type)
+
+  /* The callee expects to be invoked with:
+
+     this->unwind->this_id (this->next, &this->cache, &this->id);
+
+     The below is carefully shifted one frame `to the left' so that
+     both the unwind->this_id and unwind->prev_register methods are
+     consistently invoked with NEXT_FRAME and THIS_PROLOGUE_CACHE.
+       
+     Also note that, while the PC for this new previous frame was
+     unwound first (see above), the below is the first call that
+     [potentially] requires analysis of the new previous frame's
+     prologue.  Consequently, it is this call, that typically ends up
+     initializing the previous frame's prologue cache.  */
+  prev_frame->unwind->this_id (this_frame,
+			       &prev_frame->prologue_cache,
+			       &prev_frame->id);
+
+  /* Check that the unwound ID is valid.  */
+  if (!frame_id_p (prev_frame->id))
     {
-    case DUMMY_FRAME:
-      /* When unwinding a normal frame, the stack structure is
-	 determined by analyzing the frame's function's code (be it
-	 using brute force prologue analysis, or the dwarf2 CFI).  In
-	 the case of a dummy frame, that simply isn't possible.  The
-	 The PC is either the program entry point, or some random
-	 address on the stack.  Trying to use that PC to apply
-	 standard frame ID unwind techniques is just asking for
-	 trouble.  */
-      gdb_assert (gdbarch_unwind_dummy_id_p (current_gdbarch));
-	/* Assume hand_function_call(), via SAVE_DUMMY_FRAME_TOS,
-	   previously saved the dummy frame's ID.  Things only work if
-	   the two return the same value.  */
-      gdb_assert (SAVE_DUMMY_FRAME_TOS_P ());
-      /* Use an architecture specific method to extract the prev's
-	 dummy ID from the next frame.  Note that this method uses
-	 frame_register_unwind to obtain the register values needed to
-	 determine the dummy frame's ID.  */
-      prev_frame->id = gdbarch_unwind_dummy_id (current_gdbarch, this_frame);
-      break;
-    case NORMAL_FRAME:
-    case SIGTRAMP_FRAME:
-      /* FIXME: cagney/2003-03-04: The below call isn't right.  It
-	 should instead be doing something like "prev_frame -> unwind
-	 -> id (this_frame, & prev_frame -> unwind_cache, & prev_frame
-	 -> id)" but that requires more extensive (pending) changes.  */
-      this_frame->unwind->id (this_frame, &this_frame->unwind_cache,
-			      &prev_frame->id);
-      /* Check that the unwound ID is valid.  */
-      if (!frame_id_p (prev_frame->id))
-	{
-	  if (frame_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"Outermost frame - unwound frame ID invalid\n");
-	  return NULL;
-	}
-      /* Check that the new frame isn't inner to (younger, below,
-	 next) the old frame.  If that happens the frame unwind is
-	 going backwards.  */
-      /* FIXME: cagney/2003-02-25: Ignore the sentinel frame since
-	 that doesn't have a valid frame ID.  Should instead set the
-	 sentinel frame's frame ID to a `sentinel'.  Leave it until
-	 after the switch to storing the frame ID, instead of the
-	 frame base, in the frame object.  */
-      if (this_frame->level >= 0
-	  && frame_id_inner (prev_frame->id, get_frame_id (this_frame)))
-	error ("Unwound frame inner-to selected frame (corrupt stack?)");
-      /* Note that, due to frameless functions, the stronger test of
-	 the new frame being outer to the old frame can't be used -
-	 frameless functions differ by only their PC value.  */
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, "bad switch");
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Outermost frame - unwound frame ID invalid\n");
+      return NULL;
     }
+
+  /* Check that the new frame isn't inner to (younger, below, next)
+     the old frame.  If that happens the frame unwind is going
+     backwards.  */
+  /* FIXME: cagney/2003-02-25: Ignore the sentinel frame since that
+     doesn't have a valid frame ID.  Should instead set the sentinel
+     frame's frame ID to a true `sentinel'.  Leave it until after the
+     switch to storing the frame ID, instead of the frame base, in the
+     frame object.  */
+  if (this_frame->level >= 0
+      && frame_id_inner (prev_frame->id, get_frame_id (this_frame)))
+    error ("Unwound frame inner-to selected frame (corrupt stack?)");
+
+  /* FIXME: cagney/2003-03-14: Should check that this and next frame's
+     IDs are different (i.e., !frame_id_eq()).  Can't yet do that as
+     the EQ function doesn't yet compare PC values.  */
+
+  /* FIXME: cagney/2003-03-14: Should delay the evaluation of the
+     frame ID until when it is needed.  That way the inner most frame
+     can be created without needing to do prologue analysis.  */
+
+  /* Note that, due to frameless functions, the stronger test of the
+     new frame being outer to the old frame can't be used - frameless
+     functions differ by only their PC value.  */
 
   /* FIXME: cagney/2002-12-18: Instead of this hack, should only store
      the frame ID in PREV_FRAME.  Unfortunatly, some architectures
