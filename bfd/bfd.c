@@ -1185,6 +1185,9 @@ DESCRIPTION
 .#define bfd_merge_sections(abfd, link_info) \
 .	BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
 .
+.#define bfd_discard_group(abfd, sec) \
+.	BFD_SEND (abfd, _bfd_discard_group, (abfd, sec))
+.
 .#define bfd_link_hash_table_create(abfd) \
 .	BFD_SEND (abfd, _bfd_link_hash_table_create, (abfd))
 .

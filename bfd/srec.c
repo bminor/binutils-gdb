@@ -1270,6 +1270,7 @@ srec_print_symbol (abfd, afile, symbol, how)
 #define srec_bfd_relax_section bfd_generic_relax_section
 #define srec_bfd_gc_sections bfd_generic_gc_sections
 #define srec_bfd_merge_sections bfd_generic_merge_sections
+#define srec_bfd_discard_group bfd_generic_discard_group
 #define srec_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define srec_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define srec_bfd_link_add_symbols _bfd_generic_link_add_symbols

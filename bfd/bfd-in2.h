@@ -663,8 +663,6 @@ extern boolean bfd_elf32_discard_info
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf64_discard_info
   PARAMS ((bfd *, struct bfd_link_info *));
-extern void bfd_elf_discard_group
-  PARAMS ((bfd *, struct sec *));
 
 /* Return an upper bound on the number of bytes required to store a
    copy of ABFD's program header table entries.  Return -1 if an error
@@ -821,10 +819,11 @@ extern void bfd_ticoff_set_section_load_page
 extern int bfd_ticoff_get_section_load_page
   PARAMS ((struct sec *));
 
-/* And more from the source.  */
+/* Extracted from init.c.  */
 void
 bfd_init PARAMS ((void));
 
+/* Extracted from opncls.c.  */
 bfd *
 bfd_openr PARAMS ((const char *filename, const char *target));
 
@@ -852,6 +851,7 @@ bfd_make_writable PARAMS ((bfd *abfd));
 boolean
 bfd_make_readable PARAMS ((bfd *abfd));
 
+/* Extracted from libbfd.c.  */
 
 /* Byte swapping macros for user section data.  */
 
@@ -992,6 +992,7 @@ bfd_make_readable PARAMS ((bfd *abfd));
 #define H_GET_S8 bfd_h_get_signed_8
 
 
+/* Extracted from section.c.  */
 /* This structure is used for a comdat section, as in PE.  A comdat
    section is associated with a particular symbol.  When the linker
    sees a comdat section, it keeps only one of the sections with a
@@ -1452,9 +1453,10 @@ bfd_copy_private_section_data PARAMS ((bfd *ibfd, asection *isec,
 void
 _bfd_strip_section_from_output PARAMS ((struct bfd_link_info *info, asection *section));
 
-void
-bfd_discard_group PARAMS ((bfd *abfd, asection *group));
+boolean
+bfd_generic_discard_group PARAMS ((bfd *abfd, asection *group));
 
+/* Extracted from archures.c.  */
 enum bfd_architecture
 {
   bfd_arch_unknown,   /* File arch not known.  */
@@ -1728,6 +1730,7 @@ unsigned int
 bfd_arch_mach_octets_per_byte PARAMS ((enum bfd_architecture arch,
     unsigned long machine));
 
+/* Extracted from reloc.c.  */
 typedef enum bfd_reloc_status
 {
   /* No errors detected.  */
@@ -3090,6 +3093,7 @@ bfd_reloc_type_lookup PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 const char *
 bfd_get_reloc_code_name PARAMS ((bfd_reloc_code_real_type code));
 
+/* Extracted from syms.c.  */
 
 typedef struct symbol_cache_entry
 {
@@ -3262,6 +3266,7 @@ bfd_copy_private_symbol_data PARAMS ((bfd *ibfd, asymbol *isym, bfd *obfd, asymb
      BFD_SEND (obfd, _bfd_copy_private_symbol_data, \
                (ibfd, isymbol, obfd, osymbol))
 
+/* Extracted from bfd.c.  */
 struct _bfd
 {
   /* The filename the application opened the BFD with.  */
@@ -3561,6 +3566,9 @@ bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 #define bfd_merge_sections(abfd, link_info) \
        BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
 
+#define bfd_discard_group(abfd, sec) \
+       BFD_SEND (abfd, _bfd_discard_group, (abfd, sec))
+
 #define bfd_link_hash_table_create(abfd) \
        BFD_SEND (abfd, _bfd_link_hash_table_create, (abfd))
 
@@ -3602,6 +3610,7 @@ extern bfd_byte *bfd_get_relocated_section_contents
 boolean
 bfd_alt_mach_code PARAMS ((bfd *abfd, int index));
 
+/* Extracted from archive.c.  */
 symindex
 bfd_get_next_mapent PARAMS ((bfd *abfd, symindex previous, carsym **sym));
 
@@ -3611,6 +3620,7 @@ bfd_set_archive_head PARAMS ((bfd *output, bfd *new_head));
 bfd *
 bfd_openr_next_archived_file PARAMS ((bfd *archive, bfd *previous));
 
+/* Extracted from corefile.c.  */
 const char *
 bfd_core_file_failing_command PARAMS ((bfd *abfd));
 
@@ -3620,6 +3630,7 @@ bfd_core_file_failing_signal PARAMS ((bfd *abfd));
 boolean
 core_file_matches_executable_p PARAMS ((bfd *core_bfd, bfd *exec_bfd));
 
+/* Extracted from targets.c.  */
 #define BFD_SEND(bfd, message, arglist) \
                ((*((bfd)->xvec->message)) arglist)
 
@@ -3901,7 +3912,8 @@ CONCAT2 (NAME,_bfd_link_just_syms), \
 CONCAT2 (NAME,_bfd_final_link), \
 CONCAT2 (NAME,_bfd_link_split_section), \
 CONCAT2 (NAME,_bfd_gc_sections), \
-CONCAT2 (NAME,_bfd_merge_sections)
+CONCAT2 (NAME,_bfd_merge_sections), \
+CONCAT2 (NAME,_bfd_discard_group)
   int      (*_bfd_sizeof_headers) PARAMS ((bfd *, boolean));
   bfd_byte *(*_bfd_get_relocated_section_contents)
     PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
@@ -3935,6 +3947,9 @@ CONCAT2 (NAME,_bfd_merge_sections)
 
   /* Attempt to merge SEC_MERGE sections.  */
   boolean  (*_bfd_merge_sections) PARAMS ((bfd *, struct bfd_link_info *));
+
+  /* Discard members of a group.  */
+  boolean  (*_bfd_discard_group) PARAMS ((bfd *, struct sec *));
 
   /* Routines to handle dynamic symbols and relocs.  */
 #define BFD_JUMP_TABLE_DYNAMIC(NAME) \
@@ -3974,6 +3989,7 @@ bfd_target_list PARAMS ((void));
 const bfd_target *
 bfd_search_for_target PARAMS ((int (* search_func) (const bfd_target *, void *), void *));
 
+/* Extracted from format.c.  */
 boolean
 bfd_check_format PARAMS ((bfd *abfd, bfd_format format));
 

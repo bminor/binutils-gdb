@@ -1261,6 +1261,8 @@ extern boolean _bfd_elf_slurp_version_tables
   PARAMS ((bfd *));
 extern boolean _bfd_elf_merge_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_elf_discard_group
+  PARAMS ((bfd *, struct sec *));
 extern void _bfd_elf_link_just_syms
   PARAMS ((asection *, struct bfd_link_info *));
 extern boolean _bfd_elf_copy_private_symbol_data

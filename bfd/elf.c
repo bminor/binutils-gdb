@@ -553,7 +553,7 @@ setup_group (abfd, hdr, newsect)
   return true;
 }
 
-void
+boolean
 bfd_elf_discard_group (abfd, group)
      bfd *abfd ATTRIBUTE_UNUSED;
      asection *group;
@@ -569,6 +569,7 @@ bfd_elf_discard_group (abfd, group)
       if (s == first)
 	break;
     }
+  return true;
 }
 
 /* Make a BFD section from an ELF section.  We store a pointer to the

@@ -2602,6 +2602,8 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 /* Merging of sections is not done.  */
 #define _bfd_ecoff_bfd_merge_sections bfd_generic_merge_sections
 
+#define _bfd_ecoff_bfd_discard_group bfd_generic_discard_group
+
 extern const bfd_target ecoff_big_vec;
 
 const bfd_target ecoff_little_vec =

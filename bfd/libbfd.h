@@ -327,6 +327,10 @@ extern boolean _bfd_generic_set_section_contents
   ((boolean (*) \
     PARAMS ((bfd *, struct bfd_link_info *))) \
    bfd_false)
+#define _bfd_nolink_bfd_discard_group \
+  ((boolean (*) \
+    PARAMS ((bfd *, struct sec *))) \
+   bfd_false)
 #define _bfd_nolink_bfd_link_hash_table_create \
   ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
 #define _bfd_nolink_bfd_link_hash_table_free \
@@ -594,14 +598,15 @@ extern boolean _bfd_sh_align_load_span
 	   boolean (*) (bfd *, asection *, PTR, bfd_byte *, bfd_vma),
 	   PTR, bfd_vma **, bfd_vma *, bfd_vma, bfd_vma, boolean *));
 
-/* And more follows */
-
+/* Extracted from init.c.  */
+/* Extracted from libbfd.c.  */
 boolean
 bfd_write_bigendian_4byte_int PARAMS ((bfd *, unsigned int));
 
 unsigned int
 bfd_log2 PARAMS ((bfd_vma x));
 
+/* Extracted from cache.c.  */
 #define BFD_CACHE_MAX_OPEN 10
 extern bfd *bfd_last_cache;
 
@@ -621,6 +626,7 @@ bfd_open_file PARAMS ((bfd *abfd));
 FILE *
 bfd_cache_lookup_worker PARAMS ((bfd *abfd));
 
+/* Extracted from reloc.c.  */
 #ifdef _BFD_MAKE_TABLE_bfd_reloc_code_real
 
 static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
@@ -1277,6 +1283,7 @@ bfd_generic_get_relocated_section_contents PARAMS ((bfd *abfd,
     boolean relocateable,
     asymbol **symbols));
 
+/* Extracted from archures.c.  */
 extern const bfd_arch_info_type bfd_default_arch_struct;
 boolean
 bfd_default_set_arch_mach PARAMS ((bfd *abfd,
@@ -1290,6 +1297,7 @@ bfd_default_compatible PARAMS ((const bfd_arch_info_type *a,
 boolean
 bfd_default_scan PARAMS ((const struct bfd_arch_info *info, const char *string));
 
+/* Extracted from elf.c.  */
 struct elf_internal_shdr *
 bfd_elf_find_section PARAMS ((bfd *abfd, char *name));
 

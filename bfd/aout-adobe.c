@@ -510,6 +510,7 @@ aout_adobe_sizeof_headers (ignore_abfd, ignore)
 #define aout_32_bfd_relax_section       bfd_generic_relax_section
 #define aout_32_bfd_gc_sections         bfd_generic_gc_sections
 #define aout_32_bfd_merge_sections	bfd_generic_merge_sections
+#define aout_32_bfd_discard_group	bfd_generic_discard_group
 #define aout_32_bfd_link_hash_table_create \
   _bfd_generic_link_hash_table_create
 #define aout_32_bfd_link_hash_table_free \

@@ -2735,6 +2735,7 @@ const bfd_target rs6000coff64_vec =
   _bfd_generic_link_split_section,	/* _bfd_link_split_section */
   bfd_generic_gc_sections,		/* _bfd_gc_sections */
   bfd_generic_merge_sections,		/* _bfd_merge_sections */
+  bfd_generic_discard_group,		/* _bfd_discard_group */
 
   /* Dynamic */
   /* _get_dynamic_symtab_upper_bound */
@@ -2988,6 +2989,7 @@ const bfd_target aix5coff64_vec =
   _bfd_generic_link_split_section,	/* _bfd_link_split_section */
   bfd_generic_gc_sections,		/* _bfd_gc_sections */
   bfd_generic_merge_sections,		/* _bfd_merge_sections */
+  bfd_generic_discard_group,		/* _bfd_discard_group */
 
   /* Dynamic */
   /* _get_dynamic_symtab_upper_bound */

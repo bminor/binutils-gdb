@@ -3256,6 +3256,7 @@ mmo_canonicalize_reloc (abfd, section, relptr, symbols)
 #define mmo_set_arch_mach bfd_default_set_arch_mach
 #define mmo_bfd_relax_section bfd_generic_relax_section
 #define mmo_bfd_merge_sections bfd_generic_merge_sections
+#define mmo_bfd_discard_group bfd_generic_discard_group
 
 /* objcopy will be upset if we return -1 from bfd_get_reloc_upper_bound by
    using BFD_JUMP_TABLE_RELOCS (_bfd_norelocs) rather than 0.  FIXME: Most

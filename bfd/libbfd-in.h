@@ -322,6 +322,10 @@ extern boolean _bfd_generic_set_section_contents
   ((boolean (*) \
     PARAMS ((bfd *, struct bfd_link_info *))) \
    bfd_false)
+#define _bfd_nolink_bfd_discard_group \
+  ((boolean (*) \
+    PARAMS ((bfd *, struct sec *))) \
+   bfd_false)
 #define _bfd_nolink_bfd_link_hash_table_create \
   ((struct bfd_link_hash_table *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
 #define _bfd_nolink_bfd_link_hash_table_free \
@@ -588,6 +592,4 @@ extern boolean _bfd_sh_align_load_span
   PARAMS ((bfd *, asection *, bfd_byte *,
 	   boolean (*) (bfd *, asection *, PTR, bfd_byte *, bfd_vma),
 	   PTR, bfd_vma **, bfd_vma *, bfd_vma, bfd_vma, boolean *));
-
-/* And more follows */
 

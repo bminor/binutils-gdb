@@ -400,7 +400,8 @@ the tokens.
 .CONCAT2 (NAME,_bfd_final_link), \
 .CONCAT2 (NAME,_bfd_link_split_section), \
 .CONCAT2 (NAME,_bfd_gc_sections), \
-.CONCAT2 (NAME,_bfd_merge_sections)
+.CONCAT2 (NAME,_bfd_merge_sections), \
+.CONCAT2 (NAME,_bfd_discard_group)
 .  int      (*_bfd_sizeof_headers) PARAMS ((bfd *, boolean));
 .  bfd_byte *(*_bfd_get_relocated_section_contents)
 .    PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
@@ -434,6 +435,9 @@ the tokens.
 .
 .  {* Attempt to merge SEC_MERGE sections.  *}
 .  boolean  (*_bfd_merge_sections) PARAMS ((bfd *, struct bfd_link_info *));
+.
+.  {* Discard members of a group.  *}
+.  boolean  (*_bfd_discard_group) PARAMS ((bfd *, struct sec *));
 .
 .  {* Routines to handle dynamic symbols and relocs.  *}
 .#define BFD_JUMP_TABLE_DYNAMIC(NAME) \

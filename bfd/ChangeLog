@@ -1,3 +1,47 @@
+2002-06-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h: Remove "taken from the source" comment.
+	* libbfd-in.h: Likewise.
+	* libcoff-in.h: Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+	* elf.c (bfd_elf_discard_group): Return true.
+	* elf-bfd.h (bfd_elf_discard_group): Declare.
+	* bfd-in.h (bfd_elf_discard_group): Don't declare here.
+	* section.c (bfd_discard_group): Rename to bfd_generic_discard_group.
+	* bfd.c (bfd_discard_group): Define.
+	* targets.c (struct bfd_target): Add _bfd_discard_group.
+	(BFD_JUMP_TABLE_LINK): Here too.
+	* libbfd-in.h (_bfd_nolink_bfd_discard_group): Define.
+	* aout-adobe.c (aout_32_bfd_discard_group): Define.
+	* aout-target.h (MY_bfd_discard_group): Define.
+	* aout-tic30.c (MY_bfd_discard_group): Define.
+	* binary.c (binary_bfd_discard_group): Define.
+	* bout.c (b_out_bfd_discard_group): Define.
+	* coff-alpha.c (_bfd_ecoff_bfd_discard_group): Define.
+	* coffcode.h (coff_bfd_discard_group): Define.
+	* coff-mips.c (_bfd_ecoff_bfd_discard_group): Define.
+	* elfxx-target.h (bfd_elfNN_bfd_discard_group): Define.
+	* i386msdos.c (msdos_bfd_discard_group): Define.
+	* i386os9k.c (os9k_bfd_discard_group): Define.
+	* ieee.c (ieee_bfd_discard_group): Define.
+	* ihex.c (ihex_bfd_discard_group): Define.
+	* mmo.c (mmo_bfd_discard_group): Define.
+	* nlm-target.h (nlm_bfd_discard_group): Define.
+	* oasys.c (oasys_bfd_discard_group): Define.
+	* ppcboot.c (ppcboot_bfd_discard_group): Define.
+	* som.c (som_bfd_discard_group): Define.
+	* srec.c (srec_bfd_discard_group): Define.
+	* tekhex.c (tekhex_bfd_discard_group): Define.
+	* versados.c (versados_bfd_discard_group): Define.
+	* vms.c (vms_bfd_discard_group): Define.
+	* xcoff-target.h (_bfd_xcoff_bfd_discard_group): Define.
+	* coff64-rs6000.c (rs6000coff64_vec): Update initialiser.
+	(aix5coff64_vec): Likewise.
+	* coff-rs6000.c (rs6000coff_vec, pmac_xcoff_vec): Likewise.
+
 2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.am (BFD32_BACKENDS): Add elf32-sh64-com.lo.

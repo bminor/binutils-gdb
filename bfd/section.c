@@ -1378,21 +1378,19 @@ _bfd_strip_section_from_output (info, s)
 
 /*
 FUNCTION
-	bfd_discard_group
+	bfd_generic_discard_group
 
 SYNOPSIS
-	void bfd_discard_group (bfd *abfd, asection *group);
+	boolean bfd_generic_discard_group (bfd *abfd, asection *group);
 
 DESCRIPTION
 	Remove all members of @var{group} from the output.
 */
 
-void
-bfd_discard_group (abfd, group)
-     bfd *abfd;
-     asection *group;
+boolean
+bfd_generic_discard_group (abfd, group)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *group ATTRIBUTE_UNUSED;
 {
-  if ((group->flags & SEC_GROUP) != 0
-      && abfd->xvec->flavour == bfd_target_elf_flavour)
-    bfd_elf_discard_group (abfd, group);
+  return true;
 }
