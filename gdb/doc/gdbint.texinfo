@@ -5404,29 +5404,45 @@ configuration.
 @table @asis
 @item @var{major}.@var{minor}
 @itemx @var{major}.@var{minor}.@var{patchlevel}
-an official release (e.g., 6.0 or 6.0.1)
-@item @var{major}.@var{minor}.@var{patchlevel}_@var{YYYY}@var{MM}@var{DD}
-a snapshot (e.g., 6.0.50_20020630)
-@item @var{major}.@var{minor}.@var{patchlevel}_@var{YYYY}-@var{MM}-@var{DD}-cvs
-a @sc{cvs} check out (e.g., 6.0.90_2004-02-30-cvs)
-@item @var{major}.@var{minor}.@var{patchlevel}_@var{YYYY}@var{MM}@var{DD} (@var{vendor})
+an official release (e.g., 6.2 or 6.2.1)
+@item @var{major}.@var{minor}.@var{patchlevel}.@var{YYYY}@var{MM}@var{DD}
+a snapshot taken at @var{YYYY}-@var{MM}-@var{DD}-gmt (e.g.,
+6.1.50.20020302, 6.1.90.20020304, or 6.1.0.20020308)
+@item @var{major}.@var{minor}.@var{patchlevel}.@var{YYYY}@var{MM}@var{DD}-cvs
+a @sc{cvs} check out drawn on @var{YYYY}-@var{MM}-@var{DD} (e.g.,
+6.1.50.20020302-cvs, 6.1.90.20020304-cvs, or 6.1.0.20020308-cvs)
+@item @var{major}.@var{minor}.@var{patchlevel}.@var{YYYY}@var{MM}@var{DD} (@var{vendor})
 a vendor specific release of @value{GDBN}, that while based on@*
-@var{major}.@var{minor}.@var{patchlevel}_@var{YYYY}@var{MM}@var{DD},
-may contain additional changes
+@var{major}.@var{minor}.@var{patchlevel}.@var{YYYY}@var{MM}@var{DD},
+may include additional changes
 @end table
 
 @value{GDBN}'s mainline uses the @var{major} and @var{minor} version
 numbers from the most recent release branch, with a @var{patchlevel}
-of 50.  As each new release branch is created, the mainline
-@var{major} and @var{minor} version numbers are accordingly updated.
+of 50.  At the time each new release branch is created, the mainline's
+@var{major} and @var{minor} version numbers are updated.
 
-@value{GDBN}'s release branch uses a similar, but slightly more
-complicated scheme.  When the branch is first cut, the mainline's
-@var{patchlevel} is changed to .90.  As draft releases are drawn from
-the branch, the @var{patchlevel} is incremented.  Once the first
-release (@var{major}.@var{minor}) has been made, the version prefix is
-updated to @var{major}.@var{minor}.0.90.  Follow on releases have an
-incremented @var{patchlevel}.
+@value{GDBN}'s release branch is similar.  When the branch is cut, the
+@var{patchlevel} is changed from 50 to 90.  As draft releases are
+drawn from the branch, the @var{patchlevel} is incremented.  Once the
+first release (@var{major}.@var{minor}) has been made, the
+@var{patchlevel} is set to 0 and updates have an incremented
+@var{patchlevel}.
+
+For snapshots, and @sc{cvs} check outs, it is also possible to
+identify the @sc{cvs} origin:
+
+@table @asis
+@item @var{major}.@var{minor}.50.@var{YYYY}@var{MM}@var{DD}
+drawn from the @sc{head} of mainline @sc{cvs} (e.g., 6.1.50.20020302)
+@item @var{major}.@var{minor}.90.@var{YYYY}@var{MM}@var{DD}
+@itemx @var{major}.@var{minor}.91.@var{YYYY}@var{MM}@var{DD} @dots{}
+drawn from a release branch prior to the release (e.g.,
+6.1.90.20020304)
+@item @var{major}.@var{minor}.0.@var{YYYY}@var{MM}@var{DD}
+@itemx @var{major}.@var{minor}.1.@var{YYYY}@var{MM}@var{DD} @dots{}
+drawn from a release branch after the release (e.g., 6.2.0.20020308)
+@end table
 
 If the previous @value{GDBN} version is 6.1 and the current version is
 6.2, then, substituting 6 for @var{major} and 1 or 2 for @var{minor},
@@ -5435,34 +5451,34 @@ here's an illustration of a typical sequence:
 @smallexample
      <HEAD>
         |
-6.1.50_2002-03-02-cvs
+6.1.50.20020302-cvs
         |
-        +---------------------------.
+        +--------------------------.
         |                    <gdb_6_2-branch>
-        |                           |
-6.2.50_2002-03-03-cvs        6.1.90 (draft #1)
-        |                           |
-6.2.50_2002-03-04-cvs        6.1.90_2002-03-04-cvs
-        |                           |
-6.2.50_2002-03-05-cvs        6.1.91 (draft #2)
-        |                           |
-6.2.50_2002-03-06-cvs        6.1.91_2002-03-06-cvs
-        |                           |
-6.2.50_2002-03-07-cvs        6.2 (release)
         |                          |
-6.2.50_2002-03-08-cvs        6.2.0.90_2002-03-08-cvs
+6.2.50.20020303-cvs        6.1.90 (draft #1)
         |                          |
-6.2.50_2002-03-09-cvs        6.2.1 (update)
-        |                           |
-6.2.50_2002-03-10-cvs         <branch closed>
+6.2.50.20020304-cvs        6.1.90.20020304-cvs
+        |                          |
+6.2.50.20020305-cvs        6.1.91 (draft #2)
+        |                          |
+6.2.50.20020306-cvs        6.1.91.20020306-cvs
+        |                          |
+6.2.50.20020307-cvs        6.2 (release)
+        |                          |
+6.2.50.20020308-cvs        6.2.0.20020308-cvs
+        |                          |
+6.2.50.20020309-cvs        6.2.1 (update)
+        |                          |
+6.2.50.20020310-cvs         <branch closed>
         |
-6.2.50_2002-03-11-cvs
+6.2.50.20020311-cvs
         |
-        +---------------------------.
+        +--------------------------.
         |                     <gdb_6_3-branch>
-        |                           |
-6.3.50_2002-03-12-cvs        6.2.90 (draft #1)
-        |                           |
+        |                          |
+6.3.50.20020312-cvs        6.2.90 (draft #1)
+        |                          |
 @end smallexample
 
 @section Release Branches
@@ -5538,7 +5554,7 @@ branch (branches of individual files should be avoided).  @xref{Tags}.
 @item a branch shall be branded using @file{version.in}
 The file @file{gdb/version.in} shall be modified so that it identifies
 the branch @var{owner} and branch @var{name}, e.g.,
-@samp{6.2.50_20030303_owner_name} or @samp{6.2 (Owner Name)}.
+@samp{6.2.50.20030303_owner_name} or @samp{6.2 (Owner Name)}.
 
 @end table
 
