@@ -95,10 +95,10 @@ gnu_fetch_registers (int reg)
 
   if (! state)
     warning ("Couldn't fetch register %s from %s (invalid thread).",
-	     reg_names[reg], proc_string (thread));
+	     REGISTER_NAME (reg), proc_string (thread));
   else if (reg >= 0)
     {
-      proc_debug (thread, "fetching register: %s", reg_names[reg]);
+      proc_debug (thread, "fetching register: %s", REGISTER_NAME (reg));
       supply_register (reg, REG_ADDR(state, reg));
       thread->fetched_regs |= (1 << reg);
     }
@@ -132,7 +132,7 @@ gnu_store_registers (reg)
   if (! thread)
     error ("store inferior registers: %d: Invalid thread", inferior_pid);
 
-  proc_debug (thread, "storing register %s.", reg_names[reg]);
+  proc_debug (thread, "storing register %s.", REGISTER_NAME (reg));
 
   was_aborted = thread->aborted;
   was_valid = thread->state_valid;
@@ -143,7 +143,7 @@ gnu_store_registers (reg)
 
   if (! state)
     warning ("Couldn't store register %s from %s (invalid thread).",
-	     reg_names[reg], proc_string (thread));
+	     REGISTER_NAME (reg), proc_string (thread));
   else
     {
       if (! was_aborted && was_valid)
@@ -158,7 +158,7 @@ gnu_store_registers (reg)
 	      /* Register CHECK_REG has changed!  Ack!  */
 	      {
 		warning ("Register %s changed after thread was aborted.",
-			 reg_names [check_reg]);
+			 REGISTER_NAME (check_reg));
 		if (reg >= 0 && reg != check_reg)
 		  /* Update gdb's copy of the register.  */
 		  supply_register (check_reg, REG_ADDR (state, check_reg));
@@ -169,7 +169,7 @@ gnu_store_registers (reg)
 
       if (reg >= 0)
 	{
-	  proc_debug (thread, "storing register: %s", reg_names[reg]);
+	  proc_debug (thread, "storing register: %s", REGISTER_NAME (reg));
 	  STORE_REGS (state, reg, 1);
 	}
       else

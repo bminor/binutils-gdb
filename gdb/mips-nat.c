@@ -201,7 +201,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
     }
   if (bad_reg >= 0)
     {
-      error ("Register %s not found in core file.", reg_names[bad_reg]);
+      error ("Register %s not found in core file.", REGISTER_NAME (bad_reg));
     }
   supply_register (ZERO_REGNUM, zerobuf);
   /* Frame ptr reg must appear to be 0; it is faked by stack handling code. */

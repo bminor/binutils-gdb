@@ -1,3 +1,11 @@
+Fri Dec 11 09:52:04 1998  Andrew Cagney  <cagney@chook>
+
+	* gdbtk-cmds.c, mipsm3-nat.c, hppah-nat.c, infptrace.c,
+ 	i386gnu-nat.c, hppab-nat.c, core-aout.c, arm-xdep.c, alpha-nat.c,
+ 	altos-xdep.c, pyr-xdep.c, remote-st.c, remote-os9k.c,
+ 	tahoe-tdep.c, pyr-tdep.c, v850ice.c, vax-tdep.c: Replace reg_name
+ 	with REGISTER_NAME.
+
 Thu Dec 10 15:19:40 1998  David Taylor  <taylor@texas.cygnus.com>
 
 	The following changes were made by Jim Blandy <jimb@cygnus.com>,

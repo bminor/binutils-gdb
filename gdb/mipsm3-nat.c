@@ -314,7 +314,7 @@ store_inferior_registers (regno)
       regno == FCRIR_REGNUM)
     {
       message ("You can not alter read-only register `%s'",
-	       reg_names[ regno ]);
+	       REGISTER_NAME ( regno ));
       fetch_inferior_registers (regno);
       return;
     }

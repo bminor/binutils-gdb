@@ -120,17 +120,17 @@ print_insn_arg (d, p, addr, info)
 
       case 4:			/* Indexed */
 	p = (char *) print_insn_arg (d, p, addr + 1, info);
-	(*info->fprintf_func) (info->stream, "[%s]", reg_names[regnum]);
+	(*info->fprintf_func) (info->stream, "[%s]", REGISTER_NAME (regnum));
 	break;
 
       case 5:			/* Register */
-	(*info->fprintf_func) (info->stream, reg_names[regnum]);
+	(*info->fprintf_func) (info->stream, REGISTER_NAME (regnum));
 	break;
 
       case 7:			/* Autodecrement */
 	(*info->fprintf_func) (info->stream, "-");
       case 6:			/* Register deferred */
-	(*info->fprintf_func) (info->stream, "(%s)", reg_names[regnum]);
+	(*info->fprintf_func) (info->stream, "(%s)", REGISTER_NAME (regnum));
 	break;
 
       case 9:			/* Autoincrement deferred */
@@ -209,7 +209,7 @@ print_insn_arg (d, p, addr, info)
 	      }
 	  }
 	else
-	  (*info->fprintf_func) (info->stream, "(%s)+", reg_names[regnum]);
+	  (*info->fprintf_func) (info->stream, "(%s)+", REGISTER_NAME (regnum));
 	break;
 
       case 11:			/* Byte displacement deferred */
@@ -221,7 +221,7 @@ print_insn_arg (d, p, addr, info)
 	    (*info->print_address_func) (info->target, info);
 	  }
 	else
-	  (*info->fprintf_func) (info->stream, "%d(%s)", *p, reg_names[regnum]);
+	  (*info->fprintf_func) (info->stream, "%d(%s)", *p, REGISTER_NAME (regnum));
 	p += 1;
 	break;
 
@@ -235,7 +235,7 @@ print_insn_arg (d, p, addr, info)
 	  }
 	else
 	  (*info->fprintf_func) (info->stream, "%d(%s)",
-				 *(short *)p, reg_names[regnum]);
+				 *(short *)p, REGISTER_NAME (regnum));
 	p += 2;
 	break;
 
@@ -249,7 +249,7 @@ print_insn_arg (d, p, addr, info)
 	  }
 	else
 	  (*info->fprintf_func) (info->stream, "%d(%s)",
-				 *(long *)p, reg_names[regnum]);
+				 *(long *)p, REGISTER_NAME (regnum));
 	p += 4;
       }
 

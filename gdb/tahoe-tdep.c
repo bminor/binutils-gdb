@@ -121,17 +121,17 @@ print_insn_arg (d, p, addr, stream)
 
       case 4:			/* Indexed */
 	p = (char *) print_insn_arg (d, p, addr + 1, stream);
-	fprintf_unfiltered (stream, "[%s]", reg_names[regnum]);
+	fprintf_unfiltered (stream, "[%s]", REGISTER_NAME (regnum));
 	break;
 
       case 5:			/* Register */
-	fprintf_unfiltered (stream, reg_names[regnum]);
+	fprintf_unfiltered (stream, REGISTER_NAME (regnum));
 	break;
 
       case 7:			/* Autodecrement */
 	fputc_unfiltered ('-', stream);
       case 6:			/* Register deferred */
-	fprintf_unfiltered (stream, "(%s)", reg_names[regnum]);
+	fprintf_unfiltered (stream, "(%s)", REGISTER_NAME (regnum));
 	break;
 
       case 9:	                /* Absolute Address & Autoincrement deferred */
@@ -174,7 +174,7 @@ print_insn_arg (d, p, addr, stream)
 	  }
 
 	else                            /*8E is Autoincrement SP Mode*/
-	      fprintf_unfiltered (stream, "(%s)+", reg_names[regnum]);
+	      fprintf_unfiltered (stream, "(%s)+", REGISTER_NAME (regnum));
 	break;
 
       case 11:			/* Register + Byte Displacement Deferred Mode*/
@@ -183,7 +183,7 @@ print_insn_arg (d, p, addr, stream)
 	if (regnum == PC_REGNUM)
 	  print_address (addr + *p + 2, stream);
 	else
-	  fprintf_unfiltered (stream, "%d(%s)", *p, reg_names[regnum]);
+	  fprintf_unfiltered (stream, "%d(%s)", *p, REGISTER_NAME (regnum));
 	p += 1;
 	break;
 
@@ -196,7 +196,7 @@ print_insn_arg (d, p, addr, stream)
 	if (regnum == PC_REGNUM)
 	  print_address (addr + temp1 + 3, stream);
 	else
-	  fprintf_unfiltered (stream, "%d(%s)", temp1, reg_names[regnum]);
+	  fprintf_unfiltered (stream, "%d(%s)", temp1, REGISTER_NAME (regnum));
 	p += 2;
 	break;
 
@@ -213,7 +213,7 @@ print_insn_arg (d, p, addr, stream)
 	if (regnum == PC_REGNUM)
 	  print_address (addr + temp1 + 5, stream);
 	else
-	  fprintf_unfiltered (stream, "%d(%s)", temp1, reg_names[regnum]);
+	  fprintf_unfiltered (stream, "%d(%s)", temp1, REGISTER_NAME (regnum));
 	p += 4;
       }
 

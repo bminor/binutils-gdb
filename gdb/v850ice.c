@@ -509,11 +509,11 @@ convert_register (regno, buf)
 {
   if (regno <= 31)
     sprintf (buf, "r%d", regno);
-  else if (reg_names[regno][0] == 's'
-	   && reg_names[regno][1] == 'r')
+  else if (REGISTER_NAME (regno)[0] == 's'
+	   && REGISTER_NAME (regno)[1] == 'r')
     return 0;
   else
-    sprintf (buf, "%s", reg_names[regno]);
+    sprintf (buf, "%s", REGISTER_NAME (regno));
 
   return 1;
 }

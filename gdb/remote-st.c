@@ -424,7 +424,7 @@ get_reg_name (regno)
 
   b = buf;
 
-  for (p = reg_names[regno]; *p; p++)
+  for (p = REGISTER_NAME (regno); *p; p++)
     *b++ = toupper(*p);
   *b = '\000';
 

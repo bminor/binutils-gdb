@@ -1535,17 +1535,17 @@ map_arg_registers (objc, objv, func, argp)
   int regnum;
 
   /* Note that the test for a valid register must include checking the
-     reg_names array because NUM_REGS may be allocated for the union of the
-     register sets within a family of related processors.  In this case, the
-     trailing entries of reg_names will change depending upon the particular
-     processor being debugged.  */
+     REGISTER_NAME because NUM_REGS may be allocated for the union of
+     the register sets within a family of related processors.  In this
+     case, some entries of REGISTER_NAME will change depending upon
+     the particular processor being debugged.  */
 
   if (objc == 0)		/* No args, just do all the regs */
     {
       for (regnum = 0;
            regnum < NUM_REGS
-             && reg_names[regnum] != NULL
-             && *reg_names[regnum] != '\000';
+             && REGISTER_NAME (regnum) != NULL
+             && *REGISTER_NAME (regnum) != '\000';
            regnum++)
         func (regnum, argp);
 
@@ -1563,8 +1563,8 @@ map_arg_registers (objc, objv, func, argp)
 
       if (regnum >= 0
           && regnum < NUM_REGS
-          && reg_names[regnum] != NULL
-          && *reg_names[regnum] != '\000')
+          && REGISTER_NAME (regnum) != NULL
+          && *REGISTER_NAME (regnum) != '\000')
         func (regnum, argp);
       else
         {
@@ -1598,7 +1598,7 @@ get_register_name (regnum, argp)
      void *argp;		/* Ignored */
 {
   Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
-                            Tcl_NewStringObj (reg_names[regnum], -1));
+                            Tcl_NewStringObj (REGISTER_NAME (regnum), -1));
 }
 
 /* This implements the tcl command gdb_fetch_registers

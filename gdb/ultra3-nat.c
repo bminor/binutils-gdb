@@ -148,7 +148,7 @@ store_inferior_registers (regno)
 	      (PTRACE_ARG3_TYPE) regaddr, read_register(regno));
       if (errno != 0)
 	{
-	  sprintf (buf, "writing register %s (#%d)", reg_names[regno],regno);
+	  sprintf (buf, "writing register %s (#%d)", REGISTER_NAME (regno), regno);
 	  perror_with_name (buf);
 	}
     }
@@ -229,7 +229,7 @@ fetch_register (regno)
     val = ptrace (PT_READ_U, inferior_pid,
 		  (PTRACE_ARG3_TYPE) register_addr(regno,0), 0);
     if (errno != 0) {
-      sprintf(buf,"reading register %s (#%d)",reg_names[regno],regno);
+      sprintf(buf,"reading register %s (#%d)",REGISTER_NAME (regno), regno);
       perror_with_name (buf);
     } else {
       supply_register (regno, &val);
@@ -258,9 +258,9 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
     if (!CANNOT_FETCH_REGISTER(regno)) {
       val = bfd_seek (core_bfd, (file_ptr) register_addr (regno, 0), SEEK_SET);
       if (val < 0 || (val = bfd_read (buf, sizeof buf, 1, core_bfd)) < 0) {
-        char * buffer = (char *) alloca (strlen (reg_names[regno]) + 35);
+        char * buffer = (char *) alloca (strlen (REGISTER_NAME (regno)) + 35);
         strcpy (buffer, "Reading core register ");
-        strcat (buffer, reg_names[regno]);
+        strcat (buffer, REGISTER_NAME (regno));
         perror_with_name (buffer);
       }
       supply_register (regno, buf);
@@ -305,7 +305,7 @@ register_addr (regno,blockend)
 	case FC_REGNUM:  return(offsetof(struct ptrace_user,pt_fc));
 	default:
 	     fprintf_filtered(gdb_stderr,"register_addr():Bad register %s (%d)\n", 
-				reg_names[regno],regno);
+			      REGISTER_NAME (regno), regno);
 	     return(0xffffffff);	/* Should make ptrace() fail */
     }
   }

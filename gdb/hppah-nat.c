@@ -91,7 +91,7 @@ store_inferior_registers (regno)
 		char *err = safe_strerror (errno);
 		char *msg = alloca (strlen (err) + 128);
 		sprintf (msg, "writing register %s: %s",
-			 reg_names[regno], err);
+			 REGISTER_NAME (regno), err);
 		warning (msg);
 		return;
 	      }
@@ -131,7 +131,7 @@ fetch_register (regno)
 	     kernel doesn't let us at the registers.  */
 	  char *err = safe_strerror (errno);
 	  char *msg = alloca (strlen (err) + 128);
-	  sprintf (msg, "reading register %s: %s", reg_names[regno], err);
+	  sprintf (msg, "reading register %s: %s", REGISTER_NAME (regno), err);
 	  warning (msg);
 	  goto error_exit;
 	}

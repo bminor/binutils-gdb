@@ -246,10 +246,10 @@ core_file_command (filename, from_tty)
 	      if (val < 0
 		  || (val = myread (corechan, buf, sizeof buf)) < 0)
 		{
-		  char * buffer = (char *) alloca (strlen (reg_names[regno])
+		  char * buffer = (char *) alloca (strlen (REGISTER_NAME (regno))
 						   + 30);
 		  strcpy (buffer, "Reading register ");
-		  strcat (buffer, reg_names[regno]);
+		  strcat (buffer, REGISTER_NAME (regno));
 						   
 		  perror_with_name (buffer);
 		}

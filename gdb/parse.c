@@ -107,9 +107,9 @@ unsigned num_std_regs = (sizeof std_regs / sizeof std_regs[0]);
 
 #endif
 
-/* The generic method for targets to specify how their registers are named.
-   The mapping can be derived from three sources: reg_names; std_regs; or
-   a target specific alias hook. */
+/* The generic method for targets to specify how their registers are
+   named.  The mapping can be derived from three sources:
+   REGISTER_NAME; std_regs; or a target specific alias hook. */
 
 int
 target_map_name_to_register (str, len)

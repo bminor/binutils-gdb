@@ -547,11 +547,11 @@ get_reg_name (regno)
   if (regno < 0)
     return ("");
 /*
-  for (p = reg_names[regno]; *p; p++)
+  for (p = REGISTER_NAME (regno); *p; p++)
     *b++ = toupper(*p);
   *b = '\000';
 */
-  p = (char *)reg_names[regno];
+  p = (char *)REGISTER_NAME (regno);
   return p;
 /*
   return buf;
