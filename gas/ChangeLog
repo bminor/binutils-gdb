@@ -1,5 +1,7 @@
 1999-06-11  Ian Lance Taylor  <ian@zembu.com>
 
+	* config/tc-sparc.c (sparc_ip): Add default case to reloc switch.
+
 	* read.c (read_a_source_file): Only declare inescape if
 	QUOTES_IN_INSN.
 

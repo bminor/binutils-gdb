@@ -2173,6 +2173,9 @@ sparc_ip (str, pinsn)
 			valueT val = the_insn.exp.X_add_number;
 			switch (the_insn.reloc)
 			  {
+			  default:
+			    break;
+
 			  case BFD_RELOC_SPARC_HH22:
 			    val = BSR (val, 32);
 			    /* intentional fallthrough */
