@@ -1,3 +1,7 @@
+Thu Jan 29 12:13:01 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cgen.sh: Portably read parms past $9.
+
 Fri Jan 23 14:20:54 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Make-common.in (stamp-tvals): New rule.
