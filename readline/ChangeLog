@@ -1,3 +1,8 @@
+Mon Oct 12 15:04:07 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* readline.c (init_terminal_io): if tgetent returns 0, the
+	terminal type is unknown.
+
 Thu Oct  1 23:44:14 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: use cpu-vendor-os triple instead of nested cases
