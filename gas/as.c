@@ -1,5 +1,5 @@
 /* as.c - GAS main program.
-   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992, 1994 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -72,6 +72,11 @@ char *myname;			/* argv[0] */
 segT reg_section, expr_section;
 segT text_section, data_section, bss_section;
 #endif
+
+/* This is true if the assembler should not produce any timing info. */
+
+static int quiet_flag = 1;
+
 
 void
 print_version_id ()
@@ -98,6 +103,7 @@ main (argc, argv)
   char *arg;			/* an arg to program */
   char a;			/* an arg flag (after -) */
   int keep_it;
+  long start_time = get_run_time ();
 
 #if 0 /* do we need any of this?? */
   {
@@ -266,6 +272,18 @@ main (argc, argv)
 	      arg = "";		/* Finished with this arg. */
 	      break;
 
+	    case 'n':
+	      if (*arg && strcmp(arg, "oquiet") == 0)
+		quiet_flag = 0;
+	      else if (*arg && strcmp(arg, "ocpp") == 0)
+		;
+	      else
+		{
+		  as_warn ("Unknown option `-n%s' ignored", arg);
+		  arg += strlen (arg);
+		  break;
+		}
+
 	    case 'R':
 	      /* -R means put data into text segment */
 	      flag_readonly_data_in_text = 1;
@@ -362,6 +380,18 @@ main (argc, argv)
 #ifdef md_end
   md_end ();
 #endif
+
+  if (!quiet_flag)
+    {
+      extern char **environ;
+      char *lim = (char *) sbrk (0);
+      long run_time = get_run_time () - start_time;
+
+      fprintf (stderr, "%s: total time in assembly: %d.%06d\n",
+	       myname, run_time / 1000000, run_time % 1000000);
+      fprintf (stderr, "%s: data size %ld\n",
+	       myname, (long) (lim - (char *) &environ));
+    }
 
   if ((had_warnings () && flagseen['Z'])
       || had_errors () > 0)

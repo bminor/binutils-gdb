@@ -1,3 +1,8 @@
+Tue Jan 25 18:30:34 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* as.c (quiet_flag): New flag.
+	(main): If -noquiet given, display execution time and memory used.
+
 Tue Jan 25 15:53:11 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* doc/{all.texi,as.texinfo}: Add documentation for HPPA port.
