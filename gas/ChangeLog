@@ -1,5 +1,8 @@
 Wed Sep 11 00:09:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ecoff.c (ecoff_stab): Create an expression symbol for a complex
+	stabs expression, rather than giving an error.
+
 	* ecoff.c (ecoff_new_file): Don't do anything if we are still in
 	the same file.
 
