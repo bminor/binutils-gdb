@@ -1,3 +1,8 @@
+2000-02-10  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* rs6000-nat.c (child_xfer_memory):  Add missing parameter
+	'struct mem_attrib *' required by 2001-01-23 change.
+
 2001-02-08  Jim Kingdon  <jkingdon@engr.sgi.com>
 
 	Updates to "make TAGS":

@@ -390,7 +390,8 @@ read_word (CORE_ADDR from, int *to, int arch64)
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
-		   int write, struct target_ops *target)
+		   int write, struct mem_attrib *attrib,
+		   struct target_ops *target)
 {
   /* Round starting address down to 32-bit word boundary. */
   int mask = sizeof (int) - 1;
