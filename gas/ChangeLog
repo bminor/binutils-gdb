@@ -1,3 +1,8 @@
+Thu Apr 11 12:39:02 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (md_estimate_size_before_relax): Correct check
+	for byte jump to next instruction to skip empty frags.
+
 Wed Apr 10 16:48:12 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-alpha.c (alpha_ip): If we are going to call emit_add64

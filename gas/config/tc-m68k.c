@@ -28,7 +28,7 @@
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
-#if (defined (OBJ_ELF) && ! defined (TE_PSOS)) || defined (TE_DELTA)
+#if (defined (OBJ_ELF) && ! defined (TE_PSOS) && ! defined (TE_LINUX)) || defined (TE_DELTA)
 const char comment_chars[] = "|#";
 #else
 const char comment_chars[] = "|";
@@ -4159,13 +4159,26 @@ md_estimate_size_before_relax (fragP, segment)
     {
     case TAB (BCC68000, BYTE):
     case TAB (ABRANCH, BYTE):
-      /* We can't do a short jump to the next instruction,
-	   so we force word mode.  */
-      if (fragP->fr_symbol && S_GET_VALUE (fragP->fr_symbol) == 0 &&
-	  fragP->fr_symbol->sy_frag == fragP->fr_next)
+      /* We can't do a short jump to the next instruction, so we force
+	 word mode.  At this point S_GET_VALUE should return the
+	 offset of the symbol within its frag.  If the symbol is at
+	 the start of a frag, and it is the next frag with any data in
+	 it (usually this just the next frag, but assembler listings
+	 may introduce empty frags), we must use word mode.  */
+      if (fragP->fr_symbol && S_GET_VALUE (fragP->fr_symbol) == 0)
 	{
-	  fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
-	  fragP->fr_var += 2;
+	  fragS *l;
+
+	  for (l = fragP->fr_next;
+	       l != fragP->fr_symbol->sy_frag;
+	       l = l->fr_next)
+	    if (l->fr_fix + l->fr_var != 0)
+	      break;
+	  if (l == fragP->fr_symbol->sy_frag)
+	    {
+	      fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
+	      fragP->fr_var += 2;
+	    }
 	}
       break;
     default:
