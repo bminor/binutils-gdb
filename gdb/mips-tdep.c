@@ -1616,9 +1616,9 @@ mips_mdebug_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* Fill in the offsets for the registers which gen_mask says were
      saved.  */
   {
-    CORE_ADDR reg_position = (cache->base
-			      + PROC_REG_OFFSET (proc_desc));
+    CORE_ADDR reg_position = (cache->base + PROC_REG_OFFSET (proc_desc));
     int ireg;
+
     for (ireg = MIPS_NUMREGS - 1; gen_mask; --ireg, gen_mask <<= 1)
       if (gen_mask & 0x80000000)
 	{

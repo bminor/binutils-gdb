@@ -1,3 +1,7 @@
+2004-09-01  Joel Brobecker  <brobecker@gnat.com>
+
+	* mips-tdep.c (mips_mdebug_frame_cache): Minor reformatting.
+
 2004-09-01  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* observer.sh: Add struct so_list declaration.
