@@ -167,7 +167,7 @@ none | arm | tahoe | vax | np1 | pn | np1 | pn | pyramid | merlin | m88k)
 
 a29k)
 	case "${target_os}" in
-	none)	gdb_target=a29k ;;
+	none|aout|coff)	gdb_target=a29k ;;
 	sym1)	gdb_target=ultra3 ;;
 	kern)	gdb_target=a29k-kern ;;
 	esac
