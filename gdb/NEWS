@@ -37,6 +37,8 @@ DEC Alpha (partial)				alpha*-*-*
 DEC VAX (partial)				vax-*-*
 NEC V850					v850-*-*
 National Semiconductor NS32000 (partial)	ns32k-*-*
+Motorola 68000 (partial)                        m68k-*-*
+Motorola MCORE                                  mcore-*-*
 
 * New targets.
 
