@@ -9,8 +9,8 @@
 	* ser-e7kpc.c: Ditto.  Define WIN32_LEAN_AND_MEAN under _WIN32, for
 	faster compilation.
 	(get_ds_base): Remove _MSC_VER version of this function.
-	* nindy-share/ttyflush.c: Ditto. X
-	* rdi-share/host.h: Ditto. X
+	* nindy-share/ttyflush.c: Ditto.
+	* rdi-share/host.h: Ditto.
 	* ser-go32.c (dos_readchar): Remove call to obsolete function.
 	* remote-sim.c (gdb_os_poll_quit): Ditto.
 	* remote-e7000.c (expect): Remove obsolete #if 0'ed code.
