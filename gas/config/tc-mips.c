@@ -9678,10 +9678,10 @@ MIPS options:\n\
 -G NUM			allow referencing objects up to NUM bytes\n\
 			implicitly with the gp register [default 8]\n"));
   fprintf(stream, _("\
--mips1, -mcpu=r{2,3}000	generate code for r2000 and r3000\n\
--mips2, -mcpu=r6000	generate code for r6000\n\
--mips3, -mcpu=r4000	generate code for r4000\n\
--mips4, -mcpu=r8000	generate code for r8000\n\
+-mips1			generate MIPS ISA I instructions\n\
+-mips2			generate MIPS ISA II instructions\n\
+-mips3			generate MIPS ISA III instructions\n\
+-mips4			generate MIPS ISA IV instructions\n\
 -mcpu=vr4300		generate code for vr4300\n\
 -mcpu=vr4100		generate code for vr4100\n\
 -m4650			permit R4650 instructions\n\

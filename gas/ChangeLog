@@ -1,3 +1,7 @@
+Wed Jun 17 13:07:05 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (md_show_usage): Fix -mipsN usage.
+
 Tue Jun 16 13:06:21 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* app.c (do_scrub_begin): If tc_symbol_chars is defined, treat all
