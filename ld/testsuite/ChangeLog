@@ -1,5 +1,14 @@
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* lib/ld-lib.exp (run_dump_test): Don't require a dump program if
+	#warning given.  Rearrange to allow $program to remain unset.
+	Don't allow gas errors.  Append objcopy_as_link output to that
+	from the linker before testing against expected output.  Fail the
+	test if warning not found when expected.  Conversely fail the
+	test if ld errors or warnings given when not expected.
+
+2005-02-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld-elf/exclude1.s: Use ".dc.a".
 	* ld-elfvsb/hidden2.s: Likewise.
 

@@ -734,49 +734,42 @@ proc run_dump_test { name } {
 	}
     }
 
-    if {$opts(PROG) != ""} {
-	switch -- $opts(PROG) {
-	    objdump
-		{ set program objdump }
-	    nm
-		{ set program nm }
-	    objcopy
-		{ set program objcopy }
-	    readelf
-		{ set program readelf }
-	    default
+    set program ""
+    # It's meaningless to require an output-testing method when we
+    # expect an error.
+    if { $opts(error) == "" } {
+	if {$opts(PROG) != ""} {
+	    switch -- $opts(PROG) {
+		objdump	{ set program objdump }
+		nm	{ set program nm }
+		objcopy	{ set program objcopy }
+		readelf	{ set program readelf }
+		default
 		{ perror "unrecognized program option $opts(PROG) in $file.d"
 		  unresolved $subdir/$name
 		  return }
-	}
-    } elseif { $opts(error) != "" } {
-	# It's meaningless to require an output-testing method when we
-	# expect an error.  For simplicity, we fake an arbitrary method.
-	set program "nm"
-    } else {
+	    }
+	} else {
 	# Guess which program to run, by seeing which option was specified.
-	set program ""
-	foreach p {objdump objcopy nm readelf} {
-	    if {$opts($p) != ""} {
-		if {$program != ""} {
-		    perror "ambiguous dump program in $file.d"
-		    unresolved $subdir/$name
-		    return
-		} else {
-		    set program $p
+	    foreach p {objdump objcopy nm readelf} {
+		if {$opts($p) != ""} {
+		    if {$program != ""} {
+			perror "ambiguous dump program in $file.d"
+			unresolved $subdir/$name
+			return
+		    } else {
+			set program $p
+		    }
 		}
 	    }
 	}
-	if {$program == ""} {
+	if { $program == "" && $opts(warning) == "" } {
 	    perror "dump program unspecified in $file.d"
 	    unresolved $subdir/$name
 	    return
 	}
     }
 
-    set progopts1 $opts($program)
-    eval set progopts \$[string toupper $program]FLAGS
-    eval set binary \$[string toupper $program]
     if { $opts(name) == "" } {
 	set testname "$subdir/$name"
     } else {
@@ -790,7 +783,7 @@ proc run_dump_test { name } {
 	foreach sf $opts(source) {
 	    if { [string match "/*" $sf] } {
 		lappend sourcefiles "$sf"
-	    } {
+	    } else {
 		lappend sourcefiles "$srcdir/$subdir/$sf"
 	    }
 	    # Must have asflags indexed on source name.
@@ -816,34 +809,30 @@ proc run_dump_test { name } {
 	set cmdret [catch "exec $cmd" comp_output]
 	set comp_output [prune_warnings $comp_output]
 
-	# We accept errors at assembly stage too, unless we're supposed to
-	# link something.
 	if { $cmdret != 0 || ![string match "" $comp_output] } then {
 	    send_log "$comp_output\n"
 	    verbose "$comp_output" 3
-	    if { $opts(error) != "" && $run_ld == 0 } {
-		if [regexp $opts(error) $comp_output] {
-		    pass $testname
-		    return
-		}
-	    }
+
+	    set exitstat "succeeded"
+	    if { $cmdret != 0 } { set exitstat "failed" }
+	    verbose -log "$exitstat with: <$comp_output>"
 	    fail $testname
 	    return
 	}
     }
 
+    set expmsg $opts(error)
+    if { $opts(warning) != "" } {
+	if { $expmsg != "" } {
+	    perror "$testname: mixing error and warning test-directives"
+	    return
+	}
+	set expmsg $opts(warning)
+    }
+
     # Perhaps link the file(s).
     if { $run_ld } {
 	set objfile "tmpdir/dump"
-	set expmsg $opts(error)
-
-	if { $opts(warning) != "" } {
-	    if { $expmsg != "" } {
-		perror "$testname: mixing error and warning test-directives"
-		return
-	    }
-	    set expmsg $opts(warning)
-	}
 
 	# Add -L$srcdir/$subdir so that the linker command can use
 	# linker scripts in the source directory.
@@ -854,7 +843,7 @@ proc run_dump_test { name } {
 	set cmdret [catch "exec $cmd" comp_output]
 	set comp_output [prune_warnings $comp_output]
 
-	if { $cmdret != 0 || $comp_output != "" || $expmsg != "" } then {
+	if { $cmdret != 0 } then {
 	    # If the executed program writes to stderr and stderr is not
 	    # redirected, exec *always* returns failure, regardless of the
 	    # program exit code.  Thankfully, we can retrieve the true
@@ -862,31 +851,12 @@ proc run_dump_test { name } {
 	    # cause a tcl-specific message to be appended, and we'd rather
 	    # not deal with that if we can help it.
 	    global errorCode
-	    if { $cmdret != 0 && [lindex $errorCode 0] == "NONE" } {
+	    if { [lindex $errorCode 0] == "NONE" } {
 		set cmdret 0
-	    }
-
-	    set exitstat "succeeded"
-	    if { $cmdret != 0 } { set exitstat "failed" }
-	    verbose -log "$exitstat with: <$comp_output>, expected: <$expmsg>"
-	    send_log "$comp_output\n"
-	    verbose "$comp_output" 3
-	    if { $expmsg != "" && $run_objcopy == 0 \
-		    && [regexp $expmsg $comp_output] \
-		    && (($cmdret == 0) == ($opts(warning) != "")) } {
-		# Only "pass" and return here if we expected (and got)
-		# an error.
-		if { $opts(error) != "" } {
-		    pass $testname
-		    return
-		}
-	    } {
-		fail $testname
-		return
 	    }
 	}
 
-	if { $run_objcopy } {
+	if { $cmdret == 0 && $run_objcopy } {
 	    set infile $objfile
 	    set objfile "tmpdir/dump1"
 
@@ -896,18 +866,32 @@ proc run_dump_test { name } {
 
 	    send_log "$cmd\n"
 	    set cmdret [catch "exec $cmd" comp_output]
-	    set comp_output [prune_warnings $comp_output]
+	    append comp_output [prune_warnings $comp_output]
 
-	    if { $cmdret != 0 || ![string match "" $comp_output] } then {
-		verbose -log "failed with: <$comp_output>, expected: <$opts(error)>"
-		send_log "$comp_output\n"
-		verbose "$comp_output" 3
-		if { $opts(error) != "" } {
-		    if [regexp $opts(error) $comp_output] {
-			pass $testname
-			return
-		    }
+	    if { $cmdret != 0 } then {
+		global errorCode
+		if { [lindex $errorCode 0] == "NONE" } {
+		    set cmdret 0
 		}
+	    }
+	}
+
+	if { $cmdret != 0 || $comp_output != "" || $expmsg != "" } then {
+	    set exitstat "succeeded"
+	    if { $cmdret != 0 } { set exitstat "failed" }
+	    verbose -log "$exitstat with: <$comp_output>, expected: <$expmsg>"
+	    send_log "$comp_output\n"
+	    verbose "$comp_output" 3
+
+	    if { [regexp $expmsg $comp_output] \
+		    && (($cmdret == 0) == ($opts(warning) != "")) } {
+		# We have the expected output from ld.
+		if { $opts(error) != "" || $program == "" } {
+		    pass $testname
+		    return
+		}
+	    } else {
+		verbose -log "$exitstat with: <$comp_output>, expected: <$expmsg>"
 		fail $testname
 		return
 	    }
@@ -921,6 +905,10 @@ proc run_dump_test { name } {
 	fail $testname
 	return
     }
+
+    set progopts1 $opts($program)
+    eval set progopts \$[string toupper $program]FLAGS
+    eval set binary \$[string toupper $program]
 
     if { [which $binary] == 0 } {
 	untested $testname
