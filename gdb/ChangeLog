@@ -1,3 +1,8 @@
+Tue Oct  5 15:26:04 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (read_range_type): Remove comment which recommends
+	distinguishing float from complex by the name.
+
 Tue Oct  5 12:17:40 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 			  Jim Kingdon  (kingdon@cygnus.com)
 			  Stu Grossman  (grossman@cygnus.com)

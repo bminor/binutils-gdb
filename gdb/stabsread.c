@@ -3262,9 +3262,7 @@ read_range_type (pp, typenums, objfile)
      GDB does not have complex types.
 
      Just return the complex as a float of that size.  It won't work right
-     for the complex values, but at least it makes the file loadable.
-
-     FIXME, we may be able to distinguish these by their names. FIXME.  */
+     for the complex values, but at least it makes the file loadable.  */
 
   if (n3 == 0 && n2 > 0)
     {
