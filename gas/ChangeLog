@@ -14,6 +14,9 @@ Tue Mar 17 10:40:54 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* config/tc-dvp.c (force_mach_label): New function.
 	(md_begin,create_colon_label,s_dmadata): Use it.
 
+	* config/tc-dvp.c (s_enddmadata): Always fill dma data out to 16
+	byte boundary.
+
 Mon Mar 16 10:19:44 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-dvp.c (md_pseudo_table): Make .quad 16 bytes.

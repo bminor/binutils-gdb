@@ -2138,15 +2138,14 @@ s_enddmadata (ignore)
   /* If count provided, verify it is correct.  */
   /* ... */
 
+  /* Fill the data out to a multiple of 16 bytes.  */
+  /* FIXME: Are the fill contents right?  */
+  frag_align (4, 0, 0);
+
   /* "label" points to beginning of block.
      Create a name for the final label like _$<name>.  */
   if (dma_data_name)
-    {
-      /* Fill the data out to a multiple of 16 bytes.  */
-      /* FIXME: Are the fill contents right?  */
-      frag_align (4, 0, 0);
-      create_colon_label (0, END_LABEL_PREFIX, dma_data_name);
-    }
+    create_colon_label (0, END_LABEL_PREFIX, dma_data_name);
 }
 
 static void
