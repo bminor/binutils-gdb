@@ -1,4 +1,6 @@
 Maintiners for particular sims:
+
+arm	        Nick Clifton <nickc@redhat.com>
 ppc		Andrew Cagney <ac131313@redhat.com>
 ppc		Geoff Keating <geoffk@redhat.com>
 mips		Andrew Cagney <ac131313@redhat.com>

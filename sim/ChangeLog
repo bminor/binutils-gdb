@@ -1,3 +1,7 @@
+2002-01-10  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* MAINTAINERS: Add myself for ARM portions.
+
 2001-10-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure.in: When Linux or NetBSD, enable PowerPC simulator.
