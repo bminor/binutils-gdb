@@ -4,6 +4,9 @@ Tue Feb  1 10:50:17 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 Tue Feb  1 12:13:01 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/tc-mips.c (mips_ip): Make an unsupported instruction a
+	warning, not an error.
+
 	* config/obj-coff.c (dot_text_symbol, dot_data_symbol,
 	dot_bss_symbol): Don't define if BFD_ASSEMBLER.
 	(obj_symbol_to_chars): bfd_coff_swap_aux_out now takes more

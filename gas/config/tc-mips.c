@@ -3783,8 +3783,7 @@ mips_ip (str, ip)
 	      ++insn;
 	      continue;
 	    }
-	  insn_error = "ERROR: instruction not supported on this processor";
-	  return;
+	  as_warn ("Instruction not supported on this processor");
 	}
 
       ip->insn_mo = insn;
