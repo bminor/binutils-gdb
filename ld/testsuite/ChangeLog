@@ -1,3 +1,7 @@
+2002-08-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/libdso-4.d, ld-cris/undef1.d: New test.
+
 2002-08-13  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfvers/vers.exp: Add vers23c and vers23d.
