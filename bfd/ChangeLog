@@ -1,3 +1,9 @@
+Wed Jul 22 16:27:18 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-hppa.h: Let ELF header define the enum containing the
+	external reloc numbers.
+	* elf32-i386.h: Likewise.
+
 1998-07-22 14:57  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elf-m10300.c: Let ELF header now define the macros to get the enum.
