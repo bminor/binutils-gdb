@@ -1,5 +1,9 @@
 2001-06-07  H.J. Lu  <hjl@gnu.org>
 
+	* gas/mips/mips.exp: Set xfail for "lineno" on Linux/mips.
+
+2001-06-07  H.J. Lu  <hjl@gnu.org>
+
 	* gas/mips/empic.d: Support stabs.
 	* gas/mips/mips16-e.d: Likewise.
 	* gas/mips/mips16-f.d: Likewise.
