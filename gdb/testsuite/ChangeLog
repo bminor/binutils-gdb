@@ -1,3 +1,9 @@
+1998-06-25  Felix Lee  <flee@cygnus.com>
+
+	* gdb.base/setshow.exp: make sure $pc is sane.
+
+	* gdb.stabs/weird.exp: split expect patterns properly.
+
 start-sanitize-am33
 Wed Jun 24 13:03:15 1998  Jeffrey A Law  (law@cygnus.com)
 
