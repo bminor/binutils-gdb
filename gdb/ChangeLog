@@ -1,4 +1,12 @@
+Mon Apr 22 00:02:43 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* breakpoint.c (bpstat_print): Try all elements on the bpstat
+	chain before giving up with an internal error.
+
 Sun Apr 21 21:43:10 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* value.h, values.c (value_{,free_to_}mark): New functions.
+	breakpoint.c (bpstat_stop_status): Use them.
 
 	* tm-i386v{,-g}.h: Remove N_SET_MAGIC define.
 

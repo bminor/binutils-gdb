@@ -643,6 +643,13 @@ bpstat_print (bs)
       return 1;
     }
 
+  /* Maybe another breakpoint in the chain caused us to stop.
+     (Currently all watchpoints go on the bpstat whether hit or
+     not.  That probably could (should) be changed, provided care is taken
+     with respect to bpstat_explains_signal).  */
+  if (bs->next)
+    return bpstat_print (bs->next);
+
   fprintf_filtered (stderr, "gdb internal error: in bpstat_print\n");
   return 0;
 }
@@ -742,10 +749,16 @@ bpstat_stop_status (pc, frame_address)
 
 	  if (within_current_scope)
 	    {
+	      /* We use value_{,free_to_}mark because it could be a
+		 *long* time before we return to the command level and
+		 call free_all_values.  */
+
+	      value mark = value_mark ();
 	      value new_val = evaluate_expression (b->exp);
-	      release_value (new_val);
 	      if (!value_equal (b->val, new_val))
 		{
+		  release_value (new_val);
+		  value_free_to_mark (mark);
 		  bs->old_val = b->val;
 		  b->val = new_val;
 		  /* We will stop here */
@@ -753,7 +766,7 @@ bpstat_stop_status (pc, frame_address)
 	      else
 		{
 		  /* Nothing changed, don't do anything.  */
-		  value_free (new_val);
+		  value_free_to_mark (mark);
 		  continue;
 		  /* We won't stop here */
 		}

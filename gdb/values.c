@@ -111,6 +111,31 @@ allocate_repeat_value (type, count)
   return val;
 }
 
+/* Return a mark in the value chain.  All values allocated after the
+   mark is obtained (except for those released) are subject to being freed
+   if a subsequent value_free_to_mark is passed the mark.  */
+value
+value_mark ()
+{
+  return all_values;
+}
+
+/* Free all values allocated since MARK was obtained by value_mark
+   (except for those released).  */
+void
+value_free_to_mark (mark)
+     value mark;
+{
+  value val, next;
+
+  for (val = all_values; val && val != mark; val = next)
+    {
+      next = VALUE_NEXT (val);
+      value_free (val);
+    }
+  all_values = val;
+}
+
 /* Free all the values that have been allocated (except for those released).
    Called after each command, successful or not.  */
 

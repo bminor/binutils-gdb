@@ -196,6 +196,8 @@ value read_var_value ();
 value locate_var_value ();
 value allocate_value ();
 value allocate_repeat_value ();
+value value_mark ();
+void value_free_to_mark ();
 value value_string ();
 
 value value_binop ();
