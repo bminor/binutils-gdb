@@ -2,7 +2,7 @@
 
 	* elf.c (elf_fake_sections): Use SHT_NOBITS when SEC_NEVER_LOAD.
 
-2002-02-17  Matt Fredette  <fredette@netbsd.org>
+2002-02-14  Matt Fredette  <fredette@netbsd.org>
 
 	* elf32-m68k.c (elf32_m68k_print_private_bfd_data): Recognize
 	EF_M68000.
