@@ -224,6 +224,7 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
       for (i = 0; i < elf_elfheader (abfd)->e_phnum; i++, phdr++)
 	{
 	  if (phdr->p_type == PT_LOAD
+	      && phdr->p_paddr != 0
 	      && phdr->p_vaddr != phdr->p_paddr
 	      && phdr->p_vaddr <= hdr->sh_addr
 	      && phdr->p_vaddr + phdr->p_memsz >= hdr->sh_addr + hdr->sh_size)
@@ -1511,6 +1512,13 @@ make_mapping (abfd, sections, from, to)
     m->sections[i - from] = *hdrpp;
   m->count = to - from;
 
+  if (from == 0)
+    {
+      /* Include the headers in the first PT_LOAD segment.  */
+      m->includes_filehdr = 1;
+      m->includes_phdrs = 1;
+    }
+
   return m;
 }
 
@@ -1582,6 +1590,7 @@ map_sections_to_segments (abfd)
       /* FIXME: UnixWare and Solaris set PF_X, Irix 5 does not.  */
       m->p_flags = PF_R | PF_X;
       m->p_flags_valid = 1;
+      m->includes_phdrs = 1;
 
       *pm = m;
       pm = &m->next;
@@ -1733,7 +1742,8 @@ assign_file_positions_for_segments (abfd)
   unsigned int alloc;
   Elf_Internal_Phdr *phdrs;
   file_ptr off;
-  boolean found_load;
+  bfd_vma filehdr_vaddr, filehdr_paddr;
+  bfd_vma phdrs_vaddr, phdrs_paddr;
   Elf_Internal_Phdr *p;
 
   if (elf_tdata (abfd)->segment_map == NULL)
@@ -1782,7 +1792,10 @@ assign_file_positions_for_segments (abfd)
   off = bed->s->sizeof_ehdr;
   off += alloc * bed->s->sizeof_phdr;
 
-  found_load = false;
+  filehdr_vaddr = 0;
+  filehdr_paddr = 0;
+  phdrs_vaddr = 0;
+  phdrs_paddr = 0;
   for (m = elf_tdata (abfd)->segment_map, p = phdrs;
        m != NULL;
        m = m->next, p++)
@@ -1817,53 +1830,70 @@ assign_file_positions_for_segments (abfd)
       else
 	p->p_align = 0;
 
+      p->p_offset = 0;
       p->p_filesz = 0;
       p->p_memsz = 0;
 
+      if (m->includes_filehdr)
+	{
+	  p->p_offset = 0;
+	  p->p_filesz = bed->s->sizeof_ehdr;
+	  p->p_memsz = bed->s->sizeof_ehdr;
+	  if (m->count > 0)
+	    {
+	      BFD_ASSERT (p->p_type == PT_LOAD);
+	      p->p_vaddr -= off;
+	      if (! m->p_paddr_valid)
+		p->p_paddr -= off;
+	    }
+	  if (p->p_type == PT_LOAD)
+	    {
+	      filehdr_vaddr = p->p_vaddr;
+	      filehdr_paddr = p->p_paddr;
+	    }
+	}
+
+      if (m->includes_phdrs)
+	{
+	  if (m->includes_filehdr)
+	    {
+	      if (p->p_type == PT_LOAD)
+		{
+		  phdrs_vaddr = p->p_vaddr + bed->s->sizeof_ehdr;
+		  phdrs_paddr = p->p_paddr + bed->s->sizeof_ehdr;
+		}
+	    }
+	  else
+	    {
+	      p->p_offset = bed->s->sizeof_ehdr;
+	      if (m->count > 0)
+		{
+		  BFD_ASSERT (p->p_type == PT_LOAD);
+		  p->p_vaddr -= off - p->p_offset;
+		  if (! m->p_paddr_valid)
+		    p->p_paddr -= off - p->p_offset;
+		}
+	      if (p->p_type == PT_LOAD)
+		{
+		  phdrs_vaddr = p->p_vaddr;
+		  phdrs_paddr = p->p_paddr;
+		}
+	    }
+	  p->p_filesz += alloc * bed->s->sizeof_phdr;
+	  p->p_memsz += alloc * bed->s->sizeof_phdr;
+	}
+
       if (p->p_type == PT_LOAD)
 	{
-	  p->p_offset = off;
-
-	  if (! found_load)
+	  if (! m->includes_filehdr && ! m->includes_phdrs)
+	    p->p_offset = off;
+	  else
 	    {
-	      struct elf_segment_map *mi;
-	      Elf_Internal_Phdr *pi;
-	      struct elf_segment_map *mi_phdr;
-	      Elf_Internal_Phdr *pi_phdr;
+	      file_ptr adjust;
 
-	      /* This is the first PT_LOAD segment.  If there is a
-                 PT_INTERP segment, adjust the offset of this segment
-                 to include the program headers and the file header.  */
-	      pi_phdr = NULL;
-	      for (mi = elf_tdata (abfd)->segment_map, pi = phdrs;
-		   mi != NULL;
-		   mi = mi->next, pi++)
-		{
-		  if (mi->p_type == PT_INTERP)
-		    {
-		      p->p_offset = 0;
-		      p->p_filesz = off;
-		      p->p_memsz = off;
-		      p->p_vaddr -= off;
-		      if (! m->p_paddr_valid)
-			p->p_paddr -= off;
-		    }
-		  if (mi->p_type == PT_PHDR)
-		    {
-		      mi_phdr = mi;
-		      pi_phdr = pi;
-		    }
-		}
-
-	      /* Set up the PT_PHDR addresses.  */
-	      if (pi_phdr != NULL)
-		{
-		  pi_phdr->p_vaddr = p->p_vaddr + bed->s->sizeof_ehdr;
-		  if (! mi_phdr->p_paddr_valid)
-		    pi_phdr->p_paddr = p->p_paddr + bed->s->sizeof_ehdr;
-		}
-
-	      found_load = true;
+	      adjust = off - (p->p_offset + p->p_filesz);
+	      p->p_filesz += adjust;
+	      p->p_memsz += adjust;
 	    }
 	}
 
@@ -1927,12 +1957,24 @@ assign_file_positions_for_segments (abfd)
        m = m->next, p++)
     {
       if (p->p_type != PT_LOAD && m->count > 0)
-	p->p_offset = m->sections[0]->filepos;
-      if (p->p_type == PT_PHDR)
 	{
-	  p->p_offset = bed->s->sizeof_ehdr;
-	  p->p_filesz = count * bed->s->sizeof_phdr;
-	  p->p_memsz = p->p_filesz;
+	  BFD_ASSERT (! m->includes_filehdr && ! m->includes_phdrs);
+	  p->p_offset = m->sections[0]->filepos;
+	}
+      if (m->count == 0)
+	{
+	  if (m->includes_filehdr)
+	    {
+	      p->p_vaddr = filehdr_vaddr;
+	      if (! m->p_paddr_valid)
+		p->p_paddr = filehdr_paddr;
+	    }
+	  else if (m->includes_phdrs)
+	    {
+	      p->p_vaddr = phdrs_vaddr;
+	      if (! m->p_paddr_valid)
+		p->p_paddr = phdrs_paddr;
+	    }
 	}
     }
 
@@ -2418,6 +2460,7 @@ copy_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
+  Elf_Internal_Ehdr *iehdr;
   struct elf_segment_map *mfirst;
   struct elf_segment_map **pm;
   Elf_Internal_Phdr *p;
@@ -2430,26 +2473,36 @@ copy_private_bfd_data (ibfd, obfd)
   if (elf_tdata (ibfd)->phdr == NULL)
     return true;
 
+  iehdr = elf_elfheader (ibfd);
+
   mfirst = NULL;
   pm = &mfirst;
 
   c = elf_elfheader (ibfd)->e_phnum;
   for (i = 0, p = elf_tdata (ibfd)->phdr; i < c; i++, p++)
     {
-      struct elf_segment_map *m;
       unsigned int csecs;
+      asection *s;
+      struct elf_segment_map *m;
+      unsigned int isec;
 
       csecs = 0;
-      if (p->p_type != PT_PHDR)
-	{
-	  asection *s;
 
-	  for (s = ibfd->sections; s != NULL; s = s->next)
-	    if (s->vma >= p->p_vaddr
-		&& s->vma + s->_raw_size <= p->p_vaddr + p->p_memsz
-		&& s->output_section != NULL)
-	      ++csecs;
-	}
+      /* The complicated case when p_vaddr is 0 is to handle the
+	 Solaris linker, which generates a PT_INTERP section with
+	 p_vaddr and p_memsz set to 0.  */
+      for (s = ibfd->sections; s != NULL; s = s->next)
+	if (((s->vma >= p->p_vaddr
+	      && (s->vma + s->_raw_size <= p->p_vaddr + p->p_memsz
+		  || s->vma + s->_raw_size <= p->p_vaddr + p->p_filesz))
+	     || (p->p_vaddr == 0
+		 && p->p_filesz > 0
+		 && (s->flags & SEC_HAS_CONTENTS) != 0
+		 && (bfd_vma) s->filepos >= p->p_offset
+		 && ((bfd_vma) s->filepos + s->_raw_size
+		     <= p->p_offset + p->p_filesz)))
+	    && s->output_section != NULL)
+	  ++csecs;
 
       m = ((struct elf_segment_map *)
 	   bfd_alloc (obfd,
@@ -2465,26 +2518,37 @@ copy_private_bfd_data (ibfd, obfd)
       m->p_paddr = p->p_paddr;
       m->p_paddr_valid = 1;
 
-      if (p->p_type != PT_PHDR)
-	{
-	  asection *s;
-	  unsigned int isec;
+      m->includes_filehdr = (p->p_offset == 0
+			     && p->p_filesz >= iehdr->e_ehsize);
 
-	  isec = 0;
-	  for (s = ibfd->sections; s != NULL; s = s->next)
+      m->includes_phdrs = (p->p_offset <= (bfd_vma) iehdr->e_phoff
+			   && (p->p_offset + p->p_filesz
+			       >= ((bfd_vma) iehdr->e_phoff
+				   + iehdr->e_phnum * iehdr->e_phentsize)));
+
+      isec = 0;
+      for (s = ibfd->sections; s != NULL; s = s->next)
+	{
+	  if (((s->vma >= p->p_vaddr
+		&& (s->vma + s->_raw_size <= p->p_vaddr + p->p_memsz
+		    || s->vma + s->_raw_size <= p->p_vaddr + p->p_filesz))
+	       || (p->p_vaddr == 0
+		   && p->p_filesz > 0
+		   && (s->flags & SEC_HAS_CONTENTS) != 0
+		   && (bfd_vma) s->filepos >= p->p_offset
+		   && ((bfd_vma) s->filepos + s->_raw_size
+		       <= p->p_offset + p->p_filesz)))
+	      && s->output_section != NULL)
 	    {
-	      if (s->vma >= p->p_vaddr
-		  && s->vma + s->_raw_size <= p->p_vaddr + p->p_memsz
-		  && s->output_section != NULL)
-		{
-		  m->sections[isec] = s->output_section;
-		  ++isec;
-		}
+	      m->sections[isec] = s->output_section;
+	      ++isec;
 	    }
-	  qsort (m->sections, (size_t) csecs, sizeof (asection *),
-		 elf_sort_sections);
-	  m->count = csecs;
 	}
+      BFD_ASSERT (isec == csecs);
+      if (csecs > 0)
+	qsort (m->sections, (size_t) csecs, sizeof (asection *),
+	       elf_sort_sections);
+      m->count = csecs;
 
       *pm = m;
       pm = &m->next;

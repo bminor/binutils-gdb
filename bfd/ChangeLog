@@ -1,3 +1,19 @@
+Thu Nov 30 16:48:18 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Don't set lma based on
+	p_paddr if p_paddr is zero.
+	(make_mapping): Set includes_filehdr and includes_phdrs for first
+	PT_LOAD segment.
+	(map_sections_to_segments): Set includes_phdrs for PT_PHDR
+	segment.
+	(assign_file_positions_for_segments): Handle includes_filehdr and
+	includes_phdrs.  Remove special handling of PT_PHDR and first
+	PT_LOAD segments.
+	(copy_private_bfd_data): Set includes_filehdr and includes_phdr
+	when appropriate.  Remove special handling of PT_PHDR segment.
+	Use a more complex condition for when a section is included in a
+	segment to handle Solaris linker oddities.
+
 Thu Nov 30 11:17:33 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
 
 	* coff-m88k.c (howto_table): Reformatted for easier reading;
