@@ -22,6 +22,7 @@ Things-to-keep:
 abug.exp
 arm-ice.exp
 cpu32bug.exp
+cygmon.exp
 d10v.exp
 dve.exp
 est.exp
@@ -31,10 +32,10 @@ hmsirom.exp
 hppro.exp
 i386-bozo.exp
 i960.exp
-m32r.exp
 m32r-stub.exp
-mips.exp
+m32r.exp
 mips-idt.exp
+mips.exp
 mn10300-eval.exp
 monitor.exp
 mt-a29k-udi
