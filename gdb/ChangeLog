@@ -1,5 +1,8 @@
 2004-01-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* NEWS: Mention that %cs and %ss have been added to the AMD64
+	configurations
+
 	* frame.c: Update copyright year.
 	(get_prev_frame): Improve comment.
 
