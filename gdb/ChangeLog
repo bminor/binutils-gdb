@@ -1,5 +1,15 @@
 2001-12-09  Fred Fish  <fnf@redhat.com>
 
+	* gdbtypes.c (TYPE_FLAG_UNSIGNED, TYPE_FLAG_STUB): Use
+	TYPE_UNSIGNED and TYPE_NOSIGN to determine when to print these
+	rather than testing the bits directly.
+	(TYPE_FLAG_NOSIGN, TYPE_FLAG_TARGET_STUB, TYPE_FLAG_STATIC,
+	TYPE_FLAG_CONST, TYPE_FLAG_VOLATILE, TYPE_FLAG_PROTOTYPED,
+	TYPE_FLAG_INCOMPLETE, TYPE_FLAG_CODE_SPACE, TYPE_FLAG_DATA_SPACE,
+	TYPE_FLAG_VARARGS): Test for and print these bits as well.
+
+2001-12-09  Fred Fish  <fnf@redhat.com>
+
 	* gdbtypes.c (build_gdbtypes): For builtin_type_char, pass
 	TYPE_FLAG_NOSIGN to init_type() rather than setting it after the
 	type is created.

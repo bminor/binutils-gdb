@@ -2844,13 +2844,53 @@ recursive_dump_type (struct type *type, int spaces)
   gdb_print_host_address (TYPE_REFERENCE_TYPE (type), gdb_stdout);
   printf_filtered ("\n");
   printfi_filtered (spaces, "flags 0x%x", TYPE_FLAGS (type));
-  if (TYPE_FLAGS (type) & TYPE_FLAG_UNSIGNED)
+  if (TYPE_UNSIGNED (type))
     {
       puts_filtered (" TYPE_FLAG_UNSIGNED");
     }
-  if (TYPE_FLAGS (type) & TYPE_FLAG_STUB)
+  if (TYPE_NOSIGN (type))
+    {
+      puts_filtered (" TYPE_FLAG_NOSIGN");
+    }
+  if (TYPE_STUB (type))
     {
       puts_filtered (" TYPE_FLAG_STUB");
+    }
+  if (TYPE_TARGET_STUB (type))
+    {
+      puts_filtered (" TYPE_FLAG_TARGET_STUB");
+    }
+  if (TYPE_STATIC (type))
+    {
+      puts_filtered (" TYPE_FLAG_STATIC");
+    }
+  if (TYPE_CONST (type))
+    {
+      puts_filtered (" TYPE_FLAG_CONST");
+    }
+  if (TYPE_VOLATILE (type))
+    {
+      puts_filtered (" TYPE_FLAG_VOLATILE");
+    }
+  if (TYPE_PROTOTYPED (type))
+    {
+      puts_filtered (" TYPE_FLAG_PROTOTYPED");
+    }
+  if (TYPE_INCOMPLETE (type))
+    {
+      puts_filtered (" TYPE_FLAG_INCOMPLETE");
+    }
+  if (TYPE_CODE_SPACE (type))
+    {
+      puts_filtered (" TYPE_FLAG_CODE_SPACE");
+    }
+  if (TYPE_DATA_SPACE (type))
+    {
+      puts_filtered (" TYPE_FLAG_DATA_SPACE");
+    }
+  if (TYPE_VARARGS (type))
+    {
+      puts_filtered (" TYPE_FLAG_VARARGS");
     }
   puts_filtered ("\n");
   printfi_filtered (spaces, "nfields %d ", TYPE_NFIELDS (type));
