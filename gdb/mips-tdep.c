@@ -2677,12 +2677,25 @@ do_fp_register_row (int regnum)
       flt2 = unpack_double (builtin_type_float, raw_buffer[LO], &inv2);
       doub = unpack_double (builtin_type_double, dbl_buffer, &inv3);
 
-      printf_filtered (inv1 ? " %-5s: <invalid float>" :
-		       " %-5s%-17.9g", REGISTER_NAME (regnum), flt1);
-      printf_filtered (inv2 ? " %-5s: <invalid float>" :
-		       " %-5s%-17.9g", REGISTER_NAME (regnum + 1), flt2);
-      printf_filtered (inv3 ? " dbl: <invalid double>\n" :
-		       " dbl: %-24.17g\n", doub);
+      printf_filtered (" %-5s", REGISTER_NAME (regnum));
+      if (inv1)
+	printf_filtered (": <invalid float>");
+      else
+	printf_filtered ("%-17.9g", flt1);
+
+      printf_filtered (" %-5s", REGISTER_NAME (regnum + 1));
+      if (inv2)
+	printf_filtered (": <invalid float>");
+      else
+	printf_filtered ("%-17.9g", flt2);
+
+      printf_filtered (" dbl: ");
+      if (inv3)
+	printf_filtered ("<invalid double>");
+      else
+	printf_filtered ("%-24.17g", doub);
+      printf_filtered ("\n");
+
       /* may want to do hex display here (future enhancement) */
       regnum += 2;
     }
@@ -2695,10 +2708,19 @@ do_fp_register_row (int regnum)
 			    &raw_buffer[HI][offset], &inv1);
       doub = unpack_double (builtin_type_double, dbl_buffer, &inv3);
 
-      printf_filtered (inv1 ? " %-5s: <invalid float>" :
-		       " %-5s flt: %-17.9g", REGISTER_NAME (regnum), flt1);
-      printf_filtered (inv3 ? " dbl: <invalid double>\n" :
-		       " dbl: %-24.17g\n", doub);
+      printf_filtered (" %-5s: ", REGISTER_NAME (regnum));
+      if (inv1)
+	printf_filtered ("<invalid float>");
+      else
+	printf_filtered ("flt: %-17.9g", flt1);
+
+      printf_filtered (" dbl: ");
+      if (inv3)
+	printf_filtered ("<invalid double>");
+      else
+	printf_filtered ("%-24.17g", doub);
+
+      printf_filtered ("\n");
       /* may want to do hex display here (future enhancement) */
       regnum++;
     }

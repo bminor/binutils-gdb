@@ -1,3 +1,8 @@
+2001-02-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* mips-tdep.c (do_fp_register_row, do_fp_register_row): Fix printf
+	formatting.
+
 2001-02-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-aix5.c (solib-svr4.h): Remove include.
