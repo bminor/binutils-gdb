@@ -1,5 +1,8 @@
 2005-03-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* corelow.c (get_core_register_section): Replace usage of sprintf
+	and strcpy with xstrprintf and xstrdup.
+
 	* mips-tdep.c (mips_single_step_through_delay): Put back check for
 	breakpoint lost with the introduction of this function.
 
