@@ -1,3 +1,8 @@
+2001-10-16  Alan Modra  <amodra@bigpond.net.au>
+
+	From Andrew Pines <apines@cosmodog.com>
+	* config/tc-m68k.c (m68k_ip): Correct absolute jmp opcodes.
+
 2001-10-16  NIIBE Yutaka  <gniibe@m17n.org>,
 	    Hans-Peter Nilsson  <hp@bitrange.com>
 

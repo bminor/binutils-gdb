@@ -2573,14 +2573,14 @@ m68k_ip (instring)
 	      if (adds (&opP->disp) == 0)
 		{
 		  if (the_ins.opcode[0] == 0x6000)	/* jbra */
-		    the_ins.opcode[0] = 0x4EF1;
+		    the_ins.opcode[0] = 0x4EF9;
 		  else if (the_ins.opcode[0] == 0x6100)	/* jbsr */
-		    the_ins.opcode[0] = 0x4EB1;
+		    the_ins.opcode[0] = 0x4EB9;
 		  else					/* jCC */
 		    {
 		      the_ins.opcode[0] ^= 0x0100;
 		      the_ins.opcode[0] |= 0x0006;
-		      addword (0x4EF1);
+		      addword (0x4EF9);
 		    }
 		  add_fix ('l', &opP->disp, 0, 0);
 		  addword (0);
