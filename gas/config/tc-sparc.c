@@ -603,7 +603,7 @@ md_show_usage (stream)
   fprintf (stream, _("\
 -EL			generate code for a little endian machine\n\
 -EB			generate code for a big endian machine\n\
---little-endian-data	generate code for a machine having big endian
+--little-endian-data	generate code for a machine having big endian\n\
                         instructions and little endian data."));
 #endif
 }
@@ -3386,7 +3386,10 @@ sparc_handle_align (fragp)
     {
       int count = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
       
-      if (count >= 4 && !(count & 3) && count <= 1024 && !((long)(fragp->fr_literal + fragp->fr_fix) & 3))
+      if (count >= 4
+	  && !(count & 3)
+	  && count <= 1024
+	  && !((long)(fragp->fr_literal + fragp->fr_fix) & 3))
         {
           unsigned *p = (unsigned *)(fragp->fr_literal + fragp->fr_fix);
           int i;
@@ -3399,12 +3402,12 @@ sparc_handle_align (fragp)
 
           if (SPARC_OPCODE_ARCH_V9_P (max_architecture) && count > 8)
             {
-            char *waddr = &fragp->fr_literal + fragp->fr_fix;
-            unsigned wval = (0x30680000 | count >> 2); /* ba,a,pt %xcc, 1f */
-            if (INSN_BIG_ENDIAN)
-              number_to_chars_bigendian (waddr, wval, 4);
-            else
-              number_to_chars_littleendian (waddr, wval, 4);
+	      char *waddr = &fragp->fr_literal[fragp->fr_fix];
+	      unsigned wval = (0x30680000 | count >> 2); /* ba,a,pt %xcc, 1f */
+	      if (INSN_BIG_ENDIAN)
+		number_to_chars_bigendian (waddr, wval, 4);
+	      else
+		number_to_chars_littleendian (waddr, wval, 4);
             }
           fragp->fr_var = count;
         }
@@ -3420,15 +3423,19 @@ sparc_elf_final_processing ()
   /* Set the Sparc ELF flag bits.  FIXME: There should probably be some
      sort of BFD interface for this.  */
   if (sparc_arch_size == 64)
-    switch (sparc_memory_model)
-      {
-      case MM_RMO:
-        elf_elfheader (stdoutput)->e_flags |= EF_SPARCV9_RMO;
-        break;
-      case MM_PSO:
-        elf_elfheader (stdoutput)->e_flags |= EF_SPARCV9_PSO;
-        break;
-      }
+    {
+      switch (sparc_memory_model)
+	{
+	case MM_RMO:
+	  elf_elfheader (stdoutput)->e_flags |= EF_SPARCV9_RMO;
+	  break;
+	case MM_PSO:
+	  elf_elfheader (stdoutput)->e_flags |= EF_SPARCV9_PSO;
+	  break;
+	default:
+	  break;
+	}
+    }
   else if (current_architecture >= SPARC_OPCODE_ARCH_V9)
     elf_elfheader (stdoutput)->e_flags |= EF_SPARC_32PLUS;
   if (current_architecture == SPARC_OPCODE_ARCH_V9A)
