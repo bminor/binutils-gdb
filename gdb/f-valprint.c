@@ -595,7 +595,7 @@ info_common_command (char *comname, int from_tty)
   /* The following is generally ripped off from stack.c's routine 
      print_frame_info() */
 
-  func = find_pc_function (fi->pc);
+  func = find_pc_function (get_frame_pc (fi));
   if (func)
     {
       /* In certain pathological cases, the symtabs give the wrong
@@ -612,7 +612,7 @@ info_common_command (char *comname, int from_tty)
          be any minimal symbols in the middle of a function.
          FIXME:  (Not necessarily true.  What about text labels) */
 
-      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
+      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
 
       if (msymbol != NULL
 	  && (SYMBOL_VALUE_ADDRESS (msymbol)
@@ -624,7 +624,7 @@ info_common_command (char *comname, int from_tty)
   else
     {
       register struct minimal_symbol *msymbol =
-      lookup_minimal_symbol_by_pc (fi->pc);
+      lookup_minimal_symbol_by_pc (get_frame_pc (fi));
 
       if (msymbol != NULL)
 	funname = SYMBOL_NAME (msymbol);

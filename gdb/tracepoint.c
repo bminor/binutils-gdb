@@ -2105,7 +2105,7 @@ trace_find_line_command (char *args, int from_tty)
     {
       if (args == 0 || *args == 0)
 	{
-	  sal = find_pc_line ((get_current_frame ())->pc, 0);
+	  sal = find_pc_line (get_frame_pc (get_current_frame ()), 0);
 	  sals.nelts = 1;
 	  sals.sals = (struct symtab_and_line *)
 	    xmalloc (sizeof (struct symtab_and_line));

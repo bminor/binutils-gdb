@@ -1707,10 +1707,10 @@ deprecated_frame_in_dummy (struct frame_info *frame)
 	&& b->frame == get_frame_base (frame)
     /* We need to check the PC as well as the frame on the sparc,
        for signals.exp in the testsuite.  */
-	&& (frame->pc
+	&& (get_frame_pc (frame)
 	    >= (b->address
-	      - SIZEOF_CALL_DUMMY_WORDS / sizeof (LONGEST) * REGISTER_SIZE))
-	&& frame->pc <= b->address)
+		- SIZEOF_CALL_DUMMY_WORDS / sizeof (LONGEST) * REGISTER_SIZE))
+	&& get_frame_pc (frame) <= b->address)
       return 1;
   }
   return 0;
@@ -4968,7 +4968,7 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
 	{
 	  if (deprecated_selected_frame)
 	    {
-	      selected_pc = deprecated_selected_frame->pc;
+	      selected_pc = get_frame_pc (deprecated_selected_frame);
 	      if (arg)
 		if_arg = 1;
 	    }
@@ -4997,7 +4997,7 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
 
       frame = parse_frame_specification (level_arg);
       if (frame)
-	selected_pc = frame->pc;
+	selected_pc = get_frame_pc (frame);
       else
 	selected_pc = 0;
     }
@@ -5047,7 +5047,8 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
 	  if (deprecated_selected_frame)
 	    {
 	      addr_string = (char *) xmalloc (15);
-	      sprintf (addr_string, "*0x%s", paddr_nz (deprecated_selected_frame->pc));
+	      sprintf (addr_string, "*0x%s",
+		       paddr_nz (get_frame_pc (deprecated_selected_frame)));
 	      if (arg)
 		if_arg = 1;
 	    }
@@ -5647,8 +5648,8 @@ until_break_command (char *arg, int from_tty)
 
   if (prev_frame)
     {
-      sal = find_pc_line (prev_frame->pc, 0);
-      sal.pc = prev_frame->pc;
+      sal = find_pc_line (get_frame_pc (prev_frame), 0);
+      sal.pc = get_frame_pc (prev_frame);
       breakpoint = set_momentary_breakpoint (sal, prev_frame, bp_until);
       if (!event_loop_p || !target_can_async_p ())
 	make_cleanup_delete_breakpoint (breakpoint);
@@ -5776,7 +5777,7 @@ get_catch_sals (int this_level_only)
   if (deprecated_selected_frame == NULL)
     error ("No selected frame.");
   block = get_frame_block (deprecated_selected_frame, 0);
-  pc = deprecated_selected_frame->pc;
+  pc = get_frame_pc (deprecated_selected_frame);
 
   sals.nelts = 0;
   sals.sals = NULL;

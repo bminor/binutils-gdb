@@ -106,7 +106,7 @@ struct dummy_frame *
 cached_find_dummy_frame (struct frame_info *frame, void **cache)
 {
   if ((*cache) == NULL)
-    (*cache) = find_dummy_frame (frame->pc, get_frame_base (frame));
+    (*cache) = find_dummy_frame (get_frame_pc (frame), get_frame_base (frame));
   return (*cache);
 }
 

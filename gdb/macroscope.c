@@ -88,7 +88,7 @@ default_macro_scope (void)
 
   /* If there's a selected frame, use its PC.  */ 
   if (deprecated_selected_frame)
-    sal = find_pc_line (deprecated_selected_frame->pc, 0);
+    sal = find_pc_line (get_frame_pc (deprecated_selected_frame), 0);
   
   /* If the target has any registers at all, then use its PC.  Why we
      would have registers but no stack, I'm not sure.  */

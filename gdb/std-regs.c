@@ -103,7 +103,8 @@ value_of_builtin_frame_pc_reg (struct frame_info *frame)
     if (frame == NULL)
       memset (buf, TYPE_LENGTH (VALUE_TYPE (val)), 0);
     else
-      ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf, frame->pc);
+      ADDRESS_TO_POINTER (builtin_type_void_data_ptr, buf,
+			  get_frame_pc (frame));
     return val;
   }
 }

@@ -314,7 +314,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
 
   if (get_frame_type (fi) == DUMMY_FRAME)
     {
-      annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
+      annotate_frame_begin (level == -1 ? 0 : level, get_frame_pc (fi));
 
       /* Do this regardless of SOURCE because we don't have any source
          to list for this frame.  */
@@ -330,7 +330,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     }
   if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     {
-      annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
+      annotate_frame_begin (level == -1 ? 0 : level, get_frame_pc (fi));
 
       /* Do this regardless of SOURCE because we don't have any source
          to list for this frame.  */
@@ -369,11 +369,11 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     {
       struct symtab_and_line cursal;
       int done = 0;
-      int mid_statement = (source == SRC_LINE) && (fi->pc != sal.pc);
+      int mid_statement = (source == SRC_LINE) && (get_frame_pc (fi) != sal.pc);
 
       if (annotation_level)
 	done = identify_source_line (sal.symtab, sal.line, mid_statement,
-				     fi->pc);
+				     get_frame_pc (fi));
       if (!done)
 	{
 	  if (print_frame_info_listing_hook)
@@ -390,7 +390,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
 		 ability to decide for themselves if it is desired. */
 	      if (addressprint && mid_statement)
 		{
-		  ui_out_field_core_addr (uiout, "addr", fi->pc);
+		  ui_out_field_core_addr (uiout, "addr", get_frame_pc (fi));
 		  ui_out_text (uiout, "\t");
 		}
 
@@ -405,7 +405,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     }
 
   if (source != 0)
-    set_default_breakpoint (1, fi->pc, sal.symtab, sal.line);
+    set_default_breakpoint (1, get_frame_pc (fi), sal.symtab, sal.line);
 
   annotate_frame_end ();
 
@@ -504,7 +504,7 @@ print_frame (struct frame_info *fi,
 	}
     }
 
-  annotate_frame_begin (level == -1 ? 0 : level, fi->pc);
+  annotate_frame_begin (level == -1 ? 0 : level, get_frame_pc (fi));
 
   list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
 
@@ -514,10 +514,12 @@ print_frame (struct frame_info *fi,
       ui_out_field_fmt_int (uiout, 2, ui_left, "level", level);
     }
   if (addressprint)
-    if (fi->pc != sal.pc || !sal.symtab || source == LOC_AND_ADDRESS)
+    if (get_frame_pc (fi) != sal.pc
+	|| !sal.symtab
+	|| source == LOC_AND_ADDRESS)
       {
 	annotate_frame_address ();
-	ui_out_field_core_addr (uiout, "addr", fi->pc);
+	ui_out_field_core_addr (uiout, "addr", get_frame_pc (fi));
 	annotate_frame_address_end ();
 	ui_out_text (uiout, " in ");
       }
@@ -562,7 +564,7 @@ print_frame (struct frame_info *fi,
 #ifdef PC_SOLIB
   if (!funname || (!sal.symtab || !sal.symtab->filename))
     {
-      char *lib = PC_SOLIB (fi->pc);
+      char *lib = PC_SOLIB (get_frame_pc (fi));
       if (lib)
 	{
 	  annotate_frame_where ();
@@ -752,7 +754,7 @@ frame_info (char *addr_exp, int from_tty)
   func = get_frame_function (fi);
   /* FIXME: cagney/2002-11-28: Why bother?  Won't sal.symtab contain
      the same value.  */
-  s = find_pc_symtab (fi->pc);
+  s = find_pc_symtab (get_frame_pc (fi));
   if (func)
     {
       /* I'd like to use SYMBOL_SOURCE_NAME() here, to display
@@ -784,7 +786,7 @@ frame_info (char *addr_exp, int from_tty)
     }
   else
     {
-      register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
+      register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (get_frame_pc (fi));
       if (msymbol != NULL)
 	{
 	  funname = SYMBOL_NAME (msymbol);
@@ -807,7 +809,7 @@ frame_info (char *addr_exp, int from_tty)
       printf_filtered (":\n");
     }
   printf_filtered (" %s = ", REGISTER_NAME (PC_REGNUM));
-  print_address_numeric (fi->pc, 1, gdb_stdout);
+  print_address_numeric (get_frame_pc (fi), 1, gdb_stdout);
 
   wrap_here ("   ");
   if (funname)
@@ -1301,7 +1303,7 @@ print_frame_label_vars (register struct frame_info *fi, int this_level_only,
   register int values_printed = 0;
   int index, have_default = 0;
   char *blocks_printed;
-  CORE_ADDR pc = fi->pc;
+  CORE_ADDR pc = get_frame_pc (fi);
 
   if (block == 0)
     {
@@ -1708,7 +1710,7 @@ return_command (char *retval_exp, int from_tty)
     error ("No selected frame.");
   thisfun = get_frame_function (deprecated_selected_frame);
   selected_frame_addr = get_frame_base (deprecated_selected_frame);
-  selected_frame_pc = deprecated_selected_frame->pc;
+  selected_frame_pc = get_frame_pc (deprecated_selected_frame);
 
   /* Compute the return value (if any -- possibly getting errors here).  */
 
@@ -1753,7 +1755,7 @@ return_command (char *retval_exp, int from_tty)
      selected frame shares its fp with another frame.  */
 
   while (selected_frame_addr != get_frame_base (frame = get_current_frame ())
-	 || selected_frame_pc != frame->pc)
+	 || selected_frame_pc != get_frame_pc (frame))
     POP_FRAME;
 
   /* Then pop that frame.  */
@@ -1822,8 +1824,8 @@ func_command (char *arg, int from_tty)
   do
     {
       for (i = 0; (i < sals.nelts && !found); i++)
-	found = (fp->pc >= func_bounds[i].low &&
-		 fp->pc < func_bounds[i].high);
+	found = (get_frame_pc (fp) >= func_bounds[i].low &&
+		 get_frame_pc (fp) < func_bounds[i].high);
       if (!found)
 	{
 	  level = 1;
@@ -1851,7 +1853,7 @@ get_frame_language (void)
 
   if (deprecated_selected_frame)
     {
-      s = find_pc_symtab (deprecated_selected_frame->pc);
+      s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
       if (s)
 	flang = s->language;
       else

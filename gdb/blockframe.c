@@ -60,8 +60,8 @@ int
 func_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
   return ((chain) != 0
-	  && !inside_main_func ((thisframe)->pc)
-	  && !inside_entry_func ((thisframe)->pc));
+	  && !inside_main_func (get_frame_pc (thisframe))
+	  && !inside_entry_func (get_frame_pc (thisframe)));
 }
 
 /* A very simple method of determining a valid frame */
@@ -173,7 +173,7 @@ frameless_look_for_prologue (struct frame_info *frame)
 {
   CORE_ADDR func_start, after_prologue;
 
-  func_start = get_pc_function_start (frame->pc);
+  func_start = get_pc_function_start (get_frame_pc (frame));
   if (func_start)
     {
       func_start += FUNCTION_START_OFFSET;
@@ -181,7 +181,7 @@ frameless_look_for_prologue (struct frame_info *frame)
          prologue, not how long it is.  */
       return PROLOGUE_FRAMELESS_P (func_start);
     }
-  else if (frame->pc == 0)
+  else if (get_frame_pc (frame) == 0)
     /* A frame with a zero PC is usually created by dereferencing a
        NULL function pointer, normally causing an immediate core dump
        of the inferior. Mark function as frameless, as the inferior
@@ -202,7 +202,7 @@ frameless_look_for_prologue (struct frame_info *frame)
 CORE_ADDR
 frame_address_in_block (struct frame_info *frame)
 {
-  CORE_ADDR pc = frame->pc;
+  CORE_ADDR pc = get_frame_pc (frame);
 
   /* If we are not in the innermost frame, and we are not interrupted
      by a signal, frame->pc points to the instruction following the
@@ -710,13 +710,13 @@ int
 generic_func_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
   if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && DEPRECATED_PC_IN_CALL_DUMMY ((fi)->pc, 0, 0))
+      && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
     return 1;			/* don't prune CALL_DUMMY frames */
   else				/* fall back to default algorithm (see frame.h) */
     return (fp != 0
 	    && (INNER_THAN (get_frame_base (fi), fp)
 		|| get_frame_base (fi) == fp)
-	    && !inside_main_func ((fi)->pc)
-	    && !inside_entry_func ((fi)->pc));
+	    && !inside_main_func (get_frame_pc (fi))
+	    && !inside_entry_func (get_frame_pc (fi)));
 }
 

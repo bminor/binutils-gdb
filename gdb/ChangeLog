@@ -1,3 +1,27 @@
+2002-12-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* f-valprint.c (info_common_command): Use get_frame_pc.
+	* std-regs.c (value_of_builtin_frame_pc_reg): Ditto.
+	* ax-gdb.c (agent_command): Ditto.
+	* rs6000-tdep.c (rs6000_init_extra_frame_info): Ditto.
+	(rs6000_pop_frame): Ditto.
+	(rs6000_frameless_function_invocation): Ditto.
+	(rs6000_frame_saved_pc, frame_get_saved_regs): Ditto.
+	(frame_initial_stack_address, rs6000_frame_chain): Ditto.
+	* macroscope.c (default_macro_scope): Ditto.
+	* stack.c (print_frame_info_base): Ditto.
+	(print_frame, frame_info, print_frame_label_vars): Ditto.
+	(return_command, func_command, get_frame_language): Ditto.
+	* infcmd.c (finish_command): Ditto.
+	* dummy-frame.c (cached_find_dummy_frame): Ditto.
+	* breakpoint.c (deprecated_frame_in_dummy): Ditto.
+	(break_at_finish_at_depth_command_1): Ditto.
+	(break_at_finish_command_1): Ditto.
+	(until_break_command, get_catch_sals): Ditto.
+	* blockframe.c (func_frame_chain_valid): Ditto.
+	(frameless_look_for_prologue): Ditto.
+	(frame_address_in_block, generic_func_frame_chain_valid): Ditto.
+
 2002-12-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/rs6000/tm-rs6000.h (init_frame_pc_noop): Add declaration.

@@ -1836,7 +1836,7 @@ agent_command (char *exp, int from_tty)
 
   expr = parse_expression (exp);
   old_chain = make_cleanup (free_current_contents, &expr);
-  agent = gen_trace_for_expr (fi->pc, expr);
+  agent = gen_trace_for_expr (get_frame_pc (fi), expr);
   make_cleanup_free_agent_expr (agent);
   ax_print (gdb_stdout, agent);
 

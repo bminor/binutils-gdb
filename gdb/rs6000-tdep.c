@@ -169,8 +169,8 @@ rs6000_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   fi->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
   fi->extra_info->initial_sp = 0;
-  if (get_next_frame (fi) != (CORE_ADDR) 0
-      && fi->pc < TEXT_SEGMENT_BASE)
+  if (get_next_frame (fi) != NULL
+      && get_frame_pc (fi) < TEXT_SEGMENT_BASE)
     /* We're in get_prev_frame */
     /* and this is a special signal frame.  */
     /* (fi->pc will be some low address in the kernel, */
@@ -958,7 +958,7 @@ rs6000_pop_frame (void)
   pc = read_pc ();
   sp = get_frame_base (frame);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc,
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
 				   get_frame_base (frame),
 				   get_frame_base (frame)))
     {
@@ -974,8 +974,8 @@ rs6000_pop_frame (void)
      still in the link register, otherwise walk the frames and retrieve the
      saved %pc value in the previous frame.  */
 
-  addr = get_pc_function_start (frame->pc);
-  (void) skip_prologue (addr, frame->pc, &fdata);
+  addr = get_pc_function_start (get_frame_pc (frame));
+  (void) skip_prologue (addr, get_frame_pc (frame), &fdata);
 
   wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
   if (fdata.frameless)
@@ -1483,7 +1483,7 @@ rs6000_frameless_function_invocation (struct frame_info *fi)
       && !(get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
     return 0;
 
-  func_start = get_pc_function_start (fi->pc);
+  func_start = get_pc_function_start (get_frame_pc (fi));
 
   /* If we failed to find the start of the function, it is a mistake
      to inspect the instructions.  */
@@ -1494,13 +1494,13 @@ rs6000_frameless_function_invocation (struct frame_info *fi)
          function pointer, normally causing an immediate core dump of the
          inferior.  Mark function as frameless, as the inferior has no chance
          of setting up a stack frame.  */
-      if (fi->pc == 0)
+      if (get_frame_pc (fi) == 0)
 	return 1;
       else
 	return 0;
     }
 
-  (void) skip_prologue (func_start, fi->pc, &fdata);
+  (void) skip_prologue (func_start, get_frame_pc (fi), &fdata);
   return fdata.frameless;
 }
 
@@ -1518,20 +1518,20 @@ rs6000_frame_saved_pc (struct frame_info *fi)
     return read_memory_addr (get_frame_base (fi) + SIG_FRAME_PC_OFFSET,
 			     wordsize);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc,
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi),
 				   get_frame_base (fi),
 				   get_frame_base (fi)))
-    return deprecated_read_register_dummy (fi->pc,
+    return deprecated_read_register_dummy (get_frame_pc (fi),
 					   get_frame_base (fi), PC_REGNUM);
 
-  func_start = get_pc_function_start (fi->pc);
+  func_start = get_pc_function_start (get_frame_pc (fi));
 
   /* If we failed to find the start of the function, it is a mistake
      to inspect the instructions.  */
   if (!func_start)
     return 0;
 
-  (void) skip_prologue (func_start, fi->pc, &fdata);
+  (void) skip_prologue (func_start, get_frame_pc (fi), &fdata);
 
   if (fdata.lr_offset == 0 && get_next_frame (fi) != NULL)
     {
@@ -1539,7 +1539,7 @@ rs6000_frame_saved_pc (struct frame_info *fi)
 	return read_memory_addr ((get_frame_base (get_next_frame (fi))
 				  + SIG_FRAME_LR_OFFSET),
 				 wordsize);
-      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_next_frame (fi)->pc, 0, 0))
+      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (get_next_frame (fi)), 0, 0))
 	/* The link register wasn't saved by this frame and the next
            (inner, newer) frame is a dummy.  Get the link register
            value by unwinding it from that [dummy] frame.  */
@@ -1578,7 +1578,8 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   if (fdatap == NULL)
     {
       fdatap = &work_fdata;
-      (void) skip_prologue (get_pc_function_start (fi->pc), fi->pc, fdatap);
+      (void) skip_prologue (get_pc_function_start (get_frame_pc (fi)),
+			    get_frame_pc (fi), fdatap);
     }
 
   frame_saved_regs_zalloc (fi);
@@ -1701,7 +1702,8 @@ frame_initial_stack_address (struct frame_info *fi)
 
   /* Find out if this function is using an alloca register.  */
 
-  (void) skip_prologue (get_pc_function_start (fi->pc), fi->pc, &fdata);
+  (void) skip_prologue (get_pc_function_start (get_frame_pc (fi)),
+			get_frame_pc (fi), &fdata);
 
   /* If saved registers of this frame are not known yet, read and
      cache them.  */
@@ -1752,15 +1754,15 @@ rs6000_frame_chain (struct frame_info *thisframe)
   CORE_ADDR fp, fpp, lr;
   int wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (thisframe->pc,
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (thisframe),
 				   get_frame_base (thisframe),
 				   get_frame_base (thisframe)))
     /* A dummy frame always correctly chains back to the previous
        frame.  */
     return read_memory_addr (get_frame_base (thisframe), wordsize);
 
-  if (inside_entry_file (thisframe->pc) ||
-      thisframe->pc == entry_point_address ())
+  if (inside_entry_file (get_frame_pc (thisframe))
+      || get_frame_pc (thisframe) == entry_point_address ())
     return 0;
 
   if ((get_frame_type (thisframe) == SIGTRAMP_FRAME))

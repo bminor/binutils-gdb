@@ -1281,8 +1281,8 @@ finish_command (char *arg, int from_tty)
 
   clear_proceed_status ();
 
-  sal = find_pc_line (frame->pc, 0);
-  sal.pc = frame->pc;
+  sal = find_pc_line (get_frame_pc (frame), 0);
+  sal.pc = get_frame_pc (frame);
 
   breakpoint = set_momentary_breakpoint (sal, frame, bp_finish);
 
@@ -1293,7 +1293,7 @@ finish_command (char *arg, int from_tty)
 
   /* Find the function we will return from.  */
 
-  function = find_pc_function (deprecated_selected_frame->pc);
+  function = find_pc_function (get_frame_pc (deprecated_selected_frame));
 
   /* Print info on the selected frame, including level number
      but not source.  */
