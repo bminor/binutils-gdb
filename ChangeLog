@@ -1,3 +1,7 @@
+Mon Dec 28 08:32:06 1992  Minh Tran-Le  (mtranle@paris.intellicorp.com)
+
+	* configure.in (i[34]86-*-isc*): added; uses mh-sysv.
+
 Thu Dec 24 17:26:24 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in: don't remove binutils from Solaris builds

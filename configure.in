@@ -86,6 +86,7 @@ case "${host}" in
   mips-sgi-irix3)         host_makefile_frag=config/mh-sysv ;;
   i[34]86-ncr-sysv4*)     host_makefile_frag=config/mh-ncr3000 ;;
   i[34]86-*-sco*)         host_makefile_frag=config/mh-sco ;;
+  i[34]86-*-isc*)	  host_makefile_frag=config/mh-sysv ;;
   i[34]86-*-linux)        host_makefile_frag=config/mh-linux ;;
   i[34]86-*-solaris2*)    host_makefile_frag=config/mh-sysv4 ;;
   *-ibm-aix*)             host_makefile_frag=config/mh-aix ;;
