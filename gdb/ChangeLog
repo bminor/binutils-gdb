@@ -1,5 +1,14 @@
 2002-10-31  Andrew Cagney  <cagney@redhat.com>
 
+	* h8300-tdep.c: Include "gdb_assert.h".
+	(h8300_print_register): Add gdbarch, file and frame parameters.
+	Use frame_read_unsigned_register to read the register's value.
+	Use fprintf_filtered to display output.
+	(h8300_print_registers_info): Replace h8300_do_registers_info.
+	(h8300_gdbarch_init): Set print_registers_info.
+
+2002-10-31  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.c (frame_read_unsigned_register): New function.
 	(frame_read_signed_register): New function.
 	* frame.h (frame_read_unsigned_register): Declare.
