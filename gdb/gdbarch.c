@@ -3772,7 +3772,7 @@ set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 }
 
 
-/* Keep a registrary of per-architecture data-pointers required by GDB
+/* Keep a registry of per-architecture data-pointers required by GDB
    modules. */
 
 struct gdbarch_data
@@ -3787,13 +3787,13 @@ struct gdbarch_data_registration
   struct gdbarch_data_registration *next;
 };
 
-struct gdbarch_data_registrary
+struct gdbarch_data_registry
 {
   int nr;
   struct gdbarch_data_registration *registrations;
 };
 
-struct gdbarch_data_registrary gdbarch_data_registrary =
+struct gdbarch_data_registry gdbarch_data_registry =
 {
   0, NULL,
 };
@@ -3802,14 +3802,14 @@ struct gdbarch_data *
 register_gdbarch_data (gdbarch_data_ftype *init)
 {
   struct gdbarch_data_registration **curr;
-  for (curr = &gdbarch_data_registrary.registrations;
+  for (curr = &gdbarch_data_registry.registrations;
        (*curr) != NULL;
        curr = &(*curr)->next);
   (*curr) = XMALLOC (struct gdbarch_data_registration);
   (*curr)->next = NULL;
   (*curr)->init = init;
   (*curr)->data = XMALLOC (struct gdbarch_data);
-  (*curr)->data->index = gdbarch_data_registrary.nr++;
+  (*curr)->data->index = gdbarch_data_registry.nr++;
   return (*curr)->data;
 }
 
@@ -3820,9 +3820,9 @@ static void
 init_gdbarch_data (struct gdbarch *gdbarch)
 {
   struct gdbarch_data_registration *rego;
-  gdbarch->nr_data = gdbarch_data_registrary.nr + 1;
+  gdbarch->nr_data = gdbarch_data_registry.nr + 1;
   gdbarch->data = xmalloc (sizeof (void*) * gdbarch->nr_data);
-  for (rego = gdbarch_data_registrary.registrations;
+  for (rego = gdbarch_data_registry.registrations;
        rego != NULL;
        rego = rego->next)
     {
@@ -3845,7 +3845,7 @@ gdbarch_data (struct gdbarch_data *data)
 
 
 
-/* Keep a registrary of swapped data required by GDB modules. */
+/* Keep a registry of swapped data required by GDB modules. */
 
 struct gdbarch_swap
 {
@@ -3862,13 +3862,13 @@ struct gdbarch_swap_registration
   struct gdbarch_swap_registration *next;
 };
 
-struct gdbarch_swap_registrary
+struct gdbarch_swap_registry
 {
   int nr;
   struct gdbarch_swap_registration *registrations;
 };
 
-struct gdbarch_swap_registrary gdbarch_swap_registrary = 
+struct gdbarch_swap_registry gdbarch_swap_registry = 
 {
   0, NULL,
 };
@@ -3879,7 +3879,7 @@ register_gdbarch_swap (void *data,
 		       gdbarch_swap_ftype *init)
 {
   struct gdbarch_swap_registration **rego;
-  for (rego = &gdbarch_swap_registrary.registrations;
+  for (rego = &gdbarch_swap_registry.registrations;
        (*rego) != NULL;
        rego = &(*rego)->next);
   (*rego) = XMALLOC (struct gdbarch_swap_registration);
@@ -3895,7 +3895,7 @@ init_gdbarch_swap (struct gdbarch *gdbarch)
 {
   struct gdbarch_swap_registration *rego;
   struct gdbarch_swap **curr = &gdbarch->swap;
-  for (rego = gdbarch_swap_registrary.registrations;
+  for (rego = gdbarch_swap_registry.registrations;
        rego != NULL;
        rego = rego->next)
     {
@@ -3934,7 +3934,7 @@ swapin_gdbarch_swap (struct gdbarch *gdbarch)
 }
 
 
-/* Keep a registrary of the architectures known by GDB. */
+/* Keep a registry of the architectures known by GDB. */
 
 struct gdbarch_registration
 {
@@ -3945,7 +3945,7 @@ struct gdbarch_registration
   struct gdbarch_registration *next;
 };
 
-static struct gdbarch_registration *gdbarch_registrary = NULL;
+static struct gdbarch_registration *gdbarch_registry = NULL;
 
 static void
 append_name (const char ***buf, int *nr, const char *name)
@@ -3966,7 +3966,7 @@ gdbarch_printable_names (void)
       int nr_arches = 0;
       const char **arches = NULL;
       struct gdbarch_registration *rego;
-      for (rego = gdbarch_registrary;
+      for (rego = gdbarch_registry;
 	   rego != NULL;
 	   rego = rego->next)
 	{
@@ -4005,7 +4005,7 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
       internal_error ("gdbarch: Attempt to register unknown architecture (%d)", bfd_architecture);
     }
   /* Check that we haven't seen this architecture before */
-  for (curr = &gdbarch_registrary;
+  for (curr = &gdbarch_registry;
        (*curr) != NULL;
        curr = &(*curr)->next)
     {
@@ -4102,7 +4102,7 @@ gdbarch_update_p (struct gdbarch_info info)
   /* A default for abfd? */
 
   /* Find the target that knows about this architecture. */
-  for (rego = gdbarch_registrary;
+  for (rego = gdbarch_registry;
        rego != NULL;
        rego = rego->next)
     if (rego->bfd_architecture == info.bfd_architecture)

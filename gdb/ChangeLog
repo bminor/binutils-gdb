@@ -1,3 +1,7 @@
+Thu Nov 30 13:19:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.c: Regenerate.
+
 Thu Nov 30 01:14:21 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (varobj.o): Delete special compile rule
