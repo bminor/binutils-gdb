@@ -206,7 +206,7 @@ struct bfd_link_info
   bfd_link_stack_heap stack_heap_parameters;
 
   /* If a base output file is wanted, then this points to it */
-  FILE *base_file;
+  PTR base_file;
 };
 
 /* This structures holds a set of callback functions.  These are

@@ -1,3 +1,8 @@
+Sun Jul  2 17:48:40 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bfdlink.h (struct bfd_link_info): Change type of base_file to
+	PTR.
+
 Thu Jun 29 00:02:45 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* bfdlink.h (struct bfd_link_info): Added base_file member.
