@@ -31,7 +31,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfdlink.h"
 #include "getopt.h"
 #include "ld.h"
-#include "config.h"
 #include "ld.h"
 #include "ldmain.h"
 #include "ldgram.h"
@@ -166,11 +165,11 @@ set_pe_subsystem ()
     }
   v[] =
     {
-      {"native", BFD_PE_NATIVE},
-      {"windows",BFD_PE_WINDOWS},
-      {"console",BFD_PE_CONSOLE},
-      {"os2",BFD_PE_OS2},
-      {"posix", BFD_PE_POSIX},
+      {"native", 1},
+      {"windows",2},
+      {"console",3},
+      {"os2",5},
+      {"posix", 7},
       {0,0}
     };
 
@@ -233,13 +232,24 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
   int optc;
   int prevoptind = optind;
   int prevopterr = opterr;
-  opterr = 0;
+  int wanterror;
+  static int lastoptind = -1;
+
+  if (lastoptind != optind)
+    opterr = 0;
+  wanterror = opterr;
+
+  lastoptind = optind;
+
   optc = getopt_long_only (argc, argv, "-", longopts, &longind);
   opterr = prevopterr;
+
   switch (optc)
     {
     default:
-      optind = prevoptind;
+      if (wanterror)
+	xexit (1);
+      optind =  prevoptind;
       return 0;
 
     case OPTION_BASE_FILE:
@@ -272,7 +282,7 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       set_pe_value ("__major_subsystem_version__");
       break;
     case OPTION_MINOR_SUBSYSTEM_VERSION:
-      set_pe_value ("__minor_subsytem_version__");
+      set_pe_value ("__minor_subsystem_version__");
       break;
     case OPTION_MAJOR_IMAGE_VERSION:
       set_pe_value ("__major_image_version__");
@@ -299,15 +309,19 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
 static void
 gld_${EMULATION_NAME}_set_symbols() 
 {
-
   /* Run through and invent symbols for all the
      names and insert the defaults. */
   int j;
+  lang_statement_list_type *save;
 
   if (!init[IMAGEBASEOFF].inited)
     init[IMAGEBASEOFF].value = init[DLLOFF].value
       ? NT_DLL_IMAGE_BASE : NT_EXE_IMAGE_BASE;
 
+  /* Glue the assignments into the abs section */
+  save=stat_ptr;
+
+  stat_ptr = &(abs_output_section->children);
   for (j = 0; init[j].ptr; j++)
     {
       long val = init[j].value;
@@ -320,7 +334,9 @@ gld_${EMULATION_NAME}_set_symbols()
 	*(long *)init[j].ptr = val;
       else	abort();
     }
-
+  /* Restore the pointer. */
+  stat_ptr = save;
+  
   if (pe.FileAlignment >
       pe.SectionAlignment)
     {

@@ -1,3 +1,10 @@
+Sat Oct 28 00:10:03 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_parse_args):
+	Don't hang if last option is unrecognised.
+	(gld_${EMULATION_NAME}_set_symbols): Insert created
+	symbols into ABS output section.
+
 Fri Oct 27 18:03:17 1995  Niklas Hallqvist  <niklas@appli.se>
 
 	*  Makefile.in (ALL_EMULATIONS): Added support for the NetBSD
