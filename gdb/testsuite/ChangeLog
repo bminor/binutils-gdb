@@ -1,3 +1,20 @@
+Tue Oct 15 16:45:02 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* config/sim-gdb.exp (gdb_target_sim):  Remove setting of height
+	and width commands.  This is done elsewhere.
+	* (gdb_start):  Don't call gdb_start_sim here.  That's already
+	done in gdb_load.  This fixes lots of failures in default.exp.
+
+Sun Oct 13 10:40:23 1996  Fred Fish  <fnf@cygnus.com>
+
+	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>:
+	* gdb.base/mips_pro.exp: Fix misplaced gdb_exit/gdb_start/gdb_load.
+	* lib/gdb.exp (gdb_test): Treat failures due to program exiting
+	in the same we we treat other failures (since it may be an expected
+ 	condition), rather than as an error.
+	* gdb.base/signals.exp (test_handle_all_print): Revert back to
+	old test format.
+
 Fri Oct 11 17:05:22 1996  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (clean mostlyclean): Also remove chill *.grt files.

@@ -45,13 +45,6 @@ proc gdb_target_sim { } {
     global exit_status
     global target_sim_options
 
-    # force the height to "unlimited", so no pagers get used
-    send "set height 0\n"
-    expect -re ".*$prompt $" {}
-    # force the width to "unlimited", so no wraparound occurs
-    send "set width 0\n"
-    expect -re ".*$prompt $" {}
-
     send "target sim $target_sim_options\n"
     set timeout 60
     verbose "Timeout is now $timeout seconds" 2
@@ -115,7 +108,6 @@ proc gdb_load { arg } {
 proc gdb_start { } {
     default_gdb_start
     verbose "Setting up target, Please wait..."
-    gdb_target_sim
 }
 
 #
