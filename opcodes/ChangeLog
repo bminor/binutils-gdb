@@ -1,3 +1,8 @@
+Tue Jun 23 19:42:18 1998  Mark Alexander  <marka@cygnus.com>
+
+	* m10200-dis.c (print_insn_mn10200): Fix various non-portabilities
+	related to sign extension and the size of ints.
+
 Tue Jun 23 10:59:26 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* m10300-opc.c: Support one operand "asr", "lsr" and "asl"
