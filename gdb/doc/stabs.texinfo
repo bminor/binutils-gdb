@@ -15,7 +15,8 @@ END-INFO-DIR-ENTRY
 This document describes the stabs debugging symbol tables.
 
 Copyright 1992, 1993 Free Software Foundation, Inc.
-Contributed by Cygnus Support.  Written by Julia Menapace.
+Contributed by Cygnus Support.  Written by Julia Menapace, Jim Kingdon,
+and David MacKenzie.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
