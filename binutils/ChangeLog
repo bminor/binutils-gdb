@@ -1,3 +1,10 @@
+Thu Jun 11 17:54:26 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Remove extraneous #includes.  Fix warnings produced
+	by -Wall when compiling under Linux.
+
+	* Makefile.am (readelf_LDADD): Add $(LIBIBERTY).
+
 Thu Jun 11 18:30:20 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabs.c (struct stab_handle): Add self_crossref field.

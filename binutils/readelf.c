@@ -24,20 +24,11 @@
 
 #include <assert.h>
 #include <sys/mman.h>
-#include <fcntl.h>
-#include <stdlib.h>
-
-#include <stdio.h>
-#include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <errno.h>
 
 #include "readelf.h"
-#include "getopt.h"
 #include "bucomm.h"
+#include "getopt.h"
 
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
@@ -608,10 +599,14 @@ dump_relocations (rpnt, rel_size)
       if (is_rela)
 	rpnt = (Elf_Rel *) rapnt;
       
-      printf ("  %5.5x  %5.5x ", rpnt->r_offset, rpnt->r_info);
+      printf ("  %5.5lx  %5.5lx ", rpnt->r_offset, rpnt->r_info);
 	     
       switch (epnt->e_machine)
 	{
+	default:
+	  rtype = "UGG!";
+	  break;
+	  
 	case EM_CYGNUS_M32R:
 	  rtype = get_m32r_rel_type (ELF32_R_TYPE (rpnt->r_info));
 	  break;
@@ -680,13 +675,13 @@ dump_relocations (rpnt, rel_size)
 	    }
 
 	  if (psym->st_name == 0)
-	    printf ("    %08x  %-15s", psym->st_value,
+	    printf ("    %08lx  %-15s", psym->st_value,
 		    SECTION_NAME (elf_sections + psym->st_shndx));
 	  else
-	    printf ("    %08x  %-15s", psym->st_value, strtab + psym->st_name);
+	    printf ("    %08lx  %-15s", psym->st_value, strtab + psym->st_name);
 	    
 	  if (is_rela)
-	    printf (" + %x", rapnt->r_addend);
+	    printf (" + %lx", rapnt->r_addend);
 	}
       
       putchar ('\n');
@@ -1127,15 +1122,15 @@ process_program_headers ()
       if (do_load)
 	{
 	  printf ("  %-10s ", get_segment_type (ppnt->p_type));
-	  printf ("0x%5.5x ",ppnt->p_offset);
-	  printf ("0x%8.8x ",ppnt->p_vaddr);
-	  printf ("0x%8.8x ",ppnt->p_paddr);
-	  printf ("0x%5.5x 0x%5.5x ",ppnt->p_filesz, ppnt->p_memsz);
+	  printf ("0x%5.5lx ",ppnt->p_offset);
+	  printf ("0x%8.8lx ",ppnt->p_vaddr);
+	  printf ("0x%8.8lx ",ppnt->p_paddr);
+	  printf ("0x%5.5lx 0x%5.5lx ",ppnt->p_filesz, ppnt->p_memsz);
 	  printf ("%c%c%c ",
 		  (ppnt->p_flags & 4 ? 'R' : ' '),
 		  (ppnt->p_flags & 2 ? 'W' : ' '),
 		  (ppnt->p_flags & 1 ? 'E' : ' '));
-	  printf ("%#x", ppnt->p_align);
+	  printf ("%#lx", ppnt->p_align);
 	}
       
       if (ppnt->p_type == PT_DYNAMIC)
@@ -1284,13 +1279,13 @@ process_section_headers ()
       printf ("  [%2d] %-14s", i, SECTION_NAME (spnt));
 	  
       printf (" %-18s ",get_section_type_name (spnt->sh_type));
-      printf ( "%8.8x %6.6x %6.6x %2.2x",
+      printf ( "%8.8lx %6.6lx %6.6lx %2.2lx",
 	       spnt->sh_addr,
 	       spnt->sh_offset,
 	       spnt->sh_size,
 	       spnt->sh_entsize);
       
-      printf (" %c%c%c %2d %2x %d \n",
+      printf (" %c%c%c %2ld %2lx %ld \n",
 	      (spnt->sh_flags & 1 ? 'W' : ' '),
 	      (spnt->sh_flags & 2 ? 'A' : ' '),
 	      (spnt->sh_flags & 4 ? 'X' : ' '),
@@ -1595,7 +1590,7 @@ process_symbol_table ()
 	    {
 	      pnt = strtab + symtab[si].st_name;
 	      
-	      printf ("%3d %3d: %8x %5d %6s %6s %2d ", si, hn,
+	      printf ("%3d %3d: %8lx %5ld %6s %6s %2d ", si, hn,
 		      symtab[si].st_value,
 		      symtab[si].st_size,
 		      sttinfo [ELF_ST_TYPE (symtab[si].st_info)],
@@ -1660,7 +1655,7 @@ process_symbol_table ()
 	      
 	      pnt = strtab + psym->st_name;
 	      
-	      printf ("  %3d: %8x %5d %-7s %-6s %2d ", si,
+	      printf ("  %3d: %8lx %5ld %-7s %-6s %2d ", si,
 		      psym->st_value,
 		      psym->st_size,
 		      sttinfo [ELF_ST_TYPE (psym->st_info)],
