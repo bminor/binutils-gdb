@@ -1,3 +1,8 @@
+Tue Jan 24 14:22:47 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elf32-mips.c (mips_elf_output_extsym): Set the value of the
+	ECOFF symbol from the hash table entry.
+
 Mon Jan 23 14:53:35 1995  Steve Chamberlain  <sac@splat>
 
 	* coff-sh.c (coff_sh_relocate_section):  Don't subtract

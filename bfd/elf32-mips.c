@@ -65,7 +65,7 @@ static bfd_reloc_status_type mips_elf_gprel16_reloc PARAMS ((bfd *abfd,
 							     asection *section,
 							     bfd *output_bfd,
 							     char **error));
-static const struct reloc_howto_struct *bfd_elf32_bfd_reloc_type_lookup
+static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void mips_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
@@ -848,7 +848,7 @@ static CONST struct elf_reloc_map mips_reloc_map[] =
 
 /* Given a BFD reloc type, return a howto structure.  */
 
-static const struct reloc_howto_struct *
+static reloc_howto_type *
 bfd_elf32_bfd_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -1719,6 +1719,22 @@ mips_elf_output_extsym (h, data)
       h->esym.asym.index = indexNil;
     }
 
+  if (h->root.root.type == bfd_link_hash_common)
+    h->esym.asym.value = h->root.root.u.c.size;
+  else if (h->root.root.type == bfd_link_hash_defined)
+    {
+      asection *sec;
+
+      if (h->esym.asym.sc == scCommon)
+	h->esym.asym.sc = scBss;
+      else if (h->esym.asym.sc == scSCommon)
+	h->esym.asym.sc = scSBss;
+
+      sec = h->root.root.u.def.section;
+      h->esym.asym.value = (h->root.root.u.def.value
+			    + sec->output_offset
+			    + sec->output_section->vma);
+    }
 
   if (! bfd_ecoff_debug_one_external (einfo->abfd, einfo->debug, einfo->swap,
 				      h->root.root.root.string,
