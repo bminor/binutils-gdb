@@ -1,3 +1,7 @@
+2002-08-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* aoutx.h (NAME(aout,reloc_type_lookup)): Handle BFD_RELOC_8.
+
 2002-08-24  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_copy_indirect_symbol): New.
