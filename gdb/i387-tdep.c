@@ -318,7 +318,7 @@ print_i387_control_word (unsigned int control, struct ui_file *file)
 
 void
 i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
-		       struct frame_info *frame)
+		       struct frame_info *frame, const char *args)
 {
   unsigned int fctrl;
   unsigned int fstat;

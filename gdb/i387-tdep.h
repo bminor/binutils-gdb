@@ -25,7 +25,8 @@
 
 extern void i387_print_float_info (struct gdbarch *gdbarch,
 				   struct ui_file *file,
-				   struct frame_info *frame);
+				   struct frame_info *frame,
+				   const char *args);
 
 /* Fill register REGNUM in GDB's register array with the appropriate
    value from *FSAVE.  This function masks off any of the reserved
