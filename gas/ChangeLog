@@ -1,12 +1,15 @@
 Tue May  2 00:17:04 1995  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
-	* config/te-generic.h (TE_GENERIC): Deleted unused macro.
+	* config/te-dpx2.h (dpx2): Deleted unused macro.
+	* config/te-generic.h (TE_GENERIC): Ditto.
 	* config/te-go32.h (TE_GO32): Ditto.
 	* config/te-hp300.h (TE_HP300): Ditto.
+	* config/te-hppa.h (PA, _TE_PA_H): Ditto.
 	* config/te-ic960.h (TE_IC960): Ditto.
 	* config/te-nbsd532.h (TE_NETBSD532): Ditto.
 	* config/te-pc532mach.h (TE_PC532MACH): Ditto.
 	* config/te-ppcnw.h (TE_PPCNW): Ditto.
+	* config/te-sco386.h (scounix): Ditto.
 
 Mon May  1 15:59:56 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
