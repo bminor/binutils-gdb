@@ -61,7 +61,7 @@ except that the section entitled ``GNU General Public License'' may be
 included in a translation approved by the Free Software Foundation
 instead of in the original English.
 @end ifinfo
-@smallbook
+@c @smallbook
 @setchapternewpage odd
 _if__(_GENERIC__)
 @settitle Using _GDBN__ (v4.0)
@@ -126,25 +126,26 @@ This file describes version 4.0 of GDB, the GNU symbolic debugger.
 * New Features::                New Features in _GDBN__ version 4.0
 * Sample Session::              A Sample _GDBN__ Session
 * Invocation::                  Getting In and Out of _GDBN__
-* Commands::                    
+* Commands::                    _GDBN__ Commands
 * Running::                     Running Programs Under _GDBN__
 * Stopping::                    Stopping and Continuing
 * Stack::                       Examining the Stack
 * Source::                      Examining Source Files
 * Data::                        Examining Data
-* Cplusplus::                   C++ and _GDBN__
+* Languages::                   Using _GDBN__ with Different Languages
 * Symbols::                     Examining the Symbol Table
 * Altering::                    Altering Execution
-* _GDBN__ Files::               
+* _GDBN__ Files::                   _GDBN__'s Files
 * Targets::                     Specifying a Debugging Target 
-* Controlling _GDBN__::         Controlling _GDBN__
+* Controlling _GDBN__::             Controlling _GDBN__
 * Sequences::                   Canned Sequences of Commands
 * Emacs::                       Using _GDBN__ under GNU Emacs
-* _GDBN__ Bugs::                        Reporting Bugs in _GDBN__
+* _GDBN__ Bugs::                    Reporting Bugs in _GDBN__
 * Renamed Commands::            
-* Installing _GDBN__::          Installing _GDBN__
+* Installing _GDBN__::              Installing _GDBN__
 * Copying::                     GNU GENERAL PUBLIC LICENSE
 * Index::                       Index
+
  --- The Detailed Node Listing ---
 
 Summary of _GDBN__
@@ -154,8 +155,8 @@ Summary of _GDBN__
 
 Getting In and Out of _GDBN__
 
-* Starting _GDBN__::            Starting _GDBN__
-* Leaving _GDBN__::                     Leaving _GDBN__
+* Starting _GDBN__::                Starting _GDBN__
+* Leaving _GDBN__::                 Leaving _GDBN__
 * Shell Commands::              Shell Commands
 
 Starting _GDBN__
@@ -195,7 +196,7 @@ Breakpoints, Watchpoints, and Exceptions
 * Conditions::                  Break Conditions
 * Break Commands::              Breakpoint Command Lists
 * Breakpoint Menus::            Breakpoint Menus
-* Error in Breakpoints::        
+* Error in Breakpoints::        ``Cannot insert breakpoints''
 
 Examining the Stack
 
@@ -225,6 +226,49 @@ Examining Data
 * Registers::                   Registers
 * Floating Point Hardware::     Floating Point Hardware
 
+Using GDB with Different Languages
+
+* Setting::                     Switching between source languages
+* Show::                        Displaying the language
+* Checks::                      Type and Range checks
+* Support::                     Supported languages
+
+Switching between source languages
+
+* Manually::                    Setting the working language manually
+* Automatically::               Having GDB infer the source language
+
+Type and range Checking
+
+* Type Checking::               An overview of type checking
+* Range Checking::              An overview of range checking
+
+Supported Languages
+
+* C::                           C and C++
+* Modula-2::                    Modula-2
+
+C and C++
+
+* C Operators::                 C and C++ Operators
+* C Constants::                 C and C++ Constants
+* Cplusplus expressions::       C++ Expressions
+* C Defaults::                  Default settings for C and C++
+* C Checks::                    C and C++ Type and Range Checks
+* Debugging C::                 _GDBN__ and C
+* Debugging C plus plus::       Special features for C++
+
+Modula-2
+
+* M2 Operators::                Built-in operators
+* Builtin Func/Proc::           Built-in Functions and Procedures
+* M2 Constants::                Modula-2 Constants
+* M2 Defaults::                 Default settings for Modula-2
+* Deviations::                  Deviations from standard Modula-2
+* M2 Checks::                   Modula-2 Type and Range Checks
+* M2 Scope::                    The scope operators @code{::} and @code{.}
+* GDB/M2::                      GDB and Modula-2
+
 Altering Execution
 
 * Assignment::                  Assignment to Variables
@@ -246,9 +290,9 @@ Specifying a Debugging Target
 
 Remote Debugging
 
-* i960-Nindy Remote::           
-* EB29K Remote::                
-* VxWorks Remote::              
+* i960-Nindy Remote::           _GDBN__ with a Remote i960 (Nindy)
+* EB29K Remote::                _GDBN__ with a Remote EB29K
+* VxWorks Remote::              _GDBN__ and VxWorks
 
 _GDBN__ with a Remote i960 (Nindy)
 
@@ -287,6 +331,13 @@ Reporting Bugs in _GDBN__
 
 * Bug Criteria::                Have You Found a Bug?
 * Bug Reporting::               How to Report Bugs
+
+Installing GDB
+
+* Subdirectories::              Configuration subdirectories
+* Config Names::                Specifying names for hosts and targets
+* configure Options::           Summary of options for configure
+* Formatting Manual::           How to format and print GDB documentation
 @end menu
 
 @node Summary, New Features, Top, Top
@@ -314,9 +365,8 @@ Change things in your program, so you can experiment with correcting the
 effects of one bug and go on to learn about another.
 @end itemize
 
-You can use _GDBN__ to debug programs written in C and C++.  Modula-2 support
-is being implemented, and Fortran support will be added when a GNU
-Fortran compiler is ready.
+You can use _GDBN__ to debug programs written in C, C++, and Modula-2.
+Fortran support will be added when a GNU Fortran compiler is ready.
 
 @menu
 * Free Software::               Free Software
@@ -360,10 +410,10 @@ omitted from this list, we would like to add your names!
 
 So that they may not regard their long labor as thankless, we
 particularly thank those who shepherded GDB through major releases: John
-Gilmore (release 4.0; happy birthday, John!); Jim Kingdon (releases
-3.9, 3.5, 3.4, 3.3); and Randy Smith (releases 3.2, 3.1, 3.0).  As major
-maintainer of GDB for some period, each contributed significantly to the
-structure, stability, and capabilities of the entire debugger.
+Gilmore (releases 4.1, 4.0); Jim Kingdon (releases 3.9, 3.5, 3.4, 3.3);
+and Randy Smith (releases 3.2, 3.1, 3.0).  As major maintainer of GDB
+for some period, each contributed significantly to the structure,
+stability, and capabilities of the entire debugger.
 
 Richard Stallman, assisted at various times by Pete TerMaat, Chris
 Hanson, and Richard Mlynarik, handled releases through 2.8.
@@ -405,6 +455,10 @@ contributed remote debugging modules for their products.
 
 Brian Fox is the author of the readline libraries providing
 command-line editing and command history.
+
+Andrew Beers of SUNY Buffalo wrote the language-switching code and
+the Modula-2 support, and contributed the Languages chapter of this
+manual. 
 
 @node New Features, Sample Session, Summary, Top
 @unnumbered New Features since _GDBN__ version 3.5
@@ -462,6 +516,15 @@ version 2 compiler), and also has limited support for C++ exception
 handling, with the commands @code{catch} and @code{info catch}: _GDBN__
 can break when an exception is raised, before the stack is peeled back
 to the exception handler's context.
+
+@item Modula-2
+_GDBN__ now has preliminary support for the GNU Modula-2 compiler,
+currently under development at the State University of New York at
+Buffalo.  Coordinated development of both _GDBN__ and the GNU Modula-2
+compiler will continue through the fall of 1991 and into 1992.  Other
+Modula-2 compilers are currently not supported, and attempting to debug
+programs compiled with them will likely result in an error as the symbol
+table of the executable is read in.
 
 @item Command Rationalization
 Many _GDBN__ commands have been renamed to make them easier to remember
@@ -746,8 +809,8 @@ _1__@end smallexample
 @chapter Getting In and Out of _GDBN__
 
 @menu
-* Starting _GDBN__::            Starting _GDBN__
-* Leaving _GDBN__::                     Leaving _GDBN__
+* Starting _GDBN__::                Starting _GDBN__
+* Leaving _GDBN__::                 Leaving _GDBN__
 * Shell Commands::              Shell Commands
 @end menu
 
@@ -842,7 +905,7 @@ Add @var{directory} to the path to search for source files.
 @end table
 
 _if__(!_GENERIC__)
-@node Mode Options, i960-Nindy Remote, File Options, Starting _GDBN__
+@node Mode Options, Mode Options, File Options, Starting _GDBN__
 _fi__(!_GENERIC__)
 _if__(_GENERIC__)
 @node Mode Options,  , File Options, Starting _GDBN__
@@ -1899,9 +1962,9 @@ will not change the state of your other breakpoints;
 The simplest sort of breakpoint breaks every time the program reaches a
 specified place.  You can also specify a @dfn{condition} for a
 breakpoint.  A condition is just a Boolean expression in your
-programming language.  (@xref{Expressions}).  A breakpoint with a
-condition evaluates the expression each time the program reaches it, and
-the program stops only if the condition is @emph{true}.
+programming language.  (@xref{Expressions}).  A breakpoint with a condition
+evaluates the expression each time the program reaches it, and the
+program stops only if the condition is @emph{true}.
 
 This is the converse of using assertions for program validation; in that
 situation, you want to stop when the assertion is violated---that is,
@@ -2658,7 +2721,8 @@ argument, this command is used to select a stack frame (@pxref{Selection}).
 @kindex info f
 This command prints a verbose description of the selected stack frame,
 including the address of the frame, the addresses of the next frame down
-(called by this frame) and the next frame up (caller of this frame),
+(called by this frame) and the next frame up (caller of this frame), the
+language that the source code corresponding to this frame was written in,
 the address of the frame's arguments, the program counter saved in it
 (the address of execution in the caller frame), and which registers
 were saved in the frame.  The verbose description is useful when
@@ -2978,7 +3042,7 @@ End of assembler dump.
 
 @end smallexample
 
-@node Data, Cplusplus, Source, Top
+@node Data, Languages, Source, Top
 @chapter Examining Data
 
 @cindex printing data
@@ -2991,7 +3055,7 @@ End of assembler dump.
 The usual way to examine data in your program is with the @code{print}
 command (abbreviated @code{p}), or its synonym @code{inspect}.  It
 evaluates and prints the value of an expression of the language your
-program is written in (for now, C or C++).  You type
+program is written in (@pxref{Languages}).  You type
 
 @example
 print @var{exp}
@@ -3035,11 +3099,20 @@ _GDBN__.  This includes conditional expressions, function calls, casts
 and string constants.  It unfortunately does not include symbols defined
 by preprocessor @code{#define} commands.
 
+Because C is so widespread, most of the expressions shown in examples in
+this manual are in C.  @xref{Languages,, Using _GDBN__ with Different
+Languages}, for information on how to use expressions in other
+languages.  
+
+In this section, we discuss operators that you can use in _GDBN__
+expressions regardless of your programming language. 
+
 Casts are supported in all languages, not just in C, because it is so
 useful to cast a number into a pointer so as to examine a structure
 at that address in memory.
+@c FIXME: casts supported---Mod2 true?
 
-_GDBN__ supports three kinds of operator in addition to those of programming
+_GDBN__ supports these operators in addition to those of programming
 languages:
 
 @table @code
@@ -3105,10 +3178,10 @@ specify a variable in a particular file, using the colon-colon notation:
 @noindent
 Here @var{file} is the name of the source file whose variable you want.
 
-@cindex C++ name resolution
+@cindex C++ scope resolution
 This use of @samp{::} is very rarely in conflict with the very similar
 use of the same notation in C++.  _GDBN__ also supports use of the C++
-name resolution operator in _GDBN__ expressions.
+scope resolution operator in _GDBN__ expressions.
 
 @cindex wrong values
 @cindex variable values, wrong
@@ -3827,11 +3900,13 @@ The variable @code{$_} is automatically set by the @code{x} command to
 the last address examined (@pxref{Memory}).  Other commands which
 provide a default address for @code{x} to examine also set @code{$_}
 to that address; these commands include @code{info line} and @code{info
-breakpoint}.
+breakpoint}.  @code{$_}'s type is @code{void *} except when set by the
+@code{x} command, in which case it is a pointer to the type of @code{$__}.
 
 @item $__
 The variable @code{$__} is automatically set by the @code{x} command
-to the value found in the last address examined.
+to the value found in the last address examined.  Its type is chosen
+to match the format in which the data was printed.
 @end table
 
 @node Registers, Floating Point Hardware, Convenience Vars, Data
@@ -3944,31 +4019,540 @@ floating point chip.
 @c FIXME... m4 macros to isolate general statements from hardware-dep, 
 @c FIXME... at that point.
 
-@node Cplusplus, Symbols, Data, Top
-@chapter C++ and _GDBN__
+@node Languages, Symbols, Data, Top
+@chapter Using _GDBN__ with Different Languages
+@cindex languages
+
+Although programming languages generally have common aspects, they are
+rarely expressed in the same manner.  For instance, in ANSI C,
+dereferencing a pointer @code{p} is accomplished by @code{*p}, but in
+Modula-2, it is accomplished by @code{p^}.  Values can also be
+represented (and displayed) differently.  Hex numbers in C are written
+like @samp{0x1ae}, while in Modula-2 they appear as @samp{1AEH}.
+
+@cindex working language
+Language-specific information is built into _GDBN__ for some languages,
+allowing you to express operations like the above in the program's
+native language, and allowing _GDBN__ to output values in a manner
+consistent with the syntax of the program's native language.  The
+language you use to build expressions, called the @dfn{working
+language}, can be selected manually, or _GDBN__ can set it
+automatically.
+
+@menu
+* Setting::                     Switching between source languages
+* Show::                        Displaying the language
+* Checks::                      Type and Range checks
+* Support::                     Supported languages
+@end menu
+
+@node Setting, Show, Languages, Languages
+@section Switching between source languages
+
+There are two ways to control the working language---either have _GDBN__
+set it automatically, or select it manually yourself.  You can use the
+@code{set language} command for either purpose.  On startup, _GDBN__
+defaults to setting the language automatically.
+
+@menu
+* Manually::                    Setting the working language manually
+* Automatically::               Having _GDBN__ infer the source language
+@end menu
+
+@node Manually, Automatically, Setting, Setting
+@subsection Setting the working language
+
+@kindex set language
+To set the language, issue the command @samp{set language @var{lang}},
+where @var{lang} is the name of a language, such as @code{c} or
+@code{m2}, or the extension of a filename written in that language, such
+as @file{.c} or @file{.mod}.  For a list of the supported
+languages, type @samp{set language}.
+
+Setting the language manually prevents _GDBN__ from updating the working
+language automatically.  This can lead to confusion if you try
+to debug a program when the working language is not the same as the
+source language, when an expression is acceptable to both
+languages---but means different things.  For instance, if the current
+source file were written in C, and _GDBN__ was parsing Modula-2, a
+command such as:
+
+@example
+print a = b + c
+@end example
+
+@noindent
+might not have the effect you intended.  In C, this means to add
+@code{b} and @code{c} and place the result in @code{a}.  The result
+printed would be the value of @code{a}.  In Modula-2, this means to compare
+@code{a} to the result of @code{b+c}, yielding a @code{BOOLEAN} value.
+
+If you allow _GDBN__ to set the language automatically, then
+you can count on expressions evaluating the same way in your debugging
+session and in your program.
+
+@node Automatically,  , Manually, Setting
+@subsection Having _GDBN__ infer the source language
+
+To have _GDBN__ set the working language automatically, use @samp{set
+language local} or @samp{set language auto}.  _GDBN__ then infers the
+language that a program was written in by looking at the name of its
+source files, and examining their extensions:
+
+@table @file
+@item *.mod
+Modula-2 source file
+
+@item *.c
+@itemx *.cc
+C or C++ source file.
+@end table
+
+This information is recorded for each function or procedure in a source
+file.  When your program stops in a frame (usually by encountering a
+breakpoint), _GDBN__ sets the working language to the language recorded
+for the function in that frame.  If the language for a frame is unknown
+(that is, if the function or block corresponding to the frame was
+defined in a source file that does not have a recognized extension), the
+current working language is not changed, and _GDBN__ issues a warning.
+
+This may not seem necessary for most programs, which are written
+entirely in one source language.  However, program modules and libraries
+written in one source language can be used by a main program written in
+a different source language.  Using @samp{set language auto} in this
+case frees you from having to set the working language manually.
+
+@node Show, Checks, Setting, Languages
+@section Displaying the language
+
+The following commands will help you find out which language is the
+working language, and also what language source files were written in.
+
+@kindex show language
+@kindex info frame
+@kindex info source
+@table @code
+@item show language
+Display the current working language.  This is the
+language you can use with commands such as @code{print} to
+build and compute expressions that may involve variables in the program.
+
+@item info frame
+Among the other information listed here (@pxref{Frame Info,,Information
+about a Frame}) is the source language for this frame.  This is the
+language that will become the working language if you ever use an
+identifier that is in this frame.
+
+@item info source
+Among the other information listed here (@pxref{Symbols,,Examining the
+Symbol Table}) is the source language of this source file.
+
+@end table
+
+@node Checks, Support, Show, Languages
+@section Type and range Checking
+
+@quotation
+@emph{Warning:} In this release, the _GDBN__ commands for type and range
+checking are included, but they do not yet have any effect.  This
+section documents the intended facilities.
+@end quotation
+@c FIXME remove warning when type/range code added
+
+Some languages are designed to guard you against making seemingly common
+errors through a series of compile- and run-time checks.  These include
+checking the type of arguments to functions and operators, and making
+sure mathematical overflows are caught at run time.  Checks such as
+these help to ensure a program's correctness once it has been compiled
+by eliminating type mismatches, and providing active checks for range
+errors when the program is running.
+
+_GDBN__ can check for conditions like the above if you wish.
+Although _GDBN__ will not check the statements in your program, it
+can check expressions entered directly into _GDBN__ for evaluation via
+the @code{print} command, for example.  As with the working language,
+_GDBN__ can also decide whether or not to check automatically based on
+the source language of the program being debugged.
+@xref{Support,,Supported Languages}, for the default settings
+of supported languages.
+
+@menu
+* Type Checking::               An overview of type checking
+* Range Checking::              An overview of range checking
+@end menu
+
+@cindex type checking
+@cindex checks, type
+@node Type Checking, Range Checking, Checks, Checks
+@subsection An overview of type checking
+
+Some languages, such as Modula-2, are strongly typed, meaning that the
+arguments to operators and functions have to be of the correct type,
+otherwise an error occurs.  These checks prevent type mismatch
+errors from ever causing any run-time problems.  For example,
+
+@example
+1 + 2 @result{} 3
+@error{} 1 + 2.3
+@end example
+
+The second example fails because the @code{CARDINAL} 1 is not
+type-compatible with the @code{REAL} 2.3.
+
+For expressions you use in _GDBN__ commands, you can tell the _GDBN__
+type checker to skip checking; to treat any mismatches as errors and
+abandon the expression; or only issue warnings when type mismatches
+occur, but evaluate the expression anyway.  When you choose the last of
+these, _GDBN__ evaluates expressions like the second example above, but
+also issues a warning.
+
+Even though you may turn type checking off, other type-based reasons may
+prevent _GDBN__ from evaluating an expression.  For instance, _GDBN__ does not
+know how to add an @code{int} and a @code{struct foo}.  These particular
+type errors have nothing to do with the language in use, and usually
+arise from expressions, such as the one described above, which make
+little sense to evaluate anyway.
+
+Each language defines to what degree it is strict about type.  For
+instance, both Modula-2 and C require the arguments to arithmetical
+operators to be numbers.  In C, enumerated types and pointers can be
+represented as numbers, so that they are valid arguments to mathematical
+operators.  @xref{Support,,Supported Languages}, for futher
+details on specific languages.
+
+_GDBN__ provides some additional commands for controlling the type checker:
+
+@kindex set check
+@kindex set check type
+@kindex show check type
+@table @code
+@item set check type auto
+Set type checking on or off based on the current working language.  
+@xref{Support,,Supported Languages}, for the default settings for 
+each language.
+
+@item set check type on
+@itemx set check type off
+Set type checking on or off, overriding the default setting for the
+current working language.  Issue a warning if the setting does not
+match the language's default.  If any type mismatches occur in
+evaluating an expression while typechecking is on, _GDBN__ prints a
+message and aborts evaluation of the expression.
+
+@item set check type warn
+Cause the type checker to issue warnings, but to always attempt to
+evaluate the expression.  Evaluating the expression may still
+be impossible for other reasons.  For example, _GDBN__ cannot add
+numbers and structures.
+
+@item show type
+Show the current setting of the type checker, and whether or not _GDBN__ is 
+setting it automatically.
+@end table
+
+@cindex range checking
+@cindex checks, range
+@node Range Checking,  , Type Checking, Checks
+@subsection An overview of Range Checking
+
+In some languages (such as Modula-2), it is an error to exceed the
+bounds of a type; this is enforced with run-time checks.  Such range
+checking is meant to ensure program correctness by making sure
+computations do not overflow, or indices on an array element access do
+not exceed the bounds of the array.
+
+For expressions you use in _GDBN__ commands, you can tell _GDBN__ to
+ignore range errors; to always treat them as errors and abandon the
+expression; or to issue warnings when a range error occurs but evaluate
+the expression anyway.
+
+A range error can result from numerical overflow, from exceeding an
+array index bound, or when you type in a constant that is not a member
+of any type.  Some languages, however, do not treat overflows as an
+error.  In many implementations of C, mathematical overflow causes the
+result to ``wrap around'' to lower values---for example, if @var{m} is
+the largest integer value, and @var{s} is the smallest, then
+@example
+@var{m} + 1 @result{} @var{s}
+@end example
+
+This, too, is specific to individual languages, and in some cases
+specific to individual compilers or machines.  @xref{Support,,
+Supported Languages}, for further details on specific languages.
+
+_GDBN__ provides some additional commands for controlling the range checker:
+
+@kindex set check
+@kindex set check range
+@kindex show check range
+@table @code
+@item set check range auto
+Set range checking on or off based on the current working language.  
+@xref{Support,,Supported Languages}, for the default settings for 
+each language.
+
+@item set check range on
+@itemx set check range off
+Set range checking on or off, overriding the default setting for the
+current working language.  A warning is issued if the setting does not
+match the language's default.  If a range error occurs, then a message
+is printed and evaluation of the expression is aborted.
+
+@item set check range warn
+Output messages when the _GDBN__ range checker detects a range error,
+but attempt to evaluate the expression anyway.  Evaluating the
+expression may still be impossible for other reasons, such as accessing
+memory that the process does not own (a typical example from many UNIX
+systems).
+
+@item show range
+Show the current setting of the range checker, and whether or not it is 
+being set automatically by _GDBN__.
+@end table
+
+@node Support,  , Checks, Languages
+@section Supported Languages
+
+_GDBN__ 4.0 supports C, C++, and Modula-2.  The syntax for C and C++ is
+so closely related that _GDBN__ does not distinguish the two.  Some
+_GDBN__ features may be used in expressions regardless of the language
+you use: the _GDBN__ @code{@@} and @code{::} operators, and the
+@samp{@{type@}addr} construct (@pxref{Expressions}) can be used with the constructs of
+any of the supported languages.
+
+The following sections detail to what degree each of these
+source languages is supported by _GDBN__.  These sections are
+not meant to be language tutorials or references, but serve only as a
+reference guide to what the _GDBN__ expression parser will accept, and
+what input and output formats should look like for different languages.
+There are many good books written on each of these languages; please
+look to these for a language reference or tutorial.
+
+@menu
+* C::                           C and C++
+* Modula-2::                    Modula-2
+@end menu
+
+@node C, Modula-2, Support, Support
+@subsection C and C++
+@cindex C and C++
+
+@cindex expressions in C or C++
+Since C and C++ are so closely related, _GDBN__ does not distinguish
+between them when interpreting the expressions recognized in _GDBN__
+commands.  
 
 @cindex C++
 @kindex g++
 @cindex GNU C++
-_GDBN__ includes facilities to let you debug C++ programs naturally and
-easily.  The GNU C++ compiler and _GDBN__ implement the support for these
-facilities together.  Therefore, to debug your C++ code most
-effectively, you must compile your C++ programs with the GNU C++
-compiler, @code{g++}.
+The C++ debugging facilities are jointly implemented by the GNU C++
+compiler and _GDBN__.  Therefore, to debug your C++ code effectively,
+you must compile your C++ programs with the GNU C++ compiler,
+@code{g++}.
+
 
 @menu
-* Cplusplus expressions::               C++ Expressions
-* Cplusplus commands::          _GDBN__ Commands for C++
+* C Operators::                 C and C++ Operators
+* C Constants::                 C and C++ Constants
+* Cplusplus expressions::       C++ Expressions
+* C Defaults::                  Default settings for C and C++
+* C Checks::                    C and C++ Type and Range Checks
+* Debugging C::                 _GDBN__ and C
+* Debugging C plus plus::       Special features for C++
 @end menu
 
-@node Cplusplus expressions, Cplusplus commands, Cplusplus, Cplusplus
-@section C++ Expressions
+@cindex C and C++ operators
+@node C Operators, C Constants, C, C
+@subsubsection C and C++ Operators
+
+Operators must be defined on values of specific types.  For instance,
+@code{+} is defined on numbers, but not on structures.  Operators are
+often defined on groups of types.  For the purposes of C and C++, the
+following definitions hold:
+
+@itemize @bullet
+@item 
+@emph{Integral types} include @code{int} with any of its storage-class
+specifiers, @code{char}, and @code{enum}s.
+
+@item
+@emph{Floating-point types} include @code{float} and @code{double}.
+
+@item
+@emph{Pointer types} include all types defined as @code{(@var{type}
+*)}.
+
+@item 
+@emph{Scalar types} include all of the above.
+
+@end itemize
+
+@noindent
+The following operators are supported.  They are listed here
+in order of increasing precedence:
+
+@table @code
+_0__
+@item ,
+The comma or sequencing operator.  Expressions in a comma-separated list
+are evaluated from left to right, with the result of the entire
+expression being the last expression evaluated.
+
+@item =
+Assignment.  The value of an assignment expression is the value
+assigned.  Defined on scalar types.
+
+@item @var{op}=
+Used in an expression of the form @var{a} @var{op}@code{=} @var{b}, and
+translated to @var{a} @code{=} @var{a op b}.  @var{op}@code{=} and
+@code{=} have the same precendence.  @var{op} is any one of the
+operators @code{|}, @code{^}, @code{&}, @code{<<}, @code{>>}, @code{+},
+@code{-}, @code{*}, @code{/}, @code{%}.
+
+@item ?:
+The ternary operator.  @code{@var{a} ? @var{b} : @var{c}} can be thought
+of as:  if @var{a} then @var{b} else @var{c}.  @var{a} should be of an
+integral type.
+
+@item ||
+Logical OR.  Defined on integral types.
+
+@item &&
+Logical AND.  Defined on integral types.
+
+@item |
+Bitwise OR.  Defined on integral types.
+
+@item ^
+Bitwise exclusive-OR.  Defined on integral types.
+
+@item &
+Bitwise AND.  Defined on integral types.
+
+@item ==@r{, }!=
+Equality and inequality.  Defined on scalar types.  The value of these
+expressions is 0 for false and non-zero for true.
+
+@item <@r{, }>@r{, }<=@r{, }>=
+Less than, greater than, less than or equal, greater than or equal.
+Defined on scalar types.  The value of these expressions is 0 for false
+and non-zero for true.
+
+@item <<@r{, }>>
+left shift, and right shift.  Defined on integral types.
+
+@item @@ 
+The _GDBN__ ``artificial array'' operator (@pxref{Expressions}).
+
+@item +@r{, }-
+Addition and subtraction.  Defined on integral types, floating-point types and
+pointer types.  
+
+@item *@r{, }/@r{, }%
+Multiplication, division, and modulus.  Multiplication and division are
+defined on integral and floating-point types.  Modulus is defined on
+integral types.
+
+@item ++@r{, }--
+Increment and decrement.  When appearing before a variable, the
+operation is performed before the variable is used in an expression;
+when appearing after it, the variable's value is used before the
+operation takes place.
+
+@item *
+Pointer dereferencing.  Defined on pointer types.  Same precedence as
+@code{++}.
+
+@item &
+Address operator.  Defined on variables.  Same precedence as @code{++}.
+
+@item -
+Negative.  Defined on integral and floating-point types.  Same
+precedence as @code{++}.
+
+@item !
+Logical negation.  Defined on integral types.  Same precedence as
+@code{++}.
+
+@item ~
+Bitwise complement operator.  Defined on integral types.  Same precedence as
+@code{++}.
+
+@item .@r{, }->
+Structure member, and pointer-to-structure member.  For convenience,
+_GDBN__ regards the two as equivalent, choosing whether to dereference a
+pointer based on the stored type information.  
+Defined on @code{struct}s and @code{union}s.
+
+@item []
+Array indexing.  @code{@var{a}[@var{i}]} is defined as
+@code{*(@var{a}+@var{i})}.  Same precedence as @code{->}.
+
+@item ()
+Function parameter list.  Same precedence as @code{->}.
+
+@item ::
+C++ scope resolution operator.  Defined on
+@code{struct}, @code{union}, and @code{class} types.
+
+@item ::
+The _GDBN__ scope operator (@pxref{Expressions}).  Same precedence as
+@code{::}, above.  _1__
+@end table
+
+@cindex C and C++ constants
+@node C Constants, Cplusplus expressions, C Operators, C
+@subsubsection C and C++ Constants
+
+_GDBN__ allows you to express the constants of C and C++ in the
+following ways:
+
+@itemize @bullet
+
+@item
+Integer constants are a sequence of digits.  Octal constants are
+specified by a leading @samp{0} (ie. zero), and hexadecimal constants by
+a leading @samp{0x} or @samp{0X}.  Constants may also end with an
+@samp{l}, specifying that the constant should be treated as a
+@code{long} value.
+
+@item
+Floating point constants are a sequence of digits, followed by a decimal
+point, followed by a sequence of digits, and optionally followed by an
+exponent.  An exponent is of the form:
+@samp{@w{e@r{[[}+@r{]|}-@r{]}@var{nnn}}}, where @var{nnn} is another
+sequence of digits.  The @samp{+} is optional for positive exponents.
+
+@item
+Enumerated constants consist of enumerated identifiers, or their
+integral equivalents.
+
+@item
+Character constants are a single character surrounded by single quotes
+(@code{'}), or a number---the ordinal value of the corresponding character
+(usually its @sc{ASCII} value).  Within quotes, the single character may
+be represented by a letter or by @dfn{escape sequences}, which are of
+the form @samp{\@var{nnn}}, where @var{nnn} is the octal representation
+of the character's ordinal value; or of the form @samp{\@var{x}}, where
+@samp{@var{x}} is a predefined special character---for example,
+@samp{\n} for newline.
+
+@item
+String constants are a sequence of character constants surrounded
+by double quotes (@code{"}).
+
+@item
+Pointer constants are an integral value.
+
+@end itemize
+
+
+@node Cplusplus expressions, C Defaults, C Constants, C
+@subsubsection C++ Expressions
 
 @cindex expressions in C++
-Since C++ is closely related to C, all the facilities for evaluating C
-expressions (@pxref{Expressions}) continue to work in C++.  _GDBN__'s
-expression handling also has the following extensions to interpret a
-significant subset of C++ expressions: 
+_GDBN__'s expression handling has the following extensions to
+interpret a significant subset of C++ expressions:
 
 @enumerate
 
@@ -4011,14 +4595,82 @@ you've specified @samp{set print address off}.
 
 @item
 _GDBN__ supports the C++ name resolution operator @code{::}---your
-expressions can use it just as expressions in your program do.  _GDBN__
-also allows resolving name scope by reference to source files, in both C
-and C++ debugging; @pxref{Variables}.
+expressions can use it just as expressions in your program do.  Since
+one scope may be defined in another, you can use @code{::} repeatedly if
+necessary, for example in an expression like
+@samp{@var{scope1}::@var{scope2}::@var{name}}.  _GDBN__ also allows
+resolving name scope by reference to source files, in both C and C++
+debugging; @pxref{Variables}.
 
 @end enumerate
 
-@node Cplusplus commands, , Cplusplus expressions, Cplusplus
-@section _GDBN__ Commands for C++
+
+@node C Defaults, C Checks, Cplusplus expressions, C
+@subsubsection C and C++ Defaults
+@cindex C and C++ defaults
+
+If you allow _GDBN__ to set type and range checking automatically, they 
+both default to @code{off} whenever the working language changes to 
+C/C++.  This happens regardless of whether you, or _GDBN__,
+selected the working language.
+
+If you allow _GDBN__ to set the language automatically, it sets the
+working language to C/C++ on entering code compiled from a source file
+whose name ends with @file{.c} or @file{.cc}.
+@xref{Automatically,,Having _GDBN__ infer the source language}, for
+further details.
+
+@node C Checks, Debugging C, C Defaults, C
+@subsubsection C and C++ Type and Range Checks
+@cindex C and C++ checks
+
+@quotation
+@emph{Warning:} in this release, _GDBN__ does not yet perform type or
+range checking.
+@end quotation
+@c FIXME remove warning when type/range checks added
+
+By default, when _GDBN__ parses C or C++ expressions, type checking
+is not used.  However, if you turn type checking on, _GDBN__ will
+consider two variables type equivalent if:
+
+@itemize @bullet
+@item
+The two variables are structured and have the same structure, union, or
+enumerated tag.
+
+@item 
+Two two variables have the same type name, or types that have been
+declared equivalent through @code{typedef}.
+
+@ignore
+@c leaving this out because neither J Gilmore nor R Pesch understand it.
+@c FIXME--beers?
+@item
+The two @code{struct}, @code{union}, or @code{enum} variables are
+declared in the same declaration.  (Note: this may not be true for all C
+compilers.)
+@end ignore
+
+@end itemize
+
+Range checking, if turned on, is done on mathematical operations.  Array
+indices are not checked, since they are often used to index a pointer
+that is not itself an array.
+
+@node Debugging C, Debugging C plus plus, C Checks, C
+@subsubsection _GDBN__ and C
+
+The @code{set print union} and @code{show print union} commands apply to
+the @code{union} type.  When set to @samp{on}, any @code{union} that is
+inside a @code{struct} or @code{class} will also be printed.
+Otherwise, it will appear as @samp{@{...@}}.
+
+The @code{@@} operator aids in the debugging of dynamic arrays, formed
+with pointers and a memory allocation function.  (@pxref{Expressions})
+
+@node Debugging C plus plus,  , Debugging C, C
+@subsubsection _GDBN__ Commands for C++
 
 @cindex commands for C++
 Some _GDBN__ commands are particularly useful with C++, and some are
@@ -4070,7 +4722,452 @@ Control the format for printing virtual function tables.
 
 @end table
 
-@node Symbols, Altering, Cplusplus, Top
+
+@node Modula-2,  , C, Support
+@subsection Modula-2
+@cindex Modula-2
+
+The extensions made to _GDBN__ to support Modula-2 support output
+from the GNU Modula-2 compiler (which is currently being developed).
+Other Modula-2 compilers are not currently supported, and attempting to
+debug executables produced by them will most likely result in an error
+as _GDBN__ reads in the executable's symbol table.
+
+@cindex expressions in Modula-2
+@menu
+* M2 Operators::                Built-in operators
+* Builtin Func/Proc::           Built-in Functions and Procedures
+* M2 Constants::                Modula-2 Constants
+* M2 Defaults::                 Default settings for Modula-2
+* Deviations::                  Deviations from standard Modula-2
+* M2 Checks::                   Modula-2 Type and Range Checks
+* M2 Scope::                    The scope operators @code{::} and @code{.}
+* GDB/M2::                      _GDBN__ and Modula-2
+@end menu
+
+@node M2 Operators, Builtin Func/Proc, Modula-2, Modula-2
+@subsubsection Operators
+@cindex Modula-2 operators
+
+Operators must be defined on values of specific types.  For instance,
+@code{+} is defined on numbers, but not on structures.  Operators are
+often defined on groups of types.  For the purposes of Modula-2, the
+following definitions hold:
+
+@itemize @bullet
+
+@item
+@emph{Integral types} consist of @code{INTEGER}, @code{CARDINAL}, and
+their subranges.
+
+@item
+@emph{Character types} consist of @code{CHAR} and its subranges.
+
+@item
+@emph{Floating-point types} consist of @code{REAL}.
+
+@item
+@emph{Pointer types} consist of anything declared as @code{POINTER TO
+@var{type}}.
+
+@item
+@emph{Scalar types} consist of all of the above.
+
+@item
+@emph{Set types} consist of @code{SET}s and @code{BITSET}s.
+
+@item
+@emph{Boolean types} consist of @code{BOOLEAN}.
+
+@end itemize
+
+@noindent
+The following operators are supported, and appear in order of
+increasing precedence:
+
+@table @code
+_0__
+@item ,
+Function argument or array index separator.
+
+@item :=
+Assignment.  The value of @var{var} @code{:=} @var{value} is
+@var{value}.
+
+@item <@r{, }>
+Less than, greater than on integral, floating-point, or enumerated
+types.
+
+@item <=@r{, }>=
+Less than, greater than, less than or equal to, greater than or equal to
+on integral, floating-point and enumerated types, or set inclusion on
+set types.  Same precedence as @code{<}.
+
+@item =@r{, }<>@r{, }#
+Equality and two ways of expressing inequality, valid on scalar types.
+Same precedence as @code{<}.  In _GDBN__ scripts, only @code{<>} is
+available for inequality, since @code{#} conflicts with the script
+comment character.
+
+@item IN
+Set membership.  Defined on set types and the types of their members.
+Same precedence as @code{<}.
+
+@item OR
+Boolean disjunction.  Defined on boolean types.
+
+@item AND@r{, }&
+Boolean conjuction.  Defined on boolean types.
+
+@item @@
+The _GDBN__ ``artificial array'' operator (@pxref{Expressions}).
+
+@item +@r{, }-
+Addition and subtraction on integral and floating-point types, or union
+and difference on set types.
+
+@item *
+Multiplication on integral and floating-point types, or set intersection
+on set types.
+
+@item /
+Division on floating-point types, or symmetric set difference on set
+types.  Same precedence as @code{*}.
+
+@item DIV@r{, }MOD
+Integer division and remainder.  Defined on integral types.  Same
+precedence as @code{*}.
+
+@item -
+Negative. Defined on @code{INTEGER}s and @code{REAL}s.
+
+@item ^
+Pointer dereferencing.  Defined on pointer types.  
+
+@item NOT
+Boolean negation.  Defined on boolean types.  Same precedence as
+@code{^}.
+
+@item .
+@code{RECORD} field selector.  Defined on @code{RECORD}s.  Same
+precedence as @code{^}.
+
+@item []
+Array indexing.  Defined on @code{ARRAY}s.  Same precedence as @code{^}.
+
+@item ()
+Procedure argument list.  Defined on @code{PROCEDURE}s.  Same precedence
+as @code{^}.
+
+@item ::@r{, }.
+_GDBN__ and Modula-2 scope operators.
+
+@end table
+
+@quotation
+@emph{Warning:} Sets and their operations are not yet supported, so _GDBN__
+will treat the use of the operator @code{IN}, or the use of operators
+@code{+}, @code{-}, @code{*}, @code{/}, @code{=}, , @code{<>}, @code{#},
+@code{<=}, and @code{>=} on sets as an error.
+@end quotation
+_1__
+
+@cindex Modula-2 builtins
+@node Builtin Func/Proc, M2 Constants, M2 Operators, Modula-2
+@subsubsection Built-in Functions and Procedures
+
+Modula-2 also makes available several built-in procedures and functions.
+In describing these, the following metavariables are used:
+
+@table @var
+
+@item a
+represents an @code{ARRAY} variable.
+
+@item c
+represents a @code{CHAR} constant or variable.
+
+@item i
+represents a variable or constant of integral type.
+
+@item m
+represents an identifier that belongs to a set.  Generally used in the
+same function with the metavariable @var{s}.  The type of @var{s} should
+be @code{SET OF @var{mtype}} (where @var{mtype} is the type of @var{m}.
+
+@item n
+represents a variable or constant of integral or floating-point type.
+
+@item r
+represents a variable or constant of floating-point type.
+
+@item t
+represents a type.
+
+@item v
+represents a variable.
+
+@item x
+represents a variable or constant of one of many types.  See the
+explanation of the function for details.
+
+@end table
+
+All Modula-2 built-in procedures also return a result, described below.
+
+@table @code
+@item ABS(@var{n})
+Returns the absolute value of @var{n}.
+
+@item CAP(@var{c})
+If @var{c} is a lower case letter, it returns its upper case
+equivalent, otherwise it returns its argument
+
+@item CHR(@var{i})
+Returns the character whose ordinal value is @var{i}.
+
+@item DEC(@var{v})
+Decrements the value in the variable @var{v}.  Returns the new value.
+
+@item DEC(@var{v},@var{i})
+Decrements the value in the variable @var{v} by @var{i}.  Returns the
+new value.
+
+@item EXCL(@var{m},@var{s})
+Removes the element @var{m} from the set @var{s}.  Returns the new
+set.
+
+@item FLOAT(@var{i})
+Returns the floating point equivalent of the integer @var{i}.
+
+@item HIGH(@var{a})
+Returns the index of the last member of @var{a}.
+
+@item INC(@var{v})
+Increments the value in the variable @var{v}.  Returns the new value.
+
+@item INC(@var{v},@var{i})
+Increments the value in the variable @var{v} by @var{i}.  Returns the
+new value.
+
+@item INCL(@var{m},@var{s})
+Adds the element @var{m} to the set @var{s} if it is not already
+there.  Returns the new set.
+
+@item MAX(@var{t})
+Returns the maximum value of the type @var{t}.
+
+@item MIN(@var{t})
+Returns the minimum value of the type @var{t}.
+
+@item ODD(@var{i})
+Returns boolean TRUE if @var{i} is an odd number.
+
+@item ORD(@var{x})
+Returns the ordinal value of its argument.  For example, the ordinal
+value of a character is its ASCII value (on machines supporting the
+ASCII character set).  @var{x} must be of an ordered type, which include
+integral, character and enumerated types.
+
+@item SIZE(@var{x})
+Returns the size of its argument.  @var{x} can be a variable or a type.
+
+@item TRUNC(@var{r})
+Returns the integral part of @var{r}.
+
+@item VAL(@var{t},@var{i})
+Returns the member of the type @var{t} whose ordinal value is @var{i}.
+@end table
+
+@quotation
+@emph{Warning:}  Sets and their operations are not yet supported, so
+_GDBN__ will treat the use of procedures @code{INCL} and @code{EXCL} as
+an error.
+@end quotation
+
+@cindex Modula-2 constants
+@node M2 Constants, M2 Defaults, Builtin Func/Proc, Modula-2
+@subsubsection Constants
+
+_GDBN__ allows you to express the constants of Modula-2 in the following
+ways:
+
+@itemize @bullet
+
+@item
+Integer constants are simply a sequence of digits.  When used in an
+expression, a constant is interpreted to be type-compatible with the
+rest of the expression.  Hexadecimal integers are specified by a
+trailing @samp{H}, and octal integers by a trailing @samp{B}.
+
+@item
+Floating point constants appear as a sequence of digits, followed by a
+decimal point and another sequence of digits.  An optional exponent can
+then be specified, in the form @samp{E@r{[}+@r{|}-@r{]}@var{nnn}}, where
+@samp{@r{[}+@r{|}-@r{]}@var{nnn}} is the desired exponent.  All of the
+digits of the floating point constant must be valid decimal (base 10)
+digits.
+
+@item
+Character constants consist of a single character enclosed by a pair of
+like quotes, either single (@code{'}) or double (@code{"}).  They may
+also be expressed by their ordinal value (their ASCII value, usually)
+followed by a @samp{C}.
+
+@item
+String constants consist of a sequence of characters enclosed by a pair
+of like quotes, either single (@code{'}) or double (@code{"}).  Escape
+sequences in the style of C are also allowed.  @xref{C Constants}, for a
+brief explanation of escape sequences.
+
+@item
+Enumerated constants consist of an enumerated identifier.
+
+@item
+Boolean constants consist of the identifiers @code{TRUE} and
+@code{FALSE}.
+
+@item
+Pointer constants consist of integral values only.
+
+@item
+Set constants are not yet supported.
+
+@end itemize
+
+@node M2 Defaults, Deviations, M2 Constants, Modula-2
+@subsubsection Modula-2 Defaults
+@cindex Modula-2 defaults
+
+If type and range checking are set automatically by _GDBN__, they 
+both default to @code{on} whenever the working language changes to 
+Modula-2.  This happens regardless of whether you, or _GDBN__,
+selected the working language.
+
+If you allow _GDBN__ to set the language automatically, then entering
+code compiled from a file whose name ends with @file{.mod} will set the
+working language to Modula-2. @xref{Automatically,,Having _GDBN__ set
+the language automatically}, for further details.
+
+@node Deviations, M2 Checks, M2 Defaults, Modula-2
+@subsubsection Deviations from Standard Modula-2
+@cindex Modula-2, deviations from
+
+A few changes have been made to make Modula-2 programs easier to debug.
+This is done primarily via loosening its type strictness:
+
+@itemize @bullet
+@item 
+Unlike in standard Modula-2, pointer constants can be formed by
+integers.  This allows you to modify pointer variables during
+debugging.  (In standard Modula-2, the actual address contained in a
+pointer variable is hidden from you; it can only be modified
+through direct assignment to another pointer variable or expression that
+returned a pointer.)
+
+@item 
+C escape sequences can be used in strings and characters to represent
+non-printable characters.  _GDBN__ will print out strings with these
+escape sequences embedded.  Single non-printable characters are
+printed using the @samp{CHR(@var{nnn})} format.
+
+@item
+The assignment operator (@code{:=}) returns the value of its right-hand
+argument.
+
+@item
+All builtin procedures both modify @emph{and} return their argument.
+
+@end itemize 
+
+@node M2 Checks, M2 Scope, Deviations, Modula-2
+@subsubsection Modula-2 Type and Range Checks
+@cindex Modula-2 checks
+
+@quotation
+@emph{Warning:} in this release, _GDBN__ does not yet perform type or
+range checking.
+@end quotation
+@c FIXME remove warning when type/range checks added
+
+_GDBN__ considers two Modula-2 variables type equivalent if:
+
+@itemize @bullet
+@item
+They are of types that have been declared equivalent via a @code{TYPE
+@var{t1} = @var{t2}} statement
+
+@item
+They have been declared on the same line.  (Note:  This is true of the
+GNU Modula-2 compiler, but it may not be true of other compilers.)
+
+@end itemize
+
+As long as type checking is enabled, any attempt to combine variables
+whose types are not equivalent is an error.
+
+Range checking is done on all mathematical operations, assignment, array
+index bounds, and all builtin functions and procedures.
+
+@node M2 Scope, GDB/M2, M2 Checks, Modula-2
+@subsubsection The scope operators @code{::} and @code{.}
+@cindex scope
+@kindex .
+@kindex ::
+
+There are a few subtle differences between the Modula-2 scope operator
+(@code{.}) and the _GDBN__ scope operator (@code{::}).  The two have
+similar syntax:
+
+@example
+
+@var{module} . @var{id}
+@var{scope} :: @var{id}
+
+@end example
+
+@noindent
+where @var{scope} is the name of a module or a procedure,
+@var{module} the name of a module, and @var{id} is any delcared
+identifier within the program, except another module.
+
+Using the @code{::} operator makes _GDBN__ search the scope
+specified by @var{scope} for the identifier @var{id}.  If it is not
+found in the specified scope, then _GDBN__ will search all scopes
+enclosing the one specified by @var{scope}.
+
+Using the @code{.} operator makes _GDBN__ search the current scope for
+the identifier specified by @var{id} that was imported from the
+definition module specified by @var{module}.  With this operator, it is
+an error if the identifier @var{id} was not imported from definition
+module @var{module}, or if @var{id} is not an identifier in
+@var{module}.
+
+@node GDB/M2,  , M2 Scope, Modula-2
+@subsubsection _GDBN__ and Modula-2
+
+Some _GDBN__ commands have little use when debugging Modula-2 programs.
+Five subcommands of @code{set print} and @code{show print} apply
+specifically to C and C++: @samp{vtbl}, @samp{demangle},
+@samp{asm-demangle}, @samp{object}, and @samp{union}.  The first four
+apply to C++, and the last to C's @code{union} type, which has no direct
+analogue in Modula-2.
+
+The @code{@@} operator (@pxref{Expressions}), while available
+while using any language, is not useful with Modula-2.  Its
+intent is to aid the debugging of @dfn{dynamic arrays}, which cannot be
+created in Modula-2 as they can in C or C++.  However, because an
+address can be specified by an integral constant, the construct
+@samp{@{@var{type}@}@var{adrexp}} is still useful.  (@pxref{Expressions})
+
+_0__
+@cindex @code{#} in Modula-2
+In _GDBN__ scripts, the Modula-2 inequality operator @code{#} is
+interpreted as the beginning of a comment.  Use @code{<>} instead.
+_1__
+
+
+@node Symbols, Altering, Languages, Top
 @chapter Examining the Symbol Table
 
 The commands described in this section allow you to inquire about the
@@ -4147,7 +5244,8 @@ lists all source files where a type is defined.
 @item info source
 @kindex info source
 Show the name of the current source file---that is, the source file for
-the function containing the current point of execution.
+the function containing the current point of execution---and the language
+it was written in.
 
 @item info sources
 @kindex info sources
@@ -4237,12 +5335,9 @@ print x=4
 
 @noindent
 would store the value 4 into the variable @code{x}, and then print the
-value of the assignment expression (which is 4).  All the assignment
-operators of C are supported, including the increment operators
-@samp{++} and @samp{--}, and combining assignments such as @samp{+=} and
-_0__@samp{<<=}_1__.
+value of the assignment expression (which is 4).  @xref{Languages}, for
+more information on operators in supported languages.
 
-@kindex set
 @kindex set variable
 @cindex variables, setting
 If you are not interested in seeing the value of the assignment, use the
@@ -5093,11 +6188,12 @@ both input and output with the @code{set radix} command.
 @kindex set radix
 @item set radix @var{base}
 Set the default base for numeric input and display.  Supported choices
-for @var{base} are decimal 8, 10, 16.  @var{base} must itself be
+for @var{base} are decimal 2, 8, 10, 16.  @var{base} must itself be
 specified either unambiguously or using the current default radix; for
 example, any of
 
 @example
+set radix 1010
 set radix 012
 set radix 10.
 set radix 0xa
@@ -5113,7 +6209,7 @@ Display the current default base for numeric input and display.
 
 @end table
 
-@node Messages/Warnings, , Numbers, Controlling _GDBN__
+@node Messages/Warnings,  , Numbers, Controlling _GDBN__
 @section Optional Warnings and Messages
 By default, _GDBN__ is silent about its inner workings.  If you are running
 on a slow machine, you may want to use the @code{set verbose} command.
@@ -5522,7 +6618,7 @@ argument for @code{disassemble} by typing @kbd{C-x &}.
 You can customize this further on the fly by defining elements of the list
 @code{gdb-print-command}; once it is defined, you can format or
 otherwise process numbers picked up by @kbd{C-x &} before they are
-inserted.  A numeric argument to @kbd{C-x &} will both flag that you
+inserted.  A numeric argument to @kbd{C-x &} will both indicate that you
 wish special formatting, and act as an index to pick an element of the
 list.  If the list element is a string, the number to be inserted is
 formatted using the Emacs function @code{format}; otherwise the number
@@ -5955,7 +7051,7 @@ readable, and _GDBN__ uses the shell to start your program.
 * Subdirectories::              Configuration subdirectories
 * Config Names::                Specifying names for hosts and targets
 * configure Options::           Summary of options for configure
-* Formatting Manual::          How to format and print _GDBN__ documentation
+* Formatting Manual::           How to format and print _GDBN__ documentation
 @end menu
 
 
@@ -6216,6 +7312,12 @@ propagate configuration to subdirectories.
 
 @item +rm
 Remove the configuration that the other arguments specify.
+
+@item +parse=@var{lang} @dots{}
+Configure the _GDBN__ expression parser to parse the listed languages.
+@samp{all} configures _GDBN__ for all supported languages.  To get a
+list of all supported languages, omit the argument.  Without this
+option, _GDBN__ is configured to parse all supported languages.
 
 @item +target=@var{target} @dots{}
 Configure _GDBN__ for cross-debugging programs running on each specified
