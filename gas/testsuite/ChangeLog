@@ -1,3 +1,7 @@
+Wed Jan 14 11:13:06 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* gas/m32r/allinsn.d (cmpui): Update output to new format.
+
 start-sanitize-sky
 Mon Jan  5 14:20:17 1998  Doug Evans  <devans@seba.cygnus.com>
 
