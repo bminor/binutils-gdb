@@ -1,3 +1,7 @@
+2001-02-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS (paper trail): Update.
+
 2001-02-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* target.h (target_fetch_registers): Fix comment.
