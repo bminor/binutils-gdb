@@ -80,16 +80,15 @@ else
 	done
 fi
 
-echo 'Propagating sanitized top-level ./configure and ./config.sub through tree.'
-
-./configure -v -template=./configure
-
 echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.16  1991/09/13 03:59:44  gnu
+# Revision 1.17  1991/10/02 13:06:16  rich
+# No longer needs to propogate configure and config.sub.
+#
+# Revision 1.16  1991/09/13  03:59:44  gnu
 # Third time's a charm.
 #
 # Revision 1.15  1991/09/13  03:20:18  gnu
