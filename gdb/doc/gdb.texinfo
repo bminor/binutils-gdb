@@ -6,10 +6,10 @@ _dnl__ $Id$
 @c %**start of header 
 @setfilename _GDBP__.info
 _if__(_GENERIC__)
-@settitle Using _GDBN__ (v4)
+@settitle _GDB__, The GNU Debugger 
 _fi__(_GENERIC__)
 _if__(!_GENERIC__)
-@settitle Using _GDBN__ v4 (_HOST__)
+@settitle _GDB__, The GNU Debugger (_HOST__)
 _fi__(!_GENERIC__)
 @setchapternewpage odd
 @c @smallbook
@@ -68,7 +68,7 @@ This is Edition 4.04, March 1992,
 of @cite{Using GDB: A Guide to the GNU Source-Level Debugger}
 for GDB Version _GDB_VN__.
 
-Copyright (C) 1988, 1989, 1990, 1991 1992 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -97,7 +97,7 @@ instead of in the original English.
 
 @titlepage
 @title Using _GDBN__
-@subtitle A Guide to the GNU Source-Level Debugger
+@subtitle The GNU Source-Level Debugger
 _if__(!_GENERIC__)
 @subtitle on _HOST__ Systems
 _fi__(!_GENERIC__)
@@ -150,7 +150,7 @@ This is Edition 4.04, March 1992, for GDB Version _GDB_VN__.
 @menu
 * Summary::                     Summary of _GDBN__
 * New Features::                New features since GDB version 3.5
-* Sample Session::              A Sample _GDBN__ session
+* Sample Session::              A sample _GDBN__ session
 * Invocation::                  Getting in and out of _GDBN__
 * Commands::                    _GDBN__ commands
 * Running::                     Running programs under _GDBN__
@@ -176,14 +176,14 @@ This is Edition 4.04, March 1992, for GDB Version _GDB_VN__.
 
 Summary of _GDBN__
 
-* Free Software::               Free Software
+* Free Software::               Freely redistributable software
 * Contributors::                Contributors to _GDBN__
 
 Getting In and Out of _GDBN__
 
-* Invoking _GDBN__::                Starting _GDBN__
-* Leaving _GDBN__::                 Leaving _GDBN__
-* Shell Commands::              Shell Commands
+* Invoking _GDBN__::                How to start _GDBN__
+* Leaving _GDBN__::                 How to quit _GDBN__
+* Shell Commands::              How to use shell commands inside _GDBN__
 
 Starting _GDBN__
 
@@ -5896,8 +5896,9 @@ On systems with memory-mapped files, an auxiliary symbol table file
 @file{@var{filename}.syms} may be available for @var{filename}.  If it
 is, _GDBN__ will map in the symbol table from
 @file{@var{filename}.syms}, starting up more quickly.  See the
-descriptions of the keywords @samp{mapped} and @samp{readnow} (available
-with either @code{file} or @code{symbol-file}), for more information.
+descriptions of the options @samp{-mapped} and @samp{-readnow} (available
+with @code{file}, @code{symbol-file}, or @code{add-symbol-file}), for
+more information.
 
 @item file
 @code{file} with no argument makes _GDBN__ discard any information it
@@ -5952,8 +5953,8 @@ When the symbol table is stored in COFF format, @code{symbol-file} does
 read the symbol table data in full right away.  We have not implemented
 the two-stage strategy for COFF yet.
 
-@item symbol-file @var{filename} @r{[} readnow @r{]} @r{[} mapped @r{]}
-@itemx file @var{filename} @r{[} readnow @r{]} @r{[} mapped @r{]}
+@item symbol-file @var{filename} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
+@itemx file @var{filename} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
 @kindex readnow
 @cindex reading symbols immediately
 @cindex symbols, reading immediately
@@ -5961,20 +5962,20 @@ the two-stage strategy for COFF yet.
 @cindex memory-mapped symbol file
 @cindex saving symbol table with memory mapping
 You can override the _GDBN__ two-stage strategy for reading symbol
-tables by using the @samp{readnow} keyword with any of the commands that
+tables by using the @samp{-readnow} option with any of the commands that
 load symbol table information, if you want to be sure _GDBN__ has the
 entire symbol table available.  
 
 If memory-mapped files are available on your system through the
-@code{mmap} system call, you can use another keyword, @samp{mapped}, to
+@code{mmap} system call, you can use another option, @samp{-mapped}, to
 get _GDBN__ to write out the symbols for your program in a reusable
 file.  Next time _GDBN__ starts up (if the program hasn't changed), it
 will map in symbol information from this auxiliary symbol file, rather
 than spending time reading the symbol table from the executable program.
-Using the @samp{mapped} keyword has the same effect as starting _GDBN__
+Using the @samp{-mapped} option has the same effect as starting _GDBN__
 with the @samp{-m} command-line option.
 
-You can use both keywords together, to make sure the auxiliary symbol
+You can use both options together, to make sure the auxiliary symbol
 file has all the symbol information for your program.
 
 The auxiliary symbol file for a program called @var{myprog} is called
@@ -6047,6 +6048,7 @@ _fi__(_H8__)
 @code{load} will not repeat if you press @key{RET} again after using it.
 
 @item add-symbol-file @var{filename} @var{address}
+@itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
 @kindex add-symbol-file
 @cindex dynamic linking
 The @code{add-symbol-file} command reads additional symbol table information
@@ -6062,6 +6064,10 @@ read keeps adding to the old.  To discard all old symbol data instead,
 use the @code{symbol-file} command.
 
 @code{add-symbol-file} will not repeat if you press @key{RET} after using it.
+
+You can use the @samp{-mapped} and @samp{-readnow} options just as with
+the @code{symbol-file} command, to change how _GDBN__ manages the symbol
+tabl einformation for @var{filename}.
 
 @item info files
 @itemx info target
