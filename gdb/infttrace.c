@@ -3853,19 +3853,10 @@ kill_inferior (void)
 
       if (t->am_pseudo && (t->pid != PIDGET (inferior_ptid)))
 	{
-	  /* TT_PROC_STOP doesn't require a subsequent ttrace_wait, as it
-	   * generates no event.
-	   */
-	  call_ttrace (TT_PROC_STOP,
+	  call_ttrace (TT_PROC_EXIT,
 		       t->pid,
 		       TT_NIL,
 		       TT_NIL,
-		       TT_NIL);
-
-	  call_ttrace (TT_PROC_DETACH,
-		       t->pid,
-		       TT_NIL,
-		       (TTRACE_ARG_TYPE) TARGET_SIGNAL_0,
 		       TT_NIL);
 	}
       t = t->next;
@@ -3873,7 +3864,7 @@ kill_inferior (void)
 
   xfree (paranoia);
 
-  call_ttrace (TT_PROC_STOP,
+  call_ttrace (TT_PROC_EXIT,
 	       PIDGET (inferior_ptid),
 	       TT_NIL,
 	       TT_NIL,
