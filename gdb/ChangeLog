@@ -1,5 +1,23 @@
 Thu Apr  4 19:04:18 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* arm-xdep.c: Move native-specific code to here from arm-tdep.c.
+	* arm-tdep.c (arm_apcs_32): New global.
+	(arm_addr_bits_remove, arm_saved_pc_after_call,
+ 	arm_push_dummy_frame, arm_pop_frame): New functions.
+	(arm_skip_prologue): Updated version from Richard Earnshaw.
+	(_initialize_arm_tdep): Add set/show "apcs32".
+	* config/arm/tm-arm.h (ADDR_BITS_REMOVE): Call
+	arm_addr_bits_remove.
+	(SAVED_PC_AFTER_CALL): Call arm_saved_pc_after_call.
+	(frame_find_saved_regs): Declare properly.
+	(PUSH_DUMMY_FRAME): Call arm_push_dummy_frame.
+	(POP_FRAME): Call arm_pop_frame, use ADDR_BITS_REMOVE instead of
+	explicit mask.
+	* config/arm/nm-arm.h: New file.
+	* config/arm/xm-arm.h (KERNEL_U_ADDR, FETCH_INFERIOR_REGISTERS):
+	Move definitions to nm-arm.h.
+	* config/arm/arm.mh (NAT_FILE): Define.
+
 	* symfile.c (generic_load): Initialize data_count properly.
 
 Thu Apr  4 17:17:53 1996  Fred Fish  <fnf@cygnus.com>
