@@ -173,11 +173,6 @@ case ${with_x} in
     	;;
 esac
 
-# Recognize --without-newlib.
-if [ x${with_newlib} = xno ]; then
-  configdirs=`echo " ${configdirs} " | sed -e 's/ newlib / /'`
-fi
-
 # Some tools are only suitable for building in a "native" situation.
 # Those are added when we have a host==target configuration.  For cross
 # toolchains, we add some directories that should only be useful in a
@@ -200,6 +195,84 @@ else
 	done
 	is_cross_compiler=yes
 fi	
+
+copy_dirs=
+
+# Handle --with-headers=XXX.  The contents of the named directory are
+# copied to $(tooldir)/include.
+if [ x"${with_headers}" != x ]; then
+  if [ x${is_cross_compiler} = xno ]; then
+    echo 1>&2 '***' --with-headers is only supported when cross compiling
+    exit 1
+  fi
+  case "${exec_prefixoption}" in
+  "") x=${prefix} ;;
+  *) x=${exec_prefix} ;;
+  esac
+  copy_dirs="${copy_dirs} ${with_headers} $x/${target_alias}/include"
+fi
+
+# Handle --with-libs=XXX.  Multiple directories are permitted.  The
+# contents are copied to $(tooldir)/lib.
+if [ x"${with_libs}" != x ]; then
+  if [ x${is_cross_compiler} = xno ]; then
+    echo 1>&2 '***' --with-libs is only supported when cross compiling
+    exit 1
+  fi
+  # Copy the libraries in reverse order, so that files in the first named
+  # library override files in subsequent libraries.
+  case "${exec_prefixoption}" in
+  "") x=${prefix} ;;
+  *) x=${exec_prefix} ;;
+  esac
+  for l in ${with_libs}; do
+    copy_dirs="$l $x/${target_alias}/lib ${copy_dirs}"
+  done
+fi
+
+# If both --with-headers and --with-libs are specified, default to
+# --without-newlib.
+if [ x"${with_headers}" != x ] && [ x"${with_libs}" != x ]; then
+  if [ x"${with_newlib}" = x ]; then
+    with_newlib=no
+  fi
+fi
+
+# Recognize --without-newlib.
+if [ x${with_newlib} = xno ]; then
+  configdirs=`echo " ${configdirs} " | sed -e 's/ newlib / /'`
+fi
+
+# Handle ${copy_dirs}
+set fnord ${copy_dirs}
+shift
+while [ $# != 0 ]; do
+  if [ -f $2/COPIED ] && [ x"`cat $2/COPIED`" = x"$1" ]; then
+    :
+  else
+    echo Copying $1 to $2
+
+    # Use the install script to create the directory and all required
+    # parent directories.
+    if [ -d $2 ]; then
+      :
+    else
+      echo >config.temp
+      ${srcdir}/install.sh -c -m 644 config.temp $2/COPIED
+    fi
+
+    # Copy the directory, assuming we have tar.
+    # FIXME: Should we use B in the second tar?  Not all systems support it.
+    (cd $1; tar -cf - .) | (cd $2; tar -xpf -)
+
+    # It is the responsibility of the user to correctly adjust all
+    # symlinks.  If somebody can figure out how to handle them correctly
+    # here, feel free to add the code.
+
+    echo $1 > $2/COPIED
+  fi
+  shift; shift
+done
 
 # Configure extra directories which are host specific
 

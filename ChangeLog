@@ -1,6 +1,8 @@
 Fri Aug 26 11:19:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
-	* configure.in: Recognize --without-newlib.
+	* configure.in: Recognize --with-headers, --with-libs, and
+	--without-newlib.
+	* Makefile.in (all-xiberty): Depend upon all-ld.
 
 Wed Aug 24 12:36:50 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 

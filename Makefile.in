@@ -699,11 +699,11 @@ gcc-no-fixedincludes:
 # build a target all-X means to cd to X and make all.
 # all-glob is handled specially because it doesn't actually build.
 #
-# all-gui, all-libproc and all-librx are handled specially because
+# all-gui, and all-libproc are handled specially because
 # they are still experimental, and if they fail to build, that
 # shouldn't stop "make all".
-.PHONY: $(ALL_MODULES) all-glob all-gui all-libproc all-librx
-$(ALL_MODULES) all-glob all-gui all-libproc all-librx:
+.PHONY: $(ALL_MODULES) all-glob all-gui all-libproc
+$(ALL_MODULES) all-glob all-gui all-libproc:
 	@dir=`echo $@ | sed -e 's/all-//'`; \
 	if [ -d ./$${dir} ] ; then \
 	  if [ -f ./$${dir}/Makefile ] ; then \
@@ -949,7 +949,7 @@ all-tgas: all-libiberty all-bfd
 all-time:
 all-wdiff:
 all-uudecode: all-libiberty
-all-xiberty: all-gcc all-newlib
+all-xiberty: all-gcc all-ld all-newlib
 
 ### other supporting targets
 
