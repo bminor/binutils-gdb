@@ -1,3 +1,8 @@
+2003-06-19  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_push_dummy_code): Delete function.
+	(avr_gdbarch_init): Don't call set_gdbarch_push_dummy_code.
+
 2003-06-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* arch-utils.c (default_prepare_to_proceed): Remove.

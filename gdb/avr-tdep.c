@@ -1128,16 +1128,6 @@ avr_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
   return frame_id_build (avr_make_saddr (base), frame_pc_unwind (next_frame));
 }
 
-static CORE_ADDR
-avr_push_dummy_code (struct gdbarch *gdbarch,
-                     CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
-                     struct value **args, int nargs,
-                     struct type *value_type,
-                     CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
-{
-  fprintf_unfiltered (gdb_stderr, " ----->>>>  push_dummy_code\n");
-}
-
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The below implements a FILO (stack) to do this. */
 
@@ -1357,7 +1347,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_call_dummy_address (gdbarch, avr_call_dummy_address);
   set_gdbarch_push_dummy_call (gdbarch, avr_push_dummy_call);
-  set_gdbarch_push_dummy_code (gdbarch, avr_push_dummy_code);
 
   set_gdbarch_address_to_pointer (gdbarch, avr_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, avr_pointer_to_address);
