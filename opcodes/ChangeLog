@@ -1,4 +1,11 @@
+Tue Apr  1 16:27:45 1997  Klaus Kaempf  <kkaempf@progis.de>
+
+	* makefile.vms: Update CFLAGS, add clean target.
+
 Fri Mar 28 12:10:09 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-opc.c: Add "wait".  From Ralf Baechle
+	<ralf@gnu.ai.mit.edu>.
 
 	* configure.in: Add stdlib.h to AC_CHECK_HEADERS list.
 	* configure, config.in: Rebuild.
