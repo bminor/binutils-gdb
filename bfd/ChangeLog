@@ -1,5 +1,7 @@
 Thu Aug 25 10:44:53 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* archive.c (bsd_write_armap): Remove host dependencies.
+
 	* aoutx.h (add_to_stringtab): Check for _bfd_stringtab_add error
 	before adding BYTES_IN_WORD.
 
