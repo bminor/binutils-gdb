@@ -1,5 +1,12 @@
 Mon Oct 10 16:24:44 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* cofflink.c (_bfd_coff_final_link): Cast argument to bfd_h_put_32
+	to correct type.
+	(coff_read_string_table): Cast argument to bfd_h_get_32 to correct
+	type.
+	* elfcode.h (elf_link_output_extsym): Cast argument to
+	bfd_elf_hash to correct type.
+
 	* elf32-sparc.c (elf_sparc_howto_table): The PC10, PC22, and
 	WPLT30 relocations are PC-relative.
 

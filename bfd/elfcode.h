@@ -2306,7 +2306,11 @@ swap_out_syms (abfd)
 	       and the size into the `size' field.  This is backwards from
 	       how BFD handles it, so reverse it here.  */
 	    sym.st_size = value;
-	    sym.st_value = type_ptr ? type_ptr->internal_elf_sym.st_value : 16;
+	    if (type_ptr == NULL
+		|| type_ptr->internal_elf_sym.st_value == 0)
+	      sym.st_value = value >= 16 ? 16 : (1 << bfd_log2 (value));
+	    else
+	      sym.st_value = type_ptr->internal_elf_sym.st_value;
 	    sym.st_shndx = elf_section_from_bfd_section (abfd,
 							 syms[idx]->section);
 	  }
@@ -5916,7 +5920,7 @@ elf_link_output_extsym (h, data)
 			    + h->dynindx));
 
       bucketcount = elf_hash_table (finfo->info)->bucketcount;
-      bucket = bfd_elf_hash (h->root.root.string) % bucketcount;
+      bucket = bfd_elf_hash ((const unsigned char *) h->root.root.string) % bucketcount;
       bucketpos = ((bfd_byte *) finfo->hash_sec->contents
 		   + (bucket + 2) * (ARCH_SIZE / 8));
       chain = get_word (finfo->output_bfd, bucketpos);
