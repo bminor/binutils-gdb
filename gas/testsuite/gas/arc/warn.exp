@@ -1,9 +1,13 @@
 # Test assembler warnings.
 
-load_lib gas-dg.exp
+if [istarget arc*-*-*] {
 
-dg-init
+    load_lib gas-dg.exp
 
-dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/warn*.s]] "" "" ""
+    dg-init
 
-dg-finish
+    dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/warn*.s]] "" ""
+
+    dg-finish
+
+}
