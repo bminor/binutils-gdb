@@ -2763,8 +2763,6 @@ mips32_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0;	/* Value of $r30. Used by gcc for frame-pointer */
 restart:
-  this_cache = xrealloc (this_cache, SIZEOF_FRAME_SAVED_REGS);
-  memset (this_cache, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_FRAME_OFFSET (&temp_proc_desc) = 0;
   PROC_FRAME_ADJUST (&temp_proc_desc) = 0;	/* offset of FP from SP */
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN)

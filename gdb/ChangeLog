@@ -1,5 +1,10 @@
 2004-09-04  Joel Brobecker  <brobecker@gnat.com>
 
+	* mips-tdep.c (mips32_heuristic_proc_desc): Remove code that was
+	left behind by error.
+
+2004-09-04  Joel Brobecker  <brobecker@gnat.com>
+
 	* config/alpha/nm-osf.h (PTRACE_ARG3_TYPE): Remove define.
 	* config/powerpc/nm-aix.h (PTRACE_ARG3_TYPE): Likewise.
 
