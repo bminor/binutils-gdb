@@ -1,3 +1,9 @@
+2005-03-04  David Daney  <ddaney@avtrex.com>
+
+	* gas/mips/elf-rel23b.d: Use '__gnu_local_gp' instead of '_gp'
+	for -mno-shared optimization.
+	* gas/mips/elf-rel25a.d: Ditto.
+
 2005-03-04  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/arm.exp: Fix test for running the "undefined" to catch

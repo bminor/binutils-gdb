@@ -35,6 +35,7 @@ run_dump_test "branch-misc-1"
 # the "traditional" emulations.
 if { $linux_gnu } {
     run_dump_test "multi-got-1"
+    run_dump_test "multi-got-no-shared"
 }
 
 if $has_newabi {

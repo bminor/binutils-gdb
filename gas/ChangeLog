@@ -1,3 +1,11 @@
+2005-03-04  David Daney  <ddaney@avtrex.com>
+
+	* config/tc-mips.c (macro_build_lui): Use '__gnu_local_gp'
+	instead of '_gp' for -mno-shared optimization.
+	(s_cpload): Ditto.
+	(s_abicalls): Document it in the comment.
+	(md_show_usage): Document the -mno-shared option.
+
 2005-03-04  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (mips_set_options): Add sym32 field.

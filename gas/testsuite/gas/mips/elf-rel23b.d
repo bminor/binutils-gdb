@@ -10,7 +10,7 @@ Disassembly of section \.text:
 0+00 <.*>:
 .*:	0380282d 	move	\$5,\$28
 .*:	3c1c0000 	lui	\$28,0x0
-			.*: R_MIPS_HI16	_gp
+			.*: R_MIPS_HI16	__gnu_local_gp
 .*:	279c0000 	addiu	\$28,\$28,0
-			.*: R_MIPS_LO16	_gp
+			.*: R_MIPS_LO16	__gnu_local_gp
 .*:	00000000 	nop

@@ -1,3 +1,10 @@
+2005-03-04  David Daney  <ddaney@avtrex.com>
+
+	* ld-mips-elf/multi-got-no-shared-1.s,
+	ld-mips-elf/multi-got-no-shared-2.s,
+	ld-mips-elf/multi-got-no-shared.d: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
 2005-03-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-mips-elf/tlsbin-o32.s, ld-mips-elf/mips-dyn.ld,

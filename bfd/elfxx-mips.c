@@ -3646,6 +3646,9 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   bfd_boolean local_p, was_local_p;
   /* TRUE if the symbol referred to by this relocation is "_gp_disp".  */
   bfd_boolean gp_disp_p = FALSE;
+  /* TRUE if the symbol referred to by this relocation is
+     "__gnu_local_gp".  */
+  bfd_boolean gnu_local_gp_p = FALSE;
   Elf_Internal_Shdr *symtab_hdr;
   size_t extsymoff;
   unsigned long r_symndx;
@@ -3742,6 +3745,12 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 
 	  gp_disp_p = TRUE;
 	}
+      /* See if this is the special _gp symbol.  Note that such a
+	 symbol must always be a global symbol.  */
+      else if (strcmp (*namep, "__gnu_local_gp") == 0)
+	gnu_local_gp_p = TRUE;
+
+
       /* If this symbol is defined, calculate its address.  Note that
 	 _gp_disp is a magic symbol, always implicitly defined by the
 	 linker, so it's inappropriate to check to see whether or not
@@ -3956,6 +3965,9 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       break;
     }
 
+  if (gnu_local_gp_p)
+    symbol = gp;
+  
   /* Figure out what kind of relocation is being performed.  */
   switch (r_type)
     {

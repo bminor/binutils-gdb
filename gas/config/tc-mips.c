@@ -3393,13 +3393,14 @@ macro_build_lui (expressionS *ep, int regnum)
   else
     {
       assert (ep->X_op == O_symbol);
-      /* _gp_disp is a special case, used from s_cpload.  _gp is used
-	 if mips_no_shared.  */
+      /* _gp_disp is a special case, used from s_cpload.
+	 __gnu_local_gp is used if mips_no_shared.  */
       assert (mips_pic == NO_PIC
 	      || (! HAVE_NEWABI
 		  && strcmp (S_GET_NAME (ep->X_add_symbol), "_gp_disp") == 0)
 	      || (! mips_in_shared
-		  && strcmp (S_GET_NAME (ep->X_add_symbol), "_gp") == 0));
+		  && strcmp (S_GET_NAME (ep->X_add_symbol),
+                             "__gnu_local_gp") == 0));
       *r = BFD_RELOC_HI16_S;
     }
 
@@ -11819,12 +11820,12 @@ s_abicalls (int ignore ATTRIBUTE_UNUSED)
    The .cpload argument is normally $25 == $t9.
 
    The -mno-shared option changes this to:
-	lui	$gp,%hi(_gp)
-	addiu	$gp,$gp,%lo(_gp)
+	lui	$gp,%hi(__gnu_local_gp)
+	addiu	$gp,$gp,%lo(__gnu_local_gp)
    and the argument is ignored.  This saves an instruction, but the
    resulting code is not position independent; it uses an absolute
-   address for _gp.  Thus code assembled with -mno-shared can go into
-   an ordinary executable, but not into a shared library.  */
+   address for __gnu_local_gp.  Thus code assembled with -mno-shared
+   can go into an ordinary executable, but not into a shared library.  */
 
 static void
 s_cpload (int ignore ATTRIBUTE_UNUSED)
@@ -11852,7 +11853,8 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
   in_shared = mips_in_shared || HAVE_64BIT_SYMBOLS;
 
   ex.X_op = O_symbol;
-  ex.X_add_symbol = symbol_find_or_make (in_shared ? "_gp_disp" : "_gp");
+  ex.X_add_symbol = symbol_find_or_make (in_shared ? "_gp_disp" :
+                                         "__gnu_local_gp");
   ex.X_op_symbol = NULL;
   ex.X_add_number = 0;
 
@@ -14118,6 +14120,8 @@ MIPS options:\n\
 -non_shared		do not generate position independent code\n\
 -xgot			assume a 32 bit GOT\n\
 -mpdr, -mno-pdr		enable/disable creation of .pdr sections\n\
+-mshared, -mno-shared   disable/enable .cpload optimization for\n\
+                        non-shared code\n\
 -mabi=ABI		create ABI conformant object file for:\n"));
 
   first = 1;
