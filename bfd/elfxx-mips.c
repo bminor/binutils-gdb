@@ -8082,8 +8082,8 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   asection *rtproc_sec;
   Elf32_RegInfo reginfo;
   struct ecoff_debug_info debug;
-  const struct ecoff_debug_swap *swap
-    = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  const struct ecoff_debug_swap *swap = bed->elf_backend_ecoff_debug_swap;
   HDRR *symhdr = &debug.symbolic_header;
   void *mdebug_handle = NULL;
   asection *s;
@@ -8111,6 +8111,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       bfd *dynobj;
       asection *got;
       struct mips_got_info *g;
+      bfd_size_type dynsecsymcount;
 
       /* When we resort, we must tell mips_elf_sort_hash_table what
 	 the lowest index it may use is.  That's the number of section
@@ -8118,9 +8119,20 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	 adds these symbols when building a shared object.  Note that
 	 we count the sections after (possibly) removing the .options
 	 section above.  */
-      if (! mips_elf_sort_hash_table (info, (info->shared
-					     ? bfd_count_sections (abfd) + 1
-					     : 1)))
+
+      dynsecsymcount = 0;
+      if (info->shared)
+	{
+	  asection * p;
+
+	  for (p = abfd->sections; p ; p = p->next)
+	    if ((p->flags & SEC_EXCLUDE) == 0
+		&& (p->flags & SEC_ALLOC) != 0
+		&& !(*bed->elf_backend_omit_section_dynsym) (abfd, info, p))
+	      ++ dynsecsymcount;
+	}
+      
+      if (! mips_elf_sort_hash_table (info, dynsecsymcount + 1))
 	return FALSE;
 
       /* Make sure we didn't grow the global .got region.  */

@@ -1,3 +1,10 @@
+2004-07-01  Jie Zhang  <zhangjie@magima.com.cn>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 204
+	* elfxx-mips.c (_bfd_mips_elf_final_link): Pass the correct number
+	of section symbols to mips_elf_sort_hash_table ().
+
 2004-07-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (elf_section_ignore_discarded_relocs): Revert last
