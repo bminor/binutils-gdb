@@ -1,5 +1,7 @@
 Sun Feb  6 15:36:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t01/run.exp: Only run shell test if isnative.
+
 	* config/udi-gdb.exp (gdb_load): Use "file", not "load" command,
 	since "run" automatically loads if necessary.
 
