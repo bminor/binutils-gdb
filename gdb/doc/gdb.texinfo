@@ -3929,6 +3929,22 @@ to 0x808c:
 @end smallexample
 @end ifset
 
+@table @code
+@kindex set assembly-language
+@cindex assembly instructions
+@cindex instructions, assembly
+@cindex machine instructions
+@cindex listing machine instructions
+@item set assembly-language @var{instruction-set}
+This command selects the instruction set to use when disassembling the program via the
+@code{disassemble} or @code{x/i} commands.  It is useful for architectures that
+have more than one native instruction set.
+
+Currently it is only defined for the Intel x86 family.  You can set @var{instruction-set}
+to either @code{i386} or @code{i8086}.  The default is @code{i386}.
+@end table
+
+
 @node Data
 @chapter Examining Data
 
