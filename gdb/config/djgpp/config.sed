@@ -10,7 +10,7 @@ s|\.gdbinit|gdb.ini|g
   s,\\.info\\*,.inf* *.i[1-9] *.i[1-9][0-9],\
   s,\\.gdbinit,gdb.ini,g\
   /TEXINPUTS=/s,:,';',g\
-  /VPATH *=/s,:,;,g\
+  /VPATH *=/s,\\([^A-z]\\):,\1;,g\
   /\\$\\$file-\\[0-9\\]/s,echo,& *.i[1-9] *.i[1-9][0-9],\
   /\\$\\$file-\\[0-9\\]/s,rm -f \\$\\$file,& \\${PACKAGE}.i[1-9] \\${PACKAGE}.i[1-9][0-9],\
   s,config\\.h\\.in,config.h-in,g\
@@ -29,3 +29,4 @@ s|\.gdbinit|gdb.ini|g
 /\$]\*) INSTALL=/s,\[/\$\]\*,&|[A-z]:/*,
 /\$]\*) ac_rel_source=/s,\[/\$\]\*,&|[A-z]:/*,
 /ac_file_inputs=/s,\( -e "s%\^%\$ac_given_srcdir/%"\)\( -e "s%:% $ac_given_srcdir/%g"\),\2\1,
+/^[ 	]*if test "x`echo /s,sed 's@/,sed -e 's@^[A-z]:@@' -e 's@/,

@@ -1,3 +1,8 @@
+2000-11-13  Eli Zaretskii <eliz@is.elta.co.il>
+
+	* config/djgpp/config.sed: Fix tweaking "VPATH=.:foo", and handle
+        the gettext's posrcprefix correctly with drive letters.
+
 2000-11-10  Jim Blandy  <jimb@redhat.com>
 
 	* stabsread.c (read_range_type): Properly construct complex
