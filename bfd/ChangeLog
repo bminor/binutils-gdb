@@ -1,3 +1,8 @@
+2001-11-14  Andreas Jaeger  <aj@suse.de>
+
+	* cpu-i386.c (bfd_x86_64_arch_intel_syntax,bfd_x86_64_arch): Use
+	x86-64 for display.
+
 2001-11-14  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf2.c (struct line_head) [total_length]: Change type to
