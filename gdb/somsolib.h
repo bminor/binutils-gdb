@@ -171,7 +171,7 @@ extern char *som_solib_address (CORE_ADDR);	/* somsolib.c */
 extern CORE_ADDR som_solib_get_solib_by_pc (CORE_ADDR addr);
 
 struct so_list;
-extern CORE_ADDR so_lib_thread_start_addr (struct so_list *so);
+extern CORE_ADDR som_solib_thread_start_addr (struct so_list *so);
 
 extern void no_shared_libraries (char *ignored, int from_tty);
 

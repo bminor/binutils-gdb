@@ -1,3 +1,28 @@
+2004-11-12  Randolph Chung  <tausq@debian.org>
+
+	* pa64solib.c (pa64_solib_thread_start_addr): Rename from 
+	so_lib_thread_start_addr.
+	* pa64solib.h (so_list): Forward declare.
+	(pa64_solib_thread_start_addr): Prototype.
+	* somsolib.c (SHL_LOAD, SHL_UNLOAD): Define if not already defined.
+	(no_shared_libraries): Remove.
+	(som_solib_thread_start_addr): Rename from so_lib_thread_start_addr.
+	* somsolib.h (som_solib_thread_start_addr): Likewise; prototype.
+	* hpread.c (hpread_process_one_debug_symbol): Use either the som or
+	the elf solib handler to find the start address.
+
+	* config/pa/hppahpux.mh (NATDEPFILES): Move target-specific support 
+	files to the target makefile.
+	* config/pa/hpux1020.mh (NATDEPFILES):  Likewise.
+	* config/pa/hpux11.mh (NATDEPFILES): Likewise.
+	* config/pa/hpux11w.mh (NATDEPFILES): Likewise.
+
+	* config/pa/hppa64.mt (TDEPFILES): Put target-specific support 
+    files for symbol reading and shared library handling here.
+	* config/pa/hppahpux.mt (TDEPFILES): Likewise.  
+    (PA_SOM_ONLY): Define so we can build a 32-bit SOM only target 
+    without bringing in 64-bit support.
+
 2004-11-12  Andrew Cagney  <cagney@gnu.org>
 
 	* sparc-tdep.c: Replace VALUE_TYPE with value_type.

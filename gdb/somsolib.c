@@ -51,6 +51,14 @@
 #define O_BINARY 0
 #endif
 
+#ifndef SHL_LOAD
+#define SHL_LOAD   	4
+#endif
+
+#ifndef SHL_UNLOAD
+#define SHL_UNLOAD	8
+#endif
+
 /* Uncomment this to turn on some debugging output.
  */
 
@@ -1557,25 +1565,6 @@ som_solib_restart (void)
 }
 
 
-/* LOCAL FUNCTION
-
-   no_shared_libraries -- handle command to explicitly discard symbols
-   from shared libraries.
-
-   DESCRIPTION
-
-   Implements the command "nosharedlibrary", which discards symbols
-   that have been auto-loaded from shared libraries.  Symbols from
-   shared libraries that were added by explicit request of the user
-   are not discarded.  Also called from remote.c.  */
-
-void
-no_shared_libraries (char *ignored, int from_tty)
-{
-  /* FIXME */
-}
-
-
 void
 _initialize_som_solib (void)
 {
@@ -1621,7 +1610,7 @@ threshold in megabytes.  Is ignored when using `sharedlibrary'.",
 /* Get some HPUX-specific data from a shared lib.
  */
 CORE_ADDR
-so_lib_thread_start_addr (struct so_list *so)
+som_solib_thread_start_addr (struct so_list *so)
 {
   return so->som_solib.tsd_start_addr;
 }

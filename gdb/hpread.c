@@ -5779,8 +5779,14 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	       * where to look for this variable, using a call-back
 	       * to interpret the private shared-library data.
 	       */
-	      SYMBOL_VALUE_ADDRESS (sym) = dn_bufp->dsvar.location +
-		so_lib_thread_start_addr (so);
+	      if (bfd_get_flavour(objfile->obfd) == bfd_target_som_flavour)
+	        SYMBOL_VALUE_ADDRESS (sym) = dn_bufp->dsvar.location +
+		  som_solib_thread_start_addr (so);
+#ifndef PA_SOM_ONLY
+	      else
+	        SYMBOL_VALUE_ADDRESS (sym) = dn_bufp->dsvar.location +
+		  pa64_solib_thread_start_addr (so);
+#endif
 	    }
 	}
       break;

@@ -22,6 +22,7 @@
 struct target_ops;
 struct objfile;
 struct section_offsets;
+struct so_list;
 
 /* Called to add symbols from a shared library to gdb's symbol table.  */
 
@@ -147,3 +148,5 @@ extern char *pa64_solib_address (CORE_ADDR);	/* somsolib.c */
 /* If ADDR lies in a shared library, return its name.  */
 
 #define PC_SOLIB(addr)	pa64_solib_address (addr)
+
+CORE_ADDR pa64_solib_thread_start_addr (struct so_list *so);
