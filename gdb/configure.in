@@ -841,7 +841,7 @@ fi
 AC_LINK_FILES($files, $links)
 
 dnl Check for exe extension set on certain hosts (e.g. Win32)
-AM_EXEEXT
+AC_EXEEXT
 
 AC_CONFIG_SUBDIRS($configdirs)
 AC_OUTPUT(Makefile .gdbinit:gdbinit.in,
