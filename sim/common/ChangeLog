@@ -1,3 +1,7 @@
+Mon Apr  7 10:46:38 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sim-base.h (sim_state_base): Move `magic' to end of struct.
+
 Mon Apr  7 15:53:21 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* run.c (main): Check that a program to run was specified.
