@@ -1,3 +1,13 @@
+2004-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elfweak/elfweak.exp: Add an undefined weak size change
+	test.
+
+	* ld-elfweak/size.dat: New file.
+	* ld-elfweak/size_bar.c: Likewise.
+	* ld-elfweak/size_foo.c: Likewise.
+	* ld-elfweak/size_main.c: Likewise.
+
 2004-04-14  Brian Ford  <ford@vss.fsi.com>
 	    DJ Delorie  <dj@redhat.com>
 
