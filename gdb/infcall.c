@@ -547,6 +547,23 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
          it's address is the same as the address of the dummy.  */
       bp_addr = dummy_addr;
       break;
+    case AT_SYMBOL:
+      /* Some executables define a symbol __CALL_DUMMY_ADDRESS whose
+	 address is the location where the breakpoint should be
+	 placed.  Once all targets are using the overhauled frame code
+	 this can be deleted - ON_STACK is a better option.  */
+      {
+	struct minimal_symbol *sym;
+
+	sym = lookup_minimal_symbol ("__CALL_DUMMY_ADDRESS", NULL, NULL);
+	real_pc = funaddr;
+	if (sym)
+	  dummy_addr = SYMBOL_VALUE_ADDRESS (sym);
+	else
+	  dummy_addr = entry_point_address ();
+	bp_addr = dummy_addr;
+	break;
+      }
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }

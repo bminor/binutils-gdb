@@ -1,5 +1,14 @@
 2003-08-07  Andrew Cagney  <cagney@redhat.com>
 
+	* inferior.h (AT_SYMBOL): Define.
+	* blockframe.c (inside_entry_file): Check for AT_SYMBOL.
+	* infcall.c (call_function_by_hand): Add code to handle AT_SYMBOL.
+	* mips-tdep.c (mips_call_dummy_address): Delete function.
+	(mips_gdbarch_init): Set call_dummy_location to AT_SYMBOL, do not
+	set call_dummy_address.
+
+2003-08-07  Andrew Cagney  <cagney@redhat.com>
+
 	* language.c (op_error): Delete function.
 	(binop_type_check): Delete function.
 	* language.h (type_op_error, range_op_error): Delete macros.

@@ -59,7 +59,8 @@ inside_entry_file (CORE_ADDR addr)
     return 1;
   if (symfile_objfile == 0)
     return 0;
-  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
+  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT
+      || CALL_DUMMY_LOCATION == AT_SYMBOL)
     {
       /* Do not stop backtracing if the pc is in the call dummy
          at the entry point.  */
