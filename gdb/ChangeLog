@@ -1,5 +1,9 @@
 2002-10-14  Adam Fedor  <fedor@gnu.org>
 
+	* symfile.c (init_filename_language_table): Add ObjC file extension.
+
+2002-10-14  Adam Fedor  <fedor@gnu.org>
+
 	* utils.c (puts_filtered_tabular): New function.
 	(fprintf_symbol_filtered): Get ObjC demangled name.
 	* defs.h (puts_filtered_tabular): Declared.
