@@ -1,3 +1,7 @@
+Tue Feb 17 21:42:56 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* cgen.h (CGEN_SYNTAX_MAKE_FIELD): New macro.
+
 Tue Feb 17 16:00:56 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.h (cgen_insert_fn): Change type of result to const char *.

@@ -608,6 +608,7 @@ typedef struct
 #define CGEN_SYNTAX_CHAR_P(c) ((c) < 128)
 #define CGEN_SYNTAX_CHAR(c) (c)
 #define CGEN_SYNTAX_FIELD(c) ((c) - 128)
+#define CGEN_SYNTAX_MAKE_FIELD(c) ((c) + 128)
 
 /* ??? I can't currently think of any case where the mnemonic doesn't come
    first [and if one ever doesn't building the hash tables will be tricky].
