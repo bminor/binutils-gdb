@@ -797,13 +797,7 @@ main (argc, argv)
   textdomain (PACKAGE);
 
   if (debug_memory)
-    {
-#ifdef BFD_ASSEMBLER
-      extern long _bfd_chunksize;
-      _bfd_chunksize = 64;
-#endif
-      chunksize = 64;
-    }
+    chunksize = 64;
 
 #ifdef HOST_SPECIAL_INIT
   HOST_SPECIAL_INIT (argc, argv);

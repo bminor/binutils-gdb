@@ -1,3 +1,7 @@
+2002-04-16  Alan Modra  <alan@weed.local>
+
+	* as.c (main): Don't reference _bfd_chunksize.
+
 2002-04-15  Tom Rix  <trix@redhat.com>
 
 	* config/tc-d10v.c (d10v_fix_adjustable): Prevent adjustments to 
