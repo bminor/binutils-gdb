@@ -1,5 +1,8 @@
 2003-09-09  Andrew Cagney  <cagney@redhat.com>
 
+	* rs6000-tdep.c (rs6000_fix_call_dummy): Delete function.
+	(rs6000_push_dummy_call): Set the "TOC" register.
+
 	* rs6000-tdep.c (rs6000_gdbarch_init): Do not set the deprecated
 	methods "max_register_raw_size", "max_register_virtual_size" or
 	"register_virtual_size".

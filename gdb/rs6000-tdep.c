@@ -1075,25 +1075,6 @@ rs6000_pop_frame (void)
   flush_cached_frames ();
 }
 
-/* Fixup the call sequence of a dummy function, with the real function
-   address.  Its arguments will be passed by gdb.  */
-
-static void
-rs6000_fix_call_dummy (char *dummyname, CORE_ADDR pc, CORE_ADDR fun,
-		       int nargs, struct value **args, struct type *type,
-		       int gcc_p)
-{
-  int ii;
-  CORE_ADDR target_addr;
-
-  if (rs6000_find_toc_address_hook != NULL)
-    {
-      CORE_ADDR tocvalue = (*rs6000_find_toc_address_hook) (fun);
-      write_register (gdbarch_tdep (current_gdbarch)->ppc_toc_regnum,
-		      tocvalue);
-    }
-}
-
 /* All the ABI's require 16 byte alignment.  */
 static CORE_ADDR
 rs6000_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
@@ -1320,6 +1301,14 @@ ran_out_of_registers_for_arguments:
   /* set back chain properly */
   store_unsigned_integer (tmp_buffer, 4, saved_sp);
   write_memory (sp, tmp_buffer, 4);
+
+  /* Set the TOC register, get the value from the objfile reader
+     which, in turn, gets it from the VMAP table.  */
+  if (rs6000_find_toc_address_hook != NULL)
+    {
+      CORE_ADDR tocvalue = (*rs6000_find_toc_address_hook) (func_addr);
+      regcache_raw_write_signed (regcache, tdep->ppc_toc_regnum, tocvalue);
+    }
 
   target_store_registers (-1);
   return sp;
@@ -2938,7 +2927,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_char_signed (gdbarch, 0);
 
-  set_gdbarch_deprecated_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
   if (sysv_abi && wordsize == 8)
     /* PPC64 SYSV.  */
