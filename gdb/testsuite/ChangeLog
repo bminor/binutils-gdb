@@ -1,3 +1,14 @@
+Wed Jun  8 12:12:17 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* config/udi-gdb.exp, config/unix-gdb.exp: Call default_gdb_start.
+	* lib/gdb.exp (default_gdb_start): Define.
+	* gdb.base/bitfields.exp, gdb.base/break.exp, gdb.base/exprs.exp,
+	gdb.base/funcargs.exp, gdb.base/opaque.exp,
+	gdb.base/printcmds.exp, gdb.base/ptype.exp, gdb.base/recurse.exp,
+	gdb.base/scope.exp, gdb.base/setvar.exp, gdb.base/watchpoint.exp,
+	gdb.c++/classes.exp, gdb.c++/misc.exp, gdb.c++/virtfunc.exp:
+	Don't call gdb_target_udi in between tests.
+
 Tue Jun  7 08:30:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.c++/demangle.exp: Use gdb_test_exact, rather than demangle
