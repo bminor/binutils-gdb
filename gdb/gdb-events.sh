@@ -65,6 +65,7 @@ f:void:tracepoint_create:int number:number
 f:void:tracepoint_delete:int number:number
 f:void:tracepoint_modify:int number:number
 f:void:architecture_changed:void
+f:void:register_update:int regno:regno
 #*:void:annotate_starting_hook:void
 #*:void:annotate_stopped_hook:void
 #*:void:annotate_signalled_hook:void
@@ -87,7 +88,6 @@ f:void:architecture_changed:void
 #*:void:readline_begin_hook:char *format, ...:format
 #*:char *:readline_hook:char *prompt:prompt
 #*:void:readline_end_hook:void
-#*:void:register_changed_hook:int regno:regno
 #*:void:memory_changed_hook:CORE_ADDR addr, int len:addr, len
 #*:void:context_hook:int num:num
 #*:int:target_wait_hook:int pid, struct target_waitstatus *status:pid, status

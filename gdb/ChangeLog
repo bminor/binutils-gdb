@@ -1,3 +1,15 @@
+2002-07-22  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh (register_changed_hook): Remove comment.
+	(register_update): New event.
+	* gdb-events.c: Regenerated.
+	* gdb-events.h: Regenerated.
+
+2002-07-19  Keith Seitz  <keiths@redhat.com>
+
+	* valops.c (value_assign): Add register_update event notification
+	for lval_register and lval_reg_frame_relative.
+
 2002-06-24  Keith Seitz  <keiths@redhat.com>
 
 	* Makefile.in (interps.o): Add gdb-events.h as a dependency.

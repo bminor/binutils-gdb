@@ -119,6 +119,16 @@ architecture_changed_event (void)
   current_event_hooks->architecture_changed ();
 }
 
+void
+register_update_event (int regno)
+{
+  if (gdb_events_debug)
+    fprintf_unfiltered (gdb_stdlog, "register_update_event\n");
+  if (!current_event_hooks->register_update)
+    return;
+  current_event_hooks->register_update (regno);
+}
+
 #endif
 
 #if WITH_GDB_EVENTS
@@ -151,6 +161,7 @@ enum gdb_event
   tracepoint_delete,
   tracepoint_modify,
   architecture_changed,
+  register_update,
   nr_gdb_events
 };
 
@@ -184,6 +195,11 @@ struct tracepoint_modify
     int number;
   };
 
+struct register_update
+  {
+    int regno;
+  };
+
 struct event
   {
     enum gdb_event type;
@@ -196,6 +212,7 @@ struct event
 	struct tracepoint_create tracepoint_create;
 	struct tracepoint_delete tracepoint_delete;
 	struct tracepoint_modify tracepoint_modify;
+	struct register_update register_update;
       }
     data;
   };
@@ -274,6 +291,15 @@ queue_architecture_changed (void)
   append (event);
 }
 
+static void
+queue_register_update (int regno)
+{
+  struct event *event = XMALLOC (struct event);
+  event->type = register_update;
+  event->data.register_update.regno = regno;
+  append (event);
+}
+
 void
 gdb_events_deliver (struct gdb_events *vector)
 {
@@ -322,6 +348,10 @@ gdb_events_deliver (struct gdb_events *vector)
 	case architecture_changed:
 	  vector->architecture_changed ();
 	  break;
+	case register_update:
+	  vector->register_update
+	    (event->data.register_update.regno);
+	  break;
 	}
       delivering_events = event->next;
       xfree (event);
@@ -341,6 +371,7 @@ _initialize_gdb_events (void)
   queue_event_hooks.tracepoint_delete = queue_tracepoint_delete;
   queue_event_hooks.tracepoint_modify = queue_tracepoint_modify;
   queue_event_hooks.architecture_changed = queue_architecture_changed;
+  queue_event_hooks.register_update = queue_register_update;
 #endif
 
   c = add_set_cmd ("eventdebug", class_maintenance, var_zinteger,
