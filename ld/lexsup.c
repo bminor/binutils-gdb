@@ -126,6 +126,7 @@ int parsing_defsym = 0;
 #define OPTION_FINI                     (OPTION_INIT + 1)
 #define OPTION_SECTION_START		(OPTION_FINI + 1)
 #define OPTION_UNIQUE			(OPTION_SECTION_START + 1)
+#define OPTION_TARGET_HELP              (OPTION_UNIQUE + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -332,6 +333,8 @@ static const struct ld_option ld_options[] = {
       '\0', N_("[=COUNT]"), N_("Split output sections every COUNT relocs"), TWO_DASHES },
   { {"stats", no_argument, NULL, OPTION_STATS},
       '\0', NULL, N_("Print memory usage statistics"), TWO_DASHES },
+  { {"target-help", no_argument, NULL, OPTION_TARGET_HELP},
+      '\0', NULL, N_("Display target specific options"), TWO_DASHES },
   { {"task-link", required_argument, NULL, OPTION_TASK_LINK},
       '\0', N_("SYMBOL"), N_("Do task level linking"), TWO_DASHES },
   { {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT},
@@ -892,6 +895,10 @@ parse_args (argc, argv)
 	    set_section_start (sec_name, optarg2);
 	  }
 	  break;
+	case OPTION_TARGET_HELP:
+	  /* Mention any target specific options.  */
+          ldemul_list_emulation_options (stdout);
+          exit (0);
 	case OPTION_TBSS:
 	  set_section_start (".bss", optarg);
 	  break;

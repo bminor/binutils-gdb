@@ -1,3 +1,9 @@
+2000-10-17  Chandrakala Chavva  <cchavva@redhat.com>
+
+        * lexsup.c: New option OPTION_TARGET_HELP. Prints all target specific
+        options.
+        * ld.texinfo: Added notes about this new option.
+
 2000-10-16  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/pe.em (_after_open): Add tests of return values from

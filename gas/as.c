@@ -264,6 +264,8 @@ Options:\n\
   fprintf (stream, _("\
   --help                  show this message and exit\n"));
   fprintf (stream, _("\
+  --target-help           show target specific options\n"));
+  fprintf (stream, _("\
   -I DIR                  add DIR to search list for .include directives\n"));
   fprintf (stream, _("\
   -J                      don't warn about signed overflow\n"));
@@ -416,7 +418,9 @@ parse_args (pargc, pargv)
     {"no-warn", no_argument, NULL, 'W'},
 #define OPTION_WARN (OPTION_STD_BASE + 18)
     {"warn", no_argument, NULL, OPTION_WARN},
-#define OPTION_WARN_FATAL (OPTION_STD_BASE + 19)
+#define OPTION_TARGET_HELP (OPTION_STD_BASE + 19)
+    {"target-help", no_argument, NULL, OPTION_TARGET_HELP},
+#define OPTION_WARN_FATAL (OPTION_STD_BASE + 20)
     {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
   };
 
@@ -491,6 +495,10 @@ parse_args (pargc, pargv)
 	  new_argv[new_argc++] = optarg;
 	  new_argv[new_argc] = NULL;
 	  break;
+	
+	case OPTION_TARGET_HELP:
+          md_show_usage (stdout);
+          exit (EXIT_SUCCESS);
 
 	case OPTION_HELP:
 	  show_usage (stdout);

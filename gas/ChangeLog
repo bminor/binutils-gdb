@@ -1,3 +1,9 @@
+2000-10-17  Chandrakala Chavva  <cchavva@redhat.com>
+
+	* as.c: New option OPTION_TARGET_HELP. Prints all target specific
+	options.
+	* doc/as.texinfo: Added notes about this new option.
+
 2000-10-16  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-sh.c (JREG): Remove.

@@ -205,7 +205,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
  [ -f ] [ --gstabs ] [ --gdwarf2 ] [ --help ] [ -I @var{dir} ] [ -J ] [ -K ] [ -L ]
  [ --keep-locals ] [ -o @var{objfile} ] [ -R ] [ --statistics ] [ -v ]
  [ -version ] [ --version ] [ -W ] [ --warn ] [ --fatal-warnings ] 
- [ -w ] [ -x ] [ -Z ]
+ [ -w ] [ -x ] [ -Z ] [ --target-help ]
 @ifset A29K
 @c am29k has no machine-dependent assembler options
 @end ifset
@@ -342,6 +342,9 @@ may help debugging assembler code, if the debugger can handle it.
 
 @item --help
 Print a summary of the command line options and exit.
+
+@item --target-help
+Print a summary of all target specific options and exit.
 
 @item -I @var{dir}
 Add directory @var{dir} to the search list for @code{.include} directives.

@@ -919,6 +919,10 @@ specifying @samp{--no-gc-sections} on the command line.
 @item --help
 Print a summary of the command-line options on the standard output and exit.
 
+@kindex --target-help
+@item --target-help
+Print a summary of all target specific options on the standard output and exit.
+
 @kindex -Map
 @item -Map @var{mapfile}
 Print a link map to the file @var{mapfile}.  See the description of the
