@@ -1,3 +1,22 @@
+Wed Oct 30 17:35:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* interp.c (bfd.h) Don't include it here any more.
+	(text{,_start,_end}): Move here from simops.c and make extern.
+	(decode_pc): New function to return the PC as an address that the
+	debugger can use.
+	(dmem_addr): Print decoded PC in error message.
+	(pc_addr): Ditto.
+
+	* simops.c (bfd.h) Don't include it here any more.
+	(text{,_start,_end}): Move to simops.c.
+	(trace_input_func): Move decoding of PC, and looking up .text
+	start to decode_pc.
+
+	* d10v_sim.h (bfd.h): Include it here.
+	(text{,_start,_end}): Add external declarations.
+	(exec_bfd): Ditto.
+	(decode_pc): Ditto.
+
 Tue Oct 29 12:13:52 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* interp.c (sim_size): Now allocates unified memory for imap segments

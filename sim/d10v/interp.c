@@ -1,6 +1,5 @@
 #include <signal.h>
 #include "sysdep.h"
-#include "bfd.h"
 #include "remote-sim.h"
 
 #include "d10v_sim.h"
@@ -16,6 +15,11 @@ host_callback *d10v_callback;
 unsigned long ins_type_counters[ (int)INS_MAX ];
 
 uint16 OP[4];
+
+static int init_text_p = 0;
+asection *text;
+bfd_vma text_start;
+bfd_vma text_end;
 
 static long hash PARAMS ((long insn, int format));
 static struct hash_entry *lookup_hash PARAMS ((uint32 ins, int size));
@@ -109,6 +113,26 @@ get_operands (struct simops *s, uint32 ins)
       mask = 0x7FFFFFFF >> (31 - bits);
       OP[i] = (ins >> shift) & mask;
     }
+}
+
+bfd_vma
+decode_pc ()
+{
+  asection *s;
+  if (!init_text_p)
+    {
+      init_text_p = 1;
+      for (s = exec_bfd->sections; s; s = s->next)
+	if (strcmp (bfd_get_section_name (exec_bfd, s), ".text") == 0)
+	  {
+	    text = s;
+	    text_start = bfd_get_section_vma (exec_bfd, s);
+	    text_end = text_start + bfd_section_size (exec_bfd, s);
+	    break;
+	  }
+    }
+
+  return (PC << 2) + text_start;
 }
 
 static void
@@ -507,7 +531,8 @@ dmem_addr( addr )
   if (addr > 0xbfff)
     {
       if ( (addr & 0xfff0) != 0xff00)
-	(*d10v_callback->printf_filtered) (d10v_callback, "Data address %x is in I/O space.\n",addr);
+	(*d10v_callback->printf_filtered) (d10v_callback, "Data address 0x%lx is in I/O space, pc = 0x%lx.\n",
+					   (long)addr, (long)decode_pc ());
       return State.dmem + addr;
     }
   
@@ -524,7 +549,8 @@ dmem_addr( addr )
       seg = (DMAP & 0x3ff) >> 2;
       if (State.umem[seg] == NULL)
 	{
-	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR:  unified memory region %d unmapped\n", seg);
+	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR:  unified memory region %d unmapped, pc = 0x%lx\n",
+					     seg, (long)decode_pc ());
 	  exit(1);
 	}
       return State.umem[seg] + (DMAP & 3) * 0x4000;
@@ -550,7 +576,8 @@ pc_addr()
 
   if (State.umem[imap & 0xff] == NULL)
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR:  unified memory region %d unmapped\n", imap & 0xff);
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR:  unified memory region %d unmapped, pc = 0x%lx\n",
+					 imap & 0xff, (long)PC);
       State.exception = SIGILL;
       return 0;
     }

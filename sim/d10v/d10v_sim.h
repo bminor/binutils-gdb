@@ -4,6 +4,7 @@
 #include "ansidecl.h"
 #include "callback.h"
 #include "opcode/d10v.h"
+#include "bfd.h"
 
 #define DEBUG_TRACE		0x00000001
 #define DEBUG_VALUES		0x00000002
@@ -128,6 +129,10 @@ struct _state
 extern host_callback *d10v_callback;
 extern uint16 OP[4];
 extern struct simops Simops[];
+extern asection *text;
+extern bfd_vma text_start;
+extern bfd_vma text_end;
+extern bfd *exec_bfd;
 
 #define PC	(State.cregs[2])
 #define PSW	(State.cregs[0])
@@ -174,6 +179,7 @@ extern struct simops Simops[];
 #define INC_ADDR(x,i)	x = ((State.MD && x == MOD_E) ? MOD_S : (x)+(i))
 
 extern uint8 *dmem_addr PARAMS ((uint32));
+extern bfd_vma decode_pc PARAMS ((void));
 
 #define	RB(x)	(*(dmem_addr(x)))
 #define SB(addr,data)	( RB(addr) = (data & 0xff))

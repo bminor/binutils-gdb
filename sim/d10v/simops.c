@@ -7,7 +7,6 @@
 #include "d10v_sim.h"
 #include "simops.h"
 #include "sys/syscall.h"
-#include "bfd.h"
 
 extern char *strrchr ();
 
@@ -52,12 +51,6 @@ static void trace_output_func PARAMS ((enum op_types result));
 
 #define trace_output(result) do { if (d10v_debug) trace_output_func (result); } while (0)
 
-static int init_text_p = 0;
-static asection *text;
-static bfd_vma text_start;
-static bfd_vma text_end;
-extern bfd *exec_bfd;
-
 #ifndef SIZE_INSTRUCTION
 #define SIZE_INSTRUCTION 8
 #endif
@@ -96,7 +89,6 @@ trace_input_func (name, in1, in2, in3)
   char *p;
   long tmp;
   char *type;
-  asection *s;
   const char *filename;
   const char *functionname;
   unsigned int linenumber;
@@ -129,21 +121,8 @@ trace_input_func (name, in1, in2, in3)
 
   else
     {
-      if (!init_text_p)
-	{
-	  init_text_p = 1;
-	  for (s = exec_bfd->sections; s; s = s->next)
-	    if (strcmp (bfd_get_section_name (exec_bfd, s), ".text") == 0)
-	      {
-		text = s;
-		text_start = bfd_get_section_vma (exec_bfd, s);
-		text_end = text_start + bfd_section_size (exec_bfd, s);
-		break;
-	      }
-	}
-
       buf[0] = '\0';
-      byte_pc = (bfd_vma)PC << 2;
+      byte_pc = decode_pc ();
       if (text && byte_pc >= text_start && byte_pc < text_end)
 	{
 	  filename = (const char *)0;
