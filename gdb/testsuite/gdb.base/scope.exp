@@ -198,7 +198,6 @@ proc test_at_main {} {
 
     # Print scope1.c::foo::funclocal, which is 3
 
-    setup_xfail "mips-*-*" 1843
     send "print foo::funclocal\n"
     expect {
 	-re "\\\$$decimal = 3\r\n$prompt $" { pass "print foo::funclocal" }
@@ -430,7 +429,6 @@ proc test_at_foo {} {
 	}
     }
 
-    setup_xfail "mips-*-*" 1843
     send "print foo::funclocal\n"
     expect {
 	-re "\\\$$decimal = 3\r\n$prompt $" { pass "print foo::funclocal" }
@@ -688,7 +686,6 @@ proc test_at_bar {} {
 
     # Print scope1.c::foo::funclocal, which is 3
 
-    setup_xfail "mips-*-*" 1843
     send "print foo::funclocal\n"
     expect {
 	-re "\\\$$decimal = 3\r\n$prompt $" { pass "print foo::funclocal" }
@@ -983,14 +980,14 @@ proc test_at_localscopes {} {
 
     # This test will only fail if the file was compiled by gcc, but
     # there's no way to check that.
-    setup_xfail "mips-*-*" 1868
     setup_xfail "a29k-*-udi" 2423
     send "cont\n"
     expect {
 	-re "Break.* marker4.*at .*:$decimal.*$prompt $" {
+	    pass "continue to marker4"
 	    send "up\n"
 	    expect {
-		-re ".*$prompt $" {}
+		-re ".*$prompt $" { pass "up from marker4" }
 		timeout { fail "up from marker4" ; return }
 	    }
 	}
@@ -1035,7 +1032,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
-if [istarget "*-*-vxworks"] {
+if [istarget "*-*-vxworks*"] {
     set timeout 120
 }
 
@@ -1106,6 +1103,6 @@ if [istarget "mips-idt-*"] then {
 }
 if [runto autovars] then { test_at_autovars }
 
-if [istarget "*-*-vxworks"] {
+if [istarget "*-*-vxworks*"] {
     set timeout 120
 }

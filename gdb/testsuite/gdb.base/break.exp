@@ -128,7 +128,7 @@ if [istarget "mips-idt-*"] then {
 #
 # run until the breakpoint at main is hit
 #
-if [istarget "*-*-vxworks"] then {
+if [istarget "*-*-vxworks*"] then {
     send "run vxmain \"2\"\n"
     set timeout 120
 } else {
@@ -144,7 +144,7 @@ expect {
 #
 # run until the breakpoint at a line number
 #
-gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:60.*60\[\t \]+printf.*factorial" \
+gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.*, envp=.*\\) at .*$srcfile:60.*60\[\t \]+printf.*factorial.*" \
 			"run until breakpoint set at a line number"
 
 #
@@ -298,7 +298,7 @@ proc test_next_with_recursion {} {
 
     # Run until we call factorial with 6
 
-    if [istarget "*-*-vxworks"] then {
+    if [istarget "*-*-vxworks*"] then {
 	send "run vxmain \"6\"\n"
     } else {
 	    send "run\n"
@@ -370,7 +370,7 @@ test_clear_command
 test_next_with_recursion
 
 # Reset the default arguments for VxWorks
-if [istarget "*-*-vxworks"] then {
+if [istarget "*-*-vxworks*"] then {
     set timeout 10
     send "set args main\n"
     expect -re ".*$prompt $" {}
