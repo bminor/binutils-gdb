@@ -2536,25 +2536,30 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 
 		case R_ENTRY:
 		  {
-		    int *descp = (int *)
-		      som_symbol_data (*bfd_reloc->sym_ptr_ptr)->unwind;
+		    int tmp;
+		    arelent *tmp_reloc;
 		    bfd_put_8 (abfd, R_ENTRY, p);
 
-		    /* FIXME:  We should set the sym_ptr for the R_ENTRY
-		       reloc to point to the appropriate function symbol,
-		       and attach unwind bits to the function symbol as
-		       we canonicalize the relocs.  Doing so would ensure
-		       descp would always point to something useful.  */
-		    if (descp)
+		    /* R_ENTRY relocations have 64 bits of associated
+		       data.  Unfortunately the addend field of a bfd
+		       relocation is only 32 bits.  So, we split up
+		       the 64bit unwind information and store part in
+		       the R_ENTRY relocation, and the rest in the R_EXIT
+		       relocation.  */
+		    bfd_put_32 (abfd, bfd_reloc->addend, p + 1);
+		
+		    /* Find the next R_EXIT relocation.  */
+		    for (tmp = j; tmp < subsection->reloc_count; tmp++)
 		      {
-			bfd_put_32 (abfd, descp[0], p + 1);
-			bfd_put_32 (abfd, descp[1], p + 5);
+		        tmp_reloc = subsection->orelocation[tmp];
+			if (tmp_reloc->howto->type == R_EXIT)
+			  break;
 		      }
-		    else
-		      {
-			bfd_put_32 (abfd, 0, p + 1);
-			bfd_put_32 (abfd, 0, p + 5);
-		      }
+
+		    if (tmp == subsection->reloc_count)
+		      abort ();
+
+		    bfd_put_32 (abfd, tmp_reloc->addend, p + 5);
 		    p = try_prev_fixup (abfd, &subspace_reloc_size,
 					p, 9, reloc_queue);
 		    break;
@@ -4483,18 +4488,6 @@ bfd_som_set_symbol_type (symbol, type)
      unsigned int type;
 {
   som_symbol_data (symbol)->som_type = type;
-}
-
-/* Attach 64bits of unwind information to a symbol (which hopefully
-   is a function of some kind!).  It would be better to keep this
-   in the R_ENTRY relocation, but there is not enough space.  */
-
-void
-bfd_som_attach_unwind_info (symbol, unwind_desc)
-     asymbol *symbol;
-     char *unwind_desc;
-{
-  som_symbol_data (symbol)->unwind = unwind_desc;
 }
 
 /* Attach an auxiliary header to the BFD backend so that it may be

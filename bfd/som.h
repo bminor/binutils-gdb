@@ -64,12 +64,6 @@ typedef struct som_symbol
        the symbols from most used to least used we can significantly
        reduce the size of the relocation stream for incomplete objects.  */
     int reloc_count;
-
-    /* The unwind descriptor bits associated with R_ENTRY relocations
-       for functions (not enough room in a BFD reloc to store all the
-       information, so we tack it onto the symbol associated with the
-       function.  */
-    char *unwind;
   }
 som_symbol_type;
 
@@ -210,7 +204,6 @@ boolean bfd_som_set_section_attributes PARAMS ((asection *, int, int,
 boolean bfd_som_set_subsection_attributes PARAMS ((asection *, asection *,
 						   int, unsigned int, int));
 void bfd_som_set_symbol_type PARAMS ((asymbol *, unsigned int));
-void bfd_som_attach_unwind_info PARAMS ((asymbol *, char *));
 boolean bfd_som_attach_aux_hdr PARAMS ((bfd *, int, char *));
 int ** hppa_som_gen_reloc_type
   PARAMS ((bfd *, int, int, enum hppa_reloc_field_selector_type_alt));

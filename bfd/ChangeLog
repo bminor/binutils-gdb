@@ -1,5 +1,12 @@
 Tue Sep 13 17:57:00 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* som.h (som_symbol_type): Delete unwind field.
+
+	* som.c (som_write_fixups): For R_ENTRY fixups, get 32bits of
+	unwind information from the addend field of the R_ENTRY, get the
+	other 32bits from the addend field of the R_EXIT.
+	(bfd_som_attach_unwind_info): Delete function and all references.
+
 	* som.h (som_symbol_type): Delete unused a.out-related fields.
 
 	* som.c (bfd_section_from_som_symbol): Use bfd_abs_section_ptr
