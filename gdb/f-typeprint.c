@@ -216,8 +216,9 @@ f_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
 
       if (arrayprint_recurse_level == 1)
 	fprintf_filtered(stream,"(");
-      else
-	fprintf_filtered(stream,",");
+
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY)
+	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
 
       retcode = f77_get_dynamic_lowerbound (type,&lower_bound);
 
@@ -251,9 +252,12 @@ f_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
 	     fprintf_filtered(stream,"%d",upper_bound);
 	 }
 
-      f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_ARRAY)
+	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 0, 0);
       if (arrayprint_recurse_level == 1)
 	fprintf_filtered (stream, ")");
+      else
+	fprintf_filtered(stream,",");
       arrayprint_recurse_level--;
       break;
 

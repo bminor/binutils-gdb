@@ -225,7 +225,7 @@ f77_create_arrayprint_offset_tbl (type, stream)
      FILE *stream;
 {
   struct type *tmp_type;
-  int eltlen; 
+  int eltlen;
   int ndimen = 1;
   int upper, lower, retcode; 
   
@@ -246,31 +246,22 @@ f77_create_arrayprint_offset_tbl (type, stream)
       
       F77_DIM_SIZE (ndimen) = upper - lower + 1;
       
-      if (ndimen == 1)
-	F77_DIM_OFFSET (ndimen) = 1;
-      else
-	F77_DIM_OFFSET (ndimen) = 
-	  F77_DIM_OFFSET (ndimen - 1) * F77_DIM_SIZE(ndimen - 1);
-      
       tmp_type = TYPE_TARGET_TYPE (tmp_type);
       ndimen++; 
     }
   
-  eltlen = TYPE_LENGTH (tmp_type); 
-
   /* Now we multiply eltlen by all the offsets, so that later we 
      can print out array elements correctly.  Up till now we 
      know an offset to apply to get the item but we also 
      have to know how much to add to get to the next item */
   
-  tmp_type = type; 
-  ndimen = 1; 
-  
-  while ((TYPE_CODE (tmp_type) == TYPE_CODE_ARRAY)) 
+  ndimen--;
+  eltlen = TYPE_LENGTH (tmp_type); 
+  F77_DIM_OFFSET (ndimen) = eltlen;
+  while (--ndimen > 0)
     {
-      F77_DIM_OFFSET (ndimen) *= eltlen; 
-      ndimen++;
-      tmp_type = TYPE_TARGET_TYPE (tmp_type);
+      eltlen *= F77_DIM_SIZE (ndimen + 1);
+      F77_DIM_OFFSET (ndimen) = eltlen;
     }
 }
 

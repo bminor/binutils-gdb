@@ -1,5 +1,14 @@
-Wed Feb  1 15:44:11 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+Wed Feb  1 21:16:42 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
+	* f-typeprint.c (f_type_print_varspec_suffix):  Print array index
+	ranges in reverse order.
+	* f-valprint.c (f77_create_arrayprint_offset_tbl):  Fix calculation.
+
+	* eval.c (evaluate_subscript):  Don't call value_subscript, since
+	it adjusts for lower bound and enforces ranges.
+
+	* expression.h (exp_code):  Remove MULTI_F77_SUBSCRIPT, OP_F77_SUBSTR.
+	* eval.c, parse.c:  Removed uses of removed opcodes.
 	* eval.c (evaluate_subexp):  Clean up handling of
 	OP_UNDETERMINED_ARGLIST (no backtracking, more general).
 
