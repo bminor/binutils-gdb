@@ -496,3 +496,16 @@ extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
 /* Convert a ecoff register number to a gdb REGNUM */
 
 #define ECOFF_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)
+
+/* If the current gcc for for this target does not produce correct debugging
+   information for float parameters, both prototyped and unprototyped, then
+   define this macro.  This forces gdb to  always assume that floats are
+   passed as doubles and then converted in the callee.
+
+   For the mips chip, it appears that the debug info marks the parameters as
+   floats regardless of whether the function is prototyped, but the actual
+   values are passed as doubles for the non-prototyped case and floats for
+   the prototyped case.  Thus we choose to make the non-prototyped case work
+   and break the prototyped case.  (FIXME). */
+
+#define COERCE_FLOAT_TO_DOUBLE 1

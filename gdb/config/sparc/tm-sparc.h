@@ -634,3 +634,9 @@ extern int deferred_stores;
     target_store_registers (-2);
 #define	CLEAR_DEFERRED_STORES	\
   deferred_stores = 0;
+
+/* If the current gcc for for this target does not produce correct debugging
+   information for float parameters, both prototyped and unprototyped, then
+   define this macro.  This forces gdb to  always assume that floats are
+   passed as doubles and then converted in the callee. */
+#define COERCE_FLOAT_TO_DOUBLE 1
