@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -527,7 +527,7 @@ styp_to_sec_flags (abfd, hdr, name)
   return (sec_flags);
 }
 
-#define	get_index(symbol)	((long) (symbol)->udata)
+#define	get_index(symbol)	((symbol)->udata.i)
 
 /*
 INTERNAL_DEFINITION
@@ -681,6 +681,20 @@ dependent COFF routines:
 .       struct internal_reloc *relocs,
 .       struct internal_syment *syms,
 .       asection **sections));
+. reloc_howto_type *(*_bfd_coff_rtype_to_howto) PARAMS ((
+.       bfd *abfd,
+.       asection *sec,
+.       struct internal_reloc *rel,
+.       struct coff_link_hash_entry *h,
+.       struct internal_syment *sym,
+.       bfd_vma *addendp));
+. boolean (*_bfd_coff_adjust_symndx) PARAMS ((
+.       bfd *obfd,
+.       struct bfd_link_info *info,
+.       bfd *ibfd,
+.       asection *sec,
+.       struct internal_reloc *reloc,
+.       boolean *adjustedp));
 .
 .} bfd_coff_backend_data;
 .
@@ -778,6 +792,12 @@ dependent COFF routines:
 .#define bfd_coff_relocate_section(obfd,info,ibfd,o,con,rel,isyms,secs)\
 .        ((coff_backend_info (ibfd)->_bfd_coff_relocate_section)\
 .         (obfd, info, ibfd, o, con, rel, isyms, secs))
+.#define bfd_coff_rtype_to_howto(abfd, sec, rel, h, sym, addendp)\
+.        ((coff_backend_info (abfd)->_bfd_coff_rtype_to_howto)\
+.         (abfd, sec, rel, h, sym, addendp))
+.#define bfd_coff_adjust_symndx(obfd, info, ibfd, sec, rel, adjustedp)\
+.        ((coff_backend_info (abfd)->_bfd_coff_adjust_symndx)\
+.         (obfd, info, ibfd, sec, rel, adjustedp))
 .
 */
 
@@ -836,7 +856,8 @@ coff_new_section_hook (abfd, section)
      bfd * abfd;
      asection * section;
 {
-  section->alignment_power = abfd->xvec->align_power_min;
+  section->alignment_power = COFF_DEFAULT_SECTION_ALIGNMENT_POWER;
+
   /* Allocate aux records for section symbols, to store size and
      related info.
 
@@ -845,16 +866,19 @@ coff_new_section_hook (abfd, section)
     (combined_entry_type *) bfd_zalloc (abfd,
 					sizeof (combined_entry_type) * 10);
 
-#ifdef COFF_SPARC
-  /* This is to allow double-word operations on addresses in data or bss. */
-  if (strcmp (section->name, ".data") == 0
-      || strcmp (section->name, ".bss") == 0)
-    section->alignment_power = 3;
-#endif /* COFF_SPARC */
+  /* The .stab section must be aligned to 2**2 at most, because
+     otherwise there may be gaps in the section which gdb will not
+     know how to interpret.  Examining the section name is a hack, but
+     that is also how gdb locates the section.  We also align the
+     .stabstr section this way for backward compatibility, although I
+     believe it would work anyhow.  */
+  if (COFF_DEFAULT_SECTION_ALIGNMENT_POWER > 2
+      && (strcmp (section->name, ".stab") == 0
+	  || strcmp (section->name, ".stabstr") == 0))
+    section->alignment_power = 2;
 
   return true;
 }
-
 
 #ifdef I960
 
@@ -1086,8 +1110,9 @@ coff_set_arch_mach_hook (abfd, filehdr)
       break;
 #endif
 
-#ifdef SH_ARCH_MAGIC
-    case SH_ARCH_MAGIC:
+#ifdef SH_ARCH_MAGIC_BIG
+    case SH_ARCH_MAGIC_BIG:
+    case SH_ARCH_MAGIC_LITTLE:
       arch = bfd_arch_sh;
       machine = 0;
       break;
@@ -1332,9 +1357,12 @@ coff_set_flags (abfd, magicp, flagsp)
       break;
 #endif
 
-#ifdef SH_ARCH_MAGIC
+#ifdef SH_ARCH_MAGIC_BIG
     case bfd_arch_sh:
-      *magicp = SH_ARCH_MAGIC;
+      if (abfd->xvec->byteorder_big_p)
+	*magicp = SH_ARCH_MAGIC_BIG;
+      else
+	*magicp = SH_ARCH_MAGIC_LITTLE;
       return true;
       break;
 #endif
@@ -2309,7 +2337,7 @@ coff_slurp_symbol_table (abfd)
 
 	  dst->native = src;
 
-	  dst->symbol.udata = 0;
+	  dst->symbol.udata.i = 0;
 	  dst->lineno = (alent *) NULL;
 	  this_index += (src->u.syment.n_numaux) + 1;
 	  dst++;
@@ -2518,6 +2546,42 @@ coff_slurp_reloc_table (abfd, asect, symbols)
   return true;
 }
 
+#ifndef coff_rtype_to_howto
+#ifdef RTYPE2HOWTO
+
+/* Get the howto structure for a reloc.  This is only used if the file
+   including this one defines coff_relocate_section to be
+   _bfd_coff_generic_relocate_section, so it is OK if it does not
+   always work.  It is the responsibility of the including file to
+   make sure it is reasonable if it is needed.  */
+
+static reloc_howto_type *coff_rtype_to_howto
+  PARAMS ((bfd *, asection *, struct internal_reloc *,
+	   struct coff_link_hash_entry *, struct internal_syment *,
+	   bfd_vma *));
+
+/*ARGSUSED*/
+static reloc_howto_type *
+coff_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
+     bfd *abfd;
+     asection *sec;
+     struct internal_reloc *rel;
+     struct coff_link_hash_entry *h;
+     struct internal_syment *sym;
+     bfd_vma *addendp;
+{
+  arelent genrel;
+
+  RTYPE2HOWTO (&genrel, rel);
+  return genrel.howto;
+}
+
+#else /* ! defined (RTYPE2HOWTO) */
+
+#define coff_rtype_to_howto NULL
+
+#endif /* ! defined (RTYPE2HOWTO) */
+#endif /* ! defined (coff_rtype_to_howto) */
 
 /* This is stupid.  This function should be a boolean predicate.  */
 static long
@@ -2607,15 +2671,25 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 /* If coff_relocate_section is defined, we can use the optimized COFF
    backend linker.  Otherwise we must continue to use the old linker.  */
 #ifdef coff_relocate_section
+#ifndef coff_bfd_link_hash_table_create
 #define coff_bfd_link_hash_table_create _bfd_coff_link_hash_table_create
+#endif
+#ifndef coff_bfd_link_add_symbols
 #define coff_bfd_link_add_symbols _bfd_coff_link_add_symbols
+#endif
+#ifndef coff_bfd_final_link
 #define coff_bfd_final_link _bfd_coff_final_link
+#endif
 #else /* ! defined (coff_relocate_section) */
 #define coff_relocate_section NULL
 #define coff_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define coff_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define coff_bfd_final_link _bfd_generic_final_link
 #endif /* ! defined (coff_relocate_section) */
+
+#ifndef coff_adjust_symndx
+#define coff_adjust_symndx NULL
+#endif
 
 static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
 {
@@ -2636,7 +2710,7 @@ static CONST bfd_coff_backend_data bfd_coff_std_swap_table =
   coff_set_alignment_hook, coff_slurp_symbol_table, symname_in_debug_hook,
   coff_reloc16_extra_cases, coff_reloc16_estimate,
   coff_sym_is_global, coff_compute_section_file_positions,
-  coff_relocate_section
+  coff_relocate_section, coff_rtype_to_howto, coff_adjust_symndx
 };
 
 #define	coff_close_and_cleanup _bfd_generic_close_and_cleanup

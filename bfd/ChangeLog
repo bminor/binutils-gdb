@@ -1,5 +1,17 @@
 Tue Mar  7 12:23:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (bfd_coff_backend_data): Add new field
+	_bfd_coff_adjust_symndx.
+	(bfd_coff_adjust_symndx): Define.
+	(coff_adjust_symndx): Define as NULL if not already defined.
+	(bfd_coff_std_swap_table): Initialize new field to
+	coff_adjust_symndx.
+	* cofflink.c (coff_link_input_bfd): Call coff_adjust_symndx if it
+	is defined.
+	* coff-a29k.c (coff_a29k_adjust_symndx): New static function.
+	(coff_adjust_symndx): Define before including coffcode.h.
+	* libcoff.h: Rebuild.
+
 	* format.c (bfd_check_format_matches): Skip binary_vec when
 	searching through bfd_target_vector.
 
