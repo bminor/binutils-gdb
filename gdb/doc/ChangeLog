@@ -1,3 +1,9 @@
+2001-02-11  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdbint.texinfo: Fix up @itemize lists so that @item is alone on
+	its line.  Fix markup of commands and macros.  Add an Index node
+	and index entries.
+
 2001-01-23  J.T. Conklin  <jtc@redback.com>
 
 	* gdb.texinfo (Memory region attributes): New manual section.
