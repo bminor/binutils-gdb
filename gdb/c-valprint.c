@@ -340,6 +340,16 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       /* Do something at least vaguely reasonable, for example if the
 	 language is set wrong.  */
 
+    case TYPE_CODE_RANGE:
+      /* FIXME: create_range_type does not set the unsigned bit in a
+	 range type (I think it probably should copy it from the target
+	 type), so we won't print values which are too large to
+	 fit in a signed integer correctly.  */
+      /* FIXME: Doesn't handle ranges of enums correctly.  (Can't just
+	 print with the target type, though, because the size of our type
+	 and the target type might differ).  */
+      /* FALLTHROUGH */
+
     case TYPE_CODE_INT:
       format = format ? format : output_format;
       if (format)
@@ -394,11 +404,6 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 
     case TYPE_CODE_ERROR:
       fprintf_filtered (stream, "<error type>");
-      break;
-
-    case TYPE_CODE_RANGE:
-      /* FIXME, we should not ever have to print one of these yet.  */
-      fprintf_filtered (stream, "<range type>");
       break;
 
     case TYPE_CODE_UNDEF:

@@ -1,5 +1,7 @@
 Mon Jan 10 20:08:23 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* c-valprint.c (c_val_print): Treat TYPE_CODE_RANGE like TYPE_CODE_INT.
+
 	* config/alpha/alpha-netware.mt: Rename to alpha-nw.mt for 14
 	character filenames.
 	* configure.in: Change accordingly.
