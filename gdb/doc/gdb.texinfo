@@ -6574,6 +6574,11 @@ execute it gets the error message ``@code{You can't do that when your
 target is @dots{}}''
 @end ifset
 
+The file is loaded at whatever address is specified in the executable.
+For some object file formats, like a.out, the object file format fixes
+the address and so it won't necessarily match the address you gave to
+the linker.
+
 @ifset VXWORKS
 On VxWorks, @code{load} will dynamically link @var{filename} on the
 current target system as well as adding its symbols in @value{GDBN}.
