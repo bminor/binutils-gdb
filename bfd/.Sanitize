@@ -116,6 +116,7 @@ hp300bsd.c
 hp300hpux.c
 hppa.c
 hppa_stubs.h
+hpux-core.c
 i386aout.c
 i386bsd.c
 i386linux.c
