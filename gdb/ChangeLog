@@ -1,3 +1,9 @@
+Tue Sep  7 14:30:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/m68k/tm-m68k.h (FIX_CALL_DUMMY): Changed name of swapping
+	routine to match BFD name change.
+	* config/z8k/tm-z8k.h (FIX_CALL_DUMMY): Likewise.
+
 Tue Sep  7 13:06:44 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dbxread.c (process_one_symbol): If the value of an N_FUN for a

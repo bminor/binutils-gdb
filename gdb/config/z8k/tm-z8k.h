@@ -271,8 +271,8 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
    We use the BFD routines to store a big-endian value of known size.  */
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)     \
-{ _do_putb32 (fun,     (char *) dummyname + CALL_DUMMY_START_OFFSET + 2);  \
-  _do_putb32 (nargs*4, (char *) dummyname + CALL_DUMMY_START_OFFSET + 8); }
+{ bfd_putb32 (fun,     (char *) dummyname + CALL_DUMMY_START_OFFSET + 2);  \
+  bfd_putb32 (nargs*4, (char *) dummyname + CALL_DUMMY_START_OFFSET + 8); }
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 
