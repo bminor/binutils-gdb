@@ -1,3 +1,9 @@
+start-sanitize-d10v
+Wed Jul 31 11:52:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* emulparams/d10velf.sh (SCRIPT_NAME): Change to vanilla.
+
+end-sanitize-d10v	
 Tue Jul 30 14:46:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (lang_size_sections): Add the section VMA to the result
@@ -40,7 +46,7 @@ Mon Jul 29 17:23:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 	section if not relocateable or if common definitions are forced.
 
 start-sanitize-d10v
-	Wed Jul 24 12:16:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+Wed Jul 24 12:16:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* emulparams/d10velf.sh (SCRIPT_NAME): Change to elf.
 
