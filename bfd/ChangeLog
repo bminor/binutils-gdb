@@ -1,3 +1,12 @@
+2001-02-18  David O'Brien  <obrien@FreeBSD>
+
+	* configure.in: Recognize FreeBSD/arm, FreeBSD/PowerPC, and treat
+	FreeBSD/i386-CURRENT differently until I can figure out the needed
+	corefile changes.
+	* configure: Regenerate.
+	* config.bfd: Recognize FreeBSD/x86-64, FreeBSD/ia64, FreeBSD/arm,
+	FreeBSD/PowerPC, and FreeBSD/sparc64.
+
 2001-02-14  Philip Blundell  <pb@futuretv.com>
 
 	From 2001-02-06  H.J. Lu  <hjl@gnu.org>
