@@ -1,3 +1,7 @@
+Mon Aug 25 15:58:07 1997  Christopher Provenzano  <proven@cygnus.com>
+
+	* configure: Rebuilt with latest devo autoconf for NT support.
+
 Fri Aug 22 10:35:15 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-dis.c (disassemble): Use curly brace syntax for register
