@@ -918,6 +918,7 @@ insert_breakpoints ()
 	      b->type == bp_read_watchpoint ||
 	      b->type == bp_access_watchpoint)
 	     && b->enable == enabled
+	     && b->disposition != del_at_next_stop
 	     && !b->inserted
 	     && !b->duplicate)
       {
@@ -1020,7 +1021,7 @@ insert_breakpoints ()
 	  }
 	else
 	  {
-	    printf_filtered ("Hardware watchpoint %d deleted", b->number);
+	    printf_filtered ("Hardware watchpoint %d deleted ", b->number);
 	    printf_filtered ("because the program has left the block \n");
 	    printf_filtered ("in which its expression is valid.\n");
 	    if (b->related_breakpoint)
@@ -1031,7 +1032,7 @@ insert_breakpoints ()
 	/* Restore the frame and level.  */
 	if ((saved_frame != selected_frame) ||
 	    (saved_level != selected_frame_level))
-	  select_and_print_frame (saved_frame, saved_level);
+	  select_frame (saved_frame, saved_level);
 
 	if (val)
 	  return_val = val;	/* remember failure */
@@ -7587,8 +7588,7 @@ have been allocated for other watchpoints.\n", bpt->number);
 	}
 
       if (save_selected_frame_level >= 0)
-	select_and_print_frame (save_selected_frame,
-				save_selected_frame_level);
+	select_frame (save_selected_frame, save_selected_frame_level);
       value_free_to_mark (mark);
     }
   if (modify_breakpoint_hook)

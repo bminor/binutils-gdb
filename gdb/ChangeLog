@@ -3,6 +3,13 @@
 	* procfs.c (proc_set_watchpoint):  Declare addr parameter as
 	CORE_ADDR, to match call from procfs_set_watchpoint.
 
+	* breakpoint.c (insert_breakpoints, do_enable_breakpoint):  
+	Reselect the saved frame silently after frame selection for 
+	watchpoint evaluation.
+	(insert_breakpoints):  Add missing space in `Hardware watchpoint
+	deleted' message.  Do not reinsert hardware watchpoint if it is
+	already marked for deletion at next stop.
+
 2000-03-28  Christopher Faylor  <cgf@cygnus.com>
 
         * partial-stab.h: Add one more check against corrupted or irregular
