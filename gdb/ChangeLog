@@ -1,5 +1,11 @@
 2003-07-10  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh: When a variable, but not a function, compare against
+	0.  Fix problem in previous patch.
+	* gdbarch.c: Re-generate.
+	
+2003-07-10  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh: Use gdb_assert instead of internal_error.  Compare
 	functions against NULL, not 0.
 	* gdbarch.c: Re-generate.

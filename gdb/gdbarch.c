@@ -3422,7 +3422,7 @@ int
 gdbarch_deprecated_max_register_raw_size_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_max_register_raw_size != NULL;
+  return gdbarch->deprecated_max_register_raw_size != 0;
 }
 
 int
@@ -3445,7 +3445,7 @@ int
 gdbarch_deprecated_max_register_virtual_size_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_max_register_virtual_size != NULL;
+  return gdbarch->deprecated_max_register_virtual_size != 0;
 }
 
 int
@@ -3802,7 +3802,7 @@ int
 gdbarch_deprecated_call_dummy_stack_adjust_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_call_dummy_stack_adjust != NULL;
+  return gdbarch->deprecated_call_dummy_stack_adjust != 0;
 }
 
 int

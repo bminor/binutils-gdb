@@ -1732,7 +1732,11 @@ do
 	if [ -n "${predicate}" ]
 	then
 	    printf "  return ${predicate};\n"
-	else
+	elif class_is_variable_p
+	then
+	    printf "  return gdbarch->${function} != 0;\n"
+	elif class_is_function_p
+	then
 	    printf "  return gdbarch->${function} != NULL;\n"
 	fi
 	printf "}\n"
