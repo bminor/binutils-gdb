@@ -554,7 +554,7 @@ language.
 @example
 char * @var{name};
 gdb_cmd_fn @var{fn};
-char ** @var{doc};
+char * @var{doc};
 
 typedef void (*gdb_cmd_fn) (char * args);
 @end example
@@ -567,8 +567,8 @@ Calling this function twice with the same name replaces an earlier
 definition, but application commands can not replace builtin commands of
 the same name.
 
-The documentation string of the command is set to a copy of the NULL
-terminated array of strings @var{doc}.
+The documentation string of the command is set to a copy the string
+@var{doc}.
 @end deftypefun
 
 @node Variables, Asynchronous, Defining Commands, Top
@@ -690,7 +690,7 @@ The GDB command language contains many @code{set} and @code{show}
 commands.  These commands are used to modify or examine parameters to
 the debugger.
 
-One difficulty to get the current state 3f a parameter from the
+It is difficult to get the current state of a parameter from the
 @code{show} command because @code{show} is very verbose.
 
 @example
@@ -857,15 +857,15 @@ in an earlier example of this section.
     (type "struct bytecode_vector")
     (address 14336) )
   (exp-concat
-    "$17 = @{"
+    "$16 = @{"
     (exp-attribute
-      ( (expression "$17.v")
+      ( (expression "$16.v")
         (type "char *")
         (address 14336)
-        (deref-expression "*$17.v") )
+        (deref-expression "*$16.v") )
       "v = 0x38ae0")
     (exp-attribute
-      ( (expression "$17.v_length")
+      ( (expression "$16.v_length")
         (type "int")
         (address 14340) )
       ", v_length = 40")

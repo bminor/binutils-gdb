@@ -1,5 +1,9 @@
 Mon Oct 25 03:25:41 1993  Tom Lord  (lord@cygnus.com)
 
+	* libgdb.texinfo (Defining Commands): made the DOC arg
+	to gdb_define_app_command a char * instead of char **
+	per a suggestion from kingdon.
+
 	* libgdb.texinfo: total rewrite from a different starting
 	premise.
 
