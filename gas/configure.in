@@ -233,7 +233,7 @@ changequote([,])dnl
       mips-*-lnews*)        fmt=ecoff targ=mips-lit em=lnews ;;
       mips-*-riscos*)       fmt=ecoff targ=mips-big ;;
       mips-*-sysv*)         fmt=ecoff targ=mips-big ;;
-      mips-*-elf* | mips-*-rtems* | mips-*-linux* | mips-*-gnu*)
+      mips-*-elf* | mips-*-rtems* | mips-*-linux* | mips-*-gnu* | mips-*-openbsd*)
 			    fmt=elf 
 			    case "$endian" in
 			    big) targ=mips-big ;;

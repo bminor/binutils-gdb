@@ -1,3 +1,8 @@
+Thu Apr 17 13:59:47 1997  Per Fogelstrom  <pefo@openbsd.org>
+
+	* configure.in (mips-*-openbsd*): New target.
+	* configure: Rebuild.
+
 start-sanitize-d30v
 Wed Apr 16 12:31:24 1997  Martin Hunt <hunt@cygnus.com>
 
