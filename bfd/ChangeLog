@@ -1,5 +1,6 @@
 Sun Oct 27 16:56:58 1991  Steve Chamberlain  (steve at cygnus.com)
 
+	* coff-m88k.c, targets.c: change name of m88k_bcs to m88kbcs
 	* configure.in: add motorola delta88 cases
 	* libbfd.h, libbfd-in.h, archive.c, ieee.c, elf.c, srec.c: fix
 	write_armap prototype
