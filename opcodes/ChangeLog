@@ -1,3 +1,9 @@
+2000-07-03  Marek Michalkiewicz  <marekm@linux.org.pl>
+
+	* avr-dis.c (avr_operand): Change _ () to _() around all strings
+	marked for translation (exception from the usual coding style).
+	(print_insn_avr): Initialize insn2 to avoid warnings.
+
 2000-07-03  Kazu Hirata  <kazu@hxi.com>
 
 	* h8300-dis.c (bfd_h8_disassemble): Improve readability.

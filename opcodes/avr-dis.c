@@ -103,7 +103,7 @@ avr_operand (insn, insn2, pc, constraint, buf, comment, regs)
 	case 0: *buf++ = 'Z'; break;
 	case 2: *buf++ = 'Y'; break;
 	case 3: *buf++ = 'X'; break;
-	default: buf += sprintf (buf, _ (" unknown register ")); break;
+	default: buf += sprintf (buf, _(" unknown register ")); break;
 	}
       if (insn & 0x1)
 	*buf++ = '+';
@@ -165,7 +165,7 @@ avr_operand (insn, insn2, pc, constraint, buf, comment, regs)
       break;
 
     case 'n':
-      sprintf (buf, _ ("Internal disassembler error"));
+      sprintf (buf, _("Internal disassembler error"));
       break;
       
     case 'K':
@@ -205,7 +205,7 @@ avr_operand (insn, insn2, pc, constraint, buf, comment, regs)
       break;
       
     default:
-      sprintf (buf, _ ("unknown constraint `%c'"), constraint);
+      sprintf (buf, _("unknown constraint `%c'"), constraint);
     }
 }
 
@@ -280,6 +280,7 @@ print_insn_avr(addr, info)
       op2[0] = 0;
       comment1[0] = 0;
       comment2[0] = 0;
+      insn2 = 0;
 
       if (opcode->insn_size > 1)
 	{

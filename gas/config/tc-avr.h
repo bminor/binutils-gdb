@@ -108,6 +108,8 @@ void avr_cons_fix_new(fragS *frag,int where, int nbytes, expressionS *exp);
      of a PC relative instruction is the next instruction, so this
      macro would return the length of an instruction. */
 
+extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
+
 #define LISTING_WORD_SIZE 2
 /*   The number of bytes to put into a word in a listing.  This affects
      the way the bytes are clumped together in the listing.  For

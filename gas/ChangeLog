@@ -1,3 +1,24 @@
+2000-07-03  Marek Michalkiewicz  <marekm@linux.org.pl>
+
+	* config/tc-avr.c: Change _ () to _() around all strings marked
+	for translation (exception from the usual coding style).
+	(avr_opt): New struct variable, how the new switches are set.
+	(OPTION_MMCU): Define as 'm' and actually use.
+	(md_longopts): Add -mall-opcodes, -mno-skip-bug, -mno-wrap.
+	(show_mcu_list): New function, display the list of known MCUs.
+	(md_show_usage): Document the new switches.  Call show_mcu_list.
+	(avr_set_arch): Change 'm' to OPTION_MMCU.
+	(md_parse_option): Call show_mcu_list if unknown MCU specified.
+	Handle the new switches.
+	(avr_operands): Disable warnings for undefined combinations of
+	operands if -mall-opcodes.  Disable warnings for skipping two-word
+	instructions if enhanced core or -mno-skip-bug.
+	(avr_operand): Accept all addressing modes on avr1 if -mall-opcodes.
+	(md_apply_fix3): Reject 8K wrap if >8K or -mno-wrap.
+	(md_assemble): Accept opcodes not supported by MCU if -mall-opcodes.
+	(avr_ldi_expression): Warn about implicit lo8().
+	* config/tc-avr.h (md_pcrel_from_section): Add prototype.
+
 2000-07-01  Koundinya K  <kk@ddeorg.soft.net>
 
         * configure.in: Add entry for mips-*-sysv4*MP*

@@ -96,6 +96,16 @@ static struct mcu_type_s mcu_types[] =
 static struct mcu_type_s default_mcu = {"avr2", AVR_ISA_2xxx,bfd_mach_avr2};
 static struct mcu_type_s *avr_mcu = &default_mcu;
 
+/* AVR target-specific switches.  */
+struct avr_opt_s
+{
+  int all_opcodes;  /* -mall-opcodes: accept all known AVR opcodes */
+  int no_skip_bug;  /* -mno-skip-bug: no warnings for skipping 2-word insns */
+  int no_wrap;      /* -mno-wrap: reject rjmp/rcall with 8K wrap-around */
+};
+
+static struct avr_opt_s avr_opt = { 0, 0, 0 };
+
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 static void avr_set_arch (int dummy);
@@ -109,6 +119,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 #define LDI_IMMEDIATE(x) (((x) & 0xf) | (((x) << 4) & 0xf00))
 
+static void show_mcu_list (FILE *stream);
 static char * skip_space (char * s);
 static char * extract_word (char *from, char *to, int limit);
 static unsigned int avr_operand (struct avr_opcodes_s *opcode,
@@ -150,13 +161,46 @@ static struct hash_control *avr_hash;
 /* Reloc modifiers hash control (hh8,hi8,lo8,pm_xx).  */
 static struct hash_control *avr_mod_hash;
 
-#define OPTION_MMCU (OPTION_MD_BASE + 1)
+#define OPTION_MMCU 'm'
+#define OPTION_ALL_OPCODES (OPTION_MD_BASE + 1)
+#define OPTION_NO_SKIP_BUG (OPTION_MD_BASE + 2)
+#define OPTION_NO_WRAP     (OPTION_MD_BASE + 3)
 
 struct option md_longopts[] = {
-  {"mmcu", required_argument, NULL, 'm'},
-  {NULL, no_argument, NULL, 0}
+  { "mmcu",   required_argument, NULL, OPTION_MMCU        },
+  { "mall-opcodes", no_argument, NULL, OPTION_ALL_OPCODES },
+  { "mno-skip-bug", no_argument, NULL, OPTION_NO_SKIP_BUG },
+  { "mno-wrap",     no_argument, NULL, OPTION_NO_WRAP     },
+  { NULL, no_argument, NULL, 0 }
 };
 size_t md_longopts_size = sizeof(md_longopts);
+
+
+/* Display nicely formatted list of known MCU names.  */
+static void
+show_mcu_list (FILE *stream)
+{
+  int i, x;
+
+  fprintf (stream, _("Known MCU names:"));
+  x = 1000;
+  for (i = 0; mcu_types[i].name; i++)
+    {
+      int len = strlen (mcu_types[i].name);
+      x += len + 1;
+      if (x < 75)
+	{
+	  fprintf (stream, " %s", mcu_types[i].name);
+	}
+      else
+	{
+	  fprintf (stream, "\n  %s", mcu_types[i].name);
+	  x = len + 2;
+	}
+    }
+    fprintf (stream, "\n");
+}
+
 
 static inline char *
 skip_space (s)
@@ -202,9 +246,8 @@ void
 md_show_usage (stream)
   FILE *stream;
 {
-  fprintf
-    (stream,
-     _ ("AVR options:\n"
+  fprintf (stream,
+      _("AVR options:\n"
 	"  -mmcu=[avr-name] select microcontroller variant\n"
 	"                   [avr-name] can be:\n"
 	"                   avr1 - AT90S1200, ATtiny1x, ATtiny28\n"
@@ -213,6 +256,13 @@ md_show_usage (stream)
 	"                   avr4 - ATmega83, ATmega85\n"
 	"                   avr5 - ATmega161, ATmega163, ATmega32, AT94K\n"
 	"                   or immediate microcontroller name.\n"));
+  fprintf (stream,
+      _("  -mall-opcodes    accept all AVR opcodes, even if not supported by MCU\n"
+	"  -mno-skip-bug    disable warnings for skipping two-word instructions\n"
+	"                   (default for avr4, avr5)\n"
+	"  -mno-wrap        reject rjmp/rcall instructions with 8K wrap-around\n"
+	"                   (default for avr3, avr5)\n"));
+  show_mcu_list (stream);
 }
 
 static void
@@ -222,7 +272,7 @@ avr_set_arch (dummy)
   char * str;
   str = (char *)alloca (20);
   input_line_pointer = extract_word (input_line_pointer, str, 20);
-  md_parse_option ('m', str);
+  md_parse_option (OPTION_MMCU, str);
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);
 }
 
@@ -231,33 +281,51 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
-  char *t = alloca (strlen (arg) + 1);
-  char *s = t;
-  char *arg1 = arg;
-  do
-    *t = tolower (*arg1++);
-  while (*t++);
-
-  if (c == 'm')
+  switch (c)
     {
-      int i;
+    case OPTION_MMCU:
+      {
+	int i;
+	char *s = alloca (strlen (arg) + 1);
 
-      for (i = 0; mcu_types[i].name; ++i)
-	if (strcmp (mcu_types[i].name, s) == 0)
-	  break;
+	{
+	  char *t = s;
+	  char *arg1 = arg;
 
-      if (!mcu_types[i].name)
-	as_fatal (_ ("unknown MCU: %s\n"), arg);
+	  do
+	    *t = tolower(*arg1++);
+	  while (*t++);
+	}
 
-      /* It is OK to redefine mcu type within the same avr[1-5] bfd machine
-	 type - this for allows passing -mmcu=... via gcc ASM_SPEC as well
-	 as .arch ... in the asm output at the same time.  */
+	for (i = 0; mcu_types[i].name; ++i)
+	  if (strcmp (mcu_types[i].name, s) == 0)
+	    break;
 
-      if (avr_mcu == &default_mcu || avr_mcu->mach == mcu_types[i].mach)
-	avr_mcu = &mcu_types[i];
-      else
-	as_fatal (_ ("redefinition of mcu type `%s' to `%s'"),
-		  avr_mcu->name, mcu_types[i].name);
+	if (!mcu_types[i].name)
+	  {
+	    show_mcu_list (stderr);
+	    as_fatal (_("unknown MCU: %s\n"), arg);
+	  }
+
+	/* It is OK to redefine mcu type within the same avr[1-5] bfd machine
+	   type - this for allows passing -mmcu=... via gcc ASM_SPEC as well
+	   as .arch ... in the asm output at the same time.  */
+
+	if (avr_mcu == &default_mcu || avr_mcu->mach == mcu_types[i].mach)
+	  avr_mcu = &mcu_types[i];
+	else
+	  as_fatal (_("redefinition of mcu type `%s' to `%s'"),
+		    avr_mcu->name, mcu_types[i].name);
+	return 1;
+      }
+    case OPTION_ALL_OPCODES:
+      avr_opt.all_opcodes = 1;
+      return 1;
+    case OPTION_NO_SKIP_BUG:
+      avr_opt.no_skip_bug = 1;
+      return 1;
+    case OPTION_NO_WRAP:
+      avr_opt.no_wrap = 1;
       return 1;
     }
   return 0;
@@ -413,7 +481,7 @@ avr_operands (opcode, line)
 
 	      str = skip_space (str);
 	      if (*str++ != ',')
-		as_bad (_ ("`,' required"));
+		as_bad (_("`,' required"));
 	      str = skip_space (str);
 
 	      reg2 = avr_operand (opcode, where, op, &str);
@@ -429,22 +497,29 @@ avr_operands (opcode, line)
       bin |= reg1 | reg2;
     }
 
-  /* detect undefined combinations (like lpm r31,Z+) */
-    if (((bin & 0xFDEF) == 0x91AD) || ((bin & 0xFDEF) == 0x91AE) ||
-	((bin & 0xFDEF) == 0x91C9) || ((bin & 0xFDEF) == 0x91CA) ||
-	((bin & 0xFDEF) == 0x91E1) || ((bin & 0xFDEF) == 0x91E2) ||
-	((bin & 0xFFED) == 0x91E5))
-      as_warn( _("undefined combination of operands"));
-    
+  if (!avr_opt.all_opcodes)
+    {
+      /* Detect undefined combinations (like ld r31,Z+).  */
+      if (((bin & 0xFDEF) == 0x91AD) || ((bin & 0xFDEF) == 0x91AE) ||
+	  ((bin & 0xFDEF) == 0x91C9) || ((bin & 0xFDEF) == 0x91CA) ||
+	  ((bin & 0xFDEF) == 0x91E1) || ((bin & 0xFDEF) == 0x91E2) ||
+	  ((bin & 0xFFED) == 0x91E5))
+	as_warn (_("undefined combination of operands"));
+    }
+
   if (opcode->insn_size == 2)
     {
-      /* warn if previous opcode was cpse/sbic/sbis/sbrc/sbrs
-	 (AVR core bug)  */
-      if ((prev & 0xFC00) == 0x1000
-	  || (prev & 0xFD00) == 0x9900
-	  || (prev & 0xFC08) == 0xFC00)
-	as_warn (_("skipping two-word instruction"));
-      
+      /* Warn if the previous opcode was cpse/sbic/sbis/sbrc/sbrs
+         (AVR core bug, fixed in the newer devices).  */
+
+      if (!((avr_mcu->isa & AVR_ISA_MUL) || avr_opt.no_skip_bug))
+	{
+	  if ((prev & 0xFC00) == 0x1000
+	      || (prev & 0xFD00) == 0x9900
+	      || (prev & 0xFC08) == 0xFC00)
+	    as_warn (_("skipping two-word instruction"));
+	}
+
       bfd_putl32 ((bfd_vma)bin, frag);
     }
   else
@@ -508,32 +583,32 @@ avr_operand (opcode, where, op, line)
 	      {
 	      case 'a':
 		if (op_mask < 16 || op_mask > 23)
-		  as_bad (_ ("register r16-r23 required"));
+		  as_bad (_("register r16-r23 required"));
 		op_mask -= 16;
 		break;
 
 	      case 'd':
 		if (op_mask < 16)
-		  as_bad (_ ("register number above 15 required"));
+		  as_bad (_("register number above 15 required"));
 		op_mask -= 16;
 		break;
 		
 	      case 'v':
 		if (op_mask & 1)
-		  as_bad (_ ("even register number required"));
+		  as_bad (_("even register number required"));
 		op_mask >>= 1;
 		break;
 		
 	      case 'w':
 		op_mask -= 24;
 		if (op_mask & 1 || op_mask > 6)
-		  as_bad (_ ("register r24,r26,r28 or r30 required"));
+		  as_bad (_("register r24, r26, r28 or r30 required"));
 		op_mask >>= 1;
 		break;
 	      }
 	    break;
 	  }
-	as_bad (_ ("register name or number from 0 to 31 required"));
+	as_bad (_("register name or number from 0 to 31 required"));
       }
       break;
 
@@ -551,32 +626,33 @@ avr_operand (opcode, where, op, line)
 	else if (c == 'y')
 	  op_mask |= 0x8;
 	else if (c != 'z')
-	  as_bad (_ ("pointer register (X,Y or Z) required"));
+	  as_bad (_("pointer register (X, Y or Z) required"));
 
 	str = skip_space (str+1);
 	if (*str == '+')
 	  {
 	    ++str;
 	    if (op_mask & 2)
-	      as_bad (_ ("cannot both predecrement and postincrement"));
+	      as_bad (_("cannot both predecrement and postincrement"));
 	    op_mask |= 0x1001;
 	  }
 
 	/* avr1 can do "ld r,Z" and "st Z,r" but no other pointer
 	   registers, no predecrement, no postincrement.  */
 	
-	if ((op_mask & 0x100F) && !(avr_mcu->isa & AVR_ISA_SRAM))
-	  as_bad (_ ("addressing mode not supported"));
+	if (!avr_opt.all_opcodes && (op_mask & 0x100F)
+	    && !(avr_mcu->isa & AVR_ISA_SRAM))
+	  as_bad (_("addressing mode not supported"));
       }
       break;
 
     case 'z':
       {
 	if (*str == '-')
-	  as_bad (_ ("can't predecrement"));
+	  as_bad (_("can't predecrement"));
 
 	if (! (*str == 'z' || *str == 'Z'))
-	  as_bad (_ ("pointer register Z required"));
+	  as_bad (_("pointer register Z required"));
 
 	str = skip_space (str + 1);
 	if (*str == '+')
@@ -593,7 +669,7 @@ avr_operand (opcode, where, op, line)
 	if (c == 'y')
 	  op_mask |= 0x8;
 	else if (c != 'z')
-	  as_bad (_ ("pointer register (Y or Z) required"));
+	  as_bad (_("pointer register (Y or Z) required"));
 	str = skip_space (str);
 	if (*str++ == '+')
 	  {
@@ -702,7 +778,7 @@ avr_operand (opcode, where, op, line)
     case '?':
       break;
     default:
-      as_bad (_ ("unknown constraint `%c'"), *op);
+      as_bad (_("unknown constraint `%c'"), *op);
     }
   *line = str;
   return op_mask;
@@ -778,7 +854,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	    {
 	      /* We don't actually support subtracting a symbol.  */
  	      as_bad_where (fixp->fx_file, fixp->fx_line,
-			    _ ("expression too complex"));
+			    _("expression too complex"));
 	    }
 	}
     }
@@ -829,7 +905,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	  if (value < -2048 || value > 2047)
 	    {
 	      /* No wrap for devices with >8K of program memory.  */
-	      if (avr_mcu->isa & AVR_ISA_MEGA)
+	      if ((avr_mcu->isa & AVR_ISA_MEGA) || avr_opt.no_wrap)
 		as_bad_where (fixp->fx_file, fixp->fx_line,
 			      _("operand out of range: %ld"), value);
 	    }
@@ -1007,13 +1083,13 @@ md_assemble (str)
   str = skip_space (extract_word (str, op, sizeof(op)));
 
   if (!op[0])
-    as_bad (_ ("can't find opcode "));
+    as_bad (_("can't find opcode "));
 
   opcode = (struct avr_opcodes_s *) hash_find (avr_hash, op);
 
   if (opcode == NULL)
     {
-      as_bad (_ ("unknown opcode `%s'"), op);
+      as_bad (_("unknown opcode `%s'"), op);
       return;
     }
 
@@ -1023,8 +1099,8 @@ md_assemble (str)
   if (*str && *opcode->constraints == '?')
     ++opcode;
 
-  if ((opcode->isa & avr_mcu->isa) != opcode->isa)
-    as_bad (_ ("illegal opcode %s for mcu %s"), opcode->name, avr_mcu->name);
+  if (!avr_opt.all_opcodes && (opcode->isa & avr_mcu->isa) != opcode->isa)
+    as_bad (_("illegal opcode %s for mcu %s"), opcode->name, avr_mcu->name);
 
   /* We used to set input_line_pointer to the result of get_operands,
      but that is wrong.  Our caller assumes we don't change it.  */
@@ -1032,7 +1108,7 @@ md_assemble (str)
     char *t = input_line_pointer;
     avr_operands (opcode, &str);
     if (*skip_space (str))
-      as_bad (_ ("garbage at end of line"));
+      as_bad (_("garbage at end of line"));
     input_line_pointer = t;
   }
 }
@@ -1090,7 +1166,7 @@ avr_ldi_expression (exp)
 		      ++closes;
 		    }
 		  else
-		    as_bad (_ ("illegal expression"));
+		    as_bad (_("illegal expression"));
 		  if (*str == '-')
 		    {
 		      neg_p = 1;
@@ -1112,7 +1188,7 @@ avr_ldi_expression (exp)
 		{
 		  if (*input_line_pointer != ')')
 		    {
-		      as_bad (_ ("`)' required"));
+		      as_bad (_("`)' required"));
 		      break;
 		    }
 		  input_line_pointer++;
@@ -1124,6 +1200,17 @@ avr_ldi_expression (exp)
     }
   input_line_pointer = tmp;
   expression (exp);
+
+  /* Warn about expressions that fail to use lo8().  */
+  if (exp->X_op == O_constant)
+    {
+      int x = exp->X_add_number;
+      if (x < -255 || x > 255)
+	as_warn (_("constant out of 8-bit range: %d"), x);
+    }
+  else
+    as_warn (_("expression possibly out of 8-bit range"));
+
   return BFD_RELOC_AVR_LO8_LDI;
 }
 
@@ -1161,7 +1248,7 @@ avr_parse_cons_expression (exp, nbytes)
 		++input_line_pointer;
 	      else
 		{
-		  as_bad (_ ("`)' required"));
+		  as_bad (_("`)' required"));
 		  exp_mod_pm = 0;
 		}
 	      return;
@@ -1186,14 +1273,14 @@ avr_cons_fix_new(frag, where, nbytes, exp)
       else if (nbytes == 4)
 	fix_new_exp (frag, where, nbytes, exp, false, BFD_RELOC_32);
       else
-	as_bad (_ ("illegal %srelocation size: %d"), "", nbytes);
+	as_bad (_("illegal %srelocation size: %d"), "", nbytes);
     }
   else
     {
       if (nbytes == 2)
 	fix_new_exp (frag, where, nbytes, exp, false, BFD_RELOC_AVR_16_PM);
       else
-	as_bad (_ ("illegal %srelocation size: %d"), "`pm' ", nbytes);
+	as_bad (_("illegal %srelocation size: %d"), "`pm' ", nbytes);
       exp_mod_pm = 0;
     }
 }

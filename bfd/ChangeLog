@@ -1,3 +1,12 @@
+2000-07-03  Marek Michalkiewicz  <marekm@linux.org.pl>
+
+	* elf32-avr.c (bfd_elf32_bfd_reloc_type_lookup):
+	Add ATTRIBUTE_UNUSED to unused arguments to avoid warnings.
+	(avr_info_to_howto_rela): Likewise.
+	(elf32_avr_gc_mark_hook): Likewise.
+	(elf32_avr_gc_sweep_hook): Likewise.
+	(elf32_avr_relocate_section): Likewise.
+
 2000-07-03  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* cofflink.c (_bfd_coff_write_global_sym): Turn a weak symbol into
