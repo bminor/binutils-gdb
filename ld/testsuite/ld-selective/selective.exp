@@ -86,7 +86,7 @@ if ![ld_simple_link $ld tmpdir/2.x "$ldflags tmpdir/2.o"] {
     } else {
 	if {[info exists nm_output(foo)] } {
             send_log "foo == $nm_output(foo)\n"
-            verbose "foo== $nm_output(foo)"
+            verbose "foo == $nm_output(foo)"
             fail $test2
 	} else {
             pass $test2
@@ -112,7 +112,7 @@ if ![ld_simple_link $ld tmpdir/2.x "$ldflags -u foo tmpdir/2.o"] {
 	} else {
 	    if {$nm_output(foo) == 0} {
 		send_log "foo == $nm_output(foo)\n"
-		verbose "foo== $nm_output(foo)"
+		verbose "foo == $nm_output(foo)"
 		fail $test3
 	    } else {
                 pass $test3
@@ -136,12 +136,31 @@ if ![ld_simple_link $ld tmpdir/3.x "$ldflags tmpdir/3.o"] {
     if ![ld_nm $nm tmpdir/3.x] {
        unresolved $test4
     } else {
-	if {[ info exists nm_output(bar__1A)]} {
-	    send_log "bar__1A== $nm_output(_bar__1A)\n"
-	    verbose "bar__1A == $nm_output(_bar__1A)"
+	if [info exists nm_output(bar__1A)] {
+	    send_log "bar__1A == $nm_output(bar__1A)\n"
+	    verbose "bar__1A == $nm_output(bar__1A)"
 	    fail $test4
 	} else {
-	    pass $test4
+#note ld_nm trims leading `_' from _start
+	    if ![info exists nm_output(start)] {
+		send_log "_start missing\n"
+		verbose "_start missing"
+		fail $test4
+	    } else {
+		if ![info exists nm_output(foo__1A)] {
+		    send_log "foo__1A missing\n"
+		    verbose "foo_1A missing"
+		    fail $test4
+		} else {
+		    if ![info exists nm_output(foo__1B)] {
+			send_log "foo__1B missing\n"
+			verbose "foo_1B missing"
+			fail $test4
+		    } else {
+			pass $test4
+		    }
+		}
+	    }
 	}
     }
 }
@@ -163,7 +182,7 @@ if ![ld_simple_link $ld tmpdir/4.x "$ldflags tmpdir/4.o"] {
 	    fail $test5
 	} else {
 	    if {[info exists nm_output(foo__1A)]} {
-	        send_log "foo__1A== $nm_output(foo__1A)\n"
+	        send_log "foo__1A == $nm_output(foo__1A)\n"
 		verbose "foo__1A == $nm_output(foo__1A)"
 		fail $test5
 	    } else {

@@ -1,7 +1,8 @@
 2000-04-12  Alan Modra  <alan@linuxcare.com.au>
 
-	* ld-selective/selective.exp (test4): Delete incorrect foo__1B
-	test.  White space changes throughout file.
+	* ld-selective/selective.exp (test4): Test for presence of
+	foo__1B, not absence.  Also check for foo__1A and _start.
+	White space changes throughout file.
 
 2000-03-13  Nick Clifton  <nickc@cygnus.com>
 
