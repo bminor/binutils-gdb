@@ -1,5 +1,10 @@
 Wed Jun 15 01:34:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* i386linux.c (i386linux_write_object_contents): Define; like
+	MY(write_object_contents) in aout-target.h, but set MACHTYPE to
+	M_386.  From jrs@world.std.com (Rick Sladkey).
+	(MY_write_object_contents): Define.
+
 	* aoutx.h (translate_from_native_sym_flags): Treat N_SETV symbols
 	as N_DATA symbols.
 	(aout_link_add_symbols): Likewise.

@@ -56,4 +56,24 @@ i386linux_bfd_final_link (abfd, info)
 
 #define MY_bfd_final_link i386linux_bfd_final_link
 
+/* Set the machine type correctly.  */
+
+static boolean
+i386linux_write_object_contents (abfd)
+     bfd *abfd;
+{
+  struct external_exec exec_bytes;
+  struct internal_exec *execp = exec_hdr (abfd);
+
+  N_SET_MACHTYPE (*execp, M_386);
+
+  obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
+
+  WRITE_HEADERS(abfd, execp);
+
+  return true;
+}
+
+#define MY_write_object_contents i386linux_write_object_contents
+
 #include "aout-target.h"
