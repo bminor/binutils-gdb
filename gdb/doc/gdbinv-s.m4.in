@@ -43,7 +43,7 @@ session.  @xref{Target Commands, ,Commands for Managing Targets}.
 @node Nindy Startup, Nindy Options, i960-Nindy Remote, i960-Nindy Remote
 @subsubsection Startup with Nindy
 
-If you simply start @code{_GDBN__} without using any command-line
+If you simply start @code{_GDBP__} without using any command-line
 options, you are prompted for what serial port to use, @emph{before} you
 reach the ordinary _GDBN__ prompt:
 
@@ -452,3 +452,88 @@ where @var{task} is the VxWorks hexadecimal task ID.  The task can be running
 or suspended when you attach to it.  If running, it will be suspended at
 the time of attachment.
 _fi__(_VXWORKS__)
+_if__(_H8__)
+_if__(!_GENERIC__)
+@node Hitachi H8/300 Remote,  , VxWorks Remote, Starting _GDBN__
+_fi__(!_GENERIC__)
+_if__(_GENERIC__)
+@node Hitachi H8/300 Remote,  , VxWorks Remote, Remote
+_fi__(_GENERIC__)
+@subsection _GDBN__ and the Hitachi H8/300
+_GDBN__ needs to know three things to talk to your H8/300: 
+
+@enumerate
+@item
+that you want to use @samp{target hms}, the remote debugging
+interface for the H8/300 (this is the default for @code{gdb83}, the
+version of GDB configured specifically for the H8/300);
+
+@item
+what serial device connects your host to your H8/300 (the first serial
+device available on your host is the default);
+
+@item
+what speed to use over the serial device.
+@end enumerate
+
+@kindex device
+@cindex serial device for H8/300
+Use the special @code{gdb83} command @samp{device @var{port}} if you need to
+explicitly set the serial device.  The default @var{port} is the first
+available port on your host; on Unix hosts, this is typically something
+like @file{/dev/ttya}, and on DOS hosts @file{com1}.
+
+@kindex speed
+@cindex serial line speed for H8/300
+@code{gdb83} has another special command to set the communications speed
+for the H8/300: @samp{speed @var{bps}}.  
+
+For example, you might start an H8/300 debugging session at 19200 bps
+like this (exploiting the default target and device):
+
+@smallexample
+$ gdb83
+@c FIXME: this falsifies the exact text played out, to permit smallbook
+@c FIXME... format to come out better.
+GDB is free software and you are welcome to distribute copies
+ of it  under certain conditions; type "show copying" to see 
+ the conditions.
+There is absolutely no warranty for GDB; type "show warranty" for details.
+GDB _GDB_VN__, Copyright 1992 Free Software Foundation, Inc.
+(gdb83) speed 19200
+Remote debugging on an H8/300 HMS via /dev/ttya.
+Checking target is in sync
+Sending commands to set target to 19200
+(gdb83) 
+@end smallexample
+
+@noindent
+To download your program and make it the current _GDBN__ target, use the
+@code{load} command:
+
+@example
+(gdb83) load smain
+.text: 8000 .. 9d92  ****
+.data: 9d92 .. 9e34  *
+(gdb83) 
+@end example
+
+@noindent
+While downloading the program (@samp{smain} in this example), _GDBN__
+displays the names of the program's sections, and a @samp{*} for each 2K
+of data downloaded.  (If you want to refresh _GDBN__ data on symbols or
+on the executable file without downloading, use the _GDBN__ commands
+@code{file} or @code{symbol-file}.  These commands, and @code{load}
+itself, are described in @ref{Files,,Commands to Specify Files}.)
+
+All the standard _GDBN__ facilities are at your disposal for controlling
+the program on the H8/300; you can start the program with @code{run},
+set breakpoints with @code{break}, display data with @code{print} or
+@code{x}, and so on.
+
+Remember, however, that @emph{operating system} facilities aren't
+available on your H8/300; for example, if your program hangs, you can't
+send an interrupt---but you can press the @sc{reset} switch!  _GDBN__
+will see the effect of a @sc{reset} on the H8/300 board as a ``normal
+exit'' of your program.
+_fi__(_H8__)

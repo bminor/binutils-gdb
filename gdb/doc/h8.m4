@@ -1,0 +1,10 @@
+_divert__(-1)
+_define__(<_H8__>,<1>)
+_define__(<_GENERIC__>,<0>)
+_define__(<_AS__>,<as83>)
+_define__(<_GCC__>,<gcc83>)
+_define__(<_LD__>,<ld83>)
+_define__(<_GDBP__>,<gdb83>)
+_define__(<_GDBN__>,<GDB83>)
+_define__(<_HOST__>,<Hitachi H8/300>)
+_divert__<>

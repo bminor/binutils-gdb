@@ -18,6 +18,7 @@ _define__(<_COFF__>,<0>)
 _define__(<_ELF__>,<0>)
 
 _define__(<_AMD29K__>,<0>)		Specific architectures.  Note none
+_define__(<_H8__>,<0>)
 _define__(<_I80386__>,<0>)		starts out on.
 _define__(<_I960__>,<0>)
 _define__(<_M680X0__>,<0>)

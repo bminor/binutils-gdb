@@ -12,8 +12,9 @@ _if__(!_GENERIC__)
 @settitle Using _GDBN__ v4 (_HOST__)
 _fi__(!_GENERIC__)
 @setchapternewpage odd
-@c @smallbook
-@c @cropmarks
+@input smpklug.texi
+@smallbook
+@cropmarks
 @c %**end of header
 
 @finalout
@@ -99,7 +100,7 @@ instead of in the original English.
 @title Using _GDBN__
 @subtitle A Guide to the GNU Source-Level Debugger
 _if__(!_GENERIC__)
-@subtitle On _HOST__ Systems
+@subtitle on _HOST__ Systems
 _fi__(!_GENERIC__)
 @sp 1
 @c !!set edition, date, version
@@ -149,7 +150,7 @@ This is Edition 4.01, January 1992, for GDB Version _GDB_VN__.
 
 @menu
 * Summary::                     Summary of _GDBN__
-* New Features::                New features since _GDBN__ version 3.5
+* New Features::                New features since GDB version 3.5
 * Sample Session::              A Sample _GDBN__ session
 * Invocation::                  Getting in and out of _GDBN__
 * Commands::                    _GDBN__ commands
@@ -168,7 +169,7 @@ This is Edition 4.01, January 1992, for GDB Version _GDB_VN__.
 * Emacs::                       Using _GDBN__ under GNU Emacs
 * _GDBN__ Bugs::                    Reporting bugs in _GDBN__
 * Renamed Commands::
-* Installing _GDBN__::              Installing _GDBN__
+* Installing GDB::              Installing GDB
 * Copying::                     GNU GENERAL PUBLIC LICENSE
 * Index::                       Index
 
@@ -491,7 +492,7 @@ the Modula-2 support, and contributed the Languages chapter of this
 manual.
 
 @node New Features, Sample Session, Summary, Top
-@unnumbered New Features since _GDBN__ version 3.5
+@unnumbered New Features since GDB version 3.5
 
 @table @emph
 @item Targets
@@ -500,14 +501,14 @@ you are debugging local files, local processes, standalone systems over
 a serial port, realtime systems over a TCP/IP connection, etc.  The
 command @code{load} can download programs into a remote system.  Serial
 stubs are available for Motorola 680x0 and Intel 80386 remote systems;
-_GDBN__ also supports debugging realtime processes running under
+GDB also supports debugging realtime processes running under
 VxWorks, using SunRPC Remote Procedure Calls over TCP/IP to talk to a
-debugger stub on the target system.  Internally, _GDBN__ now uses a
+debugger stub on the target system.  Internally, GDB now uses a
 function vector to mediate access to different targets; if you need to
 add your own support for a remote protocol, this makes it much easier.
 
 @item Watchpoints
-_GDBN__ now sports watchpoints as well as breakpoints.  You can use a
+GDB now sports watchpoints as well as breakpoints.  You can use a
 watchpoint to stop execution whenever the value of an expression
 changes, without having to predict a particular place in your program
 where this may happen.
@@ -517,7 +518,7 @@ Commands that issue wide output now insert newlines at places designed
 to make the output more readable.
 
 @item Object Code Formats
-_GDBN__ uses a new library called the Binary File Descriptor (BFD)
+GDB uses a new library called the Binary File Descriptor (BFD)
 Library to permit it to switch dynamically, without reconfiguration or
 recompilation, between different object-file formats.  Formats currently
 supported are COFF, a.out, and the Intel 960 b.out; files may be read as
@@ -528,46 +529,46 @@ the other GNU binary utilities are being converted to use it.
 @item Configuration and Ports
 Compile-time configuration (to select a particular architecture and
 operating system) is much easier.  The script @code{configure} now
-allows you to configure _GDBN__ as either a native debugger or a
-cross-debugger. @xref{Installing _GDBN__}, for details on how to
+allows you to configure GDB as either a native debugger or a
+cross-debugger. @xref{Installing GDB}, for details on how to
 configure and on what architectures are now available.
 
 @item Interaction
-The user interface to _GDBN__'s control variables has been simplified
+The user interface to GDB's control variables has been simplified
 and consolidated in two commands, @code{set} and @code{show}.  Output
 lines are now broken at readable places, rather than overflowing onto
 the next line.  You can suppress output of machine-level addresses,
 displaying only source language information.
 
 @item C++
-_GDBN__ now supports C++ multiple inheritance (if used with a GCC
+GDB now supports C++ multiple inheritance (if used with a GCC
 version 2 compiler), and also has limited support for C++ exception
-handling, with the commands @code{catch} and @code{info catch}: _GDBN__
+handling, with the commands @code{catch} and @code{info catch}: GDB
 can break when an exception is raised, before the stack is peeled back
 to the exception handler's context.
 
 @item Modula-2
-_GDBN__ now has preliminary support for the GNU Modula-2 compiler,
+GDB now has preliminary support for the GNU Modula-2 compiler,
 currently under development at the State University of New York at
-Buffalo.  Coordinated development of both _GDBN__ and the GNU Modula-2
+Buffalo.  Coordinated development of both GDB and the GNU Modula-2
 compiler will continue into 1992.  Other Modula-2 compilers are
 currently not supported, and attempting to debug programs compiled with
 them will likely result in an error as the symbol table of the
 executable is read in.
 
 @item Command Rationalization
-Many _GDBN__ commands have been renamed to make them easier to remember
+Many GDB commands have been renamed to make them easier to remember
 and use.  In particular, the subcommands of @code{info} and
 @code{show}/@code{set} are grouped to make the former refer to the state
-of your program, and the latter refer to the state of _GDBN__ itself.
+of your program, and the latter refer to the state of GDB itself.
 @xref{Renamed Commands}, for details on what commands were renamed.
 
 @item Shared Libraries
-_GDBN__ 4 can debug programs and core files that use SunOS shared
+GDB 4 can debug programs and core files that use SunOS shared
 libraries.
 
 @item Reference Card
-_GDBN__ 4 has a reference card.  @xref{Formatting Documentation} for
+GDB 4 has a reference card.  @xref{Formatting Documentation} for
 instructions on printing it.
 
 @item Work in Progress
@@ -847,8 +848,9 @@ _1__@end smallexample
 @node Invocation, Commands, Sample Session, Top
 @chapter Getting In and Out of _GDBN__
 
-Type @kbd{gdb} or @kbd{gdb @var{program} @var{core}} to start GDB
-and type @kbd{quit} or @kbd{C-d} to exit.
+This chapter discusses how to start _GDBN__, and how to get out of it.
+(The essentials: type @samp{_GDBP__} to start GDB, and type @kbd{quit}
+or @kbd{C-d} to exit.)
 
 @menu
 * Invoking _GDBN__::                Starting _GDBN__
@@ -862,9 +864,21 @@ and type @kbd{quit} or @kbd{C-d} to exit.
 Start _GDBN__ with the shell command @code{_GDBP__}.  Once it's running,
 _GDBN__ reads commands from the terminal until you tell it to exit.
 
-You can run @code{_GDBP__} with no arguments or options; but the most
-usual way to start _GDBN__ is with one argument or two, specifying an
-executable program as the argument:
+You can also run @code{_GDBP__} with a variety of arguments and options,
+to specify more of your debugging environment at the outset.
+
+The command-line options described here are designed
+to cover a variety of situations; in some environments, some of these
+options may effectively be unavailable.  
+
+_if__(_H8__) 
+For details on starting up _GDBP__ as a
+remote debugger attached to a Hitachi H8/300 board, see @ref{Hitachi
+H8/300 Remote,,_GDBN__ and the Hitachi H8/300}.
+_fi__(_H8__)
+
+The most usual way to start _GDBN__ is with one argument or two,
+specifying an executable program as the argument:
 
 @example
 _GDBP__ @var{program}
@@ -888,6 +902,11 @@ _GDBP__ @var{program} 1234
 @noindent
 would attach _GDBN__ to process @code{1234} (unless you also have a file
 named @file{1234}; _GDBN__ does check for a core file first).
+
+Taking advantage of the second command-line argument requires a fairly
+complete operating system; when you use _GDBN__ as a remote debugger
+attached to a bare board, there may not be any notion of ``process'',
+and there is often no way to get a core dump.
 
 @noindent
 You can further control how _GDBN__ starts up by using command-line
@@ -1290,10 +1309,11 @@ Many C compilers are unable to handle the @samp{-g} and @samp{-O}
 options together.  Using those compilers, you cannot generate optimized
 executables containing debugging information.
 
-The GNU C compiler supports @samp{-g} with or without @samp{-O}, making it
-possible to debug optimized code.  We recommend that you @emph{always} use
-@samp{-g} whenever you compile a program.  You may think your program is
-correct, but there is no sense in pushing your luck.
+_GCC__, the GNU C compiler, supports @samp{-g} with or without
+@samp{-O}, making it possible to debug optimized code.  We recommend
+that you @emph{always} use @samp{-g} whenever you compile a program.
+You may think your program is correct, but there is no sense in pushing
+your luck.
 
 Some things do not work as well with @samp{-g -O} as with just
 @samp{-g}, particularly on machines with instruction scheduling.  If in
@@ -1301,7 +1321,7 @@ doubt, recompile with @samp{-g} alone, and if this fixes the problem,
 please report it as a bug (including a test case!).
 
 Older versions of the GNU C compiler permitted a variant option
-@samp{-gg} for debugging information.  _GDBN__ no longer supports this
+@w{@samp{-gg}} for debugging information.  _GDBN__ no longer supports this
 format; if your GNU C compiler has this option, do not use it.
 
 @ignore
@@ -5811,6 +5831,16 @@ download @var{filename} to the 960 as well as adding its symbols in
 _GDBN__.
 _fi__(_I960__)
 
+_if__(_H8__)
+@cindex download to H8/300
+@cindex H8/300 download
+When you select remote debugging to a Hitachi H8/300 board (@pxref{Hitachi
+H8/300 Remote,,_GDBN__ and the Hitachi H8/300}), the
+@code{load} command downloads your program to the H8/300 and also opens
+it as the current executable target for _GDBN__ on your host (like the
+@code{file} command).  
+_fi__(_H8__)
+
 @code{load} will not repeat if you press @key{RET} again after using it.
 
 @item add-symbol-file @var{filename} @var{address}
@@ -6047,7 +6077,7 @@ Describe a particular target, including any parameters necessary to
 select it.
 @end table
 
-Here are some common targets (available, or not, depending on the _GDBN__
+Here are some common targets (available, or not, depending on the GDB
 configuration):
 
 @table @code
@@ -6063,7 +6093,7 @@ A core dump file.  @samp{target core @var{filename}} is the same as
 
 @item target remote @var{dev}
 @kindex target remote
-Remote serial target in _GDBN__-specific protocol.  The argument @var{dev}
+Remote serial target in GDB-specific protocol.  The argument @var{dev}
 specifies what serial device to use for the connection (e.g.
 @file{/dev/ttya}). @xref{Remote, ,Remote Debugging}.
 
@@ -6078,6 +6108,15 @@ name of the program to be debugged, as it appears to DOS on the PC.
 @xref{EB29K Remote, ,GDB with a Remote EB29K}.
 
 _fi__(_AMD29K__)
+_if__(_H8__)
+@item target hms
+@kindex target hms
+A Hitachi H8/300 board, attached via serial line to your host.  Use
+special commands @code{device} and @code{speed} to control the serial
+line and the communications speed used. @xref{Hitachi H8/300
+Remote,,_GDBN__ and the Hitachi H8/300}.
+
+_fi__(_H8__)
 _if__(_I960__)
 @item target nindy @var{devicename}
 @kindex target nindy
@@ -6105,29 +6144,29 @@ _fi__(_GENERIC__)
 @cindex remote debugging
 
 If you are trying to debug a program running on a machine that cannot run
-_GDBN__ in the usual way, it is often useful to use remote debugging.  For
+GDB in the usual way, it is often useful to use remote debugging.  For
 example, you might use remote debugging on an operating system kernel, or on
 a small system which does not have a general purpose operating system
 powerful enough to run a full-featured debugger.
 
-Some configurations of _GDBN__ have special serial or TCP/IP interfaces
+Some configurations of GDB have special serial or TCP/IP interfaces
 to make this work with particular debugging targets.  In addition,
-_GDBN__ comes with a generic serial protocol (specific to _GDBN__, but
+GDB comes with a generic serial protocol (specific to GDB, but
 not specific to any particular target system) which you can use if you
 write the remote stubs---the code that will run on the remote system to
-communicate with _GDBN__.
+communicate with GDB.
 
-To use the _GDBN__ remote serial protocol, the program to be debugged on
+To use the GDB remote serial protocol, the program to be debugged on
 the remote machine needs to contain a debugging stub which talks to
-_GDBN__ over the serial line.  Several working remote stubs are
-distributed with _GDBN__; see the @file{README} file in the _GDBN__
+GDB over the serial line.  Several working remote stubs are
+distributed with GDB; see the @file{README} file in the GDB
 distribution for more information.
 
 For details of this communication protocol, see the comments in the
-_GDBN__ source file @file{remote.c}.
+GDB source file @file{remote.c}.
 
-To start remote debugging, first run _GDBN__ and specify as an executable file
-the program that is running in the remote machine.  This tells _GDBN__ how
+To start remote debugging, first run GDB and specify as an executable file
+the program that is running in the remote machine.  This tells GDB how
 to find your program's symbols and the contents of its pure text.  Then
 establish communication using the @code{target remote} command with a device
 name as an argument.  For example:
@@ -6147,7 +6186,7 @@ To resume the remote program and stop debugging it, use the @code{detach}
 command.
 
 Other remote targets may be available in your
-configuration of _GDBN__; use @code{help targets} to list them.
+configuration of GDB; use @code{help targets} to list them.
 
 _if__(_GENERIC__)
 _dnl__ Text on starting up GDB in various specific cases; it goes up front
@@ -6973,11 +7012,11 @@ version number.
 
 @item
 What compiler (and its version) was used to compile _GDBN__---e.g.
-``_GCC__-1.37.1''.
+``_GCC__-2.0''.
 
 @item
 What compiler (and its version) was used to compile the program you
-are debugging---e.g.  ``_GCC__-1.37.1''.
+are debugging---e.g.  ``_GCC__-2.0''.
 
 @item
 The command arguments you gave the compiler to compile your example and
@@ -7075,10 +7114,10 @@ things without first using the debugger to find the facts.
 @include inc-hist.texi
 @end iftex
 
-@node Renamed Commands, Installing _GDBN__, _GDBN__ Bugs, Top
+@node Renamed Commands, Installing GDB, _GDBN__ Bugs, Top
 @appendix Renamed Commands
 
-The following commands were renamed in _GDBN__ 4, in order to make the
+The following commands were renamed in GDB 4, in order to make the
 command set as a whole more consistent and easier to use and remember:
 
 @kindex add-syms
@@ -7192,39 +7231,39 @@ unset                     &&\rm(No longer an alias for delete)\cr
 @end tex
 @c END TEXI2ROFF-KILL
 
-@node Installing _GDBN__, Copying, Renamed Commands, Top
-@appendix Installing _GDBN__
-@cindex configuring _GDBN__
+@node Installing GDB, Copying, Renamed Commands, Top
+@appendix Installing GDB
+@cindex configuring GDB
 @cindex installation
 
 @iftex
 @c irrelevant in info file; it's as current as the code it lives with.
 @quotation
 @emph{Warning:} These installation instructions are current as of
-_GDBN__ version _GDB_VN__.  If you're installing a more recent release
-of _GDBN__, we may have improved the installation procedures since
+GDB version _GDB_VN__.  If you're installing a more recent release
+of GDB, we may have improved the installation procedures since
 printing this manual; see the @file{README} file included in your
 release for the most recent instructions.
 @end quotation
 @end iftex
 
-_GDBN__ comes with a @code{configure} script that automates the process
-of preparing _GDBN__ for installation; you can then use @code{make} to
-build the @code{_GDBP__} program.
+GDB comes with a @code{configure} script that automates the process
+of preparing GDB for installation; you can then use @code{make} to
+build the program.
 
-The _GDBN__ distribution includes all the source code you need for _GDBN__ in
+The GDB distribution includes all the source code you need for GDB in
 a single directory, whose name is usually composed by appending the
 version number to @samp{gdb}.
 
-For example, the _GDBN__ version _GDB_VN__ distribution is in the @file{gdb-_GDB_VN__}
+For example, the GDB version _GDB_VN__ distribution is in the @file{gdb-_GDB_VN__}
 directory.  That directory contains:
 
 @table @code
 @item gdb-_GDB_VN__/configure @r{(and supporting files)}
-script for configuring _GDBN__ and all its supporting libraries.
+script for configuring GDB and all its supporting libraries.
 
 @item gdb-_GDB_VN__/gdb
-the source specific to _GDBN__ itself
+the source specific to GDB itself
 
 @item gdb-_GDB_VN__/bfd
 source for the Binary File Descriptor Library
@@ -7239,13 +7278,13 @@ source for the @samp{-liberty} free software library
 source for the GNU command-line interface
 @end table
 
-The simplest way to configure and build _GDBN__ is to run @code{configure}
+The simplest way to configure and build GDB is to run @code{configure}
 from the @file{gdb-@var{version-number}} source directory, which in
 this example is the @file{gdb-_GDB_VN__} directory.
 
 First switch to the @file{gdb-@var{version-number}} source directory
 if you are not already in it; then run @code{configure}.  Pass the
-identifier for the platform on which _GDBN__ will run as an
+identifier for the platform on which GDB will run as an
 argument.
 
 For example:
@@ -7258,7 +7297,7 @@ make
 
 @noindent
 where @var{host} is an identifier such as @samp{sun4} or
-@samp{decstation}, that identifies the platform where _GDBN__ will run.
+@samp{decstation}, that identifies the platform where GDB will run.
 
 These @code{configure} and @code{make} commands build the three libraries @file{bfd},
 @file{readline}, and @file{libiberty}, then @code{gdb} itself.  The
@@ -7280,7 +7319,7 @@ creates configuration files for every directory level underneath (unless
 you tell it not to, with the @samp{--norecursion} option).
 
 You can run the @code{configure} script from any of the
-subordinate directories in the _GDBN__ distribution, if you only want to
+subordinate directories in the GDB distribution, if you only want to
 configure that subdirectory; but be sure to specify a path to it.
 
 For example, with version _GDB_VN__, type the following to configure only
@@ -7296,34 +7335,34 @@ cd gdb-_GDB_VN__/bfd
 You can install @code{_GDBP__} anywhere; it has no hardwired paths.
 However, you should make sure that the shell on your path (named by
 the @samp{SHELL} environment variable) is publicly readable.  Remember
-that _GDBN__ uses the shell to start your program---some systems refuse to
-let _GDBN__ debug child processes whose programs are not readable.
+that GDB uses the shell to start your program---some systems refuse to
+let GDB debug child processes whose programs are not readable.
 
 @menu
-* Separate Objdir::             Compiling _GDBN__ in another directory
+* Separate Objdir::             Compiling GDB in another directory
 * Config Names::                Specifying names for hosts and targets
 * configure Options::           Summary of options for configure
-* Formatting Documentation::    How to format and print _GDBN__ documentation
+* Formatting Documentation::    How to format and print GDB documentation
 @end menu
 
-@node Separate Objdir, Config Names, Installing _GDBN__, Installing _GDBN__
-@section Compiling _GDBN__ in Another Directory
+@node Separate Objdir, Config Names, Installing GDB, Installing GDB
+@section Compiling GDB in Another Directory
 
-If you want to run _GDBN__ versions for several host or target machines,
-you'll need a different @code{_GDBP__} compiled for each combination of
+If you want to run GDB versions for several host or target machines,
+you'll need a different @code{gdb} compiled for each combination of
 host and target.  @code{configure} is designed to make this easy by
 allowing you to generate each configuration in a separate subdirectory,
 rather than in the source directory.  If your @code{make} program
 handles the @samp{VPATH} feature (GNU @code{make} does), running
-@code{make} in each of these directories then builds the @code{_GDBP__}
+@code{make} in each of these directories then builds the @code{gdb}
 program specified there.
 
-To build @code{_GDBP__} in a separate directory, run @code{configure}
+To build @code{gdb} in a separate directory, run @code{configure}
 with the @samp{--srcdir} option to specify where to find the source.
 (Remember, you'll also need to specify a path to find @code{configure}
 itself from your working directory.)
 
-For example, with version _GDB_VN__, you can build _GDBN__ in a separate
+For example, with version _GDB_VN__, you can build GDB in a separate
 directory for a Sun 4 like this:
 
 @example
@@ -7340,11 +7379,11 @@ When @code{configure} builds a configuration using a remote source
 directory, it creates a tree for the binaries with the same structure
 (and using the same names) as the tree under the source directory.  In
 the example, you'd find the Sun 4 library @file{libiberty.a} in the
-directory @file{gdb-sun4/libiberty}, and _GDBN__ itself in
+directory @file{gdb-sun4/libiberty}, and GDB itself in
 @file{gdb-sun4/gdb}.
 
-One popular use for building several _GDBN__ configurations in separate
-directories is to configure _GDBN__ for cross-compiling (where _GDBN__
+One popular use for building several GDB configurations in separate
+directories is to configure GDB for cross-compiling (where GDB
 runs on one machine---the host---while debugging programs that run on
 another machine---the target).  You specify a cross-debugging target by
 giving the @samp{--target=@var{target}} option to @code{configure}.
@@ -7357,14 +7396,14 @@ The @code{Makefile} generated by @code{configure} for each source
 directory also runs recursively.  If you type @code{make} in a source
 directory such as @file{gdb-_GDB_VN__} (or in a separate configured
 directory configured with @samp{--srcdir=@var{path}/gdb-_GDB_VN__}), you
-will build all the required libraries, then build _GDBN__.
+will build all the required libraries, then build GDB.
 
 When you have multiple hosts or targets configured in separate
 directories, you can run @code{make} on them in parallel (for example,
 if they are NFS-mounted on each of the hosts); they will not interfere
 with each other.
 
-@node Config Names, configure Options, Separate Objdir, Installing _GDBN__
+@node Config Names, configure Options, Separate Objdir, Installing GDB
 @section Specifying Names for Hosts and Targets
 
 The specifications used for hosts and targets in the @code{configure}
@@ -7381,7 +7420,7 @@ or in a @code{--target=@var{target}} option, but the equivalent full name
 is @samp{sparc-sun-sunos4}.
 
 The following table shows all the architectures, hosts, and OS
-prefixes that @code{configure} recognizes in _GDBN__ version _GDB_VN__.  Entries
+prefixes that @code{configure} recognizes in GDB version _GDB_VN__.  Entries
 in the ``OS prefix'' column ending in a @samp{*} may be followed by a
 release number.
 
@@ -7468,7 +7507,7 @@ combinations of architecture, vendor, and OS.  There is by no means
 support available for all possible combinations!
 @end quotation
 
-The @code{configure} script accompanying _GDBN__ does not provide
+The @code{configure} script accompanying GDB does not provide
 any query facility to list all supported host and target names or
 aliases.  @code{configure} calls the Bourne shell script
 @code{config.sub} to map abbreviations to full names; you can read the
@@ -7494,11 +7533,11 @@ i386-none-sysv
 @code{config.sub} is also distributed in the GDB source
 directory (@file{gdb-_GDB_VN__}, for version _GDB_VN__).
 
-@node configure Options, Formatting Documentation, Config Names, Installing _GDBN__
+@node configure Options, Formatting Documentation, Config Names, Installing GDB
 @section @code{configure} Options
 
 Here is a summary of all the @code{configure} options and arguments that
-you might use for building _GDBN__:
+you might use for building GDB:
 
 @example
 configure @r{[}--destdir=@var{dir}@r{]} @r{[}--srcdir=@var{path}@r{]}
@@ -7514,14 +7553,14 @@ You may introduce options with a single @samp{-} rather than
 @table @code
 @item --destdir=@var{dir}
 @var{dir} is an installation directory @emph{path prefix}.  After you
-configure with this option, @code{make install} will install _GDBN__ as
-@file{@var{dir}/bin/_GDBP__}, and the libraries in @file{@var{dir}/lib}.
+configure with this option, @code{make install} will install GDB as
+@file{@var{dir}/bin/gdb}, and the libraries in @file{@var{dir}/lib}.
 If you specify @samp{--destdir=/usr/local}, for example, @code{make
 install} creates @file{/usr/local/bin/gdb}.
 
 @item --srcdir=@var{path}
 Use this option to make configurations in directories separate from the
-_GDBN__ source directories.  Among other things, you can use this to
+GDB source directories.  Among other things, you can use this to
 build (or maintain) several configurations simultaneously, in separate
 directories.  @code{configure} writes configuration specific files in
 the current directory, but arranges for them to use the source in the
@@ -7538,20 +7577,20 @@ Remove the configuration that the other arguments specify.
 
 @c This does not work (yet if ever).  FIXME.
 @c @item --parse=@var{lang} @dots{}
-@c Configure the _GDBN__ expression parser to parse the listed languages.
-@c @samp{all} configures _GDBN__ for all supported languages.  To get a
+@c Configure the GDB expression parser to parse the listed languages.
+@c @samp{all} configures GDB for all supported languages.  To get a
 @c list of all supported languages, omit the argument.  Without this
-@c option, _GDBN__ is configured to parse all supported languages.
+@c option, GDB is configured to parse all supported languages.
 
 @item --target=@var{target}
-Configure _GDBN__ for cross-debugging programs running on the specified
-@var{target}.  Without this option, _GDBN__ is configured to debug
-programs that run on the same machine (@var{host}) as _GDBN__ itself.
+Configure GDB for cross-debugging programs running on the specified
+@var{target}.  Without this option, GDB is configured to debug
+programs that run on the same machine (@var{host}) as GDB itself.
 
 There is no convenient way to generate a list of all available targets.
 
 @item @var{host} @dots{}
-Configure _GDBN__ to run on the specified @var{host}.
+Configure GDB to run on the specified @var{host}.
 
 There is no convenient way to generate a list of all available hosts.
 @end table
@@ -7559,12 +7598,12 @@ There is no convenient way to generate a list of all available hosts.
 @noindent
 @code{configure} accepts other options, for compatibility with
 configuring other GNU tools recursively; but these are the only
-options that affect _GDBN__ or its supporting libraries.
+options that affect GDB or its supporting libraries.
 
-@node Formatting Documentation,  , configure Options, Installing _GDBN__
+@node Formatting Documentation,  , configure Options, Installing GDB
 @section Formatting the Documentation
 
-All the documentation for _GDBN__, including this manual, comes as part of
+All the documentation for GDB, including this manual, comes as part of
 the distribution.  The documentation is written in Texinfo format,
 which is a documentation system that uses a single source file to
 produce both on-line information and a printed manual.  You can use
@@ -7572,7 +7611,7 @@ one of the Info formatting commands to create the on-line version of
 the documentation and @TeX{} (or @code{texi2roff}) to typeset the
 printed version.
 
-_GDBN__ includes an already formatted copy of the on-line Info version of
+GDB includes an already formatted copy of the on-line Info version of
 this manual in the @file{gdb} subdirectory.  The main Info file is
 @file{gdb-@var{version-number}/gdb/gdb.info}, and it refers to
 subordinate files matching @samp{gdb.info*} in the same directory.
@@ -7581,7 +7620,7 @@ If you want to format these Info files yourself, you need one of the
 Info formatting programs, such as @code{texinfo-format-buffer} or
 @code{makeinfo}.
 
-If you have @code{makeinfo} installed, and are in the top level _GDBN__
+If you have @code{makeinfo} installed, and are in the top level GDB
 source directory (@file{gdb-_GDB_VN__}, in the case of version _GDB_VN__), you can
 make the Info file by typing:
 
@@ -7605,7 +7644,7 @@ without any extension or a @samp{.dvi} extension.
 @TeX{} also requires a macro definitions file called
 @file{texinfo.tex}.  This file tells @TeX{} how to typeset a document
 written in Texinfo format.  On its own, @TeX{} cannot read, much less
-typeset a Texinfo file.  @file{texinfo.tex} is distributed with _GDBN__
+typeset a Texinfo file.  @file{texinfo.tex} is distributed with GDB
 and is located in the @file{gdb-@var{version-number}/texinfo}
 directory.
 
@@ -7618,16 +7657,16 @@ subdirectory of the main source directory (for example, to
 make gdb.dvi
 @end example
 
-@cindex _GDBN__ reference card
+@cindex GDB reference card
 @cindex reference card
-In addition to the manual, the _GDBN__ 4 release includes a three-column
-reference card.  Format the _GDBN__ reference card by typing:
+In addition to the manual, the GDB 4 release includes a three-column
+reference card.  Format the GDB reference card by typing:
 
 @example
 make refcard.dvi
 @end example
 
-The _GDBN__ reference card is designed to print in landscape mode on US
+The GDB reference card is designed to print in landscape mode on US
 ``letter'' size paper; that is, on a sheet 11 inches wide by 8.5 inches
 high.  You will need to specify this form of printing as an option to
 your @sc{dvi} output program.
@@ -7639,7 +7678,7 @@ subdirectory of the main source directory---in
 a PostScript or GhostScript printer, you can print the reference card
 by just sending @file{refcard.ps} to the printer.
 
-@node Copying, Index, Installing _GDBN__, Top
+@node Copying, Index, Installing GDB, Top
 @unnumbered GNU GENERAL PUBLIC LICENSE
 @center Version 2, June 1991
 

@@ -11,3 +11,7 @@ _fi__(_AMD29K__)
 _if__(_VXWORKS__)
 * VxWorks Remote::		_GDBN__ and VxWorks
 _fi__(_VXWORKS__)
+_if__(_H8__)
+* Hitachi H8/300 Remote::       _GDBN__ and the Hitachi H8/300
+_fi__(_H8__)
+ 
