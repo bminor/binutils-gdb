@@ -35,6 +35,8 @@
 #include "m68k-tdep.h"
 #include "trad-frame.h"
 #include "frame-unwind.h"
+#include "glibc-tdep.h"
+#include "solib-svr4.h"
 
 /* Offsets (in target ints) into jmp_buf.  */
 
@@ -295,6 +297,14 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_sniffer (gdbarch, m68k_linux_sigtramp_frame_sniffer);
 
   /* Shared library handling.  */
+
+  /* GNU/Linux uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					 svr4_ilp32_fetch_link_map_offsets);
+
+  /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
+  set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
+
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 }
 

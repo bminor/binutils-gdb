@@ -1,3 +1,13 @@
+2004-11-21  Andreas Schwab  <schwab@suse.de>
+
+	* m68klinux-tdep.c: Include "glibc-tdep.h" and "solib-svr4.h".
+	(m68k_linux_init_abi): Set solib_svr4_fetch_link_map_offsets to
+	svr4_ilp32_fetch_link_map_offsets and gdbarch_skip_solib_resolver
+	to glibc_skip_solib_resolver.
+	* config/m68k/linux.mt (TDEPFILES): Add glibc-tdep.o.  Remove
+	solib-legacy.o.
+	* Makefile.in (m68klinux-tdep.o): Update dependencies.
+
 2004-11-20  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* infttrace.h (ttrace_write_reg_64): Add prototype.
