@@ -58,7 +58,7 @@ BISON = `if [ -d $${rootme}/byacc ] ; \
 	fi`
 
 LEX = `if [ -d $${rootme}/flex ] ; \
-	then echo $${rootme}/flex/flex -S$${rootme}/flex/flex.skel ; \
+	then echo $${rootme}/flex/flex ; \
 	else echo flex ; fi`
 
 MAKEINFO = `if [ -d $${rootme}/texinfo/C ] ; \
@@ -132,7 +132,9 @@ standards.info: standards.texi
 	rootme=`pwd` ; export rootme ; $(MAKEINFO) -o standards.info $(srcdir)/standards.texi
 
 install-info: install-info-dirs force
-	[ -d $(infodir) ] || mkdir $(infodir)
+	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 	@$(MAKE) $(FLAGS_TO_PASS) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
 	$(INSTALL_DATA) cfg-paper.info $(infodir)/cfg-paper.info
 	$(INSTALL_DATA) configure.info $(infodir)/configure.info
@@ -140,6 +142,9 @@ install-info: install-info-dirs force
 	@$(MAKE) $(FLAGS_TO_PASS) dir.info install-dir.info
 
 install-dir.info:
+	-parent=`echo $(infodir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 	$(INSTALL_DATA) dir.info $(infodir)/dir.info
 
 all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
@@ -166,6 +171,9 @@ clean-stamps:
 	-rm -f all-*
 
 install: $(INSTALL_TARGET) $(srcdir)/configure.man
+	-parent=`echo $(man1dir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	-if [ -d $(man1dir) ] ; then true ; else mkdir $(man1dir) ; fi
 	$(INSTALL_DATA) $(srcdir)/configure.man $(man1dir)/configure.1
 
 install.all: install-no-fixedincludes
@@ -1013,15 +1021,16 @@ subdir_do:
 MAKEDIRS= \
 	$(prefix) \
 	$(exec_prefix) \
-	$(bindir) \
-	$(libdir) \
-	$(tooldir) \
-	$(includedir) \
-	$(datadir) \
-	$(docdir) \
-	$(mandir) \
-	$(man1dir) \
-	$(man5dir)
+	$(tooldir)
+
+#	$(bindir) \
+#	$(libdir) \
+#	$(includedir) \
+#	$(datadir) \
+#	$(docdir) \
+#	$(mandir) \
+#	$(man1dir) \
+#	$(man5dir)
 
 #	$(man2dir) \
 #	$(man3dir) \
@@ -1033,6 +1042,8 @@ MAKEDIRS= \
 install-dirs:
 	for i in $(MAKEDIRS) ; do \
 		echo Making $$i... ; \
+		parent=`echo $$i|sed -e 's@/[^/]*$$@@'`; \
+		if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi ; \
 		if [ ! -d $$i ] ; then \
 			if mkdir $$i ; then \
 				true ; \
@@ -1045,16 +1056,17 @@ install-dirs:
 	done
 
 MAKEINFODIRS= \
-	$(prefix) \
-	$(infodir)
+	$(prefix)
+
+#	$(infodir)
 
 install-info-dirs:
 	if [ -d $(prefix) ] ; then true ; else mkdir $(prefix) ; fi
-	if [ -d $(datadir) ] ; then true ; else mkdir $(datadir) ; fi
-	if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
+#	if [ -d $(datadir) ] ; then true ; else mkdir $(datadir) ; fi
+#	if [ -d $(infodir) ] ; then true ; else mkdir $(infodir) ; fi
 
 dir.info:
-	$(srcdir)/texinfo/gen-info-dir $(infodir) > dir.info.new
+	$(srcdir)/texinfo/gen-info-dir $(infodir) $(srcdir)/texinfo/dir.info-template > dir.info.new
 	mv -f dir.info.new dir.info
 
 etags tags: TAGS
