@@ -208,14 +208,36 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
   int gprs_saved[S390_NUM_GPRS];
   int fprs_saved[S390_NUM_FPRS];
   int regidx, instrlen;
-  int save_link_regidx, subtract_sp_regidx;
-  int const_pool_state, save_link_state;
+  int const_pool_state;
   int frame_pointer_found, varargs_state;
   int loop_cnt, gdb_gpr_store, gdb_fpr_store;
   int frame_pointer_regidx = 0xf;
   int offset, expected_offset;
   int err = 0;
   disassemble_info info;
+
+  /* What we've seen so far regarding saving the back chain link:
+     0 -- nothing yet; sp still has the same value it had at the entry
+          point.  Since not all functions allocate frames, this is a
+          valid state for the prologue to finish in.
+     1 -- We've saved the original sp in some register other than the
+          frame pointer (hard-coded to be %r11, yuck).
+          save_link_regidx is the register we saved it in.
+     2 -- We've seen the initial `bras' instruction of the sequence for
+          reserving more than 32k of stack:
+                bras %rX, .+8
+                .long N
+                s %r15, 0(%rX)
+          where %rX is not the constant pool register.
+          subtract_sp_regidx is %rX, and fextra_info->stack_bought is N.
+     3 -- We've reserved space for a new stack frame.  This means we
+          either saw a simple `ahi %r15,-N' in state 1, or the final
+          `s %r15, ...' in state 2.
+     4 -- The frame and link are now fully initialized.  We've
+          reserved space for the new stack frame, and stored the old
+          stack pointer captured in the back chain pointer field.  */
+  int save_link_state;
+  int save_link_regidx, subtract_sp_regidx;
 
   /* What we've seen so far regarding r12 --- the GOT (Global Offset
      Table) pointer.  We expect to see `l %r12, N(%r13)', which loads
@@ -493,7 +515,8 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
       /* Alternatively check for the complex construction for
          buying more than 32k of stack
          BRAS gprx,.+8
-         long vals    %r15,0(%gprx)  gprx currently r1 */
+         long val
+         s    %r15,0(%gprx)  gprx currently r1 */
       if ((save_link_state == 1) && (instr[0] == 0xa7)
 	  && ((instr[1] & 0xf) == 0x5) && (instr[2] == 0)
 	  && (instr[3] == 0x4) && ((instr[1] >> 4) != CONST_POOL_REGIDX))
