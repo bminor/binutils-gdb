@@ -133,17 +133,20 @@ static char *gdbtk_source_filename = NULL;
 
 /* Supply malloc calls for tcl/tk.  We do not want to do this on
    Windows, because Tcl_Alloc is probably in a DLL which will not call
-   the mmalloc routines.  */
+   the mmalloc routines.
+   We also don't need to do it for Tcl/Tk8.1, since we locally changed the
+   allocator to use malloc & free. */
 
+#if TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION == 0 
 char *
-Tcl_Alloc (size)
+TclpAlloc (size)
      unsigned int size;
 {
   return xmalloc (size);
 }
 
 char *
-Tcl_Realloc (ptr, size)
+TclpRealloc (ptr, size)
      char *ptr;
      unsigned int size;
 {
@@ -151,11 +154,12 @@ Tcl_Realloc (ptr, size)
 }
 
 void
-Tcl_Free(ptr)
+TclpFree(ptr)
      char *ptr;
 {
   free (ptr);
 }
+#endif /* TCL_VERSION == 8.0 */
 
 #endif /* ! _WIN32 */
 
@@ -532,7 +536,7 @@ gdbtk_init ( argv0 )
 
   {
 #ifdef NO_TCLPRO_DEBUGGER
-    static const char script[] ="\
+    static char script[] ="\
 proc gdbtk_find_main {} {\n\
     global Paths GDBTK_LIBRARY\n\
     rename gdbtk_find_main {}\n\
@@ -541,7 +545,7 @@ proc gdbtk_find_main {} {\n\
 }\n\
 gdbtk_find_main";
 #else
-    static const char script[] ="\
+    static char script[] ="\
 proc gdbtk_find_main {} {\n\
     global Paths GDBTK_LIBRARY env\n\
     rename gdbtk_find_main {}\n\

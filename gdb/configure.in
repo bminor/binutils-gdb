@@ -674,7 +674,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	   CY_AC_PATH_TKH
 	   CY_AC_PATH_ITCLH
 	   CY_AC_PATH_ITKH
-	   CY_AC_PATH_TIX
+	   CY_AC_PATH_TIXH
 
 	   # now look for Itcl library stuff
 
@@ -714,45 +714,29 @@ if test "${enable_gdbtk}" = "yes"; then
 	     ITK_DEPS="${itkdir}${ITK_LIB_FILE}"
            fi
 
-	   # now look for tix library stuff
-	   TIXVERSION=4.1.8.0
-	   . ${ac_cv_c_tclconfig}/tclConfig.sh
-	   case "${host}" in
-	   *-*-cygwin*)
-		tixdir=../tix/win/tcl8.0
-		;;
-	   *)
-		tixdir=../tix/unix/tk8.0
-		;;
-	   esac 
-	   if test "${TCL_SHARED_BUILD}" = "1"; then
-		TIX_LIB_EXT="${TCL_SHLIB_SUFFIX}"
-
-	        # Can't win them all: SunOS 4 (others?) appends a version
-                # number after the ".so"
-	        case "${host}" in
-	        *-*-sunos4*)
-	            TIX_LIB_EXT="${TIX_LIB_EXT}.1.0" ;;
-                esac
-	   
-	   else
-		TIX_LIB_EXT=".a"
-	   fi
-
-	   if test "${TCL_LIB_VERSIONS_OK}" = "ok"; then
-		TIXLIB="-L${tixdir} -ltix${TIXVERSION}"
-		TIX_DEPS="${tixdir}/libtix${TIXVERSION}${TIX_LIB_EXT}"
-	   else
-		TIXLIB="-L${tixdir} -ltix`echo ${TIXVERSION} | tr -d .`"
-		TIX_DEPS="${tixdir}/libtix`echo ${TIXVERSION} | tr -d .`${TIX_LIB_EXT}"
-	   fi
+	   # now look for Tix library stuff
+	   CY_AC_PATH_TIXCONFIG
+           if test -z "${no_tix}"; then
+             CY_AC_LOAD_TIXCONFIG
+	     TIXLIB="${TIX_BUILD_LIB_SPEC}"
+	     TIX_DEPS="${TIX_BUILD_LOCATION}/${TIX_LIB_FILE}"
+           fi
 
 	   ENABLE_GDBTK=1
            ENABLE_CFLAGS="${ENABLE_CFLAGS} -DGDBTK"
+	   # Tcl/Tk 8.1 require -fwritable strings.  I don't
+           # know whether 8.2 will or not, but I bet it will.
+           # I don't have to worry about 7.x since we don't support it.
+           GDBTK_CFLAGS=""
+	   if test ${GCC} = "yes"; then
+               if test ${TCL_VERSION} != "8.0" ; then
+                   GDBTK_CFLAGS="-fwritable-strings"
+	       fi
+           fi
 
 	   # Include some libraries that Tcl and Tk want.
 	   if test "${enable_ide}" = "yes"; then	
-	      TCL_LIBS='$(LIBIDETCL) $(LIBIDE) $(LIBGUI) $(IDE) $(ITCL) $(ITK) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	      TCL_LIBS='$(LIBIDETCL) $(LIBIDE) $(LIBGUI) $(IDE) $(ITCL) $(ITK) $(TIXLIB) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
 	      CONFIG_DEPS='$(LIBIDETCL) $(LIBIDE) $(LIBGUI) $(IDE_DEPS) $(ITCL_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
 	   else
 	      TCL_LIBS='$(LIBGUI) $(ITCL) $(ITK) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
@@ -786,6 +770,7 @@ AC_SUBST(ITK_DEPS)
 AC_SUBST(TIXLIB)
 AC_SUBST(TIX_DEPS)
 AC_SUBST(GDBTKLIBS)
+AC_SUBST(GDBTK_CFLAGS)
 # end-sanitize-gdbtk
 
 AC_PATH_X

@@ -80,7 +80,7 @@ CC=@CC@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-BISON=@YACC@
+YACC=@YACC@
 
 YLWRAP = $(srcdir)/../ylwrap
 
@@ -155,6 +155,8 @@ TCL = @TCL_LD_SEARCH_FLAGS@ @TCL_BUILD_LIB_SPEC@
 TCL_CFLAGS = @TCLHDIR@
 TCL_DEPS =
 GDBTKLIBS = @GDBTKLIBS@
+# Extra flags that the GDBTK files need:
+GDBTK_CFLAGS = @GDBTK_CFLAGS@
 
 # Where is the TK library?  Typically in ../tk.
 TK = @TK_BUILD_LIB_SPEC@
@@ -918,7 +920,7 @@ version.c: Makefile
 # Makefile.in, but that was a pretty big annoyance.
 c-exp.tab.o: c-exp.tab.c
 c-exp.tab.c: c-exp.y
-	$(SHELL) $(YLWRAP) "$(BISON)" $(srcdir)/c-exp.y  y.tab.c c-exp.tmp -- $(YFLAGS) 
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/c-exp.y  y.tab.c c-exp.tmp -- $(YFLAGS) 
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -933,7 +935,7 @@ c-exp.tab.c: c-exp.y
 # start-sanitize-java
 jv-exp.tab.o: jv-exp.tab.c
 jv-exp.tab.c: jv-exp.y
-	$(SHELL) $(YLWRAP) "$(BISON)" $(srcdir)/jv-exp.y  y.tab.c jv-exp.tmp -- $(YFLAGS) 
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/jv-exp.y  y.tab.c jv-exp.tmp -- $(YFLAGS) 
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -948,7 +950,7 @@ jv-exp.tab.c: jv-exp.y
 # end-sanitize-java
 f-exp.tab.o: f-exp.tab.c
 f-exp.tab.c: f-exp.y c-exp.tab.c
-	$(SHELL) $(YLWRAP) "$(BISON)" $(srcdir)/f-exp.y  y.tab.c f-exp.tmp -- $(YFLAGS) 
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/f-exp.y  y.tab.c f-exp.tmp -- $(YFLAGS) 
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -966,7 +968,7 @@ f-exp.tab.c: f-exp.y c-exp.tab.c
 # else.
 m2-exp.tab.o: m2-exp.tab.c
 m2-exp.tab.c: m2-exp.y
-	$(SHELL) $(YLWRAP) "$(BISON)" $(srcdir)/m2-exp.y  y.tab.c m2-exp.tmp -- $(YFLAGS) 
+	$(SHELL) $(YLWRAP) "$(YACC)" $(srcdir)/m2-exp.y  y.tab.c m2-exp.tmp -- $(YFLAGS) 
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -1210,35 +1212,35 @@ gdbtk.o: gdbtk.c gdbtk.h $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h $(tracepoint_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
         $(ITK_CFLAGS) $(TIX_CFLAGS) \
-	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
 
 gdbtk-cmds.o: gdbtk-cmds.c gdbtk.h $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h $(tracepoint_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
-	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk-cmds.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
 
 gdbtk-hooks.o: gdbtk-hooks.c gdbtk.h $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h $(tracepoint_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
-	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk-hooks.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
 
 gdbtk-variable.o: gdbtk-variable.c gdbtk.h gdbtk-wrapper.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
-	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk-variable.c
 
 gdbtk-wrapper.o: gdbtk-wrapper.c gdbtk-wrapper.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) \
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk-wrapper.c
 
 v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(frame_h) $(breakpoint_h) $(gdbcore_h) $(value_h) symfile.h \
 	gdb_string.h target.h objfiles.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
-	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/v850ice.c
 
 # end-sanitize-gdbtk

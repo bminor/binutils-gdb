@@ -241,10 +241,10 @@ char * get_prompt PARAMS ((void));
 static void get_register PARAMS ((int, void *));
 static void get_register_name PARAMS ((int, void *));
 static int map_arg_registers PARAMS ((int, Tcl_Obj *CONST [], void (*) (int, void *), void *));
-static int perror_with_name_wrapper PARAMS ((char *args));
+static int perror_with_name_wrapper PARAMS ((PTR args));
 static void register_changed_p PARAMS ((int, void *));
 void TclDebug PARAMS ((const char *fmt, ...));
-static int wrapped_call (char *opaque_args);
+static int wrapped_call (PTR opaque_args);
 static void get_frame_name PARAMS ((Tcl_Interp *interp, Tcl_Obj *list, struct frame_info *fi));
 
 /* Gdbtk_Init
@@ -441,7 +441,7 @@ call_wrapper (clientData, interp, objc, objv)
 
 static int
 wrapped_call (opaque_args)
-     char *opaque_args;
+     PTR opaque_args;
 {
   struct wrapped_call_args *args = (struct wrapped_call_args *) opaque_args;
   args->val = (*args->func) (args->func, args->interp, args->objc, args->objv);
@@ -3550,7 +3550,7 @@ gdb_path_conv (clientData, interp, objc, objv)
 
 static int
 perror_with_name_wrapper (args)
-  char * args;
+  PTR args;
 {
   perror_with_name (args);
   return 1;

@@ -16,8 +16,8 @@ dnl major rewriting for Tcl 7.5 by Don Libes <libes@nist.gov>
 dnl gdb/configure.in uses BFD_NEED_DECLARATION, so get its definition.
 sinclude(../bfd/acinclude.m4)
 
-dnl CY_AC_PATH_TCLCONFIG and CY_AC_LOAD_TCLCONFIG should be invoked
-dnl (in that order) before any other TCL macros.  Similarly for TK.
+dnl This gets the standard macros, like the TCL, TK, etc ones.
+sinclude(../config/acinclude.m4)
 
 dnl CYGNUS LOCAL: This gets the right posix flag for gcc
 AC_DEFUN(CY_AC_TCL_LYNX_POSIX,
@@ -564,7 +564,6 @@ if test x"${no_itcl}" = x ; then
     AC_MSG_RESULT(found $ITCLCONFIG)
   fi
 fi
-
 ])
 
 # Defined as a separate macro so we don't have to cache the values
@@ -748,7 +747,7 @@ AC_SUBST(ITKHDIR)
 
 # check for Tix headers. 
 
-AC_DEFUN(CY_AC_PATH_TIX, [
+AC_DEFUN(CY_AC_PATH_TIXH, [
 AC_MSG_CHECKING(for Tix private headers. srcdir=${srcdir})
 if test x"${ac_cv_c_tixh}" = x ; then
   for i in ${srcdir}/../tix ${srcdir}/../../tix ${srcdir}/../../../tix ; do
@@ -766,6 +765,111 @@ if test x"${ac_cv_c_tixh}" != x ; then
      TIXHDIR="-I${ac_cv_c_tixh}"
 fi
 AC_SUBST(TIXHDIR)
+])
+
+AC_DEFUN(CY_AC_PATH_TIXCONFIG, [
+#
+# Ok, lets find the tix configuration
+# First, look for one uninstalled.  
+# the alternative search directory is invoked by --with-itkconfig
+#
+
+if test x"${no_tix}" = x ; then
+  # we reset no_tix in case something fails here
+  no_tix=true
+  AC_ARG_WITH(tixconfig, [  --with-tixconfig           directory containing tix configuration (tixConfig.sh)],
+         with_tixconfig=${withval})
+  AC_MSG_CHECKING([for Tix configuration])
+  AC_CACHE_VAL(ac_cv_c_tixconfig,[
+
+  # First check to see if --with-tixconfig was specified.
+  if test x"${with_tixconfig}" != x ; then
+    if test -f "${with_tixconfig}/tixConfig.sh" ; then
+      ac_cv_c_tixconfig=`(cd ${with_tixconfig}; pwd)`
+    else
+      AC_MSG_ERROR([${with_tixconfig} directory doesn't contain tixConfig.sh])
+    fi
+  fi
+
+  # then check for a private Tix library
+  if test x"${ac_cv_c_tixconfig}" = x ; then
+    for i in \
+		../tix \
+		`ls -dr ../tix 2>/dev/null` \
+		../../tix \
+		`ls -dr ../../tix 2>/dev/null` \
+		../../../tix \
+		`ls -dr ../../../tix 2>/dev/null` ; do
+      echo "**** Looking at $i - with ${configdir}"
+      if test -f "$i/tixConfig.sh" ; then
+        ac_cv_c_tixconfig=`(cd $i; pwd)`
+	break
+      fi
+    done
+  fi
+  # check in a few common install locations
+  if test x"${ac_cv_c_tixconfig}" = x ; then
+    for i in `ls -d ${prefix}/lib /usr/local/lib 2>/dev/null` ; do
+      echo "**** Looking at $i"
+      if test -f "$i/tixConfig.sh" ; then
+        ac_cv_c_tixconfig=`(cd $i; pwd)`
+	break
+      fi
+    done
+  fi
+  # check in a few other private locations
+  echo "**** Other private locations"
+  if test x"${ac_cv_c_tixconfig}" = x ; then
+    for i in \
+		${srcdir}/../tix \
+		`ls -dr ${srcdir}/../tix 2>/dev/null` ; do
+      echo "**** Looking at $i - with ${configdir}"
+      if test -f "$i/${configdir}/tixConfig.sh" ; then
+        ac_cv_c_tixconfig=`(cd $i/${configdir}; pwd)`
+	break
+      fi
+    done
+  fi
+  ])
+  if test x"${ac_cv_c_tixconfig}" = x ; then
+    TIXCONFIG="# no Tix configs found"
+    AC_MSG_WARN(Can't find Tix configuration definitions)
+  else
+    no_tix=
+    TIXCONFIG=${ac_cv_c_tixconfig}/tixConfig.sh
+    AC_MSG_RESULT(found $TIXCONFIG)
+  fi
+fi
+
+])
+
+# Defined as a separate macro so we don't have to cache the values
+# from PATH_TIXCONFIG (because this can also be cached).
+AC_DEFUN(CY_AC_LOAD_TIXCONFIG, [
+    if test -f "$TIXCONFIG" ; then
+      . $TIXCONFIG
+    fi
+
+    AC_SUBST(TIX_VERSION)
+dnl not actually used, don't export to save symbols
+dnl    AC_SUBST(TIX_MAJOR_VERSION)
+dnl    AC_SUBST(TIX_MINOR_VERSION)
+dnl    AC_SUBST(TIX_DEFS)
+
+dnl not used, don't export to save symbols
+dnl    dnl AC_SUBST(TIX_LIB_FILE)
+
+dnl not used outside of configure
+dnl    AC_SUBST(TIX_LIBS)
+dnl not used, don't export to save symbols
+dnl    AC_SUBST(TIX_PREFIX)
+
+dnl not used, don't export to save symbols
+dnl    AC_SUBST(TIX_EXEC_PREFIX)
+
+dnl    AC_SUBST(TIX_BUILD_INCLUDES)
+    AC_SUBST(TIX_BUILD_LIB_SPEC)
+dnl    AC_SUBST(TIX_LIB_SPEC)
 ])
 
 

@@ -1,3 +1,29 @@
+1999-02-05  James Ingham  <jingham@cygnus.com>
+
+	* Makefile.in: Add GDBTK_CFLAGS - this is now used to hold
+	-fwritable-strings when compiling with Tk8.1.
+ 	* configure.in: Add GDBTK_CFLAGS, set it to -fwritable-strings for 
+	Tcl/Tk8.1 & greater.
+	* acinclude.m4: Move the rest of the defines to find Itcl, Itk &
+	Tix from aclocal.m4 to here.
+	* aclocal.m4: regenerate.
+	* configure: regenerate.
+
+	* gdbtk-hooks.c (x_event): Tcl_ObjGetVar2 was removed from
+	Tcl8.1.  Use Tcl_GetVar2 instead.
+	* gdbtk-hooks.c (gdbtk_trace_find): Fix up call to
+	Tcl_GlobalEvalObj for Tcl/Tk 8.1.
+	* gdbtk-hooks.c (gdbtk_trace_start_stop): Call to Tcl_EvalObj was
+	inefficient, replace with call to Tcl_GlobalEval.
+	* gdbtk.c: Don't swap out the Tcl_Alloc calls in gdbtk.c.  We took 
+	care of that in Tcl itself for 8.1.
+	* gdbtk.c: Remove const from the script string since Tcl8.1 has
+	taken to scribbling sentinals into strings passed to it again...
+
+	* gdbtk-cmds.c (wrapped_call): Change declaration of 1st arg from
+	char * to PTR to eliminate warning.
+	* gdbtk-cmds.c (perror_with_name_wrapper): Ditto
+
 Thu Feb  4 10:35:28 1999  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk-variable.c (variable_create): Allocate enough

@@ -398,8 +398,12 @@ x_event (signo)
       int val;
       if (varname == NULL)
 	{
+#if TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 1
 	  Tcl_Obj *varnamestrobj = Tcl_NewStringObj("download_cancel_ok",-1);
-	  varname = Tcl_ObjGetVar2(gdbtk_interp,varnamestrobj,NULL,TCL_GLOBAL_ONLY);
+	  varname = Tcl_ObjGetVar2(gdbtk_interp, varnamestrobj, NULL, TCL_GLOBAL_ONLY);
+#else
+	  varname = Tcl_GetObjVar2(gdbtk_interp, "download_cancel_ok", NULL, TCL_GLOBAL_ONLY);
+#endif	  
 	}
       if ((Tcl_GetIntFromObj(gdbtk_interp,varname,&val) == TCL_OK) && val)
 	{
@@ -707,17 +711,16 @@ gdbtk_trace_find (arg, from_tty)
 {
   Tcl_Obj *cmdObj;
   
-  if (from_tty) {
-    Tcl_GlobalEval (gdbtk_interp, "debug {*** In gdbtk_trace_find, from_tty is true}");
-    cmdObj = Tcl_NewListObj (0, NULL);
-    Tcl_ListObjAppendElement (gdbtk_interp, cmdObj,
-			      Tcl_NewStringObj ("gdbtk_tcl_trace_find_hook", -1));
-    Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewStringObj (arg, -1));
-    Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewIntObj(from_tty));
-    Tcl_GlobalEvalObj (gdbtk_interp, cmdObj);
-  } else {
-    Tcl_GlobalEval (gdbtk_interp, "debug {*** In gdbtk_trace_find, from_tty is false}");
-  }
+  cmdObj = Tcl_NewListObj (0, NULL);
+  Tcl_ListObjAppendElement (gdbtk_interp, cmdObj,
+			    Tcl_NewStringObj ("gdbtk_tcl_trace_find_hook", -1));
+  Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewStringObj (arg, -1));
+  Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewIntObj(from_tty));
+#if TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 1
+  Tcl_GlobalEvalObj (gdbtk_interp, cmdObj);
+#else
+  Tcl_EvalObj (gdbtk_interp, cmdObj, TCL_EVAL_GLOBAL);
+#endif    
 }
 
 /*
@@ -734,21 +737,11 @@ gdbtk_trace_start_stop (start, from_tty)
      int start;
      int from_tty;
 {
-  Tcl_Obj *cmdObj;
   
-  if (from_tty) {
-    Tcl_GlobalEval (gdbtk_interp, "debug {*** In gdbtk_trace_start, from_tty is true}");
-    cmdObj = Tcl_NewListObj (0, NULL);
-    if (start)
-      Tcl_ListObjAppendElement (gdbtk_interp, cmdObj,
-				Tcl_NewStringObj ("gdbtk_tcl_tstart", -1));
-    else
-      Tcl_ListObjAppendElement (gdbtk_interp, cmdObj,
-				Tcl_NewStringObj ("gdbtk_tcl_tstop", -1));
-    Tcl_GlobalEvalObj (gdbtk_interp, cmdObj);
-  } else {
-    Tcl_GlobalEval (gdbtk_interp, "debug {*** In gdbtk_trace_startd, from_tty is false}");
-  }
+  if (start)
+    Tcl_GlobalEval (gdbtk_interp, "gdbtk_tcl_tstart");
+  else
+    Tcl_GlobalEval (gdbtk_interp, "gdbtk_tcl_tstop");
 
 }
 
