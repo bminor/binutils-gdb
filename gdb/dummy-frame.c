@@ -37,6 +37,8 @@ struct dummy_frame
 {
   struct dummy_frame *next;
 
+  /* These values belong to the caller (the previous frame, the frame
+     that this unwinds back to).  */
   CORE_ADDR pc;
   CORE_ADDR fp;
   CORE_ADDR sp;
@@ -306,5 +308,18 @@ dummy_frame_register_unwind (struct frame_info *frame, void **cache,
          register cache.  */
       regcache_cooked_read (dummy->regcache, regnum, bufferp);
     }
+}
+
+CORE_ADDR
+dummy_frame_pc_unwind (struct frame_info *frame,
+		       void **cache)
+{
+  struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
+  /* Oops!  In a dummy-frame but can't find the stack dummy.  Pretend
+     that the frame doesn't unwind.  Should this function instead
+     return a has-no-caller indication?  */
+  if (dummy == NULL)
+    return 0;
+  return dummy->pc;
 }
 

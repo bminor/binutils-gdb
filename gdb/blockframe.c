@@ -49,7 +49,7 @@ int
 file_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
   return ((chain) != 0
-	  && !inside_entry_file (FRAME_SAVED_PC (thisframe)));
+	  && !inside_entry_file (frame_pc_unwind (thisframe)));
 }
 
 /* Use the alternate method of avoiding running up off the end of the
@@ -753,12 +753,12 @@ pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
 int
 generic_file_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 {
-  if (PC_IN_CALL_DUMMY (FRAME_SAVED_PC (fi), fp, fp))
+  if (PC_IN_CALL_DUMMY (frame_pc_unwind (fi), fp, fp))
     return 1;			/* don't prune CALL_DUMMY frames */
   else				/* fall back to default algorithm (see frame.h) */
     return (fp != 0
 	    && (INNER_THAN (fi->frame, fp) || fi->frame == fp)
-	    && !inside_entry_file (FRAME_SAVED_PC (fi)));
+	    && !inside_entry_file (frame_pc_unwind (fi)));
 }
 
 int

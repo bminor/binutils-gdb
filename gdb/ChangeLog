@@ -1,3 +1,24 @@
+2002-11-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.c (frame_pc_unwind): New function.
+	(frame_saved_regs_pc_unwind): New function.
+	(frame_register_unwind): Pass unwind_cache instead of
+	register_unwind_cache.
+	(set_unwind_by_pc): Add unwind_pc parameter, set.
+	(create_new_frame): Pass frame->pc_unwind to set_unwind_by_pc.
+	(get_prev_frame): Ditto.
+	* frame.h (frame_pc_unwind_ftype): Declare.
+	(struct frame_info): Add pc_unwind, pc_unwind_cache_p and
+	pc_unwind_cache.  Rename register_unwind_cache to unwind_cache.
+	(frame_pc_unwind): Declare.
+	* dummy-frame.c (dummy_frame_pc_unwind): New function.
+	(struct dummy_frame): Add comment mentioning that values are for
+	previous frame.
+	* dummy-frame.h (dummy_frame_pc_unwind): Declare.
+	* blockframe.c (file_frame_chain_valid): Use frame_pc_unwind.
+	(generic_file_frame_chain_valid): Ditto.
+	* stack.c (frame_info): Ditto.
+
 2002-11-15  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (locate_first_half): New function.

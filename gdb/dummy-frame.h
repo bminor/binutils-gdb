@@ -54,6 +54,12 @@ extern void dummy_frame_register_unwind (struct frame_info *frame,
 					 int *realnump,
 					 void *valuep);
 
+/* Assuming that FRAME is a dummy, return the resume address for the
+   previous frame.  */
+
+extern CORE_ADDR dummy_frame_pc_unwind (struct frame_info *frame,
+					void **unwind_cache);
+
 /* Return the regcache that belongs to the dummy-frame identifed by PC
    and FP, or NULL if no such frame exists.  */
 /* FIXME: cagney/2002-11-08: The function only exists because of

@@ -866,7 +866,7 @@ frame_info (char *addr_exp, int from_tty)
   puts_filtered ("; ");
   wrap_here ("    ");
   printf_filtered ("saved %s ", REGISTER_NAME (PC_REGNUM));
-  print_address_numeric (FRAME_SAVED_PC (fi), 1, gdb_stdout);
+  print_address_numeric (frame_pc_unwind (fi), 1, gdb_stdout);
   printf_filtered ("\n");
 
   {

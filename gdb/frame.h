@@ -139,6 +139,12 @@ extern void frame_read_unsigned_register (struct frame_info *frame,
 extern int frame_map_name_to_regnum (const char *name, int strlen);
 extern const char *frame_map_regnum_to_name (int regnum);
 
+/* Unwind the PC.  Strictly speaking return the resume address of the
+   calling frame.  For GDB, `pc' is the resume address and not a
+   specific register.  */
+
+extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
+
 
 /* Return the location (and possibly value) of REGNUM for the previous
    (older, up) frame.  All parameters except VALUEP can be assumed to
@@ -162,6 +168,12 @@ typedef void (frame_register_unwind_ftype) (struct frame_info *frame,
 					    CORE_ADDR *addrp,
 					    int *realnump,
 					    void *valuep);
+
+/* Same as for registers above, but return the address at which the
+   calling frame would resume.  */
+
+typedef CORE_ADDR (frame_pc_unwind_ftype) (struct frame_info *frame,
+					   void **unwind_cache);
 
 /* Describe the saved registers of a frame.  */
 
@@ -252,10 +264,18 @@ struct frame_info
        related unwind data.  */
     struct context *context;
 
-    /* See description above.  Return the register value for the
-       previous frame.  */
+    /* Unwind cache shared between the unwind functions - they had
+       better all agree as to the contents.  */
+    void *unwind_cache;
+
+    /* See description above.  The previous frame's registers.  */
     frame_register_unwind_ftype *register_unwind;
-    void *register_unwind_cache;
+
+    /* See description above.  The previous frame's resume address.
+       Save the previous PC in a local cache.  */
+    frame_pc_unwind_ftype *pc_unwind;
+    int pc_unwind_cache_p;
+    CORE_ADDR pc_unwind_cache;
 
     /* Pointers to the next (down, inner, younger) and previous (up,
        outer, older) frame_info's in the frame cache.  */

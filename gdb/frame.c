@@ -84,6 +84,17 @@ frame_find_by_id (struct frame_id id)
   return NULL;
 }
 
+CORE_ADDR
+frame_pc_unwind (struct frame_info *frame)
+{
+  if (!frame->pc_unwind_cache_p)
+    {
+      frame->pc_unwind_cache = frame->pc_unwind (frame, &frame->unwind_cache);
+      frame->pc_unwind_cache_p = 1;
+    }
+  return frame->pc_unwind_cache;
+}
+
 void
 frame_register_unwind (struct frame_info *frame, int regnum,
 		       int *optimizedp, enum lval_type *lvalp,
@@ -124,7 +135,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
     }
 
   /* Ask this frame to unwind its register.  */
-  frame->register_unwind (frame, &frame->register_unwind_cache, regnum,
+  frame->register_unwind (frame, &frame->unwind_cache, regnum,
 			  optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
@@ -524,6 +535,12 @@ frame_saved_regs_register_unwind (struct frame_info *frame, void **cache,
     }
 }
 
+static CORE_ADDR
+frame_saved_regs_pc_unwind (struct frame_info *frame, void **cache)
+{
+  return FRAME_SAVED_PC (frame);
+}
+	
 /* Function: get_saved_register
    Find register number REGNUM relative to FRAME and put its (raw,
    target format) contents in *RAW_BUFFER.  
@@ -627,18 +644,28 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 
 static void
 set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
-		  frame_register_unwind_ftype **unwind)
+		  frame_register_unwind_ftype **unwind_register,
+		  frame_pc_unwind_ftype **unwind_pc)
 {
   if (!USE_GENERIC_DUMMY_FRAMES)
-    /* Still need to set this to something.  The ``info frame'' code
-       calls this function to find out where the saved registers are.
-       Hopefully this is robust enough to stop any core dumps and
-       return vaguely correct values..  */
-    *unwind = frame_saved_regs_register_unwind;
+    {
+      /* Still need to set this to something.  The ``info frame'' code
+	 calls this function to find out where the saved registers are.
+	 Hopefully this is robust enough to stop any core dumps and
+	 return vaguely correct values..  */
+      *unwind_register = frame_saved_regs_register_unwind;
+      *unwind_pc = frame_saved_regs_pc_unwind;
+    }
   else if (PC_IN_CALL_DUMMY (pc, fp, fp))
-    *unwind = dummy_frame_register_unwind;
+    {
+      *unwind_register = dummy_frame_register_unwind;
+      *unwind_pc = dummy_frame_pc_unwind;
+    }
   else
-    *unwind = frame_saved_regs_register_unwind;
+    {
+      *unwind_register = frame_saved_regs_register_unwind;
+      *unwind_pc = frame_saved_regs_pc_unwind;
+    }
 }
 
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
@@ -666,7 +693,8 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
     INIT_EXTRA_FRAME_INFO (0, fi);
 
   /* Select/initialize an unwind function.  */
-  set_unwind_by_pc (fi->pc, fi->frame, &fi->register_unwind);
+  set_unwind_by_pc (fi->pc, fi->frame, &fi->register_unwind,
+		    &fi->pc_unwind);
 
   return fi;
 }
@@ -913,7 +941,8 @@ get_prev_frame (struct frame_info *next_frame)
      (and probably other architectural information).  The PC lets you
      check things like the debug info at that point (dwarf2cfi?) and
      use that to decide how the frame should be unwound.  */
-  set_unwind_by_pc (prev->pc, prev->frame, &prev->register_unwind);
+  set_unwind_by_pc (prev->pc, prev->frame, &prev->register_unwind,
+		    &prev->pc_unwind);
 
   find_pc_partial_function (prev->pc, &name,
 			    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
