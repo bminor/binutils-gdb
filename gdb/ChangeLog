@@ -1,4 +1,89 @@
+Fri Apr 26 12:02:06 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* xconfig/i386v{,32}{,-g}: Add XM_CFLAGS=-Dgetpagesize()=4096.
+	gmalloc.c: #if 0 out !HAVE_GETPAGESIZE code.
+
+	* expread.y (abs_decl): Accept '&' and '&' abs_decl.
+
+	* symtab.c, symtab.h: Have a builtin_type_{,unsigned_}long_long
+	regardless of LONG_LONG.
+	defs.h (TARGET_LONG_LONG_BIT): New macro.
+	expread.y (typebase): Add {unsigned,} long long {,int}.
+
+Thu Apr 25 12:31:22 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+
+	* valops.c (typecmp): If t2 == 0, return 1.
+
 Wed Apr 24 09:45:17 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
+	Changes from Tiemann:
+	* cplus-dem.c (optable): Add "nw", "dl", "compound".
+	(cplus_mangle_opname): New function.
+	(do_type): Add case 'Q'.
+	* values.c (check_stub_method): Do lookup_method_type and stuff
+	rather than smash_to_method_type.
+	symtab.c, symtab.h (allocate_stub_method): New function.
+	dbxread.c (read_type): If we get "##", don't lookup_function_type
+	and start clobbering it; allocate_stub_method instead.
+	* printcmd.c (x_command): Dereference references.
+	* valprint.c (type_print_varspec_prefix, case TYPE_CODE_METHOD):
+	Don't print " " type_print_base (...) "::" if !passed_a_ptr.
+	* dbxread.c (read_struct_type): Put "op$" instead of "operator"
+	in the symbol table.
+	* values.c (check_stub_method): Deal with operator names.
+	* valprint.c (cplus_val_print): Check for error in baseclass_addr.
+	* values.c: Move declaration of cplus_demangle to top of file.
+	* values.c (baseclass_addr): If can't read memory, set *ERRP
+	rather than calling error().
+	* value.h: Remove redundant declaration of value_static_field.
+	* values.c (value_static_field): Recursively check all baseclasses.
+	Return NULL if not found.
+	* values.c, value.h: New functions value_{headof,from_vtable_info}.
+	* valprint.c (val_print): Print out first element of vtbl
+	specially.
+	* valprint.c: Move print controls to top and add objectprint.
+	Add command "set print object on/off".
+	* valprint.c (value_print, is_vtbl_member): Put things in local
+	variables rather than continually doing VALUE_TYPE (val), etc.
+	* valops.c (value_struct_elt_for_address): Call check_stub_method.
+	* valops.c (value_struct_elt): Remove found, arg1_as_ptr.
+	* valops.c (search_struct_method): Give error if j > 0 && args == 0.
+	* valops.c (search_struct_field): New argument looking_for_baseclass.
+	Give error if value_static_field or value_primitive_field
+	return NULL.
+	valops.c (various): Call search_struct_field with extra parameter.
+	* symtab.c (decode_line_1): Deal with operators specified as
+	"operator" <optional whitespace> <symbols for operator>.
+	(operator_chars): Help do it.
+	* symtab.c (lookup_struct_elt_type): Call check_stub_type.
+	Take additional argument noerr.
+	Don't dump core if TYPE_FIELD_NAME is NULL.
+	Check the baseclasses recursively.
+	* symfile.c (fill_in_vptr_fieldno): Don't call check_stub_type.
+	Return void not int. (also declarations in symfile.h and value.h).
+	Deal with multiple inheritance.
+	* printcmd.c (print_command_1): Add if (objectprint) code.
+	* expread.y (variable): Allow for destructor with foo::~name.
+	* eval.c (evaluate_subexp, case UNOP_LOGNOT): If following opcode
+	is OP_SCOPE, give an error.
+	* eval.c (evaluate_subexp): Pass third arg to lookup_struct_elt_type.
+	* eval.c (evaluate_subexp), values.c (value_virtual_fn_field):
+	Don't bother to do anything with
+	return value from fill_in_vptr_fieldno.
+	* eval.c (evaluate_subexp): If value_static_field returns NULL,
+	give an error.
+	* dbxread.c (read_struct_type): Set fcontext to 0 for normal member
+	function.
+	* dbxread.c (read_struct_type): Initialize name to 0.
+	* dbxread.c (read_ofile_symtab, N_CATCH): Add offset to bufp->n_value.
+	* dbxread.c (dbx_create_type): Zero TYPE_VPTR_BASETYPE.
+	(read_struct_type): Don't bother to set TYPE_VTPR_{BASETYPE,FIELDNO}
+	if it's just going to be {0,1}.
+
+	* dbxread.c (virtual_context): Use TYPE_BASECLASS starting at 0
+	(yes, it's #if 0, but just in case...).
+
+	* vax-opcode.h, expread.y, expprint.c, cplus-dem.c: Declare some
+	things "const".
 
 	* i386-stub.c: New file.
 

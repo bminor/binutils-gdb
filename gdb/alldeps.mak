@@ -14,7 +14,7 @@ coredep.c\
 exec.c\
 gould-pinsn.c\
 gould-xdep.c\
-hp300hpux-xdep.c\
+hp300ux-xdep.c\
 i386-pinsn.c\
 i386-tdep.c\
 i386-xdep.c\
@@ -42,8 +42,8 @@ sparc-tdep.c\
 sparc-xdep.c\
 sun3-xdep.c\
 sun386-xdep.c\
-symmetry-tdep.c\
-symmetry-xdep.c\
+symm-tdep.c\
+symm-xdep.c\
 tdesc.c\
 umax-xdep.c\
 vax-pinsn.c
@@ -89,8 +89,8 @@ tm-sun4os4.h\
 tm-symmetry.h\
 tm-umax.h\
 tm-vax.h\
-tm-vxworks68.h\
-tm-vxworks960.h\
+tm-vx68.h\
+tm-vx960.h\
 xm-3b1.h\
 xm-88k.h\
 xm-altos.h\
@@ -121,6 +121,7 @@ xm-vax.h
 
 ALLCONFIG=\
 ./tconfig/3b1\
+./tconfig/CVS.adm\
 ./tconfig/altos\
 ./tconfig/altosgas\
 ./tconfig/am29k\
@@ -160,6 +161,7 @@ ALLCONFIG=\
 ./tconfig/vxworks68\
 ./tconfig/vxworks960\
 ./xconfig/3b1\
+./xconfig/CVS.adm\
 ./xconfig/altos\
 ./xconfig/altosgas\
 ./xconfig/arm\

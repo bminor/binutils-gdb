@@ -2,9 +2,10 @@
    by copying.awk.  */
 #include "defs.h"
 #include "command.h"
+#include "gdbcmd.h"
 extern int immediate_quit;
 static void
-copying_info ()
+show_copying ()
 {
   immediate_quit++;
   printf_filtered ("\n");
@@ -179,7 +180,7 @@ copying_info ()
 }
 
 static void
-warranty_info ()
+show_warranty ()
 {
   immediate_quit++;
   printf_filtered ("			    NO WARRANTY\n");
@@ -210,8 +211,10 @@ warranty_info ()
 void
 _initialize_copying ()
 {
-  add_info ("copying", copying_info,
-	    "Conditions for redistributing copies of GDB.");
-  add_info ("warranty", warranty_info,
-	  "Various kinds of warranty you do not have.");
+  add_cmd ("copying", no_class, show_copying,
+	    "Conditions for redistributing copies of GDB.",
+           &showlist);
+  add_cmd ("warranty", no_class, show_warranty,
+	    "Various kinds of warranty you do not have.",
+           &showlist);
 }
