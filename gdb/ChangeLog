@@ -92,6 +92,8 @@
 
 2004-07-09  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
+        * ada-tasks.c: Remove file.
+	
 	Remove ARI problems:
 	
 	* ada-exp.y (write_var_from_sym): Reformat to put operator at
@@ -1162,13 +1164,601 @@
 
 2004-06-02  Paul N. Hilfinger  <hilfinger@gnat.com>
 
-	* ada-exp.y: Synchronize with current ACT sources.
-	* ada-lang.c: Ditto.
-	* ada-lang.h: Ditto.
-	* ada-lex.l: Ditto.
-	* ada-tasks.c: Ditto.
-	* ada-typeprint.c: Ditto.
-	* ada-valprint.c: Ditto.
+	* ada-exp.y: Update copyright notice.
+	Include block.h.
+	
+	Replace REGNAME, LAST, INTERNAL_VARIABLE with
+	SPECIAL_VARIABLE and unify the treatment of these cases.
+
+	(write_attribute_call0): Remove.
+	(write_attribute_call1): Remove.
+	(write_attribute_calln): Remove.
+	(save_qualifier): Add missing semicolon.
+
+	(simple_exp,exp): Decomment (i.e., reactivate) code that was 
+	temporarily disabled to allow compilation with FSF head version.
+
+	(simple_exp syntax): Remove use of OP_ADA_ATTRIBUTE and 
+	use individual operators (OP_*) for all attributes.
+	(exp syntax): Use write_int.
+	Handle STRING literals with OP_STRING.
+	(variable syntax): Add limit parameter to calls to 
+	write_object_renaming.  
+
+	(temp_parse_space): New definition to hold entities that need
+	only live until the next call to ada_parse.
+	(string_to_operator): Rename fields of ada_opname_table entries.
+
+	(write_var_from_sym): Record block.
+	(write_var_from_name): Minor reformatting.
+	Make sure saved name is properly encoded in the case of multiple 
+	matches, and set its language to Ada.
+	Update comment.
+	Modify to indicate unresolved name as symbol in the UNRESOLVED 
+	namespace, allocated in temp_parse_space.
+	(write_int): New function.
+
+	(write_object_renaming): Add max_depth parameter to limit
+	chains of object renamings.
+	Handle case where root of renaming expression is itself a renaming.
+	Use temp_parse_space for temporary name buffer.
+	Handle renamings to dereferenced pointers (___XEXA suffices).
+	
+	(ada_parse, yyerror, string_to_operator, 
+	write_var_from_sym, write_var_from_name, write_attribute_call0, 
+	write_attribute_call1, write_attribute_calln, 
+	write_object_renaming): Protoize.
+
+	(_initialize_ada_exp): New function.
+	
+	* ada-lang.c: Update copyright notice.
+	General terminology change to conform to GNAT compiler usage:
+	mangle => encode, demangle => decode
+	Include gdb_obstack.h.
+	Include gdb_regex.h
+	Include frame.h
+	Include hashtab.h
+	Include completer.h
+	Include gdb_stat.h
+	Include block.h
+	Include infcall.h
+	
+	(ADA_RETAIN_DOTS): Make sure this is defined.
+	(TRUNCATION_TOWARDS_ZERO): Define.
+	(struct string_vector): Define.
+	(unresolved_names): Remove definition.
+	(xnew_string_vector): New function.
+	(string_vector_append): New function.
+	(extract_string): Make static.
+	(ada_unqualified_name): New function.
+	(add_angle_brackets): New function.
+	(function_name_from_pc): New function.
+	(place_on_stack): Rename to ensure_lval.
+
+	(ensure_lval): Renamed from place_on_stack.
+	Make identity on lvals.
+	Update comment.
+	(is_nonfunction): New interface.
+	Only symbols in LOC_CONST class can be enumerals.
+	(fill_in_ada_prototype): Remove; now independent of language.
+	(add_defn_to_vec): Add obstack and symtab arguments.
+	Use obstack to hold collected definitions.
+	(num_defns_collected): New function.
+	(defns_collected): New function.
+	(ada_resolve_subexp): Rename to resolve_subexp.
+	(resolve_subexp): Renamed from ada_resolve_subexp.
+	(ada_op_name): Return non-const result.
+	(ada_decoded_op_name): Renamed from ada_op_name, now used for
+	other purposes.
+
+	(to_fixed_array_type): Add declaration.
+	(coerce_unspec_val_to_type): Remove offset parameter.
+	(find_sal_from_funcs_and_line): New interface.
+	(find_line_in_linetable): Ditto.
+
+	(all_sals_for_line): Rename to ada_sals_for_line and make
+	global.
+	Add new parameter. When set, do not ask the user to choose the 
+	instance, but use the first one	found instead.
+	Use given line number in returned sals.
+	Fix comment. 
+	Skip the prologue if funfirstline is set.
+	Correct for memory leak when 0 lines found.
+
+	(value_pos_atr): Use pos_atr.
+	(pos_atr): New function.
+	(standard_lookup): Add block parameter.
+
+	(makeTimeStart): Remove declaration and uses.
+	(makeTimeStop): Remove declaration and uses.
+
+	(ada_completer_word_break_characters): Allow for VMS.
+	(ADA_MAIN_PROGRAM_SYMBOL_NAME): Make into constant.
+	(raise_sym_name): New constant.
+	(raise_unhandled_sym_name): New constant.
+	(raise_assert_sym_name): New constant.
+	(process_raise_exception_name): New constant.
+	(longest_exception_template): New constant.
+	(warning_limit): New variable to limit warnings during expression
+	evaluation.
+	(warnings_issued): New variable to keep track of warnings issued.
+	(known_runtime_file_name_patterns): New constant.
+	(known_auxiliary_function_name_patterns): New constant.
+	(symbol_list_obstack): New variable.
+	
+	(field_name_match,is_suffix,is_suppressed_name,ada_encode,
+	ada_decode,ada_match_name,encoded_ordered_before,equiv_types,
+	lesseq_defined_than,is_nondebugging_type,is_name_suffix,wild_match,
+	find_sal_from_funcs_and_line, ada_breakpoint_rewrite, 
+	ada_is_tagged_type, ada_is_parent_field, ada_is_wrapper_field, 
+	ada_variant_discrim_name, field_alignment, dynamic_template_type,
+	ada_is_character_type, ada_is_aligner_type, ada_is_vax_floating_type): 
+	Replace use of deprecated STREQ and STREQN macros by calls to strncmp 
+	and strcmp. 
+
+	(ada_get_field_index): New function.
+	(lim_warning): New function.
+	(ada_translate_error_message): New function.
+	(MAX_OF_SIZE): New function.
+	(MIN_OF_SIZE): New function.
+	(UMAX_OF_SIZE): New function.
+	(UMIN_OF_SIZE): New function.
+	(discrete_type_high_bound): New function.
+	(discrete_type_low_bound): New function.
+	(base_type): New function.
+	(do_command): Remove.
+	
+	(ada_update_initial_language): Use language_ada, not language_unknown.
+	(ada_encode): Renamed from ada_mangle.
+	Obey ADA_RETAIN_DOTS.
+	(ada_decode): Renamed from ada_demangle.
+	Update coding conventions.
+	(decoded_names_store): New hash table.
+	(ada_decode_symbol): New function.
+	(ada_la_decode): New function.
+	
+	(modify_general_field):	Correct computations of offset and bit 
+	position.
+	(desc_base_type): Handle ref types, too.
+	(ada_is_direct_array_type): New function.
+
+	(ada_is_simple_array): Rename to ada_is_simple_array_type.
+	(ada_is_array_descriptor): Rename to ada_is_array_descriptor_type.
+	(ada_is_bogus_array_descriptor,ada_type_of_array,
+	ada_coerce_to_simple_array_ptr,ada_coerce_to_simple_array,
+	ada_type_match,convert_actual,ada_evaluate_subexp): Use renamed 
+	ada_is_array_descriptor_type.
+	
+	(ada_coerce_to_simple_array_type): Fix incorrect value freeing.
+	(ada_is_packed_array_type): Handle pointers or 
+	references to packed arrays as well.
+	(packed_array_type): Uncomment use of TYPE_FLAG_FIXED_INSTANCE.
+	(decode_packed_array_type): Search for the packed array type 
+	symbol in the currently selected block and associated 
+	superblocks too.
+	Use lookup_symbol again.
+
+	(decode_packed_array): Handle pointers and references.
+	Update call to coerce_unspec_val_to_type.
+	(decode_packed_array_type,value_subscript_packed): Limit warnings.
+	(ada_value_primitive_packed_val): Improve comment.
+	
+	(ada_index_type): Substitute int type for "undefined".
+	(ada_index_type,ada_array_bound_from_type,ada_array_bound,
+	ada_array_langth, ada_is_string_type): Use renamed 
+	ada_is_simple_array_type.
+	(empty_array): New function.
+
+	(ada_resolve):	Rename to resolve.
+	(resolve): Make static.
+	Call renamed resolve_subexp.
+	Update comment.
+	(ada_resolve_subexp): Rename to resolve_subexp.
+	(resolve_subexp): Update comment.
+	Decomment disabled code.
+	Add LOC_COMPUTED* cases.
+	Modify to use temporary	struct symbols (marked as being in 
+	UNDEF_NAMESPACE) to indicate unresolved names, instead of 
+	OP_UNRESOLVED_VALUE.
+	Remove OP_ATTRIBUTE; use individual opcodes for attributes.	
+	Add OP_STRING case.
+	Remove OP_ARRAY.
+	Use SYMBOL_PRINT_NAME instead of ada_demangle.
+	Use new ada_lookup_symbol_list interface.
+	Use new ada_resolve_function interface.
+	Remove OP_TYPE case.
+
+	(ada_args_match): Idiot proof against null actuals.
+	Use intermediate variables to clarify.
+	(ada_resolve_function): Update comment and interface.
+	(mangled_ordered_before): Rename to encoded_ordered_before and
+	update comment.
+	(sort_choices): Update comment and interface.
+	Use SYMBOL_LINKAGE_NAME in place of SYMBOL_NAME.
+	(user_select_syms): New interface.
+	Use new sort_choices interface.
+	Use SYMBOL_PRINT_NAME rather than SYMBOL_SOURCE_NAME.
+	(possible_user_operator_p): Idiot-proof against null values.
+	(ada_simple_renamed_entity): Don't make cleanup; rely on 
+	caller to free result string.
+	Remove const from return type.
+	(make_array_descriptor): Rename uses of place_on_stack to 
+	ensure_lval.
+	Make sure that arrays are on stack.
+	
+	(HASH_SIZE): Define.
+	(struct cache_entry): Define.
+	(cache_space): Define.
+	(cache): Define.
+	(clear_ada_sym_cache): New function.
+	(find_entry): New function.
+	(lookup_cached_symbol): New function.
+	(defn_vector_size): Define.
+	(cache_symbol): New function.
+	(defn_symbols): Remove.
+	
+	(standard_lookup): Use lookup_symbol_in_language to get effect of
+	C lookup.
+	Cache results.
+	
+	(symbol_completion_match): New function.
+	(symbol_completion_add): New function.
+	(ada_make_symbol_completion_list): New function.
+
+	(ada_lookup_partial_symbol,ada_lookup_simple_minsym, 
+	add_symbols_from_enclosing_procs,remove_extra_symbols): Replace 
+	DEPRECATED_SYMBOL_NAME with SYMBOL_LINKAGE_NAME. 
+	(symtab_for_sym): Handle LOC_COMPUTED, LOC_COMPUTED_ARG.
+	
+	(ada_lookup_simple_minsym): New function.
+	(ada_lookup_minimal_symbol): Use ada_lookup_simple_minsym.
+
+	(add_symbols_from_enclosing_procs): New interface.
+	Conditionalize more helpfully.
+	Don't bother if program isn't running.
+	Use new interface to get_frame_block.
+	Limit number of levels searched	with MAX_LEXICAL_LEVELS, just in case.
+	
+	(remove_extra_symbols): New interface.
+	(xget_renaming_scope): New function.
+	(is_package_name): New function.
+	(renaming_is_visible): New function.
+	(remove_out_of_scope_renamings): New function.
+
+	(ada_lookup_symbol_list): New interface.
+	Properly reinitialize the symbol list obstack.
+	Don't call add_symbols_from_enclosing_procs if we start from a
+	static or global block.
+	Use new interfaces to ada_add_block_symbols, add_defn_to_vec, 
+	add_symbols_from_enclosing_procs.
+	Add symtab data to cached entries.
+	Handle symbols prefixed with
+	"standard__" specially; strip prefix and don't look in local symbols.
+	Do not include out of scope renaming symbols in list of 
+	symbols returned.
+	Add const to block parameter.
+	Move check for non-local, non-global symbols earlier.  
+	Remove timing stuff.
+	(ada_lookup_symbol): New interface.
+	Find symtab as well.
+	(ada_lookup_symbol_nonlocal): New function.
+
+	(is_name_suffix): Enhance suffix detection to recognize
+	an optional "__[:digit:]+" before any "\.[:digit:]+" suffix.
+	(is_dot_digits_suffix): New function.
+	(wild_match): Ignore ".[:digit:]*" suffixes during matches.
+	
+	(ada_add_block_symbols): New interface.  Use obstack to return results
+	in a vector of struct ada_symbol_infos.  Add symtab argument.
+	Use new interface to add_defn_to_vec.
+	Remove calls to fill_in_ada_prototype.
+	Use BLOCK_BUCKETS, BLOCK_BUCKET.
+	
+	(ada_finish_decode_line_1): Add const qualification to local to fix
+	warning.
+	Start looking in static block for functions to avoid attempts 
+	to search frame chain for up-level variables.
+	Adapt to new ada_sals_for_line interface.
+	Use new interfaces to ada_lookup_symbol_list and user_select_syms.
+	Handle quoting of the function name inside the spec string.
+	Skip prologue when funfirstline is set and update the 
+	function documentation to that effect.
+
+	(debug_print_lines, debug_print_block, debug_print_blocks, 
+	debug_print_symtab): Remove.
+
+	(ada_main_name): New function.	
+	(ada_exception_breakpoint_type): New function.
+	(is_known_support_routine): New function.
+	(ada_find_printable_frame): Renamed from find_printable_frame and made
+	global.
+	Remove level parameter.
+	Use new interface to select_frame.
+
+	(begin_command): Remove.
+	(ada_adjust_exception_stop): New function.
+	(ada_print_exception_stop): New function.
+	(exception_name_from_cond): New function.
+	(ada_report_exception_break): Replace disabled code with 
+	conditionalization on GNAT_GDB.
+	Get the exception name from the condition string.
+	Remove and move functionality into new functions 
+	ada_print_exception_breakpoint_task and 
+	ada_print_exception_breakpoint_nontask.
+	(error_breakpoint_runtime_sym_not_found): New function.
+	(is_runtime_sym_defined): New function.
+	(ada_breakpoint_rewrite): Uncomment suppressed code.
+	Use symbolic error-message and runtime-symbol names.
+	Surround runtime symbol names in quotes.
+	Allow non-specific breakpoints on exceptions and assertions before
+	program starts.
+	
+	(ada_is_tagged_type): Add parameter.
+	(ada_is_tag_type): New function.
+	(ada_tag_type): Use new ada_lookup_struct_elt_type interface.
+	(ada_variant_discrim_type): Ditto.
+	(value_tag_from_contents_and_address): New function.
+	(type_from_tag): New function.
+	(struct tag_args): New structure used to communicate with
+	ada_tag_name_1.
+	(ada_tag_name_1): New function.
+	(ada_tag_name): New function.
+
+	(ada_scan_number): Update comment.
+	(find_struct_field): New function.
+	(ada_search_struct_field): Make static.
+	(ada_value_struct_elt): New version that returns references when
+	given pointers or references to structs.
+	(ada_lookup_struct_elt_type): Add 'refok' parameter.
+	(ada_which_variant_applies): Use new ada_lookup_struct_elt_type
+	interface.
+	(ada_value_ind): Use new ada_to_fixed_value interface.
+	(ada_coerce_ref): Ditto.
+	(field_offset): Remove.
+
+	(ada_find_any_symbol): New function, extracted from ada_find_any_type.
+	(ada_find_renaming_symbol): New function.
+	(ada_prefer_type): Prefer named types over unnamed ones.
+	(variant_field_index): New function.
+	(contains_variant_part): Removed: subsumed by variant_field_index.
+	(ada_template_to_fixed_record_type): New function, mostly from
+	template_to_fixed_record_type.
+	(template_to_fixed_record_type): 
+	Do not scan the type fields beyond the last one; prevents a 
+	potential SEGV.
+	Handle case where variant field is listed BEFORE discriminant it 
+	depends on.
+	Fix calculation of record length when bit length is 
+	not evenly divisible by char length.
+	Move code to ada_template_to_fixed_record_type and call it.
+
+	(template_to_static_fixed_type): Revise comment.  
+	Modify to work on ordinary record types as well as templates, 
+	so as to handle	fields that use ___XVE or ___XVU encodings. 
+	(to_record_with_fixed_variant_part): Fill out comment.
+	Initialize C++ stuff in right type.
+	Allow case where DVAL is null.
+	Handle case where variant field is not last.
+	Fix typo concerning record length.
+	(to_fixed_record_type): Decomment disabled code.
+	(to_fixed_record_type): Use variant_field_index instead of 
+	contains_variant_part.
+	(to_fixed_variant_branch_type): Ditto.
+	(to_fixed_array_type): Decomment disabled code.
+	(ada_to_fixed_type): Convert tagged types to the specific type.
+	Deactivate the size-check for array types in order to avoid 
+	some false size alarms.
+	(to_static_fixed_type): Decomment disabled code.
+	Modify to call template_to_static_fixed_type
+	on ordinary structs, not just ___XVE- and ___XVU-encoded fields.
+	(ada_to_fixed_value_create): Renamed version of old ada_to_fixed_value.
+	Remove valaddr argument, as it is never really used.
+	(ada_to_fixed_value): Change interface to act on single struct value*
+	operand.
+	(adjust_pc_past_prologue): New function.
+	(ada_attribute_name): Modify to take enum exp_opcode argument.
+		
+	(ada_enum_name): Recognize new homonym-distinguishing convention.
+	Adjust local variable's type to	remove compiler warning.
+	Fix a small problem in the part	that unqualifies the enumeration name.
+	(ada_value_binop): New function.
+	(ada_value_equal): New function.
+
+	(ada_evaluate_subexp): Use new ada_lookup_struct_elt_type interface.
+	Don't give error message when not doing	normal evaluation 
+	and a tagged type doesn't seem to contain a structure member.
+	Give error message for packed arrays.
+	For indexing arrays, handle pointers to	packed arrays correctly.
+	Handle case of 'first and 'last attributes of bare integral type 
+	without encoded subtype info.  
+	Remove some unnecessary casts.
+	Fix uninitialized value of type in computing 'first, 'last, or 'length
+	of array object.  
+	Add BINOP_EQUAL and BINOP_NOTEQUAL cases.
+	Remove binop_user_defined_p tests and value_x_binop and value_x_unop
+	calls.
+	Attributes are now exp_opcode values.
+	Correct treatment of 'modulus.
+	Better error message for taking 'length of wrong kind of type; 
+	improve comment.
+	Change EVAL_NORMAL to noside for consistency.
+	Use ada_value_binop for DIV, MOD, REM.
+	Make special case out of array of length 0, since an argument 
+	of 0 upsets some platforms' malloc.
+	Use OP_STRING instead of OP_ARRAY.
+	For slice, add check that we have an array type before extracting 
+	a slice out of it.  Avoids a SEGV.
+	When evaluating an array slice,	if the array type is a reference to 
+	an aligner type, then replace the aligner type by the actual type.
+	Decomment disabled code.
+	Remove some dead code.
+	Use temporary struct symbols (marked as being in UNDEF_NAMESPACE) 
+	to indicate unresolved names, instead of OP_UNRESOLVED_VALUE.
+	Rename BINOP_MBR to BINOP_IN_BOUNDS, TERNOP_MBR to TERNOP_IN_RANGE, 
+	and UNOP_MBR to UNOP_IN_RANGE.
+	If an array type has a parallel	___XVE type, then use it.
+	Turn arrays into pointers for lvalue arrays.
+	Change TERNOP_SLICE code to work even when bounds are unknown, ignoring
+	bounds error and handle 0-length slices.
+	Use lim_warning.
+	When selecting fields, apply ada_to_fixed_value	(because the fields 
+	might have ___XVU or ___XVE encodings even if not dynamic.)
+	Use ada_to_fixed_value_create and new ada_to_fixed_value interface.
+	(ada_is_system_address_type): New function.
+
+	(get_var_value): Use new interface to ada_lookup_symbol_list.
+	(get_int_var_value): New interface.
+	(to_fixed_range_type): Allow unknown bound, with warning.
+	(ada_is_modular_type): Decomment disabled code.
+	(ADA_OPERATORS): New definition.
+	(ada_operator_length): New function.
+	(ada_expr_op_name): New function.
+	(ada_forward_operator_length): New function.
+	(ada_dump_subexp_body): New function.
+	(ada_print_subexp): New function.
+	(ada_exp_descriptor): New constant.
+	(ada_op_print_tab): Add 'size.  Remove FIXMEs.
+	(ada_language_defn): Add ada_exp_descriptor entry.
+	Change ada_parse => parse.
+	Add post-parser entry.
+	Use ada-specific non-local symbol lookup.
+	Don't use C-style arrays. 
+	String lower-bound is 1.
+	Decomment disabled code.	
+	(parse): New function.
+	New fields ada_translate_error_message, ada_lookup_symbol, 
+	ada_lookup_minimal_symbol.
+	
+	* ada-lang.h: Update copyright dates.
+	Replace the mangle/demangle terminology throughout by the
+	more appropriate encode/decode one. 
+	Include breakpoint.h.
+	Forward declare struct partial_symbol, struct block.
+	(ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS): Define.
+	(EXTRACT_ADDRESS): Remove.
+	(EXTRACT_INT): Remove.
+	(ADA_KNOWN_AUXILIARY_FUNCTION_NAME_PATTERNS): Define.
+	(MAX_ENCLOSING_FRAME_LEVELS): Define.
+	(MAX_RENAMING_CHAIN_LENGTH): Define.
+	(struct ada_opname_map): mangled => decoded, demangled=>encoded.
+
+	(enum task_states): Remove.
+	ada_task_states: Remove.
+	(fat_string): Remove.
+	(struct entry_call): Remove.
+	(struct task_fields): Remove.
+	(struct task_entry): Remove.
+
+	(struct ada_symbol_info): Define.
+	(enum ada_attribute): Remove.
+	(enum ada_operator): Define.
+	
+	(ada_get_field_index): Declare.
+	(ada_coerce_to_simple_array): Rename to ada_coerce_to_simple_array_ptr.
+	(ada_is_simple_array): Rename to ada_is_simple_array_type.
+	(ada_is_array_descriptor): Rename to ada_is_array_descriptor_type.
+	(ada_lookup_symbol_list): New interface.
+	(ada_decode_symbol): Declare.
+	(ada_decode): Declare.
+	(ada_lookup_symbol): New interface.
+	(ada_update_initial_language): Declare.
+	(ada_lookup_simple_minsym): Declare.
+	(user_select_syms): New interface.
+	(ada_sals_for_line): Declare.
+	(ada_is_tagged_type): New interface.
+	(ada_tag_name): Declare.
+	(ada_lookup_struct_elt_type): Remove declaration.
+	(ada_search_struct_field): Remove declaration.
+	(ada_attribute_name): New interface.
+	(ada_is_system_address_type): Declare.
+	(ada_to_fixed_value): Remove declaration.
+	(ada_template_to_fixed_record_type_1): Declare.
+	(get_int_var_value): New interface.
+	(ada_find_any_symbol): Declare.
+	(ada_find_renaming_symbol): Declare.
+	(ada_mangle): Rename to ada_encode.
+	(ada_simple_renamed_entity): Remove const.
+	(ada_main_name): Declare.
+	(get_current_task): Rename to ada_get_current_task.
+	(get_entry_number): Remove declaration.
+	(ada_report_exception_break): Remove declaration.
+	(ada_print_exception_breakpoint_nontask): Declare.
+	(ada_print_exception_breakpoint_task): Declare.
+	(ada_find_printable_frame): Declare.
+
+	* ada-lex.l: Update copyright notices.
+	Use xmalloc and xfree instead of malloc and free.
+	Use new interface to name_lookup.
+	Use new interface to 
+	ada_mangle=>ada_encode.
+	Redo handling of '$...' variable to parallel current treatment 
+	in c-exp.y.  
+        (resize_tempbuf, canonicalizeNumeral, is_digit_in_base,
+	digit_to_int, strtoulst, processInt, processReal, processId, 
+	block_lookup, name_lookup, find_dot_all, subseqMatch, processAttribute,
+	yywrap): Protoize.
+	
+	(processInt): Use cast to remove harmless warning.
+	(processReal): Modify to get rid of compiler warning on scan formats.
+
+	(processId): Replace xmalloc with obstack_alloc for name and remove
+	call to ada_name_string_cleanup.
+	Remove obsolete disabled code.
+	(name_lookup): Ditto. 
+	New interface.
+	Use obsavestring on temp_parse_space instead of savestring 
+	on name, and remove call to ada_name_string_cleanup.  
+	Free string returned from ada_simple_renamed_entity.
+	Use new interface to ada_lookup_symbol_list.
+	Decomment disabled code.
+	Treat LOC_COMPUTED and LOC_COMPUTED_ARG	symbols as variables, 
+	not types.
+	When a type name lookup succeeds as a result of 
+	lookup_primitive_typename, check for regular type entry that has not 
+	yet been read in.
+	Limit length of chain of renamed symbols we are willing to follow.  
+	Do not break names beginning with "standard__" into segments.  
+	(block_lookup): Use new interface to ada_lookup_symbol_list.
+	
+	* ada-typeprint.c: Update copyright notice.
+	(demangled_type_name): Rename to decoded_type_name.
+	(ada_typedef_print): Use SYMBOL_PRINT_NAME.
+	(print_range_bound):  Correct handling of negative
+	bounds that make the index type looked unsigned under STABS.  
+	(print_dynamic_range_bound): Use new interface to get_int_var_value.
+	(print_range_type_named):  Use the builtin int type if no type 
+	corresponding to the given type name could be found.
+	(print_array_type): ada_is_simple_array => ada_is_simple_array_type.
+	Add some bullet-proofing.
+	(print_variant_clauses): Allow for variant branches with ___XVU 
+	encodings that are not dynamic fields.  
+	Use new interface to ada_is_tagged_type.
+	(print_record_type): Allow for fields with ___XVE encodings that 
+	are not dynamic fields. 
+	Use new interface to ada_is_tagged_type.
+	(ada_print_type): ada_is_array_descriptor => 
+	ada_is_array_descriptor_type.
+
+	* ada-valprint.c: Update copyright notice.
+	Include gdb_string.h
+	Include infcall.h
+	(ui_memcpy): New function.
+	(ada_print_floating): New function.
+	(ada_print_str): Order arguments correctly.
+	Correct handling of empty arrays and arrays of 0-length items. 
+	ada_is_array_descriptor => ada_is_array_descriptor_type 
+	Print values of type System.Address in hexadecimal format.
+	Use ada_print_floating to print floating-point numbers in Ada format.
+	Print class tag values with type names.  
+	No longer print the address of reference values. Avoids 
+	a potential confusion.	
+	(ada_value_print): Stop printing the object type for reference
+	values, but preserve that behavior for access types. Avoids
+	a potential confusion.
+	Simplify one conditional expression, as the first part is now
+	necessarily true.
+	ada_is_array_descriptor => ada_is_array_descriptor_type 
+	Add check for arrays for null records, and print them by hand.
 	
 2004-06-01  Jim Blandy  <jimb@redhat.com>
 
