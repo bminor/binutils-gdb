@@ -1,3 +1,8 @@
+Fri Sep 16 12:16:20 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ldmain.c (main): Rather than prohibiting ld -r -s, treat it as
+	ld -r -S -x.
+
 Thu Sep 15 13:05:44 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* ldmisc.c (vfinfo): Print BFD file name as well as file name
