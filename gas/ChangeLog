@@ -1,3 +1,8 @@
+Mon Sep 15 21:28:09 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (fix_new_hppa): Make declaration match
+	definition.
+
 Mon Sep 15 18:33:06 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (processor_mask): New variable.
