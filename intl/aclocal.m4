@@ -121,40 +121,8 @@ AC_DEFUN(CY_WITH_NLS,
 	    fi
 	])
 
-        if test "$CATOBJEXT" = "NONE"; then
-	  AC_MSG_CHECKING([whether catgets can be used])
-	  AC_ARG_WITH(catgets,
-	    [  --with-catgets          use catgets functions if available],
-	    nls_cv_use_catgets=$withval, nls_cv_use_catgets=no)
-	  AC_MSG_RESULT($nls_cv_use_catgets)
-
-	  if test "$nls_cv_use_catgets" = "yes"; then
-	    dnl No gettext in C library.  Try catgets next.
-	    AC_CHECK_LIB(i, main)
-	    AC_CHECK_FUNC(catgets,
-	      [AC_DEFINE(HAVE_CATGETS)
-	       INTLOBJS="\$(CATOBJS)"
-	       AC_PATH_PROG(GENCAT, gencat, no)dnl
-	       if test "$GENCAT" != "no"; then
-		 AC_PATH_PROG(GMSGFMT, gmsgfmt, no)
-		 if test "$GMSGFMT" = "no"; then
-		   AM_PATH_PROG_WITH_TEST(GMSGFMT, msgfmt,
-		    [test -z "`$ac_dir/$ac_word -h 2>&1 | grep 'dv '`"], no)
-		 fi
-		 AM_PATH_PROG_WITH_TEST(XGETTEXT, xgettext,
-		   [test -z "`$ac_dir/$ac_word -h 2>&1 | grep '(HELP)'`"], :)
-		 USE_INCLUDED_LIBINTL=yes
-		 CATOBJEXT=.cat
-		 INSTOBJEXT=.cat
-		 DATADIRNAME=lib
-		 INTLDEPS='$(top_builddir)/../intl/libintl.a'
-		 INTLLIBS=$INTLDEPS
-		 LIBS=`echo $LIBS | sed -e 's/-lintl//'`
-		 nls_cv_header_intl=intl/libintl.h
-		 nls_cv_header_libgt=intl/libgettext.h
-	       fi])
-	  fi
-        fi
+	dnl In the standard gettext, we would now check for catgets.
+        dnl However, we never want to use catgets for our releases.
 
         if test "$CATOBJEXT" = "NONE"; then
 	  dnl Neither gettext nor catgets in included in the C library.

@@ -1,3 +1,7 @@
+Fri Mar 27 16:37:25 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* aclocal.m4, configure: Rebuilt with new cygettext.m4.
+
 Wed Mar 25 15:00:14 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* configure.in: Build config.h from config.in.
