@@ -1,5 +1,6 @@
 /* tc-ppc.h -- Header file for tc-ppc.c.
-   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -186,6 +187,19 @@ extern void ppc_adjust_symtab PARAMS ((void));
 
 /* Niclas Andersson <nican@ida.liu.se> says this is needed.  */
 #define SUB_SEGMENT_ALIGN(SEG) 2
+
+/* We also need to copy, in particular, the class of the symbol,
+   over what obj-coff would otherwise have copied.  */
+#define OBJ_COPY_SYMBOL_ATTRIBUTES(dest,src)			\
+do {								\
+  if (SF_GET_GET_SEGMENT (dest))				\
+    S_SET_SEGMENT (dest, S_GET_SEGMENT (src));			\
+  symbol_get_tc (dest)->size = symbol_get_tc (src)->size;	\
+  symbol_get_tc (dest)->align = symbol_get_tc (src)->align;	\
+  symbol_get_tc (dest)->class = symbol_get_tc (src)->class;	\
+  symbol_get_tc (dest)->within = symbol_get_tc (src)->within;	\
+} while (0)
+
 
 #endif /* OBJ_XCOFF */
 

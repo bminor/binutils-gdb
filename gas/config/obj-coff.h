@@ -371,6 +371,7 @@ extern symbolS *coff_last_function;
 
 /* Forward the segment of a forwarded symbol, handle assignments that
    just copy symbol values, etc.  */
+#ifndef OBJ_COPY_SYMBOL_ATTRIBUTES
 #ifndef TE_I386AIX
 #define OBJ_COPY_SYMBOL_ATTRIBUTES(dest,src) \
   (SF_GET_GET_SEGMENT (dest) \
@@ -381,6 +382,7 @@ extern symbolS *coff_last_function;
   (SF_GET_GET_SEGMENT (dest) && S_GET_SEGMENT (dest) == SEG_UNKNOWN \
    ? (S_SET_SEGMENT (dest, S_GET_SEGMENT (src)), 0) \
    : 0)
+#endif
 #endif
 
 /* sanity check */

@@ -1,5 +1,6 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
-   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000 
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -4556,14 +4557,13 @@ ppc_fix_adjustable (fix)
 	{
 	  while (symbol_get_tc (csect)->next != (symbolS *) NULL
 		 && (symbol_get_frag (symbol_get_tc (csect)->next)->fr_address
-		     <= symbol_get_frag (fix->fx_addsy)->fr_address))
+		     <= val))
 	    {
 	      /* If the csect address equals the symbol value, then we
                  have to look through the full symbol table to see
                  whether this is the csect we want.  Note that we will
                  only get here if the csect has zero length.  */
-	      if ((symbol_get_frag (csect)->fr_address
-		   == symbol_get_frag (fix->fx_addsy)->fr_address)
+	      if ((symbol_get_frag (csect)->fr_address == val)
 		  && S_GET_VALUE (csect) == S_GET_VALUE (fix->fx_addsy))
 		{
 		  symbolS *scan;
