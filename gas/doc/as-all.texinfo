@@ -144,7 +144,7 @@ Here is a brief summary of how to invoke @code{as}.  For details,
 @c am29k has no machine-dependent assembler options
 @c h8/300 has no machine-dependent assembler options
 @c Z8000 has no machine-dependent assembler options
-@c see md_parse_option in i960.c
+@c see md_parse_option in tc-i960.c
    [ -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC ]
    [ -b ] [ -norelax ]
    [ -l ] [ -mc68000 | -mc68010 | -mc68020 ]
@@ -184,29 +184,50 @@ Announce @code{as} version
 @item -W
 Suppress warning messages
 
+@item -- | @var{files} @dots{}
+Standard input, or source files to assemble.
+
+@end table
+
+The following options are available when as is configured for the
+Intel 80960 processor.
+
+@table @code
 @item -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC
-(When configured for Intel 960). 
 Specify which variant of the 960 architecture is the target.
 
 @item -b
-(When configured for Intel 960). 
 Add code to collect statistics about branches taken.
 
 @item -norelax
-(When configured for Intel 960). 
 Do not alter compare-and-branch instructions for long displacements;
 error if necessary.
 
+@end table
+
+The following options are available when as is configured for the
+Motorola 68000 series.
+
+@table @code
+
 @item -l
-(When configured for Motorola 68000).  
-Shorten references to undefined symbols, to one word instead of two
+Shorten references to undefined symbols, to one word instead of two.
 
-@item -mc68000 | -mc68010 | -mc68020
-(When configured for Motorola 68000).  
-Specify what processor in the 68000 family is the target (default 68020)
+@item -m68000 | -m68008 | -m68010 | -m68020 | -m68030 | -m68040 | -mcpu32
+Specify what processor in the 68000 family is the target.  The default
+is normally the 68020, but this can be changed at configuration time.
 
-@item -- | @var{files} @dots{}
-Standard input, or source files to assemble
+@item -m68881 | -m68882 | -mno-68881 | -mno-68882
+The target machine does (or does not) have a floating-point coprocessor.
+The default is to assume a coprocessor for 68020, 68030, and cpu32.  Although
+the basic 68000 is not compatible with the 68881, a combination of the
+two can be specified, since it's possible to do emulation of the
+coprocessor instructions with the main processor.
+
+@item -m68851 | -mno-68851
+The target machine does (or does not) have a memory-management
+unit coprocessor.  The default is to assume an MMU for 68020 and up.
+
 @end table
 
 @menu
@@ -275,7 +296,7 @@ If you use (or have used) the GNU assembler on one architecture, you
 should find a fairly similar environment when you use it on another
 architecture.  Each version has much in common with the others,
 including object file formats, most assembler directives (often called
-@dfn{pseudo-ops)} and assembler syntax.@refill
+@dfn{pseudo-ops}) and assembler syntax.@refill
 
 @cindex purpose of @sc{gnu} @code{as}
 @code{as} is primarily intended to assemble the output of the GNU C
@@ -395,13 +416,17 @@ source is itself synthesized from other files.
 @kindex .o
 Every time you run @code{as} it produces an output file, which is
 your assembly language program translated into numbers.  This file
-is the object file, named @code{a.out} unless you tell @code{as} to
+is the object file, named
+@code{b.out},
+if @code{as} is configured for the Intel 80960, or
+unless you tell @code{as} to
 give it another name by using the @code{-o} option.  Conventionally,
 object file names end with @file{.o}.  The default name of
 @file{a.out} is used for historical reasons:  older assemblers were
 capable of assembling self-contained programs directly into a
 runnable program.
-@c This may still work, but hasn't been tested.
+(For some formats, this isn't currently possible, but it can be done for
+@code{a.out} format.)
 
 @cindex linker
 @kindex ld
@@ -435,7 +460,8 @@ file_name:@b{NNN}:Warning Message Text
 @noindent
 @cindex line numbers, in warnings/errors
 (where @b{NNN} is a line number).  If a logical file name has
-been given (@pxref{App-File,,@code{.app-file}}) it is used for the filename, otherwise the
+been given (@pxref{App-File,,@code{.app-file}}) it is used for the
+filename, otherwise the
 name of the current input file is used.  If a logical line number was
 given
 (@pxref{Ln,,@code{.ln}})
@@ -550,7 +576,10 @@ in the object file.  Usually if you do this you also tell the linker
 @cindex naming object file
 @cindex object file name
 There is always one object file output when you run @code{as}.  By
-default it has the name @file{a.out}.  You use this option (which
+default it has the name
+@file{a.out} or @file{b.out}, depending on the target for which
+@code{as} is configured.
+You use this option (which
 takes exactly one filename) to give the object file a different name.
 
 Whatever the object file is called, @code{as} will overwrite any
@@ -567,7 +596,7 @@ existing file of the same name.
 data-section data lives in the text section.  This is only done at
 the very last moment:  your binary data are the same, but data
 section parts are relocated differently.  The data section part of
-your object file is zero bytes long because all it bytes are
+your object file is zero bytes long because all its bytes are
 appended to the text section.  (@xref{Sections,,Sections and Relocation}.)
 
 When you specify @code{-R} it would be possible to generate shorter
@@ -610,7 +639,7 @@ still reported.
 @cindex syntax, machine-independent
 This chapter describes the machine-independent syntax allowed in a
 source file.  @code{as} syntax is similar to what many other assemblers
-use; it is inspired in BSD 4.2
+use; it is inspired by the BSD 4.2
 assembler, except that @code{as} does not assemble Vax bit-fields.
 
 @menu
@@ -694,12 +723,13 @@ Anything from the @dfn{line comment} character to the next newline
 is considered a comment and is ignored.  The line comment character is
 @samp{#} on the Vax;
 @samp{#} on the i960;
+@samp{!} on the SPARC;
 @samp{|} on the 680x0;
 @samp{;} for the AMD 29K family;
-@samp{;} for the machine specific family;
+@samp{;} for the H8/300 family;
 @samp{!} for the Z8000;
 see @ref{Machine Dependent}.  @refill
-@c FIXME: fill in SPARC line comment char
+@c FIXME What about i386, m88k, i860?
 
 On some machines there are two different line comment characters.  One
 will only begin a comment if it is the first non-whitespace character on
