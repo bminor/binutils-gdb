@@ -45,6 +45,17 @@ else
 	fi
 fi
 
+# This is for newlib net releases.
+# We don't check for duplicates of COPYING.NEWLIB appearing because it's not
+# intended that keep-cygnus and keep-newlib be used together.
+newlib_files="COPYING.NEWLIB"
+
+if ( echo $* | grep keep\-newlib > /dev/null) ; then
+	keep_these_too="${keep_these_too} ${newlib_files}"
+else
+	lose_these_too="${lose_these_too} ${newlib_files}"
+fi
+
 # This top-level directory is special.  We often check out only subsets
 # of this directory, and complaining about directories or files we didn't
 # check out just gets obnoxious.
