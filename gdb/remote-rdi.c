@@ -252,16 +252,29 @@ device is attached to the remote system (e.g. /dev/ttya).");
     {
       printf_filtered ("RDI_info: %s\n", rdi_error_message (rslt));
     }
-  rslt = angel_RDI_info (RDIInfo_Icebreaker, &arg1, &arg2);
+
+  /*
+  ** There's no point asking if the target's an ICEBreaker, unless
+  ** you're going to do something with the answer. All it does is provoke
+  ** an error message on non-ICE targets
+  rslt = angel_RDI_info (RDIInfo_Icebreaker, & arg1, & arg2);
   if (rslt)
     {
       printf_filtered ("RDI_info: %s\n", rdi_error_message (rslt));
     }
-  rslt = angel_RDI_info (RDIInfo_DownLoad, &arg1, &arg2);
+    */
+
+  /*
+  ** There's no point asking if the target can accept a configuration download,
+  ** unless you're going to do something with the answer. All it does is
+  ** provoke an error message on non-ICE targets
+  rslt = angel_RDI_info (RDIInfo_DownLoad, & arg1, & arg2);
   if (rslt)
     {
       printf_filtered ("RDI_info: %s\n", rdi_error_message (rslt));
     }
+    */
+
   rslt = angel_RDI_info (RDIInfo_GetLoadSize, &arg1, &arg2);
   if (rslt)
     {
