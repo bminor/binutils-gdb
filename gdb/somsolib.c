@@ -1,5 +1,5 @@
 /* Handle HP SOM shared libraries for GDB, the GNU Debugger.
-   Copyright 1993, 1996 Free Software Foundation, Inc.
+   Copyright 1993, 1996, 1999 Free Software Foundation, Inc.
 
 This file is part of GDB.
 

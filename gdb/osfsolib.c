@@ -1,5 +1,5 @@
 /* Handle OSF/1 shared libraries for GDB, the GNU Debugger.
-   Copyright 1993, 1994, 1995, 1996, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 94, 95, 96, 98, 1999 Free Software Foundation, Inc.
    
 This file is part of GDB.
 
