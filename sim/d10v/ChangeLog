@@ -1,3 +1,27 @@
+Thu Nov 27 15:30:01 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (OP_1000): Compute carry by comparing inputs.
+
+Mon Nov 17 20:57:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (OP_1): Use 32 bit unsigned arithmetic for subtract,
+ 	carry indicated by value > 0xffff.
+
+Fri Nov 14 12:51:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_resume): Don't set up SIGINT handler using signal,
+ 	handled by client.
+	(sim_resume): Fix race condition of a direct assignment to
+ 	stop_simulator, conditionally call sim_stop.
+	(sim_stop_reason): Check stop_simulator returning SIGINT.  Clear
+ 	stop_simulator ready for next sim_resume call.
+	(sim_ctrl_c): Delete function.
+
+Thu Nov 13 19:29:34 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_resume): For "REP", only check/update the PC when
+ 	a branch instruction has not been executed.
+
 Mon Nov 10 17:50:18 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (OP_4201): "rachi". Sign extend bit 40 of ACC.  Sign

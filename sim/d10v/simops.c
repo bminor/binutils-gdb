@@ -1931,23 +1931,23 @@ OP_5201 ()
 void
 OP_4201 ()
 {
-  int64 tmp;
+  signed64 tmp;
   int shift = SEXT3 (OP[2]);
 
   trace_input ("rachi", OP_REG_OUTPUT, OP_ACCUM, OP_CONSTANT3);
   State.F1 = State.F0;
   if (shift >=0)
-    tmp = SEXT44 (State.a[OP[1]]) << shift;
+    tmp = SEXT40 (State.a[OP[1]]) << shift;
   else
-    tmp = SEXT44 (State.a[OP[1]]) >> -shift;
+    tmp = SEXT40 (State.a[OP[1]]) >> -shift;
   tmp += 0x8000;
 
-  if (tmp > MAX32)
+  if (tmp > SEXT44 (SIGNED64 (0x0007fffffff)))
     {
       State.regs[OP[0]] = 0x7fff;
       State.F0 = 1;
     }
-  else if (tmp < 0xfff80000000LL)
+  else if (tmp < SEXT44 (SIGNED64 (0xfff80000000)))
     {
       State.regs[OP[0]] = 0x8000;
       State.F0 = 1;
@@ -2480,8 +2480,10 @@ OP_1000 ()
   trace_input ("sub2w", OP_DREG, OP_DREG, OP_VOID);
   a = (uint32)((State.regs[OP[0]] << 16) | State.regs[OP[0]+1]);
   b = (uint32)((State.regs[OP[1]] << 16) | State.regs[OP[1]+1]);
-  tmp = a-b;
-  State.C = (tmp > a);
+  /* see ../common/sim-alu.h for a more extensive discussion on how to
+     compute the carry/overflow bits */
+  tmp = a - b;
+  State.C = (a < b);
   State.regs[OP[0]] = (tmp >> 16) & 0xffff;
   State.regs[OP[0]+1] = tmp & 0xffff;
   trace_output (OP_DREG);
@@ -2577,14 +2579,17 @@ OP_17001002 ()
 void
 OP_1 ()
 {
-  uint16 tmp;
+  unsigned tmp;
   if (OP[1] == 0)
     OP[1] = 16;
 
   trace_input ("subi", OP_REG, OP_CONSTANT16, OP_VOID);
-  tmp = State.regs[OP[0]] - OP[1];
-  State.C = (tmp > State.regs[OP[0]]);
-  State.regs[OP[0]] = tmp;  
+  /* see ../common/sim-alu.h for a more extensive discussion on how to
+     compute the carry/overflow bits */
+  tmp = ((unsigned)(unsigned16) State.regs[OP[0]]
+	 + (unsigned)(unsigned16) ( - OP[1]));
+  State.C = (tmp >= (1 << 16));
+  State.regs[OP[0]] = tmp;
   trace_output (OP_REG);
 }
 
