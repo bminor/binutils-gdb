@@ -1060,7 +1060,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      to IN_SIGTRAMP.  */
 
   if (SIGCONTEXT_REGISTER_ADDRESS_P () 
-      && (fi->signal_handler_caller || IN_SIGTRAMP (fi->pc, 0)))
+      && (fi->signal_handler_caller || IN_SIGTRAMP (fi->pc, (char *)0)))
     {
       for (reg = 0; reg < NUM_REGS; reg++)
 	fi->fsr.regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, fi->pc, reg);
