@@ -1,3 +1,11 @@
+2004-02-17  Jim Blandy  <jimb@redhat.com>
+
+	* stabsread.c (read_type): If we find any type numbers that are
+	forward references, complain if the references aren't resolved by
+	the time we're finished reading.
+	(cleanup_undefined_types): Make error message more appropriate for
+	a complaint.
+
 2004-02-17  Elena Zannoni  <ezannoni@redhat.com>
 
 	* Makefile.in (defs_h): Remove dependency on progress_h.
