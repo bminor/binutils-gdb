@@ -1,7 +1,38 @@
+Tue Oct 18 11:18:21 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* binutils-all/nm.exp: nm with no arguments and nm -P do not work
+	as expected on ECOFF targets; add calls to setup_xfail.
+
+	* binutils-all/objcopy.exp: New file.
+	* config/default.exp: Initialize OBJCOPY and OBJCOPYFLAGS.
+
+Fri Oct 14 14:46:22 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	Rewrite testsuite.
+	* configure.in, Makefile.in: Remove.
+	* binutils-all/configure.in, binutils-all/Makefile.in: Remove.
+	* binutils-all/bintest.c: Remove.
+	* binutils-all/bintest.s: New file.
+	* binutils-all/nm.exp, binutils-all/objdump.exp: Rewrite.
+	* binutils-all/size.exp: Rewrite.
+	* config/default.exp: Load utils-lib.exp.  Set AS and ASFLAGS.
+	Don't go up one directory from $base_dir.  Create tmpdir.
+	(binutils_run, binutils-assemble): New procedures.
+	* config/unix.exp: Remove.
+	* config/mt-a29k-udi, config/mt-i386-aout: Remove.
+	* config/mt-i960-nindy, config/mt-lynx, config/mt-m68k: Remove.
+	* config/mt-mips-ecoff, config/mt-slite: Remove.
+	* config/mt-sparc-aout, config/mt-vxworks: Remove.
+	* lib/utils-lib.exp (binutil_version): Don't redirect standard
+	input when getting version.  Don't unset errorInfo.
+	(default_binutils_run): New procedure.
+	(default_binutils_assemble): New procedure.
+
 Thu Sep 29 12:45:39 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
-	* VMS does not permits `.' in directory names.  Renamed
-	binutils.all to binutils-all.
+	* VMS does not permit `.' in directory names: renamed binutils.all
+	to binutils-all.
+	* configure.in (configdirs): Change binutils.all to binutils-all.
 
 Fri Sep 23 16:01:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 

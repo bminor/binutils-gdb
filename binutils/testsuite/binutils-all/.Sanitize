@@ -25,6 +25,7 @@ Things-to-keep:
 
 bintest.s
 nm.exp
+objcopy.exp
 objdump.exp
 size.exp
 
