@@ -21,7 +21,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Native only:  Need struct tbtable in <sys/debug.h> from host, and 
-		 need xcoff_add_toc_to_loadinfo in rs6000-tdep.c from target. */
+		 need xcoff_add_toc_to_loadinfo in rs6000-tdep.c from target.
+		 need xcoff_init_loadinfo ditto.  
+   However, if you grab <sys/debug.h> and make it available on your
+   host, and define FAKING_RS6000, then this code will compile.  */
 
 #include "defs.h"
 #include "bfd.h"
@@ -953,16 +956,11 @@ retrieve_traceback (abfd, textsec, cs, size)
 }
 
 
-/* A parameter template, used by ADD_PARM_TO_PENDING. */
+/* A parameter template, used by ADD_PARM_TO_PENDING.  It is initialized
+   in our initializer function at the bottom of the file, to avoid
+   dependencies on the exact "struct symbol" format.  */
 
-static struct symbol parmsym = {		/* default parameter symbol */
-	"",					/* name */
-	VAR_NAMESPACE,				/* namespace */
-	LOC_ARG,				/* class */
-	NULL,					/* type */
-	0,					/* line number */
-	0,					/* value */
-};
+static struct symbol parmsym;
 
 /* Add a parameter to a given pending symbol list. */ 
 
@@ -1599,7 +1597,9 @@ function_entry_point:
      If no XMC_TC0 is found, toc_offset should be zero. Another place to obtain
      this information would be file auxiliary header. */
 
+#ifndef FAKING_RS6000
   xcoff_add_toc_to_loadinfo (toc_offset);
+#endif
 }
 
 #define	SYMBOL_DUP(SYMBOL1, SYMBOL2)	\
@@ -2232,9 +2232,11 @@ xcoff_symfile_read (objfile, section_offset, mainline)
   init_minimal_symbol_collection ();
   make_cleanup (discard_minimal_symbols, 0);
 
+#ifndef FAKING_RS6000
   /* Initialize load info structure. */
   if (mainline)
     xcoff_init_loadinfo ();
+#endif
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly. */
@@ -2296,4 +2298,11 @@ void
 _initialize_xcoffread ()
 {
   add_symtab_fns(&xcoff_sym_fns);
+
+  /* Initialize symbol template later used for arguments.  */
+  SYMBOL_NAME (&parmsym) = "";
+  SYMBOL_INIT_LANGUAGE_SPECIFIC (&parmsym, language_c);
+  SYMBOL_NAMESPACE (&parmsym) = VAR_NAMESPACE;
+  SYMBOL_CLASS (&parmsym) = LOC_ARG;
+  /* Its other fields are zero, or are filled in later.  */
 }
