@@ -1,3 +1,11 @@
+2005-03-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (is_ppc_elf_target): New function.
+	(ppc_elf_merge_private_bfd_data): Use it rather than just testing
+	for bfd_target_elf_flavour.  Do this test before endian check.
+	(ppc_elf_add_symbol_hook): Use is_pcc_elf_target.
+	(ppc_elf_size_dynamic_sections): Likewise.
+
 2005-03-17  Paul Brook <paul@codesourcery.com>
 	    Dan Jacobowitz <dan@codesourcery.com>
 	    Mark Mitchell  <mark@codesourcery.com>

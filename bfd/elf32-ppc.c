@@ -2218,6 +2218,17 @@ ppc_elf_set_private_flags (bfd *abfd, flagword flags)
   return TRUE;
 }
 
+/* Return 1 if target is one of ours.  */
+
+static bfd_boolean
+is_ppc_elf_target (const struct bfd_target *targ)
+{
+  extern const bfd_target bfd_elf32_powerpc_vec;
+  extern const bfd_target bfd_elf32_powerpcle_vec;
+
+  return targ == &bfd_elf32_powerpc_vec || targ == &bfd_elf32_powerpcle_vec;
+}
+
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -2228,13 +2239,13 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   flagword new_flags;
   bfd_boolean error;
 
+  if (!is_ppc_elf_target (ibfd->xvec)
+      || !is_ppc_elf_target (obfd->xvec))
+    return TRUE;
+
   /* Check if we have the same endianess.  */
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     return FALSE;
-
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
   old_flags = elf_elfheader (obfd)->e_flags;
@@ -3296,7 +3307,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       Elf_Internal_Shdr *symtab_hdr;
       asection *srel;
 
-      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+      if (!is_ppc_elf_target (ibfd->xvec))
 	continue;
 
       for (s = ibfd->sections; s != NULL; s = s->next)
@@ -4368,8 +4379,7 @@ ppc_elf_add_symbol_hook (bfd *abfd,
   if (sym->st_shndx == SHN_COMMON
       && !info->relocatable
       && sym->st_size <= elf_gp_size (abfd)
-      && (info->hash->creator == abfd->xvec
-	  || info->hash->creator == abfd->xvec->alternative_target))
+      && is_ppc_elf_target (info->hash->creator))
     {
       /* Common symbols less than or equal to -G nn bytes are automatically
 	 put into .sbss.  */
