@@ -47,23 +47,12 @@
    since byte orders and value sizes don't need to be adjusted.  */
 #undef CROSS_COMPILE
 
-/* Some IBM compilers can't handle some of the (rather basic) constructs
-   used in the 68k support code.  */
-#undef IBM_COMPILER_SUX
-
 /* Some gas code wants to know these parameters.  */
 #define TARGET_ALIAS	"vms"
 #define TARGET_CPU	"vax"
 #define TARGET_CANONICAL	"vax-dec-vms"
 #define TARGET_OS	"vms"
 #define TARGET_VENDOR	"dec"
-
-/* Some operating systems, for example DOS, require the use of "wb" mode when
-   opening a binary file for writing.  If only "w" is used, the file will not
-   be correct.  However, some other systems reject such a mode.  This indicates
-   which ../include/fopen-*.h header file we want to include, so that we can
-   get macros that'll do the right thing for this system.  */
-#undef WANT_FOPEN_BIN
 
 /* Sometimes the system header files don't declare malloc and realloc.  */
 #undef NEED_DECLARATION_MALLOC

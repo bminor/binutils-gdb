@@ -43,7 +43,8 @@ changequote([,])dnl
   mips*)	cpu_type=mips endian=big ;;
   powerpc*)	cpu_type=ppc ;;
   rs6000*)	cpu_type=ppc ;;
-  sparc64)	cpu_type=sparc obj_format=elf AC_DEFINE(sparcv9) ;;
+  sparc64)	cpu_type=sparc obj_format=elf
+		AC_DEFINE(sparcv9) ;;
   sparclite*)   cpu_type=sparc ;;
   *)		cpu_type=${target_cpu} ;;
 esac
@@ -70,7 +71,7 @@ case ${generic_target} in
   alpha-*-netware*)	obj_format=ecoff ;;
   alpha-*-osf*)		obj_format=ecoff ;;
 
-  arm-*-riscix*)	obj_format=aout bfd_gas=yes ;;
+  arm-*-riscix*)	obj_format=aout ;;
 
   hppa-*-*elf*)		obj_format=elf emulation=hppa ;;
   hppa-*-osf*)		obj_format=som emulation=hppa ;;
@@ -115,14 +116,14 @@ case ${generic_target} in
   m68k-apollo-*)	obj_format=coff gas_target=apollo emulation=apollo ;;
   m68k-*-coff | m68k-*-sysv*)
 			obj_format=coff gas_target=m68kcoff ;;
-  m68k-*-hpux)		obj_format=hp300 emulation=hp300 ;;
+  m68k-*-hpux*)		obj_format=hp300 emulation=hp300 ;;
   m68k-*-lynxos*)	obj_format=coff gas_target=m68kcoff
 			 emulation=lynx ;;
 
   m88k-*-coff*)		obj_format=coff gas_target=m88kcoff ;;
 
   # don't change emulation like *-*-bsd does
-  mips-*-bsd*)		bfd_gas=yes obj_format=aout gas_target=mips-lit ;;
+  mips-*-bsd*)		obj_format=aout gas_target=mips-lit ;;
   mips-*-ultrix*)	obj_format=ecoff gas_target=mips-lit ;;
   mips-*-ecoff*)	obj_format=ecoff 
 			case "$endian" in
@@ -141,22 +142,22 @@ case ${generic_target} in
 			*)   gas_target=mips-lit ;;
 			esac
 			;;
-  ppc-*-aix*)		obj_format=coff bfd_gas=yes ;;
-  ppc-*-elf*)		obj_format=elf bfd_gas=yes ;;
+  ppc-*-aix*)		obj_format=coff ;;
+  ppc-*-elf*)		obj_format=elf ;;
   ppc-*-netware*)	obj_format=elf emulation=ppcnw ;;
-  ppc-*-sysv4*)		obj_format=elf bfd_gas=yes ;;
+  ppc-*-sysv4*)		obj_format=elf ;;
 
   sh-*-coff)		obj_format=coff ;;
 
-  ns32k-pc532-mach*)	obj_format=aout emulation=pc532 bfd_gas=yes ;;
-  ns32k-pc532-netbsd*)	obj_format=aout emulation=netbsd532 bfd_gas=yes ;;
+  ns32k-pc532-mach*)	obj_format=aout emulation=pc532 ;;
+  ns32k-pc532-netbsd*)	obj_format=aout emulation=nbsd532 ;;
 
-  sparc*-*-sunos4*)	obj_format=aout emulation=sun3 bfd_gas=yes ;;
+  sparc*-*-sunos4*)	obj_format=aout emulation=sun3 ;;
   sparc*-*-aout | sparc*-*-vxworks)
-			obj_format=aout bfd_gas=yes ;;
-  sparc*-*-coff)	obj_format=coff bfd_gas=yes ;;
-  sparc*-*-lynxos*)	obj_format=coff bfd_gas=yes emulation=lynx ;;
-  sparc*-fujitsu-none)	obj_format=aout bfd_gas=yes ;;
+			obj_format=aout ;;
+  sparc*-*-coff)	obj_format=coff ;;
+  sparc*-*-lynxos*)	obj_format=coff emulation=lynx ;;
+  sparc*-fujitsu-none)	obj_format=aout ;;
   sparc*-*-elf | sparc*-*-solaris*)
 			obj_format=elf ;;
 
@@ -210,11 +211,19 @@ fi
 # and target makefile frag
 
 target_frag=${srcdir}/config/${gas_target}.mt
+if test ! -r ${target_frag}; then
+  target_frag=/dev/null # ick! but subst_file can't be conditionalized
+fi
 AC_SUBST_FILE(target_frag)
 
 case ${cpu_type}-${obj_format} in
+  arm-*)	bfd_gas=yes ;;
 # not yet
 # i386-aout)	bfd_gas=preferred ;;
+  mips-*)	bfd_gas=yes ;;
+  ns32k-*)	bfd_gas=yes ;;
+  ppc-*)	bfd_gas=yes ;;
+  sparc*-*)	bfd_gas=yes ;;
   *-elf)	bfd_gas=yes ;;
   *-ecoff)	bfd_gas=yes ;;
   *-som)	bfd_gas=yes ;;
@@ -232,6 +241,9 @@ case ${user_bfd_gas}-${bfd_gas} in
     bfd_gas=no
     ;;
   *-preferred)
+    bfd_gas=yes
+    ;;
+  yes-*)
     bfd_gas=yes
     ;;
   -*)
@@ -277,16 +289,6 @@ AC_DEFINE_UNQUOTED(TARGET_CPU,		"${target_cpu}")
 AC_DEFINE_UNQUOTED(TARGET_VENDOR,	"${target_vendor}")
 AC_DEFINE_UNQUOTED(TARGET_OS,		"${target_os}")
 
-case ${host} in
-  rs6000-*-*)
-	# The IBM compiler mis-compiles some expressions used in gas.
-	# This will tell gas to work around this lossage.
-	AC_DEFINE(IBM_COMPILER_SUX) ;;
-  i386-*-go32)
-	# Using fopen(..., "w") for a binary file breaks under DOS.
-	AC_DEFINE(WANT_FOPEN_BIN)   ;;
-esac
-
 AC_PROG_CC
 AC_PROG_INSTALL
 
@@ -296,10 +298,10 @@ AC_CHECK_HEADERS(string.h stdlib.h memory.h strings.h unistd.h stdarg.h varargs.
 # people who are not cross-compiling but are compiling cross-assemblers.
 AC_MSG_CHECKING(whether compiling a cross-assembler)
 if test "${host}" = "${target}"; then
+  cross_gas=no
+else
   cross_gas=yes
   AC_DEFINE(CROSS_COMPILE)
-else
-  cross_gas=no
 fi
 AC_MSG_RESULT($cross_gas)
 
@@ -308,8 +310,8 @@ dnl AC_CONST
 AC_FUNC_ALLOCA
 AC_C_INLINE
 
-# VMS needs this.
-AC_CHECK_FUNCS(unlink delete, break)
+# VMS doesn't have unlink.
+AC_CHECK_FUNCS(unlink remove, break)
 
 # Some non-ANSI preprocessors botch requoting inside strings.  That's bad
 # enough, but on some of those systems, the assert macro relies on requoting
@@ -347,6 +349,4 @@ GAS_CHECK_DECL_NEEDED(errno, f, int f, [
 AC_CONFIG_SUBDIRS(testsuite)
 
 dnl This must come last.
-dnl Apparently symlinks are checked for in the directory containing
-dnl  the last Makefile.  Thus the order used here...
 AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in)

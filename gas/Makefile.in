@@ -53,7 +53,7 @@ infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
-VERSION=cygnus-2.4.90
+VERSION=cygnus-2.5
 
 SHELL = /bin/sh
 
@@ -67,7 +67,7 @@ DISTSTUFF= make-gas.com
 
 AR = ar
 AR_FLAGS = qv
-BISON = bison
+BISON = bison -y
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 RANLIB = ranlib
@@ -439,7 +439,7 @@ $(srcdir)/as.info: $(srcdir)/doc/as.texinfo
 diststuff: $(DISTSTUFF)
 
 clean-here:
-	-rm -f $(STAGESTUFF) core
+	-rm -f $(STAGESTUFF) core stamp-mk.com
 
 clean mostlyclean: clean-here
 	@cd doc ; $(MAKE) $(FLAGS_TO_PASS) $@
@@ -455,7 +455,7 @@ distclean: clean-here
 	else true; fi
 	-rm -f config.status Makefile targ-env.h targ-cpu.h \
 		targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
-		config-stamp config.h conf config.log config.cache
+		config-stamp config.h conf config.log config.cache .gdbinit
 realclean: clean distclean
 	-rm -rf $(DISTSTUFF)
 
@@ -536,8 +536,24 @@ stage3: force
 
 against=stage2
 
+# This rule is derived from corresponding code in the Makefile.in for gcc.
+# The "tail +16c" is to bypass headers which may include timestamps or
+# temporary assembly file names.
 comparison: force
-	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
+	x=0 ; \
+	for file in $(STAGESTUFF) ; do \
+	  tail +16c ./$$file > tmp-foo1; \
+	  if tail +16c ${against}/$$file > tmp-foo2 2>/dev/null ; then \
+	    if cmp tmp-foo1 tmp-foo2 ; then \
+	      true ; \
+	    else \
+	      echo $$file differs ; \
+	      x=1 ; \
+	    fi ; \
+	  else true; fi ; \
+	done ; \
+	exit $$x
+	-rm -f tmp-foo*
 
 de-stage1: force
 	- (cd stage1 ; rm -f as ; mv -f * ..)

@@ -1,3 +1,59 @@
+Thu Nov  3 17:44:47 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	Changes from net 2.5.2 release branch:
+
+	* configure.in: Put AC_DEFINE(sparcv9) on its own line, so that
+	the shell variable settings associated with it are permanent.  For
+	CPUs requiring bfd_gas=yes, select it based on CPU only, not
+	individual target names.  Handle m68k-hp-hpux*, not just -hpux.
+
+	* config/tc-z8k.c (tc_coff_symbol_emit_hook): Add dummy argument
+	to match prototype in obj-coff.h.
+
+	* configure.in: Skip tests for defining WANT_FOPEN_BIN and
+	IBM_COMPILER_SUX.
+	* acconfig.h: Deleted them.
+	* configure, conf.in: Rebuild with autoconf 2.0.
+	* config/go32.cfg, config/vms-conf.h: Updated.
+
+	* config/tc-m68k.c (md_apply_fix_2, md_convert_frag_1): Always use
+	IBM_COMPILER_SUX version of code, with comments indicating why.
+
+	* listing.c (file_info): Use text mode when opening file for read.
+	Use "r" directly, no macro.
+	* input-file.c (input_file_open): Don't use FOPEN_RT, just use
+	"r".
+	* read.c (s_include): Ditto.
+	* output-file.c (output_file_create): Try both "wb" and "w", don't
+	bother with FOPEN_* macros.
+	* as.h: Don't include fopen-*.h.
+
+	* config/alpha-opcode.h: Make "ret" with no operands equivalent to
+	"ret zero,(ra)", to match OSF1 and to be consistent with both
+	one-operand forms.
+
+	Patches from DJ Delorie:
+	* as.h (alloca): undef alloca before defining it just in case
+	* config/go32.cfg: new file for autoconf values
+	* config/te-go32.h: new file
+	* configure.bat: new for autoconf
+
+	* config/tc-i386.c (md_assemble): Fix typo in GOTPC check; had =
+	for ==.
+
+	* configure.in: If target_frag doesn't exist, use /dev/null.
+
+	* as.c (parse_args): For non-VMS systems, re-add `v' to
+	std_shortopts.  Add "verbose" to list of long options.
+
+	* write.c (adjust_reloc_syms): When generating an absolute section
+	symbol as a placeholder, don't mark it as used in a relocation
+	entry, here.
+
+	* Makefile.in (comparison): Compare using makefile code from gcc,
+	stripped down to discard subdir stuff and adapted to give a
+	non-zero exit status if either file differs.
+
 Thu Nov  3 15:43:02 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/tc-mips.c (load_address): Fix RELAX_ENCODE arguments for

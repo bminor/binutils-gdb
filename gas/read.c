@@ -2644,7 +2644,7 @@ s_include (arg)
       strcpy (path, include_dirs[i]);
       strcat (path, "/");
       strcat (path, filename);
-      if (0 != (try = fopen (path, FOPEN_RT)))
+      if (0 != (try = fopen (path, "r")))
 	{
 	  fclose (try);
 	  goto gotit;

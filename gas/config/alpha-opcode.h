@@ -221,7 +221,7 @@ static const struct alpha_opcode alpha_opcodes[] =
 { "jsr",        0x68004000, 0, "1,Bc" },	/* macro: lda $pv,L;jsr .. */
 { "ret",        0x68008000, 0, "1,(2),i" },
 { "ret",        0x68008000, 0, "1,(2)" },
-{ "ret",        0x6b5a8000, 0, "" },		/* macro: ret ra,(ra) */
+{ "ret",        0x6bfa8000, 0, "" },		/* macro: ret zero,(ra) */
 { "ret",        0x6be08000, 0, "(2)" },		/* macro: ret zero,(2) */
 { "ret",        0x681a8000, 0, "1" },		/* macro: ret 1,(ra) */
 { "jcr",        0x6800c000, 0, "1,(2)" },
