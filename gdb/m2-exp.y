@@ -39,11 +39,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 #include "parser-defs.h"
 
-/* In case the system defines these as macros, get rid of them; we use
-   them as tokens.  */
-#undef MAX
-#undef MIN
-
 /* These MUST be included in any grammar file!!!!
    Please choose unique names! */
 #define	yymaxdepth m2_maxdepth
@@ -136,7 +131,7 @@ char *make_qualname();
 %token <sval> NAME BLOCKNAME IDENT CONST VARNAME
 %token <sval> TYPENAME
 
-%token SIZE CAP ORD HIGH ABS MIN MAX FLOAT_FUNC VAL CHR ODD TRUNC
+%token SIZE CAP ORD HIGH ABS MIN_FUNC MAX_FUNC FLOAT_FUNC VAL CHR ODD TRUNC
 %token INC DEC INCL EXCL
 
 /* The GDB scope operator */
@@ -216,13 +211,13 @@ exp	: 	HIGH '(' exp ')'
 			{ write_exp_elt_opcode (UNOP_HIGH); }
 	;
 
-exp 	:	MIN '(' type ')'
+exp 	:	MIN_FUNC '(' type ')'
 			{ write_exp_elt_opcode (UNOP_MIN);
 			  write_exp_elt_type ($3);
 			  write_exp_elt_opcode (UNOP_MIN); }
 	;
 
-exp	: 	MAX '(' type ')'
+exp	: 	MAX_FUNC '(' type ')'
 			{ write_exp_elt_opcode (UNOP_MAX);
 			  write_exp_elt_type ($3);
 			  write_exp_elt_opcode (UNOP_MIN); }
@@ -804,8 +799,8 @@ static struct keyword keytab[] =
     {"NOT",   NOT	 },
     {"DIV",   DIV    	 },
     {"INC",   INC	 },
-    {"MAX",   MAX	 },
-    {"MIN",   MIN	 },
+    {"MAX",   MAX_FUNC	 },
+    {"MIN",   MIN_FUNC	 },
     {"MOD",   MOD	 },
     {"ODD",   ODD	 },
     {"CAP",   CAP	 },
