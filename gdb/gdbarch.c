@@ -65,7 +65,8 @@
 /* Static function declarations */
 
 static void verify_gdbarch (struct gdbarch *gdbarch);
-static void check_gdbarch_data (struct gdbarch *);
+static void alloc_gdbarch_data (struct gdbarch *);
+static void init_gdbarch_data (struct gdbarch *);
 static void free_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_swap (struct gdbarch *);
 static void swapout_gdbarch_swap (struct gdbarch *);
@@ -396,6 +397,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
 {
   struct gdbarch *gdbarch = XMALLOC (struct gdbarch);
   memset (gdbarch, 0, sizeof (*gdbarch));
+
+  alloc_gdbarch_data (gdbarch);
 
   gdbarch->tdep = tdep;
 
@@ -4334,81 +4337,66 @@ register_gdbarch_data (gdbarch_data_init_ftype *init,
 }
 
 
-/* Delete GDBARCH's data vector. */
+/* Walk through all the registered users initializing each in turn. */
+
+static void
+init_gdbarch_data (struct gdbarch *gdbarch)
+{
+  struct gdbarch_data_registration *rego;
+  for (rego = gdbarch_data_registry.registrations;
+       rego != NULL;
+       rego = rego->next)
+    {
+      struct gdbarch_data *data = rego->data;
+      gdb_assert (data->index < gdbarch->nr_data);
+      if (data->init != NULL)
+        {
+          void *pointer = data->init (gdbarch);
+          set_gdbarch_data (gdbarch, data, pointer);
+        }
+    }
+}
+
+/* Create/delete the gdbarch data vector. */
+
+static void
+alloc_gdbarch_data (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch->data == NULL);
+  gdbarch->nr_data = gdbarch_data_registry.nr;
+  gdbarch->data = xcalloc (gdbarch->nr_data, sizeof (void*));
+}
 
 static void
 free_gdbarch_data (struct gdbarch *gdbarch)
 {
-  if (gdbarch->data != NULL)
+  struct gdbarch_data_registration *rego;
+  gdb_assert (gdbarch->data != NULL);
+  for (rego = gdbarch_data_registry.registrations;
+       rego != NULL;
+       rego = rego->next)
     {
-      struct gdbarch_data_registration *rego;
-
-      for (rego = gdbarch_data_registry.registrations;
-           rego != NULL;
-           rego = rego->next)
+      struct gdbarch_data *data = rego->data;
+      gdb_assert (data->index < gdbarch->nr_data);
+      if (data->free != NULL && gdbarch->data[data->index] != NULL)
         {
-          struct gdbarch_data *data = rego->data;
-      
-          if (data->index < gdbarch->nr_data
-              && data->free != NULL
-              && gdbarch->data[data->index] != NULL)
-            {
-              data->free (gdbarch, gdbarch->data[data->index]);
-              gdbarch->data[data->index] = NULL;
-            }
+          data->free (gdbarch, gdbarch->data[data->index]);
+          gdbarch->data[data->index] = NULL;
         }
-      xfree (gdbarch->data);
-      gdbarch->data = NULL;
     }
+  xfree (gdbarch->data);
+  gdbarch->data = NULL;
 }
 
 
-/* Make sure that GDBARCH has space for all registered per-
-   architecture data.  If not, expand the table and initialize the
-   data values.  */
-static void
-check_gdbarch_data (struct gdbarch *gdbarch)
-{
-  int nr_allocated = gdbarch->nr_data;
-
-  /* How many per-architecture data items are registered so far?  */
-  int nr_registered = gdbarch_data_registry.nr;
-
-  if (nr_allocated < nr_registered)
-    {
-      /* Get enough room for all registered items, not just DATA.  */
-      int new_size = sizeof (gdbarch->data[0]) * nr_registered;
-      struct gdbarch_data_registration *rego;
-      
-      /* Expand the array, or perhaps allocate it for the first time.  */
-      gdbarch->data = (void **) (gdbarch->data
-                                 ? xrealloc (gdbarch->data, new_size)
-                                 : xmalloc (new_size));
-
-      /* Record the size now allocated.  */
-      gdbarch->nr_data = nr_registered;
-
-      /* Initialize the elements we just added.  */
-      for (rego = gdbarch_data_registry.registrations;
-           rego != NULL;
-           rego = rego->next)
-        {
-          struct gdbarch_data *data = rego->data;
-          
-          if (data->index >= nr_allocated)
-            gdbarch->data[data->index]
-              = (data->init != NULL ? data->init (gdbarch) : NULL);
-        }
-    }
-}
-
+/* Initialize the current value of thee specified per-architecture
+   data-pointer. */
 
 void
 set_gdbarch_data (struct gdbarch *gdbarch,
                   struct gdbarch_data *data,
                   void *pointer)
 {
-  check_gdbarch_data (gdbarch);
   gdb_assert (data->index < gdbarch->nr_data);
   if (data->free != NULL && gdbarch->data[data->index] != NULL)
     data->free (gdbarch, gdbarch->data[data->index]);
@@ -4421,7 +4409,6 @@ set_gdbarch_data (struct gdbarch *gdbarch,
 void *
 gdbarch_data (struct gdbarch_data *data)
 {
-  check_gdbarch_data (current_gdbarch);
   gdb_assert (data->index < current_gdbarch->nr_data);
   return current_gdbarch->data[data->index];
 }
@@ -4789,6 +4776,11 @@ gdbarch_update_p (struct gdbarch_info info)
      CURRENT_GDBARCH must be update before these modules are
      called. */
   init_gdbarch_swap (new_gdbarch);
+  
+  /* Initialize the per-architecture data-pointer of all parties that
+     registered an interest in this architecture.  CURRENT_GDBARCH
+     must be updated before these modules are called. */
+  init_gdbarch_data (new_gdbarch);
   
   if (gdbarch_debug)
     gdbarch_dump (current_gdbarch, gdb_stdlog);

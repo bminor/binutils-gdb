@@ -1,3 +1,10 @@
+2001-06-06  Jim Blandy  <jimb@redhat.com>
+
+	* gdbarch.sh, gdbarch.c: Revert change of 2001-06-01; all
+	per-architecture data should be registered at initialization time,
+	before any gdbarch objects get used, so the generality is
+	unnecessary.
+
 2001-06-06  Keith Seitz  <keiths@redhat.com>
 
 	* gdb-events.sh (function_list): Add tracepoint_create,
