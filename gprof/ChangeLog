@@ -1,3 +1,8 @@
+2003-10-11  Alan Modra  <alan@modra.org>
+
+	* corefile.c (core_create_function_syms): Don't refer directly to
+	_cooked_size and vma;  Use bfd_section_size and bfd_get_section_vma.
+
 2003-08-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/de.po: New German translation.
