@@ -1,5 +1,7 @@
 2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
 
+	* armvirt.c (ABORTS): Do not define.
+
 	* armdefs.h (struct ARMul_State): Add is_StrongARM.
 	(ARM_Strong_Prop, STRONGARM): Define.
 	* arminit.c (ARMul_NewState): Reset is_StrongARM.

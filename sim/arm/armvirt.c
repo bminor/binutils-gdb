@@ -32,7 +32,7 @@ defined to generate aborts. */
 #define ABORTS 1
 #endif
 
-#define ABORTS
+/* #define ABORTS */
 
 #ifdef ABORTS			/* the memory system will abort */
 /* For the old test suite Abort between 32 Kbytes and 32 Mbytes
