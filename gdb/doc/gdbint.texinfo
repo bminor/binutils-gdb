@@ -2020,38 +2020,44 @@ distribution!
 
 @chapter Host Definition
 
-@emph{Maintainer's note: In theory, new targets no longer need to use
-the host framework described below.  Instead it should be possible to
-handle everything using autoconf.  Patches eliminating this framework
-welcome.}
-
 With the advent of Autoconf, it's rarely necessary to have host
-definition machinery anymore.
+definition machinery anymore.  The following information is provided,
+mainly, as an historical reference.
 
 @section Adding a New Host
 
 @cindex adding a new host
 @cindex host, adding
-Most of @value{GDBN}'s host configuration support happens via
-Autoconf.  New host-specific definitions should be rarely needed.
-@value{GDBN} still uses the host-specific definitions and files listed
-below, but these mostly exist for historical reasons, and should
+@value{GDBN}'s host configuration support normally happens via Autoconf.
+New host-specific definitions should not be needed.  Older hosts
+@value{GDBN} still use the host-specific definitions and files listed
+below, but these mostly exist for historical reasons, and will
 eventually disappear.
-
-Several files control @value{GDBN}'s configuration for host systems:
 
 @table @file
 @item gdb/config/@var{arch}/@var{xyz}.mh
-Specifies Makefile fragments needed when hosting on machine @var{xyz}.
-Optionally specifies the header file which describes host @var{xyz}, by
-defining @code{XM_FILE= xm-@var{xyz}.h}.  You can also define @code{CC},
+This file once contained both host and native configuration information
+(@pxref{Native Debugging}) for the machine @var{xyz}.  The host
+configuration information is now handed by Autoconf.
+
+Host configuration information included a definition of
+@code{XM_FILE=xm-@var{xyz}.h} and possibly definitions for @code{CC},
 @code{SYSV_DEFINE}, @code{XM_CFLAGS}, @code{XM_ADD_FILES},
 @code{XM_CLIBS}, @code{XM_CDEPS}, etc.; see @file{Makefile.in}.
 
+New host only configurations do not need this file.
+
 @item gdb/config/@var{arch}/xm-@var{xyz}.h
-(@file{xm.h} is a link to this file, created by @code{configure}).  Contains C
-macro definitions describing the host system environment, such as byte
-order, host C compiler and library.
+This file once contained definitions and includes required when hosting
+gdb on machine @var{xyz}.  Those definitions and includes are now
+handled by Autoconf.
+
+New host and native configurations do not need this file.
+
+@emph{Maintainer's note: Some hosts continue to use the @file{xm-xyz.h}
+file to define the macros @var{HOST_FLOAT_FORMAT},
+@var{HOST_DOUBLE_FORMAT} and @var{HOST_LONG_DOUBLE_FORMAT}.  That code
+also needs to be replaced with either an Autoconf or run-time test.}
 
 @end table
 
@@ -3762,13 +3768,20 @@ Several files control @value{GDBN}'s configuration for native support:
 @table @file
 @vindex NATDEPFILES
 @item gdb/config/@var{arch}/@var{xyz}.mh
-Specifies Makefile fragments needed when hosting @emph{or native} on
+Specifies Makefile fragments needed by a @emph{native} configuration on
 machine @var{xyz}.  In particular, this lists the required
 native-dependent object files, by defining @samp{NATDEPFILES=@dots{}}.
 Also specifies the header file which describes native support on
 @var{xyz}, by defining @samp{NAT_FILE= nm-@var{xyz}.h}.  You can also
 define @samp{NAT_CFLAGS}, @samp{NAT_ADD_FILES}, @samp{NAT_CLIBS},
 @samp{NAT_CDEPS}, etc.; see @file{Makefile.in}.
+
+@emph{Maintainer's note: The @file{.mh} suffix is because this file
+originally contained @file{Makefile} fragments for hosting @value{GDBN}
+on machine @var{xyz}.  While the file is no longer used for this
+purpose, the @file{.mh} suffix remains.  Perhaphs someone will
+eventually rename these fragments so that they have a @file{.mn}
+suffix.}
 
 @item gdb/config/@var{arch}/nm-@var{xyz}.h
 (@file{nm.h} is a link to this file, created by @code{configure}).  Contains C
@@ -4744,6 +4757,13 @@ your system and set @code{gdb_host} to @var{xyz}, and (unless your
 desired target is already available) also edit @file{gdb/configure.tgt},
 setting @code{gdb_target} to something appropriate (for instance,
 @var{xyz}).
+
+@emph{Maintainer's note: Work in progress.  The file
+@file{gdb/configure.host} originally needed to be modified when either a
+new native target or a new host machine was being added to @value{GDBN}.
+Recent changes have removed this requirement.  The file now only needs
+to be modified when adding a new native configuration.  This will likely
+changed again in the future.}
 
 @item
 Finally, you'll need to specify and define @value{GDBN}'s host-, native-, and

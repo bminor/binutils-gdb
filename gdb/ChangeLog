@@ -1,5 +1,11 @@
 2002-01-20  Andrew Cagney  <ac131313@redhat.com>
 
+	* configure.in (host_makefile_frag): Only require a host makefile
+	fragment when a native build.
+	* configure: Re-generate.
+
+2002-01-20  Andrew Cagney  <ac131313@redhat.com>
+
 	* doublest.h (floatformat_from_type): Declare.
 	* doublest.c (floatformat_from_type): New function.
 	(convert_typed_floating): Use.
