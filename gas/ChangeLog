@@ -1,5 +1,8 @@
 Wed Jan 31 14:03:17 1996  Richard Henderson  <rth@tamu.edu>
 
+	* config/tc-m68k.c (md_pseudo_table): Add "extend" and "ldouble".
+	* doc/c-m68k.texi: Document .extend and .ldouble.
+
 	* configure.in (m68*-apple-aux*): New target.
 	* config/te-aux.h: New file.
 	* config/obj-coff.c (compare_external_relocs): New static function
