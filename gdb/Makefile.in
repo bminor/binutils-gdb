@@ -185,15 +185,6 @@ SFILES = $(SFILES_MAINDIR) $(SFILES_SUBDIR)
 # All source files that lint should look at
 LINTFILES = $(SFILES) expread.tab.c init.c
 
-# Documentation source files
-SFILES_DOCDIR = \
-	${srcdir}/doc/gdb.texinfo    \
-	${srcdir}/doc/pretex.m4      \
-	${srcdir}/doc/none.m4        \
-	${srcdir}/doc/all.m4         \
-	${srcdir}/doc/gdbinv-m.m4   \
-	${srcdir}/doc/gdbinv-s.m4   
-
 # Any additional files specified on these lines should also be added to
 # the OTHERS = definition below, so they go in the tar files.
 SFILES_STAND = $(SFILES) standalone.c
@@ -487,8 +478,7 @@ clean:
 	rm -f init.c init.o version.c
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]
-	rm -f gdb.dvi rdl-apps.texinfo gdb-all* 
-	rm -f gdbrc.ps gdbrc.dvi doc/rcfonts.tex doc/gdbrc.log
+	cd doc; make clean
 
 distclean: clean expread.tab.c TAGS
 	rm -f tm.h xm.h config.status
@@ -500,50 +490,67 @@ realclean: clean
 	rm -f tm.h xm.h config.status
 	rm -f Makefile depend
 
+STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
+
+# Copy the object files from a particular stage into a subdirectory.
+stage1: force
+	-mkdir stage1
+	-mv -f $(STAGESTUFF) stage1
+
+stage2: force
+	-mkdir stage2
+	-mv -f $(STAGESTUFF) stage2
+
+stage3: force
+	-mkdir stage3
+	-mv -f $(STAGESTUFF) stage3
+
+against=stage2
+
+comparison: force
+	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
+
+de-stage1: force
+	- (cd stage1 ; mv -f * ..)
+	- rmdir stage1
+
+de-stage2: force
+	- (cd stage2 ; mv -f * ..)
+	- rmdir stage2
+
+de-stage3: force
+	- (cd stage3 ; mv -f * ..)
+	- rmdir stage3
+
+Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
+	(cd $(srcdir) ; \
+		./configure +destdir=$(destdir) \
+		+norecurse \
+		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		$(host) +target=$(target))
+
+force:
+
 # Documentation!
 # GDB QUICK REFERENCE (TeX dvi file, CM fonts)
-gdbrc.dvi : doc/gdbrc.tex
-	( cd $(srcdir)/doc; \
-	rm -f rcfonts.tex; cp rc-cm.tex rcfonts.tex; \
-	TEXINPUTS=.:$$TEXINPUTS tex gdbrc.tex; rm -f gdbrc.log )
-	mv $(srcdir)/doc/gdbrc.dvi .
+refcard.dvi : $(srcdir)/doc/refcard.tex
+	( cd $(srcdir)/doc; make refcard.dvi )
+	mv $(srcdir)/doc/refcard.dvi .
 
 # GDB QUICK REFERENCE (PostScript output, common PS fonts)
-gdbrc.ps : doc/gdbrc.tex
-	( cd $(srcdir)/doc; \
-	rm -f rcfonts.tex; cp rc-ps.tex rcfonts.tex; \
-	TEXINPUTS=.:$$TEXINPUTS tex gdbrc.tex; \
-	dvips -t landscape gdbrc -o; rm -f gdbrc.dvi gdbrc.log )
-	mv $(srcdir)/doc/gdbrc.ps .
-
-# Cover file for "Readline" appendices
-rdl-apps.texinfo: ${READLINE_DIR}/inc-readline.texinfo \
-			${READLINE_DIR}/inc-history.texinfo
-	echo "@include ${READLINE_DIR}/inc-readline.texinfo" >rdl-apps.texinfo
-	echo "@include ${READLINE_DIR}/inc-history.texinfo" >>rdl-apps.texinfo
-
-# GDB MANUAL: texinfo source, created by preprocessing w/m4
-# Be sure to not create a bad gdb-all.texinfo if ${M4} is missing or aborts...
-gdb-all.texinfo: ${SFILES_DOCDIR}
-	rm -f gdb-all.texinfo foobus.texinfo
-	( cd $(srcdir)/doc; \
-		${M4} pretex.m4 none.m4 all.m4 gdb.texinfo ) >foobus.texinfo
-	mv foobus.texinfo gdb-all.texinfo
+refcard.ps : $(srcdir)/doc/refcard.tex
+	( cd $(srcdir)/doc; make refcard.ps )
+	mv $(srcdir)/doc/refcard.ps .
 
 # GDB MANUAL: TeX dvi file
-gdb.dvi : gdb-all.texinfo rdl-apps.texinfo
-	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texinfo
-	texindex gdb-all.??
-	TEXINPUTS=${TEXIDIR}:$$TEXINPUTS tex gdb-all.texinfo
-	mv gdb-all.dvi gdb.dvi
-	rm -f gdb-all.?? gdb-all.???
+gdb.dvi : $(srcdir)/doc/gdb-all.texinfo $(srcdir)/doc/rdl-apps.texinfo
+	( cd $(srcdir)/doc; make gdb.dvi )
+	mv $(srcdir)/doc/gdb.dvi .
 
 # GDB MANUAL: info file
-# We're using texinfo2, and older makeinfo's may not be able to
-# cope with all the markup.  In the meantime, we distribute the info
-# files as formatted by the elisp texinfo2 code.
-gdb.info: gdb-all.texinfo
-	${MAKEINFO} gdb-all.texinfo
+gdb.info: $(srcdir)/doc/gdb-all.texinfo
+	( cd $(srcdir)/doc; make gdb.info )
+	mv $(srcdir)/doc/gdb.info* .
 
 # Make copying.c from COPYING
 copying.c : COPYING copying.awk
