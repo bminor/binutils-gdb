@@ -1,3 +1,11 @@
+Tue Sep  6 11:39:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* mips.h (INSN_STORE_MEMORY): Define.
+
+Thu Jul 28 19:28:07 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* sparc.h: Document new operand type 'x'.
+
 Tue Jul 26 17:48:05 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* i960.h (I_CX2): New instruction category.

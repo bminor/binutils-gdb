@@ -62,6 +62,8 @@ Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define OP_SH_RT		16
 #define OP_MASK_FT		0x1f
 #define OP_SH_FT		16
+#define OP_MASK_CACHE		0x1f
+#define OP_SH_CACHE		16
 #define OP_MASK_RD		0x1f
 #define OP_SH_RD		11
 #define OP_MASK_FS		0x1f
@@ -120,12 +122,14 @@ struct mips_opcode
    Each of these characters corresponds to a mask field defined above.
 
    "<" 5 bit shift amount (OP_*_SHAMT)
+   ">" shift amount between 32 and 63, stored after subtracting 32 (OP_*_SHAMT)
    "a" 26 bit target address (OP_*_TARGET)
    "b" 5 bit base register (OP_*_RS)
    "c" 10 bit breakpoint code (OP_*_CODE)
    "d" 5 bit destination register specifier (OP_*_RD)
    "i" 16 bit unsigned immediate (OP_*_IMMEDIATE)
    "j" 16 bit signed immediate (OP_*_DELTA)
+   "k" 5 bit cache opcode in target register position (OP_*_CACHE)
    "o" 16 bit signed offset (OP_*_DELTA)
    "p" 16 bit PC relative branch target address (OP_*_DELTA)
    "r" 5 bit same register used as both source and target (OP_*_RS)
@@ -137,6 +141,7 @@ struct mips_opcode
    "C" 25 bit coprocessor function code (OP_*_COPZ)
    "B" 20 bit syscall function code (OP_*_SYSCALL)
    "x" accept and ignore register name
+   "z" must be zero register
 
    Floating point instructions:
    "D" 5 bit destination register (OP_*_FD)
@@ -213,7 +218,9 @@ struct mips_opcode
 #define INSN_WRITE_HI		    0x01000000
 /* Modifies the LO register.  */
 #define INSN_WRITE_LO		    0x02000000
-/* Takes a trap (FIXME: why is this interesting?).  */
+/* Instruction stores value into memory.  */
+#define INSN_STORE_MEMORY	    0x04000000
+/* Takes a trap (easier to keep out of delay slot).  */
 #define INSN_TRAP                   0x04000000
 /* MIPS ISA 2 instruction (R6000 or R4000).  */
 #define INSN_ISA2		    0x10000000
@@ -234,7 +241,6 @@ struct mips_opcode
  */
 enum {
     M_ABS,
-    M_ABSU,
     M_ADD_I,
     M_ADDU_I,
     M_AND_I,
@@ -274,6 +280,7 @@ enum {
     M_BLTUL_I,
     M_BNE_I,
     M_BNEL_I,
+    M_DABS,
     M_DADD_I,
     M_DADDU_I,
     M_DDIV_3,
@@ -296,9 +303,12 @@ enum {
     M_DREMU_3I,
     M_DSUB_I,
     M_DSUBU_I,
+    M_J_A,
+    M_JAL_1,
+    M_JAL_2,
+    M_JAL_A,
     M_L_DOB,
     M_L_DAB,
-    M_LA,
     M_LA_AB,
     M_LB_A,
     M_LB_AB,
