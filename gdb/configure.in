@@ -125,6 +125,7 @@ i[34]86-*-coff)		gdb_target=i386v ;;
 i[34]86-*-elf)		gdb_target=i386v ;;
 
 i[34]86-*-bsd*)		gdb_target=i386bsd ;;
+i[34]86-*-go32)		gdb_target=i386aout ;;
 i[34]86-*-solaris*)	gdb_target=i386sol2 ;;
 i[34]86-*-sunos*)	gdb_target=sun386 ;;
 i[34]86-*-sysv4*)	gdb_target=i386v4 ;;
@@ -193,6 +194,7 @@ sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-vxworks*)	gdb_target=sparc-un ;;
 sparc-*-*)		gdb_target=sun4os4 ;;
+sparclite-*-*)		gdb_target=sun4os4 ;;
 
 tahoe-*-*)		gdb_target=tahoe ;;
 vax-*-*)		gdb_target=vax ;;
