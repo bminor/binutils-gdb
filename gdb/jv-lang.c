@@ -136,10 +136,9 @@ add_class_symtab_symbol (struct symbol *sym)
     {
       /* Need to re-allocate. */
       class_symtab_space *= 2;
-      bl = (struct block *)
-	mrealloc (symtab->objfile->md, bl,
-		  sizeof (struct block)
-		  + ((class_symtab_space - 1) * sizeof (struct symbol *)));
+      bl = xmrealloc (symtab->objfile->md, bl,
+		      sizeof (struct block)
+		      + ((class_symtab_space - 1) * sizeof (struct symbol *)));
       class_symtab->free_ptr = (char *) bl;
       BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
     }

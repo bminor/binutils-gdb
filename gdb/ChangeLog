@@ -1,5 +1,10 @@
 2001-12-02  Andrew Cagney  <ac131313@redhat.com>
 
+	* jv-lang.c (add_class_symtab_symbol): Use xmrealloc instead of
+	mrealloc.
+
+2001-12-02  Andrew Cagney  <ac131313@redhat.com>
+
 	* i386-tdep.c (i386go32_frame_saved_pc): New function.
 	* config/i386/tm-go32.h (i386go32_frame_saved_pc): Declare.
 	(FRAME_SAVED_PC): Redefine to i386go32_frame_saved_pc.
