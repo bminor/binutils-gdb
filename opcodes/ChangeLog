@@ -1,3 +1,7 @@
+2003-12-15  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* m32r-opc.c: Regenerate.
+
 2003-12-14  Mark Mitchell  <mark@codesourcery.com>
 
 	* arm-opc.h (arm_opcodes): Put V6 instructions before XScale
