@@ -26,3 +26,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    the area occupied by the shared libraries.  Sun knows about this bug
    but has no obvious fix for it.  */
 #define BROKEN_LARGE_ALLOCA
+
+#define HAVE_STRSTR
