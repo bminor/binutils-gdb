@@ -1,3 +1,13 @@
+Thu Nov 30 20:26:02 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* dlltool.c (ppc_jtab): The binary glue for PowerPC dll linkage,
+	including the return instruction.
+	sinfo: added a preferred alignment field.
+	(secdata): section data for the PowerPC version.
+	(make_one_lib_file): More symbols, More sections (pdata, rdata)
+	(make_tail): Use idata$6 instead of idata$7 for ppc. Also added a 
+	NULL idata$3 descriptor (temporary).
+
 Tue Nov 28 17:23:44 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* dlltool.c (fill_ordinals): Don't reference d_export_vec if
