@@ -510,7 +510,7 @@ main (argc, argv)
 	 symbols will confuse it.  */
       if ((sym->flags & BSF_DEBUGGING) == 0
 	  && bfd_asymbol_name (sym)[0] == '_'
-	  && bfd_get_section (sym) == &bfd_und_section)
+	  && bfd_is_und_section (bfd_get_section (sym)))
 	{
 	  if (strcmp (bfd_asymbol_name (sym), "_edata") == 0)
 	    {
@@ -586,7 +586,7 @@ main (argc, argv)
 
       /* If it's an undefined symbol, see if it's on the import list.
 	 Change the prefix if necessary.  */
-      if (bfd_get_section (sym) == &bfd_und_section)
+      if (bfd_is_und_section (bfd_get_section (sym)))
 	{
 	  register struct string_list *l;
 
@@ -1504,7 +1504,7 @@ i386_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 
 	  /* Adjust the reloc for the changes we just made.  */
 	  rel->addend = 0;
-	  if (bfd_get_section (sym) != &bfd_und_section)
+	  if (! bfd_is_und_section (bfd_get_section (sym)))
 	    rel->sym_ptr_ptr = bfd_get_section (sym)->symbol_ptr_ptr;
 	}
 
@@ -1600,7 +1600,7 @@ alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 	}
 
       *relocs = (arelent *) xmalloc (sizeof (arelent));
-      (*relocs)->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+      (*relocs)->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
       (*relocs)->address = nlm_alpha_backend_data (outbfd)->lita_address;
       (*relocs)->addend = nlm_alpha_backend_data (outbfd)->lita_size + 1;
       (*relocs)->howto = &nlm32_alpha_nw_howto;
@@ -1614,7 +1614,7 @@ alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
       bfd_ecoff_get_gp_value (insec->owner);
 
   *relocs = (arelent *) xmalloc (sizeof (arelent));
-  (*relocs)->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+  (*relocs)->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
   (*relocs)->address = nlm_alpha_backend_data (outbfd)->gp;
   (*relocs)->addend = 0;
   (*relocs)->howto = &nlm32_alpha_nw_howto;
@@ -1754,7 +1754,7 @@ powerpc_build_stubs (inbfd, outbfd, symbols_ptr, symcount_ptr)
       /* We must make a stub for every undefined symbol whose name
 	 starts with '.'.  */
       if (bfd_asymbol_name (sym)[0] != '.'
-	  || bfd_get_section (sym) != &bfd_und_section)
+	  || ! bfd_is_und_section (bfd_get_section (sym)))
 	continue;
 
       /* Make a new undefined symbol with the same name but without

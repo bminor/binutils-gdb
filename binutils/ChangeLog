@@ -1,3 +1,15 @@
+Tue Jun 21 12:53:21 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* nlmconv.c (main): Change uses of bfd_abs_section, etc., to use
+	bfd_abs_section_ptr or bfd_is_abs_section, etc.
+	(i386_mangle_relocs, alpha_mangle_relocs): Likewise.
+	(powerpc_build_stubs): Likewise.
+	* nm.c (filter_symbols, print_symbols): Likewise.
+	* objcopy.c (filter_symbols): Likewise.
+	(mark_symbols_used_in_relocations): Likewise.
+	* objdump.c (remove_useless_symbols, dump_relocs): Likewise.
+	* size.c (sysv_internal_printer): Likewise.
+
 Mon Jun 20 16:43:03 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* Makefile.in (MANPAGES): Remove $(DEMANGLER_PROG).
