@@ -1,3 +1,8 @@
+Wed Apr 22 18:06:55 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* configure: test for and move config.status pieces from
+	  ${subdir}/.
+
 Wed Apr 22 14:38:34 1992  Fred Fish  (fnf@cygnus.com)
 
 	* config/mh-delta88, config/mh-ncr3000:  Replace MINUS_G with
