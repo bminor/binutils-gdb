@@ -1,3 +1,9 @@
+Sat Feb 24 11:38:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (bfd_elf_set_dt_needed_name): Don't do anything if the
+	format is not bfd_object.
+	(bfd_elf_get_dt_soname): Likewise.
+
 Wed Feb 21 13:58:04 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-sh.c (sh_relax_delete_bytes): Correct range of R_SH_USES

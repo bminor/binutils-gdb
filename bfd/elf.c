@@ -618,11 +618,13 @@ bfd_elf_set_dt_needed_name (abfd, name)
      bfd *abfd;
      const char *name;
 {
-  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-    elf_dt_needed_name (abfd) = name;
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+      && bfd_get_format (abfd) == bfd_object)
+    elf_dt_name (abfd) = name;
 }
 
-/* Get the list of DT_NEEDED entries for a link.  */
+/* Get the list of DT_NEEDED entries for a link.  This is a hook for
+   the ELF emulation code.  */
 
 struct bfd_link_needed_list *
 bfd_elf_get_needed_list (abfd, info)
@@ -632,6 +634,20 @@ bfd_elf_get_needed_list (abfd, info)
   if (info->hash->creator->flavour != bfd_target_elf_flavour)
     return NULL;
   return elf_hash_table (info)->needed;
+}
+
+/* Get the name actually used for a dynamic object for a link.  This
+   is the SONAME entry if there is one.  Otherwise, it is the string
+   passed to bfd_elf_set_dt_needed_name, or it is the filename.  */
+
+const char *
+bfd_elf_get_dt_soname (abfd)
+     bfd *abfd;
+{
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+      && bfd_get_format (abfd) == bfd_object)
+    return elf_dt_name (abfd);
+  return NULL;
 }
 
 /* Allocate an ELF string table--force the first byte to be zero.  */
