@@ -252,12 +252,6 @@ static int prev_insn_unreordered;
 /* Non-zero if the previous previous instruction was in a .set
    noreorder.  */
 static int prev_prev_insn_unreordered;
-
-/* The number of instructions since the last instruction which
-   accesses the data cache.  The instruction itself counts as 1, so 0
-   means no information.  This is used to work around a bug on the
-   r4600 (ORION) chip.  */
-static int insns_since_cache_access;
 
 /* Since the MIPS does not have multiple forms of PC relative
    instructions, we do not have to do relaxing as is done on other
@@ -916,18 +910,6 @@ append_insn (place, ip, address_expr, reloc_type)
 		  && (pinfo & INSN_WRITE_HI))))
 	++nops;
 
-      /* The r4600 (ORION) chip has a bug: at least four instructions
-	 are required between an instruction which accesses memory and
-	 a certain set of CACHE instructions.  Handle that now.  */
-      if (mips_cpu == 4600
-	  && insns_since_cache_access != 0
-	  && 5 - insns_since_cache_access > nops
-	  && ((ip->insn_opcode & 0xffff0000) == 0xbc0d0000
-	      || (ip->insn_opcode & 0xffff0000) == 0xbc110000
-	      || (ip->insn_opcode & 0xfc1f0000) == 0xbc150000
-	      || (ip->insn_opcode & 0xffff0000) == 0xbc190000))
-	nops = 5 - insns_since_cache_access;
-
       /* If we are being given a nop instruction, don't bother with
 	 one of the nops we would otherwise output.  This will only
 	 happen when a nop instruction is used with mips_optimize set
@@ -1231,11 +1213,6 @@ append_insn (place, ip, address_expr, reloc_type)
       prev_insn_where = f - frag_now->fr_literal;
       prev_insn_fixp = fixp;
       prev_insn_valid = 1;
-      if ((pinfo & INSN_LOAD_MEMORY_DELAY) != 0
-	  || (pinfo & INSN_STORE_MEMORY) != 0)
-	insns_since_cache_access = 1;
-      else if (insns_since_cache_access != 0)
-	++insns_since_cache_access;
     }
 
   /* We just output an insn, so the next one doesn't have a label.  */
@@ -1602,9 +1579,12 @@ load_register (counter, reg, ep)
 {
   assert (ep->X_op == O_constant);
   if (ep->X_add_number >= -0x8000 && ep->X_add_number < 0x8000)
-    macro_build ((char *) NULL, counter, ep,
-		 mips_isa < 3 ? "addiu" : "daddiu",
-		 "t,r,j", reg, 0, (int) BFD_RELOC_LO16);
+    {
+      /* No need to ever use daddiu here, since we are adding in
+         register $zero.  */
+      macro_build ((char *) NULL, counter, ep, "addiu", "t,r,j", reg, 0,
+		   (int) BFD_RELOC_LO16);
+    }
   else if (ep->X_add_number >= 0 && ep->X_add_number < 0x10000)
     macro_build ((char *) NULL, counter, ep, "ori", "t,r,i", reg, 0,
 		 (int) BFD_RELOC_LO16);
@@ -1955,7 +1935,8 @@ macro (ip)
 	  maxnum <<= 16;
 	  maxnum |= 0xffff;
 	}
-      if (imm_expr.X_add_number >= maxnum)
+      if (imm_expr.X_add_number >= maxnum
+	  && (mips_isa < 3 || sizeof (maxnum) > 4))
 	{
 	do_false:
 	  /* result is always false */
@@ -2001,7 +1982,8 @@ macro (ip)
 	  maxnum |= 0xffff;
 	}
       maxnum = - maxnum - 1;
-      if (imm_expr.X_add_number <= maxnum)
+      if (imm_expr.X_add_number <= maxnum
+	  && (mips_isa < 3 || sizeof (maxnum) > 4))
 	{
 	do_true:
 	  /* result is always true */
@@ -2136,7 +2118,8 @@ macro (ip)
 	  maxnum <<= 16;
 	  maxnum |= 0xffff;
 	}
-      if (imm_expr.X_add_number >= maxnum)
+      if (imm_expr.X_add_number >= maxnum
+	  && (mips_isa < 3 || sizeof (maxnum) > 4))
 	goto do_true;
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
@@ -5342,7 +5325,8 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_MIPS_GOT16:
     case BFD_RELOC_MIPS_GPREL32:
       if (fixP->fx_pcrel)
-	as_bad ("Invalid PC relative reloc");
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      "Invalid PC relative reloc");
       /* Nothing needed to do. The value comes from the reloc entry */
       break;
 
@@ -5411,10 +5395,11 @@ md_apply_fix (fixP, valueP)
        * the current segment).
        */
       if (value & 0x3)
-	as_warn ("Branch to odd address (%lx)", value);
+	as_warn_where (fixP->fx_file, fixP->fx_line,
+		       "Branch to odd address (%lx)", value);
       value >>= 2;
-      if ((value & ~0xFFFF) && (value & ~0xFFFF) != (-1 & ~0xFFFF))
-	as_bad ("Relocation overflow");
+      if (value < -0x8000 || value >= 0x8000)
+	as_bad_where (fixP->fx_file, fixP->fx_line, "Relocation overflow");
 
       /* update old instruction data */
       buf = (unsigned char *) (fixP->fx_where + fixP->fx_frag->fr_literal);

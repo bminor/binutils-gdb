@@ -1,3 +1,28 @@
+Wed Sep 28 11:50:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* config/tc-mips.c (md_apply_fix): Correct branch overflow test.
+	Use as_bad_where and as_warn_where rather than as_bad and as_warn.
+
+Mon Sep 26 17:15:59 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* write.c (write_relocs): Add file name and line number to
+	as_fatal calls.  Handle bfd_reloc_overflow case specifically when
+	RELOC_EXPANSION_POSSIBLE.
+
+Fri Sep 23 16:11:28 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* as.h (USE_STDARG, USE_VARARGS): Define one or neither of these
+	here.  Use them for deciding which PRINTF*LIKE macro definitions
+	to use.
+	* messages.c: Use them, instead of NO_STDARG, NO_VARARGS.
+	[!USE_STDARG && !USE_VARARGS] (va_alist, va_dcl, ...): Provide
+	default definitions matching what we were doing before.
+	(as_tsktsk): Remove the non-stdarg, non-varargs version, and
+	always use the varargs form if not using stdarg.  It's safe to
+	always use vfprintf, because libiberty will provide it if the
+	native system doesn't.  Also, always make format be const.
+	(as_warn, as_warn_where, as_bad, as_bad_where, as_fatal): Ditto.
+
 Fri Sep 23 14:42:34 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/tc-mips.c (load_register): Always use addiu when adding a
