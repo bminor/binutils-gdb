@@ -1,3 +1,7 @@
+Mon Mar 31 23:53:44 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
+
+	* config/tc-ppc.c (register_name): Declare.
+
 Mon Mar 31 16:31:04 1997  Joel Sherrill  <joel@oarcorp.com>
 
         * configure.in (hppa*-*-rtems*): New target, like hppa-*-*elf*.
