@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #if 0
 #define MASK_CHAR (0xFF)	/* If your chars aren't 8 bits, you will
@@ -378,6 +378,10 @@ read_a_source_file (name)
 	   */
 	  if (is_end_of_line[(unsigned char) input_line_pointer[-1]])
 	    {
+#ifdef md_start_line_hook
+	      md_start_line_hook ();
+#endif
+
 	      if (input_line_pointer[-1] == '\n')
 		bump_line_counters ();
 
@@ -714,6 +718,11 @@ read_a_source_file (name)
 	  input_line_pointer--;	/* Report unknown char as ignored. */
 	  ignore_rest_of_line ();
 	}			/* while (input_line_pointer<buffer_limit) */
+
+#ifdef md_after_pass_hook
+      md_after_pass_hook ();
+#endif
+
       if (old_buffer)
 	{
 	  bump_line_counters ();
@@ -1126,14 +1135,16 @@ s_lcomm (needs_align)
     }
 
 #if defined (TC_MIPS) || defined (TC_ALPHA)
-#if defined (OBJ_ECOFF) || defined (OBJ_ELF)
-  /* For MIPS and Alpha ECOFF or ELF, small objects are put in .sbss.  */
-  if (temp <= bfd_get_gp_size (stdoutput))
+  if (OUTPUT_FLAVOR == bfd_target_ecoff_flavour
+      || OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
-      bss_seg = subseg_new (".sbss", 1);
-      seg_info (bss_seg)->bss = 1;
+      /* For MIPS and Alpha ECOFF or ELF, small objects are put in .sbss.  */
+      if (temp <= bfd_get_gp_size (stdoutput))
+	{
+	  bss_seg = subseg_new (".sbss", 1);
+	  seg_info (bss_seg)->bss = 1;
+	}
     }
-#endif
 #endif
    if (!needs_align)
      {
@@ -1425,6 +1436,10 @@ s_space (mult)
   long temp_fill;
   char *p = 0;
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   /* Just like .fill, but temp_size = 1 */
   expression (&exp);
   if (exp.X_op == O_constant)
@@ -1675,6 +1690,10 @@ cons (nbytes)
      register int nbytes;	/* 1=.byte, 2=.word, 4=.long */
 {
   expressionS exp;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
 
   if (is_it_end_of_statement ())
     {
@@ -2264,6 +2283,10 @@ stringer (append_zero)		/* Worker to do .ascii etc statements. */
      register int append_zero;	/* 0: don't append '\0', else 1 */
 {
   register unsigned int c;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
 
   /*
    * The following awkward logic is to parse ZERO or more strings,

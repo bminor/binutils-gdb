@@ -16,20 +16,44 @@
 
    You should have received a copy of the GNU General Public
    License along with GAS; see the file COPYING.  If not, write
-   to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   to the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define TC_ARC 1
 
-#define LOCAL_LABELS_FB
+#define LOCAL_LABELS_FB 1
 
 #define TARGET_ARCH bfd_arch_arc
-#define TARGET_FORMAT "elf32-arc"
+
+#define LITTLE_ENDIAN   1234
+#define BIG_ENDIAN      4321
+
+/* The endianness of the target format may change based on command
+   line arguments.  */
+extern const char *arc_target_format;
+#define DEFAULT_TARGET_FORMAT "elf32-littlearc"
+#define TARGET_FORMAT arc_target_format
+#define DEFAULT_BYTE_ORDER LITTLE_ENDIAN
+
 #define LOCAL_LABEL(name)	((name)[0] == '.' && (name)[1] == 'L')
+#define FAKE_LABEL_NAME		".L0\001"
+
 #define WORKING_DOT_WORD
 
 #define LISTING_HEADER "ARC GAS "
 
 #define TC_HANDLES_FX_DONE
+
+#define MD_APPLY_FIX3
+
+/* The ARC needs to parse reloc specifiers in .word.  */
+
+extern void arc_parse_cons_expression ();
+#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) \
+arc_parse_cons_expression (EXP, NBYTES)
+
+extern void arc_cons_fix_new ();
+#define TC_CONS_FIX_NEW(FRAG, WHERE, NBYTES, EXP) \
+arc_cons_fix_new (FRAG, WHERE, NBYTES, EXP)
 
 #if 0
 /* Extra stuff that we need to keep track of for each symbol.  */

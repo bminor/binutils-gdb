@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef TC_I386
 #define TC_I386 1
@@ -100,7 +100,7 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 /* Need this for PIC relocations */
 #define NEED_FX_R_TYPE
 
-#define AOUT_MACHTYPE /* 100 */ 0
+#define AOUT_MACHTYPE 100
 #undef REVERSE_SORT_RELOCS
 
 #endif /* ! BFD_ASSEMBLER */
@@ -118,7 +118,7 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 		 && (name[1] == 'L' || name[1] == 'X' || name[1] == '.'))
 #define FAKE_LABEL_NAME ".L0\001"
 #endif
-#define LOCAL_LABELS_FB
+#define LOCAL_LABELS_FB 1
 
 #define tc_aout_pre_write_hook(x)	{;}	/* not used */
 #define tc_crawl_symbol_chain(a)	{;}	/* not used */
@@ -359,5 +359,8 @@ void i386_validate_fix ();
 #endif /* TC_I386 */
 
 #define md_operand(x)
+
+extern const struct relax_type md_relax_table[];
+#define TC_GENERIC_RELAX_TABLE md_relax_table
 
 /* end of tc-i386.h */

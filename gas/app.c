@@ -15,14 +15,13 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Modified by Allen Wirfs-Brock, Instantiations Inc 2/90 */
 /* App, the assembler pre-processor.  This pre-processor strips out excess
    spaces, turns single-quoted characters into a decimal constant, and turns
    # <number> <filename> <garbage> into a .line <number>\n.file <filename>
-   pair.  This needs better error-handling.
-   */
+   pair.  This needs better error-handling.  */
 
 #include <stdio.h>
 #include "as.h"			/* For BAD_CASE() only */
@@ -79,12 +78,11 @@ do_scrub_begin ()
 
 
 #ifdef SINGLE_QUOTE_STRINGS
-	lex['\''] = LEX_IS_STRINGQUOTE;
+  lex['\''] = LEX_IS_STRINGQUOTE;
 #endif
 
-  /* Note that these override the previous defaults, e.g. if ';'
-
-	   is a comment char, then it isn't a line separator.  */
+  /* Note that these override the previous defaults, e.g. if ';' is a
+     comment char, then it isn't a line separator.  */
   for (p = symbol_chars; *p; ++p)
     {
       lex[(unsigned char) *p] = LEX_IS_SYMBOL_COMPONENT;
@@ -110,9 +108,8 @@ do_scrub_begin ()
     {
       lex['/'] = LEX_IS_TWOCHAR_COMMENT_1ST;
     }
-  /* FIXME-soon.  This is a bad hack but otherwise, we
-	   can't do c-style comments when '/' is a line
-	   comment char. xoxorich. */
+  /* FIXME-soon.  This is a bad hack but otherwise, we can't do
+     c-style comments when '/' is a line comment char. xoxorich. */
   if (lex['*'] == 0)
     {
       lex['*'] = LEX_IS_TWOCHAR_COMMENT_2ND;
@@ -254,15 +251,28 @@ do_scrub_next_char (get, unget)
 	  8: After putting out a .appfile string, flush until newline.
 	  9: After seeing symbol char in state 3 (keep 1white after symchar)
 	 10: After seeing whitespace in state 9 (keep white before symchar)
-	  -1: output string in out_string and go to the state in old_state
-	  -2: flush text until a '*' '/' is seen, then go to state old_state
+	 11: After seeing a symbol character in state 0 (eg a label definition)
+	 -1: output string in out_string and go to the state in old_state
+	 -2: flush text until a '*' '/' is seen, then go to state old_state
 	  */
 
   /* I added states 9 and 10 because the MIPS ECOFF assembler uses
      constructs like ``.loc 1 20''.  This was turning into ``.loc
      120''.  States 9 and 10 ensure that a space is never dropped in
      between characters which could appear in a identifier.  Ian
-     Taylor, ian@cygnus.com.  */
+     Taylor, ian@cygnus.com.
+
+     I added state 11 so that something like "Lfoo add %r25,%r26,%r27" works
+     correctly on the PA (and any other target where colons are optional).
+     Jeff Law, law@cs.utah.edu.  */
+
+  /* This is purely an optimization hack, and relies on gcc's inlining
+     capability.  */
+#if defined (__GNUC__) && defined (__OPTIMIZE__)
+#define GET()	(get == scrub_from_file ? scrub_from_file () : (*get) ())
+#else
+#define GET()	((*get) ())
+#endif
 
   register int ch, ch2 = 0;
   int not_cpp_line = 0;
@@ -283,14 +293,14 @@ do_scrub_next_char (get, unget)
 	{
 	  do
 	    {
-	      ch = (*get) ();
+	      ch = GET ();
 	    }
 	  while (ch != EOF && ch != '\n' && ch != '*');
 	  if (ch == '\n' || ch == EOF)
 	    return ch;
 
 	  /* At this point, ch must be a '*' */
-	  while ((ch = (*get) ()) == '*')
+	  while ((ch = GET ()) == '*')
 	    {
 	      ;
 	    }
@@ -302,13 +312,13 @@ do_scrub_next_char (get, unget)
       return ' ';
 
     case 4:
-      ch = (*get) ();
+      ch = GET ();
       if (ch == EOF || (ch >= '0' && ch <= '9'))
 	return ch;
       else
 	{
 	  while (ch != EOF && IS_WHITESPACE (ch))
-	    ch = (*get) ();
+	    ch = GET ();
 	  if (ch == '"')
 	    {
 	      (*unget) (ch);
@@ -320,24 +330,26 @@ do_scrub_next_char (get, unget)
 	  else
 	    {
 	      while (ch != EOF && ch != '\n')
-		ch = (*get) ();
+		ch = GET ();
 	      state = 0;
 	      return ch;
 	    }
 	}
 
     case 5:
-      ch = (*get) ();
+      ch = GET ();
       if (lex[ch] == LEX_IS_STRINGQUOTE)
 	{
 	  state = old_state;
 	  return ch;
 	}
+#ifndef NO_STRING_ESCAPES
       else if (ch == '\\')
 	{
 	  state = 6;
 	  return ch;
 	}
+#endif
       else if (ch == EOF)
 	{
 	  as_warn ("End of file in string: inserted '\"'");
@@ -352,7 +364,7 @@ do_scrub_next_char (get, unget)
 
     case 6:
       state = 5;
-      ch = (*get) ();
+      ch = GET ();
       switch (ch)
 	{
 	  /* Handle strings broken across lines, by turning '\n' into
@@ -400,28 +412,32 @@ do_scrub_next_char (get, unget)
       return ch;
 
     case 7:
-      ch = (*get) ();
+      ch = GET ();
       state = 5;
       old_state = 8;
       return ch;
 
     case 8:
       do
-	ch = (*get) ();
+	ch = GET ();
       while (ch != '\n');
       state = 0;
       return ch;
     }
 
-  /* OK, we are somewhere in states 0 through 4 or 9 through 10 */
+  /* OK, we are somewhere in states 0 through 4 or 9 through 11 */
 
   /* flushchar: */
-  ch = (*get) ();
+  ch = GET ();
 recycle:
   if (ch == EOF)
     {
       if (state != 0)
-	as_warn ("End of file not at end of a line: Newline inserted.");
+	{
+	  as_warn ("End of file not at end of a line: Newline inserted.");
+	  state = 0;
+	  return '\n';
+	}
       return ch;
     }
 
@@ -437,12 +453,15 @@ recycle:
 	    return ch;
 	  }
 	else
-	  ch = (*get) ();
+	  ch = GET ();
       while (ch != EOF && IS_WHITESPACE (ch));
       if (ch == EOF)
 	return ch;
 
-      if (IS_COMMENT (ch) || (state == 0 && IS_LINE_COMMENT (ch)) || ch == '/' || IS_LINE_SEPARATOR (ch))
+      if (IS_COMMENT (ch)
+	  || (state == 0 && IS_LINE_COMMENT (ch))
+	  || ch == '/'
+	  || IS_LINE_SEPARATOR (ch))
 	{
 	  /* cpp never outputs a leading space before the #, so try to
 	     avoid being confused.  */
@@ -454,13 +473,12 @@ recycle:
       return ' ';		/* Always return one space at start of line */
 #endif
 
-      /* If we're in state 2, we've seen a non-white
-	 character followed by whitespace.  If the next
-	 character is ':', this is whitespace after a label
-	 name which we can ignore.  */
-      if (state == 2 && lex[ch] == LEX_IS_COLON)
+      /* If we're in state 2 or 11, we've seen a non-white character
+	 followed by whitespace.  If the next character is ':', this
+	 is whitespace after a label name which we *must* ignore.  */
+      if ((state == 2 || state == 11) && lex[ch] == LEX_IS_COLON)
 	{
-	  state = 0;
+	  state = 1;
 	  return ch;
 	}
 
@@ -483,20 +501,24 @@ recycle:
 	case 10:
 	  state = 10;		/* Sp after symbol char */
 	  goto recycle;
+	case 11:
+	  state = 1;
+	  (*unget) (ch);
+	  return ' ';		/* Sp after label definition.  */
 	default:
 	  BAD_CASE (state);
 	}
       break;
 
     case LEX_IS_TWOCHAR_COMMENT_1ST:
-      ch2 = (*get) ();
+      ch2 = GET ();
       if (ch2 != EOF && lex[ch2] == LEX_IS_TWOCHAR_COMMENT_2ND)
 	{
 	  for (;;)
 	    {
 	      do
 		{
-		  ch2 = (*get) ();
+		  ch2 = GET ();
 		  if (ch2 != EOF && IS_NEWLINE (ch2))
 		    add_newlines++;
 		}
@@ -506,7 +528,7 @@ recycle:
 	      while (ch2 != EOF &&
 		     (lex[ch2] == LEX_IS_TWOCHAR_COMMENT_2ND))
 		{
-		  ch2 = (*get) ();
+		  ch2 = GET ();
 		}
 
 	      if (ch2 == EOF
@@ -540,7 +562,7 @@ recycle:
 #ifndef MRI
 #ifndef IEEE_STYLE
     case LEX_IS_ONECHAR_QUOTE:
-      ch = (*get) ();
+      ch = GET ();
       if (ch == EOF)
 	{
 	  as_warn ("End-of-file after a one-character quote; \\000 inserted");
@@ -548,14 +570,14 @@ recycle:
 	}
       if (ch == '\\')
 	{
-	  ch = (*get) ();
+	  ch = GET ();
 	  ch = process_escape (ch);
 	}
       sprintf (out_buf, "%d", (int) (unsigned char) ch);
 
 
       /* None of these 'x constants for us.  We want 'x'.  */
-      if ((ch = (*get) ()) != '\'')
+      if ((ch = GET ()) != '\'')
 	{
 #ifdef REQUIRE_CHAR_CLOSE_QUOTE
 	  as_warn ("Missing close quote: (assumed)");
@@ -580,7 +602,7 @@ recycle:
       if (state == 9 || state == 10)
 	state = 3;
       else if (state != 3)
-	state = 0;
+	state = 1;
       return ch;
 
     case LEX_IS_NEWLINE:
@@ -605,7 +627,7 @@ recycle:
 	     whole lexical process should be reworked.  xoxorich.  */
 	  if (ch == '/')
 	    {
-	      ch2 = (*get) ();
+	      ch2 = GET ();
 	      if (ch2 == '*')
 		{
 		  state = -2;
@@ -621,7 +643,7 @@ recycle:
 	    not_cpp_line = 1;
 
 	  do
-	    ch = (*get) ();
+	    ch = GET ();
 	  while (ch != EOF && IS_WHITESPACE (ch));
 	  if (ch == EOF)
 	    {
@@ -632,7 +654,7 @@ recycle:
 	    {
 	      /* Non-numerics:  Eat whole comment line */
 	      while (ch != EOF && !IS_NEWLINE (ch))
-		ch = (*get) ();
+		ch = GET ();
 	      if (ch == EOF)
 		as_warn ("EOF in Comment: Newline inserted");
 	      state = 0;
@@ -654,7 +676,7 @@ recycle:
       /* Fall through.  */
     case LEX_IS_COMMENT_START:
       do
-	ch = (*get) ();
+	ch = GET ();
       while (ch != EOF && !IS_NEWLINE (ch));
       if (ch == EOF)
 	as_warn ("EOF in comment:  Newline inserted");
@@ -679,7 +701,7 @@ recycle:
       /* Some relatively `normal' character.  */
       if (state == 0)
 	{
-	  state = 2;		/* Now seeing opcode */
+	  state = 11;		/* Now seeing label definition */
 	  return ch;
 	}
       else if (state == 1)
@@ -704,6 +726,8 @@ recycle:
 	}
     }
   return -1;
+
+#undef GET
 }
 
 #ifdef TEST

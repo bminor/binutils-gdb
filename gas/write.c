@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This thing should be set up to do byteordering correctly.  But... */
 
@@ -1572,7 +1572,7 @@ write_object_file ()
 	  name = S_GET_NAME (symp);
 	  if (name)
 	    {
-	      const char *name2 = decode_local_label_name (S_GET_NAME (symp));
+	      const char *name2 = decode_local_label_name ((char *)S_GET_NAME (symp));
 	      /* They only differ if `name' is a fb or dollar local
 		 label name.  */
 	      if (name2 != name && ! S_IS_DEFINED (symp))

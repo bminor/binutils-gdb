@@ -15,21 +15,21 @@
 
 #You should have received a copy of the GNU General Public License
 #along with GNU GAS; see the file COPYING.  If not, write to
-#the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+#the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # The targets for external use include:
 # all, doc, proto, install, uninstall, includes, TAGS,
 # clean, cleanconfig, realclean, stage1, stage2, stage3, stage4.
 
 # Variables that exist for you to override.
-# See below for how to change them for certain systems.
 
-srcdir = .
+srcdir = @srcdir@
+VPATH = @srcdir@
 
-prefix = /usr/local
+prefix = @prefix@
 
-program_transform_name =
-exec_prefix = $(prefix)
+program_transform_name = @program_transform_name@
+exec_prefix = @exec_prefix@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
 
@@ -50,9 +50,9 @@ docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
-INSTALL = install -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL)
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 INSTALL_XFORM1 = $(INSTALL) -b $(program_transform_name) .1
 
 AR = ar
@@ -68,7 +68,6 @@ CONFIG=all
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../../texinfo
 
-#### host, target, and site specific Makefile frags come in here.
 ##
 
 all:
@@ -116,6 +115,14 @@ as.dvi:	$(srcdir)/as.texinfo asconfig.texi
 gasp.dvi: $(srcdir)/gasp.texi
 	$(TEXI2DVI) $(srcdir)/gasp.texi
 
+# This one isn't ready for prime time yet.  Not even a little bit.
+internals.dvi: $(srcdir)/internals.texi
+	$(TEXI2DVI) $(srcdir)/internals.texi
+internals.ps: internals.dvi
+	dvips internals.dvi -o internals.ps
+internals.ps4: internals.ps
+	psnup -4 < internals.ps > internals.ps4
+
 # ROFF doc targets as.ms, as.mm, as.me
 # (we don't use a variable because we don't trust all makes to handle
 # a var in the target name right).
@@ -147,10 +154,10 @@ as.me: $(srcdir)/as.texinfo asconfig.texi
 		$(srcdir)/as.texinfo | \
 	texi2roff -me >as.me 
 
-clean: clean-dvi clean-info
+clean mostlyclean: clean-dvi clean-info
 	rm -f asconfig.texi
 
-distclean:
+distclean realclean:
 	rm -f Makefile config.status asconfig.texi \
 		as.?? as.??s as.aux as.log as.toc \
 		gasp.?? gasp.??s gasp.aux gasp.log gasp.toc
@@ -164,4 +171,4 @@ clean-info:
 force:
 
 Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
-	$(SHELL) ./config.status
+	(cd .. ; $(SHELL) ./config.status)
