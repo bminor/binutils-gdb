@@ -1,3 +1,8 @@
+2001-02-17  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/mips.exp: Don't attempt the elf_e_flags family of
+	tests if not ELF; they test ELF-specific features.
+
 2001-02-08  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* gas/mri/mri.exp: Don't execute the M68K specific tests 
