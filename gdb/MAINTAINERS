@@ -270,6 +270,7 @@ testsuite		Fernando Nasser		fnasser@cygnus.com
   config                Mark Salter             msalter@redhat.com
   lib                   Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
+  c++ (gdb.c++)		Michael Chastain	chastain@redhat.com
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
                         Andrew Cagney           cagney@redhat.com
   stabs (gdb.satbs)     Elena Zannoni           ezannoni@redhat.com

@@ -1,5 +1,9 @@
 2001-07-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Add Michael Chastain as C++ testsuite maintainer.
+
+2001-07-19  Andrew Cagney  <ac131313@redhat.com>
+
 	From Stephen Smith:
 	* configure.tgt (i*86-*-pe*): New target.
 
