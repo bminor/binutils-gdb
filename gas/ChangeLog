@@ -1,5 +1,14 @@
 2001-10-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/obj-elf.c: Make use of elf_group_name and elf_next_in_group
+	throughout file.
+	(obj_elf_change_section): Rename "group" to "group_name".
+	(obj_elf_section): Likewise.
+	(elf_frob_file): Don't use sec->lineno for SHT_GROUP section to store
+	first member section; Instead use elf_next_in_group.
+
+2001-10-09  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/obj-elf.c: (obj_elf_change_section): Add "group" param.
 	Set elf_section_data group from it.  Warn if group name changed.
 	(obj_elf_parse_section_letters): Parse 'G' too.

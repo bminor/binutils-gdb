@@ -620,12 +620,12 @@ static struct special_section const special_sections[] =
 };
 
 static void
-obj_elf_change_section (name, type, attr, entsize, group, push)
+obj_elf_change_section (name, type, attr, entsize, group_name, push)
      const char *name;
      int type;
      int attr;
      int entsize;
-     const char *group;
+     const char *group_name;
      int push;
 {
   asection *old_sec;
@@ -712,7 +712,7 @@ obj_elf_change_section (name, type, attr, entsize, group, push)
       bfd_set_section_flags (stdoutput, sec, flags);
       if (flags & SEC_MERGE)
 	sec->entsize = entsize;
-      elf_section_data (sec)->group = group;
+      elf_group_name (sec) = group_name;
 
       /* Add a symbol for this section to the symbol table.  */
       secsym = symbol_find (name);
@@ -733,7 +733,7 @@ obj_elf_change_section (name, type, attr, entsize, group, push)
       else if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
 	as_warn (_("ignoring changed section entity size for %s"), name);
       else if ((attr & SHF_GROUP) != 0
-	       && strcmp (elf_section_data (old_sec)->group, group) != 0)
+	       && strcmp (elf_group_name (old_sec), group_name) != 0)
 	as_warn (_("ignoring new section group for %s"), name);
     }
 
@@ -895,7 +895,7 @@ void
 obj_elf_section (push)
      int push;
 {
-  char *name, *group, *beg;
+  char *name, *group_name, *beg;
   int type, attr, dummy;
   int entsize;
 
@@ -926,7 +926,7 @@ obj_elf_section (push)
     return;
   type = SHT_NULL;
   attr = 0;
-  group = NULL;
+  group_name = NULL;
   entsize = 0;
 
   if (*input_line_pointer == ',')
@@ -998,8 +998,8 @@ obj_elf_section (push)
 	  if ((attr & SHF_GROUP) != 0 && *input_line_pointer == ',')
 	    {
 	      ++input_line_pointer;
-	      group = obj_elf_section_name ();
-	      if (group == NULL)
+	      group_name = obj_elf_section_name ();
+	      if (group_name == NULL)
 		attr &= ~SHF_GROUP;
 	    }
 	  else if ((attr & SHF_GROUP) != 0)
@@ -1036,7 +1036,7 @@ obj_elf_section (push)
 
   demand_empty_rest_of_line ();
 
-  obj_elf_change_section (name, type, attr, entsize, group, push);
+  obj_elf_change_section (name, type, attr, entsize, group_name, push);
 }
 
 /* Change to the .data section.  */
@@ -1910,7 +1910,7 @@ build_group_lists (abfd, sec, inf)
      PTR inf;
 {
   struct group_list *list = (struct group_list *) inf;
-  const char *group_name = elf_section_data (sec)->group;
+  const char *group_name = elf_group_name (sec);
   unsigned int i;
 
   if (group_name == NULL)
@@ -1920,9 +1920,9 @@ build_group_lists (abfd, sec, inf)
      the list.  */
   for (i = 0; i < list->num_group; i++)
     {
-      if (strcmp (group_name, elf_section_data (list->head[i])->group) == 0)
+      if (strcmp (group_name, elf_group_name (list->head[i])) == 0)
 	{
-	  elf_section_data (sec)->next_in_group = list->head[i];
+	  elf_next_in_group (sec) = list->head[i];
 	  list->head[i] = sec;
 	  list->elt_count[i] += 1;
 	  return;
@@ -1964,7 +1964,7 @@ elf_frob_file ()
      the rest of the work.  */
   for (i = 0; i < list.num_group; i++)
     {
-      const char *group_name = elf_section_data (list.head[i])->group;
+      const char *group_name = elf_group_name (list.head[i]);
       asection *s;
       flagword flags;
 
@@ -1978,10 +1978,8 @@ elf_frob_file ()
 		    bfd_errmsg (bfd_get_error ()));
 	}
 
-      /* Pass a pointer to the first section in this group.  This
-	 seems as good a field to use as any;  It's not used otherwise
-	 by the ELF code.  */
-      s->lineno = (alent *) list.head[i];
+      /* Pass a pointer to the first section in this group.  */
+      elf_next_in_group (s) = list.head[i];
 
       s->_raw_size = 4 * (list.elt_count[i] + 1);
       s->contents = frag_more (s->_raw_size);
