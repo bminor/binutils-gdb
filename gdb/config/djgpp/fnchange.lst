@@ -70,8 +70,8 @@
 @V@/gdb/ChangeLog-2002 @V@/gdb/ChangeLog.002
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
 @V@/gdb/ada-exp.tab.c @V@/gdb/ada-exp_tab.c
-@V@/gdb/amd64fbsd-tdep.c @V@/gdb/x86fb-tdep.c
-@V@/gdb/amd64fbsd-nat.c @V@/gdb/x86fb-nat.c
+@V@/gdb/amd64fbsd-tdep.c @V@/gdb/a64fb-tdep.c
+@V@/gdb/amd64fbsd-nat.c @V@/gdb/a64fb-nat.c
 @V@/gdb/alphabsd-nat.c @V@/gdb/alphb-nat.c
 @V@/gdb/alphabsd-tdep.c @V@/gdb/alphb-tdep.c
 @V@/gdb/alphanbsd-nat.c @V@/gdb/alphnb-nat.c

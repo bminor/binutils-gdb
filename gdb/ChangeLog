@@ -1,5 +1,10 @@
 2003-09-14  Andrew Cagney  <cagney@redhat.com>
 
+	* config/djgpp/fnchange.lst: Rename "amd64fbsd-tdep.c" and
+	"amd64fbsd-nat.c" to "a64fb-tdep.c" and "a64fb-nat.c".
+
+2003-09-14  Andrew Cagney  <cagney@redhat.com>
+
 	* alpha-nat.c: Remove some occurances of "register".
 	* alpha-tdep.c, arm-tdep.c, blockframe.c, breakpoint.c: Ditto.
 	* buildsym.c, c-typeprint.c, c-valprint.c, coffread.c: Ditto.
