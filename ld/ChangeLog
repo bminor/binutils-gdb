@@ -1,3 +1,7 @@
+Thu Jun  9 08:35:17 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* scripttempl/i960.sc: Add CONSTRUCTORS to .data.
+
 Thu Jun  9 06:52:29 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* Makefile.in (check): Delete ld.new dependency so that a regression
