@@ -5,15 +5,17 @@
 	Fix typo in BEDIT warning.
 	Don't add default dialog style when explicit style specified.
 
-	* rclex.l: "\xhex" encoding in strings corrected.
-	"\a" escape (used for right justified key definitions in menus) is
-	encodes as binary 8.
+	* rclex.l (handle_quotes): "\xhex" encoding in strings corrected.
+	(handle_quotes) "\a" escape (used for right justified key
+	definitions in menus) is encodes as binary 8.
 
-	* resrc.c: Print style even if it is 0.
+	* resrc.c (write_rc_dialog): Print style even if it is 0.
+	(write_rc_directory): Fix overlooked sublang shift bug.
 
-	* resbin.c: Use signature to identify DIALOGEX.
+	* resbin.c (bin_to_res_dialog): Use signature to identify
+	DIALOGEX.
 
-	* windres.c: Set default LANGUAGE to english/us.
+	* windres.c (main): Set default LANGUAGE to english/us.
 
 2002-04-09  Gunnar Degnbol <degnbol@danbbs.dk>
 

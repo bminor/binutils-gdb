@@ -19,6 +19,10 @@
 	* binutils-all/windres/quoteclass.rc: New test case for quoted
 	CLASS definitions in DIALOG resources.
 
+	* binutils-all/windres/sublang.rc: New test case: Check assignment
+	of sub-language.
+	* binutils-all/windres/sublang.rsd: Expected output.
+
 2002-02-18  Timothy Daly  <remote_bob@yahoo.com>
 
 	* binutils-all/readelf.r: Change expected output to match new,

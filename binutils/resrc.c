@@ -1592,7 +1592,8 @@ write_rc_directory (e, rd, type, name, language, level)
 	      && (re->id.u.id & 0xffff) == re->id.u.id)
 	    {
 	      fprintf (e, "LANGUAGE %lu, %lu\n",
-		       re->id.u.id & 0xff, (re->id.u.id >> 8) & 0xff);
+		       re->id.u.id & ((1 << SUBLANG_SHIFT) - 1), 
+		       (re->id.u.id >> SUBLANG_SHIFT) & 0xff);
 	      *language = re->id.u.id;
 	    }
 	  break;
