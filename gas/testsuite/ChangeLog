@@ -1,3 +1,13 @@
+2001-03-18  H.J. Lu  <hjl@gnu.org>
+
+	* gas/i386/intel.s: Move PIC code to ...
+	* gas/i386/intelpic.s: New. Here.
+	* gas/i386/intel.d: Updated.
+	* gas/i386/intelpic.d: New.
+
+	* gas/i386/i386.exp: Check PIC code in Intel syntax for ELF
+	targets only.
+
 2001-03-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* gas/mri/mri.exp: Fix test of m6811/m6812 targets.
