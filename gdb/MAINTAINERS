@@ -96,7 +96,7 @@ maintainer works with the native maintainer when resolving API issues.
 	mcore		Deleted
 
 	mips		--target=mips-elf ,-Werror
-			Andrew Cagney		cagney@redhat.com
+			Maintenance only
 
 	mn10300		Deleted
 
@@ -214,9 +214,6 @@ language support	(Blanket Write Privs Maintainers)
 shared libs (devolved)	Kevin Buettner		kevinb@redhat.com
   xcoffsolib		Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 
-remote.c		Andrew Cagney		cagney@redhat.com
-include/remote-sim.h, remote-sim.c
-			Andrew Cagney		cagney@redhat.com
 sds protocol		(vacant)
 rdi/adp protocol	(vacant)
 documentation		Eli Zaretskii		eliz@gnu.org

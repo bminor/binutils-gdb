@@ -1,3 +1,7 @@
+2004-11-17  Andrew Cagney  <cagney@gnu.org>
+
+	* MAINTAINERS: Drop MIPS and remote.
+
 2004-11-15  Andrew Cagney  <cagney@gnu.org>
 
 	* findvar.c (value_of_register): Set the frame ID.
