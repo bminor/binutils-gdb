@@ -1,3 +1,8 @@
+Wed Apr 10 00:23:53 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (ieee_write_byte): Change second parameter from bfd_byte
+	to int to avoid promotion problems in prototype.
+
 Tue Apr  9 11:44:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.host: Use ${srcdir} when looking for picfrag.
