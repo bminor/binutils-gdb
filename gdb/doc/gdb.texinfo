@@ -1,7 +1,7 @@
 \input texinfo
 @setfilename gdb.info
 @synindex ky cp
-@c CHANGELOG CONSULTED BETWEEN:
+@c FOR UPDATES LEADING TO THIS DRAFT, GDB CHANGELOG CONSULTED BETWEEN:
 @c Tue Feb 26 01:47:07 1991  Cygnus John Gilmore  (cygnus at yuba)
 @c Sat Dec 22 02:51:40 1990  John Gilmore  (gnu at cygint)
 @ifinfo
@@ -40,10 +40,12 @@ original English.
 @title{Using GDB}
 @subtitle{A Guide to the GNU Source-Level Debugger}
 @sp 1
-@subtitle Third Edition---GDB version 4.0
-@subtitle December 1990
+@c Maybe crank this up to "Fourth Edition" when released at FSF
+@c @subtitle Third Edition---GDB version 4.0
+@subtitle GDB version 4.0
+@subtitle January 1991
 @author{Richard M. Stallman}
-@author{(Revised by Cygnus Support)}
+@author{(Revised by Roland Pesch for Cygnus Support)}
 @page
 
 @tex
@@ -108,8 +110,24 @@ GDB can be used to debug programs written in C and C++.  Pascal support
 is being implemented, and Fortran support will be added when a GNU
 Fortran compiler is written.
 
+@unnumberedsec Free Software
+GDB is Free Software, protected by the GNU General Public License (GPL).
+The GPL gives you the freedom to copy or adapt a licensed
+program---but every person getting a copy also gets with it the
+freedom to modify that copy (which means that they must get access to
+the source code), and the freedom to distribute further copies.
+Typical software companies use copyrights to limit your freedoms; the
+Free Software Foundation uses the GPL to preserve these freedoms.
+
+Fundamentally, the General Public License is a license which says that
+you have these freedoms and that you can't take these freedoms away
+from anyone else.
+
+For full details, @pxref{License}.
+
 @menu
 * New Features::		New Features in GDB version 4.0
+* Invocation::			Starting GDB
 * User Interface::		GDB Commands and Displays
 * Files::			Specifying GDB's Files
 * Compilation::			Compiling Your Program for Debugging
@@ -122,7 +140,6 @@ Fortran compiler is written.
 * Symbols::			Examining the Symbol Table
 * Altering::			Altering Execution
 * Sequences::			Canned Sequences of Commands
-* Options::			Options and Arguments for GDB
 * Emacs::			Using GDB under GNU Emacs
 * Remote::			Remote Debugging
 * GDB Bugs::			Reporting Bugs in GDB
@@ -133,10 +150,16 @@ Fortran compiler is written.
 
  --- The Detailed Node Listing ---
 
-Specifying GDB's Files
+Starting GDB
 
-* File Arguments::		Specifying Files with Arguments
-* File Commands::		Specifying Files with Commands
+* File Options::		File-specifying Options and Arguments
+* Mode Options::		Mode Options
+* Remote i960-Nindy::		Starting GDB with a Remote Intel 960 (Nindy)
+
+Specifying a Debugging Target 
+
+* Active Targets::		Active Targets
+* Target Commands::		Commands for Managing Targets
 
 Running Your Program Under GDB
 
@@ -213,13 +236,6 @@ Canned Sequences of Commands
 * Output::			Controlled output commands useful in
                    user-defined commands and command files.
 
-Options and Arguments for GDB
-
-* Mode Options::		Options controlling modes of operation.
-* File Options::		Options to specify files (executable, coredump, commands)
-* Other Arguments::		Any other arguments without options
-			also specify files.
-
 Remote Debugging
 
 * Remote Commands::		Commands used to start and finish remote debugging.
@@ -230,7 +246,7 @@ Reporting Bugs in GDB
 * Bug Reporting::		How to Report Bugs
 @end menu
 
-@node New Features, User Interface, Top, Top
+@node New Features, Invocation, Top, Top
 @unnumbered New Features in GDB version 4.0
 
 @itemize @bullet
@@ -296,11 +312,177 @@ HPPA architecture support.
 
 @end itemize
 
-@node User Interface, Files, New Features, Top
-@chapter GDB Commands and Displays
+@node Invocation, User Interface, New Features, Top
+@chapter Starting GDB
 
 GDB is invoked with the shell command @samp{gdb}.  Once started, it reads
 commands from the terminal until you tell it to exit.
+
+The most usual way to start GDB is with one argument or two, specifying
+an executable program as the argument:
+@example
+gdb program
+@end example
+@noindent
+or you can start with both an executable program and a core file specified:
+@example
+gdb program core
+@end example
+
+You can get more detailed control over how GDB starts up using a number
+of command-line options.
+
+All the options and command line arguments given are processed
+in sequential order.  The order makes a difference when the
+@samp{-x} option is used.  
+
+@menu
+* File Options::		File-specifying Options and Arguments
+* Mode Options::		Mode Options
+* Remote i960-Nindy::		Starting GDB with a Remote Intel 960 (Nindy)
+@end menu
+
+@node File Options, Mode Options, Invocation, Invocation
+@section File-specifying Options and Arguments
+
+As shown in the example, any arguments other
+than options specify an executable file and core file; that is, the
+first argument encountered with no associated option flag is equivalent
+to a @samp{-se} option, and the second, if any, is equivalent to a
+@samp{-c} option.
+
+@table @code
+@item -s @var{file}
+Read symbol table from file @var{file}.
+
+@item -e @var{file}
+Use file @var{file} as the executable file to execute when
+appropriate, and for examining pure data in conjunction with a core
+dump.
+
+@item -se @var{file}
+Read symbol table from file @var{file} and use it as the executable
+file.
+
+@item -c @var{file}
+Use file @var{file} as a core dump to examine.
+
+@item -x @var{file}
+Execute GDB commands from file @var{file}.  @xref{Command Files}.
+
+@item -d @var{directory}
+Add @var{directory} to the path to search for source files.
+@end table
+
+@node Mode Options, Remote i960-Nindy, File Options, Invocation
+@section Mode Options
+
+@table @code
+@item -nx
+Do not execute commands from the init files @file{.gdbinit}.
+Normally, the commands in these files are executed after all the
+command options and arguments have been processed.  @xref{Command
+Files}.
+
+@item -q
+``Quiet''.  Do not print the introductory and copyright messages.  These
+messages are also suppressed in batch mode, or if an executable file name is
+specified on the GDB command line.
+
+@item -batch
+Run in batch mode.  Exit with code 0 after processing all the command
+files specified with @samp{-x} (and @file{.gdbinit}, if not inhibited).
+Exit with nonzero status if an error occurs in executing the GDB
+commands in the command files.  
+
+Batch mode may be useful for running GDB as a filter, for example to
+download and run a program on another computer; in order to make this
+more useful, the message @samp{Program exited normally.} (which is
+ordinarily issued whenever a program running under GDB control stops) is
+not issued when running in batch mode.
+
+@item -fullname
+This option is used when Emacs runs GDB as a subprocess.  It tells GDB
+to output the full file name and line number in a standard,
+recognizable fashion each time a stack frame is displayed (which
+includes each time the program stops).  This recognizable format looks
+like two @samp{\032} characters, followed by the file name, line number
+and character position separated by colons, and a newline.  The
+Emacs-to-GDB interface program uses the two @samp{\032} characters as
+a signal to display the source code for the frame.
+
+@item -b @var{bps}
+Set the line speed (baud rate or bps) of any serial interface used by
+GDB (for remote debugging).
+@end table
+
+@node Remote i960-Nindy,  , Mode Options, Invocation
+@section Starting GDB with a Remote Intel 960 (Nindy)
+
+When GDB is configured to control a remote intel 960 attached to your
+host (through a Nindy monitor: Nindy is the name of a Rom Monitor
+program for Intel 960 target systems), you can attach to the 960 in
+several ways:
+
+@itemize @bullet
+@item
+Through command line options specifying device, baud rate, and protocol;
+
+@item
+By responding to a prompt on startup;
+
+@item
+By using the @samp{target} command at any point during your GDB session.
+@end itemize
+
+The command-line options for Nindy are detailed below.  If you simply
+start GDB-960 without using options to specify a serial port, you are
+prompted for it, @emph{before} you reach the ordinary GDB prompt:
+@example
+Attach /dev/ttyNN -- specify NN, or "quit" to quit:  
+@end example
+@noindent
+You can, if you choose, simply start up with no Nindy connection by
+responding to the prompt with an empty line.  If you do this, and later
+wish to attach to Nindy, use @samp{target} (@pxref{Target Commands}). 
+
+These are the startup options for beginning your GDB session with a
+Nindy-960 board attached:
+
+@table @code
+@item -r @var{port}
+Specify the serial port name of a serial interface to be used to connect
+to the target system's Nindy monitor.  (Nindy is the name of a ROM Monitor
+program for Intel 960 target systems.)  This option is only available when
+GDB is configured for the Intel 960 target architecture.  You may
+specify @var{port} as any of: a full pathname (e.g. @samp{-r /dev/ttya}), a
+device name in @samp{/dev} (e.g. @samp{-r ttya}), or simply the unique
+suffix for a specific @code{tty} (e.g. @samp{-r a}).
+
+@item -O
+Specify that GDB should use the ``old'' Nindy monitor protocol to connect
+to the target system.  This option is only available when GDB is configured
+for the Intel 960 target architecture.
+
+@quotation
+@emph{Warning:} if you specify @samp{-O}, but are actually trying to
+connect to a target system using the current protocol, the connection
+will fail appearing to be a speed mismatch, and GDB will repeatedly
+attempt to reconnect at several different line speeds.  You can abort
+this process with an interrupt.
+@end quotation
+
+@item -brk
+Specify that GDB should first send a @samp{BREAK} signal to the target
+system, in an attempt to reset it, before connecting to a Nindy target.
+This option is only available when GDB is configured for the Intel 960
+target architecture.
+
+@end table
+
+
+@node User Interface, Files, Invocation, Top
+@chapter GDB Commands and Displays
 
 A GDB command is a single line of input.  There is no limit on how long
 it can be.  It starts with a command name, which is followed by arguments
@@ -473,7 +655,7 @@ These commands display the state of the GDB history parameters.
 @kindex info set
 @item show
 @itemx info set
-This chapter introduced a number of internal GDB variables that you
+This chapter introduces a number of internal GDB variables that you
 can control with the @samp{set} command, and display with the
 @samp{show} command.   A number of others are introduced throughout the
 manual.  To display all the settable parameters and their current
@@ -673,39 +855,14 @@ order to read its symbol table and in order to start the program.  To
 debug a core dump of a previous run, GDB must be told the file name of
 the core dump.
 
-@menu
-* File Arguments::		Specifying Files with Arguments
-* File Commands::		Specifying Files with Commands
-@end menu
-
-@node File Arguments, File Commands, Files, Files
-@section Specifying Files with Arguments
-
 The usual way to specify the executable and core dump file names is with
-two command arguments given when you start GDB.  The first argument is used
-as the file for execution and symbols, and the second argument (if any) is
-used as the core dump file name.  Thus,
+the command arguments given when you start GDB, as discussed in
+@pxref{Invocation}.
 
-@example
-gdb program core
-@end example
-
-@noindent
-specifies @file{program} as the executable program and @file{core} as a core
-dump file to examine.  (You do not need to have a core dump file if what
-you plan to do is debug the program interactively.)
-
-@xref{Options}, for full information on options and arguments for
-invoking GDB.
-
-@node File Commands,  , File Arguments, Files
-@section Specifying Files with Commands
-
-Usually you specify the files for GDB to work with by giving arguments when
-you invoke GDB.  But occasionally it is necessary to change to a different
-file during a GDB session.  Or you may run GDB and forget to specify the
-files you want to use.  In these situations the GDB commands to specify new
-files are useful.
+But occasionally it is necessary to change to a different file during a
+GDB session.  Or you may run GDB and forget to specify the files you
+want to use.  In these situations the GDB commands to specify new files
+are useful.
 
 @table @code
 @item file @var{filename}
@@ -985,7 +1142,12 @@ physically separate host, controlling standalone systems over a
 serial port, or realtime systems over a TCP/IP connection---you can use
 the @samp{target} command.
 
-@node Active Targets,,,
+@menu
+* Active Targets::		Active Targets
+* Target Commands::		Commands for Managing Targets
+@end menu
+
+@node Active Targets, Target Commands, Targets, Targets
 @section Active Targets
 @cindex stacking targets
 @cindex active targets
@@ -1011,7 +1173,7 @@ To get rid of a target without replacing it, use the @samp{detach}
 command.  The related command @samp{attach} provides you
 with an alternative way of choosing a new target. @xref{Attach}.
 
-@node Target Commands,,,
+@node Target Commands,  , Active Targets, Targets
 @section Commands for Managing Targets
 
 @table @code
@@ -2301,8 +2463,10 @@ ten lines centered on the point of execution in the frame.  @xref{List}.
 These two commants are variants of @samp{up} and @samp{down},
 respectively; they differ in that they do their work silently, without
 causing display of the new frame.  They are intended primarily for use
-in GDB command scripts, where the output might be unncecssary and
+in GDB command scripts, where the output might be unnecessary and
 distracting. 
+
+@end table
 
 @node Frame Info,  , Selection, Stack
 @section Information on a Frame
@@ -3689,7 +3853,7 @@ execute some piece of your program, but without cluttering the output
 with @code{void} returned values.  The result is printed and saved in
 the value history, if it is not void.
 
-@node Sequences, Options, Altering, Top
+@node Sequences, Emacs, Altering, Top
 @chapter Canned Sequences of Commands
 
 Aside from breakpoint commands (@pxref{Break Commands}),GDB provides two
@@ -3851,112 +4015,7 @@ string are the simple ones that consist of backslash followed by a
 letter.
 @end table
 
-@node Options, Emacs, Sequences, Top
-@chapter Options and Arguments for GDB
-
-When you invoke GDB, you can specify arguments telling it what files to
-operate on and what other things to do.
-
-@menu
-* Mode Options::		Options controlling modes of operation.
-* File Options::		Options to specify files (executable, coredump, commands)
-* Other Arguments::		Any other arguments without options
-			also specify files.
-@end menu
-
-@node Mode Options, File Options, Options, Options
-@section Mode Options
-
-@table @samp
-@item -nx
-Do not execute commands from the init files @file{.gdbinit}.
-Normally, the commands in these files are executed after all the
-command options and arguments have been processed.  @xref{Command
-Files}.
-
-@item -q
-``Quiet''.  Do not print the introductory and copyright messages.  These
-messages are also suppressed in batch mode, or if an executable file name is
-specified on the GDB command line.
-
-@item -batch
-Run in batch mode.  Exit with code 0 after processing all the command
-files specified with @samp{-x} (and @file{.gdbinit}, if not inhibited).
-Exit with nonzero status if an error occurs in executing the GDB
-commands in the command files.
-
-@item -fullname
-This option is used when Emacs runs GDB as a subprocess.  It tells GDB
-to output the full file name and line number in a standard,
-recognizable fashion each time a stack frame is displayed (which
-includes each time the program stops).  This recognizable format looks
-like two @samp{\032} characters, followed by the file name, line number
-and character position separated by colons, and a newline.  The
-Emacs-to-GDB interface program uses the two @samp{\032} characters as
-a signal to display the source code for the frame.
-
-@item -b @samp{baudrate}
-Set the baud rate of any serial interface used by GDB (e.g. for remote
-debugging).
-
-@item -r @samp{port}
-Specify the serial port name of a serial interface to be used to connect
-to the target system's Nindy monitor.  (Nindy is the name of a ROM Monitor
-program for Intel 960 target systems.)  This option is only available when
-GDB is configured for the Intel 960 target architecture.
-
-@item -O
-Specify that GDB should use the ``old'' Nindy monitor protocol to connect
-to the target system.  This option is only available when GDB is configured
-for the Intel 960 target architecture.
-
-@item -brk
-Specify that GDB should first send a @samp{BREAK} signal to the target
-system, in an attempt to reset it, before connecting to a Nindy target.
-This option is only available when GDB is configured for the Intel 960
-target architecture.
-
-@end table
-
-@node File Options, Other Arguments, Mode Options, Options
-@section File-specifying Options
-
-All the options and command line arguments given are processed
-in sequential order.  The order makes a difference when the
-@samp{-x} option is used.
-
-@table @samp
-@item -s @var{file}
-Read symbol table from file @var{file}.
-
-@item -e @var{file}
-Use file @var{file} as the executable file to execute when
-appropriate, and for examining pure data in conjunction with a core
-dump.
-
-@item -se @var{file}
-Read symbol table from file @var{file} and use it as the executable
-file.
-
-@item -c @var{file}
-Use file @var{file} as a core dump to examine.
-
-@item -x @var{file}
-Execute GDB commands from file @var{file}.
-
-@item -d @var{directory}
-Add @var{directory} to the path to search for source files.
-@end table
-
-@node Other Arguments,  , File Options, Options
-@section Other Arguments
-
-If there are arguments to GDB that are not options or associated with
-options, the first one specifies the symbol table and executable file name
-(as if it were preceded by @samp{-se}) and the second one specifies a core
-dump file name (as if it were preceded by @samp{-c}).
-
-@node Emacs, Remote, Options, Top
+@node Emacs, Remote, Sequences, Top
 @chapter Using GDB under GNU Emacs
 
 @cindex emacs
@@ -3995,21 +4054,57 @@ Explicit GDB @samp{list} or search commands still produce output as
 usual, but you probably will have no reason to use them.
 @end itemize
 
-In the GDB I/O buffer, you can use these special Emacs commands:
+@quotation
+@emph{Warning:} If the directory where your program resides is not your
+current directory, it can be easy to confuse Emacs about the location of
+the source files, in which case the auxiliary display buffer will not
+appear to show your source.  GDB can find programs by searching your
+environment's @samp{PATH} variable, so the GDB I/O session will proceed
+normally; but Emacs doesn't get enough information back from GDB to
+locate the source files in this situation.  To avoid this problem,
+either start GDB mode from the directory where your program resides, or
+specify a full path name when prompted for the @kbd{M-x gdb} argument.
+
+A similar confusion can result if you use the GDB @samp{file} command to
+switch to debugging a program in some other location, from an existing
+GDB I/O buffer in Emacs.
+@end quotation
+
+By default, @kbd{M-x gdb} calls the program called ``@code{gdb}''.  If
+you need to call GDB by a different name (for example, if you keep
+several configurations around, with different names) you can set the
+Emacs variable @code{gdb-command-name}; for example,
+@example
+(setq gdb-command-name "mygdb")
+@end example
+@noindent
+(preceded by @kbd{ESC ESC}, or typed in the @code{*scratch*} buffer, or
+in your @samp{.emacs} file) will make Emacs call the program named
+``@code{mygdb}'' instead.
+
+In the GDB I/O buffer, you can use these special Emacs commands in
+addition to the standard Shell mode commands:
 
 @table @kbd
 @item C-h m
 Describe the features of Emacs' GDB Mode.
 
 @item M-s
-Execute to another source line, like the GDB @samp{step} command.
+Execute to another source line, like the GDB @samp{step} command; also
+update the display window to show the current file and location.
 
 @item M-n
 Execute to next source line in this function, skipping all function
-calls, like the GDB @samp{next} command.
+calls, like the GDB @samp{next} command.  Then update the display window
+to show the current file and location.
 
 @item M-i
-Execute one instruction, like the GDB @samp{stepi} command.
+Execute one instruction, like the GDB @samp{stepi} command; update
+display window accordingly.
+
+@item M-x gdb-nexti
+Execute to next instruction, using the GDB @samp{nexti} command; update
+display window accordingly.
 
 @item C-c C-f
 Execute until exit from the selected stack frame, like the GDB
@@ -4029,6 +4124,28 @@ like the GDB @samp{up} command.@refill
 @comment C-c C-d in emacs 19
 Go down the number of frames indicated by the numeric argument, like the
 GDB @samp{down} command.
+
+@item C-x &
+Read the number where the cursor is positioned, and insert it at the end
+of the GDB I/O buffer.  For example, if you wish to disassemble code
+around an address that was displayed earlier, type @kbd{disassemble};
+then move the cursor to the address display, and pick up the
+argument for @samp{disassemble} by typing @kbd{C-x &}.  
+
+You can customize this further on the fly by defining elements of the list
+@samp{gdb-print-command}; once it is defined, you can format or
+otherwise process numbers picked up by @kbd{C-x &} before they are
+inserted.  A numeric argument to @kbd{C-x &} will both flag that you
+wish special formatting, and act as an index to pick an element of the
+list.  If the list element is a string, the number to be inserted is
+formatted using the Emacs function @samp{format}; otherwise the number
+is passed as an argument to the corresponding list element.
+
+@item M-x gdb-display-frame
+Explicitly request display of the source code surrounding the current
+frame location, in another window.  GDB does this display automatically;
+but if, for example, you accidentally kill the buffer where it is
+displayed, this command is a way of getting it back.
 @end table
 
 In any source file, the Emacs command @kbd{C-x SPC} (@code{gdb-break})
