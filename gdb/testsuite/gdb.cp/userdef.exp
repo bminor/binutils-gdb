@@ -121,6 +121,8 @@ gdb_test "print one >> 31" "\\\$\[0-9\]* = {x = 0, y = 0}"
 gdb_test "print !one" "\\\$\[0-9\]* = 0\[\r\n\]"
 
 # Assumes 2's complement.  So does everything...
+gdb_test "print +one" "\\\$\[0-9\]* = {x = 2, y = 3}"
+
 gdb_test "print ~one" "\\\$\[0-9\]* = {x = -3, y = -4}"
 
 gdb_test "print -one" "\\\$\[0-9\]* = {x = -2, y = -3}"
@@ -138,8 +140,8 @@ gdb_test "print one += 7" "\\\$\[0-9\]* = {x = 9, y = 10}"
 gdb_test "print two = one" "\\\$\[0-9\]* = {x = 9, y = 10}"
 
 # Check that GDB tolerates whitespace in operator names.
-gdb_test "break A1::'operator+'" ".*Breakpoint $decimal at.*"
-gdb_test "break A1::'operator +'" ".*Breakpoint $decimal at.*"
+gdb_test "break A2::'operator+'" ".*Breakpoint $decimal at.*"
+gdb_test "break A2::'operator +'" ".*Breakpoint $decimal at.*"
 
 gdb_exit
 return 0

@@ -1642,6 +1642,13 @@ gen_expr (union exp_element **pc, struct agent_expr *ax,
       }
       break;
 
+    case UNOP_PLUS:
+      (*pc)++;
+      /* + FOO is equivalent to 0 + FOO, which can be optimized. */
+      gen_expr (pc, ax, value);
+      gen_usual_unary (ax, value);
+      break;
+      
     case UNOP_NEG:
       (*pc)++;
       /* -FOO is equivalent to 0 - FOO.  */

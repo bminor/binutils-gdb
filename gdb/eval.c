@@ -1855,6 +1855,15 @@ evaluate_subexp_standard (struct type *expect_type,
       evaluate_subexp (NULL_TYPE, exp, pos, noside);
       return evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
+    case UNOP_PLUS:
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+      if (unop_user_defined_p (op, arg1))
+	return value_x_unop (arg1, op, noside);
+      else
+	return value_pos (arg1);
+      
     case UNOP_NEG:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)

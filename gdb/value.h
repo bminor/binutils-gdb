@@ -326,6 +326,8 @@ extern struct value *value_addr (struct value *arg1);
 extern struct value *value_assign (struct value *toval,
 				   struct value *fromval);
 
+extern struct value *value_pos (struct value *arg1);
+
 extern struct value *value_neg (struct value *arg1);
 
 extern struct value *value_complement (struct value *arg1);

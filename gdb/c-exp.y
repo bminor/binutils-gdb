@@ -256,6 +256,10 @@ exp	:	'-' exp    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_NEG); }
 	;
 
+exp	:	'+' exp    %prec UNARY
+			{ write_exp_elt_opcode (UNOP_PLUS); }
+	;
+
 exp	:	'!' exp    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_LOGICAL_NOT); }
 	;

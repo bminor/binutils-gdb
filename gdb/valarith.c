@@ -560,6 +560,9 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
     case UNOP_NEG:
       strcpy (ptr, "-");
       break;
+    case UNOP_PLUS:
+      strcpy (ptr, "+");
+      break;
     case UNOP_IND:
       strcpy (ptr, "*");
       break;
@@ -1313,7 +1316,34 @@ value_less (struct value *arg1, struct value *arg2)
     }
 }
 
-/* The unary operators - and ~.  Both free the argument ARG1.  */
+/* The unary operators +, - and ~.  They free the argument ARG1.  */
+
+struct value *
+value_pos (struct value *arg1)
+{
+  struct type *type;
+
+  arg1 = coerce_ref (arg1);
+
+  type = check_typedef (value_type (arg1));
+
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    return value_from_double (type, value_as_double (arg1));
+  else if (is_integral_type (type))
+    {
+      /* Perform integral promotion for ANSI C/C++.  FIXME: What about
+         FORTRAN and (the deleted) chill ?  */
+      if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
+	type = builtin_type_int;
+
+      return value_from_longest (type, value_as_long (arg1));
+    }
+  else
+    {
+      error ("Argument to positive operation not a number.");
+      return 0;			/* For lint -- never reached */
+    }
+}
 
 struct value *
 value_neg (struct value *arg1)

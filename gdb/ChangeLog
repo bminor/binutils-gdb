@@ -1,5 +1,12 @@
 2005-03-08  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* ax-gdb.c (gen_expr): Add UNOP_PLUS case.
+	* c-exp.y (exp): Add unary plus.
+	* eval.c (evaluate_subexp_standard): Add UNOP_PLUS case.
+	* valarith.c (value_x_unop): Add UNOP_PLUS case.
+	(value_pos): New.
+	* value.h (value_pos): Declare.
+
 	* remote.c (MIN_REMOTE_PACKET_SIZE): Set to 20.
 	(remote_fetch_registers): Allow uppercase hex when resyncing.
 	(remote_write_bytes): Only call get_memory_write_packet_size once.

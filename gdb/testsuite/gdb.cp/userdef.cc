@@ -63,6 +63,7 @@ A1 operator/(const A1&);
 A1 operator=(const A1&);
 
 A1 operator~();
+A1 operator+();
 A1 operator-();
 int operator!();
 A1 operator++();
@@ -225,6 +226,15 @@ A1 A1::operator-(void)
  return (neg);
 }
 
+A1 A1::operator+(void)
+{
+ A1 pos(0,0);
+ pos.x = +x;
+ pos.y = +y;
+
+ return (pos);
+}
+
 A1 A1::operator~(void)
 {
  A1 acompl(0,0);
@@ -286,6 +296,17 @@ ostream& operator<<(ostream& outs, A1 one)
  return (outs << endl << "x = " << one.x << endl << "y = " << one.y << endl << "-------" << endl); 
 }
 
+class A2 {
+  public:
+A2 operator+();
+};
+
+A2 A2::operator+()
+{
+  return A2 ();
+}
+
+
 int main (void)
 {
  A1 one(2,3);
@@ -342,6 +363,8 @@ int main (void)
  
  val = (!one);
  cout << "! " << val << endl << "-----"<<endl;
+ three = (+one);
+ cout << "+ " << three;
  three = (-one);
  cout << "- " << three;
  three = (~one);

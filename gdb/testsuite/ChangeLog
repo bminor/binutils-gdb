@@ -1,5 +1,11 @@
 2005-03-08  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* gdb.cp/userdef.cc (A1::operator+): New unary plus.
+	(A2): New class.
+	(main): Test operator+.
+	* gdb.cp/userdef.exp: Test unary plus.  Use A2::operator+ for
+	breakpoint test.
+
 	* gdb.base/sigbpt.exp: Disable if gdb,nosignals.
 	* gdb.base/signull.exp: Disable if gdb,nosignals.
 	* gdb.cp/bs15503.exp: Disable if skip_cplus_tests
