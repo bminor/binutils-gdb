@@ -24,6 +24,18 @@ Do-first:
 # with rm -rf.
 
 Things-to-keep:
+add.s
+basic.exp
+bcc.s
+bccs.s
+bit.s
+cmp.s
+ext.s
+logical.s
+muldiv.s
+other.s
+shift.s
+sub.s
 
 Things-to-lose:
 

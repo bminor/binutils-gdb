@@ -1,3 +1,8 @@
+Mon Dec  9 17:08:38 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10200/*.s: New tests for the mn10200 assembler.
+	* gas/mn10200/basic.exp: Run them.
+
 Fri Dec  6 15:35:04 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/*.s: Remove '$' register prefixing.
