@@ -1,5 +1,8 @@
 Sun May  2 11:43:57 1993  Fred Fish  (fnf@cygnus.com)
 
+	* Makefile.in (NONSRC):  Add 29k-share/README.
+	* Makefile.in (HFILES):  Add 29k-share/udi/udiids.h.
+
 	* defs.h (UINT_MAX, LONG_MAX, INT_MAX, INT_MIN):  Replace hex
 	constants with slightly more portable definitions (still depends
 	on 2's complement arithmetic though).

@@ -301,6 +301,7 @@ NONSRC = ${srcdir}/Makefile.in ${srcdir}/depend ${srcdir}/alldeps.mak \
 	${srcdir}/kdb-start.c ${srcdir}/putenv.c ${srcdir}/gcc.patch \
 	${srcdir}/nindy-share/Makefile ${srcdir}/nindy-share/VERSION \
 	${srcdir}/nindy-share/README ${srcdir}/vx-share/README \
+	${srcdir}/29k-share/README \
 	${srcdir}/config/convex/Convex.notes
 
 # All source files that lint should look at
@@ -330,7 +331,7 @@ HFILES = ${srcdir}/breakpoint.h ${srcdir}/buildsym.h ${srcdir}/call-cmds.h \
 	${srcdir}/config/tm-sysv4.h ${srcdir}/config/m68k/xm-m68k.h \
 	${srcdir}/config/sparc/xm-sparc.h \
 	${srcdir}/config/xm-sysv4.h ${srcdir}/config/vax/xm-vax.h \
-	${srcdir}/config/nm-trash.h \
+	${srcdir}/config/nm-trash.h ${srcdir}/29k-share/udi/udiids.h \
 	${srcdir}/29k-share/udi/udiphcfg.h ${srcdir}/29k-share/udi/udiphsun.h \
 	${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udipt29k.h \
 	${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udisoc.h \
