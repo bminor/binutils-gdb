@@ -1,3 +1,19 @@
+Mon Apr 21 13:38:58 1997  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/run.c: Use FAKEARGV to build test executable that
+	does not require a command line arg, since most simulators
+	don't currently support passing such an arg into the simulated
+	program.
+	* gdb.base/commands.exp: Change tests to insert the proper
+	value as the arg to the first recursive factorial call.  Change
+	compilation line to define FAKEARGV at compile time.
+
+Wed Apr  9 11:12:36 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/recurse.exp: Enable these tests for the mn10300.
+	* gdb.base/watchpoint.exp: Don't expect a failure for an "calling
+	function with watchpoint enabled" test.
+
 Tue Apr  8 19:33:20 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* gdb.base/watchpoint.exp(test_watchpoint_triggered_in_syscall):
