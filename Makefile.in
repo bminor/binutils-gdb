@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Tue Nov 12 00:21:50 PST 1991, by rich@sendai
+# Last Mod Tue Nov 12 22:24:08 PST 1991, by rich@cygnus.com
 #
 # $Id$
 
@@ -113,7 +113,7 @@ pass:
 		-B`pwd`/$(unsubdir)/gas$(subdir)/$(stagepass)/ \
 		-B`pwd`/$(unsubdir)/ld$(subdir)/$(stagepass)/" \
 		"AR=`pwd`/$(unsubdir)/binutils$(subdir)/$(stagepass)/ar" \
-		"LD=`pwd`/$(unsubdir)/ld$(subdir)/$(stagepass)/ld $(GCCVERBOSE)" \
+		"LD=`pwd`/$(unsubdir)/gcc$(subdir)/$(stagepass)/gcc $(GCCVERBOSE)" \
 		"RANLIB=`pwd`/$(unsubdir)/binutils$(subdir)/$(stagepass)/ranlib" \
 		"LOADLIBES=`pwd`/$(unsubdir)/gnulib$(subdir)/$(stagepass)/gnulib.a /lib/libc.a" \
 		"LDFLAGS=-nostdlib /lib/crt0.o \
