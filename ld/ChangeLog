@@ -1,3 +1,8 @@
+2004-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* genscripts.sh (libpath.exp): Really generate for first
+	emulation only.
+
 2004-10-19  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Simplify
