@@ -39,46 +39,74 @@ read="class level macro returntype function formal actual attrib staticdefault p
 
 do_read ()
 {
-    if eval read $read
-    then
-	test "${staticdefault}" || staticdefault=0
-	# NOT YET: Breaks BELIEVE_PCC_PROMOTION and confuses non-
-	# multi-arch defaults.
-	# test "${predefault}" || predefault=0
-	test "${fmt}" || fmt="%ld"
-	test "${print}" || print="(long) ${macro}"
-	case "${invalid_p}" in
-	    0 ) valid_p=1 ;;
-	    "" )
-		if [ "${predefault}" ]
-		then
-		    #invalid_p="gdbarch->${function} == ${predefault}"
-		    valid_p="gdbarch->${function} != ${predefault}"
-		else
-		    #invalid_p="gdbarch->${function} == 0"
-		    valid_p="gdbarch->${function} != 0"
-		fi
-		;;
-	    * ) valid_p="!(${invalid_p})"
-	esac
-
-	# PREDEFAULT is a valid fallback definition of MEMBER when
-	# multi-arch is not enabled.  This ensures that the default
-	# value, when multi-arch is the same as the default value when
-	# not multi-arch.  POSTDEFAULT is always a valid definition of
-	# MEMBER as this again ensures consistency.
-	if [ "${postdefault}" != "" ]
+    comment=""
+    class=""
+    while read line
+    do
+	if test "${line}" = ""
 	then
-	    fallbackdefault="${postdefault}"
-	elif [ "${predefault}" != "" ]
+	    continue
+	elif test "${line}" = "#" -a "${comment}" = ""
 	then
-	    fallbackdefault="${predefault}"
+	    continue
+	elif expr "${line}" : "#" > /dev/null
+	then
+	    comment="${comment}
+${line}"
 	else
-	    fallbackdefault=""
+	    OFS="${IFS}" ; IFS=":"
+	    eval read ${read} <<EOF
+${line}
+EOF
+	    IFS="${OFS}"
+
+	    test "${staticdefault}" || staticdefault=0
+	    # NOT YET: Breaks BELIEVE_PCC_PROMOTION and confuses non-
+	    # multi-arch defaults.
+	    # test "${predefault}" || predefault=0
+	    test "${fmt}" || fmt="%ld"
+	    test "${print}" || print="(long) ${macro}"
+	    case "${invalid_p}" in
+		0 ) valid_p=1 ;;
+		"" )
+		    if [ "${predefault}" ]
+		    then
+			#invalid_p="gdbarch->${function} == ${predefault}"
+			valid_p="gdbarch->${function} != ${predefault}"
+		    else
+			#invalid_p="gdbarch->${function} == 0"
+			valid_p="gdbarch->${function} != 0"
+		    fi
+		    ;;
+		* ) valid_p="!(${invalid_p})"
+	    esac
+
+	    # PREDEFAULT is a valid fallback definition of MEMBER when
+	    # multi-arch is not enabled.  This ensures that the
+	    # default value, when multi-arch is the same as the
+	    # default value when not multi-arch.  POSTDEFAULT is
+	    # always a valid definition of MEMBER as this again
+	    # ensures consistency.
+
+	    if [ "${postdefault}" != "" ]
+	    then
+		fallbackdefault="${postdefault}"
+	    elif [ "${predefault}" != "" ]
+	    then
+		fallbackdefault="${predefault}"
+	    else
+		fallbackdefault=""
+	    fi
+
+	    #NOT YET: See gdbarch.log for basic verification of
+	    # database
+
+	    break
 	fi
-	#NOT YET:
-	# See gdbarch.log for basic verification of database
-	:
+    done
+    if [ "${class}" ]
+    then
+	true
     else
 	false
     fi
@@ -264,12 +292,11 @@ do
   esac
 done
 
-IFS=:
 
 function_list ()
 {
   # See below (DOCO) for description of each field
-  cat <<EOF |
+  cat <<EOF
 i:2:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info::::&bfd_default_arch_struct::::%s:TARGET_ARCHITECTURE->printable_name:TARGET_ARCHITECTURE != NULL
 #
 i:2:TARGET_BYTE_ORDER:int:byte_order::::BIG_ENDIAN
@@ -338,13 +365,13 @@ f:1:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized,
 f:1:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr:::generic_register_convertible_not::0
 f:2:REGISTER_CONVERT_TO_VIRTUAL:void:register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0::0
 f:2:REGISTER_CONVERT_TO_RAW:void:register_convert_to_raw:struct type *type, int regnum, char *from, char *to:type, regnum, from, to:::0::0
-#This function is called when the value of a pseudo-register needs
-#to be updated.  Typically it will be defined on a per-architecture
-#basis.
+# This function is called when the value of a pseudo-register needs to
+# be updated.  Typically it will be defined on a per-architecture
+# basis.
 f:2:FETCH_PSEUDO_REGISTER:void:fetch_pseudo_register:int regnum:regnum:::0::0
-#This function is called when the value of a pseudo-register needs
-#to be set or stored.  Typically it will be defined on a per-architecture
-#basis.
+# This function is called when the value of a pseudo-register needs to
+# be set or stored.  Typically it will be defined on a
+# per-architecture basis.
 f:2:STORE_PSEUDO_REGISTER:void:store_pseudo_register:int regnum:regnum:::0::0
 #
 f:2:POINTER_TO_ADDRESS:CORE_ADDR:pointer_to_address:struct type *type, void *buf:type, buf:::unsigned_pointer_to_address::0
@@ -402,14 +429,13 @@ v:2:TARGET_FLOAT_FORMAT:const struct floatformat *:float_format::::::default_flo
 v:2:TARGET_DOUBLE_FORMAT:const struct floatformat *:double_format::::::default_double_format (gdbarch)
 v:2:TARGET_LONG_DOUBLE_FORMAT:const struct floatformat *:long_double_format::::::&floatformat_unknown
 EOF
-  grep -v '^#'
 }
 
 #
 # The .log file
 #
 exec > new-gdbarch.log
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
     cat <<EOF
 ${class} ${macro}(${actual})
@@ -521,7 +547,7 @@ EOF
 echo ""
 echo ""
 echo "/* The following are pre-initialized by GDBARCH. */"
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
     if class_is_info_p
     then
@@ -540,8 +566,15 @@ done
 echo ""
 echo ""
 echo "/* The following are initialized by the target dependant code. */"
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
+    if [ "${comment}" ]
+    then
+	echo "${comment}" | sed \
+	    -e '2 s,#,/*,' \
+	    -e '3,$ s,#,  ,' \
+	    -e '$ s,$, */,'
+    fi
     if class_is_predicate_p
     then
 	echo ""
@@ -990,7 +1023,7 @@ echo ""
 echo "struct gdbarch"
 echo "{"
 echo "  /* basic architectural information */"
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
     if class_is_info_p
     then
@@ -1037,7 +1070,7 @@ cat <<EOF
      */
 
 EOF
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
     if class_is_variable_p
     then
@@ -1076,7 +1109,7 @@ cat <<EOF
   0, NULL, NULL,
   /* Multi-arch values */
 EOF
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
@@ -1109,7 +1142,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->tdep = tdep;
 EOF
 echo ""
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
     if class_is_info_p
     then
@@ -1118,7 +1151,7 @@ do
 done
 echo ""
 echo "  /* Force the explicit initialization of these. */"
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
@@ -1172,7 +1205,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     internal_error ("verify_gdbarch: bfd_arch_info unset");
   /* Check those that need to be defined for the given multi-arch level. */
 EOF
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
@@ -1233,7 +1266,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 EOF
 function_list | while do_read
 do
-    if [ ${returntype} == "void" ]
+    if [ "${returntype}" == "void" ]
     then
 	echo "#if defined (${macro}) && GDB_MULTI_ARCH"
 	echo "  /* Macro might contain \`[{}]' when not multi-arch */"
@@ -1301,7 +1334,7 @@ gdbarch_tdep (struct gdbarch *gdbarch)
 }
 EOF
 echo ""
-function_list | while do_read # eval read $read
+function_list | while do_read
 do
     if class_is_predicate_p
     then
@@ -1457,8 +1490,7 @@ init_gdbarch_data (struct gdbarch *gdbarch)
    data-pointer. */
 
 void *
-gdbarch_data (data)
-     struct gdbarch_data *data;
+gdbarch_data (struct gdbarch_data *data)
 {
   if (data->index >= current_gdbarch->nr_data)
     internal_error ("gdbarch_data: request for non-existant data.");
@@ -1850,7 +1882,7 @@ disassemble_info tm_print_insn_info;
 extern void _initialize_gdbarch (void);
 
 void
-_initialize_gdbarch ()
+_initialize_gdbarch (void)
 {
   struct cmd_list_element *c;
 

@@ -1,3 +1,10 @@
+Tue Aug  1 17:45:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh: Parse and save comments in the function_list.  Print
+ 	them out as part of the header.  Convert all function definitions
+ 	to ISO-C form.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	
 Tue Aug  1 14:50:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* top.c (get_prompt_1), tracepoint.c (replace_comma): Update

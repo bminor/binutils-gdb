@@ -100,6 +100,8 @@ extern void set_gdbarch_ptr_bit (struct gdbarch *gdbarch, int ptr_bit);
 #endif
 #endif
 
+/*v:1:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):0 */
+
 extern int gdbarch_short_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_short_bit (struct gdbarch *gdbarch, int short_bit);
 #if GDB_MULTI_ARCH
@@ -230,6 +232,11 @@ extern void set_gdbarch_num_regs (struct gdbarch *gdbarch, int num_regs);
 #define NUM_REGS (gdbarch_num_regs (current_gdbarch))
 #endif
 #endif
+
+/* This macro gives the number of pseudo-registers that live in the
+   register namespace but do not get fetched or stored on the target.
+   These pseudo-registers may be aliases for other registers,
+   combinations of other registers, or they may be computed by GDB. */
 
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (NUM_PSEUDO_REGS)
@@ -595,6 +602,10 @@ extern void set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, gdbarc
 #endif
 #endif
 
+/* This function is called when the value of a pseudo-register needs to
+   be updated.  Typically it will be defined on a per-architecture
+   basis. */
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (FETCH_PSEUDO_REGISTER)
 #define FETCH_PSEUDO_REGISTER(regnum) (internal_error ("FETCH_PSEUDO_REGISTER"), 0)
@@ -608,6 +619,10 @@ extern void set_gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch, gdbarch_
 #define FETCH_PSEUDO_REGISTER(regnum) (gdbarch_fetch_pseudo_register (current_gdbarch, regnum))
 #endif
 #endif
+
+/* This function is called when the value of a pseudo-register needs to
+   be set or stored.  Typically it will be defined on a
+   per-architecture basis. */
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (STORE_PSEUDO_REGISTER)
@@ -709,6 +724,8 @@ extern void set_gdbarch_pop_frame (struct gdbarch *gdbarch, gdbarch_pop_frame_ft
 #define POP_FRAME (gdbarch_pop_frame (current_gdbarch))
 #endif
 #endif
+
+/* I wish that these would just go away.... */
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (D10V_MAKE_DADDR)
