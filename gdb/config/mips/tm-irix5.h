@@ -25,6 +25,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef Dest_Reg
 #define Dest_Reg 25
 
+/* The signal handler trampoline is called _sigtramp.  */
+#undef IN_SIGTRAMP
+#define IN_SIGTRAMP(pc, name) ((name) && STREQ ("_sigtramp", name))
+
 /* Irix 5 saves a full 64 bits for each register.  We skip 2 * 4 to
    get to the saved PC (the register mask and status register are both
    32 bits) and then another 4 to get to the lower 32 bits.  We skip
