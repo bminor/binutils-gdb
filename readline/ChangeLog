@@ -1,3 +1,14 @@
+Tue Feb 15 14:07:08 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* readline.c (_rl_output_character_function), display.c:
+	Return int, not void, to conform with the expected arg of tputs.
+	* readline.c (init_terminal_io):  tgetflag only takes 1 arg.
+	* readline.c (_rl_savestring):  New function.
+	* chardefs.h:  To avoid conflicts and/or warnings, define
+	savestring as a macro wrapper for _rl_savestring.
+	* display.c (extern term_xn):  It's an int flag, not a string.
+	* charsdefs.h, rldefs.h:  Remove HAVE_STRING_H-related junk.
+
 Sat Feb  5 08:32:30 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in: Remove obsolete rules for history.info and

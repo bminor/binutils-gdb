@@ -4,37 +4,9 @@
 
 #include <ctype.h>
 
-#if 0
-/* Getting the correct definition of HAVE_STRING_H is harder than just
-   declaring them ourselves.  CYGNUS LOCAL.  */
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else
-#  include <strings.h>
-#endif /* HAVE_STRING_H */
-#else /* not 0 */
-/* We don't worry about declaring functions where we don't use the return
-   value (e.g. strcpy) or which return int.  */
-extern char *strrchr ();
-#endif /* not 0 */
-
 #ifndef savestring
-#if 0
-
-/* CYGNUS LOCAL--this declaration loses if xmalloc has already been
-   declared as void *xmalloc (), as in GDB.  The whole concept of
-   readline using xmalloc rather than just returning NULL when it runs
-   out of memory is questionable, but if we do want xmalloc we need a
-   better way to declare it (e.g. the client declares it, or the client
-   calls a rl_register_xmalloc function analagous to the way signal()
-   works.  */
-
-extern char *xmalloc ();
-#endif
-#  ifndef strcpy
-extern char *strcpy ();
-#  endif
-#define savestring(x) strcpy (xmalloc (1 + strlen (x)), (x))
+#define savestring(X) _rl_savestring(X)
+extern char * _rl_savestring ();
 #endif
 
 #ifndef whitespace

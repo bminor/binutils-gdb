@@ -49,13 +49,15 @@
 #endif /* __linux__ */
 
 /* Some USG machines have BSD signal handling (sigblock, sigsetmask, etc.) */
-#if defined (USG) && !defined (hpux)
+/* CYGNUS LOCAL accept __hpux as well as hpux for HP compiler in ANSI mode.  */
+#if defined (USG) && !(defined (hpux) || defined (__hpux))
 #  undef HAVE_BSD_SIGNALS
 #endif
 
 /* System V machines use termio. */
 #if !defined (_POSIX_VERSION)
-#  if defined (USG) || defined (hpux) || defined (Xenix) || defined (sgi) || defined (DGUX)
+/* CYGNUS LOCAL accept __hpux as well as hpux for HP compiler in ANSI mode.  */
+#  if defined (USG) || defined (hpux) || defined (__hpux) || defined (Xenix) || defined (sgi) || defined (DGUX)
 #    undef NEW_TTY_DRIVER
 #    define TERMIO_TTY_DRIVER
 #    include <termio.h>
@@ -149,21 +151,6 @@
 #if defined (S_IFDIR) && !defined (S_ISDIR)
 #define S_ISDIR(m) (((m)&S_IFMT) == S_IFDIR)
 #endif
-
-/* Decide which flavor of the header file describing the C library
-   string functions to include and include it. */
-
-#if defined (USG) || defined (NeXT)
-#  if !defined (HAVE_STRING_H)
-#    define HAVE_STRING_H
-#  endif /* !HAVE_STRING_H */
-#endif /* USG || NeXT */
-
-#if defined (HAVE_STRING_H)
-#  include <string.h>
-#else /* !HAVE_STRING_H */
-#  include <strings.h>
-#endif /* !HAVE_STRING_H */
 
 #if !defined (strchr) && !defined (__STDC__)
 extern char *strchr (), *strrchr ();

@@ -88,7 +88,7 @@ extern int rl_complete_with_tilde_expansion;
 /* Forward declarations used in this file. */
 void rl_dispatch ();
 void free_history_entry ();
-void _rl_output_character_function ();
+int _rl_output_character_function ();
 void _rl_set_screen_size ();
 
 #if !defined (_GO32_)
@@ -224,6 +224,8 @@ static int defining_kbd_macro = 0;
    emacs_meta_keymap or vi_escape_keymap. */
 int _rl_convert_meta_chars_to_ascii = 1;
 
+/* Non-zero tells rl_delete_text and rl_insert_text to not add to
+   the undo list. */
 static int doing_an_undo;
 
 /* **************************************************************** */
@@ -1235,7 +1237,7 @@ init_terminal_io (terminal_name)
 
   screenwidth = screenheight = 0;
 
-  term_xn = tgetflag ("am", &buffer) && tgetflag ("xn", &buffer);
+  term_xn = tgetflag ("am") && tgetflag ("xn");
 
   _rl_set_screen_size (tty, 0);
 
@@ -1319,11 +1321,11 @@ init_terminal_io (terminal_name)
 }
 
 /* A function for the use of tputs () */
-void
+int
 _rl_output_character_function (c)
      int c;
 {
-  putc (c, out_stream);
+  return putc (c, out_stream);
 }
 
 /* Write COUNT characters from STRING to the output stream. */
@@ -2277,10 +2279,6 @@ rl_transpose_chars (count)
 /*								    */
 /* **************************************************************** */
 
-/* Non-zero tells rl_delete_text and rl_insert_text to not add to
-   the undo list. */
-static int doing_an_undo = 0;
-
 /* The current undo list for THE_LINE. */
 UNDO_LIST *rl_undo_list = (UNDO_LIST *)NULL;
 
@@ -3061,6 +3059,15 @@ rl_getc (stream)
 	return (EOF);
 #endif /* !__GO32__ */
     }
+}
+
+char *
+_rl_savestring (str)
+     char *str;
+{
+  char *copy = (char*) xmalloc (strlen (str) + 1);
+  strcpy (copy, str);
+  return copy;
 }
 
 #if defined (STATIC_MALLOC)

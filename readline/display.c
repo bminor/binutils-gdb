@@ -41,10 +41,10 @@ extern int readline_echoing_p;
 extern char *term_clreol, *term_im, *term_ic,  *term_ei, *term_DC;
 /* Termcap variables. */
 extern char *term_up, *term_dc, *term_cr, *term_IC;
-extern int screenheight, screenwidth, terminal_can_insert;
+extern int screenheight, screenwidth, terminal_can_insert, term_xn;
 
 extern void _rl_output_some_chars ();
-extern void _rl_output_character_function ();
+extern int _rl_output_character_function ();
 
 extern int _rl_convert_meta_chars_to_ascii;
 extern int _rl_horizontal_scroll_mode;
@@ -75,11 +75,7 @@ extern char *xmalloc (), *xrealloc ();
 
    update_line and the code that calls it makes a multiple line,
    automatically wrapping line update.  Carefull attention needs
-   to be paid to the vertical position variables.
-
-   handling of terminals with autowrap on (incl. DEC braindamage)
-   could be improved a bit.  Right now I just cheat and decrement
-   screenwidth by one. */
+   to be paid to the vertical position variables. */
 
 /* Keep two buffers; one which reflects the current contents of the
    screen, and the other to draw what we think the new contents should
@@ -240,7 +236,7 @@ rl_redisplay ()
 
   /* PWP: now is when things get a bit hairy.  The visible and invisible
      line buffers are really multiple lines, which would wrap every
-     (screenwidth - 1) characters.  Go through each in turn, finding
+     screenwidth characters.  Go through each in turn, finding
      the changed region and updating it.  The line order is top to bottom. */
 
   /* If we can move the cursor up and down, then use multiple lines,
@@ -362,6 +358,15 @@ update_line (old, new, current_line)
 {
   register char *ofd, *ols, *oe, *nfd, *nls, *ne;
   int lendiff, wsatend;
+
+  if (_rl_last_c_pos == screenwidth && term_xn && new[0])
+    {
+      putc (new[0], rl_outstream);
+      _rl_last_c_pos = 1;
+      _rl_last_v_pos++;
+      if (old[0])
+	old[0] = new[0];
+    }
 
   /* Find first difference. */
   for (ofd = old, nfd = new;
