@@ -49,7 +49,12 @@ const char line_comment_chars[] = "!#";
 #define OP_BVC	0x50
 #define OP_BVS	0x70
 
-void s_longa ();
+static void s_longa PARAMS ((int));
+static char *parse_exp PARAMS ((char *));
+static char *get_operands PARAMS ((const struct opinfo *, char *));
+static const struct opinfo *get_specific PARAMS ((const struct opinfo *));
+static void build_Mytes PARAMS ((const struct opinfo *));
+
 
 const pseudo_typeS md_pseudo_table[] = {
   {"int", cons, 2},
@@ -59,14 +64,9 @@ const pseudo_typeS md_pseudo_table[] = {
   {0, 0, 0}
 };
 
-void cons ();
-void s_align_bytes ();
-
 #if 0
 int md_reloc_size;
 #endif
-
-static int relax;		/* set if -relax seen */
 
 const char EXP_CHARS[] = "eE";
 
@@ -124,8 +124,9 @@ relax_typeS md_relax_table[C (END, 0)] = {
    should set up all the tables, etc that the MD part of the assembler
    needs.  */
 
-void
+static void
 s_longa (xmode)
+     int xmode;
 {
   int *p = xmode ? &X : &M;
   while (*input_line_pointer == ' ')
@@ -148,7 +149,7 @@ s_longa (xmode)
 void
 md_begin ()
 {
-  struct opinfo *opcode;
+  const struct opinfo *opcode;
   char *prev_name = "";
 
   opcode_hash_control = hash_new ();
@@ -161,12 +162,6 @@ md_begin ()
 	  prev_name = opcode->name;
 	  hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
 	}
-      else
-	{
-	  /* Make all the opcodes with the same name point to the same
-	     string.  */
-	  opcode->name = prev_name;
-	}
     }
 
   flag_signed_overflow_ok = 1;
@@ -174,30 +169,13 @@ md_begin ()
 
 static expressionS immediate;	/* absolute expression */
 static expressionS immediate1;	/* absolute expression */
-
-static symbolS *
-dot ()
-{
-  const char *fake;
-
-  /* JF: '.' is pseudo symbol with value of current location
-     in current segment.  */
-  fake = FAKE_LABEL_NAME;
-  return symbol_new (fake,
-		     now_seg,
-		     (valueT) frag_now_fix (),
-		     frag_now);
-
-}
-
 int expr_size;
 int expr_shift;
 int tc_cons_reloc;
 
 void
-w65_expression (dest, bytes)
+w65_expression (dest)
      expressionS *dest;
-     unsigned int bytes;
 {
   expr_size = 0;
   expr_shift = 0;
@@ -227,16 +205,15 @@ w65_expression (dest, bytes)
 int amode;
 
 static char *
-parse_exp (s, bytes)
+parse_exp (s)
      char *s;
-     int bytes;
 {
   char *save;
   char *new;
 
   save = input_line_pointer;
   input_line_pointer = s;
-  w65_expression (&immediate, bytes);
+  w65_expression (&immediate);
   if (immediate.X_op == O_absent)
     as_bad (_("missing operand"));
   new = input_line_pointer;
@@ -246,7 +223,7 @@ parse_exp (s, bytes)
 
 static char *
 get_operands (info, ptr)
-     struct opinfo *info;
+     const struct opinfo *info;
      char *ptr;
 {
   register int override_len = 0;
@@ -474,7 +451,7 @@ get_operands (info, ptr)
     }
   else
     {
-      ptr = parse_exp (ptr, 2);
+      ptr = parse_exp (ptr);
       if (ptr[0] == ',')
 	{
 	  if (ptr[1] == 'y')
@@ -591,9 +568,9 @@ get_operands (info, ptr)
    addressing modes, return the opcode which matches the opcodes
    provided.  */
 
-static struct opinfo *
+static const struct opinfo *
 get_specific (opcode)
-     struct opinfo *opcode;
+     const struct opinfo *opcode;
 {
   int ocode = opcode->code;
 
@@ -605,28 +582,11 @@ get_specific (opcode)
   return 0;
 }
 
-int
-check (operand, low, high)
-     expressionS *operand;
-     int low;
-     int high;
-{
-  if (operand->X_op != O_constant
-      || operand->X_add_number < low
-      || operand->X_add_number > high)
-    {
-      as_bad ("operand must be absolute in range %d..%d", low, high);
-    }
-  return operand->X_add_number;
-}
-
-static int log2[] = { 0, 0, 1, 0, 2 };
-
 /* Now we know what sort of opcodes it is, let's build the bytes.  */
 
 static void
 build_Mytes (opcode)
-     struct opinfo *opcode;
+     const struct opinfo *opcode;
 {
   int size;
   int type;
@@ -656,6 +616,8 @@ build_Mytes (opcode)
       switch (opcode->amode)
 	{
 	  GETINFO (size, type, pcrel);
+	default:
+	  abort ();
 	}
 
       /* If something special was done in the expression modify the
@@ -707,12 +669,8 @@ void
 md_assemble (str)
      char *str;
 {
-  unsigned char *op_start;
-  unsigned char *op_end;
-  struct opinfo *opcode;
+  const struct opinfo *opcode;
   char name[20];
-  int nlen = 0;
-  char *p;
 
   /* Drop leading whitespace */
   while (*str == ' ')
@@ -756,25 +714,11 @@ md_assemble (str)
   build_Mytes (opcode);
 }
 
-void
-tc_crawl_symbol_chain (headers)
-     object_headers *headers;
-{
-  printf (_("call to tc_crawl_symbol_chain \n"));
-}
-
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
   return 0;
-}
-
-void
-tc_headers_hook (headers)
-     object_headers *headers;
-{
-  printf (_("call to tc_headers_hook \n"));
 }
 
 /* Various routines to kill one day.  */
@@ -796,7 +740,6 @@ md_atof (type, litP, sizeP)
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   LITTLENUM_TYPE *wordP;
   char *t;
-  char *atof_ieee ();
 
   switch (type)
     {
@@ -843,17 +786,10 @@ md_atof (type, litP, sizeP)
 
 int
 md_parse_option (c, a)
-     int c;
-     char *a;
+     int c ATTRIBUTE_UNUSED;
+     char *a ATTRIBUTE_UNUSED;
 {
   return 0;
-}
-
-void
-tc_Nout_fix_to_chars ()
-{
-  printf (_("call to tc_Nout_fix_to_chars \n"));
-  abort ();
 }
 
 /* Called after relaxing, change the frags so they know how big they
@@ -861,8 +797,8 @@ tc_Nout_fix_to_chars ()
 
 void
 md_convert_frag (headers, seg, fragP)
-     object_headers *headers;
-     segT seg;
+     object_headers *headers ATTRIBUTE_UNUSED;
+     segT seg ATTRIBUTE_UNUSED;
      fragS *fragP;
 {
   int disp_size = 0;
@@ -1058,7 +994,7 @@ md_pcrel_from (fixP)
 
 void
 tc_coff_symbol_emit_hook (x)
-     symbolS *x;
+     symbolS *x ATTRIBUTE_UNUSED;
 {
 }
 
@@ -1194,7 +1130,7 @@ struct option md_longopts[] = {
 
 void
 md_show_usage (stream)
-     FILE *stream;
+     FILE *stream ATTRIBUTE_UNUSED;
 {
 }
 

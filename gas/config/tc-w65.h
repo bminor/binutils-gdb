@@ -47,7 +47,11 @@ extern void tc_reloc_mangle
 #define RELOC_32 1234
 
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep (frag)
-#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) w65_expression (EXP, NBYTES)
+int tc_coff_sizemachdep PARAMS ((fragS *));
+
+#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) w65_expression (EXP)
+void w65_expression PARAMS ((expressionS *));
+
 #define TC_COUNT_RELOC(x) (1)
 #define TC_CONS_RELOC tc_cons_reloc
 #define DONT_OVERFLOW

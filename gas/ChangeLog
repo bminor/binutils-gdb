@@ -1,5 +1,37 @@
 2002-12-03  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-w65.c (s_longa): Prototype.  Make static, specify int arg.
+	(cons, s_align_bytes): Delete declaration.
+	(relax): Delete.
+	(md_begin): Constify "struct opinfo *" var.  Don't try to make "name"
+	strings common.
+	(dot): Delete unused function.
+	(w65_expression): Remove unused arg.
+	(parse_exp): Prototype.  Remove unused arg.  Adjust w65_expression
+	call.
+	(get_operands): Prototype.  Constify "struct opinfo *" arg.  Fix
+	parse_exp call.
+	(get_specific): Prototype.  Constify "struct opinfo *" arg and return
+	value.
+	(check): Remove unused function.
+	(build_Mytes): Prototype.  Constify "struct opinfo *" arg.  Abort
+	on unhandled switch case.
+	(md_assemble): Remove unused op_start, op_end, nlen, p vars.  Constify
+	"opcode".
+	(tc_crawl_symbol_chain): Delete unused function.
+	(tc_headers_hook): Likewise.
+	(tc_Nout_fix_to_chars): Likewise.
+	(md_undefined_symbol): Add ATTRIBUTE_UNUSED.
+	(md_parse_option): Likewise.
+	(md_convert_frag): Likewise.
+	(tc_coff_symbol_emit_hook): Likewise.
+	(md_show_usage): Likewise.
+	* config/tc-w65.h (tc_coff_sizemachdep): Declare.
+	(TC_PARSE_CONS_EXPRESSION): w65_expression takes one arg.
+	(w65_expression): Declare.
+
+	* po/POTFILES.in: Regenerate.
+
 	* config/tc-arm.c (arm_force_relocation): Return 0 for ARM_IMMEDIATE
 	and ARM_ADRL_IMMEDIATE.
 

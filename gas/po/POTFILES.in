@@ -161,7 +161,6 @@ flonum.h
 frags.c
 frags.c
 frags.h
-gasp.c
 hash.c
 hash.c
 hash.h
