@@ -586,40 +586,6 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
   show_architecture (NULL, from_tty);
 }
 
-/* Called if the user enters ``info architecture'' without an argument. */
-
-static void
-info_architecture (char *args, int from_tty)
-{
-  printf_filtered ("Available architectures are:\n");
-  if (GDB_MULTI_ARCH)
-    {
-      const char **arches = gdbarch_printable_names ();
-      const char **arch;
-      for (arch = arches; *arch != NULL; arch++)
-	{
-	  printf_filtered (" %s", *arch);
-	}
-      xfree (arches);
-    }
-  else
-    {
-      enum bfd_architecture a;
-      for (a = bfd_arch_obscure + 1; a < bfd_arch_last; a++)
-	{
-	  const struct bfd_arch_info *ap;
-	  for (ap = bfd_lookup_arch (a, 0);
-	       ap != NULL;
-	       ap = ap->next)
-	    {
-	      printf_filtered (" %s", ap->printable_name);
-	      ap = ap->next;
-	    }
-	}
-    }
-  printf_filtered ("\n");
-}
-
 /* Set the dynamic target-system-dependent parameters (architecture,
    byte-order) using information found in the BFD */
 
@@ -759,9 +725,6 @@ initialize_current_architecture (void)
        current setting. */
     add_cmd ("architecture", class_support, show_architecture,
 	     "Show the current target architecture", &showlist);
-    c = add_cmd ("architecture", class_support, info_architecture,
-		 "List supported target architectures", &infolist);
-    deprecate_cmd (c, "set architecture");
   }
 }
 

@@ -1,5 +1,11 @@
 2001-05-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* arch-utils.c (initialize_current_architecture): Delete obsolete
+	``info architecture'' command.
+	(info_architecture): Delete function.
+
+2001-05-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* TODO (5.1, 5.2): Update.
 
 2001-05-09  Andrew Cagney  <ac131313@redhat.com>
