@@ -269,6 +269,14 @@ void inheritance1 (void)
   inheritance2 ();	
 }
 
+// ======================== static member functions =====================
+
+class Static {
+public:
+  static void ii(int, int);
+};
+void Static::ii (int, int) { }
+
 // ======================== virtual base classes=========================
 
 class vA {

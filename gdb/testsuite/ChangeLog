@@ -1,3 +1,8 @@
+2001-12-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.c++/classes.exp: Add test for static member function.
+	* gdb.c++/misc.cc: Add class with static member function.
+
 2001-12-07  Jim Blandy  <jimb@redhat.com>
 
 	If GDB says it can't find the struct the function returned, report

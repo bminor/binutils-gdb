@@ -308,6 +308,22 @@ proc test_ptype_class_objects {} {
 	}
     }
 
+    # With g++ 2.x and stabs debug info, we misinterpret static methods
+    # whose name matches their argument mangling.
+    send_gdb "ptype class Static\n"
+    gdb_expect {
+	-re "type = (class|struct) Static \{(${ws}public:|)${ws}Static & operator=\\(Static const ?&\\);${ws}Static\\(Static const ?&\\);${ws}Static\\((void|)\\);${ws}static void ii\\(int, int\\);${ws}\}$nl$gdb_prompt $" {
+	    pass "ptype class Static"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "ptype class Static"
+	}
+	timeout {
+	    fail "ptype class Static (timeout)"
+	    return
+	}
+    }
+
     send_gdb "ptype class vA\n"
     gdb_expect {
 	-re "type = (class|struct) vA \{(${ws}public:|)${ws}int va;${ws}int vx;${ws}vA & operator=\\(vA const &\\);${ws}vA\\(vA const &\\);${ws}vA\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
