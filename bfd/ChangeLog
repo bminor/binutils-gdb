@@ -1,3 +1,14 @@
+Fri Apr 30 17:25:23 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* The following patches are from Jeffrey Law <law@cs.utah.edu>.
+	* hppa.c (hppa_core_file_p): Provide a temporary dummy routine
+	for HOST_HPPABSD.
+	* bfd/hosts/hppabsd.h: Fix declarations of malloc and free.
+	* bfd/libhppa.h: Include sysdep here.  Conditionalize
+	includes based on HOST_HPPAHPUX or HOST_HPPABSD.
+	Provide definitions for MAXCOMLEN and _PA_RISC_ID suitable
+	for BSD.
+
 Fri Apr 30 17:34:11 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* elf32-hppa.c: Don't include a.out.h.  Apparently not even the

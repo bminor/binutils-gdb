@@ -43,18 +43,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef CPU_PA_RISC1_0
 #define CPU_PA_RISC1_0 0x20B
 #endif /* CPU_PA_RISC1_0 */
+
 #ifndef CPU_PA_RISC1_1
 #define CPU_PA_RISC1_1 0x210
 #endif /* CPU_PA_RISC1_1 */
+
 #ifndef _PA_RISC1_0_ID
 #define _PA_RISC1_0_ID CPU_PA_RISC1_0
 #endif /* _PA_RISC1_0_ID */
+
 #ifndef _PA_RISC1_1_ID
 #define _PA_RISC1_1_ID CPU_PA_RISC1_1
 #endif /* _PA_RISC1_1_ID */
+
 #ifndef _PA_RISC_MAXID
 #define _PA_RISC_MAXID	0x2FF
 #endif /* _PA_RISC_MAXID */
+
 #ifndef _PA_RISC_ID
 #define _PA_RISC_ID(__m_num)		\
     (((__m_num) == _PA_RISC1_0_ID) ||	\
@@ -523,6 +528,7 @@ make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
   return asect;
 }
 
+#ifdef HOST_HPPAHPUX
 static bfd_target *
 hppa_core_file_p (abfd)
      bfd *abfd;
@@ -621,12 +627,21 @@ hppa_core_file_matches_executable_p  (core_bfd, exec_bfd)
 {
   return true;          /* FIXME, We have no way of telling at this point */
 }
+#endif /* HOST_HPPAHPUX */
+
+#ifdef HOST_HPPABSD
+  /* All the core file code for BSD needs to be rewritten cleanly.  For
+     now we do not support core files under BSD.  */
+
+#define hppa_core_file_p _bfd_dummy_target
+#define hppa_core_file_failing_command _bfd_dummy_core_file_failing_command
+#define hppa_core_file_failing_signal _bfd_dummy_core_file_failing_signal
+#define hppa_core_file_matches_executable_p _bfd_dummy_core_file_matches_executable_p
+#endif /* HOST_HPPABSD */
 
 #define hppa_bfd_debug_info_start        bfd_void
 #define hppa_bfd_debug_info_end          bfd_void
 #define hppa_bfd_debug_info_accumulate   (PROTO(void,(*),(bfd*, struct sec *))) bfd_void
-
-
 
 #define hppa_openr_next_archived_file    bfd_generic_openr_next_archived_file
 #define hppa_generic_stat_arch_elt       bfd_generic_stat_arch_elt

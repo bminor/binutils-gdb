@@ -1,3 +1,6 @@
+#ifndef _HPPAHPUX_H
+#define _HPPAHPUX_H
+
 #include <fcntl.h>
 #include <errno.h>
 #include <stdio.h>
@@ -51,3 +54,5 @@ typedef int int32_type;
 typedef unsigned int uint32_type;
 
 #include "fopen-same.h"
+
+#endif /* _HPPAHPUX_H */
