@@ -69,7 +69,7 @@ const struct pd_reg d10v_predefined_registers[] =
   { "r13", NULL, OPERAND_GPR+13 },
   { "r14", NULL, OPERAND_GPR+14 },
   { "r14-r15", NULL, OPERAND_GPR+14 },
-  { "r15", "sp", OPERAND_SP|OPERAND_GPR+15 },
+  { "r15", "sp", OPERAND_SP|(OPERAND_GPR+15) },
   { "r2", NULL, OPERAND_GPR+2 },
   { "r2-r3", NULL, OPERAND_GPR+2 },
   { "r3", NULL, OPERAND_GPR+3 },
@@ -85,7 +85,7 @@ const struct pd_reg d10v_predefined_registers[] =
   { "rpt_c", NULL, OPERAND_CONTROL+7 },
   { "rpt_e", NULL, OPERAND_CONTROL+9 },
   { "rpt_s", NULL, OPERAND_CONTROL+8 },
-  { "sp", NULL, OPERAND_SP|OPERAND_GPR+15 },
+  { "sp", NULL, OPERAND_SP|(OPERAND_GPR+15) },
 };
 
 int 
