@@ -99,7 +99,7 @@ extern void
 terminal_ours PARAMS ((void));
 
 extern void
-run_stack_dummy PARAMS ((CORE_ADDR, char [REGISTER_BYTES]));
+run_stack_dummy PARAMS ((char*, CORE_ADDR, char [REGISTER_BYTES]));
 
 extern CORE_ADDR
 read_pc PARAMS ((void));
