@@ -1,3 +1,9 @@
+Wed Dec 15 20:16:40 1993  david d `zoo' zuhn  (zoo@andros.cygnus.com)
+
+	* gprof.texi (Invoking): add text about -v flag
+
+	* gprof.1: add text about -v flag
+
 Wed Dec  8 16:55:06 1993  david d `zoo' zuhn  (zoo@andros.cygnus.com)
 
 	* gprof.c (VERSION): defined a version macro, print the value 

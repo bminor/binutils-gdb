@@ -329,6 +329,10 @@ may be given; only one @var{function_name} may be indicated with each
 The @samp{-k} option allows you to delete from the profile any arcs from
 routine @var{from} to routine @var{to}.
 
+@item -v
+The @samp{-v} flags causes @code{gprof} to print the current version
+number, and then exit.
+
 @item -z
 If you give the @samp{-z} option, @code{gprof} will mention all
 functions in the flat profile, even those that were never called, and
