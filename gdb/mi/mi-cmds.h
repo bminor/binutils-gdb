@@ -63,6 +63,7 @@ extern mi_cmd_argv_ftype mi_cmd_data_list_register_values;
 extern mi_cmd_argv_ftype mi_cmd_data_list_changed_registers;
 extern mi_cmd_argv_ftype mi_cmd_data_read_memory;
 extern mi_cmd_argv_ftype mi_cmd_data_write_memory;
+extern mi_cmd_argv_ftype mi_cmd_data_write_register_values;
 extern mi_cmd_args_ftype mi_cmd_exec_continue;
 extern mi_cmd_args_ftype mi_cmd_exec_finish;
 extern mi_cmd_args_ftype mi_cmd_exec_next;

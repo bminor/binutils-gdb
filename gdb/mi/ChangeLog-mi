@@ -1,5 +1,17 @@
 2000-03-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* mi-cmds.h: Export mi_cmd_data_write_register_values.
+	
+	* mi-cmds.c (mi_cmds): Implement data-write-register-values with
+ 	mi_cmd_data_write_register_values.
+
+	* mi-main.c (mi_cmd_data_write_register_values): New
+ 	function. Write a value into a register.
+
+2000-03-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* mi-cmds.h: 
+
 	* gdbmi.texinfo: Update data-disassemble documentation.
 
 2000-03-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>

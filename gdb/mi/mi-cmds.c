@@ -50,6 +50,7 @@ struct mi_cmd mi_cmds[] =
   {"data-list-register-values", 0, 0, mi_cmd_data_list_register_values},
   {"data-read-memory", 0, 0, mi_cmd_data_read_memory},
   {"data-write-memory", 0, 0, mi_cmd_data_write_memory},
+  {"data-write-register-values", 0, 0, mi_cmd_data_write_register_values},
   {"display-delete", 0, 0},
   {"display-disable", 0, 0},
   {"display-enable", 0, 0},

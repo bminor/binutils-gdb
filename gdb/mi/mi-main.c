@@ -36,6 +36,7 @@
 #include "event-loop.h"
 #include "event-top.h"
 #include "gdbcore.h"		/* for write_memory() */
+#include "value.h"		/* for write_register_bytes() */
 #include <ctype.h>
 #include <sys/time.h>
 
@@ -538,6 +539,81 @@ get_register (int regnum, int format)
       ui_out_stream_delete (stb);
     }
   return 1;
+}
+
+/* Write given values into registers. The registers and values are
+   given as pairs. The corresponding MI command is 
+   -data-write-register-values <format> [<regnum1> <value1>...<regnumN> <valueN>]*/
+enum mi_cmd_result
+mi_cmd_data_write_register_values (char *command, char **argv, int argc)
+{
+  int regnum;
+  int i;
+  int numregs;
+  char *buffer;
+  LONGEST value;
+  char format;
+
+  /* Note that the test for a valid register must include checking the
+     REGISTER_NAME because NUM_REGS may be allocated for the union of
+     the register sets within a family of related processors.  In this
+     case, some entries of REGISTER_NAME will change depending upon
+     the particular processor being debugged.  */
+
+  numregs = ARCH_NUM_REGS;
+
+  if (argc == 0)
+    {
+      asprintf (&mi_error_message,
+		"mi_cmd_data_write_register_values: Usage: -data-write-register-values <format> [<regnum1> <value1>...<regnumN> <valueN>]");
+      return MI_CMD_ERROR;
+    }
+
+  format = (int) argv[0][0];
+
+  if (!target_has_registers)
+    {
+      asprintf (&mi_error_message, "mi_cmd_data_write_register_values: No registers.");
+      return MI_CMD_ERROR;
+    }
+
+  if (!(argc - 1))
+    {
+      asprintf (&mi_error_message, "mi_cmd_data_write_register_values: No regs and values specified.");
+      return MI_CMD_ERROR;
+    }
+
+  if ((argc - 1) % 2)
+    {
+      asprintf (&mi_error_message, "mi_cmd_data_write_register_values: Regs and vals are not in pairs.");
+      return MI_CMD_ERROR;
+    }
+
+  for (i = 1; i < argc; i = i + 2)
+    {
+      regnum = atoi (argv[i]);
+
+      if (regnum >= 0
+	  && regnum < numregs
+	  && REGISTER_NAME (regnum) != NULL
+	  && *REGISTER_NAME (regnum) != '\000')
+	{
+	  /* Get the value as a number */
+	  value = parse_and_eval_address (argv[i + 1]);
+	  /* Get the value into an array */
+	  buffer = (unsigned char *) xmalloc (REGISTER_SIZE);
+	  store_signed_integer (buffer, REGISTER_SIZE, value);
+	  /* Write it down */
+	  write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
+	  /* write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_SIZE); */
+	}
+      else
+	{
+	  asprintf (&mi_error_message, "bad register number");
+	  return MI_CMD_ERROR;
+	}
+    }
+  return MI_CMD_DONE;
 }
 
 #if 0
@@ -1150,7 +1226,7 @@ mi_cmd_execute (struct mi_parse *parse)
     }
 }
 
-void 
+void
 free_and_reset (char **arg)
 {
   free (*arg);
