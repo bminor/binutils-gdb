@@ -1,3 +1,9 @@
+2003-02-23  Raoul Gough  <RaoulGough@yahoo.co.uk>
+
+	* gdb.texinfo (Cygwin Native): Links to Non-debug DLL symbols.
+	(Non-debug DLL symbols): New node, describing the minimal symbols
+	loaded from DLLs without real debugging symbols.
+
 2003-02-20  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.texinfo (Set Breaks): Add cross reference to "set remote
