@@ -1,5 +1,7 @@
 Tue Apr 21 12:31:33 1992  K. Richard Pixley  (rich@cygnus.com)
 
+	* configure: correct final line of config.status.
+
 	* configure: patch from eggert.  Avoids a protection problem if
 	  the original Makefile.in is read only.
 

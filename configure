@@ -692,7 +692,9 @@ EOF
 		*) using="${using} and \"${site_makefile_frag}\"" ;;
 		esac
 
-		echo "Created \"${Makefile}\" in" ${PWD} `echo "${using}" | sed 's/and/using/'`
+		newusing=`echo "${using}" | sed 's/and/using/'`
+		using=${newusing}
+		echo "Created \"${Makefile}\" in" ${PWD} ${using}
 	fi
 
 	. ${tmpfile}.pos
