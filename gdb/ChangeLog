@@ -1,3 +1,10 @@
+2003-01-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Create "Checks for libraries" section, and move
+	appropriate tests there.  Cleanup check for wctype in libw.  Use
+	AC_SEARCH_LIBS to see whether we need libsocket.
+	* configure: Regenerated.
+
 2002-12-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Remove bzero and bcopy from call to AC_CHECK_FUNCS.

@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+dnl Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
 dnl Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
@@ -107,6 +107,23 @@ dnl MiG is needed for the Hurd.
 AC_CHECK_TOOL(MIG, mig)
 
 AC_ARG_PROGRAM
+
+# ---------------------- #
+# Checks for libraries.  #
+# ---------------------- #
+
+# We might need to link with -lm; most simulators need it.
+AC_CHECK_LIB(m, main)
+
+# We need to link with -lw to get `wctype' on Solaris before Solaris
+# 2.6.  Solaris 2.6 and beyond have this function in libc, and have a
+# libw that some versions of the GNU linker cannot hanle (GNU ld 2.9.1
+# is known to have this problem).  Therefore we avoid libw if we can.
+AC_CHECK_FUNC(wctype, [],
+  [AC_CHECK_LIB(w, wctype)])
+
+# Some systems (e.g. Solaris) have `socketpair' in libsocket.
+AC_SEARCH_LIBS(socketpair, socket)
 
 AC_TYPE_SIGNAL
 
@@ -235,7 +252,6 @@ if test $gdb_cv_have_pt_getxmmregs = yes; then
 fi
 
 
-AC_CHECK_LIB(socket, socketpair)
 AC_CHECK_FUNCS(socketpair)
 
 
@@ -415,16 +431,6 @@ if test ${host} = ${target} ; then
     AC_DEFINE(_SYSCALL32)
   fi
 fi
-
-dnl See if host has libm.  This is usually needed by simulators.
-AC_CHECK_LIB(m, main)
-
-dnl Solaris puts wctype in /usr/lib/libw.a before Solaris 2.6.
-dnl
-dnl A bug in GNU ld 2.9.1 causes a problem if we link in -lw 
-dnl under Solaris 2.6 because it is some funky empty library.
-dnl So only link in libw if we have to.
-AC_CHECK_LIB(c, wctype,: ,AC_CHECK_LIB(w, wctype))
 
 dnl See if compiler supports "long long" type.
 
