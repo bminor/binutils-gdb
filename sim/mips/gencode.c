@@ -3585,7 +3585,12 @@ build_instruction (doisa, features, mips16, insn)
 	  fprintf(stderr,"Error: Invalid data size %d for FPSUB operation\n",GETDATASIZEINSN(insn));
 	  exit(1);
        }
-       printf("   StoreFPR(destreg,%s,%s(Sub(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s),%s));\n",type,((insn->flags & NOT) ? "Negate" : ""),type,type,type,type,type,type);
+       if (insn->flags & NOT)
+	 printf ("   StoreFPR(destreg,%s,Negate(Sub(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s),%s));\n",
+		 type, type, type, type, type, type, type);
+       else
+	 printf ("   StoreFPR(destreg,%s,Sub(Multiply(ValueFPR(fs,%s),ValueFPR(ft,%s),%s),ValueFPR(fr,%s),%s));\n",
+		 type, type, type, type, type, type);
      } else {
        printf("  if ((format != fmt_single) && (format != fmt_double))\n");
        printf("   SignalException(ReservedInstruction,instruction);\n");

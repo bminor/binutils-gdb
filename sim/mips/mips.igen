@@ -43,7 +43,9 @@
 // end-sanitize-tx19
 // start-sanitize-vr5400
 :model:::vr5400:vr5400:
+:model:::mdmx:mdmx:
 // end-sanitize-vr5400
+:model:::vr5000:vr5000:
 
 
 
@@ -73,10 +75,8 @@
 
 000000,5.RS,5.RT,5.RD,00000,100000:SPECIAL:32::ADD
 "add r<RD>, r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -96,10 +96,8 @@
 
 001000,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ADDI
 "addi r<RT>, r<RS>, IMMEDIATE"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -119,10 +117,8 @@
 
 001001,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ADDIU
 "add r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -140,10 +136,8 @@
 
 
 000000,5.RS,5.RT,5.RD,00000,100001:SPECIAL:32::ADDU
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -162,10 +156,8 @@
 
 000000,5.RS,5.RT,5.RD,00000,100100:SPECIAL:32::AND
 "and r<RD>, r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -182,10 +174,9 @@
 
 
 001100,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ANDI
-"and r<RT>, r<RS>, IMMEDIATE"
-*mipsI:
-*mipsII:
-*mipsIII:
+"and r<RT>, r<RS>, <IMMEDIATE>"
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -203,10 +194,8 @@
 
 000100,5.RS,5.RT,16.OFFSET:NORMAL:32::BEQ
 "beq r<RS>, r<RT>, <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -229,6 +218,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -250,10 +240,8 @@
 
 000001,5.RS,00001,16.OFFSET:REGIMM:32::BGEZ
 "bgez r<RS>, <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -273,10 +261,8 @@
 
 000001,5.RS!31,10001,16.OFFSET:REGIMM:32::BGEZAL
 "bgezal r<RS>, <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -300,6 +286,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -327,6 +314,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -348,10 +336,8 @@
 
 000111,5.RS,00000,16.OFFSET:NORMAL:32::BGTZ
 "bgtz r<RS>, <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -374,6 +360,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -397,10 +384,8 @@
 
 000110,5.RS,00000,16.OFFSET:NORMAL:32::BLEZ
 "blez r<RS>, <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -425,6 +410,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -446,10 +432,8 @@
 
 000001,5.RS,00000,16.OFFSET:REGIMM:32::BLTZ
 "bltz r<RS>, <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -469,10 +453,8 @@
 
 000001,5.RS!31,10000,16.OFFSET:REGIMM:32::BLTZAL
 "bltzal r<RS>, <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -498,6 +480,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -523,6 +506,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -546,10 +530,8 @@
 
 000101,5.RS,5.RT,16.OFFSET:NORMAL:32::BNE
 "bne r<RS>, r<RT>, <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -572,6 +554,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -593,10 +576,8 @@
 
 000000,20.CODE,001101:SPECIAL:32::BREAK
 "break"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -614,10 +595,7 @@
 
 0100,ZZ!0!1!3,26.COP_FUN:NORMAL:32::COPz
 "cop<ZZ> <COP_FUN>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -634,6 +612,7 @@
 "dadd r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -655,6 +634,7 @@
 "daddi r<RT>, r<RS>, <IMMEDIATE>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -676,6 +656,7 @@
 "daddu r<RT>, r<RS>, <IMMEDIATE>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -695,6 +676,7 @@
 "daddu r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -714,6 +696,7 @@
 "ddiv r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -754,6 +737,7 @@
 *mipsIII:
 *mipsIV:
 *r3900:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -781,10 +765,8 @@
 
 000000,5.RS,5.RT,0000000000011010:SPECIAL:32::DIV
 "div r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -821,10 +803,8 @@
 
 000000,5.RS,5.RT,0000000000011011:SPECIAL:32::DIVU
 "divu r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -854,111 +834,118 @@
 }
 
 
+:function:::void:do_dmult:int rs, int rt, int rd, int signed_p
+{
+  unsigned64 lo;
+  unsigned64 hi;
+  unsigned64 m00;
+  unsigned64 m01;
+  unsigned64 m10;
+  unsigned64 m11;
+  unsigned64 mid;
+  int sign;
+  unsigned64 op1 = GPR[rs];
+  unsigned64 op2 = GPR[rt];
+  CHECKHILO ("Multiplication");
+  /* make signed multiply unsigned */ 
+  sign = 0;
+  if (signed_p)
+    {
+      if (op1 < 0)
+	{
+	  op1 = - op1;
+	  ++sign;
+	}
+      if (op2 < 0)
+	{
+	  op2 = - op2;
+	  ++sign;
+	}
+    }
+  /* multuply out the 4 sub products */
+  m00 = ((unsigned64) VL4_8 (op1) * (unsigned64) VL4_8 (op2));
+  m10 = ((unsigned64) VH4_8 (op1) * (unsigned64) VL4_8 (op2));
+  m01 = ((unsigned64) VL4_8 (op1) * (unsigned64) VH4_8 (op2));
+  m11 = ((unsigned64) VH4_8 (op1) * (unsigned64) VH4_8 (op2));
+  /* add the products */
+  mid = ((unsigned64) VH4_8 (m00)
+	 + (unsigned64) VL4_8 (m10)
+	 + (unsigned64) VL4_8 (m01));
+  lo = U8_4 (mid, m00);
+  hi = (m11
+	+ (unsigned64) VH4_8 (mid)
+	+ (unsigned64) VH4_8 (m01)
+	+ (unsigned64) VH4_8 (m10));
+  /* fix the sign */
+  if (sign & 1)
+    {
+      lo = -lo;
+      if (lo == 0)
+	hi = -hi;
+      else
+	hi = -hi - 1;
+    }
+  /* save the result HI/LO (and a gpr) */
+  LO = lo;
+  HI = hi;
+  if (rd != 0)
+    GPR[rd] = lo;
+}
+
+
 000000,5.RS,5.RT,0000000000011100:SPECIAL:64::DMULT
 "dmult r<RS>, r<RT>"
-*mipsIII:
-*mipsIV:
-// start-sanitize-vr5400
-*vr5400:
-// end-sanitize-vr5400
+*mipsIII,mipsIV:
 *r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
-  CHECKHILO ("Multiplication");
-  {
-    signed64 op1 = GPR[RS];
-    signed64 op2 = GPR[RT];
-    unsigned64 lo;
-    unsigned64 hi;
-    unsigned64 m00;
-    unsigned64 m01;
-    unsigned64 m10;
-    unsigned64 m11;
-    unsigned64 mid;
-    int sign = 0;
-    /* make it unsigned */
-    if (op1 < 0)
-      {
-	op1 = - op1;
-	++sign;
-      }
-    if (op2 < 0)
-      {
-	op2 = - op2;
-	++sign;
-      }
-    /* multuply out the 4 sub products */
-    m00 = (VL4_8 (op1) * VL4_8 (op2));
-    m10 = (VH4_8 (op1) * VL4_8 (op2));
-    m01 = (VL4_8 (op1) * VH4_8 (op2));
-    m11 = (VH4_8 (op1) * VH4_8 (op2));
-    /* add the products */
-    mid = VH4_8 (m00) + VL4_8 (m10) + VL4_8 (m01);
-    lo = U8_4 (mid, m00);
-    hi = m11 + VH4_8 (mid) + VH4_8 (m01) + VH4_8 (m10);
-    /* save the result */
-    if (sign & 1)
-      {
-	LO = -lo;
-	if (lo == 0)
-	  HI = -hi;
-	else
-	  HI = -hi - 1;
-      }
-    else
-      {
-	LO = lo;
-	HI = hi;
-      }
-  }
+  do_dmult (SD_, RS, RT, 0, 1);
 }
+
+000000,5.RS,5.RT,5.RD,00000011100:SPECIAL:64::DMULT
+"dmult r<RS>, r<RT>":RD == 0
+"dmult r<RD>, r<RS>, r<RT>"
+*vr5000:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
+{
+  do_dmult (SD_, RS, RT, RD, 1);
+}
+
 
 
 000000,5.RS,5.RT,0000000000011101:SPECIAL:64::DMULTU
 "dmultu r<RS>, r<RT>"
-*mipsIII:
-*mipsIV:
-// start-sanitize-vr5400
-*vr5400:
-// end-sanitize-vr5400
+*mipsIII,mipsIV:
 *r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
-  CHECKHILO ("Multiplication");
-  {
-    signed64 op1 = GPR[RS];
-    signed64 op2 = GPR[RT];
-    unsigned64 lo;
-    unsigned64 hi;
-    unsigned64 m00;
-    unsigned64 m01;
-    unsigned64 m10;
-    unsigned64 m11;
-    unsigned64 mid;
-    /* multuply out the 4 sub products */
-    m00 = (VL4_8 (op1) * VL4_8 (op2));
-    m10 = (VH4_8 (op1) * VL4_8 (op2));
-    m01 = (VL4_8 (op1) * VH4_8 (op2));
-    m11 = (VH4_8 (op1) * VH4_8 (op2));
-    /* add the products */
-    mid = VH4_8 (m00) + VL4_8 (m10) + VL4_8 (m01);
-    lo = U8_4 (mid, m00);
-    hi = m11 + VH4_8 (mid) + VH4_8 (m01) + VH4_8 (m10);
-    /* save the result */
-    LO = lo;
-    HI = hi;
-  }
+  do_dmult (SD_, RS, RT, 0, 0);
 }
+
+000000,5.RS,5.RT,5.RD,00000011101:SPECIAL:64::DMULTU
+"dmultu r<RD>, r<RS>, r<RT>":RD == 0
+"dmultu r<RS>, r<RT>"
+*vr5000:
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
+{
+  do_dmult (SD_, RS, RT, RD, 0);
+}
+
 
 
 00000000000,5.RT,5.RD,5.SHIFT,111000:SPECIAL:64::DSLL
 "dsll r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -979,6 +966,7 @@
 "dsll32 r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -999,6 +987,7 @@
 "dsllv r<RD>, r<RT>, r<RS>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1019,6 +1008,7 @@
 "dsra r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1039,6 +1029,7 @@
 "dsra32 r<RT>, r<RD>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1059,6 +1050,7 @@
 "dsra32 r<RT>, r<RD>, r<RS>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1079,6 +1071,7 @@
 "dsrav r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1099,6 +1092,7 @@
 "dsrl32 r<RD>, r<RT>, <SHIFT>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1119,6 +1113,7 @@
 "dsrl32 r<RD>, r<RT>, r<RS>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1139,6 +1134,7 @@
 "dsub r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1160,6 +1156,7 @@
 "dsubu r<RD>, r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1177,10 +1174,8 @@
 
 000010,26.INSTR_INDEX:NORMAL:32::J
 "j <INSTR_INDEX>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1201,10 +1196,8 @@
 
 000011,26.INSTR_INDEX:NORMAL:32::JAL
 "jal <INSTR_INDEX>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1227,10 +1220,8 @@
 000000,5.RS,00000,5.RD,00000001001:SPECIAL:32::JALR
 "jalr r<RS>":RD == 31
 "jalr r<RD>, r<RS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1250,10 +1241,8 @@
 
 000000,5.RS,000000000000000001000:SPECIAL:32::JR
 "jr r<RS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1271,10 +1260,8 @@
 
 100000,5.BASE,5.RT,16.OFFSET:NORMAL:32::LB
 "lb r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1316,10 +1303,8 @@
 
 100100,5.BASE,5.RT,16.OFFSET:NORMAL:32::LBU
 "lbu r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1363,6 +1348,7 @@
 "ld r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1403,6 +1389,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1442,6 +1429,7 @@
 "ldl r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1486,6 +1474,7 @@
 "ldr r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1535,10 +1524,8 @@
 
 100001,5.BASE,5.RT,16.OFFSET:NORMAL:32::LH
 "lh r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1583,10 +1570,8 @@
 
 100101,5.BASE,5.RT,16.OFFSET:NORMAL:32::LHU
 "lhu r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1634,6 +1619,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1681,6 +1667,7 @@
 "lld r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1719,10 +1706,8 @@
 
 001111,00000,5.RT,16.IMMEDIATE:NORMAL:32::LUI
 "lui r<RT>, <IMMEDIATE>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1740,10 +1725,8 @@
 
 100011,5.BASE,5.RT,16.OFFSET:NORMAL:32::LW
 "lw r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1788,10 +1771,8 @@
 
 1100,ZZ!0!1!3,5.BASE,5.RT,16.OFFSET:NORMAL:32::LWCz
 "lwc<ZZ> r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1836,10 +1817,8 @@
 
 100010,5.BASE,5.RT,16.OFFSET:NORMAL:32::LWL
 "lwl r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1886,10 +1865,8 @@
 
 100110,5.BASE,5.RT,16.OFFSET:NORMAL:32::LWR
 "lwr r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1945,6 +1922,7 @@
 "lwu r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -1989,10 +1967,8 @@
 
 000000,0000000000,5.RD,00000,010000:SPECIAL:32::MFHI
 "mfhi r<RD>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2013,10 +1989,8 @@
 
 000000,0000000000,5.RD,00000,010010:SPECIAL:32::MFLO
 "mflo r<RD>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2038,6 +2012,7 @@
 000000,5.RS,5.RT,5.RD,00000001011:SPECIAL:32::MOVN
 "movn r<RD>, r<RS>, r<RT>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2053,6 +2028,7 @@
 000000,5.RS,5.RT,5.RD,00000001010:SPECIAL:32::MOVZ
 "movz r<RD>, r<RS>, r<RT>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2067,10 +2043,8 @@
 
 000000,5.RS,000000000000000,010001:SPECIAL:32::MTHI
 "mthi r<RS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2095,10 +2069,8 @@
 
 000000,5.RS,000000000000000010011:SPECIAL:32::MTLO
 "mtlo r<RS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2123,10 +2095,7 @@
 
 000000,5.RS,5.RT,00000,00000011000:SPECIAL:32::MULT
 "mult r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
 {
   signed64 prod;
   CHECKHILO ("Multiplication");
@@ -2137,6 +2106,7 @@
 }
 000000,5.RS,5.RT,5.RD,00000011000:SPECIAL:32::MULT
 "mult r<RD>, r<RS>, r<RT>"
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2161,10 +2131,7 @@
 
 000000,5.RS,5.RT,00000,00000011001:SPECIAL:32::MULTU
 "multu r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
 {
   unsigned64 prod;
   CHECKHILO ("Multiplication");
@@ -2175,6 +2142,7 @@
 }
 000000,5.RS,5.RT,5.RD,00000011001:SPECIAL:32::MULTU
 "multu r<RD>, r<RS>, r<RT>"
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2199,10 +2167,8 @@
 
 000000,5.RS,5.RT,5.RD,00000,100111:SPECIAL:32::NOR
 "nor r<RD>, r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2220,10 +2186,8 @@
 
 000000,5.RS,5.RT,5.RD,00000,100101:SPECIAL:32::OR
 "or r<RD>, r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2241,10 +2205,8 @@
 
 001101,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ORI
 "ori r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2262,6 +2224,7 @@
 
 110011,5.RS,nnnnn,16.OFFSET:NORMAL:32::PREF
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2286,10 +2249,8 @@
 
 101000,5.BASE,5.RT,16.OFFSET:NORMAL:32::SB
 "sb r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2336,6 +2297,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2383,6 +2345,7 @@
 "scd r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2426,6 +2389,7 @@
 "sd r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2468,6 +2432,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2509,6 +2474,7 @@
 "sdl r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2553,6 +2519,7 @@
 "sdr r<RT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2564,41 +2531,28 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    {
-      if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = 7;
-	  unsigned int reverse = (ReverseEndian ? mask : 0);
-	  unsigned int bigend = (BigEndianCPU ? mask : 0);
-	  int byte;
-	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
-	  byte = ((vaddr & mask) ^ bigend);
-	  if (!BigEndianMem)
-	    paddr &= ~mask;
-	  memval = ((unsigned64) op2 << (byte * 8));
-	  StoreMemory(uncached,(AccessLength_DOUBLEWORD - byte),memval,memval1,paddr,vaddr,isREAL);
-	}
-    }
-  }
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+  unsigned64 mask = 7;
+  unsigned int reverse = (ReverseEndian ? mask : 0);
+  unsigned int bigend = (BigEndianCPU ? mask : 0);
+  int byte;
+  address_word vaddr = (GPR[BASE] + EXTEND16 (OFFSET));
+  AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL);
+  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
+  if (BigEndianMem)
+    paddr &= ~mask;
+  byte = ((vaddr & mask) ^ bigend);
+  memval = (GPR[RT] << (byte * 8));
+  StoreMemory(uncached,(AccessLength_DOUBLEWORD - byte),memval,0,paddr,vaddr,isREAL);
 }
 
 
 101001,5.BASE,5.RT,16.OFFSET:NORMAL:32::SH
 "sh r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2645,10 +2599,8 @@
 
 00000000000,5.RT,5.RD,5.SHIFT,000000:SPECIAL:32::SLL
 "sll r<RD>, r<RT>, <SHIFT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2668,10 +2620,8 @@
 
 000000,5.RS,5.RT,5.RD,00000000100:SPECIAL:32::SLLV
 "sllv r<RD>, r<RT>, r<RS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2691,10 +2641,8 @@
 
 000000,5.RS,5.RT,5.RD,00000101010:SPECIAL:32::SLT
 "slt r<RD>, r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2712,10 +2660,8 @@
 
 001010,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::SLTI
 "slti r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2733,10 +2679,8 @@
 
 001011,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::SLTIU
 "sltiu r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2753,10 +2697,8 @@
 
 000000,5.RS,5.RT,5.RD,00000101011:SPECIAL:32::SLTU
 "sltu r<RD>, r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2774,10 +2716,8 @@
 
 000000,00000,5.RT,5.RD,5.SHIFT,000011:SPECIAL:32::SRA
 "sra r<RD>, r<RT>, <SHIFT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2797,10 +2737,8 @@
 
 000000,5.RS,5.RT,5.RD,00000000111:SPECIAL:32::SRAV
 "srav r<RD>, r<RT>, r<RS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2820,10 +2758,8 @@
 
 000000,00000,5.RT,5.RD,5.SHIFT,000010:SPECIAL:32::SRL
 "srl r<RD>, r<RT>, <SHIFT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2843,10 +2779,8 @@
 
 000000,5.RS,5.RT,5.RD,00000000110:SPECIAL:32::SRLV
 "srlv r<RD>, r<RT>, r<RS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2866,10 +2800,8 @@
 
 000000,5.RS,5.RT,5.RD,00000100010:SPECIAL:32::SUB
 "sub r<RD>, r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2889,10 +2821,8 @@
 
 000000,5.RS,5.RT,5.RD,00000100011:SPECIAL:32::SUBU
 "subu r<RD>, r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2910,10 +2840,8 @@
 
 101011,5.BASE,5.RT,16.OFFSET:NORMAL:32::SW
 "sw r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -2957,10 +2885,8 @@
 
 1110,ZZ!0!1!3,5.BASE,5.RT,16.OFFSET:NORMAL:32::SWCz
 "swc<ZZ> r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3004,10 +2930,8 @@
 
 101010,5.BASE,5.RT,16.OFFSET:NORMAL:32::SWL
 "swl r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3053,10 +2977,8 @@
 
 101110,5.BASE,5.RT,16.OFFSET:NORMAL:32::SWR
 "swr r<RT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3068,35 +2990,23 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)((instruction >> 0) & 0x0000FFFF),16);
-  signed_word op2 = GPR[((instruction >> 16) & 0x0000001F)];
-  signed_word op1 = GPR[((instruction >> 21) & 0x0000001F)];
-  {
-    address_word vaddr = ((unsigned64)op1 + offset);
-    address_word paddr;
-    int uncached;
-    {
-      if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL))
-	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = 3;
-	  unsigned int reverse = (ReverseEndian ? mask : 0);
-	  unsigned int bigend = (BigEndianCPU ? mask : 0);
-	  int byte;
-	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
-	  byte = ((vaddr & mask) ^ bigend);
-	  if (!BigEndianMem)
-	    paddr &= ~mask;
-	  memval = ((unsigned64) op2 << (byte * 8));
-	  if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2)) {
-	    memval <<= 32;
-	  }
-	  StoreMemory(uncached,(AccessLength_WORD - byte),memval,memval1,paddr,vaddr,isREAL);
-	}
-    }
-  }
+  unsigned64 memval = 0;
+  unsigned64 mask = 3;
+  unsigned int reverse = (ReverseEndian ? mask : 0);
+  unsigned int bigend = (BigEndianCPU ? mask : 0);
+  int byte;
+  address_word paddr;
+  int uncached;
+  address_word vaddr = (GPR[BASE] + EXTEND16 (OFFSET));
+  AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&uncached,isTARGET,isREAL);
+  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverse));
+  if (BigEndianMem)
+    paddr &= ~mask;
+  byte = ((vaddr & mask) ^ bigend);
+  memval = (GPR[RT] << (byte * 8));
+  if ((vaddr & (1 << 2)) ^ (BigEndianCPU << 2))
+    memval <<= 32;
+  StoreMemory(uncached,(AccessLength_WORD - byte),memval,0,paddr,vaddr,isREAL);
 }
 
 
@@ -3106,6 +3016,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3123,10 +3034,8 @@
 
 000000,20.CODE,001100:SPECIAL:32::SYSCALL
 "syscall <CODE>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3147,6 +3056,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3168,6 +3078,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3189,6 +3100,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3210,6 +3122,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3231,6 +3144,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3252,6 +3166,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3273,6 +3188,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3294,6 +3210,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3315,6 +3232,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3336,6 +3254,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3357,6 +3276,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3378,6 +3298,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3396,10 +3317,8 @@
 
 000000,5.RS,5.RT,5.RD,00000100110:SPECIAL:32::XOR
 "xor r<RD>, r<RS>, r<RT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3417,10 +3336,8 @@
 
 001110,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::XORI
 "xori r<RT>, r<RS>, <IMMEDIATE>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3508,10 +3425,8 @@
 
 010001,10,3.FMT,00000,5.FS,5.FD,000101:COP1:32,f::ABS.fmt
 "abs.%s<FMT> f<FD>, f<FS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3537,13 +3452,10 @@
 
 
 
-
 010001,10,3.FMT,5.FT,5.FS,5.FD,000000:COP1:32,f::ADD
 "add.%s<FMT> f<FD>, f<FS>, f<FT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3569,63 +3481,106 @@
 }
 
 
-//
-// FIXME: This does not correctly resolve mipsI-mipsIV differences.
-//
+
 // BC1F
 // BC1FL
 // BC1T
 // BC1TL
+
+010001,01000,3.0,1.ND,1.TF,16.OFFSET:COP1S:32,f::BC1
+"bc1%s<TF>%s<ND> <OFFSET>"
+*mipsI,mipsII,mipsIII:
+// start-sanitize-r5900
+*r5900:
+// end-sanitize-r5900
+{
+  if (PREVCOC1() == TF)
+    {
+      DELAY_SLOT (NIA + (EXTEND16 (OFFSET) << 2));
+    }
+  else if (ND)
+    {
+      NULLIFY_NEXT_INSTRUCTION ();
+    }
+}
+
 010001,01000,3.CC,1.ND,1.TF,16.OFFSET:COP1S:32,f::BC1
 "bc1%s<TF>%s<ND> <OFFSET>":CC == 0
 "bc1%s<TF>%s<ND> <CC>, <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  signed_word offset = SIGNEXTEND((signed_word)(((instruction >> 0) & 0x0000FFFF) << 2),18);
-  int boolean = ((instruction >> 16) & 0x00000001);
-  int likely = ((instruction >> 17) & 0x00000001);
-  int condition_code = ((instruction >> 18) & 0x00000007);
-  {
-    if (condition_code != 0)
-      SignalException(ReservedInstruction,instruction);
-    else {
-      int condition = (PREVCOC1() == boolean);
-      /* NOTE: The branch occurs AFTER the next instruction has been executed */
-      if (condition) {
-	DELAY_SLOT (NIA + offset);
-      }
-      else if (likely) {
-	NULLIFY_NEXT_INSTRUCTION ();
-      }
+  if (GETFCC(CC) == TF)
+    {
+      DELAY_SLOT (NIA + (EXTEND16 (OFFSET) << 2));
     }
-  }
+  else if (ND)
+    {
+      NULLIFY_NEXT_INSTRUCTION ();
+    }
 }
 
 
-//
-// FIXME: This does not correctly differentiate between mips*
-//
+
+// C.EQ.S
+// C.EQ.D
+// ...
+
+:function:::void:do_c_cond_fmt:int fmt, int ft, int fs, int cc, int cond, instruction_word insn
+{
+  if ((fmt != fmt_single) && (fmt != fmt_double))
+    SignalException (ReservedInstruction, insn);
+  else
+    {
+      int less;
+      int equal;
+      int unordered;
+      int condition;
+      unsigned64 ofs = ValueFPR (fs, fmt);
+      unsigned64 oft = ValueFPR (ft, fmt);
+      if (NaN (ofs, fmt) || NaN (oft, fmt))
+	{
+	  if (FCSR & FP_ENABLE (IO))
+	    {
+	      FCSR |= FP_CAUSE (IO);
+	      SignalExceptionFPE ();
+	    }
+	  less = 0;
+	  equal = 0;
+	  unordered = 1;
+	}
+      else
+	{
+	  less = Less (ofs, oft, fmt);
+	  equal = Equal (ofs, oft, fmt);
+	  unordered = 0;
+	}
+      condition = (((cond & (1 << 2)) && less)
+		   || ((cond & (1 << 1)) && equal)
+		   || ((cond & (1 << 0)) && unordered));
+      SETFCC (cc, condition);
+    }
+}
+
+010001,10,3.FMT,5.FT,5.FS,3.0,00,11,4.COND:COP1:32::C.cond.fmt
+*mipsI,mipsII,mipsIII:
+"c.%s<COND>.%s<FMT> f<FS>, f<FT>":
+{
+  do_c_cond_fmt (SD_, FMT, FT, FS, 0, COND, instruction_0);
+}
+
 010001,10,3.FMT,5.FT,5.FS,3.CC,00,11,4.COND:COP1:32::C.cond.fmt
 "c.%s<COND>.%s<FMT> f<FS>, f<FT>":CC == 0
 "c.%s<COND>.%s<FMT> <CC>, f<FS>, f<FT>"
-*mipsI:
-*mipsII:
-*mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3637,49 +3592,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned32 instruction = instruction_0;
-  int cmpflags = ((instruction >> 0) & 0x0000000F);
-  int condition_code = ((instruction >> 8) & 0x00000007);
-  int fs = ((instruction >> 11) & 0x0000001F);
-  int ft = ((instruction >> 16) & 0x0000001F);
-  int format = ((instruction >> 21) & 0x00000007);
-  if (condition_code != 0)
-    {
-      SignalException(ReservedInstruction,instruction);
-    }
-  else
-    {
-      if ((format != fmt_single) && (format != fmt_double))
-	SignalException(ReservedInstruction,instruction);
-      else {
-	if (condition_code != 0)
-	  SignalException(ReservedInstruction,instruction);
-	else
-	  {
-	    int ignore = 0;
-	    int less = 0;
-	    int equal = 0;
-	    int unordered = 1;
-	    unsigned64 ofs = ValueFPR(fs,format);
-	    unsigned64 oft = ValueFPR(ft,format);
-	    if (NaN(ofs,format) || NaN(oft,format)) {
-	      if (FCSR & FP_ENABLE(IO)) {
-		FCSR |= FP_CAUSE(IO);
-		SignalExceptionFPE();
-		ignore = 1;
-	      }
-	    } else {
-	      less = Less(ofs,oft,format);
-	      equal = Equal(ofs,oft,format);
-	      unordered = 0;
-	    }
-	    if (!ignore) {
-	      int condition = (((cmpflags & (1 << 2)) && less) || ((cmpflags & (1 << 1)) && equal) || ((cmpflags & (1 << 0)) && unordered));
-	      SETFCC(condition_code,condition);
-	    }
-	  }
-      }
-    }
+  do_c_cond_fmt (SD_, FMT, FT, FS, CC, COND, instruction_0);
 }
 
 
@@ -3687,6 +3600,7 @@
 "ceil.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3715,6 +3629,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3768,6 +3683,7 @@
 010001,00,X,10,5.RT,5.FS,00000000000:COP1S:32::CxC1
 "c%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3804,10 +3720,8 @@
 //
 010001,10,3.FMT,00000,5.FS,5.FD,100001:COP1:32::CVT.D.fmt
 "cvt.d.%s<FMT> f<FD>, f<FS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3836,6 +3750,7 @@
 "cvt.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3865,10 +3780,8 @@
 //
 010001,10,3.FMT,00000,5.FS,5.FD,100000:COP1:32::CVT.S.fmt
 "cvt.s.%s<FMT> f<FD>, f<FS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3895,10 +3808,8 @@
 
 010001,10,3.FMT,00000,5.FS,5.FD,100100:COP1:32::CVT.W.fmt
 "cvt.w.%s<FMT> f<FD>, f<FS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3925,10 +3836,8 @@
 
 010001,10,3.FMT,5.FT,5.FS,5.FD,000011:COP1:32::DIV.fmt
 "div.%s<FMT> f<FD>, f<FS>, f<FT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3983,6 +3892,7 @@
 010001,00,X,01,5.RT,5.FS,00000000000:COP1S:64::DMxC1
 "dm%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -3997,12 +3907,9 @@
   if (X)
     {
       if (SizeFGR() == 64)
-	FGR[FS] = GPR[RT];
+	StoreFPR (FS, fmt_uninterpreted_64, GPR[RT]);
       else if ((FS & 0x1) == 0)
-	{
-	  FGR[FS + 1] = VH4_8 (GPR[RT]);
-	  FGR[FS] = VL4_8 (GPR[RT]);
-	}
+	StoreFPR (FS, fmt_uninterpreted_64, SET64HI (FGR[FS+1]) | FGR[FS]);
     }
   else
     {
@@ -4020,6 +3927,7 @@
 "floor.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4049,6 +3957,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4078,6 +3987,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4104,6 +4014,7 @@
 010011,5.BASE,5.INDEX,5.0,5.FD,000001:COP1X:64::LDXC1
 "ldxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4134,11 +4045,9 @@
 
 
 110001,5.BASE,5.FT,16.OFFSET:COP1:32::LWC1 
-"swc1 f<FT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+"lwc1 f<FT>, <OFFSET>(r<BASE>)"
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4184,6 +4093,7 @@
 010011,5.BASE,5.INDEX,5.0,5.FD,000000:COP1X:32::LWXC1
 "lwxc1 f<FD>, r<INDEX>(r<BASE>)"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4226,6 +4136,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,100,001:COP1X:32::MADD.D
 "madd.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4247,6 +4158,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,100,000:COP1X:32::MADD.S
 "madd.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4286,6 +4198,7 @@
 010001,00,X,00,5.RT,5.FS,00000000000:COP1S:32::MxC1
 "m%s<X>c1 r<RT>, f<FS>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4298,12 +4211,8 @@
 // end-sanitize-tx19
 {
   if (X)
-    { /*MTC1*/
-      if (SizeFGR() == 64)
-	FGR[FS] = (SET64HI (0xDEADC0DE) | VL4_8 (GPR[RT]));
-      else
-	FGR[FS] = VL4_8 (GPR[RT]);
-    }
+    /*MTC1*/
+    StoreFPR (FS, fmt_uninterpreted_32, VL4_8 (GPR[RT]));
   else /*MFC1*/
     GPR[RT] = SIGNEXTEND(FGR[FS],32);
 }
@@ -4311,10 +4220,8 @@
 
 010001,10,3.FMT,00000,5.FS,5.FD,000110:COP1:32::MOV.fmt
 "mov.%s<FMT> f<FD>, f<FS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4340,6 +4247,7 @@
 000000,5.RS,3.CC,0,1.TF,5.RD,00000000001:SPECIAL:32::MOVtf
 "mov%s<TF> r<RD>, r<RS>, <CC>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4356,6 +4264,7 @@
 010001,10,3.FMT,3.CC,0,1.TF,5.FS,5.FD,010001:COP1:32::MOVtf.fmt
 "mov%s<TF>.%s<FMT> f<FD>, f<FS>, <CC>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4376,6 +4285,7 @@
 
 010001,10,3.FMT,5.RT,5.FS,5.FD,010011:COP1:32::MOVN.fmt
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4403,6 +4313,7 @@
 010001,10,3.FMT,5.RT,5.FS,5.FD,010010:COP1:32::MOVZ.fmt
 "movz.%s<FMT> f<FD>, f<FS>, r<RT>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4424,6 +4335,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,101,001:COP1X:32::MSUB.D
 "msub.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4437,7 +4349,7 @@
   int ft = ((instruction >> 16) & 0x0000001F);
   int fr = ((instruction >> 21) & 0x0000001F);
   {
-    StoreFPR(destreg,fmt_double,(Sub(Multiply(ValueFPR(fs,fmt_double),ValueFPR(ft,fmt_double),fmt_double),ValueFPR(fr,fmt_double),fmt_double),fmt_double));
+    StoreFPR(destreg,fmt_double,Sub(Multiply(ValueFPR(fs,fmt_double),ValueFPR(ft,fmt_double),fmt_double),ValueFPR(fr,fmt_double),fmt_double));
   }
 }
 
@@ -4446,6 +4358,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,101000:COP1X:32::MSUB.S
 "msub.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4459,7 +4372,7 @@
   int ft = ((instruction >> 16) & 0x0000001F);
   int fr = ((instruction >> 21) & 0x0000001F);
   {
-   StoreFPR(destreg,fmt_single,(Sub(Multiply(ValueFPR(fs,fmt_single),ValueFPR(ft,fmt_single),fmt_single),ValueFPR(fr,fmt_single),fmt_single),fmt_single));
+   StoreFPR(destreg,fmt_single,Sub(Multiply(ValueFPR(fs,fmt_single),ValueFPR(ft,fmt_single),fmt_single),ValueFPR(fr,fmt_single),fmt_single));
   }
 }
 
@@ -4469,10 +4382,8 @@
 
 010001,10,3.FMT,5.FT,5.FS,5.FD,000010:COP1:32::MUL.fmt
 "mul.%s<FMT> f<FD>, f<FS>, f<FT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4500,10 +4411,8 @@
 
 010001,10,3.FMT,00000,5.FS,5.FD,000111:COP1:32::NEG.fmt
 "neg.%s<FMT> f<FD>, f<FS>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4532,6 +4441,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,110001:COP1X:32::NMADD.D
 "nmadd.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4551,6 +4461,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,110000:COP1X:32::NMADD.S
 "nmadd.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4570,6 +4481,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,111001:COP1X:32::NMSUB.D
 "nmsub.d f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4589,6 +4501,7 @@
 010011,5.FR,5.FT,5.FS,5.FD,111000:COP1X:32::NMSUB.S
 "nmsub.s f<FD>, f<FR>, f<FS>, f<FT>"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4607,6 +4520,7 @@
 010011,5.BASE,5.INDEX,5.HINT,00000001111:COP1X:32::PREFX
 "prefx <HINT>, r<INDEX>(r<BASE>)"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4627,6 +4541,7 @@
 010001,10,3.FMT,00000,5.FS,5.FD,010101:COP1:32::RECIP.fmt
 *mipsIV:
 "recip.%s<FMT> f<FD>, f<FS>"
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4648,6 +4563,7 @@
 "round.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4677,6 +4593,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4704,6 +4621,7 @@
 010001,10,3.FMT,00000,5.FS,5.FD,010110:COP1:32::RSQRT.fmt
 *mipsIV:
 "rsqrt.%s<FMT> f<FD>, f<FS>"
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4726,6 +4644,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4752,6 +4671,7 @@
 
 010011,5.RS,5.RT,vvvvv,00000001001:COP1X:64::SDXC1
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4787,6 +4707,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4813,10 +4734,8 @@
 
 010001,10,3.FMT,5.FT,5.FS,5.FD,000001:COP1:32::SUB.fmt
 "sub.%s<FMT> f<FD>, f<FS>, f<FT>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4845,10 +4764,8 @@
 
 111001,5.BASE,5.FT,16.OFFSET:COP1:32::SWC1
 "swc1 f<FT>, <OFFSET>(r<BASE>)"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4893,6 +4810,7 @@
 010011,5.BASE,5.INDEX,5.FS,00000,001000:COP1X:32::SWXC1
 "swxc1 f<FS>, r<INDEX>(r<BASE>)"
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4931,6 +4849,7 @@
 "trunc.l.%s<FMT> f<FD>, f<FS>"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4960,6 +4879,7 @@
 *mipsII:
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -4993,10 +4913,8 @@
 
 010000,01000,00000,16.OFFSET:COP0:32::BC0F
 "bc0f <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5007,10 +4925,8 @@
 
 010000,01000,00010,16.OFFSET:COP0:32::BC0FL
 "bc0fl <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5021,10 +4937,7 @@
 
 010000,01000,00001,16.OFFSET:COP0:32::BC0T
 "bc0t <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
@@ -5033,10 +4946,8 @@
 
 010000,01000,00011,16.OFFSET:COP0:32::BC0TL
 "bc0tl <OFFSET>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5048,6 +4959,7 @@
 101111,5.BASE,5.OP,16.OFFSET:NORMAL:32::CACHE
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5075,10 +4987,8 @@
 
 010000,10000,000000000000000,111001:COP0:32::DI
 "di"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5089,10 +4999,8 @@
 
 010000,10000,000000000000000,111000:COP0:32::EI
 "ei"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5105,6 +5013,7 @@
 "eret"
 *mipsIII:
 *mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5115,10 +5024,8 @@
 
 010000,00000,5.RT,5.RD,00000,6.REGX:COP0:32::MFC0
 "mfc0 r<RT>, r<RD> # <REGX>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5131,10 +5038,8 @@
 
 010000,00100,5.RT,5.RD,00000,6.REGX:COP0:32::MTC0
 "mtc0 r<RT>, r<RD> # <REGX>"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5148,10 +5053,8 @@
 
 010000,10000,000000000000000,001000:COP0:32::TLBP
 "tlbp"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5162,10 +5065,8 @@
 
 010000,10000,000000000000000,000001:COP0:32::TLBR
 "tlbr"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5176,10 +5077,8 @@
 
 010000,10000,000000000000000,000010:COP0:32::TLBWI
 "tlbwi"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5190,10 +5089,8 @@
 
 010000,10000,000000000000000,000110:COP0:32::TLBWR
 "tlbwr"
-*mipsI:
-*mipsII:
-*mipsIII:
-*mipsIV:
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
@@ -5205,6 +5102,7 @@
 :include:::m16.igen
 // start-sanitize-vr5400
 :include::vr5400:vr5400.igen
+:include:::mdmx.igen
 // end-sanitize-vr5400
 // start-sanitize-r5900
 :include::r5900:r5900.igen
