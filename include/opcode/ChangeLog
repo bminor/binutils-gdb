@@ -1,4 +1,9 @@
 start-sanitize-tic80
+Sun Jan  5 12:12:19 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h (TIC80_OPERAND_M_SI): Add operand modifier for ":m".
+	(TIC80_OPERAND_M_LI): Ditto
+
 Sat Jan  4 19:02:44 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80.h (TIC80_OPERAND_BITNUM): Renamed from TIC80_OPERAND_CC_SZ.
