@@ -1,5 +1,9 @@
 2001-08-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* as.h (alloca): Don't declare if __GNUC__.  Remove an old comment.
+	Comment indentation of #pragma.
+	* macro.c (alloca): Likewise.
+
 	* config/tc-ppc.c: Revert 2001-08-08.
 
 2001-08-09  Alan Modra  <amodra@bigpond.net.au>

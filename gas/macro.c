@@ -24,20 +24,14 @@
 
 #include "config.h"
 
-/* AIX requires this to be the first thing in the file.  */
-#ifdef __GNUC__
-# ifndef alloca
-#  ifdef __STDC__
-extern void *alloca ();
-#  else
-extern char *alloca ();
-#  endif
-# endif
-#else
+#ifndef __GNUC__
 # if HAVE_ALLOCA_H
 #  include <alloca.h>
 # else
 #  ifdef _AIX
+/* Indented so that pre-ansi C compilers will ignore it, rather than
+   choke on it.  Some versions of AIX require this to be the first
+   thing in the file.  */
  #pragma alloca
 #  else
 #   ifndef alloca /* predefined by HP cc +Olibcalls */
@@ -49,7 +43,7 @@ extern void *alloca ();
 #   endif /* alloca */
 #  endif /* _AIX */
 # endif /* HAVE_ALLOCA_H */
-#endif
+#endif /* __GNUC__ */
 
 #include <stdio.h>
 #ifdef HAVE_STRING_H
