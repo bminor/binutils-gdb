@@ -1,3 +1,12 @@
+2001-05-16  Alan Modra  <amodra@one.net.au>
+
+	* config/tc-arc.c (md_assemble): Correct dwarf2_emit_insn param
+	for 8 byte insns.
+	* config/tc-i386.c (md_assemble): Call dwarf2_emit_insn before
+	opcodes are output rather than after.  Delete insn_size.
+	* config/tc-v850.c (md_assemble): Similarly, but delete
+	total_insn_size.
+
 2001-05-14  Richard Henderson  <rth@redhat.com>
 
 	* ehopt.c (eh_frame_convert_frag): Fix missed subtype adjustment

@@ -1,3 +1,9 @@
+1999-12-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (MATCH): Relax JumpAbsolute check.  Emit a
+	warning for absolute jump/call without `*' in non-intel mode.  No
+	need to set i.types[0] JumpAbsolute in intel mode.
+
 1999-12-22  Philip Blundell  <pb@futuretv.com>
 
 	* config/tc-arm.c (arm_s_text): If OBJ_ELF, call the appropriate

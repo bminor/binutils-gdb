@@ -1699,7 +1699,6 @@ md_assemble (str)
   int relaxable = 0;
   unsigned long insn;
   unsigned long insn_size;
-  unsigned long total_insn_size = 0;
   char *f;
   int i;
   int match;
@@ -2150,6 +2149,11 @@ md_assemble (str)
 
   input_line_pointer = str;
 
+  /* Tie dwarf2 debug info to the address at the start of the insn.
+     We can't do this after the insn has been output as the current
+     frag may have been closed off.  eg. by frag_var.  */
+  dwarf2_emit_insn (0);
+
   /* Write out the instruction.  */
 
   if (relaxable && fc > 0)
@@ -2175,7 +2179,6 @@ md_assemble (str)
 	  md_number_to_chars (f, insn, insn_size);
 	  md_number_to_chars (f + 2, 0, 4);
 	}
-      total_insn_size = insn_size;
     }
   else
     {
@@ -2190,15 +2193,11 @@ md_assemble (str)
 	insn_size = 2;
 
       f = frag_more (insn_size);
-      total_insn_size = insn_size;
-
       md_number_to_chars (f, insn, insn_size);
 
       if (extra_data_after_insn)
 	{
 	  f = frag_more (extra_data_len);
-	  total_insn_size += extra_data_len;
-
 	  md_number_to_chars (f, extra_data, extra_data_len);
 
 	  extra_data_after_insn = false;
@@ -2271,8 +2270,6 @@ md_assemble (str)
     }
 
   input_line_pointer = saved_input_line_pointer;
-
-  dwarf2_emit_insn (total_insn_size);
 }
 
 /* If while processing a fixup, a reloc really needs to be created

@@ -1231,10 +1231,6 @@ md_assemble (line)
   /* Points to template once we've found it.  */
   const template *t;
 
-  /* Count the size of the instruction generated.  Does not include
-     variable part of jump insns before relax.  */
-  int insn_size = 0;
-
   int j;
 
   char mnemonic[MAX_MNEM_SIZE];
@@ -2702,6 +2698,11 @@ md_assemble (line)
   {
     register char *p;
 
+    /* Tie dwarf2 debug info to the address at the start of the insn.
+       We can't do this after the insn has been output as the current
+       frag may have been closed off.  eg. by frag_var.  */
+    dwarf2_emit_insn (0);
+
     /* Output jumps.  */
     if (i.tm.opcode_modifier & Jump)
       {
@@ -2734,7 +2735,6 @@ md_assemble (line)
 	   bytes for the opcode and room for the prefix and largest
 	   displacement.  */
 	frag_grow (prefix + 2 + 4);
-	insn_size += prefix + 1;
 	/* Prefix and 1 opcode byte go in fr_fix.  */
 	p = frag_more (prefix + 1);
 	if (i.prefix[DATA_PREFIX])
@@ -2766,7 +2766,6 @@ md_assemble (line)
 	    size = 1;
 	    if (i.prefix[ADDR_PREFIX])
 	      {
-		insn_size += 1;
 		FRAG_APPEND_1_CHAR (ADDR_PREFIX_OPCODE);
 		i.prefixes -= 1;
 	      }
@@ -2781,7 +2780,6 @@ md_assemble (line)
 
 	    if (i.prefix[DATA_PREFIX])
 	      {
-		insn_size += 1;
 		FRAG_APPEND_1_CHAR (DATA_PREFIX_OPCODE);
 		i.prefixes -= 1;
 		code16 ^= CODE16;
@@ -2795,7 +2793,6 @@ md_assemble (line)
 	if (i.prefix[REX_PREFIX])
 	  {
 	    FRAG_APPEND_1_CHAR (i.prefix[REX_PREFIX]);
-	    insn_size++;
 	    i.prefixes -= 1;
 	  }
 
@@ -2804,13 +2801,11 @@ md_assemble (line)
 
 	if (fits_in_unsigned_byte (i.tm.base_opcode))
 	  {
-	    insn_size += 1 + size;
 	    p = frag_more (1 + size);
 	  }
 	else
 	  {
 	    /* Opcode can be at most two bytes.  */
-	    insn_size += 2 + size;
 	    p = frag_more (2 + size);
 	    *p++ = (i.tm.base_opcode >> 8) & 0xff;
 	  }
@@ -2850,7 +2845,6 @@ md_assemble (line)
 	  as_warn (_("skipping prefixes on this instruction"));
 
 	/* 1 opcode; 2 segment; offset  */
-	insn_size += prefix + 1 + 2 + size;
 	p = frag_more (prefix + 1 + 2 + size);
 
 	if (i.prefix[DATA_PREFIX])
@@ -2898,7 +2892,6 @@ md_assemble (line)
 	  {
 	    if (*q)
 	      {
-		insn_size += 1;
 		p = frag_more (1);
 		md_number_to_chars (p, (valueT) *q, 1);
 	      }
@@ -2907,12 +2900,10 @@ md_assemble (line)
 	/* Now the opcode; be careful about word order here!  */
 	if (fits_in_unsigned_byte (i.tm.base_opcode))
 	  {
-	    insn_size += 1;
 	    FRAG_APPEND_1_CHAR (i.tm.base_opcode);
 	  }
 	else
 	  {
-	    insn_size += 2;
 	    p = frag_more (2);
 	    /* Put out high byte first: can't use md_number_to_chars!  */
 	    *p++ = (i.tm.base_opcode >> 8) & 0xff;
@@ -2922,7 +2913,6 @@ md_assemble (line)
 	/* Now the modrm byte and sib byte (if present).  */
 	if (i.tm.opcode_modifier & Modrm)
 	  {
-	    insn_size += 1;
 	    p = frag_more (1);
 	    md_number_to_chars (p,
 				(valueT) (i.rm.regmem << 0
@@ -2937,7 +2927,6 @@ md_assemble (line)
 		&& i.rm.mode != 3
 		&& !(i.base_reg && (i.base_reg->reg_type & Reg16) != 0))
 	      {
-		insn_size += 1;
 		p = frag_more (1);
 		md_number_to_chars (p,
 				    (valueT) (i.sib.base << 0
@@ -2971,7 +2960,6 @@ md_assemble (line)
 			  }
 			val = offset_in_range (i.op[n].disps->X_add_number,
 					       size);
-			insn_size += size;
 			p = frag_more (size);
 			md_number_to_chars (p, val, size);
 		      }
@@ -3018,7 +3006,6 @@ md_assemble (line)
 			      size = 8;
 			  }
 
-			insn_size += size;
 			p = frag_more (size);
 			fix_new_exp (frag_now, p - frag_now->fr_literal, size,
 				     i.op[n].disps, pcrel,
@@ -3053,7 +3040,6 @@ md_assemble (line)
 			  }
 			val = offset_in_range (i.op[n].imms->X_add_number,
 					       size);
-			insn_size += size;
 			p = frag_more (size);
 			md_number_to_chars (p, val, size);
 		      }
@@ -3079,7 +3065,6 @@ md_assemble (line)
 			      size = 8;
 			  }
 
-			insn_size += size;
 			p = frag_more (size);
 			reloc_type = reloc (size, 0, sign, i.reloc[n]);
 #ifdef BFD_ASSEMBLER
@@ -3106,8 +3091,6 @@ md_assemble (line)
 	      }
 	  }
       }
-
-    dwarf2_emit_insn (insn_size);
 
 #ifdef DEBUG386
     if (flag_debug)

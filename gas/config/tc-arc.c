@@ -806,6 +806,7 @@ md_assemble (str)
 	      f = frag_more (8);
 	      md_number_to_chars (f, insn, 4);
 	      md_number_to_chars (f + 4, limm, 4);
+	      dwarf2_emit_insn (8);
 	    }
 	  else if (limm_reloc_p)
 	    {
@@ -816,6 +817,7 @@ md_assemble (str)
 	    {
 	      f = frag_more (4);
 	      md_number_to_chars (f, insn, 4);
+	      dwarf2_emit_insn (4);
 	    }
 
 	  /* Create any fixups.  */
@@ -869,8 +871,6 @@ md_assemble (str)
 			   (operand->flags & ARC_OPERAND_RELATIVE_BRANCH) != 0,
 			   (bfd_reloc_code_real_type) reloc_type);
 	    }
-
-	  dwarf2_emit_insn (4);
 
 	  /* All done.  */
 	  return;
