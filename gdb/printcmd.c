@@ -1761,6 +1761,11 @@ printf_command (arg, from_tty)
     int nargs_wanted;
     int lcount;
     int i;
+    /* We build up a va_list to pass to vprintf.  This is unnecessary;
+       instead of calling vprintf ("%d%f", <constructed va_list>) we
+       could just call printf ("%d", arg1); printf ("%f", arg2);.  Funny
+       how I thought of that right *after* I the MAKEVA stuff pretty much
+       working...  */
     makeva_list *args_makeva;
 
     argclass = (enum argclass *) alloca (strlen (s) * sizeof *argclass);
@@ -1786,10 +1791,10 @@ printf_command (arg, from_tty)
 	    argclass[nargs_wanted++] = int_arg;
 	  f++;
 	}
- 
+
     /* Now, parse all arguments and evaluate them.
        Store the VALUEs in VAL_ARGS.  */
- 
+
     while (*s != '\0')
       {
 	char *s1;
