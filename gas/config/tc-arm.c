@@ -955,7 +955,6 @@ literalT  literals[MAX_LITERAL_POOL_SIZE];
 int       next_literal_pool_place = 0; /* Next free entry in the pool */
 int       lit_pool_num = 1; /* Next literal pool number */
 symbolS * current_poolP = NULL;
-symbolS * symbol_make_empty PARAMS ((void)); 
 
 static int
 add_to_lit_pool ()
@@ -963,7 +962,8 @@ add_to_lit_pool ()
   int lit_count = 0;
 
   if (current_poolP == NULL)
-    current_poolP = symbol_make_empty ();
+    current_poolP = symbol_create (FAKE_LABEL_NAME, undefined_section,
+				   (valueT) 0, &zero_address_frag);
 
   /* Check if this literal value is already in the pool: */
   while (lit_count < next_literal_pool_place)
@@ -1027,7 +1027,7 @@ symbol_locate (symbolP, name, segment, valu, frag)
   S_SET_VALUE (symbolP, valu);
   symbol_clear_list_pointers(symbolP);
 
-  symbolP->sy_frag = frag;
+  symbol_set_frag (symbolP, frag);
 
   /* Link to end of symbol chain.  */
   {
@@ -1047,23 +1047,6 @@ symbol_locate (symbolP, name, segment, valu, frag)
 #ifdef DEBUG_SYMS
   verify_symbol_chain (symbol_rootP, symbol_lastP);
 #endif /* DEBUG_SYMS */
-}
-
-symbolS *
-symbol_make_empty () 
-{
-  symbolS * symbolP; 
-
-  symbolP = (symbolS *) obstack_alloc (&notes, sizeof (symbolS));
-
-  /* symbol must be born in some fixed state.  This seems as good as any. */
-  memset (symbolP, 0, sizeof (symbolS));
-
-  symbolP->bsym = bfd_make_empty_symbol (stdoutput);
-  assert (symbolP->bsym != 0);
-  symbolP->bsym->udata.p = (PTR) symbolP;
-
-  return symbolP;
 }
 
 /* Check that an immediate is valid, and if so, convert it to the right format.  */
@@ -2039,14 +2022,14 @@ static int
 walk_no_bignums (sp)
      symbolS * sp;
 {
-  if (sp->sy_value.X_op == O_big)
+  if (symbol_get_value_expression (sp)->X_op == O_big)
     return 1;
 
-  if (sp->sy_value.X_add_symbol)
+  if (symbol_get_value_expression (sp)->X_add_symbol)
     {
-      return (walk_no_bignums (sp->sy_value.X_add_symbol)
-	      || (sp->sy_value.X_op_symbol
-		  && walk_no_bignums (sp->sy_value.X_op_symbol)));
+      return (walk_no_bignums (symbol_get_value_expression (sp)->X_add_symbol)
+	      || (symbol_get_value_expression (sp)->X_op_symbol
+		  && walk_no_bignums (symbol_get_value_expression (sp)->X_op_symbol)));
     }
 
   return 0;
@@ -5620,7 +5603,8 @@ tc_gen_reloc (section, fixp)
 
   reloc = (arelent *) xmalloc (sizeof (arelent));
 
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   /* @@ Why fx_addnumber sometimes and fx_offset other times?  */
@@ -5801,7 +5785,7 @@ md_assemble (str)
   /* Align the previous label if needed.  */
   if (last_label_seen != NULL)
     {
-      last_label_seen->sy_frag = frag_now;
+      symbol_set_frag (last_label_seen, frag_now);
       S_SET_VALUE (last_label_seen, (valueT) frag_now_fix ());
       S_SET_SEGMENT (last_label_seen, now_seg);
     }
@@ -6625,7 +6609,7 @@ arm_adjust_symtab ()
         {
 	  if (THUMB_IS_FUNC (sym))
 	    {
-	      elf_sym = elf_symbol (sym->bsym);
+	      elf_sym = elf_symbol (symbol_get_bfdsym (sym));
 	      bind = ELF_ST_BIND (elf_sym);
 	      elf_sym->internal_elf_sym.st_info = ELF_ST_INFO (bind, STT_ARM_TFUNC);
             }

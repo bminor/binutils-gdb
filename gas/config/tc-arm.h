@@ -122,9 +122,9 @@
 /* We need to keep some local information on symbols.  */
 
 #define TC_SYMFIELD_TYPE unsigned int
-#define ARM_GET_FLAG(s)   	((s)->sy_tc)
-#define ARM_SET_FLAG(s,v) 	((s)->sy_tc |= (v))
-#define ARM_RESET_FLAG(s,v) 	((s)->sy_tc &= ~(v))
+#define ARM_GET_FLAG(s)   	(*symbol_get_tc (s))
+#define ARM_SET_FLAG(s,v) 	(*symbol_get_tc (s) |= (v))
+#define ARM_RESET_FLAG(s,v) 	(*symbol_get_tc (s) &= ~(v))
 
 #define ARM_FLAG_THUMB 		(1 << 0)	/* The symbol is a Thumb symbol rather than an Arm symbol.  */
 #define ARM_FLAG_INTERWORK 	(1 << 1)	/* The symbol is attached to code that suppports interworking.  */
