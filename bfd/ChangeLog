@@ -1,3 +1,10 @@
+Tue Aug  8 16:34:57 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Remove most
+	of special case stuff for PE.  Now handled by relocs.
+	* coff-i386.c (coff_i386_reloc): Special case of PE type 7s.
+	(howto_table): Type 7 is dir32-rva.
+
 Tue Aug  8 10:15:43 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* configure.host: Recognize aix4 explicitly.
