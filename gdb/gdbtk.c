@@ -2191,7 +2191,7 @@ gdbtk_init ( argv0 )
 			(char *) NULL);
       fprintf(stderr, "WARNING: ide_event_init_client failed: %s\n", interp->result);
 
-      Tcl_SetVar (interp, "GDBTK_IDE", "0", 0);
+      Tcl_SetVar (interp, "IDE_ENABLED", "0", 0);
     }
   else 
     {
@@ -2226,11 +2226,11 @@ gdbtk_init ( argv0 )
 	error ("ide_initialize failed: %s", interp->result);
       */
 
-      Tcl_SetVar (interp, "GDBTK_IDE", "1", 0);
+      Tcl_SetVar (interp, "IDE_ENABLED", "1", 0);
     }
   /* end-sanitize-ide */
 #else
-  Tcl_SetVar (interp, "GDBTK_IDE", "0", 0);
+  Tcl_SetVar (interp, "IDE_ENABLED", "0", 0);
 #endif /* IDE */
 
   /* We don't want to open the X connection until we've done all the
