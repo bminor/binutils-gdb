@@ -25,12 +25,14 @@ Things-to-keep:
 ChangeLog
 Makefile.in
 configure.in
+dis-buf.c
 h8500-dis.c
 h8500-opc.h
 i386-dis.c
 m68881-ext.c
 m68k-dis.c
 mips-dis.c
+sparc-dis.c
 sparc-opc.c
 z8k-dis.c
 z8k-opc.h
@@ -53,7 +55,7 @@ else
 fi
 
 
-v9dirty="sparc-pinsn.c"
+v9dirty="sparc-dis.c"
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
 	echo Keeping v9 in ${v9dirty}
