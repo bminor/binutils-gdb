@@ -1,3 +1,7 @@
+2004-04-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/tlspic.dd: Updated.
+
 2004-04-21  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld-empic/run.c: Removed as part of MIPS --embedded-relocs removal.
