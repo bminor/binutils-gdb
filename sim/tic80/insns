@@ -706,7 +706,7 @@ void::function::do_ld_u:unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, i
 
 
 // lmo
-31.Dest,26.Source,21.111111000,12.0,11./::::lmo
+31.Dest,26.Source,21.0b111111000,12.0,11./::::lmo
 	int b;
 	for (b = 0; b < 32; b++)
 	  if (rSource & BIT32 (31 - b))
@@ -820,7 +820,7 @@ void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndM
 	  }
 	/* form the end mask */
 	if (EndMask == 0)
-	  endmask = -1;
+	  endmask = ~ (unsigned32)0;
 	else
 	  endmask = (1 << EndMask) - 1;
 	if (i)
@@ -829,13 +829,13 @@ void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndM
 	switch (Merge)
 	  {
 	  case 0: case 1: case 2:
-	    shiftmask = -1; /* disabled */
+	    shiftmask = ~ (unsigned32)0;	/* disabled */
 	    break;
 	  case 3: case 4: case 5:
-	    shiftmask = ((1 << nRotate) - 1); /* enabled */
+	    shiftmask = ((1 << nRotate) - 1);	/* enabled */
 	    break;
 	  case 6: case 7:
-	    shiftmask = ~((1 << nRotate) - 1); /* inverted */
+	    shiftmask = ~((1 << nRotate) - 1);	/* inverted */
 	    break;
 	  default:
 	    engine_error (SD, CPU, cia,
@@ -848,13 +848,13 @@ void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndM
 	/* and merge */
 	switch (Merge)
 	  {
-	  case 0: case 3: case 6: /* zero */
+	  case 0: case 3: case 6:		/* zero */
 	    GPR (Dest) = rotated & cm;
 	    break;
-	  case 1: case 4: case 7: /* merge */
+	  case 1: case 4: case 7:		/* merge */
 	    GPR (Dest) = (rotated & cm) | (GPR (Dest) & ~cm);
 	    break;
-	  case 2: case 5: /* sign */
+	  case 2: case 5:			/* sign */
 	    {
 	      int b;
 	      GPR (Dest) = rotated & cm;
@@ -870,22 +870,11 @@ void::function::do_shift:int Dest, int Source, int Merge, int i, int n, int EndM
 	                  cia.ip, Source);
 
 	  }
-	TRACE_ALU2 (MY_INDEX, GPR (Dest), input);
+	TRACE_SHIFT (MY_INDEX, GPR (Dest), input, i, n, Merge, EndMask, Rotate);
 31.Dest,26.Source,21.0b0001,17.Merge,14./,11.i,10.n,9.EndMask,4.Rotate::::sl i
 	do_shift (_SD, Dest, Source, Merge, i, n, EndMask, Rotate);
 31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.i,10.n,9.EndMask,4.RotReg::::sl r
-	int endmask;
-	if (EndMask == 0)
-	  endmask = EndMask;
-	else
-	  {
-	    if (Source & 1)
-	      engine_error (SD, CPU, cia,
-	                    "0x%lx: Invalid source (%d) for shift",
-	                    cia.ip, Source);
-	    endmask = GPR (Source + 1) & 31;
-	  }
-	do_shift (_SD, Dest, Source, Merge, i, n, endmask, GPR (RotReg) & 31);
+	do_shift (_SD, Dest, Source, Merge, i, n, EndMask, GPR (RotReg) & 31);
 
 
 // sli.{d|e|i}{m|s|z} - see shift
@@ -959,12 +948,12 @@ void::function::do_sub:signed32 *rDest, signed32 Source1, signed32 Source2
 
 
 // subu
-void::function::do_subu:signed32 *rDest, signed32 Source1, signed32 Source2
+void::function::do_subu:unsigned32 *rDest, unsigned32 Source1, signed32 Source2
 	unsigned32 result = Source1 - Source2;
 	TRACE_ALU3 (MY_INDEX, result, Source1, Source2);
 	*rDest = result;
 // NOTE - the book has 15.1 which conflicts with subu.
-31.Dest,26.Source2,21.0b101101,15.1,14.SignedImmediate::::subu i
+31.Dest,26.Source2,21.0b101101,15.1,14.UnsignedImmediate::::subu i
 	do_subu (_SD, rDest, vSource1, rSource2);
 31.Dest,26.Source2,21.0b11101101,13.1,12.0,11./,4.Source1::::subu r
 	do_subu (_SD, rDest, rSource1, rSource2);

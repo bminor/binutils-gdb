@@ -168,11 +168,61 @@ tic80_trace_alu2 (int indx,
   sprintf (tic80_trace_buffer, "%-*s 0x%.*lx/%*ld %*s => 0x%.*lx/%*ld",
 	   tic80_size_name, itable[indx].name,
 	   SIZE_HEX, input, SIZE_DECIMAL, (long)(signed32)input,
-	   SIZE_HEX + SIZE_DECIMAL + 2, "",
+	   SIZE_HEX + SIZE_DECIMAL + 3, "",
 	   SIZE_HEX, result, SIZE_DECIMAL, (long)(signed32)result);
 
   return tic80_trace_buffer;
 }
+
+/* Trace the result of a shift instruction */
+char *
+tic80_trace_shift (int indx,
+		   unsigned32 result,
+		   unsigned32 input,
+		   int i,
+		   int n,
+		   int merge,
+		   int endmask,
+		   int rotate)
+{
+  const char *merge_name;
+  char name[40];
+  char *p;
+
+  if (!tic80_size_name)
+    tic80_init_trace ();
+
+  switch (merge)
+    {
+    default:	merge_name = ".??"; break;
+    case 0:	merge_name = ".dz"; break;
+    case 1:	merge_name = ".dm"; break;
+    case 2:	merge_name = ".ds"; break;
+    case 3:	merge_name = ".ez"; break;
+    case 4:	merge_name = ".em"; break;
+    case 5:	merge_name = ".es"; break;
+    case 6:	merge_name = ".iz"; break;
+    case 7:	merge_name = ".im"; break;
+    }
+
+  /* Don't use itable[indx].name, which is just sl {r,i}.  Instead reconstruct
+     the name, using the i and n fields.  */
+  p = strchr (itable[indx].name, ' ');
+  sprintf (name, "s%s%s%s%s",
+	   (n) ? "r" : "l",
+	   (i) ? "i" : "",
+	   merge_name,
+	   (p) ? p : "");
+
+  sprintf (tic80_trace_buffer, "%-*s 0x%.*lx/%*ld %*s%2d,%2d => 0x%.*lx/%*ld",
+	   tic80_size_name, name,
+	   SIZE_HEX, input, SIZE_DECIMAL, (long)(signed32)input,
+	   SIZE_HEX + SIZE_DECIMAL - 2, "",
+	   rotate, endmask,
+	   SIZE_HEX, result, SIZE_DECIMAL, (long)(signed32)result);
+
+  return tic80_trace_buffer;
+}    
 
 /* Trace the result of an FPU operation with 2 floating point inputs and a floating point output */
 void

@@ -160,6 +160,7 @@ struct _sim_cpu {
 #if defined(WITH_TRACE)
 extern char *tic80_trace_alu3	  PARAMS ((int, unsigned32, unsigned32, unsigned32));
 extern char *tic80_trace_alu2	  PARAMS ((int, unsigned32, unsigned32));
+extern char *tic80_trace_shift	  PARAMS ((int, unsigned32, unsigned32, int, int, int, int, int));
 extern void tic80_trace_fpu3	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int,
 					   sim_fpu, sim_fpu, sim_fpu));
 extern void tic80_trace_fpu2	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int,
@@ -189,6 +190,16 @@ do {									\
     trace_one_insn (SD, CPU, cia.ip, 1, itable[indx].file,		\
 		    itable[indx].line_nr, "alu",			\
 		    tic80_trace_alu2 (indx, result, input));		\
+  }									\
+} while (0)
+
+#define TRACE_SHIFT(indx, result, input, i, n, merge, endmask, rotate)	\
+do {									\
+  if (TRACE_ALU_P (CPU)) {						\
+    trace_one_insn (SD, CPU, cia.ip, 1, itable[indx].file,		\
+		    itable[indx].line_nr, "shift",			\
+		    tic80_trace_shift (indx, result, input, i, n,	\
+				       merge, endmask, rotate));	\
   }									\
 } while (0)
 
