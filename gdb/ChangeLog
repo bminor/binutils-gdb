@@ -1,3 +1,11 @@
+2001-10-31  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (register_loaded_dll): Attempt to ensure that the case of
+	the loaded DLL matches the on-disk case since the debugging API does
+	not seem to ensure this.  Calculate max name length here.
+	(handle_load_dll): Move max name length calculation to
+	register_loaded_dll.
+
 2001-10-31  Daniel Jacobowitz  <drow@mvista.com>
 
 	* arm-linux-nat.c: Include <asm/ptrace.h> explicitly.

@@ -510,7 +510,26 @@ register_loaded_dll (const char *name, DWORD load_addr)
 {
   struct so_stuff *so;
   char ppath[MAX_PATH + 1];
-  cygwin_conv_to_posix_path (name, ppath);
+  char buf[MAX_PATH + 1];
+  char cwd[MAX_PATH + 1];
+  char *p;
+  WIN32_FIND_DATA w32_fd;
+  HANDLE h = FindFirstFile(name, &w32_fd);
+  size_t len;
+
+  FindClose (h);
+  strcpy (buf, name);
+  if (GetCurrentDirectory (MAX_PATH + 1, cwd))
+    {
+      p = strrchr (buf, '\\');
+      if (p)
+	p[1] = '\0';
+      SetCurrentDirectory (buf);
+      GetFullPathName (w32_fd.cFileName, MAX_PATH, buf, &p);
+      SetCurrentDirectory (cwd);
+    }
+
+  cygwin_conv_to_posix_path (buf, ppath);
   so = (struct so_stuff *) xmalloc (sizeof (struct so_stuff) + strlen (ppath) + 8 + 1);
   so->loaded = 0;
   so->load_addr = load_addr;
@@ -519,6 +538,9 @@ register_loaded_dll (const char *name, DWORD load_addr)
   solib_end->next = so;
   solib_end = so;
   so->next = NULL;
+  len = strlen (ppath);
+  if (len > max_dll_name_len)
+    max_dll_name_len = len;
 }
 
 /* Wait for child to do something.  Return pid of child, or -1 in case
@@ -531,7 +553,6 @@ handle_load_dll (void *dummy ATTRIBUTE_UNUSED)
   DWORD done;
   char dll_buf[MAX_PATH + 1];
   char *dll_name = NULL;
-  int len;
   char *p;
 
   dll_buf[0] = dll_buf[sizeof (dll_buf) - 1] = '\0';
@@ -600,13 +621,7 @@ handle_load_dll (void *dummy ATTRIBUTE_UNUSED)
   if (!dll_name)
     return 1;
 
-  while ((p = strchr (dll_name, '\\')))
-    *p = '/';
-
   register_loaded_dll (dll_name, (DWORD) event->lpBaseOfDll + 0x1000);
-  len = strlen (dll_name);
-  if (len > max_dll_name_len)
-    max_dll_name_len = len;
 
   return 1;
 }
