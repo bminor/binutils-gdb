@@ -1350,7 +1350,7 @@ m32r_info_to_howto_rel (abfd, cache_ptr, dst)
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (ELF32_R_TYPE(dst->r_info) <= (unsigned int) R_M32R_GNU_VTENTRY)
+  BFD_ASSERT (ELF32_R_TYPE(dst->r_info) <= (unsigned int) R_M32R_GNU_VTENTRY);
   cache_ptr->howto = &m32r_elf_howto_table[r_type];
 }
 
@@ -2828,7 +2828,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
             case R_M32R_GOTOFF:
               /* Relocation is relative to the start of the global offset
                  table (for ld24 rx, #uimm24). eg access at label+addend
-		 
+
                  ld24 rx. #label@GOTOFF + addend
                  sub  rx, r12.  */
 
@@ -4271,7 +4271,7 @@ m32r_elf_print_private_bfd_data (abfd, ptr)
 {
   FILE * file = (FILE *) ptr;
 
-  BFD_ASSERT (abfd != NULL && ptr != NULL)
+  BFD_ASSERT (abfd != NULL && ptr != NULL);
 
   _bfd_elf_print_private_bfd_data (abfd, ptr);
 

@@ -5473,7 +5473,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  BFD_ASSERT (sec != NULL);
 	  BFD_ASSERT (bfd_is_und_section (sec)
 		      || strcmp (bfd_get_section_name (abfd, sec), ".got") == 0
-		      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0)
+		      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0);
 
 	    addend -= sec->output_section->vma + sec->output_offset + 0x8000;
 	  break;

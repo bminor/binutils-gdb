@@ -2960,7 +2960,7 @@ cris_elf_print_private_bfd_data (abfd, ptr)
 {
   FILE *file = (FILE *) ptr;
 
-  BFD_ASSERT (abfd != NULL && ptr != NULL)
+  BFD_ASSERT (abfd != NULL && ptr != NULL);
 
   _bfd_elf_print_private_bfd_data (abfd, ptr);
 

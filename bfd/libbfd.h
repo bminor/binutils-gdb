@@ -600,10 +600,10 @@ void bfd_assert
   (const char*,int);
 
 #define BFD_ASSERT(x) \
-  { if (!(x)) bfd_assert(__FILE__,__LINE__); }
+  do { if (!(x)) bfd_assert(__FILE__,__LINE__); } while (0)
 
 #define BFD_FAIL() \
-  { bfd_assert(__FILE__,__LINE__); }
+  do { bfd_assert(__FILE__,__LINE__); } while (0)
 
 extern void _bfd_abort
   (const char *, int, const char *) ATTRIBUTE_NORETURN;

@@ -859,9 +859,9 @@ bfd_release (bfd *abfd, void *block)
 }
 
 
-/* 
-   GNU Extension: separate debug-info files 
-   
+/*
+   GNU Extension: separate debug-info files
+
    The idea here is that a special section called .gnu_debuglink might be
    embedded in a binary file, which indicates that some *other* file
    contains the real debugging information. This special section contains a
@@ -889,7 +889,7 @@ DESCRIPTION
 
 RETURNS
 	Return the updated CRC32 value.
-*/     
+*/
 
 unsigned long
 bfd_calc_gnu_debuglink_crc32 (unsigned long crc,
@@ -1092,19 +1092,19 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
       return NULL;
     }
   BFD_ASSERT (strlen (dir) != 0);
-  
+
   /* Strip off filename part.  */
   for (i = strlen (dir) - 1; i >= 0; i--)
     if (IS_DIR_SEPARATOR (dir[i]))
       break;
 
   dir[i + 1] = '\0';
-  BFD_ASSERT (dir[i] == '/' || dir[0] == '\0')
+  BFD_ASSERT (dir[i] == '/' || dir[0] == '\0');
 
   debugfile = malloc (strlen (debug_file_directory) + 1
 		      + strlen (dir)
 		      + strlen (".debug/")
-		      + strlen (basename) 
+		      + strlen (basename)
 		      + 1);
   if (debugfile == NULL)
     {
@@ -1211,7 +1211,7 @@ DESCRIPTION
 
 RETURNS
 	A pointer to the new section is returned if all is ok.  Otherwise <<NULL>> is
-	returned and bfd_error is set.  
+	returned and bfd_error is set.
 */
 
 asection *
@@ -1228,7 +1228,7 @@ bfd_create_gnu_debuglink_section (bfd *abfd, const char *filename)
 
   /* Strip off any path components in filename.  */
   filename = lbasename (filename);
-  
+
   sect = bfd_get_section_by_name (abfd, GNU_DEBUGLINK);
   if (sect)
     {
@@ -1246,7 +1246,7 @@ bfd_create_gnu_debuglink_section (bfd *abfd, const char *filename)
     /* XXX Should we delete the section from the bfd ?  */
     return NULL;
 
-  
+
   debuglink_size = strlen (filename) + 1;
   debuglink_size += 3;
   debuglink_size &= ~3;
@@ -1255,7 +1255,7 @@ bfd_create_gnu_debuglink_section (bfd *abfd, const char *filename)
   if (! bfd_set_section_size (abfd, sect, debuglink_size))
     /* XXX Should we delete the section from the bfd ?  */
     return NULL;
-  
+
   return sect;
 }
 
@@ -1277,7 +1277,7 @@ DESCRIPTION
 
 RETURNS
 	<<TRUE>> is returned if all is ok.  Otherwise <<FALSE>> is returned
-	and bfd_error is set.  
+	and bfd_error is set.
 */
 
 bfd_boolean
@@ -1320,7 +1320,7 @@ bfd_fill_in_gnu_debuglink_section (bfd *abfd,
   /* Strip off any path components in filename,
      now that we no longer need them.  */
   filename = lbasename (filename);
-  
+
   debuglink_size = strlen (filename) + 1;
   debuglink_size += 3;
   debuglink_size &= ~3;

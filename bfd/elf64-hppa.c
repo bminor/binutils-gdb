@@ -1969,7 +1969,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
      the original values (in elf64_hppa_link_output_symbol_hook).  */
   if (dyn_h && dyn_h->want_opd)
     {
-      BFD_ASSERT (sopd != NULL)
+      BFD_ASSERT (sopd != NULL);
 
       /* Save away the original value and section index so that we
 	 can restore them later.  */
@@ -1993,7 +1993,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       Elf_Internal_Rela rel;
       bfd_byte *loc;
 
-      BFD_ASSERT (splt != NULL && spltrel != NULL)
+      BFD_ASSERT (splt != NULL && spltrel != NULL);
 
       /* We do not actually care about the value in the PLT entry
 	 if we are creating a shared library and the symbol is
@@ -2043,7 +2043,7 @@ elf64_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
       int insn;
       unsigned int max_offset;
 
-      BFD_ASSERT (stub != NULL)
+      BFD_ASSERT (stub != NULL);
 
       /* Install the generic stub template.
 

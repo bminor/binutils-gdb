@@ -924,7 +924,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	     location of interest is just "sym".  */
 	   if (symtype == STT_SECTION)
 	     toff += irel->r_addend;
-	   
+
 	   toff = _bfd_merged_section_offset (abfd, &tsec,
 					      elf_section_data (tsec)->sec_info,
 					      toff);
@@ -1125,7 +1125,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
      enough that the data segment moves, which will change the GP.
      Reset the GP so that we re-calculate next round.  We need to
      do this at the _beginning_ of the next round; now will not do.  */
-      
+
   /* Clean up and go home.  */
   while (fixups)
     {
@@ -2458,7 +2458,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	      if (!pltoff)
 		return FALSE;
 	    }
-	  
+
 	  dyn_i->want_pltoff = 1;
 	}
       if ((need_entry & NEED_DYNREL) && (sec->flags & SEC_ALLOC))
@@ -4178,7 +4178,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    dyn_i = get_dyn_sym_info (ia64_info, h, input_bfd, rel, FALSE);
 	    if (dyn_i->want_fptr)
 	      {
-		BFD_ASSERT (h == NULL || h->dynindx == -1)
+		BFD_ASSERT (h == NULL || h->dynindx == -1);
 	        if (!undef_weak_ref)
 	          value = set_fptr_entry (output_bfd, info, dyn_i, value);
 		dynindx = -1;
@@ -4262,7 +4262,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_PCREL64I:
 	  /* The PCREL21BI reloc is specifically not intended for use with
 	     dynamic relocs.  PCREL21F and PCREL21M are used for speculation
-	     fixup code, and thus probably ought not be dynamic.  The 
+	     fixup code, and thus probably ought not be dynamic.  The
 	     PCREL22 and PCREL64I relocs aren't emitted as dynamic relocs.  */
 	  if (dynamic_symbol_p)
 	    {

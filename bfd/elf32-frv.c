@@ -832,7 +832,7 @@ frvfdpic_relocs_info_for_global (struct htab *ht,
 
 /* Obtain the address of the entry in HT associated with the SYMNDXth
    local symbol of the input bfd ABFD, plus the addend, creating a new
-   entry if none existed.  */  
+   entry if none existed.  */
 inline static struct frvfdpic_relocs_info *
 frvfdpic_relocs_info_for_local (struct htab *ht,
 				bfd *abfd,
@@ -1021,7 +1021,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 				       asection *sec,
 				       Elf_Internal_Sym *sym,
 				       bfd_vma addend)
-				  
+
 {
   bfd_vma fd_lazy_rel_offset = (bfd_vma)-1;
   int dynindx = -1;
@@ -1099,7 +1099,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 				 ->output_section->vma
 				 + frvfdpic_got_section (info)->output_offset,
 				 R_FRV_32, idx, ad, entry);
-	
+
       bfd_put_32 (output_bfd, ad,
 		  frvfdpic_got_section (info)->contents
 		  + frvfdpic_got_initial_offset (info)
@@ -1112,7 +1112,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
     {
       int reloc, idx;
       bfd_vma ad = 0;
-      
+
       if (! (entry->symndx == -1
 	     && entry->d.h->root.type == bfd_link_hash_undefweak
 	     && FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
@@ -1285,7 +1285,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 	{
 	  if (ad)
 	    return FALSE;
-	  
+
 	  fd_lazy_rel_offset = ofst;
 
 	  /* A function descriptor used for lazy or local resolving is
@@ -1297,7 +1297,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 	  lowword = entry->lzplt_entry + 4
 	    + frvfdpic_plt_section (info)->output_offset
 	    + frvfdpic_plt_section (info)->output_section->vma;
-	  highword = _frvfdpic_osec_to_segment 
+	  highword = _frvfdpic_osec_to_segment
 	    (output_bfd, frvfdpic_plt_section (info)->output_section);
 	}
       else
@@ -2095,14 +2095,14 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = picrel->got_entry;
 	  check_segment[0] = check_segment[1] = got_segment;
 	  break;
-	  
+
 	case R_FRV_FUNCDESC_GOT12:
 	case R_FRV_FUNCDESC_GOTHI:
 	case R_FRV_FUNCDESC_GOTLO:
 	  relocation = picrel->fdgot_entry;
 	  check_segment[0] = check_segment[1] = got_segment;
 	  break;
-	  
+
 	case R_FRV_GOTOFFHI:
 	case R_FRV_GOTOFF12:
 	case R_FRV_GOTOFFLO:
@@ -2479,7 +2479,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (! IS_FDPIC (output_bfd) || ! picrel->plt)
 	    break;
 	  /* Fall through.  */
-	  
+
 	  /* When referencing a GOT entry, a function descriptor or a
 	     PLT, we don't want the addend to apply to the reference,
 	     but rather to the referenced symbol.  The actual entry
@@ -2497,7 +2497,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* Note that we only want GOTOFFHI, not GOTOFFLO or GOTOFF12
 	     here, since we do want to apply the addend to the others.
 	     Note that we've applied the addend to GOTOFFHI before we
-	     shifted it right.  */ 
+	     shifted it right.  */
 	case R_FRV_GOTOFFHI:
 	  relocation -= rel->r_addend;
 	  break;
@@ -3147,7 +3147,7 @@ _frvfdpic_compute_got_alloc_data (struct _frvfdpic_dynamic_got_alloc_data *gad,
       odd = cur + got;
       got += 4;
     }
-  
+
   /* Compute the tentative boundaries of this range.  */
   gad->max = cur + got;
   gad->min = fdcur - fd;
@@ -3222,7 +3222,7 @@ inline static bfd_signed_vma
 _frvfdpic_get_got_entry (struct _frvfdpic_dynamic_got_alloc_data *gad)
 {
   bfd_signed_vma ret;
-  
+
   if (gad->odd)
     {
       /* If there was an odd word left behind, use it.  */
@@ -3301,7 +3301,7 @@ _frvfdpic_assign_got_entries (void **entryp, void *info_)
     }
   else if (entry->privfd)
     entry->fd_entry = _frvfdpic_get_fd_entry (&dinfo->gothilo);
-  
+
   return 1;
 }
 
@@ -3331,7 +3331,7 @@ _frvfdpic_assign_plt_entries (void **entryp, void *info_)
 	}
       else
 	{
-	  BFD_ASSERT (dinfo->gothilo.fdplt)
+	  BFD_ASSERT (dinfo->gothilo.fdplt);
 	  entry->fd_entry = _frvfdpic_get_fd_entry (&dinfo->gothilo);
 	  dinfo->gothilo.fdplt -= 8;
 	}
@@ -3370,9 +3370,9 @@ _frvfdpic_assign_plt_entries (void **entryp, void *info_)
 	  == FRVFDPIC_LZPLT_RESOLV_LOC)
 	dinfo->g.lzplt += 4;
     }
-      
+
   return 1;
-}  
+}
 
 /* Follow indirect and warning hash entries so that each got entry
    points to the final symbol definition.  P must point to a pointer
@@ -3540,7 +3540,7 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
       if (frvfdpic_got_section (info)->contents == NULL)
 	return FALSE;
     }
-  
+
   if (elf_hash_table (info)->dynamic_sections_created)
     /* Subtract the number of lzplt entries, since those will generate
        relocations in the pltrel section.  */
@@ -3571,7 +3571,7 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
       if (frvfdpic_gotfixup_section (info)->contents == NULL)
 	return FALSE;
     }
-  
+
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       frvfdpic_pltrel_section (info)->size =
@@ -3587,7 +3587,7 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
 	    return FALSE;
 	}
     }
-  
+
   /* Add 4 bytes for every block of at most 65535 lazy PLT entries,
      such that there's room for the additional instruction needed to
      call the resolver.  Since _frvfdpic_assign_got_entries didn't
@@ -4145,14 +4145,14 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 	  picrel = NULL;
 	  break;
 	}
-      
+
       switch (ELF32_R_TYPE (rel->r_info))
         {
 	case R_FRV_LABEL24:
 	  if (IS_FDPIC (abfd))
 	    picrel->call = 1;
 	  break;
-		
+
 	case R_FRV_FUNCDESC_VALUE:
 	  picrel->relocsfdv++;
 	  if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
@@ -4167,11 +4167,11 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 	  if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
 	    picrel->relocs32++;
 	  break;
-	    
+
 	case R_FRV_GOT12:
 	  picrel->got12 = 1;
 	  break;
-	    
+
 	case R_FRV_GOTHI:
 	case R_FRV_GOTLO:
 	  picrel->gothilo = 1;
@@ -4180,32 +4180,32 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 	case R_FRV_FUNCDESC_GOT12:
 	  picrel->fdgot12 = 1;
 	  break;
-	    
+
 	case R_FRV_FUNCDESC_GOTHI:
 	case R_FRV_FUNCDESC_GOTLO:
 	  picrel->fdgothilo = 1;
 	  break;
-	    
+
 	case R_FRV_GOTOFF12:
 	case R_FRV_GOTOFFHI:
 	case R_FRV_GOTOFFLO:
 	  picrel->gotoff = 1;
 	  break;
-	    
+
 	case R_FRV_FUNCDESC_GOTOFF12:
 	  picrel->fdgoff12 = 1;
 	  break;
-	    
+
 	case R_FRV_FUNCDESC_GOTOFFHI:
 	case R_FRV_FUNCDESC_GOTOFFLO:
 	  picrel->fdgoffhilo = 1;
 	  break;
-	    
+
 	case R_FRV_FUNCDESC:
 	  picrel->fd = 1;
 	  picrel->relocsfd++;
 	  break;
-	  
+
         /* This relocation describes the C++ object vtable hierarchy.
            Reconstruct it for later use during GC.  */
         case R_FRV_GNU_VTINHERIT:
@@ -4723,7 +4723,7 @@ frv_elf_print_private_bfd_data (abfd, ptr)
 
   if (flags & EF_FRV_FDPIC)
     fprintf (file, " -mfdpic");
-  
+
   if (flags & EF_FRV_NON_PIC_RELOCS)
     fprintf (file, " non-pic relocations");
 

@@ -1,5 +1,17 @@
 2004-10-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* libbfd-in.h (BFD_ASSERT, BFD_FAIL): Wrap macro body in do while.
+	* libbfd.h: Regnerate.
+	* elf32-cris.c: Add missing semicolon to BFD_ASSERTs.
+	* elf32-frv.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* opncls.c: Likewise.
+
+2004-10-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (struct eh_frame_hdr_info): Add offsets_adjusted.
 	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Adjust
 	offsets stored in struct eh_cie_fde entries before doing other
