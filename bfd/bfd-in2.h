@@ -1689,6 +1689,7 @@ enum bfd_architecture
 #define bfd_mach_arm_5T        8
 #define bfd_mach_arm_5TE       9
 #define bfd_mach_arm_XScale    10
+#define bfd_mach_arm_ep9312    11
   bfd_arch_ns32k,     /* National Semiconductors ns32000 */
   bfd_arch_w65,       /* WDC 65816 */
   bfd_arch_tic30,     /* Texas Instruments TMS320C30 */

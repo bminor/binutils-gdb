@@ -1873,6 +1873,10 @@ decode_ARM_machine_flags (e_flags, buf)
 	      strcat (buf, ", software FP");
 	      break;
 
+	    case EF_ARM_MAVERICK_FLOAT:
+	      strcat (buf, ", Maverick FP");
+	      break;
+
 	    default:
 	      unknown = 1;
 	      break;

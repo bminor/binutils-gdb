@@ -2310,12 +2310,28 @@ ERROR: %s passes floats in integer registers, whereas %s passes them in float re
 	{
 	  if (in_flags & EF_ARM_VFP_FLOAT)
 	    _bfd_error_handler (_("\
-ERROR: %s uses VFP instructions, whereas %s uses FPA instructions"),
+ERROR: %s uses VFP instructions, whereas %s does not"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 	  else
 	    _bfd_error_handler (_("\
-ERROR: %s uses FPA instructions, whereas %s uses VFP instructions"),
+ERROR: %s uses FPA instructions, whereas %s does not"),
+				bfd_archive_filename (ibfd),
+				bfd_get_filename (obfd));
+
+	  flags_compatible = FALSE;
+	}
+
+      if ((in_flags & EF_ARM_MAVERICK_FLOAT) != (out_flags & EF_ARM_MAVERICK_FLOAT))
+	{
+	  if (in_flags & EF_ARM_MAVERICK_FLOAT)
+	    _bfd_error_handler (_("\
+ERROR: %s uses Maverick instructions, whereas %s does not"),
+				bfd_archive_filename (ibfd),
+				bfd_get_filename (obfd));
+	  else
+	    _bfd_error_handler (_("\
+ERROR: %s uses Maverick instructions, whereas %s does not"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 
@@ -2410,6 +2426,8 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 
       if (flags & EF_ARM_VFP_FLOAT)
 	fprintf (file, _(" [VFP float format]"));
+      else if (flags & EF_ARM_MAVERICK_FLOAT)
+	fprintf (file, _(" [Maverick float format]"));
       else
 	fprintf (file, _(" [FPA float format]"));
 
@@ -2430,7 +2448,8 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 
       flags &= ~(EF_ARM_INTERWORK | EF_ARM_APCS_26 | EF_ARM_APCS_FLOAT
 		 | EF_ARM_PIC | EF_ARM_NEW_ABI | EF_ARM_OLD_ABI
-		 | EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT);
+		 | EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT
+		 | EF_ARM_MAVERICK_FLOAT);
       break;
 
     case EF_ARM_EABI_VER1:

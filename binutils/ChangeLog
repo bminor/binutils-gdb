@@ -1,3 +1,8 @@
+2003-02-10  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (decode_ARM_machine_flags): Handle the
+	EF_ARM_MAVERICK_FLOAT flag.
+
 2003-02-04  Andreas Schwab  <schwab@suse.de>
 
 	* rddbg.c (read_section_stabs_debugging_info): Cast ptrdiff_t to

@@ -9278,6 +9278,13 @@ md_begin ()
     /* Using VFP conventions (even if soft-float).  */
     if (cpu_variant & FPU_VFP_EXT_NONE) flags |= F_VFP_FLOAT;
 
+#if defined OBJ_ELF
+    if (cpu_variant & ARM_CEXT_MAVERICK)
+      {
+	flags ^= F_SOFT_FLOAT;
+	flags |= EF_ARM_MAVERICK_FLOAT;
+      }
+#endif
 
     bfd_set_private_flags (stdoutput, flags);
 
@@ -9324,6 +9331,8 @@ md_begin ()
   /* Catch special cases.  */
   if (cpu_variant & ARM_CEXT_XSCALE)
     mach = bfd_mach_arm_XScale;
+  else if (cpu_variant & ARM_CEXT_MAVERICK)
+    mach = bfd_mach_arm_ep9312;
   else if (cpu_variant & ARM_EXT_V5E)
     mach = bfd_mach_arm_5TE;
   else if (cpu_variant & ARM_EXT_V5)
