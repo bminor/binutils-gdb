@@ -110,8 +110,8 @@ fetch_inferior_registers (regno)
 	      FPR0+ii, 0);
 
     /* read special registers. */
-    for (ii=0; ii <= LAST_SP_REGNUM-FIRST_SP_REGNUM; ++ii)
-      *(int*)&registers[REGISTER_BYTE (FIRST_SP_REGNUM+ii)] = 
+    for (ii=0; ii <= LAST_UISA_SP_REGNUM-FIRST_UISA_SP_REGNUM; ++ii)
+      *(int*)&registers[REGISTER_BYTE (FIRST_UISA_SP_REGNUM+ii)] = 
 	ptrace (PT_READ_GPR, inferior_pid, (PTRACE_ARG3_TYPE) special_regs[ii],
 		0, 0);
 
@@ -130,13 +130,16 @@ fetch_inferior_registers (regno)
 	    (PTRACE_ARG3_TYPE) &registers [REGISTER_BYTE (regno)],
 	    (regno-FP0_REGNUM+FPR0), 0);
   }
-  else if (regno <= LAST_SP_REGNUM) {		/* a special register */
+  else if (regno <= LAST_UISA_SP_REGNUM) { /* a special register */
     *(int*)&registers[REGISTER_BYTE (regno)] =
 	ptrace (PT_READ_GPR, inferior_pid,
-		(PTRACE_ARG3_TYPE) special_regs[regno-FIRST_SP_REGNUM], 0, 0);
+		(PTRACE_ARG3_TYPE) special_regs[regno-FIRST_UISA_SP_REGNUM],
+		0, 0);
   }
   else
-    fprintf_unfiltered (gdb_stderr, "gdb error: register no %d not implemented.\n", regno);
+    fprintf_unfiltered (gdb_stderr, 
+			"gdb error: register no %d not implemented.\n",
+			regno);
 
   register_valid [regno] = 1;
 }
@@ -190,11 +193,12 @@ store_inferior_registers (regno)
 	}
 
       /* write special registers. */
-      for (ii=0; ii <= LAST_SP_REGNUM-FIRST_SP_REGNUM; ++ii)
+      for (ii=0; ii <= LAST_UISA_SP_REGNUM-FIRST_UISA_SP_REGNUM; ++ii)
 	{
 	  ptrace (PT_WRITE_GPR, inferior_pid,
 		  (PTRACE_ARG3_TYPE) special_regs[ii],
-		  *(int*)&registers[REGISTER_BYTE (FIRST_SP_REGNUM+ii)], 0);
+		  *(int*)&registers[REGISTER_BYTE (FIRST_UISA_SP_REGNUM+ii)],
+		  0);
 	  if (errno)
 	    {
 	      perror ("ptrace write_gpr");
@@ -218,15 +222,17 @@ store_inferior_registers (regno)
 	      regno - FP0_REGNUM + FPR0, 0);
     }
 
-  else if (regno <= LAST_SP_REGNUM)		/* a special register */
+  else if (regno <= LAST_UISA_SP_REGNUM) /* a special register */
     {
       ptrace (PT_WRITE_GPR, inferior_pid,
-	      (PTRACE_ARG3_TYPE) special_regs [regno-FIRST_SP_REGNUM],
+	      (PTRACE_ARG3_TYPE) special_regs [regno-FIRST_UISA_SP_REGNUM],
 	      *(int*)&registers[REGISTER_BYTE (regno)], 0);
     }
 
   else
-    fprintf_unfiltered (gdb_stderr, "Gdb error: register no %d not implemented.\n", regno);
+    fprintf_unfiltered (gdb_stderr,
+			"Gdb error: register no %d not implemented.\n",
+			regno);
 
   if (errno)
     {
@@ -248,8 +254,9 @@ exec_one_dummy_insn ()
   int status, pid;
   CORE_ADDR prev_pc;
 
-  /* We plant one dummy breakpoint into DUMMY_INSN_ADDR address. We assume that
-     this address will never be executed again by the real code. */
+  /* We plant one dummy breakpoint into DUMMY_INSN_ADDR address. We
+     assume that this address will never be executed again by the real
+     code. */
 
   target_insert_breakpoint (DUMMY_INSN_ADDR, shadow_contents);
 
@@ -294,8 +301,9 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
       /* then comes special registes. They are supposed to be in the same
 	 order in gdb template and bfd `.reg' section. */
       core_reg_sect += (32 * 4);
-      memcpy (&registers [REGISTER_BYTE (FIRST_SP_REGNUM)], core_reg_sect, 
-	      (LAST_SP_REGNUM - FIRST_SP_REGNUM + 1) * 4);
+      memcpy (&registers [REGISTER_BYTE (FIRST_UISA_SP_REGNUM)], 
+	      core_reg_sect, 
+	      (LAST_UISA_SP_REGNUM - FIRST_UISA_SP_REGNUM + 1) * 4);
     }
 
   /* fetch floating point registers from register section 2 in core bfd. */
@@ -303,7 +311,9 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
     memcpy (&registers [REGISTER_BYTE (FP0_REGNUM)], core_reg_sect, 32 * 8);
 
   else
-    fprintf_unfiltered (gdb_stderr, "Gdb error: unknown parameter to fetch_core_registers().\n");
+    fprintf_unfiltered 
+      (gdb_stderr, 
+       "Gdb error: unknown parameter to fetch_core_registers().\n");
 }
 
 /* handle symbol translation on vmapping */
