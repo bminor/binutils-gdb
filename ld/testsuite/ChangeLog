@@ -1,3 +1,16 @@
+Mon Feb  2 14:17:48 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/phdrs.exp: Adjust phdrs_regexp for a 64 bit target.
+
+Thu Dec 18 11:13:28 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-srec/srec.exp: Duplicated Arm patch for Thumb targets.
+
+Tue Dec  2 09:50:19 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-srec/srec.exp: Applied patch from Tony.Thompson@arm.com which
+	fixes ARM tests.
+
 Mon Dec  1 16:12:05 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* ld-srec/srec.exp: Add expected failures of tests 1 and 2 for ARM
