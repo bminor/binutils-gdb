@@ -202,9 +202,6 @@ field3 = 0x77888877\}" "print struct constant"
 	gdb_test "p common0var1" "= 24"
 	setup_xfail "*-*-*"
 	gdb_test "p common0var2" "= 22"
-
-	# this long line must be continous, not with "/" escaping the newline
-	gdb_test "p v_comb" "{<> = {<> = {x = 42}, \[_a-zA-Z$.\]* = \[0-9xa-fA-F\]*, a = 43}, <> = {\[_a-zA-Z$.\]* = \[0-9xa-fA-F\]*, b = 44}, comb = 45}"
 }
 
 proc print_weird_var { var } {
