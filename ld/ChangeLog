@@ -1,5 +1,10 @@
 2004-07-19  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* NEWS: Mention the new --add-needed/--no-add-needed and
+	--as-needed/--no-as-needed options.
+
+2004-07-19  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* emultempl/elf32.em (gld${EMULATION_NAME}_load_symbols): Also
 	check the add_needed field.
 	(dt_needed): New struct.

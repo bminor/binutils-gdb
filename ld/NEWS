@@ -1,5 +1,9 @@
 -*- text -*-
 
+* New ELF --add-needed/--no-add-needed options to control if a
+DT_NEEDED tag should be added when a shared library comes from
+DT_NEEDED tags.
+
 * Support for the crx-elf target added.
 
 * Support for the sh-symbianelf target added.
@@ -17,6 +21,9 @@
   might also be used in the future to select similar tradeoffs.
 
 Changes in 2.15:
+
+* New ELF --as-needed/--no-as-needed options to control if a DT_NEEDED
+tag should be added only when a shared library is referenced.
   
 * New PE --large-address-aware option to indicate executables support virtual
   addresses greater than 2 gigabytes.
