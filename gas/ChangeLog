@@ -1,3 +1,15 @@
+2001-02-04  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* config/tc-m68hc11.h (LISTING_HEADER): Use m68hc11_listing_header
+	function to select the header according to the cpu.
+	(md_after_pass_hook, md_do_align): Remove.
+	(md_cleanup, m68hc11_cleanup): Remove.
+	(md_pcrel_from_section): Declare.
+	* config/tc-m68hc11.c (build_dbranch_insn): Remove insn_size.
+	(build_jump_insn, build_insn): Likewise.
+	(m68hc11_listing_header): New function.
+	(m68hc11_cleanup): Remove.
+
 2001-02-02  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.c (relaxable_symbol): Relax externally visible

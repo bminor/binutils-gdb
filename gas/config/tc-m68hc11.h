@@ -1,5 +1,5 @@
 /* tc-m68hc11.h -- Header file for tc-m68hc11.c.
-   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -20,6 +20,10 @@
 
 #define TC_M68HC11
 #define TC_M68HC12
+
+#ifdef ANSI_PROTOTYPES
+struct fix;
+#endif
 
 /* Define TC_M68K so that we can use the MRI mode.  */
 #define TC_M68K
@@ -63,21 +67,23 @@ extern const char *m68hc11_arch_format PARAMS ((void));
 #define LISTING_LHS_WIDTH 4	/* One word on the first line */
 #define LISTING_LHS_WIDTH_SECOND 4	/* One word on the second line */
 #define LISTING_LHS_CONT_LINES 4	/* And 4 lines max */
-#define LISTING_HEADER "M68HC11 GAS "
+#define LISTING_HEADER m68hc11_listing_header ()
+extern const char *m68hc11_listing_header PARAMS (());
 
 /* call md_pcrel_from_section, not md_pcrel_from */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section(FIXP, SEC)
+extern long md_pcrel_from_section PARAMS ((struct fix *fixp, segT sec));
 
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
 
 #define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs */
 
-extern void m68hc11_init_after_args PARAMS ((void));
 #define tc_init_after_args m68hc11_init_after_args
+extern void m68hc11_init_after_args PARAMS ((void));
 
-extern int m68hc11_parse_long_option PARAMS ((char *));
 #define md_parse_long_option m68hc11_parse_long_option
+extern int m68hc11_parse_long_option PARAMS ((char *));
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 1
 
@@ -88,19 +94,13 @@ extern int m68hc11_parse_long_option PARAMS ((char *));
 
 /* Relax table to translate short relative branches (-128..127) into
    absolute branches.  */
-extern struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
-
-extern int m68hc11_cleanup PARAMS ((void));
+extern struct relax_type md_relax_table[];
 
 #define md_operand(x)
-#define md_after_pass_hook()	     m68hc11_cleanup()
-#define md_cleanup()		     m68hc11_cleanup()
-#define md_do_align(a,b,c,d,e)	     m68hc11_cleanup()
 #define tc_frob_label(sym) do {\
-  m68hc11_cleanup(); \
   S_SET_VALUE (sym, (valueT) frag_now_fix ()); \
 } while (0)
 
-#define tc_print_statistics m68hc11_print_statistics
+#define tc_print_statistics(FILE) m68hc11_print_statistics (FILE)
 extern void m68hc11_print_statistics PARAMS ((FILE *));
