@@ -1,3 +1,8 @@
+2004-01-29  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/inherit.exp: Rewrite.  Use gdb_test_multiple and gdb
+	for all tests.  Remove old hp-ux and cygnus xfail cases.
+
 2004-01-29  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
 	* gdb.base/chng-syms.exp: New file.
