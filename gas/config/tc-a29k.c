@@ -88,7 +88,15 @@ md_pseudo_table[] = {
 
 int md_short_jump_size = 4;
 int md_long_jump_size = 4;
-int md_reloc_size = 12;
+#if defined(BFD_HEADERS)
+#ifdef RELSZ
+int md_reloc_size = RELSZ;	/* Coff headers */
+#else
+int md_reloc_size = 12;		/* something else headers */
+#endif
+#else
+int md_reloc_size = 12;		/* Not bfdized*/
+#endif
 
 /* This array holds the chars that always start a comment.  If the
     pre-processor is disabled, these aren't very useful */
@@ -881,11 +889,15 @@ fixS *fixP;
 	/* FIXME-NOW: relocation type handling is not yet written for
 	   a29k. */
 
-	know(0);
+
 	switch (fixP->fx_r_type) {
 	case RELOC_32:	return(R_WORD);
 	case RELOC_8:	return(R_BYTE);
-	default:	know(0);
+	case RELOC_CONST: return (R_ILOHALF);
+	case RELOC_CONSTH: return (R_IHIHALF);
+	case RELOC_JUMPTARG: return (R_IREL);
+	default:	printf("need %o3\n", fixP->fx_r_type);
+	  abort(0);
 	} /* switch on type */
 
 	return(0);

@@ -5,7 +5,7 @@ This file is part of GAS.
 
 GAS is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GAS is distributed in the hope that it will be useful,
@@ -39,6 +39,7 @@ const short seg_N_TYPE[] = { /* in: segT   out: N_TYPE bits */
 	C_DEBUG_SECTION,		/* SEG_DEBUG */
 	C_NTV_SECTION,		/* SEG_NTV */
 	C_PTV_SECTION,		/* SEG_PTV */
+	C_REGISTER_SECTION,	/* SEG_REGISTER */
 };
 
 
@@ -54,9 +55,10 @@ const segT N_TYPE_seg [32] =
   SEG_TEXT,			/* C_TEXT_SECTION	== 1 */
   SEG_DATA,			/* C_DATA_SECTION	== 2 */
   SEG_BSS,			/* C_BSS_SECTION	== 3 */
+  SEG_REGISTER,			/* C_REGISTER_SECTION   == 4 */
   SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,
   SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,
-  SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF
+  SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF
 };
 
 #ifdef __STDC__
@@ -64,7 +66,11 @@ const segT N_TYPE_seg [32] =
 char *s_get_name(symbolS *s);
 static symbolS *tag_find_or_make(char *name);
 static symbolS* tag_find(char *name);
-static void c_section_header_append(char **where, SCNHDR *header);
+#ifdef BFD_HEADERS
+static void obj_coff_section_header_append(char **where, struct internal_scnhdr *header);
+#else
+static void obj_coff_section_header_append(char **where, SCNHDR *header);
+#endif
 static void obj_coff_def(int what);
 static void obj_coff_dim(void);
 static void obj_coff_endef(void);
@@ -84,7 +90,7 @@ static void tag_insert(char *name, symbolS *symbolP);
 char *s_get_name();
 static symbolS *tag_find();
 static symbolS *tag_find_or_make();
-static void c_section_header_append();
+static void obj_coff_section_header_append();
 static void obj_coff_def();
 static void obj_coff_dim();
 static void obj_coff_endef();
@@ -151,10 +157,15 @@ const pseudo_typeS obj_pseudo_table[] = {
 
 
  /* obj dependant output values */
+#ifdef BFD_HEADERS
+static struct internal_scnhdr bss_section_header;
+struct internal_scnhdr data_section_header;
+struct internal_scnhdr text_section_header;
+#else
 static SCNHDR bss_section_header;
-static SCNHDR data_section_header;
-static SCNHDR text_section_header;
-
+SCNHDR data_section_header;
+SCNHDR text_section_header;
+#endif
 /* Relocation. */
 
 /*
@@ -168,7 +179,11 @@ char **where;
 fixS *fixP; /* Fixup chain for this segment. */
 relax_addressT segment_address_in_file;
 {
+#ifdef BFD_HEADERS
+	struct internal_reloc ri;
+#else
 	RELOC ri;
+#endif
 	symbolS *symbolP;
 
 	bzero((char *)&ri,sizeof(ri));
@@ -197,6 +212,7 @@ relax_addressT segment_address_in_file;
 				     : R_RELLONG);
 #elif defined(TC_A29K)
 			ri.r_type = tc_coff_fix2rtype(fixP);
+
 #else
 			you lose
 #endif /* TC_M68K || TC_I386 */
@@ -230,12 +246,37 @@ relax_addressT segment_address_in_file;
 					      : symbolP->sy_number)))); /* bss or undefined */
 
 			/* md_ri_to_chars((char *) &ri, ri); */  /* Last step : write md f */
+			
+			
+#ifdef BFD_HEADERS
+			*where += bfd_coff_swap_reloc_out(stdoutput, &ri, *where);
+#if defined(TC_A29K)
+			/* The 29k has a special kludge for the high 16 bit reloc.
+			   Two relocations are emmited, R_IHIHALF, and R_IHCONST. The second one 
+			   doesn't contain a symbol, but uses the value for offset */
+			if (ri.r_type == R_IHIHALF) {
+			  /* now emit the second bit */
+			  ri.r_type = R_IHCONST;	
+			  ri.r_symndx = 0;
+			*where += bfd_coff_swap_reloc_out(stdoutput, &ri, *where);
+			}
+
+#endif
+
+#else
 			append(where, (char *) &ri, sizeof(ri));
+#endif
 
 #ifdef TC_I960
 			if (fixP->fx_callj) {
 				ri.r_type = R_OPTCALL;
-				append(where, (char *) &ri, sizeof(ri));
+#ifdef BFD_HEADERS
+			*where += bfd_coff_swap_reloc_out(stdoutput, &ri, *where);
+#else
+			append(where, (char *) &ri, sizeof(ri));
+#endif
+
+
 			} /* if it's a callj, do it again for the opcode */
 #endif /* TC_I960 */
 
@@ -246,6 +287,24 @@ relax_addressT segment_address_in_file;
 } /* obj_emit_relocations() */
 
 /* Coff file generation & utilities */
+
+#ifdef BFD_HEADERS
+void obj_header_append(where, headers)
+char **where;
+object_headers *headers;
+{
+  tc_headers_hook(headers);
+  *where += bfd_coff_swap_filehdr_out(stdoutput, &(headers->filehdr), *where);
+#ifndef OBJ_COFF_OMIT_OPTIONAL_HEADER
+  *where += bfd_coff_swap_aouthdr_out(stdoutput, &(headers->aouthdr), *where);
+#endif
+  obj_coff_section_header_append(where, &text_section_header);
+  obj_coff_section_header_append(where, &data_section_header);
+  obj_coff_section_header_append(where, &bss_section_header);
+
+}
+
+#else
 
 void obj_header_append(where, headers)
 char **where;
@@ -288,6 +347,8 @@ object_headers *headers;
 	*where += sizeof(headers->aouthdr.text_start);
 	md_number_to_chars(*where, headers->aouthdr.data_start, sizeof(headers->aouthdr.data_start));
 	*where += sizeof(headers->aouthdr.data_start);
+	md_number_to_chars(*where, headers->aouthdr.tagentries, sizeof(headers->aouthdr.tagentries));
+	*where += sizeof(headers->aouthdr.tagentries);
 #endif /* OBJ_COFF_OMIT_OPTIONAL_HEADER */
 
 #else /* CROSS_COMPILE */
@@ -300,133 +361,169 @@ object_headers *headers;
 #endif /* CROSS_COMPILE */
 
 	/* Output the section headers */
-	c_section_header_append(where, &text_section_header);
-	c_section_header_append(where, &data_section_header);
-	c_section_header_append(where, &bss_section_header);
+	obj_coff_section_header_append(where, &text_section_header);
+	obj_coff_section_header_append(where, &data_section_header);
+	obj_coff_section_header_append(where, &bss_section_header);
 
 	return;
 } /* obj_header_append() */
-
+#endif
 void obj_symbol_to_chars(where, symbolP)
 char **where;
 symbolS *symbolP;
 {
-	SYMENT *syment = &symbolP->sy_symbol.ost_entry;
-	int i;
-	char numaux = syment->n_numaux;
-	unsigned short type = S_GET_DATA_TYPE(symbolP);
+#ifdef BFD_HEADERS
+  unsigned int numaux = symbolP->sy_symbol.ost_entry.n_numaux;
+  unsigned int i;
+
+	if (S_GET_SEGMENT(symbolP) == SEG_REGISTER) {
+	  S_SET_SEGMENT(symbolP, SEG_ABSOLUTE);
+	}
+  *where += bfd_coff_swap_sym_out(stdoutput, &symbolP->sy_symbol.ost_entry,
+				  *where);
+
+  for (i = 0; i < numaux; i++) 
+      {
+	*where += bfd_coff_swap_aux_out(stdoutput,
+					&symbolP->sy_symbol.ost_auxent[i],
+					S_GET_DATA_TYPE(symbolP),
+					S_GET_STORAGE_CLASS(symbolP),
+					*where);
+      }
+
+#else
+  SYMENT *syment = &symbolP->sy_symbol.ost_entry;
+  int i;
+  char numaux = syment->n_numaux;
+  unsigned short type = S_GET_DATA_TYPE(symbolP);
 
 #ifdef CROSS_COMPILE
-	md_number_to_chars(*where, syment->n_value, sizeof(syment->n_value));
-	*where += sizeof(syment->n_value);
-	md_number_to_chars(*where, syment->n_scnum, sizeof(syment->n_scnum));
-	*where += sizeof(syment->n_scnum);
-	md_number_to_chars(*where, syment->n_type, sizeof(syment->n_type));
-	*where += sizeof(syment->n_type);
-	md_number_to_chars(*where, syment->n_sclass, sizeof(syment->n_sclass));
-	*where += sizeof(syment->n_sclass);
-	md_number_to_chars(*where, syment->n_numaux, sizeof(syment->n_numaux));
-	*where += sizeof(syment->n_numaux);
+  md_number_to_chars(*where, syment->n_value, sizeof(syment->n_value));
+  *where += sizeof(syment->n_value);
+  md_number_to_chars(*where, syment->n_scnum, sizeof(syment->n_scnum));
+  *where += sizeof(syment->n_scnum);
+  md_number_to_chars(*where, syment->n_type, sizeof(syment->n_type));
+  *where += sizeof(syment->n_type);
+  md_number_to_chars(*where, syment->n_sclass, sizeof(syment->n_sclass));
+  *where += sizeof(syment->n_sclass);
+  md_number_to_chars(*where, syment->n_numaux, sizeof(syment->n_numaux));
+  *where += sizeof(syment->n_numaux);
 #else /* CROSS_COMPILE */
-	append(where, (char *) syment, sizeof(*syment));
+  append(where, (char *) syment, sizeof(*syment));
 #endif /* CROSS_COMPILE */
 
-	/* Should do the following : if (.file entry) MD(..)... else if (static entry) MD(..) */
-	if (numaux > OBJ_COFF_MAX_AUXENTRIES) {
-		as_bad("Internal error? too many auxents for symbol");
-	} /* too many auxents */
+  /* Should do the following : if (.file entry) MD(..)... else if (static entry) MD(..) */
+  if (numaux > OBJ_COFF_MAX_AUXENTRIES) {
+    as_bad("Internal error? too many auxents for symbol");
+  } /* too many auxents */
 
-	for (i = 0; i < numaux; ++i) {
+  for (i = 0; i < numaux; ++i) {
 #ifdef CROSS_COMPILE
 #if 0 /* This code has never been tested */
-		/* The most common case, x_sym entry. */
-		if ((SF_GET(symbolP) & (SF_FILE | SF_STATICS)) == 0) {
-			md_number_to_chars(*where, auxP->x_sym.x_tagndx, sizeof(auxP->x_sym.x_tagndx));
-			*where += sizeof(auxP->x_sym.x_tagndx);
-			if (ISFCN(type)) {
-				md_number_to_chars(*where, auxP->x_sym.x_misc.x_fsize, sizeof(auxP->x_sym.x_misc.x_fsize));
-				*where += sizeof(auxP->x_sym.x_misc.x_fsize);
-			} else {
-				md_number_to_chars(*where, auxP->x_sym.x_misc.x_lnno, sizeof(auxP->x_sym.x_misc.x_lnno));
-				*where += sizeof(auxP->x_sym.x_misc.x_lnno);
-				md_number_to_chars(*where, auxP->x_sym.x_misc.x_size, sizeof(auxP->x_sym.x_misc.x_size));
-				*where += sizeof(auxP->x_sym.x_misc.x_size);
-			}
-			if (ISARY(type)) {
-				register int index;
-				for (index = 0; index < DIMNUM; index++)
-				    md_number_to_chars(*where, auxP->x_sym.x_fcnary.x_ary.x_dimen[index], sizeof(auxP->x_sym.x_fcnary.x_ary.x_dimen[index]));
-				*where += sizeof(auxP->x_sym.x_fcnary.x_ary.x_dimen[index]);
-			} else {
-				md_number_to_chars(*where, auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr, sizeof(auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr));
-				*where += sizeof(auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr);
-				md_number_to_chars(*where, auxP->x_sym.x_fcnary.x_fcn.x_endndx, sizeof(auxP->x_sym.x_fcnary.x_fcn.x_endndx));
-				*where += sizeof(auxP->x_sym.x_fcnary.x_fcn.x_endndx);
-			}
-			md_number_to_chars(*where, auxP->x_sym.x_tvndx, sizeof(auxP->x_sym.x_tvndx));
-			*where += sizeof(auxP->x_sym.x_tvndx);
-		} else if (SF_GET_FILE(symbolP)) {	/* .file */
-			;
-		} else if (SF_GET_STATICS(symbolP)) { /* .text, .data, .bss symbols */
-			md_number_to_chars(*where, auxP->x_scn.x_scnlen, sizeof(auxP->x_scn.x_scnlen));
-			*where += sizeof(auxP->x_scn.x_scnlen);
-			md_number_to_chars(*where, auxP->x_scn.x_nreloc, sizeof(auxP->x_scn.x_nreloc));
-			*where += sizeof(auxP->x_scn.x_nreloc);
-			md_number_to_chars(*where, auxP->x_scn.x_nlinno, sizeof(auxP->x_scn.x_nlinno));
-			*where += sizeof(auxP->x_scn.x_nlinno);
-		}
+    /* The most common case, x_sym entry. */
+    if ((SF_GET(symbolP) & (SF_FILE | SF_STATICS)) == 0) {
+      md_number_to_chars(*where, auxP->x_sym.x_tagndx, sizeof(auxP->x_sym.x_tagndx));
+      *where += sizeof(auxP->x_sym.x_tagndx);
+      if (ISFCN(type)) {
+	md_number_to_chars(*where, auxP->x_sym.x_misc.x_fsize, sizeof(auxP->x_sym.x_misc.x_fsize));
+	*where += sizeof(auxP->x_sym.x_misc.x_fsize);
+      } else {
+	md_number_to_chars(*where, auxP->x_sym.x_misc.x_lnno, sizeof(auxP->x_sym.x_misc.x_lnno));
+	*where += sizeof(auxP->x_sym.x_misc.x_lnno);
+	md_number_to_chars(*where, auxP->x_sym.x_misc.x_size, sizeof(auxP->x_sym.x_misc.x_size));
+	*where += sizeof(auxP->x_sym.x_misc.x_size);
+      }
+      if (ISARY(type)) {
+	register int index;
+	for (index = 0; index < DIMNUM; index++)
+	  md_number_to_chars(*where, auxP->x_sym.x_fcnary.x_ary.x_dimen[index], sizeof(auxP->x_sym.x_fcnary.x_ary.x_dimen[index]));
+	*where += sizeof(auxP->x_sym.x_fcnary.x_ary.x_dimen[index]);
+      } else {
+	md_number_to_chars(*where, auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr, sizeof(auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr));
+	*where += sizeof(auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr);
+	md_number_to_chars(*where, auxP->x_sym.x_fcnary.x_fcn.x_endndx, sizeof(auxP->x_sym.x_fcnary.x_fcn.x_endndx));
+	*where += sizeof(auxP->x_sym.x_fcnary.x_fcn.x_endndx);
+      }
+      md_number_to_chars(*where, auxP->x_sym.x_tvndx, sizeof(auxP->x_sym.x_tvndx));
+      *where += sizeof(auxP->x_sym.x_tvndx);
+    } else if (SF_GET_FILE(symbolP)) { /* .file */
+      ;
+    } else if (SF_GET_STATICS(symbolP)) { /* .text, .data, .bss symbols */
+      md_number_to_chars(*where, auxP->x_scn.x_scnlen, sizeof(auxP->x_scn.x_scnlen));
+      *where += sizeof(auxP->x_scn.x_scnlen);
+      md_number_to_chars(*where, auxP->x_scn.x_nreloc, sizeof(auxP->x_scn.x_nreloc));
+      *where += sizeof(auxP->x_scn.x_nreloc);
+      md_number_to_chars(*where, auxP->x_scn.x_nlinno, sizeof(auxP->x_scn.x_nlinno));
+      *where += sizeof(auxP->x_scn.x_nlinno);
+    }
 #endif /* 0 */
 #else /* CROSS_COMPILE */
-		append(where, (char *) &symbolP->sy_symbol.ost_auxent[i], sizeof(symbolP->sy_symbol.ost_auxent[i]));
+    append(where, (char *) &symbolP->sy_symbol.ost_auxent[i], sizeof(symbolP->sy_symbol.ost_auxent[i]));
 #endif /* CROSS_COMPILE */
 
-	}; /* for each aux in use */
-
-	return;
+  }; /* for each aux in use */
+#endif /* BFD_HEADERS */	
+  return;
 } /* obj_symbol_to_chars() */
 
-static void c_section_header_append(where, header)
+#ifdef BFD_HEADERS
+static void obj_coff_section_header_append(where, header)
+char **where;
+struct internal_scnhdr *header;
+{
+  *where +=  bfd_coff_swap_scnhdr_out(stdoutput, header, *where);
+}
+#else
+static void obj_coff_section_header_append(where, header)
 char **where;
 SCNHDR *header;
 {
 #ifdef CROSS_COMPILE
-    md_number_to_chars(*where, header->s_paddr, sizeof(header->s_paddr));
-    *where += sizeof(header->s_paddr);
-
-    md_number_to_chars(*where, header->s_vaddr, sizeof(header->s_vaddr));
-    *where += sizeof(header->s_vaddr);
-
-    md_number_to_chars(*where, header->s_size, sizeof(header->s_size));
-    *where += sizeof(header->s_size);
-
-    md_number_to_chars(*where, header->s_scnptr, sizeof(header->s_scnptr));
-    *where += sizeof(header->s_scnptr);
-
-    md_number_to_chars(*where, header->s_relptr, sizeof(header->s_relptr));
-    *where += sizeof(header->s_relptr);
-
-    md_number_to_chars(*where, header->s_lnnoptr, sizeof(header->s_lnnoptr));
-    *where += sizeof(header->s_lnnoptr);
-
-    md_number_to_chars(*where, header->s_nreloc, sizeof(header->s_nreloc));
-    *where += sizeof(header->s_nreloc);
-
-    md_number_to_chars(*where, header->s_nlnno, sizeof(header->s_nlnno));
-    *where += sizeof(header->s_nlnno);
-
-    md_number_to_chars(*where, header->s_flags, sizeof(header->s_flags));
-    *where += sizeof(header->s_flags);
+	memcpy(*where, header->s_name, sizeof(header->s_name));
+	*where += sizeof(header->s_name);
+	
+	md_number_to_chars(*where, header->s_paddr, sizeof(header->s_paddr));
+	*where += sizeof(header->s_paddr);
+	
+	md_number_to_chars(*where, header->s_vaddr, sizeof(header->s_vaddr));
+	*where += sizeof(header->s_vaddr);
+	
+	md_number_to_chars(*where, header->s_size, sizeof(header->s_size));
+	*where += sizeof(header->s_size);
+	
+	md_number_to_chars(*where, header->s_scnptr, sizeof(header->s_scnptr));
+	*where += sizeof(header->s_scnptr);
+	
+	md_number_to_chars(*where, header->s_relptr, sizeof(header->s_relptr));
+	*where += sizeof(header->s_relptr);
+	
+	md_number_to_chars(*where, header->s_lnnoptr, sizeof(header->s_lnnoptr));
+	*where += sizeof(header->s_lnnoptr);
+	
+	md_number_to_chars(*where, header->s_nreloc, sizeof(header->s_nreloc));
+	*where += sizeof(header->s_nreloc);
+	
+	md_number_to_chars(*where, header->s_nlnno, sizeof(header->s_nlnno));
+	*where += sizeof(header->s_nlnno);
+	
+	md_number_to_chars(*where, header->s_flags, sizeof(header->s_flags));
+	*where += sizeof(header->s_flags);
+	
+#ifdef TC_I960
+	md_number_to_chars(*where, header->s_align, sizeof(header->s_align));
+	*where += sizeof(header->s_align);
+#endif /* TC_I960 */
 
 #else /* CROSS_COMPILE */
-
-    append(where, (char *) header, sizeof(*header));
-
+	
+	append(where, (char *) header, sizeof(*header));
+	
 #endif /* CROSS_COMPILE */
 
-    return;
-} /* c_section_header_append() */
+	return;
+} /* obj_coff_section_header_append() */
 
-
+#endif
 void obj_emit_symbols(where, symbol_rootP)
 char **where;
 symbolS *symbol_rootP;
@@ -552,7 +649,11 @@ void c_section_header(header,
 		      reloc_number,
 		      lineno_number,
 		      alignment)
+#ifdef BFD_HEADERS
+struct internal_scnhdr *header;
+#else
 SCNHDR *header;
+#endif
 char *name;
 long core_address;
 long size;
@@ -629,8 +730,11 @@ char **where;
 lineno *line;
 char *file_start;
 {
+#ifdef BFD_HEADERS
+	struct bfd_internal_lineno *line_entry;
+#else
 	LINENO *line_entry;
-
+#endif
 	for (; line; line = line->next) {
 		line_entry = &line->line;
 
@@ -651,7 +755,9 @@ char *file_start;
 			symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_fcn.x_lnnoptr = *where - file_start;
 
 		} /* if this is a function linno */
-
+#ifdef BFD_HEADERS
+		*where += bfd_coff_swap_lineno_out(stdoutput, line_entry, *where);
+#else
 		/* No matter which member of the union we process, they are
 		   both long. */
 #ifdef CROSS_COMPILE
@@ -663,7 +769,7 @@ char *file_start;
 #else /* CROSS_COMPILE */
 		append(where, (char *) line_entry, LINESZ);
 #endif /* CROSS_COMPILE */
-
+#endif
 	} /* for each line number */
 
 	return ;
@@ -999,10 +1105,10 @@ static void obj_coff_endef() {
 	demand_empty_rest_of_line();
 	return;
 } /* obj_coff_endef() */
-#if 0
-This code expects all the dims to be after one another, and that is not true
+#ifndef TC_I960
+/*This code expects all the dims to be after one another, and that is not true
 for gcc960
-sac@cygnus.com
+sac@cygnus.com */
 static void obj_coff_dim() {
 	register int dim_index;
 
@@ -1236,9 +1342,10 @@ char *name;
 
 void obj_read_begin_hook() {
  /* These had better be the same.  Usually 18 bytes. */
+#ifndef BFD_HEADERS
 	know(sizeof(SYMENT) == sizeof(AUXENT));
 	know(SYMESZ == AUXESZ);
-
+#endif
 	tag_init();
 
 	return;
@@ -1260,6 +1367,7 @@ object_headers *headers;
 
 	/* JF deal with forward references first... */
 	for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next(symbolP)) {
+
 		if (symbolP->sy_forward) {
 			S_SET_VALUE(symbolP, (S_GET_VALUE(symbolP)
 					      + S_GET_VALUE(symbolP->sy_forward)
@@ -1339,9 +1447,10 @@ object_headers *headers;
 	   gets moved off the list).  Hence the weird check in
 	   the loop control.
 	   */
-	for (symbolP = symbol_rootP; symbolP; symbolP = symbolP ? symbol_next(symbolP) : symbol_rootP) {
-
-		if (!SF_GET_DEBUG(symbolP)) {
+	for (symbolP = symbol_rootP;
+	     symbolP;
+	     symbolP = symbolP ? symbol_next(symbolP) : symbol_rootP) {
+ 	if (!SF_GET_DEBUG(symbolP)) {
 			/* Debug symbols do not need all this rubbish */
 			symbolS* real_symbolP;
 
@@ -1453,6 +1562,7 @@ object_headers *headers;
 		   ld will move the symbol 21 to the end of the list but
 		   endndx will still be 22 instead of 21. */
 
+
 		if (SF_GET_LOCAL(symbolP)) {
 			/* remove C_EFCN and LOCAL (L...) symbols */
 			/* next pointer remains valid */
@@ -1545,7 +1655,7 @@ char **where;
 #ifdef CROSS_COMPILE
 	/* Gotta do md_ byte-ordering stuff for string_byte_count first - KWK */
 	md_number_to_chars(*where, string_byte_count, sizeof(string_byte_count));
-	where += sizeof(string_byte_count);
+	*where += sizeof(string_byte_count);
 #else /* CROSS_COMPILE */
 	append(where, (char *) &string_byte_count, (unsigned long) sizeof(string_byte_count));
 #endif /* CROSS_COMPILE */
@@ -1579,6 +1689,12 @@ object_headers *headers;
 				++text_relocation_number;
 			} /* if callj and not already fixed. */
 #endif /* TC_I960 */
+#ifdef TC_A29K
+			/* Count 2 for a constH */
+				if (fixP->fx_r_type == RELOC_CONSTH) {
+				  ++text_relocation_number;
+				}
+#endif
 
 		} /* if not yet fixed */
 	} /* for each fix */
@@ -1593,7 +1709,15 @@ object_headers *headers;
 		if (fixP->fx_addsy) {
 			++data_relocation_number;
 		} /* if still relocatable */
+#ifdef TC_A29K
+			/* Count 2 for a constH */
+				if (fixP->fx_r_type == RELOC_CONSTH) {
+				  ++data_relocation_number;
+				}
+#endif
+
 	} /* for each fix */
+
 
 	SA_SET_SCN_NRELOC(dot_data_symbol, data_relocation_number);
 	/* Assign the size of the section */
@@ -1601,6 +1725,12 @@ object_headers *headers;
 
 	/* Assign the size of the section */
 	SA_SET_SCN_SCNLEN(dot_bss_symbol, H_GET_BSS_SIZE(headers));
+
+	  /* pre write hook can add relocs (for 960 and 29k coff) so */
+	headers->relocation_size = text_relocation_number * RELSZ +
+	 data_relocation_number *RELSZ;
+
+
 
 	/* Fill in extra coff fields */
 
@@ -1610,18 +1740,26 @@ object_headers *headers;
 	/* filehdr */
 	H_SET_FILE_MAGIC_NUMBER(headers, FILE_HEADER_MAGIC);
 	H_SET_NUMBER_OF_SECTIONS(headers, 3); /* text+data+bss */
+#ifndef OBJ_COFF_OMIT_TIMESTAMP
 	H_SET_TIME_STAMP(headers, (long)time((long*)0));
+#else /* OBJ_COFF_OMIT_TIMESTAMP */
+	H_SET_TIME_STAMP(headers, 0);
+#endif /* OBJ_COFF_OMIT_TIMESTAMP */
 	H_SET_SYMBOL_TABLE_POINTER(headers, H_GET_SYMBOL_TABLE_FILE_OFFSET(headers));
+#if 0
+printf("FILHSZ %x\n", FILHSZ);
+printf("OBJ_COFF_AOUTHDRSZ %x\n", OBJ_COFF_AOUTHDRSZ);
+printf("section headers %x\n", H_GET_NUMBER_OF_SECTIONS(headers)  * SCNHSZ);
+printf("get text size %x\n", H_GET_TEXT_SIZE(headers));
+printf("get data size %x\n", H_GET_DATA_SIZE(headers));
+printf("get relocation size %x\n", H_GET_RELOCATION_SIZE(headers));
+printf("get lineno size %x\n", H_GET_LINENO_SIZE(headers));
+#endif
 	/* symbol table size allready set */
 	H_SET_SIZEOF_OPTIONAL_HEADER(headers, OBJ_COFF_AOUTHDRSZ);
-#ifndef OBJ_COFF_IGNORE_EXEC_FLAG
 	H_SET_FLAGS(headers, (text_lineno_number == 0 ? F_LNNO : 0)
-		    | ((text_relocation_number + data_relocation_number) ? 0 : F_EXEC)
+		    | ((text_relocation_number + data_relocation_number) ? 0 : F_RELFLG)
 		    | BYTE_ORDERING);
-#else /* OBJ_COFF_IGNORE_EXEC_FLAG */
-	H_SET_FLAGS(headers, (text_lineno_number == 0 ? F_LNNO : 0)
-		    | BYTE_ORDERING);
-#endif /* OBJ_COFF_IGNORE_EXEC_FLAG */
 
 	/* aouthdr */
 	/* magic number allready set */
@@ -1765,6 +1903,7 @@ void symbol_dump() {
 	return;
 } /* symbol_dump() */
 #endif /* DEBUG */
+
 
 /*
  * Local Variables:
