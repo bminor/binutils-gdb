@@ -558,6 +558,9 @@ write_object_file ()
   for (i = SEG_E0; i < SEG_UNKNOWN; i++)
     relax_segment (segment_info[i].frag_root, i);
 
+  /* Relaxation has completed.  Freeze all syms.  */
+  finalize_syms = 1;
+
   /* Now the addresses of the frags are correct within the segment.  */
 
   bfd_as_write_hook ();

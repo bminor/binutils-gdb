@@ -1824,7 +1824,6 @@ size_section (abfd, idx)
 	  break;
 #endif
 	case rs_space:
-	  assert (frag->fr_symbol == 0);
 	case rs_fill:
 	case rs_org:
 	  size += frag->fr_fix;
@@ -2138,7 +2137,6 @@ fill_section (abfd, h, file_cursor)
 
 		  break;
 		case rs_space:
-		  assert (frag->fr_symbol == 0);
 		case rs_fill:
 		case rs_align:
 		case rs_align_code:
@@ -3472,6 +3470,9 @@ write_object_file ()
     {
       relax_segment (segment_info[i].frchainP->frch_root, i);
     }
+
+  /* Relaxation has completed.  Freeze all syms.  */
+  finalize_syms = 1;
 
   H_SET_NUMBER_OF_SECTIONS (&headers, 0);
 

@@ -1,5 +1,11 @@
 2001-05-25  Alan Modra  <amodra@one.net.au>
 
+	* config/obj-ieee.c (write_object_file): Set finalize_syms.
+	* config/obj-coff.c (write_object_file): Likewise.
+	* (size_section): Remove rs_space assert as fr_symbol is no longer
+	removed.
+	(fill_section): Likewise.
+
 	* configure.in: Replace linuxoldld with linux*oldld.
 	* configure: Regenerate.
 
