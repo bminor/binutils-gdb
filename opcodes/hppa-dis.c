@@ -356,12 +356,6 @@ print_insn_hppa (memaddr, info)
 		case 'x':
 		  fput_reg (GET_FIELD (insn, 11, 15), info);
 		  break;
-		case 'X':
-                  if (GET_FIELD (insn, 25, 25))
-		      fput_fp_reg_r (GET_FIELD (insn, 11, 15), info);
-		  else
-		      fput_fp_reg (GET_FIELD (insn, 11, 15), info);
-		  break;
 		case 'a':
 		case 'b':
 		  fput_reg (GET_FIELD (insn, 6, 10), info);
@@ -369,64 +363,100 @@ print_insn_hppa (memaddr, info)
 		case '^':
 		  fput_creg (GET_FIELD (insn, 6, 10), info);
 		  break;
-		case 'E':
-		  fput_fp_reg (GET_FIELD (insn, 6, 10), info);
-		  break;
-		case '!':
-		  fput_creg (11, info);
-		  break;
 		case 't':
 		  fput_reg (GET_FIELD (insn, 27, 31), info);
 		  break;
-		case 'v':
-                  if (GET_FIELD (insn, 25, 25))
-		      fput_fp_reg_r (GET_FIELD (insn, 27, 31), info);
-		  else
+
+		/* Handle floating point registers.  */
+		case 'f':
+		  switch (*++s)
+		    {
+		    case 't':
 		      fput_fp_reg (GET_FIELD (insn, 27, 31), info);
-		  break;
-		case 'y':
-		  fput_fp_reg (GET_FIELD (insn, 27, 31), info);
-		  break;
-		case '4':
-		  {
-		    int reg = GET_FIELD (insn, 6, 10);
+		      break;
+		    case 'T':
+		      if (GET_FIELD (insn, 25, 25))
+			fput_fp_reg_r (GET_FIELD (insn, 27, 31), info);
+		      else
+			fput_fp_reg (GET_FIELD (insn, 27, 31), info);
+		      break;
+		    case 'a':
+		      if (GET_FIELD (insn, 25, 25))
+			fput_fp_reg_r (GET_FIELD (insn, 6, 10), info);
+		      else
+			fput_fp_reg (GET_FIELD (insn, 6, 10), info);
+		      break;
+		    case 'A':
+		      if (GET_FIELD (insn, 24, 24))
+			fput_fp_reg_r (GET_FIELD (insn, 6, 10), info);
+		      else
+			fput_fp_reg (GET_FIELD (insn, 6, 10), info);
+		      
+		      break;
+		    case 'b':
+		      if (GET_FIELD (insn, 25, 25))
+			fput_fp_reg_r (GET_FIELD (insn, 11, 15), info);
+		      else
+			fput_fp_reg (GET_FIELD (insn, 11, 15), info);
+		      break;
+		    case 'B':
+		      if (GET_FIELD (insn, 19, 19))
+			fput_fp_reg_r (GET_FIELD (insn, 11, 15), info);
+		      else
+			fput_fp_reg (GET_FIELD (insn, 11, 15), info);
+		      break;
+		    case 'C':
+		      {
+			int reg = GET_FIELD (insn, 21, 22);
+			reg |= GET_FIELD (insn, 16, 18) << 2;
+			if (GET_FIELD (insn, 23, 23) != 0)
+			  fput_fp_reg_r (reg, info);
+			else
+			  fput_fp_reg (reg, info);
+			break;
+		      }
+		    case 'i':
+		      {
+			int reg = GET_FIELD (insn, 6, 10);
 
-		    reg |= (GET_FIELD (insn, 26, 26) << 4);
-		    fput_fp_reg (reg, info);
-		    break;
-		  }
-		case '6':
-		  {
-		    int reg = GET_FIELD (insn, 11, 15);
+			reg |= (GET_FIELD (insn, 26, 26) << 4);
+			fput_fp_reg (reg, info);
+			break;
+		      }
+		    case 'j':
+		      {
+			int reg = GET_FIELD (insn, 11, 15);
 
-		    reg |= (GET_FIELD (insn, 26, 26) << 4);
-		    fput_fp_reg (reg, info);
-		    break;
-		  }
-		case '7':
-		  {
-		    int reg = GET_FIELD (insn, 27, 31);
+			reg |= (GET_FIELD (insn, 26, 26) << 4);
+			fput_fp_reg (reg, info);
+			break;
+		      }
+		    case 'k':
+		      {
+			int reg = GET_FIELD (insn, 27, 31);
 
-		    reg |= (GET_FIELD (insn, 26, 26) << 4);
-		    fput_fp_reg (reg, info);
-		    break;
-		  }
-		case '8':
-		  {
-		    int reg = GET_FIELD (insn, 16, 20);
+			reg |= (GET_FIELD (insn, 26, 26) << 4);
+			fput_fp_reg (reg, info);
+			break;
+		      }
+		    case 'l':
+		      {
+			int reg = GET_FIELD (insn, 21, 25);
 
-		    reg |= (GET_FIELD (insn, 26, 26) << 4);
-		    fput_fp_reg (reg, info);
-		    break;
-		  }
-		case '9':
-		  {
-		    int reg = GET_FIELD (insn, 21, 25);
+			reg |= (GET_FIELD (insn, 26, 26) << 4);
+			fput_fp_reg (reg, info);
+			break;
+		      }
+		    case 'm':
+		      {
+			int reg = GET_FIELD (insn, 16, 20);
 
-		    reg |= (GET_FIELD (insn, 26, 26) << 4);
-		    fput_fp_reg (reg, info);
-		    break;
-		  }
+			reg |= (GET_FIELD (insn, 26, 26) << 4);
+			fput_fp_reg (reg, info);
+			break;
+		      }
+		    }
+
 		case '5':
 		  fput_const (extract_5_load (insn), info);
 		  break;
@@ -568,8 +598,7 @@ print_insn_hppa (memaddr, info)
 			   rather than by the 'f' bit (sigh): comb, comib,
 			   addb, addib */
 		      case 't':
-			fputs_filtered (compare_cond_names[GET_FIELD (insn, 16,
-								      18)],
+			fputs_filtered (compare_cond_names[GET_FIELD (insn, 16, 18)],
 					info);
 			break;
 		      case 'T':
@@ -589,8 +618,7 @@ print_insn_hppa (memaddr, info)
 					info);
 			break;
 		      case 'n':
-			fputs_filtered (compare_cond_names[GET_FIELD (insn, 16,
-								      18)
+			fputs_filtered (compare_cond_names[GET_FIELD (insn, 16, 18)
 					+ GET_FIELD (insn, 4, 4) * 8], info);
 			break;
 		      case '@':
@@ -615,24 +643,22 @@ print_insn_hppa (memaddr, info)
 			break;
 		      case 'd':
 			(*info->fprintf_func) (info->stream, "%s",
-					       add_cond_names[GET_FIELD (insn,
-									 16,
-									 18)]);
+					       add_cond_names[GET_FIELD (insn, 16, 18)]);
 			break;
+
 		      case 'D':
 			(*info->fprintf_func) (info->stream, "%s",
-					       add_cond_names[GET_FIELD (insn,
-									 16, 18)
-							      + 8]);
+					       add_cond_names[GET_FIELD (insn, 16, 18)
+							     + 8]);
 			break;
 		      case 'w':
-			(*info->fprintf_func)
+			(*info->fprintf_func) 
 			  (info->stream, "%s",
 			   wide_add_cond_names[GET_FIELD (insn, 16, 18)]);
 			break;
 
 		      case 'W':
-			(*info->fprintf_func)
+			(*info->fprintf_func) 
 			  (info->stream, "%s",
 			   wide_add_cond_names[GET_FIELD (insn, 16, 18) + 8]);
 			break;
@@ -801,7 +827,7 @@ print_insn_hppa (memaddr, info)
 		case 'D':
 		  fput_const (GET_FIELD (insn, 6, 31), info);
 		  break;
-		case 'f':
+		case 'v':
 		  (*info->fprintf_func) (info->stream, ",%d", GET_FIELD (insn, 23, 25));
 		  break;
 		case 'O':
@@ -811,17 +837,6 @@ print_insn_hppa (memaddr, info)
 		case 'o':
 		  fput_const (GET_FIELD (insn, 6, 20), info);
 		  break;
-		case '3':
-		  {
-		    int reg = GET_FIELD (insn, 21, 22);
-		    reg |= GET_FIELD (insn, 16, 18) << 2;
-		    if (GET_FIELD (insn, 23, 23) != 0)
-		      fput_fp_reg_r (reg, info);
-		    else
-		      fput_fp_reg (reg, info);
-		    break;
-		  }
-
 		case '2':
 		  fput_const ((GET_FIELD (insn, 6, 22) << 5 |
 			       GET_FIELD (insn, 27, 31)), info);
@@ -871,19 +886,6 @@ print_insn_hppa (memaddr, info)
 		    (*info->fprintf_func) (info->stream, "%s ",
 					   float_format_names[GET_FIELD
 							      (insn, 20, 20)]);
-		  break;
-		case 'J':
-                  if (GET_FIELD (insn, 24, 24))
-		      fput_fp_reg_r (GET_FIELD (insn, 6, 10), info);
-		  else
-		      fput_fp_reg (GET_FIELD (insn, 6, 10), info);
-		      
-		  break;
-		case 'K':
-                  if (GET_FIELD (insn, 19, 19))
-		      fput_fp_reg_r (GET_FIELD (insn, 11, 15), info);
-		  else
-		      fput_fp_reg (GET_FIELD (insn, 11, 15), info);
 		  break;
 		default:
 		  (*info->fprintf_func) (info->stream, "%c", *s);

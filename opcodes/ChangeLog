@@ -1,5 +1,8 @@
 Sat Aug 28 00:27:24 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
+        * hppa-dis.c (print_insn_hppa): Replace 'f' by 'v'.  Prefix float
+	register args by 'f'.
+
 	* hppa-dis.c (print_insn_hppa): Add args q, %, !, and |.
 
 	* hppa-dis.c (MASK_10, read_write_names, add_compl_names,
