@@ -25,24 +25,27 @@
    you can call.  I think I have done that. */
 
 /* Remove these declarations when we have a complete libgnu.a. */
-#define STATIC_MALLOC
-#ifndef STATIC_MALLOC
+#if !defined (STATIC_MALLOC)
 extern char *xmalloc (), *xrealloc ();
 #else
 static char *xmalloc (), *xrealloc ();
 #endif
 
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/file.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-#ifdef __GNUC__
-#define alloca __builtin_alloca
+#if defined (__GNUC__)
+#  define alloca __builtin_alloca
 #else
-#if defined (sparc) && defined (sun)
-#include <alloca.h>
-#else
+#  if defined (sparc) || defined (HAVE_ALLOCA_H)
+#    include <alloca.h>
+#  else
 extern char *alloca ();
-#endif
-#endif
+#  endif /* sparc || HAVE_ALLOCA_H */
+#endif /* !__GNU_C__ */
 
 #include "history.h"
 
@@ -64,7 +67,7 @@ extern char *alloca ();
 
 /* **************************************************************** */
 /*								    */
-/*			History functions			    */
+/*			History Functions			    */
 /*								    */
 /* **************************************************************** */
 
@@ -73,18 +76,18 @@ static HIST_ENTRY **the_history = (HIST_ENTRY **)NULL;
 
 /* Non-zero means that we have enforced a limit on the amount of
    history that we save. */
-static int history_stifled = 0;
+int history_stifled = 0;
 
 /* If HISTORY_STIFLED is non-zero, then this is the maximum number of
    entries to remember. */
-static int max_input_history;
+int max_input_history;
 
 /* The current location of the interactive history pointer.  Just makes
    life easier for outside callers. */
 static int history_offset = 0;
 
 /* The number of strings currently stored in the input_history list. */
-static int history_length = 0;
+int history_length = 0;
 
 /* The current number of slots allocated to the input_history. */
 static int history_size = 0;
@@ -121,6 +124,21 @@ using_history ()
   history_offset = history_length;
 }
 
+/* Return the number of bytes that the primary history entries are using.
+   This just adds up the lengths of the_history->lines. */
+int
+history_total_bytes ()
+{
+  register int i, result;
+
+  result = 0;
+
+  for (i = 0; the_history && the_history[i]; i++)
+    result += strlen (the_history[i]->line);
+
+  return (result);
+}
+
 /* Place STRING at the end of the history list.  The data field
    is  set to NULL. */
 void
@@ -129,43 +147,50 @@ add_history (string)
 {
   HIST_ENTRY *temp;
 
-  if (history_stifled && (history_length == max_input_history)) {
-    register int i;
+  if (history_stifled && (history_length == max_input_history))
+    {
+      register int i;
 
-    /* If the history is stifled, and history_length is zero,
-       and it equals max_input_history, we don't save items. */
-    if (!history_length)
-      return;
+      /* If the history is stifled, and history_length is zero,
+	 and it equals max_input_history, we don't save items. */
+      if (!history_length)
+	return;
 
-    /* If there is something in the slot, then remove it. */
-    if (the_history[0]) {
-      free (the_history[0]->line);
-      free (the_history[0]);
+      /* If there is something in the slot, then remove it. */
+      if (the_history[0])
+	{
+	  free (the_history[0]->line);
+	  free (the_history[0]);
+	}
+
+      for (i = 0; i < history_length; i++)
+	the_history[i] = the_history[i + 1];
+
+      history_base++;
+
     }
+  else
+    {
+      if (!history_size)
+	{
+	  the_history = (HIST_ENTRY **)
+	    xmalloc ((history_size = DEFAULT_HISTORY_GROW_SIZE)
+		     * sizeof (HIST_ENTRY *));
+	  history_length = 1;
 
-    for (i = 0; i < history_length; i++)
-      the_history[i] = the_history[i + 1];
-
-    history_base++;
-
-  } else {
-
-    if (!history_size) {
-      the_history =
-	(HIST_ENTRY **)xmalloc ((history_size = DEFAULT_HISTORY_GROW_SIZE)
-			  * sizeof (HIST_ENTRY *));
-      history_length = 1;
-
-    } else {
-      if (history_length == (history_size - 1)) {
-	the_history =
-	  (HIST_ENTRY **)xrealloc (the_history,
-				   ((history_size += DEFAULT_HISTORY_GROW_SIZE)
-				    * sizeof (HIST_ENTRY *)));
-      }
-      history_length++;
+	}
+      else
+	{
+	  if (history_length == (history_size - 1))
+	    {
+	      the_history = (HIST_ENTRY **)
+		xrealloc (the_history,
+			  ((history_size += DEFAULT_HISTORY_GROW_SIZE)
+			   * sizeof (HIST_ENTRY *)));
+	  }
+	  history_length++;
+	}
     }
-  }
 
   temp = (HIST_ENTRY *)xmalloc (sizeof (HIST_ENTRY));
   temp->line = savestring (string);
@@ -208,15 +233,22 @@ where_history ()
 }
 
 /* Search the history for STRING, starting at history_offset.
-   If DIRECTION < 0, then the search is through previous entries,
-   else through subsequent.  If the string is found, then
-   current_history () is the history entry, and the value of this function
-   is the offset in the line of that history entry that the string was
-   found in.  Otherwise, nothing is changed, and a -1 is returned. */
-int
-history_search (string, direction)
+   If DIRECTION < 0, then the search is through previous entries, else
+   through subsequent.  If ANCHORED is non-zero, the string must
+   appear at the beginning of a history line, otherwise, the string
+   may appear anywhere in the line.  If the string is found, then
+   current_history () is the history entry, and the value of this
+   function is the offset in the line of that history entry that the
+   string was found in.  Otherwise, nothing is changed, and a -1 is
+   returned. */
+
+#define ANCHORED_SEARCH 1
+#define NON_ANCHORED_SEARCH 0
+
+static int
+history_search_internal (string, direction, anchored)
      char *string;
-     int direction;
+     int direction, anchored;
 {
   register int i = history_offset;
   register int reverse = (direction < 0);
@@ -248,7 +280,19 @@ history_search (string, direction)
       if (string_len > index)
 	goto next_line;
 
-      /* Do the actual search. */
+      /* Handle anchored searches first. */
+      if (anchored == ANCHORED_SEARCH)
+	{
+	  if (strncmp (string, line, string_len) == 0)
+	    {
+	      history_offset = i;
+	      return (0);
+	    }
+
+	  goto next_line;
+	}
+
+      /* Do substring search. */
       if (reverse)
 	{
 	  index -= string_len;
@@ -265,7 +309,7 @@ history_search (string, direction)
 	}
       else
 	{
-	  register int limit = (string_len - index) + 1;
+	  register int limit = index - string_len + 1;
 	  index = 0;
 
 	  while (index < limit)
@@ -284,6 +328,24 @@ history_search (string, direction)
       else
 	i++;
     }
+}
+
+/* Do a non-anchored search for STRING through the history in DIRECTION. */
+int
+history_search (string, direction)
+     char *string;
+     int direction;
+{
+  return (history_search_internal (string, direction, NON_ANCHORED_SEARCH));
+}
+
+/* Do an anchored search for string through the history in DIRECTION. */
+int
+history_search_prefix (string, direction)
+     char *string;
+     int direction;
+{
+  return (history_search_internal (string, direction, ANCHORED_SEARCH));
 }
 
 /* Remove history element WHICH from the history.  The removed
@@ -307,6 +369,7 @@ remove_history (which)
 
       history_length--;
     }
+
   return (return_value);
 }
 
@@ -364,15 +427,10 @@ history_filename (filename)
       char *home = (char *)getenv ("HOME");
       if (!home) home = ".";
       return_val = (char *)xmalloc (2 + strlen (home) + strlen (".history"));
-      strcpy (return_val, home);
-      strcat (return_val, "/");
-      strcat (return_val, ".history");
+      sprintf (return_val, "%s/.history", home);
     }
   return (return_val);
 }
-
-/* What to use until the line gets too big. */
-#define TYPICAL_LINE_SIZE 2048
 
 /* Add the contents of FILENAME to the history list, a line at a time.
    If FILENAME is NULL, then read from ~/.history.  Returns 0 if
@@ -381,41 +439,195 @@ int
 read_history (filename)
      char *filename;
 {
-  char *input = history_filename (filename);
-  FILE *file = fopen (input, "r");
-  char *line = (char *)xmalloc (TYPICAL_LINE_SIZE);
-  int line_size = TYPICAL_LINE_SIZE;
-  int done = 0;
+  return (read_history_range (filename, 0, -1));
+}
 
-  if (!file)
+/* Read a range of lines from FILENAME, adding them to the history list.
+   Start reading at the FROM'th line and end at the TO'th.  If FROM
+   is zero, start at the beginning.  If TO is less than FROM, read
+   until the end of the file.  If FILENAME is NULL, then read from
+   ~/.history.  Returns 0 if successful, or errno if not. */
+int
+read_history_range (filename, from, to)
+     char *filename;
+     int from, to;
+{
+  register int line_start, line_end;
+  char *input, *buffer = (char *)NULL;
+  int file, current_line;
+  struct stat finfo;
+  extern int errno;
+
+  input = history_filename (filename);
+  file = open (input, O_RDONLY, 0666);
+
+  if ((file < 0) ||
+      (stat (input, &finfo) == -1))
+    goto error_and_exit;
+
+  buffer = (char *)xmalloc (finfo.st_size + 1);
+
+  if (read (file, buffer, finfo.st_size) != finfo.st_size)
+  error_and_exit:
     {
-      extern int errno;
-      free (line);
+      if (file >= 0)
+	close (file);
+
+      if (buffer)
+	free (buffer);
+
       return (errno);
     }
 
-  while (!done)
+  close (file);
+
+  /* Set TO to larger than end of file if negative. */
+  if (to < 0)
+    to = finfo.st_size;
+
+  /* Start at beginning of file, work to end. */
+  line_start = line_end = current_line = 0;
+
+  /* Skip lines until we are at FROM. */
+  while (line_start < finfo.st_size && current_line < from)
     {
-      int c;
-      int i;
-
-      i = 0;
-      while (!(done = ((c = getc (file)) == EOF)))
-	{
-	  if (c == '\n')
-	    break;
-
-	  line [i++] = c;
-	  if (i == line_size)
-	    line = (char *)xrealloc (line, line_size += TYPICAL_LINE_SIZE);
-	}
-      line[i] = '\0';
-      if (line[0])
-	add_history (line);
+      for (line_end = line_start; line_end < finfo.st_size; line_end++)
+	if (buffer[line_end] == '\n')
+	  {
+	    current_line++;
+	    line_start = line_end + 1;
+	    if (current_line == from)
+	      break;
+	  }
     }
-  free (line);
-  fclose (file);
+
+  /* If there are lines left to gobble, then gobble them now. */
+  for (line_end = line_start; line_end < finfo.st_size; line_end++)
+    if (buffer[line_end] == '\n')
+      {
+	buffer[line_end] = '\0';
+
+	if (buffer[line_start])
+	  add_history (buffer + line_start);
+
+	current_line++;
+
+	if (current_line >= to)
+	  break;
+
+	line_start = line_end + 1;
+      }
   return (0);
+}
+
+/* Truncate the history file FNAME, leaving only LINES trailing lines.
+   If FNAME is NULL, then use ~/.history. */
+history_truncate_file (fname, lines)
+     char *fname;
+     register int lines;
+{
+  register int i;
+  int file;
+  char *buffer = (char *)NULL, *filename;
+  struct stat finfo;
+
+  filename = history_filename (fname);
+  if (stat (filename, &finfo) == -1)
+    goto truncate_exit;
+
+  file = open (filename, O_RDONLY, 0666);
+
+  if (file == -1)
+    goto truncate_exit;
+
+  buffer = (char *)xmalloc (finfo.st_size + 1);
+  read (file, buffer, finfo.st_size);
+  close (file);
+
+  /* Count backwards from the end of buffer until we have passed
+     LINES lines. */
+  for (i = finfo.st_size; lines && i; i--)
+    {
+      if (buffer[i] == '\n')
+	lines--;
+    }
+
+  /* If there are fewer lines in the file than we want to truncate to,
+     then we are all done. */
+  if (!i)
+    goto truncate_exit;
+
+  /* Otherwise, write from the start of this line until the end of the
+     buffer. */
+  for (--i; i; i--)
+    if (buffer[i] == '\n')
+      {
+	i++;
+	break;
+      }
+
+  file = open (filename, O_WRONLY | O_TRUNC | O_CREAT, 0666);
+  if (file == -1)
+    goto truncate_exit;
+
+  write (file, buffer + i, finfo.st_size - i);
+  close (file);
+
+ truncate_exit:
+  if (buffer)
+    free (buffer);
+
+  free (filename);
+}
+
+#define HISTORY_APPEND 0
+#define HISTORY_OVERWRITE 1
+
+/* Workhorse function for writing history.  Writes NELEMENT entries
+   from the history list to FILENAME.  OVERWRITE is non-zero if you
+   wish to replace FILENAME with the entries. */
+static int
+history_do_write (filename, nelements, overwrite)
+     char *filename;
+     int nelements, overwrite;
+{
+  extern int errno;
+  register int i;
+  char *output = history_filename (filename);
+  int file, mode;
+  char cr = '\n';
+
+  if (overwrite)
+    mode = O_WRONLY | O_CREAT | O_TRUNC;
+  else
+    mode = O_WRONLY | O_APPEND;
+
+  if ((file = open (output, mode, 0666)) == -1)
+    return (errno);
+
+  if (nelements > history_length)
+    nelements = history_length;
+
+  for (i = history_length - nelements; i < history_length; i++)
+    {
+      if (write (file, the_history[i]->line, strlen (the_history[i]->line)) < 0)
+	break;
+      if (write (file, &cr, 1) < 0)
+	break;
+    }
+
+  close (file);
+  return (0);
+}
+  
+/* Append NELEMENT entries to FILENAME.  The entries appended are from
+   the end of the list minus NELEMENTs up to the end of the list. */
+int
+append_history (nelements, filename)
+     int nelements;
+     char *filename;
+{
+  return (history_do_write (filename, nelements, HISTORY_APPEND));
 }
 
 /* Overwrite FILENAME with the current history.  If FILENAME is NULL,
@@ -425,19 +637,7 @@ int
 write_history (filename)
      char *filename;
 {
-  extern int errno;
-  char *output = history_filename (filename);
-  FILE *file = fopen (output, "w");
-  register int i;
-
-  if (!file) return (errno);
-  if (!history_length) return (0);
-
-  for (i = 0; i < history_length; i++)
-    fprintf (file, "%s\n", the_history[i]->line);
-
-  fclose (file);
-  return (0);
+  return (history_do_write (filename, history_length, HISTORY_OVERWRITE));
 }
 
 /* Return the history entry at the current position, as determined by
@@ -653,7 +853,8 @@ get_history_event (string, caller_index, delimiting_quote)
 
   search_again:
 
-    index = history_search (temp, -1);
+    index = history_search_internal
+      (temp, -1, substring_okay ? NON_ANCHORED_SEARCH : ANCHORED_SEARCH);
 
     if (index < 0)
     search_lost:
@@ -662,9 +863,7 @@ get_history_event (string, caller_index, delimiting_quote)
 	return ((char *)NULL);
       }
 
-    if (index == 0 || substring_okay || 
-	(strncmp (temp, the_history[history_offset]->line,
-		  strlen (temp)) == 0))
+    if (index == 0)
       {
       search_won:
 	entry = current_history ();
@@ -1174,7 +1373,7 @@ get_history_word_specifier (spec, from, caller_index)
 /* Extract the args specified, starting at FIRST, and ending at LAST.
    The args are taken from STRING.  If either FIRST or LAST is < 0,
    then make that arg count from the right (subtract from the number of
-   tokens, so that FIRST = -1 means the next to last token on the line. */
+   tokens, so that FIRST = -1 means the next to last token on the line). */
 char *
 history_arg_extract (first, last, string)
      int first, last;
@@ -1205,7 +1404,7 @@ history_arg_extract (first, last, string)
 
   last++;
 
-  if (first > len || last > len)
+  if (first > len || last > len || first < 0 || last < 0)
     result = ((char *)NULL);
   else
     {
@@ -1353,7 +1552,7 @@ history_tokenize (string)
   return (result);
 }
 
-#ifdef STATIC_MALLOC
+#if defined (STATIC_MALLOC)
 
 /* **************************************************************** */
 /*								    */
@@ -1379,10 +1578,16 @@ xrealloc (pointer, bytes)
      char *pointer;
      int bytes;
 {
-  char *temp = (char *)realloc (pointer, bytes);
+  char *temp;
+
+  if (!pointer)
+    temp = (char *)xmalloc (bytes);
+  else
+    temp = (char *)realloc (pointer, bytes);
 
   if (!temp)
     memory_error_and_abort ();
+
   return (temp);
 }
 

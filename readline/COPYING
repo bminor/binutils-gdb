@@ -3,22 +3,30 @@
 		     Version 1, February 1989
 
  Copyright (C) 1989 Free Software Foundation, Inc.
-                    675 Mass Ave, Cambridge, MA 02139, USA
+		    675 Mass Ave, Cambridge, MA 02139, USA
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
+
+The Free Software Foundation has exempted Bash from the requirement of
+Paragraph 2c of the General Public License.  This is to say, there is
+no requirement for Bash to print a notice when it is started
+interactively in the usual way.	 We made this exception because users
+and standards expect shells not to print such messages.	 This
+exception applies to any program that serves as a shell and that is
+based primarily on Bash as opposed to other GNU software.
 
 			    Preamble
 
   The license agreements of most software companies try to keep users
 at the mercy of those companies.  By contrast, our General Public
 License is intended to guarantee your freedom to share and change free
-software--to make sure the software is free for all its users.  The
+software--to make sure the software is free for all its users.	The
 General Public License applies to the Free Software Foundation's
 software and to any other program whose authors commit to using it.
 You can use it for your programs, too.
 
   When we speak of free software, we are referring to freedom, not
-price.  Specifically, the General Public License is designed to make
+price.	Specifically, the General Public License is designed to make
 sure that you have the freedom to give away or sell copies of free
 software, that you receive source code or can get it if you want it,
 that you can change the software or use pieces of it in new free
@@ -65,7 +73,7 @@ appropriately publish on each copy an appropriate copyright notice and
 disclaimer of warranty; keep intact all the notices that refer to this
 General Public License and to the absence of any warranty; and give any
 other recipients of the Program a copy of this General Public License
-along with the Program.  You may charge a fee for the physical act of
+along with the Program.	 You may charge a fee for the physical act of
 transferring a copy.
 
   2. You may modify your copy or copies of the Program or any portion of
@@ -114,7 +122,7 @@ Paragraphs 1 and 2 above provided that you also do one of the following:
     Paragraphs 1 and 2 above; or,
 
     c) accompany it with the information you received as to where the
-    corresponding source code may be obtained.  (This alternative is
+    corresponding source code may be obtained.	(This alternative is
     allowed only for noncommercial distribution and only if you
     received the program in object code or executable form alone.)
 
@@ -130,7 +138,7 @@ accompany that operating system.
 Program except as expressly provided under this General Public License.
 Any attempt otherwise to copy, modify, sublicense, distribute or transfer
 the Program is void, and will automatically terminate your rights to use
-the Program under this License.  However, parties who have received
+the Program under this License.	 However, parties who have received
 copies, or rights to use copies, from you under this General Public
 License will not have their licenses terminated so long as such parties
 remain in full compliance.
@@ -150,7 +158,7 @@ of the General Public License from time to time.  Such new versions will
 be similar in spirit to the present version, but may differ in detail to
 address new problems or concerns.
 
-Each version is given a distinguishing version number.  If the Program
+Each version is given a distinguishing version number.	If the Program
 specifies a version number of the license which applies to it and "any
 later version", you have the option of following the terms and conditions
 either of that version or of any later version published by the Free
@@ -160,7 +168,7 @@ Foundation.
 
   8. If you wish to incorporate parts of the Program into other free
 programs whose distribution conditions are different, write to the author
-to ask for permission.  For software which is copyrighted by the Free
+to ask for permission.	For software which is copyrighted by the Free
 Software Foundation, write to the Free Software Foundation; we sometimes
 make exceptions for this.  Our decision will be guided by the two goals
 of preserving the free status of all derivatives of our free software and
@@ -203,7 +211,7 @@ the exclusion of warranty; and each file should have at least the
 "copyright" line and a pointer to where the full notice is found.
 
     <one line to give the program's name and a brief idea of what it does.>
-    Copyright (C) 19yy  <name of author>
+    Copyright (C) 19yy	<name of author>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

@@ -19,9 +19,9 @@
    along with Readline; see the file COPYING.  If not, write to the Free
    Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-#ifndef FILE
+#ifndef BUFSIZ
 #include <stdio.h>
-#endif /* FILE */
+#endif /* BUFSIZ */
 
 #include "readline.h"
 
@@ -39,7 +39,7 @@ KEYMAP_ENTRY_ARRAY vi_movement_keymap = {
   { ISFUNC, rl_emacs_editing_mode },	/* Control-e */
   { ISFUNC, (Function *)0x0 },		/* Control-f */
   { ISFUNC, rl_abort },			/* Control-g */
-  { ISFUNC, rl_backward },		/* Control-h */
+  { ISFUNC, rl_rubout },		/* Control-h */
   { ISFUNC, (Function *)0x0 },		/* Control-i */
   { ISFUNC, rl_newline },		/* Control-j */
   { ISFUNC, rl_kill_line },		/* Control-k */
@@ -99,7 +99,7 @@ KEYMAP_ENTRY_ARRAY vi_movement_keymap = {
   { ISFUNC, (Function *)0x0 },		/* : */
   { ISFUNC, rl_vi_char_search },	/* ; */
   { ISFUNC, (Function *)0x0 },		/* < */
-  { ISFUNC, (Function *)0x0 },		/* = */
+  { ISFUNC, rl_vi_complete },		/* = */
   { ISFUNC, (Function *)0x0 },		/* > */
   { ISFUNC, rl_vi_search },		/* ? */
   { ISFUNC, (Function *)0x0 },		/* @ */
@@ -111,7 +111,7 @@ KEYMAP_ENTRY_ARRAY vi_movement_keymap = {
   { ISFUNC, rl_vi_delete_to },		/* D */
   { ISFUNC, rl_vi_end_word },		/* E */
   { ISFUNC, rl_vi_char_search },	/* F */
-  { ISFUNC, (Function *)0x0 },		/* G */
+  { ISFUNC, rl_vi_fetch_history },	/* G */
   { ISFUNC, (Function *)0x0 },		/* H */
   { ISFUNC, rl_vi_insert_beg },		/* I */
   { ISFUNC, (Function *)0x0 },		/* J */
@@ -134,7 +134,7 @@ KEYMAP_ENTRY_ARRAY vi_movement_keymap = {
 
   /* Some more punctuation. */
   { ISFUNC, (Function *)0x0 },		/* [ */
-  { ISFUNC, (Function *)0x0 },		/* \ */
+  { ISFUNC, rl_vi_complete },		/* \ */
   { ISFUNC, (Function *)0x0 },		/* ] */
   { ISFUNC, rl_vi_first_print },	/* ^ */
   { ISFUNC, rl_vi_yank_arg },		/* _ */

@@ -40,7 +40,7 @@ KEYMAP_ENTRY_ARRAY emacs_standard_keymap = {
   { ISFUNC, rl_end_of_line },		/* Control-e */
   { ISFUNC, rl_forward },		/* Control-f */
   { ISFUNC, rl_abort },			/* Control-g */
-  { ISFUNC, rl_backward },		/* Control-h */
+  { ISFUNC, rl_rubout },		/* Control-h */
   { ISFUNC, rl_complete },		/* Control-i */
   { ISFUNC, rl_newline },		/* Control-j */
   { ISFUNC, rl_kill_line },		/* Control-k */
@@ -188,7 +188,7 @@ KEYMAP_ENTRY_ARRAY emacs_meta_keymap = {
   { ISFUNC, (Function *)0x0 },	/* Meta-Control-f */
   { ISFUNC, rl_abort },		/* Meta-Control-g */
   { ISFUNC, (Function *)0x0 },	/* Meta-Control-h */
-  { ISFUNC, (Function *)0x0 },	/* Meta-Control-i */
+  { ISFUNC, rl_tab_insert },	/* Meta-Control-i */
   { ISFUNC, rl_vi_editing_mode }, /* Meta-Control-j */
   { ISFUNC, (Function *)0x0 },	/* Meta-Control-k */
   { ISFUNC, (Function *)0x0 },	/* Meta-Control-l */
@@ -281,7 +281,7 @@ KEYMAP_ENTRY_ARRAY emacs_meta_keymap = {
   { ISFUNC, rl_do_lowercase_version },	/* Meta-Z */
 
   /* Some more punctuation. */
-  { ISFUNC, (Function *)0x0 },	/* Meta-[ */
+  { ISFUNC, rl_arrow_keys },	/* Meta-[ */
   { ISFUNC, (Function *)0x0 },	/* Meta-\ */
   { ISFUNC, (Function *)0x0 },	/* Meta-] */
   { ISFUNC, (Function *)0x0 },	/* Meta-^ */
@@ -303,7 +303,7 @@ KEYMAP_ENTRY_ARRAY emacs_meta_keymap = {
   { ISFUNC, rl_downcase_word },	/* Meta-l */
   { ISFUNC, (Function *)0x0 },	/* Meta-m */
   { ISFUNC, (Function *)0x0 },	/* Meta-n */
-  { ISFUNC, (Function *)0x0 },	/* Meta-o */
+  { ISFUNC, rl_arrow_keys },	/* Meta-o */
   { ISFUNC, (Function *)0x0 },	/* Meta-p */
   { ISFUNC, (Function *)0x0 },	/* Meta-q */
   { ISFUNC, rl_revert_line },	/* Meta-r */

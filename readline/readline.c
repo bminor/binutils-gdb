@@ -23,12 +23,12 @@
    675 Mass Ave, Cambridge, MA 02139, USA. */
 
 /* Remove these declarations when we have a complete libgnu.a. */
-#define STATIC_MALLOC
-#ifndef STATIC_MALLOC
+/* #define STATIC_MALLOC */
+#if !defined (STATIC_MALLOC)
 extern char *xmalloc (), *xrealloc ();
 #else
 static char *xmalloc (), *xrealloc ();
-#endif
+#endif /* STATIC_MALLOC */
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -36,47 +36,116 @@ static char *xmalloc (), *xrealloc ();
 #include <sys/file.h>
 #include <signal.h>
 
-#include "sysdep.h"
+#if defined (__GNUC__)
+#  define alloca __builtin_alloca
+#else
+#  if defined (sparc) || defined (HAVE_ALLOCA_H)
+#    include <alloca.h>
+#  endif
+#endif
+
+#if defined (HAVE_UNISTD_H)
+#  include <unistd.h>
+#endif
 
 #define NEW_TTY_DRIVER
-#if defined (SYSV) || defined (hpux)  || defined (Xenix)
-#undef NEW_TTY_DRIVER
-#include <termio.h>
-#else
+#define HAVE_BSD_SIGNALS
+/* #define USE_XON_XOFF */
+
+/* Some USG machines have BSD signal handling (sigblock, sigsetmask, etc.) */
+#if defined (USG) && !defined (hpux)
+#undef HAVE_BSD_SIGNALS
+#endif
+
+/* System V machines use termio. */
+#if !defined (_POSIX_VERSION)
+#  if defined (USG) || defined (hpux) || defined (Xenix) || defined (sgi) || defined (DGUX)
+#    undef NEW_TTY_DRIVER
+#    define TERMIO_TTY_DRIVER
+#    include <termio.h>
+#    if !defined (TCOON)
+#      define TCOON 1
+#    endif
+#  endif /* USG || hpux || Xenix || sgi || DUGX */
+#endif /* !_POSIX_VERSION */
+
+/* Posix systems use termios and the Posix signal functions. */
+#if defined (_POSIX_VERSION)
+#  if !defined (TERMIOS_MISSING)
+#    undef NEW_TTY_DRIVER
+#    define TERMIOS_TTY_DRIVER
+#    include <termios.h>
+#  endif /* !TERMIOS_MISSING */
+#  define HAVE_POSIX_SIGNALS
+#  if !defined (O_NDELAY)
+#    define O_NDELAY O_NONBLOCK	/* Posix-style non-blocking i/o */
+#  endif /* O_NDELAY */
+#endif /* _POSIX_VERSION */
+
+/* Other (BSD) machines use sgtty. */
+#if defined (NEW_TTY_DRIVER)
 #include <sgtty.h>
 #endif
+
+/* Define _POSIX_VDISABLE if we are not using the `new' tty driver and
+   it is not already defined.  It is used both to determine if a
+   special character is disabled and to disable certain special
+   characters.  Posix systems should set to 0, USG systems to -1. */
+#if !defined (NEW_TTY_DRIVER) && !defined (_POSIX_VDISABLE)
+#  if defined (_POSIX_VERSION)
+#    define _POSIX_VDISABLE 0
+#  else /* !_POSIX_VERSION */
+#    define _POSIX_VDISABLE -1
+#  endif /* !_POSIX_VERSION */
+#endif /* !NEW_TTY_DRIVER && !_POSIX_VDISABLE */
 
 #include <errno.h>
 extern int errno;
 
 #include <setjmp.h>
+#include <sys/stat.h>
+
+/* Posix macro to check file in statbuf for directory-ness. */
+#if defined (S_IFDIR) && !defined (S_ISDIR)
+#define S_ISDIR(m) (((m)&S_IFMT) == S_IFDIR)
+#endif
 
 /* These next are for filename completion.  Perhaps this belongs
    in a different place. */
-#include <sys/stat.h>
-
 #include <pwd.h>
-#ifdef SYSV
+#if defined (USG) && !defined (isc386) && !defined (sgi)
 struct passwd *getpwuid (), *getpwent ();
 #endif
 
-#define HACK_TERMCAP_MOTION
+/* #define HACK_TERMCAP_MOTION */
 
-#ifndef SYSV
-#include <sys/dir.h>
-#else  /* SYSV */
-#if defined (Xenix)
-#include <sys/ndir.h>
-#else
-#ifdef hpux
-#include <ndir.h>
-#else
-#include <dirent.h>
-#define direct dirent
-#define d_namlen d_reclen
-#endif  /* hpux */
-#endif  /* xenix */
-#endif  /* SYSV */
+#if defined (_POSIX_VERSION) || defined (USGr3)
+#  include <dirent.h>
+#  define direct dirent
+#  if defined (_POSIX_VERSION)
+#    define D_NAMLEN(d) (strlen ((d)->d_name))
+#  else /* !_POSIX_VERSION */
+#    define D_NAMLEN(d) ((d)->d_reclen)
+#  endif /* !_POSIX_VERSION */
+#else /* !_POSIX_VERSION && !USGr3 */
+#  define D_NAMLEN(d) ((d)->d_namlen)
+#  if !defined (USG)
+#    include <sys/dir.h>
+#  else /* USG */
+#    if defined (Xenix)
+#      include <sys/ndir.h>
+#    else /* !Xenix */
+#      include <ndir.h>
+#    endif /* !Xenix */
+#  endif /* USG */
+#endif /* !POSIX_VERSION && !USGr3 */
+
+#if defined (USG) && defined (TIOCGWINSZ)
+#  include <sys/stream.h>
+#  if defined (USGr4) || defined (USGr3)
+#    include <sys/ptem.h>
+#  endif /* USGr4 */
+#endif /* USG && TIOCGWINSZ */
 
 /* Some standard library routines. */
 #include "readline.h"
@@ -95,7 +164,6 @@ struct passwd *getpwuid (), *getpwent ();
 #endif
 
 #ifndef member
-char *index ();
 #define member(c, s) ((c) ? index ((s), (c)) : 0)
 #endif
 
@@ -107,17 +175,27 @@ char *index ();
 #define exchange(x, y) {int temp = x; x = y; y = temp;}
 #endif
 
+#if !defined (rindex)
+extern char *rindex ();
+#endif /* rindex */
+
+#if !defined (index)
+extern char *index ();
+#endif /* index */
+
+extern char *getenv ();
+extern char *tilde_expand ();
+
 static update_line ();
 static void output_character_function ();
 static delete_chars ();
-static delete_chars ();
 static insert_some_chars ();
 
-#ifdef VOID_SIGHANDLER
-#define sighandler void
+#if defined (VOID_SIGHANDLER)
+#  define sighandler void
 #else
-#define sighandler int
-#endif
+#  define sighandler int
+#endif /* VOID_SIGHANDLER */
 
 /* This typedef is equivalant to the one for Function; it allows us
    to say SigHandler *foo = signal (SIGKILL, SIG_IGN); */
@@ -137,6 +215,7 @@ typedef sighandler SigHandler ();
    By default, it is the standard emacs keymap. */
 Keymap keymap = emacs_standard_keymap;
 
+#define no_mode -1
 #define vi_mode 0
 #define emacs_mode 1
 
@@ -153,7 +232,7 @@ int rl_numeric_arg = 1;
 int rl_explicit_arg = 0;
 
 /* Temporary value used while generating the argument. */
-static int arg_sign = 1;
+int rl_arg_sign = 1;
 
 /* Non-zero means we have been called at least once before. */
 static int rl_initialized = 0;
@@ -218,7 +297,7 @@ char *rl_terminal_name = (char *)NULL;
 
 /* Line buffer and maintenence. */
 char *rl_line_buffer = (char *)NULL;
-static int rl_line_buffer_len = 0;
+int rl_line_buffer_len = 0;
 #define DEFAULT_BUFFER_SIZE 256
 
 
@@ -245,13 +324,14 @@ static int defining_kbd_macro = 0;
 /*								    */
 /* **************************************************************** */
 
+static void rl_prep_terminal (), rl_deprep_terminal ();
+
 /* Read a line of input.  Prompt with PROMPT.  A NULL PROMPT means
    none.  A return value of NULL means that EOF was encountered. */
 char *
 readline (prompt)
      char *prompt;
 {
-  static rl_prep_terminal (), rl_deprep_terminal ();
   char *readline_internal ();
   char *value;
 
@@ -267,14 +347,14 @@ readline (prompt)
   rl_initialize ();
   rl_prep_terminal ();
 
-#ifdef HANDLE_SIGNALS
+#if defined (HANDLE_SIGNALS)
   rl_set_signals ();
 #endif
 
   value = readline_internal ();
   rl_deprep_terminal ();
 
-#ifdef HANDLE_SIGNALS
+#if defined (HANDLE_SIGNALS)
   rl_clear_signals ();
 #endif
 
@@ -289,8 +369,11 @@ readline_internal ()
 {
   int lastc, c, eof_found;
 
-  in_stream = rl_instream; out_stream = rl_outstream;
-  lastc = eof_found = 0;
+  in_stream  = rl_instream;
+  out_stream = rl_outstream;
+
+  lastc = -1;
+  eof_found = 0;
 
   if (rl_startup_hook)
     (*rl_startup_hook) ();
@@ -307,7 +390,7 @@ readline_internal ()
     {
       rl_on_new_line ();
       rl_redisplay ();
-#ifdef VI_MODE
+#if defined (VI_MODE)
       if (rl_editing_mode == vi_mode)
 	rl_vi_insertion_mode ();
 #endif /* VI_MODE */
@@ -354,12 +437,12 @@ readline_internal ()
 	    last_command_was_kill = 0;
 	}
 
-#ifdef VI_MODE
+#if defined (VI_MODE)
       /* In vi mode, when you exit insert mode, the cursor moves back
 	 over the previous character.  We explicitly check for that here. */
       if (rl_editing_mode == vi_mode && keymap == vi_movement_keymap)
 	rl_vi_check ();
-#endif
+#endif /* VI_MODE */
 
       if (!rl_done)
 	rl_redisplay ();
@@ -401,15 +484,16 @@ readline_internal ()
 /*								    */
 /* **************************************************************** */
 
-#ifdef SIGWINCH
+#if defined (SIGWINCH)
 static SigHandler *old_sigwinch = (SigHandler *)NULL;
 
 static sighandler
-rl_handle_sigwinch (sig, code, scp)
-     int sig, code;
-     struct sigcontext *scp;
+rl_handle_sigwinch (sig)
+     int sig;
 {
-  char *term = rl_terminal_name, *getenv ();
+  char *term;
+
+  term = rl_terminal_name;
 
   if (readline_echoing_p)
     {
@@ -418,34 +502,43 @@ rl_handle_sigwinch (sig, code, scp)
       if (!term)
 	term = "dumb";
       rl_reset_terminal (term);
-#ifdef NEVER
+#if defined (NOTDEF)
       crlf ();
       rl_forced_update_display ();
-#endif
+#endif /* NOTDEF */
     }
 
   if (old_sigwinch &&
       old_sigwinch != (SigHandler *)SIG_IGN &&
       old_sigwinch != (SigHandler *)SIG_DFL)
-    (*old_sigwinch)(sig, code, scp);
+    (*old_sigwinch) (sig);
+#if !defined (VOID_SIGHANDLER)
+  return (0);
+#endif /* VOID_SIGHANDLER */
 }
 #endif  /* SIGWINCH */
 
-#ifdef HANDLE_SIGNALS
+#if defined (HANDLE_SIGNALS)
 /* Interrupt handling. */
-static SigHandler *old_int  = (SigHandler *)NULL,
-		  *old_tstp = (SigHandler *)NULL,
-		  *old_ttou = (SigHandler *)NULL,
-		  *old_ttin = (SigHandler *)NULL,
-		  *old_cont = (SigHandler *)NULL;
+static SigHandler
+  *old_int  = (SigHandler *)NULL,
+  *old_tstp = (SigHandler *)NULL,
+  *old_ttou = (SigHandler *)NULL,
+  *old_ttin = (SigHandler *)NULL,
+  *old_cont = (SigHandler *)NULL,
+  *old_alrm = (SigHandler *)NULL;
 
 /* Handle an interrupt character. */
 static sighandler
-rl_signal_handler (sig, code, scp)
-     int sig, code;
-     struct sigcontext *scp;
+rl_signal_handler (sig)
+     int sig;
 {
-  static rl_prep_terminal (), rl_deprep_terminal ();
+#if !defined (HAVE_BSD_SIGNALS)
+  /* Since the signal will not be blocked while we are in the signal
+     handler, ignore it until rl_clear_signals resets the catcher. */
+  if (sig == SIGINT)
+    signal (sig, SIG_IGN);
+#endif /* !HAVE_BSD_SIGNALS */
 
   switch (sig)
     {
@@ -454,23 +547,39 @@ rl_signal_handler (sig, code, scp)
       rl_clear_message ();
       rl_init_argument ();
 
-#ifdef SIGTSTP
+#if defined (SIGTSTP)
     case SIGTSTP:
     case SIGTTOU:
     case SIGTTIN:
-#endif
-
+#endif /* SIGTSTP */
+    case SIGALRM:
       rl_clean_up_for_exit ();
       rl_deprep_terminal ();
       rl_clear_signals ();
       rl_pending_input = 0;
 
       kill (getpid (), sig);
+
+#if defined (HAVE_POSIX_SIGNALS)
+      {
+	sigset_t set;
+
+	sigemptyset (&set);
+	sigprocmask (SIG_SETMASK, &set, (sigset_t *)NULL);
+      }
+#else
+#if defined (HAVE_BSD_SIGNALS)
       sigsetmask (0);
+#endif /* HAVE_BSD_SIGNALS */
+#endif /* HAVE_POSIX_SIGNALS */
 
       rl_prep_terminal ();
       rl_set_signals ();
     }
+
+#if !defined (VOID_SIGHANDLER)
+  return (0);
+#endif /* !VOID_SIGHANDLER */
 }
 
 rl_set_signals ()
@@ -479,12 +588,16 @@ rl_set_signals ()
   if (old_int == (SigHandler *)SIG_IGN)
     signal (SIGINT, SIG_IGN);
 
-#ifdef SIGTSTP
+  old_alrm = (SigHandler *)signal (SIGALRM, rl_signal_handler);
+  if (old_alrm == (SigHandler *)SIG_IGN)
+    signal (SIGALRM, SIG_IGN);
+
+#if defined (SIGTSTP)
   old_tstp = (SigHandler *)signal (SIGTSTP, rl_signal_handler);
   if (old_tstp == (SigHandler *)SIG_IGN)
     signal (SIGTSTP, SIG_IGN);
 #endif
-#ifdef SIGTTOU
+#if defined (SIGTTOU)
   old_ttou = (SigHandler *)signal (SIGTTOU, rl_signal_handler);
   old_ttin = (SigHandler *)signal (SIGTTIN, rl_signal_handler);
 
@@ -495,7 +608,7 @@ rl_set_signals ()
     }
 #endif
 
-#ifdef SIGWINCH
+#if defined (SIGWINCH)
   old_sigwinch = (SigHandler *)signal (SIGWINCH, rl_handle_sigwinch);
 #endif
 }
@@ -503,17 +616,18 @@ rl_set_signals ()
 rl_clear_signals ()
 {
   signal (SIGINT, old_int);
+  signal (SIGALRM, old_alrm);
 
-#ifdef SIGTSTP
+#if defined (SIGTSTP)
   signal (SIGTSTP, old_tstp);
 #endif
 
-#ifdef SIGTTOU
+#if defined (SIGTTOU)
   signal (SIGTTOU, old_ttou);
   signal (SIGTTIN, old_ttin);
 #endif
 
-#ifdef SIGWINCH
+#if defined (SIGWINCH)
       signal (SIGWINCH, old_sigwinch);
 #endif
 }
@@ -526,9 +640,12 @@ rl_clear_signals ()
 /*								    */
 /* **************************************************************** */
 
+#if defined (USE_XON_XOFF)
 /* If the terminal was in xoff state when we got to it, then xon_char
    contains the character that is supposed to start it again. */
 static int xon_char, xoff_state;
+#endif /* USE_XON_XOFF */
+
 static int pop_index = 0, push_index = 0, ibuffer_len = 511;
 static unsigned char ibuffer[512];
 
@@ -608,18 +725,28 @@ rl_gather_tyi ()
   long chars_avail;
   char input;
 
-#ifdef FIONREAD
+#if defined (FIONREAD)
   result = ioctl (tty, FIONREAD, &chars_avail);
 #endif
 
   if (result == -1)
     {
-      fcntl (tty, F_SETFL, O_NDELAY);
+      int flags;
+
+      flags = fcntl (tty, F_GETFL, 0);
+
+      fcntl (tty, F_SETFL, (flags | O_NDELAY));
       chars_avail = read (tty, &input, 1);
-      fcntl (tty, F_SETFL, 0);
+
+      fcntl (tty, F_SETFL, flags);
       if (chars_avail == -1 && errno == EAGAIN)
 	return;
     }
+
+  /* If there's nothing available, don't waste time trying to read
+     something. */
+  if (chars_avail == 0)
+    return;
 
   tem = ibuffer_space ();
 
@@ -645,6 +772,7 @@ rl_gather_tyi ()
     }
 }
 
+static int next_macro_key ();
 /* Read a key, including pending input. */
 int
 rl_read_key ()
@@ -660,8 +788,6 @@ rl_read_key ()
     }
   else
     {
-      static int next_macro_key ();
-
       /* If input is coming from a macro, then use that. */
       if (c = next_macro_key ())
 	return (c);
@@ -682,23 +808,11 @@ rl_read_key ()
 	}
     }
 
-#ifdef NEVER  /* This breaks supdup to 4.0.3c machines. */
-#ifdef TIOCSTART
-  /* Ugh.  But I can't think of a better way. */
-  if (xoff_state && c == xon_char)
-    {
-      ioctl (fileno (in_stream), TIOCSTART, 0);
-      xoff_state = 0;
-      return (rl_read_key ());
-    }
-#endif /* TIOCSTART */
-#endif
-
   return (c);
 }
 
 /* I'm beginning to hate the declaration rules for various compilers. */
-static void add_macro_char ();
+static void add_macro_char (), with_macro_input ();
 
 /* Do the command associated with KEY in MAP.
    If the associated command is really a keymap, then read
@@ -739,11 +853,17 @@ rl_dispatch (key, map)
 		return;
 	      }
 
-	    (*map[key].function)(rl_numeric_arg * arg_sign, key);
+	    (*map[key].function)(rl_numeric_arg * rl_arg_sign, key);
+
+	    /* If we have input pending, then the last command was a prefix
+	       command.  Don't change the state of rl_last_func.  Otherwise,
+	       remember the last command executed in this variable. */
+	    if (!rl_pending_input)
+	      rl_last_func = map[key].function;
 	  }
 	else
 	  {
-	    ding ();
+	    rl_abort ();
 	    return;
 	  }
       }
@@ -760,7 +880,7 @@ rl_dispatch (key, map)
 	}
       else
 	{
-	  ding ();
+	  rl_abort ();
 	  return;
 	}
       break;
@@ -768,19 +888,14 @@ rl_dispatch (key, map)
     case ISMACR:
       if (map[key].function != (Function *)NULL)
 	{
-	  static with_macro_input ();
-	  char *macro = savestring ((char *)map[key].function);
+	  char *macro;
 
+	  macro = savestring ((char *)map[key].function);
 	  with_macro_input (macro);
 	  return;
 	}
       break;
     }
-
-  /* If we have input pending, then the last command was a prefix
-     command.  Don't change the state of rl_last_func. */
-  if (!rl_pending_input)
-    rl_last_func = map[key].function;
 }
 
 
@@ -826,7 +941,7 @@ static void push_executing_macro (), pop_executing_macro ();
 
 /* Set up to read subsequent input from STRING.
    STRING is free ()'ed when we are done with it. */
-static
+static void
 with_macro_input (string)
      char *string;
 {
@@ -1010,7 +1125,7 @@ rl_initialize ()
 readline_initialize_everything ()
 {
   /* Find out if we are running in Emacs. */
-  running_in_emacs = (char *)getenv ("EMACS");
+  running_in_emacs = getenv ("EMACS");
 
   /* Allocate data structures. */
   if (!rl_line_buffer)
@@ -1042,17 +1157,20 @@ readline_initialize_everything ()
 
 /* If this system allows us to look at the values of the regular
    input editing characters, then bind them to their readline
-   equivalents. */
+   equivalents, iff the characters are not bound to keymaps. */
 readline_default_bindings ()
 {
 
-#ifdef NEW_TTY_DRIVER
+#if defined (NEW_TTY_DRIVER)
   struct sgttyb ttybuff;
   int tty = fileno (rl_instream);
 
   if (ioctl (tty, TIOCGETP, &ttybuff) != -1)
     {
-      int erase = ttybuff.sg_erase, kill = ttybuff.sg_kill;
+      int erase, kill;
+
+      erase = ttybuff.sg_erase;
+      kill  = ttybuff.sg_kill;
 
       if (erase != -1 && keymap[erase].type == ISFUNC)
 	keymap[erase].function = rl_rubout;
@@ -1061,13 +1179,16 @@ readline_default_bindings ()
 	keymap[kill].function = rl_unix_line_discard;
     }
 
-#ifdef TIOCGLTC
+#if defined (TIOCGLTC)
   {
     struct ltchars lt;
 
     if (ioctl (tty, TIOCGLTC, &lt) != -1)
       {
-	int erase = lt.t_werasc, nextc = lt.t_lnextc;
+	int erase, nextc;
+
+	erase = lt.t_werasc;
+	nextc = lt.t_lnextc;
 
 	if (erase != -1 && keymap[erase].type == ISFUNC)
 	  keymap[erase].function = rl_unix_word_rubout;
@@ -1078,21 +1199,58 @@ readline_default_bindings ()
   }
 #endif /* TIOCGLTC */
 #else /* not NEW_TTY_DRIVER */
+
+#if defined (TERMIOS_TTY_DRIVER)
+  struct termios ttybuff;
+#else
   struct termio ttybuff;
+#endif /* TERMIOS_TTY_DRIVER */
   int tty = fileno (rl_instream);
 
+#if defined (TERMIOS_TTY_DRIVER)
+  if (tcgetattr (tty, &ttybuff) != -1)
+#else
   if (ioctl (tty, TCGETA, &ttybuff) != -1)
+#endif /* !TERMIOS_TTY_DRIVER */
     {
-      int erase = ttybuff.c_cc[VERASE];
-      int kill = ttybuff.c_cc[VKILL];
+      int erase, kill;
 
-      if (erase != -1 && keymap[(unsigned char)erase].type == ISFUNC)
+      erase = ttybuff.c_cc[VERASE];
+      kill = ttybuff.c_cc[VKILL];
+
+      if (erase != _POSIX_VDISABLE &&
+	  keymap[(unsigned char)erase].type == ISFUNC)
 	keymap[(unsigned char)erase].function = rl_rubout;
 
-      if (kill != -1 && keymap[(unsigned char)kill].type == ISFUNC)
+      if (kill != _POSIX_VDISABLE &&
+	  keymap[(unsigned char)kill].type == ISFUNC)
 	keymap[(unsigned char)kill].function = rl_unix_line_discard;
+
+#if defined (VLNEXT)
+      {
+	int nextc;
+
+	nextc = ttybuff.c_cc[VLNEXT];
+
+	if (nextc != _POSIX_VDISABLE &&
+	    keymap[(unsigned char)nextc].type == ISFUNC)
+	  keymap[(unsigned char)nextc].function = rl_quoted_insert;
+      }
+#endif /* VLNEXT */
+
+#if defined (VWERASE)
+      {
+	int werase;
+
+	werase = ttybuff.c_cc[VWERASE];
+
+	if (werase != _POSIX_VDISABLE &&
+	    keymap[(unsigned char)werase].type == ISFUNC)
+	  keymap[(unsigned char)werase].function = rl_unix_word_rubout;
+      }
+#endif /* VWERASE */
     }
-#endif /* NEW_TTY_DRIVER */
+#endif /* !NEW_TTY_DRIVER */
 }
 
 
@@ -1123,7 +1281,7 @@ rl_discard_argument ()
 /* Create a default argument. */
 rl_init_argument ()
 {
-  rl_numeric_arg = arg_sign = 1;
+  rl_numeric_arg = rl_arg_sign = 1;
   rl_explicit_arg = 0;
 }
 
@@ -1141,7 +1299,7 @@ rl_digit_loop ()
   int key, c;
   while (1)
     {
-      rl_message ("(arg: %d) ", arg_sign * rl_numeric_arg);
+      rl_message ("(arg: %d) ", rl_arg_sign * rl_numeric_arg);
       key = c = rl_read_key ();
 
       if (keymap[c].type == ISFUNC &&
@@ -1164,7 +1322,7 @@ rl_digit_loop ()
 	  if (c == '-' && !rl_explicit_arg)
 	    {
 	      rl_numeric_arg = 1;
-	      arg_sign = -1;
+	      rl_arg_sign = -1;
 	    }
 	  else
 	    {
@@ -1251,6 +1409,10 @@ static int horizontal_scroll_mode = 0;
    which have been modified. */
 static int mark_modified_lines = 0;
 
+/* Non-zero means to use a visible bell if one is available rather than
+   simply ringing the terminal bell. */
+static int prefer_visible_bell = 0;
+
 /* I really disagree with this, but my boss (among others) insists that we
    support compilers that don't work.  I don't think we are gaining by doing
    so; what is the advantage in producing better code if we can't use it? */
@@ -1266,6 +1428,7 @@ rl_redisplay ()
 {
   register int in, out, c, linenum;
   register char *line = invisible_line;
+  char *prompt_this_line;
   int c_pos = 0;
   int inv_botlin = 0;		/* Number of lines in newly drawn buffer. */
 
@@ -1308,13 +1471,24 @@ rl_redisplay ()
   if (visible_line[0] != invisible_line[0])
     rl_display_fixed = 0;
 
-  strncpy (line + out,  rl_display_prompt, strlen (rl_display_prompt));
-  out += strlen (rl_display_prompt);
+  prompt_this_line = rindex (rl_display_prompt, '\n');
+  if (!prompt_this_line)
+    prompt_this_line = rl_display_prompt;
+  else
+    {
+      prompt_this_line++;
+      if (forced_display)
+	output_some_chars (rl_display_prompt,
+			   prompt_this_line - rl_display_prompt);
+    }
+
+  strncpy (line + out,  prompt_this_line, strlen (prompt_this_line));
+  out += strlen (prompt_this_line);
   line[out] = '\0';
 
   for (in = 0; in < rl_end; in++)
     {
-      c = the_line[in];
+      c = (unsigned char)the_line[in];
 
       if (out + 1 >= line_size)
 	{
@@ -1334,7 +1508,7 @@ rl_redisplay ()
 	  line[out++] = c - 128;
 	}
 #define DISPLAY_TABS
-#ifdef DISPLAY_TABS
+#if defined (DISPLAY_TABS)
       else if (c == '\t')
 	{
 	  register int newout = (out | (int)7) + 1;
@@ -1347,6 +1521,12 @@ rl_redisplay ()
 	  line[out++] = 'C';
 	  line[out++] = '-';
 	  line[out++] = c + 64;
+	}
+      else if (c == 127)
+	{
+	  line[out++] = 'C';
+	  line[out++] = '-';
+	  line[out++] = '?';
 	}
       else
 	line[out++] = c;
@@ -1497,7 +1677,7 @@ update_line (old, new, current_line)
   wsatend = 1;			/* flag for trailing whitespace */
   ols = oe - 1;			/* find last same */
   nls = ne - 1;
-  while ((ols > ofd) && (nls > nfd) && (*ols == *nls))
+  while ((*ols == *nls) && (ols > ofd) && (nls > nfd))
     {
       if (*ols != ' ')
 	wsatend = 0;
@@ -1647,7 +1827,7 @@ move_cursor_relative (new, data)
 	 sequence telling the terminal to move forward one character.
 	 That kind of control is for people who don't know what the
 	 data is underneath the cursor. */
-#ifdef HACK_TERMCAP_MOTION
+#if defined (HACK_TERMCAP_MOTION)
       extern char *term_forward_char;
 
       if (term_forward_char)
@@ -1683,7 +1863,7 @@ move_vert (to)
       for (i = 0; i < delta; i++)
 	putc ('\n', out_stream);
       tputs (term_cr, 1, output_character_function);
-      last_c_pos = 0;		/* because crlf() will do \r\n */
+      last_c_pos = 0;
     }
   else
     {			/* delta < 0 */
@@ -1705,7 +1885,7 @@ rl_show_char (c)
       c -= 128;
     }
 
-#ifdef DISPLAY_TABS
+#if defined (DISPLAY_TABS)
   if (c < 32 && c != '\t')
 #else
   if (c < 32)
@@ -1719,7 +1899,7 @@ rl_show_char (c)
   fflush (out_stream);
 }
 
-#ifdef DISPLAY_TABS
+#if defined (DISPLAY_TABS)
 int
 rl_character_len (c, pos)
      register int c, pos;
@@ -1792,12 +1972,15 @@ char *term_im, *term_ei, *term_ic, *term_ip, *term_IC;
 /* How to delete characters. */
 char *term_dc, *term_DC;
 
-#ifdef HACK_TERMCAP_MOTION
+#if defined (HACK_TERMCAP_MOTION)
 char *term_forward_char;
 #endif  /* HACK_TERMCAP_MOTION */
 
 /* How to go up a line. */
 char *term_up;
+
+/* A visible bell, if the terminal can be made to flash the screen. */
+char *visible_bell;
 
 /* Re-initialize the terminal considering that the TERM/TERMCAP variable
    has changed. */
@@ -1810,9 +1993,14 @@ rl_reset_terminal (terminal_name)
 init_terminal_io (terminal_name)
      char *terminal_name;
 {
-  char *term = (terminal_name? terminal_name : (char *)getenv ("TERM"));
-  char *tgetstr (), *buffer;
+  extern char *tgetstr ();
+  char *term, *buffer;
+#if defined (TIOCGWINSZ)
+  struct winsize window_size;
+#endif
+  int tty;
 
+  term = terminal_name ? terminal_name : getenv ("TERM");
 
   if (!term_string_buffer)
     term_string_buffer = (char *)xmalloc (2048);
@@ -1830,10 +2018,20 @@ init_terminal_io (terminal_name)
   if (tgetent (term_buffer, term) < 0)
     {
       dumb_term = 1;
+      screenwidth = 79;
+      screenheight = 24;
+      term_cr = "\r";
+      term_im = term_ei = term_ic = term_IC = (char *)NULL;
+      term_up = term_dc = term_DC = visible_bell = (char *)NULL;
+#if defined (HACK_TERMCAP_MOTION)
+      term_forward_char = (char *)NULL;
+#endif
+      terminal_can_insert = 0;
       return;
     }
 
-  PC = tgetstr ("pc", &buffer)? *buffer : 0;
+  BC = tgetstr ("pc", &buffer);
+  PC = buffer ? *buffer : 0;
 
   term_backspace = tgetstr ("le", &buffer);
 
@@ -1844,16 +2042,35 @@ init_terminal_io (terminal_name)
   if (!term_cr)
     term_cr =  "\r";
 
-#ifdef HACK_TERMCAP_MOTION
+#if defined (HACK_TERMCAP_MOTION)
   term_forward_char = tgetstr ("nd", &buffer);
 #endif  /* HACK_TERMCAP_MOTION */
 
-  screenwidth = tgetnum ("co");
-  if (screenwidth <= 0)
-    screenwidth = 80;
-  screenwidth--;		/* PWP: avoid autowrap bugs */
+  if (rl_instream)
+    tty = fileno (rl_instream);
+  else
+    tty = 0;
 
-  screenheight = tgetnum ("li");
+  screenwidth = screenheight = 0;
+#if defined (TIOCGWINSZ)
+  if (ioctl (tty, TIOCGWINSZ, &window_size) == 0)
+    {
+      screenwidth = (int) window_size.ws_col;
+      screenheight = (int) window_size.ws_row;
+    }
+#endif
+
+  if (screenwidth <= 0 || screenheight <= 0)
+    {
+      screenwidth = tgetnum ("co");
+      screenheight = tgetnum ("li");
+    }
+
+  screenwidth--;
+
+  if (screenwidth <= 0)
+    screenwidth = 79;
+
   if (screenheight <= 0)
     screenheight = 24;
 
@@ -1871,6 +2088,8 @@ init_terminal_io (terminal_name)
   term_up = tgetstr ("up", &buffer);
   term_dc = tgetstr ("dc", &buffer);
   term_DC = tgetstr ("DC", &buffer);
+
+  visible_bell = tgetstr ("vb", &buffer);
 }
 
 /* A function for the use of tputs () */
@@ -1889,7 +2108,6 @@ output_some_chars (string, count)
 {
   fwrite (string, 1, count, out_stream);
 }
-
 
 /* Delete COUNT characters from the display line. */
 static
@@ -1913,7 +2131,7 @@ delete_chars (count)
     }
 }
 
-/* Insert COUNT character from STRING to the output stream. */
+/* Insert COUNT characters from STRING to the output stream. */
 static
 insert_some_chars (string, count)
      char *string;
@@ -1970,7 +2188,9 @@ backspace (count)
 /* Move to the start of the next line. */
 crlf ()
 {
+#if defined (NEW_TTY_DRIVER)
   tputs (term_cr, 1, output_character_function);
+#endif /* NEW_TTY_DRIVER */
   putc ('\n', out_stream);
 }
 
@@ -2007,7 +2227,7 @@ clear_to_eol (count)
 /* Non-zero means that the terminal is in a prepped state. */
 static int terminal_prepped = 0;
 
-#ifdef NEW_TTY_DRIVER
+#if defined (NEW_TTY_DRIVER)
 
 /* Standard flags, including ECHO. */
 static int original_tty_flags = 0;
@@ -2019,132 +2239,154 @@ static int local_mode_flags = 0;
 static struct tchars original_tchars;
 
 /* Local special characters.  This has the interrupt characters in it. */
+#if defined (TIOCGLTC)
 static struct ltchars original_ltchars;
+#endif
 
 /* We use this to get and set the tty_flags. */
 static struct sgttyb the_ttybuff;
 
 /* Put the terminal in CBREAK mode so that we can detect key presses. */
-static
+static void
 rl_prep_terminal ()
 {
   int tty = fileno (rl_instream);
-  int oldmask = sigblock (sigmask (SIGINT));
+#if defined (HAVE_BSD_SIGNALS)
+  int oldmask;
+#endif /* HAVE_BSD_SIGNALS */
 
-  if (!terminal_prepped)
-    {
-      /* We always get the latest tty values.  Maybe stty changed them. */
-      ioctl (tty, TIOCGETP, &the_ttybuff);
-      original_tty_flags = the_ttybuff.sg_flags;
+  if (terminal_prepped)
+    return;
 
-      readline_echoing_p = (original_tty_flags & ECHO);
+  oldmask = sigblock (sigmask (SIGINT));
 
-	
+  /* We always get the latest tty values.  Maybe stty changed them. */
+  ioctl (tty, TIOCGETP, &the_ttybuff);
+  original_tty_flags = the_ttybuff.sg_flags;
+
+  readline_echoing_p = (original_tty_flags & ECHO);
+
 #if defined (TIOCLGET)
-      ioctl (tty, TIOCLGET, &local_mode_flags);
+  ioctl (tty, TIOCLGET, &local_mode_flags);
 #endif
 
-      /* If this terminal doesn't care how the 8th bit is used,
-	 then we can use it for the meta-key.
-	 We check by seeing if BOTH odd and even parity are allowed. */
-      if ((the_ttybuff.sg_flags & ODDP) && (the_ttybuff.sg_flags & EVENP))
-	{
-#ifdef PASS8
-	  the_ttybuff.sg_flags |= PASS8;
+#if !defined (ANYP)
+#  define ANYP (EVENP | ODDP)
 #endif
-	  /* Hack on local mode flags if we can. */
+
+  /* If this terminal doesn't care how the 8th bit is used,
+     then we can use it for the meta-key.  We check by seeing
+     if BOTH odd and even parity are allowed. */
+  if (the_ttybuff.sg_flags & ANYP)
+    {
+#if defined (PASS8)
+      the_ttybuff.sg_flags |= PASS8;
+#endif
+
+      /* Hack on local mode flags if we can. */
 #if defined (TIOCLGET) && defined (LPASS8)
-	  {
-	    int flags;
-	    flags = local_mode_flags | LPASS8;
-	    ioctl (tty, TIOCLSET, &flags);
-	  }
-#endif
-	}
-
-#ifdef TIOCGETC
       {
-	struct tchars temp;
-
-	ioctl (tty, TIOCGETC, &original_tchars);
-	bcopy (&original_tchars, &temp, sizeof (struct tchars));
-
-	/* Get rid of C-s and C-q.
-	   We remember the value of startc (C-q) so that if the terminal is in
-	   xoff state, the user can xon it by pressing that character. */
-	xon_char = temp.t_startc;
-	temp.t_stopc = -1;
-	temp.t_startc = -1;
-
-	/* If there is an XON character, bind it to restart the output. */
-	if (xon_char != -1)
-	  rl_bind_key (xon_char, rl_restart_output);
-
-	/* If there is an EOF char, bind eof_char to it. */
-	if (temp.t_eofc != -1)
-	  eof_char = temp.t_eofc;
-
-#ifdef NEVER
-	/* Get rid of C-\ and C-c. */
-	temp.t_intrc = temp.t_quitc = -1;
-#endif
-
-	ioctl (tty, TIOCSETC, &temp);
+	int flags;
+	flags = local_mode_flags | LPASS8;
+	ioctl (tty, TIOCLSET, &flags);
       }
+#endif /* TIOCLGET && LPASS8 */
+    }
+
+#if defined (TIOCGETC)
+  {
+    struct tchars temp;
+
+    ioctl (tty, TIOCGETC, &original_tchars);
+    temp = original_tchars;
+
+#if defined (USE_XON_XOFF)
+    /* Get rid of C-s and C-q.
+       We remember the value of startc (C-q) so that if the terminal is in
+       xoff state, the user can xon it by pressing that character. */
+    xon_char = temp.t_startc;
+    temp.t_stopc = -1;
+    temp.t_startc = -1;
+
+    /* If there is an XON character, bind it to restart the output. */
+    if (xon_char != -1)
+      rl_bind_key (xon_char, rl_restart_output);
+#endif /* USE_XON_XOFF */
+
+    /* If there is an EOF char, bind eof_char to it. */
+    if (temp.t_eofc != -1)
+      eof_char = temp.t_eofc;
+
+#if defined (NO_KILL_INTR)
+    /* Get rid of C-\ and C-c. */
+    temp.t_intrc = temp.t_quitc = -1;
+#endif /* NO_KILL_INTR */
+
+    ioctl (tty, TIOCSETC, &temp);
+  }
 #endif /* TIOCGETC */
 
-#ifdef TIOCGLTC
-      {
-	struct ltchars temp;
+#if defined (TIOCGLTC)
+  {
+    struct ltchars temp;
 
-	ioctl (tty, TIOCGLTC, &original_ltchars);
-	bcopy (&original_ltchars, &temp, sizeof (struct ltchars));
+    ioctl (tty, TIOCGLTC, &original_ltchars);
+    temp = original_ltchars;
 
-	/* Make the interrupt keys go away.  Just enough to make people happy. */
-	temp.t_dsuspc = -1;	/* C-y */
-	temp.t_lnextc = -1;	/* C-v */
+    /* Make the interrupt keys go away.  Just enough to make people
+       happy. */
+    temp.t_dsuspc = -1;	/* C-y */
+    temp.t_lnextc = -1;	/* C-v */
 
-	ioctl (tty, TIOCSLTC, &temp);
-      }
+    ioctl (tty, TIOCSLTC, &temp);
+  }
 #endif /* TIOCGLTC */
 
-      the_ttybuff.sg_flags &= ~ECHO;
-      the_ttybuff.sg_flags |= CBREAK;
-      ioctl (tty, TIOCSETN, &the_ttybuff);
+  the_ttybuff.sg_flags &= ~(ECHO | CRMOD);
+  the_ttybuff.sg_flags |= CBREAK;
+  ioctl (tty, TIOCSETN, &the_ttybuff);
 
-      terminal_prepped = 1;
-    }
+  terminal_prepped = 1;
+
+#if defined (HAVE_BSD_SIGNALS)
   sigsetmask (oldmask);
+#endif
 }
 
 /* Restore the terminal to its original state. */
-static
+static void
 rl_deprep_terminal ()
 {
   int tty = fileno (rl_instream);
-  int oldmask = sigblock (sigmask (SIGINT));
+#if defined (HAVE_BSD_SIGNALS)
+  int oldmask;
+#endif
 
-  if (terminal_prepped)
-    {
-      the_ttybuff.sg_flags = original_tty_flags;
-      ioctl (tty, TIOCSETN, &the_ttybuff);
-      readline_echoing_p = 1;
+  if (!terminal_prepped)
+    return;
+
+  oldmask = sigblock (sigmask (SIGINT));
+
+  the_ttybuff.sg_flags = original_tty_flags;
+  ioctl (tty, TIOCSETN, &the_ttybuff);
+  readline_echoing_p = 1;
 
 #if defined (TIOCLGET)
-      ioctl (tty, TIOCLSET, &local_mode_flags);
+  ioctl (tty, TIOCLSET, &local_mode_flags);
 #endif
 
-#ifdef TIOCSLTC
-      ioctl (tty, TIOCSLTC, &original_ltchars);
+#if defined (TIOCSLTC)
+  ioctl (tty, TIOCSLTC, &original_ltchars);
 #endif
 
-#ifdef TIOCSETC
-      ioctl (tty, TIOCSETC, &original_tchars);
+#if defined (TIOCSETC)
+  ioctl (tty, TIOCSETC, &original_tchars);
 #endif
-      terminal_prepped = 0;
-    }
+  terminal_prepped = 0;
 
+#if defined (HAVE_BSD_SIGNALS)
   sigsetmask (oldmask);
+#endif
 }
 
 #else  /* !defined (NEW_TTY_DRIVER) */
@@ -2157,38 +2399,164 @@ rl_deprep_terminal ()
 #define VTIME VEOL
 #endif
 
+#if defined (TERMIOS_TTY_DRIVER)
+static struct termios otio;
+#else
 static struct termio otio;
+#endif /* !TERMIOS_TTY_DRIVER */
 
-static
+static void
 rl_prep_terminal ()
 {
   int tty = fileno (rl_instream);
+#if defined (TERMIOS_TTY_DRIVER)
+  struct termios tio;
+#else
   struct termio tio;
+#endif /* !TERMIOS_TTY_DRIVER */
 
+#if defined (HAVE_POSIX_SIGNALS)
+  sigset_t set, oset;
+#else
+#  if defined (HAVE_BSD_SIGNALS)
+  int oldmask;
+#  endif /* HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
+
+  if (terminal_prepped)
+    return;
+
+  /* Try to keep this function from being INTerrupted.  We can do it
+     on POSIX and systems with BSD-like signal handling. */
+#if defined (HAVE_POSIX_SIGNALS)
+  sigemptyset (&set);
+  sigaddset (&set, SIGINT);
+  sigprocmask (SIG_BLOCK, &set, &oset);
+#else /* !HAVE_POSIX_SIGNALS */
+#  if defined (HAVE_BSD_SIGNALS)
+  oldmask = sigblock (sigmask (SIGINT));
+#  endif /* HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
+
+#if defined (TERMIOS_TTY_DRIVER)
+  tcgetattr (tty, &tio);
+#else
   ioctl (tty, TCGETA, &tio);
-  ioctl (tty, TCGETA, &otio);
+#endif /* !TERMIOS_TTY_DRIVER */
+
+  otio = tio;
 
   readline_echoing_p = (tio.c_lflag & ECHO);
 
   tio.c_lflag &= ~(ICANON|ECHO);
-  tio.c_iflag &= ~(IXON|IXOFF|IXANY|ISTRIP|INPCK);
+
+  if (otio.c_cc[VEOF] != _POSIX_VDISABLE)
+    eof_char = otio.c_cc[VEOF];
+
+#if defined (USE_XON_XOFF)
+#if defined (IXANY)
+  tio.c_iflag &= ~(IXON|IXOFF|IXANY);
+#else
+  /* `strict' Posix systems do not define IXANY. */
+  tio.c_iflag &= ~(IXON|IXOFF);
+#endif /* IXANY */
+#endif /* USE_XON_XOFF */
+
+  /* Only turn this off if we are using all 8 bits. */
+  /* |ISTRIP|INPCK */
+  tio.c_iflag &= ~(ISTRIP | INPCK);
+
+  /* Make sure we differentiate between CR and NL on input. */
+  tio.c_iflag &= ~(ICRNL | INLCR);
 
 #if !defined (HANDLE_SIGNALS)
   tio.c_lflag &= ~ISIG;
+#else
+  tio.c_lflag |= ISIG;
 #endif
 
   tio.c_cc[VMIN] = 1;
   tio.c_cc[VTIME] = 0;
+
+  /* Turn off characters that we need on Posix systems with job control,
+     just to be sure.  This includes ^Y and ^V.  This should not really
+     be necessary.  */
+#if defined (TERMIOS_TTY_DRIVER) && defined (_POSIX_JOB_CONTROL)
+
+#if defined (VLNEXT)
+  tio.c_cc[VLNEXT] = _POSIX_VDISABLE;
+#endif
+
+#if defined (VDSUSP)
+  tio.c_cc[VDSUSP] = _POSIX_VDISABLE;
+#endif
+
+#endif /* POSIX && JOB_CONTROL */
+
+#if defined (TERMIOS_TTY_DRIVER)
+  tcsetattr (tty, TCSADRAIN, &tio);
+  tcflow (tty, TCOON);		/* Simulate a ^Q. */
+#else
   ioctl (tty, TCSETAW, &tio);
   ioctl (tty, TCXONC, 1);	/* Simulate a ^Q. */
+#endif /* !TERMIOS_TTY_DRIVER */
+
+  terminal_prepped = 1;
+
+#if defined (HAVE_POSIX_SIGNALS)
+  sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
+#else
+#  if defined (HAVE_BSD_SIGNALS)
+  sigsetmask (oldmask);
+#  endif /* HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
 }
 
-static
+static void
 rl_deprep_terminal ()
 {
   int tty = fileno (rl_instream);
+
+  /* Try to keep this function from being INTerrupted.  We can do it
+     on POSIX and systems with BSD-like signal handling. */
+#if defined (HAVE_POSIX_SIGNALS)
+  sigset_t set, oset;
+#else /* !HAVE_POSIX_SIGNALS */
+#  if defined (HAVE_BSD_SIGNALS)
+  int oldmask;
+#  endif /* HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
+
+  if (!terminal_prepped)
+    return;
+
+#if defined (HAVE_POSIX_SIGNALS)
+  sigemptyset (&set);
+  sigaddset (&set, SIGINT);
+  sigprocmask (SIG_BLOCK, &set, &oset);
+#else /* !HAVE_POSIX_SIGNALS */
+#  if defined (HAVE_BSD_SIGNALS)
+  oldmask = sigblock (sigmask (SIGINT));
+#  endif /* HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
+
+#if defined (TERMIOS_TTY_DRIVER)
+  tcsetattr (tty, TCSADRAIN, &otio);
+  tcflow (tty, TCOON);		/* Simulate a ^Q. */
+#else /* TERMIOS_TTY_DRIVER */
   ioctl (tty, TCSETAW, &otio);
   ioctl (tty, TCXONC, 1);	/* Simulate a ^Q. */
+#endif /* !TERMIOS_TTY_DRIVER */
+
+  terminal_prepped = 0;
+
+#if defined (HAVE_POSIX_SIGNALS)
+  sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
+#else /* !HAVE_POSIX_SIGNALS */
+#  if defined (HAVE_BSD_SIGNALS)
+  sigsetmask (oldmask);
+#  endif /* HAVE_BSD_SIGNALS */
+#endif /* !HAVE_POSIX_SIGNALS */
 }
 #endif  /* NEW_TTY_DRIVER */
 
@@ -2204,12 +2572,11 @@ rl_deprep_terminal ()
 
 int allow_pathname_alphabetic_chars = 0;
 char *pathname_alphabetic_chars = "/-_=~.#$";
-char *rindex ();
+
 int
 alphabetic (c)
      int c;
 {
-
   if (pure_alphabetic (c) || (numeric (c)))
     return (1);
 
@@ -2233,8 +2600,13 @@ ding ()
 {
   if (readline_echoing_p)
     {
-      fprintf (stderr, "\007");
-      fflush (stderr);
+      if (prefer_visible_bell && visible_bell)
+	tputs (visible_bell, 1, output_character_function);
+      else
+	{
+	  fprintf (stderr, "\007");
+	  fflush (stderr);
+	}
     }
   return (-1);
 }
@@ -2251,12 +2623,17 @@ rl_abort ()
   while (executing_macro)
     pop_executing_macro ();
 
+  rl_last_func = (Function *)NULL;
   longjmp (readline_top_level, 1);
 }
 
 /* Return a copy of the string between FROM and TO.
    FROM is inclusive, TO is not. */
-static char *
+#if defined (sun) /* Yes, that's right, some crufty function in sunview is
+		     called rl_copy (). */
+static
+#endif
+char *
 rl_copy (from, to)
      int from, to;
 {
@@ -2264,17 +2641,32 @@ rl_copy (from, to)
   char *copy;
 
   /* Fix it if the caller is confused. */
-  if (from > to) {
-    int t = from;
-    from = to;
-    to = t;
-  }
+  if (from > to)
+    {
+      int t = from;
+      from = to;
+      to = t;
+    }
 
   length = to - from;
   copy = (char *)xmalloc (1 + length);
   strncpy (copy, the_line + from, length);
   copy[length] = '\0';
   return (copy);
+}
+
+/* Increase the size of RL_LINE_BUFFER until it has enough space to hold
+   LEN characters. */
+void
+rl_extend_line_buffer (len)
+     int len;
+{
+  while (len >= rl_line_buffer_len)
+    rl_line_buffer =
+      (char *)xrealloc
+	(rl_line_buffer, rl_line_buffer_len += DEFAULT_BUFFER_SIZE);
+
+  the_line = rl_line_buffer;
 }
 
 
@@ -2284,7 +2676,6 @@ rl_copy (from, to)
 /*								    */
 /* **************************************************************** */
 
-
 /* Insert a string of text into the line at point.  This is the only
    way that you should do insertion.  rl_insert () calls this
    function. */
@@ -2293,13 +2684,9 @@ rl_insert_text (string)
 {
   extern int doing_an_undo;
   register int i, l = strlen (string);
-  while (rl_end + l >= rl_line_buffer_len)
-    {
-      rl_line_buffer =
-	(char *)xrealloc (rl_line_buffer,
-			  rl_line_buffer_len += DEFAULT_BUFFER_SIZE);
-      the_line = rl_line_buffer;
-    }
+
+  if (rl_end + l >= rl_line_buffer_len)
+    rl_extend_line_buffer (rl_end + l);
 
   for (i = rl_end; i >= rl_point; i--)
     the_line[i + l] = the_line[i];
@@ -2332,11 +2719,12 @@ rl_delete_text (from, to)
   register char *text;
 
   /* Fix it if the caller is confused. */
-  if (from > to) {
-    int t = from;
-    from = to;
-    to = t;
-  }
+  if (from > to)
+    {
+      int t = from;
+      from = to;
+      to = t;
+    }
   text = rl_copy (from, to);
   strncpy (the_line + from, the_line + to, rl_end - to);
 
@@ -2394,11 +2782,11 @@ rl_forward (count)
   else
     while (count)
       {
-#ifdef VI_MODE
+#if defined (VI_MODE)
 	if (rl_point == (rl_end - (rl_editing_mode == vi_mode)))
 #else
 	if (rl_point == rl_end)
-#endif
+#endif /* VI_MODE */
 	  {
 	    ding ();
 	    return;
@@ -2558,6 +2946,36 @@ rl_clear_screen ()
   rl_display_fixed = 1;
 }
 
+rl_arrow_keys (count, c)
+     int count, c;
+{
+  int ch;
+
+  ch = rl_read_key ();
+
+  switch (to_upper (ch))
+    {
+    case 'A':
+      rl_get_previous_history (count);
+      break;
+
+    case 'B':
+      rl_get_next_history (count);
+      break;
+
+    case 'C':
+      rl_forward (count);
+      break;
+
+    case 'D':
+      rl_backward (count);
+      break;
+
+    default:
+      ding ();
+    }
+}
+
 
 /* **************************************************************** */
 /*								    */
@@ -2667,7 +3085,7 @@ rl_newline (count, key)
 
   rl_done = 1;
 
-#ifdef VI_MODE
+#if defined (VI_MODE)
   {
     extern int vi_doing_insert;
     if (vi_doing_insert)
@@ -2825,7 +3243,6 @@ rl_unix_line_discard ()
 /* **************************************************************** */
 
 /* Random and interesting things in here.  */
-
 
 /* **************************************************************** */
 /*								    */
@@ -2990,25 +3407,33 @@ rl_transpose_chars (count)
     return;
   }
 
-  while (count) {
-    if (rl_point == rl_end) {
-      int t = the_line[rl_point - 1];
-      the_line[rl_point - 1] = the_line[rl_point - 2];
-      the_line[rl_point - 2] = t;
-    } else {
-      int t = the_line[rl_point];
-      the_line[rl_point] = the_line[rl_point - 1];
-      the_line[rl_point - 1] = t;
-      if (count < 0 && rl_point)
-	rl_point--;
+  while (count)
+    {
+      if (rl_point == rl_end)
+	{
+	  int t = the_line[rl_point - 1];
+
+	  the_line[rl_point - 1] = the_line[rl_point - 2];
+	  the_line[rl_point - 2] = t;
+	}
       else
-	rl_point++;
+	{
+	  int t = the_line[rl_point];
+
+	  the_line[rl_point] = the_line[rl_point - 1];
+	  the_line[rl_point - 1] = t;
+
+	  if (count < 0 && rl_point)
+	    rl_point--;
+	  else
+	    rl_point++;
+	}
+
+      if (count < 0)
+	count++;
+      else
+	count--;
     }
-    if (count < 0)
-      count++;
-    else
-      count--;
-  }
 }
 
 
@@ -3021,10 +3446,45 @@ rl_transpose_chars (count)
 rl_restart_output (count, key)
      int count, key;
 {
-  int fildes = fileno (stdin);
-#ifdef TIOCSTART
+  int fildes = fileno (rl_outstream);
+#if defined (TIOCSTART)
+#if defined (apollo)
+  ioctl (&fildes, TIOCSTART, 0);
+#else
   ioctl (fildes, TIOCSTART, 0);
+#endif /* apollo */
+
+#else
+#  if defined (TERMIOS_TTY_DRIVER)
+        tcflow (fildes, TCOON);
+#  else
+#    if defined (TCXONC)
+        ioctl (fildes, TCXONC, TCOON);
+#    endif /* TCXONC */
+#  endif /* !TERMIOS_TTY_DRIVER */
 #endif /* TIOCSTART */
+}
+
+rl_stop_output (count, key)
+     int count, key;
+{
+  int fildes = fileno (rl_instream);
+
+#if defined (TIOCSTOP)
+# if defined (apollo)
+  ioctl (&fildes, TIOCSTOP, 0);
+# else
+  ioctl (fildes, TIOCSTOP, 0);
+# endif /* apollo */
+#else
+# if defined (TERMIOS_TTY_DRIVER)
+  tcflow (fildes, TCOOFF);
+# else
+#   if defined (TCXONC)
+  ioctl (fildes, TCXONC, TCOON);
+#   endif /* TCXONC */
+# endif /* !TERMIOS_TTY_DRIVER */
+#endif /* TIOCSTOP */
 }
 
 /* **************************************************************** */
@@ -3047,13 +3507,20 @@ Function *rl_completion_entry_function = (Function *)NULL;
    array of strings returned. */
 Function *rl_attempted_completion_function = (Function *)NULL;
 
+/* Local variable states what happened during the last completion attempt. */
+static int completion_changed_buffer = 0;
+
 /* Complete the word at or before point.  You have supplied the function
    that does the initial simple matching selection algorithm (see
    completion_matches ()).  The default is to do filename completion. */
+
 rl_complete (ignore, invoking_key)
      int ignore, invoking_key;
 {
-  rl_complete_internal (TAB);
+  if (rl_last_func == rl_complete && !completion_changed_buffer)
+    rl_complete_internal ('?');
+  else
+    rl_complete_internal (TAB);
 }
 
 /* List the possible completions.  See description of rl_complete (). */
@@ -3082,7 +3549,7 @@ int rl_completion_query_items = 100;
 /* The basic list of characters that signal a break between words for the
    completer routine.  The contents of this variable is what breaks words
    in the shell, i.e. " \t\n\"\\'`@$><=" */
-char *rl_basic_word_break_characters = " \t\n\"\\'`@$><=";
+char *rl_basic_word_break_characters = " \t\n\"\\'`@$><=;|&{(";
 
 /* The list of characters that signal a break between words for
    rl_complete_internal.  The default list is the contents of
@@ -3102,6 +3569,17 @@ int rl_ignore_completion_duplicates = 1;
    within a completion entry finder function. */
 int rl_filename_completion_desired = 0;
 
+/* This function, if defined, is called by the completer when real
+   filename completion is done, after all the matching names have been
+   generated. It is passed a (char**) known as matches in the code below.
+   It consists of a NULL-terminated array of pointers to potential
+   matching strings.  The 1st element (matches[0]) is the maximal
+   substring that is common to all matches. This function can re-arrange
+   the list of matches as required, but all elements of the array must be
+   free()'d if they are deleted. The main intent of this function is
+   to implement FIGNORE a la SunOS csh. */
+Function *rl_ignore_some_completions_function = (Function *)NULL;
+
 /* Complete the word at or before point.
    WHAT_TO_DO says what to do with the completion.
    `?' means list the possible completions.
@@ -3114,7 +3592,12 @@ rl_complete_internal (what_to_do)
   char **completion_matches (), **matches;
   Function *our_func;
   int start, end, delimiter = 0;
-  char *text;
+  char *text, *saved_line_buffer;
+
+  if (the_line)
+    saved_line_buffer = savestring (the_line);
+  else
+    saved_line_buffer = (char *)NULL;
 
   if (rl_completion_entry_function)
     our_func = rl_completion_entry_function;
@@ -3126,13 +3609,14 @@ rl_complete_internal (what_to_do)
 
   /* We now look backwards for the start of a filename/variable word. */
   end = rl_point;
+
   if (rl_point)
     {
       while (--rl_point &&
 	     !rindex (rl_completer_word_break_characters, the_line[rl_point]));
 
       /* If we are at a word break, then advance past it. */
-      if (rindex (rl_completer_word_break_characters,  (the_line[rl_point])))
+      if (rindex (rl_completer_word_break_characters, the_line[rl_point]))
 	{
 	  /* If the character that caused the word break was a quoting
 	     character, then remember it as the delimiter. */
@@ -3161,10 +3645,13 @@ rl_complete_internal (what_to_do)
 	(char **)(*rl_attempted_completion_function) (text, start, end);
 
       if (matches)
-	goto after_usual_completion;
+	{
+	  our_func = (Function *)NULL;
+	  goto after_usual_completion;
+	}
     }
 
-  matches = completion_matches (text, our_func, start, end);
+  matches = completion_matches (text, our_func);
 
  after_usual_completion:
   free (text);
@@ -3191,7 +3678,7 @@ rl_complete_internal (what_to_do)
 	  for (i = 0; matches[i]; i++);
 	  qsort (matches, i, sizeof (char *), compare_strings);
 
-	  /* Remember the lowest common denimator for it may be unique. */
+	  /* Remember the lowest common denominator for it may be unique. */
 	  lowest_common = savestring (matches[0]);
 
 	  for (i = 0; matches[i + 1]; i++)
@@ -3212,12 +3699,16 @@ rl_complete_internal (what_to_do)
 	      (char **)malloc ((3 + newlen) * sizeof (char *));
 
 	    for (i = 1, j = 1; matches[i]; i++)
-	      if (matches[i] != (char *)-1)
-		temp_array[j++] = matches[i];
+	      {
+		if (matches[i] != (char *)-1)
+		  temp_array[j++] = matches[i];
+	      }
+
 	    temp_array[j] = (char *)NULL;
 
 	    if (matches[0] != (char *)-1)
 	      free (matches[0]);
+
 	    free (matches);
 
 	    matches = temp_array;
@@ -3239,6 +3730,14 @@ rl_complete_internal (what_to_do)
       switch (what_to_do)
 	{
 	case TAB:
+	  /* If we are matching filenames, then here is our chance to
+	     do clever processing by re-examining the list.  Call the
+	     ignore function with the array as a parameter.  It can
+	     munge the array, deleting matches as it desires. */
+	  if (rl_ignore_some_completions_function &&
+	      our_func == (int (*)())filename_completion_function)
+	    (void)(*rl_ignore_some_completions_function)(matches);
+
 	  if (matches[0])
 	    {
 	      rl_delete_text (start, rl_point);
@@ -3265,11 +3764,10 @@ rl_complete_internal (what_to_do)
 	      if (rl_filename_completion_desired)
 		{
 		  struct stat finfo;
-		  char *tilde_expand ();
 		  char *filename = tilde_expand (matches[0]);
 
 		  if ((stat (filename, &finfo) == 0) &&
-		      ((finfo.st_mode & S_IFMT) == S_IFDIR))
+		      S_ISDIR (finfo.st_mode))
 		    {
 		      if (the_line[rl_point] != '/')
 			rl_insert_text ("/");
@@ -3313,7 +3811,6 @@ rl_complete_internal (what_to_do)
 	  }
 	  break;
 
-
 	case '?':
 	  {
 	    int len, count, limit, max = 0;
@@ -3322,7 +3819,7 @@ rl_complete_internal (what_to_do)
 	    /* Handle simple case first.  What if there is only one answer? */
 	    if (!matches[1])
 	      {
-		char  *temp;
+		char *temp;
 
 		if (rl_filename_completion_desired)
 		  temp = rindex (matches[0], '/');
@@ -3345,7 +3842,7 @@ rl_complete_internal (what_to_do)
 	       is. */
 	    for (i = 1; matches[i]; i++)
 	      {
-		char  *temp = (char *)NULL;
+		char *temp = (char *)NULL;
 
 		/* If we are hacking filenames, then only count the characters
 		   after the last slash in the pathname. */
@@ -3387,6 +3884,11 @@ rl_complete_internal (what_to_do)
 	    if (limit != 1 && (limit * max == screenwidth))
 	      limit--;
 
+	    /* Avoid a possible floating exception.  If max > screenwidth,
+	       limit will be 0 and a divide-by-zero fault will result. */
+	    if (limit == 0)
+	      limit = 1;
+
 	    /* How many iterations of the printing loop? */
 	    count = (len + (limit - 1)) / limit;
 
@@ -3412,7 +3914,7 @@ rl_complete_internal (what_to_do)
 		      }
 		    else
 		      {
-			char  *temp = (char *)NULL;
+			char *temp = (char *)NULL;
 
 			if (rl_filename_completion_desired)
 			  temp = rindex (matches[l], '/');
@@ -3446,6 +3948,17 @@ rl_complete_internal (what_to_do)
 	free (matches[i]);
       free (matches);
     }
+
+  /* Check to see if the line has changed through all of this manipulation. */
+  if (saved_line_buffer)
+    {
+      if (strcmp (the_line, saved_line_buffer) != 0)
+	completion_changed_buffer = 1;
+      else
+	completion_changed_buffer = 0;
+
+      free (saved_line_buffer);
+    }
 }
 
 /* Stupid comparison routine for qsort () ing strings. */
@@ -3466,13 +3979,21 @@ username_completion_function (text, state)
 {
   static char *username = (char *)NULL;
   static struct passwd *entry;
-  static int namelen;
+  static int namelen, first_char, first_char_loc;
 
   if (!state)
     {
       if (username)
 	free (username);
-      username = savestring (&text[1]);
+
+      first_char = *text;
+
+      if (first_char == '~')
+	first_char_loc = 1;
+      else
+	first_char_loc = 0;
+
+      username = savestring (&text[first_char_loc]);
       namelen = strlen (username);
       setpwent ();
     }
@@ -3491,97 +4012,17 @@ username_completion_function (text, state)
   else
     {
       char *value = (char *)xmalloc (2 + strlen (entry->pw_name));
+
       *value = *text;
-      strcpy (value + 1, entry->pw_name);
-      rl_filename_completion_desired = 1;
+
+      strcpy (value + first_char_loc, entry->pw_name);
+
+      if (first_char == '~')
+	rl_filename_completion_desired = 1;
+
       return (value);
     }
 }
-
-/* If non-null, this contains the address of a function to call if the
-   standard meaning for expanding a tilde fails.  The function is called
-   with the text (sans tilde, as in "foo"), and returns a malloc()'ed string
-   which is the expansion, or a NULL pointer if there is no expansion. */
-Function *rl_tilde_expander = (Function *)NULL;
-
-/* Expand FILENAME if it begins with a tilde.  This always returns
-   a new string. */
-char *
-tilde_expand (filename)
-     char *filename;
-{
-  char *dirname = filename ? savestring (filename) : (char *)NULL;
-
-  if (dirname && *dirname == '~')
-    {
-      char *temp_name;
-      if (!dirname[1] || dirname[1] == '/')
-	{
-	  /* Prepend $HOME to the rest of the string. */
-	  char *temp_home = (char *)getenv ("HOME");
-
-	  temp_name = (char *)alloca (1 + strlen (&dirname[1])
-				      + (temp_home? strlen (temp_home) : 0));
-	  temp_name[0] = '\0';
-	  if (temp_home)
-	    strcpy (temp_name, temp_home);
-	  strcat (temp_name, &dirname[1]);
-	  free (dirname);
-	  dirname = savestring (temp_name);
-	}
-      else
-	{
-	  struct passwd *getpwnam (), *user_entry;
-	  char *username = (char *)alloca (257);
-	  int i, c;
-
-	  for (i = 1; c = dirname[i]; i++)
-	    {
-	      if (c == '/') break;
-	      else username[i - 1] = c;
-	    }
-	  username[i - 1] = '\0';
-
-	  if (!(user_entry = getpwnam (username)))
-	    {
-	      /* If the calling program has a special syntax for
-		 expanding tildes, and we couldn't find a standard
-		 expansion, then let them try. */
-	      if (rl_tilde_expander)
-		{
-		  char *expansion;
-
-		  expansion = (char *)(*rl_tilde_expander) (username);
-
-		  if (expansion)
-		    {
-		      temp_name = (char *)alloca (1 + strlen (expansion)
-						  + strlen (&dirname[i]));
-		      strcpy (temp_name, expansion);
-		      strcat (temp_name, &dirname[i]);
-		      free (expansion);
-		      goto return_name;
-		    }
-		}
-	      /*
-	       * We shouldn't report errors.
-	       */
-	    }
-	  else
-	    {
-	      temp_name = (char *)alloca (1 + strlen (user_entry->pw_dir)
-					  + strlen (&dirname[i]));
-	      strcpy (temp_name, user_entry->pw_dir);
-	      strcat (temp_name, &dirname[i]);
-	    return_name:
-	      free (dirname);
-	      dirname = savestring (temp_name);
-	    }
-	}
-    }
-  return (dirname);
-}
-
 
 /* **************************************************************** */
 /*								    */
@@ -3784,38 +4225,46 @@ maybe_replace_line ()
   HIST_ENTRY *temp = current_history ();
 
   /* If the current line has changed, save the changes. */
-  if (temp && ((UNDO_LIST *)(temp->data) != rl_undo_list)) {
-    temp = replace_history_entry (where_history (), the_line, rl_undo_list);
-    free (temp->line);
-    free (temp);
-  }
+  if (temp && ((UNDO_LIST *)(temp->data) != rl_undo_list))
+    {
+      temp = replace_history_entry (where_history (), the_line, rl_undo_list);
+      free (temp->line);
+      free (temp);
+    }
 }
 
 /* Put back the saved_line_for_history if there is one. */
 maybe_unsave_line ()
 {
-  if (saved_line_for_history) {
-    strcpy (the_line, saved_line_for_history->line);
-    rl_undo_list = (UNDO_LIST *)saved_line_for_history->data;
-    free_history_entry (saved_line_for_history);
-    saved_line_for_history = (HIST_ENTRY *)NULL;
-    rl_end = rl_point = strlen (the_line);
-  } else {
+  if (saved_line_for_history)
+    {
+      int line_len;
+
+      line_len = strlen (saved_line_for_history->line);
+
+      if (line_len >= rl_line_buffer_len)
+	rl_extend_line_buffer (line_len);
+
+      strcpy (the_line, saved_line_for_history->line);
+      rl_undo_list = (UNDO_LIST *)saved_line_for_history->data;
+      free_history_entry (saved_line_for_history);
+      saved_line_for_history = (HIST_ENTRY *)NULL;
+      rl_end = rl_point = strlen (the_line);
+    }
+  else
     ding ();
-  }
 }
 
 /* Save the current line in saved_line_for_history. */
 maybe_save_line ()
 {
-  if (!saved_line_for_history) {
-    saved_line_for_history = (HIST_ENTRY *)xmalloc (sizeof (HIST_ENTRY));
-    saved_line_for_history->line = savestring (the_line);
-    saved_line_for_history->data = (char *)rl_undo_list;
-  }
+  if (!saved_line_for_history)
+    {
+      saved_line_for_history = (HIST_ENTRY *)xmalloc (sizeof (HIST_ENTRY));
+      saved_line_for_history->line = savestring (the_line);
+      saved_line_for_history->data = (char *)rl_undo_list;
+    }
 }
-
-
 
 /* **************************************************************** */
 /*								    */
@@ -3866,9 +4315,20 @@ rl_get_next_history (count)
     maybe_unsave_line ();
   else
     {
+      int line_len;
+
+      line_len = strlen (temp->line);
+
+      if (line_len >= rl_line_buffer_len)
+	rl_extend_line_buffer (line_len);
+
       strcpy (the_line, temp->line);
       rl_undo_list = (UNDO_LIST *)temp->data;
       rl_end = rl_point = strlen (the_line);
+#if defined (VI_MODE)
+      if (rl_editing_mode == vi_mode)
+	rl_point = 0;
+#endif /* VI_MODE */
     }
 }
 
@@ -3914,23 +4374,23 @@ rl_get_previous_history (count)
     ding ();
   else
     {
+      int line_len;
+
+      line_len = strlen (temp->line);
+
+      if (line_len >= rl_line_buffer_len)
+	rl_extend_line_buffer (line_len);
+
       strcpy (the_line, temp->line);
       rl_undo_list = (UNDO_LIST *)temp->data;
-      rl_end = rl_point = strlen (the_line);
-#ifdef VI_MODE
+      rl_end = rl_point = line_len;
+
+#if defined (VI_MODE)
       if (rl_editing_mode == vi_mode)
 	rl_point = 0;
 #endif /* VI_MODE */
     }
 }
-
-/* There is a command in ksh which yanks into this line, the last word
-   of the previous line.  Here it is.  We left it on M-. */
-rl_yank_previous_last_arg (ignore)
-     int ignore;
-{
-}
-
 
 
 /* **************************************************************** */
@@ -3973,10 +4433,10 @@ rl_display_search (search_string, reverse_p, where)
 
   *message = '\0';
 
-#ifdef NEVER
+#if defined (NOTDEF)
   if (where != -1)
     sprintf (message, "[%d]", where + history_base);
-#endif
+#endif /* NOTDEF */
 
   strcat (message, "(");
 
@@ -3995,7 +4455,7 @@ rl_display_search (search_string, reverse_p, where)
 
 /* Search through the history looking for an interactively typed string.
    This is analogous to i-search.  We start the search in the current line.
-   DIRECTION is which direction to search; > 0 means forward, < 0 means
+   DIRECTION is which direction to search; >= 0 means forward, < 0 means
    backwards. */
 rl_search_history (direction, invoking_key)
      int direction;
@@ -4016,12 +4476,11 @@ rl_search_history (direction, invoking_key)
   /* Where we get LINES from. */
   HIST_ENTRY **hlist = history_list ();
 
+  register int i = 0;
   int orig_point = rl_point;
   int orig_line = where_history ();
   int last_found_line = orig_line;
   int c, done = 0;
-  register int i = 0;
-
 
   /* The line currently being searched. */
   char *sline;
@@ -4033,7 +4492,6 @@ rl_search_history (direction, invoking_key)
   int reverse = (direction < 0);
 
   /* Create an arrary of pointers to the lines that we want to search. */
-
   maybe_replace_line ();
   if (hlist)
     for (i = 0; hlist[i]; i++);
@@ -4047,9 +4505,13 @@ rl_search_history (direction, invoking_key)
   if (saved_line_for_history)
     lines[i] = saved_line_for_history->line;
   else
+    /* So I have to type it in this way instead. */
     {
-      /* So I have to type it in this way instead. */
-      lines[i] = (char *)alloca (1 + strlen (the_line));
+      char *alloced_line;
+
+      /* Keep that mips alloca happy. */
+      alloced_line = (char *)alloca (1 + strlen (the_line));
+      lines[i] = alloced_line;
       strcpy (lines[i], &the_line[0]);
     }
 
@@ -4061,6 +4523,12 @@ rl_search_history (direction, invoking_key)
   /* Initialize search parameters. */
   *search_string = '\0';
   search_string_index = 0;
+
+  /* Normalize DIRECTION into 1 or -1. */
+  if (direction >= 0)
+    direction = 1;
+  else
+    direction = -1;
 
   rl_display_search (search_string, reverse, -1);
 
@@ -4076,12 +4544,14 @@ rl_search_history (direction, invoking_key)
 	Function *f = (Function *)NULL;
 
 	if (keymap[c].type == ISFUNC)
-	  f = keymap[c].function;
+	  {
+	    f = keymap[c].function;
 
-	if (f == rl_reverse_search_history)
-	  c = reverse ? -1 : -2;
-	else if (f == rl_forward_search_history)
-	  c =  !reverse ? -1 : -2;
+	    if (f == rl_reverse_search_history)
+	      c = reverse ? -1 : -2;
+	    else if (f == rl_forward_search_history)
+	      c =  !reverse ? -1 : -2;
+	  }
       }
 
       switch (c)
@@ -4143,9 +4613,8 @@ rl_search_history (direction, invoking_key)
 		    {
 		      while (index >= 0)
 			if (strncmp
-			    (search_string,
-			     sline + index,
-			     search_string_index) == 0)
+			    (search_string, sline + index, search_string_index)
+			    == 0)
 			  goto string_found;
 			else
 			  index--;
@@ -4199,18 +4668,30 @@ rl_search_history (direction, invoking_key)
 	      /* We have found the search string.  Just display it.  But don't
 		 actually move there in the history list until the user accepts
 		 the location. */
-	      strcpy (the_line, lines[i]);
-	      rl_point = index;
-	      rl_end = strlen (the_line);
-	      last_found_line = i;
-	      rl_display_search (search_string, reverse,
-				 (i == orig_line) ? -1 : i);
+	      {
+		int line_len;
+
+		line_len = strlen (lines[i]);
+
+		if (line_len >= rl_line_buffer_len)
+		  rl_extend_line_buffer (line_len);
+
+		strcpy (the_line, lines[i]);
+		rl_point = index;
+		rl_end = line_len;
+		last_found_line = i;
+		rl_display_search
+		  (search_string, reverse, (i == orig_line) ? -1 : i);
+	      }
 	    }
 	}
       continue;
     }
-  /* The user has won.  They found the string that they wanted.  Now all
-     we have to do is place them there. */
+
+  /* The searching is over.  The user may have found the string that she
+     was looking for, or else she may have exited a failing search.  If
+     INDEX is -1, then that shows that the string searched for was not
+     found.  We use this to determine where to place rl_point. */
   {
     int now = last_found_line;
 
@@ -4221,6 +4702,12 @@ rl_search_history (direction, invoking_key)
       rl_get_previous_history (orig_line - now);
     else
       rl_get_next_history (now - orig_line);
+
+    /* If the index of the "matched" string is less than zero, then the
+       final search string was never matched, so put point somewhere
+       reasonable. */
+    if (index < 0)
+      index = strlen (the_line);
 
     rl_point = index;
     rl_clear_message ();
@@ -4273,66 +4760,79 @@ rl_kill_text (from, to)
   char *text = rl_copy (from, to);
 
   /* Is there anything to kill? */
-  if (from == to) {
-    free (text);
-    last_command_was_kill++;
-    return;
-  }
+  if (from == to)
+    {
+      free (text);
+      last_command_was_kill++;
+      return;
+    }
 
   /* Delete the copied text from the line. */
   rl_delete_text (from, to);
 
   /* First, find the slot to work with. */
-  if (!last_command_was_kill) {
-
-    /* Get a new slot.  */
-    if (!rl_kill_ring) {
-
-      /* If we don't have any defined, then make one. */
-      rl_kill_ring =
-	(char **)xmalloc (((rl_kill_ring_length = 1) + 1) * sizeof (char *));
-      slot = 1;
-
-    } else {
-
-      /* We have to add a new slot on the end, unless we have exceeded
-	 the max limit for remembering kills. */
-      slot = rl_kill_ring_length;
-      if (slot == rl_max_kills) {
-	register int i;
-	free (rl_kill_ring[0]);
-	for (i = 0; i < slot; i++)
-	  rl_kill_ring[i] = rl_kill_ring[i + 1];
-      } else {
-	rl_kill_ring =
-	  (char **)xrealloc (rl_kill_ring,
-			     ((slot = (rl_kill_ring_length += 1)) + 1)
-			     * sizeof (char *));
-      }
+  if (!last_command_was_kill)
+    {
+      /* Get a new slot.  */
+      if (!rl_kill_ring)
+	{
+	  /* If we don't have any defined, then make one. */
+	  rl_kill_ring = (char **)
+	    xmalloc (((rl_kill_ring_length = 1) + 1) * sizeof (char *));
+	  slot = 1;
+	}
+      else
+	{
+	  /* We have to add a new slot on the end, unless we have
+	     exceeded the max limit for remembering kills. */
+	  slot = rl_kill_ring_length;
+	  if (slot == rl_max_kills)
+	    {
+	      register int i;
+	      free (rl_kill_ring[0]);
+	      for (i = 0; i < slot; i++)
+		rl_kill_ring[i] = rl_kill_ring[i + 1];
+	    }
+	  else
+	    {
+	      rl_kill_ring =
+		(char **)
+		  xrealloc (rl_kill_ring,
+			    ((slot = (rl_kill_ring_length += 1)) + 1)
+			    * sizeof (char *));
+	    }
+	}
+      slot--;
     }
-    slot--;
-  } else {
-    slot = rl_kill_ring_length - 1;
-  }
+  else
+    {
+      slot = rl_kill_ring_length - 1;
+    }
 
   /* If the last command was a kill, prepend or append. */
-  if (last_command_was_kill) {
-    char *old = rl_kill_ring[slot];
-    char *new = (char *)xmalloc (1 + strlen (old) + strlen (text));
+  if (last_command_was_kill && rl_editing_mode != vi_mode)
+    {
+      char *old = rl_kill_ring[slot];
+      char *new = (char *)xmalloc (1 + strlen (old) + strlen (text));
 
-    if (from < to) {
-      strcpy (new, old);
-      strcat (new, text);
-    } else {
-      strcpy (new, text);
-      strcat (new, old);
+      if (from < to)
+	{
+	  strcpy (new, old);
+	  strcat (new, text);
+	}
+      else
+	{
+	  strcpy (new, text);
+	  strcat (new, old);
+	}
+      free (old);
+      free (text);
+      rl_kill_ring[slot] = new;
     }
-    free (old);
-    free (text);
-    rl_kill_ring[slot] = new;
-  } else {
-    rl_kill_ring[slot] = text;
-  }
+  else
+    {
+      rl_kill_ring[slot] = text;
+    }
   rl_kill_index = slot;
   last_command_was_kill++;
 }
@@ -4340,7 +4840,6 @@ rl_kill_text (from, to)
 /* Now REMEMBER!  In order to do prepending or appending correctly, kill
    commands always make rl_point's original position be the FROM argument,
    and rl_point's extent be the TO argument. */
-
 
 /* **************************************************************** */
 /*								    */
@@ -4484,22 +4983,27 @@ rl_yank_nth_arg (count, ignore)
     }
 
   rl_begin_undo_group ();
+
+#if defined (VI_MODE)
+  /* Vi mode always inserts a space befoe yanking the argument, and it
+     inserts it right *after* rl_point. */
+  if (rl_editing_mode == vi_mode)
+    rl_point++;
+#endif /* VI_MODE */
+
   if (rl_point && the_line[rl_point - 1] != ' ')
     rl_insert_text (" ");
+
   rl_insert_text (arg);
   free (arg);
+
   rl_end_undo_group ();
 }
-
-/* Vi Mode. */
-#ifdef VI_MODE
-#include "vi_mode.c"
-#endif /* VI_MODE */
 
 /* How to toggle back and forth between editing modes. */
 rl_vi_editing_mode ()
 {
-#ifdef VI_MODE
+#if defined (VI_MODE)
   rl_editing_mode = vi_mode;
   rl_vi_insertion_mode ();
 #endif /* VI_MODE */
@@ -4524,7 +5028,7 @@ int completion_case_fold = 0;
 /* Return an array of (char *) which is a list of completions for TEXT.
    If there are no completions, return a NULL pointer.
    The first entry in the returned array is the substitution for TEXT.
-    The remaining entries are the possible completions.
+   The remaining entries are the possible completions.
    The array is terminated with a NULL pointer.
 
    ENTRY_FUNCTION is a function of two args, and returns a (char *).
@@ -4556,9 +5060,8 @@ completion_matches (text, entry_function)
   while (string = (*entry_function) (text, matches))
     {
       if (matches + 1 == match_list_size)
-	match_list =
-	  (char **)xrealloc (match_list,
-			     ((match_list_size += 10) + 1) * sizeof (char *));
+	match_list = (char **)xrealloc
+	  (match_list, ((match_list_size += 10) + 1) * sizeof (char *));
 
       match_list[++matches] = string;
       match_list[matches + 1] = (char *)NULL;
@@ -4639,7 +5142,7 @@ filename_completion_function (text, state)
   /* If we don't have any state, then do some initialization. */
   if (!state)
     {
-      char  *temp;
+      char *temp;
 
       if (dirname) free (dirname);
       if (filename) free (filename);
@@ -4664,7 +5167,9 @@ filename_completion_function (text, state)
       /* Save the version of the directory that the user typed. */
       users_dirname = savestring (dirname);
       {
-	char *tilde_expand (), *temp_dirname = tilde_expand (dirname);
+	char *temp_dirname;
+
+	temp_dirname = tilde_expand (dirname);
 	free (dirname);
 	dirname = temp_dirname;
 
@@ -4678,9 +5183,9 @@ filename_completion_function (text, state)
     }
 
   /* At this point we should entertain the possibility of hacking wildcarded
-     filenames, like /usr/man*\/te<TAB>.  If the directory name contains
-     globbing characters, then build an array of directories to glob on, and
-     glob on the first one. */
+     filenames, like /usr/man/man<WILD>/te<TAB>.  If the directory name
+     contains globbing characters, then build an array of directories to
+     glob on, and glob on the first one. */
 
   /* Now that we have some state, we can read the directory. */
 
@@ -4698,13 +5203,8 @@ filename_completion_function (text, state)
 	{
 	  /* Otherwise, if these match upto the length of filename, then
 	     it is a match. */
-#ifdef TMB_SYSV
-	  if ((strlen (entry->d_name) >= filename_len) &&
-	      (strncmp (filename, entry->d_name, filename_len) == 0))
-#else
-	    if ((entry->d_namlen >= filename_len) &&
+	    if (((int)D_NAMLEN (entry)) >= filename_len &&
 		(strncmp (filename, entry->d_name, filename_len) == 0))
-#endif /* TMB_SYSV */
 	      {
 		break;
 	      }
@@ -4726,13 +5226,8 @@ filename_completion_function (text, state)
 
       if (dirname && (strcmp (dirname, ".") != 0))
 	{
-#ifdef TMB_SYSV
-	  temp = (char *)xmalloc (1 + strlen (users_dirname)
-				  + strlen (entry->d_name));
-#else
-	  temp = (char *)xmalloc (1 + strlen (users_dirname)
-				  + entry->d_namlen);
-#endif /* TMB_SYSV */
+	  temp = (char *)
+	    xmalloc (1 + strlen (users_dirname) + D_NAMLEN (entry));
 	  strcpy (temp, users_dirname);
 	  strcat (temp, entry->d_name);
 	}
@@ -4847,8 +5342,10 @@ rl_macro_bind (keyseq, macro, map)
      char *keyseq, *macro;
      Keymap map;
 {
-  char *macro_keys = (char *)xmalloc (2 * (strlen (macro)));
+  char *macro_keys;
   int macro_keys_len;
+
+  macro_keys = (char *)xmalloc ((2 * strlen (macro)) + 1);
 
   if (rl_translate_keyseq (macro, macro_keys, &macro_keys_len))
     {
@@ -4956,7 +5453,11 @@ rl_translate_keyseq (seq, array, len)
 
 		case 'C':
 		  i += 2;
-		  array[l++] = CTRL (to_upper (seq[i]));
+		  /* Special hack for C-?... */
+		  if (seq[i] == '?')
+		    array[l++] = RUBOUT;
+		  else
+		    array[l++] = CTRL (to_upper (seq[i]));
 		  break;
 
 		case 'e':
@@ -4996,7 +5497,7 @@ static char *last_readline_init_file = "~/.inputrc";
 rl_re_read_init_file (count, ignore)
      int count, ignore;
 {
-  rl_read_init_file (last_readline_init_file);
+  rl_read_init_file ((char *)NULL);
 }
 
 /* Do key bindings from a file.  If FILENAME is NULL it defaults
@@ -5006,66 +5507,57 @@ int
 rl_read_init_file (filename)
      char *filename;
 {
-  extern int errno;
-  int line_size, line_index;
-  char *line = (char *)xmalloc (line_size = 100);
-  char *openname;
-  FILE *file;
-
-  int c;
+  register int i;
+  char *buffer, *openname, *line, *end;
+  struct stat finfo;
+  int file;
 
   /* Default the filename. */
   if (!filename)
-    filename = "~/.inputrc";
+    filename = last_readline_init_file;
 
   openname = tilde_expand (filename);
 
-  /* Open the file. */
-  file = fopen (openname, "r");
-  free (openname);
-
-  if (!file)
-    return (errno);
+  if ((stat (openname, &finfo) < 0) ||
+      (file = open (openname, O_RDONLY, 0666)) < 0)
+    {
+      free (openname);
+      return (errno);
+    }
+  else
+    free (openname);
 
   last_readline_init_file = filename;
 
-  /* Loop reading lines from the file.  Lines that start with `#' are
-     comments, all other lines are commands for readline initialization. */
-  while ((c = rl_getc (file)) != EOF)
+  /* Read the file into BUFFER. */
+  buffer = (char *)xmalloc (finfo.st_size + 1);
+  i = read (file, buffer, finfo.st_size);
+  close (file);
+
+  if (i != finfo.st_size)
+    return (errno);
+
+  /* Loop over the lines in the file.  Lines that start with `#' are
+     comments; all other lines are commands for readline initialization. */
+  line = buffer;
+  end = buffer + finfo.st_size;
+  while (line < end)
     {
-      /* If comment, flush to EOL. */
-      if (c == '#')
-	{
-	  while ((c = rl_getc (file)) != EOF && c != '\n');
-	  if (c == EOF)
-	    goto function_exit;
-	  continue;
-	}
+      /* Find the end of this line. */
+      for (i = 0; line + i != end && line[i] != '\n'; i++);
 
-      /* Otherwise, this is the start of a line.  Read the
-	 line from the file. */
-      line_index = 0;
-      while (c != EOF && c != '\n')
-	{
-	  line[line_index++] = c;
-	  if (line_index == line_size)
-	    line = (char *)xrealloc (line, line_size += 100);
-	  c = rl_getc (file);
-	}
-      line[line_index] = '\0';
+      /* Mark end of line. */
+      line[i] = '\0';
 
-      /* Parse the line. */
-      rl_parse_and_bind (line);
+      /* If the line is not a comment, then parse it. */
+      if (*line != '#')
+	rl_parse_and_bind (line);
+
+      /* Move to the next line. */
+      line += i + 1;
     }
-
-function_exit:
-
-  free (line);
-  /* Close up the file and exit. */
-  fclose (file);
   return (0);
 }
-
 
 /* **************************************************************** */
 /*								    */
@@ -5099,8 +5591,10 @@ parser_if (args)
     }
   if_stack[if_stack_depth++] = parsing_conditionalized_out;
 
-  /* We only check to see if the first word in ARGS is the same as the
-     value stored in rl_readline_name. */
+  /* If parsing is turned off, then nothing can turn it back on except
+     for finding the matching endif.  In that case, return right now. */
+  if (parsing_conditionalized_out)
+    return;
 
   /* Isolate first argument. */
   for (i = 0; args[i] && !whitespace (args[i]); i++);
@@ -5108,7 +5602,45 @@ parser_if (args)
   if (args[i])
     args[i++] = '\0';
 
-  if (stricmp (args, rl_readline_name) == 0)
+  /* Handle "if term=foo" and "if mode=emacs" constructs.  If this
+     isn't term=foo, or mode=emacs, then check to see if the first
+     word in ARGS is the same as the value stored in rl_readline_name. */
+  if (rl_terminal_name && strnicmp (args, "term=", 5) == 0)
+    {
+      char *tem, *tname;
+
+      /* Terminals like "aaa-60" are equivalent to "aaa". */
+      tname = savestring (rl_terminal_name);
+      tem = rindex (tname, '-');
+      if (tem)
+	*tem = '\0';
+
+      if (stricmp (args + 5, tname) == 0)
+	parsing_conditionalized_out = 0;
+      else
+	parsing_conditionalized_out = 1;
+    }
+#if defined (VI_MODE)
+  else if (strnicmp (args, "mode=", 5) == 0)
+    {
+      int mode;
+
+      if (stricmp (args + 5, "emacs") == 0)
+	mode = emacs_mode;
+      else if (stricmp (args + 5, "vi") == 0)
+	mode = vi_mode;
+      else
+	mode = no_mode;
+
+      if (mode == rl_editing_mode)
+	parsing_conditionalized_out = 0;
+      else
+	parsing_conditionalized_out = 1;
+    }
+#endif /* VI_MODE */
+  /* Check to see if the first word in ARGS is the same as the
+     value stored in rl_readline_name. */
+  else if (stricmp (args, rl_readline_name) == 0)
     parsing_conditionalized_out = 0;
   else
     parsing_conditionalized_out = 1;
@@ -5118,12 +5650,22 @@ parser_if (args)
 parser_else (args)
      char *args;
 {
-  if (if_stack_depth)
-    parsing_conditionalized_out = !parsing_conditionalized_out;
-  else
+  register int i;
+
+  if (!if_stack_depth)
     {
-      /* *** What, no error message? *** */
+      /* Error message? */
+      return;
     }
+
+  /* Check the previous (n - 1) levels of the stack to make sure that
+     we haven't previously turned off parsing. */
+  for (i = 0; i < if_stack_depth - 1; i++)
+    if (if_stack[i] == 1)
+      return;
+
+  /* Invert the state of parsing if at top level. */
+  parsing_conditionalized_out = !parsing_conditionalized_out;
 }
 
 /* Terminate a conditional, popping the value of
@@ -5187,6 +5729,11 @@ handle_parser_directive (statement)
   return (1);
 }
 
+/* Ugly but working hack for binding prefix meta. */
+#define PREFIX_META_HACK
+
+static int substring_member_of_array ();
+
 /* Read the binding command from STRING and perform it.
    A key binding command looks like: Keyname: function-name\0,
    a variable binding command looks like: set variable value.
@@ -5195,10 +5742,12 @@ rl_parse_and_bind (string)
      char *string;
 {
   extern char *possible_control_prefixes[], *possible_meta_prefixes[];
-  char  *funname, *kname;
-  static int substring_member_of_array ();
+  char *funname, *kname;
   register int c;
   int key, i;
+
+  while (string && whitespace (*string))
+    string++;
 
   if (!string || !*string || *string == '#')
     return;
@@ -5341,6 +5890,17 @@ rl_parse_and_bind (string)
 
       rl_macro_bind (seq, &funname[1], keymap);
     }
+#if defined (PREFIX_META_HACK)
+  /* Ugly, but working hack to keep prefix-meta around. */
+  else if (stricmp (funname, "prefix-meta") == 0)
+    {
+      char seq[2];
+
+      seq[0] = key;
+      seq[1] = '\0';
+      rl_generic_bind (ISKMAP, seq, (char *)emacs_meta_keymap, keymap);
+    }
+#endif /* PREFIX_META_HACK */
   else
     rl_bind_key (key, rl_named_function (funname));
 }
@@ -5352,9 +5912,15 @@ rl_variable_bind (name, value)
     {
       if (strnicmp (value, "vi", 2) == 0)
 	{
-#ifdef VI_MODE
+#if defined (VI_MODE)
 	  keymap = vi_insertion_keymap;
 	  rl_editing_mode = vi_mode;
+#else
+#if defined (NOTDEF)
+	  /* What state is the terminal in?  I'll tell you:
+	     non-determinate!  That means we cannot do any output. */
+	  ding ();
+#endif /* NOTDEF */
 #endif /* VI_MODE */
 	}
       else if (strnicmp (value, "emacs", 5) == 0)
@@ -5377,6 +5943,27 @@ rl_variable_bind (name, value)
       else
 	mark_modified_lines = 0;
     }
+  else if (stricmp (name, "prefer-visible-bell") == 0)
+    {
+      if (!*value || stricmp (value, "On") == 0)
+        prefer_visible_bell = 1;
+      else
+        prefer_visible_bell = 0;
+    }
+  else if (stricmp (name, "comment-begin") == 0)
+    {
+#if defined (VI_MODE)
+      extern char *rl_vi_comment_begin;
+
+      if (*value)
+	{
+	  if (rl_vi_comment_begin)
+	    free (rl_vi_comment_begin);
+
+	  rl_vi_comment_begin = savestring (value);
+	}
+#endif /* VI_MODE */
+    }
 }
 
 /* Return the character which matches NAME.
@@ -5388,18 +5975,17 @@ typedef struct {
 } assoc_list;
 
 assoc_list name_key_alist[] = {
-  { "Space", ' ' },
-  { "SPC", ' ' },
-  { "Rubout", 0x7f },
   { "DEL", 0x7f },
-  { "Tab", 0x09 },
-  { "Newline", '\n' },
-  { "Return", '\r' },
-  { "RET", '\r' },
-  { "LFD", '\n' },
-  { "Escape", '\033' },
   { "ESC", '\033' },
-
+  { "Escape", '\033' },
+  { "LFD", '\n' },
+  { "Newline", '\n' },
+  { "RET", '\r' },
+  { "Return", '\r' },
+  { "Rubout", 0x7f },
+  { "SPC", ' ' },
+  { "Space", ' ' },
+  { "Tab", 0x09 },
   { (char *)0x0, 0 }
 };
 
@@ -5419,17 +6005,243 @@ glean_key_from_name (name)
 
 /* **************************************************************** */
 /*								    */
+/*		  Key Binding and Function Information		    */
+/*								    */
+/* **************************************************************** */
+
+/* Each of the following functions produces information about the
+   state of keybindings and functions known to Readline.  The info
+   is always printed to rl_outstream, and in such a way that it can
+   be read back in (i.e., passed to rl_parse_and_bind (). */
+
+/* Print the names of functions known to Readline. */
+void
+rl_list_funmap_names (ignore)
+     int ignore;
+{
+  register int i;
+  char **funmap_names;
+  extern char **rl_funmap_names ();
+
+  funmap_names = rl_funmap_names ();
+
+  if (!funmap_names)
+    return;
+
+  for (i = 0; funmap_names[i]; i++)
+    fprintf (rl_outstream, "%s\n", funmap_names[i]);
+
+  free (funmap_names);
+}
+
+/* Return a NULL terminated array of strings which represent the key
+   sequences that are used to invoke FUNCTION in MAP. */
+static char **
+invoking_keyseqs_in_map (function, map)
+     Function *function;
+     Keymap map;
+{
+  register int key;
+  char **result;
+  int result_index, result_size;
+
+  result = (char **)NULL;
+  result_index = result_size = 0;
+
+  for (key = 0; key < 128; key++)
+    {
+      switch (map[key].type)
+	{
+	case ISMACR:
+	  /* Macros match, if, and only if, the pointers are identical.
+	     Thus, they are treated exactly like functions in here. */
+	case ISFUNC:
+	  /* If the function in the keymap is the one we are looking for,
+	     then add the current KEY to the list of invoking keys. */
+	  if (map[key].function == function)
+	    {
+	      char *keyname = (char *)xmalloc (5);
+
+	      if (CTRL_P (key))
+		sprintf (keyname, "\\C-%c", to_lower (UNCTRL (key)));
+	      else if (key == RUBOUT)
+		sprintf (keyname, "\\C-?");
+	      else
+		sprintf (keyname, "%c", key);
+	      
+	      if (result_index + 2 > result_size)
+		{
+		  if (!result)
+		    result = (char **) xmalloc
+		      ((result_size = 10) * sizeof (char *));
+		  else
+		    result = (char **) xrealloc
+		      (result, (result_size += 10) * sizeof (char *));
+		}
+
+	      result[result_index++] = keyname;
+	      result[result_index] = (char *)NULL;
+	    }
+	  break;
+
+	case ISKMAP:
+	  {
+	    char **seqs = (char **)NULL;
+
+	    /* Find the list of keyseqs in this map which have FUNCTION as
+	       their target.  Add the key sequences found to RESULT. */
+	    if (map[key].function)
+	      seqs =
+		invoking_keyseqs_in_map (function, (Keymap)map[key].function);
+
+	    if (seqs)
+	      {
+		register int i;
+
+		for (i = 0; seqs[i]; i++)
+		  {
+		    char *keyname = (char *)xmalloc (6 + strlen (seqs[i]));
+
+		    if (key == ESC)
+		      sprintf (keyname, "\\e");
+		    else if (CTRL_P (key))
+		      sprintf (keyname, "\\C-%c", to_lower (UNCTRL (key)));
+		    else if (key == RUBOUT)
+		      sprintf (keyname, "\\C-?");
+		    else
+		      sprintf (keyname, "%c", key);
+
+		    strcat (keyname, seqs[i]);
+
+		    if (result_index + 2 > result_size)
+		      {
+			if (!result)
+			  result = (char **)
+			    xmalloc ((result_size = 10) * sizeof (char *));
+			else
+			  result = (char **)
+			    xrealloc (result,
+				      (result_size += 10) * sizeof (char *));
+		      }
+
+		    result[result_index++] = keyname;
+		    result[result_index] = (char *)NULL;
+		  }
+	      }
+	  }
+	  break;
+	}
+    }
+  return (result);
+}
+
+/* Return a NULL terminated array of strings which represent the key
+   sequences that can be used to invoke FUNCTION using the current keymap. */
+char **
+rl_invoking_keyseqs (function)
+     Function *function;
+{
+  return (invoking_keyseqs_in_map (function, keymap));
+}
+
+/* Print all of the current functions and their bindings to
+   rl_outstream.  If an explicit argument is given, then print
+   the output in such a way that it can be read back in. */
+int
+rl_dump_functions (count)
+     int count;
+{
+  void rl_function_dumper ();
+
+  rl_function_dumper (rl_explicit_arg);
+  rl_on_new_line ();
+  return (0);
+}
+
+/* Print all of the functions and their bindings to rl_outstream.  If
+   PRINT_READABLY is non-zero, then print the output in such a way
+   that it can be read back in. */
+void
+rl_function_dumper (print_readably)
+     int print_readably;
+{
+  register int i;
+  char **rl_funmap_names (), **names;
+  char *name;
+
+  names = rl_funmap_names ();
+
+  fprintf (rl_outstream, "\n");
+
+  for (i = 0; name = names[i]; i++)
+    {
+      Function *function;
+      char **invokers;
+
+      function = rl_named_function (name);
+      invokers = invoking_keyseqs_in_map (function, keymap);
+
+      if (print_readably)
+	{
+	  if (!invokers)
+	    fprintf (rl_outstream, "# %s (not bound)\n", name);
+	  else
+	    {
+	      register int j;
+
+	      for (j = 0; invokers[j]; j++)
+		{
+		  fprintf (rl_outstream, "\"%s\": %s\n",
+			   invokers[j], name);
+		  free (invokers[j]);
+		}
+
+	      free (invokers);
+	    }
+	}
+      else
+	{
+	  if (!invokers)
+	    fprintf (rl_outstream, "%s is not bound to any keys\n",
+		     name);
+	  else
+	    {
+	      register int j;
+
+	      fprintf (rl_outstream, "%s can be found on ", name);
+
+	      for (j = 0; invokers[j] && j < 5; j++)
+		{
+		  fprintf (rl_outstream, "\"%s\"%s", invokers[j],
+			   invokers[j + 1] ? ", " : ".\n");
+		}
+
+	      if (j == 5 && invokers[j])
+		fprintf (rl_outstream, "...\n");
+
+	      for (j = 0; invokers[j]; j++)
+		free (invokers[j]);
+
+	      free (invokers);
+	    }
+	}
+    }
+}
+
+
+/* **************************************************************** */
+/*								    */
 /*			String Utility Functions		    */
 /*								    */
 /* **************************************************************** */
+
+static char *strindex ();
 
 /* Return non-zero if any members of ARRAY are a substring in STRING. */
 static int
 substring_member_of_array (string, array)
      char *string, **array;
 {
-  static char *strindex ();
-
   while (*array)
     {
       if (strindex (string, *array))
@@ -5495,18 +6307,12 @@ strindex (s1, s2)
 
 /* **************************************************************** */
 /*								    */
-/*			SYSV Support				    */
+/*			USG (System V) Support			    */
 /*								    */
 /* **************************************************************** */
 
-/* Since system V reads input differently than we do, I have to
-   make a special version of getc for that. */
-
-#ifdef SYSV
-
-extern int errno;
-#include <sys/errno.h>
-
+/* When compiling and running in the `Posix' environment, Ultrix does
+   not restart system calls, so this needs to do it. */
 int
 rl_getc (stream)
      FILE *stream;
@@ -5517,23 +6323,24 @@ rl_getc (stream)
   while (1)
     {
       result = read (fileno (stream), &c, sizeof (char));
+
       if (result == sizeof (char))
 	return (c);
 
+      /* If zero characters are returned, then the file that we are
+	 reading from is empty!  Return EOF in that case. */
+      if (result == 0)
+	return (EOF);
+
+      /* If the error that we received was SIGINT, then try again,
+	 this is simply an interrupted system call to read ().
+	 Otherwise, some error ocurred, also signifying EOF. */
       if (errno != EINTR)
 	return (EOF);
     }
 }
-#else
-int
-rl_getc (stream)
-     FILE *stream;
-{
-  return (getc (stream));
-}
-#endif
 
-#ifdef STATIC_MALLOC
+#if defined (STATIC_MALLOC)
 
 /* **************************************************************** */
 /*								    */
@@ -5559,10 +6366,16 @@ xrealloc (pointer, bytes)
      char *pointer;
      int bytes;
 {
-  char *temp = (char *)realloc (pointer, bytes);
+  char *temp;
+
+  if (!pointer)
+    temp = (char *)malloc (bytes);
+  else
+    temp = (char *)realloc (pointer, bytes);
 
   if (!temp)
     memory_error_and_abort ();
+
   return (temp);
 }
 
@@ -5581,7 +6394,7 @@ memory_error_and_abort ()
 /*								    */
 /* **************************************************************** */
 
-#ifdef TEST
+#if defined (TEST)
 
 main ()
 {
@@ -5609,17 +6422,20 @@ main ()
       if (strcmp (temp, "quit") == 0)
 	done = 1;
 
-      if (strcmp (temp, "list") == 0) {
-	HIST_ENTRY **list = history_list ();
-	register int i;
-	if (list) {
-	  for (i = 0; list[i]; i++) {
-	    fprintf (stderr, "%d: %s\r\n", i, list[i]->line);
-	    free (list[i]->line);
-	  }
-	  free (list);
+      if (strcmp (temp, "list") == 0)
+	{
+	  HIST_ENTRY **list = history_list ();
+	  register int i;
+	  if (list)
+	    {
+	      for (i = 0; list[i]; i++)
+		{
+		  fprintf (stderr, "%d: %s\r\n", i, list[i]->line);
+		  free (list[i]->line);
+		}
+	      free (list);
+	    }
 	}
-      }
       free (temp);
     }
 }
