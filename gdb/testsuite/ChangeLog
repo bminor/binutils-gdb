@@ -1,5 +1,9 @@
 2003-01-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.base/detach.exp: New test.
+
+2003-01-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* Makefile.in (ALL_SUBDIRS): New variable.
 	(subdirs, clean, distclean): Use it.
 	* gdb.arch/Makefile.in: Clean up Makefile.  Remove rules for
