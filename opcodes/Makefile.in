@@ -21,6 +21,7 @@ srcdir = @srcdir@
 
 prefix = @prefix@
 
+program_transform_name = @program_transform_name@
 exec_prefix = @exec_prefix@
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
@@ -62,6 +63,8 @@ SHLIB_CC = @SHLIB_CC@
 SHLIB_CFLAGS = @SHLIB_CFLAGS@
 COMMON_SHLIB = @COMMON_SHLIB@
 SHLINK = @SHLINK@
+
+SONAME = lib`echo $(SHLIB) | sed -e 's,^\.\./bfd/,,' -e 's/^lib//' | sed '$(program_transform_name)'`
 
 INCDIR = $(srcdir)/../include
 BFDDIR = $(srcdir)/../bfd
@@ -154,8 +157,36 @@ $(SHLIB): stamp-picdir $(OFILES) piclist
 	fi
 
 $(SHLINK): $(SHLIB)
+	ts=lib`echo $(SHLIB) | sed -e 's,^\.\./bfd/,,' -e 's/^lib//' | sed -e '$(program_transform_name)'`; \
+	if [ "$(COMMON_SHLIB)" = "yes" ]; then \
+	  ts=../bfd/$$ts; \
+	fi; \
+	if [ "$$ts" != "$(SHLIB)" ]; then \
+	  rm -f $$ts; \
+	  ln -sf `echo $(SHLIB) | sed -e 's,^\.\./bfd/,,'` $$ts; \
+	else true; fi
 	rm -f $(SHLINK)
 	ln -sf `echo $(SHLIB) | sed -e 's,^\.\./bfd/,,'` $(SHLINK)
+
+# This target creates libTARGET-opcodes.so.VERSION as a symlink to
+# libopcodes.so.VERSION.  It is used on SunOS, which does not have SONAME.
+stamp-tshlink: $(SHLIB)
+	tf=lib`echo $(SHLIB) | sed -e 's,\.\./bfd/,,' -e 's/^lib//' | sed '$(program_transform_name)'`; \
+	if [ "$(COMMON_SHLIB)" = "yes" ]; then \
+	  tf=../bfd/$$tf; \
+	fi; \
+	if [ "$$tf" != "$(SHLIB)" ]; then \
+	  rm -f $$tf; \
+	  ln -sf $(SHLIB) $$tf; \
+	else true; fi
+	if [ "$(COMMON_SHLIB)" = "yes" ]; then \
+	  tf=lib`echo $(TARGETLIB) | sed -e 's/^lib//' | sed '$(program_transform_name)'`; \
+	  if [ "$$tf" != "$(TARGETLIB)" ]; then \
+	    rm -f $$tf; \
+	    ln -sf $(TARGETLIB) $$tf; \
+	  else true; fi; \
+	else true; fi
+	touch stamp-tshlink
 
 $(OFILES): stamp-picdir
 
@@ -229,16 +260,20 @@ force:
 
 install: $(ALLLIBS)
 	for f in $(ALLLIBS); do \
-	  bf=`echo $$f | sed -e 's,^\.\./bfd/,,'`; \
-	  rm -f $(libdir)/$$bf; \
+	  if [ "$$f" = "stamp-tshlink" ]; then \
+	    continue; \
+	  fi; \
+	  tf=lib`echo $$f | sed -e 's,^\.\./bfd/,,' -e 's/^lib//' | sed '$(program_transform_name)'`; \
+	  rm -f $(libdir)/$$tf; \
 	  if [ "$$f" = "$(SHLINK)" ]; then \
-	    ln -sf `echo $(SHLIB) | sed -e 's,^\.\./bfd/,,'` $(libdir)/$$bf; \
+	    ts=lib`echo $(SHLIB) | sed -e 's,^\.\./bfd/,,' -e 's/^lib//' | sed '$(program_transform_name)'`; \
+	    ln -sf $$ts $(libdir)/$$tf; \
 	  elif [ "$$f" = "$(SHLIB)" ]; then \
-	    $(INSTALL_PROGRAM) $$f $(libdir)/$$bf; \
+	    $(INSTALL_PROGRAM) $$f $(libdir)/$$tf; \
 	  else \
-	    $(INSTALL_DATA) $$f $(libdir)/$$bf; \
-	    $(RANLIB) $(libdir)/$$bf; \
-	    chmod a-x $(libdir)/$$bf; \
+	    $(INSTALL_DATA) $$f $(libdir)/$$tf; \
+	    $(RANLIB) $(libdir)/$$tf; \
+	    chmod a-x $(libdir)/$$tf; \
 	  fi; \
 	done
 

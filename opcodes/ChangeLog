@@ -1,3 +1,7 @@
+Thu Feb 15 14:45:05 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (SONAME): Remove leading ../bfd/ from $(SHLIB).
+
 Wed Feb 14 19:01:27 1996  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386-dis.c (onebyte_has_modrm): New static array.
