@@ -1,3 +1,12 @@
+Wed Mar 18 15:51:15 1992  Per Bothner  (bothner@cygnus.com)
+
+	Some improvements to g++ debugging.
+	* symtab.c (list_symbols): demangle before pattern matching.
+	* symtab.c:  Other fixes to improve handing of operators.
+	* valprint.c (type_print_base):  Fix test for constructor.
+	* values.c (value_static_field):  Allow evaluation of
+	CLASS::METHOD, returning a function pointer.
+
 Wed Mar 18 08:39:52 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Roll  4.4.6.

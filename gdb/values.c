@@ -1124,6 +1124,8 @@ value_static_field (type, fieldname, fieldno)
 
   if (fieldno < 0)
     {
+      char **physnames;
+      struct symbol **sym_arr;
       /* Look for static field.  */
       int i;
       for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
@@ -1144,14 +1146,24 @@ value_static_field (type, fieldname, fieldno)
 	    return v;
 	}
 
-      if (destructor_name_p (fieldname, type))
-	error ("Cannot get value of destructor");
-
-      for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
+      sym_arr = (struct symbol **)
+	  alloca(TYPE_NFN_FIELDS_TOTAL (type) * sizeof(struct symbol*));
+      physnames = (char **)
+	  alloca (TYPE_NFN_FIELDS_TOTAL (type) * sizeof(char*));
+      /* Note: This does duplicate work, since find_methods does a
+	 recursive search *and* so does value_static_field.  FIXME */
+      i = find_methods (type, fieldname, physnames, sym_arr);
+      if (i > 1)
+	error ("Cannot get value of overloaded method \"%s\"", fieldname);
+      else if (i)
 	{
-	  if (! strcmp (TYPE_FN_FIELDLIST_NAME (type, i), fieldname))
-	    error ("Cannot get value of method \"%s\"", fieldname);
-	}
+	  struct symbol *sym = sym_arr[0];
+	  value val = read_var_value (sym, (FRAME) 0);
+	  if (val == 0)
+	     error ("Address of method \"%s\" is unknown (possibly inlined).",
+		    fieldname);
+	  return val;
+        }
       error("there is no field named %s", fieldname);
     }
 
@@ -1161,8 +1173,7 @@ value_static_field (type, fieldname, fieldno)
   if (! sym) error ("Internal error: could not find physical static variable named %s", phys_name);
 
   type = TYPE_FIELD_TYPE (type, fieldno);
-  v = value_at (type, (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
-  return v;
+  return value_at (type, (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
 }
 
 /* Compute the address of the baseclass which is

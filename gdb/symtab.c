@@ -37,10 +37,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
 /* Prototypes for local functions */
 
-static int
+extern int
 find_methods PARAMS ((struct type *, char *, char **, struct symbol **));
 
 static void
@@ -1260,13 +1261,23 @@ operator_chars (p, end)
 
   /* Don't get faked out by `operator' being part of a longer
      identifier.  */
-  if ((*p >= 'A' && *p <= 'Z') || (*p >= 'a' && *p <= 'z')
-      || *p == '_' || *p == '$' || *p == '\0')
+  if (isalpha(*p) || *p == '_' || *p == '$' || *p == '\0')
     return *end;
 
   /* Allow some whitespace between `operator' and the operator symbol.  */
   while (*p == ' ' || *p == '\t')
     p++;
+
+  /* Recognize 'operator TYPENAME'. */
+
+  if (isalpha(*p) || *p == '_' || *p == '$')
+    {
+      register char *q = p+1;
+      while (isalnum(*q) || *q == '_' || *q == '$')
+	q++;
+      *end = q;
+      return p;
+    }
 
   switch (*p)
     {
@@ -1328,7 +1339,7 @@ operator_chars (p, end)
  * physnames = (char **) alloca (TYPE_NFN_FIELDS_TOTAL (t) * sizeof(char*));
  */
 
-static int
+int
 find_methods (t, name, physnames, sym_arr)
      struct type *t;
      char *name;
@@ -1392,6 +1403,12 @@ find_methods (t, name, physnames, sym_arr)
 					     (int *) NULL,
 					     (struct symtab **) NULL);
 		if (sym_arr[i1]) i1++;
+		else
+		  {
+		    fputs_filtered("(Cannot find method ", stdout);
+		    fputs_demangled(phys_name, stdout, 0);
+		    fputs_filtered(" - possibly inlined.)\n", stdout);
+		  }
 	      }
 	}
     }
@@ -1525,18 +1542,22 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	      while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p !=':') p++;
 	      q = operator_chars (*argptr, &q1);
 
-	      copy = (char *) alloca (p - *argptr + 1 + (q1 - q));
 	      if (q1 - q)
 		{
-		  copy[0] = 'o';
-		  copy[1] = 'p';
-		  copy[2] = CPLUS_MARKER;
-		  bcopy (q, copy + 3, q1 - q);
-		  copy[3 + (q1 - q)] = '\0';
+		  char *opname;
+		  char *tmp = alloca (q1 - q + 1);
+		  memcpy (tmp, q, q1 - q);
+		  tmp[q1 - q] = '\0';
+		  opname = cplus_mangle_opname (tmp, 1);
+		  if (opname == NULL)
+		    error ("No mangling for \"%s\"", tmp);
+		  copy = (char*) alloca (3 + strlen(opname));
+		  sprintf (copy, "__%s", opname);
 		  p = q1;
 		}
 	      else
 		{
+		  copy = (char *) alloca (p - *argptr + 1 + (q1 - q));
 		  bcopy (*argptr, copy, p - *argptr);
 		  copy[p - *argptr] = '\0';
 		}
@@ -1709,6 +1730,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 
   /* Arg token is not digits => try it as a variable name
      Find the next token (everything up to end or next whitespace).  */
+
   p = *argptr;
   while (*p && *p != ' ' && *p != '\t' && *p != ',') p++;
   copy = (char *) alloca (p - *argptr + 1);
@@ -2027,6 +2049,21 @@ sources_info ()
   printf_filtered ("\n");
 }
 
+static int
+name_match(name)
+     char *name;
+{
+  char *demangled = cplus_demangle(name, -1);
+  if (demangled != NULL)
+    {
+      int cond = re_exec (demangled);
+      free (demangled);
+      return cond;
+    }
+  return re_exec(name);
+}
+#define NAME_MATCH(NAME) name_match(NAME)
+
 /* List all symbols (if REGEXP is 0) or all symbols matching REGEXP.
    If CLASS is zero, list all symbols except functions and type names.
    If CLASS is 1, list only functions.
@@ -2052,7 +2089,8 @@ list_symbols (regexp, class, bpt)
   struct partial_symbol *psym;
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
-  char *val;
+  char *val, *q2;
+/*  char *mangled;*/
   static char *classnames[]
     = {"variable", "function", "type", "method"};
   int found_in_file = 0;
@@ -2064,9 +2102,42 @@ list_symbols (regexp, class, bpt)
   enum minimal_symbol_type ourtype = types[class];
   enum minimal_symbol_type ourtype2 = types2[class];
 
+
   if (regexp)
-    if (0 != (val = re_comp (regexp)))
-      error ("Invalid regexp (%s): %s", val, regexp);
+    {
+      /* Make sure spacing is right for C++ operators.
+	 This is just a courtesy to make the matching less sensitive
+	 to how many spaces the user leaves between 'operator'
+	 and <TYPENAME> or <OPERATOR>. */
+      char *opend;
+      char *opname = operator_chars (regexp, &opend);
+      if (*opname)
+	{
+          int fix = -1; /* -1 means ok; otherwise number of spaces needed. */
+	  if (isalpha(*opname) || *opname == '_' || *opname == '$')
+	    {
+	      /* There should 1 space between 'operator' and 'TYPENAME'. */
+	      if (opname[-1] != ' ' || opname[-2] == ' ')
+	        fix = 1;
+	    }
+	  else
+	    {
+	      /* There should 0 spaces between 'operator' and 'OPERATOR'. */
+	      if (opname[-1] == ' ')
+	        fix = 0;
+	    }
+	  /* If wrong number of spaces, fix it. */
+	  if (fix >= 0)
+	    {
+	      char *tmp = (char*) alloca(opend-opname+10);
+	      sprintf(tmp, "operator%.*s%s", fix, " ", opname);
+	      regexp = tmp;
+	    }
+        }
+      
+      if (0 != (val = re_comp (regexp)))
+	error ("Invalid regexp (%s): %s", val, regexp);
+    }
 
   /* Search through the partial symtabs *first* for all symbols
      matching the regexp.  That way we don't have to reproduce all of
@@ -2104,10 +2175,10 @@ list_symbols (regexp, class, bpt)
 	      else
 		{
 		  QUIT;
-		  
+
 		  /* If it would match (logic taken from loop below)
 		     load the file and go on to the next one */
-		  if ((regexp == 0 || re_exec (SYMBOL_NAME (psym)))
+		  if ((regexp == 0 || NAME_MATCH (SYMBOL_NAME (psym)))
 		      && ((class == 0 && SYMBOL_CLASS (psym) != LOC_TYPEDEF
 			   && SYMBOL_CLASS (psym) != LOC_BLOCK)
 			  || (class == 1 && SYMBOL_CLASS (psym) == LOC_BLOCK)
@@ -2138,7 +2209,7 @@ list_symbols (regexp, class, bpt)
 	    {
 	      if (msymbol -> type == ourtype || msymbol -> type == ourtype2)
 		{
-		  if (regexp == 0 || re_exec (msymbol -> name))
+		  if (regexp == 0 || NAME_MATCH (msymbol -> name))
 		    {
 		      if (0 == find_pc_symtab (msymbol -> address))
 			{
@@ -2181,7 +2252,7 @@ list_symbols (regexp, class, bpt)
 		  {
 		    QUIT;
 		    sym = BLOCK_SYM (b, j);
-		    if ((regexp == 0 || re_exec (SYMBOL_NAME (sym)))
+		    if ((regexp == 0 || NAME_MATCH (SYMBOL_NAME (sym)))
 			&& ((class == 0 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
 			     && SYMBOL_CLASS (sym) != LOC_BLOCK)
 			    || (class == 1 && SYMBOL_CLASS (sym) == LOC_BLOCK)
@@ -2251,7 +2322,7 @@ list_symbols (regexp, class, bpt)
 	    {
 	      if (msymbol -> type == ourtype || msymbol -> type == ourtype2)
 		{
-		  if (regexp == 0 || re_exec (msymbol -> name))
+		  if (regexp == 0 || NAME_MATCH (msymbol -> name))
 		    {
 		      /* Functions:  Look up by address. */
 		      if (class != 1 &&
