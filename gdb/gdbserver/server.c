@@ -21,6 +21,10 @@
 
 #include "server.h"
 
+#include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
+
 int cont_thread;
 int general_thread;
 int step_thread;
@@ -31,14 +35,27 @@ int server_waiting;
 
 jmp_buf toplevel;
 
+/* The PID of the originally created or attached inferior.  Used to
+   send signals to the process when GDB sends us an asynchronous interrupt
+   (user hitting Control-C in the client), and to wait for the child to exit
+   when no longer debugging it.  */
+
+int signal_pid;
+
 static unsigned char
 start_inferior (char *argv[], char *statusptr)
 {
-  /* FIXME Check error? Or turn to void.  */
-  create_inferior (argv[0], argv);
+  signal (SIGTTOU, SIG_DFL);
+  signal (SIGTTIN, SIG_DFL);
+
+  signal_pid = create_inferior (argv[0], argv);
 
   fprintf (stderr, "Process %s created; pid = %d\n", argv[0],
-	   all_threads.head->id);
+	   signal_pid);
+
+  signal (SIGTTOU, SIG_IGN);
+  signal (SIGTTIN, SIG_IGN);
+  tcsetpgrp (fileno (stderr), signal_pid);
 
   /* Wait till we are at 1st instruction in program, return signal number.  */
   return mywait (statusptr, 0);
@@ -49,8 +66,14 @@ attach_inferior (int pid, char *statusptr, unsigned char *sigptr)
 {
   /* myattach should return -1 if attaching is unsupported,
      0 if it succeeded, and call error() otherwise.  */
+
   if (myattach (pid) != 0)
     return -1;
+
+  /* FIXME - It may be that we should get the SIGNAL_PID from the
+     attach function, so that it can be the main thread instead of
+     whichever we were told to attach to.  */
+  signal_pid = pid;
 
   *sigptr = mywait (statusptr, 0);
 

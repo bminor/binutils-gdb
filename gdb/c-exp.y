@@ -89,6 +89,8 @@ extern int hp_som_som_object_present;
 #define	yylloc	c_lloc
 #define yyreds	c_reds		/* With YYDEBUG defined */
 #define yytoks	c_toks		/* With YYDEBUG defined */
+#define yyname	c_name		/* With YYDEBUG defined */
+#define yyrule	c_rule		/* With YYDEBUG defined */
 #define yylhs	c_yylhs
 #define yylen	c_yylen
 #define yydefred c_yydefred

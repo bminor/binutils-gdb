@@ -2788,8 +2788,18 @@ ENUM
   BFD_RELOC_V850_CALLT_16_16_OFFSET
 ENUMDOC
   This is a 16 bit offset from the call table base pointer.
-COMMENT
-
+ENUM
+  BFD_RELOC_V850_LONGCALL
+ENUMDOC
+  Used for relaxing indirect function calls.
+ENUM
+  BFD_RELOC_V850_LONGJUMP
+ENUMDOC
+  Used for relaxing indirect jumps.
+ENUM
+  BFD_RELOC_V850_ALIGN
+ENUMDOC
+  Used to maintain alignment whilst relaxing.
 ENUM
   BFD_RELOC_MN10300_32_PCREL
 ENUMDOC

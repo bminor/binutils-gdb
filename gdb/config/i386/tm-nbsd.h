@@ -22,17 +22,6 @@
 #define TM_NBSD_H
 
 #include "i386/tm-i386.h"
-
-/* These defines allow the recognition of sigtramps as a function name
-   <sigtramp>.
-
-   FIXME: kettenis/2002-05-12: Of course these defines will have to go
-   if we go truly "multi-arch", but I don't know yet how to get rid of
-   them.  */
-
-#define SIGTRAMP_START(pc) i386bsd_sigtramp_start (pc)
-#define SIGTRAMP_END(pc) i386bsd_sigtramp_end (pc)
-extern CORE_ADDR i386bsd_sigtramp_start (CORE_ADDR pc);
-extern CORE_ADDR i386bsd_sigtramp_end (CORE_ADDR pc);
+#include "solib.h"
 
 #endif /* TM_NBSD_H */

@@ -77,10 +77,6 @@ disassemble (memaddr, info, insn)
     case bfd_mach_v850e:
       target_processor = PROCESSOR_V850E;
       break;
-
-    case bfd_mach_v850ea: 
-      target_processor = PROCESSOR_V850EA;
-      break;
     }
   
   /* Find the opcode.  */

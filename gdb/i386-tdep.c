@@ -973,20 +973,21 @@ i386_extract_return_value (struct type *type, struct regcache *regcache,
    in VALBUF of type TYPE, given in virtual format.  */
 
 static void
-i386_store_return_value (struct type *type, char *valbuf)
+i386_store_return_value (struct type *type, struct regcache *regcache,
+			 const void *valbuf)
 {
   int len = TYPE_LENGTH (type);
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       && TYPE_NFIELDS (type) == 1)
     {
-      i386_store_return_value (TYPE_FIELD_TYPE (type, 0), valbuf);
+      i386_store_return_value (TYPE_FIELD_TYPE (type, 0), regcache, valbuf);
       return;
     }
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      unsigned int fstat;
+      ULONGEST fstat;
       char buf[FPU_REG_RAW_SIZE];
 
       if (FP0_REGNUM == 0)
@@ -1004,20 +1005,20 @@ i386_store_return_value (struct type *type, char *valbuf)
 	 not exactly how it would happen on the target itself, but
 	 it is the best we can do.  */
       convert_typed_floating (valbuf, type, buf, builtin_type_i387_ext);
-      write_register_gen (FP0_REGNUM, buf);
+      regcache_raw_write (regcache, FP0_REGNUM, buf);
 
       /* Set the top of the floating-point register stack to 7.  The
          actual value doesn't really matter, but 7 is what a normal
          function return would end up with if the program started out
          with a freshly initialized FPU.  */
-      fstat = read_register (FSTAT_REGNUM);
+      regcache_raw_read_unsigned (regcache, FSTAT_REGNUM, &fstat);
       fstat |= (7 << 11);
-      write_register (FSTAT_REGNUM, fstat);
+      regcache_raw_write_unsigned (regcache, FSTAT_REGNUM, fstat);
 
       /* Mark %st(1) through %st(7) as empty.  Since we set the top of
          the floating-point register stack to 7, the appropriate value
          for the tag word is 0x3fff.  */
-      write_register (FTAG_REGNUM, 0x3fff);
+      regcache_raw_write_unsigned (regcache, FTAG_REGNUM, 0x3fff);
     }
   else
     {
@@ -1025,13 +1026,12 @@ i386_store_return_value (struct type *type, char *valbuf)
       int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
-	write_register_bytes (REGISTER_BYTE (LOW_RETURN_REGNUM), valbuf, len);
+	regcache_raw_write_part (regcache, LOW_RETURN_REGNUM, 0, len, valbuf);
       else if (len <= (low_size + high_size))
 	{
-	  write_register_bytes (REGISTER_BYTE (LOW_RETURN_REGNUM),
-				valbuf, low_size);
-	  write_register_bytes (REGISTER_BYTE (HIGH_RETURN_REGNUM),
-				valbuf + low_size, len - low_size);
+	  regcache_raw_write (regcache, LOW_RETURN_REGNUM, valbuf);
+	  regcache_raw_write_part (regcache, HIGH_RETURN_REGNUM, 0,
+				   len - low_size, (char *) valbuf + low_size);
 	}
       else
 	internal_error (__FILE__, __LINE__,
@@ -1533,7 +1533,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_return_address (gdbarch, i386_push_return_address);
   set_gdbarch_pop_frame (gdbarch, i386_pop_frame);
   set_gdbarch_store_struct_return (gdbarch, i386_store_struct_return);
-  set_gdbarch_deprecated_store_return_value (gdbarch, i386_store_return_value);
+  set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch,
 					    i386_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);

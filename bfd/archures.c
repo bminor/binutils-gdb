@@ -228,12 +228,14 @@ DESCRIPTION
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
 .  bfd_arch_w65,       {* WDC 65816 *}
 .  bfd_arch_tic30,     {* Texas Instruments TMS320C30 *}
+.  bfd_arch_tic4x,     {* Texas Instruments TMS320C3X/4X *}
+.#define bfd_mach_c3x           30
+.#define bfd_mach_c4x           40
 .  bfd_arch_tic54x,    {* Texas Instruments TMS320C54X *}
 .  bfd_arch_tic80,     {* TI TMS320c80 (MVP) *}
 .  bfd_arch_v850,      {* NEC V850 *}
 .#define bfd_mach_v850          0
 .#define bfd_mach_v850e 	'E'
-.#define bfd_mach_v850ea	'A'
 .  bfd_arch_arc,       {* ARC Cores *}
 .#define bfd_mach_arc_5         0
 .#define bfd_mach_arc_6         1
@@ -358,6 +360,7 @@ extern const bfd_arch_info_type bfd_s390_arch;
 extern const bfd_arch_info_type bfd_sh_arch;
 extern const bfd_arch_info_type bfd_sparc_arch;
 extern const bfd_arch_info_type bfd_tic30_arch;
+extern const bfd_arch_info_type bfd_tic4x_arch;
 extern const bfd_arch_info_type bfd_tic54x_arch;
 extern const bfd_arch_info_type bfd_tic80_arch;
 extern const bfd_arch_info_type bfd_v850_arch;
@@ -412,6 +415,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_sh_arch,
     &bfd_sparc_arch,
     &bfd_tic30_arch,
+    &bfd_tic4x_arch,
     &bfd_tic54x_arch,
     &bfd_tic80_arch,
     &bfd_v850_arch,

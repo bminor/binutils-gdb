@@ -152,6 +152,8 @@ extern void kill_inferior (void);
 
 extern void generic_mourn_inferior (void);
 
+extern void terminal_save_ours (void);
+
 extern void terminal_ours (void);
 
 extern int run_stack_dummy (CORE_ADDR , struct regcache *);

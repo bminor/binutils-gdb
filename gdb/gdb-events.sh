@@ -66,6 +66,7 @@ f:void:tracepoint_delete:int number:number
 f:void:tracepoint_modify:int number:number
 f:void:architecture_changed:void
 f:void:target_changed:void
+f:void:selected_frame_level_changed:int level:level
 #*:void:annotate_starting_hook:void
 #*:void:annotate_stopped_hook:void
 #*:void:annotate_signalled_hook:void
@@ -88,7 +89,6 @@ f:void:target_changed:void
 #*:void:readline_begin_hook:char *format, ...:format
 #*:char *:readline_hook:char *prompt:prompt
 #*:void:readline_end_hook:void
-#*:void:context_hook:int num:num
 #*:int:target_wait_hook:int pid, struct target_waitstatus *status:pid, status
 #*:void:call_command_hook:struct cmd_list_element *c, char *cmd, int from_tty:c, cmd, from_tty
 #*:NORETURN void:error_hook:void:: ATTR_NORETURN

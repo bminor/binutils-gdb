@@ -267,6 +267,9 @@ bfd_format;
 /* This flag indicates that the BFD contents are actually cached in
    memory.  If this is set, iostream points to a bfd_in_memory struct.  */
 #define BFD_IN_MEMORY 0x800
+ 
+/* The sections in this BFD specify a memory page.  */
+#define HAS_LOAD_PAGE 0x1000
 
 /* Symbols and relocation.  */
 
@@ -328,7 +331,7 @@ alent;
 /* Object and core file sections.  */
 
 #define	align_power(addr, align)	\
-	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
+  (((addr) + ((bfd_vma) 1 << (align)) - 1) & ((bfd_vma) -1 << (align)))
 
 typedef struct sec *sec_ptr;
 

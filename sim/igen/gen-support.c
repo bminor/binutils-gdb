@@ -141,10 +141,14 @@ gen_support_h (lf *file,
   lf_printf(file, "#define _SD SD_ /* deprecated */\n");
   lf_printf(file, "\n");
 
-  /* Map <PREFIX>_instruction_word and <PREFIX>_idecode_issue onto the
-     shorter instruction_word and idecode_issue.  Map defined here as,
-     name space problems are created when the name is defined in
-     idecode.h */
+  /* Map <PREFIX>_xxxx onto the shorter xxxx for the following names:
+
+       instruction_word
+       idecode_issue
+       semantic_illegal
+
+     Map defined here as name space problems are created when the name is
+     defined in idecode.h  */
   if (strcmp (options.module.idecode.prefix.l, "") != 0)
     {
       lf_indent_suppress (file);
@@ -158,6 +162,12 @@ gen_support_h (lf *file,
 		 "idecode_issue",
 		 options.module.idecode.prefix.l,
 		 "idecode_issue");
+      lf_printf (file, "\n");
+      lf_indent_suppress (file);
+      lf_printf (file, "#define %s %s%s\n",
+		 "semantic_illegal",
+		 options.module.idecode.prefix.l,
+		 "semantic_illegal");
       lf_printf (file, "\n");
     }
 

@@ -1,3 +1,18 @@
+2002-08-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (linux_create_inferior): Call setpgid.  Return
+	the new PID.
+	(unstopped_p, linux_signal_pid): Remove.
+	(linux_target_ops): Remove linux_signal_pid.
+	* remote-utils.c (putpkt, input_interrupt): Use signal_pid
+	global instead of target method.
+	* target.h (struct target_ops): Remove signal_pid.  Update comment
+	for create_inferior.
+	* server.c (signal_pid): New variable.
+	(create_inferior): Set signal_pid.  Block SIGTTOU and SIGTTIN in
+	gdbserver.  Set the child to be the foreground process group. 
+	(attach_inferior): Set signal_pid.
+
 2002-08-23  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ChangeLog: New file, with entries from gdb/ChangeLog after GDB 5.2.

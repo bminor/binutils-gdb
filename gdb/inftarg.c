@@ -774,6 +774,7 @@ init_child_ops (void)
   child_ops.to_terminal_init = terminal_init_inferior;
   child_ops.to_terminal_inferior = terminal_inferior;
   child_ops.to_terminal_ours_for_output = terminal_ours_for_output;
+  child_ops.to_terminal_save_ours = terminal_save_ours;
   child_ops.to_terminal_ours = terminal_ours;
   child_ops.to_terminal_info = child_terminal_info;
   child_ops.to_kill = kill_inferior;

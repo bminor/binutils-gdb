@@ -1,3 +1,258 @@
+2002-09-03  Theodore A. Roth  <troth@verinet.com>
+
+	* gdb/avr-tdep.c (avr_gdbarch_init): Use
+	generic_unwind_get_saved_register.
+
+2002-09-03  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (dwarf2_add_member_fn): Add the 'type'
+	argument (PR gdb/653).  Update call to smash_to_method_type.
+	(read_structure_scope): Update call to dwarf2_add_member_fn.
+
+2002-09-03  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-linux-tdep.c: Include gdb_string.h
+	* x86-64-linux-nat.c: Ditto.
+
+2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ada-exp.y (yyname, yyrule): Remap global variables that appear
+	when YYDEBUG is set to 1.  
+	* c-exp.y: Likewise.
+	* f-exp.y: Likewise.
+	* jv-exp.y: Likewise.
+	* m2-exp.y: Likewise.
+	* p-exp.y: Likewise.
+
+2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (i386nbsd-tdep.o): Add $(solib_svr4_h) to
+	dependency list.
+	* i386nbsd-tdep.c (i386nbsdelf_init_abi): Set
+	solib_svr4_fetch_link_map_offsets to
+	nbsd_ilp32_solib_svr4_fetch_link_map_offsets.
+	* config/i386/nbsd.mt (TDEPFILES): Add solib.o and solib-svr4.o.
+	* config/i386/nbsdaout.mh (NATDEPFILES): Remove solib.o.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Remove solib.o,
+	solib-svr4.o, and solib-legacy.o.
+	* config/i386/tm-nbsd.h: Include solib.h.
+
+2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.tgt (i[3456]86-*-netbsdelf*): Merge with... 
+	(i[3456]86-*-netbsd*): ...this.  Set gdb_target to nbsd. 
+	(i[3456]86-*-openbsd*): Make this a separate entry.  Add a
+	comment noting that this needs its own target configuration.
+	* config/i386/nbsd.mt: New file.
+	* config/i386/nbsdaout.mt: Remove.
+	* config/i386/nbsdelf.mt: Ditto.
+	* config/i386/tm-nbsdaout.h: Ditto. 
+
+2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* i386nbsd-tdep.c (i386nbsd_sigtramp_offset): New function. 
+	(i386nbsd_pc_in_sigtramp): Rewrite to use i386nbsd_sigtramp_offset. 
+	(i386nbsd_init_abi): Don't initialize tdep->sigtramp_start or
+	tdep->sigtramp_end.
+	(i386nbsd_sigtramp_start, i386nbsd_sigtramp_end): Remove. 
+	* config/i386/tm-nbsd.h (SIGTRAMP_START, SIGTRAMP_END)
+	(i386bsd_sigtramp_start, i386bsd_sigtramp_end): Remove.
+
+2002-09-02  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (i386nbsd-tdep.o): Add $(arch_utils_h),
+	$(i386_tdep_h), and $(nbsd_tdep_h) to dependency list.
+	* i386-tdep.h (i386bsd_init_abi): New prototype.
+	* i386bsd-tdep.c (i386bsd_init_abi): Remove "static" from
+	function declaration.
+	(_initialize_i386bsd_tdep): Don't register OS ABI handlers
+	for NetBSD-a.out or NetBSD-ELF.
+	(i386nbsd_sigtramp_start, i386nbsd_sigtramp_end)
+	(i386nbsd_sc_pc_offset, i386nbsd_sc_sp_offset)
+	(i386nbsd_init_abi, i386nbsdelf_init_abi): Move to...
+	* i386nbsd-tdep.c: ...here.  Include arch-utils.h, i386-tdep.h,
+	and nbsd-tdep.h.
+	(i386nbsd_pc_in_sigtramp): New function.
+	(i386nbsd_init_abi): Set gdbarch_pc_in_sigtramp to
+	i386nbsd_pc_in_sigtramp.
+	(_initialize_i386nbsd_tdep): Register i386nbsd_init_abi
+	and i386nbsdelf_init_abi OS ABI handlers.
+	* config/i386/nbsdaout.mt (TDEPFILES): Add nbsd-tdep.o.
+	* config/i386/nbsdelf.mt (TDEPFILES): Likewise.
+
+2002-09-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c (dummy_sse_values): Only try to fill in the SSE
+	registers if the target really has them.
+
+2002-08-31  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (mipsnbsd-tdep.o): Use $(nbsd_tdep_h) rather
+	than nbsd-tdep.h.
+
+2002-08-31  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (alphanbsd-tdep.o): Add $(frame_h) to dependency
+	list.
+	* alphanbsd-tdep.c (alphanbsd_sigcontext_addr)
+	(alphanbsd_skip_sigtramp_frame): New functions. 
+	(alphanbsd_init_abi): Set tdep->skip_sigtramp_frame to
+	alphanbsd_skip_sigtramp_frame.  Set tdep->sigcontext_addr
+	to alphanbsd_sigcontext_addr. 
+
+2002-08-31  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (mipsnbsd-tdep.o): Add nbsd-tdep.h to dependency
+	list.
+	(nbsd-tdep.o): Add $(gdb_string_h) to dependency list. 
+	* alphanbsd-tdep.c (alphanbsd_pc_in_sigtramp): Use
+	nbsd_pc_in_sigtramp. 
+	* mipsnbsd-tdep.c: Include nbsd-tdep.h.
+	(mipsnbsd_pc_in_sigtramp): Use nbsd_pc_in_sigtramp.
+	* nbsd-tdep.c: Include gdb_string.h.
+	(nbsd_pc_in_sigtramp): New function. 
+	* nbsd-tdep.h (nbsd_pc_in_sigtramp): New prototype. 
+	* ppcnbsd-tdep.c (ppcnbsd_pc_in_sigtramp): New function.
+	(ppcnbsd_init_abi): Set gdbarch_pc_in_sigtramp to
+	ppcnbsd_pc_in_sigtramp. 
+	* shnbsd-tdep.c (shnbsd_pc_in_sigtramp): New function.
+	(shnbsd_init_abi): Set gdbarch_pc_in_sigtramp to
+	shnbsd_pc_in_sigtramp. 
+	* sparcnbsd-tdep.c (sparcnbsd_init_abi_elf): Set
+	gdbarch_pc_in_sigtramp to nbsd_pc_in_sigtramp. 
+	* config/mips/nbsd.mt (TDEPFILES): Add nbsd-tdep.o.
+
+2002-08-30  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* breakpoint.c (breakpoint_init_inferior): Reset the val field of
+	watchpoints to NULL.
+	(insert_breakpoints): set val field of watchpoints if NULL.
+
+
+2002-08-29  Jim Blandy  <jimb@redhat.com>
+
+	* symtab.c (lookup_symbol_aux): In the cases where we find a
+	minimal symbol of an appropriate name and use its address to
+	select a symtab to read and search, use `name' (as passed to us)
+	as the demangled name when searching the symtab's global and
+	static blocks, not the minsym's name.
+
+2002-08-29  Keith Seitz  <keiths@redhat.com>
+
+	* stack.c (print_frame_info_base): Always set current_source_symtab
+	and current_source_line.
+
+2002-08-29  Donn Terry  <donnte@microsoft.com>
+
+	* proc-api.c (rw_table): Fix typo in #ifdef PCSHOLD (missing S).
+
+2002-08-28  Keith Seitz  <keiths@redhat.com>
+
+	* stack.c (select_frame): Add FIXME concerning selected-frame
+	events.
+	(select_frame_command): Send selected-frame-level-changed
+	event notification, but only if the level actually changed.
+	(up_silently_base): Add selected-frame-level-changed event
+	notification.
+	(down_silently_base): Likewise.
+
+2002-08-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in: Update dependencies for all gdb/*.c files.
+
+2002-08-27  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (osabi.o, i387-tdep.o, i386-linux-nat.o, lin-lwp.o,
+	ax-gdb.o, signals.o, jv-valprint.o, c-valprint.o, cp-abi.o):
+	Update dependencies.
+	* i387-tdep.c: Include gdb_string.h.
+	* osabi.c: Likewise.
+	* i386-linux-nat.c: Likewise.
+	* lin-lwp.c: Likewise.
+	* ax-gdb.c: Likewise.
+	* signals/signals.c: Likewise.
+	* jv-valprint.c: Likewise.
+	* p-lang.c: Likewise.
+	* c-valprint.c: Likewise.
+	* cp-abi.c: Likewise.
+
+2002-08-27  Elena Zannoni  <ezannoni@redhat.com>
+
+	* cli/cli-script.h (copy_command_lines): Export.
+	* breakpoint.c: Include cli/cli-script.h.
+	* Makefile.in (breakpoint.o): Update dependencies.
+
+2002-08-26  Joel Brobecker  <brobecker@gnat.com>
+
+	* cli/cli-script.c (copy_command_lines): New function.
+	* defs.h (copy_command_lines): Export.
+	* testsuite/gdb.base/commands.exp: New tests for commands
+	attached to a temporary breakpoint, and for commands that
+	delete the breakpoint they are attached to.
+	
+2002-08-26  Michael Snyder  <msnyder@redhat.com>
+
+	* breakpoint.c (bpstat_stop_status): Instead of copying the 
+	pointer to the breakpoint commands struct, make a new copy
+	of the struct and point to that.
+	(bpstat_clear): Free the commands struct.
+	(bpstat_clear_actions): Free the commands struct.
+	(bpstat_do_actions): Free the command actions.  Also execute
+	the local cleanups, instead of deleting them.
+	(delete_breakpoint): Leave the commands field of the bpstat
+	chain alone -- it will be freed later.
+
+2002-08-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-tdep.c (altivec_register_p): Restore function inadvertently
+	deleted in 2002-08-20 commit.  This function is still used by
+	ppc-linux-nat.c.
+
+2002-08-26  Keith Seitz  <keiths@redhat.com>
+
+	* gdb-events.sh: Add selected-frame-level-changed event.
+	* gdb-events.c: Regenerated.
+	* gdb-events.h: Regenerated.
+	
+2002-08-26  Stephane Carrez  <stcarrez@nerim.fr>
+
+	Fix PR gdb/393:
+	* inflow.c (terminal_save_ours): New function to save terminal
+	settings.
+	* inferior.h (terminal_save_ours): Declare.
+	* target.c (debug_to_terminal_save_ours): New function.
+	(cleanup_target): Defaults to_terminal_save_ours.
+	(update_current_target): Inherit to_terminal_save_ours.
+	(setup_target_debug): Set to_terminal_save_ours.
+	* target.h (target_terminal_save_ours): New to save terminal settings.
+	(target_ops): New member to_terminal_save_ours.
+	* gnu-nat.c (init_gnu_ops): Set to_terminal_save_ours.
+	* hpux-thread.c (init_hpux_thread_ops): Likewise.
+	* inftarg.c (init_child_ops): Likewise.
+	* m3-nat.c (init_m3_ops): Likewise.
+	* procfs.c (init_procfs_ops): Likewise.
+	* wince.c (init_child_ops): Likewise.
+	* win32-nat.c (init_child_ops): Likewise.
+	* sol-thread.c (init_sol_thread_ops): Likewise.
+
+2002-08-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_store_return_value): Undeprecate.  Convert to
+	use regcache_* functions.
+	(i386_gdbarch_init): Set store_return_value instead of
+	deprecated_store_return_value.
+
+	* regcache.c (regcache_raw_write_signed,
+	regcache_raw_write_unsigned): New functions.
+	* regcache.h (regcache_raw_write_signed,
+	regcache_raw_write_unsigned): New prototypes.
+
+2002-08-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (c-exp.tab.o, jv-exp.tab.o, f-exp.tab.o)
+	(m2-exp.tab.o, p-exp.tab.o, ada-exp.tab.o): Move to before the
+	source file dependencies.  Cleanup corresponding generator rules.
+
 2002-08-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* regcache.h (register_offset_hack): Declare.
@@ -149,7 +404,7 @@
 	(linux_make_note_section): Initialize thread_args.num_notes, and
 	use it to determine whether notes for any threads were created.
 
-2002-08-23  Donn Terry  <dterry@microsoft.com>
+2002-08-23  Donn Terry  <donnte@microsoft.com>
 
 	* proc-api.c (rw_table): Do not include a row for PCDSTOP if the
 	corresponding macro is not defined. Likewise for PCNICE, PCSHOLD
@@ -159,6 +414,14 @@
 	PRSABORT and PRSTOP.
 	This change will be needed by the Interix port.
 
+2002-08-22  Elena Zannoni  <ezannoni@redhat.com>
+
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_arguments): use
+	write_register wherever possible instead of manipulating the
+	register bytes directly.
+	Assign VALUE_CONTENTS to a variable and use that.
+	The GPR numbers are now dependent on the architecture.
+	
 2002-08-22  Elena Zannoni  <ezannoni@redhat.com>
 
 	* rs6000-tdep.c (struct rs6000_framedata): Add saved_ev and

@@ -423,7 +423,7 @@ static struct trans rw_table[] = {
   { PCSEXIT,  "PCSEXIT",  "set traced syscall exit  set" },
   { PCSFAULT, "PCSFAULT", "set traced fault set" },
   { PCSFPREG, "PCSFPREG", "set floating point registers" },
-#ifdef PCHOLD			/* solaris */
+#ifdef PCSHOLD			/* solaris */
   { PCSHOLD,  "PCSHOLD",  "set signal mask" },
 #endif
   { PCSREG,   "PCSREG",   "set general registers" },

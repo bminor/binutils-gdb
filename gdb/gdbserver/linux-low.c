@@ -149,6 +149,8 @@ linux_create_inferior (char *program, char **allargs)
 
       signal (SIGRTMIN + 1, SIG_DFL);
 
+      setpgid (0, 0);
+
       execv (program, allargs);
 
       fprintf (stderr, "Cannot exec %s: %s.\n", program,
@@ -160,7 +162,7 @@ linux_create_inferior (char *program, char **allargs)
   new_process = add_process (pid);
   add_thread (pid, new_process);
 
-  return 0;
+  return pid;
 }
 
 /* Attach to an inferior process.  */
@@ -1228,34 +1230,6 @@ linux_look_up_symbols (void)
 #endif
 }
 
-/* Return 1 if this process is not stopped.  */
-static int
-unstopped_p (struct inferior_list_entry *entry, void *dummy)
-{
-  struct process_info *process = (struct process_info *) entry;
-
-  if (process->stopped)
-    return 0;
-
-  return 1;
-}
-
-static int
-linux_signal_pid ()
-{
-  struct inferior_list_entry *process;
-
-  process = find_inferior (&all_processes, unstopped_p, NULL);
-
-  if (process == NULL)
-    {
-      warning ("no unstopped process");
-      return inferior_pid;
-    }
-
-  return pid_of ((struct process_info *) process);
-}
-
 
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
@@ -1269,7 +1243,6 @@ static struct target_ops linux_target_ops = {
   linux_read_memory,
   linux_write_memory,
   linux_look_up_symbols,
-  linux_signal_pid,
 };
 
 static void

@@ -318,6 +318,7 @@ NAME(aout,reloc_type_lookup) (abfd,code)
     /* std relocs.  */
     switch (code)
       {
+	STD (BFD_RELOC_8, 0);
 	STD (BFD_RELOC_16, 1);
 	STD (BFD_RELOC_32, 2);
 	STD (BFD_RELOC_8_PCREL, 4);
@@ -756,7 +757,9 @@ NAME(aout,machine_type) (arch, machine, unknown)
       break;
 
     case bfd_arch_i386:
-      if (machine == 0)
+      if (machine == 0
+	  || machine == bfd_mach_i386_i386
+	  || machine == bfd_mach_i386_i386_intel_syntax)
 	arch_flags = M_386;
       break;
 

@@ -21,6 +21,7 @@
 #include "defs.h"
 
 #include "gdb_assert.h"
+#include "gdb_string.h"
 #include <errno.h>
 #include <signal.h>
 #include <sys/ptrace.h>

@@ -34,6 +34,7 @@ case "${targ_cpu}" in
 alpha*)          targ_archs=bfd_alpha_arch ;;
 arm*)	         targ_archs=bfd_arm_arch ;;
 c30*)	         targ_archs=bfd_tic30_arch ;;
+c4x*)            targ_archs=bfd_tic4x_arch ;;
 c54x*)	         targ_archs=bfd_tic54x_arch ;;
 dlx*)		 targ_archs=bfd_dlx_arch ;;
 hppa*)	         targ_archs=bfd_hppa_arch ;;
@@ -254,6 +255,12 @@ case "${targ}" in
     ;;
   c30-*-*coff* | tic30-*-*coff*)
     targ_defvec=tic30_coff_vec
+    ;;
+
+  c4x-*-*coff* | tic4x-*-*coff*)
+    targ_defvec=tic4x_coff1_vec
+    targ_selvecs="tic4x_coff1_beh_vec tic4x_coff2_vec tic4x_coff2_beh_vec tic4x_coff0_vec tic4x_coff0_beh_vec"
+    targ_underscore=yes
     ;;
 
   c54x*-*-*coff* | tic54x-*-*coff*)

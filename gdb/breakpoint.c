@@ -45,6 +45,7 @@
 #include "completer.h"
 #include "gdb.h"
 #include "ui-out.h"
+#include "cli/cli-script.h"
 
 #include "gdb-events.h"
 
@@ -737,7 +738,19 @@ insert_breakpoints (void)
     if (b->enable_state == bp_permanent)
       /* Permanent breakpoints cannot be inserted or removed.  */
       continue;
-    else if (b->type != bp_watchpoint
+    if ((b->type == bp_watchpoint
+	 || b->type == bp_hardware_watchpoint
+	 || b->type == bp_read_watchpoint
+	 || b->type == bp_access_watchpoint) && (!b->val))
+      {
+	struct value *val;
+	val = evaluate_expression (b->exp);
+	release_value (val);
+	if (VALUE_LAZY (val))
+	  value_fetch_lazy (val);
+	b->val = val;
+      } 
+    if (b->type != bp_watchpoint
 	&& b->type != bp_hardware_watchpoint
 	&& b->type != bp_read_watchpoint
 	&& b->type != bp_access_watchpoint
@@ -1565,6 +1578,14 @@ breakpoint_init_inferior (enum inf_context context)
 	/* Likewise for watchpoints on local expressions.  */
 	if (b->exp_valid_block != NULL)
 	  delete_breakpoint (b);
+	if (context == inf_starting) 
+	  {
+	    /* Reset val field to force reread of starting value
+	       in insert_breakpoints.  */
+	    if (b->val)
+	      value_free (b->val);
+	    b->val = NULL;
+	  }
 	break;
       default:
 	/* Likewise for exception catchpoints in dynamic-linked
@@ -1763,6 +1784,7 @@ bpstat_clear (bpstat *bsp)
       q = p->next;
       if (p->old_val != NULL)
 	value_free (p->old_val);
+      free_command_lines (&p->commands);
       xfree (p);
       p = q;
     }
@@ -1875,7 +1897,7 @@ bpstat_clear_actions (bpstat bs)
 {
   for (; bs != NULL; bs = bs->next)
     {
-      bs->commands = NULL;
+      free_command_lines (&bs->commands);
       if (bs->old_val != NULL)
 	{
 	  value_free (bs->old_val);
@@ -1944,11 +1966,9 @@ top:
 	   to look at, so start over.  */
 	goto top;
       else
-	bs->commands = NULL;
+	free_command_lines (&bs->commands);
     }
-
-  executing_breakpoint_commands = 0;
-  discard_cleanups (old_chain);
+  do_cleanups (old_chain);
 }
 
 /* This is the normal print function for a bpstat.  In the future,
@@ -2730,7 +2750,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 	    /* We will stop here */
 	    if (b->disposition == disp_disable)
 	      b->enable_state = bp_disabled;
-	    bs->commands = b->commands;
+	    bs->commands = copy_command_lines (b->commands);
 	    if (b->silent)
 	      bs->print = 0;
 	    if (bs->commands &&
@@ -6787,14 +6807,8 @@ delete_breakpoint (struct breakpoint *bpt)
     if (bs->breakpoint_at == bpt)
       {
 	bs->breakpoint_at = NULL;
-
-	/* we'd call bpstat_clear_actions, but that free's stuff and due
-	   to the multiple pointers pointing to one item with no
-	   reference counts found anywhere through out the bpstat's (how
-	   do you spell fragile?), we don't want to free things twice --
-	   better a memory leak than a corrupt malloc pool! */
-	bs->commands = NULL;
 	bs->old_val = NULL;
+	/* bs->commands will be freed later.  */
       }
   /* On the chance that someone will soon try again to delete this same
      bp, we mark it as deleted before freeing its storage. */

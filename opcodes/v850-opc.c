@@ -608,17 +608,13 @@ const struct v850_opcode v850_opcodes[] =
 { "jmp",	one (0x0060),		one (0xffe0),	      	{R1}, 			1, PROCESSOR_ALL },
   
 /* load/store instructions */
-{ "sld.bu",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2_NOTR0},	1, PROCESSOR_V850EA },
 { "sld.bu",     one (0x0060),		one (0x07f0),         	{D4,   EP,   R2_NOTR0},	1, PROCESSOR_V850E },
 
-{ "sld.hu",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2_NOTR0},	1, PROCESSOR_V850EA },
 { "sld.hu",     one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2_NOTR0},	1, PROCESSOR_V850E },
 
-{ "sld.b",      one (0x0060),		one (0x07f0),         	{D4,   EP,   R2}, 	1, PROCESSOR_V850EA },
 { "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1, PROCESSOR_V850E },
 { "sld.b",	one (0x0300),		one (0x0780),	      	{D7,   EP,   R2},	1, PROCESSOR_V850 },
 
-{ "sld.h",      one (0x0070),		one (0x07f0),         	{D5_4, EP,   R2}, 	1, PROCESSOR_V850EA },
 { "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1, PROCESSOR_V850E },
 { "sld.h",	one (0x0400),		one (0x0780),	      	{D8_7, EP,   R2}, 	1, PROCESSOR_V850 },
 { "sld.w",	one (0x0500),		one (0x0781),	      	{D8_6, EP,   R2}, 	1, PROCESSOR_ALL },
@@ -626,10 +622,6 @@ const struct v850_opcode v850_opcodes[] =
 { "sst.h",	one (0x0480),		one (0x0780),	      	{R2,   D8_7, EP}, 	2, PROCESSOR_ALL },
 { "sst.w",	one (0x0501),		one (0x0781),	      	{R2,   D8_6, EP}, 	2, PROCESSOR_ALL },
 
-{ "pushml",	two (0x07e0, 0x0001),	two (0xfff0, 0x0007), 	{LIST18_L}, 		0, PROCESSOR_V850EA },
-{ "pushmh",	two (0x07e0, 0x0003),	two (0xfff0, 0x0007), 	{LIST18_H}, 		0, PROCESSOR_V850EA },
-{ "popml",	two (0x07f0, 0x0001),	two (0xfff0, 0x0007), 	{LIST18_L}, 		0, PROCESSOR_V850EA },
-{ "popmh",	two (0x07f0, 0x0003),	two (0xfff0, 0x0007), 	{LIST18_H}, 		0, PROCESSOR_V850EA },
 { "prepare",    two (0x0780, 0x0003),	two (0xffc0, 0x001f), 	{LIST12, IMM5, SP}, 	0, PROCESSOR_NOT_V850 },
 { "prepare",    two (0x0780, 0x000b),	two (0xffc0, 0x001f), 	{LIST12, IMM5, IMM16}, 	0, PROCESSOR_NOT_V850 },
 { "prepare",    two (0x0780, 0x0013),	two (0xffc0, 0x001f), 	{LIST12, IMM5, IMM16}, 	0, PROCESSOR_NOT_V850 },
@@ -676,15 +668,6 @@ const struct v850_opcode v850_opcodes[] =
 { "divhu",	two (0x07e0, 0x0282),   two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0, PROCESSOR_NOT_V850 },
 { "divh",	two (0x07e0, 0x0280),   two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0, PROCESSOR_NOT_V850 },
 { "divh",	OP  (0x02),		OP_MASK,		{R1, R2_NOTR0},		0, PROCESSOR_ALL },
-  
-{ "divhn",	two (0x07e0, 0x0280),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EA },
-{ "divhun",	two (0x07e0, 0x0282),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EA },
-{ "divn",	two (0x07e0, 0x02c0),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EA },
-{ "divun",	two (0x07e0, 0x02c2),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EA },
-{ "sdivhn",	two (0x07e0, 0x0180),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EA },
-{ "sdivhun",	two (0x07e0, 0x0182),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EA },
-{ "sdivn",	two (0x07e0, 0x01c0),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EA },
-{ "sdivun",	two (0x07e0, 0x01c2),   two (0x07e0, 0x07c3), 	{I5DIV, R1, R2, R3}, 	0, PROCESSOR_V850EA },
   
 { "nop",	one (0x00),		one (0xffff),		{0}, 			0, PROCESSOR_ALL },
 { "mov",	OP  (0x10),		OP_MASK,		{I5, R2_NOTR0},		0, PROCESSOR_ALL },

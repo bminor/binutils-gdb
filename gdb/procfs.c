@@ -170,6 +170,7 @@ init_procfs_ops (void)
   procfs_ops.to_terminal_inferior   = terminal_inferior;
   procfs_ops.to_terminal_ours_for_output = terminal_ours_for_output;
   procfs_ops.to_terminal_ours       = terminal_ours;
+  procfs_ops.to_terminal_save_ours  = terminal_save_ours;
   procfs_ops.to_terminal_info       = child_terminal_info;
 
   procfs_ops.to_find_new_threads    = procfs_find_new_threads;

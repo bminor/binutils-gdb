@@ -398,6 +398,11 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
     print_frame (fi, level, source, args, sal);
 
   source_print = (source == SRC_LINE || source == SRC_AND_LOC);
+  if (sal.symtab)
+    {
+      current_source_symtab = sal.symtab;
+      current_source_line = sal.line;
+    }
 
   if (source_print && sal.symtab)
     {
@@ -410,10 +415,7 @@ print_frame_info_base (struct frame_info *fi, int level, int source, int args)
       if (!done)
 	{
 	  if (print_frame_info_listing_hook)
-	    {
-	      print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
-	      current_source_symtab = sal.symtab;
-	    }
+	    print_frame_info_listing_hook (sal.symtab, sal.line, sal.line + 1, 0);
 	  else
 	    {
 	      /* We used to do this earlier, but that is clearly
@@ -1517,6 +1519,15 @@ select_frame (struct frame_info *fi)
   if (selected_frame_level_changed_hook)
     selected_frame_level_changed_hook (frame_relative_level (fi));
 
+  /* FIXME: kseitz/2002-08-28: It would be nice to call
+     selected_frame_level_changed_event right here, but due to limitations
+     in the current interfaces, we would end up flooding UIs with events
+     because select_frame is used extensively internally.
+
+     Once we have frame-parameterized frame (and frame-related) commands,
+     the event notification can be moved here, since this function will only
+     be called when the users selected frame is being changed. */
+
   /* Ensure that symbols for this frame are read in.  Also, determine the
      source language of this frame, and switch to it if desired.  */
   if (fi)
@@ -1620,8 +1631,8 @@ select_frame_command_wrapper (char *level_exp, int from_tty)
 static void
 select_frame_command (char *level_exp, int from_tty)
 {
-  register struct frame_info *frame, *frame1;
-  unsigned int level = 0;
+  struct frame_info *frame;
+  int level = frame_relative_level (selected_frame);
 
   if (!target_has_stack)
     error ("No stack.");
@@ -1629,6 +1640,8 @@ select_frame_command (char *level_exp, int from_tty)
   frame = parse_frame_specification (level_exp);
 
   select_frame (frame);
+  if (level != frame_relative_level (selected_frame))
+    selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 /* The "frame" command.  With no arg, print selected frame briefly.
@@ -1674,6 +1687,7 @@ up_silently_base (char *count_exp)
   if (count1 != 0 && count_exp == 0)
     error ("Initial frame selected; you cannot go up.");
   select_frame (fi);
+  selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 static void
@@ -1719,6 +1733,7 @@ down_silently_base (char *count_exp)
     }
 
   select_frame (frame);
+  selected_frame_level_changed_event (frame_relative_level (selected_frame));
 }
 
 /* ARGSUSED */

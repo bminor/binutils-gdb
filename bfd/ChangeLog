@@ -1,3 +1,107 @@
+2002-09-02  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-v850.c (v850_elf_final_link_relocate): Use helpful
+	names instead of cryptically overloaded bfd_reloc error
+	codes.
+	(v850_elf_relocate_section): Likewise.
+	(v850_elf_relax_section): Replace caching of external symbols
+	with caching of internal symbols obtained from calling
+	bfd_elf_get_elf_syms().
+        Fixup problems with freeing cached allocated memory blocks.
+
+
+2002-09-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* cpu-pj.c (scan_mach, compatible, arch_info_struct): Remove.
+	(bfd_pj_arch): Use bfd_default_scan.
+	* cpu-v850.c (scan): Remove.
+	(N): Use bfd_default_scan.
+	* cpu-z8k.c (scan_mach): Remove.
+	(arch_info_struct, bfd_z8k_arch): Reorganize so that the default is
+	first.  Use bfd_default_scan.
+
+	* ecoff.c (_bfd_ecoff_set_arch_mach_hook): Don't use hard-coded
+	bfd_mach constants.
+	(ecoff_get_magic): Likewise.
+	* elf32-v850.c (v850_elf_object_p): Likewise.
+	(v850_elf_final_write_processing): Likewise.
+	* mipsbsd.c (MY(set_arch_mach)): Likewise.
+	(MY(write_object_contents)): Likewise.
+	* coff64-rs6000.c (xcoff64_write_object_contents): Likewise.
+	* coffcode.h (coff_write_object_contents): Likewise.
+	(coff_set_arch_mach_hook): Add comment describing machine == 0.
+	Remove unnecessary "machine" assignments.
+	(coff_write_relocs): Test for the absolute section sym by testing
+	section and flags.
+
+	* aoutx.h (NAME(aout,machine_type)): Recognize bfd_mach_i386_i386
+	and bfd_mach_i386_i386_intel_syntax.
+	* pdp11.c (NAME(aout,machine_type)): Likewise.
+
+2002-08-30  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* bfd-in.h (align_power): Cast constants to bfd_vma type.
+	* bfd-in2.h (align_power): Likewise.
+
+2002-08-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+	* cpu-avr.c (compatible): Don't use hard-coded mach constants.
+	* cpu-powerpc.c (powerpc_compatible): Likewise.
+	* cpu-rs6000.c (rs6000_compatible): Likewise.
+
+2002-08-28  Catherine Moore  <clm@redhat.com>
+
+	* elf32-v850.c (v850_elf_reloc_map):  Add new relocs.
+	(v850-elf-reloc): Don't resolve pc relative relocs.
+	(v850_elf_ignore_reloc): New routine.
+	(v850_elf_final_link_relocate): Handle new relocs.
+	(v850_elf_relax_delete_bytes ): New routine.
+	(v850_elf_relax_section): New routine.
+	(bfd_elf32_bfd_relax_section): Define.
+	(HOWTO): New entries for new relocs.
+	* reloc.c (BFD_RELOC_V850_LONGCALL): New reloc.
+	(BFD_RELOC_V850_LONGJUMP): New reloc.
+	(BFD_RELOC_V850_ALIGN): New reloc.
+	* archures.c: Remove redundant v850ea architecture.
+	* cpu-v850.c: Remove redundant v850ea support.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerated.
+
+2002-08-28  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* config.bfd: Add tic4x-*-*coff* and c4x-*-*coff* target.
+	* configure.in: Add tic4x_coff vector files.
+	* configure: Regenerate.
+	* Makefile.am: Add tic4x target.
+	* Makefile.in: Regenerate.
+
+2002-08-27  Michael Hayes <m.hayes@elec.canterbury.ac.nz>
+
+	* archures.c: Add the BFD arch type tic4x.
+	* bfd-in.h: Add BFD_IN_MEMORY flag.
+	* coff-tic4x.c: New file.
+	* coffswap.h (coff_swap_sym_out): Add preadjuster.
+	* cpu-tic4x.c: New file.
+	* targets.c: Added tic4x- in list of xvecs.
+	* ticoff.h: New file.
+	* bfd-in2.h: Regenerate.
+
+2002-08-27  Adam Nemet  <anemet@lnxw.com>
+
+	* elf32-arm.h (elf32_arm_finish_dynamic_sections): Set the last
+	bit of DT_INIT and DT_FINI for Thumb functions.
+
+2002-08-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* coffcode.h (coff_set_arch_mach_hook): Handle W65MAGIC.
+
+2002-08-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* aoutx.h (NAME(aout,reloc_type_lookup)): Handle BFD_RELOC_8.
+
 2002-08-24  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_copy_indirect_symbol): New.

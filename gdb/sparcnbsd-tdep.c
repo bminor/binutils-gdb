@@ -500,6 +500,8 @@ sparcnbsd_init_abi_elf (struct gdbarch_info info,
 {
   sparcnbsd_init_abi_common (info, gdbarch);
 
+  set_gdbarch_pc_in_sigtramp (gdbarch, nbsd_pc_in_sigtramp);
+
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
 				         gdbarch_ptr_bit (gdbarch) == 32 ?
                                 nbsd_ilp32_solib_svr4_fetch_link_map_offsets :

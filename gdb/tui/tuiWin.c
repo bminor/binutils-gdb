@@ -928,7 +928,7 @@ _tuiAllWindowsInfo (char *arg, int fromTTY)
   TuiWinInfoPtr winWithFocus = tuiWinWithFocus ();
 
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
-    if (winList[type]->generic.isVisible)
+    if (winList[type] && winList[type]->generic.isVisible)
       {
 	if (winWithFocus == winList[type])
 	  printf_filtered ("        %s\t(%d lines)  <has focus>\n",
@@ -1446,7 +1446,7 @@ _newHeightOk (TuiWinInfoPtr primaryWinInfo, int newHeight)
 	}
       else
 	{
-	  int curTotalHeight, totalHeight, minHeight;
+	  int curTotalHeight, totalHeight, minHeight = 0;
 	  TuiWinInfoPtr firstWin, secondWin;
 
 	  if (curLayout == SRC_DISASSEM_COMMAND)
@@ -1465,7 +1465,7 @@ _newHeightOk (TuiWinInfoPtr primaryWinInfo, int newHeight)
 	     ** line that the first and second windows share, and add one
 	     ** for the locator.
 	   */
-	  curTotalHeight =
+	  totalHeight = curTotalHeight =
 	    (firstWin->generic.height + secondWin->generic.height - 1)
 	    + cmdWin->generic.height + 1 /*locator */ ;
 	  if (primaryWinInfo == cmdWin)

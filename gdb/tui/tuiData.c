@@ -40,6 +40,7 @@
 #endif
 
 #include "defs.h"
+#include "symtab.h"
 #include "tui.h"
 #include "tuiData.h"
 #include "tuiGeneralWin.h"
@@ -50,24 +51,10 @@
 TuiWinInfoPtr winList[MAX_MAJOR_WINDOWS];
 
 /***************************
-** Private Definitions
-****************************/
-#define FILE_WIDTH   30
-#define PROC_WIDTH   40
-#define LINE_WIDTH   4
-#define PC_WIDTH     8
-
-/***************************
 ** Private data
 ****************************/
-static char *_tuiNullStr = TUI_NULL_STR;
-static char *_tuiBlankStr = "   ";
-static char *_tuiLocationStr = "  >";
-static char *_tuiBreakStr = " * ";
-static char *_tuiBreakLocationStr = " *>";
 static TuiLayoutType _currentLayout = UNDEFINED_LAYOUT;
 static int _termHeight, _termWidth;
-static int _historyLimit = DEFAULT_HISTORY_COUNT;
 static TuiGenWinInfo _locator;
 static TuiGenWinInfo _execInfo[2];
 static TuiWinInfoPtr _srcWinList[2];
@@ -286,61 +273,6 @@ clearWinDetail (TuiWinInfoPtr winInfo)
 
 
 /*
-   ** blankStr()
-   **        Accessor for the blank string.
- */
-char *
-blankStr (void)
-{
-  return _tuiBlankStr;
-}				/* blankStr */
-
-
-/*
-   ** locationStr()
-   **        Accessor for the location string.
- */
-char *
-locationStr (void)
-{
-  return _tuiLocationStr;
-}				/* locationStr */
-
-
-/*
-   ** breakStr()
-   **        Accessor for the break string.
- */
-char *
-breakStr (void)
-{
-  return _tuiBreakStr;
-}				/* breakStr */
-
-
-/*
-   ** breakLocationStr()
-   **        Accessor for the breakLocation string.
- */
-char *
-breakLocationStr (void)
-{
-  return _tuiBreakLocationStr;
-}				/* breakLocationStr */
-
-
-/*
-   ** nullStr()
-   **        Accessor for the null string.
- */
-char *
-nullStr (void)
-{
-  return _tuiNullStr;
-}				/* nullStr */
-
-
-/*
    ** sourceExecInfoPtr().
    **        Accessor for the source execution info ptr.
  */
@@ -373,29 +305,6 @@ locatorWinInfoPtr (void)
   return &_locator;
 }				/* locatorWinInfoPtr */
 
-
-/*
-   ** historyLimit().
-   **        Accessor for the history limit
- */
-int
-historyLimit (void)
-{
-  return _historyLimit;
-}				/* historyLimit */
-
-
-/*
-   ** setHistoryLimitTo().
-   **        Mutator for the history limit
- */
-void
-setHistoryLimitTo (int h)
-{
-  _historyLimit = h;
-
-  return;
-}				/* setHistoryLimitTo */
 
 /*
    ** termHeight().
@@ -549,189 +458,7 @@ tuiPrevWin (TuiWinInfoPtr curWin)
     }
 
   return prev;
-}				/* tuiPrevWin */
-
-
-/*
-   ** displayableWinContentOf().
-   **        Answer a the content at the location indicated by index.  Note
-   **        that if this is a locator window, the string returned should be
-   **        freed after use.
- */
-char *
-displayableWinContentOf (TuiGenWinInfoPtr winInfo, TuiWinElementPtr elementPtr)
-{
-
-  char *string = nullStr ();
-
-  if (elementPtr != (TuiWinElementPtr) NULL || winInfo->type == LOCATOR_WIN)
-    {
-      /*
-         ** Now convert the line to a displayable string
-       */
-      switch (winInfo->type)
-	{
-	case SRC_WIN:
-	case DISASSEM_WIN:
-	  string = elementPtr->whichElement.source.line;
-	  break;
-	case CMD_WIN:
-	  string = elementPtr->whichElement.command.line;
-	  break;
-	case LOCATOR_WIN:
-	  if ((string = (char *) xmalloc (
-		      (termWidth () + 1) * sizeof (char))) == (char *) NULL)
-	      string = nullStr ();
-	  else
-	    {
-	      char lineNo[50], pc[50], buf[50], *fname, *pname;
-	      register int strSize = termWidth (), i, procWidth, fileWidth;
-
-	      /*
-	         ** First determine the amount of file/proc name width
-	         ** we have available
-	       */
-	      i = strSize - (PC_WIDTH + LINE_WIDTH
-			     + 25	/* pc and line labels */
-			     + strlen (FILE_PREFIX) + 1		/* file label */
-			     + 15 /* procedure label */ );
-	      if (i >= FILE_WIDTH + PROC_WIDTH)
-		{
-		  fileWidth = FILE_WIDTH;
-		  procWidth = PROC_WIDTH;
-		}
-	      else
-		{
-		  fileWidth = i / 2;
-		  procWidth = i - fileWidth;
-		}
-
-	      /* Now convert elements to string form */
-	      if (elementPtr != (TuiWinElementPtr) NULL &&
-		  *elementPtr->whichElement.locator.fileName != (char) 0 &&
-		  srcWin->generic.isVisible)
-		fname = elementPtr->whichElement.locator.fileName;
-	      else
-		fname = "??";
-	      if (elementPtr != (TuiWinElementPtr) NULL &&
-		  *elementPtr->whichElement.locator.procName != (char) 0)
-		pname = elementPtr->whichElement.locator.procName;
-	      else
-		pname = "??";
-	      if (elementPtr != (TuiWinElementPtr) NULL &&
-		  elementPtr->whichElement.locator.lineNo > 0)
-		sprintf (lineNo, "%d",
-			 elementPtr->whichElement.locator.lineNo);
-	      else
-		strcpy (lineNo, "??");
-	      if (elementPtr != (TuiWinElementPtr) NULL &&
-		  elementPtr->whichElement.locator.addr != 0)
-		sprintf (pc, "0x%lx",
-			 (long) elementPtr->whichElement.locator.addr);
-	      else
-		strcpy (pc, "??");
-	      /*
-	         ** Now create the locator line from the string version
-	         ** of the elements.  We could use sprintf() here but
-	         ** that wouldn't ensure that we don't overrun the size
-	         ** of the allocated buffer.  strcat_to_buf() will.
-	       */
-	      *string = (char) 0;
-	      /* Filename */
-	      strcat_to_buf (string, strSize, " ");
-	      strcat_to_buf (string, strSize, FILE_PREFIX);
-	      if (strlen (fname) > fileWidth)
-		{
-		  strncpy (buf, fname, fileWidth - 1);
-		  buf[fileWidth - 1] = '*';
-		  buf[fileWidth] = (char) 0;
-		}
-	      else
-		strcpy (buf, fname);
-	      strcat_to_buf (string, strSize, buf);
-	      /* procedure/class name */
-	      sprintf (buf, "%15s", PROC_PREFIX);
-	      strcat_to_buf (string, strSize, buf);
-	      if (strlen (pname) > procWidth)
-		{
-		  strncpy (buf, pname, procWidth - 1);
-		  buf[procWidth - 1] = '*';
-		  buf[procWidth] = (char) 0;
-		}
-	      else
-		strcpy (buf, pname);
-	      strcat_to_buf (string, strSize, buf);
-	      sprintf (buf, "%10s", LINE_PREFIX);
-	      strcat_to_buf (string, strSize, buf);
-	      strcat_to_buf (string, strSize, lineNo);
-	      sprintf (buf, "%10s", PC_PREFIX);
-	      strcat_to_buf (string, strSize, buf);
-	      strcat_to_buf (string, strSize, pc);
-	      for (i = strlen (string); i < strSize; i++)
-		string[i] = ' ';
-	      string[strSize] = (char) 0;
-	    }
-	  break;
-	case EXEC_INFO_WIN:
-	  string = elementPtr->whichElement.simpleString;
-	  break;
-	default:
-	  break;
-	}
-    }
-  return string;
-}				/* displayableWinContentOf */
-
-
-/*
-   **    winContentAt().
-   **        Answer a the content at the location indicated by index
- */
-char *
-displayableWinContentAt (TuiGenWinInfoPtr winInfo, int index)
-{
-  return (displayableWinContentOf (winInfo, (TuiWinElementPtr) winInfo->content[index]));
-}				/* winContentAt */
-
-
-/*
-   ** winElementHeight().
-   **        Answer the height of the element in lines
- */
-int
-winElementHeight (TuiGenWinInfoPtr winInfo, TuiWinElementPtr element)
-{
-  int h;
-
-  if (winInfo->type == DATA_WIN)
-/* FOR NOW SAY IT IS ONLY ONE LINE HIGH */
-    h = 1;
-  else
-    h = 1;
-
-  return h;
-}				/* winElementHeight */
-
-
-/*
-   **  winByName().
-   **      Answer the window represented by name
- */
-TuiWinInfoPtr
-winByName (char *name)
-{
-  TuiWinInfoPtr winInfo = (TuiWinInfoPtr) NULL;
-  int i = 0;
-
-  while (i < MAX_MAJOR_WINDOWS && m_winPtrIsNull (winInfo))
-    {
-      if (strcmp (name, winName (&(winList[i]->generic))) == 0)
-	winInfo = winList[i];
-      i++;
-    }
-
-  return winInfo;
-}				/* winByName */
+}
 
 
 /*
@@ -888,7 +615,8 @@ initContentElement (TuiWinElementPtr element, TuiWinType type)
       element->whichElement.locator.addr = 0;
       break;
     case EXEC_INFO_WIN:
-      element->whichElement.simpleString = blankStr ();
+      memset(element->whichElement.simpleString, ' ',
+             sizeof(element->whichElement.simpleString));
       break;
     default:
       break;
@@ -1202,22 +930,6 @@ freeWinContent (TuiGenWinInfoPtr winInfo)
 
   return;
 }				/* freeWinContent */
-
-
-/*
-   ** freeAllWindows().
- */
-void
-freeAllWindows (void)
-{
-  TuiWinType type = SRC_WIN;
-
-  for (; type < MAX_MAJOR_WINDOWS; type++)
-    if (m_winPtrNotNull (winList[type]) &&
-	winList[type]->generic.type != UNDEFINED_WIN)
-      freeWindow (winList[type]);
-  return;
-}				/* freeAllWindows */
 
 
 void

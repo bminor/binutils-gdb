@@ -1,3 +1,8 @@
+2002-09-03  Keith Seitz  <keiths@redhat.com>
+
+	* gdb680.exp: New file to test to check for uiout list/tuple
+	nesting bug.
+
 2002-03-04  Michael Chastain  <mec@shout.net>
 
 	* mi-var-cmd.exp: In test "create local variable func",

@@ -22,8 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
-static boolean scan_mach
-  PARAMS ((const struct bfd_arch_info *, const char *));
 static const bfd_arch_info_type *compatible
   PARAMS ((const bfd_arch_info_type *, const bfd_arch_info_type *));
 
@@ -153,22 +151,6 @@ local_bfd_reloc_type_lookup (arch, code)
 }
 #endif
 
-static boolean
-scan_mach (info, string)
-     const struct bfd_arch_info *info;
-     const char *string;
-{
-  if (strcmp (string, "z8001") == 0 || strcmp (string, "z8k") == 0)
-    {
-      return bfd_mach_z8001 == info->mach;
-    }
-  if (strcmp (string, "z8002") == 0)
-    {
-      return bfd_mach_z8002 == info->mach;
-    }
-  return false;
-}
-
 /* This routine is provided two arch_infos and returns whether
    they'd be compatible */
 
@@ -184,10 +166,12 @@ compatible (a, b)
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  {32, 32, 8, bfd_arch_z8k, bfd_mach_z8001, "z8k", "z8001", 1, false, compatible, scan_mach, 0,},
+  { 32, 16, 8, bfd_arch_z8k, bfd_mach_z8002, "z8k", "z8002", 1, false,
+    compatible, bfd_default_scan, 0 }
 };
 
 const bfd_arch_info_type bfd_z8k_arch =
 {
-  32, 16, 8, bfd_arch_z8k, bfd_mach_z8002, "z8k", "z8002", 1, true, compatible, scan_mach, &arch_info_struct[0],
+  32, 32, 8, bfd_arch_z8k, bfd_mach_z8001, "z8k", "z8001", 1, true,
+  compatible, bfd_default_scan, &arch_info_struct[0]
 };

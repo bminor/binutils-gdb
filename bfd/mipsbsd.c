@@ -1,5 +1,5 @@
 /* BFD backend for MIPS BSD (a.out) binaries.
-   Copyright 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Ralph Campbell.
 
@@ -91,12 +91,12 @@ MY(set_arch_mach) (abfd, machtype)
     {
     case M_MIPS1:
       arch = bfd_arch_mips;
-      machine = 3000;
+      machine = bfd_mach_mips3000;
       break;
 
     case M_MIPS2:
       arch = bfd_arch_mips;
-      machine = 4000;
+      machine = bfd_mach_mips4000;
       break;
 
     default:
@@ -164,8 +164,8 @@ MY (write_object_contents) (abfd)
     case bfd_arch_mips:
       switch (bfd_get_mach (abfd))
 	{
-	case 4000:
-	case 6000:
+	case bfd_mach_mips4000:
+	case bfd_mach_mips6000:
 	  N_SET_MACHTYPE (*execp, M_MIPS2);
 	  break;
 	default:
