@@ -1,3 +1,9 @@
+Sun Jun 14 08:46:25 1998  Ron Unrau  (runrau@cygnus.com)
+
+	* partial-stab.h: 'F' and 'f' type N_FUN psymbols should pass
+	  CUR_SYMBOL_VALUE as CORE_ADDR instead of long
+	* buildsym.[ch]: export pending_blocks list
+
 Sat Jun 13 13:02:32 1998  Dawn Perchik (dawn@cygnus.com)
 
 	* remote.c : Fix remote help string to match that of help.exp.
