@@ -258,7 +258,6 @@
 	* config/d30v/d30v.mt: Ditto.
 	* config/d30v/tm-d30v.h: Ditto.
 
->>>>>>> 1.2930
 2002-07-13  Aidan Skinner <aidan@velvet.net>
 
 	* ada-tasks.c (add_task_entry): replace calls to
