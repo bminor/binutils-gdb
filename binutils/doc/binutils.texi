@@ -2577,7 +2577,7 @@ for the input file name, as the output file name.  If there is no
 non-option argument, then @command{windres} will write to standard output.
 @command{windres} can not write a COFF file to standard output.
 
-@item -I @var{format}
+@item -J @var{format}
 @itemx --input-format @var{format}
 The input format to read.  @var{format} may be @samp{res}, @samp{rc}, or
 @samp{coff}.  If no input format is specified, @command{windres} will
@@ -2605,11 +2605,17 @@ preprocessor first.  This option may be used to specify the preprocessor
 to use, including any leading arguments.  The default preprocessor
 argument is @code{gcc -E -xc-header -DRC_INVOKED}.
 
-@item --include-dir @var{directory}
+@item -I @var{directory}
+@itemx --include-dir @var{directory}
 Specify an include directory to use when reading an @code{rc} file.
 @command{windres} will pass this to the preprocessor as an @option{-I}
 option.  @command{windres} will also search this directory when looking for
-files named in the @code{rc} file.
+files named in the @code{rc} file.  If the argument passed to this command
+matches any of the supported @var{formats} (as descrived in the @option{-J} 
+option), it will issue a deprecation warning, and behave just like the
+@option{-J} option.  New programs should not use this behaviour.  If a
+directory happens to match a @var{format}, simple prefix it with @samp{./}
+to disable the backward compatibility.
 
 @item -D @var{target}
 @itemx --define @var{sym}[=@var{val}]

@@ -106,8 +106,7 @@ static struct include_dir *include_dirs;
 
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
-#define OPTION_INCLUDE_DIR	150
-#define OPTION_PREPROCESSOR	(OPTION_INCLUDE_DIR + 1)
+#define OPTION_PREPROCESSOR	150
 #define OPTION_USE_TEMP_FILE	(OPTION_PREPROCESSOR + 1)
 #define OPTION_NO_USE_TEMP_FILE	(OPTION_USE_TEMP_FILE + 1)
 #define OPTION_YYDEBUG		(OPTION_NO_USE_TEMP_FILE + 1)
@@ -116,8 +115,8 @@ static const struct option long_options[] =
 {
   {"define", required_argument, 0, 'D'},
   {"help", no_argument, 0, 'h'},
-  {"include-dir", required_argument, 0, OPTION_INCLUDE_DIR},
-  {"input-format", required_argument, 0, 'I'},
+  {"include-dir", required_argument, 0, 'I'},
+  {"input-format", required_argument, 0, 'J'},
   {"language", required_argument, 0, 'l'},
   {"output-format", required_argument, 0, 'O'},
   {"preprocessor", required_argument, 0, OPTION_PREPROCESSOR},
@@ -135,7 +134,7 @@ static const struct option long_options[] =
 
 static void res_init PARAMS ((void));
 static int extended_menuitems PARAMS ((const struct menuitem *));
-static enum res_format format_from_name PARAMS ((const char *));
+static enum res_format format_from_name PARAMS ((const char *, int));
 static enum res_format format_from_filename PARAMS ((const char *, int));
 static void usage PARAMS ((FILE *, int));
 static int cmp_res_entry PARAMS ((const PTR, const PTR));
@@ -583,8 +582,9 @@ extended_menuitems (menuitems)
 /* Convert a string to a format type, or exit if it can't be done.  */
 
 static enum res_format
-format_from_name (name)
+format_from_name (name, exit_on_error)
      const char *name;
+     int exit_on_error;
 {
   const struct format_map *m;
 
@@ -592,7 +592,7 @@ format_from_name (name)
     if (strcasecmp (m->name, name) == 0)
       break;
 
-  if (m->name == NULL)
+  if (m->name == NULL && exit_on_error)
     {
       non_fatal (_("unknown format type `%s'"), name);
       fprintf (stderr, _("%s: supported formats:"), program_name);
@@ -699,15 +699,15 @@ usage (stream, status)
   fprintf (stream, _(" The options are:\n\
   -i --input=<file>            Name input file\n\
   -o --output=<file>           Name output file\n\
-  -I --input-format=<format>   Specify input format\n\
+  -J --input-format=<format>   Specify input format\n\
   -O --output-format=<format>  Specify output format\n\
   -F --target=<target>         Specify COFF target\n\
      --preprocessor=<program>  Program to use to preprocess rc file\n\
-     --include-dir=<dir>       Include directory when preprocessing rc file\n\
+  -I --include-dir=<dir>       Include directory when preprocessing rc file\n\
   -D --define <sym>[=<val>]    Define SYM when preprocessing rc file\n\
   -U --undefine <sym>          Undefine SYM when preprocessing rc file\n\
   -v --verbose                 Verbose - tells you what it's doing\n\
-     --language=<val>          Set language when reading rc file\n\
+  -l --language=<val>          Set language when reading rc file\n\
      --use-temp-file           Use a temporary file instead of popen to read\n\
                                the preprocessor output\n\
      --no-use-temp-file        Use popen (default)\n"));
@@ -776,6 +776,7 @@ main (argc, argv)
   char *input_filename;
   char *output_filename;
   enum res_format input_format;
+  enum res_format input_format_tmp;
   enum res_format output_format;
   char *target;
   char *preprocessor;
@@ -812,7 +813,7 @@ main (argc, argv)
   language = 0x409;   /* LANG_ENGLISH, SUBLANG_ENGLISH_US.  */
   use_temp_file = 0;
 
-  while ((c = getopt_long (argc, argv, "i:l:o:I:O:F:D:U:rhHvV", long_options,
+  while ((c = getopt_long (argc, argv, "i:l:o:I:J:O:F:D:U:rhHvV", long_options,
 			   (int *) 0)) != EOF)
     {
       switch (c)
@@ -825,12 +826,12 @@ main (argc, argv)
 	  output_filename = optarg;
 	  break;
 
-	case 'I':
-	  input_format = format_from_name (optarg);
+	case 'J':
+	  input_format = format_from_name (optarg, 1);
 	  break;
 
 	case 'O':
-	  output_format = format_from_name (optarg);
+	  output_format = format_from_name (optarg, 1);
 	  break;
 
 	case 'F':
@@ -869,7 +870,16 @@ main (argc, argv)
 	  verbose ++;
 	  break;
 
-	case OPTION_INCLUDE_DIR:
+	case 'I':
+	  /* For backward compatibility, should be removed in the future.  */
+	  input_format_tmp = format_from_name (optarg, 0);
+	  if (input_format_tmp != RES_FORMAT_UNKNOWN)
+	    {
+	      fprintf (stderr, _("Option -I is deprecated for setting the input format, please use -J instead.\n"));
+	      input_format = input_format_tmp;
+	      break;
+	    }
+	  
 	  if (preprocargs == NULL)
 	    {
 	      quotedarg = quot (optarg);

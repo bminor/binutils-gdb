@@ -1,3 +1,13 @@
+2003-04-22  Dimitrie O. Paun  <dpaun@rogers.com>
+
+	* windres.c (format_from_name): Make the exit on error
+	behaviour optional.
+	(main): Rename the -I option to -J. Introduce -I as a synonym
+	for --include-dir.  For backwards compatibility also support the
+	old -I behaviour, but issue a deprecation warning.
+	* doc/binutils.texi: Rename -I to -J.  Document the new behaviour
+	of the -I option.
+
 2003-04-22  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* readelf.c: Replace references to Mitsubishi M32R with

@@ -1,3 +1,8 @@
+2003-04-22  Dimitrie O. Paun  <dpaun@rogers.com>
+
+	* binutils-all/windres/windres.exp: Add test for the new -J
+	option.  Remove use of -I as it now generates a warning message.
+
 2003-04-03  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/windres/dialogid.rc: Replace "Static" with
