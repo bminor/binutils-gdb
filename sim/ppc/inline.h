@@ -62,6 +62,14 @@
 #endif
 #endif
 
+#if MODEL_INLINE
+#if MODEL_INLINE == 2
+#define INLINE_MODEL static INLINE
+#else
+#define INLINE_MODEL static
+#endif
+#endif
+
 #if BITS_INLINE
 #if BITS_INLINE == 2
 #define INLINE_BITS static INLINE

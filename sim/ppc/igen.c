@@ -43,24 +43,35 @@ enum {
   max_insn_size = 32,
 };
 
-int hi_bit_nr = 0;
-int insn_size = max_insn_size;
-int idecode_expand_semantics = 0;
-int idecode_cache = 0;
-int number_lines = 1;
+static int hi_bit_nr = 0;
+static int insn_size = max_insn_size;
+static int idecode_expand_semantics = 0;
+static int idecode_cache = 0;
+static int number_lines = 1;
 
 
 /****************************************************************/
 
 
-char *cache_idecode_formal = "cpu *processor,\n instruction_word instruction,\n unsigned_word cia,\n idecode_cache *cache_entry";
-char *cache_idecode_actual = "processor, instruction, cia, cache_entry";
+static char *cache_idecode_formal  =
+"cpu *processor,\n\
+ instruction_word instruction,\n\
+ unsigned_word cia,\n\
+ idecode_cache *cache_entry";
 
-char *cache_semantic_formal = "cpu *processor,\n idecode_cache *cache_entry,\n unsigned_word cia";
-char *cache_semantic_actual = "processor, entry, cia";
+static char *cache_idecode_actual = "processor, instruction, cia, cache_entry";
 
-char *semantic_formal = "cpu *processor,\n instruction_word instruction,\n unsigned_word cia";
-char *semantic_actual = "processor, instruction, cia";
+static char *cache_semantic_formal =
+"cpu *processor,\n\
+ idecode_cache *cache_entry,\n\
+ unsigned_word cia";
+
+static char *semantic_formal = 
+"cpu *processor,\n\
+ instruction_word instruction,\n\
+ unsigned_word cia";
+
+static char *semantic_actual = "processor, instruction, cia";
 
 
 
@@ -72,7 +83,7 @@ struct _filter {
   char *flag;
   filter *next;
 };
-filter *filters = NULL;
+static filter *filters = NULL;
 
 
 /****************************************************************/
@@ -87,7 +98,7 @@ struct _cache_rules {
   char *expression;
   cache_rules *next;
 };
-cache_rules *cache_table;
+static cache_rules *cache_table;
 
 
 enum {
@@ -102,7 +113,7 @@ enum {
 static cache_rules *
 load_cache_rules(char *file_name)
 {
-  table *file = table_open(file_name, nr_cache_rule_fields);
+  table *file = table_open(file_name, nr_cache_rule_fields, 0);
   table_entry *entry;
   cache_rules *table = NULL;
   cache_rules **curr_rule = &table;
@@ -167,7 +178,7 @@ struct _opcode_rules {
   unsigned special_rule;
   opcode_rules *next;
 };
-opcode_rules *opcode_table;
+static opcode_rules *opcode_table;
 
 
 enum {
@@ -188,7 +199,7 @@ enum {
 static opcode_rules *
 load_opcode_rules(char *file_name)
 {
-  table *file = table_open(file_name, nr_opcode_fields);
+  table *file = table_open(file_name, nr_opcode_fields, 0);
   table_entry *entry;
   opcode_rules *table = NULL;
   opcode_rules **curr_rule = &table;
@@ -567,18 +578,19 @@ typedef enum {
   insn_nmemonic,
   insn_name,
   insn_comment,
-  nr_insn_table_fields,
+  nr_insn_table_fields
 } insn_table_fields;
-char *insn_field_name[nr_insn_table_fields] = {
-  "format", "form", "flags", "nmemonic", "name", "comments"
-};
 
 typedef enum {
   function_type = insn_format,
   function_name = insn_name,
-  function_param = insn_comment,
+  function_param = insn_comment
 } function_table_fields;
 
+typedef enum {
+  model_name = insn_name,
+  model_func = insn_comment,
+} model_table_fields;
 
 typedef struct _insn insn;
 struct _insn {
@@ -587,6 +599,23 @@ struct _insn {
   insn *next;
 };
 
+typedef struct _model_func_unit model_func_unit;
+struct _model_func_unit {
+  model_func_unit *next;
+  char *name;
+  char *comment;
+  int number;
+  unsigned mask;
+};
+
+typedef struct _model model;
+struct _model {
+  model *next;
+  char *name;
+  model_func_unit *func_unit_start;
+  model_func_unit *func_unit_end;
+};
+  
 typedef struct _insn_table insn_table;
 struct _insn_table {
   int opcode_nr;
@@ -594,6 +623,9 @@ struct _insn_table {
   int nr_insn;
   insn *insns;
   insn *functions;
+  insn *last_function;
+  int max_func_unit_name_len;
+  unsigned max_func_unit_mask;
   opcode_rules *opcode_rule;
   opcode_field *opcode;
   int nr_entries;
@@ -602,23 +634,135 @@ struct _insn_table {
   insn_table *parent;
 };
 
+typedef enum {
+  insn_model_name,
+  insn_model_unit,
+  insn_model_issue,
+  insn_model_done,
+  insn_model_flags,
+  nr_insn_model_table_fields
+} insn_model_table_fields;
+
+static model *models;
+static model *last_model;
 
 
 static void
 insn_table_insert_function(insn_table *table,
 			   table_entry *file_entry)
 {
-  insn **ptr_to_cur_function = &table->functions;
-
   /* create a new function */
   insn *new_function = ZALLOC(insn);
   new_function->file_entry = file_entry;
 
   /* append it to the end of the function list */
-  while (*ptr_to_cur_function != NULL) {
-    ptr_to_cur_function = &(*ptr_to_cur_function)->next;
+  if (table->last_function)
+    table->last_function->next = new_function;
+  else
+    table->functions = new_function;
+  table->last_function = new_function;
+}
+
+
+static void
+model_table_insert(insn_table *table,
+		   table_entry *file_entry)
+{
+  /* create a new model */
+  model *new_model = ZALLOC(model);
+  model_func_unit *func_unit;
+  char *ptr, *end, *end_name, *comment, *name;
+  int ch;
+  int name_len;
+  int func_name_len;
+  unsigned unit, mask;
+  int number;
+
+  new_model->name = file_entry->fields[model_name];
+  name_len = strlen(new_model->name);
+
+  /* append it to the end of the model list */
+  if (last_model)
+    last_model->next = new_model;
+  else
+    models = new_model;
+  last_model = new_model;
+
+  /* Parse the function units separated by commas */
+  unit = 1;
+  for (ptr = file_entry->fields[model_func];
+       ((ch = *ptr) != '\0') && (ch != '\n');
+       ptr = (*end == ',') ? end+1 : end) {
+
+    while (ch == ' ' || ch == '\t')
+      ch = *++ptr;
+
+    if (!ch || ch == '\n')
+      break;
+
+    /* Search for comma or newline ending field */
+    end = ptr;
+    end_name = (char *)0;
+
+    if (ch == ',')
+      continue;
+
+    while (ch != '\0' && ch != ',' && ch != '\n') {
+      if (end_name == (char *)0 && (ch == '=' || isspace(ch)))
+	end_name = end;
+
+      ch = *++end;
+    }
+    if (!end_name)
+      end_name = end;
+
+    func_unit = ZALLOC(model_func_unit);
+    if (new_model->func_unit_end)
+      new_model->func_unit_end->next = func_unit;
+    else
+      new_model->func_unit_start = func_unit;
+
+    new_model->func_unit_end = func_unit;
+
+    /* Record function unit name as model name _ unit name */
+    func_name_len = name_len + end_name - ptr + 2;
+    if (table->max_func_unit_name_len < func_name_len)
+      table->max_func_unit_name_len = func_name_len;
+
+    func_unit->name = name = (char *)zalloc(func_name_len);
+    memcpy(name, new_model->name, name_len);
+    name[name_len] = '_';
+    memcpy(name + name_len + 1, ptr, end_name - ptr);
+
+    /* See if there are multiple functional units */
+    if (*end_name == '=') {
+      number = 0;
+      for(end_name++; end_name < end && isdigit(*end_name); end_name++)
+	number = number * 10 + (*end_name - '0');
+    } else {
+      number = 1;
+    }
+
+    /* Now figure out the mask for these unit(s) */
+    func_unit->number = number;
+    mask = 0;
+    while (number--) {
+      ASSERT(unit != 0);
+      mask |= unit;
+      unit <<= 1;
+    }
+    func_unit->mask = mask;
+    table->max_func_unit_mask |= mask;
+
+    /* Now figure out comments */
+    for (comment = end_name; comment < end && ((ch = *comment) == ' ' || ch == '\t'); comment++)
+      ;
+
+    if (comment < end) {
+      func_unit->comment = (char *)zalloc(end - comment + 1);
+      memcpy(func_unit->comment, comment, end - comment);
+    }
   }
-  *ptr_to_cur_function = new_function;
 }
 
 
@@ -629,11 +773,33 @@ insn_table_insert_insn(insn_table *table,
 {
   insn **ptr_to_cur_insn = &table->insns;
   insn *cur_insn = *ptr_to_cur_insn;
+  table_model_entry *insn_model_ptr;
+  model *model_ptr;
 
   /* create a new instruction */
   insn *new_insn = ZALLOC(insn);
   new_insn->file_entry = file_entry;
   new_insn->fields = fields;
+
+  /* Check out any model information returned to make sure the model
+     is correct.  */
+  for(insn_model_ptr = file_entry->model_first; insn_model_ptr; insn_model_ptr = insn_model_ptr->next) {
+    char *name = insn_model_ptr->fields[insn_model_name];
+
+    for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
+      if (strcmp(name, model_ptr->name) == 0) {
+
+	/* Replace the name field with that of the global model, so that when we
+	   want to print it out, we can just compare pointers.  */
+	insn_model_ptr->fields[insn_model_name] = model_ptr->name;
+	break;
+      }
+    }
+
+    if (!model_ptr)
+      error("%s:%d: machine model `%s' was not known about\n",
+	    file_entry->file_name, file_entry->line_nr, name);
+  }
 
   /* insert it according to the order of the fields */
   while (cur_insn != NULL
@@ -902,7 +1068,7 @@ insn_table_expand_insns(insn_table *table)
 static insn_table *
 insn_table_load_insns(char *file_name)
 {
-  table *file = table_open(file_name, nr_insn_table_fields);
+  table *file = table_open(file_name, nr_insn_table_fields, nr_insn_model_table_fields);
   insn_table *table = ZALLOC(insn_table);
   table_entry *file_entry;
   table->opcode_rule = opcode_table;
@@ -911,6 +1077,9 @@ insn_table_load_insns(char *file_name)
     if (it_is("function", file_entry->fields[insn_flags])
 	|| it_is("internal", file_entry->fields[insn_flags])) {
       insn_table_insert_function(table, file_entry);
+    }
+    else if (it_is("model", file_entry->fields[insn_flags])) {
+      model_table_insert(table, file_entry);
     }
     else {
       insn_fields *fields;
@@ -1854,7 +2023,7 @@ lf_print_c_validate(lf *file,
       lf_printf(file, "\n");
       lf_printf(file, "/* validate: %s */\n",
 		instruction->file_entry->fields[insn_format]);
-      lf_printf(file, "if (WITH_ASSERT && (instruction & 0x%x) != 0x%x)\n",
+      lf_printf(file, "if (WITH_RESERVED_BITS && (instruction & 0x%x) != 0x%x)\n",
 		check_mask, check_val);
       lf_indent(file, +2);
       lf_print_idecode_illegal(file);
@@ -2722,6 +2891,202 @@ gen_itable_c(insn_table *table, lf *file)
 
   lf_printf(file, "\n");
   lf_printf(file, "#endif /* _ITABLE_C_ */\n");
+}
+
+/****************************************************************/
+
+static void 
+gen_model_h(insn_table *table, lf *file)
+{
+  model *model_ptr;
+  model_func_unit *func_unit_ptr;
+  int hex_size;
+
+  lf_print_copyleft(file);
+  lf_printf(file, "\n");
+  lf_printf(file, "#ifndef _MODEL_H_\n");
+  lf_printf(file, "#define _MODEL_H_\n");
+  lf_printf(file, "\n");
+  lf_printf(file, "#ifndef INLINE_MODEL\n");
+  lf_printf(file, "#define INLINE_MODEL\n");
+  lf_printf(file, "#endif\n");
+  lf_printf(file, "\n");
+
+  lf_printf(file, "typedef struct _model_time {\t/* Instruction cycle time */\n");
+  if (table->max_func_unit_mask > 0xffff) {
+    hex_size = 8;
+    lf_printf(file, "  unsigned32 units;\n");
+    lf_printf(file, "  unsigned16 initial;\n");
+    lf_printf(file, "  unsigned16 finish;\n");
+  } else {
+    hex_size = 4;
+    lf_printf(file, "  unsigned16 units;\n");
+    lf_printf(file, "  unsigned8  initial;\n");
+    lf_printf(file, "  unsigned8  finish;\n");
+  }
+  lf_printf(file, "  unsigned32 flags;\n");
+  lf_printf(file, "} model_time;\n");
+  lf_printf(file, "\n");
+
+  lf_printf(file, "typedef enum _model_enum {\n");
+  lf_printf(file, "  MODEL_NONE,\n");
+  for (model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
+    lf_printf(file, "  MODEL_%s,\n", model_ptr->name);
+  }
+  lf_printf(file, "  nr_models\n");
+  lf_printf(file, "} model_enum;\n");
+  lf_printf(file, "\n");
+
+  for (model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
+    for (func_unit_ptr = model_ptr->func_unit_start; func_unit_ptr; func_unit_ptr = func_unit_ptr->next) {
+      if (func_unit_ptr->comment) {
+	lf_printf(file, "#define %-*s 0x%.*x  /* %s functional unit */\n",
+		  table->max_func_unit_name_len, func_unit_ptr->name,
+		  hex_size, func_unit_ptr->mask,
+		  func_unit_ptr->comment);
+      } else {
+	lf_printf(file, "#define %-*s 0x%.*x\n",
+		  table->max_func_unit_name_len, func_unit_ptr->name,
+		  hex_size, func_unit_ptr->mask);
+      }
+    }
+    lf_printf(file, "\n");
+  }
+
+  lf_printf(file, "extern const char *model_name[ (int)nr_models ];\n");
+  lf_printf(file, "extern const char *const *const model_func_unit_name[ (int)nr_models ];\n");
+  lf_printf(file, "extern const model_time *const model_time_mapping[];\n");
+  lf_printf(file, "\n");
+  lf_printf(file, "#endif /* _MODEL_H_ */\n");
+}
+
+/****************************************************************/
+
+typedef struct _model_c_data model_c_data;
+struct _model_c_data {
+  lf *file;
+  model *model_ptr;
+};
+
+static void
+model_c_insn(insn_table *entry,
+	      void *data,
+	      insn *instruction)
+{
+  model_c_data *data_ptr = (model_c_data *)data;
+  lf *file = data_ptr->file;
+  model *current_model = data_ptr->model_ptr;
+  table_model_entry *model_ptr = instruction->file_entry->model_first;
+  int i;
+
+  while (model_ptr) {
+    if (model_ptr->fields[insn_model_name] == current_model->name) {
+      lf_printf(file, "  {");
+      for(i = insn_model_unit; i < nr_insn_model_table_fields; i++) {
+	lf_printf(file, " %s,", model_ptr->fields[i]);
+      }
+      lf_printf(file, " },\n");
+      return;
+    }
+
+    model_ptr = model_ptr->next;
+  }
+
+  lf_printf(file, "  { 0 },\n");
+}
+
+static void 
+gen_model_c(insn_table *table, lf *file)
+{
+  model *model_ptr;
+  model_func_unit *func_unit_ptr;
+  int i;
+
+  lf_print_copyleft(file);
+  lf_printf(file, "\n");
+  lf_printf(file, "#ifndef _MODEL_C_\n");
+  lf_printf(file, "#define _MODEL_C_\n");
+  lf_printf(file, "\n");
+  lf_printf(file, "#ifndef STATIC_INLINE_MODEL\n");
+  lf_printf(file, "#define STATIC_INLINE_MODEL STATIC_INLINE\n");
+  lf_printf(file, "#endif\n");
+  lf_printf(file, "\n");
+  lf_printf(file, "#include \"cpu.h\"\n");
+  lf_printf(file, "\n");
+
+  lf_printf(file, "/* map model enumeration into printable string */\n");
+  lf_printf(file, "const char *model_name[ (int)nr_models ] = {\n");
+  lf_printf(file, "  \"NONE\",\n");
+  for (model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
+    lf_printf(file, "  \"%s\",\n", model_ptr->name);
+  }
+  lf_printf(file, "};\n");
+  lf_printf(file, "\n");
+
+  lf_printf(file, "/* Emit each model's individual function unit names */\n");
+  lf_printf(file, "static const char *const model_func_unit_name_NONE[] = {\n");
+  lf_printf(file, "  \"none\",\n");
+  lf_printf(file, "  (const char *)0\n");
+  lf_printf(file, "};\n");
+  lf_printf(file, "\n");
+
+  for (model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
+    lf_printf(file, "static const char *const model_func_unit_name_%s[] = {\n", model_ptr->name);
+    lf_printf(file, "  \"none\",\n");
+    for (func_unit_ptr = model_ptr->func_unit_start; func_unit_ptr; func_unit_ptr = func_unit_ptr->next) {
+
+      if (func_unit_ptr->comment)
+	lf_printf(file, "  \"%s %s functional unit\",\n", func_unit_ptr->name, func_unit_ptr->comment);
+      else
+	lf_printf(file, "  \"%s\",\n", func_unit_ptr->name);
+
+      for(i = 2; i < func_unit_ptr->number; i++) {
+	if (func_unit_ptr->comment)
+	  lf_printf(file, "  \"%s %s functional unit #%d\",\n", func_unit_ptr->name,
+		    func_unit_ptr->comment, i);
+	else
+	  lf_printf(file, "  \"%s #%d\",\n", func_unit_ptr->name, i);
+      }
+    }
+
+    lf_printf(file, "  (const char *)0\n");
+    lf_printf(file, "};\n");
+    lf_printf(file, "\n");
+  }
+
+  lf_printf(file, "/* Array to map model,function unit number to printable string. */\n");
+  lf_printf(file, "const char *const *const model_func_unit_name[] = {\n");
+  lf_printf(file, "  model_func_unit_name_NONE,\n");
+  for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
+    lf_printf(file, "  model_func_unit_name_%s,\n", model_ptr->name);
+  }
+  lf_printf(file, "};\n");
+  lf_printf(file, "\n");
+
+  lf_printf(file, "/* Insn functional unit info */\n");
+  for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
+    model_c_data data;
+
+    lf_printf(file, "static const model_time model_time_%s[] = {\n", model_ptr->name);
+    data.file = file;
+    data.model_ptr = model_ptr;
+    insn_table_traverse_insn(table,
+			     (void *)&data,
+			     model_c_insn);
+
+    lf_printf(file, "};\n");
+    lf_printf(file, "\n");
+  }
+
+  lf_printf(file, "const model_time *const model_time_mapping[] = {\n");
+  lf_printf(file, "  (const model_time *const)0,\n");
+  for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
+    lf_printf(file, "  model_time_%s,\n", model_ptr->name);
+  }
+  lf_printf(file, "};\n");
+  lf_printf(file, "\n");
+
+  lf_printf(file, "#endif /* _MODEL_C_ */\n");
 
 }
 
@@ -2755,12 +3120,13 @@ main(int argc,
     printf("Output options:\n");
     printf("  -[Cc] <output-file>  output icache.h(C) invalid(c)\n");
     printf("  -[Dd] <output-file>  output idecode.h(D) idecode.c(d)\n");
+    printf("  -[Mm] <output-file>  output model.h(M) model.c(M)\n");
     printf("  -[Ss] <output-file>  output schematic.h(S) schematic.c(s)\n");
     printf("  -[Tt] <table>      output itable.h(T) itable.c(t)\n");
   }
 
   while ((ch = getopt(argc, argv,
-		      "leb:h:r:f:I:i:O:o:K:k:n:S:s:D:d:T:t:C:")) != -1) {
+		      "leb:h:r:f:I:i:O:o:K:k:M:m:n:S:s:D:d:T:t:C:")) != -1) {
     fprintf(stderr, "\t-%c %s\n", ch, (optarg ? optarg : ""));
     switch(ch) {
     case 'l':
@@ -2822,6 +3188,8 @@ main(int argc,
     case 's':
     case 'D':
     case 'd':
+    case 'M':
+    case 'm':
     case 'T':
     case 't':
     case 'C':
@@ -2840,6 +3208,12 @@ main(int argc,
 	  break;
 	case 'd':
 	  gen_idecode_c(instructions, file);
+	  break;
+	case 'M':
+	  gen_model_h(instructions, file);
+	  break;
+	case 'm':
+	  gen_model_c(instructions, file);
 	  break;
 	case 'T':
 	  gen_itable_h(instructions, file);

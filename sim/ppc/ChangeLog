@@ -1,9 +1,57 @@
 Fri Nov 10 06:39:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* table.c (table): New field nr_model_fields.
+	(table_open): New parameter nr_model_fields.
+	(table_entry_read): Parse model fields that begin with a '*' after
+	each instruction.
+	* igen.c, dgen.c: Change callers of table_open.
+
+	* igen.c: Add support for dumping model specific information in
+	model.h and model.c.
+	(insn_field_name): Delete unused array.
+	(global variables): Make global variables static, so we can tell
+	when they are no longer used.
+	(cache_semantic_actual): Delete unused variable.
+	(insn_table_load_insns): If the insn is really a machine model,
+	call model_table_insert instead of other processing.
+	(model_table_insert): New function to handle defining the
+	functional units of a particular machine model.
+	(insn_table): Add last_function field so we can add functions at
+	the end.
+	(insn_table_insert_function): Use last_function field when
+	appending new function.
+
+	* ppc-instructions: Add a few model specific information for 603,
+	603e, and 604 for testing purposes.
+	
+	* table.h (table_model_entry): New linked list to hold model
+	specific information, one per line.
+	(table_entry): Add model_first, model_last fields.
+
 	* configure.in (--enable-sim-inline): If gcc is found and
 	--enable-sim-inline is not specified, defaine DEFAULT_INLINE to 1,
 	not 2.
+	(--enable-sim-reserved-bits): New switch to check whether reserved
+	bits are set in the instruction.
+	(--enable-sim-opcode): Make complex the default.
+	(all switches): Add appropriate checks and error messages.
 	* configure: Regenerate.
+
+	* Makefile.in (RESERVED_CFLAGS): New variable set by
+	--enable-sim-reserved-bits.
+	(CONFIG_CFLAGS): Include RESERVED_CFLAGS.
+	(BUILT_SRC): igen now generates model.c and model.h.
+	(LIB_OBJ): Include table.o.
+	(tmp-igen): Add -m/-M options to write model.c/model.h.
+	(model.o): New object.
+	(CPU_H): Include model.h.
+
+	* cpu.h: Include model.h.
+
+	* std-config.h (WITH_RESERVED_BITS): Define.
+	(MODEL_INLINE): Ditto.
+
+	* options.c (print_options): Print out WITH_RESERVED_BITS.
 
 Thu Nov  9 12:22:15 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 

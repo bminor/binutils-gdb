@@ -131,6 +131,7 @@ print_options (void)
   printf_filtered ("WITH_FUNCTION_UNIT       = %d\n", WITH_FUNCTION_UNIT);
   printf_filtered ("WITH_DEFAULT_PPC_MODEL   = %s\n", options_ppc (WITH_DEFAULT_PPC_MODEL));
   printf_filtered ("WITH_PPC_MODEL           = %s\n", options_ppc (WITH_PPC_MODEL));
+  printf_filtered ("WITH_RESERVE_BITS        = %d\n", WITH_RESERVE_BITS);
   printf_filtered ("DEFAULT_INLINE           = %d\n", DEFAULT_INLINE);
   printf_filtered ("SIM_ENDIAN_INLINE        = %d\n", SIM_ENDIAN_INLINE);
   printf_filtered ("BITS_INLINE              = %d\n", BITS_INLINE);
