@@ -1,3 +1,8 @@
+Fri Feb 18 16:51:14 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* mips-tdep.c (mips_print_register): handle 64 bits register.
+	* valprint.c (print_longest): fix a bug in printing 64 bits value.
+
 Fri Feb 18 08:26:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Version 4.12.2.
