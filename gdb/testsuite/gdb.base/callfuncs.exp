@@ -319,7 +319,9 @@ gdb_breakpoint add
 
 # Call function (causing a breakpoint hit in the call dummy) and do a continue,
 # make sure we are back at main and still have the same register contents.
-gdb_test "print add(4,5)" "The program being debugged stopped while.*" ""
+gdb_test "print add(4,5)" \
+	"The program being debugged stopped while.*" \
+	"stop at breakpoint in call dummy function"
 gdb_test "continue" "Continuing.*" "continue from call dummy breakpoint"
 if ![gdb_test "bt 2" \
 	      "#0  main.*" \
@@ -368,4 +370,61 @@ if ![gdb_test "return 7" \
     }
 }
 
+# Call function (causing a breakpoint hit in the call dummy), and
+# call another function from the call dummy frame (thereby setting up
+# several nested call dummy frames).  Test that backtrace and finish
+# work when several call dummies are nested.
+gdb_breakpoint sum10
+gdb_breakpoint t_small_values
+gdb_test "print add(2,3)" "The program being debugged stopped while.*" \
+	"stop at nested call level 1"
+gdb_test "backtrace" \
+	"\#0  add \\(a=2, b=3\\).*\#1  <function called from gdb>.*\#2  main.*" \
+	"backtrace at nested call level 1"
+gdb_test "print add(4,5)" "The program being debugged stopped while.*" \
+	"stop at nested call level 2"
+gdb_test "backtrace" \
+	"\#0  add \\(a=4, b=5\\).*\#1  <function called from gdb>.*\#2  add \\(a=2, b=3\\).*\#3  <function called from gdb>.*\#4  main.*" \
+	"backtrace at nested call level 2"
+gdb_test "print sum10(2,4,6,8,10,12,14,16,18,20)" \
+	"The program being debugged stopped while.*" \
+	"stop at nested call level 3"
+gdb_test "backtrace" \
+	"\#0  sum10 \\(i0=2, i1=4, i2=6, i3=8, i4=10, i5=12, i6=14, i7=16, i8=18, i9=20\\).*\#1  <function called from gdb>.*\#2  add \\(a=4, b=5\\).*\#3  <function called from gdb>.*\#4  add \\(a=2, b=3\\).*\#5  <function called from gdb>.*\#6  main.*" \
+	"backtrace at nested call level 3"
+gdb_test "print t_small_values(1,3,5,7,9,11,13,15,17,19)" \
+	"The program being debugged stopped while.*" \
+	"stop at nested call level 4"
+gdb_test "backtrace" \
+	"\#0  t_small_values \\(arg1=1 '.001', arg2=3, arg3=5, arg4=7 '.a', arg5=9, arg6=11 '.013', arg7=13, arg8=15, arg9=17, arg10=19\\).*\#2  sum10 \\(i0=2, i1=4, i2=6, i3=8, i4=10, i5=12, i6=14, i7=16, i8=18, i9=20\\).*\#3  <function called from gdb>.*\#4  add \\(a=4, b=5\\).*\#5  <function called from gdb>.*\#6  add \\(a=2, b=3\\).*\#7  <function called from gdb>.*\#8  main.*" \
+	"backtrace at nested call level 4"
+gdb_test "finish" "Value returned is .* = 100" \
+	"Finish from nested call level 4"
+gdb_test "backtrace" \
+	"\#0  sum10 \\(i0=2, i1=4, i2=6, i3=8, i4=10, i5=12, i6=14, i7=16, i8=18, i9=20\\).*\#1  <function called from gdb>.*\#2  add \\(a=4, b=5\\).*\#3  <function called from gdb>.*\#4  add \\(a=2, b=3\\).*\#5  <function called from gdb>.*\#6  main.*" \
+	"backtrace after finish from nested call level 4"
+gdb_test "finish" "Value returned is .* = 110" \
+	"Finish from nested call level 3"
+gdb_test "backtrace" \
+	"\#0  add \\(a=4, b=5\\).*\#1  <function called from gdb>.*\#2  add \\(a=2, b=3\\).*\#3  <function called from gdb>.*\#4  main.*" \
+	"backtrace after finish from nested call level 3"
+gdb_test "finish" "Value returned is .* = 9" \
+	"Finish from nested call level 2"
+gdb_test "backtrace" \
+	"\#0  add \\(a=2, b=3\\).*\#1  <function called from gdb>.*\#2  main.*" \
+	"backtrace after finish from nested call level 2"
+gdb_test "finish" "Value returned is .* = 5" \
+	"Finish from nested call level 1"
+gdb_test "backtrace" "\#0  main .*" \
+	"backtrace after finish from nested call level 1"
+
+do_get_all_registers
+set new_reg_content $all_registers_content
+if ![string compare $old_reg_content $new_reg_content] then {
+    pass "nested call dummies preserve register contents"
+} else {
+    fail "nested call dummies preserve register contents"
+}
+
 return 0
+
