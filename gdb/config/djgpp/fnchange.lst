@@ -426,3 +426,10 @@
 @V@/tk/unix/tkUnixScrlbr.c @V@/tk/unix/tkScrlbr.c
 @V@/tk/unix/tkUnixSelect.c @V@/tk/unix/tkSelect.c
 @V@/tk/unix/tkUnixSend.c @V@/tk/unix/tkSend.c
+@V@/opcodes/xstormy16-asm.c @V@/opcodes/xst16asm.c
+@V@/opcodes/xstormy16-desc.c @V@/opcodes/xst16dsc.c
+@V@/opcodes/xstormy16-desc.h @V@/opcodes/xst16dsc.h
+@V@/opcodes/xstormy16-dis.c @V@/opcodes/xst16dis.c
+@V@/opcodes/xstormy16-ibld.c @V@/opcodes/xst16ibd.c
+@V@/opcodes/xstormy16-opc.c @V@/opcodes/xst16opc.c
+@V@/opcodes/xstormy16-opc.h @V@/opcodes/xst16opc.h

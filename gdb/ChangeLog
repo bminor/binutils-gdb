@@ -1,3 +1,7 @@
+2001-12-14  Corinna Vinschen  <vinschen@redhat.com>
+
+	* config/djgpp/fnchange.lst: Add entries for opcodes/xstormy16-* files.
+
 2001-12-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.c (generic_register_virtual_size): Return TYPE_LENGTH
