@@ -29,11 +29,6 @@
 #include "opcode/i860.h"
 #include "elf/i860.h"
 
-/* Defined by default since this is primarily a SVR4/860 assembler.
-   However, I'm trying to leave the door open for Intel syntax. Of course,
-   if full support for anything other than SVR4 is done, then we should
-   select this based on a command-line flag.  */
-#define SYNTAX_SVR4
 
 /* The opcode hash table.  */
 static struct hash_control *op_hash = NULL;
@@ -54,12 +49,8 @@ const char EXP_CHARS[] = "eE";
    As in 0f12.456 or 0d1.2345e12.  */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
-/* Register prefix.  */
-#ifdef SYNTAX_SVR4
-static const char reg_prefix = '%';
-#else
-static const char reg_prefix = 0;
-#endif
+/* Register prefix (depends on syntax).  */
+static char reg_prefix;
 
 #define MAX_FIXUPS 2
 
@@ -90,6 +81,10 @@ static int target_warn_expand = 0;
 
 /* If true, then XP support is enabled.  */
 static int target_xp = 0;
+
+/* If true, then Intel syntax is enabled (default to AT&T/SVR4 syntax).  */
+static int target_intel_syntax = 0;
+
 
 /* Prototypes.  */
 static void i860_process_insn (char *);
@@ -206,6 +201,9 @@ md_begin (void)
 
   if (lose)
     as_fatal (_("Defective assembler.  No assembly attempted."));
+
+  /* Set the register prefix for either Intel or AT&T/SVR4 syntax.  */
+  reg_prefix = target_intel_syntax ? 0 : '%';
 }
 
 /* This is the core of the machine-dependent assembler.  STR points to a
@@ -524,7 +522,7 @@ i860_process_insn (char *str)
 	      /* Check for register prefix if necessary.  */
 	      if (reg_prefix && *s != reg_prefix)
 		goto error;
-	      else
+	      else if (reg_prefix)
 		s++;
 
 	      switch (*s)
@@ -596,7 +594,7 @@ i860_process_insn (char *str)
 	      /* Check for register prefix if necessary.  */
 	      if (reg_prefix && *s != reg_prefix)
 		goto error;
-	      else
+	      else if (reg_prefix)
 		s++;
 
 	      if (*s++ == 'f' && ISDIGIT (*s))
@@ -645,7 +643,7 @@ i860_process_insn (char *str)
 	      /* Check for register prefix if necessary.  */
 	      if (reg_prefix && *s != reg_prefix)
 		goto error;
-	      else
+	      else if (reg_prefix)
 		s++;
 
 	      if (strncmp (s, "fir", 3) == 0)
@@ -804,92 +802,97 @@ i860_process_insn (char *str)
 		 SVR4 syntax. The Intel syntax is "ha%immediate"
 		 whereas SVR4 syntax is "[immediate]@ha".  */
 	    immediate:
-#ifdef SYNTAX_SVR4
-	      if (*s == ' ')
-		s++;
+	      if (target_intel_syntax == 0)
+		{
+		  /* AT&T/SVR4 syntax.  */
+	          if (*s == ' ')
+		    s++;
 
-	      /* Note that if i860_get_expression() fails, we will still
-		 have created U entries in the symbol table for the
-		 'symbols' in the input string.  Try not to create U
-		 symbols for registers, etc.  */
-	      if (! i860_get_expression (s))
-		s = expr_end;
-	      else
-		goto error;
+	          /* Note that if i860_get_expression() fails, we will still
+	  	     have created U entries in the symbol table for the
+		     'symbols' in the input string.  Try not to create U
+		     symbols for registers, etc.  */
+	          if (! i860_get_expression (s))
+		    s = expr_end;
+	          else
+		    goto error;
 
-	      if (strncmp (s, "@ha", 3) == 0)
-		{
-		  the_insn.fi[fc].fup |= OP_SEL_HA;
-		  s += 3;
-		}
-	      else if (strncmp (s, "@h", 2) == 0)
-		{
-		  the_insn.fi[fc].fup |= OP_SEL_H;
-		  s += 2;
-		}
-	      else if (strncmp (s, "@l", 2) == 0)
-		{
-		  the_insn.fi[fc].fup |= OP_SEL_L;
-		  s += 2;
-		}
-	      else if (strncmp (s, "@gotoff", 7) == 0
-		       || strncmp (s, "@GOTOFF", 7) == 0)
-		{
-		  as_bad (_("Assembler does not yet support PIC"));
-		  the_insn.fi[fc].fup |= OP_SEL_GOTOFF;
-		  s += 7;
-		}
-	      else if (strncmp (s, "@got", 4) == 0
-		       || strncmp (s, "@GOT", 4) == 0)
-		{
-		  as_bad (_("Assembler does not yet support PIC"));
-		  the_insn.fi[fc].fup |= OP_SEL_GOT;
-		  s += 4;
-		}
-	      else if (strncmp (s, "@plt", 4) == 0
-		       || strncmp (s, "@PLT", 4) == 0)
-		{
-		  as_bad (_("Assembler does not yet support PIC"));
-		  the_insn.fi[fc].fup |= OP_SEL_PLT;
-		  s += 4;
-		}
+	          if (strncmp (s, "@ha", 3) == 0)
+		    {
+		      the_insn.fi[fc].fup |= OP_SEL_HA;
+		      s += 3;
+		    }
+	          else if (strncmp (s, "@h", 2) == 0)
+		    {
+		      the_insn.fi[fc].fup |= OP_SEL_H;
+		      s += 2;
+		    }
+	          else if (strncmp (s, "@l", 2) == 0)
+		    {
+		      the_insn.fi[fc].fup |= OP_SEL_L;
+		      s += 2;
+		    }
+	          else if (strncmp (s, "@gotoff", 7) == 0
+		           || strncmp (s, "@GOTOFF", 7) == 0)
+		    {
+		      as_bad (_("Assembler does not yet support PIC"));
+		      the_insn.fi[fc].fup |= OP_SEL_GOTOFF;
+		      s += 7;
+		    }
+	          else if (strncmp (s, "@got", 4) == 0
+		           || strncmp (s, "@GOT", 4) == 0)
+		    {
+		      as_bad (_("Assembler does not yet support PIC"));
+		      the_insn.fi[fc].fup |= OP_SEL_GOT;
+		      s += 4;
+		    }
+	          else if (strncmp (s, "@plt", 4) == 0
+		           || strncmp (s, "@PLT", 4) == 0)
+		    {
+		      as_bad (_("Assembler does not yet support PIC"));
+		      the_insn.fi[fc].fup |= OP_SEL_PLT;
+		      s += 4;
+		    }
 
-	      the_insn.expand = insn->expand;
-              fc++;
+	          the_insn.expand = insn->expand;
+                  fc++;
               
-	      continue;
-#else /* ! SYNTAX_SVR4 */
-	      if (*s == ' ')
-		s++;
-	      if (strncmp (s, "ha%", 3) == 0)
-		{
-		  the_insn.fi[fc].fup |= OP_SEL_HA;
-		  s += 3;
+	          continue;
 		}
-	      else if (strncmp (s, "h%", 2) == 0)
-		{
-		  the_insn.fi[fc].fup |= OP_SEL_H;
-		  s += 2;
-		}
-	      else if (strncmp (s, "l%", 2) == 0)
-		{
-		  the_insn.fi[fc].fup |= OP_SEL_L;
-		  s += 2;
-		}
-	      the_insn.expand = insn->expand;
-
-	      /* Note that if i860_get_expression() fails, we will still
-		 have created U entries in the symbol table for the
-		 'symbols' in the input string.  Try not to create U
-		 symbols for registers, etc.  */
-	      if (! i860_get_expression (s))
-		s = expr_end;
 	      else
-		goto error;
+		{
+		  /* Intel syntax.  */
+	          if (*s == ' ')
+		    s++;
+	          if (strncmp (s, "ha%", 3) == 0)
+		    {
+		      the_insn.fi[fc].fup |= OP_SEL_HA;
+		      s += 3;
+		    }
+	          else if (strncmp (s, "h%", 2) == 0)
+		    {
+		      the_insn.fi[fc].fup |= OP_SEL_H;
+		      s += 2;
+		    }
+	          else if (strncmp (s, "l%", 2) == 0)
+		    {
+		      the_insn.fi[fc].fup |= OP_SEL_L;
+		      s += 2;
+		    }
+	          the_insn.expand = insn->expand;
 
-              fc++;
-	      continue;
-#endif /* SYNTAX_SVR4 */
+	          /* Note that if i860_get_expression() fails, we will still
+		     have created U entries in the symbol table for the
+		     'symbols' in the input string.  Try not to create U
+		     symbols for registers, etc.  */
+	          if (! i860_get_expression (s))
+		    s = expr_end;
+	          else
+		    goto error;
+
+                  fc++;
+	          continue;
+		}
 	      break;
 
 	    default:
@@ -1060,12 +1063,14 @@ const char *md_shortopts = "";
 #define OPTION_EL		(OPTION_MD_BASE + 1)
 #define OPTION_WARN_EXPAND	(OPTION_MD_BASE + 2)
 #define OPTION_XP		(OPTION_MD_BASE + 3)
+#define OPTION_INTEL_SYNTAX	(OPTION_MD_BASE + 4)
 
 struct option md_longopts[] = {
   { "EB",	    no_argument, NULL, OPTION_EB },
   { "EL",	    no_argument, NULL, OPTION_EL },
   { "mwarn-expand", no_argument, NULL, OPTION_WARN_EXPAND },
   { "mxp",	    no_argument, NULL, OPTION_XP },
+  { "mintel-syntax",no_argument, NULL, OPTION_INTEL_SYNTAX },
   { NULL,	    no_argument, NULL, 0 }
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -1089,6 +1094,10 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_XP:
       target_xp = 1;
+      break;
+
+    case OPTION_INTEL_SYNTAX:
+      target_intel_syntax = 1;
       break;
 
 #ifdef OBJ_ELF
@@ -1117,7 +1126,8 @@ md_show_usage (FILE *stream)
   -EL			  generate code for little endian mode (default)\n\
   -EB			  generate code for big endian mode\n\
   -mwarn-expand		  warn if pseudo operations are expanded\n\
-  -mxp			  enable i860XP support (disabled by default)\n"));
+  -mxp			  enable i860XP support (disabled by default)\n\
+  -mintel-syntax	  enable Intel syntax (default to AT&T/SVR4)\n"));
 #ifdef OBJ_ELF
   /* SVR4 compatibility flags.  */
   fprintf (stream, _("\

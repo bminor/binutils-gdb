@@ -13,10 +13,7 @@
 
 @ignore
 @c FIXME: This is basically a stub for i860. There is tons more information
-that I will add later (jle@cygnus.com). The assembler is still being
-written. The i860 assembler that existed previously was never finished
-and doesn't even build. Further, its not BFD_ASSEMBLER and it doesn't
-do ELF (it doesn't do anything, but you get the point).
+that I will add later (jle@cygnus.com).
 @end ignore
 
 @cindex i860 support
@@ -36,6 +33,13 @@ support SVR4 PIC (i.e., @code{@@GOT, @@GOTOFF, @@PLT}).
 Like the SVR4/860 assembler, the output object format is ELF32. Currently,
 this is the only supported object format. If there is sufficient interest,
 other formats such as COFF may be implemented.
+
+Both the Intel and AT&T/SVR4 syntaxes are supported, with the latter
+being the default.  One difference is that AT&T syntax requires the '%'
+prefix on register names while Intel syntax does not.  Another difference
+is in the specification of relocatable expressions.  The Intel syntax
+is @code{ha%expression} whereas the SVR4 syntax is @code{[expression]@@ha}
+(and similarly for the "l" and "h" selectors).
 @node Options-i860
 @section i860 Command-line Options
 @subsection SVR4 compatibility options 
@@ -66,6 +70,9 @@ where @code{gcc} may emit these pseudo-instructions.
 Enable support for the i860XP instructions and control registers.  By default,
 this option is disabled so that only the base instruction set (i.e., i860XR)
 is supported.
+@item -mintel-syntax
+The i860 assembler defaults to AT&T/SVR4 syntax.  This option enables the
+Intel syntax.
 @end table
 
 @node Directives-i860

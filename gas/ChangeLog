@@ -1,3 +1,18 @@
+2003-08-01  Jason Eckhardt  <jle@rice.edu>
+
+        * config/tc-i860.c: Remove SYNTAX_SVR4 macro and occurrences.
+        (target_intel_syntax): Declare variable.
+        (OPTION_INTEL_SYNTAX): Declare macro.
+        (md_longopts): Add option -mintel-syntax.
+        (md_parse_option): Set target_intel_syntax.
+        (md_show_usage): Add -mintel-syntax usage.
+        (md_begin): Set reg_prefix based on target_intel_syntax.
+        (i860_process_insn): Skip register prefix only if there is one.
+        Parse relocatable expressions in either Intel or AT&T syntax based
+        on target_intel_syntax instead of the SYNTAX_SVR4 macro.
+        * doc/c-i860.texi: Document -mintel-syntax option and give blurb
+        about the differences in syntax.
+
 2003-08-01  Dmitry Diky  <diwil@mail.ru>
 
 	* config/tc-msp430.c (msp430_srcoperand): Extend 'push' bug workaround
