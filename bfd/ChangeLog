@@ -1,3 +1,11 @@
+Tue Jul  9 15:52:20 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* coff-h8300.c (h8300_reloc16_extra_cases): Use the correct
+	value for R_RELBYTE.
+
+	* reloc16.c (bfd_coff_reloc16_relax_section): Only "shrinks"
+	array if one was allocated.
+
 Tue Jul  9 12:21:54 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Kazumoto Kojima <kkojima@kk.info.kanagawa-u.ac.jp>:
