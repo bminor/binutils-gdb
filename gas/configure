@@ -876,6 +876,7 @@ for this_target in $target $canon_targets ; do
 			    *)   targ=mips-lit ;;
 			    esac
 			    ;;
+      mn10x00-*-*)	    fmt=elf bfd_gas=yes ;;
       ppc-*-pe | ppc-*-cygwin32 | ppc-*-winnt*)
 		            fmt=coff em=pe 
 			    case "$endian" in

@@ -1,3 +1,10 @@
+Thu Oct  3 00:16:50 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10x00.c, config/tc-mn10x00.h: New files
+	for Matsushita MN10x00 support.
+	* configure.in: Recognize mn10x00-*-*
+	* configure: Rebuilt.
+
 Wed Oct  2 15:54:03 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	* obj-evax.h: move openvms definitions from here to tc-alpha.c.
