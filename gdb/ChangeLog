@@ -1,3 +1,14 @@
+Mon Jan 25 19:55:30 1999  Mark Alexander  <marka@cygnus.com>
+
+	* sh-tdep.c (sh_target_architecture_hook): Return immediately
+	when a matching machine is found.
+
+Fri Jan 22 09:10:35 1999  Mark Alexander  <marka@cygnus.com>
+
+	* remote-mips.c (mips_initialize): Fix parameters to clear_breakpoint.
+	(common_breakpoint): Restore support for instruction breakpoints
+	on non-LSI targets.
+
 Thu Jan 21 17:16:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* stack.c: Close open comment.

@@ -612,6 +612,7 @@ sh_target_architecture_hook (ap)
       if (sh_processor_type_table[i].mach == ap->mach)
 	{
 	  sh_register_names = sh_processor_type_table[i].regnames;
+	  return 1;
 	}
     }
 
