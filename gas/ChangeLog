@@ -1,5 +1,8 @@
 Wed Jul  7 10:21:24 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* symbols.c (fb_label_instance, fb_label_instance_inc): Don't dump
+	core just because somebody uses a label before it is defined.
+
 	* config/mips-opcode.h: Moved to opcode/mips.h.
 	* config/tc-mips.c: Include opcode/mips.h rather than
 	mips-opcode.h.

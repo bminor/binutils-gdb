@@ -771,14 +771,18 @@ fb_label_instance_inc (label)
       return;
     }
 
-  for (i = fb_labels + FB_LABEL_SPECIAL; i < fb_labels + fb_label_count; ++i)
+  if (fb_labels != NULL)
     {
-      if (*i == label)
+      for (i = fb_labels + FB_LABEL_SPECIAL;
+	   i < fb_labels + fb_label_count; ++i)
 	{
-	  ++fb_label_instances[i - fb_labels];
-	  return;
-	}			/* if we find it */
-    }				/* for each existing label */
+	  if (*i == label)
+	    {
+	      ++fb_label_instances[i - fb_labels];
+	      return;
+	    }			/* if we find it */
+	}			/* for each existing label */
+    }
 
   /* if we get to here, we don't have label listed yet. */
 
@@ -816,16 +820,21 @@ fb_label_instance (label)
       return (fb_low_counter[label]);
     }
 
-  for (i = fb_labels + FB_LABEL_SPECIAL; i < fb_labels + fb_label_count; ++i)
+  if (fb_labels != NULL)
     {
-      if (*i == label)
+      for (i = fb_labels + FB_LABEL_SPECIAL;
+	   i < fb_labels + fb_label_count; ++i)
 	{
-	  return (fb_label_instances[i - fb_labels]);
-	}			/* if we find it */
-    }				/* for each existing label */
+	  if (*i == label)
+	    {
+	      return (fb_label_instances[i - fb_labels]);
+	    }			/* if we find it */
+	}			/* for each existing label */
+    }
 
-  /* NOTREACHED */
-  abort ();
+  /* We didn't find the label, so this must be a reference to the
+     first instance.  */
+  return 0;
 }
 
 /*
