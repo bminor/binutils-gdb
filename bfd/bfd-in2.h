@@ -47,8 +47,8 @@ here.  */
 #include "ansidecl.h"
 #include "obstack.h"
 
-#define BFD_VERSION "2.2"
-
+/* These two lines get substitutions done by commands in Makefile.in.  */
+#define BFD_VERSION   "@VERSION@"
 #define BFD_ARCH_SIZE @WORDSIZE@
 
 #if BFD_ARCH_SIZE >= 64
@@ -431,6 +431,8 @@ CAT(NAME,_close_and_cleanup),\
 CAT(NAME,_set_section_contents),\
 CAT(NAME,_get_section_contents),\
 CAT(NAME,_new_section_hook),\
+CAT(NAME,_bfd_copy_private_section_data),\
+CAT(NAME,_bfd_copy_private_bfd_data),\
 CAT(NAME,_get_symtab_upper_bound),\
 CAT(NAME,_get_symtab),\
 CAT(NAME,_get_reloc_upper_bound),\
@@ -438,6 +440,7 @@ CAT(NAME,_canonicalize_reloc),\
 CAT(NAME,_make_empty_symbol),\
 CAT(NAME,_print_symbol),\
 CAT(NAME,_get_symbol_info),\
+CAT(NAME,_bfd_is_local_label),\
 CAT(NAME,_get_lineno),\
 CAT(NAME,_set_arch_mach),\
 CAT(NAME,_openr_next_archived_file),\
@@ -946,6 +949,12 @@ bfd_get_section_contents
  PARAMS ((bfd *abfd, asection *section, PTR location,
     file_ptr offset, bfd_size_type count));
 
+boolean 
+bfd_copy_private_section_data PARAMS ((bfd *ibfd, asection *isec, bfd *obfd, asection *osec));
+
+#define bfd_copy_private_section_data(ibfd, isection, obfd, osection) \
+     BFD_SEND (ibfd, _bfd_copy_private_section_data, \
+		(ibfd, isection, obfd, osection))
 enum bfd_architecture 
 {
   bfd_arch_unknown,    /* File arch not known */
@@ -1633,6 +1642,11 @@ typedef struct symbol_cache_entry
 } asymbol;
 #define get_symtab_upper_bound(abfd) \
      BFD_SEND (abfd, _get_symtab_upper_bound, (abfd))
+boolean 
+bfd_is_local_label PARAMS ((bfd *abfd, asymbol *sym));
+
+#define bfd_is_local_label(abfd, sym) \
+     BFD_SEND (abfd, _bfd_is_local_label,(abfd, sym))
 #define bfd_canonicalize_symtab(abfd, location) \
      BFD_SEND (abfd, _bfd_canonicalize_symtab,\
                   (abfd, location))
@@ -1868,6 +1882,12 @@ bfd_set_gp_size PARAMS ((bfd *abfd, int i));
 bfd_vma 
 bfd_scan_vma PARAMS ((CONST char *string, CONST char **end, int base));
 
+boolean 
+bfd_copy_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
+
+#define bfd_copy_private_bfd_data(ibfd, obfd) \
+     BFD_SEND (ibfd, _bfd_copy_private_bfd_data, \
+		(ibfd, obfd))
 #define bfd_sizeof_headers(abfd, reloc) \
      BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
 
@@ -2017,6 +2037,9 @@ typedef struct bfd_target
   boolean       (*_bfd_get_section_contents) PARAMS ((bfd *, sec_ptr, PTR, 
                                             file_ptr, bfd_size_type));
   boolean       (*_new_section_hook) PARAMS ((bfd *, sec_ptr));
+  boolean       (*_bfd_copy_private_section_data) PARAMS ((bfd *, sec_ptr,
+							bfd *, sec_ptr));
+  boolean	 (*_bfd_copy_private_bfd_data) PARAMS ((bfd *, bfd *));
   unsigned int  (*_get_symtab_upper_bound) PARAMS ((bfd *));
   unsigned int  (*_bfd_canonicalize_symtab) PARAMS ((bfd *,
                                               struct symbol_cache_entry **));
@@ -2033,6 +2056,7 @@ typedef struct bfd_target
                                       struct symbol_cache_entry *,
                                       symbol_info *));
 #define bfd_get_symbol_info(b,p,e) BFD_SEND(b, _bfd_get_symbol_info, (b,p,e))
+  boolean	 (*_bfd_is_local_label) PARAMS ((bfd *, asymbol *));
   alent *    (*_get_lineno) PARAMS ((bfd *, struct symbol_cache_entry *));
 
   boolean    (*_bfd_set_arch_mach) PARAMS ((bfd *, enum bfd_architecture,

@@ -1,5 +1,9 @@
 Thu Mar 17 18:26:46 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* bfd-in.h (BFD_VERSION): Use @VERSION@.
+	* Makefile.in (bfd.h): Replace it with contents of VERSION file.
+	* bfd-in2.h: Regenerated.
+
 	* trad-core.c (trad_unix_bfd_is_local_label): Fixed typo where
 	this was also named trad_unix_bfd_copy_private_bfd_data.
 

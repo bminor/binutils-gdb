@@ -139,7 +139,7 @@ BFD32_BACKENDS = \
 	elf32-m68k.o \
 	elf32-m88k.o \
 	elf32-mips.o \
-	elf32-powerpc.o \
+	elf32-ppc.o \
 	elf32-sparc.o \
 	elf32.o \
 	hp300hpux.o \
@@ -159,7 +159,7 @@ BFD32_BACKENDS = \
 	nlm32-i386.o \
 	nlm32-sparc.o \
 	$(start-sanitize-powerpc-netware) \
-	nlm32-powerpc.o \
+	nlm32-ppc.o \
 	$(end-sanitize-powerpc-netware) \
 	nlm32.o \
 	oasys.o \
@@ -232,7 +232,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 cpu-rs6000.c coff-h8300.c som.c cpu-hppa.c cpu-we32k.c reloc16.c \
 	 mipsbsd.c cpu-sh.c \
 	 elf.c elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
-	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c elf32-powerpc.c \
+	 elf32-hppa.c elf32-m88k.c elf32-mips.c elf32-gen.c elf32-ppc.c \
 	 elf64.c elf64-gen.c \
 	 nlm.c nlm32.c nlm32-i386.c nlm32-sparc.c nlm32-alpha.c \
 	 nlm64.c coff-alpha.c cpu-alpha.c \
@@ -476,7 +476,11 @@ $(BFD_H): stmp-bfd.h ; @true
 stmp-bfd.h : $(srcdir)/bfd-in2.h Makefile
 	rm -f bfd.h-new 64 ../include/bfd.h
 	-grep BFD_HOST_64_BIT sysdep.h > 64
-	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' -e '/64-bit.*sysdep.h/ r 64' < $(srcdir)/bfd-in2.h > bfd.h-new
+	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' \
+	    -e "s/@VERSION@/`cat $(srcdir)/VERSION`/" \
+	    -e '/64-bit.*sysdep.h/ r 64' \
+		< $(srcdir)/bfd-in2.h \
+		> bfd.h-new
 	$(srcdir)/../move-if-change bfd.h-new $(BFD_H)
 	rm -f 64
 	touch stmp-bfd.h
@@ -640,7 +644,7 @@ elf32-mips.o : elf32-mips.c $(INCDIR)/bfdlink.h genlink.h \
   elf32-target.h
 elf32-gen.o : elf32-gen.c libelf.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-target.h
-elf32-powerpc.o : elf32-powerpc.c libelf.h $(INCDIR)/elf/common.h \
+elf32-ppc.o : elf32-ppc.c libelf.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elf32-target.h
 elf64.o : elf64.c elfcode.h libelf.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
