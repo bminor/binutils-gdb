@@ -71,6 +71,14 @@ foreach flags {"" "strip" "--static" "--traditional-format" "--no-keep-memory"} 
 	}
     }
 
+    # On FreeBSD, running static ELF binaries requires that they have their
+    # EI_OSABI set to a supported value.  There is no longer a fallback
+    # interpretation.
+    if {"$flags" == "--static"} {
+	setup_xfail "*-*-freebsd4*"
+	setup_xfail "*-*-freebsd5*"
+    }
+
     # On Irix 5, linking with --static only works if all the files are
     # compiled using -non_shared.
     if {"$flags" == "--static"} {
