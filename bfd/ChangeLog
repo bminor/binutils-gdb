@@ -1,5 +1,8 @@
 Sun Dec  6 16:30:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (copy_private_bfd_data): Always initialize the
+	includes_phdrs field.
+
 	* elflink.h (elf_fix_symbol_flags): Check for case where a non-ELF
 	file defines a symbol first mentioned in an ELF file.
 
