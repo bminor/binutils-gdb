@@ -118,7 +118,7 @@ proc _gdbtk_xvfb_init {} {
     set screen ":[getpid]"
     set pid [spawn  Xvfb $screen -ac]
     set _xvfb_spawn_id $spawn_id
-    set env(DISPLAY) $screen
+    set env(DISPLAY) localhost$screen
   } else {
     # No Xvfb found -- skip test
     return 0

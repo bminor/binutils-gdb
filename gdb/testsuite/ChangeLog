@@ -1,3 +1,9 @@
+2001-09-19  Frank Ch. Eigler  <fche@redhat.com>
+
+	* lib/insight-support.exp (_gdbtk_xvfb_init): Set DISPLAY
+	to localhost:NNN instead of :NNN, in case Xvfb is listening
+	only on TCP.
+
 2001-09-19  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/recurse.exp: When checking leaving the watchpoint
