@@ -3665,10 +3665,10 @@ fi
 # Ensure a reasonable default simulator is constructed: (DEPRECATED)
 case "${target}" in
 # start-sanitize-tx19
-  mipstx19*-*-*)        SIMCONF="-mips1 -mcpu=r1900 -mno-fp --warnings";;
+  mips*tx19*)		SIMCONF="-mips1 -mcpu=r1900 -mno-fp --warnings";;
 # end-sanitize-tx19
 # start-sanitize-tx49
-  mips64tx49*-*-*)      SIMCONF="-mips3 --warnings -mcpu=r4900";;
+  mips*tx49*)		SIMCONF="-mips3 --warnings -mcpu=r4900";;
 # end-sanitize-tx49
 # start-sanitize-r5900
   mips64r59*-*-*)      SIMCONF="-mips3 --warnings -mcpu=r5900";;
@@ -3689,7 +3689,7 @@ esac
 #
 case "${target}" in
 # start-sanitize-tx19
-  mipstx19*-*-*)        SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
+  mips*tx19*)        SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
 # end-sanitize-tx19
   mips*tx39*)           SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
   *)                    SIM_SUBTARGET="";;
@@ -3705,7 +3705,7 @@ mips_endian=
 default_endian=
 case "${target}" in
 # start-sanitize-tx19
-  mipstx19*-*-*)        default_endian=BIG_ENDIAN ;;
+  mips*tx19*)        default_endian=BIG_ENDIAN ;;
 # end-sanitize-tx19
 # start-sanitize-r5900
   mips64r59*-*-*)	mips_endian=LITTLE_ENDIAN ;;
@@ -3771,7 +3771,7 @@ fi
 mips_addr_bitsize=
 case "${target}" in
 # start-sanitize-tx19
-  mipstx19*-*-*)        mips_bitsize=32 ; mips_msb=31 ;;
+  mips*tx19*)        mips_bitsize=32 ; mips_msb=31 ;;
 # end-sanitize-tx19
 # start-sanitize-r5900
   mips64r59*-*-*)	mips_bitsize=64 ; mips_msb=63 ; mips_addr_bitsize=32;;
@@ -3854,7 +3854,7 @@ mips_fpu=HARDWARE_FLOATING_POINT
 mips_fpu_bitsize=
 case "${target}" in
 # start-sanitize-tx19
-  mipstx19*-*-*)        mips_fpu=SOFT_FLOATING_POINT ;;
+  mips*tx19*)		mips_fpu=SOFT_FLOATING_POINT ;;
 # end-sanitize-tx19
   mips*tx39*)		mips_fpu=HARD_FLOATING_POINT
 			mips_fpu_bitsize=32
@@ -3943,7 +3943,7 @@ sim_igen_filter="32,64,f"
 sim_m16_filter="16"
 case "${target}" in
 # start-sanitize-tx19
-  mipstx19*-*-*)	sim_default_gen=M16
+  mips*tx19*)		sim_default_gen=M16
 			sim_use_gen=M16
 			sim_igen_machine="-M tx19"
 			sim_m16_machine="-M tx19"
