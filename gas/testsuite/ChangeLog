@@ -1,3 +1,10 @@
+2002-01-08  H.J. Lu <hjl@gnu.org>
+
+	* gas/mips/elf-rel.s: New tests for nested ().
+
+	* gas/mips/elf-rel.d: Modified for nested () tests.
+	* gas/mips/elfel-rel.d: Likewise.
+
 2002-01-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gas/mips/jal-svr4pic.s: Add .ent and .frame directives.
