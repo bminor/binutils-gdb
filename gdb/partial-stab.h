@@ -78,13 +78,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  if ((namestring[0] == '-' && namestring[1] == 'l')
 	      || (namestring [(nsl = strlen (namestring)) - 1] == 'o'
 		  && namestring [nsl - 2] == '.')
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
               /* some cooperation from gcc to get around ld stupidity */
               || (namestring[0] == 'e' && !strcmp (namestring, "end_file."))
 #endif
 	      )
 	    {
-#ifndef hp9000s800
+#ifndef GDB_TARGET_IS_HPPA
 	      if (objfile -> ei.entry_point <  CUR_SYMBOL_VALUE &&
 		  objfile -> ei.entry_point >= last_o_file_start)
 		{

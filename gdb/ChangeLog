@@ -1,3 +1,20 @@
+Sat Sep 26 02:07:31 1992  John Gilmore  (gnu@cygnus.com)
+
+	* findvar.c (supply_register):  Add CLEAN_UP_REGISTER_VALUE hook.
+	* tm-hppa.h (CLEAN_UP_REGISTER_VALUE):  Use it.
+	* hppa-coredep.c:  Remove, now that we use the hook.
+	* config/hppab.mh, config/hppah.mh:  Use standard coredep.o.
+	* hppab-xdep.c, hppah-xdep.c:  Remove custom code, use hook.
+
+	* dbxread.c, partial-stab.h:  Replace all #ifdef hp9000s800's with
+	GDB_TARGET_IS_HPPA's.  This is a SERIOUS KLUDGE.  The code needs to all
+	be ripped out and reimplemented right (see elfread.c).
+	* tm-hppa.h (GDB_TARGET_IS_HPPA):  Define.
+
+	Rename all HPPA files to fit into unique DOS filenames:
+	* *hppabsd*  => *hppab*
+	* *hppahpux* => *hppah*
+
 Sat Sep 26 00:25:15 1992  John Gilmore  (gnu@cygnus.com)
 
 	Make the /proc support a target-struct in its own right.

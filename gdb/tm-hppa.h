@@ -167,6 +167,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define PC_REGNUM PCOQ_HEAD_REGNUM
 #define NPC_REGNUM PCOQ_TAIL_REGNUM
 
+/* When fetching register values from an inferior or a core file,
+   clean them up using this macro.  BUF is a char pointer to
+   the raw value of the register in the registers[] array.  */
+
+#define	CLEAN_UP_REGISTER_VALUE(regno, buf) \
+  do {	\
+    if ((regno) == PCOQ_HEAD_REGNUM || (regno) == PCOQ_TAIL_REGNUM) \
+      (buf)[3] &= ~0x3;	\
+  } while (0)
+
 /* Define DO_REGISTERS_INFO() to do machine-specific formatting
    of register dumps. */
 
@@ -536,6 +546,10 @@ text_space				; Otherwise, go through _sr4export,
   dummyname[13] = deposit_14 (sr4export_address & MASK_11, dummyname[13]);\
 }
 
+
+#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
+    sp = hp_push_arguments(nargs, args, sp, struct_return, struct_addr)
+
 /* Write the PC to a random value.
    On PA-RISC, we need to be sure that the PC space queue is correct. */
 
@@ -553,3 +567,10 @@ text_space				; Otherwise, go through _sr4export,
   write_register (PCSQ_HEAD_REGNUM, space_val);		\
   write_register (PCOQ_TAIL_REGNUM, addr);		\
   write_register (PCSQ_TAIL_REGNUM, space_val);}
+
+/* Symbol files have two symbol tables.  Rather than do this right,
+   like the ELF symbol reading code, massive hackery was added
+   to dbxread.c and partial-stab.h.  This flag turns on that
+   hackery, which should all go away FIXME FIXME FIXME FIXME now.  */
+
+#define	GDB_TARGET_IS_HPPA

@@ -41,7 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define L_INCR 1
 #endif
 
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
 /* We don't want to use HP-UX's nlists. */
 #define _NLIST_INCLUDED
 #endif
@@ -59,7 +59,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "gdbcore.h"		/* for bfd stuff */
 #include "libbfd.h"		/* FIXME Secret internal BFD stuff (bfd_read) */
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
 #include "libhppa.h"
 #include "syms.h"
 #else
@@ -464,7 +464,7 @@ dbx_symfile_read (objfile, section_offsets, mainline)
   if (mainline || objfile->global_psymbols.size == 0 || objfile->static_psymbols.size == 0)
     init_psymbol_list (objfile);
 
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
   symbol_size = obj_dbx_symbol_entry_size (sym_bfd);
 #else
   symbol_size = DBX_SYMBOL_SIZE (objfile);
@@ -537,7 +537,7 @@ dbx_symfile_init (objfile)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
 #define STRING_TABLE_OFFSET  (sym_bfd->origin + obj_dbx_str_filepos (sym_bfd))
 #define SYMBOL_TABLE_OFFSET  (sym_bfd->origin + obj_dbx_sym_filepos (sym_bfd))
 #define HP_STRING_TABLE_OFFSET  (sym_bfd->origin + obj_hp_str_filepos (sym_bfd))
@@ -553,7 +553,7 @@ dbx_symfile_init (objfile)
   if (!DBX_TEXT_SECT (objfile))
     error ("Can't find .text section in symbol file");
 
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
   HP_SYMCOUNT (objfile) = obj_hp_sym_count (sym_bfd);
   DBX_SYMCOUNT (objfile) = obj_dbx_sym_count (sym_bfd);
 #else
@@ -574,7 +574,7 @@ dbx_symfile_init (objfile)
      however at least check to see if the size is zero or some negative
      value. */
 
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
   DBX_STRINGTAB_SIZE (objfile) = obj_dbx_stringtab_size (sym_bfd);
   HP_STRINGTAB_SIZE (objfile) = obj_hp_stringtab_size (sym_bfd);
 #else
@@ -596,7 +596,7 @@ dbx_symfile_init (objfile)
   DBX_STRINGTAB (objfile) =
     (char *) obstack_alloc (&objfile -> psymbol_obstack,
 			    DBX_STRINGTAB_SIZE (objfile));
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
   if (HP_STRINGTAB_SIZE (objfile) <= 0)
     error ("ridiculous string table size (%d bytes).",
 	   HP_STRINGTAB_SIZE (objfile));
@@ -615,7 +615,7 @@ dbx_symfile_init (objfile)
 		  sym_bfd);
   if (val != DBX_STRINGTAB_SIZE (objfile))
     perror_with_name (name);
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
   val = bfd_seek (sym_bfd, HP_STRING_TABLE_OFFSET, L_SET);
   if (val < 0)
     perror_with_name (name);
@@ -624,7 +624,7 @@ dbx_symfile_init (objfile)
   if (val != HP_STRINGTAB_SIZE (objfile))
     perror_with_name (name);
 #endif
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
   HP_SYMTAB_OFFSET (objfile) = HP_SYMBOL_TABLE_OFFSET;
 #endif
 }
@@ -680,7 +680,7 @@ fill_symbuf (sym_bfd)
   symbuf_end = nbytes / symbol_size;
   symbuf_idx = 0;
 }
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
 /* same as above for the HP symbol table */
 
 static struct symbol_dictionary_record hp_symbuf[4096];
@@ -746,7 +746,7 @@ init_psymbol_list (objfile)
   /* Current best guess is that there are approximately a twentieth
      of the total symbols (in a debugging file) are global or static
      oriented symbols */
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
   objfile -> global_psymbols.size = (DBX_SYMCOUNT (objfile) + 
 				     HP_SYMCOUNT (objfile)) / 10;
   objfile -> static_psymbols.size = (DBX_SYMCOUNT (objfile) +
@@ -846,7 +846,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   CORE_ADDR last_o_file_start = 0;
   struct cleanup *old_chain;
   bfd *abfd;
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
   /* HP stuff */
   struct symbol_dictionary_record *hp_bufp;
   int hp_symnum;
@@ -875,7 +875,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   file_string_table_offset = 0;
   next_file_string_table_offset = 0;
 
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
   stringtab_global = HP_STRINGTAB (objfile);
 #else
   stringtab_global = DBX_STRINGTAB (objfile);
@@ -914,7 +914,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   symbuf_end = symbuf_idx = 0;
   next_symbol_text_func = dbx_next_symbol_text;
 
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
   /* On pa machines, the global symbols are all in the regular HP-UX
      symbol table. Read them in first. */
 
@@ -1036,7 +1036,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
     }
 
   /* If there's stuff to be cleaned up, clean it up.  */
-#ifndef hp9000s800
+#ifndef GDB_TARGET_IS_HPPA
   if (DBX_SYMCOUNT (objfile) > 0			/* We have some syms */
 /*FIXME, does this have a bug at start address 0? */
       && last_o_file_start
@@ -1050,7 +1050,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
 
   if (pst)
     {
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
       end_psymtab (pst, psymtab_include_list, includes_used,
 		   symnum * symbol_size, dbsubc_addr,
 		   dependency_list, dependencies_used);
@@ -1346,8 +1346,8 @@ dbx_psymtab_to_symtab_1 (pst)
       buildsym_init ();
       old_chain = make_cleanup (really_free_pendings, 0);
       file_string_table_offset = FILE_STRING_OFFSET (pst);
-#ifdef hp9000s800
-      symbol_size = obj_dbx_symbol_entry_size (sym_bfd);
+#ifdef GDB_TARGET_IS_HPPA
+      symbol_size = obj_dbx_symbol_entry_size (pst->objfile->obfd);
 #else
       symbol_size = SYMBOL_SIZE (pst);
 #endif
@@ -1442,7 +1442,7 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
   current_objfile = objfile;
   subfile_stack = NULL;
 
-#ifdef hp9000s800
+#ifdef GDB_TARGET_IS_HPPA
   stringtab_global = HP_STRINGTAB (objfile);
 #else
   stringtab_global = DBX_STRINGTAB (objfile);
