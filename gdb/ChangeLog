@@ -1,5 +1,12 @@
 2001-12-19  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_register_name): S390_LAST_REGNUM is, in fact,
+	the last register number, not one greater than the last register
+	number.
+
+	* s390-tdep.c (s390_register_virtual_type): Replace clever but
+	incorrect range comparison with correct, legible equivalent.
+
 	* s390-tdep.c (s390_register_raw_size): Replace unnecessarily
 	obscure range comparison with legible equivalent.
 

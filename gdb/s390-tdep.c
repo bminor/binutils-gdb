@@ -161,9 +161,10 @@ s390_register_name (int reg_nr)
     "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15"
   };
 
-  if (reg_nr >= S390_LAST_REGNUM)
+  if (reg_nr <= S390_LAST_REGNUM)
+    return register_names[reg_nr];
+  else
     return NULL;
-  return register_names[reg_nr];
 }
 
 
@@ -1672,8 +1673,10 @@ s390_use_struct_convention (int gcc_p, struct type *value_type)
 struct type *
 s390_register_virtual_type (int regno)
 {
-  return ((unsigned) regno - S390_FPC_REGNUM) <
-    S390_NUM_FPRS ? builtin_type_double : builtin_type_int;
+  if (S390_FP0_REGNUM <= regno && regno < S390_FP0_REGNUM + S390_NUM_FPRS)
+    return builtin_type_double;
+  else
+    return builtin_type_int;
 }
 
 
