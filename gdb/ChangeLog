@@ -1,5 +1,10 @@
 2004-07-26  Andrew Cagney  <cagney@gnu.org>
 
+	* gdb-mi.el: Move from here ...
+	* mi/gdb-mi.el: ... to here.
+
+2004-07-26  Andrew Cagney  <cagney@gnu.org>
+
 	Problem reported by Ashley Pittman <ashley@quadrics.com>.
 	* main.c (captured_main): When in batch mode always detach.
 
