@@ -1,3 +1,9 @@
+Wed Aug 12 13:25:03 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (md_assemble): Emit a warning for stand-alone
+	prefixes.
+	(i386_operand): Fix an error message.
+
 Mon Aug 10 15:39:56 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-alpha.c (tc_gen_reloc): Bias WEAK symbols just as
