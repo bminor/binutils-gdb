@@ -1,3 +1,9 @@
+2004-02-17  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+
+	Committed by Jim Blandy  <jimb@redhat.com>.
+
+	* gdb.base/float.exp: Support s390*-*-* targets.
+
 2004-02-17  Adam Fedor  <fedor@gnu.org>
 
 	* gdb.base/gdb1555.exp: New file.
