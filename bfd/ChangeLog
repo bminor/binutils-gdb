@@ -1,3 +1,7 @@
+2000-06-28  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* go32stub.h: Update stub.
+
 2000-06-26  Marek Michalkiewicz  <marekm@linux.org.pl>
 
 	* archures.c (bfd_mach_avr5): Define.
