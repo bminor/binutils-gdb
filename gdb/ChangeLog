@@ -8,11 +8,15 @@
 	REGISTER_CONVERT_TO_RAW, REGISTER_CONVERTIBLE, 
 	MAX_REGISTER_RAW_SIZE, MAX_REGISTER_VIRTUAL_SIZE): Delete.
 	(TARGET_READ_SP): Delete.
+	(DO_REGISTERS_INFO): Delete.
+
 	* mips-tdep.c (mips_gdbarch_init): Set the above in the gdbarch.
 	(mips_register_convertible, mips_register_convert_to_virtual,
 	mips_register_convert_to_raw): Make static.
 	(mips_read_sp): New function.
 	(mips_gdbarch_init): Set gdbarch read_sp to mips_read_sp.
+	(mips_do_registers_info): Make static.
+	(mips_gdbarch_init): Insert mips_do_registers_info into gdbarch.
 
 2002-08-15  Andrew Cagney  <ac131313@redhat.com>
 

@@ -2302,11 +2302,9 @@ mips_frame_chain (struct frame_info *frame)
      we loop forever if we see a zero size frame.  */
   if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
       && PROC_FRAME_OFFSET (proc_desc) == 0
-      /* The previous frame from a sigtramp frame might be frameless
-	 and have frame size zero.  */
-      && !frame->signal_handler_caller
-      /* Check if this is a call dummy frame.  */
-      && frame->pc != mips_call_dummy_address ())
+  /* The previous frame from a sigtramp frame might be frameless
+     and have frame size zero.  */
+      && !frame->signal_handler_caller)
     return 0;
   else
     return get_frame_pointer (frame, proc_desc);
@@ -3356,22 +3354,13 @@ mips_pop_frame (void)
   if (frame->saved_regs == NULL)
     FRAME_INIT_SAVED_REGS (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
-    if (regnum != SP_REGNUM && regnum != PC_REGNUM
-	&& frame->saved_regs[regnum])
-      {
-	/* Floating point registers must not be sign extended, 
-	   in case MIPS_SAVED_REGSIZE = 4 but sizeof (FP0_REGNUM) == 8.  */
-
-	if (FP0_REGNUM <= regnum && regnum < FP0_REGNUM + 32)
-	  write_register (regnum,
-			  read_memory_unsigned_integer (frame->saved_regs[regnum],
-							MIPS_SAVED_REGSIZE));
-	else
-	  write_register (regnum,
-			  read_memory_integer (frame->saved_regs[regnum],
-					       MIPS_SAVED_REGSIZE));
-      }
-
+    {
+      if (regnum != SP_REGNUM && regnum != PC_REGNUM
+	  && frame->saved_regs[regnum])
+	write_register (regnum,
+			read_memory_integer (frame->saved_regs[regnum],
+					     MIPS_SAVED_REGSIZE));
+    }
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();
 
@@ -3739,7 +3728,7 @@ do_gp_register_row (int regnum)
 
 /* MIPS_DO_REGISTERS_INFO(): called by "info register" command */
 
-void
+static void
 mips_do_registers_info (int regnum, int fpregs)
 {
   if (regnum != -1)		/* do one specified register */
@@ -4098,28 +4087,15 @@ return_value_location (struct type *valtype,
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 	  && len < MIPS_SAVED_REGSIZE)
 	{
-	  if ((gdbarch_tdep (current_gdbarch) -> mips_abi == MIPS_ABI_N32 
-	       || gdbarch_tdep (current_gdbarch) -> mips_abi == MIPS_ABI_N64)
-	      && (TYPE_CODE (valtype) == TYPE_CODE_STRUCT 
-		  || TYPE_CODE (valtype) == TYPE_CODE_UNION))
-	    {
-	      /* Values are already aligned in the low register.  */
-	      lo->reg_offset = 0;
-	    }
-	  else
-	    {
-	      /* "un-left-justify" the value in the low register */
-	      lo->reg_offset = MIPS_SAVED_REGSIZE - len;
-	    }
-	  hi->reg_offset = 0;
+	  /* "un-left-justify" the value in the low register */
+	  lo->reg_offset = MIPS_SAVED_REGSIZE - len;
 	  lo->len = len;
+	  hi->reg_offset = 0;
 	  hi->len = 0;
 	}
       else if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 	       && len > MIPS_SAVED_REGSIZE	/* odd-size structs */
 	       && len < MIPS_SAVED_REGSIZE * 2
-	       && gdbarch_tdep (current_gdbarch) -> mips_abi != MIPS_ABI_N32 
-	       && gdbarch_tdep (current_gdbarch) -> mips_abi != MIPS_ABI_N64
 	       && (TYPE_CODE (valtype) == TYPE_CODE_STRUCT ||
 		   TYPE_CODE (valtype) == TYPE_CODE_UNION))
 	{
@@ -4957,7 +4933,6 @@ mips_gdbarch_init (struct gdbarch_info info,
 	}
     }
 
-#undef MIPS_DEFAULT_ABI
 #ifdef MIPS_DEFAULT_ABI
   if (mips_abi == MIPS_ABI_UNKNOWN)
     mips_abi = MIPS_DEFAULT_ABI;
@@ -5238,7 +5213,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
-  set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
+  set_gdbarch_register_convertible (gdbarch, mips_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch, 
 					   mips_register_convert_to_virtual);
   set_gdbarch_register_convert_to_raw (gdbarch, 
@@ -5263,6 +5238,8 @@ mips_gdbarch_init (struct gdbarch_info info,
   /* There are MIPS targets which do not yet use this since they still
      define REGISTER_VIRTUAL_TYPE.  */
   set_gdbarch_register_virtual_type (gdbarch, mips_register_virtual_type);
+
+  set_gdbarch_do_registers_info (gdbarch, mips_do_registers_info);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);

@@ -141,12 +141,6 @@ extern const char *mips_register_name (int regnr);
 #define	PRID_REGNUM 89		/* Processor ID */
 #define	LAST_EMBED_REGNUM 89	/* Last one */
 
-/* Define DO_REGISTERS_INFO() to do machine-specific formatting
-   of register dumps. */
-
-#define DO_REGISTERS_INFO(_regnum, fp) mips_do_registers_info(_regnum, fp)
-extern void mips_do_registers_info (int, int);
-
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 
