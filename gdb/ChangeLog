@@ -1,3 +1,7 @@
+2003-02-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): long double is 64-bit wide.
+
 2003-02-22  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* m68hc11-tdep.c (m68hc11_init_reggroups): New function.
