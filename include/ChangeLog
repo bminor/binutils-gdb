@@ -1,3 +1,10 @@
+Thu Jan 18 11:32:38 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* demangle.h (cplus_demangle_opname): Change opname parameter to
+	const char *.
+	(cplus_mangle_opname): Change return type and opname parameter to
+	const char *.
+
 Fri Jan  5 00:01:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.h (enum ieee_record): Add ieee_asn_record_enum,
