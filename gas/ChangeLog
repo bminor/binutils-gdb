@@ -1,3 +1,19 @@
+Wed Apr  7 20:18:10 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* doc/as.texinfo: converted conditional markup to use new
+	Texinfo facilities, avoiding m4.
+
+	* doc/as-all.texinfo, all.m4, pretex.m4: deleted.
+
+	* doc/Makefile.in: recast doc configuration to use a link to an
+	included texinfo file.
+
+	* doc/all.texi: settings for generic form of documentation.
+
+Tue Apr  6 11:56:21 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* read.c (cons): Zero out frag when creating reloc.
+
 Mon Apr  5 09:41:58 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/tc-mips.c (gp_reference): Certain magic symbols can never
