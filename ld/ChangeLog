@@ -1,3 +1,8 @@
+Thu Nov 30 13:14:30 1995  Kim Knuttila  <krk@cygnus.com>
+
+	* scripttempl/ppcpe.sc: Moved .edata into its own section to
+	expose it.
+
 Thu Nov 30 11:32:34 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
 
 	* configure.host (m68*-motorola-sysv): Define HOSTING_CRT0 and
