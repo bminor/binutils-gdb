@@ -2317,12 +2317,12 @@ mips_elf_sym_is_global (abfd, sym)
      bfd *abfd ATTRIBUTE_UNUSED;
      asymbol *sym;
 {
-  if (SGI_COMPAT(abfd))
-    return (sym->flags & BSF_SECTION_SYM) == 0 ? true : false;
+  if (SGI_COMPAT (abfd))
+    return (sym->flags & BSF_SECTION_SYM) == 0;
   else
     return ((sym->flags & (BSF_GLOBAL | BSF_WEAK)) != 0
-            || bfd_is_und_section (bfd_get_section (sym))
-            || bfd_is_com_section (bfd_get_section (sym)));
+	    || bfd_is_und_section (bfd_get_section (sym))
+	    || bfd_is_com_section (bfd_get_section (sym)));
 }
 
 /* Set the right machine number for a MIPS ELF file.  This is used for
@@ -9163,11 +9163,8 @@ _bfd_elf32_mips_grok_prstatus (abfd, note)
     }
 
   /* Make a ".reg/999" section.  */
-  if (! _bfd_elfcore_make_pseudosection (abfd, ".reg",
-					 raw_size, note->descpos + offset))
-    return false;
-
-  return true;
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  raw_size, note->descpos + offset);
 }
 
 static boolean _bfd_elf32_mips_grok_psinfo (abfd, note)

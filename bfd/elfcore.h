@@ -206,7 +206,7 @@ elf_core_file_p (abfd)
   /* Process each program header.  */
   for (phindex = 0; phindex < i_ehdrp->e_phnum; ++phindex)
     {
-      if (!_bfd_elfcore_section_from_phdr (abfd, i_phdrp + phindex, phindex))
+      if (! bfd_section_from_phdr (abfd, i_phdrp + phindex, phindex))
 	goto fail;
     }
 

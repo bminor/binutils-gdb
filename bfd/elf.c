@@ -5410,10 +5410,7 @@ _bfd_elfcore_make_pseudosection (abfd, name, size, filepos)
   sect->flags = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
 
-  if (! elfcore_maybe_make_sect (abfd, name, sect))
-    return false;
-
-  return true;
+  return elfcore_maybe_make_sect (abfd, name, sect);
 }
 
 /* prstatus_t exists on:
@@ -5484,11 +5481,8 @@ elfcore_grok_prstatus (abfd, note)
     }
 
   /* Make a ".reg/999" section and a ".reg" section.  */
-  if (! _bfd_elfcore_make_pseudosection (abfd, ".reg",
-					 raw_size, note->descpos + offset));
-    return false;
-
-  return true;
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  raw_size, note->descpos + offset);
 }
 #endif /* defined (HAVE_PRSTATUS_T) */
 
@@ -5499,7 +5493,8 @@ elfcore_make_note_pseudosection (abfd, name, note)
      char *name;
      Elf_Internal_Note *note;
 {
-  return _bfd_elfcore_make_pseudosection (abfd, name, note->descsz, note->descpos);
+  return _bfd_elfcore_make_pseudosection (abfd, name,
+					  note->descsz, note->descpos);
 }
 
 /* There isn't a consistent prfpregset_t across platforms,
@@ -5544,7 +5539,7 @@ typedef psinfo32_t elfcore_psinfo32_t;
    most MAX bytes long, possibly without a terminating '\0'.
    the copy will always have a terminating '\0'.  */
 
-char*
+char *
 _bfd_elfcore_strndup (abfd, start, max)
      bfd *abfd;
      char *start;
@@ -5583,10 +5578,12 @@ elfcore_grok_psinfo (abfd, note)
       memcpy (&psinfo, note->descdata, sizeof (psinfo));
 
       elf_tdata (abfd)->core_program
-	= _bfd_elfcore_strndup (abfd, psinfo.pr_fname, sizeof (psinfo.pr_fname));
+	= _bfd_elfcore_strndup (abfd, psinfo.pr_fname,
+				sizeof (psinfo.pr_fname));
 
       elf_tdata (abfd)->core_command
-	= _bfd_elfcore_strndup (abfd, psinfo.pr_psargs, sizeof (psinfo.pr_psargs));
+	= _bfd_elfcore_strndup (abfd, psinfo.pr_psargs,
+				sizeof (psinfo.pr_psargs));
     }
 #if defined (HAVE_PRPSINFO32_T) || defined (HAVE_PSINFO32_T)
   else if (note->descsz == sizeof (elfcore_psinfo32_t))
@@ -5597,10 +5594,12 @@ elfcore_grok_psinfo (abfd, note)
       memcpy (&psinfo, note->descdata, sizeof (psinfo));
 
       elf_tdata (abfd)->core_program
-	= _bfd_elfcore_strndup (abfd, psinfo.pr_fname, sizeof (psinfo.pr_fname));
+	= _bfd_elfcore_strndup (abfd, psinfo.pr_fname,
+				sizeof (psinfo.pr_fname));
 
       elf_tdata (abfd)->core_command
-	= _bfd_elfcore_strndup (abfd, psinfo.pr_psargs, sizeof (psinfo.pr_psargs));
+	= _bfd_elfcore_strndup (abfd, psinfo.pr_psargs,
+				sizeof (psinfo.pr_psargs));
     }
 #endif
 
@@ -5742,10 +5741,7 @@ elfcore_grok_lwpstatus (abfd, note)
   sect->flags = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
 
-  if (!elfcore_maybe_make_sect (abfd, ".reg2", sect))
-    return false;
-
-  return true;
+  return elfcore_maybe_make_sect (abfd, ".reg2", sect);
 }
 #endif /* defined (HAVE_LWPSTATUS_T) */
 
@@ -5938,21 +5934,6 @@ elfcore_read_notes (abfd, offset, size)
   free (buf);
   return true;
 }
-
-/* FIXME: This function is now unnecessary.  Callers can just call
-   bfd_section_from_phdr directly.  */
-
-boolean
-_bfd_elfcore_section_from_phdr (abfd, phdr, sec_num)
-     bfd *abfd;
-     Elf_Internal_Phdr* phdr;
-     int sec_num;
-{
-  if (! bfd_section_from_phdr (abfd, phdr, sec_num))
-    return false;
-
-  return true;
-}
 
 /* Providing external access to the ELF program header table.  */
 
@@ -5970,8 +5951,7 @@ bfd_get_elf_phdr_upper_bound (abfd)
       return -1;
     }
 
-  return (elf_elfheader (abfd)->e_phnum
-	  * sizeof (Elf_Internal_Phdr));
+  return elf_elfheader (abfd)->e_phnum * sizeof (Elf_Internal_Phdr);
 }
 
 /* Copy ABFD's program header table entries to *PHDRS.  The entries

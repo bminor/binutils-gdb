@@ -1,3 +1,18 @@
+2001-06-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfcore.h (elf_core_file_p): Call bfd_section_from_phdr directly
+	instead of _bfd_elfcore_section_from_phdr.
+	* elf-bfd.h (_bfd_elfcore_section_from_phdr): Remove.
+	* elf.c (_bfd_elfcore_section_from_phdr): Remove.
+	(_bfd_elfcore_make_pseudosection): Expedite tail-call.
+	(elfcore_grok_prstatus): Likewise.
+	(elfcore_grok_lwpstatus): Likewise.
+	(bfd_get_elf_phdr_upper_bound): Likewise.
+	(elfcore_make_note_pseudosection): Formatting.
+	(_bfd_elfcore_strndup): Formatting.
+	* elf32-mips.c (mips_elf_sym_is_global): Formatting.
+	(_bfd_elf32_mips_grok_prstatus): Expedite tail-call.
+
 2001-06-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elf-bfd.h: Add prototypes for _bfd_elfcore_make_pseudosection

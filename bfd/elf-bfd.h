@@ -1159,9 +1159,6 @@ boolean _bfd_elf_make_linker_section_rela
 	   elf_linker_section_t *lsect,
 	   int alignment));
 
-boolean _bfd_elfcore_section_from_phdr
-  PARAMS ((bfd *, Elf_Internal_Phdr *, int));
-
 extern const bfd_target *bfd_elf32_object_p PARAMS ((bfd *));
 extern const bfd_target *bfd_elf32_core_file_p PARAMS ((bfd *));
 extern char *bfd_elf32_core_file_failing_command PARAMS ((bfd *));
