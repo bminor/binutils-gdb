@@ -1,3 +1,11 @@
+2002-07-24  Andrew Cagney  <cagney@redhat.com>
+
+	* findvar.c (extract_unsigned_integer): Make `addr' parameter
+	constant.  Same for local pointer variables.
+	(extract_signed_integer): Ditto.
+	* defs.h (extract_unsigned_integer): Update.
+	(extract_signed_integer): Update.
+
 2002-07-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdbserver/configure.in (unistd.h): Add to AC_CHECK_HEADERS list.

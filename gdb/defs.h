@@ -1071,9 +1071,9 @@ extern void *alloca ();
 
 /* In findvar.c.  */
 
-extern LONGEST extract_signed_integer (void *, int);
+extern LONGEST extract_signed_integer (const void *, int);
 
-extern ULONGEST extract_unsigned_integer (void *, int);
+extern ULONGEST extract_unsigned_integer (const void *, int);
 
 extern int extract_long_unsigned_integer (void *, int, LONGEST *);
 
