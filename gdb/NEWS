@@ -12,9 +12,20 @@ Reference Manual, not to be compatible with AT&T cfront.  Despite disclaimers,
 it still generated too much confusion with users attempting to use gdb with
 AT&T cfront.
 
-H8/300 simulator
-H8/500 simulator (probably by the next release)
-Z8000 family simulator
+  * Simulators
+
+GDB now uses a standard remote interface to a simulator library.
+So far, the library contains simulators for the Zilog Z8001/2, the
+Hitachi H8/300, H8/500 and Super-H.
+
+ * New targets supported
+
+H8/300 simulator 			h8300-hitachi-hms or h8300hms
+H8/500 simulator 			h8500-hitachi-hms or h8500hms
+SH simulator				sh-hitachi-hms    or sh
+Z8000 simulator		  		z8k-zilog-none 	  or z8ksim
+
+
 
 Cross-debugging to GO32 targets is supported.  It requires a custom
 version of the i386-stub.c module which is integrated with the 
