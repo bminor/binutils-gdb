@@ -545,7 +545,7 @@ handle_trap1 ()
       break;
       
     case 6:
-      a[0] = (unsigned long) (cpu.gr[4]);
+      a[0] = (unsigned long) (cpu.gr[PARM1]);
       /* Watch out for debugger's files. */
       if (is_opened (a[0]))
 	{
