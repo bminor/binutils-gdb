@@ -1145,7 +1145,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL,
   NULL,
   gld${EMULATION_NAME}_open_dynamic_archive,
-  gld${EMULATION_NAME}_place_orphan
+  gld${EMULATION_NAME}_place_orphan,
   NULL,		/* set_symbols */
   NULL,		/* parse_args */
   NULL,		/* unrecognized_file */

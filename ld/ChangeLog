@@ -1,3 +1,8 @@
+1999-07-12  Andreas Schwab  <schwab@suse.de>
+
+	* emultempl/elf32.em (ld_${EMULATION_NAME}_emulation): Add missing
+	comma in initializer.
+
 1999-07-11  Ian Lance Taylor  <ian@zembu.com>
 
 	* Many files: Changes to avoid gcc warnings: Add ATTRIBUTE_UNUSED
