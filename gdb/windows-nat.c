@@ -637,7 +637,7 @@ get_image_name (HANDLE h, void *address, int unicode)
 
   /* See if we could read the address of a string, and that the
      address isn't null. */
-  if (!ReadProcessMemory (h, address,  &address_ptr, sizeof (address_ptr), &done) 
+  if (!ReadProcessMemory (h, address,  &address_ptr, sizeof (address_ptr), &done)
       || done != sizeof (address_ptr) || !address_ptr)
     return NULL;
 
@@ -802,7 +802,7 @@ get_relocated_section_addrs (bfd *abfd, CORE_ADDR text_load)
 static struct objfile *
 solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
 {
-  struct section_addr_info *section_addrs_ptr = NULL;
+  struct section_addr_info *addrs = NULL;
   static struct objfile *result = NULL;
   bfd *abfd = NULL;
 
@@ -825,33 +825,28 @@ solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
     {
       if (bfd_check_format (abfd, bfd_object))
 	{
-	  section_addrs_ptr = get_relocated_section_addrs (abfd, load_addr);
+	  addrs = get_relocated_section_addrs (abfd, load_addr);
 	}
 
       bfd_close (abfd);
     }
 
-  if (section_addrs_ptr)
+  if (addrs)
     {
-      result = safe_symbol_file_add (name, from_tty, section_addrs_ptr,
-				     0, OBJF_SHARED);
-
-      free_section_addr_info (section_addrs_ptr);
+      result = safe_symbol_file_add (name, from_tty, addrs, 0, OBJF_SHARED);
+      free_section_addr_info (addrs);
     }
-
   else
     {
       /* Fallback on handling just the .text section. */
-      struct section_addr_info *section_addrs;
       struct cleanup *my_cleanups;
 
-      section_addrs = alloc_section_addr_info (1);
-      my_cleanups = make_cleanup (xfree, section_addrs);
-      section_addrs->other[0].name = ".text";
-      section_addrs->other[0].addr = load_addr;
+      addrs = alloc_section_addr_info (1);
+      my_cleanups = make_cleanup (xfree, addrs);
+      addrs->other[0].name = ".text";
+      addrs->other[0].addr = load_addr;
 
-      result = safe_symbol_file_add (name, from_tty, &section_addrs,
-				     0, OBJF_SHARED);
+      result = safe_symbol_file_add (name, from_tty, addrs, 0, OBJF_SHARED);
       do_cleanups (my_cleanups);
     }
 
@@ -2215,8 +2210,7 @@ typedef struct
 {
   struct target_ops *target;
   bfd_vma addr;
-}
-map_code_section_args;
+} map_code_section_args;
 
 static void
 map_single_dll_code_section (bfd * abfd, asection * sect, void *obj)
