@@ -1,3 +1,22 @@
+2004-01-23  Andrew Cagney  <cagney@redhat.com>
+
+	* printcmd.c (display_command): Replace tui_set_display call with
+	tui_set_layout_for_display_command.
+	* tui/tui.h (enum tui_win_type): Define.
+	(tui_set_layout): Delete declaration.
+	(tui_set_layout_for_display_command): Rename set_tui_layout.
+	* tui/tui-data.h (enum tui_layout_type): Define.
+	* tui/tui-layout.h: Update copyright.  Include "tui-data.h" and
+	"tui.h".
+	(tui_add_win_to_layout): Rename tuiAddWinToLayout.
+	(tui_default_win_height): Rename tuiDefaultWinHeight.
+	(tui_default_win_viewport_height): Rename
+	tuiDefaultWinViewportHeight.
+	(tui_set_layout): RenametuiSetLayout.
+	* tui/tui-layout.c: Update references.
+	* tui/tui.c: Update references.
+	* tui/tui-disasm.c: Update references.
+
 2004-01-23  David Carlton  <carlton@kealia.com>
 
 	Partial workaround for PR c++/1511:
