@@ -205,7 +205,10 @@ extern void resume (int, enum target_signal);
 
 /* From misc files */
 
-extern void do_registers_info (int, int);
+extern void default_print_registers_info (struct gdbarch *gdbarch,
+					  struct ui_file *file,
+					  struct frame_info *frame,
+					  int regnum, int all);
 
 extern void store_inferior_registers (int);
 

@@ -3094,10 +3094,22 @@ library in which breakpoints cannot be set and so should be disabled.
 @findex DO_REGISTERS_INFO
 If defined, use this to print the value of a register or all registers.
 
+This method is deprecated.
+
 @item PRINT_FLOAT_INFO()
-#findex PRINT_FLOAT_INFO
+@findex PRINT_FLOAT_INFO
 If defined, then the @samp{info float} command will print information about
 the processor's floating point unit.
+
+@item print_registers_info (@var{gdbarch}, @var{frame}, @var{regnum}, @var{all})
+@findex print_registers_info
+If defined, pretty print the value of the register @var{regnum} for the
+specified @var{frame}.  If the value of @var{regnum} is -1, pretty print
+either all registers (@var{all} is non zero) or a select subset of
+registers (@var{all} is zero).
+
+The default method prints one register per line, and if @var{all} is
+zero omits floating-point registers.
 
 @item PRINT_VECTOR_INFO()
 @findex PRINT_VECTOR_INFO

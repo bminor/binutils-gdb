@@ -172,6 +172,7 @@ struct gdbarch
   int max_register_virtual_size;
   gdbarch_register_virtual_type_ftype *register_virtual_type;
   gdbarch_do_registers_info_ftype *do_registers_info;
+  gdbarch_print_registers_info_ftype *print_registers_info;
   gdbarch_print_float_info_ftype *print_float_info;
   gdbarch_print_vector_info_ftype *print_vector_info;
   gdbarch_register_sim_regno_ftype *register_sim_regno;
@@ -324,6 +325,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  default_print_registers_info,
   0,
   0,
   0,
@@ -493,7 +495,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->max_register_raw_size = -1;
   current_gdbarch->register_virtual_size = generic_register_size;
   current_gdbarch->max_register_virtual_size = -1;
-  current_gdbarch->do_registers_info = do_registers_info;
+  current_gdbarch->print_registers_info = default_print_registers_info;
   current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
@@ -640,7 +642,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->register_virtual_type == 0))
     fprintf_unfiltered (log, "\n\tregister_virtual_type");
-  /* Skip verify of do_registers_info, invalid_p == 0 */
+  /* Skip verify of do_registers_info, has predicate */
+  /* Skip verify of print_registers_info, invalid_p == 0 */
   /* Skip verify of print_float_info, has predicate */
   /* Skip verify of print_vector_info, has predicate */
   /* Skip verify of register_sim_regno, invalid_p == 0 */
@@ -1566,6 +1569,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
     fprintf_unfiltered (file,
                         "gdbarch_dump: print_float_info = 0x%08lx\n",
                         (long) current_gdbarch->print_float_info);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: print_registers_info = 0x%08lx\n",
+                        (long) current_gdbarch->print_registers_info);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: print_vector_info = 0x%08lx\n",
@@ -2996,6 +3003,13 @@ set_gdbarch_register_virtual_type (struct gdbarch *gdbarch,
   gdbarch->register_virtual_type = register_virtual_type;
 }
 
+int
+gdbarch_do_registers_info_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->do_registers_info != 0;
+}
+
 void
 gdbarch_do_registers_info (struct gdbarch *gdbarch, int reg_nr, int fpregs)
 {
@@ -3013,6 +3027,25 @@ set_gdbarch_do_registers_info (struct gdbarch *gdbarch,
                                gdbarch_do_registers_info_ftype do_registers_info)
 {
   gdbarch->do_registers_info = do_registers_info;
+}
+
+void
+gdbarch_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, int regnum, int all)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->print_registers_info == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_print_registers_info invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_print_registers_info called\n");
+  gdbarch->print_registers_info (gdbarch, file, frame, regnum, all);
+}
+
+void
+set_gdbarch_print_registers_info (struct gdbarch *gdbarch,
+                                  gdbarch_print_registers_info_ftype print_registers_info)
+{
+  gdbarch->print_registers_info = print_registers_info;
 }
 
 int

@@ -1,3 +1,15 @@
+2002-08-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* infcmd.c (default_print_registers_info): Replace
+	do_registers_info.
+	(registers_info): Use gdbarch_print_registers_info instead of
+	DO_REGISTERS_INFO.
+	* inferior.h (default_print_registers_info): Replace
+	do_registers_info.
+	* gdbarch.sh (PRINT_REGISTERS_INFO): New method.
+	(DO_REGISTERS_INFO): Change to a predicate function.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	
 2002-08-21  Keith Seitz  <keiths@redhat.com>
 
 	* gdb-events.sh: Add target-changed event.

@@ -778,9 +778,29 @@ extern void set_gdbarch_register_virtual_type (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
+#if defined (DO_REGISTERS_INFO)
+/* Legacy for systems yet to multi-arch DO_REGISTERS_INFO */
+#if !defined (DO_REGISTERS_INFO_P)
+#define DO_REGISTERS_INFO_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DO_REGISTERS_INFO_P)
+#define DO_REGISTERS_INFO_P() (0)
+#endif
+
+extern int gdbarch_do_registers_info_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DO_REGISTERS_INFO_P)
+#error "Non multi-arch definition of DO_REGISTERS_INFO"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DO_REGISTERS_INFO_P)
+#define DO_REGISTERS_INFO_P() (gdbarch_do_registers_info_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (DO_REGISTERS_INFO)
-#define DO_REGISTERS_INFO(reg_nr, fpregs) (do_registers_info (reg_nr, fpregs))
+#define DO_REGISTERS_INFO(reg_nr, fpregs) (internal_error (__FILE__, __LINE__, "DO_REGISTERS_INFO"), 0)
 #endif
 
 typedef void (gdbarch_do_registers_info_ftype) (int reg_nr, int fpregs);
@@ -794,6 +814,10 @@ extern void set_gdbarch_do_registers_info (struct gdbarch *gdbarch, gdbarch_do_r
 #define DO_REGISTERS_INFO(reg_nr, fpregs) (gdbarch_do_registers_info (current_gdbarch, reg_nr, fpregs))
 #endif
 #endif
+
+typedef void (gdbarch_print_registers_info_ftype) (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, int regnum, int all);
+extern void gdbarch_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, int regnum, int all);
+extern void set_gdbarch_print_registers_info (struct gdbarch *gdbarch, gdbarch_print_registers_info_ftype *print_registers_info);
 
 extern int gdbarch_print_float_info_p (struct gdbarch *gdbarch);
 
