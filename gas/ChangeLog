@@ -1,3 +1,8 @@
+Wed Oct 12 20:30:51 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/te-nbsd532.h: Renamed from te-netbsd532.h.
+	* configure.in, configure: Adjusted.
+
 Wed Oct 12 16:33:38 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* config/cplus-dem.c: Removed.  It isn't used.  Even if it was,
