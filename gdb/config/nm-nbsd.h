@@ -22,6 +22,4 @@
 
 #define FETCH_INFERIOR_REGISTERS
 
-#define ATTACH_DETACH
-
 #include "solib.h"		/* Support for shared libraries. */

@@ -1,3 +1,23 @@
+2004-06-08  Andrew Cagney  <cagney@gnu.org>
+
+	* infptrace.c [ATTACH_DETACH]: Remove #ifdef wrappers.
+	(attach, detach): When neither PT_ATTACH / PT_DETACH nor
+	PTRACE_ATTACH / PTRACE_DETACH available call error.
+	(PT_ATTACH, PT_DETACH): Move definition to attach / detach.
+	* infttrace.c (update_thread_state_after_attach, attach, detach):
+	Remove #ifdef wrappers.
+	* inftarg.c (child_attach, child_detach): Remove #ifdef wrappers.
+	* gnu-nat.c [ATTACH_DETACH]: Remove #ifdef wrappers.
+	* config/nm-bsd.h (ATTACH_DETACH): Delete.
+	* config/nm-sysv4.h (ATTACH_DETACH): Delete.
+	* config/nm-nbsd.h (ATTACH_DETACH): Delete.
+	* config/nm-linux.h (ATTACH_DETACH): Delete.
+	* config/rs6000/nm-rs6000.h (ATTACH_DETACH): Delete.
+	* config/pa/nm-hppah.h (ATTACH_DETACH): Delete.
+	* config/i386/nm-i386sco5.h (ATTACH_DETACH): Delete.
+	* config/i386/nm-i386sco4.h (ATTACH_DETACH): Delete.
+	* config/i386/nm-i386gnu.h (ATTACH_DETACH): Delete.
+
 2004-06-08  Corinna Vinschen  <vinschen@redhat.com>
 
 	* configure.in: Set $configdir to the right OS specific value.

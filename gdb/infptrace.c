@@ -76,13 +76,6 @@
 #define PT_KILL		8	/* Send child a SIGKILL signal */
 #endif
 
-#ifndef PT_ATTACH
-#define PT_ATTACH PTRACE_ATTACH
-#endif
-#ifndef PT_DETACH
-#define PT_DETACH PTRACE_DETACH
-#endif
-
 #include "gdbcore.h"
 #ifndef	NO_SYS_FILE
 #include <sys/file.h>
@@ -279,18 +272,25 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 }
 #endif /* CHILD_RESUME */
 
-
-#ifdef ATTACH_DETACH
 /* Start debugging the process whose number is PID.  */
 int
 attach (int pid)
 {
   errno = 0;
+#ifndef PT_ATTACH
+#ifdef PTRACE_ATTACH
+#define PT_ATTACH PTRACE_ATTACH
+#endif
+#endif
+#ifdef PT_ATTACH
   ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0);
   if (errno)
     perror_with_name ("ptrace");
   attach_flag = 1;
   return pid;
+#else
+  error ("This system does not support attaching to a process");
+#endif
 }
 
 /* Stop debugging the process whose number is PID
@@ -301,13 +301,21 @@ void
 detach (int signal)
 {
   errno = 0;
+#ifndef PT_DETACH
+#ifdef PTRACE_DETACH
+#define PT_DETACH PTRACE_DETACH
+#endif
+#endif
+#ifdef PT_DETACH
   ptrace (PT_DETACH, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) 1,
           signal);
   if (errno)
     print_sys_errmsg ("ptrace", errno);
   attach_flag = 0;
+#else
+  error ("This system does not support detaching from a process");
+#endif
 }
-#endif /* ATTACH_DETACH */
 
 /* Default the type of the ptrace transfer to int.  */
 #ifndef PTRACE_XFER_TYPE

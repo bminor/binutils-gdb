@@ -51,9 +51,6 @@
 #define KERNEL_U_SIZE kernel_u_size ()
 extern int kernel_u_size (void);
 
-/* We can attach and detach.  */
-#define ATTACH_DETACH
-
 /* Hardware-assisted breakpoints and watchpoints.  */
 
 /* We can also do hardware watchpoints.  */

@@ -1,3 +1,8 @@
+2004-06-08  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbint.texinfo (Native Debugging): Delete documentation on
+	ATTACH_DETACH.
+
 2004-06-06  Randolph Chung  <tausq@debian.org>
 
 	* gdb.texinfo (push_dummy_call): Use @code{struct value}.

@@ -2103,8 +2103,6 @@ gnu_can_run (void)
 }
 
 
-#ifdef ATTACH_DETACH
-
 /* Attach to process PID, then initialize for debugging it
    and wait for the trace-trap that results from attaching.  */
 static void
@@ -2189,8 +2187,6 @@ gnu_detach (char *args, int from_tty)
 
   unpush_target (&gnu_ops);	/* Pop out of handling an inferior */
 }
-#endif /* ATTACH_DETACH */
-
 
 static void
 gnu_terminal_init_inferior (void)

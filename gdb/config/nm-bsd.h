@@ -24,6 +24,3 @@
 
 /* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
 #define FETCH_INFERIOR_REGISTERS
-
-/* We can attach and detach.  */
-#define ATTACH_DETACH

@@ -194,50 +194,40 @@ child_thread_alive (ptid_t ptid)
 static void
 child_attach (char *args, int from_tty)
 {
+  char *exec_file;
+  int pid;
+  char *dummy;
+
   if (!args)
     error_no_arg ("process-id to attach");
 
-#ifndef ATTACH_DETACH
-  error ("Can't attach to a process on this machine.");
-#else
-  {
-    char *exec_file;
-    int pid;
-    char *dummy;
-
-    dummy = args;
-    pid = strtol (args, &dummy, 0);
-    /* Some targets don't set errno on errors, grrr! */
-    if ((pid == 0) && (args == dummy))
+  dummy = args;
+  pid = strtol (args, &dummy, 0);
+  /* Some targets don't set errno on errors, grrr! */
+  if ((pid == 0) && (args == dummy))
       error ("Illegal process-id: %s\n", args);
+  
+  if (pid == getpid ())	/* Trying to masturbate? */
+    error ("I refuse to debug myself!");
+  
+  if (from_tty)
+    {
+      exec_file = (char *) get_exec_file (0);
+      
+      if (exec_file)
+	printf_unfiltered ("Attaching to program: %s, %s\n", exec_file,
+			   target_pid_to_str (pid_to_ptid (pid)));
+      else
+	printf_unfiltered ("Attaching to %s\n",
+			   target_pid_to_str (pid_to_ptid (pid)));
+      
+      gdb_flush (gdb_stdout);
+    }
 
-    if (pid == getpid ())	/* Trying to masturbate? */
-      error ("I refuse to debug myself!");
-
-    if (from_tty)
-      {
-	exec_file = (char *) get_exec_file (0);
-
-	if (exec_file)
-	  printf_unfiltered ("Attaching to program: %s, %s\n", exec_file,
-			     target_pid_to_str (pid_to_ptid (pid)));
-	else
-	  printf_unfiltered ("Attaching to %s\n",
-	                     target_pid_to_str (pid_to_ptid (pid)));
-
-	gdb_flush (gdb_stdout);
-      }
-
-    attach (pid);
-
-    inferior_ptid = pid_to_ptid (pid);
-    push_target (&child_ops);
-
-    /* Do this first, before anything has had a chance to query the
-       inferiors symbol table or similar.  */
-    observer_notify_inferior_created (&current_target, from_tty);
-  }
-#endif /* ATTACH_DETACH */
+  attach (pid);
+  
+  inferior_ptid = pid_to_ptid (pid);
+  push_target (&child_ops);
 }
 
 #if !defined(CHILD_POST_ATTACH)
@@ -260,31 +250,25 @@ child_post_attach (int pid)
 static void
 child_detach (char *args, int from_tty)
 {
-#ifdef ATTACH_DETACH
-  {
-    int siggnal = 0;
-    int pid = PIDGET (inferior_ptid);
-
-    if (from_tty)
-      {
-	char *exec_file = get_exec_file (0);
-	if (exec_file == 0)
-	  exec_file = "";
-	printf_unfiltered ("Detaching from program: %s, %s\n", exec_file,
-			   target_pid_to_str (pid_to_ptid (pid)));
-	gdb_flush (gdb_stdout);
-      }
-    if (args)
-      siggnal = atoi (args);
-
-    detach (siggnal);
-
-    inferior_ptid = null_ptid;
-    unpush_target (&child_ops);
-  }
-#else
-  error ("This version of Unix does not support detaching a process.");
-#endif
+  int siggnal = 0;
+  int pid = PIDGET (inferior_ptid);
+  
+  if (from_tty)
+    {
+      char *exec_file = get_exec_file (0);
+      if (exec_file == 0)
+	exec_file = "";
+      printf_unfiltered ("Detaching from program: %s, %s\n", exec_file,
+			 target_pid_to_str (pid_to_ptid (pid)));
+      gdb_flush (gdb_stdout);
+    }
+  if (args)
+    siggnal = atoi (args);
+  
+  detach (siggnal);
+  
+  inferior_ptid = null_ptid;
+  unpush_target (&child_ops);
 }
 
 /* Get ready to modify the registers array.  On machines which store

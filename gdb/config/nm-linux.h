@@ -24,9 +24,6 @@ struct target_ops;
 /* GNU/Linux is SVR4-ish but its /proc file system isn't.  */
 #undef USE_PROC_FS
 
-/* Tell GDB that we can attach and detach other processes.  */
-#define ATTACH_DETACH
-
 /* Since we're building a native debugger, we can include <signal.h>
    to find the range of real-time signals.  */
 

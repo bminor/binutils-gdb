@@ -4560,8 +4560,6 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 }
 #endif /* CHILD_RESUME */
 
-
-#ifdef ATTACH_DETACH
 /*
  * Like it says.
  *
@@ -4733,10 +4731,8 @@ update_thread_state_after_attach (int pid, attach_continue_t kind_of_go)
 
   attach_flag = 1;
 }
-#endif /* ATTACH_DETACH */
 
 
-#ifdef ATTACH_DETACH
 /* Start debugging the process whose number is PID.
  * (A _real_ pid).
  */
@@ -4803,7 +4799,6 @@ detach (int signal)
 
   /* Process-state? */
 }
-#endif /* ATTACH_DETACH */
 
 
 /* Default the type of the ttrace transfer to int.  */
