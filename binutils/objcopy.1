@@ -28,6 +28,7 @@ objcopy \- copy and translate object files
 .RB "[\|" \-X\fR\ |\ \fB\-\-discard\-locals\fR "\|]" 
 .RB "[\|" \-b\ \fIbyte\fR\ |\ \fB\-\-byte=\fIbyte\fR "\|]" 
 .RB "[\|" \-i\ \fIinterleave\fR\ |\ \fB\-\-interleave=\fIinterleave\fR "\|]" 
+.RB "[\|" \-p\fR\ |\ \fB\-\-preserve\-dates\fR "\|]" 
 .RB "[\|" \-\-debugging "\|]"
 .RB "[\|" \-\-gap\-fill=\fIval\fR "\|]"
 .RB "[\|" \-\-pad\-to=\fIaddress\fR "\|]"
@@ -158,6 +159,10 @@ ROMs.  It is typically used with an srec output target.
 Only copy one out of every \fIinterleave\fP bytes.  Which one to copy is
 selected by the \fB\-b\fP or \fB\-\-byte\fP option.  The default is 4.
 The interleave is ignored if neither \fB\-b\fP nor \fB\-\-byte\fP is given.
+.TP
+.B \-p\fR, \fB\-\-preserve\-dates
+Set the access and modification dates of the output file to be the same
+as those of the input file.
 .TP
 .B \-\-debugging
 Convert debugging information, if possible.  This is not the default
