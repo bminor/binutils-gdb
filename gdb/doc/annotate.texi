@@ -64,6 +64,7 @@ This is Edition @value{EDITION}, @value{DATE}.
 * Server::              Issuing a command without affecting user state.
 * Values::              Values are marked as such.
 * Prompting::           GDB annotations marking GDB's need for input.
+* Errors::              Annotations for error messages.
 * Breakpoint Info::     Information on breakpoints.
 * Invalidation::        Some annotations describe things now invalid.
 * Source::              Annotations describing source code.
@@ -277,6 +278,42 @@ expect this to work well; instead use @code{set height 0} to disable
 prompting.  This is because the counting of lines is buggy in the
 presence of annotations.
 @end table
+
+@node Errors
+@chapter Errors
+
+@example
+^Z^Zquit
+@end example
+
+This annotation occurs right before GDB responds to an interrupt.
+
+@example
+^Z^Zerror
+@end example
+
+This annotation occurs right before GDB responds to an error.
+
+Quit and error annotations indicate that any annotations which GDB was
+in the middle of may end abruptly.  For example, if a
+@code{value-history-begin} annotation is followed by a @code{error}, one
+cannot expect to receive the matching @code{value-history-end}.  One
+cannot expect not to receive it either, however; an error annotation
+does not necessarily mean that GDB is immediately returning all the way
+to the top level.
+
+A quit or error annotation may be preceded by
+
+@example
+^Z^Zerror-begin
+@end example
+
+Any output between that and the quit or error annotation is the error
+message.
+
+Warning messages are not yet annotated.
+@c If we want to change that, need to fix warning(), type_error(),
+@c range_error(), and possibly other places.
 
 @node Breakpoint Info
 @chapter Information on Breakpoints
