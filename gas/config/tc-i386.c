@@ -58,6 +58,14 @@
 #define DEFAULT_ARCH "i386"
 #endif
 
+#ifndef INLINE
+#if __GNUC__ >= 2
+#define INLINE __inline__
+#else
+#define INLINE
+#endif
+#endif
+
 static INLINE unsigned int mode_from_disp_size PARAMS ((unsigned int));
 static INLINE int fits_in_signed_byte PARAMS ((offsetT));
 static INLINE int fits_in_unsigned_byte PARAMS ((offsetT));
