@@ -61,7 +61,7 @@ const pseudo_typeS md_pseudo_table[] =
 {
   { "align",	s_align_bytes,		4 },	/* Do byte alignment, default is a 4 byte boundary */
   { "word",	cons,			4 },	/* FIXME: Should this be machine independent? */
-  { "bss",	s_lcomm,		1 },
+  { "bss",	s_lcomm_bytes,		1 },
   { "sect",	obj_coff_section,	0},	/* For compatibility with TI tools */
   { "section",	obj_coff_section,	0},	/* Standard COFF .section pseudo-op */
   { NULL,	NULL,			0 }

@@ -1,3 +1,19 @@
+Tue Aug 19 08:59:12 1997  Fred Fish  <fnf@cygnus.com>
+
+	* read.c (s_lcomm_internal): Renamed from s_lcomm, added arg to
+	flag when alignment is in bytes instead of power of 2, and code to
+	use that flag to convert alignment to bytes.
+	(s_lcomm, s_lcomm_bytes):  New helpers that call s_lcomm_internal.
+	* read.h (s_lcomm_bytes): Add prototype.
+	* config/obj-coff.c (write_object_file): If ALIGNMENT_IN_S_FLAGS is
+	defined, write alignment to alignment bits in section header s_flags
+	rather than the s_align field.
+start-sanitize-tic80
+	* config/obj-coff.h (ALIGNMENT_IN_S_FLAGS): Define for TC_TIC80.
+	* config/tc-tic80.c (md_pseudo_table): Use s_lcomm_bytes for bss
+	pseudo, instead of s_lcomm which wants a power of two for alignment.
+end-sanitize-tic80
+
 Mon Aug 18 20:42:23 1997  Richard Henderson  <rth@cygnus.com>
 
 	* macro.c (check_macro): use alloca instead of xmalloc to plug leak.
