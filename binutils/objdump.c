@@ -1,26 +1,21 @@
 /* objdump.c -- dump information about an object file.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
 
-This file is part of BFD, the Binary File Diddler.
+This file is part of GNU Binutils.
 
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-/*
- * Until there is other documentation, refer to the manual page dump(1) in
- * the system 5 program's reference manual
- */
+along with this program; if not, write to the Free Software
+Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -85,12 +80,15 @@ static void
 dump_symbols PARAMS ((bfd *abfd));
 
 void
-usage ()
+usage (stream, status)
+     FILE *stream;
+     int status;
 {
-  fprintf (stderr, "\
+  fprintf (stream, "\
 Usage: %s [-ahifdrtxsl] [-m machine] [-j section_name] [-b bfdname]\n\
-       [--syms] [--reloc] [--header] [--version] objfile...\n", program_name);
-  exit (1);
+       [--syms] [--reloc] [--header] [--version] [--help] objfile...\n",
+	   program_name);
+  exit (status);
 }
 
 static struct option long_options[]=
@@ -99,6 +97,7 @@ static struct option long_options[]=
   {"reloc", no_argument, &dump_reloc_info, 1},
   {"header", no_argument, &dump_section_headers, 1},
   {"version", no_argument, &show_version,    1},
+  {"help", no_argument, 0, 'H'},
 #ifdef	ELF_STAB_DISPLAY
   {"stabs", no_argument, &dump_stab_section_info, 1},
 #endif
@@ -397,6 +396,9 @@ disassemble_data (abfd)
 	case bfd_arch_i960:
 	  disassemble = print_insn_i960;
 	  break;
+	case bfd_arch_m88k:
+	  disassemble = print_insn_m88k;
+	  break;
 	case bfd_arch_mips:
 	  if (abfd->xvec->byteorder_big_p)
 	    disassemble = print_insn_big_mips;
@@ -673,8 +675,8 @@ display_bfd (abfd)
 
   if (!bfd_check_format (abfd, bfd_object))
     {
-      fprintf (stderr, "%s: %s not an object file\n", program_name,
-	       abfd->filename);
+      fprintf (stderr, "%s:%s: %s\n", program_name, abfd->filename,
+	       bfd_errmsg (bfd_error));
       return;
     }
   printf ("\n%s:     file format %s\n", abfd->filename, abfd->xvec->name);
@@ -1061,6 +1063,8 @@ main (argc, argv)
       seenflag = true;
       switch (c)
 	{
+	case 0:
+	  break;		/* we've been given a long option */
 	case 'm':
 	  machine = optarg;
 	  break;
@@ -1086,8 +1090,6 @@ main (argc, argv)
 	  dump_ar_hdrs = 1;
 	  dump_section_headers = 1;
 	  break;
-	case 0:
-	  break;		/* we've been given a long option */
 	case 't':
 	  dump_symtab = 1;
 	  break;
@@ -1106,19 +1108,24 @@ main (argc, argv)
 	case 'h':
 	  dump_section_headers = 1;
 	  break;
+	case 'H':
+	  usage (stdout, 0);
 	case 'V':
 	  show_version = 1;
 	  break;
 	default:
-	  usage ();
+	  usage (stderr, 1);
 	}
     }
 
   if (show_version)
-    printf ("%s version %s\n", program_name, program_version);
+    {
+      printf ("GNU %s version %s\n", program_name, program_version);
+      exit (0);
+    }
 
   if (seenflag == false)
-    usage ();
+    usage (stderr, 1);
 
   if (info)
     {

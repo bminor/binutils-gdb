@@ -1,3 +1,9 @@
+Thu Jul 15 12:44:09 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objdump.c (disassemble_data): Handle the m88k.
+	(display_bfd): Use bfd_errmsg, rather than just claiming that the
+	bfd is not an object file.
+
 Mon Jul 12 17:55:34 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in (TAGS): make work again by naming directories
