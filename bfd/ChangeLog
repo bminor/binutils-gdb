@@ -1,3 +1,13 @@
+Sun Aug  3 08:15:12 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* rs6000-core.c (make_bfd_asection):  New function to add a section
+	to the core file bfd.
+	(rs6000coff_core_p):  Use make_bfd_asection to add the core file
+	sections.
+	Use BFD routines to seek, read and stat the core file.
+	Handle .data sections from loaded objects and anonymously mmapped
+	regions, these are available in AIX 4 core files.
+
 Fri Aug  1 12:58:32 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Set enable_shared before AM_PROG_LIBTOOL.
