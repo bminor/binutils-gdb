@@ -81,7 +81,7 @@ rce-*-aout)		targ_emul=rce ;;
 # end-sanitize-rce
 m68k-sony-*)		targ_emul=news ;;
 m68k-hp-bsd*)		targ_emul=hp300bsd ;;
-m68*-motorola-sysv3*)	targ_emul=delta68 ;;
+m68*-motorola-sysv*)	targ_emul=delta68 ;;
 m68*-*-aout)		targ_emul=m68kaout ;;
 m68*-*-coff)		targ_emul=m68kcoff ;;
 m68*-*-elf)		targ_emul=m68kelf ;;

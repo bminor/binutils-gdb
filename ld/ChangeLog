@@ -2,7 +2,7 @@ Wed Nov  1 15:42:45 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@l
 
 	* Makefile.in (ALL_EMULATIONS): Add edelta68.o.
 	(edelta68.c): New target.
-	* configure.tgt (m68*-motorola-sysv3*): New target.
+	* configure.tgt (m68*-motorola-sysv*): New target.
 	* emulparams/delta68.sh: New file.
 	* scripttempl/delta68.sc: New file.
 
