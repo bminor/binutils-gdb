@@ -38,6 +38,9 @@ static boolean generic_add_output_symbol
 static boolean default_fill_link_order
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   struct bfd_link_order *));
+static boolean default_indirect_link_order
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   struct bfd_link_order *));
 
 /* The link hash table structure is defined in bfdlink.h.  It provides
    a base hash table which the backend specific hash tables are built
@@ -580,11 +583,16 @@ generic_link_check_archive_element (abfd, info, pneeded)
 	     the object file.  This is how a.out works.  Object
 	     formats that require different semantics must implement
 	     this function differently.  This symbol is already on the
-	     undefs list.  */
+	     undefs list.  We add the section to a common section
+	     attached to symbfd to ensure that it is in a BFD which
+	     will be linked in.  */
 	  h->type = bfd_link_hash_common;
 	  h->u.c.size = bfd_asymbol_value (p);
-	  h->u.c.section = bfd_make_section_old_way (symbfd,
-						     "COMMON");
+	  if (p->section == &bfd_com_section)
+	    h->u.c.section = bfd_make_section_old_way (symbfd, "COMMON");
+	  else
+	    h->u.c.section = bfd_make_section_old_way (symbfd,
+						       p->section->name);
 	}
       else
 	{
@@ -647,9 +655,17 @@ generic_link_add_symbol_list (abfd, info, symbol_count, symbols)
 	    }
 	  else
 	    string = NULL;
+
+	  /* We pass the constructor argument as false, for
+	     compatibility.  As backends are converted they can
+	     arrange to pass the right value (the right value is the
+	     size of a function pointer if gcc uses collect2 for the
+	     object file format, zero if it does not).
+	     FIXME: We pass the bitsize as 32, which is just plain
+	     wrong, but actually doesn't matter very much.  */
 	  if (! (_bfd_generic_link_add_one_symbol
 		 (info, abfd, name, p->flags, bfd_get_section (p),
-		  p->value, string, false,
+		  p->value, string, false, 0, 32,
 		  (struct bfd_link_hash_entry **) &h)))
 	    return false;
 
@@ -745,12 +761,15 @@ static const enum link_action link_action[8][7] =
      which case it is the warning string.
    COPY is true if NAME or STRING must be copied into locally
      allocated memory if they need to be saved.
+   CONSTRUCTOR is true if we should automatically collect gcc
+     constructor or destructor names.
+   BITSIZE is the number of bits in constructor or set entries.
    HASHP, if not NULL, is a place to store the created hash table
      entry.  */
 
 boolean
 _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
-				  string, copy, hashp)
+				  string, copy, constructor, bitsize, hashp)
      struct bfd_link_info *info;
      bfd *abfd;
      const char *name;
@@ -759,6 +778,8 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
      bfd_vma value;
      const char *string;
      boolean copy;
+     boolean constructor;
+     unsigned int bitsize;
      struct bfd_link_hash_entry **hashp;
 {
   enum link_row row;
@@ -836,6 +857,47 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  h->type = bfd_link_hash_defined;
 	  h->u.def.section = section;
 	  h->u.def.value = value;
+
+	  /* If we have been asked to, we act like collect2 and
+	     identify all functions that might be global constructors
+	     and destructors and pass them up in a callback.  We only
+	     do this for certain object file types, since many object
+	     file types can handle this automatically.  */
+	  if (constructor && name[0] == '_')
+	    {
+	      const char *s;
+
+	      /* A constructor or destructor name starts like this:
+		   _+GLOBAL_[_.$][ID][_.$]
+		 where the first [_.$] and the second are the same
+		 character (we accept any character there, in case a
+		 new object file format comes along with even worse
+		 naming restrictions).  */
+
+#define CONS_PREFIX "GLOBAL_"
+#define CONS_PREFIX_LEN (sizeof CONS_PREFIX - 1)
+
+	      s = name + 1;
+	      while (*s == '_')
+		++s;
+	      if (s[0] == 'G'
+		  && strncmp (s, CONS_PREFIX, CONS_PREFIX_LEN - 1) == 0)
+		{
+		  char c;
+
+		  c = s[CONS_PREFIX_LEN + 1];
+		  if ((c == 'I' || c == 'D')
+		      && s[CONS_PREFIX_LEN] == s[CONS_PREFIX_LEN + 2])
+		    {
+		      if (! ((*info->callbacks->constructor)
+			     (info,
+			      c == 'I' ? true : false, bitsize,
+			      name, abfd, section, value)))
+			return false;
+		    }
+		}
+	    }
+
 	  break;
 	case COM:
 	  if (h->type == bfd_link_hash_new)
@@ -860,8 +922,6 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	    return false;
 	  if (value > h->u.c.size)
 	    h->u.c.size = value;
-	  if (h->u.c.section == (asection *) NULL)
-	    h->u.c.section = bfd_make_section_old_way (abfd, "COMMON");
 	  break;
 	case CREF:
 	  BFD_ASSERT (h->type == bfd_link_hash_defined);
@@ -921,7 +981,8 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  }
 	  break;
 	case SET:
-	  if (! (*info->callbacks->add_to_set) (info, h, abfd, section, value))
+	  if (! (*info->callbacks->add_to_set) (info, h, bitsize, abfd,
+						section, value))
 	    return false;
 	  break;
 	case WARN:
@@ -1057,17 +1118,8 @@ _bfd_generic_final_link (abfd, info)
 	   p != (struct bfd_link_order *) NULL;
 	   p = p->next)
 	{
-	  switch (p->type)
-	    {
-	    case bfd_indirect_link_order:
-	      if (! _bfd_generic_indirect_link_order (abfd, info, o, p))
-		return false;
-	      break;
-	    default:
-	      if (! _bfd_default_link_order (abfd, info, o, p))
-		return false;
-	      break;
-	    }
+	  if (! _bfd_default_link_order (abfd, info, o, p))
+	    return false;
 	}
     }
 
@@ -1368,45 +1420,6 @@ _bfd_generic_link_write_global_symbol (h, data)
 
   return true;
 }
-
-/* Handle an indirect section when doing a generic link.  */
-
-boolean
-_bfd_generic_indirect_link_order (output_bfd, info, output_section, link_order)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
-     asection *output_section;
-     struct bfd_link_order *link_order;
-{
-  asection *input_section;
-  bfd *input_bfd;
-  bfd_byte *contents;
-
-  BFD_ASSERT ((output_section->flags & SEC_HAS_CONTENTS) != 0);
-
-  if (link_order->size == 0)
-    return true;
-
-  input_section = link_order->u.indirect.section;
-  input_bfd = input_section->owner;
-
-  BFD_ASSERT (input_section->output_section == output_section);
-  BFD_ASSERT (input_section->output_offset == link_order->offset);
-  BFD_ASSERT (bfd_section_size (input_bfd, input_section) == link_order->size);
-
-  /* Get and relocate the section contents.  */
-  contents = (bfd_byte *) alloca (bfd_section_size (input_bfd, input_section));
-  contents = (bfd_get_relocated_section_contents
-	      (output_bfd, info, link_order, contents, info->relocateable,
-	       bfd_get_outsymbols (input_bfd)));
-
-  /* Output the section contents.  */
-  if (! bfd_set_section_contents (output_bfd, output_section, contents,
-				  link_order->offset, link_order->size))
-    return false;
-
-  return true;
-}
 
 /* Allocate a new link_order for a section.  */
 
@@ -1449,7 +1462,7 @@ _bfd_default_link_order (abfd, info, sec, link_order)
     default:
       abort ();
     case bfd_indirect_link_order:
-      abort ();
+      return default_indirect_link_order (abfd, info, sec, link_order);
     case bfd_fill_link_order:
       return default_fill_link_order (abfd, info, sec, link_order);
     }
@@ -1457,6 +1470,7 @@ _bfd_default_link_order (abfd, info, sec, link_order)
 
 /* Default routine to handle a bfd_fill_link_order.  */
 
+/*ARGSUSED*/
 static boolean
 default_fill_link_order (abfd, info, sec, link_order)
      bfd *abfd;
@@ -1481,4 +1495,68 @@ default_fill_link_order (abfd, info, sec, link_order)
   return bfd_set_section_contents (abfd, sec, space,
 				   (file_ptr) link_order->offset,
 				   link_order->size);
+}
+
+/* Default routine to handle a bfd_indirect_link_order.  */
+
+static boolean
+default_indirect_link_order (output_bfd, info, output_section, link_order)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     asection *output_section;
+     struct bfd_link_order *link_order;
+{
+  asection *input_section;
+  bfd *input_bfd;
+  bfd_byte *contents;
+
+  BFD_ASSERT ((output_section->flags & SEC_HAS_CONTENTS) != 0);
+
+  if (link_order->size == 0)
+    return true;
+
+  input_section = link_order->u.indirect.section;
+  input_bfd = input_section->owner;
+
+  BFD_ASSERT (input_section->output_section == output_section);
+  BFD_ASSERT (input_section->output_offset == link_order->offset);
+  BFD_ASSERT (bfd_section_size (input_bfd, input_section) == link_order->size);
+
+  if (info->relocateable
+      && output_section->orelocation == (arelent **) NULL)
+    {
+      /* Space has not been allocated for the output relocations.
+	 This can happen when we are called by a specific backend
+	 because somebody is attempting to link together different
+	 types of object files.  Handling this case correctly is
+	 difficult, and sometimes impossible.  */
+      abort ();
+    }
+
+  /* Get the canonical symbols.  The generic linker will always have
+     retrieved them by this point, but we may be being called by a
+     specific linker when linking different types of object files
+     together.  */
+  if (bfd_get_outsymbols (input_bfd) == (asymbol **) NULL)
+    {
+      size_t symsize;
+
+      symsize = get_symtab_upper_bound (input_bfd);
+      input_bfd->outsymbols = (asymbol **) bfd_alloc (input_bfd, symsize);
+      input_bfd->symcount = bfd_canonicalize_symtab (input_bfd,
+						     input_bfd->outsymbols);
+    }
+
+  /* Get and relocate the section contents.  */
+  contents = (bfd_byte *) alloca (bfd_section_size (input_bfd, input_section));
+  contents = (bfd_get_relocated_section_contents
+	      (output_bfd, info, link_order, contents, info->relocateable,
+	       bfd_get_outsymbols (input_bfd)));
+
+  /* Output the section contents.  */
+  if (! bfd_set_section_contents (output_bfd, output_section, (PTR) contents,
+				  link_order->offset, link_order->size))
+    return false;
+
+  return true;
 }
