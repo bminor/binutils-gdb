@@ -1,3 +1,12 @@
+Fri Jan 21 17:49:28 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* lynx-nat.c:  Add Sparc support.
+	* sparcly-nat.c:  Remove.  It's useless.
+	* config/sparc/nm-sparclynx.h:  Rewrite.
+	* config/sparc/sparclynx.mh (NATDEPFILES):  Replace sparcly-nat.o
+	with lynx-nat.o
+	* config/sparc/tm-sparclynx.h:  Rewrite.
+
 Fri Jan 21 19:08:48 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* rs6000-pinsn.c: Use the new disassembler in the opcodes

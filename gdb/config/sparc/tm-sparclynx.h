@@ -20,12 +20,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef TM_SPARCLYNX_H
 #define TM_SPARCLYNX_H
 
+#include "tm-lynx.h"
+
 /* Use generic Sparc definitions. */
-
 #include "sparc/tm-sparc.h"
-
-/* Include COFF shared library support.  */
-
-#include "coff-solib.h"
 
 #endif /* TM_SPARCLYNX_H */
