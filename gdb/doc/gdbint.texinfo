@@ -3352,11 +3352,10 @@ assuming that we have just stopped at a @code{longjmp} breakpoint.  It takes a
 @code{CORE_ADDR *} as argument, and stores the target PC value through this
 pointer.  It examines the current state of the machine as needed.
 
-@item GET_SAVED_REGISTER
-@findex GET_SAVED_REGISTER
-@findex get_saved_register
+@item DEPRECATED_GET_SAVED_REGISTER
+@findex DEPRECATED_GET_SAVED_REGISTER
 Define this if you need to supply your own definition for the function
-@code{get_saved_register}.
+@code{DEPRECATED_GET_SAVED_REGISTER}.
 
 @item IBM6000_TARGET
 @findex IBM6000_TARGET

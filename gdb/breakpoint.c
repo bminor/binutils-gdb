@@ -1679,7 +1679,7 @@ breakpoint_inserted_here_p (CORE_ADDR pc)
 
 /* Return nonzero if FRAME is a dummy frame.  We can't use
    DEPRECATED_PC_IN_CALL_DUMMY because figuring out the saved SP would
-   take too much time, at least using get_saved_register on the 68k.
+   take too much time, at least using frame_register() on the 68k.
    This means that for this function to work right a port must use the
    bp_call_dummy breakpoint.  */
 

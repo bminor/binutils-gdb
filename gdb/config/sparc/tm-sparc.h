@@ -199,10 +199,10 @@ extern int sparc_intreg_size (void);
    stack rather than with the other registers, and this causes hair
    and confusion in places like pop_frame.  It might be better to
    remove the ins and locals from `registers', make sure that
-   get_saved_register can get them from the stack (even in the
-   innermost frame), and make this the way to access them.  For the
-   frame pointer we would do that via TARGET_READ_FP.  On the other
-   hand, that is likely to be confusing or worse for flat frames.  */
+   frame_register() can get them from the stack (even in the innermost
+   frame), and make this the way to access them.  For the frame
+   pointer we would do that via TARGET_READ_FP.  On the other hand,
+   that is likely to be confusing or worse for flat frames.  */
 
 #define REGISTER_BYTES (32*4+32*4+8*4)
 

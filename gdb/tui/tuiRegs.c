@@ -799,10 +799,10 @@ _tuiGetRegisterRawValue (int regNum, char *regValue, struct frame_info *frame)
 
   if (target_has_registers)
     {
-      int opt;
-      
-      get_saved_register (regValue, &opt, (CORE_ADDR*) NULL, frame,
-			  regNum, (enum lval_type*) NULL);
+      frame_read_register (frame, regNum, regValue);
+      /* NOTE: cagney/2003-03-13: This is bogus.  It is refering to
+         the register cache and not the frame which could have pulled
+         the register value off the stack.  */
       if (register_cached (regNum) >= 0)
 	ret = TUI_SUCCESS;
     }

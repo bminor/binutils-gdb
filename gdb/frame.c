@@ -399,24 +399,6 @@ generic_unwind_get_saved_register (char *raw_buffer,
 			 &realnumx, raw_buffer);
 }
 
-void
-get_saved_register (char *raw_buffer,
-		    int *optimized,
-		    CORE_ADDR *addrp,
-		    struct frame_info *frame,
-		    int regnum,
-		    enum lval_type *lval)
-{
-  if (DEPRECATED_GET_SAVED_REGISTER_P ())
-    {
-      DEPRECATED_GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame,
-				     regnum, lval);
-      return;
-    }
-  generic_unwind_get_saved_register (raw_buffer, optimized, addrp, frame,
-				     regnum, lval);
-}
-
 /* frame_register_read ()
 
    Find and return the value of REGNUM for the specified stack frame.
@@ -810,9 +792,10 @@ const struct frame_unwind trad_frame_unwinder = {
 const struct frame_unwind *trad_frame_unwind = &trad_frame_unwinder;
 
 
-/* Function: get_saved_register
+/* Function: deprecated_generic_get_saved_register
+
    Find register number REGNUM relative to FRAME and put its (raw,
-   target format) contents in *RAW_BUFFER.  
+   target format) contents in *RAW_BUFFER.
 
    Set *OPTIMIZED if the variable was optimized out (and thus can't be
    fetched).  Note that this is never set to anything other than zero
@@ -827,10 +810,6 @@ const struct frame_unwind *trad_frame_unwind = &trad_frame_unwinder;
    Set *ADDRP to the address, either in memory or as a REGISTER_BYTE
    offset into the registers array.  If the value is stored in a dummy
    frame, set *ADDRP to zero.
-
-   To use this implementation, define a function called
-   "get_saved_register" in your target code, which simply passes all
-   of its arguments to this function.
 
    The argument RAW_BUFFER must point to aligned memory.  */
 

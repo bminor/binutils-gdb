@@ -326,9 +326,9 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       else
 	{
 	  /* Should we adjust for stack bias here? */
-	  get_saved_register (buf, 0, 0, fi, FP_REGNUM, 0);
-	  deprecated_update_frame_base_hack (fi, extract_address (buf, REGISTER_RAW_SIZE (FP_REGNUM)));
-
+	  ULONGEST tmp;
+	  frame_read_unsigned_register (fi, FP_REGNUM, &tmp);
+	  deprecated_update_frame_base_hack (fi, tmp);
 	  if (GDB_TARGET_IS_SPARC64 && (get_frame_base (fi) & 1))
 	    deprecated_update_frame_base_hack (fi, get_frame_base (fi) + 2047);
 	}
@@ -367,8 +367,11 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	      get_frame_extra_info (fi)->sp_offset = offset;
 
 	      /* Overwrite the frame's address with the value in %i7.  */
-	      get_saved_register (buf, 0, 0, fi, I7_REGNUM, 0);
-	      deprecated_update_frame_base_hack (fi, extract_address (buf, REGISTER_RAW_SIZE (I7_REGNUM)));
+	      {
+		ULONGEST tmp;
+		frame_read_unsigned_register (fi, I7_REGNUM, &tmp);
+		deprecated_update_frame_base_hack (fi, tmp);
+	      }
 
 	      if (GDB_TARGET_IS_SPARC64 && (get_frame_base (fi) & 1))
 		deprecated_update_frame_base_hack (fi, get_frame_base (fi) + 2047);
@@ -487,9 +490,11 @@ sparc_frame_saved_pc (struct frame_info *frame)
 	saved_pc_offset = 12;
 
       /* The sigcontext address is contained in register O2.  */
-      get_saved_register (buf, (int *) NULL, (CORE_ADDR *) NULL,
-			  frame, O0_REGNUM + 2, (enum lval_type *) NULL);
-      sigcontext_addr = extract_address (buf, REGISTER_RAW_SIZE (O0_REGNUM + 2));
+      {
+	ULONGEST tmp;
+	frame_read_unsigned_register (frame, O0_REGNUM + 2, &tmp);
+	sigcontext_addr = tmp;
+      }
 
       /* Don't cause a memory_error when accessing sigcontext in case the
          stack layout has changed or the stack is corrupt.  */
@@ -505,9 +510,9 @@ sparc_frame_saved_pc (struct frame_info *frame)
     {
       /* A frameless function interrupted by a signal did not save
          the PC, it is still in %o7.  */
-      get_saved_register (buf, (int *) NULL, (CORE_ADDR *) NULL,
-			  frame, O7_REGNUM, (enum lval_type *) NULL);
-      return PC_ADJUST (extract_address (buf, SPARC_INTREG_SIZE));
+      ULONGEST tmp;
+      frame_read_unsigned_register (frame, O7_REGNUM, &tmp);
+      return PC_ADJUST (tmp);
     }
   if (get_frame_extra_info (frame)->flat)
     addr = get_frame_extra_info (frame)->pc_addr;
@@ -936,8 +941,9 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	  else if (regnum >= O0_REGNUM && regnum < O0_REGNUM + 8)
 	    {
 	      /* Outs become ins.  */
-	      get_saved_register (raw_buffer, optimized, addrp, frame1,
-				  (regnum - O0_REGNUM + I0_REGNUM), lval);
+	      int realnum;
+	      frame_register (frame1, (regnum - O0_REGNUM + I0_REGNUM),
+			      optimized, lval, addrp, &realnum, raw_buffer);
 	      return;
 	    }
 	}
@@ -1090,10 +1096,10 @@ sparc_push_dummy_frame (void)
    I think few ports of GDB get right--if you are popping a frame
    which does not save some register that *is* saved by a more inner
    frame (such a frame will never be a dummy frame because dummy
-   frames save all registers).  Rewriting pop_frame to use
-   get_saved_register would solve this problem and also get rid of the
-   ugly duplication between sparc_frame_find_saved_regs and
-   get_saved_register.
+   frames save all registers).
+
+   NOTE: cagney/2003-03-12: Since pop_frame has been rewritten to use
+   frame_unwind_register() the need for this function is questionable.
 
    Stores, into an array of CORE_ADDR, 
    the addresses of the saved registers of frame described by FRAME_INFO.
@@ -1369,12 +1375,9 @@ sparc_pop_frame (void)
 	  /* I think this happens only in the innermost frame, if so then
 	     it is a complicated way of saying
 	     "pc = read_register (O7_REGNUM);".  */
-	  char *buf;
-
-	  buf = alloca (MAX_REGISTER_RAW_SIZE);
-	  get_saved_register (buf, 0, 0, frame, O7_REGNUM, 0);
-	  pc = PC_ADJUST (extract_address
-			  (buf, REGISTER_RAW_SIZE (O7_REGNUM)));
+	  ULONGEST tmp;
+	  frame_read_unsigned_register (frame, O7_REGNUM, &tmp);
+	  pc = PC_ADJUST (tmp);
 	}
 
       write_register (PC_REGNUM, pc);

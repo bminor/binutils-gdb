@@ -538,7 +538,7 @@ extern int generic_pc_in_call_dummy (CORE_ADDR pc,
 /* NOTE: cagney/2002-06-26: Targets should no longer use this
    function.  Instead, the contents of a dummy frames registers can be
    obtained by applying: frame_register_unwind to the dummy frame; or
-   get_saved_register to the next outer frame.  */
+   frame_register_unwind() to the next outer frame.  */
 
 extern char *deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp);
 
@@ -564,11 +564,6 @@ extern void deprecated_generic_get_saved_register (char *, int *, CORE_ADDR *,
 						   enum lval_type *);
 
 extern void generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi);
-
-extern void get_saved_register (char *raw_buffer, int *optimized,
-				CORE_ADDR * addrp,
-				struct frame_info *frame,
-				int regnum, enum lval_type *lval);
 
 /* FIXME: cagney/2003-02-02: Should be deprecated or replaced with a
    function called frame_read_register_p().  This slightly weird (and

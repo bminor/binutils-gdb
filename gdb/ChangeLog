@@ -1,5 +1,25 @@
 2003-03-14  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_saved_register): Delete function.
+	* frame.h (get_saved_register): Delete declaration.
+	* xstormy16-tdep.c: Update comment.
+	* regcache.h: Update comments.
+	* sparc-tdep.c (sparc_init_extra_frame_info): Instead of
+	get_saved_register and extract_address, use
+	frame_read_unsigned_register.
+	(sparc_frame_saved_pc): Ditto.
+	(sparc_get_saved_register): Instead of get_saved_register, use
+	frame_register.
+	(sparc_pop_frame): Ditto.
+	* findvar.c: Update comments.
+	(value_of_register): Call frame_register instead of
+	get_saved_register.
+	(value_from_register): Ditto.
+	* config/sparc/tm-sparc.h: Update comment.
+	* breakpoint.c: Update comment.
+
+2003-03-14  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (DEPRECATED_GET_SAVED_REGISTER): Replace
 	GET_SAVED_REGISTER.
 	* gdbarch.h, gdbarch.c: Re-generate.

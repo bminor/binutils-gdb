@@ -98,7 +98,7 @@ extern void regcache_collect (int regnum, void *buf);
 
 /* The register's ``offset''.
 
-   FIXME: cagney/2002-11-07: The get_saved_register() function, when
+   FIXME: cagney/2002-11-07: The frame_register() function, when
    specifying the real location of a register, does so using that
    registers offset in the register cache.  That offset is then used
    by valops.c to determine the location of the register.  The code

@@ -1,3 +1,8 @@
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (get_register): Use frame_register instead of
+	get_saved_register.
+
 2003-03-08  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-out.c: Update copyright.

@@ -723,11 +723,10 @@ xstormy16_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
    actual value of the previous frame's stack register. 
 
    This function may be called in any context where the saved register
-   values may be needed (backtrace, frame_info, get_saved_register).
-   On many targets, it is called directly by init_extra_frame_info, 
-   in part because the information may be needed immediately by 
-   frame_chain.
-*/
+   values may be needed (backtrace, frame_info, frame_register).  On
+   many targets, it is called directly by init_extra_frame_info, in
+   part because the information may be needed immediately by
+   frame_chain.  */
 
 static void
 xstormy16_frame_init_saved_regs (struct frame_info *fi)
@@ -841,12 +840,11 @@ xstormy16_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
      get_frame_base (thisframe) - get_frame_extra_info (thisframe)->framesize == chain);
 }
 
-/* Function: xstormy16_saved_pc_after_call
-   Returns the previous PC immediately after a function call.
-   This function is meant to bypass the regular get_saved_register
-   mechanism, ie. it is meant to work even if the frame isn't complete. 
-   Called by step_over_function, and sometimes by get_prev_frame.
-*/
+/* Function: xstormy16_saved_pc_after_call Returns the previous PC
+   immediately after a function call.  This function is meant to
+   bypass the regular frame_register() mechanism, ie. it is meant to
+   work even if the frame isn't complete.  Called by
+   step_over_function, and sometimes by get_prev_frame.  */
 
 static CORE_ADDR
 xstormy16_saved_pc_after_call (struct frame_info *ignore)
