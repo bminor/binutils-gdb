@@ -1,3 +1,12 @@
+Tue May 12 15:22:11 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (SUBTARGET_R3900): Define for mipstx39 target.
+  	Document a replacement.
+
+Fri May  8 17:48:19 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* interp.c (sim_monitor): Make mon_printf work.
+
 Wed May  6 19:42:19 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim-main.h (INSN_NAME): New arg `cpu'.

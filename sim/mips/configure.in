@@ -32,10 +32,16 @@ esac
 AC_SUBST(SIMCONF)
 
 # DEPRECATED
+#
+# Instead of defining a `subtarget' macro, code should be checking
+# the value of {STATE,CPU}_ARCHITECTURE to identify the architecture
+# in question.
+#
 case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)        SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
 # end-sanitize-tx19
+  mipstx39*-*-*)        SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
   *)                    SIM_SUBTARGET="";;
 esac
 AC_SUBST(SIM_SUBTARGET)
