@@ -8,7 +8,6 @@ start-sanitize-sky
 	(md_parse_option): Handle them.
 	(md_show_usage): Print them.
 	(output_dma,output_pke): New static globals.
-	(md_begin): Initialize them to 1.
 	(assemble_pke): Handle -no-dma-pke.
 	(insert_file): Search include dir list.
 	(s_enddirect): Validate length if prespecified.
