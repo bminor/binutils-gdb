@@ -1,3 +1,8 @@
+2002-09-07  Christopher Faylor  <cgf@redhat.com>
+
+	* MAINTAINERS: Remove CE from list of maintainership responsibilities.
+	Add XP.
+
 2002-09-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_register_virtual_type,

@@ -223,7 +223,7 @@ AIX			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 
 djgpp native		Eli Zaretskii		eliz@gnu.org
 			DJ Delorie		dj@redhat.com
-MS Windows (NT, CE, '00, 9x, Me) host & native
+MS Windows (NT, '00, 9x, Me, XP) host & native
 			Chris Faylor		cgf@redhat.com
 GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
