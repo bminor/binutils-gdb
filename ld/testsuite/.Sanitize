@@ -28,6 +28,7 @@ config
 lib
 ld-bootstrap
 ld-cdtest
+ld-empic
 ld-scripts
 ld-shared
 
