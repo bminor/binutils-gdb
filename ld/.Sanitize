@@ -27,6 +27,7 @@ echo Sanitizing `pwd`...
 
 Things-to-keep:
 ChangeLog
+Makefile.dos
 Makefile.in
 PORTING
 README
@@ -35,7 +36,7 @@ a29k.sh
 aout.sc-sh
 config
 config.h
-configdos.bat
+configure.bat
 configure.in
 ebmon29k.sc-sh
 ebmon29k.sh
@@ -44,6 +45,7 @@ genscripts.sh
 gld.1
 gld960.em
 gld960.sh
+hp300bsd.sh
 h8300hms.em
 h8300hms.sc-sh
 h8300hms.sh
@@ -84,7 +86,6 @@ lnk960.em
 lnk960.sh
 m88kbcs.sc-sh
 m88kbcs.sh
-makefile.dos
 mkscript.c
 news.sh
 relax.c
@@ -101,7 +102,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.29  1992/02/16 20:49:26  bothner
+# Revision 1.30  1992/02/22 00:11:38  sac
+# DJ naming change
+#
+# Revision 1.29  1992/02/16  20:49:26  bothner
 # *** empty log message ***
 #
 # Revision 1.28  1992/02/07  22:32:29  hgs
