@@ -1714,7 +1714,7 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  HOWTO (0,			/* type */
+  HOWTO (0x1c,			/* type */
 	 0,			/* rightshift */
 	 4,			/* size (0 = byte, 1 = short, 2 = long) */
 	 64,			/* bitsize */
@@ -1726,7 +1726,22 @@ reloc_howto_type xcoff64_howto_table[] =
 	 true,			/* partial_inplace */
 	 MINUS_ONE,		/* src_mask */
 	 MINUS_ONE,		/* dst_mask */
-	 false)			/* pcrel_offset */
+	 false),		/* pcrel_offset */
+
+  /* 16 bit Non modifiable absolute branch.  */
+  HOWTO (0x1d,	                /* type */
+	 0,	                /* rightshift */
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 16,	                /* bitsize */
+	 false,	                /* pc_relative */
+	 0,	                /* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,		        /* special_function */
+	 "R_BA",                /* name */
+	 true,	                /* partial_inplace */
+	 0xfffc,	        /* src_mask */
+	 0xfffc,        	/* dst_mask */
+	 false),                /* pcrel_offset */
 };
 
 void
@@ -1769,6 +1784,8 @@ xcoff64_reloc_type_lookup (abfd, code)
     {
     case BFD_RELOC_PPC_B26:
       return &xcoff64_howto_table[0xa];
+    case BFD_RELOC_PPC_BA16:
+      return &xcoff64_howto_table[0x1d];
     case BFD_RELOC_PPC_BA26:
       return &xcoff64_howto_table[8];
     case BFD_RELOC_PPC_TOC16:

@@ -504,6 +504,12 @@ const struct powerpc_operand powerpc_operands[] =
   /* The SHB field in a VA form instruction. */
 #define SHB UIMM + 1
   { 4, 6, 0, 0, 0 },
+
+  /* The WS field.  */
+#define WS SHB + 1
+#define WS_MASK (0x7 << 11)
+  { 3, 11, 0, 0, 0 },
+
 };
 
 /* The functions used to insert and extract complicated operands.  */
@@ -3691,7 +3697,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "stdxe",   X(31,927), X_MASK,		BOOKE64,	{ RS, RA, RB } },
 
-{ "tlbre",   X(31,946),	X_MASK,		BOOKE,		{ RT, RA, SH } },
+{ "tlbre",   X(31,946),	X_MASK,		BOOKE,		{ RT, RA, WS } },
 
 { "tlbrehi", XTLB(31,946,0), XTLB_MASK,	PPC403,		{ RT, RA } },
 { "tlbrelo", XTLB(31,946,1), XTLB_MASK,	PPC403,		{ RT, RA } },
@@ -3712,7 +3718,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "tlbwelo", XTLB(31,978,1), XTLB_MASK,	PPC403,		{ RT, RA } },
 { "tlbwe",   X(31,978),	X_MASK,		PPC403,		{ RS, RA, SH } },
 
-{ "tlbwe",   X(31,978),	X_MASK,		BOOKE,		{ RT, RA, SH } },
+{ "tlbwe",   X(31,978),	X_MASK,		BOOKE,		{ RT, RA, WS } },
 
 { "icbi",    X(31,982),	XRT_MASK,	PPC,		{ RA, RB } },
 

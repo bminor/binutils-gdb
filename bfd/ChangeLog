@@ -1,3 +1,10 @@
+2002-02-20  Tom Rix  <trix@redhat.com>
+
+	* coff-rs6000.c (xcoff_howto_table): Add 16 bit R_BA.
+	(_bfd_xcoff_reloc_type_lookup): Use it.
+	* coff64-rs6000.c (xcoff64_howto_table): Same.
+	(xcoff64_reloc_type_lookup): Same.
+	
 2002-02-20  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* osf-core.c (osf_core_vec):  OSF/1 (Digital Unix) core files are
