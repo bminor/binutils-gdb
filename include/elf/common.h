@@ -140,7 +140,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define EM_CYGNUS_MN10300	0xbeef
 
 /* FR30 magic number - no EABI available.  */
-#define EM_CYGNUS_FR30		0x46523330
+#define EM_CYGNUS_FR30		0x3330
 
 /* See the above comment before you add a new EM_* value here.  */
 

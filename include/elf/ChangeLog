@@ -1,3 +1,7 @@
+Tue Nov 10 15:12:28 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* common.h (EM_CYGNUS_FR30): Reduce to a 16 bit value.
+
 Tue Nov 10 15:17:28 1998  Catherine Moore  <clm@cygnus.com>
 
         * d10v.h:  Add vtable relocs.
