@@ -1,3 +1,11 @@
+Wed Sep  2 11:31:14 1998  Richard Henderson  <rth@cygnus.com>
+
+	* frags.c (frag_grow): Include the size of the frag struct in the
+	obstack chunk size.
+
+	* subsegs.c (subseg_set_rest): Adjust the seginfo frchain start
+	if the new subseg comes before the old.
+
 Tue Sep  1 15:01:33 1998  Jakub Jelinek <jj@sunsite.ms.mff.cuni.cz>
 
 	* config/tc-sparc.c (sparc_ip): Allow all digits in an instruction
