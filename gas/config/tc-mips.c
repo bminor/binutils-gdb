@@ -1843,6 +1843,7 @@ macro (ip)
   int coproc = 0;
   int lr = 0;
   offsetT maxnum;
+  int off;
   bfd_reloc_code_real_type r;
   char *p;
   int hold_mips_optimize;
@@ -3569,6 +3570,8 @@ macro2 (ip)
   int likely = 0;
   int dbl = 0;
   int coproc = 0;
+  int lr = 0;
+  int off;
   offsetT maxnum;
   bfd_reloc_code_real_type r;
   char *p;
@@ -4029,58 +4032,73 @@ macro2 (ip)
       macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", treg, treg, AT);
       break;
 
+    case M_ULD:
+      s = "ldl";
+      s2 = "ldr";
+      off = 7;
+      goto ulw;
     case M_ULW:
-      if (offset_expr.X_add_number >= 0x7ffd)
+      s = "lwl";
+      s2 = "lwr";
+      off = 3;
+    ulw:
+      if (offset_expr.X_add_number >= 0x8000 - off)
 	as_bad ("operand overflow");
       if (byte_order == LITTLE_ENDIAN)
-	offset_expr.X_add_number += 3;
-      macro_build ((char *) NULL, &icnt, &offset_expr, "lwl", "t,o(b)", treg,
+	offset_expr.X_add_number += off;
+      macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       if (byte_order == LITTLE_ENDIAN)
-	offset_expr.X_add_number -= 3;
+	offset_expr.X_add_number -= off;
       else
-	offset_expr.X_add_number += 3;
-      macro_build ((char *) NULL, &icnt, &offset_expr, "lwr", "t,o(b)", treg,
+	offset_expr.X_add_number += off;
+      macro_build ((char *) NULL, &icnt, &offset_expr, s2, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       return;
 
+    case M_ULD_A:
+      s = "ldl";
+      s2 = "ldr";
+      off = 7;
+      goto ulwa;
+    case M_ULW_A:
+      s = "lwl";
+      s2 = "lwr";
+      off = 3;
+    ulwa:
+      load_address (&icnt, AT, &offset_expr);
+      if (byte_order == LITTLE_ENDIAN)
+	expr1.X_add_number = off;
+      else
+	expr1.X_add_number = 0;
+      macro_build ((char *) NULL, &icnt, &expr1, s, "t,o(b)", treg,
+		   (int) BFD_RELOC_LO16, AT);
+      if (byte_order == LITTLE_ENDIAN)
+	expr1.X_add_number = 0;
+      else
+	expr1.X_add_number = off;
+      macro_build ((char *) NULL, &icnt, &expr1, s2, "t,o(b)", treg,
+		   (int) BFD_RELOC_LO16, AT);
+      break;
+
     case M_ULH_A:
     case M_ULHU_A:
-    case M_ULW_A:
       load_address (&icnt, AT, &offset_expr);
-      if (mask == M_ULW_A)
-	{
-	  if (byte_order == LITTLE_ENDIAN)
-	    expr1.X_add_number = 3;
-	  else
-	    expr1.X_add_number = 0;
-	  macro_build ((char *) NULL, &icnt, &expr1, "lwl", "t,o(b)", treg,
-		       (int) BFD_RELOC_LO16, AT);
-	  if (byte_order == LITTLE_ENDIAN)
-	    expr1.X_add_number = 0;
-	  else
-	    expr1.X_add_number = 3;
-	  macro_build ((char *) NULL, &icnt, &expr1, "lwr", "t,o(b)", treg,
-		       (int) BFD_RELOC_LO16, AT);
-	}
+      if (byte_order == BIG_ENDIAN)
+	expr1.X_add_number = 0;
+      macro_build ((char *) NULL, &icnt, &expr1,
+		   mask == M_ULH_A ? "lb" : "lbu", "t,o(b)", treg,
+		   (int) BFD_RELOC_LO16, AT);
+      if (byte_order == BIG_ENDIAN)
+	expr1.X_add_number = 1;
       else
-	{
-	  if (byte_order == BIG_ENDIAN)
-	    expr1.X_add_number = 0;
-	  macro_build ((char *) NULL, &icnt, &expr1,
-		       mask == M_ULH_A ? "lb" : "lbu", "t,o(b)", treg,
-		       (int) BFD_RELOC_LO16, AT);
-	  if (byte_order == BIG_ENDIAN)
-	    expr1.X_add_number = 1;
-	  else
-	    expr1.X_add_number = 0;
-	  macro_build ((char *) NULL, &icnt, &expr1, "lbu", "t,o(b)", AT,
-		       (int) BFD_RELOC_LO16, AT);
-	  macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", treg,
-		       treg, 8);
-	  macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", treg,
-		       treg, AT);
-	}
+	expr1.X_add_number = 0;
+      macro_build ((char *) NULL, &icnt, &expr1, "lbu", "t,o(b)", AT,
+		   (int) BFD_RELOC_LO16, AT);
+      macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", treg,
+		   treg, 8);
+      macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", treg,
+		   treg, AT);
       break;
 
     case M_USH:
@@ -4099,64 +4117,79 @@ macro2 (ip)
 		   (int) BFD_RELOC_LO16, breg);
       break;
 
+    case M_USD:
+      s = "sdl";
+      s2 = "sdr";
+      off = 7;
+      goto usw;
     case M_USW:
-      if (offset_expr.X_add_number >= 0x7ffd)
+      s = "swl";
+      s2 = "swr";
+      off = 3;
+    usw:
+      if (offset_expr.X_add_number >= 0x8000 - off)
 	as_bad ("operand overflow");
       if (byte_order == LITTLE_ENDIAN)
-	offset_expr.X_add_number += 3;
-      macro_build ((char *) NULL, &icnt, &offset_expr, "swl", "t,o(b)", treg,
+	offset_expr.X_add_number += off;
+      macro_build ((char *) NULL, &icnt, &offset_expr, s, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       if (byte_order == LITTLE_ENDIAN)
-	offset_expr.X_add_number -= 3;
+	offset_expr.X_add_number -= off;
       else
-	offset_expr.X_add_number += 3;
-      macro_build ((char *) NULL, &icnt, &offset_expr, "swr", "t,o(b)", treg,
+	offset_expr.X_add_number += off;
+      macro_build ((char *) NULL, &icnt, &offset_expr, s2, "t,o(b)", treg,
 		   (int) BFD_RELOC_LO16, breg);
       return;
 
-    case M_USH_A:
+    case M_USD_A:
+      s = "sdl";
+      s2 = "sdr";
+      off = 7;
+      goto uswa;
     case M_USW_A:
+      s = "swl";
+      s2 = "swr";
+      off = 3;
+    uswa:
       load_address (&icnt, AT, &offset_expr);
-      if (mask == M_USW_A)
-	{
-	  if (byte_order == LITTLE_ENDIAN)
-	    expr1.X_add_number = 3;
-	  else
-	    expr1.X_add_number = 0;
-	  macro_build ((char *) NULL, &icnt, &expr1, "swl", "t,o(b)", treg,
-		       (int) BFD_RELOC_LO16, AT);
-	  if (byte_order == LITTLE_ENDIAN)
-	    expr1.X_add_number = 0;
-	  else
-	    expr1.X_add_number = 3;
-	  macro_build ((char *) NULL, &icnt, &expr1, "swr", "t,o(b)", treg,
-		       (int) BFD_RELOC_LO16, AT);
-	}
+      if (byte_order == LITTLE_ENDIAN)
+	expr1.X_add_number = off;
       else
-	{
-	  if (byte_order == LITTLE_ENDIAN)
-	    expr1.X_add_number = 0;
-	  macro_build ((char *) NULL, &icnt, &expr1, "sb", "t,o(b)", treg,
-		       (int) BFD_RELOC_LO16, AT);
-	  macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", treg,
-		       treg, 8);
-	  if (byte_order == LITTLE_ENDIAN)
-	    expr1.X_add_number = 1;
-	  else
-	    expr1.X_add_number = 0;
-	  macro_build ((char *) NULL, &icnt, &expr1, "sb", "t,o(b)", treg,
-		       (int) BFD_RELOC_LO16, AT);
-	  if (byte_order == LITTLE_ENDIAN)
-	    expr1.X_add_number = 0;
-	  else
-	    expr1.X_add_number = 1;
-	  macro_build ((char *) NULL, &icnt, &expr1, "lbu", "t,o(b)", AT,
-		       (int) BFD_RELOC_LO16, AT);
-	  macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", treg,
-		       treg, 8);
-	  macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", treg,
-		       treg, AT);
-	}
+	expr1.X_add_number = 0;
+      macro_build ((char *) NULL, &icnt, &expr1, s, "t,o(b)", treg,
+		   (int) BFD_RELOC_LO16, AT);
+      if (byte_order == LITTLE_ENDIAN)
+	expr1.X_add_number = 0;
+      else
+	expr1.X_add_number = off;
+      macro_build ((char *) NULL, &icnt, &expr1, s2, "t,o(b)", treg,
+		   (int) BFD_RELOC_LO16, AT);
+      break;
+
+    case M_USH_A:
+      load_address (&icnt, AT, &offset_expr);
+      if (byte_order == LITTLE_ENDIAN)
+	expr1.X_add_number = 0;
+      macro_build ((char *) NULL, &icnt, &expr1, "sb", "t,o(b)", treg,
+		   (int) BFD_RELOC_LO16, AT);
+      macro_build ((char *) NULL, &icnt, NULL, "srl", "d,w,<", treg,
+		   treg, 8);
+      if (byte_order == LITTLE_ENDIAN)
+	expr1.X_add_number = 1;
+      else
+	expr1.X_add_number = 0;
+      macro_build ((char *) NULL, &icnt, &expr1, "sb", "t,o(b)", treg,
+		   (int) BFD_RELOC_LO16, AT);
+      if (byte_order == LITTLE_ENDIAN)
+	expr1.X_add_number = 0;
+      else
+	expr1.X_add_number = 1;
+      macro_build ((char *) NULL, &icnt, &expr1, "lbu", "t,o(b)", AT,
+		   (int) BFD_RELOC_LO16, AT);
+      macro_build ((char *) NULL, &icnt, NULL, "sll", "d,w,<", treg,
+		   treg, 8);
+      macro_build ((char *) NULL, &icnt, NULL, "or", "d,v,t", treg,
+		   treg, AT);
       break;
 
     default:
