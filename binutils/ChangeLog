@@ -1,3 +1,7 @@
+2001-08-05  Philip Blundell  <philb@gnu.org>
+
+	* binutils.texi (objdump): Fix typos.  Use "Thumb" not "THUMB".
+
 2001-07-31  David O'Brien  <obrien@FreeBSD.org>
 
 	* readelf.1: New file.
