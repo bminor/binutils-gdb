@@ -1,3 +1,9 @@
+Fri Aug 21 14:38:44 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* messages.c (as_warn): Use fputs, not fprintf, with a buffer that
+	has already been formatted (but may still contain %-characters).
+	(as_bad): Likewise.
+
 Wed Aug 19 09:25:09 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* as.h (enum _relax_state): Start off at one, not zero, to better

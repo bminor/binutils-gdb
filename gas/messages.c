@@ -195,7 +195,7 @@ void as_warn(const char *Format, ...)
 		va_start(args, Format);
 		fprintf(stderr,"Warning: ");
 		vsprintf(buffer, Format, args);
-		fprintf(stderr, buffer);
+		fputs (buffer, stderr);
 #ifndef NO_LISTING
 		listing_warning(buffer);
 #endif
@@ -218,7 +218,7 @@ va_dcl
 		va_start(args);
 		fprintf(stderr,"Warning: ");
 		vsprintf(buffer, Format, args);
-		fprintf(stderr,buffer);
+		fputs (buffer, stderr);
 #ifndef NO_LISTING
 		listing_warning(buffer);
 #endif		
@@ -265,7 +265,7 @@ void as_bad(const char *Format, ...)
 	fprintf(stderr,"Error: ");
 	
 	vsprintf(buffer, Format, args);
-	fprintf(stderr,buffer);
+	fputs (buffer,stderr);
 #ifndef NO_LISTING
 	listing_error(buffer);
 #endif
@@ -285,7 +285,7 @@ va_dcl
 	as_where();
 	va_start(args);
 	vsprintf(buffer, Format, args);
-	fprintf(stderr,buffer);
+	fputs (buffer, stderr);
 #ifndef NO_LISTING
 	listing_error(buffer);
 #endif
