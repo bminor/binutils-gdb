@@ -1306,7 +1306,7 @@ m2_printstr (stream, string, length, force_ellipses)
 		fputs_filtered ("\", ", stream);
 	      in_quotes = 0;
 	    }
-	  c_printchar (string[i], stream);
+	  m2_printchar (string[i], stream);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  i = rep1 - 1;
 	  things_printed += repeat_count_threshold;
