@@ -1,3 +1,8 @@
+1998-07-24  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elf64-mips.c: Remove reloc_type definition completely.  It's now
+	in elf/mips.h.
+
 Thu Jul 23 13:33:19 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* elf64-mips.c (mips_elf64_reloc_type): #if 0 out more relocations
