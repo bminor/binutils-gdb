@@ -478,6 +478,7 @@
 	(determine_prefix): Look at TYPE_TAG_NAME and call
 	determine_class_name when appropriate.
 	(determine_prefix_aux, class_name): Delete.
+	(read_namespace): Set die->type.
 
 2004-03-15  Kevin Buettner  <kevinb@redhat.com>
 
