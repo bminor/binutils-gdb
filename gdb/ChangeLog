@@ -1,3 +1,22 @@
+2002-04-25  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* alpha-tdep.h (gdbarch_tdep): Add jb_pc and jb_elt_size members.
+	* alpha-linux-tdep.c (alpha_linux_init_abi): Initialize
+	tdep->jb_pc and tdep->jb_elt_size.
+	* alpha-osf1-tdep.c (alpha_osf1_init_abi): Likewise.
+	* alphafbsd-tdep.c (alphafbsd_init_abi): Likewise.
+	* alphanbsd-tdep.c (alphanbsd_init_abi): Likewise.
+	* alpha-nat.c (get_longjmp_target): Remove.
+	(JB_ELEMENT_SIZE): Ditto.
+	(JB_PC): Ditto.
+	* alpha-tdep.c (alpha_get_longjmp_target): New function.
+	(alpha_gdbarch_init): Default tdep->jb_pc to -1.  If the
+	OS ABI sets jb_pc to a valid value, set gdbarch_get_longjmp_target
+	to alpha_get_longjmp_target.
+	(alpha_dump_tdep): Report tdep->jb_pc and tdep->jb_elt_size.
+	* config/alpha/nm-linux.h (GET_LONGJMP_TARGET): Remove.
+	* config/alpha/nm-osf.h (GET_LONGJMP_TARGET): Remove.
+
 2002-04-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* README: Update to GDB 5.2.

@@ -70,6 +70,9 @@ alphafbsd_init_abi (struct gdbarch_info info,
   set_gdbarch_pc_in_sigtramp (gdbarch, alphafbsd_pc_in_sigtramp);
 
   set_gdbarch_use_struct_convention (gdbarch, alphafbsd_use_struct_convention);
+
+  tdep->jb_pc = 2;
+  tdep->jb_elt_size = 8;
 }
 
 void

@@ -41,40 +41,6 @@
 static void fetch_osf_core_registers (char *, unsigned, int, CORE_ADDR);
 static void fetch_elf_core_registers (char *, unsigned, int, CORE_ADDR);
 
-/* Size of elements in jmpbuf */
-
-#define JB_ELEMENT_SIZE 8
-
-/* The definition for JB_PC in machine/reg.h is wrong.
-   And we can't get at the correct definition in setjmp.h as it is
-   not always available (eg. if _POSIX_SOURCE is defined which is the
-   default). As the defintion is unlikely to change (see comment
-   in <setjmp.h>, define the correct value here.  */
-
-#undef JB_PC
-#define JB_PC 2
-
-/* Figure out where the longjmp will land.
-   We expect the first arg to be a pointer to the jmp_buf structure from which
-   we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
-   This routine returns true on success. */
-
-int
-get_longjmp_target (CORE_ADDR *pc)
-{
-  CORE_ADDR jb_addr;
-  char raw_buffer[ALPHA_MAX_REGISTER_RAW_SIZE];
-
-  jb_addr = read_register (ALPHA_A0_REGNUM);
-
-  if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, raw_buffer,
-			  sizeof (CORE_ADDR)))
-    return 0;
-
-  *pc = extract_address (raw_buffer, sizeof (CORE_ADDR));
-  return 1;
-}
-
 /* Extract the register values out of the core file and store
    them where `read_register' will find them.
 

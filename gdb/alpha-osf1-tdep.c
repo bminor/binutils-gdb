@@ -52,6 +52,9 @@ alpha_osf1_init_abi (struct gdbarch_info info,
   set_gdbarch_pc_in_sigtramp (gdbarch, alpha_osf1_pc_in_sigtramp);
 
   tdep->skip_sigtramp_frame = alpha_osf1_skip_sigtramp_frame;
+
+  tdep->jb_pc = 2;
+  tdep->jb_elt_size = 8;
 }
 
 void

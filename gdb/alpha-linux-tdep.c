@@ -100,6 +100,9 @@ alpha_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_pc_in_sigtramp (gdbarch, alpha_linux_pc_in_sigtramp);
 
   tdep->dynamic_sigtramp_offset = alpha_linux_sigtramp_offset;
+
+  tdep->jb_pc = 2;
+  tdep->jb_elt_size = 8;
 }
 
 void

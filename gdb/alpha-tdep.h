@@ -105,6 +105,11 @@ struct gdbarch_tdep
   /* If FRAME refers to a sigtramp frame, return the address of the next
      frame.  */
   CORE_ADDR (*skip_sigtramp_frame) (struct frame_info *, CORE_ADDR);
+
+  int jb_pc;			/* Offset to PC value in jump buffer.
+				   If htis is negative, longjmp support
+				   will be disabled.  */
+  size_t jb_elt_size;		/* And the size of each entry in the buf. */
 };
 
 void alpha_software_single_step (enum target_signal, int);

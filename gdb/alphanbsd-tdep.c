@@ -145,6 +145,9 @@ alphanbsd_init_abi (struct gdbarch_info info,
                                   alphanbsd_solib_svr4_fetch_link_map_offsets);
 
   tdep->dynamic_sigtramp_offset = alphanbsd_sigtramp_offset;
+
+  tdep->jb_pc = 2;
+  tdep->jb_elt_size = 8;
 }
 
 void

@@ -25,15 +25,6 @@
 
 #include "nm-linux.h"
 
-/* Figure out where the longjmp will land.  We expect that we have just entered
-   longjmp and haven't yet setup the stack frame, so the args are still in the
-   argument regs.  A0_REGNUM points at the jmp_buf structure from which we
-   extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
-   This routine returns true on success */
-
-#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
-extern int get_longjmp_target (CORE_ADDR *);
-
 /* ptrace register ``addresses'' are absolute.  */
 
 #define U_REGS_OFFSET 0

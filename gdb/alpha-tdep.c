@@ -78,6 +78,8 @@ static gdbarch_fix_call_dummy_ftype alpha_fix_call_dummy;
 static gdbarch_init_frame_pc_first_ftype alpha_init_frame_pc_first;
 static gdbarch_init_extra_frame_info_ftype alpha_init_extra_frame_info;
 
+static gdbarch_get_longjmp_target_ftype alpha_get_longjmp_target;
+
 struct frame_extra_info
   {
     alpha_extra_func_info_t proc_desc;
@@ -1617,6 +1619,28 @@ alpha_extract_struct_value_address (char *regbuf)
 			   REGISTER_RAW_SIZE (ALPHA_V0_REGNUM)));
 }
 
+/* Figure out where the longjmp will land.
+   We expect the first arg to be a pointer to the jmp_buf structure from
+   which we extract the PC (JB_PC) that we will land at.  The PC is copied
+   into the "pc".  This routine returns true on success.  */
+
+static int
+alpha_get_longjmp_target (CORE_ADDR *pc)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  CORE_ADDR jb_addr;
+  char raw_buffer[ALPHA_MAX_REGISTER_RAW_SIZE];
+
+  jb_addr = read_register (ALPHA_A0_REGNUM);
+
+  if (target_read_memory (jb_addr + (tdep->jb_pc * tdep->jb_elt_size),
+			  raw_buffer, tdep->jb_elt_size))
+    return 0;
+
+  *pc = extract_address (raw_buffer, tdep->jb_elt_size);
+  return 1;
+}
+
 /* alpha_software_single_step() is called just before we want to resume
    the inferior, if we want to single-step it but there is no hardware
    or kernel single-step support (NetBSD on Alpha, for example).  We find
@@ -1975,6 +1999,8 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->dynamic_sigtramp_offset = NULL;
   tdep->skip_sigtramp_frame = NULL;
 
+  tdep->jb_pc = -1;	/* longjmp support not enabled by default  */
+
   /* Type sizes */
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);
@@ -2113,6 +2139,12 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
     }
 
+  /* Now that we have tuned the configuration, set a few final things
+     based on what the OS ABI has told us.  */
+
+  if (tdep->jb_pc >= 0)
+    set_gdbarch_get_longjmp_target (gdbarch, alpha_get_longjmp_target);
+
   return gdbarch;
 }
 
@@ -2134,6 +2166,13 @@ alpha_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "alpha_dump_tdep: vm_min_address = 0x%lx\n",
 		      (long) tdep->vm_min_address);
+
+  fprintf_unfiltered (file,
+		      "alpha_dump_tdep: jb_pc = %d\n",
+		      tdep->jb_pc);
+  fprintf_unfiltered (file,
+		      "alpha_dump_tdep: jb_elt_size = %ld\n",
+		      (long) tdep->jb_elt_size);
 }
 
 void
