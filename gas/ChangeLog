@@ -1,3 +1,9 @@
+Fri May 14 10:52:13 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
+
+	* config/atof-ieee.c (gen_to_words): Correctly round a
+	denormalized number.  Fix off-by-one in range checking for
+	exponent in a denormal. 
+
 Thu May 13 09:46:59 1999  Joel Sherrill (joel@OARcorp.com)
 
 	* configure.in (i386-*-rtemself*, sh-*-rtemself*): New targets.
