@@ -782,15 +782,6 @@ sim_info (sd,verbose)
 		     pr_addr (STATE_MEM_BASE (sd)));
       
 #if !defined(FASTSIM)
-#if 0
-      /* at present this simulator executes one instruction per
-         simulator cycle.  Consequently this data never changes */
-      if (instruction_fetch_overflow != 0)
-	sim_io_printf (sd, "Instruction fetches = 0x%08X%08X\n",
-		       instruction_fetch_overflow, instruction_fetches);
-      else
-	sim_io_printf (sd, "Instruction fetches = %d\n", instruction_fetches);
-#endif
       /* It would be a useful feature, if when performing multi-cycle
 	 simulations (rather than single-stepping) we keep the start and
 	 end times of the execution, so that we can give a performance
@@ -810,6 +801,7 @@ sim_info (sd,verbose)
       /* profile minpc */
       /* profile maxpc */
     }
+  profile_print (sd, STATE_VERBOSE_P (sd), NULL, NULL);
 }
 
 

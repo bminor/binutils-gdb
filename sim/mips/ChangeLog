@@ -1,3 +1,7 @@
+Tue Oct 21 17:39:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_info): Call profile_print.
+
 Mon Oct 20 13:31:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (SIM_OBJS): Add sim-profile.o module.
