@@ -31,7 +31,7 @@ proc do_ble_relocation_test {} {
 	# a PC-relative relocation for a BLE instruction.
 	while 1 {
 	    expect {
-		-re "^00000004\[^\n\]*ABS_CALL_R17\[^\n\]*\n"	{ set x 1 }
+		-re "^00000004\[^\n\]*ABS_CALL\[^\n\]*\n"	{ set x 1 }
 		-re "\[^\n\]*\n"				{ }
 		timeout				{ error "timeout\n"; break }
 		eof				{ break }
@@ -59,10 +59,10 @@ proc do_relocation_reduction_tests {} {
 	# Doing so makes generating parameter relocation stubs impossible.
 	while 1 {
 	    expect {
-		-re "^00000000\[^\n\]*PLABEL\[^\n\]*foo\[^\n\]*\n"
+		-re "^00000004\[^\n\]*PLABEL\[^\n\]*foo\[^\n\]*\n"
 		    { set x [expr $x+1] }
-		-re "^0000001c\[^\n\]*PCREL_CALL\[^\n\]*foo\[^\n\]*\n"
-		    { set x [4xpr $x+1] }
+		-re "^00000014\[^\n\]*PCREL_CALL\[^\n\]*foo\[^\n\]*\n"
+		    { set x [expr $x+1] }
 		-re "\[^\n\]*\n"		{ }
 		timeout				{ error "timeout\n"; break }
 		eof				{ break }
@@ -113,8 +113,10 @@ proc do_plabel_relocation_test {} {
 	# Check that we make PLABEL relocation entries when they're needed.
 	while 1 {
 	    expect {
-		-re "^00000000\[^\n\]*PLABEL\[^\n\]*\n" { set x [expr $x+1] }
-		-re "^00000004\[^\n\]*PLABEL\[^\n\]*\n" { set x [expr $x+1] }
+		-re "^\[04\]0000000\[^\n\]*PLABEL\[^\n\]*\n"
+		    { set x [expr $x+1] }
+		-re "^\[04\]0000004\[^\n\]*PLABEL\[^\n\]*\n"
+		    { set x [expr $x+1] }
 		-re "\[^\n\]*\n"			{ }
 		timeout				{ error "timeout\n"; break }
 		eof				{ break }
@@ -205,6 +207,39 @@ proc do_local_label_as_operand_test {} {
     }
 }
 
+proc do_exit_relocation_test {} {
+    set testname "exitbug.s: Test for bogus R_EXIT relocation (part 2)"
+    set x 0
+
+    # Elf (osf) does not use ENTRY/EXIT relocations.
+    # I guess we could look at the unwind subspaces it builds...
+    if [istarget hppa*-*-osf*] then {
+	return;
+    }
+
+    if [gas_test_old "exitbug.s" "" "Test for bogus R_EXIT relocation (part 1)"] {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# Note that a match here is really a FAILURE!
+	while 1 {
+	    expect {
+	        -re "^00000000\[^\n\]*R_EXIT\[^\n\]*\n" 
+		    { set x [expr $x+1] }
+	        -re "\[^\n\]*\n"		{ }
+	        timeout				{ error "timeout\n"; break }
+	        eof				{ break }
+            }
+	}
+
+	# This was intended to do any cleanup necessary.  It kinda looks like it
+	# isn't needed, but just in case, please keep it in for now.
+	objdump_finish
+
+	# Did we find what we were looking for?  If not, flunk it.
+	if [expr $x==0] then { pass $testname } else { fail $testname }
+    }
+}
+
 if [istarget hppa*-*-*] then {
     # Make sure we put the right relocation entry on a BLE instruction.
     do_ble_relocation_test
@@ -214,7 +249,6 @@ if [istarget hppa*-*-*] then {
     do_relocation_reduction_tests
 
     # Check that mode selectors on a ble instruction actually work.
-    setup_xfail hppa*-*-*
     do_ble_mode_selector_test
 
     # 1.36 simply didn't generate all the plabels it should have.  Make
@@ -229,4 +263,8 @@ if [istarget hppa*-*-*] then {
     # easier on the optimizing linker.  Until then just make sure the 
     # difference is computed correctly.
     do_local_label_as_operand_test
+
+    # GAS2 incorrectly generated R_EXIT relocations when .exit directives
+    # were not in the source code.
+    do_exit_relocation_test
 }

@@ -1,4 +1,13 @@
+Wed Nov 24 01:25:03 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/exitbug.s: New test.
+	* gas/hppa/reloc/reloc.exp: Run it.
+
 Sun Nov 21 22:11:10 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/reloc.exp: Minor fixes so that SOM & ELF can
+	share the same test code.
+	* gas/hppa/reloc/relocreduce.s: Likewise.
 
 	* gas/hppa/basic/fmem.s: Add quadword FP store instructions.
 	* gas/hppa/basic/basic.exp: Test quadword FP store instructions.
