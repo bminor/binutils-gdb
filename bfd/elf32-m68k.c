@@ -847,19 +847,19 @@ elf_m68k_gc_sweep_hook (abfd, info, sec, relocs)
   unsigned long r_symndx;
   struct elf_link_hash_entry *h;
   bfd *dynobj;
-  asection *sgot = NULL;
-  asection *srelgot = NULL;
+  asection *sgot;
+  asection *srelgot;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);
 
   dynobj = elf_hash_table (info)->dynobj;
-  if (dynobj)
-    {
-      sgot = bfd_get_section_by_name (dynobj, ".got");
-      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
-    }
+  if (dynobj == NULL)
+    return true;
+
+  sgot = bfd_get_section_by_name (dynobj, ".got");
+  srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
@@ -887,7 +887,7 @@ elf_m68k_gc_sweep_hook (abfd, info, sec, relocs)
 		    }
 		}
 	    }
-	  else
+	  else if (local_got_refcounts != NULL)
 	    {
 	      if (local_got_refcounts[r_symndx] > 0)
 		{

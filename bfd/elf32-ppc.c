@@ -2540,7 +2540,7 @@ ppc_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	    if (h->got.refcount > 0)
 	      h->got.refcount--;
 	  }
-	else
+	else if (local_got_refcounts != NULL)
 	  {
 	    if (local_got_refcounts[r_symndx] > 0)
 	      local_got_refcounts[r_symndx]--;
@@ -3022,6 +3022,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      sec = h->root.u.def.section;
 	      if ((r_type == R_PPC_PLT32
+		   && splt != NULL
 		   && h->plt.offset != (bfd_vma) -1)
 		  || (r_type == R_PPC_LOCAL24PC
 		      && sec->output_section == NULL)

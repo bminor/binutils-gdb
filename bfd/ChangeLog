@@ -1,3 +1,24 @@
+2000-04-27  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf32-m68k.c (elf_m68k_gc_sweep_hook):  Return if dynobj NULL.
+	Check local_got_refcounts before dereferencing. 
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Check splt != NULL
+	before deciding we don't need R_PPC_PLT32 relocation.
+	(ppc_elf_gc_sweep_hook): Check local_got_refcounts before
+	dereferencing.
+
+	* elflink.h (elf_gc_common_finalize_got_offsets): Fix comment.
+
+	* elf32-i386.c (elf_i386_check_relocs): Reference count .got and
+	.plt entries.
+	(elf_i386_gc_sweep_hook): Garbage collect .got and .plt entries.
+	(elf_i386_adjust_dynamic_symbol): Recognize unused .plt entries.
+	(elf_i386_relocate_section): Allow for .plt to go missing.
+	(elf_i386_finish_dynamic_symbol): Use same test to decide if we
+	can use a relative reloc for got as elf_i386_relocate_section.
+	(bfd_elf32_bfd_final_link): Define to use gc form of final link.
+
 Wed Apr 26 16:31:28 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* config.bfd: Remove extraneous bfd_powerpc_64_arch.
@@ -5497,7 +5518,7 @@ Thu Jun 25 18:31:41 1998  Richard Henderson  <rth@cygnus.com>
 	(ppc_elf_howto_raw): Handle them.
 	(ppc_elf_reloc_type_lookup): Likewise.
 	(ppc_elf_relocate_section): Likewise.
-	(ppc_elf_check_relocs): Reference count .got and .plt entires.
+	(ppc_elf_check_relocs): Reference count .got and .plt entries.
 	Handle new vtable relocs.
 	(ppc_elf_adjust_dynamic_symbol): Recognize unused .plt entries.
 	(ppc_elf_gc_mark_hook, ppc_elf_gc_sweep_hook): New.

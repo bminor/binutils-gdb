@@ -6615,7 +6615,8 @@ elf_gc_common_finalize_got_offsets (abfd, info)
 	}
     }
 
-  /* Then the global .got and .plt entries.  */
+  /* Then the global .got entries.  .plt refcounts are handled by
+     adjust_dynamic_symbol  */
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_gc_allocate_got_offsets,
 			  (PTR) &gotoff);
