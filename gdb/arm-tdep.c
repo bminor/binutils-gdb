@@ -402,15 +402,24 @@ arm_skip_prologue (CORE_ADDR pc)
   unsigned long inst;
   CORE_ADDR skip_pc;
   CORE_ADDR func_addr, func_end;
+  char *func_name;
   struct symtab_and_line sal;
 
   /* See what the symbol table says.  */
 
-  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+  if (find_pc_partial_function (pc, &func_name, &func_addr, &func_end))
     {
-      sal = find_pc_line (func_addr, 0);
-      if ((sal.line != 0) && (sal.end < func_end))
-	return sal.end;
+      struct symbol *sym;
+
+      /* Found a function.  */
+      sym = lookup_symbol (func_name, NULL, VAR_NAMESPACE, NULL, NULL);
+      if (sym && SYMBOL_LANGUAGE (sym) != language_asm)
+        {
+	  /* Don't use this trick for assembly source files. */
+	  sal = find_pc_line (func_addr, 0);
+	  if ((sal.line != 0) && (sal.end < func_end))
+	    return sal.end;
+        }
     }
 
   /* Check if this is Thumb code.  */

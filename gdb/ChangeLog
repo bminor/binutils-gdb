@@ -1,3 +1,8 @@
+2001-12-04  Corinna Vinschen  <vinschen@redhat.com>
+
+	* arm-tdep.c (arm_skip_prologue): Always skip prologue by scanning
+	the prologue if source is assembler.
+
 2001-12-04  Jackie Smith Cashion  <jsmith@redhat.com>
 
 	* MAINTAINERS (write-after-approval): Add self.
