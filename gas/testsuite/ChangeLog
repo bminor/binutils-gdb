@@ -1,3 +1,8 @@
+Mon Feb  3 15:46:05 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/arm/inst.d, gas/arm/arm7t.d: Pass --prefix-addresses to
+	objdump.  Update for current relocation printing style.
+
 Thu Jan 30 11:57:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/mips16.d: Update for disassembler changes.
