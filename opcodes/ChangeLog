@@ -1,5 +1,9 @@
 Mon Dec 16 13:00:15 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10200-opc.c (mn10200_operands): Add SIMM16N.
+	(mn10200_opcodes): Use it for some logicals and btst insns.
+	Add "break" and "trap" instructions.
+
 	* mn10300-opc.c (mn10300_opcodes): Add "break" instruction.
 
 	* mn10200-opc.c: Add pseudo-ops for "mov (an),am" and "mov an,(am)".

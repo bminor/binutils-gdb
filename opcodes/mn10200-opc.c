@@ -121,8 +121,12 @@ const struct mn10200_operand mn10200_operands[] = {
 #define SIMM16    (SIMM8+1)
   {16, 0, MN10200_OPERAND_SIGNED | MN10200_OPERAND_PROMOTE},
 
+/* 16 bit signed immediate which may not promote.  */
+#define SIMM16N    (SIMM16+1)
+  {16, 0, MN10200_OPERAND_SIGNED | MN10200_OPERAND_NOCHECK},
+
 /* Either an open paren or close paren.  */
-#define PAREN	(SIMM16+1)
+#define PAREN	(SIMM16N+1)
   {0, 0, MN10200_OPERAND_PAREN}, 
 
 /* dn register that appears in the first and second register positions.  */
@@ -271,14 +275,14 @@ const struct mn10200_opcode mn10200_opcodes[] = {
 
 { "and",	0xf300,		0xfff0,		FMT_4, {DN1, DM0}},
 { "and",	0xf50000,	0xfffc00,	FMT_5, {IMM8, DN0}},
-{ "and",	0xf7000000,	0xfffc0000,	FMT_6, {IMM16, DN0}},
-{ "and",	0xf7100000,	0xffff0000,	FMT_6, {IMM16, PSW}},
+{ "and",	0xf7000000,	0xfffc0000,	FMT_6, {SIMM16N, DN0}},
+{ "and",	0xf7100000,	0xffff0000,	FMT_6, {SIMM16N, PSW}},
 { "or",		0xf310,		0xfff0,		FMT_4, {DN1, DM0}},
 { "or",		0xf50800,	0xfffc00,	FMT_5, {IMM8, DN0}},
-{ "or",		0xf7400000,	0xfffc0000,	FMT_6, {IMM16, DN0}},
-{ "or",		0xf7140000,	0xffff0000,	FMT_6, {IMM16, PSW}},
+{ "or",		0xf7400000,	0xfffc0000,	FMT_6, {SIMM16N, DN0}},
+{ "or",		0xf7140000,	0xffff0000,	FMT_6, {SIMM16N, PSW}},
 { "xor",	0xf320,		0xfff0,		FMT_4, {DN1, DM0}},
-{ "xor",	0xf74c0000,	0xfffc0000,	FMT_6, {IMM16, DN0}},
+{ "xor",	0xf74c0000,	0xfffc0000,	FMT_6, {SIMM16N, DN0}},
 { "not",	0xf3e4,		0xfffc,		FMT_4, {DN0}},
 
 { "asr",	0xf338,		0xfffc,		FMT_4, {DN0}},
@@ -287,7 +291,7 @@ const struct mn10200_opcode mn10200_opcodes[] = {
 { "rol",	0xf330,		0xfffc,		FMT_4, {DN0}},
 
 { "btst",	0xf50400,	0xfffc00,	FMT_5, {IMM8, DN0}},
-{ "btst",	0xf7040000,	0xfffc0000,	FMT_6, {IMM16, DN0}},
+{ "btst",	0xf7040000,	0xfffc0000,	FMT_6, {SIMM16N, DN0}},
 { "bset",	0xf020,		0xfff0,		FMT_4, {DM0, MEM(AN1)}},
 { "bclr",	0xf030,		0xfff0,		FMT_4, {DM0, MEM(AN1)}},
 
@@ -333,6 +337,19 @@ const struct mn10200_opcode mn10200_opcodes[] = {
 
 { "rts",	0xfe,		0xff,		FMT_1, {UNUSED}},
 { "rti",	0xeb,		0xff,		FMT_1, {UNUSED}},
+
+/* Extension.  We need some instruction to trigger "emulated syscalls"
+   for our simulator.  */
+{ "trap",	0xf010,		0xffff,		FMT_4, {UNUSED}},
+
+/* Extension.  When talking to the simulator, gdb requires some instruction
+   that will trigger a "breakpoint" (really just an instruction that isn't
+   otherwise used by the tools.  This instruction must be the same size
+   as the smallest instruction on the target machine.  In the case of the
+   mn10x00 the "break" instruction must be one byte.  0xff is available on
+   both mn10x00 architectures.  */
+{ "break",      0xff,           0xff,           FMT_1, {UNUSED}},
+
 { 0, 0, 0, 0, {0}},
 
 } ;
