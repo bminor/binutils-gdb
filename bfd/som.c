@@ -1913,6 +1913,7 @@ setup_sections (abfd, file_hdr, current_offset)
       struct som_subspace_dictionary_record subspace, save_subspace;
       unsigned int subspace_index;
       asection *space_asect;
+      bfd_size_type space_size = 0;
       char *newname;
 
       /* Read the space dictionary element.  */
@@ -2104,6 +2105,9 @@ setup_sections (abfd, file_hdr, current_offset)
 	  subspace_asect->alignment_power = exact_log2 (subspace.alignment);
 	  if (subspace_asect->alignment_power == (unsigned) -1)
 	    goto error_return;
+
+	  /* Keep track of the accumulated sizes of the sections.  */
+	  space_size += subspace.subspace_length;
 	}
 
       /* This can happen for a .o which defines symbols in otherwise
@@ -2111,11 +2115,25 @@ setup_sections (abfd, file_hdr, current_offset)
       if (!save_subspace.file_loc_init_value)
 	space_asect->size = 0;
       else
-	/* Setup the size for the space section based upon the info in the
-	   last subspace of the space.  */
-	space_asect->size = (save_subspace.subspace_start
-			     - space_asect->vma
-			     + save_subspace.subspace_length);
+	{
+	  if (file_hdr->a_magic != RELOC_MAGIC)
+	    {
+	      /* Setup the size for the space section based upon the info
+		 in the last subspace of the space.  */
+	      space_asect->size = (save_subspace.subspace_start
+				   - space_asect->vma
+				   + save_subspace.subspace_length);
+	    }
+	  else
+	    {
+	      /* The subspace_start field is not initialised in relocatable
+	         only objects, so it cannot be used for length calculations.
+		 Instead we use the space_size value which we have been
+		 accumulating.  This isn't an accurate estimate since it
+		 ignores alignment and ordering issues.  */
+	      space_asect->size = space_size;
+	    }
+	}
     }
   /* Now that we've read in all the subspace records, we need to assign
      a target index to each subspace.  */

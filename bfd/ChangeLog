@@ -1,3 +1,10 @@
+2004-07-28  Nick Clifton  <nickc@redhat.com>
+	    John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	PR 273
+	* som.c (setup_sections): Improve estimation of space sizes in
+	relocatable objects.
+
 2004-07-27  Jason Thorpe  <thorpej@wasabisystems.com>
 	* config.bfd (hppa*-*-netbsd*): Set targ_defvec to
 	bfd_elf32_hppa_nbsd_vec.  Add bfd_elf32_hppa_linux_vec
