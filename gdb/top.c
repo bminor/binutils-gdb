@@ -1,5 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -1839,6 +1839,12 @@ static void
 init_signals ()
 {
   signal (SIGINT, request_quit);
+
+  /* If SIGTRAP was set to SIG_IGN, then the SIG_IGN will get passed
+     to the inferior and breakpoints will be ignored.  */
+#ifdef SIGTRAP
+  signal (SIGTRAP, SIG_DFL);
+#endif
 
   /* If we initialize SIGQUIT to SIG_IGN, then the SIG_IGN will get
      passed to the inferior, which we don't want.  It would be

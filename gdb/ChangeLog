@@ -1,3 +1,16 @@
+Sat Feb  3 03:26:21 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dwarfread.c (read_func_scope):  Avoid GDB core dumps if
+	AT_name tag is missing.
+
+	* procfs.c (procfs_stopped_by_watchpoint):  Fix logic when
+	FLTWATCH and FLTKWATCH are defined.
+
+	* remote.c (remote_read_bytes):  Advance memaddr for transfers,
+	return number of bytes transferred for partial reads.
+
+	* top.c (init_signals):  Reset SIGTRAP to SIG_DFL.
+
 Fri Feb  2 13:40:50 1996  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* win32-nat.c (mappings): Add ppc registers.

@@ -170,6 +170,11 @@ struct complaint not_row_major =
   "DIE @ 0x%x \"%s\", array not row major; not handled correctly", 0, 0
 };
 
+struct complaint missing_at_name =
+{
+  "DIE @ 0x%x, AT_name tag missing", 0, 0
+};
+
 typedef unsigned int DIE_REF;	/* Reference to a DIE */
 
 #ifndef GCC_PRODUCER
@@ -1807,6 +1812,16 @@ read_func_scope (dip, thisdie, enddie, objfile)
 {
   register struct context_stack *new;
   
+  /* AT_name is absent if the function is described with an
+     AT_abstract_origin tag.
+     Ignore the function description for now to avoid GDB core dumps.
+     FIXME: Add code to handle AT_abstract_origin tags properly.  */
+  if (dip -> at_name == NULL)
+    {
+      complain (&missing_at_name, DIE_ID);
+      return;
+    }
+
   if (objfile -> ei.entry_point >= dip -> at_low_pc &&
       objfile -> ei.entry_point <  dip -> at_high_pc)
     {

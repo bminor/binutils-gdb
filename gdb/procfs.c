@@ -1,5 +1,5 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
-   Copyright 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -3711,7 +3711,7 @@ procfs_stopped_by_watchpoint(pid)
       what = pi->prstatus.pr_what;
       if (why == PR_FAULTED 
 #if defined (FLTWATCH) && defined (FLTKWATCH)
-	  && (what == FLTWATCH) || (what == FLTKWATCH)
+	  && (what == FLTWATCH || what == FLTKWATCH)
 #else
 #ifdef FLTWATCH
 	  && (what == FLTWATCH) 
