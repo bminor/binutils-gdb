@@ -1,3 +1,8 @@
+1999-05-28  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_apply_fix3): Add pipeline offset into reloc
+	addend unless the target uses an old ABI.
+
 Mon May 24 13:36:55 1999  Doug Evans  <devans@canuck.cygnus.com>
 
 	-Wchar-subscripts cleanup
