@@ -1003,7 +1003,8 @@ child_close ()
 
 struct target_ops child_ops ;
 
-static void init_child_ops(void)
+static void 
+init_child_ops(void)
 {
   child_ops.to_shortname =   "child";
   child_ops.to_longname =   "Win32 child process";

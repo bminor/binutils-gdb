@@ -1124,7 +1124,8 @@ sds_remove_breakpoint (addr, contents_cache)
 
 static struct target_ops sds_ops ;
 
-static void init_sds_ops(void)
+static void 
+init_sds_ops(void)
 {
   sds_ops.to_shortname =   "sds";
   sds_ops.to_longname =   "Remote serial target with SDS protocol";

@@ -308,7 +308,8 @@ bdm_ppc_store_registers (regno)
 
 struct target_ops bdm_ppc_ops ;
 
-static void init_bdm_ppc_ops(void)
+static void 
+init_bdm_ppc_ops(void)
 {
   bdm_ppc_ops.to_shortname =   "ocd";		
   bdm_ppc_ops.to_longname =   "Remote target with On-Chip Debugging";

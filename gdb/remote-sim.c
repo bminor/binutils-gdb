@@ -919,7 +919,9 @@ simulator_command (args, from_tty)
 /* Define the target subroutine names */
 
 struct target_ops gdbsim_ops ;
-static void init_gdbsim_ops(void)
+
+static void 
+init_gdbsim_ops(void)
 {
   gdbsim_ops.to_shortname =   "sim";		
   gdbsim_ops.to_longname =   "simulator";		

@@ -1623,7 +1623,8 @@ service_HIF(msg)
 
 struct target_ops udi_ops;
 
-static void init_udi_ops(void)
+static void 
+init_udi_ops(void)
 {
   udi_ops.to_shortname =         "udi";
   udi_ops.to_longname = 	"Remote UDI connected TIP";

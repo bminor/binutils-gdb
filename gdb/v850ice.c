@@ -914,7 +914,8 @@ view_source (addr)
 
 /* Define the target subroutine names */
 
-static void init_850ice_ops(void)
+static void 
+init_850ice_ops(void)
 {
   v850ice_ops.to_shortname   =   "ice";		
   v850ice_ops.to_longname    =   "NEC V850 ICE interface";

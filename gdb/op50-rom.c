@@ -56,7 +56,9 @@ static struct target_ops op50n_ops;
 static char *op50n_inits[] = {".\r", NULL};
 
 static struct monitor_ops op50n_cmds ;
-static void init_op50n_cmds(void)
+
+static void 
+init_op50n_cmds(void)
 {
   op50n_cmds.flags =   MO_CLR_BREAK_USES_ADDR /*| MO_GETMEM_READ_SINGLE*/; /* flags */
   op50n_cmds.init =   op50n_inits;			/* Init strings */

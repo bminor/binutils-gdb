@@ -149,7 +149,9 @@ static char *mon960_inits[] = { "\r", NULL};
 #endif
 
 static struct monitor_ops mon960_cmds ;
-static void init_mon960_cmds(void)
+
+static void 
+init_mon960_cmds(void)
 {
   mon960_cmds.flags =   MO_CLR_BREAK_USES_ADDR
     | MO_NO_ECHO_ON_OPEN   | MO_SEND_BREAK_ON_STOP   | MO_GETMEM_READ_SINGLE ;    /* flags */

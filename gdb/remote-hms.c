@@ -83,7 +83,9 @@ static char *hms_inits[] =
  NULL};
 
 static struct monitor_ops hms_cmds ;
-static void init_hms_cmds(void)
+
+static void 
+init_hms_cmds(void)
 {
   hms_cmds.flags =   MO_CLR_BREAK_USES_ADDR | MO_FILL_USES_ADDR | MO_GETMEM_NEEDS_RANGE;
   hms_cmds.init =   hms_inits;		/* Init strings */
@@ -1320,7 +1322,9 @@ hms_open (name, from_tty)
 /* Define the target subroutine names */
 
 struct target_ops hms_ops ;
-static void init_hms_ops(void)
+
+static void 
+init_hms_ops(void)
 {
   hms_ops.to_shortname =   "hms";
   hms_ops.to_longname =   "Remote HMS monitor";

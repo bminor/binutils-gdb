@@ -963,7 +963,8 @@ bug_clear_breakpoints ()
 
 struct target_ops bug_ops ;
 
-static void init_bug_ops(void)
+static void 
+init_bug_ops(void)
 {
   bug_ops.to_shortname =   "bug"; "Remote BUG monitor",
 				    bug_ops.to_longname =   "Use the mvme187 board running the BUG monitor connected by a serial line.";

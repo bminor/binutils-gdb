@@ -1589,7 +1589,8 @@ CORE_ADDR	*addr;
  */
 struct target_ops mm_ops ;
 
-static void init_mm_ops(void)
+static void 
+init_mm_ops(void)
 {
   mm_ops.to_shortname =   "minimon";
   mm_ops.to_longname =   "Remote AMD/Minimon target";

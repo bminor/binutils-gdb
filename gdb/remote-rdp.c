@@ -1436,7 +1436,8 @@ remote_rdp_attach(args, from_tty)
 
 struct target_ops remote_rdp_ops ;
 
-static void init_remote_rdp_ops(void)
+static void 
+init_remote_rdp_ops(void)
 {
   remote_rdp_ops.to_shortname =   "rdp";
   remote_rdp_ops.to_longname =   "Remote Target using the RDProtocol";

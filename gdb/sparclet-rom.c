@@ -195,7 +195,9 @@ sparclet_load (desc, file, hashmark)
 static char *sparclet_inits[] = {"\n\r\r\n", NULL};
 
 static struct monitor_ops sparclet_cmds ;
-static void init_sparclet_cmds(void)
+
+static void 
+init_sparclet_cmds(void)
 {
   sparclet_cmds.flags =   MO_CLR_BREAK_USES_ADDR |
     MO_HEX_PREFIX          |

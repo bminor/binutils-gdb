@@ -123,7 +123,9 @@ extern char *tmp_mips_processor_type;
 extern int mips_set_processor_type();
 
 static struct target_ops array_ops ;
-static void init_array_ops(void)
+
+static void 
+init_array_ops(void)
 {
   array_ops.to_shortname =   "array";	
   array_ops.to_longname = 		

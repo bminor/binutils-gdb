@@ -767,7 +767,9 @@ nindy_before_main_loop ()
 /* Define the target subroutine names */
 
 struct target_ops nindy_ops ;
-static void init_nindy_ops(void)
+
+static void 
+init_nindy_ops(void)
 {
   nindy_ops.to_shortname =   "nindy"; "Remote serial target in i960 NINDY-specific protocol",
 					nindy_ops.to_longname =   "Use a remote i960 system running NINDY connected by a serial line.\n\

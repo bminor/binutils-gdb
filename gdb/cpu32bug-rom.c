@@ -93,7 +93,9 @@ static struct target_ops cpu32bug_ops;
 static char *cpu32bug_inits[] = {"\r", NULL};
 
 static struct monitor_ops cpu32bug_cmds ;
-static void init_cpu32bug_cmds(void)
+
+static void 
+init_cpu32bug_cmds(void)
 {
   cpu32bug_cmds.flags =   MO_CLR_BREAK_USES_ADDR;
   cpu32bug_cmds.init =   cpu32bug_inits;		/* Init strings */

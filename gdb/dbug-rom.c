@@ -91,7 +91,8 @@ static struct monitor_ops dbug_cmds ;
 static char *dbug_inits[] = {"\r", NULL};
 
 
-static void init_dbug_cmds(void)
+static void 
+init_dbug_cmds(void)
 {
   dbug_cmds.flags =   MO_CLR_BREAK_USES_ADDR | MO_GETMEM_NEEDS_RANGE | MO_FILL_USES_ADDR;
   dbug_cmds.init =   dbug_inits;			/* Init strings */

@@ -333,7 +333,9 @@ info_proc (args, from_tty)
 }
 
 struct target_ops child_ops ;
-static void init_child_ops(void)
+
+static void 
+init_child_ops(void)
 {
   child_ops.to_shortname =   "mac";		
   child_ops.to_longname =   "MacOS application";

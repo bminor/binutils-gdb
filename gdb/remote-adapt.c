@@ -1364,7 +1364,9 @@ adapt_com (args, fromtty)
 /* Define the target subroutine names */
 
 struct target_ops adapt_ops ;
-static void init_adapt_ops(void)
+
+static void 
+init_adapt_ops(void)
 {
   adapt_ops.to_shortname = 	"adapt";
   adapt_ops.to_longname = 	"Remote AMD `Adapt' target";

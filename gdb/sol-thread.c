@@ -64,6 +64,9 @@ extern struct target_ops sol_core_ops; /* Forward declaration */
 /* place to store core_ops before we overwrite it */
 static struct target_ops orig_core_ops;
 
+struct target_ops sol_thread_ops;
+struct target_ops sol_core_ops;
+
 extern int procfs_suppress_run;
 extern struct target_ops procfs_ops; /* target vector for procfs.c */
 extern struct target_ops core_ops; /* target vector for corelow.c */
@@ -112,6 +115,9 @@ static void sol_thread_resume PARAMS ((int pid, int step,
 static int lwp_to_thread PARAMS ((int lwp));
 static int sol_thread_alive PARAMS ((int pid));
 static void sol_core_close PARAMS ((int quitting));
+
+static void init_sol_thread_ops PARAMS ((void));
+static void init_sol_core_ops PARAMS ((void));
 
 #define THREAD_FLAG 0x80000000
 #define is_thread(ARG) (((ARG) & THREAD_FLAG) != 0)
@@ -1506,21 +1512,9 @@ ignore (addr, contents)
 }
 
 
-struct target_ops sol_thread_ops;
-struct target_ops sol_core_ops;
-
-/* we suppress the call to add_target of core_ops in corelow because
-   if there are two targets in the stratum core_stratum, find_core_target
-   won't know which one to return.  see corelow.c for an additonal
-   comment on coreops_suppress_target. */
-int coreops_suppress_target = 1;
-
-void
-_initialize_sol_thread ()
+static void
+init_sol_thread_ops ()
 {
-  void *dlhandle;
-
-  /* Initialize sol_thread_ops */
   sol_thread_ops.to_shortname = "solaris-threads";
   sol_thread_ops.to_longname = "Solaris threads and pthread.";
   sol_thread_ops.to_doc = "Solaris threads and pthread support.";
@@ -1561,8 +1555,12 @@ _initialize_sol_thread ()
   sol_thread_ops.to_sections = 0;
   sol_thread_ops.to_sections_end = 0;
   sol_thread_ops.to_magic = OPS_MAGIC;
+}
 
-  /* Initialize sol_core_ops */
+
+static void
+init_sol_core_ops ()
+{
   sol_core_ops.to_shortname  = "solaris-core";
   sol_core_ops.to_longname  = "Solaris core threads and pthread.";
   sol_core_ops.to_doc  = "Solaris threads and pthread support for core files.";
@@ -1598,7 +1596,21 @@ _initialize_sol_thread ()
   sol_core_ops.to_sections  = 0;
   sol_core_ops.to_sections_end  = 0;
   sol_core_ops.to_magic  = OPS_MAGIC;
+}
 
+/* we suppress the call to add_target of core_ops in corelow because
+   if there are two targets in the stratum core_stratum, find_core_target
+   won't know which one to return.  see corelow.c for an additonal
+   comment on coreops_suppress_target. */
+int coreops_suppress_target = 1;
+
+void
+_initialize_sol_thread ()
+{
+  void *dlhandle;
+
+  init_sol_thread_ops ();
+  init_sol_core_ops ();
 
   dlhandle = dlopen ("libthread_db.so.1", RTLD_NOW);
   if (!dlhandle)

@@ -184,7 +184,9 @@ static struct target_ops sh3_ops, sh3e_ops;
 static char *sh3_inits[] = {"\003", NULL}; /* Exits sub-command mode & download cmds */
 
 static struct monitor_ops sh3_cmds ;
-static void init_sh3_cmds(void)
+
+static void 
+init_sh3_cmds(void)
 {
   sh3_cmds.flags =   MO_CLR_BREAK_USES_ADDR | MO_GETMEM_READ_SINGLE ;	/* flags */
   sh3_cmds.init =   sh3_inits;		/* monitor init string */

@@ -96,7 +96,9 @@ static char *est_inits[] = {"he\r", /* Resets the prompt, and clears repeated cm
 			      NULL};
 
 static struct monitor_ops est_cmds ;
-static void init_est_cmds(void)
+
+static void 
+init_est_cmds(void)
 {
   est_cmds.flags =   MO_CLR_BREAK_USES_ADDR | MO_FILL_USES_ADDR | MO_NEED_REGDUMP_AFTER_CONT |
     MO_SREC_ACK | MO_SREC_ACK_PLUS ;

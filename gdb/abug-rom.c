@@ -96,7 +96,8 @@ static char *abug_inits[] = {"\r", NULL};
 
 static struct monitor_ops abug_cmds ;
 
-static void init_abug_cmds(void)
+static void 
+init_abug_cmds(void)
 {
   abug_cmds.flags =   MO_CLR_BREAK_USES_ADDR;
   abug_cmds.init =   abug_inits;			/* Init strings */

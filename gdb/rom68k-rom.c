@@ -94,7 +94,9 @@ static struct target_ops rom68k_ops;
 static char *rom68k_inits[] = {".\r\r", NULL}; /* Exits pm/pr & download cmds */
 
 static struct monitor_ops rom68k_cmds ;
-static void init_rom68k_cmds(void)
+
+static void 
+init_rom68k_cmds(void)
 {
   rom68k_cmds.flags =   0;
   rom68k_cmds.init =   rom68k_inits; /* monitor init string */

@@ -2043,7 +2043,9 @@ es1800_child_detach (args, from_tty)
 /* Define the target subroutine names  */
 
 struct target_ops es1800_ops ;
-static void init_es1800_ops(void)
+
+static void 
+init_es1800_ops(void)
 {
   es1800_ops.to_shortname =   "es1800";		
   es1800_ops.to_longname =   "Remote serial target in ES1800-emulator protocol";
@@ -2114,7 +2116,9 @@ Specify the serial device it is connected to (e.g. /dev/ttya)." ;
 /* Define the target subroutine names  */
 
 struct target_ops es1800_child_ops ;
-static void init_es1800_child_ops(void)
+
+static void 
+init_es1800_child_ops(void)
 {
   es1800_child_ops.to_shortname =   "es1800_process";	
   es1800_child_ops.to_longname =   "Remote serial target in ES1800-emulator protocol";

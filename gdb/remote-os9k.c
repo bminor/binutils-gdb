@@ -1146,7 +1146,8 @@ struct monitor_ops rombug_cmds = {
 
 struct target_ops rombug_ops ;
 
-static void init_rombug_ops(void)
+static void 
+init_rombug_ops(void)
 {
   rombug_ops.to_shortname =   "rombug";
   rombug_ops.to_longname =   "Microware's ROMBUG debug monitor";

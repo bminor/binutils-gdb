@@ -893,7 +893,8 @@ sparclite_download (filename, from_tty)
 
 static struct target_ops sparclite_ops ;
 
-static void init_sparclite_ops(void)
+static void 
+init_sparclite_ops(void)
 {
   sparclite_ops.to_shortname =   "sparclite";		
   sparclite_ops.to_longname =   "SPARClite remote target";

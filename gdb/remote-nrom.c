@@ -269,7 +269,9 @@ nrom_mourn()
 /* Define the target vector. */
 
 struct target_ops nrom_ops ;
-static void init_nrom_ops(void)
+
+static void 
+init_nrom_ops(void)
 {
   nrom_ops.to_shortname =   "nrom";	
   nrom_ops.to_longname =   "Remote XDI `NetROM' target";

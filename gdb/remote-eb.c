@@ -975,7 +975,9 @@ eb_mourn_inferior ()
 /* Define the target subroutine names */
 
 struct target_ops eb_ops ;
-static void init_eb_ops(void)
+
+static void 
+init_eb_ops(void)
 {
   eb_ops.to_shortname = 	"amd-eb";
   eb_ops.to_longname = 	"Remote serial AMD EBMON target";

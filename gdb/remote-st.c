@@ -795,7 +795,8 @@ connect_command (args, fromtty)
 
 struct target_ops st2000_ops ;
 
-static void init_st2000_ops(void)
+static void 
+init_st2000_ops(void)
 {
   st2000_ops.to_shortname =   "st2000";
   st2000_ops.to_longname =   "Remote serial Tandem ST2000 target";
