@@ -1,5 +1,21 @@
 2000-04-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* symfile.h (struct section_addr_info ): Remove fields for special
+ 	treatment of .text, .data and .bss sections.
+
+	* solib.c (symbol_add_stub): The special field text_addr is not
+ 	available anymore. Search for the .text field the hard way.
+
+	* symfile.c (build_section_addr_info_from_section_table): Don't
+ 	fill in {text, data, bss}_addr any more.
+	(default_symfile_offsets): Don't use {text, data, bss}_addr fields
+ 	to fill in section_offsets for objfile.
+	(syms_from_objfile): Don't deal with {text, data, bss}_addr as a
+ 	special case anymore.
+        (add_symbol_file_command): Ditto.
+
+2000-04-17  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
 	symfile.c: (symbol_file_command): Remove support for rombug, to
  	simplify code.
 

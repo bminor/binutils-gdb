@@ -478,13 +478,6 @@ build_section_addr_info_from_section_table (const struct section_table *start,
 
   for (stp = start, oidx = 0; stp != end; stp++)
     {
-      if (strcmp (stp->the_bfd_section->name, ".text") == 0)
-	sap->text_addr = stp->addr;
-      else if (strcmp (stp->the_bfd_section->name, ".data") == 0)
-	sap->data_addr = stp->addr;
-      else if (strcmp (stp->the_bfd_section->name, ".bss") == 0)
-	sap->bss_addr = stp->addr;
-
       if (stp->the_bfd_section->flags & (SEC_ALLOC | SEC_LOAD)
 	  && oidx < MAX_SECTIONS)
 	{
@@ -531,15 +524,6 @@ default_symfile_offsets (objfile, addrs)
     obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
   memset (objfile->section_offsets, 0, SIZEOF_SECTION_OFFSETS);
 
-  /* If user explicitly specified values for data and bss, set them here. */
-  
-  if (addrs->text_addr)
-    ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT) = addrs->text_addr;
-  if (addrs->data_addr)
-    ANOFFSET (objfile->section_offsets, SECT_OFF_DATA) = addrs->data_addr;
-  if (addrs->bss_addr)
-    ANOFFSET (objfile->section_offsets, SECT_OFF_BSS)  = addrs->bss_addr;
-    
   /* Now calculate offsets for other sections. */
   for (i = 0; i < MAX_SECTIONS && addrs->other[i].name; i++)
     {
@@ -635,14 +619,7 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
 
      We no longer warn if the lowest section is not a text segment (as
      happens for the PA64 port.  */
-  if (mainline)
-    {
-      /* No offset from objfile addresses.  */
-      addrs -> text_addr = 0;
-      addrs -> data_addr = 0;
-      addrs -> bss_addr = 0;
-    }
-  else
+  if (!mainline)
     {
       /* Find lowest loadable section to be used as starting point for 
          continguous sections. FIXME!! won't work without call to find
@@ -675,57 +652,17 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
  	 (the loadable section directly below it in memory).
  	 this_offset = lower_offset = lower_addr - lower_orig_addr */
 
-      /* FIXME: These sections will not need special treatment because ALL
-	 sections are in the other sections table */
- 
-      if (addrs->text_addr != 0)
- 	{
- 	  sect = bfd_get_section_by_name (objfile->obfd, ".text");
- 	  if (sect)
- 	    {
- 	      addrs->text_addr -= bfd_section_vma (objfile->obfd, sect);
- 	      lower_offset = addrs->text_addr;
- 	    }
- 	}
-      else 
- 	/* ??? who's below me? */
-	addrs->text_addr = lower_offset;
- 
-      if (addrs->data_addr != 0)
-	{
-	  sect = bfd_get_section_by_name (objfile->obfd, ".data");
-	  if (sect)
- 	    {
-	      addrs->data_addr -= bfd_section_vma (objfile->obfd, sect);
- 	      lower_offset = addrs->data_addr;
- 	    }
-	}
-      else
-	addrs->data_addr = lower_offset;
- 
-      if (addrs->bss_addr != 0)
-	{
-	  sect = bfd_get_section_by_name (objfile->obfd, ".bss");
-	  if (sect)
- 	    {
-	      addrs->bss_addr -= bfd_section_vma (objfile->obfd, sect);
- 	      lower_offset = addrs->bss_addr;
- 	    }
-	}
-      else
-	addrs->bss_addr = lower_offset;
-  
-       /* Now calculate offsets for other sections. */
+       /* Calculate offsets for sections. */
       for (i=0 ; i < MAX_SECTIONS && addrs->other[i].name; i++)
 	{
-	 
- 	  if (addrs->other[i].addr != 0)
+	  if (addrs->other[i].addr != 0)
  	    {
- 	      sect=bfd_get_section_by_name(objfile->obfd, addrs->other[i].name);
+ 	      sect = bfd_get_section_by_name (objfile->obfd, addrs->other[i].name);
  	      if (sect)
  		{
  		  addrs->other[i].addr -= bfd_section_vma (objfile->obfd, sect);
  		  lower_offset = addrs->other[i].addr;
+		  /* This is the index used by BFD. */
 		  addrs->other[i].sectindex = sect->index ;
  		}
  	      else
@@ -782,13 +719,6 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
 	  CORE_ADDR s_addr = 0;
 	  int i;
 
- 	  if (strcmp (s->the_bfd_section->name, ".text") == 0)
- 	    s_addr = addrs->text_addr;
- 	  else if (strcmp (s->the_bfd_section->name, ".data") == 0)
- 	    s_addr = addrs->data_addr;
- 	  else if (strcmp (s->the_bfd_section->name, ".bss") == 0)
- 	    s_addr = addrs->bss_addr;
- 	  else 
  	    for (i = 0; 
 	         !s_addr && i < MAX_SECTIONS && addrs->other[i].name;
 		 i++)
@@ -1614,13 +1544,6 @@ add_symbol_file_command (args, from_tty)
 	addr = strtoul (val+2, NULL, 16);
       else
 	addr = strtoul (val, NULL, 10);
-
-      if (strcmp (sec, ".text") == 0)
-	section_addrs.text_addr = addr;
-      else if (strcmp (sec, ".data") == 0)
-	section_addrs.data_addr = addr;
-      else if (strcmp (sec, ".bss") == 0)
-	section_addrs.bss_addr = addr;
 
       /* Here we store the section offsets in the order they were
          entered on the command line. */
