@@ -12475,6 +12475,7 @@ arm_force_relocation (fixp)
 
   /* Resolve these relocations even if the symbol is extern or weak.  */
   if (fixp->fx_r_type == BFD_RELOC_ARM_IMMEDIATE
+      || fixp->fx_r_type == BFD_RELOC_ARM_OFFSET_IMM
       || fixp->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE)
     return 0;
 
