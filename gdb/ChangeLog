@@ -141,6 +141,10 @@ Mon May 15 11:23:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	value.
 	* mdebugread.c (START_PSYMTAB): Add paren to avoid x=x=x.
 
+2000-05-12  Michael Snyder  <msnyder@.cygnus.com>
+
+	* config/i386/tm-i386sol2.h (COERCE_FLOAT_TO_DOUBLE): Define.
+	
 2000-05-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2read.c (dwarf2_const_value_data): Fix typo in sign
@@ -214,7 +218,7 @@ Thu May 11 13:24:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
         * elfread.c (record_minimal_symbol_and_info): Use the section 
 	where the symbol lives to get the index, instead of guessing.
 
-2000-05-10  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-10  Michael Snyder  <msnyder@.cygnus.com>
 
 	Make Sparc a Multi-Arch target.  Discard PARAMS macro (require ANSI).
 	* sparc-tdep.c: include arch-utils.h.
@@ -288,7 +292,7 @@ Thu May 11 13:24:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	avoid using deprecated REGISTER_NAMES macro.
 	* Makefile.in: Let sparc-tdep.c depend on arch-utils.h.
 
-2000-05-08  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-08  Michael Snyder  <msnyder@.cygnus.com>
 
 	* gdbarch.sh: Add FP0_REGNUM to list of multi-arched register numbers.
 	* gdbarch.c, gdbarch.h: Regenerate.
@@ -347,7 +351,7 @@ Mon May  8 00:49:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* proc-utils.h (PROCFS_NOTE, PROC_PRETTYFPRINT_STATUS): Always
  	define.
 
-2000-05-05  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-05  Michael Snyder  <msnyder@.cygnus.com>
 
 	* procfs.c: Cleanup of procfs tracing.  Move defines and 
 	prototypes to proc-utils.h
@@ -367,7 +371,7 @@ Mon May  8 00:49:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
         used must be the index of the section where 'sym' resides,
         not .text.
 
-2000-05-05  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-05  Michael Snyder  <msnyder@.cygnus.com>
 
 	* procfs.c (many functions): change int cmd; to long cmd;
 	Solaris /proc API calls this parameter a long, and requires it
@@ -422,7 +426,7 @@ Thu May  4 20:54:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	(MIPS_NUM_ARG_REGS), config/mips/tm-mips.h (MIPS_NUM_FP_ARG_REGS):
  	Delete unused macros.
 
-2000-05-03  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-03  Michael Snyder  <msnyder@.cygnus.com>
 
 	* solib.c (elf_locate_base, info_sharedlibrary_command):
 	Look at the bfd to determine if it is elf32 or elf64, rather
@@ -437,7 +441,7 @@ Thu May  4 20:54:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	(step_over_function): Only modify step_resume_breakpoint->frame if
 	the value of step_frame_address is non-zero.
 
-2000-05-03  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-03  Michael Snyder  <msnyder@cygnus.com>
 
 	* monitor.c (monitor_fetch_register): MAX_REGISTER_RAW_SIZE
 	is not static in the MULTI_ARCH world, so don't use it in a
@@ -515,7 +519,7 @@ Fri Apr 28 15:31:10 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* m68k-tdep.c (delta68_in_sigtramp): Return 0 when the function
  	name is unknow.
 
-2000-04-27  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-04-27  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdbarch.sh (d10v_daddr_p, d10v_iaddr_p, d10v_convert_daddr_to_raw,
 	d10v_convert_iaddr_to_raw): make these multi-arch functions optional.
@@ -533,7 +537,7 @@ Fri Apr 28 11:43:05 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* config/alpha/alpha-osf3.mh (XDEPFILES): Add ser-tcp.o and
  	ser-pipe.o
 
-2000-04-27  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-04-27  Michael Snyder  <msnyder@cygnus.com>
 
 	* jv-valprint.c (java_val_print): Add arg declaration, 
 	fix compiler warning.
@@ -559,7 +563,7 @@ Thu Apr 27 10:06:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Document IRIX X ARM cross compile problems.
 
-2000-04-26  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-04-26  Michael Snyder  <msnyder@cygnus.com>
 
 	* utils.c (internal_verror): Call target_terminal_ours.
 	* wrapper.h: Fix minor comment typo.
@@ -601,7 +605,7 @@ Wed Apr 26 13:50:35 2000  Philippe De Muyter  <phdm@macqel.be>
 	(ia64-tdep.o): Add dependency for arch-utils.h.
 	* ia64-linux-tdep.c, ia64-tdep.c (arch-utils.h): Include.
 
-2000-04-25  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-04-25  Michael Snyder  <msnyder@cygnus.com>
 
 	* blockframe.c: Fix a minor typo in a comment.
 
@@ -1489,7 +1493,7 @@ Fri Mar 31 08:59:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	Safe version of value_subscript.
 	* varobj.c (): Use gdb_value_subscript() to get an array element value.
 
-2000-03-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-03-30  Michael Snyder  <msnyder@cygnus.com>
 
 	* ui-file.c: Include "gdb_string.h"
 	* cli-out.c: Include gdb_string.h to avoid compiler warnings.
@@ -1498,7 +1502,7 @@ Fri Mar 31 08:59:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	at various times.  Casting pointer to int and vice versa gives
 	warnings (and is not safe) if they are not the same size.
 	
-2000-03-30  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-03-30  Michael Snyder  <msnyder@cygnus.com>
 
 	* defs.h (struct continuation_arg): Make 'data' a union, to avoid
 	casting problems when int and pointer are not the  same size.
@@ -1559,7 +1563,7 @@ Wed Mar 29 10:16:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	infrun.c (resume):  Remove hardware watchpoints before stepping
 	when CANNOT_STEP_HW_WATCHPOINTS is nonzero.
 
-2000-03-28  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-03-28  Michael Snyder  <msnyder@cygnus.com>
 
 	* Makefile.in: Anchor tui-file.h dependency to $srcdir.
 
@@ -1752,7 +1756,7 @@ Fri Mar 24 13:44:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add Fernando Nasser to testsuite maintainers. 
 	
-2000-03-23  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-03-23  Michael Snyder  <msnyder@cygnus.com>
 
 	* solib.c (open_symbol_file_object): To sneak an int argument
 	past catch_errors, instead of casting it to a pointer, simply
@@ -1799,7 +1803,7 @@ Fri Mar 24 13:44:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	names/documentation for regular expressions.
 	(_initialize_command): Add the apropos command.
 
-2000-03-23  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-03-23  Michael Snyder  <msnyder@cygnus.com>
 
 	* sol-thread.c (ps_pglobal_lookup): Change argument type from
 	paddr_t to psaddr_t.  This mistake appears to date from an
@@ -1929,7 +1933,7 @@ Wed Mar 22 11:18:59 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* values.c (value_primitive_field): Set the offset in struct value
 	we return when the field is a packed bitfield.
 
-2000-03-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-03-20  Michael Snyder  <msnyder@cygnus.com>
 
 	* remote.c (remote_threads_extra_info): New function.
 	Implement the extra thread info query for "info threads".
@@ -2086,7 +2090,7 @@ Fri Mar 17 11:06:59 2000  Philippe De Muyter  <phdm@macqel.be>
 	* Makefile.in (go32-nat.o): Add prerequisites.
 	(ALLDEPFILES): Add go32-nat.c.
 
-2000-03-15  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-03-15  Michael Snyder  <msnyder@cygnus.com>
 
 	From "Peter.Schauer" <Peter.Schauer@regent.e-technik.tu-muenchen.de>
 	* symfile.c (reread_symbols):  Clear msymbol hash table.
@@ -3568,7 +3572,7 @@ Thu Jan 13 23:34:17 EST 2000  Nicholas Duffek <nsd@cygnus.com>
 	* coffread.c (coff_symfile_read): Reinstate ability to recognize "pe"
 	type.
 
-2000-01-07  Michael Snyder  <msnyder@cleaver.cygnus.com>
+2000-01-07  Michael Snyder  <msnyder@cygnus.com>
 
 	* uw-thread.c: New file to support UnixWare user-mode threads:
 	contributed by Nickolas Duffek  <nsd@cygnus.com>.

@@ -24,6 +24,14 @@
 #define HAVE_I387_REGS
 #include "i386/tm-i386v4.h"
 
+/* If the current gcc for for this target does not produce correct
+   debugging information for float parameters, both prototyped and
+   unprototyped, then define this macro.  This forces gdb to always
+   assume that floats are passed as doubles and then converted in the
+   callee. */
+
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (1)
+
 /* Signal handler frames under Solaris 2 are recognized by a return address
    of 0xFFFFFFFF, the third parameter on the signal handler stack is
    a pointer to an ucontext.  */
