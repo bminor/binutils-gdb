@@ -1,3 +1,19 @@
+2001-12-21  Orjan Friberg  <orjanf@axis.com>
+
+        * configure.tgt: Delete CRIS from multi-arch targets.
+
+	* config/cris/tm-cris.h: New file.
+	
+	* config/cris/cris.mt (TDEPFILES): Add corelow.o solib.o solib-svr4.o.
+	(TM_FILE): New macro.
+
+	* cris-tdep.c (cris_examine): Correct check for srp register.
+	(supply_gregset, fetch_core_registers,
+	cris_linux_svr4_fetch_link_map_offsets, cris_fpless_backtrace): 
+	New functions.
+	(_initialize_cris_tdep): Add core functions and new command.
+	(cris_gdbarch_init): Define link map offsets.
+
 Thu Dec 20 16:42:30 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* somsolib.c (som_solib_add): Ignore the solib limit threshhold

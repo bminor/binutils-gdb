@@ -35,6 +35,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* To get entry_point_address.  */
 #include "symfile.h"
 
+#include "solib.h"              /* Support for shared libraries. */
+#include "solib-svr4.h"         /* For struct link_map_offsets.  */
+
+
 enum cris_num_regs
 {
   /* There are no floating point registers.  Used in gdbserver low-linux.c.  */
@@ -512,7 +516,10 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
           insn_next = read_memory_unsigned_integer (ip, sizeof (short));
           ip += sizeof (short);
           regno = cris_get_operand2 (insn_next);
-          if (regno == (SRP_REGNUM - NUM_GENREGS))
+
+          /* This check, meant to recognize srp, used to be regno == 
+             (SRP_REGNUM - NUM_GENREGS), but that covers r11 also.  */
+          if (insn_next == 0xBE7E)
             {
               if (frameless_p)
                 {
@@ -3555,6 +3562,305 @@ cris_delayed_get_disassembler (bfd_vma addr, disassemble_info *info)
   return TARGET_PRINT_INSN (addr, info);
 }
 
+/* Copied from <asm/elf.h>.  */
+typedef unsigned long elf_greg_t;
+
+/* Same as user_regs_struct struct in <asm/user.h>.  */
+typedef elf_greg_t elf_gregset_t[35];
+
+/* Unpack an elf_gregset_t into GDB's register cache.  */
+
+void 
+supply_gregset (elf_gregset_t *gregsetp)
+{
+  int i;
+  elf_greg_t *regp = *gregsetp;
+  static char zerobuf[4] = {0};
+
+  /* The kernel dumps all 32 registers as unsigned longs, but supply_register
+     knows about the actual size of each register so that's no problem.  */
+  for (i = 0; i < NUM_GENREGS + NUM_SPECREGS; i++)
+    {
+      supply_register (i, (char *)&regp[i]);
+    }
+}
+
+/*  Use a local version of this function to get the correct types for
+    regsets, until multi-arch core support is ready.  */
+
+static void
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+                      int which, CORE_ADDR reg_addr)
+{
+  elf_gregset_t gregset;
+
+  switch (which)
+    {
+    case 0:
+      if (core_reg_size != sizeof (gregset))
+        {
+          warning ("wrong size gregset struct in core file");
+        }
+      else
+        {
+          memcpy (&gregset, core_reg_sect, sizeof (gregset));
+          supply_gregset (&gregset);
+        }
+
+    default:
+      /* We've covered all the kinds of registers we know about here,
+         so this must be something we wouldn't know what to do with
+         anyway.  Just ignore it.  */
+      break;
+    }
+}
+
+static struct core_fns cris_elf_core_fns =
+{
+  bfd_target_elf_flavour,               /* core_flavour */
+  default_check_format,                 /* check_format */
+  default_core_sniffer,                 /* core_sniffer */
+  fetch_core_registers,                 /* core_read_registers */
+  NULL                                  /* next */
+};
+
+/* Fetch (and possibly build) an appropriate link_map_offsets
+   structure for native Linux/CRIS targets using the struct offsets
+   defined in link.h (but without actual reference to that file).
+
+   This makes it possible to access Linux/CRIS shared libraries from a
+   GDB that was not built on an Linux/CRIS host (for cross debugging).
+
+   See gdb/solib-svr4.h for an explanation of these fields.  */
+
+struct link_map_offsets *
+cris_linux_svr4_fetch_link_map_offsets (void)
+{ 
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = NULL;
+
+  if (lmp == NULL)
+    { 
+      lmp = &lmo;
+
+      lmo.r_debug_size = 8;	/* The actual size is 20 bytes, but
+				   this is all we need.  */
+      lmo.r_map_offset = 4;
+      lmo.r_map_size   = 4;
+
+      lmo.link_map_size = 20;
+
+      lmo.l_addr_offset = 0;
+      lmo.l_addr_size   = 4;
+
+      lmo.l_name_offset = 4;
+      lmo.l_name_size   = 4;
+
+      lmo.l_next_offset = 12;
+      lmo.l_next_size   = 4;
+
+      lmo.l_prev_offset = 16;
+      lmo.l_prev_size   = 4;
+    }
+
+  return lmp;
+}
+
+static void
+cris_fpless_backtrace (char *noargs, int from_tty)
+{
+  /* Points at the instruction after the jsr (except when in innermost frame
+     where it points at the original pc).  */
+  CORE_ADDR pc = 0;
+
+  /* Temporary variable, used for parsing from the start of the function that
+     the pc is in, up to the pc.  */
+  CORE_ADDR tmp_pc = 0;
+  CORE_ADDR sp = 0;
+
+  /* Information about current frame.  */
+  struct symtab_and_line sal;
+  char* func_name;
+
+  /* Present instruction.  */
+  unsigned short insn;
+  
+  /* Next instruction, lookahead.  */
+  unsigned short insn_next; 
+
+  /* This is to store the offset between sp at start of function and until we
+     reach push srp (if any).  */
+  int sp_add_later = 0;
+  int push_srp_found = 0;
+
+  int val = 0;
+
+  /* Frame counter.  */
+  int frame = 0;
+
+  /* For the innermost frame, we want to look at srp in case it's a leaf
+     function (since there's no push srp in that case).  */
+  int innermost_frame = 1;
+  
+  read_register_gen (PC_REGNUM, (char *) &pc);
+  read_register_gen (SP_REGNUM, (char *) &sp);
+  
+  /* We make an explicit return when we can't find an outer frame.  */
+  while (1)
+    {
+      /* Get file name and line number.  */
+      sal = find_pc_line (pc, 0);
+
+      /* Get function name.  */
+      find_pc_partial_function (pc, &func_name, (CORE_ADDR *) NULL,
+                                (CORE_ADDR *) NULL);
+
+      /* Print information about current frame.  */
+      printf_unfiltered ("#%i  0x%08lx in %s", frame++, pc, func_name);
+      if (sal.symtab)
+        {    
+          printf_unfiltered (" at %s:%i", sal.symtab->filename, sal.line);
+        }
+      printf_unfiltered ("\n");
+      
+      /* Get the start address of this function.  */
+      tmp_pc = get_pc_function_start (pc);
+  
+      /* Mini parser, only meant to find push sp and sub ...,sp from the start
+         of the function, up to the pc.  */
+      while (tmp_pc < pc)
+        {
+          insn = read_memory_unsigned_integer (tmp_pc, sizeof (short));
+          tmp_pc += sizeof (short);
+          if (insn == 0xE1FC)
+            {
+              /* push <reg> 32 bit instruction */
+              insn_next = read_memory_unsigned_integer (tmp_pc, 
+                                                        sizeof (short));
+              tmp_pc += sizeof (short);
+
+              /* Recognize srp.  */
+              if (insn_next == 0xBE7E)
+                {
+                  /* For subsequent (not this one though) push or sub which
+                     affects sp, adjust sp immediately.  */
+                  push_srp_found = 1;
+
+                  /* Note: this will break if we ever encounter a 
+                     push vr (1 byte) or push ccr (2 bytes).  */
+                  sp_add_later += 4;
+                }
+              else
+                {
+                  /* Some other register was pushed.  */
+                  if (push_srp_found)
+                    {    
+                      sp += 4;
+                    }
+                  else
+                    {
+                      sp_add_later += 4;
+                    }
+                }
+            }
+          else if (cris_get_operand2 (insn) == SP_REGNUM 
+                   && cris_get_mode (insn) == 0x0000
+                   && cris_get_opcode (insn) == 0x000A)
+            {
+              /* subq <val>,sp */
+              val = cris_get_quick_value (insn);
+
+              if (push_srp_found)
+                {
+                  sp += val;
+                }
+              else
+                {
+                  sp_add_later += val;
+                }
+              
+            }
+          else if (cris_get_operand2 (insn) == SP_REGNUM
+                   /* Autoincrement addressing mode.  */
+                   && cris_get_mode (insn) == 0x0003
+                   /* Opcode.  */
+                   && ((insn) & 0x03E0) >> 5 == 0x0004)
+            {
+              /* subu <val>,sp */
+              val = get_data_from_address (&insn, tmp_pc);
+
+              if (push_srp_found)
+                {
+                  sp += val;
+                }
+              else
+                {
+                  sp_add_later += val;
+                }
+            }
+          else if (cris_get_operand2 (insn) == SP_REGNUM
+                   && ((insn & 0x0F00) >> 8) == 0x0001
+                   && (cris_get_signed_offset (insn) < 0))
+            {
+              /* Immediate byte offset addressing prefix word with sp as base 
+                 register.  Used for CRIS v8 i.e. ETRAX 100 and newer if <val> 
+                 is between 64 and 128. 
+                 movem r<regsave>,[sp=sp-<val>] */
+              val = -cris_get_signed_offset (insn);
+              insn_next = read_memory_unsigned_integer (tmp_pc, 
+                                                        sizeof (short));
+              tmp_pc += sizeof (short);
+              
+              if (cris_get_mode (insn_next) == PREFIX_ASSIGN_MODE
+                  && cris_get_opcode (insn_next) == 0x000F
+                  && cris_get_size (insn_next) == 0x0003
+                  && cris_get_operand1 (insn_next) == SP_REGNUM)
+                {             
+                  if (push_srp_found)
+                    {
+                      sp += val;
+                    }
+                  else
+                    {
+                      sp_add_later += val;
+                    }
+                }
+            }
+        }
+      
+      if (push_srp_found)
+        {
+          /* Reset flag.  */
+          push_srp_found = 0;
+
+          /* sp should now point at where srp is stored on the stack.  Update
+             the pc to the srp.  */
+          pc = read_memory_unsigned_integer (sp, 4);
+        }
+      else if (innermost_frame)
+        {
+          /* We couldn't find a push srp in the prologue, so this must be
+             a leaf function, and thus we use the srp register directly.
+             This should happen at most once, for the innermost function.  */
+          read_register_gen (SRP_REGNUM, (char *) &pc);
+        }
+      else
+        {
+          /* Couldn't find an outer frame.  */
+          return;
+        }
+
+      /* Reset flag.  (In case the innermost frame wasn't a leaf, we don't
+         want to look at the srp register later either).  */
+      innermost_frame = 0;
+
+      /* Now, add the offset for everything up to, and including push srp,
+         that was held back during the prologue parsing.  */ 
+      sp += sp_add_later;
+      sp_add_later = 0;
+    }
+}
+
 void
 _initialize_cris_tdep (void)
 {
@@ -3583,6 +3889,14 @@ _initialize_cris_tdep (void)
                         "Set the current CRIS ABI version.", &setlist);
   c->function.sfunc = cris_abi_update;
   add_show_from_set (c, &showlist);
+
+  c = add_cmd ("cris-fpless-backtrace", class_support, cris_fpless_backtrace, 
+               "Display call chain using the subroutine return pointer.\n"
+               "Note that this displays the address after the jump to the "
+               "subroutine.", &cmdlist);
+  
+  add_core_fns (&cris_elf_core_fns);
+  
 }
 
 /* Prints out all target specific values.  */
@@ -3997,5 +4311,9 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Helpful for backtracing and returning in a call dummy.  */
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
 
+  /* Use target_specific function to define link map offsets.  */
+  set_solib_svr4_fetch_link_map_offsets 
+    (gdbarch, cris_linux_svr4_fetch_link_map_offsets);
+  
   return gdbarch;
 }
