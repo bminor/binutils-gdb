@@ -1,3 +1,11 @@
+2004-05-10  John Paul Wallington  <jpw@gnu.org>
+
+	* ld-mmix/bspec2.d: Update sh_info to decimal.
+	* ld-mmix/local1.d: Likewise.
+	* ld-mmix/local3.d: Likewise.
+	* ld-mmix/local5.d: Likewise.
+	* ld-mmix/local7.d: Likewise.
+
 2004-05-05  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-frv/fdpic.exp: Restore $LDFLAGS at the end.
