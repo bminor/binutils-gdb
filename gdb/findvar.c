@@ -322,8 +322,8 @@ read_register (regno)
       SWAP_TARGET_AND_HOST (&lval, sizeof (lval));
       return lval;
     default:
-      error ("Can't handle register size of %d for register %d\n",
-	     REGISTER_RAW_SIZE(regno), regno);
+      error ("GDB Internal Error in read_register() for register %d, size %d",
+	     regno, RAW_REGISTER_SIZE(regno));
     }
 }
 
@@ -367,6 +367,9 @@ write_register (regno, val)
       SWAP_TARGET_AND_HOST (&lval, sizeof (lval));
       memcpy (&registers[REGISTER_BYTE (regno)], &lval, sizeof (lval));
       break;
+    default:
+      error ("GDB Internal Error in write_register() for register %d, size %d",
+	     regno, RAW_REGISTER_SIZE(regno));
     }
 
   target_store_registers (regno);
@@ -507,6 +510,7 @@ read_var_value (var, frame)
 
     case LOC_REGISTER:
     case LOC_REGPARM:
+    case LOC_REGPARM_ADDR:
       {
 	struct block *b;
 
@@ -516,20 +520,7 @@ read_var_value (var, frame)
 	
 	v = value_from_register (type, SYMBOL_VALUE (var), frame);
 
-	/* Nonzero if a struct which is located in a register or a LOC_ARG
-	   really contains
-	   the address of the struct, not the struct itself.  GCC_P is nonzero
-	   if the function was compiled with GCC.  */
-	/* A cleaner way to do this would be to add LOC_REGISTER_ADDR
-	   (register contains the address of the value) and LOC_REGPARM_ADDR,
-	   and have the symbol-reading code set them -kingdon.  */
-#if !defined (REG_STRUCT_HAS_ADDR)
-#define REG_STRUCT_HAS_ADDR(gcc_p) 0
-#endif
-
-	if (REG_STRUCT_HAS_ADDR (BLOCK_GCC_COMPILED (b))
-	    && (   (TYPE_CODE (type) == TYPE_CODE_STRUCT)
-	        || (TYPE_CODE (type) == TYPE_CODE_UNION)))
+	if (SYMBOL_CLASS (var) == LOC_REGPARM_ADDR)
 	  {
 	    addr = *(CORE_ADDR *)VALUE_CONTENTS (v);
 	    VALUE_LVAL (v) = lval_memory;
@@ -538,6 +529,11 @@ read_var_value (var, frame)
 	  return v;
       }
       break;
+
+    case LOC_OPTIMIZED_OUT:
+      VALUE_LVAL (v) = not_lval;
+      VALUE_OPTIMIZED_OUT (v) = 1;
+      return v;
 
     default:
       error ("Cannot look up value of a botched symbol.");
@@ -601,7 +597,8 @@ value_from_register (type, regnum, frame)
    numbers for the pointer & non-pointer form of the register.  But, it
    doesn't, so we're stuck with this.  */
 
-      if (TYPE_CODE (type) == TYPE_CODE_PTR)
+      if (TYPE_CODE (type) == TYPE_CODE_PTR
+	  && len > 2)
 	{
 	  int page_regnum;
 

@@ -1,3 +1,14 @@
+Mon May 17 15:43:03 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* findvar.c (write_register):  Add sanity check for register size.
+	(read_register):  Fixup sanity check for register size to be
+	consistent with write_register().
+
+Mon May 17 07:36:20 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* sparclite/Makefile.in: Add dummy info, install and install-info
+	targets.
+
 Thu May 13 07:30:22 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* remote-nindy.c: Removed declaration of coffstrip.
@@ -88,6 +99,7 @@ Thu May  6 20:55:35 1993  Fred Fish  (fnf@cygnus.com)
 Thu May  6 15:47:45 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* More patches from Jeffrey Law (law@cs.utah.edu).
+	* gdb/config/nm-hppab.h (PTRACE_ARG3_TYPE): Define as caddr_t.
 	* gdb/config/pa/tm-hppah.h (millicode_start, millicode_end):
 	Delete unnecessary declarations.
 
