@@ -417,14 +417,14 @@ info_threads_command (char *arg, int from_tty)
   struct thread_info *tp;
   ptid_t current_ptid;
   struct frame_info *cur_frame;
-  int saved_frame_level = frame_relative_level (deprecated_selected_frame);
+  int saved_frame_level = frame_relative_level (get_selected_frame ());
   int counter;
   char *extra_info;
 
-  /* Avoid coredumps which would happen if we tried to access a NULL
-     deprecated_selected_frame.  */
-  if (!target_has_stack)
-    error ("No stack.");
+  /* Check that there really is a frame.  This happens when a simulator
+     is connected but not loaded or running, for instance.  */
+  if (legacy_frame_p (current_gdbarch) && saved_frame_level < 0)
+    error ("No frame.");
 
   prune_threads ();
   target_find_new_threads ();
@@ -448,10 +448,7 @@ info_threads_command (char *arg, int from_tty)
       puts_filtered ("  ");
 
       switch_to_thread (tp->ptid);
-      if (deprecated_selected_frame)
-	print_stack_frame (deprecated_selected_frame, -1, 0);
-      else
-	printf_filtered ("[No stack.]\n");
+      print_stack_frame (get_selected_frame (), -1, 0);
     }
 
   switch_to_thread (current_ptid);
@@ -463,12 +460,12 @@ info_threads_command (char *arg, int from_tty)
    * of the stack (leaf frame).
    */
   counter = saved_frame_level;
-  cur_frame = find_relative_frame (deprecated_selected_frame, &counter);
+  cur_frame = find_relative_frame (get_selected_frame (), &counter);
   if (counter != 0)
     {
       /* Ooops, can't restore, tell user where we are. */
       warning ("Couldn't restore frame in current thread, at frame 0");
-      print_stack_frame (deprecated_selected_frame, -1, 0);
+      print_stack_frame (get_selected_frame (), -1, 0);
     }
   else
     {
