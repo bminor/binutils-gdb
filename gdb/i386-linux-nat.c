@@ -72,7 +72,6 @@
 
 /* Prototypes for local functions.  */
 static void dummy_sse_values (void);
-
 
 
 /* The register sets used in GNU/Linux ELF core-dumps are identical to
@@ -233,10 +232,10 @@ supply_gregset (elf_gregset_t *gregsetp)
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
-    supply_register (i, (char *) (regp + regmap[i]));
+    supply_register (i, regp + regmap[i]);
 
   if (I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
-    supply_register (I386_LINUX_ORIG_EAX_REGNUM, (char *) (regp + ORIG_EAX));
+    supply_register (I386_LINUX_ORIG_EAX_REGNUM, regp + ORIG_EAX);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
