@@ -1,3 +1,8 @@
+start-sanitize-m32rx
+Wed Feb 18 11:00:18 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* app.c: Parse || as a seperator between assembler statements.
+end-sanitize-m32rx
 Tue Feb 17 18:58:51 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cen.c (cgen_md_apply_fix3): Delete call to validate_operand.
