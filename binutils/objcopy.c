@@ -2733,9 +2733,10 @@ copy_main (argc, argv)
     if (stat (input_filename, & statbuf) < 0)
       fatal (_("Cannot stat: %s: %s"), input_filename, strerror (errno));
 
-  /* If there is no destination file then create a temp and rename
-     the result into the input.  */
-  if (output_filename == (char *) NULL)
+  /* If there is no destination file, or the source and destination files
+     are the same,  then create a temp and rename the result into the input.  */
+  if ((output_filename == (char *) NULL) ||
+      (strcmp (input_filename, output_filename) == 0))
     {
       char *tmpname = make_tempname (input_filename);
 

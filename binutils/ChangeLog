@@ -1,3 +1,9 @@
+2003-05-13  Michael Eager <eager@mvista.com>
+
+	* objcopy.c: Treat identical src/dst file names as if only one
+	entered.  One Windows creating an output file of the same name as
+	the input file will delete the input file before it is read.
+
 2003-05-12  Salvador Eduardo Tropea  <salvador@inti.gov.ar>
 
 	* debug.c (debug_get_real_type): Extend test for circular debug
