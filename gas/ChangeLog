@@ -1,3 +1,7 @@
+Mon Aug  5 14:21:10 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i960.c (mem_fmt): Call parse_expr before emit.
+
 Fri Aug  2 11:23:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (md_section_align): Don't change addr if
