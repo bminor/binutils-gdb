@@ -25,6 +25,7 @@
 
 #include "defs.h"
 #include "gdb_string.h"
+#include "gdb_assert.h"
 #include "frame.h"
 #include "inferior.h"
 #include "symtab.h"
@@ -361,23 +362,57 @@ static struct cmd_list_element *showmipscmdlist = NULL;
 
 /* A set of original names, to be used when restoring back to generic
    registers from a specific set.  */
+static char *mips_generic_reg_names[] = MIPS_REGISTER_NAMES;
 
-char *mips_generic_reg_names[] = MIPS_REGISTER_NAMES;
-char **mips_processor_reg_names = mips_generic_reg_names;
+/* Integer registers 0 thru 31 are handled explicitly by
+   mips_register_name().  Processor specific registers 32 and above
+   are listed in the sets of register names assigned to
+   mips_processor_reg_names.  */
+static char **mips_processor_reg_names = mips_generic_reg_names;
 
+/* Return the name of the register corresponding to REGNO.  */
 static const char *
-mips_register_name (int i)
+mips_register_name (int regno)
 {
-  return mips_processor_reg_names[i];
+  /* GPR names for all ABIs other than n32/n64.  */
+  static char *mips_gpr_names[] = {
+    "zero", "at",   "v0",   "v1",   "a0",   "a1",   "a2",   "a3",
+    "t0",   "t1",   "t2",   "t3",   "t4",   "t5",   "t6",   "t7",
+    "s0",   "s1",   "s2",   "s3",   "s4",   "s5",   "s6",   "s7",
+    "t8",   "t9",   "k0",   "k1",   "gp",   "sp",   "s8",   "ra",
+  };
+
+  /* GPR names for n32 and n64 ABIs.  */
+  static char *mips_n32_n64_gpr_names[] = {
+    "zero", "at",   "v0",   "v1",   "a0",   "a1",   "a2",   "a3", 
+    "a4",   "a5",   "a6",   "a7",   "t0",   "t1",   "t2",   "t3", 
+    "s0",   "s1",   "s2",   "s3",   "s4",   "s5",   "s6",   "s7", 
+    "t8",   "t9",   "k0",   "k1",   "gp",   "sp",   "s8",   "ra"
+  };
+
+  enum mips_abi abi = mips_abi (current_gdbarch);
+
+  /* The MIPS integer registers are always mapped from 0 to 31.  The
+     names of the registers (which reflects the conventions regarding
+     register use) vary depending on the ABI.  */
+  if (0 <= regno && regno < 32)
+    {
+      if (abi == MIPS_ABI_N32 || abi == MIPS_ABI_N64)
+	return mips_n32_n64_gpr_names[regno];
+      else
+	return mips_gpr_names[regno];
+    }
+  else if (32 <= regno && regno <= NUM_REGS)
+    return mips_processor_reg_names[regno - 32];
+  else
+    internal_error (__FILE__, __LINE__,
+		    "mips_register_name: bad register number %d", regno);
 }
+
 /* *INDENT-OFF* */
 /* Names of IDT R3041 registers.  */
 
 char *mips_r3041_reg_names[] = {
-	"zero",	"at",	"v0",	"v1",	"a0",	"a1",	"a2",	"a3",
-	"t0",	"t1",	"t2",	"t3",	"t4",	"t5",	"t6",	"t7",
-	"s0",	"s1",	"s2",	"s3",	"s4",	"s5",	"s6",	"s7",
-	"t8",	"t9",	"k0",	"k1",	"gp",	"sp",	"s8",	"ra",
 	"sr",	"lo",	"hi",	"bad",	"cause","pc",
 	"f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
 	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
@@ -391,10 +426,6 @@ char *mips_r3041_reg_names[] = {
 /* Names of IDT R3051 registers.  */
 
 char *mips_r3051_reg_names[] = {
-	"zero",	"at",	"v0",	"v1",	"a0",	"a1",	"a2",	"a3",
-	"t0",	"t1",	"t2",	"t3",	"t4",	"t5",	"t6",	"t7",
-	"s0",	"s1",	"s2",	"s3",	"s4",	"s5",	"s6",	"s7",
-	"t8",	"t9",	"k0",	"k1",	"gp",	"sp",	"s8",	"ra",
 	"sr",	"lo",	"hi",	"bad",	"cause","pc",
 	"f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
 	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
@@ -408,10 +439,6 @@ char *mips_r3051_reg_names[] = {
 /* Names of IDT R3081 registers.  */
 
 char *mips_r3081_reg_names[] = {
-	"zero",	"at",	"v0",	"v1",	"a0",	"a1",	"a2",	"a3",
-	"t0",	"t1",	"t2",	"t3",	"t4",	"t5",	"t6",	"t7",
-	"s0",	"s1",	"s2",	"s3",	"s4",	"s5",	"s6",	"s7",
-	"t8",	"t9",	"k0",	"k1",	"gp",	"sp",	"s8",	"ra",
 	"sr",	"lo",	"hi",	"bad",	"cause","pc",
 	"f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
 	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
@@ -425,10 +452,6 @@ char *mips_r3081_reg_names[] = {
 /* Names of LSI 33k registers.  */
 
 char *mips_lsi33k_reg_names[] = {
-	"zero",	"at",	"v0",	"v1",	"a0",	"a1",	"a2",	"a3",
-	"t0",	"t1",	"t2",	"t3",	"t4",	"t5",	"t6",	"t7",
-	"s0",	"s1",	"s2",	"s3",	"s4",	"s5",	"s6",	"s7",
-	"t8",	"t9",	"k0",	"k1",	"gp",	"sp",	"s8",	"ra",
 	"epc",	"hi",	"lo",	"sr",	"cause","badvaddr",
 	"dcic", "bpc",  "bda",  "",     "",     "",     "",      "",
 	"",     "",     "",     "",     "",     "",     "",      "",

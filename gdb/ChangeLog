@@ -1,3 +1,19 @@
+2003-03-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (mips-tdep.o): Add dependency on $(gdb_assert_h).
+	* mips-tdep.c (gdb_assert.h): Include.
+	(mips_generic_reg_names, mips_processor_reg_names): Make static.
+	(mips_register_name): Handle integer registers explicitly.  Add
+	bounds checking.
+	(mips_r3041_reg_names, mips_r3051_reg_names, mips_r3081_reg_names)
+	(mips_lsi33k_reg_names): Don't list integer registers; they're
+	handled by mips_register_name() now.
+	* config/mips/tm-irix3.h (MIPS_REGISTER_NAMES): Likewise.
+	* config/mips/tm-irix6.h (MIPS_REGISTER_NAMES): Likewise.
+	* config/mips/tm-mips.h (MIPS_REGISTER_NAMES): Likewise.
+	* config/mips/tm-tx39.h (MIPS_REGISTER_NAMES): Likewise.
+	* config/mips/tm-tx39l.h (MIPS_REGISTER_NAMES): Likewise.
+
 2003-03-18  Andrew Cagney  <cagney@redhat.com>
 
 	* printcmd.c (print_scalar_formatted): Change VALADDR parameter to

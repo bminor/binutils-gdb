@@ -1929,10 +1929,11 @@ mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(solib_svr4_h) $(osabi_h) $(gdb_string_h) $(mips_tdep_h) \
 	$(gdb_assert_h)
 mips-nat.o: mips-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
-mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
-	$(symtab_h) $(value_h) $(gdbcmd_h) $(language_h) $(gdbcore_h) \
-	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(target_h) $(arch_utils_h) \
-	$(regcache_h) $(osabi_h) $(mips_tdep_h) $(block_h) $(opcode_mips_h) \
+mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
+	$(frame_h) $(inferior_h) $(symtab_h) $(value_h) $(gdbcmd_h) \
+	$(language_h) $(gdbcore_h) $(symfile_h) $(objfiles_h) \
+	$(gdbtypes_h) $(target_h) $(arch_utils_h) $(regcache_h) \
+	$(osabi_h) $(mips_tdep_h) $(block_h) $(opcode_mips_h) \
 	$(elf_mips_h) $(elf_bfd_h) $(symcat_h)
 mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
