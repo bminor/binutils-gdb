@@ -26,6 +26,7 @@ SECTIONS
   }
   .data ${RELOCATING+ .} : {
     *(.data)
+    ${CONSTRUCTING+CONSTRUCTORS}
   }
   ${RELOCATING+ _gp = . + 0x8000;}
   .lit8 ${RELOCATING+ .} : {

@@ -1,3 +1,8 @@
+Tue May  4 12:37:35 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.sc-sh: Put constructors in the .data section.
+	* Makefile.in (cdtest): Added dependency on ld.new.
+
 Mon May  3 19:43:39 1993  Per Bothner  (bothner@cygnus.com)
 
 	* Makefile.in:  Change definition of $(tooldir) to match FSF.

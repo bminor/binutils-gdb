@@ -310,7 +310,7 @@ ld3: ld2
 bootstrap: ld3
 	cmp ld2 ld3
 
-cdtest: cdtest-main.o cdtest-func.o cdtest-foo.o
+cdtest: cdtest-main.o cdtest-func.o cdtest-foo.o ld.new
 	$(HOSTING_EMU); ./ld.new -o cdtest $(HOSTING_CRT0) \
 	  cdtest-main.o cdtest-func.o cdtest-foo.o $(HOSTING_LIBS)
 
