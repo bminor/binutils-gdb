@@ -1,3 +1,14 @@
+Tue Oct  8 13:02:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* as.h: Include libiberty.h.
+	(xmalloc, xrealloc): Don't declare.
+	* as.c: Don't include libiberty.h.
+	* expr.c, read.c, stabs.c, config/obj-coff.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* messages.c: Likewise.
+	(xstrerror): Don't declare.
+	* xmalloc.c: Remove.
+
 Mon Oct  7 16:53:23 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.h (pre_defined_registers) Remove.

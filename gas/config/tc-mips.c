@@ -25,7 +25,6 @@
 #include "as.h"
 #include "config.h"
 #include "subsegs.h"
-#include "libiberty.h"
 
 #include <ctype.h>
 
@@ -1211,6 +1210,9 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	      break;
 
 	    case BFD_RELOC_MIPS_JMP:
+	      ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0x3ffffff;
+	      break;
+
 	    case BFD_RELOC_16_PCREL_S2:
 	      goto need_reloc;
 

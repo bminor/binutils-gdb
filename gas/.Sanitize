@@ -100,7 +100,6 @@ testsuite
 vmsconf.sh
 write.c
 write.h
-xmalloc.c
 
 Things-to-lose:
 
