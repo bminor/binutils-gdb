@@ -71,35 +71,28 @@ float ** ptr_to_ptr_to_float;
 
 int y;
 
+/* Do nothing function used for forcing some of the above variables to
+   be referenced by the program source.  If the variables are not
+   referenced, some linkers will remove the symbol from the symbol
+   table making it impossible to refer to the variable in gdb.  */
+void usevar (void *var) {}
+
 int main ()
 {
-    void dummy();
-    int more_code();
-    
-    /* Ensure that malloc is a pointer type; avoid use of "void" and any include files. */
-    /* extern char *malloc();*/
-
-    /*  void *malloc(size_t);*/
-    
-
-    
+  void dummy();
+  int more_code();
+  
 #ifdef usestubs
   set_debug_traps();
   breakpoint();
 #endif
   dummy();
-/*  v_int_pointer2 = &v_int_pointer;
-  v_unsigned_int_pointer = &v_int;
-  
-  y = (v_unsigned_int_pointer == v_double_pointer);
-  
-  x = v_unsigned_int_pointer * v_double_pointer;
-  
-  v_unsigned_int_pointer = v_double_pointer;
-  
-  v_unsigned_int_pointer = v_unsigned_int;*/
 
   more_code ();
+
+  usevar (&v_int_pointer2);
+  usevar (&rptr);
+  usevar (&y);
 
   return 0;
   

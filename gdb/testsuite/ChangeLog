@@ -1,3 +1,12 @@
+2000-03-21  Kevin Buettner <kevinb@redhat.com>
+
+	* gdb.base/pointers.c (usevar): New function.
+	(main): Make sure that global variables v_int_pointer2, rptr,
+	and y are all referenced someplace in the program by calling
+	usevar() on them.  [Some linkers delete symbols which are
+	never referenced.  The space remains, but there's no way to
+	get a (symbolic) handle on the variable from the debugger.]
+
 2000-03-14  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.base/printcmds.c: Add typedeffed arrays.
