@@ -2055,9 +2055,9 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       if (copy_byte >= 0)
 	{
 	  /* Keep only every `copy_byte'th byte in MEMHUNK.  */
-	  char *from = memhunk + copy_byte;
+	  char *from = (char *) memhunk + copy_byte;
 	  char *to = memhunk;
-	  char *end = memhunk + size;
+	  char *end = (char *) memhunk + size;
 
 	  for (; from < end; from += interleave)
 	    *to++ = *from;

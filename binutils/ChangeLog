@@ -1,3 +1,7 @@
+2004-02-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* objcopy.c (copy_section): Avoid warnings.
+
 2004-02-14  Andrew Cagney  <cagney@redhat.com>
 
 	* ar.c (remove_output): Use bfd_cache_close.

@@ -1,3 +1,8 @@
+2004-02-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* stabs.c (generate_asm_file): Avoid warning about use of
+	uninitialized variable.
+
 2004-02-18  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (ia64_flush_insns): In addition to prologue,
