@@ -1,3 +1,8 @@
+2002-07-31  H.J. Lu <hjl@gnu.org>
+
+	* config.bfd: Add n32 vectors to 32bit Linux/mips if 64bit BFD
+	is selected.
+
 2002-07-31  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-i386.c (elf_i386_copy_indirect_symbol): Swap tls_type

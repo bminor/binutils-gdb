@@ -759,12 +759,12 @@ case "${targ}" in
   mips*el-*-linux*)
     targ_defvec=bfd_elf32_tradlittlemips_vec
     targ_selvecs="bfd_elf32_tradbigmips_vec ecoff_little_vec ecoff_big_vec"
-    targ64_selvecs="bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec"
+    targ64_selvecs="bfd_elf32_ntradlittlemips_vec bfd_elf64_tradlittlemips_vec bfd_elf32_ntradbigmips_vec bfd_elf64_tradbigmips_vec"
     ;;
   mips*-*-linux*)
     targ_defvec=bfd_elf32_tradbigmips_vec
     targ_selvecs="bfd_elf32_tradlittlemips_vec ecoff_big_vec ecoff_little_vec"
-    targ64_selvecs="bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec"
+    targ64_selvecs="bfd_elf32_ntradbigmips_vec bfd_elf64_tradbigmips_vec bfd_elf32_ntradlittlemips_vec bfd_elf64_tradlittlemips_vec"
     ;;
 #ifdef BFD64
   mmix-*-*)

@@ -1,3 +1,8 @@
+2002-07-31  H.J. Lu <hjl@gnu.org>
+
+	* configure.tgt: Enable 64bit emulations for 32bit Linux/mips
+	if 64bit BFD is selected.
+
 2002-07-31  Ian Dall  <ian@sibyl.beware.dropbear.id.au>
 
 	* emultempl/netbsd.em (LDEMUL_BEFORE_PARSE): New file to custom set

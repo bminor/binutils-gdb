@@ -396,10 +396,16 @@ mips64*-*-linux-gnu*)	targ_emul=elf32btsmipn32
 			targ_extra_emuls="elf32ltsmipn32 elf32btsmip elf32ltsmip elf64btsmip elf64ltsmip"
 			;;
 mips*el-*-linux-gnu*)	targ_emul=elf32ltsmip
-			targ_extra_emuls="elf32btsmip elf64ltsmip elf64btsmip"
+			targ_extra_emuls="elf32btsmip"
+			if test x${want64} = xtrue; then
+			  targ_extra_emuls="$targ_extra_emuls elf32ltsmipn32 elf64ltsmip elf32btsmipn32 elf64btsmip"
+			fi
 			;;
 mips*-*-linux-gnu*)	targ_emul=elf32btsmip
-			targ_extra_emuls="elf32ltsmip elf64btsmip elf64ltsmip"
+			targ_extra_emuls="elf32ltsmip"
+			if test x${want64} = xtrue; then
+			  targ_extra_emuls="$targ_extra_emuls elf32btsmipn32 elf64btsmip elf32ltsmipn32 elf64ltsmip"
+			fi
 			;;
 mips*-*-lnews*)		targ_emul=mipslnews ;;
 mips*-*-sysv4*)         targ_emul=elf32btsmip ;;
