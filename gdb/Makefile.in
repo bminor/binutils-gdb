@@ -152,8 +152,6 @@ SUBDIR_CLI_SRCS = \
 	cli/cli-interp.c \
 	cli/cli-utils.c
 SUBDIR_CLI_DEPS =
-SUBDIR_CLI_INITS = \
-	$(SUBDIR_CLI_SRCS)
 SUBDIR_CLI_LDFLAGS=
 SUBDIR_CLI_CFLAGS=
 SUBDIR_CLI_ALL=
@@ -178,8 +176,6 @@ SUBDIR_MI_SRCS = \
 	mi/mi-interp.c \
 	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c
 SUBDIR_MI_DEPS =
-SUBDIR_MI_INITS = \
-	$(SUBDIR_MI_SRCS)
 SUBDIR_MI_LDFLAGS=
 SUBDIR_MI_CFLAGS= \
 	-DMI_OUT=1
@@ -227,8 +223,6 @@ SUBDIR_TUI_SRCS = \
 	tui/tui-winsource.c \
 	tui/tui.c
 SUBDIR_TUI_DEPS =
-SUBDIR_TUI_INITS = \
-	$(SUBDIR_TUI_SRCS)
 SUBDIR_TUI_LDFLAGS=
 SUBDIR_TUI_CFLAGS= \
 	-DTUI=1 -I${srcdir}/tui
@@ -310,7 +304,6 @@ SUBDIR_GDBTK_SRCS = \
 	gdbtk/generic/gdbtk-main.c
 SUBDIR_GDBTK_DEPS = \
 	$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TK_DEPS) $(TCL_DEPS)
-SUBDIR_GDBTK_INITS = gdbtk/generic/gdbtk.c gdbtk/generic/gdbtk-interp.c
 SUBDIR_GDBTK_LDFLAGS=
 SUBDIR_GDBTK_CFLAGS= -DGDBTK
 SUBDIR_GDBTK_ALL= all-gdbtk
@@ -319,10 +312,8 @@ SUBDIR_GDBTK_INSTALL= install-gdbtk
 SUBDIR_GDBTK_UNINSTALL= uninstall-gdbtk
 
 CONFIG_OBS= @CONFIG_OBS@
-CONFIG_LIB_OBS= @CONFIG_LIB_OBS@
 CONFIG_SRCS= @CONFIG_SRCS@
 CONFIG_DEPS= @CONFIG_DEPS@
-CONFIG_INITS= @CONFIG_INITS@
 CONFIG_LDFLAGS = @CONFIG_LDFLAGS@
 ENABLE_CFLAGS= @ENABLE_CFLAGS@
 CONFIG_ALL= @CONFIG_ALL@
@@ -423,8 +414,6 @@ REMOTE_OBS = remote.o dcache.o remote-utils.o tracepoint.o ax-general.o ax-gdb.o
 
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS =
-
-ANNOTATE_OBS = annotate.o
 
 # Host and target-dependent makefile fragments come in here.
 @host_makefile_frag@
@@ -882,7 +871,7 @@ REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 # Makefile.in
 
 DEPFILES = $(TDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
-	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_LIB_OBS)
+	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_OBS)
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)
 # Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
@@ -892,6 +881,7 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = version.o \
+	annotate.o \
 	auxv.o \
 	bfd-target.o \
 	blockframe.o breakpoint.o findvar.o regcache.o \
@@ -902,6 +892,7 @@ COMMON_OBS = version.o \
 	infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \
 	interps.o \
+	main.o \
 	macrotab.o macrocmd.o macroexp.o macroscope.o \
 	event-loop.o event-top.o inf-loop.o completer.o \
 	gdbarch.o arch-utils.o gdbtypes.o osabi.o copying.o $(DEPFILES) \
@@ -934,7 +925,7 @@ COMMON_OBS = version.o \
 	reggroups.o \
 	trad-frame.o
 
-OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
+OBS = $(COMMON_OBS)
 
 TSOBS = inflow.o
 
@@ -1051,7 +1042,7 @@ uninstall: force $(CONFIG_UNINSTALL)
 # automatically adds the $(srcdir) prefixes when it encounters files
 # in sub-directories such as cli/ and mi/.
 
-INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_OBS) $(CONFIG_INITS)
+INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_SRCS)
 init.c: $(INIT_FILES)
 	@echo Making init.c
 	@rm -f init.c-tmp init.l-tmp
@@ -1092,10 +1083,10 @@ init.c: $(INIT_FILES)
 init.o: init.c $(defs_h) $(call_cmds_h)
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb$(EXEEXT): gdb.o main.o libgdb.a $(CONFIG_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
+gdb$(EXEEXT): gdb.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	rm -f gdb$(EXEEXT)
 	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
-		-o gdb$(EXEEXT) gdb.o main.o $(CONFIG_OBS) libgdb.a \
+		-o gdb$(EXEEXT) gdb.o libgdb.a \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
 nlm:	force
@@ -2628,11 +2619,11 @@ clean-gdbtk:
 	rm -f insight$(EXEEXT)
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-insight$(EXEEXT): gdbtk-main.o main.o libgdb.a $(CONFIG_OBS) $(ADD_DEPS) \
+insight$(EXEEXT): gdbtk-main.o libgdb.a $(ADD_DEPS) \
 		$(CDEPS) $(TDEPLIBS)
 	rm -f insight$(EXEEXT)
 	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
-		-o insight$(EXEEXT) gdbtk-main.o main.o $(CONFIG_OBS) libgdb.a \
+		-o insight$(EXEEXT) gdbtk-main.o libgdb.a \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
 gdbres.o: $(srcdir)/gdbtk/gdb.rc $(srcdir)/gdbtk/gdbtool.ico

@@ -1,5 +1,19 @@
 2004-02-07  Andrew Cagney  <cagney@redhat.com>
-	
+
+	* configure.in (CONFIG_INITS, CONFIG_LIB_OBS): Delete.
+	* configure: Re-generate.
+	* Makefile.in (INIT_FILES): Replace CONFIG_INITS with CONFIG_SRCS.
+	(CONFIG_LIB_OBS, CONFIG_INITS): Delete.
+	(COMMON_OBS): Add "main.o" and "annotate.o".
+	(ANNOTATE_OBS): Delete.
+	(OBS): Remove ANNOTATE_OBS.
+	(DEPFILES): Replace CONFIG_LIB_OBS with CONFIG_LIB_OBS, remove
+	CONFIG_INITS.
+	(gdb$(EXEEXT), insight$(EXEEXT)): Do not depend on, or link
+	against CONFIG_OBS and "main.o".
+	(SUBDIR_CLI_INITS, SUBDIR_MI_INITS): Delete.
+	(SUBDIR_TUI_INITS, SUBDIR_GDBTK_INITS): Delete.
+
 	* tui/tui-command.c: Include "gdb_string.h", delete register
 	attribute, use ISO-C function signatures.
 	* tui/tui-disasm.c, tui/tui-file.c, tui/tui-io.c: Ditto.
