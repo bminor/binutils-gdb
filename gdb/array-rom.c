@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern int baud_rate;
 
-void gdb_open();
+void array_open();
 void monitor_open();
 
 /*
@@ -36,28 +36,8 @@ void monitor_open();
  * registers either. So, typing "info reg sp" becomes a "r30".
  */
 static char *array_regnames[] = REGISTER_NAMES;
-
-#if 0
-static char *array_regnames[] = {
-  "r0",		"r1",	"r2",	"r3",	"r4",	"r5",	"r6",	"r7",
-  "r8",		"r9",	"r10",	"r11",	"r12",	"r13",	"r14",	"r15",
-  "r16",	"r17",	"r18",	"r19",	"r20",	"r21",	"r22",	"r23",
-  "r24",	"r25",	"r26",	"r27",	"r28",	"r29",	"r30",	"r31",
-  "sr",		"lo",	"hi",	"bad",	"cause","pc",
-  "f0",		"f1",	"f2",	"f3",	"f4",	"f5",	"f6",	"f7",
-  "f8",		"f9",	"f10",	"f11",	"f12",	"f13",	"f14",	"f15",
-  "f16",	"f17",	"f18",	"f19",	"f20",	"f21",	"f22",	"f23",
-  "f24",	"f25",	"f26",	"f27",	"f28",	"f29",	"f30",	"f31",
-  "fsr",	"fir",	"fp",
-  "",      "",     "",     "",    "",  "",    "",
-  "",     "",      "",     "",     "",    "",    "",    "",
-  "",     "",      "",     "",     "",    "",    "",    "",
-  "",     "",      "",     "",     "",    "",    "",    "",
-  "",     "",      "",     "",     "",    "",    "",    "",
-  "",     "",      "",     "",     "",    "",    "",    "",
-  "",     "",      "",     "",     "",    "",    "",    ""
-};
-#endif
+extern char *tmp_mips_processor_type;
+extern int mips_set_processor_type();
 
 /*
  * Define the monitor command strings. Since these are passed directly
@@ -70,7 +50,7 @@ struct target_ops array_ops = {
   "Debug using the standard GDB remote protocol for the Array Tech target.",
   "Debug using the standard GDB remote protocol for the Array Tech target.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).",
-  gdb_open,
+  array_open,
   monitor_close, 
   monitor_attach,
   monitor_detach,
@@ -112,11 +92,11 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 struct monitor_ops array_cmds = {
   0,					/* 1 for ASCII, 0 for binary */
   "$?#b8+\n",				/* monitor init string */
-  "go %x",				/* execute or usually GO command */
-  "c",					/* continue command */
-  "s",					/* single step */
-  "brk %x",				/* set a breakpoint */
-  "unbrk %x",				/* clear a breakpoint */
+  "go %x\n",				/* execute or usually GO command */
+  "c\n",				/* continue command */
+  "s\n",				/* single step */
+  "brk 0x%x\n",				/* set a breakpoint */
+  "unbrk %x\n",				/* clear a breakpoint */
   0,					/* 0 for number, 1 for address */
   {
     "M%8x,%4x:%8x",			/* set memory */
@@ -150,22 +130,32 @@ struct monitor_ops array_cmds = {
   array_regnames			/* registers names */
 };
 
+/*
+ * array_open -- open the Array Tech LSI33k based RAID disk controller.
+ */
 void
-gdb_open(args, from_tty)
+array_open(args, from_tty)
      char *args;
      int from_tty;
 {
+  tmp_mips_processor_type = "lsi33k";	/* change the default from r3051 */
+  mips_set_processor_type_command ("lsi33k", 0);
+
+  baud_rate = 4800;			/* this is the only supported baud rate */
+
   target_preopen(from_tty);
   push_target  (&array_ops);
   push_monitor (&array_cmds);
   monitor_open (args, "array", from_tty);
 }
 
+/*
+ * _initialize_array -- do any special init stuff for the target.
+ */
 void
 _initialize_array ()
 {
   add_target (&array_ops);
-  baud_rate = 4800;
 }
 
 
