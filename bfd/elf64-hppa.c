@@ -358,8 +358,21 @@ static boolean
 elf64_hppa_object_p (abfd)
      bfd *abfd;
 {
-  /* Set the right machine number for an HPPA ELF file.  */
-  return bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 25);
+  unsigned int flags = elf_elfheader (abfd)->e_flags;
+
+  switch (flags & (EF_PARISC_ARCH | EF_PARISC_WIDE))
+    {
+    case EFA_PARISC_1_0:
+      return bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 10);
+    case EFA_PARISC_1_1:
+      return bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 11);
+    case EFA_PARISC_2_0:
+      return bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 20);
+    case EFA_PARISC_2_0 | EF_PARISC_WIDE:
+      return bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 25);
+    }
+  /* Don't be fussy.  */
+  return true;
 }
 
 /* Given section type (hdr->sh_type), return a boolean indicating

@@ -2,6 +2,8 @@
 
 	* elf64-hppa.c (elf64_hppa_elf_get_symbol_type): New function.
 	(elf_backend_get_symbol_type): Define.
+	(elf64_hppa_object_p): Set architecture and machine from elf
+	header flags.
 
 2001-01-30  Curtis L. Janssen  <cljanss@ca.sandia.gov>
 
