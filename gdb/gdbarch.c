@@ -66,6 +66,7 @@
 #include "gdb-events.h"
 #include "reggroups.h"
 #include "osabi.h"
+#include "symfile.h"		/* For entry_point_address.  */
 
 /* Static function declarations */
 
@@ -527,6 +528,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->cannot_store_register = cannot_register_not;
   current_gdbarch->deprecated_use_generic_dummy_frames = 1;
   current_gdbarch->call_dummy_location = AT_ENTRY_POINT;
+  current_gdbarch->call_dummy_address = entry_point_address;
   current_gdbarch->call_dummy_start_offset = -1;
   current_gdbarch->call_dummy_breakpoint_offset = -1;
   current_gdbarch->call_dummy_breakpoint_offset_p = -1;
@@ -672,9 +674,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of get_longjmp_target, has predicate */
   /* Skip verify of deprecated_use_generic_dummy_frames, invalid_p == 0 */
   /* Skip verify of call_dummy_location, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->call_dummy_location == AT_ENTRY_POINT && gdbarch->call_dummy_address == 0))
-    fprintf_unfiltered (log, "\n\tcall_dummy_address");
+  /* Skip verify of call_dummy_address, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_start_offset == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_start_offset");

@@ -418,9 +418,6 @@ extern int attach_flag;
 #define ON_STACK 1
 #define AT_ENTRY_POINT 4
 
-#if !defined (CALL_DUMMY_ADDRESS)
-#define CALL_DUMMY_ADDRESS() (internal_error (__FILE__, __LINE__, "CALL_DUMMY_ADDRESS"), 0)
-#endif
 #if !defined (CALL_DUMMY_START_OFFSET)
 #define CALL_DUMMY_START_OFFSET (internal_error (__FILE__, __LINE__, "CALL_DUMMY_START_OFFSET"), 0)
 #endif

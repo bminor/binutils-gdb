@@ -1276,7 +1276,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_return_value (gdbarch, v850_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, v850_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, v850_use_struct_convention);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);

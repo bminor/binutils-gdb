@@ -39,6 +39,7 @@
 #if !GDB_MULTI_ARCH
 /* Pull in function declarations refered to, indirectly, via macros.  */
 #include "inferior.h"		/* For unsigned_address_to_pointer().  */
+#include "symfile.h"		/* For entry_point_address().  */
 #endif
 
 struct frame_info;
@@ -1138,6 +1139,11 @@ extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_d
 #if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_LOCATION)
 #define CALL_DUMMY_LOCATION (gdbarch_call_dummy_location (current_gdbarch))
 #endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (CALL_DUMMY_ADDRESS)
+#define CALL_DUMMY_ADDRESS() (entry_point_address ())
 #endif
 
 typedef CORE_ADDR (gdbarch_call_dummy_address_ftype) (void);

@@ -4255,9 +4255,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   
   /* Use generic dummy frames.  */
   
-  /* Where to execute the call in the memory segments.  */
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  
   /* Start execution at the beginning of dummy.  */
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);

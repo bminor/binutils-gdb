@@ -520,7 +520,7 @@ F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc::0:0
 # avoids any potential problems with moving beyond multi-arch partial.
 v:1:DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
 v:1:CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
-f:2:CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void:::0:0::gdbarch->call_dummy_location == AT_ENTRY_POINT && gdbarch->call_dummy_address == 0
+f::CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void::::entry_point_address::0
 v:2:CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset::::0:-1:::0x%08lx
 v:2:CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:call_dummy_breakpoint_offset::::0:-1::gdbarch->call_dummy_breakpoint_offset_p && gdbarch->call_dummy_breakpoint_offset == -1:0x%08lx::CALL_DUMMY_BREAKPOINT_OFFSET_P
 v:1:CALL_DUMMY_BREAKPOINT_OFFSET_P:int:call_dummy_breakpoint_offset_p::::0:-1
@@ -805,6 +805,7 @@ cat <<EOF
 #if !GDB_MULTI_ARCH
 /* Pull in function declarations refered to, indirectly, via macros.  */
 #include "inferior.h"		/* For unsigned_address_to_pointer().  */
+#include "symfile.h"		/* For entry_point_address().  */
 #endif
 
 struct frame_info;
@@ -1305,6 +1306,7 @@ cat <<EOF
 #include "gdb-events.h"
 #include "reggroups.h"
 #include "osabi.h"
+#include "symfile.h"		/* For entry_point_address.  */
 
 /* Static function declarations */
 
