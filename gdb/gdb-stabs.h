@@ -55,7 +55,8 @@ struct stab_section_info {
    field of the objfile struct.  */
  
 struct dbx_symfile_info {
-  asection *text_sect;		/* Text section accessor */
+  CORE_ADDR text_addr;		/* Start of text section */
+  int text_size;		/* Size of text section */
   int symcount;			/* How many symbols are there in the file */
   char *stringtab;		/* The actual string table */
   int stringtab_size;		/* Its size */
@@ -66,7 +67,8 @@ struct dbx_symfile_info {
 };
 
 #define DBX_SYMFILE_INFO(o)	((struct dbx_symfile_info *)((o)->sym_stab_info))
-#define DBX_TEXT_SECT(o)	(DBX_SYMFILE_INFO(o)->text_sect)
+#define DBX_TEXT_ADDR(o)	(DBX_SYMFILE_INFO(o)->text_addr)
+#define DBX_TEXT_SIZE(o)	(DBX_SYMFILE_INFO(o)->text_size)
 #define DBX_SYMCOUNT(o)		(DBX_SYMFILE_INFO(o)->symcount)
 #define DBX_STRINGTAB(o)	(DBX_SYMFILE_INFO(o)->stringtab)
 #define DBX_STRINGTAB_SIZE(o)	(DBX_SYMFILE_INFO(o)->stringtab_size)

@@ -1,5 +1,40 @@
 Mon Jul 17 13:08:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* stabsread.h (struct stab_section_list): Define.
+	(coffstab_build_psymtabs): Remove staboff and stabsize parameters.
+	Add textaddr, textsize, and stabs parameters.
+	* gdb-stabs.h (struct dbx_symfile_info): Remove text_sect field.
+	Add text_addr and text_size fields.
+	(DBX_TEXT_SECT): Don't define.
+	(DBX_TEXT_ADDR, DBX_TEXT_SIZE): Define.
+	* coffread.c: Include <ctype.h>.
+	(struct coff_symfile_info): Remove stabsect and stabindexsect
+	fields.  Add textaddr, textsize, and stabsects fields.
+	(coff_locate_sections): Record the address of the .text section,
+	and total the sizes of all sections with names beginning with
+	".text".  Don't bother to record a .stab.index section (COFF
+	doesn't use them).  Make a linked list of all sections with names
+	beginning with ".stab".
+	(coff_symfile_read): Adjust call to coffstab_build_psymtabs for
+	new parameters.
+	* dbxread.c (dbx_symfile_read): Use DBX_TEXT_ADDR and
+	DBX_TEXT_SIZE, rather than getting both from DBX_TEXT_SECT.
+	(dbx_symfile_init): Set DBX_TEXT_ADDR and DBX_TEXT_SIZE, not
+	DBX_TEXT_SECT.
+	(elfstab_build_psymtabs): Likewise.
+	(stabsect_build_psymtabs): Likewise.
+	(symbuf_sections, symbuf_left, symbuf_read): New static variables.
+	(fill_symbuf): If symbuf_sections is not NULL, read symbols from
+	multiple sections.
+	(coffstab_build_psymtabs): Remove staboffset and stabsize
+	parameters.  Add textaddr, textsize, and stabsects parameters.
+	Set DBX_TEXT_ADDR and DBX_TEXT_SIZE, not DBX_TEXT_SECT.  Handle
+	multiple stabs sections.
+	* os9kread.c (os9k_symfile_read):  Use DBX_TEXT_ADDR and
+	DBX_TEXT_SIZE, rather than getting both from DBX_TEXT_SECT.
+	(os9k_symfile_init): Set DBX_TEXT_ADDR and DBX_TEXT_SIZE, not
+	DBX_TEXT_SECT.
+
 	* remote-vx.c (vx_ops, vx_run_ops): Initialize new to_thread_alive
 	field.
 

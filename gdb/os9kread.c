@@ -348,8 +348,8 @@ os9k_symfile_read (objfile, section_offsets, mainline)
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
   read_os9k_psymtab (section_offsets, objfile,
-		   bfd_section_vma  (sym_bfd, DBX_TEXT_SECT (objfile)),
-		   bfd_section_size (sym_bfd, DBX_TEXT_SECT (objfile)));
+		     DBX_TEXT_ADDR (objfile),
+		     DBX_TEXT_SIZE (objfile));
 
   do_cleanups (back_to);
 }
@@ -389,7 +389,7 @@ os9k_symfile_init (objfile)
   char dbgname[512], stbname[512];
   FILE *symfile = 0;
   FILE *minfile = 0;
-
+  asection *text_sect;
 
   strcpy(dbgname, name);
   strcat(dbgname, ".dbg");
@@ -411,9 +411,11 @@ os9k_symfile_init (objfile)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
   DBX_SYMFILE_INFO (objfile)->stab_section_info = NULL;
 
-  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
-  if (!DBX_TEXT_SECT (objfile))
+  text_sect = bfd_get_section_by_name (sym_bfd, ".text");
+  if (!text_sect)
     error ("Can't find .text section in file");
+  DBX_TEXT_ADDR (objfile) = bfd_section_vma (sym_bfd, text_sect);
+  DBX_TEXT_SIZE (objfile) = bfd_section_size (sym_bfd, text_sect);
 
   DBX_SYMBOL_SIZE (objfile) = 0;     /* variable size symbol */
   DBX_SYMCOUNT (objfile) =  0;  /* used to be bfd_get_symcount(sym_bfd) */
