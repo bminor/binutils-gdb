@@ -1,3 +1,17 @@
+2001-07-18  DJ Delorie  <dj@redhat.com>
+
+	* config/default.exp (WINDRES): Add.
+	* binutils-all/windres/windres.exp: New.
+	* binutils-all/windres/README: New.
+	* binutils-all/windres/bmp1.bmp: New.
+	* binutils-all/windres/bmpalign.rc: New.
+	* binutils-all/windres/bmpalign.rsd: New.
+	* binutils-all/windres/lang.rc: New.
+	* binutils-all/windres/lang.rsd: New.
+	* binutils-all/windres/msupdate: New.
+	* binutils-all/windres/strtab1.rc: New.
+	* binutils-all/windres/strtab1.rsd: New.
+
 2001-07-05  Ben Elliston  <bje@redhat.com>
 
 	* lib/utils-lib.exp (target_assemble): Remove duplicate copy.
