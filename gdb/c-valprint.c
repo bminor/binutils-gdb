@@ -463,6 +463,28 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
       fprintf_filtered (stream, "<incomplete type>");
       break;
 
+    case TYPE_CODE_COMPLEX:
+      if (format)
+	print_scalar_formatted (valaddr + embedded_offset,
+				TYPE_TARGET_TYPE (type),
+				format, 0, stream);
+      else
+	print_floating (valaddr + embedded_offset, TYPE_TARGET_TYPE (type),
+			stream);
+      fprintf_filtered (stream, " + ");
+      if (format)
+	print_scalar_formatted (valaddr + embedded_offset
+				+ TYPE_LENGTH (TYPE_TARGET_TYPE (type)),
+				TYPE_TARGET_TYPE (type),
+				format, 0, stream);
+      else
+	print_floating (valaddr + embedded_offset
+			+ TYPE_LENGTH (TYPE_TARGET_TYPE (type)),
+			TYPE_TARGET_TYPE (type),
+			stream);
+      fprintf_filtered (stream, " * I");
+      break;
+
     default:
       error ("Invalid C/C++ type code %d in symbol table.", TYPE_CODE (type));
     }

@@ -1,5 +1,9 @@
 2002-02-05  Daniel Jacobowitz  <drow@mvista.com>
 
+        * c-valprint.c (c_val_print): Handle TYPE_CODE_COMPLEX.
+
+2002-02-05  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/linux-low.c: Remove unused include files.
 
 2002-02-05  Daniel Jacobowitz  <drow@mvista.com>
