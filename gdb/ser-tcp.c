@@ -237,21 +237,13 @@ net_close (struct serial *scb)
 static int
 net_read_prim (struct serial *scb, size_t count)
 {
-#ifdef HAVE_RECV
   return recv (scb->fd, scb->buf, count, 0);
-#else
-  return ser_unix_read_prim (scb, count);
-#endif
 }
 
 static int
 net_write_prim (struct serial *scb, const char *str, int len)
 {
-#ifdef HAVE_SEND
   return send (scb->fd, str, len, 0);
-#else
-  return ser_unix_write_prim (scb, str, len);
-#endif
 }
 
 void
