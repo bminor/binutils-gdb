@@ -643,14 +643,14 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *info,
     free (alloc);
 }
 
-/* Locate a symbol given a bfd and a section (from INFO->application_data),
-   and a VMA.  If INFO->application_data->require_sec is TRUE, then always
-   require the symbol to be in the section.  Returns NULL if there is no
-   suitable symbol.  If PLACE is not NULL, then *PLACE is set to the index
-   of the symbol in sorted_syms.  */
+/* Locate a symbol given a bfd, a section, and a VMA.  If REQUIRE_SEC
+   is TRUE, then always require the symbol to be in the section.  This
+   returns NULL if there is no suitable symbol.  If PLACE is not NULL,
+   then *PLACE is set to the index of the symbol in sorted_syms.  */
 
 static asymbol *
-find_symbol_for_address (bfd_vma vma, struct disassemble_info *info, long *place)
+find_symbol_for_address (bfd *abfd, asection *sec, bfd_vma vma,
+			 bfd_boolean require_sec, long *place)
 {
   /* @@ Would it speed things up to cache the last two symbols returned,
      and maybe their address ranges?  For many processors, only one memory
@@ -661,9 +661,6 @@ find_symbol_for_address (bfd_vma vma, struct disassemble_info *info, long *place
   long min = 0;
   long max = sorted_symcount;
   long thisplace;
-  struct objdump_disasm_info * aux = (struct objdump_disasm_info *) info->application_data;
-  bfd * abfd = aux->abfd;
-  asection * sec = aux->sec;
   unsigned int opb = bfd_octets_per_byte (abfd);
 
   if (sorted_symcount < 1)
@@ -707,7 +704,7 @@ find_symbol_for_address (bfd_vma vma, struct disassemble_info *info, long *place
      no way to tell what's desired without looking at the relocation
      table.  */
   if (sorted_syms[thisplace]->section != sec
-      && (aux->require_sec
+      && (require_sec
 	  || ((abfd->flags & HAS_RELOC) != 0
 	      && vma >= bfd_get_section_vma (abfd, sec)
 	      && vma < (bfd_get_section_vma (abfd, sec)
@@ -752,22 +749,15 @@ find_symbol_for_address (bfd_vma vma, struct disassemble_info *info, long *place
 	}
 
       if (sorted_syms[thisplace]->section != sec
-	  && (aux->require_sec
+	  && (require_sec
 	      || ((abfd->flags & HAS_RELOC) != 0
 		  && vma >= bfd_get_section_vma (abfd, sec)
 		  && vma < (bfd_get_section_vma (abfd, sec)
 			    + bfd_section_size (abfd, sec)))))
-	/* There is no suitable symbol.  */
-	return NULL;
-    }
-
-  /* Give the target a chance to reject the symbol.  */
-  while (! info->symbol_is_valid (sorted_syms [thisplace], info))
-    {
-      ++ thisplace;
-      if (thisplace >= sorted_symcount
-	  || bfd_asymbol_value (sorted_syms [thisplace]) > vma)
-	return NULL;
+	{
+	  /* There is no suitable symbol.  */
+	  return NULL;
+	}
     }
 
   if (place != NULL)
@@ -829,7 +819,7 @@ static void
 objdump_print_addr (bfd_vma vma, struct disassemble_info *info,
 		    bfd_boolean skip_zeroes)
 {
-  struct objdump_disasm_info * aux = (struct objdump_disasm_info *) info->application_data;
+  struct objdump_disasm_info *aux;
   asymbol *sym;
 
   if (sorted_symcount < 1)
@@ -839,7 +829,9 @@ objdump_print_addr (bfd_vma vma, struct disassemble_info *info,
       return;
     }
 
-  sym = find_symbol_for_address (vma, info, NULL);
+  aux = (struct objdump_disasm_info *) info->application_data;
+  sym = find_symbol_for_address (aux->abfd, aux->sec, vma, aux->require_sec,
+				 NULL);
   objdump_print_addr_with_sym (aux->abfd, aux->sec, sym, vma, info,
 			       skip_zeroes);
 }
@@ -858,9 +850,16 @@ objdump_print_address (bfd_vma vma, struct disassemble_info *info)
 static int
 objdump_symbol_at_address (bfd_vma vma, struct disassemble_info * info)
 {
+  struct objdump_disasm_info * aux;
   asymbol * sym;
 
-  sym = find_symbol_for_address (vma, info, NULL);
+  /* No symbols - do not bother checking.  */
+  if (sorted_symcount < 1)
+    return 0;
+
+  aux = (struct objdump_disasm_info *) info->application_data;
+  sym = find_symbol_for_address (aux->abfd, aux->sec, vma, aux->require_sec,
+				 NULL);
 
   return (sym != NULL && (bfd_asymbol_value (sym) == vma));
 }
@@ -1628,7 +1627,6 @@ disassemble_section (bfd *abfd, asection *section, void *info)
   bfd_get_section_contents (abfd, section, data, 0, datasize);
 
   paux->sec = section;
-  paux->require_sec = TRUE;
   pinfo->buffer = data;
   pinfo->buffer_vma = section->vma;
   pinfo->buffer_length = datasize;
@@ -1661,7 +1659,8 @@ disassemble_section (bfd *abfd, asection *section, void *info)
   printf (_("Disassembly of section %s:\n"), section->name);
 
   /* Find the nearest symbol forwards from our current position.  */
-  sym = find_symbol_for_address (section->vma + addr_offset, info, &place);
+  sym = find_symbol_for_address (abfd, section, section->vma + addr_offset,
+				 TRUE, &place);
 
   /* Disassemble a block of instructions up to the address associated with
      the symbol we have just found.  Then print the symbol and find the
@@ -1669,81 +1668,81 @@ disassemble_section (bfd *abfd, asection *section, void *info)
      or we have reached the end of the address range we are interested in.  */
   while (addr_offset < stop_offset)
     {
-      bfd_vma addr;
       asymbol *nextsym;
       unsigned long nextstop_offset;
       bfd_boolean insns;
 
-      addr = section->vma + addr_offset;
-
-      if (sym != NULL && bfd_asymbol_value (sym) <= addr)
+      if (sym != NULL
+	  && bfd_asymbol_value (sym) <= section->vma + addr_offset)
 	{
 	  int x;
 
 	  for (x = place;
 	       (x < sorted_symcount
-		&& (bfd_asymbol_value (sorted_syms[x]) <= addr));
+		&& (bfd_asymbol_value (sorted_syms[x])
+		    <= section->vma + addr_offset));
 	       ++x)
 	    continue;
 
-	  pinfo->symbols = sorted_syms + place;
+	  pinfo->symbols = & sorted_syms[place];
 	  pinfo->num_symbols = x - place;
 	}
       else
-	{
-	  pinfo->symbols = NULL;
-	  pinfo->num_symbols = 0;
-	}
+	pinfo->symbols = NULL;
 
       if (! prefix_addresses)
 	{
 	  pinfo->fprintf_func (pinfo->stream, "\n");
-	  objdump_print_addr_with_sym (abfd, section, sym, addr,
+	  objdump_print_addr_with_sym (abfd, section, sym,
+				       section->vma + addr_offset,
 				       pinfo, FALSE);
 	  pinfo->fprintf_func (pinfo->stream, ":\n");
 	}
 
-      if (sym != NULL && bfd_asymbol_value (sym) > addr)
+      if (sym != NULL
+	  && bfd_asymbol_value (sym) > section->vma + addr_offset)
 	nextsym = sym;
       else if (sym == NULL)
 	nextsym = NULL;
       else
 	{
-#define is_valid_next_sym(SYM) \
-  ((SYM)->section == section \
-   && (bfd_asymbol_value (SYM) > bfd_asymbol_value (sym)) \
-   && pinfo->symbol_is_valid (SYM, pinfo))
-	    
 	  /* Search forward for the next appropriate symbol in
 	     SECTION.  Note that all the symbols are sorted
 	     together into one big array, and that some sections
 	     may have overlapping addresses.  */
 	  while (place < sorted_symcount
-		 && ! is_valid_next_sym (sorted_syms [place]))
+		 && (sorted_syms[place]->section != section
+		     || (bfd_asymbol_value (sorted_syms[place])
+			 <= bfd_asymbol_value (sym))))
 	    ++place;
-
 	  if (place >= sorted_symcount)
 	    nextsym = NULL;
 	  else
 	    nextsym = sorted_syms[place];
 	}
 
-      if (sym != NULL && bfd_asymbol_value (sym) > addr)
-	nextstop_offset = bfd_asymbol_value (sym) - section->vma;
+      if (sym != NULL
+	  && bfd_asymbol_value (sym) > section->vma + addr_offset)
+	{
+	  nextstop_offset = bfd_asymbol_value (sym) - section->vma;
+	  if (nextstop_offset > stop_offset)
+	    nextstop_offset = stop_offset;
+	}
       else if (nextsym == NULL)
 	nextstop_offset = stop_offset;
       else
-	nextstop_offset = bfd_asymbol_value (nextsym) - section->vma;
-
-      if (nextstop_offset > stop_offset)
-	nextstop_offset = stop_offset;
+	{
+	  nextstop_offset = bfd_asymbol_value (nextsym) - section->vma;
+	  if (nextstop_offset > stop_offset)
+	    nextstop_offset = stop_offset;
+	}
 
       /* If a symbol is explicitly marked as being an object
 	 rather than a function, just dump the bytes without
 	 disassembling them.  */
       if (disassemble_all
 	  || sym == NULL
-	  || bfd_asymbol_value (sym) > addr
+	  || bfd_asymbol_value (sym) > section->vma + addr_offset
 	  || ((sym->flags & BSF_OBJECT) == 0
 	      && (strstr (bfd_asymbol_name (sym), "gnu_compiled")
 		  == NULL)
@@ -1790,7 +1789,7 @@ disassemble_data (bfd *abfd)
   /* Sort the symbols into section and symbol order.  */
   qsort (sorted_syms, sorted_symcount, sizeof (asymbol *), compare_symbols);
 
-  init_disassemble_info (&disasm_info, stdout, (fprintf_ftype) fprintf);
+  init_disassemble_info (&disasm_info, stdout, fprintf);
 
   disasm_info.application_data = (void *) &aux;
   aux.abfd = abfd;
@@ -1845,9 +1844,6 @@ disassemble_data (bfd *abfd)
     /* ??? Aborting here seems too drastic.  We could default to big or little
        instead.  */
     disasm_info.endian = BFD_ENDIAN_UNKNOWN;
-
-  /* Allow the target to customize the info structure.  */
-  disassemble_init_for_target (abfd, & disasm_info);
 
   /* Pre-load the dynamic relocs if we are going
      to be dumping them along with the disassembly.  */

@@ -1,3 +1,7 @@
+2003-11-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c: Revert rev 1.81 commit.
+
 2003-11-10  Tobias Burnus <tobias.burnus@physik.fu-berlin.de>
 
 	* ar.c (print_contents): Remove "member" from verbose output in
