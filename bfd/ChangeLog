@@ -1,3 +1,11 @@
+Tue Mar 16 10:35:27 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* elf32.c (elf_little_vec, elf_big_vec): Delete now-invalid
+	forward declarations.
+
+	* elf32-sparc.c (elf_sparc_howto_table): Don't use CONST here,
+	it's implied by the type.
+
 Fri Mar 12 18:58:08 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.host: recognize sparc-sun-solaris2* instead of sparc-sun-solaris*
