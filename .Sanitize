@@ -80,7 +80,7 @@ prms
 rcs
 readline
 sed
-send_pr
+send-pr
 shellutils
 sim
 tcl
