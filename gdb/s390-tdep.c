@@ -1760,7 +1760,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch = gdbarch_alloc (&info, NULL);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
-  set_gdbarch_char_signed (gdbarch, 0);
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, s390_frame_args_address);
