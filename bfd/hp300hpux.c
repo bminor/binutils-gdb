@@ -283,8 +283,10 @@ MY (write_object_contents) (abfd)
   /* this is really the sym table size but we store it in drelocs */
   bfd_h_put_32 (abfd, bfd_get_symcount (abfd) * 12, exec_bytes.e_drelocs);
 
-  bfd_seek (abfd, 0L, false);
-  bfd_write ((PTR) & exec_bytes, 1, EXEC_BYTES_SIZE, abfd);
+  if (bfd_seek (abfd, 0L, false) != 0
+      || (bfd_write ((PTR) & exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
+	  != EXEC_BYTES_SIZE))
+    return false;
 
   /* Write out the symbols, and then the relocs.  We must write out
        the symbols first so that we know the symbol indices.  */
@@ -302,12 +304,12 @@ MY (write_object_contents) (abfd)
 
   if (bfd_get_symcount (abfd) != 0)
     {
-      bfd_seek (abfd, (long) (N_TRELOFF (*execp)), false);
-
+      if (bfd_seek (abfd, (long) (N_TRELOFF (*execp)), false) != 0)
+	return false;
       if (!NAME (aout, squirt_out_relocs) (abfd, obj_textsec (abfd)))
 	return false;
-      bfd_seek (abfd, (long) (N_DRELOFF (*execp)), false);
-
+      if (bfd_seek (abfd, (long) (N_DRELOFF (*execp)), false) != 0)
+	return false;
       if (!NAME (aout, squirt_out_relocs) (abfd, obj_datasec (abfd)))
 	return false;
     }
@@ -503,8 +505,8 @@ MY (slurp_symbol_table) (abfd)
       return false;
     }
   syms = (struct external_nlist *) (strings + SYM_EXTRA_BYTES);
-  bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
-  if (bfd_read ((PTR) syms, symbol_bytes, 1, abfd) != symbol_bytes)
+  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
+      || bfd_read ((PTR) syms, symbol_bytes, 1, abfd) != symbol_bytes)
     {
       bfd_release (abfd, syms);
       return false;
@@ -739,7 +741,8 @@ MY (slurp_reloc_table) (abfd, asect, symbols)
   return false;
 
 doit:
-  bfd_seek (abfd, asect->rel_filepos, SEEK_SET);
+  if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
+    return false;
   each_size = obj_reloc_entry_size (abfd);
 
   count = reloc_size / each_size;

@@ -527,14 +527,16 @@ rs6000coff_snarf_ar_hdr (abfd)
 
 	size = sizeof (h.hdr);
 	if (bfd_read(&h.hdr, 1, size, abfd) != size) {
-		bfd_set_error (bfd_error_no_more_archived_files);
+	        if (bfd_get_error () != bfd_error_system_call)
+		  bfd_set_error (bfd_error_no_more_archived_files);
 		return NULL;
 	}
 	size  = atoi(h.hdr.ar_namlen);	/* ar_name[] length	*/
 	size += size & 1;
 
 	if (bfd_read(&h.hdr._ar_name.ar_name[2], 1, size, abfd) != size) {
-		bfd_set_error (bfd_error_no_more_archived_files);
+	        if (bfd_get_error () != bfd_error_system_call)
+		  bfd_set_error (bfd_error_no_more_archived_files);
 		return NULL;
 	}
 
@@ -634,7 +636,8 @@ rs6000coff_archive_p (abfd)
 	register struct artdata *art;
 
 	if (bfd_read (&hdr, sizeof (hdr), 1, abfd) != sizeof (hdr)) {
-		bfd_set_error (bfd_error_wrong_format);
+	        if (bfd_get_error () != bfd_error_system_call)
+		  bfd_set_error (bfd_error_wrong_format);
 		return 0;
 	}
 

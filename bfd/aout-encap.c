@@ -69,7 +69,8 @@ encap_object_p (abfd)
   struct external_exec exec_bytes;
   if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
       != EXEC_BYTES_SIZE) {
-    bfd_set_error (bfd_error_wrong_format);
+    if (bfd_get_error () != bfd_error_system_call)
+      bfd_set_error (bfd_error_wrong_format);
     return 0;
   }
   NAME(aout,swap_exec_header_in)(abfd, &exec_bytes, &exec);

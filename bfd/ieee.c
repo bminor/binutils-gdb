@@ -41,7 +41,8 @@ ieee_write_byte (abfd, byte)
      bfd *abfd;
      bfd_byte byte;
 {
-  bfd_write ((PTR) & byte, 1, 1, abfd);
+  if (bfd_write ((PTR) & byte, 1, 1, abfd) != 1)
+    abort ();
 }
 
 static void
@@ -52,7 +53,8 @@ ieee_write_twobyte (abfd, twobyte)
   bfd_byte b[2];
   b[1] = twobyte & 0xff;
   b[0] = twobyte >> 8;
-  bfd_write ((PTR) & b[0], 1, 2, abfd);
+  if (bfd_write ((PTR) & b[0], 1, 2, abfd) != 2)
+    abort ();
 }
 
 static void
@@ -64,7 +66,8 @@ ieee_write_2bytes (abfd, bytes)
   buffer[0] = bytes >> 8;
   buffer[1] = bytes & 0xff;
 
-  bfd_write ((PTR) buffer, 1, 2, abfd);
+  if (bfd_write ((PTR) buffer, 1, 2, abfd) != 2)
+    abort ();
 }
 
 static void
@@ -137,7 +140,8 @@ ieee_write_id (abfd, id)
     {
       BFD_FAIL ();
     }
-  bfd_write ((PTR) id, 1, length, abfd);
+  if (bfd_write ((PTR) id, 1, length, abfd) != length)
+    abort ();
 }
 
 
@@ -307,7 +311,8 @@ ieee_write_int5_out (abfd, value)
 {
   bfd_byte b[5];
   ieee_write_int5 (b, value);
-  bfd_write ((PTR) b, 1, 5, abfd);
+  if (bfd_write ((PTR) b, 1, 5, abfd) != 5)
+    abort ();
 }
 
 static boolean
@@ -1068,6 +1073,8 @@ ieee_archive_p (abfd)
     }
   ieee = IEEE_AR_DATA (abfd);
 
+  /* FIXME: Check return value.  I'm not sure whether it needs to read
+     the entire buffer or not.  */
   bfd_read ((PTR) buffer, 1, sizeof (buffer), abfd);
 
   ieee->h.first_byte = buffer;
@@ -1128,7 +1135,10 @@ ieee_archive_p (abfd)
 	    {
 	      /* Past half way, reseek and reprime */
 	      buffer_offset += ieee_pos (abfd);
-	      bfd_seek (abfd, buffer_offset, SEEK_SET);
+	      if (bfd_seek (abfd, buffer_offset, SEEK_SET) != 0)
+		return NULL;
+	      /* FIXME: Check return value.  I'm not sure whether it
+		 needs to read the entire buffer or not.  */
 	      bfd_read ((PTR) buffer, 1, sizeof (buffer), abfd);
 	      ieee->h.first_byte = buffer;
 	      ieee->h.input_p = buffer;
@@ -1150,7 +1160,10 @@ ieee_archive_p (abfd)
 
   for (i = 2; i < ieee->element_count; i++)
     {
-      bfd_seek (abfd, ieee->elements[i].file_offset, SEEK_SET);
+      if (bfd_seek (abfd, ieee->elements[i].file_offset, SEEK_SET) != 0)
+	return NULL;
+      /* FIXME: Check return value.  I'm not sure whether it needs to
+	 read the entire buffer or not.  */
       bfd_read ((PTR) buffer, 1, sizeof (buffer), abfd);
       ieee->h.first_byte = buffer;
       ieee->h.input_p = buffer;
@@ -1195,8 +1208,11 @@ ieee_object_p (abfd)
   ieee_mkobject (abfd);
 
   ieee = IEEE_DATA (abfd);
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+    goto fail;
   /* Read the first few bytes in to see if it makes sense */
+  /* FIXME: Check return value.  I'm not sure whether it needs to read
+     the entire buffer or not.  */
   bfd_read ((PTR) buffer, 1, sizeof (buffer), abfd);
 
   ieee->h.input_p = buffer;
@@ -1282,7 +1298,10 @@ ieee_object_p (abfd)
       bfd_set_error (bfd_error_no_memory);
       goto fail;
     }
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+    goto fail;
+  /* FIXME: Check return value.  I'm not sure whether it needs to read
+     the entire buffer or not.  */
   bfd_read ((PTR) (IEEE_DATA (abfd)->h.first_byte), 1, ieee->w.r.me_record + 50, abfd);
 
   ieee_slurp_sections (abfd);
@@ -1885,10 +1904,12 @@ do_with_relocs (abfd, s)
 	      ieee_write_byte (abfd, ieee_load_constant_bytes_enum);
 	      /* Output a stream of bytes */
 	      ieee_write_int (abfd, run);
-	      bfd_write ((PTR) (stream + current_byte_index),
-			 1,
-			 run,
-			 abfd);
+	      if (bfd_write ((PTR) (stream + current_byte_index),
+			     1,
+			     run,
+			     abfd)
+		  != run)
+		return false;
 	      current_byte_index += run;
 	    }
 	}
@@ -1934,10 +1955,12 @@ do_with_relocs (abfd, s)
 	    {
 	      /* Output a stream of bytes */
 	      ieee_write_int (abfd, run);
-	      bfd_write ((PTR) (stream + current_byte_index),
-			 1,
-			 run,
-			 abfd);
+	      if (bfd_write ((PTR) (stream + current_byte_index),
+			     1,
+			     run,
+			     abfd)
+		  != run)
+		return false;
 	      current_byte_index += run;
 	    }
 	  /* Output any relocations here */
@@ -2079,13 +2102,18 @@ static int output_buffer;
 static void
 fill ()
 {
+  /* FIXME: Check return value.  I'm not sure whether it needs to read
+     the entire buffer or not.  */
   bfd_read ((PTR) input_ptr_start, 1, input_ptr_end - input_ptr_start, input_bfd);
   input_ptr = input_ptr_start;
 }
 static void
 flush ()
 {
-  bfd_write ((PTR) (output_ptr_start), 1, output_ptr - output_ptr_start, output_bfd);
+  if (bfd_write ((PTR) (output_ptr_start), 1, output_ptr - output_ptr_start,
+		 output_bfd)
+      != output_ptr - output_ptr_start)
+    abort ();
   output_ptr = output_ptr_start;
   output_buffer++;
 }
@@ -2732,6 +2760,8 @@ relocate_debug (output, input)
   input_ptr_start = input_ptr = input_buffer;
   input_ptr_end = input_buffer + IBS;
   input_bfd = input;
+  /* FIXME: Check return value.  I'm not sure whether it needs to read
+     the entire buffer or not.  */
   bfd_read ((PTR) input_ptr_start, 1, IBS, input);
   block ();
 }
@@ -2811,7 +2841,10 @@ ieee_write_debug_part (abfd)
 	  ieee_data_type *entry_ieee = IEEE_DATA (entry);
 	  if (entry_ieee->w.r.debug_information_part)
 	    {
-	      bfd_seek (entry, entry_ieee->w.r.debug_information_part, SEEK_SET);
+	      if (bfd_seek (entry, entry_ieee->w.r.debug_information_part,
+			    SEEK_SET)
+		  != 0)
+		abort ();
 	      relocate_debug (abfd, entry);
 	    }
 
@@ -3056,7 +3089,8 @@ ieee_write_object_contents (abfd)
   unsigned int i;
   file_ptr old;
   /* Fast forward over the header area */
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+    return false;
   ieee_write_byte (abfd, ieee_module_beginning_enum);
 
   ieee_write_id (abfd, bfd_printable_name (abfd));
@@ -3072,17 +3106,20 @@ ieee_write_object_contents (abfd)
 		   (bfd_byte) (bfd_arch_bits_per_address (abfd) / bfd_arch_bits_per_byte (abfd)));
 
   old = bfd_tell (abfd);
-  bfd_seek (abfd, (file_ptr) (8 * N_W_VARIABLES), SEEK_CUR);
+  if (bfd_seek (abfd, (file_ptr) (8 * N_W_VARIABLES), SEEK_CUR) != 0)
+    return false;
 
   ieee->w.r.extension_record = bfd_tell (abfd);
-  bfd_write ((char *) exten, 1, sizeof (exten), abfd);
+  if (bfd_write ((char *) exten, 1, sizeof (exten), abfd) != sizeof (exten))
+    return false;
   if (abfd->flags & EXEC_P)
     ieee_write_byte (abfd, 0x1);/* Absolute */
   else
     ieee_write_byte (abfd, 0x2);/* Relocateable */
 
   ieee->w.r.environmental_record = bfd_tell (abfd);
-  bfd_write ((char *) envi, 1, sizeof (envi), abfd);
+  if (bfd_write ((char *) envi, 1, sizeof (envi), abfd) != sizeof (envi))
+    return false;
   output_bfd = abfd;
   flush ();
 
@@ -3118,7 +3155,8 @@ ieee_write_object_contents (abfd)
 
 
   /* Generate the header */
-  bfd_seek (abfd, old, SEEK_SET);
+  if (bfd_seek (abfd, old, SEEK_SET) != 0)
+    return false;
 
   for (i = 0; i < N_W_VARIABLES; i++)
     {

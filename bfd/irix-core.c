@@ -80,7 +80,11 @@ irix_core_core_file_p (abfd)
 
   val = bfd_read ((PTR)&coreout, 1, sizeof coreout, abfd);
   if (val != sizeof coreout)
-    return 0;
+    {
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
+      return 0;
+    }
 
   if (coreout.c_magic != CORE_MAGIC
       || coreout.c_version != CORE_VERSION1)
@@ -93,7 +97,8 @@ irix_core_core_file_p (abfd)
   strncpy (core_command (abfd), coreout.c_name, CORE_NAMESIZE);
   core_signal (abfd) = coreout.c_sigcause;
 
-  bfd_seek (abfd, coreout.c_vmapoffset, SEEK_SET);
+  if (bfd_seek (abfd, coreout.c_vmapoffset, SEEK_SET) != 0)
+    return NULL;
 
   for (i = 0; i < coreout.c_nvmap; i++)
     {
@@ -139,7 +144,8 @@ irix_core_core_file_p (abfd)
       || idf->i_offset + idf->i_len != ids->i_offset)
     return 0;			/* Can't deal with non-contig regs */
 
-  bfd_seek (abfd, idg->i_offset, SEEK_SET);
+  if (bfd_seek (abfd, idg->i_offset, SEEK_SET) != 0)
+    return NULL;
 
   make_bfd_asection (abfd, ".reg",
 		     SEC_ALLOC+SEC_HAS_CONTENTS,

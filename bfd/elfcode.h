@@ -1545,8 +1545,10 @@ elf_write_phdrs (abfd, i_ehdrp, i_phdrp, phdr_cnt)
   for (i = 0; i < phdr_cnt; i++)
     {
       elf_swap_phdr_out (abfd, i_phdrp + i, &x_phdr);
-      bfd_seek (abfd, outbase, SEEK_SET);
-      bfd_write ((PTR) & x_phdr, sizeof (x_phdr), 1, abfd);
+      if (bfd_seek (abfd, outbase, SEEK_SET) != 0
+	  || (bfd_write ((PTR) & x_phdr, sizeof (x_phdr), 1, abfd)
+	      != sizeof (x_phdr)))
+	return false;
       outbase += sizeof (x_phdr);
     }
 
@@ -2301,8 +2303,10 @@ write_shdrs_and_ehdr (abfd)
   elf_debug_file (i_ehdrp);
 #endif
   elf_swap_ehdr_out (abfd, i_ehdrp, &x_ehdr);
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
-  bfd_write ((PTR) & x_ehdr, sizeof (x_ehdr), 1, abfd);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
+      || (bfd_write ((PTR) & x_ehdr, sizeof (x_ehdr), 1, abfd)
+	  != sizeof (x_ehdr)))
+    return false;
 
   /* at this point we've concocted all the ELF sections... */
   x_shdrp = (Elf_External_Shdr *)
@@ -2321,8 +2325,11 @@ write_shdrs_and_ehdr (abfd)
 #endif
       elf_swap_shdr_out (abfd, i_shdrp[count], x_shdrp + count);
     }
-  bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET);
-  bfd_write ((PTR) x_shdrp, sizeof (*x_shdrp), i_ehdrp->e_shnum, abfd);
+  if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0
+      || (bfd_write ((PTR) x_shdrp, sizeof (*x_shdrp), i_ehdrp->e_shnum, abfd)
+	  != sizeof (*x_shdrp)))
+    return false;
+
   /* need to dump the string table too... */
 
   return true;
@@ -2387,9 +2394,11 @@ NAME(bfd_elf,write_object_contents) (abfd)
 	(*bed->elf_backend_section_processing) (abfd, i_shdrp[count]);
       if (i_shdrp[count]->contents)
 	{
-	  bfd_seek (abfd, i_shdrp[count]->sh_offset, SEEK_SET);
-	  bfd_write (i_shdrp[count]->contents, i_shdrp[count]->sh_size, 1,
-		     abfd);
+	  if (bfd_seek (abfd, i_shdrp[count]->sh_offset, SEEK_SET) != 0
+	      || (bfd_write (i_shdrp[count]->contents, i_shdrp[count]->sh_size,
+			     1, abfd)
+		  != i_shdrp[count]->sh_size))
+	    return false;
 	}
     }
 
@@ -2793,7 +2802,8 @@ elf_slurp_reloca_table (abfd, asect, symbols)
   if (asect->flags & SEC_CONSTRUCTOR)
     return true;
 
-  bfd_seek (abfd, asect->rel_filepos, SEEK_SET);
+  if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
+    return false;
   native_relocs = (Elf_External_Rela *)
     bfd_alloc (abfd, asect->reloc_count * sizeof (Elf_External_Rela));
   if (!native_relocs)
@@ -2801,8 +2811,10 @@ elf_slurp_reloca_table (abfd, asect, symbols)
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
-  bfd_read ((PTR) native_relocs,
-	    sizeof (Elf_External_Rela), asect->reloc_count, abfd);
+  if (bfd_read ((PTR) native_relocs,
+		sizeof (Elf_External_Rela), asect->reloc_count, abfd)
+      != sizeof (Elf_External_Rela) * asect->reloc_count)
+    return false;
 
   reloc_cache = (arelent *)
     bfd_alloc (abfd, (size_t) (asect->reloc_count * sizeof (arelent)));
@@ -2940,7 +2952,8 @@ elf_slurp_reloc_table (abfd, asect, symbols)
   if (asect->flags & SEC_CONSTRUCTOR)
     return true;
 
-  bfd_seek (abfd, asect->rel_filepos, SEEK_SET);
+  if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
+    return false;
   native_relocs = (Elf_External_Rel *)
     bfd_alloc (abfd, asect->reloc_count * sizeof (Elf_External_Rel));
   if (!native_relocs)
@@ -2948,8 +2961,10 @@ elf_slurp_reloc_table (abfd, asect, symbols)
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
-  bfd_read ((PTR) native_relocs,
-	    sizeof (Elf_External_Rel), asect->reloc_count, abfd);
+  if (bfd_read ((PTR) native_relocs,
+		sizeof (Elf_External_Rel), asect->reloc_count, abfd)
+      != sizeof (Elf_External_Rel) * asect->reloc_count)
+    return false;
 
   reloc_cache = (arelent *)
     bfd_alloc (abfd, (size_t) (asect->reloc_count * sizeof (arelent)));

@@ -454,10 +454,7 @@ nlm_powerpc_read_reloc (abfd, sym, secp, rel)
 
   /* Read the reloc from the file.  */
   if (bfd_read (&ext, sizeof ext, 1, abfd) != sizeof ext)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return false;
-    }
+    return false;
 
   /* Swap in the fields.  */
   l_vaddr = bfd_h_get_32 (abfd, ext.l_vaddr);
@@ -556,10 +553,7 @@ nlm_powerpc_read_import (abfd, sym)
 
   if (bfd_read ((PTR) &symlength, sizeof (symlength), 1, abfd)
       != sizeof (symlength))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   sym -> symbol.the_bfd = abfd;
   name = bfd_alloc (abfd, symlength + 1);
   if (name == NULL)
@@ -568,20 +562,14 @@ nlm_powerpc_read_import (abfd, sym)
       return false;
     }
   if (bfd_read (name, symlength, 1, abfd) != symlength)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   name[symlength] = '\0';
   sym -> symbol.name = name;
   sym -> symbol.flags = 0;
   sym -> symbol.value = 0;
   sym -> symbol.section = &bfd_und_section;
   if (bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   rcount = bfd_h_get_32 (abfd, temp);
   nlm_relocs = ((struct nlm_relent *)
 		bfd_alloc (abfd, rcount * sizeof (struct nlm_relent)));
@@ -740,17 +728,11 @@ nlm_powerpc_write_external (abfd, count, sym, relocs)
   len = strlen (sym->name);
   if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd) != sizeof(bfd_byte))
       || bfd_write (sym->name, len, 1, abfd) != len)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return false;
-    }
+    return false;
 
   bfd_put_32 (abfd, count, temp);
   if (bfd_write (temp, sizeof(temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return false;
-    }
+    return false;
 
   for (i = 0; i < count; i++)
     {

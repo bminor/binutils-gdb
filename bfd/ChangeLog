@@ -1,5 +1,41 @@
 Mon Apr  4 15:30:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	Made sure that every call to bfd_read, bfd_write, and bfd_seek
+	checks the return value and handled bfd_error correctly.  These
+	changes are not itemised.  Also:
+	* aoutx.h (emit_strtab): Change return type to boolean, and return
+	errors.
+	(NAME(aout,write_syms)): Check emit_strtab return value.
+	(NAME(aout,final_link)): Likewise.
+	* coffcode.h (coff_write_relocs): Change return type to boolean,
+	and return errors.
+	(coff_write_object_contents): Check coff_write_relocs return
+	value.
+	* i386os9k.c (os9k_swap_exec_header_in): Change return type to
+	boolean.
+	(os9k_object_p): Check os9k_swap_exec_header_in return value.
+	* oasys.c (oasys_read_record): Change return type to boolean.
+	(oasys_slurp_symbol_table: Check oasys_read_record return value.
+	(oasys_object_p, oasys_slurp_section_data): Likewise.
+	(oasys_write_record): Change return type to boolean.
+	(oasys_write_syms): Likewise.  Also, check oasys_write_record
+	return value.
+	(oasys_write_sections): Check oasys_write_record return value.
+	(oasys_write_header): Change return type to boolean.  Check
+	oasys_write_record return value.
+	(oasys_write_end, oasys_write_data): Likewise.
+	(oasys_write_object_contents): Check return values of
+	oasys_write_header, oasys_write_syms, oasys_write_data, and
+	oasys_write_end.
+	* srec.c (srec_write_record): Change return type to boolean.
+	(srec_write_header): Likewise.  Also, check srec_write_record
+	return value.
+	(srec_write_section, srec_write_terminator): Likewise.
+	(srec_write_symbols): Change return type to boolean.
+	(internal_srec_write_object_contents): Check return value of
+	srec_write_symbols, srec_write_header, srec_write_section, and
+	srec_write_terminator.
+
 	* Makefile.in: Rebuilt dependencies.
 
 Mon Apr  4 10:56:45 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)

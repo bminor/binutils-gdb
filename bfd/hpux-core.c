@@ -136,7 +136,9 @@ hpux_core_core_file_p (abfd)
 	case CORE_EXEC:
 	  {
 	    struct proc_exec proc_exec;
-	    bfd_read ((void *) &proc_exec, 1, core_header.len, abfd);
+	    if (bfd_read ((void *) &proc_exec, 1, core_header.len, abfd)
+		!= core_header.len)
+	      break;
 	    strncpy (core_command (abfd), proc_exec.cmd, MAXCOMLEN + 1);
 	  }
 	  break;
@@ -148,7 +150,9 @@ hpux_core_core_file_p (abfd)
 						    core_header.len,
 				(int) &proc_info - (int) &proc_info.hw_regs,
 						    2);
-	    bfd_read (&proc_info, 1, core_header.len, abfd);
+	    if (bfd_read (&proc_info, 1, core_header.len, abfd)
+		!= core_header.len)
+	      break;
 	    core_signal (abfd) = proc_info.sig;
 	  }
 	  if (!core_regsec (abfd))

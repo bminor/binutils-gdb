@@ -130,7 +130,8 @@ hppabsd_core_core_file_p (abfd)
   val = bfd_read ((void *) &u, 1, sizeof u, abfd);
   if (val != sizeof u)
     {
-      bfd_set_error (bfd_error_wrong_format);
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 

@@ -67,8 +67,8 @@ cisco_core_file_p (abfd)
   nread = bfd_read (buf, 1, 4, abfd);
   if (nread != 4)
     {
-      /* Maybe the file is too small (FIXME: what about other errors).  */
-      bfd_set_error (bfd_error_wrong_format);
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
   crashinfo_offset = bfd_get_32 (abfd, buf);
@@ -79,8 +79,8 @@ cisco_core_file_p (abfd)
   nread = bfd_read (&crashinfo, 1, sizeof (crashinfo), abfd);
   if (nread != sizeof (crashinfo))
     {
-      /* Maybe the file is too small (FIXME: what about other errors).  */
-      bfd_set_error (bfd_error_wrong_format);
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 

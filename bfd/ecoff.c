@@ -3025,7 +3025,8 @@ ecoff_slurp_armap (abfd)
   if (i != 16)
       return false;
 
-  bfd_seek (abfd, (file_ptr) -16, SEEK_CUR);
+  if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
+    return false;
 
   /* Irix 4.0.5F apparently can use either an ECOFF armap or a
      standard COFF armap.  We could move the ECOFF armap stuff into
@@ -3078,7 +3079,8 @@ ecoff_slurp_armap (abfd)
     
   if (bfd_read ((PTR) raw_armap, 1, parsed_size, abfd) != parsed_size)
     {
-      bfd_set_error (bfd_error_malformed_archive);
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_malformed_archive);
       bfd_release (abfd, (PTR) raw_armap);
       return false;
     }
@@ -3349,7 +3351,8 @@ ecoff_archive_p (abfd)
   if (bfd_read ((PTR) armag, 1, SARMAG, abfd) != SARMAG
       || strncmp (armag, ARMAG, SARMAG) != 0)
     {
-      bfd_set_error (bfd_error_wrong_format);
+      if (bfd_get_error () != bfd_error_system_call)
+	bfd_set_error (bfd_error_wrong_format);
       return (bfd_target *) NULL;
     }
 

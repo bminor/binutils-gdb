@@ -64,7 +64,12 @@ The name put into the target vector.
 /*SUPPRESS529*/
 
 void
-  NAME (sunos, set_arch_mach) (abfd, machtype)
+#if ARCH_SIZE == 64
+sunos_64_set_arch_mach
+#else
+sunos_32_set_arch_mach
+#endif
+  (abfd, machtype)
      bfd *abfd;
      int machtype;
 {
@@ -148,7 +153,12 @@ choose_reloc_size (abfd)
   file header, symbols, and relocation.  */
 
 static boolean
-  NAME (aout, sunos4_write_object_contents) (abfd)
+#if ARCH_SIZE == 64
+aout_64_sunos4_write_object_contents
+#else
+aout_32_sunos4_write_object_contents
+#endif
+  (abfd)
      bfd *abfd;
 {
   struct external_exec exec_bytes;
@@ -384,7 +394,12 @@ swapcore_sun3 (abfd, ext, intcore)
   intcore->c_len = bfd_h_get_32 (abfd, (unsigned char *) &extcore->c_len);
   intcore->c_regs_pos = (long) (((struct external_sun3_core *) 0)->c_regs);
   intcore->c_regs_size = sizeof (extcore->c_regs);
-  NAME (aout, swap_exec_header_in) (abfd, &extcore->c_aouthdr, &intcore->c_aouthdr);
+#if ARCH_SIZE == 64
+  aout_64_swap_exec_header_in
+#else
+  aout_32_swap_exec_header_in
+#endif
+    (abfd, &extcore->c_aouthdr, &intcore->c_aouthdr);
   intcore->c_signo = bfd_h_get_32 (abfd, (unsigned char *) &extcore->c_signo);
   intcore->c_tsize = bfd_h_get_32 (abfd, (unsigned char *) &extcore->c_tsize);
   intcore->c_dsize = bfd_h_get_32 (abfd, (unsigned char *) &extcore->c_dsize);
@@ -415,7 +430,12 @@ swapcore_sparc (abfd, ext, intcore)
   intcore->c_len = bfd_h_get_32 (abfd, (unsigned char *) &extcore->c_len);
   intcore->c_regs_pos = (long) (((struct external_sparc_core *) 0)->c_regs);
   intcore->c_regs_size = sizeof (extcore->c_regs);
-  NAME (aout, swap_exec_header_in) (abfd, &extcore->c_aouthdr, &intcore->c_aouthdr);
+#if ARCH_SIZE == 64
+  aout_64_swap_exec_header_in
+#else
+  aout_32_swap_exec_header_in
+#endif
+    (abfd, &extcore->c_aouthdr, &intcore->c_aouthdr);
   intcore->c_signo = bfd_h_get_32 (abfd, (unsigned char *) &extcore->c_signo);
   intcore->c_tsize = bfd_h_get_32 (abfd, (unsigned char *) &extcore->c_tsize);
   intcore->c_dsize = bfd_h_get_32 (abfd, (unsigned char *) &extcore->c_dsize);
@@ -520,7 +540,6 @@ sunos4_core_file_p (abfd)
 
   if ((bfd_read ((PTR) extcore, 1, core_size, abfd)) != core_size)
     {
-      bfd_set_error (bfd_error_system_call);
       bfd_release (abfd, (char *) mergem);
       return 0;
     }

@@ -497,7 +497,8 @@ static void
   boolean eof = false;
 
   /* To the front of the file */
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
+    abort ();
   while (eof == false)
     {
       char buffer[MAXCHUNK];
@@ -516,7 +517,8 @@ static void
       src++;
 
       /* Fetch the type and the length and the checksum */
-      bfd_read (src, 1, 5, abfd);
+      if (bfd_read (src, 1, 5, abfd) != 5)
+	abort (); /* FIXME */
 
       type = src[2];
 
@@ -525,7 +527,8 @@ static void
 
       chars_on_line = HEX (src) - 5;	/* Already read five char */
 
-      bfd_read (src, 1, chars_on_line, abfd);
+      if (bfd_read (src, 1, chars_on_line, abfd) != chars_on_line)
+	abort (); /* FIXME */
       src[chars_on_line] = 0;	/* put a null at the end */
 
       func (abfd, type, src);
@@ -592,8 +595,9 @@ tekhex_object_p (abfd)
 
   tekhex_init ();
 
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
-  bfd_read (b, 1, 4, abfd);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
+      || bfd_read (b, 1, 4, abfd) != 4)
+    return NULL;
 
   if (b[0] != '%' || !ISHEX (b[1]) || !ISHEX (b[2]) || !ISHEX (b[3]))
     return (bfd_target *) NULL;
@@ -807,10 +811,11 @@ out (abfd, type, start, end)
   sum += sum_block[front[2]];
   sum += sum_block[front[3]];	/* type */
   TOHEX (front + 4, sum);
-  bfd_write (front, 1, 6, abfd);
+  if (bfd_write (front, 1, 6, abfd) != 6)
+    abort ();
   end[0] = '\n';
-  bfd_write (start, 1, end - start + 1, abfd);
-
+  if (bfd_write (start, 1, end - start + 1, abfd) != end - start + 1)
+    abort ();
 }
 
 static boolean
@@ -924,7 +929,8 @@ tekhex_write_object_contents (abfd)
     }
 
   /* And the terminator */
-  bfd_write ("%7081010\n", 1, 9, abfd);
+  if (bfd_write ("%7081010\n", 1, 9, abfd) != 9)
+    abort ();
   return true;
 }
 

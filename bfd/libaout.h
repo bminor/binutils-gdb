@@ -434,23 +434,33 @@ aout_stab_name PARAMS ((int code));
 			   obj_reloc_entry_size (abfd));		      \
 	NAME(aout,swap_exec_header_out) (abfd, execp, &exec_bytes);	      \
 									      \
-	bfd_seek (abfd, (file_ptr) 0, SEEK_SET);			      \
-	bfd_write ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd);	      \
+	if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0) return false;	      \
+	if (bfd_write ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)	      \
+	    != EXEC_BYTES_SIZE)						      \
+	  return false;							      \
 	/* Now write out reloc info, followed by syms and strings */	      \
   									      \
 	if (bfd_get_outsymbols (abfd) != (asymbol **) NULL		      \
 	    && bfd_get_symcount (abfd) != 0) 				      \
 	    {								      \
-	      bfd_seek (abfd, (file_ptr)(N_SYMOFF(*execp)), SEEK_SET);	      \
+	      if (bfd_seek (abfd, (file_ptr)(N_SYMOFF(*execp)), SEEK_SET)     \
+		  != 0)							      \
+	        return false;						      \
 									      \
 	      if (! NAME(aout,write_syms)(abfd)) return false;		      \
 									      \
-	      bfd_seek (abfd, (file_ptr)(N_TRELOFF(*execp)), SEEK_SET);	      \
+	      if (bfd_seek (abfd, (file_ptr)(N_TRELOFF(*execp)), SEEK_SET)    \
+		  != 0)							      \
+	        return false;						      \
 									      \
-	      if (!NAME(aout,squirt_out_relocs) (abfd, obj_textsec (abfd))) return false; \
-	      bfd_seek (abfd, (file_ptr)(N_DRELOFF(*execp)), SEEK_SET);	      \
+	      if (!NAME(aout,squirt_out_relocs) (abfd, obj_textsec (abfd)))   \
+		return false;						      \
+	      if (bfd_seek (abfd, (file_ptr)(N_DRELOFF(*execp)), SEEK_SET)    \
+		  != 0)							      \
+	        return false;						      \
 									      \
-	      if (!NAME(aout,squirt_out_relocs)(abfd, obj_datasec (abfd))) return false; \
+	      if (!NAME(aout,squirt_out_relocs)(abfd, obj_datasec (abfd)))    \
+		return false;						      \
 	    }								      \
       }									      
 #endif

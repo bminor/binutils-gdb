@@ -248,7 +248,8 @@ bfd_write_bigendian_4byte_int (abfd, i)
 {
   bfd_byte buffer[4];
   bfd_putb32(i, buffer);
-  bfd_write((PTR)buffer, 4, 1, abfd);
+  if (bfd_write((PTR)buffer, 4, 1, abfd) != 4)
+    abort ();
 }
 
 long

@@ -123,7 +123,8 @@ b_out_object_p (abfd)
 
   if (bfd_read ((PTR) &exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
       != EXEC_BYTES_SIZE) {
-    bfd_set_error (bfd_error_wrong_format);
+    if (bfd_get_error () != bfd_error_system_call)
+      bfd_set_error (bfd_error_wrong_format);
     return 0;
   }
 
@@ -250,21 +251,28 @@ b_out_write_object_contents (abfd)
 
   bout_swap_exec_header_out (abfd, exec_hdr (abfd), &swapped_hdr);
 
-  bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
-  bfd_write ((PTR) &swapped_hdr, 1, EXEC_BYTES_SIZE, abfd);
+  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
+      || (bfd_write ((PTR) &swapped_hdr, 1, EXEC_BYTES_SIZE, abfd)
+	  != EXEC_BYTES_SIZE))
+    return false;
 
   /* Now write out reloc info, followed by syms and strings */
   if (bfd_get_symcount (abfd) != 0)
     {
-      bfd_seek (abfd, (file_ptr)(N_SYMOFF(*exec_hdr(abfd))), SEEK_SET);
+      if (bfd_seek (abfd, (file_ptr)(N_SYMOFF(*exec_hdr(abfd))), SEEK_SET)
+	  != 0)
+	return false;
 
       if (! aout_32_write_syms (abfd))
 	return false;
 
-      bfd_seek (abfd, (file_ptr)(N_TROFF(*exec_hdr(abfd))), SEEK_SET);
+      if (bfd_seek (abfd, (file_ptr)(N_TROFF(*exec_hdr(abfd))), SEEK_SET) != 0)
+	return false;
 
       if (!b_out_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
-      bfd_seek (abfd, (file_ptr)(N_DROFF(*exec_hdr(abfd))), SEEK_SET);
+      if (bfd_seek (abfd, (file_ptr)(N_DROFF(*exec_hdr(abfd))), SEEK_SET)
+	  != 0)
+	return false;
 
       if (!b_out_squirt_out_relocs (abfd, obj_datasec (abfd))) return false;
     }
@@ -873,7 +881,8 @@ b_out_set_section_contents (abfd, section, location, offset, count)
 
   }
   /* regardless, once we know what we're doing, we might as well get going */
-  bfd_seek (abfd, section->filepos + offset, SEEK_SET);
+  if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0)
+    return false;
 
   if (count != 0) {
     return (bfd_write ((PTR)location, 1, count, abfd) == count) ?true:false;

@@ -121,7 +121,12 @@ nlm_object_p (abfd)
 
   if (bfd_read ((PTR) x_fxdhdr, nlm_fixed_header_size (abfd), 1, abfd) !=
       nlm_fixed_header_size (abfd))
-    goto got_wrong_format_error;
+    {
+      if (bfd_get_error () != bfd_error_system_call)
+	goto got_wrong_format_error;
+      else
+	goto got_no_match;
+    }
 
   /* Allocate an instance of the nlm_obj_tdata structure and hook it up to
      the tdata pointer in the bfd.  */
@@ -246,35 +251,23 @@ nlm_swap_variable_header_in (abfd)
 		sizeof (nlm_variable_header (abfd)->descriptionLength),
 		1, abfd) !=
       sizeof (nlm_variable_header (abfd)->descriptionLength))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   if (bfd_read ((PTR) nlm_variable_header (abfd)->descriptionText,
 		nlm_variable_header (abfd)->descriptionLength + 1,
 		1, abfd) !=
       nlm_variable_header (abfd)->descriptionLength + 1)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
 
   /* Read and convert the stackSize field. */
 
   if (bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   nlm_variable_header (abfd)->stackSize = get_word (abfd, (bfd_byte *) temp);
 
   /* Read and convert the reserved field. */
 
   if (bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   nlm_variable_header (abfd)->reserved = get_word (abfd, (bfd_byte *) temp);
 
   /* Read the oldThreadName field.  This field is a fixed length string. */
@@ -283,10 +276,7 @@ nlm_swap_variable_header_in (abfd)
 		sizeof (nlm_variable_header (abfd)->oldThreadName),
 		1, abfd) !=
       sizeof (nlm_variable_header (abfd)->oldThreadName))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
 
   /* Read the screen name length and text members. */
 
@@ -294,18 +284,12 @@ nlm_swap_variable_header_in (abfd)
 		sizeof (nlm_variable_header (abfd)->screenNameLength),
 		1, abfd) !=
       sizeof (nlm_variable_header (abfd)->screenNameLength))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   if (bfd_read ((PTR) nlm_variable_header (abfd)->screenName,
 		nlm_variable_header (abfd)->screenNameLength + 1,
 		1, abfd) !=
       nlm_variable_header (abfd)->screenNameLength + 1)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
 
   /* Read the thread name length and text members. */
 
@@ -313,18 +297,12 @@ nlm_swap_variable_header_in (abfd)
 		sizeof (nlm_variable_header (abfd)->threadNameLength),
 		1, abfd) !=
       sizeof (nlm_variable_header (abfd)->threadNameLength))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   if (bfd_read ((PTR) nlm_variable_header (abfd)->threadName,
 		nlm_variable_header (abfd)->threadNameLength + 1,
 		1, abfd) !=
       nlm_variable_header (abfd)->threadNameLength + 1)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   return (true);
 }
 
@@ -343,38 +321,26 @@ nlm_swap_variable_header_out (abfd)
 		 sizeof (nlm_variable_header (abfd)->descriptionLength),
 		 1, abfd) !=
       sizeof (nlm_variable_header (abfd)->descriptionLength))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   if (bfd_write ((PTR) nlm_variable_header (abfd)->descriptionText,
 		 nlm_variable_header (abfd)->descriptionLength + 1,
 		 1, abfd) !=
       nlm_variable_header (abfd)->descriptionLength + 1)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
 
   /* Convert and write the stackSize field. */
 
   put_word (abfd, (bfd_vma) nlm_variable_header (abfd)->stackSize,
 	    (bfd_byte *) temp);
   if (bfd_write ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
 
   /* Convert and write the reserved field. */
 
   put_word (abfd, (bfd_vma) nlm_variable_header (abfd)->reserved,
 	    (bfd_byte *) temp);
   if (bfd_write ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
 
   /* Write the oldThreadName field.  This field is a fixed length string. */
 
@@ -382,10 +348,7 @@ nlm_swap_variable_header_out (abfd)
 		 sizeof (nlm_variable_header (abfd)->oldThreadName),
 		 1, abfd) !=
       sizeof (nlm_variable_header (abfd)->oldThreadName))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
 
   /* Write the screen name length and text members. */
 
@@ -393,18 +356,12 @@ nlm_swap_variable_header_out (abfd)
 		 sizeof (nlm_variable_header (abfd)->screenNameLength),
 		 1, abfd) !=
       sizeof (nlm_variable_header (abfd)->screenNameLength))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   if (bfd_write ((PTR) nlm_variable_header (abfd)->screenName,
 		 nlm_variable_header (abfd)->screenNameLength + 1,
 		 1, abfd) !=
       nlm_variable_header (abfd)->screenNameLength + 1)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
 
   /* Write the thread name length and text members. */
 
@@ -412,18 +369,12 @@ nlm_swap_variable_header_out (abfd)
 		 sizeof (nlm_variable_header (abfd)->threadNameLength),
 		 1, abfd) !=
       sizeof (nlm_variable_header (abfd)->threadNameLength))
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   if (bfd_write ((PTR) nlm_variable_header (abfd)->threadName,
 		 nlm_variable_header (abfd)->threadNameLength + 1,
 		 1, abfd) !=
       nlm_variable_header (abfd)->threadNameLength + 1)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
   return (true);
 }
 
@@ -448,23 +399,14 @@ nlm_swap_auxiliary_headers_in (abfd)
       position = bfd_tell (abfd);
       if (bfd_read ((PTR) tempstr, sizeof (tempstr), 1, abfd) !=
 	  sizeof (tempstr))
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return (false);
-	}
+	return (false);
       if (bfd_seek (abfd, position, SEEK_SET) == -1)
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return (false);
-	}
+	return (false);
       if (strncmp (tempstr, "VeRsIoN#", 8) == 0)
 	{
 	  Nlm_External_Version_Header thdr;
 	  if (bfd_read ((PTR) & thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
-	    {
-	      bfd_set_error (bfd_error_system_call);
-	      return (false);
-	    }
+	    return (false);
 	  memcpy (nlm_version_header (abfd)->stamp, thdr.stamp,
 		  sizeof (thdr.stamp));
 	  nlm_version_header (abfd)->majorVersion =
@@ -484,10 +426,7 @@ nlm_swap_auxiliary_headers_in (abfd)
 	{
 	  Nlm_External_Extended_Header thdr;
 	  if (bfd_read ((PTR) & thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
-	    {
-	      bfd_set_error (bfd_error_system_call);
-	      return (false);
-	    }
+	    return (false);
 	  memcpy (nlm_extended_header (abfd)->stamp, thdr.stamp,
 		  sizeof (thdr.stamp));
 	  nlm_extended_header (abfd)->languageID =
@@ -553,10 +492,7 @@ nlm_swap_auxiliary_headers_in (abfd)
 	{
 	  Nlm_External_Custom_Header thdr;
 	  if (bfd_read ((PTR) & thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
-	    {
-	      bfd_set_error (bfd_error_system_call);
-	      return (false);
-	    }
+	    return (false);
 	  memcpy (nlm_custom_header (abfd)->stamp, thdr.stamp,
 		  sizeof (thdr.stamp));
 	  nlm_custom_header (abfd)->dataLength =
@@ -572,26 +508,17 @@ nlm_swap_auxiliary_headers_in (abfd)
 			sizeof (nlm_copyright_header (abfd)->stamp),
 			1, abfd)
 	      != sizeof (nlm_copyright_header (abfd)->stamp))
-	    {
-	      bfd_set_error (bfd_error_system_call);
-	      return (false);
-	    }
+	    return (false);
 	  if (bfd_read ((PTR) & (nlm_copyright_header (abfd)
 				 ->copyrightMessageLength),
 			1, 1, abfd) != 1)
-	    {
-	      bfd_set_error (bfd_error_system_call);
-	      return (false);
-	    }
+	    return (false);
 	  /* The copyright message is a variable length string. */
 	  if (bfd_read ((PTR) nlm_copyright_header (abfd)->copyrightMessage,
 		    nlm_copyright_header (abfd)->copyrightMessageLength + 1,
 			1, abfd) !=
 	      nlm_copyright_header (abfd)->copyrightMessageLength + 1)
-	    {
-	      bfd_set_error (bfd_error_system_call);
-	      return (false);
-	    }
+	    return (false);
 	}
       else
 	{
@@ -644,10 +571,7 @@ nlm_swap_auxiliary_headers_out (abfd)
       put_word (abfd, (bfd_vma) nlm_version_header (abfd)->day,
 		(bfd_byte *) thdr.day);
       if (bfd_write ((PTR) & thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return false;
-	}
+	return false;
     }
 
   /* Write out the extended header if there is one.  */
@@ -745,10 +669,7 @@ nlm_swap_auxiliary_headers_out (abfd)
 		(bfd_vma) nlm_extended_header (abfd)->reserved5,
 		(bfd_byte *) thdr.reserved5);
       if (bfd_write ((PTR) & thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return false;
-	}
+	return false;
     }
 
   /* Write out the custom header if there is one.   */
@@ -769,10 +690,7 @@ nlm_swap_auxiliary_headers_out (abfd)
       put_word (abfd, (bfd_vma) nlm_custom_header (abfd)->debugRecLength,
 		(bfd_byte *) thdr.debugRecLength);
       if (bfd_write ((PTR) & thdr, sizeof (thdr), 1, abfd) != sizeof (thdr))
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return false;
-	}
+	return false;
     }
 
   /* Write out the copyright header if there is one.  */
@@ -784,26 +702,17 @@ nlm_swap_auxiliary_headers_out (abfd)
       memcpy (thdr.stamp, "CoPyRiGhT=", 10);
       if (bfd_write ((PTR) thdr.stamp, sizeof (thdr.stamp), 1, abfd)
 	  != sizeof (thdr.stamp))
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return false;
-	}
+	return false;
       thdr.copyrightMessageLength[0] =
 	nlm_copyright_header (abfd)->copyrightMessageLength;
       if (bfd_write ((PTR) thdr.copyrightMessageLength, 1, 1, abfd) != 1)
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return false;
-	}
+	return false;
       /* The copyright message is a variable length string. */
       if (bfd_write ((PTR) nlm_copyright_header (abfd)->copyrightMessage,
 		     nlm_copyright_header (abfd)->copyrightMessageLength + 1,
 		     1, abfd) !=
 	  nlm_copyright_header (abfd)->copyrightMessageLength + 1)
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return false;
-	}
+	return false;
     }
 
   return true;
@@ -966,10 +875,7 @@ nlm_slurp_symbol_table (abfd)
     }
 
   if (bfd_seek (abfd, i_fxdhdrp->publicsOffset, SEEK_SET) == -1)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return (false);
-    }
+    return (false);
 
   sym = ((nlm_symbol_type *)
 	 bfd_zalloc (abfd, totsymcount * sizeof (nlm_symbol_type)));
@@ -990,10 +896,7 @@ nlm_slurp_symbol_table (abfd)
     {
       if (bfd_read ((PTR) & symlength, sizeof (symlength), 1, abfd)
 	  != sizeof (symlength))
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return (false);
-	}
+	return (false);
       sym->symbol.the_bfd = abfd;
       sym->symbol.name = bfd_alloc (abfd, symlength + 1);
       if (!sym->symbol.name)
@@ -1003,17 +906,11 @@ nlm_slurp_symbol_table (abfd)
 	}
       if (bfd_read ((PTR) sym->symbol.name, symlength, 1, abfd)
 	  != symlength)
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return (false);
-	}
+	return (false);
       /* Cast away const.  */
       ((char *) (sym->symbol.name))[symlength] = '\0';
       if (bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp))
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return (false);
-	}
+	return (false);
       sym->symbol.flags = BSF_GLOBAL | BSF_EXPORT;
       sym->symbol.value = get_word (abfd, temp);
       if (set_public_section_func)
@@ -1048,10 +945,7 @@ nlm_slurp_symbol_table (abfd)
   if (i_fxdhdrp->numberOfDebugRecords > 0)
     {
       if (bfd_seek (abfd, i_fxdhdrp->debugInfoOffset, SEEK_SET) == -1)
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return (false);
-	}
+	return (false);
 
       symcount += i_fxdhdrp->numberOfDebugRecords;
       while (abfd->symcount < symcount)
@@ -1061,10 +955,7 @@ nlm_slurp_symbol_table (abfd)
 	   || bfd_read ((PTR) temp, sizeof (temp), 1, abfd) != sizeof (temp)
 	      || (bfd_read ((PTR) & symlength, sizeof (symlength), 1, abfd)
 		  != sizeof (symlength)))
-	    {
-	      bfd_set_error (bfd_error_system_call);
-	      return false;
-	    }
+	    return false;
 	  sym->symbol.the_bfd = abfd;
 	  sym->symbol.name = bfd_alloc (abfd, symlength + 1);
 	  if (!sym->symbol.name)
@@ -1074,10 +965,7 @@ nlm_slurp_symbol_table (abfd)
 	    }
 	  if (bfd_read ((PTR) sym->symbol.name, symlength, 1, abfd)
 	      != symlength)
-	    {
-	      bfd_set_error (bfd_error_system_call);
-	      return (false);
-	    }
+	    return (false);
 	  /* Cast away const.  */
 	  ((char *) (sym->symbol.name))[symlength] = '\0';
 	  sym->symbol.flags = BSF_LOCAL;
@@ -1111,10 +999,7 @@ nlm_slurp_symbol_table (abfd)
     {
       if (bfd_seek (abfd, i_fxdhdrp->externalReferencesOffset, SEEK_SET)
 	  == -1)
-	{
-	  bfd_set_error (bfd_error_system_call);
-	  return (false);
-	}
+	return (false);
 
       symcount += i_fxdhdrp->numberOfExternalReferences;
       while (abfd->symcount < symcount)
@@ -1160,10 +1045,7 @@ nlm_slurp_reloc_fixups (abfd)
 
   if (bfd_seek (abfd, nlm_fixed_header (abfd)->relocationFixupOffset,
 		SEEK_SET) != 0)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return false;
-    }
+    return false;
 
   count = nlm_fixed_header (abfd)->numberOfRelocationFixups;
   rels = (arelent *) bfd_alloc (abfd, count * sizeof (arelent));
@@ -1554,10 +1436,7 @@ nlm_set_section_contents (abfd, section, location, offset, count)
 
   if (bfd_seek (abfd, (file_ptr) (section->filepos + offset), SEEK_SET) != 0
       || bfd_write (location, 1, count, abfd) != count)
-    {
-      bfd_set_error (bfd_error_system_call);
-      return false;
-    }
+    return false;
 
   return true;
 }
@@ -1641,10 +1520,7 @@ nlm_write_object_contents (abfd)
   if (bfd_seek (abfd,
 	     nlm_optional_prefix_size (abfd) + nlm_fixed_header_size (abfd),
 		SEEK_SET) != 0)
-    {
-      bfd_set_error (bfd_error_system_call);
-      goto error_return;
-    }
+    goto error_return;
   if (nlm_swap_variable_header_out (abfd) == false
       || nlm_swap_auxiliary_headers_out (abfd) == false)
     {
@@ -1663,10 +1539,7 @@ nlm_write_object_contents (abfd)
   /* Advance to the relocs.  */
   if (bfd_seek (abfd, nlm_fixed_header (abfd)->relocationFixupOffset,
 		SEEK_SET) != 0)
-    {
-      bfd_set_error (bfd_error_system_call);
-      goto error_return;
-    }
+    goto error_return;
 
   /* The format of the relocation entries is dependent upon the
      particular target.  We use an external routine to write the reloc
@@ -1866,17 +1739,11 @@ nlm_write_object_contents (abfd)
 	      if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd)
 		   != sizeof (bfd_byte))
 		  || bfd_write (sym->name, len, 1, abfd) != len)
-		{
-		  bfd_set_error (bfd_error_system_call);
-		  goto error_return;
-		}
+		goto error_return;
 
 	      put_word (abfd, offset, temp);
 	      if (bfd_write (temp, sizeof (temp), 1, abfd) != sizeof (temp))
-		{
-		  bfd_set_error (bfd_error_system_call);
-		  goto error_return;
-		}
+		goto error_return;
 	    }
 	}
       nlm_fixed_header (abfd)->numberOfPublics = c;
@@ -1936,26 +1803,17 @@ nlm_write_object_contents (abfd)
 	      /* The type is 0 for data, 1 for code, 2 for absolute.  */
 	      if (bfd_write (&type, sizeof (bfd_byte), 1, abfd)
 		  != sizeof (bfd_byte))
-		{
-		  bfd_set_error (bfd_error_system_call);
-		  goto error_return;
-		}
+		goto error_return;
 
 	      put_word (abfd, offset, temp);
 	      if (bfd_write (temp, sizeof (temp), 1, abfd) != sizeof (temp))
-		{
-		  bfd_set_error (bfd_error_system_call);
-		  goto error_return;
-		}
+		goto error_return;
 
 	      len = strlen (sym->name);
 	      if ((bfd_write (&len, sizeof (bfd_byte), 1, abfd)
 		   != sizeof (bfd_byte))
 		  || bfd_write (sym->name, len, 1, abfd) != len)
-		{
-		  bfd_set_error (bfd_error_system_call);
-		  goto error_return;
-		}
+		goto error_return;
 	    }
 	  nlm_fixed_header (abfd)->numberOfDebugRecords = c;
 	}
@@ -2013,10 +1871,7 @@ nlm_write_object_contents (abfd)
   nlm_swap_fixed_header_out (abfd, nlm_fixed_header (abfd), fixed_header);
   if (bfd_write (fixed_header, nlm_fixed_header_size (abfd), 1, abfd)
       != nlm_fixed_header_size (abfd))
-    {
-      bfd_set_error (bfd_error_system_call);
-      goto error_return;
-    }
+    goto error_return;
 
   if (fixed_header != NULL)
     free (fixed_header);
