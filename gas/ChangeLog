@@ -1,3 +1,36 @@
+2004-05-07  Daniel Jacobowitz  <dan@debian.org>
+
+	* Makefile.am (DIST_SUBDIRS): Define.
+	* aclocal.m4: Regenerate with automake 1.8.4.
+	* Makefile.in: Likewise.
+	* doc/Makefile.in: Likewise.
+
+2004-05-07  Daniel Jacobowitz  <dan@debian.org>
+
+	Merge from mainline:
+	2004-05-05  Jakub Jelinek  <jakub@redhat.com>
+	* tc-s390.h (md_do_align, HANDLE_ALIGN): Remove.
+	(NOP_OPCODE): Define.
+	(s390_align_code): Remove prototype.
+	* tc-s390.c (s390_align_code): Remove.
+
+	2004-04-22  Bruno De Bus <bdebus@elis.ugent.be>
+	* config/tc-arm.h (enum mstate): Move here, add MAP_UNDEFINED
+	state.
+	(TC_SEGMENT_INFO_TYPE): Define to enum mstate.
+	* config/tc-arm.c (enum mstate): Delete from here.
+	(mapping_state): Remove the static mapstate variable and instead
+	store the state in the segment.  This allows a per-section mapping
+	state.  Handle and ignore MAP_UNDEFINED states.
+	(arm_elf_change_section): Get the current mapping state from the
+	new section.
+	(s_ltorg): Set the mapping state to MAP_DATA.
+	(arm_cleanup): Use arm_elf_change_section to get the mapping state
+	for each pool as it is emitted.
+
+	2004-04-22  Nick Clifton  <nickc@redhat.com>
+	* config/tc-arm.h: Formatting tidy ups.
+
 2004-05-07  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-frv.h (MAX_MEM_FOR_RS_ALIGN_CODE): New.

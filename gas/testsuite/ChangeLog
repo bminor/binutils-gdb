@@ -1,3 +1,12 @@
+2004-05-06  Daniel Jacobowitz  <dan@debian.org>
+
+	Merge from mainline:
+	2004-04-23  Nick Clifton  <nickc@redhat.com>
+	* gas/symver/symver1.d: Cope with extra symbols inserted by
+	arm-elf toolchains.
+	* gas/symver/symver0.d: Likewise
+	* gas/elf/symver.d: Likewise.
+
 2004-05-05  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/frv/reloc1.d: Match elf32-frvfdpic as well.

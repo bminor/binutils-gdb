@@ -1,5 +1,5 @@
 /* tc-s390.c -- Assemble for the S390
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -538,19 +538,6 @@ s390_md_end ()
     bfd_set_arch_mach (stdoutput, bfd_arch_s390, bfd_mach_s390_64);
   else
     bfd_set_arch_mach (stdoutput, bfd_arch_s390, bfd_mach_s390_31);
-}
-
-void
-s390_align_code (fragP, count)
-     fragS *fragP;
-     int count;
-{
-  /* We use nop pattern 0x0707.  */
-  if (count > 0)
-    {
-      memset (fragP->fr_literal + fragP->fr_fix, 0x07, count);
-      fragP->fr_var = count;
-    }
 }
 
 /* Insert an operand value into an instruction.  */

@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
@@ -2823,13 +2823,6 @@ validate_offset_imm (val, hwse)
 
 
 #ifdef OBJ_ELF
-enum mstate
-{
-  MAP_DATA,
-  MAP_ARM,
-  MAP_THUMB
-};
-
 /* This code is to handle mapping symbols as defined in the ARM ELF spec.
    (This text is taken from version B-02 of the spec):
 
@@ -2904,10 +2897,11 @@ enum mstate
    the EABI (which is still under development), so they are not
    implemented here.  */
 
+static enum mstate mapstate = MAP_UNDEFINED;
+
 static void
 mapping_state (enum mstate state)
 {
-  static enum mstate mapstate = MAP_DATA;
   symbolS * symbolP;
   const char * symname;
   int type;
@@ -2933,9 +2927,13 @@ mapping_state (enum mstate state)
       symname = "$t";
       type = BSF_FUNCTION;
       break;
+    case MAP_UNDEFINED:
+      return;     
     default:
       abort ();
     }
+
+  seg_info (now_seg)->tc_segment_info_data = state;
 
   symbolP = symbol_new (symname, now_seg, (valueT) frag_now_fix (), frag_now);
   symbol_table_insert (symbolP);
@@ -2977,16 +2975,7 @@ arm_elf_change_section (void)
   if ((flags & SEC_ALLOC) == 0)
     return;
 
-  if (flags & SEC_CODE)
-    {
-      if (thumb_mode)
-	mapping_state (MAP_THUMB);
-      else
-	mapping_state (MAP_ARM);
-    }
-  else
-    /* This section does not contain code.  Therefore it must contain data.  */
-    mapping_state (MAP_DATA);    
+  mapstate = seg_info (now_seg)->tc_segment_info_data;
 }
 #else
 #define mapping_state(a)
@@ -3108,6 +3097,8 @@ s_ltorg (ignored)
       || pool->symbol == NULL
       || pool->next_free_entry == 0)
     return;
+
+  mapping_state (MAP_DATA);
 
   /* Align pool as you have word accesses.
      Only make a frag if we have to.  */
@@ -13817,6 +13808,9 @@ arm_cleanup ()
     {
       /* Put it at the end of the relevent section.  */
       subseg_set (pool->section, pool->sub_section);
+#ifdef OBJ_ELF
+      arm_elf_change_section ();
+#endif
       s_ltorg (0);
     }
 }
