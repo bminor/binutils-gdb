@@ -91,6 +91,9 @@ CFILES = \
 	alpha-dis.c \
 	alpha-opc.c \
 	arm-dis.c \
+	cgen-asm.c \
+	cgen-dis.c \
+	cgen-opc.c \
 	d10v-dis.c \
 	d10v-opc.c \
 	dis-buf.c \
@@ -100,6 +103,9 @@ CFILES = \
 	hppa-dis.c \
 	i386-dis.c \
 	i960-dis.c \
+	m32r-asm.c \
+	m32r-dis.c \
+	m32r-opc.c \
 	m68k-dis.c \
 	m68k-opc.c \
 	m88k-dis.c \
@@ -129,6 +135,9 @@ ALL_MACHINES = \
 	arc-opc.o \
 	$(end-sanitize-arc) \
 	arm-dis.o \
+	cgen-asm.o \
+	cgen-dis.o \
+	cgen-opc.o \
 	d10v-dis.o \
 	d10v-opc.o \
 	$(start-sanitize-d30v) \
@@ -140,6 +149,9 @@ ALL_MACHINES = \
 	hppa-dis.o \
 	i386-dis.o \
 	i960-dis.o \
+	m32r-asm.o \
+	m32r-dis.o \
+	m32r-opc.o \
 	m68k-dis.o \
 	m68k-opc.o \
 	m88k-dis.o \
@@ -399,6 +411,12 @@ alpha-opc.o: alpha-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/alpha.h \
   $(BFD_H)
 arm-dis.o: arm-dis.c $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h \
   arm-opc.h
+cgen-asm.o: cgen-asm.c config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/libiberty.h $(BFD_H) $(INCDIR)/opcode/cgen.h
+cgen-dis.o: cgen-dis.c config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/libiberty.h $(BFD_H) $(INCDIR)/opcode/cgen.h
+cgen-opc.o: cgen-opc.c config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/libiberty.h $(BFD_H) $(INCDIR)/opcode/cgen.h
 d10v-dis.o: d10v-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/d10v.h \
   $(INCDIR)/dis-asm.h $(BFD_H)
 d10v-opc.o: d10v-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/d10v.h
@@ -416,6 +434,12 @@ i386-dis.o: i386-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h sysdep.h config.h
 i960-dis.o: i960-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h
+m32r-asm.o: m32r-asm.c $(INCDIR)/ansidecl.h $(BFD_H) \
+  m32r-opc.h $(INCDIR)/opcode/cgen.h
+m32r-dis.o: m32r-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) m32r-opc.h $(INCDIR)/opcode/cgen.h
+m32r-opc.o: m32r-opc.c config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/libiberty.h $(BFD_H) m32r-opc.h $(INCDIR)/opcode/cgen.h
 m68k-dis.o: m68k-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/floatformat.h $(INCDIR)/opcode/m68k.h
 m68k-opc.o: m68k-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/m68k.h

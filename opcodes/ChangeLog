@@ -1,3 +1,14 @@
+Fri Apr  4 12:29:38 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* m32r-asm.c, m32r-dis.c, m32r-opc.c, m32r-opc.h: New files.
+	* cgen-asm.c, cgen-dis.c, cgen-opc.c: New files.
+	* Makefile.in (CFILES): Add them.
+	(ALL_MACHINES): Add them.
+	(dependencies): Regenerate.
+	* configure.in (cgen_files): New variable.
+	(bfd_m32r_arch): Add entry.
+	* configure: Regenerate.
+
 Fri Apr  4 14:04:16 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Rebuild dependencies.

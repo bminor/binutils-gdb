@@ -113,7 +113,7 @@ AC_SUBST(BFD_PICLIST)
 AC_SUBST(SHLINK)
 AC_SUBST(INSTALL_SHLIB)
 
-AC_CHECK_HEADERS(string.h strings.h)
+AC_CHECK_HEADERS(string.h strings.h stdlib.h)
 
 # target-specific stuff:
 
@@ -143,6 +143,10 @@ do
     fi
 done	
 
+# Utility var, documents generic cgen support files.
+
+cgen_files="cgen-opc.o cgen-asm.o cgen-dis.o"
+
 # We don't do any links based on the target system, just makefile config.
 
 if test x${all_targets} = xfalse ; then
@@ -163,9 +167,7 @@ if test x${all_targets} = xfalse ; then
 # end-sanitize-arc
 	bfd_arm_arch)		ta="$ta arm-dis.o" ;;
 	bfd_convex_arch)	;;
-# start-sanitize-d10v
 	bfd_d10v_arch)		ta="$ta d10v-dis.o d10v-opc.o" ;;
-# end-sanitize-d10v
 # start-sanitize-d30v
 	bfd_d30v_arch)		ta="$ta d30v-dis.o d30v-opc.o" ;;
 # end-sanitize-d30v
@@ -175,6 +177,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_i386_arch)		ta="$ta i386-dis.o" ;;
 	bfd_i860_arch)		;;
 	bfd_i960_arch)		ta="$ta i960-dis.o" ;;
+	bfd_m32r_arch)		ta="$ta $cgen_files m32r-opc.o m32r-asm.o m32r-dis.o" ;;
 	bfd_m68k_arch)		ta="$ta m68k-dis.o m68k-opc.o" ;;
 	bfd_m88k_arch)		ta="$ta m88k-dis.o" ;;
 	bfd_mips_arch)		ta="$ta mips-dis.o mips-opc.o mips16-opc.o" ;;
