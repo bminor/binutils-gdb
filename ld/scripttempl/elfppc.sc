@@ -99,15 +99,25 @@ SECTIONS
   }
   .data1 ${RELOCATING-0} : { *(.data1) }
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
-  .ctors       ${RELOCATING-0} : { *(.ctors) }
-  .dtors       ${RELOCATING-0} : { *(.dtors) }
 
   ${RELOCATING+_GOT1_START_ = .;}
   .got1 ${RELOCATING-0} :  { *(.got1) }
   ${RELOCATING+_GOT1_END_ = .;}
 
+  /* Put .ctors and .dtors next to the .got2 section, so that the pointers
+     get relocated with -mrelocatable. */
+
   ${RELOCATING+_GOT2_START_ = .;}
-  .got2 ${RELOCATING-0} :  { *(.got2) }
+  .got2  ${RELOCATING-0} :  { *(.got2) }
+
+  ${RELOCATING+__CTOR_LIST__ = .;}
+  .ctors ${RELOCATING-0} : { *(.ctors) }
+  ${RELOCATING+__CTOR_END__ = .;}
+
+  ${RELOCATING+__DTOR_LIST__ = .;}
+  .dtors ${RELOCATING-0} : { *(.dtors) }
+  ${RELOCATING+__DTOR_END__ = .;}
+
   ${RELOCATING+_GOT2_END_ = .;}
 
   ${RELOCATING+_GOT_START_ = .;}

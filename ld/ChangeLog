@@ -1,3 +1,10 @@
+Thu Mar 16 17:17:33 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* scripttempl/elfppc.sc: Move _GOT2_END_ after the .ctors and
+	.dtors sections, so that these pointers get relocated also.
+	Define the symbols __{C,D}TOR_{LIST,END}__ to mark the beginning
+	and end of the constructors/destructors.
+
 Thu Mar 16 13:59:14 1995  Roland McGrath  <roland@churchy.gnu.ai.mit.edu>
 
 	* ldlang.c (load_symbols): If whole_archive is true and ENTRY
