@@ -1,5 +1,11 @@
 2002-08-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* coff-rs6000.c (rs6000coff_vec <object_flags>): Add SEC_CODE and
+	SEC_DATA.
+	(pmac_xcoff_vec): Likewise.
+	* coff64-rs6000.c (rs6000coff64_vec): Likewise.
+	(aix5coff64_vec): Likewise.
+
 	* elf-bfd.h (struct elf_backend_data): Add struct elf_backend_data
 	param to elf_backend_copy_indirect_symbol.
 	(_bfd_elf_link_hash_copy_indirect): Likewise.
