@@ -1,3 +1,17 @@
+Thu Dec  8 14:36:15 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* binutils-all/objdump.exp (cpus_expected): New variable, taken
+	from objdump -i test, added ns32k, sorted.
+	(objdump -i, -f tests): Use $cpus_expected.
+
+	* binutils-all/objcopy.exp: For simple-copy test, expect failure
+	for sh-coff.
+
+Tue Oct 25 16:00:14 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* binutils-all/objcopy.exp: Adjust --adjust-section-vma tests for
+	new S-record section handling.
+
 Tue Oct 18 11:18:21 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* binutils-all/nm.exp: nm with no arguments and nm -P do not work

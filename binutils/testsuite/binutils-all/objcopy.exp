@@ -32,6 +32,11 @@ if {![binutils_assemble $AS $srcdir$subdir/bintest.s tmpdir/bintest.o]} then {
 
 # Test that objcopy does not modify a file when copying it.
 
+# Since some versions of the assembler don't use BFD to generate the
+# object file, we shouldn't assume that the version written by BFD will
+# be bit-for-bit identical.  It need merely be functionally identical.
+setup_xfail "sh-*-coff"
+
 set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS tmpdir/bintest.o tmpdir/copy.o"]
 
 if ![string match "" $got] then {
@@ -203,7 +208,7 @@ if {$low == "" || $origstart == ""} then {
 	fail "objcopy --adjust-section-vma +"
     } else {
 	set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -h tmpdir/copy.srec"]
-	set want "file format srec.*vma\[ 	\]*(\[0-9a-fA-F\]+)"
+	set want "file format srec.*SECTION\[ 	\]*0\[^\n\r\]*vma\[ 	\]*(\[0-9a-fA-F\]+)"
 	if ![regexp $want $got all vma] then {
 	    fail "objcopy --adjust-section-vma +"
 	} else {
@@ -222,7 +227,7 @@ if {$low == "" || $origstart == ""} then {
 	fail "objcopy --adjust-section-vma ="
     } else {
 	set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -h tmpdir/copy.srec"]
-	set want "file format srec.*vma\[ 	\]*(\[0-9a-fA-F\]+)"
+	set want "file format srec.*SECTION\[ 	\]*0\[^\n\r\]*vma\[ 	\]*(\[0-9a-fA-F\]+)"
 	if ![regexp $want $got all vma] then {
 	    fail "objcopy --adjust-section-vma ="
 	} else {
