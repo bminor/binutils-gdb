@@ -1,5 +1,11 @@
 Fri Jan  8 15:47:53 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* bfd.c (struct _bfd): Added ecoff_tdata to tdata union.
+	* targets.c (enum target_flavour): Added bfd_target_ecoff_flavour.
+	* coff-msym.c: Use DEFUN for function definitons.
+	* coff-mips.c: Added code to read and print symbols, and to find
+	line numbers.
+
 	* coffcode.h: Moved many generic functions into coffgen.c.  Moved
 	swapping functions into coffswap.h for ECOFF use.  Moved
 	relocation functions, only used by h8300 and z8k, into reloc16.c.

@@ -132,6 +132,7 @@ of a file.
 .    bfd_target_unknown_flavour,
 .    bfd_target_aout_flavour,
 .    bfd_target_coff_flavour,
+.    bfd_target_ecoff_flavour,
 .    bfd_target_elf_flavour,
 .    bfd_target_ieee_flavour,
 .    bfd_target_oasys_flavour,
@@ -357,7 +358,7 @@ extern bfd_target rs6000coff_vec;
 extern bfd_target h8300coff_vec;
 extern bfd_target z8kcoff_vec;
 extern bfd_target we32kcoff_vec;
-#ifdef hp9000s800
+#ifdef HOST_HPPAHPUX
 extern bfd_target hppa_vec;
 #endif
 
@@ -412,7 +413,7 @@ bfd_target *target_vector[] = {
 	&m68kcoff_vec,
 	&a29kcoff_big_vec,
 	&rs6000coff_vec,
-#ifdef hp9000s800
+#ifdef HOST_HPPAHPUX
         &hppa_vec,
 #endif
 	&we32kcoff_vec,

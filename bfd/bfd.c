@@ -146,6 +146,7 @@ CODE_FRAGMENT
 .      struct _oasys_data *oasys_obj_data;
 .      struct _oasys_ar_data *oasys_ar_data;
 .      struct coff_tdata *coff_obj_data;
+.      struct ecoff_tdata *ecoff_obj_data;
 .      struct ieee_data_struct *ieee_data;
 .      struct ieee_ar_data_struct *ieee_ar_data;
 .      struct srec_data_struct *srec_data;
@@ -515,6 +516,53 @@ bfd_get_mtime (abfd)
 
   abfd->mtime = buf.st_mtime;		/* Save value in case anyone wants it */
   return buf.st_mtime;
+}
+
+/*
+FUNCTION
+	The bfd_get_size function
+
+SYNOPSIS
+	long bfd_get_size(bfd *);
+
+DESCRIPTION
+	Return file size (as read from file system) for the file
+	associated with a bfd.
+
+	Note that the initial motivation for, and use of, this routine is not
+	so we can get the exact size of the object the bfd applies to, since
+	that might not be generally possible (archive members for example?).
+	Although it would be ideal if someone could eventually modify
+	it so that such results were guaranteed.
+
+	Instead, we want to ask questions like "is this NNN byte sized
+	object I'm about to try read from file offset YYY reasonable?"
+	As as example of where we might want to do this, some object formats
+	use string tables for which the first sizeof(long) bytes of the table
+	contain the size of the table itself, including the size bytes.
+	If an application tries to read what it thinks is one of these
+	string tables, without some way to validate the size, and for
+	some reason the size is wrong (byte swapping error, wrong location
+	for the string table, etc), the only clue is likely to be a read
+	error when it tries to read the table, or a "virtual memory
+	exhausted" error when it tries to allocated 15 bazillon bytes
+	of space for the 15 bazillon byte table it is about to read.
+	This function at least allows us to answer the quesion, "is the
+	size reasonable?".
+*/
+
+long
+bfd_get_size (abfd)
+     bfd *abfd;
+{
+  FILE *fp;
+  struct stat buf;
+
+  fp = bfd_cache_lookup (abfd);
+  if (0 != fstat (fileno (fp), &buf))
+    return 0;
+
+  return buf.st_size;
 }
 
 /*

@@ -38,10 +38,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/ecoff-ext.h"	/* ECOFF external struct defns */
 
 void
-ecoff_swap_hdr_in (abfd, ext_copy, intern)
-     bfd *abfd;
-     struct hdr_ext *ext_copy;
-     HDRR *intern;
+DEFUN (ecoff_swap_hdr_in, (abfd, ext_copy, intern),
+       bfd *abfd AND
+       struct hdr_ext *ext_copy AND
+       HDRR *intern)
 {
   struct hdr_ext ext[1];
 
@@ -82,10 +82,10 @@ ecoff_swap_hdr_in (abfd, ext_copy, intern)
 /* Swap in the file descriptor record.  */
 
 void
-ecoff_swap_fdr_in (abfd, ext_copy, intern)
-     bfd *abfd;
-     struct fdr_ext *ext_copy;
-     FDR *intern;
+DEFUN (ecoff_swap_fdr_in, (abfd, ext_copy, intern),
+       bfd *abfd AND
+       struct fdr_ext *ext_copy AND
+       FDR *intern)
 {
   struct fdr_ext ext[1];
 
@@ -143,10 +143,10 @@ ecoff_swap_fdr_in (abfd, ext_copy, intern)
 /* Swap in the procedure descriptor record.  */
 
 void
-ecoff_swap_pdr_in (abfd, ext_copy, intern)
-     bfd *abfd;
-     struct pdr_ext *ext_copy;
-     PDR *intern;
+DEFUN (ecoff_swap_pdr_in, (abfd, ext_copy, intern),
+       bfd *abfd AND
+       struct pdr_ext *ext_copy AND
+       PDR *intern)
 {
   struct pdr_ext ext[1];
 
@@ -177,10 +177,10 @@ ecoff_swap_pdr_in (abfd, ext_copy, intern)
 /* Swap in a symbol record.  */
 
 void
-ecoff_swap_sym_in (abfd, ext_copy, intern)
-     bfd *abfd;
-     struct sym_ext *ext_copy;
-     SYMR *intern;
+DEFUN (ecoff_swap_sym_in, (abfd, ext_copy, intern),
+       bfd *abfd AND
+       struct sym_ext *ext_copy AND
+       SYMR *intern)
 {
   struct sym_ext ext[1];
 
@@ -226,10 +226,10 @@ ecoff_swap_sym_in (abfd, ext_copy, intern)
 /* Swap in an external symbol record.  */
 
 void
-ecoff_swap_ext_in (abfd, ext_copy, intern)
-     bfd *abfd;
-     struct ext_ext *ext_copy;
-     EXTR *intern;
+DEFUN (ecoff_swap_ext_in, (abfd, ext_copy, intern),
+       bfd *abfd AND
+       struct ext_ext *ext_copy AND
+       EXTR *intern)
 {
   struct ext_ext ext[1];
 
@@ -260,10 +260,10 @@ ecoff_swap_ext_in (abfd, ext_copy, intern)
    info comes from the file header record (fh-fBigendian).  */
 
 void
-ecoff_swap_tir_in (bigend, ext_copy, intern)
-     int bigend;
-     struct tir_ext *ext_copy;
-     TIR *intern;
+DEFUN (ecoff_swap_tir_in, (bigend, ext_copy, intern),
+       int bigend AND
+       struct tir_ext *ext_copy AND
+       TIR *intern)
 {
   struct tir_ext ext[1];
 
@@ -316,10 +316,10 @@ ecoff_swap_tir_in (bigend, ext_copy, intern)
    big-endian or little-endian format.*/
 
 void
-ecoff_swap_rndx_in (bigend, ext_copy, intern)
-     int bigend;
-     struct rndx_ext *ext_copy;
-     RNDXR *intern;
+DEFUN (ecoff_swap_rndx_in, (bigend, ext_copy, intern),
+       int bigend AND
+       struct rndx_ext *ext_copy AND
+       RNDXR *intern)
 {
   struct rndx_ext ext[1];
 
@@ -353,10 +353,10 @@ ecoff_swap_rndx_in (bigend, ext_copy, intern)
 /* Swap in a relative file descriptor.  */
 
 void
-ecoff_swap_rfd_in (abfd, ext, intern)
-     bfd *abfd;
-     struct rfd_ext *ext;
-     RFDT *intern;
+DEFUN (ecoff_swap_rfd_in, (abfd, ext, intern),
+       bfd *abfd AND
+       struct rfd_ext *ext AND
+       RFDT *intern)
 {
   
   *intern = bfd_h_get_32 (abfd, (bfd_byte *)ext->rfd);
