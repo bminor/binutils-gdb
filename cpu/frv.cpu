@@ -3851,8 +3851,6 @@
   )
 )
 
-(ne-load-quad-r-simm nldqi  OP_46 GR    (ne-XI-size) 0 NA
-		     ((fr500 (unit u-gr-load))) "Load quad word")
 (ne-load-quad-r-simm nldqfi OP_4C FRint (ne-XI-size) 1 FR-ACCESS
 		     ((fr500 (unit u-fr-load))) "Load quad float")
 
