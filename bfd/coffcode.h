@@ -1487,38 +1487,36 @@ coff_set_alignment_hook (abfd, section, scnhdr)
     }
 #endif
 
-#ifdef COFF_IMAGE_WITH_PE
-  /* In a PE image file, the s_paddr field holds the virtual size of a
-     section, while the s_size field holds the raw size.  */
-  if (hdr->s_paddr != 0)
-    {
-      if (coff_section_data (abfd, section) == NULL)
-	{
-	  section->used_by_bfd =
-	    (PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata));
-	  if (section->used_by_bfd == NULL)
-	    {
-	      /* FIXME: Return error.  */
-	      abort ();
-	    }
-	}
-      if (pei_section_data (abfd, section) == NULL)
-	{
-	  coff_section_data (abfd, section)->tdata =
-	    (PTR) bfd_zalloc (abfd, sizeof (struct pei_section_tdata));
-	  if (coff_section_data (abfd, section)->tdata == NULL)
-	    {
-	      /* FIXME: Return error.  */
-	      abort ();
-	    }
-	}
-      pei_section_data (abfd, section)->virt_size = hdr->s_paddr;
-    }
-#endif
-
 #ifdef COFF_WITH_PE
+  /* In a PE image file, the s_paddr field holds the virtual size of a
+     section, while the s_size field holds the raw size.  We also keep
+     the original section flag value, since not every bit can be
+     mapped onto a generic BFD section bit.  */
+  if (coff_section_data (abfd, section) == NULL)
+    {
+      section->used_by_bfd =
+	(PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata));
+      if (section->used_by_bfd == NULL)
+	{
+	  /* FIXME: Return error.  */
+	  abort ();
+	}
+    }
+  if (pei_section_data (abfd, section) == NULL)
+    {
+      coff_section_data (abfd, section)->tdata =
+	(PTR) bfd_zalloc (abfd, sizeof (struct pei_section_tdata));
+      if (coff_section_data (abfd, section)->tdata == NULL)
+	{
+	  /* FIXME: Return error.  */
+	  abort ();
+	}
+    }
+  pei_section_data (abfd, section)->virt_size = hdr->s_paddr;
+  pei_section_data (abfd, section)->pe_flags = hdr->s_flags;
+
   section->lma = hdr->s_vaddr;
-#endif
+#endif /* COFF_WITH_PE */
 }
 #undef ALIGN_SET
 #undef ELIFALIGN_SET

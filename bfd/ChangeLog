@@ -1,5 +1,10 @@
 1999-09-06  Donn Terry  <donn@interix.com>
 
+	* libcoff-in.h (struct pei_section_tdata): Add pe_flags field.
+	* coffcode.h (coff_set_alignment_hook): Set pe_flags field if
+	COFF_WITH_PE.
+	* libcoff.h: Rebuild.
+
 	* coffcode.h (coff_set_custom_section_alignment): Add const to
 	declaration to match definition.
 	(coff_write_object_contents): Don't set F_AR32W(R)? if

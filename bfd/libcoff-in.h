@@ -216,12 +216,14 @@ struct xcoff_section_tdata
 #define xcoff_section_data(abfd, sec) \
   ((struct xcoff_section_tdata *) coff_section_data ((abfd), (sec))->tdata)
 
-/* Tdata for sections in PEI image files.  */
+/* Tdata for sections in PE files.  */
 
 struct pei_section_tdata
 {
   /* The virtual size of the section.  */
   bfd_size_type virt_size;
+  /* The PE section flags.  */
+  long pe_flags;
 };
 
 /* An accessor macro for the pei_section_tdata structure.  */
