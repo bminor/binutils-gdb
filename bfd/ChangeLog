@@ -1,3 +1,7 @@
+Fri Jun 18 16:00:20 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* Makefile.in (stmp-bfd.h): Ignore nonzero exit status from grep.
+
 Fri Jun 18 16:54:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/riscos.m{h,t}: New files.

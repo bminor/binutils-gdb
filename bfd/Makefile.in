@@ -320,7 +320,7 @@ $(BFD_H): stmp-bfd.h ; @true
 stmp-bfd.h : $(BFDIN_H) Makefile
 	rm -f sysdep.sed nsysdep.h
 	echo "exec sed -e '/^\\$$/d' \\" > sysdep.sed
-	grep -n '#include.*hosts/' sysdep.h \
+	-grep -n '#include.*hosts/' sysdep.h \
 	    | sed -e 's|\([0-9]*\):.*hosts/\(.*\)"| -e "\1r $(srcdir)/hosts/\2" -e \1d \\|' \
 	    >> sysdep.sed
 	echo "" >> sysdep.sed
