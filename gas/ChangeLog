@@ -147,6 +147,13 @@ Fri Jun 19 00:44:19 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-h8300.c (get_operand): Fix typos in ldm/stm support.
 
+start-sanitize-sky
+Fri Jun 19 00:04:26 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* config/tc-dvp.c (md_apply_fix3): Handle new relocs
+	BFD_RELOC_MIPS_DVP_11_S4, BFD_RELOC_MIPS_DVP_U15_S3.
+
+end-sanitize-sky
 start-sanitize-am33
 Wed Jun 17 18:09:03 1998  Jeffrey A Law  (law@cygnus.com)
 
