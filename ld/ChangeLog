@@ -1,3 +1,8 @@
+2004-04-29  Brian Ford  <ford@vss.fsi.com>
+
+	* scripttempl/pe.sc: Handle .debug* and .gnu.linkonce.wi.* sections
+	for DWARF 2/3.  Update stab section's syntax.
+
 2004-04-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* pe-dll.c: Revert changes accidentally committed 2004-03-08.

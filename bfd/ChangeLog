@@ -1,3 +1,17 @@
+2004-04-29  Brian Ford  <ford@vss.fsi.com>
+
+	* bfd.c (bfd_get_sign_extend_vma): Add pe[i]-i386 case to DJGPP hack.
+	* coffcode.h (DOT_DEBUG, GNU_LINKONCE_WI): Define.
+	[!COFF_WITH_PE] (sec_to_styp_flags, styp_to_sec_flags): Use them.
+	(coff_compute_section_file_positions) [RS6000COFF_C]: Likewise.
+	[COFF_WITH_PE] (sec_to_styp_flags): Handle DWARF 2/3 .debug* and
+	.gnu.linkonce.wi. sections.
+	* pe-i386.c (COFF_SUPPORT_GNU_LINKONCE): Define.
+	(COFF_SECTION_ALIGNMENT_ENTRIES): Add entries for .debug and
+	.gnu.linkonce.wi..
+	* pei-i386.c (COFF_SUPPORT_GNU_LINKONCE): Likewise.
+	(COFF_SECTION_ALIGNMENT_ENTRIES): Likewise.
+
 2004-04-28  Chris Demetriou  <cgd@broadcom.com>
 
 	* reloc.c: Remove BFD_RELOC_PCREL_HI16_S and BFD_RELOC_PCREL_LO16.

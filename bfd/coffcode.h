@@ -1,6 +1,6 @@
 /* Support for the generic parts of most COFF variants, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -309,6 +309,9 @@ CODE_FRAGMENT
 
 #define STRING_SIZE_SIZE (4)
 
+#define DOT_DEBUG	".debug"
+#define GNU_LINKONCE_WI ".gnu.linkonce.wi."
+
 static long sec_to_styp_flags
   PARAMS ((const char *, flagword));
 static bfd_boolean styp_to_sec_flags
@@ -428,7 +431,7 @@ sec_to_styp_flags (sec_name, sec_flags)
       styp_flags = STYP_LIT;
 #endif /* _LIT */
     }
-  else if (!strncmp (sec_name, ".debug", 6))
+  else if (!strncmp (sec_name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1))
     {
       /* Handle the XCOFF debug section and DWARF2 debug sections.  */
       if (!sec_name[6])
@@ -441,7 +444,7 @@ sec_to_styp_flags (sec_name, sec_flags)
       styp_flags = STYP_DEBUG_INFO;
     }
 #ifdef COFF_LONG_SECTION_NAMES
-  else if (!strncmp (sec_name, ".gnu.linkonce.wi.", 17))
+  else if (!strncmp (sec_name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1))
     {
       styp_flags = STYP_DEBUG_INFO;
     }
@@ -518,7 +521,7 @@ sec_to_styp_flags (sec_name, sec_flags)
 
 static long
 sec_to_styp_flags (sec_name, sec_flags)
-     const char *sec_name ATTRIBUTE_UNUSED;
+     const char *sec_name;
      flagword sec_flags;
 {
   long styp_flags = 0;
@@ -530,6 +533,11 @@ sec_to_styp_flags (sec_name, sec_flags)
      COFF files.  IMAGE_SCN_* are the PE section flags which appear in
      PE files.  The STYP_* flags and the IMAGE_SCN_* flags overlap,
      but there are more IMAGE_SCN_* flags.  */
+
+  /* FIXME: There is no gas syntax to specify the debug section flag.  */
+  if (strncmp (sec_name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1) == 0
+      || strncmp (sec_name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1) == 0)
+    sec_flags = SEC_READONLY | SEC_DEBUGGING;
 
   /* skip LOAD */
   /* READONLY later */
@@ -675,12 +683,12 @@ styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
 #endif
 	sec_flags |= SEC_ALLOC;
     }
-  else if (strncmp (name, ".debug", 6) == 0
+  else if (strncmp (name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1) == 0
 #ifdef _COMMENT
 	   || strcmp (name, _COMMENT) == 0
 #endif
 #ifdef COFF_LONG_SECTION_NAMES
-	   || strncmp (name, ".gnu.linkonce.wi.", 17) == 0
+	   || strncmp (name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1) == 0
 #endif
 	   || strncmp (name, ".stab", 5) == 0)
     {
@@ -3004,7 +3012,7 @@ coff_compute_section_file_positions (abfd)
 	{
 	  asection *dsec;
 
-	  dsec = bfd_make_section_old_way (abfd, ".debug");
+	  dsec = bfd_make_section_old_way (abfd, DOT_DEBUG);
 	  if (dsec == NULL)
 	    abort ();
 	  dsec->_raw_size = sz;

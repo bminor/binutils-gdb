@@ -1,3 +1,7 @@
+2004-04-29  Brian Ford  <ford@vss.fsi.com>
+
+	* dwarf2dbg.c (dwarf2_finish): Add SEC_DEBUGGING to section flags.
+
 2004-04-28  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (HAVE_32BIT_ADDRESSES, append_insn, macro_build)
