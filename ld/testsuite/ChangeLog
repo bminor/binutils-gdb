@@ -1,3 +1,11 @@
+2005-02-17  Zack Weinberg  <zack@codesourcery.com>
+
+	* ld-scripts/align.exp: Rename existing "ALIGN" test to "align1".
+	Add dump tests "align2a", "align2b", "align2c".
+	* ld-scripts/align2.t, ld-scripts/align2a.s, ld-scripts/align2a.d
+	* ld-scripts/align2b.s, ld-scripts/align2b.d
+	* ld-scripts/align2c.s, ld-scripts/align2c.d: New files.
+
 2005-02-17  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-frv/fdpic-static-6.d: Update.
@@ -5,7 +13,7 @@
 	spelling of errors and warnings.
 
 2005-02-15  Nigel Stephens  <nigel@mips.com>
-            Maciej W. Rozycki  <macro@mips.com>
+	    Maciej W. Rozycki  <macro@mips.com>
 
 	* ld-mips-elf/mips16-hilo.d: New test for the R_MIPS16_HI16 and
 	R_MIPS16_LO16 relocs.
@@ -216,7 +224,7 @@
 
 2004-12-21  Tomer Levi  <Tomer.Levi@nsc.com>
 
-	* ld-crx/reloc-abs32.d: Update reference file according 
+	* ld-crx/reloc-abs32.d: Update reference file according
 	to disassembler printing method.
  	* ld-crx/reloc-rel16.d: Likewise.
 	* ld-crx/reloc-rel24.d: Likewise.

@@ -1,3 +1,12 @@
+2005-02-17  Zack Weinberg  <zack@codesourcery.com>
+
+	* ldexp.c (assigning_to_dot): New global flag.
+	(fold_name): If assigning_to_dot is true, object immediately to
+	an undefined symbol.
+	(exp_fold_tree): Set and clear assigning_to_dot around the
+	recursive call to exp_fold_tree to process the right-hand side
+	of an assignment to the location counter.
+
 2005-02-17  Paul Brook  <paul@codesourcery.com>
 
 	* scripttempl/armbpabi.sc: Add dummy name to version block.
@@ -14,7 +23,7 @@
 	not defined.
 	(gld${EMULATION_NAME}_parse_ld_so_conf_include): Do not use glob
 	if HAVE_GLOB is not defined.
-	
+
 2005-02-16  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Define
@@ -32,7 +41,7 @@
 	* ldlex.l (YY_NO_UNPUT): Define so that the yy_unput function is
 	not declared.  It is not used and its presence causes a compile
 	time warning.
-	
+
 2005-02-11  Zack Weinberg  <zack@codesourcery.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_stat_needed):

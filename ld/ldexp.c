@@ -50,6 +50,9 @@ struct exp_data_seg exp_data_seg;
 
 segment_type *segments;
 
+/* Principally used for diagnostics.  */
+static bfd_boolean assigning_to_dot = FALSE;
+
 /* Print the string representation of the given token.  Surround it
    with spaces if INFIX_P is TRUE.  */
 
@@ -596,7 +599,8 @@ fold_name (etree_type *tree,
 		    }
 		}
 	    }
-	  else if (allocation_done == lang_final_phase_enum)
+	  else if (allocation_done == lang_final_phase_enum
+		   || assigning_to_dot)
 	    einfo (_("%F%S: undefined symbol `%s' referenced in expression\n"),
 		   tree->name.name);
 	  else if (h->type == bfd_link_hash_new)
@@ -755,10 +759,13 @@ exp_fold_tree (etree_type *tree,
 	      || (allocation_done == lang_final_phase_enum
 		  && current_section == abs_output_section))
 	    {
+	      /* Notify the folder that this is an assignment to dot.  */
+	      assigning_to_dot = TRUE;
 	      result = exp_fold_tree (tree->assign.src,
 				      current_section,
-				      allocation_done, dot,
-				      dotp);
+				      allocation_done, dot, dotp);
+	      assigning_to_dot = FALSE;
+
 	      if (! result.valid_p)
 		einfo (_("%F%S invalid assignment to location counter\n"));
 	      else
