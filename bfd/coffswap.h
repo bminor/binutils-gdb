@@ -397,6 +397,13 @@ coff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
 	  in->x_scn.x_scnlen = GET_SCN_SCNLEN(abfd, ext);
 	  in->x_scn.x_nreloc = GET_SCN_NRELOC(abfd, ext);
 	  in->x_scn.x_nlinno = GET_SCN_NLINNO(abfd, ext);
+
+	  /* PE defines some extra fields; we zero them out for
+             safety.  */
+	  in->x_scn.x_checksum = 0;
+	  in->x_scn.x_associated = 0;
+	  in->x_scn.x_comdat = 0;
+
 	  return;
 	}
       break;

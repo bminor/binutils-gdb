@@ -1272,6 +1272,11 @@ coff_get_lineno (ignore_abfd, symbol)
   return coffsymbol (symbol)->lineno;
 }
 
+#if 0
+
+/* This is only called from coff_add_missing_symbols, which has been
+   disabled.  */
+
 asymbol *
 coff_section_symbol (abfd, name)
      bfd *abfd;
@@ -1317,6 +1322,8 @@ coff_section_symbol (abfd, name)
 
   return sym;
 }
+
+#endif /* 0 */
 
 /* This function transforms the offsets into the symbol table into
    pointers to syments.  */
@@ -1866,6 +1873,13 @@ coff_print_symbol (abfd, filep, symbol, how)
 			       (long) auxp->u.auxent.x_scn.x_scnlen,
 			       auxp->u.auxent.x_scn.x_nreloc,
 			       auxp->u.auxent.x_scn.x_nlinno);
+		      if (auxp->u.auxent.x_scn.x_checksum != 0
+			  || auxp->u.auxent.x_scn.x_associated != 0
+			  || auxp->u.auxent.x_scn.x_comdat != 0)
+			fprintf (file, "checksum 0x%lx assoc %d comdat %d",
+				 auxp->u.auxent.x_scn.x_checksum,
+				 auxp->u.auxent.x_scn.x_associated,
+				 auxp->u.auxent.x_scn.x_comdat);
 		      break;
 		    }
 		  /* else fall through */

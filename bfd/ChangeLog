@@ -1,5 +1,11 @@
 Wed Mar 27 10:43:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* peicode.h (coff_swap_aux_in): Swap in extra PE x_scn fields.
+	(coff_swap_aux_out): Swap out extra PE x_scn fields.
+	* coffswap.h (coff_swap_aux_in): Zero out extra PE x_scn fields.
+	* coffgen.c (coff_print_symbol): If any of the extra PE x_scn
+	fields is non-zero, print them.
+
 	* coff-ppc.c (ppc_record_toc_entry): Put inside COFF_IMAGE_WITH_PE
 	ifdef.  Remove unused variables.
 	(ppc_record_data_in_toc_entry): Ifdef out.  Removed unused

@@ -535,6 +535,12 @@ coff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
       in->x_scn.x_scnlen = GET_SCN_SCNLEN(abfd, ext);
       in->x_scn.x_nreloc = GET_SCN_NRELOC(abfd, ext);
       in->x_scn.x_nlinno = GET_SCN_NLINNO(abfd, ext);
+      in->x_scn.x_checksum = bfd_h_get_32 (abfd,
+					   (bfd_byte *) ext->x_scn.x_checksum);
+      in->x_scn.x_associated =
+	bfd_h_get_16 (abfd, (bfd_byte *) ext->x_scn.x_associated);
+      in->x_scn.x_comdat = bfd_h_get_8 (abfd,
+					(bfd_byte *) ext->x_scn.x_comdat);
       return;
     }
     break;
@@ -615,6 +621,12 @@ coff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
       PUT_SCN_SCNLEN(abfd, in->x_scn.x_scnlen, ext);
       PUT_SCN_NRELOC(abfd, in->x_scn.x_nreloc, ext);
       PUT_SCN_NLINNO(abfd, in->x_scn.x_nlinno, ext);
+      bfd_h_put_32 (abfd, in->x_scn.x_checksum,
+		    (bfd_byte *) ext->x_scn.x_checksum);
+      bfd_h_put_16 (abfd, in->x_scn.x_associated,
+		    (bfd_byte *) ext->x_scn.x_associated);
+      bfd_h_put_8 (abfd, in->x_scn.x_comdat,
+		   (bfd_byte *) ext->x_scn.x_comdat);
       return sizeof (AUXENT);
     }
     break;
