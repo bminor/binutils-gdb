@@ -827,8 +827,6 @@
 
 2005-01-29  Mark Kettenis  <kettenis@gnu.org>
 
-	* acconfig.h: Remove #undef.
-
 	* configure.ac: Remove extra check for ranlib.
 	* configure: Regenerated.
 
