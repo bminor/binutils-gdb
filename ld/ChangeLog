@@ -1,5 +1,8 @@
 Wed Jun 22 13:42:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* emulparams/i386linux.sh (NONPAGED_TEXT_START_ADDR): Set to 0.
+	From jrs@world.std.com (Rick Sladkey).
+
 	* scripttempl/mipsbsd.sc: Let sections align to their natural
 	boundaries.
 
