@@ -82,8 +82,6 @@ unsigned int global_symbol_count;
 
 /* IMPORTS */
 
-extern boolean option_longmap;
-
 /* LOCALS */
 #define	TABSIZE	1009
 static ldsym_type *global_symbol_hash_table[TABSIZE];
@@ -324,7 +322,7 @@ print_file_stuff (f)
   else
     {
       asection *s;
-      if (true || option_longmap)
+      if (true)
 	{
 	  for (s = f->the_bfd->sections;
 	       s != (asection *) NULL;
@@ -426,10 +424,6 @@ ldsym_print_symbol_table ()
 
       }
   }
-  if (option_longmap)
-    {
-      lang_for_each_file (list_file_locals);
-    }
 }
 
 extern lang_output_section_statement_type *create_object_symbols;

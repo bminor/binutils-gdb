@@ -49,7 +49,9 @@ static void set_scripts_dir ();
 
 /* IMPORTS */
 extern boolean lang_has_input_file;
-extern boolean trace_files;
+extern boolean force_make_executable;
+extern boolean relaxing;
+extern boolean had_script;
 
 /* EXPORTS */
 
@@ -61,8 +63,6 @@ char *program_name;
 
 /* The file that we're creating */
 bfd *output_bfd = 0;
-
-extern boolean option_v;
 
 /* set if -y on the command line */
 int had_y;
@@ -93,14 +93,11 @@ unsigned int commons_pending;
 
 unsigned int undefined_global_sym_count;
 
-/* Count the number of warning symbols encountered. */
-int warning_count;
-
-/* have we had a load script ? */
-extern boolean had_script;
-
 /* Nonzero means print names of input files as processed.  */
 boolean trace_files;
+
+/* Nonzero means same, but note open failures, too.  */
+boolean trace_file_tries;
 
 /* 1 => write load map.  */
 boolean write_map;
@@ -108,12 +105,7 @@ boolean write_map;
 #ifdef GNU960
 /* Indicates whether output file will be b.out (default) or coff */
 enum target_flavour output_flavor = BFD_BOUT_FORMAT;
-
 #endif
-
-/* Force the make_executable to be output, even if there are non-fatal
-   errors */
-boolean force_make_executable;
 
 /* A count of the total number of local symbols ever seen - by adding
  the symbol_count field of each newly read afile.*/
@@ -143,7 +135,7 @@ main (argc, argv)
   /* Initialize the data about options.  */
 
 
-  trace_files = false;
+  trace_files = trace_file_tries = false;
   write_map = false;
   config.relocateable_output = false;
   command_line.force_common_definition = false;
@@ -160,7 +152,6 @@ main (argc, argv)
 
   /* Initialize the cumulative counts of symbols.  */
   undefined_global_sym_count = 0;
-  warning_count = 0;
   multiple_def_count = 0;
   commons_pending = 0;
 
@@ -176,19 +167,33 @@ main (argc, argv)
   lang_has_input_file = false;
   parse_args (argc, argv);
 
+  if (had_script == false)
+    {
+      /* Read the emulation's appropriate default script.  */
+      char *scriptname = ldemul_get_script ();
+      /* sizeof counts the terminating NUL.  */
+      size_t size = strlen (scriptname) + sizeof ("-T /ldscripts/");
+      char *buf = (char *) ldmalloc(size);
+      /* The initial slash prevents finding the script in `.' first.  */
+      sprintf (buf, "-T /ldscripts/%s", scriptname);
+      parse_line (buf, 0);
+      free (buf);
+    }
+
   if (config.relocateable_output && command_line.relax)
     {
       einfo ("%P%F: -relax and -r may not be used together\n");
     }
   lang_final ();
 
-  if (trace_files)
-    {
-      info ("%P: mode %s\n", emulation);
-    }
   if (lang_has_input_file == false)
     {
       einfo ("%P%F: No input files\n");
+    }
+
+  if (trace_files)
+    {
+      info ("%P: mode %s\n", emulation);
     }
 
   ldemul_after_parse ();
@@ -205,7 +210,7 @@ main (argc, argv)
 	  config.map_file = fopen (config.map_filename, FOPEN_WT);
 	  if (config.map_file == (FILE *) NULL)
 	    {
-	      einfo ("%P%F: can't open map file %s, %E\n",
+	      einfo ("%P%F: cannot open map file %s: %E\n",
 		     config.map_filename);
 	    }
 	}
@@ -348,10 +353,9 @@ check_for_scripts_dir (dir)
    Libraries will be searched for here too, but that's ok.
    We look for the "ldscripts" directory in:
 
-   the curent dir
    SCRIPTDIR (passed from Makefile)
-   the dir where this program is
-   the dir where this program is/../lib  */
+   the dir where this program is (for using it from the build tree)
+   the dir where this program is/../lib (for installing the tool suite elsewhere) */
 
 static void
 set_scripts_dir ()
@@ -359,22 +363,27 @@ set_scripts_dir ()
   char *end, *dir;
   size_t dirlen;
 
-  if (check_for_scripts_dir ("."))
-    return;			/* Newest version, most likely.  */
-
   if (check_for_scripts_dir (SCRIPTDIR))
     return;			/* We've been installed normally.  */
 
   /* Look for "ldscripts" in the dir where our binary is.  */
   end = strrchr (program_name, '/');
-  if (!end)
-    return;
+  if (end)
+    {
+      dirlen = end - program_name;
+      /* Make a copy of program_name in dir.
+	 Leave room for later "/../lib".  */
+      dir = (char *) ldmalloc (dirlen + 8);
+      strncpy (dir, program_name, dirlen);
+      dir[dirlen] = '\0';
+    }
+  else
+    {
+      dirlen = 1;
+      dir = (char *) ldmalloc (dirlen + 8);
+      strcpy (dir, ".");
+    }
 
-  /* Make a copy of program_name in dir.  */
-  dirlen = end - program_name;
-  dir = (char *) ldmalloc (dirlen + 8);	/* Leave room for later "/../lib".  */
-  strncpy (dir, program_name, dirlen);
-  dir[dirlen] = '\0';
   if (check_for_scripts_dir (dir))
     return;			/* Don't free dir.  */
 
@@ -387,7 +396,7 @@ set_scripts_dir ()
 }
 
 void
-Q_read_entry_symbols (desc, entry)
+read_entry_symbols (desc, entry)
      bfd *desc;
      struct lang_input_statement_struct *entry;
 {
@@ -440,10 +449,8 @@ Whilst all this is going on we keep a count of the number of multiple
 definitions seen, undefined global symbols and pending commons.
 */
 
-extern boolean relaxing;
-
 void
-Q_enter_global_ref (nlist_p, name)
+enter_global_ref (nlist_p, name)
      asymbol ** nlist_p;	/* pointer into symbol table from incoming bfd */
      CONST char *name; /* name of symbol in linker table */
 {
@@ -602,7 +609,7 @@ Q_enter_global_ref (nlist_p, name)
 }
 
 static void
-Q_enter_file_symbols (entry)
+enter_file_symbols (entry)
      lang_input_statement_type *entry;
 {
   asymbol **q;
@@ -613,7 +620,7 @@ Q_enter_file_symbols (entry)
   ldlang_add_file (entry);
 
 
-  if (trace_files || option_v)
+  if (trace_files || trace_file_tries)
     {
       info ("%I\n", entry);
     }
@@ -669,7 +676,7 @@ Q_enter_file_symbols (entry)
 		       || bfd_is_com_section (p->section)
 		       || (p->flags & BSF_CONSTRUCTOR))
 		{
-		  Q_enter_global_ref (q, p->name);
+		  enter_global_ref (q, p->name);
 		}
 
 	    }
@@ -746,13 +753,13 @@ ldmain_open_file_read_symbol (entry)
 	  entry->the_bfd->usrdata = (PTR) entry;
 
 
-	  Q_read_entry_symbols (entry->the_bfd, entry);
+	  read_entry_symbols (entry->the_bfd, entry);
 
 	  /* look through the sections in the file and see if any of them
 	     are constructors */
 	  ldlang_check_for_constructors (entry);
 
-	  Q_enter_file_symbols (entry);
+	  enter_file_symbols (entry);
 	}
 #ifdef GNU960
       else if (gnu960_check_format (entry->the_bfd, bfd_archive))
@@ -920,7 +927,7 @@ symdef_library (entry)
 			  if (archive_member_lang_input_statement_struct->loaded == false)
 			    {
 
-			      Q_read_entry_symbols (archive_member_bfd, archive_member_lang_input_statement_struct);
+			      read_entry_symbols (archive_member_bfd, archive_member_lang_input_statement_struct);
 			      /* Now scan the symbol table and decide whether to load.  */
 
 
@@ -933,7 +940,7 @@ symdef_library (entry)
 
 				  not_finished = true;
 
-				  Q_enter_file_symbols (archive_member_lang_input_statement_struct);
+				  enter_file_symbols (archive_member_lang_input_statement_struct);
 
 				  if (prev)
 				    prev->chain = archive_member_lang_input_statement_struct;
@@ -1008,11 +1015,11 @@ linear_library (entry)
 		    return;
 		  if (subentry->loaded == false)
 		    {
-		      Q_read_entry_symbols (archive, subentry);
+		      read_entry_symbols (archive, subentry);
 
 		      if (subfile_wanted_p (subentry) == true)
 			{
-			  Q_enter_file_symbols (subentry);
+			  enter_file_symbols (subentry);
 
 			  if (prev)
 			    prev->chain = subentry;

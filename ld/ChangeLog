@@ -1,3 +1,24 @@
+Thu Jul 15 12:44:35 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldfile.c (ldfile_open_file): In error message, use the name the
+	user gave (e.g., "-lc"), rather than the base file name.
+
+	* ldexp.c (exp_fold_tree): Don't assign an int to an enum.
+
+	* ldmain.[ch]: Remove initial Q_ from function names.
+	* ldexp.c, ldindr.c, ldlang.c: Change callers.
+
+	* ldfile.c, ldmain.c, ldgram.y: Rename option_v to trace_file_tries.
+
+	* ldlang.c (lang_process): Move loading of default script from
+	here to main.  Add a "/" to start of script name to prevent
+	finding it in "." first.
+
+	* ldmain.c (set_scripts_dir): Don't look in "." first.
+
+	* ldgram.y, ldlang.c, ldsym.c: Remove traces of unused var
+	option_longmap. 
+
 Thu Jul 15 10:55:59 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (em_m88kbcs.c): Correct dependency.

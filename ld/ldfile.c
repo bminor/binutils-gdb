@@ -40,7 +40,7 @@ enum bfd_architecture ldfile_output_architecture;
 /* IMPORT */
 
 extern boolean had_script;
-extern boolean option_v;
+extern boolean trace_file_tries;
 
 
 #ifdef VMS
@@ -92,7 +92,7 @@ char *attempt;
 lang_input_statement_type  *entry;
 {
   entry->the_bfd = bfd_openr(attempt, entry->target);
-  if (option_v == true ) {
+  if (trace_file_tries == true ) {
     info("attempt to open %s %s\n", attempt,
 		(entry->the_bfd == (bfd *)NULL) ? "failed" : "succeeded" );
   }
@@ -174,14 +174,13 @@ lang_input_statement_type *entry;
 
       }
 
-
     }
   else {
     entry->the_bfd = cached_bfd_openr (entry->filename, entry);
-
   }
-  if (!entry->the_bfd)  einfo("%F%P: Can't open %s, %E\n", entry->filename);
 
+  if (!entry->the_bfd)
+    einfo("%F%P: cannot open %s: %E\n", entry->local_sym_name);
 }
 
 
@@ -196,7 +195,7 @@ char *exten;
   char buff[1000];
 
   result = fopen(name, "r");
-  if (option_v == true) {
+  if (trace_file_tries == true) {
     if (result == (FILE *)NULL) {
       info("can't find ");
     }
@@ -209,7 +208,7 @@ char *exten;
   if (*exten) {
     sprintf(buff, "%s%s", name, exten);
     result = fopen(buff, "r");
-    if (option_v == true) {
+    if (trace_file_tries == true) {
       if (result == (FILE *)NULL) {
 	info("can't find ");
       }
@@ -254,7 +253,7 @@ char *name;
   ldlex_input_stack = find_a_name(name, "");
 
   if (ldlex_input_stack == (FILE *)NULL) {
-    einfo("%P%F cannot open load script file %s, %E\n",name);
+    einfo("%P%F: cannot open load script file %s: %E\n",name);
   }
   lex_push_file(ldlex_input_stack, name);
   

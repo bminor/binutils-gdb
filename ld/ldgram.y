@@ -38,11 +38,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define YYDEBUG 1
 
-boolean option_v;
 extern unsigned int lineno;
+extern boolean trace_file_tries;
 extern boolean trace_files;
 extern boolean write_map;
-extern boolean option_longmap;
 extern int g_switch_value;
 boolean hex_mode;
 static int typebits;
@@ -192,7 +191,7 @@ command_line_option:
 	|	OPTION_V
 			{	
 			ldversion(1);
-			option_v = true;
+			trace_file_tries = true;
 			}
 	|	OPTION_version
 			{	
