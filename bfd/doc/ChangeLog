@@ -1,8 +1,16 @@
+Tue Dec 10 22:11:05 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: build chew into the current directory.
+
 Tue Dec 10 08:26:28 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* chew.c: don't core dump when can't open file
 	* Makefile.in: get proto.str from the right place when built in
 	odd directories
+
+Tue Dec 10 04:07:25 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: infodir belongs in datadir.
 
 Sat Dec  7 17:01:23 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
