@@ -1,5 +1,20 @@
 2004-10-01  Andrew Cagney  <cagney@gnu.org>
 
+	* Makefile.in (COMMON_OBS): Add inf-child.o.
+	* config/vax/obsd.mh (NATDEPFILES): Remove inf-child.o.
+	* config/vax/nbsdelf.mh (NATDEPFILES): Remove inf-child.o.
+	* config/vax/nbsdaout.mh (NATDEPFILES): Remove inf-child.o.
+	* config/powerpc/nbsd.mh (NATDEPFILES): Remove inf-child.o.
+	* config/m88k/obsd.mh (NATDEPFILES): Remove inf-child.o.
+	* config/i386/obsdaout.mh (NATDEPFILES): Remove inf-child.o.
+	* config/i386/obsd64.mh (NATDEPFILES): Remove inf-child.o.
+	* config/i386/obsd.mh (NATDEPFILES): Remove inf-child.o.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Remove inf-child.o.
+	* config/i386/nbsdaout.mh (NATDEPFILES): Remove inf-child.o.
+	* config/i386/nbsd64.mh (NATDEPFILES): Remove inf-child.o.
+	* config/i386/fbsd64.mh (NATDEPFILES): Remove inf-child.o.
+	* config/i386/fbsd.mh (NATDEPFILES): Remove inf-child.o.
+
 	* target.c (xfer_using_stratum): Change return type to LONGEST.
 	On each iteration offset, readbuf and writebuf.
 	* inf-ptrace.c (inf_ptrace_xfer_partial): Simplify computation of

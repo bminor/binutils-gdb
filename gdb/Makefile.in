@@ -895,6 +895,7 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
 	infcall.o \
 	infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \
+	inf-child.o \
 	interps.o \
 	main.o \
 	macrotab.o macrocmd.o macroexp.o macroscope.o \
