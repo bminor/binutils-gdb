@@ -1,5 +1,9 @@
 Mon Oct 18 10:28:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* c-exp.y: Remove never-used (because of shift/reduce conflicts)
+	rules for pointers to members.
+	* Makefile.in: Remove notice about expected shift/reduce conflicts.
+
 	* buildsym.c (finish_block): If we pop the context stack and it is
 	not empty, complain () instead of abort ().
 

@@ -722,15 +722,12 @@ variable:	name_not_typename
 	;
 
 
-/* shift/reduce conflict: "typebase ." and the token is '('.  (Shows up
-   twice, once where qualified_name is a possibility and once where
-   it is not).  */
-/* shift/reduce conflict: "typebase CONST_KEYWORD ." and the token is '('.  */
-/* shift/reduce conflict: "typebase VOLATILE_KEYWORD ." and the token is
-   '('.  */
 ptype	:	typebase
 	/* "const" and "volatile" are curently ignored.  A type qualifier
-	   before the type is currently handled in the typebase rule.  */
+	   before the type is currently handled in the typebase rule.
+	   The reason for recognizing these here (shift/reduce conflicts)
+	   might be obsolete now that some pointer to member rules have
+	   been deleted.  */
 	|	typebase CONST_KEYWORD
 	|	typebase VOLATILE_KEYWORD
 	|	typebase abs_decl
@@ -766,9 +763,6 @@ direct_abs_decl: '(' abs_decl ')'
 			  $$ = 0;
 			}
 
-     /* shift/reduce conflict.  "direct_abs_decl . func_mod", and the token
-	is '('.  */
-
 	| 	direct_abs_decl func_mod
 			{ push_type (tp_function); }
 	|	func_mod
@@ -787,20 +781,17 @@ func_mod:	'(' ')'
 			{ free ((PTR)$2); $$ = 0; }
 	;
 
-/* shift/reduce conflict: "type '(' typebase COLONCOLON '*' ')' ." and the
-   token is '('.  */
+/* We used to try to recognize more pointer to member types here, but
+   that didn't work (shift/reduce conflicts meant that these rules never
+   got executed).  The problem is that
+     int (foo::bar::baz::bizzle)
+   is a function type but
+     int (foo::bar::baz::bizzle::*)
+   is a pointer to member type.  Stroustrup loses again!  */
+
 type	:	ptype
 	|	typebase COLONCOLON '*'
 			{ $$ = lookup_member_type (builtin_type_int, $1); }
-	|	type '(' typebase COLONCOLON '*' ')'
-			{ $$ = lookup_member_type ($1, $3); }
-	|	type '(' typebase COLONCOLON '*' ')' '(' ')'
-			{ $$ = lookup_member_type
-			    (lookup_function_type ($1), $3); }
-	|	type '(' typebase COLONCOLON '*' ')' '(' nonempty_typelist ')'
-			{ $$ = lookup_member_type
-			    (lookup_function_type ($1), $3);
-			  free ((PTR)$8); }
 	;
 
 typebase  /* Implements (approximately): (type-qualifier)* type-specifier */

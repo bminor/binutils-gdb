@@ -718,7 +718,6 @@ version.c: Makefile
 # else.
 c-exp.tab.o: c-exp.tab.c
 c-exp.tab.c: c-exp.y Makefile.in
-	@echo 'Expect 4 shift/reduce conflicts.'
 	$(YACC) $(YFLAGS) $(srcdir)/c-exp.y
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
