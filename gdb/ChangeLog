@@ -1,5 +1,8 @@
 2003-06-01  Mark Kettenis  <kettenis@gnu.org>
 
+	Fix gdb/1216.
+	* shnbsd-nat.c: Include "sh-tdep.h".
+
 	From Richard Henderson  <rth@redhat.com>:
 	* dwarf2-frame.c (dwarf2_frame_state_alloc_regs): Fix ptr arithmetic.
 
