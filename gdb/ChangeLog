@@ -1,5 +1,7 @@
 Mon Jul 19 11:48:57 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* config/i386/xm-i386sco.h: Define HAVE_TERMIOS.
+
 	* printcmd.c, config/pa/xm-pa.h, config/alpha/xm-alpha.h: Make it so
 	arg_bytes field of makeva_list is always aligned.
 	* config/pa/xm-pa.h: Make arglist_address a char *.
