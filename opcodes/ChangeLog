@@ -1,3 +1,15 @@
+2004-10-27  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* crx-dis.c (enum REG_ARG_TYPE): New, replacing COP_ARG_TYPE.
+	(getregliststring): Support HI/LO and user registers.
+	* crx-opc.c (crx_instruction): Update data structure according to the 
+	rearrangement done in CRX opcode header file.
+	(crx_regtab):  Likewise.
+	(crx_optab):  Likewise.
+	(crx_instruction): Reorder load/stor instructions, remove unsupported 
+	formats.
+	support new Co-Processor instruction 'cpi'.
+
 2004-10-27  Nick Clifton  <nickc@redhat.com>
 
 	* opcodes/iq2000-asm.c: Regenerate.
