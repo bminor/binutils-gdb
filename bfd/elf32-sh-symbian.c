@@ -505,7 +505,7 @@ sh_symbian_relocate_section (bfd *                  output_bfd,
 
 	      /* Allow the symbol to become local if necessary.  */
 	      if (new_hash->dynindx == -1)
-		new_hash->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+		new_hash->def_regular = 1;
 
 	      if (DEBUG)
 		fprintf (stderr, "Created new symbol %s\n", ptr->new_name);

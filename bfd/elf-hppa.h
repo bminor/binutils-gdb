@@ -1115,11 +1115,11 @@ elf_hppa_unmark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
   if (! info->relocatable
       && info->unresolved_syms_in_shared_libs != RM_IGNORE
       && h->root.type == bfd_link_hash_undefined
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
+      && h->ref_dynamic
+      && !h->ref_regular)
     {
-      h->elf_link_hash_flags &= ~ELF_LINK_HASH_REF_DYNAMIC;
-      h->elf_link_hash_flags |= 0x8000;
+      h->ref_dynamic = 0;
+      h->pointer_equality_needed = 1;
     }
 
   return TRUE;
@@ -1149,12 +1149,12 @@ elf_hppa_remark_useless_dynamic_symbols (struct elf_link_hash_entry *h,
   if (! info->relocatable
       && info->unresolved_syms_in_shared_libs != RM_IGNORE
       && h->root.type == bfd_link_hash_undefined
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0
-      && (h->elf_link_hash_flags & 0x8000) != 0)
+      && !h->ref_dynamic
+      && !h->ref_regular
+      && h->pointer_equality_needed)
     {
-      h->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
-      h->elf_link_hash_flags &= ~0x8000;
+      h->ref_dynamic = 1;
+      h->pointer_equality_needed = 0;
     }
 
   return TRUE;

@@ -162,47 +162,45 @@ struct elf_link_hash_entry
   bfd_size_type size;
 
   /* Symbol type (STT_NOTYPE, STT_OBJECT, etc.).  */
-  char type;
+  unsigned int type : 8;
 
   /* Symbol st_other value, symbol visibility.  */
-  unsigned char other;
+  unsigned int other : 8;
 
-  /* Some flags; legal values follow.  */
-  unsigned short elf_link_hash_flags;
   /* Symbol is referenced by a non-shared object.  */
-#define ELF_LINK_HASH_REF_REGULAR 01
+  unsigned int ref_regular : 1;
   /* Symbol is defined by a non-shared object.  */
-#define ELF_LINK_HASH_DEF_REGULAR 02
+  unsigned int def_regular : 1;
   /* Symbol is referenced by a shared object.  */
-#define ELF_LINK_HASH_REF_DYNAMIC 04
+  unsigned int ref_dynamic : 1;
   /* Symbol is defined by a shared object.  */
-#define ELF_LINK_HASH_DEF_DYNAMIC 010
+  unsigned int def_dynamic : 1;
   /* Symbol has a non-weak reference from a non-shared object.  */
-#define ELF_LINK_HASH_REF_REGULAR_NONWEAK 020
+  unsigned int ref_regular_nonweak : 1;
   /* Dynamic symbol has been adjustd.  */
-#define ELF_LINK_HASH_DYNAMIC_ADJUSTED 040
+  unsigned int dynamic_adjusted : 1;
   /* Symbol needs a copy reloc.  */
-#define ELF_LINK_HASH_NEEDS_COPY 0100
+  unsigned int needs_copy : 1;
   /* Symbol needs a procedure linkage table entry.  */
-#define ELF_LINK_HASH_NEEDS_PLT 0200
+  unsigned int needs_plt : 1;
   /* Symbol appears in a non-ELF input file.  */
-#define ELF_LINK_NON_ELF 0400
+  unsigned int non_elf : 1;
   /* Symbol should be marked as hidden in the version information.  */
-#define ELF_LINK_HIDDEN 01000
+  unsigned int hidden : 1;
   /* Symbol was forced to local scope due to a version script file.  */
-#define ELF_LINK_FORCED_LOCAL 02000
+  unsigned int forced_local : 1;
   /* Symbol was marked during garbage collection.  */
-#define ELF_LINK_HASH_MARK 04000
+  unsigned int mark : 1;
   /* Symbol is referenced by a non-GOT/non-PLT relocation.  This is
      not currently set by all the backends.  */
-#define ELF_LINK_NON_GOT_REF 010000
+  unsigned int non_got_ref : 1;
   /* Symbol has a definition in a shared object.  */
-#define ELF_LINK_DYNAMIC_DEF 020000
+  unsigned int dynamic_def : 1;
   /* Symbol is weak in all shared objects.  */
-#define ELF_LINK_DYNAMIC_WEAK 040000
+  unsigned int dynamic_weak : 1;
   /* Symbol is referenced with a relocation where C/C++ pointer equality
      matters.  */
-#define ELF_LINK_POINTER_EQUALITY_NEEDED 0100000
+  unsigned int pointer_equality_needed : 1;
 };
 
 /* Will references to this symbol always reference the symbol
@@ -221,8 +219,8 @@ struct elf_link_hash_entry
 /* Common symbols that are turned into definitions don't have the
    DEF_REGULAR flag set, so they might appear to be undefined.  */
 #define ELF_COMMON_DEF_P(H) \
-  (((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0		\
-   && ((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0	\
+  (!(H)->def_regular							\
+   && !(H)->def_dynamic							\
    && (H)->root.type == bfd_link_hash_defined)
 
 /* Records local symbols to be emitted in the dynamic symbol table.  */
@@ -1771,10 +1769,8 @@ extern bfd_boolean _sh_elf_set_mach_from_flags
    about initializing any .plt and .got entries in relocate_section.  */
 #define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H) \
   ((DYN)								\
-   && ((SHARED)								\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
-   && ((H)->dynindx != -1						\
-       || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
+   && ((SHARED) || !(H)->forced_local)					\
+   && ((H)->dynindx != -1 || (H)->forced_local))
 
 /* This macro is to avoid lots of duplicated code in the body
    of xxx_relocate_section() in the various elfxx-xxxx.c files.  */

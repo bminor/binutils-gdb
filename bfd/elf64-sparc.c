@@ -1265,7 +1265,7 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
 		return FALSE;
 	    }
 
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	  h->needs_plt = 1;
 	  if (ELF64_R_TYPE_ID (rel->r_info) != R_SPARC_PLT32
 	      && ELF64_R_TYPE_ID (rel->r_info) != R_SPARC_PLT64)
 	    break;
@@ -1612,14 +1612,11 @@ sparc64_elf_adjust_dynamic_symbol (info, h)
 
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
-	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
+	      && (h->needs_plt
 		  || h->weakdef != NULL
-		  || ((h->elf_link_hash_flags
-		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_REF_REGULAR) != 0
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0)));
+		  || (h->def_dynamic
+		      && h->ref_regular
+		      && !h->def_regular)));
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later
@@ -1629,7 +1626,7 @@ sparc64_elf_adjust_dynamic_symbol (info, h)
      some of their functions as STT_NOTYPE when they really should be
      STT_FUNC.  */
   if (h->type == STT_FUNC
-      || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0
+      || h->needs_plt
       || (h->type == STT_NOTYPE
 	  && (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
@@ -1642,7 +1639,7 @@ sparc64_elf_adjust_dynamic_symbol (info, h)
              In such a case, we don't actually need to build a
              procedure linkage table, and we can just do a WDISP30
              reloc instead.  */
-	  BFD_ASSERT ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0);
+	  BFD_ASSERT (h->needs_plt);
 	  return TRUE;
 	}
 
@@ -1662,7 +1659,7 @@ sparc64_elf_adjust_dynamic_symbol (info, h)
 	 pointers compare as equal between the normal executable and
 	 the shared library.  */
       if (! info->shared
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+	  && !h->def_regular)
 	{
 	  h->root.u.def.section = s;
 	  h->root.u.def.value = sparc64_elf_plt_entry_offset (h->plt.offset);
@@ -1735,7 +1732,7 @@ sparc64_elf_adjust_dynamic_symbol (info, h)
       srel = bfd_get_section_by_name (dynobj, ".rela.bss");
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf64_External_Rela);
-      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_COPY;
+      h->needs_copy = 1;
     }
 
   /* We need to figure out the alignment required for this symbol.  I
@@ -2222,8 +2219,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		   become local.  */
 		else if (h != NULL && ! is_plt
 			 && ((! info->symbolic && h->dynindx != -1)
-			     || (h->elf_link_hash_flags
-				 & ELF_LINK_HASH_DEF_REGULAR) == 0))
+			     || !h->def_regular))
 		  {
 		    BFD_ASSERT (h->dynindx != -1);
 		    outrel.r_info
@@ -2325,8 +2321,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  || (info->shared
 		      && (info->symbolic
 			  || h->dynindx == -1
-			  || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
-		      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+			  || h->forced_local)
+		      && h->def_regular))
 		{
 		  /* This is actually a static link, or it is a -Bsymbolic
 		     link and the symbol is defined locally, or the symbol
@@ -2614,7 +2610,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	 not process them.  */
       if (unresolved_reloc
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
-	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
+	       && h->def_dynamic))
 	(*_bfd_error_handler)
 	  (_("%B(%A+0x%lx): unresolvable relocation against symbol `%s'"),
 	   input_bfd, input_section,
@@ -2736,7 +2732,7 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       loc += (h->plt.offset - 4) * sizeof (Elf64_External_Rela);
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
 
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+      if (!h->def_regular)
 	{
 	  /* Mark the symbol as undefined, rather than as defined in
 	     the .plt section.  Leave the value alone.  */
@@ -2745,8 +2741,7 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	     Otherwise, the PLT entry would provide a definition for
 	     the symbol even if the symbol wasn't defined anywhere,
 	     and so the symbol would never be NULL.  */
-	  if ((h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR_NONWEAK)
-	      == 0)
+	  if (!h->ref_regular_nonweak)
 	    sym->st_value = 0;
 	}
     }
@@ -2775,7 +2770,7 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 initialized in the relocate_section function.  */
       if (info->shared
 	  && (info->symbolic || h->dynindx == -1)
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+	  && h->def_regular)
 	{
 	  asection *sec = h->root.u.def.section;
 	  rela.r_info = ELF64_R_INFO (0, R_SPARC_RELATIVE);
@@ -2796,7 +2791,7 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
 
-  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_COPY) != 0)
+  if (h->needs_copy)
     {
       asection *s;
       Elf_Internal_Rela rela;

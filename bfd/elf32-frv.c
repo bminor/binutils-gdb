@@ -2755,7 +2755,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
 	     bed->collect, &bh)))
 	return FALSE;
       h = (struct elf_link_hash_entry *) bh;
-      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+      h->def_regular = 1;
       h->type = STT_OBJECT;
 
       /* Machine-specific: we want the symbol for executables as
@@ -2814,7 +2814,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
 	 bed->collect, &bh)))
     return FALSE;
   h = (struct elf_link_hash_entry *) bh;
-  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+  h->def_regular = 1;
   h->type = STT_OBJECT;
 
   /* Machine-specific: we want the symbol for executables as well.  */
@@ -2869,7 +2869,7 @@ elf32_frvfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	      FALSE, get_elf_backend_data (abfd)->collect, &bh)))
 	return FALSE;
       h = (struct elf_link_hash_entry *) bh;
-      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+      h->def_regular = 1;
       h->type = STT_OBJECT;
 
       if (! info->executable
@@ -3677,7 +3677,7 @@ elf32_frvfdpic_always_size_sections (bfd *output_bfd,
 				FALSE, FALSE, FALSE);
       if (! h || h->root.type != bfd_link_hash_defined
 	  || h->type != STT_OBJECT
-	  || !(h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
+	  || !h->def_regular)
 	{
 	  struct bfd_link_hash_entry *bh = NULL;
 
@@ -3689,7 +3689,7 @@ elf32_frvfdpic_always_size_sections (bfd *output_bfd,
 	    return FALSE;
 
 	  h = (struct elf_link_hash_entry *) bh;
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+	  h->def_regular = 1;
 	  h->type = STT_OBJECT;
 	}
 
@@ -3866,12 +3866,9 @@ elf32_frvfdpic_adjust_dynamic_symbol
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
 	      && (h->weakdef != NULL
-		  || ((h->elf_link_hash_flags
-		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_REF_REGULAR) != 0
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0)));
+		  || (h->def_dynamic
+		      && h->ref_regular
+		      && !h->def_regular)));
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the

@@ -1641,12 +1641,10 @@ elfNN_ia64_hash_copy_indirect (bed, xdir, xind)
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
 
-  dir->root.elf_link_hash_flags |=
-    (ind->root.elf_link_hash_flags
-     & (ELF_LINK_HASH_REF_DYNAMIC
-        | ELF_LINK_HASH_REF_REGULAR
-        | ELF_LINK_HASH_REF_REGULAR_NONWEAK
-        | ELF_LINK_HASH_NEEDS_PLT));
+  dir->root.ref_dynamic |= ind->root.ref_dynamic;
+  dir->root.ref_regular |= ind->root.ref_regular;
+  dir->root.ref_regular_nonweak |= ind->root.ref_regular_nonweak;
+  dir->root.needs_plt |= ind->root.needs_plt;
 
   if (ind->root.root.type != bfd_link_hash_indirect)
     return;
@@ -2235,7 +2233,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
+	  h->ref_regular = 1;
 	}
 
       /* We can only get preliminary data on whether a symbol is
@@ -2244,8 +2242,9 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	 this may help reduce memory usage and processing time later.  */
       maybe_dynamic = FALSE;
       if (h && ((!info->executable
-		 && (!info->symbolic || info->unresolved_syms_in_shared_libs == RM_IGNORE))
-		|| ! (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
+		 && (!info->symbolic
+		     || info->unresolved_syms_in_shared_libs == RM_IGNORE))
+		|| !h->def_regular
 		|| h->root.type == bfd_link_hash_defweak))
 	maybe_dynamic = TRUE;
 
@@ -2444,7 +2443,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	{
           if (!ia64_info->root.dynobj)
 	    ia64_info->root.dynobj = abfd;
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	  h->needs_plt = 1;
 	  dyn_i->want_plt = 1;
 	}
       if (need_entry & NEED_FULL_PLT)
@@ -2651,7 +2650,7 @@ allocate_plt_entries (dyn_i, data)
 	       || h->root.type == bfd_link_hash_warning)
 	  h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-      /* ??? Versioned symbols seem to lose ELF_LINK_HASH_NEEDS_PLT.  */
+      /* ??? Versioned symbols seem to lose NEEDS_PLT.  */
       if (elfNN_ia64_dynamic_symbol_p (h, x->info, 0))
 	{
 	  bfd_size_type offset = x->ofs;
@@ -4575,7 +4574,7 @@ elfNN_ia64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	     plt section.  Leave the value alone.  */
 	  /* ??? We didn't redefine it in adjust_dynamic_symbol in the
 	     first place.  But perhaps elflink.c did some for us.  */
-	  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+	  if (!h->def_regular)
 	    sym->st_shndx = SHN_UNDEF;
 	}
 

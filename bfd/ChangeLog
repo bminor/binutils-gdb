@@ -1,5 +1,50 @@
 2004-09-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct elf_link_hash_entry): Replace elf_link_hash_flags
+	with bitfields.  Make "type" and "other" bitfields too.
+	(ELF_LINK_HASH_REF_REGULAR, ELF_LINK_HASH_DEF_REGULAR,
+	ELF_LINK_HASH_REF_DYNAMIC, ELF_LINK_HASH_DEF_DYNAMIC,
+	ELF_LINK_HASH_REF_REGULAR_NONWEAK, ELF_LINK_HASH_DYNAMIC_ADJUSTED,
+	ELF_LINK_HASH_NEEDS_COPY, ELF_LINK_HASH_NEEDS_PLT, ELF_LINK_NON_ELF,
+	ELF_LINK_HIDDEN, ELF_LINK_FORCED_LOCAL, ELF_LINK_HASH_MARK,
+	ELF_LINK_NON_GOT_REF, ELF_LINK_DYNAMIC_DEF, ELF_LINK_DYNAMIC_WEAK,
+	ELF_LINK_POINTER_EQUALITY_NEEDED): Delete.
+	(ELF_COMMON_DEF_P, WILL_CALL_FINISH_DYNAMIC_SYMBOL): Update.
+	* elf-hppa.h: Update all uses of elf_link_hash_flags.
+	* elf-m10300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arm.h: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh-symbian.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf32-sparc.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* configure.in (AM_INIT_AUTOMAKE): Set version to 2.15.92.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+
+2004-09-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-arm.h (elf32_arm_gc_sweep_hook): Add #ifndef OLD_ARM_ABI
 	around uses of R_ARM_TARGET1.
 	(elf32_arm_check_relocs): Likewise.
