@@ -381,21 +381,21 @@ call_d:
 	nop
 	.global dmov
 dmov:
-	dmov @88H, r13
-	dmov r13, @54H
+	dmov @0x88, r13
+	dmov r13, @0x54
 	dmov @0x44, @r13+
 	dmov @R13+, @0x2
-	dmov @2cH, @-r15
-	dmov @r15+, @#38
+	dmov @0x2c, @-r15
+	dmov @r15+, @38
 	.global dmovh
 dmovh:
-	dmovh @88H, r13
-	dmovh r13, @52h
+	dmovh @0x88, r13
+	dmovh r13, @0x52
 	dmovh @0x34, @r13 +
 	dmovh @r13+, @0x52
 	.global dmovb
 dmovb:
-	dmovb @91H, r13
+	dmovb @0x91, r13
 	dmovb r13, @0x53
 	dmovb @71, @r13+
 	dmovb @r13+, @0x0

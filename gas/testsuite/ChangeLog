@@ -1,3 +1,7 @@
+Wed Nov 18 11:27:56 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* gas/fr30/allinsn.s (dmov): Correct hex literals.
+
 Tue Nov 17 15:24:20 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/fr30/allinsn.s: Moved currently un-assembliable instructions
