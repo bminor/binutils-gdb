@@ -5861,62 +5861,53 @@ Disable @value{GDBN} from caching target memory.  This is the default.
 @cindex append data to a file
 @cindex dump data to a file
 @cindex restore data from a file
-@kindex dump
-@kindex append
-@kindex restore
 
-The commands @code{dump}, @code{append}, and @code{restore} are used
-for copying data between target memory and a file.  Data is written
-into a file using @code{dump} or @code{append}, and restored from a 
-file into memory by using @code{restore}.  Files may be binary, srec,
-intel hex, or tekhex (but only binary files can be appended).
+You can use the commands @code{dump}, @code{append}, and
+@code{restore} to copy data between target memory and a file.  The
+@code{dump} and @code{append} commands write data to a file, and the
+@code{restore} command reads data from a file back into the inferior's
+memory.  Files may be in binary, Motorola S-record, Intel hex, or
+Tektronix Hex format; however, @value{GDBN} can only append to binary
+files.
 
 @table @code
-@kindex dump binary 
-@kindex append binary 
-@item dump binary memory @var{filename} @var{start_addr} @var{end_addr}
-Dump contents of memory from @var{start_addr} to @var{end_addr} into 
-raw binary format file @var{filename}.
 
-@item append binary memory @var{filename} @var{start_addr} @var{end_addr}
-Append contents of memory from @var{start_addr} to @var{end_addr} to
-raw binary format file @var{filename}.
+@kindex dump
+@item dump @r{[}@var{format}@r{]} memory @var{filename} @var{start_addr} @var{end_addr}
+@itemx dump @r{[}@var{format}@r{]} value @var{filename} @var{expr}
+Dump the contents of memory from @var{start_addr} to @var{end_addr},
+or the value of @var{expr}, to @var{filename} in the given format.
 
-@item dump binary value @var{filename} @var{expression}
-Dump value of @var{expression} into raw binary format file @var{filename}.
+The @var{format} parameter may be any one of:
+@table @code
+@item binary
+Raw binary form.
+@item ihex
+Intel hex format.
+@item srec
+Motorola S-record format.
+@item tekhex
+Tektronix Hex format.
+@end table
 
-@item append binary memory @var{filename} @var{expression}
-Append value of @var{expression} to raw binary format file @var{filename}.
+@value{GDBN} uses the same definitions of these formats as the
+@sc{gnu} binary utilities, like @samp{objdump} and @samp{objcopy}.  If
+@var{format} is omitted, @value{GDBN} dumps the data in raw binary
+form.
 
-@kindex dump ihex 
-@item dump ihex memory @var{filename} @var{start_addr} @var{end_addr}
-Dump contents of memory from @var{start_addr} to @var{end_addr} into 
-intel hex format file @var{filename}.
+@kindex append
+@item append @r{[}binary@r{]} memory @var{filename} @var{start_addr} @var{end_addr}
+@itemx append @r{[}binary@r{]} value @var{filename} @var{expr}
+Append the contents of memory from @var{start_addr} to @var{end_addr},
+or the value of @var{expr}, to @var{filename}, in raw binary form.
+(@value{GDBN} can only append data to files in raw binary form.)
 
-@item dump ihex value @var{filename} @var{expression}
-Dump value of @var{expression} into intel hex format file @var{filename}.
-
-@kindex dump srec 
-@item dump srec memory @var{filename} @var{start_addr} @var{end_addr}
-Dump contents of memory from @var{start_addr} to @var{end_addr} into 
-srec format file @var{filename}.
-
-@item dump srec value @var{filename} @var{expression}
-Dump value of @var{expression} into srec format file @var{filename}.
-
-@kindex dump tekhex 
-@item dump tekhex memory @var{filename} @var{start_addr} @var{end_addr}
-Dump contents of memory from @var{start_addr} to @var{end_addr} into 
-tekhex format file @var{filename}.
-
-@item dump tekhex value @var{filename} @var{expression}
-Dump value of @var{expression} into tekhex format file @var{filename}.
-
-@item restore @var{filename} [@var{binary}] @var{bias} @var{start} @var{end}
-Restore the contents of file @var{filename} into memory.  The @code{restore}
-command can automatically recognize any known bfd file format, except for
-raw binary.  To restore a raw binary file you must use the optional argument
-@var{binary} after the filename.
+@kindex restore
+@item restore @var{filename} @r{[}binary@r{]} @var{bias} @var{start} @var{end}
+Restore the contents of file @var{filename} into memory.  The
+@code{restore} command can automatically recognize any known @sc{bfd}
+file format, except for raw binary.  To restore a raw binary file you
+must specify the optional keyword @code{binary} after the filename.
 
 If @var{bias} is non-zero, its value will be added to the addresses 
 contained in the file.  Binary files always start at address zero, so

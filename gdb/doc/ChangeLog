@@ -1,3 +1,10 @@
+2003-05-08  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Dump/Restore Files): Update documentation for
+	'dump', 'append', and 'restore': note that format argument is
+	optional; simplify presentation of the command variants; and be
+	more precise about the formats.
+
 2003-05-07  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (Symbols): Update documentation: 'maint list
