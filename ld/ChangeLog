@@ -1,3 +1,7 @@
+2000-05-15  David O'Brien  <obrien@FreeBSD.org>
+
+	* lexsup.c (parse_args): Update the year in the copyright notice.
+
 2000-05-13  Philip Blundell  <pb@futuretv.com>
 
 	From Joel Sherrill <joel@OARcorp.com>:
