@@ -2419,9 +2419,10 @@ reset_saved_regs (struct mips_frame_cache *this_cache)
 }
 
 /* Analyze the function prologue from START_PC to LIMIT_PC. Builds
-   the associated FRAME_CACHE if not null.  */
+   the associated FRAME_CACHE if not null.  
+   Return the address of the first instruction past the prologue.  */
 
-static void
+static CORE_ADDR
 mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
                       struct frame_info *next_frame,
                       struct mips_frame_cache *this_cache)
@@ -2430,6 +2431,10 @@ mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
   CORE_ADDR frame_addr = 0; /* Value of $r30. Used by gcc for frame-pointer */
   long frame_offset;
   int  frame_reg = MIPS_SP_REGNUM;
+
+  CORE_ADDR end_prologue_addr = 0;
+  int seen_sp_adjust = 0;
+  int load_immediate_bytes = 0;
 
 restart:
 
@@ -2458,6 +2463,7 @@ restart:
 	       usually means that the stack cleanup code in the function
 	       epilogue is reached.  */
 	    break;
+          seen_sp_adjust = 1;
 	}
       else if ((high_word & 0xFFE0) == 0xafa0)	/* sw reg,offset($sp) */
 	{
@@ -2465,8 +2471,7 @@ restart:
 	}
       else if ((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
 	{
-	  /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and
-	     $ra.  */
+	  /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and $ra.  */
 	  set_reg_offset (this_cache, reg, sp + low_word);
 	}
       else if (high_word == 0x27be)	/* addiu $30,$sp,size */
@@ -2528,6 +2533,45 @@ restart:
 	{
 	  set_reg_offset (this_cache, reg, frame_addr + low_word);
 	}
+      else if ((high_word & 0xFFE0) == 0xE7A0 /* swc1 freg,n($sp) */
+               || (high_word & 0xF3E0) == 0xA3C0 /* sx reg,n($s8) */
+               || (inst & 0xFF9F07FF) == 0x00800021 /* move reg,$a0-$a3 */
+               || high_word == 0x3c1c /* lui $gp,n */
+               || high_word == 0x279c /* addiu $gp,$gp,n */
+               || inst == 0x0399e021 /* addu $gp,$gp,$t9 */
+               || inst == 0x033ce021 /* addu $gp,$t9,$gp */
+              )
+       {
+         /* These instructions are part of the prologue, but we don't
+            need to do anything special to handle them.  */
+       }
+      /* The instructions below load $at or $t0 with an immediate
+         value in preparation for a stack adjustment via
+         subu $sp,$sp,[$at,$t0]. These instructions could also
+         initialize a local variable, so we accept them only before
+         a stack adjustment instruction was seen.  */
+      else if (!seen_sp_adjust
+               && (high_word == 0x3c01 /* lui $at,n */
+                   || high_word == 0x3c08 /* lui $t0,n */
+                   || high_word == 0x3421 /* ori $at,$at,n */
+                   || high_word == 0x3508 /* ori $t0,$t0,n */
+                   || high_word == 0x3401 /* ori $at,$zero,n */
+                   || high_word == 0x3408 /* ori $t0,$zero,n */
+                  ))
+       {
+          load_immediate_bytes += MIPS_INSTLEN;     /* FIXME!! */
+       }
+      else
+       {
+         /* This instruction is not an instruction typically found
+            in a prologue, so we must have reached the end of the
+            prologue.  */
+         /* FIXME: brobecker/2004-10-10: Can't we just break out of this
+            loop now?  Why would we need to continue scanning the function
+            instructions?  */
+         if (end_prologue_addr == 0)
+           end_prologue_addr = cur_pc;
+       }
     }
 
   if (this_cache != NULL)
@@ -2541,6 +2585,23 @@ restart:
       this_cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
         = this_cache->saved_regs[NUM_REGS + RA_REGNUM];
     }
+
+  /* If we didn't reach the end of the prologue when scanning the function
+     instructions, then set end_prologue_addr to the address of the
+     instruction immediately after the last one we scanned.  */
+  /* brobecker/2004-10-10: I don't think this would ever happen, but
+     we may as well be careful and do our best if we have a null
+     end_prologue_addr.  */
+  if (end_prologue_addr == 0)
+    end_prologue_addr = cur_pc;
+     
+  /* In a frameless function, we might have incorrectly
+     skipped some load immediate instructions. Undo the skipping
+     if the load immediate was not followed by a stack adjustment.  */
+  if (load_immediate_bytes && !seen_sp_adjust)
+    end_prologue_addr -= load_immediate_bytes;
+
+  return end_prologue_addr;
 }
 
 static mips_extra_func_info_t
@@ -4860,107 +4921,12 @@ mips_step_skips_delay (CORE_ADDR pc)
 		     extract_unsigned_integer (buf, MIPS_INSTLEN));
 }
 
-/* Skip the PC past function prologue instructions (32-bit version).
-   This is a helper function for mips_skip_prologue.  */
-
-static CORE_ADDR
-mips32_skip_prologue (CORE_ADDR pc)
-{
-  t_inst inst;
-  CORE_ADDR end_pc;
-  int seen_sp_adjust = 0;
-  int load_immediate_bytes = 0;
-
-  /* Find an upper bound on the prologue.  */
-  end_pc = skip_prologue_using_sal (pc);
-  if (end_pc == 0)
-    end_pc = pc + 100;		/* Magic.  */
-
-  /* Skip the typical prologue instructions. These are the stack adjustment
-     instruction and the instructions that save registers on the stack
-     or in the gcc frame.  */
-  for (; pc < end_pc; pc += MIPS_INSTLEN)
-    {
-      unsigned long high_word;
-
-      inst = mips_fetch_instruction (pc);
-      high_word = (inst >> 16) & 0xffff;
-
-      if (high_word == 0x27bd	/* addiu $sp,$sp,offset */
-	  || high_word == 0x67bd)	/* daddiu $sp,$sp,offset */
-	seen_sp_adjust = 1;
-      else if (inst == 0x03a1e823 ||	/* subu $sp,$sp,$at */
-	       inst == 0x03a8e823)	/* subu $sp,$sp,$t0 */
-	seen_sp_adjust = 1;
-      else if (((inst & 0xFFE00000) == 0xAFA00000	/* sw reg,n($sp) */
-		|| (inst & 0xFFE00000) == 0xFFA00000)	/* sd reg,n($sp) */
-	       && (inst & 0x001F0000))	/* reg != $zero */
-	continue;
-
-      else if ((inst & 0xFFE00000) == 0xE7A00000)	/* swc1 freg,n($sp) */
-	continue;
-      else if ((inst & 0xF3E00000) == 0xA3C00000 && (inst & 0x001F0000))
-	/* sx reg,n($s8) */
-	continue;		/* reg != $zero */
-
-      /* move $s8,$sp.  With different versions of gas this will be either
-         `addu $s8,$sp,$zero' or `or $s8,$sp,$zero' or `daddu s8,sp,$0'.
-         Accept any one of these.  */
-      else if (inst == 0x03A0F021 || inst == 0x03a0f025 || inst == 0x03a0f02d)
-	continue;
-
-      else if ((inst & 0xFF9F07FF) == 0x00800021)	/* move reg,$a0-$a3 */
-	continue;
-      else if (high_word == 0x3c1c)	/* lui $gp,n */
-	continue;
-      else if (high_word == 0x279c)	/* addiu $gp,$gp,n */
-	continue;
-      else if (inst == 0x0399e021	/* addu $gp,$gp,$t9 */
-	       || inst == 0x033ce021)	/* addu $gp,$t9,$gp */
-	continue;
-      /* The following instructions load $at or $t0 with an immediate
-         value in preparation for a stack adjustment via
-         subu $sp,$sp,[$at,$t0]. These instructions could also initialize
-         a local variable, so we accept them only before a stack adjustment
-         instruction was seen.  */
-      else if (!seen_sp_adjust)
-	{
-	  if (high_word == 0x3c01 ||	/* lui $at,n */
-	      high_word == 0x3c08)	/* lui $t0,n */
-	    {
-	      load_immediate_bytes += MIPS_INSTLEN;	/* FIXME!! */
-	      continue;
-	    }
-	  else if (high_word == 0x3421 ||	/* ori $at,$at,n */
-		   high_word == 0x3508 ||	/* ori $t0,$t0,n */
-		   high_word == 0x3401 ||	/* ori $at,$zero,n */
-		   high_word == 0x3408)	/* ori $t0,$zero,n */
-	    {
-	      load_immediate_bytes += MIPS_INSTLEN;	/* FIXME!! */
-	      continue;
-	    }
-	  else
-	    break;
-	}
-      else
-	break;
-    }
-
-  /* In a frameless function, we might have incorrectly
-     skipped some load immediate instructions. Undo the skipping
-     if the load immediate was not followed by a stack adjustment.  */
-  if (load_immediate_bytes && !seen_sp_adjust)
-    pc -= load_immediate_bytes;
-  return pc;
-}
-
 /* Skip the PC past function prologue instructions (16-bit version).
    This is a helper function for mips_skip_prologue.  */
 
 static CORE_ADDR
-mips16_skip_prologue (CORE_ADDR pc)
+mips16_skip_prologue (CORE_ADDR pc, CORE_ADDR end_pc)
 {
-  CORE_ADDR end_pc;
   int extend_bytes = 0;
   int prev_extend_bytes;
 
@@ -5008,11 +4974,6 @@ mips16_skip_prologue (CORE_ADDR pc)
     {
     0, 0}			/* end of table marker */
   };
-
-  /* Find an upper bound on the prologue.  */
-  end_pc = skip_prologue_using_sal (pc);
-  if (end_pc == 0)
-    end_pc = pc + 100;		/* Magic.  */
 
   /* Skip the typical prologue instructions. These are the stack adjustment
      instruction and the instructions that save registers on the stack
@@ -5070,6 +5031,7 @@ mips_skip_prologue (CORE_ADDR pc)
      is greater.  */
 
   CORE_ADDR post_prologue_pc = after_prologue (pc);
+  CORE_ADDR limit_pc;
 
   if (post_prologue_pc != 0)
     return max (pc, post_prologue_pc);
@@ -5077,10 +5039,17 @@ mips_skip_prologue (CORE_ADDR pc)
   /* Can't determine prologue from the symbol table, need to examine
      instructions.  */
 
+  /* Find an upper limit on the function prologue using the debug
+     information.  If the debug information could not be used to provide
+     that bound, then use an arbitrary large number as the upper bound.  */
+  limit_pc = skip_prologue_using_sal (pc);
+  if (limit_pc == 0)
+    limit_pc = pc + 100;          /* Magic.  */
+
   if (pc_is_mips16 (pc))
-    return mips16_skip_prologue (pc);
+    return mips16_skip_prologue (pc, limit_pc);
   else
-    return mips32_skip_prologue (pc);
+    return mips32_scan_prologue (pc, limit_pc, 0, NULL, NULL);
 }
 
 /* Root of all "set mips "/"show mips " commands. This will eventually be

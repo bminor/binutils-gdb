@@ -1,3 +1,16 @@
+2004-10-14  Joel Brobecker  <brobecker@gnat.com>
+
+	* mips-tdep.c (mips32_scan_prologue): Merge code from
+	mips32_skip_prologue.  Now return the address of the first
+	instruction past the function prologue.
+	(mips32_skip_prologue): Remove.  No longer necessary.
+	(mips16_skip_prologue): Add parameter end_pc instead of
+	computing it.
+	(mips_skip_prologue): Compute the upper limit for the
+	prologue scanning. Update call to mips16_skip_prologue.
+	Replace call to mips32_skip_prologue by call to
+	mips32_scan_prologue.
+
 2004-10-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-tdep.c (hppa_frame_cache): Add support for OpenBSD and
