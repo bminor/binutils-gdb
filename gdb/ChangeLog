@@ -1,5 +1,11 @@
 2003-04-06  Andrew Cagney  <cagney@redhat.com>
 
+	* valprint.h (inspect_it): Add extern declaration.
+	* objc-lang.c (value_nsstring): Avoid assignment inside of "if".
+	(selectors_info, classes_info): Ditto.
+	(find_objc_msgcall): Fix indentation.
+	(objc_printstr): Delete extern declarations.
+
 	* arm-tdep.c (arm_frameless_function_invocation): Fix typo.
 
 2003-04-06  Andrew Cagney  <cagney@redhat.com>
