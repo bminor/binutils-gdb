@@ -1,6 +1,16 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+*** Changes in GDB-???:
+
+ * User visible changes:
+
+All vxworks based targets now support a user settable option, called
+vxworks-timeout.  This option represents the number of seconds gdb
+should wait for responses to rpc's.  You might want to use this if
+your vxworks target is, perhaps, a slow software simulator or happens
+to be on the far side of a thin network line.
+
 *** Changes in GDB-4.9:
 
  * Testsuite

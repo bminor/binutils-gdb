@@ -1,5 +1,8 @@
 Wed Jun 16 16:08:18 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* NEWS: tracking user visible changes starting with
+	vxworks-timeout.
+
 	* remote-vx.c (_initialize_vx): rename user settable option from
 	rpcTimeout to vxworks-timeout.
 
