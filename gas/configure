@@ -2583,7 +2583,7 @@ EOF
 
       w65-*-*)              fmt=coff ;;
 
-      *-*-freebsd*)	    fmt=elf bfd_gas=yes ;;
+      *-*-freebsd*)	    fmt=elf em=freebsd bfd_gas=yes ;;
       *-*-aout | *-*-scout)
 			    fmt=aout ;;
       *-*-nindy*)
