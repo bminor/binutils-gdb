@@ -1,3 +1,15 @@
+2000-02-28  Scott Bambrough <scottb@netwinder.org>
+
+	* arm-linux-nat.c (fetch_nw_fpe_*):
+ 	Renamed to fetch_nwfpe_* to use the same naming convention
+	as in the Linux kernel.  Modified prototype to get rid of
+	unused parameters.
+	(store_nw_fpe_*): Renamed to store_nwfpe_* to use the same
+	naming convention as in the Linux kernel.  Fixed calls to 
+	fetch_nwfpe_*.
+	(store_fpregs): Fixed calls to store_nwfpe_*.  Removed
+	unused variable. 
+
 Mon Feb 28 18:24:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Transfer d30v maintainership to David Taylor.

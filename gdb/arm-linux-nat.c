@@ -72,7 +72,7 @@ FPA11;
 static unsigned int os_version, os_major, os_minor, os_release;
 
 static void
-fetch_nw_fpe_single (unsigned int fn, FPA11 * fpa11, unsigned int *pmem)
+fetch_nwfpe_single (unsigned int fn, FPA11 * fpa11)
 {
   unsigned int mem[3];
 
@@ -83,7 +83,7 @@ fetch_nw_fpe_single (unsigned int fn, FPA11 * fpa11, unsigned int *pmem)
 }
 
 static void
-fetch_nw_fpe_double (unsigned int fn, FPA11 * fpa11, unsigned int *pmem)
+fetch_nwfpe_double (unsigned int fn, FPA11 * fpa11)
 {
   unsigned int mem[3];
 
@@ -94,7 +94,7 @@ fetch_nw_fpe_double (unsigned int fn, FPA11 * fpa11, unsigned int *pmem)
 }
 
 static void
-fetch_nw_fpe_none (unsigned int fn, FPA11 * fpa11, unsigned int *pmem)
+fetch_nwfpe_none (unsigned int fn)
 {
   unsigned int mem[3] =
   {0, 0, 0};
@@ -103,7 +103,7 @@ fetch_nw_fpe_none (unsigned int fn, FPA11 * fpa11, unsigned int *pmem)
 }
 
 static void
-fetch_nw_fpe_extended (unsigned int fn, FPA11 * fpa11, unsigned int *pmem)
+fetch_nwfpe_extended (unsigned int fn, FPA11 * fpa11)
 {
   unsigned int mem[3];
 
@@ -114,7 +114,7 @@ fetch_nw_fpe_extended (unsigned int fn, FPA11 * fpa11, unsigned int *pmem)
 }
 
 static void
-store_nw_fpe_single (unsigned int fn, FPA11 * fpa11)
+store_nwfpe_single (unsigned int fn, FPA11 * fpa11)
 {
   unsigned int mem[3];
 
@@ -124,7 +124,7 @@ store_nw_fpe_single (unsigned int fn, FPA11 * fpa11)
 }
 
 static void
-store_nw_fpe_double (unsigned int fn, FPA11 * fpa11)
+store_nwfpe_double (unsigned int fn, FPA11 * fpa11)
 {
   unsigned int mem[3];
 
@@ -135,7 +135,7 @@ store_nw_fpe_double (unsigned int fn, FPA11 * fpa11)
 }
 
 void
-store_nw_fpe_extended (unsigned int fn, FPA11 * fpa11)
+store_nwfpe_extended (unsigned int fn, FPA11 * fpa11)
 {
   unsigned int mem[3];
 
@@ -175,19 +175,19 @@ fetch_fpregs (void)
       switch (fp.fType[fn])
 	{
 	case typeSingle:
-	  fetch_nw_fpe_single (fn, &fp, p);
+	  fetch_nwfpe_single (fn, &fp);
 	  break;
 
 	case typeDouble:
-	  fetch_nw_fpe_double (fn, &fp, p);
+	  fetch_nwfpe_double (fn, &fp);
 	  break;
 
 	case typeExtended:
-	  fetch_nw_fpe_extended (fn, &fp, p);
+	  fetch_nwfpe_extended (fn, &fp);
 	  break;
 
 	default:
-	  fetch_nw_fpe_none (fn, &fp, p);
+	  fetch_nwfpe_none (fn);
 	}
     }
 }
@@ -199,7 +199,6 @@ static void
 store_fpregs (void)
 {
   int ret, regno;
-  unsigned int mem[3];
   FPA11 fp;
 
   /* Store fpsr.  */
@@ -215,15 +214,15 @@ store_fpregs (void)
 	  switch (fp.fType[fn])
 	    {
 	    case typeSingle:
-	      store_nw_fpe_single (fn, &fp);
+	      store_nwfpe_single (fn, &fp);
 	      break;
 
 	    case typeDouble:
-	      store_nw_fpe_double (fn, &fp);
+	      store_nwfpe_double (fn, &fp);
 	      break;
 
 	    case typeExtended:
-	      store_nw_fpe_extended (fn, &fp);
+	      store_nwfpe_extended (fn, &fp);
 	      break;
 	    }
 	}
