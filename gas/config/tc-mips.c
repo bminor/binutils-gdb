@@ -6769,18 +6769,7 @@ mips_local_label (name)
 
   /* Here it's OK to discard local labels.  */
 
-  if (name[0] == '$')
-    return 1;
-
-#ifdef TE_IRIX
-  /* gcc for the SGI generates a bunch of local labels named LM%d.  I
-     don't know why they don't start with '$'. We must check specially
-     for these.  */
-  if (name[0] == 'L' && name[1] == 'M')
-    return 1;
-#endif
-
-  return 0;
+  return name[0] == '$';
 }
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
