@@ -378,7 +378,7 @@ return_to_top_level (enum return_reason reason)
    between utils.c and top.c? */
 
 int
-catch_errors (catch_errors_ftype *func, PTR args, char *errstring,
+catch_errors (catch_errors_ftype *func, void * args, char *errstring,
 	      return_mask mask)
 {
   SIGJMP_BUF *saved_catch;
@@ -512,7 +512,7 @@ catch_command_errors (catch_command_errors_ftype * command,
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ int
-quit_cover (PTR s)
+quit_cover (void *s)
 {
   caution = 0;			/* Throw caution to the wind -- we're exiting.
 				   This prevents asking the user dumb questions.  */
