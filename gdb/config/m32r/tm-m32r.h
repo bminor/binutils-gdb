@@ -38,6 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* mvs_check  *_REGNUM */
 #define R0_REGNUM	0
+#define STRUCT_RETURN_REGNUM 0
 #define ARG0_REGNUM	0
 #define ARGLAST_REGNUM	3
 #define V0_REGNUM	0
@@ -129,10 +130,14 @@ extern CORE_ADDR m32r_frame_chain PARAMS ((struct frame_info *fi));
 /* mvs_check  FRAME_CHAIN */
 #define FRAME_CHAIN(fi) m32r_frame_chain (fi)
 
+extern int generic_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+#define FRAME_CHAIN_VALID(fp, frame)	(generic_frame_chain_valid (fp, frame))
+
 extern CORE_ADDR m32r_find_callers_reg PARAMS ((struct frame_info *fi, 
 						int regnum));
+extern CORE_ADDR m32r_frame_saved_pc PARAMS((struct frame_info *));
 /* mvs_check  FRAME_SAVED_PC */
-#define FRAME_SAVED_PC(fi) (m32r_find_callers_reg (fi, RP_REGNUM))
+#define FRAME_SAVED_PC(fi) (m32r_frame_saved_pc (fi))
 
 /* mvs_check  EXTRACT_RETURN_VALUE */
 #define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
@@ -146,11 +151,6 @@ extern CORE_ADDR m32r_find_callers_reg PARAMS ((struct frame_info *fi,
   write_register_bytes(REGISTER_BYTE (V0_REGNUM) + \
 		       ((TYPE_LENGTH (TYPE) > 4 ? 8:4) - TYPE_LENGTH (TYPE)),\
 		       (VALBUF), TYPE_LENGTH (TYPE));
-
-/* mvs_check  EXTRACT_STRUCT_VALUE_ADDRESS */
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
-		    REGISTER_RAW_SIZE (V0_REGNUM)))
 
 extern CORE_ADDR m32r_skip_prologue PARAMS ((CORE_ADDR pc));
 /* mvs_check  SKIP_PROLOGUE */
@@ -166,51 +166,85 @@ extern CORE_ADDR m32r_skip_prologue PARAMS ((CORE_ADDR pc));
 /* mvs_no_check  FRAME_NUM_ARGS */
 #define FRAME_NUM_ARGS(val, fi) ((val) = -1)
 
+#define COERCE_FLOAT_TO_DOUBLE 1
+
+#define TARGET_WRITE_SP m32r_write_sp
+
+
+
+
+
+
+/* struct passing and returning stuff */
+#define STORE_STRUCT_RETURN(STRUCT_ADDR, SP)	\
+	write_register (0, STRUCT_ADDR)
+
+#define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
+	(TYPE_LENGTH (TYPE) > 8)
+
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+  (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
+		    REGISTER_RAW_SIZE (V0_REGNUM)))
+
+#define REG_STRUCT_HAS_ADDR(gcc_p,type)     (TYPE_LENGTH (type) > 8)
+
+
+
+
+
+/* generic dummy frame stuff */
+
+extern CORE_ADDR generic_read_register_dummy PARAMS ((struct frame_info *fi,
+						      int regno));
+
+extern void generic_push_dummy_frame    PARAMS ((void));
+extern void generic_pop_dummy_frame     PARAMS ((void));
+
+extern int  generic_pc_in_call_dummy    PARAMS ((CORE_ADDR pc, 
+						 CORE_ADDR fp, 
+						 CORE_ADDR sp));
+extern char * generic_find_dummy_frame  PARAMS ((CORE_ADDR pc, 
+						 CORE_ADDR fp, 
+						 CORE_ADDR sp));
+
+#define PUSH_DUMMY_FRAME             (generic_push_dummy_frame ())
+#define PC_IN_CALL_DUMMY(PC, SP, FP) (generic_pc_in_call_dummy (PC, SP, FP))
+
+
+/* target-specific dummy_frame stuff */
+
 extern struct frame_info *m32r_pop_frame PARAMS ((struct frame_info *frame));
 /* mvs_check  POP_FRAME */
 #define POP_FRAME m32r_pop_frame (get_current_frame ())
 
-/* mvs_no_check  CALL_DUMMY */
-/* #define CALL_DUMMY { 0 } */
+/* mvs_no_check  STACK_ALIGN */
+/* #define STACK_ALIGN(x) ((x + 3) & ~3) */
 
-/* mvs_no_check  CALL_DUMMY_START_OFFSET */
-#define CALL_DUMMY_START_OFFSET (0)
+extern void m32r_push_return_address PARAMS ((CORE_ADDR));
+extern CORE_ADDR m32r_push_arguments PARAMS ((int nargs, 
+					      struct value **args, 
+					      CORE_ADDR sp,
+					      unsigned char struct_return,
+					      CORE_ADDR struct_addr));
 
-/* mvs_no_check  CALL_DUMMY_BREAKPOINT_OFFSET */
-#define CALL_DUMMY_BREAKPOINT_OFFSET (0)
 
-extern void m32r_push_dummy_frame PARAMS ((void));
-/* mvs_no_check  PUSH_DUMMY_FRAME */
-#define PUSH_DUMMY_FRAME m32r_push_dummy_frame ()
+
+/* mvs_no_check  PUSH_ARGUMENTS */
+#define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
+  (SP) = m32r_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
+
+
+
+#define CALL_DUMMY                 { } /* mvs_no_check  CALL_DUMMY */
+#define CALL_DUMMY_ADDRESS() (entry_point_address ()) /* mvs_no_check  CALL_DUMMY_ADDRESS */
+
+#define CALL_DUMMY_START_OFFSET    (0) /* mvs_no_check  CALL_DUMMY_START_OFFSET */
+#define CALL_DUMMY_BREAKPOINT_OFFSET (0) /* mvs_no_check  CALL_DUMMY_BREAKPOINT_OFFSET */
+#define CALL_DUMMY_LENGTH  (0)	/* mvs_no_check CALL_DUMMY_LENGTH */
 
 /* mvs_no_check  FIX_CALL_DUMMY */
 #define FIX_CALL_DUMMY(DUMMY1, START_SP, FUNADDR, NARGS, \
 		       ARGS, VALUE_TYPE, USING_GCC)
 
-/* mvs_no_check  CALL_DUMMY_LOCATION_AT_ENTRY_POINT */
-#define CALL_DUMMY_LOCATION AT_ENTRY_POINT
-
-/* mvs_no_check  STACK_ALIGN */
-#define STACK_ALIGN(x) ((x + 3) & ~3)
-
-extern CORE_ADDR
-m32r_push_arguments PARAMS ((int nargs, struct value **args, CORE_ADDR sp,
-			     unsigned char struct_return,
-			     CORE_ADDR struct_addr));
-/* mvs_no_check  PUSH_ARGUMENTS */
-#define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
-  (SP) = m32r_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
-
-/* mvs_no_check  STORE_STRUCT_RETURN */
-#define STORE_STRUCT_RETURN(STRUCT_ADDR, SP)
-
-/* mvs_no_check  CALL_DUMMY_ADDRESS */
-#define CALL_DUMMY_ADDRESS() (entry_point_address ())
-
-extern int m32r_pc_in_call_dummy PARAMS ((CORE_ADDR pc));
-/* mvs_no_check  PC_IN_CALL_DUMMY */
-#define PC_IN_CALL_DUMMY(PC, SP, FP) m32r_pc_in_call_dummy (PC)
-
-/* mvs_check  USE_STRUCT_CONVENTION */
-#define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
-	(TYPE_LENGTH (TYPE) > 8)
+#define CALL_DUMMY_LOCATION        AT_ENTRY_POINT
+#define PUSH_RETURN_ADDRESS(pc)      (m32r_push_return_address (pc))
