@@ -1,3 +1,12 @@
+Fri Jan 24 12:08:21 1997  J.T. Conklin  <jtc@cygnus.com>
+
+	* m68k-opc.c (m68k_opcodes): Changed operand specifier for the
+ 	coldfire moveb instruction to not allow an address register as
+ 	destination.  Although the documentation does not indicate that
+	this is invalid, experiments uncovered unexpected behavior.  
+	Added a comment explaining the situation.  Thanks to Andreas
+	Schwab for pointing this out to me.
+
 start-sanitize-tic80
 Wed Jan 22 20:13:51 1997  Fred Fish  <fnf@cygnus.com>
 

@@ -1230,6 +1230,23 @@ const struct m68k_opcode m68k_opcodes[] =
 {"lsrl",	one(0160210),	one(0170770), "QdDs", m68000up | mcf5200 },
 {"lsrl",	one(0160250),	one(0170770), "DdDs", m68000up | mcf5200 },
 
+/* NOTE: The mcf5200 family programmer's reference manual does not 
+   indicate the byte form of the movea instruction is invalid (as it
+   is on 68000 family cpus).  However, experiments on the 5202 yeild
+   unexpected results.  The value is copied, but it is not sign extended
+   (as is done with movea.w) and the top three bytes in the address 
+   register are not disturbed.  I don't know if this is the intended
+   behavior --- it could be a hole in instruction decoding (Motorola
+   decided not to trap all invalid instructions for performance reasons)
+   --- but I suspect that it is not.   
+
+   I reported this to Motorola ISD Technical Communications Support, 
+   which replied that other coldfire assemblers reject movea.b.  For 
+   this reason I've decided to not allow moveab. 
+
+	jtc@cygnus.com - 97/01/24
+ */
+
 {"moveal",	one(0020100),	one(0170700), "*lAd", m68000up | mcf5200 },
 {"moveaw",	one(0030100),	one(0170700), "*wAd", m68000up | mcf5200 },
 
@@ -1268,7 +1285,7 @@ const struct m68k_opcode m68k_opcodes[] =
 
 /* The move opcode can generate the movea and moveq instructions.  */
 {"moveb",	one(0010000),	one(0170000), ";b$d", m68000up },
-{"moveb",	one(0010000),	one(0170000), "ms%d", mcf5200 },
+{"moveb",	one(0010000),	one(0170000), "ms$d", mcf5200 },
 {"moveb",	one(0010000),	one(0170000), "nspd", mcf5200 },
 {"moveb",	one(0010000),	one(0170000), "obmd", mcf5200 },
 
