@@ -422,7 +422,7 @@ all: $(ALL)
 all.normal: \
 	$(ALL_MODULES) \
 	$(ALL_TARGET_MODULES) \
-	$(ALL_X11_MODULES)
+	$(ALL_X11_MODULES) \
 	all-gcc
 
 # The target built for a cross build.
