@@ -1,3 +1,11 @@
+2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.threads/tls.c : New file.
+        * gdb.threads/tls.exp : New file.
+        * gdb.threads/tls-main.c : New file.
+        * gdb.threads/tls-shared.c : New file.
+        * gdb.threads/tls-shared.exp : New file.
+
 2003-07-22  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.asm/powerpc.inc (gdbasm_startup): Force alignment.
@@ -20,6 +28,14 @@
 
 	* gdb.c++/templates.exp (test_ptype_of_templates): Recognize
 	expansion of size_t to 'unsigned long', not only to 'unsigned'.
+
+2003-07-09  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.threads/tls.c: New file.
+        * gdb.threads/tls.exp: New file.
+        * gdb.threads/tls-main.c: New file.
+        * gdb.threads/tls-shared.c: New file.
+        * gdb.threads/tls-shared.exp: New file.
 
 2003-07-09  Elena Zannoni  <ezannoni@redhat.com>
 
