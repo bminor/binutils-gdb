@@ -1,3 +1,8 @@
+2002-12-19  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (decode_line_1): Move code into decode_all_digits.
+	(decode_all_digits): New function.
+
 2002-12-19  Kevin Buettner  <kevinb@redhat.com>
 
 	* exec.c (print_section_info): Select a format string to use with

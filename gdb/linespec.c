@@ -74,6 +74,14 @@ static struct symtab *symtab_from_filename (char **argptr,
 					    char *p, int is_quote_enclosed);
 
 static struct
+symtabs_and_lines decode_all_digits (char **argptr,
+				     struct symtab *default_symtab,
+				     int default_line,
+				     char ***canonical,
+				     struct symtab *s,
+				     char *q);
+
+static struct
 symtabs_and_lines symbol_found (int funfirstline,
 				char ***canonical,
 				char *copy,
@@ -653,77 +661,9 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     q++;
 
   if (q != *argptr && (*q == 0 || *q == ' ' || *q == '\t' || *q == ','))
-    {
-      /* We found a token consisting of all digits -- at least one digit.  */
-      enum sign
-	{
-	  none, plus, minus
-	}
-      sign = none;
-
-      /* We might need a canonical line spec if no file was specified.  */
-      int need_canonical = (s == 0) ? 1 : 0;
-
-      /* This is where we need to make sure that we have good defaults.
-         We must guarantee that this section of code is never executed
-         when we are called with just a function name, since
-	 set_default_source_symtab_and_line uses
-         select_source_symtab that calls us with such an argument  */
-
-      if (s == 0 && default_symtab == 0)
-	{
-	  /* Make sure we have at least a default source file. */
-	  set_default_source_symtab_and_line ();
-	  initialize_defaults (&default_symtab, &default_line);
-	}
-
-      if (**argptr == '+')
-	sign = plus, (*argptr)++;
-      else if (**argptr == '-')
-	sign = minus, (*argptr)++;
-      val.line = atoi (*argptr);
-      switch (sign)
-	{
-	case plus:
-	  if (q == *argptr)
-	    val.line = 5;
-	  if (s == 0)
-	    val.line = default_line + val.line;
-	  break;
-	case minus:
-	  if (q == *argptr)
-	    val.line = 15;
-	  if (s == 0)
-	    val.line = default_line - val.line;
-	  else
-	    val.line = 1;
-	  break;
-	case none:
-	  break;		/* No need to adjust val.line.  */
-	}
-
-      while (*q == ' ' || *q == '\t')
-	q++;
-      *argptr = q;
-      if (s == 0)
-	s = default_symtab;
-
-      /* It is possible that this source file has more than one symtab, 
-         and that the new line number specification has moved us from the
-         default (in s) to a new one.  */
-      val.symtab = find_line_symtab (s, val.line, NULL, NULL);
-      if (val.symtab == 0)
-	val.symtab = s;
-
-      val.pc = 0;
-      values.sals = (struct symtab_and_line *)
-	xmalloc (sizeof (struct symtab_and_line));
-      values.sals[0] = val;
-      values.nelts = 1;
-      if (need_canonical)
-	build_canonical_line_spec (values.sals, NULL, canonical);
-      return values;
-    }
+    /* We found a token consisting of all digits -- at least one digit.  */
+    return decode_all_digits (argptr, default_symtab, default_line,
+			      canonical, s, q);
 
   /* Arg token is not digits => try it as a variable name
      Find the next token (everything up to end or next whitespace).  */
@@ -1341,6 +1281,92 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed)
   return s;
 }
 
+
+
+/* This decodes a line where the argument is all digits (possibly
+   preceded by a sign).  Q should point to the end of those digits;
+   the other arguments are as usual.  */
+
+static struct symtabs_and_lines
+decode_all_digits (char **argptr, struct symtab *default_symtab,
+		   int default_line, char ***canonical,
+		   struct symtab *s, char *q)
+
+{
+  struct symtabs_and_lines values;
+  struct symtab_and_line val;
+
+  enum sign
+    {
+      none, plus, minus
+    }
+  sign = none;
+
+  /* We might need a canonical line spec if no file was specified.  */
+  int need_canonical = (s == 0) ? 1 : 0;
+
+  init_sal (&val);
+
+  /* This is where we need to make sure that we have good defaults.
+     We must guarantee that this section of code is never executed
+     when we are called with just a function name, since
+     set_default_source_symtab_and_line uses
+     select_source_symtab that calls us with such an argument  */
+
+  if (s == 0 && default_symtab == 0)
+    {
+      /* Make sure we have at least a default source file. */
+      set_default_source_symtab_and_line ();
+      initialize_defaults (&default_symtab, &default_line);
+    }
+
+  if (**argptr == '+')
+    sign = plus, (*argptr)++;
+  else if (**argptr == '-')
+    sign = minus, (*argptr)++;
+  val.line = atoi (*argptr);
+  switch (sign)
+    {
+    case plus:
+      if (q == *argptr)
+	val.line = 5;
+      if (s == 0)
+	val.line = default_line + val.line;
+      break;
+    case minus:
+      if (q == *argptr)
+	val.line = 15;
+      if (s == 0)
+	val.line = default_line - val.line;
+      else
+	val.line = 1;
+      break;
+    case none:
+      break;		/* No need to adjust val.line.  */
+    }
+
+  while (*q == ' ' || *q == '\t')
+    q++;
+  *argptr = q;
+  if (s == 0)
+    s = default_symtab;
+
+  /* It is possible that this source file has more than one symtab, 
+     and that the new line number specification has moved us from the
+     default (in s) to a new one.  */
+  val.symtab = find_line_symtab (s, val.line, NULL, NULL);
+  if (val.symtab == 0)
+    val.symtab = s;
+
+  val.pc = 0;
+  values.sals = (struct symtab_and_line *)
+    xmalloc (sizeof (struct symtab_and_line));
+  values.sals[0] = val;
+  values.nelts = 1;
+  if (need_canonical)
+    build_canonical_line_spec (values.sals, NULL, canonical);
+  return values;
+}
 
 
 
