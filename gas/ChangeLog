@@ -1300,8 +1300,7 @@ Fri Mar 20 19:15:44 1998  Ian Lance Taylor  <ian@cygnus.com>
 start-sanitize-r5900
 Fri Mar 20 09:04:13 1998  Jeffrey A Law  (law@cygnus.com)
 
-        * config/tc-mips.c: Change '%' to '#' in r5900 code to avoid conflict
-        with vr5400 support.
+        * config/tc-mips.c: Change '%' to '#' in r5900 support.
 
 end-sanitize-r5900
 Thu Mar 19 16:03:12 1998  Nick Clifton  <nickc@cygnus.com>
