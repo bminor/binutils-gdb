@@ -1,3 +1,7 @@
+Wed Jun  3 18:56:22 1998  H.J. Lu  <hjl@gnu.org>
+
+	* i386-dis.c (dis386): Change 0x60 to "pushaS", 0x61 to "popaS".
+
 Tue Jun  2 15:06:46 1998  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* ppc-opc.c (powerpc_macros): Support shifts and rotates of size
