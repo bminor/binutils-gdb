@@ -21,10 +21,12 @@ ac_help="$ac_help
   --enable-build-warnings Enable compiler warnings if gcc is used"
 ac_help="$ac_help
   --with-mmalloc          Use memory mapped malloc package"
+# start-sanitize-carp
 ac_help="$ac_help
   --enable-carp        Configure alternative readaptive paradigm "
 ac_help="$ac_help
   --enable-targets        alternative target configurations"
+# end-sanitize-carp
 ac_help="$ac_help
   --enable-ide            Enable IDE support"
 ac_help="$ac_help
