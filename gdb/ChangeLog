@@ -1,3 +1,27 @@
+Wed Jul 26 23:33:34 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* config/rs6000/tm-rs6000.h (rs6000_framedata): Add offsets the
+	gprs, fprs, lr, and cr is stored at.
+	(FRAME_FIND_SAVED_REGS): Use new fields in rs6000_framedata.
+	(function_frame_info): Delete declaration.
+	(SKIP_PROLOGUE): Skip_prologue is now passed a rs6000_framedata
+	structure to fill in.
+	(FRAMELESS_FUNCTION_INVOCATION): Function now longer takes a
+	second argument.
+	(FRAME_SAVED_PC): Call frame_saved_pc.
+
+	* rs6000-tdep.c (skip_prologue): Recognize V.4 prologues as well
+	as AIX style.  Fill in rs6000_framedata structure.  Remember where
+	the gprs, fprs, cr, and lr are saved.
+	(pop_frame): Use skip_prologue, not function_frame_info, and use
+	new rs6000_framedata fields.
+	(function_frame_info): Function deleted.
+	(frameless_function_invocation): Separate frame_saved_pc support
+	to new function.  Recognize V.4 frames.
+	(frame_saved_pc): New function.
+	(frame_get_cache_fsr): Use skip_prologue, not function_frame_info.
+	(frame_initial_stack_address): Ditto.
+
 Wed Jul 26 01:00:37 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* remote.c:  Add documentation for extended protocol operations
