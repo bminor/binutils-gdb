@@ -1084,24 +1084,17 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Call Dummies
    * 
    * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_push_return_address (gdbarch, xstormy16_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, xstormy16_push_return_address);
   set_gdbarch_deprecated_extract_return_value (gdbarch, xstormy16_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, xstormy16_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, xstormy16_push_arguments);
   set_gdbarch_deprecated_pop_frame (gdbarch, xstormy16_pop_frame);
   set_gdbarch_deprecated_store_struct_return (gdbarch, xstormy16_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, xstormy16_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, xstormy16_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch,
 				     xstormy16_use_struct_convention);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_breakpoint_from_pc (gdbarch, xstormy16_breakpoint_from_pc);
 
   set_gdbarch_char_signed (gdbarch, 0);
@@ -1121,6 +1114,9 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_in_solib_call_trampoline (gdbarch,
 					xstormy16_in_solib_call_trampoline);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   return gdbarch;
 }

@@ -1883,43 +1883,26 @@ coff_set_arch_mach_hook (abfd, filehdr)
     case ARMPEMAGIC:
     case THUMBPEMAGIC:
       arch = bfd_arch_arm;
-      switch (internal_f->f_flags & F_ARM_ARCHITECTURE_MASK)
+      machine = bfd_arm_get_mach_from_notes (abfd, ARM_NOTE_SECTION);
+      if (machine == bfd_mach_arm_unknown)
 	{
-        case F_ARM_2:  machine = bfd_mach_arm_2;  break;
-        case F_ARM_2a: machine = bfd_mach_arm_2a; break;
-        case F_ARM_3:  machine = bfd_mach_arm_3;  break;
-        default:
-        case F_ARM_3M: machine = bfd_mach_arm_3M; break;
-        case F_ARM_4:  machine = bfd_mach_arm_4;  break;
-        case F_ARM_4T: machine = bfd_mach_arm_4T; break;
-	  /* The COFF header does not have enough bits available
-	     to cover all the different ARM architectures.  So
-	     we interpret F_ARM_5, the highest flag value to mean
-	     "the highest ARM architecture known to BFD" which is
-	     currently the XScale.  */
-        case F_ARM_5:  machine = bfd_mach_arm_XScale;  break;
+	  switch (internal_f->f_flags & F_ARM_ARCHITECTURE_MASK)
+	    {
+	    case F_ARM_2:  machine = bfd_mach_arm_2;  break;
+	    case F_ARM_2a: machine = bfd_mach_arm_2a; break;
+	    case F_ARM_3:  machine = bfd_mach_arm_3;  break;
+	    default:
+	    case F_ARM_3M: machine = bfd_mach_arm_3M; break;
+	    case F_ARM_4:  machine = bfd_mach_arm_4;  break;
+	    case F_ARM_4T: machine = bfd_mach_arm_4T; break;
+	      /* The COFF header does not have enough bits available
+		 to cover all the different ARM architectures.  So
+		 we interpret F_ARM_5, the highest flag value to mean
+		 "the highest ARM architecture known to BFD" which is
+		 currently the XScale.  */
+	    case F_ARM_5:  machine = bfd_mach_arm_XScale;  break;
+	    }
 	}
-
-      {
-	asection * arm_arch_section;
-  
-	arm_arch_section = bfd_get_section_by_name (abfd, ".note");
-
-	if (arm_arch_section)
-	  {
-	    bfd_byte buffer [4];
-
-	    if (! bfd_get_section_contents (abfd, arm_arch_section, buffer,
-					    (file_ptr) 0, sizeof buffer))
-	      (*_bfd_error_handler)
-		(_("%s: warning: unable to retrieve .note section from %s"),
-		 bfd_get_filename (abfd));
-	      
-	    /* We have to extract the value this way to allow for a
-	       host whose endian-ness is different from the target.  */
-	    machine = bfd_get_32 (abfd, buffer);
-	  }
-      }
       break;
 #endif
 #ifdef MC68MAGIC

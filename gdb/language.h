@@ -209,6 +209,9 @@ struct language_defn
        if it isn't a language tramp for this language.  */
     CORE_ADDR (*skip_trampoline) (CORE_ADDR pc);
 
+    /* Return demangled language symbol, or NULL.  */
+    char *(*la_demangle) (const char *mangled, int options);
+
     /* Base 2 (binary) formats. */
 
     struct language_format_info la_binary_format;
@@ -474,5 +477,9 @@ extern enum language get_frame_language (void);	/* In stack.c */
 /* Check for a language-specific trampoline. */
 
 extern CORE_ADDR skip_language_trampoline (CORE_ADDR pc);
+
+/* Return demangled language symbol, or NULL.  */
+extern char *language_demangle (const struct language_defn *current_language, 
+				const char *mangled, int options);
 
 #endif /* defined (LANGUAGE_H) */

@@ -595,12 +595,11 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, ns32k_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, ns32k_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, ns32k_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof_ns32k_call_dummy_words);
   set_gdbarch_fix_call_dummy (gdbarch, ns32k_fix_call_dummy);
   set_gdbarch_call_dummy_start_offset (gdbarch, 3);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 0);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 15);
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
 
@@ -610,6 +609,9 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Misc info */
   set_gdbarch_function_start_offset (gdbarch, 0);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

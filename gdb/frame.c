@@ -58,13 +58,19 @@ get_frame_id (struct frame_info *fi)
     {
       return null_frame_id;
     }
-  else
+  if (!fi->id_p)
     {
-      struct frame_id id;
-      id.base = fi->frame;
-      id.pc = fi->pc;
-      return id;
+      gdb_assert (!legacy_frame_p (current_gdbarch));
+      /* Find THIS frame's ID.  */
+      fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->id);
+      fi->id_p = 1;
+      /* FIXME: cagney/2002-12-18: Instead of this hack, should only
+	 store the frame ID in PREV_FRAME.  Unfortunatly, some
+	 architectures (HP/UX) still reply on EXTRA_FRAME_INFO and,
+	 hence, still poke at the "struct frame_info" object directly.  */
+      fi->frame = fi->id.base;
     }
+  return frame_id_build (fi->frame, fi->pc);
 }
 
 const struct frame_id null_frame_id; /* All zeros.  */
@@ -1039,6 +1045,9 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      problem.  */
   prev->type = NORMAL_FRAME;
 
+  /* A legacy frame's ID is always computed here.  Mark it as valid.  */
+  prev->id_p = 1;
+
   /* Handle sentinel frame unwind as a special case.  */
   if (this_frame->level < 0)
     {
@@ -1087,7 +1096,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	     or some random address on the stack.  Trying to use that
 	     PC to apply standard frame ID unwind techniques is just
 	     asking for trouble.  */
-	  /* Assume hand_function_call(), via SAVE_DUMMY_FRAME_TOS,
+	  /* Assume call_function_by_hand(), via SAVE_DUMMY_FRAME_TOS,
 	     previously saved the dummy frame's ID.  Things only work
 	     if the two return the same value.  */
 	  gdb_assert (SAVE_DUMMY_FRAME_TOS_P ());
@@ -1420,6 +1429,7 @@ get_prev_frame (struct frame_info *this_frame)
     return this_frame->prev;
   this_frame->prev_p = 1;
 
+#if 0
   /* If we're inside the entry file, it isn't valid.  Don't apply this
      test to a dummy frame - dummy frame PC's typically land in the
      entry file.  Don't apply this test to the sentinel frame.
@@ -1431,6 +1441,15 @@ get_prev_frame (struct frame_info *this_frame)
   /* NOTE: cagney/2003-01-10: If there is a way of disabling this test
      then it should probably be moved to before the ->prev_p test,
      above.  */
+  /* NOTE: vinschen/2003-04-01: Disabled.  It turns out that the call to
+     inside_entry_file destroys a meaningful backtrace under some
+     conditions.  E. g. the backtrace tests in the asm-source testcase
+     are broken for some targets.  In this test the functions are all
+     implemented as part of one file and the testcase is not necessarily
+     linked with a start file (depending on the target).  What happens is,
+     that the first frame is printed normaly and following frames are
+     treated as being inside the enttry file then.  This way, only the
+     #0 frame is printed in the backtrace output.  */
   if (this_frame->type != DUMMY_FRAME && this_frame->level >= 0
       && inside_entry_file (get_frame_pc (this_frame)))
     {
@@ -1439,6 +1458,7 @@ get_prev_frame (struct frame_info *this_frame)
 			    "Outermost frame - inside entry file\n");
       return NULL;
     }
+#endif
 
   /* If we're already inside the entry function for the main objfile,
      then it isn't valid.  Don't apply this test to a dummy frame -
@@ -1547,24 +1567,7 @@ get_prev_frame (struct frame_info *this_frame)
   prev_frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
 						prev_frame->pc);
 
-  /* Find the prev's frame's ID.  */
-
-  /* The callee expects to be invoked with:
-
-     this->unwind->this_id (this->next, &this->cache, &this->id);
-
-     The below is carefully shifted one frame `to the left' so that
-     both the unwind->this_id and unwind->prev_register methods are
-     consistently invoked with NEXT_FRAME and THIS_PROLOGUE_CACHE.
-       
-     Also note that, while the PC for this new previous frame was
-     unwound first (see above), the below is the first call that
-     [potentially] requires analysis of the new previous frame's
-     prologue.  Consequently, it is this call, that typically ends up
-     initializing the previous frame's prologue cache.  */
-  prev_frame->unwind->this_id (this_frame,
-			       &prev_frame->prologue_cache,
-			       &prev_frame->id);
+  /* The prev's frame's ID is computed by demand in get_frame_id().  */
 
   /* The unwound frame ID is validate at the start of this function,
      as part of the logic to decide if that frame should be further
@@ -1577,12 +1580,6 @@ get_prev_frame (struct frame_info *this_frame)
      trashed (which is one reason that "info frame" exists).  So,
      return 0 (indicating we don't know the address of the arglist) if
      we don't know what frame this frame calls.  */
-
-  /* FIXME: cagney/2002-12-18: Instead of this hack, should only store
-     the frame ID in PREV_FRAME.  Unfortunatly, some architectures
-     (HP/UX) still reply on EXTRA_FRAME_INFO and, hence, still poke at
-     the "struct frame_info" object directly.  */
-  prev_frame->frame = prev_frame->id.base;
 
   /* Link it in.  */
   this_frame->prev = prev_frame;
@@ -1625,6 +1622,12 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 CORE_ADDR
 get_frame_base (struct frame_info *fi)
 {
+  if (!fi->id_p)
+    {
+      /* HACK: Force the ID code to (indirectly) initialize the
+         ->frame pointer.  */
+      get_frame_id (fi);
+    }
   return fi->frame;
 }
 

@@ -39,7 +39,7 @@
 #include "language.h"
 #include "arch-utils.h"
 #include "regcache.h"
-
+#include "remote.h"
 #include "floatformat.h"
 #include "gdb/sim-d10v.h"
 #include "sim-regno.h"
@@ -69,7 +69,7 @@ enum
   {
     R0_REGNUM = 0,
     R3_REGNUM = 3,
-    _FP_REGNUM = 11,
+    D10V_FP_REGNUM = 11,
     LR_REGNUM = 13,
     _SP_REGNUM = 15,
     PSW_REGNUM = 16,
@@ -277,8 +277,8 @@ d10v_imap_register (int reg_nr)
 static int
 d10v_ts2_register_sim_regno (int nr)
 {
-  if (legacy_register_sim_regno (nr) < 0)
-    return legacy_register_sim_regno (nr);
+  /* Only makes sense to supply raw registers.  */
+  gdb_assert (nr >= 0 && nr < NUM_REGS);
   if (nr >= TS2_IMAP0_REGNUM
       && nr < TS2_IMAP0_REGNUM + NR_IMAP_REGS)
     return nr - TS2_IMAP0_REGNUM + SIM_D10V_IMAP0_REGNUM;
@@ -293,8 +293,8 @@ d10v_ts2_register_sim_regno (int nr)
 static int
 d10v_ts3_register_sim_regno (int nr)
 {
-  if (legacy_register_sim_regno (nr) < 0)
-    return legacy_register_sim_regno (nr);
+  /* Only makes sense to supply raw registers.  */
+  gdb_assert (nr >= 0 && nr < NUM_REGS);
   if (nr >= TS3_IMAP0_REGNUM
       && nr < TS3_IMAP0_REGNUM + NR_IMAP_REGS)
     return nr - TS3_IMAP0_REGNUM + SIM_D10V_IMAP0_REGNUM;
@@ -346,7 +346,7 @@ d10v_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == PC_REGNUM)
     return builtin_type_void_func_ptr;
-  if (reg_nr == _SP_REGNUM || reg_nr == _FP_REGNUM)
+  if (reg_nr == _SP_REGNUM || reg_nr == D10V_FP_REGNUM)
     return builtin_type_void_data_ptr;
   else if (reg_nr >= A0_REGNUM
       && reg_nr < (A0_REGNUM + NR_A_REGS))
@@ -599,7 +599,10 @@ d10v_skip_prologue (CORE_ADDR pc)
 struct d10v_unwind_cache
 {
   CORE_ADDR return_pc;
-  /* The frame's base.  Used when constructing a frame ID.  */
+  /* The previous frame's inner most stack address.  Used as this
+     frame ID's stack_addr.  */
+  CORE_ADDR prev_sp;
+  /* The frame's base, optionally used by the high-level debug info.  */
   CORE_ADDR base;
   int size;
   CORE_ADDR *saved_regs;
@@ -716,10 +719,10 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
   info->return_pc = 0;
   info->sp_offset = 0;
 
-  pc = get_pc_function_start (frame_pc_unwind (next_frame));
-
   info->uses_frame = 0;
-  while (1)
+  for (pc = get_pc_function_start (frame_pc_unwind (next_frame));
+       pc < frame_pc_unwind (next_frame);
+       pc += 4)
     {
       op = (unsigned long) read_memory_integer (pc, 4);
       if ((op & 0xC0000000) == 0xC0000000)
@@ -766,7 +769,6 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
 	      || !prologue_find_regs (info, op2, pc))
 	    break;
 	}
-      pc += 4;
     }
 
   info->size = -info->sp_offset;
@@ -777,7 +779,7 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
       /* The SP was moved to the FP.  This indicates that a new frame
          was created.  Get THIS frame's FP value by unwinding it from
          the next frame.  */
-      frame_unwind_unsigned_register (next_frame, FP_REGNUM, &this_base);
+      frame_unwind_unsigned_register (next_frame, D10V_FP_REGNUM, &this_base);
       /* The FP points at the last saved register.  Adjust the FP back
          to before the first saved register giving the SP.  */
       prev_sp = this_base + info->size;
@@ -800,14 +802,14 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
     }
 
   info->base = d10v_make_daddr (this_base);
-  prev_sp = d10v_make_daddr (prev_sp);
+  info->prev_sp = d10v_make_daddr (prev_sp);
 
   /* Adjust all the saved registers so that they contain addresses and
      not offsets.  */
   for (i = 0; i < NUM_REGS - 1; i++)
     if (info->saved_regs[i])
       {
-	info->saved_regs[i] = (prev_sp + info->saved_regs[i]);
+	info->saved_regs[i] = (info->prev_sp + info->saved_regs[i]);
       }
 
   if (info->saved_regs[LR_REGNUM])
@@ -826,7 +828,7 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
 
   /* The SP_REGNUM is special.  Instead of the address of the SP, the
      previous frame's SP value is saved.  */
-  info->saved_regs[SP_REGNUM] = prev_sp;
+  info->saved_regs[SP_REGNUM] = info->prev_sp;
 
   return info;
 }
@@ -950,29 +952,11 @@ d10v_read_sp (void)
   return (d10v_make_daddr (read_register (SP_REGNUM)));
 }
 
-static void
-d10v_write_sp (CORE_ADDR val)
-{
-  write_register (SP_REGNUM, d10v_convert_daddr_to_raw (val));
-}
-
 static CORE_ADDR
 d10v_read_fp (void)
 {
-  return (d10v_make_daddr (read_register (FP_REGNUM)));
+  return (d10v_make_daddr (read_register (D10V_FP_REGNUM)));
 }
-
-/* Function: push_return_address (pc)
-   Set up the return address for the inferior function call.
-   Needed for targets where we don't actually execute a JSR/BSR instruction */
-
-static CORE_ADDR
-d10v_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
-{
-  write_register (LR_REGNUM, d10v_convert_iaddr_to_raw (CALL_DUMMY_ADDRESS ()));
-  return sp;
-}
-
 
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The below implements a FILO (stack) to do this. */
@@ -1011,20 +995,26 @@ pop_stack_item (struct stack_item *si)
 
 
 static CORE_ADDR
-d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		     int struct_return, CORE_ADDR struct_addr)
+d10v_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
+		      CORE_ADDR dummy_addr, int nargs, struct value **args,
+		      CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
 {
   int i;
   int regnum = ARG1_REGNUM;
   struct stack_item *si = NULL;
   long val;
 
+  /* Set the return address.  For the d10v, the return breakpoint is
+     always at DUMMY_ADDR.  */
+  regcache_cooked_write_unsigned (regcache, LR_REGNUM,
+				  d10v_convert_iaddr_to_raw (dummy_addr));
+
   /* If STRUCT_RETURN is true, then the struct return address (in
      STRUCT_ADDR) will consume the first argument-passing register.
      Both adjust the register count and store that value.  */
   if (struct_return)
     {
-      write_register (regnum, struct_addr);
+      regcache_cooked_write_unsigned (regcache, regnum, struct_addr);
       regnum++;
     }
 
@@ -1042,7 +1032,7 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	/* fits in a single register, do not align */
 	{
 	  val = extract_unsigned_integer (contents, len);
-	  write_register (regnum++, val);
+	  regcache_cooked_write_unsigned (regcache, regnum++, val);
 	}
       else if (len <= (ARGN_REGNUM - aligned_regnum + 1) * 2)
 	/* value fits in remaining registers, store keeping left
@@ -1053,12 +1043,12 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  for (b = 0; b < (len & ~1); b += 2)
 	    {
 	      val = extract_unsigned_integer (&contents[b], 2);
-	      write_register (regnum++, val);
+	      regcache_cooked_write_unsigned (regcache, regnum++, val);
 	    }
 	  if (b < len)
 	    {
 	      val = extract_unsigned_integer (&contents[b], 1);
-	      write_register (regnum++, (val << 8));
+	      regcache_cooked_write_unsigned (regcache, regnum++, (val << 8));
 	    }
 	}
       else
@@ -1075,6 +1065,10 @@ d10v_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       write_memory (sp, si->data, si->len);
       si = pop_stack_item (si);
     }
+
+  /* Finally, update the SP register.  */
+  regcache_cooked_write_unsigned (regcache, SP_REGNUM,
+				  d10v_convert_daddr_to_raw (sp));
 
   return sp;
 }
@@ -1348,26 +1342,29 @@ tdisassemble_command (char *arg, int from_tty)
 {
   int i, count;
   CORE_ADDR low, high;
-  char *space_index;
 
   if (!arg)
     {
       low = 0;
       high = trace_data.size;
     }
-  else if (!(space_index = (char *) strchr (arg, ' ')))
-    {
-      low = parse_and_eval_address (arg);
-      high = low + 5;
-    }
   else
-    {
-      /* Two arguments.  */
-      *space_index = '\0';
-      low = parse_and_eval_address (arg);
-      high = parse_and_eval_address (space_index + 1);
-      if (high < low)
-	high = low;
+    { 
+      char *space_index = strchr (arg, ' ');
+      if (space_index == NULL)
+	{
+	  low = parse_and_eval_address (arg);
+	  high = low + 5;
+	}
+      else
+	{
+	  /* Two arguments.  */
+	  *space_index = '\0';
+	  low = parse_and_eval_address (arg);
+	  high = parse_and_eval_address (space_index + 1);
+	  if (high < low)
+	    high = low;
+	}
     }
 
   printf_filtered ("Dump of trace from %s to %s:\n", paddr_u (low), paddr_u (high));
@@ -1456,9 +1453,6 @@ d10v_frame_this_id (struct frame_info *next_frame,
   CORE_ADDR base;
   CORE_ADDR pc;
 
-  /* Start with a NULL frame ID.  */
-  (*this_id) = null_frame_id;
-
   /* The PC is easy.  */
   pc = frame_pc_unwind (next_frame);
 
@@ -1470,7 +1464,7 @@ d10v_frame_this_id (struct frame_info *next_frame,
   /* Hopefully the prologue analysis either correctly determined the
      frame's base (which is the SP from the previous frame), or set
      that base to "NULL".  */
-  base = info->base;
+  base = info->prev_sp;
   if (base == STACK_START || base == 0)
     return;
 
@@ -1484,8 +1478,7 @@ d10v_frame_this_id (struct frame_info *next_frame,
       && get_frame_id (next_frame).base == base)
     return;
 
-  this_id->base = base;
-  this_id->pc = pc;
+  (*this_id) = frame_id_build (base, pc);
 }
 
 static void
@@ -1606,8 +1599,6 @@ static gdbarch_init_ftype d10v_gdbarch_init;
 static struct gdbarch *
 d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  static LONGEST d10v_call_dummy_words[] =
-  {0};
   struct gdbarch *gdbarch;
   int d10v_num_regs;
   struct gdbarch_tdep *tdep;
@@ -1651,11 +1642,9 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, d10v_write_pc);
   set_gdbarch_read_fp (gdbarch, d10v_read_fp);
   set_gdbarch_read_sp (gdbarch, d10v_read_sp);
-  set_gdbarch_write_sp (gdbarch, d10v_write_sp);
 
   set_gdbarch_num_regs (gdbarch, d10v_num_regs);
   set_gdbarch_sp_regnum (gdbarch, 15);
-  set_gdbarch_fp_regnum (gdbarch, 11);
   set_gdbarch_pc_regnum (gdbarch, 18);
   set_gdbarch_register_name (gdbarch, d10v_register_name);
   set_gdbarch_register_size (gdbarch, 2);
@@ -1696,20 +1685,8 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		      "d10v_gdbarch_init: bad byte order for float format");
     }
 
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_words (gdbarch, d10v_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (d10v_call_dummy_words));
-  set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
-
   set_gdbarch_extract_return_value (gdbarch, d10v_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, d10v_push_arguments);
-  set_gdbarch_push_return_address (gdbarch, d10v_push_return_address);
-
+  set_gdbarch_push_dummy_call (gdbarch, d10v_push_dummy_call);
   set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch, d10v_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, d10v_use_struct_convention);
@@ -1745,10 +1722,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
-
-
-extern void (*target_resume_hook) (void);
-extern void (*target_wait_loop_hook) (void);
 
 void
 _initialize_d10v_tdep (void)

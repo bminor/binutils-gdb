@@ -128,9 +128,7 @@ struct value
        list.  */
     struct value *next;
 
-    /* Register number if the value is from a register.  Is not kept
-       if you take a field of a structure that is stored in a
-       register.  Shouldn't it be?  */
+    /* Register number if the value is from a register.  */
     short regno;
     /* If zero, contents of this value are in the contents field.
        If nonzero, contents are in inferior memory at address
@@ -560,9 +558,9 @@ extern struct value *find_function_in_inferior (const char *);
 
 extern struct value *value_allocate_space_in_inferior (int);
 
-extern CORE_ADDR default_push_arguments (int nargs, struct value ** args,
-					 CORE_ADDR sp, int struct_return,
-					 CORE_ADDR struct_addr);
+extern CORE_ADDR legacy_push_arguments (int nargs, struct value ** args,
+					CORE_ADDR sp, int struct_return,
+					CORE_ADDR struct_addr);
 
 extern struct value *value_of_local (const char *name, int complain);
 

@@ -251,6 +251,7 @@ const struct language_defn scm_language_defn =
   scm_val_print,		/* Print a value using appropriate syntax */
   scm_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"#o%lo", "#o", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */

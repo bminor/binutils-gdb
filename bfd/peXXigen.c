@@ -1,5 +1,5 @@
 /* Support for the generic parts of PE/PEI; the common executable parts.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
@@ -906,12 +906,24 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
      sometimes).  */
   if ((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0)
     {
-      ps = scnhdr_int->s_size;
-      ss = 0;
+      if (bfd_pe_executable_p (abfd))
+	{
+	  ps = scnhdr_int->s_size;
+	  ss = 0;
+	}
+      else
+       {
+         ps = 0;
+         ss = scnhdr_int->s_size;
+       }
     }
   else
     {
-      ps = scnhdr_int->s_paddr;
+      if (bfd_pe_executable_p (abfd))
+	ps = scnhdr_int->s_paddr;
+      else
+	ps = 0;
+
       ss = scnhdr_int->s_size;
     }
 

@@ -1,6 +1,6 @@
 /* BFD semi-generic back-end for a.out binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001, 2002
+   2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -105,9 +105,7 @@ DESCRIPTION
 	in the @file{config/@var{XXX}.mt} file, and modify @file{configure.in}
 	to use the
 	@file{@var{XXX}.mt} file (by setting "<<bfd_target=XXX>>") when your
-	configuration is selected.
-
-*/
+	configuration is selected.  */
 
 /* Some assumptions:
    * Any BFD with D_PAGED set is ZMAGIC, and vice versa.
@@ -157,9 +155,8 @@ DESCRIPTION
 	The standard records contain only an
 	address, a symbol index, and a type field. The extended records
 	(used on 29ks and sparcs) also have a full integer for an
-	addend.
+	addend.  */
 
-*/
 #ifndef CTOR_TABLE_RELOC_HOWTO
 #define CTOR_TABLE_RELOC_IDX 2
 #define CTOR_TABLE_RELOC_HOWTO(BFD)					\
@@ -230,7 +227,8 @@ reloc_howto_type howto_table_ext[] =
 
 /* Convert standard reloc records to "arelent" format (incl byte swap).  */
 
-reloc_howto_type howto_table_std[] = {
+reloc_howto_type howto_table_std[] =
+{
   /* type              rs size bsz  pcrel bitpos ovrf                     sf name     part_inpl readmask  setmask    pcdone.  */
 HOWTO ( 0,	       0,  0,  	8,  FALSE, 0, complain_overflow_bitfield,0,"8",		TRUE, 0x000000ff,0x000000ff, FALSE),
 HOWTO ( 1,	       0,  1, 	16, FALSE, 0, complain_overflow_bitfield,0,"16",	TRUE, 0x0000ffff,0x0000ffff, FALSE),
@@ -3067,9 +3065,10 @@ NAME(aout,link_hash_table_create) (abfd)
   struct aout_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct aout_link_hash_table);
 
-  ret = (struct aout_link_hash_table *) bfd_alloc (abfd, amt);
+  ret = (struct aout_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
     return (struct bfd_link_hash_table *) NULL;
+
   if (! NAME(aout,link_hash_table_init) (ret, abfd,
 					 NAME(aout,link_hash_newfunc)))
     {
@@ -3906,10 +3905,8 @@ NAME(aout,final_link) (abfd, info, callback)
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       for (p = o->link_order_head; p != NULL; p = p->next)
-	{
-	  if (p->type == bfd_indirect_link_order)
-	    p->u.indirect.section->linker_mark = TRUE;
-	}
+	if (p->type == bfd_indirect_link_order)
+	  p->u.indirect.section->linker_mark = TRUE;
     }
 
   have_link_order_relocs = FALSE;

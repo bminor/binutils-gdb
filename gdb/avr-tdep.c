@@ -1147,7 +1147,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, avr_write_pc);
   set_gdbarch_read_fp (gdbarch, avr_read_fp);
   set_gdbarch_read_sp (gdbarch, avr_read_sp);
-  set_gdbarch_write_sp (gdbarch, avr_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, avr_write_sp);
 
   set_gdbarch_num_regs (gdbarch, AVR_NUM_REGS);
 
@@ -1168,20 +1168,14 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
   set_gdbarch_call_dummy_address (gdbarch, avr_call_dummy_address);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, avr_call_dummy_words);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
 /*    set_gdbarch_believe_pcc_promotion (gdbarch, 1); // TRoth: should this be set? */
 
   set_gdbarch_address_to_pointer (gdbarch, avr_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, avr_pointer_to_address);
-  set_gdbarch_push_arguments (gdbarch, avr_push_arguments);
-  set_gdbarch_push_return_address (gdbarch, avr_push_return_address);
+  set_gdbarch_deprecated_push_arguments (gdbarch, avr_push_arguments);
+  set_gdbarch_deprecated_push_return_address (gdbarch, avr_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, avr_pop_frame);
 
   set_gdbarch_use_struct_convention (gdbarch, generic_use_struct_convention);

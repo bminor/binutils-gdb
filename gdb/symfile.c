@@ -3573,7 +3573,7 @@ symfile_relocate_debug_section (bfd *abfd, asection *sectp, bfd_byte *buf)
      all sections begin at 0.  */
   bfd_map_over_sections (abfd, symfile_dummy_outputs, NULL);
 
-  return bfd_simple_get_relocated_section_contents (abfd, sectp, buf);
+  return bfd_simple_get_relocated_section_contents (abfd, sectp, buf, NULL);
 }
 
 void

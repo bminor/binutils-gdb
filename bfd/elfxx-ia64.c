@@ -357,6 +357,10 @@ elfNN_ia64_reloc (abfd, reloc, sym, data, input_section,
       reloc->address += input_section->output_offset;
       return bfd_reloc_ok;
     }
+
+  if (input_section->flags & SEC_DEBUGGING)
+    return bfd_reloc_continue;
+
   *error_message = "Unsupported call to elfNN_ia64_reloc";
   return bfd_reloc_notsupported;
 }
@@ -1032,6 +1036,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       struct elfNN_ia64_allocate_data data;
       data.info = link_info;
       data.ofs = 0;
+      ia64_info->self_dtpmod_offset = (bfd_vma) -1;
 
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_global_data_got, &data);
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_global_fptr_got, &data);
@@ -1787,19 +1792,24 @@ elfNN_ia64_hash_table_create (abfd)
 {
   struct elfNN_ia64_link_hash_table *ret;
 
-  ret = bfd_zalloc (abfd, (bfd_size_type) sizeof (*ret));
+  ret = bfd_zmalloc ((bfd_size_type) sizeof (*ret));
   if (!ret)
     return 0;
+
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      elfNN_ia64_new_elf_hash_entry))
     {
-      bfd_release (abfd, ret);
+      free (ret);
       return 0;
     }
 
   if (!elfNN_ia64_local_hash_table_init (&ret->loc_hash_table, abfd,
 				         elfNN_ia64_new_loc_hash_entry))
-    return 0;
+    {
+      free (ret);
+      return 0;
+    }
+
   return &ret->root.root;
 }
 

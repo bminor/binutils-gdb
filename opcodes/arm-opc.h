@@ -108,7 +108,7 @@ static const struct arm_opcode arm_opcodes[] =
     {0x0c500000, 0x0ff00fff, "mra%c\t%12-15r, %16-19r, acc0"},
     {0xf450f000, 0xfc70f000, "pld\t%a"},
     
-    /* Intel(r) Wireless MMX(tm) technology instructions.  */
+    /* Intel Wireless MMX technology instructions.  */
 #define FIRST_IWMMXT_INSN 0x0e130130
 #define IWMMXT_INSN_COUNT 47
     {0x0e130130, 0x0f3f0fff, "tandc%22-23w%c\t%12-15r"},

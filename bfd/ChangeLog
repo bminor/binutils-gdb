@@ -1,3 +1,145 @@
+2003-04-03  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Compute ps and ss
+	differently for object files and executables.
+	* peicode.h (coff_swap_scnhdr_in): Only set the s_size field
+	for object files or for executables who have not already
+	initialised the field.
+	* libpei.h (bfd_pe_executable_p): New macro.  Return true if
+	the PE format bfd is an executable.
+
+2003-04-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Don't use SYMBOL_REFERENCES_LOCAL
+	here as it's too early to reliably determine locality.
+	(ppc_elf_gc_sweep_hook): Likewise.
+	(SYMBOL_REFERENCES_LOCAL): Expand comment.
+
+2003-04-02  Bob Wilson  <bob.wilson@acm.org>
+
+	* xtensa-modules.c: Remove comment indicating that this is a
+	generated file.
+
+2003-04-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfxx-mips.c (_bfd_mips_elf_hide_symbol): Test for NULL dynobj.
+
+2003-04-01  Bob Wilson  <bob.wilson@acm.org>
+
+        * Makefile.am (ALL_MACHINES): Add cpu-xtensa.lo.
+        (ALL_MACHINES_CFILES): Add cpu-xtensa.c.
+        (BFD32_BACKENDS): Add elf32-xtensa.lo, xtensa-isa.lo, and
+        xtensa-modules.lo.
+        (BFD32_BACKENDS_CFILES): Add elf32-xtensa.c, xtensa-isa.c, and
+        xtensa-modules.c.
+        (cpu-xtensa.lo): New target.
+        (elf32-xtensa.lo): Likewise.
+        (xtensa-isa.lo): Likewise.
+        (xtensa-modules.lo): Likewise.
+        * Makefile.in: Regenerate.
+        * archures.c (bfd_architecture): Add bfd_{arch,mach}_xtensa.
+        (bfd_archures_list): Add bfd_xtensa_arch.
+        * config.bfd: Handle xtensa-*-*.
+        * configure.in: Handle bfd_elf32_xtensa_{le,be}_vec.
+        * configure: Regenerate.
+        * reloc.c: Add BFD_RELOC_XTENSA_{RTLD,GLOB_DAT,JMP_SLOT,RELATIVE,
+        PLT,OP0,OP1,OP2,ASM_EXPAND,ASM_SIMPLIFY}.
+        * targets.c (bfd_elf32_xtensa_be_vec): Declare.
+        (bfd_elf32_xtensa_le_vec): Likewise.
+        (bfd_target_vector): Add bfd_elf32_xtensa_{be,le}_vec.
+        * cpu-xtensa.c: New file.
+        * elf32-xtensa.c: Likewise.
+        * xtensa-isa.c: Likewise.
+        * xtensa-modules.c: Likewise.
+        * libbfd.h: Regenerate.
+        * bfd-in2.h: Likewise.
+
+2003-04-01  Nick Clifton  <nickc@redhat.com>
+
+	* archures.c (bfd_mach_arm_unknown): Define.
+	* bfd-in.h (bfd_arm_merge_machines, bfd_arm+update_notes,
+	bfd_arm_get_mach_from_notes): Prototype.
+	* bfd-in2.h: Regenerate.
+	* coff-arm.c (coff_arm_merge_private_bfd_data): Call
+	bfd_arm_merge_machines.
+	(coff_arm_final_link_postscript): Call bfd_arm_update_notes.
+	* coffcode.h (coff_set_arch_mach_hook): Call
+	bfd_arm_get_mach_from_notes.
+	* coffgen.c (coff_real_object_p): Revert previous delta.
+	* cpu_arm.c (arm_check_note): New function.  Examine a note in a
+	.note section.
+	(bfd_arm_merge_machines): New function: Handle the merging of ARM
+	binaries compiled for different architectures..
+	(bfd_arm_update_notes): New function: Update an ARM note section.
+	(bfd_arm_get_mach_from_notes): New function: Extract a bfd machine
+	number from an ARM note section.
+	* elf32-arm.h (elf32_arm_object_p): Use
+	bfd_arm_get_mach_from_notes.
+	(elf32_arm_merge_private_bfd_data): Use bfd_arm_merge_machines.
+	(elf32_arm_final_write_processing): Use bfd_arm_update_notes.
+	
+2003-04-01  Ben Elliston  <bje@wasabisystems.com>
+
+	* dwarf2.c (read_attribute_value): Correct typo in comment.
+
+2003-04-01  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2.c (concat_filename): Use bfd_malloc() and strdup()
+	instead of concat().
+	(decode_line_info): Only free filename if it is not NULL.
+	(add_line_info): Make a copy of the filename when storing it into
+	the info structure.
+
+2003-03-31  Andreas Schwab  <schwab@suse.de>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	* simple.c (bfd_simple_get_relocated_section_contents): Add
+	parameter symbol_table.  Optionally use it instead of the symbol
+	table from the bfd.  Save and restore output offsets and output
+	sections  around bfd_get_relocated_section_contents.  Fix a memory
+	leak.
+	(simple_save_output_info, simple_restore_output_info): New
+	functions.
+	* bfd-in2.h: Regenerate.
+	* dwarf2.c (read_abbrevs): Use
+	bfd_simple_get_relocated_section_contents instead of
+	bfd_get_section_contents.
+	(decode_line_info): Likewise.
+	(_bfd_dwarf2_find_nearest_line): Likewise.  Don't call
+	find_rela_addend.
+	(find_rela_addend): Remove.
+	* elfxx-ia64.c (elfNN_ia64_reloc): Weaken sanity check for
+	debugging sections.
+	(elfNN_ia64_hash_table_create): Create the hash table with malloc,
+	not bfd_zalloc.
+
+2003-03-31  David Heine  <dlheine@suif.stanford.edu>
+
+	* aoutx.h (aout_link_hash_table_create): Use bfd_malloc instead of
+	bfd_alloc.
+	* dwarf2.c (concat_filename): Always allocate space for the
+	returned filename.
+	(decode_line_info): Free the allocated filename returned by
+	concat_filename.
+	* elf-eh-frame.c (bfd_elf_write_section_eh_frame): Fix memory leaks.
+	* elf.c (copy_private_bfd_data): Likewise.
+	(_bfd_elf_slurp_version_tables): Fix bug freeing contents pointer.
+	* elflink.h (elf_link_sort_relocs): Fix memory leak.
+	* format.c (bfd_check_format_matches): Likewise.
+	* linker.c (bfd_generic_final_link): Likewise.
+	* opncls.c (find_separate_debug_info): Likewise.
+	* simple.c (bfd_simple_get_relocated_section_contents): Likewise.
+	
+2003-03-28  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_link_add_object_symbols): Correctly combine
+	visibilities.
+
+2003-03-27  Jakub Jelinek  <jakub@redhat.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Reset self_dtpmod_offset
+	to -1 before recomputing got offsets.
+
 2003-03-26  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.

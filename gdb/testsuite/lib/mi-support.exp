@@ -549,18 +549,18 @@ proc mi_gdb_test { args } {
 	}
 	 -re "Program exited with code \[0-9\]+.*$mi_gdb_prompt\[ \]*$" {
 	    if ![string match "" $message] then {
-		set errmsg "$message: the program exited"
+		set errmsg "$message (the program exited)"
 	    } else {
-		set errmsg "$command: the program exited"
+		set errmsg "$command (the program exited)"
 	    }
 	    fail "$errmsg"
 	    return -1
 	}
 	 -re "The program is not being run.*$mi_gdb_prompt\[ \]*$" {
 	    if ![string match "" $message] then {
-		set errmsg "$message: the program is no longer running"
+		set errmsg "$message (the program is no longer running)"
 	    } else {
-		set errmsg "$command: the program is no longer running"
+		set errmsg "$command (the program is no longer running)"
 	    }
 	    fail "$errmsg"
 	    return -1

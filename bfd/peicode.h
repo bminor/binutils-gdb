@@ -1,31 +1,29 @@
 /* Support for the generic parts of PE/PEI, for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/*
-Most of this hacked by  Steve Chamberlain,
+/* Most of this hacked by  Steve Chamberlain,
 			sac@cygnus.com
 
-PE/PEI rearrangement (and code added): Donn Terry
-                                       Softway Systems, Inc.
-*/
+   PE/PEI rearrangement (and code added): Donn Terry
+                                       Softway Systems, Inc.  */
 
 /* Hey look, some documentation [and in a place you expect to find it]!
 
@@ -53,8 +51,7 @@ PE/PEI rearrangement (and code added): Donn Terry
 
    FIXME: Please add more docs here so the next poor fool that has to hack
    on this code has a chance of getting something accomplished without
-   wasting too much time.
-*/
+   wasting too much time.  */
 
 #include "libpei.h"
 
@@ -264,7 +261,11 @@ coff_swap_scnhdr_in (abfd, ext, in)
   if ((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0
       && (scnhdr_int->s_paddr > 0))
     {
-      scnhdr_int->s_size = scnhdr_int->s_paddr;
+     /* Always set it for non pe-obj files, and don't overwrite it
+        if it's zero for object files.  */
+     if (! bfd_pe_executable_p (abfd) || !scnhdr_int->s_size)
+       scnhdr_int->s_size = scnhdr_int->s_paddr;
+
       /* This code used to set scnhdr_int->s_paddr to 0.  However,
          coff_set_alignment_hook stores s_paddr in virt_size, which
          only works if it correctly holds the virtual size of the

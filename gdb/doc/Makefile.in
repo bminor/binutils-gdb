@@ -98,10 +98,8 @@ DVIPS = dvips
 
 # Main GDB manual
 GDB_DOC_SOURCE_INCLUDES = \
-	$(srcdir)/annotate.texi \
 	$(srcdir)/fdl.texi \
 	$(srcdir)/gpl.texi \
-	$(GDBMI_DIR)/gdbmi.texinfo \
 	$(READLINE_DIR)/rluser.texinfo \
 	$(READLINE_DIR)/inc-hist.texinfo
 GDB_DOC_BUILD_INCLUDES = \

@@ -2298,22 +2298,7 @@ fprintf_symbol_filtered (struct ui_file *stream, char *name,
 	}
       else
 	{
-	  switch (lang)
-	    {
-	    case language_cplus:
-	      demangled = cplus_demangle (name, arg_mode);
-	      break;
-	    case language_java:
-	      demangled = cplus_demangle (name, arg_mode | DMGL_JAVA);
-	      break;
-	    case language_objc:
-	      /* Commented out until ObjC handling is enabled.  */
-	      /*demangled = objc_demangle (name); */
-	      /*break; */
-	    default:
-	      demangled = NULL;
-	      break;
-	    }
+	  demangled = language_demangle (language_def (lang), name, arg_mode);
 	  fputs_filtered (demangled ? demangled : name, stream);
 	  if (demangled != NULL)
 	    {

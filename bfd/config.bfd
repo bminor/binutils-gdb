@@ -58,6 +58,7 @@ thumb*)	         targ_archs=bfd_arm_arch ;;
 v850*)	         targ_archs=bfd_v850_arch ;;
 x86_64)          targ_archs=bfd_i386_arch ;;
 xscale*)         targ_archs=bfd_arm_arch ;;
+xtensa*)         targ_archs=bfd_xtensa_arch ;;
 z8k*)	         targ_archs=bfd_z8k_arch ;;
 *)	         targ_archs=bfd_${targ_cpu}_arch ;;
 esac
@@ -1212,6 +1213,11 @@ case "${targ}" in
 
   xstormy16-*-elf)
     targ_defvec=bfd_elf32_xstormy16_vec
+    ;;
+
+  xtensa-*-*)
+    targ_defvec=bfd_elf32_xtensa_le_vec
+    targ_selvecs=bfd_elf32_xtensa_be_vec
     ;;
 
   z8k*-*-*)

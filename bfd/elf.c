@@ -5068,7 +5068,10 @@ copy_private_bfd_data (ibfd, obfd)
 	      amt += ((bfd_size_type) section_count - 1) * sizeof (asection *);
 	      map = (struct elf_segment_map *) bfd_alloc (obfd, amt);
 	      if (map == NULL)
-		return FALSE;
+		{
+		  free (sections);
+		  return FALSE;
+		}
 
 	      /* Initialise the fields of the segment map.  Set the physical
 		 physical address to the LMA of the first section that has
@@ -5303,7 +5306,10 @@ swap_out_syms (abfd, sttp, relocatable_p)
   amt = (bfd_size_type) (1 + symcount) * bed->s->sizeof_sym;
   outbound_syms = bfd_alloc (abfd, amt);
   if (outbound_syms == NULL)
-    return FALSE;
+    {
+      _bfd_stringtab_free (stt);
+      return FALSE;
+    }
   symtab_hdr->contents = (PTR) outbound_syms;
 
   outbound_shndx = NULL;
@@ -5313,7 +5319,11 @@ swap_out_syms (abfd, sttp, relocatable_p)
       amt = (bfd_size_type) (1 + symcount) * sizeof (Elf_External_Sym_Shndx);
       outbound_shndx = bfd_zalloc (abfd, amt);
       if (outbound_shndx == NULL)
-	return FALSE;
+	{
+	  _bfd_stringtab_free (stt);
+	  return FALSE;
+	}
+
       symtab_shndx_hdr->contents = outbound_shndx;
       symtab_shndx_hdr->sh_type = SHT_SYMTAB_SHNDX;
       symtab_shndx_hdr->sh_size = amt;
@@ -5357,7 +5367,10 @@ swap_out_syms (abfd, sttp, relocatable_p)
 							    syms[idx]->name,
 							    TRUE, FALSE);
 	  if (sym.st_name == (unsigned long) -1)
-	    return FALSE;
+	    {
+	      _bfd_stringtab_free (stt);
+	      return FALSE;
+	    }
 	}
 
       type_ptr = elf_symbol_from (abfd, syms[idx]);
@@ -5446,6 +5459,7 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 					  syms[idx]->name ? syms[idx]->name : "<Local sym>",
 					  sec->name);
 		      bfd_set_error (bfd_error_invalid_operation);      
+		      _bfd_stringtab_free (stt);
 		      return FALSE;
 		    }
   
@@ -5906,7 +5920,7 @@ _bfd_elf_slurp_version_tables (abfd)
   return TRUE;
 
  error_return:
-  if (contents == NULL)
+  if (contents != NULL)
     free (contents);
   return FALSE;
 }

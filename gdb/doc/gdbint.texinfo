@@ -3084,11 +3084,6 @@ custom breakpoint insertion and removal routines if
 @code{BREAKPOINT_FROM_PC} needs to read the target's memory for some
 reason.
 
-@item CALL_DUMMY_P
-@findex CALL_DUMMY_P
-A C expression that is non-zero when the target supports inferior function
-calls.
-
 @item CALL_DUMMY_WORDS
 @findex CALL_DUMMY_WORDS
 Pointer to an array of @code{LONGEST} words of data containing
@@ -3101,8 +3096,8 @@ data.
 
 @item SIZEOF_CALL_DUMMY_WORDS
 @findex SIZEOF_CALL_DUMMY_WORDS
-The size of @code{CALL_DUMMY_WORDS}.  When @code{CALL_DUMMY_P} this must
-return a positive value.  See also @code{CALL_DUMMY_LENGTH}.
+The size of @code{CALL_DUMMY_WORDS}.  This must return a positive value.
+See also @code{CALL_DUMMY_LENGTH}.
 
 @item CALL_DUMMY
 @findex CALL_DUMMY
@@ -3115,7 +3110,7 @@ See the file @file{inferior.h}.
 @item DEPRECATED_CALL_DUMMY_STACK_ADJUST
 @findex DEPRECATED_CALL_DUMMY_STACK_ADJUST
 Stack adjustment needed when performing an inferior function call.  This
-function is no longer needed.  @xref{PUSH_ARGUMENTS}, which can handle
+function is no longer needed.  @xref{push_dummy_call}, which can handle
 all alignment directly.
 
 @item CANNOT_FETCH_REGISTER (@var{regno})
@@ -3703,14 +3698,21 @@ definition is only used in generic code when parsing "$ps".)
 If defined, used by @code{frame_pop} to remove a stack frame.  This
 method has been superseeded by generic code.
 
-@item PUSH_ARGUMENTS (@var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
-@findex PUSH_ARGUMENTS
-@anchor{PUSH_ARGUMENTS}
-Define this to push arguments onto the stack for inferior function
-call.  Returns the updated stack pointer value.
+@item push_dummy_call (@var{gdbarch}, @var{regcache}, @var{dummy_addr}, @var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
+@findex push_dummy_call
+@findex DEPRECATED_PUSH_ARGUMENTS.
+@anchor{push_dummy_call}
+Define this to push the dummy frame's call to the inferior function onto
+the stack.  In addition to pushing @var{nargs}, the code should push
+@var{struct_addr} (when @var{struct_return}), and the return value (in
+the call dummy at @var{dummy_addr}).
 
-@item PUSH_DUMMY_FRAME
-@findex PUSH_DUMMY_FRAME
+Returns the updated top-of-stack pointer.
+
+This method replaces @code{DEPRECATED_PUSH_ARGUMENTS}.
+
+@item DEPRECATED_PUSH_DUMMY_FRAME
+@findex DEPRECATED_PUSH_DUMMY_FRAME
 Used in @samp{call_function_by_hand} to create an artificial stack frame.
 
 @item REGISTER_BYTES
@@ -3770,10 +3772,8 @@ that is at the start of the real function.
 @item SP_REGNUM
 @findex SP_REGNUM
 If the stack-pointer is kept in a register, then define this macro to be
-the number (greater than or equal to zero) of that register.
-
-This should only need to be defined if @code{TARGET_WRITE_SP} and
-@code{TARGET_WRITE_SP} are not defined.
+the number (greater than or equal to zero) of that register, or -1 if
+there is no such register.
 
 @item STAB_REG_TO_REGNUM
 @findex STAB_REG_TO_REGNUM
@@ -3880,19 +3880,16 @@ Number of bits in a short integer; defaults to @code{2 * TARGET_CHAR_BIT}.
 @findex TARGET_WRITE_PC
 @itemx TARGET_READ_SP
 @findex TARGET_READ_SP
-@itemx TARGET_WRITE_SP
-@findex TARGET_WRITE_SP
 @itemx TARGET_READ_FP
 @findex TARGET_READ_FP
 @findex read_pc
 @findex write_pc
 @findex read_sp
-@findex write_sp
 @findex read_fp
 These change the behavior of @code{read_pc}, @code{write_pc},
-@code{read_sp}, @code{write_sp} and @code{read_fp}.  For most targets,
-these may be left undefined.  @value{GDBN} will call the read and write
-register functions with the relevant @code{_REGNUM} argument.
+@code{read_sp} and @code{read_fp}.  For most targets, these may be left
+undefined.  @value{GDBN} will call the read and write register functions
+with the relevant @code{_REGNUM} argument.
 
 These macros are useful when a target keeps one of these registers in a
 hard to get at place; for example, part in a segment register and part

@@ -1684,9 +1684,6 @@ deprecated_frame_in_dummy (struct frame_info *frame)
 {
   struct breakpoint *b;
 
-  if (!CALL_DUMMY_P)
-    return 0;
-
   /* This function is used by two files: get_frame_type(), after first
      checking that !DEPRECATED_USE_GENERIC_DUMMY_FRAMES; and
      sparc-tdep.c, which doesn't yet use generic dummy frames anyway.  */

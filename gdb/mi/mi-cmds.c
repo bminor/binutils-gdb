@@ -80,6 +80,7 @@ struct mi_cmd mi_cmds[] =
   {"file-exec-and-symbols", "file %s", 0},
   {"file-exec-file", "exec-file %s", 0},
   {"file-list-exec-sections", 0, 0},
+  {"file-list-exec-source-file", 0, 0, mi_cmd_file_list_exec_source_file},
   {"file-list-exec-source-files", 0, 0},
   {"file-list-shared-libraries", 0, 0},
   {"file-list-symbol-files", 0, 0},

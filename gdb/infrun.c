@@ -1153,6 +1153,11 @@ void
 handle_inferior_event (struct execution_control_state *ecs)
 {
   CORE_ADDR real_stop_pc;
+  /* NOTE: cagney/2003-03-28: If you're looking at this code and
+     thinking that the variable stepped_after_stopped_by_watchpoint
+     isn't used, then you're wrong!  The macro STOPPED_BY_WATCHPOINT,
+     defined in the file "config/pa/nm-hppah.h", accesses the variable
+     indirectly.  Mutter something rude about the HP merge.  */
   int stepped_after_stopped_by_watchpoint;
   int sw_single_step_trap_p = 0;
 
@@ -1165,7 +1170,15 @@ handle_inferior_event (struct execution_control_state *ecs)
     case infwait_thread_hop_state:
       /* Cancel the waiton_ptid. */
       ecs->waiton_ptid = pid_to_ptid (-1);
-      /* Fall thru to the normal_state case. */
+      /* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event
+         is serviced in this loop, below. */
+      if (ecs->enable_hw_watchpoints_after_wait)
+	{
+	  TARGET_ENABLE_HW_WATCHPOINTS (PIDGET (inferior_ptid));
+	  ecs->enable_hw_watchpoints_after_wait = 0;
+	}
+      stepped_after_stopped_by_watchpoint = 0;
+      break;
 
     case infwait_normal_state:
       /* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event
@@ -1179,6 +1192,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       break;
 
     case infwait_nullified_state:
+      stepped_after_stopped_by_watchpoint = 0;
       break;
 
     case infwait_nonstep_watch_state:
@@ -1189,6 +1203,9 @@ handle_inferior_event (struct execution_control_state *ecs)
          in combination correctly?  */
       stepped_after_stopped_by_watchpoint = 1;
       break;
+
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
   ecs->infwait_state = infwait_normal_state;
 
@@ -1795,26 +1812,30 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  stop_print_frame = 1;
 	}
 
+      /* NOTE: cagney/2003-03-29: These two checks for a random signal
+	 at one stage in the past included checks for an inferior
+	 function call's call dummy's return breakpoint.  The original
+	 comment, that went with the test, read:
+
+	 ``End of a stack dummy.  Some systems (e.g. Sony news) give
+	 another signal besides SIGTRAP, so check here as well as
+	 above.''
+
+         If someone ever tries to get get call dummys on a
+         non-executable stack to work (where the target would stop
+         with something like a SIGSEG), then those tests might need to
+         be re-instated.  Given, however, that the tests were only
+         enabled when momentary breakpoints were not being used, I
+         suspect that it won't be the case.  */
+
       if (stop_signal == TARGET_SIGNAL_TRAP)
 	ecs->random_signal
 	  = !(bpstat_explains_signal (stop_bpstat)
 	      || trap_expected
-	      || (!CALL_DUMMY_BREAKPOINT_OFFSET_P
-		  && DEPRECATED_PC_IN_CALL_DUMMY (stop_pc, read_sp (),
-				       get_frame_base (get_current_frame ())))
 	      || (step_range_end && step_resume_breakpoint == NULL));
-
       else
 	{
-	  ecs->random_signal = !(bpstat_explains_signal (stop_bpstat)
-				 /* End of a stack dummy.  Some systems (e.g. Sony
-				    news) give another signal besides SIGTRAP, so
-				    check here as well as above.  */
-				 || (!CALL_DUMMY_BREAKPOINT_OFFSET_P
-				     && DEPRECATED_PC_IN_CALL_DUMMY (stop_pc, read_sp (),
-							  get_frame_base
-							  (get_current_frame
-							   ()))));
+	  ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 	  if (!ecs->random_signal)
 	    stop_signal = TARGET_SIGNAL_TRAP;
 	}
@@ -2154,31 +2175,6 @@ process_event_stop_test:
       stop_print_frame = 1;
       stop_stepping (ecs);
       return;
-    }
-
-  if (!CALL_DUMMY_BREAKPOINT_OFFSET_P)
-    {
-      /* This is the old way of detecting the end of the stack dummy.
-         An architecture which defines CALL_DUMMY_BREAKPOINT_OFFSET gets
-         handled above.  As soon as we can test it on all of them, all
-         architectures should define it.  */
-
-      /* If this is the breakpoint at the end of a stack dummy,
-         just stop silently, unless the user was doing an si/ni, in which
-         case she'd better know what she's doing.  */
-
-      if (CALL_DUMMY_HAS_COMPLETED (stop_pc, read_sp (),
-				    get_frame_base (get_current_frame ()))
-	  && !step_range_end)
-	{
-	  stop_print_frame = 0;
-	  stop_stack_dummy = 1;
-#ifdef HP_OS_BUG
-	  trap_expected_after_continue = 1;
-#endif
-	  stop_stepping (ecs);
-	  return;
-	}
     }
 
   if (step_resume_breakpoint)

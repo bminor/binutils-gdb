@@ -147,8 +147,12 @@ static bfd_boolean ppc_elf_grok_psinfo
 #define DTP_OFFSET	0x8000
 
 /* Will references to this symbol always reference the symbol
-   in this object?  */
-#define SYMBOL_REFERENCES_LOCAL(INFO, H)				\
+   in this object?  STV_PROTECTED is excluded from the visibility test
+   here so that function pointer comparisons work properly.  Since
+   function symbols not defined in an app are set to their .plt entry,
+   it's necessary for shared libs to also reference the .plt even
+   though the symbol is really local to the shared lib.  */
+#define SYMBOL_REFERENCES_LOCAL(INFO, H) 				\
   ((! INFO->shared							\
     || INFO->symbolic							\
     || H->dynindx == -1							\
@@ -3459,8 +3463,7 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	case R_PPC_REL14_BRNTAKEN:
 	case R_PPC_REL32:
 	  if (h == NULL
-	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
-	      || SYMBOL_REFERENCES_LOCAL (info, h))
+	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
 	    break;
 	  /* fall through */
 
@@ -3745,8 +3748,7 @@ ppc_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	case R_PPC_REL14_BRNTAKEN:
 	case R_PPC_REL32:
 	  if (h == NULL
-	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
-	      || SYMBOL_REFERENCES_LOCAL (info, h))
+	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
 	    break;
 	  /* Fall thru */
 

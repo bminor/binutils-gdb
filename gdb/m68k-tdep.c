@@ -1038,10 +1038,8 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 24);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 28);
   set_gdbarch_call_dummy_start_offset (gdbarch, 12);
 
@@ -1050,6 +1048,9 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fix_call_dummy (gdbarch, m68k_fix_call_dummy);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, m68k_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, m68k_pop_frame);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   return gdbarch;
 }

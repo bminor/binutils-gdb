@@ -178,8 +178,6 @@ extern CORE_ADDR read_sp (void);
 
 extern CORE_ADDR generic_target_read_sp (void);
 
-extern void write_sp (CORE_ADDR);
-
 extern void generic_target_write_sp (CORE_ADDR);
 
 extern CORE_ADDR read_fp (void);
@@ -420,40 +418,11 @@ extern int attach_flag;
 #define ON_STACK 1
 #define AT_ENTRY_POINT 4
 
-#if !defined (CALL_DUMMY_ADDRESS)
-#define CALL_DUMMY_ADDRESS() (internal_error (__FILE__, __LINE__, "CALL_DUMMY_ADDRESS"), 0)
-#endif
-#if !defined (CALL_DUMMY_START_OFFSET)
-#define CALL_DUMMY_START_OFFSET (internal_error (__FILE__, __LINE__, "CALL_DUMMY_START_OFFSET"), 0)
-#endif
-#if !defined (CALL_DUMMY_BREAKPOINT_OFFSET)
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P (0)
-#define CALL_DUMMY_BREAKPOINT_OFFSET (internal_error (__FILE__, __LINE__, "CALL_DUMMY_BREAKPOINT_OFFSET"), 0)
-#endif
-#if !defined CALL_DUMMY_BREAKPOINT_OFFSET_P
-#define CALL_DUMMY_BREAKPOINT_OFFSET_P (1)
-#endif
-#if !defined (CALL_DUMMY_LENGTH)
-#define CALL_DUMMY_LENGTH (internal_error (__FILE__, __LINE__, "CALL_DUMMY_LENGTH"), 0)
-#endif
-
 /* FIXME: cagney/2000-04-17: gdbarch should manage this.  The default
    shouldn't be necessary. */
 
-#if !defined (CALL_DUMMY_P)
-#if defined (CALL_DUMMY)
-#define CALL_DUMMY_P 1
-#else
-#define CALL_DUMMY_P 0
-#endif
-#endif
-
 #if !defined PUSH_DUMMY_FRAME
 #define PUSH_DUMMY_FRAME (internal_error (__FILE__, __LINE__, "PUSH_DUMMY_FRAME"), 0)
-#endif
-
-#if !defined FIX_CALL_DUMMY
-#define FIX_CALL_DUMMY(a1,a2,a3,a4,a5,a6,a7) (internal_error (__FILE__, __LINE__, "FIX_CALL_DUMMY"), 0)
 #endif
 
 #if !defined STORE_STRUCT_RETURN

@@ -35,6 +35,8 @@
 #include "gdb-stabs.h"
 #include "gdbtypes.h"
 #include "demangle.h"
+#include "somsolib.h"
+#include "gdb_assert.h"
 
 /* Private information attached to an objfile which we use to find
    and internalize the HP C debug symbols within that objfile.  */
@@ -1024,7 +1026,7 @@ hpread_quick_traverse (struct objfile *objfile, char *gntt_bits,
   while (VALID_CURR_FILE || VALID_CURR_MODULE)
     {
 
-      char *mod_name_string;
+      char *mod_name_string = NULL;
       char *full_name_string;
 
       /* First check for modules like "version.c", which have no code
@@ -2321,7 +2323,7 @@ static unsigned long
 hpread_get_textlow (int global, int index, struct objfile *objfile,
 		    int symcount)
 {
-  union dnttentry *dn_bufp;
+  union dnttentry *dn_bufp = NULL;
   struct minimal_symbol *msymbol;
 
   /* Look for a DNTT_TYPE_FUNCTION symbol.  */
@@ -2339,6 +2341,11 @@ hpread_get_textlow (int global, int index, struct objfile *objfile,
 	     && dn_bufp->dblock.kind != DNTT_TYPE_END
 	     && index < symcount);
     }
+
+  /* NOTE: cagney/2003-03-29: If !(index < symcount), dn_bufp is left
+     undefined and that means that the test below is using a garbage
+     pointer from the stack.  */
+  gdb_assert (dn_bufp != NULL);
 
   /* Avoid going past a DNTT_TYPE_END when looking for a DNTT_TYPE_FUNCTION.  This
      might happen when a sourcefile has no functions.  */
@@ -3359,10 +3366,10 @@ static struct type *
 hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 			       struct objfile *objfile, int newblock)
 {
-  struct type *type, *type1;
   struct pending *syms;
   struct pending *local_list = NULL;
   int nsyms = 0;
+  struct type *type;
   dnttpointer param;
   union dnttentry *paramp;
   char *name;
@@ -3378,11 +3385,17 @@ hpread_read_doc_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
     }
   else
     {
+      struct type *type1 = NULL;
       /* Nope, so read it in and store it away.  */
       if (dn_bufp->dblock.kind == DNTT_TYPE_DOC_FUNCTION ||
 	  dn_bufp->dblock.kind == DNTT_TYPE_DOC_MEMFUNC)
 	type1 = lookup_function_type (hpread_type_lookup (dn_bufp->ddocfunc.retval,
 							  objfile));
+      /* NOTE: cagney/2003-03-29: Oh, no not again.  TYPE1 is
+         potentially left undefined here.  Assert it isn't and hope
+         the assert never fails ...  */
+      gdb_assert (type1 != NULL);
+
       replace_type (type, type1);
 
       /* Mark it -- in the middle of processing */

@@ -925,7 +925,7 @@ static CORE_ADDR
 i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
-  sp = default_push_arguments (nargs, args, sp, struct_return, struct_addr);
+  sp = legacy_push_arguments (nargs, args, sp, struct_return, struct_addr);
   
   if (struct_return)
     {
@@ -937,12 +937,6 @@ i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     }
 
   return sp;
-}
-
-static void
-i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  /* Do nothing.  Everything was already done by i386_push_arguments.  */
 }
 
 /* These registers are used for returning integers (and on some
@@ -1565,15 +1559,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
   /* Call dummy code.  */
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, NULL);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch,
@@ -1586,10 +1573,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_parm_boundary (gdbarch, 32);
 
   set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
-  set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
-  set_gdbarch_push_return_address (gdbarch, i386_push_return_address);
+  set_gdbarch_deprecated_push_arguments (gdbarch, i386_push_arguments);
+  set_gdbarch_deprecated_push_return_address (gdbarch, i386_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, i386_pop_frame);
-  set_gdbarch_deprecated_store_struct_return (gdbarch, i386_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch,
 					    i386_extract_struct_value_address);
@@ -1629,6 +1615,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Add the i386 register groups.  */
   i386_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
+
+  /* Should be using push_dummy_call.  */
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

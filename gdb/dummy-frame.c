@@ -294,17 +294,6 @@ generic_pop_dummy_frame (void)
   discard_innermost_dummy (&dummy_frame_stack);
 }
 
-/* Function: fix_call_dummy
-   Stub function.  Generic dummy frames typically do not need to fix
-   the frame being created */
-
-void
-generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-			struct value **args, struct type *type, int gcc_p)
-{
-  return;
-}
-
 /* Given a call-dummy dummy-frame, return the registers.  Here the
    register value is taken from the local copy of the register buffer.  */
 
@@ -368,7 +357,7 @@ dummy_frame_this_id (struct frame_info *next_frame,
      just asking for trouble.  */
   if (gdbarch_unwind_dummy_id_p (current_gdbarch))
     {
-      /* Assume hand_function_call(), via SAVE_DUMMY_FRAME_TOS,
+      /* Assume call_function_by_hand(), via SAVE_DUMMY_FRAME_TOS,
 	 previously saved the dummy frame's ID.  Things only work if
 	 the two return the same value.  */
       gdb_assert (SAVE_DUMMY_FRAME_TOS_P ());

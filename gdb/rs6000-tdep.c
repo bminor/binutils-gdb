@@ -2076,10 +2076,10 @@ rs6000_extract_struct_value_address (struct regcache *regcache)
   /* FIXME: cagney/2002-09-26: PR gdb/724: When making an inferior
      function call GDB knows the address of the struct return value
      and hence, should not need to call this function.  Unfortunately,
-     the current hand_function_call() code only saves the most recent
-     struct address leading to occasional calls.  The code should
-     instead maintain a stack of such addresses (in the dummy frame
-     object).  */
+     the current call_function_by_hand() code only saves the most
+     recent struct address leading to occasional calls.  The code
+     should instead maintain a stack of such addresses (in the dummy
+     frame object).  */
   /* NOTE: cagney/2002-09-26: Return 0 which indicates that we've
      really got no idea where the return value is being stored.  While
      r3, on function entry, contained the address it will have since
@@ -2876,7 +2876,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
-  set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   set_gdbarch_num_regs (gdbarch, v->nregs);
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
@@ -2900,16 +2900,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_char_signed (gdbarch, 0);
 
-  set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
-  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_push_return_address (gdbarch, ppc_push_return_address);
+  set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   set_gdbarch_register_convertible (gdbarch, rs6000_register_convertible);
@@ -2924,9 +2918,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      64-bit code.  At some point in the future, this matter needs to be
      revisited.  */
   if (sysv_abi && wordsize == 4)
-    set_gdbarch_push_arguments (gdbarch, ppc_sysv_abi_push_arguments);
+    set_gdbarch_deprecated_push_arguments (gdbarch, ppc_sysv_abi_push_arguments);
   else
-    set_gdbarch_push_arguments (gdbarch, rs6000_push_arguments);
+    set_gdbarch_deprecated_push_arguments (gdbarch, rs6000_push_arguments);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, rs6000_store_struct_return);
   set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);

@@ -986,50 +986,46 @@ run_stack_dummy (CORE_ADDR addr, struct regcache *buffer)
 {
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
   int saved_async = 0;
+  struct breakpoint *bpt;
+  struct symtab_and_line sal;
 
   /* Now proceed, having reached the desired place.  */
   clear_proceed_status ();
 
-  if (CALL_DUMMY_BREAKPOINT_OFFSET_P)
+  init_sal (&sal);		/* initialize to zeroes */
+  if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
     {
-      struct breakpoint *bpt;
-      struct symtab_and_line sal;
-
-      init_sal (&sal);		/* initialize to zeroes */
-      if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
-	{
-	  sal.pc = CALL_DUMMY_ADDRESS ();
-	}
-      else
-	{
-	  /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need
-	     to put a breakpoint instruction.  If not, the call dummy
-	     already has the breakpoint instruction in it.
-
-	     ADDR IS THE ADDRESS of the call dummy plus the
-	     CALL_DUMMY_START_OFFSET, so we need to subtract the
-	     CALL_DUMMY_START_OFFSET.  */
-	  sal.pc = addr - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
-	}
-      sal.section = find_pc_overlay (sal.pc);
-
-      {
-	/* Set up a frame ID for the dummy frame so we can pass it to
-	   set_momentary_breakpoint.  We need to give the breakpoint a
-	   frame ID so that the breakpoint code can correctly
-	   re-identify the dummy breakpoint.  */
-	struct frame_id frame = frame_id_build (read_fp (), sal.pc);
-	/* Create a momentary breakpoint at the return address of the
-           inferior.  That way it breaks when it returns.  */
-	bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
-	bpt->disposition = disp_del;
-      }
-
-      /* If all error()s out of proceed ended up calling normal_stop (and
-         perhaps they should; it already does in the special case of error
-         out of resume()), then we wouldn't need this.  */
-      make_cleanup (breakpoint_auto_delete_contents, &stop_bpstat);
+      sal.pc = CALL_DUMMY_ADDRESS ();
     }
+  else
+    {
+      /* If defined, CALL_DUMMY_BREAKPOINT_OFFSET is where we need to
+	 put a breakpoint instruction.  If not, the call dummy already
+	 has the breakpoint instruction in it.
+
+	 ADDR IS THE ADDRESS of the call dummy plus the
+	 CALL_DUMMY_START_OFFSET, so we need to subtract the
+	 CALL_DUMMY_START_OFFSET.  */
+      sal.pc = addr - CALL_DUMMY_START_OFFSET + CALL_DUMMY_BREAKPOINT_OFFSET;
+    }
+  sal.section = find_pc_overlay (sal.pc);
+  
+  {
+    /* Set up a frame ID for the dummy frame so we can pass it to
+       set_momentary_breakpoint.  We need to give the breakpoint a
+       frame ID so that the breakpoint code can correctly re-identify
+       the dummy breakpoint.  */
+    struct frame_id frame = frame_id_build (read_fp (), sal.pc);
+    /* Create a momentary breakpoint at the return address of the
+       inferior.  That way it breaks when it returns.  */
+    bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
+    bpt->disposition = disp_del;
+  }
+
+  /* If all error()s out of proceed ended up calling normal_stop (and
+     perhaps they should; it already does in the special case of error
+     out of resume()), then we wouldn't need this.  */
+  make_cleanup (breakpoint_auto_delete_contents, &stop_bpstat);
 
   disable_watchpoints_before_interactive_call_start ();
   proceed_to_finish = 1;	/* We want stop_registers, please... */

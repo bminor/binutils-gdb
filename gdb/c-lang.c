@@ -31,6 +31,7 @@
 #include "gdb_assert.h"
 #include "charset.h"
 #include "gdb_string.h"
+#include "demangle.h"
 
 extern void _initialize_c_language (void);
 static void c_emit_char (int c, struct ui_file * stream, int quoter);
@@ -553,6 +554,7 @@ const struct language_defn c_language_defn =
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -606,6 +608,7 @@ const struct language_defn cplus_language_defn =
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  cplus_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -636,6 +639,7 @@ const struct language_defn asm_language_defn =
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
+  NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */

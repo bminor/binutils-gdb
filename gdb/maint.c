@@ -151,17 +151,8 @@ maintenance_demangle (char *args, int from_tty)
     }
   else
     {
-      switch (current_language->la_language)
-	{
-	case language_objc:
-	  /* Commented out until ObjC handling is enabled. */
-	  /* demangled = objc_demangle (args); */
-	  /* break; */
-	case language_cplus:
-	default:
-	  demangled = cplus_demangle (args, DMGL_ANSI | DMGL_PARAMS);
-	  break;
-	}
+      demangled = language_demangle (current_language, args, 
+				     DMGL_ANSI | DMGL_PARAMS);
       if (demangled != NULL)
 	{
 	  printf_unfiltered ("%s\n", demangled);

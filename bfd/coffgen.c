@@ -241,9 +241,6 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
 	}
     }
 
-  bfd_coff_set_arch_mach_hook (abfd, (PTR) internal_f);
-  /*  make_abs_section (abfd); */
-
   return abfd->xvec;
 
  fail:

@@ -12,7 +12,7 @@ notifications, the observer attaches a callback to the subject.
 One subject can have several observers.
 
 @file{observer.c} implements an internal generic low-level event
-notification mechanism.  This generic event notification mechansim is
+notification mechanism.  This generic event notification mechanism is
 then re-used to implement the exported high-level notification
 management routines for all possible notifications.
 
@@ -27,7 +27,7 @@ as it lacks a mechanism that would deallocate this data when the
 callback is detached.  This is not a problem so far, as this contextual
 data is only used internally to hold a function pointer.  Later on, if
 a certain observer needs to provide support for user-level contextual
-data, then the generic notification mechanism will need need to be
+data, then the generic notification mechanism will need to be
 enhanced to allow the observer to provide a routine to deallocate the
 data when attaching the callback.
 
@@ -39,10 +39,16 @@ or detach routines during a notification.
 @cindex @code{normal_stop} observer
 @cindex notification about inferior execution stop
 
-@value{GDBN} will notify all @code{normal_stop} observers when the
-inferior execution has just stopped, and all the associated internal
-processing (such as breakpoint commands, annotations, etc) is about to
-be performed before the @value{GDBN} prompt is returned to the user.
+@value{GDBN} notifies all @code{normal_stop} observers when the
+inferior execution has just stopped, the associated messages and
+annotations have been printed, and the control is about to be returned
+to the user. 
+
+Note that the @code{normal_stop} notification is not emitted when
+the execution stops due to a breakpoint, and this breakpoint has
+a condition that is not met.  If the breakpoint has any associated
+commands list, the commands are executed after the notification
+is emitted.
 
 The following interface is available to manage @code{normal_stop}
 observers:

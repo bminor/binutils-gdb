@@ -430,7 +430,8 @@ f:2:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc:
 f:2:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
 f:2:TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:generic_target_read_fp::0
 f:2:TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
-f:2:TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:generic_target_write_sp::0
+# The dummy call frame SP should be set by push_dummy_call.
+F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's
 # whole scheme for dealing with "frames" and "frame pointers" needs a
 # serious shakedown.
@@ -519,22 +520,20 @@ F:2:GET_LONGJMP_TARGET:int:get_longjmp_target:CORE_ADDR *pc:pc::0:0
 # avoids any potential problems with moving beyond multi-arch partial.
 v:1:DEPRECATED_USE_GENERIC_DUMMY_FRAMES:int:deprecated_use_generic_dummy_frames:::::1::0
 v:1:CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
-f:2:CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void:::0:0::gdbarch->call_dummy_location == AT_ENTRY_POINT && gdbarch->call_dummy_address == 0
-v:2:CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset::::0:-1:::0x%08lx
-v:2:CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:call_dummy_breakpoint_offset::::0:-1::gdbarch->call_dummy_breakpoint_offset_p && gdbarch->call_dummy_breakpoint_offset == -1:0x%08lx::CALL_DUMMY_BREAKPOINT_OFFSET_P
-v:1:CALL_DUMMY_BREAKPOINT_OFFSET_P:int:call_dummy_breakpoint_offset_p::::0:-1
-v:2:CALL_DUMMY_LENGTH:int:call_dummy_length::::0:-1:::::gdbarch->call_dummy_length >= 0
+f::CALL_DUMMY_ADDRESS:CORE_ADDR:call_dummy_address:void::::entry_point_address::0
+v::CALL_DUMMY_START_OFFSET:CORE_ADDR:call_dummy_start_offset
+v::CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:call_dummy_breakpoint_offset
+v::CALL_DUMMY_LENGTH:int:call_dummy_length
 # NOTE: cagney/2002-11-24: This function with predicate has a valid
 # (callable) initial value.  As a consequence, even when the predicate
 # is false, the corresponding function works.  This simplifies the
 # migration process - old code, calling DEPRECATED_PC_IN_CALL_DUMMY(),
 # doesn't need to be modified.
 F:1:DEPRECATED_PC_IN_CALL_DUMMY:int:deprecated_pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::generic_pc_in_call_dummy:generic_pc_in_call_dummy
-v:1:CALL_DUMMY_P:int:call_dummy_p::::0:-1
-v:2:CALL_DUMMY_WORDS:LONGEST *:call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
-v:2:SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0:0x%08lx
+v::CALL_DUMMY_WORDS:LONGEST *:call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
+v::SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words::0
 V:2:DEPRECATED_CALL_DUMMY_STACK_ADJUST:int:deprecated_call_dummy_stack_adjust::::0
-f:2:FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p:::0
+F::FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p
 F:2:DEPRECATED_INIT_FRAME_PC_FIRST:CORE_ADDR:deprecated_init_frame_pc_first:int fromleaf, struct frame_info *prev:fromleaf, prev
 F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, struct frame_info *prev:fromleaf, prev
 #
@@ -555,9 +554,12 @@ f:2:ADDRESS_TO_POINTER:void:address_to_pointer:struct type *type, void *buf, COR
 F:2:INTEGER_TO_ADDRESS:CORE_ADDR:integer_to_address:struct type *type, void *buf:type, buf
 #
 f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::generic_return_value_on_stack_not::0
-f:2:PUSH_ARGUMENTS:CORE_ADDR:push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr:::default_push_arguments::0
+# Replaced by PUSH_DUMMY_CALL
+F:2:DEPRECATED_PUSH_ARGUMENTS:CORE_ADDR:deprecated_push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr
+M::PUSH_DUMMY_CALL:CORE_ADDR:push_dummy_call:struct regcache *regcache, CORE_ADDR dummy_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:regcache, dummy_addr, nargs, args, sp, struct_return, struct_addr
 F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-:::0
-F:2:PUSH_RETURN_ADDRESS:CORE_ADDR:push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
+# NOTE: This can be handled directly in push_dummy_call.
+F:2:DEPRECATED_PUSH_RETURN_ADDRESS:CORE_ADDR:deprecated_push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
 F:2:DEPRECATED_POP_FRAME:void:deprecated_pop_frame:void:-:::0
 # NOTE: cagney/2003-03-24: Replaced by PUSH_ARGUMENTS.
 F:2:DEPRECATED_STORE_STRUCT_RETURN:void:deprecated_store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
@@ -802,6 +804,7 @@ cat <<EOF
 #if !GDB_MULTI_ARCH
 /* Pull in function declarations refered to, indirectly, via macros.  */
 #include "inferior.h"		/* For unsigned_address_to_pointer().  */
+#include "symfile.h"		/* For entry_point_address().  */
 #endif
 
 struct frame_info;
@@ -1302,6 +1305,7 @@ cat <<EOF
 #include "gdb-events.h"
 #include "reggroups.h"
 #include "osabi.h"
+#include "symfile.h"		/* For entry_point_address.  */
 
 /* Static function declarations */
 

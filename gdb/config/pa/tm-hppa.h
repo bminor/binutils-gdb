@@ -24,6 +24,9 @@
 
 #include "regcache.h"
 
+/* Wonder if this is correct?  Should be using push_dummy_call().  */
+#define DEPRECATED_DUMMY_WRITE_SP(SP) generic_target_write_sp (SP)
+
 #define GDB_MULTI_ARCH 0
 
 /* NOTE: cagney/2002-11-24: This is a guess.  */
@@ -614,7 +617,7 @@ extern CORE_ADDR hppa_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
 		                      struct value **, struct type *, int);
 
 #if !GDB_MULTI_ARCH
-#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
+#define DEPRECATED_PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
   (hppa_push_arguments((nargs), (args), (sp), (struct_return), (struct_addr)))
 extern CORE_ADDR hppa_push_arguments (int, struct value **, CORE_ADDR, int,
 				      CORE_ADDR);

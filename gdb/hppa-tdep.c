@@ -33,7 +33,7 @@
 #include "language.h"
 #include "osabi.h"
 #include "gdb_assert.h"
-
+#include "infttrace.h"
 /* For argument passing to the inferior */
 #include "symtab.h"
 
@@ -886,7 +886,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR pc = get_frame_pc (frame);
   struct unwind_table_entry *u;
-  CORE_ADDR old_pc;
+  CORE_ADDR old_pc = 0;
   int spun_around_loop = 0;
   int rp_offset = 0;
 
@@ -5003,9 +5003,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);
   set_gdbarch_call_dummy_length (gdbarch, INSTRUCTION_SIZE * 28);
-  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   /* set_gdbarch_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */
-  set_gdbarch_push_arguments (gdbarch, hppa_push_arguments);
+  set_gdbarch_deprecated_push_arguments (gdbarch, hppa_push_arguments);
   set_gdbarch_smash_text_address (gdbarch, hppa_smash_text_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_read_pc (gdbarch, hppa_target_read_pc);

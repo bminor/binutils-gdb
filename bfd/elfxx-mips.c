@@ -7716,54 +7716,57 @@ _bfd_mips_elf_hide_symbol (info, entry, force_local)
   h->forced_local = TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
-  got = mips_elf_got_section (dynobj, FALSE);
-  g = mips_elf_section_data (got)->u.got_info;
-
-  if (g->next)
+  if (dynobj != NULL)
     {
-      struct mips_got_entry e;
-      struct mips_got_info *gg = g;
+      got = mips_elf_got_section (dynobj, FALSE);
+      g = mips_elf_section_data (got)->u.got_info;
 
-      /* Since we're turning what used to be a global symbol into a
-	 local one, bump up the number of local entries of each GOT
-	 that had an entry for it.  This will automatically decrease
-	 the number of global entries, since global_gotno is actually
-	 the upper limit of global entries.  */
-      e.abfd = dynobj;
-      e.symndx = -1;
-      e.d.h = h;
-
-      for (g = g->next; g != gg; g = g->next)
-	if (htab_find (g->got_entries, &e))
-	  {
-	    BFD_ASSERT (g->global_gotno > 0);
-	    g->local_gotno++;
-	    g->global_gotno--;
-	  }
-
-      /* If this was a global symbol forced into the primary GOT, we
-	 no longer need an entry for it.  We can't release the entry
-	 at this point, but we must at least stop counting it as one
-	 of the symbols that required a forced got entry.  */
-      if (h->root.got.offset == 2)
+      if (g->next)
 	{
-	  BFD_ASSERT (gg->assigned_gotno > 0);
-	  gg->assigned_gotno--;
+	  struct mips_got_entry e;
+	  struct mips_got_info *gg = g;
+
+	  /* Since we're turning what used to be a global symbol into a
+	     local one, bump up the number of local entries of each GOT
+	     that had an entry for it.  This will automatically decrease
+	     the number of global entries, since global_gotno is actually
+	     the upper limit of global entries.  */
+	  e.abfd = dynobj;
+	  e.symndx = -1;
+	  e.d.h = h;
+
+	  for (g = g->next; g != gg; g = g->next)
+	    if (htab_find (g->got_entries, &e))
+	      {
+		BFD_ASSERT (g->global_gotno > 0);
+		g->local_gotno++;
+		g->global_gotno--;
+	      }
+
+	  /* If this was a global symbol forced into the primary GOT, we
+	     no longer need an entry for it.  We can't release the entry
+	     at this point, but we must at least stop counting it as one
+	     of the symbols that required a forced got entry.  */
+	  if (h->root.got.offset == 2)
+	    {
+	      BFD_ASSERT (gg->assigned_gotno > 0);
+	      gg->assigned_gotno--;
+	    }
 	}
-    }
-  else if (g->global_gotno == 0 && g->global_gotsym == NULL)
-    /* If we haven't got through GOT allocation yet, just bump up the
-       number of local entries, as this symbol won't be counted as
-       global.  */
-    g->local_gotno++;
-  else if (h->root.got.offset == 1)
-    {
-      /* If we're past non-multi-GOT allocation and this symbol had
-	 been marked for a global got entry, give it a local entry
-	 instead.  */
-      BFD_ASSERT (g->global_gotno > 0);
-      g->local_gotno++;
-      g->global_gotno--;
+      else if (g->global_gotno == 0 && g->global_gotsym == NULL)
+	/* If we haven't got through GOT allocation yet, just bump up the
+	   number of local entries, as this symbol won't be counted as
+	   global.  */
+	g->local_gotno++;
+      else if (h->root.got.offset == 1)
+	{
+	  /* If we're past non-multi-GOT allocation and this symbol had
+	     been marked for a global got entry, give it a local entry
+	     instead.  */
+	  BFD_ASSERT (g->global_gotno > 0);
+	  g->local_gotno++;
+	  g->global_gotno--;
+	}
     }
 
   _bfd_elf_link_hash_hide_symbol (info, &h->root, force_local);
