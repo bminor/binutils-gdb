@@ -1,3 +1,9 @@
+2002-02-12  Keith Seitz  <keiths@redhat.com>
+
+	* defs.h (core_addr_to_string_nz): New function.
+	* utils.c (core_addr_to_string): Use phex instead of phex_nz.
+	(core_addr_to_string_nz): New function.
+
 2002-02-11  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-linux-nat.c: Really include arm-tdep.h.

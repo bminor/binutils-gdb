@@ -2476,6 +2476,15 @@ core_addr_to_string (const CORE_ADDR addr)
 {
   char *str = get_cell ();
   strcpy (str, "0x");
+  strcat (str, phex (addr, sizeof (addr)));
+  return str;
+}
+
+const char *
+core_addr_to_string_nz (const CORE_ADDR addr)
+{
+  char *str = get_cell ();
+  strcpy (str, "0x");
   strcat (str, phex_nz (addr, sizeof (addr)));
   return str;
 }
