@@ -1,3 +1,13 @@
+Wed Jan 25 14:52:41 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/default.exp: xfail no-stack backtraces for h8300,
+	restart GDB for h8300 after a continue.
+	(return): Add pattern to match a29k-udi behavior.
+	* gdb.base/nodebug.exp: Remove obsolete comment.
+	* gdb.base/regs.exp: New file, testing of register displays.
+	* gdb.base/return.exp: Fix typo in reference to $objdir.
+	* gdb.base/whatis.exp: Always start with a fresh GDB.
+
 Wed Jan 25 11:12:07 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.disasm/hppa.exp (all_fpu_comparison_tests): Set timeout
