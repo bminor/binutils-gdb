@@ -1,3 +1,8 @@
+2002-07-01  Andreas Schwab  <schwab@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Only convert
+	R_X86_64_64 to R_X86_64_RELATIVE.
+
 2002-07-01  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* vaxbsd.c: New BFD backend for VAX BSD and Ultrix.
