@@ -1622,13 +1622,6 @@ elf64_alpha_section_from_shdr (abfd, hdr, name)
       if (strcmp (name, ".mdebug") != 0)
 	return false;
       break;
-#ifdef ERIC_neverdef
-    case SHT_ALPHA_REGINFO:
-      if (strcmp (name, ".reginfo") != 0
-	  || hdr->sh_size != sizeof (Elf64_External_RegInfo))
-	return false;
-      break;
-#endif
     default:
       return false;
     }
@@ -1644,23 +1637,6 @@ elf64_alpha_section_from_shdr (abfd, hdr, name)
 				    | SEC_DEBUGGING)))
 	return false;
     }
-
-#ifdef ERIC_neverdef
-  /* For a .reginfo section, set the gp value in the tdata information
-     from the contents of this section.  We need the gp value while
-     processing relocs, so we just get it now.  */
-  if (hdr->sh_type == SHT_ALPHA_REGINFO)
-    {
-      Elf64_External_RegInfo ext;
-      Elf64_RegInfo s;
-
-      if (! bfd_get_section_contents (abfd, newsect, (PTR) &ext,
-				      (file_ptr) 0, sizeof ext))
-	return false;
-      bfd_alpha_elf64_swap_reginfo_in (abfd, &ext, &s);
-      elf_gp (abfd) = s.ri_gp_value;
-    }
-#endif
 
   return true;
 }
@@ -1688,30 +1664,6 @@ elf64_alpha_fake_sections (abfd, hdr, sec)
       else
 	hdr->sh_entsize = 1;
     }
-#ifdef ERIC_neverdef
-  else if (strcmp (name, ".reginfo") == 0)
-    {
-      hdr->sh_type = SHT_ALPHA_REGINFO;
-      /* In a shared object on Irix 5.3, the .reginfo section has an
-         entsize of 0x18.  FIXME: Does this matter?  */
-      if ((abfd->flags & DYNAMIC) != 0)
-	hdr->sh_entsize = sizeof (Elf64_External_RegInfo);
-      else
-	hdr->sh_entsize = 1;
-
-      /* Force the section size to the correct value, even if the
-	 linker thinks it is larger.  The link routine below will only
-	 write out this much data for .reginfo.  */
-      hdr->sh_size = sec->_raw_size = sizeof (Elf64_External_RegInfo);
-    }
-  else if (strcmp (name, ".hash") == 0
-	   || strcmp (name, ".dynamic") == 0
-	   || strcmp (name, ".dynstr") == 0)
-    {
-      hdr->sh_entsize = 0;
-      hdr->sh_info = SIZEOF_ALPHA_DYNSYM_SECNAMES;
-    }
-#endif
   else if (strcmp (name, ".sdata") == 0
 	   || strcmp (name, ".sbss") == 0
 	   || strcmp (name, ".lit4") == 0
@@ -2216,9 +2168,6 @@ elf64_alpha_output_extsym (h, data)
 	  else
 	    h->esym.asym.value = 0;
 	}
-#if 0 /* FIXME?  */
-      h->esym.ifd = 0;
-#endif
     }
 
   if (! bfd_ecoff_debug_one_external (einfo->abfd, einfo->debug, einfo->swap,
@@ -3365,33 +3314,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      sec = h->root.root.u.def.section;
 
-#if rth_notdef
-	      if ((r_type == R_ALPHA_LITERAL
-		   && elf_hash_table(info)->dynamic_sections_created
-		   && (!info->shared
-		       || !info->symbolic
-		       || !(h->root.elf_link_hash_flags
-			    & ELF_LINK_HASH_DEF_REGULAR)))
-		  || (info->shared
-		      && (!info->symbolic
-			  || !(h->root.elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR))
-		      && (input_section->flags & SEC_ALLOC)
-		      && (r_type == R_ALPHA_REFLONG
-			  || r_type == R_ALPHA_REFQUAD
-			  || r_type == R_ALPHA_LITERAL)))
-		{
-		  /* In these cases, we don't need the relocation value.
-		     We check specially because in some obscure cases
-		     sec->output_section will be NULL.  */
-		  relocation = 0;
-		}
-#else
-	      /* FIXME: Are not these obscure cases simply bugs?  Let's
-		 get something working and come back to this.  */
 	      if (sec->output_section == NULL)
 		relocation = 0;
-#endif /* rth_notdef */
 	      else
 		{
 		  relocation = (h->root.root.u.def.value
@@ -3902,9 +3826,9 @@ elf64_alpha_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
-/* We need to use a special link routine to handle the .reginfo and
-   the .mdebug sections.  We need to merge all instances of these
-   sections together, not write them all out sequentially.  */
+/* We need to use a special link routine to handle the .mdebug section.
+   We need to merge all instances of these sections together, not write
+   them all out sequentially.  */
 
 static boolean
 elf64_alpha_final_link (abfd, info)
@@ -3913,96 +3837,17 @@ elf64_alpha_final_link (abfd, info)
 {
   asection *o;
   struct bfd_link_order *p;
-  asection *reginfo_sec, *mdebug_sec, *gptab_data_sec, *gptab_bss_sec;
+  asection *mdebug_sec;
   struct ecoff_debug_info debug;
   const struct ecoff_debug_swap *swap
     = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
   HDRR *symhdr = &debug.symbolic_header;
   PTR mdebug_handle = NULL;
 
-#if 0
-	      if (++ngots == 2)
-		{
-		  (*info->callbacks->warning)
-		    (info, _("using multiple gp values"), (char *) NULL,
-		     output_bfd, (asection *) NULL, (bfd_vma) 0);
-		}
-#endif
-
-  /* Go through the sections and collect the .reginfo and .mdebug
-     information.  */
-  reginfo_sec = NULL;
+  /* Go through the sections and collect the mdebug information.  */
   mdebug_sec = NULL;
-  gptab_data_sec = NULL;
-  gptab_bss_sec = NULL;
   for (o = abfd->sections; o != (asection *) NULL; o = o->next)
     {
-#ifdef ERIC_neverdef
-      if (strcmp (o->name, ".reginfo") == 0)
-	{
-	  memset (&reginfo, 0, sizeof reginfo);
-
-	  /* We have found the .reginfo section in the output file.
-	     Look through all the link_orders comprising it and merge
-	     the information together.  */
-	  for (p = o->link_order_head;
-	       p != (struct bfd_link_order *) NULL;
-	       p = p->next)
-	    {
-	      asection *input_section;
-	      bfd *input_bfd;
-	      Elf64_External_RegInfo ext;
-	      Elf64_RegInfo sub;
-
-	      if (p->type != bfd_indirect_link_order)
-		{
-		  if (p->type == bfd_fill_link_order)
-		    continue;
-		  abort ();
-		}
-
-	      input_section = p->u.indirect.section;
-	      input_bfd = input_section->owner;
-
-	      /* The linker emulation code has probably clobbered the
-                 size to be zero bytes.  */
-	      if (input_section->_raw_size == 0)
-		input_section->_raw_size = sizeof (Elf64_External_RegInfo);
-
-	      if (! bfd_get_section_contents (input_bfd, input_section,
-					      (PTR) &ext,
-					      (file_ptr) 0,
-					      sizeof ext))
-		return false;
-
-	      bfd_alpha_elf64_swap_reginfo_in (input_bfd, &ext, &sub);
-
-	      reginfo.ri_gprmask |= sub.ri_gprmask;
-	      reginfo.ri_cprmask[0] |= sub.ri_cprmask[0];
-	      reginfo.ri_cprmask[1] |= sub.ri_cprmask[1];
-	      reginfo.ri_cprmask[2] |= sub.ri_cprmask[2];
-	      reginfo.ri_cprmask[3] |= sub.ri_cprmask[3];
-
-	      /* ri_gp_value is set by the function
-		 alpha_elf_section_processing when the section is
-		 finally written out.  */
-
-	      /* Hack: reset the SEC_HAS_CONTENTS flag so that
-		 elf_link_input_bfd ignores this section.  */
-	      input_section->flags &=~ SEC_HAS_CONTENTS;
-	    }
-
-	  /* Force the section size to the value we want.  */
-	  o->_raw_size = sizeof (Elf64_External_RegInfo);
-
-	  /* Skip this section later on (I don't think this currently
-	     matters, but someday it might).  */
-	  o->link_order_head = (struct bfd_link_order *) NULL;
-
-	  reginfo_sec = o;
-	}
-#endif
-
       if (strcmp (o->name, ".mdebug") == 0)
 	{
 	  struct extsym_info einfo;
@@ -4189,31 +4034,6 @@ elf64_alpha_final_link (abfd, info)
 	      input_section->flags &=~ SEC_HAS_CONTENTS;
 	    }
 
-#ifdef ERIC_neverdef
-	  if (info->shared)
-	    {
-	      /* Create .rtproc section.  */
-	      rtproc_sec = bfd_get_section_by_name (abfd, ".rtproc");
-	      if (rtproc_sec == NULL)
-		{
-		  flagword flags = (SEC_HAS_CONTENTS
-				    | SEC_IN_MEMORY
-				    | SEC_LINKER_CREATED
-				    | SEC_READONLY);
-
-		  rtproc_sec = bfd_make_section (abfd, ".rtproc");
-		  if (rtproc_sec == NULL
-		      || ! bfd_set_section_flags (abfd, rtproc_sec, flags)
-		      || ! bfd_set_section_alignment (abfd, rtproc_sec, 12))
-		    return false;
-		}
-
-	      if (! alpha_elf_create_procedure_table (mdebug_handle, abfd,
-						     info, rtproc_sec, &debug))
-		return false;
-	    }
-#endif
-
 	  /* Build the external symbol information.  */
 	  einfo.abfd = abfd;
 	  einfo.info = info;
@@ -4235,229 +4055,6 @@ elf64_alpha_final_link (abfd, info)
 
 	  mdebug_sec = o;
 	}
-
-#ifdef ERIC_neverdef
-      if (strncmp (o->name, ".gptab.", sizeof ".gptab." - 1) == 0)
-	{
-	  const char *subname;
-	  unsigned int c;
-	  Elf64_gptab *tab;
-	  Elf64_External_gptab *ext_tab;
-	  unsigned int i;
-
-	  /* The .gptab.sdata and .gptab.sbss sections hold
-	     information describing how the small data area would
-	     change depending upon the -G switch.  These sections
-	     not used in executables files.  */
-	  if (! info->relocateable)
-	    {
-	      asection **secpp;
-
-	      for (p = o->link_order_head;
-		   p != (struct bfd_link_order *) NULL;
-		   p = p->next)
-		{
-		  asection *input_section;
-
-		  if (p->type != bfd_indirect_link_order)
-		    {
-		      if (p->type == bfd_fill_link_order)
-			continue;
-		      abort ();
-		    }
-
-		  input_section = p->u.indirect.section;
-
-		  /* Hack: reset the SEC_HAS_CONTENTS flag so that
-		     elf_link_input_bfd ignores this section.  */
-		  input_section->flags &=~ SEC_HAS_CONTENTS;
-		}
-
-	      /* Skip this section later on (I don't think this
-		 currently matters, but someday it might).  */
-	      o->link_order_head = (struct bfd_link_order *) NULL;
-
-	      /* Really remove the section.  */
-	      for (secpp = &abfd->sections;
-		   *secpp != o;
-		   secpp = &(*secpp)->next)
-		;
-	      *secpp = (*secpp)->next;
-	      --abfd->section_count;
-
-	      continue;
-	    }
-
-	  /* There is one gptab for initialized data, and one for
-	     uninitialized data.  */
-	  if (strcmp (o->name, ".gptab.sdata") == 0)
-	    gptab_data_sec = o;
-	  else if (strcmp (o->name, ".gptab.sbss") == 0)
-	    gptab_bss_sec = o;
-	  else
-	    {
-	      (*_bfd_error_handler)
-		(_("%s: illegal section name `%s'"),
-		 bfd_get_filename (abfd), o->name);
-	      bfd_set_error (bfd_error_nonrepresentable_section);
-	      return false;
-	    }
-
-	  /* The linker script always combines .gptab.data and
-	     .gptab.sdata into .gptab.sdata, and likewise for
-	     .gptab.bss and .gptab.sbss.  It is possible that there is
-	     no .sdata or .sbss section in the output file, in which
-	     case we must change the name of the output section.  */
-	  subname = o->name + sizeof ".gptab" - 1;
-	  if (bfd_get_section_by_name (abfd, subname) == NULL)
-	    {
-	      if (o == gptab_data_sec)
-		o->name = ".gptab.data";
-	      else
-		o->name = ".gptab.bss";
-	      subname = o->name + sizeof ".gptab" - 1;
-	      BFD_ASSERT (bfd_get_section_by_name (abfd, subname) != NULL);
-	    }
-
-	  /* Set up the first entry.  */
-	  c = 1;
-	  tab = (Elf64_gptab *) bfd_malloc (c * sizeof (Elf64_gptab));
-	  if (tab == NULL)
-	    return false;
-	  tab[0].gt_header.gt_current_g_value = elf_gp_size (abfd);
-	  tab[0].gt_header.gt_unused = 0;
-
-	  /* Combine the input sections.  */
-	  for (p = o->link_order_head;
-	       p != (struct bfd_link_order *) NULL;
-	       p = p->next)
-	    {
-	      asection *input_section;
-	      bfd *input_bfd;
-	      bfd_size_type size;
-	      unsigned long last;
-	      bfd_size_type gpentry;
-
-	      if (p->type != bfd_indirect_link_order)
-		{
-		  if (p->type == bfd_fill_link_order)
-		    continue;
-		  abort ();
-		}
-
-	      input_section = p->u.indirect.section;
-	      input_bfd = input_section->owner;
-
-	      /* Combine the gptab entries for this input section one
-		 by one.  We know that the input gptab entries are
-		 sorted by ascending -G value.  */
-	      size = bfd_section_size (input_bfd, input_section);
-	      last = 0;
-	      for (gpentry = sizeof (Elf64_External_gptab);
-		   gpentry < size;
-		   gpentry += sizeof (Elf64_External_gptab))
-		{
-		  Elf64_External_gptab ext_gptab;
-		  Elf64_gptab int_gptab;
-		  unsigned long val;
-		  unsigned long add;
-		  boolean exact;
-		  unsigned int look;
-
-		  if (! (bfd_get_section_contents
-			 (input_bfd, input_section, (PTR) &ext_gptab,
-			  gpentry, sizeof (Elf64_External_gptab))))
-		    {
-		      free (tab);
-		      return false;
-		    }
-
-		  bfd_alpha_elf64_swap_gptab_in (input_bfd, &ext_gptab,
-						&int_gptab);
-		  val = int_gptab.gt_entry.gt_g_value;
-		  add = int_gptab.gt_entry.gt_bytes - last;
-
-		  exact = false;
-		  for (look = 1; look < c; look++)
-		    {
-		      if (tab[look].gt_entry.gt_g_value >= val)
-			tab[look].gt_entry.gt_bytes += add;
-
-		      if (tab[look].gt_entry.gt_g_value == val)
-			exact = true;
-		    }
-
-		  if (! exact)
-		    {
-		      Elf64_gptab *new_tab;
-		      unsigned int max;
-
-		      /* We need a new table entry.  */
-		      new_tab = ((Elf64_gptab *)
-				 bfd_realloc ((PTR) tab,
-					      (c + 1) * sizeof (Elf64_gptab)));
-		      if (new_tab == NULL)
-			{
-			  free (tab);
-			  return false;
-			}
-		      tab = new_tab;
-		      tab[c].gt_entry.gt_g_value = val;
-		      tab[c].gt_entry.gt_bytes = add;
-
-		      /* Merge in the size for the next smallest -G
-			 value, since that will be implied by this new
-			 value.  */
-		      max = 0;
-		      for (look = 1; look < c; look++)
-			{
-			  if (tab[look].gt_entry.gt_g_value < val
-			      && (max == 0
-				  || (tab[look].gt_entry.gt_g_value
-				      > tab[max].gt_entry.gt_g_value)))
-			    max = look;
-			}
-		      if (max != 0)
-			tab[c].gt_entry.gt_bytes +=
-			  tab[max].gt_entry.gt_bytes;
-
-		      ++c;
-		    }
-
-		  last = int_gptab.gt_entry.gt_bytes;
-		}
-
-	      /* Hack: reset the SEC_HAS_CONTENTS flag so that
-		 elf_link_input_bfd ignores this section.  */
-	      input_section->flags &=~ SEC_HAS_CONTENTS;
-	    }
-
-	  /* The table must be sorted by -G value.  */
-	  if (c > 2)
-	    qsort (tab + 1, c - 1, sizeof (tab[0]), gptab_compare);
-
-	  /* Swap out the table.  */
-	  ext_tab = ((Elf64_External_gptab *)
-		     bfd_alloc (abfd, c * sizeof (Elf64_External_gptab)));
-	  if (ext_tab == NULL)
-	    {
-	      free (tab);
-	      return false;
-	    }
-
-	  for (i = 0; i < c; i++)
-	    bfd_alpha_elf64_swap_gptab_out (abfd, tab + i, ext_tab + i);
-	  free (tab);
-
-	  o->_raw_size = c * sizeof (Elf64_External_gptab);
-	  o->contents = (bfd_byte *) ext_tab;
-
-	  /* Skip this section later on (I don't think this currently
-	     matters, but someday it might).  */
-	  o->link_order_head = (struct bfd_link_order *) NULL;
-	}
-#endif
-
     }
 
   /* Invoke the regular ELF backend linker to do all the work.  */
@@ -4487,18 +4084,6 @@ elf64_alpha_final_link (abfd, info)
       }
   }
 
-#ifdef ERIC_neverdef
-  if (reginfo_sec != (asection *) NULL)
-    {
-      Elf64_External_RegInfo ext;
-
-      bfd_alpha_elf64_swap_reginfo_out (abfd, &reginfo, &ext);
-      if (! bfd_set_section_contents (abfd, reginfo_sec, (PTR) &ext,
-				      (file_ptr) 0, sizeof ext))
-	return false;
-    }
-#endif
-
   if (mdebug_sec != (asection *) NULL)
     {
       BFD_ASSERT (abfd->output_has_begun);
@@ -4508,24 +4093,6 @@ elf64_alpha_final_link (abfd, info)
 	return false;
 
       bfd_ecoff_debug_free (mdebug_handle, abfd, &debug, swap, info);
-    }
-
-  if (gptab_data_sec != (asection *) NULL)
-    {
-      if (! bfd_set_section_contents (abfd, gptab_data_sec,
-				      gptab_data_sec->contents,
-				      (file_ptr) 0,
-				      gptab_data_sec->_raw_size))
-	return false;
-    }
-
-  if (gptab_bss_sec != (asection *) NULL)
-    {
-      if (! bfd_set_section_contents (abfd, gptab_bss_sec,
-				      gptab_bss_sec->contents,
-				      (file_ptr) 0,
-				      gptab_bss_sec->_raw_size))
-	return false;
     }
 
   return true;
