@@ -1,3 +1,11 @@
+Thu Aug 21 16:18:08 1997  Geoffrey Noer  <noer@cygnus.com>
+
+        * config/powerpc/ppc-eabi.mt:
+        * config/powerpc/ppc-sim.mt:
+        * config/powerpc/ppcle-eabi.mt:
+        * config/powerpc/ppcle-sim.mt: ser-ocd.c needs to be before
+        other ocd-related files in TDEPFILES
+
 Thu Aug 21 14:56:04 1997  Geoffrey Noer  <noer@cygnus.com>
 
         * ppc-bdm.c (bdm_ppc_wait): stop printfing ecr, der
