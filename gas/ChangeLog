@@ -34,6 +34,43 @@ Tue Jul 26 18:21:24 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	* config/obj-coff.c (fixup_segment) [TC_I960]: Use SF_GET_BALNAME
 	and SF_GET_CALLNAME instead of the TC_S_IS_ versions.
 
+	* config/tc-i960.h (TC_COFF_SET_MACHINE): New macro.  Calls
+	tc_headers_hook.
+
+	* config/tc-i960.c (targ_has_iclass): Use I_CX | I_CX2 where I_CX
+	was used previously.
+	(tc_headers_hook): If I_CX2 is found, set flags to F_I960CA.
+
+	* config/tc-i960.c (po_hash): Declaration deleted.
+	(next_object_file_charP): Ditto.
+	(regnames, aregs, coj): Now const.
+	(parse_memop): Static array def_scale now const.
+	(md_begin): Cast away const when passing hash routines addresses
+	of values in regnames or aregs.
+	(md_longopts): Added "link-relax" and "no-relax" hyphenated forms.
+	Continue to accept one-word forms.
+	(struct tabentry, arch_tab): Moved to top level from inside
+	md_parse_option.  Now const.
+	(md_show_usage): Use arch_tab to generate usage message.  Print
+	hyphenated forms of relax options.
+
+	* config/tc-i960.h (DEFINE_I960_AOUT, TC_S_IS_*, TC_S_*_SYSPROC,
+	TC_S_FORCE_TO_*): Moved from here...
+	* config/tc-i960.c: ... to here.  Changed DEFINE_I960_AOUT stuff
+	to test OBJ_AOUT and OBJ_BOUT directly.
+
+	* config/tc-i960.h (CTRL, COBR, COJ, REG, MEM*, FBRA, CALLJ,
+	M1-M3, REG_OPC, R_*, SFR, LIT, FP, OP, R, RS, RL, RSL, F,
+	{R,F}{,L}{2,4}, M, SFR_OK, LIT_OK, FP_OK, REG_ALIGN, MEMOP, I_*):
+	Macros deleted.
+
+	start-sanitize-i960xl
+	* config/tc-i960.c (ARCH_XL): Define.
+	(arch_tab): Include XL.
+	(targ_has_sfr, targ_has_iclass): Handle XL.
+	(tc_headers_hook): Set flags to F_I960XL for i960XL.
+	end-sanitize-i960xl
+
 Fri Jul 15 15:36:51 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* subsegs.c (section_symbol): Had last change backwards.
