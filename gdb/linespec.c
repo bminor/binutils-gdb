@@ -298,7 +298,9 @@ build_canonical_line_spec (struct symtab_and_line *sal, char *symname,
 
 /* Find an instance of the character C in the string S that is outside
    of all parenthesis pairs, single-quoted strings, and double-quoted
-   strings.  */
+   strings.  Also, ignore the char within a template name, like a ','
+   within foo<int, int>.  */
+
 static char *
 find_toplevel_char (char *s, char c)
 {
@@ -321,9 +323,9 @@ find_toplevel_char (char *s, char c)
 	return scan;
       else if (*scan == '"' || *scan == '\'')
 	quoted = *scan;
-      else if (*scan == '(')
+      else if (*scan == '(' || *scan == '<')
 	depth++;
-      else if (*scan == ')' && depth > 0)
+      else if ((*scan == ')' || *scan == '>') && depth > 0)
 	depth--;
     }
 
