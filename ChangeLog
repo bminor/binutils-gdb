@@ -1,3 +1,7 @@
+Sat Oct 28 10:27:59 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in ($(CHECK_TARGET_MODULES)):  Fix typo.
+
 Fri Oct 27 23:14:12 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* configure.in:  Rename libFOO to target-libFOO, and xiberty

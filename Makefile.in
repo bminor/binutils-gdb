@@ -884,7 +884,7 @@ $(ALL_TARGET_MODULES):
 # To build a target install-X means to cd to X and make install.
 .PHONY: $(CHECK_TARGET_MODULES)
 $(CHECK_TARGET_MODULES):
-	@dir=`echo $@ | sed -e 's/check-target//'`; \
+	@dir=`echo $@ | sed -e 's/check-target-//'`; \
 	if [ -f $(TARGET_SUBDIR)/$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
 	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
