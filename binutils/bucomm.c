@@ -35,6 +35,9 @@
 typedef long time_t;
 #endif
 #endif
+
+/* Ought to be defined in libiberty.h...  */
+extern int mkstemps PARAMS ((char *, int));
 
 /* Error reporting */
 
@@ -233,14 +236,14 @@ make_tempname (filename)
 #endif
       strcat (tmpname, "/");
       strcat (tmpname, template);
-      close (mkstemp (tmpname));
+      close (mkstemps (tmpname, 0));
       *slash = c;
     }
   else
     {
       tmpname = xmalloc (sizeof (template));
       strcpy (tmpname, template);
-      close (mkstemp (tmpname));
+      close (mkstemps (tmpname, 0));
     }
   return tmpname;
 }

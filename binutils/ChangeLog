@@ -1,3 +1,8 @@
+2001-11-14  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* bucomm.c (make_tempname): Use mkstemps instead of mkstemp, since
+	not all systems provide mkstemp.
+
 2001-11-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/binutils.texi (objdump): Document x86 -M options.
