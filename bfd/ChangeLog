@@ -1,3 +1,9 @@
+Thu Oct 15 15:05:39 1992  Per Bothner  (bothner@cygnus.com)
+
+	* apollo68.h, apollov68.h, hp300.h, i386v.h, irix3.h: Remove
+	no-longer-used definitions of L_SET and L_INCR.
+	* i386linux.h:  Tweaks to smooth Linux build.
+
 Thu Oct 15 01:32:22 1992  John Gilmore  (gnu@cygnus.com)
 
 	* seclet.h:  Add enum tag to bfd_seclet_enum_type.
