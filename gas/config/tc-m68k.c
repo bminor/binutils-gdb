@@ -96,6 +96,9 @@ static int m68k_quick = 1;
    be 32 bits.  */
 static int m68k_rel32 = 1;
 
+/* This is non-zero if m68k_rel32 was set from the command line.  */
+static int m68k_rel32_from_cmdline;
+
 /* The default width to use for an index register when using a base
    displacement.  */
 static enum m68k_size m68k_index_width_default = SIZE_LONG;
@@ -3443,7 +3446,8 @@ md_begin ()
     {
       flag_reg_prefix_optional = 1;
       m68k_abspcadd = 1;
-      m68k_rel32 = 0;
+      if (! m68k_rel32_from_cmdline)
+	m68k_rel32 = 0;
     }
 
   op_hash = hash_new ();
@@ -3723,7 +3727,8 @@ m68k_mri_mode_change (on)
 #endif
 	}
       m68k_abspcadd = 1;
-      m68k_rel32 = 0;
+      if (! m68k_rel32_from_cmdline)
+	m68k_rel32 = 0;
     }
   else
     {
@@ -3739,7 +3744,8 @@ m68k_mri_mode_change (on)
 #endif
 	}
       m68k_abspcadd = 0;
-      m68k_rel32 = 1;
+      if (! m68k_rel32_from_cmdline)
+	m68k_rel32 = 1;
     }
 }
 
@@ -6366,6 +6372,10 @@ struct option md_longopts[] = {
   {"base-size-default-16", no_argument, NULL, OPTION_BASE_SIZE_DEFAULT_16},
 #define OPTION_BASE_SIZE_DEFAULT_32 (OPTION_MD_BASE + 4)
   {"base-size-default-32", no_argument, NULL, OPTION_BASE_SIZE_DEFAULT_32},
+#define OPTION_DISP_SIZE_DEFAULT_16 (OPTION_MD_BASE + 5)
+  {"disp-size-default-16", no_argument, NULL, OPTION_DISP_SIZE_DEFAULT_16},
+#define OPTION_DISP_SIZE_DEFAULT_32 (OPTION_MD_BASE + 6)
+  {"disp-size-default-32", no_argument, NULL, OPTION_DISP_SIZE_DEFAULT_32},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -6506,6 +6516,16 @@ md_parse_option (c, arg)
       m68k_index_width_default = SIZE_LONG;
       break;
 
+    case OPTION_DISP_SIZE_DEFAULT_16:
+      m68k_rel32 = 0;
+      m68k_rel32_from_cmdline = 1;
+      break;
+
+    case OPTION_DISP_SIZE_DEFAULT_32:
+      m68k_rel32 = 1;
+      m68k_rel32_from_cmdline = 1;
+      break;
+
     default:
       return 0;
     }
@@ -6538,7 +6558,9 @@ md_show_usage (stream)
 --bitwise-or		do not treat `|' as a comment character\n");
   fprintf (stream, "\
 --base-size-default-16	base reg without size is 16 bits\n\
---base-size-default-32	base reg without size is 32 bits (default)\n");
+--base-size-default-32	base reg without size is 32 bits (default)\n\
+--disp-size-default-16	displacement with unknown size is 16 bits\n\
+--disp-size-default-32	displacement with unknown size is 32 bits (default)\n");
 }
 
 #ifdef TEST2
