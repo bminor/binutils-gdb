@@ -300,6 +300,8 @@ proc do_misc {} {
 	    -re "^ +\[0-9\]+ 0008\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 000c\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 000e\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0012\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0016\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -311,10 +313,7 @@ proc do_misc {} {
     gas_finish
 
     # Did we find what we were looking for?  If not, flunk it.
-    if [expr $x==5] then { pass $testname } else { fail $testname }
-
-    setup_xfail "*-*-*"
-    fail "misc.s: trap tests"
+    if [expr $x==7] then { pass $testname } else { fail $testname }
 
     setup_xfail "*-*-*"
     fail "misc.s: ldsr and stsr tests"

@@ -1,6 +1,10 @@
 start-sanitize-v850
 Fri Aug 23 11:02:55 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* gas/v850/basic.exp (misc_tests): No longer expect failures
+	assembling "trap" opcodes.
+	* gas/v850/misc.s: Re-enable assembling of "trap" opcodes.
+
 	* gas/v850: New directory with v850 tests.
 
 end-sanitize-v850
