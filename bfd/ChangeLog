@@ -1,3 +1,8 @@
+2002-10-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* opncls.c: Formatting.
+	(_bfd_new_bfd): Use a smaller section hash table.
+
 2002-10-05  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Set the type
