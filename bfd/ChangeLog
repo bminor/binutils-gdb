@@ -1,3 +1,7 @@
+2000-05-04  Alan Modra  <alan@linuxcare.com.au>
+
+	* libhppa.h (HPPA_R_CONSTANT): Cast argument to bfd_signed_vma.
+
 2000-05-03  Martin v. Löwis  <loewis@informatik.hu-berlin.de>
 
 	* elflink.h (elf_link_add_object_symbols): Reset dynindx for
