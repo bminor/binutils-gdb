@@ -1932,6 +1932,13 @@ DEFUN(sunos4_find_nearest_line,(abfd,
 
 }
 
+static int 
+DEFUN(sunos4_sizeof_headers,(abfd),
+      bfd *abfd)
+{
+return 0;
+}
+
 #define sunos4_openr_next_archived_file bfd_generic_openr_next_archived_file
 #define sunos4_generic_stat_arch_elt bfd_generic_stat_arch_elt
 #define sunos4_slurp_armap bfd_slurp_bsd_armap

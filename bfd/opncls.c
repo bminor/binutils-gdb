@@ -61,7 +61,7 @@ bfd *new_bfd()
 {
   struct obstack tmp;
   bfd *nbfd;
-  obstack_init(&tmp);
+  obstack_begin(&tmp,128);
   
   nbfd = (bfd *)obstack_alloc(&tmp,sizeof(bfd));
   nbfd->memory = tmp;

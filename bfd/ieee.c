@@ -1292,8 +1292,8 @@ DEFUN(ieee_set_arch_mach,(abfd, arch, machine),
 
 static int 
 DEFUN(comp,(ap, bp),
-      PTR ap AND
-      PTR bp)
+     CONST PTR ap AND
+     CONST PTR bp)
 {
   arelent *a = *((arelent **)ap);
   arelent *b = *((arelent **)bp);
@@ -1894,6 +1894,13 @@ struct stat *buf;
   return 0;
   }
 }
+static int 
+DEFUN(ieee_sizeof_headers,(abfd),
+      bfd *abfd)
+{
+return 0;
+}
+
 #define ieee_core_file_failing_command bfd_false
 #define ieee_core_file_failing_signal bfd_false
 #define ieee_core_file_matches_executable_p bfd_false

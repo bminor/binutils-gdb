@@ -1141,8 +1141,13 @@ struct stat *buf;
     buf->st_mode = 0666;
   return 0;
   }
+}
 
-
+static int 
+DEFUN(oasys_sizeof_headers,(abfd),
+      bfd *abfd)
+{
+return 0;
 }
 
 #define oasys_core_file_failing_command bfd_false

@@ -42,7 +42,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
  * $Log$
- * Revision 1.4  1991/04/23 16:01:02  steve
+ * Revision 1.5  1991/04/23 22:44:14  steve
+ * *** empty log message ***
+ *
+ * Revision 1.4  1991/04/23  16:01:02  steve
  * *** empty log message ***
  *
  * Revision 1.3  1991/04/08  23:22:31  steve
@@ -411,6 +414,13 @@ bfd *abfd;
     }
   }
   return true;
+}
+
+static int 
+DEFUN(srec_sizeof_headers,(abfd),
+      bfd *abfd)
+{
+return 0;
 }
 
 /*SUPPRESS 460 */
