@@ -317,36 +317,9 @@ extern CONST short _bfd_host_big_endian;
 
 
 
-/*THE FOLLOWING IS EXTRACTED FROM THE SOURCE */
+/* ANd more from the source */
 
 
-/*:init.c*/
-
-/*:opncls.c*/
-
-
-/*:libbfd.c*/
-
-/*:section.c*/
-
-
-/*:archures.c*/
-
-/*:reloc.c*/
-
-/*:syms.c*/
-
-/*:bfd.c*/
-
-/*:archive.c*/
-
-/*:core.c*/
-
-/*:targets.c*/
-
-/*:format.c*/
-
-#endif
 
 
 
@@ -892,3 +865,4 @@ CONST char **EXFUN(bfd_target_list, ());
 boolean EXFUN(bfd_check_format, (bfd *abfd, bfd_format format));
 boolean EXFUN(bfd_set_format, (bfd *, bfd_format));
 CONST char *EXFUN(bfd_format_string, (bfd_format));
+#endif
