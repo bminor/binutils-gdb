@@ -810,12 +810,24 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	return 0;
     }
 
-  if (is_rela)
-    printf
-      (_("  Offset    Info  Type            Symbol's Value  Symbol's Name          Addend\n"));
+  if (is_32bit_elf)
+    {
+      if (is_rela)
+	printf
+	  (_(" Offset     Info    Type            Symbol's Value  Symbol's Name          Addend\n"));
+      else
+	printf
+	  (_(" Offset     Info    Type            Symbol's Value  Symbol's Name\n"));
+    }
   else
-    printf
-      (_("  Offset    Info  Type            Symbol's Value  Symbol's Name\n"));
+    {
+      if (is_rela)
+	printf
+	  (_("    Offset             Info            Type               Symbol's Value   Symbol's Name           Addend\n"));
+      else
+	printf
+	  (_("    Offset             Info            Type               Symbol's Value   Symbol's Name\n"));
+    }
 
   for (i = 0; i < rel_size; i++)
     {
@@ -855,11 +867,26 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 #endif
 	}
 
+      if (is_32bit_elf)
+	{
 #ifdef _bfd_int64_low
-      printf ("  %8.8lx  %5.5lx ", _bfd_int64_low (offset), _bfd_int64_low (info));
+	  printf ("%8.8lx  %8.8lx ", _bfd_int64_low (offset), _bfd_int64_low (info));
 #else
-      printf ("  %8.8lx  %5.5lx ", offset, info);
+	  printf ("%8.8lx  %8.8lx ", offset, info);
 #endif
+	}
+      else
+	{
+#ifdef _bfd_int64_low
+	  printf ("%8.8lx%8.8lx  %8.8lx%8.8lx ",
+		  _bfd_int64_high (offset),
+		  _bfd_int64_low (offset),
+		  _bfd_int64_high (info),
+		  _bfd_int64_low (info));
+#else
+	  printf ("%16.16lx  %16.16lx ", offset, info);
+#endif
+	}
 
       switch (elf_header.e_machine)
 	{
@@ -7189,8 +7216,9 @@ display_debug_info (section, start, file)
 	      return 0;
 	    }
 
-	  printf (_(" <%d><%x>: Abbrev Number: %lu (%s)\n"),
-		  level, tags - section_begin - bytes_read,
+	  printf (_(" <%d><%lx>: Abbrev Number: %lu (%s)\n"),
+		  level,
+		  (unsigned long) (tags - section_begin - bytes_read),
 		  abbrev_number,
 		  get_TAG_name (entry->tag));
 
@@ -7609,10 +7637,10 @@ display_debug_frames (section, start, file)
 	      start += augmentation_data_len;
 	    }
 
-	  printf ("\n%08lx %08lx %08lx FDE cie=%08x pc=%08lx..%08lx\n",
+	  printf ("\n%08lx %08lx %08lx FDE cie=%08lx pc=%08lx..%08lx\n",
 		  (unsigned long)(saved_start - section_start), length, cie_id,
-		  cie->chunk_start - section_start, fc->pc_begin,
-		  fc->pc_begin + fc->pc_range);
+		  (unsigned long)(cie->chunk_start - section_start),
+		  fc->pc_begin, fc->pc_begin + fc->pc_range);
 	  if (! do_debug_frames_interp && augmentation_data_len)
 	    {
 	      unsigned long i;
@@ -8511,7 +8539,8 @@ process_mips_specific (file)
 	  free (econf64);
 	}
 
-      printf (_("\nSection '.conflict' contains %d entries:\n"), conflictsno);
+      printf (_("\nSection '.conflict' contains %ld entries:\n"),
+	      (long) conflictsno);
       puts (_("  Num:    Index       Value  Name"));
 
       for (cnt = 0; cnt < conflictsno; ++cnt)

@@ -1,3 +1,10 @@
+2001-08-21  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (dump_relocations): Support ELF64 on 32bit hosts.
+	(display_debug_info): Cast for 64bit hosts.
+	(display_debug_frames): Likewise.
+	(process_mips_specific): Likewise.
+
 2001-08-21  Andreas Jaeger  <aj@suse.de>
 
 	* coffgrok.h: Add missing parameter for prototype of coff_grok.
