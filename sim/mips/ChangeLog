@@ -1,3 +1,13 @@
+Mon Nov 23 18:07:36 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in: Configure mips64vr4100-elf nee mips64vr41* as a 64
+ 	bit mips16 igen simulator.
+	* configure: Re-generate.
+
+	* mips.igen (check_div_hilo, check_mult_hilo, check_mf_hilo): Mark
+ 	as part of vr4100 ISA.
+	* vr.igen: Mark all instructions as 64 bit only.
+
 Mon Nov 23 17:07:37 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (get_cell, sim_monitor, fetch_str, CoProcPresent):

@@ -178,6 +178,7 @@
 
 :function:::int:check_mf_hilo:hilo_history *history, hilo_history *peer
 *mipsI,mipsII,mipsIII,mipsIV:
+*vr4100:
 *vr5000:
 // start-sanitize-vr4320
 *vr4320:
@@ -234,6 +235,7 @@
 
 :function:::int:check_mult_hilo:hilo_history *hi, hilo_history *lo
 *mipsI,mipsII,mipsIII,mipsIV:
+*vr4100:
 *vr5000:
 // start-sanitize-vr4320
 *vr4320:
@@ -275,6 +277,7 @@
 
 :function:::int:check_div_hilo:hilo_history *hi, hilo_history *lo
 *mipsI,mipsII,mipsIII,mipsIV:
+*vr4100:
 *vr5000:
 // start-sanitize-vr4320
 *vr4320:
