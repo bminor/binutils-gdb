@@ -1289,10 +1289,10 @@ pa_undefine_label ()
     {
       if (1
 #ifdef OBJ_SOM
- 	  && current_space == label_chain->lss_space && label_chain->lss_label
+	  && current_space == label_chain->lss_space && label_chain->lss_label
 #endif
 #ifdef OBJ_ELF
- 	  && now_seg == label_chain->lss_segment && label_chain->lss_label
+	  && now_seg == label_chain->lss_segment && label_chain->lss_label
 #endif
 	  )
 	{
@@ -2334,16 +2334,16 @@ pa_ip (str)
 		args++;
 		switch (*args)
 		  {
- 		  /* Handle FP compare conditions.  */
- 		  case 'f':
- 		    cond = pa_parse_fp_cmp_cond (&s);
- 		    INSERT_FIELD_AND_CONTINUE (opcode, cond, 0);
+		  /* Handle FP compare conditions.  */
+		  case 'f':
+		    cond = pa_parse_fp_cmp_cond (&s);
+		    INSERT_FIELD_AND_CONTINUE (opcode, cond, 0);
 
 		  /* Handle an add condition.  */
 		  case 'A':
 		  case 'a':
- 		    cmpltr = 0;
- 		    flag = 0;
+		    cmpltr = 0;
+		    flag = 0;
 		    if (*s == ',')
 		      {
 			s++;
@@ -4240,8 +4240,8 @@ tc_gen_reloc (section, fixp)
 	case R_N0SEL:
 	case R_N1SEL:
 	  /* There is no symbol or addend associated with these fixups.  */
-          relocs[i]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
-          *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
+	  relocs[i]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+	  *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
 	  relocs[i]->addend = 0;
 	  break;
 
@@ -4249,8 +4249,8 @@ tc_gen_reloc (section, fixp)
 	case R_ENTRY:
 	case R_EXIT:
 	  /* There is no symbol associated with these fixups.  */
-          relocs[i]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
-          *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
+	  relocs[i]->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
+	  *relocs[i]->sym_ptr_ptr = symbol_get_bfdsym (dummy_symbol);
 	  relocs[i]->addend = fixp->fx_offset;
 	  break;
 
@@ -5227,7 +5227,7 @@ pa_get_absolute_expression (insn, strp)
       input_line_pointer = *strp;
       s = *strp;
       while (*s != ',' && *s != ' ' && *s != '\t')
-        s++;
+	s++;
 
       c = *s;
       *s = 0;

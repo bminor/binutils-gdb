@@ -568,7 +568,7 @@ obj_coff_loc (ignore)
 
     if (listing)
       {
-        lineno += coff_line_base - 1;
+	lineno += coff_line_base - 1;
 	listing_source_line (lineno);
       }
   }
@@ -716,7 +716,7 @@ obj_coff_endef (ignore)
 
 	name = S_GET_NAME (def_symbol_in_progress);
 	if (name[0] == '.' && name[2] == 'f' && name[3] == '\0')
-  	  {
+	  {
 	    switch (name[1])
 	      {
 	      case 'b':
@@ -842,16 +842,16 @@ obj_coff_endef (ignore)
       || S_GET_SEGMENT (def_symbol_in_progress) == absolute_section
       || ! symbol_constant_p (def_symbol_in_progress)
       || (symbolP = symbol_find_base (S_GET_NAME (def_symbol_in_progress),
-                                      DO_NOT_STRIP)) == NULL
+				      DO_NOT_STRIP)) == NULL
       || SF_GET_TAG (def_symbol_in_progress) != SF_GET_TAG (symbolP))
     {
       /* If it already is at the end of the symbol list, do nothing */
       if (def_symbol_in_progress != symbol_lastP)
-        {
+	{
 	  symbol_remove (def_symbol_in_progress, &symbol_rootP, &symbol_lastP);
 	  symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP,
 			 &symbol_lastP);
-        }
+	}
     }
   else
     {
@@ -1504,13 +1504,13 @@ obj_coff_section (ignore)
          sections so adjust_reloc_syms in write.c will correctly handle
          relocs which refer to non-local symbols in these sections.  */
       if (strncmp (name, ".gnu.linkonce", sizeof (".gnu.linkonce") - 1) == 0)
-        flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+	flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 #endif
 
       if (! bfd_set_section_flags (stdoutput, sec, flags))
-        as_warn (_("error setting flags for \"%s\": %s"),
-                 bfd_section_name (stdoutput, sec),
-                 bfd_errmsg (bfd_get_error ()));
+	as_warn (_("error setting flags for \"%s\": %s"),
+		 bfd_section_name (stdoutput, sec),
+		 bfd_errmsg (bfd_get_error ()));
     }
   else if (flags != SEC_NO_FLAGS)
     {
@@ -1564,7 +1564,7 @@ coff_frob_section (sec)
       fragp = seg_info (sec)->frchainP->frch_root;
       last = seg_info (sec)->frchainP->frch_last;
       while (fragp->fr_next != last)
-        fragp = fragp->fr_next;
+	fragp = fragp->fr_next;
       last->fr_address = size;
       fragp->fr_offset += new_size - size;
     }

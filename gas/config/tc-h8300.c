@@ -1,6 +1,6 @@
 /* tc-h8300.c -- Assemble code for the Hitachi H8/300
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2001
-   Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1491,7 +1491,7 @@ md_section_align (seg, size)
      valueT size;
 {
   return ((size + (1 << section_alignment[(int) seg]) - 1)
-          & (-1 << section_alignment[(int) seg]));
+	  & (-1 << section_alignment[(int) seg]));
 }
 #endif
 

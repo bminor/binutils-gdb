@@ -1,5 +1,5 @@
 /* tc-d30v.c -- Assembler code for the Mitsubishi D30V
-   Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -246,7 +246,7 @@ check_range (num, bits, flags)
   if (bits == 32)
     {
       if (sizeof (unsigned long) * CHAR_BIT == 32)
-        return 0;
+	return 0;
 
       /* We don't record signed or unsigned for 32-bit quantities.
 	 Allow either.  */
@@ -1211,7 +1211,7 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 	    return 0;
 	}
       else
-        if ((mod_reg[0][j] & (mod_reg[1][j] | used_reg[1][j])) != 0)
+	if ((mod_reg[0][j] & (mod_reg[1][j] | used_reg[1][j])) != 0)
 	  return 0;
     }
 

@@ -521,7 +521,7 @@ struct vfp_reg
   unsigned long regno;
 };
 
-static const struct vfp_reg vfp_regs[] = 
+static const struct vfp_reg vfp_regs[] =
 {
   {"fpsid", 0x00000000},
   {"FPSID", 0x00000000},
@@ -842,7 +842,7 @@ static void do_mav_binops_3a	PARAMS ((char *));
 static void do_mav_binops_3b	PARAMS ((char *));
 static void do_mav_binops_3c	PARAMS ((char *));
 static void do_mav_binops_3d	PARAMS ((char *));
-static void do_mav_triple	PARAMS ((char *, int, enum arm_reg_type, 
+static void do_mav_triple	PARAMS ((char *, int, enum arm_reg_type,
 					 enum arm_reg_type,
 					 enum arm_reg_type));
 static void do_mav_triple_4a	PARAMS ((char *));
@@ -855,7 +855,7 @@ static void do_mav_triple_5e	PARAMS ((char *));
 static void do_mav_triple_5f	PARAMS ((char *));
 static void do_mav_triple_5g	PARAMS ((char *));
 static void do_mav_triple_5h	PARAMS ((char *));
-static void do_mav_quad		PARAMS ((char *, int, enum arm_reg_type, 
+static void do_mav_quad		PARAMS ((char *, int, enum arm_reg_type,
 					 enum arm_reg_type,
 					 enum arm_reg_type,
 					 enum arm_reg_type));
@@ -1106,7 +1106,7 @@ static const struct asm_opcode insns[] =
   {"strh",       0xe00000b0, 3,  ARM_EXT_V4,       do_ldstv4},
 
   /* ARM Architecture 4T.  */
-  /* Note: bx (and blx) are required on V5, even if the processor does 
+  /* Note: bx (and blx) are required on V5, even if the processor does
      not support Thumb.  */
   {"bx",         0xe12fff10, 2,  ARM_EXT_V4T | ARM_EXT_V5, do_bx},
 
@@ -2165,14 +2165,14 @@ add_to_lit_pool ()
 	break;
 
       if (literals[lit_count].exp.X_op == inst.reloc.exp.X_op
-          && inst.reloc.exp.X_op == O_symbol
-          && (literals[lit_count].exp.X_add_number
+	  && inst.reloc.exp.X_op == O_symbol
+	  && (literals[lit_count].exp.X_add_number
 	      == inst.reloc.exp.X_add_number)
-          && (literals[lit_count].exp.X_add_symbol
+	  && (literals[lit_count].exp.X_add_symbol
 	      == inst.reloc.exp.X_add_symbol)
-          && (literals[lit_count].exp.X_op_symbol
+	  && (literals[lit_count].exp.X_op_symbol
 	      == inst.reloc.exp.X_op_symbol))
-        break;
+	break;
 
       lit_count++;
     }
@@ -2624,9 +2624,9 @@ opcode_select (width)
 	  thumb_mode = 0;
 
 	  if (!need_pass_2)
-            frag_align (2, 0, 0);
+	    frag_align (2, 0, 0);
 
-          record_alignment (now_seg, 1);
+	  record_alignment (now_seg, 1);
 	}
       break;
 
@@ -3450,13 +3450,13 @@ ld_mode_required_here (string)
 	    }
 	  else 	      /* [Rn] */
 	    {
-              skip_whitespace (str);
+	      skip_whitespace (str);
 
-              if (* str == '!')
-               {
-                 str ++;
-                 inst.instruction |= WRITE_BACK;
-               }
+	      if (* str == '!')
+		{
+		  str ++;
+		  inst.instruction |= WRITE_BACK;
+		}
 
 	      inst.instruction |= INDEX_UP | HWOFFSET_IMM;
 	      pre_inc = 1;
@@ -4027,10 +4027,10 @@ do_blx (str)
     {
       /* This must be is BLX <target address>, no condition allowed.  */
       if (inst.instruction != COND_ALWAYS)
-    	{
-      	  inst.error = BAD_COND;
+	{
+	  inst.error = BAD_COND;
 	  return;
-    	}
+	}
 
       inst.instruction = 0xfafffffe;
 
@@ -4088,7 +4088,7 @@ do_t_blx (str)
      BKPT <16 bit unsigned immediate>
      Instruction is not conditional.
 	The bit pattern given in insns[] has the COND_ALWAYS condition,
-	and it is an error if the caller tried to override that. */
+	and it is an error if the caller tried to override that.  */
 
 static void
 do_bkpt (str)
@@ -4331,7 +4331,7 @@ do_ldrd (str)
       || (rn = ld_mode_required_here (& str)) == FAIL)
     {
       if (!inst.error)
-        inst.error = BAD_ARGS;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -4514,7 +4514,7 @@ my_get_expression (ep, str)
   return 0;
 }
 
-/* We handle all bad expressions here, so that we can report the faulty 
+/* We handle all bad expressions here, so that we can report the faulty
    instruction in the error message.  */
 void
 md_operand (expr)
@@ -5543,7 +5543,7 @@ do_ldstv4 (str)
 	      end_of_line (str);
 	      return;
 	    }
-	  
+
 	  value = validate_immediate (~ inst.reloc.exp.X_add_number);
 
 	  if (value != FAIL)
@@ -6729,7 +6729,7 @@ vfp_psr_parse (str)
   /* Mark it.  */
   *--p = 0;
 
-  for (vreg = vfp_regs + 0; 
+  for (vreg = vfp_regs + 0;
        vreg < vfp_regs + sizeof (vfp_regs) / sizeof (struct vfp_reg);
        vreg++)
     {
@@ -7929,11 +7929,11 @@ mav_reg_required_here (str, shift, regtype)
 
   /* Restore the start point.  */
   *str = start;
-  
+
   /* In the few cases where we might be able to accept something else
      this error can be overridden.  */
   inst.error = _(all_reg_maps[regtype].expected);
-  
+
   return FAIL;
 }
 
@@ -8181,7 +8181,7 @@ do_mav_quad_6b (str)
 	     REG_TYPE_MVFX);
 }
 
-/* cfmvsc32<cond> DSPSC,MVFX[15:0]. */
+/* cfmvsc32<cond> DSPSC,MVFX[15:0].  */
 static void
 do_mav_dspsc_1 (str)
      char * str;
@@ -9095,7 +9095,7 @@ create_register_alias (newname, p)
   *p = c;
   return 0;
 }
-  
+
 static void
 set_constant_flonums ()
 {
@@ -10487,7 +10487,7 @@ md_assemble (str)
 
 /* md_parse_option
       Invocation line includes a switch not recognized by the base assembler.
-      See if it's a processor-specific option.  
+      See if it's a processor-specific option.
 
       This routine is somewhat complicated by the need for backwards
       compatibility (since older releases of gcc can't be changed).
@@ -10505,7 +10505,7 @@ md_assemble (str)
 	      -mthumb			 Start in Thumb mode
 	      -mthumb-interwork		 Code supports ARM/Thumb interworking
 
-      For now we will also provide support for 
+      For now we will also provide support for
 
 	      -mapcs-32			 32-bit Program counter
 	      -mapcs-26			 26-bit Program counter
@@ -10581,7 +10581,7 @@ struct arm_option_table
   char *deprecated;	/* If non-null, print this message.  */
 };
 
-struct arm_option_table arm_opts[] = 
+struct arm_option_table arm_opts[] =
 {
   {"k",      N_("generate PIC code"),      &pic_code,    1, NULL},
   {"mthumb", N_("assemble Thumb code"),    &thumb_mode,  1, NULL},
@@ -10789,7 +10789,7 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"ep9312",		ARM_ARCH_V4T | ARM_CEXT_MAVERICK, FPU_NONE},
   {NULL, 0, 0}
 };
-   
+
 struct arm_arch_option_table
 {
   char *name;
@@ -11046,7 +11046,7 @@ md_parse_option (c, arg)
 #endif
 
     case 'a':
-      /* Listing option.  Just ignore these, we don't support additional 
+      /* Listing option.  Just ignore these, we don't support additional
 	 ones.  */
       return 0;
 
@@ -11073,10 +11073,10 @@ md_parse_option (c, arg)
 
       for (lopt = arm_long_opts; lopt->option != NULL; lopt++)
 	{
-	  /* These options are expected to have an argument.  */ 
+	  /* These options are expected to have an argument.  */
 	  if (c == lopt->option[0]
 	      && arg != NULL
-	      && strncmp (arg, lopt->option + 1, 
+	      && strncmp (arg, lopt->option + 1,
 			  strlen (lopt->option + 1)) == 0)
 	    {
 #if WARN_DEPRECATED
@@ -11248,7 +11248,7 @@ arm_frob_label (sym)
                 lsl  r3, r3, #2
                 ldr  r2, [r3, r2]
                 mov  pc, r2
-		
+
        .Lbbb:  .word .Lxxx
        .Lccc:  .word .Lyyy
        ..etc...
@@ -11258,7 +11258,7 @@ arm_frob_label (sym)
      The second instruction converts a table index into a byte offset.
      The third instruction gets the jump address out of the table.
      The fourth instruction performs the jump.
-     
+
      If the address stored at .Laaa is that of a symbol which has the
      Thumb_Func bit set, then the linker will arrange for this address
      to have the bottom bit set, which in turn would mean that the
@@ -11307,7 +11307,7 @@ arm_adjust_symtab ()
 		as_bad (_("%s: unexpected function type: %d"),
 			S_GET_NAME (sym), S_GET_STORAGE_CLASS (sym));
 	    }
-          else switch (S_GET_STORAGE_CLASS (sym))
+	  else switch (S_GET_STORAGE_CLASS (sym))
 	    {
 	    case C_EXT:
 	      S_SET_STORAGE_CLASS (sym, C_THUMBEXT);
@@ -11609,17 +11609,17 @@ arm_handle_align (fragP)
   int bytes, fix, noop_size;
   char * p;
   const char * noop;
-  
+
   if (fragP->fr_type != rs_align_code)
     return;
 
   bytes = fragP->fr_next->fr_address - fragP->fr_address - fragP->fr_fix;
   p = fragP->fr_literal + fragP->fr_fix;
   fix = 0;
-  
+
   if (bytes > MAX_MEM_FOR_RS_ALIGN_CODE)
     bytes &= MAX_MEM_FOR_RS_ALIGN_CODE;
-  
+
   if (fragP->tc_frag_data)
     {
       if (target_big_endian)
@@ -11636,7 +11636,7 @@ arm_handle_align (fragP)
 	noop = arm_noop;
       noop_size = sizeof (arm_noop);
     }
-  
+
   if (bytes & (noop_size - 1))
     {
       fix = bytes & (noop_size - 1);
@@ -11652,7 +11652,7 @@ arm_handle_align (fragP)
       bytes -= noop_size;
       fix += noop_size;
     }
-  
+
   fragP->fr_fix += fix;
   fragP->fr_var = noop_size;
 }
@@ -11671,7 +11671,7 @@ arm_frag_align_code (n, max)
      to support alignments greater than 32 bytes.  */
   if (max > MAX_MEM_FOR_RS_ALIGN_CODE)
     as_fatal (_("alignments greater than 32 bytes not supported in .text sections."));
-  
+
   p = frag_var (rs_align_code,
 		MAX_MEM_FOR_RS_ALIGN_CODE,
 		1,

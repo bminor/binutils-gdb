@@ -1,6 +1,6 @@
 /* tc-alpha.c - Processor-specific code for the DEC Alpha AXP CPU.
-   Copyright 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+   Copyright 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2001, 2002 Free Software Foundation, Inc.
    Contributed by Carnegie Mellon University, 1993.
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
@@ -1894,7 +1894,7 @@ tokenize_arguments (str, tok, ntok)
 	    goto err;
 
 	  ++input_line_pointer;
-          SKIP_WHITESPACE ();
+	  SKIP_WHITESPACE ();
 	  p = input_line_pointer;
 	  c = get_symbol_end ();
 
@@ -1917,7 +1917,7 @@ tokenize_arguments (str, tok, ntok)
 	    }
 
 	  *input_line_pointer = c;
-          SKIP_WHITESPACE ();
+	  SKIP_WHITESPACE ();
 	  if (*input_line_pointer != '!')
 	    {
 	      if (r->require_seq)
@@ -2377,7 +2377,7 @@ assemble_insn (opcode, tok, ntok, insn, reloc)
 	    abort ();
 
 	  /* There is one special case for which an insn receives two
-	     relocations, and thus the user-supplied reloc does not 
+	     relocations, and thus the user-supplied reloc does not
 	     override the operand reloc.  */
 	  if (operand->default_reloc == BFD_RELOC_ALPHA_HINT)
 	    {

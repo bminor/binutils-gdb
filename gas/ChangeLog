@@ -1,3 +1,14 @@
+2002-05-09  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* config/obj-coff.c: Fix formatting.
+	* config/obj-elf.c: Likewise.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-d10v.c: Likewise.
+	* config/tc-d30v.c: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+
 2002-05-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-i386.c (md_estimate_size_before_relax) Don't lose
