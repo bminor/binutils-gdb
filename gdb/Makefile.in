@@ -264,7 +264,7 @@ GLOBAL_CFLAGS = $(MT_CFLAGS) $(MH_CFLAGS)
 
 # CFLAGS is specifically reserved for setting from the command line
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
-CFLAGS = -g
+CFLAGS = @CFLAGS@
 
 # Need to pass this to testsuite for "make check".  Probably should be
 # consistent with top-level Makefile.in and gdb/testsuite/Makefile.in

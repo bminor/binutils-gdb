@@ -454,12 +454,14 @@ if test "${enable_netrom}" = "yes"; then
         CONFIG_SRCS="${CONFIG_SRCS} remote-nrom.c"
 fi
 
+
+build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
+-Wformat -Wparentheses -Wpointer-arith"
+# Not yet: -Wall -Wpointer-arith -Wstrict-prototypes
+# -Wmissing-prototypes -Wmissing-declarations
 AC_ARG_ENABLE(build-warnings,
 [  --enable-build-warnings Enable build-time compiler warnings if gcc is used],
-[
-# not yet: -Wall -Wpointer-arith -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations
-build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs -Wformat -Wparentheses -Wpointer-arith"
-case "${enableval}" in
+[case "${enableval}" in
   yes)	;;
   no)	build_warnings="-w";;
   ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
@@ -470,7 +472,7 @@ case "${enableval}" in
 esac
 if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
   echo "Setting warning flags = $build_warnings" 6>&1
-fi
+fi])dnl
 WARN_CFLAGS=""
 WERROR_CFLAGS=""
 if test "x${build_warnings}" != x -a "x$GCC" = xyes
@@ -483,8 +485,7 @@ then
     *) WARN_CFLAGS="${WARN_CFLAGS} $w"
     esac
   done
-fi],[build_warnings=""])dnl
-
+fi
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WERROR_CFLAGS)
 
