@@ -1,3 +1,8 @@
+Sun Nov  7 00:31:41 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/basic/basic.exp: No longer expect failures for
+	system instruction tests now that probei is fixed.
+
 Sat Nov  6 22:45:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/reloc/selectorbug.s: New test.
