@@ -1,3 +1,11 @@
+Thu Mar 14 16:06:06 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* coff-h8300.c: Include genlink.h.
+	(howto_table): Add R_MEM_INDIRECT.
+	(rtype2howto): Support R_MEM_INDIRECT.
+	(h8300_reloc16_extra_cases): Handle R_MEM_INDIRECT like R_RELBYTE
+	for now.
+	
 Tue Mar 12 12:41:17 1996  David Mosberger-Tang  <davidm@koala.azstarnet.com>
 
 	* coff-alpha.c (alpha_relocate_section): Use
