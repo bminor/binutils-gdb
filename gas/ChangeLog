@@ -1,5 +1,19 @@
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (MAX_VR4130_NOPS, MAX_DELAY_NOPS): New macros.
+	(MAX_NOPS): Bump to 4.
+	(mips_fix_vr4130): New variable.
+	(nops_for_vr4130): New function.
+	(nops_for_insn): Use MAX_DELAY_NOPS rather than MAX_NOPS.  Use
+	nops_for_vr4130 if working around VR4130 errata.
+	(OPTION_FIX_VR4130, OPTION_NO_FIX_VR4130): New macros.
+	(md_longopts): Add -mfix-vr4130 and -mno-fix-vr4130.
+	(md_parse_option): Handle them.
+	(md_show_usage): Print them.
+	* doc/c-mips.texi: Document -mfix-vr4130 and -mno-fix-vr4130.
+
+2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (append_insn): Remove cop_interlocks test from
 	branch delay code.
 
