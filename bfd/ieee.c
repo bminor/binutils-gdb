@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ieee.h"
 #include "libieee.h"
 
-static boolean ieee_write_byte PARAMS ((bfd *, bfd_byte));
+static boolean ieee_write_byte PARAMS ((bfd *, int));
 static boolean ieee_write_2bytes PARAMS ((bfd *, int));
 static boolean ieee_write_int PARAMS ((bfd *, bfd_vma));
 static boolean ieee_write_id PARAMS ((bfd *, const char *));
@@ -55,10 +55,13 @@ static boolean ieee_slurp_section_data PARAMS ((bfd *));
    standard requires. */
 
 static boolean
-ieee_write_byte (abfd, byte)
+ieee_write_byte (abfd, barg)
      bfd *abfd;
-     bfd_byte byte;
+     int barg;
 {
+  bfd_byte byte;
+
+  byte = barg;
   if (bfd_write ((PTR) &byte, 1, 1, abfd) != 1)
     return false;
   return true;
@@ -998,6 +1001,29 @@ get_section_entry (abfd, ieee, index)
      ieee_data_type *ieee;
      unsigned int index;
 {
+  if (index >= ieee->section_table_size)
+    {
+      unsigned int c, i;
+      asection **n;
+
+      c = ieee->section_table_size;
+      if (c == 0)
+	c = 20;
+      while (c <= index)
+	c *= 2;
+
+      n = ((asection **)
+	   bfd_realloc (ieee->section_table, c * sizeof (asection *)));
+      if (n == NULL)
+	return NULL;
+
+      for (i = ieee->section_table_size; i < c; i++)
+	n[i] = NULL;
+
+      ieee->section_table = n;
+      ieee->section_table_size = c;
+    }
+
   if (ieee->section_table[index] == (asection *) NULL)
     {
       char *tmp = bfd_alloc (abfd, 11);
@@ -1037,8 +1063,6 @@ ieee_slurp_sections (abfd)
 		unsigned int section_index;
 		next_byte (&(ieee->h));
 		section_index = must_parse_int (&(ieee->h));
-		/* Fixme to be nice about a silly number of sections */
-		BFD_ASSERT (section_index < NSECTIONS);
 
 		section = get_section_entry (abfd, ieee, section_index);
 
@@ -1369,7 +1393,8 @@ ieee_object_p (abfd)
   ieee->external_reference_min_index = IEEE_REFERENCE_BASE;
   ieee->external_reference_max_index = 0;
   ieee->h.abfd = abfd;
-  memset ((PTR) ieee->section_table, 0, sizeof (ieee->section_table));
+  ieee->section_table = NULL;
+  ieee->section_table_size = 0;
 
   processor = ieee->mb.processor = read_id (&(ieee->h));
   if (strcmp (processor, "LIBRARY") == 0)
@@ -1799,6 +1824,10 @@ ieee_slurp_section_data (abfd)
 	      break;
 
 	    case ieee_value_starting_address_enum & 0xff:
+	      next_byte (&(ieee->h));
+	      if (this_byte (&(ieee->h)) == ieee_function_either_open_b_enum)
+		next_byte (&(ieee->h));
+	      abfd->start_address = must_parse_int (&(ieee->h));
 	      /* We've got to the end of the data now - */
 	      return true;
 	    default:
@@ -2034,7 +2063,7 @@ ieee_write_section_part (abfd)
 					((bfd_byte)
 					 (s->index
 					  + IEEE_SECTION_NUMBER_BASE)))
-		  || ! ieee_write_int (abfd, s->vma))
+		  || ! ieee_write_int (abfd, s->lma))
 		return false;
 	    }
 	}
@@ -2071,7 +2100,7 @@ do_with_relocs (abfd, s)
     return false;
   if ((abfd->flags & EXEC_P) != 0 && relocs_to_go == 0)
     {
-      if (! ieee_write_int (abfd, s->vma))
+      if (! ieee_write_int (abfd, s->lma))
 	return false;
     }
   else
@@ -2272,7 +2301,7 @@ do_as_repeat (abfd, s)
 	  || ! ieee_write_byte (abfd,
 				(bfd_byte) (s->index
 					    + IEEE_SECTION_NUMBER_BASE))
-	  || ! ieee_write_int (abfd, s->vma)
+	  || ! ieee_write_int (abfd, s->lma)
 	  || ! ieee_write_byte (abfd, ieee_repeat_data_enum)
 	  || ! ieee_write_int (abfd, s->_raw_size)
 	  || ! ieee_write_byte (abfd, ieee_load_constant_bytes_enum)
@@ -2492,7 +2521,7 @@ copy_expression ()
 	    s = ieee->section_table[section_number];
 	    if (s->output_section)
 	      {
-		value = s->output_section->vma;
+		value = s->output_section->lma;
 	      }
 	    else
 	      {
@@ -3133,7 +3162,8 @@ ieee_set_section_contents (abfd, section, location, offset, count)
     {
       if (section->contents == NULL)
 	{
-	  section->contents = bfd_alloc (abfd, section->_raw_size);
+	  section->contents = ((unsigned char *)
+			       bfd_alloc (abfd, section->_raw_size));
 	  if (section->contents == NULL)
 	    return false;
 	}
@@ -3176,7 +3206,6 @@ ieee_write_external_part (abfd)
       for (q = abfd->outsymbols; *q != (asymbol *) NULL; q++)
 	{
 	  asymbol *p = *q;
-	  hadone = true;
 	  if (bfd_is_und_section (p->section))
 	    {
 	      /* This must be a symbol reference .. */
@@ -3186,6 +3215,7 @@ ieee_write_external_part (abfd)
 		return false;
 	      p->value = reference_index;
 	      reference_index++;
+	      hadone = true;
 	    }
 	  else if (bfd_is_com_section (p->section))
 	    {
@@ -3200,6 +3230,7 @@ ieee_write_external_part (abfd)
 		return false;
 	      p->value = reference_index;
 	      reference_index++;
+	      hadone = true;
 	    }
 	  else if (p->flags & BSF_GLOBAL)
 	    {
@@ -3252,6 +3283,7 @@ ieee_write_external_part (abfd)
 		}
 	      p->value = public_index;
 	      public_index++;
+	      hadone = true;
 	    }
 	  else
 	    {
@@ -3432,6 +3464,27 @@ ieee_write_object_contents (abfd)
   ieee->w.r.environmental_record = bfd_tell (abfd);
   if (bfd_write ((char *) envi, 1, sizeof (envi), abfd) != sizeof (envi))
     return false;
+
+  /* The HP emulator database requires a timestamp in the file.  */
+  {
+    time_t now;
+    const struct tm *t;
+
+    time (&now);
+    t = (struct tm *) localtime (&now);
+    if (! ieee_write_2bytes (abfd, (int) ieee_atn_record_enum)
+	|| ! ieee_write_byte (abfd, 0x21)
+	|| ! ieee_write_byte (abfd, 0)
+	|| ! ieee_write_byte (abfd, 50)
+	|| ! ieee_write_int (abfd, t->tm_year + 1900)
+	|| ! ieee_write_int (abfd, t->tm_mon + 1)
+	|| ! ieee_write_int (abfd, t->tm_mday)
+	|| ! ieee_write_int (abfd, t->tm_hour)
+	|| ! ieee_write_int (abfd, t->tm_min)
+	|| ! ieee_write_int (abfd, t->tm_sec))
+      return false;
+  }
+
   output_bfd = abfd;
 
   flush ();
@@ -3703,7 +3756,7 @@ const bfd_target ieee_vec =
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
   (SEC_CODE | SEC_DATA | SEC_ROM | SEC_HAS_CONTENTS
    | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* section flags */
-  0,				/* leading underscore */
+  '_',				/* leading underscore */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
