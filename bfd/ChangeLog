@@ -1,6 +1,6 @@
 Mon Mar 31 16:29:50 1997  Joel Sherrill  <joel@oarcorp.com>
 
-        * bfd/config.bfd (hppa*-*-rtems*): New target, like hppa-*-*elf*.
+        * config.bfd (hppa*-*-rtems*): New target, like hppa-*-*elf*.
 
 Mon Mar 31 16:11:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 
