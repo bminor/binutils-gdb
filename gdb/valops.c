@@ -2795,6 +2795,8 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
         }
 
       old_cleanups = make_cleanup (xfree, func_name);
+      make_cleanup (xfree, oload_syms);
+      make_cleanup (xfree, oload_champ_bv);
 
       oload_champ = find_oload_champ_namespace (arg_types, nargs,
 						current_block,
@@ -2893,7 +2895,8 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
    contained in QUALIFIED_NAME until it either finds a good match or
    runs out of namespaces.  It stores the overloaded functions in
    *OLOAD_SYMS, and the badness vector in *OLOAD_CHAMP_BV.  The
-   calling function is responsible for freeing *OLOAD_SYMS.  */
+   calling function is responsible for freeing *OLOAD_SYMS and
+   *OLOAD_CHAMP_BV.  */
 
 static int
 find_oload_champ_namespace (struct type **arg_types, int nargs,
@@ -2917,7 +2920,10 @@ find_oload_champ_namespace (struct type **arg_types, int nargs,
 /* Helper function for find_oload_champ_namespace; NAMESPACE_LEN is
    how deep we've looked for namespaces, and the champ is stored in
    OLOAD_CHAMP.  The return value is 1 if the champ is a good one, 0
-   if it isn't.  */
+   if it isn't.
+
+   It is the caller's responsibility to free *OLOAD_SYMS and
+   *OLOAD_CHAMP_BV.  */
 
 /* FIXME: carlton/2003-01-30: This isn't the cleanest function I've
    ever written, to put it mildly.  All this overloading stuff could
@@ -2951,6 +2957,10 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
     = (cp_find_first_component (qualified_name + modified_namespace_len)
        - qualified_name);
 
+  /* Initialize these to values that can safely be xfree'd.  */
+  *oload_syms = NULL;
+  *oload_champ_bv = NULL;
+
   /* First, see if we have a deeper namespace we can search in.  If we
      get a good match there, use it.  */
 
@@ -2977,18 +2987,16 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
      function symbol to start off with.)  */
 
   old_cleanups = make_cleanup (xfree, *oload_syms);
+  old_cleanups = make_cleanup (xfree, *oload_champ_bv);
   new_oload_syms = make_symbol_overload_list (func_name,
 					      qualified_name,
 					      namespace_len,
 					      current_block);
-  old_cleanups = make_cleanup (xfree, new_oload_syms);
   while (new_oload_syms[num_fns])
     ++num_fns;
-  if (!num_fns)
-    error ("Couldn't find function %s", func_name);
 
   new_oload_champ = find_oload_champ (arg_types, nargs, 0, num_fns,
-				       NULL, new_oload_syms,
+				      NULL, new_oload_syms,
 				      &new_oload_champ_bv);
 
   /* Case 1: We found a good match.  Free earlier matches (if any),
@@ -3001,17 +3009,16 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
   if (new_oload_champ != -1
       && classify_oload_match (new_oload_champ_bv, nargs, 0) == STANDARD)
     {
-      if (searched_deeper)
-	xfree (*oload_syms);
       *oload_syms = new_oload_syms;
       *oload_champ = new_oload_champ;
       *oload_champ_bv = new_oload_champ_bv;
-      discard_cleanups (old_cleanups);
+      do_cleanups (old_cleanups);
       return 1;
     }
   else if (searched_deeper)
     {
       xfree (new_oload_syms);
+      xfree (new_oload_champ_bv);
       discard_cleanups (old_cleanups);
       return 0;
     }
@@ -3031,7 +3038,9 @@ find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
    (depending on METHOD) given by FNS_PTR or OLOAD_SYMS, respectively.
    The number of methods/functions in the list is given by NUM_FNS.
    Return the index of the best match; store an indication of the
-   quality of the match in OLOAD_CHAMP_BV.  */
+   quality of the match in OLOAD_CHAMP_BV.
+
+   It is the caller's responsibility to free *OLOAD_CHAMP_BV.  */
 
 static int
 find_oload_champ (struct type **arg_types, int nargs, int method,

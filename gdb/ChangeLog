@@ -1,6 +1,26 @@
+2003-02-11  David Carlton  <carlton@math.stanford.edu>
+
+	* valops.c (find_oload_champ): Add comment.
+	(find_oload_champ_namespace_loop): Fix memory management.
+	(find_oload_champ_namespace): Add comment.
+	(find_overload_match): Free oload_syms, oload_champ_bv.
+	* gdbtypes.c (rank_function): Add comment.
+	* valops.c (find_oload_champ_namespace_loop): Allow num_fns to be
+	zero.
+	* symtab.c (lookup_partial_symbol): Use strcmp_iw_ordered.
+	(lookup_block_symbol): Delete comment.
+	* symfile.c (compare_psymbols): Use strcmp_iw_ordered.
+	* defs.h: Declare strcmp_iw_ordered.
+	* utils.c (strcmp_iw_ordered): New function.
+
+2003-02-10  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (read_in_psymtabs): Only read in symtabs where we find
+	a matching symbol.
+
 2003-02-07  David Carlton  <carlton@math.stanford.edu>
 
-	* gdb_mbuild.sh (keep): Delete extra shift after -f.
+	* gdb_mbuild.sh: Delete extra shift after -f.
 
 	* Merge with mainline; tag is carlton_dictionary-20030207-merge.
 

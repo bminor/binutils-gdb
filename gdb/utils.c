@@ -2359,6 +2359,64 @@ strcmp_iw (const char *string1, const char *string2)
   return (*string1 != '\0' && *string1 != '(') || (*string2 != '\0');
 }
 
+/* This is like strcmp except that it ignores whitespace and treats
+   '(' as the first non-NULL character in terms of ordering.  Like
+   strcmp (and unlike strcmp_iw), it returns negative if STRING1 <
+   STRING2, 0 if STRING2 = STRING2, and positive if STRING1 > STRING2
+   according to that ordering.
+
+   If a list is sorted according to this function and if you want to
+   find names in the list that match some fixed NAME according to
+   strcmp_iw(LIST_ELT, NAME), then the place to start looking is right
+   where this function would put NAME.  */
+
+int
+strcmp_iw_ordered (const char *string1, const char *string2)
+{
+  while ((*string1 != '\0') && (*string2 != '\0'))
+    {
+      while (isspace (*string1))
+	{
+	  string1++;
+	}
+      while (isspace (*string2))
+	{
+	  string2++;
+	}
+      if (*string1 != *string2)
+	{
+	  break;
+	}
+      if (*string1 != '\0')
+	{
+	  string1++;
+	  string2++;
+	}
+    }
+
+  switch (*string1)
+    {
+      /* Characters are non-equal unless they're both '\0'; we want to
+	 make sure we get the comparison right according to our
+	 comparison in the cases where one of them is '\0' or '('.  */
+    case '\0':
+      if (*string2 == '\0')
+	return 0;
+      else
+	return -1;
+    case '(':
+      if (*string2 == '\0')
+	return 1;
+      else
+	return -1;
+    default:
+      if (*string2 == '(')
+	return 1;
+      else
+	return *string1 - *string2;
+    }
+}
+
 /* A simple comparison function with opposite semantics to strcmp.  */
 
 int

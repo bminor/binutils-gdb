@@ -2410,9 +2410,12 @@ compare_badness (struct badness_vector *a, struct badness_vector *b)
     }
 }
 
-/* Rank a function by comparing its parameter types (PARMS, length NPARMS),
- * to the types of an argument list (ARGS, length NARGS).
- * Return a pointer to a badness vector. This has NARGS + 1 entries. */
+/* Rank a function by comparing its parameter types (PARMS, length
+   NPARMS), to the types of an argument list (ARGS, length NARGS).
+   Return a pointer to a badness vector. This has NARGS + 1
+   entries.
+
+   It is the caller's responsibility to free the return value.  */
 
 struct badness_vector *
 rank_function (struct type **parms, int nparms, struct type **args, int nargs)

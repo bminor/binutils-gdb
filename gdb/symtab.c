@@ -1517,8 +1517,8 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
       do_linear_search = 0;
 
       /* Binary search.  This search is guaranteed to end with center
-         pointing at the earliest partial symbol with the correct
-         name.  At that point *all* partial symbols with that name
+         pointing at the earliest partial symbol whose name might be
+         correct.  At that point *all* partial symbols with that name
          will be checked against the correct namespace. */
 
       bottom = start;
@@ -1535,7 +1535,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 	    {
 	      do_linear_search = 1;
 	    }
-	  if (strcmp (SYMBOL_BEST_NAME (*center), name) >= 0)
+	  if (strcmp_iw_ordered (SYMBOL_BEST_NAME (*center), name) >= 0)
 	    {
 	      top = center;
 	    }
@@ -1740,22 +1740,6 @@ find_main_psymtab (void)
    If LINKAGE_NAME is non-NULL, verify that any symbol we find has
    this particular linkage name.
 */
-
-/* FIXME: carlton/2002-09-26: I've slightly changed the semantics: I
-   replaced a call to SYMBOL_MATCHES_NAME (sym, name) with a call to
-   strcmp_iw (SYMBOL_BEST_NAME (sym), name) (inside the dict_iter_name
-   functions).  I think this is okay: the only situations where the
-   new behavior should differ from the old behavior are where NAME is
-   mangled (which shouldn't happen, right??? lookup_symbol always
-   tries to demangle appropriately) or where the symbol we find
-   doesn't have a demangled name and where the symbol's name is such
-   that strcmp and strcmp_iw don't match on it (which seems unlikely
-   to me).  */
-
-/* NOTE: carlton/2003-01-14: No, there are situations where this is
-   more generous: it ignores whitespace on demangled names, too.  This
-   is good: e.g. it makes recognizing templated types more generous.
-   See PR gdb/33.  */
 
 struct symbol *
 lookup_block_symbol (register const struct block *block, const char *name,
@@ -4195,11 +4179,6 @@ make_symbol_overload_list_qualified (const char *func_name)
 /* Look through the partial symtabs for all symbols which begin
    by matching FUNC_NAME.  Make sure we read that symbol table in. */
 
-/* FIXME: carlton/2003-01-30.  Lies, all lies.  The function does
-   nothing of the kind: it just reads in every single partial symtab.
-   (It used to do it in a particularly amusing way, but I've fixed
-   that.)  */
-
 static void
 read_in_psymtabs (const char *func_name)
 {
@@ -4208,7 +4187,11 @@ read_in_psymtabs (const char *func_name)
 
   ALL_PSYMTABS (objfile, ps)
   {
-    if (!ps->readin)
+    if (ps->readin)
+      continue;
+
+    if ((lookup_partial_symbol (ps, func_name, 1, VAR_NAMESPACE) != NULL)
+	|| (lookup_partial_symbol (ps, func_name, 0, VAR_NAMESPACE) != NULL))
       psymtab_to_symtab (ps);
   }
 }
