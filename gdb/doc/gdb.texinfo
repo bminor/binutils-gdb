@@ -31,7 +31,10 @@
 @set EDITION Ninth
 
 @c !!set GDB manual's revision date
-@set DATE December 2001
+@set DATE June 2002
+
+@c !!set GDB edit command default editor
+@set EDITOR /bin/ex
 
 @c THIS MANUAL REQUIRES TEXINFO 4.0 OR LATER.
 
@@ -3926,7 +3929,10 @@ For example:
 
 After such a printout, the @code{list} command with no arguments
 prints ten lines centered on the point of execution in the frame.
-@xref{List, ,Printing source lines}.
+You can also edit the program at the point of execution with your favorite
+editing program by typing @code{edit}.
+@xref{List, ,Printing source lines},
+for details.
 
 @table @code
 @kindex down-silently
@@ -4033,6 +4039,7 @@ prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 
 @menu
 * List::                        Printing source lines
+* Edit::                        Editing source files
 * Search::                      Searching source files
 * Source Path::                 Specifying source directories
 * Machine Code::                Source and machine code
@@ -4154,6 +4161,71 @@ identically named functions in different source files.
 Specifies the line containing the program address @var{address}.
 @var{address} may be any expression.
 @end table
+
+@node Edit
+@section Editing source files
+@cindex editing source files
+
+@kindex edit
+@kindex e @r{(@code{edit})}
+To edit the lines in a source file, use the @code{edit} command.
+The editing program of your choice
+is invoked with the current line set to
+the active line in the program.
+Alternatively, there are several ways to specify what part of the file you
+want to print if you want to see other parts of the program.
+
+Here are the forms of the @code{edit} command most commonly used:
+
+@table @code
+@item edit
+Edit the current source file at the active line number in the program.
+
+@item edit @var{number}
+Edit the current source file with @var{number} as the active line number.
+
+@item edit @var{function}
+Edit the file containing @var{function} at the beginning of its definition.
+
+@item edit @var{filename}:@var{number}
+Specifies line @var{number} in the source file @var{filename}.
+
+@item edit @var{filename}:@var{function}
+Specifies the line that begins the body of the
+function @var{function} in the file @var{filename}.  You only need the
+file name with a function name to avoid ambiguity when there are
+identically named functions in different source files.
+
+@item edit *@var{address}
+Specifies the line containing the program address @var{address}.
+@var{address} may be any expression.
+@end table
+
+@subsection Choosing your editor
+You can customize @value{GDBN} to use any editor you want
+@footnote{
+The only restriction is that your editor (say @code{ex}), recognizes the
+following command-line syntax:
+@example
+ex +@var{number} file
+@end example
+The optional numeric value +@var{number} designates the active line in the file.
+}.
+By default, it is @value{EDITOR}, but you can change this by setting the
+environment variable @code{EDITOR} before using
+@value{GDBN}.
+For example, to configure @value{GDBN} to use the @code{vi} editor, you
+could use these commands with the @code{sh} shell:
+@example
+EDITOR=/usr/bin/vi
+export EDITOR
+gdb ...
+@end example
+or in the @code{csh} shell,
+@example
+setenv EDITOR /usr/bin/vi
+gdb ...
+@end example
 
 @node Search
 @section Searching source files

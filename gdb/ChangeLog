@@ -1,4 +1,13 @@
-2002-09-13  Fernando Nasser  <fnasser@redhat.com>
+2002-09-20  Fernando Nasser  <fnasser@redhat.com>
+
+	From 2002-07-02  George Helffrich <george@gly.bris.ac.uk>
+	* cli/cli-cmds.c (list_command): New function.  Implements the new
+	cli edit command.
+	(_init_cli_cmds): Add new command definition.
+	* gdb.1: Document edit command.
+	* doc/gdb.texinfo: Document edit command.
+
+2002-09-20  Fernando Nasser  <fnasser@redhat.com>
 
 	* source.c: Make global variables current_source_symtab and
 	current_source_line static.
