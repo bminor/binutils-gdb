@@ -1,3 +1,8 @@
+2000-04-09  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* am33.igen: Make SP-relative offsets unsigned.  Add `*am33' for
+	some instructions that were missing it.
+
 2000-03-03  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
 
 	* Makefile.in (IGEN_INSN): Added am33.igen.

@@ -1911,6 +1911,7 @@
 // 1111 1011 0001 1010 Rn Rm IMM8; mov Rm,(d8,Rn)
 8.0xfb+8.0x1a+4.RM2,4.RN0+8.IMM8:D2m:::mov
 "mov"
+*am33
 {
   int srcreg, dstreg;
 
@@ -1923,6 +1924,7 @@
 // 1111 1011 0010 1010 Rn Rm IMM8; movbu (d8,Rm),Rn
 8.0xfb+8.0x2a+4.RN2,4.RM0+8.IMM8:D2l:::movbu
 "movbu"
+*am33
 {
   int srcreg, dstreg;
 
@@ -1935,6 +1937,7 @@
 // 1111 1011 0011 1010 Rn Rm IMM8; movbu Rm,(d8,Rn)
 8.0xfb+8.0x3a+4.RM2,4.RN0+8.IMM8:D2m:::movbu
 "movbu"
+*am33
 {
   int srcreg, dstreg;
 
@@ -1947,6 +1950,7 @@
 // 1111 1011 0100 1010 Rn Rm IMM8; movhu (d8,Rm),Rn
 8.0xfb+8.0x4a+4.RN2,4.RM0+8.IMM8:D2l:::movhu
 "movhu"
+*am33
 {
   int srcreg, dstreg;
 
@@ -1959,6 +1963,7 @@
 // 1111 1011 0101 1010 Rn Rm IMM8; movhu Rm,(d8,Rn)
 8.0xfb+8.0x5a+4.RM2,4.RN0+8.IMM8:D2m:::movhu
 "movhu"
+*am33
 {
   int srcreg, dstreg;
 
@@ -1985,6 +1990,7 @@
 // 1111 1011 0111 1010 Rn Rm IMM8; mov Rm,(d8,Rn+)
 8.0xfb+8.0x7a+4.RM2,4.RN0+8.IMM8:D2z:::mov
 "mov"
+*am33
 {
   int srcreg, dstreg;
 
@@ -1999,17 +2005,19 @@
 // 1111 1011 1000 1010 Rn 0000 IMM8; mov (d8,sp),Rn
 8.0xfb+8.0x8a+4.RN2,4.0x0+8.IMM8:D2n:::mov
 "mov"
+*am33
 {
   int dstreg;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN2);
-  State.regs[dstreg] = load_word (State.regs[REG_SP] + EXTEND8 (IMM8));
+  State.regs[dstreg] = load_word (State.regs[REG_SP] + IMM8);
 }
 
 // 1111 1011 1001 1010 Rm 0000 IMM8; mov Rm,(d8,Rn)
 8.0xfb+8.0x9a+4.RM2,4.0x0+8.IMM8:D2o:::mov
 "mov"
+*am33
 {
   int srcreg;
 
@@ -2021,17 +2029,19 @@
 // 1111 1011 1010 1010 Rn Rm IMM8; movbu (d8,sp),Rn
 8.0xfb+8.0xaa+4.RN2,4.0x0+8.IMM8:D2n:::movbu
 "movbu"
+*am33
 {
   int dstreg;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN2);
-  State.regs[dstreg] = load_byte (State.regs[REG_SP] + EXTEND8 (IMM8));
+  State.regs[dstreg] = load_byte (State.regs[REG_SP] + IMM8);
 }
 
 // 1111 1011 1011 1010 Rn Rm IMM8; movbu Rm,(sp,Rn)
 8.0xfb+8.0xba+4.RM2,4.0x0+8.IMM8:D2o:::movbu
 "movbu"
+*am33
 {
   int srcreg;
 
@@ -2043,23 +2053,25 @@
 // 1111 1011 1100 1010 Rn Rm IMM8; movhu (d8,sp),Rn
 8.0xfb+8.0xca+4.RN2,4.0x0+8.IMM8:D2n:::movhu
 "movhu"
+*am33
 {
   int dstreg;
 
   PC = cia;
   dstreg = translate_rreg (SD_, RN2);
-  State.regs[dstreg] = load_half (State.regs[REG_SP] + EXTEND8 (IMM8));
+  State.regs[dstreg] = load_half (State.regs[REG_SP] + IMM8);
 }
 
 // 1111 1011 1101 1010 Rn Rm IMM8; movhu Rm,(d8,sp)
 8.0xfb+8.0xda+4.RM2,4.0x0+8.IMM8:D2o:::movhu
 "movhu"
+*am33
 {
   int srcreg;
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
-  store_half (State.regs[REG_SP] + EXTEND8 (IMM8), State.regs[srcreg]);
+  store_half (State.regs[REG_SP] + IMM8, State.regs[srcreg]);
 }
 
 // 1111 1011 1110 1010 Rn Rm IMM8; movhu (d8,Rm+),Rn
@@ -2079,6 +2091,7 @@
 // 1111 1011 1111 1010 Rn Rm IMM8; movhu Rm,(d8,Rn+)
 8.0xfb+8.0xfa+4.RM2,4.RN0+8.IMM8:D2z:::movhu
 "movhu"
+*am33
 {
   int srcreg, dstreg;
 
@@ -2093,6 +2106,7 @@
 // 1111 1011 0000 1011 Rn Rn IMM8; mac imm8,Rn
 8.0xfb+8.0x0b+4.RN2,4.RN0=RN2+8.IMM8:D2:::mac
 "mac"
+*am33
 {
   int srcreg;
   long long temp, sum;
@@ -2119,6 +2133,7 @@
 // 1111 1011 0001 1011 Rn Rn IMM8; macu imm8,Rn
 8.0xfb+8.0x1b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macu
 "macu"
+*am33
 {
   int srcreg;
   long long temp, sum;
@@ -2145,6 +2160,7 @@
 // 1111 1011 0010 1011 Rn Rn IMM8; macb imm8,Rn
 8.0xfb+8.0x2b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macb
 "macb"
+*am33
 {
   int srcreg;
   long long temp, sum;
@@ -2171,6 +2187,7 @@
 // 1111 1011 0011 1011 Rn Rn IMM8; macbu imm8,Rn
 8.0xfb+8.0x3b+4.RN2,4.RN0=RN2+8.IMM8:D2:::macbu
 "macbu"
+*am33
 {
   int srcreg;
   long long temp, sum;
@@ -2197,6 +2214,7 @@
 // 1111 1011 0100 1011 Rn Rn IMM8; mach imm8,Rn
 8.0xfb+8.0x4b+4.RN2,4.RN0=RN2+8.IMM8:D2:::mach
 "mach"
+*am33
 {
   int srcreg;
   long long temp, sum;
@@ -2223,6 +2241,7 @@
 // 1111 1011 0101 1011 Rn Rn IMM8; machu imm8,Rn
 8.0xfb+8.0x5b+4.RN2,4.RN0=RN2+8.IMM8:D2:::machu
 "machu"
+*am33
 {
   int srcreg;
   long long temp, sum;
@@ -2249,6 +2268,7 @@
 // 1111 1011 1011 1011 Rn Rn IMM8; mcste imm8,Rn
 8.0xfb+8.0xbb+4.RN2,4.RN0=RN2+8.IMM8:D2:::mcste
 "mcste"
+*am33
 {
   int dstreg;
 
@@ -3588,8 +3608,7 @@
   PC = cia;
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_word (State.regs[REG_SP]
-				  + EXTEND24 (FETCH24 (IMM24A,
-						       IMM24B, IMM24C)));
+				  + FETCH24 (IMM24A, IMM24B, IMM24C));
 }
 
 // 1111 1101 1001 1010 Rm 0000 IMM24; mov Rm,(d24,sp)
@@ -3601,7 +3620,7 @@
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
-  store_word (State.regs[REG_SP] + EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)),
+  store_word (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
 	      State.regs[srcreg]);
 }
 
@@ -3628,7 +3647,7 @@
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
-  store_byte (State.regs[REG_SP] + EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)),
+  store_byte (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
 	      State.regs[srcreg]);
 }
 
@@ -3642,8 +3661,7 @@
   PC = cia;
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_half (State.regs[REG_SP]
-				  + EXTEND24 (FETCH24 (IMM24A,
-						       IMM24B, IMM24C)));
+				  + FETCH24 (IMM24A, IMM24B, IMM24C));
 }
 
 // 1111 1101 1101 1010 Rm Rn IMM24; movhu Rm,(d24,sp)
@@ -3655,7 +3673,7 @@
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
-  store_half (State.regs[REG_SP] + EXTEND24 (FETCH24 (IMM24A, IMM24B, IMM24C)),
+  store_half (State.regs[REG_SP] + FETCH24 (IMM24A, IMM24B, IMM24C),
 	      State.regs[srcreg]);
 }
 
