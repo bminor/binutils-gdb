@@ -1,3 +1,8 @@
+Sun Nov  3 18:06:42 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* mswin/{Makefile.in configure configure.in}:  New files for
+	configuring wingdb under Unix.
+
 Sat Nov  2 03:54:13 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* irix5-nat.c, osfsolib.c, solib.c (symbol_add_stub):  Handle
