@@ -1,3 +1,13 @@
+Tue Sep  8 17:24:52 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* remote-nindy.c (nindy_fetch_registers): Make return type void,
+	to agree with target structure field type.
+	(nindy_store_registers): Ditto.
+
+	* Makefile (OPCODES): New var, pointing to opcodes library.
+	(CLIBS, CDEPS): Include it.
+	(saber_gdb): Load opcodes library.
+
 Tue Sep  8 15:22:06 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* a68v-xdep.c (store_inferior_registers):  declare as void.

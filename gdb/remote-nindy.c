@@ -470,7 +470,7 @@ struct nindy_regs {
   char	fp_as_double[4 * 8];
 };
 
-static int
+static void
 nindy_fetch_registers(regno)
      int regno;
 {
@@ -497,7 +497,6 @@ nindy_fetch_registers(regno)
   }
 
   registers_fetched ();
-  return 0;
 }
 
 static void
@@ -506,7 +505,7 @@ nindy_prepare_to_store()
   nindy_fetch_registers(-1);
 }
 
-static int
+static void
 nindy_store_registers(regno)
      int regno;
 {
@@ -536,7 +535,6 @@ nindy_store_registers(regno)
   immediate_quit++;
   ninRegsPut( (char *) &nindy_regs );
   immediate_quit--;
-  return 0;
 }
 
 /* Read a word from remote address ADDR and return it.
