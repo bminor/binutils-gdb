@@ -26,7 +26,7 @@ static const char *const v850_reg_names[] =
 { "r0", "r1", "r2", "sp", "gp", "r5", "r6", "r7", 
   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", 
   "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23", 
-  "r24", "r25", "r26", "r27", "r28", "r29", "ep", "r31" };
+  "r24", "r25", "r26", "r27", "r28", "r29", "ep", "lp" };
 
 static const char *const v850_sreg_names[] =
 { "eipc", "eipsw", "fepc", "fepsw", "ecr", "psw", "sr6", "sr7", 
@@ -49,22 +49,43 @@ disassemble (memaddr, info, insn)
   int                           match = 0;
   int                         	short_op = ((insn & 0x0600) != 0x0600);
   int				bytes_read;
-
-
+  int				target_processor;
+  
+/* start-sanitize-v850e */
   /* Special case: 32 bit MOV */
   if ((insn & 0xffe0) == 0x0620)
     short_op = true;
-      
+/* end-sanitize-v850e */
+  
   bytes_read = short_op ? 2 : 4;
   
   /* If this is a two byte insn, then mask off the high bits. */
   if (short_op)
     insn &= 0xffff;
 
+  switch (info->mach)
+    {
+    case 0:
+    default:
+      target_processor = PROCESSOR_V850;
+      break;
+
+/* start-sanitize-v850e */
+    case bfd_mach_v850e:
+      target_processor = PROCESSOR_V850E;
+      break;
+
+    case bfd_mach_v850eq: 
+      target_processor = PROCESSOR_V850EQ;
+      break;
+/* end-sanitize-v850e */
+    }
+  
   /* Find the opcode.  */
   while (op->name)
     {
-      if ((op->mask & insn) == op->opcode)
+      if ((op->mask & insn) == op->opcode
+	  && (op->processors & target_processor))
 	{
 	  const unsigned char * opindex_ptr;
 	  unsigned int          opnum;
@@ -160,10 +181,8 @@ disassemble (memaddr, info, insn)
 		case V850E_PUSH_POP:
 		  {
 		    static int list12_regs[32] = { 30,  0,  0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0, 31, 29, 28, 23, 22, 21, 20, 27, 26, 25, 24 };
-/* start-sanitize-v850eq */
 		    static int list18_h_regs[32] = { 19, 18, 17, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 30, 31, 29, 28, 23, 22, 21, 20, 27, 26, 25, 24 };
 		    static int list18_l_regs[32] = {  3,  2,  1, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 14, 15, 13, 12,  7,  6,  5,  4, 11, 10,  9,  8 };
-/* end-sanitize-v850eq */
 		    int *             regs;
 		    int               i;
 		    unsigned long int mask = 0;
@@ -174,10 +193,8 @@ disassemble (memaddr, info, insn)
 		    switch (operand->shift)
 		      {
 		      case 0xffe00001: regs = list12_regs; break;
-/* start-sanitize-v850eq */
 		      case 0xfff8000f: regs = list18_h_regs; break;
 		      case 0xfff8001f: regs = list18_l_regs; value &= ~0x10; break;  /* Do not include magic bit */
-/* end-sanitize-v850eq */
 		      default:
 			fprintf (stderr, "unknown operand shift: %x\n", operand->shift );		    
 			abort();
@@ -190,11 +207,9 @@ disassemble (memaddr, info, insn)
 			    switch (regs[ i ])
 			      {
 			      default: mask |= (1 << regs[ i ]); break;
-/* start-sanitize-v850eq */
 			      case 0:  fprintf (stderr, "unknown pop reg: %d\n", i ); abort();
 			      case -1: pc = true; break;
 			      case -2: sr = true; break;
-/* end-sanitize-v850eq */
 			      }
 			  }
 		      }

@@ -1,3 +1,10 @@
+Wed Oct  1 16:58:54 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* v850-opc.c: Fix typo in comment.
+
+	* v850-dis.c (disassemble): Add test of processor type when
+	determining opcodes.
+
 Wed Oct  1 14:10:20 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Use a diversion to set enable_shared before the
