@@ -1,3 +1,20 @@
+Mon Oct 16 19:11:13 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/elf32.em: Struct bfd_elf_link_needed_list is now named
+	bfd_link_needed-list; make appropriate changes.
+
+	* configure.tgt (powerpc-*-aix*): New target; use aixppc.
+	(rs6000-*-aix*): New target; use aixrs6.
+	* emulparams/aixppc.sh, emulparams/aixrs6.sh: New files.
+	* emultempl/aix.em: New file.
+	* scripttempl/aix.sc: New file.
+	* Makefile.in (ALL_EMULATIONS): Add eaixppc.o and eaixrs6.o.
+	(eaixppc.c, eaixrs6.c): New targets.
+
+Fri Oct 13 14:00:37 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* scripttemp/pe.sc (.reloc): Move to the end.
+
 Tue Oct 10 17:53:22 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (lang_finish): Don't try to use an entry_symbol from a

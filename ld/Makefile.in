@@ -141,7 +141,7 @@ CC_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CC); \
     else \
-      echo gcc | sed $(program_transform_name); \
+      echo gcc | sed '$(program_transform_name)'; \
     fi; \
   fi`
 
@@ -157,7 +157,7 @@ CXX_FOR_TARGET = ` \
     if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
       echo $(CXX); \
     else \
-      echo gcc | sed $(program_transform_name); \
+      echo gcc | sed '$(program_transform_name)'; \
     fi; \
   fi`
 
@@ -202,7 +202,8 @@ ALL_EMULATIONS = ea29k.o ealpha.o earmaoutl.o earmaoutb.o \
 	emipsidt.o emipsidtl.o emipslit.o enews.o ens32knbsd.o eppcnw.o \
 	eriscix.o esa29200.o eshl.o esh.o esparclynx.o esparcnbsd.o \
 	est2000.o esun3.o esun4.o evanilla.o evax.o evsta.o \
-	ez8001.o ez8002.o ei386pe.o earmpe.o eelf32vr4300.o eelf32vr4300el.o
+	ez8001.o ez8002.o ei386pe.o earmpe.o eelf32vr4300.o eelf32vr4300el.o \
+	eaixppc.o eaixrs6.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -481,12 +482,21 @@ earmaoutl.c:	$(srcdir)/emulparams/armaoutl.sh \
 earmaoutb.c:	$(srcdir)/emulparams/armaoutb.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armaoutb
+earmcoff.c:	$(srcdir)/emulparams/armcoff.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armcoff.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} armcoff
 ez8001.c: $(srcdir)/emulparams/z8001.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8000.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} z8001
 ez8002.c: $(srcdir)/emulparams/z8002.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8000.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} z8002
+eaixppc.c: $(srcdir)/emulparams/aixppc.sh \
+  $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} aixppc
+eaixrs6.c: $(srcdir)/emulparams/aixrs6.sh \
+  $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} aixrs6
 # start-sanitize-arc
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -797,7 +807,7 @@ install:
 	for f in ldscripts/*; do \
 	  $(INSTALL_DATA) $$f $(scriptdir)/$$f ; \
 	done
-	-n=`echo ld | sed $(program_transform_name)`; \
+	-n=`echo ld | sed '$(program_transform_name)'`; \
 	  rm -f $(tooldir)/bin/ld; \
 	  ln $(bindir)/$$n $(tooldir)/bin/ld >/dev/null 2>/dev/null \
 	   || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld
