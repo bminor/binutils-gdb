@@ -13,11 +13,14 @@
 /* Whether fprintf must be declared even if <stdio.h> is included.  */
 #define NEED_DECLARATION_FPRINTF 1
 
+/* Whether sbrk must be declared even if <unistd.h> is included.  */
+#undef NEED_DECLARATION_SBRK
+
 /* Do we need to use the b modifier when opening binary files?  */
 /* #undef USE_BINARY_FOPEN */
 
 /* Define if you have the sbrk function.  */
-/* #undef HAVE_SBRK */
+#define HAVE_SBRK 1
 
 /* Define if you have the utimes function.  */
 #define HAVE_UTIMES 1
