@@ -1,5 +1,26 @@
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
+	* alpha-tdep.c (alpha_supply_int_regs, alpha_fill_int_regs): New.
+	(alpha_supply_fp_regs, alpha_fill_fp_regs): New.
+	* alpha-tdep.h: Declare them.
+
+	* alpha-nat.c (fetch_osf_core_registers): Constify core_reg_mapping.
+	Remove zerobuf.  Don't error on UNIQUE.
+	(fetch_elf_core_registers): Use alpha_supply_{int,fp}_regs.
+	(ALPHA_REGSET_UNIQUE): Provide default.
+	(supply_gregset): Use alpha_supply_int_regs.
+	(fill_gregset): Use alpha_fill_int_regs.
+	(supply_fpregset): Use alpha_supply_fp_regs.
+	(fill_fpregset): Use alpha_fill_fp_regs.
+	* alphabsd-tdep.c (NUM_GREGS, NUM_FPREGS): Remove.
+	(alphabsd_supply_reg): Use alpha_supply_int_regs.
+	(alphabsd_fill_reg): Use alpha_fill_int_regs.
+	(alphabsd_supply_fpreg): Use alpha_supply_fp_regs.
+	(alphabsd_fill_fpreg): Use alpha_fill_fp_regs.
+	* config/alpha/nm-linux.h (ALPHA_REGSET_UNIQUE): New.
+
+2003-06-02  Richard Henderson  <rth@redhat.com>
+
 	* alpha-tdep.c (alpha_store_return_value): Avoid switch fallthru.
 
 	* alpha-tdep.c (alpha_extract_return_value): Use internal_error.
@@ -21,36 +42,36 @@
 
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
-        * alpha-tdep.c (alpha_push_dummy_call): Use
-        builtin_type_ieee_double_little instead of builtin_type_double.
+	* alpha-tdep.c (alpha_push_dummy_call): Use
+	builtin_type_ieee_double_little instead of builtin_type_double.
 
-        * alpha-tdep.c (alpha_push_dummy_call): Handle ABI mandated 
-        sign-extension of 32-bit values.
-        (alpha_store_return_value): Similarly.
+	* alpha-tdep.c (alpha_push_dummy_call): Handle ABI mandated 
+	sign-extension of 32-bit values.
+	(alpha_store_return_value): Similarly.
 
-        * alpha-tdep.c (alpha_push_dummy_call): Handle COMPLEX types.
-        (alpha_extract_return_value): Likewise.
-        (alpha_store_return_value): Likewise.
+	* alpha-tdep.c (alpha_push_dummy_call): Handle COMPLEX types.
+	(alpha_extract_return_value): Likewise.
+	(alpha_store_return_value): Likewise.
 
-        * alpha-tdep.c (alpha_extract_return_value): Handle IEEE Quad floats.
-        (alpha_store_return_value): Error on IEEE Quad floats.
+	* alpha-tdep.c (alpha_extract_return_value): Handle IEEE Quad floats.
+	(alpha_store_return_value): Error on IEEE Quad floats.
 
-        * alpha-tdep.c (alpha_extract_return_value): Convert to regcache.
-        (alpha_extract_struct_value_address): Likewise.
-        (alpha_store_return_value): Likewise.
-        (alpha_store_struct_return): Remove.
-        (alpha_gdbarch_init): Update hook registration to match.
+	* alpha-tdep.c (alpha_extract_return_value): Convert to regcache.
+	(alpha_extract_struct_value_address): Likewise.
+	(alpha_store_return_value): Likewise.
+	(alpha_store_struct_return): Remove.
+	(alpha_gdbarch_init): Update hook registration to match.
 
-        * alpha-tdep.c (alpha_register_convert_to_virtual): Tidy use of
-        deprecated interfaces; use ALPHA_REGISTER_SIZE instead of gdbarch
-        macros where appropriate.
-        (alpha_register_convert_to_raw): Similarly.  Use unpack_long.
-        (alpha_convert_flt_dbl, alpha_convert_dbl_flt): New.
+	* alpha-tdep.c (alpha_register_convert_to_virtual): Tidy use of
+	deprecated interfaces; use ALPHA_REGISTER_SIZE instead of gdbarch
+	macros where appropriate.
+	(alpha_register_convert_to_raw): Similarly.  Use unpack_long.
+	(alpha_convert_flt_dbl, alpha_convert_dbl_flt): New.
 
-        * alpha-tdep.c (alpha_register_virtual_type): Use void_data_ptr
-        for SP, GP; void_func_ptr for PC; non-language-specific types
-        for all others.
-        * alpha-tdep.h (ALPHA_GP_REGNUM): New.
+	* alpha-tdep.c (alpha_register_virtual_type): Use void_data_ptr
+	for SP, GP; void_func_ptr for PC; non-language-specific types
+	for all others.
+	* alpha-tdep.h (ALPHA_GP_REGNUM): New.
 
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
@@ -67,15 +88,15 @@
 
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
-        * Makefile.in (ALLDEPFILES): Add alpha-mdebug-tdep.c.
-        (alpha-linux-tdep.o): Update dependencies.
-        (alpha-nat.o, alpha-tdep.o, alpha-mdebug-tdep.o): Likewise.
-        * alpha-mdebug-tdep.c: Remove unneeded includes.
+	* Makefile.in (ALLDEPFILES): Add alpha-mdebug-tdep.c.
+	(alpha-linux-tdep.o): Update dependencies.
+	(alpha-nat.o, alpha-tdep.o, alpha-mdebug-tdep.o): Likewise.
+	* alpha-mdebug-tdep.c: Remove unneeded includes.
 
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
-        * alpha-tdep.c (alpha_register_reggroup_p): New.
-        (alpha_gdbarch_init): Register it.
+	* alpha-tdep.c (alpha_register_reggroup_p): New.
+	(alpha_gdbarch_init): Register it.
 
 2003-06-02  Andrew Cagney  <cagney@redhat.com>
 
@@ -92,8 +113,8 @@
 
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
-        * alpha-tdep.c (alpha_gdbarch_init): Use set_gdbarch_print_insn ...
-        (_initialize_alpha_tdep): ... not deprecated_tm_print_insn.
+	* alpha-tdep.c (alpha_gdbarch_init): Use set_gdbarch_print_insn ...
+	(_initialize_alpha_tdep): ... not deprecated_tm_print_insn.
 
 2003-06-01  Adam Fedor  <fedor@gnu.org>
 
@@ -169,13 +190,13 @@
 
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
-        * alpha-tdep.h (ALPHA_FP_REGNUM): Remove.
-        * alpha-tdep.c (alpha_register_name): Remove vfp entry.
-        (alpha_cannot_fetch_register): Remove ALPHA_FP_REGNUM.
-        (alpha_cannot_store_register): Likewise.
-        * alphabsd-nat.c (fetch_inferior_registers): Don't set FP_REGNUM.
-        * alpha-nat.c (supply_gregset): Likewise.
-        * alphanbsd-tdep.c (fetch_core_registers): Likewise.
+	* alpha-tdep.h (ALPHA_FP_REGNUM): Remove.
+	* alpha-tdep.c (alpha_register_name): Remove vfp entry.
+	(alpha_cannot_fetch_register): Remove ALPHA_FP_REGNUM.
+	(alpha_cannot_store_register): Likewise.
+	* alphabsd-nat.c (fetch_inferior_registers): Don't set FP_REGNUM.
+	* alpha-nat.c (supply_gregset): Likewise.
+	* alphanbsd-tdep.c (fetch_core_registers): Likewise.
 
 2003-06-01  Andrew Cagney  <cagney@redhat.com>
 
@@ -191,17 +212,17 @@
 
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
-        * alpha-nat.c (fetch_osf_core_registers): Use ALPHA_REGISTER_SIZE
-        instead of ALPHA_MAX_REGISTER_RAW_SIZE.
-        (supply_gregset): Likewise.
-        * alpha-tdep.c (alpha_store_return_value): Likewise.
-        (alpha_get_longjmp_target): Likewise.
-        (alpha_register_name): Constify array.
-        (alpha_gdbarch_init): Remove deprecated_fp_regnum,
-        deprecated_register_size, deprecated_register_bytes,
-        deprecated_max_register_raw_size, deprecated_max_register_virtual_size.
-        * alpha-tdep.h (ALPHA_MAX_REGISTER_RAW_SIZE): Remove.
-        (ALPHA_MAX_REGISTER_VIRTUAL_SIZE): Remove.
+	* alpha-nat.c (fetch_osf_core_registers): Use ALPHA_REGISTER_SIZE
+	instead of ALPHA_MAX_REGISTER_RAW_SIZE.
+	(supply_gregset): Likewise.
+	* alpha-tdep.c (alpha_store_return_value): Likewise.
+	(alpha_get_longjmp_target): Likewise.
+	(alpha_register_name): Constify array.
+	(alpha_gdbarch_init): Remove deprecated_fp_regnum,
+	deprecated_register_size, deprecated_register_bytes,
+	deprecated_max_register_raw_size, deprecated_max_register_virtual_size.
+	* alpha-tdep.h (ALPHA_MAX_REGISTER_RAW_SIZE): Remove.
+	(ALPHA_MAX_REGISTER_VIRTUAL_SIZE): Remove.
 
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
@@ -217,23 +238,23 @@
 
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
-        * dwarf2-frame.c (struct dwarf2_cie): Add saw_z_augmentation.
-        (decode_frame_entry): Set it.  Skip FDE augmentation.
+	* dwarf2-frame.c (struct dwarf2_cie): Add saw_z_augmentation.
+	(decode_frame_entry): Set it.  Skip FDE augmentation.
 
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
-        * dwarf2-frame.c (dwarf2_frame_cache): Handle retaddr_column
-        not overlapping PC_REGNUM.
+	* dwarf2-frame.c (dwarf2_frame_cache): Handle retaddr_column
+	not overlapping PC_REGNUM.
 
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
-        * alpha-tdep.c (alpha_push_dummy_call): Transmography from
-        alpha_push_arguments.  Don't dump argument register data to
-        the target stack.  Fix float and 128-bit long double semantics.
-        Store $t12 and $ra as specified by the ABI.  Use regcache everywhere.
-        (alpha_fix_call_dummy): Remove.
-        (alpha_call_dummy_words): Remove.
-        (alpha_gdbarch_init): Kill deprecated call hooks; add push_dummy_call.
+	* alpha-tdep.c (alpha_push_dummy_call): Transmography from
+	alpha_push_arguments.  Don't dump argument register data to
+	the target stack.  Fix float and 128-bit long double semantics.
+	Store $t12 and $ra as specified by the ABI.  Use regcache everywhere.
+	(alpha_fix_call_dummy): Remove.
+	(alpha_call_dummy_words): Remove.
+	(alpha_gdbarch_init): Kill deprecated call hooks; add push_dummy_call.
 
 2003-06-01  Richard Henderson  <rth@redhat.com>
 

@@ -1260,6 +1260,73 @@ alpha_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 
+/* Helper routines for alpha*-nat.c files to move register sets to and
+   from core files.  The UNIQUE pointer is allowed to be NULL, as most
+   targets don't supply this value in their core files.  */
+
+void
+alpha_supply_int_regs (int regno, const void *r0_r30,
+		       const void *pc, const void *unique)
+{
+  int i;
+
+  for (i = 0; i < 31; ++i)
+    if (regno == i || regno == -1)
+      supply_register (i, (const char *)r0_r30 + i*8);
+
+  if (regno == ALPHA_ZERO_REGNUM || regno == -1)
+    supply_register (ALPHA_ZERO_REGNUM, NULL);
+
+  if (regno == ALPHA_PC_REGNUM || regno == -1)
+    supply_register (ALPHA_PC_REGNUM, pc);
+
+  if (regno == ALPHA_UNIQUE_REGNUM || regno == -1)
+    supply_register (ALPHA_UNIQUE_REGNUM, unique);
+}
+
+void
+alpha_fill_int_regs (int regno, void *r0_r30, void *pc, void *unique)
+{
+  int i;
+
+  for (i = 0; i < 31; ++i)
+    if (regno == i || regno == -1)
+      regcache_collect (i, (char *)r0_r30 + i*8);
+
+  if (regno == ALPHA_PC_REGNUM || regno == -1)
+    regcache_collect (ALPHA_PC_REGNUM, pc);
+
+  if (unique && (regno == ALPHA_UNIQUE_REGNUM || regno == -1))
+    regcache_collect (ALPHA_UNIQUE_REGNUM, unique);
+}
+
+void
+alpha_supply_fp_regs (int regno, const void *f0_f30, const void *fpcr)
+{
+  int i;
+
+  for (i = ALPHA_FP0_REGNUM; i < ALPHA_FP0_REGNUM + 31; ++i)
+    if (regno == i || regno == -1)
+      supply_register (i, (const char *)f0_f30 + (i - ALPHA_FP0_REGNUM) * 8);
+
+  if (regno == ALPHA_FPCR_REGNUM || regno == -1)
+    supply_register (ALPHA_FPCR_REGNUM, fpcr);
+}
+
+void
+alpha_fill_fp_regs (int regno, void *f0_f30, void *fpcr)
+{
+  int i;
+
+  for (i = ALPHA_FP0_REGNUM; i < ALPHA_FP0_REGNUM + 31; ++i)
+    if (regno == i || regno == -1)
+      regcache_collect (i, (char *)f0_f30 + (i - ALPHA_FP0_REGNUM) * 8);
+
+  if (regno == ALPHA_FPCR_REGNUM || regno == -1)
+    regcache_collect (ALPHA_FPCR_REGNUM, fpcr);
+}
+
+
 /* alpha_software_single_step() is called just before we want to resume
    the inferior, if we want to single-step it but there is no hardware
    or kernel single-step support (NetBSD on Alpha, for example).  We find

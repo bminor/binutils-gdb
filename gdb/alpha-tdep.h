@@ -94,4 +94,10 @@ extern CORE_ADDR alpha_after_prologue (CORE_ADDR pc);
 
 extern void alpha_mdebug_init_abi (struct gdbarch_info, struct gdbarch *);
 
+extern void alpha_supply_int_regs (int, const void *, const void *,
+				   const void *);
+extern void alpha_fill_int_regs (int, void *, void *, void *);
+extern void alpha_supply_fp_regs (int, const void *, const void *);
+extern void alpha_fill_fp_regs (int, void *, void *);
+
 #endif /* ALPHA_TDEP_H */

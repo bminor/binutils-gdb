@@ -68,7 +68,7 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
      OSF/1.2 core files.  OSF5 uses different names for the register
      enum list, need to handle two cases.  The actual values are the
      same.  */
-  static int core_reg_mapping[ALPHA_NUM_REGS] =
+  static int const core_reg_mapping[ALPHA_NUM_REGS] =
   {
 #ifdef NCF_REGS
 #define EFL NCF_REGS
@@ -94,18 +94,23 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
     EF_PC, -1
 #endif
   };
-  static char zerobuf[ALPHA_REGISTER_SIZE] = {0};
 
-  for (regno = 0; regno < NUM_REGS; regno++)
+  for (regno = 0; regno < ALPHA_NUM_REGS; regno++)
     {
       if (CANNOT_FETCH_REGISTER (regno))
 	{
-	  supply_register (regno, zerobuf);
+	  supply_register (regno, NULL);
 	  continue;
 	}
       addr = 8 * core_reg_mapping[regno];
       if (addr < 0 || addr >= core_reg_size)
 	{
+	  /* ??? UNIQUE is a new addition.  Don't generate an error.  */
+	  if (regno == ALPHA_UNIQUE_REGNUM)
+	    {
+	      supply_register (regno, NULL);
+	      continue;
+	    }
 	  if (bad_reg < 0)
 	    bad_reg = regno;
 	}
@@ -130,31 +135,22 @@ fetch_elf_core_registers (char *core_reg_sect, unsigned core_reg_size,
       return;
     }
 
-  if (which == 2)
+  switch (which)
     {
-      /* The FPU Registers.  */
-      memcpy (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM)],
-	      core_reg_sect, 31 * 8);
-      memset (&deprecated_registers[REGISTER_BYTE (FP0_REGNUM + 31)], 0, 8);
-      memset (&deprecated_register_valid[FP0_REGNUM], 1, 32);
-    }
-  else
-    {
-      /* The General Registers.  */
-      memcpy (&deprecated_registers[REGISTER_BYTE (ALPHA_V0_REGNUM)],
-	      core_reg_sect, 31 * 8);
-      memcpy (&deprecated_registers[REGISTER_BYTE (PC_REGNUM)],
-	      core_reg_sect + 31 * 8, 8);
-      memset (&deprecated_registers[REGISTER_BYTE (ALPHA_ZERO_REGNUM)], 0, 8);
-      memset (&deprecated_register_valid[ALPHA_V0_REGNUM], 1, 32);
-      deprecated_register_valid[PC_REGNUM] = 1;
+    case 0: /* integer registers */
+      /* PC is in slot 32; UNIQUE is in slot 33, if present.  */
+      alpha_supply_int_regs (-1, core_reg_sect, core_reg_sect + 31*8,
+			     (core_reg_size >= 33 * 8
+			      ? core_reg_sect + 32*8 : NULL));
+      break;
 
-      if (core_reg_size >= 33 * 8)
-	{
-	  memcpy (&deprecated_registers[REGISTER_BYTE (ALPHA_UNIQUE_REGNUM)],
-		  core_reg_sect + 32 * 8, 8);
-	  deprecated_register_valid[ALPHA_UNIQUE_REGNUM] = 1;
-	}
+    case 2: /* floating-point registers */
+      /* FPCR is in slot 32.  */
+      alpha_supply_fp_regs (-1, core_reg_sect, core_reg_sect + 31*8);
+      break;
+
+    default:
+      break;
     }
 }
 
@@ -192,6 +188,11 @@ kernel_u_size (void)
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 
+/* Locate the UNIQUE value within the gregset_t.  */
+#ifndef ALPHA_REGSET_UNIQUE
+#define ALPHA_REGSET_UNIQUE(ptr) NULL
+#endif
+
 /*
  * See the comment in m68k-tdep.c regarding the utility of these functions.
  */
@@ -199,31 +200,21 @@ kernel_u_size (void)
 void
 supply_gregset (gdb_gregset_t *gregsetp)
 {
-  register int regi;
   register long *regp = ALPHA_REGSET_BASE (gregsetp);
-  static char zerobuf[ALPHA_REGISTER_SIZE] = {0};
+  void *unique = ALPHA_REGSET_UNIQUE (gregsetp);
 
-  for (regi = 0; regi < 31; regi++)
-    supply_register (regi, (char *) (regp + regi));
-
-  supply_register (PC_REGNUM, (char *) (regp + 31));
-
-  /* Fill inaccessible registers with zero.  */
-  supply_register (ALPHA_ZERO_REGNUM, zerobuf);
+  /* PC is in slot 32.  */
+  alpha_supply_int_regs (-1, regp, regp + 31, unique);
 }
 
 void
 fill_gregset (gdb_gregset_t *gregsetp, int regno)
 {
-  int regi;
   register long *regp = ALPHA_REGSET_BASE (gregsetp);
+  void *unique = ALPHA_REGSET_UNIQUE (gregsetp);
 
-  for (regi = 0; regi < 31; regi++)
-    if ((regno == -1) || (regno == regi))
-      *(regp + regi) = *(long *) &deprecated_registers[REGISTER_BYTE (regi)];
-
-  if ((regno == -1) || (regno == PC_REGNUM))
-    *(regp + 31) = *(long *) &deprecated_registers[REGISTER_BYTE (PC_REGNUM)];
+  /* PC is in slot 32.  */
+  alpha_fill_int_regs (regno, regp, regp + 31, unique);
 }
 
 /*
@@ -234,27 +225,19 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 void
 supply_fpregset (gdb_fpregset_t *fpregsetp)
 {
-  register int regi;
   register long *regp = ALPHA_REGSET_BASE (fpregsetp);
 
-  for (regi = 0; regi < 32; regi++)
-    supply_register (regi + FP0_REGNUM, (char *) (regp + regi));
+  /* FPCR is in slot 32.  */
+  alpha_supply_fp_regs (-1, regp, regp + 31);
 }
 
 void
 fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 {
-  int regi;
   register long *regp = ALPHA_REGSET_BASE (fpregsetp);
 
-  for (regi = FP0_REGNUM; regi < FP0_REGNUM + 32; regi++)
-    {
-      if ((regno == -1) || (regno == regi))
-	{
-	  *(regp + regi - FP0_REGNUM) =
-	    *(long *) &deprecated_registers[REGISTER_BYTE (regi)];
-	}
-    }
+  /* FPCR is in slot 32.  */
+  alpha_fill_fp_regs (regno, regp, regp + 31);
 }
 #endif
 
