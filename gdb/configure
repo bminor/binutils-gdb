@@ -2459,34 +2459,47 @@ if test x"${ac_cv_c_tclh}" != x ; then
 fi
 
 echo $ac_n "checking Tcl version""... $ac_c" 1>&6
+rm -rf tclmajor tclminor
 orig_includes="$CPPFLAGS"
 
 if test x"${TCLHDIR}" != x ; then
   CPPFLAGS="$CPPFLAGS $TCLHDIR"
 fi
 
-# Get major and minor versions of Tcl.
-cat > conftest.c <<'EOF'
+if test "$cross_compiling" = yes; then
+  { echo "configure: error: can't be cross compiled" 1>&2; exit 1; }
+
+else
+cat > conftest.$ac_ext <<EOF
+#line 2475 "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
 #include "tcl.h"
-major = TCL_MAJOR_VERSION
-minor = TCL_MINOR_VERSION
+main() {
+	FILE *maj = fopen("tclmajor","w");
+	FILE *min = fopen("tclminor","w");
+	fprintf(maj,"%d",TCL_MAJOR_VERSION);
+	fprintf(min,"%d",TCL_MINOR_VERSION);
+	fclose(maj);
+	fclose(min);
+	return 0;
+}
 EOF
+{ (eval echo configure:2490: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
+  tclmajor=`cat tclmajor`
+	tclminor=`cat tclminor`
+	tclversion=$tclmajor.$tclminor
+	echo "$ac_t""$tclversion" 1>&6
+	rm -f tclmajor tclminor
 
-tclmajor=
-tclminor=
-if (eval "$CPP $CPPFLAGS conftest.c") 2>/dev/null >conftest.out; then
-   # Success.
-   tclmajor=`egrep '^major = ' conftest.out | sed -e 's/^major = *//' -e 's/ *$//'`
-   tclminor=`egrep '^minor = ' conftest.out | sed -e 's/^minor = *//' -e 's/ *$//'`
+else
+  echo "$ac_t""can't happen" 1>&6
+
 fi
-rm -f conftest.c conftest.out
-
-if test -z "$tclmajor" || test -z "$tclminor"; then
-   echo "$ac_t""fatal error: could not find major or minor version number of Tcl" 1>&6
-   exit 1
 fi
-echo "$ac_t""${tclmajor}.${tclminor}" 1>&6
-
+rm -fr conftest*
 CPPFLAGS="${orig_includes}"
 
 
@@ -2618,13 +2631,13 @@ else
   ac_cv_c_tclib="-l$installedtcllibroot"
 else
 cat > conftest.$ac_ext <<EOF
-#line 2622 "configure"
+#line 2635 "configure"
 #include "confdefs.h"
 
     Tcl_AppInit()
     { exit(0); }
 EOF
-{ (eval echo configure:2628: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+{ (eval echo configure:2641: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   ac_cv_c_tcllib="-l$installedtcllibroot"
 else
@@ -2734,12 +2747,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2738 "configure"
+#line 2751 "configure"
 #include "confdefs.h"
 #include <tk.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2743: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2756: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2781,6 +2794,7 @@ fi
 # if Tk is installed, extract the major/minor version
 if test x"${no_tk}" = x ; then
 echo $ac_n "checking Tk version""... $ac_c" 1>&6
+rm -rf tkmajor tkminor
 orig_includes="$CPPFLAGS"
 
 if test x"${TCLHDIR}" != x ; then
@@ -2793,28 +2807,42 @@ if test x"${x_includes}" != x -a x"${x_includes}" != xNONE ; then
   CPPFLAGS="$CPPFLAGS -I$x_includes"
 fi
 
-# Get major and minor versions of Tk.
-cat > conftest.c <<'EOF'
+if test "$cross_compiling" = yes; then
+  { echo "configure: error: can't be cross compiled" 1>&2; exit 1; }
+
+else
+cat > conftest.$ac_ext <<EOF
+#line 2816 "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
 #include "tk.h"
-major = TK_MAJOR_VERSION
-minor = TK_MINOR_VERSION
+  main() {
+	FILE *maj = fopen("tkmajor","w");
+	FILE *min = fopen("tkminor","w");
+	fprintf(maj,"%d",TK_MAJOR_VERSION);
+	fprintf(min,"%d",TK_MINOR_VERSION);
+	fclose(maj);
+	fclose(min);
+	return 0;
+}
 EOF
+{ (eval echo configure:2831: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
+  tkmajor=`cat tkmajor`
+	tkminor=`cat tkminor`
+	tkversion=$tkmajor.$tkminor
+	echo "$ac_t""$tkversion" 1>&6
+	rm -f tkmajor tkminor
 
-tkmajor=
-tkminor=
-if (eval "$CPP $CPPFLAGS conftest.c") 2>/dev/null >conftest.out; then
-   # Success.
-   tkmajor=`egrep '^major = ' conftest.out | sed -e 's/^major = *//' -e 's/ *$//'`
-   tkminor=`egrep '^minor = ' conftest.out | sed -e 's/^minor = *//' -e 's/ *$//'`
+else
+  { echo "configure: error: 
+cannot compile a simple X program - suspect your xmkmf is
+misconfigured and is incorrectly reporting the location of your X
+include or libraries - report this to your system admin" 1>&2; exit 1; } 
 fi
-rm -f conftest.c conftest.out
-
-if test -z "$tkmajor" || test -z "$tkminor"; then
-   echo "$ac_t""fatal error: could not find major or minor version number of Tk" 1>&6
-   exit 1
 fi
-echo "$ac_t""${tkmajor}.${tkminor}" 1>&6
-
+rm -fr conftest*
 CPPFLAGS="${orig_includes}"
 fi
 
@@ -2965,13 +2993,13 @@ else
   ac_cv_c_tklib="-l$installedtklibroot"
 else
 cat > conftest.$ac_ext <<EOF
-#line 2969 "configure"
+#line 2997 "configure"
 #include "confdefs.h"
 
        Tcl_AppInit()
        { exit(0); }
 EOF
-{ (eval echo configure:2975: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
+{ (eval echo configure:3003: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   ac_cv_c_tklib="-l$installedtklibroot"
 else
@@ -3012,7 +3040,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 3016 "configure"
+#line 3044 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -3020,7 +3048,7 @@ int t() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:3024: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:3052: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -3050,7 +3078,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldld  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 3054 "configure"
+#line 3082 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -3058,7 +3086,7 @@ int t() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:3062: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:3090: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -3460,6 +3488,8 @@ mips64*el-*-ecoff*)	gdb_target=embedl64 ;;
 mips64*-*-ecoff*)	gdb_target=embed64 ;;
 mips64*vr4300*el-*-elf*)	gdb_target=vr4300el ;;
 mips64*vr4300*-*-elf*)	gdb_target=vr4300 ;;
+mips64*vr4100*el-*-elf*)	gdb_target=vr4300el ;;
+mips64*vr4100*-*-elf*)	gdb_target=vr4300 ;;
 mips64*el-*-elf*)	gdb_target=embedl64 ;;
 mips64*-*-elf*)		gdb_target=embed64 ;;
 mips*el-*-ecoff*)	gdb_target=embedl ;;

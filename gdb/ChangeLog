@@ -1,3 +1,12 @@
+Wed Jun  5 01:52:57 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+ 	* configure.in (configdirs): Force 4100 builds to use 4300 GDB
+  	target.
+	* configure: Rebuild.
+
+	* config/mips/vr4300el.mt (SIM_OBS): Include simulator in
+ 	little-endian builds.
+	
 Mon Jun  3 11:48:29 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* inftarg.c (child_thread_alive): Protect declaration with
