@@ -1,3 +1,7 @@
+Fri Jun 18 12:55:10 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* elf32-mips.c: comment change.  This is a mips file, not 88k.
+
 Mon Jun 14 14:02:41 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* cache.c (bfd_cache_init): Increment open_files and call close_one
