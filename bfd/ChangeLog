@@ -1,3 +1,8 @@
+Thu Sep 12 14:07:22 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* Makefile.in: $(MAKE) for make, $(docdir) for doc
+	* doc/Makefile: redundant dependencies for Sun-make VPATH bug
+
 Tue Sep 10 20:34:12 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* aoutf1.h (sunos4_core_file_p):  Release the right storage in
