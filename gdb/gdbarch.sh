@@ -22,6 +22,7 @@
 # Make certain that the script is running in an internationalized
 # environment.
 LANG=c ; export LANG
+LC_ALL=c ; export LC_ALL
 
 
 compare_new ()
