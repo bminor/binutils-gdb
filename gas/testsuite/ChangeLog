@@ -1,3 +1,7 @@
+Thu Jun  2 19:46:58 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* gas/i386/{pushw.s,pushw.l}: New test.
+	* gas/i386/all.exp: Run it.
 
 	* Makefile.in (distclean): Remove site config files and gas.sum.
 
