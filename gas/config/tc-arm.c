@@ -13340,6 +13340,7 @@ static struct arm_arch_option_table arm_archs[] =
   {"armv5te",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP},
   {"armv5texp",		ARM_ARCH_V5TExP, FPU_ARCH_VFP},
   {"armv5tej",		ARM_ARCH_V5TEJ,  FPU_ARCH_VFP},
+  {"armv6",             ARM_ARCH_V6,     FPU_ARCH_VFP},
   {"armv6j",            ARM_ARCH_V6,     FPU_ARCH_VFP},
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP},
   {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP},
