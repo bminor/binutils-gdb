@@ -2833,18 +2833,12 @@ cast_into_complex (struct type *type, struct value *val)
 void
 _initialize_valops (void)
 {
-#if 0
-  deprecated_add_show_from_set
-    (add_set_cmd ("abandon", class_support, var_boolean, (char *) &auto_abandon,
-		  "Set automatic abandonment of expressions upon failure.",
-		  &setlist),
-     &showlist);
-#endif
-
-  deprecated_add_show_from_set
-    (add_set_cmd ("overload-resolution", class_support, var_boolean, (char *) &overload_resolution,
-		  "Set overload resolution in evaluating C++ functions.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("overload-resolution", class_support,
+			   &overload_resolution, _("\
+Set overload resolution in evaluating C++ functions."), _("\
+Show overload resolution in evaluating C++ functions."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
   overload_resolution = 1;
 }

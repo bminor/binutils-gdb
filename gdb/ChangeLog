@@ -1,3 +1,14 @@
+2005-02-18  Andrew Cagney  <cagney@gnu.org>
+
+	Use add_setshow_boolean_command through out.  Delete #ifdef 0'ed
+	code adding set/show boolean commands.
+	* cp-valprint.c, dcache.c, exec.c, gdbtypes.c, infrun.c: Update.
+	* monitor.c, p-valprint.c, pa64solib.c, printcmd.c: Update.
+	* proc-api.c, remote-mips.c, remote.c, solib.c: Update.
+	* somsolib.c, symfile.c, top.c, utils.c, valops.c: Update.
+	* valprint.c, win32-nat.c, wince.c, xcoffsolib.c: Update.
+	* cli/cli-cmds.c: Update.
+
 2005-02-17  Andrew Cagney  <cagney@gnu.org>
 
 	* cli/cli-decode.c (add_setshow_filename_cmd): Set the completer

@@ -2459,16 +2459,20 @@ initialize_utils (void)
 
   init_page_info ();
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("demangle", class_support, var_boolean,
-		  (char *) &demangle,
-		  "Set demangling of encoded C++/ObjC names when displaying symbols.",
-		  &setprintlist), &showprintlist);
+  add_setshow_boolean_cmd ("demangle", class_support, &demangle, _("\
+Set demangling of encoded C++/ObjC names when displaying symbols."), _("\
+Show demangling of encoded C++/ObjC names when displaying symbols."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("pagination", class_support,
-		  var_boolean, (char *) &pagination_enabled,
-		  "Set state of pagination.", &setlist), &showlist);
+  add_setshow_boolean_cmd ("pagination", class_support,
+			   &pagination_enabled, _("\
+Set state of pagination."), _("\
+Show state of pagination."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   if (xdb_commands)
     {
@@ -2478,17 +2482,20 @@ initialize_utils (void)
 	       _("Disable pagination"));
     }
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("sevenbit-strings", class_support, var_boolean,
-		  (char *) &sevenbit_strings,
-		  "Set printing of 8-bit characters in strings as \\nnn.",
-		  &setprintlist), &showprintlist);
+  add_setshow_boolean_cmd ("sevenbit-strings", class_support,
+			   &sevenbit_strings, _("\
+Set printing of 8-bit characters in strings as \\nnn."), _("\
+Show printing of 8-bit characters in strings as \\nnn."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("asm-demangle", class_support, var_boolean,
-		  (char *) &asm_demangle,
-		  "Set demangling of C++/ObjC names in disassembly listings.",
-		  &setprintlist), &showprintlist);
+  add_setshow_boolean_cmd ("asm-demangle", class_support, &asm_demangle, _("\
+Set demangling of C++/ObjC names in disassembly listings."), _("\
+Show demangling of C++/ObjC names in disassembly listings."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
 }
 
 /* Machine specific function to handle SIGWINCH signal. */

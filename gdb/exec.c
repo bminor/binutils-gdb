@@ -742,11 +742,12 @@ This can be used if the exec file does not contain section addresses,\n\
 file itself are wrong.  Each section must be changed separately.  The\n\
 ``info files'' command lists all the sections and their addresses."));
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("write", class_support, var_boolean, (char *) &write_files,
-		  "Set writing into executable and core files.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("write", class_support, &write_files, _("\
+Set writing into executable and core files."), _("\
+Show writing into executable and core files."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   add_target (&exec_ops);
 }

@@ -1121,12 +1121,12 @@ when gdb is started."), &cmdlist);
   add_com_alias ("q", "quit", class_support, 1);
   add_com_alias ("h", "help", class_support, 1);
 
-  c = add_set_cmd ("verbose", class_support, var_boolean, (char *) &info_verbose,
-		   "Set ",
-		   &setlist),
-    deprecated_add_show_from_set (c, &showlist);
-  set_cmd_sfunc (c, set_verbose);
-  set_verbose (NULL, 0, c);
+  add_setshow_boolean_cmd ("verbose", class_support, &info_verbose, _("\
+Set verbosity."), _("\
+Show verbosity."), NULL,
+			   set_verbose,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   add_prefix_cmd ("history", class_support, set_history,
 		  _("Generic command for setting command history parameters."),
@@ -1135,11 +1135,13 @@ when gdb is started."), &cmdlist);
 		  _("Generic command for showing command history parameters."),
 		  &showhistlist, "show history ", 0, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("expansion", no_class, var_boolean, (char *) &history_expansion_p,
-		  "Set history expansion on command input.\n\
-Without an argument, history expansion is enabled.", &sethistlist),
-     &showhistlist);
+  add_setshow_boolean_cmd ("expansion", no_class, &history_expansion_p, _("\
+Set history expansion on command input."), _("\
+Show history expansion on command input."), _("\
+Without an argument, history expansion is enabled."),
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &sethistlist, &showhistlist);
 
   add_prefix_cmd ("info", class_info, info_command, _("\
 Generic command for showing things about the program being debugged."),

@@ -1385,21 +1385,25 @@ Don't repeat this command.\n\
 Primarily used inside of user-defined commands that should not be repeated when\n\
 hitting return."));
 
-  c = add_set_cmd ("editing", class_support, var_boolean, (char *) &async_command_editing_p,
-		   "Set editing of command lines as they are typed.\n\
+  add_setshow_boolean_cmd ("editing", class_support,
+			   &async_command_editing_p, _("\
+Set editing of command lines as they are typed."), _("\
+Show editing of command lines as they are typed."), _("\
 Use \"on\" to enable the editing, and \"off\" to disable it.\n\
 Without an argument, command line editing is enabled.  To edit, use\n\
-EMACS-like or VI-like commands like control-P or ESC.", &setlist);
+EMACS-like or VI-like commands like control-P or ESC."),
+			   set_async_editing_command,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
-  deprecated_add_show_from_set (c, &showlist);
-  set_cmd_sfunc (c, set_async_editing_command);
-
-  deprecated_add_show_from_set
-    (add_set_cmd ("save", no_class, var_boolean, (char *) &write_history_p,
-		  "Set saving of the history record on exit.\n\
+  add_setshow_boolean_cmd ("save", no_class, &write_history_p, _("\
+Set saving of the history record on exit."), _("\
+Show saving of the history record on exit."), _("\
 Use \"on\" to enable the saving, and \"off\" to disable it.\n\
-Without an argument, saving is enabled.", &sethistlist),
-     &showhistlist);
+Without an argument, saving is enabled."),
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &sethistlist, &showhistlist);
 
   c = add_set_cmd ("size", no_class, var_integer, (char *) &history_size,
 		   "Set the size of the command history,\n\
@@ -1414,12 +1418,12 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
   set_cmd_completer (c, filename_completer);
   deprecated_add_show_from_set (c, &showhistlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("confirm", class_support, var_boolean,
-		  (char *) &caution,
-		  "Set whether to confirm potentially dangerous operations.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("confirm", class_support, &caution, _("\
+Set whether to confirm potentially dangerous operations."), _("\
+Show whether to confirm potentially dangerous operations."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   c = add_set_cmd ("annotate", class_obscure, var_zinteger,
 		   (char *) &annotation_level, "Set annotation_level.\n\
@@ -1429,11 +1433,14 @@ ie. the number of previous commands to keep a record of.", &sethistlist);
   deprecated_add_show_from_set (c, &showlist);
   set_cmd_sfunc (c, set_async_annotation_level);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("exec-done-display", class_support, var_boolean, (char *) &exec_done_display_p,
-		  "Set notification of completion for asynchronous execution commands.\n\
-Use \"on\" to enable the notification, and \"off\" to disable it.", &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("exec-done-display", class_support,
+			   &exec_done_display_p, _("\
+Set notification of completion for asynchronous execution commands."), _("\
+Show notification of completion for asynchronous execution commands."), _("\
+Use \"on\" to enable the notification, and \"off\" to disable it."),
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 }
 
 void

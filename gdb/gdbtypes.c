@@ -3252,11 +3252,13 @@ build_gdbtypes (void)
 	       "bool", (struct objfile *) NULL);
 
   /* Add user knob for controlling resolution of opaque types */
-  deprecated_add_show_from_set
-    (add_set_cmd ("opaque-type-resolution", class_support, var_boolean, (char *) &opaque_type_resolution,
-		  "Set resolution of opaque struct/class/union types (if set before loading symbols).",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("opaque-type-resolution", class_support,
+			   &opaque_type_resolution, _("\
+Set resolution of opaque struct/class/union types (if set before loading symbols)."), _("\
+Show resolution of opaque struct/class/union types (if set before loading symbols)."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
   opaque_type_resolution = 1;
 
   /* Build SIMD types.  */

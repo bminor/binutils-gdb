@@ -1212,12 +1212,12 @@ _initialize_valprint (void)
 		  &setprintlist),
      &showprintlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("null-stop", no_class, var_boolean,
-		  (char *) &stop_print_at_null,
-		  "Set printing of char arrays to stop at first null char.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_boolean_cmd ("null-stop", no_class, &stop_print_at_null, _("\
+Set printing of char arrays to stop at first null char."), _("\
+Show printing of char arrays to stop at first null char."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
 
   deprecated_add_show_from_set
     (add_set_cmd ("repeats", no_class, var_uinteger,
@@ -1227,31 +1227,33 @@ _initialize_valprint (void)
 		  &setprintlist),
      &showprintlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("pretty", class_support, var_boolean,
-		  (char *) &prettyprint_structs,
-		  "Set prettyprinting of structures.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_boolean_cmd ("pretty", class_support, &prettyprint_structs, _("\
+Set prettyprinting of structures."), _("\
+Show prettyprinting of structures."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("union", class_support, var_boolean, (char *) &unionprint,
-		  "Set printing of unions interior to structures.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_boolean_cmd ("union", class_support, &unionprint, _("\
+Set printing of unions interior to structures."), _("\
+Show printing of unions interior to structures."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("array", class_support, var_boolean,
-		  (char *) &prettyprint_arrays,
-		  "Set prettyprinting of arrays.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_boolean_cmd ("array", class_support, &prettyprint_arrays, _("\
+Set prettyprinting of arrays."), _("\
+Show prettyprinting of arrays."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("address", class_support, var_boolean, (char *) &addressprint,
-		  "Set printing of addresses.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_boolean_cmd ("address", class_support, &addressprint, _("\
+Set printing of addresses."), _("\
+Show printing of addresses."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
 
   c = add_set_cmd ("input-radix", class_support, var_uinteger,
 		   (char *) &input_radix,

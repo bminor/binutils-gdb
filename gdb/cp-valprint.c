@@ -810,26 +810,29 @@ cp_print_hpacc_virtual_table_entries (struct type *type, int *vfuncs,
 void
 _initialize_cp_valprint (void)
 {
-  deprecated_add_show_from_set
-    (add_set_cmd ("static-members", class_support, var_boolean,
-		  (char *) &static_field_print,
-		  "Set printing of C++ static members.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_boolean_cmd ("static-members", class_support,
+			   &static_field_print, _("\
+Set printing of C++ static members."), _("\
+Show printing of C++ static members."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
   /* Turn on printing of static fields.  */
   static_field_print = 1;
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("vtbl", class_support, var_boolean, (char *) &vtblprint,
-		  "Set printing of C++ virtual function tables.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_boolean_cmd ("vtbl", class_support, &vtblprint, _("\
+Set printing of C++ virtual function tables."), _("\
+Show printing of C++ virtual function tables."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("object", class_support, var_boolean, (char *) &objectprint,
-	      "Set printing of object's derived type based on vtable info.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_boolean_cmd ("object", class_support, &objectprint, _("\
+Set printing of object's derived type based on vtable info."), _("\
+Show printing of object's derived type based on vtable info."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
 
   /* Give people the defaults which they are used to.  */
   objectprint = 0;

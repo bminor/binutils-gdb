@@ -1107,12 +1107,13 @@ extern initialize_file_ftype _initialize_pascal_valprint; /* -Wmissing-prototype
 void
 _initialize_pascal_valprint (void)
 {
-  deprecated_add_show_from_set
-    (add_set_cmd ("pascal_static-members", class_support, var_boolean,
-		  (char *) &pascal_static_field_print,
-		  "Set printing of pascal static members.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_boolean_cmd ("pascal_static-members", class_support,
+			   &pascal_static_field_print, _("\
+Set printing of pascal static members."), _("\
+Show printing of pascal static members."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
   /* Turn on printing of static fields.  */
   pascal_static_field_print = 1;
 

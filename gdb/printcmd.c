@@ -2134,12 +2134,13 @@ environment, the value is printed in its own window."));
        "Set the largest offset that will be printed in <symbol+1234> form.",
 		  &setprintlist),
      &showprintlist);
-  deprecated_add_show_from_set
-    (add_set_cmd ("symbol-filename", no_class, var_boolean,
-		  (char *) &print_symbol_filename, "\
-Set printing of source filename and line number with <symbol>.",
-		  &setprintlist),
-     &showprintlist);
+  add_setshow_boolean_cmd ("symbol-filename", no_class,
+			   &print_symbol_filename, _("\
+Set printing of source filename and line number with <symbol>."), _("\
+Show printing of source filename and line number with <symbol>."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setprintlist, &showprintlist);
 
   /* For examine/instruction a single byte quantity is specified as
      the data.  This avoids problems with value_at_lazy() requiring a

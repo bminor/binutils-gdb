@@ -2123,54 +2123,55 @@ _initialize_win32_nat (void)
 
   add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("shell", class_support, var_boolean,
-		  (char *) &useshell,
-		  "Set use of shell to start subprocess.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("shell", class_support, &useshell, _("\
+Set use of shell to start subprocess."), _("\
+Show use of shell to start subprocess."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("new-console", class_support, var_boolean,
-		  (char *) &new_console,
-		  "Set creation of new console when creating child process.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("new-console", class_support, &new_console, _("\
+Set creation of new console when creating child process."), _("\
+Show creation of new console when creating child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("new-group", class_support, var_boolean,
-		  (char *) &new_group,
-		  "Set creation of new group when creating child process.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("new-group", class_support, &new_group, _("\
+Set creation of new group when creating child process."), _("\
+Show creation of new group when creating child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("debugexec", class_support, var_boolean,
-		  (char *) &debug_exec,
-		  "Set whether to display execution in child process.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("debugexec", class_support, &debug_exec, _("\
+Set whether to display execution in child process."), _("\
+Show whether to display execution in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("debugevents", class_support, var_boolean,
-		  (char *) &debug_events,
-		  "Set whether to display kernel events in child process.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("debugevents", class_support, &debug_events, _("\
+Set whether to display kernel events in child process."), _("\
+Show whether to display kernel events in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("debugmemory", class_support, var_boolean,
-		  (char *) &debug_memory,
-		  "Set whether to display memory accesses in child process.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("debugmemory", class_support, &debug_memory, _("\
+Set whether to display memory accesses in child process."), _("\
+Show whether to display memory accesses in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("debugexceptions", class_support, var_boolean,
-		  (char *) &debug_exceptions,
-		  "Set whether to display kernel exceptions in child process.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("debugexceptions", class_support,
+			   &debug_exceptions, _("\
+Set whether to display kernel exceptions in child process."), _("\
+Show whether to display kernel exceptions in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   add_info ("dll", info_dll_command, _("Status of loaded DLLs."));
   add_info_alias ("sharedlibrary", "dll", 1);

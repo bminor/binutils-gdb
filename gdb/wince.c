@@ -2038,51 +2038,44 @@ Show how to upload executables to remote device."), NULL,
 				   &setlist, &showlist);
   set_upload_type (NULL, 0);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ((char *) "debugexec", 
-		  class_support, var_boolean,
-		  (char *) &debug_exec,
-		  (char *) "\
-Set whether to display execution in child process.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("debugexec", class_support, &debug_exec, _("\
+Set whether to display execution in child process."), _("\
+Show whether to display execution in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ((char *) "remoteaddhost", 
-		  class_support, var_boolean,
-		  (char *) &remote_add_host,
-		  (char *) "\
+  add_setshow_boolean_cmd ("remoteaddhost", class_support,
+			   &remote_add_host, _("\
 Set whether to add this host to remote stub arguments for\n\
-debugging over a network.", 
-		  &setlist),
-     &showlist);
+debugging over a network."), _("\
+Show whether to add this host to remote stub arguments for\n\
+debugging over a network."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ((char *) "debugevents", 
-		  class_support, var_boolean,
-		  (char *) &debug_events,
-		  (char *) "\
-Set whether to display kernel events in child process.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("debugevents", class_support, &debug_events, _("\
+Set whether to display kernel events in child process."), _("\
+Show whether to display kernel events in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ((char *) "debugmemory", 
-		  class_support, var_boolean,
-		  (char *) &debug_memory,
-		  (char *) "\
-Set whether to display memory accesses in child process.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("debugmemory", class_support, &debug_memory, _("\
+Set whether to display memory accesses in child process."), _("\
+Show whether to display memory accesses in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
-  deprecated_add_show_from_set 
-    (add_set_cmd ((char *) "debugexceptions", 
-		  class_support, var_boolean,
-		  (char *) &debug_exceptions,
-		  (char *) "\
-Set whether to display kernel exceptions in child process.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("debugexceptions", class_support,
+			   &debug_exceptions, _("\
+Set whether to display kernel exceptions in child process."), _("\
+Show whether to display kernel exceptions in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   add_target (&deprecated_child_ops);
 }

@@ -5688,15 +5688,6 @@ in a memory packet.\n",
 			 show_remote_protocol_binary_download_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 1);
-#if 0
-  /* XXXX - should ``set remotebinarydownload'' be retained for
-     compatibility.  */
-  deprecated_add_show_from_set
-    (add_set_cmd ("remotebinarydownload", no_class,
-		  var_boolean, (char *) &remote_binary_download,
-		  "Set binary downloads.\n", &setlist),
-     &showlist);
-#endif
 
   add_packet_config_cmd (&remote_protocol_vcont,
 			 "vCont", "verbose-resume",

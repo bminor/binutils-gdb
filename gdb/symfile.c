@@ -3560,12 +3560,13 @@ Dynamically load FILE into the running program, and record its symbols\n\
 for access from GDB."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("symbol-reloading", class_support, var_boolean,
-		  (char *) &symbol_reloading,
-	    "Set dynamic symbol table reloading multiple times in one run.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("symbol-reloading", class_support,
+			   &symbol_reloading, _("\
+Set dynamic symbol table reloading multiple times in one run."), _("\
+Show dynamic symbol table reloading multiple times in one run."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   add_prefix_cmd ("overlay", class_support, overlay_command,
 		  _("Commands for debugging overlays."), &overlaylist,

@@ -2295,13 +2295,13 @@ void
 _initialize_remote_monitors (void)
 {
   init_base_monitor_ops ();
-  deprecated_add_show_from_set
-    (add_set_cmd ("hash", no_class, var_boolean,
-		  (char *) &hashmark,
-		  "Set display of activity while downloading a file.\n\
-When enabled, a hashmark \'#\' is displayed.",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("hash", no_class, &hashmark, _("\
+Set display of activity while downloading a file."), _("\
+Show display of activity while downloading a file."), _("\
+When enabled, a hashmark \'#\' is displayed."),
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   deprecated_add_show_from_set
     (add_set_cmd ("monitor", no_class, var_zinteger,

@@ -3415,11 +3415,11 @@ ignored.)",
   add_com ("pmon <command>", class_obscure, pmon_command,
 	   _("Send a packet to PMON (must be in debug mode)."));
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("mask-address", no_class,
-		  var_boolean, &mask_address_p, "\
-Set zeroing of upper 32 bits of 64-bit addresses when talking to PMON targets.\n\
-Use \"on\" to enable the masking and \"off\" to disable it.\n",
-		  &setlist),
-     &showlist);
+  add_setshow_boolean_cmd ("mask-address", no_class, &mask_address_p, _("\
+Set zeroing of upper 32 bits of 64-bit addresses when talking to PMON targets."), _("\
+Show zeroing of upper 32 bits of 64-bit addresses when talking to PMON targets."), _("\
+Use \"on\" to enable the masking and \"off\" to disable it."),
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 }

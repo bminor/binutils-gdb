@@ -1557,16 +1557,17 @@ _initialize_som_solib (void)
   add_info ("sharedlibrary", som_sharedlibrary_info_command,
 	    _("Status of loaded shared object libraries."));
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("auto-solib-add", class_support, var_boolean,
-		  (char *) &auto_solib_add,
-		  "Set autoloading of shared library symbols.\n\
+  add_setshow_boolean_cmd ("auto-solib-add", class_support,
+			   &auto_solib_add, _("\
+Set autoloading of shared library symbols."), _("\
+Show autoloading of shared library symbols."), _("\
 If \"on\", symbols from all shared object libraries will be loaded\n\
 automatically when the inferior begins execution, when the dynamic linker\n\
 informs gdb that a new library has been loaded, or when attaching to the\n\
-inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
-		  &setlist),
-     &showlist);
+inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'."),
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   deprecated_add_show_from_set
     (add_set_cmd ("auto-solib-limit", class_support, var_zinteger,

@@ -3929,13 +3929,15 @@ step == scheduler locked during every single-step operation.\n\
   set_cmd_sfunc (c, set_schedlock_func);	/* traps on target vector */
   deprecated_add_show_from_set (c, &showlist);
 
-  c = add_set_cmd ("step-mode", class_run,
-		   var_boolean, (char *) &step_stop_if_no_debug,
-		   "Set mode of the step operation. When set, doing a step over a\n\
-function without debug line information will stop at the first\n\
-instruction of that function. Otherwise, the function is skipped and\n\
-the step command stops at a different source line.", &setlist);
-  deprecated_add_show_from_set (c, &showlist);
+  add_setshow_boolean_cmd ("step-mode", class_run, &step_stop_if_no_debug, _("\
+Set mode of the step operation."), _("\
+Show mode of the step operation."), _("\
+When set, doing a step over a function without debug line information\n\
+will stop at the first instruction of that function. Otherwise, the\n\
+function is skipped and the step command stops at a different source line."),
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   /* ptid initializations */
   null_ptid = ptid_build (0, 0, 0);

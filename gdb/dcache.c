@@ -585,18 +585,18 @@ dcache_info (char *exp, int tty)
 void
 _initialize_dcache (void)
 {
-  deprecated_add_show_from_set
-    (add_set_cmd ("remotecache", class_support, var_boolean,
-		  (char *) &dcache_enabled_p,
-		  "\
-Set cache use for remote targets.\n\
+  add_setshow_boolean_cmd ("remotecache", class_support,
+			   &dcache_enabled_p, _("\
+Set cache use for remote targets."), _("\
+Show cache use for remote targets."), _("\
 When on, use data caching for remote targets.  For many remote targets\n\
 this option can offer better throughput for reading target memory.\n\
 Unfortunately, gdb does not currently know anything about volatile\n\
 registers and thus data caching will produce incorrect results with\n\
-volatile registers are in use.  By default, this option is off.",
-		  &setlist),
-     &showlist);
+volatile registers are in use.  By default, this option is off."),
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
 
   add_info ("dcache", dcache_info,
 	    _("Print information on the dcache performance."));
