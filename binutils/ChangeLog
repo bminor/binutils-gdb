@@ -1,3 +1,10 @@
+Mon Mar 21 12:55:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objdump.c (objdump_print_address): Make static.  Declare with
+	prototype.  Change vardiff from int to bfd_signed_vma.  Correct
+	binary search termination condition.  When looking for same
+	section symbol in relocatable file, handle final symbol correctly.
+
 Sun Mar 20 11:26:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* Makefile.in: Avoid bug in hpux sed.
