@@ -386,7 +386,7 @@ init_frame_pc_default (int fromleaf, struct frame_info *prev)
   if (fromleaf)
     return SAVED_PC_AFTER_CALL (get_next_frame (prev));
   else if (get_next_frame (prev) != NULL)
-    return FRAME_SAVED_PC (get_next_frame (prev));
+    return DEPRECATED_FRAME_SAVED_PC (get_next_frame (prev));
   else
     return read_pc ();
 }

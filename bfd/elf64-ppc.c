@@ -7638,8 +7638,8 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				       + off);
 		    if (tls_type & (TLS_LD | TLS_GD))
 		      {
-			outrel.r_info = ELF64_R_INFO (indx, R_PPC64_DTPMOD64);
 			outrel.r_addend = 0;
+			outrel.r_info = ELF64_R_INFO (indx, R_PPC64_DTPMOD64);
 			if (tls_type == (TLS_TLS | TLS_GD))
 			  {
 			    loc = htab->srelgot->contents;
@@ -7647,9 +7647,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				    * sizeof (Elf64_External_Rela));
 			    bfd_elf64_swap_reloca_out (output_bfd,
 						       &outrel, loc);
+			    outrel.r_offset += 8;
 			    outrel.r_info
 			      = ELF64_R_INFO (indx, R_PPC64_DTPREL64);
-			    outrel.r_offset += 8;
 			  }
 		      }
 		    else if (tls_type == (TLS_TLS | TLS_DTPREL))
@@ -7662,7 +7662,11 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      outrel.r_info = ELF64_R_INFO (indx, R_PPC64_GLOB_DAT);
 		    outrel.r_addend = rel->r_addend;
 		    if (indx == 0)
-		      outrel.r_addend += relocation;
+		      {
+			outrel.r_addend += relocation;
+			if (tls_type & (TLS_GD | TLS_DTPREL | TLS_TPREL))
+			  outrel.r_addend -= htab->tls_sec->vma;
+		      }
 		    loc = htab->srelgot->contents;
 		    loc += (htab->srelgot->reloc_count++
 			    * sizeof (Elf64_External_Rela));
@@ -7798,6 +7802,11 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  addend -= htab->tls_sec->vma + DTP_OFFSET;
 	  break;
 
+	case R_PPC64_DTPMOD64:
+	  relocation = 1;
+	  addend = 0;
+	  goto dodyn;
+
 	case R_PPC64_TPREL64:
 	  addend -= htab->tls_sec->vma + TP_OFFSET;
 	  goto dodyn;
@@ -7808,7 +7817,6 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  /* Relocations that may need to be propagated if this is a
 	     dynamic object.  */
-	case R_PPC64_DTPMOD64:
 	case R_PPC64_REL30:
 	case R_PPC64_REL32:
 	case R_PPC64_REL64:
@@ -8028,8 +8036,9 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     'sec' would be NULL, and we should leave the symbol
 	     alone (it will be set to zero elsewhere in the link).  */
 	  if (sec != NULL)
-	    /* Add 0x10000 if sign bit in 0:15 is set.  */
-	    addend += ((relocation + addend) & 0x8000) << 1;
+	    /* Add 0x10000 if sign bit in 0:15 is set.
+	       Bits 0:15 are not used.  */
+	    addend += 0x8000;
 	  break;
 
 	case R_PPC64_ADDR16_DS:

@@ -1,3 +1,7 @@
+2003-03-16  Mark Kettenis  <kettenis@gnu.org>
+
+	Merge with mainline.  Tag is kettenis-i386newframe-20030316-mergepoint.
+
 2003-03-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_frameless_signal_p): Removed.

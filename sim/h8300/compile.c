@@ -35,6 +35,8 @@
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
 #include "gdb/sim-h8300.h"
+#include "sys/stat.h"
+#include "sys/types.h"
 
 #ifndef SIGTRAP
 # define SIGTRAP 5
@@ -447,14 +449,36 @@ decode (int addr, unsigned char *data, decoded_inst *dst)
 		  dst->opcode = q->how;
 		  dst->cycles = q->time;
 
-		  /* And a jsr to 0xc4 is turned into a magic trap.  */
+		  /* And a jsr to these locations are turned into magic
+		     traps.  */
 
 		  if (dst->opcode == O (O_JSR, SB))
 		    {
-		      if (dst->src.literal == 0xc4)
+		      switch (dst->src.literal)
 			{
-			  dst->opcode = O (O_SYSCALL, SB);
+			case 0xc5:
+			  dst->opcode = O (O_SYS_OPEN, SB);
+			  break;
+			case 0xc6:
+			  dst->opcode = O (O_SYS_READ, SB);
+			  break;
+			case 0xc7:
+			  dst->opcode = O (O_SYS_WRITE, SB);
+			  break;
+			case 0xc8:
+			  dst->opcode = O (O_SYS_LSEEK, SB);
+			  break;
+			case 0xc9:
+			  dst->opcode = O (O_SYS_CLOSE, SB);
+			  break;
+			case 0xca:
+			  dst->opcode = O (O_SYS_STAT, SB);
+			  break;
+			case 0xcb:
+			  dst->opcode = O (O_SYS_FSTAT, SB);
+			  break;
 			}
+		      /* End of Processing for system calls.  */
 		    }
 
 		  dst->next_pc = addr + len / 2;
@@ -1386,12 +1410,289 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	    goto condtrue;
 	  goto next;
 
-	case O (O_SYSCALL, SB):
+	  /* System call processing starts.  */
+	case O (O_SYS_OPEN, SB):
 	  {
-	    char c = cpu.regs[2];
-	    sim_callback->write_stdout (sim_callback, &c, 1);
+	    int len = 0;	/* Length of filename.  */
+	    char *filename;	/* Filename would go here.  */
+	    char temp_char;	/* Temporary character */
+	    int mode = 0;	/* Mode bits for the file.  */
+	    int open_return;	/* Return value of open, file descriptor.  */
+	    int i;		/* Loop counter */
+	    int filename_ptr;	/* Pointer to filename in cpu memory.  */
+
+	    /* Setting filename_ptr to first argument of open.  */
+	    filename_ptr = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+
+	    /* Trying to get mode.  */
+	    if (h8300hmode || h8300smode)
+	      {
+		mode = GET_MEMORY_L (cpu.regs[7] + 4);
+	      }
+	    else
+	      {
+		mode = GET_MEMORY_W (cpu.regs[7] + 2);
+	      }
+
+	    /* Trying to find the length of the filename.  */
+	    temp_char = GET_MEMORY_B (cpu.regs[0]);
+
+	    len = 1;
+	    while (temp_char != '\0')
+	      {
+		temp_char = GET_MEMORY_B (filename_ptr + len);
+		len++;
+	      }
+
+	    /* Allocating space for the filename.  */
+	    filename = (char *) malloc (sizeof (char) * len);
+
+	    /* String copying the filename from memory.  */
+	    for (i = 0; i < len; i++)
+	      {
+		temp_char = GET_MEMORY_B (filename_ptr + i);
+		filename[i] = temp_char;
+	      }
+
+	    /* Callback to open and return the file descriptor.  */
+	    open_return = sim_callback->open (sim_callback, filename, mode);
+
+	    /* Return value in register 0.  */
+	    cpu.regs[0] = open_return;
+
+	    /* Freeing memory used for filename. */
+	    free (filename);
 	  }
 	  goto next;
+
+	case O (O_SYS_READ, SB):
+	  {
+	    char *char_ptr;	/* Where characters read would be stored.  */
+	    int fd;		/* File descriptor */
+	    int buf_size;	/* BUF_SIZE parameter in read.  */
+	    int i = 0;		/* Temporary Loop counter */
+	    int read_return = 0;	/* Return value from callback to
+					   read.  */
+
+	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+	    buf_size = h8300hmode ? GET_L_REG (2) : GET_W_REG (2);
+
+	    char_ptr = (char *) malloc (sizeof (char) * buf_size);
+
+	    /* Callback to read and return the no. of characters read.  */
+	    read_return =
+	      sim_callback->read (sim_callback, fd, char_ptr, buf_size);
+
+	    /* The characters read are stored in cpu memory.  */
+	    for (i = 0; i < buf_size; i++)
+	      {
+		SET_MEMORY_B ((cpu.regs[1] + (sizeof (char) * i)),
+			      *(char_ptr + (sizeof (char) * i)));
+	      }
+
+	    /* Return value in Register 0.  */
+	    cpu.regs[0] = read_return;
+
+	    /* Freeing memory used as buffer.  */
+	    free (char_ptr);
+	  }
+	  goto next;
+
+	case O (O_SYS_WRITE, SB):
+	  {
+	    int fd;		/* File descriptor */
+	    char temp_char;	/* Temporary character */
+	    int len;		/* Length of write, Parameter II to write.  */
+	    int char_ptr;	/* Character Pointer, Parameter I of write.  */
+	    char *ptr;		/* Where characters to be written are stored. 
+				 */
+	    int write_return;	/* Return value from callback to write.  */
+	    int i = 0;		/* Loop counter */
+
+	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+	    char_ptr = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
+	    len = h8300hmode ? GET_L_REG (2) : GET_W_REG (2);
+
+	    /* Allocating space for the characters to be written.  */
+	    ptr = (char *) malloc (sizeof (char) * len);
+
+	    /* Fetching the characters from cpu memory.  */
+	    for (i = 0; i < len; i++)
+	      {
+		temp_char = GET_MEMORY_B (char_ptr + i);
+		ptr[i] = temp_char;
+	      }
+
+	    /* Callback write and return the no. of characters written.  */
+	    write_return = sim_callback->write (sim_callback, fd, ptr, len);
+
+	    /* Return value in Register 0.  */
+	    cpu.regs[0] = write_return;
+
+	    /* Freeing memory used as buffer.  */
+	    free (ptr);
+	  }
+	  goto next;
+
+	case O (O_SYS_LSEEK, SB):
+	  {
+	    int fd;		/* File descriptor */
+	    int offset;		/* Offset */
+	    int origin;		/* Origin */
+	    int lseek_return;	/* Return value from callback to lseek.  */
+
+	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+	    offset = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
+	    origin = h8300hmode ? GET_L_REG (2) : GET_W_REG (2);
+
+	    /* Callback lseek and return offset.  */
+	    lseek_return =
+	      sim_callback->lseek (sim_callback, fd, offset, origin);
+
+	    /* Return value in register 0.  */
+	    cpu.regs[0] = lseek_return;
+	  }
+	  goto next;
+
+	case O (O_SYS_CLOSE, SB):
+	  {
+	    int fd;		/* File descriptor */
+	    int close_return;	/* Return value from callback to close.  */
+
+	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+
+	    /* Callback close and return.  */
+	    close_return = sim_callback->close (sim_callback, fd);
+
+	    /* Return value in register 0.  */
+	    cpu.regs[0] = close_return;
+	  }
+	  goto next;
+
+	case O (O_SYS_FSTAT, SB):
+	  {
+	    int fd;		/* File descriptor */
+	    struct stat stat_rec;	/* Stat record */
+	    int fstat_return;	/* Return value from callback to stat.  */
+	    int stat_ptr;	/* Pointer to stat record.  */
+	    char *temp_stat_ptr;	/* Temporary stat_rec pointer.  */
+
+	    fd = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+
+	    /* Setting stat_ptr to second argument of stat.  */
+	    stat_ptr = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
+
+	    /* Callback stat and return.  */
+	    fstat_return = sim_callback->fstat (sim_callback, fd, &stat_rec);
+
+	    /* Have stat_ptr point to starting of stat_rec.  */
+	    temp_stat_ptr = (char *) (&stat_rec);
+
+	    /* Setting up the stat structure returned.  */
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_dev);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_ino);
+	    stat_ptr += 2;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_mode);
+	    stat_ptr += 4;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_nlink);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_uid);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_gid);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_rdev);
+	    stat_ptr += 2;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_size);
+	    stat_ptr += 4;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_atime);
+	    stat_ptr += 8;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_mtime);
+	    stat_ptr += 8;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_ctime);
+
+	    /* Return value in register 0.  */
+	    cpu.regs[0] = fstat_return;
+	  }
+	  goto next;
+
+	case O (O_SYS_STAT, SB):
+	  {
+	    int len = 0;	/* Length of filename.  */
+	    char *filename;	/* Filename would go here.  */
+	    char temp_char;	/* Temporary character */
+	    int filename_ptr;	/* Pointer to filename in cpu memory.  */
+	    struct stat stat_rec;	/* Stat record */
+	    int stat_return;	/* Return value from callback to stat */
+	    int stat_ptr;	/* Pointer to stat record.  */
+	    char *temp_stat_ptr;	/* Temporary stat_rec pointer.  */
+	    int i = 0;		/* Loop Counter */
+
+	    /* Setting filename_ptr to first argument of open.  */
+	    filename_ptr = h8300hmode ? GET_L_REG (0) : GET_W_REG (0);
+
+	    /* Trying to find the length of the filename.  */
+	    temp_char = GET_MEMORY_B (cpu.regs[0]);
+
+	    len = 1;
+	    while (temp_char != '\0')
+	      {
+		temp_char = GET_MEMORY_B (filename_ptr + len);
+		len++;
+	      }
+
+	    /* Allocating space for the filename.  */
+	    filename = (char *) malloc (sizeof (char) * len);
+
+	    /* String copying the filename from memory.  */
+	    for (i = 0; i < len; i++)
+	      {
+		temp_char = GET_MEMORY_B (filename_ptr + i);
+		filename[i] = temp_char;
+	      }
+
+	    /* Setting stat_ptr to second argument of stat.  */
+	    /* stat_ptr = cpu.regs[1]; */
+	    stat_ptr = h8300hmode ? GET_L_REG (1) : GET_W_REG (1);
+
+	    /* Callback stat and return.  */
+	    stat_return =
+	      sim_callback->stat (sim_callback, filename, &stat_rec);
+
+	    /* Have stat_ptr point to starting of stat_rec.  */
+	    temp_stat_ptr = (char *) (&stat_rec);
+
+	    /* Freeing memory used for filename.  */
+	    free (filename);
+
+	    /* Setting up the stat structure returned.  */
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_dev);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_ino);
+	    stat_ptr += 2;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_mode);
+	    stat_ptr += 4;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_nlink);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_uid);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_gid);
+	    stat_ptr += 2;
+	    SET_MEMORY_W (stat_ptr, stat_rec.st_rdev);
+	    stat_ptr += 2;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_size);
+	    stat_ptr += 4;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_atime);
+	    stat_ptr += 8;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_mtime);
+	    stat_ptr += 8;
+	    SET_MEMORY_L (stat_ptr, stat_rec.st_ctime);
+
+	    /* Return value in register 0.  */
+	    cpu.regs[0] = stat_return;
+	  }
+	  goto next;
+	  /* End of system call processing.  */
 
 	  ONOT (O_NOT, rd = ~rd; v = 0;);
 	  OSHIFTS (O_SHLL,

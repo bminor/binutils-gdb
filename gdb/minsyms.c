@@ -113,7 +113,8 @@ add_minsym_to_hash_table (struct minimal_symbol *sym,
 {
   if (sym->hash_next == NULL)
     {
-      unsigned int hash = msymbol_hash (DEPRECATED_SYMBOL_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
+      unsigned int hash
+	= msymbol_hash (SYMBOL_LINKAGE_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
       sym->hash_next = table[hash];
       table[hash] = sym;
     }
@@ -288,7 +289,7 @@ lookup_minimal_symbol_text (register const char *name, const char *sfile,
 	       msymbol != NULL && found_symbol == NULL;
 	       msymbol = msymbol->hash_next)
 	    {
-	      if (DEPRECATED_SYMBOL_MATCHES_NAME (msymbol, name) &&
+	      if (strcmp (SYMBOL_LINKAGE_NAME (msymbol), name) == 0 &&
 		  (MSYMBOL_TYPE (msymbol) == mst_text ||
 		   MSYMBOL_TYPE (msymbol) == mst_file_text))
 		{
@@ -364,7 +365,7 @@ lookup_minimal_symbol_solib_trampoline (register const char *name,
 	       msymbol != NULL && found_symbol == NULL;
 	       msymbol = msymbol->hash_next)
 	    {
-	      if (DEPRECATED_SYMBOL_MATCHES_NAME (msymbol, name) &&
+	      if (strcmp (SYMBOL_LINKAGE_NAME (msymbol), name) == 0 &&
 		  MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
 		return msymbol;
 	    }
@@ -659,8 +660,8 @@ compare_minimal_symbols (const void *fn1p, const void *fn2p)
   else
     /* addrs are equal: sort by name */
     {
-      char *name1 = DEPRECATED_SYMBOL_NAME (fn1);
-      char *name2 = DEPRECATED_SYMBOL_NAME (fn2);
+      char *name1 = SYMBOL_LINKAGE_NAME (fn1);
+      char *name2 = SYMBOL_LINKAGE_NAME (fn2);
 
       if (name1 && name2)	/* both have names */
 	return strcmp (name1, name2);
@@ -752,7 +753,8 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
 	{
 	  if (SYMBOL_VALUE_ADDRESS (copyfrom) ==
 	      SYMBOL_VALUE_ADDRESS ((copyfrom + 1)) &&
-	      (STREQ (DEPRECATED_SYMBOL_NAME (copyfrom), DEPRECATED_SYMBOL_NAME ((copyfrom + 1)))))
+	      (STREQ (SYMBOL_LINKAGE_NAME (copyfrom),
+		      SYMBOL_LINKAGE_NAME ((copyfrom + 1)))))
 	    {
 	      if (MSYMBOL_TYPE ((copyfrom + 1)) == mst_unknown)
 		{
@@ -867,9 +869,9 @@ install_minimal_symbols (struct objfile *objfile)
 	  for (bindex = 0; bindex < msym_bunch_index; bindex++, mcount++)
 	    {
 	      msymbols[mcount] = bunch->contents[bindex];
-	      if (DEPRECATED_SYMBOL_NAME (&msymbols[mcount])[0] == leading_char)
+	      if (SYMBOL_LINKAGE_NAME (&msymbols[mcount])[0] == leading_char)
 		{
-		  DEPRECATED_SYMBOL_NAME (&msymbols[mcount])++;
+		  SYMBOL_LINKAGE_NAME (&msymbols[mcount])++;
 		}
 	    }
 	  msym_bunch_index = BUNCH_SIZE;
@@ -898,7 +900,7 @@ install_minimal_symbols (struct objfile *objfile)
          symbol count does *not* include this null symbol, which is why it
          is indexed by mcount and not mcount-1. */
 
-      DEPRECATED_SYMBOL_NAME (&msymbols[mcount]) = NULL;
+      SYMBOL_LINKAGE_NAME (&msymbols[mcount]) = NULL;
       SYMBOL_VALUE_ADDRESS (&msymbols[mcount]) = 0;
       MSYMBOL_INFO (&msymbols[mcount]) = NULL;
       MSYMBOL_TYPE (&msymbols[mcount]) = mst_unknown;
@@ -918,7 +920,7 @@ install_minimal_symbols (struct objfile *objfile)
 
 	for (i = 0; i < mcount; i++)
 	  {
-	    const char *name = DEPRECATED_SYMBOL_NAME (&objfile->msymbols[i]);
+	    const char *name = SYMBOL_LINKAGE_NAME (&objfile->msymbols[i]);
 	    if (name[0] == '_' && name[1] == 'Z')
 	      {
 		set_cp_abi_as_auto_default ("gnu-v3");
@@ -981,7 +983,8 @@ find_solib_trampoline_target (CORE_ADDR pc)
       ALL_MSYMBOLS (objfile, msymbol)
       {
 	if (MSYMBOL_TYPE (msymbol) == mst_text
-	    && STREQ (DEPRECATED_SYMBOL_NAME (msymbol), DEPRECATED_SYMBOL_NAME (tsymbol)))
+	    && STREQ (SYMBOL_LINKAGE_NAME (msymbol),
+		      SYMBOL_LINKAGE_NAME (tsymbol)))
 	  return SYMBOL_VALUE_ADDRESS (msymbol);
       }
     }

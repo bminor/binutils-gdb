@@ -1,3 +1,28 @@
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	references to get_saved_register.  Rename GET_SAVED_REGISTER to
+	DEPRECATED_GET_SAVED_REGISTER.
+
+2003-03-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	POP_FRAME with DEPRECATED_POP_FRAME.  Update description.
+
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Rename
+	FRAME_SAVED_PC to DEPRECATED_FRAME_SAVED_PC.
+	
+2003-03-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.texinfo: Add File-I/O documentation.
+
+2003-03-10  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Cross reference
+	FRAME_SAVED_PC to unwind_pc.  Document unwind_pc.
+
 2003-03-07  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.texinfo (Debugging Output): Mention the "set/show debug

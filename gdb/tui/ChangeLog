@@ -1,3 +1,17 @@
+2003-03-14  Andrew Cagney  <cagney@redhat.com>
+
+	* tuiRegs.c (_tuiGetRegisterRawValue): Use frame_read_register,
+	instead of get_saved_register.
+
+2003-03-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-out.c (tui_out_data): Fix typedef.
+
+2003-03-08  Andrew Cagney  <cagney@redhat.com>
+
+	* tui-out.c: Update copyright.
+	(tui_out_data): Define typedef.  Use instead of ui_out_data.
+
 2003-02-14  Andrew Cagney  <ac131313@redhat.com>
 
 	* tui.c (tui_enable, tui_disable): Don't modify tui_version.

@@ -43,7 +43,6 @@ static gdbarch_skip_prologue_ftype vax_skip_prologue;
 static gdbarch_saved_pc_after_call_ftype vax_saved_pc_after_call;
 static gdbarch_frame_num_args_ftype vax_frame_num_args;
 static gdbarch_frame_chain_ftype vax_frame_chain;
-static gdbarch_frame_saved_pc_ftype vax_frame_saved_pc;
 static gdbarch_frame_args_address_ftype vax_frame_args_address;
 static gdbarch_frame_locals_address_ftype vax_frame_locals_address;
 
@@ -53,7 +52,6 @@ static gdbarch_deprecated_extract_struct_value_address_ftype
     vax_extract_struct_value_address;
 
 static gdbarch_deprecated_push_dummy_frame_ftype vax_push_dummy_frame;
-static gdbarch_pop_frame_ftype vax_pop_frame;
 static gdbarch_fix_call_dummy_ftype vax_fix_call_dummy;
 
 /* Return 1 if P points to an invalid floating point value.
@@ -375,7 +373,7 @@ vax_skip_prologue (CORE_ADDR pc)
 static CORE_ADDR
 vax_saved_pc_after_call (struct frame_info *frame)
 {
-  return (FRAME_SAVED_PC(frame));
+  return (DEPRECATED_FRAME_SAVED_PC(frame));
 }
 
 /* Print the vax instruction at address MEMADDR in debugged memory,
@@ -650,7 +648,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				   generic_frameless_function_invocation_not);
 
   set_gdbarch_frame_chain (gdbarch, vax_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, vax_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, vax_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, vax_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, vax_frame_locals_address);
@@ -669,7 +667,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call dummy info */
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, vax_push_dummy_frame);
-  set_gdbarch_pop_frame (gdbarch, vax_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, vax_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, vax_call_dummy_words);

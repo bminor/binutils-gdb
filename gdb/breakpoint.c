@@ -1679,7 +1679,7 @@ breakpoint_inserted_here_p (CORE_ADDR pc)
 
 /* Return nonzero if FRAME is a dummy frame.  We can't use
    DEPRECATED_PC_IN_CALL_DUMMY because figuring out the saved SP would
-   take too much time, at least using get_saved_register on the 68k.
+   take too much time, at least using frame_register() on the 68k.
    This means that for this function to work right a port must use the
    bp_call_dummy breakpoint.  */
 
@@ -1816,6 +1816,11 @@ bpstat_copy (bpstat bs)
     {
       tmp = (bpstat) xmalloc (sizeof (*tmp));
       memcpy (tmp, bs, sizeof (*tmp));
+      if (bs->commands != NULL)
+	tmp->commands = copy_command_lines (bs->commands);
+      if (bs->old_val != NULL)
+	tmp->old_val = value_copy (bs->old_val);
+
       if (p == NULL)
 	/* This is the first thing in the chain.  */
 	retval = tmp;
@@ -2758,9 +2763,9 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 	    /* We will stop here */
 	    if (b->disposition == disp_disable)
 	      b->enable_state = bp_disabled;
-	    bs->commands = copy_command_lines (b->commands);
 	    if (b->silent)
 	      bs->print = 0;
+	    bs->commands = b->commands;
 	    if (bs->commands &&
 		(STREQ ("silent", bs->commands->line) ||
 		 (xdb_commands && STREQ ("Q", bs->commands->line))))
@@ -2768,6 +2773,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 		bs->commands = bs->commands->next;
 		bs->print = 0;
 	      }
+	    bs->commands = copy_command_lines (bs->commands);
 	  }
       }
     /* Print nothing for this entry if we dont stop or if we dont print.  */

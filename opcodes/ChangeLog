@@ -1,3 +1,7 @@
+2003-03-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ppc-opc.c (powerpc_opcodes): Readd tlbre for PPC403.
+
 2003-02-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* hppa-dis.c: Formatting.

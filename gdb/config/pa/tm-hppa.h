@@ -420,7 +420,7 @@ extern int hppa_frameless_function_invocation (struct frame_info *);
 
 #if !GDB_MULTI_ARCH
 extern CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
-#define FRAME_SAVED_PC(FRAME) hppa_frame_saved_pc (FRAME)
+#define DEPRECATED_FRAME_SAVED_PC(FRAME) hppa_frame_saved_pc (FRAME)
 #endif
 
 #if !GDB_MULTI_ARCH
@@ -463,7 +463,7 @@ extern void hppa_push_dummy_frame (struct inferior_status *);
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */
 #if !GDB_MULTI_ARCH
-#define POP_FRAME  hppa_pop_frame ()
+#define DEPRECATED_POP_FRAME  hppa_pop_frame ()
 extern void hppa_pop_frame (void);
 #endif
 

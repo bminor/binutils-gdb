@@ -4779,10 +4779,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			outrel.r_offset = (htab->got->output_section->vma
 					   + htab->got->output_offset
 					   + off);
+			outrel.r_addend = 0;
 			if (tls_ty & (TLS_LD | TLS_GD))
 			  {
 			    outrel.r_info = ELF32_R_INFO (indx, R_PPC_DTPMOD32);
-			    outrel.r_addend = 0;
 			    if (tls_ty == (TLS_TLS | TLS_GD))
 			      {
 				loc = htab->relgot->contents;
@@ -4790,9 +4790,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 					* sizeof (Elf32_External_Rela));
 				bfd_elf32_swap_reloca_out (output_bfd,
 							   &outrel, loc);
+				outrel.r_offset += 4;
 				outrel.r_info
 				  = ELF32_R_INFO (indx, R_PPC_DTPREL32);
-				outrel.r_offset += 4;
 			      }
 			  }
 			else if (tls_ty == (TLS_TLS | TLS_DTPREL))
@@ -4803,9 +4803,12 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			  outrel.r_info = ELF32_R_INFO (indx, R_PPC_RELATIVE);
 			else
 			  outrel.r_info = ELF32_R_INFO (indx, R_PPC_GLOB_DAT);
-			outrel.r_addend = 0;
 			if (indx == 0)
-			  outrel.r_addend += relocation;
+			  {
+			    outrel.r_addend += relocation;
+			    if (tls_ty & (TLS_GD | TLS_DTPREL | TLS_TPREL))
+			      outrel.r_addend -= htab->tls_sec->vma;
+			  }
 			loc = htab->relgot->contents;
 			loc += (htab->relgot->reloc_count++
 				* sizeof (Elf32_External_Rela));
@@ -4933,6 +4936,11 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  addend -= htab->tls_sec->vma + DTP_OFFSET;
 	  goto dodyn;
 
+	case R_PPC_DTPMOD32:
+	  relocation = 1;
+	  addend = 0;
+	  goto dodyn;
+
 	case R_PPC_REL24:
 	case R_PPC_REL32:
 	case R_PPC_REL14:
@@ -4959,7 +4967,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_PPC_ADDR14_BRNTAKEN:
 	case R_PPC_UADDR32:
 	case R_PPC_UADDR16:
-	case R_PPC_DTPMOD32:
 	  /* r_symndx will be zero only for relocs against symbols
 	     from removed linkonce sections, or sections discarded by
 	     a linker script.  */
@@ -5332,8 +5339,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     'sec' would be NULL, and we should leave the symbol
 	     alone (it will be set to zero elsewhere in the link).  */
 	  if (sec != NULL)
-	    /* Add 0x10000 if sign bit in 0:15 is set.  */
-	    addend += ((relocation + addend) & 0x8000) << 1;
+	    /* Add 0x10000 if sign bit in 0:15 is set.
+	       Bits 0:15 are not used.  */
+	    addend += 0x8000;
 	  break;
 	}
 

@@ -1758,7 +1758,7 @@ sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
 
   if (get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))
@@ -1790,7 +1790,7 @@ sh64_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
 
   if (get_next_frame (fi)) 
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))
@@ -4372,14 +4372,14 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_do_registers_info (gdbarch, sh_do_registers_info);
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
   set_gdbarch_frame_chain (gdbarch, sh_frame_chain);
-  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
+  set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sh_init_extra_frame_info);
   set_gdbarch_deprecated_extract_return_value (gdbarch, sh_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, sh_push_arguments);
   set_gdbarch_store_struct_return (gdbarch, sh_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, sh_use_struct_convention);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
-  set_gdbarch_pop_frame (gdbarch, sh_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, sh_pop_frame);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh);
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);
   skip_prologue_hard_way = sh_skip_prologue_hard_way;
@@ -4615,13 +4615,13 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_breakpoint_from_pc (gdbarch, sh_sh64_breakpoint_from_pc);
       set_gdbarch_deprecated_init_extra_frame_info (gdbarch, sh64_init_extra_frame_info);
       set_gdbarch_frame_chain (gdbarch, sh64_frame_chain);
-      set_gdbarch_get_saved_register (gdbarch, sh64_get_saved_register);
+      set_gdbarch_deprecated_get_saved_register (gdbarch, sh64_get_saved_register);
       set_gdbarch_deprecated_extract_return_value (gdbarch, sh64_extract_return_value);
       set_gdbarch_push_arguments (gdbarch, sh64_push_arguments);
       /*set_gdbarch_store_struct_return (gdbarch, sh64_store_struct_return);*/
       set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh64_extract_struct_value_address);
       set_gdbarch_use_struct_convention (gdbarch, sh64_use_struct_convention);
-      set_gdbarch_pop_frame (gdbarch, sh64_pop_frame);
+      set_gdbarch_deprecated_pop_frame (gdbarch, sh64_pop_frame);
       set_gdbarch_elf_make_msymbol_special (gdbarch,
                                             sh64_elf_make_msymbol_special);
       break;
@@ -4674,7 +4674,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
-  set_gdbarch_frame_saved_pc (gdbarch, sh_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, sh_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, sh_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);

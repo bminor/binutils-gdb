@@ -36,7 +36,6 @@ static gdbarch_register_virtual_type_ftype frv_register_virtual_type;
 static gdbarch_register_byte_ftype frv_register_byte;
 static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
 static gdbarch_frame_chain_ftype frv_frame_chain;
-static gdbarch_frame_saved_pc_ftype frv_frame_saved_pc;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
 static gdbarch_deprecated_extract_return_value_ftype frv_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype frv_extract_struct_value_address;
@@ -46,7 +45,6 @@ static gdbarch_init_extra_frame_info_ftype stupid_useless_init_extra_frame_info;
 static gdbarch_store_struct_return_ftype frv_store_struct_return;
 static gdbarch_push_arguments_ftype frv_push_arguments;
 static gdbarch_push_return_address_ftype frv_push_return_address;
-static gdbarch_pop_frame_ftype frv_pop_frame;
 static gdbarch_saved_pc_after_call_ftype frv_saved_pc_after_call;
 
 static void frv_pop_frame_regular (struct frame_info *frame);
@@ -1081,7 +1079,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, frv_saved_pc_after_call);
 
   set_gdbarch_frame_chain (gdbarch, frv_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, frv_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, frv_frame_saved_pc);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, frv_frame_init_saved_regs);
 
@@ -1096,7 +1094,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_push_arguments (gdbarch, frv_push_arguments);
   set_gdbarch_push_return_address (gdbarch, frv_push_return_address);
-  set_gdbarch_pop_frame (gdbarch, frv_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, frv_pop_frame);
 
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, frv_call_dummy_words);

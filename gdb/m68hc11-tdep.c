@@ -895,7 +895,7 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   
   if (get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
   
   m68hc11_frame_init_saved_regs (fi);
 
@@ -1390,7 +1390,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
                                        sizeof (m68hc11_call_dummy_words));
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
+  set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_deprecated_extract_return_value (gdbarch, m68hc11_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, m68hc11_push_arguments);
@@ -1404,13 +1404,13 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
 
   set_gdbarch_frame_chain (gdbarch, m68hc11_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, m68hc11_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, m68hc11_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, m68hc11_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, m68hc11_frame_locals_address);
   set_gdbarch_saved_pc_after_call (gdbarch, m68hc11_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 
-  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
+  set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
 
   set_gdbarch_store_struct_return (gdbarch, m68hc11_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, m68hc11_store_return_value);
@@ -1418,7 +1418,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
     (gdbarch, m68hc11_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, m68hc11_use_struct_convention);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, m68hc11_init_extra_frame_info);
-  set_gdbarch_pop_frame (gdbarch, m68hc11_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, m68hc11_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, m68hc11_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);

@@ -1,5 +1,5 @@
 /* BFD back-end for i386 a.out binaries under dynix.
-   Copyright 1994, 1995, 2001 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 2001, 2003 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -19,8 +19,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This BFD is currently only tested with gdb, writing object files
    may not work.  */
-
-#define BYTES_IN_WORD	4
 
 #define TEXT_START_ADDR 4096
 #define TARGET_PAGE_SIZE	4096
