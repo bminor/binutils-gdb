@@ -1,3 +1,10 @@
+2002-05-27  Per Lundberg  <per@caleb.dnsalias.org>
+
+	* Makefile.am (eelf_i386_chaos): Use elf_chaos.sc script.
+	* Makefile.in: Regenerate.
+	* emulparams/elf_chaos.sh: Use elf_chaos script.
+	* scripttempl/elf_chaos.sc: New file.
+
 2002-05-27  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ldlang.c (lang_size_sections_1): Move check for conflicting load

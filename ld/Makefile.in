@@ -103,6 +103,8 @@ STRIP = @STRIP@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
+bfdincludedir = @bfdincludedir@
+bfdlibdir = @bfdlibdir@
 l = @l@
 
 INTLLIBS = @INTLLIBS@
@@ -1399,7 +1401,7 @@ eelf_i386_be.c: $(srcdir)/emulparams/elf_i386_be.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_be "$(tdir_elf_i386_be)"
 eelf_i386_chaos.c: $(srcdir)/emulparams/elf_i386_chaos.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf_chaos.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_chaos "$(tdir_elf_i386_chaos)"
 eelf_i386_fbsd.c: $(srcdir)/emulparams/elf_i386_fbsd.sh \
   $(srcdir)/emulparams/elf_i386.sh \
