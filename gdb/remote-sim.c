@@ -359,7 +359,7 @@ gdbsim_store_register (int regno)
     }
   else if (REGISTER_SIM_REGNO (regno) >= 0)
     {
-      char tmp[MAX_REGISTER_RAW_SIZE];
+      char *tmp = alloca (max_register_size (current_gdbarch));
       int nr_bytes;
       deprecated_read_register_gen (regno, tmp);
       nr_bytes = sim_store_register (gdbsim_desc,

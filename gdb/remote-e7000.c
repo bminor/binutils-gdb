@@ -785,7 +785,7 @@ void
 fetch_regs_from_dump (int (*nextchar) (), char *want)
 {
   int regno;
-  char buf[MAX_REGISTER_RAW_SIZE];
+  char *buf = alloca (max_register_size (current_gdbarch));
 
   int thischar = nextchar ();
 

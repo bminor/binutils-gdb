@@ -864,17 +864,19 @@ show_regs (char *args, int from_tty)
       printf_filtered ("\n");
     }
   printf_filtered ("A0-A%d", NR_A_REGS - 1);
-  for (a = A0_REGNUM; a < A0_REGNUM + NR_A_REGS; a++)
-    {
-      char num[MAX_REGISTER_RAW_SIZE];
-      int i;
-      printf_filtered ("  ");
-      deprecated_read_register_gen (a, (char *) &num);
-      for (i = 0; i < MAX_REGISTER_RAW_SIZE; i++)
-	{
-	  printf_filtered ("%02x", (num[i] & 0xff));
-	}
-    }
+  {
+    char *num = alloca (max_register_size (current_gdbarch));
+    for (a = A0_REGNUM; a < A0_REGNUM + NR_A_REGS; a++)
+      {
+	int i;
+	printf_filtered ("  ");
+	deprecated_read_register_gen (a, (char *) &num);
+	for (i = 0; i < MAX_REGISTER_RAW_SIZE; i++)
+	  {
+	    printf_filtered ("%02x", (num[i] & 0xff));
+	  }
+      }
+  }
   printf_filtered ("\n");
 }
 

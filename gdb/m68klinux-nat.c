@@ -135,7 +135,7 @@ fetch_register (int regno)
   char mess[128];		/* For messages */
   register int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
-  char buf[MAX_REGISTER_RAW_SIZE];
+  char *buf = alloca (max_register_size (current_gdbarch));
   int tid;
 
   if (CANNOT_FETCH_REGISTER (regno))

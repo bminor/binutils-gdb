@@ -941,7 +941,7 @@ thread_db_store_registers (int regno)
 
   if (regno != -1)
     {
-      char raw[MAX_REGISTER_RAW_SIZE];
+      char *raw = alloca (max_register_size (current_gdbarch));
 
       deprecated_read_register_gen (regno, raw);
       thread_db_fetch_registers (-1);

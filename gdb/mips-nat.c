@@ -62,9 +62,6 @@
   : regno >= FP0_REGNUM ?	FPR_BASE + (regno - FP0_REGNUM) \
   : 0)
 
-static char zerobuf[MAX_REGISTER_RAW_SIZE] =
-{0};
-
 static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
 /* Get all registers from the inferior */
@@ -73,8 +70,10 @@ void
 fetch_inferior_registers (int regno)
 {
   register unsigned int regaddr;
-  char buf[MAX_REGISTER_RAW_SIZE];
+  char *buf = alloca (max_register_size (current_gdbarch));
   register int i;
+  char *zerobuf = alloca (max_register_size (current_gdbarch));
+  memset (zerobuf, 0, max_register_size (current_gdbarch));
 
   deprecated_registers_fetched ();
 
@@ -174,6 +173,10 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   register unsigned int addr;
   int bad_reg = -1;
   register reg_ptr = -reg_addr;	/* Original u.u_ar0 is -reg_addr. */
+
+  char *zerobuf = alloca (max_register_size (current_gdbarch));
+  memset (zerobuf, 0, max_register_size (current_gdbarch));
+
 
   /* If u.u_ar0 was an absolute address in the core file, relativize it now,
      so we can use it as an offset into core_reg_sect.  When we're done,

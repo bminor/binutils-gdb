@@ -1,3 +1,31 @@
+2003-02-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* mips-nat.c (zerobuf): Delete.
+	(fetch_inferior_registers): Alloc local zerobuf.
+	(fetch_core_registers): Alloc local zerobuf.
+	* d10v-tdep.c (show_regs): Don't allocate a dynamic array using
+	MAX_REGISTER_RAW_SIZE or MAX_REGISTER_VIRTUAL_SIZE.
+	* thread-db.c (thread_db_store_registers): Ditto.
+	* sh-tdep.c (sh_do_register): Ditto.
+	* rom68k-rom.c (rom68k_supply_one_register): Ditto.
+	* remote-sim.c (gdbsim_store_register): Ditto.
+	* remote-mips.c (mips_wait, mips_fetch_registers): Ditto.
+	* remote-e7000.c (fetch_regs_from_dump): Ditto.
+	* monitor.c (monitor_supply_register): Ditto.
+	* mipsv4-nat.c (supply_gregset, supply_fpregset): Ditto.
+	* mips-nat.c (fetch_inferior_registers): Ditto.
+	* m68klinux-nat.c (fetch_register): Ditto.
+	* lynx-nat.c (fetch_inferior_registers): Ditto.
+	(fetch_inferior_registers): Ditto.
+	* irix4-nat.c (supply_gregset, supply_fpregset): Ditto.
+	* hpux-thread.c (hpux_thread_fetch_registers): Ditto.
+	(hpux_thread_store_registers): Ditto.
+	* hppah-nat.c (fetch_register): Ditto.
+	* hppab-nat.c (fetch_register): Ditto.
+	* hppa-tdep.c (pa_register_look_aside): Ditto.
+	(pa_print_fp_reg, pa_strcat_fp_reg): Ditto.
+	* dve3900-rom.c (fetch_bitmapped_register): Ditto.
+
 2003-02-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh: Explictly specify all method levels.  When a

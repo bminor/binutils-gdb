@@ -1791,7 +1791,7 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
 		    &rpc, &rfp, &rsp, flags);
   if (nfields >= 3)
     {
-      char buf[MAX_REGISTER_RAW_SIZE];
+      char *buf = alloca (max_register_size (current_gdbarch));
 
       store_unsigned_integer (buf, REGISTER_RAW_SIZE (PC_REGNUM), rpc);
       supply_register (PC_REGNUM, buf);
@@ -1972,7 +1972,7 @@ mips_fetch_registers (int regno)
     }
 
   {
-    char buf[MAX_REGISTER_RAW_SIZE];
+    char *buf = alloca (max_register_size (current_gdbarch));
 
     /* We got the number the register holds, but gdb expects to see a
        value in the target byte ordering.  */

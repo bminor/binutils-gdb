@@ -4009,7 +4009,7 @@ sh64_do_pseudo_register (int regnum)
 static void
 sh_do_register (int regnum)
 {
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  char *raw_buffer = alloca (max_register_size (current_gdbarch));
 
   fputs_filtered (REGISTER_NAME (regnum), gdb_stdout);
   print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), gdb_stdout);

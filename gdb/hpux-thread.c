@@ -285,7 +285,7 @@ hpux_thread_fetch_registers (int regno)
 	child_ops.to_fetch_registers (regno);
       else
 	{
-	  unsigned char buf[MAX_REGISTER_RAW_SIZE];
+	  unsigned char *buf = alloca (max_register_size (current_gdbarch));
 	  CORE_ADDR sp;
 
 	  sp = (CORE_ADDR) tcb_ptr->static_ctx.sp - 160;
@@ -347,7 +347,7 @@ hpux_thread_store_registers (int regno)
 	child_ops.to_store_registers (regno);
       else
 	{
-	  unsigned char buf[MAX_REGISTER_RAW_SIZE];
+	  unsigned char *buf = alloca (max_register_size (current_gdbarch));
 	  CORE_ADDR sp;
 
 	  sp = (CORE_ADDR) tcb_ptr->static_ctx.sp - 160;

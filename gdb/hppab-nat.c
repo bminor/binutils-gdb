@@ -55,7 +55,7 @@ static void
 fetch_register (int regno)
 {
   register unsigned int regaddr;
-  char buf[MAX_REGISTER_RAW_SIZE];
+  char *buf = alloca (max_register_size (current_gdbarch));
   register int i;
 
   /* Offset of registers within the u area.  */

@@ -2636,7 +2636,7 @@ pa_register_look_aside (char *raw_regs, int regnum, long *raw_val)
   int start;
 
 
-  char buf[MAX_REGISTER_RAW_SIZE];
+  char *buf = alloca (max_register_size (current_gdbarch));
   long long reg_val;
 
   if (!know_which)
@@ -2833,8 +2833,8 @@ pa_strcat_registers (char *raw_regs, int regnum, int fpregs,
 static void
 pa_print_fp_reg (int i)
 {
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
-  char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
+  char *raw_buffer = alloca (max_register_size (current_gdbarch));
+  char *virtual_buffer = alloca (max_register_size (current_gdbarch));
 
   /* Get 32bits of data.  */
   frame_register_read (deprecated_selected_frame, i, raw_buffer);
@@ -2876,8 +2876,8 @@ pa_print_fp_reg (int i)
 static void
 pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
 {
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
-  char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
+  char *raw_buffer = alloca (max_register_size (current_gdbarch));
+  char *virtual_buffer = alloca (max_register_size (current_gdbarch));
 
   fputs_filtered (REGISTER_NAME (i), stream);
   print_spaces_filtered (8 - strlen (REGISTER_NAME (i)), stream);
@@ -2891,7 +2891,7 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
   if (precision == double_precision && (i % 2) == 0)
     {
 
-      char raw_buf[MAX_REGISTER_RAW_SIZE];
+      char *raw_buf = alloca (max_register_size (current_gdbarch));
 
       /* Get the data in raw format for the 2nd half.  */
       frame_register_read (deprecated_selected_frame, i + 1, raw_buf);
