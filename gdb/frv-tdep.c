@@ -200,6 +200,44 @@ new_variant (void)
   var->register_names[iacc0l_regnum] = "iacc0l";
   var->register_names[iacc0_regnum] = "iacc0";
 
+  /* fsr0 (Found on FR555 and FR501.)  */
+  var->register_names[fsr0_regnum] = "fsr0";
+
+  /* acc0 - acc7.  The architecture provides for the possibility of many
+     more (up to 64 total), but we don't want to make that big of a hole
+     in the G packet.  If we need more in the future, we'll add them
+     elsewhere.  */
+  for (r = acc0_regnum; r <= acc7_regnum; r++)
+    {
+      char *buf;
+      xasprintf (&buf, "acc%d", r - acc0_regnum);
+      var->register_names[r] = buf;
+    }
+
+  /* accg0 - accg7: These are one byte registers.  The remote protocol
+     provides the raw values packed four into a slot.  accg0123 and
+     accg4567 correspond to accg0 - accg3 and accg4-accg7 respectively.
+     We don't provide names for accg0123 and accg4567 since the user will
+     likely not want to see these raw values.  */
+
+  for (r = accg0_regnum; r <= accg7_regnum; r++)
+    {
+      char *buf;
+      xasprintf (&buf, "accg%d", r - accg0_regnum);
+      var->register_names[r] = buf;
+    }
+
+  /* msr0 and msr1.  */
+
+  var->register_names[msr0_regnum] = "msr0";
+  var->register_names[msr1_regnum] = "msr1";
+
+  /* gner and fner registers.  */
+  var->register_names[gner0_regnum] = "gner0";
+  var->register_names[gner1_regnum] = "gner1";
+  var->register_names[fner0_regnum] = "fner0";
+  var->register_names[fner1_regnum] = "fner1";
+
   return var;
 }
 
@@ -290,6 +328,21 @@ frv_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       regcache_raw_read (regcache, iacc0h_regnum, buffer);
       regcache_raw_read (regcache, iacc0l_regnum, (bfd_byte *) buffer + 4);
     }
+  else if (accg0_regnum <= reg && reg <= accg7_regnum)
+    {
+      /* The accg raw registers have four values in each slot with the
+         lowest register number occupying the first byte.  */
+
+      int raw_regnum = accg0123_regnum + (reg - accg0_regnum) / 4;
+      int byte_num = (reg - accg0_regnum) % 4;
+      bfd_byte buf[4];
+
+      regcache_raw_read (regcache, raw_regnum, buf);
+      memset (buffer, 0, 4);
+      /* FR-V is big endian, so put the requested byte in the first byte
+         of the buffer allocated to hold the pseudo-register.  */
+      ((bfd_byte *) buffer)[0] = buf[byte_num];
+    }
 }
 
 static void
@@ -301,6 +354,19 @@ frv_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       regcache_raw_write (regcache, iacc0h_regnum, buffer);
       regcache_raw_write (regcache, iacc0l_regnum, (bfd_byte *) buffer + 4);
     }
+  else if (accg0_regnum <= reg && reg <= accg7_regnum)
+    {
+      /* The accg raw registers have four values in each slot with the
+         lowest register number occupying the first byte.  */
+
+      int raw_regnum = accg0123_regnum + (reg - accg0_regnum) / 4;
+      int byte_num = (reg - accg0_regnum) % 4;
+      char buf[4];
+
+      regcache_raw_read (regcache, raw_regnum, buf);
+      buf[byte_num] = ((bfd_byte *) buffer)[0];
+      regcache_raw_write (regcache, raw_regnum, buf);
+    }
 }
 
 static int
@@ -311,8 +377,8 @@ frv_register_sim_regno (int reg)
       H_SPR_PSR,		/* psr_regnum */
       H_SPR_CCR,		/* ccr_regnum */
       H_SPR_CCCR,		/* cccr_regnum */
-      -1,			/* 132 */
-      -1,			/* 133 */
+      -1,			/* fdpic_loadmap_exec_regnum */
+      -1,			/* fdpic_loadmap_interp_regnum */
       -1,			/* 134 */
       H_SPR_TBR,		/* tbr_regnum */
       H_SPR_BRR,		/* brr_regnum */
@@ -320,14 +386,32 @@ frv_register_sim_regno (int reg)
       H_SPR_DBAR1,		/* dbar1_regnum */
       H_SPR_DBAR2,		/* dbar2_regnum */
       H_SPR_DBAR3,		/* dbar3_regnum */
-      -1,			/* 141 */
-      -1,			/* 142 */
-      -1,			/* 143 */
-      -1,			/* 144 */
+      H_SPR_SCR0,		/* scr0_regnum */
+      H_SPR_SCR1,		/* scr1_regnum */
+      H_SPR_SCR2,		/* scr2_regnum */
+      H_SPR_SCR3,		/* scr3_regnum */
       H_SPR_LR,			/* lr_regnum */
       H_SPR_LCR,		/* lcr_regnum */
       H_SPR_IACC0H,		/* iacc0h_regnum */
-      H_SPR_IACC0L		/* iacc0l_regnum */
+      H_SPR_IACC0L,		/* iacc0l_regnum */
+      H_SPR_FSR0,		/* fsr0_regnum */
+      /* FIXME: Add infrastructure for fetching/setting ACC and ACCG regs.  */
+      -1,			/* acc0_regnum */
+      -1,			/* acc1_regnum */
+      -1,			/* acc2_regnum */
+      -1,			/* acc3_regnum */
+      -1,			/* acc4_regnum */
+      -1,			/* acc5_regnum */
+      -1,			/* acc6_regnum */
+      -1,			/* acc7_regnum */
+      -1,			/* acc0123_regnum */
+      -1,			/* acc4567_regnum */
+      H_SPR_MSR0,		/* msr0_regnum */
+      H_SPR_MSR1,		/* msr1_regnum */
+      H_SPR_GNER0,		/* gner0_regnum */
+      H_SPR_GNER1,		/* gner1_regnum */
+      H_SPR_FNER0,		/* fner0_regnum */
+      H_SPR_FNER1,		/* fner1_regnum */
     };
 
   gdb_assert (reg >= 0 && reg < NUM_REGS);

@@ -1,3 +1,16 @@
+2004-04-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.h (fsr0_regnum, acc0_regnum, acc7_regnum, accg0123_regnum)
+	(accg4567_regnum, msr0_regnum, msr1_regnum, gner0_regnum)
+	(gner1_regnum, fner0_regnum, fner1_regnum, accg0_regnum)
+	(accg7_regnum): New constants.
+	(last_spr_regnum, last_pseudo_regnum): Update.
+	(new_variant): Initialize names for fsr0, acc0-acc7, accg0-accg7,
+	msr0, msr1, gner0, gner1, fner0, and fner1.
+	(frv_pseudo_register_read, frv_pseudo_register_write): Add support
+	for accg registers.
+	(frv_register_sim_regno): Update spr_map[].
+
 2004-04-04  Andrew Cagney  <cagney@redhat.com>
 
 	* config/mips/xm-riscos.h: Delete.

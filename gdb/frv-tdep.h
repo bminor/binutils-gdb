@@ -66,7 +66,18 @@ enum {
   lcr_regnum = 146,
   iacc0h_regnum = 147,
   iacc0l_regnum = 148,
-  last_spr_regnum = 148,
+  fsr0_regnum = 149,
+  acc0_regnum = 150,
+  acc7_regnum = 157,
+  accg0123_regnum = 158,
+  accg4567_regnum = 159,
+  msr0_regnum = 160,
+  msr1_regnum = 161,
+  gner0_regnum = 162,
+  gner1_regnum = 163,
+  fner0_regnum = 164,
+  fner1_regnum = 165,
+  last_spr_regnum = 165,
 
   /* The total number of registers we know exist.  */
   frv_num_regs = last_spr_regnum + 1,
@@ -76,8 +87,10 @@ enum {
 
   /* iacc0 - the 64-bit concatenation of iacc0h and iacc0l.  */
   iacc0_regnum = first_pseudo_regnum + 0,
+  accg0_regnum = first_pseudo_regnum + 1,
+  accg7_regnum = accg0_regnum + 7,
 
-  last_pseudo_regnum = iacc0_regnum,
+  last_pseudo_regnum = accg7_regnum,
   frv_num_pseudo_regs = last_pseudo_regnum - first_pseudo_regnum + 1,
 };
 
