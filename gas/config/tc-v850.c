@@ -330,7 +330,7 @@ static const struct reg_name cc_names[] =
   { "v",  0x0 },
   { "z",  0x2 },
 };
-#define CC_NAME_CNT	(sizeof(cc_names) / sizeof(struct reg_name))
+#define CC_NAME_CNT	(sizeof (cc_names) / sizeof (struct reg_name))
 
 /* reg_name_search does a binary search of the given register table
    to see if "name" is a valid regiter name.  Returns the register
@@ -991,7 +991,7 @@ md_begin ()
 
 /* Warning: The code in this function relies upon the definitions
    in the v850_operands[] array (defined in opcodes/v850-opc.c)
-   matching the hard coded values conatined herein.  */
+   matching the hard coded values contained herein.  */
 
 static bfd_reloc_code_real_type
 v850_reloc_prefix (const struct v850_operand * operand)
@@ -1021,6 +1021,13 @@ v850_reloc_prefix (const struct v850_operand * operand)
       input_line_pointer += 2;
       return BFD_RELOC_LO16;
     }
+/* start-sanitize-v850e */
+  if (strncmp (input_line_pointer, "hilo(", 5) == 0)
+    {
+      input_line_pointer += 4;
+      return BFD_RELOC_32;
+    }
+/* end-sanitize-v850e */
 
   if (strncmp (input_line_pointer, "sdaoff(", 7) == 0)
     {
@@ -1199,7 +1206,22 @@ md_assemble (str)
 			ex.X_add_number = SEXT16 (temp);
 			break;
 		      }
-
+		    
+/* start-sanitize-v850e */
+		    case BFD_RELOC_32:
+		      if ((operand->flags & V850E_IMMEDIATE32) == 0)
+			{
+			  errmsg = "use bigger instruction";
+			  goto error;
+			}
+		      
+		      extra_data_after_insn = true;
+		      extra_data_len        = 4;
+		      extra_data            = ex.X_add_number;
+		      ex.X_add_number       = 0;
+		      break;
+/* end-sanitize-v850e */
+			 
 		    default:
 		      as_bad ( "AAARG -> unhandled constant reloc");
 		      break;
@@ -1210,6 +1232,20 @@ md_assemble (str)
 		}
 	      else
 		{
+		  if (reloc == BFD_RELOC_32)
+		    {
+		      if ((operand->flags & V850E_IMMEDIATE32) == 0)
+			{
+			  errmsg = "use bigger instruction";
+			  goto error;
+			}
+		      
+		      extra_data_after_insn = true;
+		      extra_data_len        = 4;
+		      extra_data            = ex.X_add_number;
+		      ex.X_add_number       = 0;
+		    }
+		      
 		  if (fc > MAX_INSN_FIXUPS)
 		    as_fatal ("too many fixups");
 
@@ -1272,7 +1308,7 @@ md_assemble (str)
 		      errmsg = "invalid condition code name";
 		    }
 		}
-	      /* start-sanitize-v850e */
+/* start-sanitize-v850e */
 	      else if (operand->flags & V850E_PUSH_POP) 
 		{
 		  errmsg = parse_register_list (& insn, operand);
@@ -1281,8 +1317,6 @@ md_assemble (str)
 		  ex.X_op         = O_constant;
 		  ex.X_add_number = 0;
 		}
-	      /* end-sanitize-v850e */
-	      /* start-sanitize-v850e */
 	      else if (operand->flags & V850E_IMMEDIATE16) 
 		{
 		  expression (& ex);
@@ -1304,8 +1338,6 @@ md_assemble (str)
 		  extra_data            = ex.X_add_number;
 		  ex.X_add_number       = 0;
 		}
-	      /* end-sanitize-v850e */
-	      /* start-sanitize-v850e */
 	      else if (operand->flags & V850E_IMMEDIATE32) 
 		{
 		  expression (& ex);
@@ -1318,7 +1350,7 @@ md_assemble (str)
 		  extra_data            = ex.X_add_number;
 		  ex.X_add_number       = 0;
 		}
-	      /* end-sanitize-v850e */
+/* end-sanitize-v850e */
 	      else if (register_name (&ex)
 		       && (operand->flags & V850_OPERAND_REG) == 0)
 		{
@@ -1460,9 +1492,9 @@ md_assemble (str)
 
       if (extra_data_after_insn)
 	{
-	  char * g = frag_more (extra_data_len);
+	  f = frag_more (extra_data_len);
 	  
-	  md_number_to_chars (g, extra_data, extra_data_len);
+	  md_number_to_chars (f, extra_data, extra_data_len);
 
 	  extra_data_after_insn = false;
 	}
@@ -1477,12 +1509,15 @@ md_assemble (str)
   for (i = 0; i < fc; i++)
     {
       const struct v850_operand * operand;
-
-      operand = & v850_operands[ fixups[i].opindex ];
+      bfd_reloc_code_real_type    reloc;
       
-      if (fixups[i].reloc != BFD_RELOC_UNUSED)
+      operand = & v850_operands[ fixups[i].opindex ];
+
+      reloc = fixups[i].reloc;
+      
+      if (reloc != BFD_RELOC_UNUSED)
 	{
-	  reloc_howto_type * reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
+	  reloc_howto_type * reloc_howto = bfd_reloc_type_lookup (stdoutput, reloc);
 	  int                size;
 	  int                address;
 	  fixS *             fixP;
@@ -1496,13 +1531,18 @@ md_assemble (str)
 	    abort();
 
 	  address = (f - frag_now->fr_literal) + insn_size - size;
-  
+
+	  if (reloc == BFD_RELOC_32)
+	    {
+	      address += 2;
+	    }
+	  
 	  fixP = fix_new_exp (frag_now, address, size,
 			      & fixups[i].exp, 
 			      reloc_howto->pc_relative,
-			      fixups[i].reloc);
+			      reloc);
 
-	  switch (fixups[i].reloc)
+	  switch (reloc)
 	    {
 	    case BFD_RELOC_LO16:
 	    case BFD_RELOC_HI16:
@@ -1541,11 +1581,14 @@ tc_gen_reloc (seg, fixp)
   reloc->sym_ptr_ptr = & fixp->fx_addsy->bsym;
   reloc->address     = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto       = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
-  
+
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
                     "reloc %d not supported by object file format", (int)fixp->fx_r_type);
+
+      xfree (reloc);
+      
       return NULL;
     }
   
@@ -1563,7 +1606,6 @@ md_estimate_size_before_relax (fragp, seg)
   fragp->fr_var = 4;
   return 2;
 } 
-
 
 long
 md_pcrel_from (fixp)
@@ -1615,7 +1657,6 @@ md_apply_fix3 (fixp, valuep, seg)
     {
       int                         opindex;
       const struct v850_operand * operand;
-      char *                      where;
       unsigned long               insn;
 
       opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
@@ -1648,6 +1689,8 @@ md_apply_fix3 (fixp, valuep, seg)
 	fixp->fx_r_type = BFD_RELOC_V850_9_PCREL;
       else
 	{
+	  /* fprintf (stderr, "bits: %d, insn: %x\n", operand->bits, insn); */
+	  
 	  as_bad_where(fixp->fx_file, fixp->fx_line,
 		       "unresolved expression that must be resolved");
 	  fixp->fx_done = 1;
@@ -1660,9 +1703,9 @@ md_apply_fix3 (fixp, valuep, seg)
       where = fixp->fx_frag->fr_literal + fixp->fx_where;
       if (fixp->fx_size == 1)
 	*where = value & 0xff;
-      if (fixp->fx_size == 2)
+      else if (fixp->fx_size == 2)
 	bfd_putl16 (value & 0xffff, (unsigned char *) where);
-      if (fixp->fx_size == 4)
+      else if (fixp->fx_size == 4)
 	bfd_putl32 (value, (unsigned char *) where);
     }
   

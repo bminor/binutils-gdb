@@ -1,5 +1,11 @@
 Tue Sep  9 10:19:37 1997  Nick Clifton  <nickc@cygnus.com>
 
+start-sanitize-v850e
+	* doc/c-v850.texi (V850 Opcodes): Document new reloc prefix.
+	* config/tc-v850.c (v850_reloc_prefix): Add hilo() reloc prefix.
+	* config/tc-v850.c (md_assemble): Add support for BFD_RELOC_32.
+end-sanitize-v850e
+
 	* doc/c-v850.texi: Document new pseudo ops and command line
 	options.
 
