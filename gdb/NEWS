@@ -15,6 +15,7 @@ in almost all cases. RTTI support is on the way.
 * New native configurations
 
 ARM GNU/Linux					arm*-*-linux*
+PowerPC GNU/Linux				powerpc-*-linux*
 
 * New targets
 

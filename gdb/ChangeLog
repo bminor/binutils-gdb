@@ -1,3 +1,7 @@
+2000-04-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* NEWS (powerpc-*-linux*): Mention.
+
 2000-04-03  J.T. Conklin  <jtc@redback.com>
 
 	* config/i386/xm-nbsd.h (HOST_LONG_DOUBLE_FORMAT): Define.
