@@ -1,3 +1,8 @@
+2003-10-08  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* m32r-tdep.c : Include "dis-asm.h".
+	* Makefile.in (m32r-tdep.o): Update dependencies.
+
 2003-10-06  J. Brobecker  <brobecker@gnat.com>
 
 	* completer.h (get_gdb_completer_word_break_characters): Delete.
