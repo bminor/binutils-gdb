@@ -205,6 +205,7 @@ if { [istarget mips*-*-*] } then {
 	    run_dump_test "e32-rel4"
 	}
 	run_dump_test "elf-rel5"
+	run_dump_test "elf-rel6"
 	run_dump_test "${tmips}${el}empic"
 	run_dump_test "empic2"
 	run_dump_test "empic3_e"
