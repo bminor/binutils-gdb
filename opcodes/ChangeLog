@@ -1,3 +1,10 @@
+start-sanitize-arc
+Fri Feb 17 12:42:25 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* arc-dis.c (arc_get_disassembler): Change argument to int,
+	one of bfd_mach_arc_xxx.  All callers updated.
+end-sanitize-arc
+
 Thu Feb 16 17:34:41 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-opc.c: Add r4650 mul instruction.
