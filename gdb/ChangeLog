@@ -1,3 +1,7 @@
+Wed Feb 23 23:27:48 2000  Andrew Cagney  <cagney@behemoth.cygnus.com>
+
+	* hppah-nat.c: Include "gdb_wait.h" instead of <wait.h>.
+
 Thu Feb 24 18:42:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (CONFIG_INSTALL, CONFIG_UNINSTALL): Set to
