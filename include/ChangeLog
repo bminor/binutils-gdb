@@ -1,6 +1,6 @@
 Fri Aug  6 17:05:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
-	* getopt.h: Update to latest FSF version.
+	* getopt.h, obstack.h: Update to latest FSF version.
 
 Mon Aug  2 16:37:14 1993  Stu Grossman  (grossman at cygnus.com)
 
