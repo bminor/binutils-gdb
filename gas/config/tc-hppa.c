@@ -138,12 +138,6 @@ struct unwind_table
 
 struct call_info
   {
-    /* Should sr3 be saved in the prologue?  */
-    int entry_sr;
-
-    /* Does this function make calls?  */
-    int makes_calls;
-
     /* The unwind descriptor being built.  */
     struct unwind_table ci_unwind;
 
@@ -152,23 +146,6 @@ struct call_info
 
     /* (temporary) symbol used to mark the end of this function.  */
     symbolS *end_symbol;
-
-    /* frags associated with start and end of this function.  */
-    fragS *start_frag;
-    fragS *end_frag;
-
-    /* frags for starting/ending offset of this descriptor.  */
-    fragS *start_offset_frag;
-    fragS *end_offset_frag;
-
-    /* The location within {start,end}_offset_frag to find the 
-       {start,end}_offset.  */
-    int start_frag_where;
-    int end_frag_where;
-
-    /* Fixups (relocations) for start_offset and end_offset.  */
-    fixS *start_fix;
-    fixS *end_fix;
 
     /* Next entry in the chain.  */
     struct call_info *ci_next;
@@ -284,49 +261,8 @@ struct call_desc
 
 struct subspace_dictionary_chain
   {
-    /* Index of containing space.  */
-    unsigned long ssd_space_index;
-
     /* Nonzero if this space has been defined by the user code.  */
     unsigned int ssd_defined;
-
-    /* Which quadrant within the space this subspace should be loaded into.  */
-    unsigned char ssd_quadrant;
-
-    /* Alignment (in bytes) for this subspace.  */
-    unsigned long ssd_alignment;
-
-    /* Access control bits to determine read/write/execute permissions
-       as well as gateway privilege promotions.  */
-    unsigned char ssd_access_control_bits;
-
-    /* A sorting key so that it is possible to specify ordering of
-       subspaces within a space.  */
-    unsigned char ssd_sort_key;
-
-    /* Nonzero of this space should be zero filled.  */
-    unsigned long ssd_zero;
-
-    /* Nonzero if this is a common subspace.  */
-    unsigned char ssd_common;
-
-    /* Nonzero if this is a common subspace which allows symbols to be 
-       multiply defined.  */
-    unsigned char ssd_dup_common;
-
-    /* Nonzero if this subspace is loadable.  Note loadable subspaces
-       must be contained within loadable spaces; unloadable subspaces
-       must be contained in unloadable spaces.  */
-    unsigned char ssd_loadable;
-
-    /* Nonzero if this subspace contains only code.  */
-    unsigned char ssd_code_only;
-
-    /* Starting offset of this subspace.  */
-    unsigned long ssd_subspace_start;
-
-    /* Length of this subspace.  */
-    unsigned long ssd_subspace_length;
 
     /* Name of this subspace.  */
     char *ssd_name;
@@ -334,13 +270,6 @@ struct subspace_dictionary_chain
     /* GAS segment and subsegment associated with this subspace.  */
     asection *ssd_seg;
     int ssd_subseg;
-
-    /* Index of this subspace within the subspace dictionary of the object
-       file.  Not used until object file is written.  */
-    int object_file_index;
-
-    /* The size of the last alignment request for this subspace.  */
-    int ssd_last_align;
 
     /* Next space in the subspace dictionary chain.  */
     struct subspace_dictionary_chain *ssd_next;
@@ -353,14 +282,6 @@ typedef struct subspace_dictionary_chain ssd_chain_struct;
 
 struct space_dictionary_chain
   {
-
-    /* Holds the index into the string table of the name of this 
-       space.  */
-    unsigned int sd_name_index;
-
-    /* Nonzero if the space is loadable.  */
-    unsigned int sd_loadable;
-
     /* Nonzero if this space has been defined by the user code or 
        as a default space.  */
     unsigned int sd_defined;
@@ -368,15 +289,8 @@ struct space_dictionary_chain
     /* Nonzero if this spaces has been defined by the user code.  */
     unsigned int sd_user_defined;
 
-    /* Nonzero if this space is not sharable.  */
-    unsigned int sd_private;
-
     /* The space number (or index).  */
     unsigned int sd_spnum;
-
-    /* The sort key for this space.  May be used to determine how to lay
-       out the spaces within the object file.  */
-    unsigned char sd_sort_key;
 
     /* The name of this subspace.  */
     char *sd_name;
@@ -539,7 +453,6 @@ struct selector_entry
 static fp_operand_format pa_parse_fp_format PARAMS ((char **s));
 static void pa_cons PARAMS ((int));
 static void pa_data PARAMS ((int));
-static void pa_desc PARAMS ((int));
 static void pa_float_cons PARAMS ((int));
 static void pa_fill PARAMS ((int));
 static void pa_lcomm PARAMS ((int));
@@ -689,8 +602,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"COPYRIGHT", pa_copyright, 0},
   {"data", pa_data, 0},
   {"DATA", pa_data, 0},
-  {"desc", pa_desc, 0},
-  {"DESC", pa_desc, 0},
   {"double", pa_float_cons, 'd'},
   {"DOUBLE", pa_float_cons, 'd'},
   {"end", pa_end, 0},
@@ -1170,26 +1081,10 @@ static struct default_space_dict pa_def_spaces[] =
 /* These macros are used to maintain spaces/subspaces.  */
 #define SPACE_DEFINED(space_chain)	(space_chain)->sd_defined
 #define SPACE_USER_DEFINED(space_chain) (space_chain)->sd_user_defined
-#define SPACE_PRIVATE(space_chain)	(space_chain)->sd_private
-#define SPACE_LOADABLE(space_chain)	(space_chain)->sd_loadable
 #define SPACE_SPNUM(space_chain)	(space_chain)->sd_spnum
-#define SPACE_SORT(space_chain)		(space_chain)->sd_sort_key
 #define SPACE_NAME(space_chain)		(space_chain)->sd_name
-#define SPACE_NAME_INDEX(space_chain)   (space_chain)->sd_name_index
 
-#define SUBSPACE_SPACE_INDEX(ss_chain)  (ss_chain)->ssd_space_index
 #define SUBSPACE_DEFINED(ss_chain)	(ss_chain)->ssd_defined
-#define SUBSPACE_QUADRANT(ss_chain)	(ss_chain)->ssd_quadrant
-#define SUBSPACE_ALIGN(ss_chain)	(ss_chain)->ssd_alignment
-#define SUBSPACE_ACCESS(ss_chain)	(ss_chain)->ssd_access_control_bits
-#define SUBSPACE_SORT(ss_chain)		(ss_chain)->ssd_sort_key
-#define SUBSPACE_COMMON(ss_chain)	(ss_chain)->ssd_common
-#define SUBSPACE_ZERO(ss_chain)		(ss_chain)->ssd_zero
-#define SUBSPACE_DUP_COMM(ss_chain)	(ss_chain)->ssd_dup_common
-#define SUBSPACE_CODE_ONLY(ss_chain)    (ss_chain)->ssd_code_only
-#define SUBSPACE_LOADABLE(ss_chain)	(ss_chain)->ssd_loadable
-#define SUBSPACE_SUBSPACE_START(ss_chain) (ss_chain)->ssd_subspace_start
-#define SUBSPACE_SUBSPACE_LENGTH(ss_chain) (ss_chain)->ssd_subspace_length
 #define SUBSPACE_NAME(ss_chain)		(ss_chain)->ssd_name
 
 /* Insert FIELD into OPCODE starting at bit START.  Continue pa_ip
@@ -1499,10 +1394,7 @@ md_assemble (str)
 }
 
 /* Do the real work for assembling a single instruction.  Store results
-   into the global "the_insn" variable.
-
-   FIXME:  Should define and use some functions/macros to handle
-   various common insertions of information into the opcode.  */
+   into the global "the_insn" variable.  */
 
 static void
 pa_ip (str)
@@ -4183,8 +4075,6 @@ pa_build_unwind_subspace (call_info)
   /* Get some space to hold relocation information for the unwind
      descriptor.  */
   p = frag_more (4);
-  call_info->start_offset_frag = frag_now;
-  call_info->start_frag_where = p - frag_now->fr_literal;
 
   /* Relocation info. for start offset of the function.  */
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
@@ -4192,49 +4082,13 @@ pa_build_unwind_subspace (call_info)
 		(expressionS *) NULL, 0, R_HPPA_UNWIND, e_fsel, 32, 0,
 		(char *) 0);
 
-  /* We need to search for the first relocation involving the start_symbol of
-     this call_info descriptor.  */
-  {
-    fixS *fixP;
-
-    call_info->start_fix = seg_info (now_seg)->fix_root;
-    for (fixP = call_info->start_fix; fixP; fixP = fixP->fx_next)
-      {
-	if (fixP->fx_addsy == call_info->start_symbol
-	    || fixP->fx_subsy == call_info->start_symbol)
-	  {
-	    call_info->start_fix = fixP;
-	    break;
-	  }
-      }
-  }
-
   p = frag_more (4);
-  call_info->end_offset_frag = frag_now;
-  call_info->end_frag_where = p - frag_now->fr_literal;
 
   /* Relocation info. for end offset of the function.  */
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
 		call_info->end_symbol, (offsetT) 0,
 		(expressionS *) NULL, 0, R_HPPA_UNWIND, e_fsel, 32, 0,
 		(char *) 0);
-
-  /* We need to search for the first relocation involving the end_symbol of
-     this call_info descriptor.  */
-  {
-    fixS *fixP;
-
-    call_info->end_fix = seg_info (now_seg)->fix_root;	/* the default */
-    for (fixP = call_info->end_fix; fixP; fixP = fixP->fx_next)
-      {
-	if (fixP->fx_addsy == call_info->end_symbol
-	    || fixP->fx_subsy == call_info->end_symbol)
-	  {
-	    call_info->end_fix = fixP;
-	    break;
-	  }
-      }
-  }
 
   /* Dump it. */
   unwind = (char *) &call_info->ci_unwind;
@@ -4326,7 +4180,6 @@ pa_callinfo (unused)
 	  temp = get_absolute_expression ();
 	  if (temp != 3)
 	    as_bad ("Value for ENTRY_SR must be 3\n");
-	  last_call_info->entry_sr = temp - 2;
 	}
       /* Note whether or not this function performs any calls.  */
       else if ((strncasecmp (name, "calls", 5) == 0) ||
@@ -4334,13 +4187,11 @@ pa_callinfo (unused)
 	{
 	  p = input_line_pointer;
 	  *p = c;
-	  last_call_info->makes_calls = 1;
 	}
       else if ((strncasecmp (name, "no_calls", 8) == 0))
 	{
 	  p = input_line_pointer;
 	  *p = c;
-	  last_call_info->makes_calls = 0;
 	}
       /* Should RP be saved into the stack.  */
       else if ((strncasecmp (name, "save_rp", 7) == 0))
@@ -4493,8 +4344,6 @@ pa_entry (unused)
     {
       if (!callinfo_found)
 	as_bad ("Missing .callinfo.");
-
-      last_call_info->start_frag = frag_now;
     }
   demand_empty_rest_of_line ();
   within_entry_exit = TRUE;
@@ -4570,7 +4419,6 @@ process_exit ()
      for the end of the function, and finally call pa_build_unwind_subspace
      to add an entry in the unwind table.  */
   hppa_elf_mark_end_of_function ();
-  last_call_info->end_frag = frag_now;
   pa_build_unwind_subspace (last_call_info);
 #else
   /* SOM defers building of unwind descriptors until the link phase.
@@ -4968,8 +4816,6 @@ pa_proc (unused)
   call_info->ci_unwind.descriptor.cannot_unwind = 0;
   call_info->ci_unwind.descriptor.region_desc = 1;
   call_info->ci_unwind.descriptor.hpux_interrupt_marker = 0;
-  call_info->entry_sr = ~0;
-  call_info->makes_calls = 1;
 
   /* If we got a .PROC pseudo-op, we know that the function is defined
      locally.  Make sure it gets into the symbol table.  */
@@ -5123,11 +4969,8 @@ pa_parse_space_stmt (space_name, create_flag)
     {
       space = is_defined_space (space_name);
       SPACE_SPNUM (space) = spnum;
-      SPACE_LOADABLE (space) = loadable & 1;
       SPACE_DEFINED (space) = defined & 1;
       SPACE_USER_DEFINED (space) = 1;
-      SPACE_PRIVATE (space) = private & 1;
-      SPACE_SORT (space) = sort & 0xff;
       space->sd_seg = seg;
     }
 
@@ -5642,10 +5485,7 @@ pa_spaces_begin ()
 
 
 /* Create a new space NAME, with the appropriate flags as defined
-   by the given parameters.
-
-   Add the new space to the space dictionary chain in numerical
-   order as defined by the SORT entries.  */
+   by the given parameters.  */
 
 static sd_chain_struct *
 create_new_space (name, spnum, loadable, defined, private,
@@ -5668,13 +5508,9 @@ create_new_space (name, spnum, loadable, defined, private,
 
   SPACE_NAME (chain_entry) = (char *) xmalloc (strlen (name) + 1);
   strcpy (SPACE_NAME (chain_entry), name);
-  SPACE_NAME_INDEX (chain_entry) = 0;
-  SPACE_LOADABLE (chain_entry) = loadable;
   SPACE_DEFINED (chain_entry) = defined;
   SPACE_USER_DEFINED (chain_entry) = user_defined;
-  SPACE_PRIVATE (chain_entry) = private;
   SPACE_SPNUM (chain_entry) = spnum;
-  SPACE_SORT (chain_entry) = sort;
 
   chain_entry->sd_seg = seg;
   chain_entry->sd_last_subseg = -1;
@@ -5696,13 +5532,8 @@ create_new_space (name, spnum, loadable, defined, private,
 
       while (chain_pointer)
 	{
-	  if (SPACE_SORT (chain_pointer) <= SPACE_SORT (chain_entry))
-	    {
-	      prev_chain_pointer = chain_pointer;
-	      chain_pointer = chain_pointer->sd_next;
-	    }
-	  else
-	    break;
+	  prev_chain_pointer = chain_pointer;
+	  chain_pointer = chain_pointer->sd_next;
 	}
 
       /* At this point we've found the correct place to add the new
@@ -5762,25 +5593,12 @@ create_new_subspace (space, name, loadable, code_only, common,
   SUBSPACE_NAME (chain_entry) = (char *) xmalloc (strlen (name) + 1);
   strcpy (SUBSPACE_NAME (chain_entry), name);
 
-  SUBSPACE_ACCESS (chain_entry) = access;
-  SUBSPACE_LOADABLE (chain_entry) = loadable;
-  SUBSPACE_COMMON (chain_entry) = common;
-  SUBSPACE_DUP_COMM (chain_entry) = dup_common;
-  SUBSPACE_SORT (chain_entry) = sort;
-  SUBSPACE_CODE_ONLY (chain_entry) = code_only;
-  SUBSPACE_ALIGN (chain_entry) = alignment;
-  SUBSPACE_QUADRANT (chain_entry) = quadrant;
-  SUBSPACE_SUBSPACE_START (chain_entry) = pa_subspace_start (space, quadrant);
-  SUBSPACE_SPACE_INDEX (chain_entry) = space_index;
-  SUBSPACE_ZERO (chain_entry) = is_zero;
-
   /* Initialize subspace_defined.  When we hit a .subspace directive
      we'll set it to 1 which "locks-in" the subspace attributes.  */
   SUBSPACE_DEFINED (chain_entry) = 0;
 
   chain_entry->ssd_subseg = USE_ALIASES ? pa_next_subseg (space) : 0;
   chain_entry->ssd_seg = seg;
-  chain_entry->ssd_last_align = 1;
   chain_entry->ssd_next = NULL;
 
   /* Find spot for the new subspace based on its sort key.  */
@@ -5796,14 +5614,8 @@ create_new_subspace (space, name, loadable, code_only, common,
 
       while (chain_pointer)
 	{
-	  if (SUBSPACE_SORT (chain_pointer) <= SUBSPACE_SORT (chain_entry))
-	    {
-	      prev_chain_pointer = chain_pointer;
-	      chain_pointer = chain_pointer->ssd_next;
-	    }
-	  else
-	    break;
-
+	  prev_chain_pointer = chain_pointer;
+	  chain_pointer = chain_pointer->ssd_next;
 	}
 
       /* Now we have somewhere to put the new entry.  Insert it and update
@@ -5851,21 +5663,7 @@ update_subspace (space, name, loadable, code_only, common, dup_common, sort,
 {
   ssd_chain_struct *chain_entry;
 
-  if ((chain_entry = is_defined_subspace (name)))
-    {
-      SUBSPACE_ACCESS (chain_entry) = access;
-      SUBSPACE_LOADABLE (chain_entry) = loadable;
-      SUBSPACE_COMMON (chain_entry) = common;
-      SUBSPACE_DUP_COMM (chain_entry) = dup_common;
-      SUBSPACE_CODE_ONLY (chain_entry) = 1;
-      SUBSPACE_SORT (chain_entry) = sort;
-      SUBSPACE_ALIGN (chain_entry) = alignment;
-      SUBSPACE_QUADRANT (chain_entry) = quadrant;
-      SUBSPACE_SPACE_INDEX (chain_entry) = space_index;
-      SUBSPACE_ZERO (chain_entry) = zero;
-    }
-  else
-    chain_entry = NULL;
+  chain_entry = is_defined_subspace (name);
 
 #ifdef obj_set_subsection_attributes
   obj_set_subsection_attributes (section, space->sd_seg, access,
@@ -6177,15 +5975,6 @@ pa_data (unused)
   pa_undefine_label ();
 }
 
-/* FIXME.  What's the purpose of this pseudo-op?  */
-
-static void
-pa_desc (unused)
-     int unused;
-{
-  pa_undefine_label ();
-}
-
 /* Like float_cons, but we need to undefine our label.  */
 
 static void
@@ -6356,10 +6145,6 @@ hppa_elf_mark_end_of_function ()
   else
     as_bad ("No memory for symbol name.");
   
-  /* Stuff away the location of the frag for the end of the function,
-     and call pa_build_unwind_subspace to add an entry in the unwind
-     table.  */
-  last_call_info->end_frag = frag_now;
 }
 
 /* Do any symbol processing requested by the target-cpu or target-format.  */
@@ -6410,8 +6195,6 @@ hppa_tc_make_sections (abfd)
      bfd *abfd;
 {
   symext_chainS *symextP;
-  int size, n;
-  asection *symextn_sec;
   segT save_seg = now_seg;
   subsegT save_subseg = now_subseg;
 
@@ -6427,14 +6210,8 @@ hppa_tc_make_sections (abfd)
   if (symext_rootP == NULL)
     return;
 
-  /* Count the number of symbols for the symbol extension section.  */
-  for (n = 0, symextP = symext_rootP; symextP; symextP = symextP->next, ++n)
-    ;
-
-  size = sizeof (symext_entryS) * n;
-
   /* Switch to the symbol extension section.  */
-  symextn_sec = subseg_new (SYMEXTN_SECTION_NAME, 0);
+  subseg_new (SYMEXTN_SECTION_NAME, 0);
 
   frag_wane (frag_now);
   frag_new (0);
@@ -6520,19 +6297,8 @@ pa_build_symextn_section ()
 
 /* For ELF, this function serves one purpose:  to setup the st_size
    field of STT_FUNC symbols.  To do this, we need to scan the
-   call_info structure list, determining st_size in one of two possible
-   ways:
-
-   1. call_info->start_frag->fr_fix has the size of the fragment.
-   This approach assumes that the function was built into a
-   single fragment.  This works for most cases, but might fail.
-   For example, if there was a segment change in the middle of
-   the function.
-
-   2. The st_size field is the difference in the addresses of the
-   call_info->start_frag->fr_address field and the fr_address
-   field of the next fragment with fr_type == rs_fill and
-   fr_fix != 0.  */
+   call_info structure list, determining st_size in by taking the
+   difference in the address of the beginning/end marker symbols.  */
 
 void
 elf_hppa_final_processing ()

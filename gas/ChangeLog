@@ -1,3 +1,16 @@
+Mon Dec  6 11:20:02 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/obj-som.[ch] (obj_read_begin_hook): Remove last change.
+	Breaks with the HP compilers.
+
+	* config/tc-hppa.c (struct call_info): Remove fields which were
+	set but never used.  Remove all code which sets those fields.
+	(struct subspace_dictionary_chain): Likewise.
+	(struct space_dictionary_chain): Likewise.
+	(pa_desc): Delete useless function.  Delete all references.
+	(hppa_tc_make_sections): No need to count the number of symbols for
+	the symbol extension section. 
+
 Sun Dec  5 17:05:29 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/obj-som.c (obj_som_version): Pass version string to
