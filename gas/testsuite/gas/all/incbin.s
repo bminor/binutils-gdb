@@ -1,5 +1,5 @@
- .data
- .incbin "incbin.s"
- .incbin "incbin.s",0,28
- .incbin "incbin.s",15,9
- .p2align 4
+	.text
+	.incbin "incbin.dat"
+	.incbin "incbin.dat",0,8
+	.incbin "incbin.dat",8,8
+	.incbin "incbin.dat",16,16

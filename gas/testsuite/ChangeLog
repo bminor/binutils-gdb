@@ -1,3 +1,9 @@
+2001-12-21  Anders Norlander  <anorland@synergenix.se>
+
+	* gas/all/incbin.dat: New [binary] file.
+	* gas/all/incbin.s: Use incbin.dat instead of incbin.s.
+	* gas/all/incbin.d: Reflect change in incbin.s
+
 2001-12-20  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/sh/err-at.s: New test.
@@ -27,7 +33,7 @@
 	* gas/all/incbin.s: Add spaces before directives.
 	* gas/all/incbin.d: Update.
 
-Fri Dec  7 09:16:07 2001  Jeffrey A Law  (law@cygnus.com)
+2001-12-07  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/hppa/parse/linesepbug.s: Restore to its original form,
 	reverting change of July 19, 2000.
@@ -41,7 +47,7 @@ Fri Dec  7 09:16:07 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/all/gas.exp (incbin): Fix condition.
 
-Fri Nov 23 09:20:43 2001  Jeffrey A Law  (law@cygnus.com)
+2001-11-23  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/all/gas.exp (incbin): Do not run on the PA.
 
@@ -305,7 +311,7 @@ Fri Nov 23 09:20:43 2001  Jeffrey A Law  (law@cygnus.com)
 	* gas/alpha/fp.s: Output to .data not .rdata.
 	* gas/alpha/fp.d: Adjust to match.
 
-Tue Sep  4 20:06:09 2001  Jeffrey A Law  (law@cygnus.com)
+2001-09-04  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/all/gas.exp (930509a): Expect failure on the H8/300 ELF port.
 
@@ -317,7 +323,7 @@ Tue Sep  4 20:06:09 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/vtable/vtable.exp: Do not run tests on H8/300 ELF ports.
 
-Thu Aug 30 21:58:48 2001  J"orn Rennecke <amylaar@redhat.com>
+2001-08-30  J"orn Rennecke <amylaar@redhat.com>
 
 	* gas/h8300/h8300.exp (do_h8300_cbranch): Remove invocation.
 	(do_h8300_branch, do_h8300h_cbranch, do_h8300h_branch): Likewise.
@@ -333,7 +339,7 @@ Thu Aug 30 21:58:48 2001  J"orn Rennecke <amylaar@redhat.com>
 	* gas/h8300/ffxx1.s: Move to:
 	* gas/h8300/ffxx1-coff.s .
 
-Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
+2001-08-29  J"orn Rennecke <amylaar@redhat.com>
 
 	* lib/gas-defs.exp: (regexp_diff) At verbosity 3, also show
 	where mismatch occurs due to regexp mismatch.
@@ -1127,7 +1133,7 @@ Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 	* gas/arm/adrl.d: Expect to see references to 'foo' in the
 	disassembly.  COFF and ELF disassemblys should now be the same.
 
-Wed Jan 10 15:14:54 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-10  Jan Hubicka  <jh@suse.cz>
 
 	* i386.exp: Add ssemmx2 and sse2 tests.
 	(sse2.d, sse2.s, ssemmx2.d, ssemmx2.s): New tests.
@@ -1142,7 +1148,7 @@ Wed Jan 10 15:14:54 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* gas/vtable/vtable.exp: Don't run tests on Alpha.
 
-Sat Jan  6 13:34:07 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-06  Jan Hubicka  <jh@suse.cz>
 
 	* i386.exp: Add tests for presence of 32bit versus 64bit output
 	format; run both 64bit and 32bit tests when format is available;
@@ -1483,7 +1489,7 @@ Sat Jan  6 13:34:07 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* gas/i386/prefix.s: Modify so we have at least one x86 test that
 	checks the line separator.
 
-Sun May 21 10:08:08 2000  Hans-Peter Nilsson  <hp@axis.com>
+2000-05-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/elf/elf.exp: Exclude *-*-linux*coff* as non-elf.
 
@@ -1529,7 +1535,7 @@ Sun May 21 10:08:08 2000  Hans-Peter Nilsson  <hp@axis.com>
 	* gas/i386/general.l: Allow for DISP32 pe relocs.
 	* gas/i386/jump.d: Similarly.
 
-Mon Apr 24 16:35:08 2000  Jim Wilson  <wilson@cygnus.com>
+2000-04-24  Jim Wilson  <wilson@cygnus.com>
 
 	* gas/ia64/opc-i.d: Change pmin2.u to pmin2.  Change pmax2.u to pmax2.
 	Change MLI to MLX.  Switch operands for output matching tbit.z.orcm,
@@ -1546,10 +1552,10 @@ Mon Apr 24 16:35:08 2000  Jim Wilson  <wilson@cygnus.com>
 	* gas/ia64/opc-f.d: Disassemble zeroes to verify break.f.
 	* gas/ia64/opc-f.s: Add an explicit stop to make IAS output match.
 
-Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
-			  David Mosberger  <davidm@hpl.hp.com>
-			  Timothy Wall <twall@cygnus.com>
-			  Jim Wilson  <wilson@cygnus.com>
+2000-04-21  Richard Henderson  <rth@cygnus.com>
+	    David Mosberger  <davidm@hpl.hp.com>
+	    Timothy Wall <twall@cygnus.com>
+	    Jim Wilson  <wilson@cygnus.com>
 
 	* gas/vtable/vtable.exp: Disable for ia64.
 	* gas/ia64: New testsuite directory.
@@ -1625,7 +1631,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 	* gas/arm/float.s: Include test of ATPCS register naming
 	conventions.
 
-Fri Jan 21 12:48:06 2000  H.J. Lu <hjl@gnu.org>
+2000-01-21  H.J. Lu <hjl@gnu.org>
 
 	* gas/i386/general.l: Support a.out.
 	* gas/i386/jump.d: Likewise.
@@ -1645,7 +1651,7 @@ Fri Jan 21 12:48:06 2000  H.J. Lu <hjl@gnu.org>
 	* gas/i386/general.{s,l}: Add jmp and call tests for .code16gcc,
 	.code16, and .code32 modes.
 
-Tue Nov 30 23:02:01 1999  Jeffrey A Law  (law@cygnus.com)
+1999-11-30  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/{am33.s, am33_2.s, am33_3.s}: New test files.
 	* gas/mn10300/{am33_4.s, am33_5.s, am33_6.s}: Likewise.
@@ -1681,7 +1687,7 @@ Tue Nov 30 23:02:01 1999  Jeffrey A Law  (law@cygnus.com)
 	* gas/arm/inst.s: Fix erroneous test case.
 	* gas/arm/inst.d: Update to match latest objdump output.
 
-Mon Oct 11 13:37:51 1999  Geoffrey Keating  <geoffk@cygnus.com>
+1999-10-11  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* lib/gas-defs.exp (regexp_diff): Allow '#...' to mean "some
 	indeterminate number of extra lines here".
@@ -1690,14 +1696,14 @@ Mon Oct 11 13:37:51 1999  Geoffrey Keating  <geoffk@cygnus.com>
 	* gas/elf/section0.d: Make pass on MIPS (and hopefully alpha).
 	* gas/elf/section1.d: Likewise.
 
-Thu Oct  7 00:12:04 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
+1999-10-07	Diego Novillo <dnovillo@cygnus.com>
 
 	* gas/d10v: New directory.
 	* gas/d10v/d10.exp: New file.
 	* gas/d10v/inst.s: New file.
 	* gas/d10v/inst.d: New file.
 
-Thu Oct  7 12:52:25 1999  Geoffrey Keating  <geoffk@cygnus.com>
+1999-10-07  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* gas/mips/elf-rel.s: New file.
 	* gas/mips/elf-rel.d: New file.
@@ -1709,7 +1715,7 @@ Thu Oct  7 12:52:25 1999  Geoffrey Keating  <geoffk@cygnus.com>
 	* gas/mips/elf_e_flags1.d: Tweak a little so it passes
 	even if the CPU is set to something by default.
 
-Mon Oct  4 18:25:49 1999  Doug Evans  <devans@canuck.cygnus.com>
+1999-10-04  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/m32r/error.exp: New testcase driver.
 	* gas/m32r/m32rx.exp: New testcase driver.
@@ -1778,7 +1784,7 @@ Mon Aug 30 12:18:40 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/i386/white.s, gas/i386/white.l: Add space in FP reg tests.
 
-Sat Aug 28 00:16:12 1999  Jerry Quinn <jquinn@nortelnetworks.com>
+1999-08-28  Jerry Quinn <jquinn@nortelnetworks.com>
 
 	* gas/hppa/basic/basic.exp:  Add new tests shift2.s,
 	shift3.s, extract2.s, extract3.s, deposit2.s, and deposit3.s.
@@ -1922,11 +1928,11 @@ Sat Aug 28 00:16:12 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 	* gas/i386/amd.s: Add NOPs to align for coff targets
 	* gas/i386/amd.d: and check for them.
 
-Thu Apr 15 15:03:43 1999  Jeffrey A Law  (law@cygnus.com)
+1999-04-15  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/hppa/basic/basic.exp (do_coprmem): No longer expected to file.
 
-Wed Apr 14 13:43:06 1999  Jeffrey A Law  (law@cygnus.com)
+1999-04-14  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/hppa/basic/branch.s: Do not use immediate value where we
 	really want a register.
@@ -2058,20 +2064,20 @@ Wed Apr 14 13:43:06 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/fr30/allinsn.d: Update to match latest assembler output.
 
-Thu Nov 19 15:59:51 1998  Dave Brolley  <brolley@cygnus.com>
+1998-11-19  Dave Brolley  <brolley@cygnus.com>
 
 	* gas/fr30/allinsn.s: Reorder insns for better simulation.
 
-Thu Nov 19 07:50:44 1998  Doug Evans  <devans@charmed.cygnus.com>
+1998-11-19  Doug Evans  <devans@charmed.cygnus.com>
 
 	* gas/mips/sync.[sd]: New testcase.
 	* gas/mips/mips.exp: Run it.
 
-Wed Nov 18 11:27:56 1998  Dave Brolley  <brolley@cygnus.com>
+1998-11-18  Dave Brolley  <brolley@cygnus.com>
 
 	* gas/fr30/allinsn.s (dmov): Correct hex literals.
 
-Tue Nov 17 15:24:20 1998  Nick Clifton  <nickc@cygnus.com>
+1998-11-17  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/fr30/allinsn.s: Moved currently un-assembliable instructions
 	to end of file.
@@ -2422,20 +2428,20 @@ Wed Oct 15 10:40:14 1997  Jeffrey A Law  (law@cygnus.com)
 	* gas/hppa/unsorted/unsorted.exp: Update for recent disassembler
 	changes.
 
-Thu Oct  9 18:10:44 1997  Doug Evans  <dje@canuck.cygnus.com>
+1997-10-09  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/set64.[sd]: `set' doesn't take negative arguments.
 
-Thu Oct  9 12:59:55 1997  Ian Lance Taylor  <ian@cygnus.com>
+1997-10-09  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/arm/arm7t.d: Update for recent disassembler changes.
 	* gas/h8300/ffxx1.d: Likewise.
 
-Wed Oct  8 16:22:50 1997  Doug Evans  <dje@canuck.cygnus.com>
+1997-10-08  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/reloc64.[sd]: Add testcases for %hix,%lox.
 
-Wed Oct  8 15:12:35 1997  Ian Lance Taylor  <ian@cygnus.com>
+1997-10-08  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/sparc/synth.d: Update for recent disassembler changes.
 	* gas/sparc/synth64.d: Likewise.
@@ -2444,16 +2450,16 @@ Wed Oct  8 15:12:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 	function symbol.
 	* gas/mips/jal.s: Likewise.
 
-Tue Oct  7 13:30:30 1997  Doug Evans  <dje@canuck.cygnus.com>
+1997-10-07  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/reloc64.[sd]: New testcase.
 	* gas/sparc/sparc.exp: Run it.
 
-Sat Oct  4 19:14:24 1997  Ian Lance Taylor  <ian@cygnus.com>
+1997-10-04  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/ieee-fp/x930509a.exp: Accept m68k listing format.
 
-Fri Oct  3 15:46:05 1997  Ian Lance Taylor  <ian@cygnus.com>
+1997-10-03  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/ieee-fp/x930509a.exp: Remove setup_xfail; it should now
 	work.  Correct for big endian and for tabs in input file.
@@ -2461,7 +2467,7 @@ Fri Oct  3 15:46:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* gas/alpha/fp.exp: Check for alpha-*-osf*, not alpha-*-osf1*.
 	* gas/alpha/fp.s: Change comment characters from ! to #.
 
-Thu Sep 18 11:17:53 1997  Doug Evans  <dje@canuck.cygnus.com>
+1997-09-18  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/splet.d: Update to new objdump output format.
 	* gas/sparc/{asi.d,membar.d,prefetch.d,rdpr.d,wrpr.d}: Likewise.
@@ -2469,7 +2475,7 @@ Thu Sep 18 11:17:53 1997  Doug Evans  <dje@canuck.cygnus.com>
 	* gas/sparc/splet-2.[ds]: New testcase.
 	* gas/sparc/sparc.exp: Run them.
 
-Tue Sep 16 15:27:08 1997  Ken Raeburn  <raeburn@cygnus.com>
+1997-08-16  Ken Raeburn  <raeburn@cygnus.com>
 
 	Merge changes from Martin Hunt:
 
