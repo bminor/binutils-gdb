@@ -1,3 +1,10 @@
+Thu Oct  7 00:12:04 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
+
+	* gas/d10v: New directory.
+	* gas/d10v/d10.exp: New file.
+	* gas/d10v/inst.s: New file.
+	* gas/d10v/inst.d: New file.
+
 Thu Oct  7 12:52:25 1999  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* gas/mips/elf-rel.s: New file.

@@ -196,10 +196,19 @@ check_range (num, bits, flags)
 
   if (flags & OPERAND_SIGNED)
     {
-      max = (1 << (bits - 1))-1; 
-      min = - (1 << (bits - 1));  
-      if (((long)num > max) || ((long)num < min))
-	retval = 1;
+      /* Signed 3-bit integers are restricted to the (-2, 3) range */
+      if (flags & RESTRICTED_NUM3)
+	{
+	  if ((long) num < -2 || (long) num > 3)
+	    retval = 1;
+	}
+      else
+	{
+	  max = (1 << (bits - 1)) - 1; 
+	  min = - (1 << (bits - 1));  
+	  if (((long) num > max) || ((long) num < min))
+	    retval = 1;
+	}
     }
   else
     {

@@ -1,3 +1,10 @@
+Thu Oct  7 00:12:43 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
+
+	* d10v-opc.c (d10v_operands): Add RESTRICTED_NUM3 flag for
+	rac/rachi instructions.
+	(d10v_opcodes): Added seven new instructions ld, ld2w, sac, sachi,
+	slae, st and st2w.
+
 1999-10-04  Doug Evans  <devans@casey.cygnus.com>
 
 	* fr30-asm.c,fr30-desc.h: Rebuild.

@@ -115,7 +115,7 @@ const struct d10v_operand d10v_operands[] =
 #define NUM16	(RDSTE + 1)
   { 16, 0, OPERAND_NUM|OPERAND_SIGNED },
 #define NUM3	(NUM16 + 1)			/* rac, rachi */
-  { 3, 1, OPERAND_NUM|OPERAND_SIGNED },
+  { 3, 1, OPERAND_NUM|OPERAND_SIGNED|RESTRICTED_NUM3 },
 #define NUM4	(NUM3 + 1)
   { 4, 1, OPERAND_NUM|OPERAND_SIGNED },
 #define UNUM4	(NUM4 + 1)
@@ -226,10 +226,12 @@ const struct d10v_opcode d10v_opcodes[] = {
   { "ld", SHORT_2, 1, MU, PAR|RMEM, 0x6401, 0x7e01, { RDST, ATSIGN, RSRC, MINUS } },
   { "ld", SHORT_2, 1, MU, PAR|RMEM, 0x6001, 0x7e01, { RDST, ATSIGN, RSRC, PLUS } },
   { "ld", SHORT_2, 1, MU, PAR|RMEM, 0x6000, 0x7e01, { RDST, ATSIGN, RSRC } },
+  { "ld", LONG_L, 1, MU, SEQ, 0x32010000, 0x3f0f0000, { RDST, ATSIGN, NUM16 } },
   { "ld2w", LONG_L, 1, MU, SEQ, 0x31000000, 0x3f100000, { RDSTE, ATPAR, NUM16, RSRC } },
   { "ld2w", SHORT_2, 1, MU, PAR|RMEM, 0x6601, 0x7e21, { RDSTE, ATSIGN, RSRC, MINUS } },
   { "ld2w", SHORT_2, 1, MU, PAR|RMEM, 0x6201, 0x7e21, { RDSTE, ATSIGN, RSRC, PLUS } },
   { "ld2w", SHORT_2, 1, MU, PAR|RMEM, 0x6200, 0x7e21, { RDSTE, ATSIGN, RSRC } },
+  { "ld2w", LONG_L, 1, MU, SEQ, 0x33010000, 0x3f1f0000, { RDSTE, ATSIGN, NUM16 } },
   { "ldb", LONG_L, 1, MU, SEQ, 0x38000000, 0x3f000000, { RDST, ATPAR, NUM16, RSRC } },
   { "ldb", SHORT_2, 1, MU, PAR|RMEM, 0x7000, 0x7e01, { RDST, ATSIGN, RSRC } },
   { "ldi", OPCODE_FAKE, 0, 0, 0, 0, 0, { 1, 4, 16, 0 } },
@@ -276,6 +278,12 @@ const struct d10v_opcode d10v_opcodes[] = {
   { "not", SHORT_2, 1, EITHER, PAR, 0x4603, 0x7e1f, { RDST } },
   { "or", SHORT_2, 1, EITHER, PAR, 0x800, 0x7e01, { RDST, RSRC } },
   { "or3", LONG_L, 1, MU, SEQ, 0x4000000, 0x3f000000, { RDST, RSRC, NUM16 } },
+  /* Special case. sac&sachi must occur before rac&rachi because they have
+     intersecting masks! The masks for rac&rachi will match sac&sachi but
+     not the other way around.
+   */
+  { "sac", SHORT_2, 1, IU, PAR|RF0|WF0, 0x5209, 0x7e2f, { RDSTE, ASRC } },
+  { "sachi", SHORT_2, 1, IU, PAR|RF0|WF0, 0x4209, 0x7e0f, { RDST, ASRC } },
   { "rac", SHORT_2, 1, IU, PAR|WF0, 0x5201, 0x7e21, { RDSTE, ASRC0ONLY, NUM3 } },
   { "rachi", SHORT_2, 1, IU, PAR|WF0, 0x4201, 0x7e01, { RDST, ASRC, NUM3 } },
   { "rep", LONG_L, 2, MU, SEQ, 0x27000000, 0x3ff00000, { RSRC, ANUM16 } },
@@ -285,6 +293,7 @@ const struct d10v_opcode d10v_opcodes[] = {
   { "sadd", SHORT_2, 1, IU, PAR, 0x1223, 0x7eef, { ADST, ASRC } },
   { "setf0f", SHORT_2, 1, MU, PAR|RF0, 0x4611, 0x7e1f, { RDST } },
   { "setf0t", SHORT_2, 1, MU, PAR|RF0, 0x4613, 0x7e1f, { RDST } },
+  { "slae", SHORT_2, 1, IU, PAR, 0x3220, 0x7ee1, { ADST, RSRC } },
   { "sleep", SHORT_2, 1, MU, PAR, 0x5fc0, 0x7fff, { 0 } },
   { "sll", SHORT_2, 1, IU, PAR, 0x2200, 0x7e01, { RDST, RSRC } },
   { "sll", SHORT_2, 1, IU, PAR, 0x3200, 0x7ee1, { ADST, RSRC } },
@@ -305,11 +314,13 @@ const struct d10v_opcode d10v_opcodes[] = {
   { "st", SHORT_2, 1, MU, PAR|WMEM, 0x6c1f, 0x7e1f, { RSRC2, ATMINUS, RSRC } },
   { "st", SHORT_2, 1, MU, PAR|WMEM, 0x6801, 0x7e01, { RSRC2, ATSIGN, RSRC, PLUS } },
   { "st", SHORT_2, 1, MU, PAR|WMEM, 0x6c01, 0x7e01, { RSRC2, ATSIGN, RSRC, MINUS } },
+  { "st", LONG_L, 1, MU, SEQ, 0x36010000, 0x3f0f0000, { RSRC2, ATSIGN, NUM16 } },
   { "st2w", LONG_L, 1, MU, SEQ, 0x35000000, 0x3f100000, { RSRC2E, ATPAR, NUM16, RSRC } },
   { "st2w", SHORT_2, 1, MU, PAR|WMEM, 0x6a00, 0x7e21, { RSRC2E, ATSIGN, RSRC } },
   { "st2w", SHORT_2, 1, MU, PAR|WMEM, 0x6e1f, 0x7e3f, { RSRC2E, ATMINUS, RSRC } },
   { "st2w", SHORT_2, 1, MU, PAR|WMEM, 0x6a01, 0x7e21, { RSRC2E, ATSIGN, RSRC, PLUS } },
   { "st2w", SHORT_2, 1, MU, PAR|WMEM, 0x6e01, 0x7e21, { RSRC2E, ATSIGN, RSRC, MINUS } },
+  { "st2w", LONG_L, 1, MU, SEQ, 0x37010000, 0x3f1f0000, { RSRC2E, ATSIGN, NUM16 } },
   { "stb", LONG_L, 1, MU, SEQ, 0x3c000000, 0x3f000000, { RSRC2, ATPAR, NUM16, RSRC } },
   { "stb", SHORT_2, 1, MU, PAR|WMEM, 0x7800, 0x7e01, { RSRC2, ATSIGN, RSRC } },
   { "stop", SHORT_2, 1, MU, PAR, 0x5fe0, 0x7fff, { 0 } },
