@@ -1,3 +1,9 @@
+Wed Jan 28 12:51:08 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
+ 
+        * blockframe.c (generic_frame_chain_valid): A frame pointer may
+        be valid if it is equal to the frame pointer of its caller (ie.
+        not necessarily strictly INNER_THAN).  Allows frameless functions.
+ 
 Wed Jan 28 11:23:25 1998  Mark Alexander  <marka@cygnus.com>
 
 	* monitor.c (monitor_vsprintf): New function to handle
