@@ -1,5 +1,18 @@
 2002-12-05  Aldy Hernandez  <aldyh@redhat.com>
 
+	* ppc-opc.c: Delete evsabs, evsnabs, evsneg, evsadd, evssub,
+	evsmul, evsdiv, evscmpgt, evsgmplt, evststgt, evtstlt, evststeq,
+	evscfui, evscfsi, evscfuf, evscfsf, evsctui, evsctuiz, evsctsi,
+	evsctsiz, evsctuf, evsctsf, evmwhssfaa, evmwhssmaa, evmwhsmfaa,
+	evmwhsmiaa, evmwhusiaa, evmwhumiaa, evmwhssfan, evmwhssian,
+	evmwhsmfan, evmwhsmian, evmwhusian, evmwhumian, evmwhgssfaa,
+	evmwhgsmfaa, evmwhgsmiaa, evmwhgumiaa, evmwhgssfan, evmwhgsmfan,
+	evmwhgsmian, evmwhgumian.
+	(mftb): Add to opcode table.
+	(mtspefscr): Change RT to RS in opcode table.
+
+2002-12-05  Aldy Hernandez  <aldyh@redhat.com>
+
 	* ppc-opc.c: Move mbar and msync up.  Change mask for mbar and
 	msync.
 
