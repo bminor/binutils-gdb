@@ -1,3 +1,9 @@
+2004-02-20  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ldgram.y (exp): Add two operand ALIGN.
+	* ldexp.c (fold_binary): Add ALIGN_K case.
+	* ld.texinfo (ALIGN): Document two operand version.
+
 2004-02-19  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldlang.c (map_input_to_output_sections): Initialize sections

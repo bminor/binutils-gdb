@@ -1,7 +1,7 @@
 2004-02-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* binutils-all/objcopy.exp: Reorder arguments for POSIXLY_CORRECT
-	systems.p
+	systems.
 
 For older changes see ChangeLog-9303
 
