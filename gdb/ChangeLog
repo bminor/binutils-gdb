@@ -1,3 +1,7 @@
+2004-04-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64-tdep.c (sparc_address_from_register): Remove function.
+
 2004-04-08  Andrew Cagney  <cagney@redhat.com>
 
 	* breakpoint.h (deprecated_exception_catchpoints_are_fragile)
