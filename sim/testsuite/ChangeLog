@@ -1,4 +1,22 @@
 start-sanitize-sky
+Wed Jun 24 11:34:00 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+        * Updated sim/sky/t-dma.{brn|dmaexpect} because a
+	warning msg being checked for contains an address
+	that differs between -mhard-float and -msoft-float.
+
+Fri Jun 19 17:57:50 1998 Jillian Ye <jillian@cygnus.com>
+        
+        * Created sim/sky/fast_gs and sim/sky/accurate_gs
+	for storing the gs output file for float-type fast
+	and accurate respectively; also added and moved
+	files for this purpose.
+
+Tue Jun 16 18:39:32 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* sim/sky/sky-defs.tcl: Use --sky-debug option instead of environment
+	variable to collect PKE traces.
+
 Tue Jun 16 18:33:37 1998 Jillian Ye <jillian@cygnus.com>
 
         * sim/sky/sky_sce.exp: Removing sce2* and adding comments. 
