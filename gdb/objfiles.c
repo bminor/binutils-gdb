@@ -865,7 +865,7 @@ open_mapped_file (filename, mtime, flags)
     {
       free (symsfilename);
       symsfilename = concat (filename, ".syms", (char *) NULL);
-      fd = open_existing_mapped_file (symsfilename, mtime, mapped);
+      fd = open_existing_mapped_file (symsfilename, mtime, flags);
     }
 
   /* If we don't have an open file by now, then either the file does not
@@ -877,7 +877,7 @@ open_mapped_file (filename, mtime, flags)
      By default the file is rw for everyone, with the user's umask taking
      care of turning off the permissions the user wants off. */
 
-  if ((fd < 0) && mapped)
+  if ((fd < 0) && (flags & OBJF_MAPPED))
     {
       free (symsfilename);
       symsfilename = concat ("./", basename (filename), ".syms",
