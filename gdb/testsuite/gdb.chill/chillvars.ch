@@ -1,22 +1,22 @@
 testvars: MODULE
 
-DCL bool_true BOOL := TRUE;
-DCL bool_false BOOL := FALSE;
+DCL bool_true BOOL INIT := TRUE;
+DCL bool_false BOOL INIT := FALSE;
 DCL booltable1 ARRAY (0:3) BOOL INIT := [ TRUE, FALSE, FALSE, TRUE ];
 DCL booltable2 ARRAY (4:7) BOOL INIT := [ TRUE, FALSE, FALSE, TRUE ];
 
-DCL control_char CHAR := C'07';
-DCL printable_char CHAR := 'a';
+DCL control_char CHAR INIT := C'07';
+DCL printable_char CHAR INIT := 'a';
 DCL chartable1 ARRAY (0:2) CHAR INIT := [ C'00', C'01', C'02' ];
 DCL chartable2 ARRAY (3:5) CHAR INIT := [ C'00', C'01', C'02' ];
 
-DCL string1 CHARS (4) := 'abcd';
-DCL string2 CHARS (5) := 'ef' // C'00' // 'gh';
-DCL string3 CHARS (6) := 'ef' // 'gh' // 'ij';
-DCL string4 CHARS (7) := (6) 'z' // C'00';
+DCL string1 CHARS (4) INIT := 'abcd';
+DCL string2 CHARS (5) INIT := 'ef' // C'00' // 'gh';
+DCL string3 CHARS (6) INIT := 'ef' // 'gh' // 'ij';
+DCL string4 CHARS (7) INIT := (6) 'z' // C'00';
 
-DCL byte_low BYTE := -128;
-DCL byte_high BYTE := 127;
+DCL byte_low BYTE INIT := -128;
+DCL byte_high BYTE INIT := 127;
 DCL bytetable1 ARRAY (0:4) BYTE INIT := [ -2, -1, 0, 1, 2 ];
 DCL bytetable2 ARRAY (5:9) BYTE INIT := [ -2, -1, 0, 1, 2 ];
 DCL bytetable3 ARRAY (1:2,'c':'d',FALSE:TRUE) BYTE
@@ -24,38 +24,38 @@ DCL bytetable3 ARRAY (1:2,'c':'d',FALSE:TRUE) BYTE
 DCL bytetable4 ARRAY (1:2) ARRAY ('c':'d') ARRAY (FALSE:TRUE) BYTE
 	INIT := [ [ [ 0, 1 ], [ 2, 3 ] ], [ [ 4, 5 ], [ 6, 7 ] ] ];
 
-DCL ubyte_low UBYTE := 0;
-DCL ubyte_high UBYTE := 255;
+DCL ubyte_low UBYTE INIT := 0;
+DCL ubyte_high UBYTE INIT := 255;
 DCL ubytetable1 ARRAY (0:4) UBYTE INIT := [ 0, 1, 2, 3, 4 ];
 DCL ubytetable2 ARRAY (5:9) UBYTE INIT := [ 0, 1, 2, 3, 4 ];
 
-DCL int_low INT := -32_768;
-DCL int_high INT := 32_767;
+DCL int_low INT INIT := -32_768;
+DCL int_high INT INIT := 32_767;
 DCL inttable1 ARRAY (0:4) INT INIT := [ -2, -1, 0, 1, 2 ];
 DCL inttable2 ARRAY (5:9) INT INIT := [ -2, -1, 0, 1, 2 ];
 
-DCL uint_low UINT := 0;
-DCL uint_high UINT := 65_535;
+DCL uint_low UINT INIT := 0;
+DCL uint_high UINT INIT := 65_535;
 DCL uinttable1 ARRAY (0:4) UINT INIT := [ 0, 1, 2, 3, 4 ];
 DCL uinttable2 ARRAY (5:9) UINT INIT := [ 0, 1, 2, 3, 4 ];
 
-DCL long_low LONG := -2_147_483_648;
-DCL long_high LONG := 2_147_483_647;
+DCL long_low LONG INIT := -2_147_483_648;
+DCL long_high LONG INIT := 2_147_483_647;
 DCL longtable1 ARRAY (0:4) LONG INIT := [ -2, -1, 0, 1, 2 ];
 DCL longtable2 ARRAY (5:9) LONG INIT := [ -2, -1, 0, 1, 2 ];
 
-DCL ulong_low ULONG := 0;
-DCL ulong_high ULONG := 4_294_967_295;
+DCL ulong_low ULONG INIT := 0;
+DCL ulong_high ULONG INIT := 4_294_967_295;
 DCL ulongtable1 ARRAY (0:4) ULONG INIT := [ 0, 1, 2, 3, 4 ];
 DCL ulongtable2 ARRAY (5:9) ULONG INIT := [ 0, 1, 2, 3, 4 ];
 
-DCL real1 FLOAT := 3.14159265358;
-DCL real2 FLOAT := -3.14159265358;
+DCL real1 FLOAT INIT := 3.14159265358;
+DCL real2 FLOAT INIT := -3.14159265358;
 DCL realtable1 ARRAY (0:4) FLOAT INIT := [ -2.0, -1.0, 0.0, 1.0, 2.0 ];
 DCL realtable2 ARRAY (5:9) FLOAT INIT := [ -2.0, -1.0, 0.0, 1.0, 2.0 ];
 
-DCL long_real1 DOUBLE := 3.14e300;
-DCL long_real2 DOUBLE := -3.14e-300;
+DCL long_real1 DOUBLE INIT := 3.14e300;
+DCL long_real2 DOUBLE INIT := -3.14e-300;
 DCL longrealtable1 ARRAY (0:4) DOUBLE INIT := [ -2.0, -1.0, 0.0, 1.0, 2.0 ];
 DCL longrealtable2 ARRAY (5:9) DOUBLE INIT := [ -2.0, -1.0, 0.0, 1.0, 2.0 ];
 
