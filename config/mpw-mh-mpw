@@ -1,6 +1,6 @@
 # This is an MPW makefile fragment.
 
-CC = C -d MPW_C -d ALMOST_STDC
+CC = C -d MPW_C -d ALMOST_STDC -d ANSI_PROTOTYPES
 
 CFLAGS = -d MPW -w -mc68020 -model far -b
 
