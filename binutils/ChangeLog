@@ -1,3 +1,8 @@
+Tue Oct 13 01:24:20 1992  John Gilmore  (gnu@cygnus.com)
+
+	* configure.in (host):  Use ${srcdir}/../bfd/configure.host rather
+	than repeating a copy of it here.
+
 Wed Oct  7 12:53:52 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* copy.c (main): Even if is_strip, accept -d argument indicating
