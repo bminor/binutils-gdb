@@ -842,6 +842,22 @@ uninstall: force $(CONFIG_UNINSTALL)
 	rm -rf $(GDBTK_LIBRARY)
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
+install-gdbtk:
+	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY) ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(libdir)/insight$(GDBTK_VERSION) ; \
+	$(INSTALL_DATA) $(srcdir)/gdbtk/plugins/plugins.tcl $(libdir)/insight$(GDBTK_VERSION)/plugins.tcl ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs \
+		$(GDBTK_LIBRARY)/images \
+		$(GDBTK_LIBRARY)/images2 ; \
+	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY)/help \
+		$(GDBTK_LIBRARY)/help/images \
+		$(GDBTK_LIBRARY)/help/trace ; \
+	cd $(srcdir)/gdbtk/library ; \
+	for i in *.tcl *.itcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
+	  do \
+		$(INSTALL_DATA) $$i $(GDBTK_LIBRARY)/$$i ; \
+	  done ;
+
 # We do this by grepping through sources.  If that turns out to be too slow,
 # maybe we could just require every .o file to have an initialization routine
 # of a given name (top.o -> _initialize_top, etc.).
@@ -1583,22 +1599,6 @@ regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
 fork-child.o: fork-child.c $(gdb_wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(terminal_h) $(gdbthread_h) $(gdb_string_h)
 
-install-gdbtk:
-	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY) ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(libdir)/insight$(GDBTK_VERSION) ; \
-	$(INSTALL_DATA) $(srcdir)/gdbtk/plugins/plugins.tcl $(libdir)/insight$(GDBTK_VERSION)/plugins.tcl ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs \
-		$(GDBTK_LIBRARY)/images \
-		$(GDBTK_LIBRARY)/images2 ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY)/help \
-		$(GDBTK_LIBRARY)/help/images \
-		$(GDBTK_LIBRARY)/help/trace ; \
-	cd $(srcdir)/gdbtk/library ; \
-	for i in *.tcl *.itcl *.ith *.itb images/*.gif images2/*.gif images/icons.txt images2/icons.txt tclIndex help/*.html  help/trace/*.html help/trace/index.toc help/images/*.gif; \
-	  do \
-		$(INSTALL_DATA) $$i $(GDBTK_LIBRARY)/$$i ; \
-	  done ;
-
 v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(frame_h) $(breakpoint_h) $(gdbcore_h) $(value_h) $(symfile_h) \
 	$(gdb_string_h) $(target_h) $(objfiles_h) $(regcache_h)
@@ -1999,16 +1999,6 @@ remote-array.o: remote-array.c $(defs_h) $(gdbcore_h) $(target_h) \
 
 remote-rdi.o: remote-rdi.c $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(gdb_string_h) $(completer_h) $(arm_tdep_h)
-
-rdi-share/libangsd.a:	force
-	@dir=rdi-share; \
-	if [ -f ./$${dir}/Makefile ] ; then \
-	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
-	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) all); \
-	else \
-	  true; \
-	fi
 
 remote-rdp.o: remote-rdp.c $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(gdb_string_h) $(arm_tdep_h) $(callback_h)
@@ -2514,6 +2504,20 @@ nindy.o: nindy-share/nindy.c $(gdb_wait_h) nindy-share/block_io.h \
 
 ttyflush.o: nindy-share/ttyflush.c $(srcdir)/nindy-share/ttyflush.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/ttyflush.c
+
+#
+# rdi-share sub-directory
+#
+
+rdi-share/libangsd.a:	force
+	@dir=rdi-share; \
+	if [ -f ./$${dir}/Makefile ] ; then \
+	  r=`pwd`; export r; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) all); \
+	else \
+	  true; \
+	fi
 
 #
 # Signals sub-directory
