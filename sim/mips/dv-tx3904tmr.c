@@ -537,13 +537,13 @@ deliver_tx3904tmr_tick (struct hw *me,
     {
       /* apply internal clock divider */
       if(GET_TCR_CCDE(controller)) /* divisor circuit enabled? */
-	divisor = controller->ext_ticks * (1 << (1 + GET_CCDR_CDR(controller)));
+	divisor = controller->clock_ticks * (1 << (1 + GET_CCDR_CDR(controller)));
       else
-	divisor = controller->ext_ticks;
+	divisor = controller->clock_ticks;
     }
   else
     {
-      divisor = controller->clock_ticks;
+      divisor = controller->ext_ticks;
     }
 
   /* how many times to increase counter? */
