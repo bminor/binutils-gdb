@@ -273,7 +273,7 @@ static void init_ui_out_state (struct ui_out *uiout);
 
 /* Mark beginning of a table */
 
-void
+static void
 ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
 		    int nr_rows,
 		    const char *tblid)
@@ -318,7 +318,7 @@ columns.");
   uo_table_body (uiout);
 }
 
-void
+static void
 ui_out_table_end (struct ui_out *uiout)
 {
   if (!uiout->table.flag)
@@ -349,6 +349,22 @@ and before table_body.");
   append_header_to_list (uiout, width, alignment, col_name, colhdr);
 
   uo_table_header (uiout, width, alignment, col_name, colhdr);
+}
+
+static void
+do_cleanup_table_end (void *data)
+{
+  struct ui_out *ui_out = data;
+
+  ui_out_table_end (ui_out);
+}
+
+struct cleanup *
+make_cleanup_ui_out_table_begin_end (struct ui_out *ui_out, int nr_cols,
+                                     int nr_rows, const char *tblid)
+{
+  ui_out_table_begin (ui_out, nr_cols, nr_rows, tblid);
+  return make_cleanup (do_cleanup_table_end, ui_out);
 }
 
 void
@@ -388,36 +404,11 @@ specified after table_body.");
 }
 
 void
-ui_out_list_begin (struct ui_out *uiout,
-		   const char *id)
-{
-  ui_out_begin (uiout, ui_out_type_list, id);
-}
-
-void
-ui_out_tuple_begin (struct ui_out *uiout, const char *id)
-{
-  ui_out_begin (uiout, ui_out_type_tuple, id);
-}
-
-void
 ui_out_end (struct ui_out *uiout,
 	    enum ui_out_type type)
 {
   int old_level = pop_level (uiout, type);
   uo_end (uiout, type, old_level);
-}
-
-void
-ui_out_list_end (struct ui_out *uiout)
-{
-  ui_out_end (uiout, ui_out_type_list);
-}
-
-void
-ui_out_tuple_end (struct ui_out *uiout)
-{
-  ui_out_end (uiout, ui_out_type_tuple);
 }
 
 struct ui_out_end_cleanup_data
@@ -458,7 +449,7 @@ struct cleanup *
 make_cleanup_ui_out_tuple_begin_end (struct ui_out *uiout,
 				     const char *id)
 {
-  ui_out_tuple_begin (uiout, id);
+  ui_out_begin (uiout, ui_out_type_tuple, id);
   return make_cleanup_ui_out_end (uiout, ui_out_type_tuple);
 }
 
@@ -466,7 +457,7 @@ struct cleanup *
 make_cleanup_ui_out_list_begin_end (struct ui_out *uiout,
 				    const char *id)
 {
-  ui_out_list_begin (uiout, id);
+  ui_out_begin (uiout, ui_out_type_list, id);
   return make_cleanup_ui_out_end (uiout, ui_out_type_list);
 }
 

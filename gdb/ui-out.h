@@ -88,30 +88,20 @@ extern struct cleanup *ui_out_begin_cleanup_end (struct ui_out *uiout,
    implied structure: ``table = { hdr = { header, ... } , body = [ {
    field, ... }, ... ] }''. If NR_ROWS is negative then there is at
    least one row. */
-
-extern void ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
-				int nr_rows, const char *tblid);
-
 extern void ui_out_table_header (struct ui_out *uiout, int width,
 				 enum ui_align align, const char *col_name,
 				 const char *colhdr);
 
 extern void ui_out_table_body (struct ui_out *uiout);
 
-extern void ui_out_table_end (struct ui_out *uiout);
-
+extern struct cleanup *make_cleanup_ui_out_table_begin_end (struct ui_out *ui_out,
+                                                            int nr_cols,
+                                                           int nr_rows,
+                                                           const char *tblid);
 /* Compatibility wrappers.  */
-
-extern void ui_out_list_begin (struct ui_out *uiout, const char *id);
-
-extern void ui_out_list_end (struct ui_out *uiout);
 
 extern struct cleanup *make_cleanup_ui_out_list_begin_end (struct ui_out *uiout,
 							   const char *id);
-
-extern void ui_out_tuple_begin (struct ui_out *uiout, const char *id);
-
-extern void ui_out_tuple_end (struct ui_out *uiout);
 
 extern struct cleanup *make_cleanup_ui_out_tuple_begin_end (struct ui_out *uiout,
 							    const char *id);

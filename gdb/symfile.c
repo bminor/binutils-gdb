@@ -2019,6 +2019,7 @@ reread_symbols (void)
 		  error ("Can't find the file sections in `%s': %s",
 			 objfile->name, bfd_errmsg (bfd_get_error ()));
 		}
+              terminate_minimal_symbol_table (objfile);
 
 	      /* We use the same section offsets as from last time.  I'm not
 	         sure whether that is always correct for shared libraries.  */

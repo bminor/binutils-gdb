@@ -2002,7 +2002,7 @@ top:
 static enum print_stop_action
 print_it_typical (bpstat bs)
 {
-  struct cleanup *old_chain;
+  struct cleanup *old_chain, *ui_out_chain;
   struct ui_stream *stb;
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -2163,14 +2163,14 @@ print_it_typical (bpstat bs)
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "watchpoint-trigger");
 	  mention (bs->breakpoint_at);
-	  ui_out_tuple_begin (uiout, "value");
+	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
 	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "old", stb);
 	  ui_out_text (uiout, "\nNew value = ");
 	  value_print (bs->breakpoint_at->val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "new", stb);
-	  ui_out_tuple_end (uiout);
+	  do_cleanups (ui_out_chain);
 	  ui_out_text (uiout, "\n");
 	  value_free (bs->old_val);
 	  bs->old_val = NULL;
@@ -2183,11 +2183,11 @@ print_it_typical (bpstat bs)
       if (ui_out_is_mi_like_p (uiout))
 	ui_out_field_string (uiout, "reason", "read-watchpoint-trigger");
       mention (bs->breakpoint_at);
-      ui_out_tuple_begin (uiout, "value");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       ui_out_text (uiout, "\nValue = ");
       value_print (bs->breakpoint_at->val, stb->stream, 0, Val_pretty_default);
       ui_out_field_stream (uiout, "value", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
       return PRINT_UNKNOWN;
       break;
@@ -2199,7 +2199,7 @@ print_it_typical (bpstat bs)
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
 	  mention (bs->breakpoint_at);
-	  ui_out_tuple_begin (uiout, "value");
+	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
 	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
 	  ui_out_field_stream (uiout, "old", stb);
@@ -2212,12 +2212,12 @@ print_it_typical (bpstat bs)
 	  mention (bs->breakpoint_at);
 	  if (ui_out_is_mi_like_p (uiout))
 	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
-	  ui_out_tuple_begin (uiout, "value");
+	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nValue = ");
 	}
       value_print (bs->breakpoint_at->val, stb->stream, 0,Val_pretty_default);
       ui_out_field_stream (uiout, "new", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
       return PRINT_UNKNOWN;
       break;
@@ -3229,9 +3229,10 @@ print_one_breakpoint (struct breakpoint *b,
   char wrap_indent[80];
   struct ui_stream *stb = ui_out_stream_new (uiout);
   struct cleanup *old_chain = make_cleanup_ui_out_stream_delete (stb);
+  struct cleanup *bkpt_chain;
 
   annotate_record ();
-  ui_out_tuple_begin (uiout, "bkpt");
+  bkpt_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "bkpt");
 
   /* 1 */
   annotate_field (0);
@@ -3469,12 +3470,14 @@ print_one_breakpoint (struct breakpoint *b,
   
   if ((l = b->commands))
     {
+      struct cleanup *script_chain;
+
       annotate_field (9);
-      ui_out_tuple_begin (uiout, "script");
+      script_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "script");
       print_command_lines (uiout, l, 4);
-      ui_out_tuple_end (uiout);
+      do_cleanups (script_chain);
     }
-  ui_out_tuple_end (uiout);
+  do_cleanups (bkpt_chain);
   do_cleanups (old_chain);
 }
 
@@ -3542,6 +3545,7 @@ breakpoint_1 (int bnum, int allflag)
   register struct breakpoint *b;
   CORE_ADDR last_addr = (CORE_ADDR) -1;
   int nr_printable_breakpoints;
+  struct cleanup *bkpttbl_chain;
   
   /* Compute the number of rows in the table. */
   nr_printable_breakpoints = 0;
@@ -3554,9 +3558,13 @@ breakpoint_1 (int bnum, int allflag)
       }
 
   if (addressprint)
-    ui_out_table_begin (uiout, 6, nr_printable_breakpoints, "BreakpointTable");
+    bkpttbl_chain 
+      = make_cleanup_ui_out_table_begin_end (uiout, 6, nr_printable_breakpoints,
+                                             "BreakpointTable");
   else
-    ui_out_table_begin (uiout, 5, nr_printable_breakpoints, "BreakpointTable");
+    bkpttbl_chain 
+      = make_cleanup_ui_out_table_begin_end (uiout, 5, nr_printable_breakpoints,
+                                             "BreakpointTable");
 
   if (nr_printable_breakpoints > 0)
     annotate_breakpoints_headers ();
@@ -3598,7 +3606,7 @@ breakpoint_1 (int bnum, int allflag)
 	  print_one_breakpoint (b, &last_addr);
       }
   
-  ui_out_table_end (uiout);
+  do_cleanups (bkpttbl_chain);
 
   if (nr_printable_breakpoints == 0)
     {
@@ -4390,7 +4398,7 @@ static void
 mention (struct breakpoint *b)
 {
   int say_where = 0;
-  struct cleanup *old_chain;
+  struct cleanup *old_chain, *ui_out_chain;
   struct ui_stream *stb;
 
   stb = ui_out_stream_new (uiout);
@@ -4412,39 +4420,39 @@ mention (struct breakpoint *b)
       break;
     case bp_watchpoint:
       ui_out_text (uiout, "Watchpoint ");
-      ui_out_tuple_begin (uiout, "wpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_hardware_watchpoint:
       ui_out_text (uiout, "Hardware watchpoint ");
-      ui_out_tuple_begin (uiout, "wpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "wpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_read_watchpoint:
       ui_out_text (uiout, "Hardware read watchpoint ");
-      ui_out_tuple_begin (uiout, "hw-rwpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-rwpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_access_watchpoint:
       ui_out_text (uiout, "Hardware access (read/write) watchpoint ");
-      ui_out_tuple_begin (uiout, "hw-awpt");
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "hw-awpt");
       ui_out_field_int (uiout, "number", b->number);
       ui_out_text (uiout, ": ");
       print_expression (b->exp, stb->stream);
       ui_out_field_stream (uiout, "exp", stb);
-      ui_out_tuple_end (uiout);
+      do_cleanups (ui_out_chain);
       break;
     case bp_breakpoint:
       if (ui_out_is_mi_like_p (uiout))

@@ -261,11 +261,12 @@ do_captured_list_thread_ids (struct ui_out *uiout,
 {
   struct thread_info *tp;
   int num = 0;
+  struct cleanup *cleanup_chain;
 
   prune_threads ();
   target_find_new_threads ();
 
-  ui_out_tuple_begin (uiout, "thread-ids");
+  cleanup_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "thread-ids");
 
   for (tp = thread_list; tp; tp = tp->next)
     {
@@ -273,7 +274,7 @@ do_captured_list_thread_ids (struct ui_out *uiout,
       ui_out_field_int (uiout, "thread-id", tp->num);
     }
 
-  ui_out_tuple_end (uiout);
+  do_cleanups (cleanup_chain);
   ui_out_field_int (uiout, "number-of-threads", num);
   return GDB_RC_OK;
 }
