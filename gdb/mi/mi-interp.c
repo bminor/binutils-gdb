@@ -246,7 +246,7 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
       sync_execution = 1;
       if (interp_exec (interp_to_use, argv[i]) < 0)
 	{
-	  mi_error_last_message ();
+	  mi_error_message = error_last_message ();
 	  result = MI_CMD_ERROR;
 	  break;
 	}

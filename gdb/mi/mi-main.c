@@ -99,16 +99,6 @@ static void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg);
 static int register_changed_p (int regnum);
 static int get_register (int regnum, int format);
 
-/* A helper function which will set mi_error_message to
-   error_last_message.  */
-void
-mi_error_last_message (void)
-{
-  char *s = error_last_message ();
-  xasprintf (&mi_error_message, "%s", s);
-  xfree (s);
-}
-
 /* Command implementations. FIXME: Is this libgdb? No.  This is the MI
    layer that calls libgdb.  Any operation used in the below should be
    formalized. */

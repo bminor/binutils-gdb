@@ -1,5 +1,10 @@
 2004-06-01  Andrew Cagney  <cagney@gnu.org>
 
+	* mi/mi-cmds.h (mi_error_last_message): Delete declaration.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Call
+	error_last_message instead of mi_error_last_message.
+	* mi/mi-main.c (mi_error_last_message): Delete function.
+
 	* mi/mi-main.c (mi_cmd_data_read_memory): Add missing return for
 	"invalid number of columns" error.  Delete redundant "out of
 	memory" check.
