@@ -513,15 +513,19 @@ const inst crx_instruction[] =
 #define  COP_INST(NAME, OPC, TYPE, REG1, REG2) \
   /* opc12 c4 opc8 REG1 REG2 */						      \
   {NAME,  2, 0x301030+OPC,  8, TYPE | FMT_2, {{ui4,16}, {REG1,4}, {REG2,0}}}
+/* A reverse form of the above macro.  */
+#define  REV_COP_INST(NAME, OPC, TYPE, REG1, REG2) \
+  /* opc12 c4 opc8 REG2 REG1 */						      \
+  {NAME,  2, 0x301030+OPC,  8, TYPE | FMT_2, {{ui4,16}, {REG1,0}, {REG2,4}}}
 
-  COP_INST ("mtcr",   0, COP_REG_INS,	regr,	  copregr),
-  COP_INST ("mfcr",   1, COP_REG_INS,	copregr,  regr),
-  COP_INST ("mtcsr",  2, COPS_REG_INS,	regr,	  copsregr),
-  COP_INST ("mfcsr",  3, COPS_REG_INS,	copsregr, regr),
-  COP_INST ("ldcr",   4, COP_REG_INS,	regr,	  copregr),
-  COP_INST ("stcr",   5, COP_REG_INS,	copregr,  regr),
-  COP_INST ("ldcsr",  6, COPS_REG_INS,	regr,	  copsregr),
-  COP_INST ("stcsr",  7, COPS_REG_INS,	copsregr, regr),
+  COP_INST	("mtcr",   0, COP_REG_INS,	regr,	  copregr),
+  COP_INST	("mfcr",   1, COP_REG_INS,	copregr,  regr),
+  COP_INST	("mtcsr",  2, COPS_REG_INS,	regr,	  copsregr),
+  COP_INST	("mfcsr",  3, COPS_REG_INS,	copsregr, regr),
+  COP_INST	("ldcr",   4, COP_REG_INS,	regr,	  copregr),
+  REV_COP_INST	("stcr",   5, COP_REG_INS,	copregr,  regr),
+  COP_INST	("ldcsr",  6, COPS_REG_INS,	regr,     copsregr),
+  REV_COP_INST	("stcsr",  7, COPS_REG_INS,	copsregr, regr),
 
 /* Create a memory-related CO-processor instruction.  */
 #define  COPMEM_INST(NAME, OPC, TYPE) \
