@@ -1,5 +1,20 @@
 2004-03-18  Andrew Cagney  <cagney@redhat.com>
 
+	* config/mips/tm-nbsd.h: Replace IN_SIGTRAMP with
+	DEPRECATED_IN_SIGTRAMP.
+	* config/powerpc/tm-linux.h (DEPRECATED_IN_SIGTRAMP): Ditto.
+	* config/mips/tm-linux.h (DEPRECATED_IN_SIGTRAMP) Ditto.
+	* config/mips/tm-irix6.h (DEPRECATED_IN_SIGTRAMP): Ditto.
+	* config/mips/tm-irix5.h (DEPRECATED_IN_SIGTRAMP): Ditto.
+	* config/ia64/tm-linux.h (DEPRECATED_IN_SIGTRAMP): Ditto.
+	* config/ia64/tm-aix.h (DEPRECATED_IN_SIGTRAMP): Ditto.
+	* config/arm/tm-linux.h (DEPRECATED_IN_SIGTRAMP): Ditto.
+	* config/arm/tm-embed.h (DEPRECATED_IN_SIGTRAMP): Ditto.
+	* arch-utils.c (legacy_pc_in_sigtramp): Ditto.
+	* arch-utils.h: Remove reference to IN_SIGTRAMP in comment.
+
+2004-03-18  Andrew Cagney  <cagney@redhat.com>
+
 	* frame-base.c: Update copyright.  Include "gdb_obstack.h".
 	(struct frame_base_table_entry): Define.
 	(struct frame_base_table): Re-implement as a linked list.

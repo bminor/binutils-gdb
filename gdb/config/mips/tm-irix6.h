@@ -23,8 +23,8 @@
 #include "solib.h"
 
 /* The signal handler trampoline is called _sigtramp.  */
-#undef IN_SIGTRAMP
-#define IN_SIGTRAMP(pc, name) ((name) && DEPRECATED_STREQ ("_sigtramp", name))
+#undef DEPRECATED_IN_SIGTRAMP
+#define DEPRECATED_IN_SIGTRAMP(pc, name) ((name) && DEPRECATED_STREQ ("_sigtramp", name))
 
 /* Offsets for register values in _sigtramp frame.
    sigcontext is immediately above the _sigtramp frame on Irix.  */

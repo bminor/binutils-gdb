@@ -298,13 +298,13 @@ generic_register_byte (int regnum)
 int
 legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
-#if !defined (IN_SIGTRAMP)
+#if !defined (DEPRECATED_IN_SIGTRAMP)
   if (SIGTRAMP_START_P ())
     return (pc) >= SIGTRAMP_START (pc) && (pc) < SIGTRAMP_END (pc);
   else
     return name && strcmp ("_sigtramp", name) == 0;
 #else
-  return IN_SIGTRAMP (pc, name);
+  return DEPRECATED_IN_SIGTRAMP (pc, name);
 #endif
 }
 
