@@ -1,3 +1,7 @@
+2003-08-29  Jafa  <jafa@silicondust.com>
+
+	* emulparams/elf32ip2k.sh (TEMPLATE_NAME): Define.
+
 2003-08-21  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Updated Turkish translation.
