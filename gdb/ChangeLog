@@ -47,6 +47,7 @@ Wed Sep 22 10:28:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	retval.step_resume.
 
 	* mips-tdep.c (mips_frame_chain): If frame size zero, return zero.
+	* rs6000-tdep.c: Add comment about framelessness.
 
 	* remote-nindy.c: Declare ninMemGet and ninMemPut.
 

@@ -346,7 +346,13 @@ mips_frame_chain(frame)
        of stack (or otherwise hosed).  If we don't check frame size,
        we loop forever if we see a zero size frame.  */
     if (PROC_FRAME_REG (proc_desc) == SP_REGNUM
-	&& PROC_FRAME_OFFSET (proc_desc) == 0)
+	&& PROC_FRAME_OFFSET (proc_desc) == 0
+	/* Frameless functions, which can happen on the innermost frame
+	   or a frame which was innermost when a signal happened, can
+	   have frame size zero.  No need to check for non-frameless
+	   functions in these situations, though (I don't think).  */
+	&& frame->next != NULL
+	&& !frame->next->signal_handler_caller)
       return 0;
     else
       return read_next_frame_reg(frame, PROC_FRAME_REG(proc_desc))

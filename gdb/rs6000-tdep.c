@@ -949,6 +949,8 @@ int pcsaved;
 
   if (fi->next != NULL)
     /* Don't even think about framelessness except on the innermost frame.  */
+    /* FIXME: Can also be frameless if fi->next->signal_handler_caller (if
+       a signal happens while executing in a frameless function).  */
     return 0;
   
   func_start = get_pc_function_start (fi->pc) + FUNCTION_START_OFFSET;
