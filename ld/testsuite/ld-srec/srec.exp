@@ -297,4 +297,11 @@ if ![ld_compile "$CXX $CXXFLAGS -fgnu-linker" $srcdir/$subdir/sr3.cc tmpdir/sr3.
 # See above.
 setup_xfail "i\[345\]86-*-aout*"
 
+# The i960 COFF targets fail this test because the i960 defaults to
+# little endian, while the srec target is big endian.  When the number
+# of entries in the constructor table is written out, the linker uses
+# the output BFD.  This seems correct, but it generates the wrong
+# result.  I don't know how to fix this.
+setup_xfail "i960*-*-coff*" "i960*-*-vxworks5.\[123456789\]*"
+
 run_srec_test $test2 "tmpdir/sr3.o"
