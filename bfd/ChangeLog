@@ -1,3 +1,8 @@
+Sun Nov  1 19:32:28 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-m10300.c (mn10300_elf_relax_section): Do not use alloca,
+	use bfd_malloc and free instead and check return value from bfd_malloc.
+
 Sun Nov  1 16:20:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libbfd-in.h (_bfd_dwarf1_find_nearest_line): Declare.
