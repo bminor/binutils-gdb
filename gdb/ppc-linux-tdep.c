@@ -685,10 +685,11 @@ struct insn_pattern
 
    When the match is successful, fill INSN[i] with what PATTERN[i]
    matched.  If PATTERN[i] is optional, and the instruction wasn't
-   present, set INSN[i] to -1.  INSN should have as many elements as
-   PATTERN.  Note that, if PATTERN contains optional instructions
-   which aren't present in memory, then INSN will have holes, so
-   INSN[i] isn't necessarily the i'th instruction in memory.  */
+   present, set INSN[i] to 0 (an invalid instruction on the PPC).
+   INSN should have as many elements as PATTERN.  Note that, if
+   PATTERN contains optional instructions which aren't present in
+   memory, then INSN will have holes, so INSN[i] isn't necessarily the
+   i'th instruction in memory.  */
 static int
 insns_match_pattern (CORE_ADDR pc,
                      struct insn_pattern *pattern,
@@ -727,16 +728,6 @@ static CORE_ADDR
 insn_ds_field (unsigned int insn)
 {
   return ((((CORE_ADDR) insn & 0xfffc) ^ 0x8000) - 0x8000);
-}
-
-
-/* If DESC is the address of a 64-bit PowerPC Linux function
-   descriptor, return the descriptor's entry point.  */
-static CORE_ADDR
-ppc64_desc_entry_point (CORE_ADDR desc)
-{
-  /* The first word of the descriptor is the entry point.  */
-  return (CORE_ADDR) read_memory_unsigned_integer (desc, 8);
 }
 
 
@@ -874,7 +865,7 @@ ppc64_standard_linkage_target (CORE_ADDR pc, unsigned int *insn)
        + insn_ds_field (insn[2]));
 
   /* The first word of the descriptor is the entry point.  Return that.  */
-  return ppc64_desc_entry_point (desc);
+  return (CORE_ADDR) read_memory_unsigned_integer (desc, 8);
 }
 
 
@@ -890,18 +881,6 @@ ppc64_skip_trampoline_code (CORE_ADDR pc)
     return ppc64_standard_linkage_target (pc, ppc64_standard_linkage_insn);
   else
     return 0;
-}
-
-
-/* On 64-bit PowerPC Linux, the ELF header's e_entry field is the
-   address of a function descriptor for the entry point function, not
-   the actual entry point itself.  So to find the actual address at
-   which execution should begin, we need to fetch the function's entry
-   point from that descriptor.  */
-static CORE_ADDR
-ppc64_call_dummy_address (void)
-{
-  return ppc64_desc_entry_point (entry_point_address ());
 }
 
 
@@ -1026,8 +1005,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
   
   if (tdep->wordsize == 8)
     {
-      set_gdbarch_call_dummy_address (gdbarch, ppc64_call_dummy_address);
-
       set_gdbarch_in_solib_call_trampoline
         (gdbarch, ppc64_in_solib_call_trampoline);
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
