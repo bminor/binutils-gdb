@@ -1,3 +1,10 @@
+start-sanitize-r5900
+Mon Jun  1 10:28:25 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* r5900.igen (rsqrt.s): Update based on r5900 ISA manual version 2.1.
+	(sqrt.s): Likewise.
+
+end-sanitize-r5900
 Fri May 29 11:40:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (sim_igen_filter): Match mips*tx39 not mipst*tx39.
