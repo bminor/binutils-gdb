@@ -139,6 +139,12 @@ store_inferior_registers (regno)
 	    }
 	  return;
 	}
+
+      /* Another crock.  HPUX complains if you write a nonzero value to
+	 the high part of IPSW.  What will it take for HP to catch a
+	 clue about building sensible interfaces?  */
+     if (regno == IPSW_REGNUM && len == 8)
+	*(int *)&registers[REGISTER_BYTE (regno)] = 0;
 #endif
 
       for (i = 0; i < len; i += sizeof (int))
@@ -152,7 +158,7 @@ store_inferior_registers (regno)
 		 the kernel doesn't let us at the registers. */
 	      char *err = safe_strerror (errno);
 	      char *msg = alloca (strlen (err) + 128);
-	      sprintf (msg, "reading `%s' register: %s",
+	      sprintf (msg, "writing `%s' register: %s",
 		        REGISTER_NAME (regno), err);
 	      /* If we fail to write the PC, give a true error instead of
 		 just a warning.  */

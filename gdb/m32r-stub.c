@@ -1576,10 +1576,6 @@ set_debug_traps()
   exceptionHandler (16, _catchException16);
   /*  exceptionHandler (17, _catchException17); */
 
-  /* In case GDB is started before us, ack any packets (presumably
-     "$?#xx") sitting there.  */
-  putDebugChar ('+');
-
   initialized = 1;
 }
 

@@ -1,3 +1,24 @@
+Mon Aug 23 10:25:20 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/dollar.exp: Do not run for PA processors in wide mode
+	on hpux11.
+
+	* gdb.base/attach.exp: Handle another hpux11 error message variant
+	when attaching to a process that does not exist.
+
+1999-08-19  J.T. Conklin  <jtc@redback.com>
+
+	* gdb.base/call-ar-exp.exp: Fix pattern matching whitespace
+ 	characters in 'continue to 1241' test.
+
+1999-08-17  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/call-ar-st.exp: Add a shorter match case for the
+	stop in print_long_arg_list, define and use a whitespace
+	variable in print_small_structs test, add an XFAIL for Solaris.
+	* gdb.base/dbx.exp: XFAIL func commands until somebody is
+	interested enough to fix.
+
 1999-08-13  Keith Seitz  <keiths@cygnus.com>
 
 	* gdb.base/dbx.exp (dbx_gdb_file_cmd): Rename to gdb_file_cmd.

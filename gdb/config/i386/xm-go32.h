@@ -26,7 +26,7 @@
 
 #define SLASH_P(X) ((X)=='\\' || (X) == '/')
 
-#define ROOTED_P(X) ((SLASH_P((X)[0]))|| ((X)[1] ==':'))
+#define ROOTED_P(X) ((SLASH_P((X)[0])) || ((X)[0] && (X)[1] ==':'))
 
 #define SLASH_CHAR '/'
 #define SLASH_STRING "/"

@@ -602,11 +602,6 @@ set_debug_traps()
     if (ht->tt != 4 || ! (read_psr () & 0x1000))
       exceptionHandler(ht->tt, trap_low);
 
-  /* In case GDB is started before us, ack any packets (presumably
-     "$?#xx") sitting there.  */
-
-  putDebugChar ('+');
-
   initialized = 1;
 }
 

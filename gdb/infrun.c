@@ -1285,8 +1285,9 @@ init_execution_control_state (struct execution_control_state *ecs)
 }
 
 /* Call this function before setting step_resume_breakpoint, as a
-   sanity check.  We should never be setting a new
-   step_resume_breakpoint when we have an old one active.  */
+   sanity check.  There should never be more than one step-resume
+   breakpoint per thread, so we should never be setting a new
+   step_resume_breakpoint when one is already active.  */
 static void
 check_for_old_step_resume_breakpoint (void)
 {
@@ -2289,7 +2290,12 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     If we reach here and step_resume_breakpoint is already
 	     NULL, then apparently we have multiple active
 	     step-resume bp's.  We'll just delete the breakpoint we
-	     stopped at, and carry on.  */
+	     stopped at, and carry on.  
+
+	     Correction: what the code currently does is delete a
+	     step-resume bp, but it makes no effort to ensure that
+	     the one deleted is the one currently stopped at.  MVS  */
+
 	  if (step_resume_breakpoint == NULL)
 	    {
 	      step_resume_breakpoint =

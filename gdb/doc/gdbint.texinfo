@@ -2365,35 +2365,15 @@ are just as hard to understand as a single thousand-line function.
 
 @subsection Function Prototypes
 
-Prototypes must be used to @emph{declare} functions but never to
+Prototypes must be used to @emph{declare} functions, and may be used to
 @emph{define} them.  Prototypes for GDB functions must include both the
 argument type and name, with the name matching that used in the actual
 function definition.
 
-For the sake of compatibility with pre-ANSI compilers, define prototypes
-with the @code{PARAMS} macro:
-
-@example @code
-extern int memory_remove_breakpoint PARAMS ((CORE_ADDR addr,
-                                             char *contents_cache));
-@end example
-
-Note the double parentheses around the parameter types.  This allows an
-arbitrary number of parameters to be described, without freaking out the
-C preprocessor.  When the function has no parameters, it should be
-described like:
-
-@example @code
-extern void noprocess PARAMS ((void));
-@end example
-
-The @code{PARAMS} macro expands to its argument in ANSI C, or to a
-simple @code{()} in traditional C.
-
-All external functions should have a @code{PARAMS} declaration in a
-header file that callers include, except for @code{_initialize_*}
-functions, which must be external so that @file{init.c} construction
-works, but shouldn't be visible to random source files.
+All external functions should have a declaration in a header file that
+callers include, except for @code{_initialize_*} functions, which must
+be external so that @file{init.c} construction works, but shouldn't be
+visible to random source files.
 
 All static functions must be declared in a block near the top of the
 source file.

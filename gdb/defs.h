@@ -574,10 +574,29 @@ extern char *symtab_to_filename PARAMS ((struct symtab *));
 
 extern int read_relative_register_raw_bytes PARAMS ((int, char *));
 
-#if __STDC__
-enum lval_type;
+/* Possible lvalue types.  Like enum language, this should be in
+   value.h, but needs to be here for the same reason. */
+
+enum lval_type
+  {
+    /* Not an lval. */
+    not_lval,
+    /* In memory.  Could be a saved register.  */
+    lval_memory,
+    /* In a register.  */
+    lval_register,
+    /* In a gdb internal variable.  */
+    lval_internalvar,
+    /* Part of a gdb internal variable (structure field).  */
+    lval_internalvar_component,
+    /* In a register series in a frame not the current one, which may have been
+       partially saved or saved in different places (otherwise would be
+       lval_register or lval_memory).  */
+    lval_reg_frame_relative
+  };
+
 struct frame_info;
-#endif
+
 void default_get_saved_register PARAMS ((char *raw_buffer, int *optimized,
 					 CORE_ADDR *addrp,
 					 struct frame_info *frame, int regnum,

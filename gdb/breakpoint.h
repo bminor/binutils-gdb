@@ -122,17 +122,18 @@ enum bptype
 
 enum enable
   {
-    disabled,			/* The eventpoint is inactive, and cannot trigger. */
-    enabled,			/* The eventpoint is active, and can trigger. */
-    shlib_disabled,		/* The eventpoint's address is within an unloaded solib.
-				   The eventpoint will be automatically enabled & reset
-				   when that solib is loaded. */
-    call_disabled		/* The eventpoint has been disabled while a call into
-				   the inferior is "in flight", because some eventpoints
-				   interfere with the implementation of a call on some
-				   targets.  The eventpoint will be automatically enabled
-				   & reset when the call "lands" (either completes, or
-				   stops at another eventpoint). */
+    disabled,		/* The eventpoint is inactive, and cannot trigger. */
+    enabled,		/* The eventpoint is active, and can trigger. */
+    shlib_disabled,	/* The eventpoint's address is in an unloaded solib.
+			   The eventpoint will be automatically enabled 
+			   and reset when that solib is loaded. */
+    call_disabled	/* The eventpoint has been disabled while a call 
+			   into the inferior is "in flight", because some 
+			   eventpoints interfere with the implementation of 
+			   a call on some targets.  The eventpoint will be 
+			   automatically enabled and reset when the call 
+			   "lands" (either completes, or stops at another 
+			   eventpoint). */
   };
 
 
@@ -144,6 +145,14 @@ enum bpdisp
     del_at_next_stop,		/* Delete at next stop, whether hit or not */
     disable,			/* Disable it */
     donttouch			/* Leave it alone */
+  };
+
+enum target_hw_bp_type
+  {
+    hw_write   = 0, 		/* Common  HW watchpoint */
+    hw_read    = 1, 		/* Read    HW watchpoint */
+    hw_access  = 2, 		/* Access  HW watchpoint */
+    hw_execute = 3		/* Execute HW breakpoint */
   };
 
 /* Note that the ->silent field is not currently used by any commands
@@ -248,8 +257,9 @@ struct breakpoint
        aborting, so you can back up to just before the abort.  */
     int hit_count;
 
-    /* Filename of a dynamically-linked library (dll), used for bp_catch_load
-       and bp_catch_unload (malloc'd), or NULL if any library is significant.  */
+    /* Filename of a dynamically-linked library (dll), used for
+       bp_catch_load and bp_catch_unload (malloc'd), or NULL if any
+       library is significant.  */
     char *dll_pathname;
 
     /* Filename of a dll whose state change (e.g., load or unload)
@@ -257,20 +267,22 @@ struct breakpoint
        after this catchpoint has triggered.  */
     char *triggered_dll_pathname;
 
-    /* Process id of a child process whose forking triggered this catchpoint.
-       This field is only vaid immediately after this catchpoint has triggered.  */
+    /* Process id of a child process whose forking triggered this
+       catchpoint.  This field is only vaid immediately after this
+       catchpoint has triggered.  */
     int forked_inferior_pid;
 
-    /* Filename of a program whose exec triggered this catchpoint.  This
-       field is only vaid immediately after this catchpoint has triggered.  */
+    /* Filename of a program whose exec triggered this catchpoint.
+       This field is only vaid immediately after this catchpoint has
+       triggered.  */
     char *exec_pathname;
 
     asection *section;
   };
 
-/* The following stuff is an abstract data type "bpstat" ("breakpoint status").
-   This provides the ability to determine whether we have stopped at a
-   breakpoint, and what we should do about it.  */
+/* The following stuff is an abstract data type "bpstat" ("breakpoint
+   status").  This provides the ability to determine whether we have
+   stopped at a breakpoint, and what we should do about it.  */
 
 typedef struct bpstats *bpstat;
 
@@ -417,8 +429,8 @@ extern void bpstat_get_triggered_catchpoints PARAMS ((bpstat, bpstat *));
 /* Implementation:  */
 struct bpstats
   {
-    /* Linked list because there can be two breakpoints at the
-       same place, and a bpstat reflects the fact that both have been hit.  */
+    /* Linked list because there can be two breakpoints at the same
+       place, and a bpstat reflects the fact that both have been hit.  */
     bpstat next;
     /* Breakpoint that we are at.  */
     struct breakpoint *breakpoint_at;
@@ -474,7 +486,8 @@ extern struct breakpoint *set_momentary_breakpoint
 
 extern void set_ignore_count PARAMS ((int, int, int));
 
-extern void set_default_breakpoint PARAMS ((int, CORE_ADDR, struct symtab *, int));
+extern void set_default_breakpoint PARAMS ((int, CORE_ADDR, 
+					    struct symtab *, int));
 
 extern void mark_breakpoints_out PARAMS ((void));
 
@@ -588,9 +601,11 @@ extern void disable_breakpoints_in_shlibs PARAMS ((int silent));
 
 extern void re_enable_breakpoints_in_shlibs PARAMS ((void));
 
-extern void create_solib_load_event_breakpoint PARAMS ((char *, int, char *, char *));
+extern void create_solib_load_event_breakpoint PARAMS ((char *, int, 
+							char *, char *));
 
-extern void create_solib_unload_event_breakpoint PARAMS ((char *, int, char *, char *));
+extern void create_solib_unload_event_breakpoint PARAMS ((char *, int, 
+							  char *, char *));
 
 extern void create_fork_event_catchpoint PARAMS ((int, char *));
 

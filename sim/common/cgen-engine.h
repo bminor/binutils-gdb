@@ -90,7 +90,7 @@ typedef void (EXTRACT_FN) (SIM_CPU *, IADDR, CGEN_INSN_INT, ARGBUF *);
 
 /* Instruction fields are extracted into ARGBUF before calling the
    semantic routine.  */
-#if HAVE_PARALLEL_INSNS
+#if HAVE_PARALLEL_INSNS && ! WITH_PARALLEL_GENWRITE
 typedef SEM_PC (SEMANTIC_FN) (SIM_CPU *, SEM_ARG, PAREXEC *);
 #else
 typedef SEM_PC (SEMANTIC_FN) (SIM_CPU *, SEM_ARG);
@@ -103,7 +103,7 @@ typedef unsigned int SEM_STATUS;
 
 /* Instruction fields are extracted by the semantic routine.
    ??? TODO: multi word insns.  */
-#if HAVE_PARALLEL_INSNS
+#if HAVE_PARALLEL_INSNS && ! WITH_PARALLEL_GENWRITE
 typedef SEM_STATUS (SEMANTIC_FN) (SIM_CPU *, SEM_ARG, PAREXEC *, CGEN_INSN_INT);
 #else
 typedef SEM_STATUS (SEMANTIC_FN) (SIM_CPU *, SEM_ARG, CGEN_INSN_INT);
@@ -329,8 +329,8 @@ do { \
 /* Instruction information.  */
 
 /* Sanity check, at most one of these may be true.  */
-#if WITH_PARALLEL_READ && WITH_PARALLEL_WRITE
-#error "Both WITH_PARALLEL_READ && WITH_PARALLEL_WRITE can't be true."
+#if WITH_PARALLEL_READ + WITH_PARALLEL_WRITE + WITH_PARALLEL_GENWRITE > 1
+#error "At most one of WITH_PARALLEL_{READ,WRITE,GENWRITE} can be true."
 #endif
 
 /* Compile time computable instruction data.  */
@@ -346,7 +346,7 @@ struct insn_sem {
   /* Semantic format number.  */
   int sfmt;
 
-#if WITH_PARALLEL_READ || WITH_PARALLEL_WRITE
+#if HAVE_PARALLEL_INSNS && ! WITH_PARALLEL_ONLY
   /* Index in IDESC table of parallel handler.  */
   int par_index;
 #endif
@@ -397,7 +397,7 @@ struct idesc {
 #endif
 
   /* Parallel support.  */
-#if WITH_PARALLEL_READ || WITH_PARALLEL_WRITE
+#if HAVE_PARALLEL_INSNS && (! WITH_PARALLEL_ONLY || (WITH_PARALLEL_ONLY && ! WITH_PARALLEL_GENWRITE))
   /* Pointer to parallel handler if serial insn.
      Pointer to readahead/writeback handler if parallel insn.  */
   struct idesc *par_idesc;

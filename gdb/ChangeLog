@@ -1,3 +1,292 @@
+Mon Aug 23 10:16:32 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* pa64solib.c: Fix some minor whitespace problems.
+	(bfd_lookup_symbol): New function.
+	(pa64_solib_create_inferior_hook): Find the address __dld_break
+	in the dynamic linker.  Try to set a shlib event breakpoint in
+	that function.
+	(add_to_solist): Do not add the same shared library to the shlib
+	list more than once.
+
+Sun Aug 22 14:49:40 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* value.h (enum lval_type): Move declaration from here.
+	* defs.h (enum lval_type): To here.
+	* frame.h, gdbarch.h: Delete incomplete declaration of ``enum
+ 	lval_type''.
+	
+1999-08-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* breakpoint.c (can_use_hardware_watchpoint): reject expressions
+	that refer to registers or register variables.
+
+Fri Aug 20 10:53:38 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa-tdep.c (hppa_fix_call_dummy): Provide PA2.0W aware code.
+
+	* pa64solib.c pa64solib.h: New files.
+
+	* config/pa/hppa64.mt: Delete commented out code that is and
+	never will be appropriate for this target.
+	* config/pa/hpux11w.mt (TDEPFILES): Remove SOM references.  Also
+	remove pa64solib.o.
+	* config/pa/hpux11w.mh (NATDEPFILES): Remove SOM references.
+
+	* configure.host; Use "hpux11w" and "hpux11" instead of
+	"hpux1100w" and "hpux1100" respectively
+	* config/pa/hpux11w.mh: Renamed from hpux1100w.mh.
+	* config/pa/hpux11w.mt, config/pa/hpux11.mh: Likewise.
+	* config/pa/hpux11.mt: Likewise.
+
+1999-08-19  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* breakpoint.h (target_hw_bp_type): new enum.
+	* breakpoint.c (insert_breakpoints): use enum instead of consts.
+	(remove_breakpoint): use enum instead of consts.
+	[Also clean up a bunch of excessively long lines.]
+	
+1999-08-19  J.T. Conklin  <jtc@redback.com>
+
+	* i386-stub.c (waitabit): Removed.
+	(breakpoint): Update.
+
+	* i386-stub.c, m32r-stub.c, sparc-stub.c, sparcl-stub.c,
+ 	sparclet-stub.c (set_debug_traps): Don't send gratuitous ACK.
+
+	* m68k-stub.c (putpacket): Restore code so that packets are sent
+ 	until an ACK is received.
+
+1999-08-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* breakpoint.c (bpstat_stop_status): Accept triggered addresses
+	anywhere inside the region occupied by a watched variable as a
+	sign that the watchpoint fired.  Don't stop if some watchpoint
+	was triggered, but its address doesn't match the address of this 
+	watchpoint.
+	(TARGET_REGION_OK_FOR_HW_WATCHPOINT): New macro.
+	Default definition is to call TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT.
+	(can_use_hardware_watchpoint): Call TARGET_REGION_OK_FOR_HW_WATCHPOINT;
+	if it returns zero, return zero immediately. 
+	(insert_breakpoints): Try to insert watchpoints for all the values
+	on the value chain, even if some of them fail to insert.  Remove
+	the breakpoint if parts of its value chain couldn't be inserted.
+	
+1999-08-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (go32_stopped_by_watchpoint): Remove unused code.
+
+1999-08-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (tcgetpgrp, tcsetpgrp): New functions.
+
+1999-08-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (go32_wait): If we are in a single-step mode, and the
+	next instruction is INT nn or INTO, use a temporary breakpoint to
+	simulate single-step mode, and reset the trace flag.
+
+1999-08-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (wp_op): New typedef.
+	(SHOW_DR): Print the length of watched region as well.
+	(go32_insert_aligned_watchpoint): Remove unused argument PID.  All
+	callers and the prototype changed.
+	(go32_handle_nonaligned_watchpoint): Renamed from
+	go32_insert_nonaligned_watchpoint.  Now handles all operations on
+	non-aligned watchpoints: insertion, deletion, and counting.  If
+	called with wp_count as the first argument, return the count of
+	debug registers needed to watch the region.  Don't break out of
+	the loop before all the addresses in the region are processed.
+	(go32_remove_watchpoint): Call go32_remove_aligned_watchpoint to
+	do the actual work.
+	(go32_remove_aligned_watchpoint): New function, modeled after
+	go32_insert_aligned_watchpoint.  Removes watchpoints that watch
+	regions of arbitrary length by calling
+	go32_handle_nonaligned_watchpoint as needed.
+	(go32_region_ok_for_watchpoint): New function, called from
+	can_use_hardware_watchpoint via the new macro
+	TARGET_REGION_OK_FOR_HW_WATCHPOINT.
+
+	* config/i386/nm-go32.h (TARGET_REGION_OK_FOR_HW_WATCHPOINT):
+	Define to call go32_region_ok_for_watchpoint.
+	(DECR_PC_AFTER_HW_BREAK): Define back to zero (previous redefinition
+	to 1 was due to a bug in go32-nat.c).
+
+1999-08-19  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (cleanup_dregs): New function.
+	(go32_mourn_inferior): Call it.
+	(IS_REG_FREE, LOCAL_ENABLE_REG, GLOBAL_ENABLE_REG, DISABLE_REG,
+	SET_BREAK, SET_WATCH, IS_WATCH, WATCH_HIT): Protect arguments with
+	parentheses.
+	(SET_BREAK): Increment the debug register's reference count.
+	(DR_DEF): New macro, returns the access and length bits of the
+	breakpoint.
+	(SHOW_DR): Print the reference count of each register.  Disable or
+	enable print-out depending on an environment variable GDB_SHOW_DR.
+	(go32_insert_aligned_watchpoint): Look for an occupied debug
+	register with the same address and access/length bits, and reuse
+	it by incrementing reference the count, before occupying another
+	register.  Return zero upon success.
+	(go32_insert_nonaligned_watchpoint): Pass the read/write bits to
+	go32_remove_watchpoint.
+	(go32_remove_watchpoint): Accept an additional parameter: the
+	read/write bits of the watchpoint to remove, and only remove a
+	watchpoint if it's occupied and its address and read/write bits
+	match.  Only disable the register if its reference count is zero;
+	otherwise just decrease the reference count.
+	(go32_remove_hw_breakpoint): Only decrease reference count and
+	disable the debug register if it is occupied and its access bits
+	match those of an instruction breakpoint.
+	(go32_insert_hw_breakpoint): Before occupying another debug
+	register, look for an already occupied register that defines an
+	instruction breakpoint with the same address.  If found, increment
+	its reference count.  Call SHOW_DR even if failed to insert a
+	breakpoint.
+
+	* config/i386/nm-go32.h (target_remove_watchpoint): Accept the
+	TYPE argument as well.
+
+Wed Aug 18 17:47:25 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c: Add more comments.
+
+1999-08-17  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* blockframe.c: Don't use PARAMS anymore, remove obsolete comment
+	about frameless functions.
+
+1999-08-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* thread.c (delete_thread): delete any step_resume breakpoint
+	held by the thread.  (prune_threads): call delete_thread.
+	* breakpoint.c (breakpoint_init_inferior): if startup, then
+	delete any remaining step_resume breakpoints.
+	* infrun.c (handle_inferior_event): add cautionary comment.
+
+1999-08-16  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* remote.c (remote_async_mourn): New function. Async version of
+	remote_mourn().
+
+1999-08-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* terminal.h [__GO32__]: Remove conditional; DJGPP now supports
+	termios.
+
+1999-08-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* command.c (CANT_FORK) [__MSDOS__]: Define.
+	(shell_escape) [CANT_FORK]: If ARG is NULL, pass an empty string
+	to `system'.
+	[__DJGPP__]: Return to the original directory after the shell
+	exits.
+
+1999-08-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* config/i386/xm-go32.h (ROOTED_P): Don't reference X[1] if X[0]
+	is a null character.
+
+	* config/i386/nm-go32.h (DECR_PC_AFTER_HW_BREAK): Define to 1.
+
+1999-08-16  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (redir_cmdline_parse, redir_cmdline_delete,
+	redir_to_child, redir_to_debugger, redir_debug_init)
+	[__DJGPP_MINOR__ < 3]: Dummy stubs for redirecting debuggee's
+	standard handles.
+	(print_387_status): Print "last FP instruction", not "last
+	exception".  Restore the upper 5 bits of the opcode that aren't
+	stored in the FPU state.  Print the FPU stack in its physical
+	order, not relative to ST(0).  Print "special", not "trap" for
+	unnormals and infinities.  Print all 10 bytes of each FP register,
+	and print them with 19 significant digits.
+	(regno_mapping): Make the mapping consistent with tm-go32.h.
+	(sig_map): Add mappings for SIGQUIT, SIGFPE, SIGALRM.  Map NMI to
+	SIGBUS.
+	(excep_map): New variable, maps GDB signals to DJGPP exceptions.
+	(go32_attach): Signal an error: we cannot attach to other
+	processes.
+	(go32_resume): Record the signal with which the inferior should be
+	resumed, mapped to the DJGPP exception number.
+	(go32_wait): Pass the signal recorded in go32_resume to the
+	debuggee.  Save and restore debugger's and debuggee's current
+	working directory.
+	[__DJGPP_MINOR__ < 3]: Save and restore inferior's FPU state.
+	(store_register): FPU regsiters have numbers less than 31.
+	(go32_kill_inferior): Delete the parsed command-line storage.
+	(go32_create_inferior): Initialize the parsed command-line
+	storage.  Parse the command line and create the redirections for
+	inferior's standard handles.
+	[__DJGPP_MINOR__ < 3]: Init the inferior's FPU state.
+	(ignore2): Function deleted.
+	(device_mode): New function, switches a character device between
+	raw and cooked mode.
+	(go32_terminal_init): Invalidate the raw/cooked mode information.
+	(go32_terminal_info): Print whether the inferior's terminal is in
+	raw or cooked mode.
+	[__DJGPP_MINOR__ > 2]: Say if standard handles are redirected or
+	closed by the inferior.
+	(go32_terminal_inferior): Switch standard handles to the
+	inferior's files/devices.  Put the inferior's input device to
+	raw/cooked mode, exactly like we found it last time.
+	(go32_terminal_ours): Restore debugger's standard handles and put
+	the terminal into cooked mode.  Save the mode of inferior's input
+	device.
+	(init_go32_ops): Assign go32_ops.to_attach,
+	go32_ops.to_terminal_info, go32_ops.to_terminal_ours_for_output.
+	Initialize inferior's cwd and the command-line storage.
+
+Mon Aug 16 14:29:30 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/pa/tm-hppa.h (ARGS_GROW_DOWNWARD): Define.
+	* config/pa/tm-hppa64.h (ARGS_GROW_DOWNWARD): Undefine.
+	* hppa-tdep.c (hppa_push_arguments): Handle arguments growing in
+	both directions depending ARGS_GROW_DOWNWARD.
+	(hppa_find_saved_regs): Update for 64bit wide registers & pointers
+	and PA64 ABI. 
+
+	* hppa-tdep.c (hppa_pop_frame): Various fixes for 64bit wide
+	registers and pointers.
+	(hppa_fix_call_dummy, skip_trampoline_code): Likewise.
+	(restore_pc_queue): Update tests for width of memory loads.
+	(hppa_push_arguments): Delete version that was #if 0'd out.
+
+	* hppa-tdep.c (push_dummy_frame): Handle the new 64it ABI.
+	(find_dummy_frame_regs): Corresponding changes.
+
+	* hppa-tdep.c (read_unwind_info): Initialize obj_private->dp.
+	(internalize_unwinds): Improve test for when to use segment
+	relative code for unwinder bounds.
+	(rp_saved): Fix offset of saved return pointer for the 64bit ABI.
+	(hppa_frame_saved_pc): Various updates to handle 64bit registers
+	and pointers.
+	(frame_chain, restore_pc_queue): Likewise.
+
+	* hppa-tdep.c (rp_saved): RP is saved at frame-16 when
+	pointers are 64bits wide.
+
+	* hppa-tdep.c (record_text_segment_lowaddr): New function.
+	(internalize_unwinds): Use it if addressess are 8 bytes wide. 
+
+	* symfile.c (syms_from_objfile): No longer warn if the lowest
+	section does not have SEC_CODE set.
+
+	* Makefile.in (pa64solib.o): Add dependencies.
+
+	* hppah-nat.c (store_inferior_registers): Do not try to write a
+	nonzero value to the high part of IPSW.  Fix typo in unable to store
+	warning.
+
+	* config/pa/tm-hppa.h (opd_data structure): Delete.  Not actually
+	needed.
+	(struct obj_private_struct): Add new entry for the objfile's DP
+	value.
+	* config/pa/tm-hppa64.h (CALL_DUMMY): Add a nop to make it an even
+	number of instructions.  Pack the dummy into word sized hunks.
+	(CALL_DUMMY_LENGTH): Update appropriately.
+	(PC_IN_CALL_DUMMY, CALL_DUMMY_LOCATION_AFTER_TEXT_END): Delete.
+
 Mon Aug 16 19:08:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in: Try -lsocket when looking for socketpair.

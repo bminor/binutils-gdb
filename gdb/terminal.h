@@ -30,8 +30,6 @@
    nothing has already defined the one of the names, and do the right
    thing. */
 
-/* nothing works with go32, and the headers aren't complete */
-#if !defined (__GO32__)
 #if !defined (HAVE_TERMIOS) && !defined(HAVE_TERMIO) && !defined(HAVE_SGTTY)
 #if defined(HAVE_TERMIOS_H)
 #define HAVE_TERMIOS
@@ -45,13 +43,12 @@
 #endif /* ! defined (HAVE_TERMIO_H) */
 #endif /* ! defined (HAVE_TERMIOS_H) */
 #endif /* !defined (HAVE_TERMIOS) && !defined(HAVE_TERMIO) && !defined(HAVE_SGTTY) */
-#endif /* ! defined (__GO32__) */
 
 #if defined(HAVE_TERMIOS)
 #include <termios.h>
 #endif
 
-#if !defined(__GO32__) && !defined(_WIN32) && !defined (HAVE_TERMIOS)
+#if !defined(_WIN32) && !defined (HAVE_TERMIOS)
 
 /* Define a common set of macros -- BSD based -- and redefine whatever
    the system offers to make it look like that.  FIXME: serial.h and

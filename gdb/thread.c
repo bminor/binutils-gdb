@@ -160,6 +160,11 @@ delete_thread (pid)
   else
     thread_list = tp->next;
 
+  /* NOTE: this will take care of any left-over step_resume breakpoints,
+     but not any user-specified thread-specific breakpoints. */
+  if (tp->step_resume_breakpoint)
+    delete_breakpoint (tp->step_resume_breakpoint);
+
   free (tp);
 
   return;
@@ -350,20 +355,11 @@ prune_threads ()
 {
   struct thread_info *tp, *tpprev, *next;
 
-  tpprev = 0;
   for (tp = thread_list; tp; tp = next)
     {
       next = tp->next;
       if (!thread_alive (tp))
-	{
-	  if (tpprev)
-	    tpprev->next = next;
-	  else
-	    thread_list = next;
-	  free (tp);
-	}
-      else
-	tpprev = tp;
+	delete_thread (tp->pid);
     }
 }
 

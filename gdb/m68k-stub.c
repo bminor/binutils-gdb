@@ -576,8 +576,7 @@ char * buffer;
   
 }
 
-/* send the packet in buffer.  The host get's one chance to read it.  
-   This routine does not wait for a positive acknowledge.  */
+/* send the packet in buffer. */
 
 
 void putpacket(buffer)
@@ -603,7 +602,7 @@ char * buffer;
   putDebugChar(hexchars[checksum >> 4]);
   putDebugChar(hexchars[checksum % 16]);
 
-  } while (1 == 0);  /* (getDebugChar() != '+'); */
+  } while (getDebugChar() != '+');
   
 }
 

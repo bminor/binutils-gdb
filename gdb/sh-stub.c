@@ -439,8 +439,7 @@ getpacket (char *buffer)
 }
 
 
-/* send the packet in buffer.  The host get's one chance to read it.
-   This routine does not wait for a positive acknowledge.  */
+/* send the packet in buffer. */
 
 static void
 putpacket (register char *buffer)

@@ -485,11 +485,6 @@ set_debug_traps()
   for (ht = hard_trap_info; ht->tt && ht->signo; ht++)
     exceptionHandler(ht->tt, trap_low);
 
-  /* In case GDB is started before us, ack any packets (presumably
-     "$?#xx") sitting there.  */
-
-  putDebugChar ('+');
-
   initialized = 1;
 }
 

@@ -129,6 +129,7 @@ static void pa_strcat_registers PARAMS ((char *, int, int, GDB_FILE *));
 static void pa_register_look_aside PARAMS ((char *, int, long *));
 static void pa_print_fp_reg PARAMS ((int));
 static void pa_strcat_fp_reg PARAMS ((int, GDB_FILE *, enum precision_type));
+static void record_text_segment_lowaddr PARAMS ((bfd *, asection *, void *));
 
 typedef struct
   {
@@ -310,6 +311,20 @@ compare_unwind_entries (arg1, arg2)
     return 0;
 }
 
+static CORE_ADDR low_text_segment_address;
+
+static void
+record_text_segment_lowaddr (abfd, section, ignored)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section;
+     PTR ignored ATTRIBUTE_UNUSED;
+{
+  if ((section->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY)
+       == (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
+      && section->vma < low_text_segment_address)
+    low_text_segment_address = section->vma;
+}
+
 static void
 internalize_unwinds (objfile, table, section, entries, size, text_offset)
      struct objfile *objfile;
@@ -325,6 +340,22 @@ internalize_unwinds (objfile, table, section, entries, size, text_offset)
       unsigned long tmp;
       unsigned i;
       char *buf = alloca (size);
+
+      low_text_segment_address = -1;
+
+      /* If addresses are 64 bits wide, then unwinds are supposed to
+	 be segment relative offsets instead of absolute addresses.  */
+      if (TARGET_PTR_BIT == 64)
+	{
+	  bfd_map_over_sections (objfile->obfd,
+				 record_text_segment_lowaddr, (PTR) NULL);
+
+	  /* ?!? Mask off some low bits.  Should this instead subtract
+	     out the lowest section's filepos or something like that?
+	     This looks very hokey to me.  */
+	  low_text_segment_address &= ~0xfff;
+	  text_offset += low_text_segment_address;
+	}
 
       bfd_get_section_contents (objfile->obfd, section, buf, 0, size);
 
@@ -510,6 +541,7 @@ read_unwind_info (objfile)
 		       sizeof (obj_private_data_t));
       obj_private->unwind_info = NULL;
       obj_private->so_info = NULL;
+      obj_private->dp = 0;
 
       objfile->obj_private = (PTR) obj_private;
     }
@@ -764,7 +796,7 @@ rp_saved (pc)
     }
 
   if (u->Save_RP)
-    return -20;
+    return (TARGET_PTR_BIT == 64 ? -16 : -20);
   else if (u->stub_unwind.stub_type != 0)
     {
       switch (u->stub_unwind.stub_type)
@@ -831,7 +863,8 @@ hppa_frame_saved_pc (frame)
      are saved in the exact same order as GDB numbers registers.  How
      convienent.  */
   if (pc_in_interrupt_handler (pc))
-    return read_memory_integer (frame->frame + PC_REGNUM * 4, 4) & ~0x3;
+    return read_memory_integer (frame->frame + PC_REGNUM * 4,
+				TARGET_PTR_BIT / 8) & ~0x3;
 
 #ifdef FRAME_SAVED_PC_IN_SIGTRAMP
   /* Deal with signal handler caller frames too.  */
@@ -860,19 +893,23 @@ hppa_frame_saved_pc (frame)
 	  struct frame_saved_regs saved_regs;
 
 	  get_frame_saved_regs (frame->next, &saved_regs);
-	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4) & 0x2)
+	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
+				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
-	      pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
+	      pc = read_memory_integer (saved_regs.regs[31],
+					TARGET_PTR_BIT / 8) & ~0x3;
 
 	      /* Syscalls are really two frames.  The syscall stub itself
 	         with a return pointer in %rp and the kernel call with
 	         a return pointer in %r31.  We return the %rp variant
 	         if %r31 is the same as frame->pc.  */
 	      if (pc == frame->pc)
-		pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
+		pc = read_memory_integer (saved_regs.regs[RP_REGNUM],
+					  TARGET_PTR_BIT / 8) & ~0x3;
 	    }
 	  else
-	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
+	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM],
+				      TARGET_PTR_BIT / 8) & ~0x3;
 	}
       else
 	pc = read_register (ret_regnum) & ~0x3;
@@ -896,19 +933,23 @@ hppa_frame_saved_pc (frame)
 	  struct frame_saved_regs saved_regs;
 
 	  get_frame_saved_regs (frame->next, &saved_regs);
-	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4) & 0x2)
+	  if (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
+				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
-	      pc = read_memory_integer (saved_regs.regs[31], 4) & ~0x3;
+	      pc = read_memory_integer (saved_regs.regs[31],
+					TARGET_PTR_BIT / 8) & ~0x3;
 
 	      /* Syscalls are really two frames.  The syscall stub itself
 	         with a return pointer in %rp and the kernel call with
 	         a return pointer in %r31.  We return the %rp variant
 	         if %r31 is the same as frame->pc.  */
 	      if (pc == frame->pc)
-		pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
+		pc = read_memory_integer (saved_regs.regs[RP_REGNUM],
+					  TARGET_PTR_BIT / 8) & ~0x3;
 	    }
 	  else
-	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM], 4) & ~0x3;
+	    pc = read_memory_integer (saved_regs.regs[RP_REGNUM],
+				      TARGET_PTR_BIT / 8) & ~0x3;
 	}
       else if (rp_offset == 0)
 	{
@@ -918,7 +959,8 @@ hppa_frame_saved_pc (frame)
       else
 	{
 	  old_pc = pc;
-	  pc = read_memory_integer (frame->frame + rp_offset, 4) & ~0x3;
+	  pc = read_memory_integer (frame->frame + rp_offset,
+				    TARGET_PTR_BIT / 8) & ~0x3;
 	}
     }
 
@@ -1073,7 +1115,8 @@ frame_chain (frame)
      pull the old stack pointer from.  Also see frame_saved_pc for
      code to dig a saved PC out of the save state structure.  */
   if (pc_in_interrupt_handler (frame->pc))
-    frame_base = read_memory_integer (frame->frame + SP_REGNUM * 4, 4);
+    frame_base = read_memory_integer (frame->frame + SP_REGNUM * 4,
+				      TARGET_PTR_BIT / 8);
 #ifdef FRAME_BASE_BEFORE_SIGTRAMP
   else if (frame->signal_handler_caller)
     {
@@ -1107,7 +1150,7 @@ frame_chain (frame)
      The previous frame pointer is found at the top of the current frame.  */
   if (caller_framesize == -1 && my_framesize == -1)
     {
-      return read_memory_integer (frame_base, 4);
+      return read_memory_integer (frame_base, TARGET_PTR_BIT / 8);
     }
   /* Caller has a frame pointer, but callee does not.  This is a little
      more difficult as GCC and HP C lay out locals and callee register save
@@ -1164,7 +1207,7 @@ frame_chain (frame)
 	  && !tmp_frame->signal_handler_caller
 	  && !pc_in_interrupt_handler (tmp_frame->pc))
 	{
-	  return read_memory_integer (tmp_frame->frame, 4);
+	  return read_memory_integer (tmp_frame->frame, TARGET_PTR_BIT / 8);
 	}
       /* %r3 was saved somewhere in the stack.  Dig it out.  */
       else
@@ -1202,7 +1245,8 @@ frame_chain (frame)
 	  /* Abominable hack.  */
 	  if (current_target.to_has_execution == 0
 	      && ((saved_regs.regs[FLAGS_REGNUM]
-		   && (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4)
+		   && (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
+					    TARGET_PTR_BIT / 8)
 		       & 0x2))
 		  || (saved_regs.regs[FLAGS_REGNUM] == 0
 		      && read_register (FLAGS_REGNUM) & 0x2)))
@@ -1210,7 +1254,8 @@ frame_chain (frame)
 	      u = find_unwind_entry (FRAME_SAVED_PC (frame));
 	      if (!u)
 		{
-		  return read_memory_integer (saved_regs.regs[FP_REGNUM], 4);
+		  return read_memory_integer (saved_regs.regs[FP_REGNUM],
+					      TARGET_PTR_BIT / 8);
 		}
 	      else
 		{
@@ -1218,7 +1263,8 @@ frame_chain (frame)
 		}
 	    }
 
-	  return read_memory_integer (saved_regs.regs[FP_REGNUM], 4);
+	  return read_memory_integer (saved_regs.regs[FP_REGNUM],
+				      TARGET_PTR_BIT / 8);
 	}
     }
   else
@@ -1234,7 +1280,8 @@ frame_chain (frame)
       /* Abominable hack.  See above.  */
       if (current_target.to_has_execution == 0
 	  && ((saved_regs.regs[FLAGS_REGNUM]
-	       && (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4)
+	       && (read_memory_integer (saved_regs.regs[FLAGS_REGNUM],
+					TARGET_PTR_BIT / 8)
 		   & 0x2))
 	      || (saved_regs.regs[FLAGS_REGNUM] == 0
 		  && read_register (FLAGS_REGNUM) & 0x2)))
@@ -1242,7 +1289,8 @@ frame_chain (frame)
 	  u = find_unwind_entry (FRAME_SAVED_PC (frame));
 	  if (!u)
 	    {
-	      return read_memory_integer (saved_regs.regs[FP_REGNUM], 4);
+	      return read_memory_integer (saved_regs.regs[FP_REGNUM],
+					  TARGET_PTR_BIT / 8);
 	    }
 	  else
 	    {
@@ -1329,7 +1377,7 @@ push_dummy_frame (inf_status)
 {
   CORE_ADDR sp, pc, pcspace;
   register int regnum;
-  int int_buffer;
+  CORE_ADDR int_buffer;
   double freg_buffer;
 
   /* Oh, what a hack.  If we're trying to perform an inferior call
@@ -1364,20 +1412,28 @@ push_dummy_frame (inf_status)
   /* Space for "arguments"; the RP goes in here. */
   sp = read_register (SP_REGNUM) + 48;
   int_buffer = read_register (RP_REGNUM) | 0x3;
-  write_memory (sp - 20, (char *) &int_buffer, 4);
+
+  /* The 32bit and 64bit ABIs save the return pointer into different
+     stack slots.  */
+  if (REGISTER_SIZE == 8)
+    write_memory (sp - 16, (char *) &int_buffer, REGISTER_SIZE);
+  else
+    write_memory (sp - 20, (char *) &int_buffer, REGISTER_SIZE);
 
   int_buffer = TARGET_READ_FP ();
-  write_memory (sp, (char *) &int_buffer, 4);
+  write_memory (sp, (char *) &int_buffer, REGISTER_SIZE);
 
   write_register (FP_REGNUM, sp);
 
-  sp += 8;
+  sp += 2 * REGISTER_SIZE;
 
   for (regnum = 1; regnum < 32; regnum++)
     if (regnum != RP_REGNUM && regnum != FP_REGNUM)
       sp = push_word (sp, read_register (regnum));
 
-  sp += 4;
+  /* This is not necessary for the 64bit ABI.  In fact it is dangerous.  */
+  if (REGISTER_SIZE != 8)
+    sp += 4;
 
   for (regnum = FP0_REGNUM; regnum < NUM_REGS; regnum++)
     {
@@ -1401,29 +1457,38 @@ find_dummy_frame_regs (frame, frame_saved_regs)
   CORE_ADDR fp = frame->frame;
   int i;
 
-  frame_saved_regs->regs[RP_REGNUM] = (fp - 20) & ~0x3;
-  frame_saved_regs->regs[FP_REGNUM] = fp;
-  frame_saved_regs->regs[1] = fp + 8;
+  /* The 32bit and 64bit ABIs save RP into different locations.  */
+  if (REGISTER_SIZE == 8)
+    frame_saved_regs->regs[RP_REGNUM] = (fp - 16) & ~0x3;
+  else
+    frame_saved_regs->regs[RP_REGNUM] = (fp - 20) & ~0x3;
 
-  for (fp += 12, i = 3; i < 32; i++)
+  frame_saved_regs->regs[FP_REGNUM] = fp;
+
+  frame_saved_regs->regs[1] = fp + (2 * REGISTER_SIZE);
+
+  for (fp += 3 * REGISTER_SIZE, i = 3; i < 32; i++)
     {
       if (i != FP_REGNUM)
 	{
 	  frame_saved_regs->regs[i] = fp;
-	  fp += 4;
+	  fp += REGISTER_SIZE;
 	}
     }
 
-  fp += 4;
+  /* This is not necessary or desirable for the 64bit ABI.  */
+  if (REGISTER_SIZE != 8)
+    fp += 4;
+
   for (i = FP0_REGNUM; i < NUM_REGS; i++, fp += 8)
     frame_saved_regs->regs[i] = fp;
 
   frame_saved_regs->regs[IPSW_REGNUM] = fp;
-  frame_saved_regs->regs[SAR_REGNUM] = fp + 4;
-  frame_saved_regs->regs[PCOQ_HEAD_REGNUM] = fp + 8;
-  frame_saved_regs->regs[PCSQ_HEAD_REGNUM] = fp + 12;
-  frame_saved_regs->regs[PCOQ_TAIL_REGNUM] = fp + 16;
-  frame_saved_regs->regs[PCSQ_TAIL_REGNUM] = fp + 20;
+  frame_saved_regs->regs[SAR_REGNUM] = fp + REGISTER_SIZE;
+  frame_saved_regs->regs[PCOQ_HEAD_REGNUM] = fp + 2 * REGISTER_SIZE;
+  frame_saved_regs->regs[PCSQ_HEAD_REGNUM] = fp + 3 * REGISTER_SIZE;
+  frame_saved_regs->regs[PCOQ_TAIL_REGNUM] = fp + 4 * REGISTER_SIZE;
+  frame_saved_regs->regs[PCSQ_TAIL_REGNUM] = fp + 5 * REGISTER_SIZE;
 }
 
 void
@@ -1445,7 +1510,8 @@ hppa_pop_frame ()
 
   for (regnum = 31; regnum > 0; regnum--)
     if (fsr.regs[regnum])
-      write_register (regnum, read_memory_integer (fsr.regs[regnum], 4));
+      write_register (regnum, read_memory_integer (fsr.regs[regnum],
+		      REGISTER_SIZE));
 
   for (regnum = NUM_REGS - 1; regnum >= FP0_REGNUM; regnum--)
     if (fsr.regs[regnum])
@@ -1456,16 +1522,19 @@ hppa_pop_frame ()
 
   if (fsr.regs[IPSW_REGNUM])
     write_register (IPSW_REGNUM,
-		    read_memory_integer (fsr.regs[IPSW_REGNUM], 4));
+		    read_memory_integer (fsr.regs[IPSW_REGNUM],
+					 REGISTER_SIZE));
 
   if (fsr.regs[SAR_REGNUM])
     write_register (SAR_REGNUM,
-		    read_memory_integer (fsr.regs[SAR_REGNUM], 4));
+		    read_memory_integer (fsr.regs[SAR_REGNUM],
+					 REGISTER_SIZE));
 
   /* If the PC was explicitly saved, then just restore it.  */
   if (fsr.regs[PCOQ_TAIL_REGNUM])
     {
-      npc = read_memory_integer (fsr.regs[PCOQ_TAIL_REGNUM], 4);
+      npc = read_memory_integer (fsr.regs[PCOQ_TAIL_REGNUM],
+				 REGISTER_SIZE);
       write_register (PCOQ_TAIL_REGNUM, npc);
     }
   /* Else use the value in %rp to set the new PC.  */
@@ -1475,7 +1544,7 @@ hppa_pop_frame ()
       write_pc (npc);
     }
 
-  write_register (FP_REGNUM, read_memory_integer (fp, 4));
+  write_register (FP_REGNUM, read_memory_integer (fp, REGISTER_SIZE));
 
   if (fsr.regs[IPSW_REGNUM])	/* call dummy */
     write_register (SP_REGNUM, fp - 48);
@@ -1525,7 +1594,8 @@ restore_pc_queue (fsr)
      struct frame_saved_regs *fsr;
 {
   CORE_ADDR pc = read_pc ();
-  CORE_ADDR new_pc = read_memory_integer (fsr->regs[PCOQ_HEAD_REGNUM], 4);
+  CORE_ADDR new_pc = read_memory_integer (fsr->regs[PCOQ_HEAD_REGNUM],
+					  TARGET_PTR_BIT / 8);
   struct target_waitstatus w;
   int insn_count;
 
@@ -1543,7 +1613,8 @@ restore_pc_queue (fsr)
      So, load up the registers and single step until we are in the
      right place. */
 
-  write_register (21, read_memory_integer (fsr->regs[PCSQ_HEAD_REGNUM], 4));
+  write_register (21, read_memory_integer (fsr->regs[PCSQ_HEAD_REGNUM],
+					   REGISTER_SIZE));
   write_register (22, new_pc);
 
   for (insn_count = 0; insn_count < 3; insn_count++)
@@ -1572,7 +1643,20 @@ restore_pc_queue (fsr)
   return 1;
 }
 
-#if 0
+/* This function pushes a stack frame with arguments as part of the
+   inferior function calling mechanism.
+
+   For PAs the stack always grows to higher addresses.  However the arguments
+   may grow to either higher or lower addresses depending on which ABI is
+   currently in use.
+
+   We simply allocate the appropriate amount of stack space and put
+   arguments into their proper slots.  The call dummy code will copy
+   arguments into registers as needed by the ABI.
+
+   Note for the PA64 ABI we load up the argument pointer since the caller
+   must provide the argument pointer to the callee.  */
+   
 CORE_ADDR
 hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
      int nargs;
@@ -1583,115 +1667,66 @@ hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
 {
   /* array of arguments' offsets */
   int *offset = (int *) alloca (nargs * sizeof (int));
-  int cum = 0;
-  int i, alignment;
 
-  for (i = 0; i < nargs; i++)
-    {
-      int x = 0;
-      /* cum is the sum of the lengths in bytes of
-         the arguments seen so far */
-      cum += TYPE_LENGTH (VALUE_TYPE (args[i]));
-
-      /* value must go at proper alignment. Assume alignment is a
-         power of two. */
-      alignment = hppa_alignof (VALUE_TYPE (args[i]));
-
-      if (cum % alignment)
-	cum = (cum + alignment) & -alignment;
-      offset[i] = -cum;
-
-    }
-  sp += max ((cum + 7) & -8, 16);
-
-  for (i = 0; i < nargs; i++)
-    write_memory (sp + offset[i], VALUE_CONTENTS (args[i]),
-		  TYPE_LENGTH (VALUE_TYPE (args[i])));
-
-  if (struct_return)
-    write_register (28, struct_addr);
-  return sp + 32;
-}
-#endif
-
-/* elz: I am rewriting this function, because the one above is a very 
-   obscure piece of code.
-   This function pushes the arguments on the stack. The stack grows up
-   on the PA. 
-   Each argument goes in one (or more) word (4 bytes) on the stack.
-   The first four words for the args must be allocated, even if they 
-   are not used. 
-   The 'topmost' arg is arg0, the 'bottom-most' is arg3. (if you think of 
-   them as 1 word long).
-   Below these there can be any number of arguments, as needed by the function.
-   If an arg is bigger than one word, it will be written on the stack 
-   occupying as many words as needed. Args that are bigger than 64bits
-   are not copied on the stack, a pointer is passed instead.
-
-   On top of the arg0 word there are other 8 words (32bytes) which are used
-   for other purposes */
-
-CORE_ADDR
-hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     int struct_return;
-     CORE_ADDR struct_addr;
-{
-  /* array of arguments' offsets */
-  int *offset = (int *) alloca (nargs * sizeof (int));
-  /* array of arguments' lengths: real lengths in bytes, not aligned to word size */
+  /* array of arguments' lengths: real lengths in bytes, not aligned to
+     word size */
   int *lengths = (int *) alloca (nargs * sizeof (int));
 
-  int bytes_reserved;		/* this is the number of bytes on the stack occupied by an
-				   argument. This will be always a multiple of 4 */
+  /* The value of SP as it was passed into this function after
+     aligning.  */
+  CORE_ADDR orig_sp = STACK_ALIGN (sp);
 
-  int cum_bytes_reserved = 0;	/* this is the total number of bytes reserved by the args
-				   seen so far. It is a multiple of 4 always */
-  int cum_bytes_aligned = 0;	/* same as above, but aligned on 8 bytes */
+  /* The number of stack bytes occupied by the current argument.  */
+  int bytes_reserved;
+
+  /* The total number of bytes reserved for the arguments.  */
+  int cum_bytes_reserved = 0;
+
+  /* Similarly, but aligned.  */
+  int cum_bytes_aligned = 0;
   int i;
 
-  /* When an arg does not occupy a whole word, for instance in bitfields:
-     if the arg is x bits (0<x<32), it must be written
-     starting from the (x-1)-th position  down until the 0-th position. 
-     It is enough to align it to the word. */
-  /* if an arg occupies 8 bytes, it must be aligned on the 64-bits 
-     high order word in odd arg word. */
-  /* if an arg is larger than 64 bits, we need to pass a pointer to it, and
-     copy the actual value on the stack, so that the callee can play with it.
-     This is taken care of in valops.c in the call_function_by_hand function.
-     The argument that is received in this function here has already be converted
-     to a pointer to whatever is needed, so that it just can be pushed
-     as a word argument */
-
+  /* Iterate over each argument provided by the user.  */
   for (i = 0; i < nargs; i++)
     {
-
       lengths[i] = TYPE_LENGTH (VALUE_TYPE (args[i]));
 
-      if (lengths[i] % 4)
-	bytes_reserved = (lengths[i] / 4) * 4 + 4;
-      else
-	bytes_reserved = lengths[i];
+      /* Align the size of the argument to the word size for this
+	 target.  */
+      bytes_reserved = (lengths[i] + REGISTER_SIZE - 1) & -REGISTER_SIZE;
 
+#ifdef ARGS_GROW_DOWNWARD
       offset[i] = cum_bytes_reserved + lengths[i];
+#else
+      /* If the arguments grow towards lower addresses, then we want
+	 offset[i] to point to the start of the argument rather than
+	 the end of the argument.  */
+      offset[i] = cum_bytes_reserved;
 
-      if ((bytes_reserved == 8) && (offset[i] % 8))	/* if 64-bit arg is not 64 bit aligned */
+      offset[i] += (lengths[i] < REGISTER_SIZE
+		    ? REGISTER_SIZE - lengths[i] : 0);
+#endif
+
+      /* If the argument is a double word argument, then it needs to be
+	 double word aligned. 
+
+	 ?!? I do not think this code is correct when !ARGS_GROW_DOWNWAR.  */
+      if ((bytes_reserved == 2 * REGISTER_SIZE)
+	   && (offset[i] % 2 * REGISTER_SIZE))
 	{
 	  int new_offset = 0;
-	  /* bytes_reserved is already aligned to the word, so we put it at one word
-	     more down the stack. This will leave one empty word on the
-	     stack, and one unused register. This is OK, see the calling
-	     convention doc */
-	  /* the offset may have to be moved to the corresponding position
-	     one word down the stack, to maintain 
-	     alignment. */
-	  new_offset = (offset[i] / 8) * 8 + 8;
-	  if ((new_offset - offset[i]) >= 4)
+	  /* BYTES_RESERVED is already aligned to the word, so we put
+	     the argument at one word more down the stack.
+
+	     This will leave one empty word on the stack, and one unused
+	     register as mandated by the ABI.  */
+	  new_offset = ((offset[i] + 2 * REGISTER_SIZE - 1)
+			& -(2 * REGISTER_SIZE));
+
+	  if ((new_offset - offset[i]) >= 2 * REGISTER_SIZE)
 	    {
-	      bytes_reserved += 4;
-	      offset[i] += 4;
+	      bytes_reserved += REGISTER_SIZE;
+	      offset[i] += REGISTER_SIZE;
 	    }
 	}
 
@@ -1699,22 +1734,52 @@ hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
 
     }
 
-  /* now move up the sp to reserve at least 4 words required for the args,
-     or more than this if needed */
-  /* wee also need to keep the sp aligned to 8 bytes */
-  cum_bytes_aligned = STACK_ALIGN (cum_bytes_reserved);
-  sp += max (cum_bytes_aligned, 16);
+  /* CUM_BYTES_RESERVED already accounts for all the arguments
+     passed by the user.  However, the ABIs mandate minimum stack space
+     allocations for outgoing arguments.
 
-  /* now write each of the args at the proper offset down the stack */
+     The ABIs also mandate minimum stack alignments which we must
+     preserve.  */
+  cum_bytes_aligned = STACK_ALIGN (cum_bytes_reserved);
+  sp += max (cum_bytes_aligned, REG_PARM_STACK_SPACE);
+
+  /* Now write each of the args at the proper offset down the stack.
+
+     The two ABIs write arguments in different directions using different
+     starting points.  What fun. 
+
+     ?!? We need to promote values to a full register instead of skipping
+     words in the stack.  */
+#ifndef ARGS_GROW_DOWNWARD
+  for (i = 0; i < nargs; i++)
+    write_memory (orig_sp + offset[i], VALUE_CONTENTS (args[i]), lengths[i]);
+#else
   for (i = 0; i < nargs; i++)
     write_memory (sp - offset[i], VALUE_CONTENTS (args[i]), lengths[i]);
+#endif
 
-
-  /* if a structure has to be returned, set up register 28 to hold its address */
+  /* If a structure has to be returned, set up register 28 to hold its
+     address */
   if (struct_return)
     write_register (28, struct_addr);
 
-  /* the stack will have other 8 words on top of the args */
+#ifndef ARGS_GROW_DOWNWARD
+  /* For the PA64 we must pass a pointer to the outgoing argument list.
+     The ABI mandates that the pointer should point to the first byte of
+     storage beyond the register flushback area.
+
+     However, the call dummy expects the outgoing argument pointer to
+     be passed in register %r4.  */
+  write_register (4, orig_sp + REG_PARM_STACK_SPACE);
+
+  /* ?!? This needs further work.  We need to set up the global data
+     pointer for this procedure.  This assumes the same global pointer
+     for every procedure.   The call dummy expects the dp value to
+     be passed in register %r6.  */
+  write_register (6, read_register (27));
+#endif
+  
+  /* The stack will have 32 bytes of additional space for a frame marker.  */
   return sp + 32;
 }
 
@@ -1889,6 +1954,103 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
      use a PLABEL instead of an import stub.  */
   int using_gcc_plt_call = 1;
 
+#ifdef GDB_TARGET_IS_HPPA_20W
+  /* We currently use completely different code for the PA2.0W inferior
+     function call sequences.  This needs to be cleaned up.  */
+  {
+    CORE_ADDR pcsqh, pcsqt, pcoqh, pcoqt, sr5;
+    struct target_waitstatus w;
+    int inst1, inst2;
+    char buf[4];
+    int status;
+    struct objfile *objfile;
+
+    /* We can not modify the PC space queues directly, so we start
+       up the inferior and execute a couple instructions to set the
+       space queues so that they point to the call dummy in the stack.  */
+    pcsqh = read_register (PCSQ_HEAD_REGNUM);
+    sr5 = read_register (SR5_REGNUM);
+    if (1)
+      {
+        pcoqh = read_register (PCOQ_HEAD_REGNUM);
+        pcoqt = read_register (PCOQ_TAIL_REGNUM);
+        if (target_read_memory (pcoqh, buf, 4) != 0)
+          error ("Couldn't modify space queue\n");
+        inst1 = extract_unsigned_integer (buf, 4);
+
+        if (target_read_memory (pcoqt, buf, 4) != 0)
+          error ("Couldn't modify space queue\n");
+        inst2 = extract_unsigned_integer (buf, 4);
+
+        /* BVE (r1) */
+        *((int *) buf) = 0xe820d000;
+        if (target_write_memory (pcoqh, buf, 4) != 0)
+          error ("Couldn't modify space queue\n");
+
+        /* NOP */
+        *((int *) buf) = 0x08000240;
+        if (target_write_memory (pcoqt, buf, 4) != 0)
+          {
+            *((int *) buf) = inst1;
+            target_write_memory (pcoqh, buf, 4);
+            error ("Couldn't modify space queue\n");
+          }
+
+        write_register (1, pc);
+
+        /* Single step twice, the BVE instruction will set the space queue
+	   such that it points to the PC value written immediately above
+	   (ie the call dummy).  */
+        resume (1, 0);
+        target_wait (inferior_pid, &w);
+        resume (1, 0);
+        target_wait (inferior_pid, &w);
+
+	/* Restore the two instructions at the old PC locations.  */
+        *((int *) buf) = inst1;
+        target_write_memory (pcoqh, buf, 4);
+        *((int *) buf) = inst2;
+        target_write_memory (pcoqt, buf, 4);
+      }
+
+    /* The call dummy wants the ultimate destination address initially
+       in register %r5.  */
+    write_register (5, fun);
+
+    /* We need to see if this objfile has a different DP value than our
+       own (it could be a shared library for example.  */
+    ALL_OBJFILES (objfile)
+      {
+	struct obj_section *s;
+	obj_private_data_t *obj_private;
+
+	/* See if FUN is in any section within this shared library.  */
+	for (s = objfile->sections; s < objfile->sections_end; s++)
+	  if (s->addr <= fun && fun < s->endaddr)
+	    break;
+
+        if (s >= objfile->sections_end)
+	  continue;
+
+	obj_private = (obj_private_data_t *) objfile->obj_private;
+	
+	/* The DP value may be different for each objfile.  But within an
+	   objfile each function uses the same dp value.  Thus we do not need
+	   to grope around the opd section looking for dp values.
+
+	   ?!? This is not strictly correct since we may be in a shared library
+	   and want to call back into the main program.  To make that case
+	   work correctly we need to set obj_private->dp for the main program's
+	   objfile, then remove this conditional.  */
+	if (obj_private->dp)
+	  write_register (27, obj_private->dp);
+	break;
+      }
+    return pc;
+  }
+#endif
+
+#ifndef GDB_TARGET_IS_HPPA_20W
   /* Prefer __gcc_plt_call over the HP supplied routine because
      __gcc_plt_call works for any number of arguments.  */
   trampoline = NULL;
@@ -1909,11 +2071,13 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
       /* Get the GOT/DP value for the target function.  It's
          at *(fun+4).  Note the call dummy is *NOT* allowed to
          trash %r19 before calling the target function.  */
-      write_register (19, read_memory_integer ((fun & ~0x3) + 4, 4));
+      write_register (19, read_memory_integer ((fun & ~0x3) + 4,
+		      REGISTER_SIZE));
 
       /* Now get the real address for the function we are calling, it's
          at *fun.  */
-      fun = (CORE_ADDR) read_memory_integer (fun & ~0x3, 4);
+      fun = (CORE_ADDR) read_memory_integer (fun & ~0x3,
+					     TARGET_PTR_BIT / 8);
     }
   else
     {
@@ -2044,7 +2208,6 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 	}
     }
 
-#ifndef GDB_TARGET_IS_HPPA_20W
   /* Store upper 21 bits of function address into ldil.  fun will either be
      the final target (most cases) or __d_plt_call when calling into a shared
      library and __gcc_plt_call is not available.  */
@@ -2062,7 +2225,6 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
      deposit_14 (fun & MASK_11,
 		 extract_unsigned_integer (&dummy[FUNC_LDO_OFFSET],
 					   INSTRUCTION_SIZE)));
-#endif /* GDB_TARGET_IS_HPPA_20W */
 #ifdef SR4EXPORT_LDIL_OFFSET
 
   {
@@ -2119,6 +2281,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 #endif
   else
     return dyncall_addr;
+#endif
 }
 
 
@@ -2790,17 +2953,6 @@ in_solib_return_trampoline (pc, name)
    calling an argument relocation stub.  It even handles some stubs
    used in dynamic executables.  */
 
-#if 0
-CORE_ADDR
-skip_trampoline_code (pc, name)
-     CORE_ADDR pc;
-     char *name;
-{
-  return find_solib_trampoline_target (pc);
-}
-
-#endif
-
 CORE_ADDR
 skip_trampoline_code (pc, name)
      CORE_ADDR pc;
@@ -2855,12 +3007,12 @@ skip_trampoline_code (pc, name)
          the PLT entry for this function, not the address of the function
          itself.  Bit 31 has meaning too, but only for MPE.  */
       if (pc & 0x2)
-	pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, 4);
+	pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, TARGET_PTR_BIT / 8);
     }
   if (pc == dyncall_external)
     {
       pc = (CORE_ADDR) read_register (22);
-      pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, 4);
+      pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, TARGET_PTR_BIT / 8);
     }
   else if (pc == sr4export)
     pc = (CORE_ADDR) (read_register (22));
@@ -3052,7 +3204,7 @@ skip_trampoline_code (pc, name)
       else if ((curr_inst & 0xffe0f000) == 0xe840d000)
 	{
 	  return (read_memory_integer
-		  (read_register (SP_REGNUM) - 24, 4)) & ~0x3;
+		  (read_register (SP_REGNUM) - 24, TARGET_PTR_BIT / 8)) & ~0x3;
 	}
 
       /* What about be,n 0(sr0,%rp)?  It's just another way we return to
@@ -3064,7 +3216,7 @@ skip_trampoline_code (pc, name)
 	     I guess we could check for the previous instruction being
 	     mtsp %r1,%sr0 if we want to do sanity checking.  */
 	  return (read_memory_integer
-		  (read_register (SP_REGNUM) - 24, 4)) & ~0x3;
+		  (read_register (SP_REGNUM) - 24, TARGET_PTR_BIT / 8)) & ~0x3;
 	}
 
       /* Haven't found the branch yet, but we're still in the stub.
@@ -3531,9 +3683,20 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
      instead, let find_dummy_frame_regs fill in the correct offsets
      for the saved registers.  */
   if ((frame_info->pc >= frame_info->frame
-       && frame_info->pc <= (frame_info->frame + CALL_DUMMY_LENGTH
-			     + 32 * 4 + (NUM_REGS - FP0_REGNUM) * 8
-			     + 6 * 4)))
+       && frame_info->pc <= (frame_info->frame
+			     /* A call dummy is sized in words, but it is
+				actually a series of instructions.  Account
+				for that scaling factor.  */
+			     + ((REGISTER_SIZE / INSTRUCTION_SIZE)
+				* CALL_DUMMY_LENGTH)
+			     /* Similarly we have to account for 64bit
+				wide register saves.  */
+			     + (32 * REGISTER_SIZE)
+			     /* We always consider FP regs 8 bytes long.  */
+			     + (NUM_REGS - FP0_REGNUM) * 8
+			     /* Similarly we have to account for 64bit
+				wide register saves.  */
+			     + (6 * REGISTER_SIZE))))
     find_dummy_frame_regs (frame_info, frame_saved_regs);
 
   /* Interrupt handlers are special too.  They lay out the register
@@ -3545,7 +3708,8 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
 	  /* SP is a little special.  */
 	  if (i == SP_REGNUM)
 	    frame_saved_regs->regs[SP_REGNUM]
-	      = read_memory_integer (frame_info->frame + SP_REGNUM * 4, 4);
+	      = read_memory_integer (frame_info->frame + SP_REGNUM * 4,
+				     TARGET_PTR_BIT / 8);
 	  else
 	    frame_saved_regs->regs[i] = frame_info->frame + i * 4;
 	}
@@ -3882,6 +4046,7 @@ initialize_hp_cxx_exception_support ()
       return 0;
     }
 
+#ifndef GDB_TARGET_IS_HPPA_20W
   /* Check whether the executable is dynamically linked or archive bound */
   /* With an archive-bound executable we can use the raw addresses we find
      for the callback function, etc. without modification. For an executable
@@ -3925,6 +4090,7 @@ initialize_hp_cxx_exception_support ()
     }
   else
     exception_catchpoints_are_fragile = 0;
+#endif
 
   /* Now, look for the breakpointable routine in end.o */
   /* This should also be available in the SOM symbol dict. if end.o linked in */

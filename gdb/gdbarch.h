@@ -26,7 +26,6 @@
 #ifdef __STDC__
 struct frame_info;
 struct value;
-enum lval_type;
 #endif
 
 

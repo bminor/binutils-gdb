@@ -100,6 +100,7 @@ static void remote_close PARAMS ((int quitting));
 static void remote_store_registers PARAMS ((int regno));
 
 static void remote_mourn PARAMS ((void));
+static void remote_async_mourn PARAMS ((void));
 
 static void extended_remote_restart PARAMS ((void));
 
@@ -3794,6 +3795,12 @@ remote_mourn ()
 }
 
 static void
+remote_async_mourn ()
+{
+  remote_mourn_1 (&remote_async_ops);
+}
+
+static void
 extended_remote_mourn ()
 {
   /* We do _not_ want to mourn the target like this; this will
@@ -5068,7 +5075,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_remove_breakpoint = remote_remove_breakpoint;
   remote_async_ops.to_kill = remote_async_kill;
   remote_async_ops.to_load = generic_load;
-  remote_async_ops.to_mourn_inferior = remote_mourn;
+  remote_async_ops.to_mourn_inferior = remote_async_mourn;
   remote_async_ops.to_thread_alive = remote_thread_alive;
   remote_async_ops.to_find_new_threads = remote_threads_info;
   remote_async_ops.to_stop = remote_stop;

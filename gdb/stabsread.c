@@ -3724,7 +3724,8 @@ read_baseclasses (fip, pp, type, objfile)
 	  {
 	    static struct complaint msg =
 	    {
-	      "Unknown visibility `%c' for baseclass", 0, 0};
+	      "Unknown visibility `%c' for baseclass", 0, 0
+	    };
 	    complain (&msg, new->visibility);
 	    new->visibility = VISIBILITY_PUBLIC;
 	  }

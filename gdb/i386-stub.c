@@ -116,8 +116,6 @@ static char initialized;  /* boolean flag. != 0 means we've been initialized */
 int     remote_debug;
 /*  debug >  0 prints ill-formed commands in valid packets & checksum errors */
 
-void waitabit();
-
 static const char hexchars[]="0123456789abcdef";
 
 /* Number of registers.  */
@@ -893,12 +891,7 @@ int exception;
       exceptionHook    = remcomHandler;
   }
 
-  /* In case GDB is started before us, ack any packets (presumably
-     "$?#xx") sitting there.  */
-  putDebugChar ('+');
-
   initialized = 1;
-
 }
 
 /* This function will generate a breakpoint exception.  It is used at the
@@ -909,19 +902,5 @@ int exception;
 void breakpoint()
 {
   if (initialized)
-#if 0
-    handle_exception(3);
-#else
     BREAKPOINT();
-#endif
-  waitabit();
-}
-
-int waitlimit = 1000000;
-
-void
-waitabit()
-{
-  int i;
-  for (i = 0; i < waitlimit; i++) ;
 }

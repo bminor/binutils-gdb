@@ -536,9 +536,10 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 
   /* Convert addr into an offset rather than an absolute address.
      We find the lowest address of a loaded segment in the objfile,
-     and assume that <addr> is where that got loaded.  Due to historical
-     precedent, we warn if that doesn't happen to be a text segment.  */
+     and assume that <addr> is where that got loaded.
 
+     We no longer warn if the lowest section is not a text segment (as
+     happens for the PA64 port.  */
   if (mainline)
     {
       addr = 0;			/* No offset from objfile addresses.  */
@@ -553,13 +554,6 @@ syms_from_objfile (objfile, addr, mainline, verbo)
       if (lowest_sect == NULL)
 	warning ("no loadable sections found in added symbol-file %s",
 		 objfile->name);
-      else if ((bfd_get_section_flags (objfile->obfd, lowest_sect) & SEC_CODE)
-	       == 0)
-	/* FIXME-32x64--assumes bfd_vma fits in long.  */
-	warning ("Lowest section in %s is %s at 0x%lx",
-		 objfile->name,
-		 bfd_section_name (objfile->obfd, lowest_sect),
-		 (unsigned long) bfd_section_vma (objfile->obfd, lowest_sect));
 
       if (lowest_sect)
 	addr -= bfd_section_vma (objfile->obfd, lowest_sect);

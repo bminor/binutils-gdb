@@ -24,7 +24,30 @@
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS
 
+/* Returns the number of hardware watchpoints of type TYPE that we can
+   set.  Value is positive if we can set CNT watchpoints, zero if
+   setting watchpoints of type TYPE is not supported, and negative if
+   CNT is more than the maximum number of watchpoints of type TYPE
+   that we can support.  TYPE is one of bp_hardware_watchpoint,
+   bp_read_watchpoint, bp_write_watchpoint, or bp_hardware_breakpoint.
+   CNT is the number of such watchpoints used so far (including this
+   one).  OTHERTYPE is non-zero if other types of watchpoints are
+   currently enabled.
+
+   We always return 1 here because we don't have enough information
+   about possible overlap of addresses that they want to watch.  As
+   an extreme example, consider the case where all the watchpoints
+   watch the same address and the same region length: then we can
+   handle a virtually unlimited number of watchpoints, due to debug
+   register sharing implemented via reference counts in go32-nat.c.  */
+
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) 1
+
+/* Returns non-zero if we can use hardware watchpoints to watch a region
+   whose address is ADDR and whose length is LEN.  */
+
+#define TARGET_REGION_OK_FOR_HW_WATCHPOINT(addr,len) \
+	go32_region_ok_for_watchpoint(addr,len)
 
 /* After a watchpoint trap, the PC points to the instruction after the
    one that caused the trap.  Therefore we don't need to step over it.
@@ -33,15 +56,18 @@
 #define HAVE_CONTINUABLE_WATCHPOINT
 
 #define STOPPED_BY_WATCHPOINT(W)  \
-  go32_stopped_by_watchpoint (inferior_pid)
+  go32_stopped_by_watchpoint (inferior_pid, 0)
+
+#define target_stopped_data_address() \
+  go32_stopped_by_watchpoint (inferior_pid, 1)
 
 /* Use these macros for watchpoint insertion/removal.  */
 
 #define target_insert_watchpoint(addr, len, type)  \
-  go32_insert_watchpoint (inferior_pid, addr, len, 2)
+  go32_insert_watchpoint (inferior_pid, addr, len, type)
 
 #define target_remove_watchpoint(addr, len, type)  \
-  go32_remove_watchpoint (inferior_pid, addr, len)
+  go32_remove_watchpoint (inferior_pid, addr, len, type)
 
 #define target_insert_hw_breakpoint(addr, shadow)  \
   go32_insert_hw_breakpoint(addr, shadow)

@@ -34,7 +34,7 @@
 
 /* Prototypes for exported functions. */
 
-void _initialize_blockframe PARAMS ((void));
+void _initialize_blockframe (void);
 
 /* A default FRAME_CHAIN_VALID, in the form that is suitable for most
    targets.  If FRAME_CHAIN_VALID returns zero it means that the given
@@ -286,11 +286,6 @@ reinit_frame_cache ()
     }
 }
 
-/* If a machine allows frameless functions, it should define a macro
-   FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) in param.h.  FI is the struct
-   frame_info for the frame, and FRAMELESS should be set to nonzero
-   if it represents a frameless function invocation.  */
-
 /* Return nonzero if the function for this frame lacks a prologue.  Many
    machines can define FRAMELESS_FUNCTION_INVOCATION to just call this
    function.  */
@@ -300,14 +295,15 @@ frameless_look_for_prologue (frame)
      struct frame_info *frame;
 {
   CORE_ADDR func_start, after_prologue;
+
   func_start = get_pc_function_start (frame->pc);
   if (func_start)
     {
       func_start += FUNCTION_START_OFFSET;
       after_prologue = func_start;
 #ifdef SKIP_PROLOGUE_FRAMELESS_P
-      /* This is faster, since only care whether there *is* a prologue,
-         not how long it is.  */
+      /* This is faster, since only care whether there *is* a
+         prologue, not how long it is.  */
       after_prologue = SKIP_PROLOGUE_FRAMELESS_P (after_prologue);
 #else
       after_prologue = SKIP_PROLOGUE (after_prologue);
@@ -315,10 +311,10 @@ frameless_look_for_prologue (frame)
       return after_prologue == func_start;
     }
   else if (frame->pc == 0)
-    /* A frame with a zero PC is usually created by dereferencing a NULL
-       function pointer, normally causing an immediate core dump of the
-       inferior. Mark function as frameless, as the inferior has no chance
-       of setting up a stack frame.  */
+    /* A frame with a zero PC is usually created by dereferencing a
+       NULL function pointer, normally causing an immediate core dump
+       of the inferior. Mark function as frameless, as the inferior
+       has no chance of setting up a stack frame.  */
     return 1;
   else
     /* If we can't find the start of the function, we don't really
@@ -1239,7 +1235,7 @@ generic_save_dummy_frame_tos (sp)
 
 void
 generic_pop_current_frame (pop)
-     void (*pop) PARAMS ((struct frame_info * frame));
+     void (*pop) (struct frame_info * frame);
 {
   struct frame_info *frame = get_current_frame ();
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
@@ -1401,7 +1397,7 @@ generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 }
 
 void
-_initialize_blockframe ()
+_initialize_blockframe (void)
 {
   obstack_init (&frame_cache_obstack);
 }

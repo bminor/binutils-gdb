@@ -1,3 +1,21 @@
+1999-08-20  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.texinfo: Remove remaining "HPPA" conditionals, rewrite
+	surrounding text to fit HP-UX bits into general info.
+	(HPPA-cfg.texi): Remove, no longer useful.
+
+	* gdb.texinfo: Remove explicit links from @node lines, remove
+	HP-added "Detailed Node Listing" from main menu which confuses
+	things.
+
+	From Dmitry Sivachenko <dima@Chg.RU>:
+	* gdb.texinfo: Use @value{GDBN} instead of plain GDB, fix grouping
+ 	in description of `set environment'.
+
+1999-08-17  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbint.texinfo: Update coding standard to allow pure ANSI/ISO C.
+
 1999-08-12  Ben Elliston  <bje@cygnus.com>
 
 	* gdbint.texinfo (Breakpoint Handling): Add missing words.

@@ -1,6 +1,5 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998
-   Free Software Foundation, Inc.
+   Copyright 1988-1999, Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 
@@ -2032,10 +2031,16 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	    {
 	      /* This is a floating point value that fits entirely
 	         in a single register.  */
+	      /* On 32 bit ABI's the float_argreg is further adjusted
+                 above to ensure that it is even register aligned. */
 	      CORE_ADDR regval = extract_address (val, len);
 	      write_register (float_argreg++, regval);
 	      if (!MIPS_EABI)
 		{
+		  /* CAGNEY: 32 bit MIPS ABI's always reserve two FP
+                     registers for each argument.  The below is (my
+                     guess) to ensure that the corresponding integer
+                     register has reserved the same space. */
 		  write_register (argreg, regval);
 		  argreg += FP_REGISTER_DOUBLE ? 1 : 2;
 		}

@@ -131,6 +131,8 @@ proc do_attach_tests {} {
       # This response is expected on HP-UX 11.0 (i.e., ttrace-based).
       -re "Attaching to.*, process 0 failed.*Hint.*$gdb_prompt $"\
                       {pass "attach to nonexistent process is prohibited"}
+      -re "Attaching to.*, process 0.*denied.*$gdb_prompt $"\
+                      {pass "attach to nonexistent process is prohibited"}
       -re "$gdb_prompt $" {fail "attach to nonexistent process is prohibited"}
       timeout         {fail "(timeout) attach to nonexistent process is prohibited"}
    }

@@ -311,7 +311,7 @@ gdb_test "tbreak 1241" \
 
 send_gdb  "continue\n"
 gdb_expect {
- -re ".*main \\(\\) at .*call-ar-st.c:1241\r\n1241\t\[ \]+sum_array_print\\(10, \\*list1, \\*list2, \\*list3, \\*list4\\);.*$gdb_prompt $" {
+ -re ".*main \\(\\) at .*call-ar-st.c:1241\r\n1241\[\t \]+sum_array_print\\(10, \\*list1, \\*list2, \\*list3, \\*list4\\);.*$gdb_prompt $" {
                    pass "continue to 1241"}
  -re ".*$gdb_prompt $" { fail "continue to 1241"}
  timeout           { fail "(timeout) continue to 1241"}
@@ -424,18 +424,24 @@ if { [istarget "hppa*-*-hpux*"] } {
     }
 } else {
 
-    # We can't just assume that a "step" will get us into print_long_arg_list here,either.
+    # We can't just assume that a "step" will get us into
+    # print_long_arg_list here,either.
     gdb_test "tbreak print_long_arg_list" \
 	"Breakpoint .* file .*call-ar-st.c, line .*" \
 	"tbreak in print_long_arg_list after stepping into memcpy"
+    # The short match case below handles cases where a buffer
+    # overflows or something, and expect can't deal with the full
+    # line.  Perhaps a more elegant solution exists... -sts 1999-08-17
     send_gdb "continue\n"
     if {![target_info exists gdb,skip_float_tests]} {
 	gdb_expect {
-	    -re ".*print_long_arg_list \\(a=22.219999999999999, b=33.332999999999998, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}, five_char=\{ch1 = 108 \'l\', ch2 = 109 \'m\', ch3 = 110 \'n\', ch4 = 111 \'o\', ch5 = 112 \'p\'\}, int_char_combo=\{int1 = 123, ch1 = 122 \'z\'\}, d1=\{double1 = 10.5\}, d2=\{double1 = -3.3399999999999999\}, d3=\{double1 = 675.09123\}, f1=\{float1 = 45.2340012, float2 = 43.5999985\}, f2=\{float1 = 78.0100021, float2 = 122.099998\}, f3=\{float1 = -1232.34497, float2 = -199.210007\}\\) at ${srcdir}/${subdir}/${srcfile}:992\[\r\n\]+992\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {pass "step into print_long_arg_list"}
+	    -re ".*print_long_arg_list \\(a=22.219999999999999, b=33.332999999999998, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}, five_char=\{ch1 = 108 \'l\', ch2 = 109 \'m\', ch3 = 110 \'n\', ch4 = 111 \'o\', ch5 = 112 \'p\'\}, int_char_combo=\{int1 = 123, ch1 = 122 \'z\'\}, d1=\{double1 = 10.5\}, d2=\{double1 = -3.3399999999999999\}, d3=\{double1 = 675.09123\}, f1=\{float1 = 45.2340012, float2 = 43.5999985\}, f2=\{float1 = 78.0100021, float2 = 122.099998\}, f3=\{float1 = -1232.34497, float2 = -199.210007\}\\) at ${srcdir}/${subdir}/${srcfile}:992\[\r\n\]+992\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" { pass "step into print_long_arg_list" }
+	    -re ".*print_long_arg_list.*\\(a=22.219999999999999, b=33.332999999999998, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}.*\\) at ${srcdir}/${subdir}/${srcfile}:992\[\r\n\]+992\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {pass "step into print_long_arg_list (short match)"}
 	    -re ".*$gdb_prompt $" { fail "step into print_long_arg_list" }
 	    timeout { fail "step into print_long_arg_list (timeout)" }
 	}
     } else {
+	# If skipping float tests, don't expect anything in arg list.
 	gdb_expect {
 	    -re ".*print_long_arg_list \\(.*\\).*$gdb_prompt $" { pass "step into print_long_arg_list" }
 	    -re ".*$gdb_prompt $" { fail "step into print_long_arg_list" }
@@ -444,16 +450,23 @@ if { [istarget "hppa*-*-hpux*"] } {
     }
 }
 
+set ws "\[\n\r\t \]+"
+
 #call print_small_structs(struct1, struct2, struct3, struct4, flags, flags_combo, three_char, five_char, int_char_combo, d1, d2, d3, f1, f2, f3)
 if {![target_info exists gdb,skip_float_tests]} {
-  send_gdb "print print_small_structs(struct1, struct2, struct3, struct4, flags, flags_combo, three_char, five_char, int_char_combo, d1, d2, d3, f1, f2, f3)\n"
-  gdb_expect {
-    -re ".*alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+ch1: y\tch2: n\[\t\r\n \]+Contents of three_char_t:\[\t\r\n \]+a\tb\tc\[\t\r\n \]+Contents of five_char_t:\[\t\r\n \]+l\tm\tn\to\tp\[\t\r\n \]+Contents of int_char_combo_t:\[\t\r\n \]+123.*z\[\t\r\n \]+Sum of the 4 struct values and seed :\[\t\r\n \]+52\[\t\r\n \]+Contents of struct1:\[\t\r\n \]+6.*0\[\t\r\n \]+Contents of struct2:\[\t\r\n \]+10.*0\[\t\r\n \]+Contents of struct3:\[\t\r\n \]+12.*0\[\t\r\n \]+Contents of one_double_t:\[\t\r\n \]+10.500000\[\t\r\n \]+Contents of one_double_t:\[\t\r\n \]+-3.340000\[\t\r\n \]+Contents of one_double_t:\[\t\r\n \]+675.091230\[\t\r\n \]+Contents of two_floats_t:\[\t\r\n \]+45.234001.*43.599998\[\t\r\n \]+Contents of two_floats_t:\[\t\r\n \]+78.010002.*122.099998\[\t\r\n \]+Contents of two_floats_t:\[\t\r\n \]+-1232.344971.*-199.210007\[\t\r\n \]+.*$gdb_prompt $" {
-      pass "print print_small_structs from print_long_arg_list "
+    # On Solaris, some of the args are passed by ref, others by value,
+    # and GDB gets confused and says "Invalid cast" because it thinks
+    # it has to cast the structure into a pointer to structure.  A real
+    # GDB bug, probably for all Sparc configs, but obscure. -sts 1999-08-17.
+    setup_xfail "sparc*-*-solaris*"
+    send_gdb "print print_small_structs(struct1, struct2, struct3, struct4, flags, flags_combo, three_char, five_char, int_char_combo, d1, d2, d3, f1, f2, f3)\n"
+    gdb_expect {
+	-re ".*alpha${ws}gamma${ws}epsilon${ws}alpha${ws}gamma${ws}epsilon${ws}ch1: y\tch2: n${ws}Contents of three_char_t:${ws}a\tb\tc${ws}Contents of five_char_t:${ws}l\tm\tn\to\tp${ws}Contents of int_char_combo_t:${ws}123.*z${ws}Sum of the 4 struct values and seed :${ws}52${ws}Contents of struct1:${ws}6.*0${ws}Contents of struct2:${ws}10.*0${ws}Contents of struct3:${ws}12.*0${ws}Contents of one_double_t:${ws}10.500000${ws}Contents of one_double_t:${ws}-3.340000${ws}Contents of one_double_t:${ws}675.091230${ws}Contents of two_floats_t:${ws}45.234001.*43.599998${ws}Contents of two_floats_t:${ws}78.010002.*122.099998${ws}Contents of two_floats_t:${ws}-1232.344971.*-199.210007${ws}.*$gdb_prompt $" {
+	    pass "print print_small_structs from print_long_arg_list"
+	}
+	-re ".*$gdb_prompt $" { fail "print print_small_structs from print_long_arg_list" }
+	timeout { fail "(timeout) print_small_structs from print_long_arg_list" }
     }
-    -re ".*$gdb_prompt $" { fail "print print_small_structs from print_long_arg_list" }
-    timeout           { fail "(timeout) print_small_structs from print_long_arg_list" }
-  }
 }
 
 

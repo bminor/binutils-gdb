@@ -565,6 +565,7 @@ extern void hppa_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 28)
 #define REG_PARM_STACK_SPACE 16
+#define ARGS_GROW_DOWNWARD
 
 #else /* defined PA_LEVEL_0 */
 
@@ -754,18 +755,11 @@ struct obj_unwind_info
     int last;			/* Index of last entry */
   };
 
-typedef struct data {
-  CORE_ADDR dummy[2];
-  CORE_ADDR func_addr;
-  CORE_ADDR dp;
-} opd_data;
-
 typedef struct obj_private_struct
   {
     struct obj_unwind_info *unwind_info;	/* a pointer */
     struct so_list *so_info;	/* a pointer  */
-    opd_data *opd;
-    int n_opd_entries;
+    CORE_ADDR dp;
   }
 obj_private_data_t;
 

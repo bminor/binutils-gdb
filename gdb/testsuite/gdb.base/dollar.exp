@@ -32,6 +32,12 @@ if ![ istarget "*-*-hpux*" ] then {
  return
 }
 
+# When we are in "wide" mode we do not necessary have $$dyncall as a symbol
+# name, which makes all these tests useless
+if ![ istarget "hppa*w-*-hpux11*" ] then {
+ return
+}
+
 if $tracelevel then {
 	strace $tracelevel
 	}

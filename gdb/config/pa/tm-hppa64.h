@@ -152,6 +152,7 @@ extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));
 ; the right place, we load the first 8 word of arguments into both the general
 ; and fp registers.
 call_dummy
+	nop
         copy %r4,%r29
         copy %r5,%r22
         copy %r6,%r27
@@ -179,17 +180,23 @@ call_dummy
         nop
 */
 
+/* Call dummys are sized and written out in word sized hunks.  So we have
+   to pack the instructions into words.  Ugh.  */
 #undef CALL_DUMMY
-#define CALL_DUMMY {0x349d0000, 0x34b60000, 0x34db0000, \
-                    0x53a43f83, 0x53a53f93, 0x53a63fa3, 0x53a73fb3,\
-                    0x53a83fc3, 0x53a93fd3, 0x2fa1100a, 0x2fb1100b,\
-                    0x36c10000, 0x53ba3f81, 0x53b93f91, 0x53b83fa1,\
-                    0x53b73fb1, 0x53b63fc1, 0x53b53fd1, 0x0fa110d4,\
-                    0xe820f000, 0x0fb110d3, 0x00010004, 0x00151820,\
-                    0xe6c00000, 0x08000240}
+#define CALL_DUMMY {0x08000240349d0000LL, 0x34b6000034db0000LL, \
+                    0x53a43f8353a53f93LL, 0x53a63fa353a73fb3LL,\
+                    0x53a83fc353a93fd3LL, 0x2fa1100a2fb1100bLL,\
+                    0x36c1000053ba3f81LL, 0x53b93f9153b83fa1LL,\
+                    0x53b73fb153b63fc1LL, 0x53b53fd10fa110d4LL,\
+                    0xe820f0000fb110d3LL, 0x0001000400151820LL,\
+                    0xe6c0000008000240LL}
 
+/* CALL_DUMMY_LENGTH is computed based on the size of a word on the target
+   machine, not the size of an instruction.  Since a word on this target
+   holds two instructions we have to divide the instruction size by two to
+   get the word size of the dummy.  */
 #undef CALL_DUMMY_LENGTH
-#define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 25)
+#define CALL_DUMMY_LENGTH (INSTRUCTION_SIZE * 26 / 2)
 
 /* The PA64 ABI mandates a 16 byte stack alignment.  */
 #undef STACK_ALIGN
@@ -200,22 +207,14 @@ call_dummy
 #undef REG_PARM_STACK_SPACE
 #define REG_PARM_STACK_SPACE 64
 
+/* Arguments grow in the normal direction for the PA64 port.  */
+#undef ARGS_GROW_DOWNWARD
+
 #undef FUNC_LDIL_OFFSET
 #undef FUNC_LDO_OFFSET
 #undef SR4EXPORT_LDIL_OFFSET
 #undef SR4EXPORT_LDO_OFFSET
 #undef CALL_DUMMY_LOCATION
-
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) hppa64_pc_in_call_dummy (pc)
-/* jimb: need to find out what AT_WDB_CALL_DUMMY is about */
-#if 0
-#define CALL_DUMMY_LOCATION AFTER_TEXT_END
-extern CORE_ADDR wdb_call_dummy_addr;
-#undef PC_IN_CALL_DUMMY
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
-   ((pc) >= wdb_call_dummy_addr && \
-    (pc) <= wdb_call_dummy_addr + CALL_DUMMY_LENGTH)
-#endif
 
 #undef REG_STRUCT_HAS_ADDR
 

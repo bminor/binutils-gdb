@@ -51,7 +51,7 @@ model_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	const MODEL *model = sim_model_lookup (arg);
 	if (! model)
 	  {
-	    sim_io_eprintf (sd, "unknown model `%s'", arg);
+	    sim_io_eprintf (sd, "unknown model `%s'\n", arg);
 	    return SIM_RC_FAIL;
 	  }
 	sim_model_set (sd, cpu, model);

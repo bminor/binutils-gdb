@@ -85,12 +85,20 @@
 #
 # -parallel-read: support parallel execution with read-before-exec support.
 # -parallel-write: support parallel execution with write-after-exec support.
+# -parallel-generic-write: support parallel execution with generic queued
+#       writes.
 #
 #	One of these options is specified in addition to -simple, -scache,
 #	-pbb.  Note that while the code can determine if the cpu supports
 #	parallel execution with HAVE_PARALLEL_INSNS [and thus this option is
 #	technically unnecessary], having this option cuts down on the clutter
 #	in the result.
+#
+# -parallel-only: semantic code only supports parallel version of insn
+#
+#	Semantic code only supports parallel versions of each insn.
+#	Things can be sped up by generating both serial and parallel versions
+#	and is better suited to mixed parallel architectures like the m32r.
 #
 # -switch file: specify file containing semantics implemented as a switch()
 #
@@ -116,6 +124,7 @@ type=mono
 #full_switch=
 #pbb=
 parallel=no
+parallel_only=no
 switch=
 cpu="unknown"
 infile=""
@@ -134,6 +143,8 @@ do
 	-no-parallel) ;;
 	-parallel-read) parallel=read ;;
 	-parallel-write) parallel=write ;;
+	-parallel-generic-write) parallel=genwrite ;;
+	-parallel-only) parallel_only=yes ;;
 	-switch) shift ; switch=$1 ;;
 	-cpu) shift ; cpu=$1 ;;
 	-infile) shift ; infile=$1 ;;
@@ -189,22 +200,36 @@ fi
 
 echo ""
 echo "/* HAVE_PARALLEL_INSNS: non-zero if cpu can parallelly execute > 1 insn.  */"
-if [ x$parallel != xno ] ; then
-	echo "#define HAVE_PARALLEL_INSNS 1"
-	if [ x$parallel = xread ] ; then
-	    echo "/* Parallel execution is supported by read-before-exec.  */"
-	    echo "#define WITH_PARALLEL_READ 1"
-	    echo "#define WITH_PARALLEL_WRITE 0"
-	else
-	    echo "/* Parallel execution is supported by write-after-exec.  */"
-	    echo "#define WITH_PARALLEL_READ 0"
-	    echo "#define WITH_PARALLEL_WRITE 1"
-	fi
-else
-	echo "#define HAVE_PARALLEL_INSNS 0"
-	echo "#define WITH_PARALLEL_READ 0"
-	echo "#define WITH_PARALLEL_WRITE 0"
-fi
+# blah blah blah, other ways to do this, blah blah blah
+case x$parallel in
+xno)
+    echo "#define HAVE_PARALLEL_INSNS 0"
+    echo "#define WITH_PARALLEL_READ 0"
+    echo "#define WITH_PARALLEL_WRITE 0"
+    echo "#define WITH_PARALLEL_GENWRITE 0"
+    ;;
+xread)
+    echo "#define HAVE_PARALLEL_INSNS 1"
+    echo "/* Parallel execution is supported by read-before-exec.  */"
+    echo "#define WITH_PARALLEL_READ 1"
+    echo "#define WITH_PARALLEL_WRITE 0"
+    echo "#define WITH_PARALLEL_GENWRITE 0"
+    ;;
+xwrite)
+    echo "#define HAVE_PARALLEL_INSNS 1"
+    echo "/* Parallel execution is supported by write-after-exec.  */"
+    echo "#define WITH_PARALLEL_READ 0"
+    echo "#define WITH_PARALLEL_WRITE 1"
+    echo "#define WITH_PARALLEL_GENWRITE 0"
+    ;;
+xgenwrite)
+    echo "#define HAVE_PARALLEL_INSNS 1"
+    echo "/* Parallel execution is supported by generic write-after-exec.  */"
+    echo "#define WITH_PARALLEL_READ 0"
+    echo "#define WITH_PARALLEL_WRITE 0"
+    echo "#define WITH_PARALLEL_GENWRITE 1"
+    ;;
+esac
 
 if [ "x$switch" != x ] ; then
 	echo ""
@@ -360,13 +385,15 @@ void
 
 EOF
 
-if [ x$parallel != xno ] ; then
-  cat << EOF
+case x$parallel in
+xread | xwrite)
+    cat << EOF
   PAREXEC pbufs[MAX_PARALLEL_INSNS];
   PAREXEC *par_exec;
 
 EOF
-fi
+    ;;
+esac
 
 # Any initialization code before looping starts.
 # Note that this code may declare some locals.
@@ -1118,13 +1145,15 @@ void
 
 EOF
 
-if [ x$parallel != xno ] ; then
-  cat << EOF
+case x$parallel in
+xread | xwrite)
+    cat << EOF
   PAREXEC pbufs[MAX_PARALLEL_INSNS];
   PAREXEC *par_exec = &pbufs[0];
 
 EOF
-fi
+    ;;
+esac
 
 # Any initialization code before looping starts.
 # Note that this code may declare some locals.
@@ -1208,13 +1237,15 @@ void
 
 EOF
 
-if [ x$parallel != xno ] ; then
-  cat << EOF
+case x$parallel in
+xread | xwrite)
+    cat << EOF
   PAREXEC pbufs[MAX_PARALLEL_INSNS];
   PAREXEC *par_exec = &pbufs[0];
 
 EOF
-fi
+    ;;
+esac
 
 # Any initialization code before looping starts.
 # Note that this code may declare some locals.

@@ -224,7 +224,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990816
+VERSION = 19990823
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -1346,6 +1346,9 @@ somread.o: somread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 
 somsolib.o: somsolib.c $(defs_h)
 
+pa64solib.o: pa64solib.c $(defs_h)
+
+hpux-thread.o: hpux-thread.c $(defs_h) gdbthread.h target.h inferior.h
 hpux-thread.o: hpux-thread.c $(defs_h) gdbthread.h target.h inferior.h
 	$(CC) -c $(INTERNAL_CFLAGS) -I$(srcdir)/osf-share \
 	  -I$(srcdir)/osf-share/HP800 -I/usr/include/dce $(srcdir)/hpux-thread.c

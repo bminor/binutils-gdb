@@ -36,6 +36,11 @@
 
 #include "wait.h"
 
+/* FIXME: this should be auto-configured!  */
+#ifdef __MSDOS__
+# define CANT_FORK
+#endif
+
 /* Prototypes for local functions */
 
 static void undef_cmd_error PARAMS ((char *, char *));
@@ -1453,9 +1458,29 @@ shell_escape (arg, from_tty)
      int from_tty;
 {
 #ifdef CANT_FORK
-  /* FIXME: what about errors (I don't know how GO32 system() handles
-     them)?  */
-  system (arg);
+  /* If ARG is NULL, they want an inferior shell, but `system' just
+     reports if the shell is available when passed a NULL arg.  */
+  int rc = system (arg ? arg : "");
+
+  if (!arg)
+    arg = "inferior shell";
+
+  if (rc == -1)
+    {
+      fprintf_unfiltered (gdb_stderr, "Cannot execute %s: %s\n", arg,
+			  safe_strerror (errno));
+      gdb_flush (gdb_stderr);
+    }
+  else if (rc)
+    {
+      fprintf_unfiltered (gdb_stderr, "%s exited with status %d\n", arg, rc);
+      gdb_flush (gdb_stderr);
+    }
+#ifdef __DJGPP__
+  /* Make sure to return to the directory GDB thinks it is, in case the
+     shell command we just ran changed it.  */
+  chdir (current_directory);
+#endif
 #else /* Can fork.  */
   int rc, status, pid;
   char *p, *user_shell;
