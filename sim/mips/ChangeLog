@@ -1,3 +1,8 @@
+2004-08-18  Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.in (mipsisa64sb1*-*-*): Add mips3d to sim_igen_machine.
+	* configure: Regenerate.
+
 2004-06-25  Chris Demetriou  <cgd@broadcom.com>
 
 	* configure.in (sim_m16_machine): Include mipsIII.
