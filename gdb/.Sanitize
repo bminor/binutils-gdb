@@ -337,8 +337,6 @@ z8k-tdep.c
 #			  Written at SunLabs.
 # state.c		- Not used at the moment, keep for reference (fnf)
 # state.h		- Not used at the moment, keep for reference (fnf)
-# tests			- Old test programs for GDB, pre-gdbtest and pre-
-#			  DejaGnu.
 
 Things-to-lose:
 
@@ -349,7 +347,6 @@ energize.h
 remote-sa.sparc.c
 state.c
 state.h
-tests
 
 Do-last:
 
