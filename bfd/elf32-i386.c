@@ -1586,6 +1586,8 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		      h->got.offset |= 1;
 		    }
 		}
+	      else
+		unresolved_reloc = false;
 	    }
 	  else
 	    {
@@ -1632,7 +1634,6 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	    abort ();
 
 	  relocation = htab->sgot->output_offset + off;
-	  unresolved_reloc = false;
 	  break;
 
 	case R_386_GOTOFF:
@@ -1810,7 +1811,15 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	}
 
-      if (unresolved_reloc)
+      /* FIXME: Why do we allow debugging sections to escape this error?
+	 More importantly, why do we not emit dynamic relocs for
+	 R_386_32 above in debugging sections (which are ! SEC_ALLOC)?
+	 If we had emitted the dynamic reloc, we could remove the
+	 fudge here.  */
+      if (unresolved_reloc
+	  && !(info->shared
+	       && (input_section->flags & SEC_DEBUGGING) != 0
+	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	(*_bfd_error_handler)
 	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
 	   bfd_get_filename (input_bfd),

@@ -1,5 +1,10 @@
 2001-06-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-i386.c (elf_i386_relocate_section <R_386_GOT32>): Tighten
+	unresolved_reloc test to exclude cases where we use "relocation"
+	before setting it to point into the .got.  Reinstate fudge for
+	unresolved relocs in debugging sections.
+
 	* elf32-i386.c (elf_i386_relocate_section): Replace ugly
 	complicated tests for unresolvable relocs with a simple direct
 	scheme using "unresolved_reloc" var.
