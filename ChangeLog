@@ -1,3 +1,10 @@
+Thu Oct 26 22:35:01 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-configure: Set host alias from choice of host compiler,
+	only use generic MPW Makefile sed if present, edit a file
+	named "hacked_Makefile.in" instead of "Makefile.in" if present.
+	* mpw-README: Add problem notes about CW6 and CW7.
+
 Thu Oct 26 05:45:10 1995  Ken Raeburn  <raeburn@kr-pc.cygnus.com>
 
 	* Makefile.in (taz): Use ";" instead of ";;".
