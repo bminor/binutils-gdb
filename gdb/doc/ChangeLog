@@ -1,3 +1,8 @@
+Thu Sep 30 18:24:56 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo, remote.texi: assorted small improvements, mostly
+	from Melissa at FSF's editing pass.
+
 Thu Sep 30 11:54:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.texinfo: Remove stuff about ar and 14 character filenames.

@@ -54,11 +54,11 @@ END-INFO-DIR-ENTRY
 This file documents the GNU debugger @value{GDBN}.
 
 @c !!set edition, date, version
-This is Edition 4.09, April 1993, 
+This is Edition 4.09, August 1993, 
 of @cite{Debugging with @value{GDBN}: the GNU Source-Level Debugger}
 for GDB Version @value{GDBVN}.
 
-Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright (C) 1988, '89, '90, '91, '92, '93 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -89,8 +89,8 @@ into another language, under the above conditions for modified versions.
 @sp 1
 @c !!set edition, date, version
 @subtitle Edition 4.09, for @value{GDBN} version @value{GDBVN}
-@subtitle April 1993
-@author by Richard M. Stallman and Roland H. Pesch
+@subtitle August 1993
+@author Richard M. Stallman and Roland H. Pesch
 @page
 @tex
 {\parskip=0pt
@@ -102,7 +102,14 @@ into another language, under the above conditions for modified versions.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, '89, '90, '91, '92, '93 Free Software
+Foundation, Inc. 
+@sp 2
+Published by the Free Software Foundation @*
+675 Massachusetts Avenue, @*
+Cambridge, MA 02139 USA @*
+Printed copies are available for $20 each. @*
+ISBN 1-882114-11-6 @*
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -266,7 +273,7 @@ Kingdon (releases 3.5, 3.4, 3.3); and Randy Smith (releases 3.2, 3.1,
 significantly to the structure, stability, and capabilities of the
 entire debugger.
 
-Richard Stallman, assisted at various times by Pete TerMaat, Chris
+Richard Stallman, assisted at various times by Peter TerMaat, Chris
 Hanson, and Richard Mlynarik, handled releases through 2.8.
 
 @ifclear CONLY
@@ -831,11 +838,11 @@ them, so long as enough of the option is present to be unambiguous.
 than @samp{-}, though we illustrate the more usual convention.)
 
 @table @code
-@item -symbols=@var{file}
+@item -symbols @var{file}
 @itemx -s @var{file}
 Read symbol table from file @var{file}.
 
-@item -exec=@var{file}
+@item -exec @var{file}
 @itemx -e @var{file}
 Use file @var{file} as the executable file to execute when
 @ifset BARETARGET
@@ -846,12 +853,12 @@ appropriate, and for examining pure data in conjunction with a core
 dump.
 @end ifclear
 
-@item -se=@var{file}
+@item -se @var{file}
 Read symbol table from file @var{file} and use it as the executable
 file.
 
 @ifclear BARETARGET
-@item -core=@var{file}
+@item -core @var{file}
 @itemx -c @var{file}
 Use file @var{file} as a core dump to examine.
 
@@ -861,12 +868,12 @@ Connect to process ID @var{number}, as with the @code{attach} command
 case @samp{-c} specifies that file as a core dump to read).
 @end ifclear
 
-@item -command=@var{file}
+@item -command @var{file}
 @itemx -x @var{file}
 Execute @value{GDBN} commands from file @var{file}.  @xref{Command
 Files,, Command files}.
 
-@item -directory=@var{directory}
+@item -directory @var{directory}
 @itemx -d @var{directory}
 Add @var{directory} to the path to search for source files.
 
@@ -947,7 +954,7 @@ Program exited normally.
 (which is ordinarily issued whenever a program running under @value{GDBN} control
 terminates) is not issued when running in batch mode.
 
-@item -cd=@var{directory}
+@item -cd @var{directory}
 Run @value{GDBN} using @var{directory} as its working directory,
 instead of the current directory.
 
@@ -979,7 +986,7 @@ a signal to display the source code for the frame.
 Set the line speed (baud rate or bits per second) of any serial
 interface used by @value{GDBN} for remote debugging.
 
-@item -tty=@var{device}
+@item -tty @var{device}
 Run using @var{device} for your program's standard input and output.
 @c FIXME: kingdon thinks there is more to -tty.  Investigate.
 @end ifset
@@ -1482,7 +1489,7 @@ wrong program.
 When you issue the @code{run} command, your program begins to execute
 immediately.  @xref{Stopping, ,Stopping and continuing}, for discussion
 of how to arrange for your program to stop.  Once your program has
-stopped, you may calls functions in your program, using the @code{print}
+stopped, you may call functions in your program, using the @code{print}
 or @code{call} commands.  @xref{Data, ,Examining Data}.
 
 If the modification time of your symbol file has changed since the
@@ -2111,7 +2118,7 @@ expression changes, without having to predict a particular place
 where this may happen.
 
 Watchpoints currently execute two orders of magnitude more slowly than
-other breakpoints, but this can well be worth it to catch errors where
+other breakpoints, but this can be well worth it to catch errors where
 you have no clue what part of your program is the culprit.  Some
 processors provide special hardware to support watchpoint evaluation; future
 releases of @value{GDBN} will use such hardware if it is available.
@@ -2495,15 +2502,6 @@ cont
 end
 @end example
 
-@cindex lost output
-@c Do we need to mention this at all?  I am sort of tempted to mention
-@c it in case people are used to seeing this section of the manual.  But
-@c for new users it is an annoyance--it documents something which isn't
-@c there.  -kingdon, 6 Jul 93
-Previous versions of @value{GDBN} (4.9 and earlier) would flush pending
-input when executing breakpoint commands, if your program used raw mode
-for the terminal.  This is no longer true.
-
 @ignore
 @c I don't think this is true any longer, now that only readline
 @c switches to or from raw mode.  In any event, it is a (relatively
@@ -2631,27 +2629,25 @@ or when stepping, your program may stop even sooner, due to
 a breakpoint.
 @end ifset
 @ifclear BARETARGET
-a breakpoint or to a signal.  (If due to a signal, you may want to use
+a breakpoint or a signal.  (If due to a signal, you may want to use
 @code{handle}, or use @samp{signal 0} to resume execution.
 @xref{Signals, ,Signals}.)
 @end ifclear
 
 @table @code
-@item continue @r{[}@var{count}@r{]}
-@itemx c @r{[}@var{count}@r{]}
-@itemx fg @r{[}@var{count}@r{]}
+@item continue @r{[}@var{ignore-count}@r{]}
+@itemx c @r{[}@var{ignore-count}@r{]}
+@itemx fg @r{[}@var{ignore-count}@r{]}
 @kindex continue
 @kindex c
 @kindex fg
-Resume program execution, at the address where your program last
-stopped; any breakpoints set at that address are bypassed.  The optional
-argument @var{count} means to set the ignore count of a breakpoint which
-you are stopped at to @var{count} @minus{} 1, just like the @code{ignore}
-command (@pxref{Conditions, ,Break conditions}).  This means that the
-program does not stop at that breakpoint until the @var{count}th time
-it is hit.
+Resume program execution, at the address where your program last stopped;
+any breakpoints set at that address are bypassed.  The optional argument
+@var{ignore-count} allows you to specify a further number of times to
+ignore a breakpoint at this location; its effect is like that of
+@code{ignore} (@pxref{Conditions, ,Break conditions}).
 
-The argument @var{count} is meaningful only when your program
+The argument @var{ignore-count} is meaningful only when your program
 stopped due to a breakpoint.  At other times, the argument to
 @code{continue} is ignored.
 
@@ -2726,7 +2722,7 @@ Contrast this with the @code{return} command (@pxref{Returning,
 
 @item until
 @kindex until
-@item u
+@itemx u
 @kindex u
 Continue running until a source line past the current line, in the
 current stack frame, is reached.  This command is used to avoid single
@@ -2771,7 +2767,7 @@ instruction stepping, and hence is slower than @code{until} with an
 argument.
 
 @item until @var{location}
-@item u @var{location}
+@itemx u @var{location}
 Continue running your program until either the specified location is
 reached, or the current stack frame returns.  @var{location} is any of
 the forms of argument acceptable to @code{break} (@pxref{Set Breaks,
@@ -2973,6 +2969,7 @@ and so on upward.  These numbers do not really exist in your program;
 they are assigned by @value{GDBN} to give you a way of designating stack
 frames in @value{GDBN} commands.
 
+@c below produces an acceptable overful hbox. --mew 13aug1993
 @cindex frameless execution
 Some compilers provide a way to compile functions so that they operate
 without stack frames.  (For example, the @code{@value{GCC}} option
@@ -4093,7 +4090,7 @@ These settings are useful for debugging programs in any language:
 
 @table @code
 @item set print address
-@item set print address on
+@itemx set print address on
 @kindex set print address
 @value{GDBN} will print memory addresses showing the location of stack
 traces, structure values, pointer values, breakpoints, and so forth,
@@ -4398,10 +4395,11 @@ pointers back to the types defined in the symbol table.
 @cindex @code{$}
 @cindex @code{$$}
 @cindex history number
-The values printed are given @dfn{history numbers} for you to refer to them
-by.  These are successive integers starting with one.  @code{print} shows you
-the history number assigned to a value by printing @samp{$@var{num} = }
-before the value; here @var{num} is the history number.
+The values printed are given @dfn{history numbers} by which you can
+refer to them.  These are successive integers starting with one.
+@code{print} shows you the history number assigned to a value by
+printing @samp{$@var{num} = } before the value; here @var{num} is the
+history number.
 
 To refer to any previous value, use @samp{$} followed by the value's
 history number.  The way @code{print} labels its output is designed to
@@ -4487,9 +4485,9 @@ set $foo = *object_ptr
 would save in @code{$foo} the value contained in the object pointed to by
 @code{object_ptr}.
 
-Using a convenience variable for the first time creates it; but its value
-is @code{void} until you assign a new value.  You can alter the value with
-another assignment at any time.
+Using a convenience variable for the first time creates it, but its
+value is @code{void} until you assign a new value.  You can alter the
+value with another assignment at any time.
 
 Convenience variables have no fixed types.  You can assign a convenience
 variable any type of value, including structures and arrays, even if
@@ -4980,7 +4978,7 @@ is printed and evaluation of the expression is aborted.
 Output messages when the @value{GDBN} range checker detects a range error,
 but attempt to evaluate the expression anyway.  Evaluating the
 expression may still be impossible for other reasons, such as accessing
-memory that the process does not own (a typical example from many UNIX
+memory that the process does not own (a typical example from many Unix
 systems).
 
 @item show range
@@ -5685,7 +5683,7 @@ represents a variable or constant of integral type.
 @item m
 represents an identifier that belongs to a set.  Generally used in the
 same function with the metavariable @var{s}.  The type of @var{s} should
-be @code{SET OF @var{mtype}} (where @var{mtype} is the type of @var{m}.
+be @code{SET OF @var{mtype}} (where @var{mtype} is the type of @var{m}).
 
 @item n
 represents a variable or constant of integral or floating-point type.
@@ -6003,7 +6001,7 @@ local variable, this prints the stack-frame offset at which the variable
 is always stored.
 
 Note the contrast with @samp{print &@var{symbol}}, which does not work
-at all for a register variables, and for a stack local variable prints
+at all for a register variable, and for a stack local variable prints
 the exact address of the current instantiation of the variable.
 
 @item whatis @var{exp}
@@ -6298,7 +6296,7 @@ already executed, in order to examine its execution in more detail.
 @table @code
 @item signal @var{signalnum}
 @kindex signal
-Resume execution where your program stopped, but give it immediately the
+Resume execution where your program stopped, but immediately give it the
 signal number @var{signalnum}.
 
 Alternatively, if @var{signalnum} is zero, continue execution without
@@ -6692,12 +6690,12 @@ Print the names of the shared libraries which are currently loaded.
 @itemx share @var{regex}
 @kindex sharedlibrary
 @kindex share
-This is an obsolescent command; you can use it to explicitly
-load shared object library symbols for files matching a UNIX regular
-expression, but as with files loaded automatically, it will only load
-shared libraries required by your program for a core file or after
-typing @code{run}.  If @var{regex} is omitted all shared libraries
-required by your program are loaded.
+This is an obsolescent command; you can use it to explicitly load shared
+object library symbols for files matching a Unix regular expression, but
+as with files loaded automatically, it will only load shared libraries
+required by your program for a core file or after typing @code{run}.  If
+@var{regex} is omitted all shared libraries required by your program are
+loaded.
 @end table
 @end ifclear
 

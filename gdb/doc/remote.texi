@@ -68,14 +68,14 @@ For @sc{sparc} architectures.
 
 @item m68k-stub.c
 @kindex m68k-stub.c
-@kindex Motorola 680x0
-@kindex 680x0
+@cindex Motorola 680x0
+@cindex 680x0
 For Motorola 680x0 architectures.
 
 @item i386-stub.c
 @kindex i386-stub.c
-@kindex Intel
-@kindex 386
+@cindex Intel
+@cindex 386
 For Intel 386 and compatible architectures.
 @end table
 
@@ -225,7 +225,7 @@ steps.
 @enumerate
 @item
 Make sure you have the supporting low-level routines
-(@pxref{Bootstrapping}):
+(@pxref{Bootstrapping,,What you must do for the stub}):
 @display
 @code{getDebugChar}, @code{putDebugChar},
 @code{flush_i_cache}, @code{memset}, @code{exceptionHandler}.
@@ -885,8 +885,8 @@ sequences will get you back to the @value{GDBN} command prompt:
 @value{GDBN} enables developers to spawn and debug tasks running on networked
 VxWorks targets from a Unix host.  Already-running tasks spawned from
 the VxWorks shell can also be debugged.  @value{GDBN} uses code that runs on
-both the UNIX host and on the VxWorks target.  The program
-@code{gdb} is installed and executed on the UNIX host.  (It may be
+both the Unix host and on the VxWorks target.  The program
+@code{gdb} is installed and executed on the Unix host.  (It may be
 installed with the name @code{vxgdb}, to distinguish it from a
 @value{GDBN} for debugging programs on the host itself.)
 
@@ -909,7 +909,7 @@ VxWorks, see the manufacturer's manual.
 
 Once you have included the RDB interface in your VxWorks system image
 and set your Unix execution search path to find @value{GDBN}, you are ready
-to run @value{GDBN}.  From your UNIX host, run @code{gdb} (or
+to run @value{GDBN}.  From your Unix host, run @code{gdb} (or
 @code{vxgdb}, depending on your installation).
 
 @value{GDBN} comes up showing the prompt:
@@ -961,7 +961,7 @@ command again.
 @cindex download to VxWorks
 If you have connected to the VxWorks target and you want to debug an
 object that has not yet been loaded, you can use the @value{GDBN}
-@code{load} command to download a file from UNIX to VxWorks
+@code{load} command to download a file from Unix to VxWorks
 incrementally.  The object file given as an argument to the @code{load}
 command is actually opened twice: first by the VxWorks target in order
 to download the code, then by @value{GDBN} in order to read the symbol
@@ -1204,11 +1204,11 @@ retransmit-timeout}.  (These commands are @emph{only} available when
 @cindex MIPS remote floating point
 @cindex floating point, MIPS remote
 If your target board does not support the MIPS floating point
-coprocessor, use the command @samp{set mipsfpu off} (you may wish to put
-this in your @value{GDBINIT} file).  This will tell @value{GDBN} how to
-find the return value of functions which return floating point values,
-and tell it to call functions on the board without saving the floating
-point registers.
+coprocessor, you should use the command @samp{set mipsfpu off} (you may
+wish to put this in your @value{GDBINIT} file).  This tells @value{GDBN}
+how to find the return value of functions which return floating point
+values.  It also allows @value{GDBN} to avoid saving the floating point
+registers when calling functions on the board.
 @end ifset
 
 @ifset SIMS
