@@ -1363,7 +1363,8 @@ dwarf2_finish (void)
        below.  */
   if (all_segs == NULL
       && debug_type != DEBUG_DWARF2
-      && bfd_get_section_by_name (stdoutput, ".debug_info") == NULL)
+      && (bfd_get_section_by_name (stdoutput, ".debug_info") == NULL
+	  || files_in_use == 0))
     return;
 
   /* Calculate the size of an address for the target machine.  */

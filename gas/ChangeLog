@@ -1,3 +1,9 @@
+2004-11-02  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2dbg.c (dwarf2_finish): Check for the existence of a file
+	table before deciding to produce a .debug_line section to match up
+	with a user provided .debug_info section.
+
 2004-10-28  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* config/tc-crx.c (getreg_image): Bug fix, a return value was
