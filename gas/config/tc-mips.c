@@ -11510,7 +11510,7 @@ s_cpsetup (ignore)
   int icnt = 0;
   char *sym;
 
-  /* If we are not generating SVR4 PIC code, .cpload is ignored.
+  /* If we are not generating SVR4 PIC code, .cpsetup is ignored.
      We also need NewABI support.  */
   if (mips_pic != SVR4_PIC || ! HAVE_NEWABI)
     {
@@ -11567,18 +11567,15 @@ s_cpsetup (ignore)
 
   macro_build ((char *) NULL, &icnt, &ex_sym, "lui", "t,u", mips_gp_register,
 	       (int) BFD_RELOC_GPREL16);
-  fix_new (frag_now, (char *) prev_insn_fixp - 4 - frag_now->fr_literal, 0,
-	   NULL, 0, 0, BFD_RELOC_MIPS_SUB);
-  fix_new (frag_now, (char *) prev_insn_fixp - 4 - frag_now->fr_literal, 0,
-	   NULL, 0, 0, BFD_RELOC_HI16_S);
+  fix_new (frag_now, prev_insn_where, 0, NULL, 0, 0, BFD_RELOC_MIPS_SUB);
+  fix_new (frag_now, prev_insn_where, 0, NULL, 0, 0, BFD_RELOC_HI16_S);
   macro_build ((char *) NULL, &icnt, &ex_sym, "addiu", "t,r,j",
 	       mips_gp_register, mips_gp_register, (int) BFD_RELOC_GPREL16);
-  fix_new (frag_now, (char *) prev_insn_fixp - 4 - frag_now->fr_literal, 0,
-	   NULL, 0, 0, BFD_RELOC_MIPS_SUB);
-  fix_new (frag_now, (char *) prev_insn_fixp - 4 - frag_now->fr_literal, 0,
-	   NULL, 0, 0, BFD_RELOC_LO16);
-  macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "daddu",
-	       "d,v,t", mips_gp_register, mips_gp_register, reg1);
+  fix_new (frag_now, prev_insn_where, 0, NULL, 0, 0, BFD_RELOC_MIPS_SUB);
+  fix_new (frag_now, prev_insn_where, 0, NULL, 0, 0, BFD_RELOC_LO16);
+  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+	       HAVE_64BIT_ADDRESSES ? "daddu" : "addu", "d,v,t",
+	       mips_gp_register, mips_gp_register, reg1);
 
   demand_empty_rest_of_line ();
 }

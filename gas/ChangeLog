@@ -1,5 +1,10 @@
 2002-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc_mips.c (s_cpsetup): Fix completely bogus code which had
+	worked sometimes by accident. Fix copy&paste comment.
+
+2002-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (md_begin): Fix .reginfo and .MIPS.option section
 	alignment for NewABI. Let n32 use .reginfo. Remove useless casts.
 	(mips_elf_final_processing): Let n32 use .reginfo.
