@@ -816,7 +816,7 @@ cb_host_to_target_stat (cb, hs, ts)
 
       if (hs != NULL)
 	{
-	  if (1)
+	  if (0)
 	    ;
 	  /* Defined here to avoid emacs indigestion on a lone "else".  */
 #undef ST_x
