@@ -1,3 +1,8 @@
+2002-04-22  Eric Christopher  <echristo@redhat.com>
+
+	* config/tc-mips.c: Add warning if macro instructions are expanded
+	into a branch delay slot.
+
 2002-04-17  Geoffrey Keating  <geoffk@redhat.com>
 
 	* dwarf2dbg.c (dwarf2_gen_line_info): Do emit duplicate line
@@ -14,7 +19,7 @@
 
 2002-04-15  Tom Rix  <trix@redhat.com>
 
-	* config/tc-d10v.c (d10v_fix_adjustable): Prevent adjustments to 
+	* config/tc-d10v.c (d10v_fix_adjustable): Prevent adjustments to
 	symbols in merge sections.
 
 2002-04-11  Richard Sandiford  <rsandifo@redhat.com>
@@ -65,7 +70,7 @@ Tue Apr  9 16:45:48 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	    Tom Rix  <trix@redhat.com>
 
 	From Jeff Knaggs <jknaggs@redhat.com>
-	* config/tc-d10v.c (check_resource_conflict): New function to 
+	* config/tc-d10v.c (check_resource_conflict): New function to
 	check for resource conflicts.
 
 	From Jason Eckhardt  <jle@redhat.com>

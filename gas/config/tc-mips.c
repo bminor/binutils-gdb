@@ -2881,6 +2881,18 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   if (mips_opts.warn_about_macros && place == NULL && *counter == 1)
     as_warn (_("Macro instruction expanded into multiple instructions"));
 
+  /*
+   * If the macro is about to expand into a second instruction,
+   * and it is in a delay slot, print a warning.
+   */
+  if (place == NULL
+      && *counter == 1
+      && mips_opts.noreorder
+      && (prev_prev_insn.insn_mo->pinfo
+	  & (INSN_UNCOND_BRANCH_DELAY | INSN_COND_BRANCH_DELAY
+	     | INSN_COND_BRANCH_LIKELY) != 0)
+    as_warn (_("Macro instruction expanded into multiple instructions in a branch delay slot"));
+
   if (place == NULL)
     *counter += 1;		/* bump instruction counter */
 
@@ -10264,7 +10276,7 @@ MIPS options:\n\
   show (stream, "n32", &column, &first);
   show (stream, "64", &column, &first);
   show (stream, "eabi", &column, &first);
-			     
+
   fputc ('\n', stream);
 
   fprintf (stream, _("\
