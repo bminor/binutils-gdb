@@ -5,6 +5,30 @@ Thu Jan  6 14:24:44 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 Thu Jan  6 14:37:42 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* nlmcode.h (nlm_object_p): If we can't read the fixed header,
+	count it as a wrong format error, not a system call error, since
+	the object file might simply be too small.
+
+	* targets.c (target_vector): Added nlm32_alpha_vec inside #ifdef
+	BFD64.
+	* Makefile.in (BFD32_BACKENDS): Remove nlm32-alpha.o.
+	(BFD64_BACKENDS): Add nlm32-alpha.o.  It depends on 64 bit
+	support, even though it is for an Alpha in 32 bit mode.
+	* configure.in (nlm32_alpha_vec): Set target64 to true.
+
+	* nlm32-gen.c, nlm64-gen.c: Removed.  All nlm targets are
+	different, so there is no point to providing a generic one.
+	* libnlm.h: Don't bother to check for nlm_backend(bfd) being NULL
+	in the backend accessor macros; that should no longer be possible.
+	* targets.c (target_vector): Removed nlm32_big_generic_vec,
+	nlm64_big_generic_vec, nlm64_little_generic_vec.
+	* configure.in (nlm32_big_generic_vec, nlm32_little_generic_vec,
+	nlm64_big_generic_vec, nlm64_little_generic_vec): Removed.
+	* Makefile.in: Rebuilt dependencies, and
+	(BFD32_BACKENDS): Removed nlm32-gen.o.
+	(BFD64_BACKENDS): Removed nlm64-gen.o.
+	(CFILES): Removed nlm32-gen.c and nlm64-gen.c.
+
 	* hp300hpux.c (ARCH_SIZE): Define before including aoutx.h.
 
 	* linker.c (_bfd_generic_link_add_one_symbol): Add constructor and
