@@ -1,7 +1,8 @@
 Mon Nov 24 15:47:49 1997  Nick Clifton  <nickc@cygnus.com>
 
-	* coff-arm.c: Make variables and functions static, so that this
-	file can be included in multiple object files.
+	* coff-arm.c: Make variables and some functions static, so that
+	this file can be included in multiple object files.
+	(coff_arm_bfd_final_link): Fix minor bug.
 
 Sat Nov 22 15:16:00 1997  Nick Clifton  <nickc@cygnus.com>
 

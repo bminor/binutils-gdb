@@ -1459,7 +1459,8 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
-static boolean
+#ifndef COFF_WITH_PR
+boolean
 arm_allocate_interworking_sections (info) 
      struct bfd_link_info *info;
 {
@@ -1620,7 +1621,7 @@ record_thumb_to_arm_glue (info, h)
   return;
 }
 
-static boolean
+boolean
 arm_process_before_allocation (abfd, info)
      bfd *                   abfd;
      struct bfd_link_info *  info;
@@ -1716,6 +1717,7 @@ arm_process_before_allocation (abfd, info)
 
   return true;
 }
+#endif /* not COFF_WITH_PE */
 
 #define coff_relocate_section coff_arm_relocate_section
 
@@ -1765,6 +1767,12 @@ coff_arm_bfd_merge_private_bfd_data (ibfd, obfd)
   /* If the two formats are different we cannot merge anything.  */
   if (ibfd->xvec != obfd->xvec)
     {
+      _bfd_error_handler
+	("ERROR: %s is format '%s' whereas %s is format '%s'",
+	 bfd_get_filename (ibfd), bfd_get_target(ibfd), 
+	 bfd_get_filename (obfd), bfd_get_target(obfd)
+	 );
+      
       bfd_set_error (bfd_error_wrong_format);
       return false;
     }
@@ -2333,8 +2341,8 @@ coff_arm_bfd_final_link (abfd, info)
       {
 	if (! _bfd_coff_link_input_bfd (&finfo, last_one))
 	  goto error_return;
+	last_one->output_has_begun = true;
       }
-    last_one->output_has_begun = true;
   }
 #endif
 
