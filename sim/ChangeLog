@@ -425,7 +425,7 @@ Mon Sep 13 12:47:15 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 	* Makefile.in (all-z8k, install-z8k, clean-z8k, all-h8300,
 	  install-h8300, clean-h8300, all-h8500, install-h8500,
 	  clean-h8500, all-sh, install-sh, clean-sh): do not echo
-	  recursion lines. 
+	  recursion lines.
 
 Wed Jun 30 14:12:05 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
 

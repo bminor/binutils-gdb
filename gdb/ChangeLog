@@ -93,14 +93,14 @@ Tue Feb  1 00:17:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 2000-01-31  Jason Molenda  (jsm@bugshack.cygnus.com)
 
-	* config/alpha/alpha-osf2.mh, config/alpha/alpha-osf3.mh, 
-	config/i386/i386dgux.mh, config/i386/i386sol2.mh, 
-	config/i386/i386v4.mh, config/i386/i386v42mp.mh, 
-	config/i386/ncr3000.mh, config/m68k/m68kv4.mh, 
-	config/m88k/delta88v4.mh, config/mips/irix4.mh, 
-	config/mips/irix5.mh, config/mips/mipsv4.mh, 
+	* config/alpha/alpha-osf2.mh, config/alpha/alpha-osf3.mh,
+	config/i386/i386dgux.mh, config/i386/i386sol2.mh,
+	config/i386/i386v4.mh, config/i386/i386v42mp.mh,
+	config/i386/ncr3000.mh, config/m68k/m68kv4.mh,
+	config/m88k/delta88v4.mh, config/mips/irix4.mh,
+	config/mips/irix5.mh, config/mips/mipsv4.mh,
 	config/powerpc/solaris.mh (NATDEPFILES): Change references to
-	proc_api.o, proc_events.o, proc_flags.o, and proc_why.o to 
+	proc_api.o, proc_events.o, proc_flags.o, and proc_why.o to
 	proc-api.o, proc-events.o, proc-flags.o, and proc-why.o.
 
 Mon Jan 31 17:14:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
