@@ -1,3 +1,13 @@
+Wed Apr 29 15:26:51 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* cplus-dem.c:  Allow nested class names (as in
+	Foo::Bar::method()).
+	Allow the cleaner cfront style of nested class names
+	(Q2_3Foo3Bar as well as Q23Foo3Bar).
+	Make cplus_demangle re-entrant by removing use of global
+	variables.  Instead, place all shared variables in a
+	stack-allocated structure, and pass around its address.	
+
 Fri Apr 24 07:41:19 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (make-proto-gdb-1):  1st cut at packaging

@@ -78,9 +78,15 @@ extern char *cplus_demangle (const char *type, int mode);
 extern char *cplus_demangle ();
 #endif
 
-static char **typevec = 0;
-static int ntypes = 0;
-static int typevec_size = 0;
+/* Stuff that is shared betwen sub-routines.
+ * Using a shared structure allows cplus_demange to be reentrant. */
+
+struct work_stuff {
+  int arg_mode;
+  char **typevec;
+  int ntypes;
+  int typevec_size;
+};
 
 const static struct optable {
   const char *in;
@@ -204,19 +210,19 @@ static int
 get_count PARAMS ((const char **, int *));
 
 static int
-do_args PARAMS ((const char **, string *, int));
+do_args PARAMS ((const char **, string *, struct work_stuff *));
 
 static int
-do_type PARAMS ((const char **, string *, int));
+do_type PARAMS ((const char **, string *, struct work_stuff *));
 
 static int
-do_arg PARAMS ((const char **, string *, int));
+do_arg PARAMS ((const char **, string *, struct work_stuff*));
 
 static void
-munge_function_name PARAMS ((string *, int));
+munge_function_name PARAMS ((string *, struct work_stuff*));
 
 static void
-remember_type PARAMS ((const char *, int));
+remember_type PARAMS ((const char *, int, struct work_stuff *));
 
 #if 0
 static void
@@ -262,13 +268,14 @@ cplus_demangle (type, arg_mode)
   int static_type = 0;
   int const_flag = 0;
   int i;
+  struct work_stuff work[1];
   const char *p;
 #ifndef LONGERNAMES
   const char *premangle;
 #endif
 
-# define print_ansi_qualifiers (arg_mode >  0)
-# define print_arg_types       (arg_mode >= 0)
+# define print_ansi_qualifiers (work->arg_mode >  0)
+# define print_arg_types       (work->arg_mode >= 0)
 
   if (type == NULL || *type == '\0')
     return NULL;
@@ -276,6 +283,12 @@ cplus_demangle (type, arg_mode)
   if (*type++ != '_')
     return NULL;
 #endif
+
+  work->arg_mode = arg_mode;
+  work->typevec = NULL;
+  work->ntypes = 0;
+  work->typevec_size = 0;
+
   p = type;
   while (*p != '\0' && !(*p == '_' && p[1] == '_'))
     p++;
@@ -344,7 +357,7 @@ cplus_demangle (type, arg_mode)
 	  string_appendn (&decl, type, p - type);
 	  string_need (&decl, 1);
 	  *(decl.p) = '\0';
-	  munge_function_name (&decl, 1);
+	  munge_function_name (&decl, work); /* arg_mode=1 ?? */
 	  if (decl.b[0] == '_')
 	    {
 	      string_delete (&decl);
@@ -364,7 +377,7 @@ cplus_demangle (type, arg_mode)
       string_appendn (&decl, type, p - type);
       string_need (&decl, 1);
       *(decl.p) = '\0';
-      munge_function_name (&decl, arg_mode);
+      munge_function_name (&decl, work);
       p += 2;
     }
 
@@ -373,6 +386,32 @@ cplus_demangle (type, arg_mode)
 #endif
   switch (*p)
     {
+      string class;
+    case 'Q':
+      string_init (&class);
+      n = p[1] - '0';
+      if (n < 0 || n > 9)
+	success = 0;
+      if (p[2] == '_') /* cfront style */
+	p += 1;
+      p += 2;
+      while (n-- > 0)
+	{
+          string tmp;
+	  do_type (&p, &tmp, work);
+	  string_appends (&class, &tmp);
+	  string_append (&class, "::");
+	  if (n == 0 && (constructor || destructor))
+	    {
+	      if (destructor)
+		string_append(&class, "~");
+	      string_appends (&class, &tmp);
+	    }
+	  string_delete (&tmp);
+        }
+      string_prependn (&decl, class.b, class.p - class.b);
+      string_delete (&class);
+      goto do_method_args;
     case 'C':
       /* a const member function */
       if (!isdigit (p[1]))
@@ -421,8 +460,9 @@ cplus_demangle (type, arg_mode)
 	}
       p += n;
 #ifndef LONGERNAMES
-      remember_type (premangle, p - premangle);
+      remember_type (premangle, p - premangle, work);
 #endif
+    do_method_args:
       if (static_type)
 	{
 	  string_append(&decl, p+1);
@@ -430,13 +470,13 @@ cplus_demangle (type, arg_mode)
 	  success = 1;
 	}
       else
-	success = do_args (&p, &decl, arg_mode);
+	success = do_args (&p, &decl, work);
       if (const_flag && print_arg_types)
 	string_append (&decl, " const");
       break;
     case 'F':
       p += 1;
-      success = do_args (&p, &decl, arg_mode);
+      success = do_args (&p, &decl, work);
       break;
     /* template additions */
     case 't':
@@ -472,7 +512,7 @@ cplus_demangle (type, arg_mode)
 	      {
 		p += 1;
 		
-		success = do_type (&p, &temp, arg_mode);
+		success = do_type (&p, &temp, work);
 		string_appendn (&temp, "", 1);
 		if (success)
 		  string_append (&tname, temp.b);
@@ -489,7 +529,7 @@ cplus_demangle (type, arg_mode)
 		int is_integral = 0;
 		int done = 0;
 
-		success = do_type (&p, &temp, arg_mode);
+		success = do_type (&p, &temp, work);
 		string_appendn (&temp, "", 1);
 		if (success)
 		  string_append (&tname, temp.b);
@@ -620,21 +660,16 @@ cplus_demangle (type, arg_mode)
 	    success = 1;
 	  }
 	else
-	  success = do_args (&p, &decl, arg_mode);
+	  success = do_args (&p, &decl, work);
 	break;
       }
     }
 
-  for (i = 0; i < ntypes; i++)
-    if (typevec[i] != NULL)
-      free (typevec[i]);
-  ntypes = 0;
-  if (typevec != NULL)
-    {
-      free ((char *)typevec);
-      typevec = NULL;
-      typevec_size = 0;
-    }
+  for (i = 0; i < work->ntypes; i++)
+    if (work->typevec[i] != NULL)
+      free (work->typevec[i]);
+  if (work->typevec != NULL)
+    free ((char *)work->typevec);
 
   if (success)
     {
@@ -681,10 +716,10 @@ get_count (type, count)
 /* result will be initialised here; it will be freed on failure */
 
 static int
-do_type (type, result, arg_mode)
+do_type (type, result, work)
      const char **type;
      string *result;
-     int arg_mode;
+     struct work_stuff *work;
 {
   int n;
   int done;
@@ -707,9 +742,11 @@ do_type (type, result, arg_mode)
 	  n = (*type)[1] - '0';
 	  if (n < 0 || n > 9)
 	    success = 0;
+	  if ((*type)[2] == '_') /* cfront style */
+	    *type += 1;
 	  *type += 2;
 	  while (n-- > 0)
-	    do_type (type, result, arg_mode);
+	    do_type (type, result, work);
 	  break;
 
 	case 'P':
@@ -724,11 +761,11 @@ do_type (type, result, arg_mode)
 
 	case 'T':
 	  *type += 1;
-	  if (!get_count (type, &n) || n >= ntypes)
+	  if (!get_count (type, &n) || n >= work->ntypes)
 	    success = 0;
 	  else
 	    {
-	      remembered_type = typevec[n];
+	      remembered_type = work->typevec[n];
 	      type = &remembered_type;
 	    }
 	  break;
@@ -740,7 +777,7 @@ do_type (type, result, arg_mode)
 	      string_prepend (&decl, "(");
 	      string_append (&decl, ")");
 	    }
-	  if (!do_args (type, &decl, arg_mode) || **type != '_')
+	  if (!do_args (type, &decl, work) || **type != '_')
 	    success = 0;
 	  else
 	    *type += 1;
@@ -795,7 +832,7 @@ do_type (type, result, arg_mode)
 		    break;
 		  }
 	      }
-	    if ((member && !do_args (type, &decl, arg_mode)) || **type != '_')
+	    if ((member && !do_args (type, &decl, work)) || **type != '_')
 	      {
 		success = 0;
 		break;
@@ -1014,53 +1051,54 @@ do_type (type, result, arg_mode)
 /* `result' will be initialised in do_type; it will be freed on failure */
 
 static int
-do_arg (type, result, arg_mode)
+do_arg (type, result, work)
      const char **type;
      string *result;
-     int arg_mode;
+     struct work_stuff *work;
 {
   const char *start = *type;
 
-  if (!do_type (type, result, arg_mode))
+  if (!do_type (type, result, work))
     return 0;
-  remember_type (start, *type - start);
+  remember_type (start, *type - start, work);
   return 1;
 }
 
 static void
-remember_type (start, len)
+remember_type (start, len, work)
      const char *start;
      int len;
+     struct work_stuff *work;
 {
   char *tem;
 
-  if (ntypes >= typevec_size)
+  if (work->ntypes >= work->typevec_size)
     {
-      if (typevec_size == 0)
+      if (work->typevec_size == 0)
 	{
-	  typevec_size = 3;
-	  typevec = (char **) xmalloc (sizeof (char*)*typevec_size);
+	  work->typevec_size = 3;
+	  work->typevec = (char **) xmalloc (sizeof (char*)*work->typevec_size);
 	}
       else
 	{
-	  typevec_size *= 2;
-	  typevec = (char **) xrealloc ((char *)typevec, sizeof (char*)*typevec_size);
+	  work->typevec_size *= 2;
+	  work->typevec = (char **) xrealloc ((char *)work->typevec, sizeof (char*)*work->typevec_size);
 	}
     }
   tem = (char *) xmalloc (len + 1);
   memcpy (tem, start, len);
   tem[len] = '\0';
-  typevec[ntypes++] = tem;
+  work->typevec[work->ntypes++] = tem;
 }
 
 /* `decl' must be already initialised, usually non-empty;
    it won't be freed on failure */
 
 static int
-do_args (type, decl, arg_mode)
+do_args (type, decl, work)
      const char **type;
      string *decl;
-     int arg_mode;
+     struct work_stuff *work;
 {
   string arg;
   int need_comma = 0;
@@ -1075,14 +1113,14 @@ do_args (type, decl, arg_mode)
 	  int r;
 	  int t;
 	  *type += 1;
-	  if (!get_count (type, &r) || !get_count (type, &t) || t >= ntypes)
+	  if (!get_count (type, &r) || !get_count (type, &t) || t >= work->ntypes)
 	    return 0;
 	  while (--r >= 0)
 	    {
-	      const char *tem = typevec[t];
+	      const char *tem = work->typevec[t];
 	      if (need_comma && print_arg_types)
 		string_append (decl, ", ");
-	      if (!do_arg (&tem, &arg, arg_mode))
+	      if (!do_arg (&tem, &arg, work))
 		return 0;
 	      if (print_arg_types)
 		string_appends (decl, &arg);
@@ -1094,7 +1132,7 @@ do_args (type, decl, arg_mode)
 	{
 	  if (need_comma & print_arg_types)
 	    string_append (decl, ", ");
-	  if (!do_arg (type, &arg, arg_mode))
+	  if (!do_arg (type, &arg, work))
 	    return 0;
 	  if (print_arg_types)
 	    string_appends (decl, &arg);
@@ -1122,9 +1160,9 @@ do_args (type, decl, arg_mode)
 }
 
 static void
-munge_function_name (name, arg_mode)
+munge_function_name (name, work)
      string *name;
-     int arg_mode;
+     struct work_stuff *work;
 {
   if (string_empty (name))
     return;
@@ -1173,7 +1211,7 @@ munge_function_name (name, arg_mode)
       /* type conversion operator */
       string type;
       const char *tem = name->b + 5;
-      if (do_type (&tem, &type, arg_mode))
+      if (do_type (&tem, &type, work))
 	{
 	  string_clear (name);
 	  string_append (name, "operator ");
@@ -1188,7 +1226,7 @@ munge_function_name (name, arg_mode)
       /* type conversion operator.  */
       string type;
       const char *tem = name->b + 4;
-      if (do_type (&tem, &type, arg_mode))
+      if (do_type (&tem, &type, work))
 	{
 	  string_clear (name);
 	  string_append (name, "operator ");
