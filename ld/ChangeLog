@@ -1,3 +1,10 @@
+2003-10-25  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* ChangeLog-9197: Fix typos.
+	* NEWS: Likewise.
+	* ld.texinfo: Likewise.
+	* ldlang.c: Fix comment typos.
+
 2003-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldlang.c (lang_vers_match): Fix a typo.

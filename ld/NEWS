@@ -200,7 +200,7 @@ Changes in version 2.5:
 
 * The linker now supports linking against SunOS shared libraries.  It still can
 not link SunOS PIC (Position Independent Code) files, so it can not be used to
-generate shared libaries.
+generate shared libraries.
 
 * The linker now supports linking against ELF shared libraries for the i386
 (UnixWare) and SPARC (Solaris).  It can also link ELF PIC files, and can be

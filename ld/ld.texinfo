@@ -884,7 +884,7 @@ lookup caching possible.
 
 @item defs
 Disallows undefined symbols in object files.  Undefined symbols in
-shared libaries are still allowed.
+shared libraries are still allowed.
 
 @item initfirst
 This option is only meaningful when building a shared object.

@@ -2923,8 +2923,8 @@ lang_size_sections_1
 			/* By default this is an error rather than just a
 			   warning because if we allocate the section to the
 			   default memory region we can end up creating an
-			   excessivly large binary, or even seg faulting when
-			   attmepting to perform a negative seek.  See
+			   excessively large binary, or even seg faulting when
+			   attempting to perform a negative seek.  See
 			     http://sources.redhat.com/ml/binutils/2003-04/msg00423.html
 			   for an example of this.  This behaviour can be
 			   overridden by the using the --no-check-sections
