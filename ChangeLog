@@ -1,3 +1,16 @@
+Sun Aug  1 11:36:27 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* Makefile.in (COMPRESS):  Remove def.
+	* Makefile.in (gdb.tar.gz, make-gdb.tar.gz):  Renamed from
+	gdb.tar.Z and make-gdb.tar.Z respectively.
+	* Makefile.in (make-gdb.tar.gz):  Now only build gzip'd archive.
+	* Makefile.in (make-gdb.tar.gz):  Minor changes to move closer
+	to convergence with 'taz' target in Makefile.in.
+
+Wed Jul 28 11:57:36 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* Makefile.in (BASE_FLAGS_TO_PASS): remove LOADLIBES
+
 Tue Jul 27 12:43:40 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (install-dirs): Deal with a prefix like /gnu;
