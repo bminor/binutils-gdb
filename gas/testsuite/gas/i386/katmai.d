@@ -164,7 +164,8 @@ Disassembly of section .text:
  243:	c2 0a 08 [ 	]*ret    \$0x80a
  246:	90 [ 	]*nop    
  247:	90 [ 	]*nop    
- 248:	65 0f [ 	]*sfence.*\(bad\).*
+ 248:	65 [ 	]*gs
+ 249:	0f [ 	]*sfence.*\(bad\).*
  24a:	ae [ 	]*scas   %es:\(%edi\),%al
  24b:	ff 90 90 90 90 90 [ 	]*call   \*0x90909090\(%eax\)
  251:	90 [ 	]*nop    
