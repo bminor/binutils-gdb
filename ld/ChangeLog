@@ -1,8 +1,9 @@
 Wed Jun 30 15:45:55 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
-	* Makefile.in (ldgram.[hc]): rewrite this rule in such a way that
-	  gnu make can run in parallel without colliding on yacc's static
-	  file names.
+	* Makefile.in (.y.c): skip default .y.c rules. gnu make can now
+	  run in parallel without colliding on yacc's static file names.
+	  Without the stub rule, make will try to start two yacc's
+	  concurrently which fails because of yacc's static file names.
 
 Tue Jun 29 12:20:36 1993  Ian Lance Taylor  (ian@cygnus.com)
 
