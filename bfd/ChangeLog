@@ -1,3 +1,8 @@
+2002-01-07  Geoffrey Keating  <geoffk@redhat.com>
+
+	* elflink.h (elf_link_input_bfd): Don't ask for the merged offset
+	of a symbol in a section that will be deleted.
+
 2002-01-07  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/es.po: New file: Spanish translation.
