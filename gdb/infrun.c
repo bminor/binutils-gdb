@@ -1947,6 +1947,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       context_switch (ecs);
 
+      context_changed_event (pid_to_thread_id (ecs->ptid));
       if (context_hook)
 	context_hook (pid_to_thread_id (ecs->ptid));
 

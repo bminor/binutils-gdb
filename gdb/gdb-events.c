@@ -139,6 +139,16 @@ selected_frame_level_changed_event (int level)
   current_event_hooks->selected_frame_level_changed (level);
 }
 
+void
+context_changed_event (int num)
+{
+  if (gdb_events_debug)
+    fprintf_unfiltered (gdb_stdlog, "context_changed_event\n");
+  if (!current_event_hooks->context_changed)
+    return;
+  current_event_hooks->context_changed (num);
+}
+
 #endif
 
 #if WITH_GDB_EVENTS
@@ -173,6 +183,7 @@ enum gdb_event
   architecture_changed,
   register_update,
   selected_frame_level_changed,
+  context_changed,
   nr_gdb_events
 };
 
@@ -216,6 +227,11 @@ struct selected_frame_level_changed
     int level;
   };
 
+struct context_changed
+  {
+    int num;
+  };
+
 struct event
   {
     enum gdb_event type;
@@ -230,6 +246,7 @@ struct event
 	struct tracepoint_modify tracepoint_modify;
 	struct register_update register_update;
 	struct selected_frame_level_changed selected_frame_level_changed;
+	struct context_changed context_changed;
       }
     data;
   };
@@ -326,6 +343,15 @@ queue_selected_frame_level_changed (int level)
   append (event);
 }
 
+static void
+queue_context_changed (int num)
+{
+  struct event *event = XMALLOC (struct event);
+  event->type = context_changed;
+  event->data.context_changed.num = num;
+  append (event);
+}
+
 void
 gdb_events_deliver (struct gdb_events *vector)
 {
@@ -382,6 +408,10 @@ gdb_events_deliver (struct gdb_events *vector)
 	  vector->selected_frame_level_changed
 	    (event->data.selected_frame_level_changed.level);
 	  break;
+	case context_changed:
+	  vector->context_changed
+	    (event->data.context_changed.num);
+	  break;
 	}
       delivering_events = event->next;
       xfree (event);
@@ -403,6 +433,7 @@ _initialize_gdb_events (void)
   queue_event_hooks.architecture_changed = queue_architecture_changed;
   queue_event_hooks.register_update = queue_register_update;
   queue_event_hooks.selected_frame_level_changed = queue_selected_frame_level_changed;
+  queue_event_hooks.context_changed = queue_context_changed;
 #endif
 
   c = add_set_cmd ("eventdebug", class_maintenance, var_zinteger,
