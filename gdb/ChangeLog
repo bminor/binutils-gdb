@@ -1,3 +1,17 @@
+Wed Jun  8 23:20:45 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* nlmread.c (nlm_symtab_read):  Clean up a bit.
+	* (nlm_symfile_read):  Record bounds of main() so that backtrace
+	command will know where to stop.
+	* objfiles.c (objfile_relocate):  Relocate entry point/func info
+	for backtrace as well.
+	* objfiles.h:  Define values for invalid PCs for entry point info.
+	* symfile.c (init_entry_point_info):  Initialize invalid values
+	with aforementioned macros.
+	* config/alpha/tm-alphanw.h:  Turn on FRAME_CHAIN_VALID_ALTERNATE
+	to cause backtrace to stop when it gets back to main().
+	* config/i386/tm-i386nw.h:  Ditto.
+
 Sat Jun  4 18:17:03 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	Fix value_print, which used to be ostensibly langauge-indepentdent,

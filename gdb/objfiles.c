@@ -578,6 +578,27 @@ objfile_relocate (objfile, new_offsets)
 	  }
       }
   }
+
+  if (objfile->ei.entry_point != ~0)
+    objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT);
+
+  if (objfile->ei.entry_func_lowpc != INVALID_ENTRY_LOWPC)
+    {
+      objfile->ei.entry_func_lowpc += ANOFFSET (delta, SECT_OFF_TEXT);
+      objfile->ei.entry_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT);
+    }
+
+  if (objfile->ei.entry_file_lowpc != INVALID_ENTRY_LOWPC)
+    {
+      objfile->ei.entry_file_lowpc += ANOFFSET (delta, SECT_OFF_TEXT);
+      objfile->ei.entry_file_highpc += ANOFFSET (delta, SECT_OFF_TEXT);
+    }
+
+  if (objfile->ei.main_func_lowpc != INVALID_ENTRY_LOWPC)
+    {
+      objfile->ei.main_func_lowpc += ANOFFSET (delta, SECT_OFF_TEXT);
+      objfile->ei.main_func_highpc += ANOFFSET (delta, SECT_OFF_TEXT);
+    }
 }
 
 /* Many places in gdb want to test just to see if we have any partial

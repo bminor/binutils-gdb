@@ -93,6 +93,8 @@ struct entry_info
 
   CORE_ADDR entry_point;
 
+#define INVALID_ENTRY_POINT (~0) /* ~0 will not be in any file, we hope.  */
+
   /* Start (inclusive) and end (exclusive) of function containing the
      entry point. */
 
@@ -109,6 +111,15 @@ struct entry_info
 
   CORE_ADDR main_func_lowpc;
   CORE_ADDR main_func_highpc;
+
+/* Use these values when any of the above ranges is invalid.  */
+
+/* We use these values because it guarantees that there is no number that is
+   both >= LOWPC && < HIGHPC.  It is also highly unlikely that 3 is a valid
+   module or function start address (as opposed to 0).  */
+
+#define INVALID_ENTRY_LOWPC (3)
+#define INVALID_ENTRY_HIGHPC (1)
 
 };
 

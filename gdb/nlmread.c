@@ -150,25 +150,18 @@ nlm_symtab_read (abfd, addr, objfile)
 	      symaddr = sym -> value + sym -> section -> vma;
 	      /* Relocate all non-absolute symbols by base address.  */
 	      if (sym -> section != &bfd_abs_section)
-		{
-		  symaddr += addr;
-		}
+		symaddr += addr;
 
 	      /* For non-absolute symbols, use the type of the section
-		 they are relative to, to intuit text/data.  Bfd provides
+		 they are relative to, to intuit text/data.  BFD provides
 		 no way of figuring this out for absolute symbols. */
 	      if (sym -> section -> flags & SEC_CODE)
-		{
-		  ms_type = mst_text;
-		}
+		ms_type = mst_text;
 	      else if (sym -> section -> flags & SEC_DATA)
-		{
-		  ms_type = mst_data;
-		}
+		ms_type = mst_data;
 	      else
-		{
-		  ms_type = mst_unknown;
-		}
+		ms_type = mst_unknown;
+
 	      record_minimal_symbol ((char *) sym -> name, symaddr, ms_type,
 				     objfile);
 	    }
@@ -214,6 +207,7 @@ nlm_symfile_read (objfile, section_offsets, mainline)
   bfd *abfd = objfile -> obfd;
   struct cleanup *back_to;
   CORE_ADDR offset;
+  struct symbol *mainsym;
 
   init_minimal_symbol_collection ();
   back_to = make_cleanup (discard_minimal_symbols, 0);
@@ -229,6 +223,15 @@ nlm_symfile_read (objfile, section_offsets, mainline)
 
   stabsect_build_psymtabs (objfile, section_offsets, mainline, ".stab",
 			   ".stabstr");
+
+  mainsym = lookup_symbol ("main", NULL, VAR_NAMESPACE, NULL, NULL);
+
+  if (mainsym
+      && mainsym->class == LOC_BLOCK)
+    {
+      objfile->ei.main_func_lowpc = BLOCK_START (SYMBOL_BLOCK_VALUE (mainsym));
+      objfile->ei.main_func_highpc = BLOCK_END (SYMBOL_BLOCK_VALUE (mainsym));
+    }
 
   /* FIXME:  We could locate and read the optional native debugging format
      here and add the symbols to the minimal symbol table. */

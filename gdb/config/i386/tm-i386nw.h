@@ -1,5 +1,5 @@
-/* Macro definitions for i386 running under Univel NetWare.
-   Copyright 1993 Free Software Foundation, Inc.
+/* Macro definitions for i386 running NetWare.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -25,3 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    be extracted out and placed in a tm-i386.h file that all the others,
    including tm-i386v.h, includes as needed. */
 #include "i386/tm-i386v.h"
+
+/* Stop backtracing when we wander into main.  */
+
+#define FRAME_CHAIN_VALID_ALTERNATE

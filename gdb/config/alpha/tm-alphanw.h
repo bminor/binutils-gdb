@@ -8,3 +8,7 @@
 #define VM_MIN_ADDRESS ((CORE_ADDR)0)
 
 #include "alpha/tm-alpha.h"
+
+/* Stop backtracing when we wander into main.  */
+
+#define FRAME_CHAIN_VALID_ALTERNATE
