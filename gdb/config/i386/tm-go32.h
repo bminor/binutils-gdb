@@ -48,4 +48,20 @@
 #undef  FRAME_SAVED_PC
 #define FRAME_SAVED_PC(FRAME) (read_memory_integer ((FRAME)->frame + 4, 4))
 
+/* Support for longjmp.  */
+
+/* Details about jmp_buf.  It's supposed to be an array of integers.  */
+
+#define JB_ELEMENT_SIZE 4	/* Size of elements in jmp_buf.  */
+#define JB_PC		8	/* Array index of saved PC inside jmp_buf.  */
+
+/* Figure out where the longjmp will land.  Slurp the args out of the
+   stack.  We expect the first arg to be a pointer to the jmp_buf
+   structure from which we extract the pc (JB_PC) that we will land
+   at.  The pc is copied into ADDR.  This routine returns true on
+   success.  */
+
+#define GET_LONGJMP_TARGET(addr) get_longjmp_target (addr)
+extern int get_longjmp_target (CORE_ADDR *addr);
+
 #endif /* TM_GO32_H */
