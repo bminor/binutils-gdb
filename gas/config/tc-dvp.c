@@ -546,11 +546,9 @@ assemble_vif (str)
 	     with a symbol that marks the beginning of the aligned data.  */
 
 	  /* Ensure relaxable fragments are in their own fragment.
-	     Otherwise there can be two fixups in one fragment
-	     (e.g. a dma tag followed by a `direct' insn) and md_apply_fix3
-	     has trouble determining where to apply the fixup (because
-	     we set fr_opcode for the `direct' insn because it can move
-	     in the fragment).  */
+	     Otherwise md_apply_fix3 mishandles fixups to insns earlier
+	     in the fragment (because we set fr_opcode for the `direct' insn
+	     because it can move in the fragment).  */
 	  frag_wane (frag_now);
 	  frag_new (0);
 
@@ -598,11 +596,9 @@ assemble_vif (str)
 	     with a symbol that marks the beginning of the aligned data.  */
 
 	  /* Ensure relaxable fragments are in their own fragment.
-	     Otherwise there can be two fixups in one fragment
-	     (e.g. a dma tag followed by a `direct' insn) and md_apply_fix3
-	     has trouble determining where to apply the fixup (because
-	     we set fr_opcode for the `direct' insn because it can move
-	     in the fragment).  */
+	     Otherwise md_apply_fix3 mishandles fixups to insns earlier
+	     in the fragment (because we set fr_opcode for the `direct' insn
+	     because it can move in the fragment).  */
 	  frag_wane (frag_now);
 	  frag_new (0);
 
