@@ -4928,9 +4928,9 @@ print_prmask (mask)
 }
 
 /*
-  .pred.rel.clear [p1 [,p2 [,...]]]     (also .pred.rel "clear")
-  .pred.rel.imply p1, p2                (also .pred.rel "imply")
-  .pred.rel.mutex p1, p2 [,...]         (also .pred.rel "mutex")
+  .pred.rel.clear [p1 [,p2 [,...]]]     (also .pred.rel "clear" or @clear)
+  .pred.rel.imply p1, p2                (also .pred.rel "imply" or @imply)
+  .pred.rel.mutex p1, p2 [,...]         (also .pred.rel "mutex" or @mutex)
   .pred.safe_across_calls p1 [, p2 [,...]]
  */
 
@@ -4944,28 +4944,43 @@ dot_pred_rel (type)
 
   if (type == 0)
     {
-      if (*input_line_pointer != '"')
-	{
-	  as_bad (_("Missing predicate relation type"));
-	  ignore_rest_of_line ();
-	  return;
-	}
-      else
+      if (*input_line_pointer == '"')
 	{
 	  int len;
 	  char *form = demand_copy_C_string (&len);
+
 	  if (strcmp (form, "mutex") == 0)
 	    type = 'm';
 	  else if (strcmp (form, "clear") == 0)
 	    type = 'c';
 	  else if (strcmp (form, "imply") == 0)
 	    type = 'i';
-	  else
-	    {
-	      as_bad (_("Unrecognized predicate relation type"));
-	      ignore_rest_of_line ();
-	      return;
-	    }
+	  obstack_free (&notes, form);
+	}
+      else if (*input_line_pointer == '@')
+	{
+	  char *form = ++input_line_pointer;
+	  char c = get_symbol_end();
+
+	  if (strcmp (form, "mutex") == 0)
+	    type = 'm';
+	  else if (strcmp (form, "clear") == 0)
+	    type = 'c';
+	  else if (strcmp (form, "imply") == 0)
+	    type = 'i';
+	  *input_line_pointer = c;
+	}
+      else
+	{
+	  as_bad (_("Missing predicate relation type"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+      if (type == 0)
+	{
+	  as_bad (_("Unrecognized predicate relation type"));
+	  ignore_rest_of_line ();
+	  return;
 	}
       if (*input_line_pointer == ',')
 	++input_line_pointer;

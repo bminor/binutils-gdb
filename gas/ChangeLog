@@ -1,3 +1,9 @@
+2005-02-02  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (dot_pred_rel): Update comment. Handle @-prefixed
+	designators along with quoted ones. Free copy of quoted designator
+	when done.
+
 2005-02-01  Ben Elliston  <bje@au.ibm.com>
 
 	* config/atof-ieee.c, config/obj-coff.c, config/obj-elf.c,

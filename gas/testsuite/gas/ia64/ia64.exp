@@ -37,6 +37,7 @@ if [istarget "ia64-*"] then {
     run_dump_test "dv-branch"
     run_dump_test "dv-imply"
     run_dump_test "dv-mutex"
+    gas_test "pred-rel.s" "" "" ".pred.rel alternative forms"
     run_dump_test "dv-safe"
     run_dump_test "dv-srlz"
     run_dump_test "tls"

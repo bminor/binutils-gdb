@@ -1,3 +1,8 @@
+2005-02-02  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/pred-rel.s: New.
+	* gas/ia64/ia64.exp: Run new test.
+
 2005-01-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gas/mips/elf-rel23.d, gas/mips/elf-rel23a.d: Accept little-endian.
