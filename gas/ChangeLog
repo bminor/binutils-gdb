@@ -1,3 +1,9 @@
+2000-08-30  Matthew Jacob  <mjacob@feral.com>
+
+	* config/tc-alpha.c (md_undefined_symbol): Properly understand that
+	$at is the integer register $r28, vs. both $r28 and the floating
+	point register $f28.
+
 2000-04-14  Matthew Green  <mrg@cygnus.com>
 	
 	* configure.in: Add NetBSD/sparc ELF and NetBSD/sparc64 support.
