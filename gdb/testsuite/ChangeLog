@@ -1,3 +1,56 @@
+Mon Jan  4 10:06:43 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	* gdb.base/all-types.c: new file.
+	* gdb.base/call-array-struct.c: new file.
+	* gdb.base/call-return-struct.c: new file.
+	* gdb.base/call-strings.c: new file.
+	* gdb.base/callfuncs2.c: new file.
+	* gdb.base/condbreak.c: new file.
+	* gdb.base/constvars.c: new file.
+	* gdb.base/display.c: new file.
+	* gdb.base/int-type.c: new file.
+	* gdb.base/jump.c: new file.
+	* gdb.base/miscexprs.c: new file.
+	* gdb.base/pointers.c: new file.
+	* gdb.base/pointers2.c: new file.
+	* gdb.base/shmain.c: new file.
+	* gdb.base/shr1.c: new file.
+	* gdb.base/shr2.c: new file.
+	* gdb.base/solib.c: new file.
+	* gdb.base/solib1.c: new file.
+	* gdb.base/solib2.c: new file.
+	* gdb.base/varargs.c: new file.
+	* gdb.c++/derivation.cc: new file.
+	* gdb.c++/overload.cc: new file.
+	* gdb.c++/ovldbreak.cc: new file.
+	* gdb.hp/attach.c: new file.
+	* gdb.hp/attach2.c: new file.
+	* gdb.hp/average.c: new file.
+	* gdb.hp/compiler.c: new file.
+	* gdb.hp/compiler.cc: new file.
+	* gdb.hp/execd-program.c: new file.
+	* gdb.hp/follow-exec.c: new file.
+	* gdb.hp/follow-fork.c: new file.
+	* gdb.hp/follow-vfork-and-exec.c: new file.
+	* gdb.hp/misc-hp.cc: new file.
+	* gdb.hp/more-steps.c: new file.
+	* gdb.hp/optimize.c: new file.
+	* gdb.hp/quicksort.c: new file.
+	* gdb.hp/run-hp.c: new file.
+	* gdb.hp/start-stop.c: new file.
+	* gdb.hp/sum.c: new file.
+	* gdb.hp/templates-hp.cc: new file.
+	* gdb.hp/thread-local-in-lib.c: new file.
+	* gdb.hp/thread-local-in-lib.h: new file.
+	* gdb.hp/thread-local-in-lib.lib.c: new file.
+	* gdb.hp/vforked-program.c: new file.
+	* gdb.hp/virtfunc-hp.cc: new file.
+	* gdb.hp/watchpoint-hp.c: new file.
+	* gdb.hp/xdb.c: new file.
+	* gdb.hp/xdb0.c: new file.
+	* gdb.hp/xdb0.h: new file.
+	* gdb.hp/xdb1.c: new file.
+
 start-sanitize-gdbtk
 Wed Dec 30 08:52:58 1998  Keith Seitz  <keiths@cygnus.com>
 
