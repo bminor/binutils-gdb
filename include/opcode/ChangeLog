@@ -1,3 +1,9 @@
+Wed Jun  3 18:28:45 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386.h: (one_byte_segment_defaults): Remove.
+	(two_byte_segment_defaults): Remove.
+	(i386_regtab): Add BaseIndex to 32 bit regs reg_type.
+
 Fri May 15 15:59:04 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.h (cgen_hw_lookup_by_name): Renamed from cgen_hw_lookup.
