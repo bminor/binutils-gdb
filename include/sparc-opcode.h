@@ -992,12 +992,12 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 #undef tr
 
 #define brr(opcode, mask, lose, flags) /* v9 */ \
- { opcode, (mask), (lose)|ANNUL|BPRED, "k",   F_DELAYED|(flags), v9 }, \
- { opcode, (mask), (lose)|ANNUL|BPRED, ",Nk", F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",ak", F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,Nk", F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|BPRED, (lose)|ANNUL, ",Tk",   F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|ANNUL|BPRED, (lose), ",a,Tk", F_DELAYED|(flags), v9 }
+ { opcode, (mask), (lose)|ANNUL|BPRED, "1,k",   F_DELAYED|(flags), v9 }, \
+ { opcode, (mask), (lose)|ANNUL|BPRED, ",N1,k", F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",a1,k", F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,N1,k", F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|BPRED, (lose)|ANNUL, ",T1,k",   F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|ANNUL|BPRED, (lose), ",a,T1,k", F_DELAYED|(flags), v9 }
 
 #define condr(bop, mask, flags) /* v9 */ \
   brr(bop, F2(0, 3)|COND(mask), F2(~0, ~3)|COND(~(mask)), (flags)) /* v9 */ \
