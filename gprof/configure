@@ -794,7 +794,7 @@ fi
 
 PACKAGE=gprof
 
-VERSION=2.8.2
+VERSION=2.9.1
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
