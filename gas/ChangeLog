@@ -1,3 +1,8 @@
+Tue Oct 20 11:18:28 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (i386_operand): Check for garbage after
+	register name.
+
 Tue Oct 20 10:49:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (md_apply_fix3): Change handling of PCREL reloc

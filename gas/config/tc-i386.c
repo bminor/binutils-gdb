@@ -2305,63 +2305,59 @@ i386_operand (operand_string)
       op_string = end_op;
       if (is_space_char (*op_string))
 	++op_string;
-      if (*op_string == ':')
+      if (*op_string == ':' && (r->reg_type & (SReg2 | SReg3)))
 	{
-	  if (r->reg_type & (SReg2 | SReg3))
+	  switch (r->reg_num)
 	    {
-	      switch (r->reg_num)
-		{
-		case 0:
-		  i.seg[i.mem_operands] = &es;
-		  break;
-		case 1:
-		  i.seg[i.mem_operands] = &cs;
-		  break;
-		case 2:
-		  i.seg[i.mem_operands] = &ss;
-		  break;
-		case 3:
-		  i.seg[i.mem_operands] = &ds;
-		  break;
-		case 4:
-		  i.seg[i.mem_operands] = &fs;
-		  break;
-		case 5:
-		  i.seg[i.mem_operands] = &gs;
-		  break;
-		}
+	    case 0:
+	      i.seg[i.mem_operands] = &es;
+	      break;
+	    case 1:
+	      i.seg[i.mem_operands] = &cs;
+	      break;
+	    case 2:
+	      i.seg[i.mem_operands] = &ss;
+	      break;
+	    case 3:
+	      i.seg[i.mem_operands] = &ds;
+	      break;
+	    case 4:
+	      i.seg[i.mem_operands] = &fs;
+	      break;
+	    case 5:
+	      i.seg[i.mem_operands] = &gs;
+	      break;
+	    }
 
-	      /* Skip the ':' and whitespace.  */
+	  /* Skip the ':' and whitespace.  */
+	  ++op_string;
+	  if (is_space_char (*op_string))
+	    ++op_string;
+
+	  /* Pretend given string starts here. */
+	  operand_string = op_string;
+	  if (!is_digit_char (*op_string)
+	      && !is_identifier_char (*op_string)
+	      && *op_string != '('
+	      && *op_string != ABSOLUTE_PREFIX)
+	    {
+	      as_bad (_("bad memory operand `%s'"), op_string);
+	      return 0;
+	    }
+	  /* Handle case of %es:*foo. */
+	  if (*op_string == ABSOLUTE_PREFIX)
+	    {
 	      ++op_string;
 	      if (is_space_char (*op_string))
 		++op_string;
-
-	      /* Pretend given string starts here. */
-	      operand_string = op_string;
-	      if (!is_digit_char (*op_string)
-		  && !is_identifier_char (*op_string)
-		  && *op_string != '('
-		  && *op_string != ABSOLUTE_PREFIX)
-		{
-		  as_bad (_("bad memory operand `%s'"), op_string);
-		  return 0;
-		}
-	      /* Handle case of %es:*foo. */
-	      if (*op_string == ABSOLUTE_PREFIX)
-		{
-		  ++op_string;
-		  if (is_space_char (*op_string))
-		    ++op_string;
-		  i.types[this_operand] |= JumpAbsolute;
-		}
-	      goto do_memory_reference;
+	      i.types[this_operand] |= JumpAbsolute;
 	    }
-	  else
-	    {
-	      as_bad (_("bad segment prefix `%c%s'"),
-		      REGISTER_PREFIX, r->reg_name);
-	      return 0;
-	    }
+	  goto do_memory_reference;
+	}
+      if (*op_string)
+	{
+	  as_bad (_("Junk `%s' after register"), op_string);
+	  return 0;
 	}
       i.types[this_operand] |= r->reg_type & ~BaseIndex;
       i.regs[this_operand] = r;
