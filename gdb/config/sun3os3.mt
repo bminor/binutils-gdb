@@ -1,4 +1,4 @@
-# Sun 3, running SunOS 3
+# Target: Sun 3, running SunOS 3
 # The system-supplied assembler re-orders the symbols so that gdb
 # can't find "gcc_compiled.".
 #msg If you compile your program with GCC, use the GNU assembler.

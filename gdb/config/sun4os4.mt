@@ -1,4 +1,4 @@
-# Sun 4 or Sparcstation, running SunOS 4
+# Target: Sun 4 or Sparcstation, running SunOS 4
 # The system-supplied assembler re-orders the symbols so that gdb
 # can't find "gcc_compiled.".
 #msg If you compile your program with GCC, use the GNU assembler.

@@ -1,4 +1,4 @@
-# Hewlett-Packard 9000 series 300, running HPUX
+# Target: Hewlett-Packard 9000 series 300, running HPUX
 
 #msg Note that GDB can only read symbols from programs that were
 #msg compiled with GCC

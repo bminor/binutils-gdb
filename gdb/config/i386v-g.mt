@@ -1,4 +1,4 @@
-# Intel 386 running System V, using COFF encapsulation
+# Target: Intel 386 running System V, using COFF encapsulation
 
 #msg Use of the COFF encapsulation features requires the GNU binary utilities
 #msg to be ahead of their System V counterparts in your path.

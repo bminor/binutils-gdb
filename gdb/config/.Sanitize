@@ -34,6 +34,7 @@ am29k
 arm
 bigmips
 convex
+dec3100
 hp300bsd
 hp300hpux
 i386sco
@@ -76,7 +77,13 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 22:05:24  rich
+# Revision 1.2  1991/07/04 21:55:38  gnu
+#         * Add dec3100 as equivalent to littlemips.  Indicate in all host &
+#         target config files that they are for the host.  When the lines
+#         get copied into the Makefile, this makes it more obvious what's
+#         up.
+#
+# Revision 1.1  1991/05/23  22:05:24  rich
 # Initial revision
 #
 # Revision 1.2  1991/05/23  21:15:10  rich
