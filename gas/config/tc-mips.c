@@ -140,11 +140,7 @@ mips_target_format ()
 
 /* This is the set of options which may be modified by the .set
    pseudo-op.  We use a struct so that .set push and .set pop are more
-   reliable.
-
-   FIXME: The CPU specific variables (mips_4010, et. al.) should
-   probably be in here as well, and there should probably be some way
-   to set them.  */
+   reliable.  */
 
 struct mips_set_options
 {
@@ -204,71 +200,43 @@ static char* mips_abi_string = 0;
 /* Wether we should mark the file EABI64 or EABI32. */
 static int mips_eabi64 = 0;
 
-/* Whether the 4650 instructions (mad/madu) are permitted.  */
-static int mips_4650 = -1;
-
-/* Whether the 4010 instructions are permitted.  */
-static int mips_4010 = -1;
-
-/* Whether the 4100 MADD16 and DMADD16 are permitted. */
-static int mips_4100 = -1;
-
-/* start-sanitize-vr4xxx */
-/* Whether NEC 4121 instructions are permitted. */
-static int mips_4121 = -1;
-
-/* end-sanitize-vr4xxx */
-/* start-sanitize-vr4320 */
-/* Whether NEC vr4320 instructions are permitted. */
-static int mips_4320 = -1;
-
-/* end-sanitize-vr4320 */
-/* start-sanitize-cygnus */
-/* Whether NEC vr5400 instructions are permitted. */
-static int mips_5400 = -1;
-
-/* end-sanitize-cygnus */
-/* start-sanitize-r5900 */
-/* Whether Toshiba r5900 instructions are permitted. */
-static int mips_5900 = -1;
-
-/* end-sanitize-r5900 */
-/* Whether Toshiba r3900 instructions are permitted. */
-static int mips_3900 = -1;
-
-/* start-sanitize-tx49 */
-/* Whether Toshiba r4900 instructions are permitted. */
-static int mips_4900 = -1;
-
-/* end-sanitize-tx49 */
-/* start-sanitize-tx19 */
-/* The tx19 (r1900) is a mips16 decoder with a tx39(r3900) behind it.
-   The tx19 related options and configuration bits are handled by 
-   the tx39 flags. */
-/* end-sanitize-tx19 */
 
 /* Whether the processor uses hardware interlocks to protect 
    reads from the HI and LO registers, and thus does not
    require nops to be inserted.
 
-   FIXME: We really should not be checking mips_cpu here.  The -mcpu=
-   option is documented to not do anything special.  In gcc, the
-   -mcpu= option only affects scheduling, and does not affect code
-   generation.  Each test of -mcpu= here should actually be testing a
-   specific variable, such as mips_4010, and each such variable should
-   have a command line option to set it.  The -mcpu= option may be
-   used to set the default value of these options, as is the case for
-   mips_4010.  */
+   FIXME: GCC makes a distinction between -mcpu=FOO and -mFOO:
+   -mcpu=FOO schedules for FOO, but still produces code that meets the
+   requirements of MIPS ISA I.  For example, it won't generate any
+   FOO-specific instructions, and it will still assume that any
+   scheduling hazards described in MIPS ISA I are there, even if FOO
+   has interlocks.  -mFOO gives GCC permission to generate code that
+   will only run on a FOO; it will generate FOO-specific instructions,
+   and assume interlocks provided by a FOO.
 
-#define hilo_interlocks (mips_4010                                  \
+   However, GAS currently doesn't make this distinction; before Jan 28
+   1999, GAS's -mcpu=FOO implied -mFOO, which violates GCC's
+   assumptions.  The GCC driver passes these flags through to GAS, so
+   if GAS actually does anything that doesn't meet MIPS ISA I with
+   -mFOO, then GCC's -mcpu=FOO flag isn't going to work.
+
+   And furthermore, it did not assume that -mFOO implied -mcpu=FOO,
+   which seems senseless --- why generate code which will only run on
+   a FOO, but schedule for something else?
+
+   So now, at least, -mcpu=FOO and -mFOO are exactly equivalent.
+
+   -- Jim Blandy <jimb@cygnus.com> */
+
+#define hilo_interlocks (mips_cpu == 4010                           \
                          /* start-sanitize-tx49 */                  \
-                         || mips_cpu == 4900 || mips_4900           \
+                         || mips_cpu == 4900                        \
                          /* end-sanitize-tx49 */                    \
 			 /* start-sanitize-vr4320 */		    \
 			 || mips_cpu == 4320			    \
 			 /* end-sanitize-vr4320 */		    \
 			 /* start-sanitize-r5900 */		    \
-			 || mips_5900                               \
+			 || mips_cpu == 5900                        \
 			 /* end-sanitize-r5900 */		    \
                          )
 
@@ -277,12 +245,12 @@ static int mips_4900 = -1;
 #define gpr_interlocks \
   (mips_opts.isa >= 2  \
 /* start-sanitize-cygnus */ \
-   || mips_5400 \
+   || mips_cpu == 5400 \
 /* end-sanitize-cygnus */ \
 /* start-sanitize-r5900 */ \
-   || mips_5900 \
+   || mips_cpu == 5900 \
 /* end-sanitize-r5900 */ \
-   || mips_3900)
+   || mips_cpu == 3900)
 
 /* As with other "interlocks" this is used by hardware that has FP
    (co-processor) interlocks.  */
@@ -1053,48 +1021,6 @@ md_begin ()
 	mips_opts.mips16 = 0;
     }
 
-  if (mips_4650 < 0)
-    mips_4650 = (mips_cpu == 4650);
-
-  if (mips_4010 < 0)
-    mips_4010 = (mips_cpu == 4010);
-
-  if (mips_4100 < 0)
-    mips_4100 = (mips_cpu == 4100
-		 /* start-sanitize-vr4xxx */
-		 || mips_cpu == 4111
-		 /* end-sanitize-vr4xxx */
-		 );
-
-  /* start-sanitize-vr4xxx */
-  if (mips_4121 < 0)
-    mips_4121 = (mips_cpu == 4121);
-
-  /* end-sanitize-vr4xxx */
-  /* start-sanitize-vr4320 */
-  if (mips_4320 < 0)
-    mips_4320 = (mips_cpu == 4320);
-
-  /* end-sanitize-vr4320 */
-  /* start-sanitize-cygnus */
-  if (mips_5400 < 0)
-    mips_5400 = (mips_cpu == 5400);
-  /* end-sanitize-cygnus */
-
-  /* start-sanitize-r5900 */
-  if (mips_5900 < 0)
-    mips_5900 = (mips_cpu == 5900);
-  /* end-sanitize-r5900 */
-
-  if (mips_3900 < 0)
-    mips_3900 = (mips_cpu == 3900);
-
-  /* start-sanitize-tx49 */
-  if (mips_4900 < 0)
-    mips_4900 = (mips_cpu == 4900);
-
-  /* end-sanitize-tx49 */
-
   /* End of TARGET_CPU processing, get rid of malloced memory
      if necessary. */
   cpu = NULL;
@@ -1685,7 +1611,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
              though the tx39's divide insns still do require the 
 	     delay. */
 	  if (! (hilo_interlocks
-		 || (mips_3900 && (pinfo & INSN_MULT)))
+		 || (mips_cpu == 3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_LO)))
 	    nops += 2;
@@ -1707,7 +1633,7 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	     insert a NOP.  Some newer processors have interlocks.
 	     Also the note tx39's multiply above. */
 	  if (! (hilo_interlocks
-		 || (mips_3900 && (pinfo & INSN_MULT)))
+		 || (mips_cpu == 3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_HI)))
 	    nops += 2;
@@ -1746,11 +1672,11 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
 	      && (pinfo & INSN_WRITE_LO)
 	      && ! (hilo_interlocks
-		    || (mips_3900 && (pinfo & INSN_MULT))))
+		    || (mips_cpu == 3900 && (pinfo & INSN_MULT))))
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 	      && (pinfo & INSN_WRITE_HI)
 	      && ! (hilo_interlocks
-		    || (mips_3900 && (pinfo & INSN_MULT)))))
+		    || (mips_cpu == 3900 && (pinfo & INSN_MULT)))))
 	prev_prev_nop = 1;
       else
 	prev_prev_nop = 0;
@@ -2143,7 +2069,8 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		      & (INSN_LOAD_COPROC_DELAY
 			 | INSN_COPROC_MOVE_DELAY
 			 | INSN_WRITE_COND_CODE)))
-	      || (! (hilo_interlocks || (mips_3900 && (pinfo & INSN_MULT)))
+	      || (! (hilo_interlocks
+		     || (mips_cpu == 3900 && (pinfo & INSN_MULT)))
 		  && (prev_pinfo
 		      & (INSN_READ_LO
 			 | INSN_READ_HI)))
@@ -2647,38 +2574,42 @@ macro_build (place, counter, ep, name, fmt, va_alist)
       if (strcmp (fmt, insn.insn_mo->args) == 0
 	  && insn.insn_mo->pinfo != INSN_MACRO
 	  && (insn_isa <= mips_opts.isa
-	      || (mips_4650
+	      || (mips_cpu == 4650
 		  && (insn.insn_mo->membership & INSN_4650) != 0)
-	      || (mips_4010
+	      || (mips_cpu == 4010
 		  && (insn.insn_mo->membership & INSN_4010) != 0)
-	      || (mips_4100
+	      || ((mips_cpu == 4100
+		   /* start-sanitize-vr4xxx */
+		   || mips_cpu == 4111
+		   /* end-sanitize-vr4xxx */
+		   )
 		  && (insn.insn_mo->membership & INSN_4100) != 0)
 	      /* start-sanitize-vr4xxx */
-	      || (mips_4121
+	      || (mips_cpu == 4121
 		  && (insn.insn_mo->membership & INSN_4121) != 0)
 	      /* end-sanitize-vr4xxx */
 	      /* start-sanitize-vr4320 */
-	      || (mips_4320
+	      || (mips_cpu == 4320
 		  && (insn.insn_mo->membership & INSN_4320) != 0)
 	      /* end-sanitize-vr4320 */
 	      /* start-sanitize-tx49 */
-	      || (mips_4900
+	      || (mips_cpu == 4900
 		  && (insn.insn_mo->membership & INSN_4900) != 0)
 	      /* end-sanitize-tx49 */
 	      /* start-sanitize-r5900 */
-	      || (mips_5900
+	      || (mips_cpu == 5900
 		  && (insn.insn_mo->membership & INSN_5900) != 0)
 	      /* end-sanitize-r5900 */
 	      /* start-sanitize-cygnus */
-	      || (mips_5400
+	      || (mips_cpu == 5400
 		  && (insn.insn_mo->membership & INSN_5400) != 0)
 	      /* end-sanitize-cygnus */
-	      || (mips_3900
+	      || (mips_cpu == 3900
 		  && (insn.insn_mo->membership & INSN_3900) != 0))
 	  /* start-sanitize-r5900 */
-	  && (! mips_5900 || (insn.insn_mo->pinfo & FP_D) == 0)
+	  && (mips_cpu != 5900 || (insn.insn_mo->pinfo & FP_D) == 0)
 	  /* end-sanitize-r5900 */
-	  && (! mips_4650 || (insn.insn_mo->pinfo & FP_D) == 0))
+	  && (mips_cpu != 4650 || (insn.insn_mo->pinfo & FP_D) == 0))
 	break;
 
       ++insn.insn_mo;
@@ -4121,7 +4052,7 @@ macro (ip)
 	    macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", 0, 0);
 	  else
 	    /* start-sanitize-r5900 */
-	    if (mips_5900)
+	    if (mips_cpu == 5900)
 	      macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
 	    else
 	    /* end-sanitize-r5900 */
@@ -4147,7 +4078,7 @@ macro (ip)
 		       dbl ? "ddiv" : "div",
 		       "z,s,t", sreg, treg);
 	  /* start-sanitize-r5900 */
-	  if (mips_5900)
+	  if (mips_cpu == 5900)
 	    macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
 	  else
 	    /* end-sanitize-r5900 */
@@ -4191,7 +4122,7 @@ macro (ip)
 	  --mips_opts.noreorder;
 
 	  /* start-sanitize-r5900 */
-	  if (mips_5900)
+	  if (mips_cpu == 5900)
 	    macro_build ((char *) NULL, &icnt, NULL, "break", "B", 6);
 	  else
 	    /* end-sanitize-r5900 */
@@ -4243,7 +4174,7 @@ macro (ip)
 	    macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", 0, 0);
 	  else
 	    /* start-sanitize-r5900 */
-	    if (mips_5900)
+	    if (mips_cpu == 5900)
 	      macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
 	    else
 	      /* end-sanitize-r5900 */
@@ -4319,7 +4250,7 @@ macro (ip)
 	     that later insns are available for delay slot filling.  */
 	  --mips_opts.noreorder;
 	  /* start-sanitize-r5900 */
-	  if (mips_5900)
+	  if (mips_cpu == 5900)
 	    macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
 	  else
 	    /* end-sanitize-r5900 */
@@ -5019,7 +4950,7 @@ macro (ip)
       lr = 1;
       goto ld;
     case M_LDC1_AB:
-      if (mips_4650)
+      if (mips_cpu == 4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -5108,7 +5039,7 @@ macro (ip)
       s = "scd";
       goto st;
     case M_SDC1_AB:
-      if (mips_4650)
+      if (mips_cpu == 4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -5596,7 +5527,7 @@ macro (ip)
 	}
 
     case M_L_DOB:
-      if (mips_4650)
+      if (mips_cpu == 4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -5637,7 +5568,7 @@ macro (ip)
        * But, the resulting address is the same after relocation so why
        * generate the extra instruction?
        */
-      if (mips_4650)
+      if (mips_cpu == 4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -5655,7 +5586,7 @@ macro (ip)
       goto ldd_std;
 
     case M_S_DAB:
-      if (mips_4650)
+      if (mips_cpu == 4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -6209,7 +6140,7 @@ macro2 (ip)
 	  macro_build ((char *) NULL, &icnt, &expr1, "beq", "s,t,p", dreg, AT);
 	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
 	  /* start-sanitize-r5900 */
-	  if (mips_5900)
+	  if (mips_cpu == 5900)
 	    macro_build ((char *) NULL, &icnt, NULL, "break", "B", 6);
 	  else
 	    /* end-sanitize-r5900 */
@@ -6247,7 +6178,7 @@ macro2 (ip)
 	  macro_build ((char *) NULL, &icnt, &expr1, "beq", "s,t,p", AT, 0);
 	  macro_build ((char *) NULL, &icnt, NULL, "nop", "", 0);
 	  /* start-sanitize-r5900 */
-	  if (mips_5900)
+	  if (mips_cpu == 5900)
 	    macro_build ((char *) NULL, &icnt, NULL, "break", "B", 6);
 	  else
 	    /* end-sanitize-r5900 */
@@ -6293,7 +6224,7 @@ macro2 (ip)
       break;
 
     case M_S_DOB:
-      if (mips_4650)
+      if (mips_cpu == 4650)
 	{
 	  as_bad (_("opcode not supported on this processor"));
 	  return;
@@ -6905,7 +6836,7 @@ mips16_macro (ip)
       expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "bnez", "x,p", yreg);
       /* start-sanitize-r5900 */
-      if (mips_5900)
+      if (mips_cpu == 5900)
 	macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
       else
 	/* end-sanitize-r5900 */
@@ -6942,7 +6873,7 @@ mips16_macro (ip)
       expr1.X_add_number = 2;
       macro_build ((char *) NULL, &icnt, &expr1, "bnez", "x,p", yreg);
       /* start-sanitize-r5900 */
-      if (mips_5900)
+      if (mips_cpu == 5900)
 	macro_build ((char *) NULL, &icnt, NULL, "break", "B", 7);
       else
 	/* end-sanitize-r5900 */
@@ -7323,35 +7254,40 @@ mips_ip (str, ip)
 	ok = true;
       else if (insn->pinfo == INSN_MACRO)
 	ok = false;
-      else if ((mips_4650 && (insn->membership & INSN_4650) != 0)
-	       || (mips_4010 && (insn->membership & INSN_4010) != 0)
-	       || (mips_4100 && (insn->membership & INSN_4100) != 0)
+      else if ((mips_cpu == 4650 && (insn->membership & INSN_4650) != 0)
+	       || (mips_cpu == 4010 && (insn->membership & INSN_4010) != 0)
+	       || ((mips_cpu == 4100
+		    /* start-sanitize-vr4xxx */
+		    || mips_cpu == 4111
+		    /* end-sanitize-vr4xxx */
+		    )
+		   && (insn->membership & INSN_4100) != 0)
 	       /* start-sanitize-vr4xxx */
-	       || (mips_4121 && (insn->membership & INSN_4121) != 0)
+	       || (mips_cpu == 4121 && (insn->membership & INSN_4121) != 0)
 	       /* end-sanitize-vr4xxx */
 	       /* start-sanitize-vr4320 */
-	       || (mips_4320 && (insn->membership & INSN_4320) != 0)
+	       || (mips_cpu == 4320 && (insn->membership & INSN_4320) != 0)
 	       /* end-sanitize-vr4320 */
 	       /* start-sanitize-tx49 */
-	       || (mips_4900 && (insn->membership & INSN_4900) != 0)
+	       || (mips_cpu == 4900 && (insn->membership & INSN_4900) != 0)
 	       /* end-sanitize-tx49 */
 	       /* start-sanitize-r5900 */
-	       || (mips_5900 && (insn->membership & INSN_5900) != 0)
+	       || (mips_cpu == 5900 && (insn->membership & INSN_5900) != 0)
 	       /* end-sanitize-r5900 */
 	       /* start-sanitize-cygnus */
-	       || (mips_5400 && (insn->membership & INSN_5400) != 0)
+	       || (mips_cpu == 5400 && (insn->membership & INSN_5400) != 0)
 	       /* end-sanitize-cygnus */
-	       || (mips_3900 && (insn->membership & INSN_3900) != 0))
+	       || (mips_cpu == 3900 && (insn->membership & INSN_3900) != 0))
 	ok = true;
       else
 	ok = false;
 
       if (insn->pinfo != INSN_MACRO)
 	{
-	  if (mips_4650 && (insn->pinfo & FP_D) != 0)
+	  if (mips_cpu == 4650 && (insn->pinfo & FP_D) != 0)
 	    ok = false;
 	  /* start-sanitize-r5900 */
-	  if (mips_5900 && (insn->pinfo & FP_D) != 0)
+	  if (mips_cpu == 5900 && (insn->pinfo & FP_D) != 0)
 	    ok = false;
 	  /* end-sanitize-r5900 */
 	}
@@ -7735,7 +7671,7 @@ mips_ip (str, ip)
 		{
 		  /* start-sanitize-r5900 */
 		  /* Allow "$viNN" as coprocessor register name */
-		  if (mips_5900
+		  if (mips_cpu == 5900
 		      && *args == 'G'
 		      && s[1] == 'v'
 		      && s[2] == 'i')
@@ -9727,84 +9663,75 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_M4650:
-      mips_4650 = 1;
+      mips_cpu = 4650;
       break;
 
     case OPTION_NO_M4650:
-      mips_4650 = 0;
       break;
 
     case OPTION_M4010:
-      mips_4010 = 1;
+      mips_cpu = 4010;
       break;
 
     case OPTION_NO_M4010:
-      mips_4010 = 0;
       break;
 
     case OPTION_M4100:
-      mips_4100 = 1;
+      mips_cpu = 4100;
       break;
 
     case OPTION_NO_M4100:
-      mips_4100 = 0;
       break;
 
       /* start-sanitize-vr4xxx */
     case OPTION_M4121:
-      mips_4121 = 1;
+      mips_cpu = 4121;
       break;
 
     case OPTION_NO_M4121:
-      mips_4121 = 0;
       break;
 
       /* end-sanitize-vr4xxx */
       /* start-sanitize-r5900 */
     case OPTION_M5900:
-      mips_5900 = 1;
+      mips_cpu = 5900;
       break;
 
     case OPTION_NO_M5900:
-      mips_5900 = 0;
       break;
       /* end-sanitize-r5900 */
 
       /* start-sanitize-vr4320 */
     case OPTION_M4320:
-      mips_4320 = 1;
+      mips_cpu = 4320;
       break;
 
     case OPTION_NO_M4320:
-      mips_4320 = 0;
       break;
 
       /* end-sanitize-vr4320 */
       /* start-sanitize-cygnus */
     case OPTION_M5400:
-      mips_5400 = 1;
+      mips_cpu = 5400;
       break;
 
     case OPTION_NO_M5400:
-      mips_5400 = 0;
       break;
 
       /* end-sanitize-cygnus */
     case OPTION_M3900:
-      mips_3900 = 1;
+      mips_cpu = 3900;
       break;
       
     case OPTION_NO_M3900:
-      mips_3900 = 0;
       break;
 
       /* start-sanitize-tx49 */
     case OPTION_M4900:
-      mips_4900 = 1;
+      mips_cpu = 4900;
       break;
       
     case OPTION_NO_M4900:
-      mips_4900 = 0;
       break;
 
       /* end-sanitize-tx49 */
@@ -9927,10 +9854,44 @@ md_parse_option (c, arg)
   return 1;
 }
 
+
+static void
+show (stream, string, col_p, first_p)
+     FILE *stream;
+     char *string;
+     int *col_p;
+     int *first_p;
+{
+  if (*first_p)
+    {
+      fprintf (stream, "%24s", "");
+      *col_p = 24;
+    }
+  else
+    {
+      fprintf (stream, ", ");
+      *col_p += 2;
+    }
+
+  if (*col_p + strlen (string) > 72)
+    {
+      fprintf (stream, "\n%24s", "");
+      *col_p = 24;
+    }
+
+  fprintf (stream, "%s", string);
+  *col_p += strlen (string);
+
+  *first_p = 0;
+}
+
+
 void
 md_show_usage (stream)
      FILE *stream;
 {
+  int column, first;
+
   fprintf(stream, _("\
 MIPS options:\n\
 -membedded-pic		generate embedded position independent code\n\
@@ -9944,22 +9905,76 @@ MIPS options:\n\
 -mips2			generate MIPS ISA II instructions\n\
 -mips3			generate MIPS ISA III instructions\n\
 -mips4			generate MIPS ISA IV instructions\n\
--mcpu=vr4300		generate code for vr4300\n\
--mcpu=vr4100		generate code for vr4100\n\
--m4650			permit R4650 instructions\n\
--no-m4650		do not permit R4650 instructions\n\
--m4010			permit R4010 instructions\n\
--no-m4010		do not permit R4010 instructions\n\
--m4100                  permit VR4100 instructions\n\
--no-m4100		do not permit VR4100 instructions\n"));
+-mcpu=CPU		generate code for CPU, where CPU is one of:\n"));
+
+  first = 1;
+
+  /* start-sanitize-tx19 */
+  show (stream, "1900", &column, &first);
+  /* end-sanitize-tx19 */
+  show (stream, "2000", &column, &first);
+  show (stream, "3000", &column, &first);
+  show (stream, "3900", &column, &first);
+  show (stream, "4000", &column, &first);
+  show (stream, "4010", &column, &first);
+  show (stream, "4100", &column, &first);
   /* start-sanitize-vr4xxx */
-  fprintf(stream, _("\
--mcpu=vr4111		generate code for vr4111\n"));
-  fprintf(stream, _("\
--mcpu=vr4121		generate code for vr4121\n\
--m4121                  permit VR4121 instructions\n\
--no-m4121		do not permit VR4121 instructions\n"));
+  show (stream, "4111", &column, &first);
+  show (stream, "4121", &column, &first);
   /* end-sanitize-vr4xxx */
+  show (stream, "4300", &column, &first);
+  /* start-sanitize-vr4320 */
+  show (stream, "4320", &column, &first);
+  /* end-sanitize-vr4320 */
+  show (stream, "4400", &column, &first);
+  show (stream, "4600", &column, &first);
+  show (stream, "4650", &column, &first);
+  /* start-sanitize-tx49 */
+  show (stream, "4900", &column, &first);
+  /* end-sanitize-tx49 */
+  show (stream, "5000", &column, &first);
+  /* start-sanitize-cygnus */
+  show (stream, "5400", &column, &first);
+  /* end-sanitize-cygnus */
+  /* start-sanitize-r5900 */
+  show (stream, "5900", &column, &first);
+  /* end-sanitize-r5900 */
+  show (stream, "6000", &column, &first);
+  show (stream, "8000", &column, &first);
+  show (stream, "10000", &column, &first);
+  fputc ('\n', stream);
+
+  fprintf (stream, _("\
+-mCPU			equivalent to -mcpu=CPU.\n\
+-no-mCPU		don't generate code for CPU.\n\
+			For -mCPU and -no-mCPU, CPU must be one of:\n"));
+
+  first = 1;
+
+  /* start-sanitize-tx19 */
+  show (stream, "1900", &column, &first);
+  /* end-sanitize-tx19 */
+  show (stream, "3900", &column, &first);
+  show (stream, "4010", &column, &first);
+  show (stream, "4100", &column, &first);
+  /* start-sanitize-vr4xxx */
+  show (stream, "4121", &column, &first);
+  /* end-sanitize-vr4xxx */
+  /* start-sanitize-vr4320 */
+  show (stream, "4320", &column, &first);
+  /* end-sanitize-vr4320 */
+  show (stream, "4650", &column, &first);
+  /* start-sanitize-tx49 */
+  show (stream, "4900", &column, &first);
+  /* end-sanitize-tx49 */
+  /* start-sanitize-cygnus */
+  show (stream, "5400", &column, &first);
+  /* end-sanitize-cygnus */
+  /* start-sanitize-r5900 */
+  show (stream, "5900", &column, &first);
+  /* end-sanitize-r5900 */
+  fputc ('\n', stream);
+
   fprintf(stream, _("\
 -mips16			generate mips16 instructions\n\
 -no-mips16		do not generate mips16 instructions\n"));
@@ -10125,9 +10140,12 @@ mips_frob_file ()
 	  if (f != NULL)
 	    break;
 
+#if 0 /* GCC code motion plus incomplete dead code elimination
+	 can leave a %hi without a %lo.  */
 	  if (pass == 1)
 	    as_warn_where (l->fixp->fx_file, l->fixp->fx_line,
 			   _("Unmatched %%hi reloc"));
+#endif
 	}
     }
 }
