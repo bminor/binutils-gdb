@@ -1,5 +1,7 @@
 Thu Dec  5 22:26:31 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Fix typos in "mov am,(d16,an)" and "mov am,(d32,an)"
+
 	* simops.c: Fix thinkos in last change to "inc dn".
 
 Wed Dec  4 10:57:53 1996  Jeffrey A Law  (law@cygnus.com)
@@ -26,7 +28,7 @@ Sun Dec  1 16:05:42 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* simops.c: Fix overflow computation for many instructions.
 
-	* simops.c: Fix "movdm, an", "movbu dm, (an)", and "movhu dm, (an)".
+	* simops.c: Fix "mov dm, an", "movbu dm, (an)", and "movhu dm, (an)".
 
 	* simops.c: Fix "mov am, dn".
 

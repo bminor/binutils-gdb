@@ -378,7 +378,7 @@ void OP_F83000 ()
 /* mov am, (d16,an) */
 void OP_FA300000 ()
 {
-  store_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 17)]
+  store_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
 	      + SEXT16 (insn & 0xffff)), 4,
 	     State.regs[REG_A0 + ((insn & 0xc0000) >> 18)]);
 }
@@ -386,7 +386,7 @@ void OP_FA300000 ()
 /* mov am, (d32,an) */
 void OP_FC300000 ()
 {
-  store_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 17)]
+  store_mem ((State.regs[REG_A0 + ((insn & 0x30000) >> 16)]
 	      + ((insn & 0xffff) << 16) + extension), 4,
 	     State.regs[REG_A0 + ((insn & 0xc0000) >> 18)]);
 }
