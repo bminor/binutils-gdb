@@ -1,6 +1,6 @@
-/* Definitions to target GDB to GNU/Linux on x86-64.
+/* Target-dependent definitions for GNU/Linux x86-64.
 
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Michal Ludvig, SuSE Labs.
 
@@ -33,4 +33,4 @@
 #define SVR4_SHARED_LIBS
 #include "solib.h"              /* Support for shared libraries. */
 
-#endif /* #ifndef TM_X86_64LINUX_H */
+#endif /* tm-x86-64linux.h */

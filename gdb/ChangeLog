@@ -1,3 +1,7 @@
+2004-02-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-x86-64linux.h: Tweak comments.
+
 2004-02-25  Richard Sandiford  <rsandifo@redhat.com>
 
 	* MAINTAINERS: Add self to write-after-approval list.
