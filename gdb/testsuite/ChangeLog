@@ -1,3 +1,8 @@
+2004-11-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/savedregs.exp: Correct pattern used for sigtramp
+	frames.
+
 2004-11-05  Felix Lee  <felix+log1@specifixinc.com>
 
 	* gdb.base/cursal.exp: New file.
