@@ -24,6 +24,8 @@
   Please help us make it better.
   */
 
+#include <ctype.h>
+
 #include "as.h"
 
 #include "obstack.h"
@@ -213,6 +215,7 @@ static int smallest_imm_type(long num);
 static reg_entry *parse_register(char *reg_string);
 static unsigned long mode_from_disp_size(unsigned long t);
 static unsigned long opcode_suffix_to_type(unsigned long s);
+static void s_bss(void);
 
 #else /* not __STDC__ */
 
@@ -226,6 +229,7 @@ static int smallest_imm_type();
 static reg_entry *parse_register();
 static unsigned long mode_from_disp_size();
 static unsigned long opcode_suffix_to_type();
+static void s_bss();
 
 #endif /* not __STDC__ */
 
@@ -239,6 +243,7 @@ void dummy ()
 }
 
 const pseudo_typeS md_pseudo_table[] = {
+	{ "bss",	s_bss,		0 },
 	{ "align",	s_align_bytes,	0 },
 	{ "ffloat",	float_cons,	'f' },
 	{ "dfloat",	float_cons,	'd' },
@@ -2091,6 +2096,34 @@ long num;
 			: (Imm32)))));
 } /* smallest_imm_type() */
 
+static void s_bss()
+{
+  register int temp;
+
+  temp = get_absolute_expression ();
+  subseg_new (SEG_BSS, (subsegT)temp);
+  demand_empty_rest_of_line();
+}
+  
+
+#ifdef I386COFF
+
+short tc_coff_fix2rtype(fixP)
+fixS *fixP;
+{
+  return  (fixP->fx_pcrel ?
+	   (fixP->fx_size == 1 ? R_PCRBYTE :
+	    fixP->fx_size == 2 ? R_PCRWORD :
+	    R_PCRLONG):
+	   (fixP->fx_size == 1 ? R_RELBYTE :
+	    fixP->fx_size == 2 ? R_RELWORD :
+	    R_RELLONG));
+
+
+}
+
+#endif
+
 /*
  * Local Variables:
  * comment-column: 0
@@ -2098,3 +2131,4 @@ long num;
  */
 
 /* end of tc-i386.c */
+
