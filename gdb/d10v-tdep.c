@@ -763,7 +763,7 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
   /* Adjust all the saved registers so that they contain addresses and
      not offsets.  */
   for (i = 0; i < NUM_REGS - 1; i++)
-    if (info->saved_regs[i].addr)
+    if (trad_frame_addr_p (info->saved_regs, i))
       {
 	info->saved_regs[i].addr = (info->prev_sp + info->saved_regs[i].addr);
       }
@@ -776,8 +776,8 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
 
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
-  trad_frame_register_value (info->saved_regs, D10V_SP_REGNUM,
-			     d10v_make_daddr (prev_sp));
+  trad_frame_set_value (info->saved_regs, D10V_SP_REGNUM,
+			d10v_make_daddr (prev_sp));
 
   return info;
 }

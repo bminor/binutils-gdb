@@ -38,18 +38,53 @@ trad_frame_alloc_saved_regs (struct frame_info *next_frame)
   struct trad_frame_saved_reg *this_saved_regs
     = FRAME_OBSTACK_CALLOC (numregs, struct trad_frame_saved_reg);
   for (regnum = 0; regnum < numregs; regnum++)
-    this_saved_regs[regnum].realnum = regnum;
+    {
+      this_saved_regs[regnum].realreg = regnum;
+      this_saved_regs[regnum].addr = -1;
+    }      
   return this_saved_regs;
 }
 
-void
-trad_frame_register_value (struct trad_frame_saved_reg this_saved_regs[],
-			   int regnum, LONGEST val)
+enum { REG_VALUE = -1, REG_UNKNOWN = -2 };
+
+int
+trad_frame_value_p (struct trad_frame_saved_reg this_saved_regs[], int regnum)
 {
-  /* Make the REALNUM invalid, indicating that the ADDR contains the
+  return (this_saved_regs[regnum].realreg == REG_VALUE);
+}
+
+int
+trad_frame_addr_p (struct trad_frame_saved_reg this_saved_regs[], int regnum)
+{
+  return (this_saved_regs[regnum].realreg >= 0
+	  && this_saved_regs[regnum].addr != -1);
+}
+
+int
+trad_frame_realreg_p (struct trad_frame_saved_reg this_saved_regs[],
+		      int regnum)
+{
+  return (this_saved_regs[regnum].realreg >= 0
+	  && this_saved_regs[regnum].addr == -1);
+}
+
+void
+trad_frame_set_value (struct trad_frame_saved_reg this_saved_regs[],
+		      int regnum, LONGEST val)
+{
+  /* Make the REALREG invalid, indicating that the ADDR contains the
      register's value.  */
-  this_saved_regs[regnum].realnum = -1;
+  this_saved_regs[regnum].realreg = REG_VALUE;
   this_saved_regs[regnum].addr = val;
+}
+
+void
+trad_frame_set_unknown (struct trad_frame_saved_reg this_saved_regs[],
+			int regnum)
+{
+  /* Make the REALREG invalid, indicating that the value is not known.  */
+  this_saved_regs[regnum].realreg = REG_UNKNOWN;
+  this_saved_regs[regnum].addr = -1;
 }
 
 void
@@ -57,17 +92,16 @@ trad_frame_prev_register (struct frame_info *next_frame,
 			  struct trad_frame_saved_reg this_saved_regs[],
 			  int regnum, int *optimizedp,
 			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, void *bufferp)
+			  int *realregp, void *bufferp)
 {
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  if (this_saved_regs[regnum].realnum >= 0
-      && this_saved_regs[regnum].addr != 0)
+  if (trad_frame_addr_p (this_saved_regs, regnum))
     {
       /* The register was saved in memory.  */
       *optimizedp = 0;
       *lvalp = lval_memory;
       *addrp = this_saved_regs[regnum].addr;
-      *realnump = -1;
+      *realregp = -1;
       if (bufferp != NULL)
 	{
 	  /* Read the value in from memory.  */
@@ -75,22 +109,26 @@ trad_frame_prev_register (struct frame_info *next_frame,
 			    register_size (gdbarch, regnum));
 	}
     }
-  else if (this_saved_regs[regnum].realnum >= 0
-	   && this_saved_regs[regnum].addr == 0)
+  else if (trad_frame_realreg_p (this_saved_regs, regnum))
     {
       /* As the next frame to return the value of the register.  */
-      frame_register_unwind (next_frame, this_saved_regs[regnum].realnum,
-			     optimizedp, lvalp, addrp, realnump, bufferp);
+      frame_register_unwind (next_frame, this_saved_regs[regnum].realreg,
+			     optimizedp, lvalp, addrp, realregp, bufferp);
     }
-  else
+  else if (trad_frame_value_p (this_saved_regs, regnum))
     {
       /* The register's value is available.  */
       *optimizedp = 0;
       *lvalp = not_lval;
       *addrp = 0;
-      *realnump = -1;
+      *realregp = -1;
       if (bufferp != NULL)
 	store_unsigned_integer (bufferp, register_size (gdbarch, regnum),
 				this_saved_regs[regnum].addr);
+    }
+  else
+    {
+      error ("Register %s not available",
+	     gdbarch_register_name (gdbarch, regnum));
     }
 }
