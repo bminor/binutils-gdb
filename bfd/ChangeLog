@@ -1,3 +1,7 @@
+2000-12-13  Kazu Hirata  <kazu@hxi.com>
+
+	* peigen.c: Fix formatting.
+
 2000-12-12  Jim Wilson  <wilson@redhat.com>
 
 	*  elfxx-ia64.c (get_dyn_sym_info): Cast %p argument to void *.
