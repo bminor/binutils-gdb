@@ -74,7 +74,7 @@ map_over_list (arch, function, list)
 	  boolean found = false;
 	  bfd *prev = arch;
 
-	  for (head = arch->next; head; head = head->next) 
+	  for (head = arch->next; head; head = head->next)
 	    {
 	      if (head->filename != NULL
 		  && FILENAME_CMP (ptr->name, head->filename) == 0)
@@ -121,7 +121,7 @@ ar_directory (ar_name, list, output)
 	  output = 0;
 	}
     }
-  else 
+  else
     outfile = stdout;
 
   map_over_list (arch, ar_directory_doer, list);
@@ -136,23 +136,23 @@ void
 DEFUN_VOID(prompt)
 {
   extern int interactive;
-  if (interactive) 
+  if (interactive)
   {
     printf("AR >");
-    fflush(stdout); 
+    fflush(stdout);
   }
 }
 
 void
 maybequit ()
 {
-  if (! interactive) 
+  if (! interactive)
     xexit (9);
 }
 
 
 bfd *obfd;
-char *real_name ; 
+char *real_name ;
 void
 DEFUN(ar_open,(name, t),
       char *name AND
@@ -250,7 +250,7 @@ DEFUN(ar_addmod, (list),
     fprintf(stderr, _("%s: no open output archive\n"), program_name);
     maybequit();
   }
-  else 
+  else
   {
     while (list) {
       bfd *abfd = bfd_openr(list->name, NULL);
@@ -273,7 +273,7 @@ DEFUN(ar_addmod, (list),
 void
 DEFUN_VOID(ar_clear)
 {
-if (obfd) 
+if (obfd)
  obfd->archive_head = 0;
 }
 
@@ -285,7 +285,7 @@ DEFUN(ar_delete, (list),
     fprintf(stderr, _("%s: no open output archive\n"), program_name);
     maybequit();
   }
-  else 
+  else
   {
     while (list) {
       /* Find this name in the archive */
@@ -324,7 +324,7 @@ DEFUN_VOID(ar_save)
   else {
     char *ofilename = xstrdup (bfd_get_filename (obfd));
     bfd_close(obfd);
-    
+
     rename (ofilename, real_name);
     obfd = 0;
     free(ofilename);
@@ -341,20 +341,20 @@ DEFUN(ar_replace, (list),
     fprintf(stderr, _("%s: no open output archive\n"), program_name);
     maybequit();
   }
-  else 
+  else
   {
     while (list) {
       /* Find this name in the archive */
       bfd *member = obfd->archive_head;
       bfd **prev = &(obfd->archive_head);
       int found = 0;
-      while (member) 
+      while (member)
       {
-	if (FILENAME_CMP(member->filename, list->name) == 0) 
+	if (FILENAME_CMP(member->filename, list->name) == 0)
 	{
 	  /* Found the one to replace */
 	  bfd *abfd = bfd_openr(list->name, 0);
-	  if (!abfd) 
+	  if (!abfd)
 	  {
 	    fprintf(stderr, _("%s: can't open file %s\n"), program_name, list->name);
 	    maybequit();
@@ -374,12 +374,12 @@ DEFUN(ar_replace, (list),
 	bfd *abfd = bfd_openr(list->name, 0);
 	fprintf(stderr,_("%s: can't find module file %s\n"), program_name,
 		list->name);
-	if (!abfd) 
+	if (!abfd)
 	{
 	  fprintf(stderr, _("%s: can't open file %s\n"), program_name, list->name);
 	  maybequit();
 	}
-	else 
+	else
 	{
 	  *prev = abfd;
 	}
@@ -394,7 +394,7 @@ DEFUN(ar_replace, (list),
 void
 DEFUN_VOID(ar_list)
 {
-  if (!obfd) 
+  if (!obfd)
   {
     fprintf(stderr, _("%s: no open output archive\n"), program_name);
     maybequit();
@@ -406,7 +406,7 @@ DEFUN_VOID(ar_list)
     printf(_("Current open archive is %s\n"), bfd_get_filename (obfd));
     for (abfd = obfd->archive_head;
 	 abfd != (bfd *)NULL;
-	 abfd = abfd->next) 
+	 abfd = abfd->next)
     {
       ar_directory_doer (abfd, (bfd *) NULL);
     }
@@ -414,7 +414,7 @@ DEFUN_VOID(ar_list)
 }
 
 
-void 
+void
 DEFUN_VOID(ar_end)
 {
   if (obfd)
@@ -427,21 +427,21 @@ void
 DEFUN(ar_extract,(list),
       struct list *list)
 {
-  if (!obfd) 
+  if (!obfd)
   {
 
     fprintf(stderr, _("%s: no open  archive\n"), program_name);
     maybequit();
   }
-  else 
+  else
   {
     while (list) {
       /* Find this name in the archive */
       bfd *member = obfd->archive_head;
       int found = 0;
-      while (member && !found) 
+      while (member && !found)
       {
-	if (FILENAME_CMP(member->filename, list->name) == 0) 
+	if (FILENAME_CMP(member->filename, list->name) == 0)
 	{
 	  extract_file(member);
 	  found = 1;

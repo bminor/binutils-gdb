@@ -50,7 +50,7 @@ extern boolean ar_emul_default_parse_arg PARAMS ((char *));
 #define AR_EMUL_REPLACE_PRINT_VERBOSE(verbose, file_name) \
   do { if (verbose) printf ("r - %s\n", file_name); } while (0)
 
-typedef struct bin_emulation_xfer_struct 
+typedef struct bin_emulation_xfer_struct
 {
   /* Print out the extra options.  */
   void    (* ar_usage)     PARAMS ((FILE *fp));
@@ -61,4 +61,4 @@ typedef struct bin_emulation_xfer_struct
 }
 bin_emulation_xfer_type;
 
-#endif 
+#endif

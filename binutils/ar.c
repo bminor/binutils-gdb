@@ -222,7 +222,7 @@ map_over_members (arch, function, files, count)
 	    {
 	      ++match_count;
 	      if (counted_name_mode
-		  && match_count != counted_name_counter) 
+		  && match_count != counted_name_counter)
 		{
 		  /* Counting, and didn't match on count; go on to the
                      next one.  */
@@ -248,7 +248,7 @@ usage (help)
   FILE *s;
 
   s = help ? stdout : stderr;
-  
+
   if (! is_ranlib)
     {
       /* xgettext:c-format */
@@ -283,7 +283,7 @@ usage (help)
     }
   else
     {
-    /* xgettext:c-format */
+      /* xgettext:c-format */
       fprintf (s, _("Usage: %s [options] archive\n"), program_name);
       fprintf (s, _(" Generate an index to speed access to archives\n"));
       fprintf (s, _(" The options are:\n\
@@ -405,14 +405,14 @@ main (argc, argv)
 
       temp = strrchr (program_name, '/');
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
-	{
-	  /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
-	  char *bslash = strrchr (program_name, '\\');
-	  if (temp == NULL || (bslash != NULL && bslash > temp))
-	    temp = bslash;
-	  if (temp == NULL && program_name[0] != '\0' && program_name[1] == ':')
-	    temp = program_name + 1;
-	}
+      {
+	/* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
+	char *bslash = strrchr (program_name, '\\');
+	if (temp == NULL || (bslash != NULL && bslash > temp))
+	  temp = bslash;
+	if (temp == NULL && program_name[0] != '\0' && program_name[1] == ':')
+	  temp = program_name + 1;
+      }
 #endif
       if (temp == NULL)
 	temp = program_name;
@@ -452,7 +452,7 @@ main (argc, argv)
       break;
   argv += (i - 1);
   argc -= (i - 1);
-  	  
+
   if (is_ranlib)
     {
       boolean touch = false;
@@ -626,12 +626,12 @@ main (argc, argv)
       if (postype != pos_default)
 	posname = argv[arg_index++];
 
-      if (counted_name_mode) 
+      if (counted_name_mode)
 	{
-          if (operation != extract && operation != delete) 
+	  if (operation != extract && operation != delete)
 	     fatal (_("`N' is only meaningful with the `x' and `d' options."));
 	  counted_name_counter = atoi (argv[arg_index++]);
-          if (counted_name_counter <= 0)
+	  if (counted_name_counter <= 0)
 	    fatal (_("Value for `N' must be positive."));
 	}
 
@@ -667,7 +667,7 @@ main (argc, argv)
       if (operation == quick_append)
 	{
 	  /* Note that quick appending to a non-existent archive creates it,
-	     even if there are no files to append. */
+	     even if there are no files to append.  */
 	  do_quick_append (inarch_filename, files);
 	  xexit (0);
 	}
@@ -882,7 +882,7 @@ extract_file (abfd)
   long ncopied = 0;
   long size;
   struct stat buf;
-  
+
   if (bfd_stat_arch_elt (abfd, &buf) != 0)
     /* xgettext:c-format */
     fatal (_("internal stat error on %s"), bfd_get_filename (abfd));
@@ -891,7 +891,7 @@ extract_file (abfd)
   if (size < 0)
     /* xgettext:c-format */
     fatal (_("stat returns negative size for %s"), bfd_get_filename (abfd));
-  
+
   if (verbose)
     printf ("x - %s\n", bfd_get_filename (abfd));
 
@@ -1203,11 +1203,11 @@ delete_members (arch, files_to_delete)
       while (*current_ptr_ptr)
 	{
 	  if (FILENAME_CMP (normalize (*files_to_delete, arch),
-		      (*current_ptr_ptr)->filename) == 0)
+			    (*current_ptr_ptr)->filename) == 0)
 	    {
 	      ++match_count;
 	      if (counted_name_mode
-		  && match_count != counted_name_counter) 
+		  && match_count != counted_name_counter)
 		{
 		  /* Counting, and didn't match on count; go on to the
                      next one.  */
@@ -1339,7 +1339,7 @@ replace_members (arch, files_to_move, quick)
 
 		  after_bfd = get_pos_bfd (&arch->next, pos_after,
 					   current->filename);
-		  if (ar_emul_replace (after_bfd, *files_to_move, 
+		  if (ar_emul_replace (after_bfd, *files_to_move,
 				       verbose))
 		    {
 		      /* Snip out this entry from the chain.  */

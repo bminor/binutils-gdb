@@ -1,3 +1,16 @@
+2002-05-19  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* addr2line.c: Fix formatting.
+	* ar.c: Likewise.
+	* arsup.c: Likewise.
+	* arsup.h: Likewise.
+	* binemul.c: Likewise.
+	* binemul.h: Likewise.
+	* bucomm.c: Likewise.
+	* coffdump.c: Likewise.
+	* coffgrok.c: Likewise.
+	* coffgrok.h: Likewise.
+
 2002-05-16  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
 	* MAINTAINERS: Add myself as the second AVR port maintainer.

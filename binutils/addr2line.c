@@ -20,10 +20,10 @@
 
 /* Derived from objdump.c and nm.c by Ulrich.Lauther@mchp.siemens.de
 
-   Usage: 
+   Usage:
    addr2line [options] addr addr ...
    or
-   addr2line [options] 
+   addr2line [options]
 
    both forms write results to stdout, the second form reads addresses
    to be converted from stdin.  */
@@ -314,14 +314,14 @@ main (argc, argv)
 	  if (optarg != NULL)
 	    {
 	      enum demangling_styles style;
-	      
+
 	      style = cplus_demangle_name_to_style (optarg);
-	      if (style == unknown_demangling) 
+	      if (style == unknown_demangling)
 		fatal (_("unknown demangling style `%s'"),
 		       optarg);
-	      
+
 	      cplus_demangle_set_style (style);
-           }
+	    }
 	  break;
 	case 'e':
 	  filename = optarg;

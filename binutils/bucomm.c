@@ -257,7 +257,7 @@ parse_vma (s, arg)
   const char *end;
 
   ret = bfd_scan_vma (s, &end, 0);
-  
+
   if (*end != '\0')
     fatal (_("%s: bad number: %s"), arg, s);
 

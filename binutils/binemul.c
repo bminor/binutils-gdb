@@ -108,7 +108,7 @@ ar_emul_create (abfd_out, archive_file_name, file_name)
      char *file_name;
 {
   if (bin_dummy_emulation.ar_create)
-    return bin_dummy_emulation.ar_create (abfd_out, archive_file_name, 
+    return bin_dummy_emulation.ar_create (abfd_out, archive_file_name,
 					  file_name);
 
   return false;
