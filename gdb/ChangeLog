@@ -1,3 +1,21 @@
+Mon May 13 11:29:37 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	SH3-E support from Allan Tajii <atajii@hmsi.com>:
+	* sh-tdep.c (sh_reg_names, sh3_reg_names): Add empty names for
+	float registers.
+	(sh3e_reg_names): New register name array.
+	(sh_processor_type_table): Add sh3e processor type.
+	* config/sh/tm-sh.h (REGISTER_VIRTUAL_TYPE): Fix test.
+	(REGISTER_NAMES, NUM_REGS, NUM_REALREGS, etc): Adjust for
+	full set of registers.
+	* remote-e7000.c (want_sh3, want_sh3_nopc): New globals.
+	(e7000_fetch_registers, e7000_wait): Use them.
+	* sh3-rom.c (sh3_regnames): Add float registers.
+	(sh3e_cmds, sh3e_ops): New globals.
+	(sh3e_open): New function.
+	(_initialize_sh3_rom): Rename from _initialize_sh3, set up
+	sh3e target vector.
+
 Fri May 10 15:53:38 1996  Stu Grossman  (grossman@lisa.cygnus.com)
 
 	* sol-thread.c:  Cleanup.  gcc -Wall fixes.  Add prototypes.
