@@ -46,6 +46,13 @@ proc do_tests {} {
     gdb_test "p s10(1)" { = '2'} "print string element"
     gdb_test "p s10(1:3)" { = "234"} "print string slice (:)"
     gdb_test "p s10(2 up 3)" { = "345"} "print string slice (up)"
+
+    gdb_test "p length(s10)" { = 10} "print string length"
+    gdb_test "p length(s20)" { = 14} "print varying string length"
+    gdb_test "p lower(s10)" { = 0} "print string lower"
+    gdb_test "p upper(s10)" { = 9} "print string upper"
+    gdb_test "p lower(s20)" { = 0} "print varying string lower"
+    gdb_test "p upper(s20)" { = 19} "print varying string upper"
 }
 
 # Check to see if we have an executable to test.  If not, then either we

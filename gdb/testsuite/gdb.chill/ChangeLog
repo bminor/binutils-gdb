@@ -1,3 +1,7 @@
+Wed Jun 14 13:07:45 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* chillvars.exp, string.exp:  New tests for LOWER/UPPER/LENGTH.
+
 Wed Jun  7 17:52:38 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* chillvars.ch (xptr):  Declare new variable.

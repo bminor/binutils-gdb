@@ -83,6 +83,9 @@ proc test_CHAR {} {
     gdb_test "ptype printable_char"	"type = (CHAR|char)"
     gdb_test "whatis printable_char"	"type = (CHAR|char)"
     gdb_test "print printable_char"	" = 'a'"
+
+    gdb_test "print lower(char)"	" = C'00'"
+    gdb_test "print upper(char)"	" = C'ff'"
 }
 
 proc test_BYTE {} {
@@ -92,6 +95,11 @@ proc test_BYTE {} {
     gdb_test "ptype byte_high"		"type = (BYTE|byte)"
     gdb_test "whatis byte_high"		"type = (BYTE|byte)"
     gdb_test "print byte_high"		" = 127"
+
+    gdb_test "print lower(byte)"	" = -128"
+    gdb_test "print upper(byte)"	" = 127"
+    gdb_test "print lower(byte_high)"	" = -128"
+    gdb_test "print upper(byte_high)"	" = 127"
 }
 
 proc test_UBYTE {} {
@@ -241,6 +249,10 @@ proc test_arrays {} {
     gdb_test "ptype longrealtable2"	"type = ARRAY \\(+5:9\\)+ (DOUBLE|double)"
     gdb_test_exact "print longrealtable2"	\
 	{= [(5): -2, (6): -1, (7): 0, (8): 1, (9): 2]}
+
+    gdb_test "print length(longrealtable2)" {= 5}
+    gdb_test "print lower(longrealtable2)" {= 5}
+    gdb_test "print upper(longrealtable2)" {= 9}
 }
 
 proc test_strings {} {
