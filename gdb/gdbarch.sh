@@ -525,10 +525,6 @@ F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
 # DEPRECATED_REGISTER_SIZE can be deleted.
 v::DEPRECATED_REGISTER_SIZE:int:deprecated_register_size
 v::CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
-# DEPRECATED_CALL_DUMMY_START_OFFSET can be deleted.
-v::DEPRECATED_CALL_DUMMY_START_OFFSET:CORE_ADDR:deprecated_call_dummy_start_offset
-# DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET can be deleted.
-v::DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET:CORE_ADDR:deprecated_call_dummy_breakpoint_offset
 # DEPRECATED_CALL_DUMMY_WORDS can be deleted.
 v::DEPRECATED_CALL_DUMMY_WORDS:LONGEST *:deprecated_call_dummy_words::::0:legacy_call_dummy_words::0:0x%08lx
 # Implement PUSH_DUMMY_CALL, then delete DEPRECATED_SIZEOF_CALL_DUMMY_WORDS.

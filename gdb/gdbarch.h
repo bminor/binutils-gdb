@@ -827,28 +827,6 @@ extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_d
 #define CALL_DUMMY_LOCATION (gdbarch_call_dummy_location (current_gdbarch))
 #endif
 
-/* DEPRECATED_CALL_DUMMY_START_OFFSET can be deleted. */
-
-extern CORE_ADDR gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch, CORE_ADDR deprecated_call_dummy_start_offset);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_START_OFFSET)
-#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_START_OFFSET"
-#endif
-#if !defined (DEPRECATED_CALL_DUMMY_START_OFFSET)
-#define DEPRECATED_CALL_DUMMY_START_OFFSET (gdbarch_deprecated_call_dummy_start_offset (current_gdbarch))
-#endif
-
-/* DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET can be deleted. */
-
-extern CORE_ADDR gdbarch_deprecated_call_dummy_breakpoint_offset (struct gdbarch *gdbarch);
-extern void set_gdbarch_deprecated_call_dummy_breakpoint_offset (struct gdbarch *gdbarch, CORE_ADDR deprecated_call_dummy_breakpoint_offset);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET)
-#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET"
-#endif
-#if !defined (DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET)
-#define DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET (gdbarch_deprecated_call_dummy_breakpoint_offset (current_gdbarch))
-#endif
-
 /* DEPRECATED_CALL_DUMMY_WORDS can be deleted. */
 
 extern LONGEST * gdbarch_deprecated_call_dummy_words (struct gdbarch *gdbarch);

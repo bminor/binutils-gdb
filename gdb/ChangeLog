@@ -1,5 +1,13 @@
 2004-05-08  Andrew Cagney  <cagney@redhat.com>
 
+	* ns32k-tdep.c (ns32k_gdbarch_init): Do not set
+	deprecated_call_dummy_breakpoint_offset or
+	deprecated_call_dummy_start_offset.
+	* dummy-frame.c, arm-tdep.c: Update comments.
+	* gdbarch.sh (DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET)
+	(DEPRECATED_CALL_DUMMY_START_OFFSET): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
 	* infcall.c (legacy_push_dummy_code): Delete function.
 	(push_dummy_code): Delete call.
 

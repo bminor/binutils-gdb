@@ -162,8 +162,6 @@ struct gdbarch
   gdbarch_deprecated_dummy_write_sp_ftype *deprecated_dummy_write_sp;
   int deprecated_register_size;
   int call_dummy_location;
-  CORE_ADDR deprecated_call_dummy_start_offset;
-  CORE_ADDR deprecated_call_dummy_breakpoint_offset;
   LONGEST * deprecated_call_dummy_words;
   int deprecated_sizeof_call_dummy_words;
   gdbarch_deprecated_fix_call_dummy_ftype *deprecated_fix_call_dummy;
@@ -321,8 +319,6 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_dummy_write_sp */
   0,  /* deprecated_register_size */
   0,  /* call_dummy_location */
-  0,  /* deprecated_call_dummy_start_offset */
-  0,  /* deprecated_call_dummy_breakpoint_offset */
   0,  /* deprecated_call_dummy_words */
   0,  /* deprecated_sizeof_call_dummy_words */
   0,  /* deprecated_fix_call_dummy */
@@ -920,22 +916,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DECR_PC_AFTER_BREAK = %ld\n",
                       (long) DECR_PC_AFTER_BREAK);
-#endif
-#ifdef DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET # %s\n",
-                      XSTRING (DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET = %ld\n",
-                      (long) DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET);
-#endif
-#ifdef DEPRECATED_CALL_DUMMY_START_OFFSET
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_START_OFFSET # %s\n",
-                      XSTRING (DEPRECATED_CALL_DUMMY_START_OFFSET));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_START_OFFSET = %ld\n",
-                      (long) DEPRECATED_CALL_DUMMY_START_OFFSET);
 #endif
 #ifdef DEPRECATED_CALL_DUMMY_WORDS
   fprintf_unfiltered (file,
@@ -3280,38 +3260,6 @@ set_gdbarch_call_dummy_location (struct gdbarch *gdbarch,
                                  int call_dummy_location)
 {
   gdbarch->call_dummy_location = call_dummy_location;
-}
-
-CORE_ADDR
-gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_start_offset called\n");
-  return gdbarch->deprecated_call_dummy_start_offset;
-}
-
-void
-set_gdbarch_deprecated_call_dummy_start_offset (struct gdbarch *gdbarch,
-                                                CORE_ADDR deprecated_call_dummy_start_offset)
-{
-  gdbarch->deprecated_call_dummy_start_offset = deprecated_call_dummy_start_offset;
-}
-
-CORE_ADDR
-gdbarch_deprecated_call_dummy_breakpoint_offset (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_breakpoint_offset called\n");
-  return gdbarch->deprecated_call_dummy_breakpoint_offset;
-}
-
-void
-set_gdbarch_deprecated_call_dummy_breakpoint_offset (struct gdbarch *gdbarch,
-                                                     CORE_ADDR deprecated_call_dummy_breakpoint_offset)
-{
-  gdbarch->deprecated_call_dummy_breakpoint_offset = deprecated_call_dummy_breakpoint_offset;
 }
 
 LONGEST *

@@ -580,8 +580,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_call_dummy_words (gdbarch, ns32k_call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof_ns32k_call_dummy_words);
   set_gdbarch_deprecated_fix_call_dummy (gdbarch, ns32k_fix_call_dummy);
-  set_gdbarch_deprecated_call_dummy_start_offset (gdbarch, 3);
-  set_gdbarch_deprecated_call_dummy_breakpoint_offset (gdbarch, 15);
 
   /* Breakpoint info */
   set_gdbarch_breakpoint_from_pc (gdbarch, ns32k_breakpoint_from_pc);

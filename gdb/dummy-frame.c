@@ -151,11 +151,7 @@ deprecated_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR fp)
 
    FIXME: cagney/2002-11-23: This is silly.  Surely "infrun.c" can
    figure out what the real PC (as in the resume address) is BEFORE
-   calling this function (Oh, and I'm not even sure that this function
-   is called with an decremented PC, the call to pc_in_call_dummy() in
-   that file is conditional on
-   !DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET_P yet generic dummy
-   targets set DEPRECATED_CALL_DUMMY_BREAKPOINT_OFFSET. True?).  */
+   calling this function.  */
 
 static int
 pc_in_dummy_frame (CORE_ADDR pc)

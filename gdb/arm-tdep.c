@@ -191,7 +191,7 @@ static int target_is_thumb;
 
 /* Flag set by arm_fix_call_dummy that tells whether the calling
    function is a Thumb function.  This flag is checked by
-   arm_pc_is_thumb and arm_call_dummy_breakpoint_offset.  */
+   arm_pc_is_thumb.  */
 
 static int caller_is_thumb;
 
