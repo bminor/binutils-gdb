@@ -1,3 +1,8 @@
+2001-07-03  H.J. Lu  <hjl@gnu.org>
+
+	* scripttempl/elf.sc (DYNAMIC_PAD): Revert the change made on
+	2001-07-03. It creates dynamic entries even for static binaries.
+
 2001-07-03  Jakub Jelinek  <jakub@redhat.com>
 
 	* scripttempl/elf.sc (DYNAMIC_PAD): New variable.
