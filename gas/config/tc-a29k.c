@@ -21,6 +21,7 @@
    to convert it to new machines' assemblers as desired.  There was too
    much bloody rewriting required before.  There still probably is.  */
 
+#include "ctype.h"
 #include "as.h"
 
 #include "opcode/a29k.h"
@@ -236,6 +237,20 @@ define_some_regs ()
   insert_sreg ("pc2", SREG + 12);
   insert_sreg ("mmu", SREG + 13);
   insert_sreg ("lru", SREG + 14);
+
+  /* Additional protected special-purpose registers for the 29050 */
+  insert_sreg ("rsn",  SREG + 15);
+  insert_sreg ("rma0", SREG + 16);
+  insert_sreg ("rmc0", SREG + 17);
+  insert_sreg ("rma1", SREG + 18);
+  insert_sreg ("rmc1", SREG + 19);
+  insert_sreg ("spc0", SREG + 20);
+  insert_sreg ("spc1", SREG + 21);
+  insert_sreg ("spc2", SREG + 22);
+  insert_sreg ("iba0", SREG + 23);
+  insert_sreg ("ibc0", SREG + 24);
+  insert_sreg ("iba1", SREG + 25);
+  insert_sreg ("ibc1", SREG + 26);
 
   /* Unprotected special-purpose register names */
   insert_sreg ("ipc", SREG + 128);
