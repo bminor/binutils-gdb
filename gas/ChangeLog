@@ -1,3 +1,8 @@
+Thu May 21 15:02:41 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (find_real_start): Relax definition of local
+	labels.
+
 Tue May 19 16:59:44 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (d30v_align): Apply address adjustment to all

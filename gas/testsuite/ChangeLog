@@ -1,3 +1,8 @@
+Thu May 21 15:03:06 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/arm/thumb.s: Add period to start of labels to prevent
+	assembler thinking that they are function entry points.
+
 Tue May 19 18:17:10 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/mips16.d: Correct to reflect bug fix to disassembler.
