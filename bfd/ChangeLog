@@ -1,3 +1,14 @@
+Tue Feb 13 15:56:22 1996  Bryan Ford  <baford@snake.cs.utah.edu>
+
+	* i386msdos.c: Remove some #if 0 code.
+	(msdos_write_object_contents): Don't include empty sections in the
+	size computation, regardless of their address.
+
+Tue Feb 13 15:36:37 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Don't segfault if dynboj
+	is NULL, ie, the -r switch is used.
+
 Tue Feb 13 14:35:15 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.host: Set HDLFLAGS for *-*-hpux with --enable-shared.
