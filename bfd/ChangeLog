@@ -1,5 +1,27 @@
 Mon Aug 22 12:26:42 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* targets.c (BFD_JUMP_TABLE_ARCHIVE): Add _update_armap_timestamp.
+	(bfd_target): Add field _bfd_update_armap_timestamp.
+	* bfd.c (bfd_update_armap_timestamp): Define.
+	* bfd-in2.h: Rebuilt.
+	* libbfd-in.h (_bfd_noarchive_update_armap_timestamp): Define.
+	(_bfd_archive_bsd_update_armap_timestamp): Declare.
+	(_bfd_archive_coff_update_armap_timestamp): Define.
+	* libbfd.h: Rebuilt.
+	* archive.c (_bfd_write_archive_contents): Call
+	bfd_update_armap_timestamp instead of checking for a BSD archive
+	and calling bsd_update_armap_timestamp.
+	(_bfd_archive_bsd_update_armap_timestamp): Rename from
+	_bsd_update_armap_timestamp.  Don't assume that armap_datepos is
+	already set.
+	* aout-target.h (MY_update_armap_timestamp): Define if not already
+	defined.
+	* coff-rs6000.c (rs6000coff_update_armap_timestamp): Define.
+	* ieee.c (ieee_update_armap_timestamp): Define.
+	* libecoff.h (_bfd_ecoff_update_armap_timestamp): Define.
+	* oasys.c (oasys_update_armap_timestamp): Define.
+	* som.c (som_update_armap_timestamp): Define.
+
 	* hash.c: Copy string hash functions from aoutx.h.
 	* aoutx.h: String hash functions moved to hash.c.  Retain
 	simplified versions of add_to_stringtab and emit_stringtab.

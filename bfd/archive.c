@@ -183,7 +183,6 @@ static struct areltdata *bfd_ar_hdr_from_filesystem PARAMS ((bfd *abfd,
 							     const char *));
 static boolean compute_and_write_armap PARAMS ((bfd *arch,
 						unsigned int elength));
-static boolean bsd_update_armap_timestamp PARAMS ((bfd *arch));
 
 boolean
 _bfd_generic_mkarchive (abfd)
@@ -1589,20 +1588,7 @@ _bfd_write_archive_contents (arch)
   tries = 1;
   do
     {
-      /* FIXME!  This kludge is to avoid adding a member to the xvec,
-	 while generating a small patch for Adobe.  FIXME!  The
-	 update_armap_timestamp function call should be in the xvec,
-	 thus:
-
-		if (bfd_update_armap_timestamp (arch) == true) break;
-                     ^
-
-         Instead, we check whether in a BSD archive, and call
-         directly. */
-
-      if (arch->xvec->write_armap != bsd_write_armap)
-	break;
-      if (bsd_update_armap_timestamp (arch) == true) /* FIXME!!!  Vector it */
+      if (bfd_update_armap_timestamp (arch) == true) /* FIXME!!!  Vector it */
 	break;
       if (tries > 0)
 	fprintf (stderr,
@@ -1693,7 +1679,7 @@ compute_and_write_armap (arch, elength)
 		       flags & BSF_WEAK ||
 		       flags & BSF_INDIRECT ||
 		       bfd_is_com_section (sec))
-		      && (sec != &bfd_und_section))
+		      && ! bfd_is_und_section (sec))
 		    {
 		      size_t namelen;
 		      struct orl *new_map;
@@ -1862,8 +1848,8 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
    Return true if the timestamp was OK, or an unusual problem happened.
    Return false if we updated the timestamp.  */
 
-static boolean
-bsd_update_armap_timestamp (arch)
+boolean
+_bfd_archive_bsd_update_armap_timestamp (arch)
      bfd *arch;
 {
   struct stat archstat;
@@ -1892,6 +1878,8 @@ bsd_update_armap_timestamp (arch)
       (hdr.ar_date)[i] = ' ';
 
   /* Write it into the file.  */
+  bfd_ardata (arch)->armap_datepos = (SARMAG
+				      + offsetof (struct ar_hdr, ar_date[0]));
   if (bfd_seek (arch, bfd_ardata (arch)->armap_datepos, SEEK_SET) != 0
       || (bfd_write (hdr.ar_date, sizeof (hdr.ar_date), 1, arch)
 	  != sizeof (hdr.ar_date)))
