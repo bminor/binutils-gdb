@@ -1,3 +1,8 @@
+2005-01-13  Michael Snyder  <msnyder@redhat.com>
+
+	* tracepoint.[ch]: Whitespace tweaks.
+	* solist.h: Whitespace tweaks.
+
 2005-01-13  Andrew Cagney  <cagney@gnu.org>
 
 	* exceptions.h (struct exception): Make message const.
