@@ -33,11 +33,33 @@ as.texinfo
 
 Do-last:
 
+shdirty="as.texinfo h8.texi all.texi"
 
+if ( echo $* | grep keep\-sh > /dev/null ) ; then
+	echo Keeping Hitachi SH in ${shdirty}
+else
+	for i in ${shdirty} ; do
+		echo Sanitizing Hitachi SH in $i
+		rm -f new
+		sed '/start Hitachi-SH/,/^end Hitachi-SH/d' < $i > new
+		if grep -s "[- ]SH" new ; then
+			echo *****SANITIZING HITACHI SH IN $i FAILED*****
+		fi
+		if [ -n "${safe}" ] ; then
+			mv $i .Recover
+		else
+			rm $i
+		fi
+		mv new $i
+	done
+fi
 #
 #
 # $Log$
-# Revision 1.9  1993/04/08 03:12:53  pesch
+# Revision 1.10  1993/04/15 23:06:08  pesch
+# Arrange to clean out references to Hitachi SH.
+#
+# Revision 1.9  1993/04/08  03:12:53  pesch
 # Converted to Texinfo conditionals; no longer need M4.
 # Checked makeinfo output for "all" config; other old M4 configs now sanitized
 # out, will be replaced by .texi configs as each config is tested.
