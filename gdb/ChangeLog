@@ -1,3 +1,12 @@
+2002-04-15  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Merge from trunk:
+
+	2002-04-09  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-exp.y (yylex): Handle also the fact that is_a_field_of_this
+	is non zero as a found symbol.
+
 2002-04-15  Andrew Cagney  <ac131313@redhat.com>
  
 	* bcache.c: Include <stddef.h> and <stdlib.h> after "defs.h".

@@ -1300,7 +1300,7 @@ yylex ()
 			 &is_a_field_of_this,
 			 (struct symtab **) NULL);
     /* second chance uppercased (as Free Pascal does).  */
-    if (!sym)
+    if (!sym && !is_a_field_of_this)
       {
        for (i = 0; i <= namelen; i++)
          {
@@ -1311,7 +1311,7 @@ yylex ()
                         VAR_NAMESPACE,
                         &is_a_field_of_this,
                         (struct symtab **) NULL);
-       if (sym)
+       if (sym || is_a_field_of_this)
          for (i = 0; i <= namelen; i++)
            {
              if ((tokstart[i] >= 'a' && tokstart[i] <= 'z'))
@@ -1319,7 +1319,7 @@ yylex ()
            }
       }
     /* Third chance Capitalized (as GPC does).  */
-    if (!sym)
+    if (!sym && !is_a_field_of_this)
       {
        for (i = 0; i <= namelen; i++)
          {
@@ -1336,7 +1336,7 @@ yylex ()
                          VAR_NAMESPACE,
                          &is_a_field_of_this,
                          (struct symtab **) NULL);
-        if (sym)
+        if (sym || is_a_field_of_this)
           for (i = 0; i <= namelen; i++)
             {
               if (i == 0)
