@@ -1,3 +1,8 @@
+Fri Apr  5 08:17:57 1996  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in (host==solaris): Pass only the first word of $CC
+	to /usr/bin/which when checking if we're using /usr/ccs/bin/cc.
+
 Fri Apr  5 03:16:13 1996  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* Makefile.in (BASE_FLAGS_TO_PASS): pass down $(MAKE).

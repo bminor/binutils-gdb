@@ -693,7 +693,8 @@ rm -f conftest*
 # The Solaris /usr/ucb/cc compiler does not appear to work.
 case "${host}" in
   sparc-sun-solaris2*)
-      if [ "`/usr/bin/which ${CC-cc}`" = "/usr/ucb/cc" ] ; then
+      CCBASE="`echo ${CC-cc} | sed 's/ .*$//'`"
+      if [ "`/usr/bin/which $CCBASE`" = "/usr/ucb/cc" ] ; then
           could_use=
           [ -d /opt/SUNWspro/bin ] && could_use="/opt/SUNWspro/bin"
           if [ -d /opt/cygnus/bin ] ; then
