@@ -1,3 +1,8 @@
+Tue Jan 11 09:10:56 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.bfd: Use ELF, not COFF for m88*-*-dgux*.
+	Combine m88k-*-* and m88110-*-* cases into m88*-*-*.
+
 Mon Jan 10 20:46:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (install): Remove "@" which follows a backslash.  In
