@@ -1,5 +1,9 @@
 Thu Feb 27 09:38:16 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
+	* configure.in configure (HPUX/OSF thread support):  Enable this
+	only when running GCC, since HP's thread header files use ANSI C
+	which is not supported by their default compiler.
+
 	* configure.host (i[3456]86-*-windows):  Disable long long
 	support for WinGDB.  Add mswin to configdirs.
 	* configure.in configure:  Move calls to configure.host and

@@ -177,9 +177,13 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
 	hpux*)
 		AC_MSG_CHECKING(for HPUX/OSF thread support)
 		if test -f /usr/include/dce/cma_config.h ; then
-			AC_MSG_RESULT(yes)
-			AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT)
-			CONFIG_OBS="${CONFIG_OJS} hpux-thread.o"
+			if test "$GCC" = "yes" ; then
+				AC_MSG_RESULT(yes)
+				AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT)
+				CONFIG_OBS="${CONFIG_OJS} hpux-thread.o"
+			else
+				AC_MSG_RESULT(no (suppressed because you are not using GCC))
+			fi
 		else
 			AC_MSG_RESULT(no)
 		fi
