@@ -99,7 +99,7 @@ struct elf_sh64_link_hash_table
 #define sh64_elf64_link_hash_traverse(table, func, info)		\
   (elf_link_hash_traverse						\
    (&(table)->root,							\
-    (bfd_boolean (*) PARAMS ((struct elf_link_hash_entry *, PTR))) (func), \
+    (bfd_boolean (*) (struct elf_link_hash_entry *, void *)) (func), \
     (info)))
 
 /* Get the sh ELF linker hash table from a link_info structure.  */
@@ -108,71 +108,69 @@ struct elf_sh64_link_hash_table
   ((struct elf_sh64_link_hash_table *) ((p)->hash))
 
 static bfd_boolean sh_elf64_copy_private_data
-  PARAMS ((bfd *, bfd *));
+  (bfd *, bfd *);
 static bfd_boolean sh_elf64_copy_private_data_internal
-  PARAMS ((bfd *, bfd *));
+  (bfd *, bfd *);
 static bfd_boolean sh_elf64_merge_private_data
-  PARAMS ((bfd *, bfd *));
+  (bfd *, bfd *);
 static bfd_reloc_status_type sh_elf64_ignore_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type sh_elf64_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static reloc_howto_type *sh_elf64_reloc_type_lookup
-  PARAMS ((bfd *, bfd_reloc_code_real_type));
+  (bfd *, bfd_reloc_code_real_type);
 static void sh_elf64_info_to_howto
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+  (bfd *, arelent *, Elf_Internal_Rela *);
 static bfd_boolean sh_elf64_relocate_section
-  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+  (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
 static bfd_byte *sh_elf64_get_relocated_section_contents
-  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
-	   bfd_byte *, bfd_boolean, asymbol **));
+  (bfd *, struct bfd_link_info *, struct bfd_link_order *, bfd_byte *,
+   bfd_boolean, asymbol **);
 static bfd_boolean sh_elf64_set_mach_from_flags
-  PARAMS ((bfd *));
+  (bfd *);
 static bfd_boolean sh_elf64_set_private_flags
-  PARAMS ((bfd *, flagword));
+  (bfd *, flagword);
 static asection *sh_elf64_gc_mark_hook
-  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
+  (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
+   struct elf_link_hash_entry *, Elf_Internal_Sym *);
 static bfd_boolean sh_elf64_gc_sweep_hook
-  PARAMS ((bfd *, struct bfd_link_info *, asection *,
-	   const Elf_Internal_Rela *));
+  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
 static bfd_boolean sh_elf64_check_relocs
-  PARAMS ((bfd *, struct bfd_link_info *, asection *,
-	   const Elf_Internal_Rela *));
+  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
 static int sh64_elf64_get_symbol_type
-  PARAMS ((Elf_Internal_Sym *, int));
+  (Elf_Internal_Sym *, int);
 static bfd_boolean sh64_elf64_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
-	   const char **, flagword *, asection **, bfd_vma *));
+  (bfd *, struct bfd_link_info *, const Elf_Internal_Sym *, const char **,
+   flagword *, asection **, bfd_vma *);
 static bfd_boolean sh64_elf64_link_output_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
-	   asection *));
+  (bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
+   asection *);
 static bfd_boolean sh64_elf64_fake_sections
-  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
+  (bfd *, Elf_Internal_Shdr *, asection *);
 static void sh64_elf64_final_write_processing
-  PARAMS ((bfd *, bfd_boolean));
+  (bfd *, bfd_boolean);
 static struct bfd_hash_entry *sh64_elf64_link_hash_newfunc
-  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 static struct bfd_link_hash_table *sh64_elf64_link_hash_table_create
-  PARAMS ((bfd *));
+  (bfd *);
 inline static void movi_shori_putval
-  PARAMS ((bfd *, unsigned long, char *));
+  (bfd *, unsigned long, char *);
 inline static void movi_3shori_putval
-  PARAMS ((bfd *, bfd_vma, char *));
+  (bfd *, bfd_vma, char *);
 static bfd_boolean sh64_elf64_create_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 static bfd_boolean sh64_elf64_adjust_dynamic_symbol
-  PARAMS ((struct bfd_link_info *info, struct elf_link_hash_entry *));
+  (struct bfd_link_info *info, struct elf_link_hash_entry *);
 static bfd_boolean sh64_elf64_discard_copies
-  PARAMS ((struct elf_sh64_link_hash_entry *, PTR));
+  (struct elf_sh64_link_hash_entry *, void *);
 static bfd_boolean sh64_elf64_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 static bfd_boolean sh64_elf64_finish_dynamic_symbol
-  PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
-	   Elf_Internal_Sym *));
+  (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
+   Elf_Internal_Sym *);
 static bfd_boolean sh64_elf64_finish_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+  (bfd *, struct bfd_link_info *);
 
 static reloc_howto_type sh_elf64_howto_table[] = {
   /* No relocation.  */
@@ -1300,15 +1298,11 @@ static reloc_howto_type sh_elf64_howto_table[] = {
    which the linker should otherwise ignore.  */
 
 static bfd_reloc_status_type
-sh_elf64_ignore_reloc (abfd, reloc_entry, symbol, data, input_section,
-		     output_bfd, error_message)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *reloc_entry;
-     asymbol *symbol ATTRIBUTE_UNUSED;
-     PTR data ATTRIBUTE_UNUSED;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+sh_elf64_ignore_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
+		       asymbol *symbol ATTRIBUTE_UNUSED,
+		       void *data ATTRIBUTE_UNUSED, asection *input_section,
+		       bfd *output_bfd,
+		       char **error_message ATTRIBUTE_UNUSED)
 {
   if (output_bfd != NULL)
     reloc_entry->address += input_section->output_offset;
@@ -1321,15 +1315,9 @@ sh_elf64_ignore_reloc (abfd, reloc_entry, symbol, data, input_section,
    See sh_elf_reloc in elf32-sh.c for the original.  */
 
 static bfd_reloc_status_type
-sh_elf64_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
-	  error_message)
-     bfd *abfd;
-     arelent *reloc_entry;
-     asymbol *symbol_in;
-     PTR data;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+sh_elf64_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol_in,
+		void *data, asection *input_section, bfd *output_bfd,
+		char **error_message ATTRIBUTE_UNUSED)
 {
   unsigned long insn;
   bfd_vma sym_value;
@@ -1449,9 +1437,8 @@ static const struct elf_reloc_map sh64_reloc_map[] =
    corresponding SH ELf reloc.  */
 
 static reloc_howto_type *
-sh_elf64_reloc_type_lookup (abfd, code)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     bfd_reloc_code_real_type code;
+sh_elf64_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    bfd_reloc_code_real_type code)
 {
   unsigned int i;
 
@@ -1469,10 +1456,8 @@ sh_elf64_reloc_type_lookup (abfd, code)
    See sh_elf_info_to_howto in elf32-sh.c for the original.  */
 
 static void
-sh_elf64_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *cache_ptr;
-     Elf_Internal_Rela *dst;
+sh_elf64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
+			Elf_Internal_Rela *dst)
 {
   unsigned int r;
 
@@ -1492,16 +1477,12 @@ sh_elf64_info_to_howto (abfd, cache_ptr, dst)
    See sh_elf_info_to_howto in elf32-sh.c for the original.  */
 
 static bfd_boolean
-sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
-			   contents, relocs, local_syms, local_sections)
-     bfd *output_bfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *info;
-     bfd *input_bfd;
-     asection *input_section;
-     bfd_byte *contents;
-     Elf_Internal_Rela *relocs;
-     Elf_Internal_Sym *local_syms;
-     asection **local_sections;
+sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
+			   struct bfd_link_info *info, bfd *input_bfd,
+			   asection *input_section, bfd_byte *contents,
+			   Elf_Internal_Rela *relocs,
+			   Elf_Internal_Sym *local_syms,
+			   asection **local_sections)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -2177,14 +2158,12 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
    See sh_elf_relocate_section in elf32-sh.c for the original.  */
 
 static bfd_byte *
-sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
-					 data, relocatable, symbols)
-     bfd *output_bfd;
-     struct bfd_link_info *link_info;
-     struct bfd_link_order *link_order;
-     bfd_byte *data;
-     bfd_boolean relocatable;
-     asymbol **symbols;
+sh_elf64_get_relocated_section_contents (bfd *output_bfd,
+					 struct bfd_link_info *link_info,
+					 struct bfd_link_order *link_order,
+					 bfd_byte *data,
+					 bfd_boolean relocatable,
+					 asymbol **symbols)
 {
   Elf_Internal_Shdr *symtab_hdr;
   asection *input_section = link_order->u.indirect.section;
@@ -2227,7 +2206,7 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
 	}
 
       internal_relocs = (_bfd_elf_link_read_relocs
-			 (input_bfd, input_section, (PTR) NULL,
+			 (input_bfd, input_section, NULL,
 			  (Elf_Internal_Rela *) NULL, FALSE));
       if (internal_relocs == NULL)
 	goto error_return;
@@ -2291,10 +2270,9 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
 /* Set the SHF_SH5_ISA32 flag for ISA SHmedia code sections.  */
 
 bfd_boolean
-sh64_elf64_fake_sections (output_bfd, elf_section_hdr, asect)
-     bfd *output_bfd ATTRIBUTE_UNUSED;
-     Elf_Internal_Shdr *elf_section_hdr;
-     asection *asect;
+sh64_elf64_fake_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			  Elf_Internal_Shdr *elf_section_hdr,
+			  asection *asect)
 {
   /* Code sections can only contain SH64 code, so mark them as such.  */
   if (bfd_get_section_flags (output_bfd, asect) & SEC_CODE)
@@ -2304,8 +2282,7 @@ sh64_elf64_fake_sections (output_bfd, elf_section_hdr, asect)
 }
 
 static bfd_boolean
-sh_elf64_set_mach_from_flags (abfd)
-     bfd *abfd;
+sh_elf64_set_mach_from_flags (bfd *abfd)
 {
   flagword flags = elf_elfheader (abfd)->e_flags;
 
@@ -2328,9 +2305,7 @@ sh_elf64_set_mach_from_flags (abfd)
    See sh64_elf_set_private_flags in elf32-sh64.c for the original.  */
 
 static bfd_boolean
-sh_elf64_set_private_flags (abfd, flags)
-     bfd *    abfd;
-     flagword flags;
+sh_elf64_set_private_flags (bfd *abfd, flagword flags)
 {
   BFD_ASSERT (! elf_flags_init (abfd)
 	      || elf_elfheader (abfd)->e_flags == flags);
@@ -2344,9 +2319,7 @@ sh_elf64_set_private_flags (abfd, flags)
    code, to keep attributes the same as for SHmedia in 32-bit ELF.  */
 
 static bfd_boolean
-sh_elf64_copy_private_data_internal (ibfd, obfd)
-     bfd * ibfd;
-     bfd * obfd;
+sh_elf64_copy_private_data_internal (bfd *ibfd, bfd *obfd)
 {
   Elf_Internal_Shdr **o_shdrp;
   asection *isec;
@@ -2377,17 +2350,13 @@ sh_elf64_copy_private_data_internal (ibfd, obfd)
 }
 
 static bfd_boolean
-sh_elf64_copy_private_data (ibfd, obfd)
-     bfd * ibfd;
-     bfd * obfd;
+sh_elf64_copy_private_data (bfd *ibfd, bfd *obfd)
 {
   return sh_elf64_copy_private_data_internal (ibfd, obfd);
 }
 
 static bfd_boolean
-sh_elf64_merge_private_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
+sh_elf64_merge_private_data (bfd *ibfd, bfd *obfd)
 {
   flagword old_flags, new_flags;
 
@@ -2450,12 +2419,11 @@ sh_elf64_merge_private_data (ibfd, obfd)
    relocation.  */
 
 static asection *
-sh_elf64_gc_mark_hook (sec, info, rel, h, sym)
-     asection *sec;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *rel;
-     struct elf_link_hash_entry *h;
-     Elf_Internal_Sym *sym;
+sh_elf64_gc_mark_hook (asection *sec,
+		       struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		       Elf_Internal_Rela *rel,
+		       struct elf_link_hash_entry *h,
+		       Elf_Internal_Sym *sym)
 {
   if (h != NULL)
     {
@@ -2492,11 +2460,10 @@ sh_elf64_gc_mark_hook (sec, info, rel, h, sym)
 /* Update the got entry reference counts for the section being removed.  */
 
 static bfd_boolean
-sh_elf64_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     asection *sec ATTRIBUTE_UNUSED;
-     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
+sh_elf64_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
+			struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			asection *sec ATTRIBUTE_UNUSED,
+			const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED)
 {
   /* No got and plt entries for 64-bit SH at present.  */
   return TRUE;
@@ -2507,11 +2474,8 @@ sh_elf64_gc_sweep_hook (abfd, info, sec, relocs)
    virtual table relocs for gc.  */
 
 static bfd_boolean
-sh_elf64_check_relocs (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+sh_elf64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+		       asection *sec, const Elf_Internal_Rela *relocs)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
@@ -2884,9 +2848,7 @@ sh_elf64_check_relocs (abfd, info, sec, relocs)
 }
 
 static int
-sh64_elf64_get_symbol_type (elf_sym, type)
-     Elf_Internal_Sym * elf_sym;
-     int type;
+sh64_elf64_get_symbol_type (Elf_Internal_Sym * elf_sym, int type)
 {
   if (ELF_ST_TYPE (elf_sym->st_info) == STT_DATALABEL)
     return STT_DATALABEL;
@@ -2917,14 +2879,10 @@ sh64_elf64_get_symbol_type (elf_sym, type)
    (not so good).  */
 
 static bfd_boolean
-sh64_elf64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
-     const char **namep;
-     flagword *flagsp ATTRIBUTE_UNUSED;
-     asection **secp;
-     bfd_vma *valp;
+sh64_elf64_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
+			    const Elf_Internal_Sym *sym, const char **namep,
+			    flagword *flagsp ATTRIBUTE_UNUSED,
+			    asection **secp, bfd_vma *valp)
 {
   /* We want to do this for relocatable as well as final linking.  */
   if (ELF_ST_TYPE (sym->st_info) == STT_DATALABEL
@@ -3018,12 +2976,11 @@ sh64_elf64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
    DataLabel symbol.  */
 
 static bfd_boolean
-sh64_elf64_link_output_symbol_hook (abfd, info, cname, sym, input_sec)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *info;
-     const char *cname;
-     Elf_Internal_Sym *sym;
-     asection *input_sec ATTRIBUTE_UNUSED;
+sh64_elf64_link_output_symbol_hook (bfd *abfd ATTRIBUTE_UNUSED,
+				    struct bfd_link_info *info,
+				    const char *cname,
+				    Elf_Internal_Sym *sym,
+				    asection *input_sec ATTRIBUTE_UNUSED)
 {
   char *name = (char *) cname;
 
@@ -3044,9 +3001,8 @@ sh64_elf64_link_output_symbol_hook (abfd, info, cname, sym, input_sec)
    before jumping to the program entry.  */
 
 static void
-sh64_elf64_final_write_processing (abfd, linker)
-     bfd *abfd;
-     bfd_boolean linker ATTRIBUTE_UNUSED;
+sh64_elf64_final_write_processing (bfd *abfd,
+				   bfd_boolean linker ATTRIBUTE_UNUSED)
 {
   /* FIXME: Perhaps we shouldn't do this if the entry address was supplied
      numerically, but we currently lack the infrastructure to recognize
@@ -3190,10 +3146,9 @@ static const bfd_byte *elf_sh64_pic_plt_entry;
 /* Create an entry in an sh ELF linker hash table.  */
 
 static struct bfd_hash_entry *
-sh64_elf64_link_hash_newfunc (entry, table, string)
-     struct bfd_hash_entry *entry;
-     struct bfd_hash_table *table;
-     const char *string;
+sh64_elf64_link_hash_newfunc (struct bfd_hash_entry *entry,
+			      struct bfd_hash_table *table,
+			      const char *string)
 {
   struct elf_sh64_link_hash_entry *ret =
     (struct elf_sh64_link_hash_entry *) entry;
@@ -3223,8 +3178,7 @@ sh64_elf64_link_hash_newfunc (entry, table, string)
 /* Create an sh64 ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
-sh64_elf64_link_hash_table_create (abfd)
-     bfd *abfd;
+sh64_elf64_link_hash_table_create (bfd *abfd)
 {
   struct elf_sh64_link_hash_table *ret;
 
@@ -3244,10 +3198,7 @@ sh64_elf64_link_hash_table_create (abfd)
 }
 
 inline static void
-movi_shori_putval (output_bfd, value, addr)
-     bfd *output_bfd;
-     unsigned long value;
-     char *addr;
+movi_shori_putval (bfd *output_bfd, unsigned long value, char *addr)
 {
   bfd_put_32 (output_bfd,
 	      bfd_get_32 (output_bfd, addr)
@@ -3260,10 +3211,7 @@ movi_shori_putval (output_bfd, value, addr)
 }
 
 inline static void
-movi_3shori_putval (output_bfd, value, addr)
-     bfd *output_bfd;
-     bfd_vma value;
-     char *addr;
+movi_3shori_putval (bfd *output_bfd, bfd_vma value, char *addr)
 {
   bfd_put_32 (output_bfd,
 	      bfd_get_32 (output_bfd, addr)
@@ -3286,9 +3234,7 @@ movi_3shori_putval (output_bfd, value, addr)
 /* Create dynamic sections when linking against a dynamic object.  */
 
 static bfd_boolean
-sh64_elf64_create_dynamic_sections (abfd, info)
-     bfd *abfd;
-     struct bfd_link_info *info;
+sh64_elf64_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 {
   flagword flags, pltflags;
   register asection *s;
@@ -3430,9 +3376,8 @@ sh64_elf64_create_dynamic_sections (abfd, info)
    understand.  */
 
 static bfd_boolean
-sh64_elf64_adjust_dynamic_symbol (info, h)
-     struct bfd_link_info *info;
-     struct elf_link_hash_entry *h;
+sh64_elf64_adjust_dynamic_symbol (struct bfd_link_info *info,
+				  struct elf_link_hash_entry *h)
 {
   bfd *dynobj;
   asection *s;
@@ -3605,9 +3550,8 @@ sh64_elf64_adjust_dynamic_symbol (info, h)
    relocate_section routine.  */
 
 static bfd_boolean
-sh64_elf64_discard_copies (h, ignore)
-     struct elf_sh64_link_hash_entry *h;
-     PTR ignore ATTRIBUTE_UNUSED;
+sh64_elf64_discard_copies (struct elf_sh64_link_hash_entry *h,
+			   void *ignore ATTRIBUTE_UNUSED)
 {
   struct elf_sh64_pcrel_relocs_copied *s;
 
@@ -3627,9 +3571,8 @@ sh64_elf64_discard_copies (h, ignore)
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
-sh64_elf64_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
+sh64_elf64_size_dynamic_sections (bfd *output_bfd,
+				  struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *s;
@@ -3669,8 +3612,7 @@ sh64_elf64_size_dynamic_sections (output_bfd, info)
      will not fill them in in the relocate_section routine.  */
   if (info->shared && info->symbolic)
     sh64_elf64_link_hash_traverse (sh64_elf64_hash_table (info),
-				   sh64_elf64_discard_copies,
-				   (PTR) NULL);
+				   sh64_elf64_discard_copies, NULL);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -3815,11 +3757,10 @@ sh64_elf64_size_dynamic_sections (output_bfd, info)
    dynamic sections here.  */
 
 static bfd_boolean
-sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
-     struct elf_link_hash_entry *h;
-     Elf_Internal_Sym *sym;
+sh64_elf64_finish_dynamic_symbol (bfd *output_bfd,
+				  struct bfd_link_info *info,
+				  struct elf_link_hash_entry *h,
+				  Elf_Internal_Sym *sym)
 {
   bfd *dynobj;
 
@@ -4015,9 +3956,8 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
 /* Finish up the dynamic sections.  */
 
 static bfd_boolean
-sh64_elf64_finish_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
+sh64_elf64_finish_dynamic_sections (bfd *output_bfd,
+				    struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *sgot;

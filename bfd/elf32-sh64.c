@@ -39,36 +39,36 @@ struct sh64_find_section_vma_data
  };
 
 static bfd_boolean sh64_elf_new_section_hook
-  PARAMS ((bfd *, asection *));
+  (bfd *, asection *);
 static bfd_boolean sh64_elf_copy_private_data
-  PARAMS ((bfd *, bfd *));
+  (bfd *, bfd *);
 static bfd_boolean sh64_elf_merge_private_data
-  PARAMS ((bfd *, bfd *));
+  (bfd *, bfd *);
 static bfd_boolean sh64_elf_fake_sections
-  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
+  (bfd *, Elf_Internal_Shdr *, asection *);
 static bfd_boolean sh64_elf_set_private_flags
-  PARAMS ((bfd *, flagword));
+  (bfd *, flagword);
 static bfd_boolean sh64_elf_set_mach_from_flags
-  PARAMS ((bfd *));
+  (bfd *);
 static bfd_boolean shmedia_prepare_reloc
-  PARAMS ((struct bfd_link_info *, bfd *, asection *,
-	   bfd_byte *, const Elf_Internal_Rela *, bfd_vma *));
+  (struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+   const Elf_Internal_Rela *, bfd_vma *);
 static int sh64_elf_get_symbol_type
-  PARAMS ((Elf_Internal_Sym *, int));
+  (Elf_Internal_Sym *, int);
 static bfd_boolean sh64_elf_add_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
-	   const char **, flagword *, asection **, bfd_vma *));
+  (bfd *, struct bfd_link_info *, const Elf_Internal_Sym *, const char **,
+   flagword *, asection **, bfd_vma *);
 static bfd_boolean sh64_elf_link_output_symbol_hook
-  PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
-	   asection *));
+  (bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
+   asection *);
 static bfd_boolean sh64_backend_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
+  (bfd *, Elf_Internal_Shdr *, const char *);
 static void sh64_elf_final_write_processing
-  PARAMS ((bfd *, bfd_boolean));
+  (bfd *, bfd_boolean);
 static bfd_boolean sh64_bfd_elf_copy_private_section_data
-  PARAMS ((bfd *, asection *, bfd *, asection *));
+  (bfd *, asection *, bfd *, asection *);
 static void sh64_find_section_for_address
-  PARAMS ((bfd *, asection *, PTR));
+  (bfd *, asection *, void *);
 
 /* Let elf32-sh.c handle the "bfd_" definitions, so we only have to
    intrude with an #ifndef around the function definition.  */
@@ -108,9 +108,7 @@ static void sh64_find_section_for_address
 /* Tack some extra info on struct bfd_elf_section_data.  */
 
 static bfd_boolean
-sh64_elf_new_section_hook (abfd, sec)
-     bfd *abfd;
-     asection *sec;
+sh64_elf_new_section_hook (bfd *abfd, asection *sec)
 {
   struct _sh64_elf_section_data *sdata;
   bfd_size_type amt = sizeof (*sdata);
@@ -118,7 +116,7 @@ sh64_elf_new_section_hook (abfd, sec)
   sdata = (struct _sh64_elf_section_data *) bfd_zalloc (abfd, amt);
   if (sdata == NULL)
     return FALSE;
-  sec->used_by_bfd = (PTR) sdata;
+  sec->used_by_bfd = sdata;
 
   return _bfd_elf_new_section_hook (abfd, sec);
 }
@@ -127,10 +125,9 @@ sh64_elf_new_section_hook (abfd, sec)
    through SHT_SH5_CR_SORTED on a sorted .cranges section.  */
 
 bfd_boolean
-sh64_elf_fake_sections (output_bfd, elf_section_hdr, asect)
-     bfd *output_bfd ATTRIBUTE_UNUSED;
-     Elf_Internal_Shdr *elf_section_hdr;
-     asection *asect;
+sh64_elf_fake_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			Elf_Internal_Shdr *elf_section_hdr,
+			asection *asect)
 {
   if (sh64_elf_section_data (asect)->sh64_info != NULL)
     elf_section_hdr->sh_flags
@@ -147,8 +144,7 @@ sh64_elf_fake_sections (output_bfd, elf_section_hdr, asect)
 }
 
 static bfd_boolean
-sh64_elf_set_mach_from_flags (abfd)
-     bfd *abfd;
+sh64_elf_set_mach_from_flags (bfd *abfd)
 {
   flagword flags = elf_elfheader (abfd)->e_flags;
   asection *cranges;
@@ -182,9 +178,7 @@ sh64_elf_set_mach_from_flags (abfd)
 }
 
 static bfd_boolean
-sh64_elf_copy_private_data (ibfd, obfd)
-     bfd * ibfd;
-     bfd * obfd;
+sh64_elf_copy_private_data (bfd * ibfd, bfd * obfd)
 {
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -199,9 +193,7 @@ sh64_elf_copy_private_data (ibfd, obfd)
 }
 
 static bfd_boolean
-sh64_elf_merge_private_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
+sh64_elf_merge_private_data (bfd *ibfd, bfd *obfd)
 {
   flagword old_flags, new_flags;
 
@@ -261,10 +253,8 @@ sh64_elf_merge_private_data (ibfd, obfd)
    We only recognize SHT_SH5_CR_SORTED, on the .cranges section.  */
 
 bfd_boolean
-sh64_backend_section_from_shdr (abfd, hdr, name)
-     bfd *abfd;
-     Elf_Internal_Shdr *hdr;
-     const char *name;
+sh64_backend_section_from_shdr (bfd *abfd, Elf_Internal_Shdr *hdr,
+				const char *name)
 {
   flagword flags = 0;
 
@@ -308,11 +298,8 @@ sh64_backend_section_from_shdr (abfd, hdr, name)
    structure for the SH64 ELF section flags to be copied correctly.  */
 
 bfd_boolean
-sh64_bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
-     bfd *ibfd;
-     asection *isec;
-     bfd *obfd;
-     asection *osec;
+sh64_bfd_elf_copy_private_section_data (bfd *ibfd, asection *isec,
+					bfd *obfd, asection *osec)
 {
   struct sh64_section_data *sh64_sec_data;
 
@@ -344,9 +331,7 @@ sh64_bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
 /* Function to keep SH64 specific file flags.  */
 
 static bfd_boolean
-sh64_elf_set_private_flags (abfd, flags)
-     bfd *    abfd;
-     flagword flags;
+sh64_elf_set_private_flags (bfd *abfd, flagword flags)
 {
   BFD_ASSERT (! elf_flags_init (abfd)
 	      || elf_elfheader (abfd)->e_flags == flags);
@@ -359,9 +344,7 @@ sh64_elf_set_private_flags (abfd, flags)
 /* Called when writing out an object file to decide the type of a symbol.  */
 
 static int
-sh64_elf_get_symbol_type (elf_sym, type)
-     Elf_Internal_Sym * elf_sym;
-     int type;
+sh64_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 {
   if (ELF_ST_TYPE (elf_sym->st_info) == STT_DATALABEL)
     return STT_DATALABEL;
@@ -388,14 +371,10 @@ sh64_elf_get_symbol_type (elf_sym, type)
    (not so good).  */
 
 static bfd_boolean
-sh64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     const Elf_Internal_Sym *sym;
-     const char **namep;
-     flagword *flagsp ATTRIBUTE_UNUSED;
-     asection **secp;
-     bfd_vma *valp;
+sh64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
+			  const Elf_Internal_Sym *sym, const char **namep,
+			  flagword *flagsp ATTRIBUTE_UNUSED,
+			  asection **secp, bfd_vma *valp)
 {
   /* We want to do this for relocatable as well as final linking.  */
   if (ELF_ST_TYPE (sym->st_info) == STT_DATALABEL
@@ -489,12 +468,11 @@ sh64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
    DataLabel symbol.  */
 
 bfd_boolean
-sh64_elf_link_output_symbol_hook (abfd, info, cname, sym, input_sec)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *info;
-     const char *cname;
-     Elf_Internal_Sym *sym;
-     asection *input_sec ATTRIBUTE_UNUSED;
+sh64_elf_link_output_symbol_hook (bfd *abfd ATTRIBUTE_UNUSED,
+				  struct bfd_link_info *info,
+				  const char *cname,
+				  Elf_Internal_Sym *sym,
+				  asection *input_sec ATTRIBUTE_UNUSED)
 {
   char *name = (char *) cname;
 
@@ -512,14 +490,9 @@ sh64_elf_link_output_symbol_hook (abfd, info, cname, sym, input_sec)
    bad value, TRUE if ok.  */
 
 static bfd_boolean
-shmedia_prepare_reloc (info, abfd, input_section,
-		       contents, rel, relocation)
-     struct bfd_link_info *info;
-     bfd *abfd;
-     asection *input_section;
-     bfd_byte *contents;
-     const Elf_Internal_Rela *rel;
-     bfd_vma *relocation;
+shmedia_prepare_reloc (struct bfd_link_info *info, bfd *abfd,
+		       asection *input_section, bfd_byte *contents,
+		       const Elf_Internal_Rela *rel, bfd_vma *relocation)
 {
   bfd_vma disp, dropped;
 
@@ -624,10 +597,8 @@ shmedia_prepare_reloc (info, abfd, input_section,
    is called via bfd_map_over_sections.  */
 
 static void
-sh64_find_section_for_address (abfd, section, data)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *section;
-     PTR data;
+sh64_find_section_for_address (bfd *abfd ATTRIBUTE_UNUSED,
+			       asection *section, void *data)
 {
   bfd_vma vma;
   bfd_size_type size;
@@ -663,9 +634,8 @@ sh64_find_section_for_address (abfd, section, data)
    executables (final linking and objcopy).  */
 
 static void
-sh64_elf_final_write_processing (abfd, linker)
-     bfd *abfd;
-     bfd_boolean linker ATTRIBUTE_UNUSED;
+sh64_elf_final_write_processing (bfd *abfd,
+				 bfd_boolean linker ATTRIBUTE_UNUSED)
 {
   bfd_vma ld_generated_cranges_size;
   asection *cranges
@@ -717,7 +687,7 @@ sh64_elf_final_write_processing (abfd, linker)
       fsec_data.section = NULL;
 
       bfd_map_over_sections (abfd, sh64_find_section_for_address,
-			     (PTR) &fsec_data);
+			     &fsec_data);
       if (fsec_data.section
 	  && (sh64_get_contents_type (fsec_data.section,
 				      elf_elfheader (abfd)->e_entry,

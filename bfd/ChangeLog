@@ -1,3 +1,11 @@
+2003-07-25  Kaz Kojima  <kkojima@rr.iij4u.or.jp>  
+
+	* elf32-sh.c: Convert to C90.  Replace PTR with void *.
+	* elf32-sh64-com.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf32-sh64.h: Likewise.
+	* elf64-sh64.c: Likewise.
+
 2003-07-24  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_adjust_dynamic_symbol): Use SYMBOL_CALLS_LOCAL.
