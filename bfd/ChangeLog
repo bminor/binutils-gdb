@@ -46,12 +46,12 @@ Mon Dec 15 15:01:15 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-m32rx
 	* cpu-m32r.c: Add m32rx cpu architecture.
-	* bfd-in2.h (bfd_mach_m32r, bfd_mach_m32rx): Add identifiers for
-	M32RX architecture machines.
+	* bfd-in2.h (bfd_mach_m32rx): Add identifier for M32RX
+	architecture machines. 
 end-sanitize-m32rx
 
-	* bfd-in2.h (bfd_mach_m32r, bfd_mach_m32rx): Add identifiers for
-	M32R architecture machines.
+	* bfd-in2.h (bfd_mach_m32r): Add identifier for M32R architecture
+	machines. 
 
 Fri Dec 12 11:30:28 1997  Brendan Kehoe  <brendan@canuck.cygnus.com>
 

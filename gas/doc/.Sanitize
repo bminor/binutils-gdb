@@ -82,7 +82,7 @@ else
 	done
 fi
 
-m32rx_files="c-m32rx.texi as.texinfo"
+m32rx_files="c-m32r.texi as.texinfo"
 if ( echo $* | grep keep\-m32rx > /dev/null ) ; then
 	for i in $m32rx_files ; do
 		if test ! -d $i && (grep sanitize-m32rx $i > /dev/null) ; then
