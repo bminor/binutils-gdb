@@ -3639,6 +3639,24 @@ mips_call_dummy_address ()
 }
 
 
+/* If the current gcc for for this target does not produce correct debugging
+   information for float parameters, both prototyped and unprototyped, then
+   define this macro.  This forces gdb to  always assume that floats are
+   passed as doubles and then converted in the callee.
+
+   For the mips chip, it appears that the debug info marks the parameters as
+   floats regardless of whether the function is prototyped, but the actual
+   values are passed as doubles for the non-prototyped case and floats for
+   the prototyped case.  Thus we choose to make the non-prototyped case work
+   for C and break the prototyped case, since the non-prototyped case is
+   probably much more common.  (FIXME). */
+
+static int
+mips_coerce_float_to_double (struct type *formal, struct type *actual)
+{
+  return current_language->la_language == language_c;
+}
+
 
 static gdbarch_init_ftype mips_gdbarch_init;
 static struct gdbarch *
@@ -3835,6 +3853,7 @@ mips_gdbarch_init (info, arches)
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_push_arguments (gdbarch, mips_push_arguments);
   set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
+  set_gdbarch_coerce_float_to_double (gdbarch, mips_coerce_float_to_double);
 
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_get_saved_register (gdbarch, default_get_saved_register);

@@ -269,7 +269,7 @@ extern void sh_pop_frame PARAMS ((void));
 
 #define REGISTER_SIZE 4
 
-#define COERCE_FLOAT_TO_DOUBLE 1
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (1)
 
 #define BELIEVE_PCC_PROMOTION 1
 

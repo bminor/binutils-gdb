@@ -569,7 +569,7 @@ extern int deferred_stores;
    define this macro.  This forces gdb to  always assume that floats are
    passed as doubles and then converted in the callee. */
 
-#define COERCE_FLOAT_TO_DOUBLE 1
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (1)
 
 /* Select the sparc disassembler */
 

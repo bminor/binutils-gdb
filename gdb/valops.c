@@ -34,15 +34,6 @@
 #include <errno.h>
 #include "gdb_string.h"
 
-/* Default to coercing float to double in function calls only when there is
-   no prototype.  Otherwise on targets where the debug information is incorrect
-   for either the prototype or non-prototype case, we can force it by defining
-   COERCE_FLOAT_TO_DOUBLE in the target configuration file. */
-
-#ifndef COERCE_FLOAT_TO_DOUBLE
-#define COERCE_FLOAT_TO_DOUBLE (param_type == NULL)
-#endif
-
 /* Flag indicating HP compilers were used; needed to correctly handle some
    value operations with HP aCC code/runtime. */
 extern int hp_som_som_object_present;
@@ -1124,6 +1115,46 @@ default_push_arguments (nargs, args, sp, struct_return, struct_addr)
 }
 
 
+/* If we're calling a function declared without a prototype, should we
+   promote floats to doubles?  FORMAL and ACTUAL are the types of the
+   arguments; FORMAL may be NULL.
+
+   If we have no definition for this macro, either from the target or
+   from gdbarch, provide a default.  */
+#ifndef COERCE_FLOAT_TO_DOUBLE
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) \
+  (default_coerce_float_to_double ((formal), (actual)))
+#endif   
+
+
+/* A default function for COERCE_FLOAT_TO_DOUBLE: do the coercion only
+   when we don't have any type for the argument at hand.  This occurs
+   when we have no debug info, or when passing varargs.
+
+   This is an annoying default: the rule the compiler follows is to do
+   the standard promotions whenever there is no prototype in scope,
+   and almost all targets want this behavior.  But there are some old
+   architectures which want this odd behavior.  If you want to go
+   through them all and fix them, please do.  Modern gdbarch-style
+   targets may find it convenient to use standard_coerce_float_to_double.  */
+int
+default_coerce_float_to_double (struct type *formal, struct type *actual)
+{
+  return formal == NULL;
+}
+
+
+/* Always coerce floats to doubles when there is no prototype in scope.
+   If your architecture follows the standard type promotion rules for
+   calling unprototyped functions, your gdbarch init function can pass
+   this function to set_gdbarch_coerce_float_to_double to use its logic.  */
+int
+standard_coerce_float_to_double (struct type *formal, struct type *actual)
+{
+  return 1;
+}
+
+
 /* Perform the standard coercions that are specified
    for arguments to be passed to C functions.
 
@@ -1171,7 +1202,7 @@ value_arg_coerce (arg, param_type, is_prototyped)
          non-prototyped case.  As many debugging formats include
          no information about prototyping, we have to live with
          COERCE_FLOAT_TO_DOUBLE for now.  */
-      if (!is_prototyped && COERCE_FLOAT_TO_DOUBLE)
+      if (!is_prototyped && COERCE_FLOAT_TO_DOUBLE (param_type, arg_type))
 	{
 	  if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
 	    type = builtin_type_double;

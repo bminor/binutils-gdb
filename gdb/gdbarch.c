@@ -169,6 +169,7 @@ struct gdbarch
   gdbarch_fix_call_dummy_ftype *fix_call_dummy;
   int believe_pcc_promotion;
   int believe_pcc_promotion_type;
+  gdbarch_coerce_float_to_double_ftype *coerce_float_to_double;
   gdbarch_get_saved_register_ftype *get_saved_register;
   gdbarch_register_convertible_ftype *register_convertible;
   gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual;
@@ -233,6 +234,7 @@ struct gdbarch default_gdbarch = {
   8 * sizeof (float),
   8 * sizeof (double),
   8 * sizeof (long double),
+  0,
   0,
   0,
   0,
@@ -343,6 +345,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->call_dummy_length = -1;
   gdbarch->call_dummy_p = -1;
   gdbarch->call_dummy_stack_adjust_p = -1;
+  gdbarch->coerce_float_to_double = default_coerce_float_to_double;
   gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   gdbarch->decr_pc_after_break = -1;
@@ -488,6 +491,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->fix_call_dummy == 0))
     internal_error ("gdbarch: verify_gdbarch: fix_call_dummy invalid");
+  if ((GDB_MULTI_ARCH >= 2)
+      && (gdbarch->coerce_float_to_double == default_coerce_float_to_double))
+    internal_error ("gdbarch: verify_gdbarch: coerce_float_to_double invalid");
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->get_saved_register == 0))
     internal_error ("gdbarch: verify_gdbarch: get_saved_register invalid");
@@ -769,6 +775,10 @@ gdbarch_dump (void)
                       "gdbarch_update: BELIEVE_PCC_PROMOTION_TYPE = %ld\n",
                       (long) BELIEVE_PCC_PROMOTION_TYPE);
 #endif
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: COERCE_FLOAT_TO_DOUBLE = 0x%08lx\n",
+                      (long) current_gdbarch->coerce_float_to_double
+                      /*COERCE_FLOAT_TO_DOUBLE ()*/);
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: GET_SAVED_REGISTER = 0x%08lx\n",
                       (long) current_gdbarch->get_saved_register
@@ -1730,6 +1740,24 @@ set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch,
                                         int believe_pcc_promotion_type)
 {
   gdbarch->believe_pcc_promotion_type = believe_pcc_promotion_type;
+}
+
+int
+gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, struct type *formal, struct type *actual)
+{
+  if (gdbarch->coerce_float_to_double == 0)
+    internal_error ("gdbarch: gdbarch_coerce_float_to_double invalid");
+  if (gdbarch_debug >= 2)
+    /* FIXME: gdb_std??? */
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_coerce_float_to_double called\n");
+  return gdbarch->coerce_float_to_double (formal, actual);
+}
+
+void
+set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch,
+                                    gdbarch_coerce_float_to_double_ftype coerce_float_to_double)
+{
+  gdbarch->coerce_float_to_double = coerce_float_to_double;
 }
 
 void

@@ -465,6 +465,15 @@ extern void set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch, int
 #endif
 #endif
 
+typedef int (gdbarch_coerce_float_to_double_ftype) (struct type *formal, struct type *actual);
+extern int gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, struct type *formal, struct type *actual);
+extern void set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, gdbarch_coerce_float_to_double_ftype *coerce_float_to_double);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (COERCE_FLOAT_TO_DOUBLE)
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (gdbarch_coerce_float_to_double (current_gdbarch, formal, actual))
+#endif
+#endif
+
 typedef void (gdbarch_get_saved_register_ftype) (char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
 extern void gdbarch_get_saved_register (struct gdbarch *gdbarch, char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
 extern void set_gdbarch_get_saved_register (struct gdbarch *gdbarch, gdbarch_get_saved_register_ftype *get_saved_register);

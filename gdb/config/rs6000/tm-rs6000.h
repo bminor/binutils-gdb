@@ -559,4 +559,4 @@ extern CORE_ADDR get_toc_offset PARAMS ((struct objfile *));
    values are always passed in as doubles.  Thus by setting this to 1, both
    types of calls will work. */
 
-#define COERCE_FLOAT_TO_DOUBLE 1
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (1)

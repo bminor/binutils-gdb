@@ -445,7 +445,7 @@ extern struct frame_info *setup_arbitrary_frame PARAMS ((int, CORE_ADDR *));
    values are always passed in as doubles.  Thus by setting this to 1, both
    types of calls will work. */
 
-#define COERCE_FLOAT_TO_DOUBLE 1
+#define COERCE_FLOAT_TO_DOUBLE(formal, actual) (1)
 
 /* Return TRUE if procedure descriptor PROC is a procedure descriptor
    that refers to a dynamically generated sigtramp function.
