@@ -1354,6 +1354,12 @@ extern const asection bfd_ind_section;
 #define bfd_ind_section_ptr ((asection *) &bfd_ind_section)
 #define bfd_is_ind_section(sec) ((sec) == bfd_ind_section_ptr)
 
+#define bfd_is_const_section(SEC)              \
+ (   ((SEC) == bfd_abs_section_ptr)            \
+  || ((SEC) == bfd_und_section_ptr)            \
+  || ((SEC) == bfd_com_section_ptr)            \
+  || ((SEC) == bfd_ind_section_ptr))
+
 extern const struct symbol_cache_entry * const bfd_abs_symbol;
 extern const struct symbol_cache_entry * const bfd_com_symbol;
 extern const struct symbol_cache_entry * const bfd_und_symbol;

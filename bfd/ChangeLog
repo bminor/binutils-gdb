@@ -1,3 +1,11 @@
+2001-11-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* section.c (bfd_is_const_section): New macro.  Return true if the
+	given seciton is one of the special, constant, sections.
+	* bfd-in2.h: Regenerate.	
+	* coffgen.c (coff_count_linenumbers): Use bfd_is_const_section.
+	(coff_write_native_symbol): Use bfd_is_const_section.
+
 2001-11-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-hppa.c (clobber_millicode_symbols): Dec dynstr refcount.
@@ -13,6 +21,17 @@
 2001-11-19  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c: Adjust documentation tags to use texinfo 4 features.
+
+2001-11-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* section.c (bfd_is_const_section): New macro.  Return true if the
+	section pointer refers to one of the special, constant sections.
+	* bfd-in2.h: Regenerate.
+
+	* coffgen.c (coff_count_linenumbers): Only update the line number
+	count in non-special sections.
+	(coff_write_native_symbol): Only update the line number file
+	position in non-special sections.
 
 2001-11-15  Daniel Jacobowitz  <drow@mvista.com>
 

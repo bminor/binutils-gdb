@@ -555,15 +555,18 @@ coff_count_linenumbers (abfd)
 	         section's linenumber count.  */
 	      alent *l = q->lineno;
 
-	      ++q->symbol.section->output_section->lineno_count;
-	      ++total;
-	      ++l;
-	      while (l->line_number != 0)
+	      do
 		{
+		  asection * sec = q->symbol.section->output_section;
+		  
+		  /* Do not try to update fields in read-only sections.  */
+		  if (! bfd_is_const_section (sec))
+		    sec->lineno_count ++;
+
 		  ++total;
-		  ++q->symbol.section->output_section->lineno_count;
 		  ++l;
 		}
+	      while (l->line_number != 0);
 	    }
 	}
     }
@@ -1145,8 +1148,9 @@ coff_write_native_symbol (abfd, symbol, written, string_size_p,
 	}
       symbol->done_lineno = true;
 
-      symbol->symbol.section->output_section->moving_line_filepos +=
-	count * bfd_coff_linesz (abfd);
+      if (! bfd_is_const_section (symbol->symbol.section->output_section))
+	symbol->symbol.section->output_section->moving_line_filepos +=
+	  count * bfd_coff_linesz (abfd);
     }
 
   return coff_write_symbol (abfd, &(symbol->symbol), native, written,
