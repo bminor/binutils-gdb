@@ -1282,12 +1282,12 @@ add_to_lit_pool ()
 
       if (literals[lit_count].exp.X_op == inst.reloc.exp.X_op
           && inst.reloc.exp.X_op == O_symbol
-          && literals[lit_count].exp.X_add_number
-	  == inst.reloc.exp.X_add_number
-          && literals[lit_count].exp.X_add_symbol
-	  == inst.reloc.exp.X_add_symbol
-          && literals[lit_count].exp.X_op_symbol
-	  == inst.reloc.exp.X_op_symbol)
+          && (literals[lit_count].exp.X_add_number
+	      == inst.reloc.exp.X_add_number)
+          && (literals[lit_count].exp.X_add_symbol
+	      == inst.reloc.exp.X_add_symbol)
+          && (literals[lit_count].exp.X_op_symbol
+	      == inst.reloc.exp.X_op_symbol))
         break;
 
       lit_count++;
