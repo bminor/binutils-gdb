@@ -1,3 +1,16 @@
+2002-10-31  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (dl1_handle_multipart): New function.
+	(dl1_multipart_compound): Ditto.
+	(dl1_examine_compound_token): Ditto.
+	(dl1_locate_class_sym): Ditto.
+	(dl1_find_next_token): Ditto.
+	(dl1_find_method): Ditto.
+	(dl1_count_methods): Ditto.
+	(dl1_handle_filename): Ditto.
+	(decode_line_1): Call dl1_handle_multipart.
+	(cplusplus_error): Declare to be NORETURN.
+
 2002-10-28  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (dl1_initialize_defaults): New function.

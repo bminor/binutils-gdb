@@ -40,7 +40,7 @@ extern char *operator_chars (char *, char **);
 
 /* Prototypes for local functions */
 
-static void cplusplus_error (const char *name, const char *fmt, ...) ATTR_FORMAT (printf, 2, 3);
+static NORETURN void cplusplus_error (const char *name, const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 2, 3);
 
 static int total_number_of_methods (struct type *type);
 
@@ -62,7 +62,60 @@ static struct symtabs_and_lines dl1_indirect (char **argptr);
 static void dl1_set_flags (char **argptr, int *is_quoted,
 			   char **paren_pointer);
 
+enum dl1_control_flow { DO_NOTHING, DO_RETURN, DO_SYMBOL_FOUND };
+
+static enum
+dl1_control_flow dl1_handle_multipart (char **argptr,
+				       int funfirstline,
+				       char ***canonical,
+				       char *saved_arg,
+				       int is_quoted,
+				       char *paren_pointer,
+				       char **temp_copy,
+				       struct symbol **sym,
+				       struct symtab **sym_symtab,
+				       struct symtab **s,
+				       struct symtabs_and_lines *values);
+
 static char *dl1_locate_first_half (char **argptr, int *is_quote_enclosed);
+
+static enum
+dl1_control_flow dl1_multipart_compound (char **argptr,
+					 int funfirstline,
+					 char ***canonical,
+					 char *saved_arg,
+					 char *p,
+					 char **temp_copy,
+					 struct symbol **sym,
+					 struct symtab **sym_symtab,
+					 struct symtab **s,
+					 struct symtabs_and_lines *values);
+
+static enum
+dl1_control_flow dl1_examine_compound_token (char **argptr,
+					     int funfirstline,
+					     char ***canonical,
+					     char *saved_arg,
+					     char *p,
+					     struct symtabs_and_lines *values);
+
+static struct symbol *dl1_locate_class_sym (char **argptr, char *p);
+
+static char *dl1_find_next_token (char **argptr);
+
+static void dl1_find_method (int funfirstline, char ***canonical,
+			     char *saved_arg, char *copy,
+			     struct type *t,
+			     struct symbol *sym_class,
+			     struct symbol **sym_arr,
+			     struct symtabs_and_lines *values);
+
+static int dl1_count_methods (char *copy, struct type *t,
+			      struct symbol **sym_arr);
+
+static void dl1_handle_filename (char **argptr, char *p,
+				 int is_quote_enclosed,
+				 struct symtab **s);
 
 /* Helper functions. */
 
@@ -70,7 +123,7 @@ static char *dl1_locate_first_half (char **argptr, int *is_quote_enclosed);
    single quoted demangled C++ symbols as part of the completion
    error.  */
 
-static void
+static NORETURN void
 cplusplus_error (const char *name, const char *fmt, ...)
 {
   struct ui_file *tmp_stream;
@@ -521,25 +574,21 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 {
   struct symtabs_and_lines values;
   struct symtab_and_line val;
-  register char *p, *p1;
-  char *q, *ii, *p2;
+  char *p;
+  char *q, *ii;
   /* This is NULL if there are no parens in argptr, or a pointer to
      the closing parenthesis if there are parens.  */
   char *paren_pointer;
-  register struct symtab *s = NULL;
+  struct symtab *s = NULL;
 
-  register struct symbol *sym;
+  struct symbol *sym;
   /* The symtab that SYM was found in.  */
   struct symtab *sym_symtab;
 
-  register struct minimal_symbol *msymbol;
+  struct minimal_symbol *msymbol;
   char *copy;
-  struct symbol *sym_class;
-  int i1;
   int is_quoted;
   int is_quote_enclosed;
-  struct symbol **sym_arr;
-  struct type *t;
   char *saved_arg = *argptr;
 
   init_sal (&val);		/* initialize to zeroes */
@@ -561,261 +610,35 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   dl1_set_flags (argptr, &is_quoted, &paren_pointer);
 
-  /* Locate the first half of the linespec, ending in a colon, period,
-     or whitespace.  (More or less.)  */
+  /* Handle multipart linespecs (with colons or periods).  */
+  {
+    /* The code after symbol_found depends on having access to a
+       string 'copy' which is allocated via alloca.  But we can't
+       allocate via alloca within dl1_handle_multipart and still
+       expect it to be valid after we exit.  temp_copy will help us
+       get around that.  */
+    char *temp_copy;
 
-  p = dl1_locate_first_half (argptr, &is_quote_enclosed);
-
-  if ((p[0] == ':' || p[0] == '.') && paren_pointer == NULL)
-    {
-      /*  C++ */
-      /*  ... or Java */
-      if (is_quoted)
-	*argptr = *argptr + 1;
-      if (p[0] == '.' || p[1] == ':')
+    switch (dl1_handle_multipart (argptr, funfirstline, canonical,
+				  saved_arg, is_quoted, paren_pointer,
+				  &temp_copy, &sym, &sym_symtab,
+				  &s, &values))
+      {
+      case DO_RETURN:
+	return values;
+      case DO_SYMBOL_FOUND:
 	{
-	  char *saved_arg2 = *argptr;
-	  char *temp_end;
-	  /* First check for "global" namespace specification,
-	     of the form "::foo". If found, skip over the colons
-	     and jump to normal symbol processing */
-	  if (p[0] == ':' 
-	      && ((*argptr == p) || (p[-1] == ' ') || (p[-1] == '\t')))
-	    saved_arg2 += 2;
-
-	  /* We have what looks like a class or namespace
-	     scope specification (A::B), possibly with many
-	     levels of namespaces or classes (A::B::C::D).
-
-	     Some versions of the HP ANSI C++ compiler (as also possibly
-	     other compilers) generate class/function/member names with
-	     embedded double-colons if they are inside namespaces. To
-	     handle this, we loop a few times, considering larger and
-	     larger prefixes of the string as though they were single
-	     symbols.  So, if the initially supplied string is
-	     A::B::C::D::foo, we have to look up "A", then "A::B",
-	     then "A::B::C", then "A::B::C::D", and finally
-	     "A::B::C::D::foo" as single, monolithic symbols, because
-	     A, B, C or D may be namespaces.
-
-	     Note that namespaces can nest only inside other
-	     namespaces, and not inside classes.  So we need only
-	     consider *prefixes* of the string; there is no need to look up
-	     "B::C" separately as a symbol in the previous example. */
-
-	  p2 = p;		/* save for restart */
-	  while (1)
-	    {
-	      /* Extract the class name.  */
-	      p1 = p;
-	      while (p != *argptr && p[-1] == ' ')
-		--p;
-	      copy = (char *) alloca (p - *argptr + 1);
-	      memcpy (copy, *argptr, p - *argptr);
-	      copy[p - *argptr] = 0;
-
-	      /* Discard the class name from the arg.  */
-	      p = p1 + (p1[0] == ':' ? 2 : 1);
-	      while (*p == ' ' || *p == '\t')
-		p++;
-	      *argptr = p;
-
-	      sym_class = lookup_symbol (copy, 0, STRUCT_NAMESPACE, 0,
-					 (struct symtab **) NULL);
-
-	      if (sym_class &&
-		  (t = check_typedef (SYMBOL_TYPE (sym_class)),
-		   (TYPE_CODE (t) == TYPE_CODE_STRUCT
-		    || TYPE_CODE (t) == TYPE_CODE_UNION)))
-		{
-		  /* Arg token is not digits => try it as a function name
-		     Find the next token(everything up to end or next blank). */
-		  if (**argptr
-		      && strchr (get_gdb_completer_quote_characters (),
-				 **argptr) != NULL)
-		    {
-		      p = skip_quoted (*argptr);
-		      *argptr = *argptr + 1;
-		    }
-		  else
-		    {
-		      p = *argptr;
-		      while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p != ':')
-			p++;
-		    }
-
-		  copy = (char *) alloca (p - *argptr + 1);
-		  memcpy (copy, *argptr, p - *argptr);
-		  copy[p - *argptr] = '\0';
-		  if (p != *argptr
-		      && copy[p - *argptr - 1]
-		      && strchr (get_gdb_completer_quote_characters (),
-				 copy[p - *argptr - 1]) != NULL)
-		    copy[p - *argptr - 1] = '\0';
-		  
-		  /* no line number may be specified */
-		  while (*p == ' ' || *p == '\t')
-		    p++;
-		  *argptr = p;
-
-		  sym = 0;
-		  i1 = 0;	/*  counter for the symbol array */
-		  sym_arr = (struct symbol **) alloca (total_number_of_methods (t)
-						* sizeof (struct symbol *));
-
-		  if (destructor_name_p (copy, t))
-		    {
-		      /* Destructors are a special case.  */
-		      int m_index, f_index;
-
-		      if (get_destructor_fn_field (t, &m_index, &f_index))
-			{
-			  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, m_index);
-
-			  sym_arr[i1] =
-			    lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, f_index),
-					   NULL, VAR_NAMESPACE, (int *) NULL,
-					   (struct symtab **) NULL);
-			  if (sym_arr[i1])
-			    i1++;
-			}
-		    }
-		  else
-		    i1 = find_methods (t, copy, sym_arr);
-		  if (i1 == 1)
-		    {
-		      /* There is exactly one field with that name.  */
-		      sym = sym_arr[0];
-
-		      if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
-			{
-			  values.sals = (struct symtab_and_line *)
-			    xmalloc (sizeof (struct symtab_and_line));
-			  values.nelts = 1;
-			  values.sals[0] = find_function_start_sal (sym,
-							      funfirstline);
-			}
-		      else
-			{
-			  values.nelts = 0;
-			}
-		      return values;
-		    }
-		  if (i1 > 0)
-		    {
-		      /* There is more than one field with that name
-		         (overloaded).  Ask the user which one to use.  */
-		      return decode_line_2 (sym_arr, i1, funfirstline, canonical);
-		    }
-		  else
-		    {
-		      char *tmp;
-
-		      if (is_operator_name (copy))
-			{
-			  tmp = (char *) alloca (strlen (copy + 3) + 9);
-			  strcpy (tmp, "operator ");
-			  strcat (tmp, copy + 3);
-			}
-		      else
-			tmp = copy;
-		      if (tmp[0] == '~')
-			cplusplus_error (saved_arg,
-					 "the class `%s' does not have destructor defined\n",
-					 SYMBOL_SOURCE_NAME (sym_class));
-		      else
-			cplusplus_error (saved_arg,
-					 "the class %s does not have any method named %s\n",
-					 SYMBOL_SOURCE_NAME (sym_class), tmp);
-		    }
-		}
-
-	      /* Move pointer up to next possible class/namespace token */
-	      p = p2 + 1;	/* restart with old value +1 */
-	      /* Move pointer ahead to next double-colon */
-	      while (*p && (p[0] != ' ') && (p[0] != '\t') && (p[0] != '\''))
-		{
-		  if (p[0] == '<')
-		    {
-		      temp_end = find_template_name_end (p);
-		      if (!temp_end)
-			error ("malformed template specification in command");
-		      p = temp_end;
-		    }
-		  else if ((p[0] == ':') && (p[1] == ':'))
-		    break;	/* found double-colon */
-		  else
-		    p++;
-		}
-
-	      if (*p != ':')
-		break;		/* out of the while (1) */
-
-	      p2 = p;		/* save restart for next time around */
-	      *argptr = saved_arg2;	/* restore argptr */
-	    }			/* while (1) */
-
-	  /* Last chance attempt -- check entire name as a symbol */
-	  /* Use "copy" in preparation for jumping out of this block,
-	     to be consistent with usage following the jump target */
-	  copy = (char *) alloca (p - saved_arg2 + 1);
-	  memcpy (copy, saved_arg2, p - saved_arg2);
-	  /* Note: if is_quoted should be true, we snuff out quote here anyway */
-	  copy[p - saved_arg2] = '\000';
-	  /* Set argptr to skip over the name */
-	  *argptr = (*p == '\'') ? p + 1 : p;
-	  /* Look up entire name */
-	  sym = lookup_symbol (copy, 0, VAR_NAMESPACE, 0, &sym_symtab);
-	  s = (struct symtab *) 0;
-	  /* Prepare to jump: restore the " if (condition)" so outer layers see it */
-	  /* Symbol was found --> jump to normal symbol processing.
-	     Code following "symbol_found" expects "copy" to have the
-	     symbol name, "sym" to have the symbol pointer, "s" to be
-	     a specified file's symtab, and sym_symtab to be the symbol's
-	     symtab. */
-	  /* By jumping there we avoid falling through the FILE:LINE and
-	     FILE:FUNC processing stuff below */
-	  if (sym)
-	    goto symbol_found;
-
-	  /* Couldn't find any interpretation as classes/namespaces, so give up */
-	  /* The quotes are important if copy is empty.  */
-	  cplusplus_error (saved_arg,
-			   "Can't find member of namespace, class, struct, or union named \"%s\"\n",
-			   copy);
+	  int temp_copy_len = strlen (temp_copy);
+	  copy = (char *) alloca (temp_copy_len + 1);
+	  memcpy (copy, temp_copy, temp_copy_len + 1);
+	  xfree (temp_copy);
+	  goto symbol_found;
 	}
-      /*  end of C++  */
-
-
-      /* Extract the file name.  */
-      p1 = p;
-      while (p != *argptr && p[-1] == ' ')
-	--p;
-      if ((*p == '"') && is_quote_enclosed)
-	--p;
-      copy = (char *) alloca (p - *argptr + 1);
-      memcpy (copy, *argptr, p - *argptr);
-      /* It may have the ending quote right after the file name */
-      if (is_quote_enclosed && copy[p - *argptr - 1] == '"')
-	copy[p - *argptr - 1] = 0;
-      else
-	copy[p - *argptr] = 0;
-
-      /* Find that file's data.  */
-      s = lookup_symtab (copy);
-      if (s == 0)
-	{
-	  if (!have_full_symbols () && !have_partial_symbols ())
-	    error ("No symbol table is loaded.  Use the \"file\" command.");
-	  error ("No source file named %s.", copy);
-	}
-
-      /* Discard the file name from the arg.  */
-      p = p1 + 1;
-      while (*p == ' ' || *p == '\t')
-	p++;
-      *argptr = p;
-    }
+      default:
+	/* Do nothing.  */
+	;
+      }
+  }
 
   /* S is specified file's symtab, or 0 if no file specified.
      arg no longer contains the file name.  */
@@ -1098,7 +921,9 @@ minimal_symbol_found:		/* We also jump here from the case for variables
   return values;		/* for lint */
 }
 
-/* Now come a bunch of helper functions for decode_line_1.  */
+/* Now come a bunch of helper functions for decode_line_1.  Warning:
+   most of them have the side effect of advancing argptr, and I'm not
+   mentioning that in the comments.  */
 
 /* Defaults have defaults.  */
 
@@ -1189,6 +1014,47 @@ dl1_set_flags (char **argptr, int *is_quoted, char **paren_pointer)
     *ii = ' ';
 }
 
+static enum dl1_control_flow
+dl1_handle_multipart (char **argptr, int funfirstline, char ***canonical,
+		      char *saved_arg, int is_quoted, char *paren_pointer,
+		      char **temp_copy,
+		      struct symbol **sym, struct symtab **sym_symtab,
+		      struct symtab **s,
+		      struct symtabs_and_lines *values)
+{
+  char *p;
+  int is_quote_enclosed;
+
+  /* Locate the first half of the linespec, ending in a colon, period,
+     or whitespace.  (More or less.)  */
+
+  p = dl1_locate_first_half (argptr, &is_quote_enclosed);
+
+  /* Does it look like there actually were two parts?  */
+
+  if ((p[0] == ':' || p[0] == '.') && paren_pointer == NULL)
+    {
+      if (is_quoted)
+	*argptr = *argptr + 1;
+      
+      /* Is it a C++ or Java compound data structure?  */
+      
+      if (p[0] == '.' || p[1] == ':')
+	{
+	  return dl1_multipart_compound (argptr, funfirstline, canonical,
+					 saved_arg, p, temp_copy, sym,
+					 sym_symtab, s, values);
+	}
+
+      /* No, the first part is a filename; update argptr and s
+	 accordingly.  */
+      
+      dl1_handle_filename (argptr, p, is_quote_enclosed, s);
+    }
+  
+  return DO_NOTHING;
+}
+
 static char *
 dl1_locate_first_half (char **argptr, int *is_quote_enclosed)
 {
@@ -1277,4 +1143,328 @@ dl1_locate_first_half (char **argptr, int *is_quote_enclosed)
     *ii = ',';
 
   return p;
+}
+
+static enum dl1_control_flow
+dl1_multipart_compound (char **argptr, int funfirstline, char ***canonical,
+			char *saved_arg, char *p,
+			char **temp_copy, struct symbol **sym,
+			struct symtab **sym_symtab,
+			struct symtab **s,
+			struct symtabs_and_lines *values)
+{
+  char *saved_arg2 = *argptr;
+  char *temp_end;
+  char *p2;
+  
+  /* First check for "global" namespace specification,
+     of the form "::foo". If found, skip over the colons
+     and jump to normal symbol processing */
+  if (p[0] == ':' 
+      && ((*argptr == p) || (p[-1] == ' ') || (p[-1] == '\t')))
+    saved_arg2 += 2;
+      
+  /* We have what looks like a class or namespace
+     scope specification (A::B), possibly with many
+     levels of namespaces or classes (A::B::C::D).
+
+     Some versions of the HP ANSI C++ compiler (as also possibly
+     other compilers) generate class/function/member names with
+     embedded double-colons if they are inside namespaces. To
+     handle this, we loop a few times, considering larger and
+     larger prefixes of the string as though they were single
+     symbols.  So, if the initially supplied string is
+     A::B::C::D::foo, we have to look up "A", then "A::B",
+     then "A::B::C", then "A::B::C::D", and finally
+     "A::B::C::D::foo" as single, monolithic symbols, because
+     A, B, C or D may be namespaces.
+
+     Note that namespaces can nest only inside other
+     namespaces, and not inside classes.  So we need only
+     consider *prefixes* of the string; there is no need to look up
+     "B::C" separately as a symbol in the previous example. */
+
+  p2 = p;		/* save for restart */
+  while (1)
+    {
+      enum dl1_control_flow do_next
+	= dl1_examine_compound_token (argptr, funfirstline, canonical,
+				      saved_arg, p, values);
+
+      if (do_next != DO_NOTHING)
+	return do_next;
+      
+      /* Move pointer up to next possible class/namespace token */
+      p = p2 + 1;	/* restart with old value +1 */
+      /* Move pointer ahead to next double-colon */
+      while (*p && (p[0] != ' ') && (p[0] != '\t') && (p[0] != '\''))
+	{
+	  if (p[0] == '<')
+	    {
+	      temp_end = find_template_name_end (p);
+	      if (!temp_end)
+		error ("malformed template specification in command");
+	      p = temp_end;
+	    }
+	  else if ((p[0] == ':') && (p[1] == ':'))
+	    break;	/* found double-colon */
+	  else
+	    p++;
+	}
+
+      if (*p != ':')
+	break;		/* out of the while (1) */
+	  
+      p2 = p;		/* save restart for next time around */
+      *argptr = saved_arg2;	/* restore argptr */
+    }			/* while (1) */
+
+  /* Last chance attempt -- check entire name as a symbol */
+  /* Use "temp_copy" in preparation for jumping out of the block
+     after we make it back to decode_line_1.  */
+  *temp_copy = xmalloc (p - saved_arg2 + 1);
+  memcpy (*temp_copy, saved_arg2, p - saved_arg2);
+  /* Note: if is_quoted should be true, we snuff out quote here anyway */
+  (*temp_copy)[p - saved_arg2] = '\000';
+  /* Set argptr to skip over the name */
+  *argptr = (*p == '\'') ? p + 1 : p;
+  /* Look up entire name */
+  *sym = lookup_symbol (*temp_copy, 0, VAR_NAMESPACE, 0, sym_symtab);
+  *s = (struct symtab *) 0;
+  /* Prepare to jump: restore the " if (condition)" so outer layers see it */
+  /* Symbol was found --> jump to normal symbol processing.
+     Code following "symbol_found" expects "copy" to have the
+     symbol name, "sym" to have the symbol pointer, "s" to be
+     a specified file's symtab, and sym_symtab to be the symbol's
+     symtab. */
+  /* By jumping there we avoid falling through the FILE:LINE and
+     FILE:FUNC processing stuff below */
+  if (*sym)
+    return DO_SYMBOL_FOUND;
+
+  /* Couldn't find any interpretation as classes/namespaces, so give up */
+  /* FIXME: carlton/2002-10-31: I should arrange for *temp_copy to be
+     xfree'd.  */
+  /* The quotes are important if copy is empty.  */
+  cplusplus_error (saved_arg,
+		   "Can't find member of namespace, class, struct, or union named \"%s\"\n",
+		   *temp_copy);
+}
+
+static enum dl1_control_flow
+dl1_examine_compound_token (char **argptr, int funfirstline,
+			    char ***canonical, 
+			    char *saved_arg, char *p,
+			    struct symtabs_and_lines *values)
+{
+  char *copy;
+  struct symbol *sym_class;
+  struct type *t;
+  
+  /* If p points at the name of a class, find the corresponding
+     symbol.  */
+
+  sym_class = dl1_locate_class_sym (argptr, p);
+
+  if (sym_class &&
+      (t = check_typedef (SYMBOL_TYPE (sym_class)),
+       (TYPE_CODE (t) == TYPE_CODE_STRUCT
+	|| TYPE_CODE (t) == TYPE_CODE_UNION)))
+    {
+      int i1;
+      struct symbol **sym_arr;
+      
+      /* Arg token is not digits => try it as a function name
+	 Find the next token(everything up to end or next blank). */
+
+      p = dl1_find_next_token (argptr);
+      copy = (char *) alloca (p - *argptr + 1);
+      memcpy (copy, *argptr, p - *argptr);
+      copy[p - *argptr] = '\0';
+      if (p != *argptr
+	  && copy[p - *argptr - 1]
+	  && strchr (get_gdb_completer_quote_characters (),
+		     copy[p - *argptr - 1]) != NULL)
+	copy[p - *argptr - 1] = '\0';
+	      
+      /* no line number may be specified */
+      while (*p == ' ' || *p == '\t')
+	p++;
+      *argptr = p;
+
+      sym_arr = (struct symbol **) alloca (total_number_of_methods (t)
+					   * sizeof (struct symbol *));
+      
+      dl1_find_method (funfirstline, canonical, saved_arg, copy, t,
+		       sym_class, sym_arr, values);
+      
+      return DO_RETURN;
+    }
+  else
+    {
+      return DO_NOTHING;
+    }
+}
+
+static struct symbol *
+dl1_locate_class_sym (char **argptr, char *p)
+{
+  char *p1;
+  char *copy;
+      
+  /* Extract the class name.  */
+  p1 = p;
+  while (p != *argptr && p[-1] == ' ')
+    --p;
+  copy = (char *) alloca (p - *argptr + 1);
+  memcpy (copy, *argptr, p - *argptr);
+  copy[p - *argptr] = 0;
+	  
+  /* Discard the class name from the arg.  */
+  p = p1 + (p1[0] == ':' ? 2 : 1);
+  while (*p == ' ' || *p == '\t')
+    p++;
+  *argptr = p;
+
+  return lookup_symbol (copy, NULL, STRUCT_NAMESPACE, NULL, NULL);
+}
+
+static char *
+dl1_find_next_token (char **argptr)
+{
+  char *p;
+  
+  if (**argptr
+      && strchr (get_gdb_completer_quote_characters (),
+		 **argptr) != NULL)
+    {
+      p = skip_quoted (*argptr);
+      *argptr = *argptr + 1;
+    }
+  else
+    {
+      p = *argptr;
+      while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p != ':')
+	p++;
+    }
+
+  return p;
+}
+
+static void
+dl1_find_method (int funfirstline, char ***canonical, char *saved_arg,
+		 char *copy, struct type *t, struct symbol *sym_class,
+		 struct symbol **sym_arr,
+		 struct symtabs_and_lines *values)
+{
+  int i1 = dl1_count_methods (copy, t, sym_arr);
+
+  if (i1 == 1)
+    {
+      /* There is exactly one field with that name.  */
+      struct symbol *sym = sym_arr[0];
+
+      if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
+	{
+	  values->sals = xmalloc (sizeof (struct symtab_and_line));
+	  values->nelts = 1;
+	  values->sals[0] = find_function_start_sal (sym, funfirstline);
+	}
+      else
+	{
+	  values->nelts = 0;
+	}
+    }
+  else if (i1 > 0)
+    {
+      /* There is more than one field with that name
+	 (overloaded).  Ask the user which one to use.  */
+      *values = decode_line_2 (sym_arr, i1, funfirstline, canonical);
+    }
+  else
+    {
+      char *tmp;
+	  
+      if (is_operator_name (copy))
+	{
+	  tmp = (char *) alloca (strlen (copy + 3) + 9);
+	  strcpy (tmp, "operator ");
+	  strcat (tmp, copy + 3);
+	}
+      else
+	tmp = copy;
+      if (tmp[0] == '~')
+	cplusplus_error (saved_arg,
+			 "the class `%s' does not have destructor defined\n",
+			 SYMBOL_SOURCE_NAME (sym_class));
+      else
+	cplusplus_error (saved_arg,
+			 "the class %s does not have any method named %s\n",
+			 SYMBOL_SOURCE_NAME (sym_class), tmp);
+    }
+}
+
+static int
+dl1_count_methods (char *copy, struct type *t, struct symbol **sym_arr)
+{
+  int i1 = 0;	/*  counter for the symbol array */
+  
+  if (destructor_name_p (copy, t))
+    {
+      /* Destructors are a special case.  */
+      int m_index, f_index;
+      
+      if (get_destructor_fn_field (t, &m_index, &f_index))
+	{
+	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, m_index);
+	  
+	  sym_arr[i1] =
+	    lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, f_index),
+			   NULL, VAR_NAMESPACE, (int *) NULL,
+			   (struct symtab **) NULL);
+	  if (sym_arr[i1])
+	    i1++;
+	}
+    }
+  else
+    i1 = find_methods (t, copy, sym_arr);
+
+  return i1;
+}
+
+static void
+dl1_handle_filename (char **argptr, char *p, int is_quote_enclosed,
+		     struct symtab **s)
+{
+  char *p1;
+  char *copy;
+  
+  /* Extract the file name.  */
+  p1 = p;
+  while (p != *argptr && p[-1] == ' ')
+    --p;
+  if ((*p == '"') && is_quote_enclosed)
+    --p;
+  copy = (char *) alloca (p - *argptr + 1);
+  memcpy (copy, *argptr, p - *argptr);
+  /* It may have the ending quote right after the file name */
+  if (is_quote_enclosed && copy[p - *argptr - 1] == '"')
+    copy[p - *argptr - 1] = 0;
+  else
+    copy[p - *argptr] = 0;
+      
+  /* Find that file's data.  */
+  *s = lookup_symtab (copy);
+  if (*s == 0)
+    {
+      if (!have_full_symbols () && !have_partial_symbols ())
+	error ("No symbol table is loaded.  Use the \"file\" command.");
+      error ("No source file named %s.", copy);
+    }
+  
+  /* Discard the file name from the arg.  */
+  p = p1 + 1;
+  while (*p == ' ' || *p == '\t')
+    p++;
+  *argptr = p;
 }
