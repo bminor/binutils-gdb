@@ -1,5 +1,24 @@
 Tue Oct 20 11:18:28 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
+	* doc/c-i386.texi: Replace occurences of "opcode" with
+	"instruction mnemonic", "instruction", or "mnemonic" when
+	referring to the name of an instruction.  Use "opcode" when
+	referring to the sequence of machine bytes.
+
+	* config/tc-i386.c (opcode_chars): Rename to mnemonic_chars.
+	(is_opcode_char): Rename to is_mnemonic_char.
+	(md_assemble and i386_operand): Correct error messages from
+        "opcode" to "instruction mnemonic"
+	Rename throughout opcode[] -> mnemonic[], opp -> mnem_p,
+	MAX_OPCODE_SIZE -> MAX_MNEM_SIZE,
+	DWORD_OPCODE_SUFFIX -> DWORD_MNEM_SUFFIX,
+	WORD_OPCODE_SUFFIX -> WORD_MNEM_SUFFIX,
+	BYTE_OPCODE_SUFFIX -> BYTE_MNEM_SUFFIX,
+	SHORT_OPCODE_SUFFIX -> SHORT_MNEM_SUFFIX
+	LONG_OPCODE_SUFFIX -> LONG_MNEM_SUFFIX
+
+	* config/tc-i386.h (*_MNEM_SUFFIX): Rename from *_OPCODE_SUFFIX.
+
 	* config/tc-i386.c (i386_operand): Check for garbage after
 	register name.
 
