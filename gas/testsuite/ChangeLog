@@ -1,3 +1,14 @@
+Mon Sep 25 12:31:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mri/mri.exp: Add setup_xfail for arm*-*-* for constants
+	test.
+
+start-sanitize-sh3e
+Thu Sep 21 01:26:08 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/sh/fp.s (fmac): Update for new assembly syntax.
+
+end-sanitize-sh3e
 Mon Sep 18 14:04:34 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* lib/gas-defs.exp (gas_run): Call prune_system_crud.

@@ -8,6 +8,7 @@ run_dump_test equ
 
 setup_xfail "hppa*-*-osf*" "hppa*-*-hpux*" "hppa*-*-bsd*" "hppa-*-hiux*"
 setup_xfail "a29k*-*-*"
+setup_xfail "arm*-*-*"
 run_dump_test constants
 
 run_dump_test float
@@ -25,6 +26,8 @@ run_dump_test common
 
 setup_xfail "hppa*-*-osf*" "hppa*-*-hpux*" "hppa*-*-bsd*" "hppa-*-hiux*"
 run_dump_test comment
+
+gas_test "empty.s" "-M" "" "MRI empty macro"
 
 # The remaining tests assume an m68k target
 if [istarget "m68*-*-*"] {
