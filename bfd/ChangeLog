@@ -1,6 +1,6 @@
 Thu Sep 29 15:21:44 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
-	* reloc.c (bfd_install_relocation): Change type of data to
+	* reloc.c (bfd_install_relocation): Change type of "data" to
 	bfd_byte *, to go along with yesterday's change.
 
 	* elf.c (bfd_elf_print_symbol): Moved here from elf_print_symbol
@@ -28,7 +28,7 @@ Tue Sep 27 16:47:58 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	* elf32-hppa.c (elf32_hppa_backend_final_write_processing): Cast
 	return value from elf_sym_extra.
 	(elf32_hppa_build_stubs): Cast return value from bfd_zalloc.
-	(elf32_hppa_size_stubs): Csat return value from malloc.
+	(elf32_hppa_size_stubs): Cast return value from malloc.
 
 	* gen-aout.c (main): Declare and initialize "arch".
 
