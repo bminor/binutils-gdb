@@ -879,14 +879,11 @@ diff -c -r1.45 valprint.c
   	      if (i < len)
   		fprintf_filtered (stream, "...");
 ===================================================================
-RCS file: /local/cvsfiles/devo/gdb/config/amix.mh,v
-retrieving revision 1.4
-diff -c -r1.4 amix.mh
-*** 1.4	1992/06/10 02:05:16
---- config/amix.mh	1992/07/05 17:47:19
+*** config/amix.mh	Tue Jun  9 19:05:16 1992
+--- config/amix.mh	Wed Jul 15 12:37:29 1992
 ***************
 *** 22,24 ****
---- 22,31 ----
+--- 22,30 ----
   
   # SVR4 puts the BSD compatible install in /usr/ucb.
   INSTALL = /usr/ucb/install -c
