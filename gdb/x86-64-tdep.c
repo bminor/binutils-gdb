@@ -944,12 +944,9 @@ x86_64_save_dummy_frame_tos (CORE_ADDR sp)
 static struct frame_id
 x86_64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *frame)
 {
-  struct frame_id id;
-  
-  id.pc = frame_pc_unwind (frame);
-  frame_unwind_unsigned_register (frame, SP_REGNUM, &id.base);
-
-  return id;
+  CORE_ADDR base;
+  frame_unwind_unsigned_register (frame, SP_REGNUM, &base);
+  return frame_id_build (base, frame_pc_unwind (frame));
 }
 
 void

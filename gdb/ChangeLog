@@ -1,3 +1,21 @@
+2003-04-04  Andrew Cagney  <cagney@redhat.com>
+
+	* x86-64-tdep.c (x86_64_unwind_dummy_id): Use frame_id_build.
+	* dummy-frame.c (dummy_frame_this_id): Use frame_id_build.
+	* d10v-tdep.c (d10v_frame_this_id): Use get_frame_pc and
+	get_frame_base.
+	(d10v_unwind_dummy_id): Use frame_id_build.
+	* frame.c (find_frame_sal): Use get_frame_pc.
+	(create_new_frame): Use deprecated_update_frame_pc_hack and
+	deprecated_update_frame_base_hack.
+	(create_sentinel_frame): Add comment about ->pc going away.
+	(get_prev_frame): Add comment about ->pc going away.
+	(legacy_get_prev_frame): Use get_frame_base, get_frame_pc,
+	frame_id_build, deprecated_update_frame_pc_hack and
+	deprecated_update_frame_base_hack.
+	(select_frame): Use get_frame_pc.
+	(legacy_saved_regs_this_id): Use frame_id_build.
+
 2003-04-04  Elena Zannoni  <ezannoni@redhat.com>
 
         * x86-64-tdep.c (x86_64_push_arguments): Handle correctly the
