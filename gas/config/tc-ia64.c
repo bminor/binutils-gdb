@@ -82,6 +82,7 @@ enum reloc_func
     FUNC_FPTR_RELATIVE,
     FUNC_GP_RELATIVE,
     FUNC_LT_RELATIVE,
+    FUNC_LT_RELATIVE_X,
     FUNC_PC_RELATIVE,
     FUNC_PLT_RELATIVE,
     FUNC_SEC_RELATIVE,
@@ -487,6 +488,7 @@ pseudo_func[] =
     { "fptr",	PSEUDO_FUNC_RELOC, { 0 } },
     { "gprel",	PSEUDO_FUNC_RELOC, { 0 } },
     { "ltoff",	PSEUDO_FUNC_RELOC, { 0 } },
+    { "ltoffx",	PSEUDO_FUNC_RELOC, { 0 } },
     { "pcrel",	PSEUDO_FUNC_RELOC, { 0 } },
     { "pltoff",	PSEUDO_FUNC_RELOC, { 0 } },
     { "secrel",	PSEUDO_FUNC_RELOC, { 0 } },
@@ -6544,6 +6546,10 @@ md_begin ()
     symbol_new (".<ltoff>", undefined_section, FUNC_LT_RELATIVE,
 		&zero_address_frag);
 
+  pseudo_func[FUNC_LT_RELATIVE_X].u.sym =
+    symbol_new (".<ltoffx>", undefined_section, FUNC_LT_RELATIVE_X,
+		&zero_address_frag);
+
   pseudo_func[FUNC_PC_RELATIVE].u.sym =
     symbol_new (".<pcrel>", undefined_section, FUNC_PC_RELATIVE,
 		&zero_address_frag);
@@ -10000,6 +10006,9 @@ ia64_force_relocation (fix)
     case BFD_RELOC_IA64_PLTOFF64I:
     case BFD_RELOC_IA64_PLTOFF64MSB:
     case BFD_RELOC_IA64_PLTOFF64LSB:
+
+    case BFD_RELOC_IA64_LTOFF22X:
+    case BFD_RELOC_IA64_LDXMOV:
       return 1;
 
     default:
@@ -10156,6 +10165,14 @@ ia64_gen_real_reloc_type (sym, r_type)
 	{
 	case BFD_RELOC_IA64_IMM22:	new = BFD_RELOC_IA64_LTOFF22; break;
 	case BFD_RELOC_IA64_IMM64:	new = BFD_RELOC_IA64_LTOFF64I; break;
+	default:			break;
+	}
+      break;
+
+    case FUNC_LT_RELATIVE_X:
+      switch (r_type)
+	{
+	case BFD_RELOC_IA64_IMM22:	new = BFD_RELOC_IA64_LTOFF22X; break;
 	default:			break;
 	}
       break;

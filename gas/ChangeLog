@@ -1,3 +1,11 @@
+2002-12-05  Richard Henderson  <rth@redhat.com>
+
+	* config/ia64.c (enum reloc_func): Add FUNC_LT_RELATIVE_X.
+	(ia64_gen_real_reloc_type): Handle it.
+	(pseudo_func): Add @ltoffx.
+	(md_begin): Build .<ltoffx>.
+	(ia64_force_relocation): True for LTOFF22X and LDXMOV.
+
 2002-12-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-arm.c (arm_force_relocation): Move out of #if OBJ_ELF.
