@@ -111,7 +111,7 @@ get_debug_format
 
 send_gdb "print this\n"
 gdb_expect {
-  -re "\\$\[0-9\]* = \\(const (class |)A *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
+  -re "\\$\[0-9\]* = \\((const (class |)A|A const) *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
     pass "print this in A::bar"
   }
   -re "\\$\[0-9\]* = \\((class |)A *\\* *(const|)\\) $hex\r\n$gdb_prompt $" {
