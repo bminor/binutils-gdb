@@ -106,6 +106,47 @@ inside_main_func (CORE_ADDR pc)
 	    BLOCK_END (SYMBOL_BLOCK_VALUE (mainsym));
 	}
     }
+
+  /* Not in the normal symbol tables, see if "main" is in the partial
+     symbol table.  If it's not, then give up.  */
+  {
+    struct minimal_symbol *msymbol
+      = lookup_minimal_symbol (main_name (), NULL, symfile_objfile);
+    if (msymbol != NULL && MSYMBOL_TYPE (msymbol) == mst_text)
+      {
+	struct obj_section *osect
+	  = find_pc_sect_section (SYMBOL_VALUE_ADDRESS (msymbol),
+				  msymbol->ginfo.bfd_section);
+	if (osect != NULL)
+	  {
+	    int i;
+	    /* Step over other symbols at this same address, and
+	       symbols in other sections, to find the next symbol in
+	       this section with a different address.  */
+	    for (i = 1; SYMBOL_LINKAGE_NAME (msymbol + i) != NULL; i++)
+	      {
+		if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
+		    && SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
+		  break;
+	      }
+
+	    symfile_objfile->ei.main_func_lowpc = SYMBOL_VALUE_ADDRESS (msymbol);
+
+	    /* Use the lesser of the next minimal symbol in the same
+	       section, or the end of the section, as the end of the
+	       function.  */
+	    if (SYMBOL_LINKAGE_NAME (msymbol + i) != NULL
+		&& SYMBOL_VALUE_ADDRESS (msymbol + i) < osect->endaddr)
+	      symfile_objfile->ei.main_func_highpc = SYMBOL_VALUE_ADDRESS (msymbol + i);
+	    else
+	      /* We got the start address from the last msymbol in the
+		 objfile.  So the end address is the end of the
+		 section.  */
+	      symfile_objfile->ei.main_func_highpc = osect->endaddr;
+	  }
+      }
+  }
+
   return (symfile_objfile->ei.main_func_lowpc <= pc &&
 	  symfile_objfile->ei.main_func_highpc > pc);
 }
