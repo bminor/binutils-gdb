@@ -47,6 +47,7 @@
 	* syms.c (bfd_is_local_label): Return false for file symbols.
 
 2004-10-07  Bob Wilson  <bob.wilson@acm.org>
+	    David Heine  <dlheine@tensilica.com>
 
 	* elf32-xtensa.c (elf32xtensa_size_opt): New global variable.
 	(xtensa_default_isa): Global variable moved here from xtensa-isa.c.

@@ -12,6 +12,7 @@
 	* config/tc-m68k.c: Correct control register set for MCF5249.
 
 2004-10-07  Bob Wilson  <bob.wilson@acm.org>
+	    Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (absolute_literals_supported): New global flag.
 	(UNREACHABLE_MAX_WIDTH): Define.
