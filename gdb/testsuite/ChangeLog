@@ -1,3 +1,7 @@
+2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.c++/casts.exp: Correct regexp.
+
 2003-01-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Call AC_CONFIG_HEADER.  Don't call
