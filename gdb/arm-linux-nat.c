@@ -63,9 +63,9 @@ typedef struct tagFPA11
 FPA11;
 
 /* The following variables are used to determine the version of the
-   underlying Linux operating system.  Examples:
+   underlying GNU/Linux operating system.  Examples:
 
-   Linux 2.0.35                 Linux 2.2.12
+   GNU/Linux 2.0.35             GNU/Linux 2.2.12
    os_version = 0x00020023      os_version = 0x0002020c
    os_major = 2                 os_major = 2
    os_minor = 0                 os_minor = 2
@@ -78,11 +78,11 @@ FPA11;
 
 static unsigned int os_version, os_major, os_minor, os_release;
 
-/* On Linux, threads are implemented as pseudo-processes, in which
+/* On GNU/Linux, threads are implemented as pseudo-processes, in which
    case we may be tracing more than one process at a time.  In that
    case, inferior_ptid will contain the main process ID and the
-   individual thread (process) ID.  get_thread_id () is used to
-   get the thread id if it's available, and the process id otherwise. */
+   individual thread (process) ID.  get_thread_id () is used to get
+   the thread id if it's available, and the process id otherwise.  */
 
 int
 get_thread_id (ptid_t ptid)
@@ -676,7 +676,7 @@ get_linux_version (unsigned int *vmajor,
 
   if (-1 == uname (&info))
     {
-      warning ("Unable to determine Linux version.");
+      warning ("Unable to determine GNU/Linux version.");
       return -1;
     }
 

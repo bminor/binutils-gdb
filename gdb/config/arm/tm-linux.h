@@ -63,29 +63,31 @@ extern void arm_linux_extract_return_value (struct type *, char[], char *);
 extern CORE_ADDR arm_linux_push_arguments (int, struct value **, CORE_ADDR, 
 					   int, CORE_ADDR);
 
-/* The first page is not writeable in ARM Linux.  */
+/* The first page is not writeable in ARM GNU/Linux.  */
 #undef LOWEST_PC
 #define LOWEST_PC	0x8000
 
-/* Define NO_SINGLE_STEP if ptrace(PT_STEP,...) fails to function correctly
-   on ARM Linux.  This is the case on 2.0.x kernels, 2.1.x kernels and some 
-   2.2.x kernels.  This will include the implementation of single_step()
-   in armlinux-tdep.c.  See armlinux-ss.c for more details. */
+/* Define NO_SINGLE_STEP if ptrace(PT_STEP,...) fails to function
+   correctly on ARM Linux kernel.  This is the case on 2.0.x kernels,
+   2.1.x kernels and some 2.2.x kernels.  This will include the
+   implementation of single_step() in armlinux-tdep.c.  See
+   armlinux-ss.c for more details. */
 /* #define NO_SINGLE_STEP	1 */
 
 /* Offset to saved PC in sigcontext structure, from <asm/sigcontext.h> */
 #define SIGCONTEXT_PC_OFFSET	(sizeof(unsigned long) * 18)
 
-/* On ARM Linux, each call to a library routine goes through a small piece
-   of trampoline code in the ".plt" section.  The  wait_for_inferior() 
-   routine uses this macro to detect when we have stepped into one of 
-   these fragments.  We do not use lookup_solib_trampoline_symbol_by_pc,
-   because we cannot always find the shared library trampoline symbols.  */
+/* On ARM GNU/Linux, each call to a library routine goes through a
+   small piece of trampoline code in the ".plt" section.  The
+   wait_for_inferior() routine uses this macro to detect when we have
+   stepped into one of these fragments.  We do not use
+   lookup_solib_trampoline_symbol_by_pc, because we cannot always find
+   the shared library trampoline symbols.  */
 extern int in_plt_section (CORE_ADDR, char *);
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) in_plt_section((pc), (name))
 
-/* On ARM Linux, a call to a library routine does not have to go through
-   any trampoline code.  */
+/* On ARM GNU/Linux, a call to a library routine does not have to go
+   through any trampoline code.  */
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name)	0
 
 /* If PC is in a shared library trampoline code, return the PC

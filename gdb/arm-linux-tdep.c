@@ -35,12 +35,13 @@
 #include "symfile.h"
 #include "objfiles.h"
 
-/* Under ARM Linux the traditional way of performing a breakpoint is to
-   execute a particular software interrupt, rather than use a particular
-   undefined instruction to provoke a trap.  Upon exection of the software
-   interrupt the kernel stops the inferior with a SIGTRAP, and wakes the
-   debugger.  Since ARM Linux is little endian, and doesn't support Thumb
-   at the moment we only override the ARM little-endian breakpoint.  */
+/* Under ARM GNU/Linux the traditional way of performing a breakpoint
+   is to execute a particular software interrupt, rather than use a
+   particular undefined instruction to provoke a trap.  Upon exection
+   of the software interrupt the kernel stops the inferior with a
+   SIGTRAP, and wakes the debugger.  Since ARM GNU/Linux is little
+   endian, and doesn't support Thumb at the moment we only override
+   the ARM little-endian breakpoint.  */
 
 static const char arm_linux_arm_le_breakpoint[] = {0x01,0x00,0x9f,0xef};
 
@@ -72,7 +73,7 @@ arm_linux_extract_return_value (struct type *type,
 				char *valbuf)
 {
   /* ScottB: This needs to be looked at to handle the different
-     floating point emulators on ARM Linux.  Right now the code
+     floating point emulators on ARM GNU/Linux.  Right now the code
      assumes that fetch inferior registers does the right thing for
      GDB.  I suspect this won't handle NWFPE registers correctly, nor
      will the default ARM version (arm_extract_return_value()).  */
@@ -223,8 +224,8 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 }
 
 /*
-   Dynamic Linking on ARM Linux
-   ----------------------------
+   Dynamic Linking on ARM GNU/Linux
+   --------------------------------
 
    Note: PLT = procedure linkage table
    GOT = global offset table
@@ -251,11 +252,11 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    When the executable or library is first loaded, each GOT entry is
    initialized to point to the code which implements dynamic name
    resolution and code finding.  This is normally a function in the
-   program interpreter (on ARM Linux this is usually ld-linux.so.2,
-   but it does not have to be).  On the first invocation, the function
-   is located and the GOT entry is replaced with the real function
-   address.  Subsequent calls go through steps 1, 2 and 3 and end up
-   calling the real code.
+   program interpreter (on ARM GNU/Linux this is usually
+   ld-linux.so.2, but it does not have to be).  On the first
+   invocation, the function is located and the GOT entry is replaced
+   with the real function address.  Subsequent calls go through steps
+   1, 2 and 3 and end up calling the real code.
 
    1) In the code: 
 
@@ -388,7 +389,7 @@ skip_hurd_resolver (CORE_ADDR pc)
      It's kind of gross to do all these checks every time we're
      called, since they don't change once the executable has gotten
      started.  But this is only a temporary hack --- upcoming versions
-     of Linux will provide a portable, efficient interface for
+     of GNU/Linux will provide a portable, efficient interface for
      debugging programs that use shared libraries.  */
 
   struct objfile *objfile;
@@ -469,7 +470,8 @@ arm_linux_sigcontext_register_address (CORE_ADDR sp, CORE_ADDR pc, int regno)
 
   inst = read_memory_integer (pc, 4);
 
-  if (inst == ARM_LINUX_SIGRETURN_INSTR || inst == ARM_LINUX_RT_SIGRETURN_INSTR)
+  if (inst == ARM_LINUX_SIGRETURN_INSTR
+      || inst == ARM_LINUX_RT_SIGRETURN_INSTR)
     {
       CORE_ADDR sigcontext_addr;
 
