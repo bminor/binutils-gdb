@@ -43,7 +43,9 @@ TESTS = \
 	t-rachi.ok \
 	t-rep.ok \
 	t-subi.ok \
-	t-sub2w.ok
+	t-sub2w.ok \
+	t-mvtac.ok \
+	t-mac.ok 
 
 AS_FOR_TARGET = `\
   if [ -x ../../../gas/as-new ]; then \

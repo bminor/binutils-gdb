@@ -1,3 +1,8 @@
+Tue Dec  2 15:01:08 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (OP_3A00): For "macu", perform multiply stage using 32
+ 	bit rather than 16 bit precision.
+
 Tue Dec  2 11:04:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (OP_1000): For "sub2w", compute carry by comparing

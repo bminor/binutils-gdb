@@ -10,9 +10,12 @@ exit47.s
 hello.s
 loop.s
 t-macros.i
+t-mac.s
 t-rachi.s
 t-rep.s
 t-subi.s
+t-sub2w.s
+t-mvtac.s
 
 Things-to-lose:
 

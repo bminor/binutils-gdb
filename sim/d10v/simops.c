@@ -1352,13 +1352,17 @@ OP_1A00 ()
 void
 OP_3A00 ()
 {
-  int64 tmp;
+  uint64 tmp;
+  uint32 src1;
+  uint32 src2;
 
   trace_input ("macu", OP_ACCUM, OP_REG, OP_REG);
-  tmp = SEXT40 (State.regs[OP[1]] * State.regs[OP[2]]);
+  src1 = (uint16) State.regs[OP[1]];
+  src2 = (uint16) State.regs[OP[2]];
+  tmp = src1 * src2;
   if (State.FX)
-    tmp = SEXT40( (tmp << 1) & MASK40);
-  State.a[OP[0]] = (SEXT40 (State.a[OP[0]]) + tmp) & MASK40;
+    tmp = (tmp << 1);
+  State.a[OP[0]] = (State.a[OP[0]] + tmp) & MASK40;
   trace_output (OP_ACCUM);
 }
 
