@@ -273,7 +273,8 @@ mipscoff_symfile_read(sf, addr, mainline)
   
 /* Exported procedure: Allocate zeroed memory */
 
-char *xzalloc(size)
+char *
+xzalloc(size)
 {
 	char           *p = xmalloc(size);
 
@@ -841,6 +842,12 @@ data:		/* Common code for symbols describing data */
 		SYMBOL_VALUE(s) = sh->value;
 		SYMBOL_TYPE(s) = parse_type(ax + sh->index, sh, 0);
 		add_symbol(s, top_stack->cur_block);
+#if 0
+		/* FIXME:  This has not been tested.  See dbxread.c */
+		/* Add the type of this parameter to the function/procedure
+		   type of this block. */
+		add_param_to_type(&top_stack->cur_block->function->type,s);
+#endif
 		break;
 
 	    case stLabel:	/* label, goes into current block */
@@ -852,7 +859,7 @@ data:		/* Common code for symbols describing data */
 		add_symbol(s, top_stack->cur_block);
 		break;
 
-	    case stProc:	/* Procedure, goes into current block? FIXME */
+	    case stProc:	/* Procedure, usually goes into global block */
 	    case stStaticProc:	/* Static procedure, goes into current block */
 		s = new_symbol(sh->iss);
 		SYMBOL_NAMESPACE(s) = VAR_NAMESPACE;
@@ -862,10 +869,27 @@ data:		/* Common code for symbols describing data */
 			t = builtin_type_int;
 		else
 			t = parse_type(ax + sh->index, sh, 0);
-		add_symbol(s, top_stack->cur_block);
+		b = top_stack->cur_block;
+		if (sh->st == stProc) {
+		    struct blockvector *bv = BLOCKVECTOR(top_stack->cur_st);
+		    /* The next test should normally be true,
+		       but provides a hook for nested functions
+		       (which we don't want to make global). */
+		    if (b == BLOCKVECTOR_BLOCK(bv, STATIC_BLOCK))
+			b = BLOCKVECTOR_BLOCK(bv, GLOBAL_BLOCK);
+		}
+		add_symbol(s, b);
 
 		/* Make a type for the procedure itself */
+#if 0
+		/* FIXME:  This has not been tested yet!  See dbxread.c */
+		/* Generate a template for the type of this function.  The 
+		   types of the arguments will be added as we read the symbol 
+		   table. */
+		bcopy(SYMBOL_TYPE(s),lookup_function_type(t),sizeof(struct type));
+#else
 		SYMBOL_TYPE(s) = lookup_function_type (t);
+#endif
 
 		/* Create and enter a new lexical context */
 		b = new_block(top_stack->maxsyms);
@@ -1543,7 +1567,7 @@ parse_partial_symbols(end_of_text_seg)
 	 *
 	 * Only parse the Local and External symbols, and the Relative FDR.
 	 * Fixup enough of the loader symtab to be able to use it.
-	 * Allocate space only for the file`s portions we need to
+	 * Allocate space only for the file's portions we need to
 	 * look at. (XXX)
 	 */
 
@@ -2337,12 +2361,9 @@ struct symtab *
 new_symtab(name, maxsyms, maxlines)
 	char *name;
 {
-	struct symtab *s = (struct symtab *) xzalloc(sizeof(struct symtab));
-	int i;
+	struct symtab *s = allocate_symtab (name);
 
 	LINETABLE(s) = new_linetable(maxlines);
-
-	s->filename = name;
 
 	/* All symtabs must have at least two blocks */
 	BLOCKVECTOR(s) = new_bvect(2);
@@ -2380,7 +2401,7 @@ new_psymtab(name)
 	pst->next = partial_symtab_list;
 	partial_symtab_list = pst;
 
-	/* Keep a backpointer to the file`s symbols */
+	/* Keep a backpointer to the file's symbols */
 	/* FIXME, we should use private data that is a proper pointer. */
 	pst->ldsymlen = (int)cur_hdr;
 

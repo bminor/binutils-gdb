@@ -326,6 +326,13 @@ int context_stack_size;
 
 int within_function;
 
+#if 0
+/* The type of the function we are currently reading in.  This is
+   used by define_symbol to record the type of arguments to a function. */
+
+static struct type *in_function_type;
+#endif
+
 /* List of blocks already made (lexical contexts already closed).
    This is used at the end to make the blockvector.  */
 
@@ -387,7 +394,7 @@ struct complaint string_table_offset_complaint =
   {"bad string table offset in symbol %d", 0, 0};
 
 struct complaint unknown_symtype_complaint =
-  {"unknown symbol type 0x%x", 0, 0};
+  {"unknown symbol type %s", 0, 0};
 
 struct complaint lbrac_rbrac_complaint =
   {"block start larger than block end", 0, 0};
@@ -1137,7 +1144,7 @@ end_symtab (end_addr)
 
   for (subfile = subfiles; subfile; subfile = nextsub)
     {
-      symtab = (struct symtab *) xmalloc (sizeof (struct symtab));
+      symtab = allocate_symtab (subfile->name);
 
       /* Fill in its components.  */
       symtab->blockvector = blockvector;
@@ -1149,19 +1156,12 @@ end_symtab (end_addr)
       type_vector->length = type_vector_length;
       symtab->typevector = type_vector;
 
-      symtab->filename = subfile->name;
       symtab->dirname = subfile->dirname;
 
       symtab->free_code = free_linetable;
       symtab->free_ptr = 0;
       if (subfile->next == 0)
 	symtab->free_ptr = (char *) type_vector;
-
-      symtab->nlines = 0;
-      symtab->line_charpos = 0;
-
-      symtab->language = language_unknown;
-      symtab->fullname = NULL;
 
       /* There should never already be a symtab for this name, since
 	 any prev dups have been removed when the psymtab was read in.
@@ -1236,14 +1236,18 @@ record_misc_function (name, address, type)
      CORE_ADDR address;
      int type;
 {
-  enum misc_function_type misc_type =
-    (type == (N_TEXT | N_EXT) ? mf_text :
-     (type == (N_DATA | N_EXT)
-      || type == (N_DATA)
-      || type == (N_SETV | N_EXT)
-      ) ? mf_data :
-     type == (N_BSS | N_EXT) ? mf_bss :
-     type == (N_ABS | N_EXT) ? mf_abs : mf_unknown);
+  enum misc_function_type misc_type;
+
+  switch (type &~ N_EXT) {
+    case N_TEXT:  misc_type = mf_text; break;
+    case N_DATA:  misc_type = mf_data; break;
+    case N_BSS:   misc_type = mf_bss;  break;
+    case N_ABS:   misc_type = mf_abs;  break;
+#ifdef N_SETV
+    case N_SETV:  misc_type = mf_data; break;
+#endif
+    default:      misc_type = mf_unknown; break;
+  }
 
   prim_record_misc_function (obsavestring (name, strlen (name)),
 			     address, misc_type);
@@ -1964,7 +1968,6 @@ read_dbx_symtab (symfile_name, addr,
 			       namestring, valu,
 			       first_symnum * sizeof (struct nlist),
 			       global_psymbols.next, static_psymbols.next);
-
 	  continue;
 	}
 
@@ -2311,6 +2314,7 @@ read_dbx_symtab (symfile_name, addr,
 	case N_LBRAC:
 	case N_RBRAC:
 	case N_NSYMS:		/* Ultrix 4.0: symbol count */
+	case N_DEFD:		/* GNU Modula-2 */
 	  /* These symbols aren't interesting; don't worry about them */
 
 	  continue;
@@ -2318,7 +2322,7 @@ read_dbx_symtab (symfile_name, addr,
 	default:
 	  /* If we haven't found it yet, ignore it.  It's probably some
 	     new type we don't know about yet.  */
-	  complain (&unknown_symtype_complaint, bufp->n_type);
+	  complain (&unknown_symtype_complaint, local_hex_string(bufp->n_type));
 	  continue;
 	}
     }
@@ -2406,8 +2410,11 @@ compare_psymbols (s1, s2)
     *st1 = SYMBOL_NAME (s1),
     *st2 = SYMBOL_NAME (s2);
 
-  return (st1[0] - st2[0] ? st1[0] - st2[0] :
-	  strcmp (st1 + 1, st2 + 1));
+  if (st1[0] - st2[0])
+    return st1[0] - st2[0];
+  if (st1[1] - st2[1])
+    return st1[1] - st2[1];
+  return strcmp (st1 + 1, st2 + 1);
 }
 
 
@@ -2757,6 +2764,7 @@ scan_file_globals ()
 }
 
 /* Process a pair of symbols.  Currently they must both be N_SO's.  */
+/* ARGSUSED */
 static void
 process_symbol_pair (type1, desc1, value1, name1,
 		     type2, desc2, value2, name2)
@@ -2925,7 +2933,7 @@ read_ofile_symtab (desc, stringtab, stringtab_size, sym_offset,
 	processing_gcc_compilation = 1;
       else if (type & N_EXT || type == (unsigned char)N_TEXT
 	       || type == (unsigned char)N_NBTEXT
-	       )
+	       ) {
 	  /* Global symbol: see if we came across a dbx defintion for
 	     a corresponding symbol.  If so, store the value.  Remove
 	     syms from the chain when their values are stored, but
@@ -2936,6 +2944,7 @@ read_ofile_symtab (desc, stringtab, stringtab_size, sym_offset,
 	     be satisfied in each file as it appears. So we skip this
 	     section. */
 	  ;
+        }
     }
 
   return end_symtab (text_offset + text_size);
@@ -3233,6 +3242,7 @@ process_one_symbol (type, desc, valu, name)
 
     case N_ECOML:
     case N_LENG:
+    case N_DEFD:		/* GNU Modula-2 symbol */
       break;
 
     default:
@@ -3272,6 +3282,7 @@ read_type_number (pp, typenums)
    get this name).  */
 static char *type_synonym_name;
 
+/* ARGSUSED */
 static struct symbol *
 define_symbol (valu, string, desc, type)
      unsigned int valu;
@@ -3440,7 +3451,22 @@ define_symbol (valu, string, desc, type)
 
       if ((deftype == 'F' || deftype == 'f')
 	  && TYPE_CODE (type_read) != TYPE_CODE_FUNC)
+      {
+#if 0
+/* This code doesn't work -- it needs to realloc and can't.  */
+	struct type *new = (struct type *)
+	      obstack_alloc (symbol_obstack, sizeof (struct type));
+
+	/* Generate a template for the type of this function.  The 
+	   types of the arguments will be added as we read the symbol 
+	   table. */
+	*new = *lookup_function_type (type_read);
+	SYMBOL_TYPE(sym) = new;
+	in_function_type = new;
+#else
 	SYMBOL_TYPE (sym) = lookup_function_type (type_read);
+#endif
+      }
       else
 	SYMBOL_TYPE (sym) = type_read;
     }
@@ -3499,6 +3525,10 @@ define_symbol (valu, string, desc, type)
       SYMBOL_CLASS (sym) = DBX_PARM_SYMBOL_CLASS (type);
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+#if 0
+      /* This doesn't work yet.  */
+      add_param_to_type (&in_function_type, sym);
+#endif
       add_symbol_to_list (sym, &local_symbols);
 
       /* If it's gcc-compiled, if it says `short', believe it.  */
@@ -3596,11 +3626,11 @@ define_symbol (valu, string, desc, type)
 		 || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)
 		&& TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)))
 	 {
-	   int i;
-	   for (i = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)) - 1; i >= 0; i--)
-	     if (TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), i) == 0)
-	       TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), i) =
-		 type_name_no_tag (TYPE_BASECLASS (SYMBOL_TYPE (sym), i));
+	   int j;
+	   for (j = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)) - 1; j >= 0; j--)
+	     if (TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) == 0)
+	       TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) =
+		 type_name_no_tag (TYPE_BASECLASS (SYMBOL_TYPE (sym), j));
 	 }
 
       add_symbol_to_list (sym, &file_symbols);
@@ -4934,16 +4964,24 @@ read_enum_type (pp, type)
 	j = o_nsyms;
       for (; j < syms->nsyms; j++,n++)
 	{
-	  struct symbol *sym = syms->symbol[j];
-	  SYMBOL_TYPE (sym) = type;
-	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (sym);
+	  struct symbol *xsym = syms->symbol[j];
+	  SYMBOL_TYPE (xsym) = type;
+	  TYPE_FIELD_NAME (type, n) = SYMBOL_NAME (xsym);
 	  TYPE_FIELD_VALUE (type, n) = 0;
-	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (sym);
+	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (xsym);
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}
       if (syms == osyms)
 	break;
     }
+
+  /* Is this Modula-2's BOOLEAN type?  Flag it as such if so. */
+  if(TYPE_NFIELDS(type) == 2 &&
+     ((!strcmp(TYPE_FIELD_NAME(type,0),"TRUE") &&
+       !strcmp(TYPE_FIELD_NAME(type,1),"FALSE")) ||
+      (!strcmp(TYPE_FIELD_NAME(type,1),"TRUE") &&
+       !strcmp(TYPE_FIELD_NAME(type,0),"FALSE"))))
+     TYPE_CODE(type) = TYPE_CODE_BOOL;
 
   return type;
 }
@@ -5061,8 +5099,8 @@ read_huge_number (pp, end, valu, bits)
     }
 }
 
-#define	MAX_OF_TYPE(t)	((1 << (sizeof (t)*8 - 1)) - 1)
-#define MIN_OF_TYPE(t)	(-(1 << (sizeof (t)*8 - 1)))
+#define	MAX_OF_C_TYPE(t)	((1 << (sizeof (t)*8 - 1)) - 1)
+#define MIN_OF_C_TYPE(t)	(-(1 << (sizeof (t)*8 - 1)))
 
 static struct type *
 read_range_type (pp, typenums)
@@ -5222,34 +5260,39 @@ read_range_type (pp, typenums)
 					       sizeof (struct type));
   bzero (result_type, sizeof (struct type));
 
-  TYPE_TARGET_TYPE (result_type) = (self_subrange ?
-				    builtin_type_int :
-				    *dbx_lookup_type(rangenums));
-
-  /* We have to figure out how many bytes it takes to hold this
-     range type.  I'm going to assume that anything that is pushing
-     the bounds of a long was taken care of above.  */
-  if (n2 >= MIN_OF_TYPE(char) && n3 <= MAX_OF_TYPE(char))
-    TYPE_LENGTH (result_type) = 1;
-  else if (n2 >= MIN_OF_TYPE(short) && n3 <= MAX_OF_TYPE(short))
-    TYPE_LENGTH (result_type) = sizeof (short);
-  else if (n2 >= MIN_OF_TYPE(int) && n3 <= MAX_OF_TYPE(int))
-    TYPE_LENGTH (result_type) = sizeof (int);
-  else if (n2 >= MIN_OF_TYPE(long) && n3 <= MAX_OF_TYPE(long))
-    TYPE_LENGTH (result_type) = sizeof (long);
-  else
-    /* Ranged type doesn't fit within known sizes.  */
-    return error_type (pp);
-
-  TYPE_LENGTH (result_type) = TYPE_LENGTH (TYPE_TARGET_TYPE (result_type));
   TYPE_CODE (result_type) = TYPE_CODE_RANGE;
+
+  TYPE_TARGET_TYPE (result_type) = *dbx_lookup_type(rangenums);
+
   TYPE_NFIELDS (result_type) = 2;
   TYPE_FIELDS (result_type) =
-    (struct field *) obstack_alloc (symbol_obstack,
-				    2 * sizeof (struct field));
+     (struct field *) obstack_alloc (symbol_obstack,
+				     2 * sizeof (struct field));
   bzero (TYPE_FIELDS (result_type), 2 * sizeof (struct field));
   TYPE_FIELD_BITPOS (result_type, 0) = n2;
   TYPE_FIELD_BITPOS (result_type, 1) = n3;
+
+#if 0
+/* Note that TYPE_LENGTH (result_type) is just overridden a few
+   statements down.  What do we really need here?  */
+  /* We have to figure out how many bytes it takes to hold this
+     range type.  I'm going to assume that anything that is pushing
+     the bounds of a long was taken care of above.  */
+  if (n2 >= MIN_OF_C_TYPE(char) && n3 <= MAX_OF_C_TYPE(char))
+    TYPE_LENGTH (result_type) = 1;
+  else if (n2 >= MIN_OF_C_TYPE(short) && n3 <= MAX_OF_C_TYPE(short))
+    TYPE_LENGTH (result_type) = sizeof (short);
+  else if (n2 >= MIN_OF_C_TYPE(int) && n3 <= MAX_OF_C_TYPE(int))
+    TYPE_LENGTH (result_type) = sizeof (int);
+  else if (n2 >= MIN_OF_C_TYPE(long) && n3 <= MAX_OF_C_TYPE(long))
+    TYPE_LENGTH (result_type) = sizeof (long);
+  else
+    /* Ranged type doesn't fit within known sizes.  */
+    /* FIXME -- use "long long" here.  */
+    return error_type (pp);
+#endif
+
+  TYPE_LENGTH (result_type) = TYPE_LENGTH (TYPE_TARGET_TYPE (result_type));
 
   return result_type;
 }
