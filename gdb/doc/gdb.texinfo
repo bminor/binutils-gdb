@@ -1,6 +1,6 @@
 \input texinfo      @c -*-texinfo-*-
 @c Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-@c 1999, 2000, 2001
+@c 1999, 2000, 2001, 2002
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header
@@ -50,7 +50,8 @@ This is the @value{EDITION} Edition, @value{DATE},
 of @cite{Debugging with @value{GDBN}: the @sc{gnu} Source-Level Debugger}
 for @value{GDBN} Version @value{GDBVN}.
 
-Copyright (C) 1988,1989,1990,1991,1992,1993,1994,1995,1996,1998,1999,2000,2001, 2002 Free Software Foundation, Inc.
+Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,@*
+              1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -82,8 +83,8 @@ development.''
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1988,1989,1990,1991,1992,1993,1994,1995,1996,@*
-1998,1999,2000,2001,2002 Free Software Foundation, Inc.
+Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+1996, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
 59 Temple Place - Suite 330, @*
@@ -114,7 +115,7 @@ This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 This is the @value{EDITION} Edition, @value{DATE}, for @value{GDBN} Version
 @value{GDBVN}.
 
-Copyright (C) 1988-2001 Free Software Foundation, Inc.
+Copyright (C) 1988-2002 Free Software Foundation, Inc.
 
 @menu
 * Summary::                     Summary of @value{GDBN}
@@ -6034,10 +6035,8 @@ You may abbreviate @code{while-stepping} as @code{ws} or
 @kindex info tracepoints
 @cindex information about tracepoints
 @item info tracepoints @r{[}@var{num}@r{]}
-@c FIXME: Shouldn't there be an "at", "on", or "for" in the next
-@c sentence?  - Brian Y., FSF office staff
-Display information the tracepoint @var{num}.  If you don't specify a
-tracepoint number displays information about all the tracepoints
+Display information about the tracepoint @var{num}.  If you don't specify
+a tracepoint number displays information about all the tracepoints
 defined so far.  For each tracepoint, the following information is
 shown:
 
