@@ -1,3 +1,8 @@
+2002-02-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* emulparams/elf64_s390.sh (ARCH): Change to "s390:64-bit".
+	* emulparams/elf_s390.sh (ARCH): Change to "s390:31-bit".
+
 2002-02-18  Tom Rix  <trix@redhat.com>
 
 	* emultempl/aix.em (gld*_parse_args): Add -brtl support.
