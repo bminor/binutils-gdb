@@ -1,3 +1,10 @@
+2002-06-06  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* gas/config/tc-hppa.c (pa_ip): Replace "L$0\001" with FAKE_LABEL_NAME.
+	(hppa_force_relocation): Check if a stub just before the start symbol
+	of the last call_info is reachable before forcing relocation.  Fix
+	typo.
+
 2002-06-04  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* config/tc-mips.c (mips_after_parse_args): New function.

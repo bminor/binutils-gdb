@@ -3251,7 +3251,7 @@ pa_ip (str)
 	      the_insn.pcrel = 1;
 	      if (!the_insn.exp.X_add_symbol
 		  || !strcmp (S_GET_NAME (the_insn.exp.X_add_symbol),
-			      "L$0\001"))
+			      FAKE_LABEL_NAME))
 		{
 		  num = evaluate_absolute (&the_insn);
 		  if (num % 4)
@@ -3283,7 +3283,7 @@ pa_ip (str)
 	      the_insn.pcrel = 1;
 	      if (!the_insn.exp.X_add_symbol
 		  || !strcmp (S_GET_NAME (the_insn.exp.X_add_symbol),
-			      "L$0\001"))
+			      FAKE_LABEL_NAME))
 		{
 		  num = evaluate_absolute (&the_insn);
 		  if (num % 4)
@@ -3314,7 +3314,7 @@ pa_ip (str)
 	      the_insn.pcrel = 1;
 	      if (!the_insn.exp.X_add_symbol
 		  || !strcmp (S_GET_NAME (the_insn.exp.X_add_symbol),
-			      "L$0\001"))
+			      FAKE_LABEL_NAME))
 		{
 		  num = evaluate_absolute (&the_insn);
 		  if (num % 4)
@@ -3344,7 +3344,7 @@ pa_ip (str)
 	      the_insn.pcrel = 0;
 	      if (!the_insn.exp.X_add_symbol
 		  || !strcmp (S_GET_NAME (the_insn.exp.X_add_symbol),
-			      "L$0\001"))
+			      FAKE_LABEL_NAME))
 		{
 		  num = evaluate_absolute (&the_insn);
 		  if (num % 4)
@@ -8547,15 +8547,27 @@ hppa_force_relocation (fixp)
   /* Now check to see if we're going to need a long-branch stub.  */
   if (fixp->fx_r_type == (int) R_HPPA_PCREL_CALL)
     {
-      valueT distance;
+      long pc = md_pcrel_from (fixp);
+      valueT distance, min_stub_distance;
 
-      distance = (fixp->fx_offset + S_GET_VALUE (fixp->fx_addsy)
-		  - md_pcrel_from (fixp) - 8);
-      if (distance + 8388608 >= 16777216
-	  || (hppa_fixp->fx_r_format == 17 && distance + 262144 >= 524288)
-#ifdef OBJ_ELF
-	  || (hppa_fixp->fx_r_format == 12 && distance + 8192 >= 16384)
+      distance = fixp->fx_offset + S_GET_VALUE (fixp->fx_addsy) - pc - 8;
+
+      /* Distance to the closest possible stub.  This will detect most
+	 but not all circumstances where a stub will not work.  */
+      min_stub_distance = pc + 16;
+#ifdef OBJ_SOM
+      if (last_call_info != NULL)
+	min_stub_distance -= S_GET_VALUE (last_call_info->start_symbol);
 #endif
+
+      if ((distance + 8388608 >= 16777216
+	   && min_stub_distance <= 8388608)
+	  || (hppa_fixp->fx_r_format == 17
+	      && distance + 262144 >= 524288
+	      && min_stub_distance <= 262144)
+	  || (hppa_fixp->fx_r_format == 12
+	      && distance + 8192 >= 16384
+	      && min_stub_distance <= 8192)
 	  )
 	return 1;
     }
@@ -8570,7 +8582,7 @@ hppa_force_relocation (fixp)
 /* Now for some ELF specific code.  FIXME.  */
 #ifdef OBJ_ELF
 /* Mark the end of a function so that it's possible to compute
-   the size of the function in hppa_elf_final_processing.  */
+   the size of the function in elf_hppa_final_processing.  */
 
 static void
 hppa_elf_mark_end_of_function ()
