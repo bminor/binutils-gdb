@@ -1,5 +1,5 @@
 /* nm.c -- Describe symbol table of a rel file.
-   Copyright (C) 1991 Free Software Foundation, Inc.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -24,17 +24,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "aout/stab_gnu.h"
 #include "aout/ranlib.h"
 
+static boolean
+display_file PARAMS ((char *filename));
 
+static void
+do_one_rel_file PARAMS ((bfd *file));
 
-PROTO(static boolean, display_file, (char *filename));
-PROTO(static void, do_one_rel_file, (bfd *file));
-PROTO(static unsigned int, filter_symbols, (bfd *file, asymbol **syms,
-					 unsigned long symcount));
+static unsigned int
+filter_symbols PARAMS ((bfd *file, asymbol **syms, unsigned long symcount));
 
-PROTO(static void, print_symbols, (bfd *file, asymbol **syms,
-				     unsigned long symcount));
-extern PROTO(int, (*sorters[2][2]), (char *x, char *y));
-PROTO(static void, print_symdef_entry, (bfd * abfd));
+static void
+print_symbols PARAMS ((bfd *file, asymbol **syms, unsigned long symcount));
+
+static void
+print_symdef_entry PARAMS ((bfd * abfd));
 
 /* Command options.  */
 
@@ -46,6 +49,7 @@ int print_armap = 0;	/* describe __.SYMDEF data in archive files.  */
 int reverse_sort = 0;	/* sort in downward(alpha or numeric) order */
 int sort_numerically = 0; /* sort in numeric rather than alpha order */
 int undefined_only = 0;	/* print undefined symbols only */
+int show_version = 0;	/* show the version number */
 
 boolean print_each_filename = false; /* Ick.  Used in archives. */
 
@@ -53,6 +57,7 @@ boolean print_each_filename = false; /* Ick.  Used in archives. */
 extern char *program_name;
 extern char *program_version;
 extern char *target;
+extern int print_version;
 
 struct option long_options[] = {
 	{"debug-syms",	    no_argument, &print_debug_syms,  1},
@@ -64,6 +69,7 @@ struct option long_options[] = {
 	{"reverse-sort",    no_argument, &reverse_sort,      1},
 	{"target", 	    optional_argument, (int *)NULL,	   0},
 	{"undefined-only",  no_argument, &undefined_only,    1},
+	{"version",         no_argument, &show_version,    1},
 	{0, no_argument, 0, 0}
 };
 
@@ -74,7 +80,7 @@ int show_names = 0;
 void
 usage ()
 {
-  fprintf(stderr, "nm %s\nUsage: %s [-agnoprsu] filename...\n",
+  fprintf(stderr, "nm %s\nUsage: %s [-agnoprsuV] filename...\n",
 	  program_version, program_name);
   exit(0);
 }
@@ -86,12 +92,12 @@ main (argc, argv)
 {
   int c;			/* sez which option char */
   int option_index = 0;		/* used by getopt and ignored by us */
-  int retval;	
+  int retval;
   program_name = *argv;
 
   bfd_init();
 
-  while ((c = getopt_long(argc, argv, "agnoprsu", long_options, &option_index)) != EOF) {
+  while ((c = getopt_long(argc, argv, "agnoprsuV", long_options, &option_index)) != EOF) {
     switch (c) {
     case 'a': print_debug_syms = 1; break;
     case 'g': external_only = 1; break;
@@ -101,25 +107,29 @@ main (argc, argv)
     case 'r': reverse_sort = 1; break;
     case 's': print_armap = 1; break;
     case 'u': undefined_only = 1; break;
-			
+    case 'V': show_version = 1; break;
+
     case  0:
       if (!strcmp("target",(long_options[option_index]).name)) {
 	target = optarg;
       }
-			
+
       break;			/* we've been given a long option */
-			
+
     default:
       usage ();
     }
   }
-	
+
+  if (show_version)
+	printf ("%s version %s\n", program_name, program_version);
+
   /* Strangely, for the shell you should return only a nonzero value
      on sucess -- the inverse of the C sense. */
-  
+
   /* OK, all options now parsed.  If no filename specified, do a.out. */
   if (option_index == argc) return !display_file ("a.out");
-  
+
   retval = 0;
   show_names = (argc -optind)>1;
   /* We were given several filenames to do: */
@@ -132,7 +142,7 @@ main (argc, argv)
   return retval;
 }
 
-/** Display a file's stats */
+/* Display a file's stats */
 
 /* goto here is marginally cleaner than the nested if syntax */
 
@@ -143,23 +153,19 @@ display_file (filename)
   boolean retval = true;
   bfd *file;
   bfd *arfile = NULL;
-	
+
   file = bfd_openr(filename, target);
   if (file == NULL) {
     fprintf (stderr, "\n%s: can't open '%s'.\n", program_name, filename);
     return false;
-
-
   }
 
-
-  if (bfd_check_format(file, bfd_object)) 
+  if (bfd_check_format(file, bfd_object))
       {
 	if (show_names) {
 	  printf ("\n%s:\n",filename);
 	}
 	do_one_rel_file (file);
- 
       }
   else if (bfd_check_format (file, bfd_archive)) {
     if (!bfd_check_format (file, bfd_archive)) {
@@ -178,7 +184,7 @@ display_file (filename)
 	  bfd_fatal (filename);
 	goto closer;
       }
-			
+
       if (!bfd_check_format(arfile, bfd_object))
 	printf("%s: not an object file\n", arfile->filename);
       else {
@@ -192,7 +198,6 @@ display_file (filename)
     retval = false;
   }
 
-
  closer:
   if (bfd_close(file) == false)
     bfd_fatal (filename);
@@ -200,7 +205,49 @@ display_file (filename)
   return retval;
 }
 
+/* Symbol-sorting predicates */
+#define valueof(x) ((x)->section->vma + (x)->value)
+int
+numeric_forward (x, y)
+     CONST void *x;
+     CONST void *y;
+{
+  return (valueof(*(asymbol **)x) - valueof(*(asymbol **) y));
+}
 
+int
+numeric_reverse (x, y)
+     CONST void *x;
+     CONST void *y;
+{
+  return (valueof(*(asymbol **)y) - valueof(*(asymbol **) x));
+}
+
+int
+non_numeric_forward (x, y)
+     CONST void *x;
+     CONST void *y;
+{
+  CONST char *xn = (*(asymbol **) x)->name;
+  CONST char *yn = (*(asymbol **) y)->name;
+
+  return ((xn == NULL) ? ((yn == NULL) ? 0 : -1) :
+	  ((yn == NULL) ? 1 : strcmp (xn, yn)));
+}
+
+int
+non_numeric_reverse (x, y)
+     CONST void *x;
+     CONST void *y;
+{
+  return -(non_numeric_forward (x, y));
+}
+
+int (*(sorters[2][2])) PARAMS ((CONST void *, CONST void *)) = {
+	{non_numeric_forward, non_numeric_reverse},
+	{numeric_forward, numeric_reverse},
+};
+
 static void
 do_one_rel_file (abfd)
      bfd *abfd;
@@ -214,7 +261,6 @@ do_one_rel_file (abfd)
     return;
   }
 
-      
   storage = get_symtab_upper_bound (abfd);
   if (storage == 0) {
   nosymz:
@@ -233,65 +279,18 @@ do_one_rel_file (abfd)
      (after printing) */
 
   symcount = filter_symbols (abfd, syms, symcount);
-	
-  if (!no_sort) 
+
+  if (!no_sort)
     qsort((char *) syms, symcount, sizeof (asymbol *),
 	  sorters[sort_numerically][reverse_sort]);
 
   if (print_each_filename && !file_on_each_line)
     printf("\n%s:\n", bfd_get_filename(abfd));
-	
+
   print_symbols (abfd, syms, symcount);
   free (syms);
-
 }
 
-/* Symbol-sorting predicates */
-#define valueof(x) ((x)->section->vma + (x)->value)
-int
-numeric_forward (x, y)
-     char *x;
-     char *y;
-{
-
-  return (valueof(*(asymbol **)x) - valueof(*(asymbol **) y));;
-}
-
-int
-numeric_reverse (x, y)
-     char *x;
-     char *y;
-{
-  return (valueof(*(asymbol **)y) - valueof(*(asymbol **) x));
-
-}
-
-int
-non_numeric_forward (x, y)
-     char *x;
-     char *y;
-{
-  CONST char *xn = (*(asymbol **) x)->name;
-  CONST char *yn = (*(asymbol **) y)->name;
-
-  return ((xn == NULL) ? ((yn == NULL) ? 0 : -1) :
-	  ((yn == NULL) ? 1 : strcmp (xn, yn)));
-}
-
-int
-non_numeric_reverse (x, y)
-     char *x;
-     char *y;
-{
-  return -(non_numeric_forward (x, y));
-}
-
-int (*sorters[2][2])() = {
-	{non_numeric_forward, non_numeric_reverse},
-	{numeric_forward, numeric_reverse},
-};
-
-
 /* Choose which symbol entries to print;
    compact them downward to get rid of the rest.
    Return the number of symbols to be printed.  */
@@ -304,26 +303,23 @@ filter_symbols (abfd, syms, symcount)
   asymbol **from, **to;
   unsigned int dst_count = 0;
   asymbol *sym;
-  
+
   unsigned int src_count;
   for (from = to = syms, src_count = 0; src_count <symcount; src_count++) {
     int keep = 0;
 
-    
-	
     flagword flags = (from[src_count])->flags;
     sym = from[src_count];
     if (undefined_only) {
       keep = sym->section == &bfd_und_section;
     } else if (external_only) {
-      keep = ((flags & BSF_GLOBAL) 
-	      || (sym->section == &bfd_und_section) 
+      keep = ((flags & BSF_GLOBAL)
+	      || (sym->section == &bfd_und_section)
 	      ||   (sym->section == &bfd_com_section));
-      
     } else {
       keep = 1;
     }
-		
+
     if (!print_debug_syms && ((flags & BSF_DEBUGGING) != 0)) {
       keep = 0;
     }
@@ -332,7 +328,7 @@ filter_symbols (abfd, syms, symcount)
       to[dst_count++] = from[src_count];
     }
   }
-	
+
   return dst_count;
 }
 
@@ -379,7 +375,7 @@ print_symdef_entry (abfd)
     }
     elt = bfd_get_elt_at_index (abfd, idx);
     if (thesym->name != (char *)NULL) {
-    printf ("%s in %s\n", thesym->name, bfd_get_filename (elt));
-}
+      printf ("%s in %s\n", thesym->name, bfd_get_filename (elt));
+    }
   }
 }

@@ -45,8 +45,10 @@ char *xmalloc ();
 
 char *default_target = NULL;	/* default at runtime */
 
+extern *program_version;
 char *program_name = NULL;
 
+int show_version = 0;		/* show the version number */
 int dump_section_contents;	/* -s */
 int dump_section_headers;	/* -h */
 boolean dump_file_header;	/* -f */
@@ -94,6 +96,7 @@ static struct option long_options[]=
   {"syms", no_argument, &dump_symtab, 1},
   {"reloc", no_argument, &dump_reloc_info, 1},
   {"header", no_argument, &dump_section_headers, 1},
+  {"version", no_argument, &show_version,    1},
 #ifdef	ELF_STAB_DISPLAY
   {"stabs", no_argument, &dump_stab_section_info, 1},
 #endif
@@ -476,6 +479,8 @@ struct stab_print stab_print[] = {
   {0, 0}
 };
 
+void dump_elf_stabs_1 ();
+
 /* This is a kludge for dumping the stabs section from an ELF file that
    uses Sun stabs encoding.  It has to use some hooks into BFD because
    string table sections are not normally visible to BFD callers.  */
@@ -484,10 +489,7 @@ void
 dump_elf_stabs (abfd)
      bfd *abfd;
 {
-  Elf_Internal_Shdr *stab_hdr, *stabstr_hdr;
-  char *strtab;
-  struct internal_nlist *stabs, *stabs_end;
-  int i, j;
+  int i;
 
   /* Initialize stab name array if first time.  */
   if (stab_name[0][0] == 0) 
@@ -508,19 +510,35 @@ dump_elf_stabs (abfd)
       return;
     }
 
-  stab_hdr = bfd_elf_find_section (abfd, ".stab");
+  dump_elf_stabs_1 (abfd, ".stab", ".stabstr");
+  dump_elf_stabs_1 (abfd, ".stab.excl", ".stab.exclstr");
+  dump_elf_stabs_1 (abfd, ".stab.index", ".stab.indexstr");
+}
+
+void
+dump_elf_stabs_1 (abfd, name1, name2)
+     bfd *abfd;
+     char *name1;		/* Section name of .stab */
+     char *name2;		/* Section name of its string section */
+{
+  Elf_Internal_Shdr *stab_hdr, *stabstr_hdr;
+  char *strtab;
+  struct internal_nlist *stabs, *stabs_end;
+  int i;
+  unsigned file_string_table_offset, next_file_string_table_offset;
+
+  stab_hdr = bfd_elf_find_section (abfd, name1);
   if (0 == stab_hdr)
     {
-      fprintf (stderr, "%s: %s has no .stab section.\n", program_name,
-	       abfd->filename);
+      printf ("Contents of %s section:  none.\n\n", name1);
       return;
     }
 
-  stabstr_hdr = bfd_elf_find_section (abfd, ".stabstr");
+  stabstr_hdr = bfd_elf_find_section (abfd, name2);
   if (0 == stabstr_hdr)
     {
-      fprintf (stderr, "%s: %s has no .stabstr section.\n", program_name,
-	       abfd->filename);
+      fprintf (stderr, "%s: %s has no %s section.\n", program_name,
+	       abfd->filename, name2);
       return;
     }
 
@@ -531,8 +549,8 @@ dump_elf_stabs (abfd)
   if (bfd_seek (abfd, stab_hdr->sh_offset, L_SET) < 0 ||
       stab_hdr->sh_size != bfd_read ((PTR)stabs, stab_hdr->sh_size, 1, abfd))
     {
-      fprintf (stderr, "%s: reading .stab section of %s failed.\n",
-	       program_name,
+      fprintf (stderr, "%s: reading %s section of %s failed.\n",
+	       program_name, name1, 
 	       abfd->filename);
       return;
     }
@@ -541,8 +559,8 @@ dump_elf_stabs (abfd)
       stabstr_hdr->sh_size != bfd_read ((PTR)strtab, stabstr_hdr->sh_size,
 					1, abfd))
     {
-      fprintf (stderr, "%s: reading .stabstr section of %s failed.\n",
-	       program_name,
+      fprintf (stderr, "%s: reading %s section of %s failed.\n",
+	       program_name, name2,
 	       abfd->filename);
       return;
     }
@@ -557,11 +575,17 @@ dump_elf_stabs (abfd)
 				(unsigned char *)&(symp)->n_value); 	\
   }
 
-  printf ("Contents of .stab section:\n\n");
+  printf ("Contents of %s section:\n\n", name1);
   printf ("Symnum n_type n_othr n_desc n_value  n_strx String\n");
 
-  /* We start the index at -1 because there is a dummy symbol on
+  file_string_table_offset = 0;
+  next_file_string_table_offset = 0;
+
+  /* Loop through all symbols and print them.
+
+     We start the index at -1 because there is a dummy symbol on
      the front of Sun's stabs-in-elf sections.  */
+
   for (i = -1; stabs < stabs_end; stabs++, i++)
     {
       SWAP_SYMBOL (stabs, abfd);
@@ -569,14 +593,29 @@ dump_elf_stabs (abfd)
 	      stab_name [stabs->n_type],
 	      stabs->n_other, stabs->n_desc, stabs->n_value,
 	      stabs->n_strx);
-      if (stabs->n_strx < stabstr_hdr->sh_size)
-	printf (" %s", &strtab[stabs->n_strx]);
+
+      /* Symbols with type == 0 (N_UNDF) specify the length of the
+	 string table associated with this file.  We use that info
+	 to know how to relocate the *next* file's string table indices.  */
+
+      if (stabs->n_type == N_UNDF)
+	{
+	  file_string_table_offset = next_file_string_table_offset;
+	  next_file_string_table_offset += stabs->n_value;
+	}
+
+      /* Now, using the possibly updated string table offset, print the
+	 string (if any) associated with this symbol.  */
+
+      if ((stabs->n_strx + file_string_table_offset) < stabstr_hdr->sh_size)
+	printf (" %s", &strtab[stabs->n_strx + file_string_table_offset]);
+      else
+        printf (" *");
     }
   printf ("\n\n");
 }
 #endif	/* ELF_STAB_DISPLAY */
-
-void
+
 display_bfd (abfd)
      bfd *abfd;
 {
@@ -610,6 +649,7 @@ display_bfd (abfd)
       PF (DYNAMIC, "DYNAMIC");
       PF (WP_TEXT, "WP_TEXT");
       PF (D_PAGED, "D_PAGED");
+      PF (BFD_IS_RELAXABLE, "BFD_IS_RELAXABLE");
       printf ("\nstart address 0x");
       printf_vma (abfd->start_address);
     }
@@ -881,7 +921,9 @@ DEFUN (display_info_table, (first, last),
 	    bfd_target *p = target_vector[i];
 	    bfd *abfd = bfd_openw (_DUMMY_NAME_, p->name);
 	    int l = strlen (p->name);
-	    int ok = bfd_set_arch_mach (abfd, j, 0);
+	    int ok;
+	    bfd_set_format (abfd, bfd_object);
+	    ok = bfd_set_arch_mach (abfd, j, 0);
 
 	    if (ok)
 	      printf ("%s ", p->name);
@@ -909,7 +951,7 @@ DEFUN_VOID (display_info)
     {
       bfd_target *p = target_vector[i];
       bfd *abfd = bfd_openw (_DUMMY_NAME_, p->name);
-
+      bfd_set_format (abfd, bfd_object);
       printf ("%s\n (header %s, data %s)\n", p->name,
 	      p->header_byteorder_big_p ? "big endian" : "little endian",
 	      p->byteorder_big_p ? "big endian" : "little endian");
@@ -952,7 +994,7 @@ main (argc, argv)
   bfd_init ();
   program_name = *argv;
 
-  while ((c = getopt_long (argc, argv, "ib:m:dlfahrtxsj:", long_options, &ind))
+  while ((c = getopt_long (argc, argv, "ib:m:Vdlfahrtxsj:", long_options, &ind))
 	 != EOF)
     {
       seenflag = true;
@@ -1003,10 +1045,16 @@ main (argc, argv)
 	case 'h':
 	  dump_section_headers = 1;
 	  break;
+	case 'V':
+	  show_version = 1;
+	  break;
 	default:
 	  usage ();
 	}
     }
+
+  if (show_version)
+    printf ("%s version %s\n", program_name, program_version);
 
   if (seenflag == false)
     usage ();
