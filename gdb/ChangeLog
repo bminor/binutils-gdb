@@ -1,6 +1,6 @@
 2003-02-02  Elena Zannoni  <ezannoni@redhat.com>
 
-	Fix PR gdb/742 gdb/743
+	Fix PR gdb/742 gdb/743 gdb/877
 	* disasm.c (dump_insns): Use make_cleanup_ui_out_tuple_begin_end.
 	(do_mixed_source_and_assembly): Use
 	make_cleanup_ui_out_tuple_begin_end and
@@ -635,6 +635,7 @@
 
 2003-01-14  Elena Zannoni  <ezannoni@redhat.com>
 
+	Fix PR gdb/898
 	* breakpoint.c (until_break_command): Add new argument.  Use it to
 	decide whether to stop only at the current frame or not.
 	* breakpoint.h (until_break_command): Update prototype.
