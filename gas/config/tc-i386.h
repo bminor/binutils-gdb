@@ -1,5 +1,5 @@
 /* tc-i386.h -- Header file for tc-i386.c
-   Copyright (C) 1989, 1992 Free Software Foundation.
+   Copyright (C) 1989, 1992, 1993, 1994, 1995 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -53,10 +53,10 @@
    checked here.  I am not sure if some of the others are ever used with
    pcrel, but it is easier to be safe than sorry. */
 
-#define TC_RELOC_RTSYM_LOC_FIXUP(X)  \
-	      ((X) != BFD_RELOC_386_PLT32 &&  \
-	      (X) != BFD_RELOC_386_GOT32 &&  \
-	      (X) != BFD_RELOC_386_GOTPC)
+#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)  \
+  ((FIX)->fx_r_type != BFD_RELOC_386_PLT32 \
+   && (FIX)->fx_r_type != BFD_RELOC_386_GOT32 \
+   && (FIX)->fx_r_type != BFD_RELOC_386_GOTPC)
 
 #define TARGET_ARCH		bfd_arch_i386
 #define TARGET_BYTES_BIG_ENDIAN	0

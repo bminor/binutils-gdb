@@ -1,5 +1,20 @@
 Fri Jul  7 11:17:27 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	Add SPARC ELF PIC support.
+	* write.c (fixup_segment): Pass fixP to TC_RELOC_RTSYM_LOC_FIXUP,
+	not fixP->fx_r_type.
+	* config/tc-sparc.c (sparc_pic_code): New global variable. 
+	(md_apply_fix): If generating PIC, adjust fx_addnumber for any non
+	PC relative reloc.
+	(tc_gen_reloc): If generating PIC, adjust various reloc types.
+	Remove fx_pcrel assert, since it is no longer true.
+	(md_parse_option): Handle -K PIC.
+	* config/tc-sparc.h (sparc_pic_code): Declare if OBJ_ELF.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Define if OBJ_ELF.
+	(tc_fix_adjustable): Don't adjust PC relative relocs if PIC.
+	* config/tc-i386.h (TC_RELOC_RTSYM_LOC_FIXUP): Take a fixp, not a
+	reloc type.
+
 	* Makefile.in (Makefile): Add dependency on conf.in, so that conf
 	is rebuilt when conf.in changes.
 

@@ -1,5 +1,6 @@
 /* write.c - emit .o file
-   Copyright (C) 1986, 87, 90, 91, 92, 93, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 1995
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -2243,7 +2244,7 @@ fixup_segment (fixP, this_segment_type)
       if (add_symbolP)
 	{
 	  if (add_symbol_segment == this_segment_type && pcrel && !plt
-	      && TC_RELOC_RTSYM_LOC_FIXUP (fixP->fx_r_type))
+	      && TC_RELOC_RTSYM_LOC_FIXUP (fixP))
 	    {
 	      /*
 	       * This fixup was made when the symbol's segment was
