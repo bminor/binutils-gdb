@@ -1,3 +1,11 @@
+Tue Dec 31 12:56:41 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sparc.c (md_apply_fix3): Rename from md_apply_fix, and
+ 	add segment argument.  If OBJ_ELF, treat a relocation against a
+ 	symbol in a linkonce section like a relocation against an external
+ 	symbol.
+	* config/tc-sparc.h (MD_APPLY_FIX3): Define.
+
 Mon Dec 30 11:35:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips16_macro): Add case for M_ABS.
