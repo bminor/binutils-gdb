@@ -1,5 +1,6 @@
 /* tc-a29k.c -- Assemble for the AMD 29000.
-   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1998, 2000, 2001, 2002
+   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1998, 2000, 2001,
+   2002, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -787,10 +788,10 @@ md_number_to_chars (buf, val, n)
 void
 md_apply_fix3 (fixP, valP, seg)
      fixS *fixP;
-     valueT * valP;
+     valueT *valP;
      segT seg ATTRIBUTE_UNUSED;
 {
-  long val = *valP;
+  valueT val = *valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
 
   fixP->fx_addnumber = val;	/* Remember value for emit_reloc.  */
@@ -864,9 +865,7 @@ md_apply_fix3 (fixP, valP, seg)
 	}
       else if (fixP->fx_pcrel)
 	{
-	  long v = val >> 17;
-
-	  if (v != 0 && v != -1)
+	  if (val + 0x20000 > 0x3ffff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  "call/jmp target out of range");
 	}

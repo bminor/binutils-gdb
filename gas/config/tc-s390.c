@@ -1,5 +1,6 @@
 /* tc-s390.c -- Assemble for the S390
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -1596,13 +1597,10 @@ s390_insn (ignore)
   if (exp.X_op == O_constant)
     {
       if (   (   opformat->oplen == 6
-	      && (addressT) exp.X_add_number >= 0
 	      && (addressT) exp.X_add_number < (1ULL << 48))
 	  || (   opformat->oplen == 4
-	      && (addressT) exp.X_add_number >= 0
 	      && (addressT) exp.X_add_number < (1ULL << 32))
 	  || (   opformat->oplen == 2
-	      && (addressT) exp.X_add_number >= 0
 	      && (addressT) exp.X_add_number < (1ULL << 16)))
 	md_number_to_chars (insn, exp.X_add_number, opformat->oplen);
       else

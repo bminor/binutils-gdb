@@ -1,5 +1,5 @@
 /* tc-frv.c -- Assembler for the Fujitsu FRV.
-   Copyright 2002, 2003 Free Software Foundation.
+   Copyright 2002, 2003, 2004, 2005 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1423,7 +1423,7 @@ frv_force_relocation (fix)
      fixS * fix;
 {
   switch (fix->fx_r_type < BFD_RELOC_UNUSED
-	  ? fix->fx_r_type
+	  ? (int) fix->fx_r_type
 	  : fix->fx_cgen.opinfo)
     {
     case BFD_RELOC_FRV_GPREL12:

@@ -1,6 +1,6 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+   2004, 2005
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
@@ -4551,6 +4551,7 @@ do_t_bkpt (char * str)
   end_of_line (str);
 }
 
+#ifdef OBJ_ELF
 static bfd_reloc_code_real_type
 arm_parse_reloc (void)
 {
@@ -4591,6 +4592,7 @@ arm_parse_reloc (void)
 
   return reloc_map[i].reloc;
 }
+#endif
 
 /* ARM V5 branch-link-exchange (argument parse) for BLX(1) only.
    Expects inst.instruction is set for BLX(1).
@@ -11028,6 +11030,7 @@ md_begin (void)
 
   cpu_variant = mcpu_cpu_opt | mfpu_opt;
 
+#if defined OBJ_COFF || defined OBJ_ELF
   {
     unsigned int flags = 0;
 
@@ -11038,7 +11041,6 @@ md_begin (void)
       {
       case EF_ARM_EABI_UNKNOWN:
 #endif
-#if defined OBJ_COFF || defined OBJ_ELF
 	/* Set the flags in the private structure.  */
 	if (uses_apcs_26)      flags |= F_APCS26;
 	if (support_interwork) flags |= F_INTERWORK;
@@ -11064,7 +11066,7 @@ md_begin (void)
 	/* Using VFP conventions (even if soft-float).  */
 	if (cpu_variant & FPU_VFP_EXT_NONE)
 	  flags |= F_VFP_FLOAT;
-#endif
+
 #if defined OBJ_ELF
 	if (cpu_variant & FPU_ARCH_MAVERICK)
 	    flags |= EF_ARM_MAVERICK_FLOAT;
@@ -11078,7 +11080,6 @@ md_begin (void)
 	abort ();
       }
 #endif
-#if defined OBJ_COFF || defined OBJ_ELF
     bfd_set_private_flags (stdoutput, flags);
 
     /* We have run out flags in the COFF header to encode the
@@ -11098,8 +11099,8 @@ md_begin (void)
 	    bfd_set_section_contents (stdoutput, sec, NULL, 0, 0);
 	  }
       }
-#endif
   }
+#endif
 
   /* Record the CPU type as well.  */
   switch (cpu_variant & ARM_CPU_MASK)

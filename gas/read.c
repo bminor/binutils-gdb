@@ -1599,7 +1599,7 @@ s_data (int ignore ATTRIBUTE_UNUSED)
    .file.  */
 
 void
-s_app_file_string (char *file, int appfile)
+s_app_file_string (char *file, int appfile ATTRIBUTE_UNUSED)
 {
 #ifdef LISTING
   if (listing)

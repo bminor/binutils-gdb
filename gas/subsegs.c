@@ -1,6 +1,6 @@
 /* subsegs.c - subsegments -
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2002, 2004
+   1999, 2000, 2002, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -602,7 +602,7 @@ subseg_text_p (segT sec)
    seg_definitely_not_empty_p.  */
 
 int
-seg_not_empty_p (segT sec)
+seg_not_empty_p (segT sec ATTRIBUTE_UNUSED)
 {
   segment_info_type *seginfo = seg_info (sec);
   frchainS *chain;
