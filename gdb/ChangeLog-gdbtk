@@ -1,3 +1,8 @@
+Wed Feb  3 13:37:07 1999  Keith Seitz  <keiths@cygnus.com>
+
+	* gdbtk-variable.c (variable_create): Add parentheses to the name
+	so that casts do not confuse the expression parser.
+
 1999-02-03  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtool.ico: Add missing desktop image.
