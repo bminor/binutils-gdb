@@ -51,7 +51,7 @@ i386bsd_sigcontext_addr (struct frame_info *next_frame)
   CORE_ADDR sp;
 
   frame_unwind_register (next_frame, SP_REGNUM, buf);
-  sp = extract_address (buf, 4);
+  sp = extract_unsigned_integer (buf, 4);
 
   return read_memory_unsigned_integer (sp + 8, 4);
 }

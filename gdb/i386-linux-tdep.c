@@ -250,7 +250,7 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
   char buf[4];
 
   frame_unwind_register (next_frame, SP_REGNUM, buf);
-  sp = extract_address (buf, 4);
+  sp = extract_unsigned_integer (buf, 4);
 
   pc = i386_linux_sigtramp_start (frame_pc_unwind (next_frame));
   if (pc)
@@ -273,7 +273,7 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
 	 pointer to the user context is passed as the third argument
 	 to the signal handler.  */
       read_memory (sp + 8, 4, buf);
-      return extract_address (buf, 4) + 20;
+      return extract_unsigned_integer (buf, 4) + 20;
     }
 
   error ("Couldn't recognize signal trampoline.");

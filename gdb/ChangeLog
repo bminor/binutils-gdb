@@ -1,3 +1,11 @@
+2003-05-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_frame_cache, i386_sigtramp_frame_cache,
+	i386_extract_struct_value_address, i386_svr4_sigcontext_addr): Use
+	extract_unsigned_integer instead of extract_address.
+	* i386bsd-tdep.c (i386bsd_sigcontext_addr): Likewise.
+	* i386-linux-tdep.c (i386_linux_sigcontext_addr): Likewise.
+
 2003-05-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_frame_p): Move signal trampoline unwinder...

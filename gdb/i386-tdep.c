@@ -713,7 +713,7 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
    occurred.  */
 
   frame_unwind_register (next_frame, I386_EBP_REGNUM, buf);
-  cache->base = extract_address (buf, 4);
+  cache->base = extract_unsigned_integer (buf, 4);
   if (cache->base == 0)
     return cache;
 
@@ -735,7 +735,7 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
 	 functions this might work too.  */
 
       frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
-      cache->base = extract_address (buf, 4) + cache->sp_offset;
+      cache->base = extract_unsigned_integer (buf, 4) + cache->sp_offset;
     }
 
   /* Now that we have the base address for the stack frame we can
@@ -886,7 +886,7 @@ i386_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache = i386_alloc_frame_cache ();
 
   frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
-  cache->base = extract_address (buf, 4) - 4;
+  cache->base = extract_unsigned_integer (buf, 4) - 4;
 
   addr = tdep->sigcontext_addr (next_frame);
   cache->saved_regs[I386_EIP_REGNUM] = addr + tdep->sc_pc_offset;
@@ -1200,7 +1200,7 @@ i386_extract_struct_value_address (struct regcache *regcache)
   char buf[4];
 
   regcache_cooked_read (regcache, I386_EAX_REGNUM, buf);
-  return extract_address (buf, 4);
+  return extract_unsigned_integer (buf, 4);
 }
 
 
@@ -1478,7 +1478,7 @@ i386_svr4_sigcontext_addr (struct frame_info *next_frame)
   CORE_ADDR sp;
 
   frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
-  sp = extract_address (buf, 4);
+  sp = extract_unsigned_integer (buf, 4);
 
   return read_memory_unsigned_integer (sp + 8, 4);
 }
