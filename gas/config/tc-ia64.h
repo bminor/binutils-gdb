@@ -155,6 +155,10 @@ extern void ia64_convert_frag (fragS *);
 #define TC_DWARF2_EMIT_OFFSET		ia64_dwarf2_emit_offset
 #define tc_check_label(l)		ia64_check_label (l)
 
+/* Record if an alignment frag should end with a stop bit.  */
+#define TC_FRAG_TYPE			int
+#define TC_FRAG_INIT(FRAGP)		do {(FRAGP)->tc_frag_data = 0;}while (0)
+
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (15 + 16)
 
 #define WORKING_DOT_WORD	/* don't do broken word processing for now */

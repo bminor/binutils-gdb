@@ -1,3 +1,14 @@
+2004-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-ia64.c (align_frag): New.
+	(md_assemble): Set the tc_frag_data field in align_frag for
+	IA64_OPCODE_FIRST instructions.
+	(ia64_md_do_align): Set align_frag.
+	(ia64_handle_align): Add a stop bit if needed.
+
+	* config/tc-ia64.h (TC_FRAG_TYPE): New.
+	(TC_FRAG_INIT): New.
+
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-frv.c (fr400_audio): New variable.

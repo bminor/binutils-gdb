@@ -636,6 +636,9 @@ static struct gr {
   valueT value;
 } gr_values[128] = {{ 1, 0, 0 }};
 
+/* Remember the alignment frag.  */
+static fragS *align_frag;
+
 /* These are the routines required to output the various types of
    unwind records.  */
 
@@ -9990,7 +9993,24 @@ md_assemble (str)
   flags = idesc->flags;
 
   if ((flags & IA64_OPCODE_FIRST) != 0)
-    insn_group_break (1, 0, 0);
+    {
+      /* The alignment frag has to end with a stop bit only if the
+	 next instruction after the alignment directive has to be
+	 the first instruction in an instruction group.  */
+      if (align_frag)
+	{
+	  while (align_frag->fr_type != rs_align_code)
+	    {
+	      align_frag = align_frag->fr_next;
+	      assert (align_frag);
+	    }
+	  if (align_frag->fr_next == frag_now)
+	    align_frag->tc_frag_data = 1;
+	}
+
+      insn_group_break (1, 0, 0);
+    }
+  align_frag = NULL;
 
   if ((flags & IA64_OPCODE_NO_PRED) != 0 && qp_regno != 0)
     {
@@ -10808,6 +10828,8 @@ ia64_md_do_align (n, fill, len, max)
      int len ATTRIBUTE_UNUSED;
      int max ATTRIBUTE_UNUSED;
 {
+  /* The current frag is an alignment frag.  */
+  align_frag = frag_now;
   if (subseg_text_p (now_seg))
     ia64_flush_insns ();
 }
@@ -10823,12 +10845,19 @@ ia64_handle_align (fragp)
   static const unsigned char le_nop[]
     = { 0x0c, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
 	0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00};
+  static const unsigned char le_nop_stop[]
+    = { 0x0d, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+	0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00};
 
   int bytes;
   char *p;
+  const unsigned char *nop;
 
   if (fragp->fr_type != rs_align_code)
     return;
+
+  /* Check if this frag has to end with a stop bit.  */
+  nop = fragp->tc_frag_data ? le_nop_stop : le_nop;
 
   bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
   p = fragp->fr_literal + fragp->fr_fix;
@@ -10845,7 +10874,7 @@ ia64_handle_align (fragp)
     }
 
   /* Instruction bundles are always little-endian.  */
-  memcpy (p, le_nop, 16);
+  memcpy (p, nop, 16);
   fragp->fr_var = 16;
 }
 
