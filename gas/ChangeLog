@@ -1,3 +1,8 @@
+2002-11-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (tc_s390_fix_adjustable): Re-add patch to prevent
+	adjustments to symbols in merge sections.
+
 2002-11-19  Luke Deller <luked@cse.unsw.edu.au>
 
 	* config/tc-alpha.c (s_alpha_prologue): as_bad when sym is NULL.

@@ -1629,6 +1629,9 @@ int
 tc_s390_fix_adjustable (fixP)
      fixS *fixP;
 {
+  /* Don't adjust references to merge sections.  */
+  if ((S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0)
+    return 0;
   /* adjust_reloc_syms doesn't know about the GOT.  */
   if (   fixP->fx_r_type == BFD_RELOC_32_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_390_PLT16DBL
