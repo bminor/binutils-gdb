@@ -558,6 +558,7 @@ tuiRefreshAll (void)
 {
   TuiWinType type;
 
+  clearok (curscr, TRUE);
   refreshAll (winList);
   for (type = SRC_WIN; type < MAX_MAJOR_WINDOWS; type++)
     {

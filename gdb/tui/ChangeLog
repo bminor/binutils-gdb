@@ -1,5 +1,9 @@
 2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tuiWin.c (tuiRefreshAll): Use clearok to force a refresh.
+
+2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tui-file.c (tui_file_fputs): Use tui_puts.
 
 2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
