@@ -1,3 +1,7 @@
+Tue Apr 19 12:12:15 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* configure.in: Add i[34]86-*-bsd386 to the patterns recognized.
+
 Fri Apr 15 14:35:42 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldlang.c (lang_size_sections): When relaxing, adjust the

@@ -62,6 +62,7 @@ case "${targ}" in
   i[34]86-*-lynxos*)	ld_target=i386-lynx ;;
   i[34]86-*-coff)	ld_target=i386-coff ;;
   i[34]86-*-bsd)	ld_target=i386-bsd ;;
+  i[34]86-*-bsd386)	ld_target=i386-bsd ;;
   i[34]86-*-aout)	ld_target=i386-aout ;;
   i[34]86-*-linux)	ld_target=i386-linux ;;
   i[34]86-*-sysv4*)	ld_target=i386-elf ;;
