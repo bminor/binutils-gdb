@@ -681,18 +681,28 @@ reread_symbols ()
     }
 }
 
-
 /* This function is really horrible, but to avoid it, there would need
    to be more filling in of forward references.  */
-int
+void
 fill_in_vptr_fieldno (type)
      struct type *type;
 {
-  check_stub_type (type);
   if (TYPE_VPTR_FIELDNO (type) < 0)
-    TYPE_VPTR_FIELDNO (type) =
-      fill_in_vptr_fieldno (TYPE_BASECLASS (type, 1));
-  return TYPE_VPTR_FIELDNO (type);
+    {
+      int i;
+      for (i = 1; i < TYPE_N_BASECLASSES (type); i++)
+	{
+	  fill_in_vptr_fieldno (TYPE_BASECLASS (type, i));
+	  if (TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, i)) >= 0)
+	    {
+	      TYPE_VPTR_FIELDNO (type)
+		= TYPE_VPTR_FIELDNO (TYPE_BASECLASS (type, i));
+	      TYPE_VPTR_BASETYPE (type)
+		= TYPE_VPTR_BASETYPE (TYPE_BASECLASS (type, i));
+	      break;
+	    }
+	}
+    }
 }
 
 /* Functions to handle complaints during symbol reading.  */
