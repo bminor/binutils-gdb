@@ -191,30 +191,30 @@ observer_notify_normal_stop (void)
   generic_observer_notify (normal_stop_subject, NULL);
 }
 
-/* The following code is only used to unit-test the observers from
-   our testsuite.  DO NOT USE IT within observer.c!  */
+/* The following code is only used to unit-test the observers from our
+   testsuite.  DO NOT USE IT within observer.c (or anywhere else for
+   that matter)!  */
 
-/* Since this code will not be used within GDB, it will trigger
-   a warning if we decide to compile with -Wunused-function.
-   This is ok for now.  (brobecker 2003-03-18)  */
+/* If we define these variables and functions as `static', the
+   compiler will optimize them out.  */
  
-static int observer_test_first_observer = 0;
-static int observer_test_second_observer = 0;
-static int observer_test_third_observer = 0;
+int observer_test_first_observer = 0;
+int observer_test_second_observer = 0;
+int observer_test_third_observer = 0;
 
-static void
+void
 observer_test_first_notification_function (void)
 {
   observer_test_first_observer++;
 }
 
-static void
+void
 observer_test_second_notification_function (void)
 {
   observer_test_second_observer++;
 }
 
-static void
+void
 observer_test_third_notification_function (void)
 {
   observer_test_third_observer++;

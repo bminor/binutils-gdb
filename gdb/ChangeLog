@@ -1,3 +1,12 @@
+2003-12-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* observer.c (observer_test_first_observer)
+	(observer_test_second_observer, observer_test_third_observer):
+	Don't define as `static'.
+	(observer_test_first_notification_function)
+	(observer_test_second_notification_function)
+	(observer_test_third_notification_function): Likewise.
+
 2003-12-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* solib.h (SOLIB_UNLOADED_LIBRARY_PATHNAME): Define as "" instead
