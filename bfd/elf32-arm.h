@@ -1810,7 +1810,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
           || r_type == R_ARM_GNU_VTINHERIT)
         continue;
 
-      elf32_arm_info_to_howto (input_bfd, & bfd_reloc, rel);
+      elf32_arm_info_to_howto (input_bfd, & bfd_reloc, (Elf32_Internal_Rel *) rel);
       howto = bfd_reloc.howto;
 
       if (info->relocateable)
@@ -1829,8 +1829,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		  arm_add_to_rel (input_bfd, contents + rel->r_offset,
 				  howto, sec->output_offset + sym->st_value);
 #else
-		  rel->r_addend += (sec->output_offset + sym->st_value)
-		    >> howto->rightshift;
+		  rel->r_addend += (sec->output_offset + sym->st_value);
 #endif
 		}
 	    }
