@@ -1,3 +1,22 @@
+Fri Nov 19 04:02:01 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/i386-lynx.mt (TDEFINES): FPRINTF_ALREADY_DECLARED should
+	not be defined here, since it is a host attribute, not a target
+	one.
+	* config/m68k-lynx.mt, config/sparc-lynx.mt: Ditto.
+
+	* coffcode.h (coff_bfd_reloc_type_lookup): Don't define if already
+	defined.
+
+	* coff-sparc.c: Define some relocations, based on ELF relocations.
+	(enum reloc_type, bfd_coff_generic_reloc, coff_sparc_howto_table,
+	struct coff_reloc_map, sparc_reloc_map,
+	coff_sparc_reloc_type_lookup): Borrowed from elf32-sparc.c and
+	elf.c, renamed.
+	(coff_bfd_reloc_type_lookup): Define to be coff_sparc_reloc_....
+	(rtype2howto): Index into coff_sparc_howto_table using
+	dst->r_type.
+
 Thu Nov 18 11:45:39 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config.bfd (mips*-*-irix5*): New target; use mipsbelf.
