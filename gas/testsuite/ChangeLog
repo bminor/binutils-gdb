@@ -1,3 +1,9 @@
+2002-07-29  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/elf_ase_mips16.d: New file to test ELF MIPS16 ASE marking.
+	* gas/mips/elf_ase_mips16.s: Likewise.
+	* gas/mips/mips.exp: Run the new test.
+
 2002-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/ppc/altivec.d: Invoke "as" with "-a32".
