@@ -2336,7 +2336,7 @@ procfs_notice_signals (pid)
 #ifdef UNIXWARE
   premptyset (&sctl.sigset);
 #else
-  sctl.sigset = &pi->prrun.pr_trace;
+  sctl.sigset = pi->prrun.pr_trace;
 #endif
 
   notice_signals (pi, &sctl);
