@@ -1,3 +1,8 @@
+2004-04-01  Jim Blandy  <jimb@redhat.com>
+
+	* i386-tdep.c: Add FIXME regarding STABS vs. Dwarf 2 register
+	numbering.
+
 2004-04-01  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
 	* valarith.c: Update copyright notice.
