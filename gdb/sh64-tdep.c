@@ -1373,7 +1373,7 @@ sh64_pop_frame (void)
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame),
 				   get_frame_base (frame),
 				   get_frame_base (frame)))
-    deprecated_pop_dummy_frame ();
+    generic_pop_dummy_frame ();
   else
     {
       fp = get_frame_base (frame);

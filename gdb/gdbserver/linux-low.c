@@ -685,17 +685,13 @@ retry:
 	  fprintf (stderr, "\nChild exited with retcode = %x \n", WEXITSTATUS (w));
 	  *status = 'W';
 	  clear_inferiors ();
-	  free (all_processes.head);
-	  all_processes.head = all_processes.tail = NULL;
 	  return ((unsigned char) WEXITSTATUS (w));
 	}
       else if (!WIFSTOPPED (w))
 	{
 	  fprintf (stderr, "\nChild terminated with signal = %x \n", WTERMSIG (w));
-	  *status = 'X';
 	  clear_inferiors ();
-	  free (all_processes.head);
-	  all_processes.head = all_processes.tail = NULL;
+	  *status = 'X';
 	  return ((unsigned char) WTERMSIG (w));
 	}
     }

@@ -1,6 +1,5 @@
 /* Motorola 68HC11/HC12-specific support for 32-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -952,9 +951,9 @@ m68hc11_get_relocation_value (bfd *input_bfd, struct bfd_link_info *info,
     {
       bfd_boolean unresolved_reloc, warned;
 
-      RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
-			       r_symndx, symtab_hdr, sym_hashes,
-			       h, sec, *relocation, unresolved_reloc, warned);
+      RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx, symtab_hdr,
+			       *relocation, sec, unresolved_reloc,
+			       info, warned);
 
       *is_far = (h && (h->other & STO_M68HC12_FAR));
       stub_name = h->root.root.string;

@@ -2352,70 +2352,38 @@ non_heuristic_proc_desc (CORE_ADDR pc, CORE_ADDR *addrptr)
 	{
 	  int low, mid, high;
 	  char *ptr;
-	  CORE_ADDR pdr_pc;
 
 	  low = 0;
 	  high = priv->size / 32;
 
-	  /* We've found a .pdr section describing this objfile.  We want to
-	     find the entry which describes this code address.  The .pdr
-	     information is not very descriptive; we have only a function
-	     start address.  We have to look for the closest entry, because
-	     the local symbol at the beginning of this function may have
-	     been stripped - so if we ask the symbol table for the start
-	     address we may get a preceding global function.  */
-
-	  /* First, find the last .pdr entry starting at or before PC.  */
 	  do
 	    {
+	      CORE_ADDR pdr_pc;
+
 	      mid = (low + high) / 2;
 
 	      ptr = priv->contents + mid * 32;
 	      pdr_pc = bfd_get_signed_32 (sec->objfile->obfd, ptr);
 	      pdr_pc += ANOFFSET (sec->objfile->section_offsets,
 				  SECT_OFF_TEXT (sec->objfile));
-
-	      if (pdr_pc > pc)
+	      if (pdr_pc == startaddr)
+		break;
+	      if (pdr_pc > startaddr)
 		high = mid;
 	      else
 		low = mid + 1;
 	    }
 	  while (low != high);
 
-	  /* Both low and high point one past the PDR of interest.  If
-	     both are zero, that means this PC is before any region
-	     covered by a PDR, i.e. pdr_pc for the first PDR entry is
-	     greater than PC.  */
-	  if (low > 0)
-	    {
-	      ptr = priv->contents + (low - 1) * 32;
-	      pdr_pc = bfd_get_signed_32 (sec->objfile->obfd, ptr);
-	      pdr_pc += ANOFFSET (sec->objfile->section_offsets,
-				  SECT_OFF_TEXT (sec->objfile));
-	    }
-
-	  /* We don't have a range, so we have no way to know for sure
-	     whether we're in the correct PDR or a PDR for a preceding
-	     function and the current function was a stripped local
-	     symbol.  But if the PDR's PC is at least as great as the
-	     best guess from the symbol table, assume that it does cover
-	     the right area; if a .pdr section is present at all then
-	     nearly every function will have an entry.  The biggest exception
-	     will be the dynamic linker stubs; conveniently these are
-	     placed before .text instead of after.  */
-
-	  if (pc >= pdr_pc && pdr_pc >= startaddr)
+	  if (low != high)
 	    {
 	      struct symbol *sym = find_pc_function (pc);
-
-	      if (addrptr)
-		*addrptr = pdr_pc;
 
 	      /* Fill in what we need of the proc_desc.  */
 	      proc_desc = (mips_extra_func_info_t)
 		obstack_alloc (&sec->objfile->objfile_obstack,
 			       sizeof (struct mips_extra_func_info));
-	      PROC_LOW_ADDR (proc_desc) = pdr_pc;
+	      PROC_LOW_ADDR (proc_desc) = startaddr;
 
 	      /* Only used for dummy frames.  */
 	      PROC_HIGH_ADDR (proc_desc) = 0;
@@ -5779,7 +5747,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, mips_register_type);
 
   set_gdbarch_print_registers_info (gdbarch, mips_print_registers_info);
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
+  set_gdbarch_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
 
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_mips);
 

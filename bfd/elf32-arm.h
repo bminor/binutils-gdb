@@ -2125,10 +2125,10 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_boolean warned;
 	  bfd_boolean unresolved_reloc;
 
-	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
-				   r_symndx, symtab_hdr, sym_hashes,
-				   h, sec, relocation,
-				   unresolved_reloc, warned);
+	  RELOC_FOR_GLOBAL_SYMBOL (h, sym_hashes, r_symndx,
+				   symtab_hdr, relocation,
+				   sec, unresolved_reloc, info,
+				   warned);
 	  
 	  if (unresolved_reloc || relocation != 0)
 	    {
@@ -2677,18 +2677,6 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 
       flags &= ~(EF_ARM_SYMSARESORTED | EF_ARM_DYNSYMSUSESEGIDX
 		 | EF_ARM_MAPSYMSFIRST);
-      break;
-
-    case EF_ARM_EABI_VER3:
-      fprintf (file, _(" [Version3 EABI]"));
-
-      if (flags & EF_ARM_BE8)
-	fprintf (file, _(" [BE8]"));
-
-      if (flags & EF_ARM_LE8)
-	fprintf (file, _(" [LE8]"));
-
-      flags &= ~(EF_ARM_LE8 | EF_ARM_BE8);
       break;
 
     default:

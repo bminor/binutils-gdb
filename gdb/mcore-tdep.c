@@ -752,7 +752,7 @@ mcore_pop_frame (void)
 
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), get_frame_base (fi),
 				   get_frame_base (fi)))
-    deprecated_pop_dummy_frame ();
+    generic_pop_dummy_frame ();
   else
     {
       /* Write out the PC we saved. */

@@ -1591,7 +1591,8 @@ retry:
   /* Handle GNU/Linux's extended waitstatus for trace events.  */
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
     {
-      linux_handle_extended_wait (GET_LWP (lp->ptid), status, ourstatus);
+      linux_handle_extended_wait (ptid_get_pid (trap_ptid),
+				  status, ourstatus);
       return trap_ptid;
     }
 

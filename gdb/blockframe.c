@@ -382,16 +382,10 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 
   /* If sigtramp is in the u area, it counts as a function (especially
      important for step_1).  */
-  /* NOTE: cagney/2004-03-16: Determining if the PC is in a signal
-     trampoline typically depends on the detailed analysis of dynamic
-     information obtained from the inferior yet this function is
-     expected to work using static information obtained from the
-     symbol table.  */
-  if (DEPRECATED_SIGTRAMP_START_P ()
-      && DEPRECATED_PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
+  if (SIGTRAMP_START_P () && PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
     {
-      cache_pc_function_low = DEPRECATED_SIGTRAMP_START (mapped_pc);
-      cache_pc_function_high = DEPRECATED_SIGTRAMP_END (mapped_pc);
+      cache_pc_function_low = SIGTRAMP_START (mapped_pc);
+      cache_pc_function_high = SIGTRAMP_END (mapped_pc);
       cache_pc_function_name = "<sigtramp>";
       cache_pc_function_section = section;
       goto return_cached_value;
@@ -589,6 +583,14 @@ deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc, CORE_ADDR sp,
   return (INNER_THAN ((sp), (pc))
 	  && (frame_address != 0)
 	  && INNER_THAN ((pc), (frame_address)));
+}
+
+int
+deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
+					    CORE_ADDR frame_address)
+{
+  CORE_ADDR addr = entry_point_address ();
+  return ((pc) >= addr && (pc) <= (addr + DECR_PC_AFTER_BREAK));
 }
 
 /* Returns true for a user frame or a call_function_by_hand dummy

@@ -743,7 +743,7 @@ h8300_pop_frame (void)
 				   get_frame_base (frame),
 				   get_frame_base (frame)))
     {
-      deprecated_pop_dummy_frame ();
+      generic_pop_dummy_frame ();
     }
   else
     {
