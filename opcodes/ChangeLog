@@ -1,3 +1,9 @@
+Sat Dec 14 22:36:20 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-dis.c (print_mips16_insn_arg): The base address of a PC
+	relative load or add now depends upon whether the instruction is
+	in a delay slot.
+
 Wed Dec 11 09:23:46 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-dis.c: Finish writing disassembler.
