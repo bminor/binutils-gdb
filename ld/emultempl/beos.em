@@ -686,7 +686,6 @@ gld_${EMULATION_NAME}_before_allocation (void)
    but I'm leaving this here in case we want to enable it for sections
    which are not mentioned in the linker script.  */
 
-/*ARGSUSED*/
 static bfd_boolean
 gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
 {
