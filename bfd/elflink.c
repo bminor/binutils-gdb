@@ -252,9 +252,13 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   flags = bed->dynamic_sec_flags;
 
   pltflags = flags;
-  pltflags |= SEC_CODE;
   if (bed->plt_not_loaded)
+    /* We do not clear SEC_ALLOC here because we still want the OS to
+       allocate space for the section; it's just that there's nothing
+       to read in from the object file.  */
     pltflags &= ~ (SEC_CODE | SEC_LOAD | SEC_HAS_CONTENTS);
+  else
+    pltflags |= SEC_ALLOC | SEC_CODE | SEC_LOAD;
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 

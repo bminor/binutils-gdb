@@ -1,3 +1,9 @@
+2004-10-18  Mark Mitchell  <mark@codesourcery.com>
+
+	* elfarm-nabi.c (ELF_DYNAMIC_SEC_FLAGS): Add comment.
+	* elflink.c (_bfd_elf_create_dynamic_sections): For a loaded PLT,
+	set SEC_ALLOC and SEC_LOAD.
+
 2004-10-18  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-xstormy16.c (xstormy16_elf_relocate_section): Compute

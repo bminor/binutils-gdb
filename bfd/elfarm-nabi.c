@@ -1011,6 +1011,8 @@ elf32_arm_symbian_modify_segment_map (abfd, info)
 #undef elf32_bed
 #define elf32_bed elf32_arm_symbian_bed
 
+/* The dynamic sections are not allocated on SymbianOS; the postlinker
+   will process them and then discard them.  */
 #undef ELF_DYNAMIC_SEC_FLAGS
 #define ELF_DYNAMIC_SEC_FLAGS \
   (SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED)
