@@ -491,7 +491,7 @@ case "${target}" in
     noconfigdirs="$noconfigdirs ld gcc gdb target-libiberty target-libgloss target-newlib target-libio target-librx target-libstdc++ target-libg++"
     ;;
   mn10300-*-*)
-    noconfigdirs="$noconfigdirs gdb target-libgloss"
+    noconfigdirs="$noconfigdirs target-libgloss"
     ;;
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
