@@ -1,3 +1,7 @@
+2001-12-17  Richard Henderson  <rth@redhat.com>
+
+	* alpha-opc.c (unop): Encode with RB as $sp.
+
 2001-12-07  Geoffrey Keating  <geoffk@redhat.com>
 
 	* Makefile.am: Add support for xstormy16.
