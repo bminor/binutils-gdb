@@ -13,6 +13,7 @@ GNU as\-\-the portable GNU assembler.
 .I file\c
 \&\|]\|]
 .RB "[\|" \-D "\|]"
+.RB "[\|" \-\-defsym\ SYM=VAL "\|]"
 .RB "[\|" \-f "\|]"
 .RB "[\|" \-I
 .I path\c
@@ -146,6 +147,11 @@ This option is accepted only for script compatibility with calls to
 other assemblers; it has no effect on \c
 .B as\c
 \&.
+.TP
+.B \-\-defsym SYM=VALUE
+Define the symbol SYM to be VALUE before assembling the input file.
+VALUE must be an integer constant.  As in C, a leading 0x indicates a
+hexadecimal value, and a leading 0 indicates an octal value.
 .TP
 .B \-f
 ``fast''--skip preprocessing (assume source is compiler output).

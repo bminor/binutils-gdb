@@ -1,5 +1,27 @@
 Mon Aug 21 13:57:20 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* as.c (parse_args): Accept --defsym SYM=VALUE.
+	* doc/as.texinfo, doc/as.1: Document --defsym.
+
+	* read.c (read_a_source_file): In MRI mode, don't end the
+	statement inside a quotation.
+	(s_space): Don't warn about a zero repeat count in MRI mode.
+	* config/tc-m68k.c (crack_operand): In MRI mode, don't count
+	parentheses inside quotes.
+	(md_assemble): In MRI mode, anything after the operands field is a
+	comment.
+	(parse_mri_control_operand): Adjust start and stop to remove
+	spaces.
+	(s_mri_for): Likewise.
+
+	* cond.c (s_ifdef): Restore the character after the symbol name,
+	in case it is a newline.
+	(s_if): If ignoring the current tree, don't try to parse the
+	expression.
+
+	* app.c (do_scrub_next_char): If LEX_IS_STRINGQUOTE or
+	LEX_IS_ONECHAR_QUOTE is seen in	state 10, preserve one space.
+
 	* doc/as.texinfo: Document irp, irpc, macro, and rept. MRI mode
 	now supports macros, ifc, ifnc, irp, irpc, rept, and endr, without
 	using gasp.
@@ -14,7 +36,7 @@ Mon Aug 21 13:57:20 1995  Ian Lance Taylor  <ian@cygnus.com>
 	uses.
 	(potable): Add exitm, irp, irpc, macro, mexit, rept.
 	(read_a_source_file): Always clear line_label at the start of a
-	line, not just when flag_mri or LABELS_WITHOUT_COLONS.  Fixup
+	line, not just when flag_mri or LABELS_WITHOUT_COLONS.  Fix
 	MRI/LABELS_WITHOUT_COLONS handling.  In MRI mode, permit label:
 	equ val.  Set line_label when calling colon.  In MRI mode, a
 	leading '.' does not imply a pseudo-op.  Check for macro expansion
