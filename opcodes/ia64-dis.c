@@ -117,7 +117,7 @@ print_insn_ia64 (bfd_vma memaddr, struct disassemble_info *info)
     {
       /* skip L slot in MLI template: */
       slotnum = 2;
-      retval += slot_multiplier;
+      retval = 16 - slot_multiplier;
     }
 
   insn = slot[slotnum];
@@ -165,6 +165,13 @@ print_insn_ia64 (bfd_vma memaddr, struct disassemble_info *info)
             | (((insn >> 36) & 0x1) << 20)
             | ((insn >> 6) & 0xfffff);
         }
+      else if (odesc - elf64_ia64_operands == IA64_OPND_TGT64)
+	{
+	  /* 60-bit immedate for long branches.  */
+	  value = (((insn >> 13) & 0xfffff)
+		   | (((insn >> 36) & 1) << 59)
+		   | (slot[1] << 20)) << 4;
+	}
       else
 	{
 	  err = (*odesc->extract) (odesc, insn, &value);

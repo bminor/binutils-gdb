@@ -1,3 +1,8 @@
+2000-08-07  Richard Henderson  <rth@cygnus.com>
+
+	* ia64-dis.c (print_insn_ia64): Get byte skip count correct
+	for MLI templates.  Handle IA64_OPND_TGT64.
+
 2000-07-29  Marek Michalkiewicz  <marekm@linux.org.pl>
 
 	* avr-dis.c (avr_operand): Use PARAMS macro in declaration.
