@@ -22,18 +22,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#ifdef HAVE_TERM_H
-#include <term.h>
-#endif
-#include <signal.h>
-#include <fcntl.h>
-#if 0
-#include <termio.h>
-#endif
-#include <setjmp.h>
 #include "defs.h"
 #include "gdbcmd.h"
 #include "tui/tui.h"
@@ -46,7 +34,6 @@
 #include "tui/tui-win.h"
 #include "tui/tui-winsource.h"
 #include "tui/tui-windata.h"
-#include "readline/readline.h"
 #include "target.h"
 #include "frame.h"
 #include "breakpoint.h"
@@ -54,7 +41,25 @@
 #include "symtab.h"
 #include "source.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#ifdef HAVE_TERM_H
+#include <term.h>
+#endif
+#include <signal.h>
+#include <fcntl.h>
+#if 0
+#include <termio.h>
+#endif
+#include <setjmp.h>
+
 #include "gdb_curses.h"
+
+/* This redefines CTRL if it is not already defined, so it must come
+   after terminal state releated include files like <term.h> and
+   "gdb_ncurses.h".  */
+#include "readline/readline.h"
 
 /* Tells whether the TUI is active or not.  */
 int tui_active = 0;

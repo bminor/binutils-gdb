@@ -1,5 +1,6 @@
-/* Native-dependent definitions for Intel 386 running NetBSD, for GDB.
-   Copyright 1986, 1987, 1989, 1992, 1994, 2000, 2002
+/* Native-dependent definitions for NetBSD/i386.
+
+   Copyright 1986, 1987, 1989, 1992, 1994, 2000, 2002, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -22,7 +23,7 @@
 #ifndef NM_NBSD_H
 #define NM_NBSD_H
 
-/* Get generic NetBSD native definitions. */
+/* Get generic NetBSD native definitions.  */
 #include "config/nm-nbsd.h"
 
-#endif /* NM_NBSD_H */
+#endif /* nm-nbsd.h */

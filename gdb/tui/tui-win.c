@@ -50,7 +50,7 @@
 
 #include "gdb_string.h"
 #include <ctype.h>
-#include <readline/readline.h>
+#include "readline/readline.h"
 
 /*******************************
 ** Static Local Decls

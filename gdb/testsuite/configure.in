@@ -42,7 +42,7 @@ AC_ARG_WITH(stabs,
 case $target in
    powerpc-*-aix* \
  | rs6000-*-aix*  \
- | *-*-bsd*       \
+ | *-*-*bsd*      \
  | *-*-go32*      \
  | *-*-linux*     \
  | *-*-lynxos*    \

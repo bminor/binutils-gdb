@@ -38,6 +38,7 @@
 #include "trad-frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
+#include "dwarf2-frame.h"
 #include "reggroups.h"
 #include "regset.h"
 #include "value.h"
@@ -2298,6 +2299,53 @@ s390_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 
+/* DWARF-2 frame support.  */
+
+static void
+s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
+                            struct dwarf2_frame_state_reg *reg)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  switch (tdep->abi)
+    {
+    case ABI_LINUX_S390:
+      /* Call-saved registers.  */
+      if ((regnum >= S390_R6_REGNUM && regnum <= S390_R15_REGNUM)
+	  || regnum == S390_F4_REGNUM
+	  || regnum == S390_F6_REGNUM)
+	reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+
+      /* Call-clobbered registers.  */
+      else if ((regnum >= S390_R0_REGNUM && regnum <= S390_R5_REGNUM)
+	       || (regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM
+		   && regnum != S390_F4_REGNUM && regnum != S390_F6_REGNUM))
+	reg->how = DWARF2_FRAME_REG_UNDEFINED;
+
+      /* The return address column.  */
+      else if (regnum == S390_PC_REGNUM)
+	reg->how = DWARF2_FRAME_REG_RA;
+      break;
+
+    case ABI_LINUX_ZSERIES:
+      /* Call-saved registers.  */
+      if ((regnum >= S390_R6_REGNUM && regnum <= S390_R15_REGNUM)
+	  || (regnum >= S390_F8_REGNUM && regnum <= S390_F15_REGNUM))
+	reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+
+      /* Call-clobbered registers.  */
+      else if ((regnum >= S390_R0_REGNUM && regnum <= S390_R5_REGNUM)
+	       || (regnum >= S390_F0_REGNUM && regnum <= S390_F7_REGNUM))
+	reg->how = DWARF2_FRAME_REG_UNDEFINED;
+
+      /* The return address column.  */
+      else if (regnum == S390_PC_REGNUM)
+	reg->how = DWARF2_FRAME_REG_RA;
+      break;
+    }
+}
+
+
 /* Dummy function calls.  */
 
 /* Return non-zero if TYPE is an integer-like type, zero otherwise.
@@ -2977,6 +3025,9 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Frame handling.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
+  dwarf2_frame_set_init_reg (gdbarch, s390_dwarf2_frame_init_reg);
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
   frame_unwind_append_sniffer (gdbarch, s390_pltstub_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, s390_sigtramp_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, s390_frame_sniffer);

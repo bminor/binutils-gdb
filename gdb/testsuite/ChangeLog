@@ -1,6 +1,90 @@
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.cp/ctti.exp: Handle unsigned char type.  Expect templates
+	to use unsigned char.
+	* gdb.cp/cttiadd.c, gdb.cp/cttiadd1.c, gdb.cp/cttiadd2.c,
+	gdb.cp/cttiadd3.c: Change type of variable to unsigned char.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/gdbserver.exp (gdbserver_gdb_load): Wait for a complete
+	line of output.
+
+2004-02-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/relocate.c (dummy): Initialize.
+
+2004-02-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/chng-syms.exp: Anchor exit pattern.  Allow
+	a breakpoint at exit.
+
+2004-02-27  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/chng-syms.exp: Add expect condition to match failing
+	case that isn't a timeout.
+
+2004-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/bigcore.exp: Disable on HP/UX, no sparse corefile
+	support.
+
+2004-02-26  Fred Fish  <fnf@redhat.com>
+  
+	* gdb.arch/gdb1431.c: Remove.
+	* gdb.arch/gdb1431.s: New file, copy of gdb1291.s
+	* gdb.arch/gdb1431.exp: Use "advance" correctly instead
+	of "until" incorrectly.
+
+2004-02-26  J. Brobecker  <brobecker@gnat.com>
+
+	* gdb.cp/class2.cc (empty): New class.
+	(refer): New function.
+	(main): Declare an object of type empty and use it.
+	* gdb.cp/class2.exp: Print the value of an object of type empty.
+
+2004-02-26  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.base/langs.exp: Update query string to match the
+	new nquery format used for pending breakpoints.
+
+2004-02-26  Andrew Cagney  <cagney@redhat.com>
+
+	Fix PR i18n/1570.
+	* gdb.base/charset.c: Update copyright notice.
+	(main, init_string): Remove the escape character '\e' tests.
+	* gdb.base/printcmds.exp (test_print_all_chars): Ditto.
+	* gdb.base/charset.exp (valid_host_charset): Ditto.
+	* gdb.base/setvar.exp: Ditto.
+
+2004-02-24  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/corefile.exp: Use gdb_test_multiple, make "accessing
+	mmapped data in core file" PASS and FAIL messages consistent.
+
+	* gdb.java/jmisc.exp: Use the fully quallified name of "main" when
+	setting a breakpoint.  Work around PR java/1565.
+
+2004-02-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* lib/gdb.exp (gdb_breakpoint): Update query string to match
+	new nquery format.
+	* gdb.base/pending.exp: Ditto.
+
+2004-02-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Run stabs tests on *BSD.
+	* configure: Regenerated.
+
 2004-02-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/bigcore.exp: Bail out on *BSD instead of only NetBSD.
+
+2004-02-20  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls): Remove extraneous
+	blank in test for "returns short", for consistency with other
+	"returns xxx" tests.  Update copyright year.
 
 2004-02-19  Fred Fish  <fnf@redhat.com>
 

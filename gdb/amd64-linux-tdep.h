@@ -1,8 +1,8 @@
-/* Definitions to target GDB to GNU/Linux on x86-64.
+/* Target-dependent definitions for GNU/Linux x86-64.
 
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004  Free Software Foundation, Inc.
 
-   Contributed by Michal Ludvig, SuSE Labs.
+   Contributed by Michal Ludvig, SuSE AG.
 
    This file is part of GDB.
 
@@ -21,16 +21,18 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef TM_X86_64LINUX_H
-#define TM_X86_64LINUX_H
+#ifndef AMD64_LINUX_TDEP_H
+#define AMD64_LINUX_TDEP_H
 
-/* We define SVR4_SHARED_LIBS unconditionally, on the assumption that
-   link.h is available on all linux platforms.  For I386 and SH3/4, we
-   hard-code the information rather than use link.h anyway (for the
-   benefit of cross-debugging).  We may move to doing that for other
-   architectures as well.  */
+/* Fill GDB's register array with the general-purpose register values
+   in *GREGSETP.  */
 
-#define SVR4_SHARED_LIBS
-#include "solib.h"              /* Support for shared libraries. */
+void amd64_linux_supply_gregset (char *regp);
 
-#endif /* #ifndef TM_X86_64LINUX_H */
+/* Fill register REGNO (if it is a general-purpose register) in
+   *GREGSETPS with the value in GDB's register array.  If REGNO is -1,
+   do this for all registers.  */
+
+void amd64_linux_fill_gregset (char *regp, int regno);
+
+#endif /* amd64-linux-tdep.h */

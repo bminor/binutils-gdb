@@ -405,6 +405,8 @@ extern void null_cleanup (void *);
 extern int myread (int, char *, int);
 
 extern int query (const char *, ...) ATTR_FORMAT (printf, 1, 2);
+extern int nquery (const char *, ...) ATTR_FORMAT (printf, 1, 2);
+extern int yquery (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
 extern void init_page_info (void);
 

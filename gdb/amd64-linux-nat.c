@@ -47,15 +47,15 @@
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 
-#include "x86-64-tdep.h"
-#include "x86-64-linux-tdep.h"
+#include "amd64-tdep.h"
+#include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
 #include "amd64-nat.h"
 
 /* Mapping between the general-purpose registers in GNU/Linux x86-64
    `struct user' format and GDB's register cache layout.  */
 
-static int x86_64_linux_gregset64_reg_offset[] =
+static int amd64_linux_gregset64_reg_offset[] =
 {
   RAX * 8, RBX * 8,		/* %rax, %rbx */
   RCX * 8, RDX * 8,		/* %rcx, %rdx */
@@ -81,20 +81,20 @@ static int x86_64_linux_gregset64_reg_offset[] =
    little-endian we get away with that.  */
 
 /* From <sys/reg.h> on GNU/Linux i386.  */
-static int x86_64_linux_gregset32_reg_offset[] =
+static int amd64_linux_gregset32_reg_offset[] =
 {
-  10 * 8, 11 * 8,		/* %eax, %ecx */
-  12 * 8, 13 * 8,		/* %edx, %ebx */
-  19 * 8, 4 * 8,		/* %esp, %ebp */
-  13 * 8, 14 * 8,		/* %esi, %edi */
-  16 * 8, 18 * 8,		/* %eip, %eflags */
-  17 * 8, 20 * 8,		/* %cs, %ss */
-  23 * 8, 24 * 8,		/* %ds, %es */
-  25 * 4, 26 * 4,		/* %fs, %gs */
+  RAX * 8, RCX * 8,		/* %eax, %ecx */
+  RDX * 8, RBX * 8,		/* %edx, %ebx */
+  RSP * 8, RBP * 8,		/* %esp, %ebp */
+  RSI * 8, RDI * 8,		/* %esi, %edi */
+  RIP * 8, EFLAGS * 8,		/* %eip, %eflags */
+  CS * 8, SS * 8,		/* %cs, %ss */
+  DS * 8, ES * 8,		/* %ds, %es */
+  FS * 8, GS * 8,		/* %fs, %gs */
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1, -1,
-  15 * 8			/* "orig_eax" */
+  ORIG_RAX * 8			/* "orig_eax" */
 };
 
 /* Which ptrace request retrieves which registers?
@@ -166,7 +166,7 @@ store_regs (int tid, int regnum)
 void
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
-  x86_64_supply_fxsave (current_regcache, -1, fpregsetp);
+  amd64_supply_fxsave (current_regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
@@ -176,7 +176,7 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
 void
 fill_fpregset (elf_fpregset_t *fpregsetp, int regnum)
 {
-  x86_64_fill_fxsave ((char *) fpregsetp, regnum);
+  amd64_fill_fxsave ((char *) fpregsetp, regnum);
 }
 
 /* Fetch all floating-point registers from process/thread TID and store
@@ -277,7 +277,7 @@ store_inferior_registers (int regnum)
 
 
 static unsigned long
-x86_64_linux_dr_get (int regnum)
+amd64_linux_dr_get (int regnum)
 {
   int tid;
   unsigned long value;
@@ -306,7 +306,7 @@ x86_64_linux_dr_get (int regnum)
 }
 
 static void
-x86_64_linux_dr_set (int regnum, unsigned long value)
+amd64_linux_dr_set (int regnum, unsigned long value)
 {
   int tid;
 
@@ -322,59 +322,88 @@ x86_64_linux_dr_set (int regnum, unsigned long value)
 }
 
 void
-x86_64_linux_dr_set_control (unsigned long control)
+amd64_linux_dr_set_control (unsigned long control)
 {
-  x86_64_linux_dr_set (DR_CONTROL, control);
+  amd64_linux_dr_set (DR_CONTROL, control);
 }
 
 void
-x86_64_linux_dr_set_addr (int regnum, CORE_ADDR addr)
+amd64_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
   gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
 
-  x86_64_linux_dr_set (DR_FIRSTADDR + regnum, addr);
+  amd64_linux_dr_set (DR_FIRSTADDR + regnum, addr);
 }
 
 void
-x86_64_linux_dr_reset_addr (int regnum)
+amd64_linux_dr_reset_addr (int regnum)
 {
   gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
 
-  x86_64_linux_dr_set (DR_FIRSTADDR + regnum, 0L);
+  amd64_linux_dr_set (DR_FIRSTADDR + regnum, 0L);
 }
 
 unsigned long
-x86_64_linux_dr_get_status (void)
+amd64_linux_dr_get_status (void)
 {
-  return x86_64_linux_dr_get (DR_STATUS);
+  return amd64_linux_dr_get (DR_STATUS);
 }
 
+
+/* This function is called by libthread_db as part of its handling of
+   a request for a thread's local storage address.  */
 
 ps_err_e
 ps_get_thread_area (const struct ps_prochandle *ph,
                     lwpid_t lwpid, int idx, void **base)
 {
-/* This definition comes from prctl.h, but some kernels may not have it.  */
+  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+    {
+      /* The full structure is found in <asm-i386/ldt.h>.  The second
+	 integer is the LDT's base_address and that is used to locate
+	 the thread's local storage.  See i386-linux-nat.c more
+	 info.  */
+      unsigned int desc[4];
+
+      /* This code assumes that "int" is 32 bits and that
+	 GET_THREAD_AREA returns no more than 4 int values.  */
+      gdb_assert (sizeof (int) == 4);	
+#ifndef PTRACE_GET_THREAD_AREA
+#define PTRACE_GET_THREAD_AREA 25
+#endif
+      if  (ptrace (PTRACE_GET_THREAD_AREA, 
+		   lwpid, (void *) (long) idx, (unsigned long) &desc) < 0)
+	return PS_ERR;
+      
+      /* Extend the value to 64 bits.  Here it's assumed that a "long"
+	 and a "void *" are the same.  */
+      (*base) = (void *) (long) desc[1];
+      return PS_OK;
+    }
+  else
+    {
+      /* This definition comes from prctl.h, but some kernels may not
+         have it.  */
 #ifndef PTRACE_ARCH_PRCTL
 #define PTRACE_ARCH_PRCTL      30
 #endif
-
-  /* FIXME: ezannoni-2003-07-09 see comment above about include file order.
-     We could be getting bogus values for these two.  */
-  gdb_assert (FS < ELF_NGREG);
-  gdb_assert (GS < ELF_NGREG);
-  switch (idx)
-    {
-    case FS:
-      if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_FS) == 0)
-	return PS_OK;
-      break;
-    case GS:
-      if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_GS) == 0)
-	return PS_OK;
-      break;
-    default:                   /* Should not happen.  */
-      return PS_BADADDR;
+      /* FIXME: ezannoni-2003-07-09 see comment above about include
+	 file order.  We could be getting bogus values for these two.  */
+      gdb_assert (FS < ELF_NGREG);
+      gdb_assert (GS < ELF_NGREG);
+      switch (idx)
+	{
+	case FS:
+	  if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_FS) == 0)
+	    return PS_OK;
+	  break;
+	case GS:
+	  if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_GS) == 0)
+	    return PS_OK;
+	  break;
+	default:                   /* Should not happen.  */
+	  return PS_BADADDR;
+	}
     }
   return PS_ERR;               /* ptrace failed.  */
 }
@@ -389,17 +418,17 @@ child_post_startup_inferior (ptid_t ptid)
 
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_x86_64_linux_nat (void);
+void _initialize_amd64_linux_nat (void);
 
 void
-_initialize_x86_64_linux_nat (void)
+_initialize_amd64_linux_nat (void)
 {
-  amd64_native_gregset32_reg_offset = x86_64_linux_gregset32_reg_offset;
+  amd64_native_gregset32_reg_offset = amd64_linux_gregset32_reg_offset;
   amd64_native_gregset32_num_regs = I386_LINUX_NUM_REGS;
-  amd64_native_gregset64_reg_offset = x86_64_linux_gregset64_reg_offset;
+  amd64_native_gregset64_reg_offset = amd64_linux_gregset64_reg_offset;
 
-  gdb_assert (ARRAY_SIZE (x86_64_linux_gregset32_reg_offset)
+  gdb_assert (ARRAY_SIZE (amd64_linux_gregset32_reg_offset)
 	      == amd64_native_gregset32_num_regs);
-  gdb_assert (ARRAY_SIZE (x86_64_linux_gregset64_reg_offset)
+  gdb_assert (ARRAY_SIZE (amd64_linux_gregset64_reg_offset)
 	      == amd64_native_gregset64_num_regs);
 }

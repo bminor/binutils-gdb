@@ -1,5 +1,5 @@
 /* GNU/Linux/ARM specific low level interface, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -47,11 +47,15 @@ arm_cannot_fetch_register (int regno)
   return (regno >= arm_num_regs);
 }
 
+extern int debug_threads;
+
 static CORE_ADDR
 arm_get_pc ()
 {
   unsigned long pc;
   collect_register_by_name ("pc", &pc);
+  if (debug_threads)
+    fprintf (stderr, "stop pc is %08lx\n", pc);
   return pc;
 }
 

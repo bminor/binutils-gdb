@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 6.0:
+*** Changes since GDB 6.1:
+
+*** Changes in GDB 6.1:
 
 * Removed --with-mmalloc
 
@@ -83,6 +85,7 @@ HP/PA running BSD				hppa*-*-bsd*
 HP/PA running OSF/1				hppa*-*-osf*
 HP/PA Pro target				hppa*-*-pro*
 PMAX (MIPS) running Mach 3.0			mips*-*-mach3*
+386BSD						i[3456]86-*-bsd*
 Sequent family					i[3456]86-sequent-sysv4*
 						i[3456]86-sequent-sysv*
 						i[3456]86-sequent-bsd*

@@ -1,4 +1,4 @@
-# Copyright 2003 Free Software Foundation, Inc.
+# Copyright 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,9 @@
 # This file is part of the gdb testsuite.
 
 # Tests for PR:1431.  Catch gdb not continuing to second function properly.
+# Note that originally this bug was reported as a problem with the "until"
+# command, which actually is behaving as currently defined.  What apparently
+# was expected was the behavior of the newer "advance" command.
 
 if $tracelevel {
     strace $tracelevel
@@ -36,9 +39,9 @@ if ![istarget "sh-*-*"] then {
 }
 
 set testfile "gdb1431"
-set srcfile ${testfile}.c
+set srcfile ${testfile}.s
 set binfile ${objdir}/${subdir}/${testfile}
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable ""] != "" } {
     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
@@ -55,12 +58,6 @@ if ![runto_main] then {
     gdb_suppress_tests
 }
 
-gdb_test "u sub1" "sub1*" "get to sub1"
-gdb_test "bt" "#0\[ \t\]*$hex \\(\\) at sh-bt.*\r\n#1\[ \t\]*$hex in main.*" \
-	"backtrace in gdb1291"
-
-kfail "gdb/1431" "u sub2"
-# This is what we would expect to be able to do:
-#gdb_test "u sub2" "sub2*" "get to sub2"
-#gdb_test "bt" "#0\[ \t\]*$hex \\(\\) at sh-bt.*\r\n#1\[ \t\]*$hex in main.*" \
-#	"backtrace in gdb1291"
+gdb_test "advance sub1" "hello world\r\n$hex in sub1 \\(\\)" "get to sub1"
+gdb_test "advance sub2" "$hex in main \\(\\)" "advance returns from sub1 frame"
+gdb_test "advance sub2" "$hex in sub2 \\(\\)" "get to sub2"

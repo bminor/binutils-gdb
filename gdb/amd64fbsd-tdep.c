@@ -28,7 +28,8 @@
 
 #include "gdb_string.h"
 
-#include "x86-64-tdep.h"
+#include "amd64-tdep.h"
+#include "solib-svr4.h"
 
 /* Support for signal handlers.  */
 
@@ -43,7 +44,7 @@ amd64fbsd_sigcontext_addr (struct frame_info *next_frame)
   /* The `struct sigcontext' (which really is an `ucontext_t' on
      FreeBSD/amd64) lives at a fixed offset in the signal frame.  See
      <machine/sigframe.h>.  */
-  sp = frame_unwind_register_unsigned (next_frame, X86_64_RSP_REGNUM);
+  sp = frame_unwind_register_unsigned (next_frame, AMD64_RSP_REGNUM);
   return sp + 16;
 }
 
@@ -85,8 +86,8 @@ static int amd64fbsd_r_reg_offset[] =
 };
 
 /* Location of the signal trampoline.  */
-CORE_ADDR amd64fbsd_sigtramp_start = 0x7fffffffffc0;
-CORE_ADDR amd64fbsd_sigtramp_end = 0x7fffffffffe0;
+CORE_ADDR amd64fbsd_sigtramp_start_addr = 0x7fffffffffc0;
+CORE_ADDR amd64fbsd_sigtramp_end_addr = 0x7fffffffffe0;
 
 /* From <machine/signal.h>.  */
 int amd64fbsd_sc_reg_offset[] =
@@ -129,13 +130,17 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (amd64fbsd_r_reg_offset);
   tdep->sizeof_gregset = 22 * 8;
 
-  x86_64_init_abi (info, gdbarch);
+  amd64_init_abi (info, gdbarch);
 
-  tdep->sigtramp_start = amd64fbsd_sigtramp_start;
-  tdep->sigtramp_end = amd64fbsd_sigtramp_end;
+  tdep->sigtramp_start = amd64fbsd_sigtramp_start_addr;
+  tdep->sigtramp_end = amd64fbsd_sigtramp_end_addr;
   tdep->sigcontext_addr = amd64fbsd_sigcontext_addr;
   tdep->sc_reg_offset = amd64fbsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (amd64fbsd_sc_reg_offset);
+
+  /* FreeBSD uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
 
 

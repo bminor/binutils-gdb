@@ -27,7 +27,7 @@ template<class T> T add2(T v1, T v2)
 
 void subr2()
 {
-  char c;
+  unsigned char c;
   int i;
   float f;
   

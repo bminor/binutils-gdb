@@ -860,6 +860,24 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_ignore_discarded_relocs)
     (asection *);
 
+  /* These functions tell elf-eh-frame whether to attempt to turn
+     absolute or lsda encodings into pc-relative ones.  The default
+     definition enables these transformations.  */
+  bfd_boolean (*elf_backend_can_make_relative_eh_frame)
+     (bfd *, struct bfd_link_info *, asection *);
+  bfd_boolean (*elf_backend_can_make_lsda_relative_eh_frame)
+     (bfd *, struct bfd_link_info *, asection *);
+
+  /* This function returns an encoding after computing the encoded
+     value (and storing it in ENCODED) for the given OFFSET into OSEC,
+     to be stored in at LOC_OFFSET into the LOC_SEC input section.
+     The default definition chooses a 32-bit PC-relative encoding.  */
+  bfd_byte (*elf_backend_encode_eh_address)
+     (bfd *abfd, struct bfd_link_info *info,
+      asection *osec, bfd_vma offset,
+      asection *loc_sec, bfd_vma loc_offset,
+      bfd_vma *encoded);
+
   /* This function, if defined, may write out the given section.
      Returns TRUE if it did so and FALSE if the caller should.  */
   bfd_boolean (*elf_backend_write_section)
@@ -1301,6 +1319,12 @@ extern void _bfd_elf_sprintf_vma
 extern void _bfd_elf_fprintf_vma
   (bfd *, void *, bfd_vma);
 
+extern bfd_byte _bfd_elf_encode_eh_address
+  (bfd *abfd, struct bfd_link_info *info, asection *osec, bfd_vma offset,
+   asection *loc_sec, bfd_vma loc_offset, bfd_vma *encoded);
+extern bfd_boolean _bfd_elf_can_make_relative
+  (bfd *input_bfd, struct bfd_link_info *info, asection *eh_frame_section);
+
 extern enum elf_reloc_type_class _bfd_elf_reloc_type_class
   (const Elf_Internal_Rela *);
 extern bfd_vma _bfd_elf_rela_local_sym
@@ -1522,6 +1546,9 @@ extern bfd_boolean _bfd_elf_dynamic_symbol_p
 
 extern bfd_boolean _bfd_elf_symbol_refs_local_p
   (struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean);
+
+extern bfd_boolean _bfd_elf_link_add_archive_symbols
+  (bfd *, struct bfd_link_info *);
 
 extern const bfd_target *bfd_elf32_object_p
   (bfd *);

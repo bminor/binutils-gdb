@@ -275,7 +275,7 @@ proc gdb_breakpoint { function } {
 	-re "Breakpoint \[0-9\]* at .*: file .*, line $decimal.\r\n$gdb_prompt $" {}
 	-re "Breakpoint \[0-9\]*: file .*, line $decimal.\r\n$gdb_prompt $" {}
 	-re "Breakpoint \[0-9\]* at .*$gdb_prompt $" {}
-	-re "Make breakpoint pending.*y or n. $" { 
+	-re "Make breakpoint pending.*y or \\\[n\\\]. $" { 
 		send_gdb "n\n"
 		exp_continue
 	}

@@ -1,6 +1,8 @@
-/* Native-dependent definitions for Intel 386 running BSD Unix, for GDB.
-   Copyright 1986, 1987, 1989, 1992, 1993, 2000
-   Free Software Foundation, Inc.
+/* Target-dependent definitions for GNU/Linux x86-64.
+
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+
+   Contributed by Michal Ludvig, SuSE Labs.
 
    This file is part of GDB.
 
@@ -19,20 +21,16 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef NM_I386BSD_H
-#define NM_I386BSD_H
+#ifndef TM_LINUX64_H
+#define TM_LINUX64_H
 
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
+/* We define SVR4_SHARED_LIBS unconditionally, on the assumption that
+   link.h is available on all linux platforms.  For I386 and SH3/4, we
+   hard-code the information rather than use link.h anyway (for the
+   benefit of cross-debugging).  We may move to doing that for other
+   architectures as well.  */
 
-#include <machine/vmparam.h>
-#define KERNEL_U_ADDR USRSTACK
+#define SVR4_SHARED_LIBS
+#include "solib.h"              /* Support for shared libraries. */
 
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-	(addr) = i386_register_u_addr ((blockend),(regno));
-
-extern int i386_register_u_addr (int, int);
-
-#define PTRACE_ARG3_TYPE char*
-
-#endif /* NM_I386BSD_H */
+#endif /* tm-linux64.h */

@@ -23,8 +23,6 @@
 #include "safe-ctype.h"
 
 static bfd_boolean elf_link_add_object_symbols (bfd *, struct bfd_link_info *);
-static bfd_boolean elf_link_add_archive_symbols (bfd *,
-						 struct bfd_link_info *);
 static bfd_boolean elf_finalize_dynstr (bfd *, struct bfd_link_info *);
 static bfd_boolean elf_collect_hash_codes (struct elf_link_hash_entry *,
 					   void *);
@@ -41,355 +39,33 @@ elf_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
     case bfd_object:
       return elf_link_add_object_symbols (abfd, info);
     case bfd_archive:
-      return elf_link_add_archive_symbols (abfd, info);
+      return _bfd_elf_link_add_archive_symbols (abfd, info);
     default:
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;
     }
 }
 
-/* Return TRUE iff this is a non-common, definition of a non-function symbol.  */
-static bfd_boolean
-is_global_data_symbol_definition (bfd *abfd ATTRIBUTE_UNUSED,
-				  Elf_Internal_Sym *sym)
+/* Sort symbol by value and section.  */
+static int
+sort_symbol (const void *arg1, const void *arg2)
 {
-  /* Local symbols do not count, but target specific ones might.  */
-  if (ELF_ST_BIND (sym->st_info) != STB_GLOBAL
-      && ELF_ST_BIND (sym->st_info) < STB_LOOS)
-    return FALSE;
+  const struct elf_link_hash_entry *h1
+    = *(const struct elf_link_hash_entry **) arg1;
+  const struct elf_link_hash_entry *h2
+    = *(const struct elf_link_hash_entry **) arg2;
+  bfd_signed_vma vdiff = h1->root.u.def.value - h2->root.u.def.value;
 
-  /* Function symbols do not count.  */
-  if (ELF_ST_TYPE (sym->st_info) == STT_FUNC)
-    return FALSE;
-
-  /* If the section is undefined, then so is the symbol.  */
-  if (sym->st_shndx == SHN_UNDEF)
-    return FALSE;
-
-  /* If the symbol is defined in the common section, then
-     it is a common definition and so does not count.  */
-  if (sym->st_shndx == SHN_COMMON)
-    return FALSE;
-
-  /* If the symbol is in a target specific section then we
-     must rely upon the backend to tell us what it is.  */
-  if (sym->st_shndx >= SHN_LORESERVE && sym->st_shndx < SHN_ABS)
-    /* FIXME - this function is not coded yet:
-
-       return _bfd_is_global_symbol_definition (abfd, sym);
-
-       Instead for now assume that the definition is not global,
-       Even if this is wrong, at least the linker will behave
-       in the same way that it used to do.  */
-    return FALSE;
-
-  return TRUE;
-}
-
-/* Search the symbol table of the archive element of the archive ABFD
-   whose archive map contains a mention of SYMDEF, and determine if
-   the symbol is defined in this element.  */
-static bfd_boolean
-elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
-{
-  Elf_Internal_Shdr * hdr;
-  bfd_size_type symcount;
-  bfd_size_type extsymcount;
-  bfd_size_type extsymoff;
-  Elf_Internal_Sym *isymbuf;
-  Elf_Internal_Sym *isym;
-  Elf_Internal_Sym *isymend;
-  bfd_boolean result;
-
-  abfd = _bfd_get_elt_at_filepos (abfd, symdef->file_offset);
-  if (abfd == NULL)
-    return FALSE;
-
-  if (! bfd_check_format (abfd, bfd_object))
-    return FALSE;
-
-  /* If we have already included the element containing this symbol in the
-     link then we do not need to include it again.  Just claim that any symbol
-     it contains is not a definition, so that our caller will not decide to
-     (re)include this element.  */
-  if (abfd->archive_pass)
-    return FALSE;
-
-  /* Select the appropriate symbol table.  */
-  if ((abfd->flags & DYNAMIC) == 0 || elf_dynsymtab (abfd) == 0)
-    hdr = &elf_tdata (abfd)->symtab_hdr;
-  else
-    hdr = &elf_tdata (abfd)->dynsymtab_hdr;
-
-  symcount = hdr->sh_size / sizeof (Elf_External_Sym);
-
-  /* The sh_info field of the symtab header tells us where the
-     external symbols start.  We don't care about the local symbols.  */
-  if (elf_bad_symtab (abfd))
-    {
-      extsymcount = symcount;
-      extsymoff = 0;
-    }
+  if (vdiff)
+    return vdiff > 0 ? 1 : -1;
   else
     {
-      extsymcount = symcount - hdr->sh_info;
-      extsymoff = hdr->sh_info;
+      long sdiff = h1->root.u.def.section - h2->root.u.def.section;
+      if (sdiff)
+	return sdiff > 0 ? 1 : -1;
+      else
+	return 0;
     }
-
-  if (extsymcount == 0)
-    return FALSE;
-
-  /* Read in the symbol table.  */
-  isymbuf = bfd_elf_get_elf_syms (abfd, hdr, extsymcount, extsymoff,
-				  NULL, NULL, NULL);
-  if (isymbuf == NULL)
-    return FALSE;
-
-  /* Scan the symbol table looking for SYMDEF.  */
-  result = FALSE;
-  for (isym = isymbuf, isymend = isymbuf + extsymcount; isym < isymend; isym++)
-    {
-      const char *name;
-
-      name = bfd_elf_string_from_elf_section (abfd, hdr->sh_link,
-					      isym->st_name);
-      if (name == NULL)
-	break;
-
-      if (strcmp (name, symdef->name) == 0)
-	{
-	  result = is_global_data_symbol_definition (abfd, isym);
-	  break;
-	}
-    }
-
-  free (isymbuf);
-
-  return result;
-}
-
-/* Add symbols from an ELF archive file to the linker hash table.  We
-   don't use _bfd_generic_link_add_archive_symbols because of a
-   problem which arises on UnixWare.  The UnixWare libc.so is an
-   archive which includes an entry libc.so.1 which defines a bunch of
-   symbols.  The libc.so archive also includes a number of other
-   object files, which also define symbols, some of which are the same
-   as those defined in libc.so.1.  Correct linking requires that we
-   consider each object file in turn, and include it if it defines any
-   symbols we need.  _bfd_generic_link_add_archive_symbols does not do
-   this; it looks through the list of undefined symbols, and includes
-   any object file which defines them.  When this algorithm is used on
-   UnixWare, it winds up pulling in libc.so.1 early and defining a
-   bunch of symbols.  This means that some of the other objects in the
-   archive are not included in the link, which is incorrect since they
-   precede libc.so.1 in the archive.
-
-   Fortunately, ELF archive handling is simpler than that done by
-   _bfd_generic_link_add_archive_symbols, which has to allow for a.out
-   oddities.  In ELF, if we find a symbol in the archive map, and the
-   symbol is currently undefined, we know that we must pull in that
-   object file.
-
-   Unfortunately, we do have to make multiple passes over the symbol
-   table until nothing further is resolved.  */
-
-static bfd_boolean
-elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
-{
-  symindex c;
-  bfd_boolean *defined = NULL;
-  bfd_boolean *included = NULL;
-  carsym *symdefs;
-  bfd_boolean loop;
-  bfd_size_type amt;
-
-  if (! bfd_has_map (abfd))
-    {
-      /* An empty archive is a special case.  */
-      if (bfd_openr_next_archived_file (abfd, NULL) == NULL)
-	return TRUE;
-      bfd_set_error (bfd_error_no_armap);
-      return FALSE;
-    }
-
-  /* Keep track of all symbols we know to be already defined, and all
-     files we know to be already included.  This is to speed up the
-     second and subsequent passes.  */
-  c = bfd_ardata (abfd)->symdef_count;
-  if (c == 0)
-    return TRUE;
-  amt = c;
-  amt *= sizeof (bfd_boolean);
-  defined = bfd_zmalloc (amt);
-  included = bfd_zmalloc (amt);
-  if (defined == NULL || included == NULL)
-    goto error_return;
-
-  symdefs = bfd_ardata (abfd)->symdefs;
-
-  do
-    {
-      file_ptr last;
-      symindex i;
-      carsym *symdef;
-      carsym *symdefend;
-
-      loop = FALSE;
-      last = -1;
-
-      symdef = symdefs;
-      symdefend = symdef + c;
-      for (i = 0; symdef < symdefend; symdef++, i++)
-	{
-	  struct elf_link_hash_entry *h;
-	  bfd *element;
-	  struct bfd_link_hash_entry *undefs_tail;
-	  symindex mark;
-
-	  if (defined[i] || included[i])
-	    continue;
-	  if (symdef->file_offset == last)
-	    {
-	      included[i] = TRUE;
-	      continue;
-	    }
-
-	  h = elf_link_hash_lookup (elf_hash_table (info), symdef->name,
-				    FALSE, FALSE, FALSE);
-
-	  if (h == NULL)
-	    {
-	      char *p, *copy;
-	      size_t len, first;
-
-	      /* If this is a default version (the name contains @@),
-		 look up the symbol again with only one `@' as well
-		 as without the version.  The effect is that references
-		 to the symbol with and without the version will be
-		 matched by the default symbol in the archive.  */
-
-	      p = strchr (symdef->name, ELF_VER_CHR);
-	      if (p == NULL || p[1] != ELF_VER_CHR)
-		continue;
-
-	      /* First check with only one `@'.  */
-	      len = strlen (symdef->name);
-	      copy = bfd_alloc (abfd, len);
-	      if (copy == NULL)
-		goto error_return;
-	      first = p - symdef->name + 1;
-	      memcpy (copy, symdef->name, first);
-	      memcpy (copy + first, symdef->name + first + 1, len - first);
-
-	      h = elf_link_hash_lookup (elf_hash_table (info), copy,
-					FALSE, FALSE, FALSE);
-
-	      if (h == NULL)
-		{
-		  /* We also need to check references to the symbol
-		     without the version.  */
-
-		  copy[first - 1] = '\0';
-		  h = elf_link_hash_lookup (elf_hash_table (info),
-					    copy, FALSE, FALSE, FALSE);
-		}
-
-	      bfd_release (abfd, copy);
-	    }
-
-	  if (h == NULL)
-	    continue;
-
-	  if (h->root.type == bfd_link_hash_common)
-	    {
-	      /* We currently have a common symbol.  The archive map contains
-		 a reference to this symbol, so we may want to include it.  We
-		 only want to include it however, if this archive element
-		 contains a definition of the symbol, not just another common
-		 declaration of it.
-
-		 Unfortunately some archivers (including GNU ar) will put
-		 declarations of common symbols into their archive maps, as
-		 well as real definitions, so we cannot just go by the archive
-		 map alone.  Instead we must read in the element's symbol
-		 table and check that to see what kind of symbol definition
-		 this is.  */
-	      if (! elf_link_is_defined_archive_symbol (abfd, symdef))
-		continue;
-	    }
-	  else if (h->root.type != bfd_link_hash_undefined)
-	    {
-	      if (h->root.type != bfd_link_hash_undefweak)
-		defined[i] = TRUE;
-	      continue;
-	    }
-
-	  /* We need to include this archive member.  */
-	  element = _bfd_get_elt_at_filepos (abfd, symdef->file_offset);
-	  if (element == NULL)
-	    goto error_return;
-
-	  if (! bfd_check_format (element, bfd_object))
-	    goto error_return;
-
-	  /* Doublecheck that we have not included this object
-	     already--it should be impossible, but there may be
-	     something wrong with the archive.  */
-	  if (element->archive_pass != 0)
-	    {
-	      bfd_set_error (bfd_error_bad_value);
-	      goto error_return;
-	    }
-	  element->archive_pass = 1;
-
-	  undefs_tail = info->hash->undefs_tail;
-
-	  if (! (*info->callbacks->add_archive_element) (info, element,
-							 symdef->name))
-	    goto error_return;
-	  if (! elf_link_add_object_symbols (element, info))
-	    goto error_return;
-
-	  /* If there are any new undefined symbols, we need to make
-	     another pass through the archive in order to see whether
-	     they can be defined.  FIXME: This isn't perfect, because
-	     common symbols wind up on undefs_tail and because an
-	     undefined symbol which is defined later on in this pass
-	     does not require another pass.  This isn't a bug, but it
-	     does make the code less efficient than it could be.  */
-	  if (undefs_tail != info->hash->undefs_tail)
-	    loop = TRUE;
-
-	  /* Look backward to mark all symbols from this object file
-	     which we have already seen in this pass.  */
-	  mark = i;
-	  do
-	    {
-	      included[mark] = TRUE;
-	      if (mark == 0)
-		break;
-	      --mark;
-	    }
-	  while (symdefs[mark].file_offset == symdef->file_offset);
-
-	  /* We mark subsequent symbols from this object file as we go
-	     on through the loop.  */
-	  last = symdef->file_offset;
-	}
-    }
-  while (loop);
-
-  free (defined);
-  free (included);
-
-  return TRUE;
-
- error_return:
-  if (defined != NULL)
-    free (defined);
-  if (included != NULL)
-    free (included);
-  return FALSE;
 }
 
 /* Add symbols from an ELF object file to the linker hash table.  */
@@ -1493,63 +1169,132 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      assembler code, handling it correctly would be very time
      consuming, and other ELF linkers don't handle general aliasing
      either.  */
-  while (weaks != NULL)
+  if (weaks != NULL)
     {
-      struct elf_link_hash_entry *hlook;
-      asection *slook;
-      bfd_vma vlook;
       struct elf_link_hash_entry **hpp;
       struct elf_link_hash_entry **hppend;
+      struct elf_link_hash_entry **sorted_sym_hash;
+      struct elf_link_hash_entry *h;
+      size_t sym_count;
 
-      hlook = weaks;
-      weaks = hlook->weakdef;
-      hlook->weakdef = NULL;
-
-      BFD_ASSERT (hlook->root.type == bfd_link_hash_defined
-		  || hlook->root.type == bfd_link_hash_defweak
-		  || hlook->root.type == bfd_link_hash_common
-		  || hlook->root.type == bfd_link_hash_indirect);
-      slook = hlook->root.u.def.section;
-      vlook = hlook->root.u.def.value;
-
+      /* Since we have to search the whole symbol list for each weak
+	 defined symbol, search time for N weak defined symbols will be
+	 O(N^2). Binary search will cut it down to O(NlogN).  */
+      amt = extsymcount * sizeof (struct elf_link_hash_entry *);
+      sorted_sym_hash = bfd_malloc (amt);
+      if (sorted_sym_hash == NULL)
+	goto error_return;
+      sym_hash = sorted_sym_hash;
       hpp = elf_sym_hashes (abfd);
       hppend = hpp + extsymcount;
+      sym_count = 0;
       for (; hpp < hppend; hpp++)
 	{
-	  struct elf_link_hash_entry *h;
-
 	  h = *hpp;
-	  if (h != NULL && h != hlook
+	  if (h != NULL
 	      && h->root.type == bfd_link_hash_defined
-	      && h->root.u.def.section == slook
-	      && h->root.u.def.value == vlook)
+	      && h->type != STT_FUNC)
 	    {
-	      hlook->weakdef = h;
-
-	      /* If the weak definition is in the list of dynamic
-		 symbols, make sure the real definition is put there
-		 as well.  */
-	      if (hlook->dynindx != -1
-		  && h->dynindx == -1)
-		{
-		  if (! _bfd_elf_link_record_dynamic_symbol (info, h))
-		    goto error_return;
-		}
-
-	      /* If the real definition is in the list of dynamic
-		 symbols, make sure the weak definition is put there
-		 as well.  If we don't do this, then the dynamic
-		 loader might not merge the entries for the real
-		 definition and the weak definition.  */
-	      if (h->dynindx != -1
-		  && hlook->dynindx == -1)
-		{
-		  if (! _bfd_elf_link_record_dynamic_symbol (info, hlook))
-		    goto error_return;
-		}
-	      break;
+	      *sym_hash = h;
+	      sym_hash++;
+	      sym_count++;
 	    }
 	}
+
+      qsort (sorted_sym_hash, sym_count,
+	     sizeof (struct elf_link_hash_entry *),
+	     sort_symbol);
+
+      while (weaks != NULL)
+	{
+	  struct elf_link_hash_entry *hlook;
+	  asection *slook;
+	  bfd_vma vlook;
+	  long ilook;
+	  size_t i, j, idx;
+
+	  hlook = weaks;
+	  weaks = hlook->weakdef;
+	  hlook->weakdef = NULL;
+
+	  BFD_ASSERT (hlook->root.type == bfd_link_hash_defined
+		      || hlook->root.type == bfd_link_hash_defweak
+		      || hlook->root.type == bfd_link_hash_common
+		      || hlook->root.type == bfd_link_hash_indirect);
+	  slook = hlook->root.u.def.section;
+	  vlook = hlook->root.u.def.value;
+
+	  ilook = -1;
+	  i = 0;
+	  j = sym_count;
+	  while (i < j)
+	    {
+	      bfd_signed_vma vdiff;
+	      idx = (i + j) / 2;
+	      h = sorted_sym_hash [idx];
+	      vdiff = vlook - h->root.u.def.value;
+	      if (vdiff < 0)
+		j = idx;
+	      else if (vdiff > 0)
+		i = idx + 1;
+	      else
+		{
+		  long sdiff = slook - h->root.u.def.section;
+		  if (sdiff < 0)
+		    j = idx;
+		  else if (sdiff > 0)
+		    i = idx + 1;
+		  else
+		    {
+		      ilook = idx;
+		      break;
+		    }
+		}
+	    }
+
+	  /* We didn't find a value/section match.  */
+	  if (ilook == -1)
+	    continue;
+
+	  for (i = ilook; i < sym_count; i++)
+	    {
+	      h = sorted_sym_hash [i];
+
+	      /* Stop if value or section doesn't match.  */
+	      if (h->root.u.def.value != vlook
+		  || h->root.u.def.section != slook)
+		break;
+	      else if (h != hlook)
+		{
+		  hlook->weakdef = h;
+
+		  /* If the weak definition is in the list of dynamic
+		     symbols, make sure the real definition is put
+		     there as well.  */
+		  if (hlook->dynindx != -1 && h->dynindx == -1)
+		    {
+		      if (! _bfd_elf_link_record_dynamic_symbol (info,
+								 h))
+			goto error_return;
+		    }
+
+		  /* If the real definition is in the list of dynamic
+		     symbols, make sure the weak definition is put
+		     there as well.  If we don't do this, then the
+		     dynamic loader might not merge the entries for the
+		     real definition and the weak definition.  */
+		  if (h->dynindx != -1 && hlook->dynindx == -1)
+		    {
+		      if (! _bfd_elf_link_record_dynamic_symbol (info,
+								 hlook))
+			goto error_return;
+		    }
+		  break;
+		}
+	    }
+	}
+
+      free (sorted_sym_hash);
     }
 
   /* If this object is the same format as the output object, and it is
@@ -2432,6 +2177,11 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
       if ((info->new_dtags && info->flags) || (info->flags & DF_STATIC_TLS))
 	{
 	  if (! elf_add_dynamic_entry (info, DT_FLAGS, info->flags))
+	    return FALSE;
+	}
+      else if (info->flags & DF_BIND_NOW)
+	{
+	  if (! elf_add_dynamic_entry (info, DT_BIND_NOW, 0))
 	    return FALSE;
 	}
 

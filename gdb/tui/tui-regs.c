@@ -277,8 +277,14 @@ tui_display_registers_from (int start_element_no)
       TUI_DATA_WIN->detail.data_display_info.regs_content_count > 0)
     {
       int i = start_element_no;
-      int j, value_chars_wide, item_win_width, cur_y, label_width;
+      int j, value_chars_wide, item_win_width, cur_y;
       enum precision_type precision;
+
+      /* Do not rename the following variable into "label_width".
+         Unfortunately, term.h on AiX systems defines a macro with
+         the same name, which causes a build failure if we use the
+         same name for this variable.  */
+      int tui_label_width;
 
       precision = (TUI_DATA_WIN->detail.data_display_info.regs_display_type
 		   == TUI_DFLOAT_REGS) ?
@@ -287,7 +293,7 @@ tui_display_registers_from (int start_element_no)
 	  TUI_DATA_WIN->detail.data_display_info.regs_display_type == TUI_DFLOAT_REGS)
 	{
 	  value_chars_wide = DOUBLE_FLOAT_VALUE_WIDTH;
-	  label_width = DOUBLE_FLOAT_LABEL_WIDTH;
+	  tui_label_width = DOUBLE_FLOAT_LABEL_WIDTH;
 	}
       else
 	{
@@ -295,15 +301,15 @@ tui_display_registers_from (int start_element_no)
 	      TUI_SFLOAT_REGS)
 	    {
 	      value_chars_wide = SINGLE_FLOAT_VALUE_WIDTH;
-	      label_width = SINGLE_FLOAT_LABEL_WIDTH;
+	      tui_label_width = SINGLE_FLOAT_LABEL_WIDTH;
 	    }
 	  else
 	    {
 	      value_chars_wide = SINGLE_VALUE_WIDTH;
-	      label_width = SINGLE_LABEL_WIDTH;
+	      tui_label_width = SINGLE_LABEL_WIDTH;
 	    }
 	}
-      item_win_width = value_chars_wide + label_width;
+      item_win_width = value_chars_wide + tui_label_width;
       /*
          ** Now create each data "sub" window, and write the display into it.
        */
@@ -859,15 +865,21 @@ tui_display_register (int reg_num,
     {
       int i;
       char buf[40];
-      int value_chars_wide, label_width;
+      int value_chars_wide;
       struct tui_data_element * data_element_ptr = &((tui_win_content)
 				    win_info->content)[0]->which_element.data;
+
+      /* Do not rename the following variable into "label_width".
+         Unfortunately, term.h on AiX systems defines a macro with
+         the same name, which causes a build failure if we use the
+         same name for this variable.  */
+      int tui_label_width;
 
       if (IS_64BIT ||
 	  TUI_DATA_WIN->detail.data_display_info.regs_display_type == TUI_DFLOAT_REGS)
 	{
 	  value_chars_wide = DOUBLE_FLOAT_VALUE_WIDTH;
-	  label_width = DOUBLE_FLOAT_LABEL_WIDTH;
+	  tui_label_width = DOUBLE_FLOAT_LABEL_WIDTH;
 	}
       else
 	{
@@ -875,18 +887,18 @@ tui_display_register (int reg_num,
 	      TUI_SFLOAT_REGS)
 	    {
 	      value_chars_wide = SINGLE_FLOAT_VALUE_WIDTH;
-	      label_width = SINGLE_FLOAT_LABEL_WIDTH;
+	      tui_label_width = SINGLE_FLOAT_LABEL_WIDTH;
 	    }
 	  else
 	    {
 	      value_chars_wide = SINGLE_VALUE_WIDTH;
-	      label_width = SINGLE_LABEL_WIDTH;
+	      tui_label_width = SINGLE_LABEL_WIDTH;
 	    }
 	}
 
       buf[0] = (char) 0;
       tui_register_format (buf,
-			  value_chars_wide + label_width,
+			  value_chars_wide + tui_label_width,
 			  reg_num,
 			  data_element_ptr,
 			  precision);

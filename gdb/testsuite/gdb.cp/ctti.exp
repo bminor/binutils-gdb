@@ -76,7 +76,7 @@ if ![runto_main] then {
 gdb_breakpoint [gdb_get_line_number "marker add1"]
 gdb_continue_to_breakpoint "marker add1"
 
-gdb_test "print c" "\\$\[0-9\]+ = -62 .*"
+gdb_test "print c" "\\$\[0-9\]+ = 194 .*"
 gdb_test "print f" "\\$\[0-9\]+ = 9"
 gdb_test "print i" "\\$\[0-9\]+ = 4"
 
@@ -106,13 +106,13 @@ gdb_test_multiple "print add<float>(2.25,2.25)" "print add<float>(2.25,2.25)" {
     }
 }
 
-gdb_test_multiple "print add<char>('A','A')" "print add<char>('A','A')" {
+gdb_test_multiple "print add<unsigned char>('A','A')" "print add<unsigned char>('A','A')" {
     -re "\\$\[0-9\]+ = -126 .*\r\n$gdb_prompt $" {
-	pass "print add<char>('A','A')"
+	pass "print add<unsigned char>('A','A')"
     }
-    -re "No symbol \"add<char>\" in current context.\r\n$gdb_prompt $" {
+    -re "No symbol \"add<unsigned char>\" in current context.\r\n$gdb_prompt $" {
 	# TODO: kfail or xfail this
-	fail "print add<char>('A','A')"
+	fail "print add<unsigned char>('A','A')"
     }
 }
 
@@ -136,13 +136,13 @@ gdb_test_multiple "print add2<float>(2.25,2.25)" "print add2<float>(2.25,2.25)" 
     }
 }
 
-gdb_test_multiple "print add2<char>('A','A')" "print add2<char>('A','A')" {
+gdb_test_multiple "print add2<unsigned char>('A','A')" "print add2<unsigned char>('A','A')" {
     -re "\\$\[0-9]+ = -126 .*$gdb_prompt $" {
-	pass "print add2<char>('A','A')"
+	pass "print add2<unsigned char>('A','A')"
     }
-    -re "No symbol \"add2<char>\" in current context.\r\n$gdb_prompt $" {
+    -re "No symbol \"add2<unsigned char>\" in current context.\r\n$gdb_prompt $" {
 	# TODO: kfail or xfail this
-	fail "print add2<char>('A','A')"
+	fail "print add2<unsigned char>('A','A')"
     }
 }
 
@@ -166,13 +166,13 @@ gdb_test_multiple "print add3<float>(2.25,2.25)" "print add3<float>(2.25,2.25)" 
     }
 }
 
-gdb_test_multiple "print add3<char>('A','A')" "print add3<char>('A','A')" {
+gdb_test_multiple "print add3<unsigned char>('A','A')" "print add3<unsigned char>('A','A')" {
     -re "\\$\[0-9]+ = -126 .*$gdb_prompt $" {
-	pass "print add3<char>('A','A')"
+	pass "print add3<unsigned char>('A','A')"
     }
-    -re "No symbol \"add3<char>\" in current context.\r\n$gdb_prompt $" {
+    -re "No symbol \"add3<unsigned char>\" in current context.\r\n$gdb_prompt $" {
 	# TODO: kfail or xfail this
-	fail "print add3<char>('A','A')"
+	fail "print add3<unsigned char>('A','A')"
     }
 }
 
@@ -196,12 +196,12 @@ gdb_test_multiple "print add4<float>(2.25,2.25)" "print add4<float>(2.25,2.25)" 
     }
 }
 
-gdb_test_multiple "print add4<char>('A','A')" "print add4<char>('A','A')" {
+gdb_test_multiple "print add4<unsigned char>('A','A')" "print add4<unsigned char>('A','A')" {
     -re "\\$\[0-9]+ = -126 .*$gdb_prompt $" {
-	pass "print add4<char>('A','A')"
+	pass "print add4<unsigned char>('A','A')"
     }
-    -re "No symbol \"add4<char>\" in current context.\r\n$gdb_prompt $" {
+    -re "No symbol \"add4<unsigned char>\" in current context.\r\n$gdb_prompt $" {
 	# TODO: kfail or xfail this
-	fail "print add4<char>('A','A')"
+	fail "print add4<unsigned char>('A','A')"
     }
 }

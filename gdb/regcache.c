@@ -1332,8 +1332,7 @@ read_pc_pid (ptid_t ptid)
   else if (PC_REGNUM >= 0)
     {
       CORE_ADDR raw_val = read_register_pid (PC_REGNUM, ptid);
-      CORE_ADDR pc_val = ADDR_BITS_REMOVE (raw_val);
-      return pc_val;
+      pc_val = ADDR_BITS_REMOVE (raw_val);
     }
   else
     internal_error (__FILE__, __LINE__, "read_pc_pid: Unable to find PC");

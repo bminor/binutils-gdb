@@ -3476,7 +3476,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mtsrin",  X(31,242),	XRA_MASK,	PPC32,		{ RS, RB } },
 { "mtsri",   X(31,242),	XRA_MASK,	POWER32,	{ RS, RB } },
 
-{ "dcbtst",  X(31,246),	XRT_MASK,	PPC,		{ CT, RA, RB } },
+{ "dcbtst",  X(31,246),	X_MASK,	PPC,			{ CT, RA, RB } },
 
 { "stbux",   X(31,247),	X_MASK,		COM,		{ RS, RAS, RB } },
 
@@ -3510,7 +3510,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "lscbx",   XRC(31,277,0), X_MASK,	M601,		{ RT, RA, RB } },
 { "lscbx.",  XRC(31,277,1), X_MASK,	M601,		{ RT, RA, RB } },
 
-{ "dcbt",    X(31,278),	XRT_MASK,	PPC,		{ CT, RA, RB } },
+{ "dcbt",    X(31,278),	X_MASK,	PPC,			{ CT, RA, RB } },
 
 { "lhzx",    X(31,279),	X_MASK,		COM,		{ RT, RA, RB } },
 

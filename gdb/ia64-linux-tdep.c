@@ -23,6 +23,7 @@
 #include "ia64-tdep.h"
 #include "arch-utils.h"
 #include "gdbcore.h"
+#include "regcache.h"
 
 /* The sigtramp code is in a non-readable (executable-only) region
    of memory called the ``gate page''.  The addresses in question
@@ -93,4 +94,21 @@ ia64_linux_sigcontext_register_address (CORE_ADDR sp, int regno)
       default :
 	return 0;
       }
+}
+
+void
+ia64_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
+{
+  ia64_write_pc (pc, ptid);
+
+  /* We must be careful with modifying the instruction-pointer: if we
+     just interrupt a system call, the kernel would ordinarily try to
+     restart it when we resume the inferior, which typically results
+     in SIGSEGV or SIGILL.  We prevent this by clearing r10, which
+     will tell the kernel that r8 does NOT contain a valid error code
+     and hence it will skip system-call restart.
+
+     The clearing of r10 is safe as long as ia64_write_pc() is only
+     called as part of setting up an inferior call.  */
+  write_register_pid (IA64_GR10_REGNUM, 0, ptid);
 }

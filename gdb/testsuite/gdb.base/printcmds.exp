@@ -1,5 +1,7 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1999, 2000, 2002, 2003 Free
-# Software Foundation, Inc.
+# This testcase is part of GDB, the GNU debugger.
+
+# Copyright 1992, 1994, 1995, 1996, 1997, 1999, 2000, 2002, 2003, 2004
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
+# bug-gdb@gnu.org
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
@@ -161,7 +163,7 @@ proc test_print_all_chars {} {
     gdb_test "p ctable1\[24\]"  " = 24 '\\\\030'"
     gdb_test "p ctable1\[25\]"  " = 25 '\\\\031'"
     gdb_test "p ctable1\[26\]"  " = 26 '\\\\032'"
-    gdb_test "p ctable1\[27\]"  " = 27 '\\\\e'"
+    gdb_test "p ctable1\[27\]"  " = 27 '\\\\033'"
     gdb_test "p ctable1\[28\]"  " = 28 '\\\\034'"
     gdb_test "p ctable1\[29\]"  " = 29 '\\\\035'"
     gdb_test "p ctable1\[30\]"  " = 30 '\\\\036'"
@@ -479,7 +481,7 @@ proc test_print_strings {} {
     gdb_test "p &ctable1\[2*8\]" \
 	" = \\(unsigned char \\*\\) \"\\\\020\\\\021\\\\022\\\\023\\\\024\\\\025\\\\026\\\\027\"..."
     gdb_test "p &ctable1\[3*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\030\\\\031\\\\032\\\\e\\\\034\\\\035\\\\036\\\\037\"..."
+	" = \\(unsigned char \\*\\) \"\\\\030\\\\031\\\\032\\\\033\\\\034\\\\035\\\\036\\\\037\"..."
     gdb_test "p &ctable1\[4*8\]" \
 	" = \\(unsigned char \\*\\) \" !\\\\\"#\\\$%&'\"..."
     gdb_test "p &ctable1\[5*8\]" \

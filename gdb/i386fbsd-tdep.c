@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/i386.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +25,7 @@
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
+#include "solib-svr4.h"
 
 /* FreeBSD 3.0-RELEASE or later.  */
 
@@ -39,8 +40,9 @@ static int i386fbsd_r_reg_offset[] =
   1 * 4, 0 * 4, -1, -1		/* %ds, %es, %fs, %gs */
 };
 
-CORE_ADDR i386fbsd_sigtramp_start = 0xbfbfdf20;
-CORE_ADDR i386fbsd_sigtramp_end = 0xbfbfdff0;
+/* Sigtramp routine location.  */
+CORE_ADDR i386fbsd_sigtramp_start_addr = 0xbfbfdf20;
+CORE_ADDR i386fbsd_sigtramp_end_addr = 0xbfbfdff0;
 
 /* From <machine/signal.h>.  */
 static int i386fbsd_sc_reg_offset[] =
@@ -82,8 +84,8 @@ i386fbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->struct_return = reg_struct_return;
 
   /* FreeBSD uses a different memory layout.  */
-  tdep->sigtramp_start = i386fbsd_sigtramp_start;
-  tdep->sigtramp_end = i386fbsd_sigtramp_end;
+  tdep->sigtramp_start = i386fbsd_sigtramp_start_addr;
+  tdep->sigtramp_end = i386fbsd_sigtramp_end_addr;
 
   /* FreeBSD has a more complete `struct sigcontext'.  */
   tdep->sc_reg_offset = i386fbsd_sc_reg_offset;
@@ -100,8 +102,10 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_elf_init_abi (info, gdbarch);
 
   /* FreeBSD ELF uses SVR4-style shared libraries.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch,
-					generic_in_solib_call_trampoline);
+  set_gdbarch_in_solib_call_trampoline
+    (gdbarch, generic_in_solib_call_trampoline);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
 /* FreeBSD 4.0-RELEASE or later.  */

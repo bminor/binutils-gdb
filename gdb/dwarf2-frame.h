@@ -24,6 +24,7 @@
 #ifndef DWARF2_FRAME_H
 #define DWARF2_FRAME_H 1
 
+struct gdbarch;
 struct objfile;
 struct frame_info;
 

@@ -74,7 +74,7 @@ frame_unwind_find_by_frame (struct frame_info *next_frame)
   int i;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct frame_unwind_table *table = gdbarch_data (gdbarch, frame_unwind_data);
-  if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
+  if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES && legacy_frame_p (gdbarch))
     /* Seriously old code.  Don't even try to use this new mechanism.
        (Note: The variable USE_GENERIC_DUMMY_FRAMES is deprecated, not
        the dummy frame mechanism.  All architectures should be using

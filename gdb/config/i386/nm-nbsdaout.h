@@ -1,5 +1,6 @@
-/* Native-dependent definitions for Intel 386 running NetBSD, for GDB.
-   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 2000
+/* Native-dependent definitions for NetBSD/i386 a.out.
+
+   Copyright 1986, 1987, 1989, 1992, 1994, 1996, 2000, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -24,7 +25,7 @@
 
 #include "i386/nm-nbsd.h"
 
-/* Get generic NetBSD a.out native definitions. */
+/* Get generic NetBSD a.out native definitions.  */
 #include "config/nm-nbsdaout.h"
 
-#endif /* NM_NBSDAOUT_H */
+#endif /* nm-nbsdaout.h */

@@ -222,22 +222,16 @@ gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(.*\\).*" "up in corefile.exp"
 
 gdb_test "x/8bd buf1" ".*:.*0.*1.*2.*3.*4.*5.*6.*7" "accessing original mmap data in core file"
 setup_xfail "*-*-sunos*" "*-*-ultrix*" "*-*-aix*"
-send_gdb "x/8bd buf2\n"
-gdb_expect {
+set test "accessing mmapped data in core file"
+gdb_test_multiple "x/8bd buf2" "$test" {
     -re ".*:.*0.*1.*2.*3.*4.*5.*6.*7.*$gdb_prompt $" {
-	pass "accessing mmapped data in core file"
+	pass "$test"
     }
     -re "0x\[f\]*:.*Cannot access memory at address 0x\[f\]*.*$gdb_prompt $" {
-	fail "accessing mmapped data (mapping failed at runtime)"
+	fail "$test (mapping failed at runtime)"
     }
     -re "0x.*:.*Cannot access memory at address 0x.*$gdb_prompt $" {
-	fail "accessing mmapped data (mapping address not found in core file)"
-    }
-    -re ".*$gdb_prompt $" {
-	fail "accessing mmapped data (incorrect data found in core file)"
-    }
-    timeout {
-	fail "accessing mmapped data (timeout)"
+	fail "$test (mapping address not found in core file)"
     }
 }
 

@@ -1,3 +1,103 @@
+2004-02-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_link_add_archive_symbols): New prototype.
+
+	* elflink.h (is_global_data_symbol_definition): Moved to
+	elflink.c.
+	(elf_link_is_defined_archive_symbol): Likewise.
+	(elf_link_add_archive_symbols): Likewise. Renamed to
+	_bfd_elf_link_add_archive_symbols.
+
+	* elflink.c (elf_link_is_defined_archive_symbol): Get the size
+	of ELF symbol table entry from backend.
+	(_bfd_elf_link_add_archive_symbols): Call bfd_link_add_symbols
+	instead of elf_link_add_object_symbols.
+
+2004-02-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf-bfd.h (struct elf_backend_data): Added
+	elf_backend_can_make_relative_eh_frame,
+	elf_backend_can_make_lsda_relative_eh_frame and
+	elf_backend_encode_eh_address.
+	(_bfd_elf_encode_eh_address): Declare.
+	(_bfd_elf_can_make_relative): Declare.
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Use new
+	hooks to decide whether to attempt to make_relative and
+	make_lsda_relative.
+	(_bfd_elf_write_section_eh_frame_hdr): Call encode_eh_address.
+	(_bfd_elf_can_make_relative): New.
+	(_bfd_elf_encode_eh_address): New.
+	* elf32-frv.c (frv_elf_use_relative_eh_frame): New.
+	(frv_elf_encode_eh_address): New.
+	(elf_backend_can_make_relative_eh_frame): Define.
+	(elf_backend_can_make_lsda_relative_eh_frame): Define.
+	(elf_backend_encode_eh_address): Define.
+	* elfxx-target.h
+	(elf_backend_can_make_relative_eh_frame): Define.
+	(elf_backend_can_make_lsda_relative_eh_frame): Define.
+	(elf_backend_encode_eh_address): Define.
+	(elfNN_bed): Add them.
+
+2004-02-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (elf32_frv_howto_table) <R_FRV_LABEL16>: Set
+	complain_on_overflow to signed.
+
+2004-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.h (sort_symbol): New.
+	(elf_link_add_object_symbols): Use a sorted symbol array for
+	weakdef.
+
+2004-02-27  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-s390.c (allocate_dynrelocs): Use SYMBOL_REFERENCES_LOCAL
+	for pc relative relocs.
+	(elf_s390_relocate_section): Likewise.
+	* elf64-s390.c (allocate_dynrelocs): Use SYMBOL_REFERENCES_LOCAL
+	for pc relative relocs.
+	(elf_s390_relocate_section): Likewise.
+
+2004-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_check_relocs): Fix call to
+	count_dyn_reloc.
+
+2004-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_dyn_reloc_entry): Add the reltext.
+	field to track if a relocation is against readonly section.
+	(count_dyn_reloc): Take a new argument for rent->reltext.
+	(elfNN_ia64_check_relocs): Adjust call to count_dyn_reloc.
+	(get_reloc_section): Don't set ia64_info->reltext here.
+	(allocate_dynrel_entries): Set ia64_info->reltext here.
+
+2004-02-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (FRV_SYM_LOCAL): Weak undefined doesn't imply local.
+	(_frv_emit_got_relocs_plt_entries): Decay relocation to protected
+	function's descriptor to symbol+offset, and map local undefweak
+	symbol to NULL function descriptor.
+	(elf32_frv_relocate_section): Likewise.
+
+2004-02-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* libaout.h (enum machine_type): Add M_SPARC64_NETBSD and
+	M_X86_64_NETBSD.
+	* netbsd-core.c (M_SPARC64_OPENBSD): Define.
+	(netbsd_core_file_p): Set architecture from machine ID for
+	selected machines.
+
+2004-02-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.h (size_dynamic_sections): If not adding DT_FLAGS and
+	DF_BIND_NOW is set in info->flags, create DT_BIND_NOW dynamic entry.
+
+2004-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Properly handle undefined
+	symbols with non-default visibility.
+
 2004-02-21  Danny Smith  <daanysmith@users.sourceforge.net>
 
 	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Clear
