@@ -203,11 +203,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	   */
 
 	case N_SO: {
-	  unsigned long valu = CUR_SYMBOL_VALUE;
+	  unsigned long valu;
 	  static int prev_so_symnum = -10;
 	  static int first_so_symnum;
 	  char *p;
-	  
+
+	  valu = CUR_SYMBOL_VALUE + ANOFFSET (section_offsets, SECT_OFF_TEXT);
+
 	  past_first_source_file = 1;
 
 	  if (prev_so_symnum != symnum - 1)
@@ -230,8 +232,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  /* End the current partial symtab and start a new one */
 
 	  SET_NAMESTRING();
-
-	  valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 
 	  /* Some compilers (including gcc) emit a pair of initial N_SOs.
 	     The first one is a directory name; the second the file name.

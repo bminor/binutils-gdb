@@ -1,3 +1,8 @@
+Sun Jul 18 15:22:45 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* partial-stab.h (N_SO): Add the text offset to valu before, not after,
+	passing it to END_PSYMTAB.
+
 Fri Jul 16 18:48:52 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
 	* symtab.c (find_pc_symtab): Call warning, not printf directly.
