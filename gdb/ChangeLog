@@ -1,5 +1,7 @@
 2003-12-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* proc-api.c (procfs_note): Add format string to fprintf call.
+
 	* i386-tdep.c (i386_analyze_frame_setup): Add missing encodings
 	for `subl' and `xorl' instructions.
 
