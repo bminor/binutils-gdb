@@ -155,6 +155,9 @@ case "${host}" in
   mips*-*-sysv*)
     host_makefile_frag="${host_makefile_frag} config/mh-riscos"
     ;;
+  i[3456]86-*-sysv5*)
+    host_makefile_frag="${host_makefile_frag} config/mh-sysv5"
+    ;;
   i[3456]86-*-dgux*)
     host_makefile_frag="${host_makefile_frag} config/mh-dgux386"
     ;;
@@ -636,7 +639,7 @@ case "${target}" in
   i[3456]86-*-sco3.2v5*)
     # The linker does not yet know about weak symbols in COFF,
     # and is not configured to handle mixed ELF and COFF.
-    noconfigdirs="$noconfigdirs gprof ld target-libgloss"
+    noconfigdirs="$noconfigdirs ld target-libgloss"
     ;;
   i[3456]86-*-sco*)
     noconfigdirs="$noconfigdirs gprof target-libgloss"
