@@ -1,5 +1,8 @@
 2003-06-11  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-linux-tdep.c (ppc_linux_init_abi): long doubles are 16 bytes
+	long.
+
 	* arch-utils.c (always_use_struct_convention): New function.
 	* arch-utils.h (always_use_struct_convention): New prototype.
 	* alpha-tdep.c (alpha_use_struct_convention): Delete.

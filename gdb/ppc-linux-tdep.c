@@ -1027,6 +1027,8 @@ ppc_linux_init_abi (struct gdbarch_info info,
   
   if (tdep->wordsize == 8)
     {
+      set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
+
       set_gdbarch_call_dummy_address (gdbarch, ppc64_call_dummy_address);
 
       set_gdbarch_in_solib_call_trampoline
