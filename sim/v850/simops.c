@@ -7,6 +7,10 @@
 #include <utime.h>
 #endif
 
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+
  /* FIXME - should be including a version of syscall.h that does not
     pollute the name space */
 #include "../../libgloss/v850/sys/syscall.h"

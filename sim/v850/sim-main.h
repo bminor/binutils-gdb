@@ -1,5 +1,3 @@
-#define SIM_HAVE_FLATMEM 1
-
 #include "sim-basics.h"
 
 typedef address_word sim_cia;
@@ -49,6 +47,7 @@ struct sim_state {
   SIM_ADDR low_end;
   SIM_ADDR high_start;
   SIM_ADDR high_base;
+  void *mem;
   sim_state_base base;
 };
 

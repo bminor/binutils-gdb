@@ -10,6 +10,6 @@ SIM_AC_OPTION_HOSTENDIAN
 SIM_AC_OPTION_WARNINGS
 
 AC_CHECK_FUNCS(time, chmod, utime)
-AC_CHECK_HEADERS(unistd.h stdlib.h string.h strings.h utime.h)
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h strings.h utime.h time.h)
 
 SIM_AC_OUTPUT

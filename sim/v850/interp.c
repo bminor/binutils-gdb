@@ -47,8 +47,8 @@ struct interrupt_generator
   enum interrupt_type type;
   enum interrupt_cond_type cond_type;
   int number;
-  int address;
-  int time;
+  SIM_ADDR address;
+  unsigned long time;
   int enabled;
   struct interrupt_generator *next;
 };
@@ -105,8 +105,8 @@ static void do_format_9_10 PARAMS ((uint32));
 struct hash_entry
 {
   struct hash_entry *next;
-  long opcode;
-  long mask;
+  unsigned long opcode;
+  unsigned long mask;
   struct simops *ops;
 };
 
@@ -223,13 +223,13 @@ map (addr)
     {
       /* "Mirror" the addresses below 1MB. */
       addr = addr & (simulator->rom_size - 1);
-      return (uint8 *) (addr + STATE_MEMORY (simulator));
+      return (uint8 *) (simulator->mem) + addr;
     }
   else if (addr < simulator->low_end)
     {
       /* chunk is just after the rom */
       addr = addr - 0x100000 + simulator->rom_size;
-      return (uint8 *) (addr + STATE_MEMORY (simulator));
+      return (uint8 *) (simulator->mem) + addr;
     }
   else if (addr >= simulator->high_start)
     {
@@ -240,7 +240,7 @@ map (addr)
       else if (addr >= 0xffe000)
 	addr &= 0xffe3ff;
       addr = addr - simulator->high_start + simulator->high_base;
-      return (uint8 *) (STATE_MEMORY (simulator));
+      return (uint8 *) (simulator->mem) + addr;
     }
   else
     {
@@ -311,8 +311,8 @@ sim_memory_init (SIM_DESC sd)
 {
   int totsize;
 
-  if (STATE_MEMORY (sd))
-    zfree (STATE_MEMORY (sd));
+  if (sd->mem)
+    zfree (sd->mem);
   
   totsize = (simulator->rom_size
 	     + (sd->low_end - 0x100000)
@@ -320,8 +320,8 @@ sim_memory_init (SIM_DESC sd)
     
   sd->high_base = sd->rom_size + (sd->low_end - 0x100000);
 	     
-  STATE_MEMORY (sd) = zalloc (totsize);
-  if (!STATE_MEMORY (sd))
+  sd->mem = zalloc (totsize);
+  if (!sd->mem)
     {
       sim_io_error (sd, "Allocation of main memory failed.");
     }
@@ -506,7 +506,7 @@ sim_resume (sd, step, siggnal)
 {
   SIM_ELAPSED_TIME start_time;
   uint32 inst;
-  reg_t oldpc;
+  SIM_ADDR oldpc;
   struct interrupt_generator *intgen;
 
   if (step)
@@ -816,7 +816,7 @@ sim_set_interrupt (sd, spec)
       intgen->enabled = 1;
       intgen->next = intgen_list;
       intgen_list = intgen;
-      sim_io_printf (sd, "Interrupt generator %d (NMI) at pc=0x%x, time=%d.\n", intgen_list->number, intgen_list->address, intgen_list->time);
+      sim_io_printf (sd, "Interrupt generator %d (NMI) at pc=0x%x, time=%ld.\n", intgen_list->number, intgen_list->address, intgen_list->time);
     }
   else if (*argv && !strcmp (*argv, "remove"))
     {
@@ -853,10 +853,10 @@ sim_set_interrupt (sd, spec)
       if (intgen_list)
 	{
 	  for (intgen = intgen_list; intgen != NULL; intgen = intgen->next)
-	    sim_io_printf (sd, "Interrupt generator %d (%s) at pc=0x%x/time=%d%s.\n",
+	    sim_io_printf (sd, "Interrupt generator %d (%s) at pc=0x%lx/time=%ld%s.\n",
 			   intgen->number,
 			   interrupt_names[intgen->type],
-			   intgen->address,
+			   (long) intgen->address,
 			   intgen->time,
 			   (intgen->enabled ? "" : " (disabled)"));
 	}

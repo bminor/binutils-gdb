@@ -1,5 +1,20 @@
 Wed Sep  3 10:18:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-main.h: Replace SIM_HAVE_FLATMEM with mem ptr.
+	* interp.c (map): Do not add to a void pointer.
+	
+	* Makefile.in (INCLUDE): Add sim-main.h
+
+	* configure.in: Check for time.h
+	* configure: Re-generate.
+
+	* interp.c (struct interrupt_generator): Make time unsigned long,
+ 	address SIM_ADDR.
+	(sim_resume): Make oldpc SIM_ADDR.
+	(struct hash_entry): Make mask/opcode unsigned.
+
+	* v850_sim.h (struct simops ): Make opcode and mask unsigned.
+
 	* simops.c (utime.h): Include if available.
 	(OP_10007E0): Check for UTIME function.
 	(divun): Put parentheses around shift argument.
