@@ -1039,8 +1039,17 @@ gen_entry_expand_opcode (gen_entry *table,
 					  /* the table entry fully
                                              specified the condition
                                              field's value */
+					  /* extract the field's value
+                                             from the opcode */
 					  value = sub_val (t->opcode_nr, t->parent->opcode->last,
-							   first_pos, last_pos);
+							   condition->field->first, condition->field->last);
+					  /* this is a requirement of
+                                             a conditonal field
+                                             refering to another field */
+					  ASSERT ((condition->field->first - condition->field->last)
+						  == (first_pos - last_pos));
+printf ("value=%d, opcode_nr=%d, last=%d, [%d..%d]\n",
+	value, t->opcode_nr, t->parent->opcode->last, condition->field->first, condition->field->last);
 					}
 				    }
 				}

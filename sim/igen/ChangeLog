@@ -1,3 +1,8 @@
+Wed Jul 29 10:07:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen.c (gen_entry_expand_opcode): Extract the field value from an
+ 	opcode using the correct location bits.
+
 Tue Jul 28 11:19:43 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ld-insn.c (parse_insn_word): For constant conditional strings,
