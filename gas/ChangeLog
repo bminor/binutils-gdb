@@ -1,3 +1,13 @@
+start-sanitize-d30v
+Tue Mar 25 14:45:54 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d30v.c (md_assemble): If two instructions
+	are supposed to be assembled in parallel and the first one is
+	long, print an error and stop.
+	(md_apply_fix3): Don't calculate absolute relocs.  Just write
+	them out.
+
+end-sanitize-d30v	
 Mon Mar 24 12:11:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.h (iclrKludge): Define.
