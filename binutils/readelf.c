@@ -1934,6 +1934,7 @@ get_osabi_name (osabi)
     case ELFOSABI_SYSV:       return _("UNIX - System V");
     case ELFOSABI_HPUX:       return _("UNIX - HP-UX");
     case ELFOSABI_STANDALONE: return _("Standalone App");
+    case ELFOSABI_ARM:        return _("ARM");
     default:
       sprintf (buff, _("<unknown: %x>"), osabi);
       return buff;
