@@ -5085,7 +5085,7 @@ ieee_finish_compilation_unit (info)
 
       /* Coalesce ranges if it seems reasonable.  */
       while (r->next != NULL
-	     && high + 64 >= r->next->low
+	     && high + 0x1000 >= r->next->low
 	     && (r->next->high
 		 <= (bfd_get_section_vma (info->abfd, s)
 		     + bfd_section_size (info->abfd, s))))
@@ -5154,7 +5154,8 @@ ieee_add_bb11_blocks (abfd, sec, data)
 	  return;
 	}
 
-      if (low < r->low)
+      if (low < r->low
+	  && r->low - low > 0x100)
 	{
 	  if (! ieee_add_bb11 (info, sec, low, r->low))
 	    {
@@ -7586,9 +7587,12 @@ ieee_lineno (p, filename, lineno, addr)
 	return false;
     }
 
-  info->pending_lineno_filename = filename;
-  info->pending_lineno = lineno;
-  info->pending_lineno_addr = addr;
+  if (addr < info->highaddr)
+    {
+      info->pending_lineno_filename = filename;
+      info->pending_lineno = lineno;
+      info->pending_lineno_addr = addr;
+    }
 
   return true;
 }

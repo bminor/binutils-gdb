@@ -1,4 +1,19 @@
+Mon Oct 28 16:58:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (ieee_finish_compilation_unit): Permit coalescing ranges
+	that are up to 0x1000 bytes apart, not just 64.
+	(ieee_add_bb11_blocks): Don't bother to emit a BB11 that is less
+	than 0x100 bytes.
+	(ieee_lineno): Only emit line numbers that are less than
+	info->highaddr.
+
 Fri Oct 25 12:12:17 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c (struct ieee_defined_enum): Add defined field.
+	(ieee_enum_type): If the enum tag has been seen before but not
+	defined, reuse the same type index, and define it.
+	(ieee_tag_type): If this enum has not been defined, add an
+	undefined entry to the list of enums.
 
 	* objdump.c (disassemble_bytes): Let the disassembler override the
 	number of bytes printed on a line.
