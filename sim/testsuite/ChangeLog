@@ -1,5 +1,26 @@
 Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* sim/m32r/and.cgs: Test AND instruction.
+	* sim/m32r/and3.cgs: Test AND3 instruction.
+	* sim/m32r/beq.cgs: Test BEQ instruction.
+	* sim/m32r/beqz.cgs: Test BEQZ instruction.
+	* sim/m32r/bgez.cgs: Test BGEZ instruction.
+	* sim/m32r/bgtz.cgs: Test BGTZ instruction.
+	* sim/m32r/cmp.cgs: Test CMP instruction.
+	* sim/m32r/cmpi.cgs: Test CMPI instruction.
+	* sim/m32r/cmpu.cgs: Test CMPU instruction.
+	* sim/m32r/cmpui.cgs: Test CMPUI instruction.
+	* sim/m32r/div.cgs: Test DIV instruction.
+	* sim/m32r/divh.cgs: Test DIVH instruction.
+
+	* sim/m32r/bcl8.cgs: Test short BCL instruction.
+	* sim/m32r/bncl24.cgs: Test long BNCL instruction.
+	* sim/m32r/bncl8.cgs: Test short BNCL instruction.
+	* sim/m32r/cmpeq.cgs: Test CMPEQ instruction.
+	* sim/m32r/cmpz.cgs: Test CMPZ instruction.
+	* sim/m32r/sll.cgs: Test SLL instruction.
+	* sim/m32r/sll3.cgs: Test SLL3 instruction.
+	* sim/m32r/slli.cgs: Test SLLI instruction.
 	* sim/m32r/bcl24.cgs: Test long version of BCL instruction
 	* sim/m32r/sra.cgs: Test SRA instruction.
 	* sim/m32r/sra3.cgs: Test SRA3 instruction.
