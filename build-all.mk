@@ -123,7 +123,7 @@ endif
 
 ifeq ($(canonhost),m68k-sun-sunos4.1.1)
 TARGETS = $(NATIVE) \
-	m68k-aout	m68k-coff	i960-intel-nindy 
+	m68k-coff 
 GCC = gcc -O -msoft-float
 CC = cc -J
 all: all-cygnus
@@ -132,12 +132,11 @@ endif
 ifeq ($(canonhost),sparc-sun-solaris2)
 TARGETS = $(NATIVE) \
 	a29k-amd-udi \
-	i386-aout \
-	i960-vxworks	i960-intel-nindy \
-	m68k-aout	m68k-coff 	m68k-vxworks \
+	i960-vxworks \
+	m68k-aout	m68k-coff \
 	m88k-coff	\
-	mips-idt-ecoff 	mipsel-idt-ecoff \
-	sparc-aout	sparc-vxworks	sparclite-aout
+	mipsel-idt-ecoff \
+	sparclite-aout
 CC = cc -Xs
 GCC = gcc -O -pipe
 all: all-cygnus
@@ -158,8 +157,8 @@ endif
 
 ifeq ($(canonhost),rs6000-ibm-aix)
 TARGETS	= $(NATIVE) \
-	i960-vxworks	i960-intel-nindy \
-	m68k-vxworks
+	i960-vxworks \
+	m68k-aout
 all: all-cygnus
 endif
 
@@ -206,7 +205,7 @@ all: all-cross
 endif
 
 ifeq ($(canonhost),i386-sysv4.2)
-TARGETS = $(NATIVE) 
+TARGETS = $(NATIVE) i386-netware
 CC = cc
 all: all-cygnus
 endif
