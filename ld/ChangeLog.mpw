@@ -1,3 +1,10 @@
+Wed Dec 14 13:29:52 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in (m68k-apple-macos, ppc-apple-macos,
+        i386-unknown-aout, i386-unknown-coff): New targets.
+	(m68k-aout, m68k-coff): Remove targets.
+	(mk.tmp): Add definition of EMUL.
+
 Tue Jun 28 13:17:23 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-config.in (emulname): Set based on target.

@@ -1,9 +1,13 @@
 # Configuration fragment for LD.
 
-If "{target_canonical}" =~ /m68k-aout/
-	Set emulname m68kaout
-Else If "{target_canonical}" =~ /m68k-coff/
+If "{target_canonical}" =~ /m68k-apple-macos/
 	Set emulname m68kcoff
+Else If "{target_canonical}" =~ /ppc-apple-macos/
+	Set emulname ppcelf
+Else If "{target_canonical}" =~ /i386-unknown-aout/
+	Set emulname i386aout
+Else If "{target_canonical}" =~ /i386-unknown-coff/
+	Set emulname i386coff
 Else If "{target_canonical}" =~ /mips-idt-ecoff/
 	Set emulname mipsidt
 	forward-include "{srcdir}"mpw-em.c em_mipsidt.c
@@ -15,3 +19,9 @@ Echo '#define EMULATION_LIST \' >>ldemul-tmp.h
 Echo "  &ld_{emulname}_emulation, \" >>ldemul-tmp.h
 Echo '  0' >>ldemul-tmp.h
 MoveIfChange ldemul-tmp.h ldemul-list.h
+
+Echo '# From mpw-config.in'       > "{o}"mk.tmp
+
+Echo "EMUL = " {emulname} >> "{o}"mk.tmp
+
+Echo '# End from mpw-config.in'  >> "{o}"mk.tmp
