@@ -1,3 +1,11 @@
+Thu Jul 31 15:40:19 1997  Per Bothner  <bothner@cygnus.com>
+
+	* symtab.h (SYMBOL_INIT_LANGUAGE_SPECIFIC, SYMBOL_INIT_DEMANGLED_NAME,
+	SYMBOL_DEMANGLED_NAME):  Add demangling support for Java.
+	* utils.c (fprintf_symbol_filtered):  Handle language_java.
+
+	* symtab.c (decode_line_1):  Handle Java-style package.class.method.
+
 Wed Jul 30 14:04:18 1997  Per Bothner  <bothner@cygnus.com>
 
 	* java-*:  Renamed to jv-*, to make fit within 14 characters.
