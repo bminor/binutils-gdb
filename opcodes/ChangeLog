@@ -1,3 +1,8 @@
+Tue Oct  8 11:55:35 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c (mn10300_opcodes): Fix typos in yesterday's
+	changes.
+
 Mon Oct  7 16:48:45 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (FMT_XX): Renumber starting at one.

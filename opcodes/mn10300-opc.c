@@ -350,7 +350,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "jmp",	0xf0f4,		0xfffc,		FMT_D0, {AN}, },
 { "jmp",	0xcc0000,	0xff0000,	FMT_S2, {D16}, },
 { "jmp",	0xdc0000,	0xff0000,	FMT_S4, {D32}, },
-{ "call", 0, 0, FMT_S4, 0, {D16}, },
+{ "call", 0, 0, FMT_S4, {D16}, },
 { "call",	0xdd000000,	0xff000000,	FMT_S6, {D32,}, },
 { "calls",	0xf0f0,		0xfffc,		FMT_D0, {AN}, },
 { "calls",	0xfaff0000,	0xffff0000,	FMT_D2, {D16}, },
@@ -364,7 +364,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "rtm",	0xf0ff,		0xffff,		FMT_D0, {UNUSED} },
 { "nop",	0xcb,		0xff,		FMT_S0, {UNUSED} },
 /* { "udf", 0, 0, {0}, },  */
-{ 0, 0, 0, 0, 0, {0}, },
+{ 0, 0, 0, 0, {0}, },
 
 } ;
 
