@@ -1,3 +1,8 @@
+2001-12-05  Arati Dikey <aratid@kpit.com>
+ 
+ 	* tc-sh.c (parse_at): Corrected incorrect op->type selection due
+	to missing 'else'.
+
 2001-12-04  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-d10v.c (write_2_short): Don't skip dummy fixups, so

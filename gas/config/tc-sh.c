@@ -989,9 +989,8 @@ parse_at (src, op)
     {
       src += parse_reg (src, &mode, &(op->reg));
       if (mode != A_REG_N)
-	{
-	  as_bad (_("illegal register after @"));
-	}
+	as_bad (_("illegal register after @"));
+
       if (src[0] == '+')
 	{
 	  char l0, l1;
@@ -1006,8 +1005,8 @@ parse_at (src, op)
 	      src += 2;
 	      op->type = A_PMOD_N;
 	    }
-	  if ((l0 == 'r' && l1 == '9')
-	      || (l0 == 'i' && l1 == 'y'))
+	  else if (   (l0 == 'r' && l1 == '9')
+		   || (l0 == 'i' && l1 == 'y'))
 	    {
 	      src += 2;
 	      op->type = A_PMODY_N;
@@ -1016,9 +1015,7 @@ parse_at (src, op)
 	    op->type = A_INC_N;
 	}
       else
-	{
-	  op->type = A_IND_N;
-	}
+	op->type = A_IND_N;
     }
   return src;
 }
