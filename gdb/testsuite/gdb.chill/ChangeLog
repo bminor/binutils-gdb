@@ -1,3 +1,7 @@
+Wed Mar  1 20:28:42 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* misc.ch, misc.exp, Makefile.in:  New test case.
+
 Mon Feb 20 16:19:58 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* chillvars.ch:  Add missing INIT's.

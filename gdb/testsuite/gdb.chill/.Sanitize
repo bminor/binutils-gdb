@@ -28,6 +28,8 @@ chexp.exp
 chillvars.ch
 chillvars.exp
 configure.in
+misc.ch
+misc.exp
 pr-4975.ch
 pr-4975-grt.ch
 pr-4975.exp

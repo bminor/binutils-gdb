@@ -1,0 +1,79 @@
+# Copyright (C) 1995 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# This file was written by Fred Fish. (fnf@cygnus.com)
+#                          Martin Pottendorfer (pottendo@aut.alcatel.at)
+#
+
+if $tracelevel then {
+	strace $tracelevel
+}
+
+set prms_id 0
+set bug_id 0
+
+# Set the current language to chill.  This counts as a test.  If it
+# fails, then we skip the other tests.
+
+proc set_lang_chill {} {
+    global prompt
+    global binfile objdir subdir
+
+    if ![file exists $objdir/$subdir/$binfile] then {
+	return 0
+    }
+    verbose "loading file '$objdir/$subdir/$binfile'"
+    gdb_load $objdir/$subdir/$binfile
+
+    send "set language chill\n"
+    expect {
+	-re ".*$prompt $" {}
+	timeout { fail "set language chill (timeout)" ; return 0 }
+    }
+
+    return [gdb_test "show language" ".* source language is \"chill\"" \
+	"set language to \"chill\""]
+}
+
+# Start with a fresh gdb.
+
+set binfile "misc.exe"
+global passcount
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+
+send "set print sevenbit-strings\n" ; expect -re ".*$prompt $"
+
+if ![set_lang_chill] then {
+    runto dummyfunc
+    # check upper/lower case 
+    test_print_accept "ptype BOOL" "(bool|BOOL)"
+    test_print_accept "ptype bool" "(bool|BOOL)"
+    test_print_accept "print otto" "42"
+    test_print_accept "print OTTO" "42"
+    test_print_accept "print otTO" "42"
+    test_print_accept "print OTto" "42"
+    test_print_accept "print NULL" "NULL" "print emptiness literal"
+
+    gdb_test "info line" \
+	{Line 5 of .*misc.ch.* at address H'[0-9a-fA-F]+}\
+	"info about current line"
+}
