@@ -1,3 +1,14 @@
+Thu Nov 16 14:04:47 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (all-target-libgloss): Depend upon
+	configure-target-newlib, since when libgloss is built it looks to
+	see if the newlib directory exists.
+
+Wed Nov 15 14:47:52 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.in (DEVO_SUPPORT): Use config-ml.in instead of
+	cfg-ml-*.in.
+
 Wed Nov 15 11:45:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Handle LD and LD_FOR_TARGET when configuring a
