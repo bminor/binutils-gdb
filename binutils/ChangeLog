@@ -1,3 +1,8 @@
+Sat Feb 24 11:21:49 1996  Alan Modra  <alan@spri.levels.unisa.edu.au>:
+
+	* Makefile.in ($(OBJDUMP_PROG)): Search $(BFDLIB) before
+	$(OPCODES).
+
 Thu Feb 15 12:44:45 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Don't tamper with LDFLAGS.  Call AC_PROG_CC before
