@@ -30,6 +30,7 @@ altos.mh
 altos.mt
 amix.mh
 amix.mt
+apollo68b.mh
 apollo68v.mh
 arm.mh
 arm.mt
@@ -96,6 +97,7 @@ rs6000.mt
 rtbsd.mh
 sparc-noun.mt
 sparc-un.mt
+st2000.mt
 stratus.mh
 stratus.mt
 sun2os3.mh
