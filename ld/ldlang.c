@@ -2824,8 +2824,8 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	    
             /* put the section within the requested block size, or align at
                the block boundary */
-	    after = ALIGN_N (os->bfd_section->vma,
-			     os->bfd_section->_raw_size / opb,
+	    after = ALIGN_N (os->bfd_section->vma
+			     + os->bfd_section->_raw_size / opb,
 			     /* The coercion here is important, see ld.h.  */
 			     (bfd_vma) os->block_value);
 

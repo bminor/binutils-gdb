@@ -1,3 +1,7 @@
+2000-02-04  Timothy Wall  <twall@redhat.com>
+
+	* ldlang.c (lang_size_sections): Fix typo in ALIGN_N invocation.
+
 2000-02-03  Timothy Wall <twall@redhat.com>
 
 	* ld/ldexp.c (fold_name): Make SIZEOF operator return byte count, not
