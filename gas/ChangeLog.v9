@@ -1,3 +1,7 @@
+Tue Jan 11 17:10:20 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* config/tc-sparc.c (sparc_ip): Truncate args to %hi/%lo to 32 bits.
+
 Tue Nov  2 18:16:31 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-sparc.c (sparc_ip): Add default case to reloc switch.
