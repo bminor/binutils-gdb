@@ -775,7 +775,7 @@ md_assemble (instruction_string)
 				  p[1] = VAX_BRB;
 				  p[2] = 6;
 				  p[3] = VAX_JMP;
-				  p[4] = VAX_PC_RELATIVE_MODE + 1;	/* @#... */
+                                  p[4] = VAX_ABSOLUTE_MODE;     /* @#... */
 				  md_number_to_chars (p + 5, this_add_number, 4);
 				  /*
 				   * Now (eg)	xOBxxx	1f
@@ -1349,7 +1349,7 @@ md_convert_frag (headers, seg, fragP)
       addressP[0] = 6;
       addressP[1] = VAX_JMP;
       addressP[2] = VAX_PC_RELATIVE_MODE;
-      md_number_to_chars (addressP + 3, target_address, 4);
+      md_number_to_chars (addressP + 3, target_address - (address_of_var + 7), 4);
       extension = 7;
       break;
 
@@ -1383,7 +1383,7 @@ md_convert_frag (headers, seg, fragP)
       addressP[3] = 6;
       addressP[4] = VAX_JMP;
       addressP[5] = VAX_PC_RELATIVE_MODE;
-      md_number_to_chars (addressP + 6, target_address, 4);
+      md_number_to_chars (addressP + 6, target_address - (address_of_var + 10), 4);
       extension = 10;
       break;
 
@@ -1407,7 +1407,7 @@ md_convert_frag (headers, seg, fragP)
       addressP[2] = 6;
       addressP[3] = VAX_JMP;
       addressP[4] = VAX_PC_RELATIVE_MODE;
-      md_number_to_chars (addressP + 5, target_address, 4);
+      md_number_to_chars (addressP + 5, target_address - (address_of_var + 9), 4);
       extension = 9;
       break;
 
