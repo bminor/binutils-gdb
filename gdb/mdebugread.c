@@ -268,13 +268,17 @@ static int n_undef_symbols, n_undef_labels, n_undef_vars, n_undef_procs;
 
 static char stabs_symbol[] = STABS_SYMBOL;
 
-/* Extra builtin types */
+/* Types corresponding to btComplex, btDComplex, etc.  These are here
+   rather than in gdbtypes.c or some such, because the meaning of codes
+   like btComplex is specific to the mdebug debug format.  FIXME:  We should
+   be using our own types thoughout this file, instead of sometimes using
+   builtin_type_*.  */
 
-struct type *builtin_type_complex;
-struct type *builtin_type_double_complex;
-struct type *builtin_type_fixed_dec;
-struct type *builtin_type_float_dec;
-struct type *builtin_type_string;
+static struct type *mdebug_type_complex;
+static struct type *mdebug_type_double_complex;
+static struct type *mdebug_type_fixed_dec;
+static struct type *mdebug_type_float_dec;
+static struct type *mdebug_type_string;
 
 /* Forward declarations */
 
@@ -1299,12 +1303,12 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
     0,				/* btTypedef */
     0,				/* btRange */
     0,				/* btSet */
-    &builtin_type_complex,	/* btComplex */
-    &builtin_type_double_complex,	/* btDComplex */
+    &mdebug_type_complex,	/* btComplex */
+    &mdebug_type_double_complex,	/* btDComplex */
     0,				/* btIndirect */
-    &builtin_type_fixed_dec,	/* btFixedDec */
-    &builtin_type_float_dec,	/* btFloatDec */
-    &builtin_type_string,	/* btString */
+    &mdebug_type_fixed_dec,	/* btFixedDec */
+    &mdebug_type_float_dec,	/* btFloatDec */
+    &mdebug_type_string,	/* btString */
     0,				/* btBit */
     0,				/* btPicture */
     &builtin_type_void,		/* btVoid */
@@ -3655,28 +3659,36 @@ _initialize_mdebugread ()
 {
   /* Missing basic types */
 
-  builtin_type_string =
+  /* Is a "string" the way btString means it the same as TYPE_CODE_STRING?
+     FIXME.  */
+  mdebug_type_string =
     init_type (TYPE_CODE_STRING,
 	       TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0, "string",
 	       (struct objfile *) NULL);
-  builtin_type_complex =
-    init_type (TYPE_CODE_FLT,
+
+  mdebug_type_complex =
+    init_type (TYPE_CODE_ERROR,
 	       TARGET_COMPLEX_BIT / TARGET_CHAR_BIT,
 	       0, "complex",
 	       (struct objfile *) NULL);
-  builtin_type_double_complex =
-    init_type (TYPE_CODE_FLT,
+  mdebug_type_double_complex =
+    init_type (TYPE_CODE_ERROR,
 	       TARGET_DOUBLE_COMPLEX_BIT / TARGET_CHAR_BIT,
 	       0, "double complex",
 	       (struct objfile *) NULL);
-  builtin_type_fixed_dec =
+
+  /* We use TYPE_CODE_INT to print these as integers.  Does this do any
+     good?  Would we be better off with TYPE_CODE_ERROR?  Should
+     TYPE_CODE_ERROR print things in hex if it knows the size?  */
+  mdebug_type_fixed_dec =
     init_type (TYPE_CODE_INT,
 	       TARGET_INT_BIT / TARGET_CHAR_BIT,
 	       0, "fixed decimal",
 	       (struct objfile *) NULL);
-  builtin_type_float_dec =
-    init_type (TYPE_CODE_FLT,
+
+  mdebug_type_float_dec =
+    init_type (TYPE_CODE_ERROR,
 	       TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
 	       0, "floating decimal",
 	       (struct objfile *) NULL);

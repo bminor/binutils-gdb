@@ -1,5 +1,9 @@
 Sat Dec 25 09:50:29 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* mdebugread.c: Change the builtin_type_* in this file to
+	mdebug_type_* and make them static.  Use TYPE_CODE_ERROR for
+	complex and float decimal.
+
 	* printcmd.c (disassemble_command): Call wrap_here between printing
 	address and printing instruction.
 
