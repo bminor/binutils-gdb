@@ -1,3 +1,8 @@
+Tue Jul 22 17:59:54 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libiberty.h (PEXECUTE_*): Define.
+	(pexecute, pwait): Declare.
+
 Fri Jun  6 13:02:33 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.h (sim_kill): Mark as depreciated.
