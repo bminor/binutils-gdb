@@ -80,7 +80,8 @@ static int insert_file PARAMS ((const char *,
 				void (*) PARAMS ((unsigned long)),
 				unsigned long, int));
 
-static int vif_length_value PARAMS ((int, int, int, int));
+static int vif_insn_type PARAMS ((char));
+static int vif_length_value PARAMS ((char, int, int, int));
 static void install_vif_length PARAMS ((char *, int));
 
 const char comment_chars[] = ";";
@@ -1767,12 +1768,16 @@ md_apply_fix3 (fixP, valueP, seg)
       if (cpu == DVP_VIF
 	  && (operand - vif_operands) == vif_operand_datalen_special)
 	{
+	  int insn_type = vif_insn_type (where[3]);
 	  value = vif_length_value (where[3],
 				    fixP->tc_fix_data.wl, fixP->tc_fix_data.cl,
 				    value);
 	  if (fixP->tc_fix_data.user_value != -1)
 	    {
-	      if (fixP->tc_fix_data.user_value != value)
+	      /* We can't do this for unpack insns with wl > cl.  */
+	      if ((insn_type != VIF_OPCODE_UNPACK
+		   || (fixP->tc_fix_data.wl <= fixP->tc_fix_data.cl))
+		  && fixP->tc_fix_data.user_value != value)
 		as_warn_where (fixP->fx_file, fixP->fx_line,
 			       "specified length value doesn't match computed value");
 	      /* Don't override the user specified value.  */
@@ -2325,18 +2330,41 @@ parse_dma_addr_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
   return retval;
 }
 
+/* Compute the type of vif insn of IBYTE.
+   IBYTE is the msb of the insn.
+   This is only used for mpg,direct,unpack insns.
+   The result is one of VIF_OPCODE_{DIRECT,DIRECTHL,MPG,UNPACK}.  */
+
+static int
+vif_insn_type (ibyte)
+     char ibyte;
+{
+  switch (ibyte & 0x70)
+    {
+    case 0x50 :
+      return (ibyte & 1) ? VIF_OPCODE_DIRECTHL : VIF_OPCODE_DIRECT;
+    case 0x40 :
+      return VIF_OPCODE_MPG;
+    case 0x60 :
+    case 0x70 :
+      return VIF_OPCODE_UNPACK;
+    default :
+      as_fatal ("internal error: bad call to vif_insn_type");
+    }
+}
+
 /* Return the length value to insert in a VIF instruction whose upper
-   byte is CMD and whose data length is BYTES.
+   byte is IBYTE and whose data length is BYTES.
    WL,CL are used for unpack insns and are the stcycl values in effect.
    This does not do the max -> 0 conversion.  */
 
 static int
-vif_length_value (cmd, wl, cl, bytes)
-     int cmd;
+vif_length_value (ibyte, wl, cl, bytes)
+     char ibyte;
      int wl,cl;
      int bytes;
 {
-  switch (cmd & 0x70)
+  switch (ibyte & 0x70)
     {
     case 0x50 : /* direct */
       /* ??? Worry about data /= 16 cuts off?  */
@@ -2346,7 +2374,7 @@ vif_length_value (cmd, wl, cl, bytes)
       return bytes / 8;
     case 0x60 : /* unpack */
     case 0x70 :
-      return vif_unpack_len_value (cmd & 15, wl, cl, bytes);
+      return vif_unpack_len_value (ibyte & 15, wl, cl, bytes);
     default :
       as_fatal ("internal error: bad call to vif_length_value");
     }
@@ -2362,16 +2390,16 @@ install_vif_length (buf, len)
      char *buf;
      int len;
 {
-  unsigned char cmd = buf[3];
+  unsigned char ibyte = buf[3];
 
-  if ((cmd & 0x70) == 0x40)
+  if ((ibyte & 0x70) == 0x40)
     {
       /* mpg */
       if (len > 256)
 	as_bad ("`mpg' data length must be between 1 and 256");
       buf[2] = len == 256 ? 0 : len;
     }
-  else if ((cmd & 0x70) == 0x50)
+  else if ((ibyte & 0x70) == 0x50)
     {
       /* direct/directhl */
       if (len > 65536)
@@ -2380,7 +2408,7 @@ install_vif_length (buf, len)
       buf[0] = len;
       buf[1] = len >> 8;
     }
-  else if ((cmd & 0x60) == 0x60)
+  else if ((ibyte & 0x60) == 0x60)
     {
       /* unpack */
       /* len == -1 means wl,cl are unknown and thus we can't compute
