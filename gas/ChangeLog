@@ -5,6 +5,11 @@ Wed Mar 26 13:35:15 1997  H.J. Lu  <hjl@lucon.org>
 
 Wed Mar 26 11:32:51 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* listing.c (print_lines): Add lineno parameter.  Change all
+	callers.
+	(listing_listing): Only call calc_hex for the right line.
+	(listing_list): Set the new edict based on the current edict, in
+	order to handle listing commands in macros correctly.
 
 	* config/tc-mips.c (insn_uses_reg): Map register numbers in mips16
 	instructions.
