@@ -137,14 +137,20 @@ struct type
   enum type_code code;
 
   /* Name of this type, or NULL if none.
+
      This is used for printing only, except by poorly designed C++ code.
-     Type names specified as input are defined by symbols.  */
+     For looking up a name, look for a symbol in the VAR_NAMESPACE.  */
 
   char *name;
 
-  /* Tag name for this type, or NULL if none.  This is a feature which is
-     specific to C/C++ for structs, unions, or enums.  
-     This is used for printing only, except by poorly designed C++ code.  */
+  /* Tag name for this type, or NULL if none.  This means that the
+     name of the type consists of a keyword followed by the tag name.
+     Which keyword is determined by the type code ("struct" for
+     TYPE_CODE_STRUCT, etc.).  As far as I know C/C++ are the only languages
+     with this feature.
+
+     This is used for printing only, except by poorly designed C++ code.
+     For looking up a name, look for a symbol in the STRUCT_NAMESPACE.  */
 
   char *tag_name;
 
