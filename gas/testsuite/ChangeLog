@@ -1,3 +1,11 @@
+1999-02-08  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/vtable/inherit0.s: Do not use '@' prefix to .type operator.
+	Some ports use it as a comment initiator.
+
+	* gas/vtable/entry1.d: Do not look for an addend.  Some ports use
+	REL relocations and so do not have one.
+
 start-sanitize-cygnus
 Fri Feb  5 19:53:52 1999  Doug Evans  <devans@canuck.cygnus.com>
 
