@@ -1,3 +1,15 @@
+2001-05-24  Jim Blandy  <jimb@redhat.com>
+
+	Don't assume that short is shorter than int.
+	* gdb.base/exprs.exp ("print unsigned short == (~0)"): Don't
+	assume that shorts are smaller than ints.  On a 16-bit machine,
+	this isn't true. 
+	("print unsigned char == (~0)"): Add test that verifies that ~0,
+	an int, is not equal to ~0 stored in an unsigned char.  This tests
+	the same thing that the previous test meant to, but works on
+	16-bit machines, too.
+	("print unsigned char != (~0)"): Same test, complemented.
+
 2001-05-24  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.threads/pthreads.exp (all_threads_running): Add an explicit

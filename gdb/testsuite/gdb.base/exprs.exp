@@ -101,11 +101,11 @@ test_expr "set variable v_unsigned_char=127" "print v_unsigned_char > 0" "\\$\[0
 # FIXME:  gdb mishandles the cast (unsigned char) on the i960, so I've
 # set up an expected failure for this case.
 setup_xfail "i960-*-*" 1821
-test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_char == ~0" "\\$\[0-9\]* = $false"  "print v_unsigned_char == (unsigned char)~0" "\\$\[0-9\]* = $true"  "print unsigned char == (~0)"
+test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_char == ~0" "\\$\[0-9\]* = $false"  "print v_unsigned_char == (unsigned char)~0" "\\$\[0-9\]* = $true" "print v_unsigned_char == ~0" "\\$\[0-9\]* = $false"  "print unsigned char == (~0)"
 # FIXME:  gdb mishandles the cast (unsigned char) on the i960, so I've
 # set up an expected failure for this case.
 setup_xfail "i960-*-*" 1821
-test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_char != (unsigned char)~0" "\\$\[0-9\]* = $false"  "print unsigned char != (~0)"
+test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_char != (unsigned char)~0" "\\$\[0-9\]* = $false"  "print v_unsigned_char != ~0" "\\$\[0-9\]* = $true" "print unsigned char != (~0)"
 test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_char < 127" "\\$\[0-9\]* = $false"  "print unsigned char < (~0)"
 test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_char > 127" "\\$\[0-9\]* = $true"  "print unsigned char > (~0)"
 #
@@ -140,7 +140,7 @@ test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short != 0" "
 test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_short < 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned short <"
 test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_short > 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned short >"
 # make short a minus
-test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_short == ~0" "\\$\[0-9\]* = $false"  "print v_unsigned_short == (unsigned short)~0" "\\$\[0-9\]* = $true"  "print unsigned short == (~0)"
+test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short == 0" "\\$\[0-9\]* = $false"  "print sizeof (v_unsigned_short) < sizeof (~0) && v_unsigned_short == ~0" "\\$\[0-9\]* = $false"  "print v_unsigned_short == (unsigned short)~0" "\\$\[0-9\]* = $true"  "print unsigned short == (~0)"
 test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_short != (unsigned short)~0" "\\$\[0-9\]* = $false"  "print unsigned short != (~0)"
 test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_short < 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned short < (~0)"
 test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_short > 0x7FFF" "\\$\[0-9\]* = $true"  "print unsigned short > (~0)"
