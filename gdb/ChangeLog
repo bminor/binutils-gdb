@@ -1,3 +1,20 @@
+Mon Apr  3 19:28:14 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* top.c, utils.c, main.c: Replace error_pre_print with two
+	variables: error_pre_print (for RETURN_ERROR) and quit_pre_print
+	(for RETURN_QUIT).  Fixes a bug whereby typing ^C (e.g. in "maint
+	print sym") could output extraneous stuff.
+	* objfiles.c: Don't declare error_pre_print; defs.h does it.
+
+Mon Apr  3 13:48:28 1995  Stu Grossman  (grossman@andros.cygnus.com)
+
+	* monitor.h:  Add MO_GETMEM_NEEDS_RANGE flag.
+	* monitor.c (monitor_read_memory):  Use previously mentioned flag
+	to send proper format memory examine commands to the w89k monitor.
+	Also, try to handle bizarre format of memory dump...
+
+	* op50-rom.c w89k-rom.c:  Update to new monitor.[ch] conventions.
+
 Sat Apr  1 03:22:20 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* dbxread.c (process_one_symbol) [SOFUN_ADDRESS_MAYBE_MISSING]:

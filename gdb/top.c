@@ -493,15 +493,22 @@ catch_errors (func, args, errstring, mask)
   int val;
   struct cleanup *saved_cleanup_chain;
   char *saved_error_pre_print;
+  char *saved_quit_pre_print;
 
   saved_cleanup_chain = save_cleanups ();
   saved_error_pre_print = error_pre_print;
+  saved_quit_pre_print = quit_pre_print;
 
   if (mask & RETURN_MASK_ERROR)
-    memcpy ((char *)saved_error, (char *)error_return, sizeof (jmp_buf));
+    {
+      memcpy ((char *)saved_error, (char *)error_return, sizeof (jmp_buf));
+      error_pre_print = errstring;
+    }
   if (mask & RETURN_MASK_QUIT)
-    memcpy (saved_quit, quit_return, sizeof (jmp_buf));
-  error_pre_print = errstring;
+    {
+      memcpy (saved_quit, quit_return, sizeof (jmp_buf));
+      quit_pre_print = errstring;
+    }
 
   if (setjmp (tmp_jmp) == 0)
     {
@@ -516,11 +523,16 @@ catch_errors (func, args, errstring, mask)
 
   restore_cleanups (saved_cleanup_chain);
 
-  error_pre_print = saved_error_pre_print;
   if (mask & RETURN_MASK_ERROR)
-    memcpy (error_return, saved_error, sizeof (jmp_buf));
+    {
+      memcpy (error_return, saved_error, sizeof (jmp_buf));
+      error_pre_print = saved_error_pre_print;
+    }
   if (mask & RETURN_MASK_QUIT)
-    memcpy (quit_return, saved_quit, sizeof (jmp_buf));
+    {
+      memcpy (quit_return, saved_quit, sizeof (jmp_buf));
+      quit_pre_print = saved_quit_pre_print;
+    }
   return val;
 }
 

@@ -49,10 +49,6 @@ map_to_address PARAMS ((void));
 
 #endif  /* !defined(NO_MMALLOC) && defined(HAVE_MMAP) */
 
-/* Message to be printed before the error message, when an error occurs.  */
-
-extern char *error_pre_print;
-
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info. */
 
