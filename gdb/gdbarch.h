@@ -970,6 +970,11 @@ extern void set_gdbarch_get_longjmp_target (struct gdbarch *gdbarch, gdbarch_get
    reqires that these methods be set up from the word go.  This also
    avoids any potential problems with moving beyond multi-arch partial. */
 
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (USE_GENERIC_DUMMY_FRAMES)
+#define USE_GENERIC_DUMMY_FRAMES (1)
+#endif
+
 extern int gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch);
 extern void set_gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch, int use_generic_dummy_frames);
 #if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (USE_GENERIC_DUMMY_FRAMES)
@@ -979,6 +984,11 @@ extern void set_gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch, int u
 #if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (USE_GENERIC_DUMMY_FRAMES)
 #define USE_GENERIC_DUMMY_FRAMES (gdbarch_use_generic_dummy_frames (current_gdbarch))
 #endif
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (CALL_DUMMY_LOCATION)
+#define CALL_DUMMY_LOCATION (AT_ENTRY_POINT)
 #endif
 
 extern int gdbarch_call_dummy_location (struct gdbarch *gdbarch);
@@ -1046,6 +1056,11 @@ extern void set_gdbarch_call_dummy_length (struct gdbarch *gdbarch, int call_dum
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_LENGTH)
 #define CALL_DUMMY_LENGTH (gdbarch_call_dummy_length (current_gdbarch))
 #endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (PC_IN_CALL_DUMMY)
+#define PC_IN_CALL_DUMMY(pc, sp, frame_address) (generic_pc_in_call_dummy (pc, sp, frame_address))
 #endif
 
 typedef int (gdbarch_pc_in_call_dummy_ftype) (CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address);

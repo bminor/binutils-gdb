@@ -1137,7 +1137,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    * Call Dummies
    * 
    * These values and methods are used when gdb calls a target function.  */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, h8300_push_return_address);
   set_gdbarch_deprecated_extract_return_value (gdbarch, h8300_extract_return_value);
@@ -1147,13 +1146,11 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_return_value (gdbarch, h8300_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, h8300_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, h8300_use_struct_convention);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);

@@ -1092,7 +1092,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, frv_extract_struct_value_address);
 
   /* Settings for calling functions in the inferior.  */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_coerce_float_to_double (gdbarch, 
 				      standard_coerce_float_to_double);
@@ -1115,7 +1114,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
 
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);

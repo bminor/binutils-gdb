@@ -2204,7 +2204,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, ia64_write_pc);
 
   /* Settings for calling functions in the inferior.  */
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_push_arguments (gdbarch, ia64_push_arguments);
   set_gdbarch_push_return_address (gdbarch, ia64_push_return_address);
@@ -2231,11 +2230,9 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
 
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);

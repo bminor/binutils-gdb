@@ -522,11 +522,13 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
-  current_gdbarch->use_generic_dummy_frames = -1;
+  current_gdbarch->use_generic_dummy_frames = 1;
+  current_gdbarch->call_dummy_location = AT_ENTRY_POINT;
   current_gdbarch->call_dummy_start_offset = -1;
   current_gdbarch->call_dummy_breakpoint_offset = -1;
   current_gdbarch->call_dummy_breakpoint_offset_p = -1;
   current_gdbarch->call_dummy_length = -1;
+  current_gdbarch->pc_in_call_dummy = generic_pc_in_call_dummy;
   current_gdbarch->call_dummy_p = -1;
   current_gdbarch->call_dummy_words = legacy_call_dummy_words;
   current_gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
@@ -678,12 +680,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of cannot_fetch_register, invalid_p == 0 */
   /* Skip verify of cannot_store_register, invalid_p == 0 */
   /* Skip verify of get_longjmp_target, has predicate */
-  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->use_generic_dummy_frames == -1))
-    fprintf_unfiltered (log, "\n\tuse_generic_dummy_frames");
-  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->call_dummy_location == 0))
-    fprintf_unfiltered (log, "\n\tcall_dummy_location");
+  /* Skip verify of use_generic_dummy_frames, invalid_p == 0 */
+  /* Skip verify of call_dummy_location, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_location == AT_ENTRY_POINT && gdbarch->call_dummy_address == 0))
     fprintf_unfiltered (log, "\n\tcall_dummy_address");
@@ -699,9 +697,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_length == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_length");
-  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->pc_in_call_dummy == 0))
-    fprintf_unfiltered (log, "\n\tpc_in_call_dummy");
+  /* Skip verify of pc_in_call_dummy, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->call_dummy_p == -1))
     fprintf_unfiltered (log, "\n\tcall_dummy_p");
@@ -3328,9 +3324,7 @@ int
 gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->use_generic_dummy_frames == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_use_generic_dummy_frames invalid");
+  /* Skip verify of use_generic_dummy_frames, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_use_generic_dummy_frames called\n");
   return gdbarch->use_generic_dummy_frames;
@@ -3347,9 +3341,7 @@ int
 gdbarch_call_dummy_location (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->call_dummy_location == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_call_dummy_location invalid");
+  /* Skip verify of call_dummy_location, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_location called\n");
   return gdbarch->call_dummy_location;

@@ -1332,14 +1332,11 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pseudo_register_read (gdbarch, m68hc11_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, m68hc11_pseudo_register_write);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, m68hc11_call_dummy_address);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1); /*???*/
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_words (gdbarch, m68hc11_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch,
                                        sizeof (m68hc11_call_dummy_words));

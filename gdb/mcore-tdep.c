@@ -1104,17 +1104,14 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Call Dummies:  */
 
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
   set_gdbarch_function_start_offset (gdbarch, 0);

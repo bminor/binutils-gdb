@@ -1217,14 +1217,11 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, avr_call_dummy_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, avr_call_dummy_words);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);

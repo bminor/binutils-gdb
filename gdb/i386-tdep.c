@@ -1577,10 +1577,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-
   /* Call dummy code.  */
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);

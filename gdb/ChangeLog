@@ -1,3 +1,69 @@
+2002-11-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (CALL_DUMMY_LOCATION): Default to AT_ENTRY_POINT.
+	(USE_GENERIC_DUMMY_FRAMES): Default to true.
+	(PC_IN_CALL_DUMMY): Default to generic_pc_in_call_dummy.
+	* gdbarch.c, gdbarch.h: Re-generate.
+	* inferior.h (USE_GENERIC_DUMMY_FRAMES): Delete macro definition.
+	(CALL_DUMMY_LOCATION): Delete macro definition.
+	(PC_IN_CALL_DUMMY): Delete macro definitions.
+	
+	* arm-tdep.c (arm_gdbarch_init): Do not set pc_in_call_dummy,
+	default is already generic_pc_in_call_dummy.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Ditto.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+	
+	* arm-tdep.c (arm_gdbarch_init): Do not set
+	use_generic_dummy_frames, default is already 1.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Ditto.
+	* x86-64-tdep.c (x86_64_gdbarch_init): Ditto.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* i386-tdep.c (i386_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Do not set
+	call_dummy_location, default is already AT_ENTRY_POINT.
+	* x86-64-tdep.c (x86_64_gdbarch_init): Ditto.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* sparc-tdep.c (sparc_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* i386-tdep.c (i386_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+	* arm-tdep.c (arm_gdbarch_init): Ditto.
+	* alpha-tdep.c (alpha_gdbarch_init): Ditto.
+
 2002-11-28  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h: Update comments on set_current_frame, create_new_frame,

@@ -2880,14 +2880,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_char_signed (gdbarch, 0);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);

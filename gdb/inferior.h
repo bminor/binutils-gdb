@@ -423,14 +423,6 @@ extern int attach_flag;
 #define AFTER_TEXT_END 3
 #define AT_ENTRY_POINT 4
 
-#if !defined (USE_GENERIC_DUMMY_FRAMES)
-#define USE_GENERIC_DUMMY_FRAMES 0
-#endif
-
-#if !defined (CALL_DUMMY_LOCATION)
-#define CALL_DUMMY_LOCATION ON_STACK
-#endif /* No CALL_DUMMY_LOCATION.  */
-
 #if !defined (CALL_DUMMY_ADDRESS)
 #define CALL_DUMMY_ADDRESS() (internal_error (__FILE__, __LINE__, "CALL_DUMMY_ADDRESS"), 0)
 #endif
@@ -494,11 +486,6 @@ extern int attach_flag;
 extern int deprecated_pc_in_call_dummy_before_text_end (CORE_ADDR pc,
 							CORE_ADDR sp,
 							CORE_ADDR frame_address);
-#if !GDB_MULTI_ARCH
-#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == BEFORE_TEXT_END
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_before_text_end (pc, sp, frame_address)
-#endif /* Before text_end.  */
-#endif
 
 /* NOTE: cagney/2002-11-24: Targets need to both switch to generic
    dummy frames, and use generic_pc_in_call_dummy().  The generic
@@ -508,11 +495,6 @@ extern int deprecated_pc_in_call_dummy_before_text_end (CORE_ADDR pc,
 extern int deprecated_pc_in_call_dummy_after_text_end (CORE_ADDR pc,
 						       CORE_ADDR sp,
 						       CORE_ADDR frame_address);
-#if !GDB_MULTI_ARCH
-#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AFTER_TEXT_END
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_after_text_end (pc, sp, frame_address)
-#endif
-#endif
 
 /* NOTE: cagney/2002-11-24: Targets need to both switch to generic
    dummy frames, and use generic_pc_in_call_dummy().  The generic
@@ -522,11 +504,6 @@ extern int deprecated_pc_in_call_dummy_after_text_end (CORE_ADDR pc,
 extern int deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc,
 						 CORE_ADDR sp,
 						 CORE_ADDR frame_address);
-#if !GDB_MULTI_ARCH
-#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == ON_STACK
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
-#endif
-#endif
 
 /* NOTE: cagney/2002-11-24: Targets need to both switch to generic
    dummy frames, and use generic_pc_in_call_dummy().  The generic
@@ -536,11 +513,6 @@ extern int deprecated_pc_in_call_dummy_on_stack (CORE_ADDR pc,
 extern int deprecated_pc_in_call_dummy_at_entry_point (CORE_ADDR pc,
 						       CORE_ADDR sp,
 						       CORE_ADDR frame_address);
-#if !GDB_MULTI_ARCH
-#if !defined (PC_IN_CALL_DUMMY) && CALL_DUMMY_LOCATION == AT_ENTRY_POINT
-#define PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
-#endif
-#endif
 
 /* It's often not enough for our clients to know whether the PC is merely
    somewhere within the call dummy.  They may need to know whether the

@@ -3252,7 +3252,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
       set_gdbarch_call_dummy_length (gdbarch, 0);
-      set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
 #endif
       set_gdbarch_call_dummy_stack_adjust (gdbarch, 68);
@@ -3308,7 +3307,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
       set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
       set_gdbarch_call_dummy_length (gdbarch, 0);
-      set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
       set_gdbarch_call_dummy_start_offset (gdbarch, 0);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
 #endif

@@ -1088,9 +1088,6 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
-  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
-
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);

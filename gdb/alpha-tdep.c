@@ -1887,7 +1887,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Alpha OSF/1 inhibits execution of code on the stack.  But there is
      no need for a dummy on the Alpha.  PUSH_ARGUMENTS takes care of all
      argument handling and bp_call_dummy takes care of stopping the dummy.  */
-  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, alpha_call_dummy_address);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
