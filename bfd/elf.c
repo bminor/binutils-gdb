@@ -5753,7 +5753,10 @@ elfcore_grok_prstatus (abfd, note)
       offset   = offsetof (prstatus_t, pr_reg);
       memcpy (&prstat, note->descdata, sizeof (prstat));
 
-      elf_tdata (abfd)->core_signal = prstat.pr_cursig;
+      /* Do not overwrite the core signal if it
+	 has already been set by another thread.  */
+      if (elf_tdata (abfd)->core_signal == 0)
+	elf_tdata (abfd)->core_signal = prstat.pr_cursig;
       elf_tdata (abfd)->core_pid = prstat.pr_pid;
 
       /* pr_who exists on:
@@ -5776,7 +5779,10 @@ elfcore_grok_prstatus (abfd, note)
       offset   = offsetof (prstatus32_t, pr_reg);
       memcpy (&prstat, note->descdata, sizeof (prstat));
 
-      elf_tdata (abfd)->core_signal = prstat.pr_cursig;
+      /* Do not overwrite the core signal if it
+	 has already been set by another thread.  */
+      if (elf_tdata (abfd)->core_signal == 0)
+	elf_tdata (abfd)->core_signal = prstat.pr_cursig;
       elf_tdata (abfd)->core_pid = prstat.pr_pid;
 
       /* pr_who exists on:
