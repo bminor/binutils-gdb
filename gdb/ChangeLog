@@ -1,3 +1,35 @@
+2001-03-22  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	Make DJGPP use the new unified support for hardware
+	breakpoints and watchpoints on x86 targets:
+
+	* config/i386/nm-go32.h <top level>: Don't include nm-i386v.h,
+	include nm-i386.h instead.
+	(TARGET_HAS_HARDWARE_WATCHPOINTS, HAVE_CONTINUABLE_WATCHPOINT)
+	(TARGET_CAN_USE_HARDWARE_WATCHPOINT, STOPPED_BY_WATCHPOINT)
+	(TARGET_REGION_OK_FOR_HW_WATCHPOINT, DECR_PC_AFTER_HW_BREAK)
+	(target_stopped_data_address, target_insert_watchpoint)
+	(target_remove_watchpoint, target_insert_hw_breakpoint)
+	(target_remove_hw_breakpoint): Don't define.
+	(I386_USE_GENERIC_WATCHPOINTS, I386_DR_LOW_SET_CONTROL)
+	(I386_DR_LOW_SET_ADDR, I386_DR_LOW_RESET_ADDR)
+	(I386_DR_LOW_GET_STATUS): Define to call appropriate go32_*
+	functions from go32-nat.c.
+
+	* config/i386/go32.mh (NATDEPFILES): Add i386-nat.o.
+
+	* go32-nat.c <top level>: Remove prototypes for watchpoint-
+	related functions.  Remove definitions of watchpoint-related
+	macros.
+	(go32_mourn_inferior): Call i386_cleanup_dregs instead of the
+	private cleanup_dregs function.
+	(cleanup_dregs, go32_insert_watchpoint)
+	(go32_insert_aligned_watchpoint, go32_handle_nonaligned_watchpoint)
+	(go32_remove_watchpoint, go32_remove_aligned_watchpoint)
+	(go32_region_ok_for_watchpoint, go32_stopped_by_watchpoint)
+	(go32_remove_hw_breakpoint, go32_insert_hw_breakpoint): Remove.
+	(go32_set_dr, go32_set_dr7, go32_get_dr6): New functions.
+
 2001-03-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-tdep.c (fetch_instruction): Warn about slot numbers greater

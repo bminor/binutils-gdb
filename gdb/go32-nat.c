@@ -1,5 +1,5 @@
 /* Native debugging support for Intel x86 running DJGPP.
-   Copyright 1997, 1999, 2001 Free Software Foundation, Inc.
+   Copyright 1997, 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of GDB.
@@ -166,15 +166,8 @@ static void go32_files_info (struct target_ops *target);
 static void go32_stop (void);
 static void go32_kill_inferior (void);
 static void go32_create_inferior (char *exec_file, char *args, char **env);
-static void cleanup_dregs (void);
 static void go32_mourn_inferior (void);
 static int go32_can_run (void);
-static int go32_insert_aligned_watchpoint (CORE_ADDR waddr, CORE_ADDR addr,
-					   int len, int rw);
-static int go32_remove_aligned_watchpoint (CORE_ADDR waddr, CORE_ADDR addr,
-					   int len, int rw);
-static int go32_handle_nonaligned_watchpoint (wp_op what, CORE_ADDR waddr,
-					      CORE_ADDR addr, int len, int rw);
 
 static struct target_ops go32_ops;
 static void go32_terminal_init (void);
@@ -645,7 +638,7 @@ go32_mourn_inferior (void)
      be nice if GDB itself would take care to remove all breakpoints
      at all times, but it doesn't, probably under an assumption that
      the OS cleans up when the debuggee exits.  */
-  cleanup_dregs ();
+  i386_cleanup_dregs ();
   go32_kill_inferior ();
   generic_mourn_inferior ();
 }
@@ -658,393 +651,35 @@ go32_can_run (void)
 
 /* Hardware watchpoint support.  */
 
-#define DR_STATUS 6
-#define DR_CONTROL 7
-#define DR_ENABLE_SIZE 2
-#define DR_LOCAL_ENABLE_SHIFT 0
-#define DR_GLOBAL_ENABLE_SHIFT 1
-#define DR_LOCAL_SLOWDOWN 0x100
-#define DR_GLOBAL_SLOWDOWN 0x200
-#define DR_CONTROL_SHIFT 16
-#define DR_CONTROL_SIZE 4
-#define DR_RW_READWRITE 0x3
-#define DR_RW_WRITE 0x1
-#define DR_CONTROL_MASK 0xf
-#define DR_ENABLE_MASK 0x3
-#define DR_LEN_1 0x0
-#define DR_LEN_2 0x4
-#define DR_LEN_4 0xc
-
 #define D_REGS edi.dr
-#define CONTROL D_REGS[DR_CONTROL]
-#define STATUS D_REGS[DR_STATUS]
+#define CONTROL D_REGS[7]
+#define STATUS D_REGS[6]
 
-#define IS_REG_FREE(index) \
-  (!(CONTROL & (3 << (DR_ENABLE_SIZE * (index)))))
-
-#define LOCAL_ENABLE_REG(index) \
-  (CONTROL |= (1 << (DR_LOCAL_ENABLE_SHIFT + DR_ENABLE_SIZE * (index))))
-
-#define GLOBAL_ENABLE_REG(index) \
-  (CONTROL |= (1 << (DR_GLOBAL_ENABLE_SHIFT + DR_ENABLE_SIZE * (index))))
-
-#define DISABLE_REG(index) \
-  (CONTROL &= ~(3 << (DR_ENABLE_SIZE * (index))))
-
-#define SET_LOCAL_EXACT() \
-  (CONTROL |= DR_LOCAL_SLOWDOWN)
-
-#define SET_GLOBAL_EXACT() \
-  (CONTROL |= DR_GLOBAL_SLOWDOWN)
-
-#define RESET_LOCAL_EXACT() \
-   (CONTROL &= ~(DR_LOCAL_SLOWDOWN))
-
-#define RESET_GLOBAL_EXACT() \
-   (CONTROL &= ~(DR_GLOBAL_SLOWDOWN))
-
-#define SET_BREAK(index,address) \
-  do {\
-    CONTROL &= ~(DR_CONTROL_MASK << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (index)));\
-    D_REGS[index] = address;\
-    dr_ref_count[index]++;\
-  } while(0)
-
-#define SET_WATCH(index,address,rw,len) \
-  do {\
-    SET_BREAK(index,address);\
-    CONTROL |= ((len)|(rw)) << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (index));\
-  } while (0)
-
-#define IS_WATCH(index) \
-  (CONTROL & (DR_CONTROL_MASK << (DR_CONTROL_SHIFT + DR_CONTROL_SIZE*(index))))
-
-#define WATCH_HIT(index) ((STATUS & (1 << (index))) && IS_WATCH(index))
-
-#define DR_DEF(index) \
-  ((CONTROL >> (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (index))) & 0x0f)
-    
-
-#if 0 /* use debugging macro */
-#define SHOW_DR(text,len) \
-do { \
-  if (!getenv ("GDB_SHOW_DR")) break; \
-  fprintf(stderr,"%08x %08x ",edi.dr[7],edi.dr[6]); \
-  fprintf(stderr,"%08x %d %08x %d ", \
-	  edi.dr[0],dr_ref_count[0],edi.dr[1],dr_ref_count[1]); \
-  fprintf(stderr,"%08x %d %08x %d ", \
-	  edi.dr[2],dr_ref_count[2],edi.dr[3],dr_ref_count[3]); \
-  fprintf(stderr,(len)?"(%s:%d)\n":"(%s)\n",#text,len); \
-} while (0)
-#else
-#define SHOW_DR(text,len) do {} while (0)
-#endif
-
-static void
-cleanup_dregs (void)
+/* Pass the address ADDR to the inferior in the I'th debug register.
+   Here we just store the address in D_REGS, the watchpoint will be
+   actually set up when go32_wait runs the debuggee.  */
+void
+go32_set_dr (int i, CORE_ADDR addr)
 {
-  int i;
-
-  CONTROL = 0;
-  STATUS = 0;
-  for (i = 0; i < 4; i++)
-    {
-      D_REGS[i] = 0;
-      dr_ref_count[i] = 0;
-    }
+  D_REGS[i] = addr;
 }
 
-/* Insert a watchpoint.  */
-
-int
-go32_insert_watchpoint (int pid ATTRIBUTE_UNUSED, CORE_ADDR addr,
-			int len, int rw)
+/* Pass the value VAL to the inferior in the DR7 debug control
+   register.  Here we just store the address in D_REGS, the watchpoint
+   will be actually set up when go32_wait runs the debuggee.  */
+void
+go32_set_dr7 (unsigned val)
 {
-  int ret = go32_insert_aligned_watchpoint (addr, addr, len, rw);
-
-  SHOW_DR (insert_watch, len);
-  return ret;
+  CONTROL = val;
 }
 
-static int
-go32_insert_aligned_watchpoint (CORE_ADDR waddr, CORE_ADDR addr,
-				int len, int rw)
+/* Get the value of the DR6 debug status register from the inferior.
+   Here we just return the value stored in D_REGS, as we've got it
+   from the last go32_wait call.  */
+unsigned
+go32_get_dr6 (void)
 {
-  int i;
-  int read_write_bits, len_bits;
-
-  /* Values of rw: 0 - write, 1 - read, 2 - access (read and write).
-     However, x86 doesn't support read-only data breakpoints.  */
-  read_write_bits = rw ? DR_RW_READWRITE : DR_RW_WRITE;
-
-  switch (len)
-  {
-  case 4:
-    len_bits = DR_LEN_4;
-    break;
-  case 2:
-    len_bits = DR_LEN_2;
-    break;
-  case 1:
-    len_bits = DR_LEN_1;
-    break;
-  default:
-    /* The debug registers only have 2 bits for the length, so
-       so this value will always fail the loop below.  */
-    len_bits = 0x10;
-  }
-
-  /* Look for an occupied debug register with the same address and the
-     same RW and LEN definitions.  If we find one, we can use it for
-     this watchpoint as well (and save a register).  */
-  for (i = 0; i < 4; i++)
-  {
-    if (!IS_REG_FREE (i) && D_REGS[i] == addr
-	&& DR_DEF (i) == (unsigned)(len_bits | read_write_bits))
-    {
-      dr_ref_count[i]++;
-      return 0;
-    }
-  }
-
-  /* Look for a free debug register.  */
-  for (i = 0; i <= 3; i++)
-  {
-    if (IS_REG_FREE (i))
-      break;
-  }
-
-  /* No more debug registers!  */
-  if (i > 3)
-    return -1;
-
-  if (len == 2)
-  {
-    if (addr % 2)
-      return go32_handle_nonaligned_watchpoint (wp_insert, waddr, addr,
-						len, rw);
-  }
-  else if (len == 4)
-  {
-    if (addr % 4)
-      return go32_handle_nonaligned_watchpoint (wp_insert, waddr, addr,
-						len, rw);
-  }
-  else if (len != 1)
-    return go32_handle_nonaligned_watchpoint (wp_insert, waddr, addr, len, rw);
-
-  SET_WATCH (i, addr, read_write_bits, len_bits);
-  LOCAL_ENABLE_REG (i);
-  SET_LOCAL_EXACT ();
-  SET_GLOBAL_EXACT ();
-  return 0;
-}
-
-static int
-go32_handle_nonaligned_watchpoint (wp_op what, CORE_ADDR waddr, CORE_ADDR addr,
-				   int len, int rw)
-{
-  int align;
-  int size;
-  int rv = 0, status = 0;
-
-  static int size_try_array[4][4] =
-  {
-    { 1, 1, 1, 1 },		/* trying size one */
-    { 2, 1, 2, 1 },		/* trying size two */
-    { 2, 1, 2, 1 },		/* trying size three */
-    { 4, 1, 2, 1 }		/* trying size four */
-  };
-
-  while (len > 0)
-    {
-      align = addr % 4;
-      /* Four is the maximum length a 386 debug register can watch.  */
-      size = size_try_array[len > 4 ? 3 : len - 1][align];
-      if (what == wp_insert)
-	status = go32_insert_aligned_watchpoint (waddr, addr, size, rw);
-      else if (what == wp_remove)
-	status = go32_remove_aligned_watchpoint (waddr, addr, size, rw);
-      else if (what == wp_count)
-	rv++;
-      else
-	status = EINVAL;
-      /* We keep the loop going even after a failure, because some of
-	 the other aligned watchpoints might still succeed, e.g. if
-	 they watch addresses that are already watched, and thus just
-	 increment the reference counts of occupied debug registers.
-	 If we break out of the loop too early, we could cause those
-	 addresses watched by other watchpoints to be disabled when
-	 GDB reacts to our failure to insert this watchpoint and tries
-	 to remove it.  */
-      if (status)
-	rv = status;
-      addr += size;
-      len -= size;
-    }
-  return rv;
-}
-
-/* Remove a watchpoint.  */
-
-int
-go32_remove_watchpoint (int pid ATTRIBUTE_UNUSED, CORE_ADDR addr,
-			int len, int rw)
-{
-  int ret = go32_remove_aligned_watchpoint (addr, addr, len, rw);
-
-  SHOW_DR (remove_watch, len);
-  return ret;
-}
-
-static int
-go32_remove_aligned_watchpoint (CORE_ADDR waddr, CORE_ADDR addr,
-				int len, int rw)
-{
-  int i;
-  int read_write_bits, len_bits;
-
-  /* Values of rw: 0 - write, 1 - read, 2 - access (read and write).
-     However, x86 doesn't support read-only data breakpoints.  */
-  read_write_bits = rw ? DR_RW_READWRITE : DR_RW_WRITE;
-
-  switch (len)
-    {
-      case 4:
-	len_bits = DR_LEN_4;
-	break;
-      case 2:
-	len_bits = DR_LEN_2;
-	break;
-      case 1:
-	len_bits = DR_LEN_1;
-	break;
-      default:
-	/* The debug registers only have 2 bits for the length, so
-	   so this value will always fail the loop below.  */
-	len_bits = 0x10;
-    }
-
-  if (len == 2)
-    {
-      if (addr % 2)
-	return go32_handle_nonaligned_watchpoint (wp_remove, waddr, addr,
-						  len, rw);
-    }
-  else if (len == 4)
-    {
-      if (addr % 4)
-	return go32_handle_nonaligned_watchpoint (wp_remove, waddr, addr,
-						  len, rw);
-    }
-  else if (len != 1)
-    return go32_handle_nonaligned_watchpoint (wp_remove, waddr, addr, len, rw);
-
-  for (i = 0; i <= 3; i++)
-    {
-      if (!IS_REG_FREE (i) && D_REGS[i] == addr
-	  && DR_DEF (i) == (unsigned)(len_bits | read_write_bits))
-	{
-	  dr_ref_count[i]--;
-	  if (dr_ref_count[i] == 0)
-	    DISABLE_REG (i);
-	}
-    }
-  RESET_LOCAL_EXACT ();
-  RESET_GLOBAL_EXACT ();
-
-  return 0;
-}
-
-/* Can we use debug registers to watch a region whose address is ADDR
-   and whose length is LEN bytes?  */
-
-int
-go32_region_ok_for_watchpoint (CORE_ADDR addr, int len)
-{
-  /* Compute how many aligned watchpoints we would need to cover this
-     region.  */
-  int nregs = go32_handle_nonaligned_watchpoint (wp_count, addr, addr, len, 0);
-
-  return nregs <= 4 ? 1 : 0;
-}
-
-/* Check if stopped by a data watchpoint.  If so, return the address
-   whose access triggered the watchpoint.  */
-
-CORE_ADDR
-go32_stopped_by_watchpoint (int pid ATTRIBUTE_UNUSED, int data_watchpoint)
-{
-  int i, ret = 0;
-  int status;
-
-  status = edi.dr[DR_STATUS];
-  SHOW_DR (stopped_by, 0);
-  for (i = 0; i <= 3; i++)
-    {
-      if (WATCH_HIT (i) && data_watchpoint)
-	{
-	  SHOW_DR (WP_HIT, 0);
-	  ret = D_REGS[i];
-	}
-    }
-
-  return ret;
-}
-
-/* Remove a breakpoint.  */
-
-int
-go32_remove_hw_breakpoint (CORE_ADDR addr, void *shadow ATTRIBUTE_UNUSED)
-{
-  int i;
-  for (i = 0; i <= 3; i++)
-    {
-      if (!IS_REG_FREE (i) && D_REGS[i] == addr && DR_DEF (i) == 0)
-	{
-	  dr_ref_count[i]--;
-	  if (dr_ref_count[i] == 0)
-	    DISABLE_REG (i);
-	}
-    }
-  SHOW_DR (remove_hw, 0);
-  return 0;
-}
-
-int
-go32_insert_hw_breakpoint (CORE_ADDR addr, void *shadow ATTRIBUTE_UNUSED)
-{
-  int i;
-
-  /* Look for an occupied debug register with the same address and the
-     same RW and LEN definitions.  If we find one, we can use it for
-     this breakpoint as well (and save a register).  */
-  for (i = 0; i < 4; i++)
-    {
-      if (!IS_REG_FREE (i) && D_REGS[i] == addr && DR_DEF (i) == 0)
-	{
-	  dr_ref_count[i]++;
-	  SHOW_DR (insert_hw, 0);
-	  return 0;
-	}
-    }
-
-  /* Look for a free debug register.  */
-  for (i = 0; i <= 3; i++)
-    {
-      if (IS_REG_FREE (i))
-	break;
-    }
-
-  /* No more debug registers?  */
-  if (i < 4)
-    {
-      SET_BREAK (i, addr);
-      LOCAL_ENABLE_REG (i);
-    }
-  SHOW_DR (insert_hw, 0);
-
-  return i < 4 ? 0 : EBUSY;
+  return STATUS;
 }
 
 /* Put the device open on handle FD into either raw or cooked
