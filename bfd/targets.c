@@ -361,6 +361,7 @@ extern bfd_target i386coff_vec;
 extern bfd_target i386linux_vec;
 extern bfd_target i386lynx_aout_vec;
 extern bfd_target i386lynx_coff_vec;
+extern bfd_target i386mach3_vec;
 extern bfd_target icoff_big_vec;
 extern bfd_target icoff_little_vec;
 extern bfd_target ieee_vec;

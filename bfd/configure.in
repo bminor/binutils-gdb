@@ -139,6 +139,7 @@ do
     a_out_adobe_vec)		tb="$tb aout-adobe.o aout32.o stab-syms.o" ;;
     aout_mips_big_vec)		tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
     aout_mips_little_vec)	tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
+    apollocoff_vec)		tb="$tb coff-apollo.o" ;;
     b_out_vec_big_host)		tb="$tb bout.o aout32.o stab-syms.o" ;;
     b_out_vec_little_host)	tb="$tb bout.o aout32.o stab-syms.o" ;;
     bfd_elf32_big_generic_vec) 	tb="$tb elf32-gen.o elf32.o elf.o" ;;
@@ -169,7 +170,7 @@ do
     host_aout_vec)		tb="$tb host-aout.o aout32.o stab-syms.o" ;;
     hp300bsd_vec)		tb="$tb hp300bsd.o aout32.o stab-syms.o" ;;
     hp300hpux_vec)		tb="$tb hp300hpux.o aout32.o stab-syms.o" ;;
-    hppa_vec)			tb="$tb som.o" ;;
+    som_vec)			tb="$tb som.o" ;;
     i386aout_vec)		tb="$tb i386aout.o aout32.o stab-syms.o" ;;
     i386bsd_vec)		tb="$tb i386bsd.o aout32.o stab-syms.o" ;;
     netbsd386_vec)		tb="$tb netbsd386.o aout32.o stab-syms.o" ;;
@@ -177,6 +178,7 @@ do
     i386linux_vec)		tb="$tb i386linux.o aout32.o stab-syms.o" ;;
     i386lynx_aout_vec)		tb="$tb i386lynx.o lynx-core.o aout32.o stab-syms.o" ;;
     i386lynx_coff_vec)		tb="$tb i386lynx-cf.o lynx-core.o stab-syms.o" ;;
+    i386mach3_vec)		tb="$tb i386mach3.o" ;;
     icoff_big_vec)		tb="$tb coff-i960.o" ;;
     icoff_little_vec)		tb="$tb coff-i960.o" ;;
     ieee_vec)			tb="$tb ieee.o" ;;
