@@ -24,6 +24,8 @@
 #include "serial.h"
 #include "ser-unix.h"
 
+#include "gdb_vfork.h"
+
 #include <sys/types.h>
 #include "gdb_wait.h"
 #include <sys/socket.h>
@@ -64,11 +66,7 @@ pipe_open (serial_t scb, const char *name)
   if (socketpair (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
     return -1;
 
-#ifdef HAVE_VFORK
   pid = vfork ();
-#else
-  pid = fork ();
-#endif
   
   /* Error. */
   if (pid == -1)

@@ -1,3 +1,13 @@
+Tue Jan 30 17:27:11 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.in (AC_CHECK_FUNCS): Replace vfork test with
+ 	AC_FUNC_VFORK macro.
+	* config.in, configure: Re-generate.
+
+	* gdb_vfork.h: New file.
+	* ser-pipe.c (pipe_open): Update. Include "gdb_vfork.h".
+	* fork-child.c (fork_inferior): Ditto.
+	
 Tue Jan 30 17:09:07 2001  Andrew Cagney  <cagney@redhat.com>
 
 	* defs.h (strsave): Delete declaration.

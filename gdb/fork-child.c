@@ -25,6 +25,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdb_wait.h"
+#include "gdb_vfork.h"
 #include "gdbcore.h"
 #include "terminal.h"
 #include "gdbthread.h"
@@ -244,14 +245,10 @@ fork_inferior (char *exec_file, char *allargs, char **env,
   if (pre_trace_fun != NULL)
     (*pre_trace_fun) ();
 
-#ifdef HAVE_VFORK
   if (debug_fork)
     pid = fork ();
   else
     pid = vfork ();
-#else
-  pid = fork ();
-#endif
 
   if (pid < 0)
     perror_with_name ("vfork");

@@ -29,11 +29,17 @@
 /* Define if you have a working `mmap' system call.  */
 #undef HAVE_MMAP
 
+/* Define if you have <vfork.h>.  */
+#undef HAVE_VFORK_H
+
 /* Define as __inline if that's what the C compiler calls it.  */
 #undef inline
 
 /* Define to `long' if <sys/types.h> doesn't define.  */
 #undef off_t
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef pid_t
 
 /* Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
@@ -58,6 +64,9 @@
 
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
+
+/* Define vfork as fork if vfork does not work.  */
+#undef vfork
 
 /* Define if compiling on Solaris 7. */
 #undef _MSE_INT_H
@@ -224,9 +233,6 @@
 
 /* Define if you have the strchr function.  */
 #undef HAVE_STRCHR
-
-/* Define if you have the vfork function.  */
-#undef HAVE_VFORK
 
 /* Define if you have the <argz.h> header file.  */
 #undef HAVE_ARGZ_H
