@@ -99,17 +99,6 @@ i386_skip_prologue PARAMS ((int));
 
 #define INVALID_FLOAT(p, len) (0)
 
-#if 0
-/* code to execute to print interesting information about the
-   floating point processor (if any)
-   No need to define if there is nothing to do.
-   On the 386, unfortunately this code is host-dependent (and lives
-   in the i386-xdep.c file), so we can't
-   do this unless we *know* we aren't cross-debugging.  FIXME.
- */
-#define FLOAT_INFO { i386_float_info (); }
-#endif /*0*/
-
 /* Say how long (ordinary) registers are.  */
 
 #define REGISTER_TYPE long

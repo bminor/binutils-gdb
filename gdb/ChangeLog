@@ -1,9 +1,22 @@
 Fri Oct 16 13:06:08 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Native support for i386v (untested).
+
+	* config/i386v.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o coredep.o corelow.o i386-xdep.o i387-tdep.o.
+	  (NAT_FILE, NATDEPFILES): new macros.
+	* config/i386v.mt (TDEPFILES): removed exec.o, added i387-tdep.o.
+	* i386-xdep.c: removed.
+	* Makefile.in (HFILES): added nm-i386v.h
+	* i386v-nat.c, nm-i386v.h: new file.
+	* xm-i386v.h: (REGISTER_U_ADDR, i386_register_u_addr): removed to
+	  nm-i386v.h.
+	* tm-i386v.h (FLOAT_INFO): removed.
+
 	Native support for linux (untested).
 
 	* config/linux.mh (XDEPFILES): removed infptrace.o inftarg.o
-	  fork-child.o coredep.o corelow.o i387-tdep.o.
+	  fork-child.o coredep.o corelow.o i387-tdep.o i386-xdep.o.
 	  (NAT_FILE, NATDEPFILES): new macros.
 	* config/linux.mt (TDEPFILES): removed exec.o, added i387-tdep.o.
 	* Makefile.in (HFILES): added nm-linux.h.

@@ -1,4 +1,4 @@
-/* Macro defintions for i386.
+/* Host support for i386.
    Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
    Changes for 80386 by Pace Willisson (pace@prep.ai.mit.edu), July 1988.
 
@@ -43,8 +43,3 @@ on those where it does, it occurs quite reliably.  */
 
 #define KERNEL_U_ADDR 0xe0000000
 
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-	(addr) = i386_register_u_addr ((blockend),(regno));
-
-extern int
-i386_register_u_addr PARAMS ((int, int));
