@@ -1,5 +1,10 @@
 2001-05-08  Jim Blandy  <jimb@redhat.com>
 
+	* Makefile.in (mn10300-tdep.o): New rule.
+
+	* Makefile.in (gdb_string_h): Define.  Use it throughout.
+	Some rules were already using this, even though it isn't defined.
+
 	* Makefile.in (obstack_h, target_h): Define; these are already
 	used elsewhere, but have been expanding to the empty string.
 	(memattr_h): Define; needed by target_h.
