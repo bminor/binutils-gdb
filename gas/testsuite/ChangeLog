@@ -1,3 +1,14 @@
+Wed Oct  8 15:12:35 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/beq.s: Add .text to .globl to mark the symbol to as a
+	function symbol.
+	* gas/mips/jal.s: Likewise.
+
+Tue Oct  7 13:30:30 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/sparc/reloc64.[sd]: New testcase.
+	* gas/sparc/sparc.exp: Run it.
+
 Sat Oct  4 19:14:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/ieee-fp/x930509a.exp: Accept m68k listing format.
