@@ -5,7 +5,7 @@ Wed Jul 14 17:37:03 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	machine dependent fields in the makeva_list structure.
 	(makeva_size): Allocate extra space to handle gaps made by
 	alignment restrictions.
-	* xm-pa.h (MAKEVA_EXTRA_INFO): Define.
+	* config/pa/xm-pa.h (MAKEVA_EXTRA_INFO): Define.
 	(MAKEVA_START): Initialize arglist_address field.
 	(MAKEVA_ARG): Always store arguments on natural alignment 
 	boundaries.  Set arglist_address to the address right after
