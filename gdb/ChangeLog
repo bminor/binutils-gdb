@@ -1,5 +1,46 @@
 2004-08-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* alphabsd-nat.c (fetch_inferior_registers):
+	(store_inferior_registers): Replace PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+	* amd64bsd-nat.c (fetch_inferior_registers)
+	(store_inferior_registers): Replace PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+	* armnbsd-nat.c: Update copyright year.
+	(fetch_register, fetch_regs, fetch_fp_register, fetch_fp_regs)
+	(store_register, store_regs, store_fp_register, store_fp_regs):
+	Replace PTRACE_ARG3_TYPE with PTRACE_TYPE_ARG3.
+	* hppabsd-nat.c (fetch_inferior_registers)
+	(store_inferior_registers): Replace PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+	* i386bsd-nat.c (fetch_inferior_registers)
+	(store_inferior_registers, i386bsd_dr_set, i386bsd_dr_get_status):
+	Replace PTRACE_ARG3_TYPE with PTRACE_TYPE_ARG3.
+	* m68kbsd-nat.c (fetch_inferior_registers)
+	(store_inferior_registers): Replace PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+	* m88kbsd-nat.c (fetch_inferior_registers)
+	(store_inferior_registers): Replace PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+	* mipsnbsd-nat.c: Update copyright year.
+	(fetch_inferior_registers, store_inferior_registers):
+	Replace PTRACE_ARG3_TYPE with PTRACE_TYPE_ARG3.
+	* ns32knbsd-nat.c: Update copyright year.
+	(fetch_inferior_registers, store_inferior_registers):
+	Replace PTRACE_ARG3_TYPE with PTRACE_TYPE_ARG3.
+	* ppcnbsd-nat.c (fetch_inferior_registers):
+	(store_inferior_registers): Replace PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+	* ppcobsd-nat.c (fetch_inferior_registers):
+	(store_inferior_registers): Replace PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+	* shnbsd-nat.c: Update copyright year.
+	(fetch_inferior_registers, store_inferior_registers):
+	Replace PTRACE_ARG3_TYPE with PTRACE_TYPE_ARG3.
+	* vaxbsd-nat.c (fetch_inferior_registers)
+	(store_inferior_registers): Replace PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+	
 	* inferior.h (call_ptrace): Replace PTRACE_ARG3_TYPE with
 	PTRACE_TYPE_ARG3.
 	* infptrace.c (call_ptrace, child_resume, attach, detach)
