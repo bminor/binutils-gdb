@@ -221,6 +221,10 @@ case "${target}" in
     # the GNU linker supports shared libraries
     noconfigdirs="$noconfigdirs ld"
     ;;
+  powerpc-*-aix*)
+    # copied from rs6000-*-* entry
+    noconfigdirs="$noconfigdirs ld binutils gprof textutils cvs"
+    ;;
   rs6000-*-*)
     # a gcc built textutils will cause the linker to hang on 'join'
     # The CVS server code doesn't work on the RS/6000
