@@ -4,6 +4,8 @@ forward-include "{srcdir}"config:m68k:xm-mpw.h xm.h
 
 forward-include "{srcdir}"config:m68k:xm-m68k.h 'm68k/xm-m68k.h'
 
+Set xdepfiles   '"{o}"mac-xdep.c.o'
+
 # Make a copy of this file and give it a different name, so it
 # won't be confused with GDB's serial.h.
 
@@ -11,8 +13,17 @@ Duplicate -y "{MPW}"Interfaces:CIncludes:Serial.h MacSerial.h
 
 Echo "/* dummy */" >termio.h
 
-Set xdepfiles   " "
-Set natdepfiles " "
-Set tdepfiles   " "
+If "{target_canonical}" =~ /mips-idt-ecoff/
+	forward-include "{srcdir}"config:mips:tm-idt.h tm.h
 
-Set xm_file '"{s}"xm-mpw.h'
+	forward-include "{srcdir}"config:mips:tm-bigmips.h 'mips/tm-bigmips.h'
+	forward-include "{srcdir}"config:mips:tm-mips.h 'mips/tm-mips.h'
+
+	Set tdepfiles '"{o}"mips-pinsn.c.o "{o}"mips-tdep.c.o "{o}"exec.c.o "{o}"remote-mips.c.o'
+End If
+
+If "{target_canonical}" != "{host_canonical}"
+	forward-include "{srcdir}"config:nm-empty.h nm.h
+	Set natdepfiles " "
+End If
+

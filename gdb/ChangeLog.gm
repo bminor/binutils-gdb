@@ -1,6 +1,0 @@
-Thu Mar 10 15:51:40 1994  Stan Shebs  (shebs@andros.cygnus.com)
-
-	* mpw-xconfig.in: New file, mips-targeting config fragment.
-	* mpw-init.c: New file, MPW x mips version of init.c.
-
-

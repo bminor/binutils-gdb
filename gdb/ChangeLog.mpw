@@ -1,3 +1,11 @@
+Mon Sep 12 17:44:58 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-config.in: Use nm-empty.h if host is not target.
+	(xdepfiles): Add mac-xdep.c.o.
+	(xm_file): Remove.
+	* mpw-make.in: Add Fortran files.
+	(XDEPFILES): Remove.
+
 Fri Aug 19 15:23:40 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-init.c (initialize_all_files): Remove inits of utils and
@@ -130,4 +138,5 @@ Thu Mar 10 15:49:05 1994  Stan Shebs  (shebs@andros.cygnus.com)
 	* mpw-make.in: New file, MPW makefile fragment.
 	* config/m68k/xm-mpw.h: New file, MPW host definitions.
 	* ser-mac.c: New file, Mac serial interface.
+	* mpw-init.c: New file, MPW x mips version of init.c.
 

@@ -5,8 +5,6 @@ XM_CDEPS =
 TM_CDEPS = 
 NAT_CDEPS = 
 
-XDEPFILES = "{o}"mac-xdep.c.o
-
 CC_LD = Link
 
 gC = gC1
@@ -652,9 +650,9 @@ OBS =	"{o}"version.c.o "{o}"main.c.o "{o}"top.c.o "{o}"blockframe.c.o "{o}"break
 	"{o}"utils.c.o "{o}"expprint.c.o "{o}"environ.c.o "{o}"gdbtypes.c.o "{o}"copying.c.o {DEPFILES} \Option-d
 	"{o}"mem-break.c.o "{o}"target.c.o "{o}"parse.c.o "{o}"language.c.o {YYOBJ} "{o}"buildsym.c.o \Option-d
 	"{o}"objfiles.c.o "{o}"minsyms.c.o "{o}"maint.c.o "{o}"demangle.c.o "{o}"dbxread.c.o "{o}"coffread.c.o "{o}"elfread.c.o \Option-d
-	"{o}"dwarfread.c.o "{o}"mipsread.c.o "{o}"stabsread.c.o "{o}"core.c.o "{o}"c-lang.c.o "{o}"ch-lang.c.o "{o}"m2-lang.c.o \Option-d
-	"{o}"complaints.c.o "{o}"typeprint.c.o "{o}"c-typeprint.c.o "{o}"ch-typeprint.c.o "{o}"m2-typeprint.c.o \Option-d
-	"{o}"c-valprint.c.o "{o}"cp-valprint.c.o "{o}"ch-valprint.c.o "{o}"m2-valprint.c.o "{o}"nlmread.c.o \Option-d
+	"{o}"dwarfread.c.o "{o}"mipsread.c.o "{o}"stabsread.c.o "{o}"core.c.o "{o}"c-lang.c.o "{o}"ch-lang.c.o "{o}"f-lang.c.o "{o}"m2-lang.c.o \Option-d
+	"{o}"complaints.c.o "{o}"typeprint.c.o "{o}"c-typeprint.c.o "{o}"ch-typeprint.c.o "{o}"f-typeprint.c.o "{o}"m2-typeprint.c.o \Option-d
+	"{o}"c-valprint.c.o "{o}"cp-valprint.c.o "{o}"ch-valprint.c.o "{o}"f-valprint.c.o "{o}"m2-valprint.c.o "{o}"nlmread.c.o \Option-d
 	"{o}"serial.c.o "{o}"mdebugread.c.o "{o}"annotate.c.o
 
 TSOBS =
@@ -669,7 +667,7 @@ SUBDIRS = doc testsuite
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = "{o}"c-exp.tab.c "{o}"m2-exp.tab.c "{o}"ch-exp.tab.c
-YYOBJ = "{o}"c-exp.tab.c.o "{o}"m2-exp.tab.c.o "{o}"ch-exp.tab.c.o
+YYOBJ = "{o}"c-exp.tab.c.o "{o}"m2-exp.tab.c.o "{o}"ch-exp.tab.c.o "{o}"f-exp.tab.c.o
 
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
@@ -1008,6 +1006,20 @@ copying.c \Option-f  COPYING copying.awk
 	Delete -y y.tab.c
 	Rename -y c-exp.new "{o}"c-exp.tab.c
 
+"{o}"f-exp.tab.c.o \Option-f  "{o}"f-exp.tab.c
+
+"{o}"f-exp.tab.c \Option-f  "{s}"f-exp.y
+	{YACC} {YFLAGS} "{s}"f-exp.y
+	sed -e ':extern.*malloc:d' \Option-d
+	    -e ':extern.*realloc:d' \Option-d
+	    -e ':extern.*free:d' \Option-d
+	    -e ':include.*malloc.h:d' \Option-d
+	    -e 's:malloc:xmalloc:g' \Option-d
+	    -e 's:realloc:xrealloc:g' \Option-d
+	  < y.tab.c > f-exp.new
+	Delete -y y.tab.c
+	Rename -y f-exp.new "{o}"f-exp.tab.c
+
 # ch-exp.tab.c is generated in objdir from "{s}"ch-exp.y if it doesn't exist
 # in srcdir, then compiled in objdir to ch-exp.tab.c.o.
 # Remove bogus decls for malloc:realloc:free which conflict with everything
@@ -1194,6 +1206,16 @@ MAKEOVERRIDES=
 
 "{o}"expprint.c.o \Option-f  "{s}"expprint.c {defs_h} {expression_h} {gdbtypes_h} \Option-d
 	"{s}"language.h "{s}"parser-defs.h {symtab_h} {value_h}
+
+"{o}"f-lang.c.o \Option-f  "{s}"f-lang.c "{s}"f-lang.h {defs_h} {expression_h} {gdbtypes_h} \Option-d
+	"{s}"language.h "{s}"parser-defs.h {symtab_h}
+
+"{o}"f-typeprint.c.o \Option-f  "{s}"f-typeprint.c "{s}"f-lang.h {defs_h} {expression_h} \Option-d
+	{gdbcmd_h} {gdbcore_h} {gdbtypes_h} "{s}"language.h {symtab_h} "{s}"target.h \Option-d
+	"{s}"typeprint.h {value_h}
+
+"{o}"f-valprint.c.o \Option-f  "{s}"f-valprint.c {defs_h} {expression_h} {gdbtypes_h} \Option-d
+	"{s}"language.h {symtab_h} "{s}"valprint.h {value_h}
 
 "{o}"findvar.c.o \Option-f  "{s}"findvar.c {defs_h} {gdbcore_h} {inferior_h} "{s}"target.h
 
@@ -1526,6 +1548,10 @@ MAKEOVERRIDES=
 	{gdbcmd_h} {gdbtypes_h} {symtab_h}
 
 c-exp.tab.c.o \Option-f  c-exp.tab.c "{s}"c-lang.h {defs_h} {expression_h} \Option-d
+	{gdbtypes_h} "{s}"language.h "{s}"parser-defs.h {symtab_h} {value_h} \Option-d
+	{bfd_h} "{s}"objfiles.h "{s}"symfile.h
+
+f-exp.tab.c.o \Option-f  f-exp.tab.c "{s}"f-lang.h {defs_h} {expression_h} \Option-d
 	{gdbtypes_h} "{s}"language.h "{s}"parser-defs.h {symtab_h} {value_h} \Option-d
 	{bfd_h} "{s}"objfiles.h "{s}"symfile.h
 
