@@ -18,8 +18,9 @@ endif
 
 NATIVE  = native
 
-GCC     = gcc -O 
-CFLAGS  = -g
+GCC	 = gcc -O 
+CFLAGS	 = -g
+CXXFLAGS = -g -O
 
 log	= 1>$(canonhost)-build-log 2>&1
 tlog    = 1> $(canonhost)-x-$$i-build-log 2>&1
@@ -126,6 +127,7 @@ FLAGS_TO_PASS := \
 	"GCC=$(GCC)" \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
+	"CXXFLAGS=$(CXXFLAGS)" \
 	"host=$(canonhost)" \
 	"RELEASE_TAG=$(RELEASE_TAG)"
 
