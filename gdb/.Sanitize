@@ -438,35 +438,6 @@ else
 	done
 fi
 
-r16_files="configure.in configure"
-
-if ( echo $* | grep keep\-r16 > /dev/null ) ; then
-	for i in $r16_files ; do
-		if test ! -d $i && (grep sanitize-r16 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping r16 stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $r16_files ; do
-		if test ! -d $i && (grep sanitize-r16 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"r16\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-r16/,/end-\sanitize\-r16/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
 arc_files="configure.in configure ChangeLog-95"
 
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
