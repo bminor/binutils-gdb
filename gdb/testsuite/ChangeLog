@@ -1,3 +1,11 @@
+Mon Jun 28 09:15:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.stabs/wierd.def: Make value of N_GSYM's 0.
+	intp_var should be N_GSYM not N_LSYM.
+	wierd-aout.S: Use a label for the value of the N_SO.
+	wierd.def: Remove all backslashes.
+	wierd-{aout,xcoff}.S: Put a few tests with backslashes here.
+
 Mon Jun 28 07:21:51 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t20/gdbme.cc (main): Move variable initialization for AIX to
