@@ -1,0 +1,174 @@
+# Copyright 2004 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+
+# The program sigstep.c creates a very simple backtrace containing one
+# signal handler and signal trampoline.
+
+# This test runs the program up to the signal handler, and then
+# attempts to step/next the inferior back to main.
+
+if [target_info exists gdb,nosignals] {
+    verbose "Skipping sigstep.exp because of nosignals."
+    continue
+}
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+set prms_id 0
+set bug_id 0
+
+set testfile sigstep
+set srcfile ${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+    untested "Couldn't compile ${module}.c"
+    return -1
+}
+
+# get things started
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+gdb_test "display/i \$pc"
+
+# Advance to main
+if { ![runto_main] } then {
+    gdb_suppress_tests;
+}
+
+# Pass all the alarms straight through (but verbosely)
+# gdb_test "handle SIGALRM print pass nostop"
+# gdb_test "handle SIGVTALRM print pass nostop"
+# gdb_test "handle SIGPROF print pass nostop"
+
+# Run to the signal handler, validate the backtrace.
+gdb_test "break handler"
+gdb_test "continue" ".* handler .*" "continue to stepi handler"
+send_gdb "bt\n"
+gdb_expect_list "backtrace for nexti" ".*$gdb_prompt $" {
+    "\[\r\n\]+.0 \[^\r\n\]* handler "
+    "\[\r\n\]+.1  .signal handler called."
+    "\[\r\n\]+.2 \[^\r\n\]* main .*"
+}
+
+proc advance { i } {
+    global gdb_prompt
+
+    # Get us back into the handler
+    rerun_to_main
+    gdb_test "continue" ".* handler .*" "continue to handler for $i"
+
+    set test "$i out of handler"
+    gdb_test_multiple "$i" "${test}" {
+	-re "done = 1;.*${gdb_prompt} $" {
+	    send_gdb "$i\n"
+	    exp_continue
+	}
+	-re "\} .. handler .*${gdb_prompt} $" {
+	    send_gdb "$i\n"
+	    exp_continue
+	}
+	-re "Program exited normally.*${gdb_prompt} $" {
+	    kfail gdb/1613 "$test (Program exited normally)"
+	}
+	-re "while ..done.*${gdb_prompt} $" {
+	    # After stepping out of a function, GDB might find that
+	    # the inferior is already at the first instruction of this
+	    # line.
+	    pass "$test"
+	}
+	-re "return 0.*${gdb_prompt} $" {
+	    # After stepping out of a function, GDB will advance the
+	    # inferior to the start of the next line.
+	    pass "$test"
+	}
+    }
+}
+
+proc advancei { i } {
+    global gdb_prompt
+    set program_exited 0
+
+    # Get us back into the handler
+    rerun_to_main
+    gdb_test "continue" ".* handler .*" "continue to handler for $i"
+
+    set test "$i into signal trampoline"
+    gdb_test_multiple "$i" "${test}" {
+	-re "done = 1;.*${gdb_prompt} $" {
+	    send_gdb "$i\n"
+	    exp_continue
+	}
+	-re "\} .. handler .*${gdb_prompt} $" {
+	    send_gdb "$i\n"
+	    exp_continue
+	}
+	-re "signal handler called.*${gdb_prompt} $" {
+	    pass "$test"
+	}
+	-re "Program exited normally.*${gdb_prompt} $" {
+	    kfail gdb/1613 "$test (Program exited normally)"
+	    set program_exited 1
+	}
+	-re "main .*${gdb_prompt} $" {
+	    fail "$test (in main)"
+	}
+	-re "Make handler return now.*y or n. $" {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+    }
+
+    set test "$i out of signal trampoline"
+    gdb_test_multiple "$i" "${test}" {
+	-re "while .*${gdb_prompt} $" {
+	    pass "$test (in main)"
+	}
+	-re "signal handler called.*${gdb_prompt} $" {
+	    send_gdb "$i\n"
+	    exp_continue
+	}
+	-re "return .*${gdb_prompt} $" {
+	    fail "$test (stepped)"
+	}
+	-re "Make .*frame return now.*y or n. $" {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+	-re "The program is not being run.*${gdb_prompt} $" {
+	    if { $program_exited } {
+		# Previously kfailed with an exit
+		pass "$test (The program is not being run)"
+	    } else {
+		fail "$test"
+	    }
+	}
+    }
+}
+
+advance step
+advancei stepi
+
+advance next
+advancei nexti
+
+advancei finish
+advancei return
