@@ -1433,7 +1433,7 @@ obj_coff_section (ignore)
       /* Set section flags for a new section just created by subseg_new.
          Provide a default if no flags were parsed.  */
       if (flags == SEC_NO_FLAGS)
-        flags = SEC_LOAD;
+	flags = TC_COFF_SECTION_DEFAULT_ATTRIBUTES;
           
 #ifdef COFF_LONG_SECTION_NAMES
       /* Add SEC_LINK_ONCE and SEC_LINK_DUPLICATES_DISCARD to .gnu.linkonce
