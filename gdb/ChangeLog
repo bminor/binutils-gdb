@@ -1,3 +1,7 @@
+2003-09-29  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Mention Objective-C.
+
 2003-09-29  Jerome Guitton  <guitton@act-europe.fr>
 
 	* arm-tdep.c (arm_make_prologue_cache): Use trad_frame_addr_p to
