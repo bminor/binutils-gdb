@@ -1,3 +1,8 @@
+Thu Oct  9 12:59:55 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/arm/arm7t.d: Update for recent disassembler changes.
+	* gas/h8300/ffxx1.d: Likewise.
+
 Wed Oct  8 16:22:50 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/reloc64.[sd]: Add testcases for %hix,%lox.
