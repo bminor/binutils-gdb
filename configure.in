@@ -42,7 +42,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
 #
-target_libs="libm xiberty libgloss newlib libio librx libg++"
+target_libs="libm xiberty libgloss newlib libio librx libstdc++ libg++"
 
 
 # these tools are built using the target libs, and are intended to run only
@@ -64,9 +64,9 @@ target_tools="examples groff"
 
 # directories to be built in the native environment only
 #
-native_only="autoconf cvs emacs emacs19 fileutils find grep groff gzip hello indent
-             ispell m4 rcs recode sed shellutils tar textutils gash tk uudecode wdiff 
-	     gprof"
+native_only="autoconf cvs emacs emacs19 fileutils find grep groff gzip hello
+	     indent ispell m4 rcs recode sed shellutils tar textutils gash tk
+	     uudecode wdiff gprof"
 
 # directories to be built in a cross environment only
 #
@@ -306,7 +306,7 @@ esac
 
 case "${target}" in
   *-*-netware)
-    noconfigdirs="$noconfigdirs libg++ libio librx newlib"
+    noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx newlib"
     ;;
   alpha-dec-osf*)
     # ld works, but does not support shared libraries.  emacs doesn't
@@ -323,7 +323,7 @@ case "${target}" in
     ;;
   h8300*-*-* | \
   h8500-*-*)
-    noconfigdirs="$noconfigdirs libg++ libio librx"
+    noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
     ;;
   hppa*-*-*elf*)
     # Do configure ld/binutils/gas for this case.
@@ -342,7 +342,7 @@ case "${target}" in
     # add the go32 support tools to the list
     # but don't build gdb
     configdirs=`echo go32 ${configdirs}`
-    noconfigdirs="$noconfigdirs gdb libg++ libio librx"
+    noconfigdirs="$noconfigdirs gdb libg++ libstdc++ libio librx"
     ;;
   i[345]86-*-sco*)
     noconfigdirs="$noconfigdirs gprof"
