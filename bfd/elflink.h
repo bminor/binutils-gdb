@@ -5036,7 +5036,6 @@ elf_link_output_extsym (h, data)
          since the indirected symbol is already in the hash table.  */
       return true;
 
-      /* Fall through.  */
     case bfd_link_hash_warning:
       /* We can't represent these symbols in ELF, although a warning
          symbol may have come from a .gnu.warning.SYMBOL section.  We
