@@ -1,5 +1,5 @@
 /* bfd back-end for HP PA-RISC SOM objects.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
@@ -19,7 +19,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
