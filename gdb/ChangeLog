@@ -1,3 +1,7 @@
+Mon Oct 11 14:27:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* symtab.h: Fix comments re headers, sharing blockvectors, etc.
+
 Mon Oct 11 11:46:06 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* config/i960/vxworks960.mt (REMOTE_O): add dcache.o and remote-utils.o
