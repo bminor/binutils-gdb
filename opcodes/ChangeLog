@@ -1,5 +1,8 @@
 Wed Mar 25 14:32:48 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
+	* m68k-dis.c (print_insn_m68k): Use info->mach to select the
+	default m68k variant to recognize.
+
 	* i960-dis.c (pinsn): Change type of first argument to bfd_vma.
 	(ctrl, cobr, mem, ea): Likewise.
 	(print_addr): Likewise.  Remove cast.
