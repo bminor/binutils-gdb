@@ -699,7 +699,7 @@ rdp_set_command_line (char *command, char *args)
   if (commandline != NULL)
     xfree (commandline);
 
-  xasprintf (&commandline, %s %s", command, args);
+  xasprintf (&commandline, "%s %s", command, args);
 }
 
 static void

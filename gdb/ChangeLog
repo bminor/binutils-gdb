@@ -1,3 +1,7 @@
+2001-03-27  Nick Clifton  <nickc@redhat.com>
+
+	* remote-rdp.c (rdp_set_command_line): Add missing double quote.
+
 2001-03-27  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-aix5.c (build_so_lib_from_mapfile): Use xfree() instead
