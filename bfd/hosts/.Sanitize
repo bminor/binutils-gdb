@@ -26,6 +26,7 @@ Do-first:
 Things-to-keep:
 
 amix.h
+apollo68.h
 apollov68.h
 decstation.h
 dgux.h
