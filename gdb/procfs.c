@@ -639,7 +639,16 @@ wait_fd ()
   set_sigio_trap ();
 
 #ifndef LOSING_POLL
-  num_fds = poll (poll_list, num_poll_list, -1);
+  while (1)
+    {
+      num_fds = poll (poll_list, num_poll_list, -1);
+      if (num_fds > 0)
+	break;
+      if (num_fds < 0 && errno == EINTR)
+	continue;
+      print_sys_errmsg ("poll failed", errno);
+      error ("Poll failed, returned %d", num_fds);
+    }
 #else
   pi = current_procinfo;
 
@@ -664,12 +673,6 @@ wait_fd ()
   clear_sigio_trap ();
 
 #ifndef LOSING_POLL
-
-  if (num_fds <= 0)
-    {
-      print_sys_errmsg ("poll failed\n", errno);
-      error ("Poll failed, returned %d", num_fds);
-    }
 
   for (i = 0; i < num_poll_list && num_fds > 0; i++)
     {

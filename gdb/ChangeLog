@@ -1,3 +1,14 @@
+Fri Nov 15 15:34:18 1996  Fred Fish  <fnf@cygnus.com>
+
+	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>
+	* procfs.c (wait_fd):  Handle EINTR error return from poll
+        by restarting the poll.
+	* defs.h (PIDGET): Define a default version that just
+	returns its argument unchanged.
+	* inflow.c (terminal_init_inferior): Eliminate #ifdef
+	of PIDGET and fold both alternatives into common code.
+	(pass_signal): Use PIDGET for pid passed to kill().
+
 Thu Nov 14 15:54:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* utils.c (paddr,preg): Use a static variable initialized to 32
