@@ -55,18 +55,8 @@ if [get_compiler_info ${binfile}] {
     return -1;
 }
 
-if {$hp_aCC_compiler || $hp_cc_compiler} {
-    set lang "c++"
-} else {
-    set lang ""
-}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [concat debug $lang]] != "" } {
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable debug ] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-}
-
-if  [get_compiler_info ${binfile}] {
-    return -1
 }
 
 gdb_exit
@@ -90,6 +80,11 @@ proc local_compiler_xfail_check { } {
 		&& ![test_debug_format "DWARF 2"] } then {
 	    setup_xfail "*-*-*" 
 	}
+    }
+
+    global hp_cc_compiler
+    if { $hp_cc_compiler } {
+	setup_xfail "hppa*-*-hpux*"
     }
 }
 
