@@ -102,34 +102,6 @@ struct include_dir
 
 static struct include_dir *include_dirs;
 
-/* Long options.  */
-
-/* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
-
-#define OPTION_PREPROCESSOR	150
-#define OPTION_USE_TEMP_FILE	(OPTION_PREPROCESSOR + 1)
-#define OPTION_NO_USE_TEMP_FILE	(OPTION_USE_TEMP_FILE + 1)
-#define OPTION_YYDEBUG		(OPTION_NO_USE_TEMP_FILE + 1)
-
-static const struct option long_options[] =
-{
-  {"define", required_argument, 0, 'D'},
-  {"help", no_argument, 0, 'h'},
-  {"include-dir", required_argument, 0, 'I'},
-  {"input-format", required_argument, 0, 'J'},
-  {"language", required_argument, 0, 'l'},
-  {"output-format", required_argument, 0, 'O'},
-  {"preprocessor", required_argument, 0, OPTION_PREPROCESSOR},
-  {"target", required_argument, 0, 'F'},
-  {"undefine", required_argument, 0, 'U'},
-  {"use-temp-file", no_argument, 0, OPTION_USE_TEMP_FILE},
-  {"no-use-temp-file", no_argument, 0, OPTION_NO_USE_TEMP_FILE},
-  {"verbose", no_argument, 0, 'v'},
-  {"version", no_argument, 0, 'V'},
-  {"yydebug", no_argument, 0, OPTION_YYDEBUG},
-  {0, no_argument, 0, 0}
-};
-
 /* Static functions.  */
 
 static void res_init PARAMS ((void));
@@ -762,6 +734,36 @@ quot (string)
   return buf;
 }
 
+/* Long options.  */
+
+/* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
+
+#define OPTION_PREPROCESSOR	150
+#define OPTION_USE_TEMP_FILE	(OPTION_PREPROCESSOR + 1)
+#define OPTION_NO_USE_TEMP_FILE	(OPTION_USE_TEMP_FILE + 1)
+#define OPTION_YYDEBUG		(OPTION_NO_USE_TEMP_FILE + 1)
+
+static const struct option long_options[] =
+{
+  {"input", required_argument, 0, 'i'},
+  {"output", required_argument, 0, 'o'},
+  {"input-format", required_argument, 0, 'J'},
+  {"output-format", required_argument, 0, 'O'},
+  {"target", required_argument, 0, 'F'},
+  {"preprocessor", required_argument, 0, OPTION_PREPROCESSOR},
+  {"include-dir", required_argument, 0, 'I'},
+  {"define", required_argument, 0, 'D'},
+  {"undefine", required_argument, 0, 'U'},
+  {"verbose", no_argument, 0, 'v'},
+  {"language", required_argument, 0, 'l'},
+  {"use-temp-file", no_argument, 0, OPTION_USE_TEMP_FILE},
+  {"no-use-temp-file", no_argument, 0, OPTION_NO_USE_TEMP_FILE},
+  {"yydebug", no_argument, 0, OPTION_YYDEBUG},
+  {"version", no_argument, 0, 'V'},
+  {"help", no_argument, 0, 'h'},
+  {0, no_argument, 0, 0}
+};
+
 /* This keeps gcc happy when using -Wmissing-prototypes -Wstrict-prototypes.  */
 int main PARAMS ((int, char **));
 
@@ -813,7 +815,7 @@ main (argc, argv)
   language = 0x409;   /* LANG_ENGLISH, SUBLANG_ENGLISH_US.  */
   use_temp_file = 0;
 
-  while ((c = getopt_long (argc, argv, "i:l:o:I:J:O:F:D:U:rhHvV", long_options,
+  while ((c = getopt_long (argc, argv, "f:i:l:o:I:J:O:F:D:U:rhHvV", long_options,
 			   (int *) 0)) != EOF)
     {
       switch (c)
@@ -821,6 +823,22 @@ main (argc, argv)
 	case 'i':
 	  input_filename = optarg;
 	  break;
+
+	case 'f':
+	  /* For compatability with rc we accept "-fo <name>" as being the
+	     equivalent of "-o <name>".  We do not advertise this fact
+	     though, as we do not want users to use non-GNU like command
+	     line switches.  */
+	  if (*optarg != 'o')
+	    fatal (_("invalid option -f\n"));
+	  optarg++;
+	  if (* optarg == 0)
+	    {
+	      if (optind == argc)
+		fatal (_("No filename following the -fo option.\n"));	    
+	      optarg = argv [optind++];
+	    }
+	  /* Fall through.  */
 
 	case 'o':
 	  output_filename = optarg;

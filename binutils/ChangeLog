@@ -1,3 +1,13 @@
+2003-04-23  Dimitrie O. Paun <dpaun@rogers.com>
+            Nick Clifton  <nickc@redhat.com>
+
+	* windres.c (long_options): Move close to main, where it is used.
+	Add 'input' and 'output' long options.
+	(main): Accept "-fo" as an alias for "-o".  This is for rc
+	comptibility.
+	* doc/binutils.texi: Mention that -fo is accepted as an alias for
+	-o, but discourage its use.
+
 2003-04-22  Dimitrie O. Paun  <dpaun@rogers.com>
 
 	* windres.c (format_from_name): Make the exit on error

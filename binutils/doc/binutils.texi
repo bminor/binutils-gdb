@@ -2567,7 +2567,8 @@ The name of the input file.  If this option is not used, then
 @command{windres} will use the first non-option argument as the input file
 name.  If there are no non-option arguments, then @command{windres} will
 read from standard input.  @command{windres} can not read a COFF file from
-standard input.
+standard input.  Note, for compatability with @command{rc} the option
+@option{-fo} is also accepted, but its use is not recommended. 
 
 @item -o @var{filename}
 @itemx --output @var{filename}
