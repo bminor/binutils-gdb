@@ -1,3 +1,19 @@
+Fri Jun 12 16:06:15 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* readelf.c (get_ppc_rel_type): New PowerPC support.
+	(dump_relocations): PowerPC uses RELA relocations.
+	(get_machine_name): Spell PowerPC correctly.
+	(get_file_type): Change unsigned short parameter to unsigned.
+	(get_machine_name): Ditto.
+	(get_machine_data): Return whether big endian or little endian.
+	(get_machine_flags): Interpret PowerPC, M32R, and MIPS flags.
+	(process_elf_header): Print endian-ess.  Convert all numeric
+	formats to long or unsigned long.  Print out machine specific flag
+	bits.
+
+	* readelf.h: Include elf/ppc.h, elf/mips.h, and elf/m32r.h to get
+	machine specific flag bits.
+
 Thu Jun 11 17:54:26 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c: Remove extraneous #includes.  Fix warnings produced

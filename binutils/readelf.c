@@ -114,9 +114,12 @@ static char * get_d30v_rel_type    PARAMS ((bfd_vma rtype));
 static char * get_sh_rel_type      PARAMS ((bfd_vma rtype));
 static char * get_mn10300_rel_type PARAMS ((bfd_vma rtype));
 static char * get_mn10200_rel_type PARAMS ((bfd_vma rtype));
+static char * get_ppc_rel_type	   PARAMS ((bfd_vma rtype));
 static void   dump_relocations PARAMS ((Elf_Rel * rpnt, int rel_size));
-static char * get_file_type PARAMS ((unsigned short e_type));
-static char * get_machine_name PARAMS ((unsigned short e_machine));
+static char * get_file_type PARAMS ((unsigned e_type));
+static char * get_machine_name PARAMS ((unsigned e_machine));
+static char * get_machine_data PARAMS ((unsigned e_data));
+static char * get_machine_flags PARAMS ((unsigned e_flags, unsigned e_machine));
 static char * get_segment_type PARAMS ((unsigned long p_type));
 static char * get_section_type_name PARAMS ((unsigned int sh_type));
 static void   usage PARAMS ((void));
@@ -497,6 +500,69 @@ get_mn10200_rel_type (rtype)
 }
 
 
+static char *
+get_ppc_rel_type (rtype)
+     bfd_vma rtype;
+{
+  switch (rtype)
+    {
+    case 0:   return "R_PPC_NONE,";
+    case 1:   return "R_PPC_ADDR32,";
+    case 2:   return "R_PPC_ADDR24,";
+    case 3:   return "R_PPC_ADDR16,";
+    case 4:   return "R_PPC_ADDR16_LO,";
+    case 5:   return "R_PPC_ADDR16_HI,";
+    case 6:   return "R_PPC_ADDR16_HA,";
+    case 7:   return "R_PPC_ADDR14,";
+    case 8:   return "R_PPC_ADDR14_BRTAKEN,";
+    case 9:   return "R_PPC_ADDR14_BRNTAKEN,";
+    case 10:  return "R_PPC_REL24,";
+    case 11:  return "R_PPC_REL14,";
+    case 12:  return "R_PPC_REL14_BRTAKEN,";
+    case 13:  return "R_PPC_REL14_BRNTAKEN,";
+    case 14:  return "R_PPC_GOT16,";
+    case 15:  return "R_PPC_GOT16_LO,";
+    case 16:  return "R_PPC_GOT16_HI,";
+    case 17:  return "R_PPC_GOT16_HA,";
+    case 18:  return "R_PPC_PLT24,";
+    case 19:  return "R_PPC_COPY,";
+    case 21:  return "R_PPC_JMP_SLOT,";
+    case 22:  return "R_PPC_RELATIVE,";
+    case 23:  return "R_PPC_LOCAL24PC,";
+    case 24:  return "R_PPC_UADDR32,";
+    case 25:  return "R_PPC_UADDR16,";
+    case 26:  return "R_PPC_REL32,";
+    case 27:  return "R_PPC_PLT32,";
+    case 28:  return "R_PPC_PLTREL32,";
+    case 29:  return "R_PPC_PLT16_LO,";
+    case 30:  return "R_PPC_PLT16_HI,";
+    case 31:  return "R_PPC_PLT16_HA,";
+    case 32:  return "R_PPC_SDAREL,";
+    case 33:  return "R_PPC_SECTOFF,";
+    case 34:  return "R_PPC_SECTOFF_LO,";
+    case 35:  return "R_PPC_SECTOFF_HI,";
+    case 36:  return "R_PPC_SECTOFF_HA,";
+    case 101: return "R_PPC_EMB_NADDR32,";
+    case 102: return "R_PPC_EMB_NADDR16,";
+    case 103: return "R_PPC_EMB_NADDR16_LO,";
+    case 104: return "R_PPC_EMB_NADDR16_HI,";
+    case 105: return "R_PPC_EMB_NADDR16_HA,";
+    case 106: return "R_PPC_EMB_SDAI16,";
+    case 107: return "R_PPC_EMB_SDA2I16,";
+    case 108: return "R_PPC_EMB_SDA2REL,";
+    case 109: return "R_PPC_EMB_SDA21,";
+    case 110: return "R_PPC_EMB_MRKREF,";
+    case 111: return "R_PPC_EMB_RELSEC16,";
+    case 112: return "R_PPC_EMB_RELST_LO,";
+    case 113: return "R_PPC_EMB_RELST_HI,";
+    case 114: return "R_PPC_EMB_RELST_HA,";
+    case 115: return "R_PPC_EMB_BIT_FLD,";
+    case 116: return "R_PPC_EMB_RELSDA,";
+    default: return _("*INVALID*");
+    }
+}
+
+
 static void
 dump_relocations (rpnt, rel_size)
      Elf_Rel * rpnt;
@@ -548,6 +614,7 @@ dump_relocations (rpnt, rel_size)
       
     case EM_68K:
     case EM_SPARC:
+    case EM_PPC:
     case EM_CYGNUS_V850:
     case EM_CYGNUS_D30V:
     case EM_CYGNUS_MN10200:
@@ -647,6 +714,10 @@ dump_relocations (rpnt, rel_size)
 	case EM_CYGNUS_MN10200:
 	  rtype = get_mn10200_rel_type (ELF32_R_TYPE (rpnt->r_info));
 	  break;
+
+	case EM_PPC:
+	  rtype = get_ppc_rel_type (ELF32_R_TYPE (rpnt->r_info));
+	  break;
 	}
       
       printf ("%-18s", rtype);
@@ -695,7 +766,7 @@ dump_relocations (rpnt, rel_size)
 
 static char *
 get_file_type (e_type)
-     unsigned short e_type;
+     unsigned e_type;
 {
   static char buff [32];
   
@@ -718,7 +789,7 @@ get_file_type (e_type)
 
 static char *
 get_machine_name (e_machine)
-     unsigned short e_machine;
+     unsigned e_machine;
 {
   static char buff [32];
   
@@ -737,7 +808,7 @@ get_machine_name (e_machine)
     case EM_MIPS_RS4_BE: 	return "MIPS R400 big-endian";
     case EM_PARISC:      	return "HPPA";
     case EM_SPARC32PLUS: 	return "Sparc v8+" ;
-    case EM_PPC:         	return "Power PCC";
+    case EM_PPC:         	return "PowerPC";
     case EM_SPARCV9:     	return "Sparc v9";      
     case EM_ARM:	 	return "ARM";
     case EM_SH:		 	return "Hitachi SH";
@@ -751,6 +822,92 @@ get_machine_name (e_machine)
       
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
+      return buff;
+    }
+}
+
+static char *
+get_machine_flags (e_flags, e_machine)
+     unsigned e_flags;
+     unsigned e_machine;
+{
+  static char buf [1024];
+  
+  buf[0] = '\0';
+  if (e_flags)
+    {
+      switch (e_machine)
+	{
+	default:
+	  break;
+
+	case EM_PPC:
+	  if (e_flags & EF_PPC_EMB)
+	    strcat (buf, ", emb");
+
+	  if (e_flags & EF_PPC_RELOCATABLE)
+	    strcat (buf, ", relocatable");
+
+	  if (e_flags & EF_PPC_RELOCATABLE_LIB)
+	    strcat (buf, ", relocatable-lib");
+	  break;
+
+	case EM_CYGNUS_M32R:
+	  if ((e_flags & EF_M32R_ARCH) == E_M32R_ARCH)
+	    strcat (buf, ", m32r");
+
+	  /* start-sanitize-m32rx */
+#ifdef E_M32RX_ARCH
+	  if ((e_flags & EF_M32R_ARCH) == E_M32RX_ARCH)
+	    strcat (buf, ", m32rx");
+#endif
+	  /* end-sanitize-m32rx */
+	  break;
+
+	case EM_MIPS:
+	case EM_MIPS_RS4_BE:
+	  if (e_flags & EF_MIPS_NOREORDER)
+	    strcat (buf, ", noreorder");
+
+	  if (e_flags & EF_MIPS_PIC)
+	    strcat (buf, ", pic");
+
+	  if (e_flags & EF_MIPS_CPIC)
+	    strcat (buf, ", cpic");
+
+	  if (e_flags & EF_MIPS_ABI2)
+	    strcat (buf, ", abi2");
+
+	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_1)
+	    strcat (buf, ", mips1");
+
+	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_2)
+	    strcat (buf, ", mips2");
+
+	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_3)
+	    strcat (buf, ", mips3");
+
+	  if ((e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_4)
+	    strcat (buf, ", mips4");
+	  break;
+	}
+    }
+
+  return buf;
+}
+
+static char *
+get_machine_data (e_data)
+     unsigned e_data;
+{
+  static char buff [32];
+  
+  switch (e_data)
+    {
+    case ELFDATA2LSB: return _("ELFDATA2LSB (little endian)");
+    case ELFDATA2MSB: return _("ELFDATA2MSB (big endian)");
+    default:
+      sprintf (buff, _("<unknown>: %x"), e_data);
       return buff;
     }
 }
@@ -1030,17 +1187,19 @@ process_elf_header ()
       printf ("\n"); 
       printf (_(" Type:                              %s\n"), get_file_type (epnt->e_type));
       printf (_(" Machine:                           %s\n"), get_machine_name (epnt->e_machine));
-      printf (_(" Version:                           %x\n"), epnt->e_version);
-      printf (_(" Entry point address:               %x\n"), epnt->e_entry);
-      printf (_(" Start of program headers:          %d (bytes into file)\n"), epnt->e_phoff);
-      printf (_(" Start of section headers:          %d (bytes into file)\n"), epnt->e_shoff);
-      printf (_(" Flags:                             %x\n"), epnt->e_flags);
-      printf (_(" Size of this header:               %d (bytes)\n"), epnt->e_ehsize);
-      printf (_(" Size of program headers:           %d (bytes)\n"), epnt->e_phentsize);
-      printf (_(" Number of program headers:         %d\n"), epnt->e_phnum);
-      printf (_(" Size of section headers:           %d (bytes)\n"), epnt->e_shentsize);
-      printf (_(" Number of section headers:         %d\n"), epnt->e_shnum);
-      printf (_(" Section header string table index: %d\n"), epnt->e_shstrndx);
+      printf (_(" Version:                           0x%lx\n"), (unsigned long)epnt->e_version);
+      printf (_(" Data:                              %s\n"), get_machine_data (epnt->e_ident [EI_DATA]));
+      printf (_(" Entry point address:               0x%lx\n"), (unsigned long)epnt->e_entry);
+      printf (_(" Start of program headers:          %ld (bytes into file)\n"), (long)epnt->e_phoff);
+      printf (_(" Start of section headers:          %ld (bytes into file)\n"), (long)epnt->e_shoff);
+      printf (_(" Flags:                             0x%lx%s\n"), (unsigned long)epnt->e_flags,
+	      get_machine_flags (epnt->e_flags, epnt->e_machine));
+      printf (_(" Size of this header:               %ld (bytes)\n"), (long)epnt->e_ehsize);
+      printf (_(" Size of program headers:           %ld (bytes)\n"), (long)epnt->e_phentsize);
+      printf (_(" Number of program headers:         %ld\n"), (long)epnt->e_phnum);
+      printf (_(" Size of section headers:           %ld (bytes)\n"), (long)epnt->e_shentsize);
+      printf (_(" Number of section headers:         %ld\n"), (long)epnt->e_shnum);
+      printf (_(" Section header string table index: %ld\n"), (long)epnt->e_shstrndx);
     }
   
   return 1;

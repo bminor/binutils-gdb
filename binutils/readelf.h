@@ -26,6 +26,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "elf/common.h"
+#include "elf/ppc.h"
+#include "elf/m32r.h"
+#include "elf/mips.h"
 
 /* The type 'bfd_vma' is used in places where the 64 bit version of the
    structure has a 64 bit wide field, and the 32 bit version has a 32 bit wide
