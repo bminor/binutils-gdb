@@ -1,3 +1,9 @@
+Wed Apr 23 11:18:45 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/mn10200/tm-mn10200.h (STORE_RETURN_VALUE): Pointers are
+	returned in $a0.
+	(EXTRACT_RETURN_VALUE): Likewise.
+
 Tue Apr 22 11:58:15 1997  Fred Fish  <fnf@cygnus.com>
 
 	* config/arm/tm-arm.h (TARGET_DOUBLE_FORMAT): Define to use

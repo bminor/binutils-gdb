@@ -129,6 +129,10 @@ extern CORE_ADDR mn10200_frame_saved_pc   PARAMS ((struct frame_info *));
 	memcpy (VALBUF, REGBUF + REGISTER_BYTE (0), 2); \
 	memcpy (VALBUF + 2, REGBUF + REGISTER_BYTE (1), 2); \
       } \
+    else if (TYPE_CODE (TYPE) == TYPE_CODE_PTR)\
+      { \
+        memcpy (VALBUF, REGBUF + REGISTER_BYTE (4), TYPE_LENGTH (TYPE)); \
+      } \
     else \
       { \
         memcpy (VALBUF, REGBUF + REGISTER_BYTE (0), TYPE_LENGTH (TYPE)); \
@@ -147,6 +151,10 @@ extern CORE_ADDR mn10200_frame_saved_pc   PARAMS ((struct frame_info *));
       { \
 	write_register_bytes (REGISTER_BYTE (0), VALBUF, 2); \
 	write_register_bytes (REGISTER_BYTE (1), VALBUF + 2, 2); \
+      } \
+    else if (TYPE_CODE (TYPE) == TYPE_CODE_PTR)\
+      { \
+        write_register_bytes (REGISTER_BYTE (4), VALBUF, TYPE_LENGTH (TYPE)); \
       } \
     else \
       { \
