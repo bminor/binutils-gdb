@@ -1,3 +1,7 @@
+Thu Jul 25 16:11:54 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* dsrec.c (load_srec): Protect ANSI style function parms with PARAMS.
+
 Mon Jul 22 18:13:27 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in (os9kread.o):  Remove dependency on partial-stab.h.
