@@ -1,3 +1,7 @@
+2000-05-09  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo: Proofreading changes from Brian Youmans.
+
 2000-05-01  Nick Duffek  <nsd@cygnus.com>
 
 	* gdb.texinfo (Command Files): Mention -x, use @enumerate for
