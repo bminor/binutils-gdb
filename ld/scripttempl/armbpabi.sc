@@ -392,6 +392,10 @@ eval $COMBRELOCCAT <<EOF
   ${REL_SBSS2}
   .rel.bss      0 : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
   .rela.bss     0 : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
+  .rel.init_array  0 : { *(.rel.init_array) }
+  .rela.init_array 0 : { *(.rela.init_array) }
+  .rel.fini_array  0 : { *(.rel.fini_array) }
+  .rela.fini_array 0 : { *(.rela.fini_array) }
 EOF
 if [ -n "$COMBRELOC" ]; then
 cat <<EOF
@@ -413,5 +417,8 @@ cat <<EOF
   .rel.plt      0 : { *(.rel.plt) }
   .rela.plt     0 : { *(.rela.plt) }
   ${OTHER_PLT_RELOC_SECTIONS}
+  .rel.other    0 : { *(.rel.*) }
+  .rela.other   0 : { *(.rela.*) }
+  .reli.other   0 : { *(.reli.*) }
 }
 EOF

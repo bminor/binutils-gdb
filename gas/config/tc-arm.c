@@ -159,7 +159,11 @@ static int march_fpu_opt = -1;
 static int mfpu_opt = -1;
 static int mfloat_abi_opt = -1;
 #ifdef OBJ_ELF
+# ifdef EABI_DEFAULT
+static int meabi_flags = EABI_DEFAULT;
+# else
 static int meabi_flags = EF_ARM_EABI_UNKNOWN;
+# endif
 #endif
 
 /* This array holds the chars that always start a comment.  If the
@@ -2814,7 +2818,7 @@ do_mul (char * str)
 }
 
 static void
-do_mla (char * str)
+do_mlas (char * str, bfd_boolean is_mls)
 {
   int rd, rm;
 
@@ -2846,7 +2850,9 @@ do_mla (char * str)
       return;
     }
 
-  if (rm == rd)
+  /* This restriction does not apply to mls (nor to mla in v6, but
+     that's hard to detect at present).  */
+  if (rm == rd && !is_mls)
     as_tsktsk (_("rd and rm should be different in mla"));
 
   if (skip_past_comma (&str) == FAIL
@@ -2865,6 +2871,18 @@ do_mla (char * str)
     }
 
   end_of_line (str);
+}
+
+static void
+do_mla (char *str)
+{
+  do_mlas (str, FALSE);
+}
+
+static void
+do_mls (char *str)
+{
+  do_mlas (str, TRUE);
 }
 
 /* Expects *str -> the characters "acc0", possibly with leading blanks.
@@ -4511,6 +4529,286 @@ do_cpsi (char * str)
     }
   end_of_line (str);
 }
+
+/* ARM V6T2 bitfield manipulation instructions.  */
+
+static int
+five_bit_unsigned_immediate (char **str)
+{
+  expressionS expr;
+
+  skip_whitespace (*str);
+  if (!is_immediate_prefix (**str))
+    {
+      inst.error = _("immediate expression expected");
+      return -1;
+    }
+  (*str)++;
+  if (my_get_expression (&expr, str))
+    {
+      inst.error = _("bad expression");
+      return -1;
+    }
+  if (expr.X_op != O_constant)
+    {
+      inst.error = _("constant expression expected");
+      return -1;
+    }
+  if (expr.X_add_number < 0 || expr.X_add_number > 32)
+    {
+      inst.error = _("immediate value out of range");
+      return -1;
+    }
+  
+  return expr.X_add_number;
+}
+
+static void
+bfci_lsb_and_width (char *str)
+{
+  int lsb, width;
+
+  if ((lsb = five_bit_unsigned_immediate (&str)) == -1)
+    return;
+
+  if (skip_past_comma (&str) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  if ((width = five_bit_unsigned_immediate (&str)) == -1)
+    return;
+
+  end_of_line (str);
+
+  if (width == 0 || lsb == 32)
+    {
+      inst.error = _("immediate value out of range");
+      return;
+    }
+  else if (width + lsb > 32)
+    {
+      inst.error = _("bit-field extends past end of register");
+      return;
+    }
+
+  /* Convert to LSB/MSB and write to register.  */
+  inst.instruction |= lsb << 7;
+  inst.instruction |= (width + lsb - 1) << 16;
+}
+
+static void
+do_bfc (char *str)
+{
+  int rd;
+
+  /* Rd.  */
+  skip_whitespace (str);
+  if (((rd = reg_required_here (&str, 12)) == FAIL)
+      || (skip_past_comma (&str) == FAIL))
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  else if (rd == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  bfci_lsb_and_width (str);
+}
+
+static void
+do_bfi (char *str)
+{
+  int rd, rm;
+
+  /* Rd.  */
+  skip_whitespace (str);
+  if (((rd = reg_required_here (&str, 12)) == FAIL)
+      || (skip_past_comma (&str) == FAIL))
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  else if (rd == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  /* Rm.  Accept #0 in this position as an alternative syntax for bfc.  */
+  skip_whitespace (str);
+  if (is_immediate_prefix (*str))
+    {
+      expressionS expr;
+      str++;
+      if (my_get_expression (&expr, &str))
+	{
+	  inst.error = _("bad expression");
+	  return;
+	}
+      if (expr.X_op != O_constant)
+	{
+	  inst.error = _("constant expression expected");
+	  return;
+	}
+      if (expr.X_add_number != 0)
+	{
+	  inst.error = _("immediate value out of range");
+	  return;
+	}
+      inst.instruction |= 0x0000000f;  /* Rm = PC -> bfc, not bfi.  */
+    }
+  else
+    {
+      if ((rm = reg_required_here (&str, 0)) == FAIL)
+	{
+	  inst.error = BAD_ARGS;
+	  return;
+	}
+      else if (rm == REG_PC)
+	{
+	  inst.error = BAD_PC;
+	  return;
+	}
+    }
+  if (skip_past_comma (&str) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  bfci_lsb_and_width (str);
+}
+
+static void
+do_bfx (char *str)
+{
+  int lsb, width;
+
+  /* Rd.  */
+  skip_whitespace (str);
+  if (reg_required_here (&str, 12) == FAIL
+      || skip_past_comma (&str) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  /* Rm.  */
+  skip_whitespace (str);
+  if (reg_required_here (&str, 0) == FAIL
+      || skip_past_comma (&str) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  if ((lsb = five_bit_unsigned_immediate (&str)) == -1)
+    return;
+
+  if (skip_past_comma (&str) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  if ((width = five_bit_unsigned_immediate (&str)) == -1)
+    return;
+
+  end_of_line (str);
+
+  if (width == 0 || lsb == 32)
+    {
+      inst.error = _("immediate value out of range");
+      return;
+    }
+  else if (width + lsb > 32)
+    {
+      inst.error = _("bit-field extends past end of register");
+      return;
+    }
+
+  inst.instruction |= lsb << 7;
+  inst.instruction |= (width - 1) << 16;
+}
+
+static void
+do_rbit (char *str)
+{
+  /* Rd.  */
+  skip_whitespace (str);
+  if (reg_required_here (&str, 12) == FAIL
+      || skip_past_comma (&str) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  /* Rm.  */
+  skip_whitespace (str);
+  if (reg_required_here (&str, 0) == FAIL)
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+
+  end_of_line (str);
+}
+
+/* ARM V6T2 16-bit immediate register load: MOV[WT]{cond} Rd, #<imm16>.  */
+static void
+do_mov16 (char *str)
+{
+  int rd;
+  expressionS expr;
+
+  /* Rd.  */
+  skip_whitespace (str);
+  if (((rd = reg_required_here (&str, 12)) == FAIL)
+      || (skip_past_comma (&str) == FAIL))
+    {
+      inst.error = BAD_ARGS;
+      return;
+    }
+  else if (rd == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  /* Imm16.  */
+  skip_whitespace (str);
+  if (!is_immediate_prefix (*str))
+    {
+      inst.error = _("immediate expression expected");
+      return;
+    }
+  str++;
+  if (my_get_expression (&expr, &str))
+    {
+      inst.error = _("bad expression");
+      return;
+    }
+  if (expr.X_op != O_constant)
+    {
+      inst.error = _("constant expression expected");
+      return;
+    }
+  if (expr.X_add_number < 0 || expr.X_add_number > 65535)
+    {
+      inst.error = _("immediate value out of range");
+      return;
+    }
+
+  end_of_line (str);
+
+  /* The value is in two pieces: 0:11, 16:19.  */
+  inst.instruction |= (expr.X_add_number & 0x00000fff);
+  inst.instruction |= (expr.X_add_number & 0x0000f000) << 4;
+}
+  
 
 /* THUMB V5 breakpoint instruction (argument parse)
 	BKPT <immed_8>.  */
@@ -6516,6 +6814,84 @@ do_ldstv4 (char * str)
   inst.instruction |= (pre_inc ? PRE_INDEX : 0);
   end_of_line (str);
 }
+
+static void
+do_ldsttv4 (char * str)
+{
+  int conflict_reg;
+
+  skip_whitespace (str);
+
+  if ((conflict_reg = reg_required_here (& str, 12)) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+      return;
+    }
+
+  if (skip_past_comma (& str) == FAIL)
+    {
+      inst.error = _("address expected");
+      return;
+    }
+
+  if (*str == '[')
+    {
+      int reg;
+
+      str++;
+
+      skip_whitespace (str);
+
+      if ((reg = reg_required_here (&str, 16)) == FAIL)
+	return;
+
+      /* ldrt/strt always use post-indexed addressing, so if the base is
+	 the same as Rd, we warn.  */
+      if (conflict_reg == reg)
+	as_warn (_("%s register same as write-back base"),
+		 ((inst.instruction & LOAD_BIT)
+		  ? _("destination") : _("source")));
+
+      skip_whitespace (str);
+
+      if (*str == ']')
+	{
+	  str ++;
+
+	  if (skip_past_comma (&str) == SUCCESS)
+	    {
+	      /* [Rn],... (post inc)  */
+	      if (ldst_extend_v4 (&str) == FAIL)
+		return;
+	    }
+	  else
+	    {
+	      /* [Rn]  */
+	      skip_whitespace (str);
+
+	      /* Skip a write-back '!'.  */
+	      if (*str == '!')
+		str++;
+
+	      inst.instruction |= (INDEX_UP|HWOFFSET_IMM);
+	    }
+	}
+      else
+	{
+	  inst.error = _("post-indexed expression expected");
+	  return;
+	}
+    }
+  else
+    {
+      inst.error = _("post-indexed expression expected");
+      return;
+    }
+
+  end_of_line (str);
+}
+
 
 static long
 reg_list (char ** strp)
@@ -10014,6 +10390,21 @@ static const struct asm_opcode insns[] =
   /*  ARM V6Z.  */
   { "smi",       0xe1600070, 3,  ARM_EXT_V6Z,      do_smi},
 
+  /*  ARM V6T2.  */
+  { "bfc",       0xe7c0001f, 3,  ARM_EXT_V6T2,     do_bfc},
+  { "bfi",       0xe7c00010, 3,  ARM_EXT_V6T2,     do_bfi},
+  { "mls",       0xe0600090, 3,  ARM_EXT_V6T2,     do_mls},
+  { "movw",      0xe3000000, 4,  ARM_EXT_V6T2,     do_mov16},
+  { "movt",      0xe3400000, 4,  ARM_EXT_V6T2,     do_mov16},
+  { "rbit",      0xe3ff0f30, 4,  ARM_EXT_V6T2,     do_rbit},
+  { "sbfx",      0xe7a00050, 4,  ARM_EXT_V6T2,     do_bfx},
+  { "ubfx",      0xe7e00050, 4,  ARM_EXT_V6T2,     do_bfx},
+
+  { "ldrht",     0xe03000b0, 3,  ARM_EXT_V6T2,     do_ldsttv4},
+  { "ldrsht",    0xe03000f0, 3,  ARM_EXT_V6T2,     do_ldsttv4},
+  { "ldrsbt",    0xe03000d0, 3,  ARM_EXT_V6T2,     do_ldsttv4},
+  { "strht",     0xe02000b0, 3,  ARM_EXT_V6T2,     do_ldsttv4},
+
   /* Core FPA instruction set (V1).  */
   {"wfs",        0xee200110, 3,  FPU_FPA_EXT_V1,   do_fpa_ctrl},
   {"rfs",        0xee300110, 3,  FPU_FPA_EXT_V1,   do_fpa_ctrl},
@@ -10950,6 +11341,12 @@ static const struct thumb_opcode tinsns[] =
   {"sxtb",	0xb240,		2,	ARM_EXT_V6,  do_t_arit},
   {"uxth",	0xb280,		2,	ARM_EXT_V6,  do_t_arit},
   {"uxtb",	0xb2c0,		2,	ARM_EXT_V6,  do_t_arit},
+
+  /* ARM V6K.  */
+  {"sev",	0xbf40,		2,	ARM_EXT_V6K, do_empty},
+  {"wfe",	0xbf20,		2,	ARM_EXT_V6K, do_empty},
+  {"wfi",	0xbf30,		2,	ARM_EXT_V6K, do_empty},
+  {"yield",	0xbf10,		2,	ARM_EXT_V6K, do_empty},
 };
 
 void
@@ -12757,6 +13154,10 @@ static struct arm_arch_option_table arm_archs[] =
   {"armv6k",            ARM_ARCH_V6K,    FPU_ARCH_VFP},
   {"armv6z",            ARM_ARCH_V6Z,    FPU_ARCH_VFP},
   {"armv6zk",           ARM_ARCH_V6ZK,   FPU_ARCH_VFP},
+  {"armv6t2",		ARM_ARCH_V6T2,   FPU_ARCH_VFP},
+  {"armv6kt2",		ARM_ARCH_V6KT2,  FPU_ARCH_VFP},
+  {"armv6zt2",		ARM_ARCH_V6ZT2,  FPU_ARCH_VFP},
+  {"armv6zkt2",		ARM_ARCH_V6ZKT2, FPU_ARCH_VFP},
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP},
   {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP},
   {NULL, 0, 0}
@@ -13302,7 +13703,7 @@ arm_adjust_symtab (void)
 	  elf_symbol_type * elf_sym;
 
 	  elf_sym = elf_symbol (symbol_get_bfdsym (sym));
-	  bind = ELF_ST_BIND (elf_sym);
+	  bind = ELF_ST_BIND (elf_sym->internal_elf_sym.st_info);
 
 	  /* If it's a .thumb_func, declare it as so,
 	     otherwise tag label as .code 16.  */
