@@ -65,69 +65,6 @@ lookup_hash (ins, size)
   return (h);
 }
 
-uint32
-get_longword (x)
-      uint8 *x;
-{
-  uint8 *a = x;
-  return (a[0]<<24) + (a[1]<<16) + (a[2]<<8) + (a[3]);
-}
-
-int64
-get_longlong (x)
-      uint8 *x;
-{
-  uint8 *a = x;
-  return ((int64)a[0]<<56) + ((int64)a[1]<<48) + ((int64)a[2]<<40) + ((int64)a[3]<<32) +
-    ((int64)a[4]<< 24) + ((int64)a[5]<<16) + ((int64)a[6]<<8) + (int64)a[7];
-}
-
-uint16
-get_word (x)
-      uint8 *x;
-{
-  uint8 *a = x;
-  return ((uint16)a[0]<<8) + a[1];
-}
-
-
-void
-write_word (addr, data)
-     uint8 *addr;
-     uint16 data;
-{
-  uint8 *a = addr;
-  a[0] = data >> 8;
-  a[1] = data & 0xff;
-}
-
-void
-write_longword (addr, data)
-     uint8 *addr;
-     uint32 data;
-{
-  addr[0] = (data >> 24) & 0xff;
-  addr[1] = (data >> 16) & 0xff;
-  addr[2] = (data >> 8) & 0xff;
-  addr[3] = data & 0xff;
-}
-
-void
-write_longlong (addr, data)
-     uint8 *addr;
-     int64 data;
-{
-  uint8 *a = addr;
-  a[0] = data >> 56;
-  a[1] = (data >> 48) & 0xff;
-  a[2] = (data >> 40) & 0xff;
-  a[3] = (data >> 32) & 0xff;
-  a[4] = (data >> 24) & 0xff;
-  a[5] = (data >> 16) & 0xff;
-  a[6] = (data >> 8) & 0xff;
-  a[7] = data & 0xff;
-}
-
 static void
 get_operands (struct simops *s, uint32 ins)
 {

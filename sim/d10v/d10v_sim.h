@@ -167,12 +167,12 @@ extern struct simops Simops[];
 #undef ENDIAN_INLINE
 
 #else
-uint32 get_longword PARAMS ((uint8 *));
-uint16 get_word PARAMS ((uint8 *));
-int64 get_longlong PARAMS ((uint8 *));
-void write_word PARAMS ((uint8 *addr, uint16 data));
-void write_longword PARAMS ((uint8 *addr, uint32 data));
-void write_longlong PARAMS ((uint8 *addr, int64 data));
+extern uint32 get_longword PARAMS ((uint8 *));
+extern uint16 get_word PARAMS ((uint8 *));
+extern int64 get_longlong PARAMS ((uint8 *));
+extern void write_word PARAMS ((uint8 *addr, uint16 data));
+extern void write_longword PARAMS ((uint8 *addr, uint32 data));
+extern void write_longlong PARAMS ((uint8 *addr, int64 data));
 #endif
 
 #define SW(addr,data)		write_word((long)(addr)+State.imem,data)
