@@ -329,7 +329,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
     CORE_ADDR start_pc, limit_pc;
     FRAME next_frame;
 {
-    CORE_ADDR sp = next_frame ? next_frame->frame : read_register (SP_REGNUM);
+    CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
     CORE_ADDR cur_pc;
     int frame_size;
     int has_frame_reg = 0;
@@ -456,7 +456,7 @@ find_proc_desc(pc, next_frame)
   if (PC_IN_CALL_DUMMY (pc, 0, 0))
     {
       struct linked_proc_info *link;
-      CORE_ADDR sp = next_frame ? next_frame->frame : read_register (SP_REGNUM);
+      CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
       alpha_extra_func_info_t found_proc_desc = NULL;
       long min_distance = LONG_MAX;
 
@@ -913,6 +913,18 @@ alpha_skip_prologue (pc, lenient)
     unsigned long inst;
     int offset;
     CORE_ADDR post_prologue_pc;
+    char buf[4];
+
+#ifdef GDB_TARGET_HAS_SHARED_LIBS
+    /* Silently return the unaltered pc upon memory errors.
+       This could happen on OSF/1 if decode_line_1 tries to skip the
+       prologue for quickstarted shared library functions when the
+       shared library is not yet mapped in.
+       Reading target memory is slow over serial lines, so we perform
+       this check only if the target has shared libraries.  */
+    if (target_read_memory (pc, buf, 4))
+      return pc;
+#endif
 
     /* See if we can determine the end of the prologue via the symbol table.
        If so, then return either PC, or the PC after the prologue, whichever
@@ -931,7 +943,6 @@ alpha_skip_prologue (pc, lenient)
        or in the gcc frame.  */
     for (offset = 0; offset < 100; offset += 4)
       {
-	char buf[4];
 	int status;
 
 	status = read_memory_nobpt (pc + offset, buf, 4);

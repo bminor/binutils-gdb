@@ -1,3 +1,55 @@
+Thu Apr  7 17:25:21 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+			  Jim Kingdon  (kingdon@cygnus.com)
+
+	* infrun.c (IN_SOLIB_TRAMPOLINE):  Correct comment, trampolines
+	are in the .plt section.
+	* minsyms.c (lookup_solib_trampoline_symbol_by_pc,
+	find_solib_trampoline_target):  New functions for handling
+	stepping into -g compiled shared libraries.
+	* symtab.h (lookup_solib_trampoline_symbol_by_pc,
+	find_solib_trampoline_target):  Add prototypes.
+	* config/tm-sunos.h (IN_SOLIB_TRAMPOLINE, SKIP_TRAMPOLINE_CODE):
+	Define to handle stepping into  -g compiled shared libraries.
+	* config/tm-sysv4.h (SKIP_TRAMPOLINE_CODE):  Define to handle
+	stepping into  -g compiled shared libraries.
+
+Thu Apr  7 17:22:54 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.in:  Add mips-*-sysv4* support.
+	* config/mips/mipsv4.mh, config/mips/mipsv4.mt,
+	config/mips/tm-mipsv4.h, config/mips/xm-mipsv4.h, mipsv4-nat.c:
+	New files for MIPS SVR4 support.
+	* Makefile.in:  Update for new mipsv4 files.
+	* alpha-tdep.c (heuristic_proc_desc, find_proc_desc):  Use
+	read_next_frame_reg to obtain the frame relative stack pointer.
+	* mips-tdep.c (heuristic_proc_desc):  Use read_next_frame_reg to
+	obtain the frame relative stack pointer.
+	* mdebugread.c (parse_partial_symbols, psymtab_to_symtab1):
+	Handle stStatic and stStaticProc symbols in stabs-in-ecoff output
+	by entering them into the minimal symbol table.
+	* printcmd.c (print_scalar_formatted):  Do not try to unpack to
+	a long for float formats.
+	* solib.c:  Include "elf/mips.h" only if DT_MIPS_RLD_MAP does not
+	get defined in <link.h>.
+	* solib.c (solib_add):  Add shared library sections to the section
+	table of the target before adding the symbols.
+	* partial-stab.h:  Relocate static and global functions.
+	* dbxread.c (read_dbx_symtab):  Remove unused variable
+	end_of_text_address.  Relocate text_addr when passing it
+	to end_psymtab.
+
+	For Alpha OSF/1 targets, enable gdb to set breakpoints in shared
+	library functions before the executable is run. Retrieve dynamic
+	symbols from stripped executables.
+	* mipsread.c (read_alphacoff_dynamic_symtab):  New function.
+	* mipsread.c (mipscoff_symfile_read):  Use it. Issue warning message
+	if no debugging symbols were found.
+	* alpha-tdep.c (alpha_skip_prologue):  Silently return the unaltered
+	pc if memory at the pc is not accessible and GDB_TARGET_HAS_SHARED_LIBS
+	is defined.
+	* config/alpha/nm-alpha.h (GDB_TARGET_HAS_SHARED_LIBS):  Define,
+	OSF/1 has shared libraries.
+
 Thu Apr  7 15:11:11 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* dbxread.c (read_dbx_dynamic_symtab): Adjust for recent changes

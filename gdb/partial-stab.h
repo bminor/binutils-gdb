@@ -1,5 +1,5 @@
 /* Shared code to pre-read a stab (dbx-style), when building a psymtab.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -496,6 +496,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      continue;
 
 	    case 'f':
+	      CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 #ifdef DBXREAD_ONLY
 	      /* Kludges for ELF/STABS with Sun ACC */
 	      last_function_name = namestring;
@@ -517,6 +518,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	         are put into the global psymtab like one would expect.
 		 They're also in the minimal symbol table.  */
 	    case 'F':
+	      CUR_SYMBOL_VALUE += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 #ifdef DBXREAD_ONLY
 	      /* Kludges for ELF/STABS with Sun ACC */
 	      last_function_name = namestring;

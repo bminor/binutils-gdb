@@ -601,3 +601,48 @@ install_minimal_symbols (objfile)
     }
 }
 
+/* Check if PC is in a shared library trampoline code stub.
+   Return minimal symbol for the trampoline entry or NULL if PC is not
+   in a trampoline code stub.  */
+
+struct minimal_symbol *
+lookup_solib_trampoline_symbol_by_pc (pc)
+     CORE_ADDR pc;
+{
+  struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (pc);
+
+  if (msymbol != NULL && MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
+    return msymbol;
+  return NULL;
+}
+
+/* If PC is in a shared library trampoline code stub, return the
+   address of the `real' function belonging to the stub.
+   Return 0 if PC is not in a trampoline code stub or if the real
+   function is not found in the minimal symbol table.
+
+   We may fail to find the right function if a function with the
+   same name is defined in more than one shared library, but this
+   is considered bad programming style. We could return 0 if we find
+   a duplicate function in case this matters someday.  */
+
+CORE_ADDR
+find_solib_trampoline_target (pc)
+     CORE_ADDR pc;
+{
+  struct objfile *objfile;
+  struct minimal_symbol *msymbol;
+  struct minimal_symbol *tsymbol = lookup_solib_trampoline_symbol_by_pc (pc);
+
+  if (tsymbol != NULL)
+    {
+      ALL_MSYMBOLS (objfile, msymbol)
+	{
+	  if (MSYMBOL_TYPE (msymbol) == mst_text
+	      && STREQ (SYMBOL_NAME (msymbol), SYMBOL_NAME (tsymbol)))
+	    return SYMBOL_VALUE_ADDRESS (msymbol);
+	}
+    }
+  return 0;
+}
+

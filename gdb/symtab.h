@@ -26,8 +26,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 
-/* GNU C supports enums that are bitfields.  Some old compilers don't. */
-#if defined(__GNUC__) && !defined(BYTE_BITFIELD)
+/* Don't do this; it means that if some .o's are compiled with GNU C
+   and some are not (easy to do accidentally the way we configure
+   things; also it is a pain to have to "make clean" every time you
+   want to switch compilers), then GDB dies a horrible death.  */
+/* GNU C supports enums that are bitfields.  Some compilers don't. */
+#if 0 && defined(__GNUC__) && !defined(BYTE_BITFIELD)
 #define	BYTE_BITFIELD	:8;
 #else
 #define	BYTE_BITFIELD	/*nothing*/
@@ -57,6 +61,9 @@ struct general_symbol_info
 
   union
     {
+      /* The fact that this is a long not a LONGEST mainly limits the
+	 range of a LOC_CONST.  Since LOC_CONST_BYTES exists, I'm not
+	 sure that is a big deal.  */
       long value;
 
       struct block *block;
@@ -299,6 +306,15 @@ struct minimal_symbol
       mst_data,			/* Generally initialized data */
       mst_bss,			/* Generally uninitialized data */
       mst_abs,			/* Generally absolute (nonrelocatable) */
+      /* GDB uses mst_solib_trampoline for the start address of a shared
+	 library trampoline entry.  Breakpoints for shared library functions
+	 are put there if the shared library is not yet loaded.
+	 After the shared library is loaded, lookup_minimal_symbol will
+	 prefer the minimal symbol from the shared library (usually
+	 a mst_text symbol) over the mst_solib_trampoline symbol, and the
+	 breakpoints will be moved to their true address in the shared
+	 library via breakpoint_re_set.  */
+      mst_solib_trampoline,	/* Shared library trampoline code */
       /* For the mst_file* types, the names are only guaranteed to be unique
 	 within a given .o file.  */
       mst_file_text,		/* Static version of mst_text */
@@ -1016,6 +1032,12 @@ lookup_minimal_symbol PARAMS ((const char *, struct objfile *));
 extern struct minimal_symbol *
 lookup_minimal_symbol_by_pc PARAMS ((CORE_ADDR));
 
+extern struct minimal_symbol *
+lookup_solib_trampoline_symbol_by_pc PARAMS ((CORE_ADDR));
+
+extern CORE_ADDR
+find_solib_trampoline_target PARAMS ((CORE_ADDR));
+
 extern void
 init_minimal_symbol_collection PARAMS ((void));
 
@@ -1096,6 +1118,9 @@ maintenance_print_msymbols PARAMS ((char *, int));
 
 void
 maintenance_print_objfiles PARAMS ((char *, int));
+
+void
+maintenance_check_symtabs PARAMS ((char *, int));
 
 #endif
 

@@ -203,6 +203,7 @@ mips-nat.c
 mips-pinsn.c
 mips-tdep.c
 mipsm3-nat.c
+mipsv4-nat.c
 mipsread.c
 monitor.h
 news-xdep.c

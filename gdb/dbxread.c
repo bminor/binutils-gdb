@@ -1,5 +1,5 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -984,9 +984,6 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   struct cleanup *back_to;
   bfd *abfd;
 
-  /* End of the text segment of the executable file.  */
-  CORE_ADDR end_of_text_addr;
-
   /* Current partial symtab */
   struct partial_symtab *pst;
 
@@ -1100,7 +1097,8 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
       end_psymtab (pst, psymtab_include_list, includes_used,
 		   symnum * symbol_size,
 		   (lowest_text_address == (CORE_ADDR)-1
-		    ? text_addr : lowest_text_address)
+		    ? (text_addr + section_offsets->offsets[SECT_OFF_TEXT])
+		    : lowest_text_address)
 		   + text_size,
 		   dependency_list, dependencies_used);
     }

@@ -74,11 +74,6 @@ static unsigned int max_symbolic_offset = UINT_MAX;
    printing a symbolic value as `<symbol at filename:linenum>' if set.  */
 static int print_symbol_filename = 0;
 
-/* Switch for quick display of symbolic addresses -- only uses minsyms,
-   not full search of symtabs.  */
-
-int fast_symbolic_addr = 1;
-
 /* Number of auto-display expression currently being displayed.
    So that we can disable it if we get an error or a signal within it.
    -1 when not doing one.  */
@@ -374,7 +369,8 @@ print_scalar_formatted (valaddr, type, format, size, stream)
       return;
     }
 
-  val_long = unpack_long (type, valaddr);
+  if (format != 'f')
+    val_long = unpack_long (type, valaddr);
 
   /* If we are printing it as unsigned, truncate it in case it is actually
      a negative signed value (e.g. "print/u (short)-1" should print 65535
@@ -533,15 +529,15 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   /* First try to find the address in the symbol table, then
      in the minsyms.  Take the closest one.  */
 
-  if (fast_symbolic_addr)
-    {
-      /* This is defective in the sense that it only finds text symbols.  */
-      symbol = find_pc_function (addr);
-      if (symbol)
-	name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (symbol));
-    }
-  else
-    find_addr_symbol (addr, &symtab, &name_location);
+  /* This is defective in the sense that it only finds text symbols.  So
+     really this is kind of pointless--we should make sure that the
+     minimal symbols have everything we need (by changing that we could
+     save some memory, but for many debug format--ELF/DWARF or
+     anything/stabs--it would be inconvenient to eliminate those minimal
+     symbols anyway).  */
+  symbol = find_pc_function (addr);
+  if (symbol)
+    name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (symbol));
 
   if (symbol)
     {
@@ -2180,13 +2176,6 @@ environment, the value is printed in its own window.");
       add_set_cmd ("symbol-filename", no_class, var_boolean,
 		   (char *)&print_symbol_filename,
 	"Set printing of source filename and line number with <symbol>.",
-		   &setprintlist),
-      &showprintlist);
-
-  add_show_from_set (
-      add_set_cmd ("fast-symbolic-addr", no_class, var_boolean,
-		   (char *)&fast_symbolic_addr,
-	"Set fast printing of symbolic addresses (using minimal symbols).",
 		   &setprintlist),
       &showprintlist);
 

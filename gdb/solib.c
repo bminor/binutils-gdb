@@ -1,5 +1,5 @@
 /* Handle SunOS and SVR4 shared libraries for GDB, the GNU Debugger.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    
 This file is part of GDB.
 
@@ -30,6 +30,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef SVR4_SHARED_LIBS
  /* SunOS shared libs need the nlist structure.  */
 #include <a.out.h> 
+#else
+#include "libelf.h"
+#ifndef DT_MIPS_RLD_MAP
+#include "elf/mips.h"
+#endif
 #endif
 
 #include "symtab.h"
@@ -71,15 +76,12 @@ static char *bkpt_names[] = {
 
 /* Symbols which are used to locate the base of the link map structures. */
 
+#ifndef SVR4_SHARED_LIBS
 static char *debug_base_symbols[] = {
-#ifdef SVR4_SHARED_LIBS
-  "_r_debug",	/* Most SVR4 systems, Solaris 2.1, 2.2 */
-  "r_debug",	/* Solaris 2.3 */
-#else
-  "_DYNAMIC",	/* SunOS */
-#endif
+  "_DYNAMIC",
   NULL
 };
+#endif
 
 /* local data declarations */
 
@@ -164,11 +166,8 @@ solib_map_sections PARAMS ((struct so_list *));
 
 #ifdef SVR4_SHARED_LIBS
 
-static int
-look_for_base PARAMS ((int, CORE_ADDR));
-
 static CORE_ADDR
-bfd_lookup_symbol PARAMS ((bfd *, char *));
+elf_locate_base PARAMS ((void));
 
 #else
 
@@ -250,7 +249,7 @@ solib_map_sections (so)
   if (build_section_table (abfd, &so -> sections, &so -> sections_end))
     {
       error ("Can't find the file sections in `%s': %s", 
-	     bfd_get_filename (exec_bfd), bfd_errmsg (bfd_get_error ()));
+	     bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
     }
 
   for (p = so -> sections; p < so -> sections_end; p++)
@@ -261,7 +260,7 @@ solib_map_sections (so)
       p -> addr += (CORE_ADDR) LM_ADDR (so);
       p -> endaddr += (CORE_ADDR) LM_ADDR (so);
       so -> lmend = (CORE_ADDR) max (p -> endaddr, so -> lmend);
-      if (STREQ (p -> sec_ptr -> name, ".text"))
+      if (STREQ (p -> the_bfd_section -> name, ".text"))
 	{
 	  so -> textsection = p;
 	}
@@ -355,162 +354,95 @@ solib_add_common_symbols (rtc_symp, objfile)
 
 #endif	/* SVR4_SHARED_LIBS */
 
+
 #ifdef SVR4_SHARED_LIBS
 
 /*
 
 LOCAL FUNCTION
 
-	bfd_lookup_symbol -- lookup the value for a specific symbol
+	elf_locate_base -- locate the base address of dynamic linker structs
+	for SVR4 elf targets.
 
 SYNOPSIS
 
-	CORE_ADDR bfd_lookup_symbol (bfd *abfd, char *symname)
+	CORE_ADDR elf_locate_base (void)
 
 DESCRIPTION
 
-	An expensive way to lookup the value of a single symbol for
-	bfd's that are only temporary anyway.  This is used by the
-	shared library support to find the address of the debugger
-	interface structures in the shared library.
+	For SVR4 elf targets the address of the dynamic linker's runtime
+	structure is contained within the dynamic info section in the
+	executable file.  The dynamic section is also mapped into the
+	inferior address space.  Because the runtime loader fills in the
+	real address before starting the inferior, we have to read in the
+	dynamic info section from the inferior address space.
+	If there are any errors while trying to find the address, we
+	silently return 0, otherwise the found address is returned.
 
-	Note that 0 is specifically allowed as an error return (no
-	such symbol).
-
-	FIXME:  See if there is a less "expensive" way of doing this.
-	Also see if there is already another bfd or gdb function
-	that specifically does this, and if so, use it.
-*/
-
-static CORE_ADDR
-bfd_lookup_symbol (abfd, symname)
-     bfd *abfd;
-     char *symname;
-{
-  unsigned int storage_needed;
-  asymbol *sym;
-  asymbol **symbol_table;
-  unsigned int number_of_symbols;
-  unsigned int i;
-  struct cleanup *back_to;
-  CORE_ADDR symaddr = 0;
-  
-  storage_needed = get_symtab_upper_bound (abfd);
-
-  if (storage_needed > 0)
-    {
-      symbol_table = (asymbol **) xmalloc (storage_needed);
-      back_to = make_cleanup (free, (PTR)symbol_table);
-      number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table); 
-  
-      for (i = 0; i < number_of_symbols; i++)
-	{
-	  sym = *symbol_table++;
-	  if (STREQ (sym -> name, symname))
-	    {
-	      /* Bfd symbols are section relative. */
-	      symaddr = sym -> value + sym -> section -> vma;
-	      break;
-	    }
-	}
-      do_cleanups (back_to);
-    }
-  return (symaddr);
-}
-
-/*
-
-LOCAL FUNCTION
-
-	look_for_base -- examine file for each mapped address segment
-
-SYNOPSYS
-
-	static int look_for_base (int fd, CORE_ADDR baseaddr)
-
-DESCRIPTION
-
-	This function is passed to proc_iterate_over_mappings, which
-	causes it to get called once for each mapped address space, with
-	an open file descriptor for the file mapped to that space, and the
-	base address of that mapped space.
-
-	Our job is to find the debug base symbol in the file that this
-	fd is open on, if it exists, and if so, initialize the dynamic
-	linker structure base address debug_base.
-
-	Note that this is a computationally expensive proposition, since
-	we basically have to open a bfd on every call, so we specifically
-	avoid opening the exec file.
  */
 
-static int
-look_for_base (fd, baseaddr)
-     int fd;
-     CORE_ADDR baseaddr;
+static CORE_ADDR
+elf_locate_base ()
 {
-  bfd *interp_bfd;
-  CORE_ADDR address;
-  char **symbolp;
+  struct elf_internal_shdr *dyninfo_sect;
+  int dyninfo_sect_size;
+  CORE_ADDR dyninfo_addr;
+  char *buf;
+  char *bufend;
 
-  /* If the fd is -1, then there is no file that corresponds to this
-     mapped memory segment, so skip it.  Also, if the fd corresponds
-     to the exec file, skip it as well. */
+  /* Find the start address of the .dynamic section.  */
+  if (exec_bfd == NULL || bfd_get_flavour (exec_bfd) != bfd_target_elf_flavour)
+    return 0;
+  dyninfo_sect = bfd_elf_find_section (exec_bfd, ".dynamic");
+  if (dyninfo_sect == NULL)
+    return 0;
+  dyninfo_addr = dyninfo_sect->sh_addr;
 
-  if ((fd == -1) || fdmatch (fileno ((GDB_FILE *)(exec_bfd -> iostream)), fd))
+  /* Read in .dynamic section, silently ignore errors.  */
+  dyninfo_sect_size = dyninfo_sect->sh_size;
+  buf = alloca (dyninfo_sect_size);
+  if (target_read_memory (dyninfo_addr, buf, dyninfo_sect_size))
+    return 0;
+
+  /* Find the DT_DEBUG entry in the the .dynamic section.
+     For mips elf we look for DT_MIPS_RLD_MAP, mips elf apparently has
+     no DT_DEBUG entries.  */
+  /* FIXME: In lack of a 64 bit ELF ABI the following code assumes
+     a 32 bit ELF ABI target.  */
+  for (bufend = buf + dyninfo_sect_size;
+       buf < bufend;
+       buf += sizeof (Elf32_External_Dyn))
     {
-      return (0);
-    }
+      Elf32_External_Dyn *x_dynp = (Elf32_External_Dyn *)buf;
+      long dyn_tag;
+      CORE_ADDR dyn_ptr;
 
-  /* Try to open whatever random file this fd corresponds to.  Note that
-     we have no way currently to find the filename.  Don't gripe about
-     any problems we might have, just fail. */
-
-  if ((interp_bfd = bfd_fdopenr ("unnamed", gnutarget, fd)) == NULL)
-    {
-      return (0);
-    }
-  if (!bfd_check_format (interp_bfd, bfd_object))
-    {
-      bfd_close (interp_bfd);
-      return (0);
-    }
-
-  /* Now try to find our debug base symbol in this file, which we at
-     least know to be a valid ELF executable or shared library. */
-
-  for (symbolp = debug_base_symbols; *symbolp != NULL; symbolp++)
-    {
-      address = bfd_lookup_symbol (interp_bfd, *symbolp);
-      if (address != 0)
+      dyn_tag = bfd_h_get_32 (exec_bfd, (bfd_byte *) x_dynp->d_tag);
+      if (dyn_tag == DT_NULL)
+	break;
+      else if (dyn_tag == DT_DEBUG)
 	{
-	  break;
+	  dyn_ptr = bfd_h_get_32 (exec_bfd, (bfd_byte *) x_dynp->d_un.d_ptr);
+	  return dyn_ptr;
+	}
+      else if (dyn_tag == DT_MIPS_RLD_MAP)
+	{
+	  char pbuf[TARGET_PTR_BIT / HOST_CHAR_BIT];
+
+	  /* DT_MIPS_RLD_MAP contains a pointer to the address
+	     of the dynamic link structure.  */
+	  dyn_ptr = bfd_h_get_32 (exec_bfd, (bfd_byte *) x_dynp->d_un.d_ptr);
+	  if (target_read_memory (dyn_ptr, pbuf, sizeof (pbuf)))
+	    return 0;
+	  return extract_unsigned_integer (pbuf, sizeof (pbuf));
 	}
     }
-  if (address == 0)
-    {
-      bfd_close (interp_bfd);
-      return (0);
-    }
 
-  /* Eureka!  We found the symbol.  But now we may need to relocate it
-     by the base address.  If the symbol's value is less than the base
-     address of the shared library, then it hasn't yet been relocated
-     by the dynamic linker, and we have to do it ourself.  FIXME: Note
-     that we make the assumption that the first segment that corresponds
-     to the shared library has the base address to which the library
-     was relocated. */
-
-  if (address < baseaddr)
-    {
-      address += baseaddr;
-    }
-  debug_base = address;
-  bfd_close (interp_bfd);
-  return (1);
+  /* DT_DEBUG entry not found.  */
+  return 0;
 }
 
-#endif
+#endif	/* SVR4_SHARED_LIBS */
 
 /*
 
@@ -540,19 +472,12 @@ DESCRIPTION
 	have to do is look it up there.  Note that we explicitly do NOT want
 	to find the copies in the shared library.
 
-	The SVR4 version is much more complicated because the dynamic linker
-	and it's structures are located in the shared C library, which gets
-	run as the executable's "interpreter" by the kernel.  We have to go
+	The SVR4 version is a bit more complicated because the address
+	is contained somewhere in the dynamic info section.  We have to go
 	to a lot more work to discover the address of the debug base symbol.
 	Because of this complexity, we cache the value we find and return that
 	value on subsequent invocations.  Note there is no copy in the
 	executable symbol tables.
-
-	Note that we can assume nothing about the process state at the time
-	we need to find this address.  We may be stopped on the first instruc-
-	tion of the interpreter (C shared library), the first instruction of
-	the executable itself, or somewhere else entirely (if we attached
-	to the process for example).
 
  */
 
@@ -585,14 +510,12 @@ locate_base ()
 
   /* Check to see if we have a currently valid address, and if so, avoid
      doing all this work again and just return the cached address.  If
-     we have no cached address, ask the /proc support interface to iterate
-     over the list of mapped address segments, calling look_for_base() for
-     each segment.  When we are done, we will have either found the base
-     address or not. */
+     we have no cached address, try to locate it in the dynamic info
+     section.  */
 
   if (debug_base == 0)
     {
-      proc_iterate_over_mappings (look_for_base);
+      debug_base = elf_locate_base ();
     }
   return (debug_base);
 
@@ -808,35 +731,10 @@ solib_add (arg_string, from_tty, target)
       error ("Invalid regexp: %s", re_err);
     }
   
-  /* Getting new symbols may change our opinion about what is
-     frameless.  */
-  reinit_frame_cache ();
-  
-  while ((so = find_solib (so)) != NULL)
-    {
-      if (so -> so_name[0] && re_exec (so -> so_name))
-	{
-	  so -> from_tty = from_tty;
-	  if (so -> symbols_loaded)
-	    {
-	      if (from_tty)
-		{
-		  printf_unfiltered ("Symbols already loaded for %s\n", so -> so_name);
-		}
-	    }
-	  else if (catch_errors
-		   (symbol_add_stub, (char *) so,
-		    "Error while reading shared library symbols:\n",
-		    RETURN_MASK_ALL))
-	    {
-	      so_last = so;
-	      so -> symbols_loaded = 1;
-	    }
-	}
-    }
-  
-  /* Now add the shared library sections to the section table of the
-     specified target, if any.  */
+  /* Add the shared library sections to the section table of the
+     specified target, if any. We have to do this before reading the
+     symbol files as symbol_file_add calls reinit_frame_cache and
+     creating a new frame might access memory in the shared library.  */
   if (target)
     {
       /* Count how many new section_table entries there are.  */
@@ -879,6 +777,30 @@ solib_add (arg_string, from_tty, target)
 			  (sizeof (struct section_table)) * count);
 		  old += count;
 		}
+	    }
+	}
+    }
+  
+  /* Now add the symbol files.  */
+  while ((so = find_solib (so)) != NULL)
+    {
+      if (so -> so_name[0] && re_exec (so -> so_name))
+	{
+	  so -> from_tty = from_tty;
+	  if (so -> symbols_loaded)
+	    {
+	      if (from_tty)
+		{
+		  printf_unfiltered ("Symbols already loaded for %s\n", so -> so_name);
+		}
+	    }
+	  else if (catch_errors
+		   (symbol_add_stub, (char *) so,
+		    "Error while reading shared library symbols:\n",
+		    RETURN_MASK_ALL))
+	    {
+	      so_last = so;
+	      so -> symbols_loaded = 1;
 	    }
 	}
     }

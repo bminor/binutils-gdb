@@ -75,7 +75,7 @@ hook_stop_stub PARAMS ((char *));
 #endif
 
 /* For SVR4 shared libraries, each call goes through a small piece of
-   trampoline code in the ".init" section.  IN_SOLIB_TRAMPOLINE evaluates
+   trampoline code in the ".plt" section.  IN_SOLIB_TRAMPOLINE evaluates
    to nonzero if we are current stopped in one of these. */
 #ifndef IN_SOLIB_TRAMPOLINE
 #define IN_SOLIB_TRAMPOLINE(pc,name)	0
@@ -1714,7 +1714,7 @@ signals_info (signum_exp, from_tty)
 
   printf_filtered ("\n");
   /* These ugly casts brought to you by the native VAX compiler.  */
-  for (oursig = 0;
+  for (oursig = TARGET_SIGNAL_FIRST;
        (int)oursig < (int)TARGET_SIGNAL_LAST;
        oursig = (enum target_signal)((int)oursig + 1))
     {
