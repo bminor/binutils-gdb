@@ -1,3 +1,9 @@
+2002-10-03  Marko Mlinar   <markom@opencores.org>
+
+	* gdb.texinfo (Target Commands): Add or1k target specific
+	commands.
+	* gdb.texinfo (Contributors): Add myself to the contributors list.
+
 2002-10-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.texinfo (Mode Options): Update --interpreter option.  "mi2"
