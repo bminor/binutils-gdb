@@ -1,5 +1,5 @@
 /* atof_ieee.c - turn a Flonum into an IEEE floating point number
-   Copyright (C) 1987, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1987, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.

@@ -1,5 +1,6 @@
 /* atof_vax.c - turn a Flonum into a VAX floating point number
-   Copyright (C) 1987, 1992, 93, 95, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1992, 93, 95, 97, 98, 1999
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
