@@ -620,7 +620,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  return set;
 	}
 
-      argvec = (value_ptr *) alloca (sizeof (value_ptr) * nargs);
+      argvec = (struct value **) alloca (sizeof (struct value *) * nargs);
       for (tem = 0; tem < nargs; tem++)
 	{
 	  /* Ensure that array expressions are coerced into pointer objects. */
@@ -673,7 +673,7 @@ evaluate_subexp_standard (struct type *expect_type,
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       /* Allocate arg vector, including space for the function to be
          called in argvec[0] and a terminating NULL */
-      argvec = (value_ptr *) alloca (sizeof (value_ptr) * (nargs + 3));
+      argvec = (struct value **) alloca (sizeof (struct value *) * (nargs + 3));
       if (op == STRUCTOP_MEMBER || op == STRUCTOP_MPTR)
 	{
 	  LONGEST fnptr;
@@ -969,7 +969,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  /* It's a function call. */
 	  /* Allocate arg vector, including space for the function to be
 	     called in argvec[0] and a terminating NULL */
-	  argvec = (value_ptr *) alloca (sizeof (value_ptr) * (nargs + 2));
+	  argvec = (struct value **) alloca (sizeof (struct value *) * (nargs + 2));
 	  argvec[0] = arg1;
 	  tem = 1;
 	  for (; tem <= nargs; tem++)

@@ -536,7 +536,8 @@ evaluate_subexp_chill (struct type *expect_type,
 
 	  /* Allocate arg vector, including space for the function to be
 	     called in argvec[0] and a terminating NULL */
-	  argvec = (value_ptr *) alloca (sizeof (value_ptr) * (nargs + 2));
+	  argvec = (struct value **) alloca (sizeof (struct value *)
+					     * (nargs + 2));
 	  argvec[0] = arg1;
 	  tem = 1;
 	  for (; tem <= nargs && tem <= TYPE_NFIELDS (type); tem++)

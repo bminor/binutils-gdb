@@ -332,8 +332,8 @@ execute_control_command (struct command_line *cmd)
   struct expression *expr;
   struct command_line *current;
   struct cleanup *old_chain = 0;
-  value_ptr val;
-  value_ptr val_mark;
+  struct value *val;
+  struct value *val_mark;
   int loop;
   enum command_control_type ret;
   char *new_line;

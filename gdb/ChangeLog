@@ -1,5 +1,15 @@
 2001-12-25  Andrew Cagney  <ac131313@redhat.com>
 
+	* cli/cli-script.c (execute_control_command): Replace value_ptr
+	with a struct value pointer.
+	* ch-lang.c (evaluate_subexp_chill): Ditto.
+	* printcmd.c (printf_command): Ditto.
+	* tracepoint.c (set_traceframe_context): Ditto.
+	(encode_actions): Ditto.
+	* eval.c (evaluate_subexp_standard): Ditto.
+
+2001-12-25  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh: When an int variable, print value using %d instead
 	of %ld.
 	* gdbarch.c: Re-generate.

@@ -2045,7 +2045,8 @@ printf_command (char *arg, int from_tty)
   int allocated_args = 20;
   struct cleanup *old_cleanups;
 
-  val_args = (value_ptr *) xmalloc (allocated_args * sizeof (value_ptr));
+  val_args = (struct value **) xmalloc (allocated_args
+					* sizeof (struct value *));
   old_cleanups = make_cleanup (free_current_contents, &val_args);
 
   if (s == 0)
@@ -2209,9 +2210,9 @@ printf_command (char *arg, int from_tty)
       {
 	char *s1;
 	if (nargs == allocated_args)
-	  val_args = (value_ptr *) xrealloc ((char *) val_args,
-					     (allocated_args *= 2)
-					     * sizeof (value_ptr));
+	  val_args = (struct value **) xrealloc ((char *) val_args,
+						 (allocated_args *= 2)
+						 * sizeof (struct value *));
 	s1 = s;
 	val_args[nargs] = parse_to_comma_and_eval (&s1);
 

@@ -254,7 +254,8 @@ set_traceframe_context (CORE_ADDR trace_pc)
 {
   static struct type *func_string, *file_string;
   static struct type *func_range, *file_range;
-  static value_ptr func_val, file_val;
+  struct value *func_val;
+  struct value *file_val;
   static struct type *charstar;
   int len;
 
@@ -1486,7 +1487,7 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
   struct expression *exp = NULL;
   struct action_line *action;
   int i;
-  value_ptr tempval;
+  struct value *tempval;
   struct collection_list *collect;
   struct cmd_list_element *cmd;
   struct agent_expr *aexpr;
