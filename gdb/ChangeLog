@@ -1,3 +1,9 @@
+Thu May  6 15:47:45 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* More patches from Jeffrey Law (law@cs.utah.edu).
+	* gdb/config/pa/tm-hppah.h (millicode_start, millicode_end):
+	Delete unnecessary declarations.
+
 Thu May  6 15:15:46 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* ser-unix.c (wait_for):  Use VTIME to do timeouts instead of
