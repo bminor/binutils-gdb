@@ -1,3 +1,8 @@
+Wed Jan 21 21:20:32 1998  Manfred Hollstein  <manfred@s-direktnet.de>
+
+	* emultempl/sunos.em: Don't include sys/types.h and sys/stat.h
+	here; they are included already via sysdep.h.
+
 Tue Jan  6 13:40:02 1998  Richard Henderson  <rth@cygnus.com>
 
 	* scripttempl/i960.sc: Don't explicitly set .data and .bss start.
