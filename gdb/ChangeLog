@@ -1,5 +1,11 @@
 2004-04-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64nbsd-tdep.c (amd64nbsd_sigcontext_addr): Remove function.
+	(amd64nbsd_mcontext_addr): New function.
+	(amd64nbsd_init_abi): Initialize TDEP->sigcontext_addr as
+	amd64nbsd_mcontext_addr.  Directly initialize TDEP->sc_reg_offset
+	with amd64nbsd_r_reg_offset, instead of building it on the fly.
+
 	* corelow.c (core_xfer_partial): Fix coding standards violation.
 	Add support for TARGET_OBJECT_WCOOKIE.
 
