@@ -1,3 +1,14 @@
+2004-02-25  Roland McGrath  <roland@redhat.com>
+
+	* remote.c (remote_protocol_qPart_auxv): New variable.
+	(init_all_packet_configs): Initialize it.
+	(set_remote_protocol_qPart_auxv_packet_cmd): New function.
+	(show_remote_protocol_qPart_auxv_packet_cmd): New function.
+	(show_remote_cmd): Call it.
+	(_initialize_remote): Initialize commands.
+	(remote_xfer_partial): If enabled, use qPart:auxv:read:... query to
+	service TARGET_OBJECT_AUXV requests.
+
 2004-02-25  J. Brobecker  <brobecker@gnat.com>
 
 	* configure.in: Make sure that the wborder function is available.
@@ -18,7 +29,7 @@
 
 2004-02-25  Andrew Cagney  <cagney@redhat.com>
 
-	PR cli/1566.  Problem found, and fix suggested by David Allan. 
+	PR cli/1566.  Problem found, and fix suggested by David Allan.
 	* cli/cli-script.c (execute_control_command): Unconditionally
 	install a cleanup.  Default "ret" to "invalid_control".  Use
 	"break" instead of "return" to escape from the switch.
@@ -40,7 +51,7 @@
 	instead of ia64_write_pc().
 	* ia64-linux-tdep.c (regcache.h): Include.
 	(ia64_linux_write_pc): New function.
- 
+
 2004-02-23  Roland McGrath  <roland@redhat.com>
 
 	* auxv.c (info_auxv_command): Fix typos in error messages.

@@ -1,9 +1,16 @@
+2004-02-25  Roland McGrath  <roland@redhat.com>
+
+	* target.h (struct target_ops): New member `read_auxv'.
+	* server.c (handle_query): Handle qPart:auxv:read: query using that.
+	* linux-low.c (linux_read_auxv): New function.
+	(linux_target_ops): Initialize `read_auxv' member to that.
+
 2004-02-17  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
 
 	Committed by Jim Blandy  <jimb@redhat.com>.
 
 	* linux-s390-low.c (s390_num_regs): Update.
-	(s390_regmap): Remove control registers.  Use __s390x__ predefine 
+	(s390_regmap): Remove control registers.  Use __s390x__ predefine
 	instead of GPR_SIZE to distiguish s390 and s390x targets.
 
 2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
@@ -153,7 +160,7 @@ Mon Jul 21 20:09:34 UTC 2003  Brendan Conoboy  <blc@redhat.com>
 	for create_inferior.
 	* server.c (signal_pid): New variable.
 	(create_inferior): Set signal_pid.  Block SIGTTOU and SIGTTIN in
-	gdbserver.  Set the child to be the foreground process group. 
+	gdbserver.  Set the child to be the foreground process group.
 	(attach_inferior): Set signal_pid.
 
 2002-08-23  Daniel Jacobowitz  <drow@mvista.com>
@@ -182,7 +189,7 @@ Mon Jul 21 20:09:34 UTC 2003  Brendan Conoboy  <blc@redhat.com>
 
 2002-07-04  Michal Ludvig  <mludvig@suse.cz>
 
-	* linux-x86-64-low.c (x86_64_regmap): Make it an array of 
+	* linux-x86-64-low.c (x86_64_regmap): Make it an array of
 	byte offsets instead of an array of indexes.
 	(x86_64_store_gregset, x86_64_store_fpregset): Parameter made const.
 
@@ -567,4 +574,3 @@ Mon Jul 21 20:09:34 UTC 2003  Brendan Conoboy  <blc@redhat.com>
 	* server.h: Add ATTR_NORETURN and ATTR_FORMAT.  Update prototypes.
 	* utils.c (error): Remove NORETURN.
 	(fatal): Likewise.
-
