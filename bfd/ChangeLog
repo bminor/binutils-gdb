@@ -1,3 +1,10 @@
+Wed Sep 22 16:34:14 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_compute_section_file_positions): Set filepos for
+	sections with SEC_LOAD set, even if SEC_HAS_CONTENTS is clear.
+	(ecoff_write_object_contents): Don't set scnptr to zero just
+	because size of section is zero.  Needed for Irix 4.0.5F.
+
 Wed Sep 22 09:49:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.bfd: Use i960-bout, not i960-coff for i960-*-nindy*.

@@ -1643,6 +1643,12 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
 	  rptr->sym_ptr_ptr = symbols + intern.r_symndx;
 	  rptr->addend = 0;
 	}
+      else if (intern.r_symndx == RELOC_SECTION_NONE
+	       || intern.r_symndx == RELOC_SECTION_ABS)
+	{
+	  rptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+	  rptr->addend = 0;
+	}
       else
 	{
 	  CONST char *sec_name;
@@ -1663,13 +1669,12 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
 	    case RELOC_SECTION_XDATA: sec_name = ".xdata"; break;
 	    case RELOC_SECTION_PDATA: sec_name = ".pdata"; break;
 	    case RELOC_SECTION_LITA:  sec_name = ".lita";  break;
-	    case RELOC_SECTION_ABS:   sec_name = ".abs";   break;
 	    default: abort ();
 	    }
 
 	  sec = bfd_get_section_by_name (abfd, sec_name);
 	  if (sec == (asection *) NULL)
-	    sec = bfd_make_section (abfd, sec_name);
+	    abort ();
 	  rptr->sym_ptr_ptr = sec->symbol_ptr_ptr;
 
 	  rptr->addend = - bfd_get_section_vma (abfd, sec);
@@ -2851,7 +2856,7 @@ ecoff_compute_section_file_positions (abfd)
        current = current->next)
     {
       /* Only deal with sections which have contents */
-      if (! (current->flags & SEC_HAS_CONTENTS)
+      if ((current->flags & (SEC_HAS_CONTENTS | SEC_LOAD)) == 0
 	  || strcmp (current->name, SCOMMON) == 0)
 	continue;
 
@@ -3031,10 +3036,8 @@ ecoff_write_object_contents (abfd)
       section.s_paddr = vma;
       section.s_size = bfd_get_section_size_before_reloc (current);
 
-      /* If this section has no size or is unloadable then the scnptr
-	 will be 0 too.  */
-      if (current->_raw_size == 0
-	  || (current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
+      /* If this section is unloadable then the scnptr will be 0.  */
+      if ((current->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
 	section.s_scnptr = 0;
       else
 	section.s_scnptr = current->filepos;
@@ -3492,7 +3495,7 @@ ecoff_slurp_armap (abfd)
   /* This code used to overlay the symdefs over the raw archive data,
      but that doesn't work on a 64 bit host.  */
 
-  stringbase = raw_armap + count * (2 * LONG_SIZE) + 2 * LONG_SIZE;
+  stringbase = raw_armap + count * 8 + 8;
 
 #ifdef CHECK_ARMAP_HASH
   {
@@ -3505,14 +3508,14 @@ ecoff_slurp_armap (abfd)
       hlog++;
     BFD_ASSERT (i == count);
 
-    raw_ptr = raw_armap + LONG_SIZE;
-    for (i = 0; i < count; i++, raw_ptr += 2 * LONG_SIZE)
+    raw_ptr = raw_armap + 4;
+    for (i = 0; i < count; i++, raw_ptr += 8)
       {
 	unsigned int name_offset, file_offset;
 	unsigned int hash, rehash, srch;
       
 	name_offset = bfd_h_get_32 (abfd, (PTR) raw_ptr);
-	file_offset = bfd_h_get_32 (abfd, (PTR) (raw_ptr + LONG_SIZE));
+	file_offset = bfd_h_get_32 (abfd, (PTR) (raw_ptr + 4));
 	if (file_offset == 0)
 	  continue;
 	hash = ecoff_armap_hash (stringbase + name_offset, &rehash, count,
@@ -3524,11 +3527,7 @@ ecoff_slurp_armap (abfd)
 	for (srch = (hash + rehash) & (count - 1);
 	     srch != hash && srch != i;
 	     srch = (srch + rehash) & (count - 1))
-	  BFD_ASSERT (bfd_h_get_32 (abfd,
-				    (PTR) (raw_armap
-					   + LONG_SIZE
-					   + (srch * 2 * LONG_SIZE)
-					   + LONG_SIZE))
+	  BFD_ASSERT (bfd_h_get_32 (abfd, (PTR) (raw_armap + 8 + srch * 8))
 		      != 0);
 	BFD_ASSERT (srch == i);
       }
@@ -3536,9 +3535,9 @@ ecoff_slurp_armap (abfd)
 
 #endif /* CHECK_ARMAP_HASH */
 
-  raw_ptr = raw_armap + LONG_SIZE;
-  for (i = 0; i < count; i++, raw_ptr += 2 * LONG_SIZE)
-    if (bfd_h_get_32 (abfd, (PTR) (raw_ptr + LONG_SIZE)) != 0)
+  raw_ptr = raw_armap + 4;
+  for (i = 0; i < count; i++, raw_ptr += 8)
+    if (bfd_h_get_32 (abfd, (PTR) (raw_ptr + 4)) != 0)
       ++ardata->symdef_count;
 
   symdef_ptr = ((struct symdef *)
@@ -3546,12 +3545,12 @@ ecoff_slurp_armap (abfd)
 			   ardata->symdef_count * sizeof (struct symdef)));
   ardata->symdefs = (carsym *) symdef_ptr;
 
-  raw_ptr = raw_armap + LONG_SIZE;
-  for (i = 0; i < count; i++, raw_ptr += 2 * LONG_SIZE)
+  raw_ptr = raw_armap + 4;
+  for (i = 0; i < count; i++, raw_ptr += 8)
     {
       unsigned int name_offset, file_offset;
 
-      file_offset = bfd_h_get_32 (abfd, (PTR) (raw_ptr + LONG_SIZE));
+      file_offset = bfd_h_get_32 (abfd, (PTR) (raw_ptr + 4));
       if (file_offset == 0)
 	continue;
       name_offset = bfd_h_get_32 (abfd, (PTR) raw_ptr);
@@ -3588,7 +3587,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
   struct ar_hdr hdr;
   struct stat statbuf;
   unsigned int i;
-  bfd_byte temp[LONG_SIZE];
+  bfd_byte temp[4];
   bfd_byte *hashtable;
   bfd *current;
   bfd *last_elt;
@@ -3599,12 +3598,12 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
     ;
   hashsize = 1 << hashlog;
 
-  symdefsize = hashsize * 2 * LONG_SIZE;
+  symdefsize = hashsize * 8;
   padit = stridx % 2;
   stringsize = stridx + padit;
 
   /* Include 8 bytes to store symdefsize and stringsize in output. */
-  mapsize = LONG_SIZE + symdefsize + stringsize + LONG_SIZE;
+  mapsize = symdefsize + stringsize + 8;
 
   firstreal = SARMAG + sizeof (struct ar_hdr) + mapsize + elength;
 
@@ -3651,7 +3650,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
     return false;
 
   bfd_h_put_32 (abfd, hashsize, temp);
-  if (bfd_write (temp, 1, LONG_SIZE, abfd) != LONG_SIZE)
+  if (bfd_write (temp, 1, 4, abfd) != 4)
     return false;
   
   hashtable = (bfd_byte *) bfd_zalloc (abfd, symdefsize);
@@ -3678,10 +3677,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
       last_elt = current;
 
       hash = ecoff_armap_hash (*map[i].name, &rehash, hashsize, hashlog);
-      if (bfd_h_get_32 (abfd, (PTR) (hashtable
-				     + (hash * 2 * LONG_SIZE)
-				     + LONG_SIZE))
-	  != 0)
+      if (bfd_h_get_32 (abfd, (PTR) (hashtable + (hash * 8) + 4)) != 0)
 	{
 	  unsigned int srch;
 
@@ -3689,10 +3685,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
 	  for (srch = (hash + rehash) & (hashsize - 1);
 	       srch != hash;
 	       srch = (srch + rehash) & (hashsize - 1))
-	    if (bfd_h_get_32 (abfd, (PTR) (hashtable
-					   + (srch * 2 * LONG_SIZE)
-					   + LONG_SIZE))
-		== 0)
+	    if (bfd_h_get_32 (abfd, (PTR) (hashtable + (srch * 8) + 4)) == 0)
 	      break;
 
 	  BFD_ASSERT (srch != hash);
@@ -3700,10 +3693,8 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
 	  hash = srch;
 	}
 	
-      bfd_h_put_32 (abfd, map[i].namidx,
-		    (PTR) (hashtable + hash * 2 * LONG_SIZE));
-      bfd_h_put_32 (abfd, firstreal,
-		    (PTR) (hashtable + hash * 2 * LONG_SIZE + LONG_SIZE));
+      bfd_h_put_32 (abfd, map[i].namidx, (PTR) (hashtable + hash * 8));
+      bfd_h_put_32 (abfd, firstreal, (PTR) (hashtable + hash * 8 + 4));
     }
 
   if (bfd_write (hashtable, 1, symdefsize, abfd) != symdefsize)
@@ -3713,7 +3704,7 @@ ecoff_write_armap (abfd, elength, map, orl_count, stridx)
 
   /* Now write the strings.  */
   bfd_h_put_32 (abfd, stringsize, temp);
-  if (bfd_write (temp, 1, LONG_SIZE, abfd) != LONG_SIZE)
+  if (bfd_write (temp, 1, 4, abfd) != 4)
     return false;
   for (i = 0; i < orl_count; i++)
     {
