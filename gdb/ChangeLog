@@ -1,3 +1,29 @@
+Thu May 18 15:58:46 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* utils.c (fprintf_filtered, fprintf_unfiltered, fprintfi_filtered,
+	  printf_filtered, printf_unfiltered, printfi_filtered, query, warning,
+	  error, fatal, fatal_dump_core): Use stdarg.h macros when compiling 
+	  with an ANSI compiler.
+	* complain.c (complain): Likewise.
+	* language.c (type_error, range_error): Likewise.
+	* monitor.c (monitor_printf, monitor_printf_noecho): Likewise.
+	* remote-array.c (printf_monitor, debuglogs): Likewise.
+	* remote-mips.c (mips_error): Likewise.
+	* remote-os9k.c (printf_monitor): Likewise.
+	* remote-st.c (printf_stdebug): Likewise.
+start-sanitize-gdbtk
+        * gdbtk.c (gdbtk_query): Likewise.
+end-sanitize-gdbtk
+
+	* defs.h, complain.h, language.h, monitor.h: Add prototypes to
+	  match above changes.
+
+	* printcmd.c: Remove uneeded #include <varargs.h>.
+	* remote-e7000.c: Likewise.
+
+	* f-typeprint.c (f_type_print_base): Fix typo found by above
+	  changes.
+
 Wed May 17 11:21:32 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* Makefile.in (xcoffread.o): Depend on partial-stab.h.

@@ -29,7 +29,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include <tcl.h>
 #include <tk.h>
+#ifdef __STDC__
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 #include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -121,14 +125,12 @@ gdbtk_fputs (ptr, stream)
 }
 
 static int
-gdbtk_query (args)
+gdbtk_query (query, args)
+     char *query;
      va_list args;
 {
-  char *query;
   char buf[200];
   long val;
-
-  query = va_arg (args, char *);
 
   vsprintf (buf, query, args);
   Tcl_VarEval (interp, "gdbtk_tcl_query ", "{", buf, "}", NULL);
@@ -138,18 +140,26 @@ gdbtk_query (args)
 }
 
 static void
+#ifdef __STDC__
+dsprintf_append_element (Tcl_DString *dsp, char *format, ...)
+#else
 dsprintf_append_element (va_alist)
      va_dcl
+#endif
 {
   va_list args;
-  Tcl_DString *dsp;
-  char *format;
   char buf[1024];
 
-  va_start (args);
+#ifdef __STDC__
+  va_start (args, format);
+#else
+  Tcl_DString *dsp;
+  char *format;
 
+  va_start (args);
   dsp = va_arg (args, Tcl_DString *);
   format = va_arg (args, char *);
+#endif
 
   vsprintf (buf, format, args);
 

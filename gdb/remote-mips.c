@@ -31,7 +31,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "remote-utils.h"
 
 #include <signal.h>
+#ifdef __STDC__
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 
 extern char *mips_read_processor_type PARAMS ((void));
 
@@ -271,19 +275,28 @@ static serial_t mips_desc;
    inconsistent state.  */
 
 static NORETURN void
+#ifdef __STDC__
+mips_error (char *string, ...)
+#else
 mips_error (va_alist)
      va_dcl
+#endif
 {
   va_list args;
-  char *string;
 
+#ifdef __STDC__
+  va_start (args, string);
+#else
+  char *string;
   va_start (args);
+  string = va_arg (args, char *);
+#endif
+ 
   target_terminal_ours ();
   wrap_here("");			/* Force out any buffered output */
   gdb_flush (gdb_stdout);
   if (error_pre_print)
     fprintf_filtered (gdb_stderr, error_pre_print);
-  string = va_arg (args, char *);
   vfprintf_filtered (gdb_stderr, string, args);
   fprintf_filtered (gdb_stderr, "\n");
   va_end (args);

@@ -32,7 +32,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 #include "wait.h"
+#ifdef __STDC__
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 #include <signal.h>
 #include <string.h>
 #include <sys/types.h>
@@ -111,17 +115,24 @@ static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
    Works just like printf.  */
 
 void
+#ifdef __STDC__
+monitor_printf_noecho (char *pattern, ...)
+#else
 monitor_printf_noecho (va_alist)
      va_dcl
+#endif
 {
   va_list args;
-  char *pattern;
   char sndbuf[2000];
   int len;
 
+#if __STDC__
+  va_start (args, pattern);
+#else
+  char *pattern;
   va_start (args);
-
   pattern = va_arg (args, char *);
+#endif
 
   vsprintf (sndbuf, pattern, args);
 
@@ -141,18 +152,25 @@ monitor_printf_noecho (va_alist)
    printf.  */
 
 void
+#ifdef __STDC__
+monitor_printf (char *pattern, ...)
+#else
 monitor_printf (va_alist)
      va_dcl
+#endif
 {
   va_list args;
-  char *pattern;
   char sndbuf[2000];
   int len;
   int i, c;
 
+#ifdef __STDC__
+  va_start (args, pattern);
+#else
+  char *pattern;
   va_start (args);
-
   pattern = va_arg (args, char *);
+#endif
 
   vsprintf (sndbuf, pattern, args);
 

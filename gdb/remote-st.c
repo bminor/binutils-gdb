@@ -38,7 +38,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 #include "wait.h"
+#ifdef __STDC__
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 #include <signal.h>
 #include <string.h>
 #include <sys/types.h>
@@ -66,18 +70,27 @@ static serial_t st2000_desc;
 /* Send data to stdebug.  Works just like printf. */
 
 static void
+#ifdef __STDC__
+printf_stdebug(char *pattern, ...)
+#else
 printf_stdebug(va_alist)
      va_dcl
+#endif
 {
   va_list args;
-  char *pattern;
   char buf[200];
 
+#ifdef __STDC__
+  va_start(args, pattern);
+#else
+  char *pattern;
   va_start(args);
-
   pattern = va_arg(args, char *);
+#endif
 
   vsprintf(buf, pattern, args);
+  va_end(args);
+
   if (SERIAL_WRITE(st2000_desc, buf, strlen(buf)))
     fprintf(stderr, "SERIAL_WRITE failed: %s\n", safe_strerror(errno));
 }

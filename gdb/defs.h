@@ -187,7 +187,7 @@ extern void null_cleanup PARAMS ((char **));
 
 extern int myread PARAMS ((int, char *, int));
 
-extern int query ();
+extern int query PARAMS((char *, ...));
 
 /* Annotation stuff.  */
 
@@ -223,21 +223,21 @@ extern void vprintf_filtered ();
 
 extern void vfprintf_filtered ();
 
-extern void fprintf_filtered ();
+extern void fprintf_filtered PARAMS ((FILE *, char *, ...));
 
-extern void fprintfi_filtered ();
+extern void fprintfi_filtered PARAMS ((int, FILE *, char *, ...));
 
-extern void printf_filtered ();
+extern void printf_filtered PARAMS ((char *, ...));
 
-extern void printfi_filtered ();
+extern void printfi_filtered PARAMS ((int, char *, ...));
 
 extern void vprintf_unfiltered ();
 
 extern void vfprintf_unfiltered ();
 
-extern void fprintf_unfiltered ();
+extern void fprintf_unfiltered PARAMS ((FILE *, char *, ...));
 
-extern void printf_unfiltered ();
+extern void printf_unfiltered PARAMS ((char *, ...));
 
 extern void print_spaces PARAMS ((int, GDB_FILE *));
 
@@ -549,11 +549,11 @@ extern char *quit_pre_print;
 
 extern char *warning_pre_print;
 
-extern NORETURN void error () ATTR_NORETURN;
+extern NORETURN void error PARAMS((char *, ...)) ATTR_NORETURN;
 
 extern void error_begin PARAMS ((void));
 
-extern NORETURN void fatal () ATTR_NORETURN;
+extern NORETURN void fatal PARAMS((char *, ...)) ATTR_NORETURN;
 
 extern NORETURN void nomem PARAMS ((long)) ATTR_NORETURN;
 
@@ -579,7 +579,7 @@ catch_errors PARAMS ((int (*) (char *), void *, char *, return_mask));
 
 extern void warning_begin PARAMS ((void));
 
-extern void warning ();
+extern void warning PARAMS ((char *, ...));
 
 /* Global functions from other, non-gdb GNU thingies.
    Libiberty thingies are no longer declared here.  We include libiberty.h

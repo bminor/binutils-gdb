@@ -23,7 +23,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/param.h>
 #include <pwd.h>
 #endif
+#ifdef __STDC__
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 #include <ctype.h>
 #include <string.h>
 
@@ -53,7 +57,7 @@ malloc_botch PARAMS ((void));
 #endif /* NO_MMALLOC, etc */
 
 static void
-fatal_dump_core ();	/* Can't prototype with <varargs.h> usage... */
+fatal_dump_core PARAMS((char *, ...));
 
 static void
 prompt_for_continue PARAMS ((void));
@@ -250,15 +254,23 @@ warning_begin ()
 
 /* VARARGS */
 void
+#ifdef __STDC__
+warning (char *string, ...)
+#else
 warning (va_alist)
      va_dcl
+#endif
 {
   va_list args;
+#ifdef __STDC__
+  va_start (args, string);
+#else
   char *string;
 
   va_start (args);
-  warning_begin ();
   string = va_arg (args, char *);
+#endif
+  warning_begin ();
   vfprintf_unfiltered (gdb_stderr, string, args);
   fprintf_unfiltered (gdb_stderr, "\n");
   va_end (args);
@@ -290,19 +302,23 @@ error_begin ()
 
 /* VARARGS */
 NORETURN void
+#ifdef __STDC__
+error (char *string, ...)
+#else
 error (va_alist)
      va_dcl
+#endif
 {
   va_list args;
+#ifdef __STDC__
+  va_start (args, string);
+#else
   char *string;
 
   va_start (args);
-
-  if (error_hook)
-    error_hook (args);		/* Never returns */
-
-  error_begin ();
   string = va_arg (args, char *);
+#endif
+  error_begin ();
   vfprintf_filtered (gdb_stderr, string, args);
   fprintf_filtered (gdb_stderr, "\n");
   va_end (args);
@@ -318,14 +334,22 @@ error (va_alist)
 
 /* VARARGS */
 NORETURN void
+#ifdef __STDC__
+fatal (char *string, ...)
+#else
 fatal (va_alist)
      va_dcl
+#endif
 {
   va_list args;
+#ifdef __STDC__
+  va_start (args, string);
+#else
   char *string;
 
   va_start (args);
   string = va_arg (args, char *);
+#endif
   fprintf_unfiltered (gdb_stderr, "\ngdb: ");
   vfprintf_unfiltered (gdb_stderr, string, args);
   fprintf_unfiltered (gdb_stderr, "\n");
@@ -338,14 +362,22 @@ fatal (va_alist)
 
 /* VARARGS */
 static void
+#ifdef __STDC__
+fatal_dump_core (char *string, ...)
+#else
 fatal_dump_core (va_alist)
      va_dcl
+#endif
 {
   va_list args;
+#ifdef __STDC__
+  va_start (args, string);
+#else
   char *string;
 
   va_start (args);
   string = va_arg (args, char *);
+#endif
   /* "internal error" is always correct, since GDB should never dump
      core, no matter what the input.  */
   fprintf_unfiltered (gdb_stderr, "\ngdb internal error: ");
@@ -843,19 +875,29 @@ gdb_print_address (addr, stream)
 
 /* VARARGS */
 int
+#ifdef __STDC__
+query (char *ctlstr, ...)
+#else
 query (va_alist)
      va_dcl
+#endif
 {
   va_list args;
-  char *ctlstr;
   register int answer;
   register int ans2;
   int retval;
 
+#ifdef __STDC__
+  va_start (args, ctlstr);
+#else
+  char *ctlstr;
+  va_start (args);
+  ctlstr = va_arg (args, char *);
+#endif
+
   if (query_hook)
     {
-      va_start (args);
-      return query_hook (args);
+      return query_hook (ctlstr, args);
     }
 
   /* Automatically answer "yes" if input is not from a terminal.  */
@@ -875,10 +917,7 @@ query (va_alist)
       if (annotation_level > 1)
 	printf_filtered ("\n\032\032pre-query\n");
 
-      va_start (args);
-      ctlstr = va_arg (args, char *);
       vfprintf_filtered (gdb_stdout, ctlstr, args);
-      va_end (args);
       printf_filtered ("(y or n) ");
 
       if (annotation_level > 1)
@@ -1500,34 +1539,48 @@ vprintf_unfiltered (format, args)
 
 /* VARARGS */
 void
+#ifdef __STDC__
+fprintf_filtered (FILE *stream, char *format, ...)
+#else
 fprintf_filtered (va_alist)
      va_dcl
+#endif
 {
   va_list args;
+#ifdef __STDC__
+  va_start (args, format);
+#else
   FILE *stream;
   char *format;
 
   va_start (args);
   stream = va_arg (args, FILE *);
   format = va_arg (args, char *);
-
+#endif
   vfprintf_filtered (stream, format, args);
   va_end (args);
 }
 
 /* VARARGS */
 void
+#ifdef __STDC__
+fprintf_unfiltered (FILE *stream, char *format, ...)
+#else
 fprintf_unfiltered (va_alist)
      va_dcl
+#endif
 {
   va_list args;
+#ifdef __STDC__
+  va_start (args, format);
+#else
   FILE *stream;
   char *format;
 
   va_start (args);
   stream = va_arg (args, FILE *);
   format = va_arg (args, char *);
-
+#endif
   vfprintf_unfiltered (stream, format, args);
   va_end (args);
 }
@@ -1537,10 +1590,17 @@ fprintf_unfiltered (va_alist)
 
 /* VARARGS */
 void
+#ifdef __STDC__
+fprintfi_filtered (int spaces, FILE *stream, char *format, ...)
+#else
 fprintfi_filtered (va_alist)
      va_dcl
+#endif
 {
   va_list args;
+#ifdef __STDC__
+  va_start (args, format);
+#else
   int spaces;
   FILE *stream;
   char *format;
@@ -1549,6 +1609,7 @@ fprintfi_filtered (va_alist)
   spaces = va_arg (args, int);
   stream = va_arg (args, FILE *);
   format = va_arg (args, char *);
+#endif
   print_spaces_filtered (spaces, stream);
 
   vfprintf_filtered (stream, format, args);
@@ -1558,15 +1619,22 @@ fprintfi_filtered (va_alist)
 
 /* VARARGS */
 void
+#ifdef __STDC__
+printf_filtered (char *format, ...)
+#else
 printf_filtered (va_alist)
      va_dcl
+#endif
 {
   va_list args;
+#ifdef __STDC__
+  va_start (args, format);
+#else
   char *format;
 
   va_start (args);
   format = va_arg (args, char *);
-
+#endif
   vfprintf_filtered (gdb_stdout, format, args);
   va_end (args);
 }
@@ -1574,15 +1642,22 @@ printf_filtered (va_alist)
 
 /* VARARGS */
 void
+#ifdef __STDC__
+printf_unfiltered (char *format, ...)
+#else
 printf_unfiltered (va_alist)
      va_dcl
+#endif
 {
   va_list args;
+#ifdef __STDC__
+  va_start (args, format);
+#else
   char *format;
 
   va_start (args);
   format = va_arg (args, char *);
-
+#endif
   vfprintf_unfiltered (gdb_stdout, format, args);
   va_end (args);
 }
@@ -1592,16 +1667,24 @@ printf_unfiltered (va_alist)
 
 /* VARARGS */
 void
+#ifdef __STDC__
+printfi_filtered (int spaces, char *format, ...)
+#else
 printfi_filtered (va_alist)
      va_dcl
+#endif
 {
   va_list args;
+#ifdef __STDC__
+  va_start (args, format);
+#else
   int spaces;
   char *format;
 
   va_start (args);
   spaces = va_arg (args, int);
   format = va_arg (args, char *);
+#endif
   print_spaces_filtered (spaces, gdb_stdout);
   vfprintf_filtered (gdb_stdout, format, args);
   va_end (args);

@@ -20,7 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include <string.h>
-#include <varargs.h>
 #include "frame.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -586,9 +585,8 @@ print_address_numeric (addr, use_local, stream)
      GDB_FILE *stream;
 {
   /* This assumes a CORE_ADDR can fit in a LONGEST.  Probably a safe
-     assumption.  We pass use_local but I'm not completely sure whether
-     that is correct.  When (if ever) should we *not* use_local?  */
-  print_longest (stream, 'x', 1, (unsigned LONGEST) addr);
+     assumption.  */
+  print_longest (stream, 'x', use_local, (unsigned LONGEST) addr);
 }
 
 /* Print address ADDR symbolically on STREAM.
@@ -927,7 +925,7 @@ address_info (exp, from_tty)
 	  return;
 	}
 
-      msymbol = lookup_minimal_symbol (exp, (struct objfile *) NULL);
+      msymbol = lookup_minimal_symbol (exp, NULL, NULL);
 
       if (msymbol != NULL)
 	{

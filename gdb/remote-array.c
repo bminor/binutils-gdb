@@ -28,7 +28,11 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "wait.h"
+#ifdef __STDC__
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 #include <signal.h>
 #include <string.h>
 #include <sys/types.h>
@@ -62,7 +66,7 @@ static char *hex2mem();
     }									\
   while (0)
 
-static void debuglogs();
+static void debuglogs PARAMS((int, char *, ...));
 static void array_open();
 static void array_close();
 static void array_detach();
@@ -169,17 +173,24 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
  * printf_monitor -- send data to monitor.  Works just like printf.
  */
 static void
+#ifdef __STDC__
+printf_monitor(char *pattern, ...)
+#else
 printf_monitor(va_alist)
      va_dcl
+#endif
 {
   va_list args;
-  char *pattern;
   char buf[PBUFSIZ];
   int i;
 
+#ifdef __STDC__
+  va_start(args, pattern);
+#else
+  char *pattern;
   va_start(args);
-
   pattern = va_arg(args, char *);
+#endif
 
   vsprintf(buf, pattern, args);
 
@@ -213,25 +224,34 @@ write_monitor(data, len)
  *	to be formatted and printed. A CR is added after each string is printed.
  */
 static void
+#ifdef __STDC__
+debuglogs(int level, char *pattern, ...)
+#else
 debuglogs(va_alist)
      va_dcl
+#endif
 {
   va_list args;
-  char *pattern, *p;
+  char *p;
   unsigned char buf[PBUFSIZ];
   char newbuf[PBUFSIZ];
-  int level, i;
+  int i;
 
+#ifdef __STDC__
+  va_start(args, pattern);
+#else
+  char *pattern;
+  int level;
   va_start(args);
-
   level = va_arg(args, int);			/* get the debug level */
+  pattern = va_arg(args, char *);		/* get the printf style pattern */
+#endif
+
   if ((level <0) || (level > 100)) {
     error ("Bad argument passed to debuglogs(), needs debug level");
     return;
   }
       
-  pattern = va_arg(args, char *);		/* get the printf style pattern */
-
   vsprintf(buf, pattern, args);			/* format the string */
   
   /* convert some characters so it'll look right in the log */

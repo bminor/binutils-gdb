@@ -29,7 +29,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include <string.h>
+#ifdef __STDC__
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -978,19 +982,27 @@ op_error (fmt,op,fatal)
    by the value of warning_pre_print and we do not return to the top level. */
 
 void
+#ifdef __STDC__
+type_error (char *string, ...)
+#else
 type_error (va_alist)
      va_dcl
+#endif
 {
    va_list args;
+#ifdef __STDC__
+   va_start (args, string);
+#else
    char *string;
+   va_start (args);
+   string = va_arg (args, char *);
+#endif
 
    if (type_check == type_check_warn)
      fprintf_filtered (gdb_stderr, warning_pre_print);
    else
      error_begin ();
 
-   va_start (args);
-   string = va_arg (args, char *);
    vfprintf_filtered (gdb_stderr, string, args);
    fprintf_filtered (gdb_stderr, "\n");
    va_end (args);
@@ -999,19 +1011,27 @@ type_error (va_alist)
 }
 
 void
+#ifdef __STDC__
+range_error (char *string, ...)
+#else
 range_error (va_alist)
      va_dcl
+#endif
 {
    va_list args;
+#ifdef __STDC__
+   va_start (args, string);
+#else
    char *string;
+   va_start (args);
+   string = va_arg (args, char *);
+#endif
 
    if (range_check == range_check_warn)
      fprintf_filtered (gdb_stderr, warning_pre_print);
    else
      error_begin ();
 
-   va_start (args);
-   string = va_arg (args, char *);
    vfprintf_filtered (gdb_stderr, string, args);
    fprintf_filtered (gdb_stderr, "\n");
    va_end (args);

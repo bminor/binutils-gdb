@@ -425,7 +425,7 @@ f_type_print_base (type, stream, show, level)
       /* Strings may have dynamic upperbounds (lengths) like arrays. */
 
       if (TYPE_ARRAY_UPPER_BOUND_TYPE (type) == BOUND_CANNOT_BE_DETERMINED)
-	fprintf_filtered ("character*(*)");
+	fprintf_filtered (stream, "character*(*)");
       else
 	{
 	  retcode = f77_get_dynamic_upperbound (type, &upper_bound);

@@ -20,7 +20,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "complaints.h"
 #include "gdbcmd.h"
+#ifdef __STDC__
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 
 /* Structure to manage complaints about symbol file contents.  */
 
@@ -59,14 +63,23 @@ extern int info_verbose;
 
 /* VARARGS */
 void
+#ifdef __STDC__
+complain (struct complaint *complaint, ...)
+#else
 complain (va_alist)
      va_dcl
+#endif
 {
   va_list args;
+#ifdef __STDC__
+  va_start (args, complaint);
+#else
   struct complaint *complaint;
 
   va_start (args);
   complaint = va_arg (args, struct complaint *);
+#endif
+
   complaint -> counter++;
   if (complaint -> next == NULL)
     {

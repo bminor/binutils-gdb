@@ -40,7 +40,7 @@ extern struct complaint complaint_root[1];
 /* Functions that handle complaints.  (in complaints.c)  */
 
 extern void
-complain ();
+complain PARAMS ((struct complaint *, ...));
 
 extern void
 clear_complaints PARAMS ((int, int));
