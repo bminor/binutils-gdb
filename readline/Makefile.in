@@ -67,7 +67,7 @@ THINGS_TO_TAR = $(SOURCES) $(SUPPORT)
 
 ##########################################################################
 
-STAGESTUFF = *.o *.a *.log *.cp *.tp *.vr *.fn *.aux *.pg *.toc
+STAGESTUFF = *.o
 
 all: libreadline.a
 
@@ -104,7 +104,7 @@ includes:
 		fi
 		$(CP) readline.h keymaps.h chardefs.h $(INCDIR)/readline/
 clean:
-		rm -f $(STAGESTUFF)
+		rm -f $(STAGESTUFF) *.a *.log *.cp *.tp *.vr *.fn *.aux *.pg *.toc
 
 $(DESTDIR)/libreadline.a: libreadline.a
 		-mv $(DESTDIR)/libreadline.a $(DESTDIR)/libreadline.old
