@@ -1,3 +1,7 @@
+Tue Sep 17 17:44:22 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* config/hmake-sysv:  sgi/irix support.
+
 Sun May 19 07:49:34 1991  John Gilmore and Rich Pixley  (at cygnus.com)
 
 	Make readline independent of the applications that use it.
