@@ -1,3 +1,9 @@
+Tue Apr 26 22:21:40 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.t17/callfuncs.exp: More comments about t_func_values tests.
+	* gdb.t17/gdbme.c (t_func_values): Add comments about how and why
+	the code has been restructured.
+
 Thu Apr 21 12:48:07 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t00/default.exp (set write): Allow any number of \r and/or
