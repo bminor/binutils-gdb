@@ -1,3 +1,16 @@
+2002-10-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/elf32bmipn32-defs.sh: Set ELFSIZE according to
+	emulation name.  Set LIB_PATH only for native tools, and
+	search the ABI-specific versions of NATIVE_LIB_DIRS before the
+	.../lib variants, not instead of them.  Mostly copied from...
+	* emulparams/elf32ppc.sh: ... here.  Fixed typo.
+	* emulparams/elf64bmip-defs.sh: Backed out.
+	* emulparams/elf64bmip.sh: Import elf32bmipn32-defs.sh again.
+	* emulparams/elf64btsmip.sh: Likewise.
+	(DATA_ADDR, NONPAGED_TEXT_START_ADDR, SHLIB_TEXT_START_ADDR,
+	TEXT_DYNAMIC): Removed.
+
 2002-10-17  Alexandre Oliva  <aoliva@redhat.com>
 
 	* emulparams/elf32bmipn32-defs.sh (LIB_PATH): Set to /usr/lib32.

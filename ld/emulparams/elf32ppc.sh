@@ -38,5 +38,6 @@ if test `echo "$host" | sed -e s/64//` = `echo "$target" | sed -e s/64//`; then
     	case "$EMULATION_NAME" in
     	  *64*) LIB_PATH=`echo ${LIB_PATH}: | sed -e s,:,64:,g`$LIB_PATH
     	esac
+        ;;
     esac
 fi

@@ -11,7 +11,28 @@ BIG_OUTPUT_FORMAT="elf32-bigmips"
 LITTLE_OUTPUT_FORMAT="elf32-littlemips"
 
 TEMPLATE_NAME=elf32
-LIB_PATH=/usr/lib32
+
+case "$EMULATION_NAME" in
+elf32*n32*) ELFSIZE=32 ;;
+elf64*) ELFSIZE=64 ;;
+*) echo $0: unhandled emulation $EMULATION_NAME >&2; exit 1 ;;
+esac
+
+if test `echo "$host" | sed -e s/64//` = `echo "$target" | sed -e s/64//`; then
+  case " $EMULATION_LIBPATH " in
+    *" ${EMULATION_NAME} "*)
+      LIB_PATH=${libdir}
+      for lib in ${NATIVE_LIB_DIRS}; do
+	case :${LIB_PATH}: in
+	  *:${lib}:*) ;;
+	  *) LIB_PATH=${LIB_PATH}:${lib} ;;
+	esac
+      done
+      # Look for 64 bit target libraries in /lib64, /usr/lib64 etc., first.
+      LIB_PATH=`echo ${LIB_PATH}: | sed -e s,:,$ELFSIZE:,g`$LIB_PATH
+    ;;
+  esac
+fi
 
 GENERATE_SHLIB_SCRIPT=yes
 
