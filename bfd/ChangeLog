@@ -1,5 +1,14 @@
 Tue Jul 11 15:19:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (NAME(aout,link_add_symbols)): Don't bother to check
+	that archives hold a.out objects.
+	* cf-i386lynx.c (coff_bfd_link_add_symbols): Don't define.
+	(lynx_link_add_symbols): Remove.
+	* cf-m68klynx.c (coff_bfd_link_add_symbols): Don't define.
+	(lynx_link_add_symbols): Remove.
+	* elflink.h (elf_bfd_link_add_symbols): Don't bother to check that
+	archives hold ELF objects.
+
 	* archive.c (bfd_generic_archive_p): If the archive has a map, and
 	the target was defaulted, but the first object in the archive can
 	not be matched with that target, then return a bad format error.

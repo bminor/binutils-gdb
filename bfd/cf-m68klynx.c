@@ -43,7 +43,6 @@ struct internal_syment;
 
 static bfd_reloc_status_type _bfd_m68klynx_special_fn
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static boolean lynx_link_add_symbols PARAMS ((bfd *, struct bfd_link_info *));
 static reloc_howto_type *coff_m68k_lynx_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *,
 	   struct coff_link_hash_entry *, struct internal_syment *,
@@ -176,41 +175,9 @@ _bfd_m68klynx_special_fn (abfd, reloc_entry, symbol, data, input_section,
       cache_ptr->addend += asect->vma;				\
   }
 
-#define coff_bfd_link_add_symbols lynx_link_add_symbols
 #define coff_rtype_to_howto coff_m68k_lynx_rtype_to_howto
 
 #include "coff-m68k.c"
-
-/* On Lynx, we may have a COFF archive which contains a.out elements.
-   This screws up the COFF linker, which expects that any archive it
-   gets contains COFF elements.  We override the add_symbols function
-   to check for this case.  */
-
-static boolean
-lynx_link_add_symbols (abfd, info)
-     bfd *abfd;
-     struct bfd_link_info *info;
-{
-  if (bfd_get_format (abfd) == bfd_archive)
-    {
-      bfd *first;
-
-      first = bfd_openr_next_archived_file (abfd, (bfd *) NULL);
-      if (first == NULL)
-	return false;
-      if (! bfd_check_format (first, bfd_object))
-	return false;
-      if (bfd_get_flavour (first) != bfd_target_coff_flavour)
-	{
-	  /* Treat the archive as though it were actually of the
-	     flavour of its first element.  This ought to work,
-	     since the archive support is fairly generic.  */
-	  return (*first->xvec->_bfd_link_add_symbols) (abfd, info);
-	}
-    }
-
-  return _bfd_coff_link_add_symbols (abfd, info);
-}
 
 /* coff-m68k.c uses the special COFF backend linker.  We need to
    adjust common symbols.

@@ -46,29 +46,11 @@ elf_bfd_link_add_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  bfd *first;
-
   switch (bfd_get_format (abfd))
     {
     case bfd_object:
       return elf_link_add_object_symbols (abfd, info);
     case bfd_archive:
-      first = bfd_openr_next_archived_file (abfd, (bfd *) NULL);
-      if (first == NULL)
-	{
-	  /* It's OK to have an empty archive.  */
-	  return true;
-	}
-      if (! bfd_check_format (first, bfd_object))
-	return false;
-      if (bfd_get_flavour (first) != bfd_target_elf_flavour)
-	{
-	  /* On Linux, we may have an a.out archive which got
-             recognized as an ELF archive.  Therefore, we treat all
-             archives as though they were actually of the flavour of
-             their first element.  */
-	  return (*first->xvec->_bfd_link_add_symbols) (abfd, info);
-	}
       return elf_link_add_archive_symbols (abfd, info);
     default:
       bfd_set_error (bfd_error_wrong_format);
