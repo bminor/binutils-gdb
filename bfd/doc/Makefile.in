@@ -85,7 +85,7 @@ clean:
 	rm -f $(STAGESTUFF) bfd.dvi bfd.ps *~* *# bfd.??? 
 
 bfd.info: $(DOCFILES) bfd.texinfo
-	- $(MAKEINFO) -o bfd.info $(srcdir)/bfd.texinfo
+	$(MAKEINFO) -o bfd.info $(srcdir)/bfd.texinfo
 
 bfd.dvi: $(DOCFILES) bfd.texinfo
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex bfd.texinfo
