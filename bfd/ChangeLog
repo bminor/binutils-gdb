@@ -1,3 +1,12 @@
+start-sanitize-tic80
+Sun Dec 29 16:18:52 1996  Fred Fish  <fnf@cygnus.com>
+
+	* cpu-tic80.c (bfd_tic80_arch): Add struct.
+	* configure.in (case $vec): Correct typo, "tb" not "tp".
+	Also add cofflink.o for tic80coff_vec.
+	* configure: Regenerate with autoconf.
+
+end-sanitize-tic80
 Mon Dec 30 11:54:56 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libbfd.c: Patch up the mmap code so that it is only built if BFD
@@ -14,7 +23,7 @@ Sun Dec 29 10:48:57 1996  Fred Fish  <fnf@toadfish.ninemoons.com>
  	for TIc80.
 
 end-sanitize-tic80
-Fri Dec 27 20:56:41 1996  Fred Fish  <fnf@ninemoons.com>
+Fri Dec 27 20:56:41 1996  Fred Fish  <fnf@cygnus.com>
 
 	* TODO: Correct a misspelling.
 start-sanitize-tic80

@@ -2117,7 +2117,7 @@ do
     symbolsrec_vec)		tb="$tb srec.o" ;;
     tekhex_vec)			tb="$tb tekhex.o" ;;
 # start-sanitize-tic80
-    tic80coff_vec)		tp="$tp coff-tic80.o" ;;
+    tic80coff_vec)		tb="$tb coff-tic80.o cofflink.o" ;;
 # end-sanitize-tic80
     we32kcoff_vec)		tb="$tb coff-we32k.o" ;;
     z8kcoff_vec)		tb="$tb coff-z8k.o reloc16.o" ;;
