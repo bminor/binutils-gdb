@@ -1,3 +1,10 @@
+Wed Aug  4 21:00:18 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	* testsuite/lib/ld.exp: new file
+	* testsuite/config/unix-ld.exp: new file
+	* testsuite/ld.bootstrap/bootstrap.exp: new file
+	* Makefile.in: add dejagnu support for make check
+
 Wed Aug  4 17:52:32 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldlex.l (comment): Add missing newline in message.
