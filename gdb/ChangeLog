@@ -1,5 +1,6 @@
-Wed Nov  1 12:58:14 1995  Fred Fish  <fnf@cygnus.com>
+Wed Nov  1 15:32:57 1995  Fred Fish  <fnf@cygnus.com>
 
+	* breakpoint.c (breakpoint_re_set): Fix typo in comment.
 	* symtab.c (in_prologue): Document func_start and when it is zero
 	don't call SKIP_PROLOGUE (which typically leads unconditionally to
 	an error when we try to access a prologue at address 0).
