@@ -1,3 +1,7 @@
+2000-08-30  Mark Hatle  <mhatle@mvista.com>
+
+	* config/tc-ppc.c (md_parse_option): Recognize -m405.
+
 2000-08-31  Kazu Hirata  <kazu@hxi.com>
 
 	* listing.c: Fix formatting.

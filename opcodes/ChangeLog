@@ -1,3 +1,11 @@
+2000-08-28  Mark Hatle  <mhatle@mvista.com>
+
+	* ppc-opc.c: Add XTLB macro for a few PPC 4xx extended mnemonics.
+	(powerpc_opcodes): Add table entries for PPC 405 instructions.
+	Changed rfci, icbt, mfdcr, dccci, mtdcr, iccci from PPC to PPC403
+	instructions.  Added extended mnemonic mftbl as defined in the
+	405GP manual for all PPCs.
+
 2000-08-30  Kazu Hirata  <kazu@hxi.com>
 
 	* tic80-dis.c: Fix formatting.

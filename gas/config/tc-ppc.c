@@ -842,6 +842,7 @@ md_parse_option (c, arg)
       else if (strcmp (arg, "ppc") == 0
 	       || strcmp (arg, "ppc32") == 0
 	       || strcmp (arg, "403") == 0
+	       || strcmp (arg, "405") == 0
 	       || strcmp (arg, "603") == 0
 	       || strcmp (arg, "604") == 0)
 	ppc_cpu = PPC_OPCODE_PPC;
@@ -962,7 +963,7 @@ PowerPC options:\n\
 -mpwrx, -mpwr2		generate code for IBM POWER/2 (RIOS2)\n\
 -mpwr			generate code for IBM POWER (RIOS1)\n\
 -m601			generate code for Motorola PowerPC 601\n\
--mppc, -mppc32, -m403, -m603, -m604\n\
+-mppc, -mppc32, -m403, -m405, -m603, -m604\n\
 			generate code for Motorola PowerPC 603/604\n\
 -mppc64, -m620		generate code for Motorola PowerPC 620\n\
 -mppc64bridge		generate code for PowerPC 64, including bridge insns\n\
