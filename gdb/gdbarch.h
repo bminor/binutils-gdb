@@ -1536,31 +1536,6 @@ extern void set_gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, g
 #define EXTRACT_STRUCT_VALUE_ADDRESS(regcache) (gdbarch_extract_struct_value_address (current_gdbarch, regcache))
 #endif
 
-#if defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
-/* Legacy for systems yet to multi-arch DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS */
-#if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_extract_struct_value_address_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
-#error "Non multi-arch definition of DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P)
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P() (gdbarch_deprecated_extract_struct_value_address_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_extract_struct_value_address_ftype) (char *regbuf);
-extern CORE_ADDR gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, char *regbuf);
-extern void set_gdbarch_deprecated_extract_struct_value_address (struct gdbarch *gdbarch, gdbarch_deprecated_extract_struct_value_address_ftype *deprecated_extract_struct_value_address);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
-#error "Non multi-arch definition of DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS"
-#endif
-#if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) (gdbarch_deprecated_extract_struct_value_address (current_gdbarch, regbuf))
-#endif
-
 #if defined (DEPRECATED_FRAME_INIT_SAVED_REGS)
 /* Legacy for systems yet to multi-arch DEPRECATED_FRAME_INIT_SAVED_REGS */
 #if !defined (DEPRECATED_FRAME_INIT_SAVED_REGS_P)

@@ -1109,14 +1109,6 @@ print_return_value (int structure_return, struct type *value_type)
 	    error ("Function return value unknown.");
 	  value = value_at (value_type, addr, NULL);
 	}
-      else if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
-	{
-	  char *buf = deprecated_grub_regcache_for_registers (stop_registers);
-	  CORE_ADDR addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (buf);
-	  if (!addr)
-	    error ("Function return value unknown.");
-	  value = value_at (value_type, addr, NULL);
-	}
       else
 	{
 	  /* It is "struct return" yet the value is being extracted,
