@@ -22,6 +22,7 @@ d30v-*-*)		targ_emul=d30velf; targ_extra_emuls="d30v_e d30v_o" ;;
 sparc64-*-aout*)	targ_emul=sparcaout ;;
 sparc64-*-elf*)		targ_emul=elf64_sparc ;;
 sparc-sun-sunos4*) 	targ_emul=sun4 ;;
+sparclite*-*-elf)	targ_emul=elf32_sparc ;;
 sparclite*-*-coff)	targ_emul=coff_sparc ;;
 sparclite*-fujitsu-*)	targ_emul=sparcaout ;;
 sparc*-*-aout)		targ_emul=sparcaout ;;
@@ -86,6 +87,7 @@ i[3456]86-*-linux-gnu*)	targ_emul=elf_i386
 			;;
 i[3456]86-*-sysv4*)	targ_emul=elf_i386 ;;
 i[3456]86-*-unixware)	targ_emul=elf_i386 ;;
+i[3456]86-*-solaris*)	targ_emul=elf_i386 ;;
 i[3456]86-*-netbsd*)	targ_emul=i386nbsd ;;
 i[3456]86-*-netware)	targ_emul=i386nw ;;
 i[3456]86-*-elf*)	targ_emul=elf_i386 ;;
@@ -110,15 +112,16 @@ arm-*-aout | armel-*-aout) targ_emul=armaoutl ;;
 armeb-*-aout)		targ_emul=armaoutb ;;
 arm-*-coff)		targ_emul=armcoff ;;
 thumb-*-coff)		targ_emul=armcoff ;;
+thumb-*-pe)		targ_emul=armpe ;;
 h8300-*-hms)		targ_emul=h8300; targ_extra_emuls="h8300h h8300s"
 			;;
 h8500-*-hms)		targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"
 			;;
-sh-*-elf*|sh-*-rtems*)	targ_emul=shelf
+sh-*-elf*)		targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl"
 			;;
-sh-*-*)			targ_emul=sh; targ_extra_emuls=shl ;;
+sh-*-*|sh-*-rtems*)	targ_emul=sh; targ_extra_emuls=shl ;;
 m68k-sony-*)		targ_emul=news ;;
 m68k-hp-bsd*)		targ_emul=hp300bsd ;;
 m68*-motorola-sysv*)	targ_emul=delta68 ;;
@@ -169,6 +172,9 @@ mips*tx49-*-elf*)	targ_emul=elf32b4300 ;;
 # start-sanitize-r5900 
 mips*r5900*-*-elf*)	targ_emul=elf32l5900 ;;
 # end-sanitize-r5900 
+# start-sanitize-sky
+dvp-*-*)		targ_emul=elf32l5900 ;;
+# end-sanitize-sky
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
 mips*-*-rtems*)		targ_emul=elf32ebmip ;;
@@ -212,9 +218,6 @@ tic30-*-*coff*)		targ_emul=tic30coff ;;
 # start-sanitize-tic80
 tic80-*-*)		targ_emul=tic80coff ;;
 # end-sanitize-tic80
-# start-sanitize-sky
-dvp-*-*)		targ_emul=elf32l4300 ;; # mips64r5900-elf
-# end-sanitize-sky
 v850-*-*)		targ_emul=v850 ;;
 # start-sanitize-v850e
 v850e-*-*)		targ_emul=v850 ;;

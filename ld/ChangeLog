@@ -1,3 +1,7 @@
+Mon Jul  6 14:55:13 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt (i[3456]86-*-solaris*): New target.
+
 Fri Jul  3 14:19:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (wild_section): Don't get an assertion failure if the
