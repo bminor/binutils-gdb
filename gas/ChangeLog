@@ -1,3 +1,10 @@
+2000-06-20  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am: Rebuild dependency.
+	* Makefile.in: Rebuild.
+	* configure: Likewise.
+	* doc/Makefile.in: Likewise.
+
 2000-06-20  Timothy Wall  <twall@cygnus.com>
 
 	* doc/internals.texi (CPU backend): Add @itemx for
