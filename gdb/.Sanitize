@@ -159,7 +159,6 @@ hppa-pinsn.c
 hppa-tdep.c
 hppab-nat.c
 hppah-nat.c
-i386-nlmstub.c
 i386-pinsn.c
 i386-stub.c
 i386-tdep.c
