@@ -1,3 +1,16 @@
+2001-11-14  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf2.c (struct line_head) [total_length]: Change type to
+	bfd_vma.
+	(struct dwarf2_debug): Add dwarf_str_buffer and dwarf_str_size.
+	(struct comp_unit): Add stash and offset_size.
+	(read_8_bytes): Return bfd_vma.
+	(read_indirect_string): New.
+	(read_attribute): Handle DW_FORM_strp.
+	(decode_line_info): Support 64-bit DWARF format.
+	(_bfd_dwarf2_find_nearest_line): Likewise.
+	(parse_comp_unit): Set offset_size and stash.
+
 2001-11-13  Keith Walker <keith.walker@arm.com>
 
 	* dwarf2.c (read_attribute_value): New function to handle

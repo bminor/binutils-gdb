@@ -40,7 +40,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 struct line_head
 {
-  unsigned int total_length;
+  bfd_vma total_length;
   unsigned short version;
   unsigned int prologue_length;
   unsigned char minimum_instruction_length;
@@ -115,6 +115,12 @@ struct dwarf2_debug
 
   /* Length of the loaded .debug_line section.  */
   unsigned long dwarf_line_size;
+
+  /* Pointer to the .debug_str section loaded into memory.  */
+  char* dwarf_str_buffer;
+
+  /* Length of the loaded .debug_str section.  */
+  unsigned long dwarf_str_size;
 };
 
 struct arange
@@ -169,8 +175,14 @@ struct comp_unit
   /* A list of the functions found in this comp. unit.  */
   struct funcinfo* function_table;
 
+  /* Pointer to dwarf2_debug structure.  */
+  struct dwarf2_debug *stash;
+
   /* Address size for this unit - from unit header.  */
   unsigned char addr_size;
+
+  /* Offset size for this unit - from unit header.  */
+  unsigned char offset_size;
 };
 
 /* This data structure holds the information of an abbrev.  */
@@ -201,9 +213,10 @@ static unsigned int read_1_byte PARAMS ((bfd *, char *));
 static int read_1_signed_byte PARAMS ((bfd *, char *));
 static unsigned int read_2_bytes PARAMS ((bfd *, char *));
 static unsigned int read_4_bytes PARAMS ((bfd *, char *));
-static unsigned int read_8_bytes PARAMS ((bfd *, char *));
+static bfd_vma read_8_bytes PARAMS ((bfd *, char *));
 static char *read_n_bytes PARAMS ((bfd *, char *, unsigned int));
 static char *read_string PARAMS ((bfd *, char *, unsigned int *));
+static char *read_indirect_string PARAMS ((struct comp_unit *, char *, unsigned int *));
 static unsigned int read_unsigned_leb128
   PARAMS ((bfd *, char *, unsigned int *));
 static int read_signed_leb128
@@ -304,7 +317,7 @@ read_4_signed_bytes (abfd, buf)
 
 #endif
 
-static unsigned int
+static bfd_vma
 read_8_bytes (abfd, buf)
      bfd *abfd;
      char *buf;
@@ -330,9 +343,7 @@ read_string (abfd, buf, bytes_read_ptr)
      char *buf;
      unsigned int *bytes_read_ptr;
 {
-  /* If the size of a host char is 8 bits, we can return a pointer
-     to the string, otherwise we have to copy the string to a buffer
-     allocated on the temporary obstack.  */
+  /* Return a pointer to the embedded string.  */
   if (*buf == '\0')
     {
       *bytes_read_ptr = 1;
@@ -340,6 +351,59 @@ read_string (abfd, buf, bytes_read_ptr)
     }
 
   *bytes_read_ptr = strlen (buf) + 1;
+  return buf;
+}
+
+static char *
+read_indirect_string (unit, buf, bytes_read_ptr)
+     struct comp_unit* unit;
+     char *buf;
+     unsigned int *bytes_read_ptr;
+{
+  bfd_vma offset;
+  struct dwarf2_debug *stash = unit->stash;
+
+  if (unit->offset_size == 4)
+    offset = read_4_bytes (unit->abfd, buf);
+  else
+    offset = read_8_bytes (unit->abfd, buf);
+  *bytes_read_ptr = unit->offset_size;
+
+  if (! stash->dwarf_str_buffer)
+    {
+      asection *msec;
+      bfd *abfd = unit->abfd;
+
+      msec = bfd_get_section_by_name (abfd, ".debug_str");
+      if (! msec)
+	{
+	  (*_bfd_error_handler)
+	    (_("Dwarf Error: Can't find .debug_str section."));
+	  bfd_set_error (bfd_error_bad_value);
+	  return NULL;
+	}
+
+      stash->dwarf_str_size = msec->_raw_size;
+      stash->dwarf_str_buffer = (char*) bfd_alloc (abfd, msec->_raw_size);
+      if (! stash->dwarf_abbrev_buffer)
+	return NULL;
+
+      if (! bfd_get_section_contents (abfd, msec, stash->dwarf_str_buffer,
+				      (bfd_vma) 0, msec->_raw_size))
+	return NULL;
+    }
+
+  if (offset >= stash->dwarf_str_size)
+    {
+      (*_bfd_error_handler) (_("Dwarf Error: DW_FORM_strp offset (%u) greater than or equal to .debug_str size (%u)."),
+			     offset, stash->dwarf_str_size );
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
+    }
+
+  buf = stash->dwarf_str_buffer + offset;  
+  if (*buf == '\0')
+    return NULL;
   return buf;
 }
 
@@ -586,6 +650,7 @@ read_attribute_value (attr, form, unit, info_ptr)
   switch (form)
     {
     case DW_FORM_addr:
+      /* FIXME: DWARF3 draft sais DW_FORM_ref_addr is offset_size.  */
     case DW_FORM_ref_addr:
       DW_ADDR (attr) = read_address (unit, info_ptr);
       info_ptr += unit->addr_size;
@@ -622,6 +687,10 @@ read_attribute_value (attr, form, unit, info_ptr)
       break;
     case DW_FORM_string:
       DW_STRING (attr) = read_string (abfd, info_ptr, &bytes_read);
+      info_ptr += bytes_read;
+      break;
+    case DW_FORM_strp:
+      DW_STRING (attr) = read_indirect_string (unit, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
     case DW_FORM_block:
@@ -683,7 +752,6 @@ read_attribute_value (attr, form, unit, info_ptr)
       info_ptr += bytes_read;
       info_ptr = read_attribute_value (attr, form, unit, info_ptr);
       break;
-    case DW_FORM_strp:
     default:
       (*_bfd_error_handler) (_("Dwarf Error: Invalid or unhandled FORM value: %d."),
 			     form);
@@ -846,7 +914,7 @@ decode_line_info (unit, stash)
   char *line_ptr;
   char *line_end;
   struct line_head lh;
-  unsigned int i, bytes_read;
+  unsigned int i, bytes_read, offset_size;
   char *cur_file, *cur_dir;
   unsigned char op_code, extended_op, adj_opcode;
   bfd_size_type amt;
@@ -906,11 +974,21 @@ decode_line_info (unit, stash)
   /* Read in the prologue.  */
   lh.total_length = read_4_bytes (abfd, line_ptr);
   line_ptr += 4;
+  offset_size = 4;
+  if (lh.total_length == 0xffffffff)
+    {
+      lh.total_length = read_8_bytes (abfd, line_ptr);
+      line_ptr += 8;
+      offset_size = 8;
+    }
   line_end = line_ptr + lh.total_length;
   lh.version = read_2_bytes (abfd, line_ptr);
   line_ptr += 2;
-  lh.prologue_length = read_4_bytes (abfd, line_ptr);
-  line_ptr += 4;
+  if (offset_size == 4)
+    lh.prologue_length = read_4_bytes (abfd, line_ptr);
+  else
+    lh.prologue_length = read_8_bytes (abfd, line_ptr);
+  line_ptr += offset_size;
   lh.minimum_instruction_length = read_1_byte (abfd, line_ptr);
   line_ptr += 1;
   lh.default_is_stmt = read_1_byte (abfd, line_ptr);
@@ -1365,18 +1443,17 @@ find_rela_addend (abfd, sec, offset, syms)
    includes the compilation unit header that proceeds the DIE's, but
    does not include the length field that preceeds each compilation
    unit header.  END_PTR points one past the end of this comp unit.
-   If ABBREV_LENGTH is 0, then the length of the abbreviation offset
-   is assumed to be four bytes.  Otherwise, it it is the size given.
+   OFFSET_SIZE is the size of DWARF2 offsets (either 4 or 8 bytes).
 
    This routine does not read the whole compilation unit; only enough
    to get to the line number information for the compilation unit.  */
 
 static struct comp_unit *
-parse_comp_unit (abfd, stash, unit_length, abbrev_length)
+parse_comp_unit (abfd, stash, unit_length, offset_size)
      bfd* abfd;
      struct dwarf2_debug *stash;
      bfd_vma unit_length;
-     unsigned int abbrev_length;
+     unsigned int offset_size;
 {
   struct comp_unit* unit;
 
@@ -1396,12 +1473,10 @@ parse_comp_unit (abfd, stash, unit_length, abbrev_length)
 
   version = read_2_bytes (abfd, info_ptr);
   info_ptr += 2;
-  BFD_ASSERT (abbrev_length == 0
-	      || abbrev_length == 4
-	      || abbrev_length == 8);
-  if (abbrev_length == 0 || abbrev_length == 4)
+  BFD_ASSERT (offset_size == 4 || offset_size == 8);
+  if (offset_size == 4)
     abbrev_offset = read_4_bytes (abfd, info_ptr);
-  else if (abbrev_length == 8)
+  else
     abbrev_offset = read_8_bytes (abfd, info_ptr);
   /* The abbrev offset is generally a relocation pointing to
      .debug_abbrev+offset.  On RELA targets, we have to find the
@@ -1409,7 +1484,7 @@ parse_comp_unit (abfd, stash, unit_length, abbrev_length)
      abbrev_offset, so do it here.  */
   off = info_ptr - stash->sec_info_ptr;
   abbrev_offset += find_rela_addend (abfd, stash->sec, off, stash->syms);
-  info_ptr += abbrev_length;
+  info_ptr += offset_size;
   addr_size = read_1_byte (abfd, info_ptr);
   info_ptr += 1;
 
@@ -1464,8 +1539,10 @@ parse_comp_unit (abfd, stash, unit_length, abbrev_length)
   unit = (struct comp_unit*) bfd_zalloc (abfd, amt);
   unit->abfd = abfd;
   unit->addr_size = addr_size;
+  unit->offset_size = offset_size;
   unit->abbrevs = abbrevs;
   unit->end_ptr = end_ptr;
+  unit->stash = stash;
 
   for (i = 0; i < abbrev->num_attrs; ++i)
     {
@@ -1776,16 +1853,25 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
     {
       bfd_vma length;
       boolean found;
+      unsigned int offset_size = addr_size;
 
       if (addr_size == 4)
-	length = read_4_bytes (abfd, stash->info_ptr);
+	{
+	  length = read_4_bytes (abfd, stash->info_ptr);
+	  if (length == 0xffffffff)
+	    {
+	      offset_size = 8;
+	      length = read_8_bytes (abfd, stash->info_ptr + 4);
+	      stash->info_ptr += 8;
+	    }
+	}
       else
 	length = read_8_bytes (abfd, stash->info_ptr);
       stash->info_ptr += addr_size;
 
       if (length > 0)
         {
-	  each = parse_comp_unit (abfd, stash, length, addr_size);
+	  each = parse_comp_unit (abfd, stash, length, offset_size);
 	  stash->info_ptr += length;
 
 	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
