@@ -11,8 +11,8 @@ foo:	nop
 	.word 1
 	.word 1b + 16
 	.word %r_disp32(1b + 16)
-	.word 1b + 16
-	.word %r_disp32(1b + 16)
+	.word 2b + 16
+	.word %r_disp32(2b + 16)
 3:	.word foo
 	.word %r_disp32(foo)
 	.word foo + 16

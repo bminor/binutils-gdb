@@ -1,10 +1,10 @@
 #as:
-#objdump: -dr
+#objdump: -drz
 #name: allinsn
 
 .*: +file format .*
 
-Disassembly of section .text:
+Disassembly of section \.text:
 
 0+000 <abs>:
    0:	01e0      	abs	r0
@@ -55,7 +55,7 @@ Disassembly of section .text:
   1e:	1321      	bgenr	r1, r2
 
 0+020 <bkpt>:
-	...
+  20:	0000      	bkpt
 
 0+022 <bmaski>:
   22:	2c83      	bmaski	r3, 8
@@ -154,7 +154,7 @@ Disassembly of section .text:
   60:	f00e      	br	0x7e
 
 0+062 <jbsr>:
-  62:	7f0a      	jsri	0x.*
+  62:	7f0a      	jsri	0x0	// from address pool at 0x8c
 
 0+064 <jbt>:
   64:	e00c      	bt	0x7e
@@ -163,21 +163,21 @@ Disassembly of section .text:
   66:	00c1      	jmp	r1
 
 0+068 <jmpi>:
-  68:	7009      	jmpi	0x.*
+  68:	7009      	jmpi	0x0	// from address pool at 0x8c
 
 0+06a <jsr>:
   6a:	00d2      	jsr	r2
 
 0+06c <jsri>:
-  6c:	7f08      	jsri	0x.*
+  6c:	7f08      	jsri	0x0	// from address pool at 0x8c
 
-0+06e <ld.b>:
+0+06e <ld\.b>:
   6e:	a304      	ldb	r3, \(r4, 0\)
 
-0+070 <ld.h>:
+0+070 <ld\.h>:
   70:	c516      	ldh	r5, \(r6, 2\)
 
-0+072 <ld.w>:
+0+072 <ld\.w>:
   72:	8718      	ld	r7, \(r8, 4\)
 
 0+074 <ldb>:
@@ -202,7 +202,7 @@ Disassembly of section .text:
   80:	048e      	loopt	r8, 0x64
 
 0+082 <LRW>:
-  82:	7903      	lrw	r9, 0x.*
+  82:	7903      	lrw	r9, (0x86|0x0	// from address pool at 0x90)
 
 0+084 <lrw>:
   84:	7904      	lrw	r9, 0x4321
@@ -215,12 +215,14 @@ Disassembly of section .text:
 
 0+08a <lslc>:
   8a:	3c0c      	lslc	r12
-
-	...
-			8c: ADDR32	.text
-			90: ADDR32	.text.*
-  94:	0000      	bkpt
-  96:	4321      	.short 0x4321
+  8c:	0000      	bkpt
+			8c: ADDR32	\.text
+  8e:	0000      	bkpt
+  90:	(0000      	bkpt|0086      	dect	r6)
+			90: ADDR32	\.text(\+0x86)?
+  92:	0000      	bkpt
+  94:	4321      	\.short 0x4321
+  96:	0000      	bkpt
 
 0+098 <lsli>:
   98:	3dfd      	lsli	r13, 31
@@ -312,13 +314,13 @@ Disassembly of section .text:
 0+0d2 <sexth>:
   d2:	0177      	sexth	r7
 
-0+0d4 <st.b>:
+0+0d4 <st\.b>:
   d4:	b809      	stb	r8, \(r9, 0\)
 
-0+0d6 <st.h>:
+0+0d6 <st\.h>:
   d6:	da1b      	sth	r10, \(r11, 2\)
 
-0+0d8 <st.w>:
+0+0d8 <st\.w>:
   d8:	9c1d      	st	r12, \(r13, 4\)
 
 0+0da <stb>:

@@ -14,28 +14,28 @@ proc run_list_test { name opts } {
     pass $testname
 }
 
+# These tests are not (yet) supported on some targets.
+proc vtable_setup_xfails { } {
+    setup_xfail "alpha*-*" "arc-*" "avr-*" "d30v-*"
+    setup_xfail "h8300*-*" "hppa*64*-*-*hpux*"
+    setup_xfail "i370-*" "i860-*" "i960-*" "ia64-*" "ip2k-*"
+    setup_xfail "mn10200-*" "or32-*" "sparc64*-*"
+}
+
 # Vtable bits are only supported by ELF targets.
 if { (   [istarget "*-*-elf*"] || [istarget "*-*-linux*"])
      && ![istarget *-*-linux*aout*]
      && ![istarget *-*-linux*ecoff*]
      && ![istarget *-*-linux*oldld*] } then {
-	 
-    # These tests are not (yet) supported on some targets.
-    setup_xfail "alpha*-*" "arc-*" "avr-*" "d30v-*"
-    setup_xfail "h8300*-*" "hppa*64*-*-*hpux*"
-    setup_xfail "i370-*" "i960-*" "ia64-*" "ip2k-*"
-    setup_xfail "mn10200-*" "or32-*" "sparc64*-*"
+
+    vtable_setup_xfails
     run_dump_test "inherit0"
 
     # This particular test is supposed to fail..
     run_list_test "inherit1" "-al"
 
-    setup_xfail "alpha*-*" "arc-*" "avr-*" "d30v-*"
-    setup_xfail "h8300*-*" "hppa*64*-*-*hpux*"
-    setup_xfail "i370-*" "i960-*" "ia64-*" "ip2k-*"
-    setup_xfail "mn10200-*" "or32-*" "sparc64*-*"
-
     # The vtable entry results are different on Rel and Rela targets.
+    vtable_setup_xfails
     if {[istarget "arm*-*"]
 	|| [istarget "arc-*"]
 	|| [istarget "d10v-*"]

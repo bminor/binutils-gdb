@@ -1,5 +1,14 @@
 2002-08-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* gas/mcore/allinsn.d: Escape dots.  Pass -z to objdump and adjust
+	to suit.  Match coff relocs.  Match "from address pool" comments.
+	* gas/sparc/pcrel.s: Use 2b label in expressions.
+	* gas/sparc/pcrel64.s: Likewise.
+	* gas/sparc/pcrel.d: Adjust to suit.
+	* gas/sparc/pcrel64.d: Likewise.
+	* gas/vtable/vtable.exp: Move xfails to ..
+	(proc vtable_setup_xfails): .. here. Add i866.
+
 	* gas/macros/macros.exp (strings): Update xfails.
 
 2002-08-26  Alan Modra  <amodra@bigpond.net.au>

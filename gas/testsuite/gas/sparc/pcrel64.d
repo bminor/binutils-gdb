@@ -20,8 +20,8 @@ Disassembly of section .data:
 	...
 			8: R_SPARC_32	.text\+0x10
 			c: R_SPARC_DISP32	.text\+0x10
-			10: R_SPARC_32	.text\+0x10
-			14: R_SPARC_DISP32	.text\+0x10
+			10: R_SPARC_32	.text\+0x14
+			14: R_SPARC_DISP32	.text\+0x14
 			18: R_SPARC_32	foo
 			1c: R_SPARC_DISP32	foo
 			20: R_SPARC_32	foo\+0x10
