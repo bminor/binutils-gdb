@@ -1,5 +1,7 @@
 Mon Mar 30 16:50:43 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* config/irix4.mh:  Don't use coredep.o.  It doesn't work with procfs.
+
 	* mipsread.c (parse_symbol, parse_procedure):  Re-do the way that
 	.gdbinfo. symbols are created.  Move creation from parse_procedure
 	to parse_symbol, where it is fairly easy to grow the symtab.  This
