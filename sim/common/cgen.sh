@@ -97,6 +97,12 @@ cpu | decode | cpu-decode)
 		fileopts="$fileopts \
 			-T tmp-dec.h1 \
 			-D tmp-dec.c1"
+		case "$extrafiles" in
+		  ignored) # Do nothing.
+			   ;;
+		  *)       fileopts="$fileopts $extrafiles"
+			   ;;
+		esac
 		;;
 	esac
 
@@ -150,6 +156,15 @@ cpu | decode | cpu-decode)
 		${rootdir}/move-if-change tmp-dec.h ${srcdir}/decode${suffix}.h
 		sed $sedscript < tmp-dec.c1 > tmp-dec.c
 		${rootdir}/move-if-change tmp-dec.c ${srcdir}/decode${suffix}.c
+
+		if test -f tmp-sem.c1 ; then \
+			sed $sedscript < tmp-sem.c1 > tmp-sem.c ; \
+			${rootdir}/move-if-change tmp-sem.c ${srcdir}/sem${suffix}.c ; \
+		fi
+		if test -f tmp-semsw.c1 ; then \
+			sed $sedscript < tmp-semsw.c1 > tmp-semsw.c ; \
+			${rootdir}/move-if-change tmp-semsw.c ${srcdir}/sem${suffix}-switch.c ; \
+		fi
 
 		rm -f tmp-dec.h1 tmp-dec.c1
 		;;
