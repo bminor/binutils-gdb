@@ -1,3 +1,9 @@
+Wed Feb  8 17:35:38 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bfdlink.h (struct bfd_link_hash_entry): Change format of common
+	symbol information, to remove restrictions on maximum size and
+	alignment power, by using a pointer to a structure instead.
+
 Mon Feb  6 14:55:32 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bfdlink.h (enum bfd_link_hash_type): Rename bfd_link_hash_weak
