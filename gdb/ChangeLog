@@ -109,6 +109,8 @@
 
 2001-03-23  Jim Blandy  <jimb@redhat.com>
 
+	Fix from Dan Berlin:
+
 	* stabsread.c (read_cpp_abbrev): Properly construct the names of
 	virtual function table pointer fields.
 
@@ -255,9 +257,11 @@
 
 2001-03-21  Jim Blandy  <jimb@redhat.com>
 
+	Fix from Dan Berlin:
+
 	* linespec.c (find_methods): Whitespace differences aren't
 	significant in *un*mangled method names.  Use strcmp_iw to compare
-	them, not STREQ.  (Fix from Daniel Berlin.)
+	them, not STREQ.
 
 2001-03-21  Andrew Cagney  <ac131313@redhat.com>
 
@@ -354,6 +358,8 @@
 
 2001-03-20  Jim Blandy  <jimb@redhat.com>
 
+	Fix from Dan Berlin:
+	
 	* Makefile.in: Clean up dependencies on ../include/demangle.h.
 	(demangle_h): New variable.
 	(jv-typeprint.o, jv-valprint.o, linespec.o): Use it.
@@ -381,6 +387,8 @@
 
 2001-03-20  Jim Blandy  <jimb@redhat.com>
 
+	Fix from Dan Berlin:
+	
 	* linespec.c (find_methods): Just call CHECK_TYPEDEF on t, rather
 	than asking for sym_class's type; that's circuitous.  Remove
 	sym_class, since the last use of it is gone.
