@@ -164,7 +164,7 @@ ldemul_parse_args (argc, argv)
   /* Try and use the emulation parser if there is one.  */
   if (ld_emulation->parse_args)
     return (*ld_emulation->parse_args) (argc, argv);
-  return TRUE;
+  return FALSE;
 }
 
 /* Let the emulation code handle an unrecognized file.  */

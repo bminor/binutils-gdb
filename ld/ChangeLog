@@ -1,5 +1,9 @@
 2003-02-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldemul.c (ldemul_parse_args): Return FALSE by default.
+	* ldemul.h (struct ld_emulation_xfer_struct): Update parse_args
+	comment.
+
 	* ldemul.c (ldemul_add_options, ldemul_handle_option): New functions.
 	(ldemul_parse_args): Return bfd_boolean.  Formatting.
 	* ldemul.h (ldemul_add_options, ldemul_handle_option): Declare.

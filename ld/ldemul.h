@@ -147,7 +147,7 @@ typedef struct ld_emulation_xfer_struct {
   void	(*set_symbols) PARAMS ((void));
 
   /* Parse args which the base linker doesn't understand.
-     Return TRUE on success.  */
+     Return TRUE if the arg needs no further processing.  */
   bfd_boolean (*parse_args) PARAMS ((int, char **));
 
   /* Hook to add options to parameters passed by the base linker to
