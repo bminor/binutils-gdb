@@ -1,3 +1,8 @@
+2001-02-16  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c: Remove Prefetch abort for breakpoints.  Instead set
+	the state to RESUME.
+
 2001-02-14  Nick Clifton  <nickc@redhat.com>
 
 	* armemu.c: Add code to preserve processor mode when a prefetch
