@@ -1,5 +1,14 @@
 2001-11-27  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c: Get frame chains and saved pc values properly from
+ 	dummy frames.
+	(s390_frame_saved_pc_nofix): if `*fi' is a dummy frame, get the
+ 	saved PC from the dummy frame's registers.
+	(s390_frame_chain): Same for the saved SP.
+	(s390_gdbarch_init): Register `generic_save_dummy_frame_tos' as
+ 	the `SAVE_DUMMY_FRAME_TOS' method, so the dummy frame's `top' gets
+ 	set correctly.
+
 	* s390-tdep.c (s390_frame_chain): Remember that the SP's element
 	of the frame's saved_regs array is special.
 

@@ -884,6 +884,10 @@ s390_frame_saved_pc_nofix (struct frame_info *fi)
 {
   if (fi->extra_info && fi->extra_info->saved_pc_valid)
     return fi->extra_info->saved_pc;
+
+  if (generic_find_dummy_frame (fi->pc, fi->frame))
+    return generic_read_register_dummy (fi->pc, fi->frame, S390_PC_REGNUM);
+
   s390_frame_init_saved_regs (fi);
   if (fi->extra_info)
     {
@@ -937,6 +941,9 @@ s390_frame_chain (struct frame_info *thisframe)
 
   if (thisframe->prev && thisframe->prev->frame)
     prev_fp = thisframe->prev->frame;
+  else if (generic_find_dummy_frame (thisframe->pc, thisframe->frame))
+    return generic_read_register_dummy (thisframe->pc, thisframe->frame,
+                                        S390_SP_REGNUM);
   else
     {
       int sigreturn = 0;
@@ -1743,6 +1750,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_arguments (gdbarch, s390_push_arguments);
+  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
