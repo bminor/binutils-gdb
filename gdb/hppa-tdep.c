@@ -82,7 +82,7 @@ static void read_unwind_info PARAMS ((struct objfile *));
 static void internalize_unwinds PARAMS ((struct objfile *,
 					 struct unwind_table_entry *,
 					 asection *, unsigned int,
-					 unsigned int));
+					 unsigned int, CORE_ADDR));
 
 
 /* Routines to extract various sized constants out of hppa 
@@ -282,11 +282,12 @@ compare_unwind_entries (a, b)
 }
 
 static void
-internalize_unwinds (objfile, table, section, entries, size)
+internalize_unwinds (objfile, table, section, entries, size, text_offset)
      struct objfile *objfile;
      struct unwind_table_entry *table;
      asection *section;
      unsigned int entries, size;
+     CORE_ADDR text_offset;
 {
   /* We will read the unwind entries into temporary memory, then
      fill in the actual unwind table.  */
@@ -304,8 +305,10 @@ internalize_unwinds (objfile, table, section, entries, size)
 	{
 	  table[i].region_start = bfd_get_32 (objfile->obfd,
 						  (bfd_byte *)buf);
+	  table[i].region_start += text_offset;
 	  buf += 4;
 	  table[i].region_end = bfd_get_32 (objfile->obfd, (bfd_byte *)buf);
+	  table[i].region_end += text_offset;
 	  buf += 4;
 	  tmp = bfd_get_32 (objfile->obfd, (bfd_byte *)buf);
 	  buf += 4;
@@ -355,8 +358,10 @@ read_unwind_info (objfile)
   unsigned unwind_size, elf_unwind_size, stub_unwind_size, total_size;
   unsigned index, unwind_entries, elf_unwind_entries;
   unsigned stub_entries, total_entries;
+  CORE_ADDR text_offset;
   struct obj_unwind_info *ui;
 
+  text_offset = ANOFFSET (objfile->section_offsets, 0);
   ui = obstack_alloc (&objfile->psymbol_obstack,
 		      sizeof (struct obj_unwind_info));
 
@@ -415,10 +420,10 @@ read_unwind_info (objfile)
   /* Internalize the standard unwind entries.  */
   index = 0;
   internalize_unwinds (objfile, &ui->table[index], unwind_sec,
-		       unwind_entries, unwind_size);
+		       unwind_entries, unwind_size, text_offset);
   index += unwind_entries;
   internalize_unwinds (objfile, &ui->table[index], elf_unwind_sec,
-		       elf_unwind_entries, elf_unwind_size);
+		       elf_unwind_entries, elf_unwind_size, text_offset);
   index += elf_unwind_entries;
 
   /* Now internalize the stub unwind entries.  */

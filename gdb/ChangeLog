@@ -1,3 +1,12 @@
+Mon Nov  7 22:25:21 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* Enable backtracing from inside a SOM shared library back into
+	user code.
+	* hppa-tdep.c (internalize_unwinds): Accept and use new
+	"text_offset" argument for dynamic relocation of
+	region_{start,end} fields in the unwind descriptor.
+	(read_unwind_info): Pass text_offset to internalize unwinds.
+
 Mon Nov  7 14:34:42 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* m3-nat.c: Remove comments about arbitrary limit in
