@@ -143,10 +143,10 @@ static int error_index;
 %token <integer> SIZEOF NEXT ADDR 
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
 %token OPTION_v OPTION_V OPTION_m OPTION_memul OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT  NOFLOAT 
-%token OPTION_Map
+%token OPTION_L OPTION_Map
 %token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_R OPTION_relax OPTION_version
-%token <name> OPTION_l OPTION_L OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
-%token <name> OPTION_y
+%token <name> OPTION_l OPTION_Lfile OPTION_T OPTION_Aarch OPTION_Tfile
+%token <name> OPTION_Texp OPTION_y
 %token OPTION_Ur 
 %token ORIGIN FILL OPTION_g
 %token LENGTH    CREATE_OBJECT_SYMBOLS INPUT OUTPUT  CONSTRUCTORS
@@ -317,7 +317,11 @@ command_line_option:
 			{
 			lang_add_target($2);
 			}
-	|	OPTION_L
+	|	OPTION_L NAME
+			{
+			ldfile_add_library_path($2);
+		        }
+	|	OPTION_Lfile
 			{
 			ldfile_add_library_path($1);
 			}
