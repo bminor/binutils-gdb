@@ -1,5 +1,24 @@
 2002-12-23  David Carlton  <carlton@math.stanford.edu>
 
+	* symtab.c (search_symbols): Update comment.
+	(lookup_symbol): Don't demangle names.
+	(lookup_symbol_minsym): Delete FIXME comment.
+	(lookup_symbol_linkage): Add comment.
+	(lookup_symbol_aux): Rename 'mangled_name' argument to
+	'linkage_name'.
+	(lookup_symbol_aux_local): Ditto.
+	(lookup_symbol_aux_block): Ditto.
+	(lookup_symbol_aux_nonlocal): Ditto.
+	(lookup_symbol_aux_file): Ditto.
+	(lookup_symbol_aux_symtabs): Ditto.
+	(lookup_symbol_aux_psymtabs): Ditto.
+	(lookup_symbol_aux_using): Ditto.
+	(lookup_symbol_aux_using_loop): Ditto.
+	(lookup_symbol_namespace): Ditto.
+	(lookup_symbol_aux_minsyms): Ditto.
+	* symfile.c (psymbol_init_demangled_name): Delete unnecessary
+	variable, initialization.
+
 	* Merge from mainline; tag is carlton_dictionary-20021223-merge.
 
 2002-12-23  Daniel Jacobowitz  <drow@mvista.com>

@@ -2398,8 +2398,7 @@ static void
 psymbol_init_demangled_name (struct partial_symbol *psymbol,
 			     struct bcache *cache)
 {
-  const char *mangled = SYMBOL_NAME (psymbol);
-  char *demangled = NULL;
+  char *demangled;
 
   SYMBOL_CPLUS_DEMANGLED_NAME (psymbol) = NULL;
 

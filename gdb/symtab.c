@@ -82,7 +82,7 @@ static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
 						     namespace_enum);
 
 static struct symbol *lookup_symbol_aux (const char *name,
-					 const char *mangled_name,
+					 const char *linkage_name,
 					 const struct block *block,
 					 const namespace_enum namespace,
 					 int *is_a_field_of_this,
@@ -90,14 +90,14 @@ static struct symbol *lookup_symbol_aux (const char *name,
 
 static
 struct symbol *lookup_symbol_aux_local (const char *name,
-					const char *mangled_name,
+					const char *linkage_name,
 					const struct block *block,
 					const namespace_enum namespace,
 					struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_block (const char *name,
-					const char *mangled_name,
+					const char *linkage_name,
 					const struct block *block,
 					const namespace_enum namespace,
 					struct symtab **symtab);
@@ -105,13 +105,13 @@ struct symbol *lookup_symbol_aux_block (const char *name,
 static
 struct symbol *lookup_symbol_aux_nonlocal (int block_index,
 					   const char *name,
-					   const char *mangled_name,
+					   const char *linkage_name,
 					   const namespace_enum namespace,
 					   struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_file (const char *name,
-				       const char *mangled_name,
+				       const char *linkage_name,
 				       const struct block *block,
 				       const namespace_enum namespace,
 				       struct symtab **symtab);
@@ -119,27 +119,27 @@ struct symbol *lookup_symbol_aux_file (const char *name,
 static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
 					  const char *name,
-					  const char *mangled_name,
+					  const char *linkage_name,
 					  const namespace_enum namespace,
 					  struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_psymtabs (int block_index,
 					   const char *name,
-					   const char *mangled_name,
+					   const char *linkage_name,
 					   const namespace_enum namespace,
 					   struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_using (const char *name,
-					const char *mangled_name,
+					const char *linkage_name,
 					const struct block *block,
 					const namespace_enum namespace,
 					struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_using_loop (const char *name,
-					     const char *mangled_name,
+					     const char *linkage_name,
 					     const struct block *block,
 					     namespace_enum namespace,
 					     struct symtab **symtab,
@@ -149,7 +149,7 @@ struct symbol *lookup_symbol_aux_using_loop (const char *name,
 static
 struct symbol *lookup_symbol_aux_minsyms (int block_index,
 					  const char *name,
-					  const char *mangled_name,
+					  const char *linkage_name,
 					  const namespace_enum namespace,
 					  struct symtab **symtab);
 
@@ -759,16 +759,19 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
   return psym;
 }
 
-/* Find the definition for a specified symbol name NAME
-   in namespace NAMESPACE, visible from lexical block BLOCK.
-   Returns the struct symbol pointer, or zero if no symbol is found.
-   If SYMTAB is non-NULL, store the symbol table in which the
-   symbol was found there, or NULL if not found.
+/* Find the definition for a specified symbol name NAME in namespace
+   NAMESPACE, visible from lexical block BLOCK.  Returns the struct
+   symbol pointer, or zero if no symbol is found.  If SYMTAB is
+   non-NULL, store the symbol table in which the symbol was found
+   there.
+
    C++: if IS_A_FIELD_OF_THIS is nonzero on entry, check to see if
    NAME is a field of the current implied argument `this'.  If so set
-   *IS_A_FIELD_OF_THIS to 1, otherwise set it to zero. 
-   BLOCK_FOUND is set to the block in which NAME is found (in the case of
-   a field of `this', value_of_this sets BLOCK_FOUND to the proper value.) */
+   *IS_A_FIELD_OF_THIS to 1, otherwise set it to zero.
+
+   BLOCK_FOUND is set to the block in which NAME is found (in the case
+   of a field of `this', value_of_this sets BLOCK_FOUND to the proper
+   value.) */
 
 /* This function has a bunch of loops in it and it would seem to be
    attractive to put in some QUIT's (though I'm not really sure
@@ -780,31 +783,16 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
    these calls since they are looking for a known variable and thus
    can probably assume it will never hit the C++ code).  */
 
+/* NOTE: carlton/2002-12-23: I'm updating this to no longer demangle
+   names on demand.  I hope that I've tracked down everywhere in GDB
+   that might pass this a mangled name.  */
+
 struct symbol *
 lookup_symbol (const char *name, const struct block *block,
 	       const namespace_enum namespace, int *is_a_field_of_this,
 	       struct symtab **symtab)
 {
-  char *demangled_name = NULL;
-  const char *modified_name = NULL;
-  const char *mangled_name = NULL;
-  int needtofreename = 0;
-  struct symbol *returnval;
-
-  modified_name = name;
-
-  /* If we are using C++ language, demangle the name before doing a lookup, so
-     we can always binary search. */
-  if (current_language->la_language == language_cplus)
-    {
-      demangled_name = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
-      if (demangled_name)
-	{
-	  mangled_name = name;
-	  modified_name = demangled_name;
-	  needtofreename = 1;
-	}
-    }
+  const char *modified_name = name;
 
   if (case_sensitivity == case_sensitive_off)
     {
@@ -819,16 +807,12 @@ lookup_symbol (const char *name, const struct block *block,
       modified_name = copy;
     }
 
-  returnval = lookup_symbol_aux (modified_name, mangled_name, block,
-				 namespace, is_a_field_of_this, symtab);
-  if (needtofreename)
-    xfree (demangled_name);
-
-  return returnval;
+  return lookup_symbol_aux (modified_name, NULL, block,
+			    namespace, is_a_field_of_this, symtab);
 }
 
 static struct symbol *
-lookup_symbol_aux (const char *name, const char *mangled_name,
+lookup_symbol_aux (const char *name, const char *linkage_name,
 		   const struct block *block, const namespace_enum namespace,
 		   int *is_a_field_of_this, struct symtab **symtab)
 {
@@ -838,7 +822,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
-  sym = lookup_symbol_aux_local (name, mangled_name, block, namespace,
+  sym = lookup_symbol_aux_local (name, linkage_name, block, namespace,
 				 symtab);
   if (sym != NULL)
     return sym;
@@ -876,7 +860,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	if (BLOCK_START (b) <= BLOCK_START (block)
 	    && BLOCK_END (b) > BLOCK_START (block))
 	  {
-	    sym = lookup_block_symbol (b, name, mangled_name, VAR_NAMESPACE);
+	    sym = lookup_block_symbol (b, name, linkage_name, VAR_NAMESPACE);
 	    if (sym)
 	      {
 		block_found = b;
@@ -910,7 +894,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      appropriate using directives in the C++ case.  But it works fine
      in the non-C++ case, too.  */
 
-  sym = lookup_symbol_aux_using (name, mangled_name, block, namespace,
+  sym = lookup_symbol_aux_using (name, linkage_name, block, namespace,
 				 symtab);
   if (sym != NULL)
     return sym;
@@ -918,7 +902,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
   /* Now search all static file-level symbols.  Not strictly correct,
      but more useful than an error.  */
 
-  sym = lookup_symbol_aux_nonlocal (STATIC_BLOCK, name, mangled_name,
+  sym = lookup_symbol_aux_nonlocal (STATIC_BLOCK, name, linkage_name,
 				    namespace, symtab);
   if (sym != NULL)
     return sym;
@@ -933,7 +917,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
    match, store the address of STATIC_BLOCK in static_block.  */
 
 static struct symbol *
-lookup_symbol_aux_local (const char *name, const char *mangled_name,
+lookup_symbol_aux_local (const char *name, const char *linkage_name,
 			 const struct block *block,
 			 const namespace_enum namespace,
 			 struct symtab **symtab)
@@ -948,7 +932,7 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
 
   while (block != static_block)
     {
-      sym = lookup_symbol_aux_block (name, mangled_name, block, namespace,
+      sym = lookup_symbol_aux_block (name, linkage_name, block, namespace,
 				     symtab);
       if (sym != NULL)
 	return sym;
@@ -964,7 +948,7 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
    symbol, and set block_found appropriately.  */
 
 static struct symbol *
-lookup_symbol_aux_block (const char *name, const char *mangled_name,
+lookup_symbol_aux_block (const char *name, const char *linkage_name,
 			 const struct block *block,
 			 const namespace_enum namespace,
 			 struct symtab **symtab)
@@ -975,7 +959,7 @@ lookup_symbol_aux_block (const char *name, const char *mangled_name,
   struct block *b;
   struct symtab *s = NULL;
 
-  sym = lookup_block_symbol (block, name, mangled_name, namespace);
+  sym = lookup_block_symbol (block, name, linkage_name, namespace);
   if (sym)
     {
       block_found = block;
@@ -1010,25 +994,25 @@ lookup_symbol_aux_block (const char *name, const char *mangled_name,
 static struct symbol *
 lookup_symbol_aux_nonlocal (int block_index,
 			    const char *name,
-			    const char *mangled_name,
+			    const char *linkage_name,
 			    const namespace_enum namespace,
 			    struct symtab **symtab)
 {
   struct symbol *sym;
 
-  sym = lookup_symbol_aux_symtabs (block_index, name, mangled_name,
+  sym = lookup_symbol_aux_symtabs (block_index, name, linkage_name,
 				   namespace, symtab);
   if (sym != NULL)
     return sym;
 
 #ifndef HPUXHPPA
-  sym = lookup_symbol_aux_minsyms (block_index, name, mangled_name,
+  sym = lookup_symbol_aux_minsyms (block_index, name, linkage_name,
 				   namespace, symtab);
   if (sym != NULL)
     return sym;
 #endif
 
-  sym = lookup_symbol_aux_psymtabs (block_index, name, mangled_name,
+  sym = lookup_symbol_aux_psymtabs (block_index, name, linkage_name,
 				    namespace, symtab);
   if (sym != NULL)
     return sym;
@@ -1071,7 +1055,7 @@ lookup_symbol_aux_nonlocal (int block_index,
      "foo_" though... is it saying we need to do the "minsym" check
      before the static check in this case?  */
 
-  sym = lookup_symbol_aux_minsyms (block_index, name, mangled_name,
+  sym = lookup_symbol_aux_minsyms (block_index, name, linkage_name,
 				   namespace, symtab);
   if (sym != NULL)
     return sym;
@@ -1084,7 +1068,7 @@ lookup_symbol_aux_nonlocal (int block_index,
 
 static struct symbol *
 lookup_symbol_aux_file (const char *name,
-			const char *mangled_name,
+			const char *linkage_name,
 			const struct block *block,
 			const namespace_enum namespace,
 			struct symtab **symtab)
@@ -1094,13 +1078,13 @@ lookup_symbol_aux_file (const char *name,
 
   if (static_block != NULL)
     {
-      sym = lookup_symbol_aux_block (name, mangled_name, static_block,
+      sym = lookup_symbol_aux_block (name, linkage_name, static_block,
 				     namespace, symtab);
       if (sym != NULL)
 	return sym;
     }
 
-  sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, mangled_name,
+  sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, linkage_name,
 				    namespace, symtab);
 
   if (sym != NULL)
@@ -1138,7 +1122,7 @@ lookup_symbol_aux_file (const char *name,
 
 static struct symbol *
 lookup_symbol_aux_symtabs (int block_index,
-			   const char *name, const char *mangled_name,
+			   const char *name, const char *linkage_name,
 			   const namespace_enum namespace,
 			   struct symtab **symtab)
 {
@@ -1152,7 +1136,7 @@ lookup_symbol_aux_symtabs (int block_index,
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, block_index);
-    sym = lookup_block_symbol (block, name, mangled_name, namespace);
+    sym = lookup_block_symbol (block, name, linkage_name, namespace);
     if (sym)
       {
 	block_found = block;
@@ -1172,7 +1156,7 @@ lookup_symbol_aux_symtabs (int block_index,
 
 static struct symbol *
 lookup_symbol_aux_psymtabs (int block_index, const char *name,
-			    const char *mangled_name,
+			    const char *linkage_name,
 			    const namespace_enum namespace,
 			    struct symtab **symtab)
 {
@@ -1192,7 +1176,7 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, block_index);
-	sym = lookup_block_symbol (block, name, mangled_name, namespace);
+	sym = lookup_block_symbol (block, name, linkage_name, namespace);
 	if (!sym)
 	  {
 	    /* This shouldn't be necessary, but as a last resort try
@@ -1209,7 +1193,7 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 	    block = BLOCKVECTOR_BLOCK (bv,
 				       block_index == GLOBAL_BLOCK ?
 				       STATIC_BLOCK : GLOBAL_BLOCK);
-	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
+	    sym = lookup_block_symbol (block, name, linkage_name, namespace);
 	    if (!sym)
 	      error ("Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>).",
 		     block_index == GLOBAL_BLOCK ? "global" : "static",
@@ -1229,21 +1213,21 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
    each of the namespaces that are in scope.  */
 
 static struct symbol *lookup_symbol_aux_using (const char *name,
-					       const char *mangled_name,
+					       const char *linkage_name,
 					       const struct block *block,
 					       const namespace_enum namespace,
 					       struct symtab **symtab)
 {
   const char *scope = block_scope (block);
 
-  return lookup_symbol_aux_using_loop (name, mangled_name, block,
+  return lookup_symbol_aux_using_loop (name, linkage_name, block,
 				       namespace, symtab,
 				       scope, 0);
 }
 
 static struct
 symbol *lookup_symbol_aux_using_loop (const char *name,
-				      const char *mangled_name,
+				      const char *linkage_name,
 				      const struct block *block,
 				      namespace_enum namespace,
 				      struct symtab **symtab,
@@ -1263,13 +1247,13 @@ symbol *lookup_symbol_aux_using_loop (const char *name,
 	  new_scope_len += 2;
 	}
       next_component = cp_find_first_component (scope + new_scope_len) - scope;
-      sym = lookup_symbol_aux_using_loop (name, mangled_name, block, namespace,
+      sym = lookup_symbol_aux_using_loop (name, linkage_name, block, namespace,
 					  symtab, scope, next_component);
       if (sym != NULL)
 	return sym;
     }
 
-  return lookup_symbol_namespace (scope, scope_len, name, mangled_name,
+  return lookup_symbol_namespace (scope, scope_len, name, linkage_name,
 				  block, namespace, symtab);
 }
 
@@ -1291,7 +1275,7 @@ struct symbol *
 lookup_symbol_namespace (const char *namespace_name,
 			 int namespace_len,
 			 const char *name,
-			 const char *mangled_name,
+			 const char *linkage_name,
 			 const struct block *block,
 			 namespace_enum name_space,
 			 struct symtab **symtab)
@@ -1314,7 +1298,7 @@ lookup_symbol_namespace (const char *namespace_name,
 	  sym = lookup_symbol_namespace (current->name,
 					 current->inner_length,
 					 name,
-					 mangled_name,
+					 linkage_name,
 					 block,
 					 name_space,
 					 symtab);
@@ -1329,7 +1313,7 @@ lookup_symbol_namespace (const char *namespace_name,
   
   if (namespace_len == 0)
     {
-      return lookup_symbol_aux_file (name, mangled_name, block,
+      return lookup_symbol_aux_file (name, linkage_name, block,
 				     name_space, symtab);
     }
   else
@@ -1339,7 +1323,7 @@ lookup_symbol_namespace (const char *namespace_name,
       strncpy (concatenated_name, namespace_name, namespace_len);
       strcpy (concatenated_name + namespace_len, "::");
       strcpy (concatenated_name + namespace_len + 2, name);
-      sym = lookup_symbol_aux_file (concatenated_name, mangled_name,
+      sym = lookup_symbol_aux_file (concatenated_name, linkage_name,
 				    block, name_space, symtab);
 
       xfree (concatenated_name);
@@ -1352,7 +1336,7 @@ lookup_symbol_namespace (const char *namespace_name,
 
 static struct symbol *
 lookup_symbol_aux_minsyms (int block_index, const char *name,
-			   const char *mangled_name,
+			   const char *linkage_name,
 			   const namespace_enum namespace,
 			   struct symtab **symtab)
 {
@@ -1417,7 +1401,7 @@ lookup_symbol_aux_minsyms (int block_index, const char *name,
 	         to be clearly the wrong thing to pass as the
 	         unmangled name.  */
 	      sym =
-		lookup_block_symbol (block, name, mangled_name, namespace);
+		lookup_block_symbol (block, name, linkage_name, namespace);
 
 	      /* sym == 0 if symbol was found in the minimal symbol table
 	         but not in the symtab.
@@ -1443,15 +1427,6 @@ lookup_symbol_aux_minsyms (int block_index, const char *name,
 }
 
 /* Lookup the symbol associated to a minimal symbol, if there is one.  */
-
-/* FIXME: carlton/2002-12-20: This is now implemented in a way that
-   doesn't work very well and that may, in fact return the wrong
-   symbol.  For now, we're in a transition period where I want to
-   replace some calls to lookup_symbol by calls to
-   lookup_symbol_minsym, so it's okay for lookup_symbol_minsym to get
-   the answer wrong in circumstances where lookup_symbol would have
-   screwed it up, too; later, I'll fix lookup_symbol_minsym to get it
-   right as quickly and easily as possible.  */
 
 struct symbol *
 lookup_symbol_minsym (const struct minimal_symbol *minsym)
@@ -1488,6 +1463,10 @@ lookup_symbol_linkage (const char *linkage_name)
 	  name = demangled_name;
 	}
     }
+
+  /* NOTE: carlton/2002-12-23: We don't just call lookup_symbol_aux
+     because that might apply namespace stuff, defeating the purpose
+     of searching on a specific linkage name.  */
 
   sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, linkage_name,
 				    VAR_NAMESPACE, NULL);
@@ -3066,8 +3045,6 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 
   /* Here, we search through the minimal symbol tables for functions
      and variables that match, and force their symbols to be read.
-     This is in particular necessary for demangled variable names,
-     which are no longer put into the partial symbol tables.
      The symbol will then be found during the scan of symtabs below.
 
      For functions, find_pc_symtab should succeed if we have debug info
