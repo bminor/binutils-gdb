@@ -146,7 +146,11 @@ sim_config (SIM_DESC sd)
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   /* extract all relevant information */
-  if (STATE_PROG_BFD (sd) == NULL)
+  if (STATE_PROG_BFD (sd) == NULL
+      /* If we have a binary input file (presumably with specified
+	 "--architecture"), it'll have no endianness.  */
+      || (!bfd_little_endian (STATE_PROG_BFD (sd))
+	  && !bfd_big_endian (STATE_PROG_BFD (sd))))
     prefered_target_byte_order = 0;
   else
     prefered_target_byte_order = (bfd_little_endian(STATE_PROG_BFD (sd))
