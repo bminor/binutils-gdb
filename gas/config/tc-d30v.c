@@ -303,7 +303,7 @@ static int postfix (p)
 {
   while (*p != '-' && *p != '+') 
     {
-      if (*p==0 || *p=='\n' || *p=='\r') 
+      if (*p==0 || *p=='\n' || *p=='\r' || *p==' ' || *p==',') 
 	break;
       p++;
     }
@@ -516,11 +516,10 @@ build_insn (opcode, opers)
 	}
 
       /* truncate to the proper number of bits */
-      /*
-	if ((opers[i].X_op == O_constant) && check_range (number, bits, flags))
+      if ((opers[i].X_op == O_constant) && check_range (number, bits, flags))
 	as_bad("operand out of range: %d",number);
+      if (bits < 31)
 	number &= 0x7FFFFFFF >> (31 - bits);
-	*/
       
       if (bits == 32)
 	{
@@ -864,7 +863,7 @@ md_assemble (str)
 	  /* assemble first instruction and save it */
 	  prev_insn = do_assemble (str, &prev_opcode);
 	  if (prev_insn == -1)
-	    as_fatal ("can't find opcode ");
+	    as_fatal ("cannot assemble instruction ");
 	  fixups = fixups->next;
 	  str = str2 + 2;
 	}
@@ -878,7 +877,7 @@ md_assemble (str)
 	  etype = extype;
 	  return;
 	}
-      as_fatal ("can't find opcode ");
+      as_fatal ("cannot assemble instruction ");
     }
 
   if (etype)
@@ -1142,7 +1141,7 @@ tc_gen_reloc (seg, fixp)
      fixS *fixp;
 {
   arelent *reloc;
-  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
+  reloc = (arelent *) xmalloc (sizeof (arelent));
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
