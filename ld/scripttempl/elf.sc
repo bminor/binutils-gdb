@@ -124,6 +124,8 @@ SECTIONS
   .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)	}
   .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)	}
 
+  .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
+  .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
   .rel.text    ${RELOCATING-0} :
     {
       *(.rel.text)
@@ -136,8 +138,6 @@ SECTIONS
       ${RELOCATING+*(.rela.text.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.t*)}
     }
-  .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
-  .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
   .rel.fini    ${RELOCATING-0} : { *(.rel.fini)	}
   .rela.fini   ${RELOCATING-0} : { *(.rela.fini)	}
   .rel.rodata  ${RELOCATING-0} :
@@ -196,9 +196,14 @@ SECTIONS
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
   ${OTHER_PLT_RELOC_SECTIONS}
 
+  .init        ${RELOCATING-0} : 
+  { 
+    ${INIT_START}
+    KEEP (*(.init))
+    ${INIT_END}
+  } =${NOP-0}
+
   ${DATA_PLT-${BSS_PLT-${PLT}}}
-  /* .text should be before .init and so on, so that -Ttext=0x1234
-     will work.  */
   .text    ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
@@ -209,12 +214,6 @@ SECTIONS
     *(.gnu.warning)
     ${RELOCATING+*(.gnu.linkonce.t*)}
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
-  } =${NOP-0}
-  .init        ${RELOCATING-0} : 
-  { 
-    ${INIT_START}
-    KEEP (*(.init))
-    ${INIT_END}
   } =${NOP-0}
   .fini    ${RELOCATING-0} :
   {
