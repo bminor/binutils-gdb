@@ -19,6 +19,7 @@ solaris*)	host_makefile_frag=config/mh-solaris ;;
 sysv* | irix3)	host_makefile_frag=config/mh-sysv ;;
 sco*)		host_makefile_frag=config/mh-sco ;;
 irix4)		host_makefile_frag=config/mh-irix4 ;;
+linux)		host_makefile_frag=config/mh-linux ;;
 ultrix*)
 	case "${host_cpu}" in
 	mips)	host_makefile_frag=config/mh-decstation ;;
