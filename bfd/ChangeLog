@@ -1,9 +1,14 @@
+Wed May 21 17:15:50 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* peicode.h: Add & 0xffffffff when using ImageBase in case bfd_vma
+	is 64 bits.
+
 Wed May 21 09:58:10 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cofflink.c (mark_relocs): Add new function to mark symbols which
-	are used by relocations.  (_bfd_coff_link_input_bfd): Add call to
-	mark_relocs() and code to suppress the skipping of symbols that
-	have thus been marked.
+	are used by relocations.
+  	(_bfd_coff_link_input_bfd): Add call to mark_relocs() and code to
+	suppress the skipping of symbols that have thus been marked.
 
 Tue May 20 18:45:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -76,11 +81,11 @@ Fri May  9 10:15:27 1997  Nick Clifton  <nickc@cygnus.com>
 	(global): Macro redefinitions set up to use these new functions. 
 
 	* coffcode.h (coff_mkobject_hook): Added call to
-	coff_arm_bfd_set_private_flags().  (coff_set_arch_mach_hook):
-	Added code to set machine type based on bits stored in internal
-	flags.  (coff_set_flags):  Added code to set the new bits in the
-	flags field based on the machine number. 
-	
+	coff_arm_bfd_set_private_flags().
+  	(coff_set_arch_mach_hook): Added code to set machine type based on
+	bits stored in internal flags.
+  	(coff_set_flags): Added code to set the new bits in the flags
+	field based on the machine number.
 	(function definition macros): Made all function definition macros
 	conditional so that they can be overridden by target specific
 	files.
