@@ -675,8 +675,6 @@ test "$program_transform_name" = "" && program_transform_name="s,x,x,"
 
 # host-specific stuff:
 
-. ${srcdir}/configure.host
-
 # Extract the first word of "gcc", so it can be a program name with args.
 set dummy gcc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
@@ -753,6 +751,9 @@ else
 fi
 
 
+. ${srcdir}/configure.host
+
+
 
 
 
@@ -790,7 +791,7 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 794 "configure"
+#line 795 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -804,7 +805,7 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 808 "configure"
+#line 809 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
@@ -837,7 +838,7 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 841 "configure"
+#line 842 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
@@ -872,7 +873,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 876 "configure"
+#line 877 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -925,7 +926,7 @@ if eval "test \"`echo '$''{'ac_cv_header_dirent_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 929 "configure"
+#line 930 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <$ac_hdr>
@@ -965,7 +966,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldir  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 969 "configure"
+#line 970 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1000,7 +1001,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lx  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1004 "configure"
+#line 1005 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -1043,7 +1044,7 @@ if eval "test \"`echo '$''{'bfd_cv_decl_needed_free'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1047 "configure"
+#line 1048 "configure"
 #include "confdefs.h"
 
 #include <stdio.h>

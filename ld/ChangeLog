@@ -1,5 +1,10 @@
 Thu Feb 15 13:58:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Call AC_PROG_CC before configure.host.
+	* configure: Rebuild.
+	* configure.host: Remove go32 host, since it should no longer be
+	necessary.  Don't set CC for romp host.
+
 	* scripttempl/elf.sc: Don't skip a page in virtual memory space if
 	the text segment ends exactly on a page boundary.
 

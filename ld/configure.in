@@ -33,9 +33,10 @@ AC_ARG_PROGRAM
 
 # host-specific stuff:
 
+AC_PROG_CC
+
 . ${srcdir}/configure.host
 
-AC_PROG_CC
 AC_SUBST(CFLAGS)
 AC_SUBST(HLDFLAGS)
 AC_SUBST(RPATH_ENVVAR)

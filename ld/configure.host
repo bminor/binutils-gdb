@@ -4,7 +4,6 @@
 # information.
 
 # This file sets the following shell variables:
-#  CC			compiler to use (only if needed and not already set)
 #  HDEFINES		host specific compiler flags
 #  HOSTING_CRT0		crt0.o file used for bootstrapping
 #  HOSTING_LIBS		libraries used for bootstrapping
@@ -35,10 +34,6 @@ i[345]86-*-bsd* | i[345]86-*-freebsd* | i[345]86-*-netbsd*)
   # the value `/lib'; it's just a dummy.
   NATIVE_LIB_DIRS=/lib
   HOSTING_CRT0=/usr/lib/crt0.o
-  ;;
-
-i[345]86-*-go32*)
-  test -z "${CC}" && CC="i386-go32-gcc -O2 -fno-omit-frame-pointer -Wl,-S"
   ;;
 
 i[345]86-*-sysv4*)
@@ -123,7 +118,6 @@ m88*-motorola-sysv3)
 
 romp-*-*)
   HDEFINES=-DNO_VARARGS
-  CC=${CC-gcc}
   ;;
 
 sparc-*-solaris2*)
