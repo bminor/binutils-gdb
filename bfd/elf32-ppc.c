@@ -437,7 +437,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false),		 /* pcrel_offset */
 
   /* Like R_PPC_ADDR16_HA, but referring to the GOT table entry for
-     the symbol.  FIXME: Not supported.	 */
+     the symbol.  */
   HOWTO (R_PPC_GOT16_HA,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -678,7 +678,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false),		/* pcrel_offset */
 
   /* A sign-extended 16 bit value relative to _SDA_BASE_, for use with
-     small data items.  FIXME: Not supported.	 */
+     small data items.  */
   HOWTO (R_PPC_SDAREL16,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -693,7 +693,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* 32-bit section relative relocation. FIXME: not supported. */
+  /* 32-bit section relative relocation. */
   HOWTO (R_PPC_SECTOFF,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -708,7 +708,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0,			/* dst_mask */
 	 true),			/* pcrel_offset */
 
-  /* 16-bit lower half section relative relocation. FIXME: not supported. */
+  /* 16-bit lower half section relative relocation. */
   HOWTO (R_PPC_SECTOFF_LO,	  /* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -723,7 +723,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* 16-bit upper half section relative relocation. FIXME: not supported. */
+  /* 16-bit upper half section relative relocation. */
   HOWTO (R_PPC_SECTOFF_HI,	/* type */
 	 16,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -738,7 +738,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0xffff,		/* dst_mask */
 	 false),		 /* pcrel_offset */
 
-  /* 16-bit upper half adjusted section relative relocation. FIXME: not supported. */
+  /* 16-bit upper half adjusted section relative relocation. */
   HOWTO (R_PPC_SECTOFF_HA,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -868,7 +868,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 false),		/* pcrel_offset */
 
   /* A sign-extended 16 bit value relative to _SDA2_BASE_, for use with
-     small data items.  FIXME: Not supported.	 */
+     small data items.	 */
   HOWTO (R_PPC_EMB_SDA2REL,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -888,7 +888,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
      field with the appropriate register (0, 2, or 13).  */
   HOWTO (R_PPC_EMB_SDA21,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2137,6 +2137,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  sym_name = h->root.root.string;
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
@@ -2343,9 +2346,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    if (r_type == R_PPC_EMB_SDA21)
 	      {			/* fill in register field */
-		insn = bfd_get_32 (output_bfd, contents + offset - 2);
+		insn = bfd_get_32 (output_bfd, contents + offset);
 		insn = (insn & ~RA_REGISTER_MASK) | (reg << RA_REGISTER_SHIFT);
-		bfd_put_32 (output_bfd, insn, contents + offset - 2);
+		bfd_put_32 (output_bfd, insn, contents + offset);
 	      }
 	  }
 	  break;

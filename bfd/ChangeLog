@@ -1,5 +1,14 @@
 Tue Jan 30 12:09:04 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-hppa.c (elf32_hppa_relocate_section): Handle indirect and
+	warning symbols correctly.
+	* elf32-i386.c (elf_i386_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-mips.c (mips_elf_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+
 	* syms.c (_bfd_stab_section_find_nearest_line): Add casts to avoid
 	warnings.
 
