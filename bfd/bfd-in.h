@@ -640,6 +640,9 @@ extern long bfd_get_elf_phdr_upper_bound PARAMS ((bfd *abfd));
    error occurs; bfd_get_error will return an appropriate code.  */
 extern int bfd_get_elf_phdrs PARAMS ((bfd *abfd, void *phdrs));
 
+/* Return the arch_size field of an elf bfd, or -1 if not elf.  */
+extern int bfd_elf_get_arch_size PARAMS ((bfd *));
+
 /* SunOS shared library support routines for the linker.  */
 
 extern struct bfd_link_needed_list *bfd_sunos_get_needed_list

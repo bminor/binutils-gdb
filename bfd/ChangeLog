@@ -1,3 +1,9 @@
+2000-05-04  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* elf.c (bfd_elf_get_arch_size): New function, return 32 | 64 | -1.
+	* bfd-in.h: Prototype bfd_elf_get_arch_size.
+	* bfd-in2.h: Prototype bfd_elf_get_arch_size.
+
 2000-05-04  Alan Modra  <alan@linuxcare.com.au>
 
 	* libhppa.h (HPPA_R_CONSTANT): Cast argument to bfd_signed_vma.
