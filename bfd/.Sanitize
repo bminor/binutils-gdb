@@ -27,6 +27,7 @@ PORTING
 doc
 ChangeLog
 Makefile.in
+README.hppaelf
 TODO
 VERSION
 aix386-core.c
@@ -67,6 +68,8 @@ configure.in
 configure.host
 core.c
 demo64.c
+elf32-hppa.c
+elf32-hppa.h
 elf32-i386.c
 elf32-i860.c
 elf32-m68k.c
@@ -78,6 +81,7 @@ format.c
 gen-aout.c
 host-aout.c
 hosts
+hp300hpux.c
 hppa.c
 i386aout.c
 i386bsd.c
