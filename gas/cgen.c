@@ -81,6 +81,7 @@ gas_cgen_init_parse ()
 static void
 queue_fixup (opindex, opinfo, expP)
      int           opindex;
+     int           opinfo;
      expressionS * expP;
 {
   /* We need to generate a fixup for this expression.  */
@@ -247,7 +248,7 @@ static int expr_jmp_buf_p;
 
 const char *
 gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
-     CGEN_CPU_DESC cd;
+     CGEN_CPU_DESC cd ATTRIBUTE_UNUSED;
      enum cgen_parse_operand_type want;
      const char ** strP;
      int opindex;
@@ -330,7 +331,7 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
 
 void
 gas_cgen_md_operand (expressionP)
-     expressionS * expressionP;
+     expressionS * expressionP ATTRIBUTE_UNUSED;
 {
   /* Don't longjmp if we're not called from within cgen_parse_operand().  */
   if (expr_jmp_buf_p)
@@ -494,7 +495,7 @@ int
 gas_cgen_md_apply_fix3 (fixP, valueP, seg)
      fixS *   fixP;
      valueT * valueP;
-     segT     seg;
+     segT     seg ATTRIBUTE_UNUSED;
 {
   char * where = fixP->fx_frag->fr_literal + fixP->fx_where;
   valueT value;
@@ -637,7 +638,7 @@ gas_cgen_md_apply_fix3 (fixP, valueP, seg)
 
 arelent *
 gas_cgen_tc_gen_reloc (section, fixP)
-     asection * section;
+     asection * section ATTRIBUTE_UNUSED;
      fixS *     fixP;
 {
   arelent * reloc;

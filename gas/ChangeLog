@@ -1,3 +1,10 @@
+2000-07-25  Dave Brolley  <brolley@redhat.com>
+
+	* cgen.c (queue_fixup): Declare opinfo.
+	(gas_cgen_parse_operand): Mark unused parameters with ATTRIBUTE_UNUSED.
+	(gas_cgen_md_operand): Ditto.
+	(gas_cgen_md_apply_fix3): Ditto.
+
 2000-07-24  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* config/obj-coff.c (obj_frob_symbol): Don't merge
