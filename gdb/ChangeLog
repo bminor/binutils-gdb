@@ -1,3 +1,8 @@
+2001-11-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* utils.c (internal_verror): Restore calls to abort().
+	Fix PR gdb/219.
+	
 2001-11-02  Michael Chastain  <mec@shout.net>
 
         * MAINTAINERS: Update my entry.

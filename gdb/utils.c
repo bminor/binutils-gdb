@@ -702,7 +702,7 @@ internal_verror (const char *file, int line,
     case 1:
       dejavu = 2;
       fputs_unfiltered (msg, gdb_stderr);
-      internal_error (__FILE__, __LINE__, "failed internal consistency check");
+      abort (); /* NOTE: GDB has only three calls to abort().  */
     default:
       dejavu = 3;
       write (STDERR_FILENO, msg, sizeof (msg));
@@ -731,13 +731,13 @@ Create a core file containing the current state of GDB? ");
       if (dump_core_p)
 	{
 	  if (fork () == 0)
-	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
+	    abort (); /* NOTE: GDB has only three calls to abort().  */
 	}
     }
   else
     {
       if (dump_core_p)
-	internal_error (__FILE__, __LINE__, "failed internal consistency check");
+	abort (); /* NOTE: GDB has only three calls to abort().  */
       else
 	exit (1);
     }
