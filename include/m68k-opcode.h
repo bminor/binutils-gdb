@@ -1061,21 +1061,22 @@ struct m68k_opcode m68k_opcodes[] =
 {"fmovecr",	two(0xF000, 0x5C00),	two(0xF1FF, 0xFC00),	"Ii#CF7"},
 
 /* Other fmovemx.  */
-{"fmovemx",	two(0xF020, 0xE000),	two(0xF1F8, 0xFF00),	"IdL3-s"},		/* fmovem.x to autodecrement,	static and dynamic */
-{"fmovemx",	two(0xF020, 0xE000),	two(0xF1F8, 0xFF00),	"Id#3-s"},		/* fmovem.x to autodecrement,	static and dynamic */
+{"fmovemx", two(0xF000, 0xF800), two(0xF1C0, 0xFF8F), "IiDk&s"}, /* fmovem.x: reg to control,	static and dynamic: */
+{"fmovemx", two(0xF000, 0xD800), two(0xF1C0, 0xFF8F), "Ii&sDk"}, /* fmovem.x from control to reg, static and dynamic: */
 
-{"fmovemx",	two(0xF020, 0xE800),	two(0xF1F8, 0xFF8F),	"IiDk-s"},		/* fmovem.x to autodecrement,	static and dynamic */
+{"fmovemx", two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Idl3&s"}, /* fmovem.x to control, static and dynamic: */
+{"fmovemx", two(0xF000, 0xF000), two(0xF1C0, 0xFF00), "Id#3&s"}, /* fmovem.x to control, static and dynamic: */
 
-{"fmovemx",	two(0xF000, 0xF000),	two(0xF1C0, 0xFF00),	"Id#3&s"},		/* fmovem.x to control,	static and dynamic: */
-{"fmovemx",	two(0xF000, 0xF800),	two(0xF1C0, 0xFF8F),	"IiDk&s"},		/* fmovem.x to control,	static and dynamic: */
-{"fmovemx",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id&s#3"},		/* fmovem.x from control,	static and dynamic: */
-{"fmovemx",	two(0xF000, 0xD800),	two(0xF1C0, 0xFF8F),	"Ii&sDk"},		/* fmovem.x from control,	static and dynamic: */
-{"fmovemx",	two(0xF000, 0xF000),	two(0xF1C0, 0xFF00),	"Idl3&s"},		/* fmovem.x to control,	static and dynamic: */
-{"fmovemx",	two(0xF000, 0xD000),	two(0xF1C0, 0xFF00),	"Id&sl3"},		/* fmovem.x from control,	static and dynamic: */
+{"fmovemx", two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id&sl3"}, /* fmovem.x from control, static and dynamic: */
+{"fmovemx", two(0xF000, 0xD000), two(0xF1C0, 0xFF00), "Id&s#3"}, /* fmovem.x from control, static and dynamic: */
 
-{"fmovemx",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+sl3"},		/* fmovem.x from autoincrement,	static and dynamic: */
-{"fmovemx",	two(0xF018, 0xD000),	two(0xF1F8, 0xFF00),	"Id+s#3"},		/* fmovem.x from autoincrement,	static and dynamic: */
-{"fmovemx",	two(0xF018, 0xD800),	two(0xF1F8, 0xFF8F),	"Ii+sDk"},		/* fmovem.x from autoincrement,	static and dynamic: */
+{"fmovemx", two(0xF020, 0xE800), two(0xF1F8, 0xFF8F), "IiDk-s"}, /* fmovem.x: reg to autodecrement, static and dynamic */
+{"fmovemx", two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "IdL3-s"}, /* fmovem.x to autodecrement, static and dynamic */
+{"fmovemx", two(0xF020, 0xE000), two(0xF1F8, 0xFF00), "Id#3-s"}, /* fmovem.x to autodecrement, static and dynamic */
+
+{"fmovemx", two(0xF018, 0xD800), two(0xF1F8, 0xFF8F), "Ii+sDk"}, /* fmovem.x from autoincrement to reg, static and dynamic: */
+{"fmovemx", two(0xF018, 0xD000), two(0xF1F8, 0xFF00), "Id+sl3"}, /* fmovem.x from autoincrement, static and dynamic: */
+{"fmovemx", two(0xF018, 0xD000), two(0xF1F8, 0xFF00), "Id+s#3"}, /* fmovem.x from autoincrement, static and dynamic: */
 
 {"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"IiL8@s"},
 {"fmoveml",	two(0xF000, 0xA000),	two(0xF1C0, 0xE3FF),	"Ii#8@s"},
