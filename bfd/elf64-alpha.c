@@ -159,7 +159,7 @@ struct alpha_elf_link_hash_entry
     bfd *gotobj;
 
     /* the addend in effect for this entry.  */
-    bfd_vma addend;
+    bfd_signed_vma addend;
 
     /* the .got offset for this entry.  */
     int got_offset;
@@ -1119,7 +1119,8 @@ elf64_alpha_find_reloc_at_ofs (rel, relend, offset, type)
 {
   while (rel < relend)
     {
-      if (rel->r_offset == offset && ELF64_R_TYPE (rel->r_info) == type)
+      if (rel->r_offset == offset
+	  && ELF64_R_TYPE (rel->r_info) == (unsigned int) type)
 	return rel;
       ++rel;
     }
@@ -1615,7 +1616,6 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	    continue;
 
 	  info.h = h;
-	  info.gotent = gotent;
 	  info.tsec = h->root.root.u.def.section;
 	  info.other = h->root.other;
 	  gotent = h->got_entries;
@@ -1855,7 +1855,7 @@ elf64_alpha_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 {
   if (sym->st_shndx == SHN_COMMON
       && !info->relocateable
-      && sym->st_size <= bfd_get_gp_size (abfd))
+      && sym->st_size <= (unsigned int) bfd_get_gp_size (abfd))
     {
       /* Common symbols less than or equal to -G nn bytes are
 	 automatically put into .sbss.  */
@@ -2963,7 +2963,7 @@ elf64_alpha_merge_gots (a, b)
 static boolean
 elf64_alpha_calc_got_offsets_for_symbol (h, arg)
      struct alpha_elf_link_hash_entry *h;
-     PTR arg;
+     PTR arg ATTRIBUTE_UNUSED;
 {
   struct alpha_elf_got_entry *gotent;
 
@@ -3029,10 +3029,10 @@ elf64_alpha_calc_got_offsets (info)
 
 static boolean
 elf64_alpha_size_got_sections (output_bfd, info)
-     bfd *output_bfd;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
 {
-  bfd *i, *got_list, *cur_got_obj;
+  bfd *i, *got_list, *cur_got_obj = NULL;
   int something_changed = 0;
 
   got_list = alpha_elf_hash_table (info)->got_list;
@@ -3428,7 +3428,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
       struct alpha_elf_link_hash_entry *h;
       Elf_Internal_Sym *sym;
       bfd_vma relocation;
-      bfd_vma addend;
+      bfd_signed_vma addend;
       bfd_reloc_status_type r;
 
       r_type = ELF64_R_TYPE(rel->r_info);
@@ -4168,7 +4168,7 @@ elf64_alpha_final_link (abfd, info)
 	    {
 	      asection *s;
 	      EXTR esym;
-	      bfd_vma last;
+	      bfd_vma last = 0;
 	      unsigned int i;
 	      static const char * const name[] =
 		{
