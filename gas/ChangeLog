@@ -1,3 +1,14 @@
+Wed Dec 15 15:39:53 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* ecoff.c (ecoff_directive_frame): Permit extra trailing operands;
+	unused for now, but supplied by Alpha OSF1 compiler.
+
+	* as.h: Protect against multiple inclusions.
+	(int_to_gen): Don't declare.
+
+	* config/atof-vax.c (atof_vax): NULL is not a valid character
+	constant.
+
 Tue Dec 14 21:38:25 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* configure.in (hppa*-*-osf*): Do not consider this a developmental
