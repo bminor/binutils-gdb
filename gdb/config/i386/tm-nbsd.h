@@ -1,5 +1,6 @@
-/* Macro definitions for i386 running under NetBSD.
-   Copyright 1994, 1996, 2000, 2002 Free Software Foundation, Inc.
+/* Target-dependent definitions for NetBSD/i386.
+
+   Copyright 1994, 1996, 2000, 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,7 +22,6 @@
 #ifndef TM_NBSD_H
 #define TM_NBSD_H
 
-#include "i386/tm-i386.h"
 #include "solib.h"
 
-#endif /* TM_NBSD_H */
+#endif /* tm-nbsd.h */

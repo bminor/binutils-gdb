@@ -29,6 +29,7 @@
 #include "gdb_string.h"
 
 #include "x86-64-tdep.h"
+#include "solib-svr4.h"
 
 /* Support for signal handlers.  */
 
@@ -136,6 +137,10 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigcontext_addr = amd64fbsd_sigcontext_addr;
   tdep->sc_reg_offset = amd64fbsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (amd64fbsd_sc_reg_offset);
+
+  /* FreeBSD uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
 
 

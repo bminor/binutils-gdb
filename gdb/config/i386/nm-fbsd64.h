@@ -1,6 +1,6 @@
 /* Native-dependent definitions for FreeBSD/amd64.
-   Copyright 2003
-   Free Software Foundation, Inc.
+
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,10 +33,5 @@
 
 /* We can attach and detach.  */
 #define ATTACH_DETACH
-
-
-/* Shared library support.  */
-
-#include "solib.h"
 
 #endif /* nm-fbsd64.h */

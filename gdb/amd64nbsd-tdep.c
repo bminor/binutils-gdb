@@ -27,8 +27,9 @@
 
 #include "gdb_assert.h"
 
-#include "nbsd-tdep.h"
 #include "x86-64-tdep.h"
+#include "nbsd-tdep.h"
+#include "solib-svr4.h"
 
 /* Support for signal handlers.  */
 
@@ -98,6 +99,7 @@ amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* NetBSD has its own convention for signal trampolines.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, nbsd_pc_in_sigtramp);
+  tdep->sigcontext_addr = amd64nbsd_sigcontext_addr;
 
   /* Initialize the array with register offsets in `struct
      sigcontext'.  This `struct sigcontext' has an sc_mcontext member
@@ -113,7 +115,9 @@ amd64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 	tdep->sc_reg_offset[i] = 32 + amd64nbsd_r_reg_offset[i];
     }
 
-  tdep->sigcontext_addr = amd64nbsd_sigcontext_addr;
+  /* NetBSD uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
 
 

@@ -25,6 +25,7 @@
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
+#include "solib-svr4.h"
 
 /* FreeBSD 3.0-RELEASE or later.  */
 
@@ -101,8 +102,10 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_elf_init_abi (info, gdbarch);
 
   /* FreeBSD ELF uses SVR4-style shared libraries.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch,
-					generic_in_solib_call_trampoline);
+  set_gdbarch_in_solib_call_trampoline
+    (gdbarch, generic_in_solib_call_trampoline);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
 
 /* FreeBSD 4.0-RELEASE or later.  */

@@ -1,5 +1,53 @@
 2004-02-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64fbsd-tdep.c: Include "solib-svr4.h".
+	(amd64fbsd_init_abi): Set link map offsets.
+	* amd64nbsd-tdep.c: Include "slib-svr4.h".
+	(amd64nbsd_init_abi): Set link map offsets.
+	* amd64obsd-tdep.c: Include "solib-svr4.h".
+	(amd64obsd_init_abi): Set link map offsets.
+	* i386fbsd-tdep.c: Include "solib-svr4.h".
+	(i386fbsd_init_abi): Set link map offsets.
+	* i386nbsd-tdep.c: Include "solib-svr4.h".
+	(i386nbsdelf_init_abi): Set link map offsets.
+	* Makefile.in (amd64fbsd-tdep.o, amd64nbsd-tdep.o)
+	(amd64obsd-tdep.o, i386fbsd-tdep.o): Update dependencies.
+	* config/i386/fbsd.mh (NATDEPFILES): Remove solib.o, solib-svr4.o,
+	solib-legacy.o and core-aout.o. Reformat.
+	* config/i386/fbsd64.mh (NATDEPFILES): Remove solib.o,
+	solib-svr4.o, solib-legacy.o.  Reformat.
+	* config/i386/nbsdaout.mh (NATDEPFILES): Add solib.o.  Reformat.
+	* config/i386/nbsdelf.mh: Reformat.
+	* config/i386/nbsd64.mh (NATDEPFILES): Remove solib.o,
+	solib-svr4.o, solib-legacy.o and corelow.o.
+	* config/i386/obsd.mh, config/i386/obsdaout.mh: Reformat.
+	* config/i386/obsd64.mh (NATDEPFILES): Remove solib.o,
+	solib-svr4.o, solib-legacy.o and corelow.o.  Reformat.
+	* config/i386/fbsd.mt (TDEPFILES): Add solib.o, solib-svr4.o.
+	* config/i386/fbsd64.mt (TDEPFILES): Add solib.o, solib-svr4.o.
+	(TM_FILE): Set to tm-fbsd.h.
+	* config/i386/nbsd.mt (TDEPFILES): Reformat.
+	* config/i386/nbsd64.mt (TDEPFILES): Add corelow.o, solib.o and
+	solib-svr4.o.
+	* config/i386/obsd.mt (TDEPFILES): Add corelow.o, solib.o and
+	solib-svr4.o.
+	(TM_FILE): Set to nm-nbsd.h.
+	* config/i386/nm-fbsd.h: Update copyright year.  Tweak comments.
+	Simplify shared library support.  Don't include "elf/common.h".
+	(SVR4_SHARED_LIBS): Don't define.
+	* config/i386/nm-fbsd64.h: Update copyright year.  Don't include
+	"solib.h".
+	* config/i386/nm-nbsd.h, config/i386/nm-nbsdaout.h,
+	config/i386/nm-obsd.h: Update copyright year.  Tweak comments.
+	* config/i386/tm-fbsd.h: Update copyright tear.  Tweak comments.
+	Don't include "i386/tm-i386.h".  Include "solib.h".
+	* config/i386/tm-nbsd.h: Update copyright year.  Tweak comments.
+	Don't include "i386/tm-i386.h".
+	* config/i386/xm-i386.h: Update copyright year.  Tweak comments.
+	* config/i386/xm-nbsd.h: Update copyright year.  Tweak comments.
+	Include "i386/xm-i386.h".
+	(HOST_LONG_DOUBLE_FORMAT): Remove.
+
 	Fix OpenBSD/i386 sigtramp recognition.
 	* i386-tdep.h: Update copyright year.
 	(i386bsd_pc_in_sigtramp, i386bsd_sigtramp_start)

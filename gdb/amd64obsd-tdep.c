@@ -31,6 +31,7 @@
 
 #include "x86-64-tdep.h"
 #include "i387-tdep.h"
+#include "solib-svr4.h"
 
 /* Support for core dumps.  */
 
@@ -198,6 +199,10 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigcontext_addr = amd64obsd_sigcontext_addr;
   tdep->sc_reg_offset = amd64obsd_sc_reg_offset;
   tdep->sc_num_regs = ARRAY_SIZE (amd64obsd_sc_reg_offset);
+
+  /* OpenBSD uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
 
 

@@ -1,5 +1,6 @@
 /* Target-dependent definitions for FreeBSD/i386.
-   Copyright 1997, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1997, 1999, 2000, 2001, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,10 +22,10 @@
 #ifndef TM_FBSD_H
 #define TM_FBSD_H
 
-#include "i386/tm-i386.h"
+#include "solib.h"
 
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
 
-#endif /* TM_FBSD_H */
+#endif /* tm-fbsd.h */
