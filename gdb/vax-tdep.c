@@ -162,15 +162,6 @@ vax_frame_saved_pc (struct frame_info *frame)
   return (read_memory_integer (get_frame_base (frame) + 16, 4));
 }
 
-CORE_ADDR
-vax_frame_args_address_correct (struct frame_info *frame)
-{
-  if (get_next_frame (frame))
-    return (read_memory_integer (get_frame_base (get_next_frame (frame)) + 8, 4));
-
-  return (0);
-}
-
 static CORE_ADDR
 vax_frame_args_address (struct frame_info *frame)
 {
