@@ -274,7 +274,7 @@ gnu_store_registers (int regno)
 	  proc_debug (thread, "storing register %s", REGISTER_NAME (regno));
 
 	  gdb_assert (regcache_valid_p (regcache, regno));
-	  regcache_craw_collect (regcache, regno, REG_ADDR (state, regno));
+	  regcache_raw_collect (regcache, regno, REG_ADDR (state, regno));
 	}
 
       /* Restore the T bit.  */

@@ -1,5 +1,7 @@
 2004-08-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386gnu-nat.c (gnu_store_registers): Fix typo.
+
 	* i386gnu-nat.c (gnu_store_registers): Use regcache_raw_collect
 	instead of regcache_raw_supply when storing the registers.
 
