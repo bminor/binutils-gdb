@@ -22,6 +22,7 @@ kernel.
 
 * New native configurations
 
+OpenBSD/hppa					hppa*-*-openbsd*
 OpenBSD/m68k					m68*-*-openbsd*
 OpenBSD/m88k					m88*-*-openbsd*
 OpenBSD/powerpc					powerpc-*-openbsd*

@@ -1,3 +1,15 @@
+2004-06-26  Mark Kettenis  <kettenis@gnu.org>
+
+	Add OpenBSD/hppa support.
+	* NEWS (New native configurations): Mention OpenBSD/hppa.
+	* hppabsd-nat.c, hppabsd-tdep.c, config/pa/obsd.mh,
+	config/pa/obsd.mt, config/pa/nm-obsd.h, config/pa/tm-bsd.h: New
+	files.
+	* Makefile.in (ALLDEPFILES): Add hppabsd-nat.c and hppabsd-tdep.c.
+	(hppabsd-nat.o, hppabsd-tdep.c): New dependencies.
+	* configure.host: Add hppa*-*-openbsd*.
+	* configure.tgt: Add hppa*-*-openbsd*.
+
 2004-06-25  Andrew Cagney  <cagney@gnu.org>
 
 	* defs.h (deprecated_ui_loop_hook): Deprecated.
