@@ -1,3 +1,7 @@
+Tue Aug  2 14:40:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* os9k.h: Comment out apparently-unused declarations.
+
 Fri Jul 22 14:17:12 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* bfdlink.h (struct bfd_link_hash_entry): Change u.c.size into a
