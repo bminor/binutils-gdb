@@ -4256,6 +4256,95 @@ echo "$ac_t""${ac_cv_exeext}" 1>&6
 ac_exeext=$EXEEXT
 
 
+for ac_hdr in sys/gmon_out.h
+do
+ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
+echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
+echo "configure:4264: checking for $ac_hdr" >&5
+if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 4269 "configure"
+#include "confdefs.h"
+#include <$ac_hdr>
+EOF
+ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+{ (eval echo configure:4274: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
+if test -z "$ac_err"; then
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=yes"
+else
+  echo "$ac_err" >&5
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=no"
+fi
+rm -f conftest*
+fi
+if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_hdr=HAVE_`echo $ac_hdr | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_hdr 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+
+
+echo $ac_n "checking the size of gmon pointers""... $ac_c" 1>&6
+echo "configure:4302: checking the size of gmon pointers" >&5
+if test "$cross_compiling" = yes; then
+  gmon_ptr_size=4
+else
+  cat > conftest.$ac_ext <<EOF
+#line 4307 "configure"
+#include "confdefs.h"
+#include <stdio.h>
+#include <stdlib.h>
+#if HAVE_SYS_GMON_OUT_H
+#include <sys/gmon_out.h>
+#endif
+main()
+{
+#if HAVE_SYS_GMON_OUT_H
+  struct gmon_cg_arc_record arc;
+  FILE *f=fopen("conftestval", "w");
+  if (!f) exit(1);
+  fprintf(f, "%d\n", sizeof(arc.from_pc));
+  exit(0);
+#else
+  FILE *f=fopen("conftestval", "w");
+  if (!f) exit(1);
+  fprintf(f, "%d\n", (int) sizeof(char *));
+  exit(1);
+#endif
+}
+EOF
+if { (eval echo configure:4330: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+then
+  gmon_ptr_size=`cat conftestval`
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -fr conftest*
+  gmon_ptr_size=4
+fi
+rm -fr conftest*
+fi
+
+echo "$ac_t""$gmon_ptr_size" 1>&6
+
+cat >> confdefs.h <<EOF
+#define GMON_PTR_SIZE $gmon_ptr_size
+EOF
+
+
 build_warnings="-W -Wall"
 # Check whether --enable-build-warnings or --disable-build-warnings was given.
 if test "${enable_build_warnings+set}" = set; then

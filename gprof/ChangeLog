@@ -1,3 +1,66 @@
+2001-03-13  David Mosberger  <davidm@hpl.hp.com>
+
+	* hist.c (hist_dimension): Declare as an array of 16 characters.
+	(hist_read_rec): If SAMPLEDEBUG, print each histogram bin count.
+
+	* basic_blocks.c: Whitespace and formatting changes.
+	* bb_exit_func.c: Ditto.
+	* call_graph.c: Ditto.
+	* call_graph.h: Ditto.
+	* cg_arcs.c: Ditto.
+	* cg_print.c: Ditto.
+	* cg_print.h: Ditto.
+	* corefile.c: Ditto.
+	* corefile.h: Ditto.
+	* gmon_io.c: Ditto.
+	* gmon_io.h: Ditto.
+	* gmon_out.h: Ditto.
+	* gprof.c: Ditto.
+	* hist.c: Ditto.
+	* hist.h: Ditto.
+	* i386.c: Ditto.
+	* search_list.c: Ditto.
+	* search_list.h: Ditto.
+	* source.c: Ditto.
+	* source.h: Ditto.
+	* sym_ids.c: Ditto.
+	* sym_ids.h: Ditto.
+	* symtab.c: Ditto.
+	* symtab.h: Ditto.
+	* tahoe.c: Ditto.
+	* utils.c: Ditto.
+	* vax.c: Ditto.
+
+	* gmon_out.h (gmon_hist_hdr): Delete.
+	(gmon_cg_arc_record): Delete.
+
+	* gmon_io.c (put_vma): Declare "static".
+	(get_vma): Ditto.
+	(gmon_io_write): New function.
+	(gmon_io_write_8): Ditto.
+	(gmon_io_write_32): Ditto.
+	(gmon_io_write_vma): Ditto.
+	(gmon_io_read): Ditto.
+	(gmon_io_read_32): Ditto.
+	(gmon_io_read_vma): Ditto.
+	* basic_blocks.c (bb_read_rec): Use gmon_io_read* / gmon_io_write*
+	to read/write data file in a more portable fashion.
+	(bb_write_blocks): Ditto.
+	* call_graph.c (cg_read_rec): Ditto.
+	(cg_write_arcs): Ditto.
+	* hist.c (hist_read_rec): Ditto.
+	(hist_write_hist): Ditto.
+
+	From Jes Sorensen  <jes@linuxcare.com>
+	* gmon_out.h: Use GMON_PTR_SIZE instead of sizeof(char*).
+	* gmon.h: Ditto.
+	* configure.in: Get GMON_PTR_SIZE from existing <sys/gmon_out.h>
+	if it exists.
+	* acconfig.h: New file. Mention and document GMON_PTR_SIZE.
+	* gconfig.h: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2001-02-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* configure.in (BFD_VERSION): New.

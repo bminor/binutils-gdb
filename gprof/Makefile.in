@@ -182,12 +182,12 @@ NROFF = nroff
 HEADERS =  $(noinst_HEADERS)
 
 DIST_COMMON =  ./stamp-h.in ChangeLog Makefile.am Makefile.in TODO \
-acinclude.m4 aclocal.m4 configure configure.in gconfig.in
+acconfig.h acinclude.m4 aclocal.m4 configure configure.in gconfig.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(gprof_SOURCES)
 OBJECTS = $(gprof_OBJECTS)
@@ -225,7 +225,7 @@ $(srcdir)/gconfig.in: @MAINTAINER_MODE_TRUE@$(srcdir)/stamp-h.in
 		rm -f $(srcdir)/stamp-h.in; \
 		$(MAKE) $(srcdir)/stamp-h.in; \
 	else :; fi
-$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) acconfig.h
 	cd $(top_srcdir) && $(AUTOHEADER)
 	@echo timestamp > $(srcdir)/stamp-h.in 2> /dev/null
 
