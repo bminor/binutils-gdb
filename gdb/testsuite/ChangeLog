@@ -1,3 +1,7 @@
+2001-08-02  Dave Brolley  <brolley@redhat.com>
+
+	* config/sid.exp: Rename gdb-socket to cpu-gdb-socket.
+
 2001-07-25  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/consecutive.exp: New file.  Test stepping over

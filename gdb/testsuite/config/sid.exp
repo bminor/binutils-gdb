@@ -50,7 +50,7 @@ proc sid_start {} {
 	    if {! [file exists $env(SID)]} then { error "Cannot find sid in build tree" }
 	}
 	if { [board_info target sim,protocol] == "sid" } {
-	    set spawncmd "[target_info sim] [target_info sim,options] -e \"set gdb-socket sockaddr-local 0.0.0.0:$port\""
+	    set spawncmd "[target_info sim] [target_info sim,options] -e \"set cpu-gdb-socket sockaddr-local 0.0.0.0:$port\""
 	} else {
 	    set spawncmd "../../sid/bsp/[target_info sim] $sidverbose $sidendian --gdb=$port [target_info sim,options]"
 	}
@@ -67,7 +67,7 @@ proc sid_start {} {
 	if { [board_info target sim,protocol] == "sid" } {
 	    # FIXME: sim,options may be from the build tree, should find
 	    # it in the install tree.
-	    set spawncmd "sid [target_info sim,options] -e \"set gdb-socket sockaddr-local 0.0.0.0:$port\""
+	    set spawncmd "sid [target_info sim,options] -e \"set cpu-gdb-socket sockaddr-local 0.0.0.0:$port\""
 	} else {
 	    set spawncmd "[target_info sim] $sidverbose $sidendian --gdb=$port [target_info sim,options]"
 	}
