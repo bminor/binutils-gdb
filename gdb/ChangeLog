@@ -1,3 +1,11 @@
+Thu Mar 25 10:10:28 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in:  Numerous small changes to macro definitions
+	and rules for building gdb distribution tree.  Many macros
+	eliminated or merged, and rules simplified.
+	* alldeps.mak:  Update.
+	* depend:  Update.
+
 Wed Mar 24 13:52:29 1993  david d `zoo' zuhn  (zoo at poseidon.cygnus.com)
 
 	* Makefile.in: recurse through SUBDIRS for dvi target too

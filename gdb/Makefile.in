@@ -270,115 +270,81 @@ $(end-sanitize-chill)\
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
 	"BISON=$(BISON)"
 
-# Source files in the main directory.
-# Files which are included via a config/* Makefile fragment
-# should *not* be specified here; they're in "ALLDEPFILES".
-SFILES_MAINDIR = \
-	 blockframe.c breakpoint.c command.c core.c demangle.c \
-	 environ.c eval.c expprint.c findvar.c infcmd.c inflow.c infrun.c \
-	 main.c printcmd.c gdbtypes.c \
-	 remote.c source.c stack.c symmisc.c symtab.c symfile.c \
-	 utils.c valarith.c valops.c valprint.c values.c c-exp.y m2-exp.y \
-	 mem-break.c target.c \
-	 dbxread.c coffread.c elfread.c dwarfread.c stabsread.c \
-	 language.c parse.c buildsym.c objfiles.c \
-	 minsyms.c mipsread.c maint.c ch-exp.y c-lang.c ch-lang.c m2-lang.c \
-	 complaints.c typeprint.c c-typeprint.c ch-typeprint.c m2-typeprint.c \
-	 c-valprint.c cp-valprint.c ch-valprint.c m2-valprint.c
-
-# Source files in subdirectories (which will be handled separately by
-#  'make gdb.tar.Z').
-# Files which are included via a config/* Makefile fragment
-# should *not* be specified here; they're in "ALLDEPFILES".
-SFILES_SUBDIR = \
-	 ${srcdir}/vx-share/dbgRpcLib.h \
-	 ${srcdir}/vx-share/ptrace.h \
-	 ${srcdir}/vx-share/vxTypes.h \
-	 ${srcdir}/vx-share/vxWorks.h \
-	 ${srcdir}/vx-share/wait.h \
-	 ${srcdir}/vx-share/xdr_ld.h \
-	 ${srcdir}/vx-share/xdr_ptrace.h \
-	 ${srcdir}/vx-share/xdr_rdb.h \
-	 ${srcdir}/nindy-share/b.out.h \
-	 ${srcdir}/nindy-share/block_io.h \
-	 ${srcdir}/nindy-share/coff.h \
-	 ${srcdir}/nindy-share/demux.h \
-	 ${srcdir}/nindy-share/env.h \
-	 ${srcdir}/nindy-share/stop.h \
-	 ${srcdir}/nindy-share/ttycntl.h \
-	 ${srcdir}/29k-share/udi_soc
-
-# Source files in sub-subdirectories.  We need to know this because we
-# make relative symlinks with them.
-SFILES_SUBSUBDIR = \
-	 ${srcdir}/29k-share/udi/udiphcfg.h \
-	 ${srcdir}/29k-share/udi/udiphsun.h \
-	 ${srcdir}/29k-share/udi/udiproc.h \
-	 ${srcdir}/29k-share/udi/udipt29k.h \
-	 ${srcdir}/29k-share/udi/udiptcfg.h \
-	 ${srcdir}/29k-share/udi/udisoc.h
-
-# Non-source files in subdirs, that should go into gdb.tar.Z.
-NONSRC_SUBDIR = \
-	 ${srcdir}/nindy-share/Makefile \
-	 ${srcdir}/nindy-share/VERSION \
-	 ${srcdir}/nindy-share/README \
-	 ${srcdir}/vx-share/README
-
 # All source files that go into linking GDB, except config-specified files.
-SFILES = $(SFILES_MAINDIR) $(SFILES_SUBDIR) $(SFILES_SUBSUBDIR)
+# Source files which are included via a config/*/* Makefile fragment should
+# *not* be specified here; they're in "ALLDEPFILES".
+SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c c-typeprint.c \
+	c-valprint.c ch-exp.y ch-lang.c ch-typeprint.c ch-valprint.c coffread.c \
+	command.c complaints.c core.c cp-valprint.c dbxread.c demangle.c \
+	dwarfread.c elfread.c environ.c eval.c expprint.c findvar.c gdbtypes.c \
+	infcmd.c inflow.c infrun.c language.c m2-exp.y m2-lang.c m2-typeprint.c \
+	m2-valprint.c main.c maint.c mem-break.c minsyms.c mipsread.c \
+	objfiles.c parse.c printcmd.c remote.c source.c stabsread.c stack.c \
+	symfile.c symmisc.c symtab.c target.c typeprint.c utils.c valarith.c \
+	valops.c valprint.c values.c
+
+# Files that are not source code, but need to go into gdb-$(VERSION).tar.Z.
+NONSRC = Makefile.in depend alldeps.mak createtags munch configure.in \
+	ChangeLog ChangeLog-9091 ChangeLog-3.x gdb.1 refcard.ps README TODO \
+	TAGS NEWS Projects .gdbinit COPYING $(YYFILES) copying.c copying.awk \
+	saber.suppress standalone.c stuff.c kdb-start.c putenv.c gcc.patch \
+	${srcdir}/nindy-share/Makefile ${srcdir}/nindy-share/VERSION \
+	${srcdir}/nindy-share/README ${srcdir}/vx-share/README \
+	${srcdir}/config/convex/Convex.notes
+
+	 
 
 # All source files that lint should look at
 LINTFILES = $(SFILES) $(YYFILES) init.c
 
 # Any additional files specified on these lines should also be added to
-# the OTHERS = definition below, so they go in the tar files.
+# the NONSRC definition, so they go in the tar files.
 SFILES_STAND = $(SFILES) standalone.c
 SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
 # Header files that are not named in config/*/* Makefile fragments go here.
-HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h \
-	environ.h expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h \
-	ieee-float.h inferior.h language.h \
-	minimon.h objfiles.h parser-defs.h partial-stab.h \
-	serial.h signals.h solib.h symfile.h symtab.h stabsread.h \
-	target.h terminal.h typeprint.h xcoffsolib.h value.h \
-	tm-68k.h tm-hppa.h tm-i960.h tm-sparc.h tm-sunos.h tm-sysv4.h \
-	xm-m68k.h xm-sparc.h xm-sysv4.h xm-vax.h \
-	nm-trash.h \
-	c-lang.h ch-lang.h m2-lang.h complaints.h \
-	ns32k-opcode.h \
-	valprint.h
+HFILES = breakpoint.h buildsym.h call-cmds.h command.h defs.h environ.h \
+	expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h gdb-stabs.h \
+	inferior.h language.h minimon.h objfiles.h parser-defs.h \
+	partial-stab.h serial.h signals.h solib.h symfile.h symtab.h \
+	stabsread.h target.h terminal.h typeprint.h xcoffsolib.h value.h \
+	c-lang.h ch-lang.h m2-lang.h complaints.h ns32k-opcode.h valprint.h \
+	config/m68k/tm-68k.h config/pa/tm-hppa.h \
+	config/i960/tm-i960.h config/sparc/tm-sparc.h config/tm-sunos.h \
+	config/tm-sysv4.h config/m68k/xm-m68k.h config/sparc/xm-sparc.h \
+	config/xm-sysv4.h config/vax/xm-vax.h config/nm-trash.h \
+	${srcdir}/29k-share/udi/udiphcfg.h ${srcdir}/29k-share/udi/udiphsun.h \
+	${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udipt29k.h \
+	${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udisoc.h \
+	${srcdir}/29k-share/udi_soc ${srcdir}/nindy-share/b.out.h \
+	${srcdir}/nindy-share/block_io.h ${srcdir}/nindy-share/coff.h \
+	${srcdir}/nindy-share/demux.h ${srcdir}/nindy-share/env.h \
+	${srcdir}/nindy-share/stop.h ${srcdir}/nindy-share/ttycntl.h \
+	${srcdir}/vx-share/dbgRpcLib.h ${srcdir}/vx-share/ptrace.h \
+	${srcdir}/vx-share/vxTypes.h ${srcdir}/vx-share/vxWorks.h \
+	${srcdir}/vx-share/wait.h ${srcdir}/vx-share/xdr_ld.h \
+	${srcdir}/vx-share/xdr_ptrace.h ${srcdir}/vx-share/xdr_rdb.h
+
+# GDB "info" files, which should be included in their entirety
+INFOFILES = gdb.info*
 
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 
-POSSLIBS_MAINDIR = regex.c regex.h alloca.c
-POSSLIBS = $(POSSLIBS_MAINDIR)
+POSSLIBS = regex.c regex.h alloca.c
 
 TESTS = testbpt.c testfun.c testrec.c testreg.c testregs.c
-
-OTHERS = Makefile.in depend alldeps.mak createtags munch configure.in \
-	 ChangeLog ChangeLog-9091 ChangeLog-3.x gdb.1 refcard.ps \
-	 README TODO TAGS NEWS Projects \
-	 .gdbinit COPYING $(YYFILES) \
-	 copying.c Convex.notes copying.awk \
-	 saber.suppress standalone.c stuff.c kdb-start.c \
-	 putenv.c gcc.patch
 
 # Subdirectories of gdb, which should be included in their entirety in
 # gdb-xxx.tar.Z:
 TARDIRS = doc sparclite # tests
 
-# GDB "info" files, which should be included in their entirety
-INFOFILES = gdb.info*
+DEPFILES = ${TDEPFILES} ${XDEPFILES} ${NATDEPFILES}
 
-DEPFILES= ${TDEPFILES} ${XDEPFILES} ${NATDEPFILES}
-
-SOURCES=$(SFILES) $(ALLDEPFILES) $(YYFILES)
+SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS} 
-TAGFILES_MAINDIR = $(SFILES_MAINDIR) $(ALLDEPFILES_MAINDIR) \
-             ${HFILES} ${ALLPARAM} ${POSSLIBS_MAINDIR} 
-TARFILES = ${TAGFILES_MAINDIR} ${OTHERS} ${REMOTE_EXAMPLES}
+
+TARFILES = ${SFILES} ${HFILES} ${NONSRC} ${ALLDEPFILES} $(ALLCONFIG) \
+	$(ALLPARAM) $(INFOFILES) ${POSSLIBS} ${REMOTE_EXAMPLES} \
 
 OBS = version.o main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     values.o eval.o valops.o valarith.o valprint.o printcmd.o \
@@ -488,17 +454,16 @@ rapp: $(RAPP_OBS)
 	
 # Support for building Makefile out of configured pieces, automatically
 # generated dependencies, etc.  alldeps.mak is a file that contains
-# "make" variable definitions for all ALLDEPFILES, ALLDEPFILES_MAINDIR,
-# ALLDEPFILES_SUBDIR, ALLDEPFILES_SUBSUBDIR, ALLPARAM, and ALLCONFIG,
-# all cadged from the current contents of the config subdirectory.
+# "make" variable definitions for all ALLDEPFILES, ALLPARAM, and ALLCONFIG,
+# all cadged from the current contents of the config subtree.
 
-alldeps.mak: ${srcdir}/config
-	rm -f alldeps.mak alldeps.tmp allparam.tmp allconfig.tmp
-	for i in `ls -d ${srcdir}/config/*/*.m[ht]` ; do \
+alldeps.mak: force
+	rm -f alldeps.mak alldeps*.tmp allparam*.tmp allconfig*.tmp
+	for i in `find ${srcdir}/config -name '*.m[ht]'` ; do \
 	  echo $$i >>allconfig.tmp; \
 	  awk <$$i ' \
 	    $$1 == "TDEPFILES=" || $$1 == "XDEPFILES=" \
-		|| $$1 == "NATDEPFILES=" { \
+	      || $$1 == "NATDEPFILES=" { \
 	      for (i = 2; i <= NF; i++) \
 	        print $$i >> "alldeps.tmp" ; \
             } \
@@ -516,41 +481,28 @@ alldeps.mak: ${srcdir}/config
 	      -e 's!xdr_rdb.o!vx-share/xdr_rdb.c!' \
 	      -e 's!udr.o!29k-share/udi/udr.c!' \
 	      -e 's!udip2soc.o!29k-share/udi/udip2soc.c!' \
+	      -e '/..\/sim\//d' \
+	      -e '/..\/opcodes\//d' \
 	      -e 's/\.o/.c/' \
 	    >alldeps2.tmp
 	for i in `cat allparam.tmp` ; do \
-	  find config -name $$i -print >>allparam2.tmp ; \
+	  find ${srcdir}/config -name $$i -print >>allparam2.tmp ; \
 	done
-	echo '# Start of "alldeps.mak" definitions' \
-	    >>alldeps.mak;
-	echo 'ALLDEPFILES = $$(ALLDEPFILES_MAINDIR) $$(ALLDEPFILES_SUBDIR) $$(ALLDEP_FILES_SUBSUBDIR)' \
-	    >>alldeps.mak;
-	grep -v / alldeps2.tmp | \
-	  awk 'BEGIN {printf "ALLDEPFILES_MAINDIR="} \
-	    NR == 0 {printf $$0;} \
-	    NR != 0 {printf "\\\n" $$0} \
-	    END {printf "\n\n"}' >>alldeps.mak;
-	grep / alldeps2.tmp | grep -v '/.*/' | \
-	  awk 'BEGIN {printf "ALLDEPFILES_SUBDIR="} \
-	    NR == 0 {printf $$0;} \
-	    NR != 0 {printf "\\\n" $$0} \
-	    END {printf "\n\n"}' >>alldeps.mak;
-	grep '/.*/' alldeps2.tmp | \
-	  awk 'BEGIN {printf "ALLDEPFILES_SUBSUBDIR="} \
-	    NR == 0 {printf $$0;} \
-	    NR != 0 {printf "\\\n" $$0} \
-	    END {printf "\n\n"}' >>alldeps.mak;
+	echo '# Start of "alldeps.mak" definitions' >>alldeps.mak;
+	sort <alldeps2.tmp | uniq | awk 'BEGIN {printf "ALLDEPFILES="} \
+	  NR == 0 {printf $$0;} \
+	  NR != 0 {printf "\\\n" $$0} \
+	  END {printf "\n\n"}' >>alldeps.mak;
 	sort <allparam2.tmp | uniq | awk 'BEGIN {printf "ALLPARAM="} \
-	    NR == 0 {printf $$0;} \
-	    NR != 0 {printf "\\\n" $$0} \
-	    END {printf "\n\n"}' >>alldeps.mak;
+	  NR == 0 {printf $$0;} \
+	  NR != 0 {printf "\\\n" $$0} \
+	  END {printf "\n\n"}' >>alldeps.mak;
 	sort <allconfig.tmp | uniq | awk 'BEGIN {printf "ALLCONFIG="} \
-	    NR == 0 {printf $$0;} \
-	    NR != 0 {printf "\\\n" $$0} \
-	    END {printf "\n\n"}' >>alldeps.mak;
-	echo '# End of "alldeps.mak" definitions' \
-	    >>alldeps.mak;
-	rm -f alldeps.tmp alldeps2.tmp allparam.tmp allparam2.tmp allconfig.tmp
+	  NR == 0 {printf $$0;} \
+	  NR != 0 {printf "\\\n" $$0} \
+	  END {printf "\n\n"}' >>alldeps.mak;
+	echo '# End of "alldeps.mak" definitions' >>alldeps.mak;
+	rm -f alldeps*.tmp allparam*.tmp allconfig*.tmp
 
 # The sed script makes everything which depends on {x,t}m.h depend on
 # config.status as well, in case someone reconfigures gdb out from
@@ -624,7 +576,7 @@ tm-sun4os4.h: tm-sparc.h
 xm-vaxult.h: xm-vax.h
 xm-vaxbsd.h: xm-vax.h
 
-kdb: $(NTSSTART) $(OBS) $(NTSOBS) ${ADD_DEPS} ${CDEPS}
+kdb:	$(NTSSTART) $(OBS) $(NTSOBS) ${ADD_DEPS} ${CDEPS}
 	rm -f init.c
 	$(srcdir)/munch ${MUNCH_DEFINE} $(OBS) $(NTSOBS) > init.c
 	$(CC) $(LDFLAGS) -c init.c $(CLIBS) 
@@ -633,37 +585,25 @@ kdb: $(NTSSTART) $(OBS) $(NTSOBS) ${ADD_DEPS} ${CDEPS}
 
 # Put the proper machine-specific files first.
 # createtags will edit the .o in DEPFILES into .c
-TAGS: ${TAGFILES}
+TAGS:	${TAGFILES}
 	$(srcdir)/createtags $(TM_FILE) ${XM_FILE} ${NAT_FILE} \
 			     $(DEPFILES) ${TAGFILES}
 tags: TAGS
 
 # Making distributions of GDB and friends.
 
-# Make a directory `proto-gdb.dir' that contains an image of the GDB
-# directory of the distribution, built up with symlinks.
-make-proto-gdb.dir: force_update 
-	$(MAKE) $(MFLAGS) -f Makefile.in setup-to-dist
-	$(MAKE) $(MFLAGS) -f Makefile    make-proto-gdb-1
-
 # Make a tar file containing the GDB directory of the distribution.
 gdb.tar.Z: force_update
 	$(MAKE) $(MFLAGS) -f Makefile.in setup-to-dist
 	$(MAKE) $(MFLAGS) -f Makefile.in gdb-$(VERSION).tar.Z
 
-# Update the "alldeps.mak" file in a source directory.
-update-alldeps: force_update
-	../configure none -norecursion
-	rm -f alldeps.mak
-	$(MAKE) $(MFLAGS) alldeps.mak
-
-# Update the "depend" and "alldeps.mak" files in a source directory.
-# We update alldeps.mak first, since it is used to generate the list
-# of files to be checked for dependencies.
-update-depend: update-alldeps force_update
-	../configure none -norecursion
-	rm -f depend
-	$(MAKE) $(MFLAGS) depend
+# Make a directory `proto-gdb.dir' that contains an image of the GDB
+# directory of the distribution, built up with symlinks.  Note that this
+# make target is not directly referenced by any other rules in this makefile,
+# it is referenced by the makefile in the parent directory.
+make-proto-gdb.dir: force_update 
+	$(MAKE) $(MFLAGS) -f Makefile.in setup-to-dist
+	$(MAKE) $(MFLAGS) -f Makefile make-proto-gdb-1
 
 # Set up the GDB source directory for distribution, by building all files that
 # are products of other files.
@@ -673,10 +613,24 @@ setup-to-dist: update-depend force_update
 	$(MAKE) $(MFLAGS) gdb.info
 	$(MAKE) $(MFLAGS) refcard.ps
 
+# Update the "depend" and "alldeps.mak" files in a source directory.
+# We update alldeps.mak first, since it is used to generate the list
+# of files to be checked for dependencies.
+update-depend: update-alldeps force_update
+	../configure none -norecursion
+	rm -f depend
+	$(MAKE) $(MFLAGS) depend
+
+# Update the "alldeps.mak" file in a source directory.
+update-alldeps: force_update
+	../configure none -norecursion
+	rm -f alldeps.mak
+	$(MAKE) $(MFLAGS) alldeps.mak
+
 # Build a tar file from a proto-gdb.dir.
 gdb-$(VERSION).tar.Z: force_update
 	rm -f gdb.tar gdb-$(VERSION).tar.Z
-	$(MAKE) $(MFLAGS) -f Makefile    make-proto-gdb-1
+	$(MAKE) $(MFLAGS) -f Makefile make-proto-gdb-1
 	ln -s proto-gdb.dir $(DIST)
 	tar chf - $(DIST) | compress >gdb-$(VERSION).tar.Z
 	rm -rf $(DIST) proto-gdb.dir
@@ -688,30 +642,27 @@ gdb-$(VERSION).tar.Z: force_update
 make-proto-gdb-1: ${TARFILES} ${TARDIRS} gdb.info
 	rm -rf proto-gdb.dir
 	mkdir proto-gdb.dir
-	cd proto-gdb.dir ; for i in ${TARFILES} ; do ln -s ../$$i . ; done
-	cd proto-gdb.dir ; ln -s ../${INFOFILES} .
-	cd proto-gdb.dir ; for i in ${TARDIRS}; do \
-	  (mkdir $$i; cd $$i; \
-	  ln -s ../../$$i/* .; \
-	  rm -rf SCCS CVS.adm RCS config.status; \
-	  if test -f Makefile.in; then rm Makefile; else true; fi;); done
-	mkdir proto-gdb.dir/config
-	cd proto-gdb.dir/config ; \
-	  for i in $(ALLCONFIG) ; do ln -s ../../$$i ../$$i ; done
-	mkdir proto-gdb.dir/vx-share proto-gdb.dir/nindy-share
-	mkdir proto-gdb.dir/29k-share proto-gdb.dir/29k-share/udi
-	cd proto-gdb.dir/config ; \
-	  for i in $(SFILES_SUBDIR) $(NONSRC_SUBDIR) $(ALLDEPFILES_SUBDIR); \
-	    do ln -s ../../$$i ../$$i ; done
-	cd proto-gdb.dir/config ; \
-	  for i in $(SFILES_SUBSUBDIR) $(ALLDEPFILES_SUBSUBDIR); \
-	    do ln -s ../../../$$i ../$$i ; done
+	rootme=`pwd`/ ; export rootme ; \
+	  for i in `echo ${TARDIRS}`; do \
+	    (cd proto-gdb.dir ; \
+	    mkdir -p $$i; \
+	    cd $$i; \
+	    ln -s $${rootme}/$$i/* .; \
+	    rm -rf SCCS CVS CVS.adm RCS config.status; \
+	    if test -f Makefile.in; then rm Makefile; else true; fi;); \
+	  done ; \
+	  for i in `echo ${TARFILES}`; do \
+	    (cd proto-gdb.dir ; \
+	    dir=`dirname $$i`; \
+	    if test -d $$dir; then true; else mkdir -p $$dir; fi; \
+	    ln -s $${rootme}/$$i $$i;); \
+	  done
 	chmod og=u `find . -print`
 
 clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f init.c version.c
-	rm -f gdb core gdb.tar gdb.tar.Z make.log
+	rm -f gdb core make.log
 	rm -f gdb[0-9]
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
 
@@ -922,5 +873,3 @@ $(end-sanitize-chill)
 #			host- or target-dependent configurations
 #	depend -- what .o files depend on what .c and .h files,
 #			for all configurations.
-
-
