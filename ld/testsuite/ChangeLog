@@ -1,3 +1,12 @@
+2005-03-23  Eric Christopher  <echristo@redhat.com>
+
+	* ld-mips-elf/textrel-1.s, ld-mips-elf/textrel-1.d: New
+	test.
+	* ld-mips-elf/mips-elf.exp: Call it.
+	* ld-mips-elf/rel32-n32.d: Update for DF_TEXTREL removal.
+	* ld-mips-elf/rel32-o32.d: Ditto.
+	* ld-mips-elf/rel64.d: Ditto.
+
 2005-03-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-cris/expdyn5.d: Updated for alignment change in elf.sc.

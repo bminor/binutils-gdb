@@ -101,6 +101,10 @@ if {$has_newabi} {
     run_dump_test "mips16-hilo-n32"
 }
 
+if { $linux_gnu } {
+    run_dump_test "textrel-1"
+}
+
 # For tests which may involve multiple files, use run_ld_link_tests.
 
 # List contains test-items with 3 items followed by 2 lists:

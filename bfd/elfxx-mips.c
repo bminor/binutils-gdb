@@ -478,6 +478,11 @@ static bfd *reldyn_sorting_bfd;
 #define MIPS_ELF_OPTIONS_SECTION_NAME(abfd) \
   (NEWABI_P (abfd) ? ".MIPS.options" : ".options")
 
+/* Whether the section is readonly.  */
+#define MIPS_ELF_READONLY_SECTION(sec)			\
+  ((sec->flags & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))	\
+   == (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
+
 /* The name of the stub section.  */
 #define MIPS_ELF_STUB_SECTION_NAME(abfd) ".MIPS.stubs"
 
@@ -4005,6 +4010,10 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 						   &value,
 						   input_section))
 	    return bfd_reloc_undefined;
+
+	  /* If we've written this we need to set DF_TEXTREL here.  */
+	  if (MIPS_ELF_READONLY_SECTION (input_section))
+	    info->flags |= DF_TEXTREL;
 	}
       else
 	{
@@ -6101,33 +6110,21 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (sreloc == NULL)
 		    return FALSE;
 		}
-#define MIPS_READONLY_SECTION (SEC_ALLOC | SEC_LOAD | SEC_READONLY)
+
 	      if (info->shared)
-		{
-		  /* When creating a shared object, we must copy these
-		     reloc types into the output file as R_MIPS_REL32
-		     relocs.  We make room for this reloc in the
-		     .rel.dyn reloc section.  */
-		  mips_elf_allocate_dynamic_relocations (dynobj, 1);
-		  if ((sec->flags & MIPS_READONLY_SECTION)
-		      == MIPS_READONLY_SECTION)
-		    /* We tell the dynamic linker that there are
-		       relocations against the text segment.  */
-		    info->flags |= DF_TEXTREL;
-		}
+		/* When creating a shared object, we must copy these
+		   reloc types into the output file as R_MIPS_REL32
+		   relocs.  We make room for this reloc in the
+		   .rel.dyn reloc section.  */
+		mips_elf_allocate_dynamic_relocations (dynobj, 1);
 	      else
 		{
 		  struct mips_elf_link_hash_entry *hmips;
-
+		  
 		  /* We only need to copy this reloc if the symbol is
                      defined in a dynamic object.  */
 		  hmips = (struct mips_elf_link_hash_entry *) h;
 		  ++hmips->possibly_dynamic_relocs;
-		  if ((sec->flags & MIPS_READONLY_SECTION)
-		      == MIPS_READONLY_SECTION)
-		    /* We need it to tell the dynamic linker if there
-		       are relocations against the text segment.  */
-		    hmips->readonly_reloc = TRUE;
 		}
 
 	      /* Even though we don't directly need a GOT entry for
@@ -6423,9 +6420,12 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       && (h->root.type == bfd_link_hash_defweak
 	  || !h->def_regular))
     {
+      asection *sec;
+      sec = mips_elf_rel_dyn_section (dynobj, FALSE);
       mips_elf_allocate_dynamic_relocations (dynobj,
 					     hmips->possibly_dynamic_relocs);
-      if (hmips->readonly_reloc)
+
+      if (MIPS_ELF_READONLY_SECTION (sec))
 	/* We tell the dynamic linker that there are relocations
 	   against the text segment.  */
 	info->flags |= DF_TEXTREL;

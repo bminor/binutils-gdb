@@ -1,3 +1,12 @@
+2005-03-23  Eric Christopher  <echristo@redhat.com>
+
+	* elfxx-mips.c (MIPS_ELF_READONLY_SECTION): New.
+	(mips_elf_calculate_relocation): Use. Define DF_TEXTREL
+	after emitting relocation.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Ditto.
+	(_bfd_mips_elf_check_relocs): Remove code to set DF_TEXTREL
+	and readonly_reloc.
+
 2005-03-23  Mike Frysinger  <vapier@gentoo.org>
 	    Nick Clifton  <nickc@redhat.com>
 
