@@ -1,4 +1,13 @@
+Wed Oct 11 17:13:15 1995  Andrew Cagney  <cagney@highland.com.au>
+
+	* gen.c, ppc-instructions, psim.c: Fix code for generating
+	cracking instruction cache.  Delete the code that cached just the
+	result from doing an instruction lookup - this ran slower than no
+	cache at all.
+
 Fri Oct 13 09:58:43 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (gen.o): Include $(INLINE_CFLAGS).
 
 	* debug.h (ppc_trace): Rename from trace, to avoid a conflict with
 	TCL when gdb is linked with the simulator.

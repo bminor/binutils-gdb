@@ -1232,7 +1232,8 @@ insn_table_load_insns(char *file_name)
   table->opcode_rule = opcode_table;
 
   while ((file_entry = file_table_read(file)) != NULL) {
-    if (it_is("function", file_entry->fields[insn_flags])) {
+    if (it_is("function", file_entry->fields[insn_flags])
+	|| it_is("internal", file_entry->fields[insn_flags])) {
       insn_table_insert_function(table, file_entry);
     }
     else {
@@ -1575,20 +1576,6 @@ lf_print_idecode_table(lf *file,
 	lf_printf(file, "           table_entry->function_or_table)\n");
 	lf_printf(file, "          (%s));\n", insn_actual);
       }
-      else if (idecode_cache == 1 && can_assume_leaf) {
-	lf_printf(file, "ASSERT(!entry->shift);\n");
-	lf_printf(file, "return ((idecode_semantic*)\n");
-	lf_printf(file, "        table_entry->function_or_table);\n");
-      }
-      else if (idecode_cache == 1 && !can_assume_leaf) {
-	lf_printf(file, "if (table_entry->shift == 0)\n");
-	lf_printf(file, "  return ((idecode_semantic*)\n");
-	lf_printf(file, "          table_entry->function_or_table);\n");
-	lf_printf(file, "else if (table_entry->shift == -1)\n");
-	lf_printf(file, "  return (((idecode_crack*)\n");
-	lf_printf(file, "           table_entry->function_or_table)\n");
-	lf_printf(file, "          (%s));\n", insn_actual);
-      }
       else {
 	lf_printf(file, "if (table_entry->shift == 0)\n");
 	lf_printf(file, "  return (((idecode_crack*)\n");
@@ -1823,7 +1810,7 @@ semantics_h_print_function(lf *file,
 			 expanded_bits,
 			 function_name_prefix_semantics);
   lf_printf(file, "\n(%s);\n",
-	    idecode_cache > 1 ? cache_insn_formal : insn_formal);
+	    (idecode_cache ? cache_insn_formal : insn_formal));
 }
 
 
@@ -1999,48 +1986,43 @@ gen_icache_h(icache_tree *tree,
 
   /* create an instruction cache if being used */
   if (idecode_cache) {
+    icache_tree *form;
     lf_printf(file, "typedef struct _idecode_cache {\n");
     lf_printf(file, "  unsigned_word address;\n");
     lf_printf(file, "  void *semantic;\n");
-    if (idecode_cache == 1) {
-      lf_printf(file, "  instruction_word instruction;\n");
-    }
-    else {
-      icache_tree *form;
-      lf_printf(file, "  union {\n");
-      for (form = tree->children;
-	   form != NULL;
-	   form = form->next) {
-	icache_tree *field;
-	lf_printf(file, "    struct {\n");
-	for (field = form->children;
-	     field != NULL;
-	     field = field->next) {
-	  extraction_rules *rule;
-	  int found_rule = 0;
-	  for (rule = cachable_values;
-	       rule->valid;
-	       rule++) {
-	    if (strcmp(field->name, rule->old_name) == 0) {
-	      found_rule = 1;
-	      if (rule->new_name != NULL)
-		lf_printf(file, "      %s %s; /* %s */\n",
-			  rule->type == NULL ? "unsigned" : rule->type,
-			  rule->new_name, rule->old_name);
-	    }
+    lf_printf(file, "  union {\n");
+    for (form = tree->children;
+	 form != NULL;
+	 form = form->next) {
+      icache_tree *field;
+      lf_printf(file, "    struct {\n");
+      for (field = form->children;
+	   field != NULL;
+	   field = field->next) {
+	extraction_rules *rule;
+	int found_rule = 0;
+	for (rule = cachable_values;
+	     rule->valid;
+	     rule++) {
+	  if (strcmp(field->name, rule->old_name) == 0) {
+	    found_rule = 1;
+	    if (rule->new_name != NULL)
+	      lf_printf(file, "      %s %s; /* %s */\n",
+			rule->type == NULL ? "unsigned" : rule->type,
+			rule->new_name, rule->old_name);
 	  }
-	  if (!found_rule)
-	    lf_printf(file, "      unsigned %s;\n", field->name);
 	}
-	lf_printf(file, "    } %s;\n", form->name);
+	if (!found_rule)
+	  lf_printf(file, "      unsigned %s;\n", field->name);
       }
-      lf_printf(file, "  } crack;\n");
+      lf_printf(file, "    } %s;\n", form->name);
     }
+    lf_printf(file, "  } crack;\n");
     lf_printf(file, "} idecode_cache;\n");
   }
-
-  /* define various fields according to the cache */
-  if (idecode_cache <= 1) {
+  else {
+    /* alernativly, since no cache, #define the fields to be
+       extractions from the instruction variable */
     extraction_rules *rule;
     lf_printf(file, "\n");
     for (rule = cachable_values;
@@ -2216,65 +2198,120 @@ lf_print_c_extractions(lf *file,
 static void
 lf_print_idecode_illegal(lf *file)
 {
-  switch (idecode_cache) {
-  case 0:
-    lf_printf(file, "return semantic_illegal(%s);\n", insn_actual);
-    break;
-  case 1:
-    lf_printf(file, "return semantic_illegal;\n");
-    break;
-  default:
+  if (idecode_cache)
     lf_printf(file, "return idecode_illegal(%s);\n", cache_idecode_actual);
-  }
+  else
+    lf_printf(file, "return semantic_illegal(%s);\n", insn_actual);
 }
 
+
+static void
+lf_print_idecode_floating_point_unavailable(lf *file)
+{
+  if (idecode_cache)
+    lf_printf(file, "return idecode_floating_point_unavailable(%s);\n",
+	      cache_idecode_actual);
+  else
+    lf_printf(file, "return semantic_floating_point_unavailable(%s);\n",
+	      insn_actual);
+}
+
+
+/* Output code to do any final checks on the decoded instruction.
+   This includes things like verifying any on decoded fields have the
+   correct value and checking that (for floating point) floating point
+   hardware isn't disabled */
 
 static void
 lf_print_c_validate(lf *file,
 		    insn *instruction,
 		    opcode_field *opcodes)
 {
-  unsigned check_mask = 0;
-  unsigned check_val = 0;
-  insn_field *field;
-  opcode_field *opcode;
+  /* Validate: unchecked instruction fields
 
-  for (field = instruction->fields->first;
-       field->first < insn_size;
-       field = field->next) {
+     If any constant fields in the instruction were not checked by the
+     idecode tables, output code to check that they have the correct
+     value here */
+  { 
+    unsigned check_mask = 0;
+    unsigned check_val = 0;
+    insn_field *field;
+    opcode_field *opcode;
 
-    check_mask <<= field->width;
-    check_val <<= field->width;
+    /* form check_mask/check_val containing what needs to be checked
+       in the instruction */
+    for (field = instruction->fields->first;
+	 field->first < insn_size;
+	 field = field->next) {
 
-    /* is it a constant that could need validating? */
-    if (!field->is_int && !field->is_slash)
-      continue;
+      check_mask <<= field->width;
+      check_val <<= field->width;
 
-    /* has it been checked by a table? */
-    for (opcode = opcodes; opcode != NULL; opcode = opcode->parent) {
-      if (field->first >= opcode->first
-	  && field->last <= opcode->last)
-	break;
+      /* is it a constant that could need validating? */
+      if (!field->is_int && !field->is_slash)
+	continue;
+
+      /* has it been checked by a table? */
+      for (opcode = opcodes; opcode != NULL; opcode = opcode->parent) {
+	if (field->first >= opcode->first
+	    && field->last <= opcode->last)
+	  break;
+      }
+      if (opcode != NULL)
+	continue;
+
+      check_mask |= (1 << field->width)-1;
+      check_val |= field->val_int;
     }
-    if (opcode != NULL)
-      continue;
 
-    check_mask |= (1 << field->width)-1;
-    check_val |= field->val_int;
+    /* if any bits not checked by opcode tables, output code to check them */
+    if (check_mask) {
+      lf_printf(file, "\n");
+      lf_printf(file, "/* validate: %s */\n",
+		instruction->file_entry->fields[insn_format]);
+      lf_printf(file, "if ((instruction & 0x%x) != 0x%x)\n",
+		check_mask, check_val);
+      lf_indent(file, +2);
+      lf_print_idecode_illegal(file);
+      lf_indent(file, -2);
+    }
   }
 
-  /* if any bits not checked by opcode tables, output code to check them */
-  if (check_mask) {
-    lf_printf(file, "\n");
-    lf_printf(file, "/* validate: %s */\n",
-	      instruction->file_entry->fields[insn_format]);
-    lf_printf(file, "if ((instruction & 0x%x) != 0x%x)\n",
-	      check_mask, check_val);
-    lf_indent(file, +2);
-    lf_print_idecode_illegal(file);
-    lf_indent(file, -2);
+  /* Validate floating point hardware
+
+     If the simulator is being built with out floating point hardware
+     (different to it being disabled in the MSR) then floating point
+     instructions are invalid */
+  {
+    if (it_is("f", instruction->file_entry->fields[insn_flags])) {
+      lf_printf(file, "\n");
+      lf_printf(file, "/* Validate: FP hardware exists */\n");
+      lf_printf(file, "if (CURRENT_FLOATING_POINT != HARD_FLOATING_POINT)\n");
+      lf_indent(file, +2);
+      lf_print_idecode_illegal(file);
+      lf_indent(file, -2);
+    }
   }
 
+  /* Validate: Floating Point available
+
+     If floating point is not available, we enter a floating point
+     unavailable interrupt into the cache instead of the instruction
+     proper.
+
+     The PowerPC spec requires a CSI after MSR[FP] is changed and when
+     ever a CSI occures we flush the instruction cache. */
+
+  {
+    if (it_is("f", instruction->file_entry->fields[insn_flags])) {
+      lf_printf(file, "\n");
+      lf_printf(file, "/* Validate: FP available according to MSR[FP] */\n");
+      lf_printf(file, "if (!IS_FP_AVAILABLE(processor))\n");
+      lf_indent(file, +2);
+      lf_print_idecode_floating_point_unavailable(file);
+      lf_indent(file, -2);
+    }
+  }
 }
 
 
@@ -2343,31 +2380,14 @@ lf_print_c_semantic(lf *file,
   lf_print_c_extractions(file,
 			 instruction,
 			 expanded_bits,
-			 idecode_cache > 1/*get_value_from_cache*/,
+			 idecode_cache/*get_value_from_cache*/,
 			 0/*put_value_in_cache*/);
 
   lf_print_ptrace(file);
 
-  /* generate code to check previously unchecked fields */
-  if (idecode_cache < 2)
+  /* validate the instruction, if a cache this has already been done */
+  if (!idecode_cache)
     lf_print_c_validate(file, instruction, opcodes);
-
-  /* if floating-point generate checks that a. floating point hardware
-     exists and b. floating point is enabled */
-  if (it_is("f", instruction->file_entry->fields[insn_flags])) {
-    lf_printf(file, "\n");
-    lf_printf(file, "/* verify: FP hardware exists */\n");
-    lf_printf(file, "if (CURRENT_FLOATING_POINT != HARD_FLOATING_POINT)\n");
-    lf_indent(file, +2);
-    lf_print_idecode_illegal(file);
-    lf_indent(file, -2);
-    lf_printf(file, "\n");
-    lf_printf(file, "/* verify: FP is enabled */\n");
-    lf_printf(file, "if (!IS_FP_AVAILABLE(processor))\n");
-    lf_indent(file, +2);
-    lf_printf(file, "floating_point_unavailable_interrupt(processor, cia);\n");
-    lf_indent(file, -2);
-  }
 
   /* generate the code (or at least something */
   if (instruction->file_entry->annex != NULL) {
@@ -2418,7 +2438,7 @@ lf_print_c_semantic_function_header(lf *file,
 			 expanded_bits,
 			 function_name_prefix_semantics);
   lf_printf(file, "\n(%s)\n",
-	    idecode_cache > 1 ? cache_insn_formal : insn_formal);
+	    (idecode_cache ? cache_insn_formal : insn_formal));
 }
 
 static void
@@ -2558,14 +2578,14 @@ gen_idecode_h(insn_table *table, lf *file)
   lf_printf(file, "#include \"icache.h\"\n");
   lf_printf(file, "\n");
   lf_printf(file, "typedef unsigned_word idecode_semantic\n(%s);\n",
-	    idecode_cache < 2 ? insn_formal : cache_insn_formal);
+	    (idecode_cache ? cache_insn_formal : insn_formal));
   lf_printf(file, "\n");
-  if (!idecode_cache)
+  if (idecode_cache)
+    lf_printf(file, "INLINE_IDECODE idecode_semantic *idecode\n(%s);\n",
+	      cache_idecode_formal);
+  else
     lf_printf(file, "INLINE_IDECODE unsigned_word idecode_issue\n(%s);\n",
 	      insn_formal);
-  else if (idecode_cache)
-    lf_printf(file, "INLINE_IDECODE idecode_semantic *idecode\n(%s);\n",
-	      idecode_cache == 1 ? insn_formal : cache_idecode_formal);
   lf_printf(file, "\n");
   lf_printf(file, "#endif /* _IDECODE_H_ */\n");
 }
@@ -2607,9 +2627,9 @@ idecode_table_leaf(insn_table *entry,
       lf_print_function_name(file,
 			     entry->insns->file_entry->fields[insn_name],
 			     entry->expanded_bits,
-			     (idecode_cache < 2
-			      ? function_name_prefix_semantics
-			      : function_name_prefix_idecode));
+			     (idecode_cache
+			      ? function_name_prefix_idecode
+			      : function_name_prefix_semantics));
       lf_printf(file, " },\n");
     }
     else if (entry->opcode_rule->use_switch) {
@@ -2659,7 +2679,7 @@ idecode_table_padding(insn_table *table,
 
   if (!table->opcode_rule->use_switch) {
     lf_printf(file, "  /*%d*/ { 0, 0, %s_illegal },\n",
-	      opcode_nr, idecode_cache > 1 ? "idecode" : "semantic");
+	      opcode_nr, (idecode_cache ? "idecode" : "semantic"));
   }
 }
 
@@ -2705,15 +2725,13 @@ idecode_switch_leaf(insn_table *entry,
       lf_print_function_name(file,
 			     entry->insns->file_entry->fields[insn_name],
 			     entry->expanded_bits,
-			     (idecode_cache < 2
-			      ? function_name_prefix_semantics
-			      : function_name_prefix_idecode));
-      if (!idecode_cache)
-	lf_printf(file, "(%s);\n", insn_actual);
-      else if (idecode_cache == 1)
-	lf_printf(file, ";\n");
-      else
+			     (idecode_cache
+			      ? function_name_prefix_idecode
+			      : function_name_prefix_semantics));
+      if (idecode_cache)
 	lf_printf(file, "(%s);\n", cache_idecode_actual);
+      else
+	lf_printf(file, "(%s);\n", insn_actual);
     }
     else if (entry->opcode_rule->use_switch) {
       /* switch calling switch */
@@ -2801,7 +2819,7 @@ idecode_expand_if_switch(insn_table *table,
     lf_printf(file, "STATIC_INLINE_IDECODE void\n");
     lf_print_table_name(file, table);
     lf_printf(file, "\n(%s)\n",
-	      idecode_cache ? cache_idecode_formal : insn_formal);
+	      (idecode_cache ? cache_idecode_formal : insn_formal));
     lf_printf(file, "{\n");
     {
       lf_indent(file, +2);
@@ -2862,6 +2880,39 @@ idecode_crack_insn(insn_table *entry,
 			      NULL);
 }
 
+static void
+idecode_c_internal_function(insn_table *table,
+			    void *data,
+			    file_table_entry *function)
+{
+  lf *file = (lf*)data;
+  ASSERT(idecode_cache != 0);
+  if (it_is("internal", function->fields[insn_flags])) {
+    lf_printf(file, "\n");
+    lf_printf(file, "STATIC_INLINE_IDECODE idecode_semantic *\n");
+    lf_print_function_name(file,
+			   function->fields[insn_name],
+			   NULL,
+			   function_name_prefix_idecode);
+    lf_printf(file, "\n(%s)\n", cache_idecode_formal);
+    lf_printf(file, "{\n");
+    lf_indent(file, +2);
+    lf_printf(file, "/* semantic routine */\n");
+    lf_print_c_line_nr(file, function);
+    lf_printf(file, "return ");
+    lf_print_function_name(file,
+			   function->fields[insn_name],
+			   NULL,
+			   function_name_prefix_semantics);
+    lf_printf(file, ";\n");
+
+    lf_print_file_line_nr(file);
+    lf_indent(file, -2);
+    lf_printf(file, "}\n");
+  }
+}
+
+
 /****************************************************************/
 
 static void
@@ -2886,7 +2937,7 @@ gen_idecode_c(insn_table *table, lf *file)
   lf_printf(file, "\n");
   lf_printf(file, "\n");
   lf_printf(file, "typedef idecode_semantic *idecode_crack\n(%s);\n",
-	    idecode_cache > 1 ? cache_idecode_formal : insn_formal);
+	    (idecode_cache ? cache_idecode_formal : insn_formal));
   lf_printf(file, "\n");
   lf_printf(file, "typedef struct _idecode_table_entry {\n");
   lf_printf(file, "  unsigned shift;\n");
@@ -2896,8 +2947,16 @@ gen_idecode_c(insn_table *table, lf *file)
   lf_printf(file, "\n");
   lf_printf(file, "\n");
 
+  /* output `internal' invalid/floating-point unavailable functions
+     where needed */
+  if (idecode_cache) {
+    insn_table_traverse_function(table,
+				 file,
+				 idecode_c_internal_function);
+  }
+
   /* output cracking functions where needed */
-  if (idecode_cache > 1) {
+  if (idecode_cache) {
     if (idecode_expand_semantics)
       insn_table_traverse_tree(table,
 			       file,
@@ -2935,12 +2994,12 @@ gen_idecode_c(insn_table *table, lf *file)
 
   /* output the main idecode routine */
   lf_printf(file, "\n");
-  if (!idecode_cache)
+  if (idecode_cache)
+    lf_printf(file, "INLINE_IDECODE idecode_semantic *\nidecode\n(%s)\n",
+	      cache_idecode_formal);
+  else
     lf_printf(file, "INLINE_IDECODE unsigned_word\nidecode_issue\n(%s)\n",
 	      insn_formal);
-  else if (idecode_cache)
-    lf_printf(file, "INLINE_IDECODE idecode_semantic *\nidecode\n(%s)\n",
-	      idecode_cache == 1 ? insn_formal : cache_idecode_formal);
   lf_printf(file, "{\n");
   lf_indent(file, +2);
   if (!idecode_cache)
