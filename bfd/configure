@@ -425,6 +425,8 @@ if test -n "$enableval"; then
 esac
 fi
 
+
+
 ac_aux_dir=
 for ac_dir in `cd $srcdir/..;pwd` $srcdir/`cd $srcdir/..;pwd`; do
   if test -f $ac_dir/install-sh; then
@@ -556,8 +558,6 @@ target64=false
 
 # host stuff:
 
-HDEFINES=
-
 # Permit host specific settings.
 . ${srcdir}/configure.host
 
@@ -672,7 +672,12 @@ test -z "$INSTALL_PROGRAM" && INSTALL_PROGRAM='${INSTALL}'
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 
-# Put a plausible default for CC_FOR_BUILD in Makefile.
+HOST_64BIT_LONG=0
+if test "x${HOST_64BIT_TYPE}" = "xlong"; then
+  HOST_64BIT_LONG=1
+fi
+
+
 # If we cannot run a trivial program, we must be cross compiling.
 echo $ac_n "checking whether cross-compiling""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_c_cross'+set}'`\" = set"; then
@@ -682,7 +687,7 @@ else
   ac_cv_c_cross=yes
 else
 cat > conftest.$ac_ext <<EOF
-#line 686 "configure"
+#line 691 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
@@ -698,6 +703,7 @@ fi
 cross_compiling=$ac_cv_c_cross
 echo "$ac_t""$ac_cv_c_cross" 1>&6
 
+# Put a plausible default for CC_FOR_BUILD in Makefile.
 if test "x$cross_compiling" = "xno"; then
   CC_FOR_BUILD='$(CC)'
 else
@@ -705,15 +711,269 @@ else
 fi
 
 
-# Set up to make a link between the host's include file and "sysdep.h".
-files=hosts/${my_host}.h
+echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
+# On Suns, sometimes $CPP names a directory.
+if test -n "$CPP" && test -d "$CPP"; then
+  CPP=
+fi
+if test -z "$CPP"; then
+if eval "test \"`echo '$''{'ac_cv_prog_CPP'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+    # This must be in double quotes, not single quotes, because CPP may get
+  # substituted into the Makefile and "${CC-cc}" will confuse make.
+  CPP="${CC-cc} -E"
+  # On the NeXT, cc -E runs the code through the compiler's parser,
+  # not just through cpp.
+  cat > conftest.$ac_ext <<EOF
+#line 730 "configure"
+#include "confdefs.h"
+#include <assert.h>
+Syntax Error
+EOF
+eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+ac_err=`grep -v '^ *+' conftest.out`
+if test -z "$ac_err"; then
+  :
+else
+  echo "$ac_err" >&5
+  rm -rf conftest*
+  CPP="${CC-cc} -E -traditional-cpp"
+  cat > conftest.$ac_ext <<EOF
+#line 744 "configure"
+#include "confdefs.h"
+#include <assert.h>
+Syntax Error
+EOF
+eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+ac_err=`grep -v '^ *+' conftest.out`
+if test -z "$ac_err"; then
+  :
+else
+  echo "$ac_err" >&5
+  rm -rf conftest*
+  CPP=/lib/cpp
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+  ac_cv_prog_CPP="$CPP"
+fi
+  CPP="$ac_cv_prog_CPP"
+else
+  ac_cv_prog_CPP="$CPP"
+fi
+echo "$ac_t""$CPP" 1>&6
 
-if test ! -f ${srcdir}/${files} ; then
-	files=../bfd/hosts/std-host.h
-	echo "configure: warning: BFD has no specific support for host ${host} -- using std-host" 1>&2
+for ac_hdr in stddef.h string.h strings.h stdlib.h time.h unistd.h
+do
+ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
+echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 777 "configure"
+#include "confdefs.h"
+#include <$ac_hdr>
+EOF
+eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+ac_err=`grep -v '^ *+' conftest.out`
+if test -z "$ac_err"; then
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=yes"
+else
+  echo "$ac_err" >&5
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=no"
+fi
+rm -f conftest*
+fi
+if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_hdr=HAVE_`echo $ac_hdr | tr '[a-z]./\055' '[A-Z]___'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_hdr 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+
+for ac_hdr in fcntl.h sys/file.h sys/procfs.h
+do
+ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
+echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 813 "configure"
+#include "confdefs.h"
+#include <$ac_hdr>
+EOF
+eval "$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+ac_err=`grep -v '^ *+' conftest.out`
+if test -z "$ac_err"; then
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=yes"
+else
+  echo "$ac_err" >&5
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=no"
+fi
+rm -f conftest*
+fi
+if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_hdr=HAVE_`echo $ac_hdr | tr '[a-z]./\055' '[A-Z]___'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_hdr 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+
+for ac_func in fcntl
+do
+echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 848 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+char $ac_func(); 
+
+int main() { return 0; }
+int t() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+$ac_func();
+#endif
+
+; return 0; }
+EOF
+if eval $ac_link; then
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=yes"
+else
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=no"
+fi
+rm -f conftest*
+
+fi
+if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_func=HAVE_`echo $ac_func | tr '[a-z]' '[A-Z]'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_func 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+
+
+case "${host}" in
+i[345]86-*-msdos* | i[345]86-*-go32* | i[345]86-*-win32)
+  cat >> confdefs.h <<\EOF
+#define USE_BINARY_FOPEN 1
+EOF
+ ;;
+esac
+
+echo $ac_n "checking whether malloc must be declared""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'bfd_cv_decl_needed_malloc'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 906 "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+int main() { return 0; }
+int t() {
+char *(*pfn) = (char *(*)) malloc
+; return 0; }
+EOF
+if eval $ac_compile; then
+  rm -rf conftest*
+  bfd_cv_decl_needed_malloc=no
+else
+  rm -rf conftest*
+  bfd_cv_decl_needed_malloc=yes
+fi
+rm -f conftest*
+
 fi
 
+echo "$ac_t""$bfd_cv_decl_needed_malloc" 1>&6
+if test $bfd_cv_decl_needed_malloc = yes; then
+  cat >> confdefs.h <<\EOF
+#define NEED_DECLARATION_MALLOC 1
+EOF
 
+fi
+
+echo $ac_n "checking whether free must be declared""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'bfd_cv_decl_needed_free'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 945 "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+int main() { return 0; }
+int t() {
+int (*pfn) = (int (*)) free
+; return 0; }
+EOF
+if eval $ac_compile; then
+  rm -rf conftest*
+  bfd_cv_decl_needed_free=no
+else
+  rm -rf conftest*
+  bfd_cv_decl_needed_free=yes
+fi
+rm -f conftest*
+
+fi
+
+echo "$ac_t""$bfd_cv_decl_needed_free" 1>&6
+if test $bfd_cv_decl_needed_free = yes; then
+  cat >> confdefs.h <<\EOF
+#define NEED_DECLARATION_FREE 1
+EOF
+
+fi
 
 # If we are configured native, pick a core file support file.
 COREFILE=
@@ -726,37 +986,142 @@ if test "${target}" = "${host}"; then
   hppa*-*-hiux*)	COREFILE=hpux-core.o ;;
   hppa*-*-bsd*)		COREFILE="hpux-core.o hppabsd-core.o"
 			COREFLAG="-DHPUX_CORE -DHPPABSD_CORE" ;;
-  i[345]86-sequent-bsd*) COREFILE=trad-core.o ;;
+  i[345]86-sequent-bsd*)
+	COREFILE=trad-core.o;
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/symmetry.h"
+EOF
+
+	;;
   i[345]86-sequent-sysv4*) ;;
-  i[345]86-sequent-sysv*) COREFILE=trad-core.o ;;
-  i[345]86-*-bsd*)	COREFILE=trad-core.o ;;
-  i[345]86-*-freebsd*)	COREFILE=trad-core.o ;;
-  i[345]86-*-netbsd*)	COREFILE=trad-core.o ;;
-  i[345]86-esix-sysv3*)	COREFILE=trad-core.o ;;
-  i[345]86-*-sco*)	COREFILE=trad-core.o ;;
-  i[345]86-*-mach3*)	COREFILE=trad-core.o ;;
-  i[345]86-*-linux*)	COREFILE=trad-core.o ;;
+  i[345]86-sequent-sysv*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/symmetry.h"
+EOF
+
+	;;
+  i[345]86-*-bsd* | i[345]86-*-freebsd* | i[345]86-*-netbsd*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/i386bsd.h"
+EOF
+
+	;;
+  i[345]86-esix-sysv3*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/esix.h"
+EOF
+
+	;;
+  i[345]86-*-sco* | i[345]86-*-isc*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/i386sco.h"
+EOF
+
+	;;
+  i[345]86-*-mach3*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/i386mach3.h"
+EOF
+
+	;;
+  i[345]86-*-linux*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/i386linux.h"
+EOF
+
+	;;
   i[345]86-*-isc*)	COREFILE=trad-core.o ;;
   i[345]86-*-aix*)	COREFILE=aix386-core.o ;;
-  mips-dec-bsd*)	COREFILE=trad-core.o ;;
-  mips-dec-mach3*)	COREFILE=trad-core.o ;;
-  mips-dec-*)		COREFILE=trad-core.o ;;
+  mips-dec-bsd*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/mipsbsd.h"
+EOF
+
+	;;
+  mips-dec-mach3*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/mipsmach3.h"
+EOF
+
+	;;
+  mips-dec-*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/decstation.h"
+EOF
+
+	;;
   mips-sgi-irix4*)	COREFILE=irix-core.o ;;
   mips-sgi-irix5*)	COREFILE=irix-core.o ;;
-  mips-*-mach3*)	COREFILE=trad-core.o ;;
+  mips-*-mach3*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/mipsmach3.h"
+EOF
+
+	;;
   mips-*-sysv4*)	;;
-  mips-*-sysv*)		COREFILE=trad-core.o ;;
-  mips-*-riscos*)	COREFILE=trad-core.o ;;
-  mips-sony-bsd*)	COREFILE=trad-core.o ;;
-  m68*-bull*-sysv*)	COREFILE=trad-core.o ;;
+  mips-*-sysv* | mips-*-riscos*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/riscos.h"
+EOF
+
+	;;
+  mips-sony-bsd*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/news-mips".h
+EOF
+
+	;;
+  m68*-bull*-sysv*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/dpx2.h"
+EOF
+
+	;;
   m68*-hp-hpux*)	COREFILE=hpux-core.o ;;
-  m68*-hp-bsd*)		COREFILE=trad-core.o ;;
+  m68*-hp-bsd*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/hp300bsd.h"
+EOF
+
+	;;
   m68*-motorola-sysv*)	COREFILE=ptrace-core.o ;;
-  m68*-sony-*)		COREFILE=trad-core.o ;;
+  m68*-sony-*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/news.h"
+EOF
+
+	;;
   m88*-*-sysv4*)	;;
   m88*-motorola-sysv*)	COREFILE=trad-core.o ;;
-  m88*-*-mach3*)	COREFILE=trad-core.o ;;
-  ns32k-pc532-mach)	COREFILE=trad-core.o ;;
+  m88*-*-mach3*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/m88kmach3.h"
+EOF
+
+	;;
+  ns32k-pc532-mach)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/pc532mach.h"
+EOF
+
+	;;
   rs6000-*-lynx*)	COREFILE=lynx-core.o ;;
   rs6000-*-aix4*)	COREFILE=rs6000-core.o
 			COREFLAG=-DALTERNATE_AIX_CORE_FORMAT ;;
@@ -764,10 +1129,34 @@ if test "${target}" = "${host}"; then
   powerpc-*-aix4*)	COREFILE=rs6000-core.o
 			COREFLAG=-DALTERNATE_AIX_CORE_FORMAT ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.o ;;
-  tahoe-*-*)		COREFILE=trad-core.o ;;
-  vax-*-ultrix2*)	COREFILE=trad-core.o ;;
-  vax-*-ultrix*)	COREFILE=trad-core.o ;;
-  vax-*-*)		COREFILE=trad-core.o ;;
+  tahoe-*-*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/tahoe.h"
+EOF
+
+	;;
+  vax-*-ultrix2*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/vaxult2.h"
+EOF
+
+	;;
+  vax-*-ultrix*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/vaxult2.h"
+EOF
+
+	;;
+  vax-*-*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/vaxbsd.h"
+EOF
+
+	;;
   esac
 
   case "$COREFILE" in
@@ -779,7 +1168,7 @@ if test "${target}" = "${host}"; then
   osf-core.o)		COREFLAG=-DOSF_CORE ;;
   ptrace-core.o)	COREFLAG=-DPTRACE_CORE ;;
   rs6000-core.o)	COREFLAG="$COREFLAG -DAIX_CORE" ;;
-  trad-core.o)		COREFLAG=-DTRAD_CORE ;;
+  trad-core.o)		COREFLAG="$COREFLAG -DTRAD_CORE" ;;
   esac
 fi
 
@@ -1073,19 +1462,7 @@ fi
 
 trap 'rm -f $CONFIG_STATUS conftest*; exit 1' 1 2 15
 
-# Transform confdefs.h into DEFS.
-# Protect against shell expansion while executing Makefile rules.
-# Protect against Makefile macro expansion.
-cat > conftest.defs <<\EOF
-s%#define \([A-Za-z_][A-Za-z0-9_]*\) \(.*\)%-D\1=\2%g
-s%[ 	`~#$^&*(){}\\|;'"<>?]%\\&%g
-s%\[%\\&%g
-s%\]%\\&%g
-s%\$%$$%g
-EOF
-DEFS=`sed -f conftest.defs confdefs.h | tr '\012' ' '`
-rm -f conftest.defs
-
+DEFS=-DHAVE_CONFIG_H
 
 # Without the "./", some shells look in PATH for config.status.
 : ${CONFIG_STATUS=./config.status}
@@ -1123,7 +1500,7 @@ done
 ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
-trap 'rm -fr `echo "Makefile doc/Makefile" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "Makefile doc/Makefile config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 
 # Protect against being on the right side of a sed subst in config.status. 
 sed 's/%@/@@/; s/@%/@@/; s/%g$/@g/; /@g$/s/[\\\\&%]/\\\\&/g; 
@@ -1160,7 +1537,9 @@ s%@AR@%$AR%g
 s%@RANLIB@%$RANLIB%g
 s%@INSTALL_PROGRAM@%$INSTALL_PROGRAM%g
 s%@INSTALL_DATA@%$INSTALL_DATA%g
+s%@HOST_64BIT_LONG@%$HOST_64BIT_LONG%g
 s%@CC_FOR_BUILD@%$CC_FOR_BUILD%g
+s%@CPP@%$CPP%g
 s%@COREFILE@%$COREFILE%g
 s%@COREFLAG@%$COREFLAG%g
 s%@TDEFINES@%$TDEFINES%g
@@ -1230,51 +1609,102 @@ s%@INSTALL@%$INSTALL%g
 fi; done
 rm -f conftest.subs
 
-EOF
+# These sed commands are passed to sed as "A NAME B NAME C VALUE D", where
+# NAME is the cpp macro being defined and VALUE is the value it is being given.
+#
+# ac_d sets the value in "#define NAME VALUE" lines.
+ac_dA='s%^\([ 	]*\)#\([ 	]*define[ 	][ 	]*\)'
+ac_dB='\([ 	][ 	]*\)[^ 	]*%\1#\2'
+ac_dC='\3'
+ac_dD='%g'
+# ac_u turns "#undef NAME" with trailing blanks into "#define NAME VALUE".
+ac_uA='s%^\([ 	]*\)#\([ 	]*\)undef\([ 	][ 	]*\)'
+ac_uB='\([ 	]\)%\1#\2define\3'
+ac_uC=' '
+ac_uD='\4%g'
+# ac_e turns "#undef NAME" without trailing blanks into "#define NAME VALUE".
+ac_eA='s%^\([ 	]*\)#\([ 	]*\)undef\([ 	][ 	]*\)'
+ac_eB='$%\1#\2define\3'
+ac_eC=' '
+ac_eD='%g'
 
-cat >> $CONFIG_STATUS <<EOF
-ac_sources="$files"
-ac_dests="sysdep.h"
-EOF
-
-cat >> $CONFIG_STATUS <<\EOF
-srcdir=$ac_given_srcdir
-while test -n "$ac_sources"; do
-  set $ac_dests; ac_dest=$1; shift; ac_dests=$*
-  set $ac_sources; ac_source=$1; shift; ac_sources=$*
-
-  echo "linking $srcdir/$ac_source to $ac_dest"
-
-  if test ! -r $srcdir/$ac_source; then
-    { echo "configure: error: $srcdir/$ac_source: File not found" 1>&2; exit 1; }
-  fi
-  rm -f $ac_dest
-
-  # Make relative symlinks.
-  # Remove last slash and all that follows it.  Not all systems have dirname.
-  ac_dest_dir=`echo $ac_dest|sed 's%/[^/][^/]*$%%'`
-  if test "$ac_dest_dir" != "$ac_dest" && test "$ac_dest_dir" != .; then
-    # The dest file is in a subdirectory.
-    test ! -d "$ac_dest_dir" && mkdir "$ac_dest_dir"
-    ac_dest_dir_suffix="/`echo $ac_dest_dir|sed 's%^\./%%'`"
-    # A "../" for each directory in $ac_dest_dir_suffix.
-    ac_dots=`echo $ac_dest_dir_suffix|sed 's%/[^/]*%../%g'`
-  else
-    ac_dest_dir_suffix= ac_dots=
-  fi
-
-  case "$srcdir" in
-  [/$]*) ac_rel_source="$srcdir/$ac_source" ;;
-  *) ac_rel_source="$ac_dots$srcdir/$ac_source" ;;
+CONFIG_HEADERS=${CONFIG_HEADERS-"config.h"}
+for ac_file in .. $CONFIG_HEADERS; do if test "x$ac_file" != x..; then
+  # Support "outfile[:infile]", defaulting infile="outfile.in".
+  case "$ac_file" in
+  *:*) ac_file_in=`echo "$ac_file"|sed 's%.*:%%'`
+       ac_file=`echo "$ac_file"|sed 's%:.*%%'` ;;
+  *) ac_file_in="${ac_file}.in" ;;
   esac
 
-  # Make a symlink if possible; otherwise try a hard link.
-  if ln -s $ac_rel_source $ac_dest 2>/dev/null ||
-    ln $srcdir/$ac_source $ac_dest; then :
-  else
-    { echo "configure: error: can not link $ac_dest to $srcdir/$ac_source" 1>&2; exit 1; }
-  fi
+  echo creating $ac_file
+
+  rm -f conftest.frag conftest.in conftest.out
+  cp $ac_given_srcdir/$ac_file_in conftest.in
+
+EOF
+
+# Transform confdefs.h into a sed script conftest.vals that substitutes
+# the proper values into config.h.in to produce config.h.  And first:
+# Protect against being on the right side of a sed subst in config.status. 
+# Protect against being in an unquoted here document in config.status.
+rm -f conftest.vals
+cat > conftest.hdr <<\EOF
+s/[\\&%]/\\&/g
+s%[\\$`]%\\&%g
+s%#define \([A-Za-z_][A-Za-z0-9_]*\) \(.*\)%${ac_dA}\1${ac_dB}\1${ac_dC}\2${ac_dD}%gp
+s%ac_d%ac_u%gp
+s%ac_u%ac_e%gp
+EOF
+sed -n -f conftest.hdr confdefs.h > conftest.vals
+rm -f conftest.hdr
+
+# This sed command replaces #undef with comments.  This is necessary, for
+# example, in the case of _POSIX_SOURCE, which is predefined and required
+# on some systems where configure will not decide to define it.
+cat >> conftest.vals <<\EOF
+s%^[ 	]*#[ 	]*undef[ 	][ 	]*[a-zA-Z_][a-zA-Z_0-9]*%/* & */%
+EOF
+
+# Break up conftest.vals because some shells have a limit on
+# the size of here documents, and old seds have small limits too.
+# Maximum number of lines to put in a single here document.
+ac_max_here_lines=12
+
+rm -f conftest.tail
+while :
+do
+  ac_lines=`grep -c . conftest.vals`
+  # grep -c gives empty output for an empty file on some AIX systems.
+  if test -z "$ac_lines" || test "$ac_lines" -eq 0; then break; fi
+  # Write a limited-size here document to conftest.frag.
+  echo '  cat > conftest.frag <<CEOF' >> $CONFIG_STATUS
+  sed ${ac_max_here_lines}q conftest.vals >> $CONFIG_STATUS
+  echo 'CEOF
+  sed -f conftest.frag conftest.in > conftest.out
+  rm -f conftest.in
+  mv conftest.out conftest.in
+' >> $CONFIG_STATUS
+  sed 1,${ac_max_here_lines}d conftest.vals > conftest.tail
+  rm -f conftest.vals
+  mv conftest.tail conftest.vals
 done
+rm -f conftest.vals
+
+cat >> $CONFIG_STATUS <<\EOF
+  rm -f conftest.frag conftest.h
+  echo "/* $ac_file.  Generated automatically by configure.  */" > conftest.h
+  cat conftest.in >> conftest.h
+  rm -f conftest.in
+  if cmp -s $ac_file conftest.h 2>/dev/null; then
+    echo "$ac_file is unchanged"
+    rm -f conftest.h
+  else
+    rm -f $ac_file
+    mv conftest.h $ac_file
+  fi
+fi; done
+
 
 
 exit 0

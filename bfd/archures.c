@@ -1,5 +1,5 @@
 /* BFD library support routines for architectures.
-   Copyright (C) 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 
@@ -87,6 +87,8 @@ DESCRIPTION
 .
 .  bfd_arch_a29k,      {* AMD 29000 *}
 .  bfd_arch_sparc,     {* SPARC *}
+.#define bfd_mach_sparc		1
+.#define bfd_mach_sparc64	2
 .  bfd_arch_mips,      {* MIPS Rxxxx *}
 .  bfd_arch_i386,      {* Intel 386 *}
 .  bfd_arch_we32k,     {* AT&T WE32xxx *}
@@ -111,11 +113,16 @@ DESCRIPTION
 .  bfd_arch_alpha,     {* Dec Alpha *}
 .  bfd_arch_arm,       {* Advanced Risc Machines ARM *}
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
+.  bfd_arch_w65,       {* WDC 65816 *}
 . {* start-sanitize-rce *}
 .  bfd_arch_rce,       {* Motorola RCE *}
 . {* end-sanitize-rce *}
 . {* start-sanitize-arc *}
 .  bfd_arch_arc,       {* Argonaut RISC Core *}
+.#define bfd_mach_arc_base 0
+.#define bfd_mach_arc_host 1
+.#define bfd_mach_arc_graphics 2
+.#define bfd_mach_arc_audio 3
 . {* end-sanitize-arc *}
 .  bfd_arch_last
 .  };
@@ -126,6 +133,7 @@ DESCRIPTION
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
+#include <ctype.h>
 
 /*
 
@@ -246,6 +254,14 @@ bfd_arch_get_compatible (abfd, bbfd)
      CONST bfd *abfd;
      CONST bfd *bbfd;
 {
+  /* If either architecture is unknown, then all we can do is assume
+     the user knows what he's doing.  */
+  if (abfd->arch_info->arch == bfd_arch_unknown)
+  	return bbfd->arch_info;
+  if (bbfd->arch_info->arch == bfd_arch_unknown)
+  	return abfd->arch_info;
+
+  /* Otherwise architecture-specific code has to decide.  */
   return  abfd->arch_info->compatible(abfd->arch_info,bbfd->arch_info);
 }
 
@@ -452,6 +468,7 @@ extern void bfd_vax_arch PARAMS ((void));
 extern void bfd_we32k_arch PARAMS ((void));
 extern void bfd_z8k_arch PARAMS ((void));
 extern void bfd_ns32k_arch PARAMS ((void));
+extern void bfd_w65_arch PARAMS ((void));
 
 static void (*const archures_init_table[]) PARAMS ((void)) = 
 {
@@ -483,6 +500,7 @@ static void (*const archures_init_table[]) PARAMS ((void)) =
   bfd_we32k_arch,
   bfd_z8k_arch,
   bfd_ns32k_arch,
+  bfd_w65_arch,
 #endif
   0
   };
@@ -578,108 +596,112 @@ bfd_default_scan (info, string)
      CONST struct bfd_arch_info *info;
      CONST char *string;
 {
-    CONST  char *ptr_src;
-    CONST   char *ptr_tst;
-    unsigned long number;
-    enum bfd_architecture arch;
-    /* First test for an exact match */
-    if (strcmp(string, info->printable_name) == 0) return true;
+  CONST  char *ptr_src;
+  CONST   char *ptr_tst;
+  unsigned long number;
+  enum bfd_architecture arch;
+  /* First test for an exact match */
+  if (strcmp(string, info->printable_name) == 0) return true;
 
-    /* See how much of the supplied string matches with the
-       architecture, eg the string m68k:68020 would match the 68k entry
-       up to the :, then we get left with the machine number */
+  /* See how much of the supplied string matches with the
+     architecture, eg the string m68k:68020 would match the 68k entry
+     up to the :, then we get left with the machine number */
 
-    for (ptr_src = string,
-	 ptr_tst = info->arch_name; 
-	 *ptr_src && *ptr_tst;
-	 ptr_src++,
-	 ptr_tst++) 
+  for (ptr_src = string,
+       ptr_tst = info->arch_name; 
+       *ptr_src && *ptr_tst;
+       ptr_src++,
+       ptr_tst++) 
     {
-	if (*ptr_src != *ptr_tst) break;
+      if (*ptr_src != *ptr_tst) break;
     }
 
-    /* Chewed up as much of the architecture as will match, skip any
-       colons */
-    if (*ptr_src == ':') ptr_src++;
+  /* Chewed up as much of the architecture as will match, skip any
+     colons */
+  if (*ptr_src == ':') ptr_src++;
   
-    if (*ptr_src == 0) {
-	    /* nothing more, then only keep this one if it is the default
-	       machine for this architecture */
-	    return info->the_default;
-	}
-    number = 0;
-    while (isdigit(*ptr_src)) {
-	    number = number * 10 + *ptr_src  - '0';
-	    ptr_src++;
-	}
+  if (*ptr_src == 0) {
+    /* nothing more, then only keep this one if it is the default
+       machine for this architecture */
+    return info->the_default;
+  }
+  number = 0;
+  while (isdigit(*ptr_src)) {
+    number = number * 10 + *ptr_src  - '0';
+    ptr_src++;
+  }
 
-    switch (number) 
+  switch (number) 
     {
-     case 300:
+    case 65:
+      arch = bfd_arch_w65;
+      break;
+
+    case 300:
       arch = bfd_arch_h8300;
       break;
 
-     case 500:
+    case 500:
       arch = bfd_arch_h8500;
       break;
 
-      case 68010:
-      case 68020:
-      case 68030:
-      case 68040:
-      case 68332:
-      case 68050:        
-      case 68000: 
-	arch = bfd_arch_m68k; 
-	break;
-      case 386: 
-      case 80386:
-      case 486:
-      case 80486:
-	arch = bfd_arch_i386;
-	break;
-      case 29000: 
-	arch = bfd_arch_a29k;
-	break;
+    case 68010:
+    case 68020:
+    case 68030:
+    case 68040:
+    case 68332:
+    case 68050:        
+    case 68000: 
+      arch = bfd_arch_m68k; 
+      break;
+    case 386: 
+    case 80386:
+    case 486:
+    case 80486:
+      arch = bfd_arch_i386;
+      break;
+    case 29000: 
+      arch = bfd_arch_a29k;
+      break;
 
-       case 8000:
-	arch = bfd_arch_z8k;
-	break;
+    case 8000:
+      arch = bfd_arch_z8k;
+      break;
 
-      case 32000:
-	arch = bfd_arch_we32k;
-	break;
+    case 32000:
+      arch = bfd_arch_we32k;
+      break;
 
-      case 860:
-      case 80860: 
-	arch = bfd_arch_i860; 
-	break;
-      case 960:
-      case 80960:
-	arch = bfd_arch_i960;
-	break;
+    case 860:
+    case 80860: 
+      arch = bfd_arch_i860; 
+      break;
+    case 960:
+    case 80960:
+      arch = bfd_arch_i960;
+      break;
 
-      case 2000:
-      case 3000:
-      case 4000:
-      case 4400:
-        arch = bfd_arch_mips;
-        break;
+    case 2000:
+    case 3000:
+    case 4000:
+    case 4400:
+      arch = bfd_arch_mips;
+      break;
 
-      case 6000:
-	arch = bfd_arch_rs6000;
-	break;
+    case 6000:
+      arch = bfd_arch_rs6000;
+      break;
 
-      default:  
-	return false;
+    default:  
+      return false;
     }
-    if (arch != info->arch) 
-     return false;
+  if (arch != info->arch) 
+    return false;
 
-    if (number != info->mach)
-     return false;
+  if (number != info->mach)
+    return false;
 
-    return true;
+  return true;
 }
 
 

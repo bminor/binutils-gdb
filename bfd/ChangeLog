@@ -1,3 +1,49 @@
+Wed Sep  6 15:00:33 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Call AC_CONFIG_HEADER.  Substitute
+	HOST_64BIT_LONG.  Check that various header files exist.  Check
+	that fcntl exists.  Call BFD_BINARY_FOPEN.  Check whether malloc
+	and/or free need to be declared.  Don't make a link to sysdep.h.
+	Define TRAD_HEADER for various hosts.
+	* configure: Rebuild.
+	* configure.host: Don't set my_host.  Add definitions taken from
+	host header files for various entries.  Remove entries which now
+	do nothing.
+	* acconfig.h: New file.
+	* config.h.in: New file, built by autoheader.
+	* sysdep.h: New file.
+	* Makefile.in (do_distclean): Don't remove sysdep.h.
+	(RECONFIG): Remove.
+	(LOCAL_H_DEPS): New variable.
+	($(BFD_LIBS)): Use $(LOCAL_H_DEPS) rather than libbfd.h and
+	$(RECONFIG).
+	($(BFD_MACHINES), $(BFD_BACKENDS)): Likewise.
+	($(OPTIONAL_BACKENDS)): Likewise.
+	(stmp-bfd.h): Just substitute for BFD_HOST_64BIT_LONG, rather than
+	looking through sysdep.h.
+	* bfd-in.h (BFD_HOST_64BIT_LONG): Define; set by Makefile.
+	(BFD_HOST_64_BIT): Define based on BFD_HOST_64BIT_LONG.
+	(fprintf_vma, sprintf_vma): Likewise.
+	(int64_type, uint64_type): Don't define.
+	* bfd-in2.h: Rebuild.
+	* archures.c, bfd.c, srec.c: Include <ctype.h>.
+	* elfcore.h: Check HAVE_SYS_PROCFS_H rather than HAVE_PROCFS.
+	* lynx-core.c: Include stuff from old hosts/lynx.h.
+	* opncls.c (bfd_fdopenr): Check HAVE_FNCTL and defined (F_GETFL),
+	rather than NO_FCNTL.
+	* targets.c (bfd_target_list): Check HOST_HPPAHPUX and ! __STDC__
+	rather than NATIVE_HPPAHPUX_COMPILER.
+	* trad-core.c: Don't include <errno.h>.  Include TRAD_HEADER if it
+	is defined.
+	* hosts/*.h: Remove all header files which merely include,
+	declare, and define things.  Leave header files which define
+	information needed by trad-core.c.
+
+	* aclocal.m4 (BFD_BINARY_FOPEN): Define.
+	(BFD_CC_FOR_BUILD): Define.
+	* configure.in: Use BFD_CC_FOR_BUILD.
+	* configure: Rebuild.
+
 Tue Sep  5 19:35:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aclocal.m4: Don't try to grep ../Makefile if it doesn't exist.

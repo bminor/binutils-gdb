@@ -1,12 +1,24 @@
-# This file is a shell script that supplies the information necessary
-# to tailor a template configure script into the configure script
-# appropriate for this directory.  For more information, check any
-# existing configure script.
+# This file is a shell script that overrides some of the tools and
+# flags used on a host specific basis.
 
 # Since the "bfd/hosts" directory is shared by the bfd, opcodes, and
 # binutils directories (at least), the index to it is also shared.
 # This is that index.  Each configure.in file should source this file
 # in its per-host part.
+
+# This sets the following shell variables:
+#  CC			compiler to use (only if needed and not already set)
+#  CFLAGS		override CFLAGS (only if needed and not already set)
+#  LDFLAGS		override LDFLAGS (only if needed and not already set)
+#  AR			archiver to use (only if needed and not already set)
+#  RANLIB		ranlib to use (only if needed and not already set)
+#  HDEFINES		host specific compiler options
+#  host64		set to true if this is a 64 bit host
+#  HOST_64BIT_TYPE	host 64 bit type
+
+HDEFINES=
+host64=false
+HOST_64BIT_TYPE=
 
 case "${host}" in
 # WHEN ADDING ENTRIES TO THIS MATRIX:
@@ -17,95 +29,57 @@ case "${host}" in
 # Note that these entries cannot be fully alphabetical.  Don't try.
 # The order of matching is critical when multiple lines could match.
 
-alpha-*-*)		my_host=alphaosf ; host64=true ;;
-arm-*-riscix)		my_host=riscix ;;
-a29k-*-*)		my_host=ultra3 ;;
+alpha-*-*)		host64=true; HOST_64BIT_TYPE=long ;;
 
-hppa*-*-hpux*)		my_host=hppahpux ;;
-hppa*-*-hiux*)		my_host=hppahpux ;;
-hppa*-*-bsd*)		my_host=hppabsd ;;
-hppa*-*-osf*)		my_host=hppaosf ;;
+a29k-*-*)		CC=${CC-u3cc}; AR=${AR-u3ar} ;;
 
-i[345]86-sequent-bsd*)	my_host=symmetry ;;
-i[345]86-sequent-sysv4*) my_host=sysv4 ;;
-i[345]86-sequent-sysv*)	my_host=symmetry ;;
-i[345]86-*-bsd*)	my_host=i386bsd ;;
-i[345]86-*-freebsd*)	my_host=i386bsd ;;
-i[345]86-*-netbsd*)	my_host=i386bsd ;;
-i[345]86-ncr*-sysv4*)	my_host=ncr3000 ;;
-i[345]86-*-go32*)	my_host=go32 ;;
-i[345]86-*-pe*)		my_host=i386pe ;;
-i[345]86-esix-sysv3*)	my_host=esix ;;
-i[345]86-*-sysv4*)	my_host=i386v4 ;;
-i[345]86-*-sysv*)	my_host=i386v ;;
-i[345]86-*-solaris*)	my_host=solaris2 ;;
-i[345]86-*-sco*)	my_host=i386sco ;;
-i[345]86-*-mach3*)	my_host=i386mach3 ;;
-i[345]86-*-osf1mk*)	my_host=i386osf1mk ;;
-i[345]86-*-msdos*)	my_host=dose ;;
-i[345]86-*-linux*)	my_host=i386linux ;;
-i[345]86-*-lynxos*)	my_host=i386lynx ;;
-i[345]86-*-isc*)	my_host=i386sco ;;
-i[345]86-*-aix*)	my_host=i386aix ;;
+hppa*-*-hpux*)		HDEFINES=-DHOST_HPPAHPUX ;;
+hppa*-*-hiux*)		HDEFINES=-DHOST_HPPAHPUX ;;
+hppa*-*-bsd*)		HDEFINES=-DHOST_HPPABSD ;;
+hppa*-*-osf*)		HDEFINES=-DHOST_HPPAOSF ;;
 
-i860-*-*)		my_host=stratus ;;
+i[345]86-sequent-bsd*)	HDEFINES=-Dshared=genshared ;;
+i[345]86-sequent-sysv4*) ;;
+i[345]86-sequent-sysv*)	HDEFINES=-Dshared=genshared ;;
+i[345]86-ncr*-sysv4*)	CC=${CC-/usr/ccs/ATT/cc}
+			test -z "$CFLAGS" && CFLAGS=" "
+			;;
+i[345]86-*-go32*)	test -z "$CC" && CC="i386-go32-gcc -fno-omit-frame-pointer -O2 -Wl,-S"
+			AR=${AR-i386-go32-ar}
+			RANLIB=${RANLIB-i386-go32-ranlib}
+			;;
+i[345]86-*-win32)	test -z "$CC" && CC="i386-win32-gcc -O2"
+			AR=${AR-i386-win32-ar}
+			RANLIB=${RANLIB-i386-win32-ranlib}
+			;;
 
-mips-dec-bsd*)          my_host=mipsbsd ;;
-mips-dec-mach3*)        my_host=mipsmach3 ;;
-mips-dec-*)		my_host=decstation ;;
-mips-sgi-irix3*)	my_host=irix3 ;;
-mips-sgi-irix4*)	my_host=irix4 ;;
-mips-sgi-irix5*)	my_host=irix5 ;;
-mips-*-mach3*)		my_host=mipsmach3 ;;
-mips-*-sysv4*)		my_host=sysv4 ;;
-mips-*-sysv*)		my_host=riscos ;;
-mips-*-riscos*)		my_host=riscos ;;
-mips-sony-bsd*)		my_host=news-mips ;;
+mips-dec-*)		HDEFINES="-G 4"	;;
+mips-sgi-irix3*)	HDEFINES="-G 4"
+			test -z "$LDFLAGS" && LDFLAGS=-lmalloc
+			;;
+mips-sgi-irix4*)	HDEFINES="-G 4"
+			test -z "$LDFLAGS" && LDFLAGS=-lmalloc
+			;;
+mips-*-sysv4*)		;;
+mips-*-sysv*)		HDEFINES="-G 4" ;;
+mips-*-riscos*)		HDEFINES="-G 4" ;;
 
-m68*-apollo*-sysv*)	my_host=apollov68 ;;
-m68*-apollo*-bsd*)	my_host=apollo68 ;;
-m68*-atari-sysv4*)	my_host=m68kv4 ;;
-m68*-bull*-sysv*)	my_host=dpx2 ;;
-m68*-convergent-sysv*)	my_host=miniframe ;;
-m68*-cbm-amigados*)	my_host=amigados ;;
-m68*-cbm-sysv4*)	my_host=m68kv4 ;;
-m68*-hp-hpux*)		my_host=hp300 ;;
-m68*-hp-bsd*)		my_host=hp300bsd ;;
-m68*-*-lynxos*)		my_host=m68klynx ;;
-m68*-motorola-sysv*)	my_host=delta68 ;;
-m68*-sony-*)		my_host=news ;;
-m68*-sun-*)		my_host=sun3 ;;
+m68*-apollo*-sysv*)	# sef@cygnus.com says this is how to compile
+			# on an apollo in the SysV environment.
+			test -z "$CC" && CC="cc -A nansi -A cpu,3000 -A runtype,any -A systype,any -DSHORT_ENUM_BUG -DUSG -U__STDC__ -Dm68000=mc68000"
+			;;
+m68*-hp-hpux*)		HDEFINES=-DHOST_HP300HPUX ;;
 
-m88*-*-sysv4*)		my_host=delta88v4 ;;
-m88*-motorola-sysv*)	my_host=delta88 ;;
-m88*-harris-*)		my_host=harris ;;
-m88*-*-dgux*)		my_host=dgux ;;
-m88*-*-mach3*)		my_host=m88kmach3 ;;
+m88*-*-dgux*)		test -z "$CC" && CC="gcc -Wall -ansi -D__using_DGUX"
+			;;
 
-ns32k-pc532-mach)	my_host=pc532mach ;;
-ns32k-*-netbsd*)	my_host=ns32knbsd ;;
+romp-*-*)		# hc/pcc just can't cut it
+			CC=${CC-gcc}
+			;;
 
-romp-*-*)		my_host=rtbsd ;;
-
-rs6000-*-lynx*)		my_host=rs6000lynx ;;
-
-rs6000-*-*)		my_host=rs6000 ;;
-powerpc-*-aix*)		my_host=rs6000 ;;
-
-sparc-*-lynxos*)	my_host=sparclynx ;;
-sparc-*-netbsd*)	my_host=sparcnbsd;;
-sparc-*-sunos64*)	my_host=sparc-ll ;;
-sparc-*-sysv4*)		my_host=sysv4 ;;
-sparc-*-solaris2*)	my_host=solaris2 ;;
-sparc-*-sysv64*)	my_host=sysv4-ll ;;
-sparc-*-*)		my_host=sparc ;;
-
-tahoe-*-*)		my_host=tahoe ;;
-
-vax-*-ultrix2*)		my_host=vaxult2 ;;
-vax-*-ultrix*)		my_host=vaxult ;;
-vax-*-*)		my_host=vaxbsd ;;
-
-we32k-*-*)		my_host=we32k ;;
+rs6000-*-aix4)		HDEFINES=-DHOST_AIX ;;
+rs6000-*-*)		HDEFINES=-DHOST_AIX ;;
+powerpc-*-aix4*)	HDEFINES=-DHOST_AIX ;;
+powerpc-*-aix*)		HDEFINES=-DHOST_AIX ;;
 
 esac

@@ -47,6 +47,7 @@ Makefile.in
 PORTING
 TODO
 VERSION
+acconfig.h
 aclocal.m4
 aix386-core.c
 aout-adobe.c
@@ -95,6 +96,7 @@ coffgen.c
 cofflink.c
 coffswap.h
 config.bfd
+config.h.in
 configure
 configure.bat
 configure.host
@@ -227,6 +229,7 @@ srec.c
 stab-syms.c
 sunos.c
 syms.c
+sysdep.h
 targets.c
 tekhex.c
 trad-core.c

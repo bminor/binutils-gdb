@@ -45,17 +45,18 @@ docdir = doc
 
 SHELL = /bin/sh
 
-INSTALL = `cd $(srcdir)/..;pwd`/install.sh -c
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL)
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
 
-AR = ar
+AR = @AR@
 AR_FLAGS = rc
-CFLAGS = -g
+CC = @CC@
+CFLAGS = @CFLAGS@
 MAKEINFO = makeinfo
 RANLIB = @RANLIB@
 
-CC_FOR_BUILD = $(CC)
+CC_FOR_BUILD = @CC_FOR_BUILD@
 
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
@@ -233,10 +234,6 @@ TDEFAULTS = @tdefaults@
 
 all:
 
-#### host and target dependent Makefile fragments come in here.
-# @host_makefile_frag@
-###
-
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
@@ -253,7 +250,7 @@ FLAGS_TO_PASS = \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"BISON=$(BISON)"
 
-ALL_CFLAGS=$(CFLAGS) $(HDEFINES) @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES)
+ALL_CFLAGS=@HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) $(CFLAGS)
 .c.o:
 	$(CC) -c $(ALL_CFLAGS) $<
 
@@ -342,7 +339,6 @@ $(TARGETLIB): $(OFILES) ofiles
 # When compiling archures.c and targets.c, supply the default target
 # info from configure.
 
-
 targets.o: targets.c Makefile
 	$(CC) -c $(ALL_CFLAGS) $(TDEFAULTS) $<
 
@@ -379,7 +375,7 @@ do_clean: do_mostlyclean
 	rm -f libbfd.a TAGS bfd.h stmp-bfd.h ofiles \
 		elf32-target.h elf64-target.h
 do_distclean: do_clean
-	rm -f Makefile config.status sysdep.h config.cache
+	rm -f Makefile config.status config.cache
 
 # Should we remove $(srcdir)/libcoff.h $(srcdir)/libbfd.h $(srcdir)/bfd-in2.h?
 # make-stds.texi says it depends on whether they can be regenerated using
@@ -399,15 +395,12 @@ clobber realclean:
 	$(MAKE) subdir_do DO=realclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 	$(MAKE) do_realclean
 
-# Mark everything as depending on config.status, since the timestamp on
-# sysdep.h might actually move backwards if we reconfig and relink it
-# to a different hosts/h-xxx.h file.  This will force a recompile anyway.
 BFD_H_DEPS= $(INCDIR)/ansidecl.h $(INCDIR)/obstack.h
-RECONFIG = config.status
-$(BFD_LIBS):  libbfd.h $(BFD_H) $(RECONFIG) $(BFD_H_DEPS)
-$(BFD_MACHINES):  libbfd.h $(BFD_H) $(RECONFIG) $(BFD_H_DEPS)
-$(BFD_BACKENDS):  libbfd.h $(BFD_H) $(RECONFIG) $(BFD_H_DEPS)
-$(OPTIONAL_BACKENDS):  libbfd.h $(BFD_H) $(RECONFIG) $(BFD_H_DEPS)
+LOCAL_H_DEPS= libbfd.h sysdep.h config.h
+$(BFD_LIBS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
+$(BFD_MACHINES): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
+$(BFD_BACKENDS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
+$(OPTIONAL_BACKENDS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
 
 # Get around a Sun Make bug in SunOS 4.1.1 with VPATH
 cpu-i386.o:cpu-i386.c
@@ -483,7 +476,7 @@ install:
 Makefile: Makefile.in config.status
 	$(SHELL) config.status
 
-config.status: configure configure.host config.bfd @frags@
+config.status: configure configure.host config.bfd
 	$(SHELL) config.status --recheck
 
 # Have to get rid of .dep1 here so that "$?" later includes all of $(CFILES).
@@ -528,26 +521,14 @@ BFDIN_H= $(srcdir)/bfd-in2.h
 
 $(BFD_H): stmp-bfd.h ; @true
 
-# The file ../include/bfd.h is from earlier attempts to get this right.
-# If the file is still there, kill it.
-# The weird sh*t with grep is to avoid printing "exit 1 (ignored)" type
-# messages from make, and avoid various ways in which different versions
-# of make will screw up exit status checks.
-#	-grep...		-> make prints "exit 1" message
-#	grep ... ; exit 0	-> sun(?) make notices grep failure
-#	grep ... || exit 0	-> bsd4.4 make still notices
-#	if grep ...		-> seems okay so far
 stmp-bfd.h : $(srcdir)/bfd-in2.h Makefile
-	rm -f bfd.h-new 64 ../include/bfd.h
-	if grep BFD_HOST_64_BIT sysdep.h > 64 2>/dev/null; then true; \
-	else true; fi
+	rm -f bfd.h-new
 	sed -e 's/@WORDSIZE@/$(WORDSIZE)/' \
 	    -e "s/@VERSION@/`cat $(srcdir)/VERSION`/" \
-	    -e '/64-bit.*sysdep.h/ r 64' \
+	    -e 's/@BFD_HOST_64BIT_LONG@/@HOST_64BIT_LONG@/' \
 		< $(srcdir)/bfd-in2.h \
 		> bfd.h-new
 	$(srcdir)/../move-if-change bfd.h-new $(BFD_H)
-	rm -f 64
 	touch stmp-bfd.h
 
 # Could really use a "copy-if-change"...

@@ -267,7 +267,8 @@ The general target vector.
 .CAT(NAME,_bfd_merge_private_bfd_data),\
 .CAT(NAME,_bfd_copy_private_section_data),\
 .CAT(NAME,_bfd_copy_private_symbol_data),\
-.CAT(NAME,_bfd_set_private_flags)
+.CAT(NAME,_bfd_set_private_flags),\
+.CAT(NAME,_bfd_print_private_bfd_data)\
 .  {* Called to copy BFD general private data from one object file
 .     to another.  *}
 .  boolean	 (*_bfd_copy_private_bfd_data) PARAMS ((bfd *, bfd *));
@@ -284,6 +285,9 @@ The general target vector.
 .							   bfd *, asymbol *));
 .  {* Called to set private backend flags *}
 .  boolean	 (*_bfd_set_private_flags) PARAMS ((bfd *, flagword));
+.
+.  {* Called to print private BFD data *}
+.  boolean       (*_bfd_print_private_bfd_data) PARAMS ((bfd *, void  *));
 .
 .  {* Core file entry points.  *}
 .#define BFD_JUMP_TABLE_CORE(NAME)\
@@ -661,8 +665,10 @@ const bfd_target * const bfd_target_vector[] = {
 	&i386os9k_vec,
 	&i386pe_vec,
 	&i386pei_vec,
-	&armpe_vec,
-	&armpei_vec,
+	&armpe_little_vec,
+	&armpe_big_vec,
+	&armpei_little_vec,
+	&armpei_big_vec,
 	&icoff_big_vec,
 	&icoff_little_vec,
 	&ieee_vec,
@@ -829,7 +835,7 @@ const char **
 bfd_target_list ()
 {
   int vec_length= 0;
-#ifdef NATIVE_HPPAHPUX_COMPILER
+#if defined (HOST_HPPAHPUX) && ! defined (__STDC__)
   /* The native compiler on the HP9000/700 has a bug which causes it
      to loop endlessly when compiling this file.  This avoids it.  */
   volatile

@@ -1,5 +1,5 @@
 /* opncls.c -- open and close a BFD.
-   Copyright (C) 1990 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1990 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -199,7 +199,7 @@ bfd_fdopenr (filename, target, fd)
 
   bfd_set_error (bfd_error_system_call);
 
-#ifdef NO_FCNTL
+#if ! defined(HAVE_FCNTL) || ! defined(F_GETFL)
   fdflags = O_RDWR;			/* Assume full access */
 #else
   fdflags = fcntl (fd, F_GETFL, NULL);

@@ -52,8 +52,9 @@ extern "C" {
 #include "obstack.h"
 
 /* These two lines get substitutions done by commands in Makefile.in.  */
-#define BFD_VERSION   "@VERSION@"
+#define BFD_VERSION  "@VERSION@"
 #define BFD_ARCH_SIZE @WORDSIZE@
+#define BFD_HOST_64BIT_LONG @BFD_HOST_64BIT_LONG@
 
 #if BFD_ARCH_SIZE >= 64
 #define BFD64
@@ -66,9 +67,6 @@ extern "C" {
 #define INLINE
 #endif
 #endif
-
-/* 64-bit type definition (if any) from bfd's sysdep.h goes here */
-
 
 /* forward declaration */
 typedef struct _bfd bfd;
@@ -109,43 +107,42 @@ typedef enum bfd_boolean {bfd_fffalse, bfd_tttrue} boolean;
 typedef long int file_ptr;
 
 /* Support for different sizes of target format ints and addresses.
-   If the host implements 64-bit values, it defines BFD_HOST_64_BIT to
-   be the appropriate type.  Otherwise, this code will fall back on
-   gcc's "long long" type if gcc is being used.  BFD_HOST_64_BIT must
-   be defined in such a way as to be a valid type name by itself or
-   with "unsigned" prefixed.  It should be a signed type by itself.
+   If the type `long' is at least 64 bits, BFD_HOST_64BIT_LONG will be
+   set to 1 above.  Otherwise, if gcc is being used, this code will
+   use gcc's "long long" type.  Otherwise, the compilation will fail
+   if 64-bit targets are requested.  */
 
-   If neither is the case, then compilation will fail if 64-bit
-   targets are requested.  If you don't request any 64-bit targets,
-   you should be safe. */
+#ifdef BFD64
 
-#ifdef	BFD64
-
-#if defined (__GNUC__) && !defined (BFD_HOST_64_BIT)
+#ifndef BFD_HOST_64_BIT
+#if BFD_HOST_64BIT_LONG
+#define BFD_HOST_64_BIT long
+#else
+#ifdef __GNUC__
 #define BFD_HOST_64_BIT long long
-typedef BFD_HOST_64_BIT int64_type;
-typedef unsigned BFD_HOST_64_BIT uint64_type;
-#endif
-
-#if !defined (uint64_type) && defined (__GNUC__)
-#define uint64_type unsigned long long
-#define int64_type long long
-#endif
-#ifndef uint64_typeLOW
-#define uint64_typeLOW(x) ((unsigned long)(((x) & 0xffffffff)))
-#define uint64_typeHIGH(x) ((unsigned long)(((x) >> 32) & 0xffffffff))
-#endif
+#endif /* defined (__GNUC__) */
+#endif /* ! BFD_HOST_64BIT_LONG */
+#endif /* ! defined (BFD_HOST_64_BIT) */
 
 typedef unsigned BFD_HOST_64_BIT bfd_vma;
 typedef BFD_HOST_64_BIT bfd_signed_vma;
 typedef unsigned BFD_HOST_64_BIT bfd_size_type;
 typedef unsigned BFD_HOST_64_BIT symvalue;
+
 #ifndef fprintf_vma
+#if BFD_HOST_64BIT_LONG
+#define sprintf_vma(s,x) sprintf (s, "%016lx", x)
+#define fprintf_vma(f,x) fprintf (f, "%016lx", x)
+#else
+#define _bfd_int64_low(x) ((unsigned long) (((x) & 0xffffffff)))
+#define _bfd_int64_high(x) ((unsigned long) (((x) >> 32) & 0xffffffff))
 #define fprintf_vma(s,x) \
-		fprintf(s,"%08lx%08lx", uint64_typeHIGH(x), uint64_typeLOW(x))
+  fprintf ((s), "%08lx%08lx", _bfd_int64_high (x), _bfd_int64_low (x))
 #define sprintf_vma(s,x) \
-		sprintf(s,"%08lx%08lx", uint64_typeHIGH(x), uint64_typeLOW(x))
+  sprintf ((s), "%08lx%08lx", _bfd_int64_high (x), _bfd_int64_low (x))
 #endif
+#endif
+
 #else /* not BFD64  */
 
 /* Represent a target address.  Also used as a generic unsigned type
@@ -390,6 +387,11 @@ extern void bfd_hash_table_free PARAMS ((struct bfd_hash_table *));
 extern struct bfd_hash_entry *bfd_hash_lookup
   PARAMS ((struct bfd_hash_table *, const char *, boolean create,
 	   boolean copy));
+
+/* Replace an entry in a hash table.  */
+extern void bfd_hash_replace
+  PARAMS ((struct bfd_hash_table *, struct bfd_hash_entry *old,
+	   struct bfd_hash_entry *nw));
 
 /* Base method for creating a hash table entry.  */
 extern struct bfd_hash_entry *bfd_hash_newfunc

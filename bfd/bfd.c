@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 SECTION
@@ -152,6 +152,7 @@ CODE_FRAGMENT
 .      struct _oasys_data *oasys_obj_data;
 .      struct _oasys_ar_data *oasys_ar_data;
 .      struct coff_tdata *coff_obj_data;
+.      struct pe_tdata *pe_obj_data;
 .      struct ecoff_tdata *ecoff_obj_data;
 .      struct ieee_data_struct *ieee_data;
 .      struct ieee_ar_data_struct *ieee_ar_data;
@@ -200,6 +201,7 @@ CODE_FRAGMENT
 #undef obj_symbols
 #include "libelf.h"
 
+#include <ctype.h>
 
 /* provide storage for subsystem, stack and heap data which may have been
    passed in on the command line.  Ld puts this data into a bfd_link_info
@@ -207,9 +209,7 @@ CODE_FRAGMENT
    it to the following struct so that the data will be available in coffcode.h
    where it is needed.  The typedef's used are defined in bfd.h */
 
-enum bfd_link_subsystem NT_subsystem;
 
-bfd_link_stack_heap NT_stack_heap;
 
 /*
 SECTION
@@ -995,6 +995,9 @@ DESCRIPTION
 .#define bfd_get_dynamic_symtab_upper_bound(abfd) \
 .	BFD_SEND (abfd, _bfd_get_dynamic_symtab_upper_bound, (abfd))
 .
+.#define bfd_print_private_bfd_data(abfd, file)\
+.	BFD_SEND (abfd, _bfd_print_private_bfd_data, (abfd, file))
+.
 .#define bfd_canonicalize_dynamic_symtab(abfd, asymbols) \
 .	BFD_SEND (abfd, _bfd_canonicalize_dynamic_symtab, (abfd, asymbols))
 .
@@ -1039,3 +1042,6 @@ bfd_get_relocated_section_contents (abfd, link_info, link_order, data,
 
   return (*fn) (abfd, link_info, link_order, data, relocateable, symbols);
 }
+
+
+

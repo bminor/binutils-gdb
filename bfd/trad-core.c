@@ -1,5 +1,5 @@
 /* BFD back end for traditional Unix core files (U-area and raw sections)
-   Copyright 1988, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by John Gilmore of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -16,15 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
-
-/* To use this file on a particular host, configure the host with these
-   parameters in the config/h-HOST file:
-
-	HDEFINES=-DTRAD_CORE
-	HDEPFILES=trad-core.o
-
- */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -38,15 +30,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 
 #include <sys/user.h>		/* After a.out.h  */
-#if 0
-/* file.h is included by std-host.h.  So we better not try to include it
-   twice; on some systems (dpx2) it is not protected against multiple
-   inclusion.  I have checked that all the hosts which use this file
-   include sys/file.h in the hosts file.  */
-#include <sys/file.h>
-#endif
 
-#include <errno.h>
+#ifdef TRAD_HEADER
+#include TRAD_HEADER
+#endif
 
   struct trad_core_struct 
     {
@@ -63,7 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* forward declarations */
 
-bfd_target *	trad_unix_core_file_p PARAMS ((bfd *abfd));
+const bfd_target *trad_unix_core_file_p PARAMS ((bfd *abfd));
 char *		trad_unix_core_file_failing_command PARAMS ((bfd *abfd));
 int		trad_unix_core_file_failing_signal PARAMS ((bfd *abfd));
 boolean		trad_unix_core_file_matches_executable_p
@@ -72,7 +59,7 @@ boolean		trad_unix_core_file_matches_executable_p
 /* Handle 4.2-style (and perhaps also sysV-style) core dump file.  */
 
 /* ARGSUSED */
-bfd_target *
+const bfd_target *
 trad_unix_core_file_p (abfd)
      bfd *abfd;
 
@@ -185,7 +172,7 @@ trad_unix_core_file_p (abfd)
 
   core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
   core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
-  core_regsec (abfd)->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
+  core_regsec (abfd)->flags = SEC_HAS_CONTENTS;
 
   core_datasec (abfd)->_raw_size =  NBPG * u.u_dsize
 #ifdef TRAD_CORE_DSIZE_INCLUDES_TSIZE
@@ -290,7 +277,7 @@ swap_abort()
 #define	NO_SIGNED_GET \
   ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort )
 
-bfd_target trad_core_vec =
+const bfd_target trad_core_vec =
   {
     "trad-core",
     bfd_target_unknown_flavour,
@@ -334,6 +321,7 @@ bfd_target trad_core_vec =
        BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
        BFD_JUMP_TABLE_WRITE (_bfd_generic),
        BFD_JUMP_TABLE_LINK (_bfd_nolink),
+       BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
     (PTR) 0			/* backend_data */
 };

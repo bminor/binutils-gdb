@@ -107,6 +107,7 @@ DESCRIPTION
 #include "sysdep.h"
 #include "libbfd.h"
 #include "libiberty.h"
+#include <ctype.h>
 
 static void srec_init PARAMS ((void));
 static boolean srec_mkobject PARAMS ((bfd *));
@@ -773,7 +774,8 @@ srec_get_section_contents (abfd, section, location, offset, count)
 	return false;
     }
 
-  memcpy (location, (bfd_byte *) section->used_by_bfd + offset, count);
+  memcpy (location, (bfd_byte *) section->used_by_bfd + offset,
+	  (size_t) count);
 
   return true;
 }
@@ -809,7 +811,7 @@ srec_set_section_contents (abfd, section, location, offset, bytes_to_do)
 	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
-      memcpy ((PTR) data, location, bytes_to_do);
+      memcpy ((PTR) data, location, (size_t) bytes_to_do);
 
       if ((section->lma + offset + bytes_to_do - 1) <= 0xffff)
 	{
