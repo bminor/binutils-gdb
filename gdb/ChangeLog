@@ -1,3 +1,11 @@
+Tue Jan 26 18:27:26 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* Makefile.in (c-exp.tab.c): use BISON instead of YACC, to pick
+	the correct value from configure output.
+	(jv-exp.tab.c): ditto.
+	(f-exp.tab.c): ditto.
+	(m2-exp.tab.c): ditto.
+
 1999-01-26  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* breakpoint.h (ep_is_exception_catchpoint): Add prototype.

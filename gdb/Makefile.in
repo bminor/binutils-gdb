@@ -57,6 +57,14 @@ RANLIB = @RANLIB@
 DLLTOOL = @DLLTOOL@
 WINDRES = @WINDRES@
 
+# If the user configured GDB to include the TUI, the name of the tui
+# library goes here.
+TUI_LIBRARY = @TUI_LIBRARY@
+
+# If the user configured GDB to include the TUI, the all-tui 
+# target goes here.
+BUILD_TUI = @BUILD_TUI@
+
 # Flags that describe where you can find the termcap library.
 # This can be overridden in the host Makefile fragment file.
 TERMCAP = @TERM_LIB@
@@ -73,6 +81,8 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 BISON=@YACC@
+
+YLWRAP = $(srcdir)/../ylwrap
 
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
@@ -115,6 +125,11 @@ INTL = @INTLLIBS@
 INTL_DEPS = @INTLDEPS@
 INTL_SRC = $(srcdir)/$(INTL_DIR)
 INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
+
+# Where is the TUI library?  Typically in tui/.
+TUI_DIR=tui
+TUI_SRC = $(srcdir)/$(TUI_DIR)
+TUI_CFLAGS= -I$(TUI_SRC)
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
@@ -210,7 +225,7 @@ CXXFLAGS = -g -O
 INTERNAL_CFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(INTL_CFLAGS) $(ENABLE_CFLAGS) $(WARN_CFLAGS)
+	$(INTL_CFLAGS) $(TUI_CFLAGS) $(ENABLE_CFLAGS) $(WARN_CFLAGS)
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -408,7 +423,14 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	scm-valprint.c source.c stabsread.c stack.c symfile.c \
 	symmisc.c symtab.c target.c thread.c top.c tracepoint.c \
 	typeprint.c utils.c valarith.c valops.c valprint.c values.c \
-	serial.c ser-unix.c mdebugread.c os9kread.c
+	serial.c ser-unix.c mdebugread.c os9kread.c \
+	tui/tui.c tui/tui.h tui/tuiCommand.c tui/tuiCommand.h \
+	tui/tuiData.c tui/tuiData.h tui/tuiDataWin.c tui/tuiDataWin.h \
+	tui/tuiDisassem.c tui/tuiDisassem.h tui/tuiGeneralWin.c \
+	tui/tuiGeneralWin.h tui/tuiIO.c tui/tuiIO.h tui/tuiLayout.c \
+	tui/tuiLayout.h tui/tuiRegs.c tui/tuiRegs.h tui/tuiSource.c \
+	tui/tuiSource.h tui/tuiSourceWin.c tui/tuiSourceWin.h \
+	tui/tuiStack.c tui/tuiStack.h tui/tuiWin.c tui/tuiWin.h
 
 LINTFILES = $(SFILES) $(YYFILES) @CONFIG_SRCS@ init.c
 
@@ -469,7 +491,7 @@ ax_h = 		ax.h
 
 HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	dst.h environ.h $(gdbcmd_h) gdbcore.h \
-	gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
+	gdb-stabs.h hpread.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h partial-stab.h serial.h signals.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
 	c-lang.h ch-lang.h f-lang.h \
@@ -682,10 +704,10 @@ init.c: $(OBS) $(TSOBS)
 .PRECIOUS: init.c
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb$(EXEEXT): $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
+gdb$(EXEEXT): $(OBS) $(BUILD_TUI) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	rm -f gdb$(EXEEXT)
 	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) -o gdb$(EXEEXT) \
-	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
+	  init.o $(OBS) $(TSOBS) $(TUI_LIBRARY) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 
 nlm:	force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
@@ -764,6 +786,13 @@ xm-vaxbsd.h: xm-vax.h
 kdb:	$(NTSSTART) $(OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
 	ld -o kdb $(NTSSTART) $(OBS) $(NTSOBS) init.o $(ADD_FILES) \
 	  -lc $(CLIBS)
+
+# Have the TUI library depend on a phony target, so we'll always
+# recurse and make sure it's up to date.  If it is, then the file will
+# be unchanged, and we won't rebuild it.
+# .PHONY: check-tui
+all-tui: 
+	@(cd tui; ${MAKE} ${FLAGS_TO_PASS} all)
 
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.  (FIXME: those
@@ -884,7 +913,7 @@ version.c: Makefile
 # Makefile.in, but that was a pretty big annoyance.
 c-exp.tab.o: c-exp.tab.c
 c-exp.tab.c: c-exp.y
-	$(BISON) $(YFLAGS) -o c-exp.tmp $(srcdir)/c-exp.y
+	$(SHELL) $(YLWRAP) "$(BISON)" $(srcdir)/c-exp.y  y.tab.c c-exp.tmp -- $(YFLAGS) 
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -899,7 +928,7 @@ c-exp.tab.c: c-exp.y
 # start-sanitize-java
 jv-exp.tab.o: jv-exp.tab.c
 jv-exp.tab.c: jv-exp.y
-	$(BISON) $(YFLAGS) -o jv-exp.tmp $(srcdir)/jv-exp.y
+	$(SHELL) $(YLWRAP) "$(BISON)" $(srcdir)/jv-exp.y  y.tab.c jv-exp.tmp -- $(YFLAGS) 
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -914,7 +943,7 @@ jv-exp.tab.c: jv-exp.y
 # end-sanitize-java
 f-exp.tab.o: f-exp.tab.c
 f-exp.tab.c: f-exp.y c-exp.tab.c
-	$(BISON) $(YFLAGS) -o f-exp.tmp $(srcdir)/f-exp.y
+	$(SHELL) $(YLWRAP) "$(BISON)" $(srcdir)/f-exp.y  y.tab.c f-exp.tmp -- $(YFLAGS) 
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -932,7 +961,7 @@ f-exp.tab.c: f-exp.y c-exp.tab.c
 # else.
 m2-exp.tab.o: m2-exp.tab.c
 m2-exp.tab.c: m2-exp.y
-	$(BISON) $(YFLAGS) -o m2-exp.tmp $(srcdir)/m2-exp.y
+	$(SHELL) $(YLWRAP) "$(BISON)" $(srcdir)/m2-exp.y  y.tab.c m2-exp.tmp -- $(YFLAGS) 
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -985,7 +1014,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	dcache.c delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
 	go32-xdep.c gould-tdep.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-tdep.c hppab-nat.c hppah-nat.c \
-	hpread.c \
+        hp-psymtab-read.c hp-symtab-read.c \
 	i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c \
 	i386aix-nat.c i386m3-nat.c i386v4-nat.c i386ly-tdep.c \
 	i387-tdep.c \
@@ -1406,8 +1435,16 @@ hpux-thread.o: hpux-thread.c $(defs_h) gdbthread.h target.h inferior.h
 	$(CC) -c $(INTERNAL_CFLAGS) -I$(srcdir)/osf-share \
 	  -I$(srcdir)/osf-share/HP800 -I/usr/include/dce $(srcdir)/hpux-thread.c
 
+# FIXME!!!
 hpread.o: hpread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h) gdb_string.h
+
+hp-psymtab-read.o: hp-psymtab-read.c hpread.h $(bfd_h) buildsym.h complaints.h \
+	$(defs_h) gdb-stabs.h objfiles.h symfile.h $(symtab_h) gdb_string.h
+ 
+hp-symtab-read.o: hp-symtab-read.c hpread.h $(bfd_h) buildsym.h complaints.h \
+	$(defs_h) gdb-stabs.h objfiles.h symfile.h $(symtab_h) gdb_string.h
+# END FIXME!!!  
 
 parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
