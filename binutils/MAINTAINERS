@@ -36,7 +36,7 @@ repository without obtaining approval first:
   Richard Henderson <rth@redhat.com>
   Ian Taylor <ian@wasabisystems.com>
   Jeff Law <law@redhat.com>
-  Jim Wilson <wilson@tuliptree.org>
+  Jim Wilson <wilson@specifixinc.com>
   DJ Delorie <dj@redhat.com>
   Alan Modra <amodra@bigpond.net.au>
   Michael Meissner <gnu@the-meissners.org>
@@ -67,7 +67,7 @@ responsibility among the other maintainers.
   HPPA		   Dave Anglin <dave.anglin@nrc.ca>
   HPPA elf32	   Alan Modra <amodra@bigpond.net.au>
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]
-  IA-64		   Jim Wilson <wilson@tuliptree.org>
+  IA-64		   Jim Wilson <wilson@specifixinc.com>
   IQ2000	   Stan Cox <scox@redhat.com>
   i860		   Jason Eckhardt <jle@rice.edu>
   ix86		   Alan Modra <amodra@bigpond.net.au>
