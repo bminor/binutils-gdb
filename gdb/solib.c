@@ -461,30 +461,20 @@ update_solib_list (int from_tty, struct target_ops *target)
 	  catch_errors (solib_map_sections, i,
 			"Error while mapping shared library sections:\n",
 			RETURN_MASK_ALL);
-	}
 
-      /* If requested, add the shared objects' sections to the the
-	 TARGET's section table.  */
-      if (target)
-	{
-	  int new_sections;
-
-	  /* Figure out how many sections we'll need to add in total.  */
-	  new_sections = 0;
-	  for (i = inferior; i; i = i->next)
-	    new_sections += (i->sections_end - i->sections);
-
-	  if (new_sections > 0)
+	  /* If requested, add the shared object's sections to the TARGET's
+	     section table.  Do this immediately after mapping the object so
+	     that later nodes in the list can query this object, as is needed
+	     in solib-osf.c.  */
+	  if (target)
 	    {
-	      int space = target_resize_to_sections (target, new_sections);
-
-	      for (i = inferior; i; i = i->next)
+	      int count = (i->sections_end - i->sections);
+	      if (count > 0)
 		{
-		  int count = (i->sections_end - i->sections);
+		  int space = target_resize_to_sections (target, count);
 		  memcpy (target->to_sections + space,
 			  i->sections,
 			  count * sizeof (i->sections[0]));
-		  space += count;
 		}
 	    }
 	}
@@ -605,7 +595,10 @@ info_sharedlibrary_command (char *ignore, int from_tty)
     }
 
   arch_size = bfd_get_arch_size (exec_bfd);
-  /* Default to 32-bit in case of failure (non-elf). */
+  if (arch_size == -1)
+    arch_size = bfd_arch_bits_per_address(exec_bfd);
+
+  /* Default to 32-bit in case of failure.  */
   if (arch_size == 32 || arch_size == -1)
     {
       addr_width = 8 + 4;

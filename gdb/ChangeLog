@@ -1,5 +1,12 @@
 2001-05-25  Nick Duffek  <nsd@redhat.com>
 
+	* solib.c (update_solib_list): Move target_resize_to_sections()
+	into solib_map_sections() loop.
+	(info_sharedlibrary_command): Try bfd_arch_bits_per_address() if
+	bfd_get_arch_size() fails.
+
+2001-05-25  Nick Duffek  <nsd@redhat.com>
+
 	* Makefile.in (osfsolib.c, osfsolib.o): Rename to solib-osf.c and
 	solib-osf.o.
 	* config/alpha/alpha-osf1.mh (NATDEPFILES): Replace osfsolib.o
