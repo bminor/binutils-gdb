@@ -1,3 +1,7 @@
+Mon Jan 17 12:35:42 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* README:  Update notes for alpha port.
+
 Mon Jan 17 11:15:57 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* i960-tdep.c (i960_fault_to_signal): Return TARGET_SIGNAL_ILL
