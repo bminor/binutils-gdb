@@ -42,7 +42,7 @@ const struct v850_operand v850_operands[] = {
 
 /* The IMM16 field in a format 6 insn. */
 #define I16	(I5U+1)
-  { 16, 0, 0, 0, 0 }, 
+  { 16, 16, 0, 0, 0 }, 
 
 /* The signed DISP7 field in a format 4 insn. */
 #define D7S	(I16+1)
