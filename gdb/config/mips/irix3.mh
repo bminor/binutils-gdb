@@ -3,5 +3,4 @@ XDEPFILES=
 XM_FILE= xm-irix3.h
 NAT_FILE= nm-irix3.h
 NATDEPFILES= fork-child.o corelow.o infptrace.o inftarg.o mips-nat.o
-MUNCH_DEFINE=-B
 XM_CLIBS=-lbsd
