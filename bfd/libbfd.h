@@ -44,7 +44,7 @@ struct artdata {
 };
 
 #define bfd_ardata(bfd) ((struct artdata *) ((bfd)->tdata))
-#define bfd_set_ardata(bfd, v) ((bfd)->tdata = (void *) (v))
+#define bfd_set_ardata(bfd, v) ((bfd)->tdata = (PTR) (v))
 
 /* Goes in bfd's arelt_data slot */
 struct areltdata {
@@ -60,16 +60,16 @@ struct areltdata {
    it before it becomes a problem -- Gumby */
 
 PROTO (char *, zalloc, (size_t size));
-PROTO (char *, realloc, (char * ptr, size_t size));
-PROTO (bfd_target *, bfd_find_target, (char *target_name));
-PROTO (size_t, bfd_read, (void *ptr, size_t size, size_t nitems, bfd *abfd));
-PROTO (size_t, bfd_write, (void *ptr, size_t size, size_t nitems, bfd *abfd));
+
+PROTO (bfd_target *, bfd_find_target, (CONST char *target_name));
+PROTO (size_t, bfd_read, (PTR ptr, size_t size, size_t nitems, bfd *abfd));
+PROTO (size_t, bfd_write, (PTR ptr, size_t size, size_t nitems, bfd *abfd));
 
 
 
 PROTO (FILE *, bfd_cache_lookup, (bfd *));
 PROTO (void, bfd_cache_close, (bfd *));
-PROTO (int, bfd_seek,(bfd*, file_ptr, int direction));
+PROTO (int, bfd_seek,(bfd* abfd, file_ptr fp , int direction));
 PROTO (long, bfd_tell, (bfd *abfd));
 PROTO (bfd *, _bfd_create_empty_archive_element_shell, (bfd *obfd));
 PROTO (bfd *, look_for_bfd_in_cache, (bfd *arch_bfd, file_ptr index));

@@ -204,11 +204,11 @@ sunos4_object_p (abfd)
   unsigned long magic;		/* Swapped magic number */
   unsigned char exec_bytes[EXEC_BYTES_SIZE];	/* Raw bytes of exec hdr */
   struct exec *execp;
-  void *rawptr;
+  PTR rawptr;
 
   bfd_error = system_call_error;
 
-  if (bfd_read ((void *)magicbuf, 1, sizeof (magicbuf), abfd) !=
+  if (bfd_read ((PTR)magicbuf, 1, sizeof (magicbuf), abfd) !=
       sizeof (magicbuf))
     return 0;
   magic = bfd_h_getlong (abfd, magicbuf);
@@ -219,14 +219,14 @@ sunos4_object_p (abfd)
 
   if (bfd_seek (abfd, 0L, false) < 0) return 0;
 
-  if (bfd_read ((void *) exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
+  if (bfd_read ((PTR) exec_bytes, 1, EXEC_BYTES_SIZE, abfd)
       != EXEC_BYTES_SIZE) {
     bfd_error = wrong_format;
     return 0;
   }
 
   /* Use an intermediate variable for clarity */
-  rawptr = (void *) zalloc (sizeof (struct sunexdata) + sizeof (struct exec));
+  rawptr = (PTR) zalloc (sizeof (struct sunexdata) + sizeof (struct exec));
 
   if (rawptr == NULL) {
     bfd_error = no_memory;
@@ -347,7 +347,7 @@ sunos4_mkobject (abfd)
     return false;
   }
 
-  abfd->tdata = (void *)((struct sunexdata *) rawptr);
+  abfd->tdata = (PTR)((struct sunexdata *) rawptr);
   exec_hdr (abfd) = (struct exec *) (rawptr + sizeof (struct sunexdata));
 
   /* For simplicity's sake we just make all the sections right here. */
@@ -496,24 +496,24 @@ sunos4_write_object_contents (abfd)
   bfd_aout_swap_exec_header_out (abfd, execp, exec_bytes);
 
   bfd_seek (abfd, 0L, false);
-  bfd_write ((void *) exec_bytes, 1, EXEC_BYTES_SIZE, abfd);
+  bfd_write ((PTR) exec_bytes, 1, EXEC_BYTES_SIZE, abfd);
 
   /* Now write out reloc info, followed by syms and strings */
 
   if (bfd_get_symcount (abfd) != 0) 
-      {
-	bfd_seek (abfd,
-		  (long)(N_SYMOFF(*execp)), false);
+    {
+      bfd_seek (abfd,
+		(long)(N_SYMOFF(*execp)), false);
 
-	sunos4_write_syms (abfd);
+      sunos4_write_syms (abfd);
 
-	bfd_seek (abfd,	(long)(N_TROFF(*execp)), false);
+      bfd_seek (abfd,	(long)(N_TROFF(*execp)), false);
 
-	if (!sunos4_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
-	bfd_seek (abfd, (long)(N_DROFF(*execp)), false);
+      if (!sunos4_squirt_out_relocs (abfd, obj_textsec (abfd))) return false;
+      bfd_seek (abfd, (long)(N_DROFF(*execp)), false);
 
-	if (!sunos4_squirt_out_relocs (abfd, obj_datasec (abfd))) return false;
-      }
+      if (!sunos4_squirt_out_relocs (abfd, obj_datasec (abfd))) return false;
+    }
   return true;
 }
 
@@ -613,7 +613,7 @@ sunos4_core_file_p (abfd)
 
   bfd_error = system_call_error;
 
-  if (bfd_read ((void *)longbuf, 1, sizeof (longbuf), abfd) !=
+  if (bfd_read ((PTR)longbuf, 1, sizeof (longbuf), abfd) !=
 	 sizeof (longbuf))
     return 0;
   core_mag = bfd_h_getlong (abfd, longbuf);
@@ -621,7 +621,7 @@ sunos4_core_file_p (abfd)
   if (core_mag != CORE_MAGIC) return 0;
 
   /* SunOS core headers can vary in length; second word is size; */
-  if (bfd_read ((void *)longbuf, 1, sizeof (longbuf), abfd) !=
+  if (bfd_read ((PTR)longbuf, 1, sizeof (longbuf), abfd) !=
 	 sizeof (longbuf))
     return 0;
   core_size = bfd_h_getlong (abfd, longbuf);
@@ -639,9 +639,9 @@ sunos4_core_file_p (abfd)
 
   core = (struct core *) (rawptr + sizeof (struct suncordata));
 
-  if ((bfd_read ((void *) core, 1, core_size, abfd)) != core_size) {
+  if ((bfd_read ((PTR) core, 1, core_size, abfd)) != core_size) {
     bfd_error = system_call_error;
-    free ((void *)rawptr);
+    free ((PTR)rawptr);
     return 0;
   }
 
@@ -655,24 +655,24 @@ sunos4_core_file_p (abfd)
   if (core_stacksec (abfd) == NULL) {
 loser:
     bfd_error = no_memory;
-    free ((void *)rawptr);
+    free ((PTR)rawptr);
     return 0;
   }
   core_datasec (abfd) = (asection *) zalloc (sizeof (asection));
   if (core_datasec (abfd) == NULL) {
 loser1:
-    free ((void *)core_stacksec (abfd));
+    free ((PTR)core_stacksec (abfd));
     goto loser;
   }
   core_regsec (abfd) = (asection *) zalloc (sizeof (asection));
   if (core_regsec (abfd) == NULL) {
 loser2:
-    free ((void *)core_datasec (abfd));
+    free ((PTR)core_datasec (abfd));
     goto loser1;
   }
   core_reg2sec (abfd) = (asection *) zalloc (sizeof (asection));
   if (core_reg2sec (abfd) == NULL) {
-    free ((void *)core_regsec (abfd));
+    free ((PTR)core_regsec (abfd));
     goto loser2;
   }
 
@@ -841,7 +841,7 @@ sunos4_set_section_contents (abfd, section, location, offset, count)
   bfd_seek (abfd, section->filepos + offset, SEEK_SET);
 
   if (count) {
-    return (bfd_write ((void *)location, 1, count, abfd) == count) ?
+    return (bfd_write ((PTR)location, 1, count, abfd) == count) ?
       true : false;
   }
   return false;
@@ -850,7 +850,7 @@ boolean
 sunos4_get_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
-     void  *location;
+     PTR location;
      file_ptr offset;
      int count;
 {
@@ -1129,7 +1129,7 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
   }
 
   bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET);
-  if (bfd_read ((void *)&string_size, 4, 1, abfd) != 4)
+  if (bfd_read ((PTR)&string_size, 4, 1, abfd) != 4)
     return false;
   string_size = bfd_h_getlong (abfd, (unsigned char *)&string_size);
 
@@ -1148,22 +1148,22 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
                                (symbol_count * sizeof (aout_symbol_type))));
   if (cached == NULL) {
     bfd_error = no_memory;
-    free ((void *)syms);
+    free ((PTR)syms);
     return false;
   }
 
   strings = ((char *) cached) + (symbol_count * sizeof (aout_symbol_type));
 
   bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
-  if (bfd_read ((void *)syms, 1, symbol_size, abfd) != symbol_size) {
+  if (bfd_read ((PTR)syms, 1, symbol_size, abfd) != symbol_size) {
   bailout:
-    free ((void *)cached);
-    free ((void*)syms);
+    free ((PTR)cached);
+    free ((PTR)syms);
     return false;
   }
 
   bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET);
-  if (bfd_read ((void *)strings, 1, string_size, abfd) != string_size) {
+  if (bfd_read ((PTR)strings, 1, string_size, abfd) != string_size) {
     goto bailout;
   }
 
@@ -1209,7 +1209,7 @@ DEFUN(sunos4_slurp_symbol_table, (abfd),
 
   obj_aout_symbols (abfd) =  cached;
   bfd_get_symcount (abfd) = symbol_count;
-  free ((void *)syms);
+  free ((PTR)syms);
 
   return true;
 }
@@ -1257,7 +1257,7 @@ DEFUN(sunos4_write_syms,(abfd),
 
     bfd_h_putshort (abfd, nsp.n_desc, (unsigned char *)&nsp.n_desc);
     bfd_h_putlong  (abfd, nsp.n_value, (unsigned char *)&nsp.n_value);
-    bfd_write((void *)&nsp,1, sizeof(nsp), abfd);
+    bfd_write((PTR)&nsp,1, sizeof(nsp), abfd);
   }
 
 
@@ -1266,7 +1266,7 @@ DEFUN(sunos4_write_syms,(abfd),
    */
   bfd_h_putlong  (abfd, stindex, (unsigned char *)&stindex);
 
-  bfd_write((void *)&stindex, 1, sizeof(stindex), abfd);
+  bfd_write((PTR)&stindex, 1, sizeof(stindex), abfd);
   
   generic = bfd_get_outsymbols(abfd);
   for (count = 0; count < bfd_get_symcount(abfd); count++) 
@@ -1276,7 +1276,7 @@ DEFUN(sunos4_write_syms,(abfd),
       if (g->name != (char *)NULL) 
 	{
 	  size_t length = strlen(g->name)+1;
-	  bfd_write((void *)g->name, 1, length, abfd);
+	  bfd_write((PTR)g->name, 1, length, abfd);
 	}
       if ((g->flags & BSF_FAKE)==0) {
 	g->name = itos(count);	/* smash the generic symbol */
@@ -1297,13 +1297,13 @@ DEFUN(sunos4_reclaim_symbol_table,(abfd),
        section != (asection *) NULL;
        section = section->next)
     if (section->relocation) {
-      free ((void *)section->relocation);
+      free ((PTR)section->relocation);
       section->relocation = NULL;
       section->reloc_count = 0;
     }
 
   bfd_get_symcount (abfd) = 0;
-  free ((void *)obj_aout_symbols (abfd));
+  free ((PTR)obj_aout_symbols (abfd));
   obj_aout_symbols (abfd) = (aout_symbol_type *)NULL;
 }
 
@@ -1364,7 +1364,7 @@ sunos4_get_next_symbol (abfd, oidx)
   return ++oidx >= bfd_get_symcount (abfd) ? BFD_NO_MORE_SYMBOLS : oidx;
 }
 
-char *
+CONST char *
 sunos4_symbol_name (abfd, idx)
      bfd *abfd;
      symindex idx;
@@ -1438,7 +1438,7 @@ swap_std_reloc_out (abfd, p, natptr, count)
       bfd_h_putlong (abfd, g->address, natptr->r_address);
 
       r_length = g->howto->size; /* Size as a power of two */
-      r_pcrel  = g->howto->pc_relative;	/* Relative to PC? */
+      r_pcrel  = (int) g->howto->pc_relative;	/* Relative to PC? */
       /* r_baserel, r_jmptable, r_relative???  FIXME-soon */
       r_baserel = 0;
       r_jmptable = 0;
@@ -1718,7 +1718,7 @@ sunos4_slurp_reloc_table (abfd, asect, symbols)
 {
   unsigned int count;
   size_t reloc_size;
-  void *relocs;
+  PTR relocs;
   arelent *reloc_cache;
   size_t each_size;
 
@@ -1745,7 +1745,7 @@ sunos4_slurp_reloc_table (abfd, asect, symbols)
 
   count = reloc_size / each_size;
 
-  relocs =  malloc (reloc_size);
+  relocs =  (PTR) malloc (reloc_size);
   if (!relocs) {
     bfd_error = no_memory;
     return false;
@@ -1766,7 +1766,7 @@ sunos4_slurp_reloc_table (abfd, asect, symbols)
 
   if (each_size == RELOC_EXT_SIZE)
     {
-      register struct reloc_ext_bytes *rptr = relocs;
+      register struct reloc_ext_bytes *rptr = (struct reloc_ext_bytes *) relocs;
       unsigned int counter = 0;
       arelent *cache_ptr = reloc_cache;
 
@@ -1775,7 +1775,7 @@ sunos4_slurp_reloc_table (abfd, asect, symbols)
       }
     }
   else {
-    register struct reloc_std_bytes *rptr = relocs;
+    register struct reloc_std_bytes *rptr = (struct reloc_std_bytes *) relocs;
     unsigned int counter = 0;
     arelent *cache_ptr = reloc_cache;
 
@@ -1830,7 +1830,7 @@ sunos4_squirt_out_relocs (abfd, section)
       swap_std_reloc_out(abfd, generic, native, count);
     }
 
-  if ( bfd_write ((void *) native, 1, natsize, abfd) != natsize) {
+  if ( bfd_write ((PTR) native, 1, natsize, abfd) != natsize) {
     free(native);
     return false;
   }
@@ -1941,10 +1941,10 @@ bfd_print_symbol_enum_type how;
     break;
   case bfd_print_symbol_all_enum:
     {
-      char *section_name = symbol->section == (asection *)NULL ?
+   CONST char *section_name = symbol->section == (asection *)NULL ?
 	"*abs" : symbol->section->name;
 
-      bfd_print_symbol_vandf((void *)file,symbol);
+      bfd_print_symbol_vandf((PTR)file,symbol);
 
       fprintf(file," %-5s %04x %02x %02x %s",
 	      section_name,
@@ -2000,8 +2000,8 @@ DEFUN(sunos4_find_nearest_line,(abfd,
       asection *section AND
       asymbol **symbols AND
       bfd_vma offset AND
-      char **filename_ptr AND
-      char **functionname_ptr AND
+      CONST char **filename_ptr AND
+      CONST char **functionname_ptr AND
       unsigned int *line_ptr)
 {
   /* Run down the file looking for the filename, function and linenumber */
@@ -2043,7 +2043,7 @@ DEFUN(sunos4_find_nearest_line,(abfd,
 	    func = (asymbol *)q;
 	  }
 	  if (*line_ptr && func) {
-	    char *function = func->name;
+	    CONST char *function = func->name;
 	    char *p;
 	    strncpy(buffer, function, sizeof(buffer)-1);
 	    buffer[sizeof(buffer)-1] = 0;
@@ -2064,7 +2064,7 @@ DEFUN(sunos4_find_nearest_line,(abfd,
 
 }
 
-bfd_target aoutvec =
+bfd_target aout_big_vec =
 {
   "a.out-generic-big",		/* name */
   bfd_target_aout_flavour_enum,

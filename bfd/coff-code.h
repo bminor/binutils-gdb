@@ -138,7 +138,7 @@ bfd_coff_swap_sym(abfd, se)
     bfd_h_put_x(abfd, se->n_numaux, &se->n_numaux);
 }
 
-static void 
+void
 bfd_coff_swap_aux(abfd, au, type, class)
     bfd            *abfd;
     AUXENT         *au;
@@ -184,7 +184,7 @@ bfd_coff_swap_aux(abfd, au, type, class)
     }
 }
 
-static void 
+void
 bfd_coff_swap_lineno(abfd, lineno)
     bfd            *abfd;
     LINENO         *lineno;
@@ -206,7 +206,7 @@ get_index(symbol)
     return (int) symbol->value;
 }
 
-static void 
+static void
 set_index(symbol, idx)
     asymbol        *symbol;
     unsigned int    idx;
@@ -235,7 +235,7 @@ make_a_section_from_file(abfd, hdr)
 {
     asection       *return_section;
     {
-	char           *name = malloc(9);
+	char           *name = (PTR) malloc(9);
 	if (name == NULL) {
 	    bfd_error = no_memory;
 	    return (BFD_FAILURE);
@@ -311,7 +311,7 @@ coff_real_object_p(abfd, nscns, opthdr)
     + opthdr
       + (nscns * sizeof(struct scnhdr));
 
-  file_info = malloc(readsize);
+  file_info = (PTR) malloc(readsize);
   if (file_info == NULL) {
     bfd_error = no_memory;
     return 0;
@@ -1054,7 +1054,7 @@ coff_print_symbol(ignore_abfd, file, symbol, how)
 	break;
     case bfd_print_symbol_all_enum:
 	{
-	    char           *section_name = symbol->section == (asection *) NULL ?
+	 CONST char           *section_name = symbol->section == (asection *) NULL ?
 	    "*abs" : symbol->section->name;
 	    bfd_print_symbol_vandf((PTR) file, symbol);
 
@@ -1455,7 +1455,7 @@ static          boolean
 coff_set_section_contents(abfd, section, location, offset, count)
     bfd            *abfd;
     sec_ptr         section;
-    PTR location;
+    PTR             location;
     file_ptr        offset;
     size_t          count;
 {
@@ -1473,7 +1473,7 @@ static          boolean
 coff_get_section_contents(abfd, section, location, offset, count)
     bfd            *abfd;
     sec_ptr         section;
-    PTR location;
+    PTR             location;
     file_ptr        offset;
     int             count;
 {
@@ -1528,18 +1528,18 @@ buy_and_read(abfd, where, seek_direction, size)
     int             seek_direction;
     size_t          size;
 {
-  PTR area = (PTR) malloc(size);
-  if (!area) {
-    bfd_error = no_memory;
-    return (NULL);
-  }
-  bfd_seek(abfd, where, seek_direction);
-  if (bfd_read(area, 1, size, abfd) != size) {
-    bfd_error = system_call_error;
-    free(area);
-    return (NULL);
-  }				/* on error */
-  return (area);
+    PTR             area = (PTR) malloc(size);
+    if (!area) {
+	bfd_error = no_memory;
+	return (NULL);
+    }
+    bfd_seek(abfd, where, seek_direction);
+    if (bfd_read(area, 1, size, abfd) != size) {
+	bfd_error = system_call_error;
+	free(area);
+	return (NULL);
+    }				/* on error */
+    return (area);
 }				/* buy_and_read() */
 
 static void 
@@ -1685,7 +1685,7 @@ get_normalized_symtab(abfd)
     }
     else {
 	unsigned long   namelength = 0;
-	char           *filename;
+	CONST char           *filename;
 	obj_symbol_slew(abfd) = 2;
 
 	if ((retval = (SYMENT *) malloc(size
@@ -1764,12 +1764,12 @@ get_normalized_symtab(abfd)
 		}		/* if end of string */
 	    }			/* possible lengths of this string. */
 
-	    if ((newstring = malloc(++i)) == NULL) {
+	    if ((newstring = (PTR) malloc(++i)) == NULL) {
 		bfd_error = no_memory;
 		return (NULL);
 	    }			/* on error */
 	    bzero(newstring, i);
-	    strncpy(newstring, s->n_name, i -1 );
+	    strncpy(newstring, s->n_name, i-1);
 	    s->n_offset = (int) newstring;
 	    s->n_zeroes = 0;
 
@@ -1791,7 +1791,7 @@ get_normalized_symtab(abfd)
 		}		/* on error */
 		sp(string_table_size);
 
-		if ((string_table = malloc(string_table_size -= 4)) == NULL) {
+		if ((string_table = (PTR) malloc(string_table_size -= 4)) == NULL) {
 		    bfd_error = no_memory;
 		    return (NULL);
 		}		/* on mallocation error */
@@ -1867,7 +1867,7 @@ coff_get_next_symbol(abfd, oidx)
     return ++oidx >= bfd_get_symcount(abfd) ? BFD_NO_MORE_SYMBOLS : oidx;
 }
 
-static char    *
+static CONST char *
 coff_symbol_name(abfd, idx)
     bfd            *abfd;
     symindex        idx;
@@ -2004,7 +2004,7 @@ find_next_file_symbol(current, end)
    Note that C_FILE symbols can, and some do, have more than 1 aux entry.
 */
 
-static void 
+static void
 force_indices_file_symbol_relative(abfd, symtab)
     bfd            *abfd;
     SYMENT         *symtab;
@@ -2386,20 +2386,20 @@ coff_canonicalize_reloc(abfd, section, relptr, symbols)
 */
 
 static          boolean
-coff_find_nearest_line(abfd,
-		       section,
-		       symbols,
-		       offset,
-		       filename_ptr,
-		       functionname_ptr,
-		       line_ptr)
-    bfd            *abfd;
-    asection       *section;
-    asymbol       **symbols;
-    bfd_vma         offset;
-    char          **filename_ptr;
-    char          **functionname_ptr;
-    unsigned int   *line_ptr;
+DEFUN(coff_find_nearest_line,(abfd,
+			      section,
+			      symbols,
+			      offset,
+			      filename_ptr,
+			      functionname_ptr,
+			      line_ptr),
+      bfd            *abfd AND
+      asection       *section AND
+      asymbol       **symbols AND
+      bfd_vma         offset AND
+      CONST char      **filename_ptr AND
+      CONST char       **functionname_ptr AND
+      unsigned int   *line_ptr)
 {
   static bfd     *cache_abfd;
   static asection *cache_section;

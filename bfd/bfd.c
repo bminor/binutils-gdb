@@ -38,6 +38,7 @@ short _bfd_host_big_endian = 0x0100;
 
 
 
+
 /** Error handling
     o - Most functions return nonzero on success (check doc for
 	precise semantics); 0 or NULL on error.
@@ -62,8 +63,24 @@ char *bfd_errmsgs[] = {"No error",
 		       "File format not recognized",
 		       "File format is ambiguous",
 			   "Section has no contents",
+  		 "Nonrepresentable section on output",
 		       "#<Invalid error code>"
 		       };
+
+
+static 
+void 
+DEFUN(bfd_nonrepresentable_section,(abfd, name),
+	 CONST  bfd * CONST abfd AND
+	 CONST  char * CONST name)
+{
+  printf("bfd error writing file %s, can't represent section name %s\n", abfd->filename, name);
+  exit(1);
+}
+bfd_error_vector_type bfd_error_vector = 
+  {
+  bfd_nonrepresentable_section 
+  };
 
 #if !defined(ANSI_LIBRARIES)
 char *
@@ -77,6 +94,8 @@ strerror (code)
 	  sys_errlist [code]);
 }
 #endif /* not ANSI_LIBRARIES */
+
+
 
 char *
 bfd_errmsg (error_tag)
@@ -94,6 +113,15 @@ bfd_errmsg (error_tag)
   return bfd_errmsgs [(int)error_tag];
 }
 
+
+void bfd_default_error_trap(error_tag)
+bfd_ec error_tag;
+{
+  printf("bfd assert fail (%s)\n", bfd_errmsg(error_tag));
+}
+
+void (*bfd_error_trap)() = bfd_default_error_trap;
+void (*bfd_error_nonrepresentabltrap)() = bfd_default_error_trap;
 void
 bfd_perror (message)
      char *message;
@@ -135,12 +163,12 @@ extern bfd_target *target_vector[];
    will cause the first entry in the target list to be returned. */
 
 bfd_target *
-bfd_find_target (target_name)
-     char *target_name;
+DEFUN(bfd_find_target,(target_name),
+      CONST char *target_name)
 {
   bfd_target **target;
   extern char *getenv ();
-  char *targname = (target_name ? target_name : getenv ("GNUTARGET"));
+  CONST char *targname = (target_name ? target_name : getenv ("GNUTARGET"));
 
   /* This is safe; the vector cannot be null */
   if (targname == NULL || !strcmp (targname, "default"))
@@ -247,6 +275,15 @@ bfd_check_format (abfd, format)
     if (temp) {				/* This format checks out as ok! */
       right_targ = temp;
       match_count++;
+#ifdef GNU960
+      /* Big- and little-endian b.out archives look the same, but it doesn't
+       * matter: there is no difference in their headers, and member file byte
+       * orders will (I hope) be handled appropriately by bfd.  Ditto for big
+       * and little coff archives.  And the 4 coff/b.out object formats are
+       * unambiguous.  So accept the first match we find.
+       */
+      break;
+#endif
     }
   }
 
@@ -298,9 +335,9 @@ bfd_set_format (abfd, format)
 /* Hack object and core file sections */
 
 sec_ptr
-bfd_get_section_by_name (abfd, name)
-     bfd *abfd;
-     char *name;
+DEFUN(bfd_get_section_by_name,(abfd, name),
+      bfd *abfd AND
+      CONST char *name)
 {
   asection *sect;
   
@@ -312,9 +349,9 @@ bfd_get_section_by_name (abfd, name)
 /* If you try to create a section with a name which is already in use,
    returns the old section by that name instead. */
 sec_ptr
-bfd_make_section (abfd, name)
-     bfd *abfd;
-     char *name;
+DEFUN(bfd_make_section,(abfd, name),
+      bfd *abfd AND
+      CONST char *name)
 {
   asection *newsect;  
   asection **  prev = &abfd->sections;
@@ -367,7 +404,7 @@ void
 bfd_map_over_sections (abfd, operation, user_storage)
      bfd *abfd;
      void (*operation)();
-     void *user_storage;
+     PTR user_storage;
 {
   asection *sect;
   int i = 0;
@@ -418,7 +455,7 @@ boolean
 bfd_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
-void *location;
+     PTR location;
      file_ptr offset;
      int count;
 {
@@ -441,7 +478,7 @@ boolean
 bfd_get_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
-     void *location;
+     PTR location;
      file_ptr offset;
      int count;
 {
@@ -544,7 +581,7 @@ bfd_canonicalize_reloc (abfd, asect, location, symbols)
 
 void
 bfd_print_symbol_vandf(file, symbol)
-void *file;
+PTR file;
 asymbol *symbol;
 {
   flagword type = symbol->flags;
@@ -625,18 +662,16 @@ bfd_perform_relocation(abfd,
 		       output_bfd)
 bfd *abfd;
 arelent *reloc_entry;
-void  *data;
+PTR data;
 asection *input_section;
 bfd *output_bfd;
 {
   bfd_vma relocation;
   bfd_reloc_status_enum_type flag = bfd_reloc_ok;
   bfd_vma relocation_before;
-  bfd_vma mask;
-  bfd_vma target_mask;
   bfd_vma addr = reloc_entry->address ;
   bfd_vma output_base = 0;
-  struct rint_struct *howto = reloc_entry->howto;
+  CONST struct rint_struct *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
   asection *reloc_target_input_section;
   asymbol *symbol;
@@ -651,7 +686,7 @@ bfd *output_bfd;
     symbol = (asymbol*)NULL;
   }
 
-  if (howto->special_function) {
+  if (howto->special_function){
     bfd_reloc_status_enum_type cont;
     cont = howto->special_function(abfd,
 				   reloc_entry,
@@ -662,9 +697,9 @@ bfd *output_bfd;
   }
 
   /* 
-     Work out which section the relocation is targetted at and the
-     initial relocation command value.
-     */
+    Work out which section the relocation is targetted at and the
+    initial relocation command value.
+    */
 
 
   if (symbol != (asymbol *)NULL){
@@ -675,18 +710,18 @@ bfd *output_bfd;
       relocation = symbol->value;
     }
     if (symbol->section != (asection *)NULL)
-      {
-	reloc_target_input_section = symbol->section;
-      }
+	{
+	  reloc_target_input_section = symbol->section;
+	}
     else {
       reloc_target_input_section = (asection *)NULL;
     }
   }
   else if (reloc_entry->section != (asection *)NULL)
-    {
-      relocation = 0;
-      reloc_target_input_section = reloc_entry->section;
-    }
+      {
+	relocation = 0;
+	reloc_target_input_section = reloc_entry->section;
+      }
   else {
     relocation = 0;
     reloc_target_input_section = (asection *)NULL;
@@ -713,29 +748,29 @@ bfd *output_bfd;
 
 
   if(reloc_entry->address > (bfd_vma)(input_section->size)) 
-    {
-      return bfd_reloc_outofrange;
-    }
+      {
+	return bfd_reloc_outofrange;
+      }
 	  
 
   if (howto->pc_relative == true)
-    {
-      /*
-	 Anything which started out as pc relative should end up that
-	 way too 
-	 */
+      {
+	/*
+	  Anything which started out as pc relative should end up that
+	  way too 
+	  */
 
-      relocation -= 
-	output_base +   input_section->output_offset;
+	relocation -= 
+	  output_base +   input_section->output_offset;
 
-    }
+      }
 
   if (output_bfd!= (bfd *)NULL &&   howto->partial_inplace == false)  {
     /*
-       This is a partial relocation, and we want to apply the relocation
-       to the reloc entry rather than the raw data. Modify the reloc
-       inplace to reflect what we now know.
-       */
+      This is a partial relocation, and we want to apply the relocation
+      to the reloc entry rather than the raw data. Modify the reloc
+      inplace to reflect what we now know.
+      */
     reloc_entry->addend = relocation  ;
     reloc_entry->section = reloc_target_input_section;
     if (reloc_target_input_section != (asection *)NULL) {
@@ -750,82 +785,89 @@ bfd *output_bfd;
 
 
     /* 
-       Either we are relocating all the way, or we don't want to apply
-       the relocation to the reloc entry (probably because there isn't
-       any room in the output format to describe addends to relocs)
-       */
+      Either we are relocating all the way, or we don't want to apply
+      the relocation to the reloc entry (probably because there isn't
+      any room in the output format to describe addends to relocs)
+      */
     relocation >>= howto->rightshift;
-    if (howto->bitsize == 32) {
-      mask = ~0;
-    }
-    else {
-      mask = (1L << howto->bitsize) - 1 ;
-      mask |= mask - 1;		/* FIXME, what is this?  */
-    }
-
-    relocation &= mask;
 
     /* Shift everything up to where it's going to be used */
    
     relocation <<= howto->bitpos;
-    mask <<= howto->bitpos;
-    target_mask = ~mask;
+
 
     /* Wait for the day when all have the mask in them */
-
-    BFD_ASSERT(howto->mask == mask);
 
 
 
     relocation_before = relocation;
 
 
-    switch (howto->size)
-      {
-      case 0:
-	{
-	  char x = bfd_getchar(abfd, (char *)data + addr);
-	  relocation +=  x & mask;
-	  bfd_putchar(abfd,
-		      ( x & target_mask) | ( relocation & mask),
-		      (unsigned char *) data + addr);
-	}
-	break;
+    /* What we do:
+       i instruction to be left alone
+       o offset within instruction
+       r relocation offset to apply
+       S src mask
+       D dst mask
+       N ~dst mask
+       A part 1
+       B part 2
+       R result
+       
+       Do this:
+           i i i i i o o o o o 	from bfd_get<size>
+       and           S S S S S 	to get the size offset we want
+       +   r r r r r r r r r r  to get the final value to place
+       and           D D D D D  to chop to right size
+       -----------------------
+                     A A A A A 
+       And this:
+           i i i i i o o o o o	from bfd_get<size>
+       and N N N N N 	        get instruction
+       -----------------------
+           B B B B B
 
-      case 1:
- 	{ 
-	  short x = bfd_getshort(abfd, (bfd_byte *)data + addr);
-	  relocation += x & mask;
-	  bfd_putshort(abfd, ( x & target_mask) | (relocation & mask),
-		       (unsigned char *)data + addr);
-	}
-	break;
-      case 2:
-	{
-	  long  x = bfd_getlong(abfd, (bfd_byte *) data + addr);
-	  relocation +=  x & mask;
-	  bfd_putlong(abfd, ( x & target_mask) | (relocation & mask),
-		      (bfd_byte *)data + addr);
-	}	   
-	break;
-      case 3:
-	/* Do nothing */
-	break;
-      default:
-	return bfd_reloc_other;
-      }
+       And then:	     
+           B B B B B       
+       or 	     A A A A A     
+       -----------------------
+           R R R R R R R R R R 	put into bfd_put<size>
+       */
 
-    /* See if important parts of the relocation were chopped to make
-       it fit into the relocation field. (ie are there any significant
-       bits left over after the masking ? */
-    if ((relocation_before & target_mask) != 0 &&
-	howto->complain_on_overflow == true) 
-      {
-	/* Its ok if the bit which fell off is */
-	return bfd_reloc_overflow;
-      }
+#define DOIT(x) \
+     x = ( (x & ~howto->dst_mask) | (((x & howto->src_mask) +  relocation) & howto->dst_mask))
+
+      switch (howto->size)
+	  {
+	  case 0:
+	      {
+		char x = bfd_getchar(abfd, (char *)data + addr);
+		DOIT(x);
+		bfd_putchar(abfd,x, (unsigned char *) data + addr);
+	      }
+	    break;
+
+	  case 1:
+	      { 
+		short x = bfd_getshort(abfd, (bfd_byte *)data + addr);
+		DOIT(x);
+		bfd_putshort(abfd, x,   (unsigned char *)data + addr);
+	      }
+	    break;
+	  case 2:
+	      {
+		long  x = bfd_getlong(abfd, (bfd_byte *) data + addr);
+DOIT(x);
+		bfd_putlong(abfd,x,    (bfd_byte *)data + addr);
+	      }	   
+	    break;
+	  case 3:
+	    /* Do nothing */
+	    break;
+	  default:
+	    return bfd_reloc_other;
+	  }
   }
-
   return flag;
 }
 

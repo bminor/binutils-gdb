@@ -67,7 +67,7 @@ bfd *new_bfd()
   nbfd->opened_once = false;
   nbfd->output_has_begun = false;
   nbfd->section_count = 0;
-  nbfd->usrdata = (void *)NULL;
+  nbfd->usrdata = (PTR)NULL;
   nbfd->sections = (asection *)NULL;
   nbfd->cacheable = false;
   nbfd->flags = NO_FLAGS;
@@ -76,7 +76,7 @@ bfd *new_bfd()
 bfd *new_bfd_contained_in(obfd)
 bfd *obfd;
 {
-	bfd *nbfd = new_bfd(obfd);
+	bfd *nbfd = new_bfd();
 	nbfd->xvec = obfd->xvec;
 	nbfd->my_archive = obfd;
 	nbfd->direction = read_direction;
@@ -87,9 +87,9 @@ bfd *obfd;
   Returns a pointer to a freshly-allocated bfd on success, or NULL. */
 
 bfd *
-bfd_openr (filename, target)
-     char *filename;
-     char *target;
+DEFUN(bfd_openr, (filename, target),
+      CONST char *filename AND
+      CONST char *target)
 {
   bfd *nbfd;
   bfd_target *target_vec;
@@ -130,10 +130,10 @@ bfd_openr (filename, target)
  */
 
 bfd *
-bfd_fdopenr (filename, target, fd)
-     char *filename;
-     char *target;
-     int fd;
+DEFUN(bfd_fdopenr,(filename, target, fd),
+      CONST char *filename AND
+      CONST char *target AND
+      int fd)
 {
   bfd *nbfd;
   bfd_target *target_vec;
@@ -204,9 +204,9 @@ bfd_fdopenr (filename, target, fd)
   See comment by bfd_fdopenr before you try to modify this function. */
 
 bfd *
-bfd_openw (filename, target)
-     char *filename;
-     char *target;
+DEFUN(bfd_openw,(filename, target),
+      CONST char *filename AND
+      CONST char *target)
 {
   bfd *nbfd;
   bfd_target *target_vec;
@@ -262,9 +262,9 @@ bfd_close (abfd)
  called to create a bfd with no ascociated file or target 
  */
 bfd *
-bfd_create(filename, template)
-char *filename;
-bfd *template;
+DEFUN(bfd_create,(filename, template),
+      CONST char *filename AND
+      CONST bfd *template)
 {
   bfd *nbfd = new_bfd();
   if (nbfd == (bfd *)NULL) {

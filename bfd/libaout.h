@@ -61,7 +61,7 @@ struct sunexdata {
 };
 
 
-#define obj_outsymbols(bfd) ((void *)(((struct sunexdata *) ((bfd)->tdata))->outsymbols))
+#define obj_outsymbols(bfd) ((PTR)(((struct sunexdata *) ((bfd)->tdata))->outsymbols))
 
 
 
@@ -75,6 +75,6 @@ struct sunexdata {
 #define obj_arch_flags(bfd) ((((struct sunexdata *) (bfd)->tdata))->arch_flags)
 
 #define get_tdata(x)  ((struct sunexdata *)((x)->tdata))
-#define set_tdata(x,y)  ((x)->tdata = (void *) (y))
+#define set_tdata(x,y)  ((x)->tdata = (PTR) (y))
 
 

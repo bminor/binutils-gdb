@@ -115,7 +115,7 @@ char *
 zalloc (size)
      size_t size;
 {
-  char *ptr = malloc (size);
+  char *ptr = (char *) malloc (size);
 
   if ((ptr != NULL) && (size != 0))
     bzero (ptr, size);
@@ -136,7 +136,7 @@ zalloc (size)
 
 size_t
 bfd_read (ptr, size, nitems, abfd)
-     void *ptr;
+     PTR ptr;
      size_t size;
      size_t nitems;
      bfd *abfd;
@@ -146,19 +146,19 @@ bfd_read (ptr, size, nitems, abfd)
 
 size_t
 bfd_write (ptr, size, nitems, abfd)
-     void *ptr;
+     PTR ptr;
      size_t size;
      size_t nitems;
      bfd *abfd;
 {
-  return  fwrite (ptr, 1, size*nitems, bfd_cache_lookup(abfd));
+  return fwrite (ptr, 1, size*nitems, bfd_cache_lookup(abfd));
 }
 
 int
 bfd_seek (abfd, position, direction)
-bfd *abfd;
-file_ptr position;
-int direction;
+bfd * CONST abfd;
+CONST file_ptr position;
+CONST int direction;
 {
 	/* For the time being, a bfd may not seek to it's end.  The
 	   problem is that we don't easily have a way to recognize
