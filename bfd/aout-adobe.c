@@ -112,6 +112,8 @@ aout_adobe_object_p (abfd)
      take just about any a.out file as an Adobe a.out file.  FIXME!  */
 
   if (N_BADMAG (anexec)) {
+    extern char *getenv ();
+
     targ = getenv ("GNUTARGET");
     if (targ && !strcmp (targ, a_out_adobe_vec.name))
       ;		/* Just continue anyway, if specifically set to this format */
@@ -275,7 +277,7 @@ aout_adobe_write_object_contents (abfd)
      bfd *abfd;
 {
   struct external_exec swapped_hdr;
-  static struct external_segdesc sentinel[1] = {0};
+  static struct external_segdesc sentinel[1];	/* Initialized to zero */
   asection *sect;
 
   exec_hdr (abfd)->a_info = ZMAGIC;
@@ -475,6 +477,10 @@ DEFUN(aout_adobe_sizeof_headers,(ignore_abfd, ignore),
 #define aout_32_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
 #define aout_32_bfd_relax_section                   bfd_generic_relax_section
 #define aout_32_bfd_seclet_link			    bfd_generic_seclet_link
+#define aout_32_bfd_reloc_type_lookup \
+  ((CONST struct reloc_howto_struct *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
+#define aout_32_bfd_make_debug_symbol \
+  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
 bfd_target a_out_adobe_vec =
 {
@@ -501,6 +507,6 @@ bfd_target a_out_adobe_vec =
  {bfd_false, aout_adobe_write_object_contents, /* bfd_write_contents */
    _bfd_write_archive_contents, bfd_false},
 
-  JUMP_TABLE(aout_32)
- };
-
+  JUMP_TABLE(aout_32),
+  (PTR) 0
+};

@@ -32,6 +32,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define PAGE_SIZE 4096
 #define SEGMENT_SIZE PAGE_SIZE
 #define DEFAULT_ARCH bfd_arch_mips
+#define MACHTYPE_OK(mtype) ((mtype) == M_UNKNOWN \
+			    || (mtype) == M_MIPS1 || (mtype) == M_MIPS2)
 #define MY_symbol_leading_char '\0'
 
 #define MY(OP) CAT(mipsbsd_,OP)
@@ -210,18 +212,18 @@ mips_fix_hi16_s (abfd,reloc_entry,symbol,data,input_section,output_bfd)
 }
 
 static reloc_howto_type mips_howto_table_ext[] = {
-  MIPS_RELOC_32,      0, 2, 32, false, 0, true,  true, 0,
-	"32",       false, 0, 0xffffffff, false,
-  MIPS_RELOC_JMP,     2, 2, 26, false, 0, false, true, 0,
-	"MIPS_JMP", false, 0, 0x03ffffff, false,
-  MIPS_RELOC_WDISP16, 2, 1, 16, true,  0, false, true, 0,
-	"WDISP16",  false, 0, 0x0000ffff, false,
-  MIPS_RELOC_HI16,   16, 1, 16, false, 0, false, true, 0,
-	"HI16",     false, 0, 0x0000ffff, false,
-  MIPS_RELOC_HI16_S, 16, 1, 16, false, 0, false, true, mips_fix_hi16_s,
-	"HI16_S",   false, 0, 0x0000ffff, false,
-  MIPS_RELOC_LO16,    0, 1, 16, false, 0, false, true, 0,
-	"LO16",     false, 0, 0x0000ffff, false,
+  {MIPS_RELOC_32,      0, 2, 32, false, 0, true,  true, 0,
+	"32",       false, 0, 0xffffffff, false},
+  {MIPS_RELOC_JMP,     2, 2, 26, false, 0, false, true, 0,
+	"MIPS_JMP", false, 0, 0x03ffffff, false},
+  {MIPS_RELOC_WDISP16, 2, 1, 16, true,  0, false, true, 0,
+	"WDISP16",  false, 0, 0x0000ffff, false},
+  {MIPS_RELOC_HI16,   16, 1, 16, false, 0, false, true, 0,
+	"HI16",     false, 0, 0x0000ffff, false},
+  {MIPS_RELOC_HI16_S, 16, 1, 16, false, 0, false, true, mips_fix_hi16_s,
+	"HI16_S",   false, 0, 0x0000ffff, false},
+  {MIPS_RELOC_LO16,    0, 1, 16, false, 0, false, true, 0,
+	"LO16",     false, 0, 0x0000ffff, false},
 };
 
 static reloc_howto_type *
@@ -229,7 +231,6 @@ MY(reloc_howto_type_lookup) (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
-  extern reloc_howto_type NAME(aout,ext_howto_table)[];
 
   if (bfd_get_arch (abfd) != bfd_arch_mips)
     return 0;
