@@ -1442,13 +1442,20 @@ OP_5201 ()
 #ifdef DEBUG
   printf("   rac\tr%d,a%d,%d\n",OP[0],OP[1],shift);
 #endif
+  if (OP[1] != 0)
+    {
+      fprintf (stderr,"ERROR at PC 0x%x: instruction only valid for A0\n",PC<<2);
+      State.exception = SIGILL;
+    }
+
   State.F1 = State.F0;
   if (shift >=0)
     tmp = ((State.a[0] << 16) | (State.a[1] & 0xffff)) << shift;
   else
     tmp = ((State.a[0] << 16) | (State.a[1] & 0xffff)) >> -shift;
-  tmp = (tmp + 0x8000) >> 16;
-    
+  tmp = ( SEXT60(tmp) + 0x8000 ) >> 16;
+  printf("tmp=0x%llx\n",tmp);
+  /*    
   if (tmp > MAX32)
     {
       State.regs[OP[0]] = 0x7fff;
@@ -1462,6 +1469,7 @@ OP_5201 ()
       State.F0 = 1;
     } 
   else
+  */
     {
       State.regs[OP[0]] = (tmp >> 16) & 0xffff;
       State.regs[OP[0]+1] = tmp & 0xffff;
@@ -1480,10 +1488,12 @@ OP_4201 ()
 #endif
   State.F1 = State.F0;
   if (shift >=0)
-    tmp = SEXT40 (State.a[1]) << shift;
+    tmp = SEXT44 (State.a[1]) << shift;
   else
-    tmp = SEXT40 (State.a[1]) >> -shift;
+    tmp = SEXT44 (State.a[1]) >> -shift;
   tmp += 0x8000;
+  printf("tmp=0x%llx\n",tmp);
+  /*
   if (tmp > MAX32)
     {
       State.regs[OP[0]] = 0x7fff;
@@ -1495,6 +1505,7 @@ OP_4201 ()
       State.F0 = 1;
     }
   else
+  */
     {
       State.regs[OP[0]] = (tmp >> 16) & 0xffff;
       State.F0 = 0;
