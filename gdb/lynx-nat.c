@@ -606,10 +606,6 @@ child_wait (pid, ourstatus)
       set_sigint_trap();	/* Causes SIGINT to be passed on to the
 				   attached process. */
       pid = wait (&status);
-#ifdef SPARC
-/* Swap halves of status so that the rest of GDB can understand it */
-      status.w_status = ((unsigned)status.w_status << 16) | ((unsigned)status.w_status >> 16);
-#endif
 
       save_errno = errno;
 
@@ -662,7 +658,31 @@ child_wait (pid, ourstatus)
 	    }
 	}
 
+#ifdef SPARC
+      /* SPARC Lynx uses an byte reversed wait status; we must use the
+	 host macros to access it.  These lines just a copy of
+	 store_waitstatus.  We can't use CHILD_SPECIAL_WAITSTATUS
+	 because target.c can't include the Lynx <sys/wait.h>.  */
+      if (WIFEXITED (status))
+	{
+	  ourstatus->kind = TARGET_WAITKIND_EXITED;
+	  ourstatus->value.integer = WEXITSTATUS (status);
+	}
+      else if (!WIFSTOPPED (status))
+	{
+	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+	  ourstatus->value.sig =
+	    target_signal_from_host (WTERMSIG (status));
+	}
+      else
+	{
+	  ourstatus->kind = TARGET_WAITKIND_STOPPED;
+	  ourstatus->value.sig =
+	    target_signal_from_host (WSTOPSIG (status));
+	}
+#else
       store_waitstatus (ourstatus, status.w_status);
+#endif
 
       return pid;
     }
@@ -744,8 +764,9 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
   unsigned int regno;
 
   for (regno = 0; regno < NUM_REGS; regno++)
-    supply_register (regno, core_reg_sect + offsetof (st_t, ec)
-		     + regmap[regno]);
+    if (regmap[regno] != -1)
+      supply_register (regno, core_reg_sect + offsetof (st_t, ec)
+		       + regmap[regno]);
 
 #ifdef SPARC
 /* Fetching this register causes all of the I & L regs to be read from the

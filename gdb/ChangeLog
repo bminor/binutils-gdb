@@ -1,3 +1,13 @@
+Tue Oct 11 15:51:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* lynx-nat.c (child_wait): Correct handling of byte reversed SPARC
+        Lynx wait status.
+	(fetch_core_registers): Don't try to fetch a register if
+	regmap maps it to -1.
+	* sparc-tdep.c (sparc_frame_find_saved_regs): Use FRAME_SAVED_I0
+	and FRAME_SAVED_L0 when setting saved_regs_addr.  SPARC Lynx
+	stores the registers in a weird order.
+
 Sat Oct  8 20:59:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* blockframe.c (reinit_frame_cache): Reinstate select_frame call
