@@ -1,3 +1,10 @@
+Sat Jan 22 01:37:40 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* sparc-tdep.c (frame_saved_pc):  Get the pc from the saved pc
+	in the sigcontext if it is a signal trampoline frame.
+	* config/sparc/tm-sun4sol2.h (IN_SIGTRAMP, SIGCONTEXT_PC_OFFSET):
+	Define for Solaris2.
+
 Sat Jan 22 00:34:47 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* sparc-tdep.c, lynx-nat.c, config/sparc/tm-sparc.h,
