@@ -13,11 +13,6 @@
 :option:::multi-sim:true
 :model:::v850e:v850e:
 
-:option:::multi-sim:true
-:model:::v850ea:v850ea:
-
-
-
 // Cache macros
 
 :cache:::unsigned:reg1:RRRRR:(RRRRR)
@@ -161,7 +156,6 @@ ddddd,1011,ddd,cccc:III:::Bcond
 // BSH
 rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
 *v850e
-*v850ea
 "bsh r<reg2>, r<reg3>"
 {
   unsigned32 value;
@@ -184,7 +178,6 @@ rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
 // BSW
 rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 *v850e
-*v850ea
 "bsw r<reg2>, r<reg3>"
 {
 #define WORDHASNULLBYTE(x) (((x) - 0x01010101) & ~(x)&0x80808080)
@@ -210,7 +203,6 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 // CALLT
 0000001000,iiiiii:II:::callt
 *v850e
-*v850ea
 "callt <imm6>"
 {
   unsigned32 adr;
@@ -233,7 +225,6 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 
 rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 *v850e
-*v850ea
 "clr1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E407E0 ());
@@ -243,7 +234,6 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 // CTRET
 0000011111100000 + 0000000101000100:X:::ctret
 *v850e
-*v850ea
 "ctret"
 {
   nia  = (CTPC & ~1);
@@ -254,7 +244,6 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 // CMOV
 rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
 *v850e
-*v850ea
 "cmov %s<cccc>, r<reg1>, r<reg2>, r<reg3>"
 {
   int cond = condition_met (cccc);
@@ -265,7 +254,6 @@ rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
 
 rrrrr,111111,iiiii + wwwww,011000,cccc,0:XII:::cmov
 *v850e
-*v850ea
 "cmov %s<cccc>, <imm5>, r<reg2>, r<reg3>"
 {
   int cond = condition_met (cccc);
@@ -303,7 +291,6 @@ rrrrr,010011,iiiii:II:::cmp
 // "dispose <imm5>, <list12>"
 0000011001,iiiii,L + LLLLLLLLLLL,RRRRR:XIII:::dispose
 *v850e
-*v850ea
 "dispose <imm5>, <list12>":RRRRR == 0
 "dispose <imm5>, <list12>, [reg1]"
 {
@@ -395,7 +382,6 @@ rrrrr,111111,RRRRR + wwwww,01011000010:XI:::divu
 // HSW
 rrrrr,11111100000 + wwwww,01101000100:XII:::hsw
 *v850e
-*v850ea
 "hsw r<reg2>, r<reg3>"
 {
   unsigned32 value;
@@ -470,7 +456,6 @@ rrrrr,111001,RRRRR + ddddddddddddddd,1:VII:::ld.w
 
 rrrrr!0,11110,b,RRRRR + ddddddddddddddd,1:VII:::ld.bu
 *v850e
-*v850ea
 "ld.bu <disp16>[r<reg1>], r<reg2>"
 {
   COMPAT_2 (OP_10780 ());
@@ -478,7 +463,6 @@ rrrrr!0,11110,b,RRRRR + ddddddddddddddd,1:VII:::ld.bu
 
 rrrrr!0,111111,RRRRR + ddddddddddddddd,1:VII:::ld.hu
 *v850e
-*v850ea
 "ld.hu <disp16>[r<reg1>], r<reg2>"
 {
   COMPAT_2 (OP_107E0 ());
@@ -519,7 +503,6 @@ rrrrr!0,010000,iiiii:II:::mov
 
 00000110001,RRRRR + iiiiiiiiiiiiiiii + IIIIIIIIIIIIIIII:VI:::mov
 *v850e
-*v850ea
 "mov <imm32>, r<reg1>"
 {
   SAVE_2;
@@ -553,7 +536,6 @@ rrrrr!0,110010,RRRRR + iiiiiiiiiiiiiiii:VI:::movhi
 // MUL
 rrrrr,111111,RRRRR + wwwww,01000100000:XI:::mul
 *v850e
-*v850ea
 "mul r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_22007E0 ());
@@ -561,7 +543,6 @@ rrrrr,111111,RRRRR + wwwww,01000100000:XI:::mul
 
 rrrrr,111111,iiiii + wwwww,01001,IIII,00:XII:::mul
 *v850e
-*v850ea
 "mul <imm9>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_24007E0 ());
@@ -595,7 +576,6 @@ rrrrr!0,110111,RRRRR + iiiiiiiiiiiiiiii:VI:::mulhi
 // MULU
 rrrrr,111111,RRRRR + wwwww,01000100010:XI:::mulu
 *v850e
-*v850ea
 "mulu r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_22207E0 ());
@@ -603,7 +583,6 @@ rrrrr,111111,RRRRR + wwwww,01000100010:XI:::mulu
 
 rrrrr,111111,iiiii + wwwww,01001,IIII,10:XII:::mulu
 *v850e
-*v850ea
 "mulu <imm9>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_24207E0 ());
@@ -638,7 +617,6 @@ rrrrr,000001,RRRRR:I:::not
 
 rrrrr,111111,RRRRR + 0000000011100010:IX:::not1
 *v850e
-*v850ea
 "not1 r<reg2>, r<reg1>"
 {
   COMPAT_2 (OP_E207E0 ());
@@ -667,7 +645,6 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 // PREPARE
 0000011110,iiiii,L + LLLLLLLLLLL,00001:XIII:::prepare
 *v850e
-*v850ea
 "prepare <list12>, <imm5>"
 {
   int  i;
@@ -692,7 +669,6 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,00011:XIII:::prepare00
 *v850e
-*v850ea
 "prepare <list12>, <imm5>, sp"
 {
   COMPAT_2 (OP_30780 ());
@@ -700,7 +676,6 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,01011 + iiiiiiiiiiiiiiii:XIII:::prepare01
 *v850e
-*v850ea
 "prepare <list12>, <imm5>, <uimm16>"
 {
   COMPAT_2 (OP_B0780 ());
@@ -708,7 +683,6 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,10011 + iiiiiiiiiiiiiiii:XIII:::prepare10
 *v850e
-*v850ea
 "prepare <list12>, <imm5>, <uimm16>"
 {
   COMPAT_2 (OP_130780 ());
@@ -716,7 +690,6 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 
 0000011110,iiiii,L + LLLLLLLLLLL,11011 + iiiiiiiiiiiiiiii + dddddddddddddddd:XIII:::prepare11
 *v850e
-*v850ea
 "prepare <list12>, <imm5>, <uimm32>"
 {
   COMPAT_2 (OP_1B0780 ());
@@ -766,7 +739,6 @@ rrrrr,010101,iiiii:II:::sar
 // SASF
 rrrrr,1111110,cccc + 0000001000000000:IX:::sasf
 *v850e
-*v850ea
 "sasf %s<cccc>, r<reg2>"
 {
   COMPAT_2 (OP_20007E0 ());
@@ -835,7 +807,6 @@ rrrrr,1111110,cccc + 0000000000000000:IX:::setf
 
 rrrrr,111111,RRRRR + 0000000011100000:IX:::set1
 *v850e
-*v850ea
 "set1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E007E0 ());
@@ -923,7 +894,6 @@ rrrrr,1010,dddddd,0:IV:::sld.w
 
 rrrrr!0,0000110,dddd:IV:::sld.bu
 *v850e
-*v850ea
 "sld.b <disp4>[ep], r<reg2>":(PSW & PSW_US)
 "sld.bu <disp4>[ep], r<reg2>"
 {
@@ -944,7 +914,6 @@ rrrrr!0,0000110,dddd:IV:::sld.bu
 
 rrrrr!0,0000111,dddd:IV:::sld.hu
 *v850e
-*v850ea
 "sld.h <disp5>[ep], r<reg2>":(PSW & PSW_US)
 "sld.hu <disp5>[ep], r<reg2>"
 {
@@ -962,7 +931,6 @@ rrrrr!0,0000111,dddd:IV:::sld.hu
       TRACE_LD (addr, result);
     }
 }
-
 
 // SST
 rrrrr,0111,ddddddd:IV:::sst.b
@@ -983,8 +951,6 @@ rrrrr,1010,dddddd,1:IV:::sst.w
   COMPAT_1 (OP_501 ());
 }
 
-
-
 // ST
 rrrrr,111010,RRRRR + dddddddddddddddd:VII:::st.b
 "st.b r<reg2>, <disp16>[r<reg1>]"
@@ -1004,8 +970,6 @@ rrrrr,111011,RRRRR + ddddddddddddddd,1:VII:::st.w
   COMPAT_2 (OP_10760 ());
 }
 
-
-
 // STSR
 rrrrr,111111,regID + 0000000001000000:IX:::stsr
 "stsr s<regID>, r<reg2>"
@@ -1015,16 +979,12 @@ rrrrr,111111,regID + 0000000001000000:IX:::stsr
   TRACE_ALU_RESULT (GR[reg2]);
 }
 
-
-
 // SUB
 rrrrr,001101,RRRRR:I:::sub
 "sub r<reg1>, r<reg2>"
 {
   COMPAT_1 (OP_1A0 ());
 }
-
-
 
 // SUBR
 rrrrr,001100,RRRRR:I:::subr
@@ -1033,12 +993,9 @@ rrrrr,001100,RRRRR:I:::subr
   COMPAT_1 (OP_180 ());
 }
 
-
-
 // SWITCH
 00000000010,RRRRR:I:::switch
 *v850e
-*v850ea
 "switch r<reg1>"
 {
   unsigned long adr;
@@ -1049,11 +1006,9 @@ rrrrr,001100,RRRRR:I:::subr
   trace_output (OP_REG);
 }
 
-
 // SXB
 00000000101,RRRRR:I:::sxb
 *v850e
-*v850ea
 "sxb r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -1064,15 +1019,12 @@ rrrrr,001100,RRRRR:I:::subr
 // SXH
 00000000111,RRRRR:I:::sxh
 *v850e
-*v850ea
 "sxh r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
   GR[reg1] = EXTEND16 (GR[reg1]);
   TRACE_ALU_RESULT (GR[reg1]);
 }
-
-
 
 // TRAP
 00000111111,iiiii + 0000000100000000:X:::trap
@@ -1081,16 +1033,12 @@ rrrrr,001100,RRRRR:I:::subr
   COMPAT_2 (OP_10007E0 ());
 }
 
-
-
 // TST
 rrrrr,001011,RRRRR:I:::tst
 "tst r<reg1>, r<reg2>"
 {
   COMPAT_1 (OP_160 ());
 }
-
-
 
 // TST1
 11,bbb,111110,RRRRR + dddddddddddddddd:VIII:::tst1
@@ -1101,13 +1049,10 @@ rrrrr,001011,RRRRR:I:::tst
 
 rrrrr,111111,RRRRR + 0000000011100110:IX:::tst1
 *v850e
-*v850ea
 "tst1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E607E0 ());
 }
-
-
 
 // XOR
 rrrrr,001001,RRRRR:I:::xor
@@ -1116,8 +1061,6 @@ rrrrr,001001,RRRRR:I:::xor
   COMPAT_1 (OP_120 ());
 }
 
-
-
 // XORI
 rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 "xori <uimm16>, r<reg1>, r<reg2>"
@@ -1125,12 +1068,9 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
   COMPAT_2 (OP_6A0 ());
 }
 
-
-
 // ZXB
 00000000100,RRRRR:I:::zxb
 *v850e
-*v850ea
 "zxb r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -1141,14 +1081,12 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 // ZXH
 00000000110,RRRRR:I:::zxh
 *v850e
-*v850ea
 "zxh r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
   GR[reg1] = GR[reg1] & 0xffff;
   TRACE_ALU_RESULT (GR[reg1]);
 }
-
 
 // Right field must be zero so that it doesn't clash with DIVH
 // Left field must be non-zero so that it doesn't clash with SWITCH
@@ -1157,262 +1095,8 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
   sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
 }
 
-
 // New breakpoint: 0x7E0 0x7E0
 00000,111111,00000 + 00000,11111,100000:X:::ilgop
 {
   sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
 }
-
-// DIVHN
-rrrrr,111111,RRRRR + wwwww,01010,iiii,00:XI:::divhn
-*v850ea
-"divhn <imm5>, r<reg1>, r<reg2>, r<reg3>"
-{
-  signed32 quotient;
-  signed32 remainder;
-  signed32 divide_by;
-  signed32 divide_this;
-  boolean overflow = false;
-  SAVE_2;
-      
-  trace_input ("divhn", OP_IMM_REG_REG_REG, 0);
-
-  divide_by   = EXTEND16 (State.regs[ reg1 ]);
-  divide_this = State.regs[ reg2 ];
-  
-  divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
-  
-  State.regs[ reg2 ] = quotient;
-  State.regs[ reg3 ] = remainder;
-  
-  /* Set condition codes.  */
-  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-  
-  if (overflow)      PSW |= PSW_OV;
-  if (quotient == 0) PSW |= PSW_Z;
-  if (quotient <  0) PSW |= PSW_S;
-  
-  trace_output (OP_IMM_REG_REG_REG);
-}
-
-
-
-// DIVHUN
-rrrrr,111111,RRRRR + wwwww,01010,iiii,10:XI:::divhun
-*v850ea
-"divhun <imm5>, r<reg1>, r<reg2>, r<reg3>"
-{
-  signed32 quotient;
-  signed32 remainder;
-  signed32 divide_by;
-  signed32 divide_this;
-  boolean overflow = false;
-  SAVE_2;
-      
-  trace_input ("divhun", OP_IMM_REG_REG_REG, 0);
-  
-  divide_by   = State.regs[ reg1 ] & 0xffff;
-  divide_this = State.regs[ reg2 ];
-  
-  divun (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
-  
-  State.regs[ reg2 ] = quotient;
-  State.regs[ reg3 ] = remainder;
-  
-  /* Set condition codes.  */
-  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-  
-  if (overflow)      PSW |= PSW_OV;
-  if (quotient == 0) PSW |= PSW_Z;
-  if (quotient & 0x80000000) PSW |= PSW_S;
-
-  trace_output (OP_IMM_REG_REG_REG);
-}
-
-
-
-// DIVN
-rrrrr,111111,RRRRR + wwwww,01011,iiii,00:XI:::divn
-*v850ea
-"divn <imm5>, r<reg1>, r<reg2>, r<reg3>"
-{
-  signed32 quotient;
-  signed32 remainder;
-  signed32 divide_by;
-  signed32 divide_this;
-  boolean overflow = false;
-  SAVE_2;
-      
-  trace_input ("divn", OP_IMM_REG_REG_REG, 0);
-
-  divide_by   = State.regs[ reg1 ];
-  divide_this = State.regs[ reg2 ];
-
-  divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
-      
-  State.regs[ reg2 ] = quotient;
-  State.regs[ reg3 ] = remainder;
-      
-  /* Set condition codes.  */
-  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-  
-  if (overflow)      PSW |= PSW_OV;
-  if (quotient == 0) PSW |= PSW_Z;
-  if (quotient <  0) PSW |= PSW_S;
-  
-  trace_output (OP_IMM_REG_REG_REG);
-}
-
-
-
-// DIVUN
-rrrrr,111111,RRRRR + wwwww,01011,iiii,10:XI:::divun
-*v850ea
-"divun <imm5>, r<reg1>, r<reg2>, r<reg3>"
-{
-  signed32 quotient;
-  signed32 remainder;
-  signed32 divide_by;
-  signed32 divide_this;
-  boolean overflow = false;
-  SAVE_2;
-
-  trace_input ("divun", OP_IMM_REG_REG_REG, 0);
-
-  divide_by   = State.regs[ reg1 ];
-  divide_this = State.regs[ reg2 ];
-
-  divun (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
-      
-  State.regs[ reg2 ] = quotient;
-  State.regs[ reg3 ] = remainder;
-      
-  /* Set condition codes.  */
-  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-      
-  if (overflow)      PSW |= PSW_OV;
-  if (quotient == 0) PSW |= PSW_Z;
-  if (quotient & 0x80000000) PSW |= PSW_S;
-
-  trace_output (OP_IMM_REG_REG_REG);
-}
-
-
-
-// SDIVHN
-rrrrr,111111,RRRRR + wwwww,00110,iiii,00:XI:::sdivhn
-*v850ea
-"sdivhn <imm5>, r<reg1>, r<reg2>, r<reg3>"
-{
-  COMPAT_2 (OP_18007E0 ());
-}
-
-
-
-// SDIVHUN
-rrrrr,111111,RRRRR + wwwww,00110,iiii,10:XI:::sdivhun
-*v850ea
-"sdivhun <imm5>, r<reg1>, r<reg2>, r<reg3>"
-{
-  COMPAT_2 (OP_18207E0 ());
-}
-
-
-
-// SDIVN
-rrrrr,111111,RRRRR + wwwww,00111,iiii,00:XI:::sdivn
-*v850ea
-"sdivn <imm5>, r<reg1>, r<reg2>, r<reg3>"
-{
-  COMPAT_2 (OP_1C007E0 ());
-}
-
-
-
-// SDIVUN
-rrrrr,111111,RRRRR + wwwww,00111,iiii,10:XI:::sdivun
-*v850ea
-"sdivun <imm5>, r<reg1>, r<reg2>, r<reg3>"
-{
-  COMPAT_2 (OP_1C207E0 ());
-}
-
-
-
-// PUSHML
-000001111110,LLLL + LLLLLLLLLLLL,S,001:XIV:::pushml
-*v850ea
-"pushml <list18>"
-{
-  int i;
-  SAVE_2;
-  
-  trace_input ("pushml", OP_PUSHPOP3, 0);
-  
-  /* Store the registers with lower number registers being placed at
-     higher addresses.  */
-
-  for (i = 0; i < 15; i++)
-    if ((OP[3] & (1 << type3_regs[ i ])))
-      {
-	SP -= 4;
-	store_mem (SP & ~ 3, 4, State.regs[ i + 1 ]);
-      }
-  
-  if (OP[3] & (1 << 3))
-    {
-      SP -= 4;
-      
-      store_mem (SP & ~ 3, 4, PSW);
-    }
-  
-  if (OP[3] & (1 << 19))
-    {
-      SP -= 8;
-      
-      if ((PSW & PSW_NP) && ((PSW & PSW_EP) == 0))
-	{
-	  store_mem ((SP + 4) & ~ 3, 4, FEPC);
-	  store_mem ( SP      & ~ 3, 4, FEPSW);
-	}
-      else
-	{
-	  store_mem ((SP + 4) & ~ 3, 4, EIPC);
-	  store_mem ( SP      & ~ 3, 4, EIPSW);
-	}
-    }
-  
-  trace_output (OP_PUSHPOP2);
-}
-
-
-
-// PUSHHML
-000001111110,LLLL + LLLLLLLLLLLL,S,011:XIV:::pushmh
-*v850ea
-"pushhml <list18>"
-{
-  COMPAT_2 (OP_307E0 ());
-}
-
-
-
-// POPML
-000001111111,LLLL + LLLLLLLLLLLL,S,001:XIV:::popml
-*v850ea
-"popml <list18>"
-{
-  COMPAT_2 (OP_107F0 ());
-}
-
-
-
-// POPMH
-000001111111,LLLL + LLLLLLLLLLLL,S,011:XIV:::popmh
-*v850ea
-"popmh <list18>"
-{
-  COMPAT_2 (OP_307F0 ());
-}
-
