@@ -40,10 +40,15 @@ rmcmd="$rmprog -f"
 mvcmd="$mvprog"
 src=""
 dst=""
+dir_arg=""
 
 while [ x"$1" != x ]; do
     case $1 in
 	-c) instcmd="$cpprog"
+	    shift
+	    continue;;
+
+	-d) dir_arg=true
 	    shift
 	    continue;;
 
@@ -95,42 +100,50 @@ else
 	true
 fi
 
+if [ x"$dir_arg" != x ]; then
+	dst=$src
+	src=""
+	
+	if [ -d $dst ]; then
+		instcmd=:
+	else
+		instcmd=mkdir
+	fi
+else
+
 # Waiting for this to be detected by the "$instcmd $src $dsttmp" command
 # might cause directories to be created, which would be especially bad 
 # if $src (and thus $dsttmp) contains '*'.
 
-if [ -f $src -o -d $src ]
-then
-	true
-else
-	echo "install:  $src does not exist"
-	exit 1
-fi
-
-if [ x"$dst" = x ]
-then
-	echo "install:	no destination specified"
-	exit 1
-else
-	true
-fi
+	if [ -f $src -o -d $src ]
+	then
+		true
+	else
+		echo "install:  $src does not exist"
+		exit 1
+	fi
+	
+	if [ x"$dst" = x ]
+	then
+		echo "install:	no destination specified"
+		exit 1
+	else
+		true
+	fi
 
 # If destination is a directory, append the input filename; if your system
 # does not like double slashes in filenames, you may need to add some logic
 
-if [ -d $dst ]
-then
-	dst="$dst"/`basename $src`
-else
-	true
+	if [ -d $dst ]
+	then
+		dst="$dst"/`basename $src`
+	else
+		true
+	fi
 fi
-
-
-# Make a temp file name in the proper directory.
 
 ## this sed command emulates the dirname command
 dstdir=`echo $dst | sed -e 's,[^/]*$,,;s,/$,,;s,^$,.,'`
-dsttmp=$dstdir/#inst.$$#
 
 # Make sure that the destination directory exists.
 #  this part is taken from Noah Friedman's mkinstalldirs script
@@ -161,29 +174,44 @@ while [ $# -ne 0 ] ; do
 	pathcomp="${pathcomp}/"
 done
 
+if [ x"$dir_arg" != x ]
+then
+	$doit $instcmd $dst &&
+
+	if [ x"$chowncmd" != x ]; then $doit $chowncmd $dst; else true ; fi &&
+	if [ x"$chgrpcmd" != x ]; then $doit $chgrpcmd $dst; else true ; fi &&
+	if [ x"$stripcmd" != x ]; then $doit $stripcmd $dst; else true ; fi &&
+	if [ x"$chmodcmd" != x ]; then $doit $chmodcmd $dst; else true ; fi
+else
+
 # If we're going to rename the final executable, determine the name now.
 
-if [ x"$transformarg" = x ] 
-then
-	dstfile=`basename $dst`
-else
-	dstfile=`basename $dst $transformbasename | sed $transformarg`$transformbasename
-fi
+	if [ x"$transformarg" = x ] 
+	then
+		dstfile=`basename $dst`
+	else
+		dstfile=`basename $dst $transformbasename | 
+			sed $transformarg`$transformbasename
+	fi
 
 # don't allow the sed command to completely eliminate the filename
 
-if [ x"$dstfile" = x ] 
-then
-	dstfile=`basename $dst`
-else
-	true
-fi
+	if [ x"$dstfile" = x ] 
+	then
+		dstfile=`basename $dst`
+	else
+		true
+	fi
+
+# Make a temp file name in the proper directory.
+
+	dsttmp=$dstdir/#inst.$$#
 
 # Move or copy the file name to the temp name
 
-$doit $instcmd $src $dsttmp &&
+	$doit $instcmd $src $dsttmp &&
 
-trap "rm -f ${dsttmp}" 0 &&
+	trap "rm -f ${dsttmp}" 0 &&
 
 # and set any options; do chmod last to preserve setuid bits
 
@@ -191,15 +219,17 @@ trap "rm -f ${dsttmp}" 0 &&
 # ignore errors from any of these, just make sure not to ignore
 # errors from the above "$doit $instcmd $src $dsttmp" command.
 
-if [ x"$chowncmd" != x ]; then $doit $chowncmd $dsttmp; else true ; fi &&
-if [ x"$chgrpcmd" != x ]; then $doit $chgrpcmd $dsttmp; else true ; fi &&
-if [ x"$stripcmd" != x ]; then $doit $stripcmd $dsttmp; else true ; fi &&
-if [ x"$chmodcmd" != x ]; then $doit $chmodcmd $dsttmp; else true ; fi &&
+	if [ x"$chowncmd" != x ]; then $doit $chowncmd $dsttmp; else true;fi &&
+	if [ x"$chgrpcmd" != x ]; then $doit $chgrpcmd $dsttmp; else true;fi &&
+	if [ x"$stripcmd" != x ]; then $doit $stripcmd $dsttmp; else true;fi &&
+	if [ x"$chmodcmd" != x ]; then $doit $chmodcmd $dsttmp; else true;fi &&
 
 # Now rename the file to the real destination.
 
-$doit $rmcmd -f $dstdir/$dstfile &&
-$doit $mvcmd $dsttmp $dstdir/$dstfile &&
+	$doit $rmcmd -f $dstdir/$dstfile &&
+	$doit $mvcmd $dsttmp $dstdir/$dstfile 
+
+fi &&
 
 
 exit 0

@@ -1,3 +1,8 @@
+Thu Sep  9 16:48:52 1993  Jason Merrill  (jason@deneb.cygnus.com)
+
+	* install.sh: Support -d option (in the manner of SunOS 4 install,
+	as it is more deterministic than that of GNU install)
+
 Tue Sep  7 11:59:39 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* config.sub: Remove h8300hhms alias.
