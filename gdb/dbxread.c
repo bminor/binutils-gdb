@@ -1526,12 +1526,6 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
       SWAP_SYMBOL (bufp, abfd);
 
       type = bufp->n_type;
-      if (type == (unsigned char)N_CATCH)
-	{
-	  /* N_CATCH is not fixed up by the linker, and unfortunately,
-	     there's no other place to put it in the .stab map.  */
-	  bufp->n_value += text_offset - offset;
-	}
 
       SET_NAMESTRING ();
 
@@ -1687,11 +1681,6 @@ process_one_symbol (type, desc, valu, name, offset, objfile)
 
       new = push_context (0, valu);
       new->name = define_symbol (valu, name, desc, type, objfile);
-      break;
-
-    case N_CATCH:
-      /* Record the address at which this catch takes place.  */
-      define_symbol (valu+offset, name, desc, type, objfile);
       break;
 
     case N_LBRAC:
@@ -1944,6 +1933,7 @@ process_one_symbol (type, desc, valu, name, offset, objfile)
     case N_NBBSS:
     case N_NBSTS:
     case N_NBLCS:
+    case N_CATCH:
       complain (&unknown_symtype_complaint, local_hex_string(type));
       if (name)
 	define_symbol (valu, name, desc, type, objfile);
