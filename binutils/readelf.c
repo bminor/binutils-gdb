@@ -21,7 +21,25 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
+/* The difference between readelf and objdump:
 
+  Both programs are capabale of displaying the contents of ELF format files,
+  so why does the binutils project have two file dumpers ?
+  
+  The reason is that objdump sees an ELF file through a BFD filter of the
+  world; if BFD has a bug where, say, it disagrees about a machine constant
+  in e_flags, then the odds are good that it will remain internally
+  consistent.  The linker sees it the BFD way, objdump sees it the BFD way,
+  GAS sees it the BFD way.  There was need for a tool to go find out what
+  the file actually says.
+
+  This is why the readelf program does not link against the BFD library - it
+  exists as an independent program to help verify the correct working of BFD.
+
+  There is also the case that readelf can provide more information about an
+  ELF file than is provided by objdump.  In particular it can display DWARF
+  debugging information which (at the moment) objdump cannot.  */
+
 #include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>

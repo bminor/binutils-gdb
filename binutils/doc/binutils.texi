@@ -3129,6 +3129,11 @@ files.  The options control what particular information to display.
 @var{elffile}@dots{} are the object files to be examined.  32-bit and
 64-bit ELF files are supported, as are archives containing ELF files.
 
+This program performs a similar function to @command{objdump} but it
+goes into more detail and it exists independently of the @sc{bfd}
+library, so if there is a bug in @sc{bfd} then readelf will not be
+affected.
+
 @c man end
 
 @c man begin OPTIONS readelf

@@ -1,3 +1,10 @@
+2003-11-26  Daniel Jacobowitz <drow@mvista.com>
+            Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c: Add a comment describing the difference between
+	readelf and objdump.
+        * doc/binutils.texi (readelf): Likewise.
+
 2003-11-25  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* doc/binutils.texi (dlltool): Document dlltool --temp-prefix
