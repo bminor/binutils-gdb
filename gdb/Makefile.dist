@@ -209,7 +209,6 @@ OTHERS = Makefile.dist depend alldeps.mak Makefile.sdir \
 	 createtags munch config.gdb config.status \
 	 ChangeLog ChangeLog-3.x \
 	 README TODO TAGS WHATS.NEW \
-	 doc \
 	 .gdbinit COPYING expread.tab.c \
 	 copying.c Projects Convex.notes copying.awk \
 	 saber.suppress standalone.c stuff.c kdb-start.c \
@@ -410,6 +409,9 @@ gdb.tar.Z: ${TARFILES}
 	rm -f gdb.tar; rm -rf $(DIST)
 	mkdir $(DIST)
 	cd $(DIST) ; for i in ${TARFILES} ; do ln -s ../$$i . ; done
+	mkdir doc
+	cd doc; for i in ../doc/*.tex* ../doc/*.m4; \
+	   do ln -s $$i . ; done
 	mkdir $(DIST)/xconfig ${DIST}/tconfig
 	cd $(DIST)/tconfig ; \
 	  for i in $(ALLCONFIG) ; do ln -s ../../$$i ../$$i ; done
