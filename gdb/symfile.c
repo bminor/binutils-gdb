@@ -1989,7 +1989,6 @@ allocate_psymtab (char *filename, struct objfile *objfile)
   psymtab->filename = obsavestring (filename, strlen (filename),
 				    &objfile->psymbol_obstack);
   psymtab->symtab = NULL;
-  psymtab->text_addrs = addrset_new (&objfile->psymbol_obstack);
 
   /* Prepend it to the psymtab list for the objfile it belongs to.
      Psymtabs are searched in most recent inserted -> least recent
