@@ -2241,8 +2241,9 @@ relax_segment (segment_frag_root, segment)
 
 	    if (offset % fragP->fr_var != 0)
 	      {
-		as_bad (_("alignment padding (%lu bytes) not a multiple of %ld"),
-			(unsigned long) offset, (long) fragP->fr_var);
+		as_bad_where (fragP->fr_file, fragP->fr_line,
+			      _("alignment padding (%lu bytes) not a multiple of %ld"),
+			      (unsigned long) offset, (long) fragP->fr_var);
 		offset -= (offset % fragP->fr_var);
 	      }
 
@@ -2353,10 +2354,11 @@ relax_segment (segment_frag_root, segment)
 			    {
 			      char buf[50];
 			      sprint_value (buf, (addressT) lie->addnum);
-			      as_warn (_(".word %s-%s+%s didn't fit"),
-				       S_GET_NAME (lie->add),
-				       S_GET_NAME (lie->sub),
-				       buf);
+			      as_warn_where (fragP->fr_file, fragP->fr_line,
+					     _(".word %s-%s+%s didn't fit"),
+					     S_GET_NAME (lie->add),
+					     S_GET_NAME (lie->sub),
+					     buf);
 			    }
 			  lie->added = 1;
 			  if (fragP->fr_subtype == 0)
@@ -2451,6 +2453,7 @@ relax_segment (segment_frag_root, segment)
 		}
 
 	      case rs_space:
+		growth = 0;
 		if (symbolP)
 		  {
 		    offsetT amount;
@@ -2459,19 +2462,22 @@ relax_segment (segment_frag_root, segment)
 		    if (symbol_get_frag (symbolP) != &zero_address_frag
 			|| S_IS_COMMON (symbolP)
 			|| ! S_IS_DEFINED (symbolP))
-		      as_bad_where (fragP->fr_file, fragP->fr_line,
-				    _(".space specifies non-absolute value"));
-		    if (amount < 0)
 		      {
-			as_warn (_(".space or .fill with negative value, ignored"));
-			amount = 0;
+			as_bad_where (fragP->fr_file, fragP->fr_line,
+				      _(".space specifies non-absolute value"));
+			/* Prevent repeat of this error message.  */
 			fragP->fr_symbol = 0;
 		      }
-		    growth = (fragP->fr_address + amount
-			      - fragP->fr_next->fr_address);
+		    else if (amount < 0)
+		      {
+			as_warn_where (fragP->fr_file, fragP->fr_line,
+				       _(".space or .fill with negative value, ignored"));
+			fragP->fr_symbol = 0;
+		      }
+		    else
+		      growth = (was_address + amount
+				- fragP->fr_next->fr_address);
 		  }
-		else
-		  growth = 0;
 		break;
 
 	      case rs_machine_dependent:
