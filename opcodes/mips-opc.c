@@ -236,7 +236,8 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"bnel",    "s,t,p",	0x54000000, 0xfc000000,	CBL|RD_s|RD_t, 	I2|T3	},
 {"bnel",    "s,I,p",	0,    (int) M_BNEL_I,	INSN_MACRO,	I2	},
 {"break",   "",		0x0000000d, 0xffffffff,	TRAP,		I1	},
-{"break",   "c",	0x0000000d, 0xfc00003f,	TRAP,		I1	},
+{"break",   "c",	0x0000000d, 0xfc00ffff,	TRAP,		I1	},
+{"break",   "c,q",	0x0000000d, 0xfc00003f,	TRAP,		I1	},
 {"c.f.d",   "S,T",	0x46200030, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	I1	},
 {"c.f.d",   "M,S,T",	0x46200030, 0xffe000ff,	RD_S|RD_T|WR_CC|FP_D,	I4	},
 {"c.f.s",   "S,T",	0x46000030, 0xffe007ff,	RD_S|RD_T|WR_CC|FP_S,	I1	},
@@ -682,7 +683,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"msub.d",  "D,R,S,T",	0x4c000029, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_D,	I4	},
 {"msub.s",  "D,R,S,T",	0x4c000028, 0xfc00003f, RD_R|RD_S|RD_T|WR_D|FP_S,	I4	},
 /* start-sanitize-r5900 */
-{"msub.s",  "D,S,T",	0x4600001d, 0xffe007ff, WR_D|RD_S|RD_T|FP_S,	T5	},
+{"msub.s",  "D,S,T",	0x4600001d, 0xffe0003f, WR_D|RD_S|RD_T|FP_S,	T5	},
 /* end-sanitize-r5900 */
 {"msub",    "s,t",	0x0000001e, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,L1	},
 {"msubu",   "s,t",	0x0000001f, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,L1	},
@@ -939,7 +940,8 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"sd",      "t,o(b)",	0,    (int) M_SD_OB,	INSN_MACRO,	I1	},
 {"sd",      "t,A(b)",	0,    (int) M_SD_AB,	INSN_MACRO,	I1	},
 {"sdbbp",   "",		0x0000000e, 0xffffffff,	TRAP,           G2	},
-{"sdbbp",   "c",	0x0000000e, 0xfc00003f,	TRAP,		G2	},
+{"sdbbp",   "c",	0x0000000e, 0xfc00ffff,	TRAP,		G2	},
+{"sdbbp",   "c,q",	0x0000000e, 0xfc00003f,	TRAP,		G2	},
 {"sdc1",    "T,o(b)",	0xf4000000, 0xfc000000, SM|RD_T|RD_b|FP_D,	I2	},
 {"sdc1",    "E,o(b)",	0xf4000000, 0xfc000000, SM|RD_T|RD_b|FP_D,	I2	},
 {"sdc1",    "T,A(b)",	0,    (int) M_SDC1_AB,	INSN_MACRO,	I2	},

@@ -1,3 +1,10 @@
+Thu May  7 09:33:02 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* mips-opc.c (break, sdbbp): Added two-operand variety of ISA1
+	instructions to set bottom ten bits of break code.
+	* mips-dis.c (print_insn_arg): Implement 'q' operand format used
+	for above optional argument.
+
 start-sanitize-cygnus
 Wed May  6 14:47:17 1998  Doug Evans  <devans@seba.cygnus.com>
 
