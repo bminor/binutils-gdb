@@ -1,5 +1,7 @@
 2001-12-26  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.texinfo (maint info sections): Document.
+
 	* gdb.texinfo (info proc): Comment out documentation for 
 	'info proc' sub-options that are currently not implemented.
 

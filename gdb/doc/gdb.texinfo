@@ -9347,6 +9347,53 @@ use by @value{GDBN}, and the files from which symbols were loaded.  The
 command @code{help target} lists all possible targets rather than
 current ones.
 
+@kindex maint info sections
+@item maint info sections
+Another command that can give you extra information about program sections
+is @code{maint info sections}.  In addition to the section information
+displayed by @code{info files}, this command displays the flags and file
+offset of each section in the executable and core dump files.  In addition,
+@code{maint info sections} provides the following command options (which
+may be arbitrarily combined):
+
+@table @code
+@item ALLOBJ
+Display sections for all loaded object files, including shared libraries.
+@item @var{sections}
+Display info only for named var{sections}.
+@item @var{section-flags}
+Display info only for sections for which @var{section-flags} are true.
+The section flags that @value{GDBN} currently knows about are:
+@table @code
+@item ALLOC
+Section will have space allocated in the process when loaded.
+Set for all sections except those containing debug information.
+@item LOAD
+Section will be loaded from the file into the child process memory.
+Set for pre-initialized code and data, clear for @code{.bss} sections.
+@item RELOC
+Section needs to be relocated before loading.
+@item READONLY
+Section cannot be modified by the child process.
+@item CODE
+Section contains executable code only.
+@tem DATA
+Section contains data only (no executable code).
+@item ROM
+Section will reside in ROM.
+@item CONSTRUCTOR
+Section contains data for constructor/destructor lists.
+@item HAS_CONTENTS
+Section is not empty.
+@item NEVER_LOAD
+An instruction to the linker to not output the section.
+@item COFF_SHARED_LIBRARY
+A notification to the linker that the section contains
+COFF shared library information.
+@item IS_COMMON
+Section contains common symbols.
+@end table
+@end table
 @end table
 
 All file-specifying commands allow both absolute and relative file names
