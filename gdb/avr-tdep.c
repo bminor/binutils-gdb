@@ -774,14 +774,6 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
   return pc + avr_scan_arg_moves (vpc, prologue);;
 }
 
-/* Returns the return address for a dummy. */
-
-static CORE_ADDR
-avr_call_dummy_address (void)
-{
-  return entry_point_address ();
-}
-
 static CORE_ADDR
 avr_skip_prologue (CORE_ADDR pc)
 {
@@ -1339,7 +1331,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, avr_extract_return_value);
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
-  set_gdbarch_call_dummy_address (gdbarch, avr_call_dummy_address);
   set_gdbarch_push_dummy_call (gdbarch, avr_push_dummy_call);
 
   set_gdbarch_address_to_pointer (gdbarch, avr_address_to_pointer);

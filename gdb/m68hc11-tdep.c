@@ -1049,14 +1049,6 @@ m68hc11_push_arguments (int nargs,
 }
 
 
-/* Return a location where we can set a breakpoint that will be hit
-   when an inferior function call returns.  */
-static CORE_ADDR
-m68hc11_call_dummy_address (void)
-{
-  return entry_point_address ();
-}
-
 static struct type *
 m68hc11_register_virtual_type (int reg_nr)
 {
@@ -1374,7 +1366,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pseudo_register_read (gdbarch, m68hc11_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, m68hc11_pseudo_register_write);
 
-  set_gdbarch_call_dummy_address (gdbarch, m68hc11_call_dummy_address);
   set_gdbarch_deprecated_call_dummy_words (gdbarch, m68hc11_call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (m68hc11_call_dummy_words));
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);

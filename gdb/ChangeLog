@@ -1,3 +1,10 @@
+2003-06-27  Andrew Cagney  <cagney@redhat.com>
+
+	* m68hc11-tdep.c (m68hc11_call_dummy_address): Delete function.
+	(m68hc11_gdbarch_init): Do not set call_dummy_address.
+	* avr-tdep.c (avr_call_dummy_address): Delete function.
+	(avr_gdbarch_init): Do not set call_dummy_address.
+
 2003-06-27  Elena Zannoni  <ezannoni@redhat.com>
 
 	* symfile.c (syms_from_objfile): Move variables to inner block.
