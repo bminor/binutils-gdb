@@ -1,3 +1,8 @@
+2004-06-29  James E Wilson  <wilson@specifixinc.com>
+
+	* ia64-opc-a.c (ia64_opcodes_a): Delete mov immediate pseudo for adds.
+	* ia64-asmtab.c: Regnerate.
+
 2004-06-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (insert_fxm): Handle mfocrf and mtocrf.
