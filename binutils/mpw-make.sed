@@ -48,8 +48,12 @@ BUILD_DLLTOOL = \
 /lex.yy.c/s/^lex\.yy\.c/"{o}"lex.yy.c/
 /arlex.c/s/"{s}"arlex\.c/"{o}"arlex.c/g
 /arlex.c/s/^arlex\.c/"{o}"arlex.c/
+/y.tab.c/s/"{s}"y\.tab\.c/"{o}"y.tab.c/g
+/y.tab.c/s/^y\.tab\.c/"{o}"y.tab.c/
 /arparse.c/s/"{s}"arparse\.c/"{o}"arparse.c/g
 /arparse.c/s/^arparse\.c/"{o}"arparse.c/
+/y.tab.h/s/"{s}"y\.tab\.h/"{o}"y.tab.h/g
+/y.tab.h/s/^y\.tab\.h/"{o}"y.tab.h/
 /arparse.h/s/"{s}"arparse\.h/"{o}"arparse.h/g
 /arparse.h/s/^arparse\.h/"{o}"arparse.h/
 
