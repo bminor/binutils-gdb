@@ -1,3 +1,8 @@
+Mon Feb 26 12:52:48 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Edit out recent shared library support, and
+	rules to rebuild .h files using doc/chew.
+
 Mon Feb 26 14:48:39 1996  David Mosberger-Tang  <davidm@AZStarNet.com>
 
 	* ecoff.c (ecoff_compute_section_file_positions): Adjust the file
