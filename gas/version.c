@@ -11,7 +11,7 @@
    universe.c (temporal_reality): Began Time.
    */
 
-#ifdef VMS
+#ifdef HO_VMS
 dummy3 ()
 {
 }

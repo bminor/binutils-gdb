@@ -66,7 +66,7 @@ bignum_copy (in, in_length, out, out_length)
 
       if (out_length > in_length)
 	{
-	  memset ((char *) (out + out_length),
+	  memset ((char *) (out + in_length),
 		  '\0', (out_length - in_length) << LITTLENUM_SHIFT);
 	}
 
