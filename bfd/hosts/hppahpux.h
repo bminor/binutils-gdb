@@ -7,6 +7,9 @@
 #include <string.h>
 #include <sys/file.h>
 #include <memory.h>
+#include <stdlib.h>
+
+#define HOST_HPPAHPUX
 
 void free();
 
@@ -30,9 +33,6 @@ rename(from, to)
   return(link(from, to));
 }
 #endif
-
-extern PTR   EXFUN(malloc,(unsigned));
-extern PTR   EXFUN(realloc, (PTR, unsigned));
 
 /* EXACT TYPES */
 typedef char int8e_type;
