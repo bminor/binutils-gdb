@@ -23,13 +23,14 @@
 test -z "$ENTRY" && ENTRY=_start
 test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
+if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHINE}; fi
 test "$LD_FLAG" = "N" && DATA_ADDR=.
 INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
 PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
 	      "${LITTLE_OUTPUT_FORMAT}")
-OUTPUT_ARCH(${ARCH})
+OUTPUT_ARCH(${OUTPUT_ARCH})
 ENTRY(${ENTRY})
 
 ${RELOCATING+${LIB_SEARCH_DIRS}}
@@ -77,6 +78,7 @@ SECTIONS
     *(.text)
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
+    *(.gnu.linkonce*)
   } =${NOP-0}
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
@@ -85,8 +87,10 @@ SECTIONS
   .rodata1 ${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
 
-  /* Read-write section, merged into data segment: */
-  ${RELOCATING+. = ${DATA_ADDR- ALIGN(8) + ${MAXPAGESIZE}};}
+  /* Adjust the address for the data segment.  We want to adjust up to
+     the same address within the page on the next page up.  */
+  ${RELOCATING+. = ${DATA_ADDR-ALIGN(${MAXPAGESIZE}) + (ALIGN(8) & (${MAXPAGESIZE} - 1))};}
+
   .data  ${RELOCATING-0} :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
@@ -118,10 +122,26 @@ SECTIONS
   ${RELOCATING+_end = . ;}
   ${RELOCATING+PROVIDE (end = .);}
 
-  /* These are needed for ELF backends which have not yet been
-     converted to the new style linker.  */
+  /* Stabs debugging sections.  */
   .stab 0 : { *(.stab) }
   .stabstr 0 : { *(.stabstr) }
+  .stab.excl 0 : { *(.stab.excl) }
+  .stab.exclstr 0 : { *(.stab.exclstr) }
+  .stab.index 0 : { *(.stab.index) }
+  .stab.indexstr 0 : { *(.stab.indexstr) }
+
+  .comment 0 : { *(.comment) }
+
+  /* DWARF debug sections.
+     Symbols in the .debug DWARF section are relative to the beginning of the
+     section so we begin .debug at 0.  It's not clear yet what needs to happen
+     for the others.   */
+  .debug          0 : { *(.debug) }
+  .debug_srcinfo  0 : { *(.debug_srcinfo) }
+  .debug_aranges  0 : { *(.debug_aranges) }
+  .debug_pubnames 0 : { *(.debug_pubnames) }
+  .debug_sfnames  0 : { *(.debug_sfnames) }
+  .line           0 : { *(.line) }
 
   /* These must appear regardless of ${RELOCATING}.  */
   ${OTHER_SECTIONS}
