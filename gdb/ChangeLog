@@ -1,3 +1,20 @@
+Thu Aug  4 07:55:04 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/i386/i386m3.mh (NAT_CLIBS): Add -lmachid and -lnetname.
+	* m3-nat.c, config/nm-m3.h: #if 0 REQUEST_QUIT stuff.
+	* m3-nat.c: Pass argument to return_to_top_level.
+	Declare m3_kill_inferior before use.
+	(port_chain_insert): In "can't happen" case, abort rather than
+	setting `mid' to large decimal constant (which gcc warns about).
+	(get_thread_name): Use cast to convert const char * to char *.
+	(add_mach_specific_commands): #if 0 "thread break" command.
+	(m3_trace_him): Call push_target.
+	(mach_really_wait): New argument pid; remove unused
+	variable pid.
+	(intercept_exec_calls): Call target_terminal_init and
+	target_terminal_inferior once the child execs.
+	* infrun.c (proceed): Pass argument to PREPARE_TO_PROCEED.
+
 Wed Aug  3 12:05:13 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* breakpoint.c (breakpoint_1): Improve pluralization in display
@@ -28,7 +45,7 @@ Mon Aug  1 18:48:47 1994  Stan Shebs  (shebs@andros.cygnus.com)
 	* defs.h: Change two-line declarations to one-line form.
 	(NORETURN): Define as "volatile" only for older GCCs.
 	(ATTR_NORETURN): Define for newer GCCs.
-	* procfs.c (proc_init_filed): Add ATTR_NORETURN to declaration.
+	* procfs.c (proc_init_failed): Add ATTR_NORETURN to declaration.
 
 Mon Aug  1 16:43:24 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 

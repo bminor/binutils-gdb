@@ -261,6 +261,7 @@ struct cleanup *cleanup_step = NULL_CLEANUP;
 
 
 extern struct target_ops m3_ops;
+static void m3_kill_inferior ();
 
 #if 0
 #define MACH_TYPE_EXCEPTION_PORT	-1
@@ -321,7 +322,7 @@ port_chain_insert (list, name, type)
 	}
     }
   else
-    mid = 3735928559;	/* 0x? :-) */
+    abort ();
 
   new = (port_chain_t) obstack_alloc (port_chain_obstack,
 				      sizeof (struct port_chain));
@@ -617,6 +618,8 @@ void
 intercept_exec_calls (exec_counter)
      int exec_counter;
 {
+  int terminal_initted = 0;
+
   struct syscall_msg_t {
     mach_msg_header_t	header;
     mach_msg_type_t 	type;
@@ -751,6 +754,23 @@ intercept_exec_calls (exec_counter)
 	      original_exec_reply = syscall_in.header.msgh_remote_port;
 	      syscall_in.header.msgh_remote_port = exec_reply_send;
 	    }
+
+	  if (!terminal_initted)
+	    {
+	      /* Now that the child has exec'd we know it has already set its
+		 process group.  On POSIX systems, tcsetpgrp will fail with
+		 EPERM if we try it before the child's setpgid.  */
+
+	      /* Set up the "saved terminal modes" of the inferior
+		 based on what modes we are starting it with.  */
+	      target_terminal_init ();
+
+	      /* Install inferior's terminal modes.  */
+	      target_terminal_inferior ();
+
+	      terminal_initted = 1;
+	    }
+
 	  exec_counter--;
 	}
 	    
@@ -1127,6 +1147,8 @@ m3_trace_him (pid)
 {
   kern_return_t ret;
 
+  push_target (&m3_ops);
+
   inferior_task = task_by_pid (pid);
 
   if (! MACH_PORT_VALID (inferior_task))
@@ -1219,10 +1241,10 @@ int mach_really_waiting;
    Returns the inferior_pid for rest of gdb.
    Side effects: Set *OURSTATUS.  */
 int
-mach_really_wait (ourstatus)
+mach_really_wait (pid, ourstatus)
+     int pid;
      struct target_waitstatus *ourstatus;
 {
-  int pid;
   kern_return_t ret;
   int w;
 
@@ -1373,6 +1395,9 @@ mach3_quit ()
   return;
 }
 
+#if 0
+/* bogus bogus bogus.  It is NOT OK to quit out of target_wait.  */
+
 /* If ^C is typed when we are waiting for a message
  * and your Unix server is able to notice that we 
  * should quit now.
@@ -1385,6 +1410,7 @@ mach3_request_quit ()
   if (mach_really_waiting)
     immediate_quit = 1;
 }      
+#endif
 
 /*
  * Gdb message server.
@@ -2112,7 +2138,7 @@ get_thread_name (one_cproc, id)
 	sprintf(buf, "_t%d", id);
       }
     else
-      return (one_cproc->cthread->name);
+      return (char *)(one_cproc->cthread->name);
   else
     {
       if (id < 0)
@@ -2944,7 +2970,7 @@ suspend_all_threads (from_tty)
     {
       warning ("Could not suspend inferior threads.");
       m3_kill_inferior ();
-      return_to_top_level ();
+      return_to_top_level (RETURN_ERROR);
     }
   
   for (index = 0; index < thread_count; index++)
@@ -3118,7 +3144,7 @@ thread_resume_command (args, from_tty)
       {
 	if (current_thread)
 	  current_thread = saved_thread;
-	return_to_top_level ();
+	return_to_top_level (RETURN_ERROR);
       }
 
   ret = thread_info (current_thread,
@@ -3662,8 +3688,6 @@ task_command (arg, from_tty)
 
 add_mach_specific_commands ()
 {
-  extern void condition_thread ();
-
   /* Thread handling commands */
 
   /* FIXME: Move our thread support into the generic thread.c stuff so we
@@ -3689,10 +3713,15 @@ add_mach_specific_commands ()
   add_cmd ("kill", class_run, thread_kill_command,
 	   "Kill the specified thread MID from inferior task.",
 	   &cmd_thread_list);
+#if 0
+  /* The rest of this support (condition_thread) was not merged.  It probably
+     should not be merged in this form, but instead added to the generic GDB
+     thread support.  */
   add_cmd ("break", class_breakpoint, condition_thread,
 	   "Breakpoint N will only be effective for thread MID or @SLOT\n\
 	    If MID/@SLOT is omitted allow all threads to break at breakpoint",
 	   &cmd_thread_list);
+#endif
   /* Thread command shorthands (for backward compatibility) */
   add_alias_cmd ("ts", "mthread select", 0, 0, &cmdlist);
   add_alias_cmd ("tl", "mthread list",   0, 0, &cmdlist);

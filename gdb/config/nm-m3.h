@@ -111,7 +111,10 @@ struct emul_stack_top {
 /* Do Mach 3 dependent operations when ^C or a STOP is requested */
 #define DO_QUIT() mach3_quit ()
 
+#if 0
+/* This is bogus.  It is NOT OK to quit out of target_wait.  */
 /* If in mach_msg() and ^C is typed set immediate_quit */
 #define REQUEST_QUIT() mach3_request_quit ()
+#endif
 
 #endif /* NM_M3_H */
