@@ -1,3 +1,7 @@
+1999-11-22  Nick Clifton  <nickc@cygnus.com>
+
+	* d10v-opc.c: Fix pattern for "cpfg,f{0|1},c" instruction.
+
 1999-11-18  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* mips-opc.c (I5): New.
