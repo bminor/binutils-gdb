@@ -1,5 +1,9 @@
 2002-03-03  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (FLOOR.L.fmt): Store correct destination register.
+
+2002-03-03  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen: Remove whitespace at end of lines.
 
 2002-03-02  Chris Demetriou  <cgd@broadcom.com>

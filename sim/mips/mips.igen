@@ -3541,7 +3541,7 @@
     if ((fmt != fmt_single) && (fmt != fmt_double))
       SignalException(ReservedInstruction,instruction_0);
     else
-      StoreFPR(FS,fmt_long,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_long));
+      StoreFPR(FD,fmt_long,Convert(FP_RM_TOMINF,ValueFPR(FS,fmt),fmt,fmt_long));
   }
 }
 
