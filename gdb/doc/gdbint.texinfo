@@ -3501,6 +3501,17 @@ Non-zero if the target has both @code{BIG_ENDIAN} and
 @findex TARGET_CHAR_BIT
 Number of bits in a char; defaults to 8.
 
+@item TARGET_CHAR_SIGNED
+@findex TARGET_CHAR_SIGNED
+Non-zero if @code{char} is normally signed on this architecture; zero if
+it should be unsigned.
+
+The ISO C standard requires the compiler to treat @code{char} as
+equivalent to either @code{signed char} or @code{unsigned char}; any
+character in the standard execution set is supposed to be positive.
+Most compilers treat @code{char} as signed, but @code{char} is unsigned
+on the IBM S/390, RS6000, and PowerPC targets.
+
 @item TARGET_COMPLEX_BIT
 @findex TARGET_COMPLEX_BIT
 Number of bits in a complex number; defaults to @code{2 * TARGET_FLOAT_BIT}.

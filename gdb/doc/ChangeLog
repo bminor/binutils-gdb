@@ -1,3 +1,7 @@
+2001-12-20  Jim Blandy  <jimb@redhat.com>
+
+	* gdbint.texinfo (TARGET_CHAR_SIGNED): Document.
+
 2001-12-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Replace
