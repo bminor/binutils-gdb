@@ -1,5 +1,5 @@
 /* BFD back-end data structures for ELF files.
-   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999 Free Software
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999, 2000 Free Software
    Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1303,5 +1303,9 @@ extern boolean _bfd_mips_elf_modify_segment_map PARAMS ((bfd *));
 extern boolean _bfd_mips_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
+
+/* SH ELF specific routine.  */
+
+extern boolean _sh_elf_set_mach_from_flags PARAMS ((bfd *));
 
 #endif /* _LIBELF_H_ */

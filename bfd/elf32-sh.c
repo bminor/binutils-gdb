@@ -1,5 +1,5 @@
 /* Hitachi SH specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1996, 97, 98, 1999, 2000 Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -33,6 +33,14 @@ static reloc_howto_type *sh_elf_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void sh_elf_info_to_howto
   PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
+static boolean sh_elf_set_private_flags
+  PARAMS ((bfd *, flagword));
+static boolean sh_elf_copy_private_data
+  PARAMS ((bfd *, bfd *));
+static boolean sh_elf_merge_private_data
+  PARAMS ((bfd *, bfd *));
+boolean sh_elf_set_mach_from_flags
+  PARAMS ((bfd *));
 static boolean sh_elf_relax_section
   PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
 static boolean sh_elf_relax_delete_bytes
@@ -2087,6 +2095,109 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
   return true;
 }
 
+boolean
+sh_elf_set_mach_from_flags (abfd)
+     bfd *    abfd;
+{
+  flagword flags = elf_elfheader (abfd)->e_flags;
+
+  switch (elf_elfheader (abfd)->e_flags & EF_SH_MACH_MASK)
+    {
+    case EF_SH1:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh);
+      break;
+    case EF_SH2:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh2);
+      break;
+    case EF_SH_DSP:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh_dsp);
+      break;
+    case EF_SH3:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh3);
+      break;
+    case EF_SH3_DSP:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh3_dsp);
+      break;
+    case EF_SH3E:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh3e);
+      break;
+    case EF_SH_UNKNOWN:
+    case EF_SH4:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sh, bfd_mach_sh4);
+      break;
+    default:
+      return false;
+    }
+  return true;
+}
+
+/* Function to keep SH specific file flags. */
+static boolean
+sh_elf_set_private_flags (abfd, flags)
+     bfd *    abfd;
+     flagword flags;
+{
+  BFD_ASSERT (! elf_flags_init (abfd)
+	      || elf_elfheader (abfd)->e_flags == flags);
+
+  elf_elfheader (abfd)->e_flags = flags;
+  elf_flags_init (abfd) = true;
+  return sh_elf_set_mach_from_flags (abfd);
+}
+
+/* Copy backend specific data from one object module to another */
+static boolean
+sh_elf_copy_private_data (ibfd, obfd)
+     bfd * ibfd;
+     bfd * obfd;
+{
+  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  return sh_elf_set_private_flags (obfd, elf_elfheader (ibfd)->e_flags);
+}
+
+/* This routine checks for linking big and little endian objects
+   together, and for linking sh-dsp with sh3e / sh4 objects.  */
+
+static boolean
+sh_elf_merge_private_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  flagword old_flags, new_flags;
+
+  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+    return false;
+
+  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  if (! elf_flags_init (obfd))
+    {
+      elf_flags_init (obfd) = true;
+      elf_elfheader (obfd)->e_flags = 0;
+    }
+  old_flags = elf_elfheader (obfd)->e_flags;
+  new_flags = elf_elfheader (ibfd)->e_flags;
+  if ((EF_SH_HAS_DSP (old_flags) && EF_SH_HAS_FP (new_flags))
+      || (EF_SH_HAS_DSP (new_flags) && EF_SH_HAS_FP (old_flags)))
+    {
+      (*_bfd_error_handler)
+	("%s: uses %s instructions while previous modules use %s instructions",
+	 bfd_get_filename (ibfd),
+	 EF_SH_HAS_DSP (new_flags) ? "dsp" : "floating point",
+	 EF_SH_HAS_DSP (new_flags) ? "floating point" : "dsp");
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+  elf_elfheader (obfd)->e_flags = EF_SH_MERGE_MACH (old_flags, new_flags);
+
+  return sh_elf_set_mach_from_flags (obfd);
+}
+
 #define TARGET_BIG_SYM		bfd_elf32_sh_vec
 #define TARGET_BIG_NAME		"elf32-sh"
 #define TARGET_LITTLE_SYM	bfd_elf32_shl_vec
@@ -2103,8 +2214,13 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
 #define elf_backend_relocate_section	sh_elf_relocate_section
 #define bfd_elf32_bfd_get_relocated_section_contents \
 					sh_elf_get_relocated_section_contents
+#define elf_backend_object_p		sh_elf_set_mach_from_flags
+#define bfd_elf32_bfd_set_private_bfd_flags \
+					sh_elf_set_private_flags
+#define bfd_elf32_bfd_copy_private_bfd_data \
+					sh_elf_copy_private_data
 #define bfd_elf32_bfd_merge_private_bfd_data \
-					_bfd_generic_verify_endian_match
+					sh_elf_merge_private_data
 
 #define elf_backend_gc_mark_hook        sh_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook       sh_elf_gc_sweep_hook

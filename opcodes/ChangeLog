@@ -1,3 +1,20 @@
+Thu Feb 17 00:18:12 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* sh-dis.c (print_movxy, print_insn_ddt, print_dsp_reg): New functions.
+	(print_insn_ppi): Likewise.
+	(print_insn_shx): Use info->mach to select appropriate insn set.
+	Add support for sh-dsp.  Remove FD_REG_N support.
+	* sh-opc.h (sh_nibble_type): Add new values for sh-dsp support.
+	(sh_arg_type): Likewise.  Remove FD_REG_N.
+	(sh_dsp_reg_nums): New enum.
+	(arch_sh1, arch_sh2, arch_sh3, arch_sh3e, arch_sh4): New macros.
+	(arch_sh_dsp, arch_sh3_dsp, arch_sh1_up, arch_sh2_up): Likewise.
+	(arch_sh3_up, arch_sh3e_up, arch_sh4_up, arch_sh_dsp_up): Likewise.
+	(arch_sh3_dsp_up): Likewise.
+	(sh_opcode_info): New field: arch.
+	(sh_table): Split up insn with FD_REG_N into ones with F_REG_N and
+	D_REG_N.  Fill in arch field.  Add sh-dsp insns.
+
 2000-02-14  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* arm-dis.c: Change flavor name from atpcs-special to

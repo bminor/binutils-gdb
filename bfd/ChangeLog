@@ -1,3 +1,38 @@
+Thu Feb 17 00:04:48 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* archures.c (bfd_mach_sh2, bfd_mach_sh_dsp): New macros.
+	(bfd_mach_sh3_dsp): Likewise.
+	(bfd_mach_sh4): Reinstate.
+	(bfd_default_scan): Recognize 7410, 7708, 7729 and 7750.
+	* bfd-in2.h: Regenerate.
+	* coff-sh.c (struct sh_opcode): flags is no longer short.
+	(USESAS, USESAS_REG, USESR8, SETSAS, SETSAS_REG): New macros.
+	(sh_opcode41, sh_opcode42): Integrate as sh_opcode41.
+	(sh_opcode01, sh_opcode02, sh_opcode40): Add sh-dsp opcodes.
+	(sh_opcode41, sh_opcode4, sh_opcode80): Likewise.
+	(sh_opcodes): No longer const.
+	(sh_dsp_opcodef0, sh_dsp_opcodef): New arrays.
+	(sh_insn_uses_reg): Check for USESAS and USESR8.
+	(sh_insn_sets_reg, sh_insns_conflict): Check for SETSAS.
+	(_bfd_sh_align_load_span): Return early for SH4.
+	Modify sh_opcodes lookup table for sh-dsp / sh3-dsp.
+	Take into account that field b of a parallel processing insn
+	could be mistaken for a separate insn.
+	* cpu-sh.c (arch_info_struct): New array elements for
+	sh2, sh-dsp and sh3-dsp.
+	Reinstate element for sh4.
+	(SH2_NEXT, SH_DSP_NEXT, SH3_DSP_NEXT): New macros.
+	(SH4_NEXT): Reinstate.
+	(SH3_NEXT, SH3E_NEXT): Adjust.
+	* elf-bfd.h (_sh_elf_set_mach_from_flags): Declare.
+	* elf32-sh.c (sh_elf_set_private_flags): New function.
+	(sh_elf_copy_private_data, sh_elf_set_mach_from_flags): Likewise.
+	(sh_elf_merge_private_data): New function.
+	(elf_backend_object_p, bfd_elf32_bfd_set_private_bfd_flags): Define.
+	(bfd_elf32_bfd_copy_private_bfd_data): Define.
+	(bfd_elf32_bfd_merge_private_bfd_data): Change to
+	sh_elf_merge_private_data.
+
 2000-02-13  Richard Henderson  <rth@cygnus.com>
 
 	* elf-bfd.h (struct elf_link_hash_table): Add copy_indirect and

@@ -1,3 +1,22 @@
+Thu Feb 17 00:11:08 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* config/tc-sh.c ("elf/sh.h"): Include.
+	(sh_dsp, valid_arch, reg_x, reg_y, reg_efg): New static variables.
+	(md.begin): Initialize target_arch.
+	Only include opcodes in has table that match selected architecture.
+	(parse_reg): Recognize register names for sh-dsp.
+	(parse_at): Recognize post-modify addressing.
+	(get_operands): The leading space is now optional.
+	(get_specific): Remove FDREG_N support.  Add support for sh-dsp
+	arguments.  Update valid_arch.
+	(build_Mytes): Add support for SDT_REG_N.
+	(find_cooked_opcode): New function, broken out of md_assemble.
+	(assemble_ppi, sh_elf_final_processing): New functions.
+	(md_assemble): Use find_cooked_opcode and assemble_ppi.
+	(md_longopts, md_parse_option): New option: -dsp.
+	* config/tc-sh.h (elf_tc_final_processing): Define.
+	(sh_elf_final_processing): Declare.
+
 Fri Feb 11 14:21:51 2000  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_build_unwind_subspace): Use subseg_new to create

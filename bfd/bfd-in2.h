@@ -1362,8 +1362,12 @@ enum bfd_architecture
   bfd_arch_h8500,      /* Hitachi H8/500 */
   bfd_arch_sh,         /* Hitachi SH */
 #define bfd_mach_sh            0
+#define bfd_mach_sh2        0x20
+#define bfd_mach_sh_dsp     0x2d
 #define bfd_mach_sh3        0x30
+#define bfd_mach_sh3_dsp    0x3d
 #define bfd_mach_sh3e       0x3e
+#define bfd_mach_sh4        0x40
   bfd_arch_alpha,      /* Dec Alpha */
 #define bfd_mach_alpha_ev4  0x10
 #define bfd_mach_alpha_ev5  0x20

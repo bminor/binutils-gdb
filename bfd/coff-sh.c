@@ -1364,7 +1364,7 @@ struct sh_opcode
      mask value in the sh_major_opcode structure.  */
   unsigned short opcode;
   /* Flags for this instruction.  */
-  unsigned short flags;
+  unsigned flags;
 };
 
 /* Flag which appear in the sh_opcode structure.  */
@@ -1431,6 +1431,12 @@ struct sh_opcode
 #define SETSF1 (0x8000)
 #define SETSF1_REG(x) ((x & 0x0f00) >> 8)
 
+#define USESAS (0x10000)
+#define USESAS_REG(x) (((((x) >> 8) - 2) & 3) + 2)
+#define USESR8 (0x20000)
+#define SETSAS (0x40000)
+#define SETSAS_REG(x) USESAS_REG (x)
+
 static boolean sh_insn_uses_reg
   PARAMS ((unsigned int, const struct sh_opcode *, unsigned int));
 static boolean sh_insn_sets_reg
@@ -1471,21 +1477,33 @@ static const struct sh_opcode sh_opcode00[] =
 
 static const struct sh_opcode sh_opcode01[] =
 {
-  { 0x0002, SETS1 | USESSP },			/* stc sr,rn */
   { 0x0003, BRANCH | DELAY | USES1 | SETSSP },	/* bsrf rn */
   { 0x000a, SETS1 | USESSP },			/* sts mach,rn */
-  { 0x0012, SETS1 | USESSP },			/* stc gbr,rn */
   { 0x001a, SETS1 | USESSP },			/* sts macl,rn */
-  { 0x0022, SETS1 | USESSP },			/* stc vbr,rn */
   { 0x0023, BRANCH | DELAY | USES1 },		/* braf rn */
   { 0x0029, SETS1 | USESSP },			/* movt rn */
   { 0x002a, SETS1 | USESSP },			/* sts pr,rn */
+  { 0x005a, SETS1 | USESSP },			/* sts fpul,rn */
+  { 0x006a, SETS1 | USESSP },			/* sts fpscr,rn / sts dsr,rn */
+  { 0x0083, LOAD | USES1 },			/* pref @rn */
+  { 0x007a, SETS1 | USESSP },			/* sts a0,rn */
+  { 0x008a, SETS1 | USESSP },			/* sts x0,rn */
+  { 0x009a, SETS1 | USESSP },			/* sts x1,rn */
+  { 0x00aa, SETS1 | USESSP },			/* sts y0,rn */
+  { 0x00ba, SETS1 | USESSP }			/* sts y1,rn */
+};
+
+/* These sixteen instructions can be handled with one table entry below.  */
+#if 0
+  { 0x0002, SETS1 | USESSP },			/* stc sr,rn */
+  { 0x0012, SETS1 | USESSP },			/* stc gbr,rn */
+  { 0x0022, SETS1 | USESSP },			/* stc vbr,rn */
   { 0x0032, SETS1 | USESSP },			/* stc ssr,rn */
   { 0x0042, SETS1 | USESSP },			/* stc spc,rn */
-  { 0x005a, SETS1 | USESSP },			/* sts fpul,rn */
-  { 0x006a, SETS1 | USESSP },			/* sts fpscr,rn */
+  { 0x0052, SETS1 | USESSP },			/* stc mod,rn */
+  { 0x0062, SETS1 | USESSP },			/* stc rs,rn */
+  { 0x0072, SETS1 | USESSP },			/* stc re,rn */
   { 0x0082, SETS1 | USESSP },			/* stc r0_bank,rn */
-  { 0x0083, LOAD | USES1 },			/* pref @rn */
   { 0x0092, SETS1 | USESSP },			/* stc r1_bank,rn */
   { 0x00a2, SETS1 | USESSP },			/* stc r2_bank,rn */
   { 0x00b2, SETS1 | USESSP },			/* stc r3_bank,rn */
@@ -1493,10 +1511,11 @@ static const struct sh_opcode sh_opcode01[] =
   { 0x00d2, SETS1 | USESSP },			/* stc r5_bank,rn */
   { 0x00e2, SETS1 | USESSP },			/* stc r6_bank,rn */
   { 0x00f2, SETS1 | USESSP }			/* stc r7_bank,rn */
-};
+#endif
 
 static const struct sh_opcode sh_opcode02[] =
 {
+  { 0x0002, SETS1 | USESSP },			/* stc <special_reg>,rn */
   { 0x0004, STORE | USES1 | USES2 | USESR0 },	/* mov.b rm,@(r0,rn) */
   { 0x0005, STORE | USES1 | USES2 | USESR0 },	/* mov.w rm,@(r0,rn) */
   { 0x0006, STORE | USES1 | USES2 | USESR0 },	/* mov.l rm,@(r0,rn) */
@@ -1576,74 +1595,108 @@ static const struct sh_opcode sh_opcode40[] =
   { 0x4000, SETS1 | SETSSP | USES1 },		/* shll rn */
   { 0x4001, SETS1 | SETSSP | USES1 },		/* shlr rn */
   { 0x4002, STORE | SETS1 | USES1 | USESSP },	/* sts.l mach,@-rn */
-  { 0x4003, STORE | SETS1 | USES1 | USESSP },	/* stc.l sr,@-rn */
   { 0x4004, SETS1 | SETSSP | USES1 },		/* rotl rn */
   { 0x4005, SETS1 | SETSSP | USES1 },		/* rotr rn */
   { 0x4006, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,mach */
-  { 0x4007, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,sr */
   { 0x4008, SETS1 | USES1 },			/* shll2 rn */
   { 0x4009, SETS1 | USES1 },			/* shlr2 rn */
   { 0x400a, SETSSP | USES1 },			/* lds rm,mach */
   { 0x400b, BRANCH | DELAY | USES1 },		/* jsr @rn */
-  { 0x400e, SETSSP | USES1 },			/* ldc rm,sr */
   { 0x4010, SETS1 | SETSSP | USES1 },		/* dt rn */
   { 0x4011, SETSSP | USES1 },			/* cmp/pz rn */
   { 0x4012, STORE | SETS1 | USES1 | USESSP },	/* sts.l macl,@-rn */
-  { 0x4013, STORE | SETS1 | USES1 | USESSP },	/* stc.l gbr,@-rn */
+  { 0x4014, SETSSP | USES1 },			/* setrc rm */
   { 0x4015, SETSSP | USES1 },			/* cmp/pl rn */
   { 0x4016, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,macl */
-  { 0x4017, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,gbr */
   { 0x4018, SETS1 | USES1 },			/* shll8 rn */
   { 0x4019, SETS1 | USES1 },			/* shlr8 rn */
   { 0x401a, SETSSP | USES1 },			/* lds rm,macl */
   { 0x401b, LOAD | SETSSP | USES1 },		/* tas.b @rn */
-  { 0x401e, SETSSP | USES1 },			/* ldc rm,gbr */
   { 0x4020, SETS1 | SETSSP | USES1 },		/* shal rn */
   { 0x4021, SETS1 | SETSSP | USES1 },		/* shar rn */
   { 0x4022, STORE | SETS1 | USES1 | USESSP },	/* sts.l pr,@-rn */
-  { 0x4023, STORE | SETS1 | USES1 | USESSP },	/* stc.l vbr,@-rn */
   { 0x4024, SETS1 | SETSSP | USES1 | USESSP },	/* rotcl rn */
   { 0x4025, SETS1 | SETSSP | USES1 | USESSP },	/* rotcr rn */
   { 0x4026, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,pr */
-  { 0x4027, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,vbr */
   { 0x4028, SETS1 | USES1 },			/* shll16 rn */
   { 0x4029, SETS1 | USES1 },			/* shlr16 rn */
   { 0x402a, SETSSP | USES1 },			/* lds rm,pr */
   { 0x402b, BRANCH | DELAY | USES1 },		/* jmp @rn */
-  { 0x402e, SETSSP | USES1 },			/* ldc rm,vbr */
-  { 0x4033, STORE | SETS1 | USES1 | USESSP },	/* stc.l ssr,@-rn */
-  { 0x4037, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,ssr */
-  { 0x403e, SETSSP | USES1 },			/* ldc rm,ssr */
-  { 0x4043, STORE | SETS1 | USES1 | USESSP },	/* stc.l spc,@-rn */
-  { 0x4047, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,spc */
-  { 0x404e, SETSSP | USES1 },			/* ldc rm,spc */
   { 0x4052, STORE | SETS1 | USES1 | USESSP },	/* sts.l fpul,@-rn */
   { 0x4056, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,fpul */
   { 0x405a, SETSSP | USES1 },			/* lds.l rm,fpul */
-  { 0x4062, STORE | SETS1 | USES1 | USESSP },	/* sts.l fpscr,@-rn */
-  { 0x4066, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,fpscr */
-  { 0x406a, SETSSP | USES1 }			/* lds rm,fpscr */
+  { 0x4062, STORE | SETS1 | USES1 | USESSP },	/* sts.l fpscr / dsr,@-rn */
+  { 0x4066, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,fpscr / dsr */
+  { 0x406a, SETSSP | USES1 },			/* lds rm,fpscr / lds rm,dsr */
+  { 0x4072, STORE | SETS1 | USES1 | USESSP },	/* sts.l a0,@-rn */
+  { 0x4076, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,a0 */
+  { 0x407a, SETSSP | USES1 },			/* lds.l rm,a0 */
+  { 0x4082, STORE | SETS1 | USES1 | USESSP },	/* sts.l x0,@-rn */
+  { 0x4086, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,x0 */
+  { 0x408a, SETSSP | USES1 },			/* lds.l rm,x0 */
+  { 0x4092, STORE | SETS1 | USES1 | USESSP },	/* sts.l x1,@-rn */
+  { 0x4096, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,x1 */
+  { 0x409a, SETSSP | USES1 },			/* lds.l rm,x1 */
+  { 0x40a2, STORE | SETS1 | USES1 | USESSP },	/* sts.l y0,@-rn */
+  { 0x40a6, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,y0 */
+  { 0x40aa, SETSSP | USES1 },			/* lds.l rm,y0 */
+  { 0x40b2, STORE | SETS1 | USES1 | USESSP },	/* sts.l y1,@-rn */
+  { 0x40b6, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,y1 */
+  { 0x40ba, SETSSP | USES1 }			/* lds.l rm,y1 */
+#if 0 /* These groups sixteen insns can be
+         handled with one table entry each below.  */
+  { 0x4003, STORE | SETS1 | USES1 | USESSP },	/* stc.l sr,@-rn */
+  { 0x4013, STORE | SETS1 | USES1 | USESSP },	/* stc.l gbr,@-rn */
+  { 0x4023, STORE | SETS1 | USES1 | USESSP },	/* stc.l vbr,@-rn */
+  { 0x4033, STORE | SETS1 | USES1 | USESSP },	/* stc.l ssr,@-rn */
+  { 0x4043, STORE | SETS1 | USES1 | USESSP },	/* stc.l spc,@-rn */
+  { 0x4053, STORE | SETS1 | USES1 | USESSP },	/* stc.l mod,@-rn */
+  { 0x4063, STORE | SETS1 | USES1 | USESSP },	/* stc.l rs,@-rn */
+  { 0x4073, STORE | SETS1 | USES1 | USESSP },	/* stc.l re,@-rn */
+  { 0x4083, STORE | SETS1 | USES1 | USESSP },	/* stc.l r0_bank,@-rn */
+  ..
+  { 0x40f3, STORE | SETS1 | USES1 | USESSP },	/* stc.l r7_bank,@-rn */
+
+  { 0x4007, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,sr */
+  { 0x4017, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,gbr */
+  { 0x4027, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,vbr */
+  { 0x4037, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,ssr */
+  { 0x4047, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,spc */
+  { 0x4057, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,mod */
+  { 0x4067, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,rs */
+  { 0x4077, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,re */
+  { 0x4087, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,r0_bank */
+  ..
+  { 0x40f7, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,r7_bank */
+
+  { 0x400e, SETSSP | USES1 },			/* ldc rm,sr */
+  { 0x401e, SETSSP | USES1 },			/* ldc rm,gbr */
+  { 0x402e, SETSSP | USES1 },			/* ldc rm,vbr */
+  { 0x403e, SETSSP | USES1 },			/* ldc rm,ssr */
+  { 0x404e, SETSSP | USES1 },			/* ldc rm,spc */
+  { 0x405e, SETSSP | USES1 },			/* ldc rm,mod */
+  { 0x406e, SETSSP | USES1 },			/* ldc rm,rs */
+  { 0x407e, SETSSP | USES1 }			/* ldc rm,re */
+  { 0x408e, SETSSP | USES1 }			/* ldc rm,r0_bank */
+  ..
+  { 0x40fe, SETSSP | USES1 }			/* ldc rm,r7_bank */
+#endif
 };
 
 static const struct sh_opcode sh_opcode41[] =
 {
-  { 0x4083, STORE | SETS1 | USES1 | USESSP },	/* stc.l rx_bank,@-rn */
-  { 0x4087, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,rx_bank */
-  { 0x408e, SETSSP | USES1 }			/* ldc rm,rx_bank */
-};
-
-static const struct sh_opcode sh_opcode42[] =
-{
-  { 0x400c, SETS1 | USES1 | USES2 },			/* shad rm,rn */
-  { 0x400d, SETS1 | USES1 | USES2 },			/* shld rm,rn */
+  { 0x4003, STORE | SETS1 | USES1 | USESSP },	/* stc.l <special_reg>,@-rn */
+  { 0x4007, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,<special_reg> */
+  { 0x400c, SETS1 | USES1 | USES2 },		/* shad rm,rn */
+  { 0x400d, SETS1 | USES1 | USES2 },		/* shld rm,rn */
+  { 0x400e, SETSSP | USES1 },			/* ldc rm,<special_reg> */
   { 0x400f, LOAD|SETS1|SETS2|SETSSP|USES1|USES2|USESSP }, /* mac.w @rm+,@rn+ */
 };
 
 static const struct sh_minor_opcode sh_opcode4[] =
 {
   { MAP (sh_opcode40), 0xf0ff },
-  { MAP (sh_opcode41), 0xf08f },
-  { MAP (sh_opcode42), 0xf00f }
+  { MAP (sh_opcode41), 0xf00f }
 };
 
 static const struct sh_opcode sh_opcode50[] =
@@ -1695,12 +1748,15 @@ static const struct sh_opcode sh_opcode80[] =
 {
   { 0x8000, STORE | USES2 | USESR0 },	/* mov.b r0,@(disp,rn) */
   { 0x8100, STORE | USES2 | USESR0 },	/* mov.w r0,@(disp,rn) */
+  { 0x8200, SETSSP },			/* setrc #imm */
   { 0x8400, LOAD | SETSR0 | USES2 },	/* mov.b @(disp,rm),r0 */
   { 0x8500, LOAD | SETSR0 | USES2 },	/* mov.w @(disp,rn),r0 */
   { 0x8800, SETSSP | USESR0 },		/* cmp/eq #imm,r0 */
   { 0x8900, BRANCH | USESSP },		/* bt label */
   { 0x8b00, BRANCH | USESSP },		/* bf label */
+  { 0x8c00, SETSSP },			/* ldrs @(disp,pc) */
   { 0x8d00, BRANCH | DELAY | USESSP },	/* bt/s label */
+  { 0x8e00, SETSSP },			/* ldre @(disp,pc) */
   { 0x8f00, BRANCH | DELAY | USESSP }	/* bf/s label */
 };
 
@@ -1822,7 +1878,7 @@ static const struct sh_minor_opcode sh_opcodef[] =
   { MAP (sh_opcodef1), 0xf0ff }
 };
 
-static const struct sh_major_opcode sh_opcodes[] =
+static struct sh_major_opcode sh_opcodes[] =
 {
   { MAP (sh_opcode0) },
   { MAP (sh_opcode1) },
@@ -1840,6 +1896,26 @@ static const struct sh_major_opcode sh_opcodes[] =
   { MAP (sh_opcoded) },
   { MAP (sh_opcodee) },
   { MAP (sh_opcodef) }
+};
+
+/* The double data transfer / parallel processing insns are not
+   described here.  This will cause sh_align_load_span to leave them alone.  */
+
+static const struct sh_opcode sh_dsp_opcodef0[] =
+{
+  { 0xf400, USESAS | SETSAS | LOAD | SETSSP },	/* movs.x @-as,ds */
+  { 0xf401, USESAS | SETSAS | STORE | USESSP },	/* movs.x ds,@-as */
+  { 0xf404, USESAS | LOAD | SETSSP },		/* movs.x @as,ds */
+  { 0xf405, USESAS | STORE | USESSP },		/* movs.x ds,@as */
+  { 0xf408, USESAS | SETSAS | LOAD | SETSSP },	/* movs.x @as+,ds */
+  { 0xf409, USESAS | SETSAS | STORE | USESSP },	/* movs.x ds,@as+ */
+  { 0xf40c, USESAS | SETSAS | LOAD | SETSSP | USESR8 },	/* movs.x @as+r8,ds */
+  { 0xf40d, USESAS | SETSAS | STORE | USESSP | USESR8 }	/* movs.x ds,@as+r8 */
+};
+
+static const struct sh_minor_opcode sh_dsp_opcodef[] =
+{
+  { MAP (sh_dsp_opcodef0), 0xfc0d }
 };
 
 /* Given an instruction, return a pointer to the corresponding
@@ -1910,6 +1986,10 @@ sh_insn_uses_reg (insn, op, reg)
   if ((f & USESR0) != 0
       && reg == 0)
     return true;
+  if ((f & USESAS) && reg == USESAS_REG (insn))
+    return true;
+  if ((f & USESR8) && reg == 8)
+    return true;
 
   return false;
 }
@@ -1933,6 +2013,8 @@ sh_insn_sets_reg (insn, op, reg)
     return true;
   if ((f & SETSR0) != 0
       && reg == 0)
+    return true;
+  if ((f & SETSAS) && reg == SETSAS_REG (insn))
     return true;
 
   return false;
@@ -2055,6 +2137,9 @@ sh_insns_conflict (i1, op1, i2, op2)
   if ((f1 & SETSR0) != 0
       && sh_insn_uses_or_sets_reg (i2, op2, 0))
     return true;
+  if ((f1 & SETSAS)
+      && sh_insn_uses_or_sets_reg (i2, op2, SETSAS_REG (i1)))
+    return true;
   if ((f1 & SETSF1) != 0
       && sh_insn_uses_or_sets_freg (i2, op2, SETSF1_REG (i1)))
     return true;
@@ -2067,6 +2152,9 @@ sh_insns_conflict (i1, op1, i2, op2)
     return true;
   if ((f2 & SETSR0) != 0
       && sh_insn_uses_or_sets_reg (i1, op1, 0))
+    return true;
+  if ((f2 & SETSAS)
+      && sh_insn_uses_or_sets_reg (i1, op1, SETSAS_REG (i2)))
     return true;
   if ((f2 & SETSF1) != 0
       && sh_insn_uses_or_sets_freg (i1, op1, SETSF1_REG (i2)))
@@ -2136,7 +2224,23 @@ _bfd_sh_align_load_span (abfd, sec, contents, swap, relocs,
      bfd_vma stop;
      boolean *pswapped;
 {
+  int dsp = (abfd->arch_info->mach == bfd_mach_sh_dsp
+	     || abfd->arch_info->mach == bfd_mach_sh3_dsp);
   bfd_vma i;
+
+  /* The SH4 has a Harvard architecture, hence aligning loads is not
+     desirable.  In fact, it is counter-productive, since it interferes
+     with the schedules generated by the compiler.  */
+  if (abfd->arch_info->mach == bfd_mach_sh4)
+    return true;
+
+  /* If we are linking sh[3]-dsp code, swap the FPU instructions for DSP
+     instructions.  */
+  if (dsp)
+    {
+      sh_opcodes[0xf].minor_opcodes = sh_dsp_opcodef;
+      sh_opcodes[0xf].count = sizeof sh_dsp_opcodef / sizeof sh_dsp_opcodef;
+    }
 
   /* Instructions should be aligned on 2 byte boundaries.  */
   if ((start & 1) == 1)
@@ -2167,7 +2271,28 @@ _bfd_sh_align_load_span (abfd, sec, contents, swap, relocs,
       if (i > start)
 	{
 	  prev_insn = bfd_get_16 (abfd, contents + i - 2);
-	  prev_op = sh_insn_info (prev_insn);
+	  /* If INSN is the field b of a parallel processing insn, it is not
+	     a load / store after all.  Note that the test here might mistake
+	     the field_b of a pcopy insn for the starting code of a parallel
+	     processing insn; this might miss a swapping opportunity, but at
+	     least we're on the safe side.  */
+	  if (dsp && (prev_insn & 0xfc00) == 0xf800)
+	    continue;
+
+	  /* Check if prev_insn is actually the field b of a parallel
+	     processing insn.  Again, this can give a spurious match
+	     after a pcopy.  */
+	  if (dsp && i - 2 > start)
+	    {
+	      unsigned pprev_insn = bfd_get_16 (abfd, contents + i - 4);
+	
+	      if ((pprev_insn & 0xfc00) == 0xf800)
+		prev_op = NULL;
+	      else
+		prev_op = sh_insn_info (prev_insn);
+	    }
+	  else
+	    prev_op = sh_insn_info (prev_insn);
 
 	  /* If the load/store instruction is in a delay slot, we
 	     can't swap.  */

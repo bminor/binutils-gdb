@@ -149,6 +149,9 @@ extern int target_big_endian;
 
 #define TARGET_FORMAT (shl ? "elf32-shl" : "elf32-sh")
 
+#define elf_tc_final_processing sh_elf_final_processing
+extern void sh_elf_final_processing PARAMS ((void));
+
 #endif /* OBJ_ELF */
 
 /* end of tc-sh.h */

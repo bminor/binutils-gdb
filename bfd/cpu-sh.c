@@ -1,5 +1,5 @@
 /* BFD library support routines for the Hitachi-SH architecture.
-   Copyright (C) 1993 Free Software Foundation, Inc.
+   Copyright (C) 1993, 97, 1998, 2000 Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -50,11 +50,43 @@ compatible (a,b)
 #endif
 
 #define SH_NEXT &arch_info_struct[0]
-#define SH3_NEXT &arch_info_struct[1]
-#define SH3E_NEXT NULL
+#define SH2_NEXT &arch_info_struct[1]
+#define SH_DSP_NEXT &arch_info_struct[2]
+#define SH3_NEXT &arch_info_struct[3]
+#define SH3_DSP_NEXT &arch_info_struct[4]
+#define SH3E_NEXT &arch_info_struct[5]
+#define SH4_NEXT NULL
 
 static const bfd_arch_info_type arch_info_struct[] = 
 {
+  {
+    32,				/* 32 bits in a word */
+    32,				/* 32 bits in an address */
+    8,				/* 8 bits in a byte */
+    bfd_arch_sh,
+    bfd_mach_sh2,
+    "sh",			/* arch_name  */
+    "sh2",			/* printable name */
+    1,
+    false,			/* not the default */
+    bfd_default_compatible,
+    scan_mach,
+    SH2_NEXT
+  },
+  {
+    32,				/* 32 bits in a word */
+    32,				/* 32 bits in an address */
+    8,				/* 8 bits in a byte */
+    bfd_arch_sh,
+    bfd_mach_sh_dsp,
+    "sh",			/* arch_name  */
+    "sh-dsp",			/* printable name */
+    1,
+    false,			/* not the default */
+    bfd_default_compatible,
+    scan_mach,
+    SH_DSP_NEXT
+  },
   {
     32,				/* 32 bits in a word */
     32,				/* 32 bits in an address */
@@ -74,6 +106,20 @@ static const bfd_arch_info_type arch_info_struct[] =
     32,				/* 32 bits in an address */
     8,				/* 8 bits in a byte */
     bfd_arch_sh,
+    bfd_mach_sh3_dsp,
+    "sh",			/* arch_name  */
+    "sh3-dsp",			/* printable name */
+    1,
+    false,			/* not the default */
+    bfd_default_compatible,
+    scan_mach,
+    SH3_DSP_NEXT
+  },
+  {
+    32,				/* 32 bits in a word */
+    32,				/* 32 bits in an address */
+    8,				/* 8 bits in a byte */
+    bfd_arch_sh,
     bfd_mach_sh3e,
     "sh",			/* arch_name  */
     "sh3e",			/* printable name */
@@ -82,6 +128,20 @@ static const bfd_arch_info_type arch_info_struct[] =
     bfd_default_compatible,
     scan_mach,
     SH3E_NEXT
+  },
+  {
+    32,				/* 32 bits in a word */
+    32,				/* 32 bits in an address */
+    8,				/* 8 bits in a byte */
+    bfd_arch_sh,
+    bfd_mach_sh4,
+    "sh",			/* arch_name  */
+    "sh4",			/* printable name */
+    1,
+    false,			/* not the default */
+    bfd_default_compatible,
+    scan_mach,
+    SH4_NEXT
   },
 };
 

@@ -1,5 +1,6 @@
 /* BFD library support routines for architectures.
-   Copyright (C) 1990, 91-98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999, 2000
+   Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -157,8 +158,12 @@ DESCRIPTION
 .  bfd_arch_h8500,     {* Hitachi H8/500 *}
 .  bfd_arch_sh,        {* Hitachi SH *}
 .#define bfd_mach_sh            0
+.#define bfd_mach_sh2        0x20
+.#define bfd_mach_sh_dsp     0x2d
 .#define bfd_mach_sh3        0x30
+.#define bfd_mach_sh3_dsp    0x3d
 .#define bfd_mach_sh3e       0x3e
+.#define bfd_mach_sh4        0x40
 .  bfd_arch_alpha,     {* Dec Alpha *}
 .#define bfd_mach_alpha_ev4  0x10
 .#define bfd_mach_alpha_ev5  0x20
@@ -803,6 +808,26 @@ bfd_default_scan (info, string)
 
     case 6000:
       arch = bfd_arch_rs6000;
+      break;
+
+    case 7410:
+      arch = bfd_arch_sh;
+      number = bfd_mach_sh_dsp;
+      break;
+
+    case 7708:
+      arch = bfd_arch_sh;
+      number = bfd_mach_sh3;
+      break;
+
+    case 7729:
+      arch = bfd_arch_sh;
+      number = bfd_mach_sh3_dsp;
+      break;
+
+    case 7750:
+      arch = bfd_arch_sh;
+      number = bfd_mach_sh4;
       break;
 
     default:  
