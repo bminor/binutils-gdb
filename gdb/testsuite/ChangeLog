@@ -1,3 +1,9 @@
+2004-06-20  Jim Blandy  <jimb@redhat.com>
+
+        Fix PR testsuite/1680.
+	* gdb.arch/i386-sse.exp: Properly quote curly braces in
+	regular expressions.
+
 2004-06-19  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Fix PR testsuite/1679.

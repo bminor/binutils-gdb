@@ -72,7 +72,7 @@ gdb_continue_to_breakpoint "continue to first breakpoint in main"
 
 foreach r {0 1 2 3 4 5 6 7} {
     gdb_test "print \$xmm$r.v4_float" \
-        ".. = {$r, $r.25, $r.5, $r.75}.*" \
+        ".. = \\{$r, $r.25, $r.5, $r.75\\}.*" \
         "check contents of %xmm$r"
 }
 
@@ -87,6 +87,6 @@ gdb_continue_to_breakpoint "continue to second breakpoint in main"
 
 foreach r {0 1 2 3 4 5 6 7} {
     gdb_test "print data\[$r\]" \
-        ".. = {f = {[expr $r + 10], $r.25, $r.5, $r.75}}.*" \
+        ".. = \\{f = \\{[expr $r + 10], $r.25, $r.5, $r.75\\}\\}.*" \
         "check contents of data\[$r\]"
 }
