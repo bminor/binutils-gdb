@@ -7163,6 +7163,7 @@ mips_set_isa_flags (abfd)
       break;
 
     case bfd_mach_mips5000:
+    case bfd_mach_mips7000:
     case bfd_mach_mips8000:
     case bfd_mach_mips10000:
     case bfd_mach_mips12000:
@@ -8945,6 +8946,7 @@ static const struct mips_mach_extension mips_mach_extensions[] = {
   { bfd_mach_mips5, bfd_mach_mips8000 },
   { bfd_mach_mips10000, bfd_mach_mips8000 },
   { bfd_mach_mips5000, bfd_mach_mips8000 },
+  { bfd_mach_mips7000, bfd_mach_mips8000 },
 
   /* VR4100 extensions.  */
   { bfd_mach_mips4120, bfd_mach_mips4100 },

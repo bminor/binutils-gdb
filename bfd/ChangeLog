@@ -1,3 +1,11 @@
+2003-07-15  Richard Sandiford  <rsandifo@redhat.com>
+
+	* archures.c (bfd_mach_mips7000): New.
+	* bfd-in2.h: Regenerated.
+	* cpu-mips.c (arch_info_struct): Add an entry for mips:7000.
+	* elfxx-mips.c (mips_set_isa_flags): Handle bfd_mach_mips7000.
+	(mips_mach_extensions): Add an entry for it.
+
 2003-07-14  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Update with latest version.

@@ -1,3 +1,7 @@
+2003-07-15  Richard Sandiford  <rsandifo@redhat.com>
+
+	* mips-dis.c (mips_arch_choices): Add rm7000 and rm9000 entries.
+
 2003-07-14  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Update with latest version.

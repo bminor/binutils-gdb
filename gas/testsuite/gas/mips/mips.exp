@@ -552,6 +552,7 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "vr4122"
     run_dump_test "vr5400"
     run_dump_test "vr5500"
+    run_dump_test "rm7000"
     run_dump_test "perfcount"
     run_dump_test "lineno"
     run_dump_test "sync"
