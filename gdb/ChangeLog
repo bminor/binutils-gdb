@@ -243,7 +243,6 @@
 	* cli/cli-cmds.c (disassemble_command): Update.
 	* vax-tdep.c (vax_gdbarch_init): Update.
 
->>>>>>> 1.6028
 2004-06-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_collect_fpregset): Fix comment.
