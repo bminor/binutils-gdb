@@ -43,9 +43,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libnlm.h"
 #include "nlmconv.h"
 
-/* Needed for Alpha support.  */
+#ifdef NLMCONV_ALPHA
 #include "coff/sym.h"
 #include "coff/ecoff.h"
+#endif
 
 /* If strerror is just a macro, we want to use the one from libiberty
    since it will handle undefined values.  */
@@ -132,17 +133,6 @@ static void copy_sections PARAMS ((bfd *, asection *, PTR));
 static void mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 				   long *, char *,
 				   bfd_size_type));
-static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-					long *, char *,
-					bfd_size_type));
-static void alpha_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-					 long *, char *,
-					 bfd_size_type));
-static void powerpc_build_stubs PARAMS ((bfd *, bfd *, asymbol ***, long *));
-static void powerpc_resolve_stubs PARAMS ((bfd *, bfd *));
-static void powerpc_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-					   long *, char *,
-					   bfd_size_type));
 static void default_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 					   long *, char *,
 					   bfd_size_type));
@@ -151,6 +141,26 @@ static const char *choose_temp_base_try PARAMS ((const char *,
 						 const char *));
 static void choose_temp_base PARAMS ((void));
 static int pexecute PARAMS ((char *, char *[]));
+
+#ifdef NLMCONV_I386
+static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
+					long *, char *,
+					bfd_size_type));
+#endif
+
+#ifdef NLMCONV_ALPHA
+static void alpha_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
+					 long *, char *,
+					 bfd_size_type));
+#endif
+
+#ifdef NLMCONV_POWERPC
+static void powerpc_build_stubs PARAMS ((bfd *, bfd *, asymbol ***, long *));
+static void powerpc_resolve_stubs PARAMS ((bfd *, bfd *));
+static void powerpc_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
+					   long *, char *,
+					   bfd_size_type));
+#endif
 
 /* The main routine.  */
 
@@ -399,6 +409,7 @@ main (argc, argv)
   if (! bfd_set_section_flags (outbfd, secsec, SEC_HAS_CONTENTS))
     bfd_fatal ("set .nlmsections flags");
 
+#ifdef NLMCONV_POWERPC
   /* For PowerPC NetWare we need to build stubs for calls to undefined
      symbols.  Because each stub requires an entry in the TOC section
      which must be at the same location as other entries in the TOC
@@ -406,6 +417,7 @@ main (argc, argv)
      goes in setup_sections.  */
   if (bfd_get_arch (inbfd) == bfd_arch_powerpc)
     powerpc_build_stubs (inbfd, outbfd, &symbols, &symcount);
+#endif
 
   /* Set up the sections.  */
   bfd_map_over_sections (inbfd, setup_sections, (PTR) outbfd);
@@ -523,6 +535,7 @@ main (argc, argv)
 	      endsym = sym;
 	    }
 
+#ifdef NLMCONV_POWERPC
 	  /* For PowerPC NetWare, we define __GOT0.  This is the start
 	     of the .got section.  */
 	  if (bfd_get_arch (inbfd) == bfd_arch_powerpc
@@ -535,6 +548,7 @@ main (argc, argv)
 	      sym->value = got_sec->output_offset;
 	      sym->section = got_sec->output_section;
 	    }
+#endif
  	}
 
       /* If this is a global symbol, check the export list.  */
@@ -877,9 +891,11 @@ main (argc, argv)
       strncpy (version_hdr->stamp, "VeRsIoN#", 8);
     }
 
+#ifdef NLMCONV_POWERPC
   /* Resolve the stubs we build for PowerPC NetWare.  */
   if (bfd_get_arch (inbfd) == bfd_arch_powerpc)
     powerpc_resolve_stubs (inbfd, outbfd);
+#endif
 
   /* Copy over the sections.  */
   bfd_map_over_sections (inbfd, copy_sections, (PTR) outbfd);
@@ -1123,16 +1139,24 @@ select_output_format (arch, mach, bigendian)
 {
   switch (arch)
     {
+#ifdef NLMCONV_I386
     case bfd_arch_i386:
       return "nlm32-i386";
+#endif
+#ifdef NLMCONV_SPARC
     case bfd_arch_sparc:
       return "nlm32-sparc";
+#endif
+#ifdef NLMCONV_ALPHA
     case bfd_arch_alpha:
       return "nlm32-alpha";
+#endif
+#ifdef NLMCONV_POWERPC
     case bfd_arch_powerpc:
       return "nlm32-powerpc";
+#endif
     default:
-      fprintf (stderr, "%s: no default NLM format for %s\n",
+      fprintf (stderr, "%s: support not compiled in for %s\n",
 	       program_name, bfd_printable_arch_mach (arch, mach));
       exit (1);
       /* Avoid warning.  */
@@ -1338,18 +1362,24 @@ mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 {
   switch (bfd_get_arch (outbfd))
     {
+#ifdef NLMCONV_I386
     case bfd_arch_i386:
       i386_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
 			  contents, contents_size);
       break;
+#endif
+#ifdef NLMCONV_ALPHA
     case bfd_arch_alpha:
       alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
 			   contents, contents_size);
       break;
+#endif
+#ifdef NLMCONV_POWERPC
     case bfd_arch_powerpc:
       powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
 			     contents, contents_size);
       break;
+#endif
     default:
       default_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
 			     contents, contents_size);
@@ -1383,6 +1413,8 @@ default_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 	(*relocs)->address += insec->output_offset;
     }
 }
+
+#ifdef NLMCONV_I386
 
 /* NetWare on the i386 supports a restricted set of relocs, which are
    different from those used on other i386 targets.  This routine
@@ -1539,6 +1571,10 @@ i386_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
     }
 }
 
+#endif /* NLMCONV_I386 */
+
+#ifdef NLMCONV_ALPHA
+
 /* On the Alpha the first reloc for every section must be a special
    relocs which hold the GP address.  Also, the first reloc in the
    file must be a special reloc which holds the address of the .lita
@@ -1635,6 +1671,10 @@ alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 	(*relocs)->address += insec->output_offset;
     }
 }
+
+#endif /* NLMCONV_ALPHA */
+
+#ifdef NLMCONV_POWERPC
 
 /* We keep a linked list of stubs which we must build.  Because BFD
    requires us to know the sizes of all sections before we can set the
@@ -2051,6 +2091,8 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
       rel->address += insec->output_offset;
     }
 }
+
+#endif /* NLMCONV_POWERPC */
 
 /* Name of linker.  */
 #ifndef LD_NAME

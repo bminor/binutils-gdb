@@ -294,7 +294,7 @@ nlmheader.c: nlmheader.y
 
 nlmconv.o: nlmconv.c
 	ldname=`t='$(program_transform_name)'; echo ld | sed -e "s/brokensed/brokensed/" $$t`; \
-	$(CC) -c -DLD_NAME="\"$${ldname}\"" $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CFLAGS) $(srcdir)/nlmconv.c
+	$(CC) -c -DLD_NAME="\"$${ldname}\"" $(INCLUDES) $(HDEFINES) $(TDEFINES) $(NLMCONV_DEFS) $(CFLAGS) $(srcdir)/nlmconv.c
 
 $(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_LIBS) $(BFD)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)

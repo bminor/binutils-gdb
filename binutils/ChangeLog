@@ -1,5 +1,11 @@
 Tue Jun 21 12:53:21 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* configure.in: Set nlmconv_defs to -DNLMCONV_cputype for all the
+	netware targets.  Write it into Makefile as NLMCONV_DEFS.
+	* Makefile.in (nlmconv.o): Pass $(NLMCONV_DEFS) to $(CC).
+	* nlmconv.c: Only compile code for specific CPU types if
+	NLMCONV_cputype is defined.
+
 	* nlmconv.c (main): Change uses of bfd_abs_section, etc., to use
 	bfd_abs_section_ptr or bfd_is_abs_section, etc.
 	(i386_mangle_relocs, alpha_mangle_relocs): Likewise.
