@@ -28,6 +28,8 @@ ld \- the GNU linker
 .I input-format\c
 \&\|] 
 .RB "[\|" \-Bstatic "\|]"  
+.RB "[\|" \-Bdynamic "\|]"  
+.RB "[\|" \-Bsymbolic "\|]"  
 .RB "[\|" "\-c\ "\c
 .I commandfile\c
 \&\|] 
@@ -82,6 +84,7 @@ ld \- the GNU linker
 .RB "[\|" \-r | \-Ur "\|]" 
 .RB "[\|" \-S "\|]" 
 .RB "[\|" \-s "\|]" 
+.RB "[\|" \-shared "\|]" 
 .RB "[\|" \-sort\-common "\|]" 
 .RB "[\|" \-split\-by\-reloc\ "\c
 .I count\c
@@ -354,10 +357,22 @@ format from a script, using the command \c
 
 .TP
 .B \-Bstatic 
-This flag is accepted for command-line compatibility with the SunOS linker,
-but has no effect on \c
-.B ld\c
-\&.
+Do not link against shared libraries.  This is only meaningful on
+platforms for which shared libraries are supported.
+
+.TP
+.B \-Bdynamic
+Link against dynamic libraries.  This is only meaningful on platforms
+for which shared libraries are supported.  This option is normally the
+default on such platforms.
+
+.TP
+.B \-Bsymbolic
+When creating a shared library, bind references to global symbols to
+the definition within the shared library, if any.  Normally, it is
+possible for a program linked against a shared library to override the
+definition within the shared library.  This option is only meaningful
+on ELF platforms which support shared libraries.
 
 .TP
 .BI "\-c " "commandfile"\c
@@ -703,6 +718,11 @@ Omits debugger symbol information (but not all symbols) from the output file.
 .TP
 .B \-s 
 Omits all symbol information from the output file.
+
+.TP
+.B \-shared
+Create a shared library.  This is currently only supported on ELF
+platforms.
 
 .TP
 .B \-sort\-common

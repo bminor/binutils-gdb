@@ -1,3 +1,13 @@
+Mon Jul 10 13:38:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo, ld.1: Document -Bstatic, -Bdynamic, -Bshared, and
+	-shared.
+
+Mon Jul 10 13:29:43 1995  Eric Youngdale  <eric@aib.com>
+
+	* ldmain.c (main): Set link_info.symbolic to false.
+	* lexsup.c (parse_args): Handle -Bsymbolic.
+
 Wed Jul  5 00:12:11 1995  Fred Fish  (fnf@cygnus.com)
 
 	* ldmain.c (HAVE_SBRK):  Define for everything except

@@ -167,7 +167,8 @@ line:
 @c FIXME!  -relax only avail h8/300, i960.  Conditionals screwed in examples.
 @smallexample
 ld [ -o @var{output} ]  @var{objfile}@dots{}
-  [ -A@var{architecture} ]  [ -b @var{input-format} ]  [ -Bstatic ]  
+  [ -A@var{architecture} ]  [ -b @var{input-format} ]
+  [ -Bstatic ]  [ -Bdynamic ]  [ -Bsymbolic ]
   [ -c @var{MRI-commandfile} ]  [ -d | -dc | -dp ]  
   [ -defsym @var{symbol}=@var{expression} ]
   [ -dynamic-linker @var{file} ] [ -embedded-relocs ]
@@ -175,16 +176,16 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -format @var{input-format} ]  [ -g ]  [ -G @var{size} ]  [ -help ]
   [ -i ]  [ -l@var{archive} ]  [ -L@var{searchdir} ]  [ -M ]
   [ -Map @var{mapfile} ]  [ -m @var{emulation} ]  [ -N | -n ]
-  [ -noinhibit-exec ]  [ -oformat @var{output-format} ]
+  [ -noinhibit-exec ]  [ -no-keep-memory ]  [ -oformat @var{output-format} ]
   [ -R @var{filename} ]  [ -relax ]  [ -retain-symbols-file @var{filename} ]
   [ -r | -Ur ]  [ -rpath @var{dir} ] [ -S ]  [ -s ] [ -soname @var{name} ]
-  [ -sort-common ] [ -stats ] [ -T @var{commandfile} ]
+  [ -shared ] [ -sort-common ] [ -stats ] [ -T @var{commandfile} ]
   [ -Ttext @var{org} ]  [ -Tdata @var{org} ]
   [ -Tbss @var{org} ]  [ -t ] [ -traditional-format ]
   [ -u @var{symbol}]  [-V]  [-v]  [ -verbose]  [ -version ]
   [ -warn-common ]  [ -warn-once ] [ -y @var{symbol} ]  [ -X ]  [-x ]
   [ -( [ archives ] -) ] [ --start-group [ archives ] --end-group ]
-  [ -split-by-reloc @var{count} ] [-split-by-file]
+  [ -split-by-reloc @var{count} ] [ -split-by-file ] [ --whole-archive ]
 @end smallexample
 
 This plethora of command-line options may seem intimidating, but in
@@ -308,8 +309,22 @@ Commands}.
 
 @kindex -Bstatic
 @item -Bstatic 
-Do not link against shared libraries.  This option is accepted for
-command-line compatibility with the SunOS linker.
+Do not link against shared libraries.  This is only meaningful on
+platforms for which shared libraries are supported.
+
+@kindex -Bdynamic
+@item -Bdynamic
+Link against dynamic libraries.  This is only meaningful on platforms
+for which shared libraries are supported.  This option is normally the
+default on such platforms.
+
+@kindex -Bsymbolic
+@item -Bsymbolic
+When creating a shared library, bind references to global symbols to the
+definition within the shared library, if any.  Normally, it is possible
+for a program linked against a shared library to override the definition
+within the shared library.  This option is only meaningful on ELF
+platforms which support shared libraries.
 
 @kindex -c @var{MRI-cmdfile}
 @cindex compatibility, MRI
@@ -488,6 +503,15 @@ Normally, the linker will not produce an output file if it encounters
 errors during the link process; it exits without writing an output file
 when it issues any error whatsoever.
 
+@item -no-keep-memory
+@cindex memory usage
+@kindex -no-keep-memory
+@code{ld} normally optimizes for speed over memory usage by caching the
+symbol tables of input files in memory.  This option tells @code{ld} to
+instead optimize for memory usage, by rereading the symbol tables as
+necessary.  This may be required if @code{ld} runs out of memory space
+while linking a large executable.
+
 @item -o @var{output}
 @kindex -o @var{output}
 @cindex naming the output file
@@ -610,7 +634,14 @@ linker will attempt to load the shared object specified by the DT_SONAME
 field rather than the using the file name given to the linker.
 @end ifset
 
+@item -shared
+@cindex shared libraries
+@kindex -shared
+Create a shared library.  This is currently only supported on ELF
+platforms.
+
 @item -sort-common
+@kindex -sort-common
 Normally, when @code{ld} places the global common symbols in the
 appropriate output sections, it sorts them by size.  First come all the
 one byte symbols, then all the two bytes, then all the four bytes, and
@@ -815,6 +846,14 @@ encountered in a different order.
 @item -warn-once
 Only warn once for each undefined symbol, rather than once per module
 which refers to it.
+
+@kindex --whole-archive
+@cindex including an entire archive
+For each archive mentioned on the command line, include every object
+file in the archive in the link, rather than searching the archive for
+the required object files.  This is normally used to turn an archive
+file into a shared library, forcing every object to be included in the
+resulting shared library.
 
 @kindex -X
 @cindex local symbols, deleting

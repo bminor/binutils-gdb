@@ -180,6 +180,7 @@ main (argc, argv)
   link_info.callbacks = &link_callbacks;
   link_info.relocateable = false;
   link_info.shared = false;
+  link_info.symbolic = false;
   link_info.strip = strip_none;
   link_info.discard = discard_none;
   link_info.lprefix_len = 1;

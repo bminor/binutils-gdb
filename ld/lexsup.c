@@ -93,7 +93,8 @@ parse_args (argc, argv)
 #define OPTION_STACK                    (OPTION_SORT_COMMON + 1) /*WINDOWS_NT*/
 #define OPTION_STATS			(OPTION_STACK + 1)
 #define OPTION_SUBSYSTEM                (OPTION_STATS + 1) /* WINDOWS_NT */
-#define OPTION_TBSS			(OPTION_SUBSYSTEM + 1)
+#define OPTION_SYMBOLIC			(OPTION_SUBSYSTEM + 1)
+#define OPTION_TBSS			(OPTION_SYMBOLIC + 1)
 #define OPTION_TDATA			(OPTION_TBSS + 1)
 #define OPTION_TTEXT			(OPTION_TDATA + 1)
 #define OPTION_TRADITIONAL_FORMAT	(OPTION_TTEXT + 1)
@@ -109,6 +110,7 @@ parse_args (argc, argv)
   static struct option longopts[] = {
     {"Bdynamic", no_argument, NULL, OPTION_CALL_SHARED},
     {"Bstatic", no_argument, NULL, OPTION_NON_SHARED},
+    {"Bsymbolic", no_argument, NULL, OPTION_SYMBOLIC},
     {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
     {"dc", no_argument, NULL, 'd'},
     {"defsym", required_argument, NULL, OPTION_DEFSYM},
@@ -393,6 +395,9 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_SUBSYSTEM:  /* WINDOWS_NT */
 	  set_subsystem (optarg);
+	  break;
+	case OPTION_SYMBOLIC:
+	  link_info.symbolic = true;
 	  break;
 	case 't':
 	  trace_files = true;
