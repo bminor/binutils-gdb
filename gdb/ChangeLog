@@ -1,7 +1,7 @@
 2003-07-13  Mark Kettenis  <kettenis@gnu.org>
 
-	* x86-64-tdep.c (x86_64_store_return_value): Use an intermediate
-	buffer when storing double and float varibles into %xmm0.
+	* x86-64-tdep.c (x86_64_store_return_value): Use
+	regcache_cooked_write_part instead of regcache_cooked_write.
 
 	* configure.host: Add x86_64-*-freebsd*.
 	* configure.tgt: Add x86_64-*-freebsd*.
