@@ -1,3 +1,20 @@
+Tue Oct 31 16:34:28 1995  David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* configure.in (alpha-*-linux*): Use ecoff.
+	* configure: Rebuild.
+	* ecoff.c (ecoff_directive_extern): New function.
+	(ecoff_directive_weakext): New function.
+	(ecoff_build_symbols): Handle weak symbols.
+	(ecoff_setup_ext): Likewise.
+	* ecoff.h (ecoff_directive_extern): Declare.
+	(ecoff_directive_weakext): Declare.
+	* symbols.c (S_IS_WEAK): New function.
+	* symbols.h (S_IS_WEAK): Declare.
+	* config/obj-ecoff.c (obj_pseudo_table): Add "extern" and
+	"weakext".
+	* config/tc-mips.c (mips_pseudo_table): Remove "extern".
+	(s_extern): Remove.
+
 Tue Oct 31 13:29:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ppc.c (md_pseudo_table): Add "bc" and "ec".

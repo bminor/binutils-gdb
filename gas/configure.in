@@ -9,7 +9,7 @@ AC_INIT(as.h)dnl
 dnl
 user_bfd_gas=
 AC_ARG_ENABLE(bfd-assembler,
-[    bfd-assembler	use BFD back end for writing object files],
+[  --enable-bfd-assembler  use BFD back end for writing object files],
 [case "${enableval}" in
   yes) need_bfd=yes user_bfd_gas=yes ;;
   no)  user_bfd_gas=no ;;
@@ -132,6 +132,7 @@ changequote([,])dnl
 
       alpha-*-netware*)     fmt=ecoff ;;
       alpha-*-osf*)         fmt=ecoff ;;
+      alpha-*-linux*)       fmt=ecoff ;;
 
 # start-sanitize-arc
       arc-*-elf*)           fmt=elf bfd_gas=yes ;;
@@ -144,6 +145,7 @@ changequote([,])dnl
 			      *)	targ=arm-lit ;;
 			    esac
 			    ;;
+      arm-*-coff)           fmt=coff ;;
       arm-*-riscix*)        fmt=aout ;;
       arm-*-pe)             fmt=coff targ=armcoff em=pe ;;
 

@@ -19,7 +19,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "as.h"
 
@@ -936,6 +936,7 @@ typedef struct efdr {
   FDR		 fdr;		/* File header to be written out */
   FDR		*orig_fdr;	/* original file header */
   char		*name;		/* filename */
+  int		 fake;		/* whether this is faked .file */
   symint_t	 void_type;	/* aux. pointer to 'void' type */
   symint_t	 int_type;	/* aux. pointer to 'int' type */
   scope_t	*cur_scope;	/* current nested scopes */
@@ -987,6 +988,7 @@ static const efdr_t init_file =
 
   (FDR *)0,		/* orig_fdr:	original file header pointer */
   (char *)0,		/* name:	pointer to filename */
+  0,			/* fake:	whether this is a faked .file */
   0,			/* void_type:	ptr to aux node for void type */
   0,			/* int_type:	ptr to aux node for int type */
   (scope_t *)0,		/* cur_scope:	current scope being processed */
@@ -1435,7 +1437,7 @@ static tag_t *get_tag PARAMS ((const char *tag, localsym_t *sym,
 			       bt_t basic_type));
 static void add_unknown_tag PARAMS ((tag_t *ptag));
 static void add_procedure PARAMS ((char *func));
-static void add_file PARAMS ((const char *file_name, int indx));
+static void add_file PARAMS ((const char *file_name, int indx, int fake));
 #ifdef ECOFF_DEBUG
 static char *sc_to_string PARAMS ((sc_t storage_class));
 static char *st_to_string PARAMS ((st_t symbol_type));
@@ -1509,7 +1511,7 @@ ecoff_symbol_new_hook (symbolP)
      wrong.  */
   if (cur_file_ptr == (efdr_t *) NULL
       && seen_at_least_1_file ())
-    add_file ((const char *) NULL, 0);
+    add_file ((const char *) NULL, 0, 1);
   symbolP->ecoff_file = cur_file_ptr;
   symbolP->ecoff_symbol = NULL;
   symbolP->ecoff_extern_size = 0;
@@ -2178,9 +2180,10 @@ add_procedure (func)
    where the current file structure lives.  */
 
 static void
-add_file (file_name, indx)
+add_file (file_name, indx, fake)
      const char *file_name;		/* file name */
      int indx;
+     int fake;
 {
   register int first_ch;
   register efdr_t *fil_ptr;
@@ -2228,6 +2231,19 @@ add_file (file_name, indx)
 
   first_ch = *file_name;
 
+  /* ??? This is ifdefed out, because it results in incorrect line number
+     debugging info when multiple .file pseudo-ops are merged into one file
+     descriptor.  See for instance ecoff_build_lineno, which will
+     end up setting all file->fdr.* fields multiple times, resulting in
+     incorrect debug info.  In order to make this work right, all line number
+     and symbol info for the same source file has to be adjacent in the object
+     file, so that a single file descriptor can be used to point to them.
+     This would require maintaining file specific lists of line numbers and
+     symbols for each file, so that they can be merged together (or output
+     together) when two .file pseudo-ops are merged into one file
+     descriptor.  */
+
+#if 0
   /* See if the file has already been created.  */
   for (fil_ptr = first_file;
        fil_ptr != (efdr_t *) NULL;
@@ -2237,9 +2253,14 @@ add_file (file_name, indx)
 	  && strcmp (file_name, fil_ptr->name) == 0)
 	{
 	  cur_file_ptr = fil_ptr;
+	  if (! fake)
+	    cur_file_ptr->fake = 0;
 	  break;
 	}
     }
+#else
+  fil_ptr = (efdr_t *) NULL;
+#endif
 
   /* If this is a new file, create it. */
   if (fil_ptr == (efdr_t *) NULL)
@@ -2253,6 +2274,8 @@ add_file (file_name, indx)
 
       fil_ptr->file_index = current_file_idx++;
       ++file_desc.num_allocated;
+
+      fil_ptr->fake = fake;
 
       /* Allocate the string hash table.  */
       fil_ptr->str_hash = hash_new ();
@@ -3047,7 +3070,7 @@ ecoff_directive_ent (ignore)
   register int ch;
 
   if (cur_file_ptr == (efdr_t *) NULL)
-    add_file ((const char *) NULL, 0);
+    add_file ((const char *) NULL, 0, 1);
 
   if (cur_proc_ptr != (proc_t *) NULL)
     {
@@ -3088,6 +3111,31 @@ ecoff_directive_ent (ignore)
   demand_empty_rest_of_line ();
 }
 
+/* Parse .extern directives.  */
+
+void
+ecoff_directive_extern (ignore)
+     int ignore;
+{
+  char *name;
+  int c;
+  symbolS *symbolp;
+  valueT size;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  symbolp = symbol_find_or_make (name);
+  *input_line_pointer = c;
+
+  S_SET_EXTERNAL (symbolp);
+
+  if (*input_line_pointer == ',')
+    ++input_line_pointer;
+  size = get_absolute_expression ();
+
+  symbolp->ecoff_extern_size = size;
+}
+
 /* Parse .file directives.  */
 
 void
@@ -3110,7 +3158,7 @@ ecoff_directive_file (ignore)
   /* FIXME: we don't have to save the name here.  */
   name = demand_copy_C_string (&len);
 
-  add_file (name, indx - 1);
+  add_file (name, indx - 1, 0);
 
   demand_empty_rest_of_line ();
 }
@@ -3304,6 +3352,54 @@ mark_stabs (ignore)
     }
 }
 
+/* Parse .weakext directives.  */
+
+void
+ecoff_directive_weakext (ignore)
+     int ignore;
+{
+  char *name;
+  int c;
+  symbolS *symbolP;
+  expressionS exp;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  symbolP = symbol_find_or_make (name);
+  *input_line_pointer = c;
+
+  SKIP_WHITESPACE ();
+
+  if (c == ',')
+    {
+      if (S_IS_DEFINED (symbolP))
+	{
+	  as_bad ("Ignoring attempt to redefine symbol `%s'.",
+		  S_GET_NAME (symbolP));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      ++input_line_pointer;
+      SKIP_WHITESPACE ();
+      if (! is_end_of_line[(unsigned char) *input_line_pointer])
+	{
+	  expression (&exp);
+	  if (exp.X_op != O_symbol)
+	    {
+	      as_bad ("bad .weakext directive");
+	      ignore_rest_of_line();
+	      return;
+	    }
+	  symbolP->sy_value = exp;
+	}
+    }
+
+  S_SET_WEAK (symbolP);
+
+  demand_empty_rest_of_line ();
+}
+
 /* Handle .stabs directives.  The actual parsing routine is done by a
    generic routine.  This routine is called via OBJ_PROCESS_STAB.
    When this is called, input_line_pointer will be pointing at the
@@ -3373,7 +3469,7 @@ ecoff_stab (sec, what, string, type, other, desc)
   /* Make sure we have a current file.  */
   if (cur_file_ptr == (efdr_t *) NULL)
     {
-      add_file ((const char *) NULL, 0);
+      add_file ((const char *) NULL, 0, 1);
       save_file_ptr = cur_file_ptr;
     }
 
@@ -3653,8 +3749,6 @@ ecoff_build_lineno (backend, buf, bufend, offset, linecntptr)
 	  if (l->file != file && file != (efdr_t *) NULL)
 	    {
 	      file->fdr.cbLine = c - file->fdr.cbLineOffset;
-	      /* The cline field is ill-documented.  This is a guess
-		 at the right value.  */
 	      file->fdr.cline = totcount + count;
 	      if (linecntptr != (long *) NULL)
 		*linecntptr += totcount + count;
@@ -3663,8 +3757,14 @@ ecoff_build_lineno (backend, buf, bufend, offset, linecntptr)
 
 	  if (l->file != file)
 	    {
+	      efdr_t *last_file = file;
+
 	      file = l->file;
-	      file->fdr.ilineBase = iline;
+	      if (last_file != (efdr_t *) NULL)
+		file->fdr.ilineBase
+		  = last_file->fdr.ilineBase + last_file->fdr.cline;
+	      else
+		file->fdr.ilineBase = 0;
 	      file->fdr.cbLineOffset = c;
 	    }
 	  if (l->proc != proc)
@@ -3674,8 +3774,6 @@ ecoff_build_lineno (backend, buf, bufend, offset, linecntptr)
 		{
 		  proc->pdr.lnLow = l->lineno;
 		  proc->pdr.cbLineOffset = c - file->fdr.cbLineOffset;
-		  /* The iline field is ill-documented.  This is a
-		     guess at the right value.  */
 		  proc->pdr.iline = totcount;
 		}
 	    }
@@ -3888,11 +3986,14 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 			   + bfd_get_section_vma (stdoutput,
 						  S_GET_SEGMENT (as_sym)));
 
+		      sym_ptr->ecoff_sym.weakext = S_IS_WEAK (as_sym);
+
 		      /* Set st_Proc to st_StaticProc for local
 			 functions.  */
 		      if (sym_ptr->ecoff_sym.asym.st == st_Proc
 			  && S_IS_DEFINED (as_sym)
-			  && ! S_IS_EXTERNAL (as_sym))
+			  && ! S_IS_EXTERNAL (as_sym)
+			  && ! S_IS_WEAK (as_sym))
 			sym_ptr->ecoff_sym.asym.st = st_StaticProc;
 
 		      /* Get the type and storage class based on where
@@ -3915,6 +4016,7 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 
 			  if (! ECOFF_IS_STAB (&sym_ptr->ecoff_sym.asym)
 			      && (S_IS_EXTERNAL (as_sym)
+				  || S_IS_WEAK (as_sym)
 				  || ! S_IS_DEFINED (as_sym)))
 			    {
 			      if ((as_sym->bsym->flags & BSF_FUNCTION) != 0)
@@ -3983,6 +4085,7 @@ ecoff_build_symbols (backend, buf, bufend, offset)
 			 than the actual symbol.  Should we handle
 			 them here?  */
 		      if ((S_IS_EXTERNAL (as_sym)
+			   || S_IS_WEAK (as_sym)
 			   || ! S_IS_DEFINED (as_sym))
 			  && sym_ptr->proc_ptr == (proc_t *) NULL
 			  && sym_ptr->ecoff_sym.asym.st != (int) st_Nil
@@ -4473,6 +4576,7 @@ ecoff_setup_ext ()
 
       /* If this is a local symbol, then force the fields to zero.  */
       if (! S_IS_EXTERNAL (sym)
+	  && ! S_IS_WEAK (sym)
 	  && S_IS_DEFINED (sym))
 	{
 	  sym->ecoff_symbol->ecoff_sym.asym.value = 0;
@@ -4485,7 +4589,7 @@ ecoff_setup_ext ()
     }
 }
 
-/* Build the ECOFF dbeugging information.  */
+/* Build the ECOFF debugging information.  */
 
 unsigned long
 ecoff_build_debug (hdr, bufp, backend)
@@ -4507,7 +4611,7 @@ ecoff_build_debug (hdr, bufp, backend)
 
   /* Make sure we have a file.  */
   if (first_file == (efdr_t *) NULL)
-    add_file ((const char *) NULL, 0);
+    add_file ((const char *) NULL, 0, 1);
 
   /* Handle any top level tags.  */
   for (ptag = top_tag_head->first_tag;
@@ -4556,7 +4660,7 @@ ecoff_build_debug (hdr, bufp, backend)
 	     && cur_file_ptr->cur_scope->prev != (scope_t *) NULL)
 	{
 	  cur_file_ptr->cur_scope = cur_file_ptr->cur_scope->prev;
-	  if (! end_warning)
+	  if (! end_warning && ! cur_file_ptr->fake)
 	    {
 	      as_warn ("Missing .end or .bend at end of file");
 	      end_warning = 1;
@@ -5085,7 +5189,7 @@ generate_ecoff_stab (what, string, type, other, desc)
   /* Make sure we have a current file.  */
   if (cur_file_ptr == (efdr_t *) NULL)
     {
-      add_file ((const char *) NULL, 0);
+      add_file ((const char *) NULL, 0, 1);
       save_file_ptr = cur_file_ptr;
     }
 
@@ -5174,7 +5278,7 @@ ecoff_generate_asm_lineno (filename, lineno)
 
   if (current_stabs_filename == (char *)NULL || strcmp (current_stabs_filename, filename))
     {
-      add_file (filename, 0);
+      add_file (filename, 0, 1);
       generate_asm_lineno = 1;
     }
 
@@ -5216,7 +5320,7 @@ ecoff_generate_asm_line_stab (filename, lineno)
 
   if (strcmp (current_stabs_filename, filename)) 
     {
-      add_file (filename, 0);
+      add_file (filename, 0, 1);
       generate_asm_lineno = 1;
     }
 
