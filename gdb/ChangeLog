@@ -1,5 +1,9 @@
 2001-12-02  Andrew Cagney  <ac131313@redhat.com>
 
+	* coffread.c, dbxread.c, elfread.c, hp-psymtab-read.c, hpread.c,
+	nlmread.c, objfiles.c, os9kread.c, somread.c, source.c, symfile.c,
+	symmisc.c, xcoffread.c: Use xmfree instead of mfree.
+
 	* jv-lang.c (add_class_symtab_symbol): Use xmrealloc instead of
 	mrealloc.
 

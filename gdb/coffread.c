@@ -713,7 +713,7 @@ coff_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_private != NULL)
     {
-      mfree (objfile->md, objfile->sym_private);
+      xmfree (objfile->md, objfile->sym_private);
     }
 
   /* Let stabs reader clean up */

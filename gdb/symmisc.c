@@ -89,10 +89,10 @@ free_symtab_block (struct objfile *objfile, struct block *b)
   n = BLOCK_NSYMS (b);
   for (i = 0; i < n; i++)
     {
-      mfree (objfile->md, SYMBOL_NAME (BLOCK_SYM (b, i)));
-      mfree (objfile->md, (PTR) BLOCK_SYM (b, i));
+      xmfree (objfile->md, SYMBOL_NAME (BLOCK_SYM (b, i)));
+      xmfree (objfile->md, (PTR) BLOCK_SYM (b, i));
     }
-  mfree (objfile->md, (PTR) b);
+  xmfree (objfile->md, (PTR) b);
 }
 
 /* Free all the storage associated with the struct symtab <- S.
@@ -126,7 +126,7 @@ free_symtab (register struct symtab *s)
       for (i = 0; i < n; i++)
 	free_symtab_block (s->objfile, BLOCKVECTOR_BLOCK (bv, i));
       /* Free the blockvector itself.  */
-      mfree (s->objfile->md, (PTR) bv);
+      xmfree (s->objfile->md, (PTR) bv);
       /* Also free the linetable.  */
 
     case free_linetable:
@@ -134,22 +134,22 @@ free_symtab (register struct symtab *s)
          or by some other symtab, except for our linetable.
          Free that now.  */
       if (LINETABLE (s))
-	mfree (s->objfile->md, (PTR) LINETABLE (s));
+	xmfree (s->objfile->md, (PTR) LINETABLE (s));
       break;
     }
 
   /* If there is a single block of memory to free, free it.  */
   if (s->free_ptr != NULL)
-    mfree (s->objfile->md, s->free_ptr);
+    xmfree (s->objfile->md, s->free_ptr);
 
   /* Free source-related stuff */
   if (s->line_charpos != NULL)
-    mfree (s->objfile->md, (PTR) s->line_charpos);
+    xmfree (s->objfile->md, (PTR) s->line_charpos);
   if (s->fullname != NULL)
-    mfree (s->objfile->md, s->fullname);
+    xmfree (s->objfile->md, s->fullname);
   if (s->debugformat != NULL)
-    mfree (s->objfile->md, s->debugformat);
-  mfree (s->objfile->md, (PTR) s);
+    xmfree (s->objfile->md, s->debugformat);
+  xmfree (s->objfile->md, (PTR) s);
 }
 
 void

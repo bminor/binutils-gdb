@@ -187,13 +187,13 @@ allocate_objfile (bfd *abfd, int flags)
 	      objfile->mmfd = fd;
 	      /* Update pointers to functions to *our* copies */
 	      obstack_chunkfun (&objfile->psymbol_cache.cache, xmmalloc);
-	      obstack_freefun (&objfile->psymbol_cache.cache, mfree);
+	      obstack_freefun (&objfile->psymbol_cache.cache, xmfree);
 	      obstack_chunkfun (&objfile->psymbol_obstack, xmmalloc);
-	      obstack_freefun (&objfile->psymbol_obstack, mfree);
+	      obstack_freefun (&objfile->psymbol_obstack, xmfree);
 	      obstack_chunkfun (&objfile->symbol_obstack, xmmalloc);
-	      obstack_freefun (&objfile->symbol_obstack, mfree);
+	      obstack_freefun (&objfile->symbol_obstack, xmfree);
 	      obstack_chunkfun (&objfile->type_obstack, xmmalloc);
-	      obstack_freefun (&objfile->type_obstack, mfree);
+	      obstack_freefun (&objfile->type_obstack, xmfree);
 	      /* If already in objfile list, unlink it. */
 	      unlink_objfile (objfile);
 	      /* Forget things specific to a particular gdb, may have changed. */
@@ -216,16 +216,16 @@ allocate_objfile (bfd *abfd, int flags)
 	      objfile->flags |= OBJF_MAPPED;
 	      mmalloc_setkey (objfile->md, 0, objfile);
 	      obstack_specify_allocation_with_arg (&objfile->psymbol_cache.cache,
-						   0, 0, xmmalloc, mfree,
+						   0, 0, xmmalloc, xmfree,
 						   objfile->md);
 	      obstack_specify_allocation_with_arg (&objfile->psymbol_obstack,
-						   0, 0, xmmalloc, mfree,
+						   0, 0, xmmalloc, xmfree,
 						   objfile->md);
 	      obstack_specify_allocation_with_arg (&objfile->symbol_obstack,
-						   0, 0, xmmalloc, mfree,
+						   0, 0, xmmalloc, xmfree,
 						   objfile->md);
 	      obstack_specify_allocation_with_arg (&objfile->type_obstack,
-						   0, 0, xmmalloc, mfree,
+						   0, 0, xmmalloc, xmfree,
 						   objfile->md);
 	    }
 	}
@@ -280,7 +280,7 @@ allocate_objfile (bfd *abfd, int flags)
   objfile->obfd = abfd;
   if (objfile->name != NULL)
     {
-      mfree (objfile->md, objfile->name);
+      xmfree (objfile->md, objfile->name);
     }
   if (abfd != NULL)
     {
@@ -440,9 +440,9 @@ free_objfile (struct objfile *objfile)
   clear_pc_function_cache ();
 
   /* The last thing we do is free the objfile struct itself for the
-     non-reusable case, or detach from the mapped file for the reusable
-     case.  Note that the mmalloc_detach or the mfree is the last thing
-     we can do with this objfile. */
+     non-reusable case, or detach from the mapped file for the
+     reusable case.  Note that the mmalloc_detach or the xmfree() is
+     the last thing we can do with this objfile. */
 
 #if defined(USE_MMALLOC) && defined(HAVE_MMAP)
 
@@ -467,18 +467,18 @@ free_objfile (struct objfile *objfile)
     {
       if (objfile->name != NULL)
 	{
-	  mfree (objfile->md, objfile->name);
+	  xmfree (objfile->md, objfile->name);
 	}
       if (objfile->global_psymbols.list)
-	mfree (objfile->md, objfile->global_psymbols.list);
+	xmfree (objfile->md, objfile->global_psymbols.list);
       if (objfile->static_psymbols.list)
-	mfree (objfile->md, objfile->static_psymbols.list);
+	xmfree (objfile->md, objfile->static_psymbols.list);
       /* Free the obstacks for non-reusable objfiles */
       free_bcache (&objfile->psymbol_cache);
       obstack_free (&objfile->psymbol_obstack, 0);
       obstack_free (&objfile->symbol_obstack, 0);
       obstack_free (&objfile->type_obstack, 0);
-      mfree (objfile->md, objfile);
+      xmfree (objfile->md, objfile);
       objfile = NULL;
     }
 }

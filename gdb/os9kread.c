@@ -415,7 +415,7 @@ os9k_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_stab_info != NULL)
     {
-      mfree (objfile->md, objfile->sym_stab_info);
+      xmfree (objfile->md, objfile->sym_stab_info);
     }
 /*
    free_header_files ();

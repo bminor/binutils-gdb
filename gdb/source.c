@@ -241,12 +241,12 @@ forget_cached_source_info (void)
 	{
 	  if (s->line_charpos != NULL)
 	    {
-	      mfree (objfile->md, s->line_charpos);
+	      xmfree (objfile->md, s->line_charpos);
 	      s->line_charpos = NULL;
 	    }
 	  if (s->fullname != NULL)
 	    {
-	      mfree (objfile->md, s->fullname);
+	      xmfree (objfile->md, s->fullname);
 	      s->fullname = NULL;
 	    }
 	}
@@ -682,7 +682,7 @@ open_source_file (struct symtab *s)
       if (result >= 0)
 	return result;
       /* Didn't work -- free old one, try again. */
-      mfree (s->objfile->md, s->fullname);
+      xmfree (s->objfile->md, s->fullname);
       s->fullname = NULL;
     }
 

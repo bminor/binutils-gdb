@@ -788,7 +788,7 @@ dbx_symfile_finish (struct objfile *objfile)
 	    }
 	  xfree (hfiles);
 	}
-      mfree (objfile->md, objfile->sym_stab_info);
+      xmfree (objfile->md, objfile->sym_stab_info);
     }
   free_header_files ();
 }
@@ -1051,7 +1051,7 @@ find_corresponding_bincl_psymtab (char *name, int instance)
 static void
 free_bincl_list (struct objfile *objfile)
 {
-  mfree (objfile->md, (PTR) bincl_list);
+  xmfree (objfile->md, (PTR) bincl_list);
   bincls_allocated = 0;
 }
 

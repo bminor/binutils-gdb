@@ -678,7 +678,7 @@ free_elfinfo (PTR objp)
   while (ssi)
     {
       nssi = ssi->next;
-      mfree (objfile->md, ssi);
+      xmfree (objfile->md, ssi);
       ssi = nssi;
     }
 
@@ -709,7 +709,7 @@ elf_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_stab_info != NULL)
     {
-      mfree (objfile->md, objfile->sym_stab_info);
+      xmfree (objfile->md, objfile->sym_stab_info);
     }
 }
 
