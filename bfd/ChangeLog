@@ -1,5 +1,12 @@
 Sun Mar 20 09:24:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (bfd_section_from_som_symbol): Renamed from
+	som_section_from_subspace_index.  Pass in a native SOM symbol.
+	For executables, iterate through the sections to find out
+	which contains the symbol's address rather than using the
+	symbol_info field.  (symbol_info has a different meaning for
+	dynamicly linked executables.)
+
 	* trad-core.c (trad_unix_core_file_p): Don't pass abfd to
 	bfd_zmalloc.
 

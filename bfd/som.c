@@ -166,8 +166,8 @@ static boolean som_find_nearest_line PARAMS ((bfd *, asection *,
 					      CONST char **,
 					      unsigned int *));
 static void som_get_symbol_info PARAMS ((bfd *, asymbol *, symbol_info *));
-static asection * som_section_from_subspace_index PARAMS ((bfd *, 
-							   unsigned int));
+static asection * bfd_section_from_som_symbol PARAMS ((bfd *, 
+					struct symbol_dictionary_record *));
 static int log2 PARAMS ((unsigned int));
 static bfd_reloc_status_type hppa_som_reloc PARAMS ((bfd *, arelent *,
 						     asymbol *, PTR,
@@ -3616,18 +3616,41 @@ som_get_symtab_upper_bound (abfd)
 /* Convert from a SOM subspace index to a BFD section.  */
 
 static asection *
-som_section_from_subspace_index (abfd, index)
+bfd_section_from_som_symbol (abfd, symbol)
      bfd *abfd;
-     unsigned int index;
+     struct symbol_dictionary_record *symbol;
 {
   asection *section;
 
-  for (section = abfd->sections; section != NULL; section = section->next)
-    if (section->target_index == index)
-      return section;
+  /* The meaning of the symbol_info field changes for executables.  So
+     only use the quick symbol_info mapping for incomplete objects.  */
+  if ((abfd->flags & EXEC_P) == 0)
+    {
+      unsigned int index = symbol->symbol_info;
+      for (section = abfd->sections; section != NULL; section = section->next)
+	if (section->target_index == index)
+	  return section;
 
-  /* Should never happen.  */
-  abort();
+      /* Should never happen.  */
+      abort();
+    }
+  else
+    {
+      unsigned int value = symbol->symbol_value;
+      unsigned int found = 0;
+
+      /* For executables we will have to use the symbol's address and
+	 find out what section would contain that address.   Yuk.  */
+      for (section = abfd->sections; section; section = section->next)
+	{
+	  if (value >= section->vma
+	      && value <= section->vma + section->_cooked_size)
+	    return section;
+	}
+
+      /* Should never happen.  */
+      abort ();
+    }
 }
 
 /* Read and save the symbol table associated with the given BFD.  */
@@ -3762,8 +3785,7 @@ som_slurp_symbol_table (abfd)
 
 	case SS_UNIVERSAL:
 	  sym->symbol.flags |= (BSF_EXPORT | BSF_GLOBAL);
-	  sym->symbol.section
-	    = som_section_from_subspace_index (abfd, bufp->symbol_info);
+	  sym->symbol.section = bfd_section_from_som_symbol (abfd, bufp);
 	  sym->symbol.value -= sym->symbol.section->vma;
 	  break;
 
@@ -3774,8 +3796,7 @@ som_slurp_symbol_table (abfd)
 #endif
 	case SS_LOCAL:
 	  sym->symbol.flags |= BSF_LOCAL;
-	  sym->symbol.section
-	    = som_section_from_subspace_index (abfd, bufp->symbol_info);
+	  sym->symbol.section = bfd_section_from_som_symbol (abfd, bufp);
 	  sym->symbol.value -= sym->symbol.section->vma;
 	  break;
 	}
