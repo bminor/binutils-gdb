@@ -53,11 +53,12 @@ static int mips_cksum PARAMS ((const unsigned char *hdr,
 static void
 mips_send_packet PARAMS ((const char *s, int get_ack));
 
-static int mips_receive_packet PARAMS ((char *buff, int));
+static int mips_receive_packet PARAMS ((char *buff, int throw_error,
+					int timeout));
 
 static int
 mips_request PARAMS ((char cmd, unsigned int addr, unsigned int data,
-		      int *perr));
+		      int *perr, timeout));
 
 static void
 mips_initialize PARAMS ((void));
@@ -638,9 +639,10 @@ mips_send_packet (s, get_ack)
    don't print an error message and return -1.  */
 
 static int
-mips_receive_packet (buff, throw_error)
+mips_receive_packet (buff, throw_error, timeout)
      char *buff;
      int throw_error;
+     int timeout;
 {
   int ch;
   int garbage;
@@ -657,7 +659,7 @@ mips_receive_packet (buff, throw_error)
       int i;
       int err;
 
-      if (mips_receive_header (hdr, &garbage, ch, mips_receive_wait) != 0)
+      if (mips_receive_header (hdr, &garbage, ch, timeout) != 0)
 	{
 	  if (throw_error)
 	    mips_error ("Timed out waiting for remote packet");
@@ -690,7 +692,7 @@ mips_receive_packet (buff, throw_error)
 	{
 	  int rch;
 
-	  rch = mips_readchar (mips_receive_wait);
+	  rch = mips_readchar (timeout);
 	  if (rch == SYN)
 	    {
 	      ch = SYN;
@@ -714,7 +716,7 @@ mips_receive_packet (buff, throw_error)
 	  continue;
 	}
 
-      err = mips_receive_trailer (trlr, &garbage, &ch, mips_receive_wait);
+      err = mips_receive_trailer (trlr, &garbage, &ch, timeout);
       if (err == -1)
 	{
 	  if (throw_error)
@@ -830,11 +832,12 @@ mips_receive_packet (buff, throw_error)
    target board reports.  */
 
 static int
-mips_request (cmd, addr, data, perr)
+mips_request (cmd, addr, data, perr, timeout)
      char cmd;
      unsigned int addr;
      unsigned int data;
      int *perr;
+     int timeout;
 {
   char buff[DATA_MAXLEN + 1];
   int len;
@@ -860,7 +863,7 @@ mips_request (cmd, addr, data, perr)
 
   mips_need_reply = 0;
 
-  len = mips_receive_packet (buff, 1);
+  len = mips_receive_packet (buff, 1, timeout);
   buff[len] = '\0';
 
   if (sscanf (buff, "0x%x %c 0x%x 0x%x",
@@ -892,7 +895,6 @@ static void
 mips_initialize ()
 {
   char cr;
-  int hold_wait;
   char buff[DATA_MAXLEN + 1];
   int err;
 
@@ -910,10 +912,7 @@ mips_initialize ()
   cr = '\r';
   SERIAL_WRITE (mips_desc, &cr, 1);
 
-  hold_wait = mips_receive_wait;
-  mips_receive_wait = 3;
-
-  if (mips_receive_packet (buff, 0) < 0)
+  if (mips_receive_packet (buff, 0, 3) < 0)
     {
       char cc;
 
@@ -928,14 +927,14 @@ mips_initialize ()
       cr = '\r';
       SERIAL_WRITE (mips_desc, &cr, 1);
     }
-  mips_receive_packet (buff, 1);
+  mips_receive_packet (buff, 1, 3);
 
-  mips_receive_wait = hold_wait;
   mips_initializing = 0;
 
   /* If this doesn't call error, we have connected; we don't care if
      the request itself succeeds or fails.  */
-  mips_request ('r', (unsigned int) 0, (unsigned int) 0, &err);
+  mips_request ('r', (unsigned int) 0, (unsigned int) 0, &err,
+		mips_receive_wait);
 }
 
 /* Open a connection to the remote board.  */
@@ -985,7 +984,8 @@ mips_close (quitting)
       mips_is_open = 0;
 
       /* Get the board out of remote debugging mode.  */
-      mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err);
+      mips_request ('x', (unsigned int) 0, (unsigned int) 0, &err,
+		    mips_receive_wait);
 
       SERIAL_CLOSE (mips_desc);
     }
@@ -1020,7 +1020,8 @@ mips_resume (pid, step, siggnal)
   mips_request (step ? 's' : 'c',
 		(unsigned int) 1,
 		(unsigned int) 0,
-		(int *) NULL);
+		(int *) NULL,
+		mips_receive_wait);
 }
 
 /* Wait until the remote stops, and return a wait status.  */
@@ -1042,7 +1043,8 @@ mips_wait (pid, status)
       return 0;
     }
 
-  rstatus = mips_request ('\0', (unsigned int) 0, (unsigned int) 0, &err);
+  /* No timeout; we sit here as long as the program continues to execute.  */
+  rstatus = mips_request ('\0', (unsigned int) 0, (unsigned int) 0, &err, -1);
   if (err)
     mips_error ("Remote failure: %s", safe_strerror (errno));
 
@@ -1111,7 +1113,7 @@ mips_fetch_registers (regno)
     }
 
   val = mips_request ('r', (unsigned int) mips_map_regno (regno),
-		      (unsigned int) 0, &err);
+		      (unsigned int) 0, &err, mips_receive_wait);
   if (err)
     mips_error ("Can't read register %d: %s", regno, safe_strerror (errno));
 
@@ -1150,7 +1152,7 @@ mips_store_registers (regno)
 
   mips_request ('R', (unsigned int) mips_map_regno (regno),
 		(unsigned int) read_register (regno),
-		&err);
+		&err, mips_receive_wait);
   if (err)
     mips_error ("Can't write register %d: %s", regno, safe_strerror (errno));
 }
@@ -1164,11 +1166,13 @@ mips_fetch_word (addr)
   int val;
   int err;
 
-  val = mips_request ('d', (unsigned int) addr, (unsigned int) 0, &err);
+  val = mips_request ('d', (unsigned int) addr, (unsigned int) 0, &err,
+		      mips_receive_wait);
   if (err)
     {
       /* Data space failed; try instruction space.  */
-      val = mips_request ('i', (unsigned int) addr, (unsigned int) 0, &err);
+      val = mips_request ('i', (unsigned int) addr, (unsigned int) 0, &err,
+			  mips_receive_wait);
       if (err)
 	mips_error ("Can't read address 0x%x: %s", addr, safe_strerror (errno));
     }
@@ -1184,11 +1188,13 @@ mips_store_word (addr, val)
 {
   int err;
 
-  mips_request ('D', (unsigned int) addr, (unsigned int) val, &err);
+  mips_request ('D', (unsigned int) addr, (unsigned int) val, &err,
+		mips_receive_wait);
   if (err)
     {
       /* Data space failed; try instruction space.  */
-      mips_request ('I', (unsigned int) addr, (unsigned int) val, &err);
+      mips_request ('I', (unsigned int) addr, (unsigned int) val, &err,
+		    mips_receive_wait);
       if (err)
 	mips_error ("Can't write address 0x%x: %s", addr, safe_strerror (errno));
     }

@@ -1,3 +1,12 @@
+Fri Dec 31 12:13:47 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* remote-mips.c: Add timeout parameter to mips_request and
+	mips_receive_packet.
+	(callers): pass in mips_receive_wait except mips_initialize (where
+	we use it to clean up the kludge where we had been changing
+	mips_receive_wait temporarily) and mips_wait (where we pass in
+	-1 for no timeout).
+
 Fri Dec 31 14:33:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stack.c (print_block_frame_locals): Also print LOC_BASEREG variables.
