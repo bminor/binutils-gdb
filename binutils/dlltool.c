@@ -532,7 +532,7 @@ run (what, args)
   else 
     {
       int status;
-      waitpid (pid, &status);
+      waitpid (pid, &status, 0);
       if (status) 
 	{
 	  if (WIFSIGNALED (status)) 
@@ -708,10 +708,9 @@ flush_page (f, need, page_addr, on_page)
 {
   int i;
   /* Flush this page */
-  fprintf (f, "\t%s0x%08x%s\t%s Starting RVA for chunk\n",
-	   ASM_RVA_BEFORE,
+  fprintf (f, "\t%s\t0x%08x\t%s Starting RVA for chunk\n",
+	   ASM_LONG,
 	   page_addr,
-	   ASM_RVA_AFTER,
 	   ASM_C);
   fprintf (f, "\t%s\t0x%x\t%s Size of block\n",
 	   ASM_LONG,
@@ -1363,12 +1362,12 @@ workout_prefix ()
 	      ranlib_name = xmalloc (len + strlen ("ranlib")+1);
 	      as_name = xmalloc (len + strlen ("as")+1);
 
-	      strncpy (ar_name, program_name, len);
-	      strcat (ar_name, "ar");
-	      strncpy (ranlib_name, program_name, len);
-	      strcat (ranlib_name, "ranlib");
-	      strncpy (as_name, program_name, len);
-	      strcat (as_name, "as");
+	      memcpy (ar_name, program_name, len);
+	      strcpy (ar_name + len, "ar");
+	      memcpy (ranlib_name, program_name, len);
+	      strcpy (ranlib_name + len, "ranlib");
+	      memcpy (as_name, program_name, len);
+	      strcpy (as_name + len, "as");
 	    }
 	}
     }
@@ -1525,5 +1524,4 @@ main (ac, av)
 
   return 0;
 }
-
 

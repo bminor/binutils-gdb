@@ -1,3 +1,7 @@
+Thu Aug 31 04:09:16 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* dlltool.c (run): Add missing 3rd arg to waitpid.
+
 Wed Aug 30 11:02:11 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* Makefile.in (TOOL_PROGS): Include dlltool if needed.
