@@ -1,5 +1,5 @@
 /* A YACC grammer to parse a superset of the AT&T linker scripting languaue.
-   Copyright (C) 1991, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
 This file is part of GNU ld.
@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define YYDEBUG 1
 #endif
 
-static int typebits;
+static enum section_type sectype;
 
 lang_memory_region_type *region;
 
@@ -68,14 +68,22 @@ static int error_index;
   char *name;
   int token;
   union etree_union *etree;
+  struct phdr_info
+    {
+      boolean filehdr;
+      boolean phdrs;
+      union etree_union *at;
+      union etree_union *flags;
+    } phdr;
 }
 
-%type <etree> exp  opt_exp_with_type  mustbe_exp opt_at
+%type <etree> exp opt_exp_with_type mustbe_exp opt_at phdr_type phdr_val
 %type <integer> fill_opt
 %type <name> memspec_opt casesymlist
 %token <integer> INT  
 %token <name> NAME LNAME
 %type  <integer> length
+%type <phdr> phdr_qualifiers
 
 %right <token> PLUSEQ MINUSEQ MULTEQ DIVEQ  '=' LSHIFTEQ RSHIFTEQ   ANDEQ OREQ 
 %right <token> '?' ':'
@@ -94,8 +102,8 @@ static int error_index;
 %right UNARY
 %token END 
 %left <token> '('
-%token <token> ALIGN_K BLOCK QUAD LONG SHORT BYTE
-%token SECTIONS
+%token <token> ALIGN_K BLOCK BIND QUAD LONG SHORT BYTE
+%token SECTIONS PHDRS
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token SIZEOF_HEADERS
@@ -108,7 +116,7 @@ static int error_index;
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
 %token ALIGNMOD AT PROVIDE
-%type <token> assign_op 
+%type <token> assign_op atype
 %type <name>  filename
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD
 %token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE REL
@@ -136,12 +144,15 @@ defsym_expr:
 
 /* SYNTAX WITHIN AN MRI SCRIPT FILE */  
 mri_script_file:
-		{    	ldlex_mri_script();
-			PUSH_ERROR("MRI style script");
+		{
+		  ldlex_mri_script ();
+		  PUSH_ERROR ("MRI style script");
 		}
 	     mri_script_lines
-		{	ldlex_popstate(); 
-			POP_ERROR();
+		{
+		  ldlex_popstate ();
+		  mri_draw_tree ();
+		  POP_ERROR ();
 		}
 	;
 
@@ -177,7 +188,11 @@ mri_script_command:
 			{ mri_output_section($2, $4);}
 	|	ALIGN_K NAME '=' exp
 			{ mri_align($2,$4); }
+	|	ALIGN_K NAME ',' exp
+			{ mri_align($2,$4); }
 	|	ALIGNMOD NAME '=' exp
+			{ mri_alignmod($2,$4); }
+	|	ALIGNMOD NAME ',' exp
 			{ mri_alignmod($2,$4); }
 	|	ABSOLUTE mri_abs_name_list
 	|	LOAD	 mri_load_name_list
@@ -196,7 +211,7 @@ mri_script_command:
 	|	INCLUDE filename
 		{ ldfile_open_command_file ($2); } mri_script_lines END
 	|	START NAME
-		{ lang_add_entry ($2, 0); }
+		{ lang_add_entry ($2, false); }
         |
 	;
 
@@ -253,6 +268,7 @@ ifile_list:
 ifile_p1:
 		memory
 	|	sections
+	|	phdrs
 	|	startup
 	|	high_level_library
 	|	low_level_library
@@ -318,15 +334,25 @@ sec_or_group_p1:
 
 statement_anywhere:
 		ENTRY '(' NAME ')'
-		{ lang_add_entry ($3, 0); }
+		{ lang_add_entry ($3, false); }
 	|	assignment end
 	;
 
+/* The '*' and '?' cases are there because the lexer returns them as
+   separate tokens rather than as NAME.  */
 file_NAME_list:
 		NAME
-			{ lang_add_wild($1, current_file); }
+			{ lang_add_wild ($1, current_file); }
+	|	'*'
+			{ lang_add_wild ("*", current_file); }
+	|	'?'
+			{ lang_add_wild ("?", current_file); }
 	|	file_NAME_list opt_comma NAME
-			{ lang_add_wild($3, current_file); }
+			{ lang_add_wild ($3, current_file); }
+	|	file_NAME_list opt_comma '*'
+			{ lang_add_wild ("*", current_file); }
+	|	file_NAME_list opt_comma '?'
+			{ lang_add_wild ("?", current_file); }
 	;
 
 input_section_spec:
@@ -342,7 +368,14 @@ input_section_spec:
 		']'
 	|	NAME
 			{
-			current_file =$1;
+			current_file = $1;
+			}
+		'(' file_NAME_list ')'
+	|	'?'
+		/* This case is needed because the lexer returns a
+                   single question mark as '?' rather than NAME.  */
+			{
+			current_file = "?";
 			}
 		'(' file_NAME_list ')'
 	|	'*'
@@ -365,12 +398,12 @@ statement:
 		  lang_add_attribute(lang_constructors_statement_enum); 
 		}
 	| input_section_spec
-        | length '(' exp ')'
+        | length '(' mustbe_exp ')'
         	        {
 			lang_add_data((int) $1,$3);
 			}
   
-	| FILL '(' exp ')'
+	| FILL '(' mustbe_exp ')'
 			{
 			  lang_add_fill
 			    (exp_get_value_int($3,
@@ -623,36 +656,57 @@ opt_at:
 
 section:	NAME 		{ ldlex_expression(); }
 		opt_exp_with_type 
-		opt_at   	{ ldlex_popstate(); }
+		opt_at   	{ ldlex_popstate (); ldlex_script (); }
 		'{'
 			{
-			lang_enter_output_section_statement($1,$3,typebits,0,0,0,$4);
+			  lang_enter_output_section_statement($1, $3,
+							      sectype,
+							      0, 0, 0, $4);
 			}
 		statement_list_opt 	
- 		'}' {ldlex_expression();} memspec_opt fill_opt
+ 		'}' { ldlex_popstate (); ldlex_expression (); }
+		memspec_opt phdr_opt fill_opt
 		{
 		  ldlex_popstate();
-		  lang_leave_output_section_statement($12, $11);
+		  lang_leave_output_section_statement($13, $11);
 		}
-opt_comma
-
+		opt_comma
+	|	/* The GROUP case is just enough to support the gcc
+		   svr3.ifile script.  It is not intended to be full
+		   support.  I'm not even sure what GROUP is supposed
+		   to mean.  */
+		GROUP { ldlex_expression (); }
+		opt_exp_with_type
+		{
+		  ldlex_popstate ();
+		  lang_add_assignment (exp_assop ('=', ".", $3));
+		}
+		'{' sec_or_group_p1 '}'
 	;
 
 type:
-	   NOLOAD  { typebits = SEC_NEVER_LOAD; }
-	|  DSECT   { typebits = 0; }
-	|  COPY    { typebits = 0; }
-	|  INFO    { typebits = 0; }
-	|  OVERLAY { typebits = 0; }
-  	| { typebits = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS; }
+	   NOLOAD  { sectype = noload_section; }
+	|  DSECT   { sectype = dsect_section; }
+	|  COPY    { sectype = copy_section; }
+	|  INFO    { sectype = info_section; }
+	|  OVERLAY { sectype = overlay_section; }
 	;
 
+atype:
+	 	'(' type ')'
+  	| 	/* EMPTY */ { sectype = normal_section; }
+	;
 
 opt_exp_with_type:
-		exp ':'			{ $$ = $1; typebits =0;}
-	|	exp '(' type ')' ':' 	{ $$ = $1; }
-	|	':'			{ $$= (etree_type *)NULL; typebits = 0; }
-	|	'(' type ')' ':'	{ $$= (etree_type *)NULL;  }
+		exp atype ':'		{ $$ = $1; }
+	|	atype ':'		{ $$ = (etree_type *)NULL;  }
+	|	/* The BIND cases are to support the gcc svr3.ifile
+		   script.  They aren't intended to implement full
+		   support for the BIND keyword.  I'm not even sure
+		   what BIND is supposed to mean.  */
+		BIND '(' exp ')' atype ':' { $$ = $3; }
+	|	BIND '(' exp ')' BLOCK '(' exp ')' atype ':'
+		{ $$ = $3; }
 	;
 
 memspec_opt:
@@ -660,6 +714,99 @@ memspec_opt:
 		{ $$ = $2; }
 	|	{ $$ = "*default*"; }
 	;
+
+phdr_opt:
+		/* empty */
+	|	phdr_opt ':' NAME
+		{
+		  lang_section_in_phdr ($3);
+		}
+	;
+
+phdrs:
+		PHDRS '{' phdr_list '}'
+	;
+
+phdr_list:
+		/* empty */
+	|	phdr_list phdr
+	;
+
+phdr:
+		NAME { ldlex_expression (); }
+		  phdr_type phdr_qualifiers { ldlex_popstate (); }
+		  ';'
+		{
+		  lang_new_phdr ($1, $3, $4.filehdr, $4.phdrs, $4.at,
+				 $4.flags);
+		}
+	;
+
+phdr_type:
+		exp
+		{
+		  $$ = $1;
+
+		  if ($1->type.node_class == etree_name
+		      && $1->type.node_code == NAME)
+		    {
+		      const char *s;
+		      unsigned int i;
+		      static const char * const phdr_types[] =
+			{
+			  "PT_NULL", "PT_LOAD", "PT_DYNAMIC",
+			  "PT_INTERP", "PT_NOTE", "PT_SHLIB",
+			  "PT_PHDR"
+			};
+
+		      s = $1->name.name;
+		      for (i = 0;
+			   i < sizeof phdr_types / sizeof phdr_types[0];
+			   i++)
+			if (strcmp (s, phdr_types[i]) == 0)
+			  {
+			    $$ = exp_intop (i);
+			    break;
+			  }
+		    }
+		}
+	;
+
+phdr_qualifiers:
+		/* empty */
+		{
+		  memset (&$$, 0, sizeof (struct phdr_info));
+		}
+	|	NAME phdr_val phdr_qualifiers
+		{
+		  $$ = $3;
+		  if (strcmp ($1, "FILEHDR") == 0 && $2 == NULL)
+		    $$.filehdr = true;
+		  else if (strcmp ($1, "PHDRS") == 0 && $2 == NULL)
+		    $$.phdrs = true;
+		  else if (strcmp ($1, "FLAGS") == 0 && $2 != NULL)
+		    $$.flags = $2;
+		  else
+		    einfo ("%X%P:%S: PHDRS syntax error at `%s'\n", $1);
+		}
+	|	AT '(' exp ')' phdr_qualifiers
+		{
+		  $$ = $5;
+		  $$.at = $3;
+		}
+	;
+
+phdr_val:
+		/* empty */
+		{
+		  $$ = NULL;
+		}
+	| '(' exp ')'
+		{
+		  $$ = $2;
+		}
+	;
+
 %%
 void
 yyerror(arg) 

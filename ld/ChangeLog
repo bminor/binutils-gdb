@@ -1,3 +1,30 @@
+Mon Jul 29 17:23:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* fnmatch.h, fnmatch.c: New files.
+	* ldlex.l: Remove unused definition of FILENAME.  Add definition
+	of WILDCHAR.  In SCRIPT mode, accept any sequence of WILDCHAR as a
+	NAME.
+	* ldgram.y (file_NAME_list): Accept '*' and '?' specially.
+	(input_section_spec): Accept '?' specially.
+	(statement): Change exp to mustbe_exp in length and FILL cases.
+	(section): Call ldlex_script before section statements, and call
+	ldlex_popstate after them.
+	* ldlang.c: Include "fnmatch.h".
+	(wildcardp): New static function.
+	(wild_section): Permit the section name to be a wildcard.
+	(wild_file): New static function, broken out of wild.
+	(wild): Call wild_file.  Permit the file name to be a wildcard.
+	(open_input_bfds): Don't call lookup_name for a wildcard pattern.
+	* Makefile.in: Rebuild dependencies.
+ 	(CFILES): Add fnmatch.c.
+	(HFILES): Add fnmatch.h.
+	(OFILES): Add fnmatch.o.
+	* ld.texinfo: Document that file and section names can now be
+	wildcard patterns.
+
+	* ldlang.c (lang_place_orphans): Correct condition: place a common
+	section if not relocateable or if common definitions are forced.
+
 start-sanitize-d10v
 	Wed Jul 24 12:16:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 

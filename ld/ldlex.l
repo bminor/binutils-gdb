@@ -1,6 +1,6 @@
 %{
 
-/* Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GLD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 This was written by steve chamberlain
@@ -26,12 +26,13 @@ This was written by steve chamberlain
 
 #include <ansidecl.h>
 #include <stdio.h>
-/* start-sanitize-mpw */
+#include <ctype.h>
+
 #ifdef MPW
 /* Prevent enum redefinition problems. */
 #define TRUE_FALSE_ALREADY_DEFINED
 #endif /* MPW */
-/* end-sanitize-mpw */
+
 #include "bfd.h"
 #include "sysdep.h"
 #include "ld.h"
@@ -54,9 +55,14 @@ int hex_mode;
    (FIXME Actually, it doesn't appear to get reset for each file?)  */
 unsigned int lineno = 1;
 
+/* The string we are currently lexing, or NULL if we are reading a
+   file.  */
+const char *lex_string = NULL;
+
 /* Support for flex reading from more than one input file (stream).
    `include_stack' is flex's input state for each open file;
-   `file_name_stack' is the file names.
+   `file_name_stack' is the file names.  `lineno_stack' is the current
+   line numbers.
 
    If `include_stack_ptr' is 0, we haven't started reading anything yet.
    Otherwise, stack elements 0 through `include_stack_ptr - 1' are valid.  */
@@ -66,7 +72,8 @@ unsigned int lineno = 1;
 
 #define MAX_INCLUDE_DEPTH 10
 static YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
-static char *file_name_stack[MAX_INCLUDE_DEPTH];
+static const char *file_name_stack[MAX_INCLUDE_DEPTH];
+static unsigned int lineno_stack[MAX_INCLUDE_DEPTH];
 static unsigned int include_stack_ptr = 0;
 
 static YY_BUFFER_STATE yy_create_string_buffer PARAMS ((const char *string,
@@ -99,7 +106,7 @@ CMDFILENAMECHAR1  [_a-zA-Z0-9\/\.\\_\+\$\:\[\]\\\,\=\&\!\<\>\~]
 FILENAMECHAR1	[_a-zA-Z\/\.\\\$\_\~]
 SYMBOLCHARN     [_a-zA-Z\/\.\\0-9]
 FILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\\,\~]
-FILENAME	{FILENAMECHAR}+
+WILDCHAR	[_a-zA-Z0-9\/\.\-\_\+\=\$\:\[\]\\\,\~\?\*]
 WHITE		[ \t\n\r]+ 
 
 NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
@@ -139,23 +146,27 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 				return INT;
 			}
 
-<MRI,EXPRESSION>([0-9A-Fa-f])+(H|X|B|O|D) {
+<MRI,EXPRESSION>([0-9A-Fa-f])+(H|h|X|x|B|b|O|o|D|d) {
 				   int ibase ;
 				   switch (yytext[yyleng-1]) {
 				    case 'X': 
+				    case 'x':
 				    case 'H':
+				    case 'h':
 				     ibase = 16;
 				     break;
 				    case 'O':
+				    case 'o':
 				     ibase = 8;
 				     break;
 				    case 'B':
+				    case 'b':
 				     ibase = 2;
 				     break;
 				    default:
 				     ibase = 10;
 				   }
-				   yylval.integer = bfd_scan_vma (yytext+1, 0,
+				   yylval.integer = bfd_scan_vma (yytext, 0,
 								  ibase);
 				   return INT;
 				 }
@@ -172,47 +183,48 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 				    }		
 				  return INT;
 				}
-<BOTH,SCRIPT,EXPRESSION>"]"		{ RTOKEN(']');}
-<BOTH,SCRIPT,EXPRESSION>"["		{ RTOKEN('[');}
-<BOTH,SCRIPT,EXPRESSION>"<<="	{ RTOKEN(LSHIFTEQ);}
-<BOTH,SCRIPT,EXPRESSION>">>="	{ RTOKEN(RSHIFTEQ);}
-<BOTH,SCRIPT,EXPRESSION>"||"	{ RTOKEN(OROR);}
-<BOTH,SCRIPT,EXPRESSION>"=="	{ RTOKEN(EQ);}
-<BOTH,SCRIPT,EXPRESSION>"!="	{ RTOKEN(NE);}
-<BOTH,SCRIPT,EXPRESSION>">="	{ RTOKEN(GE);}
-<BOTH,SCRIPT,EXPRESSION>"<="	{ RTOKEN(LE);}
-<BOTH,SCRIPT,EXPRESSION>"<<"	{ RTOKEN(LSHIFT);}
-<BOTH,SCRIPT,EXPRESSION>">>"	{ RTOKEN(RSHIFT);}
-<BOTH,SCRIPT,EXPRESSION>"+="	{ RTOKEN(PLUSEQ);}
-<BOTH,SCRIPT,EXPRESSION>"-="	{ RTOKEN(MINUSEQ);}
-<BOTH,SCRIPT,EXPRESSION>"*="	{ RTOKEN(MULTEQ);}
-<BOTH,SCRIPT,EXPRESSION>"/="	{ RTOKEN(DIVEQ);}
-<BOTH,SCRIPT,EXPRESSION>"&="	{ RTOKEN(ANDEQ);}
-<BOTH,SCRIPT,EXPRESSION>"|="	{ RTOKEN(OREQ);}
-<BOTH,SCRIPT,EXPRESSION>"&&"	{ RTOKEN(ANDAND);}
-<BOTH,SCRIPT,EXPRESSION>">"		{ RTOKEN('>');}
-<MRI,BOTH,SCRIPT,EXPRESSION>","		{ RTOKEN(',');}
-<BOTH,SCRIPT,EXPRESSION>"&"		{ RTOKEN('&');}
-<BOTH,SCRIPT,EXPRESSION>"|"		{ RTOKEN('|');}
-<BOTH,SCRIPT,EXPRESSION>"~"		{ RTOKEN('~');}
-<BOTH,SCRIPT,EXPRESSION>"!"		{ RTOKEN('!');}
-<BOTH,SCRIPT,EXPRESSION>"?"		{ RTOKEN('?');}
-<BOTH,SCRIPT,EXPRESSION>"*"		{ RTOKEN('*');}
-<BOTH,SCRIPT,EXPRESSION>"+"		{ RTOKEN('+');}
-<BOTH,SCRIPT,EXPRESSION>"-"		{ RTOKEN('-');}
-<BOTH,SCRIPT,EXPRESSION>"/"		{ RTOKEN('/');}
-<BOTH,SCRIPT,EXPRESSION>"%"		{ RTOKEN('%');}
-<BOTH,SCRIPT,EXPRESSION>"<"		{ RTOKEN('<');}
-<MRI,BOTH,SCRIPT,EXPRESSION>"="          { RTOKEN('=');}
-<BOTH,SCRIPT,EXPRESSION>"}"			{ RTOKEN('}') ; }
-<BOTH,SCRIPT,EXPRESSION>"{"			{ RTOKEN('{'); }
-<BOTH,SCRIPT,EXPRESSION>")"			{ RTOKEN(')');}
-<BOTH,SCRIPT,EXPRESSION>"("			{ RTOKEN('(');}
-<BOTH,SCRIPT,EXPRESSION>":"		{ RTOKEN(':'); }
-<BOTH,SCRIPT,EXPRESSION>";"		{ RTOKEN(';');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"]"		{ RTOKEN(']');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"["		{ RTOKEN('[');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"<<="	{ RTOKEN(LSHIFTEQ);}
+<BOTH,SCRIPT,EXPRESSION,MRI>">>="	{ RTOKEN(RSHIFTEQ);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"||"	{ RTOKEN(OROR);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"=="	{ RTOKEN(EQ);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"!="	{ RTOKEN(NE);}
+<BOTH,SCRIPT,EXPRESSION,MRI>">="	{ RTOKEN(GE);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"<="	{ RTOKEN(LE);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"<<"	{ RTOKEN(LSHIFT);}
+<BOTH,SCRIPT,EXPRESSION,MRI>">>"	{ RTOKEN(RSHIFT);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"+="	{ RTOKEN(PLUSEQ);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"-="	{ RTOKEN(MINUSEQ);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"*="	{ RTOKEN(MULTEQ);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"/="	{ RTOKEN(DIVEQ);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"&="	{ RTOKEN(ANDEQ);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"|="	{ RTOKEN(OREQ);}
+<BOTH,SCRIPT,EXPRESSION,MRI>"&&"	{ RTOKEN(ANDAND);}
+<BOTH,SCRIPT,EXPRESSION,MRI>">"		{ RTOKEN('>');}
+<BOTH,SCRIPT,EXPRESSION,MRI>","		{ RTOKEN(',');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"&"		{ RTOKEN('&');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"|"		{ RTOKEN('|');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"~"		{ RTOKEN('~');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"!"		{ RTOKEN('!');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"?"		{ RTOKEN('?');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"*"		{ RTOKEN('*');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"+"		{ RTOKEN('+');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"-"		{ RTOKEN('-');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"/"		{ RTOKEN('/');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"%"		{ RTOKEN('%');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"<"		{ RTOKEN('<');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"="          { RTOKEN('=');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"}"			{ RTOKEN('}') ; }
+<BOTH,SCRIPT,EXPRESSION,MRI>"{"			{ RTOKEN('{'); }
+<BOTH,SCRIPT,EXPRESSION,MRI>")"			{ RTOKEN(')');}
+<BOTH,SCRIPT,EXPRESSION,MRI>"("			{ RTOKEN('(');}
+<BOTH,SCRIPT,EXPRESSION,MRI>":"		{ RTOKEN(':'); }
+<BOTH,SCRIPT,EXPRESSION,MRI>";"		{ RTOKEN(';');}
 <BOTH,SCRIPT>"MEMORY"		{ RTOKEN(MEMORY);}
 <BOTH,SCRIPT>"ORIGIN"		{ RTOKEN(ORIGIN);}
-<BOTH,SCRIPT>"BLOCK"			{ RTOKEN(BLOCK);}
+<EXPRESSION,BOTH,SCRIPT>"BLOCK"		{ RTOKEN(BLOCK);}
+<EXPRESSION,BOTH,SCRIPT>"BIND"		{ RTOKEN(BIND);}
 <BOTH,SCRIPT>"LENGTH"		{ RTOKEN(LENGTH);}
 <EXPRESSION,BOTH,SCRIPT>"ALIGN"			{ RTOKEN(ALIGN_K);}
 <EXPRESSION,BOTH,SCRIPT>"ADDR"			{ RTOKEN(ADDR);}
@@ -226,6 +238,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT>"SEARCH_DIR"		{ RTOKEN(SEARCH_DIR);}
 <BOTH,SCRIPT>"OUTPUT"		{ RTOKEN(OUTPUT);}
 <BOTH,SCRIPT>"INPUT"			{ RTOKEN(INPUT);}
+<EXPRESSION,BOTH,SCRIPT>"GROUP"		{ RTOKEN(GROUP);}
 <EXPRESSION,BOTH,SCRIPT>"DEFINED"		{ RTOKEN(DEFINED);}
 <BOTH,SCRIPT>"CREATE_OBJECT_SYMBOLS"	{ RTOKEN(CREATE_OBJECT_SYMBOLS);}
 <BOTH,SCRIPT>"CONSTRUCTORS"		{ RTOKEN( CONSTRUCTORS);}
@@ -243,25 +256,27 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <BOTH,SCRIPT>"SHORT"			{ RTOKEN( SHORT);}
 <BOTH,SCRIPT>"BYTE"			{ RTOKEN( BYTE);}
 <BOTH,SCRIPT>"NOFLOAT"		{ RTOKEN(NOFLOAT);}
-<EXPRESSION,BOTH,SCRIPT>"NOLOAD"		{ RTOKEN(NOLOAD);}
-<BOTH,SCRIPT>"DSECT"			{ RTOKEN(DSECT);}
-<BOTH,SCRIPT>"COPY"			{ RTOKEN(COPY);}
-<BOTH,SCRIPT>"INFO"			{ RTOKEN(INFO);}
-<BOTH,SCRIPT>"OVERLAY"		{ RTOKEN(OVERLAY);}
+<EXPRESSION,BOTH,SCRIPT>"NOLOAD"	{ RTOKEN(NOLOAD);}
+<EXPRESSION,BOTH,SCRIPT>"DSECT"		{ RTOKEN(DSECT);}
+<EXPRESSION,BOTH,SCRIPT>"COPY"		{ RTOKEN(COPY);}
+<EXPRESSION,BOTH,SCRIPT>"INFO"		{ RTOKEN(INFO);}
+<EXPRESSION,BOTH,SCRIPT>"OVERLAY"	{ RTOKEN(OVERLAY);}
 <BOTH,SCRIPT>"o"			{ RTOKEN(ORIGIN);}
 <BOTH,SCRIPT>"org"			{ RTOKEN(ORIGIN);}
 <BOTH,SCRIPT>"l"			{ RTOKEN( LENGTH);}
 <BOTH,SCRIPT>"len"			{ RTOKEN( LENGTH);}
 <BOTH,SCRIPT>"INCLUDE"			{ RTOKEN(INCLUDE);}
+<BOTH,SCRIPT>"PHDRS"			{ RTOKEN (PHDRS); }
 <EXPRESSION,BOTH,SCRIPT>"AT"			{ RTOKEN(AT);}
-<BOTH,SCRIPT>"PROVIDE"			{ RTOKEN(PROVIDE); }
+<EXPRESSION,BOTH,SCRIPT>"PROVIDE"		{ RTOKEN(PROVIDE); }
+<MRI>"#".*\n?\r?		{ ++ lineno; }
 <MRI>"\n"	                { ++ lineno;  RTOKEN(NEWLINE); }
 <MRI>"\r"	                { ++ lineno;  RTOKEN(NEWLINE); }
 <MRI>"*".*			{ /* Mri comment line */ }
+<MRI>";".*			{ /* Mri comment line */ }
 <MRI>"END"                      { RTOKEN(ENDWORD); }
 <MRI>"ALIGNMOD"		{ RTOKEN(ALIGNMOD);}
 <MRI>"ALIGN"		{ RTOKEN(ALIGN_K);}
-
 <MRI>"CHIP"                     { RTOKEN(CHIP); }
 <MRI>"BASE"                     { RTOKEN(BASE); }
 <MRI>"ALIAS"                     { RTOKEN(ALIAS); }
@@ -271,15 +286,27 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <MRI>"ORDER"                    { RTOKEN(ORDER); }
 <MRI>"NAME"                     { RTOKEN(NAMEWORD); }
 <MRI>"FORMAT"                   { RTOKEN(FORMAT); }
+<MRI>"CASE"                     { RTOKEN(CASE); }
+<MRI>"EXTERN"                   { RTOKEN(EXTERN); }
+<MRI>"START"                    { RTOKEN(START); }
 <MRI>"LIST".*                   { RTOKEN(LIST); /* LIST and ignore to end of line */ }
 <MRI>"SECT"			{ RTOKEN(SECT); }
 <EXPRESSION,BOTH,SCRIPT,MRI>"ABSOLUTE"			{ RTOKEN(ABSOLUTE); }
 <MRI>"end"                      { RTOKEN(ENDWORD); }
+<MRI>"alignmod"		{ RTOKEN(ALIGNMOD);}
+<MRI>"align"		{ RTOKEN(ALIGN_K);}
 <MRI>"chip"                     { RTOKEN(CHIP); }
+<MRI>"base"                     { RTOKEN(BASE); }
+<MRI>"alias"                     { RTOKEN(ALIAS); }
+<MRI>"truncate"                     { RTOKEN(TRUNCATE); }
 <MRI>"load"                     { RTOKEN(LOAD); }
+<MRI>"public"                   { RTOKEN(PUBLIC); }
 <MRI>"order"                    { RTOKEN(ORDER); }
 <MRI>"name"                     { RTOKEN(NAMEWORD); }
 <MRI>"format"                   { RTOKEN(FORMAT); }
+<MRI>"case"                     { RTOKEN(CASE); }
+<MRI>"extern"                   { RTOKEN(EXTERN); }
+<MRI>"start"                    { RTOKEN(START); }
 <MRI>"list".*                   { RTOKEN(LIST); /* LIST and ignore to end of line */ }
 <MRI>"sect"			{ RTOKEN(SECT); }
 <EXPRESSION,BOTH,SCRIPT,MRI>"absolute"			{ RTOKEN(ABSOLUTE); }
@@ -295,9 +322,11 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 				 yylval.name = buystring(yytext); 
 				  return NAME;
 				}
-<SCRIPT>{FILENAMECHAR}* { yylval.name = buystring(yytext); 
-				  return NAME;
+<BOTH,EXPRESSION>"-l"{FILENAMECHAR}+ {
+				  yylval.name = buystring (yytext + 2);
+				  return LNAME;
 				}
+<SCRIPT>{WILDCHAR}* { yylval.name = buystring(yytext); return NAME; }
 
 <EXPRESSION,BOTH,SCRIPT>"\""[^\"]*"\"" {
 					/* No matter the state, quotes
@@ -323,7 +352,8 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 
   }
   BEGIN(SCRIPT);
-  ldfile_input_filename = file_name_stack[include_stack_ptr-1];
+  ldfile_input_filename = file_name_stack[include_stack_ptr - 1];
+  lineno = lineno_stack[include_stack_ptr - 1];
 
   return END;
 }
@@ -340,13 +370,14 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 void
 lex_push_file (file, name)
      FILE *file;
-     char *name;
+     const char *name;
 {
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH) 
     {
       einfo("%F:includes nested too deeply\n");
     }
   file_name_stack[include_stack_ptr] = name;
+  lineno_stack[include_stack_ptr] = 1;
   include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
 
   include_stack_ptr++;
@@ -372,7 +403,7 @@ yy_create_string_buffer (string, size)
 
   /* yy_ch_buf has to be 2 characters longer than the size given because
      we need to put in 2 end-of-buffer characters.  */
-  b->yy_ch_buf = (YY_CHAR *) malloc ((unsigned) (b->yy_buf_size + 3));
+  b->yy_ch_buf = (char *) malloc ((unsigned) (b->yy_buf_size + 3));
 
   b->yy_ch_buf[0] = '\n';
   strcpy (b->yy_ch_buf+1, string);
@@ -380,7 +411,14 @@ yy_create_string_buffer (string, size)
   b->yy_ch_buf[size+2] = YY_END_OF_BUFFER_CHAR;
   b->yy_n_chars = size+1;
   b->yy_buf_pos = &b->yy_ch_buf[1];
+
+  /* flex 2.4.7 changed the interface.  FIXME: We should not be using
+     a flex internal interface in the first place!  */
+#ifdef YY_BUFFER_NEW
+  b->yy_buffer_status = YY_BUFFER_NEW;
+#else
   b->yy_eof_status = EOF_NOT_SEEN;
+#endif
 
   return b;
 }
@@ -400,6 +438,7 @@ lex_redirect (string)
       einfo("%F: macros nested too deeply\n");
     }
   file_name_stack[include_stack_ptr] = "redirect";
+  lineno_stack[include_stack_ptr] = 0;
   include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
   include_stack_ptr++;
   tmp = yy_create_string_buffer (string, strlen (string));
@@ -520,7 +559,23 @@ static void
 lex_warn_invalid (where, what)
      char *where, *what;
 {
-  fprintf(stderr,
-	  "%s: ignoring invalid character `%s'%s\n",
-	  program_name, what, where);
+  char buf[5];
+
+  /* If we have found an input file whose format we do not recognize,
+     and we are therefore treating it as a linker script, and we find
+     an invalid character, then most likely this is a real object file
+     of some different format.  Treat it as such.  */
+  if (ldfile_assumed_script)
+    {
+      bfd_set_error (bfd_error_file_not_recognized);
+      einfo ("%F%s: file not recognized: %E\n", ldfile_input_filename);
+    }
+
+  if (! isprint ((unsigned char) *what))
+    {
+      sprintf (buf, "\\%03o", (unsigned int) *what);
+      what = buf;
+    }
+
+  einfo ("%P:%S: ignoring invalid character `%s'%s\n", what, where);
 }
