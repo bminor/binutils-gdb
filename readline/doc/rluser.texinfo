@@ -528,7 +528,7 @@ Stop running the current editing command.
 @ignore
 @c I have no idea what this means, and can't figure it out by
 @c experiment, and can't find it in the readline source.
-@c pesch@cygnus.com, 20may1993.
+@c doc@cygnus.com, 20may1993.
 @item do-uppercase-version (@key{M-a}, @key{M-b}, ...)
 Run the command that is bound to your uppercase brother.
 @end ignore
