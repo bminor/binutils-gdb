@@ -199,8 +199,9 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 
   if (TYPE_CODE (type) == TYPE_CODE_PTR
       && TYPE_TARGET_TYPE (type)
-      && TYPE_NAME (TYPE_TARGET_TYPE (type))
-      && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "java.lang.String") == 0
+      && TYPE_TAG_NAME (TYPE_TARGET_TYPE (type))
+      && strcmp (TYPE_TAG_NAME (TYPE_TARGET_TYPE (type)),
+		 "java.lang.String") == 0
       && (format == 0 || format == 's')
       && address != 0
       && value_as_address (val) != 0)

@@ -1,3 +1,8 @@
+2003-02-20  Tom Tromey  <tromey@redhat.com>
+
+	* jv-valprint.c (java_value_print): Look at TYPE_TAG_NAME, not
+	TYPE_NAME, when printing a String value.  PR java/1075.
+
 2003-02-20  Adam Fedor  <fedor@gnu.org>
 
 	* objc-lang.h (find_methods): Remove declaration.
