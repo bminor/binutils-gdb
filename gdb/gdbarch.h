@@ -339,6 +339,18 @@ extern void set_gdbarch_write_sp (struct gdbarch *gdbarch, gdbarch_write_sp_ftyp
 #endif
 #endif
 
+extern int gdbarch_register_read_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_register_read_ftype) (struct gdbarch *gdbarch, int regnum, char *buf);
+extern void gdbarch_register_read (struct gdbarch *gdbarch, int regnum, char *buf);
+extern void set_gdbarch_register_read (struct gdbarch *gdbarch, gdbarch_register_read_ftype *register_read);
+
+extern int gdbarch_register_write_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_register_write_ftype) (struct gdbarch *gdbarch, int regnum, char *buf);
+extern void gdbarch_register_write (struct gdbarch *gdbarch, int regnum, char *buf);
+extern void set_gdbarch_register_write (struct gdbarch *gdbarch, gdbarch_register_write_ftype *register_write);
+
 extern int gdbarch_num_regs (struct gdbarch *gdbarch);
 extern void set_gdbarch_num_regs (struct gdbarch *gdbarch, int num_regs);
 #if GDB_MULTI_ARCH

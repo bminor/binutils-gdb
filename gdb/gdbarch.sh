@@ -383,6 +383,9 @@ f::TARGET_WRITE_FP:void:write_fp:CORE_ADDR val:val::0:generic_target_write_fp::0
 f::TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
 f::TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:generic_target_write_sp::0
 #
+M:::void:register_read:int regnum, char *buf:regnum, buf:
+M:::void:register_write:int regnum, char *buf:regnum, buf:
+#
 v:2:NUM_REGS:int:num_regs::::0:-1
 # This macro gives the number of pseudo-registers that live in the
 # register namespace but do not get fetched or stored on the target.

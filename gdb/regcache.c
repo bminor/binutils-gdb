@@ -26,6 +26,7 @@
 #include "gdbarch.h"
 #include "gdbcmd.h"
 #include "regcache.h"
+#include "gdb_assert.h"
 
 /*
  * DATA STRUCTURE
@@ -213,54 +214,62 @@ registers_fetched (void)
    into memory at MYADDR.  */
 
 void
-read_register_bytes (int inregbyte, char *myaddr, int inlen)
+read_register_bytes (int in_start, char *in_buf, int in_len)
 {
-  int inregend = inregbyte + inlen;
+  int in_end = in_start + in_len;
   int regnum;
-
-  if (registers_pid != inferior_pid)
-    {
-      registers_changed ();
-      registers_pid = inferior_pid;
-    }
+  char *reg_buf = alloca (MAX_REGISTER_RAW_SIZE);
 
   /* See if we are trying to read bytes from out-of-date registers.  If so,
      update just those registers.  */
 
   for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
     {
-      int regstart, regend;
-
-      if (register_cached (regnum))
-	continue;
+      int reg_start;
+      int reg_end;
+      int reg_len;
+      int start;
+      int end;
+      int byte;
 
       if (REGISTER_NAME (regnum) == NULL || *REGISTER_NAME (regnum) == '\0')
 	continue;
 
-      regstart = REGISTER_BYTE (regnum);
-      regend = regstart + REGISTER_RAW_SIZE (regnum);
+      reg_start = REGISTER_BYTE (regnum);
+      reg_len = REGISTER_RAW_SIZE (regnum);
+      reg_end = reg_start + reg_len;
 
-      if (regend <= inregbyte || inregend <= regstart)
+      if (reg_end <= in_start || in_end <= reg_start)
 	/* The range the user wants to read doesn't overlap with regnum.  */
 	continue;
 
-      /* We've found an uncached register where at least one byte will be read.
-         Update it from the target.  */
-      fetch_register (regnum);
+      /* Force the cache to fetch the entire register. */
+      read_register_gen (regnum, reg_buf);
 
-      if (!register_cached (regnum))
+      /* Legacy note: This function, for some reason, allows a NULL
+         input buffer.  If the buffer is NULL, the registers are still
+         fetched, just the final transfer is skipped. */
+      if (in_buf == NULL)
+	continue;
+
+      /* start = max (reg_start, in_start) */
+      if (reg_start > in_start)
+	start = reg_start;
+      else
+	start = in_start;
+
+      /* end = min (reg_end, in_end) */
+      if (reg_end < in_end)
+	end = reg_end;
+      else
+	end = in_end;
+
+      /* Transfer just the bytes common to both IN_BUF and REG_BUF */
+      for (byte = start; byte < end; byte++)
 	{
-	  /* Sometimes pseudoregs are never marked valid, so that they 
-	     will be fetched every time (it can be complicated to know
-	     if a pseudoreg is valid, while "fetching" them can be cheap). 
-	     */
-	  if (regnum < NUM_REGS)
- 	    error ("read_register_bytes:  Couldn't update register %d.", regnum);
+	  in_buf[byte - in_start] = reg_buf[byte - reg_start];
 	}
     }
-
-  if (myaddr != NULL)
-    memcpy (myaddr, register_buffer (-1) + inregbyte, inlen);
 }
 
 /* Read register REGNUM into memory at MYADDR, which must be large
@@ -268,9 +277,10 @@ read_register_bytes (int inregbyte, char *myaddr, int inlen)
    register is known to be the size of a CORE_ADDR or smaller,
    read_register can be used instead.  */
 
-void
-read_register_gen (int regnum, char *myaddr)
+static void
+legacy_read_register_gen (int regnum, char *myaddr)
 {
+  gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
   if (registers_pid != inferior_pid)
     {
       registers_changed ();
@@ -284,6 +294,26 @@ read_register_gen (int regnum, char *myaddr)
 	  REGISTER_RAW_SIZE (regnum));
 }
 
+void
+regcache_read (int rawnum, char *buf)
+{
+  gdb_assert (rawnum >= 0 && rawnum < NUM_REGS);
+  /* For moment, just use underlying legacy code. Ulgh!!! */
+  legacy_read_register_gen (rawnum, buf);
+}
+
+void
+read_register_gen (int regnum, char *buf)
+{
+  if (! gdbarch_register_read_p (current_gdbarch))
+    {
+      legacy_read_register_gen (regnum, buf);
+      return;
+    }
+  gdbarch_register_read (current_gdbarch, regnum, buf);
+}
+
+
 /* Write register REGNUM at MYADDR to the target.  MYADDR points at
    REGISTER_RAW_BYTES(REGNUM), which must be in target byte-order.  */
 
@@ -292,10 +322,11 @@ read_register_gen (int regnum, char *myaddr)
 #define CANNOT_STORE_REGISTER(regnum) 0
 #endif
 
-void
-write_register_gen (int regnum, char *myaddr)
+static void
+legacy_write_register_gen (int regnum, char *myaddr)
 {
   int size;
+  gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
 
   /* On the sparc, writing %g0 is a no-op, so we don't even want to
      change the registers array if something writes to this register.  */
@@ -324,6 +355,25 @@ write_register_gen (int regnum, char *myaddr)
 
   set_register_cached (regnum, 1);
   store_register (regnum);
+}
+
+void
+regcache_write (int rawnum, char *buf)
+{
+  gdb_assert (rawnum >= 0 && rawnum < NUM_REGS);
+  /* For moment, just use underlying legacy code. Ulgh!!! */
+  legacy_write_register_gen (rawnum, buf);
+}
+
+void
+write_register_gen (int regnum, char *buf)
+{
+  if (! gdbarch_register_write_p (current_gdbarch))
+    {
+      legacy_write_register_gen (regnum, buf);
+      return;
+    }
+  gdbarch_register_write (current_gdbarch, regnum, buf);
 }
 
 /* Copy INLEN bytes of consecutive data from memory at MYADDR
@@ -385,17 +435,9 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
 ULONGEST
 read_register (int regnum)
 {
-  if (registers_pid != inferior_pid)
-    {
-      registers_changed ();
-      registers_pid = inferior_pid;
-    }
-
-  if (!register_cached (regnum))
-    fetch_register (regnum);
-
-  return (extract_unsigned_integer (register_buffer (regnum),
-				    REGISTER_RAW_SIZE (regnum)));
+  char *buf = alloca (REGISTER_RAW_SIZE (regnum));
+  read_register_gen (regnum, buf);
+  return (extract_unsigned_integer (buf, REGISTER_RAW_SIZE (regnum)));
 }
 
 ULONGEST
@@ -423,17 +465,9 @@ read_register_pid (int regnum, int pid)
 LONGEST
 read_signed_register (int regnum)
 {
-  if (registers_pid != inferior_pid)
-    {
-      registers_changed ();
-      registers_pid = inferior_pid;
-    }
-
-  if (!register_cached (regnum))
-    fetch_register (regnum);
-
-  return (extract_signed_integer (register_buffer (regnum),
-				  REGISTER_RAW_SIZE (regnum)));
+  void *buf = alloca (REGISTER_RAW_SIZE (regnum));
+  read_register_gen (regnum, buf);
+  return (extract_signed_integer (buf, REGISTER_RAW_SIZE (regnum)));
 }
 
 LONGEST
@@ -461,38 +495,12 @@ read_signed_register_pid (int regnum, int pid)
 void
 write_register (int regnum, LONGEST val)
 {
-  PTR buf;
+  void *buf;
   int size;
-
-  /* On the sparc, writing %g0 is a no-op, so we don't even want to
-     change the registers array if something writes to this register.  */
-  if (CANNOT_STORE_REGISTER (regnum))
-    return;
-
-  if (registers_pid != inferior_pid)
-    {
-      registers_changed ();
-      registers_pid = inferior_pid;
-    }
-
   size = REGISTER_RAW_SIZE (regnum);
   buf = alloca (size);
   store_signed_integer (buf, size, (LONGEST) val);
-
-  /* If we have a valid copy of the register, and new value == old value,
-     then don't bother doing the actual store. */
-
-  if (register_cached (regnum)
-      && memcmp (register_buffer (regnum), buf, size) == 0)
-    return;
-
-  if (real_register (regnum))
-    target_prepare_to_store ();
-
-  memcpy (register_buffer (regnum), buf, size);
-
-  set_register_cached (regnum, 1);
-  store_register (regnum);
+  write_register_gen (regnum, buf);
 }
 
 void
@@ -546,6 +554,12 @@ supply_register (int regnum, char *val)
 
   /* On some architectures, e.g. HPPA, there are a few stray bits in
      some registers, that the rest of the code would like to ignore.  */
+
+  /* NOTE: cagney/2001-03-16: The macro CLEAN_UP_REGISTER_VALUE is
+     going to be deprecated.  Instead architectures will leave the raw
+     register value as is and instead clean things up as they pass
+     through the method gdbarch_register_read() clean up the
+     values. */
 
 #ifdef CLEAN_UP_REGISTER_VALUE
   CLEAN_UP_REGISTER_VALUE (regnum, register_buffer (regnum));

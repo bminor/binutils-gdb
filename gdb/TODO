@@ -305,6 +305,58 @@ Eliminate all warnings for at least one host/target for the flags:
 
 --
 
+Deprecate, if not delete, the following:
+
+        register[]
+        register_valid[]
+        register_buffer()
+	REGISTER_BYTE()
+                Replaced by, on the target side
+                  supply_register()
+                and on core-gdb side:
+                  {read,write}_register_gen()
+		Remote.c will need to use something
+		other than REGISTER_BYTE() and
+		REGISTER_RAW_SIZE() when unpacking
+		[gG] packets.
+
+        STORE_PSEUDO_REGISTER
+        FETCH_PSEUDO_REGISTER
+                Now handed by the methods
+                  gdbarch_{read,write}_register()
+                which sits between core GDB and
+                the register cache.
+
+        REGISTER_CONVERTIBLE
+        REGISTER_CONVERT_TO_RAW
+        REGISTER_CONVERT_TO_VIRTUAL
+                I think these three are redundant.
+                gdbarch_register_{read,write} can
+                do any conversion it likes.
+
+        REGISTER_VIRTUAL_SIZE
+        MAX_REGISTER_VIRTUAL_SIZE
+        REGISTER_VIRTUAL_TYPE
+                I think these can be replaced by
+		the pair:
+                  FRAME_REGISTER_TYPE(frame, regnum)
+                  REGISTER_TYPE(regnum)
+
+	DO_REGISTERS_INFO
+		Replace with
+		 FRAME_REGISTER_INFO (frame, ...)
+
+	REGISTER_SIM_REGNO()
+		If nothing else rename this so that
+		how it relates to rawreg and the
+		regnum is clear.
+
+	REGISTER_BYTES
+		The size of the cache can be computed
+		on the fly.
+
+--
+
 Restructure gdb directory tree so that it avoids any 8.3 and 14
 filename problems.
 

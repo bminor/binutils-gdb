@@ -22,13 +22,20 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
-/* Character array containing an image of the inferior programs'
-   registers. */
+/* Transfer a raw register [0..NUM_REGS) between core-gdb and the
+   regcache. */
+
+void regcache_read (int rawnum, char *buf);
+void regcache_write (int rawnum, char *buf);
+
+/* DEPRECATED: Character array containing an image of the inferior
+   programs' registers for the most recently referenced thread. */
 
 extern char *registers;
 
-/* Character array containing the current state of each register
-   (unavailable<0, invalid=0, valid>0). */
+/* DEPRECATED: Character array containing the current state of each
+   register (unavailable<0, invalid=0, valid>0) for the most recently
+   referenced thread. */
 
 extern signed char *register_valid;
 
@@ -37,6 +44,9 @@ extern int register_cached (int regnum);
 extern void set_register_cached (int regnum, int state);
 
 extern void register_changed (int regnum);
+
+/* DEPRECATED: Functional interface returning pointer into registers[]
+   array. */
 
 extern char *register_buffer (int regnum);
 

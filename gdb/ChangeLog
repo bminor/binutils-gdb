@@ -1,3 +1,27 @@
+2001-03-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (gdbarch_register_read, gdbarch_register_write): Add.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	
+	* regcache.h (regcache_read, regcache_write): Declare.
+	(registers, register_valid, register_buffer): Add note that these
+	interfaces are deprecated.
+	
+	* regcache.c: Include "gdb_assert.h".
+	(legacy_write_register_gen): Rename write_register_gen.
+	(legacy_read_register_gen): Rename read_register_gen.
+	(regcache_read, regcache_write): New function.
+	(read_register_gen, write_register_gen): New function.
+	(write_register): Simplify.  Use write_register_gen.
+	(read_register): Ditto using read_register_gen.
+	(read_signed_register): Ditto.
+	(read_register_bytes): Ditto!!!!
+	(supply_register): Add note that CLEANUP_REGISTER_VALUE is being
+	replaced by gdbarch_register_read.
+
+	* TODO (GDB 5.2 - Cleanups): Add list of gdbarch methods to
+	deprecate.
+
 2001-03-23  Jim Blandy  <jimb@redhat.com>
 
 	* stabsread.c (read_cpp_abbrev): Properly construct the names of
