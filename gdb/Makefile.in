@@ -195,9 +195,8 @@ REGEX1 = gnu-regex.o
 # TERMCAP comes after readline, since readline depends on it.
 # If you have the Cygnus libraries installed,
 # you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
-INSTALLED_LIBS=-lbfd -lreadline $(TERMCAP) -lopcodes -lmmalloc \
-	-liberty $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(ENABLE_CLIBS) \
-	@LIBS@
+INSTALLED_LIBS=-lbfd -lreadline $(TERMCAP) -lopcodes -lmmalloc -liberty \
+	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(ENABLE_CLIBS) @LIBS@
 CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(MMALLOC) $(LIBIBERTY) \
 	$(ENABLE_CLIBS) $(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) \
 	$(LIBIBERTY) @LIBS@
@@ -207,7 +206,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.15.1
+VERSION = 4.15.2
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -929,6 +928,7 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt config/a29k/vx29k.m
 	config/i386/sun386.mh \
 	config/i386/sun386.mt config/i386/symmetry.mh config/i386/symmetry.mt \
 	config/i386/win32.mh config/i386/win32.mt \
+	config/i960/mon960.mt \
 	config/i960/nindy960.mt config/i960/vxworks960.mt config/m68k/3b1.mh \
 	config/m68k/3b1.mt config/m68k/altos.mh config/m68k/altos.mt \
 	config/m68k/amix.mh config/m68k/amix.mt config/m68k/apollo68b.mh \
@@ -990,7 +990,7 @@ a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 alpha-nat.o: alpha-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) $(symtab_h) $(dis-asm.h)
+	$(inferior_h) $(symtab_h) $(dis-asm.h) gdb_string.h
 
 altos-xdep.o: altos-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
@@ -1004,10 +1004,10 @@ blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	objfiles.h symfile.h target.h
 
 breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) language.h target.h thread.h
+	$(inferior_h) language.h target.h thread.h gdb_string.h
 
 buildsym.o: buildsym.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
-	objfiles.h symfile.h $(symtab_h)
+	objfiles.h symfile.h $(symtab_h) gdb_string.h
 
 callback.o: callback.c $(defs_h) callback.h 
 
@@ -1015,28 +1015,30 @@ c-lang.o: c-lang.c c-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h parser-defs.h $(symtab_h)
 
 c-typeprint.o: c-typeprint.c c-lang.h $(defs_h) $(expression_h) \
-	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
-	typeprint.h $(value_h)
+	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) \
+	target.h typeprint.h $(value_h) gdb_string.h
 
 c-valprint.o: c-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h $(symtab_h) valprint.h $(value_h)
 
 f-lang.o: f-lang.c f-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
-	language.h parser-defs.h $(symtab_h)
+	language.h parser-defs.h $(symtab_h) gdb_string.h
 
 f-typeprint.o: f-typeprint.c f-lang.h $(defs_h) $(expression_h) \
-	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
-	typeprint.h $(value_h)
+	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) \
+	target.h typeprint.h $(value_h) gdb_string.h
 
 f-valprint.o: f-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
-	language.h $(symtab_h) valprint.h $(value_h)
+	language.h $(symtab_h) valprint.h $(value_h) gdb_string.h
+
+ch-exp.o: ch-exp.c ch-lang.h $(defs_h) language.h parser-defs.h $(bfd_h) symfile.h objfiles.h $(value_h)
 
 ch-lang.o: ch-lang.c ch-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h parser-defs.h $(symtab_h)
 
 ch-typeprint.o: ch-typeprint.c ch-lang.h $(defs_h) $(expression_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) \
-	target.h $(value_h) typeprint.h
+	target.h $(value_h) typeprint.h gdb_string.h
 
 ch-valprint.o: ch-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h $(symtab_h) valprint.h $(value_h) c-lang.h
@@ -1045,10 +1047,11 @@ coff-solib.o: coff-solib.c $(defs_h)
 
 coffread.o: coffread.c $(bfd_h) $(breakpoint_h) buildsym.h \
 	complaints.h $(defs_h) $(expression_h) $(gdbtypes_h) objfiles.h \
-	symfile.h $(symtab_h) gdb-stabs.h stabsread.h target.h
+	symfile.h $(symtab_h) gdb-stabs.h stabsread.h target.h \
+	gdb_string.h
 
 command.o: command.c $(defs_h) $(expression_h) $(gdbcmd_h) \
-	$(gdbtypes_h) $(symtab_h) $(value_h)
+	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h
 
 complaints.o: complaints.c complaints.h $(defs_h) $(gdbcmd_h)
 
@@ -1063,66 +1066,70 @@ copying.o: copying.c $(defs_h) $(gdbcmd_h)
 core-aout.o: core-aout.c $(defs_h) $(gdbcore_h) $(value_h) $(inferior_h)
 
 core-sol2.o: core-sol2.c $(command_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) target.h
+	$(inferior_h) target.h gdb_string.h
 
 core-regset.o: core-regset.c $(command_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) target.h
+	$(inferior_h) target.h gdb_string.h
 
 corefile.o: corefile.c $(dis-asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h language.h
+	$(inferior_h) target.h language.h gdb_string.h
 
 corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	target.h thread.h
+	target.h thread.h gdb_string.h
 
 cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
-	$(gdbtypes_h) $(symtab_h) $(value_h)
+	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h
 
-dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h)
+dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) gdb_string.h
 
 dbxread.o: dbxread.c $(breakpoint_h) buildsym.h $(command_h) \
 	complaints.h $(defs_h) $(expression_h) gdb-stabs.h $(gdbcore_h) \
 	$(gdbtypes_h) language.h objfiles.h partial-stab.h stabsread.h \
-	symfile.h $(symtab_h) target.h
+	symfile.h $(symtab_h) target.h gdb_string.h
 
 delta68-nat.o: delta68-nat.c $(defs_h)
 
-demangle.o: demangle.c $(defs_h) $(gdbcmd_h)
+demangle.o: demangle.c $(defs_h) $(gdbcmd_h) gdb_string.h
 
-dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h)
+dpx2-nat.o: dpx2-nat.c $(defs_h) $(gdbcore_h) gdb_string.h
+
+dstread.o: dstread.c gdb_string.h
 
 dwarfread.o: dwarfread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	$(expression_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
-	$(symtab_h)
+	$(symtab_h) gdb_string.h
 
 elfread.o: elfread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
-	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
+	gdb-stabs.h objfiles.h symfile.h $(symtab_h) gdb_string.h
 
-environ.o: environ.c $(defs_h) environ.h $(gdbcore_h)
+environ.o: environ.c $(defs_h) environ.h $(gdbcore_h) gdb_string.h
 
 eval.o: eval.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
-	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h)
+	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h) \
+	gdb_string.h
 
 exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
-	target.h language.h
+	target.h language.h gdb_string.h
 
 expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h parser-defs.h $(symtab_h) $(value_h)
 
-findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
+findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
+	gdb_string.h
 
 fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) target.h terminal.h thread.h
+	$(inferior_h) target.h terminal.h thread.h gdb_string.h
 
 # start-sanitize-gdbtk
 gdbtk.o: gdbtk.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
-	$(bfd_h) symfile.h objfiles.h target.h
+	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
 		$(srcdir)/gdbtk.c -DGDBTK_FILENAME=\"$(libdir)/gdbtk.tcl\"
 # end-sanitize-gdbtk
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) target.h \
-	$(value_h)
+	$(value_h) gdb_string.h
 
 go32-xdep.o: go32-xdep.c
 
@@ -1145,7 +1152,8 @@ hppa-tdep.o: hppa-tdep.c $(wait_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 hppab-nat.o: hppab-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 hppah-nat.o: hppah-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 
-i386-tdep.o: i386-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
+i386-tdep.o: i386-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
+	gdb_string.h
 
 i386aix-nat.o: i386aix-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 	language.h $(gdbcore_h) $(floatformat_h) target.h
@@ -1172,15 +1180,16 @@ i960-tdep.o: i960-tdep.c $(floatformat_h) $(defs_h) $(expression_h) \
 	$(frame_h) $(gdbtypes_h) $(symtab_h) $(value_h)
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h language.h
+	$(inferior_h) target.h language.h gdb_string.h
 
 inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
-	signals.h target.h terminal.h thread.h
+	signals.h target.h terminal.h thread.h gdb_string.h
 
-infptrace.o: infptrace.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
+infptrace.o: infptrace.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
+	gdb_string.h
 
 infrun.o: infrun.c $(wait_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h thread.h
+	$(inferior_h) target.h thread.h gdb_string.h
 
 inftarg.o: inftarg.c $(wait_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h terminal.h $(command_h)
@@ -1188,12 +1197,13 @@ inftarg.o: inftarg.c $(wait_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 irix4-nat.o: irix4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h)
 irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) target.h \
 	$(symtab_h) symfile.h objfiles.h $(command_h) $(frame_h) gnu-regex.h \
-	language.h
+	language.h gdb_string.h
+
 isi-xdep.o: isi-xdep.c
 
 language.o: language.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbtypes_h) language.h parser-defs.h $(symtab_h) \
-	target.h $(value_h)
+	target.h $(value_h) gdb_string.h
 
 lynx-nat.o: lynx-nat.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcore_h) \
 	target.h
@@ -1203,7 +1213,7 @@ m2-lang.o: m2-lang.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 
 m2-typeprint.o: m2-typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h m2-lang.h $(symtab_h) target.h \
-	$(value_h)
+	$(value_h) gdb_string.h
 
 m2-valprint.o: m2-valprint.c $(defs_h) $(gdbtypes_h) $(symtab_h) \
 	valprint.h
@@ -1219,41 +1229,44 @@ m88k-nat.o: m88k-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
-mac-nat.o: mac-nat.c $(defs_h)
+mac-nat.o: mac-nat.c $(defs_h) gdb_string.h
 
-main.o: main.c top.h $(defs_h)
+main.o: main.c top.h $(defs_h) gdb_string.h
 
 maint.o: maint.c $(defs_h) $(gdbcmd_h) $(gdbtypes_h) $(symtab_h) language.h \
 	$(expression_h)
 
 mdebugread.o: mdebugread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 	$(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
-	objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h)
+	objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h) \
+	gdb_string.h
 
 mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h)
 
 os9kread.o: os9kread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
         $(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
-        objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h) target.h
+        objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h) \
+	target.h gdb_string.h
 
 mem-break.o: mem-break.c $(defs_h) 
 
 minsyms.o: minsyms.c $(bfd_h) $(defs_h) objfiles.h symfile.h \
-	$(symtab_h)
+	$(symtab_h) gdb_string.h
 
 mips-nat.o: mips-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
 mips-tdep.o: mips-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) language.h objfiles.h symfile.h
+	$(inferior_h) language.h objfiles.h symfile.h gdb_string.h
 
 mipsread.o: mipsread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 	$(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
-	objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h)
+	objfiles.h partial-stab.h stabsread.h symfile.h $(symtab_h) \
+	gdb_string.h
 
 mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 
 monitor.o: monitor.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) target.h serial.h terminal.h
+	$(inferior_h) target.h serial.h terminal.h gdb_string.h
 
 news-xdep.o: news-xdep.c
 
@@ -1266,7 +1279,8 @@ nindy.o: nindy-share/nindy.c $(wait_h) nindy-share/block_io.h \
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/nindy.c
 
 nlmread.o: nlmread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
-	gdb-stabs.h objfiles.h symfile.h $(symtab_h) stabsread.h
+	gdb-stabs.h objfiles.h symfile.h $(symtab_h) stabsread.h \
+	gdb_string.h
 
 ns32km3-nat.o: ns32km3-nat.c $(defs_h) $(inferior_h)
 
@@ -1278,67 +1292,71 @@ nindy-tdep.o: nindy-tdep.c $(defs_h) $(frame_h) $(symtab_h)
 ns32k-tdep.o: ns32k-tdep.c $(bfd_h) $(dis-asm_h) $(defs_h)
 
 objfiles.o: objfiles.c $(bfd_h) $(defs_h) objfiles.h symfile.h \
-	$(symtab_h)
+	$(symtab_h) gdb_string.h
 
 osfsolib.o: osfsolib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	objfiles.h gnu-regex.h symfile.h target.h language.h
+	objfiles.h gnu-regex.h symfile.h target.h language.h gdb_string.h
 
 somread.o: somread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
-	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
+	gdb-stabs.h objfiles.h symfile.h $(symtab_h) gdb_string.h
 
 somsolib.o: somsolib.c $(defs_h)
 
 hpread.o: hpread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
-	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
+	gdb-stabs.h objfiles.h symfile.h $(symtab_h) gdb_string.h
 
 parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
-	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h)
+	$(gdbtypes_h) language.h parser-defs.h $(symtab_h) $(value_h) \
+	gdb_string.h
 
 ppcbug-rom.o: ppcbug-rom.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h
 
 printcmd.o: printcmd.c $(breakpoint_h) $(defs_h) $(expression_h) \
-	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
-	$(symtab_h) target.h
+	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h objfiles.h \
+	symfile.h $(symtab_h) target.h gdb_string.h
 
 procfs.o: procfs.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	target.h
+	target.h gdb_string.h
 
 pyr-tdep.o: pyr-tdep.c $(defs_h) 
 
 pyr-xdep.o: pyr-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
-gnu-regex.o: gnu-regex.c gnu-regex.h $(defs_h)
+gnu-regex.o: gnu-regex.c gnu-regex.h $(defs_h) gdb_string.h
 
 remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) target.h terminal.h
+	$(inferior_h) target.h terminal.h gdb_string.h
+
+remote-arc.o: remote-arc.c gdb_string.h
 
 remote-array.o: remote-array.c $(wait_h) $(defs_h) $(gdbcore_h) target.h \
       gdb_string.h $(command_h) serial.h monitor.h $(remote_utils_h)
 
 remote-rdp.o: remote-rdp.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) 
+	$(inferior_h) gdb_string.h
 
 remote-bug.o: remote-bug.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) target.h terminal.h $(remote_utils_h)
+	$(inferior_h) target.h terminal.h $(remote_utils_h) gdb_string.h
 
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) target.h \
-	$(wait_h) serial.h
+	$(wait_h) serial.h gdb_string.h
 
 remote-eb.o: remote-eb.c $(wait_h) $(srcdir)/config/a29k/tm-a29k.h \
-	$(defs_h) $(gdbcore_h) $(inferior_h) symfile.h target.h terminal.h
+	$(defs_h) $(gdbcore_h) $(inferior_h) symfile.h target.h terminal.h \
+	gdb_string.h
 
 remote-es.o: remote-es.c $(bfd_h) $(wait_h) $(command_h) $(defs_h) \
-	$(inferior_h) $(remote_utils_h) terminal.h
+	$(inferior_h) $(remote_utils_h) terminal.h gdb_string.h
 
 remote-hms.o: remote-hms.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) serial.h target.h terminal.h
+	$(inferior_h) serial.h target.h terminal.h gdb_string.h
 
 remote-mips.o: remote-mips.c $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(inferior_h) serial.h symfile.h target.h
 
 remote-mm.o: remote-mm.c $(bfd_h) $(wait_h) $(defs_h) $(inferior_h) \
-	minimon.h target.h terminal.h
+	minimon.h target.h terminal.h gdb_string.h
 
 remote-nindy.o: remote-nindy.c $(floatformat_h) $(wait_h) $(command_h) \
 	$(defs_h) $(gdbcore_h) $(inferior_h) \
@@ -1347,32 +1365,33 @@ remote-nindy.o: remote-nindy.c $(floatformat_h) $(wait_h) $(command_h) \
 
 remote-os9k.o: remote-os9k.c $(defs_h) $(gdbcore_h) $(wait_h) \
 	$(command_h) monitor.h $(remote_utils_h) $(symtab_h) symfile.h \
-	objfiles.h gdb-stabs.h
+	objfiles.h gdb-stabs.h gdb_string.h
 
 remote-sim.o: remote-sim.c $(wait_h) $(defs_h) $(gdbcore_h) \
-	$(inferior_h) target.h terminal.h
+	$(inferior_h) target.h terminal.h gdb_string.h
 
 remote-st.o: remote-st.c $(wait_h) $(defs_h) $(gdbcore_h) serial.h \
-	target.h
+	target.h gdb_string.h
 
 remote-udi.o: remote-udi.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) target.h terminal.h $(udiheaders)
+	$(inferior_h) target.h terminal.h $(udiheaders) gdb_string.h
 
 remote-vx.o: remote-vx.c $(wait_h) complaints.h $(defs_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(inferior_h) target.h vx-share/dbgRpcLib.h \
 	vx-share/ptrace.h vx-share/xdr_ld.h vx-share/xdr_ptrace.h \
-	vx-share/xdr_rdb.h gdb-stabs.h objfiles.h symfile.h $(bfd_h)
+	vx-share/xdr_rdb.h gdb-stabs.h objfiles.h symfile.h $(bfd_h) \
+	gdb_string.h
 
 remote-vx29k.o: remote-vx29k.c $(wait_h) complaints.h $(defs_h) $(gdbcmd_h) \
         $(gdbcore_h) $(inferior_h) target.h vx-share/dbgRpcLib.h \
         vx-share/ptrace.h vx-share/xdr_ld.h vx-share/xdr_ptrace.h \
-        vx-share/xdr_rdb.h
+        vx-share/xdr_rdb.h gdb_string.h
 
 remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) $(remote_utils_h)
+	$(inferior_h) $(remote_utils_h) gdb_string.h
 
 remote.o: remote.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) $(remote_utils_h) symfile.h terminal.h
+	$(inferior_h) $(remote_utils_h) symfile.h terminal.h gdb_string.h
 
 remote-nrom.o: remote-nrom.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) symfile.h terminal.h
@@ -1393,7 +1412,7 @@ ser-tcp.o: ser-tcp.c $(defs_h) serial.h signals.h
 
 ser-unix.o: ser-unix.c $(defs_h) serial.h 
 
-serial.o: serial.c $(defs_h) serial.h 
+serial.o: serial.c $(defs_h) serial.h gdb_string.h
 
 sh-tdep.o: sh-tdep.c $(bfd_h) $(dis-asm_h) \
 	$(srcdir)/../opcodes/sh-opc.h $(defs_h) $(expression_h) $(frame_h) \
@@ -1402,11 +1421,15 @@ sh-tdep.o: sh-tdep.c $(bfd_h) $(dis-asm_h) \
 sh3-rom.o: sh3-rom.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h
 
+mon960-rom.o: mon960-rom.c monitor.h $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
+	$(inferior_h) target.h serial.h terminal.h
+
 solib.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
-	objfiles.h gnu-regex.h symfile.h target.h
+	objfiles.h gnu-regex.h symfile.h target.h gdb_string.h
 
 source.o: source.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
-	$(gdbcore_h) language.h objfiles.h gnu-regex.h symfile.h $(symtab_h)
+	$(gdbcore_h) language.h objfiles.h gnu-regex.h symfile.h $(symtab_h) \
+	gdb_string.h
 
 sparc-nat.o: sparc-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(gdbcore_h) \
 	target.h
@@ -1420,69 +1443,77 @@ dsrec.o: dsrec.c $(defs_h) srec.h
 
 stabsread.o: stabsread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(INCLUDE_DIR)/aout/stab_gnu.h buildsym.h complaints.h $(defs_h) \
-	$(gdbtypes_h) objfiles.h stabsread.h symfile.h $(symtab_h)
+	$(gdbtypes_h) objfiles.h stabsread.h symfile.h $(symtab_h) \
+	gdb_string.h
 
 stack.o: stack.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
-	language.h target.h
+	language.h target.h gdb_string.h
 
 sun3-nat.o: sun3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 sun386-nat.o: sun386-nat.c $(defs_h) $(inferior_h) $(gdbcore_h)
 
 symfile.o: symfile.c $(breakpoint_h) complaints.h $(defs_h) \
 	$(expression_h) $(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) \
-	language.h objfiles.h symfile.h $(symtab_h) target.h
+	language.h objfiles.h symfile.h $(symtab_h) target.h \
+	gdb_string.h
 
 symm-tdep.o: symm-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)	
 symm-nat.o: symm-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 symmisc.o: symmisc.c $(bfd_h) $(breakpoint_h) $(command_h) $(defs_h) \
 	$(expression_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
-	$(symtab_h) 
+	$(symtab_h) gdb_string.h
 
 symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h objfiles.h \
-	gnu-regex.h symfile.h $(symtab_h) target.h $(value_h)
+	gnu-regex.h symfile.h $(symtab_h) target.h $(value_h) \
+	gdb_string.h
 
 tahoe-tdep.o: tahoe-tdep.c $(OP_INCLUDE)/tahoe.h $(defs_h) \
 	$(symtab_h)
 
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
-	objfiles.h symfile.h target.h
+	objfiles.h symfile.h target.h gdb_string.h
 
 thread.o: thread.c $(defs_h) thread.h $(gdbcmd_h)
 
 top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
-	$(remote_utils_h)
+	$(remote_utils_h) gdb_string.h
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
-	$(value_h) 
+	$(value_h) gdb_string.h
 
 ultra3-nat.o: ultra3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 ultra3-xdep.o: ultra3-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 umax-xdep.o: umax-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 utils.o: utils.c $(bfd_h) $(defs_h) $(expression_h) $(gdbcmd_h) \
-	language.h signals.h target.h terminal.h $(readline_headers)
+	language.h signals.h target.h terminal.h $(readline_headers) \
+	gdb_string.h
 
 valarith.o: valarith.c $(bfd_h) $(defs_h) $(expression_h) \
-	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h)
+	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h) \
+	gdb_string.h
 
-valops.o: valops.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
+valops.o: valops.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
+	gdb_string.h
 
 valprint.o: valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
-	$(value_h)
+	$(value_h) gdb_string.h
 
 values.o: values.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
-	$(gdbcore_h) $(gdbtypes_h) $(symtab_h) target.h $(value_h)
+	$(gdbcore_h) $(gdbtypes_h) $(symtab_h) target.h $(value_h) \
+	gdb_string.h
 
 vax-tdep.o: vax-tdep.c $(OP_INCLUDE)/vax.h $(defs_h) $(symtab_h)
 
 w65-tdep.o : w65-tdep.c
 
-win32-nat.o: win32-nat.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h)
+win32-nat.o: win32-nat.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \
+	gdb_string.h
 
 xdr_ld.o: vx-share/xdr_ld.c $(defs_h) vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/xdr_ld.h
@@ -1500,7 +1531,7 @@ xcoffread.o: xcoffread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(INCLUDE_DIR)/aout/stab_gnu.h $(INCLUDE_DIR)/coff/internal.h \
 	$(INCLUDE_DIR)/coff/rs6000.h $(BFD_SRC)/libcoff.h buildsym.h \
 	complaints.h $(defs_h) $(gdbtypes_h) objfiles.h stabsread.h symfile.h \
-	$(symtab_h) partial-stab.h
+	$(symtab_h) partial-stab.h gdb_string.h
 
 xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) xcoffsolib.h
 
