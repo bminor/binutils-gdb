@@ -1,7 +1,7 @@
 /* Multi-process/thread control for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1988, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Lynx Real-Time Systems, Inc.  Los Gatos, CA.
 
@@ -457,7 +457,7 @@ info_threads_command (char *arg, int from_tty)
 
       switch_to_thread (tp->ptid);
       if (deprecated_selected_frame)
-	print_only_stack_frame (deprecated_selected_frame, -1, 0);
+	print_stack_frame (deprecated_selected_frame, -1, 0);
       else
 	printf_filtered ("[No stack.]\n");
     }

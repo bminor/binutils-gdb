@@ -1,3 +1,8 @@
+2003-01-13  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-main.c (mi_cmd_exec_return): Use print_stack_frame instead of
+	show_and_print_stack_frame.
+
 2003-01-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-cmd-env.c: Include "gdb_string.h" instead of <string.h>.

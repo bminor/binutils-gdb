@@ -1,3 +1,26 @@
+2003-01-13  Elena Zannoni  <ezannoni@redhat.com>
+
+	* stack.c (print_frame_info, print_stack_frame_base_stub,
+	print_stack_frame_base, show_and_print_stack_frame_stub,
+	show_and_print_stack_frame, print_only_stack_frame_stub,
+	print_only_stack_frame): Delete functions.
+	(print_stack_frame_stub): Call print_frame_info instead of
+	print_frame_info_base.
+	(print_frame_info_base): Rename to print_frame_info.
+	(backtrace_command_1): Call print_frame_info, instead of
+	print_frame_info_base.
+	(current_frame_command): Call print_stack_frame, instead of
+	print_only_stack_frame.
+	(frame_command): Call print_stack_frame, instead of
+	show_and_print_stack_frame.
+	(up_command): Ditto.
+	(down_command): Ditto.
+	* frame.h (print_only_stack_frame): Delete prototype.
+	* infrun.c (normal_stop): Call print_stack_frame, instead of
+	show_and_print_stack_frame.
+	* thread.c (info_threads_command): Call print_stack_frame, instead
+	of print_only_stack_frame.
+
 2003-01-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* README (Graphical interface to GDB): Update URL.  Point at
