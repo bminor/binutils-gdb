@@ -1,3 +1,30 @@
+Mon Feb  1 20:54:36 1999  Catherine Moore  <clm@cygnus.com>
+
+        * disassemble.c (disassembler):  Handle bfd_mach_i386_i386_intel_syntax.
+        * i386-dis.c (x_mode):  Define.
+        (dis386):  Remove.
+        (dis386_att):  New.
+        (dis386_intel):  New.
+        (dis386_twobyte):  Remove.
+        (dis386_twobyte_att):  New.
+        (dis386_twobyte_intel):  New.
+        (print_insn_x86):  Use new arrays.
+        (float_mem):  Remove.
+        (float_mem_intel):  New.
+        (float_mem_att):  New.
+        (dofloat):  Use new float_mem arrays.
+        (print_insn_i386_att):  New.
+        (print_insn_i386_intel):  New.
+        (print_insn_i386):  Handle bfd_mach_i386_i386_intel_syntax.
+        (putop):  Handle intel syntax.
+        (OP_indirE):  Handle intel syntax.
+        (OP_E):  Handle intel syntax.
+        (OP_I):  Handle intel syntax.
+        (OP_sI):  Handle intel syntax.
+        (OP_OFF):  Handle intel syntax.
+
+
+
 1999-01-27  Doug Evans  <devans@casey.cygnus.com>
 
 	* fr30-opc.h,fr30-opc.c: Rebuild.
