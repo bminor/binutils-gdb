@@ -910,6 +910,9 @@ md_parse_option (c, arg)
 	       || strcmp (arg, "405") == 0)
 	ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
 		   | PPC_OPCODE_403 | PPC_OPCODE_32);
+      else if (strcmp (arg, "440") == 0)
+	ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_32
+		   | PPC_OPCODE_440);
       else if (strcmp (arg, "7400") == 0
 	       || strcmp (arg, "7410") == 0
 	       || strcmp (arg, "7450") == 0
@@ -1074,6 +1077,7 @@ PowerPC options:\n\
 -mppc, -mppc32, -m603, -m604\n\
 			generate code for PowerPC 603/604\n\
 -m403, -m405		generate code for PowerPC 403/405\n\
+-m440			generate code for PowerPC 440\n\
 -m7400, -m7410, -m7450, -m7455\n\
 			generate code For PowerPC 7400/7410/7450/7455\n"));
   fprintf (stream, _("\
@@ -5733,7 +5737,7 @@ md_apply_fix3 (fixP, valP, seg)
 	    abort ();
 	  {
 	    unsigned char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
-	    long val, mask;
+	    unsigned long val, mask;
 
 	    if (target_big_endian)
 	      val = bfd_getb32 (where - 2);

@@ -1,3 +1,10 @@
+2003-08-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (md_parse_option): Handle -m440.
+	(md_show_usage): Add -m440.
+	(md_apply_fix3): Warning fix.
+	* doc/c-ppc.texi: Document -m440.
+
 2003-08-16  Benjamin Kalytta  <bkausbk@web.de>
 
 	* read.c (s_print): Check for NULL.
