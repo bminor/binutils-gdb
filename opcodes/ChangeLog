@@ -1,3 +1,13 @@
+start-sanitize-sky
+Thu Apr 16 11:44:59 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-opc.c (parse_vif_unpackloc,insert_vif_unpackloc): Delete.
+	(vif_operands): Update.
+	(vif_get_unpackloc): Delete.
+	(state_vif_unpackloc{,_star_p}): Delete.
+	(dvp_opcode_init_parse): Update.
+
+end-sanitize-sky
 start-sanitize-r5900
 Wed Apr 15 10:30:07 1998   Frank Ch. Eigler  <fche@cygnus.com>
 
