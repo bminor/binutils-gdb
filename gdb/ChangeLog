@@ -1,5 +1,14 @@
 2002-04-25  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* alpha-tdep.c (alpha_skip_prologue_internal): Remove
+	GDB_TARGET_HAS_SHARED_LIBS #ifdef and update comment to
+	indicate that the condition it was testing is always true.
+	* config/alpha/nm-linux.h (GDB_TARGET_HAS_SHARED_LIBS): Remove.
+	* config/alpha/nm-nbsd.h (GDB_TARGET_HAS_SHARED_LIBS): Ditto.
+	* config/alpha/nm-osf.h (GDB_TARGET_HAS_SHARED_LIBS): Ditto.
+
+2002-04-25  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* alpha-tdep.h (gdbarch_tdep): Add jb_pc and jb_elt_size members.
 	* alpha-linux-tdep.c (alpha_linux_init_abi): Initialize
 	tdep->jb_pc and tdep->jb_elt_size.

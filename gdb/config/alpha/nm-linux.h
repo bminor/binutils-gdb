@@ -41,10 +41,6 @@
 
 #define CANNOT_STEP_BREAKPOINT
 
-/* GNU/Linux has shared libraries.  */
-
-#define GDB_TARGET_HAS_SHARED_LIBS
-
 /* Given a pointer to either a gregset_t or fpregset_t, return a
    pointer to the first register.  */
 #define ALPHA_REGSET_BASE(regsetp)  ((long *) (regsetp))

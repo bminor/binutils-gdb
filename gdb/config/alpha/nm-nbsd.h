@@ -30,7 +30,4 @@
 /* The Alpha does not step over a breakpoint.  */
 #define CANNOT_STEP_BREAKPOINT
 
-/* NetBSD/alpha has shared libraries.  */
-#define GDB_TARGET_HAS_SHARED_LIBS
-
 #endif /* NM_NBSD_H */

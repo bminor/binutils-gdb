@@ -34,10 +34,6 @@
 
 #define CANNOT_STEP_BREAKPOINT
 
-/* OSF/1 has shared libraries.  */
-
-#define GDB_TARGET_HAS_SHARED_LIBS
-
 /* Support for shared libraries.  */
 
 #include "solib.h"

@@ -1356,16 +1356,15 @@ alpha_skip_prologue_internal (CORE_ADDR pc, int lenient)
   CORE_ADDR post_prologue_pc;
   char buf[4];
 
-#ifdef GDB_TARGET_HAS_SHARED_LIBS
   /* Silently return the unaltered pc upon memory errors.
      This could happen on OSF/1 if decode_line_1 tries to skip the
      prologue for quickstarted shared library functions when the
      shared library is not yet mapped in.
      Reading target memory is slow over serial lines, so we perform
-     this check only if the target has shared libraries.  */
+     this check only if the target has shared libraries (which all
+     Alpha targets do).  */
   if (target_read_memory (pc, buf, 4))
     return pc;
-#endif
 
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
