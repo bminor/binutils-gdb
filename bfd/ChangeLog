@@ -14,6 +14,8 @@
 	* elf32-qnx.h: Remove.
 	* elf.c: Remove calls to QNX specific set_nonloadable_filepos,
 	is_contained_by_filepos, and copy_private_bfd_data_p.
+	* elf-bfd.h (struct elf_backend_data): Remove set_nonloadable_filepos,
+	is_contained_by_filepos, and copy_private_bfd_data_p.
 	* elf32-i386.c: Remove QNX extended bfd support.
 	* elf32-ppc.c: Remove QNX extended bfd support.
 	* elf32-sh.c: Remove QNX extended bfd support.

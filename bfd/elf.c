@@ -5089,26 +5089,12 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
      asection *osec;
 {
   Elf_Internal_Shdr *ihdr, *ohdr;
-  const struct elf_backend_data *bed = get_elf_backend_data (ibfd);
 
   if (ibfd->xvec->flavour != bfd_target_elf_flavour
       || obfd->xvec->flavour != bfd_target_elf_flavour)
     return true;
 
-  /* Copy over private BFD data if it has not already been copied.
-     This must be done here, rather than in the copy_private_bfd_data
-     entry point, because the latter is called after the section
-     contents have been set, which means that the program headers have
-     already been worked out.  The backend function provides a way to
-     override the test conditions and code path for the call to
-     copy_private_bfd_data.  */
-  if (bed->copy_private_bfd_data_p)
-    {
-      if ((*bed->copy_private_bfd_data_p) (ibfd, isec, obfd, osec))
-        if (! copy_private_bfd_data (ibfd, obfd))
-          return false;
-    }
-  else if (elf_tdata (obfd)->segment_map == NULL && elf_tdata (ibfd)->phdr != NULL)
+  if (elf_tdata (obfd)->segment_map == NULL && elf_tdata (ibfd)->phdr != NULL)
     {
 	asection *s;
 
