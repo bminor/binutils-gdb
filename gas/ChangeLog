@@ -1,3 +1,8 @@
+Tue May 23 19:18:33 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* as.c (parse_args) [! USE_EMULATIONS]: Always print an error
+	message.
+
 Mon May 22 20:03:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* ecoff.c (ecoff_stab): Add extra leading argument, for 4 May
