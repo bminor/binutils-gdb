@@ -1,3 +1,8 @@
+Fri Sep  4 13:57:43 1998  Jakub Jelinek <jj@sunsite.ms.mff.cuni.cz>
+
+	* config/tc-sparc.c (in_signed_range): Sign extend 32-bit words
+	to the host width.
+
 Wed Sep  2 11:31:14 1998  Richard Henderson  <rth@cygnus.com>
 
 	* frags.c (frag_grow): Include the size of the frag struct in the
