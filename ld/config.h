@@ -31,6 +31,7 @@
 #define LNK960_EMULATION_NAME "lnk960"
 #define H8300HDS_EMULATION_NAME "h8300hds"
 #define EBMON29K_EMULATION_NAME "ebmon29k"
+#define GLDI386AOUT_EMULATION_NAME "gldi386aout"
 /* Otherwise default to this emulation */
 #ifndef DEFAULT_EMULATION
 #ifdef GNU960
@@ -50,6 +51,7 @@
 #define VANILLA_TARGET "a.out-sunos-big"
 #define GLDM88KBCS_TARGET "m88kbcs"
 #define GLD29K_TARGET "coff-a29k-big"
+#define GLDI386AOUT_TARGET "a.out-i386"
 #define GLDNEWS_TARGET "a.out-newsos3"
 #define H8300HDS_TARGET "ieee"
 #define EBMON29K_TARGET "coff-a29k-big"
