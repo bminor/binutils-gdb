@@ -1,3 +1,12 @@
+2002-03-01  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.host (sparc64-*-freebsd): Add.
+	* configure.tgt: Likewise.
+	* config/sparc/fbsd.mh: New file.
+	* config/sparc/fbsd.mt: Likewise.
+	* config/sparc/nm-fbsd.h: Likewise.
+	* config/sparc/tm-fbsd.h: Likewise.
+
 2002-03-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/djgpp/fnchange.lst: Add regformats/reg-i386-linux.dat and
