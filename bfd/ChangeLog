@@ -1,5 +1,8 @@
 2003-06-24  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_check_relocs): Report plt reloc against
+	local sym errors.
+
 	* elf32-i386.c: Convert to C90 function definitions, remove unnecessary
 	prototypes and casts.  Replace PTR with void *.  Formatting.
 	* elf32-ppc.c: Likewise.  Break long strings too.

@@ -3269,6 +3269,12 @@ ppc_elf_check_relocs (bfd *abfd,
 	    {
 	      /* It does not make sense to have a procedure linkage
 		 table entry for a local symbol.  */
+	      (*_bfd_error_handler) (_("%s(%s+0x%lx): %s reloc against "
+				       "local symbol"),
+				     bfd_archive_filename (abfd),
+				     sec->name,
+				     (long) rel->r_offset,
+				     ppc_elf_howto_table[r_type]->name);
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
 	    }
