@@ -1,5 +1,8 @@
 2002-08-24  Mark Kettenis  <kettenis@gnu.org>
 
+	* PROBLEMS: Clarify problems with FreeBSD's compiler and suggest
+	workaround.
+
 	* valprint.c (print_longest) [CC_HAS_LONG_LONG &&
 	PRINTF_HAS_LONG_LONG]: Cast val_long to (long long) or (unsigned
 	long long) to prevent compiler warning on 64-bit systems.
