@@ -6,8 +6,6 @@ Mon Aug 12 15:29:08 1996  Fred Fish  <fnf@cygnus.com>
 	Add "hppa*-*-hpux*" to setup_xfail for "backtrace through
 	signal handler" test.
 	* gdb.threads/pthreads.exp: Only run this for native configs.
-	* gdb.base/signals.exp (test_handle_all_print): Remove code that
-	increased timeouts, it now makes no difference.
 	* gdb.base/structs.exp (do_function_calls): Add hppa*-*-hpux9*"
 	setup_xfails for "p fun5()", "p fun6()", "p fun7()", and "p fun8"
 	tests.
