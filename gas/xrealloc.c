@@ -18,8 +18,6 @@ along with GAS; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
-/* static const char rcsid[] = "$Id$"; */
-
 /* 
 
 NAME

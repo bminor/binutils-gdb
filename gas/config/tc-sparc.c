@@ -17,15 +17,13 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
-/* static const char rcsid[] = "$Id$"; */
-
 #include <stdio.h>
 #include <ctype.h>
 
 #include "as.h"
 
 /* careful, this file includes data *declarations* */
-#include "sparc-opcode.h"
+#include "opcode/sparc.h"
 
 void md_begin();
 void md_end();
@@ -137,10 +135,14 @@ static int special_case;
  * sort of like s_lcomm
  *
  */
+static int max_alignment = 15;
+
 static void s_reserve() {
 	char *name;
-	char c;
 	char *p;
+	char c;
+	int align;
+	int size;
 	int temp;
 	symbolS *symbolP;
 	
@@ -149,38 +151,87 @@ static void s_reserve() {
 	p = input_line_pointer;
 	*p = c;
 	SKIP_WHITESPACE();
-	if (* input_line_pointer != ',') {
+
+	if (*input_line_pointer != ',') {
 		as_bad("Expected comma after name");
 		ignore_rest_of_line();
 		return;
 	}
-	input_line_pointer ++;
-	if ((temp = get_absolute_expression()) < 0) {
-		as_bad("BSS length (%d.) <0! Ignored.", temp);
+
+	++input_line_pointer;
+
+	if ((size = get_absolute_expression()) < 0) {
+		as_bad("BSS length (%d.) <0! Ignored.", size);
 		ignore_rest_of_line();
 		return;
-	}
+	} /* bad length */
+
 	*p = 0;
 	symbolP = symbol_find_or_make(name);
 	*p = c;
+
 	if (strncmp(input_line_pointer, ",\"bss\"", 6) != 0) {
 		as_bad("bad .reserve segment: `%s'", input_line_pointer);
 		return;
-	}
+	} /* if not bss */
+
 	input_line_pointer += 6;
+	SKIP_WHITESPACE();
+
+	if (*input_line_pointer == ',') {
+		++input_line_pointer;
+
+		SKIP_WHITESPACE();
+		if (*input_line_pointer == '\n') {
+			as_bad("Missing alignment");
+			return;
+		}
+
+		align = get_absolute_expression();
+		if (align > max_alignment){
+			align = max_alignment;
+			as_warn("Alignment too large: %d. assumed.", align);
+		} else if (align < 0) {
+			align = 0;
+			as_warn("Alignment negative. 0 assumed.");
+		}
+#ifdef MANY_SEGMENTS
+#define SEG_BSS SEG_E2
+		record_alignment(SEG_E2, align);
+#else
+		record_alignment(SEG_BSS, align);
+#endif
+
+ /* convert to a power of 2 alignment */
+		for (temp = 0; (align & 1) == 0; align >>= 1, ++temp) ;;
+
+		if (align != 1) {
+			as_bad("Alignment not a power of 2");
+			ignore_rest_of_line();
+			return;
+		} /* not a power of two */
+
+		align = temp;
+    
+		/* Align */
+		align = ~((~0) << align);	/* Convert to a mask */
+		local_bss_counter = (local_bss_counter + align) & (~align);
+	} /* if has optional alignment */
+
 	if (S_GET_OTHER(symbolP) == 0
 	    && S_GET_DESC(symbolP) == 0
-	    && ((S_GET_TYPE(symbolP) == N_BSS
+	    && ((S_GET_SEGMENT(symbolP) == SEG_BSS
 		 && S_GET_VALUE(symbolP) == local_bss_counter)
 		|| !S_IS_DEFINED(symbolP))) {
 		S_SET_VALUE(symbolP, local_bss_counter);
 		S_SET_SEGMENT(symbolP, SEG_BSS);
-		symbolP->sy_frag  = & bss_address_frag;
-		local_bss_counter += temp;
+		symbolP->sy_frag  = &bss_address_frag;
+		local_bss_counter += size;
 	} else {
 		as_warn("Ignoring attempt to re-define symbol from %d. to %d.",
 			S_GET_VALUE(symbolP), local_bss_counter);
-	}
+	} /* if not redefining */
+
 	demand_empty_rest_of_line();
 	return;
 } /* s_reserve() */
@@ -876,9 +927,9 @@ char *str;
 						if (mask >= 32) {
 							mask -= 31;
 						} /* wrap high bit */
-					} /* if not an 'f' register. */
 #endif /* NO_V9 */
  /* end-sanitize-v9 */
+					} /* if not an 'f' register. */
 				} /* on error */
 
 				switch (*args) {
@@ -937,6 +988,10 @@ char *str;
 				the_insn.pcrel = 1;
 				goto immediate;
 				
+			case 'n': /* 22 bit immediate */
+				the_insn.reloc = RELOC_22;
+				goto immediate;
+
 			case 'i':   /* 13 bit immediate */
 				the_insn.reloc = RELOC_BASE13;
 				
@@ -984,23 +1039,22 @@ char *str;
 					
 					char *s1;
 					
-					for(s1=s;*s1 && *s1!=','&& *s1!=']';s1++)
-					    ;
+					for (s1 = s; *s1 && *s1 != ',' && *s1 != ']'; s1++) ;;
 					
-					if(s1!=s && isdigit(s1[-1])) {
-						if(s1[-2]=='%' && s1[-3]=='+') {
-							s1-=3;
-							*s1='\0';
-							(void)getExpression(s);
-							*s1='+';
-							s=s1;
+					if (s1 != s && isdigit(s1[-1])) {
+						if(s1[-2] == '%' && s1[-3] == '+') {
+							s1 -= 3;
+							*s1 = '\0';
+							(void) getExpression(s);
+							*s1 = '+';
+							s = s1;
 							continue;
-						} else if(strchr("goli0123456789",s1[-2]) && s1[-3]=='%' && s1[-4]=='+') {
-							s1-=4;
-							*s1='\0';
-							(void)getExpression(s);
-							*s1='+';
-							s=s1;
+						} else if (strchr("goli0123456789", s1[-2]) && s1[-3] == '%' && s1[-4] == '+') {
+							s1 -= 4;
+							*s1 = '\0';
+							(void) getExpression(s);
+							*s1 = '+';
+							s = s1;
 							continue;
 						}
 					}
@@ -1016,21 +1070,22 @@ char *str;
 				}
 				break;
 				
-			case 'A':       /* alternate space */
-				if (isdigit(*s)) {
-					long num;
-					
-					num=0;
-					while (isdigit(*s)) {
-						num= num*10 + *s-'0';
-						++s;
-					}
-					opcode |= num<<5;
-					continue;
-				}
-				break;
-				/* abort(); */
+			case 'A': {
+				char *push = input_line_pointer;
+				expressionS e;
 				
+				input_line_pointer = s;
+
+				if (expression(&e) == SEG_ABSOLUTE) {
+					opcode |= e.X_add_number << 5;
+					s = input_line_pointer;
+					input_line_pointer = push;
+					continue;
+				} /* if absolute */
+				
+				break;
+			} /* alternate space */
+
 			case 'p':
 				if (strncmp(s, "%psr", 4) == 0) {
 					s += 4;
@@ -1347,10 +1402,23 @@ long val;
 			buf[3]=0;
 		}
 		break;
-#if 0
+
 	case RELOC_22:
+		if (val & ~0x003fffff) {
+		  as_bad("relocation overflow");
+		} /* on overflow */
+		buf[1] |= (val >> 16) & 0x3f;
+		buf[2] = val >> 8;
+		buf[3] = val & 0xff;
+		break;
+		
 	case RELOC_13:
-#endif
+		if (val & ~0x00001fff) {
+		  as_bad("relocation overflow");
+		} /* on overflow */
+		buf[2] = (val >> 8) & 0x1f;
+		buf[3] = val & 0xff;
+		break;
 
  /* start-sanitize-v9 */
 #ifndef NO_V9
@@ -1492,6 +1560,7 @@ fragS *fragP;
 segT segtype;
 {
 	as_fatal("sparc_estimate_size_before_relax\n");
+	return(1);
 } /* md_estimate_size_before_relax() */
 
 #if 0
@@ -1717,6 +1786,13 @@ fixS *fixP;
 {
 	return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 } /* md_pcrel_from() */
+
+void tc_aout_pre_write_hook(headers)
+object_headers *headers;
+{
+	H_SET_VERSION(headers, 1);
+	return;
+} /* tc_aout_pre_write_hook() */
 
 /*
  * Local Variables:
