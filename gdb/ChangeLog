@@ -1,4 +1,10 @@
-FFri Oct 30 16:33:02 1992  Fred Fish  (fnf@cygnus.com)
+Tue Nov  3 11:29:17 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* dbxread.c (process_one_symbol): if not defined
+	(BLOCK_ADDRESS_FUNCTION_RELATIVE), set function_start_offset at
+	the start of the function, not just after N_FUN.
+
+Fri Oct 30 16:33:02 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (c-exp.tab.c, m2-exp.tab.c):  Add sed patterns to
 	  remap all malloc's to xmalloc's and all realloc's to xrealloc's.
