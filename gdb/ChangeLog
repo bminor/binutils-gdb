@@ -1,5 +1,11 @@
 2002-06-08  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/djgpp/fnchange.lst: Fix problems with bfd/elf32-i386.c,
+	bfd/elf32-i386qnx.c, bfd/elf32-sh.c, bfd/elf32-sh64-nbsd.c,
+	bfd/elf64-sh64-nbsd.c bfd/elf64-sh64.c.
+
+2002-06-08  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.c (GET_SAVED_REGISTER): Delete macro definition.
 	(default_get_saved_register): Delete function.
 	* gdbarch.sh (GET_SAVED_REGISTER): Set default to
