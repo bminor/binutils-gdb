@@ -4501,7 +4501,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    const char *name;
 
 	    if (h)
-	      name = NULL;
+	      name = h->root.root.string;
 	    else
 	      {
 		name = bfd_elf_string_from_elf_section (input_bfd,
