@@ -67,26 +67,6 @@
 #define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 3 * 4)
 #define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_BASE + 3 * 4 + 32 * 4 + 4)
 
-/* FIXME: cagney/2000-04-04: Testing the _MIPS_SIM_NABI32 and
-   _MIPS_SIM in a tm-*.h file is simply wrong!  Those are
-   host-dependant macros (provided by /usr/include) and stop any
-   chance of the target being cross compiled */
-#if defined (_MIPS_SIM_NABI32) && _MIPS_SIM == _MIPS_SIM_NABI32
-/*
- * Irix 6 (n32 ABI) has 32-bit GP regs and 64-bit FP regs
- */
-
-#undef  MIPS_REGISTER_BYTE
-#define MIPS_REGISTER_BYTE(N) \
-     (((N) < FP0_REGNUM) ? (N) * mips_regsize (current_gdbarch) : \
-      ((N) < FP0_REGNUM + 32) ?     \
-      FP0_REGNUM * mips_regsize (current_gdbarch) + \
-      ((N) - FP0_REGNUM) * sizeof(double) : \
-      32 * sizeof(double) + ((N) - 32) * mips_regsize (current_gdbarch))
-
-#endif /* N32 */
-
-
 /* The signal handler trampoline is called _sigtramp.  */
 #undef IN_SIGTRAMP
 #define IN_SIGTRAMP(pc, name) ((name) && STREQ ("_sigtramp", name))

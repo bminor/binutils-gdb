@@ -89,11 +89,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define	PRID_REGNUM 89		/* Processor ID */
 #define	LAST_EMBED_REGNUM 89	/* Last one */
 
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-#define MIPS_REGISTER_BYTE(N) ((N) * mips_regsize (current_gdbarch))
-
 /* Special symbol found in blocks associated with routines.  We can hang
    mips_extra_func_info_t's off of this.  */
 

@@ -61,15 +61,6 @@
 #define FCRCS_REGNUM 69		/* FP control/status */
 #define FCRIR_REGNUM 70		/* FP implementation/revision */
 
-
-#undef  MIPS_REGISTER_BYTE
-#define MIPS_REGISTER_BYTE(N) \
-     (((N) < FP0_REGNUM) ? (N) * mips_regsize (current_gdbarch) : \
-      ((N) < FP0_REGNUM + 32) ?     \
-      FP0_REGNUM * mips_regsize (current_gdbarch) + \
-      ((N) - FP0_REGNUM) * sizeof(double) : \
-      32 * sizeof(double) + ((N) - 32) * mips_regsize (current_gdbarch))
-
 /* The signal handler trampoline is called _sigtramp.  */
 #undef IN_SIGTRAMP
 #define IN_SIGTRAMP(pc, name) ((name) && STREQ ("_sigtramp", name))

@@ -1,3 +1,11 @@
+2003-11-16  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_register_byte): Delete function.
+	(mips_gdbarch_init): Do not set "deprecated_register_byte".
+	* config/mips/tm-mips.h (MIPS_REGISTER_BYTE): Delete macro.
+	* config/mips/tm-irix6.h (MIPS_REGISTER_BYTE): Delete macro.
+	* config/mips/tm-irix5.h (MIPS_REGISTER_BYTE): Delete macro.
+
 2003-11-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_extract_return_value): Don't use bfd_byte.

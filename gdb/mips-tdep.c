@@ -656,37 +656,6 @@ mips_register_raw_size (int regnum)
     internal_error (__FILE__, __LINE__, "Register %d out of range", regnum);
 }
 
-/* Register offset in a buffer for each register.
-
-   FIXME: cagney/2003-06-15: This is so bogus.  Instead REGISTER_TYPE
-   should strictly return the layout of the buffer.  Unfortunately
-   remote.c and the MIPS have come to rely on a custom layout that
-   doesn't 1:1 map onto the register type.  */
-
-static int
-mips_register_byte (int regnum)
-{
-  gdb_assert (regnum >= 0);
-  if (regnum < NUM_REGS)
-    /* Pick up the relevant per-tm file register byte method.  */
-    return MIPS_REGISTER_BYTE (regnum);
-  else if (regnum < 2 * NUM_REGS)
-    {
-      int reg;
-      int byte;
-      /* Start with the end of the raw register buffer - assum that
-	 MIPS_REGISTER_BYTE (NUM_REGS) returns that end.  */
-      byte = MIPS_REGISTER_BYTE (NUM_REGS);
-      /* Add space for all the proceeding registers based on their
-         real size.  */
-      for (reg = NUM_REGS; reg < regnum; reg++)
-	byte += TYPE_LENGTH (gdbarch_register_type (current_gdbarch, reg));
-      return byte;
-    }
-  else
-    internal_error (__FILE__, __LINE__, "Register %d out of range", regnum);
-}
-
 /* Convert between RAW and VIRTUAL registers.  The RAW register size
    defines the remote-gdb packet. */
 
@@ -5835,7 +5804,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_deprecated_register_raw_size (gdbarch, mips_register_raw_size);
-  set_gdbarch_deprecated_register_byte (gdbarch, mips_register_byte);
   set_gdbarch_register_reggroup_p (gdbarch, mips_register_reggroup_p);
   set_gdbarch_pseudo_register_read (gdbarch, mips_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, mips_pseudo_register_write);
