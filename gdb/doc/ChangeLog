@@ -1,3 +1,12 @@
+Fri May 26 15:55:33 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (pdf, gdbint.pdf, gdb.pdf, stabs.pdf): New targets.
+  	Generate using pdftex.
+	(PDFTEX): Define.
+ 	(STAGESTUFF, maintainer-clean realclean): Add *.pdf.
+	(gdb.texinfo, gdbint.texinfo, stabs.texinfo): When TeX insert the
+ 	@contents at the start.
+
 2000-05-24  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo: Remove duplicate @syncodeindex.  From Brian
