@@ -57,8 +57,6 @@ static boolean elf_m68k_finish_dynamic_sections
 
 static boolean elf32_m68k_set_private_flags
   PARAMS ((bfd *, flagword));
-static boolean elf32_m68k_copy_private_bfd_data
-  PARAMS ((bfd *, bfd *));
 static boolean elf32_m68k_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static boolean elf32_m68k_print_private_bfd_data
@@ -364,26 +362,6 @@ elf32_m68k_set_private_flags (abfd, flags)
 {
   elf_elfheader (abfd)->e_flags = flags;
   elf_flags_init (abfd) = true;
-  return true;
-}
-
-/* Copy m68k-specific data from one module to another */
-static boolean
-elf32_m68k_copy_private_bfd_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
-{
-  flagword in_flags;
-
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  in_flags = elf_elfheader (ibfd)->e_flags;
-
-  elf_elfheader (obfd)->e_flags = in_flags;
-  elf_flags_init (obfd) = true;
-
   return true;
 }
 
@@ -2329,8 +2307,6 @@ elf32_m68k_reloc_type_class (rela)
 					elf_m68k_finish_dynamic_sections
 #define elf_backend_gc_mark_hook	elf_m68k_gc_mark_hook
 #define elf_backend_gc_sweep_hook	elf_m68k_gc_sweep_hook
-#define bfd_elf32_bfd_copy_private_bfd_data \
-                                        elf32_m68k_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data \
                                         elf32_m68k_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags \

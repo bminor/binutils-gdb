@@ -39,8 +39,6 @@ static void mcore_elf_info_to_howto
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 static boolean mcore_elf_set_private_flags
   PARAMS ((bfd *, flagword));
-static boolean mcore_elf_copy_private_bfd_data
-  PARAMS ((bfd *, bfd *));
 static boolean mcore_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static bfd_reloc_status_type mcore_elf_unsupported_reloc
@@ -298,24 +296,6 @@ mcore_elf_set_private_flags (abfd, flags)
 
   elf_elfheader (abfd)->e_flags = flags;
   elf_flags_init (abfd) = true;
-  return true;
-}
-
-/* Copy backend specific data from one object module to another.  */
-static boolean
-mcore_elf_copy_private_bfd_data (ibfd, obfd)
-     bfd * ibfd;
-     bfd * obfd;
-{
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  BFD_ASSERT (! elf_flags_init (obfd)
-	      || elf_elfheader (obfd)->e_flags == elf_elfheader (ibfd)->e_flags);
-
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = true;
   return true;
 }
 
@@ -737,7 +717,6 @@ mcore_elf_check_relocs (abfd, info, sec, relocs)
 #define elf_info_to_howto	mcore_elf_info_to_howto
 #define elf_info_to_howto_rel	NULL
 
-#define bfd_elf32_bfd_copy_private_bfd_data	mcore_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	mcore_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		mcore_elf_set_private_flags
 #define bfd_elf32_bfd_reloc_type_lookup		mcore_elf_reloc_type_lookup

@@ -1,3 +1,28 @@
+2001-12-18  H.J. Lu <hjl@gnu.org>
+
+	* elf-bfd.h (_bfd_elf_copy_private_bfd_data): New. Prototype.
+	(_bfd_mips_elf_copy_private_bfd_data): Removed.
+
+	* elf.c (_bfd_elf_copy_private_bfd_data): New. Copy e_flags in
+	the ELF header.
+
+	* elf32-i370.c (??_elf_copy_private_bfd_data): Removed.
+	(bfd_elf??_bfd_copy_private_bfd_data): Removed.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-mips.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+
+	* elf64-mips.c (bfd_elf64_bfd_copy_private_bfd_data): Removed.
+
+	* elfxx-target.h (bfd_elfNN_bfd_copy_private_bfd_data): Defined
+	to _bfd_elf_copy_private_bfd_data.
+
 2001-12-18  Martin Schwidefsky  <schwidefsky@de.ibm.com>
  
 	* elf32-s390 (elf_s390_check_relocs): Pass addend to

@@ -1147,6 +1147,8 @@ extern char *bfd_elf_string_from_elf_section
 extern char *bfd_elf_get_str_section
   PARAMS ((bfd *, unsigned));
 
+extern boolean _bfd_elf_copy_private_bfd_data
+  PARAMS ((bfd *, bfd *));
 extern boolean _bfd_elf_print_private_bfd_data
   PARAMS ((bfd *, PTR));
 extern void bfd_elf_print_symbol
@@ -1546,8 +1548,6 @@ extern bfd_reloc_status_type _bfd_mips_elf_gprel32_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 extern boolean _bfd_mips_elf_set_private_flags
   PARAMS ((bfd *, flagword));
-extern boolean _bfd_mips_elf_copy_private_bfd_data
-  PARAMS ((bfd *, bfd *));
 extern boolean _bfd_mips_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 extern boolean _bfd_mips_elf_find_nearest_line

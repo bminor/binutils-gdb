@@ -7026,8 +7026,6 @@ const struct elf_size_info mips_elf64_size_info =
 #define bfd_elf64_bfd_link_hash_table_create \
 					mips_elf64_link_hash_table_create
 #define bfd_elf64_bfd_final_link	mips_elf64_final_link
-#define bfd_elf64_bfd_copy_private_bfd_data \
-					_bfd_mips_elf_copy_private_bfd_data
 #define bfd_elf64_bfd_merge_private_bfd_data \
 					_bfd_mips_elf_merge_private_bfd_data
 #define bfd_elf64_bfd_set_private_flags	_bfd_mips_elf_set_private_flags

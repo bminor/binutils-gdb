@@ -301,7 +301,6 @@ i370_elf_reloc_type_lookup (abfd, code)
   return i370_elf_howto_table[ (int)i370_reloc ];
 };
 
-static boolean i370_elf_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 static boolean i370_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
 
 static boolean i370_elf_relocate_section PARAMS ((bfd *,
@@ -378,24 +377,6 @@ i370_elf_set_private_flags (abfd, flags)
 
   elf_elfheader (abfd)->e_flags = flags;
   elf_flags_init (abfd) = true;
-  return true;
-}
-
-/* Copy backend specific data from one object module to another */
-static boolean
-i370_elf_copy_private_bfd_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
-{
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  BFD_ASSERT (!elf_flags_init (obfd)
-	      || elf_elfheader (obfd)->e_flags == elf_elfheader (ibfd)->e_flags);
-
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = true;
   return true;
 }
 
@@ -1675,7 +1656,6 @@ i370_elf_post_process_headers (abfd, link_info)
 
 #define bfd_elf32_bfd_reloc_type_lookup		i370_elf_reloc_type_lookup
 #define bfd_elf32_bfd_set_private_flags		i370_elf_set_private_flags
-#define bfd_elf32_bfd_copy_private_bfd_data	i370_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	i370_elf_merge_private_bfd_data
 #define elf_backend_relocate_section		i370_elf_relocate_section
 

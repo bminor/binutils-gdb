@@ -42,8 +42,6 @@ static bfd_reloc_status_type ppc64_elf_addr16_ha_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static boolean ppc64_elf_set_private_flags
   PARAMS ((bfd *, flagword));
-static boolean ppc64_elf_copy_private_bfd_data
-  PARAMS ((bfd *, bfd *));
 static boolean ppc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static boolean ppc64_elf_section_from_shdr
@@ -1424,24 +1422,6 @@ ppc64_elf_set_private_flags (abfd, flags)
 
   elf_elfheader (abfd)->e_flags = flags;
   elf_flags_init (abfd) = true;
-  return true;
-}
-
-/* Copy backend specific data from one object module to another.  */
-static boolean
-ppc64_elf_copy_private_bfd_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
-{
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  BFD_ASSERT (!elf_flags_init (obfd)
-	      || elf_elfheader (obfd)->e_flags == elf_elfheader (ibfd)->e_flags);
-
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = true;
   return true;
 }
 
@@ -3990,7 +3970,6 @@ ppc64_elf_finish_dynamic_sections (output_bfd, info)
 
 #define bfd_elf64_bfd_reloc_type_lookup	      ppc64_elf_reloc_type_lookup
 #define bfd_elf64_bfd_set_private_flags	      ppc64_elf_set_private_flags
-#define bfd_elf64_bfd_copy_private_bfd_data   ppc64_elf_copy_private_bfd_data
 #define bfd_elf64_bfd_merge_private_bfd_data  ppc64_elf_merge_private_bfd_data
 #define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
 #define bfd_elf64_bfd_final_link	      ppc64_elf_final_link

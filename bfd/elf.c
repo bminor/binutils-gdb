@@ -787,6 +787,24 @@ _bfd_elf_merge_sections (abfd, info)
 /* Print out the program headers.  */
 
 boolean
+_bfd_elf_copy_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  BFD_ASSERT (!elf_flags_init (obfd)
+	      || (elf_elfheader (obfd)->e_flags
+		  == elf_elfheader (ibfd)->e_flags));
+
+  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
+  elf_flags_init (obfd) = true;
+  return true;
+}
+
+boolean
 _bfd_elf_print_private_bfd_data (abfd, farg)
      bfd *abfd;
      PTR farg;

@@ -301,8 +301,6 @@ static boolean elfNN_ia64_finish_dynamic_sections
   PARAMS ((bfd *abfd, struct bfd_link_info *info));
 static boolean elfNN_ia64_set_private_flags
   PARAMS ((bfd *abfd, flagword flags));
-static boolean elfNN_ia64_copy_private_bfd_data
-  PARAMS ((bfd *ibfd, bfd *obfd));
 static boolean elfNN_ia64_merge_private_bfd_data
   PARAMS ((bfd *ibfd, bfd *obfd));
 static boolean elfNN_ia64_print_private_bfd_data
@@ -4262,24 +4260,6 @@ elfNN_ia64_set_private_flags (abfd, flags)
   return true;
 }
 
-/* Copy backend specific data from one object module to another */
-static boolean
-elfNN_ia64_copy_private_bfd_data (ibfd, obfd)
-     bfd *ibfd, *obfd;
-{
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  BFD_ASSERT (!elf_flags_init (obfd)
-	      || (elf_elfheader (obfd)->e_flags
-		  == elf_elfheader (ibfd)->e_flags));
-
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = true;
-  return true;
-}
-
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 static boolean
@@ -4470,8 +4450,6 @@ elfNN_ia64_reloc_type_class (rela)
 #define bfd_elfNN_bfd_final_link \
 	elfNN_ia64_final_link
 
-#define bfd_elfNN_bfd_copy_private_bfd_data \
-	elfNN_ia64_copy_private_bfd_data
 #define bfd_elfNN_bfd_merge_private_bfd_data \
 	elfNN_ia64_merge_private_bfd_data
 #define bfd_elfNN_bfd_set_private_flags \

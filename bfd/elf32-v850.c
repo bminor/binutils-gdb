@@ -64,8 +64,6 @@ static void v850_elf_final_write_processing
   PARAMS ((bfd *, boolean));
 static boolean v850_elf_set_private_flags
   PARAMS ((bfd *, flagword));
-static boolean v850_elf_copy_private_bfd_data
-  PARAMS ((bfd *, bfd *));
 static boolean v850_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static boolean v850_elf_print_private_bfd_data
@@ -1832,28 +1830,6 @@ v850_elf_set_private_flags (abfd, flags)
   return true;
 }
 
-/* Copy backend specific data from one object module to another.  */
-
-static boolean
-v850_elf_copy_private_bfd_data (ibfd, obfd)
-     bfd * ibfd;
-     bfd * obfd;
-{
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  BFD_ASSERT (!elf_flags_init (obfd)
-	      || (elf_elfheader (obfd)->e_flags
-		  == elf_elfheader (ibfd)->e_flags));
-
-  elf_gp (obfd) = elf_gp (ibfd);
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = true;
-
-  return true;
-}
-
 /* Merge backend specific data from an object file
    to the output object file when linking.  */
 static boolean
@@ -2238,7 +2214,6 @@ v850_elf_fake_sections (abfd, hdr, sec)
 
 #define bfd_elf32_bfd_is_local_label_name	v850_elf_is_local_label_name
 #define bfd_elf32_bfd_reloc_type_lookup		v850_elf_reloc_type_lookup
-#define bfd_elf32_bfd_copy_private_bfd_data 	v850_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data 	v850_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		v850_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	v850_elf_print_private_bfd_data

@@ -66,8 +66,6 @@ static void m32r_elf_final_write_processing
   PARAMS ((bfd *, boolean));
 static boolean m32r_elf_set_private_flags
   PARAMS ((bfd *, flagword));
-static boolean m32r_elf_copy_private_bfd_data
-  PARAMS ((bfd *, bfd *));
 static boolean m32r_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static boolean m32r_elf_print_private_bfd_data
@@ -1951,26 +1949,6 @@ m32r_elf_set_private_flags (abfd, flags)
   return true;
 }
 
-/* Copy backend specific data from one object module to another */
-static boolean
-m32r_elf_copy_private_bfd_data (ibfd, obfd)
-     bfd * ibfd;
-     bfd * obfd;
-{
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  BFD_ASSERT (!elf_flags_init (obfd)
-	      || (elf_elfheader (obfd)->e_flags
-		  == elf_elfheader (ibfd)->e_flags));
-
-  elf_gp (obfd) = elf_gp (ibfd);
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = true;
-  return true;
-}
-
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 static boolean
@@ -2192,7 +2170,6 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
 
 #define elf_backend_object_p			m32r_elf_object_p
 #define elf_backend_final_write_processing 	m32r_elf_final_write_processing
-#define bfd_elf32_bfd_copy_private_bfd_data 	m32r_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data 	m32r_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		m32r_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	m32r_elf_print_private_bfd_data

@@ -44,7 +44,6 @@ static boolean ppc_elf_relax_section
 static bfd_reloc_status_type ppc_elf_addr16_ha_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static boolean ppc_elf_set_private_flags PARAMS ((bfd *, flagword));
-static boolean ppc_elf_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 static boolean ppc_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
 
 static int ppc_elf_additional_program_headers PARAMS ((bfd *));
@@ -1391,24 +1390,6 @@ ppc_elf_set_private_flags (abfd, flags)
 
   elf_elfheader (abfd)->e_flags = flags;
   elf_flags_init (abfd) = true;
-  return true;
-}
-
-/* Copy backend specific data from one object module to another */
-static boolean
-ppc_elf_copy_private_bfd_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
-{
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  BFD_ASSERT (!elf_flags_init (obfd)
-	      || elf_elfheader (obfd)->e_flags == elf_elfheader (ibfd)->e_flags);
-
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = true;
   return true;
 }
 
@@ -3799,7 +3780,6 @@ ppc_elf_grok_psinfo (abfd, note)
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_header_size	PLT_INITIAL_ENTRY_SIZE
 
-#define bfd_elf32_bfd_copy_private_bfd_data	ppc_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	ppc_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_relax_section             ppc_elf_relax_section
 #define bfd_elf32_bfd_reloc_type_lookup		ppc_elf_reloc_type_lookup
