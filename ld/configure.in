@@ -256,6 +256,11 @@ case "$target_vendor" in
   hp) EXTRA_SHLIB_EXTENSION=".sl" ;;
   *)  EXTRA_SHLIB_EXTENSION= ;;
 esac
+
+case "$target_os" in
+  lynxos) EXTRA_SHLIB_EXTENSION=".a" ;;
+esac
+
 if test x${EXTRA_SHLIB_EXTENSION} != x ; then
   AC_DEFINE_UNQUOTED(EXTRA_SHLIB_EXTENSION, "$EXTRA_SHLIB_EXTENSION",
    [Additional extension a shared object might have.])
