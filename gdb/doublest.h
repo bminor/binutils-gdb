@@ -72,5 +72,8 @@ extern DOUBLEST extract_typed_floating (const void *addr,
 					const struct type *type);
 extern void store_typed_floating (void *addr, const struct type *type,
 				  DOUBLEST val);
+extern void convert_typed_floating (const void *from,
+				    const struct type *from_type,
+                                    void *to, const struct type *to_type);
 
 #endif

@@ -1,3 +1,8 @@
+2001-10-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* doublest.h (convert_typed_floating): New prototype.
+	* doublest.c (convert_typed_floating): New function.
+
 2001-10-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* doublest.c: Improve comments a bit.

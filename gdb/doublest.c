@@ -713,11 +713,70 @@ store_typed_floating (void *addr, const struct type *type, DOUBLEST val)
      TYPE_LENGTH (type) bits.  If the end of the buffer wasn't
      initialized, GDB would write undefined data to the target.  An
      errant program, refering to that undefined data, would then
-     become non-deterministic.  */
+     become non-deterministic.
+
+     See also the function convert_typed_floating below.  */
   memset (addr, 0, TYPE_LENGTH (type));
 
   if (TYPE_FLOATFORMAT (type) == NULL)
     return store_floating (addr, TYPE_LENGTH (type), val);
 
   floatformat_from_doublest (TYPE_FLOATFORMAT (type), &val, addr);
+}
+
+/* Convert a floating-point number of type FROM_TYPE from a
+   target-order byte-stream at FROM to a floating-point number of type
+   TO_TYPE, and store it to a target-order byte-stream at TO.  */
+
+void
+convert_typed_floating (const void *from, const struct type *from_type,
+                        void *to, const struct type *to_type)
+{
+  const struct floatformat *from_fmt = TYPE_FLOATFORMAT (from_type);
+  const struct floatformat *to_fmt = TYPE_FLOATFORMAT (to_type);
+
+  gdb_assert (TYPE_CODE (from_type) == TYPE_CODE_FLT);
+  gdb_assert (TYPE_CODE (to_type) == TYPE_CODE_FLT);
+
+  /* If the floating-point format of FROM_TYPE or TO_TYPE isn't known,
+     try to guess it from the type's length.  */
+  if (from_fmt == NULL)
+    from_fmt = floatformat_from_length (TYPE_LENGTH (from_type));
+  if (to_fmt == NULL)
+    to_fmt = floatformat_from_length (TYPE_LENGTH (to_type));
+
+  if (from_fmt == NULL || to_fmt == NULL)
+    {
+      /* If we don't know the floating-point format of FROM_TYPE or
+         TO_TYPE, there's not much we can do.  We might make the
+         assumption that if the length of FROM_TYPE and TO_TYPE match,
+         their floating-point format would match too, but that
+         assumption might be wrong on targets that support
+         floating-point types that only differ in endianness for
+         example.  So we warn instead, and zero out the target buffer.  */
+      warning ("Can't convert floating-point number to desired type.");
+      memset (to, 0, TYPE_LENGTH (to_type));
+    }
+  else if (from_fmt == to_fmt)
+    {
+      /* We're in business.  The floating-point format of FROM_TYPE
+         and TO_TYPE match.  However, even though the floating-point
+         format matches, the length of the type might still be
+         different.  Make sure we don't overrun any buffers.  See
+         comment in store_typed_floating for a discussion about
+         zeroing out remaining bytes in the target buffer.  */
+      memset (to, 0, TYPE_LENGTH (to_type));
+      memcpy (to, from, min (TYPE_LENGTH (from_type), TYPE_LENGTH (to_type)));
+    }
+  else
+    {
+      /* The floating-point types don't match.  The best we can do
+         (aport from simulating the target FPU) is converting to the
+         widest floating-point type supported by the host, and then
+         again to the desired type.  */
+      DOUBLEST d;
+
+      floatformat_to_doublest (from_fmt, from, &d);
+      floatformat_from_doublest (to_fmt, &d, to);
+    }
 }
