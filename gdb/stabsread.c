@@ -3274,8 +3274,8 @@ read_range_type (pp, typenums, objfile)
   else if (n2 == 0 && n3 == -1)
     {
       /* It is unsigned int or unsigned long.  */
-      /* GCC sometimes uses this for long long too.  We could
-	 distinguish it by the name, but we don't.  */
+      /* GCC 2.3.3 uses this for long long too, but that is just a GDB 3.5
+	 compatibility hack.  */
       return init_type (TYPE_CODE_INT, TARGET_INT_BIT / TARGET_CHAR_BIT,
 			TYPE_FLAG_UNSIGNED, NULL, objfile);
     }

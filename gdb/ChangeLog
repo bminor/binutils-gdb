@@ -1,3 +1,7 @@
+Tue Oct 12 08:59:15 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c: Fix comment about gcc 2.3.3 stab for long long int.
+
 Mon Oct 11 14:27:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* m3-nat.c, config/nm-m3.h: Add a target_ops struct and other
