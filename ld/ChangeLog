@@ -1,3 +1,8 @@
+2004-08-27  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/pe.em (after_open): Do not assume that either bfd is
+	an archive. 
+
 2004-08-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_init): Don't compare with TRUE.

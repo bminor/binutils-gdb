@@ -1096,17 +1096,19 @@ gld_${EMULATION_NAME}_after_open (void)
 			  continue;
 
 			other_bfd = blhe->u.def.section->owner;
+#define bfd_filename(bfd) ((bfd)->my_archive ? bfd_get_filename ((bfd)->my_archive) : bfd_get_filename (bfd))
 
-			if (strcmp (is->the_bfd->my_archive->filename,
-				    other_bfd->my_archive->filename) == 0)
+			if (strcmp (bfd_filename (is->the_bfd),
+				    bfd_filename (other_bfd)) == 0)
 			  continue;
 
-			/* Rename this implib to match the other.  */
-			n = (char *) xmalloc (strlen (other_bfd->my_archive->filename) + 1);
+			/* Rename this implib to match the other one.  */
+			n = xmalloc (strlen (bfd_filename (other_bfd)) + 1);
 
-			strcpy (n, other_bfd->my_archive->filename);
+			strcpy (n, bfd_filename (other_bfd));
 
-			is->the_bfd->my_archive->filename = n;
+			bfd_filename (is->the_bfd) = n;
+#undef bfd_filename
 		      }
 
 		    free (relocs);
