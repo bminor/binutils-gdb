@@ -1,3 +1,9 @@
+Wed Jan 25 08:19:35 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (proceed): Flush stdout before resuming inferior.
+	* infcmd.c (step_1), annotate.c (annotate_starting):
+	Don't bother to flush here.
+
 Wed Jan 25 01:11:21 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hpread.c (hpread_process_one_debug_symbol): Fix lines garbled

@@ -68,9 +68,6 @@ annotate_starting ()
   if (annotation_level > 1)
     {
       printf_filtered ("\n\032\032starting\n");
-      /* The starting annotation needs to appear before any output
-         from the inferior process.  */
-      gdb_flush (gdb_stdout);
     }
 }
 
