@@ -122,16 +122,6 @@ extern void m68k_mri_mode_change PARAMS ((int));
 extern int m68k_conditional_pseudoop PARAMS ((pseudo_typeS *));
 #define tc_conditional_pseudoop(pop) m68k_conditional_pseudoop (pop)
 
-#define tc_frob_label(sym)					\
-do								\
-  {								\
-    if (S_GET_SEGMENT (sym) == text_section			\
-	&& (S_GET_VALUE (sym) & 1) != 0)			\
-      as_warn ("text label `%s' aligned to odd boundary",	\
-	       S_GET_NAME (sym));				\
-  }								\
-while (0)
-
 #ifdef BFD_ASSEMBLER
 
 #define tc_frob_symbol(sym,punt) \
