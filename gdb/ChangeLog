@@ -1,3 +1,8 @@
+Thu Dec 17 01:34:36 1998  Andrew Cagney  <cagney@chook>
+
+	* gdbtypes.c (build_gdbtypes): New function.
+	(_initialize_gdbtypes): Call.
+
 Wed Dec 16 11:47:00 1998  Andrew Cagney  <cagney@chook>
 
 	* gdbarch.c (show_architecture): Use TARGET_ARCHITECTURE.

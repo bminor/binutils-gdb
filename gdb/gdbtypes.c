@@ -78,8 +78,6 @@ static void print_arg_types PARAMS ((struct type **, int));
 static void dump_fn_fieldlists PARAMS ((struct type *, int));
 static void print_cplus_stuff PARAMS ((struct type *, int));
 
-void _initialize_gdbtypes PARAMS ((void));
-
 /* Alloc a new type structure and fill it with some defaults.  If
    OBJFILE is non-NULL, then allocate the space for the type structure
    in that objfile's type_obstack. */
@@ -1876,8 +1874,10 @@ recursive_dump_type (type, spaces)
 
 #endif	/* MAINTENANCE_CMDS */
 
-void
-_initialize_gdbtypes ()
+
+static void build_gdbtypes PARAMS ((void));
+static void
+build_gdbtypes ()
 {
   builtin_type_void =
     init_type (TYPE_CODE_VOID, 1,
@@ -1995,4 +1995,12 @@ _initialize_gdbtypes ()
 	       TYPE_FLAG_UNSIGNED,
 	       "uint128_t", (struct objfile *) NULL);
   /* end-sanitize-r5900 */
+}
+
+
+extern void _initialize_gdbtypes PARAMS ((void));
+void
+_initialize_gdbtypes ()
+{
+  build_gdbtypes ();
 }
