@@ -1,3 +1,9 @@
+Wed Aug  9 10:51:48 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Move random special target handling before
+	possible break.
+	* configure: Rebuild.
+
 Tue Aug  8 23:41:25 1995  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* configure.in: Consistently use ${target_cpu_type} rather than
