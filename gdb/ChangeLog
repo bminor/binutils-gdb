@@ -1,3 +1,8 @@
+Mon Oct 21 17:47:03 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* infrun.c (wait_for_inferior):  fix stepi/nexti that was broken
+	by my last edit to this routine.
+
 Mon Oct 21 10:04:39 1991  Steve Chamberlain  (steve at rtl.cygnus.com)
 
 	* configure.in: added ebmon target.
