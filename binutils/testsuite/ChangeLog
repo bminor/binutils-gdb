@@ -1,3 +1,9 @@
+2002-02-17  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* binutils-all/objcopy.exp
+	(strip_executable_with_saving_a_symbol): Prune symbol Main in nm
+	output for mmix-knuth-mmixware.
+
 2002-02-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* binutils-all/readelf.ss-mips: Do not expect an explicit
