@@ -99,6 +99,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define elf_no_info_to_howto_rel	NAME(bfd_elf,no_info_to_howto_rel)
 #define elf_get_sect_thunk		NAME(bfd_elf,get_sect_thunk)
 #define elf_hash			NAME(bfd_elf,hash)
+#define elf_new_section_hook		NAME(bfd_elf,new_section_hook)
 
 
 #ifdef HAVE_PROCFS		/* Some core file support requires host /proc files */
@@ -571,6 +572,16 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
       return true;
 
     case SHT_STRTAB:		/* A string table */
+      if (!strcmp (name, ".strtab") || !strcmp (name, ".shstrtab"))
+	return true;
+
+      if (!hdr->rawdata)
+	{
+	  newsect = bfd_make_section (abfd, name);
+	  if (newsect)
+	    newsect->flags = SEC_HAS_CONTENTS;
+	}
+
       return true;
 
     case SHT_REL:
@@ -653,6 +664,15 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
   return true;
 }
 
+boolean
+DEFUN (elf_new_section_hook, (abfd, sec),
+       bfd *abfd
+       AND asection *sec)
+{
+  sec->symbol->name = "";
+  return true;
+}
+
 static struct strtab *
 DEFUN (bfd_new_strtab, (abfd),
        bfd * abfd)
@@ -669,7 +689,7 @@ DEFUN (bfd_new_strtab, (abfd),
   return ss;
 }
 
-int
+static int
 DEFUN (bfd_add_to_strtab, (abfd, ss, str),
        bfd * abfd AND
        struct strtab *ss AND
@@ -727,8 +747,6 @@ DEFUN (bfd_shdr_from_section, (abfd, hdr, shstrtab, indx),
 {
   asection *sect;
   int ndx;
-
-  /* figure out out to write the section name from the bfd section name. MWE */
 
   sect = abfd->sections;
   for (ndx = indx; --ndx;)
@@ -1588,125 +1606,170 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
   int this_section;
   int idx;
 
-  /* check if we're making a PROGBITS section... */
-  /* if ((asect->flags & SEC_ALLOC) && (asect->flags & SEC_LOAD)) */
-  /* this was too strict... what *do* we want to check here? */
-  if (1)
+  Elf_Internal_Shdr *this_hdr;
+  this_section = elf_section_from_bfd_section (abfd, asect);
+  this_hdr = &thunk->i_shdrp[this_section];
+
+  this_hdr->sh_addr = asect->vma;
+  this_hdr->sh_size = asect->_raw_size;
+  /* contents already set by elf_set_section_contents */
+
+  if (asect->flags & SEC_RELOC)
     {
-      Elf_Internal_Shdr *this_hdr;
-      this_section = elf_section_from_bfd_section (abfd, asect);
-      this_hdr = &thunk->i_shdrp[this_section];
+      /* emit a reloc section, and thus strtab and symtab... */
+      Elf_Internal_Shdr *rela_hdr;
+      Elf_Internal_Shdr *symtab_hdr;
+      Elf_External_Rela *outbound_relocas;
+      Elf_External_Rel *outbound_relocs;
+      int rela_section;
+      int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
 
-      this_hdr->sh_addr = asect->vma;
-      this_hdr->sh_size = asect->_raw_size;
-      /* contents already set by elf_set_section_contents */
+      symtab_hdr = &thunk->i_shdrp[thunk->symtab_section];
 
-      if (asect->flags & SEC_RELOC)
+      if (thunk->symtab_section == this_section + 1)
+	rela_section = thunk->symtab_section + 2; /* symtab + symstrtab */
+      else
+	rela_section = this_section + 1;
+      rela_hdr = &thunk->i_shdrp[rela_section];
+      rela_hdr->sh_link = thunk->symtab_section;
+      rela_hdr->sh_info = this_section;
+
+      /* orelocation has the data, reloc_count has the count... */
+      if (use_rela_p)
 	{
-	  /* emit a reloc section, and thus strtab and symtab... */
-	  Elf_Internal_Shdr *rela_hdr;
-	  Elf_Internal_Shdr *symtab_hdr;
-	  Elf_External_Rela *outbound_relocas;
-	  Elf_External_Rel *outbound_relocs;
-	  int rela_section;
-	  int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
-
-	  symtab_hdr = &thunk->i_shdrp[thunk->symtab_section];
-
-	  if (thunk->symtab_section == this_section + 1)
-	    rela_section = thunk->symtab_section + 2;	/* symtab + symstrtab */
-	  else
-	    rela_section = this_section + 1;
-	  rela_hdr = &thunk->i_shdrp[rela_section];
-	  rela_hdr->sh_link = thunk->symtab_section;
-	  rela_hdr->sh_info = this_section;
-
-	  /* orelocation has the data, reloc_count has the count... */
-	  if (use_rela_p)
+	  rela_hdr->sh_type = SHT_RELA;
+	  rela_hdr->sh_entsize = sizeof (Elf_External_Rela);
+	  rela_hdr->sh_size = rela_hdr->sh_entsize * asect->reloc_count;
+	  outbound_relocas = (Elf_External_Rela *) bfd_alloc (abfd, rela_hdr->sh_size);
+	
+	  for (idx = 0; idx < asect->reloc_count; idx++)
 	    {
-	      rela_hdr->sh_type = SHT_RELA;
-	      rela_hdr->sh_entsize = sizeof (Elf_External_Rela);
-	      rela_hdr->sh_size = rela_hdr->sh_entsize * asect->reloc_count;
-	      outbound_relocas = (Elf_External_Rela *) bfd_alloc (abfd, rela_hdr->sh_size);
-
-	      for (idx = 0; idx < asect->reloc_count; idx++)
-		{
-		  Elf_Internal_Rela dst_rela;
-		  Elf_External_Rela *src_rela;
-		  arelent *ptr;
-
-		  ptr = asect->orelocation[idx];
-		  src_rela = outbound_relocas + idx;
-		  if (!(abfd->flags & EXEC_P))
-		    dst_rela.r_offset = ptr->address - asect->vma;
-		  else
-		    dst_rela.r_offset = ptr->address;
-
-		  dst_rela.r_info
-		    = ELF32_R_INFO (elf_symbol_from_bfd_symbol (abfd, ptr->sym_ptr_ptr),
-				    ptr->howto->type);
-
-		  dst_rela.r_addend = ptr->addend;
-		  elf_swap_reloca_out (abfd, &dst_rela, src_rela);
-		}
-
-	      rela_hdr->contents = (void *) outbound_relocas;
+	      Elf_Internal_Rela dst_rela;
+	      Elf_External_Rela *src_rela;
+	      arelent *ptr;
+	
+	      ptr = asect->orelocation[idx];
+	      src_rela = outbound_relocas + idx;
+	      if (!(abfd->flags & EXEC_P))
+		dst_rela.r_offset = ptr->address - asect->vma;
+	      else
+		dst_rela.r_offset = ptr->address;
+	
+	      dst_rela.r_info
+		= ELF32_R_INFO (elf_symbol_from_bfd_symbol (abfd, ptr->sym_ptr_ptr),
+				ptr->howto->type);
+	
+	      dst_rela.r_addend = ptr->addend;
+	      elf_swap_reloca_out (abfd, &dst_rela, src_rela);
 	    }
-	  else
-	    /* REL relocations */
+
+	  rela_hdr->contents = (void *) outbound_relocas;
+	}
+      else
+	/* REL relocations */
+	{
+	  rela_hdr->sh_type = SHT_REL;
+	  rela_hdr->sh_entsize = sizeof (Elf_External_Rel);
+	  rela_hdr->sh_size = rela_hdr->sh_entsize * asect->reloc_count;
+	  outbound_relocs = (Elf_External_Rel *)
+	    bfd_alloc (abfd, rela_hdr->sh_size);
+	
+	  for (idx = 0; idx < asect->reloc_count; idx++)
 	    {
-	      rela_hdr->sh_type = SHT_REL;
-	      rela_hdr->sh_entsize = sizeof (Elf_External_Rel);
-	      rela_hdr->sh_size = rela_hdr->sh_entsize * asect->reloc_count;
-	      outbound_relocs = (Elf_External_Rel *)
-		bfd_alloc (abfd, rela_hdr->sh_size);
-
-	      for (idx = 0; idx < asect->reloc_count; idx++)
-		{
-		  Elf_Internal_Rel dst_rel;
-		  Elf_External_Rel *src_rel;
-		  arelent *ptr;
-
-		  ptr = asect->orelocation[idx];
-		  src_rel = outbound_relocs + idx;
-		  if (!(abfd->flags & EXEC_P))
-		    dst_rel.r_offset = ptr->address - asect->vma;
-		  else
-		    dst_rel.r_offset = ptr->address;
-
-		  dst_rel.r_info
-		    = ELF32_R_INFO (elf_symbol_from_bfd_symbol (abfd, ptr->sym_ptr_ptr),
-				    ptr->howto->type);
-
-		  elf_swap_reloc_out (abfd, &dst_rel, src_rel);
-
-		  /* Update the addend -- FIXME add 64 bit support.  */
+	      Elf_Internal_Rel dst_rel;
+	      Elf_External_Rel *src_rel;
+	      arelent *ptr;
+	
+	      ptr = asect->orelocation[idx];
+	      src_rel = outbound_relocs + idx;
+	      if (!(abfd->flags & EXEC_P))
+		dst_rel.r_offset = ptr->address - asect->vma;
+	      else
+		dst_rel.r_offset = ptr->address;
+	
+	      dst_rel.r_info
+		= ELF32_R_INFO (elf_symbol_from_bfd_symbol (abfd, ptr->sym_ptr_ptr),
+				ptr->howto->type);
+	
+	      elf_swap_reloc_out (abfd, &dst_rel, src_rel);
+	
+	      /* Update the addend -- FIXME add 64 bit support.  */
 #ifdef DEBUG
-		  fprintf (stderr, "Updating addend: 0x%.8lx = %d, this_section = %d\n",
-			   (long) ((unsigned char *) (elf_elfsections (abfd)[this_section].contents)
-			    + dst_rel.r_offset), ptr->addend, this_section);
+	      fprintf (stderr, "Updating addend: 0x%.8lx = %d, this_section = %d\n",
+		       (long) ((unsigned char *) (elf_elfsections (abfd)[this_section].contents)
+			       + dst_rel.r_offset), ptr->addend, this_section);
 #endif
-
-		  bfd_put_32 (abfd, ptr->addend,
-			      (unsigned char *) (elf_elfsections (abfd)[this_section].contents)
-			      + dst_rel.r_offset);
-		}
-	      rela_hdr->contents = (void *) outbound_relocs;
+	
+	      bfd_put_32 (abfd, ptr->addend,
+			  (unsigned char *) (elf_elfsections (abfd)[this_section].contents)
+			  + dst_rel.r_offset);
 	    }
+	  rela_hdr->contents = (void *) outbound_relocs;
 	}
-      if (asect->flags & SEC_ALLOC)
+    }
+  if (asect->flags & SEC_ALLOC)
+    {
+      this_hdr->sh_flags |= SHF_ALLOC;
+      if (asect->flags & SEC_LOAD)
 	{
-	  this_hdr->sh_flags |= SHF_ALLOC;
-	  if (asect->flags & SEC_LOAD)
+	  /* @@ Do something with sh_type? */
+	}
+    }
+  if (!(asect->flags & SEC_READONLY))
+    this_hdr->sh_flags |= SHF_WRITE;
+
+  if (asect->flags & SEC_CODE)
+    this_hdr->sh_flags |= SHF_EXECINSTR;
+}
+
+static void
+fix_up_strtabs (abfd, asect, obj)
+     bfd *abfd;
+     asection *asect;
+     PTR obj;
+{
+  int this_section = elf_section_from_bfd_section (abfd, asect);
+  elf_sect_thunk *thunk = (elf_sect_thunk *) obj;
+  Elf_Internal_Shdr *this_hdr = &thunk->i_shdrp[this_section];
+
+  /* @@ Check flags!  */
+  if (!strncmp (asect->name, ".stab", 5)
+      && strcmp ("str", asect->name + strlen (asect->name) - 3))
+    {
+      asection *s;
+      char strtab[100];		/* @@ fixed size buffer -- eliminate */
+      int stridx;
+
+      strcpy (strtab, asect->name);
+      strcat (strtab, "str");
+
+      s = bfd_get_section_by_name (abfd, strtab);
+      fprintf (stderr, "`%s' -> 0x%x\n", strtab, s);
+      if (s)
+	{
+	  Elf_Internal_Shdr *s2 = thunk->i_shdrp;
+
+	  for (stridx = 0; /* ?? */; s2++, stridx++)
 	    {
-	      /* @@ Do something with sh_type? */
+	      if (!strcmp (strtab, s2->sh_name + elf_shstrtab (abfd)->tab))
+		break;
 	    }
 	}
-      if (!(asect->flags & SEC_READONLY))
-	this_hdr->sh_flags |= SHF_WRITE;
-
-      if (asect->flags & SEC_CODE)
-	this_hdr->sh_flags |= SHF_EXECINSTR;
+      else
+	{
+	  asection *s2 = abfd->sections;
+	  stridx = 0;
+	  fprintf (stderr, " not in:");
+	  while (s2)
+	    {
+	      fprintf (stderr, " %s", s2->name);
+	      s2 = s2->next;
+	    }
+	  fprintf (stderr, "\n");
+	}
+      this_hdr->sh_link = stridx;
+      /* @@ Assuming 32 bits!  */
+      this_hdr->sh_entsize = 0xc;
     }
 }
 
@@ -1853,6 +1916,25 @@ DEFUN (bfd_elf_locate_sh, (abfd, strtab, shdrp, name),
 /* Map symbol from it's internal number to the external number, moving
    all local symbols to be at the head of the list.  */
 
+static INLINE int
+sym_is_global (sym)
+     asymbol *sym;
+{
+  if (sym->flags & BSF_GLOBAL)
+    {
+      if (sym->flags & BSF_LOCAL)
+	abort ();
+      return 1;
+    }
+  if (sym->section == &bfd_und_section)
+    return 1;
+  if (bfd_is_com_section (sym->section))
+    return 1;
+  if (sym->flags & (BSF_LOCAL | BSF_SECTION_SYM | BSF_FILE))
+    return 0;
+  return 0;
+}
+
 static boolean
 DEFUN (elf_map_symbols, (abfd), bfd * abfd)
 {
@@ -1915,8 +1997,7 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
   /* Identify and classify all of the symbols.  */
   for (idx = 0; idx < symcount; idx++)
     {
-      flags = syms[idx]->flags;
-      if (flags & (BSF_LOCAL | BSF_SECTION_SYM | BSF_FILE))
+      if (!sym_is_global (syms[idx]))
 	num_locals++;
       else
 	num_globals++;
@@ -1926,8 +2007,7 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
      dummy symbol.  */
   for (idx = 0; idx < symcount; idx++)
     {
-      flags = syms[idx]->flags;
-      if (flags & (BSF_LOCAL | BSF_SECTION_SYM | BSF_FILE))
+      if (!sym_is_global (syms[idx]))
 	symtab_map[idx] = 1 + num_locals2++;
       else
 	symtab_map[idx] = 1 + num_locals + num_globals2++;
@@ -2309,6 +2389,7 @@ DEFUN (elf_write_object_contents, (abfd), bfd * abfd)
   est.symtab_section = elf_onesymtab (abfd);	/* filled in by elf_fake */
 
   bfd_map_over_sections (abfd, elf_make_sections, &est);
+  bfd_map_over_sections (abfd, fix_up_strtabs, &est);
 
   /* Dump out the symtabs. */
   {
@@ -2360,8 +2441,22 @@ DEFUN (elf_write_object_contents, (abfd), bfd * abfd)
 
 	sym.st_size = (Elf32_Word) (elf_symbol_from (abfd, syms[idx]))->internal_elf_sym.st_size;
 
-	if (syms[idx]->flags & BSF_WEAK)
+	if (syms[idx]->section == &bfd_und_section
+	    || bfd_is_com_section (syms[idx]->section))
+	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_NOTYPE);
+	else if (syms[idx]->flags & BSF_WEAK)
 	  sym.st_info = ELF_ST_INFO (STB_WEAK, STT_OBJECT);
+	else if (syms[idx]->flags & BSF_SECTION_SYM)
+	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
+	else if (syms[idx]->flags & BSF_FILE)
+	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
+	else if (syms[idx]->flags & (BSF_GLOBAL | BSF_EXPORT))
+	  {
+	    if (syms[idx]->flags & BSF_FUNCTION)
+	      sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_FUNC);
+	    else
+	      sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_OBJECT);
+	  }
 	else if (syms[idx]->flags & BSF_LOCAL)
 	  {
 	    if (syms[idx]->flags & BSF_FUNCTION)
@@ -2369,26 +2464,9 @@ DEFUN (elf_write_object_contents, (abfd), bfd * abfd)
 	    else
 	      sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_OBJECT);
 	  }
-	else if (syms[idx]->flags & BSF_GLOBAL)
-	  {
-	    if (syms[idx]->flags & BSF_FUNCTION)
-	      sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_FUNC);
-	    else
-	      sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_OBJECT);
-	  }
-	else if (syms[idx]->flags & BSF_EXPORT)
-	  {
-	    if (syms[idx]->flags & BSF_FUNCTION)
-	      sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_FUNC);
-	    else
-	      sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_OBJECT);
-	  }
-	else if (syms[idx]->flags & BSF_SECTION_SYM)
-	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
-	else if (syms[idx]->flags & BSF_FILE)
-	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
 	else
-	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_OBJECT);
+	  /* Default to local if flag isn't set at all.  */
+	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_OBJECT);
 
 	sym.st_other = 0;
 	if (syms[idx]->section)
