@@ -1,3 +1,9 @@
+2005-03-27  Christopher Faylor  <cgf@timesys.com>
+
+	* win32-nat.c (handle_exception): Treat win32 routines which check for
+	valid addresses as "special" and don't stop when a SEGV is detected.
+	(get_child_debug_event): Properly flag exception as unhandled.
+
 2005-03-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cp-support.c (cp_class_name_from_physname): Rewrite.

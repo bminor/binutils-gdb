@@ -1077,6 +1077,14 @@ handle_exception (struct target_waitstatus *ourstatus)
     case EXCEPTION_ACCESS_VIOLATION:
       DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_ACCESS_VIOLATION");
       ourstatus->value.sig = TARGET_SIGNAL_SEGV;
+      {
+	char *fn;
+	if (find_pc_partial_function ((CORE_ADDR) current_event.u.Exception
+				      .ExceptionRecord.ExceptionAddress,
+				      &fn, NULL, NULL)
+	    && strncmp (fn, "KERNEL32!IsBad", strlen ("KERNEL32!IsBad")) == 0)
+	  return 0;
+      }
       break;
     case STATUS_STACK_OVERFLOW:
       DEBUG_EXCEPTION_SIMPLE ("STATUS_STACK_OVERFLOW");
@@ -1360,6 +1368,8 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 	break;
       if (handle_exception (ourstatus))
 	retval = current_event.dwThreadId;
+      else
+	continue_status = DBG_EXCEPTION_NOT_HANDLED;
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT:	/* message from the kernel */
