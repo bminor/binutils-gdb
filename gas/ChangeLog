@@ -1,3 +1,45 @@
+Fri Sep 30 16:23:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-i386.c (i386_validate_fix) [BFD_ASSEMBLER]: New
+	function.  Converts reloc for "foo-GOT" to BFD_RELOC_386_GOTOFF
+	reloc for "foo".
+	(i386_operand): Don't look up section symbol for
+	undefined_section.
+	(reloc): Always permit return of 8- and 16-bit relocation types.
+	Add a space after "pc-relative" in the error message.
+	(tc_i386_fix_adjustable) [BFD_ASSEMBLER]: Reject
+	BFD_RELOC_386_GOTOFF relocs.
+	(i386_operand): For any GOTOFF reloc, convert it to a BFD_RELOC_32
+	with a "foo-GOT" value.
+	* config/tc-i386.h (i386_validate_fix): Declare it.
+	(TC_VALIDATE_FIX): New macro -- call it.
+	(NOP_OPCODE): Cast to `char' to avoid compiler warnings.
+
+	* as.h: If __STDC__ is not defined and varargs.h is available, use
+	it rather than stdarg.h.
+
+	* write.h (struct fix): Added new bitfield fx_plt, for fixups
+	referring to PLT entries.
+	* write.c (fix_new_internal): Initialize fx_plt to zero.
+	(adjust_reloc_syms): Re-fetch `sym' after top of reduction loop.
+	Don't adjust fx_offset by frag address, since S_GET_VALUE now
+	includes the frag address.
+	(fixup_segment): Changed local var PCREL to type int, added PLT.
+	If PC-relative fixup refers to a PLT entry for a symbol in the
+	current section, don't reduce it.
+
+	* write.c (adjust_reloc_syms):  Exit loop through a label.  If
+	DEBUG5 is defined, print out each fixup before and after
+	processing.
+	(fixup_segment): If DEBUG5 is defined, print out each fixup before
+	and after processing.
+	(print_fixup): Added prototype.  Show address on first line.  Show
+	fx_offset and fx_subsy.  [!BFD_ASSEMBLER]: Only show fx_r_type if
+	NEED_FX_R_TYPE is defined.
+
+	* symbols.c (print_symbol_value_1): Check S_IS_LOCAL, S_IS_EXTERN,
+	S_IS_DEBUG, S_IS_DEFINED also.
+
 Thu Sep 29 18:57:06 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (all): Depend on .gdbinit.
