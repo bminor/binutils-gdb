@@ -72,6 +72,27 @@ enum pos {
     pos_default, pos_before, pos_after, pos_end
 }               postype = pos_default;
 
+#ifdef GNU960
+	char *default_target;
+
+	void
+	gnu960_verify_target(abfd)
+	bfd *abfd;
+	{
+	    if ( abfd->format == bfd_unknown ){
+		bfd_check_format(abfd, bfd_object);
+		/* Don't really care if it's an object --
+		 * just want to get the correct xvec.
+		 */
+	    }
+	    if ( !BFD_COFF_FILE_P(abfd) ){
+		fatal( "'%s' not a COFF file -- operation aborted",
+							abfd->filename );
+	    }
+	}
+#endif
+
+
 
 boolean operation_alters_arch = false;
 
@@ -94,8 +115,13 @@ main(argc, argv)
     char          **files;
     char           *inarch_filename;
     char           *temp;
-    program_name = argv[0];
 
+#ifdef GNU960
+    check_v960( argc, argv );
+    default_target = bfd_make_targ_name(BFD_COFF_FORMAT,HOST_BYTE_ORDER_BIG_P);
+#endif
+
+    program_name = argv[0];
 
     temp = strrchr(program_name, '/');
     if (temp == (char *) NULL)
@@ -226,9 +252,9 @@ main(argc, argv)
     */
 #if 0
     if (operation == replace && inarch == &bogus_archive) {
-      silent_create = 1;
-      do_quick_append(inarch_filename, 0);
-      open_inarch(inarch_filename);
+	silent_create = 1;
+	do_quick_append(inarch_filename, 0);
+	open_inarch(inarch_filename);
     }
 #endif
     switch (operation) {
@@ -308,7 +334,11 @@ open_inarch(archive_filename)
 
     }
     else {
+#ifdef GNU960
+	inarch = bfd_openr(archive_filename, default_target);
+#else
 	inarch = bfd_openr(archive_filename, NULL);
+#endif
 	if (inarch == NULL) {
     bloser:
 	    bfd_perror(archive_filename);
@@ -317,6 +347,9 @@ open_inarch(archive_filename)
 
 	if (bfd_check_format(inarch, bfd_archive) != true)
 	    fatal("File %s is not an archive.", archive_filename);
+#ifdef GNU960
+	gnu960_verify_target(inarch);	/* Exits on failure */
+#endif
 	last_one = &(inarch->next);
 	/* Read all the contents right away, regardless. */
 	for (next_one = bfd_openr_next_archived_file(inarch, NULL);
@@ -478,6 +511,7 @@ extract_file(abfd)
 		exit(1);
 	    }
 	}
+	/* no need to byte-swap; the two formats are presumably compatible(!) */
 	fwrite(cbuf, 1, nread, ostream);
 	ncopied += tocopy;
     }
@@ -539,7 +573,11 @@ do_quick_append(archive_filename, files_to_append)
     }
 
     /* bletch */
+#ifdef GNU960
+    temp = bfd_openr(archive_filename, default_target);
+#else
     temp = bfd_openr(archive_filename, NULL);
+#endif
     if (temp == NULL) {
 	bfd_perror(archive_filename);
 	exit(1);
@@ -547,6 +585,9 @@ do_quick_append(archive_filename, files_to_append)
     if (newfile == false) {
 	if (bfd_check_format(temp, bfd_archive) != true)
 	    fatal("File %s is not an archive.", archive_filename);
+#ifdef GNU960
+	gnu960_verify_target(temp);	/* Exits on failure */
+#endif
     }
     else {
 	fwrite(ARMAG, 1, SARMAG, ofile);
@@ -824,6 +865,9 @@ replace_members(files_to_move)
 		    fprintf(stderr, "Can't open file %s\n", *files_to_move);
 		    exit(1);
 		}
+#ifdef GNU960
+		gnu960_verify_target(*after_bfd);	/* Exits on failure */
+#endif
 		(*after_bfd)->next = temp;
 
 		if (verbose) {
@@ -844,6 +888,9 @@ replace_members(files_to_move)
 	    fprintf(stderr, "Can't open file %s\n", *files_to_move);
 	    exit(1);
 	}
+#ifdef GNU960
+	gnu960_verify_target(*after_bfd);	/* Exits on failure */
+#endif
 	if (verbose) {
 	    printf("c - %s\n", *files_to_move);
 	}
@@ -868,3 +915,5 @@ ranlib_only(archname)
     write_archive();
     exit(0);
 }
+
+
