@@ -15,7 +15,6 @@
  * CYGNUS DISCLAIMS ANY WARRANTIES, EXPRESS OR IMPLIED, WITH REGARD TO THIS
  * SOFTWARE INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY
  * AND FITNESS FOR A PARTICULAR PURPOSE.
- *
  */
 
 #include <signal.h>
@@ -29,7 +28,7 @@ int debug;
 
 #define X(op, size)  op*4+size
 
-#define SP (Hmode ? SL:SW)
+#define SP (HMODE ? SL:SW)
 #define SB 0
 #define SW 1
 #define SL 2
@@ -74,7 +73,7 @@ int debug;
 
 static cpu_state_type cpu;
 
-int Hmode;
+int HMODE = 1;
 
 
 static int
@@ -95,7 +94,6 @@ now_persec ()
 static int
 bitfrom (x)
 {
-
   switch (x & SIZE)
     {
     case L_8:
@@ -105,9 +103,8 @@ bitfrom (x)
     case L_32:
       return SL;
     case L_P:
-      return Hmode ? SL : SW;
+      return HMODE ? SL : SW;
     }
-
 }
 
 static
@@ -497,7 +494,7 @@ static unsigned int *lreg[18];
 #define GET_MEMORY_B(x)  (cpu.memory[x])
 
 int
-  fetch (arg, n)
+fetch (arg, n)
 ea_type *arg;
 {
   int rn = arg->reg;
@@ -608,6 +605,7 @@ int n;
 
     case X (OP_DEC, SL):
       t = (GET_L_REG(rn) -4 ) & cpu.mask;
+      SET_L_REG (rn, t);
       SET_MEMORY_L (t,n);
       break;
 
@@ -1058,13 +1056,13 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 
 	  OSHIFTS(O_NOT, rd = ~rd);
 	  OSHIFTS(O_SHLL, c = rd & hm; rd<<=1);
-	  OSHIFTS(O_SHLR, c = rd & 1; rd>>=1);
+	  OSHIFTS(O_SHLR, c = rd & 1; rd = (unsigned int) rd >> 1);
 	  OSHIFTS(O_SHAL, c = rd & hm; rd<<=1);
 	  OSHIFTS(O_SHAR, t = rd & hm; c = rd&1;rd>>=1;rd|=t;);
 	  OSHIFTS(O_ROTL, c = rd & hm; rd <<=1; rd|= C);
-	  OSHIFTS(O_ROTR, c = rd &1 ; rd >>=1; if (c) rd|= hm;);	  
+	  OSHIFTS(O_ROTR, c = rd & 1; rd = (unsigned int) rd >> 1; if (c) rd |= hm;);	  
 	  OSHIFTS(O_ROTXL,t = rd & hm; rd<<=1; rd|=C; c=t;);
-	  OSHIFTS(O_ROTXR,t = rd & 1; rd>>=1; if (C) rd|=hm; c=t;);	  
+	  OSHIFTS(O_ROTXR,t = rd & 1; rd = (unsigned int) rd >> 1; if (C) rd|=hm; c=t;);	  
 
 	case O(O_JMP, SB):
 	  {
@@ -1080,7 +1078,7 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 	  call:
 	    tmp = cpu.regs[7];
 
-	    if (Hmode)
+	    if (HMODE)
 	      {
 		tmp -= 4;
 		SET_MEMORY_L (tmp, code->next_pc);
@@ -1105,7 +1103,7 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 
 	    tmp = cpu.regs[7];
 
-	    if (Hmode)
+	    if (HMODE)
 	      {
 		pc = GET_MEMORY_L (tmp);
 		tmp += 4;
@@ -1269,9 +1267,27 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
 	SET_L_REG(code->dst.reg, (rd & 0xffff) | (tmp << 16));
 	goto next;
       }
-	  
-	  
-  
+    case O (O_EXTS, SW):
+      rd = GET_B_REG (code->src.reg + 8) & 0xff; /* Yes, src, not dst.  */
+      ea = rd & 0x80 ? -256 : 0;
+      res = rd + ea;
+      goto log16;
+    case O (O_EXTS, SL):
+      rd = GET_W_REG (code->src.reg) & 0xffff;
+      ea = rd & 0x8000 ? -65536 : 0;
+      res = rd + ea;
+      goto log32;
+    case O (O_EXTU, SW):
+      rd = GET_B_REG (code->src.reg + 8) & 0xff;
+      ea = 0;
+      res = rd + ea;
+      goto log16;
+    case O (O_EXTU, SL):
+      rd = GET_W_REG (code->src.reg) & 0xffff;
+      ea = 0;
+      res = rd + ea;
+      goto log32;
+
     default:
       cpu.exception = 123;
       goto end;
@@ -1333,7 +1349,6 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
   SET_W_REG(code->src.reg, rd);
   goto next;
 
-
  shift32:
   /* Set flags after an 32 bit shift op, carry set in insn */
   n = (rd & 0x80000000);
@@ -1342,7 +1357,6 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
   SET_L_REG(code->src.reg, rd);
   goto next;
 
-      
  log32:
   store (&code->dst, res);
  just_flags_log32:
@@ -1395,7 +1409,19 @@ case O(name, SL):{ int t;int hm = 0x80000000; rd = GET_L_REG(code->src.reg);how;
   nz = res & 0xffffffff;
   v = ((ea & 0x80000000) == (rd & 0x80000000)) 
     && ((ea & 0x80000000) != (res & 0x80000000));
-  c = (res < rd) || (res < ea);
+  switch (code->opcode / 4)
+    {
+    case O_ADD:
+      c = ((unsigned) res < (unsigned) rd) || ((unsigned) res < (unsigned) ea);
+      break;
+    case O_SUB:
+    case O_CMP:
+      c = (unsigned) rd < (unsigned) -ea;
+      break;
+    case O_NEG:
+      c = res != 0;
+      break;
+    }
   goto next;
 
  next:;
@@ -1559,7 +1585,7 @@ sim_fetch_register (rn, buf)
       break;
 
     }
-  if (Hmode || longreg)
+  if (HMODE || longreg)
     {
       buf[0] = v >> 24;
       buf[1] = v >> 16;
@@ -1635,3 +1661,8 @@ sim_info (verbose)
 #endif
 }
 
+void
+set_h8300h ()
+{
+  HMODE = 1;
+}

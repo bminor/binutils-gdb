@@ -1,3 +1,12 @@
+Fri Jul  9 14:36:48 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* run.c (main): Add -h flag to enable h8/300h emulation.
+	* compile.c: Rename Hmode to HMODE (consistency with gdb).
+	(set_h8300h): New function.
+	(sim_resume): Add support for extu,exts insns.
+	(sim_resume): Fix logical right shifting.
+	(sim_resume, label alu32): Fix setting of carry flag.
+	
 Sun Jul  4 00:35:41 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* compile.c (sim_csize): Initialize cpu.cache.

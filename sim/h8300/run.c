@@ -47,7 +47,8 @@ main (ac, av)
 	  sim_csize(atoi(av[i+1]));
 	  i++;
 	}
-  
+      else if (strcmp(av[i],"-h") == 0) 
+	set_h8300h ();
       else 
 	name = av[i];
     }
