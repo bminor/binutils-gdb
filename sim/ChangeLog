@@ -15,19 +15,9 @@
 
 	* MAINTAINERS: Added self and Andrew for the mips sim.
 
-2000-10-31  Ben Elliston  <bje@redhat.com>
-
-	* configure.in: Match sh64, not sh5.
-	* configure: Regenerate.
-
 2000-10-25  Geoff Keating  <geoffk@cygnus.com>
 
 	* MAINTAINERS: Added self and Andrew for the ppc sim.
-
-2000-10-09  Ben Elliston  <bje@redhat.com>
-
-	* configure.in: Add support for sh5.
-	* configure: Regenerate.
 
 Thu Jul 27 21:26:26 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
