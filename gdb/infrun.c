@@ -1826,10 +1826,11 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   if (stop_signal == TARGET_SIGNAL_TRAP)
     {
-      if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
-	ecs->random_signal = 0;
-      else if (breakpoints_inserted
-	       && breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
+      /* Check if a regular breakpoint has been hit before checking
+         for a potential single step breakpoint. Otherwise, GDB will
+         not see this breakpoint hit when stepping onto breakpoints.  */
+      if (breakpoints_inserted
+          && breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
 	{
 	  ecs->random_signal = 0;
 	  if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK,
@@ -1885,6 +1886,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 		}
 	    }
 	}
+      else if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
+        {
+          ecs->random_signal = 0;
+        }
     }
   else
     ecs->random_signal = 1;
