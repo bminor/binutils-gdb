@@ -1,5 +1,8 @@
 Fri Mar 21 15:42:37 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-ieee.c (segment_name): Don't define function if this
+	is a macro.
+
 	* config/obj-coff.h (DO_STRIP): Don't define.
 	* config/tc-h8300.h (DO_STRIP): Don't define.
 	* config/tc-h8500.h (DO_STRIP): Don't define.

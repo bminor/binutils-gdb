@@ -415,11 +415,13 @@ S_IS_DEBUG (x)
   abort ();
 }
 
+#ifndef segment_name
 char *
 segment_name ()
 {
   abort ();
 }
+#endif
 
 void
 obj_read_begin_hook ()
