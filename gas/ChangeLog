@@ -1,5 +1,16 @@
 2005-02-13  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (md_parse_option): Handle -xnone and -xdebugn.
+	(md_show_usage): Add -xnone, -xdebugn, and -xdebugx. Relocate default
+	indicator.
+	(ia64_init): Set md.detect_dv.
+	(ia64_start_line): New static variable warned. Warn only once when
+	encountering explicit stops in automatic mode.
+	* doc/c-ia64.texi: Describe -xnone, -xdebugn, and -xdebugx.
+	* NEWS: Mention new default mode.
+
+2005-02-13  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (dot_rot): Add comment that name strings should
 	be freed when wiping out previous state. Canonicalize names before
 	use. Free name string when detecting redefinition.

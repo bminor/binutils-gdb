@@ -75,16 +75,24 @@ assembler issue an error when an unwind directive check fails.
 
 @item -x
 @item -xexplicit
-These options turn on dependency violation checking.  This checking is turned on by
-default.
+These options turn on dependency violation checking.
 
 @item -xauto
 This option instructs the assembler to automatically insert stop bits where necessary
-to remove dependency violations.
+to remove dependency violations.  This is the default mode.
+
+@item -xnone
+This option turns off dependency violation checking.
 
 @item -xdebug
 This turns on debug output intended to help tracking down bugs in the dependency
 violation checker.
+
+@item -xdebugn
+This is a shortcut for -xnone -xdebug.
+
+@item -xdebugx
+This is a shortcut for -xexplicit -xdebug.
 
 @end table
 

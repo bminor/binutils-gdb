@@ -29,6 +29,6 @@
 .*:36: Error: .save.b outside of prologue
 .*:37: Error: .altrp outside of prologue
 .*:42: Error: .prologue within prologue
-.*:52: Error: .body outside of procedure
-.*:59: Warning: Initial .prologue.*
-.*:66: Warning: Initial .body.*
+.*:50: Error: .body outside of procedure
+.*:57: Warning: Initial .prologue.*
+.*:64: Warning: Initial .body.*

@@ -42,11 +42,9 @@ start:
 	.prologue
 	.save		ar.lc, r31
 	mov		r31 = ar.lc
-	;;
 	.body
 	.body
 	br.ret.sptk	rp
-	;;
 .personality personality
 .handlerdata
 .body

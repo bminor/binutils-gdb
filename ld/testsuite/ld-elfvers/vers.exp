@@ -91,6 +91,11 @@ if [istarget mips*-*-*] {
     }
 }
 
+case $target_triplet in {
+    { ia64-*-* } { set as_options "-x" }
+    default { set as_options "" }
+}
+
 proc test_ar { test lib object expect } {
     global ar
     global nm
@@ -506,6 +511,7 @@ proc build_binary { shared pic test source libname other mapfile verexp versymex
     global host_triplet
     global tmpdir
     global as
+    global as_options
     global objdump
     global CC
     global CFLAGS
@@ -516,7 +522,7 @@ proc build_binary { shared pic test source libname other mapfile verexp versymex
 	return
     }
 
-    if ![ld_assemble $as $tmpdir/$libname.s $tmpdir/$libname.o ]     {
+    if ![ld_assemble $as "$as_options $tmpdir/$libname.s" $tmpdir/$libname.o ]     {
 	unresolved "$test"
 	return
     }
@@ -593,6 +599,7 @@ proc test_ldfail { test flag source execname other mapfile whyfail } {
     global host_triplet
     global tmpdir
     global as
+    global as_options
     global objdump
     global CC
     global CFLAGS
@@ -609,7 +616,7 @@ proc test_ldfail { test flag source execname other mapfile whyfail } {
 	return
     }
 
-    if ![ld_assemble $as $tmpdir/$execname.s $tmpdir/$execname.o ]     {
+    if ![ld_assemble $as "$as_options $tmpdir/$execname.s" $tmpdir/$execname.o ]     {
 	unresolved "$test"
 	return
     }
@@ -697,6 +704,7 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
     global host_triplet
     global tmpdir
     global as
+    global as_options
     global objdump
     global CC
     global CFLAGS
@@ -708,7 +716,7 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
 	return
     }
 
-    if ![ld_assemble $as $tmpdir/$execname.s $tmpdir/$execname.o ]     {
+    if ![ld_assemble $as "$as_options $tmpdir/$execname.s" $tmpdir/$execname.o ]     {
 	unresolved "$test"
 	return
     }
@@ -910,15 +918,15 @@ if [istarget sparc*-*-*] {
 }
 run_ld_link_tests [list "\"vers24a\"
 			 \"-shared --version-script $srcdir/$subdir/vers24.map\"
-			 \"$as_pic_flags\" {vers24a.c vers24b.c} { { readelf -Wrs vers24.rd } }
+			 \"$as_pic_flags $as_options\" {vers24a.c vers24b.c} { { readelf -Wrs vers24.rd } }
 			 \"libvers24a.so\" \"-fpic\""]
 run_ld_link_tests [list "\"vers24b\"
 			 \"-shared --version-script $srcdir/$subdir/vers24.map\"
-			 \"$as_pic_flags\" {vers24b.c vers24a.c} { { readelf -Wrs vers24.rd } }
+			 \"$as_pic_flags $as_options\" {vers24b.c vers24a.c} { { readelf -Wrs vers24.rd } }
 			 \"libvers24b.so\" \"-fpic\""]
 run_ld_link_tests [list "\"vers24c\"
 			 \"-shared --version-script $srcdir/$subdir/vers24.map\"
-			 \"$as_pic_flags\" {vers24c.c} { { readelf -Wrs vers24.rd } }
+			 \"$as_pic_flags $as_options\" {vers24c.c} { { readelf -Wrs vers24.rd } }
 			 \"libvers24c.so\" \"-fpic\""]
 
 # Test versioned definition vs. normal definition in different files.

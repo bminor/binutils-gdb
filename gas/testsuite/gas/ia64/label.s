@@ -1,3 +1,4 @@
+.explicit
 start:
 {.mii
 label0:

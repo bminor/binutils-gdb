@@ -1,3 +1,4 @@
+.explicit
 _start:
 {.mlx
 	nop	0

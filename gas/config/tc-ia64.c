@@ -6830,6 +6830,10 @@ md_parse_option (c, arg)
 	{
 	  md.default_explicit_mode = 0;
 	}
+      else if (strcmp (arg, "none") == 0)
+	{
+	  md.detect_dv = 0;
+	}
       else if (strcmp (arg, "debug") == 0)
 	{
 	  md.debug_dv = 1;
@@ -6838,6 +6842,11 @@ md_parse_option (c, arg)
 	{
 	  md.default_explicit_mode = 1;
 	  md.debug_dv = 1;
+	}
+      else if (strcmp (arg, "debugn") == 0)
+	{
+	  md.debug_dv = 1;
+	  md.detect_dv = 0;
 	}
       else
 	{
@@ -6880,9 +6889,14 @@ IA-64 options:\n\
   -mle | -mbe		  select little- or big-endian byte order (default -mle)\n\
   -munwind-check=[warning|error]\n\
 			  unwind directive check (default -munwind-check=warning)\n\
-  -x | -xexplicit	  turn on dependency violation checking (default)\n\
-  -xauto		  automagically remove dependency violations\n\
-  -xdebug		  debug dependency violation checker\n"),
+  -x | -xexplicit	  turn on dependency violation checking\n\
+  -xauto		  automagically remove dependency violations (default)\n\
+  -xnone		  turn off dependency violation checking\n\
+  -xdebug		  debug dependency violation checker\n\
+  -xdebugn		  debug dependency violation checker but turn off\n\
+			  dependency violation checking\n\
+  -xdebugx		  debug dependency violation checker and turn on\n\
+			  dependency violation checking\n"),
 	stream);
 }
 
@@ -7224,6 +7238,7 @@ ia64_init (argc, argv)
      char **argv ATTRIBUTE_UNUSED;
 {
   md.flags = MD_FLAGS_DEFAULT;
+  md.detect_dv = 1;
   /* FIXME: We should change it to unwind_check_error someday.  */
   md.unwind_check = unwind_check_warning;
 }
@@ -7301,7 +7316,15 @@ ia64_start_line ()
   if (input_line_pointer[0] == ';' && input_line_pointer[-1] == ';')
     {
       if (md.detect_dv && !md.explicit_mode)
-	as_warn (_("Explicit stops are ignored in auto mode"));
+	{
+	  static int warned;
+
+	  if (!warned)
+	    {
+	      warned = 1;
+	      as_warn (_("Explicit stops are ignored in auto mode"));
+	    }
+	}
       else
 	insn_group_break (1, 0, 0);
     }

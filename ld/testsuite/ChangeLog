@@ -1,3 +1,14 @@
+2005-02-13  Jan Beulich  <jbeulich@novell.com>
+
+	* ld-elfvers/vers.exp (as_options): New. Set to -x for ia64.
+	(build_binary): Pass as_options to ld_assemble.
+	(test_ldfail): Likewise.
+	(build_exec): Likewise.
+	Pass as_options to run_ld_link_tests.
+	* ld-ia64/tlsbin.s: Add .explicit.
+	* ld-ia64/tlsbinpic.s: Likewise.
+	* ld-ia64/tlspic1.s: Likewise.
+
 2005-02-13  Eric Botcazou  <ebotcazou@libertysurf.fr>
 
 	* ld-sparc/tlssunnopic32.rd: Adjust for .dynsym changes.

@@ -1,5 +1,22 @@
 2005-02-13  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/ia64/label.l: Adjust line numbers.
+	* gas/ia64/label.s: Add .explicit.
+	* gas/ia64/nop_x.s: Likewise.
+	* gas/ia64/opc-a.d: Add assembler option -xnone.
+	* gas/ia64/opc-b.d: Likewise.
+	* gas/ia64/opc-f.d: Likewise.
+	* gas/ia64/opc-i.d: Likewise.
+	* gas/ia64/opc-m.d: Likewise.
+	* gas/ia64/opc-x.d: Likewise.
+	* gas/ia64/pseudo.d: Likewise.
+	* gas/ia64/regs.d: Likewise.
+	* gas/ia64/tls.d: Likewise.
+	* gas/ia64/unwind-err.l: Adjust line numbers.
+	* gas/ia64/unwind-err.s: Remove explicit stops.
+
+2005-02-13  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/ia64/pound.[ls]: New.
 	* gas/ia64/ia64.exp: Run new test.
 
