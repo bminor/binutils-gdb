@@ -1375,7 +1375,7 @@ print_with_operands (opcodep, insn, buffer, addr, info, prefix_opcodep,
       break;
 
     case 'i':
-      tp = format_dec ((insn & 32) ? (insn & 31) | ~31 : insn & 31, tp, 1);
+      tp = format_dec ((insn & 32) ? (insn & 31) | ~31L : insn & 31, tp, 1);
       break;
 
     case 'P':
