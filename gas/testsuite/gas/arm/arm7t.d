@@ -63,6 +63,6 @@ Disassembly of section .text:
 000000d4 <[^>]*> e1df00f4 ?	ldrsh	r0, \[pc, #4\]	; 000000e0 <[^>]*>
 000000d8 <[^>]*> e1df00f4 ?	ldrsh	r0, \[pc, #4\]	; 000000e4 <[^>]*>
 000000dc <[^>]*> 00000000 ?	andeq	r0, r0, r0
-[		]*dc:.*.rdata
+[		]*dc:.*fred
 000000e0 <[^>]*> 0000c0de ?	.*
 000000e4 <[^>]*> 0000dead ?	.*

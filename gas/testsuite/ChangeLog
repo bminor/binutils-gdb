@@ -8,6 +8,10 @@
 	* gas/arm/inst.s: Change test of BLPL instruction.
 	* gas/arm/inst.d: Change expected decode of BLPL instruction.
 	* gas/arm/arm7t.s: Remove use of .LC0 label in .word directive.
+	Remove .rdata section, since this cannot exist in an arm-aout
+	target.
+	* gas/arm/arm7t.d: Change expected reloc generated for .word
+	directive.
 
 1999-10-21  Nick Clifton  <nickc@cygnus.com>
 
