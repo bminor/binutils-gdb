@@ -28,6 +28,7 @@
 #include "regcache.h"
 #include "x86-64-tdep.h"
 #include "dwarf2cfi.h"
+#include "osabi.h"
 
 #define LINUX_SIGTRAMP_INSN0 (0x48)	/* mov $NNNNNNNN,%rax */
 #define LINUX_SIGTRAMP_OFFSET0 (0)

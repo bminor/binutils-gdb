@@ -1,5 +1,8 @@
 2003-01-06  Andrew Cagney  <cagney@redhat.com>
 
+	* x86-64-linux-tdep.c: Include "osabi.h".
+	* Makefile.in (x86-64-linux-tdep.o): Update dependencies.
+
 	* sparc-tdep.c (sparc_dump_tdep): Fix typo, match -> mach.
 
 2003-01-06  Andrew Cagney  <cagney@redhat.com>
