@@ -1,3 +1,23 @@
+2002-11-05  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* config.bfd (sh-*-linux*): Use bfd_elf*_sh64*lin_vec as sh64
+	vectors in target_selvecs.
+	(shle-*-netbsdelf*): Use bfd_elf*_sh64*nbsd_vec as sh64 vectors
+	in target_selvecs.
+	(sh-*-netbsdelf*): Likewise.
+	* configure.in (assocvecs): New variable.  Handle assocvecs like
+	selvecs.
+	* configure: Regenerate.
+	* format.c (bfd_check_format_matches): Store bfd_target pointers
+	in matching_vector instead of target names.  Select first target
+	from bfd_associated_vector that matches a list of ambiguous targets.
+	* targets.c (_bfd_associated_vector): New array.
+	(bfd_associated_vector): New variable.
+	(_bfd_target_vector): Add bfd_elf*_sh64*lin_vec.
+	* libbfd-in.h (bfd_associated_vector): Declare.
+	* libbfd.h: Regenerate.
+
 2002-11-05  Elias Athanasopoulos  <eathan@otenet.gr>
 
 	* vms-gsd.c (_bfd_vms_write_gsd): Check that symbol->udata.p is

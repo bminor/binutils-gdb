@@ -572,6 +572,9 @@ extern bfd *bfd_last_cache;
 extern const bfd_target * const *bfd_target_vector;
 extern const bfd_target *bfd_default_vector[];
 
+/* List of associated target vectors.  */
+extern const bfd_target * const *bfd_associated_vector;
+
 /* Functions shared by the ECOFF and MIPS ELF backends, which have no
    other common header files.  */
 

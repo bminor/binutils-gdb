@@ -859,6 +859,8 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_sh64l_vec,
 	&bfd_elf32_sh64lnbsd_vec,
 	&bfd_elf32_sh64nbsd_vec,
+	&bfd_elf32_sh64lin_vec,
+	&bfd_elf32_sh64blin_vec,
 #endif
 	&bfd_elf32_sparc_vec,
 	&bfd_elf32_tradbigmips_vec,
@@ -889,6 +891,8 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf64_sh64l_vec,
 	&bfd_elf64_sh64lnbsd_vec,
 	&bfd_elf64_sh64nbsd_vec,
+	&bfd_elf64_sh64lin_vec,
+	&bfd_elf64_sh64blin_vec,
 #if 0
 	&bfd_elf64_sparc_vec,
 #endif
@@ -1105,6 +1109,17 @@ const bfd_target *bfd_default_vector[] = {
 #endif
 	NULL
 };
+
+/* bfd_associated_vector[] contains the associated target vectors used
+   to reduce the ambiguity in bfd_check_format_matches.  */
+
+static const bfd_target *_bfd_associated_vector[] = {
+#ifdef ASSOCIATED_VECS
+	ASSOCIATED_VECS,
+#endif
+	NULL
+};
+const bfd_target * const *bfd_associated_vector = _bfd_associated_vector;
 
 /* When there is an ambiguous match, bfd_check_format_matches puts the
    names of the matching targets in an array.  This variable is the maximum
