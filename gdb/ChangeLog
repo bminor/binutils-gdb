@@ -1,5 +1,12 @@
 2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (handle_gnu_4_16_catch_command, get_catch_sals)
+	(struct sal_chain, map_catch_names): Remove.
+	(catch_exception_command_1): Don't call
+	handle_gnu_4_16_catch_command.
+
+2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
+
 	From Mark Dettinger <dettinge@de.ibm.com>:
 	* dwarf2cfi.c (read_2u): Increment pointer by two.
 
