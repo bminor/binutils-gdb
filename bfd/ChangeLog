@@ -1,3 +1,8 @@
+1999-12-29  Richard Henderson  <rth@cygnus.com>
+
+	* elflink.h (bfd_elf,size_dynamic_sections): Don't export all
+	if no dynamic sections created.
+
 1999-12-27  Nick Clifton  <nickc@cygnus.com>
 
 	* peicode.h (pe_bfd_object_p): Only define for PE format

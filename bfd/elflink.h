@@ -2803,20 +2803,6 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   if (dynobj == NULL)
     return true;
 
-  /* If we are supposed to export all symbols into the dynamic symbol
-     table (this is not the normal case), then do so.  */
-  if (export_dynamic)
-    {
-      struct elf_info_failed eif;
-
-      eif.failed = false;
-      eif.info = info;
-      elf_link_hash_traverse (elf_hash_table (info), elf_export_symbol,
-			      (PTR) &eif);
-      if (eif.failed)
-	return false;
-    }
-
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       struct elf_info_failed eif;
@@ -2877,6 +2863,20 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 		  || ! elf_add_dynamic_entry (info, DT_AUXILIARY, indx))
 		return false;
 	    }
+	}
+
+      /* If we are supposed to export all symbols into the dynamic symbol
+         table (this is not the normal case), then do so.  */
+      if (export_dynamic)
+	{
+	  struct elf_info_failed eif;
+
+	  eif.failed = false;
+	  eif.info = info;
+	  elf_link_hash_traverse (elf_hash_table (info), elf_export_symbol,
+			          (PTR) &eif);
+	  if (eif.failed)
+	    return false;
 	}
 
       /* Attach all the symbols to their version information.  */
