@@ -1,3 +1,8 @@
+Tue Apr 14 13:19:14 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Make-common.in (RUNTESTFLAGS): Define.
+	(check): Pass RUNTESTFLAGS to recursive make.
+
 Tue Apr 14 15:09:19 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-info.c (sim_info): Be verbose when either VERBOSE or
