@@ -1,8 +1,12 @@
+2000-11-28  David O'Brien  <obrien@dragon.nuxi.com>
+
+	* emulparams/elf64alpha.sh (ENTRY): Remove leading underscore as ELF
+	does not use them.
+
 2000-11-25  David O'Brien  <obrien@FreeBSD.org>
 
 	* ld.1: Remove old date so it does not give the impression the manpage
 	is way out of date.
-
 
 2000-11-24  Nick Clifton  <nickc@redhat.com>
 
