@@ -3255,7 +3255,7 @@ ppc64_elf_size_stubs (obfd, info, changed)
 
   /* If the .plt doesn't have any entries crossing a 64k boundary,
      then there is no need for bigger stubs.  */
-  if (next_64k <= plt_offset + htab->splt->_raw_size)
+  if (plt_offset + htab->splt->_raw_size <= next_64k)
     return true;
 
   /* OK, so we have at least one transition.  Since .plt entries are
