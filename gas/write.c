@@ -527,6 +527,7 @@ cvt_frag_to_fill (headersP, sec, fragP)
 	  as_bad_where (fragP->fr_file, fragP->fr_line,
 			_("attempt to .org/.space backwards? (%ld)"),
 			(long) fragP->fr_offset);
+	  fragP->fr_offset = 0;
 	}
       fragP->fr_type = rs_fill;
       break;
