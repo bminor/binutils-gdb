@@ -66,7 +66,7 @@ static struct ui_file *tui_file_new (void);
 static int tui_file_magic;
 
 static struct ui_file *
-tui_file_new ()
+tui_file_new (void)
 {
   struct tui_stream *tui = xmalloc (sizeof (struct tui_stream));
   struct ui_file *file = ui_file_new ();
@@ -81,8 +81,7 @@ tui_file_new ()
 }
 
 static void
-tui_file_delete (file)
-     struct ui_file *file;
+tui_file_delete (struct ui_file *file)
 {
   struct tui_stream *tmpstream = ui_file_data (file);
   if (tmpstream->ts_magic != &tui_file_magic)
@@ -96,8 +95,7 @@ tui_file_delete (file)
 }
 
 struct ui_file *
-tui_fileopen (stream)
-     FILE *stream;
+tui_fileopen (FILE *stream)
 {
   struct ui_file *file = tui_file_new ();
   struct tui_stream *tmpstream = ui_file_data (file);
@@ -109,8 +107,7 @@ tui_fileopen (stream)
 }
 
 struct ui_file *
-tui_sfileopen (n)
-     int n;
+tui_sfileopen (int n)
 {
   struct ui_file *file = tui_file_new ();
   struct tui_stream *tmpstream = ui_file_data (file);
@@ -130,8 +127,7 @@ tui_sfileopen (n)
 }
 
 static int
-tui_file_isatty (file)
-     struct ui_file *file;
+tui_file_isatty (struct ui_file *file)
 {
   struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
@@ -143,8 +139,7 @@ tui_file_isatty (file)
 }
 
 static void
-tui_file_rewind (file)
-     struct ui_file *file;
+tui_file_rewind (struct ui_file *file)
 {
   struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
@@ -174,9 +169,7 @@ tui_file_put (struct ui_file *file,
 /* FIXME: Should be broken up and moved to a TUI specific file. */
 
 void
-tui_file_fputs (linebuffer, file)
-     const char *linebuffer;
-     struct ui_file *file;
+tui_file_fputs (const char *linebuffer, struct ui_file *file)
 {
   struct tui_stream *stream = ui_file_data (file);
 #if defined(TUI)
@@ -281,8 +274,7 @@ tui_file_adjust_strbuf (int n, struct ui_file *file)
 }
 
 static void
-tui_file_flush (file)
-     struct ui_file *file;
+tui_file_flush (struct ui_file *file)
 {
   struct tui_stream *stream = ui_file_data (file);
   if (stream->ts_magic != &tui_file_magic)

@@ -47,9 +47,7 @@ static CORE_ADDR next_insn (CORE_ADDR memaddr,
    If it's more than 16 bytes long, g13 pointed to it on entry.  */
 
 int
-i960_use_struct_convention (gcc_p, type)
-     int gcc_p;
-     struct type *type;
+i960_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 16);
 }
@@ -58,7 +56,7 @@ i960_use_struct_convention (gcc_p, type)
    This routine must be called as part of gdb initialization.  */
 
 static void
-check_host ()
+check_host (void)
 {
   int i;
 
@@ -170,11 +168,8 @@ check_host ()
   (((addr) < (lim)) ? next_insn (addr, pword1, pword2) : 0)
 
 static CORE_ADDR
-examine_prologue (ip, limit, frame_addr, fsr)
-     register CORE_ADDR ip;
-     register CORE_ADDR limit;
-     CORE_ADDR frame_addr;
-     struct frame_saved_regs *fsr;
+examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
+		  CORE_ADDR frame_addr, struct frame_saved_regs *fsr)
 {
   register CORE_ADDR next_ip;
   register int src, dst;
@@ -359,9 +354,7 @@ CORE_ADDR (ip);
    fairly expensive.  */
 
 void
-frame_find_saved_regs (fi, fsr)
-     struct frame_info *fi;
-     struct frame_saved_regs *fsr;
+frame_find_saved_regs (struct frame_info *fi, struct frame_saved_regs *fsr)
 {
   register CORE_ADDR next_addr;
   register CORE_ADDR *saved_regs;
@@ -427,8 +420,7 @@ frame_find_saved_regs (fi, fsr)
    described by FI.  Returns 0 if the address is unknown.  */
 
 CORE_ADDR
-frame_args_address (fi, must_be_correct)
-     struct frame_info *fi;
+frame_args_address (struct frame_info *fi, int must_be_correct)
 {
   struct frame_saved_regs fsr;
   CORE_ADDR ap;
@@ -459,8 +451,7 @@ frame_args_address (fi, must_be_correct)
    described by FI.  Returns 0 if the address is unknown.  */
 
 CORE_ADDR
-frame_struct_result_address (fi)
-     struct frame_info *fi;
+frame_struct_result_address (struct frame_info *fi)
 {
   struct frame_saved_regs fsr;
   CORE_ADDR ap;
@@ -551,8 +542,7 @@ leafproc_return (ip)
    unless the function is a leaf procedure.  */
 
 CORE_ADDR
-saved_pc_after_call (frame)
-     struct frame_info *frame;
+saved_pc_after_call (struct frame_info *frame)
 {
   CORE_ADDR saved_pc;
 
@@ -620,8 +610,7 @@ i960_pop_frame (void)
    corresponds.  */
 
 enum target_signal
-i960_fault_to_signal (fault)
-     int fault;
+i960_fault_to_signal (int fault)
 {
   switch (fault)
     {
@@ -794,9 +783,7 @@ mem (memaddr, word1, word2, noprint)
    'pword2'.  */
 
 static CORE_ADDR
-next_insn (memaddr, pword1, pword2)
-     unsigned int *pword1, *pword2;
-     CORE_ADDR memaddr;
+next_insn (CORE_ADDR memaddr, unsigned int *pword1, unsigned int *pword2)
 {
   int len;
   char buf[8];
@@ -852,9 +839,7 @@ next_insn (memaddr, pword1, pword2)
    they display this frame.  */
 
 int
-mon960_frame_chain_valid (chain, curframe)
-     CORE_ADDR chain;
-     struct frame_info *curframe;
+mon960_frame_chain_valid (CORE_ADDR chain, struct frame_info *curframe)
 {
   struct symbol *sym;
   struct minimal_symbol *msymbol;
@@ -898,7 +883,7 @@ mon960_frame_chain_valid (chain, curframe)
 
 
 void
-_initialize_i960_tdep ()
+_initialize_i960_tdep (void)
 {
   check_host ();
 

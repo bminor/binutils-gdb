@@ -35,7 +35,7 @@
 #include "gregset.h"
 
 int
-kernel_u_size ()
+kernel_u_size (void)
 {
   return (sizeof (struct user));
 }

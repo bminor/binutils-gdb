@@ -158,8 +158,7 @@ static void nindy_store_registers (int);
 static char *savename;
 
 static void
-nindy_close (quitting)
-     int quitting;
+nindy_close (int quitting)
 {
   if (nindy_serial != NULL)
     SERIAL_CLOSE (nindy_serial);
@@ -175,9 +174,8 @@ nindy_close (quitting)
    now specified with gdb command-line options (old_protocol,
    and initial_brk).  */
 void
-nindy_open (name, from_tty)
-     char *name;		/* "/dev/ttyXX", "ttyXX", or "XX": tty to be opened */
-     int from_tty;
+nindy_open (char *name,		/* "/dev/ttyXX", "ttyXX", or "XX": tty to be opened */
+	    int from_tty)
 {
   char baudrate[1024];
 
@@ -221,9 +219,7 @@ nindy_open (name, from_tty)
 /* User-initiated quit of nindy operations.  */
 
 static void
-nindy_detach (name, from_tty)
-     char *name;
-     int from_tty;
+nindy_detach (char *name, int from_tty)
 {
   if (name)
     error ("Too many arguments");
@@ -231,7 +227,7 @@ nindy_detach (name, from_tty)
 }
 
 static void
-nindy_files_info ()
+nindy_files_info (void)
 {
   /* FIXME: this lies about the baud rate if we autobauded.  */
   printf_unfiltered ("\tAttached to %s at %d bits per second%s%s.\n", savename,
@@ -264,9 +260,7 @@ non_dle (buf, n)
 /* Tell the remote machine to resume.  */
 
 void
-nindy_resume (pid, step, siggnal)
-     int pid, step;
-     enum target_signal siggnal;
+nindy_resume (int pid, int step, enum target_signal siggnal)
 {
   if (siggnal != TARGET_SIGNAL_0 && siggnal != stop_signal)
     warning ("Can't send signals to remote NINDY targets.");
@@ -294,8 +288,7 @@ struct clean_up_tty_args
 static struct clean_up_tty_args tty_args;
 
 static void
-clean_up_tty (ptrarg)
-     PTR ptrarg;
+clean_up_tty (PTR ptrarg)
 {
   struct clean_up_tty_args *args = (struct clean_up_tty_args *) ptrarg;
   SERIAL_SET_TTY_STATE (args->serial, args->state);
@@ -310,7 +303,7 @@ static void (*old_ctrlz) ();
 #endif
 
 static void
-clean_up_int ()
+clean_up_int (void)
 {
   SERIAL_SET_TTY_STATE (tty_args.serial, tty_args.state);
   free (tty_args.state);
@@ -330,9 +323,7 @@ clean_up_int ()
  */
 
 static int
-nindy_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+nindy_wait (int pid, struct target_waitstatus *status)
 {
   fd_set fds;
   int c;
@@ -441,8 +432,7 @@ struct nindy_regs
 };
 
 static void
-nindy_fetch_registers (regno)
-     int regno;
+nindy_fetch_registers (int regno)
 {
   struct nindy_regs nindy_regs;
   int regnum;
@@ -462,15 +452,14 @@ nindy_fetch_registers (regno)
 }
 
 static void
-nindy_prepare_to_store ()
+nindy_prepare_to_store (void)
 {
   /* Fetch all regs if they aren't already here.  */
   read_register_bytes (0, NULL, REGISTER_BYTES);
 }
 
 static void
-nindy_store_registers (regno)
-     int regno;
+nindy_store_registers (int regno)
 {
   struct nindy_regs nindy_regs;
   int regnum;
@@ -506,10 +495,7 @@ nindy_xfer_inferior_memory (memaddr, myaddr, len, should_write, target)
 }
 
 static void
-nindy_create_inferior (execfile, args, env)
-     char *execfile;
-     char *args;
-     char **env;
+nindy_create_inferior (char *execfile, char *args, char **env)
 {
   int entry_pt;
   int pid;
@@ -547,9 +533,7 @@ nindy_create_inferior (execfile, args, env)
 }
 
 static void
-reset_command (args, from_tty)
-     char *args;
-     int from_tty;
+reset_command (char *args, int from_tty)
 {
   if (nindy_serial == NULL)
     {
@@ -563,9 +547,7 @@ reset_command (args, from_tty)
 }
 
 void
-nindy_kill (args, from_tty)
-     char *args;
-     int from_tty;
+nindy_kill (char *args, int from_tty)
 {
   return;			/* Ignore attempts to kill target system */
 }
@@ -577,7 +559,7 @@ nindy_kill (args, from_tty)
    instructions.  */
 
 void
-nindy_mourn_inferior ()
+nindy_mourn_inferior (void)
 {
   remove_breakpoints ();
   unpush_target (&nindy_ops);
@@ -586,17 +568,14 @@ nindy_mourn_inferior ()
 
 /* Pass the args the way catch_errors wants them.  */
 static int
-nindy_open_stub (arg)
-     char *arg;
+nindy_open_stub (char *arg)
 {
   nindy_open (arg, 1);
   return 1;
 }
 
 static void
-nindy_load (filename, from_tty)
-     char *filename;
-     int from_tty;
+nindy_load (char *filename, int from_tty)
 {
   asection *s;
   /* Can't do unix style forking on a VMS system, so we'll use bfd to do
@@ -634,8 +613,7 @@ nindy_load (filename, from_tty)
 }
 
 static int
-load_stub (arg)
-     char *arg;
+load_stub (char *arg)
 {
   target_load (arg, 1);
   return 1;
@@ -650,7 +628,7 @@ load_stub (arg)
    an i960 object file on the host system.  */
 
 void
-nindy_before_main_loop ()
+nindy_before_main_loop (void)
 {
   char ttyname[100];
   char *p, *p2;
@@ -774,7 +752,7 @@ specified when you started GDB.";
 }
 
 void
-_initialize_nindy ()
+_initialize_nindy (void)
 {
   init_nindy_ops ();
   add_target (&nindy_ops);

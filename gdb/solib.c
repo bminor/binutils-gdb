@@ -265,8 +265,7 @@ static char *solib_search_path = NULL;
  */
 
 static int
-solib_map_sections (arg)
-     PTR arg;
+solib_map_sections (PTR arg)
 {
   struct so_list *so = (struct so_list *) arg;	/* catch_errors bogon */
   char *filename;
@@ -374,7 +373,7 @@ solib_map_sections (arg)
 /* Allocate the runtime common object file.  */
 
 static void
-allocate_rt_common_objfile ()
+allocate_rt_common_objfile (void)
 {
   struct objfile *objfile;
   struct objfile *last_one;
@@ -413,8 +412,7 @@ allocate_rt_common_objfile ()
    objfile.  */
 
 static void
-solib_add_common_symbols (rtc_symp)
-     CORE_ADDR rtc_symp;
+solib_add_common_symbols (CORE_ADDR rtc_symp)
 {
   struct rtc_symb inferior_rtc_symb;
   struct nlist inferior_rtc_nlist;
@@ -500,9 +498,7 @@ static CORE_ADDR bfd_lookup_symbol (bfd *, char *);
  */
 
 static CORE_ADDR
-bfd_lookup_symbol (abfd, symname)
-     bfd *abfd;
-     char *symname;
+bfd_lookup_symbol (bfd *abfd, char *symname)
 {
   unsigned int storage_needed;
   asymbol *sym;
@@ -590,9 +586,7 @@ static int look_for_base (int, CORE_ADDR);
  */
 
 static int
-look_for_base (fd, baseaddr)
-     int fd;
-     CORE_ADDR baseaddr;
+look_for_base (int fd, CORE_ADDR baseaddr)
 {
   bfd *interp_bfd;
   CORE_ADDR address = 0;
@@ -689,7 +683,7 @@ look_for_base (fd, baseaddr)
  */
 
 static CORE_ADDR
-elf_locate_base ()
+elf_locate_base (void)
 {
   sec_ptr dyninfo_sect;
   int dyninfo_sect_size;
@@ -819,7 +813,7 @@ elf_locate_base ()
  */
 
 static CORE_ADDR
-locate_base ()
+locate_base (void)
 {
 
 #ifndef SVR4_SHARED_LIBS
@@ -885,7 +879,7 @@ locate_base ()
    does the reading.  */
 
 static CORE_ADDR
-first_link_map_member ()
+first_link_map_member (void)
 {
   CORE_ADDR lm = 0;
 
@@ -1028,8 +1022,7 @@ free_so (struct so_list *so)
    non-zero iff SONAME matches one of the known main executable names.  */
 
 static int
-match_main (soname)
-     char *soname;
+match_main (char *soname)
 {
   char **mainp;
 
@@ -1063,7 +1056,7 @@ match_main (soname)
    we provide values for.  */
 
 static struct so_list *
-current_sos ()
+current_sos (void)
 {
   CORE_ADDR lm;
   struct so_list *head = 0;
@@ -1147,8 +1140,7 @@ current_sos ()
 /* A small stub to get us past the arg-passing pinhole of catch_errors.  */
 
 static int
-symbol_add_stub (arg)
-     PTR arg;
+symbol_add_stub (PTR arg)
 {
   register struct so_list *so = (struct so_list *) arg;  /* catch_errs bogon */
   struct section_addr_info *sap;
@@ -1475,9 +1467,7 @@ solib_add (char *pattern, int from_tty, struct target_ops *target)
  */
 
 static void
-info_sharedlibrary_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+info_sharedlibrary_command (char *ignore, int from_tty)
 {
   register struct so_list *so = NULL;	/* link map state variable */
   int header_done = 0;
@@ -1559,8 +1549,7 @@ info_sharedlibrary_command (ignore, from_tty)
  */
 
 char *
-solib_address (address)
-     CORE_ADDR address;
+solib_address (CORE_ADDR address)
 {
   register struct so_list *so = 0;	/* link map state variable */
 
@@ -1576,7 +1565,7 @@ solib_address (address)
 /* Called by free_all_symtabs */
 
 void
-clear_solib ()
+clear_solib (void)
 {
   /* This function is expected to handle ELF shared libraries.  It is
      also used on Solaris, which can run either ELF or a.out binaries
@@ -1613,8 +1602,7 @@ clear_solib ()
 }
 
 static void
-do_clear_solib (dummy)
-     PTR dummy;
+do_clear_solib (PTR dummy)
 {
   solib_cleanup_queued = 0;
   clear_solib ();
@@ -1631,8 +1619,7 @@ static CORE_ADDR interp_plt_sect_low;
 static CORE_ADDR interp_plt_sect_high;
 
 int
-in_svr4_dynsym_resolve_code (pc)
-     CORE_ADDR pc;
+in_svr4_dynsym_resolve_code (CORE_ADDR pc)
 {
   return ((pc >= interp_text_sect_low && pc < interp_text_sect_high)
 	  || (pc >= interp_plt_sect_low && pc < interp_plt_sect_high)
@@ -1660,7 +1647,7 @@ in_svr4_dynsym_resolve_code (pc)
 #ifndef SVR4_SHARED_LIBS
 
 static int
-disable_break ()
+disable_break (void)
 {
   int status = 1;
 
@@ -1753,7 +1740,7 @@ disable_break ()
  */
 
 static int
-enable_break ()
+enable_break (void)
 {
   int success = 0;
 
@@ -1966,7 +1953,7 @@ enable_break ()
  */
 
 void
-solib_create_inferior_hook ()
+solib_create_inferior_hook (void)
 {
   /* If we are using the BKPT_AT_SYMBOL code, then we don't need the base
      yet.  In fact, in the case of a SunOS4 executable being run on
@@ -2054,7 +2041,7 @@ solib_create_inferior_hook ()
  */
 
 static void
-special_symbol_handling ()
+special_symbol_handling (void)
 {
 #ifndef SVR4_SHARED_LIBS
   int j;
@@ -2112,9 +2099,7 @@ special_symbol_handling ()
  */
 
 static void
-sharedlibrary_command (args, from_tty)
-     char *args;
-     int from_tty;
+sharedlibrary_command (char *args, int from_tty)
 {
   dont_repeat ();
   solib_add (args, from_tty, (struct target_ops *) 0);
@@ -2123,7 +2108,7 @@ sharedlibrary_command (args, from_tty)
 #endif /* HAVE_LINK_H */
 
 void
-_initialize_solib ()
+_initialize_solib (void)
 {
 #ifdef HAVE_LINK_H
 

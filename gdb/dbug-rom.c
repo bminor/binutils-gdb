@@ -34,11 +34,7 @@
 static void dbug_open (char *args, int from_tty);
 
 static void
-dbug_supply_register (regname, regnamelen, val, vallen)
-     char *regname;
-     int regnamelen;
-     char *val;
-     int vallen;
+dbug_supply_register (char *regname, int regnamelen, char *val, int vallen)
 {
   int regno;
 
@@ -143,15 +139,13 @@ init_dbug_cmds (void)
 }				/* init_debug_ops */
 
 static void
-dbug_open (args, from_tty)
-     char *args;
-     int from_tty;
+dbug_open (char *args, int from_tty)
 {
   monitor_open (args, &dbug_cmds, from_tty);
 }
 
 void
-_initialize_dbug_rom ()
+_initialize_dbug_rom (void)
 {
   init_dbug_cmds ();
   init_monitor_ops (&dbug_ops);

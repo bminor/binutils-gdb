@@ -29,8 +29,7 @@
 static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
@@ -63,8 +62,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
@@ -151,7 +149,7 @@ static struct core_fns sun3_core_fns =
 };
 
 void
-_initialize_core_sun3 ()
+_initialize_core_sun3 (void)
 {
   add_core_fns (&sun3_core_fns);
 }

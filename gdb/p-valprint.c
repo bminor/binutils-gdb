@@ -54,17 +54,9 @@
 
 
 int
-pascal_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref, recurse,
-		  pretty)
-     struct type *type;
-     char *valaddr;
-     int embedded_offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
+		  CORE_ADDR address, struct ui_file *stream, int format,
+		  int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   register unsigned int i = 0;	/* Number of characters printed */
   unsigned len;
@@ -536,11 +528,8 @@ pascal_val_print (type, valaddr, embedded_offset, address, stream, format, deref
 }
 
 int
-pascal_value_print (val, stream, format, pretty)
-     value_ptr val;
-     struct ui_file *stream;
-     int format;
-     enum val_prettyprint pretty;
+pascal_value_print (value_ptr val, struct ui_file *stream, int format,
+		    enum val_prettyprint pretty)
 {
   struct type *type = VALUE_TYPE (val);
 
@@ -596,10 +585,8 @@ static void
 			     int, int, enum val_prettyprint, struct type **);
 
 void
-pascal_object_print_class_method (valaddr, type, stream)
-     char *valaddr;
-     struct type *type;
-     struct ui_file *stream;
+pascal_object_print_class_method (char *valaddr, struct type *type,
+				  struct ui_file *stream)
 {
   struct type *domain;
   struct fn_field *f = NULL;
@@ -701,8 +688,7 @@ const char pascal_vtbl_ptr_name[] =
    "pointer to virtual function".  */
 
 int
-pascal_object_is_vtbl_ptr_type (type)
-     struct type *type;
+pascal_object_is_vtbl_ptr_type (struct type *type)
 {
   char *typename = type_name_no_tag (type);
 
@@ -714,8 +700,7 @@ pascal_object_is_vtbl_ptr_type (type)
    "pointer to virtual function table".  */
 
 int
-pascal_object_is_vtbl_member (type)
-     struct type *type;
+pascal_object_is_vtbl_member (struct type *type)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
@@ -745,17 +730,12 @@ pascal_object_is_vtbl_member (type)
    should not print, or zero if called from top level.  */
 
 void
-pascal_object_print_value_fields (type, valaddr, address, stream, format, recurse, pretty,
-				  dont_print_vb, dont_print_statmem)
-     struct type *type;
-     char *valaddr;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
-     struct type **dont_print_vb;
-     int dont_print_statmem;
+pascal_object_print_value_fields (struct type *type, char *valaddr,
+				  CORE_ADDR address, struct ui_file *stream,
+				  int format, int recurse,
+				  enum val_prettyprint pretty,
+				  struct type **dont_print_vb,
+				  int dont_print_statmem)
 {
   int i, len, n_baseclasses;
   struct obstack tmp_obstack;
@@ -924,16 +904,10 @@ pascal_object_print_value_fields (type, valaddr, address, stream, format, recurs
    baseclasses.  */
 
 void
-pascal_object_print_value (type, valaddr, address, stream, format, recurse, pretty,
-			   dont_print_vb)
-     struct type *type;
-     char *valaddr;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
-     struct type **dont_print_vb;
+pascal_object_print_value (struct type *type, char *valaddr, CORE_ADDR address,
+			   struct ui_file *stream, int format, int recurse,
+			   enum val_prettyprint pretty,
+			   struct type **dont_print_vb)
 {
   struct obstack tmp_obstack;
   struct type **last_dont_print
@@ -1034,13 +1008,9 @@ pascal_object_print_value (type, valaddr, address, stream, format, recurse, pret
    have the same meanings as in c_val_print.  */
 
 static void
-pascal_object_print_static_field (type, val, stream, format, recurse, pretty)
-     struct type *type;
-     value_ptr val;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
+pascal_object_print_static_field (struct type *type, value_ptr val,
+				  struct ui_file *stream, int format,
+				  int recurse, enum val_prettyprint pretty)
 {
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
@@ -1075,11 +1045,8 @@ pascal_object_print_static_field (type, val, stream, format, recurse, pretty)
 }
 
 void
-pascal_object_print_class_member (valaddr, domain, stream, prefix)
-     char *valaddr;
-     struct type *domain;
-     struct ui_file *stream;
-     char *prefix;
+pascal_object_print_class_member (char *valaddr, struct type *domain,
+				  struct ui_file *stream, char *prefix)
 {
 
   /* VAL is a byte offset into the structure type DOMAIN.
@@ -1131,7 +1098,7 @@ pascal_object_print_class_member (valaddr, domain, stream, prefix)
 
 
 void
-_initialize_pascal_valprint ()
+_initialize_pascal_valprint (void)
 {
   add_show_from_set
     (add_set_cmd ("pascal_static-members", class_support, var_boolean,

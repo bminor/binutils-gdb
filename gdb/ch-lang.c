@@ -53,8 +53,7 @@ static void chill_printchar (int, struct ui_file *);
    characters to derive the demangled form. */
 
 char *
-chill_demangle (mangled)
-     const char *mangled;
+chill_demangle (const char *mangled)
 {
   const char *joiner = NULL;
   char *demangled;
@@ -81,9 +80,7 @@ chill_demangle (mangled)
 }
 
 static void
-chill_printchar (c, stream)
-     register int c;
-     struct ui_file *stream;
+chill_printchar (register int c, struct ui_file *stream)
 {
   c &= 0xFF;			/* Avoid sign bit follies */
 
@@ -112,12 +109,8 @@ chill_printchar (c, stream)
  */
 
 static void
-chill_printstr (stream, string, length, width, force_ellipses)
-     struct ui_file *stream;
-     char *string;
-     unsigned int length;
-     int width;
-     int force_ellipses;
+chill_printstr (struct ui_file *stream, char *string, unsigned int length,
+		int width, int force_ellipses)
 {
   register unsigned int i;
   unsigned int things_printed = 0;
@@ -228,9 +221,7 @@ chill_printstr (stream, string, length, width, force_ellipses)
 }
 
 static struct type *
-chill_create_fundamental_type (objfile, typeid)
-     struct objfile *objfile;
-     int typeid;
+chill_create_fundamental_type (struct objfile *objfile, int typeid)
 {
   register struct type *type = NULL;
 
@@ -346,10 +337,8 @@ struct type **CONST_PTR (chill_builtin_types[]) =
    *RESULT_TYPE is the appropriate type for the result. */
 
 LONGEST
-type_lower_upper (op, type, result_type)
-     enum exp_opcode op;	/* Either UNOP_LOWER or UNOP_UPPER */
-     struct type *type;
-     struct type **result_type;
+type_lower_upper (enum exp_opcode op,	/* Either UNOP_LOWER or UNOP_UPPER */
+		  struct type *type, struct type **result_type)
 {
   LONGEST low, high;
   *result_type = type;
@@ -400,8 +389,7 @@ type_lower_upper (op, type, result_type)
 }
 
 static value_ptr
-value_chill_length (val)
-     value_ptr val;
+value_chill_length (value_ptr val)
 {
   LONGEST tmp;
   struct type *type = VALUE_TYPE (val);
@@ -429,8 +417,7 @@ value_chill_length (val)
 }
 
 static value_ptr
-value_chill_card (val)
-     value_ptr val;
+value_chill_card (value_ptr val)
 {
   LONGEST tmp = 0;
   struct type *type = VALUE_TYPE (val);
@@ -454,9 +441,7 @@ value_chill_card (val)
 }
 
 static value_ptr
-value_chill_max_min (op, val)
-     enum exp_opcode op;
-     value_ptr val;
+value_chill_max_min (enum exp_opcode op, value_ptr val)
 {
   LONGEST tmp = 0;
   struct type *type = VALUE_TYPE (val);
@@ -509,11 +494,9 @@ value_chill_max_min (op, val)
 }
 
 static value_ptr
-evaluate_subexp_chill (expect_type, exp, pos, noside)
-     struct type *expect_type;
-     register struct expression *exp;
-     register int *pos;
-     enum noside noside;
+evaluate_subexp_chill (struct type *expect_type,
+		       register struct expression *exp, register int *pos,
+		       enum noside noside)
 {
   int pc = *pos;
   struct type *type;
@@ -649,7 +632,7 @@ const struct language_defn chill_language_defn =
 /* Initialization for Chill */
 
 void
-_initialize_chill_language ()
+_initialize_chill_language (void)
 {
   builtin_type_chill_bool =
     init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,

@@ -61,8 +61,7 @@ extern struct target_ops nrom_ops;
    don't match.  */
 
 static int
-expect (string)
-     char *string;
+expect (char *string)
 {
   char *p = string;
   int c;
@@ -93,15 +92,13 @@ expect (string)
 }
 
 static void
-nrom_kill ()
+nrom_kill (void)
 {
   nrom_close (0);
 }
 
 static serial_t
-open_socket (name, port)
-     char *name;
-     int port;
+open_socket (char *name, int port)
 {
   char sockname[100];
   serial_t desc;
@@ -115,7 +112,7 @@ open_socket (name, port)
 }
 
 static void
-load_cleanup ()
+load_cleanup (void)
 {
   SERIAL_CLOSE (load_desc);
   load_desc = NULL;
@@ -124,9 +121,7 @@ load_cleanup ()
 /* Download a file specified in ARGS to the netROM.  */
 
 static void
-nrom_load (args, fromtty)
-     char *args;
-     int fromtty;
+nrom_load (char *args, int fromtty)
 {
   int fd, rd_amt, fsize;
   bfd *pbfd;
@@ -210,9 +205,7 @@ nrom_load (args, fromtty)
 /* Open a connection to the remote NetROM devices.  */
 
 static void
-nrom_open (name, from_tty)
-     char *name;
-     int from_tty;
+nrom_open (char *name, int from_tty)
 {
   int errn;
 
@@ -238,8 +231,7 @@ or IP address of the NetROM device you wish to use.");
 /* Close out all files and local state before this target loses control. */
 
 static void
-nrom_close (quitting)
-     int quitting;
+nrom_close (int quitting)
 {
   if (load_desc)
     SERIAL_CLOSE (load_desc);
@@ -250,9 +242,7 @@ nrom_close (quitting)
 /* Pass arguments directly to the NetROM. */
 
 static void
-nrom_passthru (args, fromtty)
-     char *args;
-     int fromtty;
+nrom_passthru (char *args, int fromtty)
 {
   char buf[1024];
 
@@ -262,7 +252,7 @@ nrom_passthru (args, fromtty)
 }
 
 static void
-nrom_mourn ()
+nrom_mourn (void)
 {
   unpush_target (&nrom_ops);
   generic_mourn_inferior ();
@@ -341,7 +331,7 @@ init_nrom_ops (void)
 };
 
 void
-_initialize_remote_nrom ()
+_initialize_remote_nrom (void)
 {
   init_nrom_ops ();
   add_target (&nrom_ops);

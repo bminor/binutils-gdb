@@ -43,14 +43,13 @@
 
 /* FIXME: Kludge this for now. It really should be system call. */
 int
-getpagesize ()
+getpagesize (void)
 {
   return (8192);
 }
 
 /* FIXME: Fake out the fcntl() call, which we don't have.  */
-fcntl (fd, cmd, arg)
-     int fd, cmd, arg;
+fcntl (int fd, int cmd, int arg)
 {
 
   switch (cmd)
@@ -71,21 +70,19 @@ fcntl (fd, cmd, arg)
 static int _SigMask;
 #define sigbit(s)       (1L << ((s)-1))
 
-init_SigMask ()
+init_SigMask (void)
 {
   /* Taken from the sym1 kernel in machdep.c:startup() */
   _SigMask = sigbit (SIGTSTP) | sigbit (SIGTTOU) | sigbit (SIGTTIN) |
     sigbit (SIGCHLD) | sigbit (SIGTINT);
 }
 
-sigmask (signo)
-     int signo;
+sigmask (int signo)
 {
   return (1 << (signo - 1));
 }
 
-sigsetmask (sigmask)
-     unsigned int sigmask;
+sigsetmask (unsigned int sigmask)
 {
   int i, mask = 1;
   int lastmask = _SigMask;
@@ -110,8 +107,7 @@ sigsetmask (sigmask)
   return (lastmask);
 }
 
-sigblock (sigmask)
-     unsigned int sigmask;
+sigblock (unsigned int sigmask)
 {
   int i, mask = 1;
   int lastmask = _SigMask;
@@ -133,7 +129,7 @@ sigblock (sigmask)
 /* Initialization code for this module.  */
 
 void
-_initialize_ultra3 ()
+_initialize_ultra3 (void)
 {
 #ifdef SYM1
   init_SigMask ();

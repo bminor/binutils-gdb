@@ -3693,8 +3693,7 @@ init_gdbarch_data (struct gdbarch *gdbarch)
    data-pointer. */
 
 void *
-gdbarch_data (data)
-     struct gdbarch_data *data;
+gdbarch_data (struct gdbarch_data *data)
 {
   if (data->index >= current_gdbarch->nr_data)
     internal_error ("gdbarch_data: request for non-existant data.");
@@ -4086,7 +4085,7 @@ disassemble_info tm_print_insn_info;
 extern void _initialize_gdbarch (void);
 
 void
-_initialize_gdbarch ()
+_initialize_gdbarch (void)
 {
   struct cmd_list_element *c;
 

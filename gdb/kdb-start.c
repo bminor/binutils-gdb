@@ -28,7 +28,7 @@ static char *environment[] =
 
 char **environ;
 
-start ()
+start (void)
 {
   INIT_STACK (kdb_stack_beg, kdb_stack_end);
 

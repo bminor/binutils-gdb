@@ -390,8 +390,7 @@ static saved_real_pid = 0;
  *************************************************
  */
 CORE_ADDR
-get_raw_pc (ttid)
-     lwpid_t ttid;
+get_raw_pc (lwpid_t ttid)
 {
   unsigned long pc_val;
   int offset;
@@ -414,8 +413,7 @@ get_raw_pc (ttid)
 }
 
 static char *
-get_printable_name_of_stepping_mode (mode)
-     stepping_mode_t mode;
+get_printable_name_of_stepping_mode (stepping_mode_t mode)
 {
   switch (mode)
     {
@@ -434,8 +432,7 @@ get_printable_name_of_stepping_mode (mode)
  * ttrace event being reported.
  */
 char *
-get_printable_name_of_ttrace_event (event)
-     ttevents_t event;
+get_printable_name_of_ttrace_event (ttevents_t event)
 {
   /* This enumeration is "gappy", so don't use a table. */
   switch (event)
@@ -478,8 +475,7 @@ get_printable_name_of_ttrace_event (event)
  * name.
  */
 char *
-get_printable_name_of_ttrace_request (request)
-     ttreq_t request;
+get_printable_name_of_ttrace_request (ttreq_t request)
 {
   if (!IS_TTRACE_REQ (request))
     return "?bad req?";
@@ -550,8 +546,7 @@ get_printable_name_of_ttrace_request (request)
  * name.
  */
 static char *
-get_printable_name_of_process_state (process_state)
-     process_state_t process_state;
+get_printable_name_of_process_state (process_state_t process_state)
 {
   switch (process_state)
     {
@@ -573,8 +568,7 @@ get_printable_name_of_process_state (process_state)
 /* Set a ttrace thread state to a safe, initial state.
  */
 static void
-clear_ttstate_t (tts)
-     ttstate_t *tts;
+clear_ttstate_t (ttstate_t *tts)
 {
   tts->tts_pid = 0;
   tts->tts_lwpid = 0;
@@ -585,9 +579,7 @@ clear_ttstate_t (tts)
 /* Copy ttrace thread state TTS_FROM into TTS_TO.
  */
 static void
-copy_ttstate_t (tts_to, tts_from)
-     ttstate_t *tts_to;
-     ttstate_t *tts_from;
+copy_ttstate_t (ttstate_t *tts_to, ttstate_t *tts_from)
 {
   memcpy ((char *) tts_to, (char *) tts_from, sizeof (*tts_to));
 }
@@ -595,7 +587,7 @@ copy_ttstate_t (tts_to, tts_from)
 /* Are there any live threads we know about?
  */
 static int
-any_thread_records ()
+any_thread_records (void)
 {
   return (thread_head.count > 0);
 }
@@ -603,9 +595,7 @@ any_thread_records ()
 /* Create, fill in and link in a thread descriptor.
  */
 static thread_info *
-create_thread_info (pid, tid)
-     int pid;
-     lwpid_t tid;
+create_thread_info (int pid, lwpid_t tid)
 {
   thread_info *new_p;
   thread_info *p;
@@ -681,7 +671,7 @@ create_thread_info (pid, tid)
 /* Get rid of our thread info.
  */
 static void
-clear_thread_info ()
+clear_thread_info (void)
 {
   thread_info *p;
   thread_info *q;
@@ -723,8 +713,7 @@ clear_thread_info ()
 /* Given a tid, find the thread block for it.
  */
 static thread_info *
-find_thread_info (tid)
-     lwpid_t tid;
+find_thread_info (lwpid_t tid)
 {
   thread_info *p;
 
@@ -755,8 +744,7 @@ find_thread_info (tid)
  * deleted threads.  We do the map, but we don't like it.
  */
 static lwpid_t
-map_from_gdb_tid (gdb_tid)
-     lwpid_t gdb_tid;
+map_from_gdb_tid (lwpid_t gdb_tid)
 {
   thread_info *p;
 
@@ -805,8 +793,7 @@ map_from_gdb_tid (gdb_tid)
  * also need to consider deleted threads.
  */
 static lwpid_t
-map_to_gdb_tid (real_tid)
-     lwpid_t real_tid;
+map_to_gdb_tid (lwpid_t real_tid)
 {
   thread_info *p;
 
@@ -836,7 +823,7 @@ map_to_gdb_tid (real_tid)
 /* Do any threads have saved signals?
  */
 static int
-saved_signals_exist ()
+saved_signals_exist (void)
 {
   thread_info *p;
 
@@ -854,8 +841,7 @@ saved_signals_exist ()
 /* Is this the tid for the zero-th thread?
  */
 static int
-is_pseudo_thread (tid)
-     lwpid_t tid;
+is_pseudo_thread (lwpid_t tid)
 {
   thread_info *p = find_thread_info (tid);
   if (NULL == p || p->terminated)
@@ -867,8 +853,7 @@ is_pseudo_thread (tid)
 /* Is this thread terminated?
  */
 static int
-is_terminated (tid)
-     lwpid_t tid;
+is_terminated (lwpid_t tid)
 {
   thread_info *p = find_thread_info (tid);
 
@@ -881,8 +866,7 @@ is_terminated (tid)
 /* Is this pid a real PID or a TID?
  */
 static int
-is_process_id (pid)
-     int pid;
+is_process_id (int pid)
 {
   lwpid_t tid;
   thread_info *tinfo;
@@ -921,9 +905,7 @@ is_process_id (pid)
 /* Add a thread to our info.  Prevent duplicate entries.
  */
 static thread_info *
-add_tthread (pid, tid)
-     int pid;
-     lwpid_t tid;
+add_tthread (int pid, lwpid_t tid)
 {
   thread_info *p;
 
@@ -937,8 +919,7 @@ add_tthread (pid, tid)
 /* Notice that a thread was deleted.
  */
 static void
-del_tthread (tid)
-     lwpid_t tid;
+del_tthread (lwpid_t tid)
 {
   thread_info *p;
   thread_info *chase;
@@ -1023,8 +1004,7 @@ del_tthread (tid)
 /* Get the pid for this tid. (Has to be a real TID!).
  */
 static int
-get_pid_for (tid)
-     lwpid_t tid;
+get_pid_for (lwpid_t tid)
 {
   thread_info *p;
 
@@ -1050,9 +1030,7 @@ get_pid_for (tid)
 /* Note that this thread's current event has been handled.
  */
 static void
-set_handled (pid, tid)
-     int pid;
-     lwpid_t tid;
+set_handled (int pid, lwpid_t tid)
 {
   thread_info *p;
 
@@ -1066,8 +1044,7 @@ set_handled (pid, tid)
 /* Was this thread's current event handled?
  */
 static int
-was_handled (tid)
-     lwpid_t tid;
+was_handled (lwpid_t tid)
 {
   thread_info *p;
 
@@ -1081,8 +1058,7 @@ was_handled (tid)
 /* Set this thread to unhandled.
  */
 static void
-clear_handled (tid)
-     lwpid_t tid;
+clear_handled (lwpid_t tid)
 {
   thread_info *p;
 
@@ -1101,7 +1077,7 @@ clear_handled (tid)
 /* Set all threads to unhandled.
  */
 static void
-clear_all_handled ()
+clear_all_handled (void)
 {
   thread_info *p;
 
@@ -1124,8 +1100,7 @@ clear_all_handled ()
 /* Set this thread to default stepping mode.
  */
 static void
-clear_stepping_mode (tid)
-     lwpid_t tid;
+clear_stepping_mode (lwpid_t tid)
 {
   thread_info *p;
 
@@ -1144,7 +1119,7 @@ clear_stepping_mode (tid)
 /* Set all threads to do default continue on resume.
  */
 static void
-clear_all_stepping_mode ()
+clear_all_stepping_mode (void)
 {
   thread_info *p;
 
@@ -1167,7 +1142,7 @@ clear_all_stepping_mode ()
 /* Set all threads to unseen on this pass.
  */
 static void
-set_all_unseen ()
+set_all_unseen (void)
 {
   thread_info *p;
 
@@ -1181,8 +1156,7 @@ set_all_unseen ()
 /* debugging routine.
  */
 static void
-print_tthread (p)
-     thread_info *p;
+print_tthread (thread_info *p)
 {
   printf (" Thread pid %d, tid %d", p->pid, p->tid);
   if (p->have_state)
@@ -1214,7 +1188,7 @@ print_tthread (p)
 }
 
 static void
-print_tthreads ()
+print_tthreads (void)
 {
   thread_info *p;
 
@@ -1254,7 +1228,7 @@ print_tthreads ()
 /* Update the thread list based on the "seen" bits.
  */
 static void
-update_thread_list ()
+update_thread_list (void)
 {
   thread_info *p;
   thread_info *chase;
@@ -1302,11 +1276,8 @@ update_thread_list ()
  * No other "raw" calls to ttrace should exist in this module.
  */
 static int
-call_real_ttrace (request, pid, tid, addr, data, addr2)
-     ttreq_t request;
-     pid_t pid;
-     lwpid_t tid;
-     TTRACE_ARG_TYPE addr, data, addr2;
+call_real_ttrace (ttreq_t request, pid_t pid, lwpid_t tid, TTRACE_ARG_TYPE addr,
+		  TTRACE_ARG_TYPE data, TTRACE_ARG_TYPE addr2)
 {
   int tt_status;
 
@@ -1359,12 +1330,8 @@ call_real_ttrace (request, pid, tid, addr, data, addr2)
  * No "raw" calls to ttrace_wait should exist elsewhere.
  */
 static int
-call_real_ttrace_wait (pid, tid, option, tsp, tsp_size)
-     int pid;
-     lwpid_t tid;
-     ttwopt_t option;
-     ttstate_t *tsp;
-     size_t tsp_size;
+call_real_ttrace_wait (int pid, lwpid_t tid, ttwopt_t option, ttstate_t *tsp,
+		       size_t tsp_size)
 {
   int ttw_status;
   thread_info *tinfo = NULL;
@@ -1394,9 +1361,7 @@ call_real_ttrace_wait (pid, tid, option, tsp, tsp_size)
    to iterate over the IDs of all stopped threads of this process.
  */
 static lwpid_t
-get_process_first_stopped_thread_id (pid, thread_state)
-     int pid;
-     ttstate_t *thread_state;
+get_process_first_stopped_thread_id (int pid, ttstate_t *thread_state)
 {
   int tt_status;
 
@@ -1444,9 +1409,7 @@ get_process_first_stopped_thread_id (pid, thread_state)
    to iterate over the IDs of all stopped threads of this process.
  */
 static lwpid_t
-get_process_next_stopped_thread_id (pid, thread_state)
-     int pid;
-     ttstate_t *thread_state;
+get_process_next_stopped_thread_id (int pid, ttstate_t *thread_state)
 {
   int tt_status;
 
@@ -1488,8 +1451,7 @@ get_process_next_stopped_thread_id (pid, thread_state)
    NOTE: currently not called.
  */
 static lwpid_t
-get_active_tid_of_pid (pid)
-     int pid;
+get_active_tid_of_pid (int pid)
 {
   ttstate_t thread_state;
 
@@ -1500,8 +1462,7 @@ get_active_tid_of_pid (pid)
  * operates upon all threads of a (i.e., the entire) process.
  */
 int
-is_process_ttrace_request (tt_request)
-     ttreq_t tt_request;
+is_process_ttrace_request (ttreq_t tt_request)
 {
   return IS_TTRACE_PROCREQ (tt_request);
 }
@@ -1511,8 +1472,7 @@ is_process_ttrace_request (tt_request)
  * the equivalent process request for a one-thread process.
  */
 static ttreq_t
-make_process_version (request)
-     ttreq_t request;
+make_process_version (ttreq_t request)
 {
   if (!IS_TTRACE_REQ (request))
     {
@@ -1556,10 +1516,8 @@ make_process_version (request)
  * reasons).
  */
 static int
-call_ttrace (request, gdb_tid, addr, data, addr2)
-     ttreq_t request;
-     int gdb_tid;
-     TTRACE_ARG_TYPE addr, data, addr2;
+call_ttrace (ttreq_t request, int gdb_tid, TTRACE_ARG_TYPE addr,
+	     TTRACE_ARG_TYPE data, TTRACE_ARG_TYPE addr2)
 {
   lwpid_t real_tid;
   int real_pid;
@@ -1757,8 +1715,7 @@ call_ttrace (request, gdb_tid, addr, data, addr2)
  *       very careful, and only call TT_PROC_STOP when you mean it!
  */
 static void
-stop_all_threads_of_process (real_pid)
-     pid_t real_pid;
+stop_all_threads_of_process (pid_t real_pid)
 {
   int ttw_status;
 
@@ -1796,9 +1753,7 @@ stop_all_threads_of_process (real_pid)
   (((evt) == TTEVT_VFORK) && ((pid) == inferior_pid))
 
 static int
-can_touch_threads_of_process (pid, stopping_event)
-     int pid;
-     ttevents_t stopping_event;
+can_touch_threads_of_process (int pid, ttevents_t stopping_event)
 {
   if (CHILD_VFORKED (stopping_event, pid))
     {
@@ -1826,9 +1781,7 @@ can_touch_threads_of_process (pid, stopping_event)
  * been stopped, undefined behaviour is guaranteed!
  */
 static int
-select_stopped_thread_of_process (pid, tsp)
-     int pid;
-     ttstate_t *tsp;
+select_stopped_thread_of_process (int pid, ttstate_t *tsp)
 {
   lwpid_t candidate_tid, tid;
   ttstate_t candidate_tstate, tstate;
@@ -1982,8 +1935,7 @@ select_stopped_thread_of_process (pid, tsp)
 /* Check our internal thread data against the real thing.
  */
 static void
-check_thread_consistency (real_pid)
-     pid_t real_pid;
+check_thread_consistency (pid_t real_pid)
 {
   int tid;			/* really lwpid_t */
   ttstate_t tstate;
@@ -2049,11 +2001,7 @@ check_thread_consistency (real_pid)
  * Return value is the status of the pseudo wait.
  */
 static int
-call_ttrace_wait (pid, option, tsp, tsp_size)
-     int pid;
-     ttwopt_t option;
-     ttstate_t *tsp;
-     size_t tsp_size;
+call_ttrace_wait (int pid, ttwopt_t option, ttstate_t *tsp, size_t tsp_size)
 {
   /* This holds the actual, for-real, true process ID.
    */
@@ -2350,7 +2298,7 @@ call_ttrace_wait (pid, option, tsp, tsp_size)
 
 #if defined(CHILD_REPORTED_EXEC_EVENTS_PER_EXEC_CALL)
 int
-child_reported_exec_events_per_exec_call ()
+child_reported_exec_events_per_exec_call (void)
 {
   return 1;			/* ttrace reports the event once per call. */
 }
@@ -2400,7 +2348,7 @@ memory_page_dictionary;
 
 
 static void
-require_memory_page_dictionary ()
+require_memory_page_dictionary (void)
 {
   int i;
 
@@ -2422,7 +2370,7 @@ require_memory_page_dictionary ()
 
 
 static void
-retire_memory_page_dictionary ()
+retire_memory_page_dictionary (void)
 {
   memory_page_dictionary.page_count = (LONGEST) - 1;
 }
@@ -2433,9 +2381,7 @@ retire_memory_page_dictionary ()
    Returns the original permissions of the page.
  */
 static int
-write_protect_page (pid, page_start)
-     int pid;
-     CORE_ADDR page_start;
+write_protect_page (int pid, CORE_ADDR page_start)
 {
   int tt_status;
   int original_permissions;
@@ -2474,10 +2420,7 @@ write_protect_page (pid, page_start)
    (what we must assume are) its original permissions.
  */
 static void
-unwrite_protect_page (pid, page_start, original_permissions)
-     int pid;
-     CORE_ADDR page_start;
-     int original_permissions;
+unwrite_protect_page (int pid, CORE_ADDR page_start, int original_permissions)
 {
   int tt_status;
 
@@ -2500,8 +2443,7 @@ unwrite_protect_page (pid, page_start, original_permissions)
    presently should be write-protected), write-protect it.
  */
 void
-hppa_enable_page_protection_events (pid)
-     int pid;
+hppa_enable_page_protection_events (int pid)
 {
   int bucket;
 
@@ -2528,8 +2470,7 @@ hppa_enable_page_protection_events (pid)
    presently is or should be write-protected), un-write-protect it.
  */
 void
-hppa_disable_page_protection_events (pid)
-     int pid;
+hppa_disable_page_protection_events (int pid)
 {
   int bucket;
 
@@ -2556,9 +2497,7 @@ hppa_disable_page_protection_events (pid)
  * Note: we could just scan our own thread list.  FIXME!
  */
 static int
-count_unhandled_events (real_pid, real_tid)
-     int real_pid;
-     lwpid_t real_tid;
+count_unhandled_events (int real_pid, lwpid_t real_tid)
 {
   ttstate_t tstate;
   lwpid_t ttid;
@@ -2656,9 +2595,7 @@ count_unhandled_events (real_pid, real_tid)
  * Note: used by core gdb and so uses the pseudo-pid (really tid).
  */
 int
-ptrace_wait (pid, status)
-     int pid;
-     int *status;
+ptrace_wait (int pid, int *status)
 {
   ttstate_t tsp;
   int ttwait_return;
@@ -3000,7 +2937,7 @@ ptrace_wait (pid, status)
    child_acknowledge_created_inferior.)
  */
 int
-parent_attach_all ()
+parent_attach_all (void)
 {
   int tt_status;
 
@@ -3059,8 +2996,7 @@ parent_attach_all ()
  * have to be the common part of both.
  */
 static void
-require_notification_of_events (real_pid)
-     int real_pid;
+require_notification_of_events (int real_pid)
 {
   int tt_status;
   ttevent_t notifiable_events;
@@ -3110,8 +3046,7 @@ require_notification_of_events (real_pid)
 }
 
 static void
-require_notification_of_exec_events (real_pid)
-     int real_pid;
+require_notification_of_exec_events (int real_pid)
 {
   int tt_status;
   ttevent_t notifiable_events;
@@ -3155,8 +3090,7 @@ require_notification_of_exec_events (real_pid)
  * ID of the child process, after the debugger has forked.
  */
 void
-child_acknowledge_created_inferior (pid)
-     int pid;
+child_acknowledge_created_inferior (int pid)
 {
   /* We need a memory home for a constant, to pass it to ttrace.
      The value of the constant is arbitrary, so long as both
@@ -3215,8 +3149,7 @@ child_acknowledge_created_inferior (pid)
  * calling require_notification_of_events.
  */
 void
-child_post_startup_inferior (real_pid)
-     int real_pid;
+child_post_startup_inferior (int real_pid)
 {
   require_notification_of_events (real_pid);
 }
@@ -3224,8 +3157,7 @@ child_post_startup_inferior (real_pid)
 /* From here on, we should expect tids rather than pids.
  */
 static void
-hppa_enable_catch_fork (tid)
-     int tid;
+hppa_enable_catch_fork (int tid)
 {
   int tt_status;
   ttevent_t ttrace_events;
@@ -3259,8 +3191,7 @@ hppa_enable_catch_fork (tid)
 
 
 static void
-hppa_disable_catch_fork (tid)
-     int tid;
+hppa_disable_catch_fork (int tid)
 {
   int tt_status;
   ttevent_t ttrace_events;
@@ -3297,8 +3228,7 @@ hppa_disable_catch_fork (tid)
 
 #if defined(CHILD_INSERT_FORK_CATCHPOINT)
 int
-child_insert_fork_catchpoint (tid)
-     int tid;
+child_insert_fork_catchpoint (int tid)
 {
   /* Enable reporting of fork events from the kernel. */
   /* ??rehrauer: For the moment, we're always enabling these events,
@@ -3311,8 +3241,7 @@ child_insert_fork_catchpoint (tid)
 
 #if defined(CHILD_REMOVE_FORK_CATCHPOINT)
 int
-child_remove_fork_catchpoint (tid)
-     int tid;
+child_remove_fork_catchpoint (int tid)
 {
   /* Disable reporting of fork events from the kernel. */
   /* ??rehrauer: For the moment, we're always enabling these events,
@@ -3324,8 +3253,7 @@ child_remove_fork_catchpoint (tid)
 
 
 static void
-hppa_enable_catch_vfork (tid)
-     int tid;
+hppa_enable_catch_vfork (int tid)
 {
   int tt_status;
   ttevent_t ttrace_events;
@@ -3361,8 +3289,7 @@ hppa_enable_catch_vfork (tid)
 
 
 static void
-hppa_disable_catch_vfork (tid)
-     int tid;
+hppa_disable_catch_vfork (int tid)
 {
   int tt_status;
   ttevent_t ttrace_events;
@@ -3397,8 +3324,7 @@ hppa_disable_catch_vfork (tid)
 
 #if defined(CHILD_INSERT_VFORK_CATCHPOINT)
 int
-child_insert_vfork_catchpoint (tid)
-     int tid;
+child_insert_vfork_catchpoint (int tid)
 {
   /* Enable reporting of vfork events from the kernel. */
   /* ??rehrauer: For the moment, we're always enabling these events,
@@ -3411,8 +3337,7 @@ child_insert_vfork_catchpoint (tid)
 
 #if defined(CHILD_REMOVE_VFORK_CATCHPOINT)
 int
-child_remove_vfork_catchpoint (tid)
-     int tid;
+child_remove_vfork_catchpoint (int tid)
 {
   /* Disable reporting of vfork events from the kernel. */
   /* ??rehrauer: For the moment, we're always enabling these events,
@@ -3431,9 +3356,7 @@ child_remove_vfork_catchpoint (tid)
  *    start the mapping.
  */
 int
-child_has_forked (tid, childpid)
-     int tid;
-     int *childpid;
+child_has_forked (int tid, int *childpid)
 {
   int tt_status;
   ttstate_t ttrace_state;
@@ -3478,9 +3401,7 @@ child_has_forked (tid, childpid)
 /* See child_has_forked for pid discussion.
  */
 int
-child_has_vforked (tid, childpid)
-     int tid;
-     int *childpid;
+child_has_vforked (int tid, int *childpid)
 {
   int tt_status;
   ttstate_t ttrace_state;
@@ -3520,7 +3441,7 @@ child_has_vforked (tid, childpid)
 
 #if defined(CHILD_CAN_FOLLOW_VFORK_PRIOR_TO_EXEC)
 int
-child_can_follow_vfork_prior_to_exec ()
+child_can_follow_vfork_prior_to_exec (void)
 {
   /* ttrace does allow this.
 
@@ -3535,8 +3456,7 @@ child_can_follow_vfork_prior_to_exec ()
 
 #if defined(CHILD_INSERT_EXEC_CATCHPOINT)
 int
-child_insert_exec_catchpoint (tid)
-     int tid;
+child_insert_exec_catchpoint (int tid)
 {
   /* Enable reporting of exec events from the kernel. */
   /* ??rehrauer: For the moment, we're always enabling these events,
@@ -3549,8 +3469,7 @@ child_insert_exec_catchpoint (tid)
 
 #if defined(CHILD_REMOVE_EXEC_CATCHPOINT)
 int
-child_remove_exec_catchpoint (tid)
-     int tid;
+child_remove_exec_catchpoint (int tid)
 {
   /* Disable reporting of execevents from the kernel. */
   /* ??rehrauer: For the moment, we're always enabling these events,
@@ -3563,9 +3482,7 @@ child_remove_exec_catchpoint (tid)
 
 #if defined(CHILD_HAS_EXECD)
 int
-child_has_execd (tid, execd_pathname)
-     int tid;
-     char **execd_pathname;
+child_has_execd (int tid, char **execd_pathname)
 {
   int tt_status;
   ttstate_t ttrace_state;
@@ -3609,10 +3526,7 @@ child_has_execd (tid, execd_pathname)
 
 #if defined(CHILD_HAS_SYSCALL_EVENT)
 int
-child_has_syscall_event (pid, kind, syscall_id)
-     int pid;
-     enum target_waitkind *kind;
-     int *syscall_id;
+child_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
 {
   int tt_status;
   ttstate_t ttrace_state;
@@ -3667,8 +3581,7 @@ child_has_syscall_event (pid, kind, syscall_id)
  * May need a FIXME for that reason.
  */
 int
-child_thread_alive (gdb_tid)
-     lwpid_t gdb_tid;
+child_thread_alive (lwpid_t gdb_tid)
 {
   lwpid_t tid;
 
@@ -3694,11 +3607,8 @@ child_thread_alive (gdb_tid)
    undefined it this function fails.
  */
 int
-read_from_register_save_state (tid, ss_offset, buf, sizeof_buf)
-     int tid;
-     TTRACE_ARG_TYPE ss_offset;
-     char *buf;
-     int sizeof_buf;
+read_from_register_save_state (int tid, TTRACE_ARG_TYPE ss_offset, char *buf,
+			       int sizeof_buf)
 {
   int tt_status;
   register_value_t register_value = 0;
@@ -3729,11 +3639,8 @@ read_from_register_save_state (tid, ss_offset, buf, sizeof_buf)
    are undefined it this function fails.
  */
 int
-write_to_register_save_state (tid, ss_offset, buf, sizeof_buf)
-     int tid;
-     TTRACE_ARG_TYPE ss_offset;
-     char *buf;
-     int sizeof_buf;
+write_to_register_save_state (int tid, TTRACE_ARG_TYPE ss_offset, char *buf,
+			      int sizeof_buf)
 {
   int tt_status;
   register_value_t register_value = 0;
@@ -3758,11 +3665,7 @@ write_to_register_save_state (tid, ss_offset, buf, sizeof_buf)
    process-specific, ttrace equivalents.
  */
 int
-call_ptrace (pt_request, gdb_tid, addr, data)
-     int pt_request;
-     int gdb_tid;
-     PTRACE_ARG3_TYPE addr;
-     int data;
+call_ptrace (int pt_request, int gdb_tid, PTRACE_ARG3_TYPE addr, int data)
 {
   ttreq_t tt_request;
   TTRACE_ARG_TYPE tt_addr = (TTRACE_ARG_TYPE) addr;
@@ -3903,7 +3806,7 @@ call_ptrace (pt_request, gdb_tid, addr, data)
 /* Kill that pesky process!
  */
 void
-kill_inferior ()
+kill_inferior (void)
 {
   int tid;
   int wait_status;
@@ -3982,8 +3885,7 @@ kill_inferior ()
 /* Sanity check a thread about to be continued.
  */
 static void
-thread_dropping_event_check (p)
-     thread_info *p;
+thread_dropping_event_check (thread_info *p)
 {
   if (!p->handled)
     {
@@ -4044,9 +3946,7 @@ thread_dropping_event_check (p)
  * the one specified, which is to be stepped.
  */
 static void
-threads_continue_all_but_one (gdb_tid, signal)
-     lwpid_t gdb_tid;
-     int signal;
+threads_continue_all_but_one (lwpid_t gdb_tid, int signal)
 {
   thread_info *p;
   int thread_signal;
@@ -4183,9 +4083,7 @@ threads_continue_all_but_one (gdb_tid, signal)
  * This is done when a signal must be sent to any of the threads.
  */
 static void
-threads_continue_all_with_signals (gdb_tid, signal)
-     lwpid_t gdb_tid;
-     int signal;
+threads_continue_all_with_signals (lwpid_t gdb_tid, int signal)
 {
   thread_info *p;
   int thread_signal;
@@ -4301,9 +4199,7 @@ threads_continue_all_with_signals (gdb_tid, signal)
 /* Step one thread only.  
  */
 static void
-thread_fake_step (tid, signal)
-     lwpid_t tid;
-     enum target_signal signal;
+thread_fake_step (lwpid_t tid, enum target_signal signal)
 {
   thread_info *p;
 
@@ -4356,9 +4252,7 @@ thread_fake_step (tid, signal)
 /* Continue one thread when a signal must be sent to it.
  */
 static void
-threads_continue_one_with_signal (gdb_tid, signal)
-     lwpid_t gdb_tid;
-     int signal;
+threads_continue_one_with_signal (lwpid_t gdb_tid, int signal)
 {
   thread_info *p;
   lwpid_t real_tid;
@@ -4428,10 +4322,7 @@ threads_continue_one_with_signal (gdb_tid, signal)
  *       |                           user command.
  */
 void
-child_resume (gdb_tid, step, signal)
-     lwpid_t gdb_tid;
-     int step;
-     enum target_signal signal;
+child_resume (lwpid_t gdb_tid, int step, enum target_signal signal)
 {
   int resume_all_threads;
   lwpid_t tid;
@@ -4761,9 +4652,7 @@ child_resume (gdb_tid, step, signal)
  * 
  */
 static void
-update_thread_state_after_attach (pid, kind_of_go)
-     int pid;
-     attach_continue_t kind_of_go;
+update_thread_state_after_attach (int pid, attach_continue_t kind_of_go)
 {
   int tt_status;
   ttstate_t thread_state;
@@ -4934,8 +4823,7 @@ update_thread_state_after_attach (pid, kind_of_go)
  * (A _real_ pid).
  */
 int
-attach (pid)
-     int pid;
+attach (int pid)
 {
   int tt_status;
 
@@ -4966,8 +4854,7 @@ attach (pid)
 
 #if defined(CHILD_POST_ATTACH)
 void
-child_post_attach (pid)
-     int pid;
+child_post_attach (int pid)
 {
 #ifdef THREAD_DEBUG
   if (debug_on)
@@ -4984,8 +4871,7 @@ child_post_attach (pid)
    SIGNAL = 0 means just continue it.
  */
 void
-detach (signal)
-     int signal;
+detach (int signal)
 {
   errno = 0;
   call_ttrace (TT_PROC_DETACH,
@@ -5008,7 +4894,7 @@ detach (signal)
 #endif
 
 void
-_initialize_kernel_u_addr ()
+_initialize_kernel_u_addr (void)
 {
 }
 
@@ -5128,7 +5014,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 
 
 static void
-udot_info ()
+udot_info (void)
 {
   int udot_off;			/* Offset into user struct */
   int udot_val;			/* Value from user struct at udot_off */
@@ -5181,8 +5067,7 @@ udot_info ()
 /* TTrace version of "target_pid_to_exec_file"
  */
 char *
-child_pid_to_exec_file (tid)
-     int tid;
+child_pid_to_exec_file (int tid)
 {
   static char exec_file_buffer[1024];
   int tt_status;
@@ -5254,7 +5139,7 @@ child_pid_to_exec_file (tid)
 
 
 void
-pre_fork_inferior ()
+pre_fork_inferior (void)
 {
   int status;
 
@@ -5283,8 +5168,7 @@ pre_fork_inferior ()
  * seems odd--it always fails in our test system.
  */
 int
-hppa_require_attach (pid)
-     int pid;
+hppa_require_attach (int pid)
 {
   int tt_status;
   CORE_ADDR pc;
@@ -5342,9 +5226,7 @@ hppa_require_attach (pid)
 }
 
 int
-hppa_require_detach (pid, signal)
-     int pid;
-     int signal;
+hppa_require_detach (int pid, int signal)
 {
   int tt_status;
 
@@ -5376,8 +5258,7 @@ hppa_require_detach (pid, signal)
    the memory page dictionary.
  */
 static int
-get_dictionary_bucket_of_page (page_start)
-     CORE_ADDR page_start;
+get_dictionary_bucket_of_page (CORE_ADDR page_start)
 {
   int hash;
 
@@ -5394,9 +5275,7 @@ get_dictionary_bucket_of_page (page_start)
    count of 0 (if the page was newly-added to the dictionary).
  */
 static memory_page_t *
-get_dictionary_entry_of_page (pid, page_start)
-     int pid;
-     CORE_ADDR page_start;
+get_dictionary_entry_of_page (int pid, CORE_ADDR page_start)
 {
   int bucket;
   memory_page_t *page = NULL;
@@ -5445,9 +5324,7 @@ get_dictionary_entry_of_page (pid, page_start)
 
 
 static void
-remove_dictionary_entry_of_page (pid, page)
-     int pid;
-     memory_page_t *page;
+remove_dictionary_entry_of_page (int pid, memory_page_t *page)
 {
   /* Restore the page's original permissions. */
   unwrite_protect_page (pid, page->page_start, page->original_permissions);
@@ -5468,8 +5345,7 @@ remove_dictionary_entry_of_page (pid, page)
 
 
 static void
-hppa_enable_syscall_events (pid)
-     int pid;
+hppa_enable_syscall_events (int pid)
 {
   int tt_status;
   ttevent_t ttrace_events;
@@ -5498,8 +5374,7 @@ hppa_enable_syscall_events (pid)
 
 
 static void
-hppa_disable_syscall_events (pid)
-     int pid;
+hppa_disable_syscall_events (int pid)
 {
   int tt_status;
   ttevent_t ttrace_events;
@@ -5540,11 +5415,7 @@ hppa_disable_syscall_events (pid)
    from the TYPE that is passed to hppa_remove_hw_watchpoint.)
  */
 int
-hppa_insert_hw_watchpoint (pid, start, len, type)
-     int pid;
-     CORE_ADDR start;
-     LONGEST len;
-     int type;
+hppa_insert_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len, int type)
 {
   CORE_ADDR page_start;
   int dictionary_was_empty;
@@ -5617,11 +5488,8 @@ hppa_insert_hw_watchpoint (pid, start, len, type)
    watchpoints.
  */
 int
-hppa_remove_hw_watchpoint (pid, start, len, type)
-     int pid;
-     CORE_ADDR start;
-     LONGEST len;
-     enum bptype type;
+hppa_remove_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len,
+			   enum bptype type)
 {
   CORE_ADDR page_start;
   int dictionary_is_empty;
@@ -5681,10 +5549,7 @@ hppa_remove_hw_watchpoint (pid, start, len, type)
    hardware support.
  */
 int
-hppa_can_use_hw_watchpoint (type, cnt, ot)
-     enum bptype type;
-     int cnt;
-     enum bptype ot;
+hppa_can_use_hw_watchpoint (enum bptype type, int cnt, enum bptype ot)
 {
   return (type == bp_hardware_watchpoint);
 }
@@ -5696,10 +5561,7 @@ hppa_can_use_hw_watchpoint (type, cnt, ot)
    on the address...
  */
 int
-hppa_range_profitable_for_hw_watchpoint (pid, start, len)
-     int pid;
-     CORE_ADDR start;
-     LONGEST len;
+hppa_range_profitable_for_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len)
 {
   int range_is_stack_based;
   int range_is_accessible;
@@ -5766,8 +5628,7 @@ hppa_range_profitable_for_hw_watchpoint (pid, start, len)
 
 
 char *
-hppa_pid_or_tid_to_str (id)
-     pid_t id;
+hppa_pid_or_tid_to_str (pid_t id)
 {
   static char buf[100];		/* Static because address returned. */
 
@@ -5792,8 +5653,7 @@ hppa_pid_or_tid_to_str (id)
  * the old thread id, else return 0.
  */
 pid_t
-hppa_switched_threads (gdb_pid)
-     pid_t gdb_pid;
+hppa_switched_threads (pid_t gdb_pid)
 {
   if (gdb_pid == old_gdb_pid)
     {
@@ -5844,8 +5704,7 @@ hppa_switched_threads (gdb_pid)
 }
 
 void
-hppa_ensure_vforking_parent_remains_stopped (pid)
-     int pid;
+hppa_ensure_vforking_parent_remains_stopped (int pid)
 {
   /* Nothing to do when using ttrace.  Only the ptrace-based implementation
      must do real work.
@@ -5854,7 +5713,7 @@ hppa_ensure_vforking_parent_remains_stopped (pid)
 
 
 int
-hppa_resume_execd_vforking_child_to_get_parent_vfork ()
+hppa_resume_execd_vforking_child_to_get_parent_vfork (void)
 {
   return 0;			/* No, the parent vfork is available now. */
 }
@@ -5867,10 +5726,7 @@ hppa_resume_execd_vforking_child_to_get_parent_vfork ()
    This is horribly gross and disgusting.  */
  
 int
-ttrace_write_reg_64 (gdb_tid, dest_addr, src_addr)
-     int gdb_tid;
-     CORE_ADDR dest_addr;
-     CORE_ADDR src_addr;
+ttrace_write_reg_64 (int gdb_tid, CORE_ADDR dest_addr, CORE_ADDR src_addr)
 {
   pid_t 	pid;
   lwpid_t 	tid;
@@ -5911,7 +5767,7 @@ ttrace_write_reg_64 (gdb_tid, dest_addr, src_addr)
 }
 
 void
-_initialize_infttrace ()
+_initialize_infttrace (void)
 {
   /* Initialize the ttrace-based hardware watchpoint implementation. */
   memory_page_dictionary.page_count = (LONGEST) - 1;

@@ -503,8 +503,7 @@ static SIGJMP_BUF *catch_return;
 /* Return for reason REASON to the nearest containing catch_errors().  */
 
 NORETURN void
-return_to_top_level (reason)
-     enum return_reason reason;
+return_to_top_level (enum return_reason reason)
 {
   quit_flag = 0;
   immediate_quit = 0;
@@ -570,11 +569,8 @@ return_to_top_level (reason)
    between utils.c and top.c? */
 
 int
-catch_errors (func, args, errstring, mask)
-     catch_errors_ftype *func;
-     PTR args;
-     char *errstring;
-     return_mask mask;
+catch_errors (catch_errors_ftype *func, PTR args, char *errstring,
+	      return_mask mask)
 {
   SIGJMP_BUF *saved_catch;
   SIGJMP_BUF catch;
@@ -700,8 +696,7 @@ catch_command_errors (catch_command_errors_ftype * command,
 
 #ifdef SIGHUP
 static void
-disconnect (signo)
-     int signo;
+disconnect (int signo)
 {
   catch_errors (quit_cover, NULL,
 	      "Could not kill the program being debugged", RETURN_MASK_ALL);
@@ -715,8 +710,7 @@ disconnect (signo)
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
 /* static */ int
-quit_cover (s)
-     PTR s;
+quit_cover (PTR s)
 {
   caution = 0;			/* Throw caution to the wind -- we're exiting.
 				   This prevents asking the user dumb questions.  */
@@ -764,8 +758,7 @@ do_restore_instream_cleanup (void *stream)
 
 /* Read commands from STREAM.  */
 void
-read_command_file (stream)
-     FILE *stream;
+read_command_file (FILE *stream)
 {
   struct cleanup *cleanups;
 
@@ -789,8 +782,7 @@ do_chdir_cleanup (void *old_dir)
 #endif
 
 void
-gdb_init (argv0)
-     char *argv0;
+gdb_init (char *argv0)
 {
   if (pre_init_ui_hook)
     pre_init_ui_hook ();
@@ -852,9 +844,7 @@ gdb_init (argv0)
    control commands (if/while).  */
 
 static struct command_line *
-build_command_line (type, args)
-     enum command_control_type type;
-     char *args;
+build_command_line (enum command_control_type type, char *args)
 {
   struct command_line *cmd;
 
@@ -878,9 +868,7 @@ build_command_line (type, args)
    such as "if" and "while".  */
 
 static struct command_line *
-get_command_line (type, arg)
-     enum command_control_type type;
-     char *arg;
+get_command_line (enum command_control_type type, char *arg)
 {
   struct command_line *cmd;
   struct cleanup *old_chain = NULL;
@@ -905,10 +893,8 @@ get_command_line (type, arg)
 /* Recursively print a command (including full control structures).  */
 #ifdef UI_OUT
 void
-print_command_lines (uiout, cmd, depth)
-     struct ui_out *uiout;
-     struct command_line *cmd;
-     unsigned int depth;
+print_command_lines (struct ui_out *uiout, struct command_line *cmd,
+		     unsigned int depth)
 {
   struct command_line *list;
 
@@ -995,10 +981,8 @@ print_command_lines (uiout, cmd, depth)
 }
 #else
 void
-print_command_line (cmd, depth, stream)
-     struct command_line *cmd;
-     unsigned int depth;
-     struct ui_file *stream;
+print_command_line (struct command_line *cmd, unsigned int depth,
+		    struct ui_file *stream)
 {
   unsigned int i;
 
@@ -1079,8 +1063,7 @@ print_command_line (cmd, depth, stream)
 /* Execute the command in CMD.  */
 
 enum command_control_type
-execute_control_command (cmd)
-     struct command_line *cmd;
+execute_control_command (struct command_line *cmd)
 {
   struct expression *expr;
   struct command_line *current;
@@ -1227,9 +1210,7 @@ execute_control_command (cmd)
    loop condition is nonzero.  */
 
 static void
-while_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+while_command (char *arg, int from_tty)
 {
   struct command_line *command = NULL;
 
@@ -1247,9 +1228,7 @@ while_command (arg, from_tty)
    on the value of the if conditional.  */
 
 static void
-if_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+if_command (char *arg, int from_tty)
 {
   struct command_line *command = NULL;
 
@@ -1279,8 +1258,7 @@ arg_cleanup (void *ignore)
    $arg0, $arg1 ... $argMAXUSERARGS.  */
 
 static struct cleanup *
-setup_user_args (p)
-     char *p;
+setup_user_args (char *p)
 {
   struct user_args *args;
   struct cleanup *old_chain;
@@ -1362,8 +1340,7 @@ setup_user_args (p)
    or NULL if P contains no arguments.  */
 
 static char *
-locate_arg (p)
-     char *p;
+locate_arg (char *p)
 {
   while ((p = strchr (p, '$')))
     {
@@ -1378,8 +1355,7 @@ locate_arg (p)
    arguments found in line, with the updated copy being placed into nline.  */
 
 static char *
-insert_args (line)
-     char *line;
+insert_args (char *line)
 {
   char *p, *save_line, *new_line;
   unsigned len, i;
@@ -1439,9 +1415,7 @@ insert_args (line)
 }
 
 void
-execute_user_command (c, args)
-     struct cmd_list_element *c;
-     char *args;
+execute_user_command (struct cmd_list_element *c, char *args)
 {
   register struct command_line *cmdlines;
   struct cleanup *old_chain;
@@ -1475,9 +1449,7 @@ execute_user_command (c, args)
    Pass FROM_TTY as second argument to the defining function.  */
 
 void
-execute_command (p, from_tty)
-     char *p;
-     int from_tty;
+execute_command (char *p, int from_tty)
 {
   register struct cmd_list_element *c;
   register enum language flang;
@@ -1580,7 +1552,7 @@ extern void serial_log_command (const char *);
    until end of file or error reading instream.  */
 
 void
-command_loop ()
+command_loop (void)
 {
   struct cleanup *old_chain;
   char *command;
@@ -1705,7 +1677,7 @@ simplified_command_loop (read_input_func, execute_command_func)
 /* Commands call this if they do not want to be repeated by null lines.  */
 
 void
-dont_repeat ()
+dont_repeat (void)
 {
   if (server_command)
     return;
@@ -1725,8 +1697,7 @@ dont_repeat ()
 
    A NULL return means end of file.  */
 char *
-gdb_readline (prompt_arg)
-     char *prompt_arg;
+gdb_readline (char *prompt_arg)
 {
   int c;
   char *result;
@@ -1842,18 +1813,14 @@ char *gdb_completer_quote_characters =
    but don't want to complete on anything else either.  */
 /* ARGSUSED */
 char **
-noop_completer (text, prefix)
-     char *text;
-     char *prefix;
+noop_completer (char *text, char *prefix)
 {
   return NULL;
 }
 
 /* Complete on filenames.  */
 char **
-filename_completer (text, word)
-     char *text;
-     char *word;
+filename_completer (char *text, char *word)
 {
   /* From readline.  */
 extern char *filename_completion_function (char *, int);
@@ -1974,11 +1941,7 @@ extern char *filename_completion_function (char *, int);
    free the string.  */
 
 static char *
-line_completion_function (text, matches, line_buffer, point)
-     char *text;
-     int matches;
-     char *line_buffer;
-     int point;
+line_completion_function (char *text, int matches, char *line_buffer, int point)
 {
   static char **list = (char **) NULL;	/* Cache of completions */
   static int index;		/* Next cached completion */
@@ -2207,9 +2170,7 @@ line_completion_function (text, matches, line_buffer, point)
 /* Line completion interface function for readline.  */
 
 static char *
-readline_line_completion_function (text, matches)
-     char *text;
-     int matches;
+readline_line_completion_function (char *text, int matches)
 {
   return line_completion_function (text, matches, rl_line_buffer, rl_point);
 }
@@ -2219,8 +2180,7 @@ readline_line_completion_function (text, matches)
    location after the "word". */
 
 char *
-skip_quoted (str)
-     char *str;
+skip_quoted (char *str)
 {
   char quote_char = '\0';
   char *scan;
@@ -2253,8 +2213,7 @@ skip_quoted (str)
 
 #ifdef STOP_SIGNAL
 static void
-stop_sig (signo)
-     int signo;
+stop_sig (int signo)
 {
 #if STOP_SIGNAL == SIGTSTP
   signal (SIGTSTP, SIG_DFL);
@@ -2274,8 +2233,7 @@ stop_sig (signo)
 
 /* Initialize signal handlers. */
 static void
-do_nothing (signo)
-     int signo;
+do_nothing (int signo)
 {
   /* Under System V the default disposition of a signal is reinstated after
      the signal is caught and delivered to an application process.  On such
@@ -2287,7 +2245,7 @@ do_nothing (signo)
 }
 
 static void
-init_signals ()
+init_signals (void)
 {
   signal (SIGINT, request_quit);
 
@@ -2333,10 +2291,7 @@ init_signals ()
    simple input as the user has requested.  */
 
 char *
-command_line_input (prompt_arg, repeat, annotation_suffix)
-     char *prompt_arg;
-     int repeat;
-     char *annotation_suffix;
+command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 {
   static char *linebuffer = 0;
   static unsigned linelength = 0;
@@ -2558,9 +2513,7 @@ command_line_input (prompt_arg, repeat, annotation_suffix)
    clause for an "if" command.  */
 
 static void
-realloc_body_list (command, new_length)
-     struct command_line *command;
-     int new_length;
+realloc_body_list (struct command_line *command, int new_length)
 {
   int n;
   struct command_line **body_list;
@@ -2585,8 +2538,7 @@ realloc_body_list (command, new_length)
    "end", return such an indication to the caller.  */
 
 static enum misc_command_type
-read_next_line (command)
-     struct command_line **command;
+read_next_line (struct command_line **command)
 {
   char *p, *p1, *prompt_ptr, control_prompt[256];
   int i = 0;
@@ -2683,8 +2635,7 @@ read_next_line (command)
    following commands are nested.  */
 
 static enum command_control_type
-recurse_read_control_structure (current_cmd)
-     struct command_line *current_cmd;
+recurse_read_control_structure (struct command_line *current_cmd)
 {
   int current_body, i;
   enum misc_command_type val;
@@ -2796,9 +2747,7 @@ recurse_read_control_structure (current_cmd)
 #define END_MESSAGE "End with a line saying just \"end\"."
 
 struct command_line *
-read_command_lines (prompt_arg, from_tty)
-     char *prompt_arg;
-     int from_tty;
+read_command_lines (char *prompt_arg, int from_tty)
 {
   struct command_line *head, *tail, *next;
   struct cleanup *old_chain;
@@ -2885,8 +2834,7 @@ read_command_lines (prompt_arg, from_tty)
 /* Free a chain of struct command_line's.  */
 
 void
-free_command_lines (lptr)
-     struct command_line **lptr;
+free_command_lines (struct command_line **lptr)
 {
   register struct command_line *l = *lptr;
   register struct command_line *next;
@@ -2934,10 +2882,7 @@ add_info (name, fun, doc)
 /* Add an alias to the list of info subcommands.  */
 
 struct cmd_list_element *
-add_info_alias (name, oldname, abbrev_flag)
-     char *name;
-     char *oldname;
-     int abbrev_flag;
+add_info_alias (char *name, char *oldname, int abbrev_flag)
 {
   return add_alias_cmd (name, oldname, 0, abbrev_flag, &infolist);
 }
@@ -2947,9 +2892,7 @@ add_info_alias (name, oldname, abbrev_flag)
 
 /* ARGSUSED */
 static void
-info_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+info_command (char *arg, int from_tty)
 {
   printf_unfiltered ("\"info\" must be followed by the name of an info command.\n");
   help_list (infolist, "info ", -1, gdb_stdout);
@@ -2959,9 +2902,7 @@ info_command (arg, from_tty)
 
 /* ARGSUSED */
 static void
-complete_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+complete_command (char *arg, int from_tty)
 {
   int i;
   int argpoint;
@@ -2986,9 +2927,7 @@ complete_command (arg, from_tty)
 
 /* ARGSUSED */
 static void
-show_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+show_command (char *arg, int from_tty)
 {
   cmd_show_list (showlist, from_tty, "");
 }
@@ -3008,18 +2947,14 @@ add_com (name, class, fun, doc)
 /* Add an alias or abbreviation command to the list of commands.  */
 
 struct cmd_list_element *
-add_com_alias (name, oldname, class, abbrev_flag)
-     char *name;
-     char *oldname;
-     enum command_class class;
-     int abbrev_flag;
+add_com_alias (char *name, char *oldname, enum command_class class,
+	       int abbrev_flag)
 {
   return add_alias_cmd (name, oldname, class, abbrev_flag, &cmdlist);
 }
 
 void
-error_no_arg (why)
-     char *why;
+error_no_arg (char *why)
 {
   error ("Argument required (%s).", why);
 }
@@ -3034,8 +2969,7 @@ help_command (command, from_tty)
 }
 
 static void
-validate_comname (comname)
-     char *comname;
+validate_comname (char *comname)
 {
   register char *p;
 
@@ -3053,16 +2987,12 @@ validate_comname (comname)
 
 /* This is just a placeholder in the command data structures.  */
 static void
-user_defined_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+user_defined_command (char *ignore, int from_tty)
 {
 }
 
 static void
-define_command (comname, from_tty)
-     char *comname;
-     int from_tty;
+define_command (char *comname, int from_tty)
 {
   register struct command_line *cmds;
   register struct cmd_list_element *c, *newc, *hookc = 0;
@@ -3137,9 +3067,7 @@ define_command (comname, from_tty)
 }
 
 static void
-document_command (comname, from_tty)
-     char *comname;
-     int from_tty;
+document_command (char *comname, int from_tty)
 {
   struct command_line *doclines;
   register struct cmd_list_element *c;
@@ -3182,8 +3110,7 @@ document_command (comname, from_tty)
 
 /* Print the GDB banner. */
 void
-print_gdb_version (stream)
-     struct ui_file *stream;
+print_gdb_version (struct ui_file *stream)
 {
   /* From GNU coding standards, first line is meant to be easy for a
      program to parse, and is just canonical program name and version
@@ -3227,9 +3154,7 @@ There is absolutely no warranty for GDB.  Type \"show warranty\" for details.\n"
 
 /* ARGSUSED */
 static void
-show_version (args, from_tty)
-     char *args;
-     int from_tty;
+show_version (char *args, int from_tty)
 {
   immediate_quit++;
   print_gdb_version (gdb_stdout);
@@ -3254,8 +3179,7 @@ show_version (args, from_tty)
 static int gdb_prompt_escape;
 
 static int
-get_prompt_1 (formatted_prompt)
-     char *formatted_prompt;
+get_prompt_1 (char *formatted_prompt)
 {
   char *local_prompt;
 
@@ -3483,7 +3407,7 @@ get_prompt_1 (formatted_prompt)
 }
 
 char *
-get_prompt ()
+get_prompt (void)
 {
   static char buf[MAX_PROMPT_SIZE];
 
@@ -3503,8 +3427,7 @@ get_prompt ()
 }
 
 void
-set_prompt (s)
-     char *s;
+set_prompt (char *s)
 {
 /* ??rehrauer: I don't know why this fails, since it looks as though
    assignments to prompt are wrapped in calls to savestring...
@@ -3522,7 +3445,7 @@ set_prompt (s)
    non-zero if we should quit, zero if we shouldn't.  */
 
 int
-quit_confirm ()
+quit_confirm (void)
 {
   if (inferior_pid != 0 && target_has_execution)
     {
@@ -3548,9 +3471,7 @@ quit_confirm ()
 /* Quit without asking for confirmation.  */
 
 void
-quit_force (args, from_tty)
-     char *args;
-     int from_tty;
+quit_force (char *args, int from_tty)
 {
   int exit_code = 0;
 
@@ -3596,9 +3517,7 @@ quit_force (args, from_tty)
 /* Handle the quit command.  */
 
 void
-quit_command (args, from_tty)
-     char *args;
-     int from_tty;
+quit_command (char *args, int from_tty)
 {
   if (!quit_confirm ())
     error ("Not confirmed.");
@@ -3609,16 +3528,14 @@ quit_command (args, from_tty)
    desires that questions be asked of them on that terminal.  */
 
 int
-input_from_terminal_p ()
+input_from_terminal_p (void)
 {
   return gdb_has_a_terminal () && (instream == stdin) & caution;
 }
 
 /* ARGSUSED */
 static void
-pwd_command (args, from_tty)
-     char *args;
-     int from_tty;
+pwd_command (char *args, int from_tty)
 {
   if (args)
     error ("The \"pwd\" command does not take an argument: %s", args);
@@ -3632,9 +3549,7 @@ pwd_command (args, from_tty)
 }
 
 void
-cd_command (dir, from_tty)
-     char *dir;
-     int from_tty;
+cd_command (char *dir, int from_tty)
 {
   int len;
   /* Found something other than leading repetitions of "/..".  */
@@ -3741,8 +3656,7 @@ struct source_cleanup_lines_args
 };
 
 static void
-source_cleanup_lines (args)
-     PTR args;
+source_cleanup_lines (PTR args)
 {
   struct source_cleanup_lines_args *p =
   (struct source_cleanup_lines_args *) args;
@@ -3760,9 +3674,7 @@ do_fclose_cleanup (void *stream)
 }
 
 void
-source_command (args, from_tty)
-     char *args;
-     int from_tty;
+source_command (char *args, int from_tty)
 {
   FILE *stream;
   struct cleanup *old_cleanups;
@@ -3822,9 +3734,7 @@ source_command (args, from_tty)
 
 /* ARGSUSED */
 static void
-echo_command (text, from_tty)
-     char *text;
-     int from_tty;
+echo_command (char *text, int from_tty)
 {
   char *p = text;
   register int c;
@@ -3854,9 +3764,7 @@ echo_command (text, from_tty)
 
 /* ARGSUSED */
 static void
-dont_repeat_command (ignored, from_tty)
-     char *ignored;
-     int from_tty;
+dont_repeat_command (char *ignored, int from_tty)
 {
   *line = 0;			/* Can't call dont_repeat here because we're not
 				   necessarily reading from stdin.  */
@@ -3867,9 +3775,7 @@ dont_repeat_command (ignored, from_tty)
 /* Number of commands to print in each call to show_commands.  */
 #define Hist_print 10
 static void
-show_commands (args, from_tty)
-     char *args;
-     int from_tty;
+show_commands (char *args, int from_tty)
 {
   /* Index for history commands.  Relative to history_base.  */
   int offset;
@@ -3946,10 +3852,7 @@ extern HIST_ENTRY *history_get (int);
 /* Called by do_setshow_command.  */
 /* ARGSUSED */
 static void
-set_history_size_command (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
 {
   if (history_size == INT_MAX)
     unstifle_history ();
@@ -3964,9 +3867,7 @@ set_history_size_command (args, from_tty, c)
 
 /* ARGSUSED */
 static void
-set_history (args, from_tty)
-     char *args;
-     int from_tty;
+set_history (char *args, int from_tty)
 {
   printf_unfiltered ("\"set history\" must be followed by the name of a history subcommand.\n");
   help_list (sethistlist, "set history ", -1, gdb_stdout);
@@ -3974,9 +3875,7 @@ set_history (args, from_tty)
 
 /* ARGSUSED */
 static void
-show_history (args, from_tty)
-     char *args;
-     int from_tty;
+show_history (char *args, int from_tty)
 {
   cmd_show_list (showhistlist, from_tty, "");
 }
@@ -3986,10 +3885,7 @@ int info_verbose = 0;		/* Default verbose msgs off */
 /* Called by do_setshow_command.  An elaborate joke.  */
 /* ARGSUSED */
 static void
-set_verbose (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_verbose (char *args, int from_tty, struct cmd_list_element *c)
 {
   char *cmdname = "verbose";
   struct cmd_list_element *showcmd;
@@ -4009,8 +3905,7 @@ set_verbose (args, from_tty, c)
 }
 
 static void
-float_handler (signo)
-     int signo;
+float_handler (int signo)
 {
   /* This message is based on ANSI C, section 4.7.  Note that integer
      divide by zero causes this, so "float" is a misnomer.  */
@@ -4019,24 +3914,20 @@ float_handler (signo)
 }
 
 static void
-set_debug (arg, from_tty)
-     char *arg;
-     int from_tty;
+set_debug (char *arg, int from_tty)
 {
   printf_unfiltered ("\"set debug\" must be followed by the name of a print subcommand.\n");
   help_list (setdebuglist, "set debug ", -1, gdb_stdout);
 }
 
 static void
-show_debug (args, from_tty)
-     char *args;
-     int from_tty;
+show_debug (char *args, int from_tty)
 {
   cmd_show_list (showdebuglist, from_tty, "");
 }
 
 static void
-init_cmd_lists ()
+init_cmd_lists (void)
 {
   cmdlist = NULL;
   infolist = NULL;
@@ -4068,7 +3959,7 @@ init_cmd_lists ()
  */
 
 void
-init_history ()
+init_history (void)
 {
   char *tmpenv;
 
@@ -4099,7 +3990,7 @@ init_history ()
 }
 
 static void
-init_main ()
+init_main (void)
 {
   struct cmd_list_element *c;
 

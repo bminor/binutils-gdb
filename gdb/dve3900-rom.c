@@ -373,11 +373,7 @@ static struct bit_field cause_fields[] =
    the hex value before passing it to monitor_supply_register.  */
 
 static void
-r3900_supply_register (regname, regnamelen, val, vallen)
-     char *regname;
-     int regnamelen;
-     char *val;
-     int vallen;
+r3900_supply_register (char *regname, int regnamelen, char *val, int vallen)
 {
   int regno = -1;
   int i;
@@ -416,7 +412,7 @@ r3900_supply_register (regname, regnamelen, val, vallen)
    you modify it.  */
 
 static void
-fetch_bad_vaddr ()
+fetch_bad_vaddr (void)
 {
   char buf[20];
 
@@ -431,8 +427,7 @@ fetch_bad_vaddr ()
    combined binary value.  */
 
 static unsigned long
-fetch_fields (bf)
-     struct bit_field *bf;
+fetch_fields (struct bit_field *bf)
 {
   char buf[20];
   unsigned long val = 0;
@@ -456,9 +451,7 @@ fetch_fields (bf)
 
 
 static void
-fetch_bitmapped_register (regno, bf)
-     int regno;
-     struct bit_field *bf;
+fetch_bitmapped_register (int regno, struct bit_field *bf)
 {
   unsigned long val;
   unsigned char regbuf[MAX_REGISTER_RAW_SIZE];
@@ -482,8 +475,7 @@ fetch_bitmapped_register (regno, bf)
    a very unusual fashion by the monitor, and must be handled specially.  */
 
 static void
-r3900_fetch_registers (regno)
-     int regno;
+r3900_fetch_registers (int regno)
 {
   switch (regno)
     {
@@ -505,9 +497,7 @@ r3900_fetch_registers (regno)
 /* Write the new value of the bitmapped register to the monitor.  */
 
 static void
-store_bitmapped_register (regno, bf)
-     int regno;
-     struct bit_field *bf;
+store_bitmapped_register (int regno, struct bit_field *bf)
 {
   unsigned long oldval, newval;
 
@@ -537,8 +527,7 @@ store_bitmapped_register (regno, bf)
 
 
 static void
-r3900_store_registers (regno)
-     int regno;
+r3900_store_registers (int regno)
 {
   switch (regno)
     {
@@ -557,9 +546,7 @@ r3900_store_registers (regno)
 /* Write a 4-byte integer to the buffer in big-endian order.  */
 
 static void
-write_long (buf, n)
-     char *buf;
-     long n;
+write_long (char *buf, long n)
 {
   buf[0] = (n >> 24) & 0xff;
   buf[1] = (n >> 16) & 0xff;
@@ -571,9 +558,7 @@ write_long (buf, n)
 /* Write a 4-byte integer to the buffer in little-endian order.  */
 
 static void
-write_long_le (buf, n)
-     char *buf;
-     long n;
+write_long_le (char *buf, long n)
 {
   buf[0] = n & 0xff;
   buf[1] = (n >> 8) & 0xff;
@@ -587,8 +572,7 @@ write_long_le (buf, n)
    character in hexadecimal; otherwise, print it in ASCII.  */
 
 static int
-debug_readchar (hex)
-     int hex;
+debug_readchar (int hex)
 {
   char buf[10];
   int c = monitor_readchar ();
@@ -614,9 +598,7 @@ debug_readchar (hex)
    print the sent buffer in hex.  */
 
 static void
-debug_write (buf, buflen)
-     unsigned char *buf;
-     int buflen;
+debug_write (unsigned char *buf, int buflen)
 {
   char s[10];
 
@@ -649,7 +631,7 @@ debug_write (buf, buflen)
  */
 
 static void
-ignore_packet ()
+ignore_packet (void)
 {
   int c;
   int len;
@@ -688,10 +670,7 @@ ignore_packet ()
  */
 
 static void
-send_packet (type, buf, buflen, seq)
-     char type;
-     unsigned char *buf;
-     int buflen, seq;
+send_packet (char type, unsigned char *buf, int buflen, int seq)
 {
   unsigned char hdr[4];
   int len = buflen;
@@ -764,9 +743,7 @@ send_packet (type, buf, buflen, seq)
  */
 
 static void
-process_read_request (buf, buflen)
-     unsigned char *buf;
-     int buflen;
+process_read_request (unsigned char *buf, int buflen)
 {
   unsigned char len[4];
   int i, chunk;
@@ -802,10 +779,7 @@ process_read_request (buf, buflen)
 /* Count loadable sections (helper function for r3900_load).  */
 
 static void
-count_section (abfd, s, section_count)
-     bfd *abfd;
-     asection *s;
-     unsigned int *section_count;
+count_section (bfd *abfd, asection *s, unsigned int *section_count)
 {
   if (s->flags & SEC_LOAD && bfd_section_size (abfd, s) != 0)
     (*section_count)++;
@@ -827,10 +801,7 @@ count_section (abfd, s, section_count)
  */
 
 static void
-load_section (abfd, s, data_count)
-     bfd *abfd;
-     asection *s;
-     unsigned int *data_count;
+load_section (bfd *abfd, asection *s, unsigned int *data_count)
 {
   if (s->flags & SEC_LOAD)
     {
@@ -886,9 +857,7 @@ load_section (abfd, s, data_count)
  */
 
 static void
-r3900_load (filename, from_tty)
-     char *filename;
-     int from_tty;
+r3900_load (char *filename, int from_tty)
 {
   bfd *abfd;
   unsigned int data_count = 0;
@@ -990,9 +959,7 @@ static struct target_ops r3900_ops;
 static struct monitor_ops r3900_cmds;
 
 static void
-r3900_open (args, from_tty)
-     char *args;
-     int from_tty;
+r3900_open (char *args, int from_tty)
 {
   char buf[64];
   int i;
@@ -1023,7 +990,7 @@ r3900_open (args, from_tty)
 }
 
 void
-_initialize_r3900_rom ()
+_initialize_r3900_rom (void)
 {
   r3900_cmds.flags = MO_NO_ECHO_ON_OPEN |
     MO_ADDR_BITS_REMOVE |

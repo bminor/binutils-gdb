@@ -206,9 +206,7 @@ int auto_solib_add = 1;
    comparison function takes two "void *" pointers. */
 
 static int
-compare_symbols (s1p, s2p)
-     const PTR s1p;
-     const PTR s2p;
+compare_symbols (const PTR s1p, const PTR s2p)
 {
   register struct symbol **s1, **s2;
 
@@ -241,9 +239,7 @@ compare_symbols (s1p, s2p)
  */
 
 static int
-compare_psymbols (s1p, s2p)
-     const PTR s1p;
-     const PTR s2p;
+compare_psymbols (const PTR s1p, const PTR s2p)
 {
   register char *st1 = SYMBOL_NAME (*(struct partial_symbol **) s1p);
   register char *st2 = SYMBOL_NAME (*(struct partial_symbol **) s2p);
@@ -275,8 +271,7 @@ compare_psymbols (s1p, s2p)
 }
 
 void
-sort_pst_symbols (pst)
-     struct partial_symtab *pst;
+sort_pst_symbols (struct partial_symtab *pst)
 {
   /* Sort the global list; don't sort the static list */
 
@@ -288,8 +283,7 @@ sort_pst_symbols (pst)
 /* Call sort_block_syms to sort alphabetically the symbols of one block.  */
 
 void
-sort_block_syms (b)
-     register struct block *b;
+sort_block_syms (register struct block *b)
 {
   qsort (&BLOCK_SYM (b, 0), BLOCK_NSYMS (b),
 	 sizeof (struct symbol *), compare_symbols);
@@ -299,8 +293,7 @@ sort_block_syms (b)
    the symbols of each block of one symtab.  */
 
 void
-sort_symtab_syms (s)
-     register struct symtab *s;
+sort_symtab_syms (register struct symtab *s)
 {
   register struct blockvector *bv;
   int nbl;
@@ -325,10 +318,7 @@ sort_symtab_syms (s)
    may be part of a larger string and we are only saving a substring. */
 
 char *
-obsavestring (ptr, size, obstackp)
-     char *ptr;
-     int size;
-     struct obstack *obstackp;
+obsavestring (char *ptr, int size, struct obstack *obstackp)
 {
   register char *p = (char *) obstack_alloc (obstackp, size + 1);
   /* Open-coded memcpy--saves function call time.  These strings are usually
@@ -349,9 +339,8 @@ obsavestring (ptr, size, obstackp)
    in the obstack pointed to by OBSTACKP.  */
 
 char *
-obconcat (obstackp, s1, s2, s3)
-     struct obstack *obstackp;
-     const char *s1, *s2, *s3;
+obconcat (struct obstack *obstackp, const char *s1, const char *s2,
+	  const char *s3)
 {
   register int len = strlen (s1) + strlen (s2) + strlen (s3) + 1;
   register char *val = (char *) obstack_alloc (obstackp, len);
@@ -366,8 +355,7 @@ obconcat (obstackp, s1, s2, s3)
 int currently_reading_symtab = 0;
 
 static void
-decrement_reading_symtab (dummy)
-     void *dummy;
+decrement_reading_symtab (void *dummy)
 {
   currently_reading_symtab--;
 }
@@ -378,8 +366,7 @@ decrement_reading_symtab (dummy)
    case inline.  */
 
 struct symtab *
-psymtab_to_symtab (pst)
-     register struct partial_symtab *pst;
+psymtab_to_symtab (register struct partial_symtab *pst)
 {
   /* If it's been looked up before, return it. */
   if (pst->symtab)
@@ -400,8 +387,7 @@ psymtab_to_symtab (pst)
 /* Initialize entry point information for this objfile. */
 
 void
-init_entry_point_info (objfile)
-     struct objfile *objfile;
+init_entry_point_info (struct objfile *objfile)
 {
   /* Save startup file's range of PC addresses to help blockframe.c
      decide where the bottom of the stack is.  */
@@ -428,7 +414,7 @@ init_entry_point_info (objfile)
 /* Get current entry point address.  */
 
 CORE_ADDR
-entry_point_address ()
+entry_point_address (void)
 {
   return symfile_objfile ? symfile_objfile->ei.entry_point : 0;
 }
@@ -443,10 +429,7 @@ entry_point_address ()
    lowest-addressed loadable section.  */
 
 void
-find_lowest_section (abfd, sect, obj)
-     bfd *abfd;
-     asection *sect;
-     PTR obj;
+find_lowest_section (bfd *abfd, asection *sect, PTR obj)
 {
   asection **lowest = (asection **) obj;
 
@@ -514,9 +497,8 @@ free_section_addr_info (struct section_addr_info *sap)
    for the objectfile OBJFILE and stuffs ADDR into all of the offsets.  */
 
 void
-default_symfile_offsets (objfile, addrs)
-     struct objfile *objfile;
-     struct section_addr_info *addrs;
+default_symfile_offsets (struct objfile *objfile,
+			 struct section_addr_info *addrs)
 {
   int i;
   asection *sect = NULL;
@@ -578,11 +560,8 @@ default_symfile_offsets (objfile, addrs)
    the symbol reading (and complaints can be more terse about it).  */
 
 void
-syms_from_objfile (objfile, addrs, mainline, verbo)
-     struct objfile *objfile;
-     struct section_addr_info *addrs;
-     int mainline;
-     int verbo;
+syms_from_objfile (struct objfile *objfile, struct section_addr_info *addrs,
+		   int mainline, int verbo)
 {
   asection *lower_sect;
   asection *sect;
@@ -790,10 +769,7 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
    objfile. */
 
 void
-new_symfile_objfile (objfile, mainline, verbo)
-     struct objfile *objfile;
-     int mainline;
-     int verbo;
+new_symfile_objfile (struct objfile *objfile, int mainline, int verbo)
 {
 
   /* If this is the main symbol file we have to clean up all users of the
@@ -829,12 +805,8 @@ new_symfile_objfile (objfile, mainline, verbo)
    Upon failure, jumps back to command level (never returns). */
 
 struct objfile *
-symbol_file_add (name, from_tty, addrs, mainline, flags)
-     char *name;
-     int from_tty;
-     struct section_addr_info *addrs;
-     int mainline;
-     int flags;
+symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
+		 int mainline, int flags)
 {
   struct objfile *objfile;
   struct partial_symtab *psymtab;
@@ -946,9 +918,7 @@ symbol_file_add (name, from_tty, addrs, mainline, flags)
    and pass that to symbol_file_add(). This is no longer supported. */
 
 void
-symbol_file_command (args, from_tty)
-     char *args;
-     int from_tty;
+symbol_file_command (char *args, int from_tty)
 {
   char **argv;
   char *name = NULL;
@@ -1034,7 +1004,7 @@ symbol_file_command (args, from_tty)
    FIXME.  */
 
 static void
-set_initial_language ()
+set_initial_language (void)
 {
   struct partial_symtab *pst;
   enum language lang = language_unknown;
@@ -1062,8 +1032,7 @@ set_initial_language ()
    In case of trouble, error() is called.  */
 
 bfd *
-symfile_bfd_open (name)
-     char *name;
+symfile_bfd_open (char *name)
 {
   bfd *sym_bfd;
   int desc;
@@ -1122,8 +1091,7 @@ symfile_bfd_open (name)
    to handle. */
 
 void
-add_symtab_fns (sf)
-     struct sym_fns *sf;
+add_symtab_fns (struct sym_fns *sf)
 {
   sf->next = symtab_fns;
   symtab_fns = sf;
@@ -1136,8 +1104,7 @@ add_symtab_fns (sf)
    symbol file.  */
 
 static void
-find_sym_fns (objfile)
-     struct objfile *objfile;
+find_sym_fns (struct objfile *objfile)
 {
   struct sym_fns *sf;
   enum bfd_flavour our_flavour = bfd_get_flavour (objfile->obfd);
@@ -1162,9 +1129,7 @@ find_sym_fns (objfile)
 /* This function runs the load command of our current target.  */
 
 static void
-load_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+load_command (char *arg, int from_tty)
 {
   if (arg == NULL)
     arg = get_exec_file (1);
@@ -1371,9 +1336,8 @@ generic_load (char *args, int from_tty)
    function signature). */
 
 void
-report_transfer_performance (data_count, start_time, end_time)
-     unsigned long data_count;
-     time_t start_time, end_time;
+report_transfer_performance (unsigned long data_count, time_t start_time,
+			     time_t end_time)
 {
   print_transfer_performance (gdb_stdout, data_count, end_time - start_time, 0);
 }
@@ -1427,9 +1391,7 @@ print_transfer_performance (struct ui_file *stream,
 
 /* ARGSUSED */
 static void
-add_symbol_file_command (args, from_tty)
-     char *args;
-     int from_tty;
+add_symbol_file_command (char *args, int from_tty)
 {
   char *filename = NULL;
   int flags = OBJF_USERLOADED;
@@ -1585,9 +1547,7 @@ add_symbol_file_command (args, from_tty)
 }
 
 static void
-add_shared_symbol_files_command (args, from_tty)
-     char *args;
-     int from_tty;
+add_shared_symbol_files_command (char *args, int from_tty)
 {
 #ifdef ADD_SHARED_SYMBOL_FILES
   ADD_SHARED_SYMBOL_FILES (args, from_tty);
@@ -1598,7 +1558,7 @@ add_shared_symbol_files_command (args, from_tty)
 
 /* Re-read symbols if a symbol-file has changed.  */
 void
-reread_symbols ()
+reread_symbols (void)
 {
   struct objfile *objfile;
   long new_modtime;
@@ -1808,9 +1768,7 @@ static filename_language *filename_language_table;
 static int fl_table_size, fl_table_next;
 
 static void
-add_filename_language (ext, lang)
-     char *ext;
-     enum language lang;
+add_filename_language (char *ext, enum language lang)
 {
   if (fl_table_next >= fl_table_size)
     {
@@ -1827,9 +1785,7 @@ add_filename_language (ext, lang)
 static char *ext_args;
 
 static void
-set_ext_lang_command (args, from_tty)
-     char *args;
-     int from_tty;
+set_ext_lang_command (char *args, int from_tty)
 {
   int i;
   char *cp = ext_args;
@@ -1886,9 +1842,7 @@ set_ext_lang_command (args, from_tty)
 }
 
 static void
-info_ext_lang_command (args, from_tty)
-     char *args;
-     int from_tty;
+info_ext_lang_command (char *args, int from_tty)
 {
   int i;
 
@@ -1901,7 +1855,7 @@ info_ext_lang_command (args, from_tty)
 }
 
 static void
-init_filename_language_table ()
+init_filename_language_table (void)
 {
   if (fl_table_size == 0)	/* protect against repetition */
     {
@@ -1932,8 +1886,7 @@ init_filename_language_table ()
 }
 
 enum language
-deduce_language_from_filename (filename)
-     char *filename;
+deduce_language_from_filename (char *filename)
 {
   int i;
   char *cp;
@@ -1962,9 +1915,7 @@ deduce_language_from_filename (filename)
  */
 
 struct symtab *
-allocate_symtab (filename, objfile)
-     char *filename;
-     struct objfile *objfile;
+allocate_symtab (char *filename, struct objfile *objfile)
 {
   register struct symtab *symtab;
 
@@ -1996,9 +1947,7 @@ allocate_symtab (filename, objfile)
 }
 
 struct partial_symtab *
-allocate_psymtab (filename, objfile)
-     char *filename;
-     struct objfile *objfile;
+allocate_psymtab (char *filename, struct objfile *objfile)
 {
   struct partial_symtab *psymtab;
 
@@ -2040,8 +1989,7 @@ allocate_psymtab (filename, objfile)
 }
 
 void
-discard_psymtab (pst)
-     struct partial_symtab *pst;
+discard_psymtab (struct partial_symtab *pst)
 {
   struct partial_symtab **prev_pst;
 
@@ -2070,7 +2018,7 @@ discard_psymtab (pst)
    table data.  */
 
 void
-clear_symtab_users ()
+clear_symtab_users (void)
 {
   /* Someday, we should do better than this, by only blowing away
      the things that really need to be blown.  */
@@ -2126,7 +2074,7 @@ static int clear_symtab_users_queued;
 static int clear_symtab_users_done;
 
 static void
-clear_symtab_users_once ()
+clear_symtab_users_once (void)
 {
   /* Enforce once-per-`do_cleanups'-semantics */
   if (clear_symtab_users_queued <= clear_symtab_users_done)
@@ -2140,8 +2088,7 @@ clear_symtab_users_once ()
 /* Delete the specified psymtab, and any others that reference it.  */
 
 static void
-cashier_psymtab (pst)
-     struct partial_symtab *pst;
+cashier_psymtab (struct partial_symtab *pst)
 {
   struct partial_symtab *ps, *pprev = NULL;
   int i;
@@ -2198,8 +2145,7 @@ cashier_psymtab (pst)
    all stray pointers into the freed symtab.  */
 
 int
-free_named_symtabs (name)
-     char *name;
+free_named_symtabs (char *name)
 {
 #if 0
   /* FIXME:  With the new method of each objfile having it's own
@@ -2305,14 +2251,10 @@ again2:
    FILENAME is the name of the symbol-file we are reading from. */
 
 struct partial_symtab *
-start_psymtab_common (objfile, section_offsets,
-		      filename, textlow, global_syms, static_syms)
-     struct objfile *objfile;
-     struct section_offsets *section_offsets;
-     char *filename;
-     CORE_ADDR textlow;
-     struct partial_symbol **global_syms;
-     struct partial_symbol **static_syms;
+start_psymtab_common (struct objfile *objfile,
+		      struct section_offsets *section_offsets, char *filename,
+		      CORE_ADDR textlow, struct partial_symbol **global_syms,
+		      struct partial_symbol **static_syms)
 {
   struct partial_symtab *psymtab;
 
@@ -2329,17 +2271,11 @@ start_psymtab_common (objfile, section_offsets,
    Since one arg is a struct, we pass in a ptr and deref it (sigh).  */
 
 void
-add_psymbol_to_list (name, namelength, namespace, class, list, val, coreaddr,
-		     language, objfile)
-     char *name;
-     int namelength;
-     namespace_enum namespace;
-     enum address_class class;
-     struct psymbol_allocation_list *list;
-     long val;			/* Value as a long */
-     CORE_ADDR coreaddr;	/* Value as a CORE_ADDR */
-     enum language language;
-     struct objfile *objfile;
+add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
+		     enum address_class class,
+		     struct psymbol_allocation_list *list, long val,	/* Value as a long */
+		     CORE_ADDR coreaddr,	/* Value as a CORE_ADDR */
+		     enum language language, struct objfile *objfile)
 {
   register struct partial_symbol *psym;
   char *buf = alloca (namelength + 1);
@@ -2384,19 +2320,13 @@ add_psymbol_to_list (name, namelength, namespace, class, list, val, coreaddr,
  * name. */
 
 void
-add_psymbol_with_dem_name_to_list (name, namelength, dem_name, dem_namelength,
-		   namespace, class, list, val, coreaddr, language, objfile)
-     char *name;
-     int namelength;
-     char *dem_name;
-     int dem_namelength;
-     namespace_enum namespace;
-     enum address_class class;
-     struct psymbol_allocation_list *list;
-     long val;			/* Value as a long */
-     CORE_ADDR coreaddr;	/* Value as a CORE_ADDR */
-     enum language language;
-     struct objfile *objfile;
+add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
+				   int dem_namelength, namespace_enum namespace,
+				   enum address_class class,
+				   struct psymbol_allocation_list *list, long val,	/* Value as a long */
+				   CORE_ADDR coreaddr,	/* Value as a CORE_ADDR */
+				   enum language language,
+				   struct objfile *objfile)
 {
   register struct partial_symbol *psym;
   char *buf = alloca (namelength + 1);
@@ -2459,9 +2389,7 @@ add_psymbol_with_dem_name_to_list (name, namelength, dem_name, dem_namelength,
 /* Initialize storage for partial symbols.  */
 
 void
-init_psymbol_list (objfile, total_symbols)
-     struct objfile *objfile;
-     int total_symbols;
+init_psymbol_list (struct objfile *objfile, int total_symbols)
 {
   /* Free any previously allocated psymbol lists.  */
 
@@ -2559,8 +2487,7 @@ void (*target_overlay_update) (struct obj_section *) = simple_overlay_update;
    SECTION is loaded at an address different from where it will "run".  */
 
 int
-section_is_overlay (section)
-     asection *section;
+section_is_overlay (asection *section)
 {
   if (overlay_debugging)
     if (section && section->lma != 0 &&
@@ -2574,7 +2501,7 @@ section_is_overlay (section)
    Invalidate the mapped state of all overlay sections (mark it as stale).  */
 
 static void
-overlay_invalidate_all ()
+overlay_invalidate_all (void)
 {
   struct objfile *objfile;
   struct obj_section *sect;
@@ -2595,8 +2522,7 @@ overlay_invalidate_all ()
    section is stale, then call TARGET_OVERLAY_UPDATE to refresh it.  */
 
 static int
-overlay_is_mapped (osect)
-     struct obj_section *osect;
+overlay_is_mapped (struct obj_section *osect)
 {
   if (osect == 0 || !section_is_overlay (osect->the_bfd_section))
     return 0;
@@ -2629,8 +2555,7 @@ overlay_is_mapped (osect)
    Returns true if section is an overlay, and is currently mapped.  */
 
 int
-section_is_mapped (section)
-     asection *section;
+section_is_mapped (asection *section)
 {
   struct objfile *objfile;
   struct obj_section *osect;
@@ -2648,9 +2573,7 @@ section_is_mapped (section)
    If PC falls into the lma range of SECTION, return true, else false.  */
 
 CORE_ADDR
-pc_in_unmapped_range (pc, section)
-     CORE_ADDR pc;
-     asection *section;
+pc_in_unmapped_range (CORE_ADDR pc, asection *section)
 {
   int size;
 
@@ -2668,9 +2591,7 @@ pc_in_unmapped_range (pc, section)
    If PC falls into the vma range of SECTION, return true, else false.  */
 
 CORE_ADDR
-pc_in_mapped_range (pc, section)
-     CORE_ADDR pc;
-     asection *section;
+pc_in_mapped_range (CORE_ADDR pc, asection *section)
 {
   int size;
 
@@ -2689,9 +2610,7 @@ pc_in_mapped_range (pc, section)
    May be the same as PC.  */
 
 CORE_ADDR
-overlay_unmapped_address (pc, section)
-     CORE_ADDR pc;
-     asection *section;
+overlay_unmapped_address (CORE_ADDR pc, asection *section)
 {
   if (overlay_debugging)
     if (section && section_is_overlay (section) &&
@@ -2706,9 +2625,7 @@ overlay_unmapped_address (pc, section)
    May be the same as PC.  */
 
 CORE_ADDR
-overlay_mapped_address (pc, section)
-     CORE_ADDR pc;
-     asection *section;
+overlay_mapped_address (CORE_ADDR pc, asection *section)
 {
   if (overlay_debugging)
     if (section && section_is_overlay (section) &&
@@ -2724,9 +2641,7 @@ overlay_mapped_address (pc, section)
    depending on whether the section is mapped or not.  */
 
 CORE_ADDR
-symbol_overlayed_address (address, section)
-     CORE_ADDR address;
-     asection *section;
+symbol_overlayed_address (CORE_ADDR address, asection *section)
 {
   if (overlay_debugging)
     {
@@ -2755,8 +2670,7 @@ symbol_overlayed_address (address, section)
    Else if PC matches an unmapped section's LMA, return that section.  */
 
 asection *
-find_pc_overlay (pc)
-     CORE_ADDR pc;
+find_pc_overlay (CORE_ADDR pc)
 {
   struct objfile *objfile;
   struct obj_section *osect, *best_match = NULL;
@@ -2783,8 +2697,7 @@ find_pc_overlay (pc)
    currently marked as MAPPED, return that section.  Else return NULL.  */
 
 asection *
-find_pc_mapped_section (pc)
-     CORE_ADDR pc;
+find_pc_mapped_section (CORE_ADDR pc)
 {
   struct objfile *objfile;
   struct obj_section *osect;
@@ -2802,9 +2715,7 @@ find_pc_mapped_section (pc)
    Print a list of mapped sections and their PC ranges */
 
 void
-list_overlays_command (args, from_tty)
-     char *args;
-     int from_tty;
+list_overlays_command (char *args, int from_tty)
 {
   int nmapped = 0;
   struct objfile *objfile;
@@ -2843,9 +2754,7 @@ list_overlays_command (args, from_tty)
    Mark the named section as mapped (ie. residing at its VMA address).  */
 
 void
-map_overlay_command (args, from_tty)
-     char *args;
-     int from_tty;
+map_overlay_command (char *args, int from_tty)
 {
   struct objfile *objfile, *objfile2;
   struct obj_section *sec, *sec2;
@@ -2896,9 +2805,7 @@ the 'overlay manual' command.");
    (ie. resident in its LMA address range, rather than the VMA range).  */
 
 void
-unmap_overlay_command (args, from_tty)
-     char *args;
-     int from_tty;
+unmap_overlay_command (char *args, int from_tty)
 {
   struct objfile *objfile;
   struct obj_section *sec;
@@ -2928,9 +2835,7 @@ the 'overlay manual' command.");
    Possibly this should be done via a set/show command. */
 
 static void
-overlay_auto_command (args, from_tty)
-     char *args;
-     int from_tty;
+overlay_auto_command (char *args, int from_tty)
 {
   overlay_debugging = -1;
   if (info_verbose)
@@ -2942,9 +2847,7 @@ overlay_auto_command (args, from_tty)
    Possibly this should be done via a set/show command. */
 
 static void
-overlay_manual_command (args, from_tty)
-     char *args;
-     int from_tty;
+overlay_manual_command (char *args, int from_tty)
 {
   overlay_debugging = 1;
   if (info_verbose)
@@ -2956,9 +2859,7 @@ overlay_manual_command (args, from_tty)
    Possibly this should be done via a set/show command. */
 
 static void
-overlay_off_command (args, from_tty)
-     char *args;
-     int from_tty;
+overlay_off_command (char *args, int from_tty)
 {
   overlay_debugging = 0;
   if (info_verbose)
@@ -2966,9 +2867,7 @@ overlay_off_command (args, from_tty)
 }
 
 static void
-overlay_load_command (args, from_tty)
-     char *args;
-     int from_tty;
+overlay_load_command (char *args, int from_tty)
 {
   if (target_overlay_update)
     (*target_overlay_update) (NULL);
@@ -2983,9 +2882,7 @@ overlay_load_command (args, from_tty)
 struct cmd_list_element *overlaylist;
 
 static void
-overlay_command (args, from_tty)
-     char *args;
-     int from_tty;
+overlay_command (char *args, int from_tty)
 {
   printf_unfiltered
     ("\"overlay\" must be followed by the name of an overlay command.\n");
@@ -3048,7 +2945,7 @@ enum ovly_index
 
 /* Throw away the cached copy of _ovly_table */
 static void
-simple_free_overlay_table ()
+simple_free_overlay_table (void)
 {
   if (cache_ovly_table)
     free (cache_ovly_table);
@@ -3060,7 +2957,7 @@ simple_free_overlay_table ()
 #if 0
 /* Throw away the cached copy of _ovly_region_table */
 static void
-simple_free_overlay_region_table ()
+simple_free_overlay_region_table (void)
 {
   if (cache_ovly_region_table)
     free (cache_ovly_region_table);
@@ -3073,10 +2970,7 @@ simple_free_overlay_region_table ()
 /* Read an array of ints from the target into a local buffer.
    Convert to host order.  int LEN is number of ints  */
 static void
-read_target_long_array (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     unsigned int *myaddr;
-     int len;
+read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr, int len)
 {
   char *buf = alloca (len * TARGET_LONG_BYTES);
   int i;
@@ -3090,7 +2984,7 @@ read_target_long_array (memaddr, myaddr, len)
 /* Find and grab a copy of the target _ovly_table
    (and _novlys, which is needed for the table's size) */
 static int
-simple_read_overlay_table ()
+simple_read_overlay_table (void)
 {
   struct minimal_symbol *msym;
 
@@ -3123,7 +3017,7 @@ simple_read_overlay_table ()
 /* Find and grab a copy of the target _ovly_region_table
    (and _novly_regions, which is needed for the table's size) */
 static int
-simple_read_overlay_region_table ()
+simple_read_overlay_region_table (void)
 {
   struct minimal_symbol *msym;
 
@@ -3162,8 +3056,7 @@ simple_read_overlay_region_table ()
    success, 0 for failure.  */
 
 static int
-simple_overlay_update_1 (osect)
-     struct obj_section *osect;
+simple_overlay_update_1 (struct obj_section *osect)
 {
   int i, size;
 
@@ -3197,8 +3090,7 @@ simple_overlay_update_1 (osect)
    re-read the entire cache, and go ahead and update all sections.  */
 
 static void
-simple_overlay_update (osect)
-     struct obj_section *osect;
+simple_overlay_update (struct obj_section *osect)
 {
   struct objfile *objfile;
 
@@ -3243,7 +3135,7 @@ simple_overlay_update (osect)
 
 
 void
-_initialize_symfile ()
+_initialize_symfile (void)
 {
   struct cmd_list_element *c;
 

@@ -121,15 +121,13 @@ init_op50n_cmds (void)
 };
 
 static void
-op50n_open (args, from_tty)
-     char *args;
-     int from_tty;
+op50n_open (char *args, int from_tty)
 {
   monitor_open (args, &op50n_cmds, from_tty);
 }
 
 void
-_initialize_op50n ()
+_initialize_op50n (void)
 {
   init_op50n_cmds ();
   init_monitor_ops (&op50n_ops);

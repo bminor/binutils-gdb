@@ -28,11 +28,7 @@
 #include "serial.h"
 
 static void
-ppcbug_supply_register (regname, regnamelen, val, vallen)
-     char *regname;
-     int regnamelen;
-     char *val;
-     int vallen;
+ppcbug_supply_register (char *regname, int regnamelen, char *val, int vallen)
 {
   int regno = 0;
 
@@ -188,23 +184,19 @@ static struct monitor_ops ppcbug_cmds0;
 static struct monitor_ops ppcbug_cmds1;
 
 static void
-ppcbug_open0 (args, from_tty)
-     char *args;
-     int from_tty;
+ppcbug_open0 (char *args, int from_tty)
 {
   monitor_open (args, &ppcbug_cmds0, from_tty);
 }
 
 static void
-ppcbug_open1 (args, from_tty)
-     char *args;
-     int from_tty;
+ppcbug_open1 (char *args, int from_tty)
 {
   monitor_open (args, &ppcbug_cmds1, from_tty);
 }
 
 void
-_initialize_ppcbug_rom ()
+_initialize_ppcbug_rom (void)
 {
   init_ppc_cmds ("lo 0\r", &ppcbug_cmds0, &ppcbug_ops0);
   init_ppc_cmds ("lo 1\r", &ppcbug_cmds1, &ppcbug_ops1);

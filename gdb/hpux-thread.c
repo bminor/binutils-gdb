@@ -100,14 +100,13 @@ static struct target_ops hpux_thread_ops;
 
 
 static struct cleanup *
-save_inferior_pid ()
+save_inferior_pid (void)
 {
   return make_cleanup (restore_inferior_pid, inferior_pid);
 }
 
 static void
-restore_inferior_pid (pid)
-     int pid;
+restore_inferior_pid (int pid)
 {
   inferior_pid = pid;
 }
@@ -119,7 +118,7 @@ static int cached_active_thread;
 static cma__t_int_tcb cached_tcb;
 
 static int
-find_active_thread ()
+find_active_thread (void)
 {
   static cma__t_int_tcb tcb;
   CORE_ADDR tcb_ptr;
@@ -139,8 +138,7 @@ find_active_thread ()
 static cma__t_int_tcb *find_tcb (int thread);
 
 static cma__t_int_tcb *
-find_tcb (thread)
-     int thread;
+find_tcb (int thread)
 {
   cma__t_known_object queue_header;
   cma__t_queue *queue_ptr;
@@ -179,9 +177,7 @@ find_tcb (thread)
 
 /* ARGSUSED */
 static void
-hpux_thread_open (arg, from_tty)
-     char *arg;
-     int from_tty;
+hpux_thread_open (char *arg, int from_tty)
 {
   child_ops.to_open (arg, from_tty);
 }
@@ -190,9 +186,7 @@ hpux_thread_open (arg, from_tty)
    and wait for the trace-trap that results from attaching.  */
 
 static void
-hpux_thread_attach (args, from_tty)
-     char *args;
-     int from_tty;
+hpux_thread_attach (char *args, int from_tty)
 {
   child_ops.to_attach (args, from_tty);
 
@@ -208,9 +202,7 @@ hpux_thread_attach (args, from_tty)
    started via the normal ptrace (PTRACE_TRACEME).  */
 
 static void
-hpux_thread_detach (args, from_tty)
-     char *args;
-     int from_tty;
+hpux_thread_detach (char *args, int from_tty)
 {
   child_ops.to_detach (args, from_tty);
 }
@@ -221,10 +213,7 @@ hpux_thread_detach (args, from_tty)
    for procfs.  */
 
 static void
-hpux_thread_resume (pid, step, signo)
-     int pid;
-     int step;
-     enum target_signal signo;
+hpux_thread_resume (int pid, int step, enum target_signal signo)
 {
   struct cleanup *old_chain;
 
@@ -253,9 +242,7 @@ hpux_thread_resume (pid, step, signo)
    to a LWP id, and vice versa on the way out.  */
 
 static int
-hpux_thread_wait (pid, ourstatus)
-     int pid;
-     struct target_waitstatus *ourstatus;
+hpux_thread_wait (int pid, struct target_waitstatus *ourstatus)
 {
   int rtnval;
   struct cleanup *old_chain;
@@ -303,8 +290,7 @@ static char regmap[NUM_REGS] =
 };
 
 static void
-hpux_thread_fetch_registers (regno)
-     int regno;
+hpux_thread_fetch_registers (int regno)
 {
   cma__t_int_tcb tcb, *tcb_ptr;
   struct cleanup *old_chain;
@@ -366,8 +352,7 @@ hpux_thread_fetch_registers (regno)
 }
 
 static void
-hpux_thread_store_registers (regno)
-     int regno;
+hpux_thread_store_registers (int regno)
 {
   cma__t_int_tcb tcb, *tcb_ptr;
   struct cleanup *old_chain;
@@ -442,7 +427,7 @@ hpux_thread_store_registers (regno)
    debugged.  */
 
 static void
-hpux_thread_prepare_to_store ()
+hpux_thread_prepare_to_store (void)
 {
   child_ops.to_prepare_to_store ();
 }
@@ -472,21 +457,19 @@ hpux_thread_xfer_memory (memaddr, myaddr, len, dowrite, target)
 /* Print status information about what we're accessing.  */
 
 static void
-hpux_thread_files_info (ignore)
-     struct target_ops *ignore;
+hpux_thread_files_info (struct target_ops *ignore)
 {
   child_ops.to_files_info (ignore);
 }
 
 static void
-hpux_thread_kill_inferior ()
+hpux_thread_kill_inferior (void)
 {
   child_ops.to_kill ();
 }
 
 static void
-hpux_thread_notice_signals (pid)
-     int pid;
+hpux_thread_notice_signals (int pid)
 {
   child_ops.to_notice_signals (pid);
 }
@@ -494,10 +477,7 @@ hpux_thread_notice_signals (pid)
 /* Fork an inferior process, and start debugging it with /proc.  */
 
 static void
-hpux_thread_create_inferior (exec_file, allargs, env)
-     char *exec_file;
-     char *allargs;
-     char **env;
+hpux_thread_create_inferior (char *exec_file, char *allargs, char **env)
 {
   child_ops.to_create_inferior (exec_file, allargs, env);
 
@@ -527,8 +507,7 @@ hpux_thread_create_inferior (exec_file, allargs, env)
 static void (*target_new_objfile_chain) (struct objfile *);
 
 void
-hpux_thread_new_objfile (objfile)
-     struct objfile *objfile;
+hpux_thread_new_objfile (struct objfile *objfile)
 {
   struct minimal_symbol *ms;
 
@@ -562,7 +541,7 @@ quit:
 /* Clean up after the inferior dies.  */
 
 static void
-hpux_thread_mourn_inferior ()
+hpux_thread_mourn_inferior (void)
 {
   child_ops.to_mourn_inferior ();
 }
@@ -570,20 +549,19 @@ hpux_thread_mourn_inferior ()
 /* Mark our target-struct as eligible for stray "run" and "attach" commands.  */
 
 static int
-hpux_thread_can_run ()
+hpux_thread_can_run (void)
 {
   return child_suppress_run;
 }
 
 static int
-hpux_thread_alive (pid)
-     int pid;
+hpux_thread_alive (int pid)
 {
   return 1;
 }
 
 static void
-hpux_thread_stop ()
+hpux_thread_stop (void)
 {
   child_ops.to_stop ();
 }
@@ -591,8 +569,7 @@ hpux_thread_stop ()
 /* Convert a pid to printable form. */
 
 char *
-hpux_pid_to_str (pid)
-     int pid;
+hpux_pid_to_str (int pid)
 {
   static char buf[100];
 
@@ -602,7 +579,7 @@ hpux_pid_to_str (pid)
 }
 
 static void
-init_hpux_thread_ops ()
+init_hpux_thread_ops (void)
 {
   hpux_thread_ops.to_shortname = "hpux-threads";
   hpux_thread_ops.to_longname = "HPUX threads and pthread.";
@@ -641,7 +618,7 @@ init_hpux_thread_ops ()
 }
 
 void
-_initialize_hpux_thread ()
+_initialize_hpux_thread (void)
 {
   init_hpux_thread_ops ();
   add_target (&hpux_thread_ops);

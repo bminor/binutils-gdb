@@ -778,9 +778,7 @@ hardwire_setbaudrate (serial_t scb, int rate)
 }
 
 static int
-hardwire_setstopbits (scb, num)
-     serial_t scb;
-     int num;
+hardwire_setstopbits (serial_t scb, int num)
 {
   struct hardwire_ttystate state;
   int newbit;

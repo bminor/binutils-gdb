@@ -150,9 +150,7 @@ extern value_ptr find_function_in_inferior (char *);
 
 /* Should call_function allocate stack space for a struct return?  */
 int
-hppa_use_struct_convention (gcc_p, type)
-     int gcc_p;
-     struct type *type;
+hppa_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 2 * REGISTER_SIZE);
 }
@@ -165,8 +163,7 @@ hppa_use_struct_convention (gcc_p, type)
    value. */
 
 static int
-sign_extend (val, bits)
-     unsigned val, bits;
+sign_extend (unsigned val, unsigned bits)
 {
   return (int) (val >> (bits - 1) ? (-1 << bits) | val : val);
 }
@@ -174,8 +171,7 @@ sign_extend (val, bits)
 /* For many immediate values the sign bit is the low bit! */
 
 static int
-low_sign_extend (val, bits)
-     unsigned val, bits;
+low_sign_extend (unsigned val, unsigned bits)
 {
   return (int) ((val & 0x1 ? (-1 << (bits - 1)) : 0) | val >> 1);
 }
@@ -183,8 +179,7 @@ low_sign_extend (val, bits)
 /* extract the immediate field from a ld{bhw}s instruction */
 
 static int
-extract_5_load (word)
-     unsigned word;
+extract_5_load (unsigned word)
 {
   return low_sign_extend (word >> 16 & MASK_5, 5);
 }
@@ -192,8 +187,7 @@ extract_5_load (word)
 /* extract the immediate field from a break instruction */
 
 static unsigned
-extract_5r_store (word)
-     unsigned word;
+extract_5r_store (unsigned word)
 {
   return (word & MASK_5);
 }
@@ -201,8 +195,7 @@ extract_5r_store (word)
 /* extract the immediate field from a {sr}sm instruction */
 
 static unsigned
-extract_5R_store (word)
-     unsigned word;
+extract_5R_store (unsigned word)
 {
   return (word >> 16 & MASK_5);
 }
@@ -210,8 +203,7 @@ extract_5R_store (word)
 /* extract a 14 bit immediate field */
 
 static int
-extract_14 (word)
-     unsigned word;
+extract_14 (unsigned word)
 {
   return low_sign_extend (word & MASK_14, 14);
 }
@@ -219,9 +211,7 @@ extract_14 (word)
 /* deposit a 14 bit constant in a word */
 
 static unsigned
-deposit_14 (opnd, word)
-     int opnd;
-     unsigned word;
+deposit_14 (int opnd, unsigned word)
 {
   unsigned sign = (opnd < 0 ? 1 : 0);
 
@@ -231,8 +221,7 @@ deposit_14 (opnd, word)
 /* extract a 21 bit constant */
 
 static int
-extract_21 (word)
-     unsigned word;
+extract_21 (unsigned word)
 {
   int val;
 
@@ -255,8 +244,7 @@ extract_21 (word)
    the low 21 bits of opnd are relevant */
 
 static unsigned
-deposit_21 (opnd, word)
-     unsigned opnd, word;
+deposit_21 (unsigned opnd, unsigned word)
 {
   unsigned val = 0;
 
@@ -276,8 +264,7 @@ deposit_21 (opnd, word)
    19 bit signed value. */
 
 static int
-extract_17 (word)
-     unsigned word;
+extract_17 (unsigned word)
 {
   return sign_extend (GET_FIELD (word, 19, 28) |
 		      GET_FIELD (word, 29, 29) << 10 |
@@ -291,9 +278,7 @@ extract_17 (word)
    larger than the first, and zero if they are equal.  */
 
 static int
-compare_unwind_entries (arg1, arg2)
-     const void *arg1;
-     const void *arg2;
+compare_unwind_entries (const void *arg1, const void *arg2)
 {
   const struct unwind_table_entry *a = arg1;
   const struct unwind_table_entry *b = arg2;
@@ -321,12 +306,9 @@ record_text_segment_lowaddr (abfd, section, ignored)
 }
 
 static void
-internalize_unwinds (objfile, table, section, entries, size, text_offset)
-     struct objfile *objfile;
-     struct unwind_table_entry *table;
-     asection *section;
-     unsigned int entries, size;
-     CORE_ADDR text_offset;
+internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
+		     asection *section, unsigned int entries, unsigned int size,
+		     CORE_ADDR text_offset)
 {
   /* We will read the unwind entries into temporary memory, then
      fill in the actual unwind table.  */
@@ -418,8 +400,7 @@ internalize_unwinds (objfile, table, section, entries, size, text_offset)
    gets freed when the objfile is destroyed.  */
 
 static void
-read_unwind_info (objfile)
-     struct objfile *objfile;
+read_unwind_info (struct objfile *objfile)
 {
   asection *unwind_sec, *stub_unwind_sec;
   unsigned unwind_size, stub_unwind_size, total_size;
@@ -561,8 +542,7 @@ read_unwind_info (objfile)
    search of the unwind tables, we depend upon them to be sorted.  */
 
 struct unwind_table_entry *
-find_unwind_entry (pc)
-     CORE_ADDR pc;
+find_unwind_entry (CORE_ADDR pc)
 {
   int first, middle, last;
   struct objfile *objfile;
@@ -624,8 +604,7 @@ find_unwind_entry (pc)
    bizarre way in which someone (?) decided they wanted to handle
    frame pointerless code in GDB.  */
 int
-hpread_adjust_stack_address (func_addr)
-     CORE_ADDR func_addr;
+hpread_adjust_stack_address (CORE_ADDR func_addr)
 {
   struct unwind_table_entry *u;
 
@@ -640,8 +619,7 @@ hpread_adjust_stack_address (func_addr)
    kind.  */
 
 static int
-pc_in_interrupt_handler (pc)
-     CORE_ADDR pc;
+pc_in_interrupt_handler (CORE_ADDR pc)
 {
   struct unwind_table_entry *u;
   struct minimal_symbol *msym_us;
@@ -663,8 +641,7 @@ pc_in_interrupt_handler (pc)
    ?!? Need to handle stubs which appear in PA64 code.  */
 
 static int
-pc_in_linker_stub (pc)
-     CORE_ADDR pc;
+pc_in_linker_stub (CORE_ADDR pc)
 {
   int found_magic_instruction = 0;
   int i;
@@ -729,8 +706,7 @@ pc_in_linker_stub (pc)
 }
 
 static int
-find_return_regnum (pc)
-     CORE_ADDR pc;
+find_return_regnum (CORE_ADDR pc)
 {
   struct unwind_table_entry *u;
 
@@ -747,8 +723,7 @@ find_return_regnum (pc)
 
 /* Return size of frame, or -1 if we should use a frame pointer.  */
 static int
-find_proc_framesize (pc)
-     CORE_ADDR pc;
+find_proc_framesize (CORE_ADDR pc)
 {
   struct unwind_table_entry *u;
   struct minimal_symbol *msym_us;
@@ -783,8 +758,7 @@ find_proc_framesize (pc)
 static int rp_saved (CORE_ADDR);
 
 static int
-rp_saved (pc)
-     CORE_ADDR pc;
+rp_saved (CORE_ADDR pc)
 {
   struct unwind_table_entry *u;
 
@@ -823,8 +797,7 @@ rp_saved (pc)
 }
 
 int
-frameless_function_invocation (frame)
-     struct frame_info *frame;
+frameless_function_invocation (struct frame_info *frame)
 {
   struct unwind_table_entry *u;
 
@@ -837,8 +810,7 @@ frameless_function_invocation (frame)
 }
 
 CORE_ADDR
-saved_pc_after_call (frame)
-     struct frame_info *frame;
+saved_pc_after_call (struct frame_info *frame)
 {
   int ret_regnum;
   CORE_ADDR pc;
@@ -857,8 +829,7 @@ saved_pc_after_call (frame)
 }
 
 CORE_ADDR
-hppa_frame_saved_pc (frame)
-     struct frame_info *frame;
+hppa_frame_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR pc = get_frame_pc (frame);
   struct unwind_table_entry *u;
@@ -1037,9 +1008,7 @@ hppa_frame_saved_pc (frame)
    in a system call.  */
 
 void
-init_extra_frame_info (fromleaf, frame)
-     int fromleaf;
-     struct frame_info *frame;
+init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   int flags;
   int framesize;
@@ -1096,8 +1065,7 @@ init_extra_frame_info (fromleaf, frame)
    a frame pointer calls code without a frame pointer.  */
 
 CORE_ADDR
-frame_chain (frame)
-     struct frame_info *frame;
+frame_chain (struct frame_info *frame)
 {
   int my_framesize, caller_framesize;
   struct unwind_table_entry *u;
@@ -1353,9 +1321,7 @@ frame_chain (frame)
    was compiled with gcc. */
 
 int
-hppa_frame_chain_valid (chain, thisframe)
-     CORE_ADDR chain;
-     struct frame_info *thisframe;
+hppa_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
   struct minimal_symbol *msym_us;
   struct minimal_symbol *msym_start;
@@ -1416,8 +1382,7 @@ hppa_frame_chain_valid (chain, thisframe)
    to be aligned to a 64-byte boundary. */
 
 void
-push_dummy_frame (inf_status)
-     struct inferior_status *inf_status;
+push_dummy_frame (struct inferior_status *inf_status)
 {
   CORE_ADDR sp, pc, pcspace;
   register int regnum;
@@ -1494,9 +1459,8 @@ push_dummy_frame (inf_status)
 }
 
 static void
-find_dummy_frame_regs (frame, frame_saved_regs)
-     struct frame_info *frame;
-     struct frame_saved_regs *frame_saved_regs;
+find_dummy_frame_regs (struct frame_info *frame,
+		       struct frame_saved_regs *frame_saved_regs)
 {
   CORE_ADDR fp = frame->frame;
   int i;
@@ -1536,7 +1500,7 @@ find_dummy_frame_regs (frame, frame_saved_regs)
 }
 
 void
-hppa_pop_frame ()
+hppa_pop_frame (void)
 {
   register struct frame_info *frame = get_current_frame ();
   register CORE_ADDR fp, npc, target_pc;
@@ -1634,8 +1598,7 @@ hppa_pop_frame ()
    queue space registers. */
 
 static int
-restore_pc_queue (fsr)
-     struct frame_saved_regs *fsr;
+restore_pc_queue (struct frame_saved_regs *fsr)
 {
   CORE_ADDR pc = read_pc ();
   CORE_ADDR new_pc = read_memory_integer (fsr->regs[PCOQ_HEAD_REGNUM],
@@ -1705,12 +1668,8 @@ restore_pc_queue (fsr)
    to the callee, so we do that too.  */
    
 CORE_ADDR
-hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     int struct_return;
-     CORE_ADDR struct_addr;
+hppa_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		     int struct_return, CORE_ADDR struct_addr)
 {
   /* array of arguments' offsets */
   int *offset = (int *) alloca (nargs * sizeof (int));
@@ -1828,12 +1787,8 @@ hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
    arguments into registers as needed by the ABI. */
    
 CORE_ADDR
-hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     int struct_return;
-     CORE_ADDR struct_addr;
+hppa_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		     int struct_return, CORE_ADDR struct_addr)
 {
   /* array of arguments' offsets */
   int *offset = (int *) alloca (nargs * sizeof (int));
@@ -1922,9 +1877,7 @@ hppa_push_arguments (nargs, args, sp, struct_return, struct_addr)
    gets the value from the stack rather than from the buffer where all the
    registers were saved when the function called completed. */
 value_ptr
-hppa_value_returned_from_stack (valtype, addr)
-     register struct type *valtype;
-     CORE_ADDR addr;
+hppa_value_returned_from_stack (register struct type *valtype, CORE_ADDR addr)
 {
   register value_ptr val;
 
@@ -1957,9 +1910,7 @@ hppa_value_returned_from_stack (valtype, addr)
    man entry for shl_findsym */
 
 CORE_ADDR
-find_stub_with_shl_get (function, handle)
-     struct minimal_symbol *function;
-     CORE_ADDR handle;
+find_stub_with_shl_get (struct minimal_symbol *function, CORE_ADDR handle)
 {
   struct symbol *get_sym, *symbol2;
   struct minimal_symbol *buff_minsym, *msymbol;
@@ -2058,14 +2009,8 @@ cover_find_stub_with_shl_get (PTR args_untyped)
    Please contact Jeff Law (law@cygnus.com) before changing this code.  */
 
 CORE_ADDR
-hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
-     char *dummy;
-     CORE_ADDR pc;
-     CORE_ADDR fun;
-     int nargs;
-     value_ptr *args;
-     struct type *type;
-     int gcc_p;
+hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
+		     value_ptr *args, struct type *type, int gcc_p)
 {
   CORE_ADDR dyncall_addr;
   struct minimal_symbol *msymbol;
@@ -2441,8 +2386,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
    We'll return zero in that case, rather than attempting to read it
    and cause a warning. */
 CORE_ADDR
-target_read_fp (pid)
-     int pid;
+target_read_fp (int pid)
 {
   int flags = read_register (FLAGS_REGNUM);
 
@@ -2461,8 +2405,7 @@ target_read_fp (pid)
    bits.  */
 
 CORE_ADDR
-target_read_pc (pid)
-     int pid;
+target_read_pc (int pid)
 {
   int flags = read_register_pid (FLAGS_REGNUM, pid);
 
@@ -2479,9 +2422,7 @@ target_read_pc (pid)
    PC value into %r31.  */
 
 void
-target_write_pc (v, pid)
-     CORE_ADDR v;
-     int pid;
+target_write_pc (CORE_ADDR v, int pid)
 {
   int flags = read_register_pid (FLAGS_REGNUM, pid);
 
@@ -2501,8 +2442,7 @@ target_write_pc (v, pid)
    alignment required by their fields. */
 
 static int
-hppa_alignof (type)
-     struct type *type;
+hppa_alignof (struct type *type)
 {
   int max_align, align, i;
   CHECK_TYPEDEF (type);
@@ -2536,9 +2476,7 @@ hppa_alignof (type)
 /* Print the register regnum, or all registers if regnum is -1 */
 
 void
-pa_do_registers_info (regnum, fpregs)
-     int regnum;
-     int fpregs;
+pa_do_registers_info (int regnum, int fpregs)
 {
   char raw_regs[REGISTER_BYTES];
   int i;
@@ -2581,11 +2519,8 @@ pa_do_registers_info (regnum, fpregs)
 
 /********** new function ********************/
 void
-pa_do_strcat_registers_info (regnum, fpregs, stream, precision)
-     int regnum;
-     int fpregs;
-     struct ui_file *stream;
-     enum precision_type precision;
+pa_do_strcat_registers_info (int regnum, int fpregs, struct ui_file *stream,
+			     enum precision_type precision)
 {
   char raw_regs[REGISTER_BYTES];
   int i;
@@ -2634,10 +2569,7 @@ pa_do_strcat_registers_info (regnum, fpregs, stream, precision)
    Note that reg_val is really expected to be an array of longs,
    with two elements. */
 static void
-pa_register_look_aside (raw_regs, regnum, raw_val)
-     char *raw_regs;
-     int regnum;
-     long *raw_val;
+pa_register_look_aside (char *raw_regs, int regnum, long *raw_val)
 {
   static int know_which = 0;	/* False */
 
@@ -2740,10 +2672,7 @@ error_exit:
 /* "Info all-reg" command */
 
 static void
-pa_print_registers (raw_regs, regnum, fpregs)
-     char *raw_regs;
-     int regnum;
-     int fpregs;
+pa_print_registers (char *raw_regs, int regnum, int fpregs)
 {
   int i, j;
   /* Alas, we are compiled so that "long long" is 32 bits */
@@ -2795,11 +2724,8 @@ pa_print_registers (raw_regs, regnum, fpregs)
 
 /************* new function ******************/
 static void
-pa_strcat_registers (raw_regs, regnum, fpregs, stream)
-     char *raw_regs;
-     int regnum;
-     int fpregs;
-     struct ui_file *stream;
+pa_strcat_registers (char *raw_regs, int regnum, int fpregs,
+		     struct ui_file *stream)
 {
   int i, j;
   long raw_val[2];		/* Alas, we are compiled so that "long long" is 32 bits */
@@ -2846,8 +2772,7 @@ pa_strcat_registers (raw_regs, regnum, fpregs, stream)
 }
 
 static void
-pa_print_fp_reg (i)
-     int i;
+pa_print_fp_reg (int i)
 {
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
@@ -2890,10 +2815,7 @@ pa_print_fp_reg (i)
 
 /*************** new function ***********************/
 static void
-pa_strcat_fp_reg (i, stream, precision)
-     int i;
-     struct ui_file *stream;
-     enum precision_type precision;
+pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
 {
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
@@ -2936,9 +2858,7 @@ pa_strcat_fp_reg (i, stream, precision)
    just shared library trampolines (import, export).  */
 
 int
-in_solib_call_trampoline (pc, name)
-     CORE_ADDR pc;
-     char *name;
+in_solib_call_trampoline (CORE_ADDR pc, char *name)
 {
   struct minimal_symbol *minsym;
   struct unwind_table_entry *u;
@@ -3098,9 +3018,7 @@ in_solib_call_trampoline (pc, name)
    just shared library trampolines (import, export).  */
 
 int
-in_solib_return_trampoline (pc, name)
-     CORE_ADDR pc;
-     char *name;
+in_solib_return_trampoline (CORE_ADDR pc, char *name)
 {
   struct unwind_table_entry *u;
 
@@ -3173,9 +3091,7 @@ in_solib_return_trampoline (pc, name)
    used in dynamic executables.  */
 
 CORE_ADDR
-skip_trampoline_code (pc, name)
-     CORE_ADDR pc;
-     char *name;
+skip_trampoline_code (CORE_ADDR pc, char *name)
 {
   long orig_pc = pc;
   long prev_inst, curr_inst, loc;
@@ -3450,8 +3366,7 @@ skip_trampoline_code (pc, name)
    This only handles instructions commonly found in prologues.  */
 
 static int
-prologue_inst_adjust_sp (inst)
-     unsigned long inst;
+prologue_inst_adjust_sp (unsigned long inst)
 {
   /* This must persist across calls.  */
   static int save_high21;
@@ -3490,8 +3405,7 @@ prologue_inst_adjust_sp (inst)
 /* Return nonzero if INST is a branch of some kind, else return zero.  */
 
 static int
-is_branch (inst)
-     unsigned long inst;
+is_branch (unsigned long inst)
 {
   switch (inst >> 26)
     {
@@ -3524,8 +3438,7 @@ is_branch (inst)
    zero it INST does not save a GR.  */
 
 static int
-inst_saves_gr (inst)
-     unsigned long inst;
+inst_saves_gr (unsigned long inst)
 {
   /* Does it look like a stw?  */
   if ((inst >> 26) == 0x1a || (inst >> 26) == 0x1b
@@ -3564,8 +3477,7 @@ inst_saves_gr (inst)
    FIXME: What about argument stores with the HP compiler in ANSI mode? */
 
 static int
-inst_saves_fr (inst)
-     unsigned long inst;
+inst_saves_fr (unsigned long inst)
 {
   /* is this an FSTD ? */
   if ((inst & 0xfc00dfc0) == 0x2c001200)
@@ -3588,8 +3500,7 @@ inst_saves_fr (inst)
 
 
 CORE_ADDR
-skip_prologue_hard_way (pc)
-     CORE_ADDR pc;
+skip_prologue_hard_way (CORE_ADDR pc)
 {
   char buf[4];
   CORE_ADDR orig_pc = pc;
@@ -3821,8 +3732,7 @@ restart:
    we can determine it from the debug symbols.  Else return zero.  */
 
 static CORE_ADDR
-after_prologue (pc)
-     CORE_ADDR pc;
+after_prologue (CORE_ADDR pc)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
@@ -3863,8 +3773,7 @@ after_prologue (pc)
    stuff some day.  */
 
 CORE_ADDR
-hppa_skip_prologue (pc)
-     CORE_ADDR pc;
+hppa_skip_prologue (CORE_ADDR pc)
 {
   unsigned long inst;
   int offset;
@@ -3896,9 +3805,8 @@ hppa_skip_prologue (pc)
    the address we return for it IS the sp for the next frame.  */
 
 void
-hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
-     struct frame_info *frame_info;
-     struct frame_saved_regs *frame_saved_regs;
+hppa_frame_find_saved_regs (struct frame_info *frame_info,
+			    struct frame_saved_regs *frame_saved_regs)
 {
   CORE_ADDR pc;
   struct unwind_table_entry *u;
@@ -4185,7 +4093,7 @@ static struct symtab_and_line *break_callback_sal = 0;
    0 => success
    1 => failure  */
 int
-setup_d_pid_in_inferior ()
+setup_d_pid_in_inferior (void)
 {
   CORE_ADDR anaddr;
   struct minimal_symbol *msymbol;
@@ -4219,7 +4127,7 @@ setup_d_pid_in_inferior ()
    1 => success          */
 
 static int
-initialize_hp_cxx_exception_support ()
+initialize_hp_cxx_exception_support (void)
 {
   struct symtabs_and_lines sals;
   struct cleanup *old_chain;
@@ -4440,9 +4348,7 @@ initialize_hp_cxx_exception_support ()
    address was found. */
 
 struct symtab_and_line *
-child_enable_exception_callback (kind, enable)
-     enum exception_event_kind kind;
-     int enable;
+child_enable_exception_callback (enum exception_event_kind kind, int enable)
 {
   char buf[4];
 
@@ -4532,7 +4438,7 @@ static struct symtab_and_line null_symtab_and_line =
    and where it will be caught.  More information may be reported
    in the future */
 struct exception_event_record *
-child_get_current_exception_event ()
+child_get_current_exception_event (void)
 {
   CORE_ADDR event_kind;
   CORE_ADDR throw_addr;
@@ -4591,9 +4497,7 @@ child_get_current_exception_event ()
 }
 
 static void
-unwind_command (exp, from_tty)
-     char *exp;
-     int from_tty;
+unwind_command (char *exp, int from_tty)
 {
   CORE_ADDR address;
   struct unwind_table_entry *u;
@@ -4698,7 +4602,7 @@ unwind_command (exp, from_tty)
    here, that's what counts, as core gdb is the one which is
    putting the BPT instruction in and taking it out. */
 int
-hppa_prepare_to_proceed ()
+hppa_prepare_to_proceed (void)
 {
   pid_t old_thread;
   pid_t current_thread;
@@ -4743,7 +4647,7 @@ hppa_prepare_to_proceed ()
 #endif /* PREPARE_TO_PROCEED */
 
 void
-hppa_skip_permanent_breakpoint ()
+hppa_skip_permanent_breakpoint (void)
 {
   /* To step over a breakpoint instruction on the PA takes some
      fiddling with the instruction address queue.
@@ -4767,7 +4671,7 @@ hppa_skip_permanent_breakpoint ()
 }
 
 void
-_initialize_hppa_tdep ()
+_initialize_hppa_tdep (void)
 {
   tm_print_insn = print_insn_hppa;
 

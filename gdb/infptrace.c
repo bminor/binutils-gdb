@@ -132,10 +132,7 @@ void _initialize_infptrace (void);
    It exists so that all calls to ptrace are isolated in this 
    machine-dependent file. */
 int
-call_ptrace (request, pid, addr, data)
-     int request, pid;
-     PTRACE_ARG3_TYPE addr;
-     int data;
+call_ptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
 {
   int pt_status = 0;
 
@@ -216,9 +213,7 @@ call_ptrace (request, pid, addr, data)
    hook before returning.  */
 
 int
-ptrace_wait (pid, status)
-     int pid;
-     int *status;
+ptrace_wait (int pid, int *status)
 {
   int wstate;
 
@@ -228,7 +223,7 @@ ptrace_wait (pid, status)
 }
 
 void
-kill_inferior ()
+kill_inferior (void)
 {
   int status;
 
@@ -255,10 +250,7 @@ kill_inferior ()
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-child_resume (pid, step, signal)
-     int pid;
-     int step;
-     enum target_signal signal;
+child_resume (int pid, int step, enum target_signal signal)
 {
   errno = 0;
 
@@ -300,8 +292,7 @@ child_resume (pid, step, signal)
 #ifdef ATTACH_DETACH
 /* Start debugging the process whose number is PID.  */
 int
-attach (pid)
-     int pid;
+attach (int pid)
 {
   errno = 0;
   ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0);
@@ -316,8 +307,7 @@ attach (pid)
    SIGNAL = 0 means just continue it.  */
 
 void
-detach (signal)
-     int signal;
+detach (int signal)
 {
   errno = 0;
   ptrace (PT_DETACH, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal);
@@ -340,7 +330,7 @@ CORE_ADDR kernel_u_addr;
 #endif /* KERNEL_U_ADDR_BSD.  */
 
 void
-_initialize_kernel_u_addr ()
+_initialize_kernel_u_addr (void)
 {
 #if defined (KERNEL_U_ADDR_BSD) && !defined (FETCH_INFERIOR_REGISTERS)
   struct nlist names[2];
@@ -376,8 +366,7 @@ _initialize_kernel_u_addr ()
 /* Fetch one register.  */
 
 static void
-fetch_register (regno)
-     int regno;
+fetch_register (int regno)
 {
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
@@ -423,8 +412,7 @@ fetch_register (regno)
    Otherwise, REGNO specifies which register (so we can save time). */
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   if (regno >= 0)
     {
@@ -447,8 +435,7 @@ fetch_inferior_registers (regno)
 /* Store one register. */
 
 static void
-store_register (regno)
-     int regno;
+store_register (int regno)
 {
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
@@ -489,8 +476,7 @@ store_register (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   if (regno >= 0)
     {
@@ -613,9 +599,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 
 
 static void
-udot_info (dummy1, dummy2)
-     char *dummy1;
-     int dummy2;
+udot_info (char *dummy1, int dummy2)
 {
 #if defined (KERNEL_U_SIZE)
   int udot_off;			/* Offset into user struct */
@@ -665,7 +649,7 @@ udot_info (dummy1, dummy2)
 
 
 void
-_initialize_infptrace ()
+_initialize_infptrace (void)
 {
 #if !defined (CHILD_XFER_MEMORY)
   add_info ("udot", udot_info,

@@ -208,8 +208,7 @@ static void som_sharedlibrary_info_command (char *, int);
 static void som_solib_sharedlibrary_command (char *, int);
 
 static LONGEST
-som_solib_sizeof_symbol_table (filename)
-     char *filename;
+som_solib_sizeof_symbol_table (char *filename)
 {
   bfd *abfd;
   int desc;
@@ -280,11 +279,8 @@ som_solib_sizeof_symbol_table (filename)
 
 
 static void
-som_solib_add_solib_objfile (so, name, from_tty, text_addr)
-     struct so_list *so;
-     char *name;
-     int from_tty;
-     CORE_ADDR text_addr;
+som_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
+			     CORE_ADDR text_addr)
 {
   obj_private_data_t *obj_private;
   struct section_addr_info section_addrs;
@@ -321,12 +317,8 @@ som_solib_add_solib_objfile (so, name, from_tty, text_addr)
 
 
 static void
-som_solib_load_symbols (so, name, from_tty, text_addr, target)
-     struct so_list *so;
-     char *name;
-     int from_tty;
-     CORE_ADDR text_addr;
-     struct target_ops *target;
+som_solib_load_symbols (struct so_list *so, char *name, int from_tty,
+			CORE_ADDR text_addr, struct target_ops *target)
 {
   struct section_table *p;
   int status;
@@ -397,10 +389,7 @@ som_solib_load_symbols (so, name, from_tty, text_addr, target)
    be exceeded.  */
 
 void
-som_solib_add (arg_string, from_tty, target)
-     char *arg_string;
-     int from_tty;
-     struct target_ops *target;
+som_solib_add (char *arg_string, int from_tty, struct target_ops *target)
 {
   struct minimal_symbol *msymbol;
   struct so_list *so_list_tail;
@@ -834,7 +823,7 @@ err:
    means running until the "_start" is called.  */
 
 void
-som_solib_create_inferior_hook ()
+som_solib_create_inferior_hook (void)
 {
   struct minimal_symbol *msymbol;
   unsigned int dld_flags, status, have_endo;
@@ -1026,8 +1015,7 @@ keep_going:
 
 
 static void
-reset_inferior_pid (saved_inferior_pid)
-     int saved_inferior_pid;
+reset_inferior_pid (int saved_inferior_pid)
 {
   inferior_pid = saved_inferior_pid;
 }
@@ -1044,8 +1032,7 @@ reset_inferior_pid (saved_inferior_pid)
    GDB may already have been notified of.
  */
 void
-som_solib_remove_inferior_hook (pid)
-     int pid;
+som_solib_remove_inferior_hook (int pid)
 {
   CORE_ADDR addr;
   struct minimal_symbol *msymbol;
@@ -1095,11 +1082,8 @@ som_solib_remove_inferior_hook (pid)
    som_solib_create_inferior_hook.
  */
 void
-som_solib_create_catch_load_hook (pid, tempflag, filename, cond_string)
-     int pid;
-     int tempflag;
-     char *filename;
-     char *cond_string;
+som_solib_create_catch_load_hook (int pid, int tempflag, char *filename,
+				  char *cond_string)
 {
   create_solib_load_event_breakpoint ("__d_trap", tempflag, filename, cond_string);
 }
@@ -1116,18 +1100,14 @@ som_solib_create_catch_load_hook (pid, tempflag, filename, cond_string)
    som_solib_create_inferior_hook.
  */
 void
-som_solib_create_catch_unload_hook (pid, tempflag, filename, cond_string)
-     int pid;
-     int tempflag;
-     char *filename;
-     char *cond_string;
+som_solib_create_catch_unload_hook (int pid, int tempflag, char *filename,
+				    char *cond_string)
 {
   create_solib_unload_event_breakpoint ("__d_trap", tempflag, filename, cond_string);
 }
 
 int
-som_solib_have_load_event (pid)
-     int pid;
+som_solib_have_load_event (int pid)
 {
   CORE_ADDR event_kind;
 
@@ -1136,8 +1116,7 @@ som_solib_have_load_event (pid)
 }
 
 int
-som_solib_have_unload_event (pid)
-     int pid;
+som_solib_have_unload_event (int pid)
 {
   CORE_ADDR event_kind;
 
@@ -1146,8 +1125,7 @@ som_solib_have_unload_event (pid)
 }
 
 static char *
-som_solib_library_pathname (pid)
-     int pid;
+som_solib_library_pathname (int pid)
 {
   CORE_ADDR dll_handle_address;
   CORE_ADDR dll_pathname_address;
@@ -1177,8 +1155,7 @@ som_solib_library_pathname (pid)
 }
 
 char *
-som_solib_loaded_library_pathname (pid)
-     int pid;
+som_solib_loaded_library_pathname (int pid)
 {
   if (!som_solib_have_load_event (pid))
     error ("Must have a load event to use this query");
@@ -1187,8 +1164,7 @@ som_solib_loaded_library_pathname (pid)
 }
 
 char *
-som_solib_unloaded_library_pathname (pid)
-     int pid;
+som_solib_unloaded_library_pathname (int pid)
 {
   if (!som_solib_have_unload_event (pid))
     error ("Must have an unload event to use this query");
@@ -1197,7 +1173,7 @@ som_solib_unloaded_library_pathname (pid)
 }
 
 static void
-som_solib_desire_dynamic_linker_symbols ()
+som_solib_desire_dynamic_linker_symbols (void)
 {
   struct objfile *objfile;
   struct unwind_table_entry *u;
@@ -1295,9 +1271,7 @@ som_solib_desire_dynamic_linker_symbols ()
 }
 
 int
-som_solib_in_dynamic_linker (pid, pc)
-     int pid;
-     CORE_ADDR pc;
+som_solib_in_dynamic_linker (int pid, CORE_ADDR pc)
 {
   struct unwind_table_entry *u_pc;
 
@@ -1344,8 +1318,7 @@ som_solib_in_dynamic_linker (pid, pc)
    ADDR isn't in any known shared library, return zero.  */
 
 CORE_ADDR
-som_solib_get_got_by_pc (addr)
-     CORE_ADDR addr;
+som_solib_get_got_by_pc (CORE_ADDR addr)
 {
   struct so_list *so_list = so_list_head;
   CORE_ADDR got_value = 0;
@@ -1370,8 +1343,7 @@ som_solib_get_got_by_pc (addr)
 /* this function is used in hppa_fix_call_dummy in hppa-tdep.c */
 
 CORE_ADDR
-som_solib_get_solib_by_pc (addr)
-     CORE_ADDR addr;
+som_solib_get_solib_by_pc (CORE_ADDR addr)
 {
   struct so_list *so_list = so_list_head;
 
@@ -1392,9 +1364,8 @@ som_solib_get_solib_by_pc (addr)
 
 
 int
-som_solib_section_offsets (objfile, offsets)
-     struct objfile *objfile;
-     struct section_offsets *offsets;
+som_solib_section_offsets (struct objfile *objfile,
+			   struct section_offsets *offsets)
 {
   struct so_list *so_list = so_list_head;
 
@@ -1438,9 +1409,7 @@ som_solib_section_offsets (objfile, offsets)
 /* Dump information about all the currently loaded shared libraries.  */
 
 static void
-som_sharedlibrary_info_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+som_sharedlibrary_info_command (char *ignore, int from_tty)
 {
   struct so_list *so_list = so_list_head;
 
@@ -1486,9 +1455,7 @@ som_sharedlibrary_info_command (ignore, from_tty)
 }
 
 static void
-som_solib_sharedlibrary_command (args, from_tty)
-     char *args;
-     int from_tty;
+som_solib_sharedlibrary_command (char *args, int from_tty)
 {
   dont_repeat ();
   som_solib_add (args, from_tty, (struct target_ops *) 0);
@@ -1497,8 +1464,7 @@ som_solib_sharedlibrary_command (args, from_tty)
 
 
 char *
-som_solib_address (addr)
-     CORE_ADDR addr;
+som_solib_address (CORE_ADDR addr)
 {
   struct so_list *so = so_list_head;
 
@@ -1520,7 +1486,7 @@ som_solib_address (addr)
 
 
 void
-som_solib_restart ()
+som_solib_restart (void)
 {
   struct so_list *sl = so_list_head;
 
@@ -1569,7 +1535,7 @@ som_solib_restart ()
 
 
 void
-_initialize_som_solib ()
+_initialize_som_solib (void)
 {
   add_com ("sharedlibrary", class_files, som_solib_sharedlibrary_command,
 	   "Load shared object library symbols for files matching REGEXP.");
@@ -1604,8 +1570,7 @@ Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
 /* Get some HPUX-specific data from a shared lib.
  */
 CORE_ADDR
-so_lib_thread_start_addr (so)
-     struct so_list *so;
+so_lib_thread_start_addr (struct so_list *so)
 {
   return so->som_solib.tsd_start_addr;
 }

@@ -232,7 +232,7 @@ child_add_thread (DWORD id, HANDLE h)
 /* Clear out any old thread list and reintialize it to a
    pristine state. */
 static void
-child_init_thread_list ()
+child_init_thread_list (void)
 {
   thread_info *th = &thread_head;
 
@@ -953,9 +953,7 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
 /* Attach to process PID, then initialize for debugging it.  */
 
 static void
-child_attach (args, from_tty)
-     char *args;
-     int from_tty;
+child_attach (char *args, int from_tty)
 {
   BOOL ok;
 
@@ -1030,10 +1028,7 @@ child_open (char *arg ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
    ENV is the environment vector to pass.  Errors reported with error().  */
 
 static void
-child_create_inferior (exec_file, allargs, env)
-     char *exec_file;
-     char *allargs;
-     char **env;
+child_create_inferior (char *exec_file, char *allargs, char **env)
 {
   char real_path[MAXPATHLEN];
   char *winenv;
@@ -1189,7 +1184,7 @@ child_create_inferior (exec_file, allargs, env)
 }
 
 static void
-child_mourn_inferior ()
+child_mourn_inferior (void)
 {
   (void) child_continue (DBG_CONTINUE, -1);
   unpush_target (&child_ops);
@@ -1200,7 +1195,7 @@ child_mourn_inferior ()
    ^C on the controlling terminal. */
 
 static void
-child_stop ()
+child_stop (void)
 {
   DEBUG_EVENTS (("gdb: GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)\n"));
   CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT, current_event.dwProcessId));
@@ -1289,19 +1284,19 @@ child_resume (int pid, int step, enum target_signal sig)
 }
 
 static void
-child_prepare_to_store ()
+child_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
 
 static int
-child_can_run ()
+child_can_run (void)
 {
   return 1;
 }
 
 static void
-child_close ()
+child_close (void)
 {
   DEBUG_EVENTS (("gdb: child_close, inferior_pid=%d\n", inferior_pid));
 }
@@ -1355,7 +1350,7 @@ init_child_ops (void)
 }
 
 void
-_initialize_inftarg ()
+_initialize_inftarg (void)
 {
   init_child_ops ();
 

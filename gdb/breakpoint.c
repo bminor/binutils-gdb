@@ -328,8 +328,7 @@ int exception_support_initialized = 0;
 /* Set breakpoint count to NUM.  */
 
 void
-set_breakpoint_count (num)
-     int num;
+set_breakpoint_count (int num)
 {
   breakpoint_count = num;
   set_internalvar (lookup_internalvar ("bpnum"),
@@ -339,7 +338,7 @@ set_breakpoint_count (num)
 /* Used in run_command to zero the hit count when a new run starts. */
 
 void
-clear_breakpoint_hit_counts ()
+clear_breakpoint_hit_counts (void)
 {
   struct breakpoint *b;
 
@@ -369,9 +368,7 @@ int default_breakpoint_line;
    TRAILER is a character which can be found after the number; most
    commonly this is `-'.  If you don't want a trailer, use \0.  */ 
 static int
-get_number_trailer (pp, trailer)
-     char **pp;
-     int trailer;
+get_number_trailer (char **pp, int trailer)
 {
   int retval = 0;	/* default */
   char *p = *pp;
@@ -435,8 +432,7 @@ get_number_trailer (pp, trailer)
 
 /* Like get_number_trailer, but don't allow a trailer.  */
 int
-get_number (pp)
-     char **pp;
+get_number (char **pp)
 {
   return get_number_trailer (pp, '\0');
 }
@@ -458,8 +454,7 @@ get_number (pp)
  */
 
 int 
-get_number_or_range (pp)
-     char **pp;
+get_number_or_range (char **pp)
 {
   static int last_retval, end_value;
   static char *end_ptr;
@@ -523,9 +518,7 @@ get_number_or_range (pp)
 /* condition N EXP -- set break condition of breakpoint N to EXP.  */
 
 static void
-condition_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+condition_command (char *arg, int from_tty)
 {
   register struct breakpoint *b;
   char *p;
@@ -576,9 +569,7 @@ condition_command (arg, from_tty)
 
 /* ARGSUSED */
 static void
-commands_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+commands_command (char *arg, int from_tty)
 {
   register struct breakpoint *b;
   char *p;
@@ -623,10 +614,7 @@ commands_command (arg, from_tty)
    shadow contents, not the breakpoints themselves.  From breakpoint.c.  */
 
 int
-read_memory_nobpt (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     unsigned len;
+read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len)
 {
   int status;
   struct breakpoint *b;
@@ -728,7 +716,7 @@ read_memory_nobpt (memaddr, myaddr, len)
    or an `errno' value if could not write the inferior.  */
 
 int
-insert_breakpoints ()
+insert_breakpoints (void)
 {
   register struct breakpoint *b, *temp;
   int return_val = 0;	/* return success code. */
@@ -1038,7 +1026,7 @@ insert_breakpoints ()
 
 
 int
-remove_breakpoints ()
+remove_breakpoints (void)
 {
   register struct breakpoint *b;
   int val;
@@ -1077,8 +1065,7 @@ remove_hw_watchpoints (void)
 }
 
 int
-reattach_breakpoints (pid)
-     int pid;
+reattach_breakpoints (int pid)
 {
   register struct breakpoint *b;
   int val;
@@ -1107,7 +1094,7 @@ reattach_breakpoints (pid)
 }
 
 void
-update_breakpoints_after_exec ()
+update_breakpoints_after_exec (void)
 {
   struct breakpoint *b;
   struct breakpoint *temp;
@@ -1222,8 +1209,7 @@ update_breakpoints_after_exec ()
 }
 
 int
-detach_breakpoints (pid)
-     int pid;
+detach_breakpoints (int pid)
 {
   register struct breakpoint *b;
   int val;
@@ -1251,9 +1237,7 @@ detach_breakpoints (pid)
 }
 
 static int
-remove_breakpoint (b, is)
-     struct breakpoint *b;
-     insertion_state_t is;
+remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 {
   int val;
 
@@ -1417,7 +1401,7 @@ remove_breakpoint (b, is)
 /* Clear the "inserted" flag in all breakpoints.  */
 
 void
-mark_breakpoints_out ()
+mark_breakpoints_out (void)
 {
   register struct breakpoint *b;
 
@@ -1438,8 +1422,7 @@ mark_breakpoints_out ()
 
 
 void
-breakpoint_init_inferior (context)
-     enum inf_context context;
+breakpoint_init_inferior (enum inf_context context)
 {
   register struct breakpoint *b, *temp;
   static int warning_needed = 0;
@@ -1506,8 +1489,7 @@ breakpoint_init_inferior (context)
      the target, to advance the PC past the breakpoint.  */
 
 enum breakpoint_here
-breakpoint_here_p (pc)
-     CORE_ADDR pc;
+breakpoint_here_p (CORE_ADDR pc)
 {
   register struct breakpoint *b;
   int any_breakpoint_here = 0;
@@ -1536,8 +1518,7 @@ breakpoint_here_p (pc)
    at PC.  */
 
 int
-breakpoint_inserted_here_p (pc)
-     CORE_ADDR pc;
+breakpoint_inserted_here_p (CORE_ADDR pc)
 {
   register struct breakpoint *b;
 
@@ -1563,8 +1544,7 @@ breakpoint_inserted_here_p (pc)
    bp_call_dummy breakpoint.  */
 
 int
-frame_in_dummy (frame)
-     struct frame_info *frame;
+frame_in_dummy (struct frame_info *frame)
 {
   struct breakpoint *b;
 
@@ -1593,9 +1573,7 @@ frame_in_dummy (frame)
    PC is valid for process/thread PID.  */
 
 int
-breakpoint_thread_match (pc, pid)
-     CORE_ADDR pc;
-     int pid;
+breakpoint_thread_match (CORE_ADDR pc, int pid)
 {
   struct breakpoint *b;
   int thread;
@@ -1625,8 +1603,7 @@ breakpoint_thread_match (pc, pid)
    in breakpoint.h.  */
 
 int
-ep_is_catchpoint (ep)
-     struct breakpoint *ep;
+ep_is_catchpoint (struct breakpoint *ep)
 {
   return
     (ep->type == bp_catch_load)
@@ -1643,8 +1620,7 @@ ep_is_catchpoint (ep)
 }
 
 int
-ep_is_shlib_catchpoint (ep)
-     struct breakpoint *ep;
+ep_is_shlib_catchpoint (struct breakpoint *ep)
 {
   return
     (ep->type == bp_catch_load)
@@ -1653,8 +1629,7 @@ ep_is_shlib_catchpoint (ep)
 }
 
 int
-ep_is_exception_catchpoint (ep)
-     struct breakpoint *ep;
+ep_is_exception_catchpoint (struct breakpoint *ep)
 {
   return
     (ep->type == bp_catch_catch)
@@ -1666,8 +1641,7 @@ ep_is_exception_catchpoint (ep)
    Also free any storage that is part of a bpstat.  */
 
 void
-bpstat_clear (bsp)
-     bpstat *bsp;
+bpstat_clear (bpstat *bsp)
 {
   bpstat p;
   bpstat q;
@@ -1690,8 +1664,7 @@ bpstat_clear (bsp)
    is part of the bpstat is copied as well.  */
 
 bpstat
-bpstat_copy (bs)
-     bpstat bs;
+bpstat_copy (bpstat bs)
 {
   bpstat p = NULL;
   bpstat tmp;
@@ -1718,9 +1691,7 @@ bpstat_copy (bs)
 /* Find the bpstat associated with this breakpoint */
 
 bpstat
-bpstat_find_breakpoint (bsp, breakpoint)
-     bpstat bsp;
-     struct breakpoint *breakpoint;
+bpstat_find_breakpoint (bpstat bsp, struct breakpoint *breakpoint)
 {
   if (bsp == NULL)
     return NULL;
@@ -1742,8 +1713,7 @@ bpstat_find_breakpoint (bsp, breakpoint)
 
    See wait_for_inferior's use of this function.  */
 struct breakpoint *
-bpstat_find_step_resume_breakpoint (bsp)
-     bpstat bsp;
+bpstat_find_step_resume_breakpoint (bpstat bsp)
 {
   if (bsp == NULL)
     error ("Internal error (bpstat_find_step_resume_breakpoint)");
@@ -1766,8 +1736,7 @@ bpstat_find_step_resume_breakpoint (bsp)
    Return 0 if passed a bpstat which does not indicate any breakpoints.  */
 
 int
-bpstat_num (bsp)
-     bpstat *bsp;
+bpstat_num (bpstat *bsp)
 {
   struct breakpoint *b;
 
@@ -1787,8 +1756,7 @@ bpstat_num (bsp)
 /* Modify BS so that the actions will not be performed.  */
 
 void
-bpstat_clear_actions (bs)
-     bpstat bs;
+bpstat_clear_actions (bpstat bs)
 {
   for (; bs != NULL; bs = bs->next)
     {
@@ -1804,8 +1772,7 @@ bpstat_clear_actions (bs)
 /* Stub for cleaning up our state if we error-out of a breakpoint command */
 /* ARGSUSED */
 static void
-cleanup_executing_breakpoints (ignore)
-     PTR ignore;
+cleanup_executing_breakpoints (PTR ignore)
 {
   executing_breakpoint_commands = 0;
 }
@@ -1816,8 +1783,7 @@ cleanup_executing_breakpoints (ignore)
    the global "breakpoint_proceeded" after each command.  */
 
 void
-bpstat_do_actions (bsp)
-     bpstat *bsp;
+bpstat_do_actions (bpstat *bsp)
 {
   bpstat bs;
   struct cleanup *old_chain;
@@ -1892,8 +1858,7 @@ top:
    analysis.  */
 
 static enum print_stop_action
-print_it_typical (bs)
-     bpstat bs;
+print_it_typical (bpstat bs)
 {
 #ifdef UI_OUT
   struct cleanup *old_chain;
@@ -2242,8 +2207,7 @@ print_bp_stop_message (bpstat bs)
    further info to be printed.*/
 
 enum print_stop_action
-bpstat_print (bs)
-     bpstat bs;
+bpstat_print (bpstat bs)
 {
   int val;
 
@@ -2271,8 +2235,7 @@ bpstat_print (bs)
    make it pass through catch_errors.  */
 
 static int
-breakpoint_cond_eval (exp)
-     PTR exp;
+breakpoint_cond_eval (PTR exp)
 {
   value_ptr mark = value_mark ();
   int i = !value_true (evaluate_expression ((struct expression *) exp));
@@ -2314,8 +2277,7 @@ bpstat_alloc (b, cbs)
 /* Check watchpoint condition.  */
 
 static int
-watchpoint_check (p)
-     PTR p;
+watchpoint_check (PTR p)
 {
   bpstat bs = (bpstat) p;
   struct breakpoint *b;
@@ -2423,9 +2385,7 @@ which its expression is valid.\n", bs->breakpoint_at->number);
    commands, FIXME??? fields.  */
 
 bpstat
-bpstat_stop_status (pc, not_a_breakpoint)
-     CORE_ADDR *pc;
-     int not_a_breakpoint;
+bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 {
   register struct breakpoint *b, *temp;
   CORE_ADDR bp_addr;
@@ -2743,8 +2703,7 @@ bpstat_stop_status (pc, not_a_breakpoint)
 
 /* Tell what to do about this bpstat.  */
 struct bpstat_what
-bpstat_what (bs)
-     bpstat bs;
+bpstat_what (bpstat bs)
 {
   /* Classify each bpstat as one of the following.  */
   enum class
@@ -3021,7 +2980,7 @@ bpstat_what (bs)
    just to things like whether watchpoints are set.  */
 
 int
-bpstat_should_step ()
+bpstat_should_step (void)
 {
   struct breakpoint *b;
   ALL_BREAKPOINTS (b)
@@ -3032,7 +2991,7 @@ bpstat_should_step ()
 
 /* Nonzero if there are enabled hardware watchpoints. */
 int
-bpstat_have_active_hw_watchpoints ()
+bpstat_have_active_hw_watchpoints (void)
 {
   struct breakpoint *b;
   ALL_BREAKPOINTS (b)
@@ -3050,9 +3009,7 @@ bpstat_have_active_hw_watchpoints ()
    function returns another bpstat which contains only the catchpoints
    on that first list, if any. */
 void
-bpstat_get_triggered_catchpoints (ep_list, cp_list)
-     bpstat ep_list;
-     bpstat *cp_list;
+bpstat_get_triggered_catchpoints (bpstat ep_list, bpstat *cp_list)
 {
   struct bpstats root_bs[1];
   bpstat bs = root_bs;
@@ -3567,9 +3524,7 @@ gdb_breakpoint_query (/* output object, */ int bnum)
    is nonzero, process only watchpoints.  */
 
 static void
-breakpoint_1 (bnum, allflag)
-     int bnum;
-     int allflag;
+breakpoint_1 (int bnum, int allflag)
 {
   register struct breakpoint *b;
   CORE_ADDR last_addr = (CORE_ADDR) -1;
@@ -3680,9 +3635,7 @@ breakpoint_1 (bnum, allflag)
 
 /* ARGSUSED */
 static void
-breakpoints_info (bnum_exp, from_tty)
-     char *bnum_exp;
-     int from_tty;
+breakpoints_info (char *bnum_exp, int from_tty)
 {
   int bnum = -1;
 
@@ -3694,9 +3647,7 @@ breakpoints_info (bnum_exp, from_tty)
 
 /* ARGSUSED */
 static void
-maintenance_info_breakpoints (bnum_exp, from_tty)
-     char *bnum_exp;
-     int from_tty;
+maintenance_info_breakpoints (char *bnum_exp, int from_tty)
 {
   int bnum = -1;
 
@@ -3709,9 +3660,7 @@ maintenance_info_breakpoints (bnum_exp, from_tty)
 /* Print a message describing any breakpoints set at PC.  */
 
 static void
-describe_other_breakpoints (pc, section)
-     CORE_ADDR pc;
-     asection *section;
+describe_other_breakpoints (CORE_ADDR pc, asection *section)
 {
   register int others = 0;
   register struct breakpoint *b;
@@ -3750,11 +3699,8 @@ describe_other_breakpoints (pc, section)
    for the `break' command with no arguments.  */
 
 void
-set_default_breakpoint (valid, addr, symtab, line)
-     int valid;
-     CORE_ADDR addr;
-     struct symtab *symtab;
-     int line;
+set_default_breakpoint (int valid, CORE_ADDR addr, struct symtab *symtab,
+			int line)
 {
   default_breakpoint_valid = valid;
   default_breakpoint_address = addr;
@@ -3769,9 +3715,7 @@ set_default_breakpoint (valid, addr, symtab, line)
    the official one, and the rest as duplicates.  */
 
 static void
-check_duplicates (address, section)
-     CORE_ADDR address;
-     asection *section;
+check_duplicates (CORE_ADDR address, asection *section)
 {
   register struct breakpoint *b;
   register int count = 0;
@@ -3838,8 +3782,7 @@ check_duplicates (address, section)
    your arguments BEFORE calling this routine!  */
 
 struct breakpoint *
-set_raw_breakpoint (sal)
-     struct symtab_and_line sal;
+set_raw_breakpoint (struct symtab_and_line sal)
 {
   register struct breakpoint *b, *b1;
 
@@ -3902,8 +3845,7 @@ make_breakpoint_permanent (struct breakpoint *b)
 #ifdef GET_LONGJMP_TARGET
 
 static void
-create_longjmp_breakpoint (func_name)
-     char *func_name;
+create_longjmp_breakpoint (char *func_name)
 {
   struct symtab_and_line sal;
   struct breakpoint *b;
@@ -3941,7 +3883,7 @@ create_longjmp_breakpoint (func_name)
    set_longjmp_resume_breakpoint() to figure out where we are going. */
 
 void
-enable_longjmp_breakpoint ()
+enable_longjmp_breakpoint (void)
 {
   register struct breakpoint *b;
 
@@ -3954,7 +3896,7 @@ enable_longjmp_breakpoint ()
 }
 
 void
-disable_longjmp_breakpoint ()
+disable_longjmp_breakpoint (void)
 {
   register struct breakpoint *b;
 
@@ -3968,8 +3910,7 @@ disable_longjmp_breakpoint ()
 }
 
 struct breakpoint *
-create_thread_event_breakpoint (address)
-     CORE_ADDR address;
+create_thread_event_breakpoint (CORE_ADDR address)
 {
   struct breakpoint *b;
   struct symtab_and_line sal;
@@ -4005,7 +3946,7 @@ remove_thread_event_breakpoints (void)
 
 #ifdef SOLIB_ADD
 void
-remove_solib_event_breakpoints ()
+remove_solib_event_breakpoints (void)
 {
   register struct breakpoint *b, *temp;
 
@@ -4015,8 +3956,7 @@ remove_solib_event_breakpoints ()
 }
 
 struct breakpoint *
-create_solib_event_breakpoint (address)
-     CORE_ADDR address;
+create_solib_event_breakpoint (CORE_ADDR address)
 {
   struct breakpoint *b;
   struct symtab_and_line sal;
@@ -4036,8 +3976,7 @@ create_solib_event_breakpoint (address)
    apply to enabled breakpoints, disabled ones can just stay disabled.  */
 
 void
-disable_breakpoints_in_shlibs (silent)
-     int silent;
+disable_breakpoints_in_shlibs (int silent)
 {
   struct breakpoint *b;
   int disabled_shlib_breaks = 0;
@@ -4070,7 +4009,7 @@ disable_breakpoints_in_shlibs (silent)
 
 /* Try to reenable any breakpoints in shared libraries.  */
 void
-re_enable_breakpoints_in_shlibs ()
+re_enable_breakpoints_in_shlibs (void)
 {
   struct breakpoint *b;
 
@@ -4089,12 +4028,8 @@ re_enable_breakpoints_in_shlibs ()
 #endif
 
 static void
-solib_load_unload_1 (hookname, tempflag, dll_pathname, cond_string, bp_kind)
-     char *hookname;
-     int tempflag;
-     char *dll_pathname;
-     char *cond_string;
-     enum bptype bp_kind;
+solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
+		     char *cond_string, enum bptype bp_kind)
 {
   struct breakpoint *b;
   struct symtabs_and_lines sals;
@@ -4170,34 +4105,24 @@ solib_load_unload_1 (hookname, tempflag, dll_pathname, cond_string, bp_kind)
 }
 
 void
-create_solib_load_event_breakpoint (hookname, tempflag, 
-				    dll_pathname, cond_string)
-     char *hookname;
-     int tempflag;
-     char *dll_pathname;
-     char *cond_string;
+create_solib_load_event_breakpoint (char *hookname, int tempflag,
+				    char *dll_pathname, char *cond_string)
 {
   solib_load_unload_1 (hookname, tempflag, dll_pathname, 
 		       cond_string, bp_catch_load);
 }
 
 void
-create_solib_unload_event_breakpoint (hookname, tempflag, 
-				      dll_pathname, cond_string)
-     char *hookname;
-     int tempflag;
-     char *dll_pathname;
-     char *cond_string;
+create_solib_unload_event_breakpoint (char *hookname, int tempflag,
+				      char *dll_pathname, char *cond_string)
 {
   solib_load_unload_1 (hookname,tempflag, dll_pathname, 
 		       cond_string, bp_catch_unload);
 }
 
 static void
-create_fork_vfork_event_catchpoint (tempflag, cond_string, bp_kind)
-     int tempflag;
-     char *cond_string;
-     enum bptype bp_kind;
+create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
+				    enum bptype bp_kind)
 {
   struct symtab_and_line sal;
   struct breakpoint *b;
@@ -4226,25 +4151,19 @@ create_fork_vfork_event_catchpoint (tempflag, cond_string, bp_kind)
 }
 
 void
-create_fork_event_catchpoint (tempflag, cond_string)
-     int tempflag;
-     char *cond_string;
+create_fork_event_catchpoint (int tempflag, char *cond_string)
 {
   create_fork_vfork_event_catchpoint (tempflag, cond_string, bp_catch_fork);
 }
 
 void
-create_vfork_event_catchpoint (tempflag, cond_string)
-     int tempflag;
-     char *cond_string;
+create_vfork_event_catchpoint (int tempflag, char *cond_string)
 {
   create_fork_vfork_event_catchpoint (tempflag, cond_string, bp_catch_vfork);
 }
 
 void
-create_exec_event_catchpoint (tempflag, cond_string)
-     int tempflag;
-     char *cond_string;
+create_exec_event_catchpoint (int tempflag, char *cond_string)
 {
   struct symtab_and_line sal;
   struct breakpoint *b;
@@ -4272,7 +4191,7 @@ create_exec_event_catchpoint (tempflag, cond_string)
 }
 
 static int
-hw_breakpoint_used_count ()
+hw_breakpoint_used_count (void)
 {
   register struct breakpoint *b;
   int i = 0;
@@ -4287,9 +4206,7 @@ hw_breakpoint_used_count ()
 }
 
 static int
-hw_watchpoint_used_count (type, other_type_used)
-     enum bptype type;
-     int *other_type_used;
+hw_watchpoint_used_count (enum bptype type, int *other_type_used)
 {
   register struct breakpoint *b;
   int i = 0;
@@ -4318,9 +4235,7 @@ hw_watchpoint_used_count (type, other_type_used)
    that gets deleted automatically... */
 
 void
-set_longjmp_resume_breakpoint (pc, frame)
-     CORE_ADDR pc;
-     struct frame_info *frame;
+set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_info *frame)
 {
   register struct breakpoint *b;
 
@@ -4339,7 +4254,7 @@ set_longjmp_resume_breakpoint (pc, frame)
 }
 
 void
-disable_watchpoints_before_interactive_call_start ()
+disable_watchpoints_before_interactive_call_start (void)
 {
   struct breakpoint *b;
 
@@ -4359,7 +4274,7 @@ disable_watchpoints_before_interactive_call_start ()
 }
 
 void
-enable_watchpoints_after_interactive_call_stop ()
+enable_watchpoints_after_interactive_call_stop (void)
 {
   struct breakpoint *b;
 
@@ -4384,10 +4299,8 @@ enable_watchpoints_after_interactive_call_stop ()
    Restrict it to frame FRAME if FRAME is nonzero.  */
 
 struct breakpoint *
-set_momentary_breakpoint (sal, frame, type)
-     struct symtab_and_line sal;
-     struct frame_info *frame;
-     enum bptype type;
+set_momentary_breakpoint (struct symtab_and_line sal, struct frame_info *frame,
+			  enum bptype type)
 {
   register struct breakpoint *b;
   b = set_raw_breakpoint (sal);
@@ -4409,8 +4322,7 @@ set_momentary_breakpoint (sal, frame, type)
 /* Tell the user we have just set a breakpoint B.  */
 
 static void
-mention (b)
-     struct breakpoint *b;
+mention (struct breakpoint *b)
 {
   int say_where = 0;
 #ifdef UI_OUT
@@ -4736,9 +4648,7 @@ breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
    second bit : 0 normal breakpoint, 1 hardware breakpoint. */
 
 static void
-break_command_1 (arg, flag, from_tty)
-     char *arg;
-     int flag, from_tty;
+break_command_1 (char *arg, int flag, int from_tty)
 {
   int tempflag, hardwareflag;
   struct symtabs_and_lines sals;
@@ -4993,10 +4903,7 @@ gdb_breakpoint (char *address, char *condition,
 
 
 static void
-break_at_finish_at_depth_command_1 (arg, flag, from_tty)
-     char *arg;
-     int flag;
-     int from_tty;
+break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
 {
   struct frame_info *frame;
   CORE_ADDR low, high, selected_pc = 0;
@@ -5071,10 +4978,7 @@ break_at_finish_at_depth_command_1 (arg, flag, from_tty)
 
 
 static void
-break_at_finish_command_1 (arg, flag, from_tty)
-     char *arg;
-     int flag;
-     int from_tty;
+break_at_finish_command_1 (char *arg, int flag, int from_tty)
 {
   char *addr_string, *break_string, *beg_addr_string;
   CORE_ADDR low, high;
@@ -5162,8 +5066,7 @@ break_at_finish_command_1 (arg, flag, from_tty)
 /* Helper function for break_command_1 and disassemble_command.  */
 
 void
-resolve_sal_pc (sal)
-     struct symtab_and_line *sal;
+resolve_sal_pc (struct symtab_and_line *sal)
 {
   CORE_ADDR pc;
 
@@ -5210,65 +5113,49 @@ resolve_sal_pc (sal)
 }
 
 void
-break_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+break_command (char *arg, int from_tty)
 {
   break_command_1 (arg, 0, from_tty);
 }
 
 static void
-break_at_finish_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+break_at_finish_command (char *arg, int from_tty)
 {
   break_at_finish_command_1 (arg, 0, from_tty);
 }
 
 static void
-break_at_finish_at_depth_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+break_at_finish_at_depth_command (char *arg, int from_tty)
 {
   break_at_finish_at_depth_command_1 (arg, 0, from_tty);
 }
 
 void
-tbreak_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+tbreak_command (char *arg, int from_tty)
 {
   break_command_1 (arg, BP_TEMPFLAG, from_tty);
 }
 
 static void
-tbreak_at_finish_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+tbreak_at_finish_command (char *arg, int from_tty)
 {
   break_at_finish_command_1 (arg, BP_TEMPFLAG, from_tty);
 }
 
 static void
-hbreak_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+hbreak_command (char *arg, int from_tty)
 {
   break_command_1 (arg, BP_HARDWAREFLAG, from_tty);
 }
 
 static void
-thbreak_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+thbreak_command (char *arg, int from_tty)
 {
   break_command_1 (arg, (BP_TEMPFLAG | BP_HARDWAREFLAG), from_tty);
 }
 
 static void
-stop_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+stop_command (char *arg, int from_tty)
 {
   printf_filtered ("Specify the type of breakpoint to set.\n\
 Usage: stop in <function | address>\n\
@@ -5276,9 +5163,7 @@ Usage: stop in <function | address>\n\
 }
 
 static void
-stopin_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+stopin_command (char *arg, int from_tty)
 {
   int badInput = 0;
 
@@ -5311,9 +5196,7 @@ stopin_command (arg, from_tty)
 }
 
 static void
-stopat_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+stopat_command (char *arg, int from_tty)
 {
   int badInput = 0;
 
@@ -5349,10 +5232,7 @@ stopat_command (arg, from_tty)
                 hw_read:   watch read, 
 		hw_access: watch access (read or write) */
 static void
-watch_command_1 (arg, accessflag, from_tty)
-     char *arg;
-     int accessflag;
-     int from_tty;
+watch_command_1 (char *arg, int accessflag, int from_tty)
 {
   struct breakpoint *b;
   struct symtab_and_line sal;
@@ -5532,8 +5412,7 @@ watch_command_1 (arg, accessflag, from_tty)
 #endif
 
 static int
-can_use_hardware_watchpoint (v)
-     struct value *v;
+can_use_hardware_watchpoint (struct value *v)
 {
   int found_memory_cnt = 0;
   struct value *head = v;
@@ -5606,51 +5485,39 @@ can_use_hardware_watchpoint (v)
 
 #ifdef UI_OUT
 void
-watch_command_wrapper (arg, from_tty)
-     char *arg;
-     int from_tty;
+watch_command_wrapper (char *arg, int from_tty)
 {
   watch_command (arg, from_tty);
 }
 #endif
 static void
-watch_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+watch_command (char *arg, int from_tty)
 {
   watch_command_1 (arg, hw_write, from_tty);
 }
 
 #ifdef UI_OUT
 void
-rwatch_command_wrapper (arg, from_tty)
-     char *arg;
-     int from_tty;
+rwatch_command_wrapper (char *arg, int from_tty)
 {
   rwatch_command (arg, from_tty);
 }
 #endif
 static void
-rwatch_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+rwatch_command (char *arg, int from_tty)
 {
   watch_command_1 (arg, hw_read, from_tty);
 }
 
 #ifdef UI_OUT
 void
-awatch_command_wrapper (arg, from_tty)
-     char *arg;
-     int from_tty;
+awatch_command_wrapper (char *arg, int from_tty)
 {
   awatch_command (arg, from_tty);
 }
 #endif
 static void
-awatch_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+awatch_command (char *arg, int from_tty)
 {
   watch_command_1 (arg, hw_access, from_tty);
 }
@@ -5674,9 +5541,7 @@ until_break_command_continuation (struct continuation_arg *arg)
 
 /* ARGSUSED */
 void
-until_break_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+until_break_command (char *arg, int from_tty)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -5761,23 +5626,22 @@ until_break_command (arg, from_tty)
 /* These aren't used; I don't konw what they were for.  */
 /* Set a breakpoint at the catch clause for NAME.  */
 static int
-catch_breakpoint (name)
-     char *name;
+catch_breakpoint (char *name)
 {
 }
 
 static int
-disable_catch_breakpoint ()
+disable_catch_breakpoint (void)
 {
 }
 
 static int
-delete_catch_breakpoint ()
+delete_catch_breakpoint (void)
 {
 }
 
 static int
-enable_catch_breakpoint ()
+enable_catch_breakpoint (void)
 {
 }
 #endif /* 0 */
@@ -5858,8 +5722,7 @@ map_catch_names (args, function)
 /* This shares a lot of code with `print_frame_label_vars' from stack.c.  */
 
 static struct symtabs_and_lines
-get_catch_sals (this_level_only)
-     int this_level_only;
+get_catch_sals (int this_level_only)
 {
   register struct blockvector *bl;
   register struct block *block;
@@ -5971,8 +5834,7 @@ get_catch_sals (this_level_only)
 }
 
 static void
-ep_skip_leading_whitespace (s)
-     char **s;
+ep_skip_leading_whitespace (char **s)
 {
   if ((s == NULL) || (*s == NULL))
     return;
@@ -5986,8 +5848,7 @@ ep_skip_leading_whitespace (s)
    the token is returned.  Else, NULL is returned. */
 
 static char *
-ep_find_event_name_end (arg)
-     char *arg;
+ep_find_event_name_end (char *arg)
 {
   char *s = arg;
   char *event_name_end = NULL;
@@ -6020,8 +5881,7 @@ ep_find_event_name_end (arg)
    if clause in the arg string. */
 
 static char *
-ep_parse_optional_if_clause (arg)
-     char **arg;
+ep_parse_optional_if_clause (char **arg)
 {
   char *cond_string;
 
@@ -6053,8 +5913,7 @@ ep_parse_optional_if_clause (arg)
    Note that clients needing to preserve the returned filename for
    future access should copy it to their own buffers. */
 static char *
-ep_parse_optional_filename (arg)
-     char **arg;
+ep_parse_optional_filename (char **arg)
 {
   static char filename[1024];
   char *arg_p = *arg;
@@ -6093,11 +5952,8 @@ static void catch_fork_command_1 (catch_fork_kind fork_kind,
 				  char *arg, int tempflag, int from_tty);
 
 static void
-catch_fork_command_1 (fork_kind, arg, tempflag, from_tty)
-     catch_fork_kind fork_kind;
-     char *arg;
-     int tempflag;
-     int from_tty;
+catch_fork_command_1 (catch_fork_kind fork_kind, char *arg, int tempflag,
+		      int from_tty)
 {
   char *cond_string = NULL;
 
@@ -6132,10 +5988,7 @@ catch_fork_command_1 (fork_kind, arg, tempflag, from_tty)
 
 #if defined(CHILD_INSERT_EXEC_CATCHPOINT)
 static void
-catch_exec_command_1 (arg, tempflag, from_tty)
-     char *arg;
-     int tempflag;
-     int from_tty;
+catch_exec_command_1 (char *arg, int tempflag, int from_tty)
 {
   char *cond_string = NULL;
 
@@ -6159,10 +6012,7 @@ catch_exec_command_1 (arg, tempflag, from_tty)
 
 #if defined(SOLIB_ADD)
 static void
-catch_load_command_1 (arg, tempflag, from_tty)
-     char *arg;
-     int tempflag;
-     int from_tty;
+catch_load_command_1 (char *arg, int tempflag, int from_tty)
 {
   char *dll_pathname = NULL;
   char *cond_string = NULL;
@@ -6204,10 +6054,7 @@ catch_load_command_1 (arg, tempflag, from_tty)
 }
 
 static void
-catch_unload_command_1 (arg, tempflag, from_tty)
-     char *arg;
-     int tempflag;
-     int from_tty;
+catch_unload_command_1 (char *arg, int tempflag, int from_tty)
 {
   char *dll_pathname = NULL;
   char *cond_string = NULL;
@@ -6255,11 +6102,9 @@ catch_unload_command_1 (arg, tempflag, from_tty)
    exception event callback */
 
 static void
-create_exception_catchpoint (tempflag, cond_string, ex_event, sal)
-     int tempflag;
-     char *cond_string;
-     enum exception_event_kind ex_event;
-     struct symtab_and_line *sal;
+create_exception_catchpoint (int tempflag, char *cond_string,
+			     enum exception_event_kind ex_event,
+			     struct symtab_and_line *sal)
 {
   struct breakpoint *b;
   int thread = -1;		/* All threads. */
@@ -6296,11 +6141,8 @@ create_exception_catchpoint (tempflag, cond_string, ex_event, sal)
 /* Deal with "catch catch" and "catch throw" commands */
 
 static void
-catch_exception_command_1 (ex_event, arg, tempflag, from_tty)
-     enum exception_event_kind ex_event;
-     char *arg;
-     int tempflag;
-     int from_tty;
+catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
+			   int tempflag, int from_tty)
 {
   char *cond_string = NULL;
   struct symtab_and_line *sal = NULL;
@@ -6351,8 +6193,7 @@ catch_exception_command_1 (ex_event, arg, tempflag, from_tty)
    inside a catch_errors */
 
 static int
-cover_target_enable_exception_callback (arg)
-     PTR arg;
+cover_target_enable_exception_callback (PTR arg)
 {
   args_for_catchpoint_enable *args = arg;
   struct symtab_and_line *sal;
@@ -6380,10 +6221,7 @@ cover_target_enable_exception_callback (arg)
 
 
 static void
-handle_gnu_4_16_catch_command (arg, tempflag, from_tty)
-     char *arg;
-     int tempflag;
-     int from_tty;
+handle_gnu_4_16_catch_command (char *arg, int tempflag, int from_tty)
 {
   /* First, translate ARG into something we can deal with in terms
      of breakpoints.  */
@@ -6479,8 +6317,7 @@ handle_gnu_4_16_catch_command (arg, tempflag, from_tty)
 /* This creates a temporary internal breakpoint
    just to placate infrun */
 static struct breakpoint *
-create_temp_exception_breakpoint (pc)
-     CORE_ADDR pc;
+create_temp_exception_breakpoint (CORE_ADDR pc)
 {
   struct symtab_and_line sal;
   struct breakpoint *b;
@@ -6504,10 +6341,7 @@ create_temp_exception_breakpoint (pc)
 #endif
 
 static void
-catch_command_1 (arg, tempflag, from_tty)
-     char *arg;
-     int tempflag;
-     int from_tty;
+catch_command_1 (char *arg, int tempflag, int from_tty)
 {
 
   /* The first argument may be an event name, such as "start" or "load".
@@ -6630,8 +6464,7 @@ catch_command_1 (arg, tempflag, from_tty)
 /* Used by the gui, could be made a worker for other things. */
 
 struct breakpoint *
-set_breakpoint_sal (sal)
-     struct symtab_and_line sal;
+set_breakpoint_sal (struct symtab_and_line sal)
 {
   struct breakpoint *b;
   b = set_raw_breakpoint (sal);
@@ -6647,51 +6480,42 @@ set_breakpoint_sal (sal)
 /* These aren't used; I don't know what they were for.  */
 /* Disable breakpoints on all catch clauses described in ARGS.  */
 static void
-disable_catch (args)
-     char *args;
+disable_catch (char *args)
 {
   /* Map the disable command to catch clauses described in ARGS.  */
 }
 
 /* Enable breakpoints on all catch clauses described in ARGS.  */
 static void
-enable_catch (args)
-     char *args;
+enable_catch (char *args)
 {
   /* Map the disable command to catch clauses described in ARGS.  */
 }
 
 /* Delete breakpoints on all catch clauses in the active scope.  */
 static void
-delete_catch (args)
-     char *args;
+delete_catch (char *args)
 {
   /* Map the delete command to catch clauses described in ARGS.  */
 }
 #endif /* 0 */
 
 static void
-catch_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+catch_command (char *arg, int from_tty)
 {
   catch_command_1 (arg, 0, from_tty);
 }
 
 
 static void
-tcatch_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+tcatch_command (char *arg, int from_tty)
 {
   catch_command_1 (arg, 1, from_tty);
 }
 
 
 static void
-clear_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+clear_command (char *arg, int from_tty)
 {
   register struct breakpoint *b, *b1;
   int default_match;
@@ -6829,8 +6653,7 @@ clear_command (arg, from_tty)
    This is called after any breakpoint is hit, or after errors.  */
 
 void
-breakpoint_auto_delete (bs)
-     bpstat bs;
+breakpoint_auto_delete (bpstat bs)
 {
   struct breakpoint *b, *temp;
 
@@ -6850,8 +6673,7 @@ breakpoint_auto_delete (bs)
    structures. */
 
 void
-delete_breakpoint (bpt)
-     struct breakpoint *bpt;
+delete_breakpoint (struct breakpoint *bpt)
 {
   register struct breakpoint *b;
   register bpstat bs;
@@ -7044,9 +6866,7 @@ make_exec_cleanup_delete_breakpoint (struct breakpoint *b)
 }
 
 void
-delete_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+delete_command (char *arg, int from_tty)
 {
   struct breakpoint *b, *temp;
 
@@ -7089,8 +6909,7 @@ delete_command (arg, from_tty)
    Unused in this case.  */
 
 static int
-breakpoint_re_set_one (bint)
-     PTR bint;
+breakpoint_re_set_one (PTR bint)
 {
   /* get past catch_errs */
   struct breakpoint *b = (struct breakpoint *) bint;
@@ -7269,7 +7088,7 @@ breakpoint_re_set_one (bint)
 
 /* Re-set all breakpoints after symbols have been re-loaded.  */
 void
-breakpoint_re_set ()
+breakpoint_re_set (void)
 {
   struct breakpoint *b, *temp;
   enum language save_language;
@@ -7313,8 +7132,7 @@ breakpoint_re_set ()
    - If the breakpoint is for all threads, leave it as-is.
    - Else, reset it to the current thread for inferior_pid. */
 void
-breakpoint_re_set_thread (b)
-     struct breakpoint *b;
+breakpoint_re_set_thread (struct breakpoint *b)
 {
   if (b->thread != -1)
     {
@@ -7324,8 +7142,7 @@ breakpoint_re_set_thread (b)
 }
 
 void
-set_ignore_count (bptnum, count, from_tty)
-     int bptnum, count, from_tty;
+set_ignore_count (int bptnum, int count, int from_tty)
 {
   register struct breakpoint *b;
 
@@ -7356,7 +7173,7 @@ set_ignore_count (bptnum, count, from_tty)
 
 /* Clear the ignore counts of all breakpoints.  */
 void
-breakpoint_clear_ignore_counts ()
+breakpoint_clear_ignore_counts (void)
 {
   struct breakpoint *b;
 
@@ -7367,9 +7184,7 @@ breakpoint_clear_ignore_counts ()
 /* Command to set ignore-count of breakpoint N to COUNT.  */
 
 static void
-ignore_command (args, from_tty)
-     char *args;
-     int from_tty;
+ignore_command (char *args, int from_tty)
 {
   char *p = args;
   register int num;
@@ -7437,8 +7252,7 @@ map_breakpoint_numbers (args, function)
 }
 
 void
-disable_breakpoint (bpt)
-     struct breakpoint *bpt;
+disable_breakpoint (struct breakpoint *bpt)
 {
   /* Never disable a watchpoint scope breakpoint; we want to
      hit them when we leave scope so we can delete both the
@@ -7461,9 +7275,7 @@ disable_breakpoint (bpt)
 
 /* ARGSUSED */
 static void
-disable_command (args, from_tty)
-     char *args;
-     int from_tty;
+disable_command (char *args, int from_tty)
 {
   register struct breakpoint *bpt;
   if (args == 0)
@@ -7496,9 +7308,7 @@ disable_command (args, from_tty)
 }
 
 static void
-do_enable_breakpoint (bpt, disposition)
-     struct breakpoint *bpt;
-     enum bpdisp disposition;
+do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 {
   struct frame_info *save_selected_frame = NULL;
   int save_selected_frame_level = -1;
@@ -7593,8 +7403,7 @@ have been allocated for other watchpoints.\n", bpt->number);
 }
 
 void
-enable_breakpoint (bpt)
-     struct breakpoint *bpt;
+enable_breakpoint (struct breakpoint *bpt)
 {
   do_enable_breakpoint (bpt, bpt->disposition);
 }
@@ -7605,9 +7414,7 @@ enable_breakpoint (bpt)
 
 /* ARGSUSED */
 static void
-enable_command (args, from_tty)
-     char *args;
-     int from_tty;
+enable_command (char *args, int from_tty)
 {
   register struct breakpoint *bpt;
   if (args == 0)
@@ -7640,33 +7447,27 @@ enable_command (args, from_tty)
 }
 
 static void
-enable_once_breakpoint (bpt)
-     struct breakpoint *bpt;
+enable_once_breakpoint (struct breakpoint *bpt)
 {
   do_enable_breakpoint (bpt, disable);
 }
 
 /* ARGSUSED */
 static void
-enable_once_command (args, from_tty)
-     char *args;
-     int from_tty;
+enable_once_command (char *args, int from_tty)
 {
   map_breakpoint_numbers (args, enable_once_breakpoint);
 }
 
 static void
-enable_delete_breakpoint (bpt)
-     struct breakpoint *bpt;
+enable_delete_breakpoint (struct breakpoint *bpt)
 {
   do_enable_breakpoint (bpt, del);
 }
 
 /* ARGSUSED */
 static void
-enable_delete_command (args, from_tty)
-     char *args;
-     int from_tty;
+enable_delete_command (char *args, int from_tty)
 {
   map_breakpoint_numbers (args, enable_delete_breakpoint);
 }
@@ -7674,9 +7475,7 @@ enable_delete_command (args, from_tty)
 /* Use default_breakpoint_'s, or nothing if they aren't valid.  */
 
 struct symtabs_and_lines
-decode_line_spec_1 (string, funfirstline)
-     char *string;
-     int funfirstline;
+decode_line_spec_1 (char *string, int funfirstline)
 {
   struct symtabs_and_lines sals;
   if (string == 0)
@@ -7695,7 +7494,7 @@ decode_line_spec_1 (string, funfirstline)
 }
 
 void
-_initialize_breakpoint ()
+_initialize_breakpoint (void)
 {
   struct cmd_list_element *c;
 

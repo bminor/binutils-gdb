@@ -1016,8 +1016,7 @@ async_do_nothing (gdb_client_data arg)
 /* Tell the event loop what to do if SIGHUP is received. 
    See event-signal.c. */
 static void
-handle_sighup (sig)
-     int sig;
+handle_sighup (int sig)
 {
   mark_async_signal_handler_wrapper (sighup_token);
   signal (sig, handle_sighup);

@@ -35,10 +35,7 @@
 #include <fcntl.h>
 
 void
-symmetry_extract_return_value (type, regbuf, valbuf)
-     struct type *type;
-     char *regbuf;
-     char *valbuf;
+symmetry_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   union
     {

@@ -49,8 +49,7 @@ static void nlm_symtab_read (bfd *, CORE_ADDR, struct objfile *);
    file at some point in the near future.  */
 
 static void
-nlm_new_init (ignore)
-     struct objfile *ignore;
+nlm_new_init (struct objfile *ignore)
 {
   stabsread_new_init ();
   buildsym_new_init ();
@@ -67,8 +66,7 @@ nlm_new_init (ignore)
    just a stub. */
 
 static void
-nlm_symfile_init (ignore)
-     struct objfile *ignore;
+nlm_symfile_init (struct objfile *ignore)
 {
 }
 
@@ -92,10 +90,7 @@ nlm_symfile_init (ignore)
  */
 
 static void
-nlm_symtab_read (abfd, addr, objfile)
-     bfd *abfd;
-     CORE_ADDR addr;
-     struct objfile *objfile;
+nlm_symtab_read (bfd *abfd, CORE_ADDR addr, struct objfile *objfile)
 {
   long storage_needed;
   asymbol *sym;
@@ -177,9 +172,7 @@ nlm_symtab_read (abfd, addr, objfile)
    is not currently used. */
 
 static void
-nlm_symfile_read (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;
+nlm_symfile_read (struct objfile *objfile, int mainline)
 {
   bfd *abfd = objfile->obfd;
   struct cleanup *back_to;
@@ -228,8 +221,7 @@ nlm_symfile_read (objfile, mainline)
    objfile struct from the global list of known objfiles. */
 
 static void
-nlm_symfile_finish (objfile)
-     struct objfile *objfile;
+nlm_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_private != NULL)
     {
@@ -251,7 +243,7 @@ static struct sym_fns nlm_sym_fns =
 };
 
 void
-_initialize_nlmread ()
+_initialize_nlmread (void)
 {
   add_symtab_fns (&nlm_sym_fns);
 }

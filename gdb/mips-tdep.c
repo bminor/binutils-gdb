@@ -268,8 +268,7 @@ char *mips_generic_reg_names[] = MIPS_REGISTER_NAMES;
 char **mips_processor_reg_names = mips_generic_reg_names;
 
 char *
-mips_register_name (i)
-     int i;
+mips_register_name (int i)
 {
   return mips_processor_reg_names[i];
 }
@@ -499,9 +498,7 @@ show_mask_address (char *cmd, int from_tty)
 
 /* Should call_function allocate stack space for a struct return?  */
 int
-mips_use_struct_convention (gcc_p, type)
-     int gcc_p;
-     struct type *type;
+mips_use_struct_convention (int gcc_p, struct type *type)
 {
   if (MIPS_EABI)
     return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
@@ -1714,10 +1711,8 @@ mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 }
 
 static void
-mips32_heuristic_proc_desc (start_pc, limit_pc, next_frame, sp)
-     CORE_ADDR start_pc, limit_pc;
-     struct frame_info *next_frame;
-     CORE_ADDR sp;
+mips32_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
+			    struct frame_info *next_frame, CORE_ADDR sp)
 {
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0;	/* Value of $r30. Used by gcc for frame-pointer */

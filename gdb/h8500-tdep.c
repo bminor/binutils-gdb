@@ -78,8 +78,7 @@ static int data_size = 2;
 int minimum_mode = 1;
 
 CORE_ADDR
-h8500_skip_prologue (start_pc)
-     CORE_ADDR start_pc;
+h8500_skip_prologue (CORE_ADDR start_pc)
 {
   short int w;
 
@@ -100,8 +99,7 @@ h8500_skip_prologue (start_pc)
 }
 
 CORE_ADDR
-h8500_addr_bits_remove (addr)
-     CORE_ADDR addr;
+h8500_addr_bits_remove (CORE_ADDR addr)
 {
   return ((addr) & 0xffffff);
 }
@@ -114,8 +112,7 @@ h8500_addr_bits_remove (addr)
    the function prologue to determine the caller's sp value, and return it.  */
 
 CORE_ADDR
-h8500_frame_chain (thisframe)
-     struct frame_info *thisframe;
+h8500_frame_chain (struct frame_info *thisframe)
 {
   if (!inside_entry_file (thisframe->pc))
     return (read_memory_integer (FRAME_FP (thisframe), PTR_SIZE));
@@ -129,10 +126,7 @@ h8500_frame_chain (thisframe)
    of the instruction. */
 
 CORE_ADDR
-NEXT_PROLOGUE_INSN (addr, lim, pword1)
-     CORE_ADDR addr;
-     CORE_ADDR lim;
-     char *pword1;
+NEXT_PROLOGUE_INSN (CORE_ADDR addr, CORE_ADDR lim, char *pword1)
 {
   if (addr < lim + 8)
     {
@@ -156,14 +150,13 @@ NEXT_PROLOGUE_INSN (addr, lim, pword1)
 /* Return the saved PC from this frame. */
 
 CORE_ADDR
-frame_saved_pc (frame)
-     struct frame_info *frame;
+frame_saved_pc (struct frame_info *frame)
 {
   return read_memory_integer (FRAME_FP (frame) + 2, PTR_SIZE);
 }
 
 void
-h8500_pop_frame ()
+h8500_pop_frame (void)
 {
   unsigned regnum;
   struct frame_saved_regs fsr;
@@ -181,8 +174,7 @@ h8500_pop_frame ()
 }
 
 void
-print_register_hook (regno)
-     int regno;
+print_register_hook (int regno)
 {
   if (regno == CCR_REGNUM)
     {
@@ -228,8 +220,7 @@ print_register_hook (regno)
 }
 
 int
-h8500_register_size (regno)
-     int regno;
+h8500_register_size (int regno)
 {
   switch (regno)
     {
@@ -265,8 +256,7 @@ h8500_register_size (regno)
 }
 
 struct type *
-h8500_register_virtual_type (regno)
-     int regno;
+h8500_register_virtual_type (int regno)
 {
   switch (regno)
     {
@@ -307,9 +297,8 @@ h8500_register_virtual_type (regno)
    the address we return for it IS the sp for the next frame.  */
 
 void
-frame_find_saved_regs (frame_info, frame_saved_regs)
-     struct frame_info *frame_info;
-     struct frame_saved_regs *frame_saved_regs;
+frame_find_saved_regs (struct frame_info *frame_info,
+		       struct frame_saved_regs *frame_saved_regs)
 {
   register int regnum;
   register int regmask;
@@ -387,7 +376,7 @@ lose:;
 }
 
 CORE_ADDR
-saved_pc_after_call ()
+saved_pc_after_call (void)
 {
   int x;
   int a = read_register (SP_REGNUM);
@@ -404,8 +393,7 @@ saved_pc_after_call ()
 }
 
 void
-h8500_set_pointer_size (newsize)
-     int newsize;
+h8500_set_pointer_size (int newsize)
 {
   static int oldsize = 0;
 
@@ -426,7 +414,7 @@ h8500_set_pointer_size (newsize)
 }
 
 static void
-big_command ()
+big_command (void)
 {
   h8500_set_pointer_size (32);
   code_size = 4;
@@ -434,7 +422,7 @@ big_command ()
 }
 
 static void
-medium_command ()
+medium_command (void)
 {
   h8500_set_pointer_size (32);
   code_size = 4;
@@ -442,7 +430,7 @@ medium_command ()
 }
 
 static void
-compact_command ()
+compact_command (void)
 {
   h8500_set_pointer_size (32);
   code_size = 2;
@@ -450,7 +438,7 @@ compact_command ()
 }
 
 static void
-small_command ()
+small_command (void)
 {
   h8500_set_pointer_size (16);
   code_size = 2;
@@ -460,9 +448,7 @@ small_command ()
 static struct cmd_list_element *setmemorylist;
 
 static void
-set_memory (args, from_tty)
-     char *args;
-     int from_tty;
+set_memory (char *args, int from_tty)
 {
   printf_unfiltered ("\"set memory\" must be followed by the name of a memory subcommand.\n");
   help_list (setmemorylist, "set memory ", -1, gdb_stdout);
@@ -471,8 +457,7 @@ set_memory (args, from_tty)
 /* See if variable name is ppc or pr[0-7] */
 
 int
-h8500_is_trapped_internalvar (name)
-     char *name;
+h8500_is_trapped_internalvar (char *name)
 {
   if (name[0] != 'p')
     return 0;
@@ -490,8 +475,7 @@ h8500_is_trapped_internalvar (name)
 }
 
 value_ptr
-h8500_value_of_trapped_internalvar (var)
-     struct internalvar *var;
+h8500_value_of_trapped_internalvar (struct internalvar *var)
 {
   LONGEST regval;
   unsigned char regbuf[4];
@@ -537,10 +521,8 @@ h8500_value_of_trapped_internalvar (var)
 }
 
 void
-h8500_set_trapped_internalvar (var, newval, bitpos, bitsize, offset)
-     struct internalvar *var;
-     int offset, bitpos, bitsize;
-     value_ptr newval;
+h8500_set_trapped_internalvar (struct internalvar *var, value_ptr newval,
+			       int bitpos, int bitsize, int offset)
 {
   char *page_regnum, *regnum;
   char expression[100];
@@ -590,48 +572,43 @@ h8500_set_trapped_internalvar (var, newval, bitpos, bitsize, offset)
 }
 
 CORE_ADDR
-h8500_read_sp ()
+h8500_read_sp (void)
 {
   return read_register (PR7_REGNUM);
 }
 
 void
-h8500_write_sp (v)
-     CORE_ADDR v;
+h8500_write_sp (CORE_ADDR v)
 {
   write_register (PR7_REGNUM, v);
 }
 
 CORE_ADDR
-h8500_read_pc (pid)
-     int pid;
+h8500_read_pc (int pid)
 {
   return read_register (PC_REGNUM);
 }
 
 void
-h8500_write_pc (v, pid)
-     CORE_ADDR v;
-     int pid;
+h8500_write_pc (CORE_ADDR v, int pid)
 {
   write_register (PC_REGNUM, v);
 }
 
 CORE_ADDR
-h8500_read_fp ()
+h8500_read_fp (void)
 {
   return read_register (PR6_REGNUM);
 }
 
 void
-h8500_write_fp (v)
-     CORE_ADDR v;
+h8500_write_fp (CORE_ADDR v)
 {
   write_register (PR6_REGNUM, v);
 }
 
 void
-_initialize_h8500_tdep ()
+_initialize_h8500_tdep (void)
 {
   tm_print_insn = print_insn_h8500;
 

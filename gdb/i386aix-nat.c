@@ -70,9 +70,7 @@ static int regmap[] =
  */
 
 int
-i386_register_u_addr (blockend, regnum)
-     int blockend;
-     int regnum;
+i386_register_u_addr (int blockend, int regnum)
 {
 #if 0
   /* this will be needed if fp registers are reinstated */
@@ -115,9 +113,7 @@ struct env387
 };
 
 static
-print_387_status (status, ep)
-     unsigned short status;
-     struct env387 *ep;
+print_387_status (unsigned short status, struct env387 *ep)
 {
   int i;
   int bothstatus;
@@ -183,7 +179,7 @@ print_387_status (status, ep)
 static struct env387 core_env387;
 
 void
-i386_float_info ()
+i386_float_info (void)
 {
   struct env387 fps;
   int fpsaved = 0;
@@ -232,8 +228,7 @@ i386_float_info ()
 
 /* Fetch one register.  */
 static void
-fetch_register (regno)
-     int regno;
+fetch_register (int regno)
 {
   char buf[MAX_REGISTER_RAW_SIZE];
   if (regno < FP0_REGNUM)
@@ -246,8 +241,7 @@ fetch_register (regno)
 }
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   if (regno < 0)
     for (regno = 0; regno < NUM_REGS; regno++)
@@ -258,8 +252,7 @@ fetch_inferior_registers (regno)
 
 /* store one register */
 static void
-store_register (regno)
-     int regno;
+store_register (int regno)
 {
   char buf[80];
   errno = 0;
@@ -281,8 +274,7 @@ store_register (regno)
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   if (regno < 0)
     for (regno = 0; regno < NUM_REGS; regno++)
@@ -366,7 +358,7 @@ static struct core_fns i386aix_core_fns =
 };
 
 void
-_initialize_core_i386aix ()
+_initialize_core_i386aix (void)
 {
   add_core_fns (&i386aix_core_fns);
 }

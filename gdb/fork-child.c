@@ -46,11 +46,7 @@ extern char **environ;
  * the four arguments "a", "b", "c", "d".
  */
 static void
-breakup_args (
-	       scratch,
-	       argv)
-     char *scratch;
-     char **argv;
+breakup_args (char *scratch, char **argv)
 {
   char *cp = scratch;
 
@@ -388,9 +384,7 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun,
    clone will set it TRUE.
  */
 void
-clone_and_follow_inferior (child_pid, followed_child)
-     int child_pid;
-     int *followed_child;
+clone_and_follow_inferior (int child_pid, int *followed_child)
 {
   extern int auto_solib_add;
 
@@ -512,8 +506,7 @@ clone_and_follow_inferior (child_pid, followed_child)
 /* Accept NTRAPS traps from the inferior.  */
 
 void
-startup_inferior (ntraps)
-     int ntraps;
+startup_inferior (int ntraps)
 {
   int pending_execs = ntraps;
   int terminal_initted;

@@ -124,17 +124,9 @@ int addressprint;		/* Controls printing of machine addresses */
 
 
 int
-val_print (type, valaddr, embedded_offset, address,
-	   stream, format, deref_ref, recurse, pretty)
-     struct type *type;
-     char *valaddr;
-     int embedded_offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+val_print (struct type *type, char *valaddr, int embedded_offset,
+	   CORE_ADDR address, struct ui_file *stream, int format, int deref_ref,
+	   int recurse, enum val_prettyprint pretty)
 {
   struct type *real_type = check_typedef (type);
   if (pretty == Val_pretty_default)
@@ -165,11 +157,8 @@ val_print (type, valaddr, embedded_offset, address,
    the number of string bytes printed.  */
 
 int
-value_print (val, stream, format, pretty)
-     value_ptr val;
-     struct ui_file *stream;
-     int format;
-     enum val_prettyprint pretty;
+value_print (value_ptr val, struct ui_file *stream, int format,
+	     enum val_prettyprint pretty)
 {
   if (val == 0)
     {
@@ -189,10 +178,8 @@ value_print (val, stream, format, pretty)
    value.  STREAM is where to print the value.  */
 
 void
-val_print_type_code_int (type, valaddr, stream)
-     struct type *type;
-     char *valaddr;
-     struct ui_file *stream;
+val_print_type_code_int (struct type *type, char *valaddr,
+			 struct ui_file *stream)
 {
   if (TYPE_LENGTH (type) > sizeof (LONGEST))
     {
@@ -243,11 +230,8 @@ val_print_type_code_int (type, valaddr, stream)
 static void print_decimal (struct ui_file * stream, char *sign,
 			   int use_local, ULONGEST val_ulong);
 static void
-print_decimal (stream, sign, use_local, val_ulong)
-     struct ui_file *stream;
-     char *sign;
-     int use_local;
-     ULONGEST val_ulong;
+print_decimal (struct ui_file *stream, char *sign, int use_local,
+	       ULONGEST val_ulong)
 {
   unsigned long temp[3];
   int i = 0;
@@ -280,11 +264,8 @@ print_decimal (stream, sign, use_local, val_ulong)
 #endif
 
 void
-print_longest (stream, format, use_local, val_long)
-     struct ui_file *stream;
-     int format;
-     int use_local;
-     LONGEST val_long;
+print_longest (struct ui_file *stream, int format, int use_local,
+	       LONGEST val_long)
 {
 #if defined (CC_HAS_LONG_LONG) && !defined (PRINTF_HAS_LONG_LONG)
   if (sizeof (long) < sizeof (LONGEST))
@@ -544,8 +525,7 @@ strcat_longest (format, use_local, val_long, buf, buflen)
    where the value must not be larger than can fit in an int.  */
 
 int
-longest_to_int (arg)
-     LONGEST arg;
+longest_to_int (LONGEST arg)
 {
   /* Let the compiler do the work */
   int rtnval = (int) arg;
@@ -566,10 +546,7 @@ longest_to_int (arg)
    on STREAM.  */
 
 void
-print_floating (valaddr, type, stream)
-     char *valaddr;
-     struct type *type;
-     struct ui_file *stream;
+print_floating (char *valaddr, struct type *type, struct ui_file *stream)
 {
   DOUBLEST doub;
   int inv;
@@ -673,10 +650,8 @@ print_floating (valaddr, type, stream)
 }
 
 void
-print_binary_chars (stream, valaddr, len)
-     struct ui_file *stream;
-     unsigned char *valaddr;
-     unsigned len;
+print_binary_chars (struct ui_file *stream, unsigned char *valaddr,
+		    unsigned len)
 {
 
 #define BITS_IN_BYTES 8
@@ -737,10 +712,7 @@ print_binary_chars (stream, valaddr, len)
  * Print it in octal on stream or format it in buf.
  */
 void
-print_octal_chars (stream, valaddr, len)
-     struct ui_file *stream;
-     unsigned char *valaddr;
-     unsigned len;
+print_octal_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
 {
   unsigned char *p;
   unsigned char octa1, octa2, octa3, carry;
@@ -888,10 +860,8 @@ print_octal_chars (stream, valaddr, len)
  * Print it in decimal on stream or format it in buf.
  */
 void
-print_decimal_chars (stream, valaddr, len)
-     struct ui_file *stream;
-     unsigned char *valaddr;
-     unsigned len;
+print_decimal_chars (struct ui_file *stream, unsigned char *valaddr,
+		     unsigned len)
 {
 #define TEN             10
 #define TWO_TO_FOURTH   16
@@ -1031,10 +1001,7 @@ print_decimal_chars (stream, valaddr, len)
 /* VALADDR points to an integer of LEN bytes.  Print it in hex on stream.  */
 
 static void
-print_hex_chars (stream, valaddr, len)
-     struct ui_file *stream;
-     unsigned char *valaddr;
-     unsigned len;
+print_hex_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
 {
   unsigned char *p;
 
@@ -1072,17 +1039,10 @@ print_hex_chars (stream, valaddr, len)
  */
 
 void
-val_print_array_elements (type, valaddr, address, stream, format, deref_ref,
-			  recurse, pretty, i)
-     struct type *type;
-     char *valaddr;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
-     unsigned int i;
+val_print_array_elements (struct type *type, char *valaddr, CORE_ADDR address,
+			  struct ui_file *stream, int format, int deref_ref,
+			  int recurse, enum val_prettyprint pretty,
+			  unsigned int i)
 {
   unsigned int things_printed = 0;
   unsigned len;
@@ -1201,11 +1161,7 @@ partial_memory_read (CORE_ADDR memaddr, char *myaddr, int len, int *errnoptr)
 /* FIXME: Use target_read_string.  */
 
 int
-val_print_string (addr, len, width, stream)
-     CORE_ADDR addr;
-     int len;
-     int width;
-     struct ui_file *stream;
+val_print_string (CORE_ADDR addr, int len, int width, struct ui_file *stream)
 {
   int force_ellipsis = 0;	/* Force ellipsis to be printed if nonzero. */
   int errcode;			/* Errno returned from bad reads. */
@@ -1383,19 +1339,14 @@ val_print_string (addr, len, width, stream)
 
 /* ARGSUSED */
 static void
-set_input_radix (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_input_radix (char *args, int from_tty, struct cmd_list_element *c)
 {
   set_input_radix_1 (from_tty, *(unsigned *) c->var);
 }
 
 /* ARGSUSED */
 static void
-set_input_radix_1 (from_tty, radix)
-     int from_tty;
-     unsigned radix;
+set_input_radix_1 (int from_tty, unsigned radix)
 {
   /* We don't currently disallow any input radix except 0 or 1, which don't
      make any mathematical sense.  In theory, we can deal with any input
@@ -1419,18 +1370,13 @@ set_input_radix_1 (from_tty, radix)
 
 /* ARGSUSED */
 static void
-set_output_radix (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_output_radix (char *args, int from_tty, struct cmd_list_element *c)
 {
   set_output_radix_1 (from_tty, *(unsigned *) c->var);
 }
 
 static void
-set_output_radix_1 (from_tty, radix)
-     int from_tty;
-     unsigned radix;
+set_output_radix_1 (int from_tty, unsigned radix)
 {
   /* Validate the radix and disallow ones that we aren't prepared to
      handle correctly, leaving the radix unchanged. */
@@ -1466,9 +1412,7 @@ set_output_radix_1 (from_tty, radix)
    the 'set input-radix' command. */
 
 static void
-set_radix (arg, from_tty)
-     char *arg;
-     int from_tty;
+set_radix (char *arg, int from_tty)
 {
   unsigned radix;
 
@@ -1486,9 +1430,7 @@ set_radix (arg, from_tty)
 
 /*ARGSUSED */
 static void
-show_radix (arg, from_tty)
-     char *arg;
-     int from_tty;
+show_radix (char *arg, int from_tty)
 {
   if (from_tty)
     {
@@ -1510,9 +1452,7 @@ show_radix (arg, from_tty)
 
 /*ARGSUSED */
 static void
-set_print (arg, from_tty)
-     char *arg;
-     int from_tty;
+set_print (char *arg, int from_tty)
 {
   printf_unfiltered (
      "\"set print\" must be followed by the name of a print subcommand.\n");
@@ -1521,15 +1461,13 @@ set_print (arg, from_tty)
 
 /*ARGSUSED */
 static void
-show_print (args, from_tty)
-     char *args;
-     int from_tty;
+show_print (char *args, int from_tty)
 {
   cmd_show_list (showprintlist, from_tty, "");
 }
 
 void
-_initialize_valprint ()
+_initialize_valprint (void)
 {
   struct cmd_list_element *c;
 

@@ -247,8 +247,7 @@ static int dos_baudconv (int rate);
 
 
 static int
-dos_getc (port)
-     volatile struct dos_ttystate *port;
+dos_getc (volatile struct dos_ttystate *port)
 {
   int c;
 
@@ -265,9 +264,7 @@ dos_getc (port)
 
 
 static int
-dos_putc (c, port)
-     int c;
-     struct dos_ttystate *port;
+dos_putc (int c, struct dos_ttystate *port)
 {
   if (port->count >= CBSIZE - 1)
     return -1;
@@ -279,8 +276,7 @@ dos_putc (c, port)
 
 
 static void
-dos_comisr (irq)
-     int irq;
+dos_comisr (int irq)
 {
   struct dos_ttystate *port;
   unsigned char iir, lsr, c;
@@ -436,8 +432,7 @@ ISR (4) ISR (5) ISR (6) ISR (7)
 
 
 static void
-dos_unhookirq (intr)
-     struct intrupt *intr;
+dos_unhookirq (struct intrupt *intr)
 {
   unsigned int irq, vec;
   unsigned char mask;
@@ -464,9 +459,7 @@ dos_unhookirq (intr)
 
 
 static int
-dos_open (scb, name)
-     serial_t scb;
-     const char *name;
+dos_open (serial_t scb, const char *name)
 {
   struct dos_ttystate *port;
   int fd, i;
@@ -570,8 +563,7 @@ ok:
 
 
 static void
-dos_close (scb)
-     serial_t scb;
+dos_close (serial_t scb)
 {
   struct dos_ttystate *port;
   struct intrupt *intrupt;
@@ -625,9 +617,7 @@ dos_raw (serial_t scb ATTRIBUTE_UNUSED)
 }
 
 static int
-dos_readchar (scb, timeout)
-     serial_t scb;
-     int timeout;
+dos_readchar (serial_t scb, int timeout)
 {
   struct dos_ttystate *port = &ports[scb->fd];
   long then;
@@ -646,8 +636,7 @@ dos_readchar (scb, timeout)
 
 
 static serial_ttystate
-dos_get_tty_state (scb)
-     serial_t scb;
+dos_get_tty_state (serial_t scb)
 {
   struct dos_ttystate *port = &ports[scb->fd];
   struct dos_ttystate *state;
@@ -671,9 +660,7 @@ dos_get_tty_state (scb)
 }
 
 static int
-dos_set_tty_state (scb, ttystate)
-     serial_t scb;
-     serial_ttystate ttystate;
+dos_set_tty_state (serial_t scb, serial_ttystate ttystate)
 {
   struct dos_ttystate *state;
 
@@ -694,8 +681,7 @@ dos_noflush_set_tty_state (serial_t scb, serial_ttystate new_ttystate,
 }
 
 static int
-dos_flush_input (scb)
-     serial_t scb;
+dos_flush_input (serial_t scb)
 {
   struct dos_ttystate *port = &ports[scb->fd];
   disable ();
@@ -716,8 +702,7 @@ dos_print_tty_state (serial_t scb ATTRIBUTE_UNUSED,
 }
 
 static int
-dos_baudconv (rate)
-     int rate;
+dos_baudconv (int rate)
 {
   long x, err;
 
@@ -740,9 +725,7 @@ dos_baudconv (rate)
 
 
 static int
-dos_setbaudrate (scb, rate)
-     serial_t scb;
-     int rate;
+dos_setbaudrate (serial_t scb, int rate)
 {
   struct dos_ttystate *port = &ports[scb->fd];
 
@@ -774,9 +757,7 @@ dos_setbaudrate (scb, rate)
 }
 
 static int
-dos_setstopbits (scb, num)
-     serial_t scb;
-     int num;
+dos_setstopbits (serial_t scb, int num)
 {
   struct dos_ttystate *port = &ports[scb->fd];
   unsigned char cfcr;
@@ -803,10 +784,7 @@ dos_setstopbits (scb, num)
 }
 
 static int
-dos_write (scb, str, len)
-     serial_t scb;
-     const char *str;
-     int len;
+dos_write (serial_t scb, const char *str, int len)
 {
   volatile struct dos_ttystate *port = &ports[scb->fd];
   int fifosize = port->fifo ? 16 : 1;
@@ -840,8 +818,7 @@ dos_write (scb, str, len)
 
 
 static int
-dos_sendbreak (scb)
-     serial_t scb;
+dos_sendbreak (serial_t scb)
 {
   volatile struct dos_ttystate *port = &ports[scb->fd];
   unsigned char cfcr;
@@ -914,7 +891,7 @@ dos_info (char *arg ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
 
 
 void
-_initialize_ser_dos ()
+_initialize_ser_dos (void)
 {
   serial_add_interface (&dos_ops);
 

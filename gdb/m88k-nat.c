@@ -106,8 +106,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   register unsigned int regaddr;
   char buf[80];
@@ -174,7 +173,7 @@ store_inferior_registers (regno)
 
 
 /* blockend is the address of the end of the user structure */
-m88k_register_u_addr (blockend, regnum)
+m88k_register_u_addr (int blockend, int regnum)
 {
   struct USER u;
   int ustart = blockend - sizeof (struct USER);
@@ -247,8 +246,7 @@ m88k_register_u_addr (blockend, regnum)
    register values. */
 
 void
-supply_gregset (gregsetp)
-     gregset_t *gregsetp;
+supply_gregset (gregset_t *gregsetp)
 {
   register int regi;
   register greg_t *regp = (greg_t *) gregsetp;
@@ -265,9 +263,7 @@ supply_gregset (gregsetp)
 }
 
 void
-fill_gregset (gregsetp, regno)
-     gregset_t *gregsetp;
-     int regno;
+fill_gregset (gregset_t *gregsetp, int regno)
 {
   int regi;
   register greg_t *regp = (greg_t *) gregsetp;

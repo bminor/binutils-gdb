@@ -213,8 +213,7 @@ static int hpread_has_name (enum dntt_entry_type);
    FIXME, there should be a cleaner peephole into the BFD environment here.  */
 
 void
-hpread_symfile_init (objfile)
-     struct objfile *objfile;
+hpread_symfile_init (struct objfile *objfile)
 {
   asection *vt_section, *slt_section, *lntt_section, *gntt_section;
 
@@ -301,9 +300,7 @@ hpread_symfile_init (objfile)
    table (as opposed to a shared lib or dynamically loaded file).  */
 
 void
-hpread_build_psymtabs (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;
+hpread_build_psymtabs (struct objfile *objfile, int mainline)
 {
   char *namestring;
   int past_first_source_file = 0;
@@ -626,8 +623,7 @@ hpread_build_psymtabs (objfile, mainline)
    objfile struct from the global list of known objfiles. */
 
 void
-hpread_symfile_finish (objfile)
-     struct objfile *objfile;
+hpread_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_private != NULL)
     {
@@ -641,27 +637,21 @@ hpread_symfile_finish (objfile)
 /* Various small functions to get entries in the debug symbol sections.  */
 
 static union dnttentry *
-hpread_get_lntt (index, objfile)
-     int index;
-     struct objfile *objfile;
+hpread_get_lntt (int index, struct objfile *objfile)
 {
   return (union dnttentry *)
     &(LNTT (objfile)[(index * sizeof (struct dntt_type_block))]);
 }
 
 static union dnttentry *
-hpread_get_gntt (index, objfile)
-     int index;
-     struct objfile *objfile;
+hpread_get_gntt (int index, struct objfile *objfile)
 {
   return (union dnttentry *)
     &(GNTT (objfile)[(index * sizeof (struct dntt_type_block))]);
 }
 
 static union sltentry *
-hpread_get_slt (index, objfile)
-     int index;
-     struct objfile *objfile;
+hpread_get_slt (int index, struct objfile *objfile)
 {
   return (union sltentry *) &(SLT (objfile)[index * sizeof (union sltentry)]);
 }
@@ -672,10 +662,7 @@ hpread_get_slt (index, objfile)
    the existance of DNTT_TYPE_FUNCTION symbols.  */
 
 static unsigned long
-hpread_get_textlow (global, index, objfile)
-     int global;
-     int index;
-     struct objfile *objfile;
+hpread_get_textlow (int global, int index, struct objfile *objfile)
 {
   union dnttentry *dn_bufp;
   struct minimal_symbol *msymbol;
@@ -708,9 +695,7 @@ hpread_get_textlow (global, index, objfile)
 /* Get the nesting depth for the source line identified by INDEX.  */
 
 static unsigned long
-hpread_get_depth (index, objfile)
-     sltpointer index;
-     struct objfile *objfile;
+hpread_get_depth (sltpointer index, struct objfile *objfile)
 {
   union sltentry *sl_bufp;
 
@@ -721,9 +706,7 @@ hpread_get_depth (index, objfile)
 /* Get the source line number the the line identified by INDEX.  */
 
 static unsigned long
-hpread_get_line (index, objfile)
-     sltpointer index;
-     struct objfile *objfile;
+hpread_get_line (sltpointer index, struct objfile *objfile)
 {
   union sltentry *sl_bufp;
 
@@ -732,9 +715,7 @@ hpread_get_line (index, objfile)
 }
 
 static CORE_ADDR
-hpread_get_location (index, objfile)
-     sltpointer index;
-     struct objfile *objfile;
+hpread_get_location (sltpointer index, struct objfile *objfile)
 {
   union sltentry *sl_bufp;
   int i;
@@ -763,8 +744,7 @@ hpread_get_location (index, objfile)
    it, else return 0.  */
 
 static int
-hpread_has_name (kind)
-     enum dntt_entry_type kind;
+hpread_has_name (enum dntt_entry_type kind)
 {
   switch (kind)
     {
@@ -815,14 +795,10 @@ hpread_has_name (kind)
    (normal). */
 
 static struct partial_symtab *
-hpread_start_psymtab (objfile, filename, textlow, ldsymoff, global_syms,
-		      static_syms)
-     struct objfile *objfile;
-     char *filename;
-     CORE_ADDR textlow;
-     int ldsymoff;
-     struct partial_symbol **global_syms;
-     struct partial_symbol **static_syms;
+hpread_start_psymtab (struct objfile *objfile, char *filename,
+		      CORE_ADDR textlow, int ldsymoff,
+		      struct partial_symbol **global_syms,
+		      struct partial_symbol **static_syms)
 {
   struct partial_symtab *result =
   start_psymtab_common (objfile, section_offsets,
@@ -843,15 +819,11 @@ hpread_start_psymtab (objfile, filename, textlow, ldsymoff, global_syms,
    FIXME:  List variables and peculiarities of same.  */
 
 static struct partial_symtab *
-hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
-		    capping_text, dependency_list, number_dependencies)
-     struct partial_symtab *pst;
-     char **include_list;
-     int num_includes;
-     int capping_symbol_offset;
-     CORE_ADDR capping_text;
-     struct partial_symtab **dependency_list;
-     int number_dependencies;
+hpread_end_psymtab (struct partial_symtab *pst, char **include_list,
+		    int num_includes, int capping_symbol_offset,
+		    CORE_ADDR capping_text,
+		    struct partial_symtab **dependency_list,
+		    int number_dependencies)
 {
   int i;
   struct objfile *objfile = pst->objfile;
@@ -941,8 +913,7 @@ hpread_end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
    table.  */
 
 static void
-hpread_psymtab_to_symtab_1 (pst)
-     struct partial_symtab *pst;
+hpread_psymtab_to_symtab_1 (struct partial_symtab *pst)
 {
   struct cleanup *old_chain;
   int i;
@@ -1000,8 +971,7 @@ hpread_psymtab_to_symtab_1 (pst)
    Be verbose about it if the user wants that.  */
 
 static void
-hpread_psymtab_to_symtab (pst)
-     struct partial_symtab *pst;
+hpread_psymtab_to_symtab (struct partial_symtab *pst)
 {
   /* Get out quick if given junk.  */
   if (!pst)
@@ -1048,15 +1018,9 @@ hpread_psymtab_to_symtab (pst)
    SECTION_OFFSETS are the relocation offsets which get added to each symbol. */
 
 static struct symtab *
-hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
-		      section_offsets, filename)
-     struct objfile *objfile;
-     int sym_offset;
-     int sym_size;
-     CORE_ADDR text_offset;
-     int text_size;
-     struct section_offsets *section_offsets;
-     char *filename;
+hpread_expand_symtab (struct objfile *objfile, int sym_offset, int sym_size,
+		      CORE_ADDR text_offset, int text_size,
+		      struct section_offsets *section_offsets, char *filename)
 {
   char *namestring;
   union dnttentry *dn_bufp;
@@ -1107,8 +1071,7 @@ hpread_expand_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
 /* Convert basic types from HP debug format into GDB internal format.  */
 
 static int
-hpread_type_translate (typep)
-     dnttpointer typep;
+hpread_type_translate (dnttpointer typep)
 {
   if (!typep.dntti.immediate)
     abort ();
@@ -1180,9 +1143,7 @@ hpread_type_translate (typep)
 /* Return the type associated with the index found in HP_TYPE.  */
 
 static struct type **
-hpread_lookup_type (hp_type, objfile)
-     dnttpointer hp_type;
-     struct objfile *objfile;
+hpread_lookup_type (dnttpointer hp_type, struct objfile *objfile)
 {
   unsigned old_len;
   int index = hp_type.dnttp.index;
@@ -1223,9 +1184,7 @@ hpread_lookup_type (hp_type, objfile)
    have it lying around.  */
 
 static struct type *
-hpread_alloc_type (hp_type, objfile)
-     dnttpointer hp_type;
-     struct objfile *objfile;
+hpread_alloc_type (dnttpointer hp_type, struct objfile *objfile)
 {
   struct type **type_addr;
 
@@ -1241,10 +1200,8 @@ hpread_alloc_type (hp_type, objfile)
 /* Read a native enumerated type and return it in GDB internal form.  */
 
 static struct type *
-hpread_read_enum_type (hp_type, dn_bufp, objfile)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
+hpread_read_enum_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+		       struct objfile *objfile)
 {
   struct type *type;
   struct pending **symlist, *osyms, *syms;
@@ -1320,10 +1277,8 @@ hpread_read_enum_type (hp_type, dn_bufp, objfile)
 /* Read and internalize a native function debug symbol.  */
 
 static struct type *
-hpread_read_function_type (hp_type, dn_bufp, objfile)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
+hpread_read_function_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+			   struct objfile *objfile)
 {
   struct type *type, *type1;
   struct pending **symlist, *osyms, *syms;
@@ -1430,10 +1385,8 @@ hpread_read_function_type (hp_type, dn_bufp, objfile)
 /* Read in and internalize a structure definition.  */
 
 static struct type *
-hpread_read_struct_type (hp_type, dn_bufp, objfile)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
+hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+			 struct objfile *objfile)
 {
   struct nextfield
     {
@@ -1510,10 +1463,8 @@ hpread_read_struct_type (hp_type, dn_bufp, objfile)
 /* Read in and internalize a set debug symbol.  */
 
 static struct type *
-hpread_read_set_type (hp_type, dn_bufp, objfile)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
+hpread_read_set_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+		      struct objfile *objfile)
 {
   struct type *type;
 
@@ -1534,10 +1485,8 @@ hpread_read_set_type (hp_type, dn_bufp, objfile)
 /* Read in and internalize an array debug symbol.  */
 
 static struct type *
-hpread_read_array_type (hp_type, dn_bufp, objfile)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
+hpread_read_array_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+			struct objfile *objfile)
 {
   struct type *type;
   union dnttentry save;
@@ -1576,10 +1525,8 @@ hpread_read_array_type (hp_type, dn_bufp, objfile)
 
 /* Read in and internalize a subrange debug symbol.  */
 static struct type *
-hpread_read_subrange_type (hp_type, dn_bufp, objfile)
-     dnttpointer hp_type;
-     union dnttentry *dn_bufp;
-     struct objfile *objfile;
+hpread_read_subrange_type (dnttpointer hp_type, union dnttentry *dn_bufp,
+			   struct objfile *objfile)
 {
   struct type *type;
 
@@ -1611,9 +1558,7 @@ hpread_read_subrange_type (hp_type, dn_bufp, objfile)
 }
 
 static struct type *
-hpread_type_lookup (hp_type, objfile)
-     dnttpointer hp_type;
-     struct objfile *objfile;
+hpread_type_lookup (dnttpointer hp_type, struct objfile *objfile)
 {
   union dnttentry *dn_bufp;
 
@@ -1729,11 +1674,9 @@ hpread_type_lookup (hp_type, objfile)
 }
 
 static sltpointer
-hpread_record_lines (subfile, s_idx, e_idx, objfile, offset)
-     struct subfile *subfile;
-     sltpointer s_idx, e_idx;
-     struct objfile *objfile;
-     CORE_ADDR offset;
+hpread_record_lines (struct subfile *subfile, sltpointer s_idx,
+		     sltpointer e_idx, struct objfile *objfile,
+		     CORE_ADDR offset)
 {
   union sltentry *sl_bufp;
 
@@ -1753,16 +1696,10 @@ hpread_record_lines (subfile, s_idx, e_idx, objfile, offset)
 /* Internalize one native debug symbol.  */
 
 static void
-hpread_process_one_debug_symbol (dn_bufp, name, section_offsets, objfile,
-				 text_offset, text_size, filename, index)
-     union dnttentry *dn_bufp;
-     char *name;
-     struct section_offsets *section_offsets;
-     struct objfile *objfile;
-     CORE_ADDR text_offset;
-     int text_size;
-     char *filename;
-     int index;
+hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
+				 struct section_offsets *section_offsets,
+				 struct objfile *objfile, CORE_ADDR text_offset,
+				 int text_size, char *filename, int index)
 {
   unsigned long desc;
   int type;

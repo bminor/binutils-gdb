@@ -86,9 +86,7 @@ static int remote_timeout = 2;
 static serial_t ocd_desc = NULL;
 
 void
-ocd_error (s, error_code)
-     char *s;
-     int error_code;
+ocd_error (char *s, int error_code)
 {
   char buf[100];
 
@@ -153,8 +151,7 @@ ocd_error (s, error_code)
 /*  Return nonzero if the thread TH is still alive on the remote system.  */
 
 int
-ocd_thread_alive (th)
-     int th;
+ocd_thread_alive (int th)
 {
   return 1;
 }
@@ -163,8 +160,7 @@ ocd_thread_alive (th)
 
 /* ARGSUSED */
 void
-ocd_close (quitting)
-     int quitting;
+ocd_close (int quitting)
 {
   if (ocd_desc)
     SERIAL_CLOSE (ocd_desc);
@@ -174,8 +170,7 @@ ocd_close (quitting)
 /* Stub for catch_errors.  */
 
 static int
-ocd_start_remote (dummy)
-     PTR dummy;
+ocd_start_remote (PTR dummy)
 {
   unsigned char buf[10], *p;
   int pktlen;
@@ -281,11 +276,8 @@ ocd_start_remote (dummy)
 static DCACHE *ocd_dcache;
 
 void
-ocd_open (name, from_tty, target_type, ops)
-     char *name;
-     int from_tty;
-     enum ocd_target_type target_type;
-     struct target_ops *ops;
+ocd_open (char *name, int from_tty, enum ocd_target_type target_type,
+	  struct target_ops *ops)
 {
   unsigned char buf[10], *p;
   int pktlen;
@@ -375,9 +367,7 @@ device the OCD device is attached to (e.g. /dev/ttya).");
    die when it hits one.  */
 
 void
-ocd_detach (args, from_tty)
-     char *args;
-     int from_tty;
+ocd_detach (char *args, int from_tty)
 {
   if (args)
     error ("Argument given to \"detach\" when remotely debugging.");
@@ -390,9 +380,7 @@ ocd_detach (args, from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-ocd_resume (pid, step, siggnal)
-     int pid, step;
-     enum target_signal siggnal;
+ocd_resume (int pid, int step, enum target_signal siggnal)
 {
   int pktlen;
 
@@ -405,7 +393,7 @@ ocd_resume (pid, step, siggnal)
 }
 
 void
-ocd_stop ()
+ocd_stop (void)
 {
   int status;
   int pktlen;
@@ -422,8 +410,7 @@ static volatile int ocd_interrupt_flag;
    packet.  */
 
 static void
-ocd_interrupt (signo)
-     int signo;
+ocd_interrupt (int signo)
 {
   /* If this doesn't work, try more severe steps.  */
   signal (signo, ocd_interrupt_twice);
@@ -445,8 +432,7 @@ static void (*ofunc) ();
 
 /* The user typed ^C twice.  */
 static void
-ocd_interrupt_twice (signo)
-     int signo;
+ocd_interrupt_twice (int signo)
 {
   signal (signo, ofunc);
 
@@ -458,7 +444,7 @@ ocd_interrupt_twice (signo)
 /* Ask the user what to do when an interrupt is received.  */
 
 static void
-interrupt_query ()
+interrupt_query (void)
 {
   target_terminal_ours ();
 
@@ -481,7 +467,7 @@ static int kill_kludge;
    means in the case of this target).  */
 
 int
-ocd_wait ()
+ocd_wait (void)
 {
   unsigned char *p;
   int error_code;
@@ -529,10 +515,7 @@ ocd_wait ()
    Returns a pointer to a static array containing the register contents.  */
 
 unsigned char *
-ocd_read_bdm_registers (first_bdm_regno, last_bdm_regno, reglen)
-     int first_bdm_regno;
-     int last_bdm_regno;
-     int *reglen;
+ocd_read_bdm_registers (int first_bdm_regno, int last_bdm_regno, int *reglen)
 {
   unsigned char buf[10];
   int i;
@@ -574,8 +557,7 @@ ocd_read_bdm_registers (first_bdm_regno, last_bdm_regno, reglen)
 /* Read register BDM_REGNO and returns its value ala read_register() */
 
 CORE_ADDR
-ocd_read_bdm_register (bdm_regno)
-     int bdm_regno;
+ocd_read_bdm_register (int bdm_regno)
 {
   int reglen;
   unsigned char *p;
@@ -588,10 +570,7 @@ ocd_read_bdm_register (bdm_regno)
 }
 
 void
-ocd_write_bdm_registers (first_bdm_regno, regptr, reglen)
-     int first_bdm_regno;
-     unsigned char *regptr;
-     int reglen;
+ocd_write_bdm_registers (int first_bdm_regno, unsigned char *regptr, int reglen)
 {
   unsigned char *buf;
   unsigned char *p;
@@ -620,9 +599,7 @@ ocd_write_bdm_registers (first_bdm_regno, regptr, reglen)
 }
 
 void
-ocd_write_bdm_register (bdm_regno, reg)
-     int bdm_regno;
-     CORE_ADDR reg;
+ocd_write_bdm_register (int bdm_regno, CORE_ADDR reg)
 {
   unsigned char buf[4];
 
@@ -632,7 +609,7 @@ ocd_write_bdm_register (bdm_regno, reg)
 }
 
 void
-ocd_prepare_to_store ()
+ocd_prepare_to_store (void)
 {
 }
 
@@ -647,10 +624,7 @@ ocd_prepare_to_store ()
 static int write_mem_command = OCD_WRITE_MEM;
 
 int
-ocd_write_bytes (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+ocd_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 {
   char buf[256 + 10];
   unsigned char *p;
@@ -722,10 +696,7 @@ ocd_write_bytes (memaddr, myaddr, len)
    Returns number of bytes transferred, or 0 for error.  */
 
 static int
-ocd_read_bytes (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+ocd_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 {
   char buf[256 + 10];
   unsigned char *p;
@@ -805,8 +776,7 @@ ocd_xfer_memory (memaddr, myaddr, len, should_write, target)
 }
 
 void
-ocd_files_info (ignore)
-     struct target_ops *ignore;
+ocd_files_info (struct target_ops *ignore)
 {
   puts_filtered ("Debugging a target over a serial line.\n");
 }
@@ -817,8 +787,7 @@ ocd_files_info (ignore)
 /* Read a single character from the remote side, handling wierd errors. */
 
 static int
-readchar (timeout)
-     int timeout;
+readchar (int timeout)
 {
   int ch;
 
@@ -843,8 +812,7 @@ readchar (timeout)
    mistaken for real data).  */
 
 static int
-get_quoted_char (timeout)
-     int timeout;
+get_quoted_char (int timeout)
 {
   int ch;
 
@@ -869,13 +837,13 @@ get_quoted_char (timeout)
 static unsigned char pkt[256 * 2 + 10], *pktp;	/* Worst case */
 
 static void
-reset_packet ()
+reset_packet (void)
 {
   pktp = pkt;
 }
 
 static void
-output_packet ()
+output_packet (void)
 {
   if (SERIAL_WRITE (ocd_desc, pkt, pktp - pkt))
     perror_with_name ("output_packet: write failed");
@@ -887,8 +855,7 @@ output_packet ()
    through untouched.  */
 
 static void
-put_quoted_char (c)
-     int c;
+put_quoted_char (int c)
 {
   switch (c)
     {
@@ -911,9 +878,7 @@ put_quoted_char (c)
    byte count. */
 
 static void
-stu_put_packet (buf, len)
-     unsigned char *buf;
-     int len;
+stu_put_packet (unsigned char *buf, int len)
 {
   unsigned char checksum;
   unsigned char c;
@@ -956,9 +921,7 @@ stu_put_packet (buf, len)
    byte count.  */
 
 static void
-ocd_put_packet (buf, len)
-     unsigned char *buf;
-     int len;
+ocd_put_packet (unsigned char *buf, int len)
 {
   unsigned char checksum;
   unsigned char c;
@@ -993,9 +956,7 @@ ocd_put_packet (buf, len)
  */
 
 static unsigned char *
-stu_get_packet (cmd, lenp, timeout)
-     unsigned char cmd;
-     int *lenp;
+stu_get_packet (unsigned char cmd, int *lenp, int timeout)
 {
   int ch;
   int len;
@@ -1058,9 +1019,7 @@ found_syn:			/* Found the start of a packet */
  */
 
 static unsigned char *
-ocd_get_packet (cmd, lenp, timeout)
-     int cmd;
-     int *lenp;
+ocd_get_packet (int cmd, int *lenp, int timeout)
 {
   int ch;
   int len;
@@ -1207,10 +1166,7 @@ ocd_get_packet (cmd, lenp, timeout)
    following the error code.  */
 
 static unsigned char *
-ocd_do_command (cmd, statusp, lenp)
-     int cmd;
-     int *statusp;
-     int *lenp;
+ocd_do_command (int cmd, int *statusp, int *lenp)
 {
   unsigned char buf[100], *p;
   int status, error_code;
@@ -1256,7 +1212,7 @@ ocd_do_command (cmd, statusp, lenp)
 }
 
 void
-ocd_kill ()
+ocd_kill (void)
 {
   /* For some mysterious reason, wait_for_inferior calls kill instead of
      mourn after it gets TARGET_WAITKIND_SIGNALLED.  Work around it.  */
@@ -1273,7 +1229,7 @@ ocd_kill ()
 }
 
 void
-ocd_mourn ()
+ocd_mourn (void)
 {
   unpush_target (current_ops);
   generic_mourn_inferior ();
@@ -1283,10 +1239,7 @@ ocd_mourn ()
    the program at that point.  */
 
 void
-ocd_create_inferior (exec_file, args, env)
-     char *exec_file;
-     char *args;
-     char **env;
+ocd_create_inferior (char *exec_file, char *args, char **env)
 {
   if (args && (*args != '\000'))
     error ("Args are not supported by BDM.");
@@ -1296,9 +1249,7 @@ ocd_create_inferior (exec_file, args, env)
 }
 
 void
-ocd_load (args, from_tty)
-     char *args;
-     int from_tty;
+ocd_load (char *args, int from_tty)
 {
   generic_load (args, from_tty);
 
@@ -1325,9 +1276,7 @@ ocd_load (args, from_tty)
 /* BDM (at least on CPU32) uses a different breakpoint */
 
 int
-ocd_insert_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+ocd_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   static char break_insn[] = BDM_BREAKPOINT;
   int val;
@@ -1341,9 +1290,7 @@ ocd_insert_breakpoint (addr, contents_cache)
 }
 
 int
-ocd_remove_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+ocd_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   static char break_insn[] = BDM_BREAKPOINT;
   int val;
@@ -1354,17 +1301,13 @@ ocd_remove_breakpoint (addr, contents_cache)
 }
 
 static void
-bdm_command (args, from_tty)
-     char *args;
-     int from_tty;
+bdm_command (char *args, int from_tty)
 {
   error ("bdm command must be followed by `reset'");
 }
 
 static void
-bdm_reset_command (args, from_tty)
-     char *args;
-     int from_tty;
+bdm_reset_command (char *args, int from_tty)
 {
   int status, pktlen;
 
@@ -1377,9 +1320,7 @@ bdm_reset_command (args, from_tty)
 }
 
 static void
-bdm_restart_command (args, from_tty)
-     char *args;
-     int from_tty;
+bdm_restart_command (char *args, int from_tty)
 {
   int status, pktlen;
 
@@ -1397,15 +1338,12 @@ bdm_restart_command (args, from_tty)
    generic_load from trying to set the PC.  */
 
 static void
-noop_store_registers (regno)
-     int regno;
+noop_store_registers (int regno)
 {
 }
 
 static void
-bdm_update_flash_command (args, from_tty)
-     char *args;
-     int from_tty;
+bdm_update_flash_command (char *args, int from_tty)
 {
   int status, pktlen;
   struct cleanup *old_chain; 
@@ -1438,9 +1376,7 @@ bdm_update_flash_command (args, from_tty)
 }
 
 static void
-bdm_read_register_command (args, from_tty)
-     char *args;
-     int from_tty;
+bdm_read_register_command (char *args, int from_tty)
 {
   /* XXX repeat should go on to the next register */
 
@@ -1453,7 +1389,7 @@ bdm_read_register_command (args, from_tty)
 }
 
 void
-_initialize_remote_ocd ()
+_initialize_remote_ocd (void)
 {
   extern struct cmd_list_element *cmdlist;
   static struct cmd_list_element *ocd_cmd_list = NULL;

@@ -207,9 +207,7 @@ int debug_level = 0;
 
 /* "Temporary" debug stuff */
 void
-xx_debug (fmt, a, b, c)
-     char *fmt;
-     int a, b, c;
+xx_debug (char *fmt, int a, int b, int c)
 {
   if (debug_level)
     warning (fmt, a, b, c);
@@ -318,10 +316,7 @@ struct obstack *cproc_obstack = &Cproc_obstack;
 port_chain_t notify_chain = (port_chain_t) NULL;
 
 port_chain_t
-port_chain_insert (list, name, type)
-     port_chain_t list;
-     mach_port_t name;
-     int type;
+port_chain_insert (port_chain_t list, mach_port_t name, int type)
 {
   kern_return_t ret;
   port_chain_t new;
@@ -363,9 +358,7 @@ port_chain_insert (list, name, type)
 }
 
 port_chain_t
-port_chain_delete (list, elem)
-     port_chain_t list;
-     mach_port_t elem;
+port_chain_delete (port_chain_t list, mach_port_t elem)
 {
   if (list)
     if (list->port == elem)
@@ -382,17 +375,14 @@ port_chain_delete (list, elem)
 }
 
 void
-port_chain_destroy (ostack)
-     struct obstack *ostack;
+port_chain_destroy (struct obstack *ostack)
 {
   obstack_free (ostack, 0);
   obstack_init (ostack);
 }
 
 port_chain_t
-port_chain_member (list, elem)
-     port_chain_t list;
-     mach_port_t elem;
+port_chain_member (port_chain_t list, mach_port_t elem)
 {
   while (list)
     {
@@ -404,9 +394,7 @@ port_chain_member (list, elem)
 }
 
 int
-map_port_name_to_mid (name, type)
-     mach_port_t name;
-     int type;
+map_port_name_to_mid (mach_port_t name, int type)
 {
   port_chain_t elem;
 
@@ -445,8 +433,7 @@ map_port_name_to_mid (name, type)
 
 /* Guard for currently_waiting_for and singlestepped_thread_port */
 static void
-discard_single_step (thread)
-     thread_t thread;
+discard_single_step (thread_t thread)
 {
   currently_waiting_for = inferior_wait_port_set;
 
@@ -455,9 +442,7 @@ discard_single_step (thread)
     setup_single_step (thread, FALSE);
 }
 
-setup_single_step (thread, start_step)
-     thread_t thread;
-     boolean_t start_step;
+setup_single_step (thread_t thread, boolean_t start_step)
 {
   kern_return_t ret;
 
@@ -545,10 +530,7 @@ setup_single_step (thread, start_step)
 }
 
 static
-request_notify (name, variant, type)
-     mach_port_t name;
-     mach_msg_id_t variant;
-     int type;
+request_notify (mach_port_t name, mach_msg_id_t variant, int type)
 {
   kern_return_t ret;
   mach_port_t previous_port_dummy = MACH_PORT_NULL;
@@ -574,9 +556,7 @@ request_notify (name, variant, type)
   notify_chain = port_chain_insert (notify_chain, name, type);
 }
 
-reverse_msg_bits (msgp, type)
-     mach_msg_header_t *msgp;
-     int type;
+reverse_msg_bits (mach_msg_header_t *msgp, int type)
 {
   int rbits, lbits;
   rbits = MACH_MSGH_BITS_REMOTE (msgp->msgh_bits);
@@ -612,7 +592,7 @@ mach_port_t original_server_port_name = MACH_PORT_NULL;
 
 /* Called from inferior after FORK but before EXEC */
 static void
-m3_trace_me ()
+m3_trace_me (void)
 {
   kern_return_t ret;
 
@@ -643,8 +623,7 @@ m3_trace_me ()
  */
 
 void
-intercept_exec_calls (exec_counter)
-     int exec_counter;
+intercept_exec_calls (int exec_counter)
 {
   int terminal_initted = 0;
 
@@ -878,9 +857,7 @@ intercept_exec_calls (exec_counter)
 }
 
 void
-consume_send_rights (thread_list, thread_count)
-     thread_array_t thread_list;
-     int thread_count;
+consume_send_rights (thread_array_t thread_list, int thread_count)
 {
   int index;
 
@@ -896,9 +873,7 @@ consume_send_rights (thread_list, thread_count)
 }
 
 /* suspend/abort/resume a thread. */
-setup_thread (thread, what)
-     mach_port_t thread;
-     int what;
+setup_thread (mach_port_t thread, int what)
 {
   kern_return_t ret;
 
@@ -918,10 +893,7 @@ setup_thread (thread, what)
 }
 
 int
-map_slot_to_mid (slot, threads, thread_count)
-     int slot;
-     thread_array_t threads;
-     int thread_count;
+map_slot_to_mid (int slot, thread_array_t threads, int thread_count)
 {
   kern_return_t ret;
   int deallocate = 0;
@@ -962,10 +934,7 @@ map_slot_to_mid (slot, threads, thread_count)
 }
 
 static int
-parse_thread_id (arg, thread_count, slots)
-     char *arg;
-     int thread_count;
-     int slots;
+parse_thread_id (char *arg, int thread_count, int slots)
 {
   kern_return_t ret;
   int mid;
@@ -1025,10 +994,7 @@ parse_thread_id (arg, thread_count, slots)
  * 
  */
 kern_return_t
-select_thread (task, thread_id, flag)
-     mach_port_t task;
-     int thread_id;
-     int flag;
+select_thread (mach_port_t task, int thread_id, int flag)
 {
   thread_array_t thread_list;
   int thread_count;
@@ -1144,8 +1110,7 @@ select_thread (task, thread_id, flag)
  * Return it's MID
  */
 int
-switch_to_thread (new_thread)
-     thread_t new_thread;
+switch_to_thread (thread_t new_thread)
 {
   thread_t saved_thread = current_thread;
   int mid;
@@ -1168,8 +1133,7 @@ switch_to_thread (new_thread)
  * Note that the registers are not yet valid in the inferior task.
  */
 static int
-m3_trace_him (pid)
-     int pid;
+m3_trace_him (int pid)
 {
   kern_return_t ret;
 
@@ -1206,7 +1170,7 @@ m3_trace_him (pid)
   return pid;
 }
 
-setup_exception_port ()
+setup_exception_port (void)
 {
   kern_return_t ret;
 
@@ -1269,9 +1233,7 @@ int mach_really_waiting;
    Returns the inferior_pid for rest of gdb.
    Side effects: Set *OURSTATUS.  */
 int
-mach_really_wait (pid, ourstatus)
-     int pid;
-     struct target_waitstatus *ourstatus;
+mach_really_wait (int pid, struct target_waitstatus *ourstatus)
 {
   kern_return_t ret;
   int w;
@@ -1391,7 +1353,7 @@ mach_really_wait (pid, ourstatus)
  * This is called just before calling error() to return to command level
  */
 void
-mach3_quit ()
+mach3_quit (void)
 {
   int mid;
   kern_return_t ret;
@@ -1435,7 +1397,7 @@ mach3_quit ()
  * Called by REQUEST_QUIT() from utils.c(request_quit)
  */
 void
-mach3_request_quit ()
+mach3_request_quit (void)
 {
   if (mach_really_waiting)
     immediate_quit = 1;
@@ -1448,8 +1410,7 @@ mach3_request_quit ()
  * gdb to return to the command level like ^C had been typed from terminal.
  */
 int
-gdb_message_server (InP)
-     mach_msg_header_t *InP;
+gdb_message_server (mach_msg_header_t *InP)
 {
   kern_return_t ret;
   int mid;
@@ -1496,7 +1457,7 @@ gdb_message_server (InP)
  * External program "stop-gdb" implements this also.
  */
 void
-stop_inferior_gdb ()
+stop_inferior_gdb (void)
 {
   kern_return_t ret;
 
@@ -1541,8 +1502,7 @@ stop_inferior_gdb ()
  * it is selected and the last exception was a breakpoint.
  */
 int
-mach_thread_for_breakpoint (mid)
-     int mid;
+mach_thread_for_breakpoint (int mid)
 {
   int cmid = map_port_name_to_mid (current_thread, MACH_TYPE_THREAD);
 
@@ -1576,8 +1536,7 @@ mach_thread_for_breakpoint (mid)
  *    slot index. (Since 0 is reserved))
  */
 int
-mach_thread_parse_id (arg)
-     char *arg;
+mach_thread_parse_id (char *arg)
 {
   int mid;
   if (arg == 0)
@@ -1590,8 +1549,7 @@ mach_thread_parse_id (arg)
 
 #ifdef THREAD_OUTPUT_ID
 char *
-mach_thread_output_id (mid)
-     int mid;
+mach_thread_output_id (int mid)
 {
   static char foobar[20];
 
@@ -1615,8 +1573,7 @@ mach_thread_output_id (mid)
  *
  */
 
-mach3_prepare_to_proceed (select_it)
-     int select_it;
+mach3_prepare_to_proceed (int select_it)
 {
   if (stop_thread &&
       stop_thread != current_thread &&
@@ -1653,11 +1610,8 @@ mach3_prepare_to_proceed (select_it)
  */
 
 kern_return_t
-catch_exception_raise (port, thread, task, exception, code, subcode)
-     mach_port_t port;
-     thread_t thread;
-     task_t task;
-     int exception, code, subcode;
+catch_exception_raise (mach_port_t port, thread_t thread, task_t task,
+		       int exception, int code, int subcode)
 {
   kern_return_t ret;
   boolean_t signal_thread;
@@ -1797,9 +1751,7 @@ catch_exception_raise (port, thread, task, exception, code, subcode)
 }
 
 int
-port_valid (port, mask)
-     mach_port_t port;
-     int mask;
+port_valid (mach_port_t port, int mask)
 {
   kern_return_t ret;
   mach_port_type_t type;
@@ -1822,10 +1774,7 @@ boolean_t vm_read_cache_valid = FALSE;
  * Return 0 on failure; number of bytes read otherwise.
  */
 int
-mach3_read_inferior (addr, myaddr, length)
-     CORE_ADDR addr;
-     char *myaddr;
-     int length;
+mach3_read_inferior (CORE_ADDR addr, char *myaddr, int length)
 {
   kern_return_t ret;
   vm_address_t low_address = (vm_address_t) trunc_page (addr);
@@ -1903,10 +1852,7 @@ struct obstack region_obstack;
  * in gdb's address space.
  */
 int
-mach3_write_inferior (addr, myaddr, length)
-     CORE_ADDR addr;
-     char *myaddr;
-     int length;
+mach3_write_inferior (CORE_ADDR addr, char *myaddr, int length)
 {
   kern_return_t ret;
   vm_address_t low_address = (vm_address_t) trunc_page (addr);
@@ -2085,8 +2031,7 @@ m3_xfer_memory (memaddr, myaddr, len, write, target)
 
 
 static char *
-translate_state (state)
-     int state;
+translate_state (int state)
 {
   switch (state)
     {
@@ -2106,8 +2051,7 @@ translate_state (state)
 }
 
 static char *
-translate_cstate (state)
-     int state;
+translate_cstate (int state)
 {
   switch (state)
     {
@@ -2129,9 +2073,7 @@ translate_cstate (state)
 /* type == MACH_MSG_TYPE_COPY_SEND || type == MACH_MSG_TYPE_MAKE_SEND */
 
 mach_port_t			/* no mach_port_name_t found in include files. */
-map_inferior_port_name (inferior_name, type)
-     mach_port_t inferior_name;
-     mach_msg_type_name_t type;
+map_inferior_port_name (mach_port_t inferior_name, mach_msg_type_name_t type)
 {
   kern_return_t ret;
   mach_msg_type_name_t acquired;
@@ -2169,9 +2111,7 @@ map_inferior_port_name (inferior_name, type)
 static char buf[7];
 
 static char *
-get_thread_name (one_cproc, id)
-     gdb_thread_t one_cproc;
-     int id;
+get_thread_name (gdb_thread_t one_cproc, int id)
 {
   if (one_cproc)
     if (one_cproc->cthread == NULL)
@@ -2274,8 +2214,7 @@ fetch_thread_info (task, mthreads_out)
  * emulator stack below struct emul_stack_top stuff.
  */
 CORE_ADDR
-fetch_usp_from_emulator_stack (sp)
-     CORE_ADDR sp;
+fetch_usp_from_emulator_stack (CORE_ADDR sp)
 {
   CORE_ADDR stack_pointer;
 
@@ -2303,8 +2242,7 @@ fetch_usp_from_emulator_stack (sp)
 /* Check if the emulator exists at task's address space.
  */
 boolean_t
-have_emulator_p (task)
-     task_t task;
+have_emulator_p (task_t task)
 {
   kern_return_t ret;
 #ifndef EMUL_VECTOR_COUNT
@@ -2352,10 +2290,8 @@ have_emulator_p (task)
 /* Map cprocs to kernel threads and vice versa.  */
 
 void
-map_cprocs_to_kernel_threads (cprocs, mthreads, thread_count)
-     gdb_thread_t cprocs;
-     gdb_thread_t mthreads;
-     int thread_count;
+map_cprocs_to_kernel_threads (gdb_thread_t cprocs, gdb_thread_t mthreads,
+			      int thread_count)
 {
   int index;
   gdb_thread_t scan;
@@ -2471,9 +2407,7 @@ map_cprocs_to_kernel_threads (cprocs, mthreads, thread_count)
 #define TL_HEADER "\n@    MID  Name        KState CState   Where\n"
 
 void
-print_tl_address (stream, pc)
-     struct ui_file *stream;
-     CORE_ADDR pc;
+print_tl_address (struct ui_file *stream, CORE_ADDR pc)
 {
   if (!lookup_minimal_symbol_by_pc (pc))
     fprintf_filtered (stream, local_hex_format (), pc);
@@ -2494,8 +2428,7 @@ print_tl_address (stream, pc)
 
 /* Returns the address of variable NAME or 0 if not found */
 CORE_ADDR
-lookup_address_of_variable (name)
-     char *name;
+lookup_address_of_variable (char *name)
 {
   struct symbol *sym;
   CORE_ADDR symaddr = 0;
@@ -2522,7 +2455,7 @@ lookup_address_of_variable (name)
 }
 
 static gdb_thread_t
-get_cprocs ()
+get_cprocs (void)
 {
   gdb_thread_t cproc_head;
   gdb_thread_t cproc_copy;
@@ -2636,8 +2569,7 @@ get_cprocs ()
 #define FETCH_CPROC_STATE(mth) mach3_cproc_state (mth)
 
 int
-mach3_cproc_state (mthread)
-     gdb_thread_t mthread;
+mach3_cproc_state (gdb_thread_t mthread)
 {
   int context;
 
@@ -2674,7 +2606,7 @@ mach3_cproc_state (mthread)
 
 
 void
-thread_list_command ()
+thread_list_command (void)
 {
   thread_basic_info_data_t ths;
   int thread_count;
@@ -2893,9 +2825,7 @@ thread_list_command ()
 }
 
 void
-thread_select_command (args, from_tty)
-     char *args;
-     int from_tty;
+thread_select_command (char *args, int from_tty)
 {
   int mid;
   thread_array_t thread_list;
@@ -2932,9 +2862,7 @@ thread_select_command (args, from_tty)
 						   MACH_TYPE_THREAD) : mid);
 }
 
-thread_trace (thread, set)
-     mach_port_t thread;
-     boolean_t set;
+thread_trace (mach_port_t thread, boolean_t set)
 {
   int flavor = TRACE_FLAVOR;
   unsigned int stateCnt = TRACE_FLAVOR_SIZE;
@@ -2980,8 +2908,7 @@ thread_trace (thread, set)
    This definitely includes breakpoints, for instance, or else we
    end up looping in mysterious Bpt traps */
 
-flush_inferior_icache (pc, amount)
-     CORE_ADDR pc;
+flush_inferior_icache (CORE_ADDR pc, int amount)
 {
   vm_machine_attribute_val_t flush = MATTR_VAL_ICACHE_FLUSH;
   kern_return_t ret;
@@ -2999,8 +2926,7 @@ flush_inferior_icache (pc, amount)
 
 
 static
-suspend_all_threads (from_tty)
-     int from_tty;
+suspend_all_threads (int from_tty)
 {
   kern_return_t ret;
   thread_array_t thread_list;
@@ -3052,9 +2978,7 @@ suspend_all_threads (from_tty)
 }
 
 void
-thread_suspend_command (args, from_tty)
-     char *args;
-     int from_tty;
+thread_suspend_command (char *args, int from_tty)
 {
   kern_return_t ret;
   int mid;
@@ -3103,8 +3027,7 @@ thread_suspend_command (args, from_tty)
   current_thread = saved_thread;
 }
 
-resume_all_threads (from_tty)
-     int from_tty;
+resume_all_threads (int from_tty)
 {
   kern_return_t ret;
   thread_array_t thread_list;
@@ -3157,9 +3080,7 @@ resume_all_threads (from_tty)
 }
 
 void
-thread_resume_command (args, from_tty)
-     char *args;
-     int from_tty;
+thread_resume_command (char *args, int from_tty)
 {
   int mid;
   mach_port_t saved_thread;
@@ -3218,9 +3139,7 @@ out:
 }
 
 void
-thread_kill_command (args, from_tty)
-     char *args;
-     int from_tty;
+thread_kill_command (char *args, int from_tty)
 {
   int mid;
   kern_return_t ret;
@@ -3282,9 +3201,7 @@ thread_kill_command (args, from_tty)
 /* Task specific commands; add more if you like */
 
 void
-task_resume_command (args, from_tty)
-     char *args;
-     int from_tty;
+task_resume_command (char *args, int from_tty)
 {
   kern_return_t ret;
   task_basic_info_data_t ta_info;
@@ -3328,9 +3245,7 @@ task_resume_command (args, from_tty)
 
 
 void
-task_suspend_command (args, from_tty)
-     char *args;
-     int from_tty;
+task_suspend_command (char *args, int from_tty)
 {
   kern_return_t ret;
   task_basic_info_data_t ta_info;
@@ -3359,8 +3274,7 @@ task_suspend_command (args, from_tty)
 }
 
 static char *
-get_size (bytes)
-     int bytes;
+get_size (int bytes)
 {
   static char size[30];
   int zz = bytes / 1024;
@@ -3375,9 +3289,7 @@ get_size (bytes)
 
 /* Does this require the target task to be suspended?? I don't think so. */
 void
-task_info_command (args, from_tty)
-     char *args;
-     int from_tty;
+task_info_command (char *args, int from_tty)
 {
   int mid = -5;
   mach_port_t task;
@@ -3454,9 +3366,7 @@ task_info_command (args, from_tty)
  */
 
 static void
-exception_command (args, from_tty)
-     char *args;
-     int from_tty;
+exception_command (char *args, int from_tty)
 {
   char *scan = args;
   int exception;
@@ -3505,8 +3415,7 @@ exception_command (args, from_tty)
 }
 
 static void
-print_exception_info (exception)
-     int exception;
+print_exception_info (int exception)
 {
   boolean_t forward = exception_map[exception].forward;
 
@@ -3524,9 +3433,7 @@ print_exception_info (exception)
 }
 
 void
-exception_info (args, from_tty)
-     char *args;
-     int from_tty;
+exception_info (char *args, int from_tty)
 {
   int exception;
 
@@ -3546,10 +3453,7 @@ exception_info (args, from_tty)
 
 /* Check for actions for mach exceptions.
  */
-mach3_exception_actions (w, force_print_only, who)
-     WAITTYPE *w;
-     boolean_t force_print_only;
-     char *who;
+mach3_exception_actions (WAITTYPE *w, boolean_t force_print_only, char *who)
 {
   boolean_t force_print = FALSE;
 
@@ -3603,8 +3507,7 @@ mach3_exception_actions (w, force_print_only, who)
     }
 }
 
-setup_notify_port (create_new)
-     int create_new;
+setup_notify_port (int create_new)
 {
   kern_return_t ret;
 
@@ -3649,9 +3552,7 @@ setup_notify_port (create_new)
 char registered_name[MAX_NAME_LEN];
 
 void
-message_port_info (args, from_tty)
-     char *args;
-     int from_tty;
+message_port_info (char *args, int from_tty)
 {
   if (registered_name[0])
     printf_filtered ("gdb's message port name: '%s'\n",
@@ -3661,9 +3562,7 @@ message_port_info (args, from_tty)
 }
 
 void
-gdb_register_port (name, port)
-     char *name;
-     mach_port_t port;
+gdb_register_port (char *name, mach_port_t port)
 {
   kern_return_t ret;
   static int already_signed = 0;
@@ -3715,9 +3614,7 @@ struct cmd_list_element *cmd_task_list;
 
 /*ARGSUSED */
 static void
-thread_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+thread_command (char *arg, int from_tty)
 {
   printf_unfiltered ("\"thread\" must be followed by the name of a thread command.\n");
   help_list (cmd_thread_list, "thread ", -1, gdb_stdout);
@@ -3725,15 +3622,13 @@ thread_command (arg, from_tty)
 
 /*ARGSUSED */
 static void
-task_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+task_command (char *arg, int from_tty)
 {
   printf_unfiltered ("\"task\" must be followed by the name of a task command.\n");
   help_list (cmd_task_list, "task ", -1, gdb_stdout);
 }
 
-add_mach_specific_commands ()
+add_mach_specific_commands (void)
 {
   /* Thread handling commands */
 
@@ -3814,9 +3709,7 @@ Normally \"keep\" is used to return to GDB on exception.");
 }
 
 kern_return_t
-do_mach_notify_dead_name (notify, name)
-     mach_port_t notify;
-     mach_port_t name;
+do_mach_notify_dead_name (mach_port_t notify, mach_port_t name)
 {
   kern_return_t kr = KERN_SUCCESS;
 
@@ -3875,9 +3768,7 @@ do_mach_notify_dead_name (notify, name)
 }
 
 kern_return_t
-do_mach_notify_msg_accepted (notify, name)
-     mach_port_t notify;
-     mach_port_t name;
+do_mach_notify_msg_accepted (mach_port_t notify, mach_port_t name)
 {
   warning ("do_mach_notify_msg_accepted : notify %x, name %x",
 	   notify, name);
@@ -3885,9 +3776,7 @@ do_mach_notify_msg_accepted (notify, name)
 }
 
 kern_return_t
-do_mach_notify_no_senders (notify, mscount)
-     mach_port_t notify;
-     mach_port_mscount_t mscount;
+do_mach_notify_no_senders (mach_port_t notify, mach_port_mscount_t mscount)
 {
   warning ("do_mach_notify_no_senders : notify %x, mscount %x",
 	   notify, mscount);
@@ -3895,9 +3784,7 @@ do_mach_notify_no_senders (notify, mscount)
 }
 
 kern_return_t
-do_mach_notify_port_deleted (notify, name)
-     mach_port_t notify;
-     mach_port_t name;
+do_mach_notify_port_deleted (mach_port_t notify, mach_port_t name)
 {
   warning ("do_mach_notify_port_deleted : notify %x, name %x",
 	   notify, name);
@@ -3905,9 +3792,7 @@ do_mach_notify_port_deleted (notify, name)
 }
 
 kern_return_t
-do_mach_notify_port_destroyed (notify, rights)
-     mach_port_t notify;
-     mach_port_t rights;
+do_mach_notify_port_destroyed (mach_port_t notify, mach_port_t rights)
 {
   warning ("do_mach_notify_port_destroyed : notify %x, rights %x",
 	   notify, rights);
@@ -3915,8 +3800,7 @@ do_mach_notify_port_destroyed (notify, rights)
 }
 
 kern_return_t
-do_mach_notify_send_once (notify)
-     mach_port_t notify;
+do_mach_notify_send_once (mach_port_t notify)
 {
 #ifdef DUMP_SYSCALL
   /* MANY of these are generated. */
@@ -3928,7 +3812,7 @@ do_mach_notify_send_once (notify)
 
 /* Kills the inferior. It's gone when you call this */
 static void
-kill_inferior_fast ()
+kill_inferior_fast (void)
 {
   WAITTYPE w;
 
@@ -3953,7 +3837,7 @@ kill_inferior_fast ()
 }
 
 static void
-m3_kill_inferior ()
+m3_kill_inferior (void)
 {
   kill_inferior_fast ();
   target_mourn_inferior ();
@@ -3962,7 +3846,7 @@ m3_kill_inferior ()
 /* Clean up after the inferior dies.  */
 
 static void
-m3_mourn_inferior ()
+m3_mourn_inferior (void)
 {
   unpush_target (&m3_ops);
   generic_mourn_inferior ();
@@ -3972,10 +3856,7 @@ m3_mourn_inferior ()
 /* Fork an inferior process, and start debugging it.  */
 
 static void
-m3_create_inferior (exec_file, allargs, env)
-     char *exec_file;
-     char *allargs;
-     char **env;
+m3_create_inferior (char *exec_file, char *allargs, char **env)
 {
   fork_inferior (exec_file, allargs, env, m3_trace_me, m3_trace_him, NULL, NULL);
   /* We are at the first instruction we care about.  */
@@ -3986,7 +3867,7 @@ m3_create_inferior (exec_file, allargs, env)
 /* Mark our target-struct as eligible for stray "run" and "attach"
    commands.  */
 static int
-m3_can_run ()
+m3_can_run (void)
 {
   return 1;
 }
@@ -3994,8 +3875,7 @@ m3_can_run ()
 /* Mach 3.0 does not need ptrace for anything
  * Make sure nobody uses it on mach.
  */
-ptrace (a, b, c, d)
-     int a, b, c, d;
+ptrace (int a, int b, int c, int d)
 {
   error ("Lose, Lose! Somebody called ptrace\n");
 }
@@ -4005,10 +3885,7 @@ ptrace (a, b, c, d)
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-m3_resume (pid, step, signal)
-     int pid;
-     int step;
-     enum target_signal signal;
+m3_resume (int pid, int step, enum target_signal signal)
 {
   kern_return_t ret;
 
@@ -4066,8 +3943,7 @@ m3_resume (pid, step, signal)
 
 /* Start debugging the process with the given task */
 void
-task_attach (tid)
-     task_t tid;
+task_attach (task_t tid)
 {
   kern_return_t ret;
   inferior_task = tid;
@@ -4097,14 +3973,13 @@ task_attach (tid)
  * (Someone must have killed it))
  */
 void
-attach_to_thread ()
+attach_to_thread (void)
 {
   if (select_thread (inferior_task, 0, 1) != KERN_SUCCESS)
     error ("Could not select any threads to attach to");
 }
 
-mid_attach (mid)
-     int mid;
+mid_attach (int mid)
 {
   kern_return_t ret;
 
@@ -4125,8 +4000,7 @@ mid_attach (mid)
  * "atta pidself". Anyway, the latter is allowed by specifying a MID.
  */
 static int
-m3_do_attach (pid)
-     int pid;
+m3_do_attach (int pid)
 {
   kern_return_t ret;
 
@@ -4162,9 +4036,7 @@ m3_do_attach (pid)
    and wait for the trace-trap that results from attaching.  */
 
 static void
-m3_attach (args, from_tty)
-     char *args;
-     int from_tty;
+m3_attach (char *args, int from_tty)
 {
   char *exec_file;
   int pid;
@@ -4195,7 +4067,7 @@ m3_attach (args, from_tty)
 }
 
 void
-deallocate_inferior_ports ()
+deallocate_inferior_ports (void)
 {
   kern_return_t ret;
   thread_array_t thread_list;
@@ -4251,8 +4123,7 @@ deallocate_inferior_ports ()
    SIGNAL = 0 means just continue it.  */
 
 static void
-m3_do_detach (signal)
-     int signal;
+m3_do_detach (int signal)
 {
   kern_return_t ret;
 
@@ -4299,9 +4170,7 @@ m3_do_detach (signal)
    started via fork.  */
 
 static void
-m3_detach (args, from_tty)
-     char *args;
-     int from_tty;
+m3_detach (char *args, int from_tty)
 {
   int siggnal = 0;
 
@@ -4330,7 +4199,7 @@ m3_detach (args, from_tty)
    debugged.  */
 
 static void
-m3_prepare_to_store ()
+m3_prepare_to_store (void)
 {
 #ifdef CHILD_PREPARE_TO_STORE
   CHILD_PREPARE_TO_STORE ();
@@ -4340,8 +4209,7 @@ m3_prepare_to_store ()
 /* Print status information about what we're accessing.  */
 
 static void
-m3_files_info (ignore)
-     struct target_ops *ignore;
+m3_files_info (struct target_ops *ignore)
 {
   /* FIXME: should print MID and all that crap.  */
   printf_unfiltered ("\tUsing the running image of %s %s.\n",
@@ -4349,9 +4217,7 @@ m3_files_info (ignore)
 }
 
 static void
-m3_open (arg, from_tty)
-     char *arg;
-     int from_tty;
+m3_open (char *arg, int from_tty)
 {
   error ("Use the \"run\" command to start a Unix child process.");
 }
@@ -4435,11 +4301,7 @@ char *bsd1_names[] =
 int bsd1_nnames = sizeof (bsd1_names) / sizeof (bsd1_names[0]);
 
 char *
-name_str (name, buf)
-
-     int name;
-     char *buf;
-
+name_str (int name, char *buf)
 {
   switch (name)
     {
@@ -4464,11 +4326,7 @@ name_str (name, buf)
 }
 
 char *
-id_str (id, buf)
-
-     int id;
-     char *buf;
-
+id_str (int id, char *buf)
 {
   char *p;
   if (id >= 101000 && id < 101000 + bsd1_nnames)
@@ -4484,8 +4342,7 @@ id_str (id, buf)
   return buf;
 }
 
-print_msg (mp)
-     mach_msg_header_t *mp;
+print_msg (mach_msg_header_t *mp)
 {
   char *fmt_x = "%20s : 0x%08x\n";
   char *fmt_d = "%20s : %10d\n";
@@ -4550,10 +4407,7 @@ print_msg (mp)
     }
 }
 
-print_data (p, size, number)
-
-     char *p;
-
+print_data (char *p, int size, int number)
 {
   int *ip;
   short *sp;
@@ -4587,21 +4441,20 @@ print_data (p, size, number)
 #endif /* DUMP_SYSCALL */
 
 static void
-m3_stop ()
+m3_stop (void)
 {
   error ("to_stop target function not implemented");
 }
 
 static char *
-m3_pid_to_exec_file (pid)
-     int pid;
+m3_pid_to_exec_file (int pid)
 {
   error ("to_pid_to_exec_file target function not implemented");
   return NULL;			/* To keep all compilers happy. */
 }
 
 static void
-init_m3_ops ()
+init_m3_ops (void)
 {
   m3_ops.to_shortname = "mach";
   m3_ops.to_longname = "Mach child process";
@@ -4639,7 +4492,7 @@ init_m3_ops ()
 }
 
 void
-_initialize_m3_nat ()
+_initialize_m3_nat (void)
 {
   kern_return_t ret;
 

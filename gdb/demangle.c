@@ -120,10 +120,7 @@ static void set_demangling_command (char *, int, struct cmd_list_element *);
    a malloc'd string, even if it is a null-string. */
 
 static void
-set_demangling_command (ignore, from_tty, c)
-     char *ignore;
-     int from_tty;
-     struct cmd_list_element *c;
+set_demangling_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
   const struct demangler *dem;
 
@@ -184,8 +181,7 @@ set_demangling_command (ignore, from_tty, c)
 /* Fake a "set demangle-style" command. */
 
 void
-set_demangling_style (style)
-     char *style;
+set_demangling_style (char *style)
 {
   if (current_demangling_style_string != NULL)
     {
@@ -215,14 +211,13 @@ static char cplus_markers[] =
 {CPLUS_MARKER, '.', '$', '\0'};
 
 int
-is_cplus_marker (c)
-     int c;
+is_cplus_marker (int c)
 {
   return c && strchr (cplus_markers, c) != NULL;
 }
 
 void
-_initialize_demangler ()
+_initialize_demangler (void)
 {
   struct cmd_list_element *set, *show;
 

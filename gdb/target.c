@@ -181,9 +181,7 @@ static void setup_target_debug (void);
 
 /* ARGSUSED */
 static void
-target_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+target_command (char *arg, int from_tty)
 {
   fputs_filtered ("Argument required (target name).  Try `help target'\n",
 		  gdb_stdout);
@@ -192,8 +190,7 @@ target_command (arg, from_tty)
 /* Add a possible target architecture to the list.  */
 
 void
-add_target (t)
-     struct target_ops *t;
+add_target (struct target_ops *t)
 {
   if (!target_structs)
     {
@@ -225,7 +222,7 @@ information on the arguments for a particular protocol, type\n\
 /* Stub functions */
 
 void
-target_ignore ()
+target_ignore (void)
 {
 }
 
@@ -237,42 +234,36 @@ target_load (char *arg, int from_tty)
 
 /* ARGSUSED */
 static int
-nomemory (memaddr, myaddr, len, write, t)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *t;
+nomemory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+	  struct target_ops *t)
 {
   errno = EIO;			/* Can't read/write this location */
   return 0;			/* No bytes handled */
 }
 
 static void
-tcomplain ()
+tcomplain (void)
 {
   error ("You can't do that when your target is `%s'",
 	 current_target.to_shortname);
 }
 
 void
-noprocess ()
+noprocess (void)
 {
   error ("You can't do that without a process to debug.");
 }
 
 /* ARGSUSED */
 static int
-nosymbol (name, addrp)
-     char *name;
-     CORE_ADDR *addrp;
+nosymbol (char *name, CORE_ADDR *addrp)
 {
   return 1;			/* Symbol does not exist in target env */
 }
 
 /* ARGSUSED */
 static void
-nosupport_runtime ()
+nosupport_runtime (void)
 {
   if (!inferior_pid)
     noprocess ();
@@ -283,9 +274,7 @@ nosupport_runtime ()
 
 /* ARGSUSED */
 static void
-default_terminal_info (args, from_tty)
-     char *args;
-     int from_tty;
+default_terminal_info (char *args, int from_tty)
 {
   printf_unfiltered ("No saved terminal information.\n");
 }
@@ -296,8 +285,7 @@ default_terminal_info (args, from_tty)
    the target, and the operation should be attempted.  */
 
 static void
-kill_or_be_killed (from_tty)
-     int from_tty;
+kill_or_be_killed (int from_tty)
 {
   if (target_has_execution)
     {
@@ -319,28 +307,21 @@ kill_or_be_killed (from_tty)
 }
 
 static void
-maybe_kill_then_attach (args, from_tty)
-     char *args;
-     int from_tty;
+maybe_kill_then_attach (char *args, int from_tty)
 {
   kill_or_be_killed (from_tty);
   target_attach (args, from_tty);
 }
 
 static void
-maybe_kill_then_create_inferior (exec, args, env)
-     char *exec;
-     char *args;
-     char **env;
+maybe_kill_then_create_inferior (char *exec, char *args, char **env)
 {
   kill_or_be_killed (0);
   target_create_inferior (exec, args, env);
 }
 
 static void
-default_clone_and_follow_inferior (child_pid, followed_child)
-     int child_pid;
-     int *followed_child;
+default_clone_and_follow_inferior (int child_pid, int *followed_child)
 {
   target_clone_and_follow_inferior (child_pid, followed_child);
 }
@@ -349,8 +330,7 @@ default_clone_and_follow_inferior (child_pid, followed_child)
    We default entries, at least to stubs that print error messages.  */
 
 static void
-cleanup_target (t)
-     struct target_ops *t;
+cleanup_target (struct target_ops *t)
 {
 
 #define de_fault(field, value) \
@@ -537,7 +517,7 @@ cleanup_target (t)
    pushed target vectors.  */
 
 static void
-update_current_target ()
+update_current_target (void)
 {
   struct target_stack_item *item;
   struct target_ops *t;
@@ -645,8 +625,7 @@ update_current_target ()
    checking them.  */
 
 int
-push_target (t)
-     struct target_ops *t;
+push_target (struct target_ops *t)
 {
   struct target_stack_item *cur, *prev, *tmp;
 
@@ -711,8 +690,7 @@ push_target (t)
    Return how many times it was removed (0 or 1).  */
 
 int
-unpush_target (t)
-     struct target_ops *t;
+unpush_target (struct target_ops *t)
 {
   struct target_stack_item *cur, *prev;
 
@@ -745,7 +723,7 @@ unpush_target (t)
 }
 
 void
-pop_target ()
+pop_target (void)
 {
   (current_target.to_close) (0);	/* Let it clean up */
   if (unpush_target (target_stack->target_ops) == 1)
@@ -767,11 +745,7 @@ pop_target ()
    read.  */
 
 int
-target_read_string (memaddr, string, len, errnop)
-     CORE_ADDR memaddr;
-     char **string;
-     int len;
-     int *errnop;
+target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
 {
   int tlen, origlen, offset, i;
   char buf[4];
@@ -848,19 +822,13 @@ done:
    deal with partial reads should call target_read_memory_partial. */
 
 int
-target_read_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+target_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   return target_xfer_memory (memaddr, myaddr, len, 0);
 }
 
 int
-target_write_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+target_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   return target_xfer_memory (memaddr, myaddr, len, 1);
 }
@@ -876,11 +844,7 @@ target_write_memory (memaddr, myaddr, len)
    Result is 0 or errno value.  */
 
 static int
-target_xfer_memory (memaddr, myaddr, len, write)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
+target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 {
   int curlen;
   int res;
@@ -1012,9 +976,7 @@ target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 
 /* ARGSUSED */
 static void
-target_info (args, from_tty)
-     char *args;
-     int from_tty;
+target_info (char *args, int from_tty)
 {
   struct target_ops *t;
   struct target_stack_item *item;
@@ -1049,8 +1011,7 @@ target_info (args, from_tty)
    anything.  */
 
 void
-target_preopen (from_tty)
-     int from_tty;
+target_preopen (int from_tty)
 {
   dont_repeat ();
 
@@ -1073,9 +1034,7 @@ target_preopen (from_tty)
 /* Detach a target after doing deferred register stores.  */
 
 void
-target_detach (args, from_tty)
-     char *args;
-     int from_tty;
+target_detach (char *args, int from_tty)
 {
   /* Handle any optimized stores to the inferior.  */
 #ifdef DO_DEFERRED_STORES
@@ -1085,9 +1044,7 @@ target_detach (args, from_tty)
 }
 
 void
-target_link (modname, t_reloc)
-     char *modname;
-     CORE_ADDR *t_reloc;
+target_link (char *modname, CORE_ADDR *t_reloc)
 {
   if (STREQ (current_target.to_shortname, "rombug"))
     {
@@ -1114,8 +1071,7 @@ target_async_mask (int mask)
    Result is always valid (error() is called for errors).  */
 
 static struct target_ops *
-find_default_run_target (do_mesg)
-     char *do_mesg;
+find_default_run_target (char *do_mesg)
 {
   struct target_ops **t;
   struct target_ops *runable = NULL;
@@ -1140,9 +1096,7 @@ find_default_run_target (do_mesg)
 }
 
 void
-find_default_attach (args, from_tty)
-     char *args;
-     int from_tty;
+find_default_attach (char *args, int from_tty)
 {
   struct target_ops *t;
 
@@ -1152,9 +1106,7 @@ find_default_attach (args, from_tty)
 }
 
 void
-find_default_require_attach (args, from_tty)
-     char *args;
-     int from_tty;
+find_default_require_attach (char *args, int from_tty)
 {
   struct target_ops *t;
 
@@ -1164,10 +1116,7 @@ find_default_require_attach (args, from_tty)
 }
 
 void
-find_default_require_detach (pid, args, from_tty)
-     int pid;
-     char *args;
-     int from_tty;
+find_default_require_detach (int pid, char *args, int from_tty)
 {
   struct target_ops *t;
 
@@ -1177,10 +1126,7 @@ find_default_require_detach (pid, args, from_tty)
 }
 
 void
-find_default_create_inferior (exec_file, allargs, env)
-     char *exec_file;
-     char *allargs;
-     char **env;
+find_default_create_inferior (char *exec_file, char *allargs, char **env)
 {
   struct target_ops *t;
 
@@ -1190,9 +1136,7 @@ find_default_create_inferior (exec_file, allargs, env)
 }
 
 void
-find_default_clone_and_follow_inferior (child_pid, followed_child)
-     int child_pid;
-     int *followed_child;
+find_default_clone_and_follow_inferior (int child_pid, int *followed_child)
 {
   struct target_ops *t;
 
@@ -1202,13 +1146,13 @@ find_default_clone_and_follow_inferior (child_pid, followed_child)
 }
 
 static int
-return_zero ()
+return_zero (void)
 {
   return 0;
 }
 
 static int
-return_one ()
+return_one (void)
 {
   return 1;
 }
@@ -1300,7 +1244,7 @@ remove_target_sections (bfd *abfd)
    some reason there is more than one, return NULL.  */
 
 struct target_ops *
-find_run_target ()
+find_run_target (void)
 {
   struct target_ops **t;
   struct target_ops *runable = NULL;
@@ -1324,7 +1268,7 @@ find_run_target ()
    If for some reason there is more than one, return NULL.  */
 
 struct target_ops *
-find_core_target ()
+find_core_target (void)
 {
   struct target_ops **t;
   struct target_ops *runable = NULL;
@@ -1350,8 +1294,7 @@ find_core_target ()
  */
 
 struct target_ops *
-find_target_beneath (t)
-     struct target_ops *t;
+find_target_beneath (struct target_ops *t)
 {
   struct target_stack_item *cur;
 
@@ -1369,7 +1312,7 @@ find_target_beneath (t)
 /* The inferior process has died.  Long live the inferior!  */
 
 void
-generic_mourn_inferior ()
+generic_mourn_inferior (void)
 {
   extern int show_breakpoint_hit_counts;
 
@@ -1504,8 +1447,7 @@ static struct {
 
 /* Return the string for a signal.  */
 char *
-target_signal_to_string (sig)
-     enum target_signal sig;
+target_signal_to_string (enum target_signal sig)
 {
   if ((sig >= TARGET_SIGNAL_FIRST) && (sig <= TARGET_SIGNAL_LAST))
     return signals[sig].string;
@@ -1515,8 +1457,7 @@ target_signal_to_string (sig)
 
 /* Return the name for a signal.  */
 char *
-target_signal_to_name (sig)
-     enum target_signal sig;
+target_signal_to_name (enum target_signal sig)
 {
   if (sig == TARGET_SIGNAL_UNKNOWN)
     /* I think the code which prints this will always print it along with
@@ -1527,8 +1468,7 @@ target_signal_to_name (sig)
 
 /* Given a name, return its signal.  */
 enum target_signal
-target_signal_from_name (name)
-     char *name;
+target_signal_from_name (char *name)
 {
   enum target_signal sig;
 
@@ -1552,8 +1492,7 @@ target_signal_from_name (name)
 
 /* Convert host signal to our signals.  */
 enum target_signal
-target_signal_from_host (hostsig)
-     int hostsig;
+target_signal_from_host (int hostsig)
 {
   /* A switch statement would make sense but would require special kludges
      to deal with the cases where more than one signal has the same number.  */
@@ -2079,9 +2018,7 @@ target_signal_to_host (enum target_signal oursig)
    HOSTSTATUS is the waitstatus from wait() or the equivalent; store our
    translation of that in OURSTATUS.  */
 void
-store_waitstatus (ourstatus, hoststatus)
-     struct target_waitstatus *ourstatus;
-     int hoststatus;
+store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
 {
 #ifdef CHILD_SPECIAL_WAITSTATUS
   /* CHILD_SPECIAL_WAITSTATUS should return nonzero and set *OURSTATUS
@@ -2116,8 +2053,7 @@ store_waitstatus (ourstatus, hoststatus)
    most systems.  Use of symbolic signal names is strongly encouraged.  */
 
 enum target_signal
-target_signal_from_command (num)
-     int num;
+target_signal_from_command (int num)
 {
   if (num >= 1 && num <= 15)
     return (enum target_signal) num;
@@ -2133,8 +2069,7 @@ int target_activity_fd;
    buffer.  */
 
 char *
-normal_pid_to_str (pid)
-     int pid;
+normal_pid_to_str (int pid)
 {
   static char buf[30];
 
@@ -2159,8 +2094,7 @@ normal_pid_to_str (pid)
    target_acknowledge_forked_child.
  */
 static void
-normal_target_post_startup_inferior (pid)
-     int pid;
+normal_target_post_startup_inferior (int pid)
 {
   /* This space intentionally left blank. */
 }
@@ -2169,7 +2103,7 @@ normal_target_post_startup_inferior (pid)
    vector.  */
 
 static void
-init_dummy_target ()
+init_dummy_target (void)
 {
   dummy_target.to_shortname = "None";
   dummy_target.to_longname = "None";
@@ -2188,9 +2122,7 @@ init_dummy_target ()
 static struct target_ops debug_target;
 
 static void
-debug_to_open (args, from_tty)
-     char *args;
-     int from_tty;
+debug_to_open (char *args, int from_tty)
 {
   debug_target.to_open (args, from_tty);
 
@@ -2198,8 +2130,7 @@ debug_to_open (args, from_tty)
 }
 
 static void
-debug_to_close (quitting)
-     int quitting;
+debug_to_close (int quitting)
 {
   debug_target.to_close (quitting);
 
@@ -2207,9 +2138,7 @@ debug_to_close (quitting)
 }
 
 static void
-debug_to_attach (args, from_tty)
-     char *args;
-     int from_tty;
+debug_to_attach (char *args, int from_tty)
 {
   debug_target.to_attach (args, from_tty);
 
@@ -2218,8 +2147,7 @@ debug_to_attach (args, from_tty)
 
 
 static void
-debug_to_post_attach (pid)
-     int pid;
+debug_to_post_attach (int pid)
 {
   debug_target.to_post_attach (pid);
 
@@ -2227,9 +2155,7 @@ debug_to_post_attach (pid)
 }
 
 static void
-debug_to_require_attach (args, from_tty)
-     char *args;
-     int from_tty;
+debug_to_require_attach (char *args, int from_tty)
 {
   debug_target.to_require_attach (args, from_tty);
 
@@ -2238,9 +2164,7 @@ debug_to_require_attach (args, from_tty)
 }
 
 static void
-debug_to_detach (args, from_tty)
-     char *args;
-     int from_tty;
+debug_to_detach (char *args, int from_tty)
 {
   debug_target.to_detach (args, from_tty);
 
@@ -2248,10 +2172,7 @@ debug_to_detach (args, from_tty)
 }
 
 static void
-debug_to_require_detach (pid, args, from_tty)
-     int pid;
-     char *args;
-     int from_tty;
+debug_to_require_detach (int pid, char *args, int from_tty)
 {
   debug_target.to_require_detach (pid, args, from_tty);
 
@@ -2260,10 +2181,7 @@ debug_to_require_detach (pid, args, from_tty)
 }
 
 static void
-debug_to_resume (pid, step, siggnal)
-     int pid;
-     int step;
-     enum target_signal siggnal;
+debug_to_resume (int pid, int step, enum target_signal siggnal)
 {
   debug_target.to_resume (pid, step, siggnal);
 
@@ -2273,9 +2191,7 @@ debug_to_resume (pid, step, siggnal)
 }
 
 static int
-debug_to_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+debug_to_wait (int pid, struct target_waitstatus *status)
 {
   int retval;
 
@@ -2322,9 +2238,7 @@ debug_to_wait (pid, status)
 }
 
 static void
-debug_to_post_wait (pid, status)
-     int pid;
-     int status;
+debug_to_post_wait (int pid, int status)
 {
   debug_target.to_post_wait (pid, status);
 
@@ -2333,8 +2247,7 @@ debug_to_post_wait (pid, status)
 }
 
 static void
-debug_to_fetch_registers (regno)
-     int regno;
+debug_to_fetch_registers (int regno)
 {
   debug_target.to_fetch_registers (regno);
 
@@ -2348,8 +2261,7 @@ debug_to_fetch_registers (regno)
 }
 
 static void
-debug_to_store_registers (regno)
-     int regno;
+debug_to_store_registers (int regno)
 {
   debug_target.to_store_registers (regno);
 
@@ -2363,7 +2275,7 @@ debug_to_store_registers (regno)
 }
 
 static void
-debug_to_prepare_to_store ()
+debug_to_prepare_to_store (void)
 {
   debug_target.to_prepare_to_store ();
 
@@ -2371,12 +2283,8 @@ debug_to_prepare_to_store ()
 }
 
 static int
-debug_to_xfer_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;
+debug_to_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		      struct target_ops *target)
 {
   int retval;
 
@@ -2408,8 +2316,7 @@ debug_to_xfer_memory (memaddr, myaddr, len, write, target)
 }
 
 static void
-debug_to_files_info (target)
-     struct target_ops *target;
+debug_to_files_info (struct target_ops *target)
 {
   debug_target.to_files_info (target);
 
@@ -2417,9 +2324,7 @@ debug_to_files_info (target)
 }
 
 static int
-debug_to_insert_breakpoint (addr, save)
-     CORE_ADDR addr;
-     char *save;
+debug_to_insert_breakpoint (CORE_ADDR addr, char *save)
 {
   int retval;
 
@@ -2433,9 +2338,7 @@ debug_to_insert_breakpoint (addr, save)
 }
 
 static int
-debug_to_remove_breakpoint (addr, save)
-     CORE_ADDR addr;
-     char *save;
+debug_to_remove_breakpoint (CORE_ADDR addr, char *save)
 {
   int retval;
 
@@ -2449,7 +2352,7 @@ debug_to_remove_breakpoint (addr, save)
 }
 
 static void
-debug_to_terminal_init ()
+debug_to_terminal_init (void)
 {
   debug_target.to_terminal_init ();
 
@@ -2457,7 +2360,7 @@ debug_to_terminal_init ()
 }
 
 static void
-debug_to_terminal_inferior ()
+debug_to_terminal_inferior (void)
 {
   debug_target.to_terminal_inferior ();
 
@@ -2465,7 +2368,7 @@ debug_to_terminal_inferior ()
 }
 
 static void
-debug_to_terminal_ours_for_output ()
+debug_to_terminal_ours_for_output (void)
 {
   debug_target.to_terminal_ours_for_output ();
 
@@ -2473,7 +2376,7 @@ debug_to_terminal_ours_for_output ()
 }
 
 static void
-debug_to_terminal_ours ()
+debug_to_terminal_ours (void)
 {
   debug_target.to_terminal_ours ();
 
@@ -2481,9 +2384,7 @@ debug_to_terminal_ours ()
 }
 
 static void
-debug_to_terminal_info (arg, from_tty)
-     char *arg;
-     int from_tty;
+debug_to_terminal_info (char *arg, int from_tty)
 {
   debug_target.to_terminal_info (arg, from_tty);
 
@@ -2492,7 +2393,7 @@ debug_to_terminal_info (arg, from_tty)
 }
 
 static void
-debug_to_kill ()
+debug_to_kill (void)
 {
   debug_target.to_kill ();
 
@@ -2500,9 +2401,7 @@ debug_to_kill ()
 }
 
 static void
-debug_to_load (args, from_tty)
-     char *args;
-     int from_tty;
+debug_to_load (char *args, int from_tty)
 {
   debug_target.to_load (args, from_tty);
 
@@ -2510,9 +2409,7 @@ debug_to_load (args, from_tty)
 }
 
 static int
-debug_to_lookup_symbol (name, addrp)
-     char *name;
-     CORE_ADDR *addrp;
+debug_to_lookup_symbol (char *name, CORE_ADDR *addrp)
 {
   int retval;
 
@@ -2524,10 +2421,7 @@ debug_to_lookup_symbol (name, addrp)
 }
 
 static void
-debug_to_create_inferior (exec_file, args, env)
-     char *exec_file;
-     char *args;
-     char **env;
+debug_to_create_inferior (char *exec_file, char *args, char **env)
 {
   debug_target.to_create_inferior (exec_file, args, env);
 
@@ -2536,8 +2430,7 @@ debug_to_create_inferior (exec_file, args, env)
 }
 
 static void
-debug_to_post_startup_inferior (pid)
-     int pid;
+debug_to_post_startup_inferior (int pid)
 {
   debug_target.to_post_startup_inferior (pid);
 
@@ -2546,8 +2439,7 @@ debug_to_post_startup_inferior (pid)
 }
 
 static void
-debug_to_acknowledge_created_inferior (pid)
-     int pid;
+debug_to_acknowledge_created_inferior (int pid)
 {
   debug_target.to_acknowledge_created_inferior (pid);
 
@@ -2556,9 +2448,7 @@ debug_to_acknowledge_created_inferior (pid)
 }
 
 static void
-debug_to_clone_and_follow_inferior (child_pid, followed_child)
-     int child_pid;
-     int *followed_child;
+debug_to_clone_and_follow_inferior (int child_pid, int *followed_child)
 {
   debug_target.to_clone_and_follow_inferior (child_pid, followed_child);
 
@@ -2568,7 +2458,7 @@ debug_to_clone_and_follow_inferior (child_pid, followed_child)
 }
 
 static void
-debug_to_post_follow_inferior_by_clone ()
+debug_to_post_follow_inferior_by_clone (void)
 {
   debug_target.to_post_follow_inferior_by_clone ();
 
@@ -2576,8 +2466,7 @@ debug_to_post_follow_inferior_by_clone ()
 }
 
 static int
-debug_to_insert_fork_catchpoint (pid)
-     int pid;
+debug_to_insert_fork_catchpoint (int pid)
 {
   int retval;
 
@@ -2590,8 +2479,7 @@ debug_to_insert_fork_catchpoint (pid)
 }
 
 static int
-debug_to_remove_fork_catchpoint (pid)
-     int pid;
+debug_to_remove_fork_catchpoint (int pid)
 {
   int retval;
 
@@ -2604,8 +2492,7 @@ debug_to_remove_fork_catchpoint (pid)
 }
 
 static int
-debug_to_insert_vfork_catchpoint (pid)
-     int pid;
+debug_to_insert_vfork_catchpoint (int pid)
 {
   int retval;
 
@@ -2618,8 +2505,7 @@ debug_to_insert_vfork_catchpoint (pid)
 }
 
 static int
-debug_to_remove_vfork_catchpoint (pid)
-     int pid;
+debug_to_remove_vfork_catchpoint (int pid)
 {
   int retval;
 
@@ -2632,9 +2518,7 @@ debug_to_remove_vfork_catchpoint (pid)
 }
 
 static int
-debug_to_has_forked (pid, child_pid)
-     int pid;
-     int *child_pid;
+debug_to_has_forked (int pid, int *child_pid)
 {
   int has_forked;
 
@@ -2647,9 +2531,7 @@ debug_to_has_forked (pid, child_pid)
 }
 
 static int
-debug_to_has_vforked (pid, child_pid)
-     int pid;
-     int *child_pid;
+debug_to_has_vforked (int pid, int *child_pid)
 {
   int has_vforked;
 
@@ -2662,7 +2544,7 @@ debug_to_has_vforked (pid, child_pid)
 }
 
 static int
-debug_to_can_follow_vfork_prior_to_exec ()
+debug_to_can_follow_vfork_prior_to_exec (void)
 {
   int can_immediately_follow_vfork;
 
@@ -2675,11 +2557,8 @@ debug_to_can_follow_vfork_prior_to_exec ()
 }
 
 static void
-debug_to_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child)
-     int parent_pid;
-     int followed_parent;
-     int child_pid;
-     int followed_child;
+debug_to_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
+			    int followed_child)
 {
   debug_target.to_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child);
 
@@ -2689,8 +2568,7 @@ debug_to_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_chi
 }
 
 static int
-debug_to_insert_exec_catchpoint (pid)
-     int pid;
+debug_to_insert_exec_catchpoint (int pid)
 {
   int retval;
 
@@ -2703,8 +2581,7 @@ debug_to_insert_exec_catchpoint (pid)
 }
 
 static int
-debug_to_remove_exec_catchpoint (pid)
-     int pid;
+debug_to_remove_exec_catchpoint (int pid)
 {
   int retval;
 
@@ -2717,9 +2594,7 @@ debug_to_remove_exec_catchpoint (pid)
 }
 
 static int
-debug_to_has_execd (pid, execd_pathname)
-     int pid;
-     char **execd_pathname;
+debug_to_has_execd (int pid, char **execd_pathname)
 {
   int has_execd;
 
@@ -2733,7 +2608,7 @@ debug_to_has_execd (pid, execd_pathname)
 }
 
 static int
-debug_to_reported_exec_events_per_exec_call ()
+debug_to_reported_exec_events_per_exec_call (void)
 {
   int reported_exec_events;
 
@@ -2747,10 +2622,8 @@ debug_to_reported_exec_events_per_exec_call ()
 }
 
 static int
-debug_to_has_syscall_event (pid, kind, syscall_id)
-     int pid;
-     enum target_waitkind *kind;
-     int *syscall_id;
+debug_to_has_syscall_event (int pid, enum target_waitkind *kind,
+			    int *syscall_id)
 {
   int has_syscall_event;
   char *kind_spelling = "??";
@@ -2779,10 +2652,7 @@ debug_to_has_syscall_event (pid, kind, syscall_id)
 }
 
 static int
-debug_to_has_exited (pid, wait_status, exit_status)
-     int pid;
-     int wait_status;
-     int *exit_status;
+debug_to_has_exited (int pid, int wait_status, int *exit_status)
 {
   int has_exited;
 
@@ -2795,7 +2665,7 @@ debug_to_has_exited (pid, wait_status, exit_status)
 }
 
 static void
-debug_to_mourn_inferior ()
+debug_to_mourn_inferior (void)
 {
   debug_target.to_mourn_inferior ();
 
@@ -2803,7 +2673,7 @@ debug_to_mourn_inferior ()
 }
 
 static int
-debug_to_can_run ()
+debug_to_can_run (void)
 {
   int retval;
 
@@ -2815,8 +2685,7 @@ debug_to_can_run ()
 }
 
 static void
-debug_to_notice_signals (pid)
-     int pid;
+debug_to_notice_signals (int pid)
 {
   debug_target.to_notice_signals (pid);
 
@@ -2824,8 +2693,7 @@ debug_to_notice_signals (pid)
 }
 
 static int
-debug_to_thread_alive (pid)
-     int pid;
+debug_to_thread_alive (int pid)
 {
   int retval;
 
@@ -2838,7 +2706,7 @@ debug_to_thread_alive (pid)
 }
 
 static void
-debug_to_find_new_threads ()
+debug_to_find_new_threads (void)
 {
   debug_target.to_find_new_threads ();
 
@@ -2846,7 +2714,7 @@ debug_to_find_new_threads ()
 }
 
 static void
-debug_to_stop ()
+debug_to_stop (void)
 {
   debug_target.to_stop ();
 
@@ -2854,11 +2722,7 @@ debug_to_stop ()
 }
 
 static int
-debug_to_query (type, req, resp, siz)
-     int type;
-     char *req;
-     char *resp;
-     int *siz;
+debug_to_query (int type, char *req, char *resp, int *siz)
 {
   int retval;
 
@@ -2878,9 +2742,7 @@ debug_to_rcmd (char *command,
 }
 
 static struct symtab_and_line *
-debug_to_enable_exception_callback (kind, enable)
-     enum exception_event_kind kind;
-     int enable;
+debug_to_enable_exception_callback (enum exception_event_kind kind, int enable)
 {
   struct symtab_and_line *result;
   result = debug_target.to_enable_exception_callback (kind, enable);
@@ -2891,7 +2753,7 @@ debug_to_enable_exception_callback (kind, enable)
 }
 
 static struct exception_event_record *
-debug_to_get_current_exception_event ()
+debug_to_get_current_exception_event (void)
 {
   struct exception_event_record *result;
   result = debug_target.to_get_current_exception_event ();
@@ -2900,8 +2762,7 @@ debug_to_get_current_exception_event ()
 }
 
 static char *
-debug_to_pid_to_exec_file (pid)
-     int pid;
+debug_to_pid_to_exec_file (int pid)
 {
   char *exec_file;
 
@@ -2914,8 +2775,7 @@ debug_to_pid_to_exec_file (pid)
 }
 
 static char *
-debug_to_core_file_to_sym_file (core)
-     char *core;
+debug_to_core_file_to_sym_file (char *core)
 {
   char *sym_file;
 
@@ -2928,7 +2788,7 @@ debug_to_core_file_to_sym_file (core)
 }
 
 static void
-setup_target_debug ()
+setup_target_debug (void)
 {
   memcpy (&debug_target, &current_target, sizeof debug_target);
 
@@ -3013,7 +2873,7 @@ do_monitor_command (char *cmd,
 }
 
 void
-initialize_targets ()
+initialize_targets (void)
 {
   init_dummy_target ();
   push_target (&dummy_target);

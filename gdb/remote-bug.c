@@ -111,9 +111,7 @@ static int need_artificial_trap = 0;
  */
 
 static void
-bug_load (args, fromtty)
-     char *args;
-     int fromtty;
+bug_load (char *args, int fromtty)
 {
   bfd *abfd;
   asection *s;
@@ -170,8 +168,7 @@ bug_load (args, fromtty)
 
 #if 0
 static char *
-get_word (p)
-     char **p;
+get_word (char **p)
 {
   char *s = *p;
   char *word;
@@ -217,9 +214,7 @@ static char *cpu_check_strings[] =
 };
 
 static void
-bug_open (args, from_tty)
-     char *args;
-     int from_tty;
+bug_open (char *args, int from_tty)
 {
   if (args == NULL)
     args = "";
@@ -245,9 +240,7 @@ bug_open (args, from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-bug_resume (pid, step, sig)
-     int pid, step;
-     enum target_signal sig;
+bug_resume (int pid, int step, enum target_signal sig)
 {
   dcache_flush (gr_get_dcache ());
 
@@ -279,9 +272,7 @@ static char *wait_strings[] =
 };
 
 int
-bug_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+bug_wait (int pid, struct target_waitstatus *status)
 {
   int old_timeout = sr_get_timeout ();
   int old_immediate_quit = immediate_quit;
@@ -352,8 +343,7 @@ bug_wait (pid, status)
 
    Returns a pointer to a static buffer containing the answer.  */
 static char *
-get_reg_name (regno)
-     int regno;
+get_reg_name (int regno)
 {
   static char *rn[] =
   {
@@ -386,8 +376,7 @@ get_reg_name (regno)
    success, -1 on failure.  */
 
 static int
-bug_scan (s)
-     char *s;
+bug_scan (char *s)
 {
   int c;
 
@@ -407,8 +396,7 @@ bug_scan (s)
 #endif /* never */
 
 static int
-bug_srec_write_cr (s)
-     char *s;
+bug_srec_write_cr (char *s)
 {
   char *p = s;
 
@@ -434,8 +422,7 @@ bug_srec_write_cr (s)
 /* Store register REGNO, or all if REGNO == -1. */
 
 static void
-bug_fetch_register (regno)
-     int regno;
+bug_fetch_register (int regno)
 {
   sr_check_open ();
 
@@ -513,8 +500,7 @@ bug_fetch_register (regno)
 /* Store register REGNO, or all if REGNO == -1. */
 
 static void
-bug_store_register (regno)
-     int regno;
+bug_store_register (int regno)
 {
   char buffer[1024];
   sr_check_open ();
@@ -582,7 +568,7 @@ bug_xfer_memory (memaddr, myaddr, len, write, target)
 }
 
 static void
-start_load ()
+start_load (void)
 {
   char *command;
 
@@ -616,10 +602,7 @@ static char *srecord_strings[] =
 };
 
 static int
-bug_write_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     unsigned char *myaddr;
-     int len;
+bug_write_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   int done;
   int checksum;
@@ -743,10 +726,7 @@ bug_write_memory (memaddr, myaddr, len)
 /* Read LEN bytes from inferior memory at MEMADDR.  Put the result
    at debugger address MYADDR.  Returns errno value.  */
 static int
-bug_read_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     unsigned char *myaddr;
-     int len;
+bug_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   char request[100];
   char *buffer;
@@ -888,7 +868,7 @@ bug_remove_breakpoint (addr, save)
 
 /* Clear the bugs notion of what the break points are */
 static int
-bug_clear_breakpoints ()
+bug_clear_breakpoints (void)
 {
 
   if (sr_is_open ())
@@ -973,7 +953,7 @@ init_bug_ops (void)
 }				/* init_bug_ops */
 
 void
-_initialize_remote_bug ()
+_initialize_remote_bug (void)
 {
   init_bug_ops ();
   add_target (&bug_ops);

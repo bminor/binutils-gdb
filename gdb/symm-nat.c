@@ -53,8 +53,7 @@
 #include "gdbcore.h"
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   struct pt_regset regs;
   int i;
@@ -93,8 +92,7 @@ store_inferior_registers (regno)
 }
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   int i;
   struct pt_regset regs;
@@ -129,8 +127,7 @@ fetch_inferior_registers (regno)
 
 /* FIXME:  This should be merged with i387-tdep.c as well. */
 static
-print_fpu_status (ep)
-     struct pt_regset ep;
+print_fpu_status (struct pt_regset ep)
 {
   int i;
   int bothstatus;
@@ -199,9 +196,7 @@ print_fpu_status (ep)
 }
 
 
-print_1167_control_word (pcr)
-     unsigned int pcr;
-
+print_1167_control_word (unsigned int pcr)
 {
   int pcr_tmp;
 
@@ -355,9 +350,7 @@ print_1167_regs (regs)
     }
 }
 
-print_fpa_status (ep)
-     struct pt_regset ep;
-
+print_fpa_status (struct pt_regset ep)
 {
 
   printf_unfiltered ("WTL 1167:");
@@ -374,7 +367,7 @@ print_fpa_status (ep)
 }
 
 #if 0				/* disabled because it doesn't go through the target vector.  */
-i386_float_info ()
+i386_float_info (void)
 {
   char ubuf[UPAGES * NBPG];
   struct pt_regset regset;
@@ -408,8 +401,7 @@ static volatile int got_sigchld;
 /*ARGSUSED */
 /* This will eventually be more interesting. */
 void
-sigchld_handler (signo)
-     int signo;
+sigchld_handler (int signo)
 {
   got_sigchld++;
 }
@@ -432,9 +424,7 @@ sigchld_handler (signo)
  * Thanks to XPT_MPDEBUGGER, we have to mange child_wait().
  */
 int
-child_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+child_wait (int pid, struct target_waitstatus *status)
 {
   int save_errno, rv, xvaloff, saoff, sa_hand;
   struct pt_stop pt;
@@ -595,9 +585,7 @@ child_wait (pid, status)
  * the MPDEBUGGER child_wait() works properly.  This will go away when
  * that is fixed.
  */
-child_wait (pid, ourstatus)
-     int pid;
-     struct target_waitstatus *ourstatus;
+child_wait (int pid, struct target_waitstatus *ourstatus)
 {
   int save_errno;
   int status;
@@ -630,19 +618,13 @@ child_wait (pid, ourstatus)
    It exists so that all calls to ptrace are isolated in this 
    machine-dependent file. */
 int
-call_ptrace (request, pid, addr, data)
-     int request, pid;
-     PTRACE_ARG3_TYPE addr;
-     int data;
+call_ptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
 {
   return ptrace (request, pid, addr, data);
 }
 
 int
-call_mptrace (request, pid, addr, data)
-     int request, pid;
-     PTRACE_ARG3_TYPE addr;
-     int data;
+call_mptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
 {
   return mptrace (request, pid, addr, data);
 }
@@ -655,7 +637,7 @@ call_mptrace (request, pid, addr, data)
 #endif
 
 void
-kill_inferior ()
+kill_inferior (void)
 {
   if (inferior_pid == 0)
     return;
@@ -679,10 +661,7 @@ kill_inferior ()
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-child_resume (pid, step, signal)
-     int pid;
-     int step;
-     enum target_signal signal;
+child_resume (int pid, int step, enum target_signal signal)
 {
   errno = 0;
 
@@ -710,8 +689,7 @@ child_resume (pid, step, signal)
 #ifdef ATTACH_DETACH
 /* Start debugging the process whose number is PID.  */
 int
-attach (pid)
-     int pid;
+attach (int pid)
 {
   sigset_t set;
   int rv;
@@ -731,8 +709,7 @@ attach (pid)
 }
 
 void
-detach (signo)
-     int signo;
+detach (int signo)
 {
   int rv;
 
@@ -854,7 +831,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 
 
 void
-_initialize_symm_nat ()
+_initialize_symm_nat (void)
 {
 #ifdef ATTACH_DETACH
 /*

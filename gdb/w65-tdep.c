@@ -36,32 +36,29 @@
 
 
 CORE_ADDR
-w65_frame_saved_pc (frame)
-     struct frame_info *frame;
+w65_frame_saved_pc (struct frame_info *frame)
 {
   return (read_memory_integer (frame->frame + 2, 4) & 0xffffff);
 }
 
 CORE_ADDR
-w65_addr_bits_remove (addr)
-     CORE_ADDR addr;
+w65_addr_bits_remove (CORE_ADDR addr)
 {
   return ((addr) & 0xffffff);
 }
 
-read_memory_pointer (x)
-     CORE_ADDR x;
+read_memory_pointer (CORE_ADDR x)
 {
   return read_memory_integer (ADDR_BITS_REMOVE (x), 4);
 }
 
-init_frame_pc ()
+init_frame_pc (void)
 {
   abort ();
 }
 
 void
-w65_push_dummy_frame ()
+w65_push_dummy_frame (void)
 {
   abort ();
 }
@@ -76,9 +73,7 @@ w65_push_dummy_frame ()
    it is fairly expensive.  */
 
 void
-frame_find_saved_regs (fip, fsrp)
-     struct frame_info *fip;
-     struct frame_saved_regs *fsrp;
+frame_find_saved_regs (struct frame_info *fip, struct frame_saved_regs *fsrp)
 {
   int locals;
   CORE_ADDR pc;
@@ -89,7 +84,7 @@ frame_find_saved_regs (fip, fsrp)
 }
 
 int
-saved_pc_after_call ()
+saved_pc_after_call (void)
 {
   int sp = read_register (SP_REGNUM);
   int val = read_memory_integer (sp + 1, 4);
@@ -97,10 +92,7 @@ saved_pc_after_call ()
 }
 
 
-extract_return_value (type, regbuf, valbuf)
-     struct type *type;
-     char *regbuf;
-     char *valbuf;
+extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   int b;
   int len = TYPE_LENGTH (type);
@@ -115,9 +107,7 @@ extract_return_value (type, regbuf, valbuf)
 }
 
 void
-write_return_value (type, valbuf)
-     struct type *type;
-     char *valbuf;
+write_return_value (struct type *type, char *valbuf)
 {
   int reg;
   int len;
@@ -128,41 +118,37 @@ write_return_value (type, valbuf)
 }
 
 void
-store_struct_return (addr, sp)
-     CORE_ADDR addr;
-     CORE_ADDR sp;
+store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (2, addr);
 }
 
 void
-w65_pop_frame ()
+w65_pop_frame (void)
 {
 }
 
-init_extra_frame_info ()
+init_extra_frame_info (void)
 {
 }
 
-pop_frame ()
+pop_frame (void)
 {
 }
 
-w65_frame_chain (thisframe)
-     struct frame_info *thisframe;
+w65_frame_chain (struct frame_info *thisframe)
 {
   return 0xffff & read_memory_integer ((thisframe)->frame, 2);
 }
 
 static int
-gb (x)
+gb (int x)
 {
   return read_memory_integer (x, 1) & 0xff;
 }
 
 extern CORE_ADDR
-w65_skip_prologue (pc)
-     CORE_ADDR pc;
+w65_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR too_far = pc + 20;
 
@@ -229,14 +215,14 @@ w65_skip_prologue (pc)
 }
 
 
-register_raw_size (n)
+register_raw_size (int n)
 {
   return sim_reg_size (n);
 }
 
 
 void
-print_register_hook (regno)
+print_register_hook (int regno)
 {
   if (regno == P_REGNUM)
     {
@@ -290,7 +276,7 @@ print_register_hook (regno)
 }
 
 void
-_initialize_w65_tdep ()
+_initialize_w65_tdep (void)
 {
   tm_print_insn = print_insn_w65;
 }

@@ -63,10 +63,7 @@ static void cp_print_hpacc_virtual_table_entries (struct type *, int *,
 
 
 void
-cp_print_class_method (valaddr, type, stream)
-     char *valaddr;
-     struct type *type;
-     struct ui_file *stream;
+cp_print_class_method (char *valaddr, struct type *type, struct ui_file *stream)
 {
   struct type *domain;
   struct fn_field *f = NULL;
@@ -184,8 +181,7 @@ const char hpacc_vtbl_ptr_type_name[] =
    "pointer to virtual function".  */
 
 int
-cp_is_vtbl_ptr_type (type)
-     struct type *type;
+cp_is_vtbl_ptr_type (struct type *type)
 {
   char *typename = type_name_no_tag (type);
 
@@ -198,8 +194,7 @@ cp_is_vtbl_ptr_type (type)
    "pointer to virtual function table".  */
 
 int
-cp_is_vtbl_member (type)
-     struct type *type;
+cp_is_vtbl_member (struct type *type)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
@@ -232,19 +227,10 @@ cp_is_vtbl_member (type)
    should not print, or zero if called from top level.  */
 
 void
-cp_print_value_fields (type, real_type, valaddr, offset, address, stream, format, recurse, pretty,
-		       dont_print_vb, dont_print_statmem)
-     struct type *type;
-     struct type *real_type;
-     char *valaddr;
-     int offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
-     struct type **dont_print_vb;
-     int dont_print_statmem;
+cp_print_value_fields (struct type *type, struct type *real_type, char *valaddr,
+		       int offset, CORE_ADDR address, struct ui_file *stream,
+		       int format, int recurse, enum val_prettyprint pretty,
+		       struct type **dont_print_vb, int dont_print_statmem)
 {
   int i, len, n_baseclasses;
   struct obstack tmp_obstack;
@@ -495,18 +481,10 @@ cp_print_value_fields (type, real_type, valaddr, offset, address, stream, format
    baseclasses.  */
 
 static void
-cp_print_value (type, real_type, valaddr, offset, address, stream, format, recurse, pretty,
-		dont_print_vb)
-     struct type *type;
-     struct type *real_type;
-     char *valaddr;
-     int offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
-     struct type **dont_print_vb;
+cp_print_value (struct type *type, struct type *real_type, char *valaddr,
+		int offset, CORE_ADDR address, struct ui_file *stream,
+		int format, int recurse, enum val_prettyprint pretty,
+		struct type **dont_print_vb)
 {
   struct obstack tmp_obstack;
   struct type **last_dont_print
@@ -627,13 +605,8 @@ cp_print_value (type, real_type, valaddr, offset, address, stream, format, recur
    have the same meanings as in c_val_print.  */
 
 static void
-cp_print_static_field (type, val, stream, format, recurse, pretty)
-     struct type *type;
-     value_ptr val;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
+cp_print_static_field (struct type *type, value_ptr val, struct ui_file *stream,
+		       int format, int recurse, enum val_prettyprint pretty)
 {
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
@@ -668,11 +641,8 @@ cp_print_static_field (type, val, stream, format, recurse, pretty)
 }
 
 void
-cp_print_class_member (valaddr, domain, stream, prefix)
-     char *valaddr;
-     struct type *domain;
-     struct ui_file *stream;
-     char *prefix;
+cp_print_class_member (char *valaddr, struct type *domain,
+		       struct ui_file *stream, char *prefix)
 {
 
   /* VAL is a byte offset into the structure type DOMAIN.
@@ -746,14 +716,10 @@ cp_print_class_member (valaddr, domain, stream, prefix)
 
 
 static void
-cp_print_hpacc_virtual_table_entries (type, vfuncs, v, stream, format, recurse, pretty)
-     struct type *type;
-     int *vfuncs;
-     value_ptr v;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
+cp_print_hpacc_virtual_table_entries (struct type *type, int *vfuncs,
+				      value_ptr v, struct ui_file *stream,
+				      int format, int recurse,
+				      enum val_prettyprint pretty)
 {
   int fn, oi;
 
@@ -798,7 +764,7 @@ cp_print_hpacc_virtual_table_entries (type, vfuncs, v, stream, format, recurse, 
 
 
 void
-_initialize_cp_valprint ()
+_initialize_cp_valprint (void)
 {
   add_show_from_set
     (add_set_cmd ("static-members", class_support, var_boolean,

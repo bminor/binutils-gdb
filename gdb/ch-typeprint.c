@@ -40,12 +40,8 @@
 static void chill_type_print_base (struct type *, struct ui_file *, int, int);
 
 void
-chill_print_type (type, varstring, stream, show, level)
-     struct type *type;
-     char *varstring;
-     struct ui_file *stream;
-     int show;
-     int level;
+chill_print_type (struct type *type, char *varstring, struct ui_file *stream,
+		  int show, int level)
 {
   if (varstring != NULL && *varstring != '\0')
     {
@@ -68,11 +64,8 @@ chill_print_type (type, varstring, stream, show, level)
    We increase it for some recursive calls.  */
 
 static void
-chill_type_print_base (type, stream, show, level)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int level;
+chill_type_print_base (struct type *type, struct ui_file *stream, int show,
+		       int level)
 {
   register int len;
   register int i;

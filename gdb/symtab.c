@@ -128,8 +128,7 @@ char no_symtab_msg[] = "No symbol table is loaded.  Use the \"file\" command.";
    symbols.  Remove when loose ends are cleaned up.   FIXME -fnf */
 
 static void
-cplusplus_hint (name)
-     char *name;
+cplusplus_hint (char *name)
 {
   while (*name == '\'')
     name++;
@@ -142,8 +141,7 @@ cplusplus_hint (name)
    in the symtab filename will also work.  */
 
 static struct symtab *
-lookup_symtab_1 (name)
-     char *name;
+lookup_symtab_1 (char *name)
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
@@ -206,8 +204,7 @@ got_symtab:
    of variations if the first lookup doesn't work.  */
 
 struct symtab *
-lookup_symtab (name)
-     char *name;
+lookup_symtab (char *name)
 {
   register struct symtab *s;
 #if 0
@@ -244,8 +241,7 @@ lookup_symtab (name)
    in the psymtab filename will also work.  */
 
 struct partial_symtab *
-lookup_partial_symtab (name)
-     char *name;
+lookup_partial_symtab (char *name)
 {
   register struct partial_symtab *pst;
   register struct objfile *objfile;
@@ -282,9 +278,7 @@ lookup_partial_symtab (name)
    specified by SIGNATURE_ID.  Note that this function is g++ specific. */
 
 char *
-gdb_mangle_name (type, method_id, signature_id)
-     struct type *type;
-     int method_id, signature_id;
+gdb_mangle_name (struct type *type, int method_id, int signature_id)
 {
   int mangled_name_len;
   char *mangled_name;
@@ -383,9 +377,7 @@ gdb_mangle_name (type, method_id, signature_id)
 /* Find which partial symtab on contains PC and SECTION.  Return 0 if none.  */
 
 struct partial_symtab *
-find_pc_sect_psymtab (pc, section)
-     CORE_ADDR pc;
-     asection *section;
+find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
 {
   register struct partial_symtab *pst;
   register struct objfile *objfile;
@@ -432,8 +424,7 @@ find_pc_sect_psymtab (pc, section)
    Backward compatibility, no section */
 
 struct partial_symtab *
-find_pc_psymtab (pc)
-     CORE_ADDR pc;
+find_pc_psymtab (CORE_ADDR pc)
 {
   return find_pc_sect_psymtab (pc, find_pc_mapped_section (pc));
 }
@@ -442,10 +433,8 @@ find_pc_psymtab (pc)
    Return 0 if none.  Check all psymtabs if PSYMTAB is 0.  */
 
 struct partial_symbol *
-find_pc_sect_psymbol (psymtab, pc, section)
-     struct partial_symtab *psymtab;
-     CORE_ADDR pc;
-     asection *section;
+find_pc_sect_psymbol (struct partial_symtab *psymtab, CORE_ADDR pc,
+		      asection *section)
 {
   struct partial_symbol *best = NULL, *p, **pp;
   CORE_ADDR best_pc;
@@ -516,9 +505,7 @@ find_pc_sect_psymbol (psymtab, pc, section)
    Check all psymtabs if PSYMTAB is 0.  Backwards compatibility, no section. */
 
 struct partial_symbol *
-find_pc_psymbol (psymtab, pc)
-     struct partial_symtab *psymtab;
-     CORE_ADDR pc;
+find_pc_psymbol (struct partial_symtab *psymtab, CORE_ADDR pc)
 {
   return find_pc_sect_psymbol (psymtab, pc, find_pc_mapped_section (pc));
 }
@@ -527,9 +514,7 @@ find_pc_psymbol (psymtab, pc)
    out of the minimal symbols and stash that in the debug symbol.  */
 
 static void
-fixup_section (ginfo, objfile)
-     struct general_symbol_info *ginfo;
-     struct objfile *objfile;
+fixup_section (struct general_symbol_info *ginfo, struct objfile *objfile)
 {
   struct minimal_symbol *msym;
   msym = lookup_minimal_symbol (ginfo->name, NULL, objfile);
@@ -539,9 +524,7 @@ fixup_section (ginfo, objfile)
 }
 
 struct symbol *
-fixup_symbol_section (sym, objfile)
-     struct symbol *sym;
-     struct objfile *objfile;
+fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
 {
   if (!sym)
     return NULL;
@@ -555,9 +538,7 @@ fixup_symbol_section (sym, objfile)
 }
 
 static struct partial_symbol *
-fixup_psymbol_section (psym, objfile)
-     struct partial_symbol *psym;
-     struct objfile *objfile;
+fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
 {
   if (!psym)
     return NULL;
@@ -592,12 +573,9 @@ fixup_psymbol_section (psym, objfile)
    can probably assume it will never hit the C++ code).  */
 
 struct symbol *
-lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
-     const char *name;
-     register const struct block *block;
-     const namespace_enum namespace;
-     int *is_a_field_of_this;
-     struct symtab **symtab;
+lookup_symbol (const char *name, register const struct block *block,
+	       const namespace_enum namespace, int *is_a_field_of_this,
+	       struct symtab **symtab)
 {
   register struct symbol *sym;
   register struct symtab *s = NULL;
@@ -959,11 +937,8 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
    symbols if GLOBAL, the static symbols if not */
 
 static struct partial_symbol *
-lookup_partial_symbol (pst, name, global, namespace)
-     struct partial_symtab *pst;
-     const char *name;
-     int global;
-     namespace_enum namespace;
+lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
+		       namespace_enum namespace)
 {
   struct partial_symbol *temp;
   struct partial_symbol **start, **psym;
@@ -1054,8 +1029,7 @@ lookup_partial_symbol (pst, name, global, namespace)
 
 
 struct type *
-lookup_transparent_type (name)
-     const char *name;
+lookup_transparent_type (const char *name)
 {
   register struct symbol *sym;
   register struct symtab *s = NULL;
@@ -1163,7 +1137,7 @@ lookup_transparent_type (name)
    executables that have no main() ? */
 
 struct partial_symtab *
-find_main_psymtab ()
+find_main_psymtab (void)
 {
   register struct partial_symtab *pst;
   register struct objfile *objfile;
@@ -1190,10 +1164,8 @@ find_main_psymtab ()
    tested for a match. */
 
 struct symbol *
-lookup_block_symbol (block, name, namespace)
-     register const struct block *block;
-     const char *name;
-     const namespace_enum namespace;
+lookup_block_symbol (register const struct block *block, const char *name,
+		     const namespace_enum namespace)
 {
   register int bot, top, inc;
   register struct symbol *sym;
@@ -1350,9 +1322,7 @@ lookup_block_symbol (block, name, namespace)
    If no alias is active, then return SYM.  */
 
 static struct symbol *
-find_active_alias (sym, addr)
-     struct symbol *sym;
-     CORE_ADDR addr;
+find_active_alias (struct symbol *sym, CORE_ADDR addr)
 {
   struct range_list *r;
   struct alias_list *aliases;
@@ -1381,8 +1351,7 @@ find_active_alias (sym, addr)
    lexical block, described by a struct block BL.  */
 
 struct symbol *
-block_function (bl)
-     struct block *bl;
+block_function (struct block *bl)
 {
   while (BLOCK_FUNCTION (bl) == 0 && BLOCK_SUPERBLOCK (bl) != 0)
     bl = BLOCK_SUPERBLOCK (bl);
@@ -1394,9 +1363,7 @@ block_function (bl)
    psymtabs and read in another symtab if necessary. */
 
 struct symtab *
-find_pc_sect_symtab (pc, section)
-     CORE_ADDR pc;
-     asection *section;
+find_pc_sect_symtab (CORE_ADDR pc, asection *section)
 {
   register struct block *b;
   struct blockvector *bv;
@@ -1484,8 +1451,7 @@ find_pc_sect_symtab (pc, section)
    read in another symtab if necessary.  Backward compatibility, no section */
 
 struct symtab *
-find_pc_symtab (pc)
-     CORE_ADDR pc;
+find_pc_symtab (CORE_ADDR pc)
 {
   return find_pc_sect_symtab (pc, find_pc_mapped_section (pc));
 }
@@ -1501,10 +1467,7 @@ find_pc_symtab (pc)
    line *0x2345" cause psymtabs to be converted to symtabs).  */
 
 struct symbol *
-find_addr_symbol (addr, symtabp, symaddrp)
-     CORE_ADDR addr;
-     struct symtab **symtabp;
-     CORE_ADDR *symaddrp;
+find_addr_symbol (CORE_ADDR addr, struct symtab **symtabp, CORE_ADDR *symaddrp)
 {
   struct symtab *symtab, *best_symtab;
   struct objfile *objfile;
@@ -1602,10 +1565,7 @@ done:
 /* If it's worth the effort, we could be using a binary search.  */
 
 struct symtab_and_line
-find_pc_sect_line (pc, section, notcurrent)
-     CORE_ADDR pc;
-     struct sec *section;
-     int notcurrent;
+find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
 {
   struct symtab *s;
   register struct linetable *l;
@@ -1828,9 +1788,7 @@ find_pc_sect_line (pc, section, notcurrent)
 /* Backward compatibility (no section) */
 
 struct symtab_and_line
-find_pc_line (pc, notcurrent)
-     CORE_ADDR pc;
-     int notcurrent;
+find_pc_line (CORE_ADDR pc, int notcurrent)
 {
   asection *section;
 
@@ -1854,11 +1812,7 @@ static struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
    If not found, return NULL.  */
 
 static struct symtab *
-find_line_symtab (symtab, line, index, exact_match)
-     struct symtab *symtab;
-     int line;
-     int *index;
-     int *exact_match;
+find_line_symtab (struct symtab *symtab, int line, int *index, int *exact_match)
 {
   int exact;
 
@@ -1940,10 +1894,7 @@ done:
    The source file is specified with a struct symtab.  */
 
 int
-find_line_pc (symtab, line, pc)
-     struct symtab *symtab;
-     int line;
-     CORE_ADDR *pc;
+find_line_pc (struct symtab *symtab, int line, CORE_ADDR *pc)
 {
   struct linetable *l;
   int ind;
@@ -1970,9 +1921,8 @@ find_line_pc (symtab, line, pc)
    Returns 0 if could not find the specified line.  */
 
 int
-find_line_pc_range (sal, startptr, endptr)
-     struct symtab_and_line sal;
-     CORE_ADDR *startptr, *endptr;
+find_line_pc_range (struct symtab_and_line sal, CORE_ADDR *startptr,
+		    CORE_ADDR *endptr)
 {
   CORE_ADDR startaddr;
   struct symtab_and_line found_sal;
@@ -2010,10 +1960,8 @@ find_line_pc_range (sal, startptr, endptr)
    Set *EXACT_MATCH nonzero if the value returned is an exact match.  */
 
 static int
-find_line_common (l, lineno, exact_match)
-     register struct linetable *l;
-     register int lineno;
-     int *exact_match;
+find_line_common (register struct linetable *l, register int lineno,
+		  int *exact_match)
 {
   register int i;
   register int len;
@@ -2056,9 +2004,7 @@ find_line_common (l, lineno, exact_match)
 }
 
 int
-find_pc_line_pc_range (pc, startptr, endptr)
-     CORE_ADDR pc;
-     CORE_ADDR *startptr, *endptr;
+find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
 {
   struct symtab_and_line sal;
   sal = find_pc_line (pc, 0);
@@ -2076,9 +2022,7 @@ static struct symtab_and_line
 find_function_start_sal (struct symbol *sym, int);
 
 static struct symtab_and_line
-find_function_start_sal (sym, funfirstline)
-     struct symbol *sym;
-     int funfirstline;
+find_function_start_sal (struct symbol *sym, int funfirstline)
 {
   CORE_ADDR pc;
   struct symtab_and_line sal;
@@ -2128,9 +2072,7 @@ find_function_start_sal (sym, funfirstline)
    beginning of the substring of the operator text.
    Otherwise, return "".  */
 char *
-operator_chars (p, end)
-     char *p;
-     char **end;
+operator_chars (char *p, char **end)
 {
   *end = "";
   if (strncmp (p, "operator", 8))
@@ -2216,8 +2158,7 @@ operator_chars (p, end)
 static int total_number_of_methods (struct type *type);
 
 static int
-total_number_of_methods (type)
-     struct type *type;
+total_number_of_methods (struct type *type)
 {
   int n;
   int count;
@@ -2241,10 +2182,7 @@ total_number_of_methods (type)
    Note that this function is g++ specific.  */
 
 static int
-find_methods (t, name, sym_arr)
-     struct type *t;
-     char *name;
-     struct symbol **sym_arr;
+find_methods (struct type *t, char *name, struct symbol **sym_arr)
 {
   int i1 = 0;
   int ibase;
@@ -2364,10 +2302,8 @@ find_methods (t, name, sym_arr)
    line spec is `filename:linenum'.  */
 
 static void
-build_canonical_line_spec (sal, symname, canonical)
-     struct symtab_and_line *sal;
-     char *symname;
-     char ***canonical;
+build_canonical_line_spec (struct symtab_and_line *sal, char *symname,
+			   char ***canonical)
 {
   char **canonical_arr;
   char *canonical_name;
@@ -2476,12 +2412,8 @@ find_toplevel_char (char *s, char c)
    can use as appropriate instead of make_symbol_completion_list.  */
 
 struct symtabs_and_lines
-decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
-     char **argptr;
-     int funfirstline;
-     struct symtab *default_symtab;
-     int default_line;
-     char ***canonical;
+decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
+	       int default_line, char ***canonical)
 {
   struct symtabs_and_lines values;
 #ifdef HPPA_COMPILER_BUG
@@ -3286,9 +3218,7 @@ minimal_symbol_found:		/* We also jump here from the case for variables
 }
 
 struct symtabs_and_lines
-decode_line_spec (string, funfirstline)
-     char *string;
-     int funfirstline;
+decode_line_spec (char *string, int funfirstline)
 {
   struct symtabs_and_lines sals;
   if (string == 0)
@@ -3437,9 +3367,7 @@ decode_line_2 (sym_arr, nelts, funfirstline, canonical)
    NAME is the name to print and *FIRST is nonzero if this is the first
    name printed.  Set *FIRST to zero.  */
 static void
-output_source_filename (name, first)
-     char *name;
-     int *first;
+output_source_filename (char *name, int *first)
 {
   /* Table of files printed so far.  Since a single source file can
      result in several partial symbol tables, we need to avoid printing
@@ -3493,9 +3421,7 @@ output_source_filename (name, first)
 }
 
 static void
-sources_info (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+sources_info (char *ignore, int from_tty)
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
@@ -3552,8 +3478,7 @@ file_matches (file, files, nfiles)
 
 /* Free any memory associated with a search. */
 void
-free_search_symbols (symbols)
-     struct symbol_search *symbols;
+free_search_symbols (struct symbol_search *symbols)
 {
   struct symbol_search *p;
   struct symbol_search *next;
@@ -3876,12 +3801,8 @@ search_symbols (regexp, kind, nfiles, files, matches)
    regarding the match to gdb_stdout.
  */
 static void
-print_symbol_info (kind, s, sym, block, last)
-     namespace_enum kind;
-     struct symtab *s;
-     struct symbol *sym;
-     int block;
-     char *last;
+print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
+		   int block, char *last)
 {
   if (last == NULL || strcmp (last, s->filename) != 0)
     {
@@ -3939,8 +3860,7 @@ print_symbol_info (kind, s, sym, block, last)
    for non-debugging symbols to gdb_stdout.
  */
 static void
-print_msymbol_info (msymbol)
-     struct minimal_symbol *msymbol;
+print_msymbol_info (struct minimal_symbol *msymbol)
 {
   printf_filtered ("	%08lx  %s\n",
 		   (unsigned long) SYMBOL_VALUE_ADDRESS (msymbol),
@@ -3953,10 +3873,7 @@ print_msymbol_info (msymbol)
    matches.
  */
 static void
-symtab_symbol_info (regexp, kind, from_tty)
-     char *regexp;
-     namespace_enum kind;
-     int from_tty;
+symtab_symbol_info (char *regexp, namespace_enum kind, int from_tty)
 {
   static char *classnames[]
   =
@@ -4004,26 +3921,20 @@ symtab_symbol_info (regexp, kind, from_tty)
 }
 
 static void
-variables_info (regexp, from_tty)
-     char *regexp;
-     int from_tty;
+variables_info (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, VARIABLES_NAMESPACE, from_tty);
 }
 
 static void
-functions_info (regexp, from_tty)
-     char *regexp;
-     int from_tty;
+functions_info (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, FUNCTIONS_NAMESPACE, from_tty);
 }
 
 
 static void
-types_info (regexp, from_tty)
-     char *regexp;
-     int from_tty;
+types_info (char *regexp, int from_tty)
 {
   symtab_symbol_info (regexp, TYPES_NAMESPACE, from_tty);
 }
@@ -4031,8 +3942,7 @@ types_info (regexp, from_tty)
 #if 0
 /* Tiemann says: "info methods was never implemented."  */
 static void
-methods_info (regexp)
-     char *regexp;
+methods_info (char *regexp)
 {
   symtab_symbol_info (regexp, METHODS_NAMESPACE, 0, from_tty);
 }
@@ -4041,17 +3951,13 @@ methods_info (regexp)
 /* Breakpoint all functions matching regular expression. */
 #ifdef UI_OUT
 void
-rbreak_command_wrapper (regexp, from_tty)
-     char *regexp;
-     int from_tty;
+rbreak_command_wrapper (char *regexp, int from_tty)
 {
   rbreak_command (regexp, from_tty);
 }
 #endif
 static void
-rbreak_command (regexp, from_tty)
-     char *regexp;
-     int from_tty;
+rbreak_command (char *regexp, int from_tty)
 {
   struct symbol_search *ss;
   struct symbol_search *p;
@@ -4094,8 +4000,7 @@ rbreak_command (regexp, from_tty)
    or if a and b have the same pc range.
    Return zero otherwise. */
 int
-contained_in (a, b)
-     struct block *a, *b;
+contained_in (struct block *a, struct block *b)
 {
   if (!a || !b)
     return 0;
@@ -4128,12 +4033,8 @@ static char **return_val;
    characters.  If so, add it to the current completion list. */
 
 static void
-completion_list_add_name (symname, sym_text, sym_text_len, text, word)
-     char *symname;
-     char *sym_text;
-     int sym_text_len;
-     char *text;
-     char *word;
+completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
+			  char *text, char *word)
 {
   int newsize;
   int i;
@@ -4212,9 +4113,7 @@ completion_list_add_name (symname, sym_text, sym_text_len, text, word)
    I'm not going to worry about this; hopefully there won't be that many.  */
 
 char **
-make_symbol_completion_list (text, word)
-     char *text;
-     char *word;
+make_symbol_completion_list (char *text, char *word)
 {
   register struct symbol *sym;
   register struct symtab *s;
@@ -4403,9 +4302,7 @@ make_symbol_completion_list (text, word)
  */
 
 int
-in_prologue (pc, func_start)
-     CORE_ADDR pc;
-     CORE_ADDR func_start;
+in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
@@ -4483,9 +4380,7 @@ static struct symbol **sym_return_val;
    characters.  If so, add it to the current completion list. */
 
 static void
-overload_list_add_symbol (sym, oload_name)
-     struct symbol *sym;
-     char *oload_name;
+overload_list_add_symbol (struct symbol *sym, char *oload_name)
 {
   int newsize;
   int i;
@@ -4534,8 +4429,7 @@ overload_list_add_symbol (sym, oload_name)
 
 
 struct symbol **
-make_symbol_overload_list (fsym)
-     struct symbol *fsym;
+make_symbol_overload_list (struct symbol *fsym)
 {
   register struct symbol *sym;
   register struct symtab *s;
@@ -4655,7 +4549,7 @@ make_symbol_overload_list (fsym)
 
 
 void
-_initialize_symtab ()
+_initialize_symtab (void)
 {
   add_info ("variables", variables_info,
 	 "All global and static variable names, or those matching REGEXP.");

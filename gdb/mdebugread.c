@@ -410,8 +410,7 @@ CORE_ADDR sigtramp_address, sigtramp_end;
 /* Allocate zeroed memory */
 
 static PTR
-xzalloc (size)
-     unsigned int size;
+xzalloc (unsigned int size)
 {
   PTR p = xmalloc (size);
 
@@ -425,8 +424,7 @@ xzalloc (size)
    and reorders the symtab list at the end */
 
 static void
-mdebug_psymtab_to_symtab (pst)
-     struct partial_symtab *pst;
+mdebug_psymtab_to_symtab (struct partial_symtab *pst)
 {
 
   if (!pst)
@@ -455,8 +453,7 @@ mdebug_psymtab_to_symtab (pst)
 /* Find a file descriptor given its index RF relative to a file CF */
 
 static FDR *
-get_rfd (cf, rf)
-     int cf, rf;
+get_rfd (int cf, int rf)
 {
   FDR *fdrs;
   register FDR *f;
@@ -478,8 +475,7 @@ get_rfd (cf, rf)
 /* Return a safer print NAME for a file descriptor */
 
 static char *
-fdr_name (f)
-     FDR *f;
+fdr_name (FDR *f)
 {
   if (f->rss == -1)
     return "<stripped file>";
@@ -493,10 +489,9 @@ fdr_name (f)
    different sections are relocated via the SECTION_OFFSETS.  */
 
 void
-mdebug_build_psymtabs (objfile, swap, info)
-     struct objfile *objfile;
-     const struct ecoff_debug_swap *swap;
-     struct ecoff_debug_info *info;
+mdebug_build_psymtabs (struct objfile *objfile,
+		       const struct ecoff_debug_swap *swap,
+		       struct ecoff_debug_info *info)
 {
   cur_bfd = objfile->obfd;
   debug_swap = swap;
@@ -580,7 +575,7 @@ static struct parse_stack
 /* Enter a new lexical context */
 
 static void
-push_parse_stack ()
+push_parse_stack (void)
 {
   struct parse_stack *new;
 
@@ -605,7 +600,7 @@ push_parse_stack ()
 /* Exit a lexical context */
 
 static void
-pop_parse_stack ()
+pop_parse_stack (void)
 {
   if (!top_stack)
     return;
@@ -639,9 +634,7 @@ static struct mdebug_pending **pending_list;
 /* Check whether we already saw symbol SH in file FH */
 
 static struct mdebug_pending *
-is_pending_symbol (fh, sh)
-     FDR *fh;
-     char *sh;
+is_pending_symbol (FDR *fh, char *sh)
 {
   int f_idx = fh - debug_info->fdr;
   register struct mdebug_pending *p;
@@ -656,10 +649,7 @@ is_pending_symbol (fh, sh)
 /* Add a new symbol SH of type T */
 
 static void
-add_pending (fh, sh, t)
-     FDR *fh;
-     char *sh;
-     struct type *t;
+add_pending (FDR *fh, char *sh, struct type *t)
 {
   int f_idx = fh - debug_info->fdr;
   struct mdebug_pending *p = is_pending_symbol (fh, sh);
@@ -690,13 +680,8 @@ add_pending (fh, sh, t)
    SYMR's handled (normally one).  */
 
 static int
-parse_symbol (sh, ax, ext_sh, bigend, section_offsets, objfile)
-     SYMR *sh;
-     union aux_ext *ax;
-     char *ext_sh;
-     int bigend;
-     struct section_offsets *section_offsets;
-     struct objfile *objfile;
+parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
+	      struct section_offsets *section_offsets, struct objfile *objfile)
 {
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   void (*const swap_sym_in) (bfd *, PTR, SYMR *) = debug_swap->swap_sym_in;
@@ -1437,13 +1422,8 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets, objfile)
    they are big-endian or little-endian (from fh->fBigendian).  */
 
 static struct type *
-parse_type (fd, ax, aux_index, bs, bigend, sym_name)
-     int fd;
-     union aux_ext *ax;
-     unsigned int aux_index;
-     int *bs;
-     int bigend;
-     char *sym_name;
+parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
+	    int bigend, char *sym_name)
 {
   /* Null entries in this map are treated specially */
   static struct type **map_bt[] =
@@ -1778,13 +1758,8 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
    Returns the number of aux symbols we parsed. */
 
 static int
-upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
-     int fd;
-     struct type **tpp;
-     int tq;
-     union aux_ext *ax;
-     int bigend;
-     char *sym_name;
+upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
+	      char *sym_name)
 {
   int off;
   struct type *t;
@@ -1902,10 +1877,8 @@ upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
 static void parse_procedure (PDR *, struct symtab *, struct partial_symtab *);
 
 static void
-parse_procedure (pr, search_symtab, pst)
-     PDR *pr;
-     struct symtab *search_symtab;
-     struct partial_symtab *pst;
+parse_procedure (PDR *pr, struct symtab *search_symtab,
+		 struct partial_symtab *pst)
 {
   struct symbol *s, *i;
   struct block *b;
@@ -2058,9 +2031,7 @@ parse_procedure (pr, search_symtab, pst)
 /* Relocate the extra function info pointed to by the symbol table.  */
 
 void
-ecoff_relocate_efi (sym, delta)
-     struct symbol *sym;
-     CORE_ADDR delta;
+ecoff_relocate_efi (struct symbol *sym, CORE_ADDR delta)
 {
   struct mips_extra_func_info *e;
 
@@ -2079,11 +2050,8 @@ static void parse_external (EXTR *, int, struct section_offsets *,
 			    struct objfile *);
 
 static void
-parse_external (es, bigend, section_offsets, objfile)
-     EXTR *es;
-     int bigend;
-     struct section_offsets *section_offsets;
-     struct objfile *objfile;
+parse_external (EXTR *es, int bigend, struct section_offsets *section_offsets,
+		struct objfile *objfile)
 {
   union aux_ext *ax;
 
@@ -2175,13 +2143,8 @@ static void parse_lines (FDR *, PDR *, struct linetable *, int,
 			 struct partial_symtab *, CORE_ADDR);
 
 static void
-parse_lines (fh, pr, lt, maxlines, pst, lowest_pdr_addr)
-     FDR *fh;
-     PDR *pr;
-     struct linetable *lt;
-     int maxlines;
-     struct partial_symtab *pst;
-     CORE_ADDR lowest_pdr_addr;
+parse_lines (FDR *fh, PDR *pr, struct linetable *lt, int maxlines,
+	     struct partial_symtab *pst, CORE_ADDR lowest_pdr_addr)
 {
   unsigned char *base;
   int j, k;
@@ -2247,8 +2210,7 @@ parse_lines (fh, pr, lt, maxlines, pst, lowest_pdr_addr)
    into a partial_symtab.  */
 
 static void
-parse_partial_symbols (objfile)
-     struct objfile *objfile;
+parse_partial_symbols (struct objfile *objfile)
 {
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   const bfd_size_type external_rfd_size = debug_swap->external_rfd_size;
@@ -3156,11 +3118,8 @@ parse_partial_symbols (objfile)
    all the the enum constants to the partial symbol table.  */
 
 static void
-handle_psymbol_enumerators (objfile, fh, stype, svalue)
-     struct objfile *objfile;
-     FDR *fh;
-     int stype;
-     CORE_ADDR svalue;
+handle_psymbol_enumerators (struct objfile *objfile, FDR *fh, int stype,
+			    CORE_ADDR svalue)
 {
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   void (*const swap_sym_in) (bfd *, PTR, SYMR *) = debug_swap->swap_sym_in;
@@ -3249,9 +3208,7 @@ mdebug_next_symbol_text (objfile)
    The flow of control and even the memory allocation differs.  FIXME.  */
 
 static void
-psymtab_to_symtab_1 (pst, filename)
-     struct partial_symtab *pst;
-     char *filename;
+psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 {
   bfd_size_type external_sym_size;
   bfd_size_type external_pdr_size;
@@ -3636,9 +3593,7 @@ psymtab_to_symtab_1 (pst, filename)
    to an opaque aggregate type, else 0.  */
 
 static int
-has_opaque_xref (fh, sh)
-     FDR *fh;
-     SYMR *sh;
+has_opaque_xref (FDR *fh, SYMR *sh)
 {
   TIR tir;
   union aux_ext *ax;
@@ -3670,14 +3625,8 @@ has_opaque_xref (fh, sh)
    Return value says how many aux symbols we ate. */
 
 static int
-cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
-     int fd;
-     union aux_ext *ax;
-     struct type **tpp;
-     enum type_code type_code;	/* Use to alloc new type if none is found. */
-     char **pname;
-     int bigend;
-     char *sym_name;
+cross_ref (int fd, union aux_ext *ax, struct type **tpp, enum type_code type_code,	/* Use to alloc new type if none is found. */
+	   char **pname, int bigend, char *sym_name)
 {
   RNDXR rn[1];
   unsigned int rf;
@@ -3874,11 +3823,8 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
    keeping the symtab sorted */
 
 static struct symbol *
-mylookup_symbol (name, block, namespace, class)
-     char *name;
-     register struct block *block;
-     namespace_enum namespace;
-     enum address_class class;
+mylookup_symbol (char *name, register struct block *block,
+		 namespace_enum namespace, enum address_class class)
 {
   register int bot, top, inc;
   register struct symbol *sym;
@@ -3909,9 +3855,7 @@ mylookup_symbol (name, block, namespace, class)
    that's the only time we know how big the block is.  FIXME.  */
 
 static void
-add_symbol (s, b)
-     struct symbol *s;
-     struct block *b;
+add_symbol (struct symbol *s, struct block *b)
 {
   int nsyms = BLOCK_NSYMS (b)++;
   struct block *origb;
@@ -3944,9 +3888,7 @@ add_symbol (s, b)
 /* Add a new block B to a symtab S */
 
 static void
-add_block (b, s)
-     struct block *b;
-     struct symtab *s;
+add_block (struct block *b, struct symtab *s)
 {
   struct blockvector *bv = BLOCKVECTOR (s);
 
@@ -3976,11 +3918,7 @@ add_block (b, s)
    This is another reason why -ggdb debugging format is preferable.  */
 
 static int
-add_line (lt, lineno, adr, last)
-     struct linetable *lt;
-     int lineno;
-     CORE_ADDR adr;
-     int last;
+add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
 {
   /* DEC c89 sometimes produces zero linenos which confuse gdb.
      Change them to something sensible. */
@@ -4002,9 +3940,7 @@ add_line (lt, lineno, adr, last)
 /* Blocks with a smaller low bound should come first */
 
 static int
-compare_blocks (arg1, arg2)
-     const PTR arg1;
-     const PTR arg2;
+compare_blocks (const PTR arg1, const PTR arg2)
 {
   register int addr_diff;
   struct block **b1 = (struct block **) arg1;
@@ -4021,8 +3957,7 @@ compare_blocks (arg1, arg2)
    as required by some MI search routines */
 
 static void
-sort_blocks (s)
-     struct symtab *s;
+sort_blocks (struct symtab *s)
 {
   struct blockvector *bv = BLOCKVECTOR (s);
 
@@ -4073,11 +4008,7 @@ sort_blocks (s)
    MAXSYMS and linenumbers MAXLINES we'll put in it */
 
 static struct symtab *
-new_symtab (name, maxsyms, maxlines, objfile)
-     char *name;
-     int maxsyms;
-     int maxlines;
-     struct objfile *objfile;
+new_symtab (char *name, int maxsyms, int maxlines, struct objfile *objfile)
 {
   struct symtab *s = allocate_symtab (name, objfile);
 
@@ -4099,9 +4030,7 @@ new_symtab (name, maxsyms, maxlines, objfile)
 /* Allocate a new partial_symtab NAME */
 
 static struct partial_symtab *
-new_psymtab (name, objfile)
-     char *name;
-     struct objfile *objfile;
+new_psymtab (char *name, struct objfile *objfile)
 {
   struct partial_symtab *psymtab;
 
@@ -4130,8 +4059,7 @@ new_psymtab (name, objfile)
    proper size to allocate.  */
 
 static struct linetable *
-new_linetable (size)
-     int size;
+new_linetable (int size)
 {
   struct linetable *l;
 
@@ -4148,8 +4076,7 @@ new_linetable (size)
    calculating the proper size to allocate.  */
 
 static struct linetable *
-shrink_linetable (lt)
-     struct linetable *lt;
+shrink_linetable (struct linetable *lt)
 {
 
   return (struct linetable *) xrealloc ((PTR) lt,
@@ -4161,8 +4088,7 @@ shrink_linetable (lt)
 /* Allocate and zero a new blockvector of NBLOCKS blocks. */
 
 static struct blockvector *
-new_bvect (nblocks)
-     int nblocks;
+new_bvect (int nblocks)
 {
   struct blockvector *bv;
   int size;
@@ -4178,8 +4104,7 @@ new_bvect (nblocks)
 /* Allocate and zero a new block of MAXSYMS symbols */
 
 static struct block *
-new_block (maxsyms)
-     int maxsyms;
+new_block (int maxsyms)
 {
   int size = sizeof (struct block) + (maxsyms - 1) * sizeof (struct symbol *);
 
@@ -4190,9 +4115,7 @@ new_block (maxsyms)
    Shrink_block can also be used by add_symbol to grow a block.  */
 
 static struct block *
-shrink_block (b, s)
-     struct block *b;
-     struct symtab *s;
+shrink_block (struct block *b, struct symtab *s)
 {
   struct block *new;
   struct blockvector *bv = BLOCKVECTOR (s);
@@ -4220,8 +4143,7 @@ shrink_block (b, s)
 /* Create a new symbol with printname NAME */
 
 static struct symbol *
-new_symbol (name)
-     char *name;
+new_symbol (char *name)
 {
   struct symbol *s = ((struct symbol *)
 		      obstack_alloc (&current_objfile->symbol_obstack,
@@ -4238,8 +4160,7 @@ new_symbol (name)
 /* Create a new type with printname NAME */
 
 static struct type *
-new_type (name)
-     char *name;
+new_type (char *name)
 {
   struct type *t;
 
@@ -4255,10 +4176,8 @@ new_type (name)
    it as normal.  */
 
 void
-elfmdebug_build_psymtabs (objfile, swap, sec)
-     struct objfile *objfile;
-     const struct ecoff_debug_swap *swap;
-     asection *sec;
+elfmdebug_build_psymtabs (struct objfile *objfile,
+			  const struct ecoff_debug_swap *swap, asection *sec)
 {
   bfd *abfd = objfile->obfd;
   struct ecoff_debug_info *info;
@@ -4293,7 +4212,7 @@ elfmdebug_build_psymtabs (objfile, swap, sec)
 #ifdef TM_MIPS_H
 
 void
-fixup_sigtramp ()
+fixup_sigtramp (void)
 {
   struct symbol *s;
   struct symtab *st;
@@ -4395,7 +4314,7 @@ fixup_sigtramp ()
 #endif /* TM_MIPS_H */
 
 void
-_initialize_mdebugread ()
+_initialize_mdebugread (void)
 {
   mdebug_type_void =
     init_type (TYPE_CODE_VOID, 1,

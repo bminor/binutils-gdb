@@ -296,9 +296,7 @@ static int u_offsets[] =
   };
 
 CORE_ADDR
-register_addr (regno, blockend)
-     int regno;
-     CORE_ADDR blockend;
+register_addr (int regno, CORE_ADDR blockend)
 {
   CORE_ADDR addr;
 
@@ -356,8 +354,7 @@ int ia64_cannot_store_register (regno)
 }
 
 void
-supply_gregset (gregsetp)
-     gregset_t *gregsetp;
+supply_gregset (gregset_t *gregsetp)
 {
   int regi;
   greg_t *regp = (greg_t *) gregsetp;
@@ -393,9 +390,7 @@ supply_gregset (gregsetp)
 }
 
 void
-fill_gregset (gregsetp, regno)
-     gregset_t *gregsetp;
-     int regno;
+fill_gregset (gregset_t *gregsetp, int regno)
 {
   int regi;
   greg_t *regp = (greg_t *) gregsetp;
@@ -439,8 +434,7 @@ fill_gregset (gregsetp, regno)
    idea of the current floating point register values. */
 
 void
-supply_fpregset (fpregsetp)
-     fpregset_t *fpregsetp;
+supply_fpregset (fpregset_t *fpregsetp)
 {
   register int regi;
   char *from;
@@ -458,9 +452,7 @@ supply_fpregset (fpregsetp)
    them all. */
 
 void
-fill_fpregset (fpregsetp, regno)
-     fpregset_t *fpregsetp;
-     int regno;
+fill_fpregset (fpregset_t *fpregsetp, int regno)
 {
   int regi;
   char *to;

@@ -323,7 +323,7 @@ m68hc11_saved_pc_after_call (struct frame_info *frame)
    registers.  */
 
 void
-m68hc11_pop_frame ()
+m68hc11_pop_frame (void)
 {
   m68hc11_not_yet ("m68hc11_pop_frame");
 }
@@ -727,7 +727,7 @@ m68hc11_push_arguments (int nargs,
 
 
 CORE_ADDR
-m68hc11_call_dummy_address ()
+m68hc11_call_dummy_address (void)
 {
   m68hc11_not_yet ("m68hc11_call_dummy_address");
   return 0;  
@@ -745,7 +745,7 @@ m68hc11_extract_return_value (struct type *valtype,
 }
 
 void
-_initialize_m68hc11_tdep ()
+_initialize_m68hc11_tdep (void)
 {
   tm_print_insn = print_insn_m68hc11;
 

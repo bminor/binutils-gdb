@@ -35,10 +35,7 @@ static void c_emit_char (int c, struct ui_file * stream, int quoter);
    characters and strings is language specific. */
 
 static void
-c_emit_char (c, stream, quoter)
-     register int c;
-     struct ui_file *stream;
-     int quoter;
+c_emit_char (register int c, struct ui_file *stream, int quoter)
 {
   c &= 0xFF;			/* Avoid sign bit follies */
 
@@ -83,9 +80,7 @@ c_emit_char (c, stream, quoter)
 }
 
 void
-c_printchar (c, stream)
-     int c;
-     struct ui_file *stream;
+c_printchar (int c, struct ui_file *stream)
 {
   fputc_filtered ('\'', stream);
   LA_EMIT_CHAR (c, stream, '\'');
@@ -99,12 +94,8 @@ c_printchar (c, stream)
    printing LENGTH characters, or if FORCE_ELLIPSES.  */
 
 void
-c_printstr (stream, string, length, width, force_ellipses)
-     struct ui_file *stream;
-     char *string;
-     unsigned int length;
-     int width;
-     int force_ellipses;
+c_printstr (struct ui_file *stream, char *string, unsigned int length,
+	    int width, int force_ellipses)
 {
   register unsigned int i;
   unsigned int things_printed = 0;
@@ -223,9 +214,7 @@ c_printstr (stream, string, length, width, force_ellipses)
    debugging information supplied by the compiler.  fnf@cygnus.com */
 
 struct type *
-c_create_fundamental_type (objfile, typeid)
-     struct objfile *objfile;
-     int typeid;
+c_create_fundamental_type (struct objfile *objfile, int typeid)
 {
   register struct type *type = NULL;
 
@@ -521,7 +510,7 @@ const struct language_defn asm_language_defn =
 };
 
 void
-_initialize_c_language ()
+_initialize_c_language (void)
 {
   add_language (&c_language_defn);
   add_language (&cplus_language_defn);

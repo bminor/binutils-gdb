@@ -95,8 +95,7 @@ struct vmap *vmap;
 
 /* ARGSUSED */
 static void
-exec_close (quitting)
-     int quitting;
+exec_close (int quitting)
 {
   int need_symtab_cleanup = 0;
   struct vmap *vp, *nxt;
@@ -168,9 +167,7 @@ exec_close (quitting)
    we're supplying the exec pathname late for good reason.) */
 
 void
-exec_file_attach (args, from_tty)
-     char *args;
-     int from_tty;
+exec_file_attach (char *args, int from_tty)
 {
   char **argv;
   char *filename;
@@ -311,9 +308,7 @@ exec_file_attach (args, from_tty)
    which can take multiple args. */
 
 void
-exec_file_command (args, from_tty)
-     char *args;
-     int from_tty;
+exec_file_command (char *args, int from_tty)
 {
   target_preopen (from_tty);
   exec_file_attach (args, from_tty);
@@ -324,9 +319,7 @@ exec_file_command (args, from_tty)
    command was added?  */
 
 static void
-file_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+file_command (char *arg, int from_tty)
 {
   /* FIXME, if we lose on reading the symbol file, we should revert
      the exec file, but that's rough.  */
@@ -342,10 +335,7 @@ file_command (arg, from_tty)
    we cast it back to its proper type.  */
 
 static void
-add_to_section_table (abfd, asect, table_pp_char)
-     bfd *abfd;
-     sec_ptr asect;
-     PTR table_pp_char;
+add_to_section_table (bfd *abfd, sec_ptr asect, PTR table_pp_char)
 {
   struct section_table **table_pp = (struct section_table **) table_pp_char;
   flagword aflag;
@@ -366,9 +356,8 @@ add_to_section_table (abfd, asect, table_pp_char)
    Returns 0 if OK, 1 on error.  */
 
 int
-build_section_table (some_bfd, start, end)
-     bfd *some_bfd;
-     struct section_table **start, **end;
+build_section_table (bfd *some_bfd, struct section_table **start,
+		     struct section_table **end)
 {
   unsigned count;
 
@@ -385,10 +374,7 @@ build_section_table (some_bfd, start, end)
 }
 
 static void
-bfdsec_to_vmap (abfd, sect, arg3)
-     bfd *abfd;
-     sec_ptr sect;
-     PTR arg3;
+bfdsec_to_vmap (bfd *abfd, sec_ptr sect, PTR arg3)
 {
   struct vmap_and_bfd *vmap_bfd = (struct vmap_and_bfd *) arg3;
   struct vmap *vp;
@@ -418,9 +404,7 @@ bfdsec_to_vmap (abfd, sect, arg3)
    Return the new vmap.  */
 
 struct vmap *
-map_vmap (abfd, arch)
-     bfd *abfd;
-     bfd *arch;
+map_vmap (bfd *abfd, bfd *arch)
 {
   struct vmap_and_bfd vmap_bfd;
   struct vmap *vp, **vpp;
@@ -463,12 +447,8 @@ map_vmap (abfd, arch)
    we just tail-call it with more arguments to select between them.  */
 
 int
-xfer_memory (memaddr, myaddr, len, write, target)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-     struct target_ops *target;
+xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+	     struct target_ops *target)
 {
   boolean res;
   struct section_table *p;
@@ -528,9 +508,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
 
 
 void
-print_section_info (t, abfd)
-     struct target_ops *t;
-     bfd *abfd;
+print_section_info (struct target_ops *t, bfd *abfd)
 {
   struct section_table *p;
 
@@ -561,8 +539,7 @@ print_section_info (t, abfd)
 }
 
 static void
-exec_files_info (t)
-     struct target_ops *t;
+exec_files_info (struct target_ops *t)
 {
   print_section_info (t, exec_bfd);
 
@@ -596,10 +573,8 @@ exec_files_info (t)
    in the exec objfile.  */
 
 void
-exec_set_section_offsets (text_off, data_off, bss_off)
-     bfd_signed_vma text_off;
-     bfd_signed_vma data_off;
-     bfd_signed_vma bss_off;
+exec_set_section_offsets (bfd_signed_vma text_off, bfd_signed_vma data_off,
+			  bfd_signed_vma bss_off)
 {
   struct section_table *sect;
 
@@ -630,9 +605,7 @@ exec_set_section_offsets (text_off, data_off, bss_off)
 }
 
 static void
-set_section_command (args, from_tty)
-     char *args;
-     int from_tty;
+set_section_command (char *args, int from_tty)
 {
   struct section_table *p;
   char *secname;
@@ -676,9 +649,7 @@ set_section_command (args, from_tty)
    breakpoint_init_inferior).  */
 
 static int
-ignore (addr, contents)
-     CORE_ADDR addr;
-     char *contents;
+ignore (CORE_ADDR addr, char *contents)
 {
   return 0;
 }
@@ -687,7 +658,7 @@ ignore (addr, contents)
    defined.  */
 
 void
-init_exec_ops ()
+init_exec_ops (void)
 {
   exec_ops.to_shortname = "exec";
   exec_ops.to_longname = "Local exec file";
@@ -710,7 +681,7 @@ Specify the filename of the executable file.";
 }
 
 void
-_initialize_exec ()
+_initialize_exec (void)
 {
   struct cmd_list_element *c;
 

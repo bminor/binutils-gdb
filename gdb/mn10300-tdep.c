@@ -58,24 +58,19 @@ static char *am33_register_names[] =
 static int am33_mode;
 
 char *
-mn10300_register_name (i)
-     int i;
+mn10300_register_name (int i)
 {
   return mn10300_register_names[i];
 }
 
 CORE_ADDR
-mn10300_saved_pc_after_call (fi)
-     struct frame_info *fi;
+mn10300_saved_pc_after_call (struct frame_info *fi)
 {
   return read_memory_integer (read_register (SP_REGNUM), 4);
 }
 
 void
-mn10300_extract_return_value (type, regbuf, valbuf)
-     struct type *type;
-     char *regbuf;
-     char *valbuf;
+mn10300_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     memcpy (valbuf, regbuf + REGISTER_BYTE (4), TYPE_LENGTH (type));
@@ -84,17 +79,14 @@ mn10300_extract_return_value (type, regbuf, valbuf)
 }
 
 CORE_ADDR
-mn10300_extract_struct_value_address (regbuf)
-     char *regbuf;
+mn10300_extract_struct_value_address (char *regbuf)
 {
   return extract_address (regbuf + REGISTER_BYTE (4),
 			  REGISTER_RAW_SIZE (4));
 }
 
 void
-mn10300_store_return_value (type, valbuf)
-     struct type *type;
-     char *valbuf;
+mn10300_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     write_register_bytes (REGISTER_BYTE (4), valbuf, TYPE_LENGTH (type));
@@ -104,9 +96,7 @@ mn10300_store_return_value (type, valbuf)
 
 static struct frame_info *analyze_dummy_frame (CORE_ADDR, CORE_ADDR);
 static struct frame_info *
-analyze_dummy_frame (pc, frame)
-     CORE_ADDR pc;
-     CORE_ADDR frame;
+analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
 {
   static struct frame_info *dummy = NULL;
   if (dummy == NULL)
@@ -135,9 +125,7 @@ analyze_dummy_frame (pc, frame)
 
 /* Should call_function allocate stack space for a struct return?  */
 int
-mn10300_use_struct_convention (gcc_p, type)
-     int gcc_p;
-     struct type *type;
+mn10300_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_NFIELDS (type) > 1 || TYPE_LENGTH (type) > 8);
 }
@@ -150,9 +138,7 @@ mn10300_use_struct_convention (gcc_p, type)
    one, so we defined it ourselves.  */
 
 unsigned char *
-mn10300_breakpoint_from_pc (bp_addr, bp_size)
-     CORE_ADDR *bp_addr;
-     int *bp_size;
+mn10300_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 {
   static char breakpoint[] =
   {0xff};
@@ -165,9 +151,7 @@ mn10300_breakpoint_from_pc (bp_addr, bp_size)
    function for mn10300_analyze_prologue. */
 
 static void
-fix_frame_pointer (fi, stack_size)
-     struct frame_info *fi;
-     int stack_size;
+fix_frame_pointer (struct frame_info *fi, int stack_size)
 {
   if (fi && fi->next == NULL)
     {
@@ -183,9 +167,7 @@ fix_frame_pointer (fi, stack_size)
    This is a helper function for mn10300_analyze_prologue.  */
 
 static void
-set_movm_offsets (fi, movm_args)
-     struct frame_info *fi;
-     int movm_args;
+set_movm_offsets (struct frame_info *fi, int movm_args)
 {
   int offset = 0;
 
@@ -271,9 +253,7 @@ set_movm_offsets (fi, movm_args)
    frame chain to not bother trying to unwind past this frame.  */
 
 static CORE_ADDR
-mn10300_analyze_prologue (fi, pc)
-     struct frame_info *fi;
-     CORE_ADDR pc;
+mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end, addr, stop;
   CORE_ADDR stack_size;
@@ -515,8 +495,7 @@ mn10300_analyze_prologue (fi, pc)
    stack pointer that was in use at the time the function call was made?  */
 
 CORE_ADDR
-mn10300_frame_chain (fi)
-     struct frame_info *fi;
+mn10300_frame_chain (struct frame_info *fi)
 {
   struct frame_info *dummy;
   /* Walk through the prologue to determine the stack size,
@@ -583,8 +562,7 @@ mn10300_frame_chain (fi)
    Return the address of the first inst past the prologue of the function.  */
 
 CORE_ADDR
-mn10300_skip_prologue (pc)
-     CORE_ADDR pc;
+mn10300_skip_prologue (CORE_ADDR pc)
 {
   /* We used to check the debug symbols, but that can lose if
      we have a null prologue.  */
@@ -597,8 +575,7 @@ mn10300_skip_prologue (pc)
    command, or the call dummy breakpoint gets hit.  */
 
 void
-mn10300_pop_frame (frame)
-     struct frame_info *frame;
+mn10300_pop_frame (struct frame_info *frame)
 {
   int regnum;
 
@@ -634,12 +611,8 @@ mn10300_pop_frame (frame)
    order on the stack.  */
 
 CORE_ADDR
-mn10300_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     unsigned char struct_return;
-     CORE_ADDR struct_addr;
+mn10300_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+			unsigned char struct_return, CORE_ADDR struct_addr)
 {
   int argnum = 0;
   int len = 0;
@@ -719,9 +692,7 @@ mn10300_push_arguments (nargs, args, sp, struct_return, struct_addr)
    Needed for targets where we don't actually execute a JSR/BSR instruction */
 
 CORE_ADDR
-mn10300_push_return_address (pc, sp)
-     CORE_ADDR pc;
-     CORE_ADDR sp;
+mn10300_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[4];
 
@@ -735,9 +706,7 @@ mn10300_push_return_address (pc, sp)
    call.  */
 
 CORE_ADDR
-mn10300_store_struct_return (addr, sp)
-     CORE_ADDR addr;
-     CORE_ADDR sp;
+mn10300_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   /* The structure return address is passed as the first argument.  */
   write_register (0, addr);
@@ -752,8 +721,7 @@ mn10300_store_struct_return (addr, sp)
    will be found.  */
 
 CORE_ADDR
-mn10300_frame_saved_pc (fi)
-     struct frame_info *fi;
+mn10300_frame_saved_pc (struct frame_info *fi)
 {
   int adjust = 0;
 
@@ -787,8 +755,7 @@ mn10300_frame_saved_pc (fi)
    pointer just prior to calling the target function (see run_stack_dummy).  */
 
 void
-mn10300_init_extra_frame_info (fi)
-     struct frame_info *fi;
+mn10300_init_extra_frame_info (struct frame_info *fi)
 {
   if (fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
@@ -809,10 +776,7 @@ mn10300_init_extra_frame_info (fi)
    any frame pointer offsets.  */
 
 void
-mn10300_virtual_frame_pointer (pc, reg, offset)
-     CORE_ADDR pc;
-     long *reg;
-     long *offset;
+mn10300_virtual_frame_pointer (CORE_ADDR pc, long *reg, long *offset)
 {
   struct frame_info *dummy = analyze_dummy_frame (pc, 0);
   /* Set up a dummy frame_info, Analyze the prolog and fill in the
@@ -832,8 +796,7 @@ mn10300_virtual_frame_pointer (pc, reg, offset)
 
 /* This can be made more generic later.  */
 static void
-set_machine_hook (filename)
-     char *filename;
+set_machine_hook (char *filename)
 {
   int i;
 
@@ -853,7 +816,7 @@ set_machine_hook (filename)
 }
 
 void
-_initialize_mn10300_tdep ()
+_initialize_mn10300_tdep (void)
 {
 /*  printf("_initialize_mn10300_tdep\n"); */
 

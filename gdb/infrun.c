@@ -1309,8 +1309,7 @@ struct execution_control_state async_ecss;
 struct execution_control_state *async_ecs;
 
 void
-fetch_inferior_event (client_data)
-     void *client_data;
+fetch_inferior_event (void *client_data)
 {
   static struct cleanup *old_cleanups;
 

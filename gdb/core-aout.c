@@ -73,11 +73,8 @@ void _initialize_core_aout (void);
  */
 
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR reg_addr;
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+		      CORE_ADDR reg_addr)
 {
   int regno;
   CORE_ADDR addr;
@@ -115,9 +112,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
    BLOCKEND is the address of the end of the user structure.  */
 
 CORE_ADDR
-register_addr (regno, blockend)
-     int regno;
-     CORE_ADDR blockend;
+register_addr (int regno, CORE_ADDR blockend)
 {
   CORE_ADDR addr;
 
@@ -144,7 +139,7 @@ static struct core_fns aout_core_fns =
 };
 
 void
-_initialize_core_aout ()
+_initialize_core_aout (void)
 {
   add_core_fns (&aout_core_fns);
 }

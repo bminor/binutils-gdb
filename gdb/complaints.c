@@ -124,9 +124,7 @@ complain (struct complaint *complaint,...)
    context for the user to figure it out.  */
 
 void
-clear_complaints (sym_reading, noisy)
-     int sym_reading;
-     int noisy;
+clear_complaints (int sym_reading, int noisy)
 {
   struct complaint *p;
 
@@ -145,7 +143,7 @@ clear_complaints (sym_reading, noisy)
 }
 
 void
-_initialize_complaints ()
+_initialize_complaints (void)
 {
   add_show_from_set
     (add_set_cmd ("complaints", class_support, var_zinteger,

@@ -45,27 +45,20 @@ extern struct type **CONST_PTR (c_builtin_types[]);
 struct type *builtin_type_scm;
 
 void
-scm_printchar (c, stream)
-     int c;
-     struct ui_file *stream;
+scm_printchar (int c, struct ui_file *stream)
 {
   fprintf_filtered (stream, "#\\%c", c);
 }
 
 static void
-scm_printstr (stream, string, length, width, force_ellipses)
-     struct ui_file *stream;
-     char *string;
-     unsigned int length;
-     int width;
-     int force_ellipses;
+scm_printstr (struct ui_file *stream, char *string, unsigned int length,
+	      int width, int force_ellipses)
 {
   fprintf_filtered (stream, "\"%s\"", string);
 }
 
 int
-is_scmvalue_type (type)
-     struct type *type;
+is_scmvalue_type (struct type *type)
 {
   if (TYPE_CODE (type) == TYPE_CODE_INT
       && TYPE_NAME (type) && strcmp (TYPE_NAME (type), "SCM") == 0)
@@ -79,9 +72,7 @@ is_scmvalue_type (type)
    of the 0'th one.  */
 
 LONGEST
-scm_get_field (svalue, index)
-     LONGEST svalue;
-     int index;
+scm_get_field (LONGEST svalue, int index)
 {
   char buffer[20];
   read_memory (SCM2PTR (svalue) + index * TYPE_LENGTH (builtin_type_scm),
@@ -94,10 +85,7 @@ scm_get_field (svalue, index)
    or Boolean (CONTEXT == TYPE_CODE_BOOL).  */
 
 LONGEST
-scm_unpack (type, valaddr, context)
-     struct type *type;
-     char *valaddr;
-     enum type_code context;
+scm_unpack (struct type *type, char *valaddr, enum type_code context)
 {
   if (is_scmvalue_type (type))
     {
@@ -142,7 +130,7 @@ scm_unpack (type, valaddr, context)
 /* True if we're correctly in Guile's eval.c (the evaluator and apply). */
 
 static int
-in_eval_c ()
+in_eval_c (void)
 {
   if (current_source_symtab && current_source_symtab->filename)
     {
@@ -159,8 +147,7 @@ in_eval_c ()
    function), then try lookup_symbol for compiled variables. */
 
 static value_ptr
-scm_lookup_name (str)
-     char *str;
+scm_lookup_name (char *str)
 {
   value_ptr args[3];
   int len = strlen (str);
@@ -195,9 +182,7 @@ scm_lookup_name (str)
 }
 
 value_ptr
-scm_evaluate_string (str, len)
-     char *str;
-     int len;
+scm_evaluate_string (char *str, int len)
 {
   value_ptr func;
   value_ptr addr = value_allocate_space_in_inferior (len + 1);
@@ -210,11 +195,8 @@ scm_evaluate_string (str, len)
 }
 
 static value_ptr
-evaluate_subexp_scm (expect_type, exp, pos, noside)
-     struct type *expect_type;
-     register struct expression *exp;
-     register int *pos;
-     enum noside noside;
+evaluate_subexp_scm (struct type *expect_type, register struct expression *exp,
+		     register int *pos, enum noside noside)
 {
   enum exp_opcode op = exp->elts[*pos].opcode;
   int len, pc;
@@ -273,7 +255,7 @@ const struct language_defn scm_language_defn =
 };
 
 void
-_initialize_scheme_language ()
+_initialize_scheme_language (void)
 {
   add_language (&scm_language_defn);
   builtin_type_scm = init_type (TYPE_CODE_INT,

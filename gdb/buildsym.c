@@ -1104,7 +1104,7 @@ merge_symbol_lists (struct pending **srclist, struct pending **targetlist)
    corresponding to a psymtab.  */
 
 void
-buildsym_init ()
+buildsym_init (void)
 {
   free_pendings = NULL;
   file_symbols = NULL;
@@ -1117,7 +1117,7 @@ buildsym_init ()
    file, e.g. a shared library).  */
 
 void
-buildsym_new_init ()
+buildsym_new_init (void)
 {
   buildsym_init ();
 }

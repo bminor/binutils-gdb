@@ -44,8 +44,7 @@
    was moved back here from tm-m68k.h.  FIXME? */
 
 extern CORE_ADDR
-altos_skip_prologue (pc)
-     CORE_ADDR pc;
+altos_skip_prologue (CORE_ADDR pc)
 {
   register int op = read_memory_integer (pc, 2);
   if (op == P_LINKW_FP)
@@ -67,8 +66,7 @@ altos_skip_prologue (pc)
    was moved back here from tm-m68k.h.  FIXME? */
 
 extern CORE_ADDR
-isi_skip_prologue (pc)
-     CORE_ADDR pc;
+isi_skip_prologue (CORE_ADDR pc)
 {
   register int op = read_memory_integer (pc, 2);
   if (op == P_LINKW_FP)
@@ -87,9 +85,7 @@ isi_skip_prologue (pc)
 }
 
 int
-delta68_in_sigtramp (pc, name)
-     CORE_ADDR pc;
-     char *name;
+delta68_in_sigtramp (CORE_ADDR pc, char *name)
 {
   if (name != NULL)
     return strcmp (name, "_sigcode") == 0;
@@ -98,8 +94,7 @@ delta68_in_sigtramp (pc, name)
 }
 
 CORE_ADDR
-delta68_frame_args_address (frame_info)
-     struct frame_info * frame_info;
+delta68_frame_args_address (struct frame_info *frame_info)
 {
   /* we assume here that the only frameless functions are the system calls
      or other functions who do not put anything on the stack. */
@@ -118,8 +113,7 @@ delta68_frame_args_address (frame_info)
 }
 
 CORE_ADDR
-delta68_frame_saved_pc (frame_info)
-     struct frame_info * frame_info;
+delta68_frame_saved_pc (struct frame_info *frame_info)
 {
   return read_memory_integer (delta68_frame_args_address (frame_info) + 4, 4);
 }
@@ -128,8 +122,7 @@ delta68_frame_saved_pc (frame_info)
    Can return -1, meaning no way to tell.  */
 
 int
-isi_frame_num_args (fi)
-     struct frame_info *fi;
+isi_frame_num_args (struct frame_info *fi)
 {
   int val;
   CORE_ADDR pc = FRAME_SAVED_PC (fi);
@@ -151,8 +144,7 @@ isi_frame_num_args (fi)
 }
 
 int
-delta68_frame_num_args (fi)
-     struct frame_info *fi;
+delta68_frame_num_args (struct frame_info *fi)
 {
   int val;
   CORE_ADDR pc = FRAME_SAVED_PC (fi);
@@ -174,8 +166,7 @@ delta68_frame_num_args (fi)
 }
 
 int
-news_frame_num_args (fi)
-     struct frame_info *fi;
+news_frame_num_args (struct frame_info *fi)
 {
   int val;
   CORE_ADDR pc = FRAME_SAVED_PC (fi);
@@ -199,7 +190,7 @@ news_frame_num_args (fi)
 /* Push an empty stack frame, to record the current PC, etc.  */
 
 void
-m68k_push_dummy_frame ()
+m68k_push_dummy_frame (void)
 {
   register CORE_ADDR sp = read_register (SP_REGNUM);
   register int regnum;
@@ -229,7 +220,7 @@ m68k_push_dummy_frame ()
    restoring all saved registers.  */
 
 void
-m68k_pop_frame ()
+m68k_pop_frame (void)
 {
   register struct frame_info *frame = get_current_frame ();
   register CORE_ADDR fp;
@@ -298,8 +289,7 @@ m68k_pop_frame ()
  */
 
 CORE_ADDR
-m68k_skip_prologue (ip)
-     CORE_ADDR ip;
+m68k_skip_prologue (CORE_ADDR ip)
 {
   register CORE_ADDR limit;
   struct symtab_and_line sal;
@@ -335,9 +325,8 @@ m68k_skip_prologue (ip)
 }
 
 void
-m68k_find_saved_regs (frame_info, saved_regs)
-     struct frame_info *frame_info;
-     struct frame_saved_regs *saved_regs;
+m68k_find_saved_regs (struct frame_info *frame_info,
+		      struct frame_saved_regs *saved_regs)
 {
   register int regnum;
   register int regmask;
@@ -551,8 +540,7 @@ lose:;
    register values. */
 
 void
-supply_gregset (gregsetp)
-     gregset_t *gregsetp;
+supply_gregset (gregset_t *gregsetp)
 {
   register int regi;
   register greg_t *regp = (greg_t *) gregsetp;
@@ -566,9 +554,7 @@ supply_gregset (gregsetp)
 }
 
 void
-fill_gregset (gregsetp, regno)
-     gregset_t *gregsetp;
-     int regno;
+fill_gregset (gregset_t *gregsetp, int regno)
 {
   register int regi;
   register greg_t *regp = (greg_t *) gregsetp;
@@ -597,8 +583,7 @@ fill_gregset (gregsetp, regno)
    idea of the current floating point register values. */
 
 void
-supply_fpregset (fpregsetp)
-     fpregset_t *fpregsetp;
+supply_fpregset (fpregset_t *fpregsetp)
 {
   register int regi;
   char *from;
@@ -619,9 +604,7 @@ supply_fpregset (fpregsetp)
    them all. */
 
 void
-fill_fpregset (fpregsetp, regno)
-     fpregset_t *fpregsetp;
-     int regno;
+fill_fpregset (fpregset_t *fpregsetp, int regno)
 {
   int regi;
   char *to;
@@ -661,8 +644,7 @@ fill_fpregset (fpregsetp, regno)
    This routine returns true on success. */
 
 int
-get_longjmp_target (pc)
-     CORE_ADDR *pc;
+get_longjmp_target (CORE_ADDR *pc)
 {
   char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
   CORE_ADDR sp, jb_addr;
@@ -692,8 +674,7 @@ get_longjmp_target (pc)
    prior to doing the trap. */
 
 CORE_ADDR
-m68k_saved_pc_after_call (frame)
-     struct frame_info *frame;
+m68k_saved_pc_after_call (struct frame_info *frame)
 {
 #ifdef SYSCALL_TRAP
   int op;
@@ -709,7 +690,7 @@ m68k_saved_pc_after_call (frame)
 
 
 void
-_initialize_m68k_tdep ()
+_initialize_m68k_tdep (void)
 {
   tm_print_insn = print_insn_m68k;
 }

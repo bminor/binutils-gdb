@@ -52,12 +52,8 @@ void pascal_type_print_varspec_prefix (struct type *, struct ui_file *, int, int
 /* LEVEL is the depth to indent lines by.  */
 
 void
-pascal_print_type (type, varstring, stream, show, level)
-     struct type *type;
-     char *varstring;
-     struct ui_file *stream;
-     int show;
-     int level;
+pascal_print_type (struct type *type, char *varstring, struct ui_file *stream,
+		   int show, int level)
 {
   register enum type_code code;
   int demangled_args;
@@ -122,9 +118,7 @@ pascal_print_type (type, varstring, stream, show, level)
    the form that they appear in the source code. */
 
 static void
-pascal_type_print_derivation_info (stream, type)
-     struct ui_file *stream;
-     struct type *type;
+pascal_type_print_derivation_info (struct ui_file *stream, struct type *type)
 {
   char *name;
   int i;
@@ -147,10 +141,8 @@ pascal_type_print_derivation_info (stream, type)
 /* Print the Pascal method arguments ARGS to the file STREAM.  */
 
 void
-pascal_type_print_method_args (physname, methodname, stream)
-     char *physname;
-     char *methodname;
-     struct ui_file *stream;
+pascal_type_print_method_args (char *physname, char *methodname,
+			       struct ui_file *stream)
 {
   int is_constructor = STREQN (physname, "__ct__", 6);
   int is_destructor = STREQN (physname, "__dt__", 6);
@@ -201,11 +193,8 @@ pascal_type_print_method_args (physname, methodname, stream)
    SHOW is always zero on recursive calls.  */
 
 void
-pascal_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int passed_a_ptr;
+pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
+				  int show, int passed_a_ptr)
 {
   char *name;
   if (type == 0)
@@ -316,9 +305,7 @@ pascal_type_print_varspec_prefix (type, stream, show, passed_a_ptr)
 }
 
 static void
-pascal_type_print_args (type, stream)
-     struct type *type;
-     struct ui_file *stream;
+pascal_type_print_args (struct type *type, struct ui_file *stream)
 {
   int i;
   struct type **args;
@@ -397,12 +384,9 @@ pascal_print_func_args (struct type *type, struct ui_file *stream)
    Args work like pascal_type_print_varspec_prefix.  */
 
 static void
-pascal_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int passed_a_ptr;
-     int demangled_args;
+pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
+				  int show, int passed_a_ptr,
+				  int demangled_args)
 {
   if (type == 0)
     return;
@@ -505,11 +489,8 @@ pascal_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_ar
    We increase it for some recursive calls.  */
 
 void
-pascal_type_print_base (type, stream, show, level)
-     struct type *type;
-     struct ui_file *stream;
-     int show;
-     int level;
+pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
+			int level)
 {
   register int i;
   register int len;

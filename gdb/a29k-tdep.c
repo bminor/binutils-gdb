@@ -46,9 +46,7 @@ static CORE_ADDR rstack_high_address = UINT_MAX;
 /* Should call_function allocate stack space for a struct return?  */
 /* On the a29k objects over 16 words require the caller to allocate space.  */
 int
-a29k_use_struct_convention (gcc_p, type)
-     int gcc_p;
-     struct type *type;
+a29k_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 16 * 4);
 }
@@ -83,11 +81,7 @@ struct prologue_info
    frame pointer is being used.  */
 
 CORE_ADDR
-examine_prologue (pc, rsize, msize, mfp_used)
-     CORE_ADDR pc;
-     unsigned *msize;
-     unsigned *rsize;
-     int *mfp_used;
+examine_prologue (CORE_ADDR pc, unsigned *rsize, unsigned *msize, int *mfp_used)
 {
   long insn;
   CORE_ADDR p = pc;
@@ -338,8 +332,7 @@ done:
    to reach some "real" code.  */
 
 CORE_ADDR
-a29k_skip_prologue (pc)
-     CORE_ADDR pc;
+a29k_skip_prologue (CORE_ADDR pc)
 {
   return examine_prologue (pc, NULL, NULL, NULL);
 }
@@ -355,12 +348,8 @@ a29k_skip_prologue (pc)
  */
 
 static int			/* 0/1 - failure/success of finding the tag word  */
-examine_tag (p, is_trans, argcount, msize, mfp_used)
-     CORE_ADDR p;
-     int *is_trans;
-     int *argcount;
-     unsigned *msize;
-     int *mfp_used;
+examine_tag (CORE_ADDR p, int *is_trans, int *argcount, unsigned *msize,
+	     int *mfp_used)
 {
   unsigned int tag1, tag2;
 
@@ -398,9 +387,7 @@ examine_tag (p, is_trans, argcount, msize, mfp_used)
    of stacks and the frame cache in tm-a29k.h for more detail.  */
 
 static void
-init_frame_info (innermost_frame, frame)
-     int innermost_frame;
-     struct frame_info *frame;
+init_frame_info (int innermost_frame, struct frame_info *frame)
 {
   CORE_ADDR p;
   long insn;
@@ -505,8 +492,7 @@ init_frame_info (innermost_frame, frame)
 }
 
 void
-init_extra_frame_info (frame)
-     struct frame_info *frame;
+init_extra_frame_info (struct frame_info *frame)
 {
   if (frame->next == 0)
     /* Assume innermost frame.  May produce strange results for "info frame"
@@ -521,9 +507,7 @@ init_extra_frame_info (frame)
 }
 
 void
-init_frame_pc (fromleaf, frame)
-     int fromleaf;
-     struct frame_info *frame;
+init_frame_pc (int fromleaf, struct frame_info *frame)
 {
   frame->pc = (fromleaf ? SAVED_PC_AFTER_CALL (frame->next) :
 	       frame->next ? FRAME_SAVED_PC (frame->next) : read_pc ());
@@ -535,8 +519,7 @@ init_frame_pc (fromleaf, frame)
    saved_msp (gcc).  */
 
 CORE_ADDR
-frame_locals_address (fi)
-     struct frame_info *fi;
+frame_locals_address (struct frame_info *fi)
 {
   if (fi->flags & MFP_USED)
     return fi->saved_msp;
@@ -556,11 +539,8 @@ frame_locals_address (fi)
    on where it came from.  The contents written into MYADDR are in
    target format.  */
 void
-read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     CORE_ADDR *actual_mem_addr;
-     enum lval_type *lval;
+read_register_stack (CORE_ADDR memaddr, char *myaddr,
+		     CORE_ADDR *actual_mem_addr, enum lval_type *lval)
 {
   long rfb = read_register (RFB_REGNUM);
   long rsp = read_register (RSP_REGNUM);
@@ -616,9 +596,7 @@ read_register_stack (memaddr, myaddr, actual_mem_addr, lval)
 /* Analogous to read_memory_integer
    except the length is understood to be 4.  */
 long
-read_register_stack_integer (memaddr, len)
-     CORE_ADDR memaddr;
-     int len;
+read_register_stack_integer (CORE_ADDR memaddr, int len)
 {
   char buf[4];
   read_register_stack (memaddr, buf, NULL, NULL);
@@ -629,10 +607,8 @@ read_register_stack_integer (memaddr, len)
    at MEMADDR and put the actual address written into in
    *ACTUAL_MEM_ADDR.  */
 static void
-write_register_stack (memaddr, myaddr, actual_mem_addr)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     CORE_ADDR *actual_mem_addr;
+write_register_stack (CORE_ADDR memaddr, char *myaddr,
+		      CORE_ADDR *actual_mem_addr)
 {
   long rfb = read_register (RFB_REGNUM);
   long rsp = read_register (RSP_REGNUM);
@@ -673,13 +649,9 @@ write_register_stack (memaddr, myaddr, actual_mem_addr)
    The argument RAW_BUFFER must point to aligned memory.  */
 
 void
-a29k_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
-     char *raw_buffer;
-     int *optimized;
-     CORE_ADDR *addrp;
-     struct frame_info *frame;
-     int regnum;
-     enum lval_type *lvalp;
+a29k_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
+			 struct frame_info *frame, int regnum,
+			 enum lval_type *lvalp)
 {
   struct frame_info *fi;
   CORE_ADDR addr;
@@ -762,7 +734,7 @@ a29k_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
    restoring all saved registers.  */
 
 void
-pop_frame ()
+pop_frame (void)
 {
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR rfb = read_register (RFB_REGNUM);
@@ -825,7 +797,7 @@ pop_frame ()
 /* Push an empty stack frame, to record the current PC, etc.  */
 
 void
-push_dummy_frame ()
+push_dummy_frame (void)
 {
   long w;
   CORE_ADDR rab, gr1;
@@ -910,9 +882,7 @@ push_dummy_frame ()
    good job.  */
 
 struct frame_info *
-setup_arbitrary_frame (argc, argv)
-     int argc;
-     CORE_ADDR *argv;
+setup_arbitrary_frame (int argc, CORE_ADDR *argv)
 {
   struct frame_info *frame;
 
@@ -939,9 +909,7 @@ setup_arbitrary_frame (argc, argv)
 }
 
 int
-gdb_print_insn_a29k (memaddr, info)
-     bfd_vma memaddr;
-     disassemble_info *info;
+gdb_print_insn_a29k (bfd_vma memaddr, disassemble_info *info)
 {
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     return print_insn_big_a29k (memaddr, info);
@@ -952,7 +920,7 @@ gdb_print_insn_a29k (memaddr, info)
 enum a29k_processor_types processor_type = a29k_unknown;
 
 void
-a29k_get_processor_type ()
+a29k_get_processor_type (void)
 {
   unsigned int cfg_reg = (unsigned int) read_register (CFG_REGNUM);
 
@@ -1002,8 +970,7 @@ a29k_get_processor_type ()
    This routine returns true on success */
 
 int
-get_longjmp_target (pc)
-     CORE_ADDR *pc;
+get_longjmp_target (CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
   char buf[sizeof (CORE_ADDR)];
@@ -1020,7 +987,7 @@ get_longjmp_target (pc)
 #endif /* GET_LONGJMP_TARGET */
 
 void
-_initialize_a29k_tdep ()
+_initialize_a29k_tdep (void)
 {
   extern CORE_ADDR text_end;
 

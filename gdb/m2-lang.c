@@ -44,10 +44,7 @@ static void m2_emit_char (int, struct ui_file *, int);
  */
 
 static void
-m2_emit_char (c, stream, quoter)
-     register int c;
-     struct ui_file *stream;
-     int quoter;
+m2_emit_char (register int c, struct ui_file *stream, int quoter)
 {
 
   c &= 0xFF;			/* Avoid sign bit follies */
@@ -96,9 +93,7 @@ m2_emit_char (c, stream, quoter)
    be replaced with a true Modula version. */
 
 static void
-m2_printchar (c, stream)
-     int c;
-     struct ui_file *stream;
+m2_printchar (int c, struct ui_file *stream)
 {
   fputs_filtered ("'", stream);
   LA_EMIT_CHAR (c, stream, '\'');
@@ -113,12 +108,8 @@ m2_printchar (c, stream)
    be replaced with a true Modula version. */
 
 static void
-m2_printstr (stream, string, length, width, force_ellipses)
-     struct ui_file *stream;
-     char *string;
-     unsigned int length;
-     int width;
-     int force_ellipses;
+m2_printstr (struct ui_file *stream, char *string, unsigned int length,
+	     int width, int force_ellipses)
 {
   register unsigned int i;
   unsigned int things_printed = 0;
@@ -205,9 +196,7 @@ m2_printstr (stream, string, length, width, force_ellipses)
    by an experienced Modula programmer. */
 
 static struct type *
-m2_create_fundamental_type (objfile, typeid)
-     struct objfile *objfile;
-     int typeid;
+m2_create_fundamental_type (struct objfile *objfile, int typeid)
 {
   register struct type *type = NULL;
 
@@ -449,7 +438,7 @@ const struct language_defn m2_language_defn =
 /* Initialization for Modula-2 */
 
 void
-_initialize_m2_language ()
+_initialize_m2_language (void)
 {
   /* Modula-2 "pervasive" types.  NOTE:  these can be redefined!!! */
   builtin_type_m2_int =

@@ -465,7 +465,7 @@ tuiDefaultWinViewportHeight (type, layout)
    **        manipulation.
  */
 void
-_initialize_tuiLayout ()
+_initialize_tuiLayout (void)
 {
   if (tui_version)
     {

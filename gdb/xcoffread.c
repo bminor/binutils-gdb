@@ -262,10 +262,7 @@ struct find_targ_sec_arg
 static void find_targ_sec (bfd *, asection *, void *);
 
 static void
-find_targ_sec (abfd, sect, obj)
-     bfd *abfd;
-     asection *sect;
-     PTR obj;
+find_targ_sec (bfd *abfd, asection *sect, PTR obj)
 {
   struct find_targ_sec_arg *args = (struct find_targ_sec_arg *) obj;
   struct objfile *objfile = args->objfile;
@@ -284,9 +281,7 @@ find_targ_sec (abfd, sect, obj)
 
 /* Return the section number (SECT_OFF_*) that CS points to.  */
 static int
-secnum_to_section (secnum, objfile)
-     int secnum;
-     struct objfile *objfile;
+secnum_to_section (int secnum, struct objfile *objfile)
 {
   int off = SECT_OFF_TEXT (objfile);
   asection *sect = NULL;
@@ -301,9 +296,7 @@ secnum_to_section (secnum, objfile)
 
 /* Return the BFD section that CS points to.  */
 static asection *
-secnum_to_bfd_section (secnum, objfile)
-     int secnum;
-     struct objfile *objfile;
+secnum_to_bfd_section (int secnum, struct objfile *objfile)
 {
   int off = SECT_OFF_TEXT (objfile);
   asection *sect = NULL;
@@ -321,9 +314,7 @@ secnum_to_bfd_section (secnum, objfile)
 #if 0
 
 static void
-add_stab_to_list (stabname, stabvector)
-     char *stabname;
-     struct pending_stabs **stabvector;
+add_stab_to_list (char *stabname, struct pending_stabs **stabvector)
 {
   if (*stabvector == NULL)
     {
@@ -403,9 +394,7 @@ add_stab_to_list (stabname, stabvector)
 /* compare line table entry addresses. */
 
 static int
-compare_lte (lte1p, lte2p)
-     const void *lte1p;
-     const void *lte2p;
+compare_lte (const void *lte1p, const void *lte2p)
 {
   struct linetable_entry *lte1 = (struct linetable_entry *) lte1p;
   struct linetable_entry *lte2 = (struct linetable_entry *) lte2p;
@@ -518,8 +507,7 @@ static int inclDepth;		/* nested include depth */
 static void allocate_include_entry (void);
 
 static void
-record_include_begin (cs)
-     struct coff_symbol *cs;
+record_include_begin (struct coff_symbol *cs)
 {
   if (inclDepth)
     {
@@ -542,8 +530,7 @@ record_include_begin (cs)
 }
 
 static void
-record_include_end (cs)
-     struct coff_symbol *cs;
+record_include_end (struct coff_symbol *cs)
 {
   InclTable *pTbl;
 
@@ -564,7 +551,7 @@ record_include_end (cs)
 }
 
 static void
-allocate_include_entry ()
+allocate_include_entry (void)
 {
   if (inclTable == NULL)
     {
@@ -593,8 +580,7 @@ static struct partial_symtab *this_symtab_psymtab;
    at times) process its lines and create appropriate line vectors. */
 
 static void
-process_linenos (start, end)
-     CORE_ADDR start, end;
+process_linenos (CORE_ADDR start, CORE_ADDR end)
 {
   int offset, ii;
   file_ptr max_offset =
@@ -775,7 +761,7 @@ return_after_cleanup:
 }
 
 void
-aix_process_linenos ()
+aix_process_linenos (void)
 {
   /* process line numbers and enter them into line vector */
   process_linenos (last_source_start_addr, cur_src_end_addr);
@@ -791,12 +777,9 @@ aix_process_linenos ()
    attention to.  */
 
 static void
-enter_line_range (subfile, beginoffset, endoffset, startaddr, endaddr,
-		  firstLine)
-     struct subfile *subfile;
-     unsigned beginoffset, endoffset;	/* offsets to line table */
-     CORE_ADDR startaddr, endaddr;
-     unsigned *firstLine;
+enter_line_range (struct subfile *subfile, unsigned beginoffset, unsigned endoffset,	/* offsets to line table */
+		  CORE_ADDR startaddr,	/* offsets to line table */
+		  CORE_ADDR endaddr, unsigned *firstLine)
 {
   unsigned int curoffset;
   CORE_ADDR addr;
@@ -912,8 +895,7 @@ static char *raw_symbol;
    continuations.  */
 
 static char *
-xcoff_next_symbol_text (objfile)
-     struct objfile *objfile;
+xcoff_next_symbol_text (struct objfile *objfile)
 {
   struct internal_syment symbol;
   static struct complaint msg =
@@ -954,8 +936,7 @@ xcoff_next_symbol_text (objfile)
 /* Read symbols for a given partial symbol table.  */
 
 static void
-read_xcoff_symtab (pst)
-     struct partial_symtab *pst;
+read_xcoff_symtab (struct partial_symtab *pst)
 {
   struct objfile *objfile = pst->objfile;
   bfd *abfd = objfile->obfd;
@@ -1488,9 +1469,7 @@ static struct type *var_symbol_type;
 /* process one xcoff symbol. */
 
 static struct symbol *
-process_xcoff_symbol (cs, objfile)
-     register struct coff_symbol *cs;
-     struct objfile *objfile;
+process_xcoff_symbol (register struct coff_symbol *cs, struct objfile *objfile)
 {
   struct symbol onesymbol;
   register struct symbol *sym = &onesymbol;
@@ -1627,9 +1606,7 @@ process_xcoff_symbol (cs, objfile)
    Result is in static storage and is only good for temporary use.  */
 
 static char *
-coff_getfilename (aux_entry, objfile)
-     union internal_auxent *aux_entry;
-     struct objfile *objfile;
+coff_getfilename (union internal_auxent *aux_entry, struct objfile *objfile)
 {
   static char buffer[BUFSIZ];
 
@@ -1647,9 +1624,7 @@ coff_getfilename (aux_entry, objfile)
 
 /* Set *SYMBOL to symbol number symno in symtbl.  */
 static void
-read_symbol (symbol, symno)
-     struct internal_syment *symbol;
-     int symno;
+read_symbol (struct internal_syment *symbol, int symno)
 {
   int nsyms =
   ((struct coff_symfile_info *) this_symtab_psymtab->objfile->sym_private)
@@ -1674,8 +1649,7 @@ read_symbol (symbol, symno)
 /* Get value corresponding to symbol number symno in symtbl.  */
 
 static CORE_ADDR
-read_symbol_nvalue (symno)
-     int symno;
+read_symbol_nvalue (int symno)
 {
   struct internal_syment symbol[1];
 
@@ -1688,8 +1662,7 @@ read_symbol_nvalue (symno)
    symno is the symbol pointed to by the linetable.  */
 
 static int
-read_symbol_lineno (symno)
-     int symno;
+read_symbol_lineno (int symno)
 {
   struct objfile *objfile = this_symtab_psymtab->objfile;
   boolean xcoff64 = xcoff_data (objfile->obfd)->xcoff64;
@@ -1758,10 +1731,7 @@ gotit:
  * mainline code can read the whole thing for efficiency.
  */
 static void
-find_linenos (abfd, asect, vpinfo)
-     bfd *abfd;
-     sec_ptr asect;
-     PTR vpinfo;
+find_linenos (bfd *abfd, sec_ptr asect, PTR vpinfo)
 {
   struct coff_symfile_info *info;
   int size, count;
@@ -1787,8 +1757,7 @@ find_linenos (abfd, asect, vpinfo)
 static void xcoff_psymtab_to_symtab_1 (struct partial_symtab *);
 
 static void
-xcoff_psymtab_to_symtab_1 (pst)
-     struct partial_symtab *pst;
+xcoff_psymtab_to_symtab_1 (struct partial_symtab *pst)
 {
   struct cleanup *old_chain;
   int i;
@@ -1844,8 +1813,7 @@ static void xcoff_psymtab_to_symtab (struct partial_symtab *);
    Be verbose about it if the user wants that.  */
 
 static void
-xcoff_psymtab_to_symtab (pst)
-     struct partial_symtab *pst;
+xcoff_psymtab_to_symtab (struct partial_symtab *pst)
 {
   bfd *sym_bfd;
 
@@ -1888,8 +1856,7 @@ xcoff_psymtab_to_symtab (pst)
 }
 
 static void
-xcoff_new_init (objfile)
-     struct objfile *objfile;
+xcoff_new_init (struct objfile *objfile)
 {
   stabsread_new_init ();
   buildsym_new_init ();
@@ -1902,8 +1869,7 @@ xcoff_new_init (objfile)
    uses BFD's determination to vector to us.  */
 
 static void
-xcoff_symfile_init (objfile)
-     struct objfile *objfile;
+xcoff_symfile_init (struct objfile *objfile)
 {
   /* Allocate struct to keep track of the symfile */
   objfile->sym_private = xmmalloc (objfile->md,
@@ -1923,8 +1889,7 @@ xcoff_symfile_init (objfile)
    objfile struct from the global list of known objfiles. */
 
 static void
-xcoff_symfile_finish (objfile)
-     struct objfile *objfile;
+xcoff_symfile_finish (struct objfile *objfile)
 {
   if (objfile->sym_private != NULL)
     {
@@ -1942,10 +1907,7 @@ xcoff_symfile_finish (objfile)
 
 
 static void
-init_stringtab (abfd, offset, objfile)
-     bfd *abfd;
-     file_ptr offset;
-     struct objfile *objfile;
+init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
 {
   long length;
   int val;
@@ -2008,13 +1970,9 @@ static struct partial_symtab *xcoff_start_psymtab
    (normal). */
 
 static struct partial_symtab *
-xcoff_start_psymtab (objfile, filename, first_symnum, global_syms,
-		     static_syms)
-     struct objfile *objfile;
-     char *filename;
-     int first_symnum;
-     struct partial_symbol **global_syms;
-     struct partial_symbol **static_syms;
+xcoff_start_psymtab (struct objfile *objfile, char *filename, int first_symnum,
+		     struct partial_symbol **global_syms,
+		     struct partial_symbol **static_syms)
 {
   struct partial_symtab *result =
   start_psymtab_common (objfile, objfile->section_offsets,
@@ -2047,15 +2005,10 @@ static struct partial_symtab *xcoff_end_psymtab
    are the information for includes and dependencies.  */
 
 static struct partial_symtab *
-xcoff_end_psymtab (pst, include_list, num_includes, capping_symbol_number,
-		   dependency_list, number_dependencies, textlow_not_set)
-     struct partial_symtab *pst;
-     char **include_list;
-     int num_includes;
-     int capping_symbol_number;
-     struct partial_symtab **dependency_list;
-     int number_dependencies;
-     int textlow_not_set;
+xcoff_end_psymtab (struct partial_symtab *pst, char **include_list,
+		   int num_includes, int capping_symbol_number,
+		   struct partial_symtab **dependency_list,
+		   int number_dependencies, int textlow_not_set)
 {
   int i;
   struct objfile *objfile = pst->objfile;
@@ -2150,13 +2103,9 @@ static void swap_sym (struct internal_syment *,
    the symbol and its auxents.  */
 
 static void
-swap_sym (symbol, aux, name, raw, symnump, objfile)
-     struct internal_syment *symbol;
-     union internal_auxent *aux;
-     char **name;
-     char **raw;
-     unsigned int *symnump;
-     struct objfile *objfile;
+swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
+	  char **name, char **raw, unsigned int *symnump,
+	  struct objfile *objfile)
 {
   bfd_coff_swap_sym_in (objfile->obfd, *raw, symbol);
   if (symbol->n_zeroes)
@@ -2201,8 +2150,7 @@ swap_sym (symbol, aux, name, raw, symnump, objfile)
 }
 
 static void
-scan_xcoff_symtab (objfile)
-     struct objfile *objfile;
+scan_xcoff_symtab (struct objfile *objfile)
 {
   CORE_ADDR toc_offset = 0;	/* toc offset value in data section. */
   char *filestring = NULL;
@@ -2634,8 +2582,7 @@ scan_xcoff_symtab (objfile)
 /* Return the toc offset value for a given objfile.  */
 
 CORE_ADDR
-get_toc_offset (objfile)
-     struct objfile *objfile;
+get_toc_offset (struct objfile *objfile)
 {
   if (objfile)
     return ((struct coff_symfile_info *) objfile->sym_private)->toc_offset;
@@ -2760,9 +2707,7 @@ xcoff_initial_scan (objfile, mainline)
 }
 
 static void
-xcoff_symfile_offsets (objfile, addrs)
-     struct objfile *objfile;
-     struct section_addr_info *addrs;
+xcoff_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
 {
   asection *sect = NULL;
   int i;
@@ -2828,7 +2773,7 @@ static struct sym_fns xcoff_sym_fns =
 };
 
 void
-_initialize_xcoffread ()
+_initialize_xcoffread (void)
 {
   add_symtab_fns (&xcoff_sym_fns);
 

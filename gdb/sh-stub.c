@@ -383,7 +383,7 @@ hexToInt (char **ptr, int *intValue)
 /* scan for the sequence $<data>#<checksum>     */
 
 char *
-getpacket ()
+getpacket (void)
 {
   unsigned char *buffer = &remcomInBuffer[0];
   unsigned char checksum;
@@ -802,7 +802,7 @@ void handle_exception(int exceptionVector)
 }
 
 void
-gdb_mode()
+gdb_mode (void)
 {
   ingdbmode = GDBCOOKIE;
   breakpoint();
@@ -1324,7 +1324,7 @@ static __inline__ void code_for_catch_exception(int n)
 
 
 static  void
-exceptions()
+exceptions (void)
 {
   code_for_catch_exception (CPU_BUS_ERROR_VEC);
   code_for_catch_exception (DMA_BUS_ERROR_VEC);
@@ -1492,12 +1492,12 @@ exceptions()
 void handleError (char theSSR);
 
 void
-nop ()
+nop (void)
 {
 
 }
 void 
-init_serial()
+init_serial (void)
 {
   int i;
 
@@ -1556,7 +1556,7 @@ getDebugChar (void)
 }
 
 int 
-putDebugCharReady()
+putDebugCharReady (void)
 {
   return (SSR1 & SCI_TDRE);
 }

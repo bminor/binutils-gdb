@@ -123,8 +123,7 @@ static int codestream_cnt;
 			 codestream_fill(0) : codestream_buf[codestream_off++])
 
 static unsigned char
-codestream_fill (peek_flag)
-     int peek_flag;
+codestream_fill (int peek_flag)
 {
   codestream_addr = codestream_next_addr;
   codestream_next_addr += CODESTREAM_BUFSIZ;
@@ -139,8 +138,7 @@ codestream_fill (peek_flag)
 }
 
 static void
-codestream_seek (place)
-     CORE_ADDR place;
+codestream_seek (CORE_ADDR place)
 {
   codestream_next_addr = place / CODESTREAM_BUFSIZ;
   codestream_next_addr *= CODESTREAM_BUFSIZ;
@@ -151,9 +149,7 @@ codestream_seek (place)
 }
 
 static void
-codestream_read (buf, count)
-     unsigned char *buf;
-     int count;
+codestream_read (unsigned char *buf, int count)
 {
   unsigned char *p;
   int i;
@@ -165,7 +161,7 @@ codestream_read (buf, count)
 /* next instruction is a jump, move to target */
 
 static void
-i386_follow_jump ()
+i386_follow_jump (void)
 {
   unsigned char buf[4];
   long delta;
@@ -223,8 +219,7 @@ i386_follow_jump ()
  */
 
 static long
-i386_get_frame_setup (pc)
-     CORE_ADDR pc;
+i386_get_frame_setup (CORE_ADDR pc)
 {
   unsigned char op;
 
@@ -375,8 +370,7 @@ i386_get_frame_setup (pc)
    Can return -1, meaning no way to tell.  */
 
 int
-i386_frame_num_args (fi)
-     struct frame_info *fi;
+i386_frame_num_args (struct frame_info *fi)
 {
 #if 1
   return -1;
@@ -477,8 +471,7 @@ i386_frame_num_args (fi)
  */
 
 void
-i386_frame_init_saved_regs (fip)
-     struct frame_info *fip;
+i386_frame_init_saved_regs (struct frame_info *fip)
 {
   long locals = -1;
   unsigned char op;
@@ -539,8 +532,7 @@ i386_frame_init_saved_regs (fip)
 /* return pc of first real instruction */
 
 int
-i386_skip_prologue (pc)
-     int pc;
+i386_skip_prologue (int pc)
 {
   unsigned char op;
   int i;
@@ -621,7 +613,7 @@ i386_skip_prologue (pc)
 }
 
 void
-i386_push_dummy_frame ()
+i386_push_dummy_frame (void)
 {
   CORE_ADDR sp = read_register (SP_REGNUM);
   int regnum;
@@ -659,7 +651,7 @@ i386_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 }
 
 void
-i386_pop_frame ()
+i386_pop_frame (void)
 {
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR fp;
@@ -694,8 +686,7 @@ i386_pop_frame ()
    This routine returns true on success. */
 
 int
-get_longjmp_target (pc)
-     CORE_ADDR *pc;
+get_longjmp_target (CORE_ADDR *pc)
 {
   char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
   CORE_ADDR sp, jb_addr;
@@ -814,8 +805,7 @@ i386_register_convert_to_raw (struct type *type, int regnum,
    for all three variants of SVR4 sigtramps.  */
 
 CORE_ADDR
-i386v4_sigtramp_saved_pc (frame)
-     struct frame_info *frame;
+i386v4_sigtramp_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR saved_pc_offset = 4;
   char *name = NULL;
@@ -843,8 +833,7 @@ i386v4_sigtramp_saved_pc (frame)
    it is done for C too.  */
 
 char *
-sunpro_static_transform_name (name)
-     char *name;
+sunpro_static_transform_name (char *name)
 {
   char *p;
   if (IS_STATIC_TRANSFORM_NAME (name))
@@ -869,9 +858,7 @@ sunpro_static_transform_name (name)
 /* Stuff for WIN32 PE style DLL's but is pretty generic really. */
 
 CORE_ADDR
-skip_trampoline_code (pc, name)
-     CORE_ADDR pc;
-     char *name;
+skip_trampoline_code (CORE_ADDR pc, char *name)
 {
   if (pc && read_memory_unsigned_integer (pc, 2) == 0x25ff)	/* jmp *(dest) */
     {
@@ -891,9 +878,7 @@ skip_trampoline_code (pc, name)
 }
 
 static int
-gdb_print_insn_i386 (memaddr, info)
-     bfd_vma memaddr;
-     disassemble_info *info;
+gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
 {
   if (disassembly_flavor == att_flavor)
     return print_insn_i386_att (memaddr, info);
@@ -909,16 +894,14 @@ gdb_print_insn_i386 (memaddr, info)
    command, and does that.  */
 
 static void
-set_disassembly_flavor_sfunc (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_disassembly_flavor_sfunc (char *args, int from_tty,
+			      struct cmd_list_element *c)
 {
   set_disassembly_flavor ();
 }
 
 static void
-set_disassembly_flavor ()
+set_disassembly_flavor (void)
 {
   if (disassembly_flavor == att_flavor)
     set_architecture_from_arch_mach (bfd_arch_i386, bfd_mach_i386_i386);
@@ -928,7 +911,7 @@ set_disassembly_flavor ()
 
 
 void
-_initialize_i386_tdep ()
+_initialize_i386_tdep (void)
 {
   /* Initialize the table saying where each register starts in the
      register file.  */

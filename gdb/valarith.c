@@ -43,8 +43,7 @@ void _initialize_valarith (void);
 
 
 value_ptr
-value_add (arg1, arg2)
-     value_ptr arg1, arg2;
+value_add (value_ptr arg1, value_ptr arg2)
 {
   register value_ptr valint, valptr;
   register int len;
@@ -90,8 +89,7 @@ value_add (arg1, arg2)
 }
 
 value_ptr
-value_sub (arg1, arg2)
-     value_ptr arg1, arg2;
+value_sub (value_ptr arg1, value_ptr arg2)
 {
   struct type *type1, *type2;
   COERCE_NUMBER (arg1);
@@ -137,8 +135,7 @@ an integer nor a pointer of the same type.");
    verbosity is set, warn about invalid indices (but still use them). */
 
 value_ptr
-value_subscript (array, idx)
-     value_ptr array, idx;
+value_subscript (value_ptr array, value_ptr idx)
 {
   value_ptr bound;
   int c_style = current_language->c_style_arrays;
@@ -214,9 +211,7 @@ value_subscript (array, idx)
    to doubles, but no longer does.  */
 
 static value_ptr
-value_subscripted_rvalue (array, idx, lowerbound)
-     value_ptr array, idx;
-     int lowerbound;
+value_subscripted_rvalue (value_ptr array, value_ptr idx, int lowerbound)
 {
   struct type *array_type = check_typedef (VALUE_TYPE (array));
   struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
@@ -250,9 +245,7 @@ value_subscripted_rvalue (array, idx, lowerbound)
    For now, we do not overload the `=' operator.  */
 
 int
-binop_user_defined_p (op, arg1, arg2)
-     enum exp_opcode op;
-     value_ptr arg1, arg2;
+binop_user_defined_p (enum exp_opcode op, value_ptr arg1, value_ptr arg2)
 {
   struct type *type1, *type2;
   if (op == BINOP_ASSIGN || op == BINOP_CONCAT)
@@ -274,9 +267,7 @@ binop_user_defined_p (op, arg1, arg2)
    For now, we do not overload the `&' operator.  */
 
 int
-unop_user_defined_p (op, arg1)
-     enum exp_opcode op;
-     value_ptr arg1;
+unop_user_defined_p (enum exp_opcode op, value_ptr arg1)
 {
   struct type *type1;
   if (op == UNOP_ADDR)
@@ -303,10 +294,8 @@ unop_user_defined_p (op, arg1)
    unused.  */
 
 value_ptr
-value_x_binop (arg1, arg2, op, otherop, noside)
-     value_ptr arg1, arg2;
-     enum exp_opcode op, otherop;
-     enum noside noside;
+value_x_binop (value_ptr arg1, value_ptr arg2, enum exp_opcode op,
+	       enum exp_opcode otherop, enum noside noside)
 {
   value_ptr *argvec;
   char *ptr;
@@ -468,10 +457,7 @@ value_x_binop (arg1, arg2, op, otherop, noside)
    is legal for GNU C++).  */
 
 value_ptr
-value_x_unop (arg1, op, noside)
-     value_ptr arg1;
-     enum exp_opcode op;
-     enum noside noside;
+value_x_unop (value_ptr arg1, enum exp_opcode op, enum noside noside)
 {
   value_ptr *argvec;
   char *ptr, *mangle_ptr;
@@ -571,8 +557,7 @@ value_x_unop (arg1, op, noside)
  */
 
 value_ptr
-value_concat (arg1, arg2)
-     value_ptr arg1, arg2;
+value_concat (value_ptr arg1, value_ptr arg2)
 {
   register value_ptr inval1, inval2, outval = NULL;
   int inval1len, inval2len;
@@ -705,9 +690,7 @@ value_concat (arg1, arg2)
    use value_add or value_sub if you want to handle those possibilities.  */
 
 value_ptr
-value_binop (arg1, arg2, op)
-     value_ptr arg1, arg2;
-     enum exp_opcode op;
+value_binop (value_ptr arg1, value_ptr arg2, enum exp_opcode op)
 {
   register value_ptr val;
   struct type *type1, *type2;
@@ -1131,8 +1114,7 @@ value_binop (arg1, arg2, op)
 /* Simulate the C operator ! -- return 1 if ARG1 contains zero.  */
 
 int
-value_logical_not (arg1)
-     value_ptr arg1;
+value_logical_not (value_ptr arg1)
 {
   register int len;
   register char *p;
@@ -1160,8 +1142,7 @@ value_logical_not (arg1)
    necessarily null terminated) based on their length */
 
 static int
-value_strcmp (arg1, arg2)
-     register value_ptr arg1, arg2;
+value_strcmp (register value_ptr arg1, register value_ptr arg2)
 {
   int len1 = TYPE_LENGTH (VALUE_TYPE (arg1));
   int len2 = TYPE_LENGTH (VALUE_TYPE (arg2));
@@ -1191,9 +1172,7 @@ value_strcmp (arg1, arg2)
    iff ARG1 and ARG2 have equal contents.  */
 
 int
-value_equal (arg1, arg2)
-     register value_ptr arg1, arg2;
-
+value_equal (register value_ptr arg1, register value_ptr arg2)
 {
   register int len;
   register char *p1, *p2;
@@ -1252,8 +1231,7 @@ value_equal (arg1, arg2)
    iff ARG1's contents are less than ARG2's.  */
 
 int
-value_less (arg1, arg2)
-     register value_ptr arg1, arg2;
+value_less (register value_ptr arg1, register value_ptr arg2)
 {
   register enum type_code code1;
   register enum type_code code2;
@@ -1295,8 +1273,7 @@ value_less (arg1, arg2)
 /* The unary operators - and ~.  Both free the argument ARG1.  */
 
 value_ptr
-value_neg (arg1)
-     register value_ptr arg1;
+value_neg (register value_ptr arg1)
 {
   register struct type *type;
   register struct type *result_type = VALUE_TYPE (arg1);
@@ -1325,8 +1302,7 @@ value_neg (arg1)
 }
 
 value_ptr
-value_complement (arg1)
-     register value_ptr arg1;
+value_complement (register value_ptr arg1)
 {
   register struct type *type;
   register struct type *result_type = VALUE_TYPE (arg1);
@@ -1354,10 +1330,7 @@ value_complement (arg1)
    Return -1 if out of range, -2 other error. */
 
 int
-value_bit_index (type, valaddr, index)
-     struct type *type;
-     char *valaddr;
-     int index;
+value_bit_index (struct type *type, char *valaddr, int index)
 {
   LONGEST low_bound, high_bound;
   LONGEST word;
@@ -1377,8 +1350,7 @@ value_bit_index (type, valaddr, index)
 }
 
 value_ptr
-value_in (element, set)
-     value_ptr element, set;
+value_in (value_ptr element, value_ptr set)
 {
   int member;
   struct type *settype = check_typedef (VALUE_TYPE (set));
@@ -1400,6 +1372,6 @@ value_in (element, set)
 }
 
 void
-_initialize_valarith ()
+_initialize_valarith (void)
 {
 }

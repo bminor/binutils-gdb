@@ -141,8 +141,7 @@ static int reg_offset[] =
 
 /* Fech thread's registers. if regno == -1, fetch all regs */
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   kern_return_t ret;
 
@@ -296,8 +295,7 @@ fetch_inferior_registers (regno)
  */
 
 void
-store_inferior_registers (regno)
-     register int regno;
+store_inferior_registers (register int regno)
 {
   thread_state_data_t state;
   kern_return_t ret;

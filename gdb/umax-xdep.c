@@ -40,9 +40,7 @@
    This code would be in corefile.c if it weren't machine-dependent. */
 
 void
-core_file_command (filename, from_tty)
-     char *filename;
-     int from_tty;
+core_file_command (char *filename, int from_tty)
 {
   int val;
 

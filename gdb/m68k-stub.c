@@ -528,7 +528,7 @@ static char remcomOutBuffer[BUFMAX];
 /* scan for the sequence $<data>#<checksum>     */
   
 unsigned char *
-getpacket ()
+getpacket (void)
 {
   unsigned char *buffer = &remcomInBuffer[0];
   unsigned char checksum;
@@ -966,7 +966,7 @@ void handle_exception(int exceptionVector)
 
 
 void
-initializeRemcomErrorFrame()
+initializeRemcomErrorFrame (void)
 {
     lastFrame = ((Frame *) &gdbFrameStack[FRAMESIZE-1]) - 1;
     lastFrame->previous = lastFrame;

@@ -234,6 +234,6 @@ mi_parse (char *cmd)
 }
 
 void
-_initialize_mi_parse ()
+_initialize_mi_parse (void)
 {
 }

@@ -130,8 +130,7 @@ static int last_source_error = 0;
    before we need to would make things slower than necessary.  */
 
 void
-select_source_symtab (s)
-     register struct symtab *s;
+select_source_symtab (register struct symtab *s)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -213,9 +212,7 @@ select_source_symtab (s)
 }
 
 static void
-show_directories (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+show_directories (char *ignore, int from_tty)
 {
   puts_filtered ("Source directories searched: ");
   puts_filtered (source_path);
@@ -227,7 +224,7 @@ show_directories (ignore, from_tty)
    may be found in a different directory now.  */
 
 void
-forget_cached_source_info ()
+forget_cached_source_info (void)
 {
   register struct symtab *s;
   register struct objfile *objfile;
@@ -251,7 +248,7 @@ forget_cached_source_info ()
 }
 
 void
-init_source_path ()
+init_source_path (void)
 {
   char buf[20];
 
@@ -263,9 +260,7 @@ init_source_path ()
 /* Add zero or more directories to the front of the source path.  */
 
 void
-directory_command (dirname, from_tty)
-     char *dirname;
-     int from_tty;
+directory_command (char *dirname, int from_tty)
 {
   dont_repeat ();
   /* FIXME, this goes to "delete dir"... */
@@ -290,9 +285,7 @@ directory_command (dirname, from_tty)
 /* Add zero or more directories to the front of an arbitrary path.  */
 
 void
-mod_path (dirname, which_path)
-     char *dirname;
-     char **which_path;
+mod_path (char *dirname, char **which_path)
 {
   char *old = *which_path;
   int prefix = 0;
@@ -472,9 +465,7 @@ mod_path (dirname, which_path)
 
 
 static void
-source_info (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+source_info (char *ignore, int from_tty)
 {
   register struct symtab *s = current_source_symtab;
 
@@ -519,13 +510,8 @@ source_info (ignore, from_tty)
 /*  >>>> This should only allow files of certain types,
    >>>>  eg executable, non-directory */
 int
-openp (path, try_cwd_first, string, mode, prot, filename_opened)
-     char *path;
-     int try_cwd_first;
-     char *string;
-     int mode;
-     int prot;
-     char **filename_opened;
+openp (char *path, int try_cwd_first, char *string, int mode, int prot,
+       char **filename_opened)
 {
   register int fd;
   register char *filename;
@@ -653,9 +639,7 @@ done:
    Else, this functions returns 0, and FULL_PATHNAME is set to NULL.
  */
 int
-source_full_path_of (filename, full_pathname)
-     char *filename;
-     char **full_pathname;
+source_full_path_of (char *filename, char **full_pathname)
 {
   int fd;
 
@@ -675,8 +659,7 @@ source_full_path_of (filename, full_pathname)
    negative number for error.  */
 
 int
-open_source_file (s)
-     struct symtab *s;
+open_source_file (struct symtab *s)
 {
   char *path = source_path;
   char *p;
@@ -753,8 +736,7 @@ open_source_file (s)
    if no symtab.  */
 
 char *
-symtab_to_filename (s)
-     struct symtab *s;
+symtab_to_filename (struct symtab *s)
 {
   int fd;
 
@@ -785,9 +767,7 @@ symtab_to_filename (s)
    All set S->nlines to the number of such lines.  */
 
 void
-find_source_lines (s, desc)
-     struct symtab *s;
-     int desc;
+find_source_lines (struct symtab *s, int desc)
 {
   struct stat st;
   register char *data, *p, *end;
@@ -890,9 +870,7 @@ find_source_lines (s, desc)
 #if 0				/* Currently unused */
 
 int
-source_line_charpos (s, line)
-     struct symtab *s;
-     int line;
+source_line_charpos (struct symtab *s, int line)
 {
   if (!s)
     return 0;
@@ -906,9 +884,7 @@ source_line_charpos (s, line)
 /* Return the line number of character position POS in symtab S.  */
 
 int
-source_charpos_line (s, chr)
-     register struct symtab *s;
-     register int chr;
+source_charpos_line (register struct symtab *s, register int chr)
 {
   register int line = 0;
   register int *lnp;
@@ -936,9 +912,7 @@ source_charpos_line (s, chr)
    or to 0 if the file is not found.  */
 
 static int
-get_filename_and_charpos (s, fullname)
-     struct symtab *s;
-     char **fullname;
+get_filename_and_charpos (struct symtab *s, char **fullname)
 {
   register int desc, linenums_changed = 0;
 
@@ -969,11 +943,8 @@ get_filename_and_charpos (s, fullname)
    Return 1 if successful, 0 if could not find the file.  */
 
 int
-identify_source_line (s, line, mid_statement, pc)
-     struct symtab *s;
-     int line;
-     int mid_statement;
-     CORE_ADDR pc;
+identify_source_line (struct symtab *s, int line, int mid_statement,
+		      CORE_ADDR pc)
 {
   if (s->line_charpos == 0)
     get_filename_and_charpos (s, (char **) NULL);
@@ -999,11 +970,7 @@ identify_source_line (s, line, mid_statement, pc)
 static void print_source_lines_base (struct symtab *s, int line, int stopline,
 				     int noerror);
 static void
-print_source_lines_base (s, line, stopline, noerror)
-     struct symtab *s;
-     int line;
-     int stopline;
-     int noerror;
+print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 {
   register int c;
   register int desc;
@@ -1157,9 +1124,7 @@ print_source_lines_base (s, line, stopline, noerror)
    window otherwise it is simply printed */
 
 void
-print_source_lines (s, line, stopline, noerror)
-     struct symtab *s;
-     int line, stopline, noerror;
+print_source_lines (struct symtab *s, int line, int stopline, int noerror)
 {
 #if defined(TUI)
   if (!tui_version ||
@@ -1196,8 +1161,7 @@ extern void tui_vUpdateSourceWindowsWithLine (va_list);
    SALS provides the filenames and line numbers.  */
 
 static void
-ambiguous_line_spec (sals)
-     struct symtabs_and_lines *sals;
+ambiguous_line_spec (struct symtabs_and_lines *sals)
 {
   int i;
 
@@ -1207,9 +1171,7 @@ ambiguous_line_spec (sals)
 }
 
 static void
-list_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+list_command (char *arg, int from_tty)
 {
   struct symtabs_and_lines sals, sals_end;
   struct symtab_and_line sal, sal_end;
@@ -1387,9 +1349,7 @@ list_command (arg, from_tty)
 /* Print info on range of pc's in a specified line.  */
 
 static void
-line_info (arg, from_tty)
-     char *arg;
-     int from_tty;
+line_info (char *arg, int from_tty)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
@@ -1487,9 +1447,7 @@ line_info (arg, from_tty)
 
 /* ARGSUSED */
 static void
-forward_search_command (regex, from_tty)
-     char *regex;
-     int from_tty;
+forward_search_command (char *regex, int from_tty)
 {
   register int c;
   register int desc;
@@ -1609,9 +1567,7 @@ forward_search_command (regex, from_tty)
 
 /* ARGSUSED */
 static void
-reverse_search_command (regex, from_tty)
-     char *regex;
-     int from_tty;
+reverse_search_command (char *regex, int from_tty)
 {
   register int c;
   register int desc;
@@ -1724,7 +1680,7 @@ reverse_search_command (regex, from_tty)
 }
 
 void
-_initialize_source ()
+_initialize_source (void)
 {
   struct cmd_list_element *c;
   current_source_symtab = 0;

@@ -145,8 +145,7 @@ static char *pa64_debug_section_names[] = {
 /* Return a ballbark figure for the amount of memory GDB will need to
    allocate to read in the debug symbols from FILENAME.  */
 static LONGEST
-pa64_solib_sizeof_symbol_table (filename)
-     char *filename;
+pa64_solib_sizeof_symbol_table (char *filename)
 {
   bfd *abfd;
   int i;
@@ -216,11 +215,8 @@ pa64_solib_sizeof_symbol_table (filename)
 /* Add a shared library to the objfile list and load its symbols into
    GDB's symbol table.  */
 static void
-pa64_solib_add_solib_objfile (so, name, from_tty, text_addr)
-     struct so_list *so;
-     char *name;
-     int from_tty;
-     CORE_ADDR text_addr;
+pa64_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
+			      CORE_ADDR text_addr)
 {
   bfd *tmp_bfd;
   asection *sec;
@@ -298,12 +294,8 @@ pa64_solib_add_solib_objfile (so, name, from_tty, text_addr)
    NULL if we are not attaching to a process or reading a core file.  */
 
 static void
-pa64_solib_load_symbols (so, name, from_tty, text_addr, target)
-     struct so_list *so;
-     char *name;
-     int from_tty;
-     CORE_ADDR text_addr;
-     struct target_ops *target;
+pa64_solib_load_symbols (struct so_list *so, char *name, int from_tty,
+			 CORE_ADDR text_addr, struct target_ops *target)
 {
   struct section_table *p;
   asection *sec;
@@ -379,10 +371,7 @@ pa64_solib_load_symbols (so, name, from_tty, text_addr, target)
    be exceeded.  */
 
 void
-pa64_solib_add (arg_string, from_tty, target)
-     char *arg_string;
-     int from_tty;
-     struct target_ops *target;
+pa64_solib_add (char *arg_string, int from_tty, struct target_ops *target)
 {
   struct minimal_symbol *msymbol;
   CORE_ADDR addr;
@@ -471,7 +460,7 @@ pa64_solib_add (arg_string, from_tty, target)
      call the breakpoint routine for significant events.  */
 
 void
-pa64_solib_create_inferior_hook ()
+pa64_solib_create_inferior_hook (void)
 {
   struct minimal_symbol *msymbol;
   unsigned int dld_flags, status;
@@ -601,8 +590,7 @@ get_out:
    GDB may already have been notified of.  */
 
 void
-pa64_solib_remove_inferior_hook (pid)
-     int pid;
+pa64_solib_remove_inferior_hook (int pid)
 {
   /* Turn off the DT_HP_DEBUG_CALLBACK bit in the dynamic linker flags.  */
   dld_cache.dld_flags &= ~DT_HP_DEBUG_CALLBACK;
@@ -623,11 +611,8 @@ pa64_solib_remove_inferior_hook (pid)
    pa64_solib_create_inferior_hook.  */
 
 void
-pa64_solib_create_catch_load_hook (pid, tempflag, filename, cond_string)
-     int pid;
-     int tempflag;
-     char *filename;
-     char *cond_string;
+pa64_solib_create_catch_load_hook (int pid, int tempflag, char *filename,
+				   char *cond_string)
 {
   create_solib_load_event_breakpoint ("", tempflag, filename, cond_string);
 }
@@ -644,11 +629,8 @@ pa64_solib_create_catch_load_hook (pid, tempflag, filename, cond_string)
    pa64_solib_create_inferior_hook.  */
 
 void
-pa64_solib_create_catch_unload_hook (pid, tempflag, filename, cond_string)
-     int pid;
-     int tempflag;
-     char *filename;
-     char *cond_string;
+pa64_solib_create_catch_unload_hook (int pid, int tempflag, char *filename,
+				     char *cond_string)
 {
   create_solib_unload_event_breakpoint ("", tempflag, filename, cond_string);
 }
@@ -657,8 +639,7 @@ pa64_solib_create_catch_unload_hook (pid, tempflag, filename, cond_string)
    has been loaded.  */
 
 int
-pa64_solib_have_load_event (pid)
-     int pid;
+pa64_solib_have_load_event (int pid)
 {
   CORE_ADDR event_kind;
 
@@ -669,8 +650,7 @@ pa64_solib_have_load_event (pid)
 /* Return nonzero if the dynamic linker has reproted that a library
    has been unloaded.  */
 int
-pa64_solib_have_unload_event (pid)
-     int pid;
+pa64_solib_have_unload_event (int pid)
 {
   CORE_ADDR event_kind;
 
@@ -685,8 +665,7 @@ pa64_solib_have_unload_event (pid)
    restarted.  */
 
 char *
-pa64_solib_loaded_library_pathname (pid)
-     int pid;
+pa64_solib_loaded_library_pathname (int pid)
 {
   static char dll_path[MAXPATHLEN];
   CORE_ADDR  dll_path_addr = read_register (ARG3_REGNUM);
@@ -701,8 +680,7 @@ pa64_solib_loaded_library_pathname (pid)
    restarted.  */
 
 char *
-pa64_solib_unloaded_library_pathname (pid)
-     int pid;
+pa64_solib_unloaded_library_pathname (int pid)
 {
   static char dll_path[MAXPATHLEN];
   CORE_ADDR dll_path_addr = read_register (ARG3_REGNUM);
@@ -713,9 +691,7 @@ pa64_solib_unloaded_library_pathname (pid)
 /* Return nonzero if PC is an address inside the dynamic linker.  */
 
 int
-pa64_solib_in_dynamic_linker (pid, pc)
-     int pid;
-     CORE_ADDR pc;
+pa64_solib_in_dynamic_linker (int pid, CORE_ADDR pc)
 {
   asection *shlib_info;
 
@@ -735,8 +711,7 @@ pa64_solib_in_dynamic_linker (pid, pc)
    ADDR isn't in any known shared library, return zero.  */
 
 CORE_ADDR
-pa64_solib_get_got_by_pc (addr)
-     CORE_ADDR addr;
+pa64_solib_get_got_by_pc (CORE_ADDR addr)
 {
   struct so_list *so_list = so_list_head;
   CORE_ADDR got_value = 0;
@@ -762,8 +737,7 @@ pa64_solib_get_got_by_pc (addr)
    This function is used in hppa_fix_call_dummy in hppa-tdep.c.  */
 
 CORE_ADDR
-pa64_solib_get_solib_by_pc (addr)
-     CORE_ADDR addr;
+pa64_solib_get_solib_by_pc (CORE_ADDR addr)
 {
   struct so_list *so_list = so_list_head;
   CORE_ADDR retval = 0;
@@ -786,9 +760,7 @@ pa64_solib_get_solib_by_pc (addr)
 /* Dump information about all the currently loaded shared libraries.  */
 
 static void
-pa64_sharedlibrary_info_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+pa64_sharedlibrary_info_command (char *ignore, int from_tty)
 {
   struct so_list *so_list = so_list_head;
 
@@ -842,9 +814,7 @@ pa64_sharedlibrary_info_command (ignore, from_tty)
 /* Load up one or more shared libraries as directed by the user.  */
 
 static void
-pa64_solib_sharedlibrary_command (args, from_tty)
-     char *args;
-     int from_tty;
+pa64_solib_sharedlibrary_command (char *args, int from_tty)
 {
   dont_repeat ();
   pa64_solib_add (args, from_tty, (struct target_ops *) 0);
@@ -854,8 +824,7 @@ pa64_solib_sharedlibrary_command (args, from_tty)
    is not contained in any known shared library.  */
 
 char *
-pa64_solib_address (addr)
-     CORE_ADDR addr;
+pa64_solib_address (CORE_ADDR addr)
 {
   struct so_list *so = so_list_head;
 
@@ -879,7 +848,7 @@ pa64_solib_address (addr)
 /* We are killing the inferior and restarting the program.  */
 
 void
-pa64_solib_restart ()
+pa64_solib_restart (void)
 {
   struct so_list *sl = so_list_head;
 
@@ -910,7 +879,7 @@ pa64_solib_restart ()
 }
 
 void
-_initialize_pa64_solib ()
+_initialize_pa64_solib (void)
 {
   add_com ("sharedlibrary", class_files, pa64_solib_sharedlibrary_command,
 	   "Load shared object library symbols for files matching REGEXP.");
@@ -944,8 +913,7 @@ Otherwise, symbols must be loaded manually, using `sharedlibrary'.",
 
 /* Get some HPUX-specific data from a shared lib.  */
 CORE_ADDR
-so_lib_thread_start_addr (so)
-     struct so_list *so;
+so_lib_thread_start_addr (struct so_list *so)
 {
   return so->pa64_solib_desc.tls_start_addr;
 }
@@ -958,8 +926,7 @@ so_lib_thread_start_addr (so)
    return nonzero.  */
 
 static boolean
-read_dld_descriptor (target)
-     struct target_ops *target;
+read_dld_descriptor (struct target_ops *target)
 {
   char *dll_path;
   asection *dyninfo_sect;
@@ -1028,9 +995,7 @@ read_dld_descriptor (target)
    was used as a model for this.  */
 
 static boolean
-read_dynamic_info (dyninfo_sect, dld_cache_p)
-     asection *dyninfo_sect;
-     dld_cache_t *dld_cache_p;
+read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p)
 {
   char *buf;
   char *bufend;
@@ -1111,11 +1076,7 @@ read_dynamic_info (dyninfo_sect, dld_cache_p)
 /* Wrapper for target_read_memory to make dlgetmodinfo happy.  */
 
 static void *
-pa64_target_read_memory (buffer, ptr, bufsiz, ident)
-     void *buffer;
-     CORE_ADDR ptr;
-     size_t bufsiz;
-     int ident;
+pa64_target_read_memory (void *buffer, CORE_ADDR ptr, size_t bufsiz, int ident)
 {
   if (target_read_memory (ptr, buffer, bufsiz) != 0)
     return 0;
@@ -1130,13 +1091,9 @@ pa64_target_read_memory (buffer, ptr, bufsiz, ident)
    be read from the inferior process at the address load_module_desc_addr.  */
 
 static void
-add_to_solist (from_tty, dll_path, load_module_desc_p,
-	       load_module_desc_addr, target)
-     boolean from_tty; 
-     char *dll_path; 
-     struct load_module_desc *load_module_desc_p;
-     CORE_ADDR load_module_desc_addr;
-     struct target_ops *target;
+add_to_solist (boolean from_tty, char *dll_path,
+	       struct load_module_desc *load_module_desc_p,
+	       CORE_ADDR load_module_desc_addr, struct target_ops *target)
 {
   struct so_list *new_so, *so_list_tail;
   int pa64_solib_st_size_threshhold_exceeded;
@@ -1239,9 +1196,7 @@ add_to_solist (from_tty, dll_path, load_module_desc_p,
  */
 
 static CORE_ADDR
-bfd_lookup_symbol (abfd, symname)
-     bfd *abfd;
-     char *symname;
+bfd_lookup_symbol (bfd *abfd, char *symname)
 {
   unsigned int storage_needed;
   asymbol *sym;

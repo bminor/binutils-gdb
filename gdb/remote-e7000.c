@@ -148,8 +148,7 @@ static int timeout = 20;
 /* Send data to e7000debug.  */
 
 static void
-puts_e7000debug (buf)
-     char *buf;
+puts_e7000debug (char *buf)
 {
   if (!e7000_desc)
     error ("Use \"target e7000 ...\" first.");
@@ -168,8 +167,7 @@ puts_e7000debug (buf)
 }
 
 static void
-putchar_e7000 (x)
-     int x;
+putchar_e7000 (int x)
 {
   char b[1];
 
@@ -178,15 +176,13 @@ putchar_e7000 (x)
 }
 
 static void
-write_e7000 (s)
-     char *s;
+write_e7000 (char *s)
 {
   SERIAL_WRITE (e7000_desc, s, strlen (s));
 }
 
 static int
-normal (x)
-     int x;
+normal (int x)
 {
   if (x == '\n')
     return '\r';
@@ -198,8 +194,7 @@ normal (x)
    returns -1, else returns next char.  Discards chars > 127.  */
 
 static int
-readchar (timeout)
-     int timeout;
+readchar (int timeout)
 {
   int c;
 
@@ -230,7 +225,7 @@ readchar (timeout)
 
 #if 0
 char *
-tl (x)
+tl (int x)
 {
   static char b[8][10];
   static int p;
@@ -256,8 +251,7 @@ tl (x)
    out.  Let the user break out immediately.  */
 
 static void
-expect (string)
-     char *string;
+expect (char *string)
 {
   char *p = string;
   int c;
@@ -327,20 +321,19 @@ expect (string)
    into states from which we can't recover.  */
 
 static void
-expect_prompt ()
+expect_prompt (void)
 {
   expect (":");
 }
 
 static void
-expect_full_prompt ()
+expect_full_prompt (void)
 {
   expect ("\r:");
 }
 
 static int
-convert_hex_digit (ch)
-     int ch;
+convert_hex_digit (int ch)
 {
   if (ch >= '0' && ch <= '9')
     return ch - '0';
@@ -352,8 +345,7 @@ convert_hex_digit (ch)
 }
 
 static int
-get_hex (start)
-     int *start;
+get_hex (int *start)
 {
   int value = convert_hex_digit (*start);
   int try;
@@ -373,9 +365,7 @@ get_hex (start)
    them in registers starting at REGNO.  */
 
 static void
-get_hex_regs (n, regno)
-     int n;
-     int regno;
+get_hex_regs (int n, int regno)
 {
   long val;
   int i;
@@ -396,10 +386,7 @@ get_hex_regs (n, regno)
    user types "run" after having attached.  */
 
 static void
-e7000_create_inferior (execfile, args, env)
-     char *execfile;
-     char *args;
-     char **env;
+e7000_create_inferior (char *execfile, char *args, char **env)
 {
   int entry_pt;
 
@@ -448,8 +435,7 @@ static char *dir = "";
 /* Grab the next token and buy some space for it */
 
 static char *
-next (ptr)
-     char **ptr;
+next (char **ptr)
 {
   char *p = *ptr;
   char *s;
@@ -472,9 +458,7 @@ next (ptr)
 }
 
 static void
-e7000_login_command (args, from_tty)
-     char *args;
-     int from_tty;
+e7000_login_command (char *args, int from_tty)
 {
   if (args)
     {
@@ -496,9 +480,7 @@ e7000_login_command (args, from_tty)
 /* Start an ftp transfer from the E7000 to a host */
 
 static void
-e7000_ftp_command (args, from_tty)
-     char *args;
-     int from_tty;
+e7000_ftp_command (char *args, int from_tty)
 {
   /* FIXME: arbitrary limit on machine names and such.  */
   char buf[200];
@@ -528,10 +510,7 @@ e7000_ftp_command (args, from_tty)
 }
 
 static int
-e7000_parse_device (args, dev_name, baudrate)
-     char *args;
-     char *dev_name;
-     int baudrate;
+e7000_parse_device (char *args, char *dev_name, int baudrate)
 {
   char junk[128];
   int n = 0;
@@ -583,8 +562,7 @@ or \t\ttarget e7000 pc\n");
 /* Stub for catch_errors.  */
 
 static int
-e7000_start_remote (dummy)
-     char *dummy;
+e7000_start_remote (char *dummy)
 {
   int loop;
   int sync;
@@ -674,9 +652,7 @@ e7000_start_remote (dummy)
 }
 
 static void
-e7000_open (args, from_tty)
-     char *args;
-     int from_tty;
+e7000_open (char *args, int from_tty)
 {
   int n;
 
@@ -711,8 +687,7 @@ e7000_open (args, from_tty)
 /* Close out all files and local state before this target loses control. */
 
 static void
-e7000_close (quitting)
-     int quitting;
+e7000_close (int quitting)
 {
   if (e7000_desc)
     {
@@ -725,8 +700,7 @@ e7000_close (quitting)
    when you want to detach and do something else with your gdb.  */
 
 static void
-e7000_detach (from_tty)
-     int from_tty;
+e7000_detach (int from_tty)
 {
   pop_target ();		/* calls e7000_close to do the real work */
   if (from_tty)
@@ -736,8 +710,7 @@ e7000_detach (from_tty)
 /* Tell the remote machine to resume.  */
 
 static void
-e7000_resume (pid, step, sig)
-     int pid, step, sig;
+e7000_resume (int pid, int step, int sig)
 {
   if (step)
     puts_e7000debug ("S\r");
@@ -807,13 +780,13 @@ char *want_nopc_sh3 = "%16 SR=%22\n\
  R4_BANK1-R7_BANK1 %37 %38 %39 %40";
 
 static int
-gch ()
+gch (void)
 {
   return readchar (timeout);
 }
 
 static unsigned int
-gbyte ()
+gbyte (void)
 {
   int high = convert_hex_digit (gch ());
   int low = convert_hex_digit (gch ());
@@ -930,7 +903,7 @@ fetch_regs_from_dump (nextchar, want)
 }
 
 static void
-e7000_fetch_registers ()
+e7000_fetch_registers (void)
 {
   int regno;
   char *wanted;
@@ -973,8 +946,7 @@ e7000_fetch_registers ()
    errno value.  */
 
 static void
-e7000_fetch_register (regno)
-     int regno;
+e7000_fetch_register (int regno)
 {
   e7000_fetch_registers ();
 }
@@ -982,7 +954,7 @@ e7000_fetch_register (regno)
 /* Store the remote registers from the contents of the block REGS.  */
 
 static void
-e7000_store_registers ()
+e7000_store_registers (void)
 {
   int regno;
 
@@ -995,8 +967,7 @@ e7000_store_registers ()
 /* Store register REGNO, or all if REGNO == 0.  Return errno value.  */
 
 static void
-e7000_store_register (regno)
-     int regno;
+e7000_store_register (int regno)
 {
   char buf[200];
 
@@ -1087,21 +1058,19 @@ e7000_store_register (regno)
    debugged.  */
 
 static void
-e7000_prepare_to_store ()
+e7000_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
 
 static void
-e7000_files_info ()
+e7000_files_info (void)
 {
   printf_unfiltered ("\tAttached to %s at %d baud.\n", dev_name, baudrate);
 }
 
 static int
-stickbyte (where, what)
-     char *where;
-     unsigned int what;
+stickbyte (char *where, unsigned int what)
 {
   static CONST char digs[] = "0123456789ABCDEF";
 
@@ -1114,10 +1083,7 @@ stickbyte (where, what)
 /* Write a small ammount of memory. */
 
 static int
-write_small (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     unsigned char *myaddr;
-     int len;
+write_small (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   int i;
   char buf[200];
@@ -1161,10 +1127,7 @@ write_small (memaddr, myaddr, len)
  */
 
 static int
-write_large (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     unsigned char *myaddr;
-     int len;
+write_large (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   int i;
 #define maxstride  128
@@ -1258,10 +1221,7 @@ write_large (memaddr, myaddr, len)
    then.  */
 
 static int
-e7000_write_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     unsigned char *myaddr;
-     int len;
+e7000_write_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   if (len < 16 || using_tcp || using_pc)
     return write_small (memaddr, myaddr, len);
@@ -1279,10 +1239,7 @@ e7000_write_inferior_memory (memaddr, myaddr, len)
  */
 
 static int
-e7000_read_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     unsigned char *myaddr;
-     int len;
+e7000_read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   int count;
   int c;
@@ -1361,10 +1318,8 @@ e7000_read_inferior_memory (memaddr, myaddr, len)
  */
 
 static int
-e7000_read_inferior_memory_large (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     unsigned char *myaddr;
-     int len;
+e7000_read_inferior_memory_large (CORE_ADDR memaddr, unsigned char *myaddr,
+				  int len)
 {
   int count;
   int c;
@@ -1426,10 +1381,8 @@ e7000_read_inferior_memory_large (memaddr, myaddr, len)
 #if 0
 
 static int
-fast_but_for_the_pause_e7000_read_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+fast_but_for_the_pause_e7000_read_inferior_memory (CORE_ADDR memaddr,
+						   char *myaddr, int len)
 {
   int loop;
   int c;
@@ -1532,16 +1485,12 @@ e7000_xfer_inferior_memory (memaddr, myaddr, len, write, target)
 }
 
 static void
-e7000_kill (args, from_tty)
-     char *args;
-     int from_tty;
+e7000_kill (char *args, int from_tty)
 {
 }
 
 static void
-e7000_load (args, from_tty)
-     char *args;
-     int from_tty;
+e7000_load (char *args, int from_tty)
 {
   struct cleanup *old_chain;
   asection *section;
@@ -1727,7 +1676,7 @@ e7000_load (args, from_tty)
    instructions.  */
 
 static void
-e7000_mourn_inferior ()
+e7000_mourn_inferior (void)
 {
   remove_breakpoints ();
   unpush_target (&e7000_ops);
@@ -1747,9 +1696,7 @@ static CORE_ADDR breakaddr[MAX_BREAKPOINTS] =
 {0};
 
 static int
-e7000_insert_breakpoint (addr, shadow)
-     CORE_ADDR addr;
-     unsigned char *shadow;
+e7000_insert_breakpoint (CORE_ADDR addr, unsigned char *shadow)
 {
   int i;
   char buf[200];
@@ -1792,9 +1739,7 @@ e7000_insert_breakpoint (addr, shadow)
 }
 
 static int
-e7000_remove_breakpoint (addr, shadow)
-     CORE_ADDR addr;
-     unsigned char *shadow;
+e7000_remove_breakpoint (CORE_ADDR addr, unsigned char *shadow)
 {
   int i;
   char buf[200];
@@ -1837,9 +1782,7 @@ e7000_remove_breakpoint (addr, shadow)
    is placed on the users terminal until the prompt is seen. */
 
 static void
-e7000_command (args, fromtty)
-     char *args;
-     int fromtty;
+e7000_command (char *args, int fromtty)
 {
   /* FIXME: arbitrary limit on length of args.  */
   char buf[200];
@@ -1871,10 +1814,7 @@ e7000_command (args, fromtty)
 
 
 static void
-e7000_drain_command (args, fromtty)
-     char *args;
-     int fromtty;
-
+e7000_drain_command (char *args, int fromtty)
 {
   int c;
 
@@ -1898,7 +1838,7 @@ e7000_drain_command (args, fromtty)
 #define NITEMS 7
 
 static int
-why_stop ()
+why_stop (void)
 {
   static char *strings[NITEMS] =
   {
@@ -1943,8 +1883,7 @@ why_stop ()
    otherwise echo them.  */
 
 int
-expect_n (strings)
-     char **strings;
+expect_n (char **strings)
 {
   char *(ptr[10]);
   int n;
@@ -2028,7 +1967,7 @@ expect_n (strings)
    pc, and the simulators never do. */
 
 static void
-sub2_from_pc ()
+sub2_from_pc (void)
 {
   char buf[4];
   char buf2[200];
@@ -2059,9 +1998,7 @@ static char *estrings[] =
    STATUS just as `wait' would.  */
 
 static int
-e7000_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+e7000_wait (int pid, struct target_waitstatus *status)
 {
   int stop_reason;
   int regno;
@@ -2189,7 +2126,7 @@ e7000_wait (pid, status)
 /* Stop the running program.  */
 
 static void
-e7000_stop ()
+e7000_stop (void)
 {
   /* Sending a ^C is supposed to stop the running program.  */
   putchar_e7000 (CTRLC);
@@ -2274,7 +2211,7 @@ target e7000 foobar";
 };
 
 void
-_initialize_remote_e7000 ()
+_initialize_remote_e7000 (void)
 {
   init_e7000_ops ();
   add_target (&e7000_ops);

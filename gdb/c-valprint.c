@@ -44,17 +44,9 @@
    The PRETTY parameter controls prettyprinting.  */
 
 int
-c_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref, recurse,
-	     pretty)
-     struct type *type;
-     char *valaddr;
-     int embedded_offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+c_val_print (struct type *type, char *valaddr, int embedded_offset,
+	     CORE_ADDR address, struct ui_file *stream, int format,
+	     int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   register unsigned int i = 0;	/* Number of characters printed */
   unsigned len;
@@ -454,11 +446,8 @@ c_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
 }
 
 int
-c_value_print (val, stream, format, pretty)
-     value_ptr val;
-     struct ui_file *stream;
-     int format;
-     enum val_prettyprint pretty;
+c_value_print (value_ptr val, struct ui_file *stream, int format,
+	       enum val_prettyprint pretty)
 {
   struct type *type = VALUE_TYPE (val);
   struct type *real_type;

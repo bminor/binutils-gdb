@@ -145,9 +145,7 @@ add_cmd (name, class, fun, doc, list)
    Returns a pointer to the deprecated command.  */
 
 struct cmd_list_element *
-deprecate_cmd (cmd, replacement)
-     struct cmd_list_element *cmd;
-     char *replacement;
+deprecate_cmd (struct cmd_list_element *cmd, char *replacement)
 {
   cmd->flags |= (CMD_DEPRECATED | DEPRECATED_WARN_USER);
 
@@ -182,12 +180,8 @@ add_abbrev_cmd (name, class, fun, doc, list)
 #endif
 
 struct cmd_list_element *
-add_alias_cmd (name, oldname, class, abbrev_flag, list)
-     char *name;
-     char *oldname;
-     enum command_class class;
-     int abbrev_flag;
-     struct cmd_list_element **list;
+add_alias_cmd (char *name, char *oldname, enum command_class class,
+	       int abbrev_flag, struct cmd_list_element **list)
 {
   /* Must do this since lookup_cmd tries to side-effect its first arg */
   char *copied_name;
@@ -260,9 +254,7 @@ add_abbrev_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
 
 /* This is an empty "cfunc".  */
 void
-not_just_help_class_command (args, from_tty)
-     char *args;
-     int from_tty;
+not_just_help_class_command (char *args, int from_tty)
 {
 }
 
@@ -270,10 +262,7 @@ not_just_help_class_command (args, from_tty)
 static void empty_sfunc (char *, int, struct cmd_list_element *);
 
 static void
-empty_sfunc (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+empty_sfunc (char *args, int from_tty, struct cmd_list_element *c)
 {
 }
 
@@ -350,9 +339,8 @@ add_set_auto_boolean_cmd (char *name,
    command to LIST and return a pointer to the added command (not 
    necessarily the head of LIST).  */
 struct cmd_list_element *
-add_show_from_set (setcmd, list)
-     struct cmd_list_element *setcmd;
-     struct cmd_list_element **list;
+add_show_from_set (struct cmd_list_element *setcmd,
+		   struct cmd_list_element **list)
 {
   struct cmd_list_element *showcmd =
   (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
@@ -391,9 +379,7 @@ add_show_from_set (setcmd, list)
 /* Remove the command named NAME from the command list.  */
 
 void
-delete_cmd (name, list)
-     char *name;
-     struct cmd_list_element **list;
+delete_cmd (char *name, struct cmd_list_element **list)
 {
   register struct cmd_list_element *c;
   struct cmd_list_element *p;
@@ -516,9 +502,7 @@ apropos_command (char *searchstr, int from_tty)
  */
 
 void
-help_cmd (command, stream)
-     char *command;
-     struct ui_file *stream;
+help_cmd (char *command, struct ui_file *stream)
 {
   struct cmd_list_element *c;
   extern struct cmd_list_element *cmdlist;
@@ -585,11 +569,8 @@ help_cmd (command, stream)
  * If you call this routine with a class >= 0, it recurses.
  */
 void
-help_list (list, cmdtype, class, stream)
-     struct cmd_list_element *list;
-     char *cmdtype;
-     enum command_class class;
-     struct ui_file *stream;
+help_list (struct cmd_list_element *list, char *cmdtype,
+	   enum command_class class, struct ui_file *stream)
 {
   int len;
   char *cmdtype1, *cmdtype2;
@@ -649,9 +630,7 @@ help_all (struct ui_file *stream)
 
 /* Print only the first line of STR on STREAM.  */
 static void
-print_doc_line (stream, str)
-     struct ui_file *stream;
-     char *str;
+print_doc_line (struct ui_file *stream, char *str)
 {
   static char *line_buffer = 0;
   static int line_size;
@@ -700,12 +679,8 @@ print_doc_line (stream, str)
  * is at the low level, not the high-level).
  */
 void
-help_cmd_list (list, class, prefix, recurse, stream)
-     struct cmd_list_element *list;
-     enum command_class class;
-     char *prefix;
-     int recurse;
-     struct ui_file *stream;
+help_cmd_list (struct cmd_list_element *list, enum command_class class,
+	       char *prefix, int recurse, struct ui_file *stream)
 {
   register struct cmd_list_element *c;
 
@@ -733,12 +708,8 @@ help_cmd_list (list, class, prefix, recurse, stream)
    found in nfound */
 
 static struct cmd_list_element *
-find_cmd (command, len, clist, ignore_help_classes, nfound)
-     char *command;
-     int len;
-     struct cmd_list_element *clist;
-     int ignore_help_classes;
-     int *nfound;
+find_cmd (char *command, int len, struct cmd_list_element *clist,
+	  int ignore_help_classes, int *nfound)
 {
   struct cmd_list_element *found, *c;
 
@@ -796,10 +767,8 @@ find_cmd (command, len, clist, ignore_help_classes, nfound)
    the struct cmd_list_element is NULL).  */
 
 struct cmd_list_element *
-lookup_cmd_1 (text, clist, result_list, ignore_help_classes)
-     char **text;
-     struct cmd_list_element *clist, **result_list;
-     int ignore_help_classes;
+lookup_cmd_1 (char **text, struct cmd_list_element *clist,
+	      struct cmd_list_element **result_list, int ignore_help_classes)
 {
   char *p, *command;
   int len, tmp, nfound;
@@ -931,8 +900,7 @@ lookup_cmd_1 (text, clist, result_list, ignore_help_classes)
 /* All this hair to move the space to the front of cmdtype */
 
 static void
-undef_cmd_error (cmdtype, q)
-     char *cmdtype, *q;
+undef_cmd_error (char *cmdtype, char *q)
 {
   error ("Undefined %scommand: \"%s\".  Try \"help%s%.*s\".",
 	 cmdtype,
@@ -957,12 +925,8 @@ undef_cmd_error (cmdtype, q)
    the function field of the struct cmd_list_element is 0).  */
 
 struct cmd_list_element *
-lookup_cmd (line, list, cmdtype, allow_unknown, ignore_help_classes)
-     char **line;
-     struct cmd_list_element *list;
-     char *cmdtype;
-     int allow_unknown;
-     int ignore_help_classes;
+lookup_cmd (char **line, struct cmd_list_element *list, char *cmdtype,
+	    int allow_unknown, int ignore_help_classes)
 {
   struct cmd_list_element *last_list = 0;
   struct cmd_list_element *c =
@@ -1279,11 +1243,8 @@ lookup_cmd_composition (char *text,
    CMDTYPE precedes the word "command" in the error message.  */
 
 struct cmd_list_element *
-lookup_cmd (line, list, cmdtype, allow_unknown)
-     char **line;
-     struct cmd_list_element *list;
-     char *cmdtype;
-     int allow_unknown;
+lookup_cmd (char **line, struct cmd_list_element *list, char *cmdtype,
+	    int allow_unknown)
 {
   register char *p;
   register struct cmd_list_element *c, *found;
@@ -1415,10 +1376,7 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
    "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
 
 char **
-complete_on_cmdlist (list, text, word)
-     struct cmd_list_element *list;
-     char *text;
-     char *word;
+complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
 {
   struct cmd_list_element *ptr;
   char **matchlist;
@@ -1576,8 +1534,7 @@ parse_auto_binary_operation (const char *arg)
 }
 
 static int
-parse_binary_operation (arg)
-     char *arg;
+parse_binary_operation (char *arg)
 {
   int length;
 
@@ -1611,10 +1568,7 @@ parse_binary_operation (arg)
    directly by the user (i.e. these are just like any other
    command).  C is the command list element for the command.  */
 void
-do_setshow_command (arg, from_tty, c)
-     char *arg;
-     int from_tty;
-     struct cmd_list_element *c;
+do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 {
   if (c->type == set_cmd)
     {
@@ -1932,10 +1886,7 @@ do_setshow_command (arg, from_tty, c)
 /* Show all the settings in a list of show commands.  */
 
 void
-cmd_show_list (list, from_tty, prefix)
-     struct cmd_list_element *list;
-     int from_tty;
-     char *prefix;
+cmd_show_list (struct cmd_list_element *list, int from_tty, char *prefix)
 {
 #ifdef UI_OUT
   ui_out_list_begin (uiout, "showlist");
@@ -1980,9 +1931,7 @@ cmd_show_list (list, from_tty, prefix)
 
 /* ARGSUSED */
 static void
-shell_escape (arg, from_tty)
-     char *arg;
-     int from_tty;
+shell_escape (char *arg, int from_tty)
 {
 #ifdef CANT_FORK
   /* If ARG is NULL, they want an inferior shell, but `system' just
@@ -2043,9 +1992,7 @@ shell_escape (arg, from_tty)
 }
 
 static void
-make_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+make_command (char *arg, int from_tty)
 {
   char *p;
 
@@ -2062,9 +2009,7 @@ make_command (arg, from_tty)
 }
 
 static void
-show_user_1 (c, stream)
-     struct cmd_list_element *c;
-     struct ui_file *stream;
+show_user_1 (struct cmd_list_element *c, struct ui_file *stream)
 {
   register struct command_line *cmdlines;
 
@@ -2090,9 +2035,7 @@ show_user_1 (c, stream)
 
 /* ARGSUSED */
 static void
-show_user (args, from_tty)
-     char *args;
-     int from_tty;
+show_user (char *args, int from_tty)
 {
   struct cmd_list_element *c;
   extern struct cmd_list_element *cmdlist;
@@ -2115,7 +2058,7 @@ show_user (args, from_tty)
 }
 
 void
-_initialize_command ()
+_initialize_command (void)
 {
   add_com ("shell", class_support, shell_escape,
 	   "Execute the rest of the line as a shell command.  \n\

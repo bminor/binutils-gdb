@@ -121,18 +121,14 @@ d10v_stack_align (CORE_ADDR len)
    registers. */
 
 int
-d10v_use_struct_convention (gcc_p, type)
-     int gcc_p;
-     struct type *type;
+d10v_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 8);
 }
 
 
 unsigned char *
-d10v_breakpoint_from_pc (pcptr, lenptr)
-     CORE_ADDR *pcptr;
-     int *lenptr;
+d10v_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] =
   {0x2f, 0x90, 0x5e, 0x00};
@@ -288,8 +284,7 @@ d10v_register_sim_regno (int nr)
    register REG_NR.  */
 
 int
-d10v_register_byte (reg_nr)
-     int reg_nr;
+d10v_register_byte (int reg_nr)
 {
   if (reg_nr < A0_REGNUM)
     return (reg_nr * 2);
@@ -306,8 +301,7 @@ d10v_register_byte (reg_nr)
    register REG_NR.  */
 
 int
-d10v_register_raw_size (reg_nr)
-     int reg_nr;
+d10v_register_raw_size (int reg_nr)
 {
   if (reg_nr < A0_REGNUM)
     return 2;
@@ -321,8 +315,7 @@ d10v_register_raw_size (reg_nr)
    for register N.  */
 
 int
-d10v_register_virtual_size (reg_nr)
-     int reg_nr;
+d10v_register_virtual_size (int reg_nr)
 {
   return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (reg_nr));
 }
@@ -331,8 +324,7 @@ d10v_register_virtual_size (reg_nr)
    of data in register N.  */
 
 struct type *
-d10v_register_virtual_type (reg_nr)
-     int reg_nr;
+d10v_register_virtual_type (int reg_nr)
 {
   if (reg_nr >= A0_REGNUM
       && reg_nr < (A0_REGNUM + NR_A_REGS))
@@ -346,18 +338,14 @@ d10v_register_virtual_type (reg_nr)
 
 /* convert $pc and $sp to/from virtual addresses */
 int
-d10v_register_convertible (nr)
-     int nr;
+d10v_register_convertible (int nr)
 {
   return ((nr) == PC_REGNUM || (nr) == SP_REGNUM);
 }
 
 void
-d10v_register_convert_to_virtual (regnum, type, from, to)
-     int regnum;
-     struct type *type;
-     char *from;
-     char *to;
+d10v_register_convert_to_virtual (int regnum, struct type *type, char *from,
+				  char *to)
 {
   ULONGEST x = extract_unsigned_integer (from, REGISTER_RAW_SIZE (regnum));
   if (regnum == PC_REGNUM)
@@ -368,11 +356,8 @@ d10v_register_convert_to_virtual (regnum, type, from, to)
 }
 
 void
-d10v_register_convert_to_raw (type, regnum, from, to)
-     struct type *type;
-     int regnum;
-     char *from;
-     char *to;
+d10v_register_convert_to_raw (struct type *type, int regnum, char *from,
+			      char *to)
 {
   ULONGEST x = extract_unsigned_integer (from, TYPE_LENGTH (type));
   x &= 0x3ffff;
@@ -383,44 +368,38 @@ d10v_register_convert_to_raw (type, regnum, from, to)
 
 
 CORE_ADDR
-d10v_make_daddr (x)
-     CORE_ADDR x;
+d10v_make_daddr (CORE_ADDR x)
 {
   return ((x) | DMEM_START);
 }
 
 CORE_ADDR
-d10v_make_iaddr (x)
-     CORE_ADDR x;
+d10v_make_iaddr (CORE_ADDR x)
 {
   return (((x) << 2) | IMEM_START);
 }
 
 int
-d10v_daddr_p (x)
-     CORE_ADDR x;
+d10v_daddr_p (CORE_ADDR x)
 {
   return (((x) & 0x3000000) == DMEM_START);
 }
 
 int
-d10v_iaddr_p (x)
-     CORE_ADDR x;
+d10v_iaddr_p (CORE_ADDR x)
 {
   return (((x) & 0x3000000) == IMEM_START);
 }
 
 
 CORE_ADDR
-d10v_convert_iaddr_to_raw (x)
-     CORE_ADDR x;
+d10v_convert_iaddr_to_raw (CORE_ADDR x)
 {
   return (((x) >> 2) & 0xffff);
 }
 
 CORE_ADDR
-d10v_convert_daddr_to_raw (x)
-     CORE_ADDR x;
+d10v_convert_daddr_to_raw (CORE_ADDR x)
 {
   return ((x) & 0xffff);
 }
@@ -432,9 +411,7 @@ d10v_convert_daddr_to_raw (x)
    register. */
 
 void
-d10v_store_struct_return (addr, sp)
-     CORE_ADDR addr;
-     CORE_ADDR sp;
+d10v_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (ARG1_REGNUM, (addr));
 }
@@ -445,9 +422,7 @@ d10v_store_struct_return (addr, sp)
    Things always get returned in RET1_REGNUM, RET2_REGNUM, ... */
 
 void
-d10v_store_return_value (type, valbuf)
-     struct type *type;
-     char *valbuf;
+d10v_store_return_value (struct type *type, char *valbuf)
 {
   write_register_bytes (REGISTER_BYTE (RET1_REGNUM),
 			valbuf,
@@ -459,8 +434,7 @@ d10v_store_return_value (type, valbuf)
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 CORE_ADDR
-d10v_extract_struct_value_address (regbuf)
-     char *regbuf;
+d10v_extract_struct_value_address (char *regbuf)
 {
   return (extract_address ((regbuf) + REGISTER_BYTE (ARG1_REGNUM),
 			   REGISTER_RAW_SIZE (ARG1_REGNUM))
@@ -468,22 +442,19 @@ d10v_extract_struct_value_address (regbuf)
 }
 
 CORE_ADDR
-d10v_frame_saved_pc (frame)
-     struct frame_info *frame;
+d10v_frame_saved_pc (struct frame_info *frame)
 {
   return ((frame)->extra_info->return_pc);
 }
 
 CORE_ADDR
-d10v_frame_args_address (fi)
-     struct frame_info *fi;
+d10v_frame_args_address (struct frame_info *fi)
 {
   return (fi)->frame;
 }
 
 CORE_ADDR
-d10v_frame_locals_address (fi)
-     struct frame_info *fi;
+d10v_frame_locals_address (struct frame_info *fi)
 {
   return (fi)->frame;
 }
@@ -493,8 +464,7 @@ d10v_frame_locals_address (fi)
    the stack and that may not be written yet. */
 
 CORE_ADDR
-d10v_saved_pc_after_call (frame)
-     struct frame_info *frame;
+d10v_saved_pc_after_call (struct frame_info *frame)
 {
   return ((read_register (LR_REGNUM) << 2)
 	  | IMEM_START);
@@ -504,14 +474,13 @@ d10v_saved_pc_after_call (frame)
    registers.  */
 
 void
-d10v_pop_frame ()
+d10v_pop_frame (void)
 {
   generic_pop_current_frame (do_d10v_pop_frame);
 }
 
 static void
-do_d10v_pop_frame (fi)
-     struct frame_info *fi;
+do_d10v_pop_frame (struct frame_info *fi)
 {
   CORE_ADDR fp;
   int regnum;
@@ -550,8 +519,7 @@ do_d10v_pop_frame (fi)
 }
 
 static int
-check_prologue (op)
-     unsigned short op;
+check_prologue (unsigned short op)
 {
   /* st  rn, @-sp */
   if ((op & 0x7E1F) == 0x6C1F)
@@ -585,8 +553,7 @@ check_prologue (op)
 }
 
 CORE_ADDR
-d10v_skip_prologue (pc)
-     CORE_ADDR pc;
+d10v_skip_prologue (CORE_ADDR pc)
 {
   unsigned long op;
   unsigned short op1, op2;
@@ -654,8 +621,7 @@ d10v_skip_prologue (pc)
  */
 
 CORE_ADDR
-d10v_frame_chain (fi)
-     struct frame_info *fi;
+d10v_frame_chain (struct frame_info *fi)
 {
   d10v_frame_init_saved_regs (fi);
 
@@ -683,10 +649,7 @@ d10v_frame_chain (fi)
 static int next_addr, uses_frame;
 
 static int
-prologue_find_regs (op, fi, addr)
-     unsigned short op;
-     struct frame_info *fi;
-     CORE_ADDR addr;
+prologue_find_regs (unsigned short op, struct frame_info *fi, CORE_ADDR addr)
 {
   int n;
 
@@ -757,8 +720,7 @@ prologue_find_regs (op, fi, addr)
    for it IS the sp for the next frame. */
 
 void
-d10v_frame_init_saved_regs (fi)
-     struct frame_info *fi;
+d10v_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR fp, pc;
   unsigned long op;
@@ -859,9 +821,7 @@ d10v_frame_init_saved_regs (fi)
 }
 
 void
-d10v_init_extra_frame_info (fromleaf, fi)
-     int fromleaf;
-     struct frame_info *fi;
+d10v_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   fi->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
@@ -884,9 +844,7 @@ d10v_init_extra_frame_info (fromleaf, fi)
 }
 
 static void
-show_regs (args, from_tty)
-     char *args;
-     int from_tty;
+show_regs (char *args, int from_tty)
 {
   int a;
   printf_filtered ("PC=%04lx (0x%lx) PSW=%04lx RPT_S=%04lx RPT_E=%04lx RPT_C=%04lx\n",
@@ -946,8 +904,7 @@ show_regs (args, from_tty)
 }
 
 CORE_ADDR
-d10v_read_pc (pid)
-     int pid;
+d10v_read_pc (int pid)
 {
   int save_pid;
   CORE_ADDR pc;
@@ -962,9 +919,7 @@ d10v_read_pc (pid)
 }
 
 void
-d10v_write_pc (val, pid)
-     CORE_ADDR val;
-     int pid;
+d10v_write_pc (CORE_ADDR val, int pid)
 {
   int save_pid;
 
@@ -975,27 +930,25 @@ d10v_write_pc (val, pid)
 }
 
 CORE_ADDR
-d10v_read_sp ()
+d10v_read_sp (void)
 {
   return (D10V_MAKE_DADDR (read_register (SP_REGNUM)));
 }
 
 void
-d10v_write_sp (val)
-     CORE_ADDR val;
+d10v_write_sp (CORE_ADDR val)
 {
   write_register (SP_REGNUM, D10V_CONVERT_DADDR_TO_RAW (val));
 }
 
 void
-d10v_write_fp (val)
-     CORE_ADDR val;
+d10v_write_fp (CORE_ADDR val)
 {
   write_register (FP_REGNUM, D10V_CONVERT_DADDR_TO_RAW (val));
 }
 
 CORE_ADDR
-d10v_read_fp ()
+d10v_read_fp (void)
 {
   return (D10V_MAKE_DADDR (read_register (FP_REGNUM)));
 }
@@ -1005,9 +958,7 @@ d10v_read_fp ()
    Needed for targets where we don't actually execute a JSR/BSR instruction */
 
 CORE_ADDR
-d10v_push_return_address (pc, sp)
-     CORE_ADDR pc;
-     CORE_ADDR sp;
+d10v_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   write_register (LR_REGNUM, D10V_CONVERT_IADDR_TO_RAW (CALL_DUMMY_ADDRESS ()));
   return sp;
@@ -1027,10 +978,7 @@ struct stack_item
 static struct stack_item *push_stack_item (struct stack_item *prev,
 					   void *contents, int len);
 static struct stack_item *
-push_stack_item (prev, contents, len)
-     struct stack_item *prev;
-     void *contents;
-     int len;
+push_stack_item (struct stack_item *prev, void *contents, int len)
 {
   struct stack_item *si;
   si = xmalloc (sizeof (struct stack_item));
@@ -1043,8 +991,7 @@ push_stack_item (prev, contents, len)
 
 static struct stack_item *pop_stack_item (struct stack_item *si);
 static struct stack_item *
-pop_stack_item (si)
-     struct stack_item *si;
+pop_stack_item (struct stack_item *si)
 {
   struct stack_item *dead = si;
   si = si->prev;
@@ -1055,12 +1002,8 @@ pop_stack_item (si)
 
 
 CORE_ADDR
-d10v_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     int struct_return;
-     CORE_ADDR struct_addr;
+d10v_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		     int struct_return, CORE_ADDR struct_addr)
 {
   int i;
   int regnum = ARG1_REGNUM;
@@ -1285,9 +1228,7 @@ struct trace_buffer
 trace_data;
 
 static void
-trace_command (args, from_tty)
-     char *args;
-     int from_tty;
+trace_command (char *args, int from_tty)
 {
   /* Clear the host-side trace buffer, allocating space if needed.  */
   trace_data.size = 0;
@@ -1302,9 +1243,7 @@ trace_command (args, from_tty)
 }
 
 static void
-untrace_command (args, from_tty)
-     char *args;
-     int from_tty;
+untrace_command (char *args, int from_tty)
 {
   tracing = 0;
 
@@ -1312,9 +1251,7 @@ untrace_command (args, from_tty)
 }
 
 static void
-trace_info (args, from_tty)
-     char *args;
-     int from_tty;
+trace_info (char *args, int from_tty)
 {
   int i;
 
@@ -1341,9 +1278,7 @@ trace_info (args, from_tty)
    on STREAM.  Returns length of the instruction, in bytes.  */
 
 static int
-print_insn (memaddr, stream)
-     CORE_ADDR memaddr;
-     struct ui_file *stream;
+print_insn (CORE_ADDR memaddr, struct ui_file *stream)
 {
   /* If there's no disassembler, something is very wrong.  */
   if (tm_print_insn == NULL)
@@ -1357,7 +1292,7 @@ print_insn (memaddr, stream)
 }
 
 static void
-d10v_eva_prepare_to_trace ()
+d10v_eva_prepare_to_trace (void)
 {
   if (!tracing)
     return;
@@ -1369,7 +1304,7 @@ d10v_eva_prepare_to_trace ()
    more useful for display.  */
 
 static void
-d10v_eva_get_trace_data ()
+d10v_eva_get_trace_data (void)
 {
   int count, i, j, oldsize;
   int trace_addr, trace_seg, trace_cnt, next_cnt;
@@ -1429,9 +1364,7 @@ d10v_eva_get_trace_data ()
 }
 
 static void
-tdisassemble_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+tdisassemble_command (char *arg, int from_tty)
 {
   int i, count;
   CORE_ADDR low, high;
@@ -1466,8 +1399,7 @@ tdisassemble_command (arg, from_tty)
 }
 
 static void
-display_trace (low, high)
-     int low, high;
+display_trace (int low, int high)
 {
   int i, count, trace_show_source, first, suppress;
   CORE_ADDR next_address;
@@ -1527,9 +1459,7 @@ display_trace (low, high)
 static gdbarch_init_ftype d10v_gdbarch_init;
 
 static struct gdbarch *
-d10v_gdbarch_init (info, arches)
-     struct gdbarch_info info;
-     struct gdbarch_list *arches;
+d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   static LONGEST d10v_call_dummy_words[] =
   {0};
@@ -1686,7 +1616,7 @@ extern void (*target_resume_hook) (void);
 extern void (*target_wait_loop_hook) (void);
 
 void
-_initialize_d10v_tdep ()
+_initialize_d10v_tdep (void)
 {
   register_gdbarch_init (bfd_arch_d10v, d10v_gdbarch_init);
 

@@ -53,9 +53,7 @@ char *registers = my_registers;
    ALLARGS is a vector of program-name and args. */
 
 int
-create_inferior (program, allargs)
-     char *program;
-     char **allargs;
+create_inferior (char *program, char **allargs)
 {
   int pid;
 
@@ -91,7 +89,7 @@ create_inferior (program, allargs)
 /* Kill the inferior process.  Make us have no inferior.  */
 
 void
-kill_inferior ()
+kill_inferior (void)
 {
   if (inferior_pid == 0)
     return;
@@ -103,8 +101,7 @@ kill_inferior ()
 
 /* Return nonzero if the given thread is still alive.  */
 int
-mythread_alive (pid)
-     int pid;
+mythread_alive (int pid)
 {
   /* Arggh.  Apparently pthread_kill only works for threads within
      the process that calls pthread_kill.
@@ -122,8 +119,7 @@ mythread_alive (pid)
 /* Wait for process, returns status */
 
 unsigned char
-mywait (status)
-     char *status;
+mywait (char *status)
 {
   int pid;
   union wait w;
@@ -186,9 +182,7 @@ mywait (status)
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-myresume (step, signal)
-     int step;
-     int signal;
+myresume (int step, int signal)
 {
   errno = 0;
   ptrace (step ? PTRACE_SINGLESTEP_ONE : PTRACE_CONT,
@@ -352,8 +346,7 @@ static int regmap[] =
    It also handles knows where to find the I & L regs on the stack.  */
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
 #if 0
   int whatregs = 0;
@@ -457,8 +450,7 @@ fetch_inferior_registers (regno)
    this point.  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
 #if 0
   int whatregs = 0;
@@ -566,7 +558,7 @@ store_inferior_registers (regno)
    saved context block.  */
 
 static unsigned long
-lynx_registers_addr ()
+lynx_registers_addr (void)
 {
   CORE_ADDR stblock;
   int ecpoff = offsetof (st_t, ecp);
@@ -591,8 +583,7 @@ lynx_registers_addr ()
    marking them as valid so we won't fetch them again.  */
 
 void
-fetch_inferior_registers (ignored)
-     int ignored;
+fetch_inferior_registers (int ignored)
 {
   int regno;
   unsigned long reg;
@@ -623,8 +614,7 @@ fetch_inferior_registers (ignored)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (ignored)
-     int ignored;
+store_inferior_registers (int ignored)
 {
   int regno;
   unsigned long reg;
@@ -662,10 +652,7 @@ store_inferior_registers (ignored)
    to debugger memory starting at MYADDR.  */
 
 void
-read_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -692,10 +679,7 @@ read_inferior_memory (memaddr, myaddr, len)
    returns the value of errno.  */
 
 int
-write_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -748,6 +732,6 @@ ptrace (PTRACE_POKETEXT): errno=%d, pid=0x%x, addr=0x%x, buffer[i] = 0x%x\n",
 }
 
 void
-initialize_low ()
+initialize_low (void)
 {
 }

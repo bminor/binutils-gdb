@@ -84,9 +84,7 @@ child_wait (int pid, struct target_waitstatus *ourstatus)
 /* Attach to process PID, then initialize for debugging it.  */
 
 static void
-child_attach (args, from_tty)
-     char *args;
-     int from_tty;
+child_attach (char *args, int from_tty)
 {
   ProcessSerialNumber psn;
   ProcessInfoRec inforec;
@@ -130,9 +128,7 @@ child_attach (args, from_tty)
 }
 
 static void
-child_detach (args, from_tty)
-     char *args;
-     int from_tty;
+child_detach (char *args, int from_tty)
 {
   char *exec_file;
 
@@ -152,8 +148,7 @@ child_detach (args, from_tty)
 /* Print status information about what we're accessing.  */
 
 static void
-child_files_info (ignore)
-     struct target_ops *ignore;
+child_files_info (struct target_ops *ignore)
 {
   printf_unfiltered ("\tUsing the running image of %s %s.\n",
       attach_flag ? "attached" : "child", target_pid_to_str (inferior_pid));
@@ -161,9 +156,7 @@ child_files_info (ignore)
 
 /* ARGSUSED */
 static void
-child_open (arg, from_tty)
-     char *arg;
-     int from_tty;
+child_open (char *arg, int from_tty)
 {
   error ("Use the \"run\" command to start a Mac application.");
 }
@@ -174,10 +167,7 @@ child_open (arg, from_tty)
    ENV is the environment vector to pass.  Errors reported with error().  */
 
 static void
-child_create_inferior (exec_file, allargs, env)
-     char *exec_file;
-     char *allargs;
-     char **env;
+child_create_inferior (char *exec_file, char *allargs, char **env)
 {
   LaunchParamBlockRec launchparms;
   FSSpec fsspec;
@@ -221,14 +211,14 @@ child_create_inferior (exec_file, allargs, env)
 }
 
 static void
-child_mourn_inferior ()
+child_mourn_inferior (void)
 {
   unpush_target (&child_ops);
   generic_mourn_inferior ();
 }
 
 static void
-child_stop ()
+child_stop (void)
 {
 }
 
@@ -263,26 +253,24 @@ child_resume (int pid, int step, enum target_signal signal)
 }
 
 static void
-child_prepare_to_store ()
+child_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
 
 static int
-child_can_run ()
+child_can_run (void)
 {
   return 1;
 }
 
 static void
-child_close ()
+child_close (void)
 {
 }
 
 static void
-info_proc (args, from_tty)
-     char *args;
-     int from_tty;
+info_proc (char *args, int from_tty)
 {
   ProcessSerialNumber psn;
   ProcessInfoRec inforec;
@@ -404,7 +392,7 @@ init_child_ops (void)
 };
 
 void
-_initialize_mac_nat ()
+_initialize_mac_nat (void)
 {
   init_child_ops ();
 

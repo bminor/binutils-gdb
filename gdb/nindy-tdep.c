@@ -34,9 +34,7 @@
    they display this frame.  */
 
 int
-nindy_frame_chain_valid (chain, curframe)
-     CORE_ADDR chain;
-     struct frame_info *curframe;
+nindy_frame_chain_valid (CORE_ADDR chain, struct frame_info *curframe)
 {
   struct symbol *sym;
   struct minimal_symbol *msymbol;

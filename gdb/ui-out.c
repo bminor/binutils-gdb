@@ -187,10 +187,7 @@ static void init_ui_out_state (struct ui_out *uiout);
 /* Mark beginning of a table */
 
 void
-ui_out_table_begin (uiout, nbrofcols, tblid)
-     struct ui_out *uiout;
-     int nbrofcols;
-     char *tblid;
+ui_out_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid)
 {
   if (uiout->table_flag)
     internal_error ("gdb/ui_out.c: tables cannot be nested; table_begin found before \
@@ -208,8 +205,7 @@ previous table_end.");
 }
 
 void
-ui_out_table_body (uiout)
-     struct ui_out *uiout;
+ui_out_table_body (struct ui_out *uiout)
 {
   if (!uiout->table_flag)
     internal_error ("gdb/ui_out.c: table_body outside a table is not valid; it must be \
@@ -228,8 +224,7 @@ columns.");
 }
 
 void
-ui_out_table_end (uiout)
-     struct ui_out *uiout;
+ui_out_table_end (struct ui_out *uiout)
 {
   if (!uiout->table_flag)
     internal_error ("gdb/ui_out.c: misplaced table_end or missing table_begin.");
@@ -245,11 +240,8 @@ ui_out_table_end (uiout)
 }
 
 void
-ui_out_table_header (uiout, width, alignment, colhdr)
-     struct ui_out *uiout;
-     int width;
-     enum ui_align alignment;
-     char *colhdr;
+ui_out_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
+		     char *colhdr)
 {
   if (!uiout->table_flag || uiout->body_flag)
     internal_error ("ui_out: table header must be specified after table_begin \
@@ -261,9 +253,7 @@ and before table_body.");
 }
 
 void
-ui_out_list_begin (uiout, lstid)
-     struct ui_out *uiout;
-     char *lstid;
+ui_out_list_begin (struct ui_out *uiout, char *lstid)
 {
   if (uiout->table_flag && !uiout->body_flag)
     internal_error ("ui_out: table header or table_body expected; lists must be \
@@ -281,8 +271,7 @@ nested.");
 }
 
 void
-ui_out_list_end (uiout)
-     struct ui_out *uiout;
+ui_out_list_end (struct ui_out *uiout)
 {
   if (!uiout->list_flag)
     internal_error ("ui_out: misplaced list_end; there is no list to be closed.");
@@ -293,10 +282,7 @@ ui_out_list_end (uiout)
 }
 
 void
-ui_out_field_int (uiout, fldname, value)
-     struct ui_out *uiout;
-     char *fldname;
-     int value;
+ui_out_field_int (struct ui_out *uiout, char *fldname, int value)
 {
   int fldno;
   int width;
@@ -313,10 +299,7 @@ ui_out_field_int (uiout, fldname, value)
 }
 
 void
-ui_out_field_core_addr (uiout, fldname, address)
-     struct ui_out *uiout;
-     char *fldname;
-     CORE_ADDR address;
+ui_out_field_core_addr (struct ui_out *uiout, char *fldname, CORE_ADDR address)
 {
   char addstr[20];
 
@@ -328,10 +311,7 @@ ui_out_field_core_addr (uiout, fldname, address)
 }
 
 void
-ui_out_field_stream (uiout, fldname, buf)
-     struct ui_out *uiout;
-     char *fldname;
-     struct ui_stream *buf;
+ui_out_field_stream (struct ui_out *uiout, char *fldname, struct ui_stream *buf)
 {
   long length;
   char *buffer = ui_file_xstrdup (buf->stream, &length);
@@ -347,9 +327,7 @@ ui_out_field_stream (uiout, fldname, buf)
 /* used to ommit a field */
 
 void
-ui_out_field_skip (uiout, fldname)
-     struct ui_out *uiout;
-     char *fldname;
+ui_out_field_skip (struct ui_out *uiout, char *fldname)
 {
   int fldno;
   int width;
@@ -409,17 +387,13 @@ ui_out_field_fmt (struct ui_out *uiout, char *fldname, char *format,...)
 }
 
 void
-ui_out_spaces (uiout, numspaces)
-     struct ui_out *uiout;
-     int numspaces;
+ui_out_spaces (struct ui_out *uiout, int numspaces)
 {
   uo_spaces (uiout, numspaces);
 }
 
 void
-ui_out_text (uiout, string)
-     struct ui_out *uiout;
-     char *string;
+ui_out_text (struct ui_out *uiout, char *string)
 {
   uo_text (uiout, string);
 }
@@ -437,8 +411,7 @@ ui_out_message (struct ui_out *uiout, int verbosity, char *format,...)
 }
 
 struct ui_stream *
-ui_out_stream_new (uiout)
-     struct ui_out *uiout;
+ui_out_stream_new (struct ui_out *uiout)
 {
   struct ui_stream *tempbuf;
 
@@ -449,8 +422,7 @@ ui_out_stream_new (uiout)
 }
 
 void
-ui_out_stream_delete (buf)
-     struct ui_stream *buf;
+ui_out_stream_delete (struct ui_stream *buf)
 {
   ui_file_delete (buf->stream);
   free (buf);
@@ -470,25 +442,20 @@ make_cleanup_ui_out_stream_delete (struct ui_stream *buf)
 
 
 void
-ui_out_wrap_hint (uiout, identstring)
-     struct ui_out *uiout;
-     char *identstring;
+ui_out_wrap_hint (struct ui_out *uiout, char *identstring)
 {
   uo_wrap_hint (uiout, identstring);
 }
 
 void
-ui_out_flush (uiout)
-     struct ui_out *uiout;
+ui_out_flush (struct ui_out *uiout)
 {
   uo_flush (uiout);
 }
 
 /* set the flags specified by the mask given */
 int
-ui_out_set_flags (uiout, mask)
-     struct ui_out *uiout;
-     int mask;
+ui_out_set_flags (struct ui_out *uiout, int mask)
 {
   int oldflags = uiout->flags;
 
@@ -499,9 +466,7 @@ ui_out_set_flags (uiout, mask)
 
 /* clear the flags specified by the mask given */
 int
-ui_out_clear_flags (uiout, mask)
-     struct ui_out *uiout;
-     int mask;
+ui_out_clear_flags (struct ui_out *uiout, int mask)
 {
   int oldflags = uiout->flags;
 
@@ -512,9 +477,7 @@ ui_out_clear_flags (uiout, mask)
 
 /* test the flags against the mask given */
 int
-ui_out_test_flags (uiout, mask)
-     struct ui_out *uiout;
-     int mask;
+ui_out_test_flags (struct ui_out *uiout, int mask)
 {
   return (uiout->flags & mask);
 }
@@ -523,8 +486,7 @@ ui_out_test_flags (uiout, mask)
    'set verbositylevel' command */
 
 int
-ui_out_get_verblvl (uiout)
-     struct ui_out *uiout;
+ui_out_get_verblvl (struct ui_out *uiout)
 {
   /* FIXME: not implemented yet */
   return 0;
@@ -532,54 +494,42 @@ ui_out_get_verblvl (uiout)
 
 #if 0
 void
-ui_out_result_begin (uiout, class)
-     struct ui_out *uiout;
-     char *class;
+ui_out_result_begin (struct ui_out *uiout, char *class)
 {
 }
 
 void
-ui_out_result_end (uiout)
-     struct ui_out *uiout;
+ui_out_result_end (struct ui_out *uiout)
 {
 }
 
 void
-ui_out_info_begin (uiout, class)
-     struct ui_out *uiout;
-     char *class;
+ui_out_info_begin (struct ui_out *uiout, char *class)
 {
 }
 
 void
-ui_out_info_end (uiout)
-     struct ui_out *uiout;
+ui_out_info_end (struct ui_out *uiout)
 {
 }
 
 void
-ui_out_notify_begin (uiout, class)
-     struct ui_out *uiout;
-     char *class;
+ui_out_notify_begin (struct ui_out *uiout, char *class)
 {
 }
 
 void
-ui_out_notify_end (uiout)
-     struct ui_out *uiout;
+ui_out_notify_end (struct ui_out *uiout)
 {
 }
 
 void
-ui_out_error_begin (uiout, class)
-     struct ui_out *uiout;
-     char *class;
+ui_out_error_begin (struct ui_out *uiout, char *class)
 {
 }
 
 void
-ui_out_error_end (uiout)
-     struct ui_out *uiout;
+ui_out_error_end (struct ui_out *uiout)
 {
 }
 #endif
@@ -603,67 +553,45 @@ gdb_query (uiout, qflags, qprompt)
 /* default gdb-out hook functions */
 
 static void
-default_table_begin (uiout, nbrofcols, tblid)
-     struct ui_out *uiout;
-     int nbrofcols;
-     char *tblid;
+default_table_begin (struct ui_out *uiout, int nbrofcols, char *tblid)
 {
 }
 
 static void
-default_table_body (uiout)
-     struct ui_out *uiout;
+default_table_body (struct ui_out *uiout)
 {
 }
 
 static void
-default_table_end (uiout)
-     struct ui_out *uiout;
+default_table_end (struct ui_out *uiout)
 {
 }
 
 static void
-default_table_header (uiout, width, alignment, colhdr)
-     struct ui_out *uiout;
-     int width;
-     enum ui_align alignment;
-     char *colhdr;
+default_table_header (struct ui_out *uiout, int width, enum ui_align alignment,
+		      char *colhdr)
 {
 }
 
 static void
-default_list_begin (uiout, list_flag, lstid)
-     struct ui_out *uiout;
-     int list_flag;
-     char *lstid;
+default_list_begin (struct ui_out *uiout, int list_flag, char *lstid)
 {
 }
 
 static void
-default_list_end (uiout, list_flag)
-     struct ui_out *uiout;
-     int list_flag;
+default_list_end (struct ui_out *uiout, int list_flag)
 {
 }
 
 static void
-default_field_int (uiout, fldno, width, align, fldname, value)
-     struct ui_out *uiout;
-     int fldno;
-     int width;
-     enum ui_align align;
-     char *fldname;
-     int value;
+default_field_int (struct ui_out *uiout, int fldno, int width,
+		   enum ui_align align, char *fldname, int value)
 {
 }
 
 static void
-default_field_skip (uiout, fldno, width, align, fldname)
-     struct ui_out *uiout;
-     int fldno;
-     int width;
-     enum ui_align align;
-     char *fldname;
+default_field_skip (struct ui_out *uiout, int fldno, int width,
+		    enum ui_align align, char *fldname)
 {
 }
 
@@ -678,50 +606,35 @@ default_field_string (struct ui_out *uiout,
 }
 
 static void
-default_field_fmt (uiout, fldno, width, align, fldname, format, args)
-     struct ui_out *uiout;
-     int fldno;
-     int width;
-     enum ui_align align;
-     char *fldname;
-     char *format;
-     va_list args;
+default_field_fmt (struct ui_out *uiout, int fldno, int width,
+		   enum ui_align align, char *fldname, char *format,
+		   va_list args)
 {
 }
 
 static void
-default_spaces (uiout, numspaces)
-     struct ui_out *uiout;
-     int numspaces;
+default_spaces (struct ui_out *uiout, int numspaces)
 {
 }
 
 static void
-default_text (uiout, string)
-     struct ui_out *uiout;
-     char *string;
+default_text (struct ui_out *uiout, char *string)
 {
 }
 
 static void
-default_message (uiout, verbosity, format, args)
-     struct ui_out *uiout;
-     int verbosity;
-     char *format;
-     va_list args;
+default_message (struct ui_out *uiout, int verbosity, char *format,
+		 va_list args)
 {
 }
 
 static void
-default_wrap_hint (uiout, identstring)
-     struct ui_out *uiout;
-     char *identstring;
+default_wrap_hint (struct ui_out *uiout, char *identstring)
 {
 }
 
 static void
-default_flush (uiout)
-     struct ui_out *uiout;
+default_flush (struct ui_out *uiout)
 {
 }
 
@@ -853,8 +766,7 @@ uo_flush (struct ui_out *uiout)
 /* list of column headers manipulation routines */
 
 static void
-clear_header_list (uiout)
-     struct ui_out *uiout;
+clear_header_list (struct ui_out *uiout)
 {
   while (uiout->headerfirst != NULL)
     {
@@ -964,8 +876,7 @@ verify_field_alignment (struct ui_out *uiout,
 /* access to ui_out format private members */
 
 void
-ui_out_get_field_separator (uiout)
-     struct ui_out *uiout;
+ui_out_get_field_separator (struct ui_out *uiout)
 {
 }
 
@@ -1001,7 +912,7 @@ ui_out_new (struct ui_out_impl *impl,
 /* standard gdb initialization hook */
 
 void
-_initialize_ui_out ()
+_initialize_ui_out (void)
 {
   /* nothing needs to be done */
 }

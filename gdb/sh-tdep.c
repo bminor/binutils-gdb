@@ -289,9 +289,7 @@ sh_sh4_register_name (int reg_nr)
 }
 
 static unsigned char *
-sh_breakpoint_from_pc (pcptr, lenptr)
-     CORE_ADDR *pcptr;
-     int *lenptr;
+sh_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   /* 0xc3c3 is trapa #c3, and it works in big and little endian modes */
   static unsigned char breakpoint[] =  {0xc3, 0xc3};
@@ -375,8 +373,7 @@ sh_breakpoint_from_pc (pcptr, lenptr)
 /* Skip the prologue using the debug information. If this fails we'll
    fall back on the 'guess' method below. */
 static CORE_ADDR
-after_prologue (pc)
-     CORE_ADDR pc;
+after_prologue (CORE_ADDR pc)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
@@ -405,8 +402,7 @@ after_prologue (pc)
    where the prologue ends. Unfortunately this is not always 
    accurate. */
 static CORE_ADDR
-skip_prologue_hard_way (start_pc)
-     CORE_ADDR start_pc;
+skip_prologue_hard_way (CORE_ADDR start_pc)
 {
   CORE_ADDR here, end;
   int updated_fp = 0;
@@ -439,8 +435,7 @@ skip_prologue_hard_way (start_pc)
 }
 
 static CORE_ADDR
-sh_skip_prologue (pc)
-     CORE_ADDR pc;
+sh_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR post_prologue_pc;
 
@@ -465,17 +460,14 @@ sh_skip_prologue (pc)
 
    The return address is the value saved in the PR register + 4  */
 static CORE_ADDR
-sh_saved_pc_after_call (frame)
-     struct frame_info *frame;
+sh_saved_pc_after_call (struct frame_info *frame)
 {
   return (ADDR_BITS_REMOVE(read_register(PR_REGNUM)));
 }
 
 /* Should call_function allocate stack space for a struct return?  */
 static int
-sh_use_struct_convention (gcc_p, type)
-     int gcc_p;
-     struct type *type;
+sh_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 1);
 }
@@ -485,18 +477,14 @@ sh_use_struct_convention (gcc_p, type)
 
    We store structs through a pointer passed in R0 */
 static void
-sh_store_struct_return (addr, sp)
-     CORE_ADDR addr;
-     CORE_ADDR sp;
+sh_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (STRUCT_RETURN_REGNUM, (addr));
 }
 
 /* Disassemble an instruction.  */
 static int
-gdb_print_insn_sh (memaddr, info)
-     bfd_vma memaddr;
-     disassemble_info *info;
+gdb_print_insn_sh (bfd_vma memaddr, disassemble_info *info)
 {
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     return print_insn_sh (memaddr, info);
@@ -511,8 +499,7 @@ gdb_print_insn_sh (memaddr, info)
    For us, the frame address is its stack pointer value, so we look up
    the function prologue to determine the caller's sp value, and return it.  */
 static CORE_ADDR
-sh_frame_chain (frame)
-     struct frame_info *frame;
+sh_frame_chain (struct frame_info *frame)
 {
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return frame->frame;	/* dummy frame same as caller's frame */
@@ -529,9 +516,7 @@ sh_frame_chain (frame)
    caller-saves registers for an inner frame.  */
 
 static CORE_ADDR
-sh_find_callers_reg (fi, regnum)
-     struct frame_info *fi;
-     int regnum;
+sh_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
     if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
@@ -556,8 +541,7 @@ sh_find_callers_reg (fi, regnum)
    ways in the stack frame.  sp is even more special: the address we
    return for it IS the sp for the next frame. */
 static void
-sh_nofp_frame_init_saved_regs (fi)
-     struct frame_info *fi;
+sh_nofp_frame_init_saved_regs (struct frame_info *fi)
 {
   int where[NUM_REGS];
   int rn;
@@ -677,8 +661,7 @@ sh_nofp_frame_init_saved_regs (fi)
 }
 
 static void
-sh_fp_frame_init_saved_regs (fi)
-     struct frame_info *fi;
+sh_fp_frame_init_saved_regs (struct frame_info *fi)
 {
   int where[NUM_REGS];
   int rn;
@@ -810,9 +793,7 @@ sh_fp_frame_init_saved_regs (fi)
 
 /* Initialize the extra info saved in a FRAME */
 static void
-sh_init_extra_frame_info (fromleaf, fi)
-     int fromleaf;
-     struct frame_info *fi;
+sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
 
   fi->extra_info = (struct frame_extra_info *)
@@ -851,22 +832,19 @@ static sh_extract_struct_value_address (regbuf)
 }
 
 static CORE_ADDR
-sh_frame_saved_pc (frame)
-     struct frame_info *frame;
+sh_frame_saved_pc (struct frame_info *frame)
 {
   return ((frame)->extra_info->return_pc);
 }
 
 static CORE_ADDR
-sh_frame_args_address (fi)
-     struct frame_info *fi;
+sh_frame_args_address (struct frame_info *fi)
 {
   return (fi)->frame;
 }
 
 static CORE_ADDR
-sh_frame_locals_address (fi)
-     struct frame_info *fi;
+sh_frame_locals_address (struct frame_info *fi)
 {
   return (fi)->frame;
 }
@@ -874,7 +852,7 @@ sh_frame_locals_address (fi)
 /* Discard from the stack the innermost frame,
    restoring all saved registers.  */
 static void
-sh_pop_frame ()
+sh_pop_frame (void)
 {
   register struct frame_info *frame = get_current_frame ();
   register CORE_ADDR fp;
@@ -942,12 +920,8 @@ sh_pop_frame ()
    to R7.   */
 
 static CORE_ADDR
-sh_push_arguments (nargs, args, sp, struct_return, struct_addr)
-     int nargs;
-     value_ptr *args;
-     CORE_ADDR sp;
-     unsigned char struct_return;
-     CORE_ADDR struct_addr;
+sh_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
+		   unsigned char struct_return, CORE_ADDR struct_addr)
 {
   int stack_offset, stack_alloc;
   int argreg;
@@ -1026,9 +1000,7 @@ sh_push_arguments (nargs, args, sp, struct_return, struct_addr)
    Needed for targets where we don't actually execute a JSR/BSR instruction */
 
 static CORE_ADDR
-sh_push_return_address (pc, sp)
-     CORE_ADDR pc;
-     CORE_ADDR sp;
+sh_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   write_register (PR_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
@@ -1050,14 +1022,8 @@ sh_push_return_address (pc, sp)
 
 #if 0
 void
-sh_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
-     char *dummy;
-     CORE_ADDR pc;
-     CORE_ADDR fun;
-     int nargs;
-     value_ptr *args;
-     struct type *type;
-     int gcc_p;
+sh_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
+		   value_ptr *args, struct type *type, int gcc_p)
 {
   *(unsigned long *) (dummy + 8) = fun;
 }
@@ -1074,10 +1040,7 @@ sh_coerce_float_to_double (struct type *formal, struct type *actual)
    containing the (raw) register state a function return value of type
    TYPE, and copy that, in virtual format, into VALBUF.  */
 static void
-sh_extract_return_value (type, regbuf, valbuf)
-     struct type *type;
-     char *regbuf;
-     char *valbuf;
+sh_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   int len = TYPE_LENGTH (type);
 
@@ -1117,7 +1080,7 @@ sh3e_sh4_store_return_value (struct type *type, char *valbuf)
 /* Print the registers in a form similar to the E7000 */
 
 static void
-sh_generic_show_regs ()
+sh_generic_show_regs (void)
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
@@ -1151,7 +1114,7 @@ sh_generic_show_regs ()
 }
 
 static void
-sh3_show_regs ()
+sh3_show_regs (void)
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
@@ -1189,7 +1152,7 @@ sh3_show_regs ()
 
 
 static void
-sh3e_show_regs ()
+sh3e_show_regs (void)
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
@@ -1248,7 +1211,7 @@ sh3e_show_regs ()
 }
 
 static void
-sh3_dsp_show_regs ()
+sh3_dsp_show_regs (void)
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
@@ -1305,7 +1268,7 @@ sh3_dsp_show_regs ()
 }
 
 static void
-sh4_show_regs ()
+sh4_show_regs (void)
 {
   int pr = read_register (gdbarch_tdep (current_gdbarch)->FPSCR_REGNUM) & 0x80000;
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
@@ -1369,7 +1332,7 @@ sh4_show_regs ()
 }
 
 static void
-sh_dsp_show_regs ()
+sh_dsp_show_regs (void)
 {
   printf_filtered ("PC=%s SR=%08lx PR=%08lx MACH=%08lx MACHL=%08lx\n",
 		   paddr (read_register (PC_REGNUM)),
@@ -1430,15 +1393,13 @@ void sh_show_regs_command (char *args, int from_tty)
 /* Index within `registers' of the first byte of the space for
    register N.  */
 static int
-sh_default_register_byte (reg_nr)
-     int reg_nr;
+sh_default_register_byte (int reg_nr)
 {
   return (reg_nr * 4);
 }
 
 static int
-sh_sh4_register_byte (reg_nr)
-     int reg_nr;
+sh_sh4_register_byte (int reg_nr)
 {
   if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
       && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
@@ -1453,15 +1414,13 @@ sh_sh4_register_byte (reg_nr)
 /* Number of bytes of storage in the actual machine representation for
    register REG_NR.  */
 static int
-sh_default_register_raw_size (reg_nr)
-     int reg_nr;
+sh_default_register_raw_size (int reg_nr)
 {
   return 4;
 }
 
 static int
-sh_sh4_register_raw_size (reg_nr)
-     int reg_nr;
+sh_sh4_register_raw_size (int reg_nr)
 {
   if (reg_nr >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
       && reg_nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
@@ -1476,8 +1435,7 @@ sh_sh4_register_raw_size (reg_nr)
 /* Number of bytes of storage in the program's representation
    for register N.  */
 static int
-sh_register_virtual_size (reg_nr)
-     int reg_nr;
+sh_register_virtual_size (int reg_nr)
 {
   return 4;
 }
@@ -1486,8 +1444,7 @@ sh_register_virtual_size (reg_nr)
    of data in register N.  */
 
 static struct type *
-sh_sh3e_register_virtual_type (reg_nr)
-     int reg_nr;
+sh_sh3e_register_virtual_type (int reg_nr)
 {
   if ((reg_nr >= FP0_REGNUM
        && (reg_nr <= gdbarch_tdep (current_gdbarch)->FP15_REGNUM)) 
@@ -1498,8 +1455,7 @@ sh_sh3e_register_virtual_type (reg_nr)
 }
 
 static struct type *
-sh_sh4_register_virtual_type (reg_nr)
-     int reg_nr;
+sh_sh4_register_virtual_type (int reg_nr)
 {
   if ((reg_nr >= FP0_REGNUM
        && (reg_nr <= gdbarch_tdep (current_gdbarch)->FP15_REGNUM)) 
@@ -1525,8 +1481,7 @@ sh_sh4_build_float_register_type (int high)
 }
 
 static struct type *
-sh_default_register_virtual_type (reg_nr)
-     int reg_nr;
+sh_default_register_virtual_type (int reg_nr)
 {
   return builtin_type_int;
 }
@@ -1846,9 +1801,7 @@ sh_do_registers_info (int regnum, int fpregs)
 static gdbarch_init_ftype sh_gdbarch_init;
 
 static struct gdbarch *
-sh_gdbarch_init (info, arches)
-     struct gdbarch_info info;
-     struct gdbarch_list *arches;
+sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   static LONGEST sh_call_dummy_words[] = {0};
   struct gdbarch *gdbarch;
@@ -2129,7 +2082,7 @@ sh_gdbarch_init (info, arches)
 }
 
 void
-_initialize_sh_tdep ()
+_initialize_sh_tdep (void)
 {
   struct cmd_list_element *c;
   

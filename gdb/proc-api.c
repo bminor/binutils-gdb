@@ -69,10 +69,7 @@ prepare_to_trace (void)
 }
 
 static void
-set_procfs_trace_cmd (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_procfs_trace_cmd (char *args, int from_tty, struct cmd_list_element *c)
 {
 #if 0	/* not sure what I might actually need to do here, if anything */
   if (procfs_file)
@@ -81,10 +78,7 @@ set_procfs_trace_cmd (args, from_tty, c)
 }
 
 static void
-set_procfs_file_cmd (args, from_tty, c)
-     char *args;
-     int from_tty;
-     struct cmd_list_element *c;
+set_procfs_file_cmd (char *args, int from_tty, struct cmd_list_element *c)
 {
   /* Just changed the filename for procfs tracing.
      If a file was already open, close it.  */
@@ -223,12 +217,7 @@ static struct trans ioctl_table[] = {
 };
 
 int
-ioctl_with_trace (fd, opcode, ptr, file, line)
-     int  fd;
-     long opcode;
-     void *ptr;
-     char *file;
-     int  line;
+ioctl_with_trace (int fd, long opcode, void *ptr, char *file, int line)
 {
   int i, ret, arg1;
 
@@ -453,12 +442,7 @@ static struct trans rw_table[] = {
 static off_t lseek_offset;
 
 int
-write_with_trace (fd, varg, len, file, line)
-     int  fd;
-     void *varg;
-     size_t len;
-     char *file;
-     int  line;
+write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 {
   int  i;
   int ret;
@@ -614,12 +598,7 @@ write_with_trace (fd, varg, len, file, line)
 }
 
 off_t
-lseek_with_trace (fd, offset, whence, file, line)
-     int fd;
-     off_t offset;
-     int whence;
-     char *file;
-     int line;
+lseek_with_trace (int fd, off_t offset, int whence, char *file, int line)
 {
   off_t ret;
 
@@ -642,11 +621,7 @@ lseek_with_trace (fd, offset, whence, file, line)
 #endif /* NEW_PROC_API */
 
 int
-open_with_trace (filename, mode, file, line)
-     char *filename;
-     int   mode;
-     char *file;
-     int   line;
+open_with_trace (char *filename, int mode, char *file, int line)
 {
   int ret;
 
@@ -687,10 +662,7 @@ open_with_trace (filename, mode, file, line)
 }
 
 int
-close_with_trace (fd, file, line)
-     int   fd;
-     char *file;
-     int   line;
+close_with_trace (int fd, char *file, int line)
 {
   int ret;
 
@@ -716,10 +688,7 @@ close_with_trace (fd, file, line)
 }
 
 pid_t
-wait_with_trace (wstat, file, line)
-     int  *wstat;
-     char *file;
-     int   line;
+wait_with_trace (int *wstat, char *file, int line)
 {
   int ret, lstat = 0;
 
@@ -754,10 +723,7 @@ wait_with_trace (wstat, file, line)
 }
 
 void
-procfs_note (msg, file, line)
-     char *msg;
-     char *file;
-     int   line;
+procfs_note (char *msg, char *file, int line)
 {
   prepare_to_trace ();
   if (procfs_trace)
@@ -772,11 +738,7 @@ procfs_note (msg, file, line)
 }
 
 void
-proc_prettyfprint_status (flags, why, what, thread)
-     long flags;
-     int  why;
-     int  what;
-     int  thread;
+proc_prettyfprint_status (long flags, int why, int what, int thread)
 {
   prepare_to_trace ();
   if (procfs_trace)
@@ -798,7 +760,7 @@ proc_prettyfprint_status (flags, why, what, thread)
 
 
 void
-_initialize_proc_api ()
+_initialize_proc_api (void)
 {
   struct cmd_list_element *c;
 

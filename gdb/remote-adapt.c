@@ -118,9 +118,7 @@ FILE *adapt_stream;
 #define ON	1
 #define OFF	0
 static void
-rawmode (desc, turnon)
-     int desc;
-     int turnon;
+rawmode (int desc, int turnon)
 {
 
   TERMINAL sg;
@@ -150,7 +148,7 @@ rawmode (desc, turnon)
 }
 
 /* Suck up all the input from the adapt */
-slurp_input ()
+slurp_input (void)
 {
   char buf[8];
 
@@ -167,7 +165,7 @@ slurp_input ()
 /* Read a character from the remote system, doing all the fancy
    timeout stuff.  */
 static int
-readchar ()
+readchar (void)
 {
   char buf;
 
@@ -198,8 +196,7 @@ readchar ()
 /* Keep discarding input from the remote system, until STRING is found. 
    Let the user break out immediately.  */
 static void
-expect (string)
-     char *string;
+expect (char *string)
 {
   char *p = string;
 
@@ -236,7 +233,7 @@ expect (string)
    necessary to prevent getting into states from which we can't
    recover.  */
 static void
-expect_prompt ()
+expect_prompt (void)
 {
 #if defined (LOG_FILE)
   /* This is a convenient place to do this.  The idea is to do it often
@@ -250,8 +247,7 @@ expect_prompt ()
 /* Get a hex digit from the remote system & return its value.
    If ignore_space is nonzero, ignore spaces (not newline, tab, etc).  */
 static int
-get_hex_digit (ignore_space)
-     int ignore_space;
+get_hex_digit (int ignore_space)
 {
   int ch;
   while (1)
@@ -276,8 +272,7 @@ get_hex_digit (ignore_space)
 /* Get a byte from adapt_desc and put it in *BYT.  Accept any number
    leading spaces.  */
 static void
-get_hex_byte (byt)
-     char *byt;
+get_hex_byte (char *byt)
 {
   int val;
 
@@ -288,7 +283,7 @@ get_hex_byte (byt)
 
 /* Read a 32-bit hex word from the adapt, preceded by a space  */
 static long
-get_hex_word ()
+get_hex_word (void)
 {
   long val;
   int j;
@@ -301,9 +296,7 @@ get_hex_word ()
 /* Get N 32-bit hex words from remote, each preceded by a space 
    and put them in registers starting at REGNO.  */
 static void
-get_hex_regs (n, regno)
-     int n;
-     int regno;
+get_hex_regs (int n, int regno)
 {
   long val;
   while (n--)
@@ -324,7 +317,7 @@ get_hex_regs (n, regno)
 volatile int n_alarms;
 
 void
-adapt_timer ()
+adapt_timer (void)
 {
 #if 0
   if (kiodebug)
@@ -344,9 +337,7 @@ static char *prog_name = NULL;
 static int need_artificial_trap = 0;
 
 void
-adapt_kill (arg, from_tty)
-     char *arg;
-     int from_tty;
+adapt_kill (char *arg, int from_tty)
 {
   fprintf (adapt_stream, "K");
   fprintf (adapt_stream, "\r");
@@ -357,9 +348,7 @@ adapt_kill (arg, from_tty)
  * FIXME: Assumes the file to download is a binary coff file.
  */
 static void
-adapt_load (args, fromtty)
-     char *args;
-     int fromtty;
+adapt_load (char *args, int fromtty)
 {
   FILE *fp;
   int n;
@@ -429,10 +418,7 @@ adapt_load (args, fromtty)
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 void
-adapt_create_inferior (execfile, args, env)
-     char *execfile;
-     char *args;
-     char **env;
+adapt_create_inferior (char *execfile, char *args, char **env)
 {
   int entry_pt;
 
@@ -569,8 +555,7 @@ baudtab[] =
 };
 
 static int
-damn_b (rate)
-     int rate;
+damn_b (int rate)
 {
   int i;
 
@@ -588,9 +573,7 @@ damn_b (rate)
 
 static int baudrate = 9600;
 static void
-adapt_open (name, from_tty)
-     char *name;
-     int from_tty;
+adapt_open (char *name, int from_tty)
 {
   TERMINAL sg;
   unsigned int prl;
@@ -701,8 +684,7 @@ the baud rate, and the name of the program to run on the remote system.");
 /* Close out all files and local state before this target loses control. */
 
 static void
-adapt_close (quitting)
-     int quitting;
+adapt_close (int quitting)
 {
 
   /* Clear any break points */
@@ -742,9 +724,7 @@ adapt_close (quitting)
 
 /* Attach to the target that is already loaded and possibly running */
 static void
-adapt_attach (args, from_tty)
-     char *args;
-     int from_tty;
+adapt_attach (char *args, int from_tty)
 {
 
   if (from_tty)
@@ -761,9 +741,7 @@ adapt_attach (args, from_tty)
    Use this when you want to detach and do something else
    with your gdb.  */
 void
-adapt_detach (args, from_tty)
-     char *args;
-     int from_tty;
+adapt_detach (char *args, int from_tty)
 {
 
   if (adapt_stream)
@@ -780,9 +758,7 @@ adapt_detach (args, from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-adapt_resume (pid, step, sig)
-     int pid, step;
-     enum target_signal sig;
+adapt_resume (int pid, int step, enum target_signal sig)
 {
   if (step)
     {
@@ -811,8 +787,7 @@ adapt_resume (pid, step, sig)
    storing status in STATUS just as `wait' would.  */
 
 int
-adapt_wait (status)
-     struct target_waitstatus *status;
+adapt_wait (struct target_waitstatus *status)
 {
   /* Strings to look for.  '?' means match any single character.  
      Note that with the algorithm we use, the initial character
@@ -909,8 +884,7 @@ adapt_wait (status)
 
    Returns a pointer to a static buffer containing the answer.  */
 static char *
-get_reg_name (regno)
-     int regno;
+get_reg_name (int regno)
 {
   static char buf[80];
   if (regno >= GR96_REGNUM && regno < GR96_REGNUM + 32)
@@ -945,7 +919,7 @@ get_reg_name (regno)
 /* Read the remote registers.  */
 
 static void
-adapt_fetch_registers ()
+adapt_fetch_registers (void)
 {
   int reg_index;
   int regnum_index;
@@ -1062,8 +1036,7 @@ adapt_fetch_registers ()
 /* Fetch register REGNO, or all registers if REGNO is -1.
  */
 static void
-adapt_fetch_register (regno)
-     int regno;
+adapt_fetch_register (int regno)
 {
   if (regno == -1)
     adapt_fetch_registers ();
@@ -1081,7 +1054,7 @@ adapt_fetch_register (regno)
 /* Store the remote registers from the contents of the block REGS.  */
 
 static void
-adapt_store_registers ()
+adapt_store_registers (void)
 {
   int i, j;
 
@@ -1137,8 +1110,7 @@ adapt_store_registers ()
 /* Store register REGNO, or all if REGNO == -1.
    Return errno value.  */
 void
-adapt_store_register (regno)
-     int regno;
+adapt_store_register (int regno)
 {
   /* printf("adapt_store_register() called.\n"); fflush(stdout); /* */
   if (regno == -1)
@@ -1166,14 +1138,13 @@ adapt_store_register (regno)
    debugged.  */
 
 void
-adapt_prepare_to_store ()
+adapt_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
 
 static CORE_ADDR
-translate_addr (addr)
-     CORE_ADDR addr;
+translate_addr (CORE_ADDR addr)
 {
 #if defined(KERNEL_DEBUGGING)
   /* Check for a virtual address in the kernel */
@@ -1196,11 +1167,7 @@ translate_addr (addr)
 
 /* FIXME!  Merge these two.  */
 int
-adapt_xfer_inferior_memory (memaddr, myaddr, len, write)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
+adapt_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 {
 
   memaddr = translate_addr (memaddr);
@@ -1212,7 +1179,7 @@ adapt_xfer_inferior_memory (memaddr, myaddr, len, write)
 }
 
 void
-adapt_files_info ()
+adapt_files_info (void)
 {
   printf_filtered ("\tAttached to %s at %d baud and running program %s\n",
 		   dev_name, baudrate, prog_name);
@@ -1224,10 +1191,7 @@ adapt_files_info ()
    * sb/sh instructions don't work on unaligned addresses, when TU=1. 
  */
 int
-adapt_write_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+adapt_write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int i;
   unsigned int cps;
@@ -1258,10 +1222,7 @@ adapt_write_inferior_memory (memaddr, myaddr, len)
 /* Read LEN bytes from inferior memory at MEMADDR.  Put the result
    at debugger address MYADDR.  Returns errno value.  */
 int
-adapt_read_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+adapt_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int i;
 
@@ -1371,7 +1332,7 @@ adapt_remove_breakpoint (addr, save)
 
 /* Clear the adapts notion of what the break points are */
 static int
-adapt_clear_breakpoints ()
+adapt_clear_breakpoints (void)
 {
   if (adapt_stream)
     {
@@ -1383,7 +1344,7 @@ adapt_clear_breakpoints ()
   num_brkpts = 0;
 }
 static void
-adapt_mourn ()
+adapt_mourn (void)
 {
   adapt_clear_breakpoints ();
   pop_target ();		/* Pop back to no-child state */
@@ -1394,8 +1355,7 @@ adapt_mourn ()
  * specified string
  */
 static int
-display_until (str)
-     char *str;
+display_until (char *str)
 {
   int i = 0, j, c;
 
@@ -1429,9 +1389,7 @@ display_until (str)
    FIXME: Can't handle commands that take input.  */
 
 void
-adapt_com (args, fromtty)
-     char *args;
-     int fromtty;
+adapt_com (char *args, int fromtty)
 {
   if (!adapt_stream)
     {
@@ -1554,7 +1512,7 @@ init_adapt_ops (void)
 }				/* init_adapt_ops */
 
 void
-_initialize_remote_adapt ()
+_initialize_remote_adapt (void)
 {
   init_adapt_ops ();
   add_target (&adapt_ops);

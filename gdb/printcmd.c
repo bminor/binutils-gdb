@@ -191,10 +191,7 @@ static void sym_info (char *, int);
    past the specification and past all whitespace following it.  */
 
 static struct format_data
-decode_format (string_ptr, oformat, osize)
-     char **string_ptr;
-     int oformat;
-     int osize;
+decode_format (char **string_ptr, int oformat, int osize)
 {
   struct format_data val;
   register char *p = *string_ptr;
@@ -282,11 +279,8 @@ decode_format (string_ptr, oformat, osize)
    This is used to pad hex numbers so they line up.  */
 
 static void
-print_formatted (val, format, size, stream)
-     register value_ptr val;
-     register int format;
-     int size;
-     struct ui_file *stream;
+print_formatted (register value_ptr val, register int format, int size,
+		 struct ui_file *stream)
 {
   struct type *type = check_typedef (VALUE_TYPE (val));
   int len = TYPE_LENGTH (type);
@@ -349,12 +343,8 @@ print_formatted (val, format, size, stream)
    with a format.  */
 
 void
-print_scalar_formatted (valaddr, type, format, size, stream)
-     char *valaddr;
-     struct type *type;
-     int format;
-     int size;
-     struct ui_file *stream;
+print_scalar_formatted (char *valaddr, struct type *type, int format, int size,
+			struct ui_file *stream)
 {
   LONGEST val_long;
   unsigned int len = TYPE_LENGTH (type);
@@ -526,8 +516,7 @@ print_scalar_formatted (valaddr, type, format, size, stream)
    `info lines' uses this.  */
 
 void
-set_next_address (addr)
-     CORE_ADDR addr;
+set_next_address (CORE_ADDR addr)
 {
   next_address = addr;
 
@@ -546,11 +535,8 @@ set_next_address (addr)
    settings of the demangle and asm_demangle variables.  */
 
 void
-print_address_symbolic (addr, stream, do_demangle, leadin)
-     CORE_ADDR addr;
-     struct ui_file *stream;
-     int do_demangle;
-     char *leadin;
+print_address_symbolic (CORE_ADDR addr, struct ui_file *stream, int do_demangle,
+			char *leadin)
 {
   char *name = NULL;
   char *filename = NULL;
@@ -730,10 +716,7 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 /* Print address ADDR on STREAM.  USE_LOCAL means the same thing as for
    print_longest.  */
 void
-print_address_numeric (addr, use_local, stream)
-     CORE_ADDR addr;
-     int use_local;
-     struct ui_file *stream;
+print_address_numeric (CORE_ADDR addr, int use_local, struct ui_file *stream)
 {
   /* Truncate address to the size of a target pointer, avoiding shifts
      larger or equal than the width of a CORE_ADDR.  The local
@@ -754,9 +737,7 @@ print_address_numeric (addr, use_local, stream)
    <SYMBOL + OFFSET> after the number.  */
 
 void
-print_address (addr, stream)
-     CORE_ADDR addr;
-     struct ui_file *stream;
+print_address (CORE_ADDR addr, struct ui_file *stream)
 {
   print_address_numeric (addr, 1, stream);
   print_address_symbolic (addr, stream, asm_demangle, " ");
@@ -768,10 +749,7 @@ print_address (addr, stream)
    or not.  */
 
 void
-print_address_demangle (addr, stream, do_demangle)
-     CORE_ADDR addr;
-     struct ui_file *stream;
-     int do_demangle;
+print_address_demangle (CORE_ADDR addr, struct ui_file *stream, int do_demangle)
 {
   if (addr == 0)
     {
@@ -803,10 +781,7 @@ static struct type *examine_g_type;
    Fetch it from memory and print on gdb_stdout.  */
 
 static void
-do_examine (fmt, addr, sect)
-     struct format_data fmt;
-     CORE_ADDR addr;
-     asection *sect;
+do_examine (struct format_data fmt, CORE_ADDR addr, asection *sect)
 {
   register char format = 0;
   register char size;
@@ -887,9 +862,7 @@ do_examine (fmt, addr, sect)
 }
 
 static void
-validate_format (fmt, cmdname)
-     struct format_data fmt;
-     char *cmdname;
+validate_format (struct format_data fmt, char *cmdname)
 {
   if (fmt.size != 0)
     error ("Size letters are meaningless in \"%s\" command.", cmdname);
@@ -907,10 +880,7 @@ validate_format (fmt, cmdname)
  */
 
 static void
-print_command_1 (exp, inspect, voidprint)
-     char *exp;
-     int inspect;
-     int voidprint;
+print_command_1 (char *exp, int inspect, int voidprint)
 {
   struct expression *expr;
   register struct cleanup *old_chain = 0;
@@ -1003,9 +973,7 @@ print_command_1 (exp, inspect, voidprint)
 
 /* ARGSUSED */
 static void
-print_command (exp, from_tty)
-     char *exp;
-     int from_tty;
+print_command (char *exp, int from_tty)
 {
   print_command_1 (exp, 0, 1);
 }
@@ -1013,9 +981,7 @@ print_command (exp, from_tty)
 /* Same as print, except in epoch, it gets its own window */
 /* ARGSUSED */
 static void
-inspect_command (exp, from_tty)
-     char *exp;
-     int from_tty;
+inspect_command (char *exp, int from_tty)
 {
   extern int epoch_interface;
 
@@ -1025,18 +991,14 @@ inspect_command (exp, from_tty)
 /* Same as print, except it doesn't print void results. */
 /* ARGSUSED */
 static void
-call_command (exp, from_tty)
-     char *exp;
-     int from_tty;
+call_command (char *exp, int from_tty)
 {
   print_command_1 (exp, 0, 0);
 }
 
 /* ARGSUSED */
 void
-output_command (exp, from_tty)
-     char *exp;
-     int from_tty;
+output_command (char *exp, int from_tty)
 {
   struct expression *expr;
   register struct cleanup *old_chain;
@@ -1071,9 +1033,7 @@ output_command (exp, from_tty)
 
 /* ARGSUSED */
 static void
-set_command (exp, from_tty)
-     char *exp;
-     int from_tty;
+set_command (char *exp, int from_tty)
 {
   struct expression *expr = parse_expression (exp);
   register struct cleanup *old_chain =
@@ -1084,9 +1044,7 @@ set_command (exp, from_tty)
 
 /* ARGSUSED */
 static void
-sym_info (arg, from_tty)
-     char *arg;
-     int from_tty;
+sym_info (char *arg, int from_tty)
 {
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
@@ -1131,9 +1089,7 @@ sym_info (arg, from_tty)
 
 /* ARGSUSED */
 static void
-address_info (exp, from_tty)
-     char *exp;
-     int from_tty;
+address_info (char *exp, int from_tty)
 {
   register struct symbol *sym;
   register struct minimal_symbol *msymbol;
@@ -1345,9 +1301,7 @@ address_info (exp, from_tty)
 }
 
 void
-x_command (exp, from_tty)
-     char *exp;
-     int from_tty;
+x_command (char *exp, int from_tty)
 {
   struct expression *expr;
   struct format_data fmt;
@@ -1424,9 +1378,7 @@ x_command (exp, from_tty)
    Specify the expression.  */
 
 static void
-display_command (exp, from_tty)
-     char *exp;
-     int from_tty;
+display_command (char *exp, int from_tty)
 {
   struct format_data fmt;
   register struct expression *expr;
@@ -1484,8 +1436,7 @@ display_command (exp, from_tty)
 }
 
 static void
-free_display (d)
-     struct display *d;
+free_display (struct display *d)
 {
   free ((PTR) d->exp);
   free ((PTR) d);
@@ -1496,7 +1447,7 @@ free_display (d)
    the types stored in many expressions.  */
 
 void
-clear_displays ()
+clear_displays (void)
 {
   register struct display *d;
 
@@ -1511,8 +1462,7 @@ clear_displays ()
 /* Delete the auto-display number NUM.  */
 
 static void
-delete_display (num)
-     int num;
+delete_display (int num)
 {
   register struct display *d1, *d;
 
@@ -1544,9 +1494,7 @@ delete_display (num)
    Specify the element numbers.  */
 
 static void
-undisplay_command (args, from_tty)
-     char *args;
-     int from_tty;
+undisplay_command (char *args, int from_tty)
 {
   register char *p = args;
   register char *p1;
@@ -1584,8 +1532,7 @@ undisplay_command (args, from_tty)
    or if the display is disabled. */
 
 static void
-do_one_display (d)
-     struct display *d;
+do_one_display (struct display *d)
 {
   int within_current_scope;
 
@@ -1670,7 +1617,7 @@ do_one_display (d)
    evaluated in the current scope.  */
 
 void
-do_displays ()
+do_displays (void)
 {
   register struct display *d;
 
@@ -1682,8 +1629,7 @@ do_displays ()
    This is done when there is an error or a signal.  */
 
 void
-disable_display (num)
-     int num;
+disable_display (int num)
 {
   register struct display *d;
 
@@ -1697,7 +1643,7 @@ disable_display (num)
 }
 
 void
-disable_current_display ()
+disable_current_display (void)
 {
   if (current_display_number >= 0)
     {
@@ -1709,9 +1655,7 @@ disable_current_display ()
 }
 
 static void
-display_info (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+display_info (char *ignore, int from_tty)
 {
   register struct display *d;
 
@@ -1738,9 +1682,7 @@ Num Enb Expression\n");
 }
 
 static void
-enable_display (args, from_tty)
-     char *args;
-     int from_tty;
+enable_display (char *args, int from_tty)
 {
   register char *p = args;
   register char *p1;
@@ -1779,9 +1721,7 @@ enable_display (args, from_tty)
 
 /* ARGSUSED */
 static void
-disable_display_command (args, from_tty)
-     char *args;
-     int from_tty;
+disable_display_command (char *args, int from_tty)
 {
   register char *p = args;
   register char *p1;
@@ -1814,10 +1754,8 @@ disable_display_command (args, from_tty)
    specified by a struct symbol.  */
 
 void
-print_variable_value (var, frame, stream)
-     struct symbol *var;
-     struct frame_info *frame;
-     struct ui_file *stream;
+print_variable_value (struct symbol *var, struct frame_info *frame,
+		      struct ui_file *stream)
 {
   value_ptr val = read_var_value (var, frame);
 
@@ -1833,11 +1771,8 @@ print_variable_value (var, frame, stream)
    according to the stack frame".  At least for VAX, i386, isi.  */
 
 void
-print_frame_args (func, fi, num, stream)
-     struct symbol *func;
-     struct frame_info *fi;
-     int num;
-     struct ui_file *stream;
+print_frame_args (struct symbol *func, struct frame_info *fi, int num,
+		  struct ui_file *stream)
 {
   struct block *b = NULL;
   int nsyms = 0;
@@ -2055,12 +1990,8 @@ print_frame_args (func, fi, num, stream)
    the first nameless arg).  */
 
 static void
-print_frame_nameless_args (fi, start, num, first, stream)
-     struct frame_info *fi;
-     long start;
-     int num;
-     int first;
-     struct ui_file *stream;
+print_frame_nameless_args (struct frame_info *fi, long start, int num,
+			   int first, struct ui_file *stream)
 {
   int i;
   CORE_ADDR argsaddr;
@@ -2098,9 +2029,7 @@ print_frame_nameless_args (fi, start, num, first, stream)
 
 /* ARGSUSED */
 static void
-printf_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+printf_command (char *arg, int from_tty)
 {
   register char *f = NULL;
   register char *s = arg;
@@ -2382,9 +2311,7 @@ printf_command (arg, from_tty)
 
 /* ARGSUSED */
 static void
-disassemble_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+disassemble_command (char *arg, int from_tty)
 {
   CORE_ADDR low, high;
   char *name;
@@ -2507,9 +2434,7 @@ disassemble_command (arg, from_tty)
    on STREAM.  Returns length of the instruction, in bytes.  */
 
 static int
-print_insn (memaddr, stream)
-     CORE_ADDR memaddr;
-     struct ui_file *stream;
+print_insn (CORE_ADDR memaddr, struct ui_file *stream)
 {
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
     TARGET_PRINT_INSN_INFO->endian = BFD_ENDIAN_BIG;
@@ -2525,7 +2450,7 @@ print_insn (memaddr, stream)
 
 
 void
-_initialize_printcmd ()
+_initialize_printcmd (void)
 {
   current_display_number = -1;
 

@@ -776,8 +776,7 @@ static struct die_info *dwarf_alloc_die (void);
    information and return true if we have enough to do something.  */
 
 int
-dwarf2_has_info (abfd)
-     bfd *abfd;
+dwarf2_has_info (bfd *abfd)
 {
   dwarf_info_offset = dwarf_abbrev_offset = dwarf_line_offset = 0;
   bfd_map_over_sections (abfd, dwarf2_locate_sections, NULL);
@@ -796,10 +795,7 @@ dwarf2_has_info (abfd)
    in.  */
 
 static void
-dwarf2_locate_sections (ignore_abfd, sectp, ignore_ptr)
-     bfd *ignore_abfd;
-     asection *sectp;
-     PTR ignore_ptr;
+dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, PTR ignore_ptr)
 {
   if (STREQ (sectp->name, INFO_SECTION))
     {
@@ -846,9 +842,7 @@ dwarf2_locate_sections (ignore_abfd, sectp, ignore_ptr)
 /* Build a partial symbol table.  */
 
 void
-dwarf2_build_psymtabs (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;
+dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
 {
 
   /* We definitely need the .debug_info and .debug_abbrev sections */
@@ -891,9 +885,7 @@ dwarf2_build_psymtabs (objfile, mainline)
    .debug_pubnames and .debug_aranges sections.  */
 
 static void
-dwarf2_build_psymtabs_easy (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;
+dwarf2_build_psymtabs_easy (struct objfile *objfile, int mainline)
 {
   bfd *abfd = objfile->obfd;
   char *aranges_buffer, *pubnames_buffer;
@@ -950,9 +942,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
    .debug_info and .debug_abbrev sections.  */
 
 static void
-dwarf2_build_psymtabs_hard (objfile, mainline)
-     struct objfile *objfile;
-     int mainline;
+dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 {
   /* Instead of reading this into a big buffer, we should probably use
      mmap()  on architectures that support it. (FIXME) */
@@ -1278,8 +1268,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
 /* Expand this partial symbol table into a full symbol table.  */
 
 static void
-dwarf2_psymtab_to_symtab (pst)
-     struct partial_symtab *pst;
+dwarf2_psymtab_to_symtab (struct partial_symtab *pst)
 {
   /* FIXME: This is barely more than a stub.  */
   if (pst != NULL)
@@ -1306,8 +1295,7 @@ dwarf2_psymtab_to_symtab (pst)
 }
 
 static void
-psymtab_to_symtab_1 (pst)
-     struct partial_symtab *pst;
+psymtab_to_symtab_1 (struct partial_symtab *pst)
 {
   struct objfile *objfile = pst->objfile;
   bfd *abfd = objfile->obfd;
@@ -1684,11 +1672,8 @@ read_lexical_block_scope (struct die_info *die, struct objfile *objfile,
    Return 1 if the attributes are present and valid, otherwise, return 0.  */
 
 static int
-dwarf2_get_pc_bounds (die, lowpc, highpc, objfile)
-     struct die_info *die;
-     CORE_ADDR *lowpc;
-     CORE_ADDR *highpc;
-     struct objfile *objfile;
+dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc, CORE_ADDR *highpc,
+		      struct objfile *objfile)
 {
   struct attribute *attr;
   CORE_ADDR low;
@@ -1885,10 +1870,8 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 /* Create the vector of fields, and attach it to the type.  */
 
 static void
-dwarf2_attach_fields_to_type (fip, type, objfile)
-     struct field_info *fip;
-     struct type *type;
-     struct objfile *objfile;
+dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
+			      struct objfile *objfile)
 {
   int nfields = fip->nfields;
 
@@ -2102,10 +2085,8 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 /* Create the vector of member function fields, and attach it to the type.  */
 
 static void
-dwarf2_attach_fn_fields_to_type (fip, type, objfile)
-     struct field_info *fip;
-     struct type *type;
-     struct objfile *objfile;
+dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
+				 struct objfile *objfile)
 {
   struct fnfieldlist *flp;
   int total_length = 0;
@@ -2684,9 +2665,7 @@ read_tag_volatile_type (struct die_info *die, struct objfile *objfile,
    attribute to reference it.  */
 
 static void
-read_tag_string_type (die, objfile)
-     struct die_info *die;
-     struct objfile *objfile;
+read_tag_string_type (struct die_info *die, struct objfile *objfile)
 {
   struct type *type, *range_type, *index_type, *char_type;
   struct attribute *attr;
@@ -2827,9 +2806,7 @@ read_typedef (struct die_info *die, struct objfile *objfile,
    it in the TYPE field of the die.  */
 
 static void
-read_base_type (die, objfile)
-     struct die_info *die;
-     struct objfile *objfile;
+read_base_type (struct die_info *die, struct objfile *objfile)
 {
   struct type *type;
   struct attribute *attr;
@@ -2948,8 +2925,7 @@ read_comp_unit (char *info_ptr, bfd *abfd,
 /* Free a linked list of dies.  */
 
 static void
-free_die_list (dies)
-     struct die_info *dies;
+free_die_list (struct die_info *dies)
 {
   struct die_info *die, *next;
 
@@ -2980,10 +2956,8 @@ make_cleanup_free_die_list (struct die_info *dies)
    object file specified by OBJFILE into the psymbol_obstack and return it.  */
 
 static char *
-dwarf2_read_section (objfile, offset, size)
-     struct objfile *objfile;
-     file_ptr offset;
-     unsigned int size;
+dwarf2_read_section (struct objfile *objfile, file_ptr offset,
+		     unsigned int size)
 {
   bfd *abfd = objfile->obfd;
   char *buf;
@@ -3008,9 +2982,7 @@ dwarf2_read_section (objfile, offset, size)
    in a hash table.  */
 
 static void
-dwarf2_read_abbrevs (abfd, offset)
-     bfd *abfd;
-     unsigned int offset;
+dwarf2_read_abbrevs (bfd *abfd, unsigned int offset)
 {
   char *abbrev_ptr;
   struct abbrev_info *cur_abbrev;
@@ -3083,8 +3055,7 @@ dwarf2_read_abbrevs (abfd, offset)
 
 /* ARGSUSED */
 static void
-dwarf2_empty_abbrev_table (ignore)
-     PTR ignore;
+dwarf2_empty_abbrev_table (PTR ignore)
 {
   int i;
   struct abbrev_info *abbrev, *next;
@@ -3107,8 +3078,7 @@ dwarf2_empty_abbrev_table (ignore)
 /* Lookup an abbrev_info structure in the abbrev hash table.  */
 
 static struct abbrev_info *
-dwarf2_lookup_abbrev (number)
-     unsigned int number;
+dwarf2_lookup_abbrev (unsigned int number)
 {
   unsigned int hash_number;
   struct abbrev_info *abbrev;
@@ -3416,57 +3386,43 @@ read_attribute (struct attribute *attr, struct attr_abbrev *abbrev,
 /* read dwarf information from a buffer */
 
 static unsigned int
-read_1_byte (abfd, buf)
-     bfd *abfd;
-     char *buf;
+read_1_byte (bfd *abfd, char *buf)
 {
   return bfd_get_8 (abfd, (bfd_byte *) buf);
 }
 
 static int
-read_1_signed_byte (abfd, buf)
-     bfd *abfd;
-     char *buf;
+read_1_signed_byte (bfd *abfd, char *buf)
 {
   return bfd_get_signed_8 (abfd, (bfd_byte *) buf);
 }
 
 static unsigned int
-read_2_bytes (abfd, buf)
-     bfd *abfd;
-     char *buf;
+read_2_bytes (bfd *abfd, char *buf)
 {
   return bfd_get_16 (abfd, (bfd_byte *) buf);
 }
 
 static int
-read_2_signed_bytes (abfd, buf)
-     bfd *abfd;
-     char *buf;
+read_2_signed_bytes (bfd *abfd, char *buf)
 {
   return bfd_get_signed_16 (abfd, (bfd_byte *) buf);
 }
 
 static unsigned int
-read_4_bytes (abfd, buf)
-     bfd *abfd;
-     char *buf;
+read_4_bytes (bfd *abfd, char *buf)
 {
   return bfd_get_32 (abfd, (bfd_byte *) buf);
 }
 
 static int
-read_4_signed_bytes (abfd, buf)
-     bfd *abfd;
-     char *buf;
+read_4_signed_bytes (bfd *abfd, char *buf)
 {
   return bfd_get_signed_32 (abfd, (bfd_byte *) buf);
 }
 
 static unsigned long
-read_8_bytes (abfd, buf)
-     bfd *abfd;
-     char *buf;
+read_8_bytes (bfd *abfd, char *buf)
 {
   return bfd_get_64 (abfd, (bfd_byte *) buf);
 }
@@ -3517,10 +3473,7 @@ read_address (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
 }
 
 static char *
-read_n_bytes (abfd, buf, size)
-     bfd *abfd;
-     char *buf;
-     unsigned int size;
+read_n_bytes (bfd *abfd, char *buf, unsigned int size)
 {
   /* If the size of a host char is 8 bits, we can return a pointer
      to the buffer, otherwise we have to copy the data to a buffer
@@ -3542,10 +3495,7 @@ read_n_bytes (abfd, buf, size)
 }
 
 static char *
-read_string (abfd, buf, bytes_read_ptr)
-     bfd *abfd;
-     char *buf;
-     unsigned int *bytes_read_ptr;
+read_string (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
 {
   /* If the size of a host char is 8 bits, we can return a pointer
      to the string, otherwise we have to copy the string to a buffer
@@ -3580,10 +3530,7 @@ read_string (abfd, buf, bytes_read_ptr)
 }
 
 static unsigned long
-read_unsigned_leb128 (abfd, buf, bytes_read_ptr)
-     bfd *abfd;
-     char *buf;
-     unsigned int *bytes_read_ptr;
+read_unsigned_leb128 (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
 {
   unsigned long result;
   unsigned int num_read;
@@ -3611,10 +3558,7 @@ read_unsigned_leb128 (abfd, buf, bytes_read_ptr)
 }
 
 static long
-read_signed_leb128 (abfd, buf, bytes_read_ptr)
-     bfd *abfd;
-     char *buf;
-     unsigned int *bytes_read_ptr;
+read_signed_leb128 (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
 {
   long result;
   int i, shift, size, num_read;
@@ -3646,8 +3590,7 @@ read_signed_leb128 (abfd, buf, bytes_read_ptr)
 }
 
 static void
-set_cu_language (lang)
-     unsigned int lang;
+set_cu_language (unsigned int lang)
 {
   switch (lang)
     {
@@ -3680,9 +3623,7 @@ set_cu_language (lang)
 /* Return the named attribute or NULL if not there.  */
 
 static struct attribute *
-dwarf_attr (die, name)
-     struct die_info *die;
-     unsigned int name;
+dwarf_attr (struct die_info *die, unsigned int name)
 {
   unsigned int i;
   struct attribute *spec = NULL;
@@ -4005,9 +3946,7 @@ done:
    subfile, so that `break /srcdir/list0.c:1' works as expected.  */
 
 static void
-dwarf2_start_subfile (filename, dirname)
-     char *filename;
-     char *dirname;
+dwarf2_start_subfile (char *filename, char *dirname)
 {
   /* If the filename isn't absolute, try to match an existing subfile
      with the full pathname.  */
@@ -4453,9 +4392,7 @@ die_containing_type (struct die_info *die, struct objfile *objfile,
 
 #if 0
 static struct type *
-type_at_offset (offset, objfile)
-     unsigned int offset;
-     struct objfile *objfile;
+type_at_offset (unsigned int offset, struct objfile *objfile)
 {
   struct die_info *die;
   struct type *type;
@@ -4574,10 +4511,7 @@ read_type_die (struct die_info *die, struct objfile *objfile,
 }
 
 static struct type *
-dwarf_base_type (encoding, size, objfile)
-     int encoding;
-     int size;
-     struct objfile *objfile;
+dwarf_base_type (int encoding, int size, struct objfile *objfile)
 {
   /* FIXME - this should not produce a new (struct type *)
      every time.  It should cache base types.  */
@@ -4654,8 +4588,7 @@ dwarf_base_type (encoding, size, objfile)
 
 #if 0
 struct die_info *
-copy_die (old_die)
-     struct die_info *old_die;
+copy_die (struct die_info *old_die)
 {
   struct die_info *new_die;
   int i, num_attrs;
@@ -4689,8 +4622,7 @@ copy_die (old_die)
 /* Return sibling of die, NULL if no sibling.  */
 
 struct die_info *
-sibling_die (die)
-     struct die_info *die;
+sibling_die (struct die_info *die)
 {
   int nesting_level = 0;
 
@@ -4734,8 +4666,7 @@ sibling_die (die)
 /* Get linkage name of a die, return NULL if not found.  */
 
 static char *
-dwarf2_linkage_name (die)
-     struct die_info *die;
+dwarf2_linkage_name (struct die_info *die)
 {
   struct attribute *attr;
 
@@ -4751,8 +4682,7 @@ dwarf2_linkage_name (die)
 /* Convert a DIE tag into its string name.  */
 
 static char *
-dwarf_tag_name (tag)
-     register unsigned tag;
+dwarf_tag_name (register unsigned tag)
 {
   switch (tag)
     {
@@ -4868,8 +4798,7 @@ dwarf_tag_name (tag)
 /* Convert a DWARF attribute code into its string name.  */
 
 static char *
-dwarf_attr_name (attr)
-     register unsigned attr;
+dwarf_attr_name (register unsigned attr)
 {
   switch (attr)
     {
@@ -5035,8 +4964,7 @@ dwarf_attr_name (attr)
 /* Convert a DWARF value form code into its string name.  */
 
 static char *
-dwarf_form_name (form)
-     register unsigned form;
+dwarf_form_name (register unsigned form)
 {
   switch (form)
     {
@@ -5090,8 +5018,7 @@ dwarf_form_name (form)
 /* Convert a DWARF stack opcode into its string name.  */
 
 static char *
-dwarf_stack_op_name (op)
-     register unsigned op;
+dwarf_stack_op_name (register unsigned op)
 {
   switch (op)
     {
@@ -5391,8 +5318,7 @@ dwarf_stack_op_name (op)
 }
 
 static char *
-dwarf_bool_name (mybool)
-     unsigned mybool;
+dwarf_bool_name (unsigned mybool)
 {
   if (mybool)
     return "TRUE";
@@ -5403,8 +5329,7 @@ dwarf_bool_name (mybool)
 /* Convert a DWARF type code into its string name.  */
 
 static char *
-dwarf_type_encoding_name (enc)
-     register unsigned enc;
+dwarf_type_encoding_name (register unsigned enc)
 {
   switch (enc)
     {
@@ -5433,8 +5358,7 @@ dwarf_type_encoding_name (enc)
 
 #if 0
 static char *
-dwarf_cfi_name (cfi_opc)
-     register unsigned cfi_opc;
+dwarf_cfi_name (register unsigned cfi_opc)
 {
   switch (cfi_opc)
     {
@@ -5484,8 +5408,7 @@ dwarf_cfi_name (cfi_opc)
 #endif
 
 void
-dump_die (die)
-     struct die_info *die;
+dump_die (struct die_info *die)
 {
   unsigned int i;
 
@@ -5547,8 +5470,7 @@ dump_die (die)
 }
 
 void
-dump_die_list (die)
-     struct die_info *die;
+dump_die_list (struct die_info *die)
 {
   while (die)
     {
@@ -5558,9 +5480,7 @@ dump_die_list (die)
 }
 
 void
-store_in_ref_table (offset, die)
-     unsigned int offset;
-     struct die_info *die;
+store_in_ref_table (unsigned int offset, struct die_info *die)
 {
   int h;
   struct die_info *old;
@@ -5573,15 +5493,14 @@ store_in_ref_table (offset, die)
 
 
 static void
-dwarf2_empty_hash_tables ()
+dwarf2_empty_hash_tables (void)
 {
   memset (die_ref_table, 0, sizeof (die_ref_table));
   memset (dwarf2_cached_types, 0, sizeof(dwarf2_cached_types));
 }
 
 static unsigned int
-dwarf2_get_ref_die_offset (attr)
-     struct attribute *attr;
+dwarf2_get_ref_die_offset (struct attribute *attr)
 {
   unsigned int result = 0;
 
@@ -5603,8 +5522,7 @@ dwarf2_get_ref_die_offset (attr)
 }
 
 struct die_info *
-follow_die_ref (offset)
-     unsigned int offset;
+follow_die_ref (unsigned int offset)
 {
   struct die_info *die;
   int h;
@@ -5623,9 +5541,7 @@ follow_die_ref (offset)
 }
 
 static struct type *
-dwarf2_fundamental_type (objfile, typeid)
-     struct objfile *objfile;
-     int typeid;
+dwarf2_fundamental_type (struct objfile *objfile, int typeid)
 {
   if (typeid < 0 || typeid >= FT_NUM_MEMBERS)
     {
@@ -5893,14 +5809,13 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 
 /* ARGSUSED */
 static void
-dwarf2_free_tmp_obstack (ignore)
-     PTR ignore;
+dwarf2_free_tmp_obstack (PTR ignore)
 {
   obstack_free (&dwarf2_tmp_obstack, NULL);
 }
 
 static struct dwarf_block *
-dwarf_alloc_block ()
+dwarf_alloc_block (void)
 {
   struct dwarf_block *blk;
 
@@ -5910,7 +5825,7 @@ dwarf_alloc_block ()
 }
 
 static struct abbrev_info *
-dwarf_alloc_abbrev ()
+dwarf_alloc_abbrev (void)
 {
   struct abbrev_info *abbrev;
 
@@ -5920,7 +5835,7 @@ dwarf_alloc_abbrev ()
 }
 
 static struct die_info *
-dwarf_alloc_die ()
+dwarf_alloc_die (void)
 {
   struct die_info *die;
 

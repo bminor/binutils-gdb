@@ -63,9 +63,7 @@ int query ();
    ENV is the environment vector to pass.  */
 
 int
-create_inferior (program, allargs)
-     char *program;
-     char **allargs;
+create_inferior (char *program, char **allargs)
 {
   int pid;
 
@@ -91,7 +89,7 @@ create_inferior (program, allargs)
 /* Kill the inferior process.  Make us have no inferior.  */
 
 void
-kill_inferior ()
+kill_inferior (void)
 {
   if (inferior_pid == 0)
     return;
@@ -102,8 +100,7 @@ kill_inferior ()
 
 /* Return nonzero if the given thread is still alive.  */
 int
-mythread_alive (pid)
-     int pid;
+mythread_alive (int pid)
 {
   return 1;
 }
@@ -111,8 +108,7 @@ mythread_alive (pid)
 /* Wait for process, returns status */
 
 unsigned char
-mywait (status)
-     char *status;
+mywait (char *status)
 {
   int pid;
   union wait w;
@@ -145,9 +141,7 @@ mywait (status)
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-myresume (step, signal)
-     int step;
-     int signal;
+myresume (int step, int signal)
 {
   errno = 0;
   ptrace (step ? PTRACE_SINGLESTEP : PTRACE_CONT, inferior_pid, 1, signal);
@@ -160,8 +154,7 @@ myresume (step, signal)
    marking them as valid so we won't fetch them again.  */
 
 void
-fetch_inferior_registers (ignored)
-     int ignored;
+fetch_inferior_registers (int ignored)
 {
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
@@ -207,8 +200,7 @@ fetch_inferior_registers (ignored)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (ignored)
-     int ignored;
+store_inferior_registers (int ignored)
 {
   struct regs inferior_registers;
   struct fp_status inferior_fp_registers;
@@ -250,10 +242,7 @@ store_inferior_registers (ignored)
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
 
-read_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -280,10 +269,7 @@ read_inferior_memory (memaddr, myaddr, len)
    returns the value of errno.  */
 
 int
-write_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -324,6 +310,6 @@ write_inferior_memory (memaddr, myaddr, len)
 }
 
 void
-initialize_low ()
+initialize_low (void)
 {
 }

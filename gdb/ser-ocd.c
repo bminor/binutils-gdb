@@ -34,9 +34,7 @@ static int (*dll_do_command) (const char *, char *);
 #endif
 
 static int
-ocd_open (scb, name)
-     serial_t scb;
-     const char *name;
+ocd_open (serial_t scb, const char *name)
 {
 #ifdef _WIN32
   /* Find the wiggler DLL which talks to the board.  */
@@ -62,15 +60,13 @@ ocd_open (scb, name)
 }
 
 static int
-ocd_noop (scb)
-     serial_t scb;
+ocd_noop (serial_t scb)
 {
   return 0;
 }
 
 static void
-ocd_raw (scb)
-     serial_t scb;
+ocd_raw (serial_t scb)
 {
   /* Always in raw mode */
 }
@@ -81,9 +77,7 @@ unsigned char from_wiggler_buffer[WIGGLER_BUFF_SIZE];
 unsigned char *wiggler_buffer_ptr;	/* curr spot in buffer */
 
 static int
-ocd_readchar (scb, timeout)
-     serial_t scb;
-     int timeout;
+ocd_readchar (serial_t scb, int timeout)
 {
   /* Catch attempts at reading past the end of the buffer */
   if (wiggler_buffer_ptr >
@@ -102,8 +96,7 @@ struct ocd_ttystate
    vector.  Someday, they may do something real... */
 
 static serial_ttystate
-ocd_get_tty_state (scb)
-     serial_t scb;
+ocd_get_tty_state (serial_t scb)
 {
   struct ocd_ttystate *state;
 
@@ -113,18 +106,14 @@ ocd_get_tty_state (scb)
 }
 
 static int
-ocd_set_tty_state (scb, ttystate)
-     serial_t scb;
-     serial_ttystate ttystate;
+ocd_set_tty_state (serial_t scb, serial_ttystate ttystate)
 {
   return 0;
 }
 
 static int
-ocd_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
-     serial_t scb;
-     serial_ttystate new_ttystate;
-     serial_ttystate old_ttystate;
+ocd_noflush_set_tty_state (serial_t scb, serial_ttystate new_ttystate,
+			   serial_ttystate old_ttystate)
 {
   return 0;
 }
@@ -139,18 +128,13 @@ ocd_print_tty_state (serial_t scb,
 }
 
 static int
-ocd_setbaudrate (scb, rate)
-     serial_t scb;
-     int rate;
+ocd_setbaudrate (serial_t scb, int rate)
 {
   return 0;
 }
 
 static int
-ocd_write (scb, str, len)
-     serial_t scb;
-     const char *str;
-     int len;
+ocd_write (serial_t scb, const char *str, int len)
 {
 #ifdef _WIN32
   /* send packet to Wigglers.dll and store response so we can give it to
@@ -163,8 +147,7 @@ ocd_write (scb, str, len)
 }
 
 static void
-ocd_close (scb)
-     serial_t scb;
+ocd_close (serial_t scb)
 {
 }
 
@@ -189,7 +172,7 @@ static struct serial_ops ocd_ops =
 };
 
 void
-_initialize_ser_ocd_bdm ()
+_initialize_ser_ocd_bdm (void)
 {
   serial_add_interface (&ocd_ops);
 }

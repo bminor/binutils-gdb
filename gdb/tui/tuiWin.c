@@ -62,7 +62,7 @@ static void _parseScrollingArgs (char *, TuiWinInfoPtr *, int *);
    **        Function to initialize gdb commands, for tui window manipulation.
  */
 void
-_initialize_tuiWin ()
+_initialize_tuiWin (void)
 {
   if (tui_version)
     {

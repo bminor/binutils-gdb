@@ -32,11 +32,7 @@ static int parallel_in_use;
 static void sh3_open (char *args, int from_tty);
 
 static void
-sh3_supply_register (regname, regnamelen, val, vallen)
-     char *regname;
-     int regnamelen;
-     char *val;
-     int vallen;
+sh3_supply_register (char *regname, int regnamelen, char *val, int vallen)
 {
   int numregs;
   int regno;
@@ -122,10 +118,7 @@ sh3_supply_register (regname, regnamelen, val, vallen)
 }
 
 static void
-sh3_load (desc, file, hashmark)
-     serial_t desc;
-     char *file;
-     int hashmark;
+sh3_load (serial_t desc, char *file, int hashmark)
 {
   if (parallel_in_use)
     {
@@ -249,9 +242,7 @@ init_sh3_cmds (void)
 static struct monitor_ops sh3e_cmds;
 
 static void
-sh3_open (args, from_tty)
-     char *args;
-     int from_tty;
+sh3_open (char *args, int from_tty)
 {
   char *serial_port_name = args;
   char *parallel_port_name = 0;
@@ -291,9 +282,7 @@ sh3_open (args, from_tty)
 
 
 static void
-sh3e_open (args, from_tty)
-     char *args;
-     int from_tty;
+sh3e_open (char *args, int from_tty)
 {
   char *serial_port_name = args;
   char *parallel_port_name = 0;
@@ -339,8 +328,7 @@ sh3e_open (args, from_tty)
 }
 
 static void
-sh3_close (quitting)
-     int quitting;
+sh3_close (int quitting)
 {
   monitor_close (quitting);
   if (parallel_in_use)
@@ -351,7 +339,7 @@ sh3_close (quitting)
 }
 
 void
-_initialize_sh3_rom ()
+_initialize_sh3_rom (void)
 {
   init_sh3_cmds ();
   init_monitor_ops (&sh3_ops);

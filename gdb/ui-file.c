@@ -50,7 +50,7 @@ struct ui_file
 int ui_file_magic;
 
 struct ui_file *
-ui_file_new ()
+ui_file_new (void)
 {
   struct ui_file *file = xmalloc (sizeof (struct ui_file));
   file->magic = &ui_file_magic;
@@ -65,23 +65,20 @@ ui_file_new ()
 }
 
 void
-ui_file_delete (file)
-     struct ui_file *file;
+ui_file_delete (struct ui_file *file)
 {
   file->to_delete (file);
   free (file);
 }
 
 static int
-null_file_isatty (file)
-     struct ui_file *file;
+null_file_isatty (struct ui_file *file)
 {
   return 0;
 }
 
 static void
-null_file_rewind (file)
-     struct ui_file *file;
+null_file_rewind (struct ui_file *file)
 {
   return;
 }
@@ -95,8 +92,7 @@ null_file_put (struct ui_file *file,
 }
 
 static void
-null_file_flush (file)
-     struct ui_file *file;
+null_file_flush (struct ui_file *file)
 {
   return;
 }
@@ -130,9 +126,7 @@ null_file_write (struct ui_file *file,
 }
 
 static void
-null_file_fputs (buf, file)
-     const char *buf;
-     struct ui_file *file;
+null_file_fputs (const char *buf, struct ui_file *file)
 {
   if (file->to_write == null_file_write)
     /* Both the write and fputs methods are null. Discard the
@@ -146,15 +140,13 @@ null_file_fputs (buf, file)
 }
 
 static void
-null_file_delete (file)
-     struct ui_file *file;
+null_file_delete (struct ui_file *file)
 {
   return;
 }
 
 void *
-ui_file_data (file)
-     struct ui_file *file;
+ui_file_data (struct ui_file *file)
 {
   if (file->magic != &ui_file_magic)
     internal_error ("ui_file_data: bad magic number");
@@ -162,22 +154,19 @@ ui_file_data (file)
 }
 
 void
-gdb_flush (file)
-     struct ui_file *file;
+gdb_flush (struct ui_file *file)
 {
   file->to_flush (file);
 }
 
 int
-ui_file_isatty (file)
-     struct ui_file *file;
+ui_file_isatty (struct ui_file *file)
 {
   return file->to_isatty (file);
 }
 
 void
-ui_file_rewind (file)
-     struct ui_file *file;
+ui_file_rewind (struct ui_file *file)
 {
   file->to_rewind (file);
 }
@@ -199,41 +188,31 @@ ui_file_write (struct ui_file *file,
 }
 
 void
-fputs_unfiltered (buf, file)
-     const char *buf;
-     struct ui_file *file;
+fputs_unfiltered (const char *buf, struct ui_file *file)
 {
   file->to_fputs (buf, file);
 }
 
 void
-set_ui_file_flush (file, flush)
-     struct ui_file *file;
-     ui_file_flush_ftype *flush;
+set_ui_file_flush (struct ui_file *file, ui_file_flush_ftype *flush)
 {
   file->to_flush = flush;
 }
 
 void
-set_ui_file_isatty (file, isatty)
-     struct ui_file *file;
-     ui_file_isatty_ftype *isatty;
+set_ui_file_isatty (struct ui_file *file, ui_file_isatty_ftype *isatty)
 {
   file->to_isatty = isatty;
 }
 
 void
-set_ui_file_rewind (file, rewind)
-     struct ui_file *file;
-     ui_file_rewind_ftype *rewind;
+set_ui_file_rewind (struct ui_file *file, ui_file_rewind_ftype *rewind)
 {
   file->to_rewind = rewind;
 }
 
 void
-set_ui_file_put (file, put)
-     struct ui_file *file;
-     ui_file_put_ftype *put;
+set_ui_file_put (struct ui_file *file, ui_file_put_ftype *put)
 {
   file->to_put = put;
 }
@@ -246,18 +225,14 @@ set_ui_file_write (struct ui_file *file,
 }
 
 void
-set_ui_file_fputs (file, fputs)
-     struct ui_file *file;
-     ui_file_fputs_ftype *fputs;
+set_ui_file_fputs (struct ui_file *file, ui_file_fputs_ftype *fputs)
 {
   file->to_fputs = fputs;
 }
 
 void
-set_ui_file_data (file, data, delete)
-     struct ui_file *file;
-     void *data;
-     ui_file_delete_ftype *delete;
+set_ui_file_data (struct ui_file *file, void *data,
+		  ui_file_delete_ftype *delete)
 {
   file->to_data = data;
   file->to_delete = delete;
@@ -420,9 +395,7 @@ struct stdio_file
   };
 
 static struct ui_file *
-stdio_file_new (file, close_p)
-     FILE *file;
-     int close_p;
+stdio_file_new (FILE *file, int close_p)
 {
   struct ui_file *ui_file = ui_file_new ();
   struct stdio_file *stdio = xmalloc (sizeof (struct stdio_file));
@@ -438,8 +411,7 @@ stdio_file_new (file, close_p)
 }
 
 static void
-stdio_file_delete (file)
-     struct ui_file *file;
+stdio_file_delete (struct ui_file *file)
 {
   struct stdio_file *stdio = ui_file_data (file);
   if (stdio->magic != &stdio_file_magic)
@@ -452,8 +424,7 @@ stdio_file_delete (file)
 }
 
 static void
-stdio_file_flush (file)
-     struct ui_file *file;
+stdio_file_flush (struct ui_file *file)
 {
   struct stdio_file *stdio = ui_file_data (file);
   if (stdio->magic != &stdio_file_magic)
@@ -471,9 +442,7 @@ stdio_file_write (struct ui_file *file, const char *buf, long length_buf)
 }
 
 static void
-stdio_file_fputs (linebuffer, file)
-     const char *linebuffer;
-     struct ui_file *file;
+stdio_file_fputs (const char *linebuffer, struct ui_file *file)
 {
   struct stdio_file *stdio = ui_file_data (file);
   if (stdio->magic != &stdio_file_magic)
@@ -482,8 +451,7 @@ stdio_file_fputs (linebuffer, file)
 }
 
 static int
-stdio_file_isatty (file)
-     struct ui_file *file;
+stdio_file_isatty (struct ui_file *file)
 {
   struct stdio_file *stdio = ui_file_data (file);
   if (stdio->magic != &stdio_file_magic)
@@ -494,16 +462,13 @@ stdio_file_isatty (file)
 /* Like fdopen().  Create a ui_file from a previously opened FILE. */
 
 struct ui_file *
-stdio_fileopen (file)
-     FILE *file;
+stdio_fileopen (FILE *file)
 {
   return stdio_file_new (file, 0);
 }
 
 struct ui_file *
-gdb_fopen (name, mode)
-     char *name;
-     char *mode;
+gdb_fopen (char *name, char *mode)
 {
   FILE *f = fopen (name, mode);
   if (f == NULL)

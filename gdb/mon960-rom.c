@@ -39,9 +39,7 @@ static void mon960_open (char *args, int from_tty);
 #ifdef USE_GENERIC_LOAD
 
 static void
-mon960_load_gen (filename, from_tty)
-     char *filename;
-     int from_tty;
+mon960_load_gen (char *filename, int from_tty)
 {
   extern int inferior_pid;
 
@@ -56,10 +54,7 @@ mon960_load_gen (filename, from_tty)
 #else
 
 static void
-mon960_load (desc, file, hashmark)
-     serial_t desc;
-     char *file;
-     int hashmark;
+mon960_load (serial_t desc, char *file, int hashmark)
 {
   bfd *abfd;
   asection *s;
@@ -217,9 +212,7 @@ init_mon960_cmds (void)
 };
 
 static void
-mon960_open (args, from_tty)
-     char *args;
-     int from_tty;
+mon960_open (char *args, int from_tty)
 {
   char buf[64];
 
@@ -242,7 +235,7 @@ mon960_open (args, from_tty)
 }
 
 void
-_initialize_mon960 ()
+_initialize_mon960 (void)
 {
   memcpy (mon960_regnames, full_regnames, sizeof (full_regnames));
 

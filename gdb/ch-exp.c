@@ -200,7 +200,7 @@ static YYSTYPE val_buffer[MAX_LOOK_AHEAD + 1];
 /*int current_token, lookahead_token; */
 
 INLINE static enum ch_terminal
-PEEK_TOKEN ()
+PEEK_TOKEN (void)
 {
   if (terminal_buffer[0] == TOKEN_NOT_READ)
     {
@@ -213,8 +213,7 @@ PEEK_TOKEN ()
 #define PEEK_TOKEN1() peek_token_(1)
 #define PEEK_TOKEN2() peek_token_(2)
 static enum ch_terminal
-peek_token_ (i)
-     int i;
+peek_token_ (int i)
 {
   if (i > MAX_LOOK_AHEAD)
     internal_error ("ch-exp.c - too much lookahead");
@@ -229,9 +228,7 @@ peek_token_ (i)
 #if 0
 
 static void
-pushback_token (code, node)
-     enum ch_terminal code;
-     YYSTYPE node;
+pushback_token (enum ch_terminal code, YYSTYPE node)
 {
   int i;
   if (terminal_buffer[MAX_LOOK_AHEAD] != TOKEN_NOT_READ)
@@ -248,7 +245,7 @@ pushback_token (code, node)
 #endif
 
 static void
-forward_token_ ()
+forward_token_ (void)
 {
   int i;
   for (i = 0; i < MAX_LOOK_AHEAD; i++)
@@ -264,8 +261,7 @@ forward_token_ ()
    if it isn't TOKEN, the parser is broken. */
 
 static void
-require (token)
-     enum ch_terminal token;
+require (enum ch_terminal token)
 {
   if (PEEK_TOKEN () != token)
     {
@@ -275,8 +271,7 @@ require (token)
 }
 
 static int
-check_token (token)
-     enum ch_terminal token;
+check_token (enum ch_terminal token)
 {
   if (PEEK_TOKEN () != token)
     return 0;
@@ -288,9 +283,7 @@ check_token (token)
    else return 1.
  */
 static int
-expect (token, message)
-     enum ch_terminal token;
-     char *message;
+expect (enum ch_terminal token, char *message)
 {
   if (PEEK_TOKEN () != token)
     {
@@ -347,7 +340,7 @@ parse_opt_name_string (allow_all)
 }
 
 static tree
-parse_simple_name_string ()
+parse_simple_name_string (void)
 {
   int token = PEEK_TOKEN ();
   tree name;
@@ -362,7 +355,7 @@ parse_simple_name_string ()
 }
 
 static tree
-parse_name_string ()
+parse_name_string (void)
 {
   tree name = parse_opt_name_string (0);
   if (name)
@@ -377,7 +370,7 @@ parse_name_string ()
    Returns if pass 2: a decl or value for identifier. */
 
 static tree
-parse_name ()
+parse_name (void)
 {
   tree name = parse_name_string ();
   if (pass == 1 || ignoring)
@@ -404,8 +397,7 @@ parse_name ()
 
 #if 0
 static void
-pushback_paren_expr (expr)
-     tree expr;
+pushback_paren_expr (tree expr)
 {
   if (pass == 1 && !ignoring)
     expr = build1 (PAREN_EXPR, NULL_TREE, expr);
@@ -416,7 +408,7 @@ pushback_paren_expr (expr)
 /* Matches: <case label> */
 
 static void
-parse_case_label ()
+parse_case_label (void)
 {
   if (check_token (ELSE))
     error ("ELSE in tuples labels not implemented");
@@ -430,7 +422,7 @@ parse_case_label ()
 }
 
 static int
-parse_opt_untyped_expr ()
+parse_opt_untyped_expr (void)
 {
   switch (PEEK_TOKEN ())
     {
@@ -445,7 +437,7 @@ parse_opt_untyped_expr ()
 }
 
 static void
-parse_unary_call ()
+parse_unary_call (void)
 {
   FORWARD_TOKEN ();
   expect ('(', NULL);
@@ -458,7 +450,7 @@ parse_unary_call ()
 #if 0
 
 static struct type *
-parse_mode_call ()
+parse_mode_call (void)
 {
   struct type *type;
   FORWARD_TOKEN ();
@@ -474,7 +466,7 @@ parse_mode_call ()
 #endif
 
 static struct type *
-parse_mode_or_normal_call ()
+parse_mode_or_normal_call (void)
 {
   struct type *type;
   FORWARD_TOKEN ();
@@ -497,7 +489,7 @@ parse_mode_or_normal_call ()
    Assume we have parsed the function, and are at the '('. */
 
 static void
-parse_call ()
+parse_call (void)
 {
   int arg_count;
   require ('(');
@@ -534,7 +526,7 @@ parse_call ()
 }
 
 static void
-parse_named_record_element ()
+parse_named_record_element (void)
 {
   struct stoken label;
   char buf[256];
@@ -556,8 +548,7 @@ parse_named_record_element ()
 /* Returns one or more TREE_LIST nodes, in reverse order. */
 
 static void
-parse_tuple_element (type)
-     struct type *type;
+parse_tuple_element (struct type *type)
 {
   if (PEEK_TOKEN () == DOT_FIELD_NAME)
     {
@@ -622,8 +613,7 @@ parse_tuple_element (type)
 /* Matches:  a COMMA-separated list of tuple elements.
    Returns a list (of TREE_LIST nodes). */
 static void
-parse_opt_element_list (type)
-     struct type *type;
+parse_opt_element_list (struct type *type)
 {
   arglist_len = 0;
   if (PEEK_TOKEN () == ']')
@@ -643,8 +633,7 @@ parse_opt_element_list (type)
    If modename is non-NULL it prefixed the tuple.  */
 
 static void
-parse_tuple (mode)
-     struct type *mode;
+parse_tuple (struct type *mode)
 {
   struct type *type;
   if (mode)
@@ -672,7 +661,7 @@ parse_tuple (mode)
 }
 
 static void
-parse_primval ()
+parse_primval (void)
 {
   struct type *type;
   enum exp_opcode op;
@@ -942,7 +931,7 @@ parse_primval ()
 }
 
 static void
-parse_operand6 ()
+parse_operand6 (void)
 {
   if (check_token (RECEIVE))
     {
@@ -959,7 +948,7 @@ parse_operand6 ()
 }
 
 static void
-parse_operand5 ()
+parse_operand5 (void)
 {
   enum exp_opcode op;
   /* We are supposed to be looking for a <string repetition operator>,
@@ -990,7 +979,7 @@ parse_operand5 ()
 }
 
 static void
-parse_operand4 ()
+parse_operand4 (void)
 {
   enum exp_opcode op;
   parse_operand5 ();
@@ -1020,7 +1009,7 @@ parse_operand4 ()
 }
 
 static void
-parse_operand3 ()
+parse_operand3 (void)
 {
   enum exp_opcode op;
   parse_operand4 ();
@@ -1047,7 +1036,7 @@ parse_operand3 ()
 }
 
 static void
-parse_operand2 ()
+parse_operand2 (void)
 {
   enum exp_opcode op;
   parse_operand3 ();
@@ -1091,7 +1080,7 @@ parse_operand2 ()
 }
 
 static void
-parse_operand1 ()
+parse_operand1 (void)
 {
   enum exp_opcode op;
   parse_operand2 ();
@@ -1115,7 +1104,7 @@ parse_operand1 ()
 }
 
 static void
-parse_operand0 ()
+parse_operand0 (void)
 {
   enum exp_opcode op;
   parse_operand1 ();
@@ -1142,7 +1131,7 @@ parse_operand0 ()
 }
 
 static void
-parse_expr ()
+parse_expr (void)
 {
   parse_operand0 ();
   if (check_token (GDB_ASSIGNMENT))
@@ -1153,14 +1142,14 @@ parse_expr ()
 }
 
 static void
-parse_then_alternative ()
+parse_then_alternative (void)
 {
   expect (THEN, "missing 'THEN' in 'IF' expression");
   parse_expr ();
 }
 
 static void
-parse_else_alternative ()
+parse_else_alternative (void)
 {
   if (check_token (ELSIF))
     parse_if_expression_body ();
@@ -1173,7 +1162,7 @@ parse_else_alternative ()
 /* Matches: <boolean expression> <then alternative> <else alternative> */
 
 static void
-parse_if_expression_body ()
+parse_if_expression_body (void)
 {
   parse_expr ();
   parse_then_alternative ();
@@ -1182,7 +1171,7 @@ parse_if_expression_body ()
 }
 
 static void
-parse_if_expression ()
+parse_if_expression (void)
 {
   require (IF);
   parse_if_expression_body ();
@@ -1196,7 +1185,7 @@ parse_if_expression ()
    You should call convert() to fix up the <untyped_expr>. */
 
 static void
-parse_untyped_expr ()
+parse_untyped_expr (void)
 {
   switch (PEEK_TOKEN ())
     {
@@ -1226,7 +1215,7 @@ parse_untyped_expr ()
 }
 
 int
-chill_parse ()
+chill_parse (void)
 {
   terminal_buffer[0] = TOKEN_NOT_READ;
   if (PEEK_TOKEN () == TYPENAME && PEEK_TOKEN1 () == END_TOKEN)
@@ -1271,8 +1260,7 @@ static int tempbufindex;	/* Current index into buffer */
    on demand. */
 
 static void
-growbuf_by_size (count)
-     int count;
+growbuf_by_size (int count)
 {
   int growby;
 
@@ -1293,7 +1281,7 @@ growbuf_by_size (count)
    in symbol table lookups.  If not successful, returns NULL. */
 
 static char *
-match_simple_name_string ()
+match_simple_name_string (void)
 {
   char *tokptr = lexptr;
 
@@ -1321,10 +1309,7 @@ match_simple_name_string ()
    digits we have encountered. */
 
 static int
-decode_integer_value (base, tokptrptr, ivalptr)
-     int base;
-     char **tokptrptr;
-     LONGEST *ivalptr;
+decode_integer_value (int base, char **tokptrptr, LONGEST *ivalptr)
 {
   char *tokptr = *tokptrptr;
   int temp;
@@ -1395,9 +1380,7 @@ decode_integer_value (base, tokptrptr, ivalptr)
 }
 
 static int
-decode_integer_literal (valptr, tokptrptr)
-     LONGEST *valptr;
-     char **tokptrptr;
+decode_integer_literal (LONGEST *valptr, char **tokptrptr)
 {
   char *tokptr = *tokptrptr;
   int base = 0;
@@ -1480,7 +1463,7 @@ decode_integer_literal (valptr, tokptrptr)
    legal floating point value. */
 
 static enum ch_terminal
-match_float_literal ()
+match_float_literal (void)
 {
   char *tokptr = lexptr;
   char *buf;
@@ -1610,7 +1593,7 @@ convert_float:
    a string, it is simply doubled (I.E. "this""is""one""string") */
 
 static enum ch_terminal
-match_string_literal ()
+match_string_literal (void)
 {
   char *tokptr = lexptr;
   int in_ctrlseq = 0;
@@ -1706,7 +1689,7 @@ match_string_literal ()
  */
 
 static enum ch_terminal
-match_character_literal ()
+match_character_literal (void)
 {
   char *tokptr = lexptr;
   LONGEST ival = 0;
@@ -1788,7 +1771,7 @@ match_character_literal ()
    in any integer literal. */
 
 static enum ch_terminal
-match_integer_literal ()
+match_integer_literal (void)
 {
   char *tokptr = lexptr;
   LONGEST ival;
@@ -1817,7 +1800,7 @@ match_integer_literal ()
    in any bit-string literal. */
 
 static enum ch_terminal
-match_bitstring_literal ()
+match_bitstring_literal (void)
 {
   register char *tokptr = lexptr;
   int bitoffset = 0;
@@ -1989,7 +1972,7 @@ static const struct token tokentab2[] =
    operators used are compatible.  */
 
 static enum ch_terminal
-ch_lex ()
+ch_lex (void)
 {
   unsigned int i;
   enum ch_terminal token;
@@ -2226,9 +2209,8 @@ ch_lex ()
 }
 
 static void
-write_lower_upper_value (opcode, type)
-     enum exp_opcode opcode;	/* Either UNOP_LOWER or UNOP_UPPER */
-     struct type *type;
+write_lower_upper_value (enum exp_opcode opcode,	/* Either UNOP_LOWER or UNOP_UPPER */
+			 struct type *type)
 {
   if (type == NULL)
     write_exp_elt_opcode (opcode);
@@ -2244,8 +2226,7 @@ write_lower_upper_value (opcode, type)
 }
 
 void
-chill_error (msg)
-     char *msg;
+chill_error (char *msg)
 {
   /* Never used. */
 }

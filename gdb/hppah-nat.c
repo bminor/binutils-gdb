@@ -36,8 +36,7 @@ extern CORE_ADDR text_end;
 static void fetch_register (int);
 
 void
-fetch_inferior_registers (regno)
-     int regno;
+fetch_inferior_registers (int regno)
 {
   if (regno == -1)
     for (regno = 0; regno < NUM_REGS; regno++)
@@ -54,8 +53,7 @@ fetch_inferior_registers (regno)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   register unsigned int regaddr;
   char buf[80];
@@ -178,8 +176,7 @@ store_inferior_registers (regno)
 
 /* Fetch a register's value from the process's U area.  */
 static void
-fetch_register (regno)
-     int regno;
+fetch_register (int regno)
 {
   char buf[MAX_REGISTER_RAW_SIZE];
   unsigned int addr, len, offset;
@@ -378,7 +375,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 
 
 void
-child_post_follow_inferior_by_clone ()
+child_post_follow_inferior_by_clone (void)
 {
   int status;
 
@@ -396,11 +393,8 @@ child_post_follow_inferior_by_clone ()
 
 
 void
-child_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child)
-     int parent_pid;
-     int followed_parent;
-     int child_pid;
-     int followed_child;
+child_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
+			 int followed_child)
 {
   /* Are we a debugger that followed the parent of a vfork?  If so,
      then recall that the child's vfork event was delivered to us
@@ -438,8 +432,7 @@ child_post_follow_vfork (parent_pid, followed_parent, child_pid, followed_child)
 /* Format a process id, given PID.  Be sure to terminate
    this with a null--it's going to be printed via a "%s".  */
 char *
-child_pid_to_str (pid)
-     pid_t pid;
+child_pid_to_str (pid_t pid)
 {
   /* Static because address returned */
   static char buf[30];
@@ -456,8 +449,7 @@ child_pid_to_str (pid)
    Note: This is a core-gdb tid, not the actual system tid.
    See infttrace.c for details.  */
 char *
-hppa_tid_to_str (tid)
-     pid_t tid;
+hppa_tid_to_str (pid_t tid)
 {
   /* Static because address returned */
   static char buf[30];
@@ -515,10 +507,7 @@ extern int parent_attach_all (int, PTRACE_ARG3_TYPE, int);
    child_acknowledge_created_inferior.)  */
 
 int
-parent_attach_all (pid, addr, data)
-     int pid;
-     PTRACE_ARG3_TYPE addr;
-     int data;
+parent_attach_all (int pid, PTRACE_ARG3_TYPE addr, int data)
 {
   int pt_status = 0;
 
@@ -555,8 +544,7 @@ parent_attach_all (pid, addr, data)
 #endif
 
 int
-hppa_require_attach (pid)
-     int pid;
+hppa_require_attach (int pid)
 {
   int pt_status;
   CORE_ADDR pc;
@@ -589,9 +577,7 @@ hppa_require_attach (pid)
 }
 
 int
-hppa_require_detach (pid, signal)
-     int pid;
-     int signal;
+hppa_require_detach (int pid, int signal)
 {
   errno = 0;
   call_ptrace (PT_DETACH, pid, (PTRACE_ARG3_TYPE) 1, signal);
@@ -604,58 +590,42 @@ hppa_require_detach (pid, signal)
    dummy versions, which perform no useful work.  */
 
 void
-hppa_enable_page_protection_events (pid)
-     int pid;
+hppa_enable_page_protection_events (int pid)
 {
 }
 
 void
-hppa_disable_page_protection_events (pid)
-     int pid;
+hppa_disable_page_protection_events (int pid)
 {
 }
 
 int
-hppa_insert_hw_watchpoint (pid, start, len, type)
-     int pid;
-     CORE_ADDR start;
-     LONGEST len;
-     int type;
+hppa_insert_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len, int type)
 {
   error ("Hardware watchpoints not implemented on this platform.");
 }
 
 int
-hppa_remove_hw_watchpoint (pid, start, len, type)
-     int pid;
-     CORE_ADDR start;
-     LONGEST len;
-     enum bptype type;
+hppa_remove_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len,
+			   enum bptype type)
 {
   error ("Hardware watchpoints not implemented on this platform.");
 }
 
 int
-hppa_can_use_hw_watchpoint (type, cnt, ot)
-     enum bptype type;
-     int cnt;
-     enum bptype ot;
+hppa_can_use_hw_watchpoint (enum bptype type, int cnt, enum bptype ot)
 {
   return 0;
 }
 
 int
-hppa_range_profitable_for_hw_watchpoint (pid, start, len)
-     int pid;
-     CORE_ADDR start;
-     LONGEST len;
+hppa_range_profitable_for_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len)
 {
   error ("Hardware watchpoints not implemented on this platform.");
 }
 
 char *
-hppa_pid_or_tid_to_str (id)
-     pid_t id;
+hppa_pid_or_tid_to_str (pid_t id)
 {
   /* In the ptrace world, there are only processes. */
   return child_pid_to_str (id);
@@ -666,15 +636,13 @@ hppa_pid_or_tid_to_str (id)
    hppa-tdep.c. */
 
 pid_t
-hppa_switched_threads (pid)
-     pid_t pid;
+hppa_switched_threads (pid_t pid)
 {
   return (pid_t) 0;
 }
 
 void
-hppa_ensure_vforking_parent_remains_stopped (pid)
-     int pid;
+hppa_ensure_vforking_parent_remains_stopped (int pid)
 {
   /* This assumes that the vforked parent is presently stopped, and
      that the vforked child has just delivered its first exec event.
@@ -686,14 +654,13 @@ hppa_ensure_vforking_parent_remains_stopped (pid)
 }
 
 int
-hppa_resume_execd_vforking_child_to_get_parent_vfork ()
+hppa_resume_execd_vforking_child_to_get_parent_vfork (void)
 {
   return 1;			/* Yes, the child must be resumed. */
 }
 
 void
-require_notification_of_events (pid)
-     int pid;
+require_notification_of_events (int pid)
 {
 #if defined(PT_SET_EVENT_MASK)
   int pt_status;
@@ -758,8 +725,7 @@ require_notification_of_events (pid)
 }
 
 void
-require_notification_of_exec_events (pid)
-     int pid;
+require_notification_of_exec_events (int pid)
 {
 #if defined(PT_SET_EVENT_MASK)
   int pt_status;
@@ -800,8 +766,7 @@ require_notification_of_exec_events (pid)
    ID of the child process, after the debugger has forked.  */
 
 void
-child_acknowledge_created_inferior (pid)
-     int pid;
+child_acknowledge_created_inferior (int pid)
 {
   /* We need a memory home for a constant.  */
   int tc_magic_parent = PT_VERSION;
@@ -848,22 +813,19 @@ child_acknowledge_created_inferior (pid)
 }
 
 void
-child_post_startup_inferior (pid)
-     int pid;
+child_post_startup_inferior (int pid)
 {
   require_notification_of_events (pid);
 }
 
 void
-child_post_attach (pid)
-     int pid;
+child_post_attach (int pid)
 {
   require_notification_of_events (pid);
 }
 
 int
-child_insert_fork_catchpoint (pid)
-     int pid;
+child_insert_fork_catchpoint (int pid)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_SET_EVENT_MASK)
@@ -877,8 +839,7 @@ child_insert_fork_catchpoint (pid)
 }
 
 int
-child_remove_fork_catchpoint (pid)
-     int pid;
+child_remove_fork_catchpoint (int pid)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_SET_EVENT_MASK)
@@ -892,8 +853,7 @@ child_remove_fork_catchpoint (pid)
 }
 
 int
-child_insert_vfork_catchpoint (pid)
-     int pid;
+child_insert_vfork_catchpoint (int pid)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_SET_EVENT_MASK)
@@ -907,8 +867,7 @@ child_insert_vfork_catchpoint (pid)
 }
 
 int
-child_remove_vfork_catchpoint (pid)
-     int pid;
+child_remove_vfork_catchpoint (int pid)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_SET_EVENT_MASK)
@@ -922,9 +881,7 @@ child_remove_vfork_catchpoint (pid)
 }
 
 int
-child_has_forked (pid, childpid)
-     int pid;
-     int *childpid;
+child_has_forked (int pid, int *childpid)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
@@ -955,9 +912,7 @@ child_has_forked (pid, childpid)
 }
 
 int
-child_has_vforked (pid, childpid)
-     int pid;
-     int *childpid;
+child_has_vforked (int pid, int *childpid)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
@@ -989,15 +944,14 @@ child_has_vforked (pid, childpid)
 }
 
 int
-child_can_follow_vfork_prior_to_exec ()
+child_can_follow_vfork_prior_to_exec (void)
 {
   /* ptrace doesn't allow this. */
   return 0;
 }
 
 int
-child_insert_exec_catchpoint (pid)
-     int pid;
+child_insert_exec_catchpoint (int pid)
 {
   /* This request is only available on HPUX 10.0 and later.   */
 #if !defined(PT_SET_EVENT_MASK)
@@ -1012,8 +966,7 @@ child_insert_exec_catchpoint (pid)
 }
 
 int
-child_remove_exec_catchpoint (pid)
-     int pid;
+child_remove_exec_catchpoint (int pid)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_SET_EVENT_MASK)
@@ -1028,9 +981,7 @@ child_remove_exec_catchpoint (pid)
 }
 
 int
-child_has_execd (pid, execd_pathname)
-     int pid;
-     char **execd_pathname;
+child_has_execd (int pid, char **execd_pathname)
 {
   /* This request is only available on HPUX 10.0 and later.  */
 #if !defined(PT_GET_PROCESS_STATE)
@@ -1063,16 +1014,13 @@ child_has_execd (pid, execd_pathname)
 }
 
 int
-child_reported_exec_events_per_exec_call ()
+child_reported_exec_events_per_exec_call (void)
 {
   return 2;			/* ptrace reports the event twice per call. */
 }
 
 int
-child_has_syscall_event (pid, kind, syscall_id)
-     int pid;
-     enum target_waitkind *kind;
-     int *syscall_id;
+child_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
 {
   /* This request is only available on HPUX 10.30 and later, via
      the ttrace interface.  */
@@ -1083,8 +1031,7 @@ child_has_syscall_event (pid, kind, syscall_id)
 }
 
 char *
-child_pid_to_exec_file (pid)
-     int pid;
+child_pid_to_exec_file (int pid)
 {
   static char exec_file_buffer[1024];
   int pt_status;
@@ -1150,7 +1097,7 @@ child_pid_to_exec_file (pid)
 }
 
 void
-pre_fork_inferior ()
+pre_fork_inferior (void)
 {
   int status;
 
@@ -1176,8 +1123,7 @@ pre_fork_inferior ()
    return "TRUE".  */
 
 int
-child_thread_alive (pid)
-     int pid;
+child_thread_alive (int pid)
 {
   return 1;
 }

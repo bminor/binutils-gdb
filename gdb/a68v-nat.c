@@ -30,8 +30,7 @@
 extern int errno;
 
 void
-fetch_inferior_registers (ignored)
-     int ignored;
+fetch_inferior_registers (int ignored)
 {
   struct ptrace_$data_regs_m68k inferior_registers;
   struct ptrace_$floating_regs_m68k inferior_fp_registers;
@@ -72,8 +71,7 @@ fetch_inferior_registers (ignored)
    Otherwise, REGNO specifies which register (so we can save time).  */
 
 void
-store_inferior_registers (regno)
-     int regno;
+store_inferior_registers (int regno)
 {
   struct ptrace_$data_regs_m68k inferior_registers;
   struct ptrace_$floating_regs_m68k inferior_fp_registers;

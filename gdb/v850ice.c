@@ -192,7 +192,7 @@ static struct target_ops v850ice_ops;	/* Forward decl */
 
 /* This function creates a hidden window */
 static int
-init_hidden_window ()
+init_hidden_window (void)
 {
   WNDCLASS class;
 
@@ -242,11 +242,7 @@ init_hidden_window ()
    WM_STATE_CHANGE - tells us that a state change has occured in the ICE
  */
 static LRESULT CALLBACK
-v850ice_wndproc (hwnd, message, wParam, lParam)
-     HWND hwnd;
-     UINT message;
-     WPARAM wParam;
-     LPARAM lParam;
+v850ice_wndproc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   LRESULT result = FALSE;
 
@@ -318,9 +314,7 @@ v850ice_wndproc (hwnd, message, wParam, lParam)
 /* Code for opening a connection to the ICE.  */
 
 static void
-v850ice_open (name, from_tty)
-     char *name;
-     int from_tty;
+v850ice_open (char *name, int from_tty)
 {
   HINSTANCE handle;
 
@@ -381,8 +375,7 @@ v850ice_open (name, from_tty)
 
 /* ARGSUSED */
 static void
-v850ice_close (quitting)
-     int quitting;
+v850ice_close (int quitting)
 {
   if (ice_open)
     {
@@ -394,16 +387,14 @@ v850ice_close (quitting)
 
 /* Stop the process on the ice. */
 static void
-v850ice_stop ()
+v850ice_stop (void)
 {
   /* This is silly, but it works... */
   v850ice_command ("stop", 0);
 }
 
 static void
-v850ice_detach (args, from_tty)
-     char *args;
-     int from_tty;
+v850ice_detach (char *args, int from_tty)
 {
   if (args)
     error ("Argument given to \"detach\" when remotely debugging.");
@@ -416,9 +407,7 @@ v850ice_detach (args, from_tty)
 /* Tell the remote machine to resume.  */
 
 static void
-v850ice_resume (pid, step, siggnal)
-     int pid, step;
-     enum target_signal siggnal;
+v850ice_resume (int pid, int step, enum target_signal siggnal)
 {
   long retval;
   char buf[256];
@@ -442,9 +431,7 @@ v850ice_resume (pid, step, siggnal)
    means in the case of this target).  */
 
 static int
-v850ice_wait (pid, status)
-     int pid;
-     struct target_waitstatus *status;
+v850ice_wait (int pid, struct target_waitstatus *status)
 {
   long v850_status;
   char buf[256];
@@ -500,9 +487,7 @@ v850ice_wait (pid, status)
 }
 
 static int
-convert_register (regno, buf)
-     int regno;
-     char *buf;
+convert_register (int regno, char *buf)
 {
   if (regno <= 31)
     sprintf (buf, "r%d", regno);
@@ -521,8 +506,7 @@ convert_register (regno, buf)
    convert it to target byte-order if necessary.  */
 
 static void
-v850ice_fetch_registers (regno)
-     int regno;
+v850ice_fetch_registers (int regno)
 {
   long retval;
   char cmd[100];
@@ -561,8 +545,7 @@ v850ice_fetch_registers (regno)
    of REGISTERS.  */
 
 static void
-v850ice_store_registers (regno)
-     int regno;
+v850ice_store_registers (int regno)
 {
   long retval;
   char cmd[100];
@@ -595,7 +578,7 @@ v850ice_store_registers (regno)
    register at a time.  */
 
 static void
-v850ice_prepare_to_store ()
+v850ice_prepare_to_store (void)
 {
 }
 
@@ -722,16 +705,13 @@ v850ice_xfer_memory (memaddr, myaddr, len, should_write, target)
 }
 
 static void
-v850ice_files_info (ignore)
-     struct target_ops *ignore;
+v850ice_files_info (struct target_ops *ignore)
 {
   puts_filtered ("Debugging a target via the NEC V850 ICE.\n");
 }
 
 static int
-v850ice_insert_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+v850ice_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   long retval;
   char cmd[100];
@@ -750,9 +730,7 @@ v850ice_insert_breakpoint (addr, contents_cache)
 }
 
 static int
-v850ice_remove_breakpoint (addr, contents_cache)
-     CORE_ADDR addr;
-     char *contents_cache;
+v850ice_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   long retval;
   char cmd[100];
@@ -772,21 +750,19 @@ v850ice_remove_breakpoint (addr, contents_cache)
 }
 
 static void
-v850ice_kill ()
+v850ice_kill (void)
 {
   target_mourn_inferior ();
   inferior_pid = 0;
 }
 
 static void
-v850ice_mourn ()
+v850ice_mourn (void)
 {
 }
 
 static void
-v850ice_load (filename, from_tty)
-     char *filename;
-     int from_tty;
+v850ice_load (char *filename, int from_tty)
 {
   struct MessageIO iob;
   char buf[256];
@@ -798,8 +774,7 @@ v850ice_load (filename, from_tty)
 }
 
 static int
-ice_file (arg)
-     char *arg;
+ice_file (char *arg)
 {
   char *s;
 
@@ -835,8 +810,7 @@ ice_file (arg)
 }
 
 static int
-ice_cont (c)
-     char *c;
+ice_cont (char *c)
 {
   printf_filtered ("continue (ice)\n");
   ReplyMessage ((LRESULT) 1);
@@ -875,8 +849,7 @@ do_gdb (cmd, str, func, count)
 
 
 static int
-ice_stepi (c)
-     char *c;
+ice_stepi (char *c)
 {
   int count = (int) c;
 
@@ -885,8 +858,7 @@ ice_stepi (c)
 }
 
 static int
-ice_nexti (c)
-     char *c;
+ice_nexti (char *c)
 {
   int count = (int) c;
 
@@ -895,9 +867,7 @@ ice_nexti (c)
 }
 
 static void
-v850ice_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+v850ice_command (char *arg, int from_tty)
 {
   struct MessageIO iob;
   char buf[256];
@@ -915,8 +885,7 @@ togdb_force_update (void)
 }
 
 static void
-view_source (addr)
-     CORE_ADDR addr;
+view_source (CORE_ADDR addr)
 {
   char c[256];
 
@@ -981,7 +950,7 @@ init_850ice_ops (void)
 }
 
 void
-_initialize_v850ice ()
+_initialize_v850ice (void)
 {
   init_850ice_ops ();
   add_target (&v850ice_ops);

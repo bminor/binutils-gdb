@@ -65,7 +65,7 @@ FILE *eb_stream;
 /* Read a character from the remote system, doing all the fancy
    timeout stuff.  */
 static int
-readchar ()
+readchar (void)
 {
   char buf;
 
@@ -96,8 +96,7 @@ readchar ()
 /* Keep discarding input from the remote system, until STRING is found. 
    Let the user break out immediately.  */
 static void
-expect (string)
-     char *string;
+expect (char *string)
 {
   char *p = string;
 
@@ -133,7 +132,7 @@ expect (string)
    necessary to prevent getting into states from which we can't
    recover.  */
 static void
-expect_prompt ()
+expect_prompt (void)
 {
 #if defined (LOG_FILE)
   /* This is a convenient place to do this.  The idea is to do it often
@@ -146,8 +145,7 @@ expect_prompt ()
 /* Get a hex digit from the remote system & return its value.
    If ignore_space is nonzero, ignore spaces (not newline, tab, etc).  */
 static int
-get_hex_digit (ignore_space)
-     int ignore_space;
+get_hex_digit (int ignore_space)
 {
   int ch;
   while (1)
@@ -172,8 +170,7 @@ get_hex_digit (ignore_space)
 /* Get a byte from eb_desc and put it in *BYT.  Accept any number
    leading spaces.  */
 static void
-get_hex_byte (byt)
-     char *byt;
+get_hex_byte (char *byt)
 {
   int val;
 
@@ -185,9 +182,7 @@ get_hex_byte (byt)
 /* Get N 32-bit words from remote, each preceded by a space,
    and put them in registers starting at REGNO.  */
 static void
-get_hex_regs (n, regno)
-     int n;
-     int regno;
+get_hex_regs (int n, int regno)
 {
   long val;
   int i;
@@ -213,7 +208,7 @@ get_hex_regs (n, regno)
 volatile int n_alarms;
 
 void
-eb_timer ()
+eb_timer (void)
 {
 #if 0
   if (kiodebug)
@@ -239,10 +234,7 @@ static int need_artificial_trap = 0;
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 static void
-eb_create_inferior (execfile, args, env)
-     char *execfile;
-     char *args;
-     char **env;
+eb_create_inferior (char *execfile, char *args, char **env)
 {
   int entry_pt;
 
@@ -377,8 +369,7 @@ baudtab[] =
 };
 
 int
-damn_b (rate)
-     int rate;
+damn_b (int rate)
 {
   int i;
 
@@ -396,9 +387,7 @@ damn_b (rate)
 static int baudrate = 9600;
 static char *dev_name;
 void
-eb_open (name, from_tty)
-     char *name;
-     int from_tty;
+eb_open (char *name, int from_tty)
 {
   TERMINAL sg;
 
@@ -494,8 +483,7 @@ the baud rate, and the name of the program to run on the remote system.");
 /* Close out all files and local state before this target loses control. */
 
 static void
-eb_close (quitting)
-     int quitting;
+eb_close (int quitting)
 {
 
   /* Due to a bug in Unix, fclose closes not only the stdio stream,
@@ -525,8 +513,7 @@ eb_close (quitting)
    Use this when you want to detach and do something else
    with your gdb.  */
 void
-eb_detach (from_tty)
-     int from_tty;
+eb_detach (int from_tty)
 {
   pop_target ();		/* calls eb_close to do the real work */
   if (from_tty)
@@ -536,9 +523,7 @@ eb_detach (from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-eb_resume (pid, step, sig)
-     int pid, step;
-     enum target_signal sig;
+eb_resume (int pid, int step, enum target_signal sig)
 {
   if (step)
     {
@@ -578,8 +563,7 @@ eb_resume (pid, step, sig)
    storing status in STATUS just as `wait' would.  */
 
 int
-eb_wait (status)
-     struct target_waitstatus *status;
+eb_wait (struct target_waitstatus *status)
 {
   /* Strings to look for.  '?' means match any single character.  
      Note that with the algorithm we use, the initial character
@@ -678,8 +662,7 @@ eb_wait (status)
 
    Returns a pointer to a static buffer containing the answer.  */
 static char *
-get_reg_name (regno)
-     int regno;
+get_reg_name (int regno)
 {
   static char buf[80];
   if (regno >= GR96_REGNUM && regno < GR96_REGNUM + 32)
@@ -704,7 +687,7 @@ get_reg_name (regno)
 /* Read the remote registers into the block REGS.  */
 
 static void
-eb_fetch_registers ()
+eb_fetch_registers (void)
 {
   int reg_index;
   int regnum_index;
@@ -798,8 +781,7 @@ eb_fetch_registers ()
 /* Fetch register REGNO, or all registers if REGNO is -1.
    Returns errno value.  */
 void
-eb_fetch_register (regno)
-     int regno;
+eb_fetch_register (int regno)
 {
   if (regno == -1)
     eb_fetch_registers ();
@@ -818,7 +800,7 @@ eb_fetch_register (regno)
 /* Store the remote registers from the contents of the block REGS.  */
 
 static void
-eb_store_registers ()
+eb_store_registers (void)
 {
   int i, j;
   fprintf (eb_stream, "s gr1,%x\n", read_register (GR1_REGNUM));
@@ -857,8 +839,7 @@ eb_store_registers ()
 /* Store register REGNO, or all if REGNO == 0.
    Return errno value.  */
 void
-eb_store_register (regno)
-     int regno;
+eb_store_register (int regno)
 {
   if (regno == -1)
     eb_store_registers ();
@@ -885,7 +866,7 @@ eb_store_register (regno)
    debugged.  */
 
 void
-eb_prepare_to_store ()
+eb_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
@@ -907,7 +888,7 @@ eb_xfer_inferior_memory (memaddr, myaddr, len, write, target)
 }
 
 void
-eb_files_info ()
+eb_files_info (void)
 {
   printf ("\tAttached to %s at %d baud and running program %s.\n",
 	  dev_name, baudrate, prog_name);
@@ -916,10 +897,7 @@ eb_files_info ()
 /* Copy LEN bytes of data from debugger memory at MYADDR
    to inferior's memory at MEMADDR.  Returns length moved.  */
 int
-eb_write_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+eb_write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int i;
 
@@ -941,10 +919,7 @@ eb_write_inferior_memory (memaddr, myaddr, len)
 /* Read LEN bytes from inferior memory at MEMADDR.  Put the result
    at debugger address MYADDR.  Returns length moved.  */
 int
-eb_read_inferior_memory (memaddr, myaddr, len)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
+eb_read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
   int i;
 
@@ -1014,9 +989,7 @@ eb_read_inferior_memory (memaddr, myaddr, len)
 }
 
 static void
-eb_kill (args, from_tty)
-     char *args;
-     int from_tty;
+eb_kill (char *args, int from_tty)
 {
   return;			/* Ignore attempts to kill target system */
 }
@@ -1028,7 +1001,7 @@ eb_kill (args, from_tty)
    instructions.  */
 
 void
-eb_mourn_inferior ()
+eb_mourn_inferior (void)
 {
   remove_breakpoints ();
   unpush_target (&eb_ops);
@@ -1111,7 +1084,7 @@ target amd-eb /dev/ttya 9600 demo",
 };
 
 void
-_initialize_remote_eb ()
+_initialize_remote_eb (void)
 {
   init_eb_ops ();
   add_target (&eb_ops);

@@ -151,17 +151,13 @@ generic_prologue_frameless_p (CORE_ADDR ip)
 /* Helper functions for INNER_THAN */
 
 int
-core_addr_lessthan (lhs, rhs)
-     CORE_ADDR lhs;
-     CORE_ADDR rhs;
+core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs)
 {
   return (lhs < rhs);
 }
 
 int
-core_addr_greaterthan (lhs, rhs)
-     CORE_ADDR lhs;
-     CORE_ADDR rhs;
+core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs)
 {
   return (lhs > rhs);
 }
@@ -211,16 +207,14 @@ default_double_format (struct gdbarch *gdbarch)
 /* Misc helper functions for targets. */
 
 int
-frame_num_args_unknown (fi)
-     struct frame_info *fi;
+frame_num_args_unknown (struct frame_info *fi)
 {
   return -1;
 }
 
 
 int
-generic_register_convertible_not (num)
-     int num;
+generic_register_convertible_not (int num)
 {
   return 0;
 }
@@ -539,8 +533,7 @@ info_architecture (char *args, int from_tty)
    byte-order) using information found in the BFD */
 
 void
-set_gdbarch_from_file (abfd)
-     bfd *abfd;
+set_gdbarch_from_file (bfd *abfd)
 {
   if (GDB_MULTI_ARCH)
     {

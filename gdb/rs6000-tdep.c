@@ -1403,7 +1403,7 @@ rs6000_register_virtual_size (int n)
    of data in register N.  */
 
 static struct type *
-rs6000_register_virtual_type (n)
+rs6000_register_virtual_type (int n)
 {
   struct gdbarch_tdep *tdep = TDEP;
   const struct reg *reg = tdep->regs + n;
@@ -2099,7 +2099,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Initialization code.  */
 
 void
-_initialize_rs6000_tdep ()
+_initialize_rs6000_tdep (void)
 {
   register_gdbarch_init (bfd_arch_rs6000, rs6000_gdbarch_init);
   register_gdbarch_init (bfd_arch_powerpc, rs6000_gdbarch_init);

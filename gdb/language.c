@@ -145,9 +145,7 @@ char lang_frame_mismatch_warn[] =
 /* Show command.  Display a warning if the language set
    does not match the frame. */
 static void
-show_language_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+show_language_command (char *ignore, int from_tty)
 {
   enum language flang;		/* The language of the current frame */
 
@@ -160,9 +158,7 @@ show_language_command (ignore, from_tty)
 
 /* Set command.  Change the current working language. */
 static void
-set_language_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+set_language_command (char *ignore, int from_tty)
 {
   int i;
   enum language flang;
@@ -234,9 +230,7 @@ set_language_command (ignore, from_tty)
 /* Show command.  Display a warning if the type setting does
    not match the current language. */
 static void
-show_type_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+show_type_command (char *ignore, int from_tty)
 {
   if (type_check != current_language->la_type_check)
     printf_unfiltered (
@@ -245,9 +239,7 @@ show_type_command (ignore, from_tty)
 
 /* Set command.  Change the setting for type checking. */
 static void
-set_type_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+set_type_command (char *ignore, int from_tty)
 {
   if (STREQ (type, "on"))
     {
@@ -283,9 +275,7 @@ set_type_command (ignore, from_tty)
 /* Show command.  Display a warning if the range setting does
    not match the current language. */
 static void
-show_range_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+show_range_command (char *ignore, int from_tty)
 {
 
   if (range_check != current_language->la_range_check)
@@ -295,9 +285,7 @@ show_range_command (ignore, from_tty)
 
 /* Set command.  Change the setting for range checking. */
 static void
-set_range_command (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+set_range_command (char *ignore, int from_tty)
 {
   if (STREQ (range, "on"))
     {
@@ -335,7 +323,7 @@ set_range_command (ignore, from_tty)
    If SHOW is non-zero, then print out the current language,
    type and range checking status. */
 static void
-set_type_range ()
+set_type_range (void)
 {
 
   if (range_mode == range_mode_auto)
@@ -351,8 +339,7 @@ set_type_range ()
 /* Set current language to (enum language) LANG.  Returns previous language. */
 
 enum language
-set_language (lang)
-     enum language lang;
+set_language (enum language lang)
 {
   int i;
   enum language prev_language;
@@ -376,7 +363,7 @@ set_language (lang)
 /* This page contains functions that update the global vars
    language, type and range. */
 static void
-set_lang_str ()
+set_lang_str (void)
 {
   char *prefix = "";
 
@@ -389,7 +376,7 @@ set_lang_str ()
 }
 
 static void
-set_type_str ()
+set_type_str (void)
 {
   char *tmp = NULL, *prefix = "";
 
@@ -417,7 +404,7 @@ set_type_str ()
 }
 
 static void
-set_range_str ()
+set_range_str (void)
 {
   char *tmp, *pref = "";
 
@@ -449,8 +436,7 @@ set_range_str ()
    type checking.  If QUIETLY, print only what has changed.  */
 
 void
-language_info (quietly)
-     int quietly;
+language_info (int quietly)
 {
   if (quietly && expected_language == current_language)
     return;
@@ -473,8 +459,7 @@ language_info (quietly)
 #if 0				/* Currently unused */
 
 struct type *
-binop_result_type (v1, v2)
-     value_ptr v1, v2;
+binop_result_type (value_ptr v1, value_ptr v2)
 {
   int size, uns;
   struct type *t1 = check_typedef (VALUE_TYPE (v1));
@@ -521,8 +506,7 @@ binop_result_type (v1, v2)
 /* Returns the appropriate printf format for hexadecimal
    numbers. */
 char *
-local_hex_format_custom (pre)
-     char *pre;
+local_hex_format_custom (char *pre)
 {
   static char form[50];
 
@@ -543,8 +527,7 @@ local_hex_format_custom (pre)
    static string.  Returns a pointer to this string. */
 
 char *
-longest_raw_hex_string (num)
-     LONGEST num;
+longest_raw_hex_string (LONGEST num)
 {
   static char res_longest_raw_hex_string[50];
   long long ll = num;		/* MERGEBUG ?? see below */
@@ -561,8 +544,7 @@ longest_raw_hex_string (num)
 /* Converts a number to hexadecimal and stores it in a static
    string.  Returns a pointer to this string. */
 char *
-local_hex_string (num)
-     unsigned long num;
+local_hex_string (unsigned long num)
 {
   static char res[50];
 
@@ -573,8 +555,7 @@ local_hex_string (num)
 /* Converts a LONGEST number to hexadecimal and stores it in a static
    string.  Returns a pointer to this string. */
 char *
-longest_local_hex_string (num)
-     LONGEST num;
+longest_local_hex_string (LONGEST num)
 {
   return longest_local_hex_string_custom (num, "l");
 }
@@ -582,9 +563,7 @@ longest_local_hex_string (num)
 /* Converts a number to custom hexadecimal and stores it in a static
    string.  Returns a pointer to this string. */
 char *
-local_hex_string_custom (num, pre)
-     unsigned long num;
-     char *pre;
+local_hex_string_custom (unsigned long num, char *pre)
 {
   static char res[50];
 
@@ -597,9 +576,7 @@ local_hex_string_custom (num, pre)
    should end with "l", e.g. "08l" as with calls to local_hex_string_custom */
 
 char *
-longest_local_hex_string_custom (num, width)
-     LONGEST num;
-     char *width;
+longest_local_hex_string_custom (LONGEST num, char *width)
 {
 #define RESULT_BUF_LEN 50
   static char res2[RESULT_BUF_LEN];
@@ -694,8 +671,7 @@ longest_local_hex_string_custom (num, width)
 /* Returns the appropriate printf format for octal
    numbers. */
 char *
-local_octal_format_custom (pre)
-     char *pre;
+local_octal_format_custom (char *pre)
 {
   static char form[50];
 
@@ -709,8 +685,7 @@ local_octal_format_custom (pre)
 
 /* Returns the appropriate printf format for decimal numbers. */
 char *
-local_decimal_format_custom (pre)
-     char *pre;
+local_decimal_format_custom (char *pre)
 {
   static char form[50];
 
@@ -741,8 +716,7 @@ local_decimal_format_custom (pre)
    both Modula-2 and for C.  In the C case, TYPE_CODE_CHAR will never occur,
    and thus will never cause the failure of the test. */
 int
-simple_type (type)
-     struct type *type;
+simple_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
@@ -765,8 +739,7 @@ simple_type (type)
    properties of "greater than", "less than", etc, or for which the
    operations "increment" or "decrement" make sense. */
 int
-ordered_type (type)
-     struct type *type;
+ordered_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
@@ -785,8 +758,7 @@ ordered_type (type)
 
 /* Returns non-zero if the two types are the same */
 int
-same_type (arg1, arg2)
-     struct type *arg1, *arg2;
+same_type (struct type *arg1, struct type *arg2)
 {
   CHECK_TYPEDEF (type);
   if (structured_type (arg1) ? !structured_type (arg2) : structured_type (arg2))
@@ -804,8 +776,7 @@ same_type (arg1, arg2)
 
 /* Returns non-zero if the type is integral */
 int
-integral_type (type)
-     struct type *type;
+integral_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
@@ -826,8 +797,7 @@ integral_type (type)
 
 /* Returns non-zero if the value is numeric */
 int
-numeric_type (type)
-     struct type *type;
+numeric_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
@@ -843,8 +813,7 @@ numeric_type (type)
 
 /* Returns non-zero if the value is a character type */
 int
-character_type (type)
-     struct type *type;
+character_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
@@ -866,8 +835,7 @@ character_type (type)
 
 /* Returns non-zero if the value is a string type */
 int
-string_type (type)
-     struct type *type;
+string_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
@@ -888,8 +856,7 @@ string_type (type)
 
 /* Returns non-zero if the value is a boolean type */
 int
-boolean_type (type)
-     struct type *type;
+boolean_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   if (TYPE_CODE (type) == TYPE_CODE_BOOL)
@@ -910,8 +877,7 @@ boolean_type (type)
 
 /* Returns non-zero if the value is a floating-point type */
 int
-float_type (type)
-     struct type *type;
+float_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   return TYPE_CODE (type) == TYPE_CODE_FLT;
@@ -919,8 +885,7 @@ float_type (type)
 
 /* Returns non-zero if the value is a pointer type */
 int
-pointer_type (type)
-     struct type *type;
+pointer_type (struct type *type)
 {
   return TYPE_CODE (type) == TYPE_CODE_PTR ||
     TYPE_CODE (type) == TYPE_CODE_REF;
@@ -928,8 +893,7 @@ pointer_type (type)
 
 /* Returns non-zero if the value is a structured type */
 int
-structured_type (type)
-     struct type *type;
+structured_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   switch (current_language->la_language)
@@ -957,7 +921,7 @@ structured_type (type)
 #endif
 
 struct type *
-lang_bool_type ()
+lang_bool_type (void)
 {
   struct symbol *sym;
   struct type *type;
@@ -1006,8 +970,7 @@ lang_bool_type ()
 
 /* Returns non-zero if the value VAL represents a true value. */
 int
-value_true (val)
-     value_ptr val;
+value_true (value_ptr val)
 {
   /* It is possible that we should have some sort of error if a non-boolean
      value is used in this context.  Possibly dependent on some kind of
@@ -1024,9 +987,7 @@ value_true (val)
 #if 0				/* Currently unused */
 
 void
-binop_type_check (arg1, arg2, op)
-     value_ptr arg1, arg2;
-     int op;
+binop_type_check (value_ptr arg1, value_ptr arg2, int op)
 {
   struct type *t1, *t2;
 
@@ -1218,10 +1179,7 @@ binop_type_check (arg1, arg2, op)
    this is an error and error () is called.  Otherwise, it is
    a warning and printf() is called. */
 void
-op_error (fmt, op, fatal)
-     char *fmt;
-     enum exp_opcode op;
-     int fatal;
+op_error (char *fmt, enum exp_opcode op, int fatal)
 {
   if (fatal)
     error (fmt, op_string (op));
@@ -1280,8 +1238,7 @@ range_error (char *string,...)
 /* Return the language enum for a given language string. */
 
 enum language
-language_enum (str)
-     char *str;
+language_enum (char *str)
 {
   int i;
 
@@ -1295,8 +1252,7 @@ language_enum (str)
 /* Return the language struct for a given language enum. */
 
 const struct language_defn *
-language_def (lang)
-     enum language lang;
+language_def (enum language lang)
 {
   int i;
 
@@ -1312,8 +1268,7 @@ language_def (lang)
 
 /* Return the language as a string */
 char *
-language_str (lang)
-     enum language lang;
+language_str (enum language lang)
 {
   int i;
 
@@ -1328,9 +1283,7 @@ language_str (lang)
 }
 
 static void
-set_check (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+set_check (char *ignore, int from_tty)
 {
   printf_unfiltered (
      "\"set check\" must be followed by the name of a check subcommand.\n");
@@ -1338,9 +1291,7 @@ set_check (ignore, from_tty)
 }
 
 static void
-show_check (ignore, from_tty)
-     char *ignore;
-     int from_tty;
+show_check (char *ignore, int from_tty)
 {
   cmd_show_list (showchecklist, from_tty, "");
 }
@@ -1348,8 +1299,7 @@ show_check (ignore, from_tty)
 /* Add a language to the set of known languages.  */
 
 void
-add_language (lang)
-     const struct language_defn *lang;
+add_language (const struct language_defn *lang)
 {
   if (lang->la_magic != LANG_MAGIC)
     {
@@ -1376,87 +1326,60 @@ add_language (lang)
 /* Define the language that is no language.  */
 
 static int
-unk_lang_parser ()
+unk_lang_parser (void)
 {
   return 1;
 }
 
 static void
-unk_lang_error (msg)
-     char *msg;
+unk_lang_error (char *msg)
 {
   error ("Attempted to parse an expression with unknown language");
 }
 
 static void
-unk_lang_emit_char (c, stream, quoter)
-     register int c;
-     struct ui_file *stream;
-     int quoter;
+unk_lang_emit_char (register int c, struct ui_file *stream, int quoter)
 {
   error ("internal error - unimplemented function unk_lang_emit_char called.");
 }
 
 static void
-unk_lang_printchar (c, stream)
-     register int c;
-     struct ui_file *stream;
+unk_lang_printchar (register int c, struct ui_file *stream)
 {
   error ("internal error - unimplemented function unk_lang_printchar called.");
 }
 
 static void
-unk_lang_printstr (stream, string, length, width, force_ellipses)
-     struct ui_file *stream;
-     char *string;
-     unsigned int length;
-     int width;
-     int force_ellipses;
+unk_lang_printstr (struct ui_file *stream, char *string, unsigned int length,
+		   int width, int force_ellipses)
 {
   error ("internal error - unimplemented function unk_lang_printstr called.");
 }
 
 static struct type *
-unk_lang_create_fundamental_type (objfile, typeid)
-     struct objfile *objfile;
-     int typeid;
+unk_lang_create_fundamental_type (struct objfile *objfile, int typeid)
 {
   error ("internal error - unimplemented function unk_lang_create_fundamental_type called.");
 }
 
 static void
-unk_lang_print_type (type, varstring, stream, show, level)
-     struct type *type;
-     char *varstring;
-     struct ui_file *stream;
-     int show;
-     int level;
+unk_lang_print_type (struct type *type, char *varstring, struct ui_file *stream,
+		     int show, int level)
 {
   error ("internal error - unimplemented function unk_lang_print_type called.");
 }
 
 static int
-unk_lang_val_print (type, valaddr, embedded_offset, address, stream, format, deref_ref,
-		    recurse, pretty)
-     struct type *type;
-     char *valaddr;
-     int embedded_offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+unk_lang_val_print (struct type *type, char *valaddr, int embedded_offset,
+		    CORE_ADDR address, struct ui_file *stream, int format,
+		    int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   error ("internal error - unimplemented function unk_lang_val_print called.");
 }
 
 static int
-unk_lang_value_print (val, stream, format, pretty)
-     value_ptr val;
-     struct ui_file *stream;
-     int format;
-     enum val_prettyprint pretty;
+unk_lang_value_print (value_ptr val, struct ui_file *stream, int format,
+		      enum val_prettyprint pretty)
 {
   error ("internal error - unimplemented function unk_lang_value_print called.");
 }
@@ -1558,7 +1481,7 @@ const struct language_defn local_language_defn =
 /* Initialize the language routines */
 
 void
-_initialize_language ()
+_initialize_language (void)
 {
   struct cmd_list_element *set, *show;
 

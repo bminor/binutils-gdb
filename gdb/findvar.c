@@ -388,8 +388,7 @@ store_floating (void *addr, int len, DOUBLEST val)
    Caller will check return value or die!  */
 
 value_ptr
-value_of_register (regnum)
-     int regnum;
+value_of_register (int regnum)
 {
   CORE_ADDR addr;
   int optim;
@@ -460,8 +459,7 @@ address_to_signed_pointer (struct type *type, void *buf, CORE_ADDR addr)
    up caring what frame it is being evaluated relative to?  SYM must
    be non-NULL.  */
 int
-symbol_read_needs_frame (sym)
-     struct symbol *sym;
+symbol_read_needs_frame (struct symbol *sym)
 {
   switch (SYMBOL_CLASS (sym))
     {
@@ -506,9 +504,7 @@ symbol_read_needs_frame (sym)
    If FRAME is NULL, use the selected_frame.  */
 
 value_ptr
-read_var_value (var, frame)
-     register struct symbol *var;
-     struct frame_info *frame;
+read_var_value (register struct symbol *var, struct frame_info *frame)
 {
   register value_ptr v;
   struct type *type = SYMBOL_TYPE (var);
@@ -713,10 +709,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
    Caller will check return value or die!  */
 
 value_ptr
-value_from_register (type, regnum, frame)
-     struct type *type;
-     int regnum;
-     struct frame_info *frame;
+value_from_register (struct type *type, int regnum, struct frame_info *frame)
 {
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   CORE_ADDR addr;
@@ -961,9 +954,7 @@ value_from_register (type, regnum, frame)
    address.  */
 
 value_ptr
-locate_var_value (var, frame)
-     register struct symbol *var;
-     struct frame_info *frame;
+locate_var_value (register struct symbol *var, struct frame_info *frame)
 {
   CORE_ADDR addr = 0;
   struct type *type = SYMBOL_TYPE (var);
