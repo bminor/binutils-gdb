@@ -2705,8 +2705,8 @@ pmon_load_fast (file)
   int final;
   int finished = 0;
 
-  buffer = (char *)malloc(MAXRECSIZE + 1);
-  binbuf = (unsigned char *)malloc(BINCHUNK);
+  buffer = (char *)xmalloc(MAXRECSIZE + 1);
+  binbuf = (unsigned char *)xmalloc(BINCHUNK);
 
   abfd = bfd_openr(file,0);
   if (!abfd)

@@ -301,7 +301,7 @@ som_solib_add (arg_string, from_tty, target)
       text_addr = extract_unsigned_integer (buf, 4);
 
 
-      new_so = (struct so_list *) malloc (sizeof (struct so_list));
+      new_so = (struct so_list *) xmalloc (sizeof (struct so_list));
       memset ((char *)new_so, 0, sizeof (struct so_list));
       if (so_list_head == NULL)
 	{

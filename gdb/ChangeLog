@@ -1,3 +1,12 @@
+Mon Feb 12 14:17:52 1996  Fred Fish  <fnf@cygnus.com>
+
+	* somsolib.c (som_solib_add): Use xmalloc rather than bare
+	unchecked call to malloc.
+	* remote-mips.c (pmon_load_fast): ditto.
+	* remote-mm.c (mm_open): ditto.
+	* hpread.c (hpread_lookup_type): ditto.
+	* remote-adapt.c (adapt_open): ditto.
+
 Mon Feb 12 13:11:32 1996  Fred Fish  <fnf@cygnus.com>
 
 	* f-lang.c (allocate_saved_bf_node, allocate_saved_function_node,

@@ -1215,7 +1215,7 @@ hpread_lookup_type (hp_type, objfile)
 	    {
 	      TYPE_VECTOR_LENGTH (objfile) = 100;
 	      TYPE_VECTOR (objfile) = (struct type **)
-		malloc (TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *));
+		xmalloc (TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *));
 	    }
 	  while (index >= TYPE_VECTOR_LENGTH (objfile))
 	    TYPE_VECTOR_LENGTH (objfile) *= 2;

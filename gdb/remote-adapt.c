@@ -484,7 +484,7 @@ erroid:
     error ("\
 Please include the name of the device for the serial port,\n\
 the baud rate, and the name of the program to run on the remote system.");
-  dev_name = (char*)malloc(p - name + 1);
+  dev_name = (char*)xmalloc(p - name + 1);
   strncpy (dev_name, name, p - name);
   dev_name[p - name] = '\0';
 

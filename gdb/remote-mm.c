@@ -260,7 +260,7 @@ mm_open (name, from_tty)
   if (p == 0 || *p == '\0')
 erroid:
     error ("Usage : <command> <serial-device> <baud-rate> [progname]");
-  dev_name = (char*)malloc (p - name + 1);
+  dev_name = (char*)xmalloc (p - name + 1);
   strncpy (dev_name, name, p - name);
   dev_name[p - name] = '\0';
 
