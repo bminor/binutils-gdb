@@ -229,7 +229,7 @@ SCHEMEFLAGS = -s
 CGENDIR = $(srcdir)/../cgen
 CGENFLAGS = -v
 
-CGENFILES = $(CGENDIR)/object.scm $(CGENDIR)/utils.scm \
+CGENFILES = $(CGENDIR)/cos.scm $(CGENDIR)/utils.scm \
 	$(CGENDIR)/attr.scm $(CGENDIR)/enum.scm $(CGENDIR)/types.scm \
 	$(CGENDIR)/utils-cgen.scm $(CGENDIR)/cpu.scm \
 	$(CGENDIR)/mode.scm $(CGENDIR)/mach.scm \

@@ -1,3 +1,7 @@
+Wed Jul  1 09:42:07 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.in (CGENFILES): Replace object.scm with cos.scm.
+
 start-sanitize-am33
 Tue Jun 30 09:59:37 1998  Jeffrey A Law  (law@cygnus.com)
 
