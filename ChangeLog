@@ -1,5 +1,7 @@
 Thu Apr 23 12:26:38 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ltconfig: Update cygwin32 support.
+
 	* Makefile.in (GAS_SUPPORT_DIRS): Add intl.
 	(BINUTILS_SUPPORT_DIRS, GASB_SUPPORT_DIRS): Likewise.
 	(GDB_SUPPORT_DIRS): Likewise.
