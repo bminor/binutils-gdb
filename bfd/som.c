@@ -77,6 +77,10 @@
 /* Max number of SOMs to be found in an archive.  */
 #define SOM_LST_MODULE_LIMIT 1024
 
+/* Generic alignment macro.  */
+#define SOM_ALIGN(val, alignment) \
+  (((val) + (alignment) - 1) & ~((alignment) - 1))
+
 /* SOM allows any one of the four previous relocations to be reused
    with a "R_PREV_FIXUP" relocation entry.  Since R_PREV_FIXUP
    relocations are always a single byte, using a R_PREV_FIXUP instead
@@ -2654,6 +2658,7 @@ som_begin_writing (abfd)
   asection *section;
   asymbol **syms = bfd_get_outsymbols (abfd);
   unsigned int total_subspaces = 0;
+  struct som_exec_auxhdr exec_header;
 
   /* The file header will always be first in an object file, 
      everything else can be in random locations.  To keep things
@@ -2676,10 +2681,13 @@ som_begin_writing (abfd)
   if (abfd->flags & EXEC_P)
     {
       /* Parts of the exec header will be filled in later, so
-	 delay writing the header itself.  Just leave space for
-	 it.  */
-      current_offset += sizeof (struct som_exec_auxhdr);
-      obj_som_file_hdr (abfd)->aux_header_size += sizeof (struct som_exec_auxhdr);
+	 delay writing the header itself.  Fill in the defaults,
+	 and write it later.  */
+      current_offset += sizeof (exec_header);
+      obj_som_file_hdr (abfd)->aux_header_size += sizeof (exec_header);
+      memset (&exec_header, 0, sizeof (exec_header));
+      exec_header.som_auxhdr.type = HPUX_AUX_ID;
+      exec_header.som_auxhdr.length = 40;
     }
   if (obj_som_version_hdr (abfd) != NULL)
     {
@@ -2841,32 +2849,73 @@ som_begin_writing (abfd)
   obj_som_file_hdr (abfd)->compiler_location = current_offset;
   obj_som_file_hdr (abfd)->compiler_total = 0;
 
-  /* Now compute the file positions for the loadable subspaces.  */
+  /* Now compute the file positions for the loadable subspaces, taking
+     care to make sure everything stays properly aligned.  */
 
   section = abfd->sections;
   for (i = 0; i < num_spaces; i++)
     {
       asection *subsection;
+      int first_subspace;
 
       /* Find a space.  */
       while (som_section_data (section)->is_space == 0)
 	section = section->next;
 
+      first_subspace = 1;
       /* Now look for all its subspaces.  */
       for (subsection = abfd->sections;
 	   subsection != NULL;
 	   subsection = subsection->next)
 	{
-	  
+
 	  if (som_section_data (subsection)->is_subspace == 0
 	      || som_section_data (subsection)->containing_space != section
 	      || (subsection->flags & SEC_ALLOC) == 0)
 	    continue;
 
+	  /* If this is the first subspace in the space, and we are
+	     building an executable, then take care to make sure all
+	     the alignments are correct and update the exec header.  */
+	  if (first_subspace
+	      && (abfd->flags & EXEC_P))
+	    {
+	      /* Demand paged executables have each space aligned to a
+		 page boundary.  Sharable executables (write-protected
+		 text) have just the private (aka data & bss) space aligned
+		 to a page boundary.  */
+	      if (abfd->flags & D_PAGED
+		  || ((abfd->flags & WP_TEXT)
+		      && (subsection->flags & SEC_DATA)))
+		current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
+
+	      /* Update the exec header.  */
+	      if (subsection->flags & SEC_CODE && exec_header.exec_tfile == 0)
+		{
+		  exec_header.exec_tmem = section->vma;
+		  exec_header.exec_tfile = current_offset;
+		}
+	      if (subsection->flags & SEC_DATA && exec_header.exec_dfile == 0)
+		{
+		  exec_header.exec_dmem = section->vma;
+		  exec_header.exec_dfile = current_offset;
+		}
+
+	      /* Only do this for the first subspace within each space.  */
+	      first_subspace = 0;
+	    }
+
 	  som_section_data (subsection)->subspace_index = total_subspaces++;
 	  /* This is real data to be loaded from the file.  */
 	  if (subsection->flags & SEC_LOAD)
 	    {
+	      /* Update the size of the code & data.  */
+	      if (abfd->flags & EXEC_P
+		  && subsection->flags & SEC_CODE)
+		exec_header.exec_tsize += subsection->_cooked_size;
+	      else if (abfd->flags & EXEC_P
+		       && subsection->flags & SEC_DATA)
+		exec_header.exec_dsize += subsection->_cooked_size;
 	      som_section_data (subsection)->subspace_dict.file_loc_init_value
 		= current_offset;
 	      section->filepos = current_offset;
@@ -2875,6 +2924,10 @@ som_begin_writing (abfd)
 	  /* Looks like uninitialized data.  */
 	  else
 	    {
+	      /* Update the size of the bss section.  */
+	      if (abfd->flags & EXEC_P)
+		exec_header.exec_bsize += subsection->_cooked_size;
+
 	      som_section_data (subsection)->subspace_dict.file_loc_init_value
 		= 0;
 	      som_section_data (subsection)->subspace_dict.
@@ -2885,7 +2938,12 @@ som_begin_writing (abfd)
       section = section->next; 
     }
 
-  /* Finally compute the file positions for unloadable subspaces.  */
+  /* Finally compute the file positions for unloadable subspaces.
+     If building an executable, start the unloadable stuff on its
+     own page.  */
+
+  if (abfd->flags & EXEC_P)
+    current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
 
   obj_som_file_hdr (abfd)->unloadable_sp_location = current_offset;
   section = abfd->sections;
@@ -2896,6 +2954,8 @@ som_begin_writing (abfd)
       /* Find a space.  */
       while (som_section_data (section)->is_space == 0)
 	section = section->next;
+
+      current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
 
       /* Now look for all its subspaces.  */
       for (subsection = abfd->sections;
@@ -2930,6 +2990,22 @@ som_begin_writing (abfd)
       section = section->next; 
     }
 
+  /* If building an executable, then make sure to seek to and write
+     one byte at the end of the file to make sure any necessary
+     zeros are filled in.  Ugh.  */
+  if (abfd->flags & EXEC_P)
+    current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
+  if (bfd_seek (abfd, current_offset, SEEK_SET) < 0)
+    {
+      bfd_set_error (bfd_error_system_call);
+      return false;
+    }
+  if (bfd_write ((PTR) "", 1, 1, abfd) != 1)
+    {
+      bfd_set_error (bfd_error_system_call);
+      return false;
+    }
+
   obj_som_file_hdr (abfd)->unloadable_sp_size
     = current_offset - obj_som_file_hdr (abfd)->unloadable_sp_location;
 
@@ -2939,6 +3015,29 @@ som_begin_writing (abfd)
 
   /* Done.  Store the total size of the SOM.  */
   obj_som_file_hdr (abfd)->som_length = current_offset;
+
+  /* Now write the exec header.  */
+  if (abfd->flags & EXEC_P)
+    {
+      long tmp;
+
+      /* Oh joys.  Ram some of the BSS data into the DATA section
+	 to be compatable with how the hp linker makes objects
+	 (saves memory space).  */
+      tmp = exec_header.exec_dsize;
+      tmp = SOM_ALIGN (tmp, PA_PAGESIZE);
+      exec_header.exec_bsize -= (tmp - exec_header.exec_dsize);
+      exec_header.exec_dsize = tmp;
+
+      bfd_seek (abfd, obj_som_file_hdr (abfd)->aux_header_location, SEEK_SET);
+
+      if (bfd_write ((PTR) &exec_header, AUX_HDR_SIZE, 1, abfd)
+	  != AUX_HDR_SIZE)
+	{
+	  bfd_set_error (bfd_error_system_call);
+	  return false;
+	}
+    }
   return true;
 }
 
