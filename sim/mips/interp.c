@@ -15,7 +15,7 @@
 
    $Revision$
      $Author$
-       $Date$
+       $Date$             
 
 NOTEs:
 
@@ -63,8 +63,8 @@ code on the hardware.
 #include "getopt.h"
 #include "libiberty.h"
 
-#include "remote-sim.h" /* GDB simulator interface */
 #include "callback.h"   /* GDB simulator callback interface */
+#include "remote-sim.h" /* GDB simulator interface */
 
 #include "support.h"    /* internal support manifests */
 
@@ -186,7 +186,9 @@ static host_callback *callback = NULL; /* handle onto the current callback struc
    order that the tools are built, we cannot rely on a configured GDB
    world whilst constructing the simulator. This means we have to
    assume the GDB register number mapping. */
+#ifndef TM_MIPS_H
 #define LAST_EMBED_REGNUM (89)
+#endif
 
 /* To keep this default simulator simple, and fast, we use a direct
    vector of registers. The internal simulator engine then uses
@@ -321,6 +323,26 @@ static int    pending_total;
 static int    pending_slot_count[PSLOTS];
 static int    pending_slot_reg[PSLOTS];
 static ut_reg pending_slot_value[PSLOTS];
+
+/*---------------------------------------------------------------------------*/
+/*-- GDB simulator interface ------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+static void dotrace PARAMS((FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...));
+static void sim_warning PARAMS((char *fmt,...));
+extern void sim_error PARAMS((char *fmt,...));
+static void ColdReset PARAMS((void));
+static int AddressTranslation PARAMS((uword64 vAddr,int IorD,int LorS,uword64 *pAddr,int *CCA,int host,int raw));
+static void StoreMemory PARAMS((int CCA,int AccessLength,uword64 MemElem,uword64 pAddr,uword64 vAddr,int raw));
+static uword64 LoadMemory PARAMS((int CCA,int AccessLength,uword64 pAddr,uword64 vAddr,int IorD,int raw));
+static void SignalException PARAMS((int exception,...));
+static void simulate PARAMS((void));
+static long getnum PARAMS((char *value));
+extern void sim_size PARAMS((unsigned int newsize));
+extern void sim_set_profile PARAMS((int frequency));
+static unsigned int power2 PARAMS((unsigned int value));
+
+/*---------------------------------------------------------------------------*/
 
 /* The following are not used for MIPS IV onwards: */
 #define PENDING_FILL(r,v) {\
@@ -482,22 +504,6 @@ static fnptr_swap_long host_swap_long;
 
 /*---------------------------------------------------------------------------*/
 /*-- GDB simulator interface ------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-static void dotrace PARAMS((FILE *tracefh,int type,unsigned int address,int width,char *comment,...));
-static void sim_warning PARAMS((char *fmt,...));
-extern void sim_error PARAMS((char *fmt,...));
-static void ColdReset PARAMS((void));
-static int AddressTranslation PARAMS((uword64 vAddr,int IorD,int LorS,uword64 *pAddr,int *CCA,int host,int raw));
-static void StoreMemory PARAMS((int CCA,int AccessLength,uword64 MemElem,uword64 pAddr,uword64 vAddr,int raw));
-static uword64 LoadMemory PARAMS((int CCA,int AccessLength,uword64 pAddr,uword64 vAddr,int IorD,int raw));
-static void SignalException PARAMS((int exception,...));
-static void simulate PARAMS((void));
-static long getnum PARAMS((char *value));
-extern void sim_size PARAMS((unsigned int newsize));
-extern void sim_set_profile PARAMS((int frequency));
-static unsigned int power2 PARAMS((unsigned int value));
-
 /*---------------------------------------------------------------------------*/
 
 void
@@ -752,7 +758,7 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
   if (!monitor) {
     fprintf(stderr,"Not enough VM for monitor simulation (%d bytes)\n",monitor_size);
   } else {
-    int loop;
+    unsigned loop;
     /* Entry into the IDT monitor is via fixed address vectors, and
        not using machine instructions. To avoid clashing with use of
        the MIPS TRAP system, we place our own (simulator specific)
@@ -802,7 +808,8 @@ Re-compile simulator with \"-DPROFILE\" to enable this option.\n");
               value = 17;
               break;
           }
-        value = (monitor_base + (value * 8));
+	    /* FIXME - should monitor_base be SIM_ADDR?? */
+        value = ((unsigned int)monitor_base + (value * 8));
         if (AddressTranslation(vaddr,isDATA,isSTORE,&paddr,&cca,isTARGET,isRAW))
           StoreMemory(cca,AccessLength_WORD,value,paddr,vaddr,isRAW);
         else
@@ -895,7 +902,7 @@ sim_close (quitting)
   if ((state & simPROFILE) && (profile_hist != NULL)) {
     unsigned short *p = profile_hist;
     FILE *pf = fopen("gmon.out","wb");
-    int loop;
+    unsigned loop;
 
     if (pf == NULL)
      sim_warning("Failed to open \"gmon.out\" profile file");
@@ -929,8 +936,9 @@ sim_close (quitting)
 #endif /* PROFILE */
 
 #if defined(TRACE)
-  if (tracefh != stderr)
+  if (tracefh != NULL && tracefh != stderr)
    fclose(tracefh);
+  tracefh = NULL;
   state &= ~simTRACE;
 #endif /* TRACE */
 
@@ -1145,7 +1153,7 @@ sim_fetch_register (rn,memory)
    sim_warning("Invalid register width for %d (register fetch ignored)",rn);
   else {
     if (register_widths[rn] == 32)
-     *((unsigned int *)memory) = host_swap_word(registers[rn] & 0xFFFFFFFF);
+     *((unsigned int *)memory) = host_swap_word((unsigned int)(registers[rn] & 0xFFFFFFFF));
     else /* 64bit register */
      *((uword64 *)memory) = host_swap_long(registers[rn]);
   }
@@ -1326,7 +1334,7 @@ sim_kill ()
   return;
 }
 
-int
+ut_reg
 sim_get_quit_code ()
 {
   /* The standard MIPS PCS (Procedure Calling Standard) uses V0(r2) as
@@ -1541,7 +1549,6 @@ sim_monitor(reason)
   switch (reason) {
     case 6: /* int open(char *path,int flags) */
       {
-        const char *ptr;
         uword64 paddr;
         int cca;
         if (AddressTranslation(A0,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
@@ -1553,7 +1560,6 @@ sim_monitor(reason)
 
     case 7: /* int read(int file,char *ptr,int len) */
       {
-        const char *ptr;
         uword64 paddr;
         int cca;
         if (AddressTranslation(A1,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
@@ -1565,7 +1571,6 @@ sim_monitor(reason)
 
     case 8: /* int write(int file,char *ptr,int len) */
       {
-        const char *ptr;
         uword64 paddr;
         int cca;
         if (AddressTranslation(A1,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL))
@@ -1584,10 +1589,10 @@ sim_monitor(reason)
         char tmp;
         if (callback->read_stdin(callback,&tmp,sizeof(char)) != sizeof(char)) {
           sim_error("Invalid return from character read");
-          V0 = -1;
+          V0 = (ut_reg)-1;
         }
         else
-         V0 = tmp;
+         V0 = (ut_reg)tmp;
       }
       break;
 
@@ -1722,7 +1727,7 @@ sim_monitor(reason)
                   }
 		}
 		if (strchr ("dobxXu", *s)) {
-                  long long lv = (long long)*ap++;
+                  word64 lv = (word64) *ap++;
                   if (*s == 'b')
                     callback->printf_filtered(callback,"<binary not supported>");
                   else {
@@ -1733,7 +1738,11 @@ sim_monitor(reason)
                       callback->printf_filtered(callback,tmp,(int)lv);
                   }
 		} else if (strchr ("eEfgG", *s)) {
+#ifdef _MSC_VER /* MSVC version 2.x can't convert from uword64 directly */
+                  double dbl = (double)((word64)*ap++);
+#else
                   double dbl = (double)*ap++;
+#endif
                   sprintf(tmp,"%%%d.%d%c",width,trunc,*s);
                   callback->printf_filtered(callback,tmp,dbl);
                   trunc = 0;
@@ -1757,8 +1766,12 @@ sim_monitor(reason)
 }
 
 void
+#ifdef _MSC_VER
+sim_warning(char *fmt,...)
+#else
 sim_warning(fmt)
      char *fmt;
+#endif
 {
   va_list ap;
   va_start(ap,fmt);
@@ -1778,8 +1791,12 @@ sim_warning(fmt)
 }
 
 void
+#ifdef _MSC_VER
+sim_error(char *fmt,...)
+#else
 sim_error(fmt)
      char *fmt;
+#endif
 {
   va_list ap;
   va_start(ap,fmt);
@@ -1869,17 +1886,23 @@ getnum(value)
    to construct an end product, rather than a processor). They
    currently have an ARM version of their tool called ChARM. */
 
+
 static
+#ifdef _MSC_VER
+void dotrace(FILE *tracefh,int type,SIM_ADDR address,int width,char *comment,...)
+#else
 void dotrace(tracefh,type,address,width,comment)
      FILE *tracefh;
      int type;
-     unsigned int address;
+     SIM_ADDR address;
      int width;
      char *comment;
+#endif
 {
   if (state & simTRACE) {
     va_list ap;
-    fprintf(tracefh,"%d %08x ; width %d ; ",type,address,width);
+    fprintf(tracefh,"%d %08x%08x ; width %d ; ", 
+		type,(unsigned long)(address>>32),(unsigned long)(address&0xffffffff),width);
     va_start(ap,comment);
     fprintf(tracefh,comment,ap);
     va_end(ap);
@@ -1910,68 +1933,106 @@ void dotrace(tracefh,type,address,width,comment)
    simulation, at the cost of increasing the image and source size. */
 
 static unsigned int
+#ifdef _MSC_VER
+xfer_direct_word(unsigned char *memory)
+#else
 xfer_direct_word(memory)
      unsigned char *memory;
+#endif
 {
   return *((unsigned int *)memory);
 }
 
 static uword64
+#ifdef _MSC_VER
+xfer_direct_long(unsigned char *memory)
+#else
 xfer_direct_long(memory)
      unsigned char *memory;
+#endif
 {
   return *((uword64 *)memory);
 }
 
 static unsigned int
+#ifdef _MSC_VER
+swap_direct_word(unsigned int data)
+#else
 swap_direct_word(data)
      unsigned int data;
+#endif
 {
   return data;
 }
 
 static uword64
+#ifdef _MSC_VER
+swap_direct_long(uword64 data)
+#else
 swap_direct_long(data)
      uword64 data;
+#endif
 {
   return data;
 }
 
 static unsigned int
+#ifdef _MSC_VER
+xfer_big_word(unsigned char *memory)
+#else
 xfer_big_word(memory)
      unsigned char *memory;
+#endif
 {
   return ((memory[0] << 24) | (memory[1] << 16) | (memory[2] << 8) | memory[3]);
 }
 
 static uword64
+#ifdef _MSC_VER
+xfer_big_long(unsigned char *memory)
+#else
 xfer_big_long(memory)
      unsigned char *memory;
+#endif
 {
   return (((uword64)memory[0] << 56) | ((uword64)memory[1] << 48)
           | ((uword64)memory[2] << 40) | ((uword64)memory[3] << 32)
-          | (memory[4] << 24) | (memory[5] << 16) | (memory[6] << 8) | memory[7]);
+          | ((uword64)memory[4] << 24) | ((uword64)memory[5] << 16) 
+	  | ((uword64)memory[6] << 8) | ((uword64)memory[7]));
 }
 
 static unsigned int
+#ifdef _MSC_VER
+xfer_little_word(unsigned char *memory)
+#else
 xfer_little_word(memory)
      unsigned char *memory;
+#endif
 {
   return ((memory[3] << 24) | (memory[2] << 16) | (memory[1] << 8) | memory[0]);
 }
 
 static uword64
+#ifdef _MSC_VER
+xfer_little_long(unsigned char *memory)
+#else
 xfer_little_long(memory)
      unsigned char *memory;
+#endif
 {
   return (((uword64)memory[7] << 56) | ((uword64)memory[6] << 48)
           | ((uword64)memory[5] << 40) | ((uword64)memory[4] << 32)
-          | (memory[3] << 24) | (memory[2] << 16) | (memory[1] << 8) | memory[0]);
+          | ((uword64)memory[3] << 24) | ((uword64)memory[2] << 16) 
+	  | ((uword64)memory[1] << 8) | (uword64)memory[0]);
 }
 
 static unsigned int
+#ifdef _MSC_VER
+swap_word(unsigned int data)
+#else
 swap_word(data)
      unsigned int data;
+#endif
 {
   unsigned int result;
   result = data ^ ((data << 16) | (data >> 16));
@@ -1981,8 +2042,12 @@ swap_word(data)
 }
 
 static uword64
+#ifdef _MSC_VER
+swap_long(uword64 data)
+#else
 swap_long(data)
      uword64 data;
+#endif
 {
   unsigned int tmphi = WORD64HI(data);
   unsigned int tmplo = WORD64LO(data);
@@ -2134,7 +2199,7 @@ AddressTranslation(vAddr,IorD,LorS,pAddr,CCA,host,raw)
     sim_warning("Failed: AddressTranslation(0x%08X%08X,%s,%s,...) IPC = 0x%08X%08X",WORD64HI(vAddr),WORD64LO(vAddr),(IorD ? "isDATA" : "isINSTRUCTION"),(LorS ? "isSTORE" : "isLOAD"),WORD64HI(IPC),WORD64LO(IPC));
 #endif /* DEBUG */
     res = 0; /* AddressTranslation has failed */
-    *pAddr = -1;
+    *pAddr = (SIM_ADDR)-1;
     if (!raw) /* only generate exceptions on real memory transfers */
      SignalException((LorS == isSTORE) ? AddressStore : AddressLoad);
     else
@@ -2472,8 +2537,12 @@ SyncOperation(stype)
    that aborts the instruction. The instruction operation pseudocode
    will never see a return from this function call. */
 static void
+#ifdef _MSC_VER
+SignalException (int exception,...)
+#else
 SignalException(exception)
      int exception;
+#endif
 {
   /* Ensure that any active atomic read/modify/write operation will fail: */
   LLBIT = 0;
@@ -2514,7 +2583,7 @@ SignalException(exception)
      }
 
     default:
-#if 1 /* def DEBUG */
+#ifdef DEBUG
      if (exception != BreakPoint)
       callback->printf_filtered(callback,"DBG: SignalException(%d) IPC = 0x%08X%08X\n",exception,WORD64HI(IPC),WORD64LO(IPC));
 #endif /* DEBUG */
@@ -2523,21 +2592,26 @@ SignalException(exception)
 
      /* TODO: If not simulating exceptions then stop the simulator
         execution. At the moment we always stop the simulation. */
-#if 1 /* bodge to allow exit() code to be returned, by assuming that a breakpoint exception after a monitor exit() call should be silent */
-/* further bodged since the standard libgloss/mips world doesn't use the _exit() monitor call, it just uses a break instruction */
-     if (exception == BreakPoint /* && state & simEXIT */)
-      {
-       state |= simSTOP;
-#if 1 /* since the _exit() monitor call may not be called */
-       state |= simEXIT;
-       rcexit = (unsigned int)(A0 & 0xFFFFFFFF);
-#endif
-      }
-     else
-       state |= (simSTOP | simEXCEPTION);
-#else
      state |= (simSTOP | simEXCEPTION);
-#endif
+
+     /* Keep a copy of the current A0 in-case this is the program exit
+        breakpoint:  */
+     if (exception == BreakPoint) {
+       va_list ap;
+       unsigned int instruction;
+       va_start(ap,exception);
+       instruction = va_arg(ap,unsigned int);
+       va_end(ap);
+       /* Check for our special terminating BREAK: */
+       if ((instruction & 0x03FFFFC0) == 0x03ff0000) {
+         rcexit = (unsigned int)(A0 & 0xFFFFFFFF);
+         state &= ~simEXCEPTION;
+         state |= simEXIT;
+       }
+     }
+
+     /* Store exception code into current exception id variable (used
+        by exit code): */
      CAUSE = (exception << 2);
      if (state & simDELAYSLOT) {
        CAUSE |= cause_BD;
@@ -3309,14 +3383,24 @@ SquareRoot(op,fmt)
    case fmt_single:
     {
       unsigned int wop = (unsigned int)op;
+#ifdef HAVE_SQRT
       float tmp = ((float)sqrt((double)*(float *)&wop));
       result = (uword64)*(unsigned int *)&tmp;
+#else
+      /* TODO: Provide square-root */
+      result = (uword64)0;
+#endif
     }
     break;
    case fmt_double:
     {
+#ifdef HAVE_SQRT
       double tmp = (sqrt(*(double *)&op));
       result = *(uword64 *)&tmp;
+#else
+      /* TODO: Provide square-root */
+      result = (uword64)0;
+#endif
     }
     break;
   }
@@ -3360,7 +3444,7 @@ Convert(rm,op,from,to)
         break;
 
        case fmt_long:
-        tmp = (float)((int)op);
+        tmp = (float)((word64)op);
         break;
       }
 
@@ -3424,7 +3508,7 @@ Convert(rm,op,from,to)
 
        case fmt_word:
         xxx = SIGNEXTEND((op & 0xFFFFFFFF),32);
-        tmp = xxx;
+        tmp = (double)xxx;
         break;
 
        case fmt_long:
@@ -3475,16 +3559,16 @@ Convert(rm,op,from,to)
       SignalException(FPE);
     } else {
       if (to == fmt_word) {
-        unsigned int tmp;
+        int tmp;
         switch (from) {
          case fmt_single:
           {
             unsigned int wop = (unsigned int)op;
-            tmp = (unsigned int)*((float *)&wop);
+            tmp = (int)*((float *)&wop);
           }
           break;
          case fmt_double:
-          tmp = (unsigned int)*((double *)&op);
+          tmp = (int)*((double *)&op);
 #ifdef DEBUG
           printf("DBG: from double %.30f (0x%08X%08X) to word: 0x%08X\n",*((double *)&op),WORD64HI(op),WORD64LO(op),tmp);
 #endif /* DEBUG */
@@ -3492,17 +3576,19 @@ Convert(rm,op,from,to)
         }
         result = (uword64)tmp;
       } else { /* fmt_long */
+	word64 tmp;
         switch (from) {
          case fmt_single:
           {
             unsigned int wop = (unsigned int)op;
-            result = (uword64)*((float *)&wop);
+            tmp = (word64)*((float *)&wop);
           }
           break;
          case fmt_double:
-          result = (uword64)*((double *)&op);
+          tmp = (word64)*((double *)&op);
           break;
         }
+	result = (uword64)tmp;
       }
     }
     break;
@@ -3797,7 +3883,7 @@ simulate ()
       instruction_fetch_overflow++;
 #if defined(PROFILE)
     if ((state & simPROFILE) && ((instruction_fetches % profile_frequency) == 0) && profile_hist) {
-      int n = ((unsigned int)(PC - profile_minpc) >> (profile_shift + 2));
+      unsigned n = ((unsigned int)(PC - profile_minpc) >> (profile_shift + 2));
       if (n < profile_nsamples) {
         /* NOTE: The counts for the profiling bins are only 16bits wide */
         if (profile_hist[n] != USHRT_MAX)

@@ -22,10 +22,6 @@
 #define DEBUG (1) /* Just for testing */
 #endif
 
-/* The Makefile currently defines "INSIDE_SIMULATOR" as part of the
-   build. It is not currently used by the MIPS simulator world
-   though. */
-
 /* All output sent to stdout is for the simulator engine. All program
    related warnings and errors should be sent to stderr. */
 

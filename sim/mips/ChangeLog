@@ -1,3 +1,46 @@
+Wed Nov 20 01:54:37 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in: Delete stuff moved to ../common/Make-common.in.
+	(SIM_{OBJS,EXTRA_CFLAGS,EXTRA_CLEAN}): Define.
+	* configure.in: Simplify using macros in ../common/aclocal.m4.
+	* configure: Regenerated.
+	* tconfig.in: New file.
+
+Tue Nov 12 13:34:00 1996  Dawn Perchik  <dawn@cygnus.com>
+
+	* interp.c: Fix bugs in 64-bit port.
+	Use ansi function declarations for msvc compiler.
+	Initialize and test file pointer in trace code.
+	Prevent duplicate definition of LAST_EMED_REGNUM.
+
+Tue Oct 15 11:07:06 1996  Mark Alexander  <marka@cygnus.com>
+
+	* interp.c (xfer_big_long): Prevent unwanted sign extension.
+
+Thu Sep 26 17:35:00 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* interp.c (SignalException): Check for explicit terminating
+ 	breakpoint value.
+	* gencode.c: Pass instruction value through SignalException()
+ 	calls for Trap, Breakpoint and Syscall.
+
+Thu Sep 26 11:35:17 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* interp.c (SquareRoot): Add HAVE_SQRT check to ensure sqrt() is
+ 	only used on those hosts that provide it.
+	* configure.in: Add sqrt() to list of functions to be checked for.
+	* config.in: Re-generated.
+	* configure: Re-generated.
+
+Fri Sep 20 15:47:12 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gencode.c (process_instructions): Call build_endian_shift when
+	expanding STORE RIGHT, to fix swr.
+	* support.h (SIGNEXTEND): If the sign bit is not set, explicitly
+	clear the high bits.
+	* interp.c (Convert): Fix fmt_single to fmt_long to not truncate.
+	Fix float to int conversions to produce signed values.
+
 Thu Sep 19 15:34:17 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gencode.c (MIPS_DECODE): Set UNSIGNED for multu instruction.
