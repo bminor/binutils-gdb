@@ -94,11 +94,6 @@ struct general_symbol_info
       char *demangled_name;
     }
     cplus_specific;
-    struct objc_specific
-    {
-      char *demangled_name;
-    }
-    objc_specific;
   }
   language_specific;
 
@@ -168,9 +163,6 @@ extern void symbol_set_names (struct general_symbol_info *symbol,
 #define SYMBOL_DEMANGLED_NAME(symbol) \
   (symbol_demangled_name (&(symbol)->ginfo))
 extern char *symbol_demangled_name (struct general_symbol_info *symbol);
-
-#define SYMBOL_OBJC_DEMANGLED_NAME(symbol)				\
-   (symbol)->ginfo.language_specific.objc_specific.demangled_name
 
 /* Macro that returns a version of the name of a symbol that is
    suitable for output.  In C++ this is the "demangled" form of the

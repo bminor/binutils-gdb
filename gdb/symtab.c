@@ -413,13 +413,10 @@ symbol_init_language_specific (struct general_symbol_info *gsymbol,
 {
   gsymbol->language = language;
   if (gsymbol->language == language_cplus
-      || gsymbol->language == language_java)
+      || gsymbol->language == language_java
+      || gsymbol->language == language_objc)
     {
       gsymbol->language_specific.cplus_specific.demangled_name = NULL;
-    }
-  else if (gsymbol->language == language_objc)
-    {
-      gsymbol->language_specific.objc_specific.demangled_name = NULL;
     }
   else
     {
@@ -584,11 +581,9 @@ char *
 symbol_demangled_name (struct general_symbol_info *gsymbol)
 {
   if (gsymbol->language == language_cplus
-      || gsymbol->language == language_java)
+      || gsymbol->language == language_java
+      || gsymbol->language == language_objc)
     return gsymbol->language_specific.cplus_specific.demangled_name;
-
-  else if (gsymbol->language == language_objc)
-    return gsymbol->language_specific.objc_specific.demangled_name;
 
   else 
     return NULL;

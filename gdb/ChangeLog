@@ -1,3 +1,10 @@
+2003-02-20  Adam Fedor  <fedor@gnu.org>
+
+	* symtab.h: Remove objc_specific struct
+	(SYMBOL_OBJC_DEMANGLED_NAME): Remove.
+	* symtab.c (symbol_init_language_specific, symbol_demangled_name):
+	Have language_objc use cplus_specific struct.
+
 2003-02-20  Tom Tromey  <tromey@redhat.com>
 
 	* jv-valprint.c (java_value_print): Look at TYPE_TAG_NAME, not
