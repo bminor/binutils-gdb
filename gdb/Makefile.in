@@ -168,12 +168,12 @@ SUBDIR_CLI_UNINSTALL=
 #
 SUBDIR_MI_OBS = \
 	mi-out.o mi-console.o \
-	mi-cmds.o mi-cmd-var.o mi-cmd-break.o mi-cmd-stack.o \
+	mi-cmds.o mi-cmd-env.o mi-cmd-var.o mi-cmd-break.o mi-cmd-stack.o \
 	mi-cmd-disas.o \
 	mi-main.o mi-parse.o mi-getopt.o
 SUBDIR_MI_SRCS = \
 	mi/mi-out.c mi/mi-console.c \
-	mi/mi-cmds.c \
+	mi/mi-cmds.c mi/mi-cmd-env.c \
 	mi/mi-cmd-var.c mi/mi-cmd-break.c mi/mi-cmd-stack.c \
 	mi/mi-cmd-disas.c \
 	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c
@@ -2536,6 +2536,10 @@ mi-cmd-break.o: $(srcdir)/mi/mi-cmd-break.c $(defs_h) $(mi_cmds_h) \
 mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(target_h) $(value_h) \
 	$(mi_cmds_h) $(mi_getopt_h) $(ui_out_h) $(gdb_string_h) $(disasm_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-disas.c
+mi-cmd-env.o: $(srcdir)/mi/mi-cmd-env.c $(defs_h) $(mi_cmds_h) $(ui_out_h) \
+	$(mi_out_h) $(varobj_h) $(value_h) $(gdb_string_h) $(inferior.h) \
+	$(mi_getopt_h) $(environ_h) $(gdbcmd_h) $(top_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-env.c
 mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(target_h) $(frame_h) \
 	$(value_h) $(mi_cmds_h) $(ui_out_h) $(symtab_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-stack.c

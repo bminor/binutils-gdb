@@ -1,3 +1,14 @@
+2002-12-13  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* defs.h (init_last_source_visited): New prototype.
+	(add_path): Ditto.
+	* source.c (add_path): New function that adds to a specified path.
+	(mod_path): Change to call add_path.
+	(init_last_source_visited): New function to allow interfaces to
+	initialize static variable: last_source_visited.  Part of fix
+	for PR gdb/741.
+	* Makefile.in: Add support for mi/mi-cmd-env.c.
+
 2002-12-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.h (frame_id_unwind): Declare.

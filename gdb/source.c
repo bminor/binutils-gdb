@@ -358,6 +358,12 @@ init_source_path (void)
   forget_cached_source_info ();
 }
 
+void
+init_last_source_visited (void)
+{
+  last_source_visited = NULL;
+}
+
 /* Add zero or more directories to the front of the source path.  */
 
 void
@@ -388,6 +394,18 @@ directory_command (char *dirname, int from_tty)
 void
 mod_path (char *dirname, char **which_path)
 {
+  add_path (dirname, which_path, 1);
+}
+
+/* Workhorse of mod_path.  Takes an extra argument to determine
+   if dirname should be parsed for separators that indicate multiple
+   directories.  This allows for interfaces that pre-parse the dirname
+   and allow specification of traditional separator characters such
+   as space or tab. */
+
+void
+add_path (char *dirname, char **which_path, int parse_separators)
+{
   char *old = *which_path;
   int prefix = 0;
 
@@ -404,9 +422,16 @@ mod_path (char *dirname, char **which_path)
       struct stat st;
 
       {
-	char *separator = strchr (name, DIRNAME_SEPARATOR);
-	char *space = strchr (name, ' ');
-	char *tab = strchr (name, '\t');
+	char *separator = NULL;
+	char *space = NULL;
+	char *tab = NULL;
+
+	if (parse_separators)
+	  {
+	    separator = strchr (name, DIRNAME_SEPARATOR);
+	    space = strchr (name, ' ');
+	    tab = strchr (name, '\t');
+	  }
 
 	if (separator == 0 && space == 0 && tab == 0)
 	  p = dirname = name + strlen (name);
@@ -537,7 +562,8 @@ mod_path (char *dirname, char **which_path)
 	    tinybuf[0] = DIRNAME_SEPARATOR;
 	    tinybuf[1] = '\0';
 
-	    /* If we have already tacked on a name(s) in this command,                     be sure they stay on the front as we tack on some more.  */
+	    /* If we have already tacked on a name(s) in this command, be sure they stay 
+	       on the front as we tack on some more.  */
 	    if (prefix)
 	      {
 		char *temp, c;
