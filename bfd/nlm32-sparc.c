@@ -253,6 +253,7 @@ nlm_sparc_read_import (abfd, sym)
   bfd_size_type rcount;			/* number of relocs */
   bfd_byte temp[NLM_TARGET_LONG_SIZE];	/* temporary 32-bit value */
   unsigned char symlength;		/* length of symbol name */
+  char *name;
   
   /*
    * First, read in the number of relocation
@@ -271,8 +272,8 @@ nlm_sparc_read_import (abfd, sym)
       != sizeof (symlength))
     return false;
   sym -> symbol.the_bfd = abfd;
-  sym -> symbol.name = bfd_alloc (abfd, symlength + 1);
-  if (!sym -> symbol.name)
+  name = bfd_alloc (abfd, symlength + 1);
+  if (name == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
@@ -282,9 +283,10 @@ nlm_sparc_read_import (abfd, sym)
    * Then read in the symbol
    */
   
-  if (bfd_read ((PTR) sym -> symbol.name, symlength, 1, abfd)
-      != symlength)
+  if (bfd_read (name, symlength, 1, abfd) != symlength)
     return false;
+  name[symlength] = '\0';
+  sym -> symbol.name = name;
   sym -> symbol.flags = 0;
   sym -> symbol.value = 0;
   sym -> symbol.section = &bfd_und_section;

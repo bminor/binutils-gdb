@@ -1,5 +1,10 @@
 Thu Mar 31 11:52:15 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* nlm32-i386.c (nlm_i386_read_import): Null terminate the symbol
+	name.
+	* nlm32-alpha.c (nlm_alpha_read_import): Likewise.
+	* nlm32-sparc.c (nlm_sparc_read_import): Likewise.
+
 	* coffgen.c (coff_write_symbol): Reindented.  Changed to return
 	boolean, and changed written to unsigned int *.  Check error
 	returns from called functions.
