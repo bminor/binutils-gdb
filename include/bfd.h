@@ -310,10 +310,8 @@ extern CONST short _bfd_host_big_endian;
 
 /*THE FOLLOWING IS EXTRACTED FROM THE SOURCE */
 
-/* FROM opncls.c*/
-/* ------------------------------START FROM opncls.c
-
-*i bfd_openr
+/*:opncls.c*/
+/* *i bfd_openr
 Opens the file supplied (using @code{fopen}) with the target supplied, it
 returns a pointer to the created BFD.
 
@@ -376,13 +374,10 @@ BFD.
  PROTO(bfd_size_type,bfd_alloc_size,(bfd *abfd));
 
 /*
+*/
 
- --------------------------------END FROM opncls.c*/
-
-
-/* FROM archures.c*/
-/* ------------------------------START FROM archures.c
- bfd_architecture
+/*:archures.c*/
+/* bfd_architecture
 This enum gives the object file's CPU
 architecture, in a global sense.  E.g. what processor family does it
 belong to?  There is another field, which indicates what processor
@@ -475,15 +470,8 @@ Set atch mach
      BFD_SEND (abfd, _bfd_set_arch_mach,\
                     (abfd, arch, mach))
 
-/*
- --------------------------------END FROM archures.c*/
-
-
-
-/* FROM libbfd.c*/
-/* ------------------------------START FROM libbfd.c
-
-*i bfd_put_size
+/*:libbfd.c*/
+/* *i bfd_put_size
 *i bfd_get_size
 These macros as used for reading and writing raw data in sections;
 each access (except for bytes) is vectored through the target format
@@ -530,12 +518,9 @@ endan order.
                 BFD_SEND(abfd, bfd_h_putx64,(val, ptr))
 #define bfd_h_get_64(abfd, ptr) \
                 BFD_SEND(abfd, bfd_h_getx64,(ptr))
-/* --------------------------------END FROM libbfd.c*/
 
-/* FROM section.c*/
-/* ------------------------------START FROM section.c
-
-The shape of a section struct:
+/*:section.c*/
+/* The shape of a section struct:
 */
 
 typedef struct sec {
@@ -931,13 +916,11 @@ Possible errors are:
          file_ptr offset, bfd_size_type count));
 
 /*
+*/
 
- --------------------------------END FROM section.c*/
 
-/* FROM syms.c*/
-/* ------------------------------START FROM syms.c
-
-@subsection typedef asymbol
+/*:syms.c*/
+/* @subsection typedef asymbol
 An @code{asymbol} has the form:
 */
 
@@ -1158,13 +1141,8 @@ problems later on.
 #define bfd_make_empty_symbol(abfd) \
      BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))
 
-/*
- --------------------------------END FROM syms.c*/
-
-/* FROM bfd.c*/
-/* ------------------------------START FROM bfd.c
-
-@section typedef bfd
+/*:bfd.c*/
+/* @section typedef bfd
 
 Pointers to bfd structs are the cornerstone of any application using
 @code{libbfd}. References though the BFD and to data in the BFD give the
@@ -1405,12 +1383,10 @@ before); else determine modify time, cache it, and return it.
         BFD_SEND ( a, _bfd_coff_swap_lineno_in, (a,e,i))
 
 /*
+*/
 
- --------------------------------END FROM bfd.c*/
-
-/* FROM archive.c*/
-/* ------------------------------START FROM archive.c
- bfd_get_next_mapent
+/*:archive.c*/
+/* bfd_get_next_mapent
 What this does
 */
  PROTO(symindex, bfd_get_next_mapent, (bfd *, symindex, carsym **));
@@ -1444,12 +1420,11 @@ NULL is returned when there are no more.
                (bfd *archive, bfd *previous));
 
 /*
+*/
 
- --------------------------------END FROM archive.c*/
 
-/* FROM core.c*/
-/* ------------------------------START FROM core.c
- bfd_core_file_failing_command
+/*:core.c*/
+/* bfd_core_file_failing_command
 Returns a read-only string explaining what program was running when
 it failed and produced the core file being read
 */
@@ -1476,12 +1451,10 @@ or else @code{false}.
     (bfd *core_bfd, bfd *exec_bfd));
 
 /*
+*/
 
- --------------------------------END FROM core.c*/
-
-/* FROM reloc.c*/
-/* ------------------------------START FROM reloc.c
- bfd_perform_relocation
+/*:reloc.c*/
+/* bfd_perform_relocation
 The relocation routine returns as a status an enumerated type:
 */
 
@@ -1732,12 +1705,10 @@ this problem.
                         bfd *output_bfd));
 
 /*
+*/
 
- --------------------------------END FROM reloc.c*/
-
-/* FROM targets.c*/
-/* ------------------------------START FROM targets.c
- bfd_target
+/*:targets.c*/
+/* bfd_target
 @node bfd_target
 @subsection bfd_target
 This structure contains everything that BFD knows about a target.
@@ -2010,13 +1981,11 @@ names of all the valid BFD targets. Do not modify the names
  PROTO(CONST char **,bfd_target_list,());
 
 /*
+*/
 
- --------------------------------END FROM targets.c*/
 
-/* FROM format.c*/
-/* ------------------------------START FROM format.c
-
-*i bfd_check_format
+/*:format.c*/
+/* *i bfd_check_format
 This routine is supplied a BFD and a format. It attempts to verify if
 the file attached to the BFD is indeed compatible with the format
 specified (ie, one of @code{bfd_object}, @code{bfd_archive} or
@@ -2065,7 +2034,6 @@ returns a pointer to a const string "invalid", "object", "archive",
  PROTO(CONST char *, bfd_format_string, (bfd_format));
 
 /*
-
- --------------------------------END FROM format.c*/
+*/
 
 #endif
