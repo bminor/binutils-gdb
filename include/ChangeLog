@@ -1,3 +1,27 @@
+Mon Nov 17 14:00:51 1997  Doug Evans  <devans@seba.cygnus.com>
+
+	* callback.h (CB_TARGET_DEFS_MAP): Renamed from target_defs_map.
+	(host_callback): Add stat, fstat, syscall_map, errno_map, open_map,
+	signal_map, stat_map.
+	(errn_map,open_map): Renamed to cb_init_foo_map.
+	(cb_host_to_target_errno,cb_target_to_host_open): Renamed from
+	host_to_target_errno,target_to_host_open.
+	(cb_read_target_syscall_maps): Add prototype.
+	(cb_target_to_host_syscall): Likewise.
+	(cb_host_to_target_stat): Likewise.
+	(cb_syscall): Likewise.
+	(CB_SYS_{exit,open,close,read,write,lseek,unlink,getpid,kill,fstat,
+	argvlen,argv,chdir,stat,chmod,utime,time}): Define.
+	(CB_SYSCALL): New type.
+	(CB_RC): New enum.
+
+Tue Oct 14 16:07:51 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* dis-asm.h (struct disassemble_info): New field
+	'symbol_at_address_func'.
+	(INIT_DISASSEMBLE_INFO_NO_ARCH): Initialise new field with
+	generic_symbol_at_address. 
+
 Mon Oct 13 10:17:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote-sim.h: Clarify sim_read, sim_write MEM argument.
@@ -235,12 +259,10 @@ Mon Sep 30 13:56:11 1996  Fred Fish  <fnf@cygnus.com>
 
 	* libiberty.h: Remove #ifndef PRIVATE_XMALLOC.
 
-start-sanitize-v850
 Sat Aug 31 13:27:06 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* dis-asm.h (print_insn_v850): Declare.
 
-end-sanitize-v850
 Tue Aug 13 16:10:30 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* obstack.h:  Change bcopy to memcpy.  Works better on Posix
