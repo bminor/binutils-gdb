@@ -58,8 +58,8 @@ extern void free_all_psymtabs ();
 
 /* To be an sdb debug type, type must have at least a basic or primary
    derived type.  Using this rather than checking against T_NULL is
-   said to prevent core dumps if we try to operate on a coff-encap file.
-   (I'm not sure that can happen with BFD...).  */
+   said to prevent core dumps if we try to operate on Michael Bloom
+   dbx-in-coff file.  */
 
 #define SDB_TYPE(type) (BTYPE(type) | (type & N_TMASK))
 
