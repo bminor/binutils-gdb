@@ -1073,6 +1073,7 @@ m68hc11_elf_relax_section (abfd, sec, link_info, again)
             }
         }
       prev_insn_branch = 0;
+      prev_insn_group = 0;
     }
 
   if (free_relocs != NULL)

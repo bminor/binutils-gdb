@@ -1,3 +1,9 @@
+2003-04-26  Stephane Carrez  <stcarrez@nerim.fr>
+
+	PR savannah/3331:
+	* elf32-m68hc11.c (m68hc11_elf_relax_section): Clear prev_insn_group
+	when we couldn't relax something.
+
 2003-04-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_merge_symbol): When we find a regular definition

@@ -1,3 +1,8 @@
+2003-04-26  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ld-m68hc11/bug-3331.d: New test.
+	* ld-m68hc11/bug-3331.s: New file.
+
 2003-04-25  Nick Clifton <nickc@redhat.com>
             J"orn Rennecke <joern.rennecke@superh.com>
 
