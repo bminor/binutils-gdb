@@ -239,15 +239,60 @@ const struct mn10300_operand mn10300_operands[] = {
 #define RN0      (EPSW+1)
   {4, 0, MN10300_OPERAND_RREG},
 
+/* rn register in the third register operand position.  */
+#define RN2      (RN0+1)
+  {4, 4, MN10300_OPERAND_RREG},
+
 /* rm register in the third register operand position.  */
-#define RM1      (RN0+1)
+#define RM0      (RN2+1)
+  {4, 0, MN10300_OPERAND_RREG},
+
+/* rm register in the third register operand position.  */
+#define RM1      (RM0+1)
   {4, 2, MN10300_OPERAND_RREG},
+
+/* rm register in the third register operand position.  */
+#define RM2      (RM1+1)
+  {4, 4, MN10300_OPERAND_RREG},
+
+#define RN02      (RM2+1)
+  {4, 0, MN10300_OPERAND_RREG | MN10300_OPERAND_REPEATED},
+
+#define XRN0      (RN02+1)
+  {4, 0, MN10300_OPERAND_XRREG},
+
+#define XRM2      (XRN0+1)
+  {4, 4, MN10300_OPERAND_XRREG},
+
+/* + for autoincrement */
+#define PLUS	(XRM2+1)
+  {0, 0, MN10300_OPERAND_PLUS}, 
+
+#define XRN02      (PLUS+1)
+  {4, 0, MN10300_OPERAND_XRREG | MN10300_OPERAND_REPEATED},
+
+/* Ick */
+#define RD0      (XRN02+1)
+  {4, -8, MN10300_OPERAND_RREG},
+
+#define RD2      (RD0+1)
+  {4, -4, MN10300_OPERAND_RREG},
+
+/* 8 unsigned dispacement in a memory operation which
+   may promote to a 32bit displacement.  */
+#define IMM8_MEM    (RD2+1)
+  {8, 0, MN10300_OPERAND_PROMOTE | MN10300_OPERAND_MEMADDR},
+
+/* Index register.  */
+#define RI (IMM8_MEM+1)
+  {4, 4, MN10300_OPERAND_RREG},
 
 /* end-sanitize-am33 */
 
 } ; 
 
 #define MEM(ADDR) PAREN, ADDR, PAREN 
+#define MEMINC(ADDR) PAREN, ADDR, PLUS, PAREN 
 #define MEM2(ADDR1,ADDR2) PAREN, ADDR1, ADDR2, PAREN 
 
 /* The opcode table.
@@ -322,6 +367,10 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0xfa800000,	0xfff30000,	FMT_D2, {AM1, MEM(IMM16_MEM)}},
 { "mov",	0xfc800000,	0xfff30000,	FMT_D4, {AM1, MEM(IMM32_MEM)}},
 { "mov",	0xf8f400,	0xfffc00,	FMT_D1, {SP, MEM2(SD8N, AN0)}},
+{ "mov",	0x2c0000,	0xfc0000,	FMT_S2, {SIMM16, DN0}},
+{ "mov",	0xfccc0000,	0xfffc0000,	FMT_D4, {IMM32, DN0}},
+{ "mov",	0x240000,	0xfc0000,	FMT_S2, {IMM16, AN0}},
+{ "mov",	0xfcdc0000,	0xfffc0000,	FMT_D4, {IMM32, AN0}},
 /* start-sanitize-am33 */
 { "mov",	0xf020,		0xfffc,		FMT_D0, {USP, AN0}},
 { "mov",	0xf024,		0xfffc,		FMT_D0, {SSP, AN0}},
@@ -336,21 +385,65 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0xf540,		0xffc0,		FMT_D0, {DM2, RN0}},
 { "mov",	0xf580,		0xffc0,		FMT_D0, {RM1, AN0}},
 { "mov",	0xf5c0,		0xffc0,		FMT_D0, {RM1, DN0}},
-/* end-sanitize-am33 */
-{ "mov",	0x2c0000,	0xfc0000,	FMT_S2, {SIMM16, DN0}},
-{ "mov",	0xfccc0000,	0xfffc0000,	FMT_D4, {IMM32, DN0}},
-{ "mov",	0x240000,	0xfc0000,	FMT_S2, {IMM16, AN0}},
-{ "mov",	0xfcdc0000,	0xfffc0000,	FMT_D4, {IMM32, AN0}},
+{ "mov",	0xf90800,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "mov",	0xf9e800,	0xffff00,	FMT_D6, {XRM2, RN0}},
+{ "mov",	0xf9f800,	0xffff00,	FMT_D6, {RM2, XRN0}},
+{ "mov",	0xf90a00,	0xffff00,	FMT_D6, {MEM(RM0), RN2}},
+{ "mov",	0xf91a00,	0xffff00,	FMT_D6, {RM2, MEM(RN0)}},
+{ "mov",	0xf96a00,	0xffff00,	FMT_D6, {MEMINC(RM0), RN2}},
+{ "mov",	0xf97a00,	0xffff00,	FMT_D6, {RM2, MEMINC(RN0)}},
+{ "mov",	0xf98a00,	0xffff0f,	FMT_D6, {MEM(SP), RN2}},
+{ "mov",	0xf99a00,	0xffff0f,	FMT_D6, {RM2, MEM(SP)}},
+{ "mov",	0xfb080000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+{ "mov",	0xfbf80000,	0xffff0000,	FMT_D7, {SIMM8, XRN02}},
+{ "mov",	0xfb0a0000,	0xffff0000,	FMT_D7, {MEM2(SD8, RM0), RN2}},
+{ "mov",	0xfb1a0000,	0xffff0000,	FMT_D7, {RM2, MEM2(SD8, RN0)}},
+{ "mov",	0xfb8a0000,	0xffff0f00,	FMT_D7, {MEM2(SD8, SP), RN2}},
+{ "mov",	0xfb9a0000,	0xffff0f00,	FMT_D7, {RM2, MEM2(SD8, SP)}},
+{ "mov",	0xfb0e0000,	0xffff0f00,	FMT_D7, {MEM(IMM8_MEM), RN2}},
+{ "mov",	0xfb1e0000,	0xffff0f00,	FMT_D7, {RM2, MEM(IMM8_MEM)}},
+{ "mov",	0xfb8e0000,	0xffff000f,	FMT_D7, {MEM2(RI, RM0), RD2}},
+{ "mov",	0xfb9e0000,	0xffff000f,	FMT_D7, {RD2, MEM2(RI, RN0))}},
 
-/* start-sanitize-am33 */
+{ "movu",	0xfb180000,	0xffff0000,	FMT_D7, {IMM8, RN02}},
+
 { "mcst9",	0xf630,		0xfff0,		FMT_D0, {DN01}},
 { "mcst48",	0xf660,		0xfff0,		FMT_D0, {DN01}},
 { "swap",	0xf680,		0xfff0,		FMT_D0, {DM1, DN0}},
+{ "swap",	0xf9cb00,	0xffff00,	FMT_D6, {RM2, RN0}},
 { "swaph",	0xf690,		0xfff0,		FMT_D0, {DM1, DN0}},
+{ "swaph",	0xf9db00,	0xffff00,	FMT_D6, {RM2, RN0}},
 { "getchx",	0xf6c0,		0xfff0,		FMT_D0, {DN01}},
 { "getclx",	0xf6d0,		0xfff0,		FMT_D0, {DN01}},
-/* end-sanitize-am33 */
-
+{ "mac",	0xfb0f0000,	0xffff0000,	FMT_D7, {RM2, RN0, RD2, RD0}},
+{ "mac",	0xf90b00,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "mac",	0xfb0b0000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+{ "macu",	0xfb1f0000,	0xffff0000,	FMT_D7, {RM2, RN0, RD2, RD0}},
+{ "macu",	0xf91b00,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "macu",	0xfb1b0000,	0xffff0000,	FMT_D7, {IMM8, RN02}},
+{ "macb",	0xfb2f0000,	0xffff0000,	FMT_D7, {RM2, RN0, RD2, RD0}},
+{ "macb",	0xf92b00,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "macb",	0xfb2b0000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+{ "macbu",	0xfb3f0000,	0xffff0000,	FMT_D7, {RM2, RN0, RD2, RD0}},
+{ "macbu",	0xf93b00,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "macbu",	0xfb3b0000,	0xffff0000,	FMT_D7, {IMM8, RN02}},
+{ "mach",	0xfb4f0000,	0xffff0000,	FMT_D7, {RM2, RN0, RD2, RD0}},
+{ "mach",	0xf94b00,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "mach",	0xfb4b0000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+{ "machu",	0xfb5f0000,	0xffff0000,	FMT_D7, {RM2, RN0, RD2, RD0}},
+{ "machu",	0xf95b00,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "machu",	0xfb5b0000,	0xffff0000,	FMT_D7, {IMM8, RN02}},
+{ "dmach",	0xfb6f0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD2}},
+{ "dmach",	0xf96b00,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "dmachu",	0xfb7f0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD2}},
+{ "dmachu",	0xf97b00,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "dmulh",	0xfb8f0000,	0xffff0000,	FMT_D7, {RM2, RN0, RD2, RD0}},
+{ "dmulh",	0xf98b00,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "dmulhu",	0xfb9f0000,	0xffff0000,	FMT_D7, {RM2, RN0, RD2, RD0}},
+{ "dmulhu",	0xf99b00,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "mcste",	0xf9bb00,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "mcste",	0xfbbb0000,	0xffff0000,	FMT_D7, {IMM8, RN02}},
+{ "swhw",	0xf9eb00,	0xffff00,	FMT_D6, {RM2, RN0}},
 /* end-sanitize-am33 */
 
 { "movbu",	0xf040,		0xfff0,		FMT_D0, {MEM(AM0), DN1}},
@@ -373,6 +466,20 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movbu",	0xf440,		0xffc0,		FMT_D0, {DM2, MEM2(DI, AN0)}},
 { "movbu",	0x020000,	0xf30000,	FMT_S2, {DM1, MEM(IMM16_MEM)}},
 { "movbu",	0xfc820000,	0xfff30000,	FMT_D4, {DM1, MEM(IMM32_MEM)}},
+/* start-sanitize-am33 */
+{ "movbu",	0xf92a00,	0xffff00,	FMT_D6, {MEM(RM0), RN2}},
+{ "movbu",	0xf93a00,	0xffff00,	FMT_D6, {RM2, MEM(RN0)}},
+{ "movbu",	0xf9aa00,	0xffff0f,	FMT_D6, {MEM(SP), RN2}},
+{ "movbu",	0xf9ba00,	0xffff0f,	FMT_D6, {RM2, MEM(SP)}},
+{ "movbu",	0xfb2a0000,	0xffff0000,	FMT_D7, {MEM2(SD8, RM0), RN2}},
+{ "movbu",	0xfb3a0000,	0xffff0000,	FMT_D7, {RM2, MEM2(SD8, RN0)}},
+{ "movbu",	0xfbaa0000,	0xffff0f00,	FMT_D7, {MEM2(SD8, SP), RN2}},
+{ "movbu",	0xfbba0000,	0xffff0f00,	FMT_D7, {RM2, MEM2(SD8, SP)}},
+{ "movbu",	0xfb2e0000,	0xffff0f00,	FMT_D7, {MEM(IMM8_MEM), RN2}},
+{ "movbu",	0xfb3e0000,	0xffff0f00,	FMT_D7, {RM2, MEM(IMM8_MEM)}},
+{ "movbu",	0xfbae0000,	0xffff000f,	FMT_D7, {MEM2(RI, RM0), RD2}},
+{ "movbu",	0xfbbe0000,	0xffff000f,	FMT_D7, {RD2, MEM2(RI, RN0))}},
+/* end-sanitize-am33 */
 
 { "movhu",	0xf060,		0xfff0,		FMT_D0, {MEM(AM0), DN1}},
 { "movhu",	0xf86000,	0xfff000,	FMT_D1, {MEM2(SD8, AM0), DN1}},
@@ -394,12 +501,43 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "movhu",	0xf4c0,		0xffc0,		FMT_D0, {DM2, MEM2(DI, AN0)}},
 { "movhu",	0x030000,	0xf30000,	FMT_S2, {DM1, MEM(IMM16_MEM)}},
 { "movhu",	0xfc830000,	0xfff30000,	FMT_D4, {DM1, MEM(IMM32_MEM)}},
+/* start-sanitize-am33 */
+{ "movhu",	0xf94a00,	0xffff00,	FMT_D6, {MEM(RM0), RN2}},
+{ "movhu",	0xf95a00,	0xffff00,	FMT_D6, {RM2, MEM(RN0)}},
+{ "movhu",	0xf9ca00,	0xffff0f,	FMT_D6, {MEM(SP), RN2}},
+{ "movhu",	0xf9da00,	0xffff0f,	FMT_D6, {RM2, MEM(SP)}},
+{ "movhu",	0xf9ea00,	0xffff00,	FMT_D6, {MEMINC(RM0), RN2}},
+{ "movhu",	0xf9fa00,	0xffff00,	FMT_D6, {RM2, MEMINC(RN0)}},
+{ "movhu",	0xfb4a0000,	0xffff0000,	FMT_D7, {MEM2(SD8, RM0), RN2}},
+{ "movhu",	0xfb5a0000,	0xffff0000,	FMT_D7, {RM2, MEM2(SD8, RN0)}},
+{ "movhu",	0xfbca0000,	0xffff0f00,	FMT_D7, {MEM2(SD8, SP), RN2}},
+{ "movhu",	0xfbda0000,	0xffff0f00,	FMT_D7, {RM2, MEM2(SD8, SP)}},
+{ "movhu",	0xfb4e0000,	0xffff0f00,	FMT_D7, {MEM(IMM8_MEM), RN2}},
+{ "movhu",	0xfb5e0000,	0xffff0f00,	FMT_D7, {RM2, MEM(IMM8_MEM)}},
+{ "movbu",	0xfbce0000,	0xffff000f,	FMT_D7, {MEM2(RI, RM0), RD2}},
+{ "movbu",	0xfbde0000,	0xffff000f,	FMT_D7, {RD2, MEM2(RI, RN0))}},
+/* end-sanitize-am33 */
 
 { "ext",	0xf2d0,		0xfffc,		FMT_D0, {DN0}},
+/* start-sanitize-am33 */
+{ "ext",	0xf91800,	0xffff00,	FMT_D6, {RN02}},
+/* end-sanitize-am33 */
 { "extb",	0x10, 		0xfc,		FMT_S0, {DN0}},
+/* start-sanitize-am33 */
+{ "extb",	0xf92800,	0xffff00,	FMT_D6, {RM2, RN0}},
+/* end-sanitize-am33 */
 { "extbu",	0x14,		0xfc,		FMT_S0, {DN0}},
+/* start-sanitize-am33 */
+{ "extbu",	0xf93800,	0xffff00,	FMT_D6, {RM2, RN0}},
+/* end-sanitize-am33 */
 { "exth",	0x18,		0xfc,		FMT_S0, {DN0}},
+/* start-sanitize-am33 */
+{ "exth",	0xf94800,	0xffff00,	FMT_D6, {RM2, RN0}},
+/* end-sanitize-am33 */
 { "exthu",	0x1c,		0xfc,		FMT_S0, {DN0}},
+/* start-sanitize-am33 */
+{ "exthu",	0xf95800,	0xffff00,	FMT_D6, {RM2, RN0}},
+/* end-sanitize-am33 */
 
 { "movm",	0xce00,		0xff00,		FMT_S1, {MEM(SP), REGS}},
 { "movm",	0xcf00,		0xff00,		FMT_S1, {REGS, MEM(SP)}},
@@ -409,7 +547,13 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 /* end-sanitize-am33 */
 
 { "clr",	0x00,		0xf3,		FMT_S0, {DN1}},
+/* start-sanitize-am33 */
+{ "clr",	0xf96800,	0xffff00,	FMT_D6, {RN02}},
+/* end-sanitize-am33 */
 
+/* start-sanitize-am33 */
+{ "add",	0xfb7c0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD0}},
+/* end-sanitize-am33 */
 { "add",	0xe0,		0xf0,		FMT_S0, {DM1, DN0}},
 { "add",	0xf160,		0xfff0,		FMT_D0, {DM1, AN0}},
 { "add",	0xf150,		0xfff0,		FMT_D0, {AM1, DN0}},
@@ -423,25 +567,69 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "add",	0xf8fe00,	0xffff00,	FMT_D1, {SIMM8, SP}},
 { "add",	0xfafe0000,	0xffff0000,	FMT_D2, {SIMM16, SP}},
 { "add",	0xfcfe0000,	0xffff0000,	FMT_D4, {IMM32, SP}},
+/* start-sanitize-am33 */
+{ "add",	0xf97800,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "add",	0xfb780000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+{ "addc",	0xfb8c0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD0}},
+/* end-sanitize-am33 */
 { "addc",	0xf140,		0xfff0,		FMT_D0, {DM1, DN0}},
+/* start-sanitize-am33 */
+{ "addc",	0xf98800,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "addc",	0xfb880000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+/* end-sanitize-am33 */
 
+/* start-sanitize-am33 */
+{ "sub",	0xfb9c0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD0}},
+/* end-sanitize-am33 */
 { "sub",	0xf100,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "sub",	0xf120,		0xfff0,		FMT_D0, {DM1, AN0}},
 { "sub",	0xf110,		0xfff0,		FMT_D0, {AM1, DN0}},
 { "sub",	0xf130,		0xfff0,		FMT_D0, {AM1, AN0}},
 { "sub",	0xfcc40000,	0xfffc0000,	FMT_D4, {IMM32, DN0}},
 { "sub",	0xfcd40000,	0xfffc0000,	FMT_D4, {IMM32, AN0}},
+/* start-sanitize-am33 */
+{ "sub",	0xf99800,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "sub",	0xfb980000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+{ "subc",	0xfa8c0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD0}},
+/* end-sanitize-am33 */
 { "subc",	0xf180,		0xfff0,		FMT_D0, {DM1, DN0}},
+/* start-sanitize-am33 */
+{ "subc",	0xf9a800,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "subc",	0xfba80000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+/* end-sanitize-am33 */
 
+/* start-sanitize-am33 */
+{ "mul",	0xfbab0000,	0xffff0000,	FMT_D7, {RM2, RN0, RD2, RD0}},
+{ "mul",	0xf9a900,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "mul",	0xfba90000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+/* end-sanitize-am33 */
 { "mul",	0xf240,		0xfff0,		FMT_D0, {DM1, DN0}},
+
+/* start-sanitize-am33 */
+{ "mulu",	0xfbbb0000,	0xffff0000,	FMT_D7, {RM2, RN0, RD2, RD0}},
+{ "mulu",	0xf9b900,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "mulu",	0xfbb90000,	0xffff0000,	FMT_D7, {IMM8, RN02}},
+/* end-sanitize-am33 */
 { "mulu",	0xf250,		0xfff0,		FMT_D0, {DM1, DN0}},
 
 { "div",	0xf260,		0xfff0,		FMT_D0, {DM1, DN0}},
+/* start-sanitize-am33 */
+{ "div",	0xf9c900,	0xffff00,	FMT_D6, {RM2, RN0}},
+/* end-sanitize-am33 */
 { "divu",	0xf270,		0xfff0,		FMT_D0, {DM1, DN0}},
+/* start-sanitize-am33 */
+{ "divu",	0xf9d900,	0xffff00,	FMT_D6, {RM2, RN0}},
+/* end-sanitize-am33 */
 
 { "inc",	0x40,		0xf3,		FMT_S0, {DN1}},
 { "inc",	0x41,		0xf3,		FMT_S0, {AN1}},
+/* start-sanitize-am33 */
+{ "inc",	0xf9b800,	0xffff00,	FMT_D6, {RN02}},
+/* end-sanitize-am33 */
 { "inc4",	0x50,		0xfc,		FMT_S0, {AN0}},
+/* start-sanitize-am33 */
+{ "inc4",	0xf9c800,	0xffff00,	FMT_D6, {RN02}},
+/* end-sanitize-am33 */
 
 { "cmp",	0xa000,		0xf000,		FMT_S1, {SIMM8, DN01}},
 { "cmp",	0xa0,		0xf0,		FMT_S0, {DM1, DN0}},
@@ -453,7 +641,14 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "cmp",	0xfcc80000,	0xfffc0000,	FMT_D4, {IMM32, DN0}},
 { "cmp",	0xfad80000,	0xfffc0000,	FMT_D2, {IMM16, AN0}},
 { "cmp",	0xfcd80000,	0xfffc0000,	FMT_D4, {IMM32, AN0}},
+/* start-sanitize-am33 */
+{ "cmp",	0xf9d800,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "cmp",	0xfbd80000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+/* end-sanitize-am33 */
 
+/* start-sanitize-am33 */
+{ "and",	0xfb0d0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD0}},
+/* end-sanitize-am33 */
 { "and",	0xf200,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "and",	0xf8e000,	0xfffc00,	FMT_D1, {IMM8, DN0}},
 { "and",	0xfae00000,	0xfffc0000,	FMT_D2, {IMM16, DN0}},
@@ -461,6 +656,12 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "and",	0xfafc0000,	0xffff0000,	FMT_D2, {IMM16, PSW}},
 /* start-sanitize-am33 */
 { "and",	0xfcfc0000,	0xffff0000,	FMT_D4, {IMM32, EPSW}},
+{ "and",	0xf90900,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "and",	0xfb090000,	0xffff0000,	FMT_D7, {IMM8, RN02}},
+/* end-sanitize-am33 */
+
+/* start-sanitize-am33 */
+{ "or",		0xfb1d0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD0}},
 /* end-sanitize-am33 */
 { "or",		0xf210,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "or",		0xf8e400,	0xfffc00,	FMT_D1, {IMM8, DN0}},
@@ -469,11 +670,24 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "or",		0xfafd0000,	0xffff0000,	FMT_D2, {IMM16, PSW}},
 /* start-sanitize-am33 */
 { "or",		0xfcfd0000,	0xffff0000,	FMT_D4, {IMM32, EPSW}},
+{ "or",		0xf91900,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "or",		0xfb190000,	0xffff0000,	FMT_D7, {IMM8, RN02}},
+/* end-sanitize-am33 */
+
+/* start-sanitize-am33 */
+{ "xor",	0xfb2d0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD0}},
 /* end-sanitize-am33 */
 { "xor",	0xf220,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "xor",	0xfae80000,	0xfffc0000,	FMT_D2, {IMM16, DN0}},
 { "xor",	0xfce80000,	0xfffc0000,	FMT_D4, {IMM32, DN0}},
+/* start-sanitize-am33 */
+{ "xor",	0xf92900,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "xor",	0xfb290000,	0xffff0000,	FMT_D7, {IMM8, RN02}},
+/* end-sanitize-am33 */
 { "not",	0xf230,		0xfffc,		FMT_D0, {DN0}},
+/* start-sanitize-am33 */
+{ "not",	0xf93900,	0xffff00,	FMT_D6, {RN02}},
+/* end-sanitize-am33 */
 
 { "btst",	0xf8ec00,	0xfffc00,	FMT_D1, {IMM8, DN0}},
 { "btst",	0xfaec0000,	0xfffc0000,	FMT_D2, {IMM16, DN0}},
@@ -482,6 +696,9 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 							 MEM(IMM32_LOWSHIFT8)}},
 { "btst",	0xfaf80000,	0xfffc0000,	FMT_D2,
 					{IMM8, MEM2(SD8N_SHIFT8,AN0)}},
+/* start-sanitize-am33 */
+{ "btst",	0xfbe90000,	0xffff0000,	FMT_D7, {IMM8, RN02}},
+/* end-sanitize-am33 */
 { "bset",	0xf080,		0xfff0,		FMT_D0, {DM1, MEM(AN0)}},
 { "bset",	0xfe000000,	0xffff0000,	FMT_D5, {IMM8E,
 							 MEM(IMM32_LOWSHIFT8)}},
@@ -493,15 +710,48 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "bclr",	0xfaf40000,	0xfffc0000,	FMT_D2, {IMM8,
 						MEM2(SD8N_SHIFT8,AN0)}},
 
+/* start-sanitize-am33 */
+{ "asr",	0xfb4d0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD0}},
+/* end-sanitize-am33 */
 { "asr",	0xf2b0,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "asr",	0xf8c800,	0xfffc00,	FMT_D1, {IMM8, DN0}},
+/* start-sanitize-am33 */
+{ "asr",	0xf94900,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "asr",	0xfb490000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+/* end-sanitize-am33 */
+
+/* start-sanitize-am33 */
+{ "lsr",	0xfb5d0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD0}},
+/* end-sanitize-am33 */
 { "lsr",	0xf2a0,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "lsr",	0xf8c400,	0xfffc00,	FMT_D1, {IMM8, DN0}},
+/* start-sanitize-am33 */
+{ "lsr",	0xf95900,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "lsr",	0xfb590000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+/* end-sanitize-am33 */
+
+/* start-sanitize-am33 */
+{ "asl",	0xfb6d0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD0}},
+/* end-sanitize-am33 */
 { "asl",	0xf290,		0xfff0,		FMT_D0, {DM1, DN0}},
 { "asl",	0xf8c000,	0xfffc00,	FMT_D1, {IMM8, DN0}},
+/* start-sanitize-am33 */
+{ "asl",	0xf96900,	0xffff00,	FMT_D6, {RM2, RN0}},
+{ "asl",	0xfb690000,	0xffff0000,	FMT_D7, {SIMM8, RN02}},
+/* end-sanitize-am33 */
 { "asl2",	0x54,		0xfc,		FMT_S0, {DN0}},
+/* start-sanitize-am33 */
+{ "asl2",	0xf97900,	0xffff00,	FMT_D6, {RN02}},
+/* end-sanitize-am33 */
+
 { "ror",	0xf284,		0xfffc,		FMT_D0, {DN0}},
+/* start-sanitize-am33 */
+{ "ror",	0xf98900,	0xffff00,	FMT_D6, {RN02}},
+/* end-sanitize-am33 */
 { "rol",	0xf280,		0xfffc,		FMT_D0, {DN0}},
+/* start-sanitize-am33 */
+{ "rol",	0xf99900,	0xffff00,	FMT_D6, {RN02}},
+/* end-sanitize-am33 */
 
 { "beq",	0xc800,		0xff00,		FMT_S1, {SD8N_PCREL}},
 { "bne",	0xc900,		0xff00,		FMT_S1, {SD8N_PCREL}},
@@ -562,15 +812,27 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mulqu",	0xfb140000,	0xfffc0000,	FMT_D2, {SIMM16, DN0}},
 { "mulqu",	0xfd140000,	0xfffc0000,	FMT_D4, {IMM32, DN0}},
 { "sat16",	0xf640,		0xfff0,		FMT_D0, {DM1, DN0}},
+/* start-sanitize-am33 */
+{ "sat16",	0xf9ab00,	0xffff00,	FMT_D6, {RM2, RN0}},
+/* end-sanitize-am33 */
+
+/* start-sanitize-am33 */
+{ "sat24",	0xfbaf0000,	0xffff00ff,	FMT_D7, {RM2, RN0}},
+/* end-sanitize-am33 */
 { "sat24",	0xf650,		0xfff0,		FMT_D0, {DM1, DN0}},
+
+/* start-sanitize-am33 */
+{ "bsch",	0xfbff0000,	0xffff000f,	FMT_D7, {RM2, RN0, RD0}},
+{ "bsch",	0xf9fb00,	0xffff00,	FMT_D6, {RM2, RN0}},
+/* end-sanitize-am33 */
 { "bsch",	0xf670,		0xfff0,		FMT_D0, {DM1, DN0}},
 
 /* Extension.  We need some instruction to trigger "emulated syscalls"
    for our simulator.  */
-{ "syscall",    0xf0c0,         0xffff,         FMT_D0, {UNUSED}},
 /* start-sanitize-am33 */
 { "syscall",	0xf0e0,		0xfff0,		FMT_D0, {IMM4}},
 /* end-sanitize-am33 */
+{ "syscall",    0xf0c0,         0xffff,         FMT_D0, {UNUSED}},
 
 /* Extension.  When talking to the simulator, gdb requires some instruction
    that will trigger a "breakpoint" (really just an instruction that isn't
