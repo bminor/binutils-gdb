@@ -2765,6 +2765,10 @@ process_section_headers (file)
 	      )
 	    request_dump (i, DEBUG_DUMP);
 	}
+      /* linkonce section to be combined with .debug_info at link time.  */
+      else if ((do_debugging || do_debug_info)
+	       && strncmp (name, ".gnu.linkonce.wi.", 17) == 0)
+	request_dump (i, DEBUG_DUMP);
       else if (do_debug_frames && strcmp (name, ".eh_frame") == 0)
 	request_dump (i, DEBUG_DUMP);
     }
@@ -6323,17 +6327,17 @@ display_debug_info (section, start, file)
       cu_offset = start - section_begin;
       start += compunit.cu_length + sizeof (external->cu_length);
 
+      printf (_("  Compilation Unit @ %lx:\n"), cu_offset);
+      printf (_("   Length:        %ld\n"), compunit.cu_length);
+      printf (_("   Version:       %d\n"), compunit.cu_version);
+      printf (_("   Abbrev Offset: %ld\n"), compunit.cu_abbrev_offset);
+      printf (_("   Pointer Size:  %d\n"), compunit.cu_pointer_size);
+
       if (compunit.cu_version != 2)
 	{
 	  warn (_("Only version 2 DWARF debug information is currently supported.\n"));
 	  continue;
 	}
-
-      printf (_("  Compilation Unit:\n"));
-      printf (_("   Length:        %ld\n"), compunit.cu_length);
-      printf (_("   Version:       %d\n"), compunit.cu_version);
-      printf (_("   Abbrev Offset: %ld\n"), compunit.cu_abbrev_offset);
-      printf (_("   Pointer Size:  %d\n"), compunit.cu_pointer_size);
 
       if (first_abbrev != NULL)
 	free_abbrevs ();
@@ -7044,6 +7048,8 @@ display_debug_section (section, file)
 		  "debug section data");
 
   /* See if we know how to display the contents of this section.  */
+  if (strncmp (name, ".gnu.linkonce.wi.", 17) == 0)
+    name = ".debug_info";  
   for (i = NUM_ELEM (debug_displays); i--;)
     if (strcmp (debug_displays[i].name, name) == 0)
       {

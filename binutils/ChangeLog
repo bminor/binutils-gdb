@@ -1,14 +1,20 @@
+2000-12-04  Jason Merrill  <jason@redhat.com>
+
+	* readelf.c (process_section_headers): Handle linkonce.wi sections.
+	(display_debug_section): Likewise.
+	(display_debug_info): Display CU header before bailing.
+
 2000-12-01  Chris Demetriou  <cgd@sibyte.com>
 
-        * readelf.c (get_machine_flags): Recognize MIPS32 ISA in
-        EF_MIPS_ARCH.  Replace use of E_MIPS_MACH_MIPS32 with
-        E_MIPS_MACH_MIPS32_4K and adjust printed CPU name similarly.
+	* readelf.c (get_machine_flags): Recognize MIPS32 ISA in
+	EF_MIPS_ARCH.  Replace use of E_MIPS_MACH_MIPS32 with
+	E_MIPS_MACH_MIPS32_4K and adjust printed CPU name similarly.
 
-        * readelf.c (get_machine_flags): Add cases for E_MIPS_ARCH_5,
-        and E_MIPS_ARCH_64.
+	* readelf.c (get_machine_flags): Add cases for E_MIPS_ARCH_5,
+	and E_MIPS_ARCH_64.
 
-        * readelf.c (get_machine_flags): Add case for
-        E_MIPS_MACH_SB1.
+	* readelf.c (get_machine_flags): Add case for
+	E_MIPS_MACH_SB1.
 
 2000-11-30  Richard Earnshaw  <rearnsha@arm.com>
 
