@@ -1,3 +1,14 @@
+Tue Nov 21 18:04:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use BFD_NEED_DECLARATION.
+	* acconfig.h: Put NEED_DECLARATION_FPRINTF in @TOP@ section.
+	* configure, config.in: Rebuild with autoconf 2.6.
+
+Fri Nov 17 10:34:37 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (CC_FOR_TARGET): Use @host@ and @target@, not
+	$(host_canonical) and $(target_canonical).
+
 Thu Nov 16 03:39:20 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	Version 2.6 released.
