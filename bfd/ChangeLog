@@ -13,6 +13,9 @@ Tue Sep 26 14:06:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Tue Sep 26 12:48:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* bfd.c (bfd_assert): Remove \n from string passed to
+        _bfd_error_handler.
+
 	* coff-i386.c: (TWO_DATA_SECS): Don't define.
 	* coffcode.h (bfd_coff_backend_data): Remove _bfd_make_section_hook.
 	(bfd_coff_make_section_hook): Don't define.
