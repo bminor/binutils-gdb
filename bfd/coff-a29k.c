@@ -189,24 +189,15 @@ a29k_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
    case R_BYTE:
     insn = bfd_get_8(abfd, hit_data); 
     unsigned_value = insn + sym_value + reloc_entry->addend;	
-    if (unsigned_value & 0xffffff00) {
-      fprintf(stderr,"Relocation problem : ");
-      fprintf(stderr,"byte value too large in module %s\n",
-	      abfd->filename); 
+    if (unsigned_value & 0xffffff00)
       return(bfd_reloc_overflow);
-    }
     bfd_put_8(abfd, unsigned_value, hit_data); 
     break;
    case R_HWORD:
     insn = bfd_get_16(abfd, hit_data); 
     unsigned_value = insn + sym_value + reloc_entry->addend;	
-    if (unsigned_value & 0xffff0000) {
-      fprintf(stderr,"Relocation problem : ");
-      fprintf(stderr,"hword value too large in module %s\n",
-	      abfd->filename); 
+    if (unsigned_value & 0xffff0000)
       return(bfd_reloc_overflow);
-    }
-
     bfd_put_16(abfd, insn, hit_data); 
     break;
    case R_WORD:

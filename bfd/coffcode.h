@@ -2455,11 +2455,10 @@ coff_slurp_symbol_table (abfd)
 	    case C_ALIAS:	/* duplicate tag		 */
 	    case C_HIDDEN:	/* ext symbol in dmert public lib */
 	    default:
-
-	      fprintf (stderr, "Unrecognized storage class %d (assuming debugging)\n  for %s symbol `%s'\n",
-		       src->u.syment.n_sclass, dst->symbol.section->name,
-		       dst->symbol.name);
-/*	abort();*/
+	      (*_bfd_error_handler)
+		("%s: Unrecognized storage class %d for %s symbol `%s'",
+		 bfd_get_filename (abfd), src->u.syment.n_sclass,
+		 dst->symbol.section->name, dst->symbol.name);
 	      dst->symbol.flags = BSF_DEBUGGING;
 	      dst->symbol.value = (src->u.syment.n_value);
 	      break;
@@ -2799,7 +2798,6 @@ dummy_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
      unsigned int *src_ptr;
      unsigned int *dst_ptr;
 {
-  fprintf (stderr, "%s\n", reloc->howto->name);
   abort ();
 }
 #endif

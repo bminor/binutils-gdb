@@ -931,11 +931,11 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
   /* Check if we have the same endianess */
   if (ibfd->xvec->byteorder_big_p != obfd->xvec->byteorder_big_p)
     {
-      fprintf (stderr,
-	       "%s: compiled for a %s endian system and target is %s endian.\n",
-	       bfd_get_filename (ibfd),
-	       (ibfd->xvec->byteorder_big_p) ? "big" : "little",
-	       (obfd->xvec->byteorder_big_p) ? "big" : "little");
+      (*_bfd_error_handler)
+	("%s: compiled for a %s endian system and target is %s endian.\n",
+	 bfd_get_filename (ibfd),
+	 (ibfd->xvec->byteorder_big_p) ? "big" : "little",
+	 (obfd->xvec->byteorder_big_p) ? "big" : "little");
 
       bfd_set_error (bfd_error_wrong_format);
       return false;
@@ -965,16 +965,16 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
       if ((new_flags & EF_PPC_RELOCATABLE) != 0
 	  && (old_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0)
 	{
-	  fprintf (stderr,
-		   "%s: compiled with -mrelocatable and linked with modules compiled normally\n",
-		   bfd_get_filename (ibfd));
+	  (*_bfd_error_handler)
+	    ("%s: compiled with -mrelocatable and linked with modules compiled normally\n",
+	     bfd_get_filename (ibfd));
 	}
       else if ((new_flags & (EF_PPC_RELOCATABLE | EF_PPC_RELOCATABLE_LIB)) == 0
 	       && (old_flags & EF_PPC_RELOCATABLE) != 0)
 	{
-	  fprintf (stderr,
-		   "%s: compiled normally and linked with modules compiled with -mrelocatable\n",
-		   bfd_get_filename (ibfd));
+	  (*_bfd_error_handler)
+	    ("%s: compiled normally and linked with modules compiled with -mrelocatable\n",
+	     bfd_get_filename (ibfd));
 	}
       else if ((new_flags & EF_PPC_RELOCATABLE_LIB) != 0)
 	elf_elfheader (obfd)->e_flags |= EF_PPC_RELOCATABLE_LIB;
@@ -986,23 +986,23 @@ ppc_elf_merge_private_bfd_data (ibfd, obfd)
       if ((new_flags & EF_PPC_EMB) != 0 && (old_flags & EF_PPC_EMB) == 0)
 	{
 	  new_flags &= ~EF_PPC_EMB;
-	  fprintf (stderr,
-		   "%s: compiled for the eabi and linked with modules compiled for System V\n",
-		   bfd_get_filename (ibfd));
+	  (*_bfd_error_handler)
+	    ("%s: compiled for the eabi and linked with modules compiled for System V\n",
+	     bfd_get_filename (ibfd));
 	}
       else if ((new_flags & EF_PPC_EMB) == 0 && (old_flags & EF_PPC_EMB) != 0)
 	{
 	  old_flags &= ~EF_PPC_EMB;
-	  fprintf (stderr,
-		   "%s: compiled for System V and linked with modules compiled for eabi\n",
-		   bfd_get_filename (ibfd));
+	  (*_bfd_error_handler)
+	    ("%s: compiled for System V and linked with modules compiled for eabi\n",
+	     bfd_get_filename (ibfd));
 	}
 
       /* Warn about any other mismatches */
       if (new_flags != old_flags)
-	fprintf (stderr,
-		 "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)\n",
-		 bfd_get_filename (ibfd), (long)new_flags, (long)old_flags);
+	(*_bfd_error_handler)
+	  ("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)\n",
+	   bfd_get_filename (ibfd), (long)new_flags, (long)old_flags);
 
       bfd_set_error (bfd_error_bad_value);
       return false;
@@ -1065,11 +1065,11 @@ ppc_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
      char **error_message;
 {
   BFD_ASSERT (reloc_entry->howto != (reloc_howto_type *)0);
-  fprintf (stderr,
-	   "%s: Relocation %s (%d) is not currently supported.\n",
-	   bfd_get_filename (abfd),
-	   reloc_entry->howto->name,
-	   reloc_entry->howto->type);
+  (*_bfd_error_handler)
+    ("%s: Relocation %s (%d) is not currently supported.\n",
+     bfd_get_filename (abfd),
+     reloc_entry->howto->name,
+     reloc_entry->howto->type);
 
   return bfd_reloc_notsupported;
 }
@@ -1236,10 +1236,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       /* Unknown relocation handling */
       if ((unsigned)r_type >= (unsigned)R_PPC_max || !ppc_elf_howto_table[(int)r_type])
 	{
-	  fprintf (stderr,
-		   "%s: Unknown relocation type %d\n",
-		   bfd_get_filename (input_bfd),
-		   (int)r_type);
+	  (*_bfd_error_handler)
+	    ("%s: Unknown relocation type %d\n",
+	     bfd_get_filename (input_bfd),
+	     (int)r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = false;
@@ -1281,11 +1281,11 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       /* Complain about known relocation that are not yet supported */
       if (howto->special_function == ppc_elf_unsupported_reloc)
 	{
-	  fprintf (stderr,
-		   "%s: Relocation %s (%d) is not currently supported.\n",
-		   bfd_get_filename (input_bfd),
-		   howto->name,
-		   (int)r_type);
+	  (*_bfd_error_handler)
+	    ("%s: Relocation %s (%d) is not currently supported.\n",
+	     bfd_get_filename (input_bfd),
+	     howto->name,
+	     (int)r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = false;

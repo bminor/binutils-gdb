@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 
@@ -100,7 +100,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	mkobject
    This should also be fixed.  */
 
-#define ARCH 32
 #define TARGETNAME "a.out-hp300hpux"
 #define MY(OP) CAT(hp300hpux_,OP)
 
@@ -131,6 +130,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define MY_get_symtab_upper_bound hp300hpux_get_symtab_upper_bound
 #define MY_canonicalize_reloc hp300hpux_canonicalize_reloc
 #define MY_write_object_contents hp300hpux_write_object_contents
+
+#define MY_read_minisymbols _bfd_generic_read_minisymbols
+#define MY_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 
 #define MY_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define MY_bfd_link_add_symbols _bfd_generic_link_add_symbols
@@ -184,7 +186,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ARCH_SIZE 32
 
 /* aoutx.h requires definitions for BMAGIC and QMAGIC.  */
-#define BMAGIC 0415
+#define BMAGIC HPUX_DOT_O_MAGIC
 #define QMAGIC 0314
 
 #include "aoutx.h"
@@ -199,7 +201,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Set parameters about this a.out file that are machine-dependent.
    This routine is called from some_aout_object_p just before it returns.  */
-static bfd_target *
+static const bfd_target *
 MY (callback) (abfd)
      bfd *abfd;
 {
@@ -377,7 +379,8 @@ convert_sym_type (sym_pointer, cache_ptr, abfd)
 	  break;
 
 	default:
-	  fprintf (stderr, "unknown symbol type encountered: %x", name_type);
+	  abort ();
+	  break;
 	}
       if (name_type & HP_SYMTYPE_EXTERNAL)
 	new_type |= N_EXT;
@@ -499,11 +502,6 @@ MY (slurp_symbol_table) (abfd)
   if (obj_aout_symbols (abfd) != (aout_symbol_type *) NULL)
     return true;
   symbol_bytes = exec_hdr (abfd)->a_syms;
-  if (symbol_bytes == 0)
-    {
-      bfd_set_error (bfd_error_no_symbols);
-      return false;
-    }
 
   strings = (char *) bfd_alloc (abfd,
 				symbol_bytes + SYM_EXTRA_BYTES);
@@ -536,10 +534,10 @@ MY (slurp_symbol_table) (abfd)
   /* now that we know the symbol count, update the bfd header */
   bfd_get_symcount (abfd) = num_syms + num_secondary;
 
-  cached = (aout_symbol_type *)
-    bfd_zalloc (abfd, (bfd_size_type) (bfd_get_symcount (abfd) *
-				       sizeof (aout_symbol_type)));
-  if (!cached)
+  cached = ((aout_symbol_type *)
+	    bfd_zalloc (abfd,
+			bfd_get_symcount (abfd) * sizeof (aout_symbol_type)));
+  if (cached == NULL && bfd_get_symcount (abfd) != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
@@ -564,7 +562,7 @@ MY (slurp_symbol_table) (abfd)
 	cache_ptr->symbol.value = GET_SWORD (abfd, sym_pointer->e_value);
 	cache_ptr->desc = bfd_get_16 (abfd, sym_pointer->e_almod);
 	cache_ptr->type = bfd_get_8 (abfd, sym_pointer->e_type);
-	cache_ptr->symbol.udata = 0;
+	cache_ptr->symbol.udata.p = NULL;
 	length = bfd_get_8 (abfd, sym_pointer->e_length);
 	cache_ptr->other = length;	/* other not used, save length here */
 
@@ -634,11 +632,12 @@ MY (slurp_symbol_table) (abfd)
 
 
 void
-MY (swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
+MY (swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
      bfd *abfd;
      struct hp300hpux_reloc *bytes;
      arelent *cache_ptr;
      asymbol **symbols;
+     bfd_size_type symcount;
 {
   int r_index;
   int r_extern = 0;
@@ -674,8 +673,8 @@ MY (swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
     case HP_RSEGMENT_NOOP:
       break;
     default:
-      fprintf (stderr, "illegal relocation segment type: %x\n",
-	       (bytes->r_type[0]));
+      abort ();
+      break;
     }
 
   switch (bytes->r_length[0])
@@ -690,8 +689,8 @@ MY (swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
       r_length = 2;
       break;
     default:
-      fprintf (stderr, "illegal relocation length: %x\n", bytes->r_length[0]);
-      r_length = 0;
+      abort ();
+      break;
     }
 
   cache_ptr->howto = howto_table_std + r_length + 4 * r_pcrel;
@@ -784,7 +783,8 @@ doit:
 
   for (; counter < count; counter++, rptr++, cache_ptr++)
     {
-      MY (swap_std_reloc_in) (abfd, rptr, cache_ptr, symbols);
+      MY (swap_std_reloc_in) (abfd, rptr, cache_ptr, symbols,
+			      bfd_get_symcount (abfd));
     }
 
 

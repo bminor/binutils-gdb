@@ -643,11 +643,11 @@ return true;
 }
 
 void
-bfd_assert(file, line)
-char *file;
-int line;
+bfd_assert (file, line)
+     const char *file;
+     int line;
 {
-  fprintf(stderr, "bfd assertion fail %s:%d\n",file,line);
+  (*_bfd_error_handler) ("bfd assertion fail %s:%d\n", file, line);
 }
 
 

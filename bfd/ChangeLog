@@ -5,6 +5,35 @@ Mon Sep 25 16:04:09 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Mon Sep 25 11:48:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aout-adobe.c (aout_adobe_callback): Use _bfd_error_handler
+	rather than a direct fprintf.
+	* archive.c (_bfd_write_archive_contents): Likewise.
+	* coffcode.h (coff_slurp_symbol_table): Likewise.
+	* elf32-ppc.c (ppc_elf_merge_private_bfd_data): Likewise.
+	(ppc_elf_unsupported_reloc): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	* i386linux.c (linux_tally_symbols): Likewise.
+	(linux_finish_dynamic_link): Likewise.
+	* osf-core.c (osf_core_core_file_p): Likewise.
+	* rs6000-core.c (rs6000coff_get_section_contents): Likewise.
+	* som.c (som_sizeof_headers): Likewise.
+	* srec.c (srec_bad_byte): Likewise.
+	* bfd.c (bfd_assert): Likewise.  Also change file to be const.
+	* libbfd-in.h (bfd_assert): Declare first parameter const.
+	* libbfd.h: Rebuild.
+	* coff-a29k.c (a29k_reloc): Don't bother to fprintf; returning
+	bfd_reloc_overflow is enough.
+	* coff-h8300.c (rtype2howto): Don't bother to fprintf; just abort.
+	* coff-h8500.c (rtype2howto): Likewise.
+	* coff-z8k.c (rtype2howto): Likewise.
+	* coffcode.h (dummy_reloc16_extra_cases): Likewise.
+	* elf.c (_bfd_elf_get_lineno): Likewise.
+	(_bfd_elf_no_info_to_howto): Likewise.
+	(_bfd_elf_no_info_to_howto_rel): Likewise.
+	* hp300hpux.c (convert_sym_type): Likewise.
+	(MY(swap_std_reloc_in)): Likewise.
+	* elf.c (bfd_section_from_shdr): Remove #if 0 sections.
+
 	* libaout.h (struct aoutdata): Add line_buf field.
 	* aoutx.h (NAME(aout,find_nearest_line)): Remove statics buffer
 	and filename_buffer.  Instead, use a malloc buffer stored in the
