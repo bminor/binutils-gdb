@@ -438,14 +438,6 @@ extern int attach_flag;
 /* FIXME: cagney/2000-04-17: gdbarch should manage this.  The default
    shouldn't be necessary. */
 
-#if !defined (CALL_DUMMY_P)
-#if defined (CALL_DUMMY)
-#define CALL_DUMMY_P 1
-#else
-#define CALL_DUMMY_P 0
-#endif
-#endif
-
 #if !defined PUSH_DUMMY_FRAME
 #define PUSH_DUMMY_FRAME (internal_error (__FILE__, __LINE__, "PUSH_DUMMY_FRAME"), 0)
 #endif

@@ -3138,7 +3138,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_breakpoint_from_pc (gdbarch, memory_breakpoint_from_pc);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sparc_extract_struct_value_address);

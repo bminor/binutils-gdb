@@ -1239,17 +1239,6 @@ extern void set_gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, gd
 #endif
 #endif
 
-extern int gdbarch_call_dummy_p (struct gdbarch *gdbarch);
-extern void set_gdbarch_call_dummy_p (struct gdbarch *gdbarch, int call_dummy_p);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_P)
-#error "Non multi-arch definition of CALL_DUMMY_P"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_P)
-#define CALL_DUMMY_P (gdbarch_call_dummy_p (current_gdbarch))
-#endif
-#endif
-
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (CALL_DUMMY_WORDS)
 #define CALL_DUMMY_WORDS (legacy_call_dummy_words)

@@ -1388,7 +1388,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_words (gdbarch, m68hc11_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch,
                                        sizeof (m68hc11_call_dummy_words));
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_deprecated_extract_return_value (gdbarch, m68hc11_extract_return_value);

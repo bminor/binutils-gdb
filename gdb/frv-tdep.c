@@ -1093,7 +1093,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_return_address (gdbarch, frv_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, frv_pop_frame);
 
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, frv_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (frv_call_dummy_words));
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);

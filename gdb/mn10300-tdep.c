@@ -1185,7 +1185,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_read_fp (gdbarch, generic_target_read_sp);
 
   /* Calling functions in the inferior from GDB.  */
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);

@@ -2076,10 +2076,10 @@ rs6000_extract_struct_value_address (struct regcache *regcache)
   /* FIXME: cagney/2002-09-26: PR gdb/724: When making an inferior
      function call GDB knows the address of the struct return value
      and hence, should not need to call this function.  Unfortunately,
-     the current hand_function_call() code only saves the most recent
-     struct address leading to occasional calls.  The code should
-     instead maintain a stack of such addresses (in the dummy frame
-     object).  */
+     the current call_function_by_hand() code only saves the most
+     recent struct address leading to occasional calls.  The code
+     should instead maintain a stack of such addresses (in the dummy
+     frame object).  */
   /* NOTE: cagney/2002-09-26: Return 0 which indicates that we've
      really got no idea where the return value is being stored.  While
      r3, on function entry, contained the address it will have since
@@ -2905,7 +2905,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);

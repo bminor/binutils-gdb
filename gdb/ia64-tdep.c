@@ -2218,7 +2218,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_return_address (gdbarch, ia64_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, ia64_pop_frame);
 
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, ia64_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (ia64_call_dummy_words));
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);

@@ -1095,7 +1095,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	     or some random address on the stack.  Trying to use that
 	     PC to apply standard frame ID unwind techniques is just
 	     asking for trouble.  */
-	  /* Assume hand_function_call(), via SAVE_DUMMY_FRAME_TOS,
+	  /* Assume call_function_by_hand(), via SAVE_DUMMY_FRAME_TOS,
 	     previously saved the dummy frame's ID.  Things only work
 	     if the two return the same value.  */
 	  gdb_assert (SAVE_DUMMY_FRAME_TOS_P ());

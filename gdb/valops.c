@@ -1240,8 +1240,8 @@ find_function_addr (struct value *function, struct type **retval_type)
 
    ARGS is modified to contain coerced values. */
 
-static struct value *
-hand_function_call (struct value *function, int nargs, struct value **args)
+struct value *
+call_function_by_hand (struct value *function, int nargs, struct value **args)
 {
   register CORE_ADDR sp;
   register int i;
@@ -1852,21 +1852,6 @@ the function call).", name);
       }
   }
 }
-
-struct value *
-call_function_by_hand (struct value *function, int nargs, struct value **args)
-{
-  if (CALL_DUMMY_P)
-    {
-      return hand_function_call (function, nargs, args);
-    }
-  else
-    {
-      error ("Cannot invoke functions on this machine.");
-    }
-}
-
-
 
 /* Create a value for an array by allocating space in the inferior, copying
    the data into that space, and then setting up an array value.

@@ -668,7 +668,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, vax_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, vax_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, vax_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof_vax_call_dummy_words);
   set_gdbarch_fix_call_dummy (gdbarch, vax_fix_call_dummy);

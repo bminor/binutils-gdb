@@ -3084,11 +3084,6 @@ custom breakpoint insertion and removal routines if
 @code{BREAKPOINT_FROM_PC} needs to read the target's memory for some
 reason.
 
-@item CALL_DUMMY_P
-@findex CALL_DUMMY_P
-A C expression that is non-zero when the target supports inferior function
-calls.
-
 @item CALL_DUMMY_WORDS
 @findex CALL_DUMMY_WORDS
 Pointer to an array of @code{LONGEST} words of data containing
@@ -3101,8 +3096,8 @@ data.
 
 @item SIZEOF_CALL_DUMMY_WORDS
 @findex SIZEOF_CALL_DUMMY_WORDS
-The size of @code{CALL_DUMMY_WORDS}.  When @code{CALL_DUMMY_P} this must
-return a positive value.  See also @code{CALL_DUMMY_LENGTH}.
+The size of @code{CALL_DUMMY_WORDS}.  This must return a positive value.
+See also @code{CALL_DUMMY_LENGTH}.
 
 @item CALL_DUMMY
 @findex CALL_DUMMY

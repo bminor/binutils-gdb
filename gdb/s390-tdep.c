@@ -1861,7 +1861,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     (gdbarch, generic_cannot_extract_struct_value_address);
 
   /* Parameters for inferior function calls.  */
-  set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
