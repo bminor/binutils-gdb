@@ -226,7 +226,7 @@ BASE_FLAGS_TO_PASS = \
 	"CXX_FOR_BUILD=$(CXX_FOR_BUILD)" \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
-	"GCC_FOR_TARGET=$$(CC_FOR_TARGET)" \
+	"GCC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
@@ -976,6 +976,12 @@ make-gdb.tar.gz: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 	ln proto-toplev/gdb/COPYING proto-toplev/include/COPYING
 	rm                          proto-toplev/readline/COPYING
 	ln proto-toplev/gdb/COPYING proto-toplev/readline/COPYING
+
+	# Change the bug reporting address in configure to bug-gdb
+	rm proto-toplev/configure
+	sed -e 's/configure@cygnus.com/bug-gdb@prep.ai.mit.edu/' \
+	    <configure >proto-toplev/configure
+	chmod a+x proto-toplev/configure
 
 	# Take out texinfo and glob from configurable dirs
 	rm proto-toplev/configure.in
