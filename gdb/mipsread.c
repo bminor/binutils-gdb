@@ -2347,10 +2347,11 @@ psymtab_to_symtab_1(pst, filename)
 	    /* Procedures next, note we need to look-ahead to
 	       find out where the procedure's code ends */
 
-	    for (i = 0; i < fh->cpd-1; i++) {
+	    if (fh->cpd > 0)
+	      for (i = 0; i < fh->cpd-1; i++) {
 		pr = (PDR *) (IPDFIRST(cur_hdr, fh)) + i;
 		parse_procedure(pr, pr[1].adr);	/* next proc up */
-	    }
+	      }
 	    if (fh->cpd) {
 		pr = (PDR *) (IPDFIRST(cur_hdr, fh)) + i;
 		parse_procedure(pr, bound);	/* next file up */

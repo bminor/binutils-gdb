@@ -266,6 +266,7 @@ xm-i386v.h
 xm-i386v4.h
 xm-i386v32.h
 xm-irix3.h
+xm-irix4.h
 xm-isi.h
 xm-m68k.h
 xm-merlin.h

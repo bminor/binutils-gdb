@@ -1,0 +1,7 @@
+# Host: SGI Iris running irix 4.x
+XDEPFILES= procfs.o coredep.o
+XM_FILE= xm-irix4.h
+ALLOCA=alloca.o
+ALLOCA1=alloca.o
+MUNCH_DEFINE=-B
+XM_CLIBS=-lbsd

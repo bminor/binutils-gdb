@@ -1,0 +1,5 @@
+# Makefile changes for SGI's running IRIX-4.x.
+# Tell compiler to use K&R C.  We can't compile under the SGI Ansi environment.
+CC = cc -cckr
+SYSV = -DSYSV
+RANLIB = echo >/dev/null

@@ -80,7 +80,12 @@ mips)
 	sony)	gdb_host=bigmips ;;
 	dec)	gdb_host=decstation ;;
 	little)	gdb_host=littlemips ;;
-	sgi)	gdb_host=irix3 ;;
+	sgi)
+		case "${host_os}" in
+		sysv)	gdb_host=irix3 ;;
+		irix4)	gdb_host=irix4 ;;
+		esac
+		;;
 	esac
 	;;
 

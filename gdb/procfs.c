@@ -36,6 +36,7 @@ regardless of whether or not the actual target has floating point hardware.
 
 #ifdef USE_PROC_FS	/* Entire file goes away if not using /proc */
 
+#include <time.h>
 #include <sys/procfs.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -466,8 +467,23 @@ proc_set_exec_trap ()
       _exit (127);
     }
   premptyset (&exitset);
+
+/*
+ * GW: Rationale...
+ * Not all systems with /proc have all the exec* syscalls with the same
+ * names.  On the SGI, for example, there is no SYS_exec, but there
+ * *is* a SYS_execv.  So, we try to account for that.
+ */
+#ifdef SYS_exec
   praddset (&exitset, SYS_exec);
+#endif
+#ifdef SYS_execve
   praddset (&exitset, SYS_execve);
+#endif
+#ifdef SYS_execv
+  praddset(&exitset, SYS_execv);
+#endif
+
   if (ioctl (fd, PIOCSEXIT, &exitset) < 0)
     {
       perror (procname);
@@ -886,8 +902,21 @@ proc_wait (statloc)
 	{
 	  statval = (what << 8) | 0177;
 	}
-      else if ((why == PR_SYSEXIT) &&
-	       (what == SYS_exec || what == SYS_execve))
+      else if ((why == PR_SYSEXIT)
+	       &&
+	       (
+#ifdef SYS_exec
+		what == SYS_exec
+#else
+		0 == 0
+#endif
+#ifdef SYS_execve
+		|| what == SYS_execve
+#endif
+#ifdef SYS_execv
+		|| what == SYS_execv
+#endif
+		))
 	{
 	  statval = (SIGTRAP << 8) | 0177;
 	}

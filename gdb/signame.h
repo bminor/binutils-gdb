@@ -34,10 +34,12 @@ sig_abbrev PARAMS ((int));
 extern int
 sig_number PARAMS ((const char *));
 
+#ifndef PSIGNAL_IN_SIGNAL_H
 /* Print to standard error the name of SIGNAL, preceded by MESSAGE and
    a colon, and followed by a newline.  */
 
 extern void
 psignal PARAMS ((unsigned, const char *));
+#endif
 
 #endif	/* !defined (SIGNAME_H) */

@@ -14,7 +14,8 @@ srcname="gnu development package"
 case "${host_os}" in
 m88kbcs)	host_makefile_frag=config/mh-delta88;;
 sysv4*)		host_makefile_frag=config/mh-sysv4 ;;
-sysv* | irix*)	host_makefile_frag=config/mh-sysv ;;
+sysv* | irix3)	host_makefile_frag=config/mh-sysv ;;
+irix4)		host_makefile_frag=config/mh-irix4 ;;
 ultrix*)
 	case "${host_cpu}" in
 	mips)	host_makefile_frag=config/mh-decstation ;;

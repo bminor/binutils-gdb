@@ -102,6 +102,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
+#define A0_REGNUM 4		/* Loc of first arg during a subr call */
 #define SP_REGNUM 29		/* Contains address of top of stack */
 #define FP_REGNUM 30		/* Pseudo register that contains true address of executing stack frame */
 #define RA_REGNUM 31		/* Contains return address value */
@@ -323,3 +324,16 @@ typedef struct mips_extra_func_info {
   struct frame_saved_regs *saved_regs;
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci) init_extra_frame_info(fci)
+
+/* Size of elements in jmpbuf */
+
+#define JB_ELEMENT_SIZE 4
+
+/* Figure out where the longjmp will land.  We expect that we have just entered
+   longjmp and haven't yet setup the stack frame, so the args are still in the
+   argument regs.  a0 (CALL_ARG0) points at the jmp_buf structure from which we
+   extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+/* Note that caller must #include <setjmp.h> in order to get def of JB_* */
+#define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)

@@ -36,6 +36,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <signal.h>
 #include <sys/ioctl.h>
 
+#ifdef sgi
+/* Must do it this way only for SGIs, as other mips platforms get their
+   JB_ symbols from machine/pcb.h (included via sys/user.h). */
+#include <setjmp.h>
+#endif
+
 #include "gdbcore.h"
 
 #ifndef	MIPSMAGIC
@@ -641,7 +647,114 @@ isa_NAN(p, len)
     }
   else return 1;
 }
+
+/*
+ * Implemented for Irix 4.x by Garrett A. Wollman
+ */
+#ifdef USE_PROC_FS		/* Target-dependent /proc support */
 
+#include <sys/time.h>
+#include <sys/procfs.h>
+
+typedef unsigned int greg_t;	/* why isn't this defined? */
+
+/*
+ * See the comment in m68k-tdep.c regarding the utility of these functions.
+ */
+
+void 
+supply_gregset (gregsetp)
+     gregset_t *gregsetp;
+{
+  register int regno;
+  register greg_t *regp = (greg_t *)(gregsetp->gp_regs);
+
+  /* FIXME: somewhere, there should be a #define for the meaning
+     of this magic number 32; we should use that. */
+  for(regno = 0; regno < 32; regno++)
+    supply_register (regno, (char *)(regp + regno));
+
+  supply_register (PC_REGNUM, (char *)&(gregsetp->gp_pc));
+  supply_register (HI_REGNUM, (char *)&(gregsetp->gp_mdhi));
+  supply_register (LO_REGNUM, (char *)&(gregsetp->gp_mdlo));
+  supply_register (PS_REGNUM, (char *)&(gregsetp->gp_cause));
+}
+
+void
+fill_gregset (gregsetp, regno)
+     gregset_t *gregsetp;
+     int regno;
+{
+  int regi;
+  register greg_t *regp = (greg_t *)(gregsetp->gp_regs);
+  extern char registers[];
+
+  /* same FIXME as above wrt 32*/
+  for (regi = 0; regi < 32; regi++)
+    if ((regno == -1) || (regno == regi))
+      *(regp + regno) = *(greg_t *) &registers[REGISTER_BYTE (regi)];
+
+  if ((regno == -1) || (regno == PC_REGNUM))
+    gregsetp->gp_pc = *(greg_t *) &registers[REGISTER_BYTE (PC_REGNUM)];
+
+  if ((regno == -1) || (regno == PS_REGNUM))
+    gregsetp->gp_cause = *(greg_t *) &registers[REGISTER_BYTE (PS_REGNUM)];
+
+  if ((regno == -1) || (regno == HI_REGNUM))
+    gregsetp->gp_mdhi = *(greg_t *) &registers[REGISTER_BYTE (HI_REGNUM)];
+
+  if ((regno == -1) || (regno == LO_REGNUM))
+    gregsetp->gp_mdlo = *(greg_t *) &registers[REGISTER_BYTE (LO_REGNUM)];
+}
+
+/*
+ * Now we do the same thing for floating-point registers.
+ * We don't bother to condition on FP0_REGNUM since any
+ * reasonable MIPS configuration has an R3010 in it.
+ *
+ * Again, see the comments in m68k-tdep.c.
+ */
+
+void
+supply_fpregset (fpregsetp)
+     fpregset_t *fpregsetp;
+{
+  register int regno;
+
+  for (regno = 0; regno < 32; regno++)
+    supply_register (FP0_REGNUM + regno,
+		     (char *)&fpregsetp->fp_r.fp_regs[regno]);
+
+  supply_register (FCRCS_REGNUM, (char *)&fpregsetp->fp_csr);
+
+  /* FIXME: how can we supply FCRIR_REGNUM?  SGI doesn't tell us. */
+}
+
+void
+fill_fpregset (fpregsetp, regno)
+     fpregset_t *fpregsetp;
+     int regno;
+{
+  int regi;
+  char *from, *to;
+  extern char registers[];
+
+  for (regi = FP0_REGNUM; regi < FP0_REGNUM + 32; regi++)
+    {
+      if ((regno == -1) || (regno == regi))
+	{
+	  from = (char *) &registers[REGISTER_BYTE (regi)];
+	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi]);
+	  bcopy(from, to, REGISTER_RAW_SIZE (regno));
+	}
+    }
+
+  if ((regno == -1) || (regno == FCRCS_REGNUM))
+    fpregsetp->fp_csr = *(unsigned *) &registers[REGISTER_BYTE(FCRCS_REGNUM)];
+}
+
+#endif /* USE_PROC_FS */
+
 /* To skip prologues, I use this predicate. Returns either PC
    itself if the code at PC does not look like a function prologue,
    PC+4 if it does (our caller does not need anything more fancy). */
