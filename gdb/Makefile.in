@@ -566,8 +566,11 @@ callback_h =	$(INCLUDE_DIR)/gdb/callback.h
 coff_sym_h =	$(INCLUDE_DIR)/coff/sym.h
 coff_symconst_h =	$(INCLUDE_DIR)/coff/symconst.h
 coff_ecoff_h =	$(INCLUDE_DIR)/coff/ecoff.h
+coff_internal_h =	$(INCLUDE_DIR)/coff/internal.h
 dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h 
+elf_reloc_macros_h =	$(INCLUDE_DIR)/elf/reloc-macros.h
 elf_sh_h =	$(INCLUDE_DIR)/elf/sh.h
+elf_arm_h =	$(INCLUDE_DIR)/elf/arm.h $(elf_reloc_macros_h)
 elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
 libaout_h =	$(BFD_SRC)/libaout.h
 remote_sim_h =	$(INCLUDE_DIR)/gdb/remote-sim.h
@@ -871,6 +874,7 @@ YYFILES = c-exp.tab.c \
 	jv-exp.tab.c \
 	f-exp.tab.c m2-exp.tab.c p-exp.tab.c
 YYOBJ = c-exp.tab.o \
+	objc-exp.tab.o \
 	jv-exp.tab.o \
 	f-exp.tab.o m2-exp.tab.o p-exp.tab.o
 
@@ -966,6 +970,13 @@ uninstall: force $(CONFIG_UNINSTALL)
 # everything else.  The catch is that other modules still take the
 # address of these builtin types forcing them to be variables, sigh!
 
+# NOTE: cagney/2003-03-18: The sed pattern ``s|^\([^ /]...'' is
+# anchored on the first column and excludes the ``/'' character so
+# that it doesn't add the $(srcdir) prefix to any file that already
+# has an absolute path.  It turns out that $(DEC)'s True64 make
+# automatically adds the $(srcdir) prefixes when it encounters files
+# in sub-directories such as cli/ and mi/.
+
 INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_OBS) $(CONFIG_INITS)
 init.c: $(INIT_FILES)
 	@echo Making init.c
@@ -985,7 +996,7 @@ init.c: $(INIT_FILES)
 	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
 	    -e 's/\.o/.c/' \
 	    -e 's,signals\.c,signals/signals\.c,' \
-	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
+	    -e 's|^\([^  /][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
 	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' | \
 	( echo _initialize_gdbtypes ; grep -v '^_initialize_gdbtypes$$' ) > init.l-tmp
@@ -1344,7 +1355,7 @@ ALLDEPFILES = \
 	hppa-tdep.c hppa-hpux-tdep.c \
 	hppab-nat.c hppah-nat.c hpread.c \
 	i386-tdep.c i386b-nat.c i386v-nat.c i386-linux-nat.c \
-	i386v4-nat.c i386ly-tdep.c \
+	i386v4-nat.c i386ly-tdep.c i386-cygwin-tdep.c \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c \
 	i387-tdep.c \
 	i386-linux-tdep.c i386-nat.c \
@@ -1490,7 +1501,7 @@ alpha-linux-tdep.o: alpha-linux-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 alpha-nat.o: alpha-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 	$(regcache_h) $(alpha_tdep_h) $(gregset_h) $(gdb_string_h)
 alpha-osf1-tdep.o: alpha-osf1-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
-	$(value_h) $(alpha_tdep_h) $(osabi_h)
+	$(value_h) $(osabi_h) $(gdb_string_h) $(alpha_tdep_h)
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \
 	$(value_h) $(gdbcmd_h) $(gdbcore_h) $(dis_asm_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_string_h) $(linespec_h) $(regcache_h) \
@@ -1520,9 +1531,9 @@ arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) $(target_h) $(value_h) \
 	$(osabi_h)
 arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(symfile_h) $(gdb_string_h) $(dis_asm_h) $(regcache_h) \
-	$(doublest_h) $(value_h) $(arch_utils_h) $(solib_svr4_h) \
-	$(arm_tdep_h) $(gdb_sim_arm_h) $(elf_bfd_h) $(coff_internal_h) \
-	$(elf_arm_h) $(gdb_assert_h) $(bfd_in2_h) $(libcoff_h) $(osabi_h)
+	$(doublest_h) $(value_h) $(arch_utils_h) $(solib_svr4_h) $(osabi_h) \
+	$(arm_tdep_h) $(sim_arm_h) $(elf_bfd_h) $(coff_internal_h) \
+	$(elf_arm_h) $(gdb_assert_h)
 armnbsd-nat.o: armnbsd-nat.c $(defs_h) $(arm_tdep_h) $(inferior_h) \
 	$(regcache_h) $(gdbcore_h)
 armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) $(arm_tdep_h) $(nbsd_tdep_h) \
@@ -1735,7 +1746,7 @@ hpacc-abi.o: hpacc-abi.c $(defs_h) $(value_h) $(gdb_regex_h) $(gdb_string_h) \
 hppa-tdep.o: hppa-tdep.c $(defs_h) $(frame_h) $(bfd_h) $(inferior_h) \
 	$(value_h) $(regcache_h) $(completer_h) $(symtab_h) $(a_out_encap_h) \
 	$(gdb_stat_h) $(gdb_wait_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) \
-	$(symfile_h) $(objfiles_h) $(language_h) $(osabi_h)
+	$(symfile_h) $(objfiles_h) $(language_h) $(osabi_h) $(gdb_assert_h)
 hppa-hpux-tdep.o: hppa-hpux-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
 	$(osabi_h)
 hppab-nat.o: hppab-nat.c $(defs_h) $(inferior_h) $(target_h) $(regcache_h)
@@ -1778,6 +1789,8 @@ i386gnu-nat.o: i386gnu-nat.c $(defs_h) $(inferior_h) $(floatformat_h) \
 i386gnu-tdep.o: i386gnu-tdep.c $(defs_h) $(i386_tdep_h) $(osabi_h)
 i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h) $(target_h) $(i386_tdep_h) $(osabi_h)
+i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(gdb_string_h) \
+	$(i386_tdep_h) $(osabi_h)
 i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(regcache_h) $(arch_utils_h) $(i386_tdep_h) $(i387_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h) $(osabi_h)
@@ -1817,7 +1830,8 @@ infptrace.o: infptrace.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 	$(inferior_h) $(breakpoint_h) $(gdb_wait_h) $(gdbcore_h) $(gdbcmd_h) \
 	$(cli_script_h) $(target_h) $(gdbthread_h) $(annotate_h) \
-	$(symfile_h) $(top_h) $(inf_loop_h) $(regcache_h) $(value_h)
+	$(symfile_h) $(top_h) $(inf_loop_h) $(regcache_h) $(value_h) \
+	$(observer_h) $(language_h)
 inftarg.o: inftarg.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(command_h) $(gdb_stat_h) $(gdb_wait_h) $(inflow_h)
 infttrace.o: infttrace.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
@@ -1928,10 +1942,11 @@ mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(solib_svr4_h) $(osabi_h) $(gdb_string_h) $(mips_tdep_h) \
 	$(gdb_assert_h)
 mips-nat.o: mips-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
-mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
-	$(symtab_h) $(value_h) $(gdbcmd_h) $(language_h) $(gdbcore_h) \
-	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(target_h) $(arch_utils_h) \
-	$(regcache_h) $(osabi_h) $(mips_tdep_h) $(block_h) $(opcode_mips_h) \
+mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
+	$(frame_h) $(inferior_h) $(symtab_h) $(value_h) $(gdbcmd_h) \
+	$(language_h) $(gdbcore_h) $(symfile_h) $(objfiles_h) \
+	$(gdbtypes_h) $(target_h) $(arch_utils_h) $(regcache_h) \
+	$(osabi_h) $(mips_tdep_h) $(block_h) $(opcode_mips_h) \
 	$(elf_mips_h) $(elf_bfd_h) $(symcat_h)
 mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 mipsnbsd-nat.o: mipsnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
@@ -2175,7 +2190,7 @@ somread.o: somread.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 somsolib.o: somsolib.c $(defs_h) $(frame_h) $(bfd_h) $(som_h) $(libhppa_h) \
 	$(gdbcore_h) $(symtab_h) $(breakpoint_h) $(symfile_h) $(objfiles_h) \
 	$(inferior_h) $(gdb_stabs_h) $(gdb_stat_h) $(gdbcmd_h) $(language_h) \
-	$(regcache_h)
+	$(regcache_h) $(gdb_assert_h)
 source.o: source.c $(defs_h) $(symtab_h) $(expression_h) $(language_h) \
 	$(command_h) $(source_h) $(gdbcmd_h) $(frame_h) $(value_h) \
 	$(gdb_string_h) $(gdb_stat_h) $(gdbcore_h) $(gdb_regex_h) \

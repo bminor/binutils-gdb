@@ -245,10 +245,10 @@ m68k_store_return_value (struct type *type, char *valbuf)
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* FRAME_CHAIN takes a frame's nominal address and produces the frame's
-   chain-pointer.
-   In the case of the 68000, the frame's nominal address
-   is the address of a 4-byte word containing the calling frame's address.  */
+/* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
+   the frame's chain-pointer.  In the case of the 68000, the frame's
+   nominal address is the address of a 4-byte word containing the
+   calling frame's address.  */
 
 /* If we are chaining from sigtramp, then manufacture a sigtramp frame
    (which isn't really on the stack.  I'm not sure this is right for anything
@@ -1000,17 +1000,17 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Stack grows down. */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_stack_align (gdbarch, m68k_stack_align);
-
+  set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_decr_pc_after_break (gdbarch, 2);
 
-  set_gdbarch_store_struct_return (gdbarch, m68k_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, m68k_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch,
 					       m68k_deprecated_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, m68k_store_return_value);
 
-  set_gdbarch_frame_chain (gdbarch, m68k_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, m68k_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, m68k_frame_saved_pc);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68k_frame_init_saved_regs);
   set_gdbarch_frameless_function_invocation (gdbarch,
@@ -1042,13 +1042,11 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 24);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 28);
   set_gdbarch_call_dummy_start_offset (gdbarch, 12);
 
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_words));
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, m68k_fix_call_dummy);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, m68k_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, m68k_pop_frame);

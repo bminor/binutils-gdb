@@ -1,3 +1,77 @@
+2003-03-26  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.
+	(elf_m68k_relocate_section): Use it to correctly handle symbols
+	forced to be local.
+	(elf_m68k_finish_dynamic_symbol): Emit RELATIVE reloc for got
+	entries for symbols that are forced to be local.
+
+2003-03-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_relax_section): New function.
+	* elfxx-mips.h (_bfd_mips_relax_section): Declare.
+	* elfn32-mips.c, elf64-mips.c: Use it.
+
+2003-03-25  Stan Cox   <scox@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+	    
+	Contribute support for Intel's iWMMXt chip - an	ARM variant:
+
+	* archures.c: Add bfd_mach_arm_iWMMXt.
+	* reloc.c: Add BFD_RELOC_ARM_CP_OFF_IMM_S2.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* coff-arm.c (coff_arm_merge_private_bfd_data): Allow iWMMXt
+	object files to be linked with XScale ones.
+	(coff_arm_final_link_postscript): Update note section.
+	* coffcode.h (coff_set_arch_mach_hook): Handle note section.
+	* coffgen.c (coff_real_object_p): Call bfd_coff_set_arch_mach_hook
+	after identifying a coff binary.
+	* cpu-arm.c (processors): Add iWMMXt.
+	(arch_inf): Likewise.
+	* elf32-arm.h (arm_object_p): Handle note section.
+	(elf32_arm_merge_private_bfd_data):  Allow iWMMXt object files to
+	be linked with XScale ones.
+	(elf32_arm_section_flags): New function: Set flags on note section.
+	(elf32_arm_final_write_processing): Handle note section.
+
+2003-03-21  DJ Delorie  <dj@redhat.com>
+
+	* elf32-xstormy16.c (elf32_xstormy16_relocate_section): Call
+	_bfd_elf_rela_local_sym.
+
+2003-03-20  H.J. Lu <hjl@gnu.org>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Don't try relax for
+	non-ELF outputs.
+
+2003-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Initialise $idata2 and
+	$idata5 in case bfd_coff_final_link is not called.
+
+2003-03-19  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-sparc.c (struct sparc64_elf_section_data): Add reloc_count
+	field.
+	(canon_reloc_count): Define.
+	(sparc64_elf_slurp_one_reloc_table, sparc64_elf_slurp_reloc_table,
+	sparc64_elf_canonicalize_dynamic_reloc): Use it instead of
+	reloc_count.
+	(sparc64_elf_canonicalize_reloc): New routine.
+	(bfd_elf64_canonicalize_reloc): Define.
+
+2003-03-18  Jakub Jelinek  <jakub@redhat.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Handle relaxation
+	againt mergeable sections.  Take r_addend into account when caching
+	trampolines.
+
+2003-03-18  Richard Henderson  <rth@redhat.com>
+
+        * elfxx-ia64.c (get_dyn_sym_info): Return NULL gracefully for
+        local symbols that have no dyninfo.
+
 2003-03-14  Gene Smith  <gene.smith@siemens.com>
 
 	* ieee.c (ieee_write_expression): Handle the case where symbol is

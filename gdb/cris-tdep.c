@@ -4276,7 +4276,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
   
   /* No stack adjustment needed when peforming an inferior function call.  */
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
@@ -4287,7 +4286,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_return_address (gdbarch, cris_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, cris_pop_frame);
 
-  set_gdbarch_store_struct_return (gdbarch, cris_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, cris_store_struct_return);
   set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, cris_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, cris_use_struct_convention);
@@ -4314,15 +4313,12 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation 
     (gdbarch, cris_frameless_function_invocation);
-  set_gdbarch_frame_chain (gdbarch, cris_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, cris_frame_chain);
 
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, cris_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, cris_saved_pc_after_call);
 
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-  
-  /* No extra stack alignment needed.  Set to 1 by default.  */
-  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
   
   /* Helpful for backtracing and returning in a call dummy.  */
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);

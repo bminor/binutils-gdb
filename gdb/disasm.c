@@ -338,11 +338,8 @@ gdb_disassembly (struct ui_out *uiout,
       di_initialized = 1;
     }
 
-  di.mach = TARGET_PRINT_INSN_INFO->mach;
-  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    di.endian = BFD_ENDIAN_BIG;
-  else
-    di.endian = BFD_ENDIAN_LITTLE;
+  di.mach = gdbarch_bfd_arch_info (current_gdbarch)->mach;
+  di.endian = gdbarch_byte_order (current_gdbarch);
 
   /* If gdb_disassemble_from_exec == -1, then we use the following heuristic to
      determine whether or not to do disassembly from target memory or from the

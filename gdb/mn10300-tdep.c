@@ -1170,13 +1170,13 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mn10300_init_extra_frame_info);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mn10300_frame_init_saved_regs);
-  set_gdbarch_frame_chain (gdbarch, mn10300_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, mn10300_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, mn10300_frame_saved_pc);
   set_gdbarch_deprecated_extract_return_value (gdbarch, mn10300_extract_return_value);
   set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, mn10300_extract_struct_value_address);
   set_gdbarch_deprecated_store_return_value (gdbarch, mn10300_store_return_value);
-  set_gdbarch_store_struct_return (gdbarch, mn10300_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, mn10300_store_struct_return);
   set_gdbarch_deprecated_pop_frame (gdbarch, mn10300_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, mn10300_skip_prologue);
   set_gdbarch_frame_args_skip (gdbarch, 0);
@@ -1188,7 +1188,6 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_call_dummy_words (gdbarch, mn10300_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 

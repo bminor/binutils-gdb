@@ -1244,7 +1244,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    */
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, v850_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, v850_init_extra_frame_info);
-  set_gdbarch_frame_chain (gdbarch, v850_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, v850_frame_chain);
   set_gdbarch_saved_pc_after_call (gdbarch, v850_saved_pc_after_call);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, v850_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, v850_skip_prologue);
@@ -1272,7 +1272,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_return_value (gdbarch, v850_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, v850_push_arguments);
   set_gdbarch_deprecated_pop_frame (gdbarch, v850_pop_frame);
-  set_gdbarch_store_struct_return (gdbarch, v850_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, v850_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, v850_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, v850_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, v850_use_struct_convention);
@@ -1284,8 +1284,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  /* set_gdbarch_call_dummy_stack_adjust */
   set_gdbarch_fix_call_dummy (gdbarch, v850_fix_call_dummy);
   set_gdbarch_breakpoint_from_pc (gdbarch, v850_breakpoint_from_pc);
 
@@ -1293,8 +1291,6 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-
-  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
 
   return gdbarch;
 }

@@ -343,7 +343,7 @@ print_formatted (struct value *val, register int format, int size,
    with a format.  */
 
 void
-print_scalar_formatted (char *valaddr, struct type *type, int format, int size,
+print_scalar_formatted (void *valaddr, struct type *type, int format, int size,
 			struct ui_file *stream)
 {
   LONGEST val_long;

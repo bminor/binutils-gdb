@@ -1389,7 +1389,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_sizeof_call_dummy_words (gdbarch,
                                        sizeof (m68hc11_call_dummy_words));
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_deprecated_extract_return_value (gdbarch, m68hc11_extract_return_value);
@@ -1397,13 +1396,13 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_push_return_address (gdbarch, m68hc11_push_return_address);
   set_gdbarch_return_value_on_stack (gdbarch, m68hc11_return_value_on_stack);
 
-  set_gdbarch_store_struct_return (gdbarch, m68hc11_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, m68hc11_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, m68hc11_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m68hc11_extract_struct_value_address);
   set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
 
 
-  set_gdbarch_frame_chain (gdbarch, m68hc11_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, m68hc11_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, m68hc11_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, m68hc11_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, m68hc11_frame_locals_address);
@@ -1412,7 +1411,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
 
-  set_gdbarch_store_struct_return (gdbarch, m68hc11_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, m68hc11_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, m68hc11_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, m68hc11_extract_struct_value_address);
@@ -1425,6 +1424,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, m68hc11_breakpoint_from_pc);
   set_gdbarch_stack_align (gdbarch, m68hc11_stack_align);
+  set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_m68hc11);
 
   m68hc11_add_reggroups (gdbarch);

@@ -147,7 +147,7 @@ linux_create_inferior (char *program, char **allargs)
     {
       ptrace (PTRACE_TRACEME, 0, 0, 0);
 
-      signal (SIGRTMIN + 1, SIG_DFL);
+      signal (__SIGRTMIN + 1, SIG_DFL);
 
       setpgid (0, 0);
 
@@ -493,8 +493,8 @@ linux_wait_for_event (struct thread_info *child)
 	  /* FIXME drow/2002-06-09: Get signal numbers from the inferior's
 	     thread library?  */
 	  if (WIFSTOPPED (wstat)
-	      && (WSTOPSIG (wstat) == SIGRTMIN
-		  || WSTOPSIG (wstat) == SIGRTMIN + 1))
+	      && (WSTOPSIG (wstat) == __SIGRTMIN
+		  || WSTOPSIG (wstat) == __SIGRTMIN + 1))
 	    {
 	      if (debug_threads)
 		fprintf (stderr, "Ignored signal %d for %d (LWP %d).\n",
@@ -1248,7 +1248,7 @@ linux_init_signals ()
 {
   /* FIXME drow/2002-06-09: As above, we should check with LinuxThreads
      to find what the cancel signal actually is.  */
-  signal (SIGRTMIN+1, SIG_IGN);
+  signal (__SIGRTMIN+1, SIG_IGN);
 }
 
 void

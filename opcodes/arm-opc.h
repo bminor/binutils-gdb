@@ -1,6 +1,6 @@
 /* Opcode table for the ARM.
 
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2003
    Free Software Foundation, Inc.
    
    This program is free software; you can redistribute it and/or modify
@@ -60,6 +60,13 @@ struct thumb_opcode
    %m			print register mask for ldm/stm instruction
    %C			print the PSR sub type.
    %F			print the COUNT field of a LFM/SFM instruction.
+IWMMXT specific format options:
+   %<bitfield>g         print as an iWMMXt 64-bit register
+   %<bitfield>G         print as an iWMMXt general purpose or control register
+   %<bitfield>w         print as an iWMMXt width field - [bhwd]ss/us
+   %Z			print the Immediate of a WSHUFH instruction.
+   %L			print as an iWMMXt N/M width field.
+   %l			like 'A' except use byte offsets for 'B' & 'H' versions
 Thumb specific format options:
    %D                   print Thumb register (bits 0..2 as high number if bit 7 set)
    %S                   print Thumb register (bits 3..5 as high number if bit 6 set)
@@ -101,6 +108,59 @@ static const struct arm_opcode arm_opcodes[] =
     {0x0c500000, 0x0ff00fff, "mra%c\t%12-15r, %16-19r, acc0"},
     {0xf450f000, 0xfc70f000, "pld\t%a"},
     
+    /* Intel(r) Wireless MMX(tm) technology instructions.  */
+#define FIRST_IWMMXT_INSN 0x0e130130
+#define IWMMXT_INSN_COUNT 47
+    {0x0e130130, 0x0f3f0fff, "tandc%22-23w%c\t%12-15r"},
+    {0x0e400010, 0x0ff00f3f, "tbcst%6-7w%c\t%16-19g, %12-15r"},
+    {0x0e130170, 0x0f3f0ff8, "textrc%22-23w%c\t%12-15r, #%0-2d"},
+    {0x0e100070, 0x0f300ff0, "textrm%3?su%22-23w%c\t%12-15r, %16-19g, #%0-2d"},
+    {0x0e600010, 0x0ff00f38, "tinsr%6-7w%c\t%16-19g, %12-15r, #%0-2d"},
+    {0x0e000110, 0x0ff00fff, "tmcr%c\t%16-19G, %12-15r"},
+    {0x0c400000, 0x0ff00ff0, "tmcrr%c\t%0-3g, %12-15r, %16-19r"},
+    {0x0e2c0010, 0x0ffc0e10, "tmia%17?tb%16?tb%c\t%5-8g, %0-3r, %12-15r"},
+    {0x0e200010, 0x0fff0e10, "tmia%c\t%5-8g, %0-3r, %12-15r"},
+    {0x0e280010, 0x0fff0e10, "tmiaph%c\t%5-8g, %0-3r, %12-15r"},
+    {0x0e100030, 0x0f300fff, "tmovmsk%22-23w%c\t%12-15r, %16-19g"},
+    {0x0e100110, 0x0ff00ff0, "tmrc%c\t%12-15r, %16-19G"},
+    {0x0c500000, 0x0ff00ff0, "tmrrc%c\t%12-15r, %16-19r, %0-3g"},
+    {0x0e130150, 0x0f3f0fff, "torc%22-23w%c\t%12-15r"},
+    {0x0e0001c0, 0x0f300fff, "wacc%22-23w%c\t%12-15g, %16-19g"},
+    {0x0e000180, 0x0f000ff0, "wadd%20-23w%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e000020, 0x0f800ff0, "waligni%c\t%12-15g, %16-19g, %0-3g, #%20-22d"},
+    {0x0e800020, 0x0fc00ff0, "walignr%20-21d%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e200000, 0x0fe00ff0, "wand%20'n%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e800000, 0x0fa00ff0, "wavg2%22?hb%20'r%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e000060, 0x0f300ff0, "wcmpeq%22-23w%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e100060, 0x0f100ff0, "wcmpgt%21?su%22-23w%c\t%12-15g, %16-19g, %0-3g"},
+    {0xfc100100, 0xfe500f00, "wldrw\t%12-15G, %A"},
+    {0x0c100000, 0x0e100e00, "wldr%L%c\t%12-15g, %l"},
+    {0x0e400100, 0x0fc00ff0, "wmac%21?su%20'z%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e800100, 0x0fd00ff0, "wmadd%21?su%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e000160, 0x0f100ff0, "wmax%21?su%22-23w%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e100160, 0x0f100ff0, "wmin%21?su%22-23w%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e000100, 0x0fc00ff0, "wmul%21?su%20?ml%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e000000, 0x0ff00ff0, "wor%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e000080, 0x0f000ff0, "wpack%20-23w%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e300040, 0x0f300ff0, "wror%22-23w%8'g%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e300148, 0x0f300ffc, "wror%22-23w%8'g%c\t%12-15g, %16-19g, %0-3G"},
+    {0x0e000120, 0x0fa00ff0, "wsad%22?hb%20'z%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e0001e0, 0x0f000ff0, "wshufh%c\t%12-15g, %16-19g, #%Z"},
+    {0x0e100040, 0x0f300ff0, "wsll%22-23w%8'g%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e100148, 0x0f300ffc, "wsll%22-23w%8'g%c\t%12-15g, %16-19g, %0-3G"},
+    {0x0e000040, 0x0f300ff0, "wsra%22-23w%8'g%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e000148, 0x0f300ffc, "wsra%22-23w%8'g%c\t%12-15g, %16-19g, %0-3G"},
+    {0x0e200040, 0x0f300ff0, "wsrl%22-23w%8'g%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e200148, 0x0f300ffc, "wsrl%22-23w%8'g%c\t%12-15g, %16-19g, %0-3G"},
+    {0xfc000100, 0xfe500f00, "wstrw\t%12-15G, %A"},
+    {0x0c000000, 0x0e100e00, "wstr%L%c\t%12-15g, %l"},
+    {0x0e0001a0, 0x0f000ff0, "wsub%20-23w%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e0000c0, 0x0f100fff, "wunpckeh%21?su%22-23w%c\t%12-15g, %16-19g"},
+    {0x0e0000e0, 0x0f100fff, "wunpckel%21?su%22-23w%c\t%12-15g, %16-19g"},
+    {0x0e1000c0, 0x0f300ff0, "wunpckih%22-23w%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e1000e0, 0x0f300ff0, "wunpckil%22-23w%c\t%12-15g, %16-19g, %0-3g"},
+    {0x0e100000, 0x0ff00ff0, "wxor%c\t%12-15g, %16-19g, %0-3g"},
+
     /* V5 Instructions.  */
     {0xe1200070, 0xfff000f0, "bkpt\t0x%16-19X%12-15X%8-11X%0-3X"},
     {0xfa000000, 0xfe000000, "blx\t%B"},

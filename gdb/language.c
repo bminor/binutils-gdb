@@ -100,6 +100,8 @@ static int unk_lang_val_print (struct type *, char *, int, CORE_ADDR,
 
 static int unk_lang_value_print (struct value *, struct ui_file *, int, enum val_prettyprint);
 
+static CORE_ADDR unk_lang_trampoline (CORE_ADDR pc);
+
 /* Forward declaration */
 extern const struct language_defn unknown_language_defn;
 
@@ -1337,6 +1339,29 @@ add_language (const struct language_defn *lang)
   languages[languages_size++] = lang;
 }
 
+/* Iterate through all registered languages looking for and calling
+   any non-NULL struct language_defn.skip_trampoline() functions.
+   Return the result from the first that returns non-zero, or 0 if all
+   `fail'.  */
+CORE_ADDR 
+skip_language_trampoline (CORE_ADDR pc)
+{
+  int i;
+
+  for (i = 0; i < languages_size; i++)
+    {
+      if (languages[i]->skip_trampoline)
+	{
+	  CORE_ADDR real_pc = (languages[i]->skip_trampoline) (pc);
+	  if (real_pc)
+	    return real_pc;
+	}
+    }
+
+  return 0;
+}
+
+
 /* Define the language that is no language.  */
 
 static int
@@ -1398,6 +1423,11 @@ unk_lang_value_print (struct value *val, struct ui_file *stream, int format,
   error ("internal error - unimplemented function unk_lang_value_print called.");
 }
 
+static CORE_ADDR unk_lang_trampoline (CORE_ADDR pc)
+{
+  return 0;
+}
+
 static struct type **const (unknown_builtin_types[]) =
 {
   0
@@ -1425,6 +1455,7 @@ const struct language_defn unknown_language_defn =
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
+  unk_lang_trampoline,		/* Language specific skip_trampoline */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -1455,6 +1486,7 @@ const struct language_defn auto_language_defn =
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
+  unk_lang_trampoline,		/* Language specific skip_trampoline */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */
@@ -1484,6 +1516,7 @@ const struct language_defn local_language_defn =
   unk_lang_print_type,		/* Print a type using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
+  unk_lang_trampoline,		/* Language specific skip_trampoline */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */
   {"%ld", "", "d", ""},		/* Decimal format info */

@@ -322,7 +322,7 @@ enum exp_opcode
     OP_EXPRSTRING,
 
     /* An Objective C Foundation Class NSString constant */
-    OP_OBJC_NSSTRING,
+    OP_OBJC_NSSTRING
   };
 
 union exp_element

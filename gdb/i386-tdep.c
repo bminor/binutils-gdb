@@ -636,10 +636,10 @@ i386_frame_num_args (struct frame_info *fi)
   if (pfi == 0)
     {
       /* NOTE: This can happen if we are looking at the frame for
-         main, because FRAME_CHAIN_VALID won't let us go into start.
-         If we have debugging symbols, that's not really a big deal;
-         it just means it will only show as many arguments to main as
-         are declared.  */
+         main, because DEPRECATED_FRAME_CHAIN_VALID won't let us go
+         into start.  If we have debugging symbols, that's not really
+         a big deal; it just means it will only show as many arguments
+         to main as are declared.  */
       return -1;
     }
   else
@@ -1573,7 +1573,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, NULL);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
   set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
@@ -1590,7 +1589,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
   set_gdbarch_push_return_address (gdbarch, i386_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, i386_pop_frame);
-  set_gdbarch_store_struct_return (gdbarch, i386_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, i386_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch,
 					    i386_extract_struct_value_address);
@@ -1614,7 +1613,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 8);
   set_gdbarch_frameless_function_invocation (gdbarch,
                                            i386_frameless_function_invocation);
-  set_gdbarch_frame_chain (gdbarch, i386_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, i386_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, i386_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);

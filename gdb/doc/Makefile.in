@@ -114,7 +114,8 @@ GDB_DOC_FILES = \
 
 # Internals Manual
 GDBINT_DOC_SOURCE_INCLUDES = \
-	$(srcdir)/fdl.texi
+	$(srcdir)/fdl.texi \
+	$(srcdir)/observer.texi
 GDBINT_DOC_BUILD_INCLUDES = \
 	gdb-cfg.texi \
 	GDBvn.texi

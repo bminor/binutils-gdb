@@ -392,8 +392,8 @@ extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
 #define CANNOT_STORE_REGISTER(regno) ((regno) == G0_REGNUM)
 
 /*
- * FRAME_CHAIN and FRAME_INFO definitions, collected here for convenience.
- */
+ * DEPRECATED_FRAME_CHAIN and FRAME_INFO definitions, collected here
+ * for convenience.  */
 
 #if !defined (GDB_MULTI_ARCH) || (GDB_MULTI_ARCH == 0)
 /*
@@ -403,8 +403,8 @@ extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer. */
+/* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
+   the frame's chain-pointer. */
 
 /* In the case of the Sun 4, the frame-chain's nominal address
    is held in the frame pointer register.
@@ -472,7 +472,7 @@ void sparc_get_saved_register (char *raw_buffer,
      sparc_init_extra_frame_info (FROMLEAF, FCI)
 extern void sparc_init_extra_frame_info (int, struct frame_info *);
 
-#define FRAME_CHAIN(THISFRAME) (sparc_frame_chain (THISFRAME))
+#define DEPRECATED_FRAME_CHAIN(THISFRAME) (sparc_frame_chain (THISFRAME))
 extern CORE_ADDR sparc_frame_chain (struct frame_info *);
 
 /* A macro that tells us whether the function invocation represented
@@ -649,7 +649,7 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + 0x30)
 
-#define CALL_DUMMY_STACK_ADJUST 68
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST 68
 
 /* Call dummy method (eg. on stack, at entry point, etc.) */
 
@@ -756,3 +756,4 @@ extern int deferred_stores;
 
 #define TM_PRINT_INSN_MACH bfd_mach_sparc
 
+#define DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED 1

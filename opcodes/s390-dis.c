@@ -57,7 +57,7 @@ init_disasm (info)
       current_arch_mask = 1 << S390_OPCODE_ESA;
       break;
     case bfd_mach_s390_64:
-      current_arch_mask = 1 << S390_OPCODE_ESAME;
+      current_arch_mask = 1 << S390_OPCODE_ZARCH;
       break;
     default:
       abort ();
@@ -161,7 +161,7 @@ print_insn_s390 (memaddr, info)
 	  const unsigned char *opindex;
 
 	  /* Check architecture.  */
-	  if (!(opcode->architecture & current_arch_mask))
+	  if (!(opcode->modes & current_arch_mask))
 	    continue;
 	  /* Check signature of the opcode.  */
 	  if ((buffer[1] & opcode->mask[1]) != opcode->opcode[1]

@@ -102,8 +102,8 @@
 #define CALL_DUMMY_LOCATION AT_ENTRY_POINT
 #undef  DEPRECATED_PC_IN_CALL_DUMMY
 #define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_at_entry_point (pc, sp, frame_address)
-#undef  CALL_DUMMY_STACK_ADJUST
-#define CALL_DUMMY_STACK_ADJUST 128
+#undef  DEPRECATED_CALL_DUMMY_STACK_ADJUST
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST 128
 #undef  SIZEOF_CALL_DUMMY_WORDS
 #define SIZEOF_CALL_DUMMY_WORDS 0
 #undef  CALL_DUMMY_ADDRESS
@@ -143,8 +143,8 @@ extern void sparc_at_entry_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 
 /* 128 is to reserve space to write the %i/%l registers that will be restored
    when we resume. */
-#undef  CALL_DUMMY_STACK_ADJUST
-#define CALL_DUMMY_STACK_ADJUST 128
+#undef  DEPRECATED_CALL_DUMMY_STACK_ADJUST
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST 128
 
 /* Size of the call dummy in bytes. */
 #undef  CALL_DUMMY_LENGTH

@@ -137,6 +137,18 @@ altivec_register_p (int regno)
     return (regno >= tdep->ppc_vr0_regnum && regno <= tdep->ppc_vrsave_regnum);
 }
 
+/* Use the architectures FP registers?  */
+int
+ppc_floating_point_unit_p (struct gdbarch *gdbarch)
+{
+  const struct bfd_arch_info *info = gdbarch_bfd_arch_info (gdbarch);
+  if (info->arch == bfd_arch_powerpc)
+    return (info->mach != bfd_mach_ppc_e500);
+  if (info->arch == bfd_arch_rs6000)
+    return 1;
+  return 0;
+}
+
 /* Read a LEN-byte address from debugged memory address MEMADDR. */
 
 static CORE_ADDR
@@ -1554,14 +1566,16 @@ rs6000_frame_saved_pc (struct frame_info *fi)
 	  return lr;
 	}
       else
-	return read_memory_addr (FRAME_CHAIN (fi) + tdep->lr_frame_offset,
+	return read_memory_addr (DEPRECATED_FRAME_CHAIN (fi)
+				 + tdep->lr_frame_offset,
 				 wordsize);
     }
 
   if (fdata.lr_offset == 0)
     return read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
 
-  return read_memory_addr (FRAME_CHAIN (fi) + fdata.lr_offset, wordsize);
+  return read_memory_addr (DEPRECATED_FRAME_CHAIN (fi) + fdata.lr_offset,
+			   wordsize);
 }
 
 /* If saved registers of frame FI are not known yet, read and cache them.
@@ -1608,7 +1622,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
        ->frame pointed to the outer-most address of the frame.  In the
        mean time, the address of the prev frame is used as the base
        address of this frame.  */
-    frame_addr = FRAME_CHAIN (fi);
+    frame_addr = DEPRECATED_FRAME_CHAIN (fi);
 
   /* if != -1, fdatap->saved_fpr is the smallest number of saved_fpr.
      All fpr's from saved_fpr to fp31 are saved.  */
@@ -1746,8 +1760,8 @@ frame_initial_stack_address (struct frame_info *fi)
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer.  */
+/* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
+   the frame's chain-pointer.  */
 
 /* In the case of the RS/6000, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
@@ -2892,7 +2906,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
@@ -2915,7 +2928,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     set_gdbarch_push_arguments (gdbarch, rs6000_push_arguments);
 
-  set_gdbarch_store_struct_return (gdbarch, rs6000_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, rs6000_store_struct_return);
   set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, rs6000_pop_frame);
 
@@ -2937,7 +2950,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frameless_function_invocation (gdbarch,
                                          rs6000_frameless_function_invocation);
-  set_gdbarch_frame_chain (gdbarch, rs6000_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, rs6000_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);

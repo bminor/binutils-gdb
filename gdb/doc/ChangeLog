@@ -1,3 +1,29 @@
+2003-03-25  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	reference to CALL_DUMMY_STACK_ADJUST_P.  Rename
+	CALL_DUMMY_STACK_ADJUST to DEPRECATED_CALL_DUMMY_STACK_ADJUST.
+	Add reference to PUSH_ARGUMENTS.
+
+2003-03-23  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Algorithms, Target Architecture Definition):
+	Deprecate FRAME_CHAIN and FRAME_CHAIN_VALID.
+
+2003-03-18  J. Brobecker  <brobecker@gnat.com>
+
+	* gdbint.texinfo (Algorithms): Add new section describing the
+	Observer paradigm.
+	(Top): Add menu entry to new observer appendix.
+	* observer.texi: New file.
+	* Makefile.in (GDBINT_DOC_SOURCE_INCLUDES): Add dependency on
+	new observer.texi file.
+
+2003-03-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (DATE): Delete.  Remove date from titles.  Mention
+	that GNU Press update the manual version number.
+
 2003-03-12  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete

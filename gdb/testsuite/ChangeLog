@@ -1,3 +1,54 @@
+2003-03-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.asm/asm-source.exp: Set asm-arch for m6811 and m6812.
+	* gdb.asm/m68hc11.inc: New file for HC11/HC12 macros.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/default.exp: Fix regular expression.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/args.exp: Fix regular expression.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/help.exp: Allow Win32 child process.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/ending-run.exp: Check for Cygwin specific wrapper function
+	when stepping out of main().
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/default.exp: Check for win32 specific message when calling
+	"run" without executable.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/args.exp: Expect .exe in output.
+
+2003-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add appropriate --entry linker flag for
+	Cygwin native.
+
+2003-03-17  Andrew Cagney  <cagney@redhat.com>
+
+	From Elena Zannoni <ezannoni@redhat.com>.  Test e500 abi and
+	vector registes.
+	* gdb.arch/e500-regs.c, gdb.arch/e500-regs.exp: New files.
+	* gdb.arch/e500-abi.c, gdb.arch/e500-abi.exp: New files.
+
+2003-03-17  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.base/watchpoint.exp (test_watchpoint_and_breakpoint): New
+	test, for PR breakpoints/38.
+	Call test_watchpoint_and_breakpoint.
+	* gdb.base/watchpoint.c (func3): New function.
+	(main): Call func3.
+
 2003-03-04  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/templates.exp (do_tests): Accept valid const in "print

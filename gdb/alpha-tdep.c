@@ -54,7 +54,6 @@ static gdbarch_register_convertible_ftype alpha_register_convertible;
 static gdbarch_register_convert_to_virtual_ftype
     alpha_register_convert_to_virtual;
 static gdbarch_register_convert_to_raw_ftype alpha_register_convert_to_raw;
-static gdbarch_store_struct_return_ftype alpha_store_struct_return;
 static gdbarch_deprecated_extract_return_value_ftype alpha_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype
     alpha_extract_struct_value_address;
@@ -67,7 +66,6 @@ static gdbarch_frame_locals_address_ftype alpha_frame_locals_address;
 
 static gdbarch_skip_prologue_ftype alpha_skip_prologue;
 static gdbarch_saved_pc_after_call_ftype alpha_saved_pc_after_call;
-static gdbarch_frame_chain_ftype alpha_frame_chain;
 
 static gdbarch_push_arguments_ftype alpha_push_arguments;
 static gdbarch_fix_call_dummy_ftype alpha_fix_call_dummy;
@@ -1839,7 +1837,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_saved_pc_after_call (gdbarch, alpha_saved_pc_after_call);
 
-  set_gdbarch_frame_chain (gdbarch, alpha_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, alpha_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, alpha_frame_saved_pc);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, alpha_frame_init_saved_regs);
@@ -1847,7 +1845,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, alpha_extract_return_value);
 
-  set_gdbarch_store_struct_return (gdbarch, alpha_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, alpha_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, alpha_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
 					    alpha_extract_struct_value_address);
@@ -1877,7 +1875,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, alpha_push_dummy_frame);
   set_gdbarch_fix_call_dummy (gdbarch, alpha_fix_call_dummy);
   set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);

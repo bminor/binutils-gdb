@@ -1174,7 +1174,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, avr_call_dummy_words);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 
 /*    set_gdbarch_believe_pcc_promotion (gdbarch, 1); // TRoth: should this be set? */
@@ -1186,7 +1185,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pop_frame (gdbarch, avr_pop_frame);
 
   set_gdbarch_use_struct_convention (gdbarch, generic_use_struct_convention);
-  set_gdbarch_store_struct_return (gdbarch, avr_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, avr_store_struct_return);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, avr_scan_prologue);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, avr_init_extra_frame_info);
@@ -1200,7 +1199,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					     avr_remote_translate_xfer_address);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);	/* ??? */
-  set_gdbarch_frame_chain (gdbarch, avr_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, avr_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, avr_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, avr_frame_address);
   set_gdbarch_frame_locals_address (gdbarch, avr_frame_address);

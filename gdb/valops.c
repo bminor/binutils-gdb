@@ -1374,9 +1374,9 @@ hand_function_call (struct value *function, int nargs, struct value **args)
        be able to correctly perform back traces.  If a target is
        having trouble with backtraces, first thing to do is add
        FRAME_ALIGN() to its architecture vector.  After that, try
-       adding SAVE_DUMMY_FRAME_TOS() and modifying FRAME_CHAIN so that
-       when the next outer frame is a generic dummy, it returns the
-       current frame's base.  */
+       adding SAVE_DUMMY_FRAME_TOS() and modifying
+       DEPRECATED_FRAME_CHAIN so that when the next outer frame is a
+       generic dummy, it returns the current frame's base.  */
     sp = old_sp;
 
   if (INNER_THAN (1, 2))
@@ -1599,7 +1599,10 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      on other architectures. This is because all the alignment is
      taken care of in the above code (ifdef REG_STRUCT_HAS_ADDR) and
      in hppa_push_arguments */
-  if (EXTRA_STACK_ALIGNMENT_NEEDED)
+  /* NOTE: cagney/2003-03-24: The below code is very broken.  Given an
+     odd sized parameter the below will mis-align the stack.  As was
+     suggested back in '96, better to let PUSH_ARGUMENTS handle it.  */
+  if (DEPRECATED_EXTRA_STACK_ALIGNMENT_NEEDED)
     {
       /* MVS 11/22/96: I think at least some of this stack_align code
 	 is really broken.  Better to let PUSH_ARGUMENTS adjust the
@@ -1611,8 +1614,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
 	  for (i = nargs - 1; i >= 0; i--)
 	    len += TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
-	  if (CALL_DUMMY_STACK_ADJUST_P)
-	    len += CALL_DUMMY_STACK_ADJUST;
+	  if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
+	    len += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
 	  sp -= STACK_ALIGN (len) - len;
 	}
     }
@@ -1636,8 +1639,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     {
       /* If stack grows up, we must leave a hole at the bottom, note
          that sp already has been advanced for the arguments!  */
-      if (CALL_DUMMY_STACK_ADJUST_P)
-	sp += CALL_DUMMY_STACK_ADJUST;
+      if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
+	sp += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
       sp = STACK_ALIGN (sp);
     }
 
@@ -1646,24 +1649,19 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   /* MVS 11/22/96: I think at least some of this stack_align code is
      really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
      a target-defined manner.  */
-  if (CALL_DUMMY_STACK_ADJUST_P)
+  if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
     if (INNER_THAN (1, 2))
       {
 	/* stack grows downward */
-	sp -= CALL_DUMMY_STACK_ADJUST;
+	sp -= DEPRECATED_CALL_DUMMY_STACK_ADJUST;
       }
 
   /* Store the address at which the structure is supposed to be
-     written.  Note that this (and the code which reserved the space
-     above) assumes that gcc was used to compile this function.  Since
-     it doesn't cost us anything but space and if the function is pcc
-     it will ignore this value, we will make that assumption.
-
-     Also note that on some machines (like the sparc) pcc uses a
-     convention like gcc's.  */
-
-  if (struct_return)
-    STORE_STRUCT_RETURN (struct_addr, sp);
+     written.  */
+  /* NOTE: 2003-03-24: Since PUSH_ARGUMENTS can (and typically does)
+     store the struct return address, this call is entirely redundant.  */
+  if (struct_return && DEPRECATED_STORE_STRUCT_RETURN_P ())
+    DEPRECATED_STORE_STRUCT_RETURN (struct_addr, sp);
 
   /* Write the stack pointer.  This is here because the statements above
      might fool with it.  On SPARC, this write also stores the register

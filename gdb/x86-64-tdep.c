@@ -1016,7 +1016,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_push_arguments (gdbarch, x86_64_push_arguments);
   set_gdbarch_push_return_address (gdbarch, x86_64_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, x86_64_pop_frame);
-  set_gdbarch_store_struct_return (gdbarch, x86_64_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, x86_64_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, x86_64_store_return_value);
   /* Override, since this is handled by x86_64_extract_return_value.  */
   set_gdbarch_extract_struct_value_address (gdbarch, NULL);
@@ -1025,7 +1025,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
   set_gdbarch_skip_prologue (gdbarch, x86_64_skip_prologue);
 
-  set_gdbarch_frame_chain (gdbarch, x86_64_linux_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, x86_64_linux_frame_chain);
   set_gdbarch_frameless_function_invocation (gdbarch,
 					 x86_64_frameless_function_invocation);
   /* FIXME: kettenis/20021026: These two are GNU/Linux-specific and

@@ -1120,7 +1120,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    */
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, h8300_frame_init_saved_regs);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, h8300_init_extra_frame_info);
-  set_gdbarch_frame_chain (gdbarch, h8300_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, h8300_frame_chain);
   set_gdbarch_saved_pc_after_call (gdbarch, h8300_saved_pc_after_call);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, h8300_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, h8300_skip_prologue);
@@ -1152,7 +1152,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_return_value (gdbarch, h8300_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, h8300_push_arguments);
   set_gdbarch_deprecated_pop_frame (gdbarch, h8300_pop_frame);
-  set_gdbarch_store_struct_return (gdbarch, h8300_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, h8300_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, h8300_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, h8300_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, h8300_use_struct_convention);
@@ -1164,8 +1164,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  /* set_gdbarch_call_dummy_stack_adjust */
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_breakpoint_from_pc (gdbarch, h8300_breakpoint_from_pc);
 
@@ -1175,7 +1173,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_addr_bit (gdbarch, BINWORD * TARGET_CHAR_BIT);
 
   /* set_gdbarch_stack_align (gdbarch, SOME_stack_align); */
-  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   return gdbarch;

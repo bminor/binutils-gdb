@@ -2119,10 +2119,43 @@ static bfd_boolean
 elf32_arm_object_p (abfd)
      bfd *abfd;
 {
-  /* XXX - we ought to examine a .note section here.  */
+  asection * arm_arch_section;
 
-  if (elf_elfheader (abfd)->e_flags & EF_ARM_MAVERICK_FLOAT)
-    bfd_default_set_arch_mach (abfd, bfd_arch_arm, bfd_mach_arm_ep9312);
+  arm_arch_section = bfd_get_section_by_name (abfd, ARM_NOTE_SECTION);
+
+  if (arm_arch_section)
+    {
+      char          buffer [4];
+      unsigned long arm_mach;
+
+      if (! bfd_get_section_contents (abfd, arm_arch_section, buffer,
+				      (file_ptr) 0, sizeof buffer))
+	(*_bfd_error_handler)
+	  (_("%s: warning: unable to retrieve %s section from %s"),
+	   ARM_NOTE_SECTION, bfd_get_filename (abfd));
+      else
+	{
+	  /* We have to extract the value this way to allow for a
+	     host whose endian-ness is different from the target.  */
+	  arm_mach = bfd_get_32 (abfd, buffer);
+	  bfd_default_set_arch_mach (abfd, bfd_arch_arm, arm_mach);
+
+	  if (bfd_get_arch (abfd) == bfd_arch_arm)
+	    return TRUE;
+      
+	  /* If the set failed for some reason, do not leave the architecture
+	     type as 0 (unknown), but issue a warning message and force it to
+	     be set to bfd_arch_arm.  */
+	  (*_bfd_error_handler)
+	    (_("%s: warning: unrecognized ARM machine number: %x"),
+	     bfd_get_filename (abfd), arm_mach);
+	}
+    }
+  else
+    {
+      if (elf_elfheader (abfd)->e_flags & EF_ARM_MAVERICK_FLOAT)
+	bfd_default_set_arch_mach (abfd, bfd_arch_arm, bfd_mach_arm_ep9312);
+    }
 
   return TRUE;
 }
@@ -2261,6 +2294,25 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
 	return bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
 
       return TRUE;
+    }
+
+  if (bfd_get_mach (obfd) && bfd_get_mach (obfd) != bfd_get_mach (ibfd))
+    {
+      /* For now, allow an output file type of 'xscale' if the
+	 input file type is 'iWMMXt'.  This means that we will
+	 not have to build an entire iWMMXt enabled set of libraries
+	 just to test a iWMMXt enabled binary.  Change the output
+	 type to iWMMXt though.  Similarly allow 'xscale' binaries
+         to be linked into a 'iWMMXt' output binary.  */
+      if (   bfd_get_mach (obfd) == bfd_mach_arm_XScale
+	  && bfd_get_mach (ibfd) == bfd_mach_arm_iWMMXt)
+	bfd_set_arch_mach (obfd, bfd_get_arch (obfd), bfd_mach_arm_iWMMXt);
+      else if (   bfd_get_mach (ibfd) != bfd_mach_arm_XScale
+	       || bfd_get_mach (obfd) != bfd_mach_arm_iWMMXt)
+	{
+	  bfd_set_error (bfd_error_wrong_format);
+	  return FALSE;
+	}
     }
 
   /* Identical flags must be compatible.  */
@@ -3660,6 +3712,65 @@ elf32_arm_reloc_type_class (rela)
     }
 }
 
+static bfd_boolean elf32_arm_section_flags           PARAMS ((flagword *, Elf_Internal_Shdr *));
+static void        elf32_arm_final_write_processing  PARAMS ((bfd *, bfd_boolean));
+
+/* Set the right machine number for an Arm ELF file.  */
+
+static bfd_boolean
+elf32_arm_section_flags (flags, hdr)
+     flagword *flags;
+     Elf_Internal_Shdr *hdr;
+{
+  if (hdr->sh_type == SHT_NOTE)
+    *flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_SAME_CONTENTS;
+
+  return TRUE;
+}
+
+void
+elf32_arm_final_write_processing (abfd, linker)
+     bfd *abfd;
+     bfd_boolean linker ATTRIBUTE_UNUSED;
+{
+  asection *    arm_arch_section;
+  char          buffer [4];
+  unsigned long arm_mach;
+
+  /* Look for a .note.arm.ident section.  If one is present check
+     the machine number encoded in it, and set it to the current
+     machine number if it is different.  This allows XScale and
+     iWMMXt binaries to be merged and the resulting output to be set
+     to iWMMXt, even if the first input file had an XScale .note.  */
+
+  arm_arch_section = bfd_get_section_by_name (abfd, ARM_NOTE_SECTION);
+
+  if (arm_arch_section == NULL)
+    return;
+
+  if (! bfd_get_section_contents (abfd, arm_arch_section, buffer,
+				(file_ptr) 0, sizeof buffer))
+    /* If the ident section does not exist then just skip this check.  */
+    return;
+
+  /* We have to extract the value this way to allow for a
+     host whose endian-ness is different from the target.  */
+  arm_mach = bfd_get_32 (abfd, buffer);
+
+  if (arm_mach == bfd_get_mach (abfd))
+    return;
+
+  bfd_put_32 (abfd, bfd_get_mach (abfd), buffer);
+
+  if (! bfd_set_section_contents (abfd, arm_arch_section, buffer,
+				  (file_ptr) 0, sizeof buffer))
+    (*_bfd_error_handler)
+      (_("warning: unable to update contents of %s section in %s"),
+       ARM_NOTE_SECTION, bfd_get_filename (abfd));
+
+  return;
+}
+
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
 #define ELF_MAXPAGESIZE			0x8000
@@ -3685,6 +3796,8 @@ elf32_arm_reloc_type_class (rela)
 #define elf_backend_post_process_headers	elf32_arm_post_process_headers
 #define elf_backend_reloc_type_class		elf32_arm_reloc_type_class
 #define elf_backend_object_p			elf32_arm_object_p
+#define elf_backend_section_flags		elf32_arm_section_flags
+#define elf_backend_final_write_processing      elf32_arm_final_write_processing
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_plt_readonly    1

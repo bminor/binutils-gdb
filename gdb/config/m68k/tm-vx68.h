@@ -39,8 +39,8 @@
    If our current frame pointer is zero, we're at the top; else read out
    the saved FP from memory pointed to by the current FP.  */
 
-#undef	FRAME_CHAIN
-#define FRAME_CHAIN(thisframe) ((thisframe)->frame? read_memory_integer ((thisframe)->frame, 4): 0)
+#undef	DEPRECATED_FRAME_CHAIN
+#define DEPRECATED_FRAME_CHAIN(thisframe) ((thisframe)->frame? read_memory_integer ((thisframe)->frame, 4): 0)
 
 /* FIXME, Longjmp information stolen from Sun-3 config.  Dunno if right.  */
 /* Offsets (in target ints) into jmp_buf.  Not defined by Sun, but at least

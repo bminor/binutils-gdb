@@ -94,6 +94,7 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 * Testsuite::
 * Hints::
 
+* GDB Observers::  @value{GDBN} Currently available observers
 * GNU Free Documentation License::  The license for this documentation
 * Index::
 @end menu
@@ -252,9 +253,9 @@ if it is defined; that is where you should use the @code{FP_REGNUM}
 value, if your frames are nonstandard.)
 
 @cindex frame chain
-Given a @value{GDBN} frame, define @code{FRAME_CHAIN} to determine the
-address of the calling function's frame.  This will be used to create a
-new @value{GDBN} frame struct, and then
+Given a @value{GDBN} frame, define @code{DEPRECATED_FRAME_CHAIN} to
+determine the address of the calling function's frame.  This will be
+used to create a new @value{GDBN} frame struct, and then
 @code{DEPRECATED_INIT_EXTRA_FRAME_INFO} and
 @code{DEPRECATED_INIT_FRAME_PC} will be called for the new frame.
 
@@ -695,6 +696,29 @@ always sets watchpoints to be locally enabled, since global
 watchpoints might interfere with the underlying OS and are probably
 unavailable in many platforms.
 @end enumerate
+
+@section Observing changes in @value{GDBN} internals
+@cindex observer pattern interface
+@cindex notifications about changes in internals
+
+In order to function properly, several modules need to be notified when
+some changes occur in the @value{GDBN} internals.  Traditionally, these
+modules have relied on several paradigms, the most common ones being
+hooks and gdb-events.  Unfortunately, none of these paradigms was
+versatile enough to become the standard notification mechanism in
+@value{GDBN}.  The fact that they only supported one ``client'' was also
+a strong limitation.
+
+A new paradigm, based on the Observer pattern of the @cite{Design
+Patterns} book, has therefore been implemented.  The goal was to provide
+a new interface overcoming the issues with the notification mechanisms
+previously available.  This new interface needed to be strongly typed,
+easy to extend, and versatile enough to be used as the standard
+interface when adding new notifications.
+
+See @ref{GDB Observers} for a brief description of the observers
+currently implemented in GDB. The rationale for the current
+implementation is also briefly discussed.
 
 @node User Interface
 
@@ -3088,17 +3112,11 @@ A static initializer for @code{CALL_DUMMY_WORDS}.  Deprecated.
 @findex CALL_DUMMY_LOCATION
 See the file @file{inferior.h}.
 
-@item CALL_DUMMY_STACK_ADJUST
-@findex CALL_DUMMY_STACK_ADJUST
-Stack adjustment needed when performing an inferior function call.
-
-Should be deprecated in favor of something like @code{STACK_ALIGN}.
-
-@item CALL_DUMMY_STACK_ADJUST_P
-@findex CALL_DUMMY_STACK_ADJUST_P
-Predicate for use of @code{CALL_DUMMY_STACK_ADJUST}.
-
-Should be deprecated in favor of something like @code{STACK_ALIGN}.
+@item DEPRECATED_CALL_DUMMY_STACK_ADJUST
+@findex DEPRECATED_CALL_DUMMY_STACK_ADJUST
+Stack adjustment needed when performing an inferior function call.  This
+function is no longer needed.  @xref{PUSH_ARGUMENTS}, which can handle
+all alignment directly.
 
 @item CANNOT_FETCH_REGISTER (@var{regno})
 @findex CANNOT_FETCH_REGISTER
@@ -3239,12 +3257,12 @@ By default, no frame based stack alignment is performed.
 @findex FRAME_ARGS_ADDRESS_CORRECT
 See @file{stack.c}.
 
-@item FRAME_CHAIN(@var{frame})
-@findex FRAME_CHAIN
+@item DEPRECATED_FRAME_CHAIN(@var{frame})
+@findex DEPRECATED_FRAME_CHAIN
 Given @var{frame}, return a pointer to the calling frame.
 
-@item FRAME_CHAIN_VALID(@var{chain}, @var{thisframe})
-@findex FRAME_CHAIN_VALID
+@item DEPRECATED_FRAME_CHAIN_VALID(@var{chain}, @var{thisframe})
+@findex DEPRECATED_FRAME_CHAIN_VALID
 Define this to be an expression that returns zero if the given frame is an
 outermost frame, with no caller, and nonzero otherwise.  Most normal
 situations can be handled without defining this macro, including @code{NULL}
@@ -3687,6 +3705,7 @@ method has been superseeded by generic code.
 
 @item PUSH_ARGUMENTS (@var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
 @findex PUSH_ARGUMENTS
+@anchor{PUSH_ARGUMENTS}
 Define this to push arguments onto the stack for inferior function
 call.  Returns the updated stack pointer value.
 
@@ -6595,6 +6614,7 @@ is so old that it has never been converted to use BFD.  Now that's old!
 
 @end table
 
+@include observer.texi
 @include fdl.texi
 
 @node Index

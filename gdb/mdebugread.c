@@ -916,9 +916,13 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
                    method whose name is identical to the class name
                    (in particular constructor method names are different
                    from the class name).  There is therefore no risk that
-                   this check stops the count on the StEnd of a method.  */
-                if (strcmp (debug_info->ss + cur_fdr->issBase + tsym.iss,
-                            name) == 0)
+                   this check stops the count on the StEnd of a method.
+		   
+		   Also, assume that we're really at the end when tsym.iss
+		   is 0 (issNull).  */
+                if (tsym.iss == issNull
+		    || strcmp (debug_info->ss + cur_fdr->issBase + tsym.iss,
+                               name) == 0)
                   goto end_of_fields;
                 break;
 

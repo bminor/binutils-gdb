@@ -1125,7 +1125,6 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
@@ -1137,13 +1136,13 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Frames:  */
 
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, mcore_init_extra_frame_info);
-  set_gdbarch_frame_chain (gdbarch, mcore_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, mcore_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, mcore_frame_init_saved_regs);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, mcore_frame_saved_pc);
   set_gdbarch_deprecated_store_return_value (gdbarch, mcore_store_return_value);
   set_gdbarch_deprecated_extract_return_value (gdbarch, 
 					       mcore_extract_return_value);
-  set_gdbarch_store_struct_return (gdbarch, mcore_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, mcore_store_struct_return);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 
 						       mcore_extract_struct_value_address);
   set_gdbarch_skip_prologue (gdbarch, mcore_skip_prologue);

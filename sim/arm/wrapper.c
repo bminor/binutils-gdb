@@ -59,6 +59,38 @@ static int big_endian;
 
 int stop_simulator;
 
+/* Cirrus DSP registers.
+
+   We need to define these registers outside of maverick.c because
+   maverick.c might not be linked in unless --target=arm9e-* in which
+   case wrapper.c will not compile because it tries to access Cirrus
+   registers.  This should all go away once we get the Cirrus and ARM
+   Coprocessor to coexist in armcopro.c-- aldyh.  */
+
+struct maverick_regs
+{
+  union
+  {
+    int i;
+    float f;
+  } upper;
+  
+  union
+  {
+    int i;
+    float f;
+  } lower;
+};
+
+union maverick_acc_regs
+{
+  long double ld;		/* Acc registers are 72-bits.  */
+};
+
+struct maverick_regs     DSPregs[16];
+union maverick_acc_regs  DSPacc[4];
+ARMword DSPsc;
+
 static void
 init ()
 {
@@ -71,7 +103,6 @@ init ()
       state->bigendSig = (big_endian ? HIGH : LOW);
       ARMul_MemoryInit (state, mem_size);
       ARMul_OSInit (state);
-      ARMul_CoProInit (state);
       state->verbose = verbosity;
       done = 1;
     }
@@ -234,6 +265,10 @@ sim_create_inferior (sd, abfd, argv, env)
 	 32bit mode.  */
     case bfd_mach_arm_XScale:
       ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_XScale_Prop);
+      break;
+
+    case bfd_mach_arm_ep9312:
+      ARMul_SelectProcessor (state, ARM_v4_Prop | ARM_ep9312_Prop);
       break;
 
     case bfd_mach_arm_5:
@@ -422,6 +457,30 @@ sim_store_register (sd, rn, memory, length)
       ARMul_CPSRAltered (state);
       break;
 
+    case SIM_ARM_MAVERIC_COP0R0_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R1_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R2_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R3_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R4_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R5_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R6_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R7_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R8_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R9_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R10_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R11_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R12_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R13_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R14_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R15_REGNUM:
+      memcpy (& DSPregs [rn - SIM_ARM_MAVERIC_COP0R0_REGNUM],
+	      memory, sizeof (struct maverick_regs));
+      return sizeof (struct maverick_regs);
+
+    case SIM_ARM_MAVERIC_DSPSC_REGNUM:
+      memcpy (&DSPsc, memory, sizeof DSPsc);
+      return sizeof DSPsc;
+
     default:
       return 0;
     }
@@ -476,6 +535,30 @@ sim_fetch_register (sd, rn, memory, length)
     case SIM_ARM_PS_REGNUM:
       regval = ARMul_GetCPSR (state);
       break;
+
+    case SIM_ARM_MAVERIC_COP0R0_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R1_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R2_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R3_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R4_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R5_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R6_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R7_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R8_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R9_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R10_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R11_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R12_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R13_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R14_REGNUM:
+    case SIM_ARM_MAVERIC_COP0R15_REGNUM:
+      memcpy (memory, & DSPregs [rn - SIM_ARM_MAVERIC_COP0R0_REGNUM],
+	      sizeof (struct maverick_regs));
+      return sizeof (struct maverick_regs);
+
+    case SIM_ARM_MAVERIC_DSPSC_REGNUM:
+      memcpy (memory, & DSPsc, sizeof DSPsc);
+      return sizeof DSPsc;
 
     default:
       return 0;

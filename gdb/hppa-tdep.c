@@ -32,6 +32,7 @@
 #include "completer.h"
 #include "language.h"
 #include "osabi.h"
+#include "gdb_assert.h"
 
 /* For argument passing to the inferior */
 #include "symtab.h"
@@ -164,7 +165,7 @@ CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
 CORE_ADDR hppa_frame_args_address (struct frame_info *fi);
 CORE_ADDR hppa_frame_locals_address (struct frame_info *fi);
 int hppa_frame_num_args (struct frame_info *frame);
-void hppa_push_dummy_frame (struct inferior_status *inf_status);
+void hppa_push_dummy_frame (void);
 void hppa_pop_frame (void);
 CORE_ADDR hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
                                int nargs, struct value **args,
@@ -1068,9 +1069,10 @@ hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame)
   if (frame->next && !fromleaf)
     return;
 
-  /* If the next frame represents a frameless function invocation
-     then we have to do some adjustments that are normally done by
-     FRAME_CHAIN.  (FRAME_CHAIN is not called in this case.)  */
+  /* If the next frame represents a frameless function invocation then
+     we have to do some adjustments that are normally done by
+     DEPRECATED_FRAME_CHAIN.  (DEPRECATED_FRAME_CHAIN is not called in
+     this case.)  */
   if (fromleaf)
     {
       /* Find the framesize of *this* frame without peeking at the PC
@@ -1425,45 +1427,28 @@ hppa_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
   return 0;
 }
 
-/*
-   These functions deal with saving and restoring register state
-   around a function call in the inferior. They keep the stack
-   double-word aligned; eventually, on an hp700, the stack will have
-   to be aligned to a 64-byte boundary. */
+/* These functions deal with saving and restoring register state
+   around a function call in the inferior.  They keep the stack
+   double-word aligned;  eventually, on an hp700, the stack will have
+   to be aligned to a 64-byte boundary.  */
 
 void
-hppa_push_dummy_frame (struct inferior_status *inf_status)
+hppa_push_dummy_frame (void)
 {
   CORE_ADDR sp, pc, pcspace;
   register int regnum;
   CORE_ADDR int_buffer;
   double freg_buffer;
 
-  /* Oh, what a hack.  If we're trying to perform an inferior call
-     while the inferior is asleep, we have to make sure to clear
-     the "in system call" bit in the flag register (the call will
-     start after the syscall returns, so we're no longer in the system
-     call!)  This state is kept in "inf_status", change it there.
-
-     We also need a number of horrid hacks to deal with lossage in the
-     PC queue registers (apparently they're not valid when the in syscall
-     bit is set).  */
   pc = hppa_target_read_pc (inferior_ptid);
   int_buffer = read_register (FLAGS_REGNUM);
   if (int_buffer & 0x2)
     {
-      unsigned int sid;
-      int_buffer &= ~0x2;
-      write_inferior_status_register (inf_status, 0, int_buffer);
-      write_inferior_status_register (inf_status, PCOQ_HEAD_REGNUM, pc + 0);
-      write_inferior_status_register (inf_status, PCOQ_TAIL_REGNUM, pc + 4);
-      sid = (pc >> 30) & 0x3;
+      const unsigned int sid = (pc >> 30) & 0x3;
       if (sid == 0)
 	pcspace = read_register (SR4_REGNUM);
       else
 	pcspace = read_register (SR4_REGNUM + 4 + sid);
-      write_inferior_status_register (inf_status, PCSQ_HEAD_REGNUM, pcspace);
-      write_inferior_status_register (inf_status, PCSQ_TAIL_REGNUM, pcspace);
     }
   else
     pcspace = read_register (PCSQ_HEAD_REGNUM);
@@ -4982,7 +4967,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_saved_pc_after_call (gdbarch, hppa_saved_pc_after_call);
   set_gdbarch_inner_than (gdbarch, hppa_inner_than);
   set_gdbarch_stack_align (gdbarch, hppa_stack_align);
-  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_num_regs (gdbarch, hppa_num_regs);
@@ -4998,7 +4982,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_register_virtual_type (gdbarch, hppa_register_virtual_type);
-  set_gdbarch_store_struct_return (gdbarch, hppa_store_struct_return);
+  set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch,
                                                hppa_extract_return_value);
   set_gdbarch_use_struct_convention (gdbarch, hppa_use_struct_convention);
@@ -5007,8 +4991,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     (gdbarch, hppa_extract_struct_value_address);
   set_gdbarch_cannot_store_register (gdbarch, hppa_cannot_store_register);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, hppa_init_extra_frame_info);
-  set_gdbarch_frame_chain (gdbarch, hppa_frame_chain);
-  set_gdbarch_frame_chain_valid (gdbarch, hppa_frame_chain_valid);
+  set_gdbarch_deprecated_frame_chain (gdbarch, hppa_frame_chain);
+  set_gdbarch_deprecated_frame_chain_valid (gdbarch, hppa_frame_chain_valid);
   set_gdbarch_frameless_function_invocation
     (gdbarch, hppa_frameless_function_invocation);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
@@ -5016,7 +5000,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_locals_address (gdbarch, hppa_frame_locals_address);
   set_gdbarch_frame_num_args (gdbarch, hppa_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  /* set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);  */
+  set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);
   set_gdbarch_call_dummy_length (gdbarch, INSTRUCTION_SIZE * 28);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);

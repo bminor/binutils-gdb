@@ -2240,6 +2240,25 @@ coff_arm_merge_private_bfd_data (ibfd, obfd)
   if (ibfd == obfd)
     return TRUE;
 
+  if (bfd_get_mach (obfd) && bfd_get_mach (obfd) != bfd_get_mach (ibfd))
+    {
+      /* For now, allow an output file type of 'xscale' if the
+	 input file type is 'iWMMXt'.  This means that we will
+	 not have to build an entire iWMMXt enabled set of libraries
+	 just to test a iWMMXt enabled binary.  Change the output
+	 type to iWMMXt though.  Similarly allow 'xscale' binaries
+         to be linked into a 'iWMMXt' output binary.  */
+      if (   bfd_get_mach (obfd) == bfd_mach_arm_XScale
+	  && bfd_get_mach (ibfd) == bfd_mach_arm_iWMMXt)
+	bfd_set_arch_mach (obfd, bfd_get_arch (obfd), bfd_mach_arm_iWMMXt);
+      else if (   bfd_get_mach (ibfd) != bfd_mach_arm_XScale
+	       || bfd_get_mach (obfd) != bfd_mach_arm_iWMMXt)
+	{
+	  bfd_set_error (bfd_error_wrong_format);
+	  return FALSE;
+	}
+    }
+
   /* If the two formats are different we cannot merge anything.
      This is not an error, since it is permissable to change the
      input and output formats.  */
@@ -2583,6 +2602,44 @@ coff_arm_final_link_postscript (abfd, pfinfo)
 
       globals->bfd_of_glue_owner->output_has_begun = TRUE;
     }
+
+  {
+    asection * arm_arch_section;
+
+    /* Look for a .note section.  If one is present check
+       the machine number encoded in it, and set it to the current
+       machine number if it is different.  This allows XScale and
+       iWMMXt binaries to be merged and the resulting output to be set
+       to iWMMXt, even if the first input file had an XScale .note.  */
+
+    arm_arch_section = bfd_get_section_by_name (abfd, ".note");
+
+    if (arm_arch_section != NULL)
+      {
+	char buffer [4];
+
+	if (bfd_get_section_contents (abfd, arm_arch_section, buffer,
+					(file_ptr) 0, sizeof buffer))
+	  {
+	    unsigned long arm_mach;
+
+	    /* We have to extract the value this way to allow for a
+	       host whose endian-ness is different from the target.  */
+	    arm_mach = bfd_get_32 (abfd, buffer);
+  
+	    if (arm_mach != bfd_get_mach (abfd))
+	      {
+		bfd_put_32 (abfd, bfd_get_mach (abfd), buffer);
+
+		if (! bfd_set_section_contents (abfd, arm_arch_section, buffer,
+						(file_ptr) 0, sizeof buffer))
+		  (*_bfd_error_handler)
+		    (_("warning: unable to update contents of .note section in %s"),
+		     bfd_get_filename (abfd));
+	      }
+	  }
+      }
+  }
 
   return TRUE;
 }

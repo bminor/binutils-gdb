@@ -432,9 +432,9 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 CORE_ADDR
 sparc_frame_chain (struct frame_info *frame)
 {
-  /* Value that will cause FRAME_CHAIN_VALID to not worry about the chain
-     value.  If it really is zero, we detect it later in
-     sparc_init_prev_frame.
+  /* Value that will cause DEPRECATED_FRAME_CHAIN_VALID to not worry
+     about the chain value.  If it really is zero, we detect it later
+     in sparc_init_prev_frame.
      
      Note:  kevinb/2003-02-18:  The constant 1 used to be returned
      here, but, after some recent changes to frame_chain_valid(),
@@ -2249,8 +2249,8 @@ sparc32_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     }
 
   /* Make room for the arguments on the stack.  */
-  accumulate_size += CALL_DUMMY_STACK_ADJUST;
-  sp = ((sp - accumulate_size) & ~7) + CALL_DUMMY_STACK_ADJUST;
+  accumulate_size += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
+  sp = ((sp - accumulate_size) & ~7) + DEPRECATED_CALL_DUMMY_STACK_ADJUST;
 
   /* `Push' arguments on the stack.  */
   for (i = 0, oregnum = 0, m_arg = sparc_args; 
@@ -3139,7 +3139,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, memory_breakpoint_from_pc);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 1);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sparc_extract_struct_value_address);
@@ -3147,7 +3146,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_fp_regnum (gdbarch, SPARC_FP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, SPARC_FP0_REGNUM);
-  set_gdbarch_frame_chain (gdbarch, sparc_frame_chain);
+  set_gdbarch_deprecated_frame_chain (gdbarch, sparc_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, sparc_frame_saved_pc);
@@ -3252,7 +3251,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_length (gdbarch, 0);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
 #endif
-      set_gdbarch_call_dummy_stack_adjust (gdbarch, 68);
+      set_gdbarch_deprecated_call_dummy_stack_adjust (gdbarch, 68);
       set_gdbarch_call_dummy_start_offset (gdbarch, 0);
       set_gdbarch_frame_args_skip (gdbarch, 68);
       set_gdbarch_function_start_offset (gdbarch, 0);
@@ -3276,7 +3275,8 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
 #endif
       set_gdbarch_stack_align (gdbarch, sparc32_stack_align);
-      set_gdbarch_store_struct_return (gdbarch, sparc32_store_struct_return);
+      set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);
+      set_gdbarch_deprecated_store_struct_return (gdbarch, sparc32_store_struct_return);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 generic_use_struct_convention);
       set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
@@ -3308,7 +3308,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_start_offset (gdbarch, 0);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
 #endif
-      set_gdbarch_call_dummy_stack_adjust (gdbarch, 128);
+      set_gdbarch_deprecated_call_dummy_stack_adjust (gdbarch, 128);
       set_gdbarch_frame_args_skip (gdbarch, 136);
       set_gdbarch_function_start_offset (gdbarch, 0);
       set_gdbarch_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
@@ -3333,7 +3333,8 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
 #endif
       set_gdbarch_stack_align (gdbarch, sparc64_stack_align);
-      set_gdbarch_store_struct_return (gdbarch, sparc64_store_struct_return);
+      set_gdbarch_deprecated_extra_stack_alignment_needed (gdbarch, 1);
+      set_gdbarch_deprecated_store_struct_return (gdbarch, sparc64_store_struct_return);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 sparc64_use_struct_convention);
       set_gdbarch_write_sp (gdbarch, sparc64_write_sp);

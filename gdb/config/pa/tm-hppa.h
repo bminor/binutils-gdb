@@ -116,10 +116,6 @@ extern CORE_ADDR hppa_stack_align (CORE_ADDR sp);
 #define STACK_ALIGN(sp) hppa_stack_align (sp)
 #endif
 
-#if !GDB_MULTI_ARCH
-#define EXTRA_STACK_ALIGNMENT_NEEDED 0
-#endif
-
 /* Sequence of bytes for breakpoint instruction.  */
 
 #define BREAKPOINT {0x00, 0x01, 0x00, 0x04}
@@ -390,21 +386,21 @@ extern void hppa_init_extra_frame_info (int, struct frame_info *);
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
 
-/* FRAME_CHAIN takes a frame's nominal address and produces the
-   frame's chain-pointer.  */
+/* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and produces
+   the frame's chain-pointer.  */
 
 /* In the case of the PA-RISC, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's
    address (previous FP).  */
 
 #if !GDB_MULTI_ARCH
-#define FRAME_CHAIN(thisframe) hppa_frame_chain (thisframe)
+#define DEPRECATED_FRAME_CHAIN(thisframe) hppa_frame_chain (thisframe)
 extern CORE_ADDR hppa_frame_chain (struct frame_info *);
 #endif
 
 #if !GDB_MULTI_ARCH
 extern int hppa_frame_chain_valid (CORE_ADDR, struct frame_info *);
-#define FRAME_CHAIN_VALID(chain, thisframe) hppa_frame_chain_valid (chain, thisframe)
+#define DEPRECATED_FRAME_CHAIN_VALID(chain, thisframe) hppa_frame_chain_valid (chain, thisframe)
 #endif
 
 /* Define other aspects of the stack frame.  */
@@ -450,15 +446,10 @@ extern void hppa_frame_find_saved_regs (struct frame_info *,
 
 /* Things needed for making the inferior call functions.  */
 
-/* Push an empty stack frame, to record the current PC, etc. */
-
-/* FIXME: brobecker 2002-12-26.  This macro definition takes advantage
-   of the fact that DEPRECATED_PUSH_DUMMY_FRAME is called within a
-   function where a variable inf_status of type struct inferior_status
-   * is defined.  Ugh!  Until this is fixed, we will not be able to
-   move to multiarch partial.  */
-#define DEPRECATED_PUSH_DUMMY_FRAME hppa_push_dummy_frame (inf_status)
-extern void hppa_push_dummy_frame (struct inferior_status *);
+#if !GDB_MULTI_ARCH
+#define DEPRECATED_PUSH_DUMMY_FRAME hppa_push_dummy_frame ()
+extern void hppa_push_dummy_frame (void);
+#endif
 
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */

@@ -472,6 +472,7 @@ const struct language_defn f_language_defn =
   f_print_type,			/* Print a type using appropriate syntax */
   f_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* FIXME */
+  NULL,				/* Language specific skip_trampoline */
   {"", "", "", ""},		/* Binary format info */
   {"0%o", "0", "o", ""},	/* Octal format info */
   {"%d", "", "d", ""},		/* Decimal format info */

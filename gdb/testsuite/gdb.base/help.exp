@@ -547,7 +547,7 @@ gdb_test "help support" "Support facilities\.\[\r\n\]+List of commands:.*\[\r\n\
 # test help symbol-file
 gdb_test "help symbol-file" "Load symbol table from executable file FILE\.\[\r\n\]+The `file' command can also load symbol tables, as well as setting the file\[\r\n\]+to execute\." "help symbol-file"
 # test help target child
-gdb_test "help target child" "Unix child process \\(started by the \"run\" command\\)\.|Undefined target command: \"child\"\.  Try \"help target\"\." "help target child"
+gdb_test "help target child" "(Unix|Win32) child process \\(started by the \"run\" command\\)\.|Undefined target command: \"child\"\.  Try \"help target\"\." "help target child"
 # test help target procfs
 gdb_test "help target procfs" "Unix /proc child process \\(started by the \"run\" command\\)\.|Undefined target command: \"procfs\"\.  Try \"help target\"\." "help target procfs (procfs version)"
 # test help target core
