@@ -2441,6 +2441,8 @@ print_insn (CORE_ADDR memaddr, struct ui_file *stream)
     TARGET_PRINT_INSN_INFO->mach = TARGET_ARCHITECTURE->mach;
   /* else: should set .mach=0 but some disassemblers don't grok this */
 
+  TARGET_PRINT_INSN_INFO->stream = stream;
+
   return TARGET_PRINT_INSN (memaddr, TARGET_PRINT_INSN_INFO);
 }
 
