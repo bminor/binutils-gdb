@@ -1212,7 +1212,7 @@ dwarf2_finish ()
   struct line_seg *s;
 
   /* If no debug information was recorded, nothing to do.  */
-  if (all_segs == NULL)
+  if (all_segs == NULL && files_in_use <= 1)
     return;
 
   /* Calculate the size of an address for the target machine.  */
@@ -1239,7 +1239,7 @@ dwarf2_finish ()
 
   /* If this is assembler generated line info, we need .debug_info
      and .debug_abbrev sections as well.  */
-  if (debug_type == DEBUG_DWARF2)
+  if (all_segs != NULL && debug_type == DEBUG_DWARF2)
     {
       segT abbrev_seg;
       segT info_seg;

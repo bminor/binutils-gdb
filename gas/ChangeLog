@@ -1,3 +1,8 @@
+2001-06-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2dbg.c (dwarf2_finish): Output file info even when no
+	line info.
+
 2001-06-13  Philip Blundell  <philb@gnu.org>
 
 	* config/tc-arm.c (thumb_shift): Improve wording of error message.
