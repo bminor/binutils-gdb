@@ -1260,13 +1260,12 @@ md_assemble (line)
     if ((i.tm.opcode_modifier & IsString) != 0 && i.mem_operands != 0)
       {
 	int mem_op = (i.types[0] & Mem) ? 0 : 1;
-	if ((i.tm.operand_types[mem_op+0] & EsSeg) != 0)
+	if ((i.tm.operand_types[mem_op] & EsSeg) != 0)
 	  {
 	    if (i.seg[0] != (seg_entry *) 0 && i.seg[0] != (seg_entry *) &es)
 	      {
-		as_bad ("`%s' %s operand must use `%%es' segment",
-			i.tm.name,
-			ordinal_names[mem_op+0]);
+		as_bad ("`%s' operand %d must use `%%es' segment",
+			i.tm.name, mem_op);
 		return;
 	      }
 	    /* There's only ever one segment override allowed per instruction.
@@ -1275,13 +1274,12 @@ md_assemble (line)
 	       instructions store it, allowing common code.  */
 	    i.seg[0] = i.seg[1];
 	  }
-	else if ((i.tm.operand_types[mem_op+1] & EsSeg) != 0)
+	else if ((i.tm.operand_types[mem_op + 1] & EsSeg) != 0)
 	  {
 	    if (i.seg[1] != (seg_entry *) 0 && i.seg[1] != (seg_entry *) &es)
 	      {
-		as_bad ("`%s' %s operand must use `%%es' segment",
-			i.tm.name,
-			ordinal_names[mem_op+1]);
+		as_bad ("`%s' operand %d must use `%%es' segment",
+			i.tm.name, mem_op + 1);
 		return;
 	      }
 	  }
@@ -2622,8 +2620,8 @@ i386_operand (operand_string)
     }
   else
     {				/* it's not a memory operand; argh! */
-      as_bad (_("invalid char %s begining %s operand `%s'"),
-	      output_invalid (*op_string), ordinal_names[this_operand],
+      as_bad (_("invalid char %s begining operand %d `%s'"),
+	      output_invalid (*op_string), this_operand,
 	      op_string);
       return 0;
     }

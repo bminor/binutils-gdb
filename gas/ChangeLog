@@ -1,3 +1,9 @@
+Wed Apr 22 14:52:36 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (md_assemble): Print operand number rather than
+	using ordinal_names.
+	(i386_operand): Likewise.
+
 Tue Apr 21 22:34:25 1998  Tom Tromey  <tromey@scribbles.cygnus.com>
 
 	* Makefile.am (INTLLIBS): Define to work around apparent automake
