@@ -7437,6 +7437,7 @@ language}.
 * Show::                        Displaying the language
 * Checks::                      Type and range checks
 * Support::                     Supported languages
+* Unsupported languages::       Unsupported languages
 @end menu
 
 @node Setting
@@ -8842,6 +8843,22 @@ address can be specified by an integral constant, the construct
 @cindex @code{#} in Modula-2
 In @value{GDBN} scripts, the Modula-2 inequality operator @code{#} is
 interpreted as the beginning of a comment.  Use @code{<>} instead.
+
+@node Unsupported languages
+@section Unsupported languages
+
+@cindex unsupported languages
+@cindex minimal language
+In addition to the other fully-supported programming languages,
+@value{GDBN} also provides a pseudo-language, called @code{minimal}.
+It does not represent a real programming language, but provides a set
+of capabilities close to what the C or assembly languages provide.
+This should allow most simple operations to be performed while debugging
+an application that uses a language currently not supported by @value{GDBN}.
+
+If the language is set to @code{auto}, @value{GDBN} will automatically
+select this language if the current frame corresponds to an unsupported
+language.
 
 @node Symbols
 @chapter Examining the Symbol Table
