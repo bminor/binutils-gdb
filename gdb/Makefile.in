@@ -1402,7 +1402,7 @@ ALLDEPFILES = \
 	ppc-sysv-tdep.o ppc-linux-nat.c ppc-linux-tdep.c \
 	ppcnbsd-nat.o ppcnbsd-tdep.o \
 	procfs.c \
-	remote-array.c remote-e7000.c \
+	remote-e7000.c \
 	remote-hms.c remote-mips.c \
 	remote-rdp.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
@@ -2107,9 +2107,6 @@ regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
 	$(gdb_string_h) $(gdbcmd_h)
 reggroups.o: reggroups.c $(defs_h) $(reggroups_h) $(gdbtypes_h) \
 	$(gdb_assert_h) $(regcache_h) $(command_h) $(gdbcmd_h)
-remote-array.o: remote-array.c $(defs_h) $(gdbcore_h) $(target_h) \
-	$(gdb_string_h) $(command_h) $(serial_h) $(monitor_h) \
-	$(remote_utils_h) $(inferior_h) $(version_h) $(regcache_h)
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(gdbarch_h) \
 	$(inferior_h) $(target_h) $(value_h) $(command_h) $(gdb_string_h) \
 	$(gdbcmd_h) $(serial_h) $(remote_utils_h) $(symfile_h) $(regcache_h)

@@ -1,4 +1,16 @@
 2003-06-14  Andrew Cagney  <cagney@redhat.com>
+
+	* config/mips/embedl64.mt (TDEPFILES): Delete "remote-array.o".
+	* config/mips/embedl.mt (TDEPFILES): Delete "remote-array.o".
+	* config/mips/embed64.mt (TDEPFILES): Delete "remote-array.o".
+	* config/djgpp/fnchange.lst: Delete "remote-array.c".
+	* README: Delete reference to remote-array.
+	* Makefile.in (ALLDEPFILES): Remove "remote-array.c".
+	(remote-array.o): Delete target.
+	* config/mips/embed.mt (TDEPFILES): Delete "remote-array.o".
+	* remote-array.c: Delete file.
+
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
             Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbarch.sh (CONVERT_REGISTER_P): Add "type" parameter.
