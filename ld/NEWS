@@ -2,14 +2,17 @@
 
 Changes in version 2.10:
 
-* Added SORT to the linker script language to permit sorting sections by file
-  name or section name.
-
-* The -e option now accepts a number as well as a symbol name.
-
 * Added garbage collection of unused sections, enabled by --gc-sections. 
   It does require a bit of backend support; currently implemented are
   ppc-elf, mips-elf, and mn10300-elf.  Others will ignore the option.
+
+* Added SORT to the linker script language to permit sorting sections by file
+  name or section name.
+
+* Added EXTERN to the linker script language as an equivalent to the -u
+  command-line option.
+
+* The -e option now accepts a number as well as a symbol name.
 
 Changes in version 2.9:
 

@@ -1,3 +1,13 @@
+Fri Jul  3 14:19:06 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldgram.y (extern_name_list): Do not require symbols to be
+	separated by commas.
+	(ifile_p1): Add EXTERN.
+	* ldlex.l: Accept EXTERN in BOTH and SCRIPT mode as well as MRI
+	mode.
+	* ld.texinfo (Options): Mention that EXTERN is equivalent to -u.
+	(Miscellaneous Commands): Document EXTERN.
+
 Wed Jul  1 19:40:34 1998  Richard Henderson <rth@cygnus.com>
 
 	* ld.h (args_type): Add gc_sections.

@@ -626,12 +626,11 @@ options.  Multiple @samp{-T} options accumulate.
 @cindex undefined symbol
 @item -u @var{symbol}
 @itemx --undefined=@var{symbol}
-Force @var{symbol} to be entered in the output file as an undefined symbol.
-Doing this may, for example, trigger linking of additional modules from
-standard libraries.  @samp{-u} may be repeated with different option
-arguments to enter additional undefined symbols.
-@c Nice idea, but no such command: This option is equivalent
-@c to the @code{EXTERN} linker command.
+Force @var{symbol} to be entered in the output file as an undefined
+symbol.  Doing this may, for example, trigger linking of additional
+modules from standard libraries.  @samp{-u} may be repeated with
+different option arguments to enter additional undefined symbols.  This
+option is equivalent to the @code{EXTERN} linker script command.
 
 @kindex -v
 @kindex -V
@@ -1663,6 +1662,15 @@ command is also used to set the format for the output file.  @xref{BFD}.
 There are a few other linker scripts commands.
 
 @table @code
+@item EXTERN(@var{symbol} @var{symbol} @dots{})
+@kindex EXTERN
+@cindex undefined symbol in linker script
+Force @var{symbol} to be entered in the output file as an undefined
+symbol.  Doing this may, for example, trigger linking of additional
+modules from standard libraries.  You may list several @var{symbol}s for
+each @code{EXTERN}, and you may use @code{EXTERN} multiple times.  This
+command has the same effect as the @samp{-u} command-line option.
+
 @item FORCE_COMMON_ALLOCATION
 @kindex FORCE_COMMON_ALLOCATION
 @cindex common allocation in linker script

@@ -264,6 +264,8 @@ casesymlist:
 extern_name_list:
 	  NAME
 			{ ldlang_add_undef ($1); }
+	| extern_name_list NAME
+			{ ldlang_add_undef ($2); }
 	| extern_name_list ',' NAME
 			{ ldlang_add_undef ($3); }
 	;
@@ -325,6 +327,7 @@ ifile_p1:
 		{
 		  lang_add_nocrossref ($3);
 		}
+	|	EXTERN '(' extern_name_list ')'
 	;
 
 input_list:

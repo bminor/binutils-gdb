@@ -242,6 +242,7 @@ V_IDENTIFIER [*?.$_a-zA-Z][*?_a-zA-Z0-9]*
 <EXPRESSION,BOTH>"MAX"			{ RTOKEN(MAX); }
 <EXPRESSION,BOTH>"MIN"			{ RTOKEN(MIN); }
 <BOTH,SCRIPT>"ENTRY"			{ RTOKEN(ENTRY);}
+<BOTH,SCRIPT,MRI>"EXTERN"		{ RTOKEN(EXTERN);}
 <EXPRESSION,BOTH,SCRIPT>"NEXT"			{ RTOKEN(NEXT);}
 <EXPRESSION,BOTH,SCRIPT>"sizeof_headers"	{ RTOKEN(SIZEOF_HEADERS);}
 <EXPRESSION,BOTH,SCRIPT>"SIZEOF_HEADERS"	{ RTOKEN(SIZEOF_HEADERS);}
@@ -304,7 +305,6 @@ V_IDENTIFIER [*?.$_a-zA-Z][*?_a-zA-Z0-9]*
 <MRI>"NAME"                     { RTOKEN(NAMEWORD); }
 <MRI>"FORMAT"                   { RTOKEN(FORMAT); }
 <MRI>"CASE"                     { RTOKEN(CASE); }
-<MRI>"EXTERN"                   { RTOKEN(EXTERN); }
 <MRI>"START"                    { RTOKEN(START); }
 <MRI>"LIST".*                   { RTOKEN(LIST); /* LIST and ignore to end of line */ }
 <MRI>"SECT"			{ RTOKEN(SECT); }
