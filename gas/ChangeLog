@@ -2,6 +2,9 @@
 
 	* config/tc-sh.c: Fix formatting.
 	* config/tc-tic54x.c: Fix formatting.
+	* depend.c: Fix formatting.
+	* flonum-konst.c: Likewise.
+	* flonum-mult.c: Likewise.
 
 2000-07-07  Kazu Hirata <kazu@hxi.com>
 
