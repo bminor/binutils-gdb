@@ -1,3 +1,11 @@
+2003-04-10  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ld-mips-elf/elf-rel-got-n32.d,
+	ld-mips-elf/elf-rel-got-n64.d, ld-mips-elf/elf-rel-xgot-n32.d,
+	ld-mips-elf/elf-rel-xgot-n64.d: New.
+	* ld-mips-elf/mips-elf.exp (hasn32): Define as condition for
+	new tests to run.
+
 2003-04-04  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* ld-m68hc11/bug-1417.d: Update to take into account jsr->bsr relax.

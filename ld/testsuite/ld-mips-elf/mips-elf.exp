@@ -17,6 +17,7 @@
 #
 
 if { [istarget mips*-*-*] } then {
+    set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
 
     set elf [expr [istarget mips*-*-elf] || [istarget mips*-*-linux*] || \
 		  [istarget mips*-*-netbsd] || [istarget mips*-*-irix*]]
@@ -34,10 +35,17 @@ if { [istarget mips*-*-*] } then {
 	# Test multi-got link.
 	run_dump_test "multi-got-1"
  
-	run_dump_test "relax-jalr-n32"
-	run_dump_test "relax-jalr-n32-shared"
-	run_dump_test "relax-jalr-n64"
-	run_dump_test "relax-jalr-n64-shared"
+	if $has_newabi {
+	    run_dump_test "elf-rel-got-n32"
+	    run_dump_test "elf-rel-xgot-n32"
+	    run_dump_test "elf-rel-got-n64"
+	    run_dump_test "elf-rel-xgot-n64"
+
+	    run_dump_test "relax-jalr-n32"
+	    run_dump_test "relax-jalr-n32-shared"
+	    run_dump_test "relax-jalr-n64"
+	    run_dump_test "relax-jalr-n64-shared"
+	}
     }
 
     if { $linux_gnu } {
