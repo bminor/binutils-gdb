@@ -6734,8 +6734,8 @@ mips_elf_calculate_relocation (abfd,
   /* Calls from 16-bit code to 32-bit code and vice versa require the
      special jalx instruction.  */
   *require_jalxp = (!info->relocateable
-		    && (((r_type == R_MIPS16_26) != target_is_16_bit_code_p
-			 || ((r_type == R_MIPS_26) == target_is_16_bit_code_p))));
+                    && (((r_type == R_MIPS16_26) && !target_is_16_bit_code_p)
+                        || ((r_type == R_MIPS_26) && target_is_16_bit_code_p)));
 
   local_p = mips_elf_local_relocation_p (input_bfd, relocation,
 					 local_sections, true);
