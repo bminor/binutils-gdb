@@ -28,29 +28,6 @@
 #include "libbfd.h"
 #include "libaout.h"
 
-#if 0
-struct exe_header
-{
-  unsigned short magic;
-  unsigned short bytes_in_last_page;
-  unsigned short npages;	/* number of 512-byte "pages" including this header */
-  unsigned short nrelocs;
-  unsigned short header_paras;	/* number of 16-byte paragraphs in header */
-  unsigned short reserved;
-  unsigned short load_switch;
-  unsigned short ss_ofs;
-  unsigned short sp;
-  unsigned short checksum;
-  unsigned short ip;
-  unsigned short cs_ofs;
-  unsigned short reloc_ofs;
-  unsigned short reserved2;
-  unsigned short something1;
-  unsigned short something2;
-  unsigned short something3;
-};
-#endif
-
 #define EXE_MAGIC	0x5a4d
 #define EXE_LOAD_HIGH	0x0000
 #define EXE_LOAD_LOW	0xffff

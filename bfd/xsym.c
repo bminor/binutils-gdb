@@ -1367,21 +1367,6 @@ bfd_sym_print_modules_table_entry (abfd, f, entry)
     fprintf (f, ", child %lu", entry->mte_cmte_index);
   else
     fprintf (f, ", no child");
-
-#if 0
-  {
-    MTE bfd_sym_modules_table_entry pentry;
-
-    ret = bfd_sym_fetch_modules_table_entry (abfd, &pentry, entry->mte_parent);
-    if (ret < 0)
-      fprintf (f, " parent MTE %lu [INVALID]\n", entry->mte_parent);
-    else
-      fprintf (f, " parent MTE %lu \"%.*s\"\n",
-	       entry->mte_parent,
-	       bfd_sym_symbol_name (abfd, pentry.mte_nte_index)[0],
-	       &bfd_sym_symbol_name (abfd, pentry.mte_nte_index)[1]);
-  }
-#endif
 }
 
 void

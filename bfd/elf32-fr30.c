@@ -557,12 +557,6 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
 	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
-#if 0
-	  fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x\n",
-		   sec->name, name, sym->st_name,
-		   sec->output_section->vma, sec->output_offset,
-		   sym->st_value, rel->r_addend);
-#endif
 	}
       else
 	{

@@ -1656,26 +1656,6 @@ static const struct sh_opcode sh_opcode01[] =
   { 0x00ba, SETS1 | USESSP }			/* sts y1,rn */
 };
 
-/* These sixteen instructions can be handled with one table entry below.  */
-#if 0
-  { 0x0002, SETS1 | USESSP },			/* stc sr,rn */
-  { 0x0012, SETS1 | USESSP },			/* stc gbr,rn */
-  { 0x0022, SETS1 | USESSP },			/* stc vbr,rn */
-  { 0x0032, SETS1 | USESSP },			/* stc ssr,rn */
-  { 0x0042, SETS1 | USESSP },			/* stc spc,rn */
-  { 0x0052, SETS1 | USESSP },			/* stc mod,rn */
-  { 0x0062, SETS1 | USESSP },			/* stc rs,rn */
-  { 0x0072, SETS1 | USESSP },			/* stc re,rn */
-  { 0x0082, SETS1 | USESSP },			/* stc r0_bank,rn */
-  { 0x0092, SETS1 | USESSP },			/* stc r1_bank,rn */
-  { 0x00a2, SETS1 | USESSP },			/* stc r2_bank,rn */
-  { 0x00b2, SETS1 | USESSP },			/* stc r3_bank,rn */
-  { 0x00c2, SETS1 | USESSP },			/* stc r4_bank,rn */
-  { 0x00d2, SETS1 | USESSP },			/* stc r5_bank,rn */
-  { 0x00e2, SETS1 | USESSP },			/* stc r6_bank,rn */
-  { 0x00f2, SETS1 | USESSP }			/* stc r7_bank,rn */
-#endif
-
 static const struct sh_opcode sh_opcode02[] =
 {
   { 0x0002, SETS1 | USESSP },			/* stc <special_reg>,rn */
@@ -1806,44 +1786,6 @@ static const struct sh_opcode sh_opcode40[] =
   { 0x40b2, STORE | SETS1 | USES1 | USESSP },	/* sts.l y1,@-rn */
   { 0x40b6, LOAD | SETS1 | SETSSP | USES1 },	/* lds.l @rm+,y1 */
   { 0x40ba, SETSSP | USES1 }			/* lds.l rm,y1 */
-#if 0 /* These groups sixteen insns can be
-         handled with one table entry each below.  */
-  { 0x4003, STORE | SETS1 | USES1 | USESSP },	/* stc.l sr,@-rn */
-  { 0x4013, STORE | SETS1 | USES1 | USESSP },	/* stc.l gbr,@-rn */
-  { 0x4023, STORE | SETS1 | USES1 | USESSP },	/* stc.l vbr,@-rn */
-  { 0x4033, STORE | SETS1 | USES1 | USESSP },	/* stc.l ssr,@-rn */
-  { 0x4043, STORE | SETS1 | USES1 | USESSP },	/* stc.l spc,@-rn */
-  { 0x4053, STORE | SETS1 | USES1 | USESSP },	/* stc.l mod,@-rn */
-  { 0x4063, STORE | SETS1 | USES1 | USESSP },	/* stc.l rs,@-rn */
-  { 0x4073, STORE | SETS1 | USES1 | USESSP },	/* stc.l re,@-rn */
-  { 0x4083, STORE | SETS1 | USES1 | USESSP },	/* stc.l r0_bank,@-rn */
-  ..
-  { 0x40f3, STORE | SETS1 | USES1 | USESSP },	/* stc.l r7_bank,@-rn */
-
-  { 0x4007, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,sr */
-  { 0x4017, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,gbr */
-  { 0x4027, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,vbr */
-  { 0x4037, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,ssr */
-  { 0x4047, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,spc */
-  { 0x4057, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,mod */
-  { 0x4067, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,rs */
-  { 0x4077, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,re */
-  { 0x4087, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,r0_bank */
-  ..
-  { 0x40f7, LOAD | SETS1 | SETSSP | USES1 },	/* ldc.l @rm+,r7_bank */
-
-  { 0x400e, SETSSP | USES1 },			/* ldc rm,sr */
-  { 0x401e, SETSSP | USES1 },			/* ldc rm,gbr */
-  { 0x402e, SETSSP | USES1 },			/* ldc rm,vbr */
-  { 0x403e, SETSSP | USES1 },			/* ldc rm,ssr */
-  { 0x404e, SETSSP | USES1 },			/* ldc rm,spc */
-  { 0x405e, SETSSP | USES1 },			/* ldc rm,mod */
-  { 0x406e, SETSSP | USES1 },			/* ldc rm,rs */
-  { 0x407e, SETSSP | USES1 }			/* ldc rm,re */
-  { 0x408e, SETSSP | USES1 }			/* ldc rm,r0_bank */
-  ..
-  { 0x40fe, SETSSP | USES1 }			/* ldc rm,r7_bank */
-#endif
 };
 
 static const struct sh_opcode sh_opcode41[] =

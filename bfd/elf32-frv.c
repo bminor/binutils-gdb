@@ -846,62 +846,6 @@ static reloc_howto_type elf32_frv_rel_tlsoff_howto =
 
 
 
-/* Map BFD reloc types to FRV ELF reloc types.  */
-#if 0
-struct frv_reloc_map
-{
-  unsigned int bfd_reloc_val;
-  unsigned int frv_reloc_val;
-};
-
-static const struct frv_reloc_map frv_reloc_map [] =
-{
-  { BFD_RELOC_NONE,           R_FRV_NONE },
-  { BFD_RELOC_32,             R_FRV_32 },
-  { BFD_RELOC_FRV_LABEL16,    R_FRV_LABEL16 },
-  { BFD_RELOC_FRV_LABEL24,    R_FRV_LABEL24 },
-  { BFD_RELOC_FRV_LO16,       R_FRV_LO16 },
-  { BFD_RELOC_FRV_HI16,       R_FRV_HI16 },
-  { BFD_RELOC_FRV_GPREL12,    R_FRV_GPREL12 },
-  { BFD_RELOC_FRV_GPRELU12,   R_FRV_GPRELU12 },
-  { BFD_RELOC_FRV_GPREL32,    R_FRV_GPREL32 },
-  { BFD_RELOC_FRV_GPRELHI,    R_FRV_GPRELHI },
-  { BFD_RELOC_FRV_GPRELLO,    R_FRV_GPRELLO },
-  { BFD_RELOC_FRV_GOT12,      R_FRV_GOT12 },
-  { BFD_RELOC_FRV_GOTHI,      R_FRV_GOTHI },
-  { BFD_RELOC_FRV_GOTLO,      R_FRV_GOTLO },
-  { BFD_RELOC_FRV_FUNCDESC,   R_FRV_FUNCDESC },
-  { BFD_RELOC_FRV_FUNCDESC_GOT12, R_FRV_FUNCDESC_GOT12 },
-  { BFD_RELOC_FRV_FUNCDESC_GOTHI, R_FRV_FUNCDESC_GOTHI },
-  { BFD_RELOC_FRV_FUNCDESC_GOTLO, R_FRV_FUNCDESC_GOTLO },
-  { BFD_RELOC_FRV_FUNCDESC_VALUE, R_FRV_FUNCDESC_VALUE },
-  { BFD_RELOC_FRV_FUNCDESC_GOTOFF12, R_FRV_FUNCDESC_GOTOFF12 },
-  { BFD_RELOC_FRV_FUNCDESC_GOTOFFHI, R_FRV_FUNCDESC_GOTOFFHI },
-  { BFD_RELOC_FRV_FUNCDESC_GOTOFFLO, R_FRV_FUNCDESC_GOTOFFLO },
-  { BFD_RELOC_FRV_GOTOFF12,   R_FRV_GOTOFF12 },
-  { BFD_RELOC_FRV_GOTOFFHI,   R_FRV_GOTOFFHI },
-  { BFD_RELOC_FRV_GOTOFFLO,   R_FRV_GOTOFFLO },
-  { BFD_RELOC_FRV_GETTLSOFF,  R_FRV_GETTLSOFF },
-  { BFD_RELOC_FRV_TLSDESC_VALUE, R_FRV_TLSDESC_VALUE },
-  { BFD_RELOC_FRV_GOTTLSDESC12, R_FRV_GOTTLSDESC12 },
-  { BFD_RELOC_FRV_GOTTLSDESCHI, R_FRV_GOTTLSDESCHI },
-  { BFD_RELOC_FRV_GOTTLSDESCLO, R_FRV_GOTTLSDESCLO },
-  { BFD_RELOC_FRV_TLSMOFF12,  R_FRV_TLSMOFF12 },
-  { BFD_RELOC_FRV_TLSMOFFHI,  R_FRV_TLSMOFFHI },
-  { BFD_RELOC_FRV_TLSMOFFLO,  R_FRV_TLSMOFFLO },
-  { BFD_RELOC_FRV_GOTTLSOFF12, R_FRV_GOTTLSOFF12 },
-  { BFD_RELOC_FRV_GOTTLSOFFHI, R_FRV_GOTTLSOFFHI },
-  { BFD_RELOC_FRV_GOTTLSOFFLO, R_FRV_GOTTLSOFFLO },
-  { BFD_RELOC_FRV_TLSOFF,     R_FRV_TLSOFF },
-  { BFD_RELOC_FRV_TLSDESC_RELAX, R_FRV_TLSDESC_RELAX },
-  { BFD_RELOC_FRV_GETTLSOFF_RELAX, R_FRV_GETTLSOFF_RELAX },
-  { BFD_RELOC_FRV_TLSOFF_RELAX, R_FRV_TLSOFF_RELAX },
-  { BFD_RELOC_FRV_TLSMOFF,    R_FRV_TLSMOFF },
-  { BFD_RELOC_VTABLE_INHERIT, R_FRV_GNU_VTINHERIT },
-  { BFD_RELOC_VTABLE_ENTRY,   R_FRV_GNU_VTENTRY },
-};
-#endif
-
 extern const bfd_target bfd_elf32_frvfdpic_vec;
 #define IS_FDPIC(bfd) ((bfd)->xvec == &bfd_elf32_frvfdpic_vec)
 
@@ -1322,46 +1266,6 @@ frvfdpic_pic_merge_early_relocs_info (struct frvfdpic_relocs_info *e2,
   e2->gotoff |= e1->gotoff;
   e2->call |= e1->call;
   e2->sym |= e1->sym;
-
-#if 0
-  /* These are set in _frvfdpic_count_got_plt_entries() or later, and this
-     function is only called in _frvfdpic_resolve_final_relocs_info(), that
-     runs just before it, so we don't have to worry about the fields
-     below.  */
-
-  e2->plt |= e1->plt;
-  e2->privfd |= e1->privfd;
-  e2->lazyplt |= e1->lazyplt;
-  e2->done |= e1->done;
-
-  e2->relocs32 += e1->relocs32;
-  e2->relocsfd += e1->relocsfd;
-  e2->relocsfdv += e1->relocsfdv;
-  e2->relocstlsd += e1->relocstlsd;
-  e2->relocstlsoff += e1->relocstlsoff;
-  e2->fixups += e1->fixups;
-  e2->dynrelocs += e1->dynrelocs;
-
-  if (abs (e1->got_entry) < abs (e2->got_entry))
-    e2->got_entry = e1->got_entry;
-  if (abs (e1->fdgot_entry) < abs (e2->fdgot_entry))
-    e2->fdgot_entry = e1->fdgot_entry;
-  if (abs (e1->fd_entry) < abs (e2->fd_entry))
-    e2->fd_entry = e1->fd_entry;
-
-  if (e1->plt_entry < e2->plt_entry)
-    e2->plt_entry = e1->plt_entry;
-  if (e1->lzplt_entry < e2->lzplt_entry)
-    e2->lzplt_entry = e1->lzplt_entry;
-
-  if (abs (e1->tlsoff_entry) < abs (e2->tlsoff_entry))
-    e2->tlsoff_entry = e1->tlsoff_entry;
-  if (abs (e1->tlsdesc_entry) < abs (e2->tlsdesc_entry))
-    e2->tlsdesc_entry = e1->tlsdesc_entry;
-
-  if (e1->tlsplt_entry < e2->tlsplt_entry)
-    t2->tlsplt_entry = t1->tlsplt_entry;
-#endif
 }
 
 /* Every block of 65535 lazy PLT entries shares a single call to the
@@ -3581,14 +3485,16 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    break;
 
-#if 0	    /* There's nothing to relax in these.  */
-	  case R_FRV_TLSDESC_VALUE:
-	  case R_FRV_TLSOFF:
-	  case R_FRV_TLSMOFF12:
-	  case R_FRV_TLSMOFFHI:
-	  case R_FRV_TLSMOFFLO:
-	  case R_FRV_TLSMOFF:
-#endif
+	    /*
+	      There's nothing to relax in these:
+	        R_FRV_TLSDESC_VALUE
+	        R_FRV_TLSOFF
+	        R_FRV_TLSMOFF12
+	        R_FRV_TLSMOFFHI
+	        R_FRV_TLSMOFFLO
+	        R_FRV_TLSMOFF
+	    */
+
 	  default:
 	    break;
 	  }
@@ -4018,8 +3924,8 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 
       if (check_segment[0] != check_segment[1] && IS_FDPIC (output_bfd))
 	{
-#if 1 /* If you take this out, remove the #error from fdpic-static-6.d
-	 in the ld testsuite.  */
+	  /* If you take this out, remove the #error from fdpic-static-6.d
+	     in the ld testsuite.  */
 	  /* This helps catch problems in GCC while we can't do more
 	     than static linking.  The idea is to test whether the
 	     input file basename is crt0.o only once.  */
@@ -4032,7 +3938,6 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 			     + strlen (input_bfd->filename) - 7,
 			     "/crt0.o") == 0)
 	      ? -1 : 0;
-#endif
 	  if (!silence_segment_error
 	      /* We don't want duplicate errors for undefined
 		 symbols.  */
@@ -5226,32 +5131,8 @@ _frvfdpic_assign_plt_entries (void **entryp, void *info_)
   struct frvfdpic_relocs_info *entry = *entryp;
   struct _frvfdpic_dynamic_got_plt_info *dinfo = info_;
 
-#if 1
   if (entry->privfd)
     BFD_ASSERT (entry->fd_entry);
-#else
-  /* If this symbol requires a local function descriptor, allocate
-     one.  */
-  if (entry->privfd && entry->fd_entry == 0)
-    {
-      if (dinfo->got12.fdplt)
-	{
-	  entry->fd_entry = _frvfdpic_get_fd_entry (&dinfo->got12);
-	  dinfo->got12.fdplt -= 8;
-	}
-      else if (dinfo->gotlos.fdplt)
-	{
-	  entry->fd_entry = _frvfdpic_get_fd_entry (&dinfo->gotlos);
-	  dinfo->gotlos.fdplt -= 8;
-	}
-      else
-	{
-	  BFD_ASSERT (dinfo->gothilo.fdplt);
-	  entry->fd_entry = _frvfdpic_get_fd_entry (&dinfo->gothilo);
-	  dinfo->gothilo.fdplt -= 8;
-	}
-    }
-#endif
 
   if (entry->plt)
     {

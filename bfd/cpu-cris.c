@@ -45,7 +45,6 @@ get_compatible (a,b)
   if (b->mach == bfd_mach_cris_v10_v32)
     return a;
 
-#if 0
   /* See ldlang.c:lang_check.  Quite illogically, incompatible arches
      (as signalled by this function) are only *warned* about, while with
      this function signalling compatible ones, we can have the
@@ -57,9 +56,12 @@ get_compatible (a,b)
      pretending matching machs here.  */
 
   /* Except for the compatible mach, machs must match.  */
-  if (a->mach != b->mach)
-    return NULL;
-#endif
+
+  /*
+    This code is disabled but kept as a warning:
+    if (a->mach != b->mach)
+      return NULL;
+  */
 
   return a;
 }

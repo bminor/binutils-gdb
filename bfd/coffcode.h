@@ -1066,15 +1066,11 @@ styp_to_sec_flags (abfd, hdr, name, section, flags_ptr)
 	  unhandled = "IMAGE_SCN_MEM_NOT_CACHED";
 	  break;
 	case IMAGE_SCN_MEM_NOT_PAGED:
-#if 0
-	  unhandled = "IMAGE_SCN_MEM_NOT_PAGED";
-#else
 	  /* Generate a warning message rather using the 'unhandled'
 	     variable as this will allow some .sys files generate by
 	     other toolchains to be processed.  See bugzilla issue 196.  */
 	  _bfd_error_handler (_("%B: Warning: Ignoring section flag IMAGE_SCN_MEM_NOT_PAGED in section %s"),
 			      abfd, name);
-#endif
 	  break;
 	case IMAGE_SCN_MEM_EXECUTE:
 	  sec_flags |= SEC_CODE;
@@ -3352,86 +3348,6 @@ coff_compute_section_file_positions (abfd)
   return TRUE;
 }
 
-#if 0
-
-/* This can never work, because it is called too late--after the
-   section positions have been set.  I can't figure out what it is
-   for, so I am going to disable it--Ian Taylor 20 March 1996.  */
-
-/* If .file, .text, .data, .bss symbols are missing, add them.  */
-/* @@ Should we only be adding missing symbols, or overriding the aux
-   values for existing section symbols?  */
-static bfd_boolean
-coff_add_missing_symbols (abfd)
-     bfd *abfd;
-{
-  unsigned int nsyms = bfd_get_symcount (abfd);
-  asymbol **sympp = abfd->outsymbols;
-  asymbol **sympp2;
-  unsigned int i;
-  int need_text = 1, need_data = 1, need_bss = 1, need_file = 1;
-  bfd_size_type amt;
-
-  for (i = 0; i < nsyms; i++)
-    {
-      coff_symbol_type *csym = coff_symbol_from (abfd, sympp[i]);
-      const char *name;
-
-      if (csym)
-	{
-	  /* Only do this if there is a coff representation of the input
-	     symbol.  */
-	  if (csym->native && csym->native->u.syment.n_sclass == C_FILE)
-	    {
-	      need_file = 0;
-	      continue;
-	    }
-	  name = csym->symbol.name;
-	  if (!name)
-	    continue;
-	  if (!strcmp (name, _TEXT))
-	    need_text = 0;
-#ifdef APOLLO_M68
-	  else if (!strcmp (name, ".wtext"))
-	    need_text = 0;
-#endif
-	  else if (!strcmp (name, _DATA))
-	    need_data = 0;
-	  else if (!strcmp (name, _BSS))
-	    need_bss = 0;
-	}
-    }
-  /* Now i == bfd_get_symcount (abfd).  */
-  /* @@ For now, don't deal with .file symbol.  */
-  need_file = 0;
-
-  if (!need_text && !need_data && !need_bss && !need_file)
-    return TRUE;
-  nsyms += need_text + need_data + need_bss + need_file;
-  amt = nsyms;
-  amt *= sizeof (asymbol *);
-  sympp2 = (asymbol **) bfd_alloc (abfd, amt);
-  if (!sympp2)
-    return FALSE;
-  memcpy (sympp2, sympp, i * sizeof (asymbol *));
-
-  if (need_file)
-    /* @@ Generate fake .file symbol, in sympp2[i], and increment i.  */
-    abort ();
-
-  if (need_text)
-    sympp2[i++] = coff_section_symbol (abfd, _TEXT);
-  if (need_data)
-    sympp2[i++] = coff_section_symbol (abfd, _DATA);
-  if (need_bss)
-    sympp2[i++] = coff_section_symbol (abfd, _BSS);
-  BFD_ASSERT (i == nsyms);
-  bfd_set_symtab (abfd, sympp2, nsyms);
-  return TRUE;
-}
-
-#endif /* 0 */
-
 #ifdef COFF_IMAGE_WITH_PE
 
 static unsigned int pelength;
@@ -4116,10 +4032,7 @@ coff_write_object_contents (abfd)
   if (bfd_get_symcount (abfd) != 0)
     {
       int firstundef;
-#if 0
-      if (!coff_add_missing_symbols (abfd))
-	return FALSE;
-#endif
+
       if (!coff_renumber_symbols (abfd, &firstundef))
 	return FALSE;
       coff_mangle_symbols (abfd);
@@ -4401,32 +4314,6 @@ coff_set_section_contents (abfd, section, location, offset, count)
 
   return bfd_bwrite (location, count, abfd) == count;
 }
-#if 0
-static bfd_boolean
-coff_close_and_cleanup (abfd)
-     bfd *abfd;
-{
-  if (!bfd_read_p (abfd))
-    switch (abfd->format)
-      {
-      case bfd_archive:
-	if (!_bfd_write_archive_contents (abfd))
-	  return FALSE;
-	break;
-      case bfd_object:
-	if (!coff_write_object_contents (abfd))
-	  return FALSE;
-	break;
-      default:
-	bfd_set_error (bfd_error_invalid_operation);
-	return FALSE;
-      }
-
-  /* We depend on bfd_close to free all the memory on the objalloc.  */
-  return TRUE;
-}
-
-#endif
 
 static PTR
 buy_and_read (abfd, where, size)
@@ -4610,11 +4497,6 @@ coff_slurp_symbol_table (abfd)
 	    {
 #ifdef I960
 	    case C_LEAFEXT:
-#if 0
-	      dst->symbol.value = src->u.syment.n_value - dst->symbol.section->vma;
-	      dst->symbol.flags = BSF_EXPORT | BSF_GLOBAL;
-	      dst->symbol.flags |= BSF_NOT_AT_END | BSF_FUNCTION;
-#endif
 	      /* Fall through to next case.  */
 #endif
 

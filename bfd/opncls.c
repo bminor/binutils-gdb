@@ -1189,10 +1189,6 @@ RETURNS
 char *
 bfd_follow_gnu_debuglink (bfd *abfd, const char *dir)
 {
-#if 0 /* Disabled until DEBUGDIR can be defined by configure.in.  */
-  if (dir == NULL)
-    dir = DEBUGDIR;
-#endif
   return find_separate_debug_file (abfd, dir);
 }
 

@@ -124,11 +124,6 @@ MY(callback) (abfd)
 
   /* Don't set sizes now -- can't be sure until we know arch & mach.
      Sizes get set in set_sizes callback, later.  */
-#if 0
-  adata(abfd).page_size = TARGET_PAGE_SIZE;
-  adata(abfd).segment_size = SEGMENT_SIZE;
-  adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
-#endif
 
   return abfd->xvec;
 }
@@ -207,16 +202,9 @@ static bfd_boolean
 MY(mkobject) (abfd)
      bfd *abfd;
 {
-  if (! NAME(aout,mkobject) (abfd))
-    return FALSE;
-#if 0 /* Sizes get set in set_sizes callback, later, after we know
-	 the architecture and machine.  */
-  adata(abfd).page_size = TARGET_PAGE_SIZE;
-  adata(abfd).segment_size = SEGMENT_SIZE;
-  adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
-#endif
-  return TRUE;
+  return NAME (aout, mkobject (abfd));
 }
+
 #define MY_mkobject MY(mkobject)
 #endif
 

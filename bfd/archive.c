@@ -642,14 +642,6 @@ bfd_generic_archive_p (bfd *abfd)
 	  if (bfd_check_format (first, bfd_object)
 	      && first->xvec != abfd->xvec)
 	    {
-#if 0
-	      /* We ought to close `first' here, but we can't, because
-		 we have no way to remove it from the archive cache.
-		 It's close to impossible to figure out when we can
-		 release bfd_ardata.  FIXME.  */
-	      bfd_close (first);
-	      bfd_release (abfd, bfd_ardata (abfd));
-#endif
 	      bfd_set_error (bfd_error_wrong_object_format);
 	      bfd_ardata (abfd) = tdata_hold;
 	      return NULL;
@@ -784,7 +776,6 @@ do_slurp_coff_armap (bfd *abfd)
   nsymz = bfd_getb32 (int_buf);
   stringsize = parsed_size - (4 * nsymz) - 4;
 
-#if 1
   /* ... except that some archive formats are broken, and it may be our
      fault - the i960 little endian coff sometimes has big and sometimes
      little, because our tools changed.  Here's a horrible hack to clean
@@ -799,7 +790,6 @@ do_slurp_coff_armap (bfd *abfd)
       stringsize = parsed_size - (4 * nsymz) - 4;
       swap = bfd_getl32;
     }
-#endif
 
   /* The coff armap must be read sequentially.  So we construct a
      bsd-style one in core all at once, for simplicity.  */
@@ -1092,9 +1082,6 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 
       /* FIXME, we can't release namedata here because it was allocated
 	 below extended_names on the objalloc...  */
-#if 0
-      bfd_release (abfd, namedata);
-#endif
     }
   return TRUE;
 }
@@ -1654,11 +1641,7 @@ _bfd_write_archive_contents (bfd *arch)
 
       if (makemap && ! hasobjects)
 	{			/* Don't bother if we won't make a map!  */
-	  if ((bfd_check_format (current, bfd_object))
-#if 0				/* FIXME -- these are not set correctly */
-	      && ((bfd_get_file_flags (current) & HAS_SYMS))
-#endif
-	    )
+	  if ((bfd_check_format (current, bfd_object)))
 	    hasobjects = TRUE;
 	}
     }

@@ -113,15 +113,6 @@ coff_mips_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
       diff = reloc_entry->addend;
     }
 
-#ifdef COFF_WITH_PE
-#if 0
-  /* dj - handle it like any other reloc? */
-  /* FIXME: How should this case be handled?  */
-  if (reloc_entry->howto->type == MIPS_R_RVA && diff != 0)
-    abort ();
-#endif
-#endif
-
 #define DOIT(x) \
   x = ((x & ~howto->dst_mask) | (((x & howto->src_mask) + (diff >> howto->rightshift)) & howto->dst_mask))
 
@@ -641,12 +632,6 @@ coff_pe_mips_relocate_section (output_bfd, info, input_bfd,
   BFD_ASSERT (input_bfd->xvec->byteorder
 	      == output_bfd->xvec->byteorder);
 
-#if 0
-  printf ("dj: relocate %s(%s) %08x\n",
-	 input_bfd->filename, input_section->name,
-	 input_section->output_section->vma + input_section->output_offset);
-#endif
-
   gp = _bfd_get_gp_value (output_bfd);
   if (gp == 0)
     gp_undefined = TRUE;
@@ -754,12 +739,6 @@ coff_pe_mips_relocate_section (output_bfd, info, input_bfd,
 
       src = rel->r_vaddr + input_section->output_section->vma
 	+ input_section->output_offset;
-#if 0
-      printf ("dj: reloc %02x %-8s a=%08x/%08x(%08x) v=%08x+%08x %s\n",
-	     rel->r_type, howto_table[rel->r_type].name,
-	     src, rel->r_vaddr, *(unsigned long *)mem, val, rel->r_offset,
-	     h?h->root.root.string:"(none)");
-#endif
 
       /* OK, at this point the following variables are set up:
 	   src = VMA of the memory we're fixing up

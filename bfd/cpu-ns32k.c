@@ -279,7 +279,6 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 	  /* WTF?? */
 	  if (abfd->xvec->flavour == bfd_target_coff_flavour)
 	    {
-#if 1
 	      /* For m68k-coff, the addend was being subtracted twice during
 		 relocation with -r.  Removing the line below this comment
 		 fixes that problem; see PR 2953.
@@ -355,7 +354,6 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		   7) if they are different you have to figure out which
 		      version is right.  */
 	      relocation -= reloc_entry->addend;
-#endif
 	      reloc_entry->addend = 0;
 	    }
 	  else

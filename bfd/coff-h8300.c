@@ -397,11 +397,7 @@ reloc_processing (arelent *relent, struct internal_reloc *reloc,
     relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 
   relent->addend = reloc->r_offset;
-
   relent->address -= section->vma;
-#if 0
-  relent->section = 0;
-#endif
 }
 
 static bfd_boolean

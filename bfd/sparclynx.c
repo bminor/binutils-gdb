@@ -18,16 +18,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#if 0
-#define N_SHARED_LIB(x) 0
-
-#define TEXT_START_ADDR 0
-#define TARGET_PAGE_SIZE 4096
-#define SEGMENT_SIZE TARGET_PAGE_SIZE
-#define DEFAULT_ARCH bfd_arch_sparc
-
-#endif
-
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */

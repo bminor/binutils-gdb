@@ -1059,19 +1059,6 @@ bfd_set_section_flags (bfd *abfd ATTRIBUTE_UNUSED,
 		       sec_ptr section,
 		       flagword flags)
 {
-#if 0
-  /* If you try to copy a text section from an input file (where it
-     has the SEC_CODE flag set) to an output file, this loses big if
-     the bfd_applicable_section_flags (abfd) doesn't have the SEC_CODE
-     set - which it doesn't, at least not for a.out.  FIXME */
-
-  if ((flags & bfd_applicable_section_flags (abfd)) != flags)
-    {
-      bfd_set_error (bfd_error_invalid_operation);
-      return FALSE;
-    }
-#endif
-
   section->flags = flags;
   return TRUE;
 }

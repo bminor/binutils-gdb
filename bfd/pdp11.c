@@ -842,15 +842,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
     }
 #endif /* STAT_FOR_EXEC */
 
-  if (result)
-    {
-#if 0 /* These should be set correctly anyways.  */
-      abfd->sections = obj_textsec (abfd);
-      obj_textsec (abfd)->next = obj_datasec (abfd);
-      obj_datasec (abfd)->next = obj_bsssec (abfd);
-#endif
-    }
-  else
+  if (!result)
     {
       free (rawptr);
       abfd->tdata.aout_data = oldrawptr;
@@ -1074,9 +1066,6 @@ adjust_o_magic (abfd, execp)
   /* Data.  */
   if (!obj_datasec (abfd)->user_set_vma)
     {
-#if 0	    /* ?? Does alignment in the file image really matter? */
-      pad = align_power (vma, obj_datasec (abfd)->alignment_power) - vma;
-#endif
       obj_textsec (abfd)->size += pad;
       pos += pad;
       vma += pad;
@@ -1091,9 +1080,6 @@ adjust_o_magic (abfd, execp)
   /* BSS.  */
   if (! obj_bsssec (abfd)->user_set_vma)
     {
-#if 0
-      pad = align_power (vma, obj_bsssec (abfd)->alignment_power) - vma;
-#endif
       obj_datasec (abfd)->size += pad;
       pos += pad;
       vma += pad;
@@ -1708,41 +1694,6 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
   else if ((cache_ptr->flags & BSF_GLOBAL) != 0)
     sym_pointer->e_type[0] |= N_EXT;
 
-#if 0
-  if ((cache_ptr->flags & BSF_CONSTRUCTOR) != 0)
-    {
-      int type = ((aout_symbol_type *) cache_ptr)->type;
-
-
-      switch (type)
-	{
-	case N_ABS:	type = N_SETA; break;
-	case N_TEXT:	type = N_SETT; break;
-	case N_DATA:	type = N_SETD; break;
-	case N_BSS:	type = N_SETB; break;
-	}
-      sym_pointer->e_type[0] = type;
-    }
-#endif
-
-#if 0
-  if ((cache_ptr->flags & BSF_WEAK) != 0)
-    {
-      int type;
-
-      switch (sym_pointer->e_type[0] & N_TYPE)
-	{
-	default:
-	case N_ABS:	type = N_WEAKA; break;
-	case N_TEXT:	type = N_WEAKT; break;
-	case N_DATA:	type = N_WEAKD; break;
-	case N_BSS:	type = N_WEAKB; break;
-	case N_UNDF:	type = N_WEAKU; break;
-	}
-      sym_pointer->e_type[0] = type;
-    }
-#endif
-
   PUT_WORD(abfd, value, sym_pointer->e_value);
 
   return TRUE;
@@ -2063,30 +2014,6 @@ pdp11_aout_swap_reloc_out (abfd, g, natptr)
   else
     r_index = (*(g->sym_ptr_ptr))->KEEPIT;
 
-#if 0
-  if (bfd_is_abs_section (bfd_get_section (sym)))
-    {
-      r_extern = 0;
-      r_index = N_ABS;
-      r_type = RABS;
-    }
-  else if ((sym->flags & BSF_SECTION_SYM) == 0)
-    {
-      if (bfd_is_und_section (bfd_get_section (sym))
-	  || (sym->flags & BSF_GLOBAL) != 0)
-	r_extern = 1;
-      else
-	r_extern = 0;
-      r_index = (*(g->sym_ptr_ptr))->KEEPIT;
-    }
-  else
-    {
-      /* Just an ordinary section */
-      r_extern = 0;
-      r_index = output_section->target_index;
-    }
-#endif
-
   reloc_entry = r_index << 4 | r_type | r_pcrel;
 
   PUT_WORD (abfd, reloc_entry, natptr);
@@ -2296,14 +2223,6 @@ NAME(aout,squirt_out_relocs) (abfd, section)
   unsigned char *native;
   unsigned int count = section->reloc_count;
   bfd_size_type natsize;
-
-#if 0
-  /* If we're writing an .o file, we must write
-     relocation information, even if there is none. */
-  if ((count == 0 || section->orelocation == NULL) &&
-      <writing_executable>)
-    return TRUE;
-#endif
 
   natsize = section->size;
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
@@ -3184,12 +3103,6 @@ aout_link_add_symbols (abfd, info)
       *sym_hash = NULL;
 
       type = H_GET_8 (abfd, p->e_type);
-
-#if 0 /* not supported in PDP-11 a.out */
-      /* Ignore debugging symbols.  */
-      if ((type & N_STAB) != 0)
-	continue;
-#endif
 
       name = strings + GET_WORD (abfd, p->e_strx);
       value = GET_WORD (abfd, p->e_value);
@@ -4661,13 +4574,7 @@ pdp11_aout_link_input_section (finfo, input_bfd, input_section, relocs,
 	    }
 
 	  /* Change the address of the relocation.  */
-#if 0
-	  PUT_WORD (output_bfd,
-		    r_addr + input_section->output_offset,
-		    rel->r_address);
-#else
-fprintf (stderr, "TODO: change the address of the relocation\n");
-#endif
+	  fprintf (stderr, "TODO: change the address of the relocation\n");
 
 	  /* Adjust a PC relative relocation by removing the reference
 	     to the original address in the section and including the

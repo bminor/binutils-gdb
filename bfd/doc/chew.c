@@ -588,45 +588,6 @@ translatecomments ()
   pc++;
 }
 
-#if 0
-
-/* This is not currently used.  */
-
-/* turn everything not starting with a . into a comment */
-
-static void
-manglecomments ()
-{
-  unsigned int idx = 0;
-  string_type out;
-  init_string (&out);
-
-  while (at (tos, idx))
-    {
-      if (at (tos, idx) == '\n' && at (tos, idx + 1) == '*')
-	{
-	  cattext (&out, "	/*");
-	  idx += 2;
-	}
-      else if (at (tos, idx) == '*' && at (tos, idx + 1) == '}')
-	{
-	  cattext (&out, "*/");
-	  idx += 2;
-	}
-      else
-	{
-	  catchar (&out, at (tos, idx));
-	  idx++;
-	}
-    }
-
-  overwrite_string (tos, &out);
-
-  pc++;
-}
-
-#endif
-
 /* Mod tos so that only lines with leading dots remain */
 static void
 outputdots ()

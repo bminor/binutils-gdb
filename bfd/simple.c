@@ -243,24 +243,9 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   if (contents == NULL && data != NULL)
     free (data);
 
-#if 0
-  /* NOTE: cagney/2003-04-05: This free, which was introduced on
-     2003-03-31 to stop a memory leak, caused a memory corruption
-     between GDB and BFD.  The problem, which is stabs specific, can
-     be identified by a bunch of failures in relocate.exp vis:
-
-       gdb.base/relocate.exp: get address of static_bar
-
-     Details of the problem can be found on the binutils@ mailing
-     list, see the discussion thread: "gdb.mi/mi-cli.exp failures".  */
-  if (storage_needed != 0)
-    free (symbol_table);
-#endif
-
   bfd_map_over_sections (abfd, simple_restore_output_info, saved_offsets);
   free (saved_offsets);
 
   _bfd_generic_link_hash_table_free (link_info.hash);
-
   return contents;
 }

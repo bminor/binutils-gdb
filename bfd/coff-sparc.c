@@ -56,25 +56,6 @@ enum reloc_type
     R_SPARC_max
   };
 
-#if 0
-static const char *const reloc_type_names[] =
-{
-  "R_SPARC_NONE",
-  "R_SPARC_8",		"R_SPARC_16",		"R_SPARC_32",
-  "R_SPARC_DISP8",	"R_SPARC_DISP16",	"R_SPARC_DISP32",
-  "R_SPARC_WDISP30",	"R_SPARC_WDISP22",
-  "R_SPARC_HI22",	"R_SPARC_22",
-  "R_SPARC_13",		"R_SPARC_LO10",
-  "R_SPARC_GOT10",	"R_SPARC_GOT13",	"R_SPARC_GOT22",
-  "R_SPARC_PC10",	"R_SPARC_PC22",
-  "R_SPARC_WPLT30",
-  "R_SPARC_COPY",
-  "R_SPARC_GLOB_DAT",	"R_SPARC_JMP_SLOT",
-  "R_SPARC_RELATIVE",
-  "R_SPARC_UA32",
-};
-#endif
-
 /* This is stolen pretty directly from elf.c.  */
 static bfd_reloc_status_type
 bfd_coff_generic_reloc PARAMS ((bfd *, arelent *, asymbol *, PTR,

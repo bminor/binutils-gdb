@@ -299,20 +299,6 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
 
   if (abfd->format != bfd_archive && abfd->my_archive == 0)
     {
-#if 0
-      /* Explanation for this code: I'm only about 95+% sure that the above
-	 conditions are sufficient and that all i/o calls are properly
-	 adjusting the `where' field.  So this is sort of an `assert'
-	 that the `where' field is correct.  If we can go a while without
-	 tripping the abort, we can probably safely disable this code,
-	 so that the real optimizations happen.  */
-      file_ptr where_am_i_now;
-      where_am_i_now = real_ftell (bfd_cache_lookup (abfd));
-      if (abfd->my_archive)
-	where_am_i_now -= abfd->origin;
-      if (where_am_i_now != abfd->where)
-	abort ();
-#endif
       if (direction == SEEK_SET && (bfd_vma) position == abfd->where)
 	return 0;
     }

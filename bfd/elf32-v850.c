@@ -1415,30 +1415,6 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
   relocation += symbol->section->output_offset;
   relocation += reloc->addend;
 
-#if 0 /* Since this reloc is going to be processed later on, we should
-	 not make it pc-relative here.  To test this, try assembling and
-	 linking this program:
-
-	 	.text
-		.globl _start
-		nop
-	_start:
-        	jr foo
-
-	        .section ".foo","ax"
-		nop
-	foo:
-        	nop      */
-  if (reloc->howto->pc_relative)
-    {
-      /* Here the variable relocation holds the final address of the
-	 symbol we are relocating against, plus any addend.  */
-      relocation -= isection->output_section->vma + isection->output_offset;
-
-      /* Deal with pcrel_offset.  */
-      relocation -= reloc->address;
-    }
-#endif
   reloc->addend = relocation;
   return bfd_reloc_ok;
 }
@@ -1719,17 +1695,6 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
-#if 0
-	  {
-	    char * name;
-
-	    name = bfd_elf_string_from_elf_section (input_bfd, symtab_hdr->sh_link, sym->st_name);
-	    name = (name == NULL) ? "<none>" : name;
-	    fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x\n",
-		     sec->name, name, sym->st_name,
-		     sec->output_section->vma, sec->output_offset, sym->st_value, rel->r_addend);
-	  }
-#endif
 	}
       else
 	{

@@ -654,14 +654,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
 #endif /* STAT_FOR_EXEC */
 
   if (result)
-    {
-#if 0 /* These should be set correctly anyways.  */
-      abfd->sections = obj_textsec (abfd);
-      obj_textsec (abfd)->next = obj_datasec (abfd);
-      obj_datasec (abfd)->next = obj_bsssec (abfd);
-#endif
-      return result;
-    }
+    return result;
 
  error_ret:
   bfd_release (abfd, rawptr);
@@ -917,9 +910,6 @@ adjust_o_magic (abfd, execp)
   /* Data.  */
   if (!obj_datasec (abfd)->user_set_vma)
     {
-#if 0	    /* ?? Does alignment in the file image really matter?  */
-      pad = align_power (vma, obj_datasec (abfd)->alignment_power) - vma;
-#endif
       obj_textsec (abfd)->size += pad;
       pos += pad;
       vma += pad;
@@ -934,9 +924,6 @@ adjust_o_magic (abfd, execp)
   /* BSS.  */
   if (!obj_bsssec (abfd)->user_set_vma)
     {
-#if 0
-      pad = align_power (vma, obj_bsssec (abfd)->alignment_power) - vma;
-#endif
       obj_datasec (abfd)->size += pad;
       pos += pad;
       vma += pad;
@@ -1509,88 +1496,6 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 	/* This code is no longer needed.  It used to be used to make
            the linker handle set symbols, but they are now handled in
            the add_symbols routine instead.  */
-#if 0
-	asection *section;
-	arelent_chain *reloc;
-	asection *into_section;
-	bfd_size_type amt;
-
-	/* This is a set symbol.  The name of the symbol is the name
-	   of the set (e.g., __CTOR_LIST__).  The value of the symbol
-	   is the value to add to the set.  We create a section with
-	   the same name as the symbol, and add a reloc to insert the
-	   appropriate value into the section.
-
-	   This action is actually obsolete; it used to make the
-	   linker do the right thing, but the linker no longer uses
-	   this function.  */
-
-	section = bfd_get_section_by_name (abfd, cache_ptr->symbol.name);
-	if (section == NULL)
-	  {
-	    char *copy;
-
-	    amt = strlen (cache_ptr->symbol.name) + 1;
-	    copy = bfd_alloc (abfd, amt);
-	    if (copy == NULL)
-	      return FALSE;
-
-	    strcpy (copy, cache_ptr->symbol.name);
-	    section = bfd_make_section (abfd, copy);
-	    if (section == NULL)
-	      return FALSE;
-	  }
-
-	amt = sizeof (arelent_chain);
-	reloc = (arelent_chain *) bfd_alloc (abfd, amt);
-	if (reloc == NULL)
-	  return FALSE;
-
-	/* Build a relocation entry for the constructor.  */
-	switch (cache_ptr->type & N_TYPE)
-	  {
-	  case N_SETA:
-	    into_section = bfd_abs_section_ptr;
-	    cache_ptr->type = N_ABS;
-	    break;
-	  case N_SETT:
-	    into_section = obj_textsec (abfd);
-	    cache_ptr->type = N_TEXT;
-	    break;
-	  case N_SETD:
-	    into_section = obj_datasec (abfd);
-	    cache_ptr->type = N_DATA;
-	    break;
-	  case N_SETB:
-	    into_section = obj_bsssec (abfd);
-	    cache_ptr->type = N_BSS;
-	    break;
-	  }
-
-	/* Build a relocation pointing into the constructor section
-	   pointing at the symbol in the set vector specified.  */
-	reloc->relent.addend = cache_ptr->symbol.value;
-	cache_ptr->symbol.section = into_section;
-	reloc->relent.sym_ptr_ptr = into_section->symbol_ptr_ptr;
-
-	/* We modify the symbol to belong to a section depending upon
-	   the name of the symbol, and add to the size of the section
-	   to contain a pointer to the symbol. Build a reloc entry to
-	   relocate to this symbol attached to this section.  */
-	section->flags = SEC_CONSTRUCTOR | SEC_RELOC;
-
-	section->reloc_count++;
-	section->alignment_power = 2;
-
-	reloc->next = section->constructor_chain;
-	section->constructor_chain = reloc;
-	reloc->relent.address = section->size;
-	section->size += BYTES_IN_WORD;
-
-	reloc->relent.howto = CTOR_TABLE_RELOC_HOWTO (abfd);
-
-#endif /* 0 */
-
 	switch (cache_ptr->type & N_TYPE)
 	  {
 	  case N_SETA:
@@ -2076,11 +1981,6 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
   r_baserel = (g->howto->type & 8) != 0;
   r_jmptable = (g->howto->type & 16) != 0;
   r_relative = (g->howto->type & 32) != 0;
-
-#if 0
-  /* For a standard reloc, the addend is in the object file.  */
-  r_addend = g->addend + (*(g->sym_ptr_ptr))->section->output_section->vma;
-#endif
 
   /* Name was clobbered by aout_write_syms to be symbol index.  */
 

@@ -62,25 +62,6 @@ enum reloc_type
     R_SPARC_max
   };
 
-#if 0
-static const char *const reloc_type_names[] =
-  {
-    "R_SPARC_NONE",
-    "R_SPARC_8",		"R_SPARC_16",		"R_SPARC_32",
-    "R_SPARC_DISP8",	"R_SPARC_DISP16",	"R_SPARC_DISP32",
-    "R_SPARC_WDISP30",	"R_SPARC_WDISP22",
-    "R_SPARC_HI22",	"R_SPARC_22",
-    "R_SPARC_13",		"R_SPARC_LO10",
-    "R_SPARC_GOT10",	"R_SPARC_GOT13",	"R_SPARC_GOT22",
-    "R_SPARC_PC10",	"R_SPARC_PC22",
-    "R_SPARC_WPLT30",
-    "R_SPARC_COPY",
-    "R_SPARC_GLOB_DAT",	"R_SPARC_JMP_SLOT",
-    "R_SPARC_RELATIVE",
-    "R_SPARC_UA32",
-  };
-#endif
-
 static reloc_howto_type nlm32_sparc_howto_table[] =
   {
     HOWTO (R_SPARC_NONE,    0,0, 0,FALSE,0,complain_overflow_dont,    0,"R_SPARC_NONE",    FALSE,0,0x00000000,TRUE),
@@ -211,11 +192,7 @@ nlm_sparc_write_reloc (abfd, sec, rel)
      segment.  This offset is the section vma, adjusted by the vma of
      the lowest section in that segment, plus the address of the
      relocation.  */
-#if 0
-  val = bfd_get_section_vma (abfd, (*rel->sym_ptr_ptr)->section) + rel->address;
-#else
   val = bfd_get_section_vma (abfd, sec) + rel->address;
-#endif
 
 #ifdef DEBUG
   fprintf (stderr, "%s:  val = %08lx, addend = %08lx, type = %d\n",

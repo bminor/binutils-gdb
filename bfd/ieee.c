@@ -1801,10 +1801,6 @@ ieee_print_symbol (abfd, afile, symbol, how)
       fprintf (file, "%s", symbol->name);
       break;
     case bfd_print_symbol_more:
-#if 0
-      fprintf (file, "%4x %2x", aout_symbol (symbol)->desc & 0xffff,
-	       aout_symbol (symbol)->other & 0xff);
-#endif
       BFD_FAIL ();
       break;
     case bfd_print_symbol_all:
@@ -2316,11 +2312,6 @@ ieee_write_section_part (abfd)
 
 	  if (! ieee_write_id (abfd, s->name))
 	    return FALSE;
-#if 0
-	  ieee_write_int (abfd, 0);	/* Parent */
-	  ieee_write_int (abfd, 0);	/* Brother */
-	  ieee_write_int (abfd, 0);	/* Context */
-#endif
 	  /* Alignment.  */
 	  if (! ieee_write_byte (abfd, ieee_section_alignment_enum)
 	      || ! ieee_write_byte (abfd,
@@ -2471,10 +2462,6 @@ do_with_relocs (abfd, s)
 		{
 		  arelent *r = *p;
 		  bfd_signed_vma ov;
-#if 0
-		  if (r->howto->pc_relative)
-		    r->addend += current_byte_index;
-#endif
 		  switch (r->howto->size)
 		    {
 		    case 2:
@@ -3937,68 +3924,6 @@ ieee_sizeof_headers (abfd, x)
 {
   return 0;
 }
-
-
-/* The debug info routines are never used.  */
-#if 0
-
-static void
-ieee_bfd_debug_info_start (abfd)
-     bfd *abfd;
-{
-
-}
-
-static void
-ieee_bfd_debug_info_end (abfd)
-     bfd *abfd;
-{
-
-}
-
-
-/* Add this section to the list of sections we have debug info for, to
-   be ready to output it at close time.  */
-static void
-ieee_bfd_debug_info_accumulate (abfd, section)
-     bfd *abfd;
-     asection *section;
-{
-  ieee_data_type *ieee = IEEE_DATA (section->owner);
-  ieee_data_type *output_ieee = IEEE_DATA (abfd);
-
-  /* Can only accumulate data from other ieee bfds.  */
-  if (section->owner->xvec != abfd->xvec)
-    return;
-  /* Only bother once per bfd.  */
-  if (ieee->done_debug)
-    return;
-  ieee->done_debug = TRUE;
-
-  /* Don't bother if there is no debug info.  */
-  if (ieee->w.r.debug_information_part == 0)
-    return;
-
-  /* Add to chain.  */
-  {
-    bfd_size_type amt = sizeof (bfd_chain_type);
-    bfd_chain_type *n = (bfd_chain_type *) bfd_alloc (abfd, amt);
-
-    if (!n)
-      abort ();		/* FIXME */
-    n->this = section->owner;
-    n->next = (bfd_chain_type *) NULL;
-
-    if (output_ieee->chain_head)
-      output_ieee->chain_head->next = n;
-    else
-      output_ieee->chain_root = n;
-
-    output_ieee->chain_head = n;
-  }
-}
-
-#endif
 
 #define	ieee_close_and_cleanup _bfd_generic_close_and_cleanup
 #define ieee_bfd_free_cached_info _bfd_generic_bfd_free_cached_info

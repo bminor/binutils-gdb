@@ -1846,17 +1846,6 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 		       that objcopy can handle it.  */
 		    break;
 		  }
-#if 0 /* Not handling other string tables specially right now.  */
-		hdr2 = elf_elfsections (abfd)[i];	/* in case it moved */
-		/* We have a strtab for some random other section.  */
-		newsect = (asection *) hdr2->bfd_section;
-		if (!newsect)
-		  break;
-		hdr->bfd_section = newsect;
-		hdr2 = &elf_section_data (newsect)->str_hdr;
-		*hdr2 = *hdr;
-		elf_elfsections (abfd)[shindex] = hdr2;
-#endif
 	      }
 	  }
       }
@@ -4628,18 +4617,8 @@ prep_headers (bfd *abfd)
 
   /* If we're building an executable, we'll need a program header table.  */
   if (abfd->flags & EXEC_P)
-    {
-      /* It all happens later.  */
-#if 0
-      i_ehdrp->e_phentsize = sizeof (Elf_External_Phdr);
-
-      /* elf_build_phdrs() returns a (NULL-terminated) array of
-	 Elf_Internal_Phdrs.  */
-      i_phdrp = elf_build_phdrs (abfd, i_ehdrp, i_shdrp, &i_ehdrp->e_phnum);
-      i_ehdrp->e_phoff = outbase;
-      outbase += i_ehdrp->e_phentsize * i_ehdrp->e_phnum;
-#endif
-    }
+    /* It all happens later.  */
+    ;
   else
     {
       i_ehdrp->e_phentsize = 0;
@@ -5424,31 +5403,6 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	phdr_adjust_seg->p_paddr
 	  -= (count - phdr_adjust_num) * iehdr->e_phentsize;
     }
-
-#if 0
-  /* Final Step: Sort the segments into ascending order of physical
-     address.  */
-  if (map_first != NULL)
-    {
-      struct elf_segment_map *prev;
-
-      prev = map_first;
-      for (map = map_first->next; map != NULL; prev = map, map = map->next)
-	{
-	  /* Yes I know - its a bubble sort....  */
-	  if (map->next != NULL && (map->next->p_paddr < map->p_paddr))
-	    {
-	      /* Swap map and map->next.  */
-	      prev->next = map->next;
-	      map->next = map->next->next;
-	      prev->next->next = map;
-
-	      /* Restart loop.  */
-	      map = map_first;
-	    }
-	}
-    }
-#endif
 
 #undef SEGMENT_END
 #undef SECTION_SIZE

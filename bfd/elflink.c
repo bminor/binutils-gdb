@@ -7830,22 +7830,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	goto error_return;
     }
 
-#if 0
-  /* Some standard ELF linkers do this, but we don't because it causes
-     bootstrap comparison failures.  */
-  /* Output a file symbol for the output file as the second symbol.
-     We output this even if we are discarding local symbols, although
-     I'm not sure if this is correct.  */
-  elfsym.st_value = 0;
-  elfsym.st_size = 0;
-  elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
-  elfsym.st_other = 0;
-  elfsym.st_shndx = SHN_ABS;
-  if (! elf_link_output_sym (&finfo, bfd_get_filename (abfd),
-			     &elfsym, bfd_abs_section_ptr, NULL))
-    goto error_return;
-#endif
-
   /* Output a symbol for each section.  We output these even if we are
      discarding local symbols, since they are used for relocs.  These
      symbols have no names.  We store the index of each one in the

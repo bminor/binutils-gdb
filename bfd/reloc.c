@@ -715,7 +715,6 @@ bfd_perform_relocation (bfd *abfd,
 	      && strcmp (abfd->xvec->name, "coff-Intel-little") != 0
 	      && strcmp (abfd->xvec->name, "coff-Intel-big") != 0)
 	    {
-#if 1
 	      /* For m68k-coff, the addend was being subtracted twice during
 		 relocation with -r.  Removing the line below this comment
 		 fixes that problem; see PR 2953.
@@ -786,7 +785,6 @@ space consuming.  For each target:
        right
 */
 	      relocation -= reloc_entry->addend;
-#endif
 	      reloc_entry->addend = 0;
 	    }
 	  else
@@ -1100,10 +1098,10 @@ bfd_install_relocation (bfd *abfd,
 	  && strcmp (abfd->xvec->name, "coff-Intel-little") != 0
 	  && strcmp (abfd->xvec->name, "coff-Intel-big") != 0)
 	{
-#if 1
-/* For m68k-coff, the addend was being subtracted twice during
-   relocation with -r.  Removing the line below this comment
-   fixes that problem; see PR 2953.
+
+	  /* For m68k-coff, the addend was being subtracted twice during
+	     relocation with -r.  Removing the line below this comment
+	     fixes that problem; see PR 2953.
 
 However, Ian wrote the following, regarding removing the line below,
 which explains why it is still enabled:  --djm
@@ -1170,7 +1168,6 @@ space consuming.  For each target:
     7) if they are different you have to figure out which version is
        right.  */
 	  relocation -= reloc_entry->addend;
-#endif
 	  reloc_entry->addend = 0;
 	}
       else

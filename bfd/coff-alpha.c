@@ -1221,23 +1221,6 @@ alpha_bfd_reloc_type_lookup (abfd, code)
     case BFD_RELOC_64_PCREL:
       alpha_type = ALPHA_R_SREL64;
       break;
-#if 0
-    case ???:
-      alpha_type = ALPHA_R_OP_PUSH;
-      break;
-    case ???:
-      alpha_type = ALPHA_R_OP_STORE;
-      break;
-    case ???:
-      alpha_type = ALPHA_R_OP_PSUB;
-      break;
-    case ???:
-      alpha_type = ALPHA_R_OP_PRSHIFT;
-      break;
-    case ???:
-      alpha_type = ALPHA_R_GPVALUE;
-      break;
-#endif
     default:
       return (reloc_howto_type *) NULL;
     }

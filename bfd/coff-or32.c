@@ -148,23 +148,14 @@ or32_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
         signed_value = 0;
 
       signed_value += sym_value + reloc_entry->addend;
-#if 0
-      if ((signed_value & ~0x3ffff) == 0)
-        {                     /* Absolute jmp/call.  */
-          insn |= (1<<24);    /* Make it absolute.  */
-          /* FIXME: Should we change r_type to R_IABS.  */
-        }
-      else
-#endif
-        {
-          /* Relative jmp/call, so subtract from the value the
-             address of the place we're coming from.  */
-          signed_value -= (reloc_entry->address
-                           + input_section->output_section->vma
-                           + input_section->output_offset);
-          if (signed_value > 0x7ffffff || signed_value < -0x8000000)
-            return bfd_reloc_overflow;
-        }
+      /* Relative jmp/call, so subtract from the value the
+	 address of the place we're coming from.  */
+      signed_value -= (reloc_entry->address
+		       + input_section->output_section->vma
+		       + input_section->output_offset);
+      if (signed_value > 0x7ffffff || signed_value < -0x8000000)
+	return bfd_reloc_overflow;
+
       signed_value >>= 2;
       insn = INSERT_JUMPTARG (insn, signed_value);
       bfd_put_32 (abfd, insn, hit_data);
@@ -465,25 +456,15 @@ coff_or32_relocate_section (output_bfd, info, input_bfd, input_section,
           /* Determine the destination of the jump.  */
           signed_value += val;
 
-#if 0
-          if ((signed_value & ~0x3ffff) == 0)
-            {
-              /* We can use an absolute jump.  */
-              insn |= (1 << 24);
-            }
-          else
-#endif
-            {
-              /* Make the destination PC relative.  */
-              signed_value -= (input_section->output_section->vma
-                               + input_section->output_offset
-                               + (rel->r_vaddr - input_section->vma));
-              if (signed_value > 0x7ffffff || signed_value < - 0x8000000)
-                {
-                  overflow = TRUE;
-                  signed_value = 0;
-                }
-            }
+	  /* Make the destination PC relative.  */
+	  signed_value -= (input_section->output_section->vma
+			   + input_section->output_offset
+			   + (rel->r_vaddr - input_section->vma));
+	  if (signed_value > 0x7ffffff || signed_value < - 0x8000000)
+	    {
+	      overflow = TRUE;
+	      signed_value = 0;
+	    }
 
           /* Put the adjusted value back into the instruction.  */
           signed_value >>= 2;

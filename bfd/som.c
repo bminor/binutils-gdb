@@ -4543,11 +4543,6 @@ som_slurp_symbol_table (abfd)
 	  sym->symbol.value -= sym->symbol.section->vma;
 	  break;
 
-#if 0
-	/* SS_GLOBAL and SS_LOCAL are two names for the same thing.
-	   Sound dumb?  It is.  */
-	case SS_GLOBAL:
-#endif
 	case SS_LOCAL:
 	  sym->symbol.flags |= BSF_LOCAL;
 	  sym->symbol.section = bfd_section_from_som_symbol (abfd, bufp);

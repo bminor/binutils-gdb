@@ -1,5 +1,22 @@
 2005-02-01  Ben Elliston  <bje@au.ibm.com>
- 
+
+	* aout-arm.c, aout-target.h, aoutx.h, archive.c, armnetbsd.c,
+	bfd-in.h, bfdio.c, coff-alpha.c, coff-arm.c, coff-h8300.c,
+	coff-i860.c, coff-mcore.c, coff-or32.c, coff-ppc.c, coff-sh.c,
+	coff-sparc.c, coffcode.h, coffgen.c, cofflink.c, cpu-cris.c,
+	cpu-h8500.c, cpu-ns32k.c, ecoff.c, ecofflink.c, elf.c,
+	elf32-dlx.c, elf32-fr30.c, elf32-frv.c, elf32-hppa.c,
+	elf32-i860.c, elf32-ip2k.c, elf32-m32r.c, elf32-sh.c,
+	elf32-v850.c, elf64-mips.c, elf64-sparc.c, elflink.c,
+	i386aout.c, i386msdos.c, i386os9k.c, ieee.c, mach-o.c,
+	nlm32-sparc.c, oasys.c, opncls.c, pdp11.c, pe-mips.c, peXXigen.c,
+	pef.c, peicode.h, reloc.c, riscix.c, section.c, simple.c, som.c,
+	sparclynx.c, targets.c, vms-misc.c, vms-tir.c, xsym.c, doc/chew.c,
+	hosts/delta68.h, hosts/vaxbsd.h: Remove #if 0'd code
+	throughout. Similarly, collapse #if 1'd code.
+
+2005-02-01  Ben Elliston  <bje@au.ibm.com>
+
 	* elf-bfd.h (bfd_elf_discard_group): Remove.
 	* elf.c (bfd_elf_discard_group): Likewise.
 	* elfxx-target.h (bfd_elfNN_bfd_discard_group): Remove macro.

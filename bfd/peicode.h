@@ -487,11 +487,6 @@ pe_ILF_make_a_symbol_reloc (pe_ILF_vars *                 vars,
   internal->r_vaddr  = address;
   internal->r_symndx = sym_index;
   internal->r_type   = entry->howto->type;
-#if 0  /* These fields do not need to be initialised.  */
-  internal->r_size   = 0;
-  internal->r_extern = 0;
-  internal->r_offset = 0;
-#endif
 
   vars->relcount ++;
 
@@ -583,38 +578,17 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
 
   /* The following initialisations are unnecessary - the memory is
      zero initialised.  They are just kept here as reminders.  */
-#if 0
-  esym->e.e.e_zeroes = 0;
-  esym->e_value = 0;
-  esym->e_type = T_NULL;
-  esym->e_numaux = 0;
-#endif
 
   /* Initialise the internal symbol structure.  */
   ent->u.syment.n_sclass          = sclass;
   ent->u.syment.n_scnum           = section->target_index;
   ent->u.syment._n._n_n._n_offset = (long) sym;
 
-#if 0 /* See comment above.  */
-  ent->u.syment.n_value  = 0;
-  ent->u.syment.n_flags  = 0;
-  ent->u.syment.n_type   = T_NULL;
-  ent->u.syment.n_numaux = 0;
-  ent->fix_value         = 0;
-#endif
-
   sym->symbol.the_bfd = vars->abfd;
   sym->symbol.name    = vars->string_ptr;
   sym->symbol.flags   = BSF_EXPORT | BSF_GLOBAL | extra_flags;
   sym->symbol.section = section;
   sym->native         = ent;
-
-#if 0 /* See comment above.  */
-  sym->symbol.value   = 0;
-  sym->symbol.udata.i = 0;
-  sym->done_lineno    = FALSE;
-  sym->lineno         = NULL;
-#endif
 
   * vars->table_ptr = vars->sym_index;
   * vars->sym_ptr_ptr = sym;

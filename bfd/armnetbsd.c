@@ -35,19 +35,4 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* This needs to start with a.out so GDB knows it is an a.out variant.  */
 #define TARGETNAME 		"a.out-arm-netbsd"
 
-#if 0
-#define NAME(x,y) CONCAT3 (aoutarm,_32_,y)
-
-#define aoutarm_32_get_section_contents aout_32_get_section_contents
-
-#define MY_bfd_reloc_type_lookup aoutarm_bfd_reloc_type_lookup
-
-#include "bfd.h"		/* To ensure following declaration is OK */
-
-const struct reloc_howto_struct *
-MY_bfd_reloc_type_lookup
-  PARAMS ((bfd * abfd AND
-	  bfd_reloc_code_real_type code));
-#endif
-
 #include "netbsd.h"

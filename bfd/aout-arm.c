@@ -411,11 +411,6 @@ MY_swap_std_reloc_out (abfd, g, natptr)
       r_pcrel = 1;
     }
 
-#if 0
-  /* For a standard reloc, the addend is in the object file.  */
-  r_addend = g->addend + (*(g->sym_ptr_ptr))->section->output_section->vma;
-#endif
-
   /* name was clobbered by aout_write_syms to be symbol index */
 
   /* If this relocation is relative to a symbol then set the

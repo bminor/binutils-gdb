@@ -40,10 +40,6 @@ Boston, MA 02111-1307, USA.  */
    final_link routine once.  */
 extern bfd_boolean mcore_bfd_coff_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
-#if 0
-static struct bfd_link_hash_table *coff_mcore_link_hash_table_create
-  PARAMS ((bfd *));
-#endif
 static bfd_reloc_status_type mcore_coff_unsupported_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_boolean coff_mcore_relocate_section
@@ -222,35 +218,6 @@ mcore_hash_table;
 #define coff_mcore_hash_table(info) \
   ((mcore_hash_table *) ((info)->hash))
 
-#if 0
-/* Create an MCore coff linker hash table.  */
-
-static struct bfd_link_hash_table *
-coff_mcore_link_hash_table_create (abfd)
-     bfd * abfd;
-{
-  mcore_hash_table * ret;
-
-  ret = (mcore_hash_table *) bfd_malloc ((bfd_size_type) sizeof (* ret));
-  if (ret == (mcore_hash_table *) NULL)
-    return NULL;
-
-  if (! _bfd_coff_link_hash_table_init
-      (& ret->root, abfd, _bfd_coff_link_hash_newfunc))
-    {
-      free (ret);
-      return (struct bfd_link_hash_table *) NULL;
-    }
-
-  ret->bfd_of_toc_owner = NULL;
-  ret->global_toc_size  = 0;
-  ret->import_table_size = 0;
-  ret->first_thunk_address = 0;
-  ret->thunk_size = 0;
-
-  return & ret->root.root;
-}
-#endif
 
 /* Add an entry to the base file.  */
 

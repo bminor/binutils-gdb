@@ -1839,24 +1839,9 @@ mk_fdrtab (abfd, debug_info, debug_swap, line_info)
 	     addresses do not equal the FDR vma, but they (the PDR address)
 	     are still vma's and not offsets.  Cf. comments in
 	     'lookup_line'.  */
-#if 0
-	    bfd_size_type external_pdr_size;
-	    char *pdr_ptr;
-	    PDR pdr;
-	    
-	    external_pdr_size = debug_swap->external_pdr_size;
-	    
-	    pdr_ptr = ((char *) debug_info->external_pdr
-	              + fdr_ptr->ipdFirst * external_pdr_size);
-	    (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
-	  /* The address of the first PDR is the offset of that
-	     procedure relative to the beginning of file FDR.  */
-	    tab->base_addr = fdr_ptr->adr - pdr.adr;
-#else
 	  /* The address of the first PDR is the offset of that
 	     procedure relative to the beginning of file FDR.  */
 	  tab->base_addr = fdr_ptr->adr; 
-#endif
 	}
       else
 	{
@@ -2115,11 +2100,6 @@ lookup_line (abfd, debug_info, debug_swap, line_info)
          considerably, which is undesirable.  */
       external_pdr_size = debug_swap->external_pdr_size;
 
-#if 0 /* eraxxon: PDR addresses (pdr.adr) are not relative to FDRs!
-	 Leave 'offset' alone.  */
-      /* Make offset relative to object file's start-address.  */
-      offset -= tab[i].base_addr;
-#endif
       /* eraxxon: The Horrible Hack: Because of the problems above, set 'i'
 	 to 0 so we look through all FDRs.
 

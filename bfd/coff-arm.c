@@ -1288,11 +1288,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 #ifdef ARM_WINCE
       /* MS ARM-CE makes the reloc relative to the opcode's pc, not
 	 the next opcode's pc, so is off by one.  */
-#if 0 /* This appears to have been true for WINCE 2.0, but it is not
-	 true for WINCE 3.0.  */
-      if (howto->pc_relative && !info->relocatable)
-	addend -= 8;
-#endif
 #endif
 
       /* If we are doing a relocatable link, then we can just ignore
@@ -1342,7 +1337,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-#if 1 /* THUMBEXTENSION */
           /* We don't output the stubs if we are generating a
              relocatable output file, since we may as well leave the
              stub generation to the final linker pass. If we fail to
@@ -1579,7 +1573,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (done)
 	    rstat = bfd_reloc_ok;
 	  else
-#endif /* THUMBEXTENSION */
 	    if (   h->root.type == bfd_link_hash_defined
 		|| h->root.type == bfd_link_hash_defweak)
 	    {
@@ -1608,7 +1601,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				      rel->r_vaddr);
 	}
 
-#if 1 /* THUMBEXTENSION */
       if (done)
 	rstat = bfd_reloc_ok;
 #ifndef ARM_WINCE
@@ -1729,7 +1721,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
         }
 #endif
       else
-#endif /* THUMBEXTENSION */
         if (info->relocatable && ! howto->partial_inplace)
             rstat = bfd_reloc_ok;
         else
@@ -1737,7 +1728,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 					    contents,
 					    rel->r_vaddr - input_section->vma,
 					    val, addend);
-#if 1 /* THUMBEXTENSION */
       /* FIXME:
 	 Is this the best way to fix up thumb addresses? krk@cygnus.com
 	 Probably not, but it works, and if it works it don't need fixing!  nickc@cygnus.com */
@@ -1774,7 +1764,6 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	      bfd_put_32 (input_bfd, x | 1, location);
 	    }
 	}
-#endif /* THUMBEXTENSION */
 
       switch (rstat)
 	{
@@ -1824,9 +1813,6 @@ bfd_arm_allocate_interworking_sections (info)
   asection *                        s;
   bfd_byte *                        foo;
   struct coff_arm_link_hash_table * globals;
-#if 0
-  static char                       test_char = '1';
-#endif
 
   globals = coff_arm_hash_table (info);
 
@@ -1843,9 +1829,6 @@ bfd_arm_allocate_interworking_sections (info)
 
       foo = (bfd_byte *) bfd_alloc (globals->bfd_of_glue_owner,
 				    globals->arm_glue_size);
-#if 0
-      memset (foo, test_char, (size_t) globals->arm_glue_size);
-#endif
 
       s->size = globals->arm_glue_size;
       s->contents = foo;
@@ -1862,9 +1845,6 @@ bfd_arm_allocate_interworking_sections (info)
 
       foo = (bfd_byte *) bfd_alloc (globals->bfd_of_glue_owner,
 				    globals->thumb_glue_size);
-#if 0
-      memset (foo, test_char, (size_t) globals->thumb_glue_size);
-#endif
 
       s->size = globals->thumb_glue_size;
       s->contents = foo;

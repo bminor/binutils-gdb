@@ -862,73 +862,6 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, weak)
 	case N_SETD:
 	case N_SETB:
 	  {
-	    /* This code is no longer needed.  It used to be used to
-	       make the linker handle set symbols, but they are now
-	       handled in the add_symbols routine instead.  */
-#if 0
-	    const char *name;
-	    asection *section;
-	    arelent_chain *reloc_chain;
-	    unsigned int bitsize;
-	    bfd_size_type amt;
-
-	    /* Get a section with the same name as the symbol (usually
-	       __CTOR_LIST__ or __DTOR_LIST__).  FIXME: gcc uses the
-	       name ___CTOR_LIST (three underscores).  We need
-	       __CTOR_LIST (two underscores), since ECOFF doesn't use
-	       a leading underscore.  This should be handled by gcc,
-	       but instead we do it here.  Actually, this should all
-	       be done differently anyhow.  */
-	    name = bfd_asymbol_name (asym);
-	    if (name[0] == '_' && name[1] == '_' && name[2] == '_')
-	      {
-		++name;
-		asym->name = name;
-	      }
-	    section = bfd_get_section_by_name (abfd, name);
-	    if (section == (asection *) NULL)
-	      {
-		char *copy;
-
-		amt = strlen (name) + 1;
-		copy = (char *) bfd_alloc (abfd, amt);
-		if (!copy)
-		  return FALSE;
-		strcpy (copy, name);
-		section = bfd_make_section (abfd, copy);
-	      }
-
-	    /* Build a reloc pointing to this constructor.  */
-	    amt = sizeof (arelent_chain);
-	    reloc_chain = (arelent_chain *) bfd_alloc (abfd, amt);
-	    if (!reloc_chain)
-	      return FALSE;
-	    reloc_chain->relent.sym_ptr_ptr =
-	      bfd_get_section (asym)->symbol_ptr_ptr;
-	    reloc_chain->relent.address = section->size;
-	    reloc_chain->relent.addend = asym->value;
-	    reloc_chain->relent.howto =
-	      ecoff_backend (abfd)->constructor_reloc;
-
-	    /* Set up the constructor section to hold the reloc.  */
-	    section->flags = SEC_CONSTRUCTOR;
-	    ++section->reloc_count;
-
-	    /* Constructor sections must be rounded to a boundary
-	       based on the bitsize.  These are not real sections--
-	       they are handled specially by the linker--so the ECOFF
-	       16 byte alignment restriction does not apply.  */
-	    bitsize = ecoff_backend (abfd)->constructor_bitsize;
-	    section->alignment_power = 1;
-	    while ((1 << section->alignment_power) < bitsize / 8)
-	      ++section->alignment_power;
-
-	    reloc_chain->next = section->constructor_chain;
-	    section->constructor_chain = reloc_chain;
-	    section->size += bitsize / 8;
-
-#endif /* 0 */
-
 	    /* Mark the symbol as a constructor.  */
 	    asym->flags |= BSF_CONSTRUCTOR;
 	  }
@@ -3192,14 +3125,10 @@ _bfd_ecoff_write_armap (abfd, elength, map, orl_count, stridx)
      armap.  */
   hdr.ar_uid[0] = '0';
   hdr.ar_gid[0] = '0';
-#if 0
-  hdr.ar_mode[0] = '0';
-#else
   /* Building gcc ends up extracting the armap as a file - twice.  */
   hdr.ar_mode[0] = '6';
   hdr.ar_mode[1] = '4';
   hdr.ar_mode[2] = '4';
-#endif
 
   sprintf (hdr.ar_size, "%-10d", (int) mapsize);
 
@@ -3361,14 +3290,10 @@ _bfd_ecoff_archive_p (abfd)
 	  if (bfd_check_format (first, bfd_object)
 	      && first->xvec != abfd->xvec)
 	    {
-#if 0
 	      /* We ought to close `first' here, but we can't, because
 		 we have no way to remove it from the archive cache.
-		 It's close to impossible to figure out when we can
+		 It's almost impossible to figure out when we can
 		 release bfd_ardata.  FIXME.  */
-	      (void) bfd_close (first);
-	      bfd_release (abfd, bfd_ardata (abfd));
-#endif
 	      bfd_set_error (bfd_error_wrong_object_format);
 	      bfd_ardata (abfd) = tdata_hold;
 	      return NULL;

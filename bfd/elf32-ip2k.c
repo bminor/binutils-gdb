@@ -1598,12 +1598,6 @@ ip2k_elf_gc_mark_hook (sec, info, rel, h, sym)
     {
       switch (ELF32_R_TYPE (rel->r_info))
       {
-#if 0
-      case R_IP2K_GNU_VTINHERIT:
-      case R_IP2K_GNU_VTENTRY:
-        break;
-#endif
-
       default:
         switch (h->root.type)
           {

@@ -600,13 +600,7 @@ bfd_pef_scan (abfd, header, mdata)
     }
 
   if (bfd_pef_scan_start_address (abfd) < 0)
-    {
-#if 0
-      fprintf (stderr, "bfd_pef_scan: unable to scan start address: %s\n",
-	       bfd_errmsg (bfd_get_error ()));
-      return -1;
-#endif
-    }
+    ;
 
   abfd->tdata.pef_data = mdata;
 

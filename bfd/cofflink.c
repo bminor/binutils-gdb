@@ -1345,9 +1345,6 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
 {
   unsigned int n_tmask = coff_data (input_bfd)->local_n_tmask;
   unsigned int n_btshft = coff_data (input_bfd)->local_n_btshft;
-#if 0
-  unsigned int n_btmask = coff_data (input_bfd)->local_n_btmask;
-#endif
   bfd_boolean (*adjust_symndx)
     (bfd *, struct bfd_link_info *, bfd *, asection *,
      struct internal_reloc *, bfd_boolean *);

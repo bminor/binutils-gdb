@@ -26,6 +26,14 @@
 #include "fnmatch.h"
 
 /*
+   It's okay to see some:
+#if 0
+   directives in this source file, as targets.c uses them to exclude
+   certain BFD vectors.  This comment is specially formatted to catch
+   users who grep for ^#if 0, so please keep it this way!
+*/
+
+/*
 SECTION
 	Targets
 

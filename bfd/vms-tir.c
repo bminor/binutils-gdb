@@ -439,11 +439,6 @@ etir_sto (abfd, cmd, ptr)
 
     case ETIR_S_C_STO_B:
       dummy = _bfd_vms_pop (abfd, &psect);
-#if 0
-      if (is_share)		/* FIXME */
-	(*_bfd_error_handler) ("%s: byte fixups not supported",
-			       cmd_name (cmd));
-#endif
       /* FIXME: check top bits */
       image_write_b (abfd, (unsigned int) dummy & 0xff);
       break;
@@ -453,11 +448,6 @@ etir_sto (abfd, cmd, ptr)
 
     case ETIR_S_C_STO_W:
       dummy = _bfd_vms_pop (abfd, &psect);
-#if 0
-      if (is_share)		/* FIXME */
-	(*_bfd_error_handler) ("%s: word fixups not supported",
-			       cmd_name (cmd));
-#endif
       /* FIXME: check top bits */
       image_write_w (abfd, (unsigned int) dummy & 0xffff);
       break;
@@ -909,9 +899,6 @@ etir_stc (abfd, cmd, ptr)
 
     case ETIR_S_C_STC_NBH_PS:
       /* FIXME */
-#if 0
-      (*_bfd_error_handler) ("%s: not supported", cmd_name (cmd));
-#endif
       break;
 
     default:
@@ -2266,19 +2253,6 @@ _bfd_vms_write_tir (abfd, objtype)
 				sptr->size = len;
 				sto_imm (abfd, sptr, vaddr, section->index);
 				sptr->size = hint_size;
-#if 0
-				vms_output_begin (abfd,
-						  ETIR_S_C_STO_HINT_GBL, -1);
-				vms_output_long (abfd,
-						 (unsigned long) (sec->index));
-				vms_output_quad (abfd, (uquad) addr);
-
-				hash = (_bfd_vms_length_hash_symbol
-					(abfd, sym->name, EOBJ_S_C_SYMSIZ));
-				vms_output_counted (abfd, hash);
-
-				vms_output_flush (abfd);
-#endif
 			      }
 			      break;
 			    case ALPHA_R_LINKAGE:

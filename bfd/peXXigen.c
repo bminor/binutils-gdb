@@ -138,24 +138,6 @@ _bfd_XXi_swap_sym_in (abfd, ext1, in1)
     {
       in->n_value = 0x0;
 
-#if 0
-      /* FIXME: This is clearly wrong.  The problem seems to be that
-         undefined C_SECTION symbols appear in the first object of a
-         MS generated .lib file, and the symbols are not defined
-         anywhere.  */
-      in->n_scnum = 1;
-
-      /* I have tried setting the class to 3 and using the following
-	 to set the section number.  This will put the address of the
-	 pointer to the string kernel32.dll at addresses 0 and 0x10
-	 off start of idata section which is not correct.  */
-#if 0
-      if (strcmp (in->_n._n_name, ".idata$4") == 0)
-	in->n_scnum = 3;
-      else
-	in->n_scnum = 2;
-#endif
-#else
       /* Create synthetic empty sections as needed.  DJ */
       if (in->n_scnum == 0)
 	{
@@ -205,7 +187,6 @@ _bfd_XXi_swap_sym_in (abfd, ext1, in1)
 	  in->n_scnum = unused_section_number;
 	}
       in->n_sclass = C_STAT;
-#endif
     }
 #endif
 
@@ -1050,14 +1031,6 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
 	  H_PUT_16 (abfd, 0xffff, scnhdr_ext->s_nreloc);
 	  scnhdr_int->s_flags |= IMAGE_SCN_LNK_NRELOC_OVFL;
 	  H_PUT_32 (abfd, scnhdr_int->s_flags, scnhdr_ext->s_flags);
-#if 0
-	  (*_bfd_error_handler) (_("%s: reloc overflow 1: 0x%lx > 0xffff"),
-				 bfd_get_filename (abfd),
-				 scnhdr_int->s_nreloc);
-	  bfd_set_error (bfd_error_file_truncated);
-	  H_PUT_16 (abfd, 0xffff, scnhdr_ext->s_nreloc);
-	  ret = 0;
-#endif
 	}
     }
   return ret;
@@ -1230,11 +1203,6 @@ pe_print_idata (abfd, vfile)
 
       /* Print (i + extra->DataDirectory[1].VirtualAddress).  */
       fprintf (file, " %08lx\t", (unsigned long) (i + adj + dataoff));
-#if 0
-      if (i + 20 > datasize)
-	/* Check stuff.  */
-	;
-#endif
       hint_addr = bfd_get_32 (abfd, data + i + dataoff);
       time_stamp = bfd_get_32 (abfd, data + i + 4 + dataoff);
       forward_chain = bfd_get_32 (abfd, data + i + 8 + dataoff);
@@ -2010,14 +1978,6 @@ _bfd_XX_get_symbol_info (abfd, symbol, ret)
      symbol_info *ret;
 {
   coff_get_symbol_info (abfd, symbol, ret);
-#if 0 /* This code no longer appears to be necessary.
-	 ImageBase has already been added in by coff_swap_scnhdr_in.  */
-  if (pe_data (abfd) != NULL
-      && ((symbol->flags & BSF_DEBUGGING) == 0
-	  || (symbol->flags & BSF_DEBUGGING_RELOC) != 0)
-      && ! bfd_is_abs_section (symbol->section))
-    ret->value += pe_data (abfd)->pe_opthdr.ImageBase;
-#endif
 }
 
 /* Handle the .idata section and other things that need symbol table

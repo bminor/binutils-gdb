@@ -770,13 +770,7 @@ _bfd_vms_output_flush (abfd)
   while (aligncount-- > 0)
     {
       PRIV (output_buf)[real_size++] = 0;
-#if 0
-      /* this is why I *love* vms: inconsistency :-}
-	 alignment is added to the subrecord length
-	 but not to the record length  */
-      if (PRIV (push_level) > 0)
-#endif
-	length++;
+      length++;
     }
 
   /* put length to buffer  */
