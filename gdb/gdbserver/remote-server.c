@@ -57,7 +57,6 @@ main (argc, argv)
   int i = 0;
   unsigned char signal;
   unsigned int mem_addr, len;
-  char argvec[1024];
 
   if (setjmp(toplevel))
     {
@@ -71,18 +70,10 @@ main (argc, argv)
   initialize ();
   remote_open (argv[1], 0);
 
-  argvec[0] = '\000';
-  for (i = 2; i < argc; i++)
-    strcat(argvec, argv[i]);
+  inferior_pid = create_inferior (argv[2], &argv[2]);
+  fprintf (stderr, "Process %s created; pid = %d\n", argv[2], inferior_pid);
 
-  inferior_pid = create_inferior (argvec, environ);
-  fprintf (stderr, "Process %s created; pid = %d\n", argv[1], inferior_pid);
-
-  signal = mywait (&status);	/* Wait till we are at 1st instr in shell */
-  if (status != 'S' || signal != SIGTRAP)
-    error ("Bad status from shell\n");
-  myresume (0, 0);		/* Start up the shell */
-  signal = mywait (&status);	/* Wait for program to start */
+  signal = mywait (&status);	/* Wait till we are at 1st instr in prog */
 
   /* We are now stopped at the first instruction of the target process */
 

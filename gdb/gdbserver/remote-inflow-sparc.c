@@ -59,37 +59,23 @@ int query ();
    ENV is the environment vector to pass.  */
 
 int
-create_inferior (allargs, env)
+create_inferior (program, allargs)
+     char *program;
      char **allargs;
-     char **env;
 {
   int pid;
-  extern int sys_nerr;
-  extern char *sys_errlist[];
-  extern int errno;
-  char status;
-  char execbuf[1024];
 
-  /* exec is said to fail if the executable is open.  */
-  /****************close_exec_file ();*****************/
-
-  sprintf (execbuf, "exec %s", allargs);
-
-  pid = vfork ();
+  pid = fork ();
   if (pid < 0)
-    perror_with_name ("vfork");
+    perror_with_name ("fork");
 
   if (pid == 0)
     {
-      /* Run inferior in a separate process group.  */
-      setpgrp (getpid (), getpid ());
-
-      errno = 0;
       ptrace (PTRACE_TRACEME);
 
-      execle ("/bin/sh", "sh", "-c", execbuf, 0, env);
+      execv (program, allargs);
 
-      fprintf (stderr, "Cannot exec /bin/sh: %s.\n",
+      fprintf (stderr, "Cannot exec %s: %s.\n", program,
 	       errno < sys_nerr ? sys_errlist[errno] : "unknown error");
       fflush (stderr);
       _exit (0177);
