@@ -1,3 +1,12 @@
+2001-04-12  Jim Blandy  <jimb@redhat.com>
+
+	* mips.igen (CFC1, CTC1): Pass the correct register numbers to
+	PENDING_FILL.  Use PENDING_SCHED directly to handle the pending
+	set of the FCSR.
+	* sim-main.h (COCIDX): Remove definition; this isn't supported by
+	PENDING_FILL, and you can get the intended effect gracefully by
+	calling PENDING_SCHED directly.
+
 2001-02-23  Ben Elliston  <bje@redhat.com>
 
 	* sim-main.h (ENGINE_ISSUE_PREFIX_HOOK): Only define if not

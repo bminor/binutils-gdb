@@ -2839,11 +2839,11 @@
   if (X)
     {
       if (FS == 0)
-	PENDING_FILL((FS + FCR0IDX),VL4_8(GPR[RT]));
+	PENDING_FILL(FCR0IDX,VL4_8(GPR[RT]));
       else if (FS == 31)
-	PENDING_FILL((FS + FCR31IDX),VL4_8(GPR[RT]));
+	PENDING_FILL(FCR31IDX,VL4_8(GPR[RT]));
       /* else NOP */
-      PENDING_FILL(COCIDX,0); /* special case */
+      PENDING_SCHED(FCSR, FCR31 & (1<<23), 1, 23);
     }
   else
     { /* control from */

@@ -405,7 +405,6 @@ enum float_operation
 #define Debug	(REGISTERS[86])
 #define DEPC	(REGISTERS[87])
 #define EPC	(REGISTERS[88])
-#define COCIDX  (LAST_EMBED_REGNUM + 2) /* special case : outside the normal range */
 
   /* All internal state modified by signal_exception() that may need to be
      rolled back for passing moment-of-exception image back to gdb. */
