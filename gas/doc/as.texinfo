@@ -36,7 +36,7 @@ original English.
 @tex
 @finalout
 @end tex
-
+@smallbook
 @setchapternewpage odd
 @c if m680x0
 @c @settitle Using GNU as (680x0)
@@ -637,7 +637,7 @@ takes exactly one filename) to give the object file a different name.
 Whatever the object file is called, @code{as} will overwrite any
 existing file of the same name.
 
-@subsection Fold Data Segment into Text Segment: @code{-R}
+@subsection Data Segment into Text Segment: @code{-R}
 @code{-R} tells @code{as} to write the object file as if all
 data-segment data lives in the text segment.  This is only done at
 the very last moment:  your binary data are the same, but data
@@ -842,13 +842,13 @@ another$label:           # This is an empty statement.
 @section Constants
 A constant is a number, written so that its value is known by
 inspection, without knowing any context.  Like this:
-@example
+@smallexample
 .byte  74, 0112, 092, 0x4A, 0X4a, 'J, '\J # All the same value.
 .ascii "Ring the bell\7"                  # A string constant.
 .octa  0x123456789abcdef0123456789ABCDEF0 # A bignum.
 .float 0f-314159265358979323846264338327\
 95028841971.693993751E-40                 # - pi, a flonum.
-@end example
+@end smallexample
 
 @menu
 * Characters::			Character Constants
@@ -1787,17 +1787,17 @@ of a program quit, it could use this directive tells @code{as} to
 quit also.  One day @code{.abort} will not be supported.
 
 @node Align, App-File, Abort, Pseudo Ops
-@section @code{.align @var{absolute-expression} , @var{absolute-expression}}
+@section @code{.align @var{abs-expression} , @var{abs-expression}}
 Pad the location counter (in the current subsegment) to a particular
-storage boundary.  The first expression is the number of low-order zero
-bits the location counter will have after advancement.  For example
-@samp{.align 3} will advance the location counter until it a multiple of
-8.  If the location counter is already a multiple of 8, no change is
-needed.
+storage boundary.  The first expression (which must be absolute) is the
+number of low-order zero bits the location counter will have after
+advancement.  For example @samp{.align 3} will advance the location
+counter until it a multiple of 8.  If the location counter is already a
+multiple of 8, no change is needed.
 
-The second expression gives the value to be stored in the padding
-bytes.  It (and the comma) may be omitted.  If it is omitted, the
-padding bytes are zero.
+The second expression (also absolute) gives the value to be stored in
+the padding bytes.  It (and the comma) may be omitted.  If it is
+omitted, the padding bytes are zero.
 
 @node App-File, Ascii, Align, Pseudo Ops
 @section @code{.app-file @var{string}}
@@ -1844,9 +1844,9 @@ absolute expression).  If @var{subsegment} is omitted, it defaults
 to zero.
 
 @node Desc, Double, Data, Pseudo Ops
-@section @code{.desc @var{symbol}, @var{absolute-expression}}
+@section @code{.desc @var{symbol}, @var{abs-expression}}
 This directive sets the descriptor of the symbol (@pxref{Symbol Attributes})
-to the low 16 bits of @var{absolute-expression}.
+to the low 16 bits of an absolute expression.
 
 @node Double, Else, Desc, Pseudo Ops
 @section @code{.double @var{flonums}}
@@ -2030,9 +2030,10 @@ One day this directive will be unsupported: it is used only
 for compatibility with existing assembler programs. @refill
 
 @node List, Long, Ln, Pseudo Ops
-@section @code{.list}, @code{.nolist}, @code{.eject}, @code{.lflags}, @code{.title}, @code{.sbttl}
-GNU @code{as} ignores these directives; however, they're
-accepted for compatibility with assemblers that use them.
+@section @code{.list} and related directives
+GNU @code{as} ignores the directives @code{.list}, @code{.nolist},
+@code{.eject}, @code{.lflags}, @code{.title}, @code{.sbttl}; however,
+they're accepted for compatibility with assemblers that use them.
 
 @node Long, Lsym, List, Pseudo Ops
 @section @code{.long @var{expressions}}
@@ -4425,7 +4426,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 @end ifinfo
 
 @page
-@unnumberedsec Appendix: How to Apply These Terms to Your New Programs
+@unnumberedsec How to Apply These Terms to Your New Programs
 
   If you develop a new program, and you want it to be of the greatest
 possible use to humanity, the best way to achieve this is to make it
@@ -4478,14 +4479,14 @@ You should also get your employer (if you work as a programmer) or your
 school, if any, to sign a ``copyright disclaimer'' for the program, if
 necessary.  Here is a sample; alter the names:
 
-@example
+@smallexample
 Yoyodyne, Inc., hereby disclaims all copyright interest in the
 program `Gnomovision' (a program to direct compilers to make passes
 at assemblers) written by James Hacker.
 
 @var{signature of Ty Coon}, 1 April 1989
 Ty Coon, President of Vice
-@end example
+@end smallexample
 
 That's all there is to it!
 
