@@ -1,3 +1,15 @@
+Tue Mar 31 21:30:39 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-tdep.c (gdb_print_insn_arm): Attach a fake Thumb symbol
+	vector to the info structure when disassembling thumb
+	instructions. 
+
+	* coffread.c (coff_symtab_read, read_one_sym,
+	process_coff_symbol):  Support Thumb symbol types. 
+
+	* dbxread.c (process_one_symbol): Call SMASH_TEXT_ADDRESS (if it
+	is defined) for function symbols.  
+
 Mon Feb 16 14:05:54 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* d10v-tdep.c (d10v_extract_return_value): Wierd.  GCC wants to
