@@ -3,14 +3,25 @@
 
 /********************** FILE HEADER **********************/
 
-struct filehdr {
-	unsigned short	f_magic;	/* magic number			*/
-	unsigned short	f_nscns;	/* number of sections		*/
-	long		f_timdat;	/* time & date stamp		*/
-	long		f_symptr;	/* file pointer to symtab	*/
-	long		f_nsyms;	/* number of symtab entries	*/
-	unsigned short	f_opthdr;	/* sizeof(optional hdr)		*/
-	unsigned short	f_flags;	/* flags			*/
+struct external_filehdr {
+	char f_magic[2];	/* magic number			*/
+	char f_nscns[2];	/* number of sections		*/
+	char f_timdat[4];	/* time & date stamp		*/
+	char f_symptr[4];	/* file pointer to symtab	*/
+	char f_nsyms[4];	/* number of symtab entries	*/
+	char f_opthdr[2];	/* sizeof(optional hdr)		*/
+	char f_flags[2];	/* flags			*/
+};
+
+struct internal_filehdr 
+{
+  unsigned short	f_magic; /* magic number			*/
+  unsigned short	f_nscns; /* number of sections		*/
+  long		f_timdat;	 /* time & date stamp		*/
+  long		f_symptr;	 /* file pointer to symtab	*/
+  long		f_nsyms;	 /* number of symtab entries	*/
+  unsigned short	f_opthdr; /* sizeof(optional hdr)		*/
+  unsigned short	f_flags;  /* flags			*/
 };
 
 /* Bits for f_flags:
@@ -41,25 +52,41 @@ struct filehdr {
 
 			
 
-#define	FILHDR	struct filehdr
+#define	FILHDR	struct external_filehdr
 #define	FILHSZ	sizeof(FILHDR)
 
 
 /********************** AOUT "OPTIONAL HEADER" **********************/
-
-typedef	struct aouthdr {
+struct internal_aouthdr {
 	short		magic;	/* type of file				*/
 	short		vstamp;	/* version stamp			*/
 	unsigned long	tsize;	/* text size in bytes, padded to FW bdry*/
 	unsigned long	dsize;	/* initialized data "  "		*/
 	unsigned long	bsize;	/* uninitialized data "   "		*/
-
+#if U3B
+	unsigned long	dum1;
+	unsigned long	dum2;	/* pad to entry point	*/
+#endif
 	unsigned long	entry;	/* entry pt.				*/
 	unsigned long	text_start;	/* base of text used for this file */
 	unsigned long	data_start;	/* base of data used for this file */
-} AOUTHDR;
+	unsigned long	tagentries;	/* number of tag entries to follow */
+} ;
 
 
+typedef struct 
+{
+  char 	magic[2];		/* type of file				*/
+  char	vstamp[2];		/* version stamp			*/
+  char	tsize[4];		/* text size in bytes, padded to FW bdry*/
+  char	dsize[4];		/* initialized data "  "		*/
+  char	bsize[4];		/* uninitialized data "   "		*/
+  char	entry[4];		/* entry pt.				*/
+  char 	text_start[4];		/* base of text used for this file */
+  char 	data_start[4];		/* base of data used for this file */
+  char	tagentries[4];		/* number of tag entries to follow */
+}
+AOUTHDR;
 
 #define AOUTSZ (sizeof(AOUTHDR))
 
@@ -98,7 +125,7 @@ typedef	struct aouthdr {
 
 /********************** SECTION HEADER **********************/
 
-struct scnhdr {
+struct internal_scnhdr {
 	char		s_name[8];	/* section name			*/
 	long		s_paddr;	/* physical address, aliased s_nlib */
 	long		s_vaddr;	/* virtual address		*/
@@ -109,7 +136,19 @@ struct scnhdr {
 	unsigned short	s_nreloc;	/* number of relocation entries	*/
 	unsigned short	s_nlnno;	/* number of line number entries*/
 	long		s_flags;	/* flags			*/
+};
 
+struct external_scnhdr {
+	char		s_name[8];	/* section name			*/
+	char		s_paddr[4];	/* physical address, aliased s_nlib */
+	char		s_vaddr[4];	/* virtual address		*/
+	char		s_size[4];	/* section size			*/
+	char		s_scnptr[4];	/* file ptr to raw data for section */
+	char		s_relptr[4];	/* file ptr to relocation	*/
+	char		s_lnnoptr[4];	/* file ptr to line numbers	*/
+	char		s_nreloc[2];	/* number of relocation entries	*/
+	char		s_nlnno[2];	/* number of line number entries*/
+	char		s_flags[4];	/* flags			*/
 };
 
 /*
@@ -143,7 +182,7 @@ struct scnhdr {
 #define STYP_REVERSE_PAD (0x4000) /* section will be padded with no-op instructions wherever padding is necessary and there is a
 				     word of contiguous bytes beginning on a word boundary. */
 
-#define	SCNHDR	struct scnhdr
+#define	SCNHDR	struct external_scnhdr
 #define	SCNHSZ	sizeof(SCNHDR)
 
 

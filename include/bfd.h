@@ -808,18 +808,18 @@ BFD_SEND (abfd, _bfd_find_nearest_line, (abfd, section,symbols, offset, filename
 
 #define bfd_h_put_x(abfd, val, ptr) \
   do {  \
-       if (sizeof(*(ptr)) == LONG_SIZE) \
-		bfd_h_putlong  (abfd, val, (bfd_byte*)(ptr));\
-  else if (sizeof(*(ptr)) == SHORT_SIZE) \
-		bfd_h_putshort (abfd, val, (bfd_byte *)(ptr));\
-  else if (sizeof(*(ptr)) == BYTE_SIZE) \
-		bfd_h_putchar  (abfd, val, (bfd_byte *)(ptr));\
+       if (sizeof((ptr)) == LONG_SIZE) \
+		bfd_h_putlong  (abfd, val, (ptr));\
+  else if (sizeof((ptr)) == SHORT_SIZE) \
+		bfd_h_putshort (abfd, val, (ptr));\
+  else if (sizeof((ptr)) == BYTE_SIZE) \
+		bfd_h_putchar  (abfd, val, (ptr));\
   else abort(); } while (0)
 
 #define bfd_h_get_x(abfd, ptr) \
-  ((sizeof(*(ptr))==LONG_SIZE) ?  bfd_h_getlong (abfd, (bfd_byte *)(ptr)):\
-   (sizeof(*(ptr))==SHORT_SIZE) ? bfd_h_getshort(abfd, (bfd_byte *)(ptr)):\
-   (sizeof(*(ptr))==BYTE_SIZE) ?  bfd_h_getchar (abfd, (bfd_byte *)(ptr)):\
+  ((sizeof((ptr))==LONG_SIZE) ?  bfd_h_getlong (abfd, &(ptr[0])):\
+   (sizeof((ptr))==SHORT_SIZE) ? bfd_h_getshort(abfd, &(ptr[0])):\
+   (sizeof((ptr))==BYTE_SIZE) ?  bfd_h_getchar (abfd, &(ptr[0])):\
    (abort(),1) )
 
 #ifdef GNU960

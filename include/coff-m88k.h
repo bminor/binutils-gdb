@@ -1,15 +1,25 @@
 /*** coff information for 88k bcs */
 
 /********************** FILE HEADER **********************/
+struct external_filehdr {
+	char f_magic[2];	/* magic number			*/
+	char f_nscns[2];	/* number of sections		*/
+	char f_timdat[4];	/* time & date stamp		*/
+	char f_symptr[4];	/* file pointer to symtab	*/
+	char f_nsyms[4];	/* number of symtab entries	*/
+	char f_opthdr[2];	/* sizeof(optional hdr)		*/
+	char f_flags[2];	/* flags			*/
+};
 
-struct filehdr {
-	unsigned short	f_magic;	/* magic number			*/
-	unsigned short	f_nscns;	/* number of sections		*/
-	long		f_timdat;	/* time & date stamp		*/
-	long		f_symptr;	/* file pointer to symtab	*/
-	long		f_nsyms;	/* number of symtab entries	*/
-	unsigned short	f_opthdr;	/* sizeof(optional hdr)		*/
-	unsigned short	f_flags;	/* flags			*/
+struct internal_filehdr 
+{
+  unsigned short	f_magic; /* magic number			*/
+  unsigned short	f_nscns; /* number of sections		*/
+  long		f_timdat;	 /* time & date stamp		*/
+  long		f_symptr;	 /* file pointer to symtab	*/
+  long		f_nsyms;	 /* number of symtab entries	*/
+  unsigned short	f_opthdr; /* sizeof(optional hdr)		*/
+  unsigned short	f_flags;  /* flags			*/
 };
 
 /* Bits for f_flags:
@@ -32,7 +42,7 @@ struct filehdr {
 
 #define MC88BADMAG(x) (((x).f_magic!=MC88MAGIC) &&((x).f_magic!=MC88DMAGIC) && ((x).f_magic != MC88OMAGIC))
 
-#define	FILHDR	struct filehdr
+#define	FILHDR	struct external_filehdr
 #define	FILHSZ	sizeof(FILHDR)
 
 
@@ -42,18 +52,33 @@ struct filehdr {
 #define PAGEMAGIC3 0414 /* Split i&d, zero mapped */
 #define PAGEMAGICBCS 0413
 
-typedef	struct aouthdr {
-	short		magic;	/* type of file				*/
-	short		vstamp;	/* version stamp			*/
-	unsigned long	tsize;	/* text size in bytes, padded to FW bdry*/
-	unsigned long	dsize;	/* initialized data "  "		*/
-	unsigned long	bsize;	/* uninitialized data "   "		*/
+struct internal_aouthdr 
+{
+  short		magic;		/* type of file				*/
+  short		vstamp;		/* version stamp			*/
+  unsigned long	tsize;		/* text size in bytes, padded to FW bdry*/
+  unsigned long	dsize;		/* initialized data "  "		*/
+  unsigned long	bsize;		/* uninitialized data "   "		*/
+  unsigned long	entry;		/* entry pt.				*/
+  unsigned long	text_start;	/* base of text used for this file */
+  unsigned long	data_start;	/* base of data used for this file */
+  unsigned long	tagentries;	/* number of tag entries to follow */
+} ;
 
-	unsigned long	entry;	/* entry pt.				*/
-	unsigned long	text_start;	/* base of text used for this file */
-	unsigned long	data_start;	/* base of data used for this file */
 
-} AOUTHDR;
+typedef struct 
+{
+  char 	magic[2];		/* type of file				*/
+  char	vstamp[2];		/* version stamp			*/
+  char	tsize[4];		/* text size in bytes, padded to FW bdry*/
+  char	dsize[4];		/* initialized data "  "		*/
+  char	bsize[4];		/* uninitialized data "   "		*/
+  char	entry[4];		/* entry pt.				*/
+  char 	text_start[4];		/* base of text used for this file */
+  char 	data_start[4];		/* base of data used for this file */
+  char	tagentries[4];		/* number of tag entries to follow */
+}
+AOUTHDR;
 
 
 /* compute size of a header */
@@ -95,17 +120,32 @@ typedef	struct aouthdr {
 
 /********************** SECTION HEADER **********************/
 
-struct scnhdr {
-	char		s_name[8];	/* section name			*/
-	long		s_paddr;	/* physical address, aliased s_nlib */
-	long		s_vaddr;	/* virtual address		*/
-	long		s_size;		/* section size			*/
-	long		s_scnptr;	/* file ptr to raw data for section */
-	long		s_relptr;	/* file ptr to relocation	*/
-	long		s_lnnoptr;	/* file ptr to line numbers	*/
-	long    	s_nreloc;	/* number of relocation entries	*/
-	long  	        s_nlnno;	/* number of line number entries*/
-	long		s_flags;	/* flags			*/
+struct internal_scnhdr 
+{
+  char		s_name[8];	/* section name			*/
+  long		s_paddr;	/* physical address, aliased s_nlib */
+  long		s_vaddr;	/* virtual address		*/
+  long		s_size;		/* section size			*/
+  long		s_scnptr;	/* file ptr to raw data for section */
+  long		s_relptr;	/* file ptr to relocation	*/
+  long		s_lnnoptr;	/* file ptr to line numbers	*/
+  unsigned long s_nreloc;	/* number of relocation entries	*/
+  unsigned long s_nlnno;	/* number of line number entries*/
+  long		s_flags;	/* flags			*/
+};
+
+struct external_scnhdr 
+{
+  char		s_name[8];	/* section name			*/
+  char		s_paddr[4];	/* physical address, aliased s_nlib */
+  char		s_vaddr[4];	/* virtual address		*/
+  char		s_size[4];	/* section size			*/
+  char		s_scnptr[4];	/* file ptr to raw data for section */
+  char		s_relptr[4];	/* file ptr to relocation	*/
+  char		s_lnnoptr[4];	/* file ptr to line numbers	*/
+  char		s_nreloc[4];	/* number of relocation entries	*/
+  char		s_nlnno[4];	/* number of line number entries*/
+  char		s_flags[4];	/* flags			*/
 };
 
 /*
@@ -122,7 +162,7 @@ struct scnhdr {
 #define STYP_DATA	0x40		/* section contains data only	*/
 #define STYP_BSS	0x80		/* section contains bss only	*/
 
-#define	SCNHDR	struct scnhdr
+#define	SCNHDR	struct external_scnhdr
 #define	SCNHSZ	sizeof(SCNHDR)
 
 

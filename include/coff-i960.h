@@ -7,23 +7,34 @@
 
 /********************** FILE HEADER **********************/
 
-struct filehdr {
-	unsigned short	f_magic;	/* magic number			*/
-	unsigned short	f_nscns;	/* number of sections		*/
-	long		f_timdat;	/* time & date stamp		*/
-	long		f_symptr;	/* file pointer to symtab	*/
-	long		f_nsyms;	/* number of symtab entries	*/
-	unsigned short	f_opthdr;	/* sizeof(optional hdr)		*/
-	unsigned short	f_flags;	/* flags			*/
+struct external_filehdr {
+	char f_magic[2];	/* magic number			*/
+	char f_nscns[2];	/* number of sections		*/
+	char f_timdat[4];	/* time & date stamp		*/
+	char f_symptr[4];	/* file pointer to symtab	*/
+	char f_nsyms[4];	/* number of symtab entries	*/
+	char f_opthdr[2];	/* sizeof(optional hdr)		*/
+	char f_flags[2];	/* flags			*/
+};
+
+struct internal_filehdr 
+{
+  unsigned short	f_magic; /* magic number			*/
+  unsigned short	f_nscns; /* number of sections		*/
+  long		f_timdat;	 /* time & date stamp		*/
+  long		f_symptr;	 /* file pointer to symtab	*/
+  long		f_nsyms;	 /* number of symtab entries	*/
+  unsigned short	f_opthdr; /* sizeof(optional hdr)		*/
+  unsigned short	f_flags;  /* flags			*/
 };
 
 /* Bits for f_flags:
- *	F_RELFLG	relocation info stripped from file
- *	F_EXEC		file is executable (no unresolved external references)
- *	F_LNNO		line numbers stripped from file
- *	F_LSYMS		local symbols stripped from file
- *	F_AR32WR	file has byte ordering of an AR32WR machine (e.g. vax)
- */
+*	F_RELFLG	relocation info stripped from file
+*	F_EXEC		file is executable (no unresolved external references)
+*	F_LNNO		line numbers stripped from file
+*	F_LSYMS		local symbols stripped from file
+*	F_AR32WR	file has byte ordering of an AR32WR machine (e.g. vax)
+*/
 
 #define F_RELFLG	(0x0001)
 #define F_EXEC		(0x0002)
@@ -32,9 +43,9 @@ struct filehdr {
 #define F_AR32WR	(0x0010)
 
 /*
- *	Intel 80960 (I960) processor flags.
- *	F_I960TYPE == mask for processor type field. 
- */
+*	Intel 80960 (I960) processor flags.
+*	F_I960TYPE == mask for processor type field. 
+*/
 
 #define	F_I960TYPE	(0xf000)
 #define	F_I960CORE	(0x1000)
@@ -45,19 +56,35 @@ struct filehdr {
 #define	F_I960CA	(0x5000)
 #define	F_I960KA	(0x6000)
 #define	F_I960SA	(0x6000)
-  
-  /*
-   * i80960 Magic Numbers
-   */
+
+
+/* Mips magics */
+#define MIPSEBMAGIC 0x160
+#define MIPSELMAGIC 0x161
+#define  SMIPSEBMAGIC	0x6001
+#define  SMIPSELMAGIC	0x162 /*0x6201*/ 
+#define  MIPSEBUMAGIC	0x0180
+#define  MIPSELUMAGIC	0x0182
+
+
+
+#define ECOFFBADMAG(x) (((x).f_magic!=MIPSEBMAGIC) &&\
+			((x).f_magic!=MIPSELMAGIC) &&\
+			((x).f_magic!=SMIPSEBMAGIC) &&\
+			((x).f_magic!=SMIPSELMAGIC) &&\
+			((x).f_magic!=MIPSEBUMAGIC) &&\
+			((x).f_magic!=MIPSELUMAGIC))
+
+/** i80960 Magic Numbers
+*/
 
 #define I960ROMAGIC	(0x160)	/* read-only text segments */
 #define I960RWMAGIC	(0x161)	/* read-write text segments */
 
 #define I960BADMAG(x) (((x).f_magic!=I960ROMAGIC) && ((x).f_magic!=I960RWMAGIC))
 
-#define	FILHDR	struct filehdr
-#define	FILHSZ	sizeof(FILHDR)
-
+#define	FILHDR	struct external_filehdr
+#define	FILHSZ	20
 
 /********************** AOUT "OPTIONAL HEADER" **********************/
 
@@ -89,7 +116,7 @@ typedef struct {
 #define SASMAGIC    (010000)	/* (?) "Single Address Space" */    
 #define MASMAGIC    (020000)	/* (?) "Multiple (separate I/D) Addr. Spaces" */
 
-typedef	struct aouthdr {
+struct internal_aouthdr {
 	short		magic;	/* type of file				*/
 	short		vstamp;	/* version stamp			*/
 	unsigned long	tsize;	/* text size in bytes, padded to FW bdry*/
@@ -101,9 +128,31 @@ typedef	struct aouthdr {
 #endif
 	unsigned long	entry;	/* entry pt.				*/
 	unsigned long	text_start;	/* base of text used for this file */
-	unsigned long	data_start;	/* base of data used for this file */
-	unsigned long	tagentries;	/* number of tag entries to follow */
-} AOUTHDR;
+	unsigned long	data_start;	/* base of data used for this
+					   file */
+#ifndef MIPS
+	unsigned long	tagentries;	/* number of tag entries to
+					   follow */
+#endif
+
+} ;
+
+
+typedef struct 
+{
+  char 	magic[2];		/* type of file				*/
+  char	vstamp[2];		/* version stamp			*/
+  char	tsize[4];		/* text size in bytes, padded to FW bdry*/
+  char	dsize[4];		/* initialized data "  "		*/
+  char	bsize[4];		/* uninitialized data "   "		*/
+  char	entry[4];		/* entry pt.				*/
+  char 	text_start[4];		/* base of text used for this file */
+  char 	data_start[4];		/* base of data used for this file */
+#ifndef MIPS
+  char	tagentries[4];		/* number of tag entries to follow */
+#endif
+}
+AOUTHDR;
 
 /* return a pointer to the tag bits array */
 
@@ -163,7 +212,7 @@ typedef	struct aouthdr {
 
 /********************** SECTION HEADER **********************/
 
-struct scnhdr {
+struct internal_scnhdr {
 	char		s_name[8];	/* section name			*/
 	long		s_paddr;	/* physical address, aliased s_nlib */
 	long		s_vaddr;	/* virtual address		*/
@@ -177,6 +226,23 @@ struct scnhdr {
 #ifndef MIPS
  /* This field exists in Intel COFF, not in Mips ECOFF. */
 	unsigned long	s_align;	/* section alignment		*/
+#endif
+};
+
+struct external_scnhdr {
+	char		s_name[8];	/* section name			*/
+	char		s_paddr[4];	/* physical address, aliased s_nlib */
+	char		s_vaddr[4];	/* virtual address		*/
+	char		s_size[4];	/* section size			*/
+	char		s_scnptr[4];	/* file ptr to raw data for section */
+	char		s_relptr[4];	/* file ptr to relocation	*/
+	char		s_lnnoptr[4];	/* file ptr to line numbers	*/
+	char		s_nreloc[2];	/* number of relocation entries	*/
+	char		s_nlnno[2];	/* number of line number entries*/
+	char		s_flags[4];	/* flags			*/
+#ifndef MIPS
+ /* This field exists in Intel COFF, not in Mips ECOFF. */
+	char 		s_align[4];	/* section alignment		*/
 #endif
 };
 
@@ -211,7 +277,7 @@ struct scnhdr {
 #define STYP_REVERSE_PAD (0x4000) /* section will be padded with no-op instructions wherever padding is necessary and there is a
 				     word of contiguous bytes beginning on a word boundary. */
 
-#define	SCNHDR	struct scnhdr
+#define	SCNHDR	struct external_scnhdr
 #define	SCNHSZ	sizeof(SCNHDR)
 
 
@@ -227,7 +293,7 @@ struct external_lineno {
 		char l_symndx[4];	/* function name symbol index, iff l_lnno == 0*/
 		char l_paddr[4];	/* (physical) address of line number	*/
 	} l_addr;
-	unsigned short	l_lnno;	/* line number		*/
+	char l_lnno[2];		/* line number		*/
 	char padding[2];	/* force alignment	*/
 };
 
@@ -462,9 +528,9 @@ union 	internal_auxent {
 };
 
 #define	SYMENT	struct external_syment
-#define	SYMESZ	sizeof(SYMENT)	
+#define	SYMESZ	sizeof(SYMENT)			/* FIXME - calc by hand */
 #define	AUXENT	union external_auxent
-#define	AUXESZ	sizeof(AUXENT)
+#define	AUXESZ	sizeof(AUXENT)			/* FIXME - calc by hand */
 
 #	define _ETEXT	"_etext"
 

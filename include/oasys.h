@@ -16,6 +16,19 @@ typedef struct {
 } oasys_archive_header_type;
 
 typedef struct {
+  char version[4];
+  char create_date[12];
+  char revision_date[12];
+  char mod_count[4];
+  char mod_tbl_offset[4];
+  char sym_tbl_size[4];
+  char sym_count[4];
+  char sym_tbl_offset[4];
+  char xref_count[4];
+  char xref_lst_offset[4];
+} oasys_external_archive_header_type;
+
+typedef struct {
   int32_type mod_number;
   char mod_date[12];
   int32_type mod_size;
@@ -25,6 +38,18 @@ typedef struct {
   int32_type file_offset;
   int32_type mod_name_length;
 } oasys_module_table_type;
+
+
+typedef struct {
+  char mod_number[4];
+  char mod_date[12];
+  char mod_size[4];
+  char dep_count[4];
+  char depee_count[4];
+  char sect_count[4];
+  char file_offset[4];
+  char mod_name_length[4];
+} oasys_external_module_table_type;
 
 
 typedef enum {
