@@ -826,7 +826,7 @@ _initialize_solib (void)
   add_info ("sharedlibrary", info_sharedlibrary_command,
 	    "Status of loaded shared object libraries.");
   add_com ("nosharedlibrary", class_files, no_shared_libraries,
-	   "Unload all shared object library symbols except .");
+	   "Unload all shared object library symbols.");
 
   add_show_from_set
     (add_set_cmd ("auto-solib-add", class_support, var_zinteger,
