@@ -1,3 +1,8 @@
+2004-09-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* messages.c (as_internal_value_out_of_range): Cast values passed
+	to as_bad_where or as_warn_where to proper type.
+
 2004-09-11  Theodore A. Roth  <troth@openavr.org>
 
 	* config/tc-avr.c: Add support for

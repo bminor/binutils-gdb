@@ -1,5 +1,6 @@
 /* messages.c - error reporter -
-   Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001, 2003
+   Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001,
+   2003, 2004
    Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
@@ -534,9 +535,11 @@ as_internal_value_out_of_range (char *    prefix,
       err = _("%s out of range (%d is not between %d and %d)");
 
       if (bad)
-	as_bad_where (file, line, err, prefix, val, min, max);
+	as_bad_where (file, line, err,
+		      prefix, (int) val, (int) min, (int) max);
       else
-	as_warn_where (file, line, err, prefix, val, min, max);
+	as_warn_where (file, line, err,
+		       prefix, (int) val, (int) min, (int) max);
     }
 #ifdef BFD_ASSEMBLER
   else
