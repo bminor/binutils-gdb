@@ -1,3 +1,19 @@
+Tue Mar 24 17:46:08 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
+
+	* Makefile.in:  Get SHELL from configure.
+	* configure:  Regenerate with autoconf 2.12.1 to fix shell issues for
+	NT native builds.
+
+Mon Mar 16 12:51:31 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.c: Pass sim_cia to trace_prefix.
+
+Thu Feb 26 19:25:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ld-insn.c (parse_function_record): Check models are valid.
+	(parse_function_record): Only discard function when no model is
+ 	common.
+
 Tue Feb 24 01:42:03 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen-engine.c (print_run_body): Always wrap generated idecode
