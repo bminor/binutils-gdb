@@ -778,7 +778,7 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target)
       som_solib_st_size_threshold_exceeded =
 	!from_tty &&
 	auto_solib_add &&
-	((st_size + som_solib_total_st_size) > (auto_solib_limit * (LONGEST) 1000000));
+	((st_size + som_solib_total_st_size) > (auto_solib_limit * (LONGEST) (1024 * 1024)));
 
       if (som_solib_st_size_threshold_exceeded)
 	{

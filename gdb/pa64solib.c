@@ -1168,7 +1168,7 @@ add_to_solist (boolean from_tty, char *dll_path,
        !from_tty 
     && auto_solib_add
     && (  (st_size + pa64_solib_total_st_size) 
-	> (auto_solib_limit * (LONGEST)1000000));
+	> (auto_solib_limit * (LONGEST) (1024 * 1024)));
   if (pa64_solib_st_size_threshhold_exceeded)
     {
       pa64_solib_add_solib_objfile (new_so, dll_path, from_tty, 1);

@@ -1453,7 +1453,6 @@ _initialize_inftarg (void)
 	       "Load dll library symbols from FILE.");
   c->completer = filename_completer;
 
-  auto_solib_add = 1;
   add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
 
   add_show_from_set (add_set_cmd ("new-console", class_support, var_boolean,

@@ -1,3 +1,10 @@
+2001-10-30  Fred Fish  <fnf@redhat.com>
+
+	* somsolib.c (som_solib_add): A megabyte is 1024*1024 bytes.
+	* pa64solib.c (add_to_solist): Ditto.
+	* win32-nat.c (_initialize_inftarg): Remove unnecessary
+	initialization of auto_solib_add, it defaults to 1.
+
 2001-10-27  Fred Fish  <fnf@redhat.com>
 
 	* symfile.c (auto_solib_add): Update comment to note that
