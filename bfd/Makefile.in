@@ -37,14 +37,14 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 	archures.o 
 
 BFD_BACKENDS = oasys.o ieee.o srec.o  sunos.o icoff.o b.out.o \
-	m88k-bcs.o coffswap.o ecoff.o # trad-core.o
+	m68kcoff.o m88k-bcs.o coffswap.o ecoff.o # trad-core.o
 
 BFD_H=$(INCDIR)/bfd.h
 SYSDEP_H=$(INCDIR)/sysdep.h
 
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
-	 sunos.c icoff.c b.out.c  srec.c oasys.c ieee.c m88k-bcs.c \
+	 sunos.c icoff.c b.out.c  srec.c oasys.c ieee.c m68kcoff.c m88k-bcs.c \
 	 coffswap.c ecoff.c trad-core.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
