@@ -51,7 +51,11 @@ const struct v850_operand v850_operands[] = {
 
 /* The DISP22 field in a format 4 insn. */
 #define D22	(D16+1)
-  { 16, 0, OPERAND_NUM }
+  { 16, 0, OPERAND_NUM },
+
+#define B3	(D22+1)
+/* The 3 bit immediate field in format 8 insn.  */
+  { 3, 3, OPERAND_NUM }
 } ; 
 
 
@@ -172,13 +176,11 @@ const struct v850_opcode v850_opcodes[] = {
 { "jarl",	one(0x0780),		one(0xf83f),	{ R2,D22 } }, 
 { "jr",		one(0x0780),		one(0xffe0),	{ D22 } },
 
-#if 0
 /* bit manipulation instructions */
-{ "set1",	one(0x07c0),		one(0xc7e0),	{B3, R1, D16} },
-{ "not1",	one(0x47c0),		one(0xc7e0),	{B3, R1, D16} },
-{ "clr1",	one(0x87c0),		one(0xc7e0),	{B3, R1, D16} },
-{ "tst1",	one(0xc7c0),		one(0xc7e0),	{B3, R1, D16} },
-#endif
+{ "set1",	two(0x07c0,0x0000),	two(0xc7e0,0x0000),	{B3, R1, D16} },
+{ "not1",	two(0x47c0,0x0000),	two(0xc7e0,0x0000),	{B3, R1, D16} },
+{ "clr1",	two(0x87c0,0x0000),	two(0xc7e0,0x0000),	{B3, R1, D16} },
+{ "tst1",	two(0xc7c0,0x0000),	two(0xc7e0,0x0000),	{B3, R1, D16} },
 
 /* special instructions */
 { "di",		two(0x07e0,0x0160),	two(0xffff,0xffff),	{0} },

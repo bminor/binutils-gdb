@@ -1,7 +1,11 @@
 start-sanitize-v850
 Wed Aug 21 18:46:26 1996  Jeffrey A Law  (law@cygnus.com)
 
-	* v850-ope.c ("jmp"): R1 is only operand.
+	* v850-opc.c (v850_operands): Add "B3" support.
+	(v850_opcodes): Fix and enable "set1", "clr1", "not1"
+	and "tst1".
+
+	* v850-opc.c (v850_opcodes): "jmp" has only an R1 operand.
 
 	* v850-opc.c: Close unterminated comment.
 
