@@ -255,6 +255,7 @@ struct gdbarch
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
   gdbarch_in_solib_call_trampoline_ftype *in_solib_call_trampoline;
   gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
+  gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments;
 };
 
 
@@ -394,6 +395,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_in_function_epilogue_p,
+  construct_inferior_arguments,
   /* startup_gdbarch() */
 };
 
@@ -504,6 +506,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   current_gdbarch->in_solib_call_trampoline = generic_in_solib_call_trampoline;
   current_gdbarch->in_function_epilogue_p = generic_in_function_epilogue_p;
+  current_gdbarch->construct_inferior_arguments = construct_inferior_arguments;
   /* gdbarch_alloc() */
 
   return current_gdbarch;
@@ -755,6 +758,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   /* Skip verify of in_solib_call_trampoline, invalid_p == 0 */
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
+  /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -962,6 +966,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->coerce_float_to_double
                         /*COERCE_FLOAT_TO_DOUBLE ()*/);
 #endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: construct_inferior_arguments = 0x%08lx\n",
+                        (long) current_gdbarch->construct_inferior_arguments);
 #ifdef CONVERT_FROM_FUNC_PTR_ADDR
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -4268,6 +4276,24 @@ set_gdbarch_in_function_epilogue_p (struct gdbarch *gdbarch,
                                     gdbarch_in_function_epilogue_p_ftype in_function_epilogue_p)
 {
   gdbarch->in_function_epilogue_p = in_function_epilogue_p;
+}
+
+char *
+gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
+{
+  if (gdbarch->construct_inferior_arguments == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_construct_inferior_arguments invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_construct_inferior_arguments called\n");
+  return gdbarch->construct_inferior_arguments (gdbarch, argc, argv);
+}
+
+void
+set_gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch,
+                                          gdbarch_construct_inferior_arguments_ftype construct_inferior_arguments)
+{
+  gdbarch->construct_inferior_arguments = construct_inferior_arguments;
 }
 
 

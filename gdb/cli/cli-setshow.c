@@ -267,6 +267,10 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
       old_chain = make_cleanup_ui_out_stream_delete (stb);
 #endif /* UI_OUT */
 
+      /* Possibly call the pre hook.  */
+      if (c->pre_show_hook)
+	(c->pre_show_hook) (c);
+
       /* Print doc minus "show" at start.  */
       print_doc_line (gdb_stdout, c->doc + 5);
 

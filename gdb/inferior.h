@@ -270,6 +270,8 @@ extern void clone_and_follow_inferior (int, int *);
 
 extern void startup_inferior (int);
 
+extern char *construct_inferior_arguments (struct gdbarch *, int, char **);
+
 /* From inflow.c */
 
 extern void new_tty_prefork (char *);
@@ -306,6 +308,8 @@ extern void attach_command (char *, int);
 extern char *get_inferior_args (void);
 
 extern char *set_inferior_args (char *);
+
+extern void set_inferior_args_vector (int, char **);
 
 /* Last signal that the inferior received (why it stopped).  */
 

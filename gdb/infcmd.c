@@ -123,6 +123,12 @@ static void breakpoint_auto_delete_contents (PTR);
 
 static char *inferior_args;
 
+/* The inferior arguments as a vector.  If INFERIOR_ARGC is nonzero,
+   then we must compute INFERIOR_ARGS from this (via the target).  */
+
+static int inferior_argc;
+static char **inferior_argv;
+
 /* File name for default use for standard in/out in the inferior.  */
 
 char *inferior_io_terminal;
@@ -199,6 +205,19 @@ struct environ *inferior_environ;
 char *
 get_inferior_args (void)
 {
+  if (inferior_argc != 0)
+    {
+      char *n, *old;
+
+      n = gdbarch_construct_inferior_arguments (current_gdbarch,
+						inferior_argc, inferior_argv);
+      old = set_inferior_args (n);
+      xfree (old);
+    }
+
+  if (inferior_args == NULL)
+    inferior_args = xstrdup ("");
+
   return inferior_args;
 }
 
@@ -208,9 +227,36 @@ set_inferior_args (char *newargs)
   char *saved_args = inferior_args;
 
   inferior_args = newargs;
+  inferior_argc = 0;
+  inferior_argv = 0;
 
   return saved_args;
 }
+
+void
+set_inferior_args_vector (int argc, char **argv)
+{
+  inferior_argc = argc;
+  inferior_argv = argv;
+}
+
+/* Notice when `set args' is run.  */
+static void
+notice_args_set (char *args, int from_tty, struct cmd_list_element *c)
+{
+  inferior_argc = 0;
+  inferior_argv = 0;
+}
+
+/* Notice when `show args' is run.  */
+static void
+notice_args_read (struct cmd_list_element *c)
+{
+  /* Might compute the value.  */
+  get_inferior_args ();
+}
+
+
 
 /* This function detects whether or not a '&' character (indicating
    background execution) has been added as *the last* of the arguments ARGS
@@ -331,7 +377,9 @@ Start it from the beginning? "))
       if (exec_file)
 	ui_out_field_string (uiout, "execfile", exec_file);
       ui_out_spaces (uiout, 1);
-      ui_out_field_string (uiout, "infargs", inferior_args);
+      /* We call get_inferior_args() because we might need to compute
+	 the value now.  */
+      ui_out_field_string (uiout, "infargs", get_inferior_args ());
       ui_out_text (uiout, "\n");
       ui_out_flush (uiout);
 #else
@@ -339,13 +387,17 @@ Start it from the beginning? "))
       if (exec_file)
 	puts_filtered (exec_file);
       puts_filtered (" ");
-      puts_filtered (inferior_args);
+      /* We call get_inferior_args() because we might need to compute
+	 the value now.  */
+      puts_filtered (get_inferior_args ());
       puts_filtered ("\n");
       gdb_flush (gdb_stdout);
 #endif
     }
 
-  target_create_inferior (exec_file, inferior_args,
+  /* We call get_inferior_args() because we might need to compute
+     the value now.  */
+  target_create_inferior (exec_file, get_inferior_args (),
 			  environ_vector (inferior_environ));
 }
 
@@ -1785,8 +1837,10 @@ _initialize_infcmd (void)
 		   "Set argument list to give program being debugged when it is started.\n\
 Follow this command with any number of args, to be passed to the program.",
 		   &setlist);
-  add_show_from_set (c, &showlist);
   c->completer = filename_completer;
+  c->function.sfunc = notice_args_set;
+  c = add_show_from_set (c, &showlist);
+  c->pre_show_hook = notice_args_read;
 
   c = add_cmd
     ("environment", no_class, environment_info,
@@ -1952,7 +2006,6 @@ Register name as argument means describe only that register.");
   add_info ("float", float_info,
 	    "Print the status of the floating point unit\n");
 
-  set_inferior_args (xstrdup (""));	/* Initially no args */
   inferior_environ = make_environ ();
   init_environ (inferior_environ);
 }

@@ -134,7 +134,7 @@ struct cmd_list_element
 	/* If type is not_set_cmd, call it like this:  */
 	void (*cfunc) (char *args, int from_tty);
 
-	/* If type is cmd_set or show_cmd, first set the variables, and
+	/* If type is set_cmd or show_cmd, first set the variables, and
 	   then call this.  */
 	void (*sfunc) (char *args, int from_tty, struct cmd_list_element * c);
       }
@@ -171,6 +171,10 @@ struct cmd_list_element
 
     /* if this command is deprecated, this is the replacement name */
     char *replacement;
+
+    /* If this command represents a show command, then this function
+       is called before the variable's value is examined.  */
+    void (*pre_show_hook) (struct cmd_list_element *c);
 
     /* Hook for another command to be executed before this command.  */
     struct cmd_list_element *hook_pre;

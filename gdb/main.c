@@ -124,6 +124,7 @@ captured_main (void *data)
   int count;
   static int quiet = 0;
   static int batch = 0;
+  static int set_args = 0;
 
   /* Pointers to various arguments from command line.  */
   char *symarg = NULL;
@@ -263,6 +264,7 @@ captured_main (void *data)
       {"windows", no_argument, &use_windows, 1},
       {"statistics", no_argument, 0, 13},
       {"write", no_argument, &write_files, 1},
+      {"args", no_argument, &set_args, 1},
 /* Allow machine descriptions to add more options... */
 #ifdef ADDITIONAL_OPTIONS
       ADDITIONAL_OPTIONS
@@ -276,7 +278,7 @@ captured_main (void *data)
 
 	c = getopt_long_only (argc, argv, "",
 			      long_options, &option_index);
-	if (c == EOF)
+	if (c == EOF || set_args)
 	  break;
 
 	/* Long option that takes an argument.  */
@@ -432,25 +434,46 @@ extern int gdbtk_test (char *);
       use_windows = 0;
 #endif
 
-    /* OK, that's all the options.  The other arguments are filenames.  */
-    count = 0;
-    for (; optind < argc; optind++)
-      switch (++count)
-	{
-	case 1:
-	  symarg = argv[optind];
-	  execarg = argv[optind];
-	  break;
-	case 2:
-	  /* FIXME: The documentation says this can be a "ProcID". as well. */
-	  corearg = argv[optind];
-	  break;
-	case 3:
-	  fprintf_unfiltered (gdb_stderr,
-			  "Excess command line arguments ignored. (%s%s)\n",
-			  argv[optind], (optind == argc - 1) ? "" : " ...");
-	  break;
-	}
+    if (set_args)
+      {
+	/* The remaining options are the command-line options for the
+	   inferior.  The first one is the sym/exec file, and the rest
+	   are arguments.  */
+	if (optind >= argc)
+	  {
+	    fprintf_unfiltered (gdb_stderr,
+				"%s: `--args' specified but no program specified\n",
+				argv[0]);
+	    exit (1);
+	  }
+	symarg = argv[optind];
+	execarg = argv[optind];
+	++optind;
+	set_inferior_args_vector (argc - optind, &argv[optind]);
+      }
+    else
+      {
+	/* OK, that's all the options.  The other arguments are filenames.  */
+	count = 0;
+	for (; optind < argc; optind++)
+	  switch (++count)
+	    {
+	    case 1:
+	      symarg = argv[optind];
+	      execarg = argv[optind];
+	      break;
+	    case 2:
+	      /* FIXME: The documentation says this can be a
+		 "ProcID". as well.  */
+	      corearg = argv[optind];
+	      break;
+	    case 3:
+	      fprintf_unfiltered (gdb_stderr,
+				  "Excess command line arguments ignored. (%s%s)\n",
+				  argv[optind], (optind == argc - 1) ? "" : " ...");
+	      break;
+	    }
+      }
     if (batch)
       quiet = 1;
   }
@@ -713,8 +736,12 @@ print_gdb_help (struct ui_file *stream)
 {
   fputs_unfiltered ("\
 This is the GNU debugger.  Usage:\n\n\
-    gdb [options] [executable-file [core-file or process-id]]\n\n\
+    gdb [options] [executable-file [core-file or process-id]]\n\
+    gdb [options] --args executable-file [inferior-arguments ...]\n\n\
 Options:\n\n\
+", stream);
+  fputs_unfiltered ("\
+  --args             Arguments after executable-file are passed to inferior\n\
 ", stream);
   fputs_unfiltered ("\
   --[no]async        Enable (disable) asynchronous version of CLI\n\

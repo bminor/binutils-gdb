@@ -560,6 +560,15 @@ f:2:IN_SOLIB_CALL_TRAMPOLINE:int:in_solib_call_trampoline:CORE_ADDR pc, char *na
 # which don't suffer from that problem could just let this functionality
 # untouched.
 m:::int:in_function_epilogue_p:CORE_ADDR addr:addr::0:generic_in_function_epilogue_p::0
+# Given a vector of command-line arguments, return a newly allocated
+# string which, when passed to the create_inferior function, will be
+# parsed (on Unix systems, by the shell) to yield the same vector.
+# This function should call error() if the argument vector is not
+# representable for this target or if this target does not support
+# command-line arguments.
+# ARGC is the number of elements in the vector.
+# ARGV is an array of strings, one per argument.
+m::CONSTRUCT_INFERIOR_ARGUMENTS:char *:construct_inferior_arguments:int argc, char **argv:argc, argv:::construct_inferior_arguments::0
 EOF
 }
 

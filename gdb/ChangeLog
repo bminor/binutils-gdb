@@ -1,3 +1,28 @@
+2001-11-21  Tom Tromey  <tromey@redhat.com>
+
+	Fix for PR gdb/209, PR gdb/156:
+	* gdbarch.c, gdbarch.h: Rebuilt.
+	* gdbarch.sh: Added `construct_inferior_arguments'.
+	* cli/cli-decode.h (cmd_list_element): Added pre_show_hook.
+	Typo fix.
+	* cli/cli-setshow.c (do_setshow_command): Call the pre_show_hook.
+	* infcmd.c (_initialize_infcmd): Set sfunc on `set args' command.
+	(inferior_argc, inferior_argv): New globals.
+	(notice_args_set): New function.
+	(set_inferior_args): Clear inferior_argc and inferior_argv.
+	(set_inferior_args_vector): New function.
+	(get_inferior_args): Handle inferior argument vector.
+	(run_command): Use get_inferior_args().
+	(notice_args_read): New function.
+	(_initialize_infcmd): Don't call set_inferior_args.
+	* command.h: Typo fix.
+	(cmd_list_element): Added pre_show_hook.
+	* main.c (captured_main): Added --args option.
+	(print_gdb_help): Document --args.
+	* inferior.h (construct_inferior_arguments): Declare.
+	(set_inferior_args_vector): Likewise.
+	* fork-child.c (construct_inferior_arguments): New function.
+
 2001-11-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* lin-lwp.c (lin_lwp_attach_lwp): Make sure SIGCHLD is in set of
