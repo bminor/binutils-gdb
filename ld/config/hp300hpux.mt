@@ -1,1 +1,1 @@
-EMUL=hp300hpux
+EMUL=hp3hpux
