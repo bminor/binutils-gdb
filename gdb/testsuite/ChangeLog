@@ -1,5 +1,7 @@
 Tue Nov 16 21:07:44 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t06/signals.exp: Add kludge to force re-sync.
+
 	* gdb.t00/teststrategy.exp: If we accidently send the "maint dump-me"
 	to xgdb instead of gdb, get out of gdb.
 
