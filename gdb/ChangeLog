@@ -1,3 +1,7 @@
+2002-01-20  Michael Chastain  <mec@shout.net>
+
+	* top.c (print_gdb_version): Bump copyright year to 2002.
+
 2002-01-13  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c (save_npx) [__DJGPP_MINOR__ < 3]: Remove extraneous

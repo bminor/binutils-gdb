@@ -1232,7 +1232,7 @@ print_gdb_version (struct ui_file *stream)
 
   /* Second line is a copyright notice. */
 
-  fprintf_filtered (stream, "Copyright 2001 Free Software Foundation, Inc.\n");
+  fprintf_filtered (stream, "Copyright 2002 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on
