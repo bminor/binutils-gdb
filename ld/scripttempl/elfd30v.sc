@@ -19,14 +19,6 @@ SECTIONS
     ${RELOCATING+ PROVIDE (__stext_end = .) ; }
   } ${RELOCATING+ > text}
 
-  /* External memory */
-  .etext	${RELOCATING-0} :
-  {
-    ${RELOCATING+ PROVIDE (__etext_start = .) ; }
-    *(.etext)
-    ${RELOCATING+ PROVIDE (__etext_end = .) ; }
-  } ${RELOCATING+ > emem}
-
   /* Internal text space or external memory */
   .text :
   {
@@ -46,14 +38,6 @@ SECTIONS
     *(.sdata)
     ${RELOCATING+ PROVIDE (__sdata_end = .) ; }
   } ${RELOCATING+ > data}
-
-  /* External memory */
-  .edata	${RELOCATING-0} :
-  {
-    ${RELOCATING+ PROVIDE (__edata_start = .) ; }
-    *(.edata)
-    ${RELOCATING+ PROVIDE (__edata_end = .) ; }
-  } ${RELOCATING+ > emem}
 
   /* Internal data space or external memory */
   .strings	${RELOCATING-0} : { *(.strings) }	${RELOCATING+ > ${DATA_MEMORY}}
@@ -82,6 +66,21 @@ SECTIONS
     ${CONSTRUCTING+CONSTRUCTORS}
     ${RELOCATING+ _edata = . ; }
   } ${RELOCATING+ > ${DATA_MEMORY}}
+
+  /* External memory */
+  .etext	${RELOCATING-0} :
+  {
+    ${RELOCATING+ PROVIDE (__etext_start = .) ; }
+    *(.etext)
+    ${RELOCATING+ PROVIDE (__etext_end = .) ; }
+  } ${RELOCATING+ > emem}
+
+  .edata	${RELOCATING-0} :
+  {
+    ${RELOCATING+ PROVIDE (__edata_start = .) ; }
+    *(.edata)
+    ${RELOCATING+ PROVIDE (__edata_end = .) ; }
+  } ${RELOCATING+ > emem}
 
   .sbss		${RELOCATING-0} :
   {
