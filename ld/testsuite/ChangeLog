@@ -1,5 +1,8 @@
 2004-03-05  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* ld-scripts/size-1.d: Add bigendian regexps.
+	* ld-scripts/size-2.d: Set --wide for readelf.
+
 	* ld-scripts/size.exp: New.
 	* ld-scripts/size-[12].{d,s,t}: New.
 
