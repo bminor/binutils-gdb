@@ -2955,10 +2955,6 @@ mips_n32n64_push_arguments (int nargs,
 			   typecode == TYPE_CODE_PTR ||
 			   typecode == TYPE_CODE_FLT) && len <= 4)
 			longword_offset = MIPS_STACK_ARGSIZE - len;
-		      else if ((typecode == TYPE_CODE_STRUCT ||
-				typecode == TYPE_CODE_UNION) &&
-			       TYPE_LENGTH (arg_type) < MIPS_STACK_ARGSIZE)
-			longword_offset = MIPS_STACK_ARGSIZE - len;
 		    }
 
 		  if (mips_debug)
@@ -4906,12 +4902,14 @@ mips_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 }
 
 static CORE_ADDR
-mips_extract_struct_value_address (struct regcache *ignore)
+mips_extract_struct_value_address (struct regcache *regcache)
 {
   /* FIXME: This will only work at random.  The caller passes the
      struct_return address in V0, but it is not preserved.  It may
      still be there, or this may be a random value.  */
-  return read_register (V0_REGNUM);
+  CORE_ADDR val;
+  regcache_cooked_read_unsigned (regcache, V0_REGNUM, &val);
+  return val;
 }
 
 /* Exported procedure: Is PC in the signal trampoline code */
