@@ -54,6 +54,8 @@ configure.bat
 configure.in
 debug.c
 doc
+ecoff.c
+ecoff.h
 expr.c
 expr.h
 flonum-copy.c
@@ -121,7 +123,10 @@ fi
 #
 #
 # $Log$
-# Revision 1.20  1993/06/04 23:06:28  raeburn
+# Revision 1.21  1993/11/17 23:23:36  ian
+# New files for ECOFF debugging split out of config/obj-ecoff.c.
+#
+# Revision 1.20  1993/06/04  23:06:28  raeburn
 # clean v9 stuff out of configure.in
 #
 # Revision 1.19  1993/05/27  06:21:49  rich
