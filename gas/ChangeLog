@@ -1,3 +1,16 @@
+Fri Mar 17 12:40:34 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_comm): Make sure to always reset the frag
+	and section for common symbols.
+
+Thu Mar 16 17:26:18 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_validate_fix): Allow non PC relative
+	pointers in the .ctors and .dtors section also when using the
+	-mrelocatable option.
+	(md_parse_option): Support -m403 as a PowerPC computer.
+	(md_show_usage): Ditto.
+
 Wed Mar 15 14:45:42 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (ecoff_build_debug): The cur_scope field of a fil_ptr
