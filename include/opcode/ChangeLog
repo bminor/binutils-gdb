@@ -1,4 +1,8 @@
 start-sanitize-arc
+Mon Feb 13 11:05:00 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc.h (ARC_OPERAND_LIMM): New flag.
+
 Thu Feb  9 18:55:59 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* arc.h (ARC_MACH_{BASE,HOST,GRAPHICS,AUDIO}): Define.
