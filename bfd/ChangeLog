@@ -1,3 +1,12 @@
+Sun Oct  4 21:19:09 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-i386.c (elf_i386_info_to_howto_rel): Handle vtable relocs
+	correctly.
+
+1998-09-27  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+        * elflink.h (elf_link_add_object_symbols): Undo last change.
+
 Wed Sep 23 16:09:31 1998  Richard Henderson  <rth@cygnus.com>
 
         * elflink.h (elf_link_add_object_symbols): Don't record a dynamic
