@@ -1,3 +1,7 @@
+Tue Dec 24 11:38:08 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Roll VERSION to 4.3.2.
+
 Mon Dec 23 13:54:35 1991  Per Bothner  (bothner at cygnus.com)
 
 	* m68k-opcode.h, mips-opcode.h, sparc-opcode.h:  Deleted.
