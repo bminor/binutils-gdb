@@ -94,7 +94,7 @@ extern CORE_ADDR saved_pc_after_call ();
 	/*  8 */ "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",\
 	/* 16 */ "g0",  "g1",  "g2",  "g3",  "g4",  "g5",  "g6",  "g7", \
 	/* 24 */ "g8",  "g9",  "g10", "g11", "g12", "g13", "g14", "fp", \
-	/* 32 */ "pc",  "ac",  "ip",  "tc",  "fp0", "fp1", "fp2", "fp3",\
+	/* 32 */ "pcw", "ac",  "tc",  "ip",  "fp0", "fp1", "fp2", "fp3",\
 }
 
 /* Register numbers of various important registers (used to index
@@ -110,8 +110,8 @@ extern CORE_ADDR saved_pc_after_call ();
 #define FP_REGNUM  31	/* Contains address of executing stack frame */
 #define	PCW_REGNUM 32	/* process control word */
 #define	ACW_REGNUM 33	/* arithmetic control word */
-#define	IP_REGNUM  34	/* instruction pointer */
-#define	TCW_REGNUM 35	/* trace control word */
+#define	TCW_REGNUM 34	/* trace control word */
+#define IP_REGNUM  35	/* instruction pointer */
 #define FP0_REGNUM 36	/* First floating point register */
 
 /* Some registers have more than one name */
