@@ -1,3 +1,13 @@
+2002-08-16  Sivaguru Sankaridurg  <siva@eternal-systems.com>
+
+	* stabs.c (parse_stab_argtype): Pass length of physname to
+	stab_demangle_argtypes.
+	(stab_demangle_argtypes): Add new parameter - length of physname.
+	Pass length of physname on to stab_demangle_prefix.
+	(stab_demangle_prefix): Add new parameter - length of physname.
+	Use length of physname (if supplied) to compute end of function
+	name.
+
 2002-08-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c: Include elf/i370.h.

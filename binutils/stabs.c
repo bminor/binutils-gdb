@@ -1,5 +1,5 @@
 /* stabs.c -- Parse stabs debugging information
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -213,7 +213,7 @@ static debug_type stab_find_tagged_type
   PARAMS ((PTR, struct stab_handle *, const char *, int,
 	   enum debug_type_kind));
 static debug_type *stab_demangle_argtypes
-  PARAMS ((PTR, struct stab_handle *, const char *, boolean *));
+  PARAMS ((PTR, struct stab_handle *, const char *, boolean *, unsigned int));
 
 /* Save a string in memory.  */
 
@@ -2908,6 +2908,7 @@ parse_stab_argtypes (dhandle, info, class_type, fieldname, tagname,
   boolean is_destructor;
   debug_type *args;
   boolean varargs;
+  unsigned int physname_len = 0;
 
   /* Constructors are sometimes handled specially.  */
   is_full_physname_constructor = ((argtypes[0] == '_'
@@ -2984,6 +2985,7 @@ parse_stab_argtypes (dhandle, info, class_type, fieldname, tagname,
 	    strcpy (physname, fieldname);
 	}
 
+      physname_len = strlen (physname);
       strcat (physname, buf);
       if (tagname != NULL)
 	strcat (physname, tagname);
@@ -3000,7 +3002,7 @@ parse_stab_argtypes (dhandle, info, class_type, fieldname, tagname,
 				     false);
     }
 
-  args = stab_demangle_argtypes (dhandle, info, *pphysname, &varargs);
+  args = stab_demangle_argtypes (dhandle, info, *pphysname, &varargs, physname_len);
   if (args == NULL)
     return DEBUG_TYPE_NULL;
 
@@ -3729,7 +3731,7 @@ static unsigned int stab_demangle_count PARAMS ((const char **));
 static boolean stab_demangle_get_count
   PARAMS ((const char **, unsigned int *));
 static boolean stab_demangle_prefix
-  PARAMS ((struct stab_demangle_info *, const char **));
+  PARAMS ((struct stab_demangle_info *, const char **, unsigned int));
 static boolean stab_demangle_function_name
   PARAMS ((struct stab_demangle_info *, const char **, const char *));
 static boolean stab_demangle_signature
@@ -3821,11 +3823,12 @@ stab_demangle_get_count (pp, pi)
    terminated array of argument types.  */
 
 static debug_type *
-stab_demangle_argtypes (dhandle, info, physname, pvarargs)
+stab_demangle_argtypes (dhandle, info, physname, pvarargs, physname_len)
      PTR dhandle;
      struct stab_handle *info;
      const char *physname;
      boolean *pvarargs;
+     unsigned int physname_len;
 {
   struct stab_demangle_info minfo;
 
@@ -3842,7 +3845,7 @@ stab_demangle_argtypes (dhandle, info, physname, pvarargs)
   /* cplus_demangle checks for special GNU mangled forms, but we can't
      see any of them in mangled method argument types.  */
 
-  if (! stab_demangle_prefix (&minfo, &physname))
+  if (! stab_demangle_prefix (&minfo, &physname, physname_len))
     goto error_return;
 
   if (*physname != '\0')
@@ -3869,9 +3872,10 @@ stab_demangle_argtypes (dhandle, info, physname, pvarargs)
 /* Demangle the prefix of the mangled name.  */
 
 static boolean
-stab_demangle_prefix (minfo, pp)
+stab_demangle_prefix (minfo, pp, physname_len)
      struct stab_demangle_info *minfo;
      const char **pp;
+     unsigned int physname_len;
 {
   const char *scan;
   unsigned int i;
@@ -3879,26 +3883,29 @@ stab_demangle_prefix (minfo, pp)
   /* cplus_demangle checks for global constructors and destructors,
      but we can't see them in mangled argument types.  */
 
-  /* Look for `__'.  */
-  scan = *pp;
-  do
+  if (physname_len)
+    scan = *pp + physname_len;
+  else
     {
-      scan = strchr (scan, '_');
+      /* Look for `__'.  */
+      scan = *pp;
+      do
+	scan = strchr (scan, '_');
+      while (scan != NULL && *++scan != '_');
+
+      if (scan == NULL)
+	{
+	  stab_bad_demangle (*pp);
+	  return false;
+	}
+
+      --scan;
+
+      /* We found `__'; move ahead to the last contiguous `__' pair.  */
+      i = strspn (scan, "_");
+      if (i > 2)
+	scan += i - 2;
     }
-  while (scan != NULL && *++scan != '_');
-
-  if (scan == NULL)
-    {
-      stab_bad_demangle (*pp);
-      return false;
-    }
-
-  --scan;
-
-  /* We found `__'; move ahead to the last contiguous `__' pair.  */
-  i = strspn (scan, "_");
-  if (i > 2)
-    scan += i - 2;
 
   if (scan == *pp
       && (ISDIGIT (scan[2])
