@@ -304,7 +304,7 @@ NONSRC = Makefile.in munch configure.in ChangeLog ChangeLog-9091 \
 	Projects .gdbinit COPYING $(YYFILES) copying.c copying.awk \
 	saber.suppress standalone.c stuff.c kdb-start.c gcc.patch \
 	nindy-share/Makefile nindy-share/VERSION nindy-share/README \
-	vx-share/README 29k-share/udi/README config/convex/Convex.notes
+	vx-share/README 29k-share/README config/convex/Convex.notes
 
 # All source files that lint should look at
 LINTFILES = $(SFILES) $(YYFILES) init.c
@@ -367,8 +367,8 @@ HFILES = buildsym.h call-cmds.h defs.h environ.h $(gdbcmd_h) \
 	config/m68k/xm-m68k.h config/sparc/xm-sparc.h config/xm-sysv4.h \
 	config/vax/xm-vax.h config/nm-trash.h $(udiheaders) \
 	29k-share/udi/udiids.h 29k-share/udi_soc nindy-share/b.out.h \
-	nindy-share/block_io.h nindy-share/coff.h nindy-share/demux.h \
-	nindy-share/env.h nindy-share/stop.h nindy-share/ttycntl.h \
+	nindy-share/block_io.h nindy-share/coff.h \
+	nindy-share/env.h nindy-share/stop.h \
 	vx-share/dbgRpcLib.h vx-share/ptrace.h vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/wait.h vx-share/xdr_ld.h \
 	vx-share/xdr_ptrace.h vx-share/xdr_rdb.h
@@ -403,7 +403,7 @@ TARFILES = $(SFILES) $(HFILES) $(NONSRC) $(ALLDEPFILES) $(ALLCONFIG) \
 
 OBS =	version.o main.o blockframe.o breakpoint.o findvar.o stack.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
-	symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o command.o \
+	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
 	utils.o expprint.o environ.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o putenv.o parse.o language.o $(YYOBJ) buildsym.o \
 	objfiles.o minsyms.o maint.o demangle.o dbxread.o coffread.o elfread.o \
@@ -807,7 +807,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	infptrace.c inftarg.c irix4-nat.c isi-xdep.c m68k-pinsn.c m68k-tdep.c \
 	m88k-nat.c m88k-pinsn.c m88k-tdep.c mips-nat.c mips-pinsn.c \
 	mips-tdep.c news-xdep.c nindy-share/Onindy.c nindy-share/nindy.c \
-	nindy-share/ttybreak.c nindy-share/ttyflush.c nindy-tdep.c \
+	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-pinsn.c paread.c procfs.c pyr-pinsn.c pyr-tdep.c pyr-xdep.c \
 	remote-adapt.c remote-eb.c remote-es.c remote-hms.c remote-mips.c \
 	remote-mm.c remote-monitor.c remote-nindy.c remote-sim.c remote-st.c \
@@ -1129,20 +1129,17 @@ mipsread.o: mipsread.c buildsym.h complaints.h $(defs_h) \
 news-xdep.o: news-xdep.c
 
 Onindy.o: nindy-share/Onindy.c $(wait_h) nindy-share/block_io.h \
-	nindy-share/env.h nindy-share/ttycntl.h
+	nindy-share/env.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/Onindy.c
 
 nindy.o: nindy-share/nindy.c $(wait_h) nindy-share/block_io.h \
-	nindy-share/env.h nindy-share/ttycntl.h
+	nindy-share/env.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/nindy.c
 
 nlmread.o: nlmread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h)
 
-ttybreak.o: nindy-share/ttybreak.c nindy-share/ttycntl.h 
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/ttybreak.c
-
-ttyflush.o: nindy-share/ttyflush.c nindy-share/ttycntl.h 
+ttyflush.o: nindy-share/ttyflush.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/ttyflush.c
 
 nindy-tdep.o: nindy-tdep.c $(defs_h) $(frame_h) $(symtab_h) 
@@ -1198,8 +1195,8 @@ remote-monitor.o: remote-monitor.c $(wait_h) $(command_h) $(defs_h) \
 	$(gdbcore_h) monitor.h serial.h target.h
 
 remote-nindy.o: remote-nindy.c $(ieee-float_h) $(wait_h) $(command_h) \
-	$(defs_h) $(gdbcore_h) $(inferior_h) nindy-share/demux.h \
-	nindy-share/env.h nindy-share/stop.h nindy-share/ttycntl.h \
+	$(defs_h) $(gdbcore_h) $(inferior_h) \
+	nindy-share/env.h nindy-share/stop.h \
 	symfile.h target.h
 
 remote-sim.o: remote-sim.c $(wait_h) $(defs_h) $(gdbcore_h) \

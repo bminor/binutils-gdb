@@ -1,3 +1,8 @@
+Thu Jul 29 12:36:20 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* Makefile.in (NONSRC):  Need 29k-share/README, not
+	29k-share/udi/README.
+
 Thu Jul 29 12:09:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* paread.c (pa_symfile_init): If error reading string table, don't
