@@ -23,6 +23,9 @@ INCLUDE	= $(srcdir)/../include
 INCLUDES = -I. -I$(srcdir)  -I$(INCLUDE) 
 DEBUG	= -g
 
+BISON = bison
+BISONFLAGS = -v
+
 SCRIPTS = ldgld68k.script ldgld68kUr.script ldgld68kr.script \
 	ldgld.script ldgldUr.script ldgldr.script ldlnk960.script \
 	ldlnk960r.script ldgld960.script \
@@ -85,9 +88,9 @@ all: Makefile $(PROCESSED_SCRIPTS) $(LD_PROG)
 $(PROCESSED_SCRIPTS): mkscript $(SCRIPTS)
 
 ldgram.c:ldgram.y
-	$(YACC) $(VPATH)/ldgram.y
-	mv y.tab.c ldgram.c
-	mv y.tab.h ldgram.h
+	$(BISON) $(BISONFLAGS) -d $(VPATH)/ldgram.y -o ldgram.c
+#	mv y.tab.c ldgram.c
+#	mv y.tab.h ldgram.h
 
 ldlex.c:ldlex.l
 	lex -t $(VPATH)/ldlex.l >ldlex.c
@@ -156,6 +159,11 @@ stage3:	force
 	- mkdir stage3
 	- mv -f $(STAGESTUFF) stage3
 	- (cd stage3 ; ln -s $(LD_PROG) ld)
+
+against=stage2
+
+comparison: force
+	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
 
 de-stage1: force
 	- (cd stage1 ; mv -f * ..)
