@@ -51,12 +51,17 @@
 #define ARM_LONGMUL	0x00000010	/* allow long multiplies */
 #define ARM_HALFWORD    0x00000020	/* allow half word loads */
 #define ARM_THUMB       0x00000040	/* allow BX instruction  */
+#define ARM_EXT_V5	0x00000080	/* allow CLZ etc	 */
 
-#define ARM_ARCHv4	(ARM_7 | ARM_LONGMUL | ARM_HALFWORD)
+/* Architectures are the sum of the base and extensions */
+#define ARM_ARCH_V4	(ARM_7 | ARM_LONGMUL | ARM_HALFWORD)
+#define ARM_ARCH_V4T	(ARM_ARCH_V4 | ARM_THUMB)
+#define ARM_ARCH_V5	(ARM_ARCH_V4 | ARM_EXT_V5)
+#define ARM_ARCH_V5T	(ARM_ARCH_V5 | ARM_THUMB)
 
 /* Some useful combinations:  */
 #define ARM_ANY		0x00ffffff
-#define ARM_2UP		0x00fffffe
+#define ARM_2UP		(ARM_ANY - ARM_1)
 #define ARM_ALL		ARM_2UP		/* Not arm1 only */
 #define ARM_3UP		0x00fffffc
 #define ARM_6UP		0x00fffff8      /* Includes ARM7 */
@@ -73,7 +78,7 @@
      
 #ifndef CPU_DEFAULT
 #if defined __thumb__
-#define CPU_DEFAULT (ARM_ARCHv4 | ARM_THUMB)
+#define CPU_DEFAULT (ARM_ARCH_V4 | ARM_THUMB)
 #else
 #define CPU_DEFAULT ARM_ALL
 #endif
@@ -419,6 +424,7 @@ static void do_branch		PARAMS ((char *operands, unsigned long flags));
 static void do_swi		PARAMS ((char *operands, unsigned long flags));
 /* Pseudo Op codes */
 static void do_adr		PARAMS ((char *operands, unsigned long flags));
+static void do_adrl		PARAMS ((char * operands, unsigned long flags));
 static void do_nop		PARAMS ((char *operands, unsigned long flags));
 /* ARM 2 */
 static void do_mul		PARAMS ((char *operands, unsigned long flags));
@@ -455,6 +461,7 @@ static void symbol_locate	PARAMS ((symbolS *, CONST char *, segT,
 					 valueT, fragS *));
 static int add_to_lit_pool	PARAMS ((void));
 static unsigned validate_immediate	PARAMS ((unsigned));
+static unsigned validate_immediate_twopart	PARAMS ((unsigned int, unsigned int *));
 static int validate_offset_imm	PARAMS ((int, int));
 static void opcode_select	PARAMS ((int));
 static void end_of_line		PARAMS ((char *));
@@ -484,7 +491,7 @@ static void thumb_mov_compare	PARAMS ((char *, int));
 static void set_constant_flonums	PARAMS ((void));
 static valueT md_chars_to_number	PARAMS ((char *, int));
 static void insert_reg_alias	PARAMS ((char *, int));
-static void output_inst		PARAMS ((char *));
+static void output_inst		PARAMS ((void));
 #ifdef OBJ_ELF
 static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
 #endif
@@ -540,6 +547,7 @@ static CONST struct asm_opcode insns[] =
 
 /* Pseudo ops */
   {"adr",   0x028f0000, NULL,   NULL,        ARM_ANY,      do_adr},
+  {"adrl",  0x028f0000, NULL,   NULL,        ARM_ANY,      do_adrl},
   {"nop",   0x01a00000, NULL,   NULL,        ARM_ANY,      do_nop},
 
 /* ARM 2 multiplies */
@@ -870,8 +878,8 @@ static CONST struct reg_entry reg_table[] =
   {NULL, 0}
 };
 
-#define bad_args _("Bad arguments to instruction");
-#define bad_pc _("r15 not allowed here");
+#define bad_args 	_("Bad arguments to instruction");
+#define bad_pc 		_("r15 not allowed here");
 
 static struct hash_control * arm_ops_hsh = NULL;
 static struct hash_control * arm_tops_hsh = NULL;
@@ -1075,6 +1083,47 @@ validate_immediate (val)
   for (i = 0; i < 32; i += 2)
     if ((a = rotate_left (val, i)) <= 0xff)
       return a | (i << 7); /* 12-bit pack: [shift-cnt,const] */
+  
+  return FAIL;
+}
+
+/* Check to see if an immediate can be computed as two seperate immediate
+   values, added together.  We already know that this value cannot be
+   computed by just one ARM instruction.  */
+
+static unsigned int
+validate_immediate_twopart (val, highpart)
+     unsigned int val;
+     unsigned int * highpart;
+{
+  unsigned int a;
+  unsigned int i;
+  
+  for (i = 0; i < 32; i += 2)
+    if (((a = rotate_left (val, i)) & 0xff) != 0)
+      {
+	if (a & 0xff00)
+	  {
+	    if (a & ~ 0xffff)
+	      continue;
+	    * highpart = (a  >> 8) | ((i + 24) << 7);
+	  }
+	else if (a & 0xff0000)
+	  {
+	    if (a & 0xff000000)
+	      continue;
+
+	    * highpart = (a >> 16) | ((i + 16) << 7);
+	  }
+	else
+	  {
+	    assert (a & 0xff000000);
+
+	    * highpart = (a >> 24) | ((i + 8) << 7);
+	  }
+
+	return (a & 0xff) | (i << 7);
+      }
   
   return FAIL;
 }
@@ -2603,6 +2652,41 @@ do_adr (str, flags)
   inst.reloc.pc_rel = 1;
   inst.instruction |= flags;
   end_of_line (str);
+  return;
+}
+
+static void
+do_adrl (str, flags)
+     char *        str;
+     unsigned long flags;
+{
+  /* This is a pseudo-op of the form "adrl rd, label" to be converted
+     into a relative address of the form:
+     	add rd, pc, #low(label-.-8)"
+     	add rd, rd, #high(label-.-8)"   */
+
+  while (* str == ' ')
+    str ++;
+
+  if (reg_required_here (& str, 12) == FAIL
+      || skip_past_comma (& str) == FAIL
+      || my_get_expression (& inst.reloc.exp, & str))
+    {
+      if (!inst.error)
+	inst.error = bad_args;
+      return;
+    }
+  
+  end_of_line (str);
+  
+  /* Frag hacking will turn this into a sub instruction if the offset turns
+     out to be negative.  */
+  inst.reloc.type              = BFD_RELOC_ARM_ADRL_IMMEDIATE;
+  inst.reloc.exp.X_add_number -= 8; /* PC relative adjust */
+  inst.reloc.pc_rel            = 1;
+  inst.instruction            |= flags;
+  inst.size                    = INSN_SIZE * 2;
+  
   return;
 }
 
@@ -4984,9 +5068,13 @@ md_begin ()
     /* Catch special cases */
     if (cpu_variant != (FPU_DEFAULT | CPU_DEFAULT))
       {
-	if (cpu_variant & ARM_THUMB)
+	if (cpu_variant & (ARM_EXT_V5 & ARM_THUMB))
+	  mach = bfd_mach_arm_5T;
+	else if (cpu_variant & ARM_EXT_V5)
+	  mach = bfd_mach_arm_5;
+	else if (cpu_variant & ARM_THUMB)
 	  mach = bfd_mach_arm_4T;
-	else if ((cpu_variant & ARM_ARCHv4) == ARM_ARCHv4)
+	else if ((cpu_variant & ARM_ARCH_V4) == ARM_ARCH_V4)
 	  mach = bfd_mach_arm_4;
 	else if (cpu_variant & ARM_LONGMUL)
 	  mach = bfd_mach_arm_3M;
@@ -5326,7 +5414,51 @@ md_apply_fix3 (fixP, val, seg)
       md_number_to_chars (buf, (valueT) newimm, INSN_SIZE);
       break;
 
-     case BFD_RELOC_ARM_OFFSET_IMM:
+    case BFD_RELOC_ARM_ADRL_IMMEDIATE:
+      {
+	unsigned int highpart = 0;
+	unsigned int newinsn  = 0xe1a00000; /* nop */
+	newimm = validate_immediate (value);
+	temp = md_chars_to_number (buf, INSN_SIZE);
+
+	/* If the instruction will fail, see if we can fix things up by
+	   changing the opcode.  */
+	if (newimm == (unsigned int) FAIL
+	    && (newimm = negate_data_op (& temp, value)) == (unsigned int) FAIL)
+	  {
+	    /* No ?  OK - try using two ADD instructions to generate the value.  */
+	    newimm = validate_immediate_twopart (value, & highpart);
+
+	    /* Yes - then make sure that the second instruction is also an add.  */
+	    if (newimm != (unsigned int) FAIL)
+	      newinsn = temp;
+	    /* Still No ?  Try using a negated value.  */
+	    else if (validate_immediate_twopart (- value, & highpart) != (unsigned int) FAIL)
+		temp = newinsn = (temp & OPCODE_MASK) | OPCODE_SUB << DATA_OP_SHIFT;
+	    /* Otherwise - give up.  */
+	    else
+	      {
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      _("Unable to compute ADRL instructions for PC offset of 0x%x\n"), value);
+		break;
+	      }
+
+	    /* Replace the first operand in the 2nd instruction (which is the PC)
+	       with the destination register.  We have already added in the PC in the
+	       first instruction and we do not want to do it again.  */
+	    newinsn &= ~ 0xf0000;
+	    newinsn |= ((newinsn & 0x0f000) << 4);
+	  }
+
+	newimm |= (temp & 0xfffff000);
+	md_number_to_chars (buf, (valueT) newimm, INSN_SIZE);
+
+	highpart |= (newinsn & 0xfffff000);
+	md_number_to_chars (buf + INSN_SIZE, (valueT) highpart, INSN_SIZE);
+      }
+      break;
+
+    case BFD_RELOC_ARM_OFFSET_IMM:
       sign = value >= 0;
       if ((value = validate_offset_imm (value, 0)) == FAIL)
         {
@@ -5816,6 +5948,12 @@ tc_gen_reloc (section, fixp)
 		    fixp->fx_r_type);
       return NULL;
 
+    case BFD_RELOC_ARM_ADRL_IMMEDIATE:
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+		    _("ADRL used for a symbol not defined in the same file"),
+		    fixp->fx_r_type);
+      return NULL;
+
     case BFD_RELOC_ARM_OFFSET_IMM:
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("Internal_relocation (type %d) not fixed up (OFFSET_IMM)"),
@@ -5880,8 +6018,7 @@ md_estimate_size_before_relax (fragP, segtype)
 }
 
 static void
-output_inst (str)
-     char * str;
+output_inst PARAMS ((void))
 {
   char * to = NULL;
     
@@ -5896,7 +6033,13 @@ output_inst (str)
     {
       assert (inst.size == (2 * THUMB_SIZE));
       md_number_to_chars (to, inst.instruction >> 16, THUMB_SIZE);
-      md_number_to_chars (to + 2, inst.instruction, THUMB_SIZE);
+      md_number_to_chars (to + THUMB_SIZE, inst.instruction, THUMB_SIZE);
+    }
+  else if (inst.size > INSN_SIZE)
+    {
+      assert (inst.size == (2 * INSN_SIZE));
+      md_number_to_chars (to, inst.instruction, INSN_SIZE);
+      md_number_to_chars (to + INSN_SIZE, inst.instruction, INSN_SIZE);
     }
   else
     md_number_to_chars (to, inst.instruction, inst.size);
@@ -5936,7 +6079,7 @@ md_assemble (str)
 
   if (*str == ' ')
     str++;			/* Skip leading white space */
-    
+  
   /* Scan up to the end of the op-code, which must end in white space or
      end of string.  */
   for (start = p = str; *p != '\0'; p++)
@@ -5951,24 +6094,25 @@ md_assemble (str)
 
   if (thumb_mode)
     {
-      CONST struct thumb_opcode *opcode;
+      CONST struct thumb_opcode * opcode;
 
       c = *p;
       *p = '\0';
       opcode = (CONST struct thumb_opcode *) hash_find (arm_tops_hsh, str);
       *p = c;
+      
       if (opcode)
 	{
 	  inst.instruction = opcode->value;
 	  inst.size = opcode->size;
 	  (*opcode->parms)(p);
-	  output_inst (start);
+	  output_inst ();
 	  return;
 	}
     }
   else
     {
-      CONST struct asm_opcode *opcode;
+      CONST struct asm_opcode * opcode;
 
       inst.size = INSN_SIZE;
       /* p now points to the end of the opcode, probably white space, but we
@@ -5982,10 +6126,11 @@ md_assemble (str)
 	  *q = '\0';
 	  opcode = (CONST struct asm_opcode *) hash_find (arm_ops_hsh, str);
 	  *q = c;
+	  
 	  if (opcode && opcode->template)
 	    {
 	      unsigned long flag_bits = 0;
-	      char *r;
+	      char * r;
 
 	      /* Check that this instruction is supported for this CPU */
 	      if ((opcode->variants & cpu_variant) == 0)
@@ -6002,7 +6147,7 @@ md_assemble (str)
 		      inst.instruction |= COND_ALWAYS;
 		      (*opcode->parms)(q, 0);
 		    }
-		  output_inst (start);
+		  output_inst ();
 		  return;
 		}
 
@@ -6087,7 +6232,7 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
 		}
 
 	      (*opcode->parms) (p, flag_bits);
-	      output_inst (start);
+	      output_inst ();
 	      return;
 	    }
 
@@ -6174,9 +6319,10 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
  *            -m[arm]3                Arm 3 processor
  *            -m[arm]6[xx],           Arm 6 processors
  *            -m[arm]7[xx][t][[d]m]   Arm 7 processors
- *            -m8[10]                 Arm 8 processors
- *            -m9[20][tdmi]           Arm 9 processors
+ *            -m[arm]8[10]            Arm 8 processors
+ *            -m[arm]9[20][tdmi]      Arm 9 processors
  *            -mstrongarm[110[0]]     StrongARM processors
+ *            -m[arm]v[2345]	      Arm architecures
  *            -mall                   All (except the ARM1)
  *    FP variants:
  *            -mfpa10, -mfpa11        FPA10 and 11 co-processor instructions
@@ -6265,7 +6411,7 @@ md_parse_option (c, arg)
             }
           else if (streq (str, "thumb-interwork"))
             {
-              cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_THUMB | ARM_ARCHv4;
+              cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_THUMB | ARM_ARCH_V4;
 #if defined OBJ_COFF || defined OBJ_ELF
               support_interwork = true;
 #endif
@@ -6399,7 +6545,7 @@ md_parse_option (c, arg)
                 switch (* str)
                   {
                   case 't':
-                    cpu_variant |= (ARM_THUMB | ARM_ARCHv4);
+                    cpu_variant |= (ARM_THUMB | ARM_ARCH_V4);
                     break;
 
                   case 'm':
@@ -6426,20 +6572,20 @@ md_parse_option (c, arg)
 
 	    case '8':
 	      if (streq (str, "8") || streq (str, "810"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_8 | ARM_ARCHv4 | ARM_LONGMUL;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_8 | ARM_ARCH_V4 | ARM_LONGMUL;
 	      else
 		goto bad;
 	      break;
 	      
 	    case '9':
 	      if (streq (str, "9"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCHv4 | ARM_LONGMUL | ARM_THUMB;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
 	      else if (streq (str, "920"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCHv4 | ARM_LONGMUL;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL;
 	      else if (streq (str, "920t"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCHv4 | ARM_LONGMUL | ARM_THUMB;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
 	      else if (streq (str, "9tdmi"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCHv4 | ARM_LONGMUL | ARM_THUMB;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_9 | ARM_ARCH_V4 | ARM_LONGMUL | ARM_THUMB;
 	      else
 		goto bad;
 	      break;
@@ -6448,7 +6594,7 @@ md_parse_option (c, arg)
 	      if (streq (str, "strongarm")
 		  || streq (str, "strongarm110")
 		  || streq (str, "strongarm1100"))
-		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_8 | ARM_ARCHv4 | ARM_LONGMUL;
+		cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_8 | ARM_ARCH_V4 | ARM_LONGMUL;
 	      else
 		goto bad;
 	      break;
@@ -6478,7 +6624,18 @@ md_parse_option (c, arg)
 		  break;
 		  
 		case '4':
-		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCHv4;
+		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V4;
+		  
+		  switch (*++str)
+		    {
+		    case 't': cpu_variant |= ARM_THUMB; break;
+		    case 0:   break;
+		    default:  as_bad (_("Invalid architecture variant -m%s"), arg); break;
+		    }
+		  break;
+		  
+		case '5':
+		  cpu_variant = (cpu_variant & ~ARM_ANY) | ARM_ARCH_V5;
 		  
 		  switch (*++str)
 		    {
@@ -6521,7 +6678,7 @@ md_show_usage (fp)
 _("\
  ARM Specific Assembler Options:\n\
   -m[arm][<processor name>] select processor variant\n\
-  -m[arm]v[2|2a|3|3m|4|4t]  select architecture variant\n\
+  -m[arm]v[2|2a|3|3m|4|4t|5]select architecture variant\n\
   -mthumb                   only allow Thumb instructions\n\
   -mthumb-interwork         mark the assembled code as supporting interworking\n\
   -mall                     allow any instruction\n\

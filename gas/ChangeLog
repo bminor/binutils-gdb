@@ -1,3 +1,26 @@
+1999-07-05  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (ARM_EXT_V5): Define.
+	(ARM_ARCH_V5, ARM_ARCH_V5T): Define.
+	(md_begin): Detect ARM v5 architectures.
+	(md_parse_option): Accept arm v5 specification.
+	(md_show_usage): Documment -marmv5 switch.
+
+	* doc/c-arm.texi: Document -marmv5 command line option.
+	
+	* config/tc-arm.c (do_adrl): New function.  Implement ADRL pseudo
+	op.
+	(validate_immediate_twopart): New function.  Determine if a
+	constant can be computed by two ADD instructions.
+	(output_inst): Remove its command line parameter - it was never
+	used.
+	(md_apply_fix3): Support BFD_RELOC_ARM_ADRL_IMMEDIATE, used to
+	implememt the ADRL pseudo op.
+	(tc_gen_reloc): Generate a suitable error message if an ADRL
+	instruction tries to generate a real reloc.
+
+	* doc/c-arm.texi: Document NOP, ADR and ADRL pseudo ops.
+
 Thu Jul  1 15:33:10 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_ip): Convert the opcode and all completers
