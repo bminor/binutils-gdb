@@ -4,7 +4,7 @@ Tue Jun  8 14:52:55 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 	* config/sparc/tm-vxsparc.h, config/sparc/vxsparc.mt: new files.
 	* configure.in: sparc-vxworks gdb_target now vxsparc.
 
-	* remote.c: symfile.h requires bfd.h so include it.
+	* remote-eb.c, remote.c: symfile.h requires bfd.h so include it.
 
 Tue Jun  8 14:42:10 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 

@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "a29k/tm-a29k.h"
 
 #include "inferior.h"
+#include "bfd.h"
 #include "symfile.h"
 #include "wait.h"
 #include "value.h"
