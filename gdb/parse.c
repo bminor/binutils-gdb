@@ -1331,24 +1331,36 @@ build_parse (void)
   i = 0;
   /* fill it in */
 #ifdef PC_REGNUM
-  std_regs[i].name = "pc";
-  std_regs[i].regnum = PC_REGNUM;
-  i++;
+  if (PC_REGNUM >= 0)
+    {
+      std_regs[i].name = "pc";
+      std_regs[i].regnum = PC_REGNUM;
+      i++;
+    }
 #endif
 #ifdef FP_REGNUM
-  std_regs[i].name = "fp";
-  std_regs[i].regnum = FP_REGNUM;
-  i++;
+  if (FP_REGNUM >= 0)
+    {
+      std_regs[i].name = "fp";
+      std_regs[i].regnum = FP_REGNUM;
+      i++;
+    }
 #endif
 #ifdef SP_REGNUM
-  std_regs[i].name = "sp";
-  std_regs[i].regnum = SP_REGNUM;
-  i++;
+  if (SP_REGNUM >= 0)
+    {
+      std_regs[i].name = "sp";
+      std_regs[i].regnum = SP_REGNUM;
+      i++;
+    }
 #endif
 #ifdef PS_REGNUM
-  std_regs[i].name = "ps";
-  std_regs[i].regnum = PS_REGNUM;
-  i++;
+  if (PS_REGNUM >= 0)
+    {
+      std_regs[i].name = "ps";
+      std_regs[i].regnum = PS_REGNUM;
+      i++;
+    }
 #endif
   memset (&std_regs[i], 0, sizeof (std_regs[i]));
 }

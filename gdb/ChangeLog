@@ -1,3 +1,8 @@
+Mon Aug  7 10:24:30 2000  David Taylor  <taylor@texas.cygnus.com>
+
+	* parse.c (build_parse): don't write off the end of the std_regs
+ 	array.
+
 2000-05-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* solib.c (bfd_lookup_symbol): Fall back on the dynamic symbol
