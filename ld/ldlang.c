@@ -3047,9 +3047,8 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 
 	    /* Put the section within the requested block size, or
 	       align at the block boundary.  */
-	    after = ALIGN_N (os->bfd_section->vma
+	    after = align_n (os->bfd_section->vma
 			     + os->bfd_section->_raw_size / opb,
-			     /* The coercion here is important, see ld.h.  */
 			     (bfd_vma) os->block_value);
 
 	    if (bfd_is_abs_section (os->bfd_section))
@@ -3748,8 +3747,8 @@ lang_one_common (h, info)
   section = h->u.c.p->section;
 
   /* Increase the size of the section.  */
-  section->_cooked_size = ALIGN_N ((section->_cooked_size + opb - 1) / opb,
-				   (bfd_size_type) (1 << power_of_two)) * opb;
+  section->_cooked_size = align_n ((section->_cooked_size + opb - 1) / opb,
+				   (bfd_vma) 1 << power_of_two) * opb;
 
   /* Adjust the alignment if necessary.  */
   if (power_of_two > section->alignment_power)

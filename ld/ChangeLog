@@ -1,3 +1,16 @@
+2002-08-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/elf32_dlx.sh (TARGET_PAGE_SIZE): Set to 1.
+	(MAXPAGESIZE): Set to 1.
+
+	* ld.h (ALIGN_N): Delete.
+	* ldexp.h (align_n): Declare.
+	* ldexp.c (align_n): New function.
+	(fold_binary): Use align_n instead of ALIGN_N.
+	(exp_fold_tree): Likewise.
+	* ldlang.c (lang_size_sections_1): Likewise.
+	(lang_one_common): Likewise.
+
 2002-07-31  Graeme Peterson  <gp@qnx.com>
 
 	* configure.tgt: Add support for powerpc{le}-*-nto* targets.

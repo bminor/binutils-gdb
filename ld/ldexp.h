@@ -122,5 +122,6 @@ int exp_get_value_int PARAMS ((etree_type *, int, char *, lang_phase_type));
 fill_type *exp_get_fill PARAMS ((etree_type *, fill_type *, char *,
 				 lang_phase_type));
 bfd_vma exp_get_abs_int PARAMS ((etree_type *, int, char *, lang_phase_type));
+bfd_vma align_n PARAMS ((bfd_vma, bfd_vma));
 
 #endif
