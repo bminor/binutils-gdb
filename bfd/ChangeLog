@@ -6,10 +6,18 @@ Thu Sep 23 11:06:34 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 Thu Sep 23 10:48:27 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* archive.c (compute_and_write_armap): Put weak symbols in the
+	armap.
+
+	* elfcode.h (fix_up_strtabs): Set sh_entsize for the .stab
+	section, not the .stabstr section.  Set the type of the .stabstr
+	section to SHT_STRTAB.
+	(elf_section_from_bfd_section): Handle SHT_STRTAB sections.
+
 	* section.c (SEC_DEBUGGING): New section flag.
 	* elfcode.h (bfd_section_from_shdr): If section is SHT_PROGBITS,
 	and the name starts with .debug, .line or .stab, set
-	SEC_DEBUGGING.
+	SEC_DEBUGGING.  If SHT_STRTAB, check for .debug and .stab.
 	* elf32-target.h (TARGET_BIG_SYM, TARGET_LITTLE_SYM): Added
 	SEC_DEBUGGING to section_flags.
 	* elf64-target.h (TARGET_BIG_SYM, TARGET_LITTLE_SYM): Added
