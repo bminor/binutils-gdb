@@ -1,5 +1,9 @@
 Mon Apr  8 11:56:23 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/elf32.em: When checking for a native emulation, check
+	that the current emulation is the default emulation.
+	* emultempl/sunos.em: Likewise.
+
 	* configure.in: Permit --enable-shared to specify a list of
 	directories.
 	* configure: Rebuild.
