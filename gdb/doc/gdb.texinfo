@@ -31,7 +31,7 @@ _0__@c ===> NOTE! <==_1__
 \xdef\manvers{\$Revision$}  % For use in headers, footers too
 @end tex
 
-@c FOR UPDATES LEADING TO THIS DRAFT, GDB CHANGELOG CONSULTED BETWEEN:
+@c GDB CHANGELOG CONSULTED BETWEEN:
 @c Fri Oct 11 23:27:06 1991  John Gilmore  (gnu at cygnus.com)
 @c Sat Dec 22 02:51:40 1990  John Gilmore  (gnu at cygint)
 
@@ -64,7 +64,7 @@ _fi__(0)
 This file documents the GNU debugger _GDBN__.
 
 @c !!set edition, date, version
-This is Edition 4.01, January 1992, 
+This is Edition 4.04, March 1992, 
 of @cite{Using GDB: A Guide to the GNU Source-Level Debugger}
 for GDB Version _GDB_VN__.
 
@@ -103,8 +103,8 @@ _if__(!_GENERIC__)
 _fi__(!_GENERIC__)
 @sp 1
 @c !!set edition, date, version
-@subtitle Edition 4.01, for _GDBN__ version _GDB_VN__
-@subtitle January 1992
+@subtitle Edition 4.04, for _GDBN__ version _GDB_VN__
+@subtitle March 1992
 @author by Richard M. Stallman and Roland H. Pesch
 @page
 @tex
@@ -144,7 +144,7 @@ instead of in the original English.
 This file describes _GDBN__, the GNU symbolic debugger.
 
 @c !!set edition, date, version
-This is Edition 4.01, January 1992, for GDB Version _GDB_VN__.
+This is Edition 4.04, March 1992, for GDB Version _GDB_VN__.
 @end ifinfo
 
 @menu
@@ -205,6 +205,7 @@ Running Programs Under _GDBN__
 * Input/Output::                Your Program's Input and Output
 * Attach::                      Debugging an Already-Running Process
 * Kill Process::                Killing the Child Process
+* Process Information::         Additional Process Information
 
 Stopping and Continuing
 
@@ -1301,6 +1302,7 @@ To debug a program, you must run it under _GDBN__.
 * Input/Output::                Your Program's Input and Output
 * Attach::                      Debugging an Already-Running Process
 * Kill Process::                Killing the Child Process
+* Process Information::         Additional Process Information
 @end menu
 
 @node Compilation, Starting, Running, Running
@@ -1670,7 +1672,7 @@ confirmation if you try to do either of these things; you can control
 whether or not you need to confirm by using the @code{set confirm} command
 (@pxref{Messages/Warnings, ,Optional Warnings and Messages}).
 
-@node Kill Process,  , Attach, Running
+@node Kill Process, Process Information, Attach, Running
 @c @group
 @section Killing the Child Process
 
@@ -1696,6 +1698,44 @@ executable file while it is running in a process.  In this case, when you
 next type @code{run}, _GDBN__ will notice that the file has changed, and
 will re-read the symbol table (while trying to preserve your current
 breakpoint settings).
+
+@node Process Information, , Kill Process, Running
+@section Additional Process Information
+
+@kindex /proc
+@cindex process image
+Some operating systems provide a facility called @samp{/proc} that can
+be used to examine the image of a running process as a file.  If _GDBN__
+is configured for an operating system with this facility, the command
+@code{info proc} is available to report on several kinds of information
+about the process running your program.
+
+@table @code
+@item info proc
+@kindex info proc
+Summarize available information about the process.
+
+@item info proc mappings
+@kindex info proc mappings
+Report on the address ranges accessible in the program, with information
+on whether your program may read, write, or execute each range.
+
+@item info proc times
+@kindex info proc times
+Starting time, user CPU time, and system CPU time for your program and
+its children.
+
+@item info proc id
+@kindex info proc id
+Report on the process ID's related to your program: its own process id,
+the id of its parent, the process group id, and the session id.
+
+@item info proc status
+@kindex info proc status
+General information on the state of the process.  If the process is
+stopped, this report includes the reason for stopping, and any signal
+received.
+@end table
 
 @node Stopping, Stack, Running, Top
 @chapter Stopping and Continuing
@@ -1786,7 +1826,7 @@ no effect on your program until you enable it again.
 Breakpoints are set with the @code{break} command (abbreviated
 @code{b}).  The debugger convenience variable @samp{$bpnum} records the 
 number of the beakpoint you've set most recently; see @ref{Convenience
-Vars,, Convenience Variables} for a discussion of what you can do with
+Vars,, Convenience Variables}, for a discussion of what you can do with
 convenience variables.
 
 You have several ways to say where the breakpoint should go.
@@ -1886,7 +1926,7 @@ Breakpoint or watchpoint.
 @item Disposition
 Whether the breakpoint is marked to be disabled or deleted when hit.
 @item Enabled or Disabled
-Enabled breakpoints are marked with @samp{y}.  {n} marks breakpoints
+Enabled breakpoints are marked with @samp{y}.  @samp{n} marks breakpoints
 that are not enabled.
 @item Address
 Where the breakpoint is in your program, as a memory address
@@ -2421,7 +2461,7 @@ Use the "delete" command to delete unwanted breakpoints.
 @c FIXME: "cannot insert breakpoints" error, v unclear.
 @c        Q in pending mail to Gilmore. ---pesch@cygnus.com, 26mar91
 @c        some light may be shed by looking at instances of
-@c        ONE_PROCESS_WRITETEXT.  But error seems possible otherwise
+@c        ONE_PROCESS_WRITETEXT.  But error message seems possible otherwise
 @c        too.  pesch, 20sep91
 Under some operating systems, breakpoints cannot be used in a program if
 any other process is running that program.  In this situation,
@@ -5535,6 +5575,7 @@ which match the regular-expression @var{regexp}.
 
 @item printsyms @var{filename}
 @itemx printpsyms @var{filename}
+@itemx printmsyms @var{filename}
 @kindex printsyms
 @cindex symbol dump
 @kindex printsyms
@@ -5546,11 +5587,14 @@ _GDBN__ includes all the symbols for which it has already collected full
 details: that is, @var{filename} reflects symbols for only those files
 whose symbols _GDBN__ has read.  You can use the command @code{info
 sources} to find out which files these are.  If you use
-@code{printpsyms}, the dump also shows information about symbols that
+@code{printpsyms} instead, the dump shows information about symbols that
 _GDBN__ only knows partially---that is, symbols defined in files that
-_GDBN__ has skimmed, but not yet read completely.  The description of
-@code{symbol-file} describes how _GDBN__ reads symbols; both commands
-are described under @ref{Files, ,Commands to Specify Files}.
+_GDBN__ has skimmed, but not yet read completely.  Finally,
+@code{printmsyms} dumos just the minimal symbol information required for
+each object file from which _GDBN__ has read some symbols.  The description of
+@code{symbol-file} explains how _GDBN__ reads symbols; both @code{info
+source} and @code{symbol-file} are described in @ref{Files, ,Commands
+to Specify Files}.
 @end table
 
 @node Altering, _GDBN__ Files, Symbols, Top
