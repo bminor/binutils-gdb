@@ -1,3 +1,7 @@
+2001-06-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/djgpp/fnchange.lst: Sort.
+
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/djgpp/fnchange.lst: Rename mi0-var-block.exp,
