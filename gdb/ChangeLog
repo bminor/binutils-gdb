@@ -1,3 +1,8 @@
+Fri Jan 28 11:55:52 1994  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* configure.in: Make m68k-coff and aout add monitor support in
+	addition to the standard serial support.
+
 Fri Jan 28 08:45:02 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* mdebugread.c (psymtab_to_symtab_1): Don't complain on stLabel with
