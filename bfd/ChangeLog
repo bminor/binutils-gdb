@@ -1,3 +1,16 @@
+2004-12-16  Richard Sandiford  <rsandifo@redhat.com>
+
+	* reloc.c (BFD_RELOC_V850_LO16_SPLIT_OFFSET): New bfd_reloc_code_type.
+	* elf32-v850.c (v850_elf_howto_table): Add entry for
+	R_V850_LO16_SPLIT_OFFSET.
+	(v850_elf_reloc_map): Map it to BFD_RELOC_V850_LO16_SPLIT_OFFSET.
+	(v850_elf_perform_lo16_relocation): New function, extracted from...
+	(v850_elf_perform_relocation): ...here.  Use it to handle
+	R_V850_LO16_SPLIT_OFFSET.
+	(v850_elf_check_relocs, v850_elf_final_link_relocate): Handle
+	R_V850_LO16_SPLIT_OFFSET.
+	* libbfd.h, bfd-in2.h: Regenerate.
+
 2004-12-14  P.J. Darcy  <darcypj@us.ibm.com>
 
 	* config.bfd: Add s390x-ibm-tpf support.

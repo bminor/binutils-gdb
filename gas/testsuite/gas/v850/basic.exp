@@ -436,4 +436,5 @@ if [istarget v850*-*-*] then {
 
     gas_test_error "range.s" "-mwarn-signed-overflow" "Check for range error on byte load/store"
     run_dump_test "v850e1"
+    run_dump_test "split-lo16"
 }

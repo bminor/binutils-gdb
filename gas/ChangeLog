@@ -1,3 +1,9 @@
+2004-12-16  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-v850.c (handle_lo16): New function.
+	(v850_reloc_prefix): Use it to check lo().
+	(md_assemble, md_apply_fix3): Handle BFD_RELOC_V850_LO16_SPLIT_OFFSET.
+
 2004-12-14  P.J. Darcy  <darcypj@us.ibm.com>
 
 	* configure.in: Add s390x-ibm-tpf support.

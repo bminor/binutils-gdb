@@ -1,3 +1,7 @@
+2004-12-16  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-v850: New directory.
+
 2004-12-14  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-mips-elf/jal-overflow-2.[sd]: New test.

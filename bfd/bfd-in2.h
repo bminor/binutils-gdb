@@ -2967,6 +2967,10 @@ bits placed non-contiguously in the instruction.  */
 /* Used to maintain alignment whilst relaxing.  */
   BFD_RELOC_V850_ALIGN,
 
+/* This is a variation of BFD_RELOC_LO16 that can be used in v850e ld.bu
+instructions.  */
+  BFD_RELOC_V850_LO16_SPLIT_OFFSET,
+
 /* This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
 instruction.  */
   BFD_RELOC_MN10300_32_PCREL,

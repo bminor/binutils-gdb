@@ -3099,6 +3099,11 @@ ENUM
 ENUMDOC
   Used to maintain alignment whilst relaxing.
 ENUM
+  BFD_RELOC_V850_LO16_SPLIT_OFFSET
+ENUMDOC
+  This is a variation of BFD_RELOC_LO16 that can be used in v850e ld.bu
+  instructions.
+ENUM
   BFD_RELOC_MN10300_32_PCREL
 ENUMDOC
   This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the

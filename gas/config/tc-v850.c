@@ -1375,6 +1375,25 @@ md_begin ()
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, machine);
 }
 
+static bfd_reloc_code_real_type
+handle_lo16 (const struct v850_operand *operand)
+{
+  if (operand != NULL)
+    {
+      if (operand->bits == -1)
+	return BFD_RELOC_V850_LO16_SPLIT_OFFSET;
+
+      if (!(operand->bits == 16 && operand->shift == 16)
+	  && !(operand->bits == 15 && operand->shift == 17))
+	{
+	  as_bad (_("lo() relocation used on an instruction which does "
+		    "not support it"));
+	  return BFD_RELOC_64;  /* Used to indicate an error condition.  */
+	}
+    }
+  return BFD_RELOC_LO16;
+}
+
 static bfd_reloc_code_real_type handle_ctoff
   PARAMS ((const struct v850_operand *));
 
@@ -1516,7 +1535,7 @@ v850_reloc_prefix (operand)
 
   CHECK_ ("hi0",    BFD_RELOC_HI16	   );
   CHECK_ ("hi",	    BFD_RELOC_HI16_S	   );
-  CHECK_ ("lo",	    BFD_RELOC_LO16	   );
+  CHECK_ ("lo",	    handle_lo16 (operand)  );
   CHECK_ ("sdaoff", handle_sdaoff (operand));
   CHECK_ ("zdaoff", handle_zdaoff (operand));
   CHECK_ ("tdaoff", handle_tdaoff (operand));
@@ -1755,6 +1774,7 @@ md_assemble (str)
 		      /* Fall through.  */
 
 		    case BFD_RELOC_LO16:
+		    case BFD_RELOC_V850_LO16_SPLIT_OFFSET:
 		      {
 			/* Truncate, then sign extend the value.  */
 			ex.X_add_number = SEXT16 (ex.X_add_number);
@@ -2199,6 +2219,7 @@ md_assemble (str)
 	  switch (reloc)
 	    {
 	    case BFD_RELOC_LO16:
+	    case BFD_RELOC_V850_LO16_SPLIT_OFFSET:
 	    case BFD_RELOC_HI16:
 	    case BFD_RELOC_HI16_S:
 	      fixP->fx_no_overflow = 1;
@@ -2405,7 +2426,11 @@ md_apply_fix3 (fixP, valueP, seg)
       /* We still have to insert the value into memory!  */
       where = fixP->fx_frag->fr_literal + fixP->fx_where;
 
-      if (fixP->fx_size == 1)
+      if (fixP->fx_r_type == BFD_RELOC_V850_LO16_SPLIT_OFFSET)
+	bfd_putl32 (((value << 16) & 0xfffe0000)
+		    | ((value << 5) & 0x20)
+		    | (bfd_getl32 (where) & ~0xfffe0020), where);
+      else if (fixP->fx_size == 1)
 	*where = value & 0xff;
       else if (fixP->fx_size == 2)
 	bfd_putl16 (value & 0xffff, (unsigned char *) where);

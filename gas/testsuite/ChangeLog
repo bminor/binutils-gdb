@@ -1,3 +1,8 @@
+2004-12-16  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/v850/split-lo16.{s,d}: New test.
+	* gas/v850/v850.exp: Run it.
+
 2004-12-15 Jan Beulich  <jbeulich@novell.com>
 
 	* gas/elf/section5.[els]: New.
