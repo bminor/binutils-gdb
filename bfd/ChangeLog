@@ -1,3 +1,8 @@
+Fri Dec  8 17:47:07 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Set section_count to 0
+	when setting sections to NULL.
+
 Wed Dec  6 17:05:37 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (struct xcoff_loader_info): Add export_defineds

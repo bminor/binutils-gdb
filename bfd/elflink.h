@@ -464,6 +464,7 @@ elf_link_add_object_symbols (abfd, info)
 	 still implies that the section takes up space in the output
 	 file.  */
       abfd->sections = NULL;
+      abfd->section_count = 0;
 
       /* If this is the first dynamic object found in the link, create
 	 the special sections required for dynamic linking.  */
