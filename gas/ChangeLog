@@ -1,3 +1,9 @@
+Thu Oct 14 16:51:00 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-i386.c (md_apply_fix_1): Make cross segment calls work
+	for ELF by hacking around bizarre bfd_perform_relocation behaviour
+	that I don't dare change.
+
 Thu Oct 14 11:33:25 1993  Michael Meissner  (meissner@osf.org)
 
 	* config/tc-i386.c: (md_begin): Do not zero static arrays.  Don't
