@@ -1,3 +1,14 @@
+Wed May  6 15:30:06 1998  Klaus Kaempf  <kkaempf@progis.de>
+
+	* makefile.vms: Run dec c with /nodebug.
+
+Mon May  4 10:19:57 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in: Rebuilt.
+	* Makefile.am: Regenerated dependencies with mkdep.
+
+	* opintl.h (_): Define as dgettext.
+
 start-sanitize-cygnus
 Fri May  1 13:47:42 1998  Doug Evans  <devans@canuck.cygnus.com>
 
