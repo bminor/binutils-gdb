@@ -1162,6 +1162,20 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      return false;
 	    }
 
+	  /* This can happen if we get a link error with the input ELF
+	     variant mismatching the output variant.  Emit an error so
+	     it's noticed if it happens elsewhere.  */
+	  if (sgot == NULL)
+	    {
+	      (*_bfd_error_handler)
+		(_("%s: relocation %s in section %s with no GOT created"),
+		 bfd_archive_filename (input_bfd),
+		 cris_elf_howto_table[r_type].name,
+		 bfd_get_section_name (input_bfd, input_section));
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
+
 	  /* This relocation is like a PC-relative one, except the
 	     reference point is the location of GOT.  Note that
 	     sgot->output_offset is not involved in this calculation.  We
