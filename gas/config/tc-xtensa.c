@@ -477,8 +477,6 @@ static void xg_assemble_literal_space
   PARAMS ((int));
 static symbolS *xtensa_create_literal_symbol
   PARAMS ((segT, fragS *));
-static symbolS *xtensa_create_local_symbol
-  PARAMS ((bfd *, const char *, segT, valueT, fragS *));
 static bfd_boolean get_is_linkonce_section
   PARAMS ((bfd *, segT));
 static bfd_boolean xg_emit_insn
@@ -514,7 +512,7 @@ static addressT next_frag_pre_opcode_bytes
 static bfd_boolean is_next_frag_target
   PARAMS ((const fragS *, const fragS *));
 static void xtensa_mark_literal_pool_location
-  PARAMS ((bfd_boolean));
+  PARAMS ((void));
 static void xtensa_move_labels
   PARAMS ((fragS *, valueT, fragS *, valueT));
 static void assemble_nop
@@ -1421,7 +1419,7 @@ xtensa_literal_position (ignore)
   if (inside_directive (directive_literal))
     as_warn (_(".literal_position inside literal directive; ignoring"));
   else if (!use_literal_section)
-    xtensa_mark_literal_pool_location (FALSE);
+    xtensa_mark_literal_pool_location ();
 
   demand_empty_rest_of_line ();
 }
@@ -1648,7 +1646,7 @@ expression_maybe_register (opnd, tok)
 	      || !strncmp (input_line_pointer, plt_suffix,
 			   strlen (plt_suffix) - 1)))
 	{
-	  tok->X_add_symbol->sy_tc.plt = 1;
+	  symbol_get_tc (tok->X_add_symbol)->plt = 1;
 	  input_line_pointer += strlen (plt_suffix);
 	}
     }
@@ -3899,40 +3897,24 @@ xtensa_create_literal_symbol (sec, frag)
 {
   static int lit_num = 0;
   static char name[256];
-  symbolS *fragSym;
-
-  sprintf (name, ".L_lit_sym%d", lit_num);
-  fragSym = xtensa_create_local_symbol (stdoutput, name, sec, 0, frag_now);
-
-  frag->tc_frag_data.is_literal = TRUE;
-  lit_num++;
-  return fragSym;
-}
-
-
-/* Create a local symbol.  If it is in a linkonce section, we have to
-   be careful to make sure that if it is used in a relocation that the
-   symbol will be in the output file.  */
-
-symbolS *
-xtensa_create_local_symbol (abfd, name, sec, value, frag)
-     bfd *abfd;
-     const char *name;
-     segT sec;
-     valueT value;
-     fragS *frag;
-{
   symbolS *symbolP;
 
-  if (get_is_linkonce_section (abfd, sec))
+  sprintf (name, ".L_lit_sym%d", lit_num);
+
+  /* Create a local symbol.  If it is in a linkonce section, we have to
+     be careful to make sure that if it is used in a relocation that the
+     symbol will be in the output file.  */
+  if (get_is_linkonce_section (stdoutput, sec))
     {
-      symbolP = symbol_new (name, sec, value, frag);
+      symbolP = symbol_new (name, sec, 0, frag);
       S_CLEAR_EXTERNAL (symbolP);
       /* symbolP->local = 1; */
     }
   else
-    symbolP = symbol_new (name, sec, value, frag);
+    symbolP = symbol_new (name, sec, 0, frag);
 
+  frag->tc_frag_data.is_literal = TRUE;
+  lit_num++;
   return symbolP;
 }
 
@@ -4579,15 +4561,12 @@ next_frag_pre_opcode_bytes (fragp)
    placed nearest to their use.  */
 
 static void
-xtensa_mark_literal_pool_location (move_labels)
-     bfd_boolean move_labels;
+xtensa_mark_literal_pool_location ()
 {
   /* Any labels pointing to the current location need
      to be adjusted to after the literal pool.  */
   emit_state s;
-  fragS *label_target = frag_now;
   fragS *pool_location;
-  offsetT label_offset = frag_now_fix ();
 
   frag_align (2, 0, 0);
 
@@ -4610,8 +4589,6 @@ xtensa_mark_literal_pool_location (move_labels)
   frag_now->tc_frag_data.literal_frag = pool_location;
   frag_variant (rs_fill, 0, 0, 0, NULL, 0, NULL);
   xtensa_restore_emit_state (&s);
-  if (move_labels)
-    xtensa_move_labels (label_target, label_offset, frag_now, 0);
 }
 
 
@@ -4820,13 +4797,13 @@ xtensa_frob_label (sym)
     as_bad (_("invalid last instruction for a zero-overhead loop"));
 
   /* No target aligning in the absolute section.  */
-  if (now_seg != absolute_section && align_targets
-      && !is_unaligned_label (sym))
+  if (now_seg != absolute_section
+      && align_targets
+      && !is_unaligned_label (sym)
+      && !frag_now->tc_frag_data.is_literal)
     {
       fragS *old_frag = frag_now;
       offsetT old_offset = frag_now_fix ();
-      if (frag_now->tc_frag_data.is_literal)
-	return;
       /* frag_now->tc_frag_data.is_insn = TRUE; */
       frag_var (rs_machine_dependent, 4, 4,
 		RELAX_DESIRE_ALIGN_IF_TARGET,
@@ -4997,7 +4974,7 @@ md_assemble (str)
 	}
     }
 
-  /* Special count for "entry" instruction.  */
+  /* Special-case for "entry" instruction.  */
   if (is_entry_opcode (orig_insn.opcode))
     {
       /* Check that the second opcode (#1) is >= 16.  */
@@ -5015,14 +4992,18 @@ md_assemble (str)
 	      as_warn (_("entry instruction with non-constant decrement"));
 	    }
 	}
-    }
 
-  if (!orig_insn.is_specific_opcode && is_entry_opcode (orig_insn.opcode))
-    {
-      xtensa_mark_literal_pool_location (TRUE);
+      if (!orig_insn.is_specific_opcode)
+	{
+	  fragS *label_target = frag_now;
+	  offsetT label_offset = frag_now_fix ();
 
-      /* Automatically align ENTRY instructions.  */
-      frag_align (2, 0, 0);
+	  xtensa_mark_literal_pool_location ();
+
+	  /* Automatically align ENTRY instructions.  */
+	  xtensa_move_labels (label_target, label_offset, frag_now, 0);
+	  frag_align (2, 0, 0);
+	}
     }
 
   if (software_a0_b_retw_interlock)
@@ -5222,7 +5203,7 @@ void
 xtensa_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
-  symbolP->sy_tc.plt = 0;
+  symbol_get_tc (symbolP)->plt = 0;
 }
 
 
@@ -7283,7 +7264,7 @@ fix_new_exp_in_seg (new_seg, new_subseg,
 
   if (r_type == BFD_RELOC_32
       && exp->X_add_symbol
-      && exp->X_add_symbol->sy_tc.plt == 1)
+      && symbol_get_tc (exp->X_add_symbol)->plt == 1)
     {
       r_type = BFD_RELOC_XTENSA_PLT;
     }
@@ -7775,7 +7756,7 @@ xtensa_switch_to_literal_fragment (result)
       as_warn (_("inlining literal pool; "
 		 "specify location with .literal_position."));
       recursive = TRUE;
-      xtensa_mark_literal_pool_location (FALSE);
+      xtensa_mark_literal_pool_location ();
       recursive = FALSE;
     }
 

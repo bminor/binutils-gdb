@@ -1,5 +1,19 @@
 2003-09-09  Bob Wilson  <bob.wilson@acm.org>
 
+	* config/tc-xtensa.c (xtensa_mark_literal_pool_location): Remove
+	"move_labels" argument and corresponding call to xtensa_move_labels.
+	(md_assemble): Add a separate call to xtensa_move_labels and remove
+	argument for call to xtensa_mark_literal_pool_location.
+	(xtensa_literal_position, xtensa_switch_to_literal_fragment): Fix
+	calls to xtensa_mark_literal_pool_location.
+	(xtensa_create_local_symbol): Delete and inline the code into...
+	(xtensa_create_literal_symbol): ...here.
+	(xtensa_frob_label): Combine conditionals.
+	(expression_maybe_register, xtensa_symbol_new_hook,
+	fix_new_exp_in_seg): Use symbol_get_tc.
+
+2003-09-09  Bob Wilson  <bob.wilson@acm.org>
+
 	* config/tc-xtensa.c (xtensa_literal_pseudo): Remove code for
 	combining identical literals.
 	(expression_maybe_register): Remove call to find_lit_sym_translation.
