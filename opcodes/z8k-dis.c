@@ -142,7 +142,7 @@ int z8k_lookup_instr PARAMS ((unsigned char *, disassemble_info *));
 static void output_instr
   PARAMS ((instr_data_s *, unsigned long, disassemble_info *));
 static void unpack_instr PARAMS ((instr_data_s *, int, disassemble_info *));
-static void unparse_instr PARAMS ((instr_data_s *,int));
+static void unparse_instr PARAMS ((instr_data_s *, int));
 
 static int
 print_insn_z8k (addr, info, is_segmented)
@@ -334,15 +334,6 @@ unpack_instr (instr_data, is_segmented, info)
 
       switch (datum_class)
 	{
-	case CLASS_X:
-	  instr_data->address = instr_nibl;
-	  break;
-	case CLASS_BA:
-	  instr_data->displacement = instr_nibl;
-	  break;
-	case CLASS_BX:
-	  instr_data->arg_reg[datum_value] = instr_nibl;
-	  break;
 	case CLASS_DISP:
 	  switch (datum_value)
 	    {
@@ -412,12 +403,6 @@ unpack_instr (instr_data, is_segmented, info)
 	case CLASS_CC:
 	  instr_data->cond_code = instr_nibl;
 	  break;
-#if 0
-	case CLASS_CTRL:
-	  instr_data->ctrl_code = instr_nibl;
-	  break;
-#endif
-	case CLASS_DA:
 	case CLASS_ADDRESS:
 	  if (is_segmented)
 	    {
@@ -465,31 +450,13 @@ unpack_instr (instr_data, is_segmented, info)
 	case CLASS_BIT:
 	  instr_data->ctrl_code = instr_nibl & 0x7;
 	  break;
-	case CLASS_IR:
-	  instr_data->arg_reg[datum_value] = instr_nibl;
-	  break;
 	case CLASS_FLAGS:
 	  instr_data->flags = instr_nibl;
 	  break;
 	case CLASS_REG:
 	  instr_data->arg_reg[datum_value] = instr_nibl;
 	  break;
-	case CLASS_REG_BYTE:
-	  instr_data->arg_reg[datum_value] = instr_nibl;
-	  break;
-	case CLASS_REG_WORD:
-	  instr_data->arg_reg[datum_value] = instr_nibl;
-	  break;
-	case CLASS_REG_QUAD:
-	  instr_data->arg_reg[datum_value] = instr_nibl;
-	  break;
-	case CLASS_REG_LONG:
-	  instr_data->arg_reg[datum_value] = instr_nibl;
-	  break;
 	case CLASS_REGN0:
-	  instr_data->arg_reg[datum_value] = instr_nibl;
-	  break;
-	case CLASS_PR:
 	  instr_data->arg_reg[datum_value] = instr_nibl;
 	  break;
         case CLASS_DISP8:
@@ -497,6 +464,7 @@ unpack_instr (instr_data, is_segmented, info)
 	  nibl_count += 1;
           break;
 	default:
+          abort ();
 	  break;
 	}
 
@@ -605,6 +573,7 @@ unparse_instr (instr_data,is_segmented)
 	  strcat (out_str, tmp_str);
 	  break;
 	default:
+          abort ();
 	  break;
 	}
     }

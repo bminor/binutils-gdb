@@ -1,3 +1,10 @@
+2001-06-06  Christian Groessler <cpg@aladdin.de>
+
+        * z8k-dis.c: Fix formatting.
+        (unpack_instr): Remove unused cases in switch statement. Add
+        safety abort() in default case.
+        (unparse_instr): Add safety abort() in default case.
+
 2001-06-06  Peter Jakubek <pjak@snafu.de>
 
 	* opcodes/m68k-dis.c (print_insn_m68k): Fix typo.

@@ -1,3 +1,15 @@
+2001-06-06  Christian Groessler <cpg@aladdin.de>
+
+        * config/tc-z8k.c: Removed many warnings by removing unused
+	variables and tagging unused parameters as such.
+	(md_begin): Fixed a typo (","instead of ";").
+	(struct ctrl_table): Add parentheses to initialize array
+	correctly.
+	(struct flag_table): Likewise.
+	(struct intr_table): Likewise.
+	(struct table): Likewise.
+	(check_operand): "#if 0"'ed since it doesn't seem to be used.
+
 2001-06-06  Peter Jakubek <pjak@snafu.de>
 
 	* gas/config/tc-m68k.c (md_show_usage): Add all supported ColdFire

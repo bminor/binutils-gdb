@@ -1,5 +1,5 @@
 /* BFD back-end for Zilog Z800n COFF binaries.
-   Copyright 1992, 1993, 1994, 1995, 1997, 1999, 2000
+   Copyright 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
@@ -31,12 +31,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (1)
 
 static reloc_howto_type r_imm32 =
-HOWTO (R_IMM32, 0, 1, 32, false, 0,
+HOWTO (R_IMM32, 0, 2, 32, false, 0,
        complain_overflow_bitfield, 0, "r_imm32", true, 0xffffffff,
        0xffffffff, false);
 
 static reloc_howto_type r_imm4l =
-HOWTO (R_IMM4L, 0, 1, 4, false, 0,
+HOWTO (R_IMM4L, 0, 0, 4, false, 0,
        complain_overflow_bitfield, 0, "r_imm4l", true, 0xf, 0xf, false);
 
 static reloc_howto_type r_da =
@@ -45,7 +45,7 @@ HOWTO (R_IMM16, 0, 1, 16, false, 0,
        false);
 
 static reloc_howto_type r_imm8 =
-HOWTO (R_IMM8, 0, 1, 8, false, 0,
+HOWTO (R_IMM8, 0, 0, 8, false, 0,
        complain_overflow_bitfield, 0, "r_imm8", true, 0x000000ff, 0x000000ff,
        false);
 
@@ -55,11 +55,11 @@ HOWTO (R_REL16, 0, 1, 16, false, 0,
        true);
 
 static reloc_howto_type r_jr =
-HOWTO (R_JR, 0, 1, 8, true, 0, complain_overflow_signed, 0,
+HOWTO (R_JR, 0, 0, 8, true, 0, complain_overflow_signed, 0,
        "r_jr", true, 0, 0, true);
 
 static reloc_howto_type r_disp7 =
-HOWTO (R_DISP7, 0, 1, 7, true, 0, complain_overflow_bitfield, 0,
+HOWTO (R_DISP7, 0, 0, 7, true, 0, complain_overflow_bitfield, 0,
        "r_disp7", true, 0, 0, true);
 
 static reloc_howto_type r_callr =
@@ -141,7 +141,7 @@ rtype2howto (internal, dst)
 static void
 reloc_processing (relent, reloc, symbols, abfd, section)
      arelent * relent;
-     struct internal_reloc *reloc;
+     struct internal_reloc * reloc;
      asymbol ** symbols;
      bfd * abfd;
      asection * section;
@@ -150,13 +150,9 @@ reloc_processing (relent, reloc, symbols, abfd, section)
   rtype2howto (relent, reloc);
 
   if (reloc->r_symndx > 0)
-    {
-      relent->sym_ptr_ptr = symbols + obj_convert (abfd)[reloc->r_symndx];
-    }
+    relent->sym_ptr_ptr = symbols + obj_convert (abfd)[reloc->r_symndx];
   else
-    {
-      relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
-    }
+    relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 
   relent->addend = reloc->r_offset;
   relent->address -= section->vma;
@@ -164,15 +160,15 @@ reloc_processing (relent, reloc, symbols, abfd, section)
 
 static void
 extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
-     bfd *in_abfd;
-     struct bfd_link_info *link_info;
-     struct bfd_link_order *link_order;
-     arelent *reloc;
-     bfd_byte *data;
-     unsigned int *src_ptr;
-     unsigned int *dst_ptr;
+     bfd * in_abfd;
+     struct bfd_link_info * link_info;
+     struct bfd_link_order * link_order;
+     arelent * reloc;
+     bfd_byte * data;
+     unsigned int * src_ptr;
+     unsigned int * dst_ptr;
 {
-  asection *input_section = link_order->u.indirect.section;
+  asection * input_section = link_order->u.indirect.section;
 
   switch (reloc->howto->type)
     {
@@ -186,7 +182,8 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 
     case R_IMM32:
       bfd_put_32 (in_abfd,
-		  bfd_coff_reloc16_get_value (reloc, link_info, input_section),
+		  /* 0x80000000 indicates a long segmented address.  */
+		  bfd_coff_reloc16_get_value (reloc, link_info, input_section) | 0x80000000,
 		  data + *dst_ptr);
       (*dst_ptr) += 4;
       (*src_ptr) += 4;
@@ -218,8 +215,8 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 	bfd_vma dot = (link_order->offset
 		       + *dst_ptr
 		       + input_section->output_section->vma);
-	int gap = dst - dot - 1;/* -1 since were in the odd byte of the
-				    word and the pc's been incremented */
+	int gap = dst - dot - 1;  /* -1, since we're in the odd byte of the
+                                     word and the pc's been incremented.  */
 
 	if (gap & 1)
 	  abort ();
@@ -245,8 +242,8 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 	bfd_vma dot = (link_order->offset
 		       + *dst_ptr
 		       + input_section->output_section->vma);
-	int gap = dst - dot - 1;/* -1 since were in the odd byte of the
-				    word and the pc's been incremented */
+	int gap = dst - dot - 1;  /* -1, since we're in the odd byte of the
+                                     word and the pc's been incremented.  */
 
 	if (gap & 1)
 	  abort ();
@@ -318,6 +315,7 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 	(*src_ptr) += 2;
 	break;
       }
+
     default:
       abort ();
     }

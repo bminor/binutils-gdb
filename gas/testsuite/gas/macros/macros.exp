@@ -30,5 +30,6 @@ if { ![istarget hppa*-*-*] || [istarget *-*-linux*] } {
     # FIXME: Due to macro mishandling of ONLY_STANDARD_ESCAPES.
     setup_xfail cris-*-*
     setup_xfail sh*-*-*
+    setup_xfail z8k*-*-*
     run_dump_test strings
 }
