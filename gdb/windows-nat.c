@@ -514,7 +514,7 @@ register_loaded_dll (const char *name, DWORD load_addr)
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */
 static int
-handle_load_dll (PTR dummy ATTRIBUTE_UNUSED)
+handle_load_dll (void *dummy ATTRIBUTE_UNUSED)
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
   DWORD dll_name_ptr;
@@ -1228,7 +1228,7 @@ child_stop (void)
 
 int
 child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
-		   int write, struct mem_attrib *mem ATTRIBUTE_UNUSED,
+		   int write,  struct mem_attrib *mem ATTRIBUTE_UNUSED,
 		   struct target_ops *target ATTRIBUTE_UNUSED)
 {
   DWORD done;
@@ -1489,7 +1489,7 @@ typedef struct
 map_code_section_args;
 
 static void
-map_single_dll_code_section (bfd * abfd, asection * sect, PTR obj)
+map_single_dll_code_section (bfd * abfd, asection * sect, void *obj)
 {
   int old;
   int update_coreops;
@@ -1554,14 +1554,14 @@ dll_code_sections_add (const char *dll_name, int base_addr, struct target_ops *t
       map_args.target = target;
       map_args.addr = base_addr - bfd_section_vma (dll_bfd, lowest_sect);
 
-      bfd_map_over_sections (dll_bfd, &map_single_dll_code_section, (PTR) (&map_args));
+      bfd_map_over_sections (dll_bfd, &map_single_dll_code_section, (void *) (&map_args));
     }
 
   return 1;
 }
 
 static void
-core_section_load_dll_symbols (bfd * abfd, asection * sect, PTR obj)
+core_section_load_dll_symbols (bfd * abfd, asection * sect, void *obj)
 {
   struct target_ops *target = (struct target_ops *) obj;
 

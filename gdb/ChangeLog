@@ -1,3 +1,7 @@
+2001-02-05  Christopher Faylor  <cgf@cygnus.com>
+
+	* win32-nat.c: Change PTR to void * throughout.
+
 2001-02-05  J.T. Conklin  <jtc@redback.com>
 
 	* signals.h: Removed.
