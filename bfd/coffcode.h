@@ -1,22 +1,22 @@
-/* Support for Intel 960 COFF and Motorola 88k BCS COFF (and maybe others) */
+/* Support for Intel 960 COFF and Motorola 88k BCS COFF (and maybe others)
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Cygnus Support.
 
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+This file is part of BFD, the Binary File Descriptor library.
 
-This file is part of BFD, the Binary File Diddler.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License as published by the Free Software
-Foundation; either version 1, or (at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-BFD is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-details.
-
-You should have received a copy of the GNU General Public License along with
-BFD; see the file COPYING.  If not, write to the Free Software Foundation,
-675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*doc*
 @section coff backends
@@ -238,8 +238,6 @@ $ } coff_symbol_type;
 /* $Id$ */
 /* Most of this hacked by Steve Chamberlain, steve@cygnus.com */
 
-#include "archures.h"		/* Machine architectures and types */
-
 /* Align an address upward to a boundary, expressed as a number of bytes.
    E.g. align to an 8-byte boundary with argument of 8.  */
 #define ALIGN(this, boundary) \
@@ -448,6 +446,7 @@ DEFUN(bfd_swap_filehdr_out,(abfd, filehdr_in, filehdr_out),
 }
 
 
+#ifndef NO_COFF_SYMBOLS
 
 static void 
 DEFUN(coff_swap_sym_in,(abfd, ext1, in1),
@@ -623,6 +622,10 @@ DEFUN(coff_swap_aux_out,(abfd, in, type, class, ext),
   }
 }
 
+#endif /* NO_COFF_SYMBOLS */
+
+#ifndef NO_COFF_LINENOS
+
 static void
 DEFUN(coff_swap_lineno_in,(abfd, ext1, in1),
       bfd            *abfd AND
@@ -654,7 +657,7 @@ DEFUN(coff_swap_lineno_out,(abfd, in, ext),
 #endif
 }
 
-
+#endif /* NO_COFF_LINENOS */
 
 
 static void 
@@ -1072,30 +1075,7 @@ DEFUN(coff_object_p,(abfd),
 
 
 
-
-/* 
-Takes a bfd and a symbol, returns a pointer to the coff specific area
-of the symbol if there is one.
-*/
-static coff_symbol_type *
-DEFUN(coff_symbol_from,(abfd, symbol),
-      bfd            *abfd AND
-      asymbol        *symbol)
-{
-  if (symbol->the_bfd->xvec->flavour != bfd_target_coff_flavour_enum) 
-    return (coff_symbol_type *)NULL;
-    
-  if (symbol->the_bfd->tdata == (PTR)NULL)
-    return (coff_symbol_type *)NULL;
-    
-  return  (coff_symbol_type *) symbol;
-}
-
-
-
-
-
-
+#ifndef NO_COFF_LINENOS
 
 static void 
 DEFUN(coff_count_linenumbers,(abfd),
@@ -1132,6 +1112,28 @@ DEFUN(coff_count_linenumbers,(abfd),
       }
     }
   }
+}
+
+#endif /* NO_COFF_LINENOS */
+
+#ifndef NO_COFF_SYMBOLS
+
+/* 
+Takes a bfd and a symbol, returns a pointer to the coff specific area
+of the symbol if there is one.
+*/
+static coff_symbol_type *
+DEFUN(coff_symbol_from,(abfd, symbol),
+      bfd            *abfd AND
+      asymbol        *symbol)
+{
+  if (symbol->the_bfd->xvec->flavour != bfd_target_coff_flavour_enum) 
+    return (coff_symbol_type *)NULL;
+    
+  if (symbol->the_bfd->tdata == (PTR)NULL)
+    return (coff_symbol_type *)NULL;
+    
+  return  (coff_symbol_type *) symbol;
 }
 
 
@@ -1666,15 +1668,17 @@ DEFUN(coff_write_symbols,(abfd),
   if (string_size != 0) 
    {
      unsigned int    size = string_size + 4;
-     size =  size;
-     bfd_write((PTR) &size, 1, sizeof(size), abfd);
+     char buffer[4];
+     bfd_h_put_32(abfd, size, buffer);
+     bfd_write((PTR) buffer, 1, sizeof(buffer), abfd);
      for (p = abfd->outsymbols, i = 0; i < limit; i++, p++) 
 	 {
 	   asymbol        *q = *p;
 	   size_t          name_length = strlen(q->name);
 	   int maxlen;
 	   coff_symbol_type*	   c_symbol = coff_symbol_from(abfd, q);
-	   maxlen = ((c_symbol != NULL && c_symbol->native != NULL) && (c_symbol->native->u.syment.n_sclass == C_FILE)) ?
+	   maxlen = ((c_symbol != NULL && c_symbol->native != NULL) &&
+		     (c_symbol->native->u.syment.n_sclass == C_FILE)) ?
 	     FILNMLEN : SYMNMLEN;
 	
 	   if (name_length > maxlen) {
@@ -1694,6 +1698,8 @@ DEFUN(coff_write_symbols,(abfd),
       
   }
 }
+#endif /* NO_COFF_SYMBOLS */
+
 /*doc*
 @subsubsection Writing Relocations
 To write a relocations, all the back end does is step though the
@@ -1738,6 +1744,8 @@ DEFUN(coff_write_relocs,(abfd),
   }
 }
 
+#ifndef NO_COFF_LINENOS
+
 static void 
 DEFUN(coff_write_linenumbers,(abfd),
       bfd            *abfd)
@@ -1775,6 +1783,15 @@ DEFUN(coff_write_linenumbers,(abfd),
   }
 }
 
+static alent   *
+DEFUN(coff_get_lineno,(ignore_abfd, symbol),
+      bfd            *ignore_abfd AND
+      asymbol        *symbol)
+{
+  return coffsymbol(symbol)->lineno;
+}
+
+#endif /* NO_COFF_LINENOS */
 
 static asymbol *
 coff_make_empty_symbol(abfd)
@@ -1790,6 +1807,8 @@ bfd            *abfd;
   new->symbol.the_bfd = abfd;
   return &new->symbol;
 }
+
+#ifndef NO_COFF_SYMBOLS
 
 static void 
 DEFUN(coff_print_symbol,(ignore_abfd, filep, symbol, how),
@@ -1825,18 +1844,11 @@ DEFUN(coff_print_symbol,(ignore_abfd, filep, symbol, how),
   }
 }
 
-static alent   *
-DEFUN(coff_get_lineno,(ignore_abfd, symbol),
-      bfd            *ignore_abfd AND
-      asymbol        *symbol)
-{
-  return coffsymbol(symbol)->lineno;
-}
+#endif /* NO_COFF_SYMBOLS */
 
-/*
-Set flags and magic number of a coff file from architecture and machine
-type.  Result is true if we can represent the arch&type, false if not.
-*/
+/* Set flags and magic number of a coff file from architecture and machine
+   type.  Result is true if we can represent the arch&type, false if not.  */
+
 static          boolean
 DEFUN(coff_set_flags,(abfd, magicp, flagsp),
       bfd            *abfd AND
@@ -2037,14 +2049,18 @@ DEFUN(coff_write_object_contents,(abfd),
   /* Make a pass through the symbol table to count line number entries and
      put them into the correct asections */
     
+#ifndef NO_COFF_LINENOS
   coff_count_linenumbers(abfd);
+#endif
   data_base = scn_base;
     
   /* Work out the size of the reloc and linno areas */
     
   for (current = abfd->sections; current != NULL; current = current->next) {
     reloc_size += current->reloc_count * RELSZ;
+#ifndef NO_COFF_LINENOS
     lnno_size += current->lineno_count * LINESZ;
+#endif
     data_base += SCNHSZ;
   }
     
@@ -2056,7 +2072,9 @@ DEFUN(coff_write_object_contents,(abfd),
     if (current->lineno_count) {
       current->line_filepos = lineno_base;
       current->moving_line_filepos = lineno_base;
+#ifndef NO_COFF_LINENOS
       lineno_base += current->lineno_count * LINESZ;
+#endif
     }
     else {
       current->line_filepos = 0;
@@ -2231,6 +2249,7 @@ DEFUN(coff_write_object_contents,(abfd),
   /* Now should write relocs, strings, syms */
   obj_sym_filepos(abfd) = sym_base;
 
+#ifndef NO_COFF_SYMBOLS
   if (bfd_get_symcount(abfd) != 0) {
     coff_renumber_symbols(abfd);
     coff_mangle_symbols(abfd);
@@ -2238,6 +2257,7 @@ DEFUN(coff_write_object_contents,(abfd),
     coff_write_linenumbers(abfd);
     coff_write_relocs(abfd);
   }
+#endif /* NO_COFF_SYMBOLS */
   if (text_sec) {
     internal_a.tsize = text_sec->size;
     internal_a.text_start =text_sec->size ? text_sec->vma : 0;
@@ -2269,6 +2289,8 @@ DEFUN(coff_write_object_contents,(abfd),
   return true;
 }
 
+#ifndef NO_COFF_SYMBOLS
+
 /*
 this function transforms the offsets into the symbol table into
 pointers to syments.
@@ -2293,14 +2315,13 @@ combined_entry_type *auxent)
       auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l;
     auxent->fix_end = 1;
   }
-if (auxent->u.auxent.x_sym.x_tagndx.l != 0) {
-  auxent->u.auxent.x_sym.x_tagndx.p = table_base +  auxent->u.auxent.x_sym.x_tagndx.l;
-  auxent->fix_tag = 1;
+  if (auxent->u.auxent.x_sym.x_tagndx.l != 0) {
+    auxent->u.auxent.x_sym.x_tagndx.p = table_base +  auxent->u.auxent.x_sym.x_tagndx.l;
+    auxent->fix_tag = 1;
+  }
 }
 
-
-
-}
+#endif /* NO_COFF_SYMBOLS */
 
 static          boolean
 DEFUN(coff_set_section_contents,(abfd, section, location, offset, count),
@@ -2367,6 +2388,7 @@ buy_and_read(abfd, where, seek_direction, size)
 }				/* buy_and_read() */
 
 
+#ifndef NO_COFF_SYMBOLS
 
 static char *
 DEFUN(build_string_table,(abfd),
@@ -2545,6 +2567,8 @@ bfd            *abfd)
   return (internal);
 }				/* get_normalized_symtab() */
 
+#endif /* NO_COFF_SYMBOLS */
+
 static
 struct sec *
 DEFUN(section_from_bfd_index,(abfd, index),
@@ -2561,7 +2585,7 @@ DEFUN(section_from_bfd_index,(abfd, index),
   return 0;
 }
 
-
+#ifndef NO_COFF_LINENOS
 
 /*doc*
 @subsubsection Reading Linenumbers
@@ -2635,6 +2659,10 @@ asection       *asect;
     /* FIXME, free native_lineno here, or use alloca or something. */
     return true;
   }				/* coff_slurp_line_table() */
+
+#endif /* NO_COFF_LINENOS */
+
+#ifndef NO_COFF_LINENOS
 
 static          boolean
 DEFUN(coff_slurp_symbol_table,(abfd),
@@ -2862,6 +2890,8 @@ asymbol       **alocation;
     return bfd_get_symcount(abfd);
   }
 
+#endif /* NO_COFF_SYMBOLS */
+
 static unsigned int
 coff_get_reloc_upper_bound(abfd, asect)
 bfd            *abfd;
@@ -2913,8 +2943,10 @@ DEFUN(coff_slurp_reloc_table,(abfd, asect, symbols),
       return true;
     if (asect->reloc_count == 0)
       return true;
+#ifndef NO_COFF_SYMBOLS
     if (!coff_slurp_symbol_table(abfd))
       return false;
+#endif
     native_relocs =
       (RELOC *) buy_and_read(abfd,
 			     asect->rel_filepos,
@@ -3044,6 +3076,7 @@ asymbol       **symbols;
     return section->reloc_count;
   }
 
+#ifndef NO_COFF_SYMBOLS
 
 /*
 provided a bfd, a section and an offset into the section, calculate and
@@ -3164,6 +3197,8 @@ bfd *abfd;
     return obj_sym_filepos(abfd);
   }
 #endif
+
+#endif /* NO_COFF_SYMBOLS */
 
 
 static int 
