@@ -685,7 +685,7 @@ funcsymbol( symp )
   if (!symp->section)
     return FALSE;
 
-  if (!aflag && (symp->flags&BSF_LOCAL)) {
+  if (aflag && (symp->flags&BSF_LOCAL)) {
 #if defined(DEBUG)
     fprintf (stderr, "%s(%d):  %s:  not a function\n", __FILE__, __LINE__, symp->name);
 #endif

@@ -1,3 +1,7 @@
+Sat Feb 27 18:17:10 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* gprof.c (funcsymbol):  Invert test for aflag.
+
 Thu Feb 25 16:01:50 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* printgprof (xmalloc, xrealloc):  Cast results of malloc
