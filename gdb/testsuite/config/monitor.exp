@@ -101,10 +101,28 @@ proc gdb_load { arg } {
     global timeout
 
     for { set j 1; } { $j <= 2 } {incr j; } {
+	if [target_info exists gdb,use_standard_load] {
+	    gdb_test "target exec" "No exec file now." "" ".*Kill it.*y or n.*" "y"
+	    remote_push_conn host;
+	    set state [remote_ld target $arg];
+	    remote_close target;
+	    remote_pop_conn host;
+	    if { $state != "pass" } {
+		perror "Couldn't load file into GDB."
+		return -1;
+	    }
+	    if { $arg != "" } {
+		if [gdb_file_cmd $arg] { return -1 }
+	    }
+	    gdb_target_monitor;
+	    gdb_test "list main" ".*" ""
+	    verbose "Loaded $arg into $GDB\n";
+	    return 1;
+	}
+
 	if { $arg != "" } {
 	    if [gdb_file_cmd $arg] { return -1 }
 	}
-	
 	gdb_target_monitor
 
 	if [is_remote host] {

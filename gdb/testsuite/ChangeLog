@@ -1,3 +1,14 @@
+Fri Mar  7 13:48:30 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/default.exp: Don't set match_max.
+	* gdb.base/help.exp: Ditto.
+	* gdb.base/list.exp: Ditto.
+	* gdb.base/signals.exp: Ditto.
+
+	* config/monitor.exp(gdb_load): If gdb,use_standard_load is
+	set, use remote_ld to download the testcase instead of
+	the GDB loader.
+
 Wed Mar  5 00:00:43 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/vr5000.exp: New file.
