@@ -569,7 +569,7 @@ assemble_vif (str)
 
 	  /* Ensure relaxable fragments are in their own fragment.
 	     Otherwise md_apply_fix3 mishandles fixups to insns earlier
-	     in the fragment (because we set fr_opcode for the `direct' insn
+	     in the fragment (because we set fr_opcode for the `mpg' insn
 	     because it can move in the fragment).  */
 	  frag_wane (frag_now);
 	  frag_new (0);
@@ -762,7 +762,7 @@ assemble_vif (str)
 	{
 	  /* data_len == -1 means the value must be computed from
 	     the data.  */
-	  if (data_len == 0 || data_len <= -2)
+	  if (data_len <= -2)
 	    as_bad ("invalid data length");
 
 	  if (output_vif && data_len != -1)
@@ -1345,7 +1345,7 @@ md_operand (expressionP)
       /* Advance over the '*'.  */
       ++input_line_pointer;
     }
-  /* Check if this is a '*' for mpgloc.  */
+  /* Check if this is a '*' for unpackloc.  */
   else if (cur_opcode
 	   && (cur_opcode->flags & VIF_OPCODE_UNPACK) != 0
 	   && (cur_operand->flags & DVP_OPERAND_UNPACK_ADDRESS) != 0
@@ -2246,8 +2246,9 @@ install_vif_length (buf, len)
 	  as_bad ("missing `stcycle', can't compute length of `unpack' insn");
 	  len = 1;
 	}
-      if (len < 1 || len > 256)
-	as_bad ("`unpack' data length must be between 1 and 256");
+      if (len < 0 || len > 256)
+	as_bad ("`unpack' data length must be between 0 and 256");
+      /* 256 is recorded as 0 in the insn */
       len = len == 256 ? 0 : len;
       buf[2] = len;
     }

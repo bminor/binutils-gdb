@@ -2,6 +2,8 @@ start-sanitize-sky
 Mon Apr  6 17:08:47 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* config/tc-dvp.c (assemble_vif): Watch for macro insns.
+	0 is a valid length value (= max+1).
+	(install_vif_length): 0 is a valid length value (= max+1).
 
 end-sanitize-sky
 Mon Apr  6 12:06:39 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
