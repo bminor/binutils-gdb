@@ -1,3 +1,10 @@
+Fri Nov 10 06:39:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (--enable-sim-inline): If gcc is found and
+	--enable-sim-inline is not specified, defaine DEFAULT_INLINE to 1,
+	not 2.
+	* configure: Regenerate.
+
 Thu Nov  9 12:22:15 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in: If --silent, don't output information messages.

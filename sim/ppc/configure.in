@@ -118,7 +118,7 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
   echo "Setting inline flags = $sim_inline" 6>&1
 fi],[if test x"$GCC" != ""; then
-  sim_inline="-DDEFAULT_INLINE=2"
+  sim_inline="-DDEFAULT_INLINE=1"
   if test x"$silent" != x"yes"; then
     echo "Setting inline flags = $sim_inline" 6>&1
   fi
