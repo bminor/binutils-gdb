@@ -1,3 +1,12 @@
+Tue Sep  8 10:10:34 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* aoutx.h: adjust_sizes_and_vmas did not return anything.
+
+Thu Sep  3 19:29:04 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* section.c (bfd_set_section_flags):  Remove a sanity check.
+	It is unfortunately broken, and prevents strip from working.
+
 Thu Sep  3 16:14:40 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* sparc-opc.c (condr): Remove extraneous, but harmless, backlash
