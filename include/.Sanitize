@@ -27,6 +27,7 @@ echo Sanitizing `pwd`...
 
 Things-to-keep:
 
+COPYING
 a.out.encap.h
 a.out.gnu.h
 a.out.host.h
@@ -102,7 +103,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.5  1991/07/24 00:47:13  gnu
+# Revision 1.6  1991/07/24 01:07:25  gnu
+# Add COPYING file.
+#
+# Revision 1.5  1991/07/24  00:47:13  gnu
 # Blow away v9 stuff in aout64.h too.
 #
 # Revision 1.4  1991/07/15  23:34:14  steve
