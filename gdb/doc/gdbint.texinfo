@@ -3635,13 +3635,16 @@ definition is only used in generic code when parsing "$ps".)
 If defined, used by @code{frame_pop} to remove a stack frame.  This
 method has been superseeded by generic code.
 
-@item push_dummy_call (@var{gdbarch}, @var{func_addr}, @var{regcache}, @var{pc_addr}, @var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
+@item push_dummy_call (@var{gdbarch}, @var{function}, @var{regcache}, @var{pc_addr}, @var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
 @findex push_dummy_call
 @findex DEPRECATED_PUSH_ARGUMENTS.
 @anchor{push_dummy_call} Define this to push the dummy frame's call to
 the inferior function onto the stack.  In addition to pushing
 @var{nargs}, the code should push @var{struct_addr} (when
 @var{struct_return}), and the return address (@var{bp_addr}).
+
+@var{function} is a pointer to a struct value; on architectures that use
+function descriptors, this contains the function descriptor value.
 
 Returns the updated top-of-stack pointer.
 
