@@ -1,5 +1,8 @@
 Wed Feb 28 15:38:56 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-hppa.c (hppa_fix_adjustable): For SOM, don't
+	reduce relocs using e_nlrsel field selectors.
+
 	* write.c (fix_new_exp): Don't use #elif.  Some compilers
 	don't handle it.
 

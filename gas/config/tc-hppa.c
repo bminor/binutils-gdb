@@ -6301,7 +6301,8 @@ hppa_fix_adjustable (fixp)
      selectors.  That confuses the optimization pass in HP linker.  */
   if (fixp->fx_r_type == R_DP_RELATIVE
       && (hppa_fix->fx_r_field == e_lrsel
-	  || hppa_fix->fx_r_field == e_rrsel))
+	  || hppa_fix->fx_r_field == e_rrsel
+	  || hppa_fix->fx_r_field == e_nlrsel))
     return 0;
 #endif
 
