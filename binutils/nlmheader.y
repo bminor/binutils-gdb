@@ -55,6 +55,8 @@ boolean debug_info;
 char *exit_procedure;
 /* Exported symbols (EXPORT).  */
 struct string_list *export_symbols;
+/* List of files from INPUT.  */
+struct string_list *input_files;
 /* Map file name (MAP, FULLMAP).  */
 char *map_file;
 /* Whether a full map has been requested (FULLMAP).  */
@@ -67,6 +69,8 @@ struct string_list *import_symbols;
 char *message_file;
 /* Autoload module list (MODULE).  */
 struct string_list *modules;
+/* File named by OUTPUT.  */
+char *output_file;
 /* File named by SHARELIB.  */
 char *sharelib_file;
 /* Start procedure name (START).  */
@@ -126,7 +130,7 @@ static char *xstrdup PARAMS ((const char *));
 %token <string> QUOTED_STRING
 
 /* Typed non-terminals.  */
-%type <list> symbol_list_opt symbol_list module_list
+%type <list> symbol_list_opt symbol_list string_list
 %type <string> symbol
 
 %%
@@ -252,10 +256,9 @@ command:
 	  {
 	    import_symbols = string_list_append (import_symbols, $3);
 	  }
-	| INPUT STRING
+	| INPUT string_list
 	  {
-	    nlmheader_warn ("INPUT not supported", -1);
-	    free ($2);
+	    input_files = string_list_append (input_files, $2);
 	  }
 	| MAP STRING
 	  {
@@ -265,7 +268,7 @@ command:
 	  {
 	    message_file = $2;
 	  }
-	| MODULE module_list
+	| MODULE string_list
 	  {
 	    modules = string_list_append (modules, $2);
 	  }
@@ -279,8 +282,10 @@ command:
 	  }
 	| OUTPUT STRING
 	  {
-	    nlmheader_warn ("OUTPUT not supported", -1);
-	    free ($2);
+	    if (output_file == NULL)
+	      output_file = $2;
+	    else
+	      nlmheader_warn ("ignoring duplicate OUTPUT statement", -1);
 	  }
 	| PSEUDOPREEMPTION
 	  {
@@ -460,14 +465,14 @@ symbol:
 	  }
 	;
 
-/* A list of modules.  */
+/* A list of strings.  */
 
-module_list:
+string_list:
 	  /* May be empty.  */
 	  {
 	    $$ = NULL;
 	  }
-	| STRING module_list
+	| STRING string_list
 	  {
 	    $$ = string_list_cons ($1, $2);
 	  }

@@ -1,3 +1,25 @@
+Thu Dec  9 17:47:19 1993  Ian Lance Taylor  (ian@deneb.cygnus.com)
+
+	* nlmconv.c (debug, unlink_on_exit): New static variables.
+	(long_options): Add "debug" and "linker".
+	(main): Handle -d and -l arguments.  Make command line input and
+	output files optional.  Parse the command file before opening the
+	BFD's, which requires storing more information in local variables.
+	If INPUT names multiple files, link them together.  Use OUTPUT for
+	the output file name if not named on command line.
+	(show_usage): Changed for new options.
+	(link_inputs): New function to automatically invoke linker to
+	handle multiple INPUT files.
+	(choose_temp_base_try, choose_temp_base, pexecute): New functions,
+	mostly copied from gcc/gcc.c.
+	* nlmconv.h (input_files, output_file): Declare.
+	* nlmheader.y (input_files, output_file): Define.
+	(command): Support INPUT with a string_list argument.  Support
+	OUTPUT.
+	(string_list): Renamed from module_list.
+	* Makefile.in (nlmconv.o): Define LD_NAME based on
+	program_transform_name.
+
 Wed Dec  8 10:09:04 1993  Ian Lance Taylor  (ian@deneb.cygnus.com)
 
 	* nlmheader.y (nlmheader_identify): New function.  Use it to print

@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <assert.h>
 #include <getopt.h>
 #include <bfd.h>
@@ -54,8 +55,18 @@ extern char *strerror ();
 extern struct tm *localtime ();
 #endif
 
+#ifndef getenv
+extern char *getenv ();
+#endif
+
 #ifndef SEEK_SET
 #define SEEK_SET 0
+#endif
+
+#ifndef R_OK
+#define R_OK 4
+#define W_OK 2
+#define X_OK 1
 #endif
 
 /* Global variables.  */
@@ -68,15 +79,26 @@ extern char *program_version;
 
 /* Local variables.  */
 
+/* Whether to print out debugging information (currently just controls
+   whether it prints the linker command if there is one).  */
+static int debug;
+
 /* The symbol table.  */
 static asymbol **symbols;
+
+/* A temporary file name to be unlinked on exit.  Actually, for most
+   errors, we leave it around.  It's not clear whether that is helpful
+   or not.  */
+static char *unlink_on_exit;
 
 /* The list of long options.  */
 static struct option long_options[] =
 {
+  { "debug", no_argument, 0, 'd' },
   { "header-file", required_argument, 0, 'T' },
   { "help", no_argument, 0, 'h' },
   { "input-format", required_argument, 0, 'I' },
+  { "linker", required_argument, 0, 'l' },
   { "output-format", required_argument, 0, 'O' },
   { "version", no_argument, 0, 'V' },
   { NULL, no_argument, 0, 0 }
@@ -102,6 +124,11 @@ static void alpha_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 static void default_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 					   bfd_size_type *, char *,
 					   bfd_size_type));
+static char *link_inputs PARAMS ((struct string_list *, char *));
+static const char *choose_temp_base_try PARAMS ((const char *,
+						 const char *));
+static void choose_temp_base PARAMS ((void));
+static int pexecute PARAMS ((char *, char *[]));
 
 /* The main routine.  */
 
@@ -111,9 +138,16 @@ main (argc, argv)
      char **argv;
 {
   int opt;
+  char *input_file = NULL;
   const char *input_format = NULL;
   const char *output_format = NULL;
   const char *header_file = NULL;
+  char *ld_arg = NULL;
+  Nlm_Internal_Fixed_Header fixed_hdr_struct;
+  Nlm_Internal_Variable_Header var_hdr_struct;
+  Nlm_Internal_Version_Header version_hdr_struct;
+  Nlm_Internal_Copyright_Header copyright_hdr_struct;
+  Nlm_Internal_Extended_Header extended_hdr_struct;
   bfd *inbfd;
   bfd *outbfd;
   asymbol **newsyms, **outsyms;
@@ -140,16 +174,23 @@ main (argc, argv)
 
   bfd_init ();
 
-  while ((opt = getopt_long (argc, argv, "hI:O:T:V", long_options, (int *) 0))
+  while ((opt = getopt_long (argc, argv, "dhI:l:O:T:V", long_options,
+			     (int *) NULL))
 	 != EOF)
     {
       switch (opt)
 	{
+	case 'd':
+	  debug = 1;
+	  break;
 	case 'h':
 	  show_help ();
 	  /*NOTREACHED*/
 	case 'I':
 	  input_format = optarg;
+	  break;
+	case 'l':
+	  ld_arg = optarg;
 	  break;
 	case 'O':
 	  output_format = optarg;
@@ -169,48 +210,39 @@ main (argc, argv)
 	}
     }
 
-  if (optind + 2 != argc)
-    show_usage (stderr, 1);
-
-  if (strcmp (argv[optind], argv[optind + 1]) == 0)
+  /* The input and output files may be named on the command line.  */
+  output_file = NULL;
+  if (optind < argc)
     {
-      fprintf (stderr, "%s: input and output files must be different\n",
-	       program_name);
-      exit (1);
+      input_file = argv[optind];
+      ++optind;
+      if (optind < argc)
+	{
+	  output_file = argv[optind];
+	  ++optind;
+	  if (optind < argc)
+	    show_usage (stderr, 1);
+	  if (strcmp (input_file, output_file) == 0)
+	    {
+	      fprintf (stderr,
+		       "%s: input and output files must be different\n",
+		       program_name);
+	      exit (1);
+	    }
+	}
     }
 
-  inbfd = bfd_openr (argv[optind], input_format);
-  if (inbfd == NULL)
-    bfd_fatal (argv[optind]);
-
-  if (! bfd_check_format (inbfd, bfd_object))
-    bfd_fatal (argv[optind]);
-
-  if (output_format == NULL)
-    output_format = select_output_format (bfd_get_arch (inbfd),
-					  bfd_get_mach (inbfd),
-					  inbfd->xvec->byteorder_big_p);
-
-  assert (output_format != NULL);
-  outbfd = bfd_openw (argv[optind + 1], output_format);
-  if (outbfd == NULL)
-    bfd_fatal (argv[optind + 1]);
-  if (! bfd_set_format (outbfd, bfd_object))
-    bfd_fatal (argv[optind + 1]);
-
-  assert (outbfd->xvec->flavour == bfd_target_nlm_flavour);
-
-  if (bfd_arch_get_compatible (inbfd, outbfd) == NULL)
-    fprintf (stderr,
-	     "%s: warning:input and output formats are not compatible\n",
-	     program_name);
-
   /* Initialize the header information to default values.  */
-  fixed_hdr = nlm_fixed_header (outbfd);
-  var_hdr = nlm_variable_header (outbfd);
-  version_hdr = nlm_version_header (outbfd);
-  copyright_hdr = nlm_copyright_header (outbfd);
-  extended_hdr = nlm_extended_header (outbfd);
+  fixed_hdr = &fixed_hdr_struct;
+  memset ((PTR) &fixed_hdr_struct, 0, sizeof fixed_hdr_struct);
+  var_hdr = &var_hdr_struct;
+  memset ((PTR) &var_hdr_struct, 0, sizeof var_hdr_struct);
+  version_hdr = &version_hdr_struct;
+  memset ((PTR) &version_hdr_struct, 0, sizeof version_hdr_struct);
+  copyright_hdr = &copyright_hdr_struct;
+  memset ((PTR) &copyright_hdr_struct, 0, sizeof copyright_hdr_struct);
+  extended_hdr = &extended_hdr_struct;
+  memset ((PTR) &extended_hdr_struct, 0, sizeof extended_hdr_struct);
   check_procedure = NULL;
   custom_file = NULL;
   debug_info = false;
@@ -237,6 +269,69 @@ main (argc, argv)
 	  || parse_errors != 0)
 	exit (1);
     }
+
+  if (input_files != NULL)
+    {
+      if (input_file != NULL)
+	{
+	  fprintf (stderr,
+		   "%s: input file named both on command line and with INPUT\n",
+		   program_name);
+	  exit (1);
+	}
+      if (input_files->next == NULL)
+	input_file = input_files->string;
+      else
+	input_file = link_inputs (input_files, ld_arg);
+    }
+  else if (input_file == NULL)
+    {
+      fprintf (stderr, "%s: no input file\n", program_name);
+      show_usage (stderr, 1);
+    }
+
+  inbfd = bfd_openr (input_file, input_format);
+  if (inbfd == NULL)
+    bfd_fatal (input_file);
+
+  if (! bfd_check_format (inbfd, bfd_object))
+    bfd_fatal (input_file);
+
+  if (output_format == NULL)
+    output_format = select_output_format (bfd_get_arch (inbfd),
+					  bfd_get_mach (inbfd),
+					  inbfd->xvec->byteorder_big_p);
+
+  assert (output_format != NULL);
+
+  /* Use the output file named on the command line if it exists.
+     Otherwise use the file named in the OUTPUT statement.  */
+  if (output_file == NULL)
+    {
+      fprintf (stderr, "%s: no name for output file\n",
+	       program_name);
+      show_usage (stderr, 1);
+    }
+
+  outbfd = bfd_openw (output_file, output_format);
+  if (outbfd == NULL)
+    bfd_fatal (output_file);
+  if (! bfd_set_format (outbfd, bfd_object))
+    bfd_fatal (output_file);
+
+  assert (outbfd->xvec->flavour == bfd_target_nlm_flavour);
+
+  if (bfd_arch_get_compatible (inbfd, outbfd) == NULL)
+    fprintf (stderr,
+	     "%s: warning:input and output formats are not compatible\n",
+	     program_name);
+
+  /* Move the values read from the command file into outbfd.  */
+  *nlm_fixed_header (outbfd) = fixed_hdr_struct;
+  *nlm_variable_header (outbfd) = var_hdr_struct;
+  *nlm_version_header (outbfd) = version_hdr_struct;
+  *nlm_copyright_header (outbfd) = copyright_hdr_struct;
+  *nlm_extended_header (outbfd) = extended_hdr_struct;
 
   /* Start copying the input BFD to the output BFD.  */
   if (! bfd_set_file_flags (outbfd, bfd_get_file_flags (inbfd)))
@@ -849,12 +944,12 @@ main (argc, argv)
 	sharedhdr.exitProcedureOffset;
       free (data);
     }
-  len = strlen (argv[optind + 1]);
+  len = strlen (output_file);
   if (len > NLM_MODULE_NAME_SIZE - 2)
     len = NLM_MODULE_NAME_SIZE - 2;
   nlm_fixed_header (outbfd)->moduleName[0] = len;
 
-  strncpy (nlm_fixed_header (outbfd)->moduleName + 1, argv[optind + 1],
+  strncpy (nlm_fixed_header (outbfd)->moduleName + 1, output_file,
 	   NLM_MODULE_NAME_SIZE - 2);
   nlm_fixed_header (outbfd)->moduleName[NLM_MODULE_NAME_SIZE - 1] = '\0';
   for (modname = nlm_fixed_header (outbfd)->moduleName;
@@ -867,9 +962,12 @@ main (argc, argv)
 	   NLM_OLD_THREAD_NAME_LENGTH);
 
   if (! bfd_close (outbfd))
-    bfd_fatal (argv[optind + 1]);
+    bfd_fatal (output_file);
   if (! bfd_close (inbfd))
-    bfd_fatal (argv[optind]);
+    bfd_fatal (input_file);
+
+  if (unlink_on_exit != NULL)
+    unlink (unlink_on_exit);
 
   return 0;
 }
@@ -892,10 +990,11 @@ show_usage (file, status)
      int status;
 {
   fprintf (file, "\
-Usage: %s [-hV] [-I format] [-O format] [-T header-file]\n\
+Usage: %s [-dhV] [-I format] [-O format] [-T header-file] [-l linker]\n\
        [--input-format=format] [--output-format=format]\n\
-       [--header-file=file] [--help] [--version]\n\
-       in-file out-file\n",
+       [--header-file=file] [--linker=linker] [--debug]\n\
+       [--help] [--version]\n\
+       [in-file [out-file]]\n",
 	   program_name);
   exit (status);
 }
@@ -1389,3 +1488,256 @@ alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 	(*relocs)->address += insec->output_offset;
     }
 }
+
+/* Name of linker.  */
+#ifndef LD_NAME
+#define LD_NAME "ld"
+#endif
+
+/* Temporary file name base.  */
+static char *temp_filename;
+
+/* The user has specified several input files.  Invoke the linker to
+   link them all together, and convert and delete the resulting output
+   file.  */
+
+static char *
+link_inputs (inputs, ld)
+     struct string_list *inputs;
+     char *ld;
+{
+  size_t c;
+  struct string_list *q;
+  char **argv;
+  size_t i;
+  int pid;
+  int status;
+
+  c = 0;
+  for (q = inputs; q != NULL; q = q->next)
+    ++c;
+
+  argv = (char **) alloca (c + 5);
+
+#ifndef __MSDOS__
+  if (ld == NULL)
+    {
+      char *p;
+
+      /* Find the linker to invoke based on how nlmconv was run.  */
+      p = program_name + strlen (program_name);
+      while (p != program_name)
+	{
+	  if (p[-1] == '/')
+	    {
+	      ld = (char *) xmalloc (p - program_name + strlen (LD_NAME) + 1);
+	      memcpy (ld, program_name, p - program_name);
+	      strcpy (ld + (p - program_name), LD_NAME);
+	      break;
+	    }
+	  --p;
+	}
+    }
+#endif
+
+  if (ld == NULL)
+    ld = (char *) LD_NAME;
+
+  choose_temp_base ();
+
+  unlink_on_exit = xmalloc (strlen (temp_filename) + 3);
+  sprintf (unlink_on_exit, "%s.O", temp_filename);
+
+  argv[0] = ld;
+  argv[1] = (char *) "-r";
+  argv[2] = (char *) "-o";
+  argv[3] = unlink_on_exit;
+  i = 4;
+  for (q = inputs; q != NULL; q = q->next, i++)
+    argv[i] = q->string;
+  argv[i] = NULL;
+
+  if (debug)
+    {
+      for (i = 0; argv[i] != NULL; i++)
+	fprintf (stderr, " %s", argv[i]);
+      fprintf (stderr, "\n");
+    }
+
+  pid = pexecute (ld, argv);
+
+  if (waitpid (pid, &status, 0) < 0)
+    {
+      perror ("waitpid");
+      unlink (unlink_on_exit);
+      exit (1);
+    }
+
+  if (status != 0)
+    {
+      fprintf (stderr, "%s: Execution of %s failed\n", program_name, ld);
+      unlink (unlink_on_exit);
+      exit (1);
+    }
+
+  return unlink_on_exit;
+}
+
+/* Choose a temporary file name.  Stolen from gcc.c.  */
+
+static const char *
+choose_temp_base_try (try, base)
+     const char *try;
+     const char *base;
+{
+  const char *rv;
+
+  if (base)
+    rv = base;
+  else if (try == NULL)
+    rv = NULL;
+  else if (access (try, R_OK | W_OK) != 0)
+    rv = NULL;
+  else
+    rv = try;
+  return rv;
+}
+
+static void
+choose_temp_base ()
+{
+  const char *base = NULL;
+  int len;
+
+  base = choose_temp_base_try (getenv ("TMPDIR"), base);
+  base = choose_temp_base_try (getenv ("TMP"), base);
+  base = choose_temp_base_try (getenv ("TEMP"), base);
+
+#ifdef P_tmpdir
+  base = choose_temp_base_try (P_tmpdir, base);
+#endif
+
+  base = choose_temp_base_try ("/usr/tmp", base);
+  base = choose_temp_base_try ("/tmp", base);
+
+  /* If all else fails, use the current directory! */  
+  if (base == NULL)
+    base = "./";
+
+  len = strlen (base);
+  temp_filename = xmalloc (len + sizeof("/ccXXXXXX") + 1);
+  strcpy (temp_filename, base);
+  if (len > 0 && temp_filename[len-1] != '/')
+    temp_filename[len++] = '/';
+  strcpy (temp_filename + len, "ccXXXXXX");
+
+  mktemp (temp_filename);
+  if (*temp_filename == '\0')
+    abort ();
+}
+
+/* Execute a job.  Stolen from gcc.c.  */
+
+#ifndef OS2
+#ifdef __MSDOS__
+
+static int
+pexecute (program, argv)
+     char *program;
+     char *argv[];
+{
+  char *scmd, *rf;
+  FILE *argfile;
+  int i;
+
+  scmd = (char *)malloc (strlen (program) + strlen (temp_filename) + 10);
+  rf = scmd + strlen(program) + 2 + el;
+  sprintf (scmd, "%s.exe @%s.gp", program, temp_filename);
+  argfile = fopen (rf, "w");
+  if (argfile == 0)
+    pfatal_with_name (rf);
+
+  for (i=1; argv[i]; i++)
+    {
+      char *cp;
+      for (cp = argv[i]; *cp; cp++)
+	{
+	  if (*cp == '"' || *cp == '\'' || *cp == '\\' || isspace (*cp))
+	    fputc ('\\', argfile);
+	  fputc (*cp, argfile);
+	}
+      fputc ('\n', argfile);
+    }
+  fclose (argfile);
+
+  i = system (scmd);
+
+  remove (rf);
+  
+  if (i == -1)
+    {
+      perror (program);
+      return MIN_FATAL_STATUS << 8;
+    }
+
+  return i << 8;
+}
+
+#else /* not __MSDOS__ */
+
+static int
+pexecute (program, argv)
+     char *program;
+     char *argv[];
+{
+  int pid;
+  int retries, sleep_interval;
+
+  /* Fork a subprocess; wait and retry if it fails.  */
+  sleep_interval = 1;
+  for (retries = 0; retries < 4; retries++)
+    {
+      pid = vfork ();
+      if (pid >= 0)
+	break;
+      sleep (sleep_interval);
+      sleep_interval *= 2;
+    }
+
+  switch (pid)
+    {
+    case -1:
+#ifdef vfork
+      perror ("fork");
+#else
+      perror ("vfork");
+#endif
+      exit (1);
+      /* NOTREACHED */
+      return 0;
+
+    case 0: /* child */
+      /* Exec the program.  */
+      execvp (program, argv);
+      perror (program);
+      exit (1);
+      /* NOTREACHED */
+      return 0;
+
+    default:
+      /* Return child's process number.  */
+      return pid;
+    }
+}
+
+#endif /* not __MSDOS__ */
+#else /* not OS2 */
+
+static int
+pexecute (program, argv)
+     char *program;
+     char *argv[];
+{
+  return spawnvp (1, program, argv);
+}
+#endif /* not OS2 */
