@@ -1,3 +1,9 @@
+Tue Dec  1 11:33:33 1998  Jim Wilson  <wilson@cygnus.com>
+
+	* coff-h8300.c (h8300_bfd_link_add_symbols): Make reloc_size,
+	reloc_count and i long instead of unsigned long.  Handle error
+	return from bfd_canonicalize_reloc.
+
 1998-12-01  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_relocate_section): Detect the absence of
