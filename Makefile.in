@@ -90,6 +90,7 @@ M4 = `if [ -f $${rootme}/m4/m4 ] ; \
 MAKEINFO = `if [ -f $${rootme}/texinfo/makeinfo/makeinfo ] ; \
 	then echo $${rootme}/texinfo/makeinfo/makeinfo ; \
 	else echo makeinfo ; fi`
+
 # This just becomes part of the MAKEINFO definition passed down to
 # sub-makes.  It lets flags be given on the command line while still
 # using the makeinfo from the object tree.
@@ -249,7 +250,7 @@ BASE_FLAGS_TO_PASS = \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
 	"EXPECT=$(EXPECT)" \
 	"RUNTEST=$(RUNTEST)" \
-	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
+	"RUNTEST_FLAGS=$(RUNTEST_FLAGS)" \
 	"XTRAFLAGS_FOR_TARGET=$(XTRAFLAGS)" \
 	"exec_prefix=$(exec_prefix)" \
 	"prefix=$(prefix)" \
@@ -1052,19 +1053,35 @@ SUPPORT_FILES = list-of-support-files-for-tool-in-question
 DISTSTUFFDIRS= ld gprof gdb libg++ binutils
 # Files where "byacc" (Cygnus version) should be changed to "bison -y" (FSF).
 DISTBISONFILES= binutils/Makefile.in gas/Makefile.in gdb/Makefile.in
+# Directories where "info" and "dvi" should be built.
+DISTDOCDIRS= ld gprof binutils gdb libg++ gas bfd
 
 .PHONY: taz
 
-taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
-	# Do this first so "diststuff" files get built properly.
+taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
+  texinfo/texinfo.tex texinfo/gpl.texinfo texinfo/lgpl.texinfo
+	# Make sure "diststuff" files get built properly.
 	for f in $(DISTBISONFILES) ; do \
 	  if [ -r $$f ]; then \
 	    sed '/^BISON *=.*$$/s/.*/BISON = bison -y/' <$$f >tmp ; \
 	    mv -f tmp $$f ; \
 	  else true; fi ; \
 	done
+	# Take out texinfo from a few places; make simple BISON=bison line.
+	sed -e '/^all\.normal: /s/\all-texinfo //' \
+	    -e '/^	install-texinfo /d' \
+	    -e '/^BISON = /,/^$$/d' \
+	    -e '/^# BISON:/s/.*/BISON = bison -y/' \
+	<Makefile.in >tmp
+	mv -f tmp Makefile.in
 	#
 	./configure sun4
+	# Doc files don't change; include them in distribution.
+	for f in $(DISTDOCDIRS) ; do \
+	  if [ -r $$f/Makefile ]; then \
+	    (cd $$f ; $(MAKE) info dvi) || exit 1 ; \
+	  else true ; fi ; \
+	done
 	# Make links, and run "make diststuff" when needed.
 	# The `echo' for setting `p' is to convert all whitespace to spaces.
 	# Then the `case' further below should tell whether $$d is in
@@ -1077,7 +1094,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	    case " $$p " in \
 	    *" $$d "*)	\
 		echo making diststuff in $$d ; \
-		(cd $$d ; pwd ; $(MAKE) diststuff BISON="bison -y") || exit 1  ;; \
+		(cd $$d ; pwd ; $(MAKE) diststuff ) || exit 1  ;; \
 	    esac ; \
 	    if [ -d $$d/proto-$$d.dir ]; then \
 	      ln -s ../$$d/proto-$$d.dir proto-toplev/$$d ; \
@@ -1099,17 +1116,10 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	    -e '/^host_libs=/s/glob //' \
 	    <configure.in >proto-toplev/configure.in
 	#
-	# Take out texinfo from a few places; make simple BISON=bison line.
-	rm proto-toplev/Makefile.in
-	sed -e '/^all\.normal: /s/\all-texinfo //' \
-	    -e '/^	install-texinfo /d' \
-	    -e '/^BISON = /,/^$$/d' \
-	    -e '/^# BISON:/s/.*/BISON = bison -y/' \
-	<Makefile.in >proto-toplev/Makefile.in
-	#
 	mkdir proto-toplev/texinfo
 	ln -s ../../texinfo/texinfo.tex proto-toplev/texinfo/
 	ln -s ../../texinfo/gpl.texinfo proto-toplev/texinfo/
+	ln -s ../../texinfo/lgpl.texinfo proto-toplev/texinfo/
 	ln -s ../../texinfo/tex3patch   proto-toplev/texinfo/
 	chmod og=u `find . -print`
 	(VER=`sed <$(TOOL)/Makefile.in -n 's/^VERSION *= *//p'`; \
@@ -1118,29 +1128,33 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 		tar cfh - $(TOOL)-$$VER \
 		| $(GZIP) -v -9 >$(TOOL)-$$VER.tar.gz)
 
-TEXINFO_SUPPORT= texinfo/texinfo.tex texinfo/gpl.texinfo
+TEXINFO_SUPPORT= texinfo/texinfo.tex texinfo/gpl.texinfo texinfo/lgpl.texinfo
 DIST_SUPPORT= $(DEVO_SUPPORT) $(TEXINFO_SUPPORT)
 
 .PHONY: gas.tar.gz
 GAS_SUPPORT_DIRS= bfd include libiberty opcodes
 gas.tar.gz: $(DIST_SUPPORT) $(GAS_SUPPORT_DIRS) gas
-	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(GAS_SUPPORT_DIRS)" TOOL=gas
+	$(MAKE) -f Makefile.in taz TOOL=gas \
+		SUPPORT_FILES="$(GAS_SUPPORT_DIRS)"
 
 # The FSF "binutils" release includes gprof and ld.
 .PHONY: binutils.tar.gz
 BINUTILS_SUPPORT_DIRS= bfd include libiberty opcodes ld gprof
 binutils.tar.gz: $(DIST_SUPPORT) $(BINUTILS_SUPPORT_DIRS) binutils
-	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(BINUTILS_SUPPORT_DIRS)" TOOL=binutils
+	$(MAKE) -f Makefile.in taz TOOL=binutils \
+		SUPPORT_FILES="$(BINUTILS_SUPPORT_DIRS)"
 
 .PHONY: gas+binutils.tar.gz
 GASB_SUPPORT_DIRS= $(GAS_SUPPORT_DIRS) binutils ld gprof
 gas+binutils.tar.gz: $(DIST_SUPPORT) $(GASB_SUPPORT_DIRS) gas
-	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(GASB_SUPPORT_DIRS)" TOOL=gas
+	$(MAKE) -f Makefile.in taz TOOL=gas \
+		SUPPORT_FILES="$(GASB_SUPPORT_DIRS)"
 
 .PHONY: libg++.tar.gz
 LIBGXX_SUPPORT_DIRS=include libio libiberty xiberty
 libg++.tar.gz: $(DIST_SUPPORT) libg++
-	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(LIBGXX_SUPPORT_DIRS)" TOOL=libg++
+	$(MAKE) -f Makefile.in taz TOOL=libg++ \
+		SUPPORT_FILES="$(LIBGXX_SUPPORT_DIRS)"
 
 .NOEXPORT:
 MAKEOVERRIDES=

@@ -1,3 +1,13 @@
+Thu Nov 04 08:08:04 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	* Makefile.in: Change RUNTESTFLAGS to RUNTEST_FLAGS
+
+Wed Nov  3 22:09:46 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* Makefile.in (DISTDOCDIRS): New variable.
+	(taz): Edit local Makefile.in sooner, instead of proto-toplev
+	Makefile.in later.  Build "info" and "dvi" in DISTDOCDIRS.  
+
 Wed Nov  3 21:31:52 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* configure.in (hppa target): check the source directory for the
