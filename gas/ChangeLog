@@ -1,3 +1,7 @@
+2002-06-28  David O'Brien  <obrien@FreeBSD.org>
+
+	* NEWS: Note the next release is 2.13.
+
 2002-06-26  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/tr.po: New translation imported.
