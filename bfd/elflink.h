@@ -1191,19 +1191,11 @@ elf_link_add_object_symbols (abfd, info)
 		  char *fnm, *anm;
 
 		  /* When we see DT_RPATH before DT_RUNPATH, we have
-		     to free runpath. */
+		     to clear runpath.  Do _NOT_ bfd_release, as that
+		     frees all more recently bfd_alloc'd blocks as
+		     well.  */
 		  if (rpath && elf_hash_table (info)->runpath)
-		    {
-		      struct bfd_link_needed_list *nn;
-		      for (n = elf_hash_table (info)->runpath;
-			   n != NULL; n = nn)
-			{
-			  nn = n->next;
-			  bfd_release (abfd, n);
-			}
-		      bfd_release (abfd, elf_hash_table (info)->runpath);
-		      elf_hash_table (info)->runpath = NULL;
-		    }
+		    elf_hash_table (info)->runpath = NULL;
 
 		  n = ((struct bfd_link_needed_list *)
 		       bfd_alloc (abfd, sizeof (struct bfd_link_needed_list)));

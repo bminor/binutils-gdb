@@ -1,3 +1,7 @@
+2000-09-29  NIIBE Yutaka <gniibe@chroot.org>
+
+	* elflink.h (elf_link_add_object_symbols): Don't bfd_release runpath.
+
 2000-09-29  Momchil Velikov <velco@fadata.bg>
 
 	* elf.c (elf_fake_sections): Do not mark the section SHT_NOBITS if
