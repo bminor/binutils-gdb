@@ -151,6 +151,9 @@
 /* Define if defaulting to ELF on SCO 5. */
 #undef SCO_ELF
 
+/* Using strict COFF? */
+#undef STRICTCOFF
+
 /* Use ELF stabs for MIPS, not ECOFF stabs */
 #undef MIPS_STABS_ELF
 
@@ -165,9 +168,6 @@
 
 /* Using cgen code? */
 #undef USING_CGEN
-
-/* Using strict COFF? */
-#undef STRICTCOFF
 
 /* Using i386 COFF? */
 #undef I386COFF

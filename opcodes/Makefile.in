@@ -70,6 +70,8 @@ CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CC_FOR_BUILD = @CC_FOR_BUILD@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
 DATADIRNAME = @DATADIRNAME@
 DLLTOOL = @DLLTOOL@
 EXEEXT = @EXEEXT@
@@ -91,10 +93,12 @@ MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
 OBJDUMP = @OBJDUMP@
+OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+STRIP = @STRIP@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
@@ -343,7 +347,7 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 libopcodes_a_LIBADD = 
 libopcodes_a_SOURCES = libopcodes.a.c
-libopcodes_a_OBJECTS =  libopcodes.a.o
+libopcodes_a_OBJECTS =  libopcodes.a.$(OBJEXT)
 LTLIBRARIES =  $(lib_LTLIBRARIES)
 
 libopcodes_la_OBJECTS =  dis-buf.lo disassemble.lo
@@ -361,11 +365,11 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 TAR = gtar
 GZIP_ENV = --best
 SOURCES = libopcodes.a.c $(libopcodes_la_SOURCES)
-OBJECTS = libopcodes.a.o $(libopcodes_la_OBJECTS)
+OBJECTS = libopcodes.a.$(OBJEXT) $(libopcodes_la_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .lo .o .s
+.SUFFIXES: .S .c .lo .o .obj .s
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
 
@@ -418,6 +422,11 @@ maintainer-clean-noinstLIBRARIES:
 .c.o:
 	$(COMPILE) -c $<
 
+# FIXME: We should only use cygpath when building on Windows,
+# and only if it is available.
+.c.obj:
+	$(COMPILE) -c `cygpath -w $<`
+
 .s.o:
 	$(COMPILE) -c $<
 
@@ -426,6 +435,7 @@ maintainer-clean-noinstLIBRARIES:
 
 mostlyclean-compile:
 	-rm -f *.o core *.core
+	-rm -f *.$(OBJEXT)
 
 clean-compile:
 
@@ -756,7 +766,7 @@ run-cgen:
 
 # For now, require developers to configure with --enable-cgen-maint.
 $(srcdir)/m32r-desc.h $(srcdir)/m32r-desc.c $(srcdir)/m32r-opc.h $(srcdir)/m32r-opc.c $(srcdir)/m32r-ibld.c $(srcdir)/m32r-opinst.c $(srcdir)/m32r-asm.c $(srcdir)/m32r-dis.c: $(M32R_DEPS)
-	@true	
+	@true
 stamp-m32r: $(CGENDEPS) $(CGENDIR)/m32r.cpu $(CGENDIR)/m32r.opc
 	$(MAKE) run-cgen arch=m32r prefix=m32r options=opinst extrafiles=opinst
 
@@ -764,8 +774,6 @@ $(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-
 	@true
 stamp-fr30: $(CGENDEPS) $(CGENDIR)/fr30.cpu $(CGENDIR)/fr30.opc
 	$(MAKE) run-cgen arch=fr30 prefix=fr30 options= extrafiles=
-
-# The start marker is written this way to pass through automake unscathed.
 
 ia64-ic.tbl: $(srcdir)/ia64-ic.tbl
 	$(LN_S) -f $(srcdir)/ia64-ic.tbl
