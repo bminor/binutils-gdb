@@ -1,3 +1,7 @@
+Wed Jun 24 11:50:54 1998  Klaus Kaempf  <kkaempf@progis.de>
+
+	* config/obj-vms.c (Create_VMS_Object_File): Force binary file.
+
 start-sanitize-am33
 Wed Jun 24 09:38:10 1998  Jeffrey A Law  (law@cygnus.com)
 

@@ -1,5 +1,5 @@
 /* vms.c -- Write out a VAX/VMS object file
-   Copyright (C) 1987, 1988, 1992, 1994, 1995, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1987, 88, 92, 94, 95, 97, 1998 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -14,8 +14,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+along with GAS; see the file COPYING.  If not, write to the Free
+Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA.  */
 
 /* Written by David L. Kashtan */
 /* Modified by Eric Youngdale to write VMS debug records for program
@@ -585,7 +586,8 @@ Create_VMS_Object_File ()
   VMS_Object_File_FD = creat (out_file_name, 0777, "var");
 #else	/* eunice */
   VMS_Object_File_FD = creat (out_file_name, 0, "rfm=var",
-			      "mbc=16", "deq=64", "fop=tef", "shr=nil");
+			      "ctx=bin", "mbc=16", "deq=64", "fop=tef",
+			      "shr=nil");
 #endif	/* eunice */
   /* Deal with errors.  */
   if (VMS_Object_File_FD < 0)
