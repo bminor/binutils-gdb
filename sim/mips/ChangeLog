@@ -1,3 +1,7 @@
+Tue Nov 18 15:33:48 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Use $(SIM_NEW_COMMON_OBJS).
+
 Fri Nov 14 11:56:48 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen: Tag vr5000 instructions.

@@ -1,3 +1,12 @@
+Tue Nov 18 15:33:48 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Use $(SIM_NEW_COMMON_OBJS).
+
+Fri Oct 31 10:33:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_open): Check state magic number.
+	(sim.assert.h): Include.
+
 Tue Oct 28 11:06:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* v850.igen: Add model filter field to records.
