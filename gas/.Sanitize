@@ -15,6 +15,13 @@
 
 Do-first:
 
+lose_these_too=""
+for d in obsolete regress regress.m68k testscripts ; do
+    if [ -d $d ]; then
+	lose_these_too="${lose_these_too} $d"
+    fi
+done
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -109,11 +116,6 @@ write.c
 write.h
 
 Things-to-lose:
-
-obsolete
-regress
-regress.m68k
-testscripts
 
 Do-last:
 
