@@ -33,6 +33,9 @@ remote-utils.c
 
 Things-to-lose:
 
+remote-inflow-sparc.c
+server.h
+
 Do-last:
 
 # End of file.
