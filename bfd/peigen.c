@@ -469,10 +469,17 @@ _bfd_pei_swap_aouthdr_in (abfd, aouthdr_ext1, aouthdr_int1)
     int idx;
     for (idx=0; idx < 16; idx++)
       {
-	a->DataDirectory[idx].VirtualAddress =
-	  bfd_h_get_32 (abfd, (bfd_byte *)src->DataDirectory[idx][0]);
-	a->DataDirectory[idx].Size =
-	  bfd_h_get_32 (abfd, (bfd_byte *)src->DataDirectory[idx][1]);
+        /* If data directory is empty, rva also should be 0 */
+	int size = bfd_h_get_32 (abfd, (bfd_byte *) src->DataDirectory[idx][1]);
+	a->DataDirectory[idx].Size = size;
+
+	if (size)
+          {
+  	    a->DataDirectory[idx].VirtualAddress =
+  	      bfd_h_get_32 (abfd, (bfd_byte *) src->DataDirectory[idx][0]);
+          }
+        else
+	  a->DataDirectory[idx].VirtualAddress = 0;
       }
   }
 
@@ -527,9 +534,16 @@ add_data_entry (abfd, aout, idx, name, base)
       && (coff_section_data (abfd, sec) != NULL)
       && (pei_section_data (abfd, sec) != NULL))
     {
-      aout->DataDirectory[idx].VirtualAddress = (sec->vma - base) & 0xffffffff;
-      aout->DataDirectory[idx].Size = pei_section_data (abfd, sec)->virt_size;
-      sec->flags |= SEC_DATA;
+      /* If data directory is empty, rva also should be 0 */
+      int size = pei_section_data (abfd, sec)->virt_size;
+      aout->DataDirectory[idx].Size = size;
+
+      if (size)
+        {
+          aout->DataDirectory[idx].VirtualAddress =
+          			(sec->vma - base) & 0xffffffff;
+          sec->flags |= SEC_DATA;
+        }
     }
 }
 
