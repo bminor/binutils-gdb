@@ -43,22 +43,6 @@ struct sgi_core_struct
 
 static asection *make_bfd_asection
   (bfd *, const char *, flagword, bfd_size_type, bfd_vma, file_ptr);
-static const bfd_target *irix_core_core_file_p
-  (bfd *);
-static char *irix_core_core_file_failing_command
-  (bfd *);
-static int irix_core_core_file_failing_signal
-  (bfd *);
-static bfd_boolean irix_core_core_file_matches_executable_p
-  (bfd *, bfd *);
-static void swap_abort
-  (void);
-#ifdef CORE_MAGIC64
-static int do_sections64
-  (bfd *, struct coreout *);
-#endif
-static int do_sections
-  (bfd *, struct coreout *);
 
 /* Helper function for irix_core_core_file_p:
    32-bit and 64-bit versions.  */

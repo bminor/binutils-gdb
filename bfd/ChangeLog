@@ -1,3 +1,7 @@
+2005-03-29  Joel Brobecker  <brobecker@gnat.com>
+
+        * irix-core.c: Remove some unnecessary prototypes.
+
 2005-03-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* irix-core.c: Convert to ISO C.
