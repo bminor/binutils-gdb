@@ -1,3 +1,7 @@
+Wed Jun 10 15:58:37 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* m32r-opc.c: Regenerate.
+
 Tue Jun  9 14:27:57 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-opc.h (thumb_opcodes): Display 'add rx, rY, #0' insns as
