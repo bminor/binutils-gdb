@@ -75,9 +75,14 @@ dvi: gprof.dvi
 check:
 installcheck:
 
-install-info: 
-	for i in *.info* ; do \
-		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
+install-info: gprof.info
+	if [ -r gprof.info ]; then \
+	  dir=. ; \
+	else \
+	  dir=$(srcdir) ; \
+	fi ; \
+	for i in `cd $$dir; echo gprof.info*` ; do \
+		$(INSTALL_DATA) $$dir/$$i $(infodir)/$$i ; \
 	done
 
 install: 
