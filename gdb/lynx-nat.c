@@ -376,7 +376,7 @@ store_inferior_registers (regno)
 	perror_with_name ("Sparc fetch_inferior_registers(ptrace)");
       }
 }
-#endif
+#endif /* SPARC */
 
 #ifndef SPARC
 
@@ -427,7 +427,7 @@ fetch_inferior_registers (regno)
 
   ecp = registers_addr (inferior_pid);
 
-  for (regno = reglo; regno <= reghi && regmap[regno] != -1; regno++)
+  for (regno = reglo; regno <= reghi; regno++)
     {
       char buf[MAX_REGISTER_RAW_SIZE];
       int ptrace_fun = PTRACE_PEEKTHREAD;
@@ -474,7 +474,7 @@ store_inferior_registers (regno)
 
   ecp = registers_addr (inferior_pid);
 
-  for (regno = reglo; regno <= reghi && regmap[regno] != -1; regno++)
+  for (regno = reglo; regno <= reghi; regno++)
     {
       int ptrace_fun = PTRACE_POKEUSER;
 
@@ -603,4 +603,11 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
   for (regno = 0; regno < NUM_REGS; regno++)
     supply_register (regno, core_reg_sect + offsetof (st_t, ec)
 		     + regmap[regno]);
+
+#ifdef SPARC
+/* Fetching this register causes all of the I & L regs to be read from the
+   stack and validated.  */
+
+  fetch_inferior_registers (I0_REGNUM);
+#endif
 }
