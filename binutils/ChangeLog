@@ -1,3 +1,8 @@
+2003-05-20  Michal Ludvig  <mludvig@suse.cz>
+
+	* readelf.c (display_debug_frames): Print both registers
+	for DW_CFA_register.
+
 2003-05-16  Kelley Cook  <kelleycook@wideopenwest.com>
 
 	* configure.in: Accept i[3-7]86 variants. Escape '[]' for

@@ -9257,7 +9257,7 @@ display_debug_frames (section, start, file)
 	      reg = LEB ();
 	      roffs = LEB ();
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_register: r%ld\n", reg);
+		printf ("  DW_CFA_register: r%ld in r%ld\n", reg, roffs);
 	      fc->col_type[reg] = DW_CFA_register;
 	      fc->col_offset[reg] = roffs;
 	      break;
