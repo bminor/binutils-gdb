@@ -56,6 +56,9 @@ static void elf_link_output_relocs
   PARAMS ((bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *));
 static boolean elf_link_size_reloc_section
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
+static void elf_link_adjust_relocs 
+  PARAMS ((bfd *, Elf_Internal_Shdr *, unsigned int, 
+	   struct elf_link_hash_entry **));
 
 /* Given an ELF BFD, add symbols to the global hash table as
    appropriate.  */
@@ -3782,6 +3785,55 @@ elf_link_size_reloc_section (abfd, rel_hdr, o)
   return true;
 }
 
+/* When performing a relocateable link, the input relocations are
+   preserved.  But, if they reference global symbols, the indices
+   referenced must be updated.  Update all the relocations in
+   REL_HDR (there are COUNT of them), using the data in REL_HASH.  */
+
+static void
+elf_link_adjust_relocs (abfd, rel_hdr, count, rel_hash)
+     bfd *abfd;
+     Elf_Internal_Shdr *rel_hdr;
+     unsigned int count;
+     struct elf_link_hash_entry **rel_hash;
+{
+  unsigned int i;
+
+  for (i = 0; i < count; i++, rel_hash++)
+    {
+      if (*rel_hash == NULL)
+	continue;
+
+      BFD_ASSERT ((*rel_hash)->indx >= 0);
+
+      if (rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
+	{
+	  Elf_External_Rel *erel;
+	  Elf_Internal_Rel irel;
+	  
+	  erel = (Elf_External_Rel *) rel_hdr->contents + i;
+	  elf_swap_reloc_in (abfd, erel, &irel);
+	  irel.r_info = ELF_R_INFO ((*rel_hash)->indx,
+				    ELF_R_TYPE (irel.r_info));
+	  elf_swap_reloc_out (abfd, &irel, erel);
+	}
+      else
+	{
+	  Elf_External_Rela *erela;
+	  Elf_Internal_Rela irela;
+	  
+	  BFD_ASSERT (rel_hdr->sh_entsize
+		      == sizeof (Elf_External_Rela));
+	  
+	  erela = (Elf_External_Rela *) rel_hdr->contents + i;
+	  elf_swap_reloca_in (abfd, erela, &irela);
+	  irela.r_info = ELF_R_INFO ((*rel_hash)->indx,
+				     ELF_R_TYPE (irela.r_info));
+	  elf_swap_reloca_out (abfd, &irela, erela);
+	}
+    }
+}
+
 /* Do the final step of an ELF link.  */
 
 boolean
@@ -4268,42 +4320,14 @@ elf_bfd_final_link (abfd, info)
       if ((o->flags & SEC_RELOC) == 0)
 	continue;
 
-      rel_hash = elf_section_data (o)->rel_hashes;
-      rel_hdr = &elf_section_data (o)->rel_hdr;
-      BFD_ASSERT (elf_section_data (o)->rel_count == o->reloc_count);
-      for (i = 0; i < o->reloc_count; i++, rel_hash++)
-	{
-	  if (*rel_hash == NULL)
-	    continue;
-
-	  BFD_ASSERT ((*rel_hash)->indx >= 0);
-
-	  if (rel_hdr->sh_entsize == sizeof (Elf_External_Rel))
-	    {
-	      Elf_External_Rel *erel;
-	      Elf_Internal_Rel irel;
-
-	      erel = (Elf_External_Rel *) rel_hdr->contents + i;
-	      elf_swap_reloc_in (abfd, erel, &irel);
-	      irel.r_info = ELF_R_INFO ((*rel_hash)->indx,
-					ELF_R_TYPE (irel.r_info));
-	      elf_swap_reloc_out (abfd, &irel, erel);
-	    }
-	  else
-	    {
-	      Elf_External_Rela *erela;
-	      Elf_Internal_Rela irela;
-
-	      BFD_ASSERT (rel_hdr->sh_entsize
-			  == sizeof (Elf_External_Rela));
-
-	      erela = (Elf_External_Rela *) rel_hdr->contents + i;
-	      elf_swap_reloca_in (abfd, erela, &irela);
-	      irela.r_info = ELF_R_INFO ((*rel_hash)->indx,
-					 ELF_R_TYPE (irela.r_info));
-	      elf_swap_reloca_out (abfd, &irela, erela);
-	    }
-	}
+      elf_link_adjust_relocs (abfd, &elf_section_data (o)->rel_hdr, 
+			      elf_section_data (o)->rel_count,
+			      elf_section_data (o)->rel_hashes);
+      if (elf_section_data (o)->rel_hdr2 != NULL)
+	elf_link_adjust_relocs (abfd, elf_section_data (o)->rel_hdr2,
+				elf_section_data (o)->rel_count2,
+				(elf_section_data (o)->rel_hashes 
+				 + elf_section_data (o)->rel_count));
 
       /* Set the reloc_count field to 0 to prevent write_relocs from
 	 trying to swap the relocs out itself.  */
@@ -5224,7 +5248,8 @@ elf_link_input_bfd (finfo, input_bfd)
 	      irelaend = 
 		irela + o->reloc_count * bed->s->int_rels_per_ext_rel;
 	      rel_hash = (elf_section_data (o->output_section)->rel_hashes
-			  + elf_section_data (o->output_section)->rel_count);
+			  + elf_section_data (o->output_section)->rel_count
+			  + elf_section_data (o->output_section)->rel_count2);
 	      for (; irela < irelaend; irela++, rel_hash++)
 		{
 		  unsigned long r_symndx;
@@ -5414,7 +5439,8 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
 
   /* Figure out the symbol index.  */
   rel_hash_ptr = (elf_section_data (output_section)->rel_hashes
-		  + elf_section_data (output_section)->rel_count);
+		  + elf_section_data (output_section)->rel_count
+		  + elf_section_data (output_section)->rel_count2);
   if (link_order->type == bfd_section_reloc_link_order)
     {
       indx = link_order->u.reloc.p->u.section->target_index;

@@ -4388,20 +4388,6 @@ _bfd_mips_elf_final_link (abfd, info)
 	elf_gp (abfd) = (h->u.def.value
 			 + h->u.def.section->output_section->vma
 			 + h->u.def.section->output_offset);
-      else if (info->relocateable)
-	{
-	  bfd_vma lo;
-
-	  /* Find the GP-relative section with the lowest offset.  */
-	  lo = (bfd_vma) -1;
-	  for (o = abfd->sections; o != (asection *) NULL; o = o->next)
-	    if (o->vma < lo 
-		&& (elf_section_data (o)->this_hdr.sh_flags & SHF_MIPS_GPREL))
-	      lo = o->vma;
-
-	  /* And calculate GP relative to that.  */
-	  elf_gp (abfd) = lo + ELF_MIPS_GP_OFFSET (abfd);
-	}
       else
 	{
 	  /* If the relocate_section function needs to do a reloc
@@ -6429,7 +6415,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
      Elf_Internal_Sym *local_syms;
      asection **local_sections;
 {
-  const Elf_Internal_Rela *rel;
+  Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *relend;
   bfd_vma addend;
   bfd_vma last_hi16_addend;
@@ -6445,10 +6431,13 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_vma value;
       reloc_howto_type *howto;
       boolean require_jalx;
+      /* True if the relocation is a RELA relocation, rather than a
+         REL relocation.  */
+      boolean rela_relocation_p = true;
+      int r_type = ELF32_R_TYPE (rel->r_info);
 
       /* Find the relocation howto for this relocation.  */
-      if (ELF32_R_TYPE (rel->r_info) == R_MIPS_64
-	  && !ABI_64_P (output_bfd))
+      if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
 	/* Some 32-bit code uses R_MIPS_64.  In particular, people use
 	   64-bit code, but make sure all their addresses are in the 
 	   lowermost or uppermost 32-bit section of the 64-bit address
@@ -6457,7 +6446,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	   stored value is sign-extended to 64 bits.  */
 	howto = elf_mips_howto_table + R_MIPS_32;
       else
-	howto = elf_mips_howto_table + ELF32_R_TYPE (rel->r_info);
+	howto = elf_mips_howto_table + r_type;
 
       if (!use_saved_addend_p)
 	{
@@ -6476,8 +6465,10 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    rel_hdr = elf_section_data (input_section)->rel_hdr2;
 	  if (rel_hdr->sh_entsize == MIPS_ELF_REL_SIZE (input_bfd))
 	    {
-	      int r_type = ELF32_R_TYPE (rel->r_info);
+	      /* Note that this is a REL relocation.  */
+	      rela_relocation_p = false;
 
+	      /* Get the addend, which is stored in the input file.  */
 	      addend = mips_elf_obtain_contents (howto, 
 						 rel,
 						 input_bfd,
@@ -6533,13 +6524,63 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    addend = rel->r_addend;
 	}
 
+      if (info->relocateable)
+	{
+	  Elf_Internal_Sym *sym;
+	  unsigned long r_symndx;
+
+	  /* Since we're just relocating, all we need to do is copy
+	     the relocations back out to the object file, unless they're 
+	     against a section symbol, in which case we need to adjust 
+	     by the section offset.  */
+
+	  if (!mips_elf_local_relocation_p (input_bfd, rel, local_sections))
+	    /* A non-local relocation is never against a section.  */
+	    continue;
+
+	  r_symndx = ELF32_R_SYM (rel->r_info);
+	  sym = local_syms + r_symndx;
+	  if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
+	    continue;
+
+	  /* Adjust the addend appropriately.  */
+	  addend += local_sections[r_symndx]->output_offset;
+
+	  /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
+	     then we only want to write out the high-order 16 bits.
+	     The subsequent R_MIPS_LO16 will handle the low-order bits.  */
+	  if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16)
+	    addend >>= 16;
+
+	  if (rela_relocation_p)
+	    /* If this is a RELA relocation, just update the addend.
+               We have to cast away constness for REL.  */
+	    rel->r_addend = addend;
+	  else
+	    {
+	      /* Otherwise, we have to write the value back out.  Note
+		 that we use the source mask, rather than the
+		 destination mask because the place to which we are
+		 writing will be source of the addend in the final
+		 link.  */
+	      addend &= howto->src_mask;
+	      if (!mips_elf_perform_relocation (info, howto, rel, addend,
+						input_bfd,  input_section, 
+						contents, false))
+		return false;
+	    }
+
+	  /* Go on to the next relocation.  */
+	  continue;
+	}
+
       /* In the N32 and 64-bit ABIs there may be multiple consecutive
 	 relocations for the same offset.  In that case we are
 	 supposed to treat the output of each relocation as the addend
 	 for the next.  */
       if (rel + 1 < relend 
 	  && rel->r_offset == rel[1].r_offset
-	  && ELF32_R_TYPE (rel[1].r_info) != R_MIPS_NONE)
+	  && r_type != R_MIPS_NONE)
 	use_saved_addend_p = true;
       else
 	use_saved_addend_p = false;
@@ -6602,8 +6643,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  continue;
 	}
 
-      if (ELF32_R_TYPE (rel->r_info) == R_MIPS_64
-	  && !ABI_64_P (output_bfd))
+      if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
 	/* See the comment above about using R_MIPS_64 in the 32-bit
 	   ABI.  Until now, we've been using the HOWTO for R_MIPS_32;
 	   that calculated the right value.  Now, however, we
