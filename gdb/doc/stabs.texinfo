@@ -583,7 +583,7 @@ This description includes parts of those files.
 
 @section Flow of control and nested scopes 
 
-@table strong
+@table @strong
 @item Directive:
 @code{.stabn}
 @item Types:
