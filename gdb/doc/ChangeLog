@@ -1,3 +1,9 @@
+Wed Sep 30 18:03:19 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdbint.texinfo: Complete overhaul.  Group descriptions more
+	logically, add more info on generic algorithms, remove much
+	obsolete and/or wrong material.
+
 Fri Jul 24 17:51:38 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabs.texinfo (Method Type Descriptor): Expand and correct.
