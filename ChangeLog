@@ -1,3 +1,7 @@
+Mon Sep  8 20:46:20 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.guess: Merge with FSF.
+
 Sun Sep  7 15:55:28 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* config.sub: Add "marketing-names" patch.
