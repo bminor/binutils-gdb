@@ -1,3 +1,10 @@
+Tue Aug  5 00:01:41 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (STRIP_PROG): Change from strip.new to strip-new.
+	(NM_PROG): Change from nm.new to nm-new.
+	(TOOL_PROGS, install-exec-local): Adjust accordingly.
+	* Makefile.in: Rebuild.
+
 Mon Aug  4 11:47:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Remove AC_ARG_PROGRAM; it's invoked by

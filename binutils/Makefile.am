@@ -16,13 +16,13 @@ RANLIB_PROG=ranlib
 
 # objcopy and strip should be the same program
 OBJCOPY_PROG=objcopy
-STRIP_PROG=strip.new
+STRIP_PROG=strip-new
 
 STRINGS_PROG=strings
 
 # These should all be the same program too.
 SIZE_PROG=size
-NM_PROG=nm.new
+NM_PROG=nm-new
 OBJDUMP_PROG=objdump
 
 # This is the demangler, as a standalone program.
@@ -46,13 +46,13 @@ bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) \
 	$(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(ADDR2LINE_PROG) \
 	@BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@
 
-## We need a special rule to install the programs which are built with .new
+## We need a special rule to install the programs which are built with -new
 noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
 
 EXTRA_PROGRAMS = $(NLMCONV_PROG) $(SRCONV_PROG) $(DLLTOOL_PROG) $(WINDRES_PROG)
 
 # Stuff that goes in tooldir/ if appropriate
-TOOL_PROGS = nm.new strip.new ar$(EXEEXT) ranlib$(EXEEXT) dlltool$(EXEEXT)
+TOOL_PROGS = nm-new strip-new ar ranlib dlltool
 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
@@ -300,18 +300,18 @@ CLEANFILES = dep.sed .dep .dep1
 install-exec-local: $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/.new//'|sed '$(transform)'`$(EXEEXT)"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/.new//'|sed '$(transform)'`$(EXEEXT); \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`; \
 	  else :; fi; \
 	done
 	$(mkinstalldirs) $(tooldir)/bin
 	for i in $(TOOL_PROGS); do \
-	  if [ -f $$i ]; then \
-	    j=`echo $$i | sed -e 's/.new//' -e 's/$(EXEEXT)//'`; \
+	  if [ -f $$i$(EXEEXT) ]; then \
+	    j=`echo $$i | sed -e 's/-new//'`; \
 	    rm -f $(tooldir)/bin/$$j$(EXEEXT); \
 	    k=`echo $$j | sed '$(transform)'`; \
 	    ln $(bindir)/$$k$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT) >/dev/null 2>/dev/null \
-		|| $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$j$(EXEEXT); \
+		|| $(INSTALL_PROGRAM) $$i$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT); \
 	  else true; \
 	  fi; \
 	done

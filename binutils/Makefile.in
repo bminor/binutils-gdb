@@ -91,13 +91,13 @@ RANLIB_PROG=ranlib
 
 # objcopy and strip should be the same program
 OBJCOPY_PROG=objcopy
-STRIP_PROG=strip.new
+STRIP_PROG=strip-new
 
 STRINGS_PROG=strings
 
 # These should all be the same program too.
 SIZE_PROG=size
-NM_PROG=nm.new
+NM_PROG=nm-new
 OBJDUMP_PROG=objdump
 
 # This is the demangler, as a standalone program.
@@ -126,7 +126,7 @@ noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
 EXTRA_PROGRAMS = $(NLMCONV_PROG) $(SRCONV_PROG) $(DLLTOOL_PROG) $(WINDRES_PROG)
 
 # Stuff that goes in tooldir/ if appropriate
-TOOL_PROGS = nm.new strip.new ar$(EXEEXT) ranlib$(EXEEXT) dlltool$(EXEEXT)
+TOOL_PROGS = nm-new strip-new ar ranlib dlltool
 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
@@ -238,7 +238,7 @@ bin_PROGRAMS =  size$(EXEEXT) objdump$(EXEEXT) ar$(EXEEXT) \
 strings$(EXEEXT) ranlib$(EXEEXT) c++filt$(EXEEXT) objcopy$(EXEEXT) \
 addr2line$(EXEEXT) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ \
 @BUILD_WINDRES@
-noinst_PROGRAMS =  nm.new strip.new
+noinst_PROGRAMS =  nm-new$(EXEEXT) strip-new$(EXEEXT)
 PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 
@@ -497,12 +497,12 @@ addr2line$(EXEEXT): $(addr2line_OBJECTS) $(addr2line_DEPENDENCIES)
 	@rm -f addr2line$(EXEEXT)
 	$(LINK) $(addr2line_LDFLAGS) $(addr2line_OBJECTS) $(addr2line_LDADD) $(LIBS)
 
-nm.new: $(nm_new_OBJECTS) $(nm_new_DEPENDENCIES)
-	@rm -f nm.new
+nm-new$(EXEEXT): $(nm_new_OBJECTS) $(nm_new_DEPENDENCIES)
+	@rm -f nm-new$(EXEEXT)
 	$(LINK) $(nm_new_LDFLAGS) $(nm_new_OBJECTS) $(nm_new_LDADD) $(LIBS)
 
-strip.new: $(strip_new_OBJECTS) $(strip_new_DEPENDENCIES)
-	@rm -f strip.new
+strip-new$(EXEEXT): $(strip_new_OBJECTS) $(strip_new_DEPENDENCIES)
+	@rm -f strip-new$(EXEEXT)
 	$(LINK) $(strip_new_LDFLAGS) $(strip_new_OBJECTS) $(strip_new_LDADD) $(LIBS)
 .y.c:
 	$(SHELL) $(YLWRAP) "$(YACC)" $< y.tab.c $*.c y.tab.h $*.h -- $(YFLAGS)
@@ -1004,18 +1004,18 @@ $(DEMANGLER_PROG).1: cxxfilt.man Makefile
 install-exec-local: $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/.new//'|sed '$(transform)'`$(EXEEXT)"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/.new//'|sed '$(transform)'`$(EXEEXT); \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/-new//'|sed '$(transform)'`; \
 	  else :; fi; \
 	done
 	$(mkinstalldirs) $(tooldir)/bin
 	for i in $(TOOL_PROGS); do \
-	  if [ -f $$i ]; then \
-	    j=`echo $$i | sed -e 's/.new//' -e 's/$(EXEEXT)//'`; \
+	  if [ -f $$i$(EXEEXT) ]; then \
+	    j=`echo $$i | sed -e 's/-new//'`; \
 	    rm -f $(tooldir)/bin/$$j$(EXEEXT); \
 	    k=`echo $$j | sed '$(transform)'`; \
 	    ln $(bindir)/$$k$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT) >/dev/null 2>/dev/null \
-		|| $(INSTALL_PROGRAM) $$i $(tooldir)/bin/$$j$(EXEEXT); \
+		|| $(INSTALL_PROGRAM) $$i$(EXEEXT) $(tooldir)/bin/$$j$(EXEEXT); \
 	  else true; \
 	  fi; \
 	done
