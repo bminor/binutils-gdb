@@ -79,6 +79,10 @@ mips)
 	esac
 	;;
 
+i860)
+	gdb_host=stratus
+	;;
+
 i386)
 	case "${host_vendor}" in
 	sun)	gdb_host=sun386 ;;
@@ -237,6 +241,9 @@ sparc)
 
 h8300)
 	gdb_target=h8300hds 
+	;;
+
+i860)	gdb_target=stratus
 	;;
 
 i386)

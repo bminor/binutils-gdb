@@ -1,3 +1,14 @@
+Sat Jan 18 16:45:01 1992  Fred Fish  (fnf at cygnus.com)
+
+	* config/mh-stratus, config/mt-stratus, i860-opcode.h,
+	i860-pinsn.c, i860-tdep.c, tm-stratus.h, xm-stratus.h:
+	New files for stratus.
+
+	* Makefile.in (USER_CFLAGS):  Add macro specifically reserved
+	for getting custom flags into CFLAGS when doing makes.
+
+	* configure.in:  Add config information for stratus.
+
 Thu Jan 16 00:51:46 1992  Fred Fish  (fnf at cygnus.com)
 
 	* dbxread.c (process_one_symbol):  Pass address of structure

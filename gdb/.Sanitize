@@ -96,6 +96,9 @@ i386-stub.c
 i386-tdep.c
 i386-xdep.c
 i387-tdep.c
+i860-opcode.h
+i860-pinsn.c
+i860-tdep.c
 i960-pinsn.c
 i960-tdep.c
 ieee-float.c
@@ -209,6 +212,7 @@ tm-pn.h
 tm-pyr.h
 tm-rs6000.h
 tm-sparc.h
+tm-stratus.h
 tm-sun2.h
 tm-sun2os4.h
 tm-sun3.h
@@ -264,6 +268,7 @@ xm-pyr.h
 xm-rs6000.h
 xm-rtbsd.h
 xm-sparc.h
+xm-stratus.h
 xm-sun2.h
 xm-sun3.h
 xm-sun386.h
