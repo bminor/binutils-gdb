@@ -934,8 +934,18 @@ md_assemble (line)
 
 	if (*l != END_OF_INSN
 	    && current_templates
-	    && (current_templates->start->opcode_modifier & IsPrefix) != 0)
+	    && (current_templates->start->opcode_modifier & IsPrefix))
 	  {
+	    /* If we are in 16-bit mode, do not allow addr16 or data16.
+	       Similarly, in 32-bit mode, do not allow addr32 or data32.  */
+	    if ((current_templates->start->opcode_modifier & (Size16 | Size32))
+		&& (((current_templates->start->opcode_modifier & Size32) != 0)
+		    ^ flag_16bit_code))
+	      {
+		as_bad (_("redundant %s prefix"),
+			current_templates->start->name);
+		return;
+	      }
 	    /* Add prefix, checking for repeated prefixes.  */
 	    switch (add_prefix (current_templates->start->base_opcode))
 	      {
@@ -1246,9 +1256,9 @@ md_assemble (line)
 
     /* If matched instruction specifies an explicit opcode suffix, use
        it.  */
-    if (i.tm.opcode_modifier & (Data16|Data32))
+    if (i.tm.opcode_modifier & (Size16 | Size32))
       {
-	if (i.tm.opcode_modifier & Data16)
+	if (i.tm.opcode_modifier & Size16)
 	  i.suffix = WORD_OPCODE_SUFFIX;
 	else
 	  i.suffix = DWORD_OPCODE_SUFFIX;
@@ -1453,7 +1463,7 @@ md_assemble (line)
 	   prefix anyway.  */
 	if ((i.suffix == DWORD_OPCODE_SUFFIX
 	     || i.suffix == LONG_OPCODE_SUFFIX) == flag_16bit_code
-	    && !(i.tm.opcode_modifier & IgnoreDataSize))
+	    && !(i.tm.opcode_modifier & IgnoreSize))
 	  {
 	    unsigned int prefix = DATA_PREFIX_OPCODE;
 	    if (i.tm.opcode_modifier & JumpByte) /* jcxz, loop */

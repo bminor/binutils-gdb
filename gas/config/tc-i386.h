@@ -312,9 +312,9 @@ typedef struct
 #define FloatD		 0x400	/* direction for float insns:  MUST BE 0x400 */
 #define Seg2ShortForm	 0x800	/* encoding of load segment reg insns */
 #define Seg3ShortForm	0x1000	/* fs/gs segment register insns. */
-#define Data16		0x2000	/* needs data prefix if in 32-bit mode */
-#define Data32		0x4000	/* needs data prefix if in 16-bit mode */
-#define IgnoreDataSize	0x8000  /* instruction ignores operand size prefix */
+#define Size16		0x2000	/* needs size prefix if in 32-bit mode */
+#define Size32		0x4000	/* needs size prefix if in 16-bit mode */
+#define IgnoreSize	0x8000  /* instruction ignores operand size prefix */
 #define No_bSuf	       0x10000	/* b suffix on instruction illegal */
 #define No_wSuf	       0x20000	/* w suffix on instruction illegal */
 #define No_lSuf	       0x40000	/* l suffix on instruction illegal */

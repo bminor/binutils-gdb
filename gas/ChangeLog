@@ -1,3 +1,11 @@
+Tue Jun  9 12:20:05 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.h: Change Data16 to Size16, Data32 to Size32,
+	IgnoreDataSize to IgnoreSize as they are used for address size as
+	well as data size.
+	* config/tc-i386.c: Likewise.  Add code to reject addr32/data32 in
+	32-bit mode, similarly addr16/data16 and variants.
+
 Mon Jun  8 18:32:01 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-d30v.c (md_assemble): Fix handling of reverse
