@@ -1,3 +1,7 @@
+2001-09-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-linux-tdep.c (STRUCT_OFFSET): Removed.
+
 2001-09-21  Jiri Smid   <smid@suse.cz>
 
 	* config/i386/x86-64linux.mh: New file.

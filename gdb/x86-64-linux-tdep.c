@@ -27,9 +27,6 @@
 #include "x86-64-tdep.h"
 #include "dwarf2cfi.h"
 
-#define STRUCT_OFFSET(struct_type, member)    \
-    ((long) ((char*) &((struct_type*) 0)->member))
-
 #define LINUX_SIGTRAMP_INSN0 (0x48)	/* mov $NNNNNNNN,%rax */
 #define LINUX_SIGTRAMP_OFFSET0 (0)
 #define LINUX_SIGTRAMP_INSN1 (0x0f)	/* syscall */
