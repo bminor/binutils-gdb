@@ -51,9 +51,9 @@ ARM RISCix					arm-*-* (as host)
 Tahoe						tahoe-*-*
 ser-ocd.c					*-*-*
 
-* GDB has been converted to ANS/ISO C.
+* GDB has been converted to ISO C.
 
-GDB's source code has been converted to ANS/ISO C.  In particular, the
+GDB's source code has been converted to ISO C.  In particular, the
 sources are fully protoized, and rely on standard headers being
 present.
 

@@ -1,3 +1,8 @@
+2001-09-10  Jason Molenda  (jmolenda@apple.com)
+
+	* NEWS: "ANS/ISO C" -> "ISO C".
+	* MAINTAINERS (write-after-approval):  Update my entry.
+
 2001-08-24  Andrew Cagney  <ac131313@redhat.com>
 
 	* regcache.c (read_register_bytes): When REGISTER_NAME indicates
