@@ -205,11 +205,8 @@ gdb_get_breakpoint_info (clientData, interp, argc, argv)
     if (b->number == bpnum)
       break;
 
-  if (!b)
+  if (!b || b->type != bp_breakpoint)
     error ("Breakpoint #%d does not exist", bpnum);
-
-  if (b->type != bp_breakpoint)
-    return;
 
   sal = find_pc_line (b->address, 0);
 
@@ -289,7 +286,6 @@ gdb_loc (clientData, interp, argc, argv)
      char *argv[];
 {
   char *filename;
-  char buf[100];
   struct symtab_and_line sal;
   char *funcname;
   CORE_ADDR pc;
@@ -329,11 +325,9 @@ gdb_loc (clientData, interp, argc, argv)
   filename = symtab_to_filename (sal.symtab);
   Tcl_DStringAppendElement (result_ptr, filename);
 
-  sprintf (buf, "%d", sal.line);
-  Tcl_DStringAppendElement (result_ptr, buf); /* line number */
+  dsprintf_append_element (result_ptr, "%d", sal.line); /* line number */
 
-  sprintf (buf, "0x%lx", pc);
-  Tcl_DStringAppendElement (result_ptr, buf); /* PC */
+  dsprintf_append_element (result_ptr, "0x%lx", pc); /* PC */
 
   return TCL_OK;
 }
@@ -382,7 +376,6 @@ gdb_sourcelines (clientData, interp, argc, argv)
   struct symtab *symtab;
   struct linetable_entry *le;
   int nlines;
-  char buf[100];
 
   if (argc != 2)
     error ("wrong # args");
@@ -412,8 +405,7 @@ gdb_sourcelines (clientData, interp, argc, argv)
 	  && le->pc == (le + 1)->pc)
 	continue;
 
-      sprintf (buf, "%d", le->line);
-      Tcl_DStringAppendElement (result_ptr, buf);
+      dsprintf_append_element (result_ptr, "%d", le->line);
     }
 
   return TCL_OK;
@@ -576,8 +568,7 @@ register_changed_p (regnum, argp)
   memcpy (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
 	  REGISTER_RAW_SIZE (regnum));
 
-  sprintf (buf, "%d", regnum);
-  Tcl_DStringAppendElement (result_ptr, buf);
+  dsprintf_append_element (result_ptr, "%d", regnum);
 }
 
 static int

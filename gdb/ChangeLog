@@ -1,5 +1,8 @@
 Wed Mar  8 16:12:21 1995  Stu Grossman  (grossman@cygnus.com)
 
+	* gdbtk.c (gdb_get_breakpoint_info):  Return error if breakpoint
+	type is not bp_breakpoint.
+
 	* source.c (forward_search_command reverse_search_command):  Set
 	convenience variable $_ to be the line # of the match.
 	* symtab.c (decode_line_1):  Allow convenience variables to be
