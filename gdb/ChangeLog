@@ -1,5 +1,8 @@
 2003-01-13  Andrew Cagney  <ac131313@redhat.com>
 
+	* README (Graphical interface to GDB): Update URL.  Point at
+	gdb/links/.
+
 	* gdb_indent.sh: Update to version 2.2.9.  Warn when not exact
 	version match.
 
