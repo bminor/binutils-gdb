@@ -208,7 +208,7 @@ allocate_objfile (abfd, mapped)
 
   if (mapped)
     {
-      warning ("this version of gdb does not support mapped symbol tables.");
+      warning ("mapped symbol tables are not supported on this machine; missing or broken mmap().");
 
       /* Turn off the global flag so we don't try to do mapped symbol tables
 	 any more, which shuts up gdb unless the user specifically gives the

@@ -1,3 +1,10 @@
+Mon Nov 20 11:12:34 1995  Fred Fish  <fnf@cygnus.com>
+
+	* objfiles.c (allocate_objfile): Change warning message about mapped
+	symbol tables so that it is obvious that they are not supported on
+	this particular machine rather than implying they are not supported
+	at all in this version of gdb.
+
 Sun Nov 19 05:20:53 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* irix5-nat.c, osfsolib.c (solib_address):  Return the name of the
