@@ -1,3 +1,8 @@
+2002-11-07  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-cris/expdyn6.d, ld-cris/weakref2.d, ld-cris/expdyn7.d,
+	ld-cris/nodyn5.d, ld-cris/expdyn5.d: New tests.
+
 2002-11-07  Nick Clifton  <nickc@redhat.com>
 
 	* ld-fastcall/fastcall.exp: Only run tests for PE type x86
