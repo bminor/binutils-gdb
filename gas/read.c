@@ -633,7 +633,7 @@ read_a_source_file (name)
 			num = buffer_limit - buffer;
 
 		      tmp_buf = xrealloc (tmp_buf, tmp_len + num);
-		      memcpy (tmp_buf, buffer + tmp_len, num);
+		      memcpy (tmp_buf + tmp_len, buffer, num);
 		      tmp_len += num;
 		    }
 		  while (!ends);
