@@ -1,3 +1,11 @@
+Mon Apr  6 14:34:08 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* configure:  Quote $( better.  Keep various shells happy.
+
+Tue Mar 31 16:32:57 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: eliminate stamp-files.
+
 Mon Mar 30 22:20:23 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in: add send_pr.  remove "force" from .stmp-gprof rule.
