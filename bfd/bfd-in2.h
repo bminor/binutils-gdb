@@ -1942,9 +1942,6 @@ add3, load, and store instructions. */
 /* This is a 9-bit reloc */
   BFD_RELOC_V850_9_PCREL,
 
-/* This is a 16-bit reloc */
-  BFD_RELOC_V850_16_PCREL,
-
 /* This is a 22-bit reloc */
   BFD_RELOC_V850_22_PCREL,
 

@@ -83,21 +83,6 @@ static reloc_howto_type v850_elf_howto_table[] =
 	 0x00ffffff,			/* dst_mask */
 	 true),				/* pcrel_offset */
 
-  /* A PC relative 16 bit load/store. */
-  HOWTO (R_V850_16_PCREL,		/* type */
-	 0,				/* rightshift */
-	 2,				/* size (0 = byte, 1 = short, 2 = long) */
-	 15,				/* bitsize */
-	 true,				/* pc_relative */
-	 17,				/* bitpos */
-	 complain_overflow_bitfield,	/* complain_on_overflow */
-	 v850_elf_reloc,		/* special_function */
-	 "R_V850_16_PCREL",		/* name */
-	 false,				/* partial_inplace */
-	 0xfffe0000,			/* src_mask */
-	 0xfffe0000,			/* dst_mask */
-	 true),				/* pcrel_offset */
-
   /* A PC relative 22 bit branch. */
   HOWTO (R_V850_22_PCREL,		/* type */
 	 2,				/* rightshift */
@@ -385,7 +370,6 @@ static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
 {
   { BFD_RELOC_NONE,		R_V850_NONE },
   { BFD_RELOC_V850_9_PCREL,	R_V850_9_PCREL },
-  { BFD_RELOC_V850_16_PCREL,	R_V850_16_PCREL },
   { BFD_RELOC_V850_22_PCREL,	R_V850_22_PCREL },
   { BFD_RELOC_HI16_S,		R_V850_HI16_S },
   { BFD_RELOC_HI16,		R_V850_HI16 },
@@ -502,7 +486,6 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
 	default:
 	case R_V850_NONE:
 	case R_V850_9_PCREL:
-	case R_V850_16_PCREL:
 	case R_V850_22_PCREL:
 	case R_V850_HI16_S:
 	case R_V850_HI16:
@@ -694,19 +677,6 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 	  bfd_put_32 (abfd, insn, (bfd_byte *)data + reloc->address);
 	  return bfd_reloc_ok;
 
-	case R_V850_16_PCREL:
-	  if (relocation > 0x7fff || relocation < -0x10000)
-	    return bfd_reloc_overflow;
-
-	  if ((relocation % 2) != 0)
-	    return bfd_reloc_dangerous;
-
-	  insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc->address);
-	  insn &= 0x1ffff;
-	  insn |= ((relocation & 0xfffe) << 16);
-	  bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc->address);
-	  return bfd_reloc_ok;
-
 	case R_V850_9_PCREL:
 	  if (relocation > 0xff || relocation < -0x100)
 	    return bfd_reloc_overflow;
@@ -896,22 +866,6 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       bfd_put_16 (input_bfd, insn, hit_data);
       return bfd_reloc_ok;
     
-    case R_V850_16_PCREL:
-      value -= (input_section->output_section->vma + input_section->output_offset);
-      value -= offset;
-
-      if ((long)value > 0x7fff || (long)value < -0x10000)
-	return bfd_reloc_overflow;
-      
-      if ((value % 2) != 0)
-	return bfd_reloc_dangerous;
-      
-      insn = bfd_get_32 (input_bfd, hit_data);
-      insn &= 0x1ffff;
-      insn |= ((value & 0xfffe) << 16);
-      bfd_put_32 (input_bfd, insn, hit_data);
-      return bfd_reloc_ok;
-      
     case R_V850_22_PCREL:
       value -= (input_section->output_section->vma
 		+ input_section->output_offset);
