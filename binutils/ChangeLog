@@ -1,3 +1,23 @@
+1999-12-28  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Update with new constants added by Oct 4, 1999
+	ELF ABI draft.
+	(guess_is_rela): Add new machine codes, but leave
+	rel type undetermined.
+	(get_machine_name): Add new machine codes.
+	(get_section_type_name): Add new section types.
+	(get_elf_section_flags): New funciton: Decode section flags.
+	(process_section_headers): Call get_elf_section_flags() in
+	order to decode flags in section header.
+	(get_dynamic_flags): New function: Decode dynamic section
+	flags.
+	(process_dynamic_section): Display flags (if present).
+	(get_symbol_type): Add STT_COMMON.
+	(get_symbol_visibility): New function: Decode a symbol's
+	visibility.
+	(process_symbol_table): Call get_symbol_visibility().
+	(get_note_type): Add NT_PRXFPREGS.
+
 1999-12-26  Ian Lance Taylor  <ian@zembu.com>
 
 	* strings.c (main): Correct handling of numeric argument.

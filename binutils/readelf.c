@@ -158,8 +158,11 @@ static const char *       get_segment_type            PARAMS ((unsigned long));
 static const char *       get_mips_section_type_name  PARAMS ((unsigned int));
 static const char *       get_parisc_section_type_name PARAMS ((unsigned int));
 static const char *       get_section_type_name       PARAMS ((unsigned int));
-static char *             get_symbol_binding          PARAMS ((unsigned int));
-static char *             get_symbol_type             PARAMS ((unsigned int));
+static const char *       get_symbol_binding          PARAMS ((unsigned int));
+static const char *       get_symbol_type             PARAMS ((unsigned int));
+static const char *       get_symbol_visibility       PARAMS ((unsigned int));
+static const char *       get_symbol_index_type       PARAMS ((unsigned int));
+static const char *       get_dynamic_flags 	      PARAMS ((bfd_vma));
 static void               usage                       PARAMS ((void));
 static void               parse_args                  PARAMS ((int, char **));
 static int                process_file_header         PARAMS ((void));
@@ -174,7 +177,6 @@ static void               process_file                PARAMS ((char *));
 static int                process_relocs              PARAMS ((FILE *));
 static int                process_version_sections    PARAMS ((FILE *));
 static char *             get_ver_flags               PARAMS ((unsigned int));
-static char *             get_symbol_index_type       PARAMS ((unsigned int));
 static int                get_32bit_section_headers   PARAMS ((FILE *));
 static int                get_64bit_section_headers   PARAMS ((FILE *));
 static int		  get_32bit_program_headers   PARAMS ((FILE *, Elf_Internal_Phdr *));
@@ -565,6 +567,24 @@ guess_is_rela (e_machine)
     case EM_MCORE:
       return TRUE;
 
+    case EM_MMA:
+    case EM_PCP:
+    case EM_NCPU:
+    case EM_NDR1:
+    case EM_STARCORE:
+    case EM_ME16:
+    case EM_ST100:
+    case EM_TINYJ:
+    case EM_FX66:
+    case EM_ST9PLUS:
+    case EM_ST7:
+    case EM_68HC16:
+    case EM_68HC11:
+    case EM_68HC08:
+    case EM_68HC05:
+    case EM_SVX:
+    case EM_ST19:
+    case EM_VAX:
     default:
       warn (_("Don't know about relocations on this machine architecture\n"));
       return FALSE;
@@ -1037,6 +1057,11 @@ get_dynamic_type (type)
     case DT_FINI_ARRAY: return "FINI_ARRAY";
     case DT_INIT_ARRAYSZ: return "INIT_ARRAYSZ";
     case DT_FINI_ARRAYSZ: return "FINI_ARRAYSZ";
+    case DT_RUNPATH:    return "RUNPATH";
+    case DT_FLAGS:      return "FLAGS";
+    case DT_ENCODING:   return "ENCODING";
+    case DT_PREINIT_ARRAY: return "PREINIT_ARRAY";
+    case DT_PREINIT_ARRAYSZ: return "PREINIT_ARRAYSZ";
 
     case DT_PLTPADSZ:	return "PLTPADSZ";
     case DT_MOVEENT:	return "MOVEENT";
@@ -1142,7 +1167,7 @@ static char *
 get_machine_name (e_machine)
      unsigned e_machine;
 {
-  static char buff [32];
+  static char buff [64]; /* XXX */
 
   switch (e_machine)
     {
@@ -1154,7 +1179,7 @@ get_machine_name (e_machine)
     case EM_88K:         	return "MC88000";
     case EM_486:         	return "Intel 80486";
     case EM_860:         	return "Intel 80860";
-    case EM_MIPS:        	return "MIPS R3000 big-endian";
+    case EM_MIPS:        	return "MIPS R3000";
     case EM_S370:        	return "Amdahl";
     case EM_MIPS_RS4_BE: 	return "MIPS R4000 big-endian";
     case EM_OLD_SPARCV9:	return "Sparc v9 (old)";
@@ -1191,6 +1216,24 @@ get_machine_name (e_machine)
     case EM_CYGNUS_MN10200:	return "mn10200";
     case EM_CYGNUS_FR30:	return "Fujitsu FR30";
     case EM_PJ:                 return "picoJava";
+    case EM_MMA:      		return "Fujitsu Multimedia Accelerator";
+    case EM_PCP:      		return "Siemens PCP";
+    case EM_NCPU:     		return "Sony nCPU embedded RISC processor";
+    case EM_NDR1:     		return "Denso NDR1 microprocesspr";
+    case EM_STARCORE: 		return "Motorola Star*Core processor";
+    case EM_ME16:     		return "Toyota ME16 processor";
+    case EM_ST100:    		return "STMicroelectronics ST100 processor";
+    case EM_TINYJ:    		return "Advanced Logic Corp. TinyJ embedded processor";
+    case EM_FX66:     		return "Siemens FX66 microcontroller";
+    case EM_ST9PLUS:  		return "STMicroelectronics ST9+ 8/16 bit microcontroller";
+    case EM_ST7:      		return "STMicroelectronics ST7 8-bit microcontroller";
+    case EM_68HC16:   		return "Motorola MC68HC16 Microcontroller";
+    case EM_68HC11:   		return "Motorola MC68HC11 Microcontroller";
+    case EM_68HC08:   		return "Motorola MC68HC08 Microcontroller";
+    case EM_68HC05:   		return "Motorola MC68HC05 Microcontroller";
+    case EM_SVX:      		return "Silicon Graphics SVx";
+    case EM_ST19:     		return "STMicroelectronics ST19 8-bit microcontroller";
+    case EM_VAX:      		return "Digital VAX";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;
@@ -1205,6 +1248,7 @@ get_machine_flags (e_flags, e_machine)
   static char buf [1024];
 
   buf[0] = '\0';
+  
   if (e_flags)
     {
       switch (e_machine)
@@ -1545,6 +1589,9 @@ get_section_type_name (sh_type)
     case SHT_REL:		return "REL";
     case SHT_SHLIB:		return "SHLIB";
     case SHT_DYNSYM:		return "DYNSYM";
+    case SHT_INIT_ARRAY:	return "INIT_ARRAY";
+    case SHT_FINI_ARRAY:	return "FINI_ARRAY";
+    case SHT_PREINIT_ARRAY:	return "PREINIT_ARRAY";
     case SHT_GNU_verdef:	return "VERDEF";
     case SHT_GNU_verneed:	return "VERNEED";
     case SHT_GNU_versym:	return "VERSYM";
@@ -2389,6 +2436,52 @@ get_64bit_elf_symbols (file, offset, number)
   return isyms;
 }
 
+static const char *
+get_elf_section_flags (sh_flags)
+     bfd_vma sh_flags;
+{
+  static char buff [32];
+
+  * buff = 0;
+  
+  while (sh_flags)
+    {
+      bfd_vma flag;
+
+      flag = sh_flags & - sh_flags;
+      sh_flags &= ~ flag;
+      
+      switch (flag)
+	{
+	case SHF_WRITE:            strcat (buff, "W"); break;
+	case SHF_ALLOC:            strcat (buff, "A"); break;
+	case SHF_EXECINSTR:        strcat (buff, "X"); break;
+	case SHF_MERGE:            strcat (buff, "M"); break;
+	case SHF_STRINGS:          strcat (buff, "S"); break;
+	case SHF_INFO_LINK:        strcat (buff, "I"); break;
+	case SHF_LINK_ORDER:       strcat (buff, "L"); break;
+	case SHF_OS_NONCONFORMING: strcat (buff, "O"); break;
+	  
+	default:
+	  if (flag & SHF_MASKOS)
+	    {
+	      strcat (buff, "o");
+	      sh_flags &= ~ SHF_MASKOS;
+	    }
+	  else if (flag & SHF_MASKPROC)
+	    {
+	      strcat (buff, "p");
+	      sh_flags &= ~ SHF_MASKPROC;
+	    }
+	  else
+	    strcat (buff, "x");
+	  break;
+	}
+    }
+  
+  return buff;
+}
+
 static int
 process_section_headers (file)
      FILE * file;
@@ -2488,6 +2581,7 @@ process_section_headers (file)
     return 1;
 
   printf (_("\nSection Header%s:\n"), elf_header.e_shnum > 1 ? "s" : "");
+  
   if (is_32bit_elf)
     printf
       (_("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n"));
@@ -2514,11 +2608,10 @@ process_section_headers (file)
 		   (unsigned long) section->sh_offset,
 		   (unsigned long) section->sh_size,
 		   (unsigned long) section->sh_entsize);
-	  
-	  printf (" %c%c%c %2ld %3lx %ld\n",
-		  (section->sh_flags & SHF_WRITE ? 'W' : ' '),
-		  (section->sh_flags & SHF_ALLOC ? 'A' : ' '),
-		  (section->sh_flags & SHF_EXECINSTR ? 'X' : ' '),
+
+	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
+		  
+	  printf (" %2ld %3lx %ld\n",
 		  (unsigned long) section->sh_link,
 		  (unsigned long) section->sh_info,
 		  (unsigned long) section->sh_addralign);
@@ -2533,17 +2626,18 @@ process_section_headers (file)
 	  printf ("  ");
 	  print_vma (section->sh_entsize, LONG_HEX);
 	  
-	  printf (" %c%c%c",
-		  (section->sh_flags & SHF_WRITE ? 'W' : ' '),
-		  (section->sh_flags & SHF_ALLOC ? 'A' : ' '),
-		  (section->sh_flags & SHF_EXECINSTR ? 'X' : ' '));
-	  
+	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
+		  
 	  printf ("     %2ld   %3lx     %ld\n",
 		  (unsigned long) section->sh_link,
 		  (unsigned long) section->sh_info,
 		  (unsigned long) section->sh_addralign);
 	}
     }
+
+  printf (_("Key to Flags: W (write), A (alloc), X (execute), M (merge), S (strings)\n"));
+  printf (_("              I (info), L (link order), O (extra OS processing required)\n"));
+  printf (_("              o (os specific), p (processor specific) x (unknown)\n"));
 
   return 1;
 }
@@ -2886,6 +2980,29 @@ get_64bit_dynamic_segment (file)
   return 1;
 }
 
+static const char *
+get_dynamic_flags (flags)
+     bfd_vma flags;
+{
+  static char buff [64];
+  while (flags)
+    {
+      bfd_vma flag;
+
+      flag = flags & - flags;
+      flags &= ~ flag;
+
+      switch (flag)
+	{
+	case DF_ORIGIN:   strcat (buff, "ORIGIN "); break;
+	case DF_SYMBOLIC: strcat (buff, "SYMBOLIC "); break;
+	case DF_TEXTREL:  strcat (buff, "TEXTREL "); break;
+	case DF_BIND_NOW: strcat (buff, "BIND_NOW "); break;
+	default:          strcat (buff, "unknown "); return;
+	}
+    }
+}
+
 /* Parse and display the contents of the dynamic segment.  */
 static int
 process_dynamic_segment (file)
@@ -3058,6 +3175,11 @@ process_dynamic_segment (file)
 
       switch (entry->d_tag)
 	{
+	case DT_FLAGS:
+	  if (do_dynamic)
+	    printf (get_dynamic_flags (entry->d_un.d_val));
+	  break;
+	  
 	case DT_AUXILIARY:
 	case DT_FILTER:
 	  if (do_dynamic)
@@ -3854,7 +3976,7 @@ process_version_sections (file)
   return 1;
 }
 
-static char *
+static const char *
 get_symbol_binding (binding)
      unsigned int binding;
 {
@@ -3876,7 +3998,7 @@ get_symbol_binding (binding)
     }
 }
 
-static char *
+static const char *
 get_symbol_type (type)
      unsigned int type;
 {
@@ -3889,6 +4011,7 @@ get_symbol_type (type)
     case STT_FUNC:     return "FUNC";
     case STT_SECTION:  return "SECTION";
     case STT_FILE:     return "FILE";
+    case STT_COMMON:   return "COMMON";
     default:
       if (type >= STT_LOPROC && type <= STT_HIPROC)
 	{
@@ -3921,7 +4044,21 @@ get_symbol_type (type)
     }
 }
 
-static char *
+static const char *
+get_symbol_visibility (visibility)
+     unsigned int visibility;
+{
+  switch (visibility)
+    {
+    case STV_DEFAULT:   return "DEFAULT";
+    case STV_INTERNAL:  return "INTERNAL";
+    case STV_HIDDEN:    return "HIDDEN";
+    case STV_PROTECTED: return "PROTECTED";
+    default: abort ();
+    }
+}
+
+static const char *
 get_symbol_index_type (type)
      unsigned int type;
 {
@@ -3946,7 +4083,6 @@ get_symbol_index_type (type)
 	}
     }
 }
-
 
 static int *
 get_dynamic_data (file, number)
@@ -4042,9 +4178,9 @@ process_symbol_table (file)
 
       printf (_("\nSymbol table for image:\n"));
       if (is_32bit_elf)
-	printf (_("  Num Buc:    Value  Size   Type   Bind Ot Ndx Name\n"));
+	printf (_("  Num Buc:    Value  Size   Type   Bind Vis      Ot Ndx Name\n"));
       else
-	printf (_("  Num Buc:    Value          Size   Type   Bind Ot Ndx Name\n"));
+	printf (_("  Num Buc:    Value          Size   Type   Bind Vis      Ot Ndx Name\n"));
 
       for (hn = 0; hn < nbuckets; hn++)
 	{
@@ -4060,15 +4196,13 @@ process_symbol_table (file)
 	      printf ("  %3d %3d: ", si, hn);
 	      print_vma (psym->st_value, LONG_HEX);
 	      putchar (' ' );
-	      print_vma (psym->st_size,  DEC_5);
+	      print_vma (psym->st_size, DEC_5);
 		      
-	      printf ("  %6s %6s %2d ",
-		      get_symbol_type (ELF_ST_TYPE (psym->st_info)),
-		      get_symbol_binding (ELF_ST_BIND (psym->st_info)),
-		      psym->st_other);
-
-	      printf ("%3.3s", get_symbol_index_type (psym->st_shndx));
-
+	      printf ("  %6s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
+	      printf (" %6s",  get_symbol_binding (ELF_ST_BIND (psym->st_info)));
+	      printf (" %3s",  get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
+	      printf (" %2d",  ELF_ST_OTHER (psym->st_other));
+	      printf (" %3.3s", get_symbol_index_type (psym->st_shndx));
 	      printf (" %s\n", dynamic_strings + psym->st_name);
 	    }
 	}
@@ -4095,9 +4229,9 @@ process_symbol_table (file)
 		  SECTION_NAME (section),
 		  (unsigned long) (section->sh_size / section->sh_entsize));
 	  if (is_32bit_elf)
-	    printf (_("   Num:    Value  Size Type    Bind   Ot  Ndx Name\n"));
+	    printf (_("   Num:    Value  Size Type    Bind   Vis      Ot Ndx Name\n"));
 	  else
-	    printf (_("   Num:    Value          Size Type    Bind   Ot  Ndx Name\n"));
+	    printf (_("   Num:    Value          Size Type    Bind   Vis      Ot  Ndx Name\n"));
 
 	  symtab = GET_ELF_SYMBOLS (file, section->sh_offset,
 				    section->sh_size / section->sh_entsize);
@@ -4124,13 +4258,11 @@ process_symbol_table (file)
 	      print_vma (psym->st_value, LONG_HEX);
 	      putchar (' ');
 	      print_vma (psym->st_size, DEC_5);
-	      printf (" %-7s %-6s %2d ",
-		      get_symbol_type (ELF_ST_TYPE (psym->st_info)),
-		      get_symbol_binding (ELF_ST_BIND (psym->st_info)),
-		      psym->st_other);
-
-	      printf ("%4s", get_symbol_index_type (psym->st_shndx));
-
+	      printf (" %-7s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
+	      printf (" %-6s", get_symbol_binding (ELF_ST_BIND (psym->st_info)));
+	      printf (" %-3s", get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
+	      printf (" %2d", ELF_ST_OTHER (psym->st_other));
+	      printf (" %4s", get_symbol_index_type (psym->st_shndx));
 	      printf (" %s", strtab + psym->st_name);
 
 	      if (section->sh_type == SHT_DYNSYM &&
@@ -6541,7 +6673,7 @@ process_mips_specific (file)
   if (options_offset != 0)
     {
       Elf_External_Options * eopt;
-      Elf_Internal_Shdr * sect = section_headers;
+      Elf_Internal_Shdr *    sect = section_headers;
       Elf_Internal_Options * iopt;
       Elf_Internal_Options * option;
       size_t offset;
@@ -6549,7 +6681,7 @@ process_mips_specific (file)
 
       /* Find the section header so that we get the size.  */
       while (sect->sh_type != SHT_MIPS_OPTIONS)
-	++sect;
+	++ sect;
 
       GET_DATA_ALLOC (options_offset, sect->sh_size, eopt,
 		      Elf_External_Options *, "options");
@@ -6564,6 +6696,7 @@ process_mips_specific (file)
 
       offset = cnt = 0;
       option = iopt;
+      
       while (offset < sect->sh_size)
 	{
 	  Elf_External_Options * eoption;
@@ -6576,6 +6709,7 @@ process_mips_specific (file)
 	  option->info = BYTE_GET (eoption->info);
 
 	  offset += option->size;
+	  
 	  ++option;
 	  ++cnt;
 	}
@@ -6584,6 +6718,7 @@ process_mips_specific (file)
 	      string_table + sect->sh_name, cnt);
 
       option = iopt;
+      
       while (cnt-- > 0)
 	{
 	  size_t len;
@@ -6799,6 +6934,7 @@ get_note_type (e_type)
     case NT_FPREGSET:	return _("NT_FPREGSET (floating point registers)");
     case NT_PRPSINFO:   return _("NT_PRPSINFO (prpsinfo structure)");
     case NT_TASKSTRUCT: return _("NT_TASKSTRUCT (task structure)");
+    case NT_PRXFPREG:   return _("NT_PRXFPREG (user_xfpregs structure)");
     case NT_PSTATUS:	return _("NT_PSTATUS (pstatus structure)");
     case NT_FPREGS:	return _("NT_FPREGS (floating point registers)");
     case NT_PSINFO:	return _("NT_PSINFO (psinfo structure)");
