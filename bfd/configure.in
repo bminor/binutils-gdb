@@ -536,6 +536,7 @@ do
     # use one entry per line, even though this leads to long lines.
     a29kcoff_big_vec)		tb="$tb coff-a29k.lo cofflink.lo" ;;
     a_out_adobe_vec)		tb="$tb aout-adobe.lo aout32.lo" ;;
+    aix5coff64_vec)		tb="$tb coff64-rs6000.lo xcofflink.lo aix5ppc-core.lo"; target_size=64 ;;
     aout0_big_vec)		tb="$tb aout0.lo aout32.lo" ;;
     aout_arm_big_vec)		tb="$tb aout-arm.lo aout32.lo" ;;
     aout_arm_little_vec)	tb="$tb aout-arm.lo aout32.lo" ;;
@@ -600,23 +601,19 @@ do
     bfd_elf32_powerpc_vec)	tb="$tb elf32-ppc.lo elf32.lo $elf" ;;
     bfd_elf32_powerpcle_vec)	tb="$tb elf32-ppc.lo elf32.lo $elf" ;;
     bfd_elf32_s390_vec)		tb="$tb elf32-s390.lo elf32.lo $elf" ;;
+    # FIXME: We include cofflink.lo not because it's needed for
+    # bfd_elf32_sh64[l]_vec, but because we include bfd_elf32_sh[l]_vec
+    # which needs it but does not list it.  Should be fixed in right place.
+    bfd_elf32_sh64_vec)		tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf32_sh64l_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
+    bfd_elf32_sh64lnbsd_vec)	tb="$tb elf32-sh64-nbsd.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" ;;
+    bfd_elf32_sh64nbsd_vec)	tb="$tb elf32-sh64-nbsd.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" ;;
     bfd_elf32_sh_vec)		tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_shblin_vec)	tb="$tb elf32-sh-lin.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shl_vec)		tb="$tb elf32-sh.lo elf32.lo $elf coff-sh.lo" ;;
     bfd_elf32_shlin_vec)	tb="$tb elf32-sh-lin.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shlnbsd_vec)	tb="$tb elf32-sh-nbsd.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
     bfd_elf32_shnbsd_vec)	tb="$tb elf32-sh-nbsd.lo elf32.lo $elf coff-sh.lo cofflink.lo" ;;
-    # FIXME: We include cofflink.lo not because it's needed for
-    # bfd_elf32_sh64[l]_vec, but because we include bfd_elf32_sh[l]_vec
-    # which needs it but does not list it.  Should be fixed in right place.
-    bfd_elf32_sh64_vec)		tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
-    bfd_elf32_sh64l_vec)	tb="$tb elf32-sh64.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" target_size=64 ;;
-    bfd_elf64_sh64_vec)		tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
-    bfd_elf64_sh64l_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
-    bfd_elf32_sh64nbsd_vec)	tb="$tb elf32-sh64-nbsd.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" ;;
-    bfd_elf32_sh64lnbsd_vec)	tb="$tb elf32-sh64-nbsd.lo elf32-sh64-com.lo elf32.lo $elf cofflink.lo" ;;
-    bfd_elf64_sh64nbsd_vec)	tb="$tb elf64-sh64-nbsd.lo elf64.lo $elf" target_size=64 ;;
-    bfd_elf64_sh64lnbsd_vec)	tb="$tb elf64-sh64-nbsd.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.lo elf32.lo $elf" ;;
     bfd_elf32_tradbigmips_vec)  tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_tradlittlemips_vec) tb="$tb elf32-mips.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo" ;;
@@ -640,6 +637,10 @@ do
     bfd_elf64_powerpc_vec)	tb="$tb elf64-ppc.lo elf64-gen.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_powerpcle_vec)	tb="$tb elf64-ppc.lo elf64-gen.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_s390_vec)		tb="$tb elf64-s390.lo elf64.lo $elf"; target_size=64 ;;
+    bfd_elf64_sh64_vec)		tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
+    bfd_elf64_sh64l_vec)	tb="$tb elf64-sh64.lo elf64.lo $elf" target_size=64 ;;
+    bfd_elf64_sh64lnbsd_vec)	tb="$tb elf64-sh64-nbsd.lo elf64.lo $elf" target_size=64 ;;
+    bfd_elf64_sh64nbsd_vec)	tb="$tb elf64-sh64-nbsd.lo elf64.lo $elf" target_size=64 ;;
     bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_tradbigmips_vec)	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_tradlittlemips_vec) tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
@@ -649,8 +650,6 @@ do
     bfd_powerpc_pei_vec)        tb="$tb pei-ppc.lo peigen.lo cofflink.lo" ;;
     bfd_powerpcle_pe_vec)       tb="$tb pe-ppc.lo peigen.lo cofflink.lo" ;;
     bfd_powerpcle_pei_vec)      tb="$tb pei-ppc.lo peigen.lo cofflink.lo" ;;
-    cisco_core_big_vec)		tb="$tb cisco-core.lo" ;;
-    cisco_core_little_vec)	tb="$tb cisco-core.lo" ;;
     cris_aout_vec)		tb="$tb aout-cris.lo" ;;
     demo_64_vec)		tb="$tb demo64.lo aout64.lo"; target_size=64 ;;
     ecoff_big_vec)		tb="$tb coff-mips.lo ecoff.lo ecofflink.lo" ;;
@@ -692,6 +691,7 @@ do
     m68knetbsd_vec)		tb="$tb m68knetbsd.lo aout32.lo" ;;
     m68ksysvcoff_vec)		tb="$tb coff-svm68k.lo cofflink.lo" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.lo" ;;
+    m88kmach3_vec)		tb="$tb m88kmach3.lo aout32.lo" ;;
     mcore_pe_big_vec)		tb="$tb pe-mcore.lo peigen.lo cofflink.lo" ;;
     mcore_pe_little_vec)	tb="$tb pe-mcore.lo peigen.lo cofflink.lo" ;;
     mcore_pei_big_vec)		tb="$tb pei-mcore.lo peigen.lo cofflink.lo" ;;
@@ -711,7 +711,6 @@ do
     ppcboot_vec)		tb="$tb ppcboot.lo" ;;
     riscix_vec)			tb="$tb aout32.lo riscix.lo" ;;
     rs6000coff64_vec)		tb="$tb coff64-rs6000.lo xcofflink.lo aix5ppc-core.lo"; target_size=64 ;;
-    aix5coff64_vec)		tb="$tb coff64-rs6000.lo xcofflink.lo aix5ppc-core.lo"; target_size=64 ;;
     rs6000coff_vec)		tb="$tb coff-rs6000.lo xcofflink.lo" ;;
     shcoff_small_vec)		tb="$tb coff-sh.lo cofflink.lo" ;;
     shcoff_vec)			tb="$tb coff-sh.lo cofflink.lo" ;;
@@ -726,10 +725,7 @@ do
     sparclynx_aout_vec)		tb="$tb sparclynx.lo lynx-core.lo aout32.lo" ;;
     sparclynx_coff_vec)		tb="$tb cf-sparclynx.lo lynx-core.lo" ;;
     sparcnetbsd_vec)		tb="$tb sparcnetbsd.lo aout32.lo" ;;
-    srec_vec)			tb="$tb srec.lo" ;;
     sunos_big_vec)		tb="$tb sunos.lo aout32.lo" ;;
-    symbolsrec_vec)		tb="$tb srec.lo" ;;
-    tekhex_vec)			tb="$tb tekhex.lo" ;;
     tic30_aout_vec)		tb="$tb aout-tic30.lo" ;;
     tic30_coff_vec)		tb="$tb coff-tic30.lo" ;;
     tic54x_coff0_beh_vec)	tb="$tb coff-tic54x.lo" ;;
@@ -747,6 +743,13 @@ do
     w65_vec)			tb="$tb coff-w65.lo reloc16.lo" ;;
     we32kcoff_vec)		tb="$tb coff-we32k.lo" ;;
     z8kcoff_vec)		tb="$tb coff-z8k.lo reloc16.lo" ;;
+
+    # These appear out of order in targets.c
+    srec_vec)			tb="$tb srec.lo" ;;
+    symbolsrec_vec)		tb="$tb srec.lo" ;;
+    tekhex_vec)			tb="$tb tekhex.lo" ;;
+    cisco_core_big_vec)		tb="$tb cisco-core.lo" ;;
+    cisco_core_little_vec)	tb="$tb cisco-core.lo" ;;
 
     "")			;;
     *) AC_MSG_ERROR(*** unknown target vector $vec) ;;

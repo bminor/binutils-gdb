@@ -1,3 +1,13 @@
+2002-06-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* targets.c: Sort target vecs.
+	(_bfd_target_vector): Add aix5coff64_vec, bfd_elf32_sh64_vec,
+	bfd_elf32_sh64l_vec, bfd_elf32_sh64lnbsd_vec,
+	bfd_elf32_sh64nbsd_vec, bfd_elf64_sh64_vec, bfd_elf64_sh64l_vec,
+	bfd_elf64_sh64lnbsd_vec, bfd_elf64_sh64nbsd_vec.
+	* configure.in: Sort target vecs.  Add m88kmach3_vec.
+	* configure: Regenerate.
+
 2002-06-16  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* elf64-mmix.c (bpo_reloc_request_sort_fn): Use member
