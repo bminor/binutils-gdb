@@ -412,6 +412,39 @@ visibility_run protected_undef_def
 visibility_run protected_weak
 visibility_run normal
 
+if { ![ld_compile "$CC -g $CFLAGS" $srcdir/$subdir/common.c tmpdir/common.o] } {
+    unresolved "common hidden symbol"
+} else {
+    if ![ld_simple_link $ld tmpdir/common "tmpdir/common.o"] {
+	fail "common hidden symbol"
+    } else {
+	pass "common hidden symbol"
+    }
+}
+
+if { ![ld_compile "$CC -g $CFLAGS" $srcdir/$subdir/test.c tmpdir/test.o] } {
+    unresolved "weak hidden symbol"
+} else {
+   if { ![ld_compile "$CC -g $CFLAGS $picflag" $srcdir/$subdir/sh3.c tmpdir/sh3.o] } {
+	unresolved "weak hidden symbol"
+    } else {
+	if ![ld_simple_link $ld tmpdir/sh3.so "-shared tmpdir/sh3.o"] {
+	    fail "weak hidden symbol"
+	} else {
+	    if ![ld_simple_link $ld tmpdir/weak "tmpdir/test.o tmpdir/sh3.o"] {
+		fail "weak hidden symbol DSO last"
+	    } else {
+		pass "weak hidden symbol DSO last"
+	    }
+	    if ![ld_simple_link $ld tmpdir/weak "tmpdir/sh3.so tmpdir/test.o"] {
+		fail "weak hidden symbol DSO first"
+	    } else {
+		pass "weak hidden symbol DSO first"
+	    }
+	}
+    }
+}
+
 if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
     # Remove the temporary directory.
     catch "exec rm -rf $tmpdir" exec_status

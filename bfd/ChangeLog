@@ -1,3 +1,14 @@
+2003-05-20  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.h (elf_link_output_extsym): Only issue error about !=
+	STV_DEFAULT symbols if they are bfd_link_hash_undefined.
+
+2003-05-20  H.J. Lu <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Check ELF_LINK_DYNAMIC_DEF
+	when removing the old definition for symbols with non-default
+	visibility.
+
 2003-05-18  Jason Eckhardt  <jle@rice.edu>
 
 	* elf32-i860.c (elf32_i860_relocate_highadj): Simplify calculation.

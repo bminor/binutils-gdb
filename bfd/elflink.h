@@ -4622,7 +4622,7 @@ elf_link_output_extsym (h, data)
   if (! finfo->info->relocateable
       && ELF_ST_VISIBILITY (sym.st_other) != STV_DEFAULT
       && ELF_ST_BIND (sym.st_info) != STB_WEAK
-      && h->root.type != bfd_link_hash_undefweak
+      && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
     {
       (*_bfd_error_handler)
