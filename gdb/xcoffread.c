@@ -190,8 +190,8 @@ static void xcoff_new_init (struct objfile *);
 
 static void xcoff_symfile_finish (struct objfile *);
 
-static void
-xcoff_symfile_offsets (struct objfile *, struct section_addr_info *addrs);
+static void xcoff_symfile_offsets (struct objfile *,
+				   struct section_addr_info *addrs);
 
 static void find_linenos (bfd *, sec_ptr, void *);
 

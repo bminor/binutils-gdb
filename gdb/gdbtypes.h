@@ -1102,8 +1102,7 @@ smash_to_method_type (struct type *type, struct type *domain,
 		      struct type *to_type, struct field *args,
 		      int nargs, int varargs);
 
-extern void
-smash_to_member_type (struct type *, struct type *, struct type *);
+extern void smash_to_member_type (struct type *, struct type *, struct type *);
 
 extern struct type *allocate_stub_method (struct type *);
 

@@ -320,8 +320,8 @@ int gdb_print_insn_mips (bfd_vma, disassemble_info *);
 
 static void mips_print_register (int, int);
 
-static mips_extra_func_info_t
-heuristic_proc_desc (CORE_ADDR, CORE_ADDR, struct frame_info *, int);
+static mips_extra_func_info_t heuristic_proc_desc (CORE_ADDR, CORE_ADDR,
+						   struct frame_info *, int);
 
 static CORE_ADDR heuristic_proc_start (CORE_ADDR);
 
@@ -333,8 +333,9 @@ static void mips_show_processor_type_command (char *, int);
 
 static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
 
-static mips_extra_func_info_t
-find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame);
+static mips_extra_func_info_t find_proc_desc (CORE_ADDR pc,
+					      struct frame_info *next_frame,
+					      int cur_frame);
 
 static CORE_ADDR after_prologue (CORE_ADDR pc,
 				 mips_extra_func_info_t proc_desc);

@@ -1074,8 +1074,8 @@ extern struct symbol *find_pc_sect_function (CORE_ADDR, asection *);
 
 /* lookup function from address, return name, start addr and end addr */
 
-extern int
-find_pc_partial_function (CORE_ADDR, char **, CORE_ADDR *, CORE_ADDR *);
+extern int find_pc_partial_function (CORE_ADDR, char **, CORE_ADDR *,
+				     CORE_ADDR *);
 
 extern void clear_pc_function_cache (void);
 
@@ -1258,8 +1258,8 @@ extern struct symtab_and_line find_pc_sect_line (CORE_ADDR, asection *, int);
 
 extern int find_line_pc (struct symtab *, int, CORE_ADDR *);
 
-extern int
-find_line_pc_range (struct symtab_and_line, CORE_ADDR *, CORE_ADDR *);
+extern int find_line_pc_range (struct symtab_and_line, CORE_ADDR *,
+			       CORE_ADDR *);
 
 extern void resolve_sal_pc (struct symtab_and_line *);
 

@@ -112,14 +112,13 @@
 #define FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) 
 #undef  PUSH_RETURN_ADDRESS
 #define PUSH_RETURN_ADDRESS(PC, SP) sparc_at_entry_push_return_address (PC, SP)
-extern CORE_ADDR 
-sparc_at_entry_push_return_address (CORE_ADDR pc, CORE_ADDR sp);
+extern CORE_ADDR sparc_at_entry_push_return_address (CORE_ADDR pc,
+						     CORE_ADDR sp);
 
 #undef  STORE_STRUCT_RETURN
 #define STORE_STRUCT_RETURN(ADDR, SP) \
      sparc_at_entry_store_struct_return (ADDR, SP)
-extern void 
-sparc_at_entry_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
+extern void sparc_at_entry_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
 
 
 #else

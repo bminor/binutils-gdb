@@ -136,12 +136,12 @@ struct sym_fns
 /* The default version of sym_fns.sym_offsets for readers that don't
    do anything special.  */
 
-extern void
-default_symfile_offsets (struct objfile *objfile, struct section_addr_info *);
+extern void default_symfile_offsets (struct objfile *objfile,
+				     struct section_addr_info *);
 
 
-extern void
-extend_psymbol_list (struct psymbol_allocation_list *, struct objfile *);
+extern void extend_psymbol_list (struct psymbol_allocation_list *,
+				 struct objfile *);
 
 /* Add any kind of symbol to a psymbol_allocation_list. */
 
@@ -174,8 +174,8 @@ extern void add_symtab_fns (struct sym_fns *);
 
 extern void init_entry_point_info (struct objfile *);
 
-extern void
-syms_from_objfile (struct objfile *, struct section_addr_info *, int, int);
+extern void syms_from_objfile (struct objfile *, struct section_addr_info *,
+			       int, int);
 
 extern void new_symfile_objfile (struct objfile *, int, int);
 
@@ -192,8 +192,7 @@ build_section_addr_info_from_section_table (const struct section_table *start,
 
 /* Free all memory allocated by build_section_addr_info_from_section_table. */
 
-extern void
-free_section_addr_info (struct section_addr_info *);
+extern void free_section_addr_info (struct section_addr_info *);
 
 
 extern struct partial_symtab *start_psymtab_common (struct objfile *,

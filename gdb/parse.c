@@ -89,8 +89,8 @@ static void free_funcalls (void *ignore);
 
 static void prefixify_expression (struct expression *);
 
-static void
-prefixify_subexp (struct expression *, struct expression *, int, int);
+static void prefixify_subexp (struct expression *, struct expression *, int,
+			      int);
 
 void _initialize_parse (void);
 

@@ -1868,8 +1868,7 @@ process_autoincrement (int size, unsigned short inst, inst_env_type *inst_env)
 
 /* Just a forward declaration.  */
 
-unsigned long
-get_data_from_address (unsigned short *inst, CORE_ADDR address);
+unsigned long get_data_from_address (unsigned short *inst, CORE_ADDR address);
 
 /* Calculates the prefix value for the general case of offset addressing 
    mode.  */

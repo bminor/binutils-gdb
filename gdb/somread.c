@@ -45,11 +45,10 @@ static void som_symfile_read (struct objfile *, int);
 
 static void som_symfile_finish (struct objfile *);
 
-static void
-som_symtab_read (bfd *, struct objfile *, struct section_offsets *);
+static void som_symtab_read (bfd *, struct objfile *,
+			     struct section_offsets *);
 
-static void
-som_symfile_offsets (struct objfile *, struct section_addr_info *);
+static void som_symfile_offsets (struct objfile *, struct section_addr_info *);
 
 /* FIXME: These should really be in a common header somewhere */
 

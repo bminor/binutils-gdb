@@ -686,8 +686,8 @@ void sparc_pop_frame (void);
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
      sparc32_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR)
 
-extern CORE_ADDR
-sparc32_push_arguments (int, struct value **, CORE_ADDR, int, CORE_ADDR);
+extern CORE_ADDR sparc32_push_arguments (int, struct value **, CORE_ADDR, int,
+					 CORE_ADDR);
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function_by_hand. 

@@ -134,8 +134,8 @@ read_tilde_fields (struct field_info *, char **, struct type *,
 
 static int attach_fn_fields_to_type (struct field_info *, struct type *);
 
-static int
-attach_fields_to_type (struct field_info *, struct type *, struct objfile *);
+static int attach_fields_to_type (struct field_info *, struct type *,
+				  struct objfile *);
 
 static struct type *read_struct_type (char **, struct type *,
                                       enum type_code,
@@ -174,8 +174,8 @@ read_cpp_abbrev (struct field_info *, char **, struct type *,
 
 static char *find_name_end (char *name);
 
-static void
-add_live_range (struct objfile *, struct symbol *, CORE_ADDR, CORE_ADDR);
+static void add_live_range (struct objfile *, struct symbol *, CORE_ADDR,
+			    CORE_ADDR);
 
 static int resolve_live_range (struct objfile *, struct symbol *, char *);
 
@@ -183,8 +183,8 @@ static int process_reference (char **string);
 
 static CORE_ADDR ref_search_value (int refnum);
 
-static int
-resolve_symbol_reference (struct objfile *, struct symbol *, char *);
+static int resolve_symbol_reference (struct objfile *, struct symbol *,
+				     char *);
 
 void stabsread_clear_cache (void);
 

@@ -1,4 +1,14 @@
-2003-01-16  Michael Chastain  <mec@shout.net>
+2003-01-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* cris-tdep.c: Fix function declaration indentation.
+	* dwarfread.c, gdbcore.h, gdbtypes.h, i386v-nat.c: Ditto.
+	* mips-tdep.c, monitor.h, parse.c, proc-utils.h: Ditto.
+	* rs6000-nat.c, ser-go32.c, somread.c, stabsread.c: Ditto.
+	* symfile.h, symtab.h, target.c, target.h, value.h: Ditto.
+	* xcoffread.c, config/pa/tm-hppa.h: Ditto.
+	* config/sparc/tm-sp64.h, config/sparc/tm-sparc.h: Ditto.
+
+2003-01-18  Michael Chastain  <mec@shout.net>
 
 	* README (Unpacking and Installation -- quick overview):
 	Warn against ".../gdb-5.3/gdb/configure".

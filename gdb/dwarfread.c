@@ -370,19 +370,19 @@ static void add_enum_psymbol (struct dieinfo *, struct objfile *);
 
 static void handle_producer (char *);
 
-static void
-read_file_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_file_scope (struct dieinfo *, char *, char *,
+			     struct objfile *);
 
-static void
-read_func_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_func_scope (struct dieinfo *, char *, char *,
+			     struct objfile *);
 
-static void
-read_lexical_block_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_lexical_block_scope (struct dieinfo *, char *, char *,
+				      struct objfile *);
 
 static void scan_partial_symbols (char *, char *, struct objfile *);
 
-static void
-scan_compilation_units (char *, char *, file_ptr, file_ptr, struct objfile *);
+static void scan_compilation_units (char *, char *, file_ptr, file_ptr,
+				    struct objfile *);
 
 static void add_partial_symbol (struct dieinfo *, struct objfile *);
 
@@ -398,8 +398,8 @@ static void read_ofile_symtab (struct partial_symtab *);
 
 static void process_dies (char *, char *, struct objfile *);
 
-static void
-read_structure_scope (struct dieinfo *, char *, char *, struct objfile *);
+static void read_structure_scope (struct dieinfo *, char *, char *,
+				  struct objfile *);
 
 static struct type *decode_array_element_type (char *);
 
@@ -413,8 +413,8 @@ static void read_tag_string_type (struct dieinfo *dip);
 
 static void read_subroutine_type (struct dieinfo *, char *, char *);
 
-static void
-read_enumeration (struct dieinfo *, char *, char *, struct objfile *);
+static void read_enumeration (struct dieinfo *, char *, char *,
+			      struct objfile *);
 
 static struct type *struct_type (struct dieinfo *, char *, char *,
 				 struct objfile *);
@@ -441,8 +441,8 @@ static struct type *alloc_utype (DIE_REF, struct type *);
 
 static struct symbol *new_symbol (struct dieinfo *, struct objfile *);
 
-static void
-synthesize_typedef (struct dieinfo *, struct objfile *, struct type *);
+static void synthesize_typedef (struct dieinfo *, struct objfile *,
+				struct type *);
 
 static int locval (struct dieinfo *);
 
