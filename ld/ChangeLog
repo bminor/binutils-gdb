@@ -1,3 +1,7 @@
+2000-04-21  Richard Henderson  <rth@cygnus.com>
+
+	* scripttempl/elfd30v.sc: Place .gcc_except_table.
+
 2000-04-19  Alan Modra  <alan@linuxcare.com.au>
 
 	* dep-in.sed: Match space at start of file name, not at end.

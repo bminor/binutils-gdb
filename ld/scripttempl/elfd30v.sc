@@ -122,6 +122,7 @@ SECTIONS
 
   /* C++ exception support.  */
   .eh_frame	${RELOCATING-0} : { *(.eh_frame) }	${RELOCATING+ > ${DATA_MEMORY}}
+  .gcc_except_table ${RELOCATING-0} : { *(.gcc_except_table) }	${RELOCATING+ > ${DATA_MEMORY}}
 
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
