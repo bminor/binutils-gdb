@@ -78,10 +78,10 @@ proc test_ptype_of_classes {} {
     # considered right for GDB to print it as "struct".
     send_gdb "ptype VA\n"
     gdb_expect {
-	-re "type = (struct|class) VA \{(${ws}public:|)${ws}int va;${ws}VA & operator=\\(VA const &\\);${ws}VA\\(VA const &\\);${ws}VA\\(void\\);${ws}\}.*$gdb_prompt $" {
+	-re "type = (struct|class) VA \{(${ws}public:|)${ws}int va;${ws}VA & operator=\\(VA const ?&\\);${ws}VA\\(VA const ?&\\);${ws}VA\\((void|)\\);${ws}\}.*$gdb_prompt $" {
 	    pass "ptype VA"
 	}
-	-re "type = (struct|class) VA \{(${ws}public:|)${ws}int va;((${ws}VA & operator=\\(VA const &\\);)|(${ws}VA\\(VA const &\\);)|(${ws}VA\\(void\\);))*${ws}\}.*$gdb_prompt $" {
+	-re "type = (struct|class) VA \{(${ws}public:|)${ws}int va;((${ws}VA & operator=\\(VA const ?&\\);)|(${ws}VA\\(VA const ?&\\);)|(${ws}VA\\((void|)\\);))*${ws}\}.*$gdb_prompt $" {
 	    pass "ptype VA (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -94,13 +94,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype VB\n"
     gdb_expect {
-	-re "type = class VB \{${ws}public:${ws}int vb;${ws}VB & operator=\\(VB const &\\);${ws}VB\\(VB const &\\);${ws}VB\\(void\\);${ws}int fvb\\(void\\);${ws}virtual int vvb\\(void\\);${ws}\}.*$gdb_prompt $" {
+	-re "type = class VB \{${ws}public:${ws}int vb;${ws}VB & operator=\\(VB const ?&\\);${ws}VB\\(VB const ?&\\);${ws}VB\\((void|)\\);${ws}int fvb\\((void|)\\);${ws}virtual int vvb\\((void|)\\);${ws}\}.*$gdb_prompt $" {
 	    pass "ptype VB"
 	}
-	-re "type = class VB \{${ws}public:${ws}int vb;${ws}int fvb \\(void\\);${ws}virtual int vvb \\(void\\);${ws}\}.*$gdb_prompt $" {
+	-re "type = class VB \{${ws}public:${ws}int vb;${ws}int fvb \\((void|)\\);${ws}virtual int vvb \\((void|)\\);${ws}\}.*$gdb_prompt $" {
 	    pass "ptype VB (aCC)"
 	}
-	-re "type = class VB \{${ws}public:${ws}int vb;((${ws}VB & operator=\\(VB const &\\);)|(${ws}VB\\(VB const &\\);)|(${ws}VB\\(void\\);)|(${ws}int fvb\\(void\\);)|(${ws}virtual int vvb\\(void\\);))*${ws}\}.*$gdb_prompt $" {
+	-re "type = class VB \{${ws}public:${ws}int vb;((${ws}VB & operator=\\(VB const ?&\\);)|(${ws}VB\\(VB const ?&\\);)|(${ws}VB\\((void|)\\);)|(${ws}int fvb\\((void|)\\);)|(${ws}virtual int vvb\\((void|)\\);))*${ws}\}.*$gdb_prompt $" {
 	    pass "ptype VB (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -113,13 +113,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype V\n"
     gdb_expect {
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const &\\);${ws}V\\(V const &\\);${ws}V\\(void\\);${ws}int f\\(void\\);${ws}virtual int vv\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);${ws}int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype V"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\(void\\);${ws}virtual int vv \\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\((void|)\\);${ws}virtual int vv \\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype V (aCC)"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const &\\);)|(${ws}V\\(V const &\\);)|(${ws}V\\(void\\);)|(${ws}int f\\(void\\);)|(${ws}virtual int vv\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const ?&\\);)|(${ws}V\\(V const ?&\\);)|(${ws}V\\((void|)\\);)|(${ws}int f\\((void|)\\);)|(${ws}virtual int vv\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype V (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -135,13 +135,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype A\n"
     gdb_expect {
-	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:${ws}A & operator=\\(A const &\\);${ws}A\\(int, A const &\\);${ws}A\\(int\\);${ws}virtual int f\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:${ws}A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);${ws}virtual int f\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype A"
 	}
-        -re "type = class A : public virtual V \{${ws}private:${ws}int a;${ws}public:${ws}virtual int f\\(void\\);${ws}\}$nl$gdb_prompt $" {
+        -re "type = class A : public virtual V \{${ws}private:${ws}int a;${ws}public:${ws}virtual int f\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
             pass "ptype A (aCC)"
         }
-	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:((${ws}A & operator=\\(A const &\\);)|(${ws}A\\(int, A const &\\);)|(${ws}A\\(int\\);)|(${ws}virtual int f\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:((${ws}A & operator=\\(A const ?&\\);)|(${ws}A\\(int, A const ?&\\);)|(${ws}A\\(int\\);)|(${ws}virtual int f\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype A (obsolescent gcc or gdb)"
 	}
 	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}FOO;${ws}int a;${ws}public:${ws}virtual int f.void.;${ws}\}$nl$gdb_prompt $" {
@@ -161,13 +161,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype B\n"
     gdb_expect {
-	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}B & operator=\\(B const &\\);${ws}B\\(int, B const &\\);${ws}B\\(int\\);${ws}virtual int f\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}B & operator=\\(B const ?&\\);${ws}B\\(int, B const ?&\\);${ws}B\\(int\\);${ws}virtual int f\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype B"
 	}
-	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}virtual int f \\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}virtual int f \\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype B (aCC)"
 	}
-	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:((${ws}B & operator=\\(B const &\\);)|(${ws}B\\(int, B const &\\);)|(${ws}B\\(int\\);)|(${ws}virtual int f\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:((${ws}B & operator=\\(B const ?&\\);)|(${ws}B\\(int, B const ?&\\);)|(${ws}B\\(int\\);)|(${ws}virtual int f\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype B (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -180,13 +180,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype C\n"
     gdb_expect {
-	-re "type = class C : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int c;${ws}C & operator=\\(C const &\\);${ws}C\\(int, C const &\\);${ws}C\\(int\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class C : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int c;${ws}C & operator=\\(C const ?&\\);${ws}C\\(int, C const ?&\\);${ws}C\\(int\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype C"
 	}
         -re "type = class C : public virtual V \{${ws}public:${ws}int c;${ws}\}$nl$gdb_prompt $" {
             pass "ptype C (aCC)"
         }
-	-re "type = class C : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int c;((${ws}C & operator=\\(C const &\\);)|(${ws}C\\(int, C const &\\);)|(${ws}C\\(int\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class C : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int c;((${ws}C & operator=\\(C const ?&\\);)|(${ws}C\\(int, C const ?&\\);)|(${ws}C\\(int\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype C (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -199,13 +199,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype AD\n"
     gdb_expect {
-	-re "type = class AD \{${ws}public:${ws}AD & operator=\\(AD const &\\);${ws}AD\\(AD const &\\);${ws}AD\\(void\\);${ws}virtual int vg\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class AD \{${ws}public:${ws}AD & operator=\\(AD const ?&\\);${ws}AD\\(AD const ?&\\);${ws}AD\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype AD"
 	}
-	-re "type = class AD \{${ws}public:${ws}virtual int vg \\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class AD \{${ws}public:${ws}virtual int vg \\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype AD (aCC)"
 	}
-	-re "type = class AD \{${ws}public:((${ws}AD & operator=\\(AD const &\\);)|(${ws}AD\\(AD const &\\);)|(${ws}AD\\(void\\);)|(${ws}virtual int vg\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class AD \{${ws}public:((${ws}AD & operator=\\(AD const ?&\\);)|(${ws}AD\\(AD const ?&\\);)|(${ws}AD\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype AD (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -218,13 +218,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype D\n"
     gdb_expect {
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const &\\);${ws}D\\(int, D const &\\);${ws}D\\(int\\);${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype D"
 	}
-        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\}$nl$gdb_prompt $" {
+        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
             pass "ptype D (aCC)"
         }
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const &\\);)|(${ws}D\\(int, D const &\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\(void\\);)|(${ws}virtual int vg\\(void\\);)|(${ws}virtual int vd\\(void\\);)|(${ws}int fd\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const ?&\\);)|(${ws}D\\(int, D const ?&\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);)|(${ws}virtual int vd\\((void|)\\);)|(${ws}int fd\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype D (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -237,13 +237,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype E\n"
     gdb_expect {
-	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}E & operator=\\(E const &\\);${ws}E\\(int, E const &\\);${ws}E\\(int\\);${ws}virtual int f\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vv\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}E & operator=\\(E const ?&\\);${ws}E\\(int, E const ?&\\);${ws}E\\(int\\);${ws}virtual int f\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vv\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype E"
 	}
-	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}virtual int f \\(void\\);${ws}virtual int vg \\(void\\);${ws}virtual int vv \\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}virtual int f \\((void|)\\);${ws}virtual int vg \\((void|)\\);${ws}virtual int vv \\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype E (aCC)"
 	}
-	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;((${ws}E & operator=\\(E const &\\);)|(${ws}E\\(int, E const &\\);)|(${ws}E\\(int\\);)|(${ws}virtual int f\\(void\\);)|(${ws}virtual int vg\\(void\\);)|(${ws}virtual int vv\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;((${ws}E & operator=\\(E const ?&\\);)|(${ws}E\\(int, E const ?&\\);)|(${ws}E\\(int\\);)|(${ws}virtual int f\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);)|(${ws}virtual int vv\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype E (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -256,13 +256,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype dd\n"
     gdb_expect {
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const &\\);${ws}D\\(int, D const &\\);${ws}D\\(int\\);${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype dd"
 	}
-        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\}$nl$gdb_prompt $" {
+        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
             pass "ptype dd (aCC)"
         }
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const &\\);)|(${ws}D\\(int, D const &\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\(void\\);)|(${ws}virtual int vg\\(void\\);)|(${ws}virtual int vd\\(void\\);)|(${ws}int fd\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const ?&\\);)|(${ws}D\\(int, D const ?&\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);)|(${ws}virtual int vd\\((void|)\\);)|(${ws}int fd\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype dd (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -275,13 +275,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype ppd\n"
     gdb_expect {
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const &\\);${ws}D\\(int, D const &\\);${ws}D\\(int\\);${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype ppd"
 	}
-        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
             pass "ptype ppd (aCC)"
         }
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const &\\);)|(${ws}D\\(int, D const &\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\(void\\);)|(${ws}virtual int vg\\(void\\);)|(${ws}virtual int vd\\(void\\);)|(${ws}int fd\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const ?&\\);)|(${ws}D\\(int, D const ?&\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);)|(${ws}virtual int vd\\((void|)\\);)|(${ws}int fd\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype ppd (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -294,13 +294,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pAd\n"
     gdb_expect {
-	-re "type = class AD \{${ws}public:${ws}AD & operator=\\(AD const &\\);${ws}AD\\(AD const &\\);${ws}AD\\(void\\);${ws}virtual int vg\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class AD \{${ws}public:${ws}AD & operator=\\(AD const ?&\\);${ws}AD\\(AD const ?&\\);${ws}AD\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pAd"
 	}
-	-re "type = class AD \{${ws}public:${ws}virtual int vg \\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class AD \{${ws}public:${ws}virtual int vg \\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pAd (aCC)"
 	}
-	-re "type = class AD \{${ws}public:((${ws}AD & operator=\\(AD const &\\);)|(${ws}AD\\(AD const &\\);)|(${ws}AD\\(void\\);)|(${ws}virtual int vg\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class AD \{${ws}public:((${ws}AD & operator=\\(AD const ?&\\);)|(${ws}AD\\(AD const ?&\\);)|(${ws}AD\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pAd (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -313,13 +313,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype a\n"
     gdb_expect {
-	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:${ws}A & operator=\\(A const &\\);${ws}A\\(int, A const &\\);${ws}A\\(int\\);${ws}virtual int f\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:${ws}A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);${ws}virtual int f\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype a"
 	}
-        -re "type = class A : public virtual V \{${ws}private:${ws}int a;${ws}public:${ws}virtual int f\\(void\\);${ws}\}$nl$gdb_prompt $" {
+        -re "type = class A : public virtual V \{${ws}private:${ws}int a;${ws}public:${ws}virtual int f\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
             pass "ptype a (aCC)"
         }
-	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:((${ws}A & operator=\\(A const &\\);)|(${ws}A\\(int, A const &\\);)|(${ws}A\\(int\\);)|(${ws}virtual int f\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:((${ws}A & operator=\\(A const ?&\\);)|(${ws}A\\(int, A const ?&\\);)|(${ws}A\\(int\\);)|(${ws}virtual int f\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype a (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -332,13 +332,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype b\n"
     gdb_expect {
-	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}B & operator=\\(B const &\\);${ws}B\\(int, B const &\\);${ws}B\\(int\\);${ws}virtual int f\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}B & operator=\\(B const ?&\\);${ws}B\\(int, B const ?&\\);${ws}B\\(int\\);${ws}virtual int f\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype b"
 	}
-	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}virtual int f \\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}virtual int f \\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype b (aCC)"
 	}
-	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:((${ws}B & operator=\\(B const &\\);)|(${ws}B\\(int, B const &\\);)|(${ws}B\\(int\\);)|(${ws}virtual int f\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:((${ws}B & operator=\\(B const ?&\\);)|(${ws}B\\(int, B const ?&\\);)|(${ws}B\\(int\\);)|(${ws}virtual int f\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype b (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -351,13 +351,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype c\n"
     gdb_expect {
-	-re "type = class C : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int c;${ws}C & operator=\\(C const &\\);${ws}C\\(int, C const &\\);${ws}C\\(int\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class C : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int c;${ws}C & operator=\\(C const ?&\\);${ws}C\\(int, C const ?&\\);${ws}C\\(int\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype c"
 	}
         -re "type = class C : public virtual V \{${ws}public:${ws}int c;${ws}\}$nl$gdb_prompt $" {
             pass "ptype c (aCC)"
         }
-	-re "type = class C : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int c;((${ws}C & operator=\\(C const &\\);)|(${ws}C\\(int, C const &\\);)|(${ws}C\\(int\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class C : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int c;((${ws}C & operator=\\(C const ?&\\);)|(${ws}C\\(int, C const ?&\\);)|(${ws}C\\(int\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype c (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -370,13 +370,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype d\n"
     gdb_expect {
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const &\\);${ws}D\\(int, D const &\\);${ws}D\\(int\\);${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype d"
 	}
-        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\}$nl$gdb_prompt $" {
+        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
             pass "ptype d (aCC)"
         }
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const &\\);)|(${ws}D\\(int, D const &\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\(void\\);)|(${ws}virtual int vg\\(void\\);)|(${ws}virtual int vd\\(void\\);)|(${ws}int fd\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const ?&\\);)|(${ws}D\\(int, D const ?&\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);)|(${ws}virtual int vd\\((void|)\\);)|(${ws}int fd\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype d (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -389,13 +389,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype e\n"
     gdb_expect {
-	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}E & operator=\\(E const &\\);${ws}E\\(int, E const &\\);${ws}E\\(int\\);${ws}virtual int f\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vv\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}E & operator=\\(E const ?&\\);${ws}E\\(int, E const ?&\\);${ws}E\\(int\\);${ws}virtual int f\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vv\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype e"
 	}
-	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}virtual int f \\(void\\);${ws}virtual int vg \\(void\\);${ws}virtual int vv \\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}virtual int f \\((void|)\\);${ws}virtual int vg \\((void|)\\);${ws}virtual int vv \\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype e (aCC)"
 	}
-	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;((${ws}E & operator=\\(E const &\\);)|(${ws}E\\(int, E const &\\);)|(${ws}E\\(int\\);)|(${ws}virtual int f\\(void\\);)|(${ws}virtual int vg\\(void\\);)|(${ws}virtual int vv\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;((${ws}E & operator=\\(E const ?&\\);)|(${ws}E\\(int, E const ?&\\);)|(${ws}E\\(int\\);)|(${ws}virtual int f\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);)|(${ws}virtual int vv\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype e (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -408,13 +408,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype v\n"
     gdb_expect {
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const &\\);${ws}V\\(V const &\\);${ws}V\\(void\\);${ws}int f\\(void\\);${ws}virtual int vv\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);${ws}int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype v"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\(void\\);${ws}virtual int vv \\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\((void|)\\);${ws}virtual int vv \\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype v (aCC)"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const &\\);)|(${ws}V\\(V const &\\);)|(${ws}V\\(void\\);)|(${ws}int f\\(void\\);)|(${ws}virtual int vv\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const ?&\\);)|(${ws}V\\(V const ?&\\);)|(${ws}V\\((void|)\\);)|(${ws}int f\\((void|)\\);)|(${ws}virtual int vv\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype v (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -427,13 +427,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype vb\n"
     gdb_expect {
-	-re "type = class VB \{${ws}public:${ws}int vb;${ws}VB & operator=\\(VB const &\\);${ws}VB\\(VB const &\\);${ws}VB\\(void\\);${ws}int fvb\\(void\\);${ws}virtual int vvb\\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class VB \{${ws}public:${ws}int vb;${ws}VB & operator=\\(VB const ?&\\);${ws}VB\\(VB const ?&\\);${ws}VB\\((void|)\\);${ws}int fvb\\((void|)\\);${ws}virtual int vvb\\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype vb"
 	}
-	-re "type = class VB \{${ws}public:${ws}int vb;${ws}int fvb \\(void\\);${ws}virtual int vvb \\(void\\);${ws}\}$nl$gdb_prompt $" {
+	-re "type = class VB \{${ws}public:${ws}int vb;${ws}int fvb \\((void|)\\);${ws}virtual int vvb \\((void|)\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype vb (aCC)"
 	}
-	-re "type = class VB \{${ws}public:${ws}int vb;((${ws}VB & operator=\\(VB const &\\);)|(${ws}VB\\(VB const &\\);)|(${ws}VB\\(void\\);)|(${ws}int fvb\\(void\\);)|(${ws}virtual int vvb\\(void\\);))*${ws}\}$nl$gdb_prompt $" {
+	-re "type = class VB \{${ws}public:${ws}int vb;((${ws}VB & operator=\\(VB const ?&\\);)|(${ws}VB\\(VB const ?&\\);)|(${ws}VB\\((void|)\\);)|(${ws}int fvb\\((void|)\\);)|(${ws}virtual int vvb\\((void|)\\);))*${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype vb (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -446,13 +446,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pAa\n"
     gdb_expect {
-	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:${ws}A & operator=\\(A const &\\);${ws}A\\(int, A const &\\);${ws}A\\(int\\);${ws}virtual int f\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:${ws}A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);${ws}virtual int f\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pAa"
 	}
-        -re "type = class A : public virtual V \{${ws}private:${ws}int a;${ws}public:${ws}virtual int f\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+        -re "type = class A : public virtual V \{${ws}private:${ws}int a;${ws}public:${ws}virtual int f\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
             pass "ptype pAa (aCC)"
         }
-	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:((${ws}A & operator=\\(A const &\\);)|(${ws}A\\(int, A const &\\);)|(${ws}A\\(int\\);)|(${ws}virtual int f\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:((${ws}A & operator=\\(A const ?&\\);)|(${ws}A\\(int, A const ?&\\);)|(${ws}A\\(int\\);)|(${ws}virtual int f\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pAa (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -465,13 +465,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pAe\n"
     gdb_expect {
-	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:${ws}A & operator=\\(A const &\\);${ws}A\\(int, A const &\\);${ws}A\\(int\\);${ws}virtual int f\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:${ws}A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);${ws}virtual int f\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pAe"
 	}
-        -re "type = class A : public virtual V \{${ws}private:${ws}int a;${ws}public:${ws}virtual int f\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+        -re "type = class A : public virtual V \{${ws}private:${ws}int a;${ws}public:${ws}virtual int f\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
             pass "ptype pAe (aCC)"
 	}
-	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:((${ws}A & operator=\\(A const &\\);)|(${ws}A\\(int, A const &\\);)|(${ws}A\\(int\\);)|(${ws}virtual int f\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class A : public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}int a;${ws}public:((${ws}A & operator=\\(A const ?&\\);)|(${ws}A\\(int, A const ?&\\);)|(${ws}A\\(int\\);)|(${ws}virtual int f\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pAe (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -484,13 +484,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pBe\n"
     gdb_expect {
-	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}B & operator=\\(B const &\\);${ws}B\\(int, B const &\\);${ws}B\\(int\\);${ws}virtual int f\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}B & operator=\\(B const ?&\\);${ws}B\\(int, B const ?&\\);${ws}B\\(int\\);${ws}virtual int f\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pBe"
 	}
-	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}virtual int f \\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:${ws}virtual int f \\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pBe (aCC)"
 	}
-	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:((${ws}B & operator=\\(B const &\\);)|(${ws}B\\(int, B const &\\);)|(${ws}B\\(int\\);)|(${ws}virtual int f\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class B : public A \{${ws}private:${ws}int b;${ws}public:((${ws}B & operator=\\(B const ?&\\);)|(${ws}B\\(int, B const ?&\\);)|(${ws}B\\(int\\);)|(${ws}virtual int f\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pBe (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -503,13 +503,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pDd\n"
     gdb_expect {
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const &\\);${ws}D\\(int, D const &\\);${ws}D\\(int\\);${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pDd"
 	}
-        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
             pass "ptype pDd (aCC)"
         }
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const &\\);)|(${ws}D\\(int, D const &\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\(void\\);)|(${ws}virtual int vg\\(void\\);)|(${ws}virtual int vd\\(void\\);)|(${ws}int fd\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const ?&\\);)|(${ws}D\\(int, D const ?&\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);)|(${ws}virtual int vd\\((void|)\\);)|(${ws}int fd\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pDd (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -522,13 +522,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pDe\n"
     gdb_expect {
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const &\\);${ws}D\\(int, D const &\\);${ws}D\\(int\\);${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;${ws}D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pDe"
 	}
-        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vd\\(void\\);${ws}int fd\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+        -re "type = class D : public AD, public virtual V \{${ws}public:${ws}int d;${ws}static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
             pass "ptype pDe (aCC)"
         }
-	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const &\\);)|(${ws}D\\(int, D const &\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\(void\\);)|(${ws}virtual int vg\\(void\\);)|(${ws}virtual int vd\\(void\\);)|(${ws}int fd\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class D : public AD, public virtual V \{${ws}private:${ws}V \\*${vbptr}V;${ws}public:${ws}int d;((${ws}D & operator=\\(D const ?&\\);)|(${ws}D\\(int, D const ?&\\);)|(${ws}D\\(int\\);)|(${ws}static void s\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);)|(${ws}virtual int vd\\((void|)\\);)|(${ws}int fd\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pDe (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -541,13 +541,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pVa\n"
     gdb_expect {
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const &\\);${ws}V\\(V const &\\);${ws}V\\(void\\);${ws}int f\\(void\\);${ws}virtual int vv\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);${ws}int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVa"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\(void\\);${ws}virtual int vv \\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\((void|)\\);${ws}virtual int vv \\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVa (aCC)"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const &\\);)|(${ws}V\\(V const &\\);)|(${ws}V\\(void\\);)|(${ws}int f\\(void\\);)|(${ws}virtual int vv\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const ?&\\);)|(${ws}V\\(V const ?&\\);)|(${ws}V\\((void|)\\);)|(${ws}int f\\((void|)\\);)|(${ws}virtual int vv\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVa (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -560,13 +560,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pVv\n"
     gdb_expect {
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const &\\);${ws}V\\(V const &\\);${ws}V\\(void\\);${ws}int f\\(void\\);${ws}virtual int vv\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);${ws}int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVv"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\(void\\);${ws}virtual int vv \\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\((void|)\\);${ws}virtual int vv \\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVv (aCC)"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const &\\);)|(${ws}V\\(V const &\\);)|(${ws}V\\(void\\);)|(${ws}int f\\(void\\);)|(${ws}virtual int vv\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const ?&\\);)|(${ws}V\\(V const ?&\\);)|(${ws}V\\((void|)\\);)|(${ws}int f\\((void|)\\);)|(${ws}virtual int vv\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVv (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -579,13 +579,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pVe\n"
     gdb_expect {
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const &\\);${ws}V\\(V const &\\);${ws}V\\(void\\);${ws}int f\\(void\\);${ws}virtual int vv\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);${ws}int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVe"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\(void\\);${ws}virtual int vv \\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\((void|)\\);${ws}virtual int vv \\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVe (aCC)"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const &\\);)|(${ws}V\\(V const &\\);)|(${ws}V\\(void\\);)|(${ws}int f\\(void\\);)|(${ws}virtual int vv\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const ?&\\);)|(${ws}V\\(V const ?&\\);)|(${ws}V\\((void|)\\);)|(${ws}int f\\((void|)\\);)|(${ws}virtual int vv\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVe (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -598,13 +598,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pVd\n"
     gdb_expect {
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const &\\);${ws}V\\(V const &\\);${ws}V\\(void\\);${ws}int f\\(void\\);${ws}virtual int vv\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}V & operator=\\(V const ?&\\);${ws}V\\(V const ?&\\);${ws}V\\((void|)\\);${ws}int f\\((void|)\\);${ws}virtual int vv\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVd"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\(void\\);${ws}virtual int vv \\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;${ws}int f \\((void|)\\);${ws}virtual int vv \\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVd (aCC)"
 	}
-	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const &\\);)|(${ws}V\\(V const &\\);)|(${ws}V\\(void\\);)|(${ws}int f\\(void\\);)|(${ws}virtual int vv\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class V : public VA, public VB \{${ws}public:${ws}int w;((${ws}V & operator=\\(V const ?&\\);)|(${ws}V\\(V const ?&\\);)|(${ws}V\\((void|)\\);)|(${ws}int f\\((void|)\\);)|(${ws}virtual int vv\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVd (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -617,13 +617,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pADe\n"
     gdb_expect {
-	-re "type = class AD \{${ws}public:${ws}AD & operator=\\(AD const &\\);${ws}AD\\(AD const &\\);${ws}AD\\(void\\);${ws}virtual int vg\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class AD \{${ws}public:${ws}AD & operator=\\(AD const ?&\\);${ws}AD\\(AD const ?&\\);${ws}AD\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pADe"
 	}
-	-re "type = class AD \{${ws}public:${ws}virtual int vg \\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class AD \{${ws}public:${ws}virtual int vg \\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pADe (aCC)"
 	}
-	-re "type = class AD \{${ws}public:((${ws}AD & operator=\\(AD const &\\);)|(${ws}AD\\(AD const &\\);)|(${ws}AD\\(void\\);)|(${ws}virtual int vg\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class AD \{${ws}public:((${ws}AD & operator=\\(AD const ?&\\);)|(${ws}AD\\(AD const ?&\\);)|(${ws}AD\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pADe (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -636,13 +636,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pEe\n"
     gdb_expect {
-	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}E & operator=\\(E const &\\);${ws}E\\(int, E const &\\);${ws}E\\(int\\);${ws}virtual int f\\(void\\);${ws}virtual int vg\\(void\\);${ws}virtual int vv\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}E & operator=\\(E const ?&\\);${ws}E\\(int, E const ?&\\);${ws}E\\(int\\);${ws}virtual int f\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vv\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pEe"
 	}
-	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}virtual int f \\(void\\);${ws}virtual int vg \\(void\\);${ws}virtual int vv \\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;${ws}virtual int f \\((void|)\\);${ws}virtual int vg \\((void|)\\);${ws}virtual int vv \\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pEe (aCC)"
 	}
-	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;((${ws}E & operator=\\(E const &\\);)|(${ws}E\\(int, E const &\\);)|(${ws}E\\(int\\);)|(${ws}virtual int f\\(void\\);)|(${ws}virtual int vg\\(void\\);)|(${ws}virtual int vv\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class E : public B, public virtual V, public D, public C \{${ws}public:${ws}int e;((${ws}E & operator=\\(E const ?&\\);)|(${ws}E\\(int, E const ?&\\);)|(${ws}E\\(int\\);)|(${ws}virtual int f\\((void|)\\);)|(${ws}virtual int vg\\((void|)\\);)|(${ws}virtual int vv\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pEe (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {
@@ -655,13 +655,13 @@ proc test_ptype_of_classes {} {
 
     send_gdb "ptype pVB\n"
     gdb_expect {
-	-re "type = class VB \{${ws}public:${ws}int vb;${ws}VB & operator=\\(VB const &\\);${ws}VB\\(VB const &\\);${ws}VB\\(void\\);${ws}int fvb\\(void\\);${ws}virtual int vvb\\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class VB \{${ws}public:${ws}int vb;${ws}VB & operator=\\(VB const ?&\\);${ws}VB\\(VB const ?&\\);${ws}VB\\((void|)\\);${ws}int fvb\\((void|)\\);${ws}virtual int vvb\\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVB"
 	}
-	-re "type = class VB \{${ws}public:${ws}int vb;${ws}int fvb \\(void\\);${ws}virtual int vvb \\(void\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class VB \{${ws}public:${ws}int vb;${ws}int fvb \\((void|)\\);${ws}virtual int vvb \\((void|)\\);${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVB (aCC)"
 	}
-	-re "type = class VB \{${ws}public:${ws}int vb;((${ws}VB & operator=\\(VB const &\\);)|(${ws}VB\\(VB const &\\);)|(${ws}VB\\(void\\);)|(${ws}int fvb\\(void\\);)|(${ws}virtual int vvb\\(void\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
+	-re "type = class VB \{${ws}public:${ws}int vb;((${ws}VB & operator=\\(VB const ?&\\);)|(${ws}VB\\(VB const ?&\\);)|(${ws}VB\\((void|)\\);)|(${ws}int fvb\\((void|)\\);)|(${ws}virtual int vvb\\((void|)\\);))*${ws}\} \[*\]+$nl$gdb_prompt $" {
 	    pass "ptype pVB (obsolescent gcc or gdb)"
 	}
 	-re ".*$gdb_prompt $" {

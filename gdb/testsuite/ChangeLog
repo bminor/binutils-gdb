@@ -1,5 +1,8 @@
 2001-11-07  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.c++/virtfunc.exp: Replace "const &" with "const ?&", 
+	making the whitespace optional.  Also replace "(void) with
+	"((void|)), making the keyword "void" optional.
 	* gdb.base/callfuncs.c (t_float_values): This function must
 	_not_ be prototyped, and the following function (t_float_values2)
 	must be prototyped (if the compiler supports it), so that GDB 
