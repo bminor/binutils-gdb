@@ -17,10 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/*
- * Changes for IBM AIX PS/2 by Minh Tran-Le (tranle@intellicorp.com)
- * Revision:	 5-May-93 00:11:35
- */
+/* Changes for IBM AIX PS/2 by Minh Tran-Le (tranle@intellicorp.com).  */
 
 #ifndef TM_I386AIX_H
 #define TM_I386AIX_H 1
@@ -132,7 +129,7 @@ i387_to_double PARAMS ((char *, char *));
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
 { \
   double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
-  double_to_i387((char *)&val, (TO)))
+  double_to_i387((char *)&val, (TO))) \
 }
 extern void
 double_to_i387 PARAMS ((char *, char *));

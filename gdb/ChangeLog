@@ -1,5 +1,10 @@
 Sat Feb  5 08:03:41 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/i386/tm-i386aix.h (REGISTER_CONVERT_TO_RAW): Add missing
+	backslash.
+	* i386-tdep.c (i386_extract_return_value): Pass TYPE_LENGTH (type)
+	to store_floating, not nonexistent variable len.
+
 	* remote-mips.c (mips_insert_breakpoint, mips_remove_breakpoint):
 	New functions.
 	(mips_store_word): Change calling convention to return errors, and
