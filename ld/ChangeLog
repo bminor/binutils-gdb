@@ -1,3 +1,11 @@
+2001-02-11  Philip Blundell  <philb@gnu.org>
+
+	* Makefile.am: Remove mention of earmelf_linux26.o.
+	* Makefile.in: Regenerate.
+	* emulparams/armelf_linux.sh (TEXT_START_ADDR): Set to 0x8000.
+	* emulparams/armelf_linux26.sh: Delete.
+	* configure.tgt: Remove mention of armelf_linux26 emulation.
+
 2001-02-09  David Mosberger  <davidm@hpl.hp.com>
 
 	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Add

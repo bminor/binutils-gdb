@@ -110,7 +110,6 @@ ALL_EMULATIONS = \
 	earmcoff.o \
 	earmelf.o \
 	earmelf_linux.o \
-	earmelf_linux26.o \
 	earmelf_oabi.o \
 	earmnbsd.o \
 	earmpe.o \
