@@ -914,7 +914,7 @@ parse_at (src, op)
   else if (src[0] == '(')
     {
       /* Could be @(disp, rn), @(disp, gbr), @(disp, pc),  @(r0, gbr) or
-         @(r0, rn) */
+         @(r0, rn).  */
       src++;
       len = parse_reg (src, &mode, &(op->reg));
       if (len && mode == A_REG_N)
@@ -925,29 +925,42 @@ parse_at (src, op)
 	      as_bad (_("must be @(r0,...)"));
 	    }
 	  if (src[0] == ',')
-	    src++;
-	  /* Now can be rn or gbr */
-	  len = parse_reg (src, &mode, &(op->reg));
-	  if (mode == A_GBR)
 	    {
-	      op->type = A_R0_GBR;
-	    }
-	  else if (mode == A_REG_N)
-	    {
-	      op->type = A_IND_R0_REG_N;
+	      src++;
+	      /* Now can be rn or gbr.  */
+	      len = parse_reg (src, &mode, &(op->reg));
 	    }
 	  else
 	    {
-	      as_bad (_("syntax error in @(r0,...)"));
+	      len = 0;
+	    }
+	  if (len)
+	    {
+	      if (mode == A_GBR)
+		{
+		  op->type = A_R0_GBR;
+		}
+	      else if (mode == A_REG_N)
+		{
+		  op->type = A_IND_R0_REG_N;
+		}
+	      else
+		{
+		  as_bad (_("syntax error in @(r0,...)"));
+		}
+	    }
+	  else
+	    {
+	      as_bad (_("syntax error in @(r0...)"));
 	    }
 	}
       else
 	{
-	  /* Must be an @(disp,.. thing) */
+	  /* Must be an @(disp,.. thing).  */
 	  src = parse_exp (src, op);
 	  if (src[0] == ',')
 	    src++;
-	  /* Now can be rn, gbr or pc */
+	  /* Now can be rn, gbr or pc.  */
 	  len = parse_reg (src, &mode, &op->reg);
 	  if (len)
 	    {

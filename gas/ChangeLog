@@ -1,3 +1,7 @@
+2001-12-20  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sh.c (parse_at): Reject @(r0) and @(r0,).
+
 2001-12-20  matthew green  <mrg@redhat.com>
 
 	* config/tc-ppc.c (md_parse_option): Make -maltivec default
