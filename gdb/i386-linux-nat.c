@@ -123,6 +123,13 @@ int have_ptrace_getxfpregs =
    the GETREGS request.  I want to avoid changing `infptrace.c' right
    now.  */
 
+#ifndef PT_READ_U
+#define PT_READ_U PTRACE_PEEKUSR
+#endif
+#ifndef PT_WRITE_U
+#define PT_WRITE_U PTRACE_POKEUSR
+#endif
+
 /* Default the type of the ptrace transfer to int.  */
 #ifndef PTRACE_XFER_TYPE
 #define PTRACE_XFER_TYPE int
