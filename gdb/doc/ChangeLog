@@ -2,7 +2,7 @@ Sat May 22 10:40:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Constants):  Allow an `e' constant to be non-enum.
 	(Traditional builtin types): Document convex convention for long long.
-	(Negative builtin types): Discuss type names.
+	(Negative builtin types): Discuss type names, and misc fixes.
 
 Fri May 21 11:20:31 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
