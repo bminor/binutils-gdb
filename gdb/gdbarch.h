@@ -693,6 +693,11 @@ extern void set_gdbarch_register_bytes (struct gdbarch *gdbarch, int register_by
 #endif
 #endif
 
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_BYTE)
+#define REGISTER_BYTE(reg_nr) (generic_register_byte (reg_nr))
+#endif
+
 typedef int (gdbarch_register_byte_ftype) (int reg_nr);
 extern int gdbarch_register_byte (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_byte (struct gdbarch *gdbarch, gdbarch_register_byte_ftype *register_byte);

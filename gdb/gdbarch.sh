@@ -461,7 +461,7 @@ f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:
 f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_name::0
 v:2:REGISTER_SIZE:int:register_size::::0:-1
 v:2:REGISTER_BYTES:int:register_bytes::::0:-1
-f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::0:0
+f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte::0
 f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
 v:2:MAX_REGISTER_RAW_SIZE:int:max_register_raw_size::::0:-1
 f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0

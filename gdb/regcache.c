@@ -1279,7 +1279,8 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	{
 	  fprintf_unfiltered (file, " %6ld",
 			      regcache->descr->register_offset[regnum]);
-	  if (register_offset != regcache->descr->register_offset[regnum])
+	  if (register_offset != regcache->descr->register_offset[regnum]
+	      || register_offset != REGISTER_BYTE (regnum))
 	    {
 	      if (!footnote_register_offset)
 		footnote_register_offset = ++footnote_nr;

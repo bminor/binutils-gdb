@@ -444,6 +444,23 @@ generic_register_size (int regnum)
        (name && STREQ ("_sigtramp", name))
 #endif
 #endif
+
+/* Assume all registers are adjacent.  */
+
+int
+generic_register_byte (int regnum)
+{
+  int byte;
+  int i;
+  gdb_assert (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS);
+  byte = 0;
+  for (i = 0; i < regnum; i++)
+    {
+      byte += TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (i));
+    }
+  return byte;
+}
+
 
 int
 legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)

@@ -315,7 +315,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  0,
+  generic_register_byte,
   generic_register_size,
   0,
   generic_register_size,
@@ -484,6 +484,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->register_name = legacy_register_name;
   current_gdbarch->register_size = -1;
   current_gdbarch->register_bytes = -1;
+  current_gdbarch->register_byte = generic_register_byte;
   current_gdbarch->register_raw_size = generic_register_size;
   current_gdbarch->max_register_raw_size = -1;
   current_gdbarch->register_virtual_size = generic_register_size;
@@ -623,9 +624,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->register_bytes == -1))
     fprintf_unfiltered (log, "\n\tregister_bytes");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->register_byte == 0))
-    fprintf_unfiltered (log, "\n\tregister_byte");
+  /* Skip verify of register_byte, invalid_p == 0 */
   /* Skip verify of register_raw_size, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->max_register_raw_size == -1))

@@ -1,5 +1,14 @@
 2002-08-09  Andrew Cagney  <cagney@redhat.com>
 
+	* regcache.c (regcache_dump): Compare the register offset
+	with REGISTER_BYTE.
+	* arch-utils.c (generic_register_byte): New function.
+	* arch-utils.h (generic_register_byte): Declare.
+	* gdbarch.sh (REGISTER_BYTE): Default to generic_register_byte.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2002-08-09  Andrew Cagney  <cagney@redhat.com>
+
 	* regcache.c: Include "gdbcmd.h"
 	(_initialize_regcache): Add commands "maintenance print
 	registers", "maintenance print raw-registers" and "maintenance
