@@ -1,3 +1,9 @@
+2003-01-03  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.base/psymtab.exp: New file.
+	* gdb.base/psymtab1.c: Ditto.
+	* gdb.base/psymtab2.c: Ditto.
+
 2002-12-23  Adam Fedor  <fedor@gnu.org>
 
 	* gdb.base/maint.exp: Update expect output to include 'ObjC'.
