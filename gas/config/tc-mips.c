@@ -313,6 +313,14 @@ static int mips_big_got;
    instructions.  */
 static int mips_trap;
 
+/* 1 if double width floating point constants should not be constructed
+   by a assembling two single width halves into two single width floating
+   point registers which just happen to alias the double width destination
+   register.  On some architectures this aliasing can be disabled by a bit
+   in the status register, and the settin gof this bit cannot be determined
+   automatically at assemble time.  */
+static int mips_disable_float_construction;
+
 /* Non-zero if any .set noreorder directives were used.  */
 
 static int mips_any_noreorder;
@@ -7601,6 +7609,7 @@ mips_ip (str, ip)
 		      imm_expr.X_add_number = bfd_getb32 (temp);
 		  }
 		else if (length > 4
+			 && ! mips_disable_float_construction
 			 && ((temp[0] == 0 && temp[1] == 0)
 			     || (temp[2] == 0 && temp[3] == 0))
 			 && ((temp[4] == 0 && temp[5] == 0)
@@ -8826,6 +8835,10 @@ struct option md_longopts[] = {
   {"mcpu", required_argument, NULL, OPTION_MCPU},
 #define OPTION_MEMBEDDED_PIC (OPTION_MD_BASE + 6)
   {"membedded-pic", no_argument, NULL, OPTION_MEMBEDDED_PIC},
+
+#define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
+#define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
+
 #define OPTION_TRAP (OPTION_MD_BASE + 9)
   {"trap", no_argument, NULL, OPTION_TRAP},
   {"no-break", no_argument, NULL, OPTION_TRAP},
@@ -8848,15 +8861,20 @@ struct option md_longopts[] = {
   {"m4100", no_argument, NULL, OPTION_M4100},
 #define OPTION_NO_M4100 (OPTION_MD_BASE + 18)
   {"no-m4100", no_argument, NULL, OPTION_NO_M4100},
+
+#define OPTION_XGOT (OPTION_MD_BASE + 19)
+#define OPTION_32 (OPTION_MD_BASE + 20)
+#define OPTION_64 (OPTION_MD_BASE + 21)
+  
 #define OPTION_MIPS16 (OPTION_MD_BASE + 22)
   {"mips16", no_argument, NULL, OPTION_MIPS16},
 #define OPTION_NO_MIPS16 (OPTION_MD_BASE + 23)
   {"no-mips16", no_argument, NULL, OPTION_NO_MIPS16},
+
 #define OPTION_M3900 (OPTION_MD_BASE + 26)
   {"m3900", no_argument, NULL, OPTION_M3900},
 #define OPTION_NO_M3900 (OPTION_MD_BASE + 27)
   {"no-m3900", no_argument, NULL, OPTION_NO_M3900},
-
 
 #define OPTION_MABI (OPTION_MD_BASE + 38)
   {"mabi", required_argument, NULL, OPTION_MABI},
@@ -8866,11 +8884,6 @@ struct option md_longopts[] = {
 #define OPTION_NO_M7000_HILO_FIX (OPTION_MD_BASE + 40)
   {"no-fix-7000", no_argument, NULL, OPTION_NO_M7000_HILO_FIX},
 
-#define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
-#define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
-#define OPTION_XGOT (OPTION_MD_BASE + 19)
-#define OPTION_32 (OPTION_MD_BASE + 20)
-#define OPTION_64 (OPTION_MD_BASE + 21)
 #ifdef OBJ_ELF
   {"KPIC", no_argument, NULL, OPTION_CALL_SHARED},
   {"xgot", no_argument, NULL, OPTION_XGOT},
@@ -8885,6 +8898,12 @@ struct option md_longopts[] = {
   {"mgp32", no_argument, NULL, OPTION_GP32},
   {"mgp64", no_argument, NULL, OPTION_GP64},
 
+#define OPTION_CONSTRUCT_FLOATS (OPTION_MD_BASE + 43)
+  {"construct-floats", no_argument, NULL, OPTION_CONSTRUCT_FLOATS},
+
+#define OPTION_NO_CONSTRUCT_FLOATS (OPTION_MD_BASE + 44)
+  {"no-construct-floats", no_argument, NULL, OPTION_NO_CONSTRUCT_FLOATS},
+
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -8896,6 +8915,14 @@ md_parse_option (c, arg)
 {
   switch (c)
     {
+    case OPTION_CONSTRUCT_FLOATS:
+      mips_disable_float_construction = 0;
+      break;
+      
+    case OPTION_NO_CONSTRUCT_FLOATS:
+      mips_disable_float_construction = 1;
+      break;
+      
     case OPTION_TRAP:
       mips_trap = 1;
       break;
@@ -9338,6 +9365,7 @@ MIPS options:\n\
   fprintf(stream, _("\
 -O0			remove unneeded NOPs, do not swap branches\n\
 -O			remove unneeded NOPs and swap branches\n\
+--[no-]construct-floats [dis]allow floating point values to be constructed\n\
 --trap, --no-break	trap exception on div by 0 and mult overflow\n\
 --break, --no-trap	break exception on div by 0 and mult overflow\n"));
 #ifdef OBJ_ELF

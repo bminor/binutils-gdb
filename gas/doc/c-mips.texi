@@ -151,6 +151,21 @@ other assemblers, which use it to turn off C style preprocessing.  With
 @sc{gnu} @code{@value{AS}}, there is no need for @samp{-nocpp}, because the
 @sc{gnu} assembler itself never runs the C preprocessor.
 
+@item --construct-floats
+@itemx --no-construct-floats
+@cindex --construct-floats
+@cindex --no-construct-floats
+The @code{--no-construct-floats} option disables the construction of
+double width floating point constants by loading the two halves of the
+value into the two single width floating point registers that make up
+the double width register.  This feature is useful if the processor
+support the FR bit in its status  register, and this bit is known (by
+the programmer) to be set.  This bit prevents the aliasing of the double
+width register by the single width registers.
+
+By default @code {--construct-floats} is selected, allowing construction
+of these floating point constants.
+
 @item --trap
 @itemx --no-break
 @c FIXME!  (1) reflect these options (next item too) in option summaries;

@@ -1,3 +1,17 @@
+2000-07-14  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-mips.c (mips_disable_float_construction): New
+	static variable.  Set to true if doubles should not be
+	constructed by loading two single width fp registers with
+	halves of the value.
+	(mips_ip): Test mips_disable_float_construction.
+	(md_longopts): Add command line switches --construct-floats
+	and --no-construct-floats.
+	(md_parse_option): Parse new command line options.
+	(md_show_usage): Describe new command line options.
+
+	* doc/c-mips.texi: Document new command line options.
+
 2000-07-13  Koundinya K  <kk@ddeorg.soft.net>
 
 	* configure.in: Remove the test /usr/dde for mips-*-sysv4*MP*
