@@ -1,3 +1,13 @@
+2000-11-06  Kazu Hirata  <kazu@hxi.com>
+
+	* aout-adobe.c: Fix formatting.
+	* aout-arm.c: Likewise.
+	* aout-cris.c: Likewise.
+	* aout-encap.c: Likewise.
+	* aout-ns32k.c: Likewise.
+	* aout-target.h: Likewise.
+	* aout-tic30.c: Likewise.
+
 2000-11-05  Philip Blundell  <philb@gnu.org>
 
 	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Always permit

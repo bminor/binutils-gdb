@@ -61,7 +61,7 @@ MY(callback) (abfd)
       bfd_vma adjust;
 
       adjust = execp->a_entry - obj_textsec (abfd)->vma;
-      /* Adjust only by whole pages. */
+      /* Adjust only by whole pages.  */
       adjust &= ~(TARGET_PAGE_SIZE - 1);
       obj_textsec (abfd)->vma += adjust;
       obj_datasec (abfd)->vma += adjust;
@@ -84,7 +84,7 @@ MY(callback) (abfd)
   /* The file offsets of the string table and symbol table.  */
   obj_sym_filepos (abfd) = N_SYMOFF (*execp);
   obj_str_filepos (abfd) = N_STROFF (*execp);
-  
+
   /* Determine the architecture and machine type of the object file.  */
 #ifdef SET_ARCH_MACH
   SET_ARCH_MACH(abfd, *execp);
@@ -178,7 +178,7 @@ MY(object_p) (abfd)
    * means that it isn't obvious if EXEC_P should be set.
    * All of the following must be true for an executable:
    * There must be no relocations, the bfd can be neither an
-   * archive nor an archive element, and the file must be executable. */
+   * archive nor an archive element, and the file must be executable.  */
 
   if (exec.a_trsize + exec.a_drsize == 0
       && bfd_get_format(abfd) == bfd_object && abfd->my_archive == NULL)
@@ -196,7 +196,6 @@ MY(object_p) (abfd)
 }
 #define MY_object_p MY(object_p)
 #endif
-
 
 #ifndef MY_mkobject
 
@@ -230,7 +229,6 @@ MY(mkobject) (abfd)
 static boolean MY_bfd_copy_private_section_data
   PARAMS ((bfd *, asection *, bfd *, asection *));
 
-/*ARGSUSED*/
 static boolean
 MY_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
      bfd *ibfd;
@@ -530,7 +528,6 @@ MY_bfd_final_link (abfd, info)
 #define MY_bfd_link_split_section  _bfd_generic_link_split_section
 #endif
 
-
 #ifndef MY_bfd_copy_private_bfd_data
 #define MY_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
 #endif
@@ -581,7 +578,7 @@ MY_bfd_final_link (abfd, info)
 #endif
 
 /* Aout symbols normally have leading underscores */
-#ifndef MY_symbol_leading_char 
+#ifndef MY_symbol_leading_char
 #define MY_symbol_leading_char '_'
 #endif
 
@@ -643,7 +640,7 @@ const bfd_target MY(vec) =
 
   /* Alternative_target */
   NULL,
-  
+
   (PTR) MY_backend_data
 };
 #endif /* MY_BFD_TARGET */

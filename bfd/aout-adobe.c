@@ -42,7 +42,7 @@ static void aout_adobe_write_section PARAMS ((bfd *abfd, sec_ptr sect));
 void aout_adobe_swap_exec_header_in
   PARAMS ((bfd *abfd, struct external_exec *raw_bytes,
 	   struct internal_exec *execp));
-	 
+
 void
 aout_adobe_swap_exec_header_in (abfd, raw_bytes, execp)
      bfd *abfd;
@@ -77,7 +77,7 @@ aout_adobe_swap_exec_header_out (abfd, execp, raw_bytes)
 {
   struct external_exec *bytes = (struct external_exec *)raw_bytes;
 
-  /* Now fill in fields in the raw data, from the fields in the exec struct. */
+  /* Now fill in fields in the raw data, from the fields in the exec struct.  */
   bfd_h_put_32 (abfd, execp->a_info  , bytes->e_info);
   PUT_WORD (abfd, execp->a_text  , bytes->e_text);
   PUT_WORD (abfd, execp->a_data  , bytes->e_data);
@@ -87,7 +87,6 @@ aout_adobe_swap_exec_header_out (abfd, execp, raw_bytes)
   PUT_WORD (abfd, execp->a_trsize, bytes->e_trsize);
   PUT_WORD (abfd, execp->a_drsize, bytes->e_drsize);
 }
-
 
 static const bfd_target *
 aout_adobe_object_p (abfd)
@@ -126,7 +125,6 @@ aout_adobe_object_p (abfd)
   aout_adobe_swap_exec_header_in (abfd, &exec_bytes, &anexec);
   return aout_32_some_aout_object_p (abfd, &anexec, aout_adobe_callback);
 }
-
 
 /* Finish up the opening of a b.out file for reading.  Fill in all the
    fields that are not handled by common code.  */
@@ -180,13 +178,13 @@ aout_adobe_callback (abfd)
 
     default:
       (*_bfd_error_handler)
-	(_("%s: Unknown section type in a.out.adobe file: %x\n"), 
+	(_("%s: Unknown section type in a.out.adobe file: %x\n"),
 	 bfd_get_filename (abfd), ext->e_type[0]);
       goto no_more_sections;
     }
 
     /* First one is called ".text" or whatever; subsequent ones are
-       ".text1", ".text2", ... */
+       ".text1", ".text2", ...  */
 
     bfd_set_error (bfd_error_no_error);
     sect = bfd_make_section (abfd, section_name);
@@ -230,12 +228,12 @@ aout_adobe_callback (abfd)
       break;
     }
   }
-no_more_sections:  
+no_more_sections:
 
   adata(abfd).reloc_entry_size = sizeof (struct reloc_std_external);
   adata(abfd).symbol_entry_size = sizeof (struct external_nlist);
-  adata(abfd).page_size = 1; /* Not applicable. */
-  adata(abfd).segment_size = 1; /* Not applicable. */
+  adata(abfd).page_size = 1; /* Not applicable.  */
+  adata(abfd).segment_size = 1; /* Not applicable.  */
   adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
 
   return abfd->xvec;
@@ -261,13 +259,12 @@ aout_adobe_mkobject (abfd)
 
   adata(abfd).reloc_entry_size = sizeof (struct reloc_std_external);
   adata(abfd).symbol_entry_size = sizeof (struct external_nlist);
-  adata(abfd).page_size = 1; /* Not applicable. */
-  adata(abfd).segment_size = 1; /* Not applicable. */
+  adata(abfd).page_size = 1; /* Not applicable.  */
+  adata(abfd).segment_size = 1; /* Not applicable.  */
   adata(abfd).exec_bytes_size = EXEC_BYTES_SIZE;
 
   return true;
 }
-
 
 static boolean
 aout_adobe_write_object_contents (abfd)
@@ -279,7 +276,7 @@ aout_adobe_write_object_contents (abfd)
 
   exec_hdr (abfd)->a_info = ZMAGIC;
 
-  /* Calculate text size as total of text sections, etc. */
+  /* Calculate text size as total of text sections, etc.  */
 
   exec_hdr (abfd)->a_text = 0;
   exec_hdr (abfd)->a_data = 0;
@@ -337,7 +334,7 @@ aout_adobe_write_object_contents (abfd)
     return false;
 
   /* Now write out reloc info, followed by syms and strings */
-  if (bfd_get_symcount (abfd) != 0) 
+  if (bfd_get_symcount (abfd) != 0)
     {
       if (bfd_seek (abfd, (file_ptr)(N_SYMOFF(*exec_hdr(abfd))), SEEK_SET)
 	  != 0)
@@ -449,16 +446,13 @@ aout_adobe_set_arch_mach (abfd, arch, machine)
   return false;
 }
 
-static int 
+static int
 aout_adobe_sizeof_headers (ignore_abfd, ignore)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
      boolean ignore ATTRIBUTE_UNUSED;
 {
   return sizeof(struct internal_exec);
 }
-
-
-
 
 /* Build the transfer vector for Adobe A.Out files.  */
 
@@ -525,6 +519,6 @@ const bfd_target a_out_adobe_vec =
      BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   NULL,
-  
+
   (PTR) 0
 };

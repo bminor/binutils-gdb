@@ -47,7 +47,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    adata(abfd).zmagic_disk_block_size, even though the exec_header is
    *not* included in the text segment.  A simple workaround is to
    #define ZMAGIC_DISK_BLOCK_SIZE, which is used if defined; otherwise
-   TARGET_PAGE_SIZE is used. */
+   TARGET_PAGE_SIZE is used.  */
 #define ZMAGIC_DISK_BLOCK_SIZE N_TXTOFF (0)
 
 /* It seems odd at first to set a page-size this low, but gives greater
@@ -116,7 +116,6 @@ static boolean MY(set_sizes) PARAMS ((bfd *));
 #include "aout32.c"
 #include "aout-target.h"
 
-
 /* We need our own version to set header flags.  */
 
 static boolean
@@ -144,10 +143,9 @@ MY(write_object_contents) (abfd)
   return true;
 }
 
-
 /* We need our own for these reasons:
-   - Assert that a normal 8, 16 or 32 reloc is output. 
-   - Fix what seems to be a weak-bug (perhaps there for valid reasons).  */ 
+   - Assert that a normal 8, 16 or 32 reloc is output.
+   - Fix what seems to be a weak-bug (perhaps there for valid reasons).  */
 
 static void
 MY(swap_ext_reloc_out) (abfd, g, natptr)
@@ -206,7 +204,7 @@ MY(swap_ext_reloc_out) (abfd, g, natptr)
     {
       (*_bfd_error_handler) (_("%s: Invalid relocation type exported: %d"),
 			     bfd_get_filename (abfd), r_type);
-    
+
       bfd_set_error (bfd_error_wrong_format);
     }
 
@@ -220,7 +218,6 @@ MY(swap_ext_reloc_out) (abfd, g, natptr)
 
   PUT_WORD (abfd, r_addend, natptr->r_addend);
 }
-
 
 /* We need our own to assert that a normal 8, 16 or 32 reloc is input.  */
 
@@ -251,10 +248,10 @@ MY(swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
     {
       (*_bfd_error_handler) (_("%s: Invalid relocation type imported: %d"),
 			     bfd_get_filename (abfd), r_type);
-    
+
       bfd_set_error(bfd_error_wrong_format);
     }
-    
+
   cache_ptr->howto =  howto_table_ext + r_type;
 
   if (r_extern && r_index > symcount)
@@ -262,7 +259,7 @@ MY(swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
       (*_bfd_error_handler)
         (_("%s: Bad relocation record imported: %d"),
          bfd_get_filename (abfd), r_index);
-    
+
       bfd_set_error (bfd_error_wrong_format);
 
       /* We continue, so we can catch further errors.  */
@@ -274,7 +271,6 @@ MY(swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
      default.  */
   MOVE_ADDRESS (GET_SWORD (abfd, bytes->r_addend));
 }
-
 
 /* We use the same as the default, except that we also set
    "obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;", to avoid changing
@@ -297,7 +293,7 @@ MY(set_sizes) (abfd)
      target-specific things should not be added there.  */
 
   obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
-  
+
   return true;
 }
 
