@@ -109,14 +109,19 @@ struct bfd_link_hash_entry
 	{
 	  /* The linker needs to know three things about common
              symbols: the size, the alignment, and the section in
-             which the symbol should be placed.  On the assumption
-             that a single common symbol will not take up incredible
-             amounts of memory, we pack the size and the alignment
-             into the space of a single integer.  The alignment is
-             stored as a power of two.  */
-	  unsigned int alignment_power : 6;	/* Alignment.  */
-	  unsigned int size : 26;		/* Common symbol size.  */
-	  asection *section;			/* Symbol section.  */
+             which the symbol should be placed.  We store the size
+             here, and we allocate a small structure to hold the
+             section and the alignment.  The alignment is stored as a
+             power of two.  We don't store all the information
+             directly because we don't want to increase the size of
+             the union; this structure is a major space user in the
+             linker.  */
+	  bfd_size_type size;	/* Common symbol size.  */
+	  struct bfd_link_hash_common_entry
+	    {
+	      unsigned int alignment_power;	/* Alignment.  */
+	      asection *section;		/* Symbol section.  */
+	    } *p;
 	} c;
     } u;
 };
@@ -195,6 +200,13 @@ struct bfd_link_info
   /* Hash table of symbols to report back via notice_callback.  If
      this is NULL no symbols are reported back.  */
   struct bfd_hash_table *notice_hash;
+
+
+  enum   bfd_link_subsystem  subsystem;
+  bfd_link_stack_heap stack_heap_parameters;
+
+  /* If a base output file is wanted, then this points to it */
+  FILE *base_file;
 };
 
 /* This structures holds a set of callback functions.  These are
