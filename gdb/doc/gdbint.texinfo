@@ -1153,6 +1153,167 @@ in the @code{REGISTER_NAME} and related macros.
 
 @value{GDBN} can handle big-endian, little-endian, and bi-endian architectures.
 
+@section Pointers Are Not Always Addresses
+@cindex pointer representation
+@cindex address representation
+@cindex word-addressed machines
+@cindex separate data and code address spaces
+@cindex spaces, separate data and code address
+@cindex address spaces, separate data and code
+@cindex code pointers, word-addressed
+@cindex converting between pointers and addresses
+@cindex D10V addresses
+
+On almost all 32-bit architectures, the representation of a pointer is
+indistinguishable from the representation of some fixed-length number
+whose value is the byte address of the object pointed to.  On such
+machines, the words `pointer' and `address' can be used interchangeably.
+However, architectures with smaller word sizes are often cramped for
+address space, so they may choose a pointer representation that breaks this
+identity, and allows a larger code address space.
+
+For example, the Mitsubishi D10V is a 16-bit VLIW processor whose
+instructions are 32 bits long@footnote{Some D10V instructions are
+actually pairs of 16-bit sub-instructions.  However, since you can't
+jump into the middle of such a pair, code addresses can only refer to
+full 32 bit instructions, which is what matters in this explanation.}.
+If the D10V used ordinary byte addresses to refer to code locations,
+then the processor would only be able to address 64kb of instructions.
+However, since instructions must be aligned on four-byte boundaries, the
+low two bits of any valid instruction's byte address are always zero ---
+byte addresses waste two bits.  So instead of byte addresses, the D10V
+uses word addresses --- byte addresses shifted right two bits --- to
+refer to code.  Thus, the D10V can use 16-bit words to address 256kb of
+code space.
+
+However, this means that code pointers and data pointers have different
+forms on the D10V.  The 16-bit word @code{0xC020} refers to byte address
+@code{0xC020} when used as a data address, but refers to byte address
+@code{0x30080} when used as a code address.
+
+(The D10V also uses separate code and data address spaces, which also
+affects the correspondence between pointers and addresses, but we're
+going to ignore that here; this example is already too long.)
+
+To cope with architectures like this --- the D10V is not the only one!
+--- @value{GDBN} tries to distinguish between @dfn{addresses}, which are
+byte numbers, and @dfn{pointers}, which are the target's representation
+of an address of a particular type of data.  In the example above,
+@code{0xC020} is the pointer, which refers to one of the addresses
+@code{0xC020} or @code{0x30080}, depending on the type imposed upon it.
+@value{GDBN} provides functions for turning a pointer into an address
+and vice versa, in the appropriate way for the current architecture.
+
+Unfortunately, since addresses and pointers are identical on almost all
+processors, this distinction tends to bit-rot pretty quickly.  Thus,
+each time you port @value{GDBN} to an architecture which does
+distinguish between pointers and addresses, you'll probably need to
+clean up some architecture-independent code.
+
+Here are functions which convert between pointers and addresses:
+
+@deftypefun CORE_ADDR extract_typed_address (void *@var{buf}, struct type *@var{type})
+Treat the bytes at @var{buf} as a pointer or reference of type
+@var{type}, and return the address it represents, in a manner
+appropriate for the current architecture.  This yields an address
+@value{GDBN} can use to read target memory, disassemble, etc.  Note that
+@var{buf} refers to a buffer in @value{GDBN}'s memory, not the
+inferior's.
+
+For example, if the current architecture is the Intel x86, this function
+extracts a little-endian integer of the appropriate length from
+@var{buf} and returns it.  However, if the current architecture is the
+D10V, this function will return a 16-bit integer extracted from
+@var{buf}, multiplied by four if @var{type} is a pointer to a function.
+
+If @var{type} is not a pointer or reference type, then this function
+will signal an internal error.
+@end deftypefun
+
+@deftypefun CORE_ADDR store_typed_address (void *@var{buf}, struct type *@var{type}, CORE_ADDR @var{addr})
+Store the address @var{addr} in @var{buf}, in the proper format for a
+pointer of type @var{type} in the current architecture.  Note that
+@var{buf} refers to a buffer in @value{GDBN}'s memory, not the
+inferior's.
+
+For example, if the current architecture is the Intel x86, this function
+stores @var{addr} unmodified as a little-endian integer of the
+appropriate length in @var{buf}.  However, if the current architecture
+is the D10V, this function divides @var{addr} by four if @var{type} is
+a pointer to a function, and then stores it in @var{buf}.
+
+If @var{type} is not a pointer or reference type, then this function
+will signal an internal error.
+@end deftypefun
+
+@deftypefun CORE_ADDR value_as_pointer (value_ptr @var{val})
+Assuming that @var{val} is a pointer, return the address it represents,
+as appropriate for the current architecture.
+
+This function actually works on integral values, as well as pointers.
+For pointers, it performs architecture-specific conversions as
+described above for @code{extract_typed_address}.
+@end deftypefun
+
+@deftypefun CORE_ADDR value_from_pointer (struct type *@var{type}, CORE_ADDR @var{addr})
+Create and return a value representing a pointer of type @var{type} to
+the address @var{addr}, as appropriate for the current architecture.
+This function performs architecture-specific conversions as described
+above for @code{store_typed_address}.
+@end deftypefun
+
+
+@value{GDBN} also provides functions that do the same tasks, but assume
+that pointers are simply byte addresses; they aren't sensitive to the
+current architecture, beyond knowing the appropriate endianness.
+
+@deftypefun CORE_ADDR extract_address (void *@var{addr}, int len)
+Extract a @var{len}-byte number from @var{addr} in the appropriate
+endianness for the current architecture, and return it.  Note that
+@var{addr} refers to @value{GDBN}'s memory, not the inferior's.
+
+This function should only be used in architecture-specific code; it
+doesn't have enough information to turn bits into a true address in the
+appropriate way for the current architecture.  If you can, use
+@code{extract_typed_address} instead.
+@end deftypefun
+
+@deftypefun void store_address (void *@var{addr}, int @var{len}, LONGEST @var{val})
+Store @var{val} at @var{addr} as a @var{len}-byte integer, in the
+appropriate endianness for the current architecture.  Note that
+@var{addr} refers to a buffer in @value{GDBN}'s memory, not the
+inferior's.
+
+This function should only be used in architecture-specific code; it
+doesn't have enough information to turn a true address into bits in the
+appropriate way for the current architecture.  If you can, use
+@code{store_typed_address} instead.
+@end deftypefun
+
+
+Here are some macros which architectures can define to indicate the
+relationship between pointers and addresses.  These have default
+definitions, appropriate for architectures on which all pointers are
+simple byte addresses.
+
+@deftypefn {Target Macro} CORE_ADDR POINTER_TO_ADDRESS (struct type *@var{type}, char *@var{buf})
+Assume that @var{buf} holds a pointer of type @var{type}, in the
+appropriate format for the current architecture.  Return the byte
+address the pointer refers to.
+
+This function may safely assume that @var{type} is either a pointer or a
+C++ reference type.
+@end deftypefn
+
+@deftypefn {Target Macro} void ADDRESS_TO_POINTER (struct type *@var{type}, char *@var{buf}, CORE_ADDR @var{addr})
+Store in @var{buf} a pointer of type @var{type} representing the address
+@var{addr}, in the appropriate format for the current architecture.
+
+This function may safely assume that @var{type} is either a pointer or a
+C++ reference type.
+@end deftypefn
+
+
 @section Using Different Register and Memory Data Representations
 @cindex raw representation
 @cindex virtual representation
@@ -1277,6 +1438,13 @@ instruction.  Since instructions must always be aligned on four-byte
 boundaries, the processor masks out these bits to generate the actual
 address of the instruction.  ADDR_BITS_REMOVE should filter out these
 bits with an expression such as @code{((addr) & ~3)}.
+
+@item ADDRESS_TO_POINTER (@var{type}, @var{buf}, @var{addr})
+Store in @var{buf} a pointer of type @var{type} representing the address
+@var{addr}, in the appropriate format for the current architecture.
+This macro may safely assume that @var{type} is either a pointer or a
+C++ reference type.
+@xref{Target Architecture Definition, , Pointers Are Not Always Addresses}.
 
 @item BEFORE_MAIN_LOOP_HOOK
 Define this to expand into any code that you want to execute before the
@@ -1674,6 +1842,12 @@ text section.  (Seems dubious.)
 
 @item NO_HIF_SUPPORT
 (Specific to the a29k.)
+
+@item POINTER_TO_ADDRESS (@var{type}, @var{buf})
+Assume that @var{buf} holds a pointer of type @var{type}, in the
+appropriate format for the current architecture.  Return the byte
+address the pointer refers to.
+@xref{Target Architecture Definition, , Pointers Are Not Always Addresses}.
 
 @item REGISTER_CONVERTIBLE (@var{reg})
 Return non-zero if @var{reg} uses different raw and virtual formats.
