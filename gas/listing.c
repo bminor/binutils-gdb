@@ -269,8 +269,7 @@ file_info (file_name)
   p = (file_info_type *) xmalloc (sizeof (file_info_type));
   p->next = file_info_head;
   file_info_head = p;
-  p->filename = xmalloc ((unsigned long) strlen (file_name) + 1);
-  strcpy (p->filename, file_name);
+  p->filename = xstrdup (file_name);
   p->pos = 0;
   p->linenum = 0;
   p->at_end = 0;

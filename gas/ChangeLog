@@ -1,3 +1,11 @@
+2002-06-26  Elias Athanasopoulos  <eathan@otenet.gr>
+
+	* ecoff.c: (get_tag): Replace strcpy with xstrdup.
+	(ecoff_directive_def): Likewise.
+	(ecoff_directive_tag): Likewise.
+	* listing.c (file_info): Likewise.
+	* hash.c (what): Likewise.
+
 2002-06-25  H.J. Lu <hjl@gnu.org>
 
 	* Makefile.am (check-DEJAGNU): Set LC_ALL=C and export it.
@@ -11,7 +19,7 @@ Wed Jun 19 15:12:00 2002  Dhananjay R. Deshpande <dhananjayd@kpit.com>
 
 2002-06-18  Dave Brolley  <brolley@redhat.com>
 
-	From Catherine Moore, Michael Meissner, Richard Sandiford, Dave Brolley:
+	From Catherine Moore, Michael Meissner, Richard Sandiford, Dave Brolley
 	* po/POTFILES.in: Add tc-frv.c, tc-frv.h.
 	* configure.in: Support frv-*-*.
 	* Makefile.am (CPU_TYPES): Add frv.
@@ -28,7 +36,7 @@ Wed Jun 19 15:12:00 2002  Dhananjay R. Deshpande <dhananjayd@kpit.com>
 
 2002-06-17  Catherine Moore <clm@redhat.com>
 
-        * config/obj-elf.h (TARGET_SYMBOL_FIELDS): Conditionally define.
+	* config/obj-elf.h (TARGET_SYMBOL_FIELDS): Conditionally define.
 
 Mon Jun 17 16:29:58 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
@@ -86,7 +94,7 @@ Mon Jun 17 16:29:58 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config/tc-ppc.c (ppc_subseg_align): Delete.
 	(ppc_change_csect): Default csect align is 2.
-	* config/tc-ppc.h (SUB_SEGMENT_ALIGN): Delete 
+	* config/tc-ppc.h (SUB_SEGMENT_ALIGN): Delete
 
 2002-06-09  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
@@ -97,22 +105,22 @@ Mon Jun 17 16:29:58 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* configure.in (vax-*-netbsdelf*, vax-*-netbsdaout*)
 	(vax-*-netbsd*): New targets.
 	* configure: Regenerate.
-	* config/aout_gnu.h (enum machine_type): Add M_VAX4K_NETBSD. 
+	* config/aout_gnu.h (enum machine_type): Add M_VAX4K_NETBSD.
 	* config/tc-vax.c: Add support for ELF and PIC.
-	(flag_want_pic): New flag. 
+	(flag_want_pic): New flag.
 	(float_cons): Fix prototype.
 	(md_apply_fix3): Adjust for BFD_ASSEMBLER.
 	(md_assemble): Introduce a new is_absolute local, and use it
 	rather than repeating the test.  Make fatal errors actually
-	fatal by using as_fatal as appropriate.  Adjust for BFD_ASSEMBLER. 
+	fatal by using as_fatal as appropriate.  Adjust for BFD_ASSEMBLER.
 	Add support for ELF.  Add support for PIC.
-	(md_convert_frag): Adjust for BFD_ASSEMBLER. 
+	(md_convert_frag): Adjust for BFD_ASSEMBLER.
 	(tc_aout_fix_to_chars): Only include if OBJ_AOUT and not
 	BFD_ASSEMBLER.
-	(vax_reg_parse): Make the % register prefix mandatory for ELF, 
+	(vax_reg_parse): Make the % register prefix mandatory for ELF,
 	optional for a.out, and not allowed for VMS.  Adjust all callers.
 	(md_create_short_jump): Add ATTRIBUTE_UNUSED to unused arguments.
-	(md_create_long_jump): Likewise. 
+	(md_create_long_jump): Likewise.
 	(md_undefined_symbol): Likewise.
 	(md_section_align): Likewise.
 	(md_shortopts): Allow -k and -K for ELF.
@@ -166,10 +174,10 @@ Mon Jun 17 16:29:58 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	Based on patch from Matt Green:
 	* config/obj-elf.h (ECOFF_DEBUGGING): Make configurable.
-	* config/tc-mips.c (s_mips_file): Renamed from s_file.  
+	* config/tc-mips.c (s_mips_file): Renamed from s_file.
 	(s_mips_loc): New function.
 	(mips_nonecoff_pseudo_table): Call them.
-	(append_insn): Call dwarf2_emit_insn.   
+	(append_insn): Call dwarf2_emit_insn.
 
 2002-06-08  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
@@ -304,7 +312,7 @@ Thu Jun  6 17:42:12 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	(tc_get_register): Likewise.
 
 2002-05-30  Chris G. Demetriou  <cgd@broadcom.com>
-            Ed Satterthwaite  <ehs@broadcom.com>
+	    Ed Satterthwaite  <ehs@broadcom.com>
 
 	* config/tc-mips.c (mips_set_options): New "ase_mdmx" member.
 	(mips_opts): Initialize "ase_mdmx" member.
@@ -381,11 +389,11 @@ Thu Jun  6 17:42:12 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2002-05-30  Diego Novillo  <dnovillo@redhat.com>
 
-        * gas/config/tc-d10v.c (check_resource_conflict): Only check
-        write-write conflicts.
-        (md_assemble): Reformat introductory comment.
-        (parallel_ok): Prevent packing only if the first
-        instruction cannot be packed.
+	* gas/config/tc-d10v.c (check_resource_conflict): Only check
+	write-write conflicts.
+	(md_assemble): Reformat introductory comment.
+	(parallel_ok): Prevent packing only if the first
+	instruction cannot be packed.
 
 2002-05-30  Jason Eckhardt <jle@redhat.com>
 	    Tom Rix <trix@redhat.com>
@@ -527,7 +535,7 @@ Thu Jun  6 17:42:12 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config/obj-coff.c (obj_coff_section): Silently ignore an 'a'
 	flag.
-        * doc/as.texinfo: Document that the COFF version of .section
+	* doc/as.texinfo: Document that the COFF version of .section
 	ignores the 'a' flag.
 
 2002-05-23  Alan Modra  <amodra@bigpond.net.au>
@@ -775,7 +783,7 @@ Thu Jun  6 17:42:12 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* configure.in: Add support for powerpc-*-windiss.
 	* configure: Regenerated.
-	
+
 2002-04-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-s390.c (md_parse_option): Formatting.
@@ -884,23 +892,23 @@ Tue Apr  9 16:45:48 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	check for resource conflicts.
 
 	From Jason Eckhardt  <jle@redhat.com>
-        * config/tc-d10v.c (build_insn): Check for unresolved imm4 or
-        imm3 fields.
-        * config/tc-d10v.c (find_opcode): Emit a warning if one of the
-        reserved control registers is used.
-        * config/tc-d10v.c (build_insn): Check for unresolved imm4 or
-        imm3 fields.
+	* config/tc-d10v.c (build_insn): Check for unresolved imm4 or
+	imm3 fields.
+	* config/tc-d10v.c (find_opcode): Emit a warning if one of the
+	reserved control registers is used.
+	* config/tc-d10v.c (build_insn): Check for unresolved imm4 or
+	imm3 fields.
 
 	From 2001-03-28  Diego Novillo  <dnovillo@redhat.com>
-        * tc-d10v.c (parallel_ok): Prevent packing only if the first
-        instruction cannot be packed.
+	* tc-d10v.c (parallel_ok): Prevent packing only if the first
+	instruction cannot be packed.
 
 	From 2001-03-30  Diego Novillo  <dnovillo@redhat.com>
-        * gas/config/tc-d10v.c (check_resource_conflict): Only check
-        write-write conflicts.
-        (md_assemble): Reformat introductory comment.
-        * opcodes/d10v-opc.c (d10v_opcodes): `btsti' does not modify its
-        arguments.
+	* gas/config/tc-d10v.c (check_resource_conflict): Only check
+	write-write conflicts.
+	(md_assemble): Reformat introductory comment.
+	* opcodes/d10v-opc.c (d10v_opcodes): `btsti' does not modify its
+	arguments.
 
 2002-04-03  Alan Modra  <amodra@bigpond.net.au>
 
@@ -910,7 +918,7 @@ Tue Apr  9 16:45:48 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2002-04-01  Jessica Han  <jessica@cup.hp.com>
 
-        * config/tc-ia64.c (ia64_cons_fix_new): Handle 8 byte iplt reloc
+	* config/tc-ia64.c (ia64_cons_fix_new): Handle 8 byte iplt reloc
 	in 32-bit mode.
 
 2002-03-27  Andreas Schwab  <schwab@suse.de>
@@ -1198,7 +1206,7 @@ Tue Apr  9 16:45:48 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2002-02-15  Chris Demetriou  <cgd@broadcom.com>
 
-        * config/tc-mips.c (md_estimate_size_before_relax): Really
+	* config/tc-mips.c (md_estimate_size_before_relax): Really
 	make sure we treat weak like extern only for ELF.  (Fixes
 	patch from 2001-07-25.)
 
