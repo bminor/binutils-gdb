@@ -23,6 +23,9 @@ Wed Jan 18 13:49:26 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 Wed Jan 18 12:16:07 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* write.c (fix_new_internal): Clear fx_bsr on those targets which
+	use it.
+
 	* expr.c (operand): Parenthesize && within ||.
 	* listing.c (listing_newline): Likewise.
 	(list_symbol_table): Use %lu to print sizeof.

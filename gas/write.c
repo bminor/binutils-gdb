@@ -146,7 +146,7 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   fixP->fx_tcbit = 0;
   fixP->fx_done = 0;
 
-#ifdef TC_something
+#if defined (TC_I960) || defined (TC_NS32k)
   fixP->fx_bsr = 0;
 #endif
 
