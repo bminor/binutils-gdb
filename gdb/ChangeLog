@@ -1,3 +1,8 @@
+2000-12-11  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* sh-tdep.c (sh_extract_struct_value_address): For consistancy,
+	change decl from "CORE_ADDR static" to "static CORE_ADDR".
+
 2000-12-11  Fernando Nasser  <fnasser@redhat.com>
 
 	* configure.in: Fix typos.  It is CONFIG_SRCS not CONFIG_SRS.

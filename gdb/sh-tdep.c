@@ -826,8 +826,8 @@ sh_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
-CORE_ADDR
-static sh_extract_struct_value_address (regbuf)
+static CORE_ADDR
+sh_extract_struct_value_address (regbuf)
      char *regbuf;
 {
   return (extract_address ((regbuf), REGISTER_RAW_SIZE (0)));
