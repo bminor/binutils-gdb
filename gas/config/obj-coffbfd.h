@@ -61,7 +61,9 @@
 
 #ifdef TC_M68K
 #include "coff/m68k.h"
+#ifndef TARGET_FORMAT
 #define TARGET_FORMAT "coff-m68k"
+#endif
 #endif
 
 #ifdef TC_M88K
@@ -71,7 +73,9 @@
 
 #ifdef TC_I386
 #include "coff/i386.h"
+#ifndef TARGET_FORMAT
 #define TARGET_FORMAT "coff-i386"
+#endif
 #endif
 
 #ifdef TC_A29K
@@ -522,7 +526,6 @@ extern struct internal_scnhdr text_section_header;
 extern SCNHDR data_section_header;
 extern SCNHDR text_section_header;
 #endif
-#endif
 
 /* Forward the segment of a forwarded symbol.  */
 #define obj_frob_forward_symbol(symp) \
@@ -530,6 +533,15 @@ extern SCNHDR text_section_header;
    ? (S_SET_SEGMENT (symp, S_GET_SEGMENT (symp->sy_value.X_add_symbol)), 0) \
    : 0)
 
+/* Stabs in a coff file go into their own section. */
+
 #define SEPARATE_STAB_SECTIONS
 
-/* end of obj-coffbfd.h */
+/* We need 12 bytes at the start of the section to hold some initial
+   information.  */
+
+extern void obj_coff_init_stab_section PARAMS ((segT));
+
+#define INIT_STAB_SECTION(seg) obj_coff_init_stab_section (seg)
+
+#endif /* OBJ_FORMAT_H */

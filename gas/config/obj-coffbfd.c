@@ -40,6 +40,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 #include "subsegs.h"
 #include "frags.h"
+/* This is needed because we include internal bfd things. */
+#include <time.h>
 #include "../bfd/libbfd.h"
 #include "../bfd/libcoff.h"
 
@@ -75,7 +77,6 @@ const short seg_N_TYPE[] =
   C_PTV_SECTION,		/* SEG_PTV */
   C_REGISTER_SECTION,		/* SEG_REGISTER */
 };
-
 
 int function_lineoff = -1;	/* Offset in line#s where the last function
 				   started (the odd entry for line #0) */
@@ -1811,6 +1812,7 @@ extern void
 DEFUN_VOID (write_object_file)
 {
   int i;
+  char *name;
   struct frchain *frchain_ptr;
 
   object_headers headers;
@@ -1902,6 +1904,18 @@ DEFUN_VOID (write_object_file)
     }
 #endif
 
+  /* Look for ".stab" segments and fill in their initial symbols
+     correctly. */
+  for (i = SEG_E0; i < SEG_UNKNOWN; i++)
+    {
+      name = segment_info[i].scnhdr.s_name;
+
+      if (name != NULL
+	  && strncmp (".stab", name, 5) == 0
+	  && strncmp (".stabstr", name, 8) != 0)
+	adjust_stab_section (abfd, i);
+    }
+
   file_cursor = H_GET_TEXT_FILE_OFFSET (&headers);
 
   bfd_seek (abfd, (file_ptr) file_cursor, 0);
@@ -1943,7 +1957,7 @@ DEFUN_VOID (write_object_file)
   }
 
   coff_header_append (abfd, &headers);
-
+  
   if (bfd_close_all_done (abfd) == false)
     as_fatal ("Can't close %s: %s", out_file_name,
 	      bfd_errmsg (bfd_error));
@@ -2628,3 +2642,76 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 }				/* fixup_segment() */
 
 #endif
+
+/* The first entry in a .stab section is special.  */
+
+void
+obj_coff_init_stab_section (seg)
+     segT seg;
+{
+  extern char *logical_input_file, *physical_input_file;
+  char *p;
+  const char *file;
+  unsigned int stroff;
+
+  /* Make space for this first symbol. */
+  p = frag_more (12);
+  file = logical_input_file;
+  if (file == NULL)
+    file = physical_input_file;
+  if (file == NULL)
+    file = "UNKNOWN";
+  stroff = get_stab_string_offset (file, segment_info[seg].scnhdr.s_name);
+  know (stroff == 1);
+  md_number_to_chars (p, stroff, 4);
+}
+
+/* Fill in the counts in the first entry in a .stab section.  */
+
+adjust_stab_section(abfd, seg)
+     bfd *abfd;
+     segT seg;
+{
+  segT stabstrseg = -1;
+  char *secname, *name, *name2;
+  asection *stabsec, *stabstrsec;
+  char *p = NULL;
+  int i, strsz = 0, nsyms;
+  fragS *frag = segment_info[seg].frchainP->frch_root;
+
+  /* Look for the associated string table section. */
+
+  secname = segment_info[seg].scnhdr.s_name;
+  name = (char *) alloca (strlen (secname) + 4);
+  strcpy (name, secname);
+  strcat (name, "str");
+
+  for (i = SEG_E0; i < SEG_UNKNOWN; i++)
+    {
+      name2 = segment_info[i].scnhdr.s_name;
+      if (name2 != NULL && strncmp(name2, name, 8) == 0)
+	{
+	  stabstrseg = i;
+	  break;
+	}
+    }
+
+  /* If we found the section, get its size. */
+  if (stabstrseg >= 0)
+    strsz = size_section (abfd, stabstrseg);
+
+  nsyms = size_section (abfd, seg) / 12 - 1;
+
+  /* Look for the first frag of sufficient size for the initial stab
+     symbol, and collect a pointer to it. */
+  while (frag && frag->fr_fix < 12)
+    frag = frag->fr_next;
+  assert (frag != 0);
+  p = frag->fr_literal;
+  assert (p != 0);
+
+  /* Write in the number of stab symbols and the size of the string
+     table. */
+  bfd_h_put_16 (abfd, (bfd_vma) nsyms, (bfd_byte *) p + 6);
+  bfd_h_put_32 (abfd, (bfd_vma) strsz, (bfd_byte *) p + 8);
+}

@@ -1,3 +1,23 @@
+Tue Sep 28 12:02:04 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* configure.in: Split i386 LynxOS out from other coff targets,
+	add a specific Lynx emulation.
+	Add m68k LynxOS target.
+	* config/tc-i386.c: Define specific Lynx target format.
+	* config/tc-m68k.c: Define specific Lynx target format.
+	* config/te-lynx.h: New file.
+
+	* config/obj-coffbfd.h: Don't set TARGET_FORMAT to be
+	"coff-{i386,m68k}" if TARGET_FORMAT already defined.
+	(INIT_STAB_SECTION): Define.
+	* config/obj-coffbfd.c: Include <time.h>.
+	(write_object_file): Look for .stab sections and call
+	adjust_stab_section.
+	(adjust_stab_section): New function, fills in the first symbol
+	of a stab section with number of symbols and string table size.
+	(obj_coff_init_stab_section): New function, creates the initial
+	symbol for a stab section.
+
 Mon Sep 27 15:21:55 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/atof-vax.c (md_atof): Return null on success instead of
