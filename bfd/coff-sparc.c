@@ -231,7 +231,7 @@ bfd_target
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-  2,				/* minimum alignment power */
+  3,				/* minimum alignment power */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,
      bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */

@@ -27,6 +27,10 @@ Thu Apr 14 13:05:10 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	and BFD_RELOC_PCREL_LO16.
 	* bfd-in2.h: Rebuilt.
 
+Wed Apr 13 11:50:07 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* coff-sparc.c (sparccoff_vec): Set minimum alignment power to 3.
+
 Tue Apr 12 13:36:20 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_write_fixups): Always emit at least
