@@ -27,13 +27,13 @@ echo Sanitizing `pwd`...
 
 Things-to-keep:
 
+Makefile
 all.m4
 amd29k.m4
 gdbinv-m.m4
 gdbinv-s.m4
 gdb.texinfo
 gdbint.texinfo
-gdbrc.tex
 gen.m4
 i80386.m4
 i960.m4
@@ -43,6 +43,7 @@ pretex.m4
 rc-cm.tex
 rc-ps.tex
 rc-pslong.tex
+refcard.tex
 sparc.m4
 threecol.tex
 vax.m4
@@ -54,7 +55,12 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 2.3  1991/08/01 22:34:55  pesch
+# Revision 2.4  1991/08/07 00:15:02  pesch
+# Makefile: GDB documentation nos has its own Makefile
+# .Sanitize: add Makefile; recognize renamed refcard.tex (formerly gdbrc.tex)
+# gdbint.texinfo: add markup in "Cleanups" chapter
+#
+# Revision 2.3  1991/08/01  22:34:55  pesch
 # *** empty log message ***
 #
 # Revision 2.2  1991/07/29  22:38:53  pesch
