@@ -92,8 +92,7 @@ struct symbol *lookup_symbol_aux_local (const char *name,
 					const char *mangled_name,
 					const struct block *block,
 					const namespace_enum namespace,
-					struct symtab **symtab,
-					const struct block **static_block);
+					struct symtab **symtab);
 
 static
 struct symbol *lookup_symbol_aux_block (const char *name,
@@ -840,7 +839,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
   sym = lookup_symbol_aux_local (name, mangled_name, block, namespace,
-				 symtab, &static_block);
+				 symtab);
   if (sym != NULL)
     return sym;
 
@@ -921,6 +920,8 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      seems best: it's cleanest, it's correct, and it might be useful
      for handling namespace scope issues completely correctly.  */
 
+  static_block = block_static_block (block);
+
   if (static_block != NULL)
     {
       sym = lookup_symbol_aux_block (name, mangled_name, static_block,
@@ -976,20 +977,17 @@ static struct symbol *
 lookup_symbol_aux_local (const char *name, const char *mangled_name,
 			 const struct block *block,
 			 const namespace_enum namespace,
-			 struct symtab **symtab,
-			 const struct block **static_block)
+			 struct symtab **symtab)
 {
   struct symbol *sym;
+  const struct block *static_block = block_static_block (block);
 
   /* Either no block is specified or it's a global block.  */
 
-  if (block == NULL || BLOCK_SUPERBLOCK (block) == NULL)
-    {
-      *static_block = NULL;
-      return NULL;
-    }
+  if (static_block == NULL)
+    return NULL;
 
-  while (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) != NULL)
+  while (block != static_block)
     {
       sym = lookup_symbol_aux_block (name, mangled_name, block, namespace,
 				     symtab);
@@ -998,9 +996,8 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  /* We've reached the static block.  */
+  /* We've reached the static block without finding a result.  */
 
-  *static_block = block;
   return NULL;
 }
 

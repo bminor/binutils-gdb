@@ -1324,10 +1324,10 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
     }
   sign = none;
 
-  init_sal (&val);
-
   /* We might need a canonical line spec if no file was specified.  */
   int need_canonical = (file_symtab == NULL) ? 1 : 0;
+
+  init_sal (&val);
 
   /* This is where we need to make sure that we have good defaults.
      We must guarantee that this section of code is never executed

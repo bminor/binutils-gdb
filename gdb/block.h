@@ -149,3 +149,5 @@ extern const char *block_scope (const struct block *block);
 
 extern void block_set_scope (struct block *block, const char *scope,
 			     struct obstack *obstack);
+
+extern const struct block *block_static_block (const struct block *block);

@@ -140,3 +140,18 @@ block_initialize_namespace (struct block *block, struct obstack *obstack)
       BLOCK_NAMESPACE (block)->using = NULL;
     }
 }
+
+/* Return the static block associated to BLOCK.  Return NULL if block
+   is NULL or if block is a global block.  */
+
+const struct block *
+block_static_block (const struct block *block)
+{
+  if (block == NULL || BLOCK_SUPERBLOCK (block) == NULL)
+    return NULL;
+
+  while (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) != NULL)
+    block = BLOCK_SUPERBLOCK (block);
+
+  return block;
+}

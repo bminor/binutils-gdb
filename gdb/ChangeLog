@@ -1,5 +1,14 @@
 2002-11-15  David Carlton  <carlton@math.stanford.edu>
 
+	* symtab.c (lookup_symbol_aux): Get at static block via
+	block_static_block.
+	(lookup_symbol_aux_local): Delete static_block argument, and use
+	block_static_block.
+	* block.h: Declare block_static_block.
+	* block.c (block_static_block): New function.
+	* linespec.c (decode_all_digits): Move up definition of
+	need_canonical.
+
 	* Merge from mainline; tag is carlton_dictionary-20021115-merge.
 
 2002-11-14  Andrew Cagney  <ac131313@redhat.com>
