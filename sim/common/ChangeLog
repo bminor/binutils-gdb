@@ -1,7 +1,14 @@
+Mon Aug  3 11:46:01 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-sim.h (cgen_state): New member opcode_table.
+	* cgen-utils.c (sim_disassemble_insn): Use it.
+
 Fri Jul 24 10:14:18 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen-mem.h (DECLARE_SETT): Fix return type.
-
+	* cgen-sim.h (sim_engine_illegal_insn): Declare.
+	* cgen-scache.c: Include stdlib.h.
+	* cgen-trace.c (trace_extract): Use %lx for PCADDR.
 	* sim-model.c (model_option_handler): Remove unused variable `n'.
 
 Tue Jul 21 16:27:43 1998  Doug Evans  <devans@seba.cygnus.com>
