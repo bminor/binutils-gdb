@@ -1,3 +1,7 @@
+Tue May 10 11:57:53 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* inflow.c (job_control): Move definition to front of file.
+
 Tue May 10 14:42:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* maint.c (print_section_table): Rename SEC_SHARED_LIBRARY to

@@ -58,6 +58,10 @@ kill_command PARAMS ((char *, int));
 static void
 terminal_ours_1 PARAMS ((int));
 
+/* Nonzero if we have job control. */
+
+int job_control;
+
 /* Nonzero if we are debugging an attached outside process
    rather than an inferior.  */
 
@@ -176,7 +180,13 @@ terminal_init_inferior ()
 	free (inferior_ttystate);
       inferior_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
 #ifdef PROCESS_GROUP_TYPE
-#ifdef PIDGET			/* XXX Lynx */
+#ifdef PIDGET
+      /* This is for Lynx, and should be cleaned up by having Lynx be
+	 a separate debugging target with a version of
+	 target_terminal_init_inferior which passes in the process
+	 group to a generic routine which does all the work (and the
+	 non-threaded child_terminal_init_inferior can just pass in
+	 inferior_pid to the same routine).  */
       inferior_process_group = PIDGET (inferior_pid);
 #else
       inferior_process_group = inferior_pid;
@@ -318,7 +328,10 @@ terminal_ours_1 (output_only)
 
       /* Here we used to set ICANON in our ttystate, but I believe this
 	 was an artifact from before when we used readline.  Readline sets
-	 the tty state when it needs to.  */
+	 the tty state when it needs to.
+	 FIXME-maybe: However, query() expects non-raw mode and doesn't
+	 use readline.  Maybe query should use readline (on the other hand,
+	 this only matters for HAVE_SGTTY, not termio or termios, I think).  */
 
       /* Set tty state to our_ttystate.  We don't change in our out of raw
 	 mode, to avoid flushing input.  We need to do the same thing
@@ -326,6 +339,7 @@ terminal_ours_1 (output_only)
 	 terminal_is_ours and terminal_is_ours_for_output flags.  It's OK,
 	 though, since readline will deal with raw mode when/if it needs to.
 	 */
+
       SERIAL_NOFLUSH_SET_TTY_STATE (stdin_serial, our_ttystate,
 				    inferior_ttystate);
 
@@ -598,8 +612,6 @@ clear_sigint_trap()
 }
 
 
-int job_control;
-
 /* This is here because this is where we figure out whether we (probably)
    have job control.  Just using job_control only does part of it because
    setpgid or setpgrp might not exist on a system without job control.
@@ -613,6 +625,7 @@ int
 gdb_setpgid ()
 {
   int retval = 0;
+
   if (job_control)
     {
 #if defined (NEED_POSIX_SETPGID) || defined (HAVE_TERMIOS)
