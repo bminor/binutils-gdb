@@ -1,6 +1,6 @@
 2001-03-02  Kevin Buettner  <kevinb@redhat.com>
 
-	* sparc-nat.c (sparc-nat.c): Don't include.
+	* sparc-nat.c (sparc-nat.c): Don't include self.
 
 2001-03-01  J.T. Conklin  <jtc@redback.com>
 
