@@ -1513,7 +1513,7 @@ sunos_scan_dynamic_symbol (h, data)
      which are referenced by a regular object and defined by a dynamic
      object do not seem to show up in the regular symbol table.  */
   if ((h->flags & SUNOS_DEF_REGULAR) == 0)
-    h->root.root.written = true;
+    h->root.written = true;
 
   /* If this symbol is defined by a dynamic object and referenced by a
      regular object, see whether we gave it a reasonable value while
@@ -1694,6 +1694,10 @@ sunos_write_dynamic_symbol (output_bfd, info, harg)
     case bfd_link_hash_common:
       type = N_UNDF | N_EXT;
       val = h->root.root.u.c.size;
+      break;
+    case bfd_link_hash_weak:
+      type = N_WEAKU;
+      val = 0;
       break;
     case bfd_link_hash_indirect:
     case bfd_link_hash_warning:

@@ -1,3 +1,25 @@
+Sat Jun 11 16:32:30 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Add weak symbols as an extension to a.out.
+	* aoutx.h (sym_in_text_section): Don't define.
+	(sym_in_data_section, sym_in_bss_section): Likewise.
+	(sym_is_undefined, sym_is_global_defn): Likewise.
+	(sym_is_debugger_info, sym_is_fortrancommon): Likewise.
+	(sym_is_absolute, sym_is_indirect): Likewise.
+	(translate_from_native_sym_flags): Rewrite for clarity.  Rearrange
+	arguments and change caller.  Handle weak symbols.
+	(translate_to_native_sym_flags): Likewise.
+	(aout_link_check_ar_symbols): Don't ignore weak symbols.  Pull
+	object in from archive if a weak defintion is found for an
+	existing undefined symbol.
+	(aout_link_add_symbols): Put all cases in switch.  Set flags of an
+	undefined symbol to 0.  Handle weak symbols.
+	(aout_link_write_symbols): Handle weak symbols.
+	(aout_link_write_other_symbol): Likewise.
+	(aout_link_input_section_std): Likewise.
+	(aout_link_input_section_ext): Likewise.
+	* sunos.c (sunos_write_dynamic_symbol): Likewise.
+
 Fri Jun 10 13:25:13 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* aoutx.h (NAME(aout,canonicalize_reloc)): Handle .bss section.
