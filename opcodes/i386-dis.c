@@ -1132,30 +1132,64 @@ static unsigned char need_modrm;
    need to update onebyte_has_modrm or twobyte_has_modrm.  */
 #define MODRM_CHECK  if (!need_modrm) abort ()
 
-static const char *names64[] = {
-  "%rax","%rcx","%rdx","%rbx", "%rsp","%rbp","%rsi","%rdi",
+static const char **names64;
+static const char **names32;
+static const char **names16;
+static const char **names8;
+static const char **names8rex;
+static const char **names_seg;
+static const char **index16;
+
+static const char *intel_names64[] = {
+  "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
+  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
+};
+static const char *intel_names32[] = {
+  "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi",
+  "r8d", "r9d", "r10d", "r11d", "r12d", "r13d", "r14d", "r15d"
+};
+static const char *intel_names16[] = {
+  "ax", "cx", "dx", "bx", "sp", "bp", "si", "di",
+  "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w"
+};
+static const char *intel_names8[] = {
+  "al", "cl", "dl", "bl", "ah", "ch", "dh", "bh",
+};
+static const char *intel_names8rex[] = {
+  "al", "cl", "dl", "bl", "spl", "bpl", "sil", "dil",
+  "r8b", "r9b", "r10b", "r11b", "r12b", "r13b", "r14b", "r15b"
+};
+static const char *intel_names_seg[] = {
+  "es", "cs", "ss", "ds", "fs", "gs", "?", "?",
+};
+static const char *intel_index16[] = {
+  "bx+si", "bx+di", "bp+si", "bp+di", "si", "di", "bp", "bx"
+};
+
+static const char *att_names64[] = {
+  "%rax", "%rcx", "%rdx", "%rbx", "%rsp", "%rbp", "%rsi", "%rdi",
   "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15"
 };
-static const char *names32[] = {
-  "%eax","%ecx","%edx","%ebx", "%esp","%ebp","%esi","%edi",
+static const char *att_names32[] = {
+  "%eax", "%ecx", "%edx", "%ebx", "%esp", "%ebp", "%esi", "%edi",
   "%r8d", "%r9d", "%r10d", "%r11d", "%r12d", "%r13d", "%r14d", "%r15d"
 };
-static const char *names16[] = {
-  "%ax","%cx","%dx","%bx","%sp","%bp","%si","%di",
+static const char *att_names16[] = {
+  "%ax", "%cx", "%dx", "%bx", "%sp", "%bp", "%si", "%di",
   "%r8w", "%r9w", "%r10w", "%r11w", "%r12w", "%r13w", "%r14w", "%r15w"
 };
-static const char *names8[] = {
-  "%al","%cl","%dl","%bl","%ah","%ch","%dh","%bh",
+static const char *att_names8[] = {
+  "%al", "%cl", "%dl", "%bl", "%ah", "%ch", "%dh", "%bh",
 };
-static const char *names8rex[] = {
-  "%al","%cl","%dl","%bl","%spl", "%bpl", "%sil", "%dil",
+static const char *att_names8rex[] = {
+  "%al", "%cl", "%dl", "%bl", "%spl", "%bpl", "%sil", "%dil",
   "%r8b", "%r9b", "%r10b", "%r11b", "%r12b", "%r13b", "%r14b", "%r15b"
 };
-static const char *names_seg[] = {
-  "%es","%cs","%ss","%ds","%fs","%gs","%?","%?",
+static const char *att_names_seg[] = {
+  "%es", "%cs", "%ss", "%ds", "%fs", "%gs", "%?", "%?",
 };
-static const char *index16[] = {
-  "%bx,%si","%bx,%di","%bp,%si","%bp,%di","%si","%di","%bp","%bx"
+static const char *att_index16[] = {
+  "%bx,%si", "%bx,%di", "%bp,%si", "%bp,%di", "%si", "%di", "%bp", "%bx"
 };
 
 static const struct dis386 grps[][8] = {
@@ -1812,6 +1846,13 @@ print_insn_i386_att (pc, info)
      disassemble_info *info;
 {
   intel_syntax = 0;
+  names64 = att_names64;
+  names32 = att_names32;
+  names16 = att_names16;
+  names8 = att_names8;
+  names8rex = att_names8rex;
+  names_seg = att_names_seg;
+  index16 = att_index16;
   open_char = '(';
   close_char =  ')';
   separator_char = ',';
@@ -1826,6 +1867,13 @@ print_insn_i386_intel (pc, info)
      disassemble_info *info;
 {
   intel_syntax = 1;
+  names64 = intel_names64;
+  names32 = intel_names32;
+  names16 = intel_names16;
+  names8 = intel_names8;
+  names8rex = intel_names8rex;
+  names_seg = intel_names_seg;
+  index16 = intel_index16;
   open_char = '[';
   close_char = ']';
   separator_char = '+';
@@ -2450,7 +2498,7 @@ OP_STi (bytemode, sizeflag)
      int sizeflag ATTRIBUTE_UNUSED;
 {
   sprintf (scratchbuf, "%%st(%d)", rm);
-  oappend (scratchbuf);
+  oappend (scratchbuf + intel_syntax);
 }
 
 /* capital letters in template are macros */
@@ -2755,33 +2803,33 @@ append_seg ()
 {
   if (prefixes & PREFIX_CS)
     {
-      oappend ("%cs:");
       used_prefixes |= PREFIX_CS;
+      oappend ("%cs:" + intel_syntax);
     }
   if (prefixes & PREFIX_DS)
     {
-      oappend ("%ds:");
       used_prefixes |= PREFIX_DS;
+      oappend ("%ds:" + intel_syntax);
     }
   if (prefixes & PREFIX_SS)
     {
-      oappend ("%ss:");
       used_prefixes |= PREFIX_SS;
+      oappend ("%ss:" + intel_syntax);
     }
   if (prefixes & PREFIX_ES)
     {
-      oappend ("%es:");
       used_prefixes |= PREFIX_ES;
+      oappend ("%es:" + intel_syntax);
     }
   if (prefixes & PREFIX_FS)
     {
-      oappend ("%fs:");
       used_prefixes |= PREFIX_FS;
+      oappend ("%fs:" + intel_syntax);
     }
   if (prefixes & PREFIX_GS)
     {
-      oappend ("%gs:");
       used_prefixes |= PREFIX_GS;
+      oappend ("%gs:" + intel_syntax);
     }
 }
 
@@ -3036,10 +3084,12 @@ OP_E (bytemode, sizeflag)
                           *obufp++ = separator_char;
                           *obufp = '\0';
                         }
-                      sprintf (scratchbuf, "%s", mode_64bit ? names64[index] : names32[index]);
+                      sprintf (scratchbuf, "%s",
+			       mode_64bit ? names64[index] : names32[index]);
                     }
                   else
-		    sprintf (scratchbuf, ",%s", mode_64bit ? names64[index] : names32[index]);
+		    sprintf (scratchbuf, ",%s",
+			     mode_64bit ? names64[index] : names32[index]);
 		  oappend (scratchbuf);
 		}
               if (!intel_syntax
@@ -3060,6 +3110,12 @@ OP_E (bytemode, sizeflag)
                 /* Don't print zero displacements */
                 if (disp != 0)
                   {
+		    if ((bfd_signed_vma) disp > 0)
+		      {
+			*obufp++ = '+';
+			*obufp = '\0';
+		      }
+
 		    print_operand_value (scratchbuf, 0, disp);
                     oappend (scratchbuf);
                   }
@@ -3077,7 +3133,7 @@ OP_E (bytemode, sizeflag)
 		;
 	      else
 		{
-		  oappend (names_seg[3]);
+		  oappend (names_seg[ds_reg - es_reg]);
 		  oappend (":");
 		}
 	      print_operand_value (scratchbuf, 1, disp);
@@ -3269,7 +3325,10 @@ OP_REG (code, sizeflag)
   switch (code)
     {
     case indir_dx_reg:
-      s = "(%dx)";
+      if (intel_syntax)
+        s = "[dx]";
+      else
+        s = "(%dx)";
       break;
     case ax_reg: case cx_reg: case dx_reg: case bx_reg:
     case sp_reg: case bp_reg: case si_reg: case di_reg:
@@ -3324,7 +3383,10 @@ OP_IMREG (code, sizeflag)
   switch (code)
     {
     case indir_dx_reg:
-      s = "(%dx)";
+      if (intel_syntax)
+        s = "[dx]";
+      else
+        s = "(%dx)";
       break;
     case ax_reg: case cx_reg: case dx_reg: case bx_reg:
     case sp_reg: case bp_reg: case si_reg: case di_reg:
@@ -3409,8 +3471,8 @@ OP_I (bytemode, sizeflag)
 
   op &= mask;
   scratchbuf[0] = '$';
-  print_operand_value (scratchbuf + !intel_syntax, 1, op);
-  oappend (scratchbuf);
+  print_operand_value (scratchbuf + 1, 1, op);
+  oappend (scratchbuf + intel_syntax);
   scratchbuf[0] = '\0';
 }
 
@@ -3462,8 +3524,8 @@ OP_I64 (bytemode, sizeflag)
 
   op &= mask;
   scratchbuf[0] = '$';
-  print_operand_value (scratchbuf + !intel_syntax, 1, op);
-  oappend (scratchbuf);
+  print_operand_value (scratchbuf + 1, 1, op);
+  oappend (scratchbuf + intel_syntax);
   scratchbuf[0] = '\0';
 }
 
@@ -3515,7 +3577,7 @@ OP_sI (bytemode, sizeflag)
 
   scratchbuf[0] = '$';
   print_operand_value (scratchbuf + 1, 1, op);
-  oappend (scratchbuf);
+  oappend (scratchbuf + intel_syntax);
 }
 
 static void
@@ -3561,11 +3623,7 @@ OP_SEG (dummy, sizeflag)
      int dummy ATTRIBUTE_UNUSED;
      int sizeflag ATTRIBUTE_UNUSED;
 {
-  static char *sreg[] = {
-    "%es","%cs","%ss","%ds","%fs","%gs","%?","%?",
-  };
-
-  oappend (sreg[reg]);
+  oappend (names_seg[reg]);
 }
 
 static void
@@ -3586,7 +3644,10 @@ OP_DIR (dummy, sizeflag)
       seg = get16 ();
     }
   used_prefixes |= (prefixes & PREFIX_DATA);
-  sprintf (scratchbuf, "$0x%x,$0x%x", seg, offset);
+  if (intel_syntax)
+    sprintf (scratchbuf, "0x%x,0x%x", seg, offset);
+  else
+    sprintf (scratchbuf, "$0x%x,$0x%x", seg, offset);
   oappend (scratchbuf);
 }
 
@@ -3609,7 +3670,7 @@ OP_OFF (bytemode, sizeflag)
       if (!(prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS
 		        | PREFIX_ES | PREFIX_FS | PREFIX_GS)))
 	{
-	  oappend (names_seg[3]);
+	  oappend (names_seg[ds_reg - es_reg]);
 	  oappend (":");
 	}
     }
@@ -3639,7 +3700,7 @@ OP_OFF64 (bytemode, sizeflag)
       if (!(prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS
 		        | PREFIX_ES | PREFIX_FS | PREFIX_GS)))
 	{
-	  oappend (names_seg[3]);
+	  oappend (names_seg[ds_reg - es_reg]);
 	  oappend (":");
 	}
     }
@@ -3653,7 +3714,11 @@ ptr_reg (code, sizeflag)
      int sizeflag;
 {
   const char *s;
-  oappend ("(");
+  if(intel_syntax)
+    oappend ("[");
+  else
+    oappend ("(");
+
   USED_REX (REX_MODE64);
   if (rex & REX_MODE64)
     s = names64[code - eAX_reg];
@@ -3662,7 +3727,10 @@ ptr_reg (code, sizeflag)
   else
     s = names16[code - eAX_reg];
   oappend (s);
-  oappend (")");
+  if(intel_syntax)
+    oappend ("]");
+  else
+    oappend (")");
 }
 
 static void
@@ -3670,7 +3738,7 @@ OP_ESreg (code, sizeflag)
      int code;
      int sizeflag;
 {
-  oappend ("%es:");
+  oappend ("%es:" + intel_syntax);
   ptr_reg (code, sizeflag);
 }
 
@@ -3700,8 +3768,8 @@ OP_C (dummy, sizeflag)
   USED_REX (REX_EXTX);
   if (rex & REX_EXTX)
     add = 8;
-  sprintf (scratchbuf, "%%cr%d", reg+add);
-  oappend (scratchbuf);
+  sprintf (scratchbuf, "%%cr%d", reg + add);
+  oappend (scratchbuf + intel_syntax);
 }
 
 static void
@@ -3713,7 +3781,10 @@ OP_D (dummy, sizeflag)
   USED_REX (REX_EXTX);
   if (rex & REX_EXTX)
     add = 8;
-  sprintf (scratchbuf, "%%db%d", reg+add);
+  if (intel_syntax)
+    sprintf (scratchbuf, "db%d", reg+add);
+  else
+    sprintf (scratchbuf, "%%db%d", reg+add);
   oappend (scratchbuf);
 }
 
@@ -3723,7 +3794,7 @@ OP_T (dummy, sizeflag)
      int sizeflag ATTRIBUTE_UNUSED;
 {
   sprintf (scratchbuf, "%%tr%d", reg);
-  oappend (scratchbuf);
+  oappend (scratchbuf + intel_syntax);
 }
 
 static void
@@ -3751,7 +3822,7 @@ OP_MMX (bytemode, sizeflag)
     sprintf (scratchbuf, "%%xmm%d", reg + add);
   else
     sprintf (scratchbuf, "%%mm%d", reg + add);
-  oappend (scratchbuf);
+  oappend (scratchbuf + intel_syntax);
 }
 
 static void
@@ -3764,7 +3835,7 @@ OP_XMM (bytemode, sizeflag)
   if (rex & REX_EXTX)
     add = 8;
   sprintf (scratchbuf, "%%xmm%d", reg + add);
-  oappend (scratchbuf);
+  oappend (scratchbuf + intel_syntax);
 }
 
 static void
@@ -3790,7 +3861,7 @@ OP_EM (bytemode, sizeflag)
     sprintf (scratchbuf, "%%xmm%d", rm + add);
   else
     sprintf (scratchbuf, "%%mm%d", rm + add);
-  oappend (scratchbuf);
+  oappend (scratchbuf + intel_syntax);
 }
 
 static void
@@ -3812,7 +3883,7 @@ OP_EX (bytemode, sizeflag)
   MODRM_CHECK;
   codep++;
   sprintf (scratchbuf, "%%xmm%d", rm + add);
-  oappend (scratchbuf);
+  oappend (scratchbuf + intel_syntax);
 }
 
 static void

@@ -1,3 +1,9 @@
+2001-07-28  Matthias Kramm <kramm@quiss.org>
+
+	* i386-dis.c: Change formatting conventions for architecture 
+	i386:intel to better match the format of various intel i386 
+	assemblers, like nasm, tasm or masm.
+
 2001-07-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Update dependencies with "make dep-am".
