@@ -84,13 +84,14 @@ allocate_objfile (abfd, mapped)
       if (((mapto = map_to_address ()) == 0) ||
 	  ((md = mmalloc_attach (fd, (void *) mapto)) == NULL))
 	{
-	  close (fd);
+	  (void) close (fd);
 	}
       else if ((objfile = (struct objfile *) mmalloc_getkey (md, 0)) != NULL)
 	{
 	  /* Update memory corruption handler function addresses. */
 	  init_malloc (md);
 	  objfile -> md = md;
+	  objfile -> mmfd = fd;
 	  /* Update pointers to functions to *our* copies */
 	  obstack_chunkfun (&objfile -> psymbol_obstack, xmmalloc);
 	  obstack_freefun (&objfile -> psymbol_obstack, mfree);
@@ -107,6 +108,7 @@ allocate_objfile (abfd, mapped)
 	  objfile = (struct objfile *) xmmalloc (md, sizeof (struct objfile));
 	  (void) memset (objfile, 0, sizeof (struct objfile));
 	  objfile -> md = md;
+	  objfile -> mmfd = fd;
 	  objfile -> flags |= OBJF_MAPPED;
 	  mmalloc_setkey (objfile -> md, 0, objfile);
 	  obstack_full_begin (&objfile -> psymbol_obstack, 0, 0,
@@ -165,6 +167,10 @@ allocate_objfile (abfd, mapped)
      region. */
 
   objfile -> obfd = abfd;
+  if (objfile -> name != NULL)
+    {
+      mfree (objfile -> md, objfile -> name);
+    }
   objfile -> name = mstrsave (objfile -> md, bfd_get_filename (abfd));
   objfile -> mtime = bfd_get_mtime (abfd);
 
@@ -186,28 +192,40 @@ allocate_objfile (abfd, mapped)
 
    	objfile -> sf
 
-   */
+   FIXME:  If the objfile is using reusable symbol information (via mmalloc),
+   then we need to take into account the fact that more than one process
+   may be using the symbol information at the same time (when mmalloc is
+   extended to support cooperative locking).  When more than one process
+   is using the mapped symbol info, we need to be more careful about when
+   we free objects in the reusable area. */
 
 void
 free_objfile (objfile)
      struct objfile *objfile;
 {
   struct objfile *ofp;
+  int mmfd;
+
+  /* First do any symbol file specific actions required when we are
+     finished with a particular symbol file.  Note that if the objfile
+     is using reusable symbol information (via mmalloc) then each of
+     these routines is responsible for doing the correct thing, either
+     freeing things which are valid only during this particular gdb
+     execution, or leaving them to be reused during the next one. */
 
   if (objfile -> sf != NULL)
     {
       (*objfile -> sf -> sym_finish) (objfile);
     }
-  if (objfile -> name != NULL)
-    {
-      mfree (objfile -> md, objfile -> name);
-    }
+
+  /* We always close the bfd. */
+
   if (objfile -> obfd != NULL)
     {
       bfd_close (objfile -> obfd);
     }
 
-  /* Remove it from the chain of all objfiles.  */
+  /* Remove it from the chain of all objfiles. */
 
   if (object_files == objfile)
     {
@@ -220,13 +238,11 @@ free_objfile (objfile)
 	  if (ofp -> next == objfile)
 	    {
 	      ofp -> next = objfile -> next;
+	      break;
 	    }
 	}
     }
-
-  obstack_free (&objfile -> psymbol_obstack, 0);
-  obstack_free (&objfile -> symbol_obstack, 0);
-  obstack_free (&objfile -> type_obstack, 0);
+  objfile -> next = NULL;
 
 #if 0	/* FIXME!! */
 
@@ -245,9 +261,31 @@ free_objfile (objfile)
 
 #endif
 
-  /* The last thing we do is free the objfile struct itself */
+  /* The last thing we do is free the objfile struct itself for the
+     non-reusable case, or detach from the mapped file for the reusable
+     case.  Note that the mmalloc_detach or the mfree is the last thing
+     we can do with this objfile. */
 
-  mfree (objfile -> md, objfile);
+  if (objfile -> flags & OBJF_MAPPED)
+    {
+      /* Remember the fd so we can close it.  We can't close it before
+	 doing the detach, and after the detach the objfile is gone. */
+      mmfd = objfile -> mmfd;
+      mmalloc_detach (objfile -> md);
+      (void) close (mmfd);
+    }
+  else
+    {
+      if (objfile -> name != NULL)
+	{
+	  mfree (objfile -> md, objfile -> name);
+	}
+      /* Free the obstacks for non-reusable objfiles */
+      obstack_free (&objfile -> psymbol_obstack, 0);
+      obstack_free (&objfile -> symbol_obstack, 0);
+      obstack_free (&objfile -> type_obstack, 0);
+      mfree (objfile -> md, objfile);
+    }
 }
 
 
@@ -356,7 +394,7 @@ open_mapped_file (filename, mtime, mapped)
     {
       if (fstat (fd, &sbuf) != 0)
 	{
-	  close (fd);
+	  (void) close (fd);
 	  perror_with_name (symfilename);
 	}
       else if (sbuf.st_mtime > mtime)
@@ -365,7 +403,7 @@ open_mapped_file (filename, mtime, mapped)
 	}
       else
 	{
-	  close (fd);
+	  (void) close (fd);
 	  fd = -1;
 	}
     }

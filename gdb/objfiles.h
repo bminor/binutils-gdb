@@ -124,7 +124,18 @@ struct objfile
 
   /* All struct objfile's are chained together by their next pointers.
      The global variable "object_files" points to the first link in this
-     chain. */
+     chain.
+
+     FIXME:  There is a problem here if the objfile is reusable, and if
+     multiple users are to be supported.  The problem is that the objfile
+     list is linked through a member of the objfile struct itself, which
+     is only valid for one gdb process.  The list implementation needs to
+     be changed to something like:
+
+     struct list {struct list *next; struct objfile *objfile};
+
+     where the list structure is completely maintained separately within
+     each gdb process. */
 
   struct objfile *next;
 
@@ -204,6 +215,12 @@ struct objfile
      data.  NULL if we are not. */
 
   PTR md;
+
+  /* The file descriptor that was used to obtain the mmalloc descriptor
+     for this objfile.  If we call mmalloc_detach with the malloc descriptor
+     we should then close this file descriptor. */
+
+  int mmfd;
 
   /* Structure which keeps track of functions that manipulate objfile's
      of the same type as this objfile.  I.E. the function to read partial

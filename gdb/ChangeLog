@@ -1,3 +1,24 @@
+Thu Apr 16 19:56:50 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dwarfread.c (TARGET_FT_POINTER_SIZE, TARGET_FT_LONG_SIZE):
+	Define using TARGET_PTR_BIT and TARGET_LONG_BIT for now.
+	* objfiles.c:  Cast calls to close() with unused returns to void.
+	* objfiles.c (allocate_objfile):  Initialize objfile's mmfd, free
+	old objfile's name before updating it.
+	* objfiles.c (free_objfile):  Major rewrite for mapped objfiles.
+	* objfiles.h (objfile struct):  Add mmfd member.
+	* symfile.c (syms_from_objfile):  Move some code to
+	new_symfile_objfile.
+	* symfile.c (new_symfile_objfile):  Add new function, common code
+	from syms_from_objfile.
+	* symfile.c (symbol_file_add):  Call new_symfile_objfile for both
+	mapped and unmapped symbol files.
+	* symfile.c (symbol_file_command):  Print "No symbol file now"
+	message, ala exec_file_command for the exec file.
+	* symfile.h (new_symfile_objfile):  Add prototype.	
+	* xcoffexec.c (map_vmap):  Add call to new_symfile_objfile.
+	* xcoffsolib.c (solib_add):  Add call to new_symfile_objfile.
+
 Thu Apr 16 18:26:34 1992  Per Bothner  (bothner@cygnus.com)
 
 	* rs6000-pinsn.c:  New version from IBM (Metin).

@@ -345,6 +345,7 @@ map_vmap (bfd *bf, bfd *arch)
     we don't have to load them as default anymore.
     
     syms_from_objfile (obj, 0, 0, 0);
+    new_symfile_objfile (obj, 0, 0);
 #endif
   }
 

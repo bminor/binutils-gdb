@@ -103,15 +103,15 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 /* Macros that return the sizes of various types of data in the target
    environment.
 
-   FIXME:  They currently just return the sizes in the host environment.
-   They need to be able to get the right size either from the bfd or possibly
-   from the DWARF info.  It would be nice if the DWARF producer inserted DIES
-   that describe the fundamental types in the target environment into the
-   DWARF info, similar to the way dbx stabs producers produce information
-   about their fundamental types. */
+   FIXME:  Currently these are just compile time constants (as they are in
+   other parts of gdb as well).  They need to be able to get the right size
+   either from the bfd or possibly from the DWARF info.  It would be nice if
+   the DWARF producer inserted DIES that describe the fundamental types in
+   the target environment into the DWARF info, similar to the way dbx stabs
+   producers produce information about their fundamental types. */
 
-#define TARGET_FT_POINTER_SIZE(objfile)	sizeof (PTR)	/* FIXME */
-#define TARGET_FT_LONG_SIZE(objfile)	sizeof (long)	/* FIXME */
+#define TARGET_FT_POINTER_SIZE(objfile)	(TARGET_PTR_BIT / TARGET_CHAR_BIT)
+#define TARGET_FT_LONG_SIZE(objfile)	(TARGET_LONG_BIT / TARGET_CHAR_BIT)
 
 /* The Amiga SVR4 header file <dwarf.h> defines AT_element_list as a
    FORM_BLOCK2, and this is the value emitted by the AT&T compiler.
