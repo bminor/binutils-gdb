@@ -1,3 +1,11 @@
+Wed Nov  8 11:31:11 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libbfd.c (bfd_get_file_window): Change return type to boolean.
+	Cast realloc and malloc return values.  If malloc or realloc fail,
+	set bfd_error_no_memory.
+	* bfd-in.h (bfd_get_file_window): Change type to boolean.
+	* bfd-in2.h: Rebuild.
+
 Tue Nov  7 11:53:48 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* coff-ppc.c (ppc_record_toc_entry): new function.

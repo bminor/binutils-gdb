@@ -302,7 +302,7 @@ bfd_free_window (windowp)
 
 static int ok_to_map = 1;
 
-int
+boolean
 bfd_get_file_window (abfd, offset, size, windowp, writable)
      bfd *abfd;
      file_ptr offset;
@@ -412,14 +412,19 @@ bfd_get_file_window (abfd, offset, size, windowp, writable)
     fprintf (stderr, "\n\t%s(%6ld)",
 	     i->data ? "realloc" : " malloc", (long) size_to_alloc);
   if (i->data)
-    i->data = realloc (i->data, size_to_alloc);
+    i->data = (PTR) realloc (i->data, size_to_alloc);
   else
-    i->data = malloc (size_to_alloc);
+    i->data = (PTR) malloc (size_to_alloc);
   if (debug_windows)
     fprintf (stderr, "\t-> %p\n", i->data);
   i->refcount = 1;
-  if (i->data == 0)
-    return size_to_alloc == 0;
+  if (i->data == NULL)
+    {
+      if (size_to_alloc == 0)
+	return true;
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
     return false;
   i->size = bfd_read (i->data, size, 1, abfd);
