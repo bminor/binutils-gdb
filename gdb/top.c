@@ -823,6 +823,8 @@ execute_control_command (cmd)
 	/* Keep iterating so long as the expression is true.  */
 	while (loop == 1)
 	  {
+	    QUIT;
+
 	    /* Evaluate the expression.  */
 	    val = evaluate_expression (expr);
 

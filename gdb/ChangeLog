@@ -1,3 +1,8 @@
+Mon May 13 17:40:58 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* top.c (execute_control_command, case while_control): Allow
+	a while command to be interrupted.
+
 Mon May 13 16:17:36 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* sol-thread.c:  More cleanup, add comments.
