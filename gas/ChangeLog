@@ -1,3 +1,8 @@
+Tue Jan  5 08:42:16 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* configure.in (per-target): Look for with_bfd_assembler option.
+	For now, only accept "no", until the merge is done.
+
 Mon Jan  4 05:17:26 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* read.c (s_data): Always use "data_section", since it'll map to
