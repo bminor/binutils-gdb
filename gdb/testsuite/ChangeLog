@@ -1,5 +1,8 @@
 Mon Jan 16 12:13:28 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
+	* gdb.stabs/aout.sed: Enclose comments within a sed command to avoid
+	losing with the irix4 sed.
+
 	* gdb.base/sigall.exp (test_one_sig): Add xfail for "get signal
 	ALRM" on irix4.
 
