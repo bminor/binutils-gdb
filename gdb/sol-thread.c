@@ -111,7 +111,7 @@ static void sol_core_close (int quitting);
 static void init_sol_thread_ops (void);
 static void init_sol_core_ops (void);
 
-/* Default definitions: These must be defined in tm.h 
+/* Default definitions: These must be defined in tm.h
    if they are to be shared with a process module such as procfs.  */
 
 #define GET_PID(ptid)		ptid_get_pid (ptid)
@@ -127,56 +127,56 @@ static void init_sol_core_ops (void);
 /* Pointers to routines from lithread_db resolved by dlopen() */
 
 static void     (*p_td_log)               (const int on_off);
-static td_err_e (*p_td_ta_new)            (const struct ps_prochandle * ph_p, 
+static td_err_e (*p_td_ta_new)            (const struct ps_prochandle * ph_p,
 					   td_thragent_t ** ta_pp);
 static td_err_e (*p_td_ta_delete)         (td_thragent_t * ta_p);
 static td_err_e (*p_td_init)              (void);
-static td_err_e (*p_td_ta_get_ph)         (const td_thragent_t * ta_p, 
+static td_err_e (*p_td_ta_get_ph)         (const td_thragent_t * ta_p,
 					   struct ps_prochandle ** ph_pp);
-static td_err_e (*p_td_ta_get_nthreads)   (const td_thragent_t * ta_p, 
+static td_err_e (*p_td_ta_get_nthreads)   (const td_thragent_t * ta_p,
 					   int *nthread_p);
-static td_err_e (*p_td_ta_tsd_iter)       (const td_thragent_t * ta_p, 
-					   td_key_iter_f * cb, 
+static td_err_e (*p_td_ta_tsd_iter)       (const td_thragent_t * ta_p,
+					   td_key_iter_f * cb,
 					   void *cbdata_p);
-static td_err_e (*p_td_ta_thr_iter)       (const td_thragent_t * ta_p, 
-					   td_thr_iter_f * cb, 
-					   void *cbdata_p, 
+static td_err_e (*p_td_ta_thr_iter)       (const td_thragent_t * ta_p,
+					   td_thr_iter_f * cb,
+					   void *cbdata_p,
 					   td_thr_state_e state,
-					   int ti_pri, 
-					   sigset_t * ti_sigmask_p, 
+					   int ti_pri,
+					   sigset_t * ti_sigmask_p,
 					   unsigned ti_user_flags);
 static td_err_e (*p_td_thr_validate)      (const td_thrhandle_t * th_p);
-static td_err_e (*p_td_thr_tsd)           (const td_thrhandle_t * th_p, 
-					   const thread_key_t key, 
+static td_err_e (*p_td_thr_tsd)           (const td_thrhandle_t * th_p,
+					   const thread_key_t key,
 					   void **data_pp);
-static td_err_e (*p_td_thr_get_info)      (const td_thrhandle_t * th_p, 
+static td_err_e (*p_td_thr_get_info)      (const td_thrhandle_t * th_p,
 					   td_thrinfo_t * ti_p);
-static td_err_e (*p_td_thr_getfpregs)     (const td_thrhandle_t * th_p, 
+static td_err_e (*p_td_thr_getfpregs)     (const td_thrhandle_t * th_p,
 					   prfpregset_t * fpregset);
-static td_err_e (*p_td_thr_getxregsize)   (const td_thrhandle_t * th_p, 
+static td_err_e (*p_td_thr_getxregsize)   (const td_thrhandle_t * th_p,
 					   int *xregsize);
-static td_err_e (*p_td_thr_getxregs)      (const td_thrhandle_t * th_p, 
+static td_err_e (*p_td_thr_getxregs)      (const td_thrhandle_t * th_p,
 					   const caddr_t xregset);
-static td_err_e (*p_td_thr_sigsetmask)    (const td_thrhandle_t * th_p, 
+static td_err_e (*p_td_thr_sigsetmask)    (const td_thrhandle_t * th_p,
 					   const sigset_t ti_sigmask);
-static td_err_e (*p_td_thr_setprio)       (const td_thrhandle_t * th_p, 
+static td_err_e (*p_td_thr_setprio)       (const td_thrhandle_t * th_p,
 					   const int ti_pri);
-static td_err_e (*p_td_thr_setsigpending) (const td_thrhandle_t * th_p, 
-					   const uchar_t ti_pending_flag, 
+static td_err_e (*p_td_thr_setsigpending) (const td_thrhandle_t * th_p,
+					   const uchar_t ti_pending_flag,
 					   const sigset_t ti_pending);
-static td_err_e (*p_td_thr_setfpregs)     (const td_thrhandle_t * th_p, 
+static td_err_e (*p_td_thr_setfpregs)     (const td_thrhandle_t * th_p,
 					   const prfpregset_t * fpregset);
-static td_err_e (*p_td_thr_setxregs)      (const td_thrhandle_t * th_p, 
+static td_err_e (*p_td_thr_setxregs)      (const td_thrhandle_t * th_p,
 					   const caddr_t xregset);
-static td_err_e (*p_td_ta_map_id2thr)     (const td_thragent_t * ta_p, 
-					   thread_t tid, 
+static td_err_e (*p_td_ta_map_id2thr)     (const td_thragent_t * ta_p,
+					   thread_t tid,
 					   td_thrhandle_t * th_p);
-static td_err_e (*p_td_ta_map_lwp2thr)    (const td_thragent_t * ta_p, 
-					   lwpid_t lwpid, 
+static td_err_e (*p_td_ta_map_lwp2thr)    (const td_thragent_t * ta_p,
+					   lwpid_t lwpid,
 					   td_thrhandle_t * th_p);
-static td_err_e (*p_td_thr_getgregs)      (const td_thrhandle_t * th_p, 
+static td_err_e (*p_td_thr_getgregs)      (const td_thrhandle_t * th_p,
 					   prgregset_t regset);
-static td_err_e (*p_td_thr_setgregs)      (const td_thrhandle_t * th_p, 
+static td_err_e (*p_td_thr_setgregs)      (const td_thrhandle_t * th_p,
 					   const prgregset_t regset);
 
 /*
@@ -647,7 +647,7 @@ sol_thread_store_registers (int regno)
   if (regno != -1)
     {				/* Not writing all the regs */
       char old_value[MAX_REGISTER_SIZE];
-      
+
       /* Save new register value.  */
       regcache_collect (regno, old_value);
 
@@ -739,11 +739,42 @@ sol_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
   /* Note: don't need to call switch_to_thread; we're just reading memory.  */
 
   if (target_has_execution)
-    retval = procfs_ops.to_xfer_memory (memaddr, myaddr, len, 
+    retval = procfs_ops.to_xfer_memory (memaddr, myaddr, len,
 					dowrite, attrib, target);
   else
     retval = orig_core_ops.to_xfer_memory (memaddr, myaddr, len,
 					   dowrite, attrib, target);
+
+  do_cleanups (old_chain);
+
+  return retval;
+}
+
+/* Perform partial transfers on OBJECT.  See target_read_partial
+   and target_write_partial for details of each variant.  One, and
+   only one, of readbuf or writebuf must be non-NULL.  */
+
+static LONGEST
+sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
+			  const char *annex, void *readbuf,
+			  const void *writebuf, ULONGEST offset, LONGEST len)
+{
+  int retval;
+  struct cleanup *old_chain;
+
+  old_chain = save_inferior_ptid ();
+
+  if (is_thread (inferior_ptid) ||	/* A thread */
+      !target_thread_alive (inferior_ptid))	/* An lwp, but not alive */
+    inferior_ptid = procfs_first_available ();	/* Find any live lwp.  */
+  /* Note: don't need to call switch_to_thread; we're just reading memory.  */
+
+  if (target_has_execution)
+    retval = procfs_ops.to_xfer_partial (ops, object, annex,
+					 readbuf, writebuf, offset, len);
+  else
+    retval = orig_core_ops.to_xfer_partial (ops, object, annex,
+					    readbuf, writebuf, offset, len);
 
   do_cleanups (old_chain);
 
@@ -798,7 +829,7 @@ sol_thread_create_inferior (char *exec_file, char *allargs, char **env)
    those variables don't show up until the library gets mapped and the symbol
    table is read in.  */
 
-/* This new_objfile event is now managed by a chained function pointer. 
+/* This new_objfile event is now managed by a chained function pointer.
  * It is the callee's responsability to call the next client on the chain.
  */
 
@@ -864,7 +895,7 @@ sol_thread_can_run (void)
   return procfs_suppress_run;
 }
 
-/* 
+/*
 
    LOCAL FUNCTION
 
@@ -1028,10 +1059,10 @@ rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
 
       /* FIXME: passing 0 as attrib argument.  */
       if (target_has_execution)
-	cc = procfs_ops.to_xfer_memory (addr, buf, size, 
+	cc = procfs_ops.to_xfer_memory (addr, buf, size,
 					dowrite, 0, &procfs_ops);
       else
-	cc = orig_core_ops.to_xfer_memory (addr, buf, size, 
+	cc = orig_core_ops.to_xfer_memory (addr, buf, size,
 					   dowrite, 0, &core_ops);
 
       if (cc < 0)
@@ -1048,10 +1079,10 @@ rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
       else if (cc == 0)
 	{
 	  if (dowrite == 0)
-	    warning ("rw_common (): unable to read at addr 0x%lx", 
+	    warning ("rw_common (): unable to read at addr 0x%lx",
 		     (long) addr);
 	  else
-	    warning ("rw_common (): unable to write at addr 0x%lx", 
+	    warning ("rw_common (): unable to write at addr 0x%lx",
 		     (long) addr);
 
 	  do_cleanups (old_chain);
@@ -1430,7 +1461,7 @@ sol_core_files_info (struct target_ops *t)
 }
 
 /* Worker bee for info sol-thread command.  This is a callback function that
-   gets called once for each Solaris thread (ie. not kernel thread) in the 
+   gets called once for each Solaris thread (ie. not kernel thread) in the
    inferior.  Print anything interesting that we can think of.  */
 
 static int
@@ -1512,10 +1543,10 @@ info_solthreads (char *args, int from_tty)
 }
 
 static int
-sol_find_memory_regions (int (*func) (CORE_ADDR, 
-				      unsigned long, 
-				      int, int, int, 
-				      void *), 
+sol_find_memory_regions (int (*func) (CORE_ADDR,
+				      unsigned long,
+				      int, int, int,
+				      void *),
 			 void *data)
 {
   return procfs_ops.to_find_memory_regions (func, data);
@@ -1549,6 +1580,7 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_store_registers = sol_thread_store_registers;
   sol_thread_ops.to_prepare_to_store = sol_thread_prepare_to_store;
   sol_thread_ops.to_xfer_memory = sol_thread_xfer_memory;
+  sol_thread_ops.to_xfer_partial = sol_thread_xfer_partial;
   sol_thread_ops.to_files_info = sol_thread_files_info;
   sol_thread_ops.to_insert_breakpoint = memory_insert_breakpoint;
   sol_thread_ops.to_remove_breakpoint = memory_remove_breakpoint;
@@ -1592,6 +1624,7 @@ init_sol_core_ops (void)
   sol_core_ops.to_detach = sol_core_detach;
   sol_core_ops.to_fetch_registers = sol_thread_fetch_registers;
   sol_core_ops.to_xfer_memory = sol_thread_xfer_memory;
+  sol_core_ops.to_xfer_partial = sol_thread_xfer_partial;
   sol_core_ops.to_files_info = sol_core_files_info;
   sol_core_ops.to_insert_breakpoint = ignore;
   sol_core_ops.to_remove_breakpoint = ignore;
