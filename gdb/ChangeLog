@@ -1,5 +1,8 @@
 Thu Jul 16 13:37:09 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* breakpoint.c (commands_command):  Simplify code a bit, remove
+	unnecessary fflush().
+
 	* Makefile.in (OTHERS):  Add gcc.patch.
 	* partial-stab.h (N_SO):  Fix handling of redundant SOs (again...)
 
