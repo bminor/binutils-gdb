@@ -3,7 +3,7 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="libiberty bfd binutils bison gcc readline ld gas gnulib ${clib} gdb emacs make grep diff rcs gdbm cvs prms"
+configdirs="libiberty bfd binutils bison gcc readline ld gas gnulib clib gdb emacs make grep diff rcs gdbm cvs prms"
 srctrigger=README.configure
 srcname="gnu development package"
 
@@ -19,6 +19,8 @@ esac
 # per-target:
 
 
+bfd_target=
+
 case "${target_vendor}" in
 amd)
 	case "${target_os}" in
@@ -28,7 +30,7 @@ amd)
 	esac
 	;;
 *)
-	echo "bad target_vendor"
+	bfd_target=${target_alias}
 	;;
 esac
 
