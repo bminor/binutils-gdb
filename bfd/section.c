@@ -552,8 +552,8 @@ static const asymbol global_syms[] =
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)	\
   const asymbol * const SYM = (asymbol *) &global_syms[IDX]; \
   const asection SEC = \
-    /* name, id,       index, next, flags, user_set_vma, reloc_done, */	\
-    { NAME,  -1-(IDX), 0,     NULL, FLAGS, 0,            0,		\
+    /* name, id,  index, next, flags, user_set_vma, reloc_done,      */	\
+    { NAME,  IDX, 0,     NULL, FLAGS, 0,            0,			\
 									\
     /* linker_mark, gc_mark, vma, lma, _cooked_size, _raw_size,      */	\
        0,           0,       0,   0,   0,            0,			\
@@ -693,7 +693,7 @@ bfd_make_section_anyway (abfd, name)
      bfd *abfd;
      const char *name;
 {
-  static int section_id = 0;
+  static int section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
   asection *newsect;
   asection **prev = &abfd->sections;
   asection *sect = abfd->sections;
