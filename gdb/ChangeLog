@@ -1,3 +1,8 @@
+2002-04-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbarch.sh (initialize_non_multiarch): Call init_gdbarch_swap.
+	* gdbarch.c: Regenerate.
+
 2002-04-05  Michael Snyder  <msnyder@redhat.com>
 
 	* cli/cli-dump.c (restore_section_callback): Use paddr_nz.
