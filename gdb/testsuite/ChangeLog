@@ -1,3 +1,8 @@
+Fri Aug  6 21:40:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t17/interrupt.exp:  Add xfail for 386 bsd. Accept echoed newline
+	while waiting for `Continuing'.
+
 Fri Aug  6 13:38:08 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* gdb.t10/nodebug.exp:  Expect to find local/global minimal symbols
