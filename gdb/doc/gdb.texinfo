@@ -24,6 +24,8 @@ m4; Berkeley won't do) a file suitable for formatting.  See the text in
 
 _fi__(0)
 _include__(gdbVN.m4)
+@c @smallbook
+@c @cropmarks
 @tex
 \def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
 \xdef\manvers{\$Revision$}  % For use in headers, footers too
@@ -80,10 +82,8 @@ _if__(!_GENERIC__)
 @subtitle{On _HOST__ Systems}
 _fi__(!_GENERIC__)
 @sp 1
-@c Maybe crank this up to "Fourth Edition" when released at FSF
-@c @subtitle Third Edition---_GDBN__ version _GDB_VN__
 @subtitle _GDBN__ version _GDB_VN__
-@subtitle July 1991
+@subtitle November 1991
 @author{Richard M. Stallman@qquad @hfill Free Software Foundation}
 @author{Roland H. Pesch@qquad @hfill Cygnus Support}
 @page
@@ -599,9 +599,13 @@ Let's use _GDBN__ to try to see what's going on.
 
 @smallexample
 $ @i{_GDBP__ m4}
-GDB is free software and you are welcome to distribute copies of it
- under certain conditions; type "show copying" to see the conditions.
-There is absolutely no warranty for GDB; type "show warranty" for details.
+@c FIXME: this falsifies the exact text played out, to permit smallbook
+@c FIXME... format to come out better.
+GDB is free software and you are welcome to distribute copies
+ of it under certain conditions; type "show copying" to see 
+ the conditions.
+There is absolutely no warranty for GDB; type "show warranty" 
+for details.
 GDB _GDB_VN__, Copyright 1991 Free Software Foundation, Inc...
 (_GDBP__)
 @end smallexample
@@ -649,7 +653,8 @@ context where it stops.
 @smallexample
 @i{changequote(<QUOTE>,<UNQUOTE>)}
 
-Breakpoint 1, m4_changequote (argc=3, argv=0x33c70) at builtin.c:879
+Breakpoint 1, m4_changequote (argc=3, argv=0x33c70) 
+    at builtin.c:879
 879         if (bad_argc(TOKEN_DATA_TEXT(argv[0]), argc, 1, 3))
 @end smallexample
 
@@ -659,7 +664,8 @@ the next line of the current function.
 
 @smallexample
 (_GDBP__) @i{n}
-882         set_quotes((argc >= 2) ? TOKEN_DATA_TEXT(argv[1]) : nil,
+882         set_quotes((argc >= 2) ? TOKEN_DATA_TEXT(argv[1])\
+ : nil,
 @end smallexample
 
 @noindent
@@ -686,7 +692,8 @@ active subroutine.
 (_GDBP__) @i{bt}
 #0  set_quotes (lq=0x34c78 "<QUOTE>", rq=0x34c88 "<UNQUOTE>")
     at input.c:530
-#1  0x6344 in m4_changequote (argc=3, argv=0x33c70) at builtin.c:882
+#1  0x6344 in m4_changequote (argc=3, argv=0x33c70) 
+    at builtin.c:882
 #2  0x8174 in expand_macro (sym=0x33320) at macro.c:242
 #3  0x7a88 in expand_token (obs=0x0, t=209696, td=0xf7fffa30)
     at macro.c:71
@@ -702,11 +709,11 @@ falling into the @code{xstrdup} subroutine.
 (_GDBP__) @i{s}
 0x3b5c  532         if (rquote != def_rquote)
 (_GDBP__) @i{s}
-0x3b80  535         lquote = (lq == nil || *lq == '\0') ? def_lquote :\
- xstrdup(lq);
+0x3b80  535         lquote = (lq == nil || *lq == '\0') ?  \
+def_lquote : xstrdup(lq);
 (_GDBP__) @i{n}
-536         rquote = (rq == nil || *rq == '\0') ? def_rquote : xstrdup\
-(rq);
+536         rquote = (rq == nil || *rq == '\0') ? def_rquote\
+ : xstrdup(rq);
 (_GDBP__) @i{n}
 538         len_lquote = strlen(rquote);
 @end smallexample
@@ -733,10 +740,10 @@ surrounding the current line, with the @code{l} (@code{list}) command.
 (_GDBP__) @i{l}
 533             xfree(rquote);
 534
-535         lquote = (lq == nil || *lq == '\0') ? def_lquote : xstrdup\
-(lq);
-536         rquote = (rq == nil || *rq == '\0') ? def_rquote : xstrdup\
-(rq);
+535         lquote = (lq == nil || *lq == '\0') ? def_lquote\
+ : xstrdup (lq);
+536         rquote = (rq == nil || *rq == '\0') ? def_rquote\
+ : xstrdup (rq);
 537
 538         len_lquote = strlen(rquote);
 539         len_rquote = strlen(lquote);
@@ -1100,8 +1107,10 @@ user-defined -- User-defined commands
 aliases -- Aliases of other commands
 obscure -- Obscure features
 
-Type "help" followed by a class name for a list of commands in that class.
-Type "help" followed by command name for full documentation.
+Type "help" followed by a class name for a list of 
+commands in that class.
+Type "help" followed by command name for full 
+documentation.
 Command name abbreviations are allowed if unambiguous.
 (_GDBP__)
 @end smallexample
@@ -1119,7 +1128,8 @@ List of commands:
 show -- Generic command for showing things set with "set"
 info -- Generic command for printing status
 
-Type "help" followed by command name for full documentation.
+Type "help" followed by command name for full 
+documentation.
 Command name abbreviations are allowed if unambiguous.
 (_GDBP__)
 @end smallexample
@@ -2097,8 +2107,8 @@ Specify a list of commands for breakpoint number @var{bnum}.  The commands
 themselves appear on the following lines.  Type a line containing just
 @code{end} to terminate the commands.
 
-To remove all commands from a breakpoint, type @code{commands} followed
-immediately by @code{end}; that is, give no commands.
+To remove all commands from a breakpoint, type @code{commands} and
+follow it immediately with @code{end}; that is, give no commands.
 
 With no @var{bnum} argument, @code{commands} refers to the last
 breakpoint or watchpoint set (not to the breakpoint most recently
@@ -2631,7 +2641,8 @@ Here is an example of a backtrace.  It was made with the command
 
 @smallexample
 @group
-#0  m4_traceon (obs=0x24eb0, argc=1, argv=0x2b8c8) at builtin.c:993
+#0  m4_traceon (obs=0x24eb0, argc=1, argv=0x2b8c8) 
+    at builtin.c:993
 #1  0x6e38 in expand_macro (sym=0x2b600) at macro.c:242
 #2  0x6840 in expand_token (obs=0x0, t=177664, td=0xf7fffb08)
     at macro.c:71
@@ -2702,7 +2713,8 @@ example:
 
 @smallexample
 (_GDBP__) up
-#1  0x22f0 in main (argc=1, argv=0xf7fffbf4, env=0xf7fffbfc) at env.c:10
+#1  0x22f0 in main (argc=1, argv=0xf7fffbf4, env=0xf7fffbfc)
+    at env.c:10
 10              read_input_file (argv[i]);
 @end smallexample
 
@@ -3682,7 +3694,8 @@ For example, given the declarations
 @smallexample
 typedef enum @{Tree, Bug@} Species;
 typedef enum @{Big_tree, Acorn, Seedling@} Tree_forms;
-typedef enum @{Caterpillar, Cocoon, Butterfly@} Bug_forms;
+typedef enum @{Caterpillar, Cocoon, Butterfly@} 
+              Bug_forms;
 
 struct thing @{
   Species it;
@@ -6650,18 +6663,22 @@ Execute until exit from the selected stack frame, like the _GDBN__
 
 @item M-c
 Continue execution of the program, like the _GDBN__ @code{continue}
-command.  @emph{Warning:} In Emacs v19, this command is @kbd{C-c C-p}.
+command.  
+
+@emph{Warning:} In Emacs v19, this command is @kbd{C-c C-p}.
 
 @item M-u
 Go up the number of frames indicated by the numeric argument
 (@pxref{Arguments, , Numeric Arguments, emacs, The GNU Emacs Manual}),
-like the _GDBN__ @code{up} command.  @emph{Warning:} In Emacs v19, this
-command is @kbd{C-c C-u}.@refill
+like the _GDBN__ @code{up} command.  
+
+@emph{Warning:} In Emacs v19, this command is @kbd{C-c C-u}.@refill
 
 @item M-d
 Go down the number of frames indicated by the numeric argument, like the
-_GDBN__ @code{down} command.  @emph{Warning:} In Emacs v19, this command
-is @kbd{C-c C-d}.
+_GDBN__ @code{down} command.  
+
+@emph{Warning:} In Emacs v19, this command is @kbd{C-c C-d}.
 
 @item C-x &
 Read the number where the cursor is positioned, and insert it at the end
@@ -7103,8 +7120,10 @@ subordinate directories in the _GDBN__ distribution (if you only want to
 configure that subdirectory); but be sure to specify a path to it.  For
 example, to configure only the @code{bfd} subdirectory, 
 @example
+@group
 cd gdb-_GDB_VN__/bfd
 ../configure @var{host}
+@end group
 @end example
 
 You can install @code{_GDBP__} anywhere; it has no hardwired paths.  However,
@@ -7173,13 +7192,13 @@ configure sun4 +target=vxworks960
 @end example
 @noindent
 creates the following directories:
-@smallexample
+@example
 gdb-_GDB_VN__/H-sun4/T-vxworks960
 gdb-_GDB_VN__/bfd/H-sun4/T-vxworks960
 gdb-_GDB_VN__/gdb/H-sun4/T-vxworks960
 gdb-_GDB_VN__/libiberty/H-sun4/T-vxworks960
 gdb-_GDB_VN__/readline/H-sun4/T-vxworks960
-@end smallexample
+@end example
 
 When you run @code{make} to build a program or library, you must run it
 in a configured directory.  If you made a single configuration,
@@ -7223,102 +7242,75 @@ prefix'' column ending in a @samp{*} may be followed by a release number.
 @ifinfo
 @example
 
-ARCHITECTURE  VENDOR        OS prefix
-------------+------------+-------------
-            |            |
- 580        | altos      | aix*    
- a29k       | amd        | amigados
- alliant    | amdahl     | aout    
- arm        | aout       | bout    
- c1         | apollo     | bsd*    
- c2         | att        | coff    
- cray2      | bcs        | ctix*   
- h8300      | bout       | dgux*   
- i386       | bull       | dynix*  
- i860       | cbm        | ebmon   
- i960       | coff       | esix*   
- m68000     | convergent | hds     
- m68k       | convex     | hpux*   
- m88k       | cray       | irix*   
- mips       | dec        | isc*    
- ns32k      | encore     | kern    
- pyramid    | gould      | mach*   
- romp       | hitachi    | msdos*  
- rs6000     | hp         | newsos* 
- sparc      | ibm        | nindy*  
- tahoe      | intel      | osf*    
- tron       | isi        | sco*    
- vax        | little     | sunos*  
- xmp        | mips       | svr4    
- ymp        | motorola   | sym*    
-            | ncr        | sysv*   
-            | next       | ultrix* 
-            | nyu        | unicos* 
-            | sco        | unos*   
-            | sequent    | uts     
-            | sgi        | v88r*   
-            | sony       | vms*    
-            | sun        | vxworks*
-            | unicom     |
-            | utek       |
-            | wrs        |          
-
+ARCHITECTURE  VENDOR                     OS prefix
+------------+--------------------------+---------------------------
+            |                          |
+ 580        | altos        hp          | aix*          msdos*     
+ a29k       | amd          ibm         | amigados      newsos* 
+ alliant    | amdahl       intel       | aout          nindy*  
+ arm        | aout         isi         | bout          osf*    
+ c1         | apollo       little      | bsd*          sco*    
+ c2         | att          mips        | coff          sunos*  
+ cray2      | bcs          motorola    | ctix*         svr4    
+ h8300      | bout         ncr         | dgux*         sym*    
+ i386       | bull         next        | dynix*        sysv*   
+ i860       | cbm          nyu         | ebmon         ultrix* 
+ i960       | coff         sco         | esix*         unicos* 
+ m68000     | convergent   sequent     | hds           unos*   
+ m68k       | convex       sgi         | hpux*         uts     
+ m88k       | cray         sony        | irix*         v88r*   
+ mips       | dec          sun         | isc*          vms*    
+ ns32k      | encore       unicom      | kern          vxworks*
+ pyramid    | gould        utek        | mach*         
+ romp       | hitachi      wrs         | 
+ rs6000     |                          | 
+ sparc      |                          | 
+ tahoe      |                          | 
+ tron       |                          | 
+ vax        |                          | 
+ xmp        |                          | 
+ ymp        |                          |                          
 @end example
+@end ifinfo
+@tex
+%\vskip\parskip
+\vskip \baselineskip
+\hfil\vbox{\offinterlineskip
+\halign{\strut\tt #\hfil\ &\vrule#&\strut\ \tt #\hfil\ &\strut\ \tt #\hfil
+\ &\vrule#&\strut\ \tt #\hfil\ &\strut\ \tt #\hfil \cr
+{\bf Architecture} &&{\bf Vendor} &&&{\bf OS prefix}\cr
+\multispan7\hrulefill\cr
+ 580        && altos     &  hp          && aix*       &  msdos*     \cr
+ a29k       && amd       &  ibm         && amigados   &  newsos*    \cr
+ alliant    && amdahl    &  intel       && aout       &  nindy*     \cr
+ arm        && aout      &  isi         && bout       &  osf*       \cr
+ c1         && apollo    &  little      && bsd*       &  sco*       \cr
+ c2         && att       &  mips        && coff       &  sunos*     \cr
+ cray2      && bcs       &  motorola    && ctix*      &  svr4       \cr
+ h8300      && bout      &  ncr         && dgux*      &  sym*       \cr
+ i386       && bull      &  next        && dynix*     &  sysv*      \cr
+ i860       && cbm       &  nyu         && ebmon      &  ultrix*    \cr
+ i960       && coff      &  sco         && esix*      &  unicos*    \cr
+ m68000     && convergent&  sequent     && hds        &  unos*      \cr
+ m68k       && convex    &  sgi         && hpux*      &  uts        \cr
+ m88k       && cray      &  sony        && irix*      &  v88r*      \cr
+ mips       && dec       &  sun         && isc*       &  vms*       \cr
+ ns32k      && encore    &  unicom      && kern       &  vxworks*   \cr
+ pyramid    && gould     &  utek        && mach*      &             \cr
+ romp       && hitachi   &  wrs         &&            &             \cr
+ rs6000     &&           &              &&            &             \cr
+ sparc      &&           &              &&            &             \cr
+ tahoe      &&           &              &&            &             \cr
+ tron       &&           &              &&            &             \cr
+ vax        &&           &              &&            &             \cr
+ xmp        &&           &              &&            &             \cr
+ ymp        &&           &              &&            &             \cr
+}\hfil}
+@end tex                                              
 @quotation
 @emph{Warning:} Many combinations of architecture, vendor, and OS are
 untested.
 @end quotation
-@end ifinfo
-@c FIXME: this table is probably screwed in @smallbook.  Try setting
-@c FIXME...smallbook fonts?
-@tex
-%\vskip\parskip
-\advance\baselineskip -1pt
-% TERRIBLE KLUGE ABOVE makes table fit on one page (large format, prob
-% not smallbook).  FIXME Reformat table for next time!!
-\vskip \baselineskip
-\halign{\hskip\parindent\tt #\hfil &\qquad#&\tt #\hfil &\qquad#&\tt
-#\hfil &\qquad\qquad\it #\hfil\cr
-{\bf Architecture} &&{\bf Vendor} &&{\bf OS prefix}\cr
-\multispan5\hrulefill\cr
- 580        && altos      && aix*      \cr
- a29k       && amd        && amigados  \cr
- alliant    && amdahl     && aout      \cr
- arm        && aout       && bout      \cr
- c1         && apollo     && bsd*      \cr
- c2         && att        && coff      \cr
- cray2      && bcs        && ctix*     \cr
- h8300      && bout       && dgux*     \cr
- i386       && bull       && dynix*    \cr
- i860       && cbm        && ebmon     &Warning:                   \cr
- i960       && coff       && esix*     &Many combinations          \cr
- m68000     && convergent && hds       &of architecture, vendor    \cr
- m68k       && convex     && hpux*     &and OS are untested.       \cr
- m88k       && cray       && irix*     \cr
- mips       && dec        && isc*      \cr
- ns32k      && encore     && kern      \cr
- pyramid    && gould      && mach*     \cr
- romp       && hitachi    && msdos*    \cr
- rs6000     && hp         && newsos*   \cr
- sparc      && ibm        && nindy*    \cr
- tahoe      && intel      && osf*      \cr
- tron       && isi        && sco*      \cr
- vax        && little     && sunos*    \cr
- xmp        && mips       && svr4      \cr
- ymp        && motorola   && sym*      \cr
-            && ncr        && sysv*     \cr
-            && next       && ultrix*   \cr
-            && nyu        && unicos*   \cr
-            && sco        && unos*     \cr
-            && sequent    && uts       \cr
-            && sgi        && v88r*     \cr
-            && sony       && vms*      \cr
-            && sun        && vxworks*  \cr
-            && unicom     &&           \cr
-            && utek       &&           \cr
-            && wrs        &&           \cr
-}
-@end tex
 
 The @code{configure} script accompanying _GDBN__ _GDB_VN__ does not provide
 any query facility to list all supported host and target names or
@@ -7829,13 +7821,13 @@ convey the exclusion of warranty; and each file should have at least
 the ``copyright'' line and a pointer to where the full notice is found.
 
 @smallexample
-@var{one line to give the program's name and a brief idea of what it does.}
+@var{one line to give the program's name and an idea of what it does.}
 Copyright (C) 19@var{yy}  @var{name of author}
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -7843,8 +7835,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+along with this program; if not, write to the 
+Free Software Foundation, Inc., 675 Mass Ave,
+Cambridge, MA 02139, USA.
 @end smallexample
 
 Also add information on how to contact you by electronic and paper mail.
@@ -7854,9 +7847,10 @@ when it starts in an interactive mode:
 
 @smallexample
 Gnomovision version 69, Copyright (C) 19@var{yy} @var{name of author}
-Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
-This is free software, and you are welcome to redistribute it
-under certain conditions; type `show c' for details.
+Gnomovision comes with ABSOLUTELY NO WARRANTY; for details
+type `show w'.  This is free software, and you are welcome
+to redistribute it under certain conditions; type `show c' 
+for details.
 @end smallexample
 
 The hypothetical commands @samp{show w} and @samp{show c} should show
@@ -7869,13 +7863,14 @@ You should also get your employer (if you work as a programmer) or your
 school, if any, to sign a ``copyright disclaimer'' for the program, if
 necessary.  Here is a sample; alter the names:
 
-@example
-Yoyodyne, Inc., hereby disclaims all copyright interest in the program
-`Gnomovision' (which makes passes at compilers) written by James Hacker.
+@smallexample
+Yoyodyne, Inc., hereby disclaims all copyright interest in
+the program `Gnomovision' (which makes passes at compilers)
+written by James Hacker.
 
 @var{signature of Ty Coon}, 1 April 1989
 Ty Coon, President of Vice
-@end example
+@end smallexample
 
 This General Public License does not permit incorporating your program into
 proprietary programs.  If your program is a subroutine library, you may
