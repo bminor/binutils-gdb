@@ -1,3 +1,11 @@
+Thu Aug 26 07:20:00 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* gdb.t22/virtfunc.exp:  Accept missing struct/class names as
+	an expected fail for certain ptype commands.
+
+	* gdb.t20/classes.exp:  Update expected results of "ptype class
+	Base1" to account for the constructor that now appears in the type.
+
 Wed Aug 25 16:48:05 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* configure.in (configdirs):  Restore gdb.t04, which mysteriously
