@@ -1,5 +1,7 @@
 Sun Jun 13 09:17:48 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* config/m68k/xm-news.h: Include <sys/param.h>.
+
 	* m88k-tdep.c (IEEE_isNAN): Remove.
 	config/m88k/tm-m88k.h (INVALID_FLOAT): Return 0.  This was the same
 	broken isNAN as on the mips.
