@@ -191,7 +191,7 @@ const struct predefined_symbol tic80_predefined_symbols[] =
   { "r22",	TIC80_OPERAND_GPR | 22 },
   { "r23",	TIC80_OPERAND_GPR | 23 },
   { "r24",	TIC80_OPERAND_GPR | 24 },
-  { "r24",	TIC80_OPERAND_GPR | 24 },
+  { "r25",	TIC80_OPERAND_GPR | 25 },
   { "r26",	TIC80_OPERAND_GPR | 26 },
   { "r27",	TIC80_OPERAND_GPR | 27 },
   { "r28",	TIC80_OPERAND_GPR | 28 },
@@ -429,7 +429,7 @@ const struct tic80_operand tic80_operands[] =
   /* Long signed PC word offset in following 32 bit word */
 
 #define OFF_SL_PC (OFF_SS_PC + 1)
-  {32, 0, NULL, NULL, TIC80_OPERAND_PCREL | TIC80_OPERAND_SIGNED },
+  { 32, 0, NULL, NULL, TIC80_OPERAND_PCREL | TIC80_OPERAND_SIGNED },
 
   /* Short signed base relative byte offset in bits 14-0 */
 
@@ -439,11 +439,17 @@ const struct tic80_operand tic80_operands[] =
   /* Long signed base relative byte offset in following 32 bit word */
 
 #define OFF_SL_BR (OFF_SS_BR + 1)
-  {32, 0, NULL, NULL, TIC80_OPERAND_BASEREL | TIC80_OPERAND_SIGNED },
+  { 32, 0, NULL, NULL, TIC80_OPERAND_BASEREL | TIC80_OPERAND_SIGNED },
+
+  /* Long signed base relative byte offset in following 32 bit word
+     with optional ":s" modifier flag in bit 11 */
+
+#define OFF_SL_BR_SCALED (OFF_SL_BR + 1)
+  { 32, 0, NULL, NULL, TIC80_OPERAND_BASEREL | TIC80_OPERAND_SIGNED | TIC80_OPERAND_SCALED },
 
   /* BITNUM in bits 31-27 */
 
-#define BITNUM (OFF_SL_BR + 1)
+#define BITNUM (OFF_SL_BR_SCALED + 1)
   { 5, 27, NULL, NULL, TIC80_OPERAND_BITNUM },
 
   /* Condition code in bits 31-27 */
@@ -483,15 +489,9 @@ const struct tic80_operand tic80_operands[] =
 #define REG_SCALED (REG_BASE_M_LI + 1)
   { 5, 0, NULL, NULL, TIC80_OPERAND_GPR | TIC80_OPERAND_SCALED },
 
-  /* Long signed immediate in following 32 bit word, with optional ":s" modifier
-     flag in bit 11 */
-
-#define LSI_SCALED (REG_SCALED + 1)
-  { 32, 0, NULL, NULL, TIC80_OPERAND_SIGNED | TIC80_OPERAND_SCALED },
-
   /* Unsigned immediate in bits 4-0, used only for shift instructions */
 
-#define ROTATE (LSI_SCALED + 1)
+#define ROTATE (REG_SCALED + 1)
   { 5, 0, NULL, NULL, 0 },
 
   /* Unsigned immediate in bits 9-5, used only for shift instructions */
@@ -589,7 +589,9 @@ const int tic80_num_operands = sizeof (tic80_operands)/sizeof(*tic80_operands);
  entries with the same mnemonic are sorted so that they are adjacent in the table,
  allowing the use of a hash table to locate the first of a sequence of opcodes that have
  a particular name.  The short immediate forms also come before the long immediate forms
- so that the assembler will pick the "best fit" for the size of the operand. */
+ so that the assembler will pick the "best fit" for the size of the operand, except for
+ the case of the PC relative forms, where the long forms come first and are the default
+ forms. */
 
 const struct tic80_opcode tic80_opcodes[] = {
 
@@ -602,11 +604,11 @@ const struct tic80_opcode tic80_opcodes[] = {
   /* The "br" instruction is really "bbz target,r0,31".  We put it first so that
      this specific bit pattern will get disassembled as a br rather than bbz. */
 
-  {"br",	OP_SI(0x48),	0xFFFF8000,	0,	{OFF_SS_PC}	},
   {"br",	OP_LI(0x391),	0xFFFFF000,	0,	{OFF_SL_PC}	},
+  {"br",	OP_SI(0x48),	0xFFFF8000,	0,	{OFF_SS_PC}	},
   {"br",	OP_REG(0x390),	0xFFFFF000,	0,	{REG_0}		},
-  {"br.a",	OP_SI(0x49),	0xFFFF8000,	0,	{OFF_SS_PC}	},
   {"br.a",	OP_LI(0x393),	0xFFFFF000,	0,	{OFF_SL_PC}	},
+  {"br.a",	OP_SI(0x49),	0xFFFF8000,	0,	{OFF_SS_PC}	},
   {"br.a",	OP_REG(0x392),	0xFFFFF000,	0,	{REG_0}		},
 
   /* Signed integer ADD */
@@ -650,38 +652,38 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Branch Bit One - nonannulled */
 
-  {"bbo",	OP_SI(0x4A),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbo",	OP_LI(0x395),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, BITNUM}	},
+  {"bbo",	OP_SI(0x4A),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbo",	OP_REG(0x394),	MASK_REG,	0,	{REG_0, REG_22, BITNUM}		},
 
   /* Branch Bit One - annulled */
 
-  {"bbo.a",	OP_SI(0x4B),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbo.a",	OP_LI(0x397),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, BITNUM}	},
+  {"bbo.a",	OP_SI(0x4B),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbo.a",	OP_REG(0x396),	MASK_REG,	0,	{REG_0, REG_22, BITNUM}		},
 
   /* Branch Bit Zero - nonannulled */
 
-  {"bbz",	OP_SI(0x48),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbz",	OP_LI(0x391),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, BITNUM}	},
+  {"bbz",	OP_SI(0x48),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbz",	OP_REG(0x390),	MASK_REG,	0,	{REG_0, REG_22, BITNUM}		},
 
   /* Branch Bit Zero - annulled */
 
-  {"bbz.a",	OP_SI(0x49),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbz.a",	OP_LI(0x393),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, BITNUM}	},
+  {"bbz.a",	OP_SI(0x49),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbz.a",	OP_REG(0x392),	MASK_REG,	0,	{REG_0, REG_22, BITNUM}		},
 
   /* Branch Conditional - nonannulled */
 
-  {"bcnd",	OP_SI(0x4C),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, CC}	},
   {"bcnd",	OP_LI(0x399),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, CC}	},
+  {"bcnd",	OP_SI(0x4C),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, CC}	},
   {"bcnd",	OP_REG(0x398),	MASK_REG,	0,	{REG_0, REG_22, CC}	},
 
   /* Branch Conditional - annulled */
 
-  {"bcnd.a",	OP_SI(0x4D),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, CC}	},
   {"bcnd.a",	OP_LI(0x39B),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, CC}	},
+  {"bcnd.a",	OP_SI(0x4D),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, CC}	},
   {"bcnd.a",	OP_REG(0x39A),	MASK_REG,	0,	{REG_0, REG_22, CC}	},
 
   /* Branch Control Register */
@@ -692,14 +694,14 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Branch and save return - nonannulled */
 
-  {"bsr",	OP_SI(0x40),	MASK_SI,	0,	{OFF_SS_PC, REG_DEST}	},
   {"bsr",	OP_LI(0x381),	MASK_LI,	0, 	{OFF_SL_PC, REG_DEST}	},
+  {"bsr",	OP_SI(0x40),	MASK_SI,	0,	{OFF_SS_PC, REG_DEST}	},
   {"bsr",	OP_REG(0x380),	MASK_REG,	0,	{REG_0, REG_DEST}	},
 
   /* Branch and save return - annulled */
 
-  {"bsr.a",	OP_SI(0x41),	MASK_SI,	0, 	{OFF_SS_PC, REG_DEST}	},
   {"bsr.a",	OP_LI(0x383),	MASK_LI,	0, 	{OFF_SL_PC, REG_DEST}	},
+  {"bsr.a",	OP_SI(0x41),	MASK_SI,	0, 	{OFF_SS_PC, REG_DEST}	},
   {"bsr.a",	OP_REG(0x382),	MASK_REG,	0,	{REG_0, REG_DEST}	},
 
   /* Send command */
@@ -728,32 +730,32 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Direct load signed data into register */
 
-  {"dld",	OP_LI(0x345)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dld",	OP_REG(0x344) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dld.b",	OP_LI(0x341)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dld.b",	OP_REG(0x340) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dld.d",	OP_LI(0x347)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
-  {"dld.d",	OP_REG(0x346) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
-  {"dld.h",	OP_LI(0x343)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dld.h",	OP_REG(0x342) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld",	OP_LI(0x345)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld",	OP_REG(0x344) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
+  {"dld.b",	OP_LI(0x341)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld.b",	OP_REG(0x340) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
+  {"dld.d",	OP_LI(0x347)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
+  {"dld.d",	OP_REG(0x346) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}		},
+  {"dld.h",	OP_LI(0x343)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld.h",	OP_REG(0x342) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
 
   /* Direct load unsigned data into register */
 
-  {"dld.ub",	OP_LI(0x351)  | D(1),	(MASK_LI  &  ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dld.ub",	OP_REG(0x350) | D(1),	(MASK_REG & ~M_REG(1))  | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dld.uh",	OP_LI(0x353)  | D(1),	(MASK_LI  &  ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dld.uh",	OP_REG(0x352) | D(1),	(MASK_REG & ~M_REG(1))  | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld.ub",	OP_LI(0x351)  | D(1),	(MASK_LI  &  ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld.ub",	OP_REG(0x350) | D(1),	(MASK_REG & ~M_REG(1))  | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
+  {"dld.uh",	OP_LI(0x353)  | D(1),	(MASK_LI  &  ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dld.uh",	OP_REG(0x352) | D(1),	(MASK_REG & ~M_REG(1))  | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
 
   /* Direct store data into memory */
 
-  {"dst",	OP_LI(0x365)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dst",	OP_REG(0x364) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dst.b",	OP_LI(0x361)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dst.b",	OP_REG(0x360) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dst.d",	OP_LI(0x367)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
-  {"dst.d",	OP_REG(0x366) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
-  {"dst.h",	OP_LI(0x363)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"dst.h",	OP_REG(0x362) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dst",	OP_LI(0x365)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dst",	OP_REG(0x364) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
+  {"dst.b",	OP_LI(0x361)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dst.b",	OP_REG(0x360) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
+  {"dst.d",	OP_LI(0x367)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
+  {"dst.d",	OP_REG(0x366) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}		},
+  {"dst.h",	OP_LI(0x363)  | D(1),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"dst.h",	OP_REG(0x362) | D(1),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
 
   /* Emulation stop */
 
@@ -938,27 +940,27 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Load Signed Data Into Register */
 
-  {"ld",	OP_SI(0x22),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
-  {"ld",	OP_LI(0x345)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld",	OP_REG(0x344) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.b",	OP_SI(0x20),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
-  {"ld.b",	OP_LI(0x341)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.b",	OP_REG(0x340) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.d",	OP_SI(0x23),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST_E}		},
-  {"ld.d",	OP_LI(0x347)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
-  {"ld.d",	OP_REG(0x346) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
-  {"ld.h",	OP_SI(0x21),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
-  {"ld.h",	OP_LI(0x343)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.h",	OP_REG(0x342) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld",	OP_SI(0x22),		(MASK_SI  & ~M_SI(1)),		0,	{OFF_SS_BR, REG_BASE_M_SI, REG_DEST}		},
+  {"ld",	OP_LI(0x345)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld",	OP_REG(0x344) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
+  {"ld.b",	OP_SI(0x20),		(MASK_SI  & ~M_SI(1)),		0,	{OFF_SS_BR, REG_BASE_M_SI, REG_DEST}		},
+  {"ld.b",	OP_LI(0x341)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld.b",	OP_REG(0x340) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
+  {"ld.d",	OP_SI(0x23),		(MASK_SI  & ~M_SI(1)),		0,	{OFF_SS_BR, REG_BASE_M_SI, REG_DEST_E}		},
+  {"ld.d",	OP_LI(0x347)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
+  {"ld.d",	OP_REG(0x346) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}		},
+  {"ld.h",	OP_SI(0x21),		(MASK_SI  & ~M_SI(1)),		0,	{OFF_SS_BR, REG_BASE_M_SI, REG_DEST}		},
+  {"ld.h",	OP_LI(0x343)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld.h",	OP_REG(0x342) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
 
   /* Load Unsigned Data Into Register */
 
-  {"ld.ub",	OP_SI(0x28),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
-  {"ld.ub",	OP_LI(0x351)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.ub",	OP_REG(0x350) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.uh",	OP_SI(0x29),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
-  {"ld.uh",	OP_LI(0x353)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.uh",	OP_REG(0x352) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld.ub",	OP_SI(0x28),		(MASK_SI  & ~M_SI(1)),		0,	{OFF_SS_BR, REG_BASE_M_SI, REG_DEST}		},
+  {"ld.ub",	OP_LI(0x351)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld.ub",	OP_REG(0x350) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
+  {"ld.uh",	OP_SI(0x29),		(MASK_SI  & ~M_SI(1)),		0,	{OFF_SS_BR, REG_BASE_M_SI, REG_DEST}		},
+  {"ld.uh",	OP_LI(0x353)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"ld.uh",	OP_REG(0x352) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
 
   /* Leftmost one */
 
@@ -1089,18 +1091,18 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Store Data into Memory */
 
-  {"st",	OP_SI(0x32),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
-  {"st",	OP_LI(0x365)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"st",	OP_REG(0x364) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"st.b",	OP_SI(0x30),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
-  {"st.b",	OP_LI(0x361)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"st.b",	OP_REG(0x360) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"st.d",	OP_SI(0x33),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST_E}},
-  {"st.d",	OP_LI(0x367)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
-  {"st.d",	OP_REG(0x366) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
-  {"st.h",	OP_SI(0x31),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
-  {"st.h",	OP_LI(0x363)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"st.h",	OP_REG(0x362) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"st",	OP_SI(0x32),		(MASK_SI  & ~M_SI(1)),		0, 	{OFF_SS_BR, REG_BASE_M_SI, REG_DEST}		},
+  {"st",	OP_LI(0x365)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"st",	OP_REG(0x364) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
+  {"st.b",	OP_SI(0x30),		(MASK_SI  & ~M_SI(1)),		0, 	{OFF_SS_BR, REG_BASE_M_SI, REG_DEST}		},
+  {"st.b",	OP_LI(0x361)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"st.b",	OP_REG(0x360) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
+  {"st.d",	OP_SI(0x33),		(MASK_SI  & ~M_SI(1)),		0, 	{OFF_SS_BR, REG_BASE_M_SI, REG_DEST_E}		},
+  {"st.d",	OP_LI(0x367)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
+  {"st.d",	OP_REG(0x366) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}		},
+  {"st.h",	OP_SI(0x31),		(MASK_SI  & ~M_SI(1)),		0, 	{OFF_SS_BR, REG_BASE_M_SI, REG_DEST}		},
+  {"st.h",	OP_LI(0x363)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{OFF_SL_BR_SCALED, REG_BASE_M_LI, REG_DEST}	},
+  {"st.h",	OP_REG(0x362) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}		},
 
   /* Signed Integer Subtract */
 
