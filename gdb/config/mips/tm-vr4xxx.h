@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#define TARGET_BYTE_ORDER_SELECTABLE
+#define TARGET_BYTE_ORDER_SELECTABLE_P 1
 #define MIPS_EABI 1
 #define MIPS_DEFAULT_FPU_TYPE MIPS_FPU_NONE
 #define TARGET_MONITOR_PROMPT "<RISQ> "

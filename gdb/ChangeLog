@@ -1,3 +1,9 @@
+Tue Dec 15 23:46:40 1998  Andrew Cagney  <cagney@chook>
+
+	* config/mips/tm-*.h: (TARGET_BYTE_ORDER_DEFAULT,
+ 	TARGET_BYTE_ORDER_SELECTABLE_P): Replace TARGET_BYTE_ORDER and
+ 	TARGET_BYTE_ORDER_SELECTABLE.
+	
 1998-12-14  Anthony Thompson   (athompso@cambridge.arm.com)
 
 	* remote-rdp.c (rdp_init): Don't discard first character on reset.
