@@ -30,7 +30,12 @@ else
 
 	m68k)
 		case "${host_vendor}" in
-		hp)	bfd_host=hp9000 ;;
+		hp)	
+			case "${host_os}" in
+			hpux)	bfd_host=hp9000 ;;
+			bsd)	bfd_host=hp300bsd ;;
+			esac
+			;;
 		sony)	bfd_host=news ;;
 		sun)	bfd_host=sun3 ;;
 		esac
@@ -58,7 +63,7 @@ else
 fi
 
 if [ ! -f config/hmake-${bfd_host} ] ; then
-	echo '***' BFD does not support host ${host}
+	echo '***' BFD does not support host ${host}: no file config/hmake-${bfd_host}
 	exit 1
 fi
 
@@ -66,30 +71,46 @@ host_makefile_frag=config/hmake-${bfd_host}
 
 # per-target:
 
-case ${target_os} in
-aout | coff | bout) bfd_target=${target_cpu}-${target_os} ;;
-sunos*)
+case "${target_vendor}" in
+aout | coff | bout) bfd_target=${target_cpu}-${target_vendor} ;;
+sony)	bfd_target=news ;;
+intel)	bfd_target=${target_cpu}-coff ;;	
+wrs)
 	case "${target_cpu}" in
-	m68k)	bfd_target=sun3 ;;
-	sparc)	bfd_target=sun4 ;;
+	i960) bfd_target=i960-bout ;;
+	m68k) bfd_target=m68k-aout ;;
 	esac
 	;;
-newsos)	bfd_target=news ;;
-*)
+sun)
 	case "${target_cpu}" in
-	tahoe | vax)
-		bfd_target=${target_cpu} ;;
-	mips)
-		case "${host_vendor}" in
-		dec)	bfd_host=dec3100 ;;
+	m68k)	bfd_target=m68k-aout ;;
+	sparc)	bfd_target=sparc-aout ;;
+	esac
+	;;
+dec)
+	case "${target_cpu}" in
+	mips) bfd_target=dec3100 ;;
+	esac
+	;;
+hp)
+	case "${target_cpu}" in
+	m68k)
+		case "${target_os}" in
+		hpux)	bfd_target=hp9000 ;;
+		bsd)	bfd_target=hp300bsd ;;
 		esac
 		;;
+	esac
+	;;
+*)
+	case "${target_cpu}" in
+	tahoe | vax) bfd_target=${target_cpu} ;;
 	esac
 	;;
 esac
 
 if [ ! -f config/tmake-${bfd_target} ] ; then
-	echo '***' BFD does not support target ${target}
+	echo '***' BFD does not support target ${target}: no file config/tmake-${bfd_target}
 	exit 1
 fi
 
