@@ -1,3 +1,16 @@
+Mon Aug 21 17:33:36 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-opc.c (m68k_opcode_aliases): Add bhib as an alias for bhis,
+	and likewise for the other branches.  Add bhs as an alias for bcc,
+	and likewise for the size variants.  Add dbhs as an alias for
+	dbcc.
+
+start-sanitize-sh3e
+Fri Aug 11 13:40:24 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* sh-opc.h (FP sts instructions): Update to match reality.
+
+end-sanitize-sh3e
 Mon Aug  7 16:12:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-dis.c: (fpcr_names): Add % before all register names.
