@@ -710,5 +710,5 @@ extern void pop_frame ();
 	(((num) > LR0_REGNUM + 127) \
 	   ? fprintf(stderr, 	\
 		"Invalid register number %d in symbol table entry for %s\n", \
-	         (num), SYMBOL_NAME (sym)), (num)	\
+	         (num), SYMBOL_SOURCE_NAME (sym)), (num)	\
 	   : (num))

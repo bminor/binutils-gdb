@@ -72,18 +72,16 @@ c_typedef_print (type, new, stream)
       fprintf_filtered(stream, "typedef ");
       type_print(type,"",stream,0);
       if(TYPE_NAME ((SYMBOL_TYPE (new))) == 0
-	 || 0 != strcmp (TYPE_NAME ((SYMBOL_TYPE (new))),
-			 SYMBOL_NAME (new)))
-	 fprintf_filtered(stream,  " %s", SYMBOL_NAME(new));
+	 || !STREQ (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_NAME (new)))
+	fprintf_filtered(stream,  " %s", SYMBOL_SOURCE_NAME(new));
       break;
 #endif
 #ifdef _LANG_m2
    case language_m2:
       fprintf_filtered(stream, "TYPE ");
       if(!TYPE_NAME(SYMBOL_TYPE(new)) ||
-	 strcmp (TYPE_NAME(SYMBOL_TYPE(new)),
-		    SYMBOL_NAME(new)))
-	 fprintf_filtered(stream, "%s = ", SYMBOL_NAME(new));
+	 !STREQ (TYPE_NAME(SYMBOL_TYPE(new)), SYMBOL_NAME(new)))
+	fprintf_filtered(stream, "%s = ", SYMBOL_SOURCE_NAME(new));
       else
 	 fprintf_filtered(stream, "<builtin> = ");
       type_print(type,"",stream,0);
@@ -113,7 +111,6 @@ c_print_type (type, varstring, stream, show, level)
      int level;
 {
   register enum type_code code;
-  char *demangled = NULL;
   int demangled_args;
 
   c_type_print_base (type, stream, show, level);
@@ -132,25 +129,14 @@ c_print_type (type, varstring, stream, show, level)
     fputs_filtered (" ", stream);
   c_type_print_varspec_prefix (type, stream, show, 0);
 
-  /* See if the name has a C++ demangled equivalent, and if so, print that
-     instead. */
-
-  if (demangle)
-    {
-      demangled = cplus_demangle (varstring, DMGL_ANSI | DMGL_PARAMS);
-    }
-  fputs_filtered ((demangled != NULL) ? demangled : varstring, stream);
+  fputs_filtered (varstring, stream);
 
   /* For demangled function names, we have the arglist as part of the name,
      so don't print an additional pair of ()'s */
 
-  demangled_args = (demangled != NULL) && (code == TYPE_CODE_FUNC);
+  demangled_args = varstring[strlen(varstring) - 1] == ')';
   c_type_print_varspec_suffix (type, stream, show, 0, demangled_args);
 
-  if (demangled != NULL)
-    {
-      free (demangled);
-    }
 }
 
 /* Print the C++ method arguments ARGS to the file STREAM.  */
@@ -622,7 +608,7 @@ c_type_print_base (type, stream, show, level)
 	      struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
 	      int j, len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	      char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
-	      int is_constructor = name && strcmp(method_name, name) == 0;
+	      int is_constructor = name && STREQ(method_name, name);
 	      for (j = 0; j < len2; j++)
 		{
 		  QUIT;

@@ -371,14 +371,14 @@ step_1 (skip_subroutines, single_inst, count_string)
 	      fflush (stdout);
 
 	      /* No info or after _etext ("Can't happen") */
-	      if (msymbol == NULL || (msymbol + 1) -> name == NULL)
+	      if (msymbol == NULL || SYMBOL_NAME (msymbol + 1) == NULL)
 		error ("No data available on pc function.");
 
 	      printf_filtered ("Single stepping until function exit.\n");
 	      fflush (stdout);
 
-	      step_range_start = msymbol -> address;
-	      step_range_end = (msymbol + 1) -> address;
+	      step_range_start = SYMBOL_VALUE_ADDRESS (msymbol);
+	      step_range_end = SYMBOL_VALUE_ADDRESS (msymbol + 1);
 	    }
 	}
       else
@@ -420,8 +420,6 @@ jump_command (arg, from_tty)
   struct symtab_and_line sal;
   struct symbol *fn;
   struct symbol *sfn;
-  char *fname;
-  struct cleanup *back_to;
 
   ERROR_NO_INFERIOR;
 
@@ -447,14 +445,12 @@ jump_command (arg, from_tty)
   sfn = find_pc_function (sal.pc);
   if (fn != NULL && sfn != fn)
     {
-      fname = strdup_demangled (SYMBOL_NAME (fn));
-      back_to = make_cleanup (free, fname);
-      if (!query ("Line %d is not in `%s'.  Jump anyway? ", sal.line, fname))
+      if (!query ("Line %d is not in `%s'.  Jump anyway? ", sal.line,
+		  SYMBOL_SOURCE_NAME (fn)))
 	{
 	  error ("Not confirmed.");
 	  /* NOTREACHED */
 	}
-      do_cleanups (back_to);
     }
 
   addr = ADDR_BITS_SET (sal.pc);
@@ -572,7 +568,7 @@ until_next_command (from_tty)
       if (msymbol == NULL)
 	error ("Execution is not within a known function.");
       
-      step_range_start = msymbol -> address;
+      step_range_start = SYMBOL_VALUE_ADDRESS (msymbol);
       step_range_end = pc;
     }
   else

@@ -595,7 +595,7 @@ damn_b (rate)
 
   for (i = 0; baudtab[i].rate != 0; i++)
     {
-      if (!strcmp (rate, baudtab[i].rate))
+      if (STREQ (rate, baudtab[i].rate))
 	{
 	  return (baudtab[i].damn_b);
 	}
@@ -1307,7 +1307,7 @@ verify_break (vec)
 	{
 	  memory_error (status, memaddress);
 	}
-      return (strcmp (instr, buf));
+      return (STRCMP (instr, buf));
     }
     return (-1);
 }

@@ -202,7 +202,7 @@ dump_msymbols (objfile, outfile)
   
   fprintf_filtered (outfile, "\nObject file %s:\n\n", objfile -> name);
   for (index = 0, msymbol = objfile -> msymbols;
-       msymbol -> name != NULL; msymbol++, index++)
+       SYMBOL_NAME (msymbol) != NULL; msymbol++, index++)
     {
       switch (msymbol -> type)
 	{
@@ -225,8 +225,14 @@ dump_msymbols (objfile, outfile)
 	    ms_type = '?';
 	    break;
 	}
-      fprintf_filtered (outfile, "[%2d] %c %#10x %s\n", index, ms_type,
-			msymbol -> address, msymbol -> name);
+      fprintf_filtered (outfile, "[%2d] %c %#10x %s", index, ms_type,
+			SYMBOL_VALUE_ADDRESS (msymbol), SYMBOL_NAME (msymbol));
+      if (SYMBOL_LANGUAGE (msymbol) == language_cplus &&
+	  SYMBOL_DEMANGLED_NAME (msymbol) != NULL)
+	{
+	  fprintf_filtered (outfile, "  %s", SYMBOL_DEMANGLED_NAME (msymbol));
+	}
+      fputs_filtered ("\n", outfile);
     }
   if (objfile -> minimal_symbol_count != index)
     {
@@ -325,7 +331,15 @@ dump_symtab (objfile, symtab, outfile)
       if (BLOCK_SUPERBLOCK (b))
 	fprintf (outfile, " (under 0x%x)", (unsigned int) BLOCK_SUPERBLOCK (b));
       if (BLOCK_FUNCTION (b))
-	fprintf (outfile, " %s", SYMBOL_NAME (BLOCK_FUNCTION (b)));
+	{
+	  fprintf (outfile, " %s", SYMBOL_NAME (BLOCK_FUNCTION (b)));
+	  if (SYMBOL_LANGUAGE (BLOCK_FUNCTION (b)) == language_cplus &&
+	      SYMBOL_DEMANGLED_NAME (BLOCK_FUNCTION (b)) != NULL)
+	    {
+	      fprintf (outfile, " %s",
+		       SYMBOL_DEMANGLED_NAME (BLOCK_FUNCTION (b)));
+	    }
+	}
       if (BLOCK_GCC_COMPILED(b))
 	fprintf (outfile, " gcc%d compiled", BLOCK_GCC_COMPILED(b));
       fputc ('\n', outfile);
@@ -383,7 +397,7 @@ maintenance_print_symbols (args, from_tty)
 
   immediate_quit++;
   ALL_SYMTABS (objfile, s)
-    if (symname == NULL || (strcmp (symname, s -> filename) == 0))
+    if (symname == NULL || (STREQ (symname, s -> filename)))
       dump_symtab (objfile, s, outfile);
   immediate_quit--;
   do_cleanups (cleanups);
@@ -398,7 +412,7 @@ print_symbol (symbol, depth, outfile)
   print_spaces (depth, outfile);
   if (SYMBOL_NAMESPACE (symbol) == LABEL_NAMESPACE)
     {
-      fprintf (outfile, "label %s at 0x%x\n", SYMBOL_NAME (symbol),
+      fprintf (outfile, "label %s at 0x%x\n", SYMBOL_SOURCE_NAME (symbol),
 	       SYMBOL_VALUE_ADDRESS (symbol));
       return;
     }
@@ -433,7 +447,7 @@ print_symbol (symbol, depth, outfile)
 	  fprintf (outfile, "; ");
 	}
       else
-	fprintf (outfile, "%s ", SYMBOL_NAME (symbol));
+	fprintf (outfile, "%s ", SYMBOL_SOURCE_NAME (symbol));
 
       switch (SYMBOL_CLASS (symbol))
 	{
@@ -572,7 +586,7 @@ maintenance_print_psymbols (args, from_tty)
 
   immediate_quit++;
   ALL_PSYMTABS (objfile, ps)
-    if (symname == NULL || (strcmp (symname, ps -> filename) == 0))
+    if (symname == NULL || (STREQ (symname, ps -> filename)))
       dump_psymtab (objfile, ps, outfile);
   immediate_quit--;
   do_cleanups (cleanups);
@@ -589,7 +603,13 @@ print_partial_symbol (p, count, what, outfile)
   fprintf_filtered (outfile, "  %s partial symbols:\n", what);
   while (count-- > 0)
     {
-      fprintf_filtered (outfile, "    `%s', ", SYMBOL_NAME(p));
+      fprintf_filtered (outfile, "    `%s'", SYMBOL_NAME(p));
+      if (SYMBOL_LANGUAGE (p) == language_cplus &&
+	  SYMBOL_DEMANGLED_NAME (p) != NULL)
+	{
+	  fprintf_filtered (outfile, "  `%s'", SYMBOL_DEMANGLED_NAME (p));
+	}
+      fputs_filtered (", ", outfile);
       switch (SYMBOL_NAMESPACE (p))
 	{
 	case UNDEF_NAMESPACE:
@@ -703,7 +723,7 @@ maintenance_print_msymbols (args, from_tty)
 
   immediate_quit++;
   ALL_OBJFILES (objfile)
-    if (symname == NULL || (strcmp (symname, objfile -> name) == 0))
+    if (symname == NULL || (STREQ (symname, objfile -> name)))
       dump_msymbols (objfile, outfile);
   immediate_quit--;
   fprintf_filtered (outfile, "\n\n");
@@ -771,61 +791,3 @@ extend_psymbol_list (listp, objfile)
   listp->next = listp->list + listp->size;
   listp->size = new_size;
 }
-
-#ifdef DEBUG
-
-/* The work performed by this function is normally done by the macro
-   ADD_PSYMBOL_TO_LIST defined in symfile.h.  When debugging gdb, this
-   function makes things easier. */
-
-void
-add_psymbol_to_list (name, namelength, namespace, class, listp, psymval)
-     char *name;
-     int namelength;
-     enum namespace namespace;
-     enum address_class class;
-     struct psymbol_allocation_list *listp;
-     unsigned long psymval;
-{
-  register struct partial_symbol *psym;
-
-  if (listp -> next >= listp -> list + listp -> size)
-    extend_psymbol_list (listp, objfile);
-  psym = listp -> next++;
-  SYMBOL_NAME (psym) = (char *) obstack_alloc (&objfile->psymbol_obstack,
-					       namelength + 1);
-  memcpy (SYMBOL_NAME (psym), name, namelength);
-  SYMBOL_NAME (psym)[namelength] = '\0';
-  SYMBOL_NAMESPACE (psym) = namespace;
-  SYMBOL_CLASS (psym) = class;
-  SYMBOL_VALUE (psym) = psymval;
-}
-
-/* The work performed by this function is normally done by the macro
-   ADD_PSYMBOL_ADDR_TO_LIST defined in symfile.h.  When debugging gdb, this
-   function makes things easier. */
-
-void
-add_psymbol_addr_to_list (name, namelength, namespace, class, listp, psymval)
-     char *name;
-     int namelength;
-     enum namespace namespace;
-     enum address_class class;
-     struct psymbol_allocation_list *listp;
-     CORE_ADDR psymval;
-{
-  register struct partial_symbol *psym;
-
-  if (listp -> next >= listp -> list + listp -> size)
-    extend_psymbol_list (listp, objfile);
-  psym = listp -> next++;
-  SYMBOL_NAME (psym) = (char *) obstack_alloc (&objfile->psymbol_obstack,
-					       namelength + 1);
-  memcpy (SYMBOL_NAME (psym), name, namelength);
-  SYMBOL_NAME (psym)[namelength] = '\0';
-  SYMBOL_NAMESPACE (psym) = namespace;
-  SYMBOL_CLASS (psym) = class;
-  SYMBOL_VALUE_ADDRESS (psym) = psymval;
-}
-
-#endif /* DEBUG */

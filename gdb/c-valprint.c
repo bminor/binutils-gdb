@@ -186,8 +186,8 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		  for (j = 0; j < len2; j++)
 		    {
 		      QUIT;
-		      if (!strcmp (SYMBOL_NAME (sym),
-				   TYPE_FN_FIELD_PHYSNAME (f, j)))
+		      if (STREQ (SYMBOL_NAME (sym),
+				  TYPE_FN_FIELD_PHYSNAME (f, j)))
 			{
 			  goto common;
 			}
@@ -333,11 +333,11 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 
 	      struct minimal_symbol *msymbol =
 		lookup_minimal_symbol_by_pc (vt_address);
-	      if ((msymbol != NULL) && (vt_address == msymbol -> address))
+	      if ((msymbol != NULL) &&
+		  (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
 		{
 		  fputs_filtered (" <", stream);
-		  fputs_demangled (msymbol -> name, stream,
-				   DMGL_ANSI | DMGL_PARAMS);
+		  fputs_filtered (SYMBOL_SOURCE_NAME (msymbol), stream);
 		  fputs_filtered (">", stream);
 		}
 	      if (vtblprint)

@@ -56,6 +56,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define FT_NUM_MEMBERS		28	/* Highest FT_* above, plus one. */
 
+/* Some macros for char-based bitfields.  */
+
+#define B_SET(a,x)	((a)[(x)>>3] |= (1 << ((x)&7)))
+#define B_CLR(a,x)	((a)[(x)>>3] &= ~(1 << ((x)&7)))
+#define B_TST(a,x)	((a)[(x)>>3] & (1 << ((x)&7)))
+#define B_TYPE		unsigned char
+#define	B_BYTES(x)	( 1 + ((x)>>3) )
+#define	B_CLRALL(a,x)	memset ((a), 0, B_BYTES(x))
+
 /* Different kinds of data types are distinguished by the `code' field.  */
 
 enum type_code

@@ -133,6 +133,10 @@ struct symloc {
 #define BELIEVE_PCC_PROMOTION 0
 #endif
 
+/* Remember what we deduced to be the source language of this psymtab. */
+
+static enum language psymtab_language = language_unknown;
+
 /* Nonzero means give verbose info on gdb action.  From main.c.  */
 extern int info_verbose;
 
@@ -345,7 +349,7 @@ add_old_header_file (name, instance)
   register int i;
 
   for (i = 0; i < n_header_files; i++)
-    if (!strcmp (p[i].name, name) && instance == p[i].instance)
+    if (STREQ (p[i].name, name) && instance == p[i].instance)
       {
 	add_this_object_header_file (i);
 	return;
@@ -811,7 +815,7 @@ find_corresponding_bincl_psymtab (name, instance)
 
   for (bincl = bincl_list; bincl < next_bincl; bincl++)
     if (bincl->instance == instance
-	&& !strcmp (name, bincl->name))
+	&& STREQ (name, bincl->name))
       return bincl->pst;
 
   return (struct partial_symtab *) 0;
@@ -963,7 +967,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
       /* Use the address of dbsubc to finish the last psymtab. */
       if (hp_bufp->symbol_type == ST_CODE &&
           HP_STRINGTAB (objfile)[hp_bufp->name.n_strx] == '_' &&
-          !strcmp (HP_STRINGTAB (objfile) + hp_bufp->name.n_strx, "_dbsubc"))
+          STREQ (HP_STRINGTAB (objfile) + hp_bufp->name.n_strx, "_dbsubc"))
         dbsubc_addr = hp_bufp->symbol_value;
       if (hp_bufp->symbol_scope == SS_UNIVERSAL)
         {
@@ -971,10 +975,10 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
             error ("Invalid symbol data; bad HP string table offset: %d",
                    hp_bufp->name.n_strx);
           /* A hack, but gets the job done. */
-          if (!strcmp (hp_bufp->name.n_strx + HP_STRINGTAB (objfile), 
+          if (STREQ (hp_bufp->name.n_strx + HP_STRINGTAB (objfile), 
 		       "$START$"))
 	    objfile -> ei.entry_file_lowpc = hp_bufp->symbol_value;
-          if (!strcmp (hp_bufp->name.n_strx + HP_STRINGTAB (objfile), 
+          if (STREQ (hp_bufp->name.n_strx + HP_STRINGTAB (objfile), 
 		       "_sr4export"))
 	    objfile -> ei.entry_file_highpc = hp_bufp->symbol_value;
           record_minimal_symbol (hp_bufp->name.n_strx + HP_STRINGTAB (objfile),
@@ -1105,6 +1109,9 @@ start_psymtab (objfile, section_offsets,
      if successful.  */
   elfstab_offset_sections (objfile, result);
 
+  /* Deduce the source language from the filename for this psymtab. */
+  psymtab_language = deduce_language_from_filename (filename);
+
   return result;
 }
 
@@ -1179,7 +1186,8 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
     minsym = lookup_minimal_symbol (p, objfile);
 
     if (minsym) {
-      pst->texthigh = minsym->address + (int)minsym->info;
+      pst->texthigh = SYMBOL_VALUE_ADDRESS (minsym) +
+	(int) MSYMBOL_INFO (minsym);
     } else {
       /* This file ends with a static function, and it's
 	 difficult to imagine how hard it would be to track down
@@ -1473,9 +1481,9 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
       processing_gcc_compilation = 0;
       if (bufp->n_type == N_TEXT)
 	{
-	  if (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0)
+	  if (STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
 	    processing_gcc_compilation = 1;
-	  else if (strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0)
+	  else if (STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
 	    processing_gcc_compilation = 2;
 	}
 
@@ -1537,9 +1545,9 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
 	     However, there is no reason not to accept
 	     the GCC_COMPILED_FLAG_SYMBOL anywhere.  */
 
-	  if (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0)
+	  if (STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
 	    processing_gcc_compilation = 1;
-	  else if (strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0)
+	  else if (STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
 	    processing_gcc_compilation = 2;
 
 #if 1	  /* Works, but is experimental.  -fnf */
@@ -1970,7 +1978,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_OPT:			/* Solaris 2:  Compiler options */
       if (name)
 	{
-	  if (strcmp (name, GCC2_COMPILED_FLAG_SYMBOL) == 0)
+	  if (STREQ (name, GCC2_COMPILED_FLAG_SYMBOL))
 	    {
 	      processing_gcc_compilation = 2;
 #if 1	      /* Works, but is experimental.  -fnf */

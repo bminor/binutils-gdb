@@ -47,7 +47,7 @@ main (argc, argv)
   outfile = 0;
   for (i = 1; i < argc; i++)
     {
-      if (strcmp (argv[i], "-o") == 0)
+      if (STREQ (argv[i], "-o"))
 	outfile = argv[++i];
     }
   if (outfile == 0)
@@ -66,7 +66,7 @@ main (argc, argv)
    * that name the output file. */
   for (i = 1; i < argc; i++)
     {
-      if (strcmp (argv[i], "-o") == 0)
+      if (STREQ (argv[i], "-o"))
 	continue;
       if ((in_fd = open (argv[i], O_RDONLY)) < 0)
 	err ("Error opening %s for read: %s\n", argv[i],
@@ -152,7 +152,7 @@ find_symbol (sym_name, symbol_table, length, strings)
       {
 	if ((sym->n_type & N_TYPE) != N_DATA) continue;
 	if (sym->n_un.n_strx == 0) continue;
-	if (strcmp (sym_name, strings + sym->n_un.n_strx - 4) == 0)
+	if (STREQ (sym_name, strings + sym->n_un.n_strx - 4))
 	  return sym->n_value;
       }
     err ("Data symbol %s not found in %s\n", sym_name, file);

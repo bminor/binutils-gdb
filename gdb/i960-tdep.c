@@ -472,7 +472,7 @@ leafproc_return (ip)
 
   if ((msymbol = lookup_minimal_symbol_by_pc (ip)) != NULL)
     {
-      if ((p = index (msymbol -> name, '.')) && !strcmp (p, ".lf"))
+      if ((p = index (msymbol -> name, '.')) && STREQ (p, ".lf"))
 	{
 	  if (next_insn (msymbol -> address, &insn1, &insn2)
 	      && (insn1 & 0xff87ffff) == 0x5c80161e       /* mov g14, gx */

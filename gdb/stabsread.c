@@ -34,6 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native */
 #include "buildsym.h"
 #include "complaints.h"
+#include "demangle.h"
 
 /* Ask stabsread.h to define the vars it normally declares `extern'.  */
 #define	EXTERN	/**/
@@ -491,9 +492,12 @@ define_symbol (valu, string, desc, type, objfile)
   else
     {
     normal:
+      SYMBOL_LANGUAGE (sym) = current_subfile -> language;
       SYMBOL_NAME (sym)	= (char *)
 	obstack_alloc (&objfile -> symbol_obstack, ((p - string) + 1));
       /* Open-coded bcopy--saves function call time.  */
+      /* FIXME:  Does it really?  Try replacing with simple strcpy and
+	 try it on an executable with a large symbol table. */
       {
 	register char *p1 = string;
 	register char *p2 = SYMBOL_NAME (sym);
@@ -503,6 +507,24 @@ define_symbol (valu, string, desc, type, objfile)
 	  }
 	*p2++ = '\0';
       }
+
+      /* If this symbol is from a C++ compilation, then attempt to cache the
+	 demangled form for future reference.  This is a typical time versus
+	 space tradeoff, that was decided in favor of time because it sped up
+	 C++ symbol lookups by a factor of about 20. */
+
+      if (SYMBOL_LANGUAGE (sym) == language_cplus)
+	{
+	  char *demangled =
+	    cplus_demangle (SYMBOL_NAME (sym), DMGL_PARAMS | DMGL_ANSI);
+	  if (demangled != NULL)
+	    {
+	      SYMBOL_DEMANGLED_NAME (sym) = 
+		obsavestring (demangled, strlen (demangled),
+			      &objfile -> symbol_obstack);
+	      free (demangled);
+	    }
+	}
     }
   p++;
 
@@ -785,7 +807,7 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
       if (SYMBOL_VALUE (sym) >= NUM_REGS)
 	{
-	  complain (&reg_value_complaint, SYMBOL_NAME (sym));
+	  complain (&reg_value_complaint, SYMBOL_SOURCE_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;  /* Known safe, though useless */
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -799,7 +821,7 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
       if (SYMBOL_VALUE (sym) >= NUM_REGS)
 	{
-	  complain (&reg_value_complaint, SYMBOL_NAME (sym));
+	  complain (&reg_value_complaint, SYMBOL_SOURCE_NAME (sym));
 	  SYMBOL_VALUE (sym) = SP_REGNUM;  /* Known safe, though useless */
 	}
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -864,12 +886,10 @@ define_symbol (valu, string, desc, type, objfile)
 
       if (synonym)
 	{
+	  /* Clone the sym and then modify it. */
 	  register struct symbol *typedef_sym = (struct symbol *)
 	    obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
-	  memset (typedef_sym, 0, sizeof (struct symbol));
-	  SYMBOL_NAME (typedef_sym) = SYMBOL_NAME (sym);
-	  SYMBOL_TYPE (typedef_sym) = SYMBOL_TYPE (sym);
-
+	  *typedef_sym = *sym;
 	  SYMBOL_CLASS (typedef_sym) = LOC_TYPEDEF;
 	  SYMBOL_VALUE (typedef_sym) = valu;
 	  SYMBOL_NAMESPACE (typedef_sym) = VAR_NAMESPACE;
@@ -1121,7 +1141,7 @@ read_type (pp, objfile)
 	      if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 		  && SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE
 		  && (TYPE_CODE (SYMBOL_TYPE (sym)) == code)
-		  && !strcmp (SYMBOL_NAME (sym), type_name_only))
+		  && STREQ (SYMBOL_NAME (sym), type_name_only))
 		{
 		  obstack_free (&objfile -> type_obstack, type_name);
 		  type = SYMBOL_TYPE (sym);
@@ -2435,6 +2455,7 @@ read_enum_type (pp, type, objfile)
 	obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_NAME (sym) = name;
+      SYMBOL_LANGUAGE (sym) = current_subfile -> language;
       SYMBOL_CLASS (sym) = LOC_CONST;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       SYMBOL_VALUE (sym) = n;
@@ -2485,10 +2506,10 @@ read_enum_type (pp, type, objfile)
   /* This screws up perfectly good C programs with enums.  FIXME.  */
   /* Is this Modula-2's BOOLEAN type?  Flag it as such if so. */
   if(TYPE_NFIELDS(type) == 2 &&
-     ((!strcmp(TYPE_FIELD_NAME(type,0),"TRUE") &&
-       !strcmp(TYPE_FIELD_NAME(type,1),"FALSE")) ||
-      (!strcmp(TYPE_FIELD_NAME(type,1),"TRUE") &&
-       !strcmp(TYPE_FIELD_NAME(type,0),"FALSE"))))
+     ((STREQ(TYPE_FIELD_NAME(type,0),"TRUE") &&
+       STREQ(TYPE_FIELD_NAME(type,1),"FALSE")) ||
+      (STREQ(TYPE_FIELD_NAME(type,1),"TRUE") &&
+       STREQ(TYPE_FIELD_NAME(type,0),"FALSE"))))
      TYPE_CODE(type) = TYPE_CODE_BOOL;
 #endif
 
@@ -3090,7 +3111,7 @@ cleanup_undefined_types ()
 			    && SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE
 			    && (TYPE_CODE (SYMBOL_TYPE (sym)) ==
 				TYPE_CODE (*type))
-			    && !strcmp (SYMBOL_NAME (sym), typename))
+			    && STREQ (SYMBOL_NAME (sym), typename))
 			  {
 			    memcpy (*type, SYMBOL_TYPE (sym),
 				    sizeof (struct type));
@@ -3147,7 +3168,7 @@ scan_file_globals (objfile)
   if (objfile->msymbols == 0)		/* Beware the null file.  */
     return;
 
-  for (msymbol = objfile -> msymbols; msymbol -> name != NULL; msymbol++)
+  for (msymbol = objfile -> msymbols; SYMBOL_NAME (msymbol) != NULL; msymbol++)
     {
       QUIT;
 
@@ -3156,12 +3177,12 @@ scan_file_globals (objfile)
       /* Get the hash index and check all the symbols
 	 under that hash index. */
 
-      hash = hashname (msymbol -> name);
+      hash = hashname (SYMBOL_NAME (msymbol));
 
       for (sym = global_sym_chain[hash]; sym;)
 	{
-	  if (*(msymbol -> name) == SYMBOL_NAME (sym)[0]
-	      && !strcmp(msymbol -> name + 1, SYMBOL_NAME (sym) + 1))
+	  if (SYMBOL_NAME (msymbol)[0] == SYMBOL_NAME (sym)[0] &&
+	      STREQ(SYMBOL_NAME (msymbol) + 1, SYMBOL_NAME (sym) + 1))
 	    {
 	      /* Splice this symbol out of the hash chain and
 		 assign the value we have to it. */
@@ -3180,11 +3201,11 @@ scan_file_globals (objfile)
 
 	      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
 		{
-		  fix_common_block (sym, msymbol -> address);
+		  fix_common_block (sym, SYMBOL_VALUE_ADDRESS (msymbol));
 		}
 	      else
 		{
-		  SYMBOL_VALUE_ADDRESS (sym) = msymbol -> address;
+		  SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msymbol);
 		}
 	      
 	      if (prev)

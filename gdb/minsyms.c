@@ -42,6 +42,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "demangle.h"
 
 /* Accumulate the minimal symbols for each objfile in bunches of BUNCH_SIZE.
    At the end, copy them all into one newly allocated location on an objfile's
@@ -105,29 +106,32 @@ lookup_minimal_symbol (name, objf)
       if (objf == NULL || objf == objfile)
 	{
 	  for (msymbol = objfile -> msymbols;
-	       msymbol != NULL && msymbol -> name != NULL &&
+	       msymbol != NULL && SYMBOL_NAME (msymbol) != NULL &&
 	       found_symbol == NULL;
 	       msymbol++)
 	    {
-	      if (strcmp (msymbol -> name, name) == 0)
+	      if (SYMBOL_MATCHES_NAME (msymbol, name))
 		{
 #ifdef IBM6000_TARGET
-/* I *think* all platforms using shared libraries (and trampoline code)
- * will suffer this problem. Consider a case where there are 5 shared
- * libraries, each referencing `foo' with a trampoline entry. When someone
- * wants to put a breakpoint on `foo' and the only info we have is minimal
- * symbol vector, we want to use the real `foo', rather than one of those
- * trampoline entries. MGO */	
-	  /* If a trampoline symbol is found, we prefer to keep looking
-	     for the *real* symbol. If the actual symbol not found,
-	     then we'll use the trampoline entry. Sorry for the machine
-	     dependent code here, but I hope this will benefit other
-	     platforms as well. For trampoline entries, we used mst_unknown
-	     earlier. Perhaps we should define a `mst_trampoline' type?? */
+		  /* I *think* all platforms using shared libraries (and
+		     trampoline code) will suffer this problem. Consider a
+		     case where there are 5 shared libraries, each referencing
+		     `foo' with a trampoline entry. When someone wants to put
+		     a breakpoint on `foo' and the only info we have is minimal
+		     symbol vector, we want to use the real `foo', rather than
+		     one of those trampoline entries. MGO */
+		  /* If a trampoline symbol is found, we prefer to keep looking
+		     for the *real* symbol. If the actual symbol not found,
+		     then we'll use the trampoline entry. Sorry for the machine
+		     dependent code here, but I hope this will benefit other
+		     platforms as well. For trampoline entries, we used
+		     mst_unknown earlier. Perhaps we should define a
+		     `mst_trampoline' type?? */
 
-		  if (msymbol->type != mst_unknown)
+		  if (MSYMBOL_TYPE (msymbol) != mst_unknown)
 		    found_symbol = msymbol;
-	          else if (msymbol->type == mst_unknown && !trampoline_symbol)
+	          else if (MSYMBOL_TYPE (msymbol) == mst_unknown &&
+			   !trampoline_symbol)
 		    trampoline_symbol = msymbol;
 		     
 #else
@@ -197,14 +201,15 @@ lookup_minimal_symbol_by_pc (pc)
 	     Warning: this code is trickier than it would appear at first. */
 
 	  /* Should also requires that pc is <= end of objfile.  FIXME! */
-	  if (pc >= msymbol[lo].address)
+	  if (pc >= SYMBOL_VALUE_ADDRESS (&msymbol[lo]))
 	    {
-	      while (msymbol[hi].address > pc)
+	      while (SYMBOL_VALUE_ADDRESS (&msymbol[hi]) > pc)
 		{
 		  /* pc is still strictly less than highest address */
 		  /* Note "new" will always be >= lo */
 		  new = (lo + hi) / 2;
-		  if ((msymbol[new].address >= pc) || (lo == new))
+		  if ((SYMBOL_VALUE_ADDRESS (&msymbol[new]) >= pc) ||
+		      (lo == new))
 		    {
 		      hi = new;
 		    }
@@ -218,7 +223,8 @@ lookup_minimal_symbol_by_pc (pc)
 		 overall. */
 
 	      if ((best_symbol == NULL) ||
-		  (best_symbol -> address < msymbol[hi].address))
+		  (SYMBOL_VALUE_ADDRESS (best_symbol) < 
+		   SYMBOL_VALUE_ADDRESS (&msymbol[hi])))
 		{
 		  best_symbol = &msymbol[hi];
 		}
@@ -247,6 +253,7 @@ prim_record_minimal_symbol (name, address, ms_type)
      enum minimal_symbol_type ms_type;
 {
   register struct msym_bunch *new;
+  register struct minimal_symbol *msymbol;
 
   if (msym_bunch_index == BUNCH_SIZE)
     {
@@ -255,13 +262,24 @@ prim_record_minimal_symbol (name, address, ms_type)
       new -> next = msym_bunch;
       msym_bunch = new;
     }
-  msym_bunch -> contents[msym_bunch_index].name = (char *) name;
-  msym_bunch -> contents[msym_bunch_index].address = address;
-  msym_bunch -> contents[msym_bunch_index].info = NULL;
-  msym_bunch -> contents[msym_bunch_index].type = ms_type;
+  msymbol = &msym_bunch -> contents[msym_bunch_index];
+  SYMBOL_NAME (msymbol) = (char *) name;
+  /* Note that SYMBOL_LANGUAGE and SYMBOL_DEMANGLED_NAME are not initialized
+     to their final values until the minimal symbols are actually added to
+     the minimal symbol table.  We just set them to a known state here so
+     random values won't confuse anyone debugging the debugger. */
+  SYMBOL_LANGUAGE (msymbol) = language_unknown;
+  SYMBOL_DEMANGLED_NAME (msymbol) = NULL;
+  SYMBOL_VALUE_ADDRESS (msymbol) = address;
+  MSYMBOL_TYPE (msymbol) = ms_type;
+  /* FIXME:  This info, if it remains, needs its own field.  */
+  MSYMBOL_INFO (msymbol) = NULL; /* FIXME! */
   msym_bunch_index++;
   msym_count++;
 }
+
+/* FIXME:  Why don't we just combine this function with the one above
+   and pass it a NULL info pointer value if info is not needed? */
 
 void
 prim_record_minimal_symbol_and_info (name, address, ms_type, info)
@@ -271,6 +289,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info)
      char *info;
 {
   register struct msym_bunch *new;
+  register struct minimal_symbol *msymbol;
 
   if (msym_bunch_index == BUNCH_SIZE)
     {
@@ -279,12 +298,18 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info)
       new -> next = msym_bunch;
       msym_bunch = new;
     }
-  msym_bunch -> contents[msym_bunch_index].name = (char *) name;
-  msym_bunch -> contents[msym_bunch_index].address = address;
-  msym_bunch -> contents[msym_bunch_index].info = NULL;
-  msym_bunch -> contents[msym_bunch_index].type = ms_type;
-    /* FIXME:  This info, if it remains, needs its own field.  */
-  msym_bunch -> contents[msym_bunch_index].info = info;  /* FIXME! */
+  msymbol = &msym_bunch -> contents[msym_bunch_index];
+  SYMBOL_NAME (msymbol) = (char *) name;
+  /* Note that SYMBOL_LANGUAGE and SYMBOL_DEMANGLED_NAME are not initialized
+     to their final values until the minimal symbols are actually added to
+     the minimal symbol table.  We just set them to a known state here so
+     random values won't confuse anyone debugging the debugger. */
+  SYMBOL_LANGUAGE (msymbol) = language_unknown;
+  SYMBOL_DEMANGLED_NAME (msymbol) = NULL;
+  SYMBOL_VALUE_ADDRESS (msymbol) = address;
+  MSYMBOL_TYPE (msymbol) = ms_type;
+  /* FIXME:  This info, if it remains, needs its own field.  */
+  MSYMBOL_INFO (msymbol) = info; /* FIXME! */
   msym_bunch_index++;
   msym_count++;
 }
@@ -303,11 +328,11 @@ compare_minimal_symbols (fn1p, fn2p)
   fn1 = (const struct minimal_symbol *) fn1p;
   fn2 = (const struct minimal_symbol *) fn2p;
 
-  if (fn1 -> address < fn2 -> address)
+  if (SYMBOL_VALUE_ADDRESS (fn1) < SYMBOL_VALUE_ADDRESS (fn2))
     {
       return (-1);
     }
-  else if (fn1 -> address > fn2 -> address)
+  else if (SYMBOL_VALUE_ADDRESS (fn1) > SYMBOL_VALUE_ADDRESS (fn2))
     {
       return (1);
     }
@@ -389,12 +414,13 @@ compact_minimal_symbols (msymbol, mcount)
       copyfrom = copyto = msymbol;
       while (copyfrom < msymbol + mcount - 1)
 	{
-	  if (copyfrom -> address == (copyfrom + 1) -> address
-	      && (strcmp (copyfrom -> name, (copyfrom + 1) -> name) == 0))
+	  if (SYMBOL_VALUE_ADDRESS (copyfrom) == 
+	      SYMBOL_VALUE_ADDRESS ((copyfrom + 1)) &&
+	      (STREQ (SYMBOL_NAME (copyfrom), SYMBOL_NAME ((copyfrom + 1)))))
 	    {
-	      if ((copyfrom + 1) -> type == mst_unknown)
+	      if (MSYMBOL_TYPE((copyfrom + 1)) == mst_unknown)
 		{
-		  (copyfrom + 1) -> type = copyfrom -> type;
+		  MSYMBOL_TYPE ((copyfrom + 1)) = MSYMBOL_TYPE (copyfrom);
 		}
 	      copyfrom++;
 	    }
@@ -409,11 +435,28 @@ compact_minimal_symbols (msymbol, mcount)
   return (mcount);
 }
 
-/* Add the minimal symbols in the existing bunches to the objfile's
-   official minimal symbol table.  99% of the time, this adds the
-   bunches to NO existing symbols.  Once in a while for shared
-   libraries, we add symbols (e.g. common symbols) to an existing
-   objfile.  */
+/* Add the minimal symbols in the existing bunches to the objfile's official
+   minimal symbol table.  In most cases there is no minimal symbol table yet
+   for this objfile, and the existing bunches are used to create one.  Once
+   in a while (for shared libraries for example), we add symbols (e.g. common
+   symbols) to an existing objfile.
+
+   Because of the way minimal symbols are collected, we generally have no way
+   of knowing what source language applies to any particular minimal symbol.
+   Specifically, we have no way of knowing if the minimal symbol comes from a
+   C++ compilation unit or not.  So for the sake of supporting cached
+   demangled C++ names, we have no choice but to try and demangle each new one
+   that comes in.  If the demangling succeeds, then we assume it is a C++
+   symbol and set the symbol's language and demangled name fields
+   appropriately.  Note that in order to avoid unnecessary demanglings, and
+   allocating obstack space that subsequently can't be freed for the demangled
+   names, we mark all newly added symbols with language_auto.  After
+   compaction of the minimal symbols, we go back and scan the entire minimal
+   symbol table looking for these new symbols.  For each new symbol we attempt
+   to demangle it, and if successful, record it as a language_cplus symbol
+   and cache the demangled form on the symbol obstack.  Symbols which don't
+   demangle are marked as language_unknown symbols, which inhibits future
+   attempts to demangle them if we later add more minimal symbols. */
 
 void
 install_minimal_symbols (objfile)
@@ -425,6 +468,7 @@ install_minimal_symbols (objfile)
   register struct minimal_symbol *msymbols;
   int alloc_count;
   register char leading_char;
+  char *demangled_name;
 
   if (msym_count > 0)
     {
@@ -459,9 +503,10 @@ install_minimal_symbols (objfile)
 	  for (bindex = 0; bindex < msym_bunch_index; bindex++, mcount++)
 	    {
 	      msymbols[mcount] = bunch -> contents[bindex];
-	      if (msymbols[mcount].name[0] == leading_char)
+	      SYMBOL_LANGUAGE (&msymbols[mcount]) = language_auto;
+	      if (SYMBOL_NAME (&msymbols[mcount])[0] == leading_char)
 		{
-		  msymbols[mcount].name++;
+		  SYMBOL_NAME(&msymbols[mcount])++;
 		}
 	    }
 	  msym_bunch_index = BUNCH_SIZE;
@@ -482,19 +527,20 @@ install_minimal_symbols (objfile)
       msymbols = (struct minimal_symbol *)
 	obstack_finish (&objfile->symbol_obstack);
 
-      /* We also terminate the minimal symbol table
-	 with a "null symbol", which is *not* included in the size of
-	 the table.  This makes it easier to find the end of the table
-	 when we are handed a pointer to some symbol in the middle of it.
-         Zero out the fields in the "null symbol" allocated at the end
-	 of the array.  Note that the symbol count does *not* include
-	 this null symbol, which is why it is indexed by mcount and not
-	 mcount-1. */
+      /* We also terminate the minimal symbol table with a "null symbol",
+	 which is *not* included in the size of the table.  This makes it
+	 easier to find the end of the table when we are handed a pointer
+	 to some symbol in the middle of it.  Zero out the fields in the
+	 "null symbol" allocated at the end of the array.  Note that the
+	 symbol count does *not* include this null symbol, which is why it
+	 is indexed by mcount and not mcount-1. */
 
-      msymbols[mcount].name = NULL;
-      msymbols[mcount].address = 0;
-      msymbols[mcount].info = NULL;
-      msymbols[mcount].type = mst_unknown;
+      SYMBOL_NAME (&msymbols[mcount]) = NULL;
+      SYMBOL_VALUE_ADDRESS (&msymbols[mcount]) = 0;
+      MSYMBOL_INFO (&msymbols[mcount]) = NULL;
+      MSYMBOL_TYPE (&msymbols[mcount]) = mst_unknown;
+      SYMBOL_LANGUAGE (&msymbols[mcount]) = language_unknown;
+      SYMBOL_DEMANGLED_NAME (&msymbols[mcount]) = NULL;
 
       /* Attach the minimal symbol table to the specified objfile.
 	 The strings themselves are also located in the symbol_obstack
@@ -502,6 +548,31 @@ install_minimal_symbols (objfile)
 
       objfile -> minimal_symbol_count = mcount;
       objfile -> msymbols = msymbols;
+
+      /* Now walk through all the minimal symbols, selecting the newly added
+	 ones and attempting to cache their C++ demangled names. */
+
+      for ( ; mcount-- > 0 ; msymbols++)
+	{
+	  if (SYMBOL_LANGUAGE (msymbols) == language_auto)
+	    {
+	      demangled_name = cplus_demangle (SYMBOL_NAME (msymbols),
+					       DMGL_PARAMS | DMGL_ANSI);
+	      if (demangled_name == NULL)
+		{
+		  SYMBOL_LANGUAGE (msymbols) = language_unknown;
+		}
+	      else
+		{
+		  SYMBOL_LANGUAGE (msymbols) = language_cplus;
+		  SYMBOL_DEMANGLED_NAME (msymbols) =
+		    obsavestring (demangled_name, strlen (demangled_name),
+				  &objfile->symbol_obstack);
+					  
+		  free (demangled_name);
+		}
+	    }
+	}
     }
 }
 

@@ -391,7 +391,7 @@ lookup_internalvar (name)
   register struct internalvar *var;
 
   for (var = internalvars; var; var = var->next)
-    if (!strcmp (var->name, name))
+    if (STREQ (var->name, name))
       return var;
 
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
@@ -1045,7 +1045,7 @@ value_headof (arg, btype, dtype)
   /* Check that VTBL looks like it points to a virtual function table.  */
   msymbol = lookup_minimal_symbol_by_pc (VALUE_ADDRESS (vtbl));
   if (msymbol == NULL
-      || !VTBL_PREFIX_P (demangled_name = msymbol -> name))
+      || !VTBL_PREFIX_P (demangled_name = SYMBOL_NAME (msymbol)))
     {
       /* If we expected to find a vtable, but did not, let the user
 	 know that we aren't happy, but don't throw an error.
@@ -1091,8 +1091,8 @@ value_headof (arg, btype, dtype)
       *(strchr (demangled_name, ':')) = '\0';
     }
   sym = lookup_symbol (demangled_name, 0, VAR_NAMESPACE, 0, 0);
-  if (sym == 0)
-    error ("could not find type declaration for `%s'", SYMBOL_NAME (sym));
+  if (sym == NULL)
+    error ("could not find type declaration for `%s'", demangled_name);
   if (best_entry)
     {
       free (demangled_name);
@@ -1152,7 +1152,7 @@ baseclass_offset (type, index, arg, offset)
 	 in the fields.  */
       for (i = n_baseclasses; i < len; i++)
 	{
-	  if (! strcmp (vbase_name, TYPE_FIELD_NAME (type, i)))
+	  if (STREQ (vbase_name, TYPE_FIELD_NAME (type, i)))
 	    {
 	      CORE_ADDR addr
 		= unpack_pointer (TYPE_FIELD_TYPE (type, i),
@@ -1220,7 +1220,7 @@ baseclass_addr (type, index, valaddr, valuep, errp)
 	 in the fields.  */
       for (i = n_baseclasses; i < len; i++)
 	{
-	  if (! strcmp (vbase_name, TYPE_FIELD_NAME (type, i)))
+	  if (STREQ (vbase_name, TYPE_FIELD_NAME (type, i)))
 	    {
 	      value val = allocate_value (basetype);
 	      CORE_ADDR addr;

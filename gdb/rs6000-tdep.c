@@ -276,7 +276,7 @@ CORE_ADDR pc;
          function as well. */
 
       tmp = find_pc_misc_function (pc);
-      if (tmp >= 0 && !strcmp (misc_function_vector [tmp].name, "main"))
+      if (tmp >= 0 && STREQ (misc_function_vector [tmp].name, "main"))
         return pc + 8;
     }
   }

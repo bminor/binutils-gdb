@@ -99,45 +99,69 @@ extend_psymbol_list PARAMS ((struct psymbol_allocation_list *,
 
 /* Add any kind of symbol to a psymbol_allocation_list. */
 
-#define	ADD_PSYMBOL_VT_TO_LIST(NAME,NAMELENGTH,NAMESPACE,CLASS,LIST,VALUE,VT) \
-  do {		        						\
-    register struct partial_symbol *psym;				\
-    if ((LIST).next >= (LIST).list + (LIST).size)			\
-	   extend_psymbol_list (&(LIST),objfile);				\
-    psym = (LIST).next++;						\
-									\
-    SYMBOL_NAME (psym) = (char *) obstack_alloc (&objfile->psymbol_obstack,	\
-						 (NAMELENGTH) + 1);	\
-    memcpy (SYMBOL_NAME (psym), (NAME), (NAMELENGTH));			\
-    SYMBOL_NAME (psym)[(NAMELENGTH)] = '\0';				\
-    SYMBOL_NAMESPACE (psym) = (NAMESPACE);				\
-    SYMBOL_CLASS (psym) = (CLASS);					\
-    VT (psym) = (VALUE); 						\
-  } while (0);
+#ifndef INLINE_ADD_PSYMBOL
+#define INLINE_ADD_PSYMBOL 1
+#endif
 
-#ifdef DEBUG
+#if !INLINE_ADD_PSYMBOL
 
 /* Since one arg is a struct, we have to pass in a ptr and deref it (sigh) */
 
-#define	ADD_PSYMBOL_TO_LIST(name, namelength, namespace, class, list, value) \
-  add_psymbol_to_list (name, namelength, namespace, class, &list, value)
+#define	ADD_PSYMBOL_TO_LIST(name, namelength, namespace, class, list, value, language, objfile) \
+  add_psymbol_to_list (name, namelength, namespace, class, &list, value, language, objfile)
 
-#define	ADD_PSYMBOL_ADDR_TO_LIST(name, namelength, namespace, class, list, value) \
-  add_psymbol_addr_to_list (name, namelength, namespace, class, &list, value)
+#define	ADD_PSYMBOL_ADDR_TO_LIST(name, namelength, namespace, class, list, value, language, objfile) \
+  add_psymbol_addr_to_list (name, namelength, namespace, class, &list, value, language, objfile)
 
-#else	/* !DEBUG */
+#else	/* !INLINE_ADD_PSYMBOL */
+
+#include "demangle.h"
+
+#define	ADD_PSYMBOL_VT_TO_LIST(NAME,NAMELENGTH,NAMESPACE,CLASS,LIST,VALUE,VT,LANGUAGE, OBJFILE) \
+  do {		        						\
+    register struct partial_symbol *psym;				\
+    register char *demangled_name;					\
+    if ((LIST).next >= (LIST).list + (LIST).size)			\
+      extend_psymbol_list (&(LIST),(OBJFILE));				\
+    psym = (LIST).next++;						\
+    SYMBOL_NAME (psym) =						\
+      (char *) obstack_alloc (&objfile->psymbol_obstack,		\
+			      (NAMELENGTH) + 1);			\
+    memcpy (SYMBOL_NAME (psym), (NAME), (NAMELENGTH));			\
+    SYMBOL_NAME (psym)[(NAMELENGTH)] = '\0';				\
+    SYMBOL_NAMESPACE (psym) = (NAMESPACE);				\
+    PSYMBOL_CLASS (psym) = (CLASS);					\
+    VT (psym) = (VALUE); 						\
+    SYMBOL_LANGUAGE (psym) = (LANGUAGE);				\
+    if ((LANGUAGE) == language_cplus)					\
+    {									\
+      demangled_name = 							\
+	cplus_demangle (SYMBOL_NAME (psym), DMGL_PARAMS | DMGL_ANSI);	\
+      if (demangled_name == NULL)					\
+	{								\
+	  SYMBOL_DEMANGLED_NAME (psym) = NULL;				\
+	}								\
+      else								\
+	{								\
+	  SYMBOL_DEMANGLED_NAME (psym) =				\
+	    obsavestring (demangled_name, strlen (demangled_name),	\
+			  &objfile->psymbol_obstack);			\
+	  free (demangled_name);					\
+	}								\
+    }									\
+  } while (0);
 
 /* Add a symbol with an integer value to a psymtab. */
 
-#define ADD_PSYMBOL_TO_LIST(name, namelength, namespace, class, list, value) \
-  ADD_PSYMBOL_VT_TO_LIST (name, namelength, namespace, class, list, value, SYMBOL_VALUE)
+#define ADD_PSYMBOL_TO_LIST(name, namelength, namespace, class, list, value, language, objfile) \
+  ADD_PSYMBOL_VT_TO_LIST (name, namelength, namespace, class, list, value, SYMBOL_VALUE, language, objfile)
 
 /* Add a symbol with a CORE_ADDR value to a psymtab. */
 
-#define	ADD_PSYMBOL_ADDR_TO_LIST(name, namelength, namespace, class, list, value)\
-  ADD_PSYMBOL_VT_TO_LIST (name, namelength, namespace, class, list, value, SYMBOL_VALUE_ADDRESS)
+#define	ADD_PSYMBOL_ADDR_TO_LIST(name, namelength, namespace, class, list, value, language, objfile)\
+  ADD_PSYMBOL_VT_TO_LIST (name, namelength, namespace, class, list, value, SYMBOL_VALUE_ADDRESS, language, objfile)
 
-#endif	/* DEBUG */
+#endif	/* INLINE_ADD_PSYMBOL */
 
 			/*   Functions   */
 

@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "language.h"
 #include "complaints.h"
+#include "demangle.h"
 
 #include <obstack.h>
 #include <assert.h>
@@ -131,7 +132,7 @@ compare_symbols (s1p, s2p)
   if (namediff != 0) return namediff;
 
   /* If they match, compare the rest of the names.  */
-  namediff = strcmp (SYMBOL_NAME (*s1), SYMBOL_NAME (*s2));
+  namediff = STRCMP (SYMBOL_NAME (*s1), SYMBOL_NAME (*s2));
   if (namediff != 0) return namediff;
 
   /* For symbols of the same name, registers should come first.  */
@@ -179,7 +180,7 @@ compare_psymbols (s1p, s2p)
     }
   else
     {
-      return (strcmp (st1 + 2, st2 + 2));
+      return (STRCMP (st1 + 2, st2 + 2));
     }
 }
 
@@ -428,7 +429,7 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 	warning ("no loadable sections found in added symbol-file %s",
 		 objfile->name);
       else if (0 == bfd_get_section_name (objfile->obfd, lowest_sect)
-	       || 0 != strcmp(".text",
+	       || !STREQ (".text",
 			      bfd_get_section_name (objfile->obfd, lowest_sect)))
 	warning ("Lowest section in %s is %s at 0x%x",
 		 objfile->name,
@@ -670,11 +671,11 @@ symbol_file_command (args, from_tty)
       cleanups = make_cleanup (freeargv, (char *) argv);
       while (*argv != NULL)
 	{
-	  if (strcmp (*argv, "-mapped") == 0)
+	  if (STREQ (*argv, "-mapped"))
 	    {
 	      mapped = 1;
 	    }
-	  else if (strcmp (*argv, "-readnow") == 0)
+	  else if (STREQ (*argv, "-readnow"))
 	    {
 	      readnow = 1;
 	    }
@@ -872,11 +873,11 @@ add_symbol_file_command (args, from_tty)
 	{
 	  name = arg;
 	}
-      else if (strcmp (arg, "-mapped") == 0)
+      else if (STREQ (arg, "-mapped"))
 	{
 	  mapped = 1;
 	}
-      else if (strcmp (arg, "-readnow") == 0)
+      else if (STREQ (arg, "-readnow"))
 	{
 	  readnow = 1;
 	}
@@ -969,14 +970,14 @@ deduce_language_from_filename (filename)
   char *c = strrchr (filename, '.');
   
   if (!c) ; /* Get default. */
-  else if(!strcmp(c,".mod"))
+  else if(STREQ(c,".mod"))
      return language_m2;
-  else if(!strcmp(c,".c"))
+  else if(STREQ(c,".c"))
      return language_c;
-  else if(!strcmp(c,".cc") || !strcmp(c,".C"))
+  else if(STREQ(c,".cc") || STREQ(c,".C"))
      return language_cplus;
   /* start-sanitize-chill */
-  else if(!strcmp(c,".chill") || !strcmp(c,".c186") || !strcmp(c,".c286"))
+  else if(STREQ(c,".ch") || STREQ(c,".c186") || STREQ(c,".c286"))
      return language_chill;
   /* end-sanitize-chill */
 
@@ -1193,7 +1194,7 @@ free_named_symtabs (name)
 
 again2:
   for (ps = partial_symtab_list; ps; ps = ps->next) {
-    if (!strcmp (name, ps->filename)) {
+    if (STREQ (name, ps->filename)) {
       cashier_psymtab (ps);	/* Blow it away...and its little dog, too.  */
       goto again2;		/* Must restart, chain has been munged */
     }
@@ -1203,7 +1204,7 @@ again2:
 
   for (s = symtab_list; s; s = s->next)
     {
-      if (!strcmp (name, s->filename))
+      if (STREQ (name, s->filename))
 	break;
       prev = s;
     }
@@ -1291,40 +1292,109 @@ start_psymtab_common (objfile, section_offsets,
 /* Debugging versions of functions that are usually inline macros
    (see symfile.h).  */
 
-#if 0		/* Don't quite work nowadays... */
+#if !INLINE_ADD_PSYMBOL
 
 /* Add a symbol with a long value to a psymtab.
    Since one arg is a struct, we pass in a ptr and deref it (sigh).  */
 
 void
-add_psymbol_to_list (name, namelength, namespace, class, list, val)
+add_psymbol_to_list (name, namelength, namespace, class, list, val, language,
+		     objfile)
      char *name;
      int namelength;
      enum namespace namespace;
      enum address_class class;
      struct psymbol_allocation_list *list;
      long val;
+     enum language language;
+     struct objfile *objfile;
 {
-  ADD_PSYMBOL_VT_TO_LIST (name, namelength, namespace, class, (*list), val,
-			  SYMBOL_VALUE);
+  register struct partial_symbol *psym;
+  register char *demangled_name;
+
+  if (list->next >= list->list + list->size)
+    {
+      extend_psymbol_list (list,objfile);
+    }
+  psym = list->next++;
+  
+  SYMBOL_NAME (psym) =
+    (char *) obstack_alloc (&objfile->psymbol_obstack, namelength + 1);
+  memcpy (SYMBOL_NAME (psym), name, namelength);
+  SYMBOL_NAME (psym)[namelength] = '\0';
+  SYMBOL_VALUE (psym) = val;
+  SYMBOL_LANGUAGE (psym) = language;
+  PSYMBOL_NAMESPACE (psym) = namespace;
+  PSYMBOL_CLASS (psym) = class;
+  if (language == language_cplus)
+    {
+      demangled_name =
+	cplus_demangle (SYMBOL_NAME (psym), DMGL_PARAMS | DMGL_ANSI);
+      if (demangled_name == NULL)
+	{
+	  SYMBOL_DEMANGLED_NAME (psym) = NULL;
+	}
+      else
+	{
+	  SYMBOL_DEMANGLED_NAME (psym) =
+	    obsavestring (demangled_name, strlen (demangled_name),
+			  &objfile->psymbol_obstack);
+	  free (demangled_name);
+	}
+    }	
 }
 
 /* Add a symbol with a CORE_ADDR value to a psymtab. */
 
 void
-add_psymbol_addr_to_list (name, namelength, namespace, class, list, val)
+add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
+			  language, objfile)
      char *name;
      int namelength;
      enum namespace namespace;
      enum address_class class;
      struct psymbol_allocation_list *list;
      CORE_ADDR val;
+     enum language language;
+     struct objfile *objfile;
 {
-  ADD_PSYMBOL_VT_TO_LIST (name, namelength, namespace, class, (*list), val,
-			  SYMBOL_VALUE_ADDRESS);
+  register struct partial_symbol *psym;
+  register char *demangled_name;
+
+  if (list->next >= list->list + list->size)
+    {
+      extend_psymbol_list (list,objfile);
+    }
+  psym = list->next++;
+  
+  SYMBOL_NAME (psym) =
+    (char *) obstack_alloc (&objfile->psymbol_obstack, namelength + 1);
+  memcpy (SYMBOL_NAME (psym), name, namelength);
+  SYMBOL_NAME (psym)[namelength] = '\0';
+  SYMBOL_VALUE_ADDRESS (psym) = val;
+  SYMBOL_LANGUAGE (psym) = language;
+  PSYMBOL_NAMESPACE (psym) = namespace;
+  PSYMBOL_CLASS (psym) = class;
+  if (language == language_cplus)
+    {
+      demangled_name =
+	cplus_demangle (SYMBOL_NAME (psym), DMGL_PARAMS | DMGL_ANSI);
+      if (demangled_name == NULL)
+	{
+	  SYMBOL_DEMANGLED_NAME (psym) = NULL;
+	}
+      else
+	{
+	  SYMBOL_DEMANGLED_NAME (psym) =
+	    obsavestring (demangled_name, strlen (demangled_name),
+			  &objfile->psymbol_obstack);
+	  free (demangled_name);
+	}
+    }	
 }
 
-#endif /* 0 */
+#endif /* !INLINE_ADD_PSYMBOL */
+
 
 void
 _initialize_symfile ()

@@ -45,14 +45,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Prototypes for local functions */
 
-static char *
-expensive_mangler PARAMS ((const char *));
-
 extern int
-find_methods PARAMS ((struct type *, char *, char **, struct symbol **));
+find_methods PARAMS ((struct type *, char *, struct symbol **));
 
 static void
-completion_list_add_symbol PARAMS ((char *, char *, int));
+completion_list_add_name PARAMS ((char *, char *, int));
 
 static struct symtabs_and_lines
 decode_line_2 PARAMS ((struct symbol *[], int, int));
@@ -87,13 +84,6 @@ find_line_common PARAMS ((struct linetable *, int, int *));
 static struct partial_symbol *
 lookup_partial_symbol PARAMS ((struct partial_symtab *, const char *,
 			       int, enum namespace));
-
-static struct partial_symbol *
-lookup_demangled_partial_symbol PARAMS ((const struct partial_symtab *,
-					 const char *));
-
-static struct symbol *
-lookup_demangled_block_symbol PARAMS ((const struct block *, const char *));
 
 static struct symtab *
 lookup_symtab_1 PARAMS ((char *));
@@ -141,7 +131,7 @@ lookup_symtab_1 (name)
   /* First, search for an exact match */
 
   ALL_SYMTABS (objfile, s)
-    if (strcmp (name, s->filename) == 0)
+    if (STREQ (name, s->filename))
       return s;
 
   slash = strchr (name, '/');
@@ -157,7 +147,7 @@ lookup_symtab_1 (name)
 	if (tail)
 	  p = tail + 1;
 
-	if (strcmp (p, name) == 0)
+	if (STREQ (p, name))
 	  return s;
       }
 
@@ -165,7 +155,7 @@ lookup_symtab_1 (name)
      psymtabs.  */
 
   ALL_PSYMTABS (objfile, ps)
-    if (strcmp (name, ps -> filename) == 0)
+    if (STREQ (name, ps -> filename))
       goto got_psymtab;
 
   if (!slash)
@@ -177,7 +167,7 @@ lookup_symtab_1 (name)
 	if (tail)
 	  p = tail + 1;
 
-	if (strcmp (p, name) == 0)
+	if (STREQ (p, name))
 	  goto got_psymtab;
       }
 
@@ -243,7 +233,7 @@ char *name;
   
   ALL_PSYMTABS (objfile, pst)
     {
-      if (strcmp (name, pst -> filename) == 0)
+      if (STREQ (name, pst -> filename))
 	{
 	  return (pst);
 	}
@@ -264,7 +254,7 @@ gdb_mangle_name (type, i, j)
   char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
   char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
   char *newname = type_name_no_tag (type);
-  int is_constructor = strcmp(field_name, newname) == 0;
+  int is_constructor = STREQ (field_name, newname);
   int is_destructor = is_constructor && physname[0] == '_'
       && physname[1] == CPLUS_MARKER && physname[2] == '_';
   /* Need a new type prefix.  */
@@ -442,18 +432,6 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
   char *temp;
   extern char *gdb_completer_word_break_characters;
 
-  /* If NAME contains any characters from gdb_completer_word_break_characters
-     then it is probably from a quoted name string.  So check to see if it
-     has a C++ mangled equivalent, and if so, use the mangled equivalent. */
-
-  if (strpbrk (name, gdb_completer_word_break_characters) != NULL)
-    {
-      if ((temp = expensive_mangler (name)) != NULL)
-	{
-	  name = temp;
-	}
-    }
-
   /* Search specified block and its superiors.  */
 
   while (block != 0)
@@ -483,11 +461,7 @@ found:
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  /* But that doesn't do any demangling for the STATIC_BLOCK.
-     I'm not sure whether demangling is needed in the case of
-     nested function in inner blocks; if so this needs to be changed.
-     
-     Don't need to mess with the psymtabs; if we have a block,
+  /* Don't need to mess with the psymtabs; if we have a block,
      that file is read in.  If we don't, then we deal later with
      all the psymtab stuff that needs checking.  */
   if (namespace == VAR_NAMESPACE && block != NULL)
@@ -501,7 +475,7 @@ found:
 	  if (BLOCK_START (b) <= BLOCK_START (block)
 	      && BLOCK_END (b) > BLOCK_START (block))
 	    {
-	      sym = lookup_demangled_block_symbol (b, name);
+	      sym = lookup_block_symbol (b, name, VAR_NAMESPACE);
 	      if (sym)
 		{
 		  block_found = b;
@@ -554,43 +528,22 @@ found:
   if (namespace == VAR_NAMESPACE)
     {
       msymbol = lookup_minimal_symbol (name, (struct objfile *) NULL);
-
-      if (msymbol == NULL)
-	{
-	  /* Test each minimal symbol to see if the minimal symbol's name
-	     is a C++ mangled name that matches a user visible name.  */
-
-	  char *demangled;
-
-	  ALL_MSYMBOLS (objfile, msymbol)
-	    {
-	      demangled = demangle_and_match (msymbol -> name, name,
-					      DMGL_PARAMS | DMGL_ANSI);
-	      if (demangled != NULL)
-		{
-		  free (demangled);
-		  goto found_msym;
-		}
-	    }
-	  msymbol = NULL;		/* Not found */
-        }
-
-found_msym:
       if (msymbol != NULL)
 	{
-	  s = find_pc_symtab (msymbol -> address);
+	  s = find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol));
 	  /* If S is NULL, there are no debug symbols for this file.
 	     Skip this stuff and check for matching static symbols below. */
 	  if (s != NULL)
 	    {
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	      sym = lookup_block_symbol (block, msymbol -> name, namespace);
+	      sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
+					 namespace);
               /* We kept static functions in minimal symbol table as well as
 		 in static scope. We want to find them in the symbol table. */
 		if (!sym) {
 		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_block_symbol (block, msymbol -> name,
+		  sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
 					     namespace);
 		}
 
@@ -673,7 +626,7 @@ found_msym:
 	{
 	  bv = BLOCKVECTOR (s);
 	  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	  sym = lookup_demangled_block_symbol (block, name);
+	  sym = lookup_block_symbol (block, name, VAR_NAMESPACE);
 	  if (sym) 
 	    {
 	      block_found = block;
@@ -685,12 +638,12 @@ found_msym:
 
       ALL_PSYMTABS (objfile, ps)
 	{
-	  if (!ps->readin && lookup_demangled_partial_symbol (ps, name))
+	  if (!ps->readin && lookup_partial_symbol (ps, name, 0, VAR_NAMESPACE))
 	    {
 	      s = PSYMTAB_TO_SYMTAB(ps);
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	      sym = lookup_demangled_block_symbol (block, name);
+	      sym = lookup_block_symbol (block, name, VAR_NAMESPACE);
 	      if (!sym)
 		error ("Internal: mangled static symbol `%s' found in %s psymtab but not in symtab", name, ps->filename);
 	      if (symtab != NULL)
@@ -705,71 +658,6 @@ found_msym:
   return 0;
 }
 
-/* Look for a static demangled symbol in block BLOCK.  */
-
-static struct symbol *
-lookup_demangled_block_symbol (block, name)
-     register const struct block *block;
-     const char *name;
-{
-  register int bot, top;
-  register struct symbol *sym;
-  char *demangled;
-
-  bot = 0;
-  top = BLOCK_NSYMS (block);
-
-  while (bot < top)
-    {
-      sym = BLOCK_SYM (block, bot);
-      if (SYMBOL_NAMESPACE (sym) == VAR_NAMESPACE)
-	{
-	  demangled = demangle_and_match (SYMBOL_NAME (sym), name,
-					  DMGL_PARAMS | DMGL_ANSI);
-	  if (demangled != NULL)
-	    {
-	      free (demangled);
-	      return (sym);
-	    }
-	}
-      bot++;
-    }
-
-  return (NULL);
-}
-
-/* Look, in partial_symtab PST, for static mangled symbol NAME. */
-
-static struct partial_symbol *
-lookup_demangled_partial_symbol (pst, name)
-     const struct partial_symtab *pst;
-     const char *name;
-{
-  struct partial_symbol *start, *psym;
-  int length = pst->n_static_syms;
-  char *demangled;
-
-  if (!length)
-    return (struct partial_symbol *) 0;
-  
-  start = pst->objfile->static_psymbols.list + pst->statics_offset;
-  for (psym = start; psym < start + length; psym++)
-    {
-      if (SYMBOL_NAMESPACE (psym) == VAR_NAMESPACE)
-	{
-	  demangled = demangle_and_match (SYMBOL_NAME (psym), name,
-					  DMGL_PARAMS | DMGL_ANSI);
-	  if (demangled != NULL)
-	    {
-	      free (demangled);
-	      return (psym);
-	    }
-	}
-    }
-
-  return (NULL);
-}
-
 /* Look, in partial_symtab PST, for symbol NAME.  Check the global
    symbols if GLOBAL, the static symbols if not */
 
@@ -781,56 +669,76 @@ lookup_partial_symbol (pst, name, global, namespace)
      enum namespace namespace;
 {
   struct partial_symbol *start, *psym;
+  struct partial_symbol *top, *bottom, *center;
   int length = (global ? pst->n_global_syms : pst->n_static_syms);
+  int do_linear_search = 1;
 
-  if (!length)
-    return (struct partial_symbol *) 0;
+  if (length == 0)
+    {
+      return (NULL);
+    }
   
   start = (global ?
 	   pst->objfile->global_psymbols.list + pst->globals_offset :
 	   pst->objfile->static_psymbols.list + pst->statics_offset  );
 
-  if (global)			/* This means we can use a binary */
-				/* search.  */
+  if (global)		/* This means we can use a binary search. */
     {
-      struct partial_symbol *top, *bottom, *center;
+      do_linear_search = 0;
 
       /* Binary search.  This search is guaranteed to end with center
          pointing at the earliest partial symbol with the correct
 	 name.  At that point *all* partial symbols with that name
 	 will be checked against the correct namespace. */
+
       bottom = start;
       top = start + length - 1;
       while (top > bottom)
 	{
 	  center = bottom + (top - bottom) / 2;
-
 	  assert (center < top);
-	  
-	  if (strcmp (SYMBOL_NAME (center), name) >= 0)
-	    top = center;
+	  if (!do_linear_search && SYMBOL_LANGUAGE (center) == language_cplus)
+	    {
+	      do_linear_search = 1;
+	    }
+	  if (STRCMP (SYMBOL_NAME (center), name) >= 0)
+	    {
+	      top = center;
+	    }
 	  else
-	    bottom = center + 1;
+	    {
+	      bottom = center + 1;
+	    }
 	}
       assert (top == bottom);
-      
-      while (!strcmp (SYMBOL_NAME (top), name))
+      while (STREQ (SYMBOL_NAME (top), name))
 	{
 	  if (SYMBOL_NAMESPACE (top) == namespace)
-	    return top;
+	    {
+	      return top;
+	    }
 	  top ++;
 	}
     }
-  else
+
+  /* Can't use a binary search or else we found during the binary search that
+     we should also do a linear search. */
+
+  if (do_linear_search)
     {
-      /* Can't use a binary search */
       for (psym = start; psym < start + length; psym++)
-	if (namespace == SYMBOL_NAMESPACE (psym)
-	    && !strcmp (name, SYMBOL_NAME (psym)))
-	  return psym;
+	{
+	  if (namespace == SYMBOL_NAMESPACE (psym))
+	    {
+	      if (SYMBOL_MATCHES_NAME (psym, name))
+		{
+		  return (psym);
+		}
+	    }
+	}
     }
 
-  return (struct partial_symbol *) 0;
+  return (NULL);
 }
 
 /* Find the psymtab containing main(). */
@@ -853,7 +761,16 @@ find_main_psymtab ()
   return (NULL);
 }
 
-/* Look for a symbol in block BLOCK.  */
+/* Search BLOCK for symbol NAME in NAMESPACE.
+
+   Note that if NAME is the demangled form of a C++ symbol, we will fail
+   to find a match during the binary search of the non-encoded names, but
+   for now we don't worry about the slight inefficiency of looking for
+   a match we'll never find, since it will go pretty quick.  Once the
+   binary search terminates, we drop through and do a straight linear
+   search on the symbols.  Each symbol which is marked as being a C++
+   symbol (language_cplus set) has both the encoded and non-encoded names
+   tested for a match. */
 
 struct symbol *
 lookup_block_symbol (block, name, namespace)
@@ -862,42 +779,63 @@ lookup_block_symbol (block, name, namespace)
      const enum namespace namespace;
 {
   register int bot, top, inc;
-  register struct symbol *sym, *parameter_sym;
-
-  top = BLOCK_NSYMS (block);
-  bot = 0;
+  register struct symbol *sym;
+  register struct symbol *sym_found = NULL;
+  register int do_linear_search = 1;
 
   /* If the blocks's symbols were sorted, start with a binary search.  */
 
   if (BLOCK_SHOULD_SORT (block))
     {
-      /* First, advance BOT to not far before
-	 the first symbol whose name is NAME.  */
+      /* Reset the linear search flag so if the binary search fails, we
+	 won't do the linear search once unless we find some reason to
+	 do so, such as finding a C++ symbol during the binary search.
+	 Note that for C++ modules, ALL the symbols in a block should
+	 end up marked as C++ symbols. */
+
+      do_linear_search = 0;
+      top = BLOCK_NSYMS (block);
+      bot = 0;
+
+      /* Advance BOT to not far before the first symbol whose name is NAME. */
 
       while (1)
 	{
 	  inc = (top - bot + 1);
 	  /* No need to keep binary searching for the last few bits worth.  */
 	  if (inc < 4)
-	    break;
+	    {
+	      break;
+	    }
 	  inc = (inc >> 1) + bot;
 	  sym = BLOCK_SYM (block, inc);
+	  if (!do_linear_search && SYMBOL_LANGUAGE (sym) == language_cplus)
+	    {
+	      do_linear_search = 1;
+	    }
 	  if (SYMBOL_NAME (sym)[0] < name[0])
-	    bot = inc;
+	    {
+	      bot = inc;
+	    }
 	  else if (SYMBOL_NAME (sym)[0] > name[0])
-	    top = inc;
-	  else if (strcmp (SYMBOL_NAME (sym), name) < 0)
-	    bot = inc;
+	    {
+	      top = inc;
+	    }
+	  else if (STRCMP (SYMBOL_NAME (sym), name) < 0)
+	    {
+	      bot = inc;
+	    }
 	  else
-	    top = inc;
+	    {
+	      top = inc;
+	    }
 	}
 
-      /* Now scan forward until we run out of symbols,
-	 find one whose name is greater than NAME,
-	 or find one we want.
-	 If there is more than one symbol with the right name and namespace,
-	 we return the first one.  dbxread.c is careful to make sure
-	 that if one is a register then it comes first.  */
+      /* Now scan forward until we run out of symbols, find one whose name is
+	 greater than NAME, or find one we want.  If there is more than one
+	 symbol with the right name and namespace, we return the first one.
+	 dbxread.c is careful to make sure that if one is a register then it
+	 comes first.  */
 
       top = BLOCK_NSYMS (block);
       while (bot < top)
@@ -905,19 +843,27 @@ lookup_block_symbol (block, name, namespace)
 	  sym = BLOCK_SYM (block, bot);
 	  inc = SYMBOL_NAME (sym)[0] - name[0];
 	  if (inc == 0)
-	    inc = strcmp (SYMBOL_NAME (sym), name);
+	    {
+	      inc = STRCMP (SYMBOL_NAME (sym), name);
+	    }
 	  if (inc == 0 && SYMBOL_NAMESPACE (sym) == namespace)
-	    return sym;
+	    {
+	      return (sym);
+	    }
 	  if (inc > 0)
-	    return 0;
+	    {
+	      break;
+	    }
 	  bot++;
 	}
-      return 0;
     }
 
-  /* Here if block isn't sorted.
-     This loop is equivalent to the loop above,
-     but hacked greatly for speed.
+  /* Here if block isn't sorted, or we fail to find a match during the
+     binary search above.  If during the binary search above, we find a
+     symbol which is a C++ symbol, then we have re-enabled the linear
+     search flag which was reset when starting the binary search.
+
+     This loop is equivalent to the loop above, but hacked greatly for speed.
 
      Note that parameter symbols do not always show up last in the
      list; this loop makes sure to take anything else other than
@@ -925,28 +871,31 @@ lookup_block_symbol (block, name, namespace)
      last resort.  Note that this only takes up extra computation
      time on a match.  */
 
-  parameter_sym = (struct symbol *) 0;
-  top = BLOCK_NSYMS (block);
-  inc = name[0];
-  while (bot < top)
+  if (do_linear_search)
     {
-      sym = BLOCK_SYM (block, bot);
-      if (SYMBOL_NAME (sym)[0] == inc
-	  && !strcmp (SYMBOL_NAME (sym), name)
-	  && SYMBOL_NAMESPACE (sym) == namespace)
+      top = BLOCK_NSYMS (block);
+      bot = 0;
+      while (bot < top)
 	{
-	  if (SYMBOL_CLASS (sym) == LOC_ARG
-	      || SYMBOL_CLASS (sym) == LOC_LOCAL_ARG
-	      || SYMBOL_CLASS (sym) == LOC_REF_ARG
-	      || SYMBOL_CLASS (sym) == LOC_REGPARM)
-	    parameter_sym = sym;
-	  else
-	    return sym;
+	  sym = BLOCK_SYM (block, bot);
+	  if (SYMBOL_NAMESPACE (sym) == namespace &&
+	      SYMBOL_MATCHES_NAME (sym, name))
+	    {
+	      sym_found = sym;
+	      if (SYMBOL_CLASS (sym) != LOC_ARG &&
+		  SYMBOL_CLASS (sym) != LOC_LOCAL_ARG &&
+		  SYMBOL_CLASS (sym) != LOC_REF_ARG &&
+		  SYMBOL_CLASS (sym) != LOC_REGPARM)
+		{
+		  break;
+		}
+	    }
+	  bot++;
 	}
-      bot++;
     }
-  return parameter_sym;		/* Will be 0 if not found. */
+  return (sym_found);		/* Will be NULL if not found. */
 }
+
 
 /* Return the symbol for the function which contains a specified
    lexical block, described by a struct block BL.  */
@@ -1366,17 +1315,15 @@ operator_chars (p, end)
 /* Recursive helper function for decode_line_1.
  * Look for methods named NAME in type T.
  * Return number of matches.
- * Put matches in PHYSNAMES and SYM_ARR (which better be big enough!).
+ * Put matches in SYM_ARR (which better be big enough!).
  * These allocations seem to define "big enough":
  * sym_arr = (struct symbol **) alloca(TYPE_NFN_FIELDS_TOTAL (t) * sizeof(struct symbol*));
- * physnames = (char **) alloca (TYPE_NFN_FIELDS_TOTAL (t) * sizeof(char*));
  */
 
 int
-find_methods (t, name, physnames, sym_arr)
+find_methods (t, name, sym_arr)
      struct type *t;
      char *name;
-     char **physnames;
      struct symbol **sym_arr;
 {
   int i1 = 0;
@@ -1418,7 +1365,7 @@ find_methods (t, name, physnames, sym_arr)
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, method_counter);
 
 	  char *method_name = TYPE_FN_FIELDLIST_NAME (t, method_counter);
-	  if (!strcmp (name, method_name))
+	  if (STREQ (name, method_name))
 	    /* Find all the fields with that name.  */
 	    for (field_counter = TYPE_FN_FIELDLIST_LENGTH (t, method_counter) - 1;
 		 field_counter >= 0;
@@ -1428,8 +1375,6 @@ find_methods (t, name, physnames, sym_arr)
 		if (TYPE_FN_FIELD_STUB (f, field_counter))
 		  check_stub_method (t, method_counter, field_counter);
 		phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
-		physnames[i1] = (char*) alloca (strlen (phys_name) + 1);
-		strcpy (physnames[i1], phys_name);
 		sym_arr[i1] = lookup_symbol (phys_name,
 					     SYMBOL_BLOCK_VALUE (sym_class),
 					     VAR_NAMESPACE,
@@ -1452,7 +1397,7 @@ find_methods (t, name, physnames, sym_arr)
     return i1;
   for (ibase = 0; ibase < TYPE_N_BASECLASSES (t); ibase++)
     i1 += find_methods(TYPE_BASECLASS(t, ibase), name,
-		       physnames + i1, sym_arr + i1);
+		       sym_arr + i1);
   return i1;
 }
 
@@ -1539,7 +1484,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
   int is_quoted;
   struct symbol **sym_arr;
   struct type *t;
-  char **physnames;
   char *saved_arg = *argptr;
   extern char *gdb_completer_quote_characters;
   
@@ -1643,7 +1587,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 	      i1 = 0;		/*  counter for the symbol array */
 	      t = SYMBOL_TYPE (sym_class);
 	      sym_arr = (struct symbol **) alloca(TYPE_NFN_FIELDS_TOTAL (t) * sizeof(struct symbol*));
-	      physnames = (char **) alloca (TYPE_NFN_FIELDS_TOTAL (t) * sizeof(char*));
 
 	      if (destructor_name_p (copy, t))
 		{
@@ -1651,15 +1594,13 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 		  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, 0);
 		  int len = TYPE_FN_FIELDLIST_LENGTH (t, 0) - 1;
 		  char *phys_name = TYPE_FN_FIELD_PHYSNAME (f, len);
-		  physnames[i1] = (char *)alloca (strlen (phys_name) + 1);
-		  strcpy (physnames[i1], phys_name);
 		  sym_arr[i1] =
 		    lookup_symbol (phys_name, SYMBOL_BLOCK_VALUE (sym_class),
 				   VAR_NAMESPACE, 0, (struct symtab **)NULL);
 		  if (sym_arr[i1]) i1++;
 		}
 	      else
-		i1 = find_methods (t, copy, physnames, sym_arr);
+		i1 = find_methods (t, copy, sym_arr);
 	      if (i1 == 1)
 		{
 		  /* There is exactly one field with that name.  */
@@ -1702,10 +1643,10 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
 		    tmp = copy;
 		  if (tmp[0] == '~')
 		    warning ("the class `%s' does not have destructor defined",
-			     sym_class->name);
+			     SYMBOL_SOURCE_NAME(sym_class));
 		  else
 		    warning ("the class %s does not have any method named %s",
-			     sym_class->name, tmp);
+			     SYMBOL_SOURCE_NAME(sym_class), tmp);
 		  cplusplus_hint (saved_arg);
 		  return_to_top_level ();
 		}
@@ -1821,10 +1762,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
       char *temp;
       copy [p - *argptr - 1] = '\0';
       copy++;
-      if ((temp = expensive_mangler (copy)) != NULL)
-	{
-	  copy = temp;
-	}
     }
   while (*p == ' ' || *p == '\t') p++;
   *argptr = p;
@@ -1896,7 +1833,7 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
     {
       val.symtab = 0;
       val.line = 0;
-      val.pc = msymbol -> address + FUNCTION_START_OFFSET;
+      val.pc = SYMBOL_VALUE_ADDRESS (msymbol) + FUNCTION_START_OFFSET;
       if (funfirstline)
 	SKIP_PROLOGUE (val.pc);
       values.sals = (struct symtab_and_line *)xmalloc (sizeof (struct symtab_and_line));
@@ -1928,9 +1865,9 @@ decode_line_spec (string, funfirstline)
   return sals;
 }
 
-/* Given a list of NELTS symbols in sym_arr (with corresponding
-   mangled names in physnames), return a list of lines to operate on
-   (ask user if necessary).  */
+/* Given a list of NELTS symbols in sym_arr, return a list of lines to
+   operate on (ask user if necessary).  */
+
 static struct symtabs_and_lines
 decode_line_2 (sym_arr, nelts, funfirstline)
      struct symbol *sym_arr[];
@@ -1942,7 +1879,7 @@ decode_line_2 (sym_arr, nelts, funfirstline)
   char *args, *arg1;
   int i;
   char *prompt;
-  char *demangled;
+  char *symname;
 
   values.sals = (struct symtab_and_line *) alloca (nelts * sizeof(struct symtab_and_line));
   return_values.sals = (struct symtab_and_line *) xmalloc (nelts * sizeof(struct symtab_and_line));
@@ -1961,15 +1898,8 @@ decode_line_2 (sym_arr, nelts, funfirstline)
 	  values.sals[i] = find_pc_line (pc, 0);
 	  values.sals[i].pc = (values.sals[i].end && values.sals[i].pc != pc) ?
 			       values.sals[i].end                      :  pc;
-	  demangled = cplus_demangle (SYMBOL_NAME (sym_arr[i]),
-				      DMGL_PARAMS | DMGL_ANSI);
-	  printf("[%d] %s at %s:%d\n", (i+2),
-		 demangled ? demangled : SYMBOL_NAME (sym_arr[i]), 
+	  printf("[%d] %s at %s:%d\n", (i+2), SYMBOL_SOURCE_NAME (sym_arr[i]),
 		 values.sals[i].symtab->filename, values.sals[i].line);
-	  if (demangled != NULL)
-	    {
-	      free (demangled);
-	    }
 	}
       else printf ("?HERE\n");
       i++;
@@ -2070,7 +2000,7 @@ output_source_filename (name, first)
 
   /* Is NAME in tab?  */
   for (p = tab; p < tab + tab_cur_size; p++)
-    if (strcmp (*p, name) == 0)
+    if (STREQ (*p, name))
       /* Yes; don't print it again.  */
       return;
   /* No; add it to tab.  */
@@ -2131,22 +2061,7 @@ sources_info (ignore, from_tty)
   printf_filtered ("\n");
 }
 
-static int
-name_match (name)
-     char *name;
-{
-  char *demangled = cplus_demangle (name, DMGL_ANSI);
-  if (demangled != NULL)
-    {
-      int cond = re_exec (demangled);
-      free (demangled);
-      return (cond);
-    }
-  return (re_exec (name));
-}
-#define NAME_MATCH(NAME) name_match(NAME)
-
-/* List all symbols (if REGEXP is 0) or all symbols matching REGEXP.
+/* List all symbols (if REGEXP is NULL) or all symbols matching REGEXP.
    If CLASS is zero, list all symbols except functions, type names, and
 		     constants (enums).
    If CLASS is 1, list only functions.
@@ -2184,7 +2099,7 @@ list_symbols (regexp, class, bpt)
   enum minimal_symbol_type ourtype = types[class];
   enum minimal_symbol_type ourtype2 = types2[class];
 
-  if (regexp)
+  if (regexp != NULL)
     {
       /* Make sure spacing is right for C++ operators.
 	 This is just a courtesy to make the matching less sensitive
@@ -2257,7 +2172,7 @@ list_symbols (regexp, class, bpt)
 
 	      /* If it would match (logic taken from loop below)
 		 load the file and go on to the next one */
-	      if ((regexp == 0 || NAME_MATCH (SYMBOL_NAME (psym)))
+	      if ((regexp == NULL || SYMBOL_MATCHES_REGEXP (psym))
 		  && ((class == 0 && SYMBOL_CLASS (psym) != LOC_TYPEDEF
 		       && SYMBOL_CLASS (psym) != LOC_BLOCK)
 		      || (class == 1 && SYMBOL_CLASS (psym) == LOC_BLOCK)
@@ -2282,11 +2197,12 @@ list_symbols (regexp, class, bpt)
     {
       ALL_MSYMBOLS (objfile, msymbol)
 	{
-	  if (msymbol -> type == ourtype || msymbol -> type == ourtype2)
+	  if (MSYMBOL_TYPE (msymbol) == ourtype ||
+	      MSYMBOL_TYPE (msymbol) == ourtype2)
 	    {
-	      if (regexp == 0 || NAME_MATCH (msymbol -> name))
+	      if (regexp == NULL || SYMBOL_MATCHES_REGEXP (msymbol))
 		{
-		  if (0 == find_pc_symtab (msymbol -> address))
+		  if (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)))
 		    {
 		      found_misc = 1;
 		    }
@@ -2324,7 +2240,7 @@ list_symbols (regexp, class, bpt)
 	      {
 		QUIT;
 		sym = BLOCK_SYM (b, j);
-		if ((regexp == 0 || NAME_MATCH (SYMBOL_NAME (sym)))
+		if ((regexp == NULL || SYMBOL_MATCHES_REGEXP (sym))
 		    && ((class == 0 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
 			 && SYMBOL_CLASS (sym) != LOC_BLOCK
 			 && SYMBOL_CLASS (sym) != LOC_CONST)
@@ -2360,7 +2276,7 @@ list_symbols (regexp, class, bpt)
 		      {
 			type_print (SYMBOL_TYPE (sym),
 				    (SYMBOL_CLASS (sym) == LOC_TYPEDEF
-				     ? "" : SYMBOL_NAME (sym)),
+				     ? "" : SYMBOL_SOURCE_NAME (sym)),
 				    stdout, 0);
 			
 			printf_filtered (";\n");
@@ -2392,18 +2308,19 @@ list_symbols (regexp, class, bpt)
       found_in_file = 0;
       ALL_MSYMBOLS (objfile, msymbol)
 	{
-	  if (msymbol -> type == ourtype || msymbol -> type == ourtype2)
+	  if (MSYMBOL_TYPE (msymbol) == ourtype ||
+	      MSYMBOL_TYPE (msymbol) == ourtype2)
 	    {
-	      if (regexp == 0 || NAME_MATCH (msymbol -> name))
+	      if (regexp == NULL || SYMBOL_MATCHES_REGEXP (msymbol))
 		{
 		  /* Functions:  Look up by address. */
 		  if (class != 1 ||
-		      (0 == find_pc_symtab (msymbol -> address)))
+		      (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol))))
 		    {
 		      /* Variables/Absolutes:  Look up by name */
-		      if (lookup_symbol (msymbol -> name, 
-					 (struct block *) 0, VAR_NAMESPACE, 0,
-					 (struct symtab **) 0) == NULL)
+		      if (lookup_symbol (SYMBOL_NAME (msymbol), 
+					 (struct block *) NULL, VAR_NAMESPACE,
+					 0, (struct symtab **) NULL) == NULL)
 			{
 			  if (!found_in_file)
 			    {
@@ -2411,8 +2328,8 @@ list_symbols (regexp, class, bpt)
 			      found_in_file = 1;
 			    }
 			  printf_filtered ("	%08x  %s\n",
-					   msymbol -> address,
-					   msymbol -> name);
+					   SYMBOL_VALUE_ADDRESS (msymbol),
+					   SYMBOL_SOURCE_NAME (msymbol));
 			}
 		    }
 		}
@@ -2485,53 +2402,49 @@ static int return_val_size;
 static int return_val_index;
 static char **return_val;
 
-/*  Test to see if the symbol specified by SYMNAME (or it's demangled
-    equivalent) matches TEXT in the first TEXT_LEN characters.  If so,
-    add it to the current completion list. */
+#define COMPLETION_LIST_ADD_SYMBOL(symbol, text, len) \
+  do { \
+    completion_list_add_name (SYMBOL_NAME (symbol), text, len); \
+      if (SYMBOL_LANGUAGE (symbol) == language_cplus && \
+	  SYMBOL_DEMANGLED_NAME (symbol) != NULL) \
+      completion_list_add_name (SYMBOL_DEMANGLED_NAME (symbol), text, len); \
+  } while (0)
+
+/*  Test to see if the symbol specified by SYMNAME (which is already
+    demangled for C++ symbols) matches TEXT in the first TEXT_LEN
+    characters.  If so, add it to the current completion list. */
 
 static void
-completion_list_add_symbol (symname, text, text_len)
+completion_list_add_name (symname, text, text_len)
      char *symname;
      char *text;
      int text_len;
 {
-  char *demangled;
   int newsize;
   int i;
 
   /* clip symbols that cannot match */
 
-  if (!cplus_match (symname, text, text_len)) {
-    return;
-  }
-
-  /* matches mangled, may match unmangled.  now clip any symbol names
-     that we've already considered.  (This is a time optimization)  */
-
-  for (i = 0; i < return_val_index; ++i) {
-    if (strcmp (symname, return_val[i]) == 0) {
+  if (strncmp (symname, text, text_len) != 0)
+    {
       return;
     }
-  }
-  
-  /* See if SYMNAME is a C++ mangled name, and if so, use the
-     demangled name instead, including any parameters.  */
 
-  if ((demangled = cplus_demangle (symname, DMGL_PARAMS | DMGL_ANSI)) != NULL)
+  /* Clip any symbol names that we've already considered.  (This is a
+     time optimization)  */
+
+  for (i = 0; i < return_val_index; ++i)
     {
-      if (strncmp (demangled, text, text_len) != 0) {
-	return;
-      }	/* demangled, but didn't match so clip it */
-
-      symname = demangled;
-    } else {
-      symname = savestring (symname, strlen (symname));
+      if (STREQ (symname, return_val[i]))
+	{
+	  return;
+	}
     }
+  
+  /* We have a match for a completion, so add SYMNAME to the current list
+     of matches. Note that the name is moved to freshly malloc'd space. */
 
-  /* If we have a match for a completion, then add SYMNAME to the current
-     list of matches. Note that the name is in freshly malloc'd space;
-     either from cplus_demangle or from savestring above.  */
-
+  symname = savestring (symname, strlen (symname));
   if (return_val_index + 3 > return_val_size)
     {
       newsize = (return_val_size *= 2) * sizeof (char *);
@@ -2539,8 +2452,6 @@ completion_list_add_symbol (symname, text, text_len)
     }
   return_val[return_val_index++] = symname;
   return_val[return_val_index] = NULL;
-
-  return;
 }
 
 /* Return a NULL terminated array of all symbols (regardless of class) which
@@ -2586,7 +2497,7 @@ make_symbol_completion_list (text)
 	{
 	  /* If interrupted, then quit. */
 	  QUIT;
-	  completion_list_add_symbol (SYMBOL_NAME (psym), text, text_len);
+	  COMPLETION_LIST_ADD_SYMBOL (psym, text, text_len);
 	}
       
       for (psym = objfile->static_psymbols.list + ps->statics_offset;
@@ -2595,7 +2506,7 @@ make_symbol_completion_list (text)
 	   psym++)
 	{
 	  QUIT;
-	  completion_list_add_symbol (SYMBOL_NAME (psym), text, text_len);
+	  COMPLETION_LIST_ADD_SYMBOL (psym, text, text_len);
 	}
     }
 
@@ -2607,7 +2518,7 @@ make_symbol_completion_list (text)
   ALL_MSYMBOLS (objfile, msymbol)
     {
       QUIT;
-      completion_list_add_symbol (msymbol -> name, text, text_len);
+      COMPLETION_LIST_ADD_SYMBOL (msymbol, text, text_len);
     }
 
   /* Search upwards from currently selected frame (so that we can
@@ -2626,7 +2537,7 @@ make_symbol_completion_list (text)
       for (i = 0; i < BLOCK_NSYMS (b); i++)
 	{
 	  sym = BLOCK_SYM (b, i);
-	  completion_list_add_symbol (SYMBOL_NAME (sym), text, text_len);
+	  COMPLETION_LIST_ADD_SYMBOL (sym, text, text_len);
 	  if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
 	    {
 	      struct type *t = SYMBOL_TYPE (sym);
@@ -2638,7 +2549,7 @@ make_symbol_completion_list (text)
 		    {
 		      if (TYPE_FIELD_NAME (t, j))
 			{
-			  completion_list_add_symbol (TYPE_FIELD_NAME (t, j),
+			  completion_list_add_name (TYPE_FIELD_NAME (t, j),
 						      text, text_len);
 			}
 		    }
@@ -2657,7 +2568,7 @@ make_symbol_completion_list (text)
       for (i = 0; i < BLOCK_NSYMS (b); i++)
 	{
 	  sym = BLOCK_SYM (b, i);
-	  completion_list_add_symbol (SYMBOL_NAME (sym), text, text_len);
+	  COMPLETION_LIST_ADD_SYMBOL (sym, text, text_len);
 	}
     }
 
@@ -2670,172 +2581,11 @@ make_symbol_completion_list (text)
       for (i = 0; i < BLOCK_NSYMS (b); i++)
 	{
 	  sym = BLOCK_SYM (b, i);
-	  completion_list_add_symbol (SYMBOL_NAME (sym), text, text_len);
+	  COMPLETION_LIST_ADD_SYMBOL (sym, text, text_len);
 	}
     }
 
   return (return_val);
-}
-
-
-/* Find a mangled symbol that corresponds to LOOKFOR using brute force.
-   Basically we go munging through available symbols, demangling each one,
-   looking for a match on the demangled result. */
-
-static char *
-expensive_mangler (lookfor)
-     const char *lookfor;
-{
-  register struct symbol *sym;
-  register struct symtab *s;
-  register struct partial_symtab *ps;
-  register struct minimal_symbol *msymbol;
-  register struct objfile *objfile;
-  register struct block *b, *surrounding_static_block = 0;
-  register int i, j;
-  struct partial_symbol *psym;
-  char *demangled;
-
-  /* Look through the partial symtabs for a symbol that matches */
-
-  ALL_PSYMTABS (objfile, ps)
-    {
-      /* If the psymtab's been read in we'll get it when we search
-	 through the blockvector.  */
-      if (ps->readin) continue;
-      
-      for (psym = objfile->global_psymbols.list + ps->globals_offset;
-	   psym < (objfile->global_psymbols.list + ps->globals_offset
-		   + ps->n_global_syms);
-	   psym++)
-	{
-	  QUIT;			/* If interrupted, then quit. */
-	  demangled = demangle_and_match (SYMBOL_NAME (psym), lookfor,
-					  DMGL_PARAMS | DMGL_ANSI);
-	  if (demangled != NULL)
-	    {
-	      free (demangled);
-	      return (SYMBOL_NAME (psym));
-	    }
-	}
-      
-      for (psym = objfile->static_psymbols.list + ps->statics_offset;
-	   psym < (objfile->static_psymbols.list + ps->statics_offset
-		   + ps->n_static_syms);
-	   psym++)
-	{
-	  QUIT;
-	  demangled = demangle_and_match (SYMBOL_NAME (psym), lookfor,
-					  DMGL_PARAMS | DMGL_ANSI);
-	  if (demangled != NULL)
-	    {
-	      free (demangled);
-	      return (SYMBOL_NAME (psym));
-	    }
-	}
-    }
-
-  /* Scan through the misc symbol vectors looking for a match. */
-
-  ALL_MSYMBOLS (objfile, msymbol)
-    {
-      QUIT;
-      demangled = demangle_and_match (msymbol -> name, lookfor,
-				      DMGL_PARAMS | DMGL_ANSI);
-      if (demangled != NULL)
-	{
-	  free (demangled);
-	  return (msymbol -> name);
-	}
-    }
-
-  /* Search upwards from currently selected frame looking for a match */
-
-  for (b = get_selected_block (); b; b = BLOCK_SUPERBLOCK (b))
-    {
-      if (!BLOCK_SUPERBLOCK (b))
-	surrounding_static_block = b; /* For elmin of dups */
-      
-      /* Also catch fields of types defined in this places which
-	 match our text string.  Only complete on types visible
-	 from current context.  */
-      for (i = 0; i < BLOCK_NSYMS (b); i++)
-	{
-	  sym = BLOCK_SYM (b, i);
-	  demangled = demangle_and_match (SYMBOL_NAME (sym), lookfor,
-					  DMGL_PARAMS | DMGL_ANSI);
-	  if (demangled != NULL)
-	    {
-	      free (demangled);
-	      return (SYMBOL_NAME (sym));
-	    }
-	  if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
-	    {
-	      struct type *t = SYMBOL_TYPE (sym);
-	      enum type_code c = TYPE_CODE (t);
-
-	      if (c == TYPE_CODE_UNION || c == TYPE_CODE_STRUCT)
-		{
-		  for (j = TYPE_N_BASECLASSES (t); j < TYPE_NFIELDS (t); j++)
-		    {
-		      if (TYPE_FIELD_NAME (t, j))
-			{
-			  demangled =
-			    demangle_and_match (TYPE_FIELD_NAME (t, j),
-						lookfor,
-						DMGL_PARAMS | DMGL_ANSI);
-			  if (demangled != NULL)
-			    {
-			      free (demangled);
-			      return (TYPE_FIELD_NAME (t, j));
-			    }
-			}
-		    }
-		}
-	    }
-	}
-    }
-
-  /* Go through the symtabs and check the externs and statics for
-     symbols which match.  */
-
-  ALL_SYMTABS (objfile, s)
-    {
-      QUIT;
-      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-      for (i = 0; i < BLOCK_NSYMS (b); i++)
-	{
-	  sym = BLOCK_SYM (b, i);
-	  demangled = demangle_and_match (SYMBOL_NAME (sym), lookfor,
-					  DMGL_PARAMS | DMGL_ANSI);
-	  if (demangled != NULL)
-	    {
-	      free (demangled);
-	      return (SYMBOL_NAME (sym));
-	    }
-	}
-    }
-
-  ALL_SYMTABS (objfile, s)
-    {
-      QUIT;
-      b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-      /* Don't do this block twice.  */
-      if (b == surrounding_static_block) continue;
-      for (i = 0; i < BLOCK_NSYMS (b); i++)
-	{
-	  sym = BLOCK_SYM (b, i);
-	  demangled = demangle_and_match (SYMBOL_NAME (sym), lookfor,
-					  DMGL_PARAMS | DMGL_ANSI);
-	  if (demangled != NULL)
-	    {
-	      free (demangled);
-	      return (SYMBOL_NAME (sym));
-	    }
-	}
-    }
-
-  return (NULL);
 }
 
 

@@ -71,7 +71,7 @@ cp_is_vtbl_ptr_type(type)
   static const char vtbl_ptr_name[] =
     { CPLUS_MARKER,'v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
 
-  return (typename != NULL && !strcmp(typename, vtbl_ptr_name));
+  return (typename != NULL && STREQ(typename, vtbl_ptr_name));
 }
 
 /* Return truth value for the assertion that TYPE is of the type

@@ -1,3 +1,110 @@
+Tue Dec 22 20:33:38 1992  Fred Fish  (fnf@cygnus.com)
+
+	* defs.h (STRCMP, STREQ, STREQN):  New macros.
+	* defs.h (demangle_and_match):  Remove prototype.
+	* dwarfread.c (STREQ, STREQN):  Remove macros, replaced with STREQ
+	  and STREQN defined in defs.h.
+	* dwarfread.c (set_cu_language):  For completely unknown languages,
+	  try to deduce the language from the filename.  Retain behavior
+	  that for known languages we don't know how to handle, we use
+	  language_unknown.
+	* dwarfread.c (enum_type, symthesize_typedef):  Initialize language
+	  and demangled name fields in symbol.
+	* dwarfread.c, mipsread.c, partial-stab.h:  For all usages of
+	  ADD_PSYMBOL_TO_LIST, add language and objfile parameters.
+	* dwarfread.c (new_symbol):  Attempt to demangle C++ symbol names
+	  and cache the results in SYMBOL_DEMANGLED_NAME for the symbol.
+	* elfread.c (STREQ):  Remove macro, use STREQ defined in defs.h.
+	  Replace usages throughout.
+	* elfread.c (demangle.h):  Include.
+	* elfread.c (record_minimal_symbol):  Remove prototype and function.
+	* gdbtypes.h, symtab.h (B_SET, B_CLR, B_TST, B_TYPE, B_BYTES,
+	  B_CLRALL):  Moved from symtab.h to gdbtypes.h.
+	* infcmd.c (jump_command):  Remove code to demangle name and add
+	  it to a cleanup list.  Now just use SYMBOL_DEMANGLED_NAME.
+	* minsyms.c (demangle.h):  Include.
+	* minsyms.c (lookup_minimal_symbol):  Indent comment to match code.
+	* minsyms.c (install_minimal_symbols):  Attempt to demangle symbol
+	  names as C++ names, and cache them in SYMBOL_DEMANGLED_NAME.
+	* mipsread.c (psymtab_language):  Add static variable.
+	* stabsread.c (demangle.h):  Include.
+	* stabsread.c (define_symbol):  Attempt to demangle C++ symbol
+	  names and cache them in the SYMBOL_DEMANGLED_NAME field.
+	* stack.c (return_command):  Remove explicit demangling of name
+	  and use of cleanups.  Just use SYMBOL_DEMANGLED_NAME. 
+	* symfile.c (demangle.h):  Include.
+	* symfile.c (add_psymbol_to_list, add_psymbol_addr_to_list):  Fix
+	  to match macros in symfile.h and allow them to be compiled
+	  if INLINE_ADD_PSYMBOL is not true.
+	* symfile.h (INLINE_ADD_PSYMBOL):  Default to true if not set.
+	* symfile.h (ADD_PSYMBOL_*):  Add language and objfile parameters.
+	  Add code to demangle and cache C++ symbol names.  Use macro form
+	  if INLINE_ADD_PSYMBOL is true, otherwise use C function form.
+	* symmisc.c (add_psymbol_to_list, add_psymbol_addr_to_list):
+	  Remove, also defined in symfile.c, which we already fixed.
+	* symtab.c (expensive_mangler):  Remove prototype and function.
+	* symtab.c (find_methods):  Remove physnames parameter and fix
+	  prototype to match.
+	* symtab.c (completion_list_add_symbol):  Name changed to
+	  completion_list_add_name.
+	* symtab.c (COMPLETION_LIST_ADD_SYMBOL):  New macro, adds both
+	  the normal symbol name and the cached C++ demangled name.
+	* symtab.c (lookup_demangled_partial_symbol,
+	  lookup_demangled_block_symbol):  Remove prototypes and functions.
+	* symtab.c (lookup_symbol):  Remove use of expensive_mangler,
+	  use lookup_block_symbol instead of lookup_demangled_block_symbol.
+	  Remove code to try demangling names and matching them.
+	* symtab.c (lookup_partial_symbol, lookup_block_symbol):
+	  Fix to try matching the cached demangled name if no match is
+	  found using the regular symbol name.
+	* symtab.c (find_methods):  Remove unused physnames array.
+	* symtab.c (name_match, NAME_MATCH):  Remove function and macro,
+	  replaced with SYMBOL_MATCHES_REGEXP from symtab.h.
+	* symtab.c (completion_list_add_symbol):  Rewrite to use cached
+	  C++ demangled symbol names.
+	* symtab.h:  Much reformatting of structures and such to add
+	  whitespace to make them more readable, and make them more
+	  consistent with other gdb structure definitions.
+	* symtab.h (general_symbol_info): New struct containing fields
+	  common to all symbols.
+	* symtab.h (SYMBOL_LANGUAGE, SYMBOL_DEMANGLED_NAME,
+	  SYMBOL_SOURCE_NAME, SYMBOL_LINKAGE_NAME, SYMBOL_MATCHES_NAME,
+	  SYMBOL_MATCHES_REGEXP, MSYMBOL_INFO, MSYMBOL_TYPE):  New macros.
+	* symtab. (struct minimal_symbol, struct partial_symbol, struct
+	  symbol): Use general_symbol_info struct.
+	* utils.c (demangle_and_match):  Remove, no longer used.
+	* valops.c (demangle.h):  Include.	
+	* xcoffexec.c (eq):  Remove macro, replace usages with STREQ.
+	* blockframe.c, breakpoint.c, c-exp.y, c-valprint.c, dbxread.c,
+	  infcmd.c, m2-exp.y, minsyms.c, objfiles.h, solib.c, stack.c,
+	  symmisc.c, symtab.c, valops.c:  Replace references to minimal
+	  symbol fields with appropriate macros.
+	* breakpoint.c, buildsym.c, c-exp.y, c-typeprint.c, c-valprint.c,
+	  coffread.c, command.c, convex-tdep.c, cp-valprint.c, dbxread.c,
+	  demangle.c, elfread.c, energize.c, environ.c, exec.c,
+	  gdbtypes.c, i960-tdep.c, infrun.c, infrun-hacked.c, language.c,
+	  main.c, minsyms.c, mipsread.c, partial-stab.h, remote-es1800.c,
+	  remote-nindy.c, remote-udi.c, rs6000-tdep.c, solib.c, source.c,
+	  sparc-pinsn.c, stabsread.c, standalone.c, state.c, stuff.c, 
+	  symfile.c, symmisc.c, symtab.c, symtab.h, tm-sysv4.h,
+	  tm-ultra3.h, values.c, xcoffexec.c, xcoffread.c:  Replace strcmp
+	  and strncmp usages with STREQ, STREQN, or STRCMP as appropriate.
+	* breakpoint.c, buildsym.c, c-typeprint.c, expprint.c, findvar.c,
+	  mipsread.c, printcmd.c, source.c, stabsread.c, stack.c,
+	  symmisc.c, tm-29k.h, valops.c, values.c:  Replace SYMBOL_NAME
+	  references with SYMBOL_SOURCE_NAME or SYMBOL_LINKAGE_NAME as
+	  appropriate.
+	* buildsym.c (start_subfile, patch_subfile_names):  Default the
+	  source language to what can be deduced from the filename.
+	* buildsym.c (end_symtab):  Update the source language in the
+	  allocated symtab to match what we have been using.
+	* buildsym.h (struct subfile):  Add a language field.
+	* c-typeprint.c (c_print_type):  Remove code to do explicit
+	  demangling.
+	* dbxread.c (psymtab_language):  Add static variable.
+	* dbxread.c (start_psymtab):  Initialize psymtab_language using
+	  deduce_language_from_filename.
+
 Mon Dec 21 22:24:33 1992  Fred Fish  (fnf@cygnus.com)
 
 	* valprint.c (val_print):  Reorganize comment and add note

@@ -176,7 +176,7 @@ set_language_command (ignore, from_tty)
 
   /* Search the list of languages for a match.  */
   for (i = 0; i < languages_size; i++) {
-    if (!strcmp (languages[i]->la_name, language)) {
+    if (STREQ (languages[i]->la_name, language)) {
       /* Found it!  Go into manual mode, and use this language.  */
       if (languages[i]->la_language == language_auto) {
 	/* Enter auto mode.  Set to the current frame's language, if known.  */
@@ -224,22 +224,22 @@ set_type_command(ignore, from_tty)
    char *ignore;
    int from_tty;
 {
-   if (!strcmp(type,"on"))
+   if (STREQ(type,"on"))
    {
       type_check = type_check_on;
       type_mode = type_mode_manual;
    }
-   else if (!strcmp(type,"warn"))
+   else if (STREQ(type,"warn"))
    {
       type_check = type_check_warn;
       type_mode = type_mode_manual;
    }
-   else if (!strcmp(type,"off"))
+   else if (STREQ(type,"off"))
    {
       type_check = type_check_off;
       type_mode = type_mode_manual;
    }
-   else if (!strcmp(type,"auto"))
+   else if (STREQ(type,"auto"))
    {
       type_mode = type_mode_auto;
       set_type_range();
@@ -270,22 +270,22 @@ set_range_command(ignore, from_tty)
    char *ignore;
    int from_tty;
 {
-   if (!strcmp(range,"on"))
+   if (STREQ(range,"on"))
    {
       range_check = range_check_on;
       range_mode = range_mode_manual;
    }
-   else if (!strcmp(range,"warn"))
+   else if (STREQ(range,"warn"))
    {
       range_check = range_check_warn;
       range_mode = range_mode_manual;
    }
-   else if (!strcmp(range,"off"))
+   else if (STREQ(range,"off"))
    {
       range_check = range_check_off;
       range_mode = range_mode_manual;
    }
-   else if (!strcmp(range,"auto"))
+   else if (STREQ(range,"auto"))
    {
       range_mode = range_mode_auto;
       set_type_range();
@@ -762,7 +762,7 @@ value_true(val)
       }
     if (i >= len)
       return 0;		/* Not a valid BOOLEAN value */
-    if (!strcmp ("TRUE", TYPE_FIELD_NAME(VALUE_TYPE(val), i)))
+    if (STREQ ("TRUE", TYPE_FIELD_NAME(VALUE_TYPE(val), i)))
       return 1;		/* BOOLEAN with value TRUE */
     else
       return 0;		/* BOOLEAN with value FALSE */

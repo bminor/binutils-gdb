@@ -111,8 +111,8 @@ set_demangling_command (ignore, from_tty)
 
   for (dem = demanglers; dem -> demangling_style_name != NULL; dem++)
     {
-      if (strcmp (current_demangling_style_string,
-		  dem -> demangling_style_name) == 0)
+      if (STREQ (current_demangling_style_string,
+		  dem -> demangling_style_name))
 	{
 	  current_demangling_style = dem -> demangling_style;
 	  break;

@@ -207,9 +207,6 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 #endif
 /* end-sanitize-chill */
 
-#define STREQ(a,b)		(strcmp(a,b)==0)
-#define STREQN(a,b,n)		(strncmp(a,b,n)==0)
-
 /* Flags to target_to_host() that tell whether or not the data object is
    expected to be signed.  Used, for example, when fetching a signed
    integer in the target environment which is used as a signed integer
@@ -691,8 +688,12 @@ set_cu_language (dip)
       case LANG_FORTRAN77:
       case LANG_FORTRAN90:
       case LANG_PASCAL83:
-      default:
+	/* We don't know anything special about these yet. */
 	cu_language = language_unknown;
+	break;
+      default:
+	/* If no at_language, try to deduce one from the filename */
+	cu_language = deduce_language_from_filename (dip -> at_name);
 	break;
     }
   cu_language_defn = language_def (cu_language);
@@ -1736,6 +1737,8 @@ enum_type (dip, objfile)
 	  memset (sym, 0, sizeof (struct symbol));
 	  SYMBOL_NAME (sym) = create_name (list -> field.name,
 					   &objfile->symbol_obstack);
+	  SYMBOL_LANGUAGE (sym) = cu_language;
+	  SYMBOL_DEMANGLED_NAME (sym) = NULL;
 	  SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_TYPE (sym) = type;
@@ -2543,7 +2546,8 @@ add_enum_psymbol (dip, objfile)
 	{
 	  scan += TARGET_FT_LONG_SIZE (objfile);
 	  ADD_PSYMBOL_TO_LIST (scan, strlen (scan), VAR_NAMESPACE, LOC_CONST,
-			       objfile -> static_psymbols, 0);
+			       objfile -> static_psymbols, 0, cu_language,
+			       objfile);
 	  scan += strlen (scan) + 1;
 	}
     }
@@ -2579,7 +2583,7 @@ add_partial_symbol (dip, objfile)
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_BLOCK,
 			   objfile -> global_psymbols,
-			   dip -> at_low_pc);
+			   dip -> at_low_pc, cu_language, objfile);
       break;
     case TAG_global_variable:
       record_minimal_symbol (dip -> at_name, locval (dip -> at_location),
@@ -2587,25 +2591,25 @@ add_partial_symbol (dip, objfile)
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_STATIC,
 			   objfile -> global_psymbols,
-			   0);
+			   0, cu_language, objfile);
       break;
     case TAG_subroutine:
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_BLOCK,
 			   objfile -> static_psymbols,
-			   dip -> at_low_pc);
+			   dip -> at_low_pc, cu_language, objfile);
       break;
     case TAG_local_variable:
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_STATIC,
 			   objfile -> static_psymbols,
-			   0);
+			   0, cu_language, objfile);
       break;
     case TAG_typedef:
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   VAR_NAMESPACE, LOC_TYPEDEF,
 			   objfile -> static_psymbols,
-			   0);
+			   0, cu_language, objfile);
       break;
     case TAG_class_type:
     case TAG_structure_type:
@@ -2614,14 +2618,14 @@ add_partial_symbol (dip, objfile)
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   STRUCT_NAMESPACE, LOC_TYPEDEF,
 			   objfile -> static_psymbols,
-			   0);
+			   0, cu_language, objfile);
       if (cu_language == language_cplus)
 	{
 	  /* For C++, these implicitly act as typedefs as well. */
 	  ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			       VAR_NAMESPACE, LOC_TYPEDEF,
 			       objfile -> static_psymbols,
-			       0);
+			       0, cu_language, objfile);
 	}
       break;
     }
@@ -2928,6 +2932,26 @@ new_symbol (dip, objfile)
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_TYPE (sym) = decode_die_type (dip);
+
+      /* If this symbol is from a C++ compilation, then attempt to cache the
+	 demangled form for future reference.  This is a typical time versus
+	 space tradeoff, that was decided in favor of time because it sped up
+	 C++ symbol lookups by a factor of about 20. */
+
+      SYMBOL_LANGUAGE (sym) = cu_language;
+      if (SYMBOL_LANGUAGE (sym) == language_cplus)
+	{
+	  char *demangled =
+	    cplus_demangle (SYMBOL_NAME (sym), DMGL_PARAMS | DMGL_ANSI);
+	  if (demangled != NULL)
+	    {
+	      SYMBOL_DEMANGLED_NAME (sym) = 
+		obsavestring (demangled, strlen (demangled),
+			      &objfile -> symbol_obstack);
+	      free (demangled);
+	    }
+	}
+
       switch (dip -> die_tag)
 	{
 	case TAG_label:
@@ -3056,6 +3080,8 @@ synthesize_typedef (dip, objfile, type)
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_NAME (sym) = create_name (dip -> at_name,
 				       &objfile->symbol_obstack);
+      SYMBOL_LANGUAGE (sym) = cu_language;
+      SYMBOL_DEMANGLED_NAME (sym) = NULL;
       SYMBOL_TYPE (sym) = type;
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;

@@ -476,7 +476,7 @@ lookup_primitive_typename (name)
 
    for (p = current_language -> la_builtin_type_vector; *p != NULL; p++)
      {
-       if (!strcmp ((**p) -> name, name))
+       if (STREQ ((**p) -> name, name))
 	 {
 	   return (**p);
 	 }
@@ -676,7 +676,7 @@ lookup_struct_elt_type (type, name, noerr)
     {
       char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-      if (t_field_name && !strcmp (t_field_name, name))
+      if (t_field_name && STREQ (t_field_name, name))
 	{
 	  return TYPE_FIELD_TYPE (type, i);
 	}

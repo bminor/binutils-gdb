@@ -757,7 +757,7 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
 
   if (execarg != NULL
       && symarg != NULL
-      && strcmp (execarg, symarg) == 0)
+      && STREQ (execarg, symarg))
     {
       /* The exec file and the symbol-file are the same.  If we can't open
 	 it, better only print one error message.  */
@@ -1767,7 +1767,7 @@ define_command (comname, from_tty)
 
   /* Look it up, and verify that we got an exact match.  */
   c = lookup_cmd (&tem, cmdlist, "", -1, 1);
-  if (c && 0 != strcmp (comname, c->name))
+  if (c && !STREQ (comname, c->name))
     c = 0;
     
   if (c)
@@ -1789,7 +1789,7 @@ define_command (comname, from_tty)
       /* Look up cmd it hooks, and verify that we got an exact match.  */
       tem = comname+HOOK_LEN;
       hookc = lookup_cmd (&tem, cmdlist, "", -1, 0);
-      if (hookc && 0 != strcmp (comname+HOOK_LEN, hookc->name))
+      if (hookc && !STREQ (comname+HOOK_LEN, hookc->name))
 	hookc = 0;
       if (!hookc)
 	{
@@ -1960,7 +1960,7 @@ pwd_command (args, from_tty)
   if (args) error ("The \"pwd\" command does not take an argument: %s", args);
   getcwd (dirbuf, sizeof (dirbuf));
 
-  if (strcmp (dirbuf, current_directory))
+  if (!STREQ (dirbuf, current_directory))
     printf ("Working directory %s\n (canonically %s).\n",
 	    current_directory, dirbuf);
   else

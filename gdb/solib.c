@@ -233,7 +233,7 @@ solib_map_sections (so)
       p -> addr += (CORE_ADDR) LM_ADDR (so);
       p -> endaddr += (CORE_ADDR) LM_ADDR (so);
       so -> lmend = (CORE_ADDR) max (p -> endaddr, so -> lmend);
-      if (strcmp (p -> sec_ptr -> name, ".text") == 0)
+      if (STREQ (p -> sec_ptr -> name, ".text"))
 	{
 	  so -> textsection = p;
 	}
@@ -361,7 +361,7 @@ bfd_lookup_symbol (abfd, symname)
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = *symbol_table++;
-	  if (strcmp (sym -> name, symname) == 0)
+	  if (STREQ (sym -> name, symname))
 	    {
 	      symaddr = sym -> value;
 	      break;
@@ -516,9 +516,9 @@ locate_base ()
      library.  We don't want the shared library versions. */
 
   msymbol = lookup_minimal_symbol (DEBUG_BASE, symfile_objfile);
-  if ((msymbol != NULL) && (msymbol -> address != 0))
+  if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
     {
-      address = msymbol -> address;
+      address = SYMBOL_VALUE_ADDRESS (msymbol);
     }
   return (address);
 
@@ -1056,9 +1056,9 @@ enable_break ()
   struct minimal_symbol *msymbol;
 
   msymbol = lookup_minimal_symbol ("main", symfile_objfile);
-  if ((msymbol != NULL) && (msymbol -> address != 0))
+  if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
     {
-      breakpoint_addr = msymbol -> address;
+      breakpoint_addr = SYMBOL_VALUE_ADDRESS (msymbol);
     }
   else
     {

@@ -470,7 +470,7 @@ load_state_command (arg_string, from_tty)
 
   while (*++argv != NULL)
     {
-      if (strcmp (*argv, "symbols") == 0)
+      if (STREQ (*argv, "symbols"))
 	{
 	  if (from_tty
 	      && !query ("load symbol table state from file \"%s\"? ",
@@ -533,7 +533,7 @@ dump_state_command (arg_string, from_tty)
   fseek (asfd -> fp, sizeof (sf_hdr), SEEK_SET);
   while (*++argv != NULL)
     {
-      if (strcmp (*argv, "objfile") == 0)
+      if (STREQ (*argv, "objfile"))
 	{
 	  write_objfile_state (asfd);
 	}

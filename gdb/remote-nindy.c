@@ -921,7 +921,7 @@ nindy_before_main_loop ()
 		;
 	}
 	*p2= '\0';
-	if ( !strcmp("quit",p) ){
+	if ( STREQ("quit",p) ){
 		exit(1);
 	}
 

@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "gdbcore.h"
 #include "target.h"
+#include "demangle.h"
 
 #include <errno.h>
 
@@ -420,7 +421,7 @@ value_of_variable (var)
 
   val = read_var_value (var, (FRAME) 0);
   if (val == 0)
-    error ("Address of symbol \"%s\" is unknown.", SYMBOL_NAME (var));
+    error ("Address of symbol \"%s\" is unknown.", SYMBOL_SOURCE_NAME (var));
   return val;
 }
 
@@ -950,7 +951,7 @@ value_string (ptr, len)
 	val =
 	  value_from_longest (lookup_pointer_type (lookup_function_type (
 				lookup_pointer_type (builtin_type_char))),
-			      (LONGEST) msymbol -> address);
+			      (LONGEST) SYMBOL_VALUE_ADDRESS (msymbol));
       else
 	error ("String constants require the program to have a function \"malloc\".");
     }
@@ -989,17 +990,17 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
       {
 	char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-	if (t_field_name && !strcmp (t_field_name, name))
+	if (t_field_name && STREQ (t_field_name, name))
 	  {
 	    value v;
 	    if (TYPE_FIELD_STATIC (type, i))
 	      {
 		char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, i);
 		struct symbol *sym =
-		  lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
-		if (! sym) error (
-	  "Internal error: could not find physical static variable named %s",
-				  phys_name);
+		    lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
+		if (sym == NULL)
+		    error ("Internal error: could not find physical static variable named %s",
+			   phys_name);
 		v = value_at (TYPE_FIELD_TYPE (type, i),
 			      (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
 	      }
@@ -1017,7 +1018,7 @@ search_struct_field (name, arg1, offset, type, looking_for_baseclass)
       /* If we are looking for baseclasses, this is what we get when we
 	 hit them.  */
       int found_baseclass = (looking_for_baseclass
-			     && !strcmp (name, TYPE_BASECLASS_NAME (type, i)));
+			     && STREQ (name, TYPE_BASECLASS_NAME (type, i)));
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -1062,7 +1063,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
     {
       char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
-      if (t_field_name && !strcmp (t_field_name, name))
+      if (t_field_name && STREQ (t_field_name, name))
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (type, i) - 1;
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (type, i);
@@ -1235,7 +1236,7 @@ destructor_name_p (name, type)
   if (name[0] == '~')
     {
       char *dname = type_name_no_tag (type);
-      if (strcmp (dname, name+1))
+      if (!STREQ (dname, name+1))
 	error ("name of destructor must equal name of class");
       else
 	return 1;
@@ -1257,7 +1258,7 @@ check_field_in (type, name)
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
       char *t_field_name = TYPE_FIELD_NAME (type, i);
-      if (t_field_name && !strcmp (t_field_name, name))
+      if (t_field_name && STREQ (t_field_name, name))
 	return 1;
     }
 
@@ -1270,7 +1271,7 @@ check_field_in (type, name)
 
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
     {
-      if (!strcmp (TYPE_FN_FIELDLIST_NAME (type, i), name))
+      if (STREQ (TYPE_FN_FIELDLIST_NAME (type, i), name))
 	return 1;
     }
 
@@ -1337,16 +1338,15 @@ value_struct_elt_for_reference (domain, offset, curtype, name, intype)
     {
       char *t_field_name = TYPE_FIELD_NAME (t, i);
       
-      if (t_field_name && !strcmp (t_field_name, name))
+      if (t_field_name && STREQ (t_field_name, name))
 	{
 	  if (TYPE_FIELD_STATIC (t, i))
 	    {
 	      char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (t, i);
 	      struct symbol *sym =
 		lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
-	      if (! sym)
-		error (
-	    "Internal error: could not find physical static variable named %s",
+	      if (sym == NULL)
+		error ("Internal error: could not find physical static variable named %s",
 		       phys_name);
 	      return value_at (SYMBOL_TYPE (sym),
 			       (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
@@ -1376,7 +1376,7 @@ value_struct_elt_for_reference (domain, offset, curtype, name, intype)
 
   for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; --i)
     {
-      if (!strcmp (TYPE_FN_FIELDLIST_NAME (t, i), name))
+      if (STREQ (TYPE_FN_FIELDLIST_NAME (t, i), name))
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (t, i);
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);

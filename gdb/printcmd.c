@@ -549,7 +549,8 @@ set_next_address (addr)
    after LEADIN.  Print nothing if no symbolic name is found nearby.
    DO_DEMANGLE controls whether to print a symbol in its native "raw" form,
    or to interpret it as a possible C++ name and convert it back to source
-   form. */
+   form.  However note that DO_DEMANGLE can be overridden by the specific
+   settings of the demangle and asm_demangle variables. */
 
 void
 print_address_symbolic (addr, stream, do_demangle, leadin)
@@ -569,10 +570,10 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
   fputs_filtered (leadin, stream);
   fputs_filtered ("<", stream);
   if (do_demangle)
-    fputs_demangled (msymbol -> name, stream, DMGL_ANSI | DMGL_PARAMS);
+    fputs_filtered (SYMBOL_SOURCE_NAME (msymbol), stream);
   else
-    fputs_filtered (msymbol -> name, stream);
-  name_location = msymbol -> address;
+    fputs_filtered (SYMBOL_LINKAGE_NAME (msymbol), stream);
+  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
   if (addr - name_location)
     fprintf_filtered (stream, "+%d>", addr - name_location);
   else
@@ -876,7 +877,7 @@ address_info (exp, from_tty)
 
   sym = lookup_symbol (exp, get_selected_block (), VAR_NAMESPACE, 
 		       &is_a_field_of_this, (struct symtab **)NULL);
-  if (sym == 0)
+  if (sym == NULL)
     {
       if (is_a_field_of_this)
 	{
@@ -888,7 +889,7 @@ address_info (exp, from_tty)
 
       if (msymbol != NULL)
 	printf ("Symbol \"%s\" is at %s in a file compiled without debugging.\n",
-		exp, local_hex_string(msymbol -> address));
+		exp, local_hex_string(SYMBOL_VALUE_ADDRESS (msymbol)));
       else
 	error ("No symbol \"%s\" in current context.", exp);
       return;
@@ -1503,7 +1504,7 @@ print_frame_args (func, fi, num, stream)
       if (! first)
 	fprintf_filtered (stream, ", ");
       wrap_here ("    ");
-      fprint_symbol (stream, SYMBOL_NAME (sym));
+      fprint_symbol (stream, SYMBOL_SOURCE_NAME (sym));
       fputs_filtered ("=", stream);
 
       /* Avoid value_print because it will deref ref parameters.  We just

@@ -174,7 +174,7 @@ extern char *inferior_thisrun_terminal;
    no name, assume we are not in sigtramp).  */
 #if !defined (IN_SIGTRAMP)
 #define IN_SIGTRAMP(pc, name) \
-  name && !strcmp ("_sigtramp", name)
+  name && STREQ ("_sigtramp", name)
 #endif
 
 /* Tables of how to react to signals; the user sets them.  */

@@ -1401,9 +1401,9 @@ fprint_symbol (stream, name)
    don't (slightly different than strcmp()'s range of return values).
    
    As an extra hack, string1=="FOO(ARGS)" matches string2=="FOO".
-   This "feature" is useful for demangle_and_match(), which is used
-   when searching for matching C++ function names (such as if the
-   user types 'break FOO', where FOO is a mangled C++ function). */
+   This "feature" is useful when searching for matching C++ function names
+   (such as if the user types 'break FOO', where FOO is a mangled C++
+   function). */
 
 int
 strcmp_iw (string1, string2)
@@ -1431,40 +1431,6 @@ strcmp_iw (string1, string2)
 	}
     }
   return (*string1 != '\0' && *string1 != '(') || (*string2 != '\0');
-}
-
-/* Demangle NAME and compare the result with LOOKFOR, ignoring any differences
-   in whitespace.
-   
-   If a match is found, returns a pointer to the demangled version of NAME
-   in malloc'd memory, which needs to be freed by the caller after use.
-   If a match is not found, returns NULL.
-
-   OPTIONS is a flags word that controls the demangling process and is just
-   passed on to the demangler.
-
-   When the caller sees a non-NULL result, it knows that NAME is the mangled
-   equivalent of LOOKFOR, and it can use either NAME, the "official demangled"
-   version of NAME (the return value) or the "unofficial demangled" version
-   of NAME (LOOKFOR, which it already knows). */
-
-char *
-demangle_and_match (name, lookfor, options)
-     const char *name;
-     const char *lookfor;
-     int options;
-{
-  char *demangled;
-
-  if ((demangled = cplus_demangle (name, options)) != NULL)
-    {
-      if (strcmp_iw (demangled, lookfor) != 0)
-	{
-	  free (demangled);
-	  demangled = NULL;
-	}
-    }
-  return (demangled);
 }
 
 

@@ -144,7 +144,7 @@ open (filename, modes)
   for (next - files_start; * (int *) next;
        next += * (int *) next)
     {
-      if (!strcmp (next + 4, filename))
+      if (!STRCMP (next + 4, filename))
 	{
 	  sourcebeg = next + 4 + strlen (next + 4) + 1;
 	  sourcebeg = (char *) (((int) sourcebeg + 3) & (-4));

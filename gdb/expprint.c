@@ -102,7 +102,7 @@ print_subexp (exp, pos, stream, prec)
 
     case OP_VAR_VALUE:
       (*pos) += 2;
-      fputs_filtered (SYMBOL_NAME (exp->elts[pc + 1].symbol), stream);
+      fputs_filtered (SYMBOL_SOURCE_NAME (exp->elts[pc + 1].symbol), stream);
       return;
 
     case OP_LAST:

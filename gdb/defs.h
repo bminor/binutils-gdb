@@ -33,6 +33,13 @@ typedef unsigned int CORE_ADDR;
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
+/* Gdb does *lots* of string compares.  Use macros to speed them up by
+   avoiding function calls if the first characters are not the same. */
+
+#define STRCMP(a,b) (*(a) == *(b) ? strcmp ((a), (b)) : *(a) - *(b))
+#define STREQ(a,b) (*(a) == *(b) ? !strcmp ((a), (b)) : 0)
+#define STREQN(a,b,c) (*(a) == *(b) ? !strncmp ((a), (b), (c)) : 0)
+
 /* The character C++ uses to build identifiers that must be unique from
    the program's identifiers (such as $this and $$vptr).  */
 #define CPLUS_MARKER '$'	/* May be overridden to '.' for SysV */
@@ -93,7 +100,7 @@ inside_entry_file PARAMS ((CORE_ADDR addr));
 extern int
 inside_main_func PARAMS ((CORE_ADDR pc));
 
-/* From cplus-dem.c */
+/* From libiberty.a */
 
 extern char *
 cplus_demangle PARAMS ((const char *, int));
@@ -125,9 +132,6 @@ extern PTR
 mmalloc_getkey PARAMS ((PTR, int));
 
 /* From utils.c */
-
-extern char *
-demangle_and_match PARAMS ((const char *, const char *, int));
 
 extern int
 strcmp_iw PARAMS ((const char *, const char *));

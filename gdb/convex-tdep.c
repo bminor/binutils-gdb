@@ -316,9 +316,9 @@ is_trapped_internalvar (name)
 
   if ((name[0] == 'v' || name[0] == 'V')
       && (((name[1] & -8) == '0' && name[2] == '\0')
-	  || !strcmp (name, "vl")
-	  || !strcmp (name, "vs") 
-	  || !strcmp (name, "vm")))
+	  || STREQ (name, "vl")
+	  || STREQ (name, "vs") 
+	  || STREQ (name, "vm")))
     return 1;
   else return 0;
 }
@@ -336,17 +336,17 @@ value_of_trapped_internalvar (var)
   long len = *read_vector_register (VL_REGNUM);
   if (len <= 0 || len > 128) len = 128;
 
-  if (!strcmp (name, "vl"))
+  if (STREQ (name, "vl"))
     {
       val = value_from_longest (builtin_type_int,
 			     (LONGEST) *read_vector_register_1 (VL_REGNUM));
     }
-  else if (!strcmp (name, "vs"))
+  else if (STREQ (name, "vs"))
     {
       val = value_from_longest (builtin_type_int,
 			     (LONGEST) *read_vector_register_1 (VS_REGNUM));
     }
-  else if (!strcmp (name, "vm"))
+  else if (STREQ (name, "vm"))
     {
       long vm[4];
       long i, *p;
@@ -408,13 +408,13 @@ set_trapped_internalvar (var, val, bitpos, bitsize, offset)
   char *name = var->name;
   long long newval = value_as_long (val);
 
-  if (!strcmp (name, "vl")) 
+  if (STREQ (name, "vl")) 
     write_vector_register (VL_REGNUM, 0, newval);
-  else if (!strcmp (name, "vs"))
+  else if (STREQ (name, "vs"))
     write_vector_register (VS_REGNUM, 0, newval);
   else if (name[0] == 'c' || name[0] == 'C')
     write_comm_register (atoi (&name[1]), newval);
-  else if (!strcmp (name, "vm"))
+  else if (STREQ (name, "vm"))
     error ("can't assign to $vm");
   else
     {
@@ -498,9 +498,9 @@ set_pipelining_command (arg)
       sequential = !sequential;
       printf_filtered ("%s\n", sequential ? "off" : "on");
     }
-  else if (!strcmp (arg, "on"))
+  else if (STREQ (arg, "on"))
     sequential = 0;
-  else if (!strcmp (arg, "off"))
+  else if (STREQ (arg, "off"))
     sequential = 1;
   else error ("valid args are `on', to allow instructions to overlap, or\n\
 `off', to prevent it and thereby pinpoint exceptions.");
@@ -517,9 +517,9 @@ set_parallel_command (arg)
 
   if (!strncmp (arg, "fixed", strlen (arg)))
     parallel = 2;  
-  else if (!strcmp (arg, "on"))
+  else if (STREQ (arg, "on"))
     parallel = 1;
-  else if (!strcmp (arg, "off"))
+  else if (STREQ (arg, "off"))
     parallel = 0;
   else error ("valid args are `on', to allow multiple threads, or\n\
 `fixed', to force multiple threads, or\n\

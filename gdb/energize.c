@@ -1117,7 +1117,7 @@ kernel_dispatch(queue)
 
 	    while (*text == ' ' || *text == '\t') text++;
 
-	    if (strcmp(text, "]*[") == 0) /* XXX - What does this mean??? */
+	    if (STREQ(text, "]*[")) /* XXX - What does this mean??? */
 	      break;
 
 	    if (*text != '\000')
@@ -1576,9 +1576,9 @@ energize_call_command(cmdblk, arg, from_tty)
   else
     (*cmdblk->function.cfunc)(arg, from_tty);
 
-  if (strcmp(cmdblk->name, "up") == 0
-      || strcmp(cmdblk->name, "down") == 0
-      || strcmp(cmdblk->name, "frame") == 0)
+  if (STREQ(cmdblk->name, "up")
+      || STREQ(cmdblk->name, "down")
+      || STREQ(cmdblk->name, "frame"))
     send_location(get_frame_info(selected_frame)->pc,
 		  selected_frame_level);
   print_prompt();

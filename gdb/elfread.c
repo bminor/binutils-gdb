@@ -45,8 +45,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdb-stabs.h"
 #include "complaints.h"
 #include <string.h>
-
-#define STREQ(a,b) (strcmp((a),(b))==0)
+#include "demangle.h"
 
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the complation of psymtab-reading.
@@ -95,12 +94,6 @@ free_elfinfo PARAMS ((PTR));
 
 static struct section_offsets *
 elf_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
-
-#if 0
-static void
-record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type,
-			       struct objfile *));
-#endif
 
 static void
 record_minimal_symbol_and_info PARAMS ((char *, CORE_ADDR,
@@ -181,39 +174,6 @@ elf_interpreter (abfd)
 	}
     }
   return (interp);
-}
-
-#endif
-
-/*
-
-LOCAL FUNCTION
-
-	record_minimal_symbol -- add entry to minimal symbol table
-
-SYNOPSIS
-
-	static void record_minimal_symbol (char *name, CORE_ADDR address)
-
-DESCRIPTION
-
-	Given a pointer to the name of a symbol that should be added to the
-	minimal symbol table and the address associated with that symbol, records
-	this information for later use in building the minimal symbol table.
-
- */
-
-#if 0	/* FIXME:  Unused */
-
-static void
-record_minimal_symbol (name, address, ms_type, objfile)
-     char *name;
-     CORE_ADDR address;
-     enum minimal_symbol_type ms_type;
-     struct objfile *objfile;
-{
-  name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
-  prim_record_minimal_symbol (name, address, ms_type);
 }
 
 #endif
@@ -351,15 +311,15 @@ elf_symtab_read (abfd, addr, objfile)
 	      switch (sym->name[1])
 		{
 		  case 'b':
-			if (!strcmp ("Bbss.bss", sym->name))
+			if (STREQ ("Bbss.bss", sym->name))
 			  index = SECT_OFF_BSS;
 			break;
 		  case 'd':
-			if (!strcmp ("Ddata.data", sym->name))
+			if (STREQ ("Ddata.data", sym->name))
 			  index = SECT_OFF_DATA;
 			break;
 		  case 'r':
-			if (!strcmp ("Drodata.rodata", sym->name))
+			if (STREQ ("Drodata.rodata", sym->name))
 			  index = SECT_OFF_RODATA;
 			break;
 		}
@@ -628,7 +588,7 @@ elfstab_offset_sections (objfile, pst)
   for (; maybe; maybe = maybe->next)
     {
       if (filename[0] == maybe->filename[0]
-	  && !strcmp (filename, maybe->filename))
+	  && STREQ (filename, maybe->filename))
 	{
 	  /* We found a match.  But there might be several source files
 	     (from different directories) with the same name.  */

@@ -154,7 +154,7 @@ select_source_symtab (s)
 	{
 	  char *name = s -> filename;
 	  int len = strlen (name);
-	  if (! (len > 2 && (strcmp (&name[len - 2], ".h") == 0)))
+	  if (! (len > 2 && (STREQ (&name[len - 2], ".h"))))
 	    {
 	      current_source_symtab = s;
 	    }
@@ -171,7 +171,7 @@ select_source_symtab (s)
 	{
 	  char *name = ps -> filename;
 	  int len = strlen (name);
-	  if (! (len > 2 && (strcmp (&name[len - 2], ".h") == 0)))
+	  if (! (len > 2 && (STREQ (&name[len - 2], ".h"))))
 	    {
 	      cs_pst = ps;
 	    }
@@ -910,7 +910,7 @@ list_command (arg, from_tty)
 
   /* "l" or "l +" lists next ten lines.  */
 
-  if (arg == 0 || !strcmp (arg, "+"))
+  if (arg == 0 || STREQ (arg, "+"))
     {
       if (current_source_symtab == 0)
 	error ("No default source file yet.  Do \"help list\".");
@@ -920,7 +920,7 @@ list_command (arg, from_tty)
     }
 
   /* "l -" lists previous ten lines, the ones before the ten just listed.  */
-  if (!strcmp (arg, "-"))
+  if (STREQ (arg, "-"))
     {
       if (current_source_symtab == 0)
 	error ("No default source file yet.  Do \"help list\".");
@@ -1010,7 +1010,7 @@ list_command (arg, from_tty)
       if (sym)
 	{
 	  printf_filtered ("%s is in ", local_hex_string(sal.pc));
-	  fprint_symbol (stdout, SYMBOL_NAME (sym));
+	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stdout);
 	  printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
 	}
       else

@@ -1035,9 +1035,9 @@ download(load_arg_string, from_tty)
 	{
 	  token++;
 
-	  if (strcmp (token, "ms") == 0)
+	  if (STREQ (token, "ms"))
 	    stack_sizes[1] = atol (strtok (NULL, " \t"));
-	  else if (strcmp (token, "rs") == 0)
+	  else if (STREQ (token, "rs"))
 	    stack_sizes[0] = atol (strtok (NULL, " \t"));
 	  else
 	    {
@@ -1094,13 +1094,13 @@ download(load_arg_string, from_tty)
 	  const char *section_name;
 
 	  section_name = bfd_get_section_name (pbfd, section);
-	  if (strcmp (section_name, ".text") == 0 && !load_text)
+	  if (STREQ (section_name, ".text") && !load_text)
 	    continue;
-	  else if (strcmp (section_name, ".data") == 0 && !load_data)
+	  else if (STREQ (section_name, ".data") && !load_data)
 	    continue;
-	  else if (strcmp (section_name, ".bss") == 0 && !load_bss)
+	  else if (STREQ (section_name, ".bss") && !load_bss)
 	    continue;
-	  else if (strcmp (section_name, ".lit") == 0 && !load_lit)
+	  else if (STREQ (section_name, ".lit") && !load_lit)
 	    continue;
 
 	  To.Offset = bfd_get_section_vma (pbfd, section);

@@ -233,7 +233,7 @@ compare_symbols (s1p, s2p)
   /* Names that are less should come first.  */
   register struct symbol **s1 = (struct symbol **) s1p;
   register struct symbol **s2 = (struct symbol **) s2p;
-  register int namediff = strcmp (SYMBOL_NAME (*s1), SYMBOL_NAME (*s2));
+  register int namediff = STRCMP (SYMBOL_NAME (*s1), SYMBOL_NAME (*s2));
   if (namediff != 0) 
     return namediff;
 
@@ -1419,7 +1419,7 @@ function_entry_point:
     
 
     case C_FCN:
-      if (strcmp (cs->c_name, ".bf") == 0) {
+      if (STREQ (cs->c_name, ".bf")) {
 
         bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
 			      main_aux);
@@ -1503,7 +1503,7 @@ function_entry_point:
 		(fcn_cs_saved.c_value, fcn_stab_saved.c_name, 0, 0, objfile);
 #endif
       }
-      else if (strcmp (cs->c_name, ".ef") == 0) {
+      else if (STREQ (cs->c_name, ".ef")) {
 
         bfd_coff_swap_aux_in (abfd, raw_auxptr, cs->c_type, cs->c_sclass,
 			      main_aux);
@@ -1565,11 +1565,11 @@ function_entry_point:
 	break;
 
     case C_BLOCK	:
-      if (strcmp (cs->c_name, ".bb") == 0) {
+      if (STREQ (cs->c_name, ".bb")) {
 	depth++;
 	new = push_context (depth, cs->c_value);
       }
-      else if (strcmp (cs->c_name, ".eb") == 0) {
+      else if (STREQ (cs->c_name, ".eb")) {
 	new = pop_context ();
 	if (depth != new->depth)
 	  error ("Invalid symbol data: .bb/.eb symbol mismatch at symbol %d.",
@@ -1951,7 +1951,7 @@ read_symbol_lineno (symtable, symno)
   for (ii = 0; ii < 50; ii++) {
     bfd_coff_swap_sym_in (symfile_bfd,
 			     symtable + (symno*local_symesz), symbol);
-    if (symbol->n_sclass == C_FCN && 0 == strcmp (symbol->n_name, ".bf"))
+    if (symbol->n_sclass == C_FCN && STREQ (symbol->n_name, ".bf"))
       goto gotit;
     symno += symbol->n_numaux+1;
   }
@@ -1986,7 +1986,7 @@ PTR vpinfo;
 
   count = asect->lineno_count;
 
-  if (strcmp (asect->name, ".text") || count == 0)
+  if (!STREQ (asect->name, ".text") || count == 0)
     return;
 
   size   = count * coff_data (symfile_bfd)->local_linesz;

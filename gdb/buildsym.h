@@ -59,6 +59,7 @@ struct subfile
   char *dirname;
   struct linetable *line_vector;
   int line_vector_length;
+  enum language language;
 };
 
 EXTERN struct subfile *subfiles;

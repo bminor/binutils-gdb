@@ -52,8 +52,6 @@ exec_close PARAMS ((int));
 
 struct section_table *exec_sections, *exec_sections_end;
 
-#define eq(s0, s1)	!strcmp(s0, s1)
-
 /* Whether to open exec and core files read-only or read-write.  */
 
 int write_files = 0;
@@ -293,7 +291,7 @@ sex_to_vmap(bfd *bf, sec_ptr sex, struct vmap_and_bfd *vmap_bfd)
   if ((bfd_get_section_flags(bf, sex) & SEC_LOAD) == 0)
     return;
 
-  if (!strcmp(bfd_section_name(bf, sex), ".text")) {
+  if (STREQ(bfd_section_name(bf, sex), ".text")) {
     vp->tstart = 0;
     vp->tend   = vp->tstart + bfd_section_size(bf, sex);
 
@@ -305,12 +303,12 @@ sex_to_vmap(bfd *bf, sec_ptr sex, struct vmap_and_bfd *vmap_bfd)
     vp->tadj = sex->filepos - bfd_section_vma(bf, sex);
   }
 
-  else if (!strcmp(bfd_section_name(bf, sex), ".data")) {
+  else if (STREQ(bfd_section_name(bf, sex), ".data")) {
     vp->dstart = 0;
     vp->dend   = vp->dstart + bfd_section_size(bf, sex);
   }
 
-  else if (!strcmp(bfd_section_name(bf, sex), ".bss"))	/* FIXMEmgo */
+  else if (STREQ(bfd_section_name(bf, sex), ".bss"))	/* FIXMEmgo */
     printf ("bss section in exec! Don't know what the heck to do!\n");
 }
 
@@ -579,7 +577,7 @@ register struct ld_info *ldi; {
 		 * FIXME??? am I tossing BFDs?  bfd?
 		 */
 		while (last = bfd_openr_next_archived_file(bfd, last))
-			if (eq(mem, last->filename))
+			if (STREQ(mem, last->filename))
 				break;
 
 		if (!last) {
@@ -631,12 +629,12 @@ vmap_exec ()
 
   for (i=0; &exec_ops.to_sections[i] < exec_ops.to_sections_end; i++)
     {
-      if (strcmp(".text", exec_ops.to_sections[i].sec_ptr->name) == 0)
+      if (STREQ(".text", exec_ops.to_sections[i].sec_ptr->name))
 	{
 	  exec_ops.to_sections[i].addr += vmap->tstart;
 	  exec_ops.to_sections[i].endaddr += vmap->tstart;
 	}
-      else if (strcmp(".data", exec_ops.to_sections[i].sec_ptr->name) == 0)
+      else if (STREQ(".data", exec_ops.to_sections[i].sec_ptr->name))
 	{
 	  exec_ops.to_sections[i].addr += vmap->dstart;
 	  exec_ops.to_sections[i].endaddr += vmap->dstart;
@@ -707,8 +705,8 @@ retry:
 
 	  /* The filenames are not always sufficient to match on. */
 
-	  if ((name[0] == "/" && !eq(name, vp->name))
-	      	|| (memb[0] && !eq(memb, vp->member)))
+	  if ((name[0] == "/" && !STREQ(name, vp->name))
+	      	|| (memb[0] && !STREQ(memb, vp->member)))
 	    continue;
 
 	  io = bfd_cache_lookup(vp->bfd);		/* totally opaque! */
