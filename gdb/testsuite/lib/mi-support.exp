@@ -117,13 +117,8 @@ proc mi_gdb_start { } {
 	return 1;
     }
     gdb_expect {
-	-re ".*MI_OUT.*$mi_gdb_prompt$" {
-	    verbose "GDB initialized."
-	}
 	-re ".*$mi_gdb_prompt$" {
-	    untested "Skip mi tests (output not in headless format)."
-	    remote_close host;
-	    return -1;
+	    verbose "GDB initialized."
 	}
 	-re ".*$gdb_prompt $" {
 	    untested "Skip mi tests (got non-mi prompt)."

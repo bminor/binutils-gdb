@@ -1,3 +1,8 @@
+2001-10-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* lib/mi-support.exp (mi_gdb_start): Don't require MI_OUT when
+	checking MI enabled.
+
 2001-07-25  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/consecutive.exp: New file.  Test stepping over

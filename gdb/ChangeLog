@@ -1,3 +1,8 @@
+2001-10-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* top.c (print_gdb_version): Do not print ``(MI_OUT)''.  MI
+	interface is always enabled.
+
 2001-10-21  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* config/djgpp/README: Fix a typo and tweak for GDB 5.1.
