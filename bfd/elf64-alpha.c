@@ -329,6 +329,22 @@ elf64_alpha_mkobject (abfd)
     return false;
   return true;
 }
+
+static boolean
+elf64_alpha_object_p (abfd)
+     bfd *abfd;
+{
+  /* Allocate our special target data.  */
+  struct alpha_elf_obj_tdata *new_tdata;
+  new_tdata = bfd_zalloc (abfd, sizeof (struct alpha_elf_obj_tdata));
+  if (new_tdata == NULL)
+    return false;
+  new_tdata->root = *abfd->tdata.elf_obj_data;
+  abfd->tdata.any = new_tdata;
+
+  /* Set the right machine number for an Alpha ELF file.  */
+  return bfd_default_set_arch_mach (abfd, bfd_arch_alpha, 0);
+}
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
@@ -539,7 +555,8 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 false),		/* pcrel_offset */
 
   /* Push a value on the reloc evaluation stack.  */
-  HOWTO (ALPHA_R_OP_PUSH,	/* type */
+  /* Not implemented -- it's dumb.  */
+  HOWTO (R_ALPHA_OP_PUSH,	/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
@@ -555,7 +572,8 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 
   /* Store the value from the stack at the given address.  Store it in
      a bitfield of size r_size starting at bit position r_offset.  */
-  HOWTO (ALPHA_R_OP_STORE,	/* type */
+  /* Not implemented -- it's dumb.  */
+  HOWTO (R_ALPHA_OP_STORE,	/* type */
 	 0,			/* rightshift */
 	 4,			/* size (0 = byte, 1 = short, 2 = long) */
 	 64,			/* bitsize */
@@ -571,7 +589,8 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 
   /* Subtract the reloc address from the value on the top of the
      relocation stack.  */
-  HOWTO (ALPHA_R_OP_PSUB,	/* type */
+  /* Not implemented -- it's dumb.  */
+  HOWTO (R_ALPHA_OP_PSUB,	/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
@@ -587,7 +606,8 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 
   /* Shift the value on the top of the relocation stack right by the
      given value.  */
-  HOWTO (ALPHA_R_OP_PRSHIFT,	/* type */
+  /* Not implemented -- it's dumb.  */
+  HOWTO (R_ALPHA_OP_PRSHIFT,	/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
@@ -601,7 +621,146 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 0,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
+  /* Change the value of GP used by +r_addend until the next GPVALUE or the
+     end of the input bfd.  */
+  /* Not implemented -- it's dumb.  */
+  HOWTO (R_ALPHA_GPVALUE,
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 elf64_alpha_reloc_bad, /* special_function */
+	 "GPVALUE",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* The high 16 bits of the displacement from GP to the target.  */
+  /* XXX: Not implemented.  */
+  HOWTO (R_ALPHA_GPRELHIGH,
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 elf64_alpha_reloc_bad, /* special_function */
+	 "GPRELHIGH",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* The low 16 bits of the displacement from GP to the target.  */
+  /* XXX: Not implemented.  */
+  HOWTO (R_ALPHA_GPRELLOW,
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 elf64_alpha_reloc_bad, /* special_function */
+	 "GPRELLOW",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* A 16-bit displacement from the GP to the target.  */
+  /* XXX: Not implemented.  */
+  HOWTO (R_ALPHA_IMMED_GP_16,
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 elf64_alpha_reloc_bad, /* special_function */
+	 "IMMED_GP_16",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* The high bits of a 32-bit displacement from the GP to the target; the
+     low bits are supplied in the subsequent R_ALPHA_IMMED_LO32 relocs.  */
+  /* XXX: Not implemented.  */
+  HOWTO (R_ALPHA_IMMED_GP_HI32,
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 elf64_alpha_reloc_bad, /* special_function */
+	 "IMMED_GP_HI32",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* The high bits of a 32-bit displacement to the starting address of the
+     current section (the relocation target is ignored); the low bits are 
+     supplied in the subsequent R_ALPHA_IMMED_LO32 relocs.  */
+  /* XXX: Not implemented.  */
+  HOWTO (R_ALPHA_IMMED_SCN_HI32,
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 elf64_alpha_reloc_bad, /* special_function */
+	 "IMMED_SCN_HI32",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* The high bits of a 32-bit displacement from the previous br, bsr, jsr
+     or jmp insn (as tagged by a BRADDR or HINT reloc) to the target; the
+     low bits are supplied by subsequent R_ALPHA_IMMED_LO32 relocs.  */
+  /* XXX: Not implemented.  */
+  HOWTO (R_ALPHA_IMMED_BR_HI32,
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 elf64_alpha_reloc_bad, /* special_function */
+	 "IMMED_BR_HI32",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* The low 16 bits of a displacement calculated in a previous HI32 reloc.  */
+  /* XXX: Not implemented.  */
+  HOWTO (R_ALPHA_IMMED_LO32,
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 elf64_alpha_reloc_bad, /* special_function */
+	 "IMMED_LO32",		/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
   /* Misc ELF relocations. */
+
+  /* A dynamic relocation to copy the target into our .dynbss section.  */
+  /* Not generated, as all Alpha objects use PIC, so it is not needed.  It
+     is present because every other ELF has one, but should not be used
+     because .dynbss is an ugly thing.  */
   HOWTO (R_ALPHA_COPY,
 	 0,
 	 0,
@@ -616,6 +775,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 0,
 	 true),
 
+  /* A dynamic relocation for a .got entry.  */
   HOWTO (R_ALPHA_GLOB_DAT,
 	 0,
 	 0,
@@ -630,6 +790,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 0,
 	 true),
 
+  /* A dynamic relocation for a .plt entry.  */
   HOWTO (R_ALPHA_JMP_SLOT,
 	 0,
 	 0,
@@ -644,6 +805,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
 	 0,
 	 true),
 
+  /* A dynamic relocation to add the base of the DSO to a 64-bit field.  */
   HOWTO (R_ALPHA_RELATIVE,
 	 0,
 	 0,
@@ -850,22 +1012,13 @@ elf64_alpha_info_to_howto (abfd, cache_ptr, dst)
 #define PLT_HEADER_WORD4	0x6b7b0000	/* jmp  $27,($27)   */
 
 #define PLT_ENTRY_SIZE 12
-#define PLT_ENTRY_WORD1		0x279f0000	/* ldah $28, 0($31) */
-#define PLT_ENTRY_WORD2		0x239c0000	/* lda  $28, 0($28) */
-#define PLT_ENTRY_WORD3		0xc3e00000	/* br   $31, plt0   */
+#define PLT_ENTRY_WORD1		0xc3800000	/* br   $28, plt0   */
+#define PLT_ENTRY_WORD2		0
+#define PLT_ENTRY_WORD3		0
 
 #define MAX_GOT_ENTRIES		(64*1024 / 8)
 
 #define ELF_DYNAMIC_INTERPRETER "/usr/lib/ld.so"
-
-/* Set the right machine number for an Alpha ELF file.  */
-
-static boolean
-elf64_alpha_object_p (abfd)
-     bfd *abfd;
-{
-  return bfd_default_set_arch_mach (abfd, bfd_arch_alpha, 0);
-}
 
 /* Handle an Alpha specific section when reading an object file.  This
    is called when elfcode.h finds a section with an unknown type.
@@ -1785,7 +1938,8 @@ elf64_alpha_adjust_dynamic_symbol (info, h)
 
   if (h->root.type != bfd_link_hash_undefweak
       && alpha_elf_dynamic_symbol_p (h, info)
-      && (h->type == STT_FUNC
+      && ((h->type == STT_FUNC
+	   && !(ah->flags & ALPHA_ELF_LINK_HASH_LU_ADDR))
 	  || (h->type == STT_NOTYPE
 	      && ah->flags == ALPHA_ELF_LINK_HASH_LU_FUNC))
       /* Don't prevent otherwise valid programs from linking by attempting
@@ -1946,6 +2100,7 @@ elf64_alpha_merge_gots (a, b)
 	    for (ae = *start; ae ; ae = ae->next)
 	      if (ae->gotobj == a && ae->addend == be->addend)
 		{
+		  ae->flags |= be->flags;
 		  *pbe = be->next;
 		  goto global_found;
 		}
@@ -2297,7 +2452,8 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 					      s->output_section);
 	      target = bfd_get_section_by_name (output_bfd, outname + 5);
 	      if (target != NULL
-		  && (target->flags & SEC_READONLY) != 0)
+		  && (target->flags & SEC_READONLY) != 0
+		  && (target->flags & SEC_ALLOC) != 0)
 		reltext = true;
 
 	      if (strcmp(name, ".rela.plt") == 0)
@@ -2610,6 +2766,39 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (h != NULL)
 	      {
 		gotent = h->got_entries;
+
+		/* We may be looking at a default versioned symbol, which
+		   won't have the got entries we set up earlier.  Go find
+		   the original.  */
+		if (!gotent)
+		  {
+		    struct alpha_elf_link_hash_entry *v;
+		    char *p, *name;
+		    size_t len;
+
+		    p = strchr (h->root.root.root.string, ELF_VER_CHR);
+		    BFD_ASSERT (p != NULL && p[1] == ELF_VER_CHR);
+
+		    len = p - h->root.root.root.string;
+		    name = bfd_malloc (len + 1);
+		    if (name == NULL)
+		      return false;
+		    memcpy (name, h->root.root.root.string, len);
+		    name[len] = '\0';
+
+		    v = alpha_elf_link_hash_lookup (alpha_elf_hash_table (info),
+						    name, false, false, false);
+		    BFD_ASSERT (v != NULL);
+		    while (v->got_entries == NULL)
+		      {
+			BFD_ASSERT (v->root.root.type==bfd_link_hash_indirect);
+			v = (struct alpha_elf_link_hash_entry *)
+			  v->root.root.u.i.link;
+		      }
+		    gotent = v->got_entries;
+		    free (name);
+		  }
+
 		while (gotent->gotobj != gotobj || gotent->addend != addend)
 		  gotent = gotent->next;
 
@@ -2687,6 +2876,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_ALPHA_REFQUAD:
 	  {
 	    Elf_Internal_Rela outrel;
+	    boolean skip;
 
 	    /* Careful here to remember RELATIVE relocations for global
 	       variables for symbolic shared objects.  */
@@ -2719,9 +2909,29 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		BFD_ASSERT(srel != NULL);
 	      }
 
-	    outrel.r_offset = (input_section->output_section->vma
-			       + input_section->output_offset
-			       + rel->r_offset);
+	    skip = false;
+
+	    if (elf_section_data (input_section)->stab_info == NULL)
+	      outrel.r_offset = rel->r_offset;
+	    else
+	      {
+		bfd_vma off;
+
+		off = (_bfd_stab_section_offset
+		       (output_bfd, &elf_hash_table (info)->stab_info,
+			input_section,
+			&elf_section_data (input_section)->stab_info,
+			rel->r_offset));
+		if (off == (bfd_vma) -1)
+		  skip = true;
+		outrel.r_offset = off;
+	      }
+
+	    if (! skip)
+	      outrel.r_offset += (input_section->output_section->vma
+				  + input_section->output_offset);
+	    else
+	      memset (&outrel, 0, sizeof outrel);
 
 	    bfd_elf64_swap_reloca_out (output_bfd, &outrel,
 				       ((Elf64_External_Rela *)
@@ -2821,16 +3031,10 @@ elf64_alpha_finish_dynamic_symbol (output_bfd, info, h, sym)
       /* Fill in the entry in the procedure linkage table.  */
       {
 	unsigned insn1, insn2, insn3;
-	long hi, lo;
 
-	/* decompose the reloc offset for the plt for ldah+lda */
-	hi = plt_index * sizeof(Elf64_External_Rela);
-	lo = ((hi & 0xffff) ^ 0x8000) - 0x8000;
-	hi = (hi - lo) >> 16;
-
-	insn1 = PLT_ENTRY_WORD1 | (hi & 0xffff);
-	insn2 = PLT_ENTRY_WORD2 | (lo & 0xffff);
-	insn3 = PLT_ENTRY_WORD3 | ((-(h->plt_offset + 12) >> 2) & 0x1fffff);
+	insn1 = PLT_ENTRY_WORD1 | ((-(h->plt_offset + 4) >> 2) & 0x1fffff);
+	insn2 = PLT_ENTRY_WORD2;
+	insn3 = PLT_ENTRY_WORD3;
 
 	bfd_put_32 (output_bfd, insn1, splt->contents + h->plt_offset);
 	bfd_put_32 (output_bfd, insn2, splt->contents + h->plt_offset + 4);
@@ -3715,9 +3919,9 @@ elf64_alpha_ecoff_debug_swap =
 
 #define bfd_elf64_mkobject \
   elf64_alpha_mkobject
-
 #define elf_backend_object_p \
   elf64_alpha_object_p
+
 #define elf_backend_section_from_shdr \
   elf64_alpha_section_from_shdr
 #define elf_backend_fake_sections \

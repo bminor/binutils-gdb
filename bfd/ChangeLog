@@ -1,3 +1,10 @@
+Mon Oct 13 21:24:04 1997  Richard Henderson  <rth@cygnus.com>
+
+	* bfd/elf64-alpha.c (elf64_alpha_relocate_section): Use the
+	got_enties of the default symbol for the default versioned
+	symbol.  Patch from hjl@gnu.ai.mit.edu, modified not to use
+	alloca in the loop.
+
 Mon Oct 13 17:37:37 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_final_link_relocate): Only use the bottom
