@@ -1,3 +1,16 @@
+Wed May 24 15:49:47 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* arm-tdep.c (convert_from_extended, convert_to_extended):
+	New.
+	* coffread.c (enter_linenos): Return if linetab 0.
+	* config/arm/arm.mt (TDEPFILES): Add simulator support.
+	* config/arm/tm-arm.h (FRAME_FIND_SAVED_REGS): Fix prototypes.
+
+Mon May 22 19:37:21 1995  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* config/idt.mt: replace monitor and array-rom with the new
+	remote-array.
+
 Mon May 22 15:38:25 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* remote-nindy.c:  Install Kung patch for PR 6820.  I have no idea
