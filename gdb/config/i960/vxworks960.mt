@@ -5,4 +5,4 @@ TM_FILE= tm-vx960.h
 MT_CFLAGS= -DI80960
 # Don't use remote.o; it doesn't compile (and won't work) due to lack of
 # BREAKPOINT.
-REMOTE_O=
+REMOTE_O=dcache.o remote-utils.o 
