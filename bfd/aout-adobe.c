@@ -336,14 +336,14 @@ aout_adobe_write_object_contents (abfd)
   /* Now write out reloc info, followed by syms and strings */
   if (bfd_get_symcount (abfd) != 0)
     {
-      if (bfd_seek (abfd, (file_ptr)(N_SYMOFF(*exec_hdr(abfd))), SEEK_SET)
+      if (bfd_seek (abfd, (file_ptr) (N_SYMOFF(*exec_hdr(abfd))), SEEK_SET)
 	  != 0)
 	return false;
 
       if (! aout_32_write_syms (abfd))
 	return false;
 
-      if (bfd_seek (abfd, (file_ptr)(N_TRELOFF(*exec_hdr(abfd))), SEEK_SET)
+      if (bfd_seek (abfd, (file_ptr) (N_TRELOFF(*exec_hdr(abfd))), SEEK_SET)
 	  != 0)
 	return false;
 
@@ -354,7 +354,7 @@ aout_adobe_write_object_contents (abfd)
         }
       }
 
-      if (bfd_seek (abfd, (file_ptr)(N_DRELOFF(*exec_hdr(abfd))), SEEK_SET)
+      if (bfd_seek (abfd, (file_ptr) (N_DRELOFF(*exec_hdr(abfd))), SEEK_SET)
 	  != 0)
 	return false;
 
@@ -451,7 +451,7 @@ aout_adobe_sizeof_headers (ignore_abfd, ignore)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
      boolean ignore ATTRIBUTE_UNUSED;
 {
-  return sizeof(struct internal_exec);
+  return sizeof (struct internal_exec);
 }
 
 /* Build the transfer vector for Adobe A.Out files.  */

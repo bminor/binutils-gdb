@@ -188,8 +188,8 @@ aix386_core_file_p (abfd)
   core_regsec (abfd)->flags = SEC_HAS_CONTENTS;
   core_reg2sec (abfd)->flags = SEC_HAS_CONTENTS;
 
-  core_regsec (abfd)->_raw_size = sizeof(core->cd_regs);
-  core_reg2sec (abfd)->_raw_size = sizeof(core->cd_fpregs);
+  core_regsec (abfd)->_raw_size = sizeof (core->cd_regs);
+  core_reg2sec (abfd)->_raw_size = sizeof (core->cd_fpregs);
 
   core_regsec (abfd)->vma = -1;
   core_reg2sec (abfd)->vma = -1;
@@ -233,9 +233,9 @@ aix386_core_file_matches_executable_p (core_bfd, exec_bfd)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 static void
-swap_abort()
+swap_abort ()
 {
-  abort(); /* This way doesn't require any declaration for ANSI to fuck up */
+  abort (); /* This way doesn't require any declaration for ANSI to fuck up */
 }
 #define	NO_GET	((PROTO(bfd_vma, (*), (       const bfd_byte *))) swap_abort )
 #define NO_GETS ((PROTO(bfd_signed_vma, (*), (const bfd_byte *))) swap_abort )

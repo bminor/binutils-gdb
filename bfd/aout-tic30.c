@@ -296,13 +296,15 @@ tic30_aout_fix_pcrel_16 (abfd, reloc_entry, symbol, data, input_section,
 
 /* These macros will get 24-bit values from the bfd definition.
    Big-endian only.  */
-#define bfd_getb_24(BFD,ADDR) (bfd_get_8(BFD,ADDR) << 16) | \
-                              (bfd_get_8(BFD,ADDR+1) << 8) | \
-                              (bfd_get_8(BFD,ADDR+2))
+#define bfd_getb_24(BFD,ADDR)			\
+ (bfd_get_8 (BFD, ADDR    ) << 16) |		\
+ (bfd_get_8 (BFD, ADDR + 1) <<  8) |		\
+ (bfd_get_8 (BFD, ADDR + 2)      )
 
-#define bfd_putb_24(BFD,DATA,ADDR) bfd_put_8(BFD,(bfd_byte)((DATA >> 16) & 0xFF),ADDR); \
-	                               bfd_put_8(BFD,(bfd_byte)((DATA >> 8) & 0xFF),ADDR+1); \
-		         				   bfd_put_8(BFD,(bfd_byte)(DATA & 0xFF),ADDR+2)
+#define bfd_putb_24(BFD,DATA,ADDR)				\
+ bfd_put_8 (BFD, (bfd_byte) ((DATA >> 16) & 0xFF), ADDR    );	\
+ bfd_put_8 (BFD, (bfd_byte) ((DATA >>  8) & 0xFF), ADDR + 1);	\
+ bfd_put_8 (BFD, (bfd_byte) ( DATA        & 0xFF), ADDR + 2)
 
 /* Set parameters about this a.out file that are machine-dependent.
    This routine is called from some_aout_object_p just before it returns.  */

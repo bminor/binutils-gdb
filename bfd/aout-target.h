@@ -164,7 +164,7 @@ MY(object_p) (abfd)
   if (!(MACHTYPE_OK (N_MACHTYPE (exec)))) return 0;
 #endif
 
-  NAME(aout,swap_exec_header_in)(abfd, &exec_bytes, &exec);
+  NAME(aout,swap_exec_header_in) (abfd, &exec_bytes, &exec);
 
 #ifdef SWAP_MAGIC
   /* swap_exec_header_in read in a_info with the wrong byte order */
@@ -205,7 +205,7 @@ static boolean
 MY(mkobject) (abfd)
      bfd *abfd;
 {
-  if (NAME(aout,mkobject)(abfd) == false)
+  if (NAME(aout,mkobject) (abfd) == false)
     return false;
 #if 0 /* Sizes get set in set_sizes callback, later, after we know
 	 the architecture and machine.  */

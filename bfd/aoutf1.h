@@ -180,7 +180,7 @@ sunos_set_arch_mach (abfd, machtype)
 }
 
 #define SET_ARCH_MACH(ABFD, EXEC) \
-  NAME(sunos,set_arch_mach)(ABFD, N_MACHTYPE (EXEC)); \
+  NAME(sunos,set_arch_mach) (ABFD, N_MACHTYPE (EXEC)); \
   choose_reloc_size(ABFD);
 
 /* Determine the size of a relocation entry, based on the architecture */

@@ -97,7 +97,7 @@ reloc_howto_type MY(howto_table)[] =
 #define RELOC_ARM_BITS_NEG_LITTLE   ((unsigned int) 0x10)
 
 reloc_howto_type *
-MY(reloc_howto)(abfd, rel, r_index, r_extern, r_pcrel)
+MY(reloc_howto) (abfd, rel, r_index, r_extern, r_pcrel)
      bfd *abfd;
      struct reloc_std_external *rel;
      int *r_index;
@@ -143,7 +143,7 @@ MY(reloc_howto)(abfd, rel, r_index, r_extern, r_pcrel)
 	MY(reloc_howto) (BFD, REL, &IN, &EX, &PC)
 
 void
-MY(put_reloc)(abfd, r_extern, r_index, value, howto, reloc)
+MY(put_reloc) (abfd, r_extern, r_index, value, howto, reloc)
      bfd *abfd;
      int r_extern;
      int r_index;
@@ -189,10 +189,10 @@ MY(put_reloc)(abfd, r_extern, r_index, value, howto, reloc)
 }
 
 #define MY_put_reloc(BFD, EXT, IDX, VAL, HOWTO, RELOC) \
-  MY(put_reloc)(BFD, EXT, IDX, VAL, HOWTO, RELOC)
+  MY(put_reloc) (BFD, EXT, IDX, VAL, HOWTO, RELOC)
 
 void
-MY(relocatable_reloc)(howto, abfd, reloc, amount, r_addr)
+MY(relocatable_reloc) (howto, abfd, reloc, amount, r_addr)
      reloc_howto_type *howto;
      bfd *abfd;
      struct reloc_std_external *reloc;
@@ -224,7 +224,7 @@ MY(relocatable_reloc)(howto, abfd, reloc, amount, r_addr)
 }
 
 #define MY_relocatable_reloc(HOW, BFD, REL, AMOUNT, ADDR) \
-  MY(relocatable_reloc)(HOW, BFD, REL, &(AMOUNT), ADDR)
+  MY(relocatable_reloc) (HOW, BFD, REL, &(AMOUNT), ADDR)
 
 static bfd_reloc_status_type
 MY(fix_pcrel_26_done) (abfd, reloc_entry, symbol, data, input_section,
@@ -301,7 +301,7 @@ MY(fix_pcrel_26) (abfd, reloc_entry, symbol, data, input_section,
 }
 
 reloc_howto_type *
-MY(bfd_reloc_type_lookup)(abfd,code)
+MY(bfd_reloc_type_lookup) (abfd,code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {

@@ -162,7 +162,7 @@ struct ar_cache {
 #define ar_padchar(abfd) ((abfd)->xvec->ar_pad_char)
 #define ar_maxnamelen(abfd) ((abfd)->xvec->ar_max_namelen)
 
-#define arch_eltdata(bfd) ((struct areltdata *)((bfd)->arelt_data))
+#define arch_eltdata(bfd) ((struct areltdata *) ((bfd)->arelt_data))
 #define arch_hdr(bfd) ((struct ar_hdr *)arch_eltdata(bfd)->arch_header)
 
 static char *get_extended_arelt_filename PARAMS ((bfd *arch,
@@ -895,7 +895,7 @@ do_slurp_coff_armap (abfd)
 	    && tmp->arch_header[1] == ' ')
 	  {
 	    ardata->first_file_filepos +=
-	      (tmp->parsed_size + sizeof(struct ar_hdr) + 1) & ~1;
+	      (tmp->parsed_size + sizeof (struct ar_hdr) + 1) & ~1;
 	  }
 	bfd_release (abfd, tmp);
       }

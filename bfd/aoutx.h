@@ -267,7 +267,7 @@ EMPTY_HOWTO (-1),
   HOWTO(40,	       0,  2,	 0, false, 0, complain_overflow_bitfield,0,"BASEREL",   false,         0,0x00000000, false),
 };
 
-#define TABLE_SIZE(TABLE)	(sizeof(TABLE)/sizeof(TABLE[0]))
+#define TABLE_SIZE(TABLE)	(sizeof (TABLE)/sizeof (TABLE[0]))
 
 reloc_howto_type *
 NAME(aout,reloc_type_lookup) (abfd,code)
@@ -435,7 +435,7 @@ FUNCTION
 SYNOPSIS
 	const bfd_target *aout_@var{size}_some_aout_object_p
 	 (bfd *abfd,
-	  const bfd_target *(*callback_to_real_object_p)());
+	  const bfd_target *(*callback_to_real_object_p) ());
 
 DESCRIPTION
 	Some a.out variant thinks that the file open in @var{abfd}
@@ -600,7 +600,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
      header, should cope with them in this callback as well.  */
 #endif				/* DOCUMENTATION */
 
-  result = (*callback_to_real_object_p)(abfd);
+  result = (*callback_to_real_object_p) (abfd);
 
   /* Now that the segment addresses have been worked out, take a better
      guess at whether the file is executable.  If the entry point
@@ -1982,11 +1982,11 @@ NAME(aout,get_symtab) (abfd, location)
     unsigned int counter = 0;
     aout_symbol_type *symbase;
 
-    if (!NAME(aout,slurp_symbol_table)(abfd))
+    if (!NAME(aout,slurp_symbol_table) (abfd))
       return -1;
 
     for (symbase = obj_aout_symbols(abfd); counter++ < bfd_get_symcount (abfd);)
-      *(location++) = (asymbol *)( symbase++);
+      *(location++) = (asymbol *) ( symbase++);
     *location++ =0;
     return bfd_get_symcount (abfd);
 }
@@ -2478,7 +2478,7 @@ NAME(aout,canonicalize_reloc) (abfd, section, relptr, symbols)
       return 0;
     }
 
-  if (!(tblptr || NAME(aout,slurp_reloc_table)(abfd, section, symbols)))
+  if (!(tblptr || NAME(aout,slurp_reloc_table) (abfd, section, symbols)))
     return -1;
 
   if (section->flags & SEC_CONSTRUCTOR) {
@@ -2539,7 +2539,7 @@ long
 NAME(aout,get_symtab_upper_bound) (abfd)
      bfd *abfd;
 {
-  if (!NAME(aout,slurp_symbol_table)(abfd))
+  if (!NAME(aout,slurp_symbol_table) (abfd))
     return -1;
 
   return (bfd_get_symcount (abfd)+1) * (sizeof (aout_symbol_type *));
@@ -2574,8 +2574,8 @@ NAME(aout,get_symbol_info) (ignore_abfd, symbol, ret)
 	}
       ret->type = '-';
       ret->stab_type = type_code;
-      ret->stab_other = (unsigned)(aout_symbol(symbol)->other & 0xff);
-      ret->stab_desc = (unsigned)(aout_symbol(symbol)->desc & 0xffff);
+      ret->stab_other = (unsigned) (aout_symbol(symbol)->other & 0xff);
+      ret->stab_desc = (unsigned) (aout_symbol(symbol)->desc & 0xffff);
       ret->stab_name = stab_name;
     }
 }
@@ -2595,9 +2595,9 @@ NAME(aout,print_symbol) (ignore_abfd, afile, symbol, how)
       fprintf(file,"%s", symbol->name);
     break;
   case bfd_print_symbol_more:
-    fprintf(file,"%4x %2x %2x",(unsigned)(aout_symbol(symbol)->desc & 0xffff),
-	    (unsigned)(aout_symbol(symbol)->other & 0xff),
-	    (unsigned)(aout_symbol(symbol)->type));
+    fprintf(file,"%4x %2x %2x",(unsigned) (aout_symbol(symbol)->desc & 0xffff),
+	    (unsigned) (aout_symbol(symbol)->other & 0xff),
+	    (unsigned) (aout_symbol(symbol)->type));
     break;
   case bfd_print_symbol_all:
     {
@@ -2607,9 +2607,9 @@ NAME(aout,print_symbol) (ignore_abfd, afile, symbol, how)
 
       fprintf(file," %-5s %04x %02x %02x",
 	      section_name,
-	      (unsigned)(aout_symbol(symbol)->desc & 0xffff),
-	      (unsigned)(aout_symbol(symbol)->other & 0xff),
-	      (unsigned)(aout_symbol(symbol)->type  & 0xff));
+	      (unsigned) (aout_symbol(symbol)->desc & 0xffff),
+	      (unsigned) (aout_symbol(symbol)->other & 0xff),
+	      (unsigned) (aout_symbol(symbol)->type  & 0xff));
       if (symbol->name)
         fprintf(file," %s", symbol->name);
     }
@@ -2724,7 +2724,7 @@ NAME(aout,find_nearest_line)
   *line_ptr = 0;
   if (symbols != (asymbol **)NULL) {
     for (p = symbols; *p; p++) {
-      aout_symbol_type  *q = (aout_symbol_type *)(*p);
+      aout_symbol_type  *q = (aout_symbol_type *) (*p);
     next:
       switch (q->type){
       case N_TEXT:
@@ -2775,7 +2775,7 @@ NAME(aout,find_nearest_line)
 	p++;
 	if (*p == NULL)
 	  break;
-	q = (aout_symbol_type *)(*p);
+	q = (aout_symbol_type *) (*p);
 	if (q->type != (int)N_SO)
 	  goto next;
 

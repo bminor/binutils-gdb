@@ -1,3 +1,16 @@
+2000-11-20  Kazu Hirata  <kazu@hxi.com>
+
+	* aix386-core.c: Fix formatting.
+	* aout-adobe.c: Likewise.
+	* aout-arm.c: Likewise.
+	* aout-encap.c: Likewise.
+	* aout-ns32k.c: Likewise.
+	* aout-target.h: Likewise.
+	* aout-tic30.c: Likewise.
+	* aoutf1.h: Likewise.
+	* aoutx.h: Likewise.
+	* archive.c: Likewise.
+
 2000-11-17  H.J. Lu  <hjl@gnu.org>
 
 	* elfxx-ia64.c (elfNN_ia64_size_dynamic_sections): Don't create

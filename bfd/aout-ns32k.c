@@ -154,7 +154,7 @@ reloc_howto_type MY(howto_table)[] =
 #define RELOC_STD_BITS_NS32K_TYPE_SH_LITTLE 5
 
 reloc_howto_type *
-MY(reloc_howto)(abfd, rel, r_index, r_extern, r_pcrel)
+MY(reloc_howto) (abfd, rel, r_index, r_extern, r_pcrel)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct reloc_std_external *rel;
      int *r_index;
@@ -176,10 +176,10 @@ MY(reloc_howto)(abfd, rel, r_index, r_extern, r_pcrel)
   return (MY(howto_table) + r_length + 3 * (*r_pcrel) + 6 * r_ns32k_type);
 }
 
-#define MY_reloc_howto(BFD,REL,IN,EX,PC) MY(reloc_howto)(BFD, REL, &IN, &EX, &PC)
+#define MY_reloc_howto(BFD,REL,IN,EX,PC) MY(reloc_howto) (BFD, REL, &IN, &EX, &PC)
 
 void
-MY(put_reloc)(abfd, r_extern, r_index, value, howto, reloc)
+MY(put_reloc) (abfd, r_extern, r_index, value, howto, reloc)
      bfd *abfd;
      int r_extern;
      int r_index;
@@ -206,7 +206,7 @@ MY(put_reloc)(abfd, r_extern, r_index, value, howto, reloc)
 }
 
 #define MY_put_reloc(BFD, EXT, IDX, VAL, HOWTO, RELOC) \
-  MY(put_reloc)(BFD, EXT, IDX, VAL, HOWTO, RELOC)
+  MY(put_reloc) (BFD, EXT, IDX, VAL, HOWTO, RELOC)
 
 #define STAT_FOR_EXEC
 
@@ -216,7 +216,7 @@ MY(put_reloc)(abfd, r_extern, r_index, value, howto, reloc)
 #include <aoutx.h>
 
 reloc_howto_type *
-MY(bfd_reloc_type_lookup)(abfd,code)
+MY(bfd_reloc_type_lookup) (abfd,code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
