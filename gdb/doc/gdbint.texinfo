@@ -1656,7 +1656,7 @@ The SOM reader is in @file{hpread.c}.
 
 @cindex Netware Loadable Module format
 Other file formats that have been supported by @value{GDBN} include Netware
-Loadable Modules (@file{nlmread.c}.
+Loadable Modules (@file{nlmread.c}).
 
 @section Debugging File Formats
 
