@@ -9527,7 +9527,9 @@ md_apply_fix (fixP, valueP)
 	{
 	  valueT symval = S_GET_VALUE (fixP->fx_addsy);
 	  value -= symval;
-	  if (value != 0 && ! fixP->fx_pcrel)
+	  if (value != 0
+	      && ! fixP->fx_pcrel
+	      && fixP->fx_r_type != BFD_RELOC_MIPS_GPREL)
 	    {
 	      /* In this case, the bfd_install_relocation routine will
 		 incorrectly add the symbol value back in.  We just want
