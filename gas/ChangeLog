@@ -1,5 +1,7 @@
 Thu Nov  3 20:20:40 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* config/go32.mh: Unused file deleted.
+
 	* read.c (get_absolute_expression): Indicate that the error may
 	merely be that the expression can't currently be reduced.
 
