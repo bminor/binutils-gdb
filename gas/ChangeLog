@@ -1,3 +1,8 @@
+2001-04-25  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/obj-coff.c (do_linenos_for): Check to see if the filename
+	symbol has been initialised before extracting its symbol index.
+
 2001-04-24  H.J. Lu  <hjl@gnu.org>
 
 	* configure: Regenerated with the right version of autoconf.

@@ -2076,7 +2076,7 @@ fill_section (abfd, h, file_cursor)
       if (s->s_name[0])
 	{
 	  fragS *frag = segment_info[i].frchainP->frch_root;
-	  char *buffer;
+	  char *buffer = NULL;
 
 	  if (s->s_size == 0)
 	    s->s_scnptr = 0;
@@ -3350,12 +3350,13 @@ do_linenos_for (abfd, h, file_cursor)
 	       line_ptr != (struct lineno_list *) NULL;
 	       line_ptr = line_ptr->next)
 	    {
-
 	      if (line_ptr->line.l_lnno == 0)
 		{
-		  /* Turn a pointer to a symbol into the symbols' index */
-		  line_ptr->line.l_addr.l_symndx =
-		    ((symbolS *) line_ptr->line.l_addr.l_symndx)->sy_number;
+		  /* Turn a pointer to a symbol into the symbols' index,
+		     provided that it has been initialised.  */
+		  if (line_ptr->line.l_addr.l_symndx)
+		    line_ptr->line.l_addr.l_symndx =
+		      ((symbolS *) line_ptr->line.l_addr.l_symndx)->sy_number;
 		}
 	      else
 		{
