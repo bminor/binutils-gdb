@@ -2076,6 +2076,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       Elf_Internal_Sym *sym		= (Elf_Internal_Sym *)0;
       asection *sec			= (asection *)0;
       struct elf_link_hash_entry *h	= (struct elf_link_hash_entry *)0;
+      const char *sym_name		= (const char *)0;
       reloc_howto_type *howto;
       unsigned long r_symndx;
       bfd_vma relocation;
@@ -2127,6 +2128,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
+	  sym_name = "<local symbol>";
+
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
@@ -2134,6 +2137,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  sym_name = h->root.root.string;
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
@@ -2161,9 +2165,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       switch ((int)r_type)
 	{
 	default:
-	  (*_bfd_error_handler) ("%s: unknown relocation type %d",
+	  (*_bfd_error_handler) ("%s: unknown relocation type %d for symbol %s",
 				 bfd_get_filename (input_bfd),
-				 (int)r_type);
+				 (int)r_type, sym_name);
 
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = false;
@@ -2257,8 +2261,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (strcmp (bfd_get_section_name (abfd, sec), ".sdata") != 0
 	      && strcmp (bfd_get_section_name (abfd, sec), ".sbss") != 0)
 	    {
-	      (*_bfd_error_handler) ("%s: The target of a %s relocation is in the wrong section (%s)",
+	      (*_bfd_error_handler) ("%s: The target (%s) of a %s relocation is in the wrong section (%s)",
 				     bfd_get_filename (input_bfd),
+				     sym_name,
 				     ppc_elf_howto_table[ (int)r_type ]->name,
 				     bfd_get_section_name (abfd, sec));
 
@@ -2278,8 +2283,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (strcmp (bfd_get_section_name (abfd, sec), ".sdata2") != 0
 	      && strcmp (bfd_get_section_name (abfd, sec), ".sbss2") != 0)
 	    {
-	      (*_bfd_error_handler) ("%s: The target of a %s relocation is in the wrong section (%s)",
+	      (*_bfd_error_handler) ("%s: The target (%s) of a %s relocation is in the wrong section (%s)",
 				     bfd_get_filename (input_bfd),
+				     sym_name,
 				     ppc_elf_howto_table[ (int)r_type ]->name,
 				     bfd_get_section_name (abfd, sec));
 
@@ -2324,8 +2330,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    else
 	      {
-		(*_bfd_error_handler) ("%s: The target of a %s relocation is in the wrong section (%s)",
+		(*_bfd_error_handler) ("%s: The target (%s) of a %s relocation is in the wrong section (%s)",
 				       bfd_get_filename (input_bfd),
+				       sym_name,
 				       ppc_elf_howto_table[ (int)r_type ]->name,
 				       bfd_get_section_name (abfd, sec));
 
@@ -2391,9 +2398,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case (int)R_PPC_EMB_RELST_HI:
 	case (int)R_PPC_EMB_RELST_HA:
 	case (int)R_PPC_EMB_BIT_FLD:
-	  (*_bfd_error_handler) ("%s: Relocation %s is not yet supported.",
+	  (*_bfd_error_handler) ("%s: Relocation %s is not yet supported for symbol %s.",
 				 bfd_get_filename (input_bfd),
-				 ppc_elf_howto_table[ (int)r_type ]->name);
+				 ppc_elf_howto_table[ (int)r_type ]->name,
+				 sym_name);
 
 	  bfd_set_error (bfd_error_invalid_operation);
 	  ret = false;
@@ -2402,9 +2410,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 
 #ifdef DEBUG
-      fprintf (stderr, "\ttype = %s (%d), symbol index = %ld, offset = %ld, addend = %ld\n",
+      fprintf (stderr, "\ttype = %s (%d), name = %s, symbol index = %ld, offset = %ld, addend = %ld\n",
 	       howto->name,
 	       (int)r_type,
+	       sym_name,
 	       r_symndx,
 	       (long)offset,
 	       (long)addend);

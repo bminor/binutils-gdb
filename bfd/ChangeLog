@@ -16,7 +16,8 @@ Thu Jan 25 12:08:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(ppc_elf_add_symbol_hook): Use the value of -G nn to determine
 	whether to put something in .sbss or not.
 	(ppc_elf_relocate_section): Add support for more relocations.  Add
-	in sec->output_offset where appropriate.
+	in sec->output_offset where appropriate.  Make error messages
+	include the symbol name.
 
 	* elflink.c (_bfd_elf_create_linker_section): Lookup symbol before
 	trying to add it to the symbol table, so _GLOBAL_OFFSET_TABLE_
