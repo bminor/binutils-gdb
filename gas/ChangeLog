@@ -1,3 +1,8 @@
+Fri Apr 22 15:17:06 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* listing.c (list_symbol_table): Don't print register symbols as
+	undefined.
+
 Thu Apr 21 15:50:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (append_insn): Permit branches to be switched

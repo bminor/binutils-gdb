@@ -96,6 +96,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 #include "as.h"
 #include <obstack.h>
 #include "input-file.h"
+#include "subsegs.h"
 
 #ifndef NO_LISTING
 #ifndef LISTING_HEADER
@@ -180,7 +181,6 @@ list_info_type;
 static struct list_info_struct *head;
 struct list_info_struct *listing_tail;
 extern int listing;
-extern unsigned int physical_input_line;
 extern fragS *frag_now;
 
 
@@ -275,12 +275,13 @@ file_info (file_name)
   p = (file_info_type *) xmalloc (sizeof (file_info_type));
   p->next = file_info_head;
   file_info_head = p;
-  p->filename = xmalloc (strlen (file_name) + 1);
+  p->filename = xmalloc ((unsigned long) strlen (file_name) + 1);
   strcpy (p->filename, file_name);
   p->linenum = 0;
   p->end_pending = 0;
 
-  p->file = fopen (p->filename, "rb");
+  /* Do we really prefer binary mode for this??  */
+  p->file = fopen (p->filename, FOPEN_RB);
   if (p->file)
     fgetc (p->file);
 
@@ -301,20 +302,21 @@ void
 listing_newline (ps)
      char *ps;
 {
-  extern char *file_name;
+  char *file;
+  unsigned int line;
   static unsigned int last_line = 0xffff;
-
-
   list_info_type *new;
-  if (physical_input_line != last_line)
+
+  as_where (&file, &line);
+  if (line != last_line)
     {
-      last_line = physical_input_line;
+      last_line = line;
       new_frag ();
 
       new = (list_info_type *) xmalloc (sizeof (list_info_type));
       new->frag = frag_now;
-      new->line = physical_input_line;
-      new->file = file_info (file_name);
+      new->line = line;
+      new->file = file_info (file);
 
       if (listing_tail)
 	{
@@ -334,6 +336,34 @@ listing_newline (ps)
     }
 }
 
+/* Attach all current frags to the previous line instead of the
+   current line.  This is called by the MIPS backend when it discovers
+   that it needs to add some NOP instructions; the added NOP
+   instructions should go with the instruction that has the delay, not
+   with the new instruction.  */
+
+void
+listing_prev_line ()
+{
+  list_info_type *l;
+  fragS *f;
+
+  if (head == (list_info_type *) NULL
+      || head == listing_tail)
+    return;
+
+  new_frag ();
+
+  for (l = head; l->next != listing_tail; l = l->next)
+    ;
+
+  for (f = frchain_now->frch_root; f != (fragS *) NULL; f = f->fr_next)
+    if (f->line == listing_tail)
+      f->line = l;
+
+  listing_tail->frag = frag_now;
+  new_frag ();
+}
 
 /*
  This function returns the next source line from the file supplied,
@@ -454,12 +484,12 @@ calc_hex (list)
      list_info_type * list;
 {
   list_info_type *first = list;
-  unsigned int address = ~0;
+  unsigned int address = (unsigned int) ~0;
 
   fragS *frag;
   fragS *frag_ptr;
 
-  unsigned int byte_in_frag = 0;
+  unsigned int byte_in_frag;
 
 
   /* Find first frag which says it belongs to this line */
@@ -475,6 +505,7 @@ calc_hex (list)
   while (frag_ptr != (fragS *) NULL && frag_ptr->line == first)
     {
       /* Print as many bytes from the fixed part as is sensible */
+      byte_in_frag = 0;
       while (byte_in_frag < frag_ptr->fr_fix && data_buffer_size < sizeof (data_buffer) - 10)
 	{
 	  if (address == ~0)
@@ -690,7 +721,8 @@ list_symbol_table ()
     {
       if (S_GET_NAME (ptr) && strlen (S_GET_NAME (ptr)) != 0)
 	{
-	  if (ptr->sy_frag->line == 0)
+	  if (ptr->sy_frag->line == 0
+	      && S_GET_SEGMENT (ptr) != reg_section)
 	    {
 	      printf ("%s\n", S_GET_NAME (ptr));
 	      on_page++;
@@ -889,13 +921,15 @@ listing_file (name)
 }
 
 void
-listing_eject ()
+listing_eject (ignore)
+     int ignore;
 {
   listing_tail->edict = EDICT_EJECT;
 }
 
 void
-listing_flags ()
+listing_flags (ignore)
+     int ignore;
 {
   while ((*input_line_pointer++) && (*input_line_pointer != '\n'))
     input_line_pointer++;
@@ -904,14 +938,15 @@ listing_flags ()
 
 void
 listing_list (on)
-     unsigned int on;
+     int on;
 {
   listing_tail->edict = on ? EDICT_LIST : EDICT_NOLIST;
 }
 
 
 void
-listing_psize ()
+listing_psize (ignore)
+     int ignore;
 {
   paper_height = get_absolute_expression ();
 
@@ -930,10 +965,10 @@ listing_psize ()
 
 void
 listing_title (depth)
-     unsigned int depth;
+     int depth;
 {
   char *start;
-  char *title;
+  char *ttl;
   unsigned int length;
 
   SKIP_WHITESPACE ();
@@ -947,11 +982,11 @@ listing_title (depth)
 	  if (*input_line_pointer == '\"')
 	    {
 	      length = input_line_pointer - start;
-	      title = xmalloc (length + 1);
-	      memcpy (title, start, length);
-	      title[length] = 0;
+	      ttl = xmalloc (length + 1);
+	      memcpy (ttl, start, length);
+	      ttl[length] = 0;
 	      listing_tail->edict = depth ? EDICT_SBTTL : EDICT_TITLE;
-	      listing_tail->edict_arg = title;
+	      listing_tail->edict_arg = ttl;
 	      input_line_pointer++;
 	      demand_empty_rest_of_line ();
 	      return;
@@ -990,7 +1025,8 @@ void
 listing_source_file (file)
      const char *file;
 {
-  listing_tail->hll_file = file_info (file);
+  if (listing_tail)
+    listing_tail->hll_file = file_info (file);
 }
 
 
@@ -1001,33 +1037,36 @@ listing_source_file (file)
 /* Dummy functions for when compiled without listing enabled */
 
 void
-listing_flags ()
+listing_flags (ignore)
+     int ignore;
 {
   s_ignore (0);
 }
 
 void 
 listing_list (on)
-     unsigned int on;
+     int on;
 {
   s_ignore (0);
 }
 
 void 
-listing_eject ()
+listing_eject (ignore)
+     int ignore;
 {
   s_ignore (0);
 }
 
 void 
-listing_psize ()
+listing_psize (ignore)
+     int ignore;
 {
   s_ignore (0);
 }
 
 void 
 listing_title (depth)
-     unsigned int depth;
+     int depth;
 {
   s_ignore (0);
 }
