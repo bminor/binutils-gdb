@@ -1,3 +1,8 @@
+2003-01-29  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_got_entry_hash): Don't dereference
+	entry->abfd when it's NULL.
+
 2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Handle

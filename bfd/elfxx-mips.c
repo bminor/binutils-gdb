@@ -1584,10 +1584,11 @@ mips_elf_got_entry_hash (entry_)
 {
   const struct mips_got_entry *entry = (struct mips_got_entry *)entry_;
 
-  return entry->abfd->id + entry->symndx
+  return entry->symndx
     + (! entry->abfd ? mips_elf_hash_bfd_vma (entry->d.address)
-       : entry->symndx >= 0 ? mips_elf_hash_bfd_vma (entry->d.addend)
-       : entry->d.h->root.root.root.hash);
+       : entry->abfd->id
+         + (entry->symndx >= 0 ? mips_elf_hash_bfd_vma (entry->d.addend)
+	    : entry->d.h->root.root.root.hash));
 }
 
 static int
