@@ -1,3 +1,5 @@
 # Extra configuration fragment for opcodes.
 
-forward-include "{srcroot}"include:opcode:mips.h 'opcode/mips.h'
+If "{target_canonical}" =~ /mips-idt-ecoff/
+	Set BFD_MACHINES  '"{o}"mips-dis.c.o "{o}"mips-opc.c.o'
+End If
