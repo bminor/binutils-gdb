@@ -1,3 +1,19 @@
+Fri Sep  8 01:07:38 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-opc.c: Change unaligned loads and stores with "t,A"
+	operands to use "t,A(b)".
+
+start-sanitize-sh3e
+Thu Sep  7 19:02:46 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* sh-dis.c (print_insn_shx): Add F_FR0 support.
+
+end-sanitize-sh3e
+Thu Sep  7 19:02:46 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* sh-dis.c (print_insn_shx): Change loop over op->arg[n] to iterate
+	until 3 instead of until 2.
+
 Wed Sep  6 21:21:33 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (ALL_CFLAGS): Define.
