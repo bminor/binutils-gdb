@@ -43,8 +43,8 @@ typedef struct reg gregset_t;
 typedef struct fpreg fpregset_t;
 #endif
 
-#include "gregset.h"
 #include "i386-tdep.h"
+#include "i387-tdep.h"
 
 
 /* In older BSD versions we cannot get at some of the segment
@@ -120,7 +120,7 @@ cannot_fetch_register (int regnum)
 /* Fill GDB's register array with the general-purpose register values
    in *GREGSETP.  */
 
-void
+static void
 supply_gregset (gregset_t *gregsetp)
 {
   struct regcache *regcache = current_regcache;
@@ -139,7 +139,7 @@ supply_gregset (gregset_t *gregsetp)
    *GREGSETPS with the value in GDB's register array.  If REGNUM is -1,
    do this for all registers.  */
 
-void
+static void
 fill_gregset (gregset_t *gregsetp, int regnum)
 {
   struct regcache *regcache = current_regcache;
@@ -150,26 +150,7 @@ fill_gregset (gregset_t *gregsetp, int regnum)
       regcache_raw_collect (regcache, i, REG_ADDR (gregsetp, i));
 }
 
-#include "i387-tdep.h"
 
-/* Fill GDB's register array with the floating-point register values
-   in *FPREGSETP.  */
-
-void
-supply_fpregset (fpregset_t *fpregsetp)
-{
-  i387_supply_fsave (current_regcache, -1, fpregsetp);
-}
-
-/* Fill register REGNUM (if it is a floating-point register) in
-   *FPREGSETP with the value in GDB's register array.  If REGNUM is
-   -1, do this for all registers.  */
-
-void
-fill_fpregset (fpregset_t *fpregsetp, int regnum)
-{
-  i387_collect_fsave (current_regcache, regnum, fpregsetp);
-}
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating point registers).  */

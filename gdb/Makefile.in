@@ -1855,7 +1855,7 @@ hpread.o: hpread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(hp_symtab_h) \
 hpux-thread.o: hpux-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
 	$(inferior_h) $(regcache_h) $(gdb_stat_h) $(gdbcore_h)
 i386bsd-nat.o: i386bsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(gdb_assert_h) $(gregset_h) $(i386_tdep_h) $(i387_tdep_h)
+	$(gdb_assert_h) $(i386_tdep_h) $(i387_tdep_h)
 i386bsd-tdep.o: i386bsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) $(i386_tdep_h)
 i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
