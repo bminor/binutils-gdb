@@ -81,13 +81,18 @@ void sim_set_simcache_size PARAMS ((int));
 #define HIGH_BYTE(x) (((x) >> 8) & 0xff)
 #define P(X,Y) ((X << 8) | Y)
 
-#define BUILDSR()   cpu.ccr = (N << 3) | (Z << 2) | (V << 1) | C;
+#define BUILDSR()   cpu.ccr = (I << 7) | (UI << 6)| (H<<5) | (U<<4) | \
+                              (N << 3) | (Z << 2) | (V<<1) | C;
 
 #define GETSR()		    \
   c = (cpu.ccr >> 0) & 1;\
   v = (cpu.ccr >> 1) & 1;\
   nz = !((cpu.ccr >> 2) & 1);\
-  n = (cpu.ccr >> 3) & 1;
+  n = (cpu.ccr >> 3) & 1;\
+  u = (cpu.ccr >> 4) & 1;\
+  h = (cpu.ccr >> 5) & 1;\
+  ui = ((cpu.ccr >> 6) & 1);\
+  intMaskBit = (cpu.ccr >> 7) & 1;
 
 #ifdef __CHAR_IS_SIGNED__
 #define SEXTCHAR(x) ((char) (x))
@@ -775,6 +780,10 @@ control_c (sig, code, scp, addr)
 #define Z (nz == 0)
 #define V (v != 0)
 #define N (n != 0)
+#define U (u != 0)
+#define H (h != 0)
+#define UI (ui != 0)
+#define I (intMaskBit != 0)
 
 static int
 mop (code, bsize, sign)
@@ -934,7 +943,7 @@ sim_resume (sd, step, siggnal)
   int ea;
   int bit;
   int pc;
-  int c, nz, v, n;
+  int c, nz, v, n, u, h, ui, intMaskBit;
   int oldmask;
   init_pointers ();
 
