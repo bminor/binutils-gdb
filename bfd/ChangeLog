@@ -10,6 +10,7 @@ Tue Feb 25 18:51:35 1997  Stan Shebs  <shebs@andros.cygnus.com>
 	content byteorder instead of header byteorder.
 	(ecoff_biglittle_vec): New BFD, big-endian headers, little-endian
 	data.
+	* targets.c (bfd_target_vector): Add ecoff_biglittle_vec.
 	* configure.in (ecoff_biglittle_vec): Add case.
 	* configure: Update.
 

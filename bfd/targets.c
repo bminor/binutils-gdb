@@ -490,9 +490,7 @@ extern const bfd_target bfd_elf32_littlearc_vec;
 extern const bfd_target bfd_elf32_big_generic_vec;
 extern const bfd_target bfd_elf32_bigmips_vec;
 extern const bfd_target bfd_elf64_bigmips_vec;
-/* start-sanitize-d10v */
 extern const bfd_target bfd_elf32_d10v_vec;
-/* end-sanitize-d10v */
 /* start-sanitize-d30v */
 extern const bfd_target bfd_elf32_d30v_vec;
 /* end-sanitize-d30v */
@@ -523,6 +521,7 @@ extern const bfd_target bfd_elf64_sparc_vec;
 extern const bfd_target demo_64_vec;
 extern const bfd_target ecoff_big_vec;
 extern const bfd_target ecoff_little_vec;
+extern const bfd_target ecoff_biglittle_vec;
 extern const bfd_target ecoffalpha_little_vec;
 extern const bfd_target evax_alpha_vec;
 extern const bfd_target h8300coff_vec;
@@ -655,9 +654,7 @@ const bfd_target * const bfd_target_vector[] = {
 #ifdef BFD64
 	&bfd_elf64_bigmips_vec,
 #endif
-/* start-sanitize-d10v */
 	&bfd_elf32_d10v_vec,
-/* end-sanitize-d10v */
 /* start-sanitize-d30v */
 	&bfd_elf32_d30v_vec,
 /* end-sanitize-d30v */
@@ -699,6 +696,7 @@ const bfd_target * const bfd_target_vector[] = {
 #endif
 	&ecoff_big_vec,
 	&ecoff_little_vec,
+	&ecoff_biglittle_vec,
 #ifdef BFD64
 	&ecoffalpha_little_vec,
 	&evax_alpha_vec,
