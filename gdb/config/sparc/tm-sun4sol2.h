@@ -22,6 +22,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #undef IN_SOLIB_TRAMPOLINE
 #define IN_SOLIB_TRAMPOLINE(pc, name)	in_solib_trampoline((pc), (name))
+ 
+/* The signal handler trampoline is called sigacthandler in Solaris2.  */
+#define IN_SIGTRAMP(pc, name) ((name) && STREQ ("sigacthandler", name))
+ 
+/* The signal handler gets a pointer to an ucontext as third argument.
+   This is the offset to the saved PC within it.  */  
+#define SIGCONTEXT_PC_OFFSET 44
 
 #if 0	/* FIXME Setjmp/longjmp are not as well doc'd in SunOS 5.x yet */
 
