@@ -45,6 +45,7 @@ ecoff.h
 gdbm.h
 getopt.h
 i386-opcode.h
+i386coff.h
 i860-opcode.h
 i960-opcode.h
 ieee.h
@@ -77,6 +78,7 @@ Do-last:
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
 	echo Keeping v9 in sparc-opcode.h.
 else
+	echo Sanitizing v9 in sparc-opcode.h.
 	rm -f new
 	grep -v v9 sparc-opcode.h > new
 	rm sparc-opcode.h
@@ -88,7 +90,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.1  1991/05/23 17:00:59  rich
+# Revision 1.2  1991/05/31 11:26:52  gnu
+# Add i386coff.h.  Print msg when sanitizing sparc-opcode.h.
+#
+# Revision 1.1  1991/05/23  17:00:59  rich
 # Initial revision
 #
 #
