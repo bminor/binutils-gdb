@@ -187,37 +187,20 @@ void ns32k_frame_init_saved_regs (struct frame_info *);
 extern void ns32k_push_dummy_frame (void);
 #define PUSH_DUMMY_FRAME ns32k_push_dummy_frame ()
 
-/* Discard from the stack the innermost frame, restoring all registers.  */
-
 extern void ns32k_pop_frame (void);
 #define POP_FRAME ns32k_pop_frame ()
 
-/* This sequence of words is the instructions
-   enter        0xff,0          82 ff 00
-   jsr  @0x00010203     7f ae c0 01 02 03
-   adjspd       0x69696969      7f a5 01 02 03 04
-   bpt                  f2
-   Note this is 16 bytes.  */
+extern LONGEST ns32k_call_dummy_words[];
+#define CALL_DUMMY_WORDS ns32k_call_dummy_words
 
-#define CALL_DUMMY { 0x7f00ff82, 0x0201c0ae, 0x01a57f03, 0xf2040302 }
+extern int sizeof_ns32k_call_dummy_words;
+#define SIZEOF_CALL_DUMMY_WORDS sizeof_ns32k_call_dummy_words
 
 #define CALL_DUMMY_START_OFFSET	3
-#define CALL_DUMMY_LENGTH	16
-#define CALL_DUMMY_ADDR		5
-#define CALL_DUMMY_NARGS	11
 
-/* Insert the specified number of args and function address
-   into a call sequence of the above form stored at DUMMYNAME.  */
-
-void flip_bytes (void *ptr, int count);
-
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)   		\
-{								\
-	int	flipped;					\
-	flipped = fun | 0xc0000000;				\
-	flip_bytes (&flipped, 4);				\
-	*((int *) (((char *) dummyname)+CALL_DUMMY_ADDR)) = flipped;	\
-	flipped = - nargs * 4;					\
-	flip_bytes (&flipped, 4);				\
-	*((int *) (((char *) dummyname)+CALL_DUMMY_NARGS)) = flipped;	\
-}
+struct value;
+struct type;
+extern void ns32k_fix_call_dummy (char *, CORE_ADDR, CORE_ADDR, int,
+                                  struct value **, struct type *, int);
+#define FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p) \
+  ns32k_fix_call_dummy ((dummy), (pc), (fun), (nargs), (args), (type), (gcc_p))

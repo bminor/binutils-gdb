@@ -1,5 +1,16 @@
 2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* ns32k-tdep.c (ns32k_call_dummy_words, sizeof_ns32k_call_dummy_words,
+	ns32k_fix_call_dummy): New.
+	* config/ns32k/tm-umax.h (CALL_DUMMY_WORDS): Define as
+	ns32k_call_dummy_words.
+	(SIZEOF_CALL_DUMMY_WORDS): Define as sizeof_ns32k_call_dummy_words.
+	(CALL_DUMMY, CALL_DUMMY_LENGTH, CALL_DUMMY_ADDR,
+	CALL_DUMMY_NARGS): Remove.
+	(FIX_CALL_DUMMY): Define as ns32k_fix_call_dummy.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* ns32k-tdep.c (ns32k_breakpoint_from_pc, ns32k_frame_chain,
 	ns32k_frame_saved_pc, ns32k_frame_args_address,
 	ns32k_frame_locals_address, ns32k_frame_init_saved_regs,

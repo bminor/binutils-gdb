@@ -26,6 +26,7 @@
 static int sign_extend (int value, int bits);
 static CORE_ADDR ns32k_get_enter_addr (CORE_ADDR);
 static int ns32k_localcount (CORE_ADDR enter_pc);
+static void flip_bytes (void *, int);
 
 char *
 ns32k_register_name_32082 (int regno)
@@ -203,7 +204,7 @@ sign_extend (int value, int bits)
 	  : value);
 }
 
-void
+static void
 flip_bytes (void *p, int count)
 {
   char tmp;
@@ -395,7 +396,43 @@ ns32k_pop_frame (void)
   write_register (SP_REGNUM, fp + 8);
   flush_cached_frames ();
 }
+
+/* The NS32000 call dummy sequence:
 
+	enter	0xff,0			82 ff 00
+	jsr	@0x00010203		7f ae c0 01 02 03
+	adjspd	0x69696969		7f a5 01 02 03 04
+	bpt				f2
+
+   It is 16 bytes long.  */
+
+LONGEST ns32k_call_dummy_words[] =
+{
+  0x7f00ff82,
+  0x0201c0ae,
+  0x01a57f03,
+  0xf2040302
+};
+int sizeof_ns32k_call_dummy_words = sizeof (ns32k_call_dummy_words);
+
+#define NS32K_CALL_DUMMY_ADDR         5
+#define NS32K_CALL_DUMMY_NARGS        11
+
+void
+ns32k_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
+                      struct value **args, struct type *type, int gcc_p)
+{
+  int flipped;
+
+  flipped = fun | 0xc0000000;
+  flip_bytes (&flipped, 4);
+  store_unsigned_integer (dummy + NS32K_CALL_DUMMY_ADDR, 4, flipped);
+
+  flipped = - nargs * 4;
+  flip_bytes (&flipped, 4);
+  store_unsigned_integer (dummy + NS32K_CALL_DUMMY_NARGS, 4, flipped);
+}
+
 void
 _initialize_ns32k_tdep (void)
 {
