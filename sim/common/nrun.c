@@ -165,7 +165,8 @@ main (int argc, char **argv)
       
     }
   /* Print any stats the simulator collected.  */
-  sim_info (sd, 0);
+  if (STATE_VERBOSE_P (sd))
+    sim_info (sd, 0);
   
   /* Shutdown the simulator.  */
   sim_close (sd, 0);

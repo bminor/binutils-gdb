@@ -166,7 +166,7 @@ int hw_find_integer_array_property
 (struct hw *me,
  const char *property,
  unsigned index,
- signed_word *integer);
+ signed_cell *integer);
 
 
 
