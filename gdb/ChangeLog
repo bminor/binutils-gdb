@@ -1,3 +1,10 @@
+Thu Nov 18 08:25:50 1993  Fred Fish  (fnf@cygnus.com)
+
+	* valprint.c (val_print_string):  When looking for a null
+	terminator compare current bufsize to fetchlimit to determine
+	when to stop, instead of computing buffer+fetchlimit which
+	may overflow for very large limits (like "unlimited").
+
 Wed Nov 17 18:23:09 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* eval.c(evaluate_subexp): to use unified search so type conversion 
