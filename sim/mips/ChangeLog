@@ -1,3 +1,21 @@
+start-sanitize-r5900
+Thu Apr 16 10:40:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* r5900.igen (CFC1, CTC1): Implement R5900 specific version.
+	* mips.igen (CFC1, CTC1): R5900 des not use generic version.
+
+	* r5900.igen (r59fp_unpack): New function.
+	(r59fp_op1, r59fp_op2, r59fp_op3, C.cond.S, CVT.S.W, DIV.S,
+ 	RSQRT.S, SQRT.S): Use.
+	(r59fp_zero): New function.
+	(r59fp_overflow): Generate r5900 specific overflow value.
+	(r59fp_store): Re-write, overflow to MAX_R5900_FP value, underflow
+ 	to zero.
+	(CVT.S.W, CVT.W.S): Exchange implementations.
+	
+	* sim-main.h (R5900_EXPMAX, R5900_EXPMIN, R5900_EXPBIAS): Defile.
+	
+end-sanitize-r5900
 start-sanitize-tx19
 Thu Apr 16 09:14:44 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

@@ -2,7 +2,7 @@
    of the floating point routines in libgcc1.c for targets without
    hardware floating point.  */
 
-/* Copyright (C) 1994,1997 Free Software Foundation, Inc.
+/* Copyright (C) 1994,1997-1998 Free Software Foundation, Inc.
 
 This file is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -709,6 +709,40 @@ sim_fpu_to64 (unsigned64 *u,
 	      const sim_fpu *f)
 {
   *u = pack_fpu (f, 1);
+}
+
+
+INLINE_SIM_FPU (void)
+sim_fpu_fractionto (sim_fpu *f,
+		    int sign,
+		    int normal_exp,
+		    unsigned64 fraction,
+		    int precision)
+{
+  int shift = (NR_FRAC_GUARD - precision);
+  f->class = sim_fpu_class_number;
+  f->sign = sign;
+  f->normal_exp = normal_exp;
+  /* shift the fraction to where sim-fpu expects it */
+  if (shift >= 0)
+    f->fraction = (fraction << shift);
+  else
+    f->fraction = (fraction >> -shift);
+  f->fraction |= IMPLICIT_1;
+}
+
+
+INLINE_SIM_FPU (unsigned64)
+sim_fpu_tofraction (const sim_fpu *d,
+		    int precision)
+{
+  /* we have NR_FRAC_GUARD bits, we want only PRECISION bits */
+  int shift = (NR_FRAC_GUARD - precision);
+  unsigned64 fraction = (d->fraction & ~IMPLICIT_1);
+  if (shift >= 0)
+    return fraction >> shift;
+  else
+    return fraction << -shift;
 }
 
 
@@ -2186,6 +2220,7 @@ sim_fpu_exp (const sim_fpu *d)
 }
 
 
+
 INLINE_SIM_FPU (int)
 sim_fpu_is (const sim_fpu *d)
 {
@@ -2196,8 +2231,10 @@ sim_fpu_is (const sim_fpu *d)
     case sim_fpu_class_snan:
       return SIM_FPU_IS_SNAN;
     case sim_fpu_class_infinity:
-      return SIM_FPU_IS_NINF;
-      return SIM_FPU_IS_PINF;
+      if (d->sign)
+	return SIM_FPU_IS_NINF;
+      else
+	return SIM_FPU_IS_PINF;
     case sim_fpu_class_number:
       if (d->sign)
 	return SIM_FPU_IS_NNUMBER;

@@ -1,3 +1,10 @@
+Thu Apr 16 10:30:14 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-fpu.c, sim-fpu.h (sim_fpu_fractionto, sim_fpu_tofraction):
+ 	New functions, pack / unpack sim_fpu struct using raw values.
+	(sim_fpu_is): Differentiate between negative and positive
+ 	infinity.
+
 Tue Apr 14 18:49:31 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-bits.h (EXTEND4): Define.
