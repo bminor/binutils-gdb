@@ -1,5 +1,19 @@
 2002-09-30  Andrew Cagney  <ac131313@redhat.com>
 
+	* mips-tdep.c (mips_frame_saved_pc): When a generic dummy frame,
+	use frame_unwind_signed_register to obtain the PC.
+	(mips_frame_chain): Handle a generic dummy frame.
+	(mips_init_extra_frame_info): When a generic dummy frame, don't
+	re-compute the frame base.
+	(mips_pop_frame): Handle generic dummy frames.
+	(mips_gdbarch_init): When generic dummy frames, set
+	use_generic_dummy_frames, push_dummy_frame to
+	generic_push_dummy_frame, pc_in_call_dummy to
+	generic_pc_in_call_dummy, and save_dummy_frame_top_of_stack to
+	generic_save_dummy_frame_tos.
+
+2002-09-30  Andrew Cagney  <ac131313@redhat.com>
+
 	* blockframe.c (generic_find_dummy_frame): Rewrite.  Only test
 	against TOP when TOP was explictly set.
 	(generic_push_dummy_frame): Set TOP to zero.
