@@ -1,5 +1,10 @@
 Mon Jun 10 11:45:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-ns32k.c (convert_iif): Call frag_grow rather than
+	manipulating frags directly.
+	(md_number_to_field): Adjust mem_ptr correctly if ENDIAN is
+	defined.
+
 	* app.c (do_scrub_chars): If '/' is LINE_COMMENT_START, check
  	whether the next character is '*' before checking whether we are
 	at the start of a line.  Permit LINE_COMMENT_START to start a
