@@ -1,3 +1,7 @@
+Wed Jan 31 13:22:03 1996  Richard Henderson  <rth@tamu.edu>
+
+	* Makefile.in (distclean): Remove $(DEMANGLER_PROG).1.
+
 Mon Jan 29 17:36:29 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patches from H J Lu <hjl@zoom.com>:
