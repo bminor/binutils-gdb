@@ -90,6 +90,13 @@ static struct symbol *lookup_symbol_aux_local (const char *name,
 					       struct symtab **symtab);
 
 static
+struct symbol *lookup_symbol_aux_block (const char *name,
+					const char *mangled_name,
+					const struct block *block,
+					const namespace_enum namespace,
+					struct symtab **symtab);
+
+static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
 					  const char *name,
 					  const char *mangled_name,
@@ -964,36 +971,55 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
 			 struct symtab **symtab)
 {
   struct symbol *sym;
+  
+  while (block != 0)
+    {
+      sym = lookup_symbol_aux_block (name, mangled_name, block, namespace,
+				     symtab);
+      if (sym != NULL)
+	return sym;
+      block = BLOCK_SUPERBLOCK (block);
+    }
+
+  return NULL;
+}
+
+/* Look up a symbol in a block; if found, locate its symtab, fixup the
+   symbol, and set block_found appropriately.  */
+
+static struct symbol *
+lookup_symbol_aux_block (const char *name, const char *mangled_name,
+			 const struct block *block,
+			 const namespace_enum namespace,
+			 struct symtab **symtab)
+{
+  struct symbol *sym;
   struct objfile *objfile = NULL;
   struct blockvector *bv;
   struct block *b;
   struct symtab *s = NULL;
-  
-  while (block != 0)
-    {
-      sym = lookup_block_symbol (block, name, mangled_name, namespace);
-      if (sym)
-	{
-	  block_found = block;
-	  if (symtab != NULL)
-	    {
-	      /* Search the list of symtabs for one which contains the
-	         address of the start of this block.  */
-	      ALL_SYMTABS (objfile, s)
-	      {
-		bv = BLOCKVECTOR (s);
-		b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-		if (BLOCK_START (b) <= BLOCK_START (block)
-		    && BLOCK_END (b) > BLOCK_START (block))
-		  goto found;
-	      }
-	    found:
-	      *symtab = s;
-	    }
 
-	  return fixup_symbol_section (sym, objfile);
+  sym = lookup_block_symbol (block, name, mangled_name, namespace);
+  if (sym)
+    {
+      block_found = block;
+      if (symtab != NULL)
+	{
+	  /* Search the list of symtabs for one which contains the
+	     address of the start of this block.  */
+	  ALL_SYMTABS (objfile, s)
+	    {
+	      bv = BLOCKVECTOR (s);
+	      b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	      if (BLOCK_START (b) <= BLOCK_START (block)
+		  && BLOCK_END (b) > BLOCK_START (block))
+		goto found;
+	    }
+	found:
+	  *symtab = s;
 	}
-      block = BLOCK_SUPERBLOCK (block);
+      
+      return fixup_symbol_section (sym, objfile);
     }
 
   return NULL;
