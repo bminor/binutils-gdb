@@ -1,3 +1,9 @@
+2002-04-24  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* po/id.po: New Indonesian translation.
+	* configure.in (ALL_LIGUAS): Add id.po
+	* configure: Regenerate.
+
 2002-04-17  matthew green  <mrg@redhat.com>
 
 	* ppc-opc.c (powerpc_opcode): Fix dssall operand list.
