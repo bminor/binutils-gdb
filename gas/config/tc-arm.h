@@ -1,5 +1,5 @@
 /* This file is tc-arm.h
-   Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 
@@ -26,6 +26,8 @@
 #define TARGET_BYTES_BIG_ENDIAN 0
 #endif
 
+#define WORKING_DOT_WORD
+
 #define COFF_MAGIC ARMMAGIC
 #define TARGET_ARCH bfd_arch_arm
 
@@ -47,11 +49,9 @@
 #ifdef TE_RISCIX
 #define TARGET_FORMAT "a.out-riscix"
 #else
-#if TARGET_BYTES_BIG_ENDIAN
-#define TARGET_FORMAT "a.out-arm-big"
-#else
-#define TARGET_FORMAT "a.out-arm-little"
-#endif
+#define ARM_BI_ENDIAN
+#define TARGET_FORMAT \
+  (target_big_endian ? "a.out-arm-big" : "a.out-arm-little")
 #endif
 #endif
 
@@ -60,19 +60,33 @@
 #endif
 
 #ifdef OBJ_COFF
+# define ARM_BI_ENDIAN
+  extern boolean arm_validate_fix ();
+# define TC_VALIDATE_FIX(fixP,segType,Label) if (arm_validate_fix (fixP)) add_symbolP = fixP->fx_addsy
+# ifdef TE_PE
+#  define TC_FORCE_RELOCATION(x) ((x)->fx_r_type==BFD_RELOC_RVA)
+#  define TARGET_FORMAT (target_big_endian ? "pe-arm-big" : "pe-arm-little")
+# else
+#  define TARGET_FORMAT (target_big_endian ? "coff-arm-big" : "coff-arm-little")
+   /* Tell tc-arm.c to support runtime endian selection.  */
+# endif
+#endif
+
+/* start-sanitize-armelf */
+#ifdef OBJ_ELF
+extern boolean arm_validate_fix ();
+#define TC_VALIDATE_FIX(fixP,segType,Label) if (arm_validate_fix (fixP)) add_symbolP = fixP->fx_addsy
 #define ARM_BI_ENDIAN
-#ifdef TE_PE
-#define TC_FORCE_RELOCATION(x) ((x)->fx_r_type==BFD_RELOC_RVA)
-#define TARGET_FORMAT (target_big_endian ? "pe-arm-big" : "pe-arm-little")
-#else
-#define TARGET_FORMAT (target_big_endian ? "coff-arm-big" : "coff-arm-little")
-/* Tell tc-arm.c to support runtime endian selection.  */
+#define TARGET_FORMAT (target_big_endian ? "elf32-bigarm" : "elf32-littlearm")
 #endif
-#endif
+/* end-sanitize-armelf */
 
-#define md_convert_frag(b,s,f)		{as_fatal ("arm convert_frag\n");}
+#define md_convert_frag(b,s,f)		{as_fatal (_("arm convert_frag\n"));}
 
-#define md_after_pass_hook() arm_after_pass_hook ()
+extern void arm_cleanup PARAMS ((void));
+extern void arm_start_line_hook PARAMS ((void));
+extern void arm_frob_label PARAMS ((struct symbol *));
+#define md_cleanup() arm_cleanup ()
 #define md_start_line_hook() arm_start_line_hook ()
 #define tc_frob_label(S) arm_frob_label (S)
 /* We also need to mark assembler created symbols:  */
@@ -83,11 +97,25 @@
 
 #define obj_fix_adjustable(fixP) 0
 
-/* We need to keep some local information on symbols. At the moment
-   this is 0 for ARM symbols, non-zero for Thumb symbols.  */
+/* We need to keep some local information on symbols.  */
+
 #define TC_SYMFIELD_TYPE unsigned int
-#define ARM_GET_TYPE(S)   ((S)->sy_tc)
-#define ARM_SET_TYPE(S,V) ((S)->sy_tc = (V))
+#define ARM_GET_FLAG(s)   	((s)->sy_tc)
+#define ARM_SET_FLAG(s,v) 	((s)->sy_tc |= (v))
+#define ARM_RESET_FLAG(s,v) 	((s)->sy_tc &= ~(v))
+
+#define ARM_FLAG_THUMB 		(1 << 0)	/* The symbol is a Thumb symbol rather than an Arm symbol.  */
+#define ARM_FLAG_INTERWORK 	(1 << 1)	/* The symbol is attached to code that suppports interworking.  */
+#define THUMB_FLAG_FUNC		(1 << 2)	/* The symbol is attached to the start of a Thumb function.  */
+
+#define ARM_IS_THUMB(s)		(ARM_GET_FLAG (s) & ARM_FLAG_THUMB)
+#define ARM_IS_INTERWORK(s)	(ARM_GET_FLAG (s) & ARM_FLAG_INTERWORK)
+#define THUMB_IS_FUNC(s)	(ARM_GET_FLAG (s) & THUMB_FLAG_FUNC)
+
+#define ARM_SET_THUMB(s,t)      ((t) ? ARM_SET_FLAG (s, ARM_FLAG_THUMB)     : ARM_RESET_FLAG (s, ARM_FLAG_THUMB))
+#define ARM_SET_INTERWORK(s,t)  ((t) ? ARM_SET_FLAG (s, ARM_FLAG_INTERWORK) : ARM_RESET_FLAG (s, ARM_FLAG_INTERWORK))
+#define THUMB_SET_FUNC(s,t)     ((t) ? ARM_SET_FLAG (s, THUMB_FLAG_FUNC)    : ARM_RESET_FLAG (s, THUMB_FLAG_FUNC))
+
 
 #define TC_FIX_TYPE PTR
 #define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)
