@@ -1,3 +1,12 @@
+2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gas/m68hc11/m68hc11.exp: Execute the new tests.
+	* gas/m68hc11/abi.s: New test for abi elf flags.
+	* gas/m68hc11/abi-m68hc11-32-64.d: Test for 32-bit int, 64-bit float.
+	* gas/m68hc11/abi-m68hc11-16-64.d: Test for 16-bit int, 64-bit float.
+	* gas/m68hc11/abi-m68hc11-32-32.d: Test for 32-bit int, 32-bit float.
+	* gas/m68hc11/abi-m68hc11-16-32.d: Test for 16-bit int, 32-bit float.
+
 2003-07-15  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/rm7000.[sd]: New test.
