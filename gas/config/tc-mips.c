@@ -13677,9 +13677,8 @@ tc_gen_reloc (section, fixp)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = retval[0] = (arelent *) xmalloc (sizeof (arelent));
-  retval[1] = NULL;
-
+  memset (retval, 0, sizeof(retval));
+  reloc = retval[0] = (arelent *) xcalloc (1, sizeof (arelent));
   reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
@@ -13784,7 +13783,6 @@ tc_gen_reloc (section, fixp)
       reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
       reloc->addend += fixp->fx_frag->tc_frag_data.tc_fr_offset;
       reloc2 = retval[1] = (arelent *) xmalloc (sizeof (arelent));
-      retval[2] = NULL;
       reloc2->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
       *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc2->address = (reloc->address
@@ -13800,7 +13798,6 @@ tc_gen_reloc (section, fixp)
 	  arelent *reloc3;
 
 	  reloc3 = retval[2] = (arelent *) xmalloc (sizeof (arelent));
-	  retval[3] = NULL;
 	  *reloc3 = *reloc2;
 	  reloc3->address += 4;
 	}
