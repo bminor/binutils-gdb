@@ -1,3 +1,25 @@
+Mon Feb  5 16:25:30 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	Support for building bfd and opcodes as shared libraries, based on
+	patches from Alan Modra <alan@spri.levels.unisa.edu.au>:
+	* configure.in (HLDFLAGS): New substitution.
+	* configure: Rebuild.
+	* configure.host: Set HLDFLAGS on SunOS.
+	* Makefile.in (HLDFLAGS): New variable.
+	(BFDDEP): New variable.
+	(BFDLIB): Change to -L../bfd -lbfd.
+	($(LD_PROG)): Depend upon $(BFDDEP) rathern than $(BFDLIB).  Use
+	$(HLDFLAGS) in link.
+	(check): Set LD_LIBRARY_PATH in the environment.
+
+Fri Feb  2 19:26:25 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
+
+	* scripttempl/elfppc.sc (.sdata2, .sbss2): Put .sdata2 and .sbss
+	in the read-only section, not read/write unless we are making a
+	shared library.
+	(.debug*): Add dwarf debug sections.
+	(.rela.{sdata*,sbss*}): Add sections.
+
 Fri Feb  2 16:50:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Regenerate.
