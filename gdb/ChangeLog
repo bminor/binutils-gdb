@@ -1,3 +1,10 @@
+Sat Oct 26 00:16:32 1991  John Gilmore  (gnu at cygus.com)
+
+	* buildsym.c:  New file.  Breaks out symbol-table-building routines
+	from dbxread.c, so they can be shared with xcoffread.c.
+	* buildsym.h:  New file.  Declarations for buildsym.c users.
+	* dbxread.c:  Remove large chunks into buildsym.c.
+
 Fri Oct 25 18:59:32 1991  Per Bothner  (bothner at cygnus.com)
 
 	Various fixes to improve g++ debugging.
