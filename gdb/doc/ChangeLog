@@ -1,4 +1,4 @@
-2002-12-05  Andrew Cagney  <ac131313@redhat.com>
+2002-12-10  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Algorithms): Replace INIT_FRAME_PC with
 	DEPRECATED_INIT_FRAME_PC.
