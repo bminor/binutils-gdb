@@ -1230,20 +1230,6 @@ void
 supply_register (int regnum, const void *val)
 {
   regcache_raw_supply (current_regcache, regnum, val);
-
-  /* On some architectures, e.g. HPPA, there are a few stray bits in
-     some registers, that the rest of the code would like to ignore.  */
-
-  /* NOTE: cagney/2001-03-16: The macro CLEAN_UP_REGISTER_VALUE is
-     going to be deprecated.  Instead architectures will leave the raw
-     register value as is and instead clean things up as they pass
-     through the method gdbarch_pseudo_register_read() clean up the
-     values. */
-
-#ifdef DEPRECATED_CLEAN_UP_REGISTER_VALUE
-  DEPRECATED_CLEAN_UP_REGISTER_VALUE \
-    (regnum, register_buffer (current_regcache, regnum));
-#endif
 }
 
 void

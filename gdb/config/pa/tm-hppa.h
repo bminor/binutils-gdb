@@ -66,16 +66,6 @@ extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define ARG2_REGNUM 24		/* The third argument of a callee. */
 #define ARG3_REGNUM 23		/* The fourth argument of a callee. */
 
-/* When fetching register values from an inferior or a core file,
-   clean them up using this macro.  BUF is a char pointer to
-   the raw value of the register in the registers[] array.  */
-
-#define	DEPRECATED_CLEAN_UP_REGISTER_VALUE(regno, buf) \
-  do {	\
-    if ((regno) == PCOQ_HEAD_REGNUM || (regno) == PCOQ_TAIL_REGNUM) \
-      (buf)[sizeof(CORE_ADDR) -1] &= ~0x3; \
-  } while (0)
-
 /* PA specific macro to see if the current instruction is nullified. */
 #ifndef INSTRUCTION_NULLIFIED
 extern int hppa_instruction_nullified (void);

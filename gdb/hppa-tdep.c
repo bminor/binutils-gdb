@@ -2540,6 +2540,18 @@ hppa_fetch_pointer_argument (struct frame_info *frame, int argi,
   return addr;
 }
 
+static void
+hppa_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+			   int regnum, void *buf)
+{
+    ULONGEST tmp;
+
+    regcache_raw_read_unsigned (regcache, regnum, &tmp);
+    if (regnum == PCOQ_HEAD_REGNUM || regnum == PCOQ_TAIL_REGNUM)
+      tmp &= ~0x3;
+    store_unsigned_integer (buf, sizeof(tmp), tmp);
+}
+
 /* Here is a table of C type sizes on hppa with various compiles
    and options.  I measured this on PA 9000/800 with HP-UX 11.11
    and these compilers:
@@ -2698,6 +2710,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_pc (gdbarch, hppa_unwind_pc);
   frame_unwind_append_sniffer (gdbarch, hppa_frame_unwind_sniffer);
   frame_base_append_sniffer (gdbarch, hppa_frame_base_sniffer);
+
+  set_gdbarch_pseudo_register_read (gdbarch, hppa_pseudo_register_read);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

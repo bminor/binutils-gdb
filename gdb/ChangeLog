@@ -1,5 +1,13 @@
 2004-04-17  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.c (hppa_pseudo_register_read): Define.
+	(hppa_gdbarch_init): Set pseudo_register_read.
+	* config/pa/tm-hppa.h (DEPRECATED_CLEAN_UP_REGISTER_VALUE): Remove.
+	* regcache.c (supply_register): Remove check for
+	DEPRECATED_CLEAN_UP_REGISTER_VALUE since we've removed the last user.
+
+2004-04-17  Randolph Chung  <tausq@debian.org>
+
 	* Makefile.in (hpread.o, pa64solib.o, somsolib.o): Add $(hppa_tdep_h)
 	* hppa-tdep.h (INSTRUCTION_SIZE): Move from tm-hppa.h.
 	(hpread_adjust_stack_address): Move to hpread.c.
