@@ -143,6 +143,6 @@ if [ -n "${safe}" -a ! -f po/.Recover/binutils.pot ]; then
    mv po/binutils.pot po/.Recover
 fi
 # If this fails, Sanitization must fail.
-xgettext -c -k _ -k N_ -f po/POTFILES.in -o po/binutils.pot || exit 1
+xgettext -c -k_ -kN_ -f po/POTFILES.in -o po/binutils.pot || exit 1
 
 # eof
