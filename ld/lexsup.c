@@ -47,6 +47,8 @@ unsigned long strtoul ();
 static void set_default_dirlist PARAMS ((char *dirlist_ptr));
 static void set_section_start PARAMS ((char *sect, char *valstr));
 
+/* Non-zero if we are processing a --defsym from the command line.  */
+int parsing_defsym = 0;
 
 void
 parse_args (argc, argv)
@@ -260,9 +262,13 @@ parse_args (argc, argv)
 	  command_line.force_common_definition = true;
 	  break;
 	case OPTION_DEFSYM:
+	  lex_string = optarg;
 	  lex_redirect (optarg);
 	  parser_input = input_defsym;
+	  parsing_defsym = 1;
 	  yyparse ();
+	  parsing_defsym = 0;
+	  lex_string = NULL;
 	  break;
 	case OPTION_DYNAMIC_LINKER:
 	  command_line.interpreter = optarg;

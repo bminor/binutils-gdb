@@ -1,5 +1,17 @@
 Thu Sep 28 12:34:13 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld.h (parsing_defsym): Declare.
+	* ldlex.h (lex_string): Declare.
+	* ldlex.l (lex_string): Define.
+	* lexsup.c (parsing_defsym): Define.
+	(parse_args): In OPTION_DEFSYM case, set lex_string before calling
+	lex_redirect, and clear it after calling yyparse.  Set
+	parsing_defsym around call to yyparse.
+	* ldmain.c (main): Set lex_string before calling lex_redirect, and
+	clear it after calling yyparse.
+	* ldmisc.c (vfinfo): For %S, handle --defsym arguments and built
+	in linker scripts correctly.
+
 	* scripttempl/sparccoff.sc: Add .ctors/.dtors handling like other
 	COFF targets, allowing for the leading underscore used on SPARC
 	COFF.
