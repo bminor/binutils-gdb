@@ -60,7 +60,7 @@ SECTIONS
     ${RELOCATING+ *(.fini)}
     /* ??? Why is .gcc_exc here?  */
     ${RELOCATING+ *(.gcc_exc)}
-    ${RELOCATING+ etext = .;}
+    ${RELOCATING+PROVIDE (etext = .);}
     *(.gcc_except_table)
   }
 
@@ -132,8 +132,8 @@ SECTIONS
   .endjunk ${RELOCATING+BLOCK(__section_alignment__)} :
   {
     /* end is deprecated, don't use it */
-    ${RELOCATING+ end = .;}
-    ${RELOCATING+ _end = .;}
+    ${RELOCATING+PROVIDE (end = .);}
+    ${RELOCATING+PROVIDE ( _end = .);}
     ${RELOCATING+ __end__ = .;}
   }
 
