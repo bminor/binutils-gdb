@@ -60,13 +60,34 @@ struct target_ops
   void 	      (*to_close) PARAMS ((int));
   void 	      (*to_attach) PARAMS ((char *, int));
   void 	      (*to_detach) PARAMS ((char *, int));
-  void 	      (*to_resume) PARAMS ((int, int));
+  void 	      (*to_resume) PARAMS ((int, int, int));
   int  	      (*to_wait) PARAMS ((int *));
   void 	      (*to_fetch_registers) PARAMS ((int));
   void 	      (*to_store_registers) PARAMS ((int));
   void 	      (*to_prepare_to_store) PARAMS ((void));
-  int  	      (*to_xfer_memory) PARAMS ((CORE_ADDR, char *, int, int,
-					 struct target_ops *));
+
+  /* Transfer LEN bytes of memory between GDB address MYADDR and
+     target address MEMADDR.  If WRITE, transfer them to the target, else
+     transfer them from the target.  TARGET is the target from which we
+     get this function.
+
+     Return value, N, is one of the following:
+
+     0 means that we can't handle this.  If errno has been set, it is the
+     error which prevented us from doing it (FIXME: What about bfd_error?).
+
+     positive (call it N) means that we have transferred N bytes
+     starting at MEMADDR.  We might be able to handle more bytes
+     beyond this length, but no promises.
+
+     negative (call its absolute value N) means that we cannot
+     transfer right at MEMADDR, but we could transfer at least
+     something at MEMADDR + N.  */
+
+  int  	      (*to_xfer_memory) PARAMS ((CORE_ADDR memaddr, char *myaddr,
+					 int len, int write,
+					 struct target_ops * target));
+
   void 	      (*to_files_info) PARAMS ((struct target_ops *));
   int  	      (*to_insert_breakpoint) PARAMS ((CORE_ADDR, char *));
   int 	      (*to_remove_breakpoint) PARAMS ((CORE_ADDR, char *));
@@ -81,6 +102,7 @@ struct target_ops
   void 	      (*to_create_inferior) PARAMS ((char *, char *, char **));
   void 	      (*to_mourn_inferior) PARAMS ((void));
   int	      (*to_can_run) PARAMS ((void));
+  void	      (*to_notice_signals) PARAMS ((void));
   enum strata   to_stratum;
   struct target_ops
     	       *to_next;
@@ -103,7 +125,8 @@ struct target_ops
 
 #define	OPS_MAGIC	3840
 
-/* The ops structure for our "current" target process.  */
+/* The ops structure for our "current" target process.  This should
+   never be NULL.  If there is no target, it points to the dummy_target.  */
 
 extern struct target_ops	*current_target;
 
@@ -147,15 +170,15 @@ extern struct target_ops	*current_target;
    typed by the user (e.g. a signal to send the process).  FROM_TTY
    says whether to be verbose or not.  */
 
-#define	target_detach(args, from_tty)		\
-	(*current_target->to_detach) (args, from_tty)
+extern void
+target_detach PARAMS ((char *, int));
 
-/* Resume execution of the target process.  STEP says whether to single-step
-   or to run free; SIGGNAL is the signal value (e.g. SIGINT) to be given
-   to the target, or zero for no signal.  */
+/* Resume execution of the target process PID.  STEP says whether to
+   single-step or to run free; SIGGNAL is the signal value (e.g. SIGINT) to be
+   given to the target, or zero for no signal.  */
 
-#define	target_resume(step, siggnal)	\
-	(*current_target->to_resume) (step, siggnal)
+#define	target_resume(pid, step, siggnal)	\
+	(*current_target->to_resume) (pid, step, siggnal)
 
 /* Wait for inferior process to do something.  Return pid of child,
    or -1 in case of error; store status through argument pointer STATUS.  */
@@ -169,8 +192,8 @@ extern struct target_ops	*current_target;
 	(*current_target->to_fetch_registers) (regno)
 
 /* Store at least register REGNO, or all regs if REGNO == -1.
-   It can store as many registers as it wants to, so the entire registers
-   array must be valid.  Result is 0 for success, -1 for problems.  */
+   It can store as many registers as it wants to, so target_prepare_to_store
+   must have been previously called.  Calls error() if there are problems.  */
 
 #define	target_store_registers(regs)	\
 	(*current_target->to_store_registers) (regs)
@@ -184,15 +207,14 @@ extern struct target_ops	*current_target;
 #define	target_prepare_to_store()	\
 	(*current_target->to_prepare_to_store) ()
 
-/* Reading and writing memory actually happens through a glue
-   function which iterates across the various targets.  Result is
-   0 for success, or an errno value.  */
-
 extern int
 target_read_string PARAMS ((CORE_ADDR, char *, int));
 
 extern int
 target_read_memory PARAMS ((CORE_ADDR, char *, int));
+
+extern int
+target_read_memory_partial PARAMS ((CORE_ADDR, char *, int, int *));
 
 extern int
 target_write_memory PARAMS ((CORE_ADDR, char *, int));
@@ -203,8 +225,13 @@ xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
 extern int
 child_xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
 
-extern int
-target_xfer_memory PARAMS ((CORE_ADDR, char *, int, int));
+/* Transfer LEN bytes between target address MEMADDR and GDB address MYADDR.
+   Returns 0 for success, errno code for failure (which includes partial
+   transfers--if you want a more useful response to partial transfers, try
+   target_read_memory_partial).  */
+
+extern int target_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
+				       int len, int write));
 
 /* From exec.c */
 
@@ -238,7 +265,7 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 
 #define target_terminal_init() \
 	(*current_target->to_terminal_init) ()
-	
+
 /* Put the inferior's terminal settings into effect.
    This is preparation for starting or resuming the inferior.  */
 
@@ -311,6 +338,11 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 #define target_can_run(t) \
   	((t)->to_can_run) ()
 
+/* post process changes to signal handling in the inferior.  */
+
+#define target_notice_signals() \
+  	(*current_target->to_notice_signals) ()
+
 /* Pointer to next target in the chain, e.g. a core file and an exec file.  */
 
 #define	target_next \
@@ -339,11 +371,25 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 #define	target_has_registers	\
 	(current_target->to_has_registers)
 
-/* Does the target have execution?  Can we make it jump (through hoops),
-   or pop its stack a few times?  */
+/* Does the target have execution?  Can we make it jump (through
+   hoops), or pop its stack a few times?  FIXME: If this is to work that
+   way, it needs to check whether an inferior actually exists.
+   remote-udi.c and probably other targets can be the current target
+   when the inferior doesn't actually exist at the moment.  Right now
+   this just tells us whether this target is *capable* of execution.  */
 
 #define	target_has_execution	\
 	(current_target->to_has_execution)
+
+/* Converts a process id to a string.  Usually, the string just contains
+   `process xyz', but on some systems it may contain
+   `process xyz thread abc'.  */
+
+#ifndef target_pid_to_str
+#define target_pid_to_str(PID) \
+	normal_pid_to_str (PID)
+extern char *normal_pid_to_str PARAMS ((int pid));
+#endif
 
 /* Routines for maintenance of the target structures...
 
@@ -412,4 +458,7 @@ find_default_attach PARAMS ((char *, int));
 void
 find_default_create_inferior PARAMS ((char *, char *, char **));
 
+struct target_ops *
+find_core_target PARAMS ((void));
+
 #endif	/* !defined (TARGET_H) */

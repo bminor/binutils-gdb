@@ -1,3 +1,9 @@
+Thu Oct  7 19:20:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/h8300/tm-h8300.h: Don't define sr_get_debug.
+	* remote-sim.c: Include remote-utils.h.
+	* target.h: Add comment about target_has_execution.
+
 Thu Oct  7 16:14:19 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
 	* h8300-tdep.c (sim_load, sim_kill, sim_open, sim_set_args):
