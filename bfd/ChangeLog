@@ -1,3 +1,7 @@
+2004-10-24  Daniel Jacobowitz  <dan@debian.org>
+
+	* opncls.c (bfd_close): Return TRUE for BFD_IN_MEMORY.
+
 2004-10-24  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c (File Layout): Correct place of misplaced blurb about

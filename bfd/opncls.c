@@ -598,7 +598,7 @@ bfd_close (bfd *abfd)
   if (!(abfd->flags & BFD_IN_MEMORY))
     ret = abfd->iovec->bclose (abfd);
   else
-    ret = 0;
+    ret = TRUE;
 
   /* If the file was open for writing and is now executable,
      make it so.  */
