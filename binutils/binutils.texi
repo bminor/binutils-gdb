@@ -1280,8 +1280,8 @@ For each @var{file} given, GNU @code{strings} prints the printable
 character sequences that are at least 4 characters long (or the number
 given with the options below) and are followed by a NUL or newline
 character.  By default, it only prints the strings from the initialized
-data sections of object files; for other types of files, it prints the
-strings from the whole file.
+and loaded sections of object files; for other types of files, it prints
+the strings from the whole file.
 
 @code{strings} is mainly useful for determining the contents of non-text
 files.
@@ -1290,8 +1290,8 @@ files.
 @item -a
 @itemx --all
 @itemx -
-Do not scan only the initialized data section of object files; scan
-the whole files.
+Do not scan only the initialized and loaded sections of object files;
+scan the whole files.
 
 @item -f
 @itemx --print-file-name
