@@ -1,3 +1,8 @@
+2003-11-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/sparc/nm-linux.h (PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE):
+	Define.
+
 2003-10-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.h (struct sparc_gregset): New.
