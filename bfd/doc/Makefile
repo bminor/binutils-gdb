@@ -15,6 +15,10 @@ VPATH=..
 .c.ip:
 	scanph -i $< $@
 
+# main GDB source directory
+srcdir = ..
+
+TEXIDIR=${srcdir}/../texinfo/fsf
 
 DOCFILES = aoutx.texi  archive.texi archures.texi \
 	bfd.texi  cache.texi coffcode.texi \
@@ -67,12 +71,12 @@ bfd.info: $(DOCFILES) bfd.texinfo
 	makeinfo +no-validate bfd.texinfo
 
 bfd.dvi: $(DOCFILES) bfd.texinfo
-	tex bfd.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex bfd.texinfo
 	texindex bfd.??
-	tex bfd.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex bfd.texinfo
 
 bfd.ps: bfd.dvi
 	dvips bfd -o
 	
-quickdoc: $(DSRC) docs
-	tex bfd.texinfo
+quickdoc: $(DOCFILES) bfd.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex bfd.texinfo
