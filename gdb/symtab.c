@@ -50,11 +50,6 @@
 #include <ctype.h>
 #include "cp-abi.h"
 
-/* Prototype for one function in parser-defs.h,
-   instead of including that entire file. */
-
-extern char *find_template_name_end (char *);
-
 /* Prototypes for local functions */
 
 static void completion_list_add_name (char *, char *, int, char *, char *);
@@ -120,19 +115,6 @@ struct type *builtin_type_error;
    value_of_this. */
 
 const struct block *block_found;
-
-/* While the C++ support is still in flux, issue a possibly helpful hint on
-   using the new command completion feature on single quoted demangled C++
-   symbols.  Remove when loose ends are cleaned up.   FIXME -fnf */
-
-static void
-cplusplus_hint (char *name)
-{
-  while (*name == '\'')
-    name++;
-  printf_filtered ("Hint: try '%s<TAB> or '%s<ESC-?>\n", name, name);
-  printf_filtered ("(Note leading single quote.)\n");
-}
 
 /* Check for a symtab of a specific name; first in symtabs, then in
    psymtabs.  *If* there is no '/' in the name, a match after a '/'
