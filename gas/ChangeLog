@@ -1,3 +1,8 @@
+Sun Apr  4 15:21:09 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* config/tc-h8500.c: Get relax size of branch instructions right,
+	(get_operand): Parse @sp+ correctly.
+
 Fri Apr  2 08:54:57 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* config/tc-mips.h (LOCAL_LABEL): Treat any label starting with
