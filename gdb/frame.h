@@ -160,6 +160,11 @@ extern void frame_saved_regs_zalloc (struct frame_info *);
 
 #define FRAME_FP(fi) ((fi)->frame)
 
+/* Level of the frame: 0 for innermost, 1 for its caller, ...; or -1
+   for an invalid frame.  */
+
+extern int frame_relative_level (struct frame_info *fi);
+
 /* Define a default FRAME_CHAIN_VALID, in the form that is suitable for most
    targets.  If FRAME_CHAIN_VALID returns zero it means that the given frame
    is the outermost one and has no caller.
@@ -184,7 +189,10 @@ extern struct frame_info *selected_frame;
    0 for innermost, 1 for its caller, ...
    or -1 for frame specified by address with no defined level.  */
 
-extern int selected_frame_level;
+/* FIXME: cagney/2002-04-21: The variable `selected_frame_level' is
+   deprecated.  It will dissapear `real soon now'.  */
+
+extern int selected_frame_level;  /* DEPRECATED */
 
 extern struct frame_info *create_new_frame (CORE_ADDR, CORE_ADDR);
 

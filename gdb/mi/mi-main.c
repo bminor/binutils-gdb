@@ -165,7 +165,7 @@ mi_cmd_exec_return (char *args, int from_tty)
   /* Because we have called return_command with from_tty = 0, we need
      to print the frame here. */
   show_and_print_stack_frame (selected_frame,
-			      selected_frame_level,
+			      frame_relative_level (selected_frame),
 			      LOC_AND_ADDRESS);
 
   return MI_CMD_DONE;

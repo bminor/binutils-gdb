@@ -1958,7 +1958,8 @@ finish_tfind_command (char *msg,
       else
 	source_only = 1;
 
-      print_stack_frame (selected_frame, selected_frame_level, source_only);
+      print_stack_frame (selected_frame, frame_relative_level (selected_frame),
+			 source_only);
       do_displays ();
     }
 }

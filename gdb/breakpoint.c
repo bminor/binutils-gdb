@@ -901,7 +901,7 @@ insert_breakpoints (void)
 	/* Save the current frame and level so we can restore it after
 	   evaluating the watchpoint expression on its own frame.  */
 	saved_frame = selected_frame;
-	saved_level = selected_frame_level;
+	saved_level = frame_relative_level (selected_frame);
 
 	/* Determine if the watchpoint is within scope.  */
 	if (b->exp_valid_block == NULL)
@@ -1002,7 +1002,7 @@ insert_breakpoints (void)
 
 	/* Restore the frame and level.  */
 	if ((saved_frame != selected_frame) ||
-	    (saved_level != selected_frame_level))
+	    (saved_level != frame_relative_level (selected_frame)))
 	  select_frame (saved_frame, saved_level);
 
 	if (val)
@@ -7282,7 +7282,7 @@ is valid is not currently in scope.\n", bpt->number);
 	    }
 
 	  save_selected_frame = selected_frame;
-	  save_selected_frame_level = selected_frame_level;
+	  save_selected_frame_level = frame_relative_level (selected_frame);
 	  select_frame (fr, -1);
 	}
 

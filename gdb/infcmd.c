@@ -1289,7 +1289,8 @@ finish_command (char *arg, int from_tty)
   if (from_tty)
     {
       printf_filtered ("Run till exit from ");
-      print_stack_frame (selected_frame, selected_frame_level, 0);
+      print_stack_frame (selected_frame,
+			 frame_relative_level (selected_frame), 0);
     }
 
   /* If running asynchronously and the target support asynchronous

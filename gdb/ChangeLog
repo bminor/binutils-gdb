@@ -1,3 +1,23 @@
+2002-04-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.h (selected_frame_level): Document as deprecated.
+	(frame_relative_level): Declare.
+	* stack.c (frame_relative_level): New function.
+	(selected_frame_level): Document as deprecated.
+	(select_frame): Do not set the selected_frame_level.
+
+	* stack.c (frame_info, record_selected_frame): Update.
+	(frame_command, current_frame_command): Update.
+	(up_silently_base, up_command, down_silently_base): Update.
+	(down_command): Update.
+	* inflow.c (kill_command): Update.
+	* tracepoint.c (finish_tfind_command): Update.
+	* corelow.c (core_open): Update.
+	* thread.c (info_threads_command): Update.
+	(do_captured_thread_select): Update.
+	* infcmd.c (finish_command): Update.
+	* breakpoint.c (insert_breakpoints, do_enable_breakpoint): Update.
+
 2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config/alpha/tm-fbsd.h (FRAME_CHAIN_VALID): Remove.

@@ -594,7 +594,8 @@ kill_command (char *arg, int from_tty)
       if (selected_frame == NULL)
 	fputs_filtered ("No selected stack frame.\n", gdb_stdout);
       else
-	print_stack_frame (selected_frame, selected_frame_level, 1);
+	print_stack_frame (selected_frame,
+			   frame_relative_level (selected_frame), 1);
     }
 }
 

@@ -119,7 +119,22 @@ struct frame_info *selected_frame;
    0 for innermost, 1 for its caller, ...
    or -1 for frame specified by address with no defined level.  */
 
-int selected_frame_level;
+/* FIXME: cagney/2002-04-21: The variable `selected_frame_level' is
+   deprecated.  It will dissapear `real soon now'.  */
+
+int selected_frame_level; /* DEPRECATED */
+
+/* Level of the selected frame: 0 for innermost, 1 for its caller, ...
+   or -1 for NULL frame.  */
+
+int
+frame_relative_level (struct frame_info *fi)
+{
+  if (fi == NULL)
+    return -1;
+  else
+    return fi->level;
+}
 
 /* Zero means do things normally; we are interacting directly with the
    user.  One means print the full filename and linenumber when a
@@ -817,9 +832,10 @@ frame_info (char *addr_exp, int from_tty)
     }
   calling_frame_info = get_prev_frame (fi);
 
-  if (!addr_exp && selected_frame_level >= 0)
+  if (!addr_exp && frame_relative_level (selected_frame) >= 0)
     {
-      printf_filtered ("Stack level %d, frame at ", selected_frame_level);
+      printf_filtered ("Stack level %d, frame at ",
+		       frame_relative_level (selected_frame));
       print_address_numeric (fi->frame, 1, gdb_stdout);
       printf_filtered (":\n");
     }
@@ -1457,7 +1473,9 @@ select_frame (struct frame_info *fi, int level)
   register struct symtab *s;
 
   selected_frame = fi;
-  selected_frame_level = level;
+  /* FIXME: cagney/2002-04-21: The variable `selected_frame_level' is
+     deprecated.  It will dissapear `real soon now'.  */
+  selected_frame_level = level; /* DEPRECATED */
   /* FIXME: cagney/2002-04-05: It can't be this easy (and looking at
      the increasingly complex list of checkes, it wasn't)!  GDB is
      dragging around, and constantly updating, the global variable
@@ -1530,7 +1548,7 @@ void
 record_selected_frame (CORE_ADDR *frameaddrp, int *levelp)
 {
   *frameaddrp = selected_frame ? selected_frame->frame : 0;
-  *levelp = selected_frame_level;
+  *levelp = frame_relative_level (selected_frame);
 }
 
 /* Return the symbol-block in which the selected frame is executing.
@@ -1641,7 +1659,8 @@ void
 frame_command (char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
-  show_and_print_stack_frame (selected_frame, selected_frame_level, 1);
+  show_and_print_stack_frame (selected_frame,
+			      frame_relative_level (selected_frame), 1);
 }
 
 /* The XDB Compatibility command to print the current frame. */
@@ -1651,7 +1670,8 @@ current_frame_command (char *level_exp, int from_tty)
 {
   if (target_has_stack == 0 || selected_frame == 0)
     error ("No stack.");
-  print_only_stack_frame (selected_frame, selected_frame_level, 1);
+  print_only_stack_frame (selected_frame,
+			  frame_relative_level (selected_frame), 1);
 }
 
 /* Select the frame up one or COUNT stack levels
@@ -1673,7 +1693,7 @@ up_silently_base (char *count_exp)
   fi = find_relative_frame (selected_frame, &count1);
   if (count1 != 0 && count_exp == 0)
     error ("Initial frame selected; you cannot go up.");
-  select_frame (fi, selected_frame_level + count - count1);
+  select_frame (fi, frame_relative_level (selected_frame) + count - count1);
 }
 
 static void
@@ -1686,7 +1706,8 @@ static void
 up_command (char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
-  show_and_print_stack_frame (selected_frame, selected_frame_level, 1);
+  show_and_print_stack_frame (selected_frame,
+			      frame_relative_level (selected_frame), 1);
 }
 
 /* Select the frame down one or COUNT stack levels
@@ -1717,7 +1738,7 @@ down_silently_base (char *count_exp)
       error ("Bottom (i.e., innermost) frame selected; you cannot go down.");
     }
 
-  select_frame (frame, selected_frame_level + count - count1);
+  select_frame (frame, frame_relative_level (selected_frame) + count - count1);
 }
 
 /* ARGSUSED */
@@ -1731,7 +1752,8 @@ static void
 down_command (char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
-  show_and_print_stack_frame (selected_frame, selected_frame_level, 1);
+  show_and_print_stack_frame (selected_frame,
+			      frame_relative_level (selected_frame), 1);
 }
 
 void

@@ -421,7 +421,7 @@ info_threads_command (char *arg, int from_tty)
   struct thread_info *tp;
   ptid_t current_ptid;
   struct frame_info *cur_frame;
-  int saved_frame_level = selected_frame_level;
+  int saved_frame_level = frame_relative_level (selected_frame);
   int counter;
   char *extra_info;
 
@@ -713,7 +713,7 @@ do_captured_thread_select (struct ui_out *uiout,
 #endif
   ui_out_text (uiout, ")]");
 
-  print_stack_frame (selected_frame, selected_frame_level, 1);
+  print_stack_frame (selected_frame, frame_relative_level (selected_frame), 1);
   return GDB_RC_OK;
 }
 
