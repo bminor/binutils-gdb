@@ -25,12 +25,12 @@ Do-first:
 
 Things-to-keep:
 
-
 ChangeLog
 common.h
 dwarf.h
 external.h
 internal.h
+mips.h
 
 Things-to-lose:
 
