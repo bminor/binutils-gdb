@@ -1,5 +1,8 @@
 Wed Feb  1 08:03:48 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/nodebug.exp: Add xfails for ultrix (same places as
+	other ecoff systems).
+
 	* gdb.base/a1-selftest.exp (test_with_self): Don't invoke stty on
 	ultrix.
 

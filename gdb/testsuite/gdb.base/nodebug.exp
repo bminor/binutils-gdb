@@ -36,27 +36,27 @@ if ![file exists $binfile] then {
 	# GCC puts out stProc and related symbols which cause GDB to think
 	# it knows the type.  GDB probably could be fixed to do better, but
 	# for now xfail these tests.
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "p top" \
 	    "{<(text variable|function), no debug info>} \[0-9a-fx]* <top>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "whatis top" "<(text variable|function), no debug info>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "ptype top" "int \\(\\)"
 
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "p middle" \
 	    "{<(text variable|function), no debug info>} \[0-9a-fx]* <middle>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "whatis middle" "<(text variable|function), no debug info>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "ptype middle" "int \\(\\)"
 
 	gdb_test "p dataglobal" "= 3"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "whatis dataglobal" \
 	    "<(data variable|variable), no debug info>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "ptype dataglobal" "<(data variable|variable), no debug info>"
 
 	# The only symbol xcoff puts out for statics is for the TOC entry.
@@ -65,25 +65,25 @@ if ![file exists $binfile] then {
 	setup_xfail "rs6000*-*-aix*"
 	gdb_test "p datalocal" "= 4"
 	setup_xfail "rs6000*-*-aix*"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "whatis datalocal" "<(data variable|variable), no debug info>"
 	setup_xfail "rs6000*-*-aix*"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "ptype datalocal" "<(data variable|variable), no debug info>"
 
 	gdb_test "p bssglobal" "= 0"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "whatis bssglobal" "<(data variable|variable), no debug info>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "ptype bssglobal" "<(data variable|variable), no debug info>"
 
 	setup_xfail "rs6000*-*-aix*"
 	gdb_test "p bsslocal" "= 0"
 	setup_xfail "rs6000*-*-aix*"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "whatis bsslocal" "<(data variable|variable), no debug info>"
 	setup_xfail "rs6000*-*-aix*"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*"
+	setup_xfail "alpha*-*-osf*" "mips*-*-irix4*" "*-*-ultrix*"
 	gdb_test "ptype bsslocal" "<(data variable|variable), no debug info>"
 
 	gdb_test "backtrace" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main"
