@@ -2919,7 +2919,25 @@ assign_section_numbers (bfd *abfd)
 			}
 		      else
 			{
-			  s = elf_shdrp[elfsec]->bfd_section->output_section;
+			  s = elf_shdrp[elfsec]->bfd_section;
+			  if (elf_discarded_section (s))
+			    {
+			      asection *kept;
+			       (*_bfd_error_handler)
+				  (_("%B: sh_link of section `%A' points to discarded section `%A' of `%B'"),
+				   abfd, d->this_hdr.bfd_section,
+				   s, s->owner);
+			       /* Point to the kept section if it has
+				  the same size as the discarded
+				  one.  */
+			       kept = _bfd_elf_check_kept_section (s);
+			       if (kept == NULL)
+				 {
+				   bfd_set_error (bfd_error_bad_value);
+				   return FALSE;
+				 }
+			    }
+			  s = s->output_section;
 			  BFD_ASSERT (s != NULL);
 			  d->this_hdr.sh_link = elf_section_data (s)->this_idx;
 			}

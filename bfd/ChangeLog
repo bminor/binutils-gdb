@@ -1,3 +1,15 @@
+2005-03-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_check_kept_section): New.
+
+	* elf.c (assign_section_numbers): When sh_link points to a
+	discarded section, call _bfd_elf_check_kept_section to see if
+	the kept section can be used. Otherwise reject sh_link
+	pointing to discarded section.
+
+	* elflink.c (_bfd_elf_check_kept_section): New.
+	(elf_link_input_bfd): Use it.
+
 2005-04-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_edit_toc): Account for dynamic relocs

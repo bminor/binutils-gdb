@@ -1441,6 +1441,8 @@ extern void _bfd_elf_section_already_linked
   (bfd *, struct bfd_section *);
 extern void bfd_elf_set_group_contents
   (bfd *, asection *, void *);
+extern asection *_bfd_elf_check_kept_section
+  (asection *);
 extern void _bfd_elf_link_just_syms
   (asection *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_copy_private_header_data

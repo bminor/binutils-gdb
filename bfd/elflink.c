@@ -6700,6 +6700,26 @@ match_group_member (asection *sec, asection *group)
   return NULL;
 }
 
+/* Check if the kept section of a discarded section SEC can be used
+   to replace it. Return the replacement if it is OK. Otherwise return
+   NULL. */
+
+asection *
+_bfd_elf_check_kept_section (asection *sec)
+{
+  asection *kept;
+
+  kept = sec->kept_section;
+  if (kept != NULL)
+    {
+      if (elf_sec_group (sec) != NULL)
+	kept = match_group_member (sec, kept);
+      if (kept != NULL && sec->size != kept->size)
+	kept = NULL;
+    }
+  return kept;
+}
+
 /* Link an input file into the linker output file.  This function
    handles all the sections and relocations of the input file at once.
    This is so that we only have to read the local symbols once, and
@@ -7013,8 +7033,6 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		     discarded section.  */
 		  if ((sec = *ps) != NULL && elf_discarded_section (sec))
 		    {
-		      asection *kept;
-
 		      BFD_ASSERT (r_symndx != 0);
 		      if (action & COMPLAIN)
 			{
@@ -7035,13 +7053,12 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			 is that we warn in non-debug sections, and
 			 debug sections tend to come after other
 			 sections.  */
-		      kept = sec->kept_section;
-		      if (kept != NULL && (action & PRETEND))
+		      if (action & PRETEND)
 			{
-			  if (elf_sec_group (sec) != NULL)
-			    kept = match_group_member (sec, kept);
-			  if (kept != NULL
-			      && sec->size == kept->size)
+			  asection *kept;
+
+			  kept = _bfd_elf_check_kept_section (sec);
+			  if (kept != NULL)
 			    {
 			      *ps = kept;
 			      continue;
