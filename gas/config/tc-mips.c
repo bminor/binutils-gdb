@@ -153,7 +153,8 @@ mips_target_format ()
    pseudo-op.  We use a struct so that .set push and .set pop are more
    reliable.  */
 
-struct mips_set_options {
+struct mips_set_options
+{
   /* MIPS ISA (Instruction Set Architecture) level.  This is set to -1
      if it has not been initialized.  Changed by `.set mipsN', and the
      -mipsN command line option, and the default CPU.  */
@@ -190,7 +191,8 @@ struct mips_set_options {
    that we must set the isa field to ISA_UNKNOWN and the mips16 field to
    -1 to indicate that they have not been initialized.  */
 
-static struct mips_set_options mips_opts = {
+static struct mips_set_options mips_opts =
+{
   ISA_UNKNOWN, -1, 0, 0, 0, 0, 0, 0
 };
 
@@ -207,7 +209,7 @@ static int file_mips_isa = ISA_UNKNOWN;
 static int mips_cpu = CPU_UNKNOWN;
 
 /* The argument of the -mabi= flag.  */
-static char *mips_abi_string = 0;
+static char * mips_abi_string = 0;
 
 /* Wether we should mark the file EABI64 or EABI32.  */
 static int mips_eabi64 = 0;
@@ -289,7 +291,8 @@ static int mips_gp32 = 0;
 
 /* MIPS PIC level.  */
 
-enum mips_pic_level {
+enum mips_pic_level
+{
   /* Do not generate PIC code.  */
   NO_PIC,
 
@@ -483,7 +486,8 @@ static int prev_nop_frag_since;
    relocation.  We then sort them so that they immediately precede the
    corresponding LO relocation.  */
 
-struct mips_hi_fixup {
+struct mips_hi_fixup
+{
   /* Next HI fixup.  */
   struct mips_hi_fixup *next;
   /* This fixup.  */
@@ -499,7 +503,8 @@ static struct mips_hi_fixup *mips_hi_fixup_list;
 /* Map normal MIPS register numbers to mips16 register numbers.  */
 
 #define X ILLEGAL_REG
-static const int mips32_to_16_reg_map[] = {
+static const int mips32_to_16_reg_map[] =
+{
   X, X, 2, 3, 4, 5, 6, 7,
   X, X, X, X, X, X, X, X,
   0, 1, X, X, X, X, X, X,
@@ -509,7 +514,8 @@ static const int mips32_to_16_reg_map[] = {
 
 /* Map mips16 register numbers to normal MIPS register numbers.  */
 
-static const unsigned int mips16_to_32_reg_map[] = {
+static const unsigned int mips16_to_32_reg_map[] =
+{
   16, 17, 2, 3, 4, 5, 6, 7
 };
 
@@ -713,7 +719,8 @@ static int validate_mips_insn PARAMS ((const struct mips_opcode *));
 /* Table and functions used to map between CPU/ISA names, and
    ISA levels, and CPU numbers.  */
 
-struct mips_cpu_info {
+struct mips_cpu_info
+{
   const char *name;           /* CPU or ISA name.  */
   int is_isa;                 /* Is this an ISA?  (If 0, a CPU.) */
   int isa;                    /* ISA level.  */
@@ -742,7 +749,8 @@ static const struct mips_cpu_info *mips_cpu_info_from_cpu PARAMS ((int));
    they are not currently supported: .asm0, .endr, .lab, .repeat,
    .struct.  */
 
-static const pseudo_typeS mips_pseudo_table[] = {
+static const pseudo_typeS mips_pseudo_table[] =
+{
   /* MIPS specific pseudo-ops.  */
   {"option", s_option, 0},
   {"set", s_mipsset, 0},
@@ -787,7 +795,8 @@ static const pseudo_typeS mips_pseudo_table[] = {
   { NULL, NULL, 0 },
 };
 
-static const pseudo_typeS mips_nonecoff_pseudo_table[] = {
+static const pseudo_typeS mips_nonecoff_pseudo_table[] =
+{
   /* These pseudo-ops should be defined by the object file format.
      However, a.out doesn't support them, so we have versions here.  */
   {"aent", s_mips_ent, 1},
@@ -816,7 +825,8 @@ mips_pop_insert ()
 
 /* Symbols labelling the current insn.  */
 
-struct insn_label_list {
+struct insn_label_list
+{
   struct insn_label_list *next;
   symbolS *label;
 };
@@ -1543,7 +1553,6 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	       && insn_uses_reg (ip, ((prev_insn.insn_opcode >> OP_SH_RD)
 				      & OP_MASK_RD),
 				 MIPS_GR_REG))
-
 	{
 	  nops += 2;
 	}
@@ -6912,7 +6921,7 @@ validate_mips_insn (opc)
       case 'G':	USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
       case 'H': USE_BITS (OP_MASK_SEL,		OP_SH_SEL);	break;
       case 'I': break;
-      case 'J':       USE_BITS (OP_MASK_CODE19,       OP_SH_CODE19);  break;
+      case 'J': USE_BITS (OP_MASK_CODE19,       OP_SH_CODE19);  break;
       case 'L': break;
       case 'M':	USE_BITS (OP_MASK_CCC,		OP_SH_CCC);	break;
       case 'N':	USE_BITS (OP_MASK_BCC,		OP_SH_BCC);	break;
@@ -8461,7 +8470,8 @@ mips16_ip (str, ip)
 /* This structure holds information we know about a mips16 immediate
    argument type.  */
 
-struct mips16_immed_operand {
+struct mips16_immed_operand
+{
   /* The type code used in the argument string in the opcode table.  */
   int type;
   /* The number of bits in the short form of the opcode.  */
@@ -8819,7 +8829,8 @@ md_number_to_chars (buf, val, n)
 
 CONST char *md_shortopts = "O::g::G:";
 
-struct option md_longopts[] = {
+struct option md_longopts[] =
+{
 #define OPTION_MIPS1 (OPTION_MD_BASE + 1)
   {"mips0", no_argument, NULL, OPTION_MIPS1},
   {"mips1", no_argument, NULL, OPTION_MIPS1},
@@ -10158,7 +10169,8 @@ s_option (x)
 
 /* This structure is used to hold a stack of .set values.  */
 
-struct mips_option_stack {
+struct mips_option_stack
+{
   struct mips_option_stack *next;
   struct mips_set_options options;
 };
@@ -11908,7 +11920,8 @@ s_loc (x)
 
    Case is ignored in comparison, so put the canonical entry in the
    appropriate case but everything else in lower case to ease eye pain.  */
-static const struct mips_cpu_info mips_cpu_info_table[] = {
+static const struct mips_cpu_info mips_cpu_info_table[] =
+{
   /* MIPS1 ISA */
   { "MIPS1",          1,      ISA_MIPS1,      CPU_R3000, },
   { "mips",           1,      ISA_MIPS1,      CPU_R3000, },
@@ -11955,7 +11968,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] = {
   /* TX3900 CPU */
   { "R3900",          0,      ISA_MIPS1,      CPU_R3900, },
   { "3900",           0,      ISA_MIPS1,      CPU_R3900, },
-  { "mipstx39",               0,      ISA_MIPS1,      CPU_R3900, },
+  { "mipstx39",       0,      ISA_MIPS1,      CPU_R3900, },
 
   /* R4000 CPU */
   { "R4000",          0,      ISA_MIPS3,      CPU_R4000, },
@@ -12042,7 +12055,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] = {
 
   /* SiByte SB-1 CPU */
   { "SB-1",           0,      ISA_MIPS64,     CPU_SB1, },
-  { "sb-1250",                0,      ISA_MIPS64,     CPU_SB1, },
+  { "sb-1250",        0,      ISA_MIPS64,     CPU_SB1, },
   { "sb1",            0,      ISA_MIPS64,     CPU_SB1, },
   { "sb1250",         0,      ISA_MIPS64,     CPU_SB1, },
 
@@ -12060,7 +12073,7 @@ mips_cpu_info_from_name (name)
     if (strcasecmp (name, mips_cpu_info_table[i].name) == 0)
       return (&mips_cpu_info_table[i]);
 
-  return (NULL);
+  return NULL;
 }
 
 static const struct mips_cpu_info *
@@ -12074,7 +12087,7 @@ mips_cpu_info_from_isa (isa)
       && isa == mips_cpu_info_table[i].isa)
       return (&mips_cpu_info_table[i]);
 
-  return (NULL);
+  return NULL;
 }
 
 static const struct mips_cpu_info *
@@ -12088,5 +12101,5 @@ mips_cpu_info_from_cpu (cpu)
       && cpu == mips_cpu_info_table[i].cpu)
       return (&mips_cpu_info_table[i]);
 
-  return (NULL);
+  return NULL;
 }

@@ -3,6 +3,7 @@
 	* cgen.h: Fix formatting.
 	* input-scrub.c: Fix formatting.
 	* macro.c: Fix formatting.
+	* config/tc-mips.c: Fix formatting.
 
 Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 

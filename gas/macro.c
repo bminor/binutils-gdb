@@ -320,29 +320,29 @@ getstring (idx, in, acc)
 
 	      if (macro_alternate && in->ptr[idx] == '!')
 		{
-		  idx++;
+		  idx ++;
 
 		  sb_add_char (acc, in->ptr[idx]);
 
-		  idx++;
+		  idx ++;
 		}
 	      else if (escaped && in->ptr[idx] == tchar)
 		{
 		  sb_add_char (acc, tchar);
-		  idx++;
+		  idx ++;
 		}
 	      else
 		{
 		  if (in->ptr[idx] == tchar)
 		    {
-		      idx++;
+		      idx ++;
 
 		      if (idx >= in->len || in->ptr[idx] != tchar)
 			break;
 		    }
 
 		  sb_add_char (acc, in->ptr[idx]);
-		  idx++;
+		  idx ++;
 		}
 	    }
 	}

@@ -102,22 +102,23 @@ static line_numberT physical_input_line;
 static int logical_input_line;
 
 /* Struct used to save the state of the input handler during include files */
-struct input_save {
-  char *buffer_start;
-  char *partial_where;
-  int partial_size;
-  char save_source[AFTER_SIZE];
-  unsigned int buffer_length;
-  char *physical_input_file;
-  char *logical_input_file;
-  line_numberT physical_input_line;
-  int logical_input_line;
-  int sb_index;
-  sb from_sb;
-  int from_sb_is_expansion;	/* Should we do a conditional check? */
-  struct input_save *next_saved_file;	/* Chain of input_saves */
-  char *input_file_save;	/* Saved state of input routines */
-  char *saved_position;		/* Caller's saved position in buf */
+struct input_save
+{
+  char *              buffer_start;
+  char *              partial_where;
+  int                 partial_size;
+  char                save_source[AFTER_SIZE];
+  unsigned int        buffer_length;
+  char *              physical_input_file;
+  char *              logical_input_file;
+  line_numberT        physical_input_line;
+  int                 logical_input_line;
+  int                 sb_index;
+  sb                  from_sb;
+  int                 from_sb_is_expansion; /* Should we do a conditional check?  */
+  struct input_save * next_saved_file;	/* Chain of input_saves.  */
+  char *              input_file_save;	/* Saved state of input routines.  */
+  char *              saved_position;	/* Caller's saved position in buf.  */
 };
 
 static struct input_save *input_scrub_push PARAMS ((char *saved_position));

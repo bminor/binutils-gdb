@@ -475,6 +475,7 @@ changequote([,])dnl
       ppc-*)	bfd_gas=yes ;;
       sparc-*)	bfd_gas=yes ;;
       strongarm-*)	bfd_gas=yes ;;
+      xscale-*)	bfd_gas=yes ;;
       *-elf)	bfd_gas=yes ;;
       *-ecoff)	bfd_gas=yes ;;
       *-som)	bfd_gas=yes ;;

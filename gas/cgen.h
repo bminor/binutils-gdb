@@ -31,15 +31,16 @@ extern CGEN_CPU_DESC gas_cgen_cpu_desc;
 #endif
 
 /* Struct defining result of gas_cgen_finish_insn.  */
-typedef struct {
+typedef struct
+{
   /* frag containing the insn */
-  fragS *frag;
+  fragS * frag;
   /* Address of insn in frag.  */
-  char *addr;
+  char * addr;
   /* Number of fixups this insn has.  */
   int num_fixups;
   /* Array of fixups.  */
-  fixS *fixups[GAS_CGEN_MAX_FIXUPS];
+  fixS * fixups[GAS_CGEN_MAX_FIXUPS];
 } finished_insnS;
 
 /* Callback for operand parsing.
