@@ -95,6 +95,18 @@ else
 	true
 fi
 
+# Waiting for this to be detected by the "$instcmd $src $dsttmp" command
+# might cause directories to be created, which would be especially bad 
+# if $src (and thus $dsttmp) contains '*'.
+
+if [ -f $src -o -d $src ]
+then
+	true
+else
+	echo "install:  $src does not exist"
+	exit 1
+fi
+
 if [ x"$dst" = x ]
 then
 	echo "install:	no destination specified"
@@ -119,7 +131,6 @@ fi
 ## this sed command emulates the dirname command
 dstdir=`echo $dst | sed -e 's,[^/]*$,,;s,/$,,;s,^$,.,'`
 dsttmp=$dstdir/#inst.$$#
-trap "rm -f ${dsttmp}" 0
 
 # Make sure that the destination directory exists.
 #  this part is taken from Noah Friedman's mkinstalldirs script
@@ -170,19 +181,25 @@ fi
 
 # Move or copy the file name to the temp name
 
-$doit $instcmd $src $dsttmp
+$doit $instcmd $src $dsttmp &&
+
+trap "rm -f ${dsttmp}" 0 &&
 
 # and set any options; do chmod last to preserve setuid bits
 
-if [ x"$chowncmd" != x ]; then $doit $chowncmd $dsttmp; fi
-if [ x"$chgrpcmd" != x ]; then $doit $chgrpcmd $dsttmp; fi
-if [ x"$stripcmd" != x ]; then $doit $stripcmd $dsttmp; fi
-if [ x"$chmodcmd" != x ]; then $doit $chmodcmd $dsttmp; fi
+# If any of these fail, we abort the whole thing.  If we want to
+# ignore errors from any of these, just make sure not to ignore
+# errors from the above "$doit $instcmd $src $dsttmp" command.
+
+if [ x"$chowncmd" != x ]; then $doit $chowncmd $dsttmp; fi &&
+if [ x"$chgrpcmd" != x ]; then $doit $chgrpcmd $dsttmp; fi &&
+if [ x"$stripcmd" != x ]; then $doit $stripcmd $dsttmp; fi &&
+if [ x"$chmodcmd" != x ]; then $doit $chmodcmd $dsttmp; fi &&
 
 # Now rename the file to the real destination.
 
-$doit $rmcmd $dstdir/$dstfile
-$doit $mvcmd $dsttmp $dstdir/$dstfile
+$doit $rmcmd -f $dstdir/$dstfile &&
+$doit $mvcmd $dsttmp $dstdir/$dstfile &&
 
 
 exit 0
