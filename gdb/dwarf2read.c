@@ -2220,7 +2220,7 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 	      /* C++ static member.  */
 	      dwarf2_add_field (&fi, child_die, objfile, cu_header);
 	    }
-	  else if (child_die->tag == DW_TAG_subprogram, cu_header)
+	  else if (child_die->tag == DW_TAG_subprogram)
 	    {
 	      /* C++ member function. */
 	      process_die (child_die, objfile, cu_header);
