@@ -59,12 +59,13 @@ s390_register_u_addr (int blockend, int regnum)
   else
     {
 #ifdef GDBSERVER
-      error
+      error ("s390_register_u_addr invalid regnum %s %d regnum=%d",
+             __FILE__, (int) __LINE__, regnum);
 #else
-      internal_error
+      internal_error (__FILE__, __LINE__,
+                      "s390_register_u_addr invalid regnum regnum=%d",
+                      regnum);
 #endif
-	("s390_register_u_addr invalid regnum %s %d regnum=%d", __FILE__,
-	 (int) __LINE__, regnum);
       retval = 0;
     }
   return retval + blockend;
