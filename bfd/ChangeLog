@@ -1,19 +1,9 @@
-Fri Dec  6 22:58:48 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+Sat Dec  7 07:22:09 1991  John Gilmore  (gnu at cygnus.com)
 
-	* Makefile.in: install using INSTALL_DATA, added standards.text
-	  support.
-
-	* configure.in: mark directory as target dependent.  configure
-	  nows works in objdir always so make file existence checks
-	  against ${srcdir}.
-
-Thu Dec  5 22:46:19 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
-
-	* Makefile.in: idestdir and ddestdir go away.  Added copyrights
-	  and shift gpl to v2.  Added ChangeLog if it didn't exist. docdir
-	  and mandir now keyed off datadir by default.
+	* coffcode.h, srec.c:  Lint.
 
 Wed Dec  4 10:14:17 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
+
 	* aoutf1.h (sunos_<size>_object_p, sunos4_callback): moved the
 	computation of arch and machine type so it's worked out before
 	some_aout_object_p is called. 
