@@ -34,6 +34,8 @@ if ![file exists $objdir/$subdir/$binfile] then {
     return 0
 }
 
+gdb_exit
+gdb_start
 delete_breakpoints
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
@@ -107,7 +109,7 @@ proc if_while_breakpoint_command_test {} {
         default { fail "(timeout or eof) commands" }
     }
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while value > 0\\nset value -= 1\\nif \(value % 2\) == 1\\np/x 0xdeadbeef\\nelse\\np/x 0xfeedface\\nend\\nend\\nend\\n" ".*$prompt.*" "commands"
+    gdb_test "while value > 0\\nset value -= 1\\nif \(value % 2\) == 1\\np/x 0xdeadbeef\\nelse\\np/x 0xfeedface\\nend\\nend\\nend\\n" "" "commands"
     gdb_test "continue" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "if_while_breakpoint_command_test #1"
    gdb_test "info break" "while.*set.*if.*p/x.*else.*p/x.*end.*" "info break"
 }

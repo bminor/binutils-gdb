@@ -1,4 +1,13 @@
+Thu Jan 12 01:14:53 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* gdb.base/help.exp: Don't test "help show".
+
 Wed Jan 11 14:37:04 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* gdb.base/commands.exp: Call gdb_exit and gdb_start so that
+	"set print address" is on.
+	* gdb.base/commands.exp (if_while_breakpoint_command_test): Don't
+	pass prompt to gdb_test; gdb_test already looks for the prompt.
 
 	* gdb.base/help.exp: Replace most of docstring for "define" with ".*".
 
