@@ -10,14 +10,14 @@ OFFSET   TYPE              VALUE
 
 RELOCATION RECORDS FOR \[.ARM.exidx\]:
 OFFSET   TYPE              VALUE 
-00000000 R_ARM_REL32       .text
-00000008 R_ARM_REL32       .text
+00000000 R_ARM_PREL31      .text
+00000008 R_ARM_PREL31      .text
 0000000c R_ARM_PREL31      .ARM.extab
-00000010 R_ARM_REL32       .text
+00000010 R_ARM_PREL31      .text
 00000014 R_ARM_PREL31      .ARM.extab
-00000018 R_ARM_REL32       .text
+00000018 R_ARM_PREL31      .text
 0000001c R_ARM_PREL31      .ARM.extab
-00000020 R_ARM_REL32       .text
+00000020 R_ARM_PREL31      .text
 
 
 Contents of section .text:

@@ -14079,7 +14079,7 @@ s_arm_unwind_fnend (int ignored ATTRIBUTE_UNUSED)
 
   /* Self relative offset of the function start.  */
   fix_new (frag_now, where, 4, unwind.proc_start, 0, 1,
-	   BFD_RELOC_32);
+	   BFD_RELOC_ARM_PREL31);
 
   if (val)
     /* Inline exception table entry.  */

@@ -1,3 +1,7 @@
+2004-12-09  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/unwind.d: Expect R_ARM_PREL31 relocations.
+
 2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* gas/mips/branch-swap.d: Pass -32 to as.

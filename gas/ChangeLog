@@ -1,3 +1,8 @@
+2004-12-09  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (s_arm_unwind_fnend): Use R_ARM_PREL31 relocation
+	for function start.
+
 2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* config/tc-mips.c (append_insn): If we emit a nop during a relax
