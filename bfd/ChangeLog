@@ -1,5 +1,7 @@
 Fri May 13 10:51:21 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* bout.c (b_out_bfd_reloc_type_lookup): Handle BFD_RELOC_CTOR.
+
 	* config/mipsbelf.mt (SELECT_VECS): Add ecoff_big_vec and
 	ecoff_little_vec since Irix 5 supports ECOFF executables.
 
