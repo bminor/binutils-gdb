@@ -377,7 +377,7 @@ guess_is_rela (e_machine)
 /* Display the contents of the relocation data
    found at the specified offset.  */
 static int
-dump_relocations (file, rel_offset, rel_size, symtab, strtabm, is_rela)
+dump_relocations (file, rel_offset, rel_size, symtab, strtab, is_rela)
      FILE *                 file;
      unsigned long          rel_offset;
      unsigned long          rel_size;
