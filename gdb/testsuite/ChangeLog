@@ -1,7 +1,7 @@
 2002-03-22  Michael Snyder  <msnyder@redhat.com>
 
-	* gdb.base/default.exp: Add test for gcore.
-	* gdb.base/help.exp: Add test for gcore.
+	* gdb.base/default.exp: Add test for gcore.  Update copyright.
+	* gdb.base/help.exp: Add test for gcore.  Update copyright.
 
 2002-03-06  Fred Fish  <fnf@redhat.com>
 
