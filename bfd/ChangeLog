@@ -1,3 +1,8 @@
+Fri Jul 24 13:54:19 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* linker.c (_bfd_generic_final_link): Allocate NULL symbol before
+	actually mapping the output sections.
+
 Fri Jul 24 11:24:29 1998  Jeffrey A Law  (law@cygnus.com)
 
 start-sanitize-am33
