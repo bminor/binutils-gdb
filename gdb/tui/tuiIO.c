@@ -28,11 +28,7 @@
 #include "tuiCommand.h"
 #include "tuiWin.h"
 
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 /* The Solaris header files seem to provide no declaration for this at
    all when __STDC__ is defined.  This shouldn't conflict with
@@ -62,15 +58,7 @@ static unsigned int _tuiHandleResizeDuringIO (unsigned int);
    **              mode), calls tuiPuts_unfiltered().
  */
 void
-#ifdef __STDC__
-tuiPuts_unfiltered (
-		     const char *string,
-		     struct ui_file * stream)
-#else
-tuiPuts_unfiltered (string, stream)
-     char *string;
-     struct ui_file *stream;
-#endif
+tuiPuts_unfiltered (const char *string, struct ui_file * stream)
 {
   int len = strlen (string);
   int i, linech;
@@ -277,12 +265,7 @@ tui_tputs (str, affcnt, putfunc)
    **        Wrapper around wgetch with the window in a va_list
  */
 unsigned int
-#ifdef __STDC__
 tui_vwgetch (va_list args)
-#else
-tui_vwgetch (args)
-     va_list args;
-#endif
 {
   unsigned int ch;
   WINDOW *window;
@@ -298,12 +281,7 @@ tui_vwgetch (args)
    **   Wrapper around read() with paramets in a va_list
  */
 unsigned int
-#ifdef __STDC__
 tui_vread (va_list args)
-#else
-tui_vread (args)
-     va_list args;
-#endif
 {
   int result = 0;
   int filedes = va_arg (args, int);
@@ -320,17 +298,7 @@ tui_vread (args)
    **    Function to perform a read() catching resize events
  */
 int
-#ifdef __STDC__
-tuiRead (
-	  int filedes,
-	  char *buf,
-	  int nbytes)
-#else
-tuiRead (filedes, buf, nbytes)
-     int filedes;
-     char *buf;
-     int nbytes;
-#endif
+tuiRead (int filedes, char *buf, int nbytes)
 {
   int result = 0;
 
@@ -351,11 +319,7 @@ tuiRead (filedes, buf, nbytes)
    **                command_line_input() in top.c
  */
 unsigned int
-#ifdef __STDC__
 tuiGetc (void)
-#else
-tuiGetc ()
-#endif
 {
   unsigned int ch;
   extern char *rl_prompt;
@@ -399,11 +363,7 @@ tuiGetc ()
    utils.c */
 
 unsigned int
-#ifdef __STDC__
 tuiBufferGetc (void)
-#else
-tuiBufferGetc ()
-#endif
 {
   unsigned int ch;
   static unsigned char _ibuffer[512];
@@ -452,13 +412,7 @@ tuiBufferGetc ()
    ** tuiStartNewLines().
  */
 void
-#ifdef __STDC__
-tuiStartNewLines (
-		   int numLines)
-#else
-tuiStartNewLines (numLines)
-     int numLines;
-#endif
+tuiStartNewLines (int numLines)
 {
   if (numLines > 0)
     {
@@ -483,13 +437,7 @@ tuiStartNewLines (numLines)
    **        With numLines in a va_list
  */
 void
-#ifdef __STDC__
-tui_vStartNewLines (
-		     va_list args)
-#else
-tui_vStartNewLines (args)
-     va_list args;
-#endif
+tui_vStartNewLines (va_list args)
 {
   int numLines = va_arg (args, int);
 
@@ -511,13 +459,8 @@ tui_vStartNewLines (args)
    **    to return from getc or read.
  */
 static unsigned int
-#ifdef __STDC__
-_tuiHandleResizeDuringIO (
-			   unsigned int originalCh)	/* the char just read */
-#else
-_tuiHandleResizeDuringIO (originalCh)
-     unsigned int originalCh;
-#endif
+_tuiHandleResizeDuringIO (unsigned int originalCh)
+	/* the char just read */
 {
   if (tuiWinResized ())
     {
@@ -537,13 +480,7 @@ _tuiHandleResizeDuringIO (originalCh)
    **        Function to update the command window information.
  */
 static void
-#ifdef __STDC__
-_updateCommandInfo (
-		     int sizeOfString)
-#else
-_updateCommandInfo (sizeOfString)
-     int sizeOfString;
-#endif
+_updateCommandInfo (int sizeOfString)
 {
 
   if ((sizeOfString +
@@ -573,13 +510,7 @@ int tui_owns_terminal = 0;
  */
 
 void
-#ifdef __STDC__
-tuiTermSetup (
-	       int turn_off_echo)
-#else
-tuiTermSetup (turn_off_echo)
-     int turn_off_echo;
-#endif
+tuiTermSetup (int turn_off_echo)
 {
   char *buffer;
   int start;
@@ -668,15 +599,7 @@ tuiTermSetup (turn_off_echo)
  * way out of tuiDo, thus setting up the terminal this way for
  * debugger command I/O.  */
 void
-#ifdef __STDC__
-tuiTermUnsetup (
-		 int turn_on_echo,
-		 int to_column)
-#else
-tuiTermUnsetup (turn_on_echo, to_column)
-     int turn_on_echo;
-     int to_column;
-#endif
+tuiTermUnsetup (int turn_on_echo, int to_column)
 {
   int start;
   int end;

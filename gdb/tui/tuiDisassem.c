@@ -47,15 +47,7 @@ static struct breakpoint *_hasBreak (CORE_ADDR);
    **        Function to set the disassembly window's content.
  */
 TuiStatus
-#ifdef __STDC__
-tuiSetDisassemContent (
-			struct symtab *s,
-			Opaque startAddr)
-#else
-tuiSetDisassemContent (s, startAddr)
-     struct symtab *s;
-     Opaque startAddr;
-#endif
+tuiSetDisassemContent (struct symtab *s, Opaque startAddr)
 {
   TuiStatus ret = TUI_FAILURE;
   struct ui_file *gdb_dis_out;
@@ -149,13 +141,7 @@ extern void strcat_address_numeric (CORE_ADDR, int, char *, int);
    **        Function to display the disassembly window with disassembled code.
  */
 void
-#ifdef __STDC__
-tuiShowDisassem (
-		  Opaque startAddr)
-#else
-tuiShowDisassem (startAddr)
-     Opaque startAddr;
-#endif
+tuiShowDisassem (Opaque startAddr)
 {
   struct symtab *s = find_pc_symtab ((CORE_ADDR) startAddr);
   TuiWinInfoPtr winWithFocus = tuiWinWithFocus ();
@@ -178,13 +164,7 @@ tuiShowDisassem (startAddr)
    **        Function to display the disassembly window.
  */
 void
-#ifdef __STDC__
-tuiShowDisassemAndUpdateSource (
-				 Opaque startAddr)
-#else
-tuiShowDisassemAndUpdateSource (startAddr)
-     Opaque startAddr;
-#endif
+tuiShowDisassemAndUpdateSource (Opaque startAddr)
 {
   struct symtab_and_line sal;
 
@@ -212,13 +192,7 @@ tuiShowDisassemAndUpdateSource (startAddr)
    **        the disassembly as specified by the horizontal offset.
  */
 void
-#ifdef __STDC__
-tuiShowDisassemAsIs (
-		      Opaque addr)
-#else
-tuiShowDisassemAsIs (addr)
-     Opaque addr;
-#endif
+tuiShowDisassemAsIs (Opaque addr)
 {
   tuiAddWinToLayout (DISASSEM_WIN);
   tuiUpdateSourceWindowAsIs (disassemWin, (struct symtab *) NULL, addr, FALSE);
@@ -237,11 +211,7 @@ tuiShowDisassemAsIs (addr)
    ** tuiGetBeginAsmAddress().
  */
 Opaque
-#ifdef __STDC__
 tuiGetBeginAsmAddress (void)
-#else
-tuiGetBeginAsmAddress ()
-#endif
 {
   TuiGenWinInfoPtr locator;
   TuiLocatorElementPtr element;
@@ -272,15 +242,8 @@ tuiGetBeginAsmAddress ()
    **      Scroll the disassembly forward or backward vertically
  */
 void
-#ifdef __STDC__
-tuiVerticalDisassemScroll (
-			    TuiScrollDirection scrollDirection,
-			    int numToScroll)
-#else
-tuiVerticalDisassemScroll (scrollDirection, numToScroll)
-     TuiScrollDirection scrollDirection;
-     int numToScroll;
-#endif
+tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
+                           int numToScroll)
 {
   if (disassemWin->generic.content != (OpaquePtr) NULL)
     {
@@ -335,13 +298,7 @@ tuiVerticalDisassemScroll (scrollDirection, numToScroll)
    **      source file indicated
  */
 static struct breakpoint *
-#ifdef __STDC__
-_hasBreak (
-	    CORE_ADDR addr)
-#else
-_hasBreak (addr)
-     CORE_ADDR addr;
-#endif
+_hasBreak (CORE_ADDR addr)
 {
   struct breakpoint *bpWithBreak = (struct breakpoint *) NULL;
   struct breakpoint *bp;

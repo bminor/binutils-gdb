@@ -98,11 +98,7 @@ static void _tui_vShowRegisters_commandSupport (va_list);
    **        If there are no registers (-1) is returned.
  */
 int
-#ifdef __STDC__
 tuiLastRegsLineNo (void)
-#else
-tuiLastRegsLineNo ()
-#endif
 {
   register int numLines = (-1);
 
@@ -125,13 +121,7 @@ tuiLastRegsLineNo ()
    **        there are, -1 is returned.
  */
 int
-#ifdef __STDC__
-tuiLineFromRegElementNo (
-			  int elementNo)
-#else
-tuiLineFromRegElementNo (elementNo)
-     int elementNo;
-#endif
+tuiLineFromRegElementNo (int elementNo)
 {
   if (elementNo < dataWin->detail.dataDisplayInfo.regsContentCount)
     {
@@ -160,13 +150,7 @@ tuiLineFromRegElementNo (elementNo)
    **        past the register area (-1) is returned.
  */
 int
-#ifdef __STDC__
-tuiFirstRegElementNoInLine (
-			     int lineNo)
-#else
-tuiFirstRegElementNoInLine (lineNo)
-     int lineNo;
-#endif
+tuiFirstRegElementNoInLine (int lineNo)
 {
   if ((lineNo * dataWin->detail.dataDisplayInfo.regsColumnCount)
       <= dataWin->detail.dataDisplayInfo.regsContentCount)
@@ -184,13 +168,7 @@ tuiFirstRegElementNoInLine (lineNo)
    **        the register area (-1) is returned.
  */
 int
-#ifdef __STDC__
-tuiLastRegElementNoInLine (
-			    int lineNo)
-#else
-tuiLastRegElementNoInLine (lineNo)
-     int lineNo;
-#endif
+tuiLastRegElementNoInLine (int lineNo)
 {
   if ((lineNo * dataWin->detail.dataDisplayInfo.regsColumnCount) <=
       dataWin->detail.dataDisplayInfo.regsContentCount)
@@ -207,13 +185,7 @@ tuiLastRegElementNoInLine (lineNo)
    **        the registers.
  */
 int
-#ifdef __STDC__
-tuiCalculateRegsColumnCount (
-			      TuiRegisterDisplayType dpyType)
-#else
-tuiCalculateRegsColumnCount (dpyType)
-     TuiRegisterDisplayType dpyType;
-#endif
+tuiCalculateRegsColumnCount (TuiRegisterDisplayType dpyType)
 {
   int colCount, colWidth;
 
@@ -239,13 +211,7 @@ tuiCalculateRegsColumnCount (dpyType)
    **        cleared.  What registers are displayed is dependent upon dpyType.
  */
 void
-#ifdef __STDC__
-tuiShowRegisters (
-		   TuiRegisterDisplayType dpyType)
-#else
-tuiShowRegisters (dpyType)
-     TuiRegisterDisplayType dpyType;
-#endif
+tuiShowRegisters (TuiRegisterDisplayType dpyType)
 {
   TuiStatus ret = TUI_FAILURE;
   int refreshValuesOnly = FALSE;
@@ -318,13 +284,7 @@ tuiShowRegisters (dpyType)
    **        the end of the registers is done here.
  */
 void
-#ifdef __STDC__
-tuiDisplayRegistersFrom (
-			  int startElementNo)
-#else
-tuiDisplayRegistersFrom (startElementNo)
-     int startElementNo;
-#endif
+tuiDisplayRegistersFrom (int startElementNo)
 {
   if (dataWin->detail.dataDisplayInfo.regsContent != (TuiWinContent) NULL &&
       dataWin->detail.dataDisplayInfo.regsContentCount > 0)
@@ -410,15 +370,7 @@ tuiDisplayRegistersFrom (startElementNo)
    **        of the register display.
  */
 void
-#ifdef __STDC__
-tuiDisplayRegElementAtLine (
-			     int startElementNo,
-			     int startLineNo)
-#else
-tuiDisplayRegElementAtLine (startElementNo, startLineNo)
-     int startElementNo;
-     int startLineNo;
-#endif
+tuiDisplayRegElementAtLine (int startElementNo, int startLineNo)
 {
   if (dataWin->detail.dataDisplayInfo.regsContent != (TuiWinContent) NULL &&
       dataWin->detail.dataDisplayInfo.regsContentCount > 0)
@@ -457,15 +409,7 @@ tuiDisplayRegElementAtLine (startElementNo, startLineNo)
    **        actually started from.  If nothing is displayed (-1) is returned.
  */
 int
-#ifdef __STDC__
-tuiDisplayRegistersFromLine (
-			      int lineNo,
-			      int forceDisplay)
-#else
-tuiDisplayRegistersFromLine (lineNo, forceDisplay)
-     int lineNo;
-     int forceDisplay;
-#endif
+tuiDisplayRegistersFromLine (int lineNo, int forceDisplay)
 {
   int elementNo;
 
@@ -512,13 +456,7 @@ tuiDisplayRegistersFromLine (lineNo, forceDisplay)
    **        they are updated with the new value and highlighted.
  */
 void
-#ifdef __STDC__
-tuiCheckRegisterValues (
-			 struct frame_info *frame)
-#else
-tuiCheckRegisterValues (frame)
-     struct frame_info *frame;
-#endif
+tuiCheckRegisterValues (struct frame_info *frame)
 {
   if (m_winPtrNotNull (dataWin) && dataWin->generic.isVisible)
     {
@@ -576,11 +514,7 @@ tuiCheckRegisterValues (frame)
    ** tuiToggleFloatRegs().
  */
 void
-#ifdef __STDC__
 tuiToggleFloatRegs (void)
-#else
-tuiToggleFloatRegs ()
-#endif
 {
   TuiLayoutDefPtr layoutDef = tuiLayoutDef ();
 
@@ -637,13 +571,7 @@ registers.\n",
    **        Return the register name.
  */
 static char *
-#ifdef __STDC__
-_tuiRegisterName (
-		   int regNum)
-#else
-_tuiRegisterName (regNum)
-     int regNum;
-#endif
+_tuiRegisterName (int regNum)
 {
   if (reg_names[regNum] != (char *) NULL && *(reg_names[regNum]) != (char) 0)
     return reg_names[regNum];
@@ -658,21 +586,9 @@ _tuiRegisterName (regNum)
    **        suitable for printing or display
  */
 static void
-#ifdef __STDC__
-_tuiRegisterFormat (
-		     char *buf,
-		     int bufLen,
-		     int regNum,
-		     TuiDataElementPtr dataElement,
-		     enum precision_type precision)
-#else
-_tuiRegisterFormat (buf, bufLen, regNum, dataElement, precision)
-     char *buf;
-     int bufLen;
-     int regNum;
-     TuiDataElementPtr dataElement;
-     enum precision_type precision;
-#endif
+_tuiRegisterFormat (char *buf, int bufLen, int regNum,
+                    TuiDataElementPtr dataElement,
+                    enum precision_type precision)
 {
   char tmpBuf[15];
   char *fmt;
@@ -693,13 +609,7 @@ _tuiRegisterFormat (buf, bufLen, regNum, dataElement, precision)
    **      Set the content of the data window to consist of the general registers.
  */
 static TuiStatus
-#ifdef __STDC__
-_tuiSetGeneralRegsContent (
-			    int refreshValuesOnly)
-#else
-_tuiSetGeneralRegsContent (refreshValuesOnly)
-     int refreshValuesOnly;
-#endif
+_tuiSetGeneralRegsContent (int refreshValuesOnly)
 {
   return (_tuiSetRegsContent (0,
 			      NUM_GENERAL_REGS - 1,
@@ -716,13 +626,7 @@ _tuiSetGeneralRegsContent (refreshValuesOnly)
    **      Set the content of the data window to consist of the special registers.
  */
 static TuiStatus
-#ifdef __STDC__
-_tuiSetSpecialRegsContent (
-			    int refreshValuesOnly)
-#else
-_tuiSetSpecialRegsContent (refreshValuesOnly)
-     int refreshValuesOnly;
-#endif
+_tuiSetSpecialRegsContent (int refreshValuesOnly)
 {
   TuiStatus ret = TUI_FAILURE;
   int i, endRegNum;
@@ -749,13 +653,7 @@ _tuiSetSpecialRegsContent (refreshValuesOnly)
    **      Set the content of the data window to consist of the special registers.
  */
 static TuiStatus
-#ifdef __STDC__
-_tuiSetGeneralAndSpecialRegsContent (
-				      int refreshValuesOnly)
-#else
-_tuiSetGeneralAndSpecialRegsContent (refreshValuesOnly)
-     int refreshValuesOnly;
-#endif
+_tuiSetGeneralAndSpecialRegsContent (int refreshValuesOnly)
 {
   TuiStatus ret = TUI_FAILURE;
   int i, endRegNum = (-1);
@@ -778,15 +676,8 @@ _tuiSetGeneralAndSpecialRegsContent (refreshValuesOnly)
    **        Set the content of the data window to consist of the float registers.
  */
 static TuiStatus
-#ifdef __STDC__
-_tuiSetFloatRegsContent (
-			  TuiRegisterDisplayType dpyType,
-			  int refreshValuesOnly)
-#else
-_tuiSetFloatRegsContent (dpyType, refreshValuesOnly)
-     TuiRegisterDisplayType dpyType;
-     int refreshValuesOnly;
-#endif
+_tuiSetFloatRegsContent (TuiRegisterDisplayType dpyType,
+                         int refreshValuesOnly)
 {
   TuiStatus ret = TUI_FAILURE;
   int i, startRegNum;
@@ -814,17 +705,9 @@ _tuiSetFloatRegsContent (dpyType, refreshValuesOnly)
    **        If TRUE, newValue is filled in with the new value.
  */
 static int
-#ifdef __STDC__
-_tuiRegValueHasChanged (
-			 TuiDataElementPtr dataElement,
-			 struct frame_info *frame,
-			 char *newValue)
-#else
-_tuiRegValueHasChanged (dataElement, frame, newValue)
-     TuiDataElementPtr dataElement;
-     struct frame_info *frame;
-     char *newValue;
-#endif
+_tuiRegValueHasChanged (TuiDataElementPtr dataElement,
+                        struct frame_info *frame,
+                        char *newValue)
 {
   int hasChanged = FALSE;
 
@@ -856,17 +739,8 @@ _tuiRegValueHasChanged (dataElement, frame, newValue)
    **        Get the register raw value.  The raw value is returned in regValue.
  */
 static TuiStatus
-#ifdef __STDC__
-_tuiGetRegisterRawValue (
-			  int regNum,
-			  char *regValue,
-			  struct frame_info *frame)
-#else
-_tuiGetRegisterRawValue (regNum, regValue, frame)
-     int regNum;
-     char *regValue;
-     struct frame_info *frame;
-#endif
+_tuiGetRegisterRawValue (int regNum, char *regValue,
+                         struct frame_info *frame)
 {
   TuiStatus ret = TUI_FAILURE;
 
@@ -887,19 +761,9 @@ _tuiGetRegisterRawValue (regNum, regValue, frame)
    **       the register value.
  */
 static void
-#ifdef __STDC__
-_tuiSetRegisterElement (
-			 int regNum,
-			 struct frame_info *frame,
-			 TuiDataElementPtr dataElement,
-			 int refreshValueOnly)
-#else
-_tuiSetRegisterElement (regNum, frame, dataElement, refreshValueOnly)
-     int regNum;
-     struct frame_info *frame;
-     TuiDataElementPtr dataElement;
-     int refreshValueOnly;
-#endif
+_tuiSetRegisterElement (int regNum, struct frame_info *frame,
+                        TuiDataElementPtr dataElement,
+                        int refreshValueOnly)
 {
   if (dataElement != (TuiDataElementPtr) NULL)
     {
@@ -926,21 +790,10 @@ _tuiSetRegisterElement (regNum, frame, dataElement, refreshValueOnly)
    **        refreshValuesOnly is TRUE, startRegNum and endRegNum are ignored.
  */
 static TuiStatus
-#ifdef __STDC__
-_tuiSetRegsContent (
-		     int startRegNum,
-		     int endRegNum,
-		     struct frame_info *frame,
-		     TuiRegisterDisplayType dpyType,
-		     int refreshValuesOnly)
-#else
-_tuiSetRegsContent (startRegNum, endRegNum, frame, dpyType, refreshValuesOnly)
-     int startRegNum;
-     int endRegNum;
-     struct frame_info *frame;
-     TuiRegisterDisplayType dpyType;
-     int refreshValuesOnly;
-#endif
+_tuiSetRegsContent (int startRegNum, int endRegNum,
+                    struct frame_info *frame,
+                    TuiRegisterDisplayType dpyType,
+                    int refreshValuesOnly)
 {
   TuiStatus ret = TUI_FAILURE;
   int numRegs = endRegNum - startRegNum + 1;
@@ -1014,17 +867,9 @@ _tuiSetRegsContent (startRegNum, endRegNum, frame, dpyType, refreshValuesOnly)
    **        than the value will be displayed in reverse video
  */
 static void
-#ifdef __STDC__
-_tuiDisplayRegister (
-		      int regNum,
-		      TuiGenWinInfoPtr winInfo,		/* the data item window */
-		      enum precision_type precision)
-#else
-_tuiDisplayRegister (regNum, winInfo, precision)
-     int regNum;
-     TuiGenWinInfoPtr winInfo;	/* the data item window */
-     enum precision_type precision;
-#endif
+_tuiDisplayRegister (int regNum,
+                     TuiGenWinInfoPtr winInfo,		/* the data item window */
+                     enum precision_type precision)
 {
   if (winInfo->handle != (WINDOW *) NULL)
     {
@@ -1076,13 +921,7 @@ _tuiDisplayRegister (regNum, winInfo, precision)
 
 
 static void
-#ifdef __STDC__
-_tui_vShowRegisters_commandSupport (
-				     va_list args)
-#else
-_tui_vShowRegisters_commandSupport (args)
-     va_list args;
-#endif
+_tui_vShowRegisters_commandSupport (va_list args)
 {
   TuiRegisterDisplayType dpyType = va_arg (args, TuiRegisterDisplayType);
 
@@ -1099,15 +938,7 @@ _tui_vShowRegisters_commandSupport (args)
 
 
 static void
-#ifdef __STDC__
-_tuiShowFloat_command (
-			char *arg,
-			int fromTTY)
-#else
-_tuiShowFloat_command (arg, fromTTY)
-     char *arg;
-     int fromTTY;
-#endif
+_tuiShowFloat_command (char *arg, int fromTTY)
 {
   if (m_winPtrIsNull (dataWin) || !dataWin->generic.isVisible ||
       (dataWin->detail.dataDisplayInfo.regsDisplayType != TUI_SFLOAT_REGS &&
@@ -1120,15 +951,7 @@ _tuiShowFloat_command (arg, fromTTY)
 
 
 static void
-#ifdef __STDC__
-_tuiShowGeneral_command (
-			  char *arg,
-			  int fromTTY)
-#else
-_tuiShowGeneral_command (arg, fromTTY)
-     char *arg;
-     int fromTTY;
-#endif
+_tuiShowGeneral_command (char *arg, int fromTTY)
 {
   tuiDo ((TuiOpaqueFuncPtr) _tui_vShowRegisters_commandSupport,
 	 TUI_GENERAL_REGS);
@@ -1138,15 +961,7 @@ _tuiShowGeneral_command (arg, fromTTY)
 
 
 static void
-#ifdef __STDC__
-_tuiShowSpecial_command (
-			  char *arg,
-			  int fromTTY)
-#else
-_tuiShowSpecial_command (arg, fromTTY)
-     char *arg;
-     int fromTTY;
-#endif
+_tuiShowSpecial_command (char *arg, int fromTTY)
 {
   tuiDo ((TuiOpaqueFuncPtr) _tui_vShowRegisters_commandSupport,
 	 TUI_SPECIAL_REGS);
@@ -1156,15 +971,7 @@ _tuiShowSpecial_command (arg, fromTTY)
 
 
 static void
-#ifdef __STDC__
-_tuiToggleFloatRegs_command (
-			      char *arg,
-			      int fromTTY)
-#else
-_tuiToggleFloatRegs_command (arg, fromTTY)
-     char *arg;
-     int fromTTY;
-#endif
+_tuiToggleFloatRegs_command (char *arg, int fromTTY)
 {
   if (m_winPtrNotNull (dataWin) && dataWin->generic.isVisible)
     tuiDo ((TuiOpaqueFuncPtr) tuiToggleFloatRegs);
@@ -1184,15 +991,7 @@ _tuiToggleFloatRegs_command (arg, fromTTY)
 
 
 static void
-#ifdef __STDC__
-_tuiScrollRegsForward_command (
-				char *arg,
-				int fromTTY)
-#else
-_tuiScrollRegsForward_command (arg, fromTTY)
-     char *arg;
-     int fromTTY;
-#endif
+_tuiScrollRegsForward_command (char *arg, int fromTTY)
 {
   tuiDo ((TuiOpaqueFuncPtr) tui_vScroll, FORWARD_SCROLL, dataWin, 1);
 
@@ -1201,15 +1000,7 @@ _tuiScrollRegsForward_command (arg, fromTTY)
 
 
 static void
-#ifdef __STDC__
-_tuiScrollRegsBackward_command (
-				 char *arg,
-				 int fromTTY)
-#else
-_tuiScrollRegsBackward_command (arg, fromTTY)
-     char *arg;
-     int fromTTY;
-#endif
+_tuiScrollRegsBackward_command (char *arg, int fromTTY)
 {
   tuiDo ((TuiOpaqueFuncPtr) tui_vScroll, BACKWARD_SCROLL, dataWin, 1);
 

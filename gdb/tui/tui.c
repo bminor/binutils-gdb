@@ -75,12 +75,7 @@ static Opaque _tui_vDo (TuiOpaqueFuncPtr, va_list);
    ** tuiInit().
  */
 void
-#ifdef __STDC__
 tuiInit (char *argv0)
-#else
-tuiInit (argv0)
-     char *argv0;
-#endif
 {
   extern void init_page_info ();
 extern void initialize_tui_files (void);
@@ -113,11 +108,7 @@ extern void initialize_tui_files (void);
    ** tuiInitWindows().
  */
 void
-#ifdef __STDC__
 tuiInitWindows (void)
-#else
-tuiInitWindows ()
-#endif
 {
   TuiWinType type;
 
@@ -138,11 +129,7 @@ tuiInitWindows ()
    **        Kill signal handler and cleanup termination method
  */
 void
-#ifdef __STDC__
 tuiResetScreen (void)
-#else
-tuiResetScreen ()
-#endif
 {
   TuiWinType type = SRC_WIN;
 
@@ -170,11 +157,7 @@ tuiResetScreen ()
    **        Kill signal handler and cleanup termination method
  */
 void
-#ifdef __STDC__
 tuiCleanUp (void)
-#else
-tuiCleanUp ()
-#endif
 {
   char *buffer;
   extern char *term_cursor_move;
@@ -196,15 +179,7 @@ tuiCleanUp ()
    ** tuiError().
  */
 void
-#ifdef __STDC__
-tuiError (
-	   char *string,
-	   int exitGdb)
-#else
-tuiError (string, exitGdb)
-     char *string;
-     int exitGdb;
-#endif
+tuiError (char *string, int exitGdb)
 {
   puts_unfiltered (string);
   if (exitGdb)
@@ -222,13 +197,7 @@ tuiError (string, exitGdb)
    **        tuiError with args in a va_list.
  */
 void
-#ifdef __STDC__
-tui_vError (
-	     va_list args)
-#else
-tui_vError (args)
-     va_list args;
-#endif
+tui_vError (va_list args)
 {
   char *string;
   int exitGdb;
@@ -247,13 +216,7 @@ tui_vError (args)
    **    Wrapper on top of free() to ensure that input address is greater than 0x0
  */
 void
-#ifdef __STDC__
-tuiFree (
-	  char *ptr)
-#else
-tuiFree (ptr)
-     char *ptr;
-#endif
+tuiFree (char *ptr)
 {
   if (ptr != (char *) NULL)
     {
@@ -270,15 +233,7 @@ tuiFree (ptr)
    **        low address input.
  */
 Opaque
-#ifdef __STDC__
-tuiGetLowDisassemblyAddress (
-			      Opaque low,
-			      Opaque pc)
-#else
-tuiGetLowDisassemblyAddress (low, pc)
-     Opaque low;
-     Opaque pc;
-#endif
+tuiGetLowDisassemblyAddress (Opaque low, Opaque pc)
 {
   int line;
   Opaque newLow;
@@ -307,13 +262,7 @@ tuiGetLowDisassemblyAddress (low, pc)
    **        disassembly window with args in a va_list.
  */
 Opaque
-#ifdef __STDC__
-tui_vGetLowDisassemblyAddress (
-				va_list args)
-#else
-tui_vGetLowDisassemblyAddress (args)
-     va_list args;
-#endif
+tui_vGetLowDisassemblyAddress (va_list args)
 {
   int line;
   Opaque newLow;
@@ -344,14 +293,7 @@ tui_vGetLowDisassemblyAddress (args)
    **       be replaced by judicious use of QUIT.
  */
 Opaque
-#ifdef __STDC__
-tuiDo (
-	TuiOpaqueFuncPtr func,...)
-#else
-tuiDo (func, va_alist)
-     TuiOpaqueFuncPtr func;
-     va_dcl
-#endif
+tuiDo (TuiOpaqueFuncPtr func, ...)
 {
   extern int terminal_is_ours;
 
@@ -367,11 +309,7 @@ tuiDo (func, va_alist)
     {
       va_list args;
 
-#ifdef __STDC__
       va_start (args, func);
-#else
-      va_start (args);
-#endif
       ret = _tui_vDo (func, args);
       va_end (args);
     }
@@ -398,14 +336,7 @@ tuiDo (func, va_alist)
    **
  */
 Opaque
-#ifdef __STDC__
-tuiDoAndReturnToTop (
-		      TuiOpaqueFuncPtr func,...)
-#else
-tuiDoAndReturnToTop (func, va_alist)
-     TuiOpaqueFuncPtr func;
-     va_dcl
-#endif
+tuiDoAndReturnToTop (TuiOpaqueFuncPtr func, ...)
 {
   extern int terminal_is_ours;
 
@@ -421,11 +352,7 @@ tuiDoAndReturnToTop (func, va_alist)
     {
       va_list args;
 
-#ifdef __STDC__
       va_start (args, func);
-#else
-      va_start (args);
-#endif
       ret = _tui_vDo (func, args);
 
       /* force a return to the top level */
@@ -437,13 +364,7 @@ tuiDoAndReturnToTop (func, va_alist)
 
 
 void
-#ifdef __STDC__
-tui_vSelectSourceSymtab (
-			  va_list args)
-#else
-tui_vSelectSourceSymtab (args)
-     va_list args;
-#endif
+tui_vSelectSourceSymtab (va_list args)
 {
   struct symtab *s = va_arg (args, struct symtab *);
 
@@ -499,15 +420,7 @@ Usage:\ttoggle $fregs\n\ttoggle breakpoints";
    **       be replaced by judicious use of QUIT.
  */
 Opaque
-#ifdef __STDC__
-va_catch_errors (
-		  TuiOpaqueFuncPtr func,
-		  va_list args)
-#else
-va_catch_errors (func, args)
-     TuiOpaqueFuncPtr func;
-     va_list args;
-#endif
+va_catch_errors (TuiOpaqueFuncPtr func, va_list args)
 {
   Opaque ret = (Opaque) NULL;
 
@@ -557,32 +470,14 @@ va_catch_errors (func, args)
    **        argument list as well.
  */
 Opaque
-#ifdef __STDC__
-vcatch_errors (
-		OpaqueFuncPtr func,...)
-#else
-vcatch_errors (va_alist)
-     va_dcl
-/*
-   vcatch_errors(func, va_alist)
-   OpaqueFuncPtr    func;
-   va_dcl
- */
-#endif
+vcatch_errors (OpaqueFuncPtr func, ...)
 {
   Opaque ret = (Opaque) NULL;
   va_list args;
-#ifdef __STDC__
   va_start (args, func);
 /*
    va_arg(args, OpaqueFuncPtr);
  */
-#else
-  OpaqueFuncPtr func;
-
-  va_start (args);
-  func = va_arg (args, OpaqueFuncPtr);
-#endif
   ret = va_catch_errors (func, args);
   va_end (args);
 
@@ -591,17 +486,7 @@ vcatch_errors (va_alist)
 
 
 void
-#ifdef __STDC__
-strcat_to_buf (
-		char *buf,
-		int buflen,
-		char *itemToAdd)
-#else
-strcat_to_buf (buf, buflen, itemToAdd)
-     char *buf;
-     int buflen;
-     char *itemToAdd;
-#endif
+strcat_to_buf (char *buf, int buflen, char *itemToAdd)
 {
   if (itemToAdd != (char *) NULL && buf != (char *) NULL)
     {
@@ -616,31 +501,12 @@ strcat_to_buf (buf, buflen, itemToAdd)
 
 /* VARARGS */
 void
-#ifdef ANSI_PROTOTYPES
-strcat_to_buf_with_fmt (
-			 char *buf,
-			 int bufLen,
-			 char *format,...)
-#else
-strcat_to_buf_with_fmt (va_alist)
-     va_dcl
-#endif
+strcat_to_buf_with_fmt (char *buf, int bufLen, char *format, ...)
 {
   char *linebuffer;
   struct cleanup *old_cleanups;
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, format);
-#else
-  char *buf;
-  int bufLen;
-  char *format;
-
-  va_start (args);
-  buf = va_arg (args, char *);
-  bufLen = va_arg (args, int);
-  format = va_arg (args, char *);
-#endif
   vasprintf (&linebuffer, format, args);
   old_cleanups = make_cleanup (xfree, linebuffer);
   strcat_to_buf (buf, bufLen, linebuffer);
@@ -673,15 +539,7 @@ strcat_to_buf_with_fmt (va_alist)
    **       be replaced by judicious use of QUIT.
  */
 static Opaque
-#ifdef __STDC__
-_tui_vDo (
-	   TuiOpaqueFuncPtr func,
-	   va_list args)
-#else
-_tui_vDo (func, args)
-     TuiOpaqueFuncPtr func;
-     va_list args;
-#endif
+_tui_vDo (TuiOpaqueFuncPtr func, va_list args)
 {
   extern int terminal_is_ours;
 
@@ -712,15 +570,7 @@ _tui_vDo (func, args)
 
 
 static void
-#ifdef __STDC__
-_toggle_command (
-		  char *arg,
-		  int fromTTY)
-#else
-_toggle_command (arg, fromTTY)
-     char *arg;
-     int fromTTY;
-#endif
+_toggle_command (char *arg, int fromTTY)
 {
   printf_filtered ("Specify feature to toggle.\n%s\n",
 		   (tui_version) ? TUI_TOGGLE_USAGE : TOGGLE_USAGE);
@@ -733,13 +583,7 @@ _toggle_command (arg, fromTTY)
    ** _tui_vToggle_command().
  */
 static void
-#ifdef __STDC__
-_tui_vToggle_command (
-		       va_list args)
-#else
-_tui_vToggle_command (args)
-     va_list args;
-#endif
+_tui_vToggle_command (va_list args)
 {
   char *arg;
   int fromTTY;
@@ -771,11 +615,7 @@ _tui_vToggle_command (args)
 
 
 static void
-#ifdef __STDC__
 _tuiReset (void)
-#else
-_tuiReset ()
-#endif
 {
   struct termio mode;
 

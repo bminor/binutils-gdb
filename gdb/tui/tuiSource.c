@@ -65,17 +65,7 @@ static struct breakpoint *_hasBreak (char *, int);
    **    Function to display source in the source window.
  */
 TuiStatus
-#ifdef __STDC__
-tuiSetSourceContent (
-		      struct symtab *s,
-		      int lineNo,
-		      int noerror)
-#else
-tuiSetSourceContent (s, lineNo, noerror)
-     struct symtab *s;
-     int lineNo;
-     int noerror;
-#endif
+tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
 {
   TuiStatus ret = TUI_FAILURE;
 
@@ -269,15 +259,7 @@ tuiSetSourceContent (s, lineNo, noerror)
    cannot be accessed */
 
 void
-#ifdef __STDC__
-tuiSetSourceContentNil (
-			 TuiWinInfoPtr winInfo,
-			 char *warning_string)
-#else
-tuiSetSourceContentNil (winInfo, warning_string)
-     TuiWinInfoPtr winInfo;
-     char *warning_string;
-#endif
+tuiSetSourceContentNil (TuiWinInfoPtr winInfo, char *warning_string)
 {
   int lineWidth;
   int nLines;
@@ -350,17 +332,7 @@ tuiSetSourceContentNil (winInfo, warning_string)
    **        initializes the horizontal scroll to 0.
  */
 void
-#ifdef __STDC__
-tuiShowSource (
-		struct symtab *s,
-		Opaque line,
-		int noerror)
-#else
-tuiShowSource (s, line, noerror)
-     struct symtab *s;
-     Opaque line;
-     int noerror;
-#endif
+tuiShowSource (struct symtab *s, Opaque line, int noerror)
 {
   srcWin->detail.sourceInfo.horizontalOffset = 0;
   m_tuiShowSourceAsIs (s, line, noerror);
@@ -374,13 +346,7 @@ tuiShowSource (s, line, noerror)
    **        Answer whether the source is currently displayed in the source window.
  */
 int
-#ifdef __STDC__
-tuiSourceIsDisplayed (
-		       char *fname)
-#else
-tuiSourceIsDisplayed (fname)
-     char *fname;
-#endif
+tuiSourceIsDisplayed (char *fname)
 {
   return (srcWin->generic.contentInUse &&
 	  (strcmp (((TuiWinElementPtr) (locatorWinInfoPtr ())->
@@ -393,15 +359,7 @@ tuiSourceIsDisplayed (fname)
    **      Scroll the source forward or backward vertically
  */
 void
-#ifdef __STDC__
-tuiVerticalSourceScroll (
-			  TuiScrollDirection scrollDirection,
-			  int numToScroll)
-#else
-tuiVerticalSourceScroll (scrollDirection, numToScroll)
-     TuiScrollDirection scrollDirection;
-     int numToScroll;
-#endif
+tuiVerticalSourceScroll (TuiScrollDirection scrollDirection, int numToScroll)
 {
   if (srcWin->generic.content != (OpaquePtr) NULL)
     {
@@ -448,15 +406,7 @@ tuiVerticalSourceScroll (scrollDirection, numToScroll)
    **        the source file indicated
  */
 static struct breakpoint *
-#ifdef __STDC__
-_hasBreak (
-	    char *sourceFileName,
-	    int lineNo)
-#else
-_hasBreak (sourceFileName, lineNo)
-     char *sourceFileName;
-     int lineNo;
-#endif
+_hasBreak (char *sourceFileName, int lineNo)
 {
   struct breakpoint *bpWithBreak = (struct breakpoint *) NULL;
   struct breakpoint *bp;

@@ -39,13 +39,7 @@ static void _winResize (void);
    **        Refresh the window
  */
 void
-#ifdef __STDC__
-tuiRefreshWin (
-		TuiGenWinInfoPtr winInfo)
-#else
-tuiRefreshWin (winInfo)
-     TuiGenWinInfoPtr winInfo;
-#endif
+tuiRefreshWin (TuiGenWinInfoPtr winInfo)
 {
   if (winInfo->type == DATA_WIN && winInfo->contentSize > 0)
     {
@@ -81,13 +75,7 @@ tuiRefreshWin (winInfo)
    **        Function to delete the curses window, checking for null
  */
 void
-#ifdef __STDC__
-tuiDelwin (
-	    WINDOW * window)
-#else
-tuiDelwin (window)
-     WINDOW *window;
-#endif
+tuiDelwin (WINDOW * window)
 {
   if (window != (WINDOW *) NULL)
     delwin (window);
@@ -100,15 +88,7 @@ tuiDelwin (window)
    ** boxWin().
  */
 void
-#ifdef __STDC__
-boxWin (
-	 TuiGenWinInfoPtr winInfo,
-	 int highlightFlag)
-#else
-boxWin (winInfo, highlightFlag)
-     TuiGenWinInfoPtr winInfo;
-     int highlightFlag;
-#endif
+boxWin (TuiGenWinInfoPtr winInfo, int highlightFlag)
 {
   if (m_genWinPtrNotNull (winInfo) && winInfo->handle != (WINDOW *) NULL)
     {
@@ -130,13 +110,7 @@ boxWin (winInfo, highlightFlag)
    ** unhighlightWin().
  */
 void
-#ifdef __STDC__
-unhighlightWin (
-		 TuiWinInfoPtr winInfo)
-#else
-unhighlightWin (winInfo)
-     TuiWinInfoPtr winInfo;
-#endif
+unhighlightWin (TuiWinInfoPtr winInfo)
 {
   if (m_winPtrNotNull (winInfo) && winInfo->generic.handle != (WINDOW *) NULL)
     {
@@ -151,13 +125,7 @@ unhighlightWin (winInfo)
    ** highlightWin().
  */
 void
-#ifdef __STDC__
-highlightWin (
-	       TuiWinInfoPtr winInfo)
-#else
-highlightWin (winInfo)
-     TuiWinInfoPtr winInfo;
-#endif
+highlightWin (TuiWinInfoPtr winInfo)
 {
   if (m_winPtrNotNull (winInfo) &&
       winInfo->canHighlight && winInfo->generic.handle != (WINDOW *) NULL)
@@ -173,13 +141,7 @@ highlightWin (winInfo)
    ** checkAndDisplayHighlightIfNecessay
  */
 void
-#ifdef __STDC__
-checkAndDisplayHighlightIfNeeded (
-				   TuiWinInfoPtr winInfo)
-#else
-checkAndDisplayHighlightIfNeeded (winInfo)
-     TuiWinInfoPtr winInfo;
-#endif
+checkAndDisplayHighlightIfNeeded (TuiWinInfoPtr winInfo)
 {
   if (m_winPtrNotNull (winInfo) && winInfo->generic.type != CMD_WIN)
     {
@@ -197,15 +159,7 @@ checkAndDisplayHighlightIfNeeded (winInfo)
    ** makeWindow().
  */
 void
-#ifdef __STDC__
-makeWindow (
-	     TuiGenWinInfoPtr winInfo,
-	     int boxIt)
-#else
-makeWindow (winInfo, boxIt)
-     TuiGenWinInfoPtr winInfo;
-     int boxIt;
-#endif
+makeWindow (TuiGenWinInfoPtr winInfo, int boxIt)
 {
   WINDOW *handle;
 
@@ -242,13 +196,7 @@ makeWindow (winInfo, boxIt)
    **        Clear the window of all contents without calling wclear.
  */
 void
-#ifdef __STDC__
-tuiClearWin (
-	      TuiGenWinInfoPtr winInfo)
-#else
-tuiClearWin (winInfo)
-     TuiGenWinInfoPtr winInfo;
-#endif
+tuiClearWin (TuiGenWinInfoPtr winInfo)
 {
   if (m_genWinPtrNotNull (winInfo) && winInfo->handle != (WINDOW *) NULL)
     {
@@ -272,15 +220,7 @@ tuiClearWin (winInfo)
    **        and create it again when making it visible.
  */
 void
-#ifdef __STDC__
-makeVisible (
-	      TuiGenWinInfoPtr winInfo,
-	      int visible)
-#else
-makeVisible (winInfo, visible)
-     TuiGenWinInfoPtr winInfo;
-     int visible;
-#endif
+makeVisible (TuiGenWinInfoPtr winInfo, int visible)
 {
   /* Don't tear down/recreate command window */
   if (winInfo->type == CMD_WIN)
@@ -315,13 +255,7 @@ makeVisible (winInfo, visible)
    **        Makes all windows invisible (except the command and locator windows)
  */
 void
-#ifdef __STDC__
-makeAllVisible (
-		 int visible)
-#else
-makeAllVisible (visible)
-     int visible;
-#endif
+makeAllVisible (int visible)
 {
   int i;
 
@@ -345,15 +279,7 @@ makeAllVisible (visible)
    ** scrollWinForward
  */
 void
-#ifdef __STDC__
-scrollWinForward (
-		   TuiGenWinInfoPtr winInfo,
-		   int numLines)
-#else
-scrollWinForward (winInfo, numLines)
-     TuiGenWinInfoPtr winInfo;
-     int numLines;
-#endif
+scrollWinForward (TuiGenWinInfoPtr winInfo, int numLines)
 {
   if (winInfo->content != (OpaquePtr) NULL &&
       winInfo->lastVisibleLine < winInfo->contentSize - 1)
@@ -395,15 +321,7 @@ scrollWinForward (winInfo, numLines)
    ** scrollWinBackward
  */
 void
-#ifdef __STDC__
-scrollWinBackward (
-		    TuiGenWinInfoPtr winInfo,
-		    int numLines)
-#else
-scrollWinBackward (winInfo, numLines)
-     TuiGenWinInfoPtr winInfo;
-     int numLines;
-#endif
+scrollWinBackward (TuiGenWinInfoPtr winInfo, int numLines)
 {
   if (winInfo->content != (OpaquePtr) NULL &&
       (winInfo->lastVisibleLine - winInfo->viewportHeight) > 0)
@@ -445,13 +363,7 @@ scrollWinBackward (winInfo, numLines)
    **        Function to refresh all the windows currently displayed
  */
 void
-#ifdef __STDC__
-refreshAll (
-	     TuiWinInfoPtr * list)
-#else
-refreshAll (list)
-     TuiWinInfoPtr *list;
-#endif
+refreshAll (TuiWinInfoPtr * list)
 {
   TuiWinType type;
   TuiGenWinInfoPtr locator = locatorWinInfoPtr ();

@@ -1,5 +1,14 @@
 2001-07-14  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tuiWin.c, tui.c, tuiCommand.c: Use ansi prototype.
+	tuiIO.c, tuiData.c: Likewise.
+	tuiDataWin.c, tuiDisassem.c: Likewise.
+	tuiGeneralWin.c, tuiLayout.c: Likewise.
+	tuiRegs.c, tuiSource.c: Likewise.
+	tuiSouceWin.c, tuiStack.c: Likewise.
+
+2001-07-14  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tuiWin.c, tuiWin.h, tui.c, tui.h, tuiCommand.c: Add FSF copyright.
 	tuiCommand.h, tuiIO.c, tuiIO.h, tuiData.h, tuiData.c: Likewise.
 	tuiDataWin.c, tuiDataWin.h, tuiDisassem.c, tuiDisassem.h: Likewise.

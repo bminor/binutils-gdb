@@ -41,13 +41,7 @@
    **        Dispatch the correct tui function based upon the control character.
  */
 unsigned int
-#ifdef __STDC__
-tuiDispatchCtrlChar (
-		      unsigned int ch)
-#else
-tuiDispatchCtrlChar (ch)
-     unsigned int ch;
-#endif
+tuiDispatchCtrlChar (unsigned int ch)
 {
   TuiWinInfoPtr winInfo = tuiWinWithFocus ();
 
@@ -129,13 +123,7 @@ tuiDispatchCtrlChar (ch)
    **     checking for overflow.  Returns the new value of the char count.
  */
 int
-#ifdef __STDC__
-tuiIncrCommandCharCountBy (
-			    int count)
-#else
-tuiIncrCommandCharCountBy (count)
-     int count;
-#endif
+tuiIncrCommandCharCountBy (int count)
 {
   if (tui_version)
     {
@@ -156,13 +144,7 @@ tuiIncrCommandCharCountBy (count)
    **     checking for overflow.  Returns the new value of the char count.
  */
 int
-#ifdef __STDC__
-tuiDecrCommandCharCountBy (
-			    int count)
-#else
-tuiDecrCommandCharCountBy (count)
-     int count;
-#endif
+tuiDecrCommandCharCountBy (int count)
 {
   if (tui_version)
     {
@@ -182,13 +164,7 @@ tuiDecrCommandCharCountBy (count)
    **     Set the character count to count.
  */
 int
-#ifdef __STDC__
-tuiSetCommandCharCountTo (
-			   int count)
-#else
-tuiSetCommandCharCountTo (count)
-     int count;
-#endif
+tuiSetCommandCharCountTo (int count)
 {
   if (tui_version)
     {
@@ -211,11 +187,7 @@ tuiSetCommandCharCountTo (count)
    **     Clear the character count to count.
  */
 int
-#ifdef __STDC__
 tuiClearCommandCharCount (void)
-#else
-tuiClearCommandCharCount ()
-#endif
 {
   if (tui_version)
     cmdWin->detail.commandInfo.curch = 0;
