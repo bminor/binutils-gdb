@@ -96,6 +96,11 @@ proc default_ld_simple_link { ld target objects } {
     
     catch "exec $ld -o $target $objects" exec_output
     set exec_output [prune_system_crud $host_triplet $exec_output]
+
+    # We don't care if we get a warning about a non-existent start
+    # symbol, since the default linker script might use ENTRY.
+    regsub -all "(^|\n)($ld: warning: cannot find entry symbol\[^\n\]*\n?)" $exec_output "\\1" exec_output
+
     if [string match "" $exec_output] then {
 	return 1
     } else {

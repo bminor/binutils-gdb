@@ -23,18 +23,10 @@ Do-first:
 
 Things-to-keep:
 
-ChangeLog
-config
-lib
-ld-bootstrap
-ld-cdtest
-ld-empic
-ld-scripts
-ld-sh
-ld-shared
-ld-srec
-ld-undefined
-ld-versados
+sr1.c
+sr2.c
+sr3.cc
+srec.exp
 
 Things-to-lose:
 
