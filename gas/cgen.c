@@ -323,9 +323,7 @@ cgen_md_operand (expressionP)
    LENGTH is the size of the insn in bits.
    RELAX_P is non-zero if relaxable insns should be emitted as such.
    Otherwise they're emitted in non-relaxable forms.
-   The "result" is stored in RESULT if non-NULL.
-   Returns the address of the buffer containing the assembled instruction,
-   in case the caller needs to modify it for some reason. */
+   The "result" is stored in RESULT if non-NULL.  */
 
 void
 cgen_asm_finish_insn (insn, buf, length, relax_p, result)
@@ -549,10 +547,12 @@ cgen_md_apply_fix3 (fixP, valueP, seg)
 	  || fixP->fx_pcrel)
 	{
 	  CGEN_FIELDS_BITSIZE (& fields) = CGEN_INSN_BITSIZE (insn);
-	  CGEN_SYM (set_operand) (opindex, & value, & fields);
-	  errmsg = CGEN_SYM (insert_operand) (opindex, & fields, where);
+	  CGEN_SYM (set_vma_operand) (opindex, & fields, (bfd_vma) value);
+	  /* ??? 0 is passed for `pc' */
+	  errmsg = CGEN_SYM (insert_operand) (opindex, & fields, where,
+					      (bfd_vma) 0);
 	  if (errmsg)
-	    as_warn_where (fixP->fx_file, fixP->fx_line, "%s\n", errmsg);
+	    as_warn_where (fixP->fx_file, fixP->fx_line, "%s", errmsg);
 	}
 
       if (fixP->fx_done)
