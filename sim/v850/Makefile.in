@@ -155,3 +155,4 @@ clean-extra: clean-igen
 #interp.o: interp.c table.c $(INCLUDE)
 simops.o: simops.c $(INCLUDE)
 #table.o: table.c
+semantics.o: $(INCLUDE)

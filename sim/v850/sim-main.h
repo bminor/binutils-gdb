@@ -96,21 +96,27 @@ OP[2] = (inst >> 16) & 0xffff; /* wwwww -> reg3 */
 OP[3] = inst;
 #endif
 
-#define COMPAT_1(CALL) \
+#define SAVE_1 \
 PC = cia; \
 OP[0] = instruction_0 & 0x1f; \
 OP[1] = (instruction_0 >> 11) & 0x1f; \
 OP[2] = 0; \
-OP[3] = instruction_0 ; \
+OP[3] = instruction_0
+
+#define COMPAT_1(CALL) \
+SAVE_1; \
 PC += (CALL); \
 nia = PC
 
-#define COMPAT_2(CALL) \
+#define SAVE_2 \
 PC = cia; \
 OP[0] = instruction_0 & 0x1f; \
 OP[1] = (instruction_0 >> 11) & 0x1f; \
 OP[2] = instruction_1; \
-OP[3] = (instruction_1 << 16) | instruction_0; \
+OP[3] = (instruction_1 << 16) | instruction_0
+
+#define COMPAT_2(CALL) \
+SAVE_2; \
 PC += (CALL); \
 nia = PC
 

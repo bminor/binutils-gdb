@@ -475,7 +475,7 @@ rrrrr!0,11110,dddddd + ddddddddddddddd,0:V:::jarl
 00000000011,RRRRR:I:::jmp
 "jmp [r<reg1>]"
 {
-  COMPAT_1 (0);
+  SAVE_1;
   trace_input ("jmp", OP_REG, 0);
   nia = State.regs[ reg1 ];
   trace_output (OP_REG);
@@ -738,7 +738,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 "prepare <list12>, <imm5>"
 {
   int  i;
-  COMPAT_2 (0);
+  SAVE_2;
   
   trace_input ("prepare", OP_PUSHPOP1, 0);
   
@@ -967,7 +967,7 @@ rrrrr!0,0000110,dddd:IV:::sld.bu
 {
   unsigned long result;
       
-  COMPAT_1 (0);
+  SAVE_1;
   result = load_mem (State.regs[30] + disp4, 1);
       
   /* start-sanitize-v850eq */
@@ -1181,7 +1181,7 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 // end-sanitize-v850eq
 "zxb r<reg1>"
 {
-  COMPAT_1 (0);
+  SAVE_1;
 
   trace_input ("zxb", OP_REG, 0);
 
@@ -1202,7 +1202,7 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 // end-sanitize-v850eq
 "zxh r<reg1>"
 {
-  COMPAT_1 (0);
+  SAVE_1;
 
   trace_input ("zxh", OP_REG, 0);
       
@@ -1232,7 +1232,7 @@ rrrrr,111111,RRRRR + wwwww,01010,iiii,00:XI:::divhn
   signed32 divide_by;
   signed32 divide_this;
   boolean overflow = false;
-  COMPAT_2 (0);
+  SAVE_2;
       
   trace_input ("divhn", OP_IMM_REG_REG_REG, 0);
 
@@ -1266,7 +1266,7 @@ rrrrr,111111,RRRRR + wwwww,01010,iiii,10:XI:::divhun
   signed32 divide_by;
   signed32 divide_this;
   boolean overflow = false;
-  COMPAT_2 (0);
+  SAVE_2;
       
   trace_input ("divhun", OP_IMM_REG_REG_REG, 0);
   
@@ -1300,7 +1300,7 @@ rrrrr,111111,RRRRR + wwwww,01011,iiii,00:XI:::divn
   signed32 divide_by;
   signed32 divide_this;
   boolean overflow = false;
-  COMPAT_2 (0);
+  SAVE_2;
       
   trace_input ("divn", OP_IMM_REG_REG_REG, 0);
 
@@ -1334,7 +1334,7 @@ rrrrr,111111,RRRRR + wwwww,01011,iiii,10:XI:::divun
   signed32 divide_by;
   signed32 divide_this;
   boolean overflow = false;
-  COMPAT_2 (0);
+  SAVE_2;
 
   trace_input ("divun", OP_IMM_REG_REG_REG, 0);
 
@@ -1404,7 +1404,7 @@ rrrrr,111111,RRRRR + wwwww,00111,iiii,10:XI:::sdivun
 "pushml <list18>"
 {
   int i;
-  COMPAT_2 (0);
+  SAVE_2;
   
   trace_input ("pushml", OP_PUSHPOP3, 0);
   
