@@ -177,7 +177,7 @@ sce%.ok: sce%.exe
 	GIF_TRACE=sce$*_our_gif.dat ; export GIF_TRACE; \
 	ulimit -t $(ULIMIT) ; $(RUN_FOR_TARGET) $< ; \
         if [ $$? -ne 0 ];  then \
-	   diff -bitw sce$*_out_dif.dat sce$*_our_gif.dat > sce$*.ok; \
+	   diff -bitw $(srcdir)/sce$*_out_gif.dat sce$*_our_gif.dat > sce$*.ok; \
 	   touch sce$*.ok; \
 	else \
 	   echo Running sce$*.exe returns $$? > sce$*.ok ;\
