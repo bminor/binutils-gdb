@@ -1,4 +1,5 @@
  #
+CC=gcc -Wall -ansi
 # Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 #
 # This file is part of BFD, the Binary File Diddler.
@@ -230,11 +231,13 @@ PROTOS = doc/opncls.proto doc/archures.proto doc/libbfd.proto doc/section.proto 
 
 
 headers : $(PROTOS)
-	mkdir -f doc
+	- mkdir  doc
 	# Rebuild prototypes in bfd.h
 	sed <$(BFD_H) >bfd.h.new -e '1,/THE FOLLOWING/!d'
 	cat doc/opncls.proto doc/archures.proto \
-	doc/libbfd.proto doc/section.proto doc/syms.proto  doc/bfd.proto doc/archive.proto \
+	doc/libbfd.proto doc/section.proto doc/syms.proto \
+	doc/bfd.proto doc/archive.proto \
+	doc/core.proto \
 	doc/reloc.proto doc/targets.proto doc/format.proto >>bfd.h.new
 	echo >> bfd.h.new
 	echo "#endif" >> bfd.h.new
