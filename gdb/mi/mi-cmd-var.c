@@ -81,7 +81,7 @@ mi_cmd_var_create (char *command, char **argv, int argc)
   else
     {
       var_type = USE_SPECIFIED_FRAME;
-      frameaddr = parse_and_eval_address (frame);
+      frameaddr = string_to_core_addr (frame);
     }
 
   if (varobjdebug)
