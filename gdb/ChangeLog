@@ -1,5 +1,15 @@
 2004-07-29  Andrew Cagney  <cagney@gnu.org>
 
+	* config/xm-nbsd.h: Delete file.
+	* config/arm/xm-nbsd.h: Delete file.
+	* config/i386/xm-nbsd.h: Delete file.
+	* config/ns32k/xm-nbsd.h: Delete file.
+	* config/ns32k/nbsdaout.mh (XM_FILE): Delete.
+	* config/i386/nbsdelf.mh (XM_FILE): Delete.
+	* config/i386/nbsdaout.mh (XM_FILE): Delete.
+	* config/arm/nbsdelf.mh (XM_FILE): Delete.
+	* config/arm/nbsdaout.mh (XM_FILE): Delete.
+
 	* config/i386/xm-i386v.h (KERNEL_U_ADDR): Move from here ...
 	* config/i386/nm-i386v42mp.h (KERNEL_U_ADDR): ... to here, ...
 	* config/i386/nm-i386v4.h (KERNEL_U_ADDR): ... here, ...
