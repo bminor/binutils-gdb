@@ -145,6 +145,7 @@ i386aout.c
 i386bsd.c
 i386dynix.c
 i386linux.c
+i386netbsd.c
 i386lynx.c
 i386mach3.c
 i386os9k.c
@@ -170,8 +171,7 @@ m88kmach3.c
 makefile.dos
 mipsbsd.c
 newsos3.c
-netbsd386.c
-netbsd532.c
+netbsd.h
 nlm-target.h
 nlm.c
 nlm32-alpha.c
@@ -182,6 +182,7 @@ nlm32.c
 nlm64.c
 nlmcode.h
 nlmswap.h
+ns32knetbsd.c
 oasys.c
 opncls.c
 osf-core.c
@@ -195,6 +196,7 @@ section.c
 som.c
 som.h
 sparclynx.c
+sparcnetbsd.c
 srec.c
 stab-syms.c
 sunos.c

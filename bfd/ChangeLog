@@ -1,3 +1,24 @@
+Tue Sep 13 11:09:39 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* configure.host (sparc-*-netbsd): use sparcnbsd.
+	  (ns32k-*-netbsd): use ns32knbsd.
+
+	* hosts/{nbsd,i386nbsd,ns32knbsd,sparcnbsd}.h: New files, NetBSD
+	  host support.
+
+	* sparcnetbsd.c: New file, adds support for NetBSD/sparc.
+	* config/sparc-nbsd.mt: Likewise.
+
+	* netbsd.h: New file, definitions common to all netbsd ports.
+	* i386netbsd.c: Use it.
+        * ns32knetbsd.c: Use it.
+
+	* Makefile.in, configure.in, targets.c, config/i386-nbsd.mt,
+	  config/ns32k-nbsd.mt: canonicalize netbsd targets to conform to
+	  file/variable naming conventions.
+	* i386netbsd.c: New file, renamed from netbsd386.c.
+	* ns32knetbsd.c: New file, renamed from netbsd532.c.
+	
 Mon Sep 12 21:56:20 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_reloc_skip): Correct off-by-one error for 4-byte
@@ -287,7 +308,6 @@ Wed Aug 24 11:49:19 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 	bytes in bits2.
 
 	* configure.host, config.bfd: Change i[34]86 to i[345]86.
-
 	* coffgen.c (coff_real_object_p): Set obj_conv_table_size here,
 	rather than waiting until coff_slurp_symbol_table.
 	(coff_write_alien_symbol): Just ignore BSF_DEBUGGING symbols.

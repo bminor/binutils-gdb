@@ -157,8 +157,7 @@ BFD32_BACKENDS = \
 	i386bsd.o \
 	i386linux.o \
 	i386lynx.o \
-	netbsd386.o \
-	netbsd532.o \
+	i386netbsd.o \
 	i386mach3.o \
 	i386os9k.o \
 	ieee.o \
@@ -171,6 +170,7 @@ BFD32_BACKENDS = \
 	nlm32-sparc.o \
 	nlm32-ppc.o \
 	nlm32.o \
+	ns32knetbsd.o \
 	oasys.o \
 	pc532-mach.o \
 	reloc16.o \
@@ -237,7 +237,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 coff-a29k.c coff-rs6000.c coff-sparc.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c \
 	 coff-m88k.c coff-mips.c coff-sh.c trad-core.c cisco-core.c newsos3.c \
-	 i386aout.c i386linux.c netbsd386.c i386mach3.c i386os9k.c \
+	 i386aout.c i386linux.c i386mach3.c i386netbsd.c i386os9k.c \
 	 bout.c aout-adobe.c coff-we32k.c \
 	 i386bsd.c i386dynix.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
 	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-powerpc.c \
@@ -614,12 +614,12 @@ i386aout.o: i386aout.c libaout.h $(INCDIR)/bfdlink.h \
 i386linux.o: i386linux.c $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h
-netbsd386.o: netbsd386.c libaout.h $(INCDIR)/bfdlink.h \
-  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
-  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 i386mach3.o: i386mach3.c $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h libaout.h \
   $(INCDIR)/bfdlink.h aout-target.h
+i386netbsd.o: i386netbsd.c libaout.h $(INCDIR)/bfdlink.h \
+  aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 i386os9k.o: i386os9k.c $(INCDIR)/bfdlink.h libaout.h \
   $(INCDIR)/os9k.h
 bout.o: bout.c $(INCDIR)/bfdlink.h genlink.h $(INCDIR)/bout.h \
