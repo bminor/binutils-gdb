@@ -33,27 +33,27 @@ struct external_filehdr {
 
 typedef struct 
 {
-  char 	magic[2];		/* type of file				*/
-  char	vstamp[2];		/* version stamp			*/
-  char	tsize[4];		/* text size in bytes, padded to FW bdry*/
-  char	dsize[4];		/* initialized data "  "		*/
-  char	bsize[4];		/* uninitialized data "   "		*/
-  char	entry[4];		/* entry pt.				*/
-  char 	text_start[4];		/* base of text used for this file */
-  char 	data_start[4];		/* base of data used for this file */
-  char  o_toc[4];
-  char  o_snentry[2];
-  char  o_sntext[2];
-  char  o_sndata[2];
-  char  o_sntoc[2];
-  char  o_snloader[2];
-  char  o_snbss[2];
-  char  o_algntext[2];
-  char  o_algndata[2];
-  char  o_modtype[2];
-  char  o_resv1[2];
-  char  o_maxstack[4];
-  char  o_resv2[16];
+  unsigned char	magic[2];	/* type of file			*/
+  unsigned char	vstamp[2];	/* version stamp		*/
+  unsigned char	tsize[4];	/* text size in bytes, padded to FW bdry */
+  unsigned char	dsize[4];	/* initialized data "  "	*/
+  unsigned char	bsize[4];	/* uninitialized data "   "	*/
+  unsigned char	entry[4];	/* entry pt.			*/
+  unsigned char	text_start[4];	/* base of text used for this file */
+  unsigned char	data_start[4];	/* base of data used for this file */
+  unsigned char	o_toc[4];
+  unsigned char	o_snentry[2];
+  unsigned char	o_sntext[2];
+  unsigned char	o_sndata[2];
+  unsigned char	o_sntoc[2];
+  unsigned char	o_snloader[2];
+  unsigned char	o_snbss[2];
+  unsigned char	o_algntext[2];
+  unsigned char	o_algndata[2];
+  unsigned char	o_modtype[2];
+  unsigned char	o_resv1[2];
+  unsigned char	o_maxstack[4];
+  unsigned char	o_resv2[16];
 }
 AOUTHDR;
 
@@ -185,13 +185,13 @@ union external_auxent {
 	} x_tv;		/* info about .tv section (in auxent of symbol .tv)) */
 
 	struct {
-		char x_scnlen[4],
-		     x_parmhash[4],
-		     x_snhash[2],
-		     x_smtyp[1],
-		     x_smclas[1],
-		     x_stab[4],
-		     x_snstab[2];
+		unsigned char x_scnlen[4];
+		unsigned char x_parmhash[4];
+		unsigned char x_snhash[2];
+		unsigned char x_smtyp[1];
+		unsigned char x_smclas[1];
+		unsigned char x_stab[4];
+		unsigned char x_snstab[2];
 	} x_csect;
 
 };

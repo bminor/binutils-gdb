@@ -1,3 +1,13 @@
+/* Internal format of COFF object file data structures, for GNU BFD.
+   This file is part of BFD, the Binary File Descriptor library.  */
+
+/* First, make "signed char" work, even on old compilers. */
+#ifndef signed
+#ifndef __STDC__
+#define	signed	/**/
+#endif
+#endif
+
 /********************** FILE HEADER **********************/
 struct internal_filehdr 
 {
@@ -111,21 +121,21 @@ struct internal_aouthdr {
 #define C_EINCL         109     /* Marks ending of include file */
 
 	/* storage classes for stab symbols for RS/6000 */
-#define C_GSYM          0x80
-#define C_LSYM          0x81
-#define C_PSYM          0x82
-#define C_RSYM          0x83
-#define C_RPSYM         0x84
-#define C_STSYM         0x85
-#define C_TCSYM         0x86
-#define C_BCOMM         0x87
-#define C_ECOML         0x88
-#define C_ECOMM         0x89
-#define C_DECL          0x8c
-#define C_ENTRY         0x8d
-#define C_FUN           0x8e
-#define C_BSTAT         0x8f
-#define C_ESTAT         0x90
+#define C_GSYM          ((signed char)0x80)
+#define C_LSYM          ((signed char)0x81)
+#define C_PSYM          ((signed char)0x82)
+#define C_RSYM          ((signed char)0x83)
+#define C_RPSYM         ((signed char)0x84)
+#define C_STSYM         ((signed char)0x85)
+#define C_TCSYM         ((signed char)0x86)
+#define C_BCOMM         ((signed char)0x87)
+#define C_ECOML         ((signed char)0x88)
+#define C_ECOMM         ((signed char)0x89)
+#define C_DECL          ((signed char)0x8c)
+#define C_ENTRY         ((signed char)0x8d)
+#define C_FUN           ((signed char)0x8e)
+#define C_BSTAT         ((signed char)0x8f)
+#define C_ESTAT         ((signed char)0x90)
 
 /********************** SECTION HEADER **********************/
 struct internal_scnhdr {
@@ -209,10 +219,7 @@ struct internal_syment {
 	short		n_scnum;	/* section number		*/
 	unsigned short	n_flags;	/* copy of flags from filhdr	*/
 	unsigned short	n_type;		/* type and derived type	*/
-#if __STDC__
-	signed
-#endif
-	char		n_sclass;	/* storage class		*/
+	signed char	n_sclass;	/* storage class		*/
 	char		n_numaux;	/* number of aux. entries	*/
 };
 #define n_name		_n._n_name
