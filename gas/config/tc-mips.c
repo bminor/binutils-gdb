@@ -1,5 +1,5 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999, 2000 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -118,6 +118,8 @@ mips_target_format ()
       return target_big_endian ? "a.out-mips-big" : "a.out-mips-little";
     case bfd_target_ecoff_flavour:
       return target_big_endian ? "ecoff-bigmips" : ECOFF_LITTLE_FORMAT;
+    case bfd_target_coff_flavour:
+      return "pe-mips";
     case bfd_target_elf_flavour:
       return (target_big_endian
 	      ? (mips_64 ? "elf64-bigmips" : "elf32-bigmips")
@@ -132,6 +134,8 @@ mips_target_format ()
 #define RDATA_SECTION_NAME (OUTPUT_FLAVOR == bfd_target_aout_flavour \
 			    ? ".data" \
 			    : OUTPUT_FLAVOR == bfd_target_ecoff_flavour \
+			    ? ".rdata" \
+			    : OUTPUT_FLAVOR == bfd_target_coff_flavour \
 			    ? ".rdata" \
 			    : OUTPUT_FLAVOR == bfd_target_elf_flavour \
 			    ? ".rodata" \
@@ -847,6 +851,15 @@ md_begin ()
   char *a = NULL;
   int broken = 0;
   int mips_isa_from_cpu;
+
+  /* GP relative stuff not working for PE */
+  if (strncmp (TARGET_OS, "pe", 2) == 0
+      && g_switch_value != 0)
+    {
+      if (g_switch_seen)
+	as_bad (_("-G not supported in this configuration."));
+      g_switch_value = 0;
+    }
 
   cpu = TARGET_CPU;
   if (strcmp (cpu + (sizeof TARGET_CPU) - 3, "el") == 0)
@@ -9645,6 +9658,7 @@ md_apply_fix (fixP, valueP)
 	}
       break;
 
+    case BFD_RELOC_RVA:
     case BFD_RELOC_32:
       /* If we are deleting this reloc entry, we must fill in the
 	 value now.  This can happen if we have a .word which is not

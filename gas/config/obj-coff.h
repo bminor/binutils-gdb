@@ -110,11 +110,28 @@
 #endif
 
 #ifdef TC_SH
+
+#ifdef TE_PE
+#define COFF_WITH_PE
+#endif
+
 #include "coff/sh.h"
+
+#ifdef TE_PE
+#define TARGET_FORMAT "pe-shl"
+#else
 #define TARGET_FORMAT					\
   (shl							\
    ? (sh_small ? "coff-shl-small" : "coff-shl")		\
    : (sh_small ? "coff-sh-small" : "coff-sh"))
+#endif
+#endif
+
+#ifdef TC_MIPS
+#define COFF_WITH_PE
+#include "coff/mipspe.h"
+#undef  TARGET_FORMAT
+#define TARGET_FORMAT "pe-mips"
 #endif
 
 #ifdef TC_M88K

@@ -1,5 +1,5 @@
 /* tc-arm.c -- Assemble for the ARM
-   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 97, 98, 1999, 2000 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 
@@ -54,7 +54,7 @@
 #define ARM_EXT_V5	0x00000080	/* allow CLZ etc	 */
 #define ARM_EXT_V5E     0x00000200	/* "El Segundo" 	 */
 
-/* Architectures are the sum of the base and extensions */
+/* Architectures are the sum of the base and extensions.  */
 #define ARM_ARCH_V4	(ARM_7 | ARM_LONGMUL | ARM_HALFWORD)
 #define ARM_ARCH_V4T	(ARM_ARCH_V4 | ARM_THUMB)
 #define ARM_ARCH_V5	(ARM_ARCH_V4 | ARM_EXT_V5)
@@ -547,9 +547,14 @@ static CONST struct asm_opcode insns[] =
   {"stm",   0x08000000, NULL,   stm_flags,   ARM_ANY,      do_ldmstm},
   {"ldm",   0x08100000, NULL,   ldm_flags,   ARM_ANY,      do_ldmstm},
   {"swi",   0x0f000000, NULL,   NULL,        ARM_ANY,      do_swi},
+#ifdef TE_WINCE
+  {"bl",    0x0b000000, NULL,   NULL,        ARM_ANY,      do_branch},
+  {"b",     0x0a000000, NULL,   NULL,        ARM_ANY,      do_branch},
+#else
   {"bl",    0x0bfffffe, NULL,   NULL,        ARM_ANY,      do_branch},
   {"b",     0x0afffffe, NULL,   NULL,        ARM_ANY,      do_branch},
-
+#endif
+  
 /* Pseudo ops */
   {"adr",   0x028f0000, NULL,   NULL,        ARM_ANY,      do_adr},
   {"adrl",  0x028f0000, NULL,   NULL,        ARM_ANY,      do_adrl},
@@ -3020,7 +3025,9 @@ do_ldst (str, flags)
         }
       else
         inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
+#ifndef TE_WINCE
       inst.reloc.exp.X_add_number -= 8;  /* PC rel adjust */
+#endif
       inst.reloc.pc_rel = 1;
       inst.instruction |= (REG_PC << 16);
       pre_inc = 1;
@@ -4116,6 +4123,7 @@ thumb_add_sub (str, subtract)
 	    }
 	}
     }
+  
   end_of_line (str);
 }
 
@@ -4140,7 +4148,7 @@ thumb_shift (str, shift)
     {
       /* Two operand immediate format, set Rs to Rd.  */
       Rs = Rd;
-      str++;
+      str ++;
       if (my_get_expression (&inst.reloc.exp, &str))
 	return;
     }
@@ -4225,6 +4233,7 @@ thumb_shift (str, shift)
 
       inst.instruction |= Rd | (Rs << 3);
     }
+  
   end_of_line (str);
 }
 
@@ -5206,7 +5215,13 @@ md_pcrel_from (fixP)
       return (fixP->fx_where + fixP->fx_frag->fr_address) & ~3;
     }
 
+#ifdef TE_WINCE
+  /* The pattern was adjusted to accomodate CE's off-by-one fixups,
+     so we un-adjust here to compensate for the accomodation.  */
+  return fixP->fx_where + fixP->fx_frag->fr_address + 8;
+#else
   return fixP->fx_where + fixP->fx_frag->fr_address;
+#endif
 }
 
 /* Round up a section size to the appropriate boundary. */
@@ -6890,13 +6905,14 @@ arm_adjust_symtab ()
 #endif
 #ifdef OBJ_ELF
   symbolS *         sym;
-  elf_symbol_type * elf_sym;
   char              bind;
 
   for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
     {
       if (ARM_IS_THUMB (sym))
         {
+	  elf_symbol_type * elf_sym;
+	  
 	  elf_sym = elf_symbol (symbol_get_bfdsym (sym));
 	  bind = ELF_ST_BIND (elf_sym);
 	  

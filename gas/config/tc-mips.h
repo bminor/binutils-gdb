@@ -1,5 +1,5 @@
 /* tc-mips.h -- header file for tc-mips.c.
-   Copyright (C) 1993, 94, 95, 96, 97, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 1999, 2000 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF support by Ian Lance Taylor of Cygnus Support.
@@ -142,6 +142,7 @@ extern void md_mips_end PARAMS ((void));
 #define md_end()	md_mips_end()
 
 #define USE_GLOBAL_POINTER_OPT	(OUTPUT_FLAVOR == bfd_target_ecoff_flavour \
+				 || OUTPUT_FLAVOR == bfd_target_coff_flavour \
 				 || OUTPUT_FLAVOR == bfd_target_elf_flavour)
 
 extern void mips_pop_insert PARAMS ((void));

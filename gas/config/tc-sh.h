@@ -1,5 +1,5 @@
 /* This file is tc-sh.h
-   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -129,6 +129,9 @@ extern void sh_coff_reloc_mangle
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
 extern int tc_coff_sizemachdep PARAMS ((fragS *));
 
+#ifdef BFD_ASSEMBLER
+#define SUB_SEGMENT_ALIGN(SEG) 4
+#else
 /* We align most sections to a 16 byte boundary.  */
 #define SUB_SEGMENT_ALIGN(SEG)					\
   (strncmp (obj_segment_name (SEG), ".stabstr", 8) == 0		\
@@ -138,6 +141,7 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *));
        || strcmp (obj_segment_name (SEG), ".dtors") == 0)	\
       ? 2							\
       : (sh_small ? 2 : 4)))
+#endif
 
 #endif /* OBJ_COFF */
 

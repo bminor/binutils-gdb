@@ -1,3 +1,33 @@
+2000-02-24  Nick Clifton  <nickc@cygnus.com>
+
+	* configure: Add arm-wince, mips-pe and sh-pe targets.
+	* configure: Regenerate.
+
+	* config/obj-coff.h (COFF_WITH_PE): Define for mips-pe and
+	sh-pe targets.
+	(TARGET_FORMAT): Set to "pe-shl" for the sh-pe target and to
+	"pe-mips" for the mips-pe target.
+
+	* config/tc-arm.c (insns): Change displacement encoded in BL
+	and B instructions if the target port is arm-wince.
+	(do_ldst): Do not bias the relocation offset if the target
+	port is arm-wince.
+	(md_pcrel_from): Add in missing relocation offset bias if the
+	target os arm-wince.
+
+	* config/tc-mips.c (mips_target_format): Support COFF flavour.
+	(md_begin): Disable -G support for mips-pe target.
+	(md_apply_fix): Treat BFD_RELOC_RVA reloc as BFD_RELOC_32.
+	* config/tc-mips.h (USE_GLOBAL_POINTER_OPT): Add support for
+	COFF flavour.
+
+	* config/tc-sh.c (md_begin): sh-pe target is little endian.
+	* config/tc-sh.h (SUB_SEGMENT_ALIGN): If using a BFD
+	assembler, just set the alignment to 4.
+
+	* config/te-wince-pe.h: New file for WinCE targets.  Define
+	TE_WINCE.
+
 2000-02-25  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (md_assemble): Swap segments too for intel mode

@@ -155,6 +155,7 @@ changequote([,])dnl
       arm-*-netbsd*)	                fmt=aout em=nbsd bfd_gas=yes ;;
       arm-*-oabi | thumb-*-oabi)        fmt=elf ;;
       arm-epoc-pe | thumb-epoc-pe)      fmt=coff em=epoc-pe ;;
+      arm-*-wince)          fmt=coff em=wince-pe bfd_gas=yes;;
       arm-*-pe | thumb-*-pe)            fmt=coff em=pe ;;
       arm-*-riscix*)	                fmt=aout em=riscix ;;
 
@@ -267,6 +268,7 @@ changequote([,])dnl
       mips-*-osf*)          fmt=ecoff endian=little ;;
       mips-*-ecoff*)        fmt=ecoff ;;
       mips-*-ecoff*)        fmt=ecoff ;;
+      mips-*-pe*)           fmt=coff endian=little em=pe ;;
       mips-*-irix6*)	    fmt=elf ;;
       mips-*-irix5*)        fmt=elf ;;
       mips-*-irix*)         fmt=ecoff ;;
@@ -311,6 +313,7 @@ changequote([,])dnl
 
       sh-*-elf*)	    fmt=elf ;;
       sh-*-coff*)           fmt=coff ;;
+      sh-*-pe*)             fmt=coff em=pe bfd_gas=yes;;
       sh-*-rtemself*)       fmt=elf ;;
       sh-*-rtems*)	    fmt=coff ;;
 

@@ -206,8 +206,13 @@ md_begin ()
   char *prev_name = "";
   int target_arch;
 
+#ifdef TE_PE
+  /* The WinCE OS only supports little endian executables.  */
+  target_big_endian = 0;
+#else
   if (! shl)
     target_big_endian = 1;
+#endif
 
   target_arch = arch_sh1_up & ~(sh_dsp ? arch_sh3e_up : arch_sh_dsp_up);
   valid_arch = target_arch;
@@ -1678,6 +1683,7 @@ DEFUN (md_undefined_symbol, (name),
 }
 
 #ifdef OBJ_COFF
+#ifndef BFD_ASSEMBLER
 
 void
 DEFUN (tc_crawl_symbol_chain, (headers),
@@ -1693,6 +1699,7 @@ DEFUN (tc_headers_hook, (headers),
   printf (_("call to tc_headers_hook \n"));
 }
 
+#endif
 #endif
 
 /* Various routines to kill one day */
