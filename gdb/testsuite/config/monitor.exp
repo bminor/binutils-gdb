@@ -56,7 +56,7 @@ proc gdb_target_monitor { exec_file } {
 		    send_gdb "y\n";
 		    exp_continue;
 		}
-		-re ".*Couldn't establish connection to remote.*$gdb_prompt" {
+		-re "Couldn't establish connection to remote.*$gdb_prompt" {
 		    verbose "Connection failed";
 		}
 		-re "Remote MIPS debugging.*$gdb_prompt" {
@@ -114,7 +114,7 @@ proc gdb_load { arg } {
     if { $arg == "" } {
 	send_gdb "info files\n";
 	gdb_expect {
-	    -re "Symbols from \"([^\"]+)\"" {
+	    -re "Symbols from \"(\[^\"\]+)\"" {
 		set arg $expect_out(1,string);
 		exp_continue;
 	    }
@@ -140,12 +140,15 @@ proc gdb_load { arg } {
 		return 0;
 	    }
 	} else {
-	    if [is_remote host] {
-		# FIXME:
-		set arg a.out;
-	    }
 
 	    if [gdb_target_monitor $arg] { return -1 }
+
+	    if [is_remote host] {
+		# FIXME: Multiple downloads. bleah.
+		set farg [remote_download host $arg];
+	    } else {
+		set farg $arg;
+	    }
 
 	    if { $arg != "" && [target_info exists gdb_sect_offset] } {
 		set textoff [target_info gdb_sect_offset];
@@ -173,26 +176,28 @@ proc gdb_load { arg } {
 		}
 	    }
 
-	    verbose "Loading $arg"
+	    verbose "Loading $farg"
 	    if [target_info exists gdb_load_offset] {
-		set command "load $arg [target_info gdb_load_offset]\n";
+		set command "load $farg [target_info gdb_load_offset]\n";
 	    } else {
-		set command "load $arg\n";
+		set command "load $farg\n";
 	    }
 	    send_gdb $command;
-	    set timeout 1000
+	    set timeout 1200
 	    verbose "Timeout is now $timeout seconds" 2
 	    gdb_expect {
 		-re "\[Ff\]ailed.*$gdb_prompt $" {
 		    verbose "load failed";
 		}
+		-re "Timeout reading from remote.*$gdb_prompt" {
+		}
 		-re "$gdb_prompt $" {
-		    verbose "Loaded $arg into $GDB\n"
+		    verbose "Loaded $farg into $GDB\n"
 		    return 0;
 		}
 		timeout {
 		    if { $verbose > 1 } {
-			perror "Timed out trying to load $arg."
+			perror "Timed out trying to load $farg."
 		    }
 		}
 	    }
