@@ -48,6 +48,9 @@ endif
 ifeq ($(canonhost),i386-unknown-sco3.2v4.0)
 canonhost := i386-sco3.2v4
 endif
+ifeq ($(canonhost),i386-unknown-sco3.2v4)
+canonhost := i386-sco3.2v4
+endif
 ifeq ($(canonhost),i386-unknown-go32)
 canonhost := i386-go32
 endif
@@ -198,8 +201,8 @@ all-emacs:
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
 	-rm -f $(ROOTING)/$(RELEASE_TAG)
 	ln -s $(INSTALLDIR) $(ROOTING)/$(RELEASE_TAG) 
-	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) do1 > $(canonhost)-native-log 2>&1 
-	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) do-latest > $(canonhost)-latest-log 2>&1 
+	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) do1 > $(canonhost)-emacs-native-log 2>&1 
+	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) do-latest > $(canonhost)-emacs-latest-log 2>&1 
 	@echo done at `date`
 
 all-cygnus:
