@@ -199,6 +199,9 @@
 /* Define if you have the <argz.h> header file.  */
 #undef HAVE_ARGZ_H
 
+/* Define if you have the <asm/debugreg.h> header file.  */
+#undef HAVE_ASM_DEBUGREG_H
+
 /* Define if you have the <ctype.h> header file.  */
 #undef HAVE_CTYPE_H
 

@@ -1,3 +1,9 @@
+1998-10-12  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* configure.in: Check for sys/debugreg.h, asm/debugreg.h.
+	* i386v-nat.c: Include asm/debugreg.h, sys/debugreg.h if it is not
+	present.
+
 Sun Oct 11 12:08:07 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* dwarf2read.c (dwarf2_build_psymtabs_hard):  Do not adjust the

@@ -72,7 +72,7 @@ AC_CHECK_HEADERS(ctype.h curses.h endian.h libintl.h limits.h link.h \
                  memory.h objlist.h ptrace.h sgtty.h stddef.h stdlib.h \
                  string.h strings.h sys/procfs.h sys/ptrace.h sys/reg.h \
                  term.h termio.h termios.h unistd.h wait.h sys/wait.h \
-                 wchar.h wctype.h)
+                 wchar.h wctype.h asm/debugreg.h)
 
 AC_HEADER_STAT
 
