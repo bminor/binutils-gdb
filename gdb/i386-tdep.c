@@ -1254,7 +1254,7 @@ sunpro_static_transform_name (char *name)
 /* Stuff for WIN32 PE style DLL's but is pretty generic really.  */
 
 CORE_ADDR
-skip_trampoline_code (CORE_ADDR pc, char *name)
+i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name)
 {
   if (pc && read_memory_unsigned_integer (pc, 2) == 0x25ff) /* jmp *(dest) */
     {

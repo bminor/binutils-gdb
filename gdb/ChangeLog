@@ -1,5 +1,12 @@
 2002-08-16  Joel Brobecker  <brobecker@gnat.com>
 
+	* i386-tdep.c (i386_pe_skip_trampoline_code): renamed from
+	skip_trampoline_code, for better namespace-proofing.   
+
+	* i386-tdep.h (i386_pe_skip_trampoline_code): Add declaration.
+
+2002-08-16  Joel Brobecker  <brobecker@gnat.com>
+
 	* config/i386/tm-cygwin.h: Remove some "#if 0"'ed macros.
 
 2002-08-16  Joel Brobecker  <brobecker@gnat.com>

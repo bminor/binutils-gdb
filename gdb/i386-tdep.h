@@ -160,6 +160,9 @@ struct gdbarch_tdep
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	16
 
+/* Functions exported from i386-tdep.c.  */
+extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
+
 /* Return the name of register REG.  */
 extern char const *i386_register_name (int reg);
 
