@@ -387,7 +387,6 @@ catcher (catch_exceptions_ftype *func,
   char *saved_error_pre_print;
   char *saved_quit_pre_print;
   struct ui_out *saved_uiout;
-  struct gdb_interpreter *saved_interp;
 
   /* Return value from SIGSETJMP(): enum return_reason if error or
      quit caught, 0 otherwise. */
@@ -410,7 +409,6 @@ catcher (catch_exceptions_ftype *func,
   /* Override the global ``struct ui_out'' builder.  */
 
   saved_uiout = uiout;
-  saved_interp = gdb_current_interpreter ();
   uiout = func_uiout;
 
   /* Prevent error/quit during FUNC from calling cleanups established
@@ -441,24 +439,7 @@ catcher (catch_exceptions_ftype *func,
 
   restore_cleanups (saved_cleanup_chain);
 
-  /*
-    cases:
-    1. interp1 calls using uiout1
-    2. interp1 calls using uiout1 calls using uiout2
-    3. interp1 calls using uiout1 calls interp2 using uiout2
-    4. more?
-    is it enough to note that the interpreter has changed and
-    reset saved_uiout
-   */
-  if (gdb_current_interpreter () == saved_interp)
-    uiout = saved_uiout;
-  else
-    {
-      /* We've changed interpreters under this call.
-	 Reset uiout to the current interpreter's uiout
-	 and hope for the best. */
-      uiout = gdb_interpreter_ui_out (NULL);
-    }
+  uiout = saved_uiout;
 
   if (mask & RETURN_MASK_QUIT)
     quit_pre_print = saved_quit_pre_print;
