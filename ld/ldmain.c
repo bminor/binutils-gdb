@@ -228,9 +228,9 @@ main (argc, argv)
      interface by default.  */
   demangling = getenv ("COLLECT_NO_DEMANGLE") == NULL;
 
-  link_info.callbacks = &link_callbacks;
   link_info.relocateable = FALSE;
   link_info.emitrelocations = FALSE;
+  link_info.task_link = FALSE;
   link_info.shared = FALSE;
   link_info.symbolic = FALSE;
   link_info.export_dynamic = FALSE;
@@ -241,31 +241,34 @@ main (argc, argv)
   link_info.allow_shlib_undefined = FALSE;
   link_info.allow_multiple_definition = FALSE;
   link_info.allow_undefined_version = TRUE;
+  link_info.keep_memory = TRUE;
+  link_info.notice_all = FALSE;
+  link_info.nocopyreloc = FALSE;
+  link_info.new_dtags = FALSE;
+  link_info.combreloc = TRUE;
+  link_info.eh_frame_hdr = FALSE;
   link_info.strip = strip_none;
   link_info.discard = discard_sec_merge;
-  link_info.keep_memory = TRUE;
+  link_info.common_skip_ar_aymbols = bfd_link_common_skip_none;
+  link_info.callbacks = &link_callbacks;
+  link_info.hash = NULL;
+  link_info.keep_hash = NULL;
+  link_info.notice_hash = NULL;
+  link_info.wrap_hash = NULL;
   link_info.input_bfds = NULL;
   link_info.create_object_symbols_section = NULL;
   link_info.gc_sym_list = NULL;
-  link_info.hash = NULL;
-  link_info.keep_hash = NULL;
-  link_info.notice_all = FALSE;
-  link_info.notice_hash = NULL;
-  link_info.wrap_hash = NULL;
-  link_info.mpc860c0 = 0;
+  link_info.base_file = NULL;
   /* SVR4 linkers seem to set DT_INIT and DT_FINI based on magic _init
      and _fini symbols.  We are compatible.  */
   link_info.init_function = "_init";
   link_info.fini_function = "_fini";
-  link_info.new_dtags = FALSE;
-  link_info.eh_frame_hdr = FALSE;
-  link_info.flags = (bfd_vma) 0;
-  link_info.flags_1 = (bfd_vma) 0;
+  link_info.mpc860c0 = 0;
   link_info.pei386_auto_import = -1;
   link_info.pei386_runtime_pseudo_reloc = FALSE;
-  link_info.combreloc = TRUE;
   link_info.spare_dynamic_tags = 5;
-  link_info.common_skip_ar_aymbols = bfd_link_common_skip_none;
+  link_info.flags = (bfd_vma) 0;
+  link_info.flags_1 = (bfd_vma) 0;
 
   ldfile_add_arch ("");
 

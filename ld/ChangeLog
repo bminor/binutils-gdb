@@ -1,3 +1,8 @@
+2002-12-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldmain.c (main): Re-order link_info initialization.  Init all
+	fields.
+
 2002-12-19  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* ld.texinfo: Clarify and extend the documentation
