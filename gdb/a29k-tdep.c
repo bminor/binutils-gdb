@@ -917,9 +917,9 @@ gdb_print_insn_a29k (memaddr, info)
      disassemble_info *info;
 {
   if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-    return print_insn_big_a29k (memaddr, &info);
+    return print_insn_big_a29k (memaddr, info);
   else
-    return print_insn_little_a29k (memaddr, &info);
+    return print_insn_little_a29k (memaddr, info);
 }
 
 enum a29k_processor_types processor_type = a29k_unknown;

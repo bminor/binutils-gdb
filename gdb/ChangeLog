@@ -1,5 +1,7 @@
 Tue Jan 17 09:48:38 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
+	* a29k-tdep.c (gdb_print_insn_a29k): Fix typo (&info -> info).
+
 	* parse.c (write_exp_msymbol): Use new variables
 	msym_*_symbol_type as type of msymbol expression.
 	(_initialize_parse): Initialize them.
