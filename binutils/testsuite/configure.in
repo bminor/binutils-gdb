@@ -6,7 +6,7 @@
 srctrigger="Makefile.in"
 srcname="DejaGnu"
 
-configdirs="binutils.all"
+configdirs="binutils-all"
 
 # per-host:
 
