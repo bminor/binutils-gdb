@@ -1,3 +1,8 @@
+2003-10-27  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ld-undefined/undefined.exp: Mark as xfail for m6811 and m6812
+	due to elf/Dwarf2 binutils limitation.
+
 2003-10-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elfvers/vers.exp (test_ldfail): Add "-Wl," to pass the
