@@ -164,7 +164,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	v850		--target=v850-elf ,-Werror
 			Maintenance only
-			OBSOLETE candidate, not multi-arch
 
 	vax		--target=vax-dec-vms5.5 ,-Werror
 			Maintenance only

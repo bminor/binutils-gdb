@@ -1,3 +1,7 @@
+2002-05-22  Corinna Vinschen  <vinschen@redhat.com>
+
+	* MAINTAINERS: Remove status `OBSOLETE' from v850.
+
 2002-05-22  Michal Ludvig  <mludvig@suse.cz>
 
 	* dwarf2cfi.c (frame_state_for): Added safety check for a valid
