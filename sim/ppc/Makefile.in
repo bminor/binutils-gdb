@@ -106,6 +106,9 @@ CONFIG_CFLAGS = $(BSWAP_CFLAGS) \
 
 STD_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARNING_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)
 NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEFINES) $(TDEFINES) $(INCLUDES)
+BUILD_CFLAGS	= -O $(INCLUDES)
+
+BUILD_LDFLAGS	=
 
 CONFIG_FILE = @sim_config@
 IGEN_OPCODE_RULES = @sim_opcode@
@@ -182,7 +185,8 @@ CPU_H = \
 DEVICE_TABLE_H = \
 	$(BASICS_H) \
 	device_table.h \
-	device.h
+	device.h \
+	hw.h
 
 EMUL_GENERIC_H = \
 	$(CPU_H) \
@@ -201,7 +205,9 @@ BUILT_SRC_WO_CONFIG = \
 	semantics.h semantics.c \
 	itable.h itable.c \
 	spreg.h spreg.c \
-	model.h model.c
+	model.h model.c \
+	hw.h hw.c \
+	filter_host.c
 
 BUILT_SRC = \
 	$(BUILT_SRC_WO_CONFIG) \
@@ -231,7 +237,8 @@ LIB_SRC = \
 	device_table.c \
 	cap.c \
 	mon.c \
-	options.c
+	options.c \
+	$(HW_SRC)
 
 MAIN_SRC = \
 	main.c \
@@ -266,10 +273,25 @@ LIB_OBJ = \
 	semantics.o \
 	idecode.o \
 	psim.o \
-	options.o
+	options.o \
+	$(HW)
 
 
 GDB_OBJ = sim_calls.o 
+
+HW_SRC = \
+	hw_cpu.c \
+	hw_memory.c \
+	hw_nvram.c \
+	hw_iobus.c \
+	hw_pal.c
+
+HW = \
+	hw_cpu.o \
+	hw_memory.o \
+	hw_nvram.o \
+	hw_iobus.o \
+	hw_pal.o
 
 
 psim: $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBS)
@@ -279,7 +301,7 @@ run: psim
 	rm -f run
 	ln psim run
 
-$(TARGETLIB): tmp-igen tmp-dgen $(LIB_OBJ) $(GDB_OBJ)
+$(TARGETLIB): tmp-igen tmp-dgen $(HW) $(LIB_OBJ) $(GDB_OBJ)
 	rm -f $(TARGETLIB)
 	$(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(RANLIB) $(TARGETLIB)
@@ -316,7 +338,7 @@ idecode.o: idecode.c $(CPU_H) $(IDECODE_H) semantics.h
 vm.o: vm.c vm.h vm_n.h $(BASICS_H) $(REGISTERS_H) \
 	device.h corefile.h interrupts.h itable.h mon.h
 
-corefile.o: corefile.c corefile.h corefile-n.h $(BASICS_H) device.h device_table.h
+corefile.o: corefile.c corefile.h corefile-n.h $(BASICS_H) $(DEVICE_TABLE_H)
 
 model.o: model.c $(CPU_H)
 
@@ -330,7 +352,7 @@ main.o: main.c $(PSIM_H) itable.h options.h
 
 device.o: device.c $(DEVICE_TABLE_H) cap.h
 
-device_table.o: device_table.c $(DEVICE_TABLE_H) events.h
+device_table.o: device_table.c $(DEVICE_TABLE_H) events.h hw.c
 
 cap.o: cap.c cap.h $(BASICS_H)
 
@@ -395,17 +417,57 @@ $(TARGETLIB): tmp-igen tmp-dgen
 itable.h itable.c icache.h idecode.h idecode.c semantics.h semantics.c model.h model.c: tmp-igen
 spreg.h spreg.c: tmp-dgen
 
-dgen: dgen.o table.o lf.o misc.o filter_filename.o
-	$(CC_FOR_BUILD) $(CFLAGS) $(SIM_CFLAGS) $(LDFLAGS) -o dgen dgen.o table.o lf.o misc.o filter_filename.o $(LIBIBERTY_LIB) $(LIBS)
+dgen: dgen.o table.o lf.o misc.o filter_host.o
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o dgen dgen.o table.o lf.o misc.o filter_host.o $(LIBIBERTY_LIB) $(LIBS)
 
-igen: igen.o table.o lf.o misc.o filter_filename.o
-	$(CC_FOR_BUILD) $(CFLAGS) $(SIM_CFLAGS) $(LDFLAGS) -o igen igen.o table.o lf.o misc.o filter_filename.o $(LIBIBERTY_LIB) $(LIBS)
+igen: igen.o table.o lf.o misc.o filter_host.o
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o igen igen.o table.o lf.o misc.o filter_host.o $(LIBIBERTY_LIB) $(LIBS)
 
-table.o: misc.h filter_filename.h lf.h table.h
-lf.o: misc.h filter_filename.h lf.h
-dgen.o igen.o: misc.h filter_filename.h lf.h table.h
+filter_host.c: filter_filename.c
+	cat $(srcdir)/filter_filename.c > filter_host.c
+
+filter_host.o: filter_host.c filter_filename.h config.h ppc-config.h
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c filter_host.c
+
+table.o: table.c misc.h filter_filename.h lf.h table.h
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/table.c
+
+lf.o: lf.c misc.h filter_filename.h lf.h
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/lf.c
+
+dgen.o: dgen.c misc.h filter_filename.h lf.h table.h
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/dgen.c
+
+igen.o: igen.c misc.h filter_filename.h lf.h table.h
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/igen.c
+
 misc.o: misc.h filter_filename.h
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/misc.c
+
 # With out this #, make thinks that misc.o doesn't have a rule
+
+# real hardware
+hw.h:
+	(cd $(srcdir); ls $(HW_SRC)) \
+	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
+		-e 's/^/extern const device_descriptor /' \
+		-e 's/$$/_device_descriptor\[\];/' \
+		> tmp-hw.h
+	mv tmp-hw.h hw.h
+hw.c:
+	(cd $(srcdir); ls $(HW_SRC)) \
+	| sed -e 's/^.*\(hw_.*\)\.c/\1/' \
+		-e 's/^/    /' \
+		-e 's/$$/_device_descriptor,/' \
+		> tmp-hw.c
+	mv tmp-hw.c hw.c
+hw_cpu.o: hw_cpu.c $(DEVICE_TABLE_H)
+hw_memory.o: hw_memory.c $(DEVICE_TABLE_H)
+hw_nvram.o: hw_nvram.c $(DEVICE_TABLE_H)
+hw_iobus.o: hw_iobus.c $(DEVICE_TABLE_H)
+hw_pal.o: hw_pal.c $(DEVICE_TABLE_H)
+# ignore this line, it stops make from getting confused
+
 
 tags etags: TAGS
 

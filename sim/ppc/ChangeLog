@@ -1,3 +1,8 @@
+Fri May  3 15:07:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in: Correctly build simulator for build machine != host
+	machine.
+
 Tue Apr 30 18:46:05 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (--enable-hostendian): Rework so the default uses
