@@ -499,7 +499,8 @@ SOURCE_HFILES = \
 	elfcode.h elfcore.h elflink.h freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libieee.h libnlm.h liboasys.h libpei.h netbsd.h nlm-target.h \
-	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h libxcoff.h xcoff.h
+	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h libxcoff.h \
+	xcoff-target.h
 
 ## ... and all .h files which are in the build tree.
 BUILD_HFILES = \

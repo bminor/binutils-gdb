@@ -121,7 +121,7 @@ is_global_data_symbol_definition (abfd, sym)
 }
 
 /* Search the symbol table of the archive element of the archive ABFD
-   whoes archive map contains a mention of SYMDEF, and determine if
+   whose archive map contains a mention of SYMDEF, and determine if
    the symbol is defined in this element.  */
 static boolean
 elf_link_is_defined_archive_symbol (abfd, symdef)
@@ -2471,7 +2471,7 @@ elf_link_read_relocs_from_section (abfd, shdr, external_relocs,
 			       * sizeof (Elf_Internal_Rel)));
       for (; erel < erelend; erel++, irela += bed->s->int_rels_per_ext_rel)
 	{
-	  unsigned char i;
+	  unsigned int i;
 
 	  if (bed->s->swap_reloc_in)
 	    (*bed->s->swap_reloc_in) (abfd, (bfd_byte *) erel, irel);
@@ -5484,7 +5484,7 @@ elf_link_output_relocs (output_bfd, input_section, input_rel_hdr,
       erel = ((Elf_External_Rel *) output_rel_hdr->contents + *rel_countp);
       for (; irela < irelaend; irela += bed->s->int_rels_per_ext_rel, erel++)
 	{
-	  unsigned char i;
+	  unsigned int i;
 	  
 	  for (i = 0; i < bed->s->int_rels_per_ext_rel; i++)
 	    {
@@ -5840,7 +5840,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	      Elf_Internal_Rela *irelaend;
 	      struct elf_link_hash_entry **rel_hash;
 	      Elf_Internal_Shdr *input_rel_hdr;
-	      unsigned char next_erel;
+	      unsigned int next_erel;
 
 	      /* Adjust the reloc addresses and symbol indices.  */
 
@@ -6162,7 +6162,7 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
     {
       Elf_Internal_Rel *irel;
       Elf_External_Rel *erel;
-      unsigned char i;
+      unsigned int i;
       
       irel = (Elf_Internal_Rel *) bfd_zmalloc (bed->s->int_rels_per_ext_rel
 					       * sizeof (Elf_Internal_Rel));
@@ -6187,7 +6187,7 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
     {
       Elf_Internal_Rela *irela;
       Elf_External_Rela *erela;
-      unsigned char i;
+      unsigned int i;
       
       irela = (Elf_Internal_Rela *) bfd_zmalloc (bed->s->int_rels_per_ext_rel
 						 * sizeof (Elf_Internal_Rela));

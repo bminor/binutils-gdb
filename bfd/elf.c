@@ -829,8 +829,8 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
       break;
     case bfd_print_symbol_all:
       {
-	CONST char *section_name;
-	CONST char *name = NULL;
+	const char *section_name;
+	const char *name = NULL;
 	struct elf_backend_data *bed;
 	unsigned char st_other;
 
@@ -5020,13 +5020,13 @@ _bfd_elf_set_arch_mach (abfd, arch, machine)
 
 static boolean
 elf_find_function (abfd, section, symbols, offset,
-                  filename_ptr, functionname_ptr)
+		   filename_ptr, functionname_ptr)
      bfd *abfd ATTRIBUTE_UNUSED;
      asection *section;
      asymbol **symbols;
      bfd_vma offset;
-     CONST char **filename_ptr;
-     CONST char **functionname_ptr;
+     const char **filename_ptr;
+     const char **functionname_ptr;
 {
   const char *filename;
   asymbol *func;
@@ -5082,46 +5082,46 @@ elf_find_function (abfd, section, symbols, offset,
 
 boolean
 _bfd_elf_find_nearest_line (abfd, section, symbols, offset,
-                           filename_ptr, functionname_ptr, line_ptr)
+			    filename_ptr, functionname_ptr, line_ptr)
      bfd *abfd;
      asection *section;
      asymbol **symbols;
      bfd_vma offset;
-     CONST char **filename_ptr;
-     CONST char **functionname_ptr;
+     const char **filename_ptr;
+     const char **functionname_ptr;
      unsigned int *line_ptr;
 {
   boolean found;
 
   if (_bfd_dwarf1_find_nearest_line (abfd, section, symbols, offset,
-                                    filename_ptr, functionname_ptr,
-                                    line_ptr))
+				     filename_ptr, functionname_ptr,
+				     line_ptr))
     {
       if (!*functionname_ptr)
-       elf_find_function (abfd, section, symbols, offset,
-                          *filename_ptr ? NULL : filename_ptr,
-                          functionname_ptr);
-       
+	elf_find_function (abfd, section, symbols, offset,
+			   *filename_ptr ? NULL : filename_ptr,
+			   functionname_ptr);
+
       return true;
     }
 
   if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
-                                    filename_ptr, functionname_ptr,
-                                    line_ptr, 0,
-                                    &elf_tdata (abfd)->dwarf2_find_line_info))
+				     filename_ptr, functionname_ptr,
+				     line_ptr, 0,
+				     &elf_tdata (abfd)->dwarf2_find_line_info))
     {
       if (!*functionname_ptr)
-       elf_find_function (abfd, section, symbols, offset,
-                          *filename_ptr ? NULL : filename_ptr,
-                          functionname_ptr);
-       
+	elf_find_function (abfd, section, symbols, offset,
+			   *filename_ptr ? NULL : filename_ptr,
+			   functionname_ptr);
+
       return true;
     }
 
   if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,
-                                            &found, filename_ptr,
-                                            functionname_ptr, line_ptr,
-                                            &elf_tdata (abfd)->line_info))
+					     &found, filename_ptr,
+					     functionname_ptr, line_ptr,
+					     &elf_tdata (abfd)->line_info))
     return false;
   if (found)
     return true;
@@ -5130,7 +5130,7 @@ _bfd_elf_find_nearest_line (abfd, section, symbols, offset,
     return false;
 
   if (! elf_find_function (abfd, section, symbols, offset,
-                          filename_ptr, functionname_ptr))
+			   filename_ptr, functionname_ptr))
     return false;
 
   *line_ptr = 0;

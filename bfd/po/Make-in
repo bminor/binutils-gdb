@@ -206,7 +206,7 @@ clean: mostlyclean
 distclean: clean
 	rm -f Makefile Makefile.in *.mo *.msg *.cat *.cat.m
 	rm -f SRC-POTFILES BLD-POTFILES SRC-POTFILES.in	BLD-POTFILES.in
-	
+
 maintainer-clean: distclean
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."

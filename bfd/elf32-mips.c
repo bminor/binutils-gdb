@@ -249,8 +249,8 @@ static bfd *reldyn_sorting_bfd;
     (abfd->xvec == &bfd_elf32_tradlittlemips_vec)) ? ict_none : \
   ((ABI_N32_P (abfd) || ABI_64_P (abfd)) ? ict_irix6 : ict_irix5))
 #endif
-/* Whether we are trying to be compatible with IRIX at all.  */
 
+/* Whether we are trying to be compatible with IRIX at all.  */
 #define SGI_COMPAT(abfd) \
   (IRIX_COMPAT (abfd) != ict_none)
 

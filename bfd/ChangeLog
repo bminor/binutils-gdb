@@ -1,3 +1,18 @@
+2001-06-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h: Whitespace changes.
+	(elf_link_read_relocs_from_section): Use "unsigned int" iterator
+	rather than "unsigned char".
+	(elf_link_output_relocs): Likewise.
+	(elf_link_input_bfd): Likewise.
+	(elf_reloc_link_order): LIkewise.
+	* elf.c: s/CONST/const/.  Whitespace changes.
+	* elf32-mips.c: Formatting fix.
+
+	* Makefile.am (SOURCE_HFILES): Include xcoff-target.h, remove xcoff.h.
+	* Makefile.in: Regenerate.
+	* po/Make-in: Remove trailing tab.
+
 2001-06-09  Philip Blundell  <philb@gnu.org>
 
 	* elf32-arm.h (elf32_arm_plt0_entry): Correct error in last
@@ -53,7 +68,7 @@
 	* elf32-i386.c (elf_i386_check_relocs): Don't allocate .got and
 	.relgot space here.
 	(elf_i386_gc_sweep_hook): ..and no need to deallocate here..
-	(elf32_hppa_adjust_dynamic_symbol): ..and don't allocate .plt and
+	(elf_i386_adjust_dynamic_symbol): ..and don't allocate .plt and
 	.rel.plt here..
 	(allocate_plt_and_got): ..instead do it all here.  New function.
 	(elf_i386_size_dynamic_sections): Allocate local .got space and
@@ -278,7 +293,7 @@
 
 	* reloc.c (bfd_reloc_code_real): Add MIPS ELF64 relocations.
 	* libbfd.h: Regenerate.
-	* bfd0in2.h: Regenerate.
+	* bfd-in2.h: Regenerate.
 
 	* aoutx.h (aout_@var{size}_machine_type): Add MIPS r12k support.
 	* archures.c (bfd_mach_mips12000): Define.
