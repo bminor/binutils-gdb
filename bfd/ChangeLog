@@ -1,3 +1,8 @@
+2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf-m10300.c (elf32_mn10300_link_hash_newfunc): Reorder
+	initializers to match struct declaration.
+
 2002-12-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf2.c (comp_unit_contains_address): Comment typo fix.

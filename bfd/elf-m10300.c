@@ -2675,9 +2675,9 @@ elf32_mn10300_link_hash_newfunc (entry, table, string)
     {
       ret->direct_calls = 0;
       ret->stack_size = 0;
+      ret->movm_args = 0;
       ret->movm_stack_size = 0;
       ret->flags = 0;
-      ret->movm_args = 0;
     }
 
   return (struct bfd_hash_entry *) ret;
