@@ -513,8 +513,8 @@ char *str;
 	break;
       case LR:
 	op_end = parse_reg(op_end + 1, &reg);
-	if( reg==0 || reg==15 )
-	        as_bad ("invalid register 'r0' and 'r15' illegal");
+	if( reg==3 || reg==15 )
+	        as_bad ("invalid register 'r3' and 'r15' illegal");
 	inst |= (reg<<8);
 	if (*op_end++ == ',')
 	  {   
@@ -573,10 +573,10 @@ char *str;
 		{   op_end = parse_reg(op_end + 1, &basereg);
 		    if (*op_end == ')')
 			op_end++;
-		    if (endreg == 15 && basereg == 0)
+		    if (endreg == 15 && basereg == 3)
 		    {	
 			if(reg==0 || reg==15)
-			  as_bad("bad register list, r0 and r15 invalid as starting registers");
+			  as_bad("bad register list, 'r3' and 'r15' invalid as starting registers");
 			inst |= 0x0080;		/* list form */
 		    	inst |= reg;
 		    }
