@@ -1,3 +1,20 @@
+Sat Apr 13 02:58:02 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* eval.c (evaluate_subexp_standard):  Report error when attempting to
+	evaluate subscripts for types which cannot be subscripted.
+
+	* valarith.c (value_x_binop, value_x_unop):  Add noside parameter.
+	Return a zero value with the return type of the member function
+	if noside is EVAL_AVOID_SIDE_EFFECTS instead of calling the member
+	function.
+	* values.h (value_x_binop, value_x_unop):  Update prototypes
+	accordingly.
+	* eval.c (evaluate_subexp_standard):  Update all callers of
+	value_x_binop, value_x_unop accordingly.
+
+	* valarith.c (value_neg, value_complement):  Perform ANSI C/C++
+	integral promotion on operands.
+
 Fri Apr 12 13:19:27 1996  Fred Fish  <fnf@cygnus.com>
 
 	* README: Update for 4.16 release.
