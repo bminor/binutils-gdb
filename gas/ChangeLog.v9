@@ -1,3 +1,14 @@
+Wed Jun 30 06:21:27 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-sparc.c (md_begin): If sparcv9 is defined, reset
+	current_architecture to v9 automatically.
+
+	* config/tc-sparc.h (TARGET_FORMAT): Use elf64-sparc for v9.
+
+	* config/tc-sparc64.h, config/tc-sparc64.c: New files.
+	* configure.in: Use sparc64 cpu files for v9, and default to elf
+	format.
+
 Fri Jun 25 10:47:24 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* config/tc-sparc.c (sparc_ip): Remove support for %d/%q fp regs.
