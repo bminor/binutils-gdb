@@ -276,8 +276,8 @@ esac
 AC_SUBST(BFDLIB)
 AC_SUBST(ALL_OBJ_DEPS)
 
-case "x${host_canon}" in
-  x${target_canon})			;;
+case "x${host}" in
+  x${target})				;;
   *)		AC_DEFINE(CROSS_COMPILE);;
 esac
 

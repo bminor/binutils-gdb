@@ -783,8 +783,8 @@ esac
 
 
 
-case "x${host_canon}" in
-  x${target_canon})			;;
+case "x${host}" in
+  x${target})				;;
   *)		cat >> confdefs.h <<\EOF
 #define CROSS_COMPILE 1
 EOF
