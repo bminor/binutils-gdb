@@ -1,3 +1,8 @@
+2003-01-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.c, sentinel-frame.c, sentinel-frame.h: Merge with
+	mainline.
+	
 2003-01-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in: Update.

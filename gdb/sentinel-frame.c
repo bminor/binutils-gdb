@@ -102,7 +102,7 @@ sentinel_frame_pop (struct frame_info *frame,
   internal_error (__FILE__, __LINE__, "Function sentinal_frame_pop called");
 }
 
-const struct frame_unwind sentinel_frame_unwind =
+const struct frame_unwind sentinel_frame_unwinder =
 {
   sentinel_frame_pop,
   sentinel_frame_pc_unwind,
@@ -110,8 +110,4 @@ const struct frame_unwind sentinel_frame_unwind =
   sentinel_frame_register_unwind
 };
 
-const struct frame_unwind *
-sentinel_frame_unwind_p (CORE_ADDR pc)
-{
-  return &sentinel_frame_unwind;
-}
+const struct frame_unwind *const sentinel_frame_unwind = &sentinel_frame_unwinder;
