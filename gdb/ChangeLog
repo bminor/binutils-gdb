@@ -1,3 +1,9 @@
+2002-07-04  Michal Ludvig  <mludvig@suse.cz>
+
+	* gdbserver/linux-x86-64-low.c (x86_64_regmap): Make it an array of 
+	byte offsets instead of an array of indexes.
+	(x86_64_store_gregset, x86_64_store_fpregset): Parameter made const.
+
 2002-07-03  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (struct regcache): Add opaque declaration.
