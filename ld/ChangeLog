@@ -1,5 +1,8 @@
 Mon Jul 12 11:45:48 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* ldmain.c (set_scripts_dir): Check . and <ld bin dir>/../lib for
+	ldscripts, as well as <ld bin dir> and SCRIPTDIR.
+
 	* ldlang.c (lang_process): Use sizeof instead of magic constant.
 
 	* ldmain.c (get_emulation, check_for_scripts_dir,

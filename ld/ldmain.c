@@ -338,36 +338,52 @@ check_for_scripts_dir (dir)
   sprintf (buf, "%s/ldscripts", dir);
 
   res = stat (buf, &s) == 0 && S_ISDIR (s.st_mode);
+  free (buf);
   if (res)
-    {
-      buf[dirlen] = '\0';
-      ldfile_add_library_path (buf);
-    }
-  else
-    free (buf);
-
+    ldfile_add_library_path (dir);
   return res;
 }
 
 /* Set the default directory for finding script files.
-   Libraries will be searched for here too, but that's ok.  */
+   Libraries will be searched for here too, but that's ok.
+   We look for the "ldscripts" directory in:
+
+   the curent dir
+   SCRIPTDIR (passed from Makefile)
+   the dir where this program is
+   the dir where this program is/../lib  */
 
 static void
 set_scripts_dir ()
 {
-  char *end;
+  char *end, *dir;
+  size_t dirlen;
+
+  if (check_for_scripts_dir ("."))
+    return;			/* Newest version, most likely.  */
 
   if (check_for_scripts_dir (SCRIPTDIR))
-    return;			/* Good--we've been installed.  */
+    return;			/* We've been installed normally.  */
 
   /* Look for "ldscripts" in the dir where our binary is.  */
   end = strrchr (program_name, '/');
   if (!end)
-    return;			/* Hope for the best.  */
+    return;
 
-  *end = '\0';
-  check_for_scripts_dir (program_name);
-  *end = '/';
+  /* Make a copy of program_name in dir.  */
+  dirlen = end - program_name;
+  dir = (char *) ldmalloc (dirlen + 8);	/* Leave room for later "/../lib".  */
+  strncpy (dir, program_name, dirlen);
+  dir[dirlen] = '\0';
+  if (check_for_scripts_dir (dir))
+    return;			/* Don't free dir.  */
+
+  /* Look for "ldscripts" in <the dir where our binary is>/../lib.  */
+  strcpy (dir + dirlen, "/../lib");
+  if (check_for_scripts_dir (dir))
+    return;
+
+  free (dir);			/* Well, we tried.  */
 }
 
 void
