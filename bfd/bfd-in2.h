@@ -160,17 +160,50 @@ typedef enum bfd_format {
 	      bfd_type_end}	/* marks the end; don't use it! */
          bfd_format;
 
-/* Object file flag values */
+/* Values that may appear in the flags field of a BFD.  These also
+   appear in the object_flags field of the bfd_target structure, where
+   they indicate the set of flags used by that backend (not all flags
+   are meaningful for all object file formats) (FIXME: at the moment,
+   the object_flags values have mostly just been copied from backend
+   to another, and are not necessarily correct).  */
+
+/* No flags.  */
 #define NO_FLAGS    	0x00
+
+/* BFD contains relocation entries.  */
 #define HAS_RELOC   	0x01
+
+/* BFD is directly executable.  */
 #define EXEC_P      	0x02
+
+/* BFD has line number information (basically used for F_LNNO in a
+   COFF header).  */
 #define HAS_LINENO  	0x04
+
+/* BFD has debugging information.  */
 #define HAS_DEBUG   	0x08
+
+/* BFD has symbols.  */
 #define HAS_SYMS    	0x10
+
+/* BFD has local symbols (basically used for F_LSYMS in a COFF
+   header).  */
 #define HAS_LOCALS  	0x20
+
+/* BFD is a dynamic object.  */
 #define DYNAMIC     	0x40
+
+/* Text section is write protected (if D_PAGED is not set, this is
+   like an a.out NMAGIC file) (the linker sets this by default, but
+   clears it for -r or -N).  */
 #define WP_TEXT     	0x80
+
+/* BFD is dynamically paged (this is like an a.out ZMAGIC file) (the
+   linker sets this by default, but clears it for -r or -n or -N).  */
 #define D_PAGED     	0x100
+
+/* BFD is relaxable (this means that bfd_relax_section may be able to
+   do something).  */
 #define BFD_IS_RELAXABLE 0x200
 
 /* symbols and relocation */
@@ -387,6 +420,7 @@ CAT(NAME,_bfd_make_debug_symbol)
 #define bfd_get_filename(abfd) ((char *) (abfd)->filename)
 #define bfd_get_format(abfd) ((abfd)->format)
 #define bfd_get_target(abfd) ((abfd)->xvec->name)
+#define bfd_get_flavour(abfd) ((abfd)->xvec->flavour)
 #define bfd_get_file_flags(abfd) ((abfd)->flags)
 #define bfd_applicable_file_flags(abfd) ((abfd)->xvec->object_flags)
 #define bfd_applicable_section_flags(abfd) ((abfd)->xvec->section_flags)
@@ -1000,9 +1034,17 @@ typedef CONST struct reloc_howto_struct
            unwanted data from the relocation.  */
   unsigned int rightshift;
 
-        /*  The size of the item to be relocated - 0, is one byte, 1 is 2
-           bytes, 2 is four bytes.  A negative value indicates that the
-	    result is to be subtracted from the data.  */
+	 /*  The size of the item to be relocated.  This is *not* a
+	    power-of-two measure.
+		 0 : one byte
+		 1 : two bytes
+		 2 : four bytes
+		 3 : nothing done (unless special_function is nonzero)
+		 4 : eight bytes
+		-2 : two bytes, result should be subtracted from the
+		     data instead of added
+	    There is currently no trivial way to extract a "number of
+	    bytes" from a howto pointer.  */
   int size;
 
         /*  The number of bits in the item to be relocated.  This is used
@@ -1097,46 +1139,44 @@ bfd_perform_relocation
     bfd *output_bfd));
 
 typedef enum bfd_reloc_code_real 
-
 {
-   /* 64 bits wide, simple reloc */
+   /* Basic absolute relocations */
   BFD_RELOC_64,
-   /* 64 bits, PC-relative */
-  BFD_RELOC_64_PCREL,
-
-   /* 32 bits wide, simple reloc */
   BFD_RELOC_32,
-   /* 32 bits, PC-relative */
-  BFD_RELOC_32_PCREL,
-
-   /* 16 bits wide, simple reloc */
   BFD_RELOC_16,        
-   /* 16 bits, PC-relative */
-  BFD_RELOC_16_PCREL,
-
-   /* 8 bits wide, simple */
   BFD_RELOC_8,
-   /* 8 bits wide, pc relative */
+
+   /* PC-relative relocations */
+  BFD_RELOC_64_PCREL,
+  BFD_RELOC_32_PCREL,
+  BFD_RELOC_24_PCREL,     /* used by i960 */
+  BFD_RELOC_16_PCREL,
   BFD_RELOC_8_PCREL,
-   /* 8 bits wide, but used to form an address like 0xffnn */
-  BFD_RELOC_8_FFnn,
+
+   /* Linkage-table relative */
+  BFD_RELOC_32_BASEREL,
+  BFD_RELOC_16_BASEREL,
+  BFD_RELOC_8_BASEREL,
 
    /* The type of reloc used to build a contructor table - at the moment
      probably a 32 bit wide abs address, but the cpu can choose. */
   BFD_RELOC_CTOR,
 
-   /* High 22 bits of 32-bit value; simple reloc.  */
+   /* 8 bits wide, but used to form an address like 0xffnn */
+  BFD_RELOC_8_FFnn,
+
+   /* 32-bit pc-relative, shifted right 2 bits (i.e., 30-bit
+     word displacement, e.g. for SPARC) */
+  BFD_RELOC_32_PCREL_S2,
+
+   /* High 22 bits of 32-bit value, placed into lower 22 bits of
+     target word; simple reloc.  */
   BFD_RELOC_HI22,
    /* Low 10 bits.  */
   BFD_RELOC_LO10,
 
    /* Reloc types used for i960/b.out.  */
-  BFD_RELOC_24_PCREL,
   BFD_RELOC_I960_CALLJ,
-
-   /* 32-bit pc-relative, shifted right 2 bits (i.e., 30-bit
-     word displacement, e.g. for SPARC) */
-  BFD_RELOC_32_PCREL_S2,
 
    /* now for the sparc/elf codes */
   BFD_RELOC_NONE,		 /* actually used */
@@ -1563,7 +1603,7 @@ struct _bfd
       struct bout_data_struct *bout_data;
       struct sun_core_struct *sun_core_data;
       struct trad_core_struct *trad_core_data;
-      struct hppa_data_struct *hppa_data;
+      struct som_data_struct *som_data;
       struct hpux_core_struct *hpux_core_data;
       struct sgi_core_struct *sgi_core_data;
       struct lynx_core_struct *lynx_core_data;
@@ -1675,21 +1715,22 @@ core_file_matches_executable_p
                ((*((bfd)->xvec->message)) arglist)
 #define BFD_SEND_FMT(bfd, message, arglist) \
             (((bfd)->xvec->message[(int)((bfd)->format)]) arglist)
+enum bfd_flavour {
+  bfd_target_unknown_flavour,
+  bfd_target_aout_flavour,
+  bfd_target_coff_flavour,
+  bfd_target_ecoff_flavour,
+  bfd_target_elf_flavour,
+  bfd_target_ieee_flavour,
+  bfd_target_nlm_flavour,
+  bfd_target_oasys_flavour,
+  bfd_target_tekhex_flavour,
+  bfd_target_srec_flavour,
+  bfd_target_som_flavour};
 typedef struct bfd_target
 {
   char *name;
-  enum target_flavour {
-    bfd_target_unknown_flavour,
-    bfd_target_aout_flavour,
-    bfd_target_coff_flavour,
-    bfd_target_ecoff_flavour,
-    bfd_target_elf_flavour,
-    bfd_target_ieee_flavour,
-    bfd_target_nlm_flavour,
-    bfd_target_oasys_flavour,
-    bfd_target_tekhex_flavour,
-    bfd_target_srec_flavour,
-    bfd_target_hppa_flavour} flavour;
+  enum bfd_flavour flavour;
   boolean byteorder_big_p;
   boolean header_byteorder_big_p;
   flagword object_flags;       

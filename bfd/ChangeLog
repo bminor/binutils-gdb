@@ -1,5 +1,10 @@
 Sun Oct 31 09:35:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* targets.c: Move enum target_flavour outside of struct and change
+	the name to enum bfd_flavour.  This means bfd clients can use it.
+	* bfd-in.h: Add macro bfd_get_flavour.
+	* bfd-in2.h: Rebuilt.
+
 	* som.c: Add comment about how abort() on corrupt executable is evil.
 
 Fri Oct 29 16:04:33 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
