@@ -1,3 +1,7 @@
+1999-10-08  Ben Elliston  <bje@cygnus.com>
+
+        * binutils.texi: Some rewording and clarifications.
+
 1999-09-15  Ulrich Drepper  <drepper@cygnus.com>
 
 	* readelf.c (dynamic_segment_parisc_val): Print 0 for DLD_FLAGS if
