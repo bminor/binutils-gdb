@@ -3,21 +3,21 @@
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -1836,16 +1836,15 @@ mk_fdrtab (abfd, debug_info, debug_swap, line_info)
   fdr_start = debug_info->fdr;
   fdr_end = fdr_start + debug_info->symbolic_header.ifdMax;
 
-  /* First, let's see how long the table needs to be: */
+  /* First, let's see how long the table needs to be.  */
   for (len = 0, fdr_ptr = fdr_start; fdr_ptr < fdr_end; fdr_ptr++)
     {
-      if (fdr_ptr->cpd == 0)	/* skip FDRs that have no PDRs */
+      if (fdr_ptr->cpd == 0)	/* Skip FDRs that have no PDRs.  */
 	continue;
       ++len;
     }
 
-  /* Now, create and fill in the table: */
-
+  /* Now, create and fill in the table.  */
   amt = (bfd_size_type) len * sizeof (struct ecoff_fdrtab_entry);
   line_info->fdrtab = (struct ecoff_fdrtab_entry*) bfd_zalloc (abfd, amt);
   if (line_info->fdrtab == NULL)
@@ -1868,7 +1867,7 @@ mk_fdrtab (abfd, debug_info, debug_swap, line_info)
 	  SYMR sym;
 
 	  sym_ptr = ((char *) debug_info->external_sym
-		     + (fdr_ptr->isymBase + 1)*debug_swap->external_sym_size);
+		     + (fdr_ptr->isymBase + 1) * debug_swap->external_sym_size);
 	  (*debug_swap->swap_sym_in) (abfd, sym_ptr, &sym);
 	  if (strcmp (debug_info->ss + fdr_ptr->issBase + sym.iss,
 		      STABS_SYMBOL) == 0)
@@ -1877,23 +1876,37 @@ mk_fdrtab (abfd, debug_info, debug_swap, line_info)
 
       if (!stabs)
 	{
-	  bfd_size_type external_pdr_size;
-	  char *pdr_ptr;
-	  PDR pdr;
-
-	  external_pdr_size = debug_swap->external_pdr_size;
-
-	  pdr_ptr = ((char *) debug_info->external_pdr
-		     + fdr_ptr->ipdFirst * external_pdr_size);
-	  (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
+	  /* eraxxon: There are at least two problems with this computation:
+	     1) PDRs do *not* contain offsets but full vma's; and typically the
+	     address of the first PDR is the address of the FDR, which will
+	     make (most) of the results of the original computation 0!
+	     2) Once in a wacky while, the Compaq compiler generated PDR
+	     addresses do not equal the FDR vma, but they (the PDR address)
+	     are still vma's and not offsets.  Cf. comments in
+	     'lookup_line'.  */
+#if 0
+	    bfd_size_type external_pdr_size;
+	    char *pdr_ptr;
+	    PDR pdr;
+	    
+	    external_pdr_size = debug_swap->external_pdr_size;
+	    
+	    pdr_ptr = ((char *) debug_info->external_pdr
+	              + fdr_ptr->ipdFirst * external_pdr_size);
+	    (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
 	  /* The address of the first PDR is the offset of that
 	     procedure relative to the beginning of file FDR.  */
-	  tab->base_addr = fdr_ptr->adr - pdr.adr;
+	    tab->base_addr = fdr_ptr->adr - pdr.adr;
+#else
+	  /* The address of the first PDR is the offset of that
+	     procedure relative to the beginning of file FDR.  */
+	  tab->base_addr = fdr_ptr->adr; 
+#endif
 	}
       else
 	{
 	  /* XXX I don't know about stabs, so this is a guess
-	     (davidm@cs.arizona.edu): */
+	     (davidm@cs.arizona.edu).  */
 	  tab->base_addr = fdr_ptr->adr;
 	}
       tab->fdr = fdr_ptr;
@@ -1937,14 +1950,22 @@ fdrtab_lookup (line_info, offset)
       else
 	low = mid + 1;
     }
+
+  /* eraxxon: at this point 'offset' is either lower than the lowest entry or
+     higher than the highest entry. In the former case high = low = mid = 0;
+     we want to return -1.  In the latter case, low = high and mid = low - 1;
+     we want to return the index of the highest entry.  Only in former case
+     will the following 'catch-all' test be true.  */
   ++mid;
 
-  /* last entry is catch-all for all higher addresses: */
+  /* Last entry is catch-all for all higher addresses.  */
   if (offset < tab[mid].base_addr)
     return -1;
 
  find_min:
 
+  /* eraxxon: There may be multiple FDRs in the table with the
+     same base_addr; make sure that we are at the first one.  */
   while (mid > 0 && tab[mid - 1].base_addr == tab[mid].base_addr)
     --mid;
 
@@ -1967,6 +1988,7 @@ lookup_line (abfd, debug_info, debug_swap, line_info)
   FDR *fdr_ptr;
   int i;
 
+  /* eraxxon: note that 'offset' is the full vma, not a section offset.  */
   offset = line_info->cache.start;
 
   /* Build FDR table (sorted by object file's base-address) if we
@@ -1977,10 +1999,80 @@ lookup_line (abfd, debug_info, debug_swap, line_info)
 
   tab = line_info->fdrtab;
 
-  /* find first FDR for address OFFSET */
+  /* Find first FDR for address OFFSET.  */
   i = fdrtab_lookup (line_info, offset);
   if (i < 0)
     return FALSE;		/* no FDR, no fun...  */
+  
+  /* eraxxon: 'fdrtab_lookup' doesn't give what we want, at least for Compaq's
+     C++ compiler 6.2.  Consider three FDRs with starting addresses of x, y,
+     and z, respectively, such that x < y < z.  Assume further that
+     y < 'offset' < z.  It is possble at times that the PDR for 'offset' is
+     associated with FDR x and *not* with FDR y.  Erg!!
+
+     From a binary dump of my C++ test case 'moo' using Compaq's coffobjanl
+     (output format has been edited for our purposes):
+
+     FDR [2]: (main.C): First instruction: 0x12000207c <x>
+       PDR [5] for File [2]: LoopTest__Xv                 <0x1200020a0> (a)
+       PDR [7] for File [2]: foo__Xv                      <0x120002168>
+     FDR [1]: (-1):     First instruction: 0x1200020e8 <y>
+       PDR [3] for File [1]:                              <0x120001ad0> (b)
+     FDR [6]: (-1):     First instruction: 0x1200026f0 <z>
+
+     (a) In the case of PDR5, the vma is such that the first few instructions
+     of the procedure can be found.  But since the size of this procedure is
+     160b, the vma will soon cross into the 'address space' of FDR1 and no
+     debugging info will be found.  How repugnant!
+
+     (b) It is also possible for a PDR to have a *lower* vma than its associated
+     FDR; see FDR1 and PDR3.  Gross!
+
+     Since the FDRs that are causing so much havok (in this case) 1) do not
+     describe actual files (fdr.rss == -1), and 2) contain only compiler
+     genarated routines, I thought a simple fix would be to exclude them from
+     the FDR table in 'mk_fdrtab'.  But, besides not knowing for certain
+     whether this would be correct, it creates an additional problem.  If we
+     happen to ask for source file info on a compiler generated (procedure)
+     symbol -- which is still in the symbol table -- the result can be
+     information from a real procedure!  This is because compiler generated
+     procedures with vma's higher than the last FDR in the fdr table will be
+     associated with a PDR from this FDR, specifically the PDR with the
+     highest vma.  This wasn't a problem before, because each procedure had a
+     PDR.  (Yes, this problem could be eliminated if we kept the size of the
+     last PDR around, but things are already getting ugly).
+
+     Probably, a better solution would be to have a sorted PDR table.  Each
+     PDR would have a pointer to its FDR so file information could still be
+     obtained.  A FDR table could still be constructed if necessary -- since
+     it only contains pointers, not much extra memory would be used -- but
+     the PDR table would be searched to locate debugging info.
+
+     There is still at least one remaining issue.  Sometimes a FDR can have a
+     bogus name, but contain PDRs that should belong to another FDR with a
+     real name.  E.g:
+
+     FDR [3]: 0000000120001b50 (/home/.../Array.H~alt~deccxx_5E5A62AD)
+       PDR [a] for File [3]: 0000000120001b50
+       PDR [b] for File [3]: 0000000120001cf0
+       PDR [c] for File [3]: 0000000120001dc8
+       PDR [d] for File [3]: 0000000120001e40
+       PDR [e] for File [3]: 0000000120001eb8
+       PDR [f] for File [3]: 0000000120001f4c
+     FDR [4]: 0000000120001b50 (/home/.../Array.H)
+
+     Here, FDR4 has the correct name, but should (seemingly) contain PDRa-f.
+     The symbol table for PDR4 does contain symbols for PDRa-f, but so does
+     the symbol table for FDR3.  However the former is different; perhaps this
+     can be detected easily. (I'm not sure at this point.)  This problem only
+     seems to be associated with files with templates.  I am assuming the idea
+     is that there is a 'fake' FDR (with PDRs) for each differently typed set
+     of templates that must be generated.  Currently, FDR4 is completely
+     excluded from the FDR table in 'mk_fdrtab' because it contains no PDRs.
+
+     Since I don't have time to prepare a real fix for this right now, be
+     prepared for 'A Horrible Hack' to force the inspection of all non-stabs
+     FDRs.  It's coming...  */
   fdr_ptr = tab[i].fdr;
 
   /* Check whether this file has stabs debugging information.  In a
@@ -2006,7 +2098,7 @@ lookup_line (abfd, debug_info, debug_swap, line_info)
       char *pdr_ptr;
       char *best_pdr = NULL;
       FDR *best_fdr;
-      bfd_vma best_dist = ~(bfd_vma) 0;
+      bfd_signed_vma best_dist = -1;
       PDR pdr;
       unsigned char *line_ptr;
       unsigned char *line_end;
@@ -2068,14 +2160,29 @@ lookup_line (abfd, debug_info, debug_swap, line_info)
          considerably, which is undesirable.  */
       external_pdr_size = debug_swap->external_pdr_size;
 
-      /* Make offset relative to object file's start-address: */
+#if 0 /* eraxxon: PDR addresses (pdr.adr) are not relative to FDRs!
+	 Leave 'offset' alone.  */
+      /* Make offset relative to object file's start-address.  */
       offset -= tab[i].base_addr;
+#endif
+      /* eraxxon: The Horrible Hack: Because of the problems above, set 'i'
+	 to 0 so we look through all FDRs.
+
+	 Because FDR's without any symbols are assumed to be non-stabs,
+	 searching through all FDRs may cause the following code to try to
+	 read stabs FDRs as ECOFF ones.  However, I don't think this will
+	 harm anything.  */
+      i = 0;
+      
       /* Search FDR list starting at tab[i] for the PDR that best matches
          OFFSET.  Normally, the FDR list is only one entry long.  */
       best_fdr = NULL;
       do
 	{
-	  bfd_vma dist, min_dist = 0;
+	  /* eraxxon: 'dist' and 'min_dist' can be negative now
+             because we iterate over every FDR rather than just ones
+             with a base address less than or equal to 'offset'.  */
+	  bfd_signed_vma dist = -1, min_dist = -1;
 	  char *pdr_hold;
 	  char *pdr_end;
 
@@ -2098,7 +2205,10 @@ lookup_line (abfd, debug_info, debug_swap, line_info)
 	      if (offset >= (pdr.adr - 0x10 * pdr.prof))
 		{
 		  dist = offset - (pdr.adr - 0x10 * pdr.prof);
-		  if (!pdr_hold || dist < min_dist)
+
+		  /* eraxxon: 'dist' can be negative now.  Note that
+                     'min_dist' can be negative if 'pdr_hold' below is NULL.  */
+		  if (!pdr_hold || (dist >= 0 && dist < min_dist))
 		    {
 		      min_dist = dist;
 		      pdr_hold = pdr_ptr;
@@ -2106,21 +2216,22 @@ lookup_line (abfd, debug_info, debug_swap, line_info)
 		}
 	    }
 
-	  if (!best_pdr || min_dist < best_dist)
+	  if (!best_pdr || (min_dist >= 0 && min_dist < best_dist))
 	    {
-	      best_dist = min_dist;
+	      best_dist = (bfd_vma) min_dist;  
 	      best_fdr = fdr_ptr;
 	      best_pdr = pdr_hold;
 	    }
-	  /* continue looping until base_addr of next entry is different: */
+	  /* Continue looping until base_addr of next entry is different.  */
 	}
-      while (++i < line_info->fdrtab_len
-	     && tab[i].base_addr == tab[i - 1].base_addr);
+      /* eraxxon: We want to iterate over all FDRs.
+	 See previous comment about 'fdrtab_lookup'.  */
+      while (++i < line_info->fdrtab_len);
 
       if (!best_fdr || !best_pdr)
-	return FALSE;			/* shouldn't happen...  */
+	return FALSE;			/* Shouldn't happen...  */
 
-      /* phew, finally we got something that we can hold onto: */
+      /* Phew, finally we got something that we can hold onto.  */
       fdr_ptr = best_fdr;
       pdr_ptr = best_pdr;
       (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
@@ -2130,7 +2241,7 @@ lookup_line (abfd, debug_info, debug_swap, line_info)
          number entries.  */
       line_end = debug_info->line + fdr_ptr->cbLineOffset + fdr_ptr->cbLine;
 
-      /* Make offset relative to procedure entry: */
+      /* Make offset relative to procedure entry.  */
       offset -= pdr.adr - 0x10 * pdr.prof;
       lineno = pdr.lnLow;
       line_ptr = debug_info->line + fdr_ptr->cbLineOffset + pdr.cbLineOffset;
