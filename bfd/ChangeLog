@@ -1,5 +1,14 @@
 2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
+	* elf32-s390.c (ELIMINATE_COPY_RELOCS): Define as one.
+	(elf_s390_adjust_dynamic_symbol): For weak symbols, copy
+	ELF_LINK_NON_GOT_REF from weakdef.
+	(elf_s390_copy_indirect_symbol): Test whether the weakdef sym has
+	already been adjusted before treating it specially.
+	* el64-s390.c: Likwise.
+
+2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
 	* elf32-s390.c (allocate_dynrelocs): For undef weak syms with
 	non-default visibility, a) don't make them dynamic, b) discard
 	space for dynamic relocs.
