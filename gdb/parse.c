@@ -59,6 +59,8 @@ int comma_terminates;
 static int expressiondebug = 0;
 #endif
 
+extern int hp_som_som_object_present;
+
 static void
 free_funcalls PARAMS ((void));
 
@@ -477,6 +479,9 @@ write_dollar_variable (str)
   /* Handle the tokens $digits; also $ (short for $0) and $$ (short for $$1)
      and $$digits (equivalent to $<-digits> if you could type that). */
 
+  struct symbol * sym = NULL;
+  struct minimal_symbol * msym = NULL;
+
   int negate = 0;
   int i = 1;
   /* Double dollar means negate the number and add -1 as well.
@@ -510,6 +515,29 @@ write_dollar_variable (str)
   if( i >= 0 )
     goto handle_register;
 
+  /* On HP-UX, certain system routines (millicode) have names beginning
+     with $ or $$, e.g. $$dyncall, which handles inter-space procedure
+     calls on PA-RISC. Check for those, first. */
+
+  sym = lookup_symbol (copy_name (str), (struct block *) NULL,
+                       VAR_NAMESPACE, (int *) NULL, (struct symtab **) NULL);
+  if (sym)
+    {
+      write_exp_elt_opcode (OP_VAR_VALUE);
+      write_exp_elt_block (block_found); /* set by lookup_symbol */
+      write_exp_elt_sym (sym);
+      write_exp_elt_opcode (OP_VAR_VALUE);
+      return;
+    }
+  msym = lookup_minimal_symbol (copy_name (str), NULL, NULL);
+  if (msym)
+    {
+      write_exp_msymbol (msym,
+                         lookup_function_type (builtin_type_int),
+                         builtin_type_int);
+      return;
+    }
+  
   /* Any other names starting in $ are debugger internal variables.  */
 
   write_exp_elt_opcode (OP_INTERNALVAR);
@@ -527,6 +555,257 @@ write_dollar_variable (str)
   write_exp_elt_opcode (OP_REGISTER); 
   return;
 }
+
+
+/* Parse a string that is possibly a namespace / nested class
+   specification, i.e., something of the form A::B::C::x.  Input
+   (NAME) is the entire string; LEN is the current valid length; the
+   output is a string, TOKEN, which points to the largest recognized
+   prefix which is a series of namespaces or classes.  CLASS_PREFIX is
+   another output, which records whether a nested class spec was
+   recognized (= 1) or a fully qualified variable name was found (=
+   0).  ARGPTR is side-effected (if non-NULL) to point to beyond the
+   string recognized and consumed by this routine.
+
+   The return value is a pointer to the symbol for the base class or
+   variable if found, or NULL if not found.  Callers must check this
+   first -- if NULL, the outputs may not be correct. 
+
+   This function is used c-exp.y.  This is used specifically to get
+   around HP aCC (and possibly other compilers), which insists on
+   generating names with embedded colons for namespace or nested class
+   members.
+
+   (Argument LEN is currently unused. 1997-08-27)
+
+   Callers must free memory allocated for the output string TOKEN.  */
+
+static const char coloncolon[2] = {':',':'};
+
+struct symbol *
+parse_nested_classes_for_hpacc (name, len, token, class_prefix, argptr)
+  char * name;
+  int len;
+  char ** token;
+  int * class_prefix;
+  char ** argptr;
+{
+   /* Comment below comes from decode_line_1 which has very similar
+      code, which is called for "break" command parsing. */
+  
+   /* We have what looks like a class or namespace
+     scope specification (A::B), possibly with many
+     levels of namespaces or classes (A::B::C::D).
+
+     Some versions of the HP ANSI C++ compiler (as also possibly
+     other compilers) generate class/function/member names with
+     embedded double-colons if they are inside namespaces. To
+     handle this, we loop a few times, considering larger and
+     larger prefixes of the string as though they were single
+     symbols.  So, if the initially supplied string is
+     A::B::C::D::foo, we have to look up "A", then "A::B",
+     then "A::B::C", then "A::B::C::D", and finally
+     "A::B::C::D::foo" as single, monolithic symbols, because
+     A, B, C or D may be namespaces.
+
+     Note that namespaces can nest only inside other
+     namespaces, and not inside classes.  So we need only
+     consider *prefixes* of the string; there is no need to look up
+     "B::C" separately as a symbol in the previous example. */
+
+  register char * p;
+  char * start, * end;
+  char * prefix = NULL;
+  char * tmp;
+  struct symbol * sym_class = NULL;
+  struct symbol * sym_var = NULL;
+  struct type * t;
+  register int i;
+  int colons_found = 0;
+  int prefix_len = 0;
+  int done = 0;
+  char * q; 
+
+  /* Check for HP-compiled executable -- in other cases
+     return NULL, and caller must default to standard GDB
+     behaviour. */
+
+  if (!hp_som_som_object_present)
+    return (struct symbol *) NULL;
+
+  p = name;
+
+  /* Skip over whitespace and possible global "::" */ 
+  while (*p && (*p == ' ' || *p == '\t')) p++;
+  if (p[0] == ':' && p[1] == ':')
+    p += 2;
+  while (*p && (*p == ' ' || *p == '\t')) p++;
+  
+  while (1)
+    {
+      /* Get to the end of the next namespace or class spec. */
+      /* If we're looking at some non-token, fail immediately */
+      start = p;
+      if (!(isalpha (*p) || *p == '$' || *p == '_'))
+        return (struct symbol *) NULL;
+      p++;
+      while (*p && (isalnum (*p) || *p == '$' || *p == '_')) p++;
+
+      if (*p == '<') 
+        {
+          /* If we have the start of a template specification,
+             scan right ahead to its end */ 
+          q = find_template_name_end (p);
+          if (q)
+            p = q;
+        }
+        
+      end = p;
+
+      /* Skip over "::" and whitespace for next time around */ 
+      while (*p && (*p == ' ' || *p == '\t')) p++;
+      if (p[0] == ':' && p[1] == ':')
+        p += 2;
+      while (*p && (*p == ' ' || *p == '\t')) p++;
+
+      /* Done with tokens? */ 
+      if (!*p || !(isalpha (*p) || *p == '$' || *p == '_'))
+        done = 1;
+
+      tmp = (char *) alloca (prefix_len + end - start + 3);
+      if (prefix)
+        {
+          memcpy (tmp, prefix, prefix_len);
+          memcpy (tmp + prefix_len, coloncolon, 2);
+          memcpy (tmp + prefix_len + 2, start, end - start);
+          tmp[prefix_len + 2 + end - start] = '\000';
+        }
+      else
+        {
+          memcpy (tmp, start, end - start);
+          tmp[end - start] = '\000';
+        }
+      
+      prefix = tmp;
+      prefix_len = strlen (prefix);
+      
+#if 0 /* DEBUGGING */ 
+      printf ("Searching for nested class spec: Prefix is %s\n", prefix);
+#endif      
+
+      /* See if the prefix we have now is something we know about */
+
+      if (!done) 
+        {
+          /* More tokens to process, so this must be a class/namespace */
+          sym_class = lookup_symbol (prefix, 0, STRUCT_NAMESPACE,
+                                     0, (struct symtab **) NULL);
+        }
+      else
+        {
+          /* No more tokens, so try as a variable first */ 
+          sym_var = lookup_symbol (prefix, 0, VAR_NAMESPACE,
+                               0, (struct symtab **) NULL);
+          /* If failed, try as class/namespace */ 
+          if (!sym_var)
+            sym_class = lookup_symbol (prefix, 0, STRUCT_NAMESPACE,
+                                       0, (struct symtab **) NULL);
+        }
+
+      if (sym_var ||
+          (sym_class &&
+           (t = check_typedef (SYMBOL_TYPE (sym_class)),
+            (TYPE_CODE (t) == TYPE_CODE_STRUCT
+             || TYPE_CODE (t) == TYPE_CODE_UNION))))
+        {
+          /* We found a valid token */
+          *token = (char *) xmalloc (prefix_len + 1 );
+          memcpy (*token, prefix, prefix_len);
+          (*token)[prefix_len] = '\000';
+          break;
+        }
+
+      /* No variable or class/namespace found, no more tokens */ 
+      if (done)
+        return (struct symbol *) NULL;
+    }
+
+  /* Out of loop, so we must have found a valid token */
+  if (sym_var)
+    *class_prefix = 0;
+  else
+    *class_prefix = 1;
+
+  if (argptr)
+    *argptr = done ? p : end;
+
+#if 0 /* DEBUGGING */ 
+  printf ("Searching for nested class spec: Token is %s, class_prefix %d\n", *token, *class_prefix);
+#endif
+
+  return sym_var ? sym_var : sym_class; /* found */ 
+}
+
+char *
+find_template_name_end (p)
+  char * p;
+{
+  int depth = 1;
+  int just_seen_right = 0;
+  int just_seen_colon = 0;
+  int just_seen_space = 0;
+  
+  if (!p || (*p != '<'))
+    return 0;
+
+  while (*++p)
+    {
+      switch (*p)
+        {
+          case '\'': case '\"':
+          case '{': case '}':
+            /* In future, may want to allow these?? */ 
+            return 0;
+          case '<':
+            depth++;                /* start nested template */ 
+            if (just_seen_colon || just_seen_right || just_seen_space)    
+              return 0;             /* but not after : or :: or > or space */ 
+            break;
+          case '>': 
+            if (just_seen_colon || just_seen_right)
+              return 0;             /* end a (nested?) template */
+            just_seen_right = 1;    /* but not after : or :: */ 
+            if (--depth == 0)       /* also disallow >>, insist on > > */ 
+              return ++p;           /* if outermost ended, return */ 
+            break;
+          case ':':
+            if (just_seen_space || (just_seen_colon > 1))
+              return 0;             /* nested class spec coming up */ 
+            just_seen_colon++;      /* we allow :: but not :::: */ 
+            break;
+          case ' ':
+            break;
+          default:
+            if (!((*p >= 'a' && *p <= 'z') ||   /* allow token chars */ 
+                  (*p >= 'A' && *p <= 'Z') ||
+                  (*p >= '0' && *p <= '9') ||
+                  (*p == '_') || (*p == ',') || /* commas for template args */
+                  (*p == '&') || (*p == '*') || /* pointer and ref types */
+                  (*p == '(') || (*p == ')') || /* function types */ 
+                  (*p == '[') || (*p == ']') )) /* array types */  
+              return 0;
+        }
+      if (*p != ' ')
+        just_seen_space = 0;
+      if (*p != ':')
+        just_seen_colon = 0;
+      if (*p != '>')
+        just_seen_right = 0;
+    }
+  return 0;
+}
+
+
 
 /* Return a null-terminated temporary copy of the name
    of a string token.  */

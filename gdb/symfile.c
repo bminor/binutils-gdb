@@ -1,5 +1,5 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998
    Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -52,6 +52,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define O_BINARY 0
 #endif
 
+#ifdef HPUXHPPA
+extern int hpread_pxdb_check PARAMS ((bfd *, char *));
+
+/* Some HP-UX related globals to clear when a new "main"
+   symbol file is loaded. HP-specific.  */
+
+extern int hp_som_som_object_present;
+extern int hp_cxx_exception_support_initialized;
+#define RESET_HP_UX_GLOBALS() do {\
+                                    hp_som_som_object_present = 0;             /* indicates HP-compiled code */        \
+                                    hp_cxx_exception_support_initialized = 0;  /* must reinitialize exception stuff */ \
+                              } while (0)
+#endif
+
 int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 void (*pre_add_symbol_hook) PARAMS ((char *));
 void (*post_add_symbol_hook) PARAMS ((void));
@@ -95,11 +109,41 @@ static int compare_psymbols PARAMS ((const void *, const void *));
 
 static int compare_symbols PARAMS ((const void *, const void *));
 
-static bfd *symfile_bfd_open PARAMS ((char *));
+bfd *symfile_bfd_open PARAMS ((char *));
 
 static void find_sym_fns PARAMS ((struct objfile *));
 
 static void decrement_reading_symtab PARAMS ((void *));
+
+static void overlay_invalidate_all PARAMS ((void));
+
+static int overlay_is_mapped PARAMS ((struct obj_section *));
+
+void list_overlays_command PARAMS ((char *, int));
+
+void map_overlay_command PARAMS ((char *, int));
+
+void unmap_overlay_command PARAMS ((char *, int));
+
+static void overlay_auto_command PARAMS ((char *, int));
+
+static void overlay_manual_command PARAMS ((char *, int));
+
+static void overlay_off_command PARAMS ((char *, int));
+
+static void overlay_load_command PARAMS ((char *, int));
+
+static void overlay_command PARAMS ((char *, int));
+
+static void simple_free_overlay_table PARAMS ((void));
+
+static void read_target_long_array PARAMS ((CORE_ADDR, unsigned int *, int));
+
+static int simple_read_overlay_table PARAMS ((void));
+
+static int simple_overlay_update_1 PARAMS ((struct obj_section *));
+
+void _initialize_symfile PARAMS ((void));
 
 /* List of all available sym_fns.  On gdb startup, each object file reader
    calls add_symtab_fns() to register information on each format it is
@@ -116,15 +160,25 @@ int symbol_reloading = SYMBOL_RELOADING_DEFAULT;
 int symbol_reloading = 0;
 #endif
 
-/* If true, then shared library symbols will be added automatically
-   when the inferior is created, new libraries are loaded, or when
-   attaching to the inferior.  This is almost always what users
+/* If non-zero, then on HP-UX (i.e., platforms that use somsolib.c),
+   this variable is interpreted as a threshhold.  If adding a new
+   library's symbol table to those already known to the debugger would
+   exceed this threshhold, then the shlib's symbols are not added.
+
+   If non-zero on other platforms, shared library symbols will be added
+   automatically when the inferior is created, new libraries are loaded,
+   or when attaching to the inferior.  This is almost always what users
    will want to have happen; but for very large programs, the startup
    time will be excessive, and so if this is a problem, the user can
    clear this flag and then add the shared library symbols as needed.
    Note that there is a potential for confusion, since if the shared
    library symbols are not loaded, commands like "info fun" will *not*
-   report all the functions that are actually present.  */
+   report all the functions that are actually present. 
+
+   Note that HP-UX interprets this variable to mean, "threshhold size
+   in megabytes, where zero means never add".  Other platforms interpret
+   this variable to mean, "always add if non-zero, never add if zero."
+   */
 
 int auto_solib_add = 1;
 
@@ -186,7 +240,19 @@ compare_psymbols (s1p, s2p)
     }
   else
     {
-      return (STRCMP (st1 + 2, st2 + 2));
+      /* Note: I replaced the STRCMP line (commented out below)
+       * with a simpler "strcmp()" which compares the 2 strings
+       * from the beginning. (STRCMP is a macro which first compares
+       * the initial characters, then falls back on strcmp).
+       * The reason is that the STRCMP line was tickling a C compiler
+       * bug on HP-UX 10.30, which is avoided with the simpler
+       * code. The performance gain from the more complicated code
+       * is negligible, given that we have already checked the
+       * initial 2 characters above. I reported the compiler bug,
+       * and once it is fixed the original line can be put back. RT
+       */
+      /* return ( STRCMP (st1 + 2, st2 + 2)); */
+      return ( strcmp (st1, st2));
     }
 }
 
@@ -431,13 +497,13 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
-  old_chain = make_cleanup (free_objfile, objfile);
+  old_chain = make_cleanup ((make_cleanup_func) free_objfile, objfile);
 
   if (mainline) 
     {
       /* We will modify the main symbol table, make sure that all its users
 	 will be cleaned up if an error occurs during symbol reading.  */
-      make_cleanup (clear_symtab_users, 0);
+      make_cleanup ((make_cleanup_func) clear_symtab_users, 0);
 
       /* Since no error yet, throw away the old symbol table.  */
 
@@ -604,17 +670,25 @@ new_symfile_objfile (objfile, mainline, verbo)
    as dynamically loaded code.  If !mainline, ADDR is the address
    where the text segment was loaded.
 
+   USER_LOADED is TRUE if the add-symbol-file command was how this
+   symbol file came to be processed.
+
+   IS_SOLIB is TRUE if this symbol file represents a solib, as discovered
+   by the target's implementation of the solib package.
+
    Upon success, returns a pointer to the objfile that was added.
    Upon failure, jumps back to command level (never returns). */
 
 struct objfile *
-symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
+symbol_file_add (name, from_tty, addr, mainline, mapped, readnow, user_loaded, is_solib)
      char *name;
      int from_tty;
      CORE_ADDR addr;
      int mainline;
      int mapped;
      int readnow;
+     int  user_loaded;
+     int  is_solib;
 {
   struct objfile *objfile;
   struct partial_symtab *psymtab;
@@ -625,13 +699,59 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 
   abfd = symfile_bfd_open (name);
 
+#if 0
+#ifdef GDB_TARGET_IS_HPPA 
+{
+  /********* TARGET SPECIFIC CODE (HACK!) **********
+   *
+   * The following code is HP-specific.  The "right" way of
+   * doing this is unknown, but we bet would involve a target-
+   * specific pre-file-load check using a generic mechanism.
+   */
+ /* elz: I moved this code from inside the symfile_bfd_open function
+    this way we don't have to worry about recursion. 
+    I also have taken out the call to pxdb from within the check
+    for pxdb processing. Seemed two logically unrelated things, 
+    and I needed a pure checking later on anyway. 
+ */
+
+      if( hpread_pxdb_needed( abfd )) 
+      {
+          /*
+           * This file has not been pre-processed. 
+           * Preprocess now 
+           */
+
+         if (hpread_call_pxdb(name))
+         {
+          /* The
+           * call above has used "system" to pre-process
+           * the on-disk file, so we now need to close
+           * and re-open the file.
+           */
+          bfd_close (abfd);	/* This also closes 'desc', */
+                                /* hence the recursion.     */
+          abfd = symfile_bfd_open( name );
+         }
+        else /* we fail miserably without pxdb!!!*/
+             /* the warning to the user has already been given
+                from within the call_pxdb function 
+             */
+         error("Command ignored.\n");
+      }
+}
+ /*************** END HACK ********************/
+#endif
+#endif /* 0 */
+
+
   if ((have_full_symbols () || have_partial_symbols ())
       && mainline
       && from_tty
       && !query ("Load new symbol table from \"%s\"? ", name))
       error ("Not confirmed.");
 
-  objfile = allocate_objfile (abfd, mapped);
+  objfile = allocate_objfile (abfd, mapped, user_loaded, is_solib);
 
   /* If the objfile uses a mapped symbol file, and we have a psymtab for
      it, then skip reading any symbols at this time. */
@@ -658,17 +778,17 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 	 performed, or need to read an unmapped symbol table. */
       if (from_tty || info_verbose)
 	{
-      if (pre_add_symbol_hook)
-        pre_add_symbol_hook (name);
-      else
-        {
-          printf_filtered ("Reading symbols from %s...", name);
-          wrap_here ("");
-          gdb_flush (gdb_stdout);
-        }
+	  if (pre_add_symbol_hook)
+	    pre_add_symbol_hook (name);
+	  else
+	    {
+	      printf_filtered ("Reading symbols from %s...", name);
+	      wrap_here ("");
+	      gdb_flush (gdb_stdout);
+	    }
 	}
       syms_from_objfile (objfile, addr, mainline, from_tty);
-    }      
+    }
 
   /* We now have at least a partial symbol table.  Check to see if the
      user requested that all symbols be read on initial access via either
@@ -742,11 +862,23 @@ symbol_file_command (args, from_tty)
 		     symfile_objfile -> name))
 	error ("Not confirmed.");
       free_all_objfiles ();
+
+      /* solib descriptors may have handles to objfiles.  Since their
+         storage has just been released, we'd better wipe the solib
+         descriptors as well.
+         */
+#if defined(SOLIB_RESTART)
+      SOLIB_RESTART ();
+#endif
+
       symfile_objfile = NULL;
       if (from_tty)
 	{
 	  printf_unfiltered ("No symbol file now.\n");
 	}
+#ifdef HPUXHPPA
+      RESET_HP_UX_GLOBALS ();
+#endif
     }
   else
     {
@@ -754,7 +886,7 @@ symbol_file_command (args, from_tty)
 	{
 	  nomem (0);
 	}
-      cleanups = make_cleanup (freeargv, (char *) argv);
+      cleanups = make_cleanup ((make_cleanup_func) freeargv, (char *) argv);
       while (*argv != NULL)
 	{
 	  if (STREQ (*argv, "-mapped"))
@@ -786,11 +918,16 @@ symbol_file_command (args, from_tty)
               if (text_relocation == (CORE_ADDR)0)
                 return;
               else if (text_relocation == (CORE_ADDR)-1)
-                symbol_file_add (name, from_tty, (CORE_ADDR)0, 1, mapped,
-				 readnow);
+                {
+                  symbol_file_add (name, from_tty, (CORE_ADDR)0, 
+                                   1, mapped, readnow, 1, 0);
+#ifdef HPUXHPPA
+                  RESET_HP_UX_GLOBALS ();
+#endif
+                }
               else
                 symbol_file_add (name, from_tty, (CORE_ADDR)text_relocation,
-				 0, mapped, readnow);
+				 0, mapped, readnow, 1, 0);
 
 	      /* Getting new symbols may change our opinion about what is
 		 frameless.  */
@@ -805,6 +942,7 @@ symbol_file_command (args, from_tty)
 	{
 	  error ("no symbol file name was specified");
 	}
+      TUIDO(((TuiOpaqueFuncPtr)tuiDisplayMainFunction));
       do_cleanups (cleanups);
     }
 }
@@ -847,13 +985,15 @@ set_initial_language ()
    malloc'd` copy of NAME (tilde-expanded and made absolute).
    In case of trouble, error() is called.  */
 
-static bfd *
+bfd *
 symfile_bfd_open (name)
      char *name;
 {
   bfd *sym_bfd;
   int desc;
   char *absolute_name;
+
+
 
   name = tilde_expand (name);	/* Returns 1st new malloc'd copy */
 
@@ -897,6 +1037,42 @@ symfile_bfd_open (name)
       error ("\"%s\": can't read symbols: %s.", name,
 	     bfd_errmsg (bfd_get_error ()));
     }
+
+#ifdef HPUXHPPA
+  {
+  /********* TARGET SPECIFIC CODE (HACK!) **********
+   *
+   * The following code is HP-specific.  The "right" way of
+   * doing this is unknown, but we bet would involve a target-
+   * specific pre-file-load check using a generic mechanism.
+   */
+  static prevent_recursion = 0;  /* Needed for hack below!  HP-specific */
+  
+  if( prevent_recursion == 0 ) {
+      if( hpread_pxdb_needed (sym_bfd, name)) {
+          /*
+           * This file has not been pre-processed. 
+           * Preprocess now 
+           */
+
+         if (hpread_call_pxdb(name))
+         {
+          /* The
+           * call above has used "system" to pre-process
+           * the on-disk file, so we now need to close
+           * and re-open the file.
+           */
+          bfd_close (sym_bfd);	/* This also closes 'desc', */
+                                /* hence the recursion.     */
+          prevent_recursion++;
+          sym_bfd = symfile_bfd_open( name );
+          prevent_recursion--;
+         }
+      }
+  }
+}
+ /*************** END HACK ********************/
+#endif
 
   return (sym_bfd);
 }
@@ -1004,7 +1180,7 @@ generic_load (filename, from_tty)
   /* FIXME: should be checking for errors from bfd_close (for one thing,
      on error it does not free all the storage associated with the
      bfd).  */
-  old_cleanups = make_cleanup (bfd_close, loadfile_bfd);
+  old_cleanups = make_cleanup ((make_cleanup_func) bfd_close, loadfile_bfd);
 
   if (!bfd_check_format (loadfile_bfd, bfd_object)) 
     {
@@ -1210,7 +1386,9 @@ add_symbol_file_command (args, from_tty)
 	          name, local_hex_string ((unsigned long)text_addr))))
     error ("Not confirmed.");
 
-  symbol_file_add (name, from_tty, text_addr, 0, mapped, readnow);
+  symbol_file_add (name, from_tty, text_addr, 0, mapped, readnow,
+                   1,  /* user_loaded */
+                   0); /* We'll guess it's ! is_solib */
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */
@@ -1284,9 +1462,10 @@ reread_symbols ()
 	  /* If we get an error, blow away this objfile (not sure if
 	     that is the correct response for things like shared
 	     libraries).  */
-	  old_cleanups = make_cleanup (free_objfile, objfile);
+	  old_cleanups = make_cleanup ((make_cleanup_func) free_objfile, 
+                                       objfile);
 	  /* We need to do this whenever any symbols go away.  */
-	  make_cleanup (clear_symtab_users, 0);
+	  make_cleanup ((make_cleanup_func) clear_symtab_users, 0);
 
 	  /* Clean up any state BFD has sitting around.  We don't need
 	     to close the descriptor but BFD lacks a way of closing the
@@ -1375,7 +1554,12 @@ reread_symbols ()
 	     distinguishing between the main file and additional files
 	     in this way seems rather dubious.  */
 	  if (objfile == symfile_objfile)
-	    (*objfile->sf->sym_new_init) (objfile);
+            {
+              (*objfile->sf->sym_new_init) (objfile);
+#ifdef HPUXHPPA
+              RESET_HP_UX_GLOBALS ();
+#endif
+            }
 
 	  (*objfile->sf->sym_init) (objfile);
 	  clear_complaints (1, 1);
@@ -1423,35 +1607,152 @@ reread_symbols ()
 }
 
 
+
+typedef struct {
+  char         *ext;
+  enum language lang;
+} filename_language;
+
+static filename_language * filename_language_table;
+static int fl_table_size, fl_table_next;
+
+static void
+add_filename_language (ext, lang)
+     char         *ext;
+     enum language lang;
+{
+  if (fl_table_next >= fl_table_size)
+    {
+      fl_table_size += 10;
+      filename_language_table = realloc (filename_language_table, 
+					 fl_table_size);
+    }
+
+  filename_language_table[fl_table_next].ext  = strsave (ext);
+  filename_language_table[fl_table_next].lang = lang;
+  fl_table_next++;
+}
+
+static char *ext_args;
+
+static void
+set_ext_lang_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  int i;
+  char *cp = ext_args;
+  enum language lang;
+
+  /* First arg is filename extension, starting with '.' */
+  if (*cp != '.')
+    error ("'%s': Filename extension must begin with '.'", ext_args);
+
+  /* Find end of first arg.  */
+  while (*cp && !isspace (*cp))	
+    cp++;
+
+  if (*cp == '\0')
+    error ("'%s': two arguments required -- filename extension and language",
+	   ext_args);
+
+  /* Null-terminate first arg */
+  *cp++ = '\0'; 
+
+  /* Find beginning of second arg, which should be a source language.  */
+  while (*cp && isspace (*cp))
+    cp++;
+
+  if (*cp == '\0')
+    error ("'%s': two arguments required -- filename extension and language",
+	   ext_args);
+
+  /* Lookup the language from among those we know.  */
+  lang = language_enum (cp);
+
+  /* Now lookup the filename extension: do we already know it?  */
+  for (i = 0; i < fl_table_next; i++)
+    if (0 == strcmp (ext_args, filename_language_table[i].ext))
+      break;
+
+  if (i >= fl_table_next)
+    {
+      /* new file extension */
+      add_filename_language (ext_args, lang);
+    }
+  else
+    {
+      /* redefining a previously known filename extension */
+
+      /* if (from_tty) */
+      /*   query ("Really make files of type %s '%s'?", */
+      /*          ext_args, language_str (lang));           */
+
+      free (filename_language_table[i].ext);
+      filename_language_table[i].ext  = strsave (ext_args);
+      filename_language_table[i].lang = lang;
+    }
+}
+
+static void
+info_ext_lang_command (args, from_tty)
+     char *args;
+     int   from_tty;
+{
+  int i;
+
+  printf_filtered ("Filename extensions and the languages they represent:");
+  printf_filtered ("\n\n");
+  for (i = 0; i < fl_table_next; i++)
+    printf_filtered ("\t%s\t- %s\n", 
+		     filename_language_table[i].ext, 
+		     language_str (filename_language_table[i].lang));
+}
+
+static void
+init_filename_language_table ()
+{
+  if (fl_table_size == 0)	/* protect against repetition */
+    {
+      fl_table_size = 20;
+      fl_table_next = 0;
+      filename_language_table = 
+	xmalloc (fl_table_size * sizeof (*filename_language_table));
+      add_filename_language (".c",     language_c);
+      add_filename_language (".C",     language_cplus);
+      add_filename_language (".cc",    language_cplus);
+      add_filename_language (".cp",    language_cplus);
+      add_filename_language (".cpp",   language_cplus);
+      add_filename_language (".cxx",   language_cplus);
+      add_filename_language (".c++",   language_cplus);
+  /* start-sanitize-java */
+      add_filename_language (".java",  language_java);
+      add_filename_language (".class", language_java);
+  /* end-sanitize-java */
+      add_filename_language (".ch",    language_chill);
+      add_filename_language (".c186",  language_chill);
+      add_filename_language (".c286",  language_chill);
+      add_filename_language (".f",     language_fortran);
+      add_filename_language (".F",     language_fortran);
+      add_filename_language (".s",     language_asm);
+      add_filename_language (".S",     language_asm);
+    }
+}
+
 enum language
 deduce_language_from_filename (filename)
      char *filename;
 {
-  char *c;
-  
-  if (0 == filename) 
-    ; /* Get default */
-  else if (0 == (c = strrchr (filename, '.')))
-    ; /* Get default. */
-  else if (STREQ (c, ".c"))
-    return language_c;
-  else if (STREQ (c, ".cc") || STREQ (c, ".C") || STREQ (c, ".cxx")
-	   || STREQ (c, ".cpp") || STREQ (c, ".cp") || STREQ (c, ".c++"))
-    return language_cplus;
-  /* start-sanitize-java */
-  else if (STREQ (c, ".java") || STREQ (c, ".class"))
-    return language_java;
-  /* end-sanitize-java */
-  else if (STREQ (c, ".ch") || STREQ (c, ".c186") || STREQ (c, ".c286"))
-    return language_chill;
-  else if (STREQ (c, ".f") || STREQ (c, ".F"))
-    return language_fortran;
-  else if (STREQ (c, ".mod"))
-    return language_m2;
-  else if (STREQ (c, ".s") || STREQ (c, ".S"))
-    return language_asm;
+  int i;
+  char *cp;
 
-  return language_unknown;		/* default */
+  if (filename != NULL)
+    if ((cp = strrchr (filename, '.')) != NULL)
+      for (i = 0; i < fl_table_next; i++)
+	if (strcmp (cp, filename_language_table[i].ext) == 0)
+	  return filename_language_table[i].lang;
+
+  return language_unknown;
 }
 
 /* allocate_symtab:
@@ -1874,6 +2175,83 @@ add_psymbol_to_list (name, namelength, namespace, class, list, val, coreaddr,
   OBJSTAT (objfile, n_psyms++);
 }
 
+/* Add a symbol with a long value to a psymtab. This differs from
+ * add_psymbol_to_list above in taking both a mangled and a demangled
+ * name. */
+
+void
+add_psymbol_with_dem_name_to_list (name, namelength, dem_name, dem_namelength,
+                                   namespace, class, list, val, coreaddr, language, objfile)
+     char *name;
+     int namelength;
+     char *dem_name;
+     int dem_namelength;
+     namespace_enum namespace;
+     enum address_class class;
+     struct psymbol_allocation_list *list;
+     long val;					/* Value as a long */
+     CORE_ADDR coreaddr;			/* Value as a CORE_ADDR */
+     enum language language;
+     struct objfile *objfile;
+{
+  register struct partial_symbol *psym;
+  char *buf = alloca (namelength + 1);
+  /* psymbol is static so that there will be no uninitialized gaps in the
+     structure which might contain random data, causing cache misses in
+     bcache. */
+  static struct partial_symbol psymbol;
+
+  /* Create local copy of the partial symbol */
+
+  memcpy (buf, name, namelength);
+  buf[namelength] = '\0';
+  SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, &objfile->psymbol_cache);
+
+  buf = alloca (dem_namelength + 1);
+  memcpy (buf, dem_name, dem_namelength);
+  buf[dem_namelength] = '\0';
+  
+  switch (language)
+    {
+      case language_c:
+      case language_cplus:
+        SYMBOL_CPLUS_DEMANGLED_NAME (&psymbol) =
+          bcache (buf, dem_namelength + 1, &objfile->psymbol_cache);
+        break;
+      case language_chill:
+        SYMBOL_CHILL_DEMANGLED_NAME (&psymbol) = 
+          bcache (buf, dem_namelength + 1, &objfile->psymbol_cache);
+        
+      /* FIXME What should be done for the default case? Ignoring for now. */
+    }
+
+  /* val and coreaddr are mutually exclusive, one of them *will* be zero */
+  if (val != 0)
+    {
+      SYMBOL_VALUE (&psymbol) = val;
+    }
+  else
+    {
+      SYMBOL_VALUE_ADDRESS (&psymbol) = coreaddr;
+    }
+  SYMBOL_SECTION (&psymbol) = 0;
+  SYMBOL_LANGUAGE (&psymbol) = language;
+  PSYMBOL_NAMESPACE (&psymbol) = namespace;
+  PSYMBOL_CLASS (&psymbol) = class;
+  SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, language);
+
+  /* Stash the partial symbol away in the cache */
+  psym = bcache (&psymbol, sizeof (struct partial_symbol), &objfile->psymbol_cache);
+
+  /* Save pointer to partial symbol in psymtab, growing symtab if needed. */
+  if (list->next >= list->list + list->size)
+    {
+      extend_psymbol_list (list, objfile);
+    }
+  *list->next++ = psym;
+  OBJSTAT (objfile, n_psyms++);
+}
+
 /* Initialize storage for partial symbols.  */
 
 void
@@ -2240,10 +2618,17 @@ list_overlays_command (args, from_tty)
 	  lma  = bfd_section_lma (objfile->obfd, osect->the_bfd_section);
 	  size = bfd_get_section_size_before_reloc (osect->the_bfd_section);
 	  name = bfd_section_name (objfile->obfd, osect->the_bfd_section);
-	  printf_filtered ("Section %s, loaded at %08x - %08x, ",
-			   name, lma, lma + size);
-	  printf_filtered ("mapped at %08x - %08x\n", 
-			   vma, vma + size);
+
+	  printf_filtered ("Section %s, loaded at ", name);
+	  print_address_numeric (lma, 1, stdout);
+	  puts_filtered (" - ");
+	  print_address_numeric (lma + size, 1, stdout);
+	  printf_filtered (", mapped at ");
+	  print_address_numeric (vma, 1, stdout);
+	  puts_filtered (" - ");
+	  print_address_numeric (vma + size, 1, stdout);
+	  puts_filtered ("\n");
+
 	  nmapped ++;
 	}
   if (nmapped == 0)
@@ -2367,7 +2752,7 @@ overlay_off_command (args, from_tty)
      char *args;
      int   from_tty;
 {
-  overlay_debugging = 0;
+  overlay_debugging = 0; 
   if (info_verbose)
     printf_filtered ("Overlay debugging disabled.");
 }
@@ -2707,4 +3092,16 @@ for access from GDB.", &cmdlist);
 	   "Enable automatic overlay debugging.", &overlaylist);
   add_cmd ("load-target", class_support, overlay_load_command, 
 	   "Read the overlay mapping state from the target.", &overlaylist);
+
+  /* Filename extension to source language lookup table: */
+  init_filename_language_table ();
+  c = add_set_cmd ("extension-language", class_files, var_string_noescape,
+		   (char *) &ext_args, 
+		   "Set mapping between filename extension and source language.\n\
+Usage: set extension-language .foo bar",
+		     &setlist);
+  c->function.cfunc = set_ext_lang_command;
+
+  add_info ("extensions", info_ext_lang_command, 
+	    "All filename extensions associated with a source language.");
 }

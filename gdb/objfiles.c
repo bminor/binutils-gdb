@@ -123,12 +123,21 @@ build_objfile_section_table (objfile)
 /* Given a pointer to an initialized bfd (ABFD) and a flag that indicates
    whether or not an objfile is to be mapped (MAPPED), allocate a new objfile
    struct, fill it in as best we can, link it into the list of all known
-   objfiles, and return a pointer to the new objfile struct. */
+   objfiles, and return a pointer to the new objfile struct.
+
+   USER_LOADED is simply recorded in the objfile.  This record offers a way for
+   run_command to remove old objfile entries which are no longer valid (i.e.,
+   are associated with an old inferior), but to preserve ones that the user
+   explicitly loaded via the add-symbol-file command.
+
+   IS_SOLIB is also simply recorded in the objfile. */
 
 struct objfile *
-allocate_objfile (abfd, mapped)
+allocate_objfile (abfd, mapped, user_loaded, is_solib)
      bfd *abfd;
      int mapped;
+     int  user_loaded;
+     int  is_solib;
 {
   struct objfile *objfile = NULL;
   struct objfile *last_one = NULL;
@@ -287,6 +296,15 @@ allocate_objfile (abfd, mapped)
 	   last_one = last_one -> next);
       last_one -> next = objfile;
     }
+
+  /* Record whether this objfile was created because the user explicitly
+     caused it (e.g., used the add-symbol-file command).
+     */
+  objfile -> user_loaded = user_loaded;
+
+  /* Record whether this objfile definitely represents a solib. */
+  objfile -> is_solib = is_solib;
+
   return (objfile);
 }
 
@@ -541,7 +559,8 @@ objfile_relocate (objfile, new_offsets)
 		   But I'm leaving out that test, on the theory that
 		   they can't possibly pass the tests below.  */
 		if ((SYMBOL_CLASS (sym) == LOC_LABEL
-		     || SYMBOL_CLASS (sym) == LOC_STATIC)
+		     || SYMBOL_CLASS (sym) == LOC_STATIC 
+                     || SYMBOL_CLASS (sym) == LOC_INDIRECT)
 		    && SYMBOL_SECTION (sym) >= 0)
 		  {
 		    SYMBOL_VALUE_ADDRESS (sym) += 
@@ -698,6 +717,28 @@ have_full_symbols ()
     }
   return 0;
 }
+
+
+/* This operations deletes all objfile entries that represent solibs that
+   weren't explicitly loaded by the user, via e.g., the add-symbol-file
+   command.
+   */
+void
+objfile_purge_solibs ()
+{
+  struct objfile *  objf;
+  struct objfile *  temp;
+
+  ALL_OBJFILES_SAFE (objf, temp)
+  {
+    /* We assume that the solib package has been purged already, or will
+       be soon.
+       */
+    if (! objf->user_loaded && objf->is_solib)
+      free_objfile (objf);
+  }
+}
+
 
 /* Many places in gdb want to test just to see if we have any minimal
    symbols available.  This function returns zero if none are currently
@@ -903,8 +944,13 @@ find_pc_sect_section (pc, section)
   
   ALL_OBJFILES (objfile)
     for (s = objfile->sections; s < objfile->sections_end; ++s)
+#if defined(HPUXHPPA)
+      if ((section == 0 || section == s->the_bfd_section) && 
+	  s->addr <= pc && pc <= s->endaddr)
+#else
       if ((section == 0 || section == s->the_bfd_section) && 
 	  s->addr <= pc && pc < s->endaddr)
+#endif
 	return(s);
 
   return(NULL);

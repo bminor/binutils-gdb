@@ -106,7 +106,7 @@ gdbtk_readline_begin (char *format, ...);
 gdbtk_readline_begin ();
 #endif
 static void gdbtk_readline_end PARAMS ((void));
-static void   gdbtk_flush PARAMS ((FILE *));
+static void   gdbtk_flush PARAMS ((GDB_FILE *));
 static void gdbtk_pre_add_symbol PARAMS ((char *));
 static void gdbtk_print_frame_info PARAMS ((struct symtab *, int, int, int));
 static void gdbtk_post_add_symbol PARAMS ((void));
@@ -120,7 +120,7 @@ static void gdbtk_context_change PARAMS ((int));
  * See note there for details.
  */
 
-void   gdbtk_fputs PARAMS ((const char *, FILE *));
+void   gdbtk_fputs PARAMS ((const char *, GDB_FILE *));
 int           gdbtk_load_hash PARAMS ((char *, unsigned long));
 static void   breakpoint_notify PARAMS ((struct breakpoint *, const char *));
 
@@ -214,7 +214,7 @@ int gdbtk_two_elem_cmd (cmd_name, argv1)
 
 static void
 gdbtk_flush (stream)
-     FILE *stream;
+     GDB_FILE *stream;
 {
 #if 0
   /* Force immediate screen update */
@@ -238,7 +238,7 @@ gdbtk_flush (stream)
  *    We place the data into the result_ptr, either as a string,
  *    or a list, depending whether the GDBTK_MAKES_LIST bit is set.
  * 3) The GDBTK_TO_RESULT flag is unset - We route the data to gdbtk_tcl_fputs
- *    UNLESS it was coming to stderr.  Then we place it in the result_ptr
+ *    UNLESS it was coming to gdb_stderr.  Then we place it in the result_ptr
  *    anyway, so it can be dealt with.
  *
  */
@@ -246,7 +246,7 @@ gdbtk_flush (stream)
 void
 gdbtk_fputs (ptr, stream)
      const char *ptr;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   in_fputs = 1;
 
@@ -329,7 +329,7 @@ pc_changed()
 static void
 tk_command_loop ()
 {
-  extern GDB_FILE *instream;
+  extern FILE *instream;
 
   /* We no longer want to use stdin as the command input stream */
   instream = NULL;

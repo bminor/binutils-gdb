@@ -34,6 +34,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "dis-asm.h"
 #include "language.h"
 #include "gdb_stat.h"
+#include "symfile.h"
+#include "objfiles.h"
 
 extern char registers[];
 
@@ -76,7 +78,29 @@ core_file_command (filename, from_tty)
     if (!filename)
       (t->to_detach) (filename, from_tty);
     else
-      (t->to_open) (filename, from_tty);
+      {
+        /* Yes, we were given the path of a core file.  Do we already
+           have a symbol file?  If not, can we determine it from the
+           core file?  If we can, do so.
+           */
+#ifdef HPUXHPPA
+        if (symfile_objfile == NULL)
+          {
+            char *  symfile;
+            symfile = t->to_core_file_to_sym_file (filename);
+            if (symfile)
+              {
+                char *  symfile_copy = strdup (symfile);
+
+                make_cleanup (free, symfile_copy);
+                symbol_file_command (symfile_copy, from_tty);
+              }
+            else
+              warning ("Unknown symbols for '%s'; use the 'symbol-file' command.", filename);
+          }
+#endif
+        (t->to_open) (filename, from_tty);
+      }
   else
     error ("GDB can't read core files on this machine.");
 }

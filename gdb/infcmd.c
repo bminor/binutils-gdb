@@ -32,6 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 #include "language.h"
 #include "symfile.h"
+#include "objfiles.h"
 
 /* Functions exported for general use: */
 
@@ -90,6 +91,8 @@ static void step_command PARAMS ((char *, int));
 static void run_command PARAMS ((char *, int));
 
 void _initialize_infcmd PARAMS ((void));
+
+#define GO_USAGE   "Usage: go <location>\n"
 
 #ifdef CALL_DUMMY_BREAKPOINT_OFFSET
 static void breakpoint_auto_delete_contents PARAMS ((PTR));
@@ -207,11 +210,18 @@ run_command (args, from_tty)
 Start it from the beginning? "))
 	error ("Program not restarted.");
       target_kill ();
+#if defined(SOLIB_RESTART)
+      SOLIB_RESTART ();
+#endif
+      init_wait_for_inferior ();
     }
 
   clear_breakpoint_hit_counts ();
 
   exec_file = (char *) get_exec_file (0);
+
+  /* Purge old solib objfiles. */
+  objfile_purge_solibs ();
 
   do_run_cleanups (NULL);
 
@@ -249,6 +259,17 @@ Start it from the beginning? "))
   target_create_inferior (exec_file, inferior_args,
 			  environ_vector (inferior_environ));
 }
+
+
+static void
+run_no_args_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  execute_command("set args", from_tty);
+  run_command((char *)NULL, from_tty);
+}
+
 
 void
 continue_command (proc_count_exp, from_tty)
@@ -481,6 +502,23 @@ jump_command (arg, from_tty)
   proceed (addr, TARGET_SIGNAL_0, 0);
 }
 
+
+/* Go to line or address in current procedure */
+static void
+go_command(line_no, from_tty)
+     char *line_no;
+     int from_tty;
+{
+  if (line_no == (char *)NULL || !*line_no)
+    printf_filtered(GO_USAGE);
+  else
+    {
+      tbreak_command(line_no, from_tty);
+      jump_command(line_no, from_tty);
+    }
+}
+
+
 /* Continue program giving it specified signal.  */
 
 static void
@@ -615,8 +653,10 @@ run_stack_dummy (addr, buffer)
   }
 #endif /* CALL_DUMMY_BREAKPOINT_OFFSET.  */
 
+  disable_watchpoints_before_interactive_call_start ();
   proceed_to_finish = 1;	/* We want stop_registers, please... */
   proceed (addr, TARGET_SIGNAL_0, 0);
+  enable_watchpoints_after_interactive_call_stop ();
 
   discard_cleanups (old_cleanups);
 
@@ -754,6 +794,7 @@ finish_command (arg, from_tty)
       struct type *value_type;
       register value_ptr val;
       CORE_ADDR funcaddr;
+      int struct_return;
 
       value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
       if (!value_type)
@@ -764,15 +805,36 @@ finish_command (arg, from_tty)
 
       funcaddr = BLOCK_START (SYMBOL_BLOCK_VALUE (function));
 
-      val = value_being_returned (value_type, stop_registers,
-	      using_struct_return (value_of_variable (function, NULL),
+      struct_return = using_struct_return (value_of_variable (function, NULL),
+
 				   funcaddr,
 				   check_typedef (value_type),
-		BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function))));
+		BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function)));
 
-      printf_filtered ("Value returned is $%d = ", record_latest_value (val));
-      value_print (val, gdb_stdout, 0, Val_no_prettyprint);
-      printf_filtered ("\n");
+      if (!struct_return)
+      {
+        val = value_being_returned (value_type, stop_registers, struct_return);
+        printf_filtered ("Value returned is $%d = ", record_latest_value (val));
+        value_print (val, gdb_stdout, 0, Val_no_prettyprint);
+        printf_filtered ("\n");
+      }
+      else
+      {
+       /* elz: we cannot determine the contents of the structure because
+               it is on the stack, and we don't know where, since we did not
+               initiate the call, as opposed to the call_function_by_hand case */
+#ifdef VALUE_RETURNED_FROM_STACK
+          val = 0;
+          printf_filtered ("Value returned has type: %s.", TYPE_NAME (value_type));
+          printf_filtered (" Cannot determine contents\n");
+#else
+          val = value_being_returned (value_type, stop_registers, struct_return);
+          printf_filtered ("Value returned is $%d = ", record_latest_value (val));
+          value_print (val, gdb_stdout, 0, Val_no_prettyprint);
+          printf_filtered ("\n");
+#endif
+       
+      }
     }
   do_cleanups(old_chain);
 }
@@ -971,6 +1033,7 @@ path_command (dirname, from_tty)
   if (from_tty)
     path_info ((char *)NULL, from_tty);
 }
+
 
 #ifdef REGISTER_NAMES
 char *gdb_register_names[] = REGISTER_NAMES;
@@ -1186,6 +1249,9 @@ attach_command (args, from_tty)
   extern int auto_solib_add;
 #endif
 
+  char *  exec_file;
+  char *  full_exec_path = NULL;
+
   dont_repeat ();			/* Not for the faint of heart */
 
   if (target_has_execution)
@@ -1217,14 +1283,42 @@ attach_command (args, from_tty)
   wait_for_inferior ();
 #endif
 
+  /*
+   * If no exec file is yet known, try to determine it from the
+   * process itself.
+   */
+  exec_file = (char *) get_exec_file (0);
+  if (! exec_file) {
+    exec_file = target_pid_to_exec_file (inferior_pid);
+    if (exec_file) {
+     /* It's possible we don't have a full path, but rather just a
+         filename.  Some targets, such as HP-UX, don't provide the
+         full path, sigh.
+
+         Attempt to qualify the filename against the source path.
+         (If that fails, we'll just fall back on the original
+         filename.  Not much more we can do...)
+         */
+      if (!source_full_path_of (exec_file, &full_exec_path))
+        full_exec_path = savestring (exec_file, strlen (exec_file));
+
+      exec_file_attach (full_exec_path, from_tty);
+      symbol_file_command (full_exec_path, from_tty);
+    }
+  }
+
 #ifdef SOLIB_ADD
   if (auto_solib_add)
     {
       /* Add shared library symbols from the newly attached process, if any.  */
-      SOLIB_ADD ((char *)0, from_tty, (struct target_ops *)0);
+      SOLIB_ADD ((char *)0, from_tty, &current_target);
       re_enable_breakpoints_in_shlibs ();
     }
 #endif
+
+  /* Take any necessary post-attaching actions for this platform.
+     */
+  target_post_attach (inferior_pid);
 
   normal_stop ();
 }
@@ -1247,6 +1341,9 @@ detach_command (args, from_tty)
 {
   dont_repeat ();			/* Not for the faint of heart */
   target_detach (args, from_tty);
+#if defined(SOLIB_RESTART)
+  SOLIB_RESTART ();
+#endif
 }
 
 /* ARGSUSED */
@@ -1332,12 +1429,15 @@ fully linked executable files and separately compiled object files as needed.", 
  add_com ("attach", class_run, attach_command,
  	   "Attach to a process or file outside of GDB.\n\
 This command attaches to another target, of the same type as your last\n\
-`target' command (`info files' will show your target stack).\n\
+\"target\" command (\"info files\" will show your target stack).\n\
 The command may take as argument a process id or a device file.\n\
 For a process id, you must have permission to send the process a signal,\n\
 and it must have the same effective uid as the debugger.\n\
-When using \"attach\", you should use the \"file\" command to specify\n\
-the program running in the process, and to load its symbol table.");
+When using \"attach\" with a process id, the debugger finds the\n\
+program running in the process, looking first in the current working\n\
+directory, or (if not found there) using the source file search path\n\
+(see the \"directory\" command).  You can also use the \"file\" command\n\
+to specify the program, and to load its symbol table.");
 
   add_com ("detach", class_run, detach_command,
 	   "Detach a process or file previously attached.\n\
@@ -1368,6 +1468,8 @@ Like the \"step\" command as long as subroutine calls do not happen;\n\
 when they do, the call is treated as one instruction.\n\
 Argument N means do this N times (or till program stops for another reason).");
   add_com_alias ("n", "next", class_run, 1);
+  if (xdb_commands)
+    add_com_alias("S", "next", class_run, 1);
 
   add_com ("step", class_run, step_command,
 	   "Step program until it reaches a different source line.\n\
@@ -1385,6 +1487,16 @@ Execution will also stop upon exit from the current stack frame.");
 Give as argument either LINENUM or *ADDR, where ADDR is an expression\n\
 for an address to start at.");
 
+  add_com ("go", class_run, go_command,
+	   "Usage: go <location>\n\
+Continue program being debugged, stopping at specified line or \n\
+address.\n\
+Give as argument either LINENUM or *ADDR, where ADDR is an \n\
+expression for an address to start at.\n\
+This command is a combination of tbreak and jump.");
+  if (xdb_commands)
+    add_com_alias("g", "g", class_run, 1);
+
   add_com ("continue", class_run, continue_command,
 	   "Continue program being debugged, after signal or breakpoint.\n\
 If proceeding from breakpoint, a number N may be used as an argument,\n\
@@ -1401,11 +1513,18 @@ With no arguments, uses arguments last specified (with \"run\" or \"set args\").
 To cancel previous arguments and run with no arguments,\n\
 use \"set args\" without arguments.");
   add_com_alias ("r", "run", class_run, 1);
+  if (xdb_commands)
+    add_com ("R", class_run, run_no_args_command,
+         "Start debugged program with no arguments.");
 
   add_info ("registers", nofp_registers_info,
     "List of integer registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register.");
 
+  if (xdb_commands)
+    add_com("lr", class_info, nofp_registers_info,
+      "List of integer registers and their contents, for selected stack frame.\n\
+  Register name as argument means describe only that register.");
   add_info ("all-registers", all_registers_info,
 "List of all registers and their contents, for selected stack frame.\n\
 Register name as argument means describe only that register.");

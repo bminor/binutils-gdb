@@ -1299,7 +1299,7 @@ udi_load (args, from_tty)
   /* As a convenience, pick up any symbol info that is in the program
      being loaded.  Note that we assume that the program is the``mainline'';
      if this is not always true, then this code will need to be augmented.  */
-  symbol_file_add (strtok (args, " \t"), from_tty, 0, 1, 0, 0);
+  symbol_file_add (strtok (args, " \t"), from_tty, 0, 1, 0, 0, 0, 0);
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */

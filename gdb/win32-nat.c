@@ -424,7 +424,7 @@ handle_load_dll (char *dummy)
      FIXME: Is this the real reason that we need the 0x1000 ? */
 
   printf_unfiltered ("%x:%s", event->lpBaseOfDll, dll_name);
-  symbol_file_add (dll_name, 0, (int) event->lpBaseOfDll + 0x1000, 0, 0, 0);
+  symbol_file_add (dll_name, 0, (int) event->lpBaseOfDll + 0x1000, 0, 0, 0, 0, 1);
   printf_unfiltered ("\n");
 
 out:

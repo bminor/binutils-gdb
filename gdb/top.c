@@ -203,6 +203,14 @@ struct cmd_list_element *enablelist;
 
 struct cmd_list_element *disablelist;
 
+/* Chain containing all defined toggle subcommands. */
+
+struct cmd_list_element *togglelist;
+
+/* Chain containing all defined stop subcommands. */
+
+struct cmd_list_element *stoplist;
+
 /* Chain containing all defined delete subcommands. */
 
 struct cmd_list_element *deletelist;
@@ -371,7 +379,7 @@ void (*command_loop_hook) PARAMS ((void));
 
 /* Called instead of fputs for all output.  */
 
-void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer, FILE *stream));
+void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer, GDB_FILE *stream));
 
 /* Called when the target says something to the host, which may
    want to appear in a different window. */
@@ -392,7 +400,7 @@ void (*warning_hook) PARAMS ((const char *, va_list));
 
 /* Called from gdb_flush to flush output.  */
 
-void (*flush_hook) PARAMS ((FILE *stream));
+void (*flush_hook) PARAMS ((GDB_FILE *stream));
 
 /* These three functions support getting lines of text from the user.  They
    are used in sequence.  First readline_begin_hook is called with a text
@@ -1301,13 +1309,16 @@ command_loop ()
   int stdin_is_tty = ISATTY (stdin);
   long time_at_cmd_start;
 #ifdef HAVE_SBRK
-  long space_at_cmd_start;
+  long space_at_cmd_start = 0;
 #endif
   extern int display_time;
   extern int display_space;
 
   while (instream && !feof (instream))
     {
+#if defined(TUI)
+      extern int insert_mode;
+#endif
       if (window_hook && instream == stdin)
 	(*window_hook) (instream, prompt);
 
@@ -1315,8 +1326,22 @@ command_loop ()
       if (instream == stdin && stdin_is_tty)
 	reinitialize_more_filter ();
       old_chain = make_cleanup ((make_cleanup_func) command_loop_marker, 0);
+
+#if defined(TUI)
+      /* A bit of paranoia: I want to make sure the "insert_mode" global
+       * is clear except when it is being used for command-line editing
+       * (see tuiIO.c, utils.c); otherwise normal output will
+       * get messed up in the TUI. So clear it before/after
+       * the command-line-input call. - RT
+       */
+      insert_mode = 0;
+#endif
+      /* Get a command-line. This calls the readline package. */
       command = command_line_input (instream == stdin ? prompt : (char *) NULL,
 				    instream == stdin, "prompt");
+#if defined(TUI)
+      insert_mode = 0;
+#endif
       if (command == 0)
 	return;
 
@@ -2803,6 +2828,7 @@ document_command (comname, from_tty)
   free_command_lines (&doclines);
 }
 
+/* Print the GDB banner. */
 void
 print_gdb_version (stream)
   GDB_FILE *stream;
@@ -2871,6 +2897,19 @@ get_prompt ()
 {
   return prompt;
 }
+
+void
+set_prompt (s)
+     char *s;
+{
+/* ??rehrauer: I don't know why this fails, since it looks as though
+   assignments to prompt are wrapped in calls to savestring...
+  if (prompt != NULL)
+    free (prompt);
+*/
+  prompt = savestring (s, strlen (s));
+}
+
 
 /* If necessary, make the user confirm that we should quit.  Return
    non-zero if we should quit, zero if we shouldn't.  */
@@ -2933,6 +2972,16 @@ quit_force (args, from_tty)
     write_history (history_filename);
 
   do_final_cleanups(ALL_CLEANUPS);	/* Do any final cleanups before exiting */
+
+#if defined(TUI)
+  /* tuiDo((TuiOpaqueFuncPtr)tuiCleanUp); */
+  /* The above does not need to be inside a tuiDo(), since
+   * it is not manipulating the curses screen, but rather,
+   * it is tearing it down.
+   */
+  if (tui_version)
+    tuiCleanUp();
+#endif
 
   exit (exit_code);
 }
@@ -3341,6 +3390,8 @@ init_cmd_lists ()
   infolist = NULL;
   enablelist = NULL;
   disablelist = NULL;
+  togglelist = NULL;
+  stoplist = NULL;
   deletelist = NULL;
   enablebreaklist = NULL;
   setlist = NULL;
@@ -3428,7 +3479,8 @@ well documented as user commands.",
 The commands in this class are those defined by the user.\n\
 Use the \"define\" command to define a command.", &cmdlist);
   add_cmd ("support", class_support, NO_FUNCTION, "Support facilities.", &cmdlist);
-  add_cmd ("status", class_info, NO_FUNCTION, "Status inquiries.", &cmdlist);
+  if (!dbx_commands)
+    add_cmd ("status", class_info, NO_FUNCTION, "Status inquiries.", &cmdlist);
   add_cmd ("files", class_files, NO_FUNCTION, "Specifying and examining files.", &cmdlist);
   add_cmd ("breakpoints", class_breakpoint, NO_FUNCTION, "Making program stop at certain points.", &cmdlist);
   add_cmd ("data", class_vars, NO_FUNCTION, "Examining data.", &cmdlist);

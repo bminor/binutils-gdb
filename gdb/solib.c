@@ -207,6 +207,8 @@ solib_add_common_symbols PARAMS ((struct rtc_symb *));
 
 #endif
 
+void _initialize_solib PARAMS ((void));
+
 /* If non-zero, this is a prefix that will be added to the front of the name
    shared libraries with an absolute filename for loading.  */
 static char *solib_absolute_prefix = NULL;
@@ -412,7 +414,7 @@ solib_add_common_symbols (rtc_symp)
     }
 
   init_minimal_symbol_collection ();
-  make_cleanup (discard_minimal_symbols, 0);
+  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
 
   while (rtc_symp)
     {
@@ -583,7 +585,7 @@ look_for_base (fd, baseaddr)
 
   if (fd == -1
       || (exec_bfd != NULL
-	  && fdmatch (fileno ((GDB_FILE *)(exec_bfd -> iostream)), fd)))
+	  && fdmatch (fileno ((FILE *)(exec_bfd -> iostream)), fd)))
     {
       return (0);
     }
@@ -969,7 +971,7 @@ find_solib (so_list_ptr)
 
 	  if (! solib_cleanup_queued)
 	    {
-	      make_run_cleanup (do_clear_solib);
+	      make_run_cleanup (do_clear_solib, NULL);
 	      solib_cleanup_queued = 1;
 	    }
 	  
@@ -1040,7 +1042,7 @@ symbol_add_stub (arg)
   so -> objfile =
     symbol_file_add (so -> so_name, so -> from_tty,
 		     text_addr,
-		     0, 0, 0);
+		     0, 0, 0, 0, 1);
   return (1);
 }
 
@@ -1119,7 +1121,7 @@ solib_add (arg_string, from_tty, target)
 	     here, otherwise we dereference a potential dangling pointer
 	     for each call to target_read/write_memory within this routine.  */
 	  update_coreops = core_ops.to_sections == target->to_sections;
-	     
+          	     
 	  /* Reallocate the target's section table including the new size.  */
 	  if (target -> to_sections)
 	    {

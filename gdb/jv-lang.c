@@ -59,7 +59,13 @@ get_dynamics_objfile ()
 {
   if (dynamics_objfile == NULL)
     {
-      dynamics_objfile = allocate_objfile (NULL, 0);
+
+/* CHECK WITH STU -- edie. Params 3 and 4 are USER_LOADED and IS_SOLIB. 
+   USER_LOADED - used by run_command to remove old objfile entries which 
+                 are no longer valid 
+   IS_SOLIB    - 1 if the object file is a shared library */
+
+      dynamics_objfile = allocate_objfile (NULL, 0, 0, 0);
     }
   return dynamics_objfile;
 }

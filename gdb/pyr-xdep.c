@@ -115,7 +115,7 @@ fetch_inferior_registers (regno)
   supply_register(CSP_REGNUM, reg_buf+CSP_REGNUM);
 #ifdef  PYRAMID_CONTROL_FRAME_DEBUGGING
   if (skipped_frames) {
-    fprintf_unfiltered (stderr,
+    fprintf_unfiltered (gdb_stderr,
 	     "skipped %d frames from %x to %x; cfp was %x, now %x\n",
 	     skipped_frames, reg_buf[CSP_REGNUM]);
   }

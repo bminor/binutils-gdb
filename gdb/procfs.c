@@ -534,7 +534,7 @@ static void procfs_attach PARAMS ((char *, int));
 
 static void proc_set_exec_trap PARAMS ((void));
 
-static int  procfs_init_inferior PARAMS ((int));
+static void  procfs_init_inferior PARAMS ((int));
 
 static struct procinfo *create_procinfo PARAMS ((int));
 
@@ -2519,7 +2519,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	int procfs_init_inferior (int pid)
+	void procfs_init_inferior (int pid)
 
 DESCRIPTION
 
@@ -2537,7 +2537,7 @@ NOTES
 
  */
 
-static int 
+static void 
 procfs_init_inferior (pid)
      int pid;
 {
@@ -2563,7 +2563,6 @@ procfs_init_inferior (pid)
   /* One trap to exec the shell, one to exec the program being debugged.  */
   startup_inferior (2);
 #endif
-  return (pid);
 }
 
 /*
@@ -5574,7 +5573,7 @@ procfs_create_inferior (exec_file, allargs, env)
     }
 
   fork_inferior (exec_file, allargs, env,
-		 proc_set_exec_trap, procfs_init_inferior, shell_file);
+		 proc_set_exec_trap, procfs_init_inferior, NULL, shell_file);
 
   /* We are at the first instruction we care about.  */
   /* Pedal to the metal... */

@@ -126,6 +126,7 @@ a29k-tdep.c
 a68v-nat.c
 abug-rom.c
 acconfig.h
+acinclude.m4
 aclocal.m4
 alpha-nat.c
 alpha-tdep.c
@@ -244,12 +245,15 @@ gould-tdep.c
 gould-xdep.c
 h8300-tdep.c
 h8500-tdep.c
+hp-psymtab-read.c
+hp-symtab-read.c
 hp300ux-nat.c
 hppa-tdep.c
 hppab-nat.c
 hppah-nat.c
 hppam3-nat.c
 hpread.c
+hpread.h
 hpux-thread.c
 i386-stub.c
 i386-tdep.c
@@ -269,6 +273,7 @@ inflow.c
 infptrace.c
 infrun.c
 inftarg.c
+infttrace.c
 irix4-nat.c
 irix5-nat.c
 isi-xdep.c
@@ -435,6 +440,7 @@ top.c
 top.h
 tracepoint.c
 tracepoint.h
+tui
 typeprint.c
 typeprint.h
 ultra3-nat.c

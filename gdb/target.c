@@ -1196,7 +1196,7 @@ generic_mourn_inferior ()
 
   inferior_pid = 0;
   attach_flag = 0;
-  breakpoint_init_inferior ();
+  breakpoint_init_inferior (inf_exited);
   registers_changed ();
 
 #ifdef CLEAR_DEFERRED_STORES

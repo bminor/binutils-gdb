@@ -474,7 +474,11 @@ c_value_print (val, stream, format, pretty)
       if (TYPE_CODE (type) == TYPE_CODE_PTR &&
 	  TYPE_NAME (type) == NULL &&
 	  TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL &&
-	  STREQ (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char"))
+	  STREQ (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char") &&
+          !TYPE_VOLATILE (TYPE_TARGET_TYPE (type)) &&
+          (TYPE_UNSIGNED (TYPE_TARGET_TYPE (type)) || TYPE_NOSIGN (TYPE_TARGET_TYPE (type))) &&
+          !TYPE_VOLATILE (type) &&
+          !TYPE_CONST (type))
 	{
 	  /* Print nothing */
 	}

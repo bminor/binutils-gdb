@@ -244,6 +244,7 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
   BLOCK_END (block) = end;
  /* Superblock filled in when containing block is made */
   BLOCK_SUPERBLOCK (block) = NULL;
+
   BLOCK_GCC_COMPILED (block) = processing_gcc_compilation;
 
   /* Put the block in as the value of the symbol that names it.  */
@@ -276,6 +277,7 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		case LOC_UNDEF:
 		case LOC_CONST:
 		case LOC_STATIC:
+		case LOC_INDIRECT:
 		case LOC_REGISTER:
 		case LOC_LOCAL:
 		case LOC_TYPEDEF:
@@ -312,6 +314,7 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		    case LOC_UNDEF:
 		    case LOC_CONST:
 		    case LOC_STATIC:
+                    case LOC_INDIRECT:
 		    case LOC_REGISTER:
 		    case LOC_LOCAL:
 		    case LOC_TYPEDEF:
@@ -1046,11 +1049,13 @@ push_context (desc, valu)
   new = &context_stack[context_stack_depth++];
   new->depth = desc;
   new->locals = local_symbols;
+  new->params = param_symbols;
   new->old_blocks = pending_blocks;
   new->start_addr = valu;
   new->name = NULL;
 
   local_symbols = NULL;
+  param_symbols = NULL;
 
   return (new);
 }
@@ -1093,6 +1098,40 @@ record_debugformat (format)
 {
   current_subfile -> debugformat = savestring (format, strlen (format));
 }
+
+
+/* Merge the first symbol list SRCLIST into the second symbol list
+   TARGETLIST by repeated calls to add_symbol_to_list().  This
+   procedure "frees" each link of SRCLIST by adding it to the
+   free_pendings list.  Caller must set SRCLIST to a null list after
+   calling this function.
+   
+   Void return. */ 
+
+void
+merge_symbol_lists (srclist, targetlist)
+  struct pending ** srclist;
+  struct pending ** targetlist;
+{
+  register int i;
+  register struct pending * link;
+
+  if (!srclist || !*srclist)
+    return;
+
+  /* Merge in elements from current link */ 
+  for (i=0; i < (*srclist)->nsyms; i++)
+    add_symbol_to_list ((*srclist)->symbol[i], targetlist);
+
+  /* Recurse on next */
+  merge_symbol_lists (&(*srclist)->next, targetlist);
+  
+  /* "Free" the current link */
+  (*srclist)->next = free_pendings;
+  free_pendings = (*srclist);
+}
+
+
 
 
 /* Initialize anything that needs initializing when starting to read

@@ -53,9 +53,25 @@ struct thread_info
   int trap_expected;
   int handling_longjmp;
   int another_trap;
+
+  /* This is set TRUE when a catchpoint of a shared library event
+     triggers.  Since we don't wish to leave the inferior in the
+     solib hook when we report the event, we step the inferior
+     back to user code before stopping and reporting the event.
+     */
+  int  stepping_through_solib_after_catch;
+
+  /* When stepping_through_solib_after_catch is TRUE, this is a
+     list of the catchpoints that should be reported as triggering
+     when we finally do stop stepping.
+     */
+  bpstat  stepping_through_solib_catchpoints;
+
+  /* This is set to TRUE when this thread is in a signal handler
+     trampoline and we're single-stepping through it */
+  int stepping_through_sigtramp;
+
 };
-
-
 
 static struct target_thread_vector *target_thread_functions;
 
@@ -104,6 +120,7 @@ bind_target_thread_vector (vec)
 {
   target_thread_functions = vec;
 }
+
 /* Prototypes for exported functions. */
 
 struct target_thread_vector *
@@ -203,6 +220,9 @@ add_thread (pid)
   tp->handling_longjmp = 0;
   tp->trap_expected = 0;
   tp->another_trap = 0;
+  tp->stepping_through_solib_after_catch = 0;
+  tp->stepping_through_solib_catchpoints = NULL;
+  tp->stepping_through_sigtramp = 0;
   tp->next = thread_list;
   thread_list = tp;
 }
@@ -301,7 +321,10 @@ void load_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
 			trap_expected, step_resume_breakpoint,
 			through_sigtramp_breakpoint, step_range_start,
 			step_range_end, step_frame_address,
-			handling_longjmp, another_trap)
+			handling_longjmp, another_trap,
+                        stepping_through_solib_after_catch,
+                        stepping_through_solib_catchpoints,
+                        stepping_through_sigtramp)
      int pid;
      CORE_ADDR *prev_pc;
      CORE_ADDR *prev_func_start;
@@ -314,6 +337,9 @@ void load_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
      CORE_ADDR *step_frame_address;
      int *handling_longjmp;
      int *another_trap;
+     int *  stepping_through_solib_after_catch;
+     bpstat *  stepping_through_solib_catchpoints;
+     int *  stepping_through_sigtramp;
 {
   struct thread_info *tp;
 
@@ -334,6 +360,9 @@ void load_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
   *handling_longjmp = tp->handling_longjmp;
   *trap_expected = tp->trap_expected;
   *another_trap = tp->another_trap;
+  *stepping_through_solib_after_catch = tp->stepping_through_solib_after_catch;
+  *stepping_through_solib_catchpoints = tp->stepping_through_solib_catchpoints;
+  *stepping_through_sigtramp = tp->stepping_through_sigtramp;
 }
 
 /* Save infrun state for the thread PID.  */
@@ -342,7 +371,10 @@ void save_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
 			trap_expected, step_resume_breakpoint,
 			through_sigtramp_breakpoint, step_range_start,
 			step_range_end, step_frame_address,
-			handling_longjmp, another_trap)
+			handling_longjmp, another_trap,
+                        stepping_through_solib_after_catch,
+                        stepping_through_solib_catchpoints,
+                        stepping_through_sigtramp)
      int pid;
      CORE_ADDR prev_pc;
      CORE_ADDR prev_func_start;
@@ -355,6 +387,9 @@ void save_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
      CORE_ADDR step_frame_address;
      int handling_longjmp;
      int another_trap;
+     int  stepping_through_solib_after_catch;
+     bpstat  stepping_through_solib_catchpoints;
+     int  stepping_through_sigtramp;
 {
   struct thread_info *tp;
 
@@ -375,6 +410,9 @@ void save_infrun_state (pid, prev_pc, prev_func_start, prev_func_name,
   tp->handling_longjmp = handling_longjmp;
   tp->trap_expected = trap_expected;
   tp->another_trap = another_trap;
+  tp->stepping_through_solib_after_catch = stepping_through_solib_after_catch;
+  tp->stepping_through_solib_catchpoints = stepping_through_solib_catchpoints;
+  tp->stepping_through_sigtramp = stepping_through_sigtramp;
 }
 
 /* Return true if TP is an active thread. */
@@ -414,7 +452,12 @@ prune_threads ()
     }
 }
 
-/* Print information about currently known threads */
+/* Print information about currently known threads 
+ *
+ * Note: this has the drawback that it _really_ switches
+ *       threads, which frees the frame cache.  A no-side
+ *       effects info-threads command would be nicer.
+ */
 
 static void
 info_threads_command (arg, from_tty)
@@ -423,6 +466,9 @@ info_threads_command (arg, from_tty)
 {
   struct thread_info *tp;
   int current_pid = inferior_pid;
+  struct frame_info *cur_frame;
+  int                saved_frame_level = selected_frame_level;
+  int                counter;
 
   /* Avoid coredumps which would happen if we tried to access a NULL
      selected_frame.  */
@@ -440,16 +486,39 @@ info_threads_command (arg, from_tty)
       else
 	printf_filtered ("  ");
 
+#ifdef HPUXHPPA
+      printf_filtered ("%d %s  ", tp->num, target_tid_to_str (tp->pid));
+#else
       printf_filtered ("%d %s  ", tp->num, target_pid_to_str (tp->pid));
-
+#endif
       switch_to_thread (tp->pid);
       if (selected_frame)
-	print_stack_frame (selected_frame, -1, 0);
+	print_only_stack_frame (selected_frame, -1, 0);
       else
 	printf_filtered ("[No stack.]\n");
     }
 
   switch_to_thread (current_pid);
+
+  /* Code below copied from "up_silently_base" in "stack.c".
+   * It restores the frame set by the user before the "info threads"
+   * command.  We have finished the info-threads display by switching
+   * back to the current thread.  That switch has put us at the top
+   * of the stack (leaf frame).
+   */
+  counter   = saved_frame_level;
+  cur_frame = find_relative_frame(selected_frame, &counter);
+  if (counter != 0) {
+      /* Ooops, can't restore, tell user where we are. */
+      warning ("Couldn't restore frame in current thread, at frame 0");
+      print_stack_frame (selected_frame, -1, 0);
+  }
+  else {
+      select_frame(cur_frame, saved_frame_level);
+  }
+
+  /* re-show current frame. */
+  show_stack_frame(cur_frame);
 }
 
 /* Switch from one thread to another. */
@@ -472,8 +541,10 @@ static void
 restore_current_thread (pid)
      int pid;
 {
-  if (pid != inferior_pid)
+  if (pid != inferior_pid) {
     switch_to_thread (pid);
+    print_stack_frame( get_current_frame(), 0, -1);
+  }
 }
 
 /* Apply a GDB command to a list of threads.  List syntax is a whitespace
@@ -503,8 +574,14 @@ thread_apply_all_command (cmd, from_tty)
     if (thread_alive (tp))
       {
 	switch_to_thread (tp->pid);
+#ifdef HPUXHPPA
+     printf_filtered ("\nThread %d (%s):\n",
+                       tp->num,
+		       target_tid_to_str (inferior_pid));
+#else
 	printf_filtered ("\nThread %d (%s):\n", tp->num,
 			 target_pid_to_str (inferior_pid));
+#endif
 	execute_command (cmd, from_tty);
       }
 }
@@ -567,8 +644,13 @@ thread_apply_command (tidlist, from_tty)
 	  else
 	    {
 	      switch_to_thread (tp->pid);
+#ifdef HPUXHPPA
+	  printf_filtered ("\nThread %d (%s):\n", tp->num,
+			   target_tid_to_str (inferior_pid));
+#else
 	      printf_filtered ("\nThread %d (%s):\n", tp->num,
 			       target_pid_to_str (inferior_pid));
+#endif
 	      execute_command (cmd, from_tty);
 	    }
 	}
@@ -587,9 +669,21 @@ thread_command (tidstr, from_tty)
   struct thread_info *tp;
 
   if (!tidstr)
-    error ("Please specify a thread ID.  Use the \"info threads\" command to\n\
-see the IDs of currently known threads.");
-
+    {
+      /* Don't generate an error, just say which thread is current. */
+      if (target_has_stack)
+	printf_filtered ("[Current thread is %d (%s)]\n",
+			 pid_to_thread_id(inferior_pid),
+#if defined(HPUXHPPA)
+			 target_tid_to_str(inferior_pid)
+#else
+			 target_pid_to_str(inferior_pid)
+#endif
+			 );
+      else
+	error ("No stack.");
+      return;
+    }
   num = atoi (tidstr);
 
   tp = find_thread_id (num);
@@ -602,9 +696,18 @@ see the IDs of currently known threads.", num);
     error ("Thread ID %d has terminated.\n", num);
 
   switch_to_thread (tp->pid);
+
   if (context_hook)
     context_hook (num);
-  printf_filtered ("[Switching to %s]\n", target_pid_to_str (inferior_pid));
+
+  printf_filtered ("[Switching to thread %d (%s)]\n",
+		   pid_to_thread_id (inferior_pid),
+#if defined(HPUXHPPA)
+		   target_tid_to_str (inferior_pid)
+#else
+		   target_pid_to_str (inferior_pid)
+#endif
+		   );
   print_stack_frame (selected_frame, selected_frame_level, 1);
 }
 
@@ -633,5 +736,6 @@ The new thread ID must be currently known.", &thread_cmd_list, "thread ", 1,
 	   "Apply a command to all threads.",
 	   &thread_apply_list);
 
-  add_com_alias ("t", "thread", class_run, 1);
+  if (!xdb_commands)
+    add_com_alias ("t", "thread", class_run, 1);
 }

@@ -691,7 +691,7 @@ vx_add_symbols (name, from_tty, text_addr, data_addr, bss_addr)
 
   /* It might be nice to suppress the breakpoint_re_set which happens here
      because we are going to do one again after the objfile_relocate.  */
-  objfile = symbol_file_add (name, from_tty, 0, 0, 0, 0);
+  objfile = symbol_file_add (name, from_tty, 0, 0, 0, 0, 0, 0);
 
   /* This is a (slightly cheesy) way of superceding the old symbols.  A less
      cheesy way would be to find the objfile with the same name and

@@ -64,6 +64,9 @@
 /* Define if your locale.h file contains LC_MESSAGES.  */
 #undef HAVE_LC_MESSAGES
 
+/* Define if you want to use the full-screen terminal user interface.  */
+#undef TUI
+
 /* Define if <proc_service.h> on solaris uses int instead of
    size_t, and assorted other type changes. */
 #undef PROC_SERVICE_IS_OLD

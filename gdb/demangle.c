@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Select the default C++ demangling style to use.  The default is "auto",
    which allows gdb to attempt to pick an appropriate demangling style for
    the executable it has loaded.  It can be set to a specific style ("gnu",
-   "lucid", "arm", etc.) in which case gdb will never attempt to do auto
+   "lucid", "arm", "hp", etc.) in which case gdb will never attempt to do auto
    selection of the style unless you do an explicit "set demangle auto".
    To select one of these as the default, set DEFAULT_DEMANGLING_STYLE in
    the appropriate target configuration file. */
@@ -67,6 +67,12 @@ static const struct demangler
   {ARM_DEMANGLING_STYLE_STRING,
      arm_demangling,
      "ARM style demangling"},
+  {HP_DEMANGLING_STYLE_STRING,
+     hp_demangling,
+     "HP (aCC) style demangling"},
+  {EDG_DEMANGLING_STYLE_STRING,
+     edg_demangling,
+     "EDG style demangling"},
   {NULL, unknown_demangling, NULL}
 };
 

@@ -431,7 +431,7 @@ set_trapped_internalvar (var, val, bitpos, bitsize, offset)
    If it looks like an address, print it in hex instead.  */
 
 decout (stream, type, val)
-     FILE *stream;
+     GDB_FILE *stream;
      struct type *type;
      LONGEST val;
 {

@@ -846,7 +846,7 @@ symbol_add_stub (arg)
   
   so -> objfile = symbol_file_add (so -> so_name, so -> from_tty,
 				   text_addr,
-				   0, 0, 0);
+				   0, 0, 0, 0, 0);
   return (1);
 }
 

@@ -54,11 +54,17 @@ int display_time;
 
 int display_space;
 
+/* Whether this is the command line version or not */
+int tui_version = 0;
+
 /* Whether xdb commands will be handled */
 int xdb_commands = 0;
 
 /* Whether dbx commands will be handled */
 int dbx_commands = 0;
+
+GDB_FILE *gdb_stdout;
+GDB_FILE *gdb_stderr;
 
 static void print_gdb_help PARAMS ((GDB_FILE *));
 extern void gdb_init PARAMS ((char *));
@@ -108,6 +114,8 @@ main (argc, argv)
 
   long time_at_startup = get_run_time ();
 
+  int gdb_file_size;
+
   START_PROGRESS (argv[0], 0);
 
 #ifdef MPW
@@ -144,6 +152,20 @@ main (argc, argv)
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
   current_directory = gdb_dirbuf;
 
+  gdb_file_size = sizeof(GDB_FILE);
+
+  gdb_stdout = (GDB_FILE *)xmalloc (gdb_file_size);
+  gdb_stdout->ts_streamtype = afile;
+  gdb_stdout->ts_filestream = stdout;
+  gdb_stdout->ts_strbuf = NULL;
+  gdb_stdout->ts_buflen = 0;
+
+  gdb_stderr = (GDB_FILE *)xmalloc (gdb_file_size);
+  gdb_stderr->ts_streamtype = afile;
+  gdb_stderr->ts_filestream = stderr;
+  gdb_stderr->ts_strbuf = NULL;
+  gdb_stderr->ts_buflen = 0;
+
   /* Parse arguments and options.  */
   {
     int c;
@@ -152,6 +174,11 @@ main (argc, argv)
        with no equivalent).  */
     static struct option long_options[] =
       {
+#if defined(TUI)
+	{"tui", no_argument, &tui_version, 1},
+#endif
+	{"xdb", no_argument, &xdb_commands, 1},
+	{"dbx", no_argument, &dbx_commands, 1},
 	{"readnow", no_argument, &readnow_symbol_files, 1},
 	{"r", no_argument, &readnow_symbol_files, 1},
 	{"mapped", no_argument, &mapped_symbol_files, 1},
@@ -340,7 +367,20 @@ main (argc, argv)
 
     /* If --help or --version, disable window interface.  */
     if (print_help || print_version)
+      {
+	use_windows = 0;
+#ifdef TUI
+	/* Disable the TUI as well.  */
+	tui_version = 0;
+#endif
+      }
+
+#ifdef TUI
+    /* An explicit --tui flag overrides the default UI, which is the
+       window system.  */
+    if (tui_version)
       use_windows = 0;
+#endif      
 
     /* OK, that's all the options.  The other arguments are filenames.  */
     count = 0;
@@ -364,6 +404,10 @@ main (argc, argv)
       quiet = 1;
   }
 
+#if defined(TUI)
+  if (tui_version)
+    init_ui_hook = tuiInit;
+#endif
   gdb_init (argv[0]);
 
   /* Do these (and anything which might call wrap_here or *_filtered)
@@ -496,10 +540,12 @@ main (argc, argv)
   warning_pre_print = "\nwarning: ";
 
   if (corearg != NULL)
-    if (!SET_TOP_LEVEL ())
-      core_file_command (corearg, !batch);
-    else if (isdigit (corearg[0]) && !SET_TOP_LEVEL ())
-      attach_command (corearg, !batch);
+    {
+      if (!SET_TOP_LEVEL ())
+	core_file_command (corearg, !batch);
+      else if (isdigit (corearg[0]) && !SET_TOP_LEVEL ())
+	attach_command (corearg, !batch);
+    }
   do_cleanups (ALL_CLEANUPS);
 
   if (ttyarg != NULL)
@@ -626,6 +672,7 @@ Options:\n\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
 ", stream);
       fputs_unfiltered ("\
+  --dbx              DBX compatibility mode.\n\
   --directory=DIR    Search for source files in DIR.\n\
   --epoch            Output information used by epoch emacs-GDB interface.\n\
   --exec=EXECFILE    Use EXECFILE as the executable.\n\
@@ -643,7 +690,15 @@ Options:\n\n\
   --se=FILE          Use FILE as symbol file and executable file.\n\
   --symbols=SYMFILE  Read symbols from SYMFILE.\n\
   --tty=TTY          Use TTY for input/output by the program being debugged.\n\
+", stream);
+#if defined(TUI)
+      fputs_unfiltered ("\
+  --tui              Use a terminal user interface.\n\
+", stream);
+#endif
+      fputs_unfiltered ("\
   --version          Print version information and then exit.\n\
+  --xdb              XDB compatibility mode.\n\
 ", stream);
 #ifdef ADDITIONAL_OPTION_HELP
       fputs_unfiltered (ADDITIONAL_OPTION_HELP, stream);
@@ -676,12 +731,57 @@ proc_remove_foreign (pid)
 void
 fputs_unfiltered (linebuffer, stream)
      const char *linebuffer;
-     FILE *stream;
+     GDB_FILE *stream;
 {
+#if defined(TUI)
+  extern int tui_owns_terminal;
+#endif
+  /* If anything (GUI, TUI) wants to capture GDB output, this is
+   * the place... the way to do it is to set up 
+   * fputs_unfiltered_hook.
+   * Our TUI ("gdb -tui") used to hook output, but in the
+   * new (XDB style) scheme, we do not do that anymore... - RT
+   */
   if (fputs_unfiltered_hook
       && (stream == gdb_stdout
 	  || stream == gdb_stderr))
     fputs_unfiltered_hook (linebuffer, stream);
   else
-    fputs (linebuffer, stream);
+    {
+#if defined(TUI)
+      if (tui_version && tui_owns_terminal) {
+	/* If we get here somehow while updating the TUI (from
+	 * within a tuiDo(), then we need to temporarily 
+	 * set up the terminal for GDB output. This probably just
+	 * happens on error output.
+	 */
+
+        if (stream->ts_streamtype == astring) {
+           gdb_file_adjust_strbuf(strlen(linebuffer), stream);
+           strcat(stream->ts_strbuf, linebuffer);
+        } else {
+           tuiTermUnsetup(0, (tui_version) ? cmdWin->detail.commandInfo.curch : 0);
+           fputs (linebuffer, stream->ts_filestream);
+           tuiTermSetup(0);
+           if (linebuffer[strlen(linebuffer) - 1] == '\n')
+              tuiClearCommandCharCount();
+           else
+              tuiIncrCommandCharCountBy(strlen(linebuffer));
+        }
+      } else {
+        /* The normal case - just do a fputs() */
+        if (stream->ts_streamtype == astring) {
+           gdb_file_adjust_strbuf(strlen(linebuffer), stream);
+           strcat(stream->ts_strbuf, linebuffer);
+        } else fputs (linebuffer, stream->ts_filestream);
+      }
+ 
+
+#else
+      if (stream->ts_streamtype == astring) {
+           gdb_file_adjust_strbuf(strlen(linebuffer), stream);
+           strcat(stream->ts_strbuf, linebuffer);
+        } else fputs (linebuffer, stream->ts_filestream);
+#endif
+    }
 }

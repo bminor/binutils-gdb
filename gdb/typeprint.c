@@ -34,6 +34,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include <errno.h>
 
+/* For real-type printing in whatis_exp() */
+extern int objectprint;		/* Controls looking up an object's derived type
+				   using what we find in its vtables.  */
+
 static void
 ptype_command PARAMS ((char *, int));
 
@@ -74,6 +78,10 @@ whatis_exp (exp, show)
   struct expression *expr;
   register value_ptr val;
   register struct cleanup *old_chain = NULL;
+  struct type * real_type = NULL;
+  int full = 0;
+  int top = -1;
+  int using_enc = 0;
 
   if (exp)
     {
@@ -85,7 +93,16 @@ whatis_exp (exp, show)
   else
     val = access_value_history (0);
 
+  real_type = value_rtti_type (val, &full, &top, &using_enc);
+
   printf_filtered ("type = ");
+
+  if (real_type && objectprint)
+    printf_filtered ("/* real type = %s%s */\n",
+                     TYPE_NAME (real_type),
+                     full ? "" : " (incomplete object)");
+  /* FIXME: maybe better to use type_print (real_type, "", gdb_stdout, -1); */
+
   type_print (VALUE_TYPE (val), "", gdb_stdout, show);
   printf_filtered ("\n");
 

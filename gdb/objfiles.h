@@ -159,6 +159,24 @@ struct obj_section {
   int ovly_mapped;
 };
 
+/* An import entry contains information about a symbol that
+   is used in this objfile but not defined in it, and so needs
+   to be imported from some other objfile */
+/* Currently we just store the name; no attributes. 1997-08-05 */ 
+typedef char * ImportEntry;
+
+
+/* An export entry contains information about a symbol that
+   is defined in this objfile and available for use in other
+   objfiles */ 
+typedef struct {
+  char * name; /* name of exported symbol */ 
+  int address; /* offset subject to relocation */ 
+  /* Currently no other attributes 1997-08-05 */ 
+} ExportEntry;
+
+
+
 /* The "objstats" structure provides a place for gdb to record some
    interesting information about its internal state at runtime, on a
    per objfile basis, such as information about the number of symbols
@@ -218,6 +236,22 @@ struct objfile
   /* The object file's name.  Malloc'd; free it if you free this struct.  */
 
   char *name;
+
+  /* TRUE if this objfile was created because the user explicitly caused
+     it (e.g., used the add-symbol-file command).
+     */
+  int  user_loaded;
+
+  /* TRUE if this objfile was explicitly created to represent a solib.
+
+     (If FALSE, the objfile may actually be a solib.  This can happen if
+     the user created the objfile by using the add-symbol-file command.
+     GDB doesn't in that situation actually check whether the file is a
+     solib.  Rather, the target's implementation of the solib interface
+     is responsible for setting this flag when noticing solibs used by
+     an inferior.)
+     */
+  int  is_solib;
 
   /* Some flag bits for this objfile. */
 
@@ -358,6 +392,14 @@ struct objfile
   /* two auxiliary fields, used to hold the fp of separate symbol files */
   FILE *auxf1, *auxf2;
 
+  /* Imported symbols */
+  ImportEntry * import_list;
+  int import_list_size;
+
+  /* Exported symbols */
+  ExportEntry * export_list;
+  int export_list_size;
+
   /* Place to stash various statistics about this objfile */
   OBJSTATS;
 };
@@ -428,7 +470,7 @@ extern struct objfile *object_files;
 /* Declarations for functions defined in objfiles.c */
 
 extern struct objfile *
-allocate_objfile PARAMS ((bfd *, int));
+allocate_objfile PARAMS ((bfd *, int, int, int));
 
 extern int
 build_objfile_section_table PARAMS ((struct objfile *));
@@ -452,6 +494,13 @@ have_partial_symbols PARAMS ((void));
 
 extern int
 have_full_symbols PARAMS ((void));
+
+/* This operation deletes all objfile entries that represent solibs that
+   weren't explicitly loaded by the user, via e.g., the add-symbol-file
+   command.
+   */
+extern void
+objfile_purge_solibs PARAMS ((void));
 
 /* Functions for dealing with the minimal symbol table, really a misc
    address<->symbol mapping for things we don't have debug symbols for.  */

@@ -70,9 +70,9 @@ pyr_do_registers_info (regnum, fpregs)
       if (i == regnum) {
 	long val = raw_regs[i];
 	
-	fputs_filtered (REGISTER_NAME (i), stdout);
+	fputs_filtered (REGISTER_NAME (i), gdb_stdout);
 	printf_filtered(":");
-	print_spaces_filtered (6 - strlen (REGISTER_NAME (i)), stdout);
+	print_spaces_filtered (6 - strlen (REGISTER_NAME (i)), gdb_stdout);
 	if (val == 0)
 	  printf_filtered ("0");
 	else
@@ -89,7 +89,7 @@ CORE_ADDR frame_locals_address (frame)
   register int addr = find_saved_register (frame,CFP_REGNUM);
   register int result = read_memory_integer (addr, 4);
 #ifdef PYRAMID_CONTROL_FRAME_DEBUGGING
-  fprintf_unfiltered (stderr,
+  fprintf_unfiltered (gdb_stderr,
 	   "\t[[..frame_locals:%8x, %s= %x @%x fcfp= %x foo= %x\n\t gr13=%x pr13=%x tr13=%x @%x]]\n",
 	   frame->frame,
 	   REGISTER_NAME (CFP_REGNUM),
@@ -115,7 +115,7 @@ CORE_ADDR frame_args_addr (frame)
   register int result = read_memory_integer (addr, 4);
 
 #ifdef PYRAMID_CONTROL_FRAME_DEBUGGING
-  fprintf_unfiltered (stderr,
+  fprintf_unfiltered (gdb_stderr,
 	   "\t[[..frame_args:%8x, %s= %x @%x fcfp= %x r_r= %x\n\t gr13=%x pr13=%x tr13=%x @%x]]\n",
 	   frame->frame,
 	   REGISTER_NAME (CFP_REGNUM),
@@ -184,7 +184,7 @@ CORE_ADDR pyr_saved_pc(frame)
 int
 pyr_print_insn (memaddr, stream)
      CORE_ADDR memaddr;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   unsigned char buffer[MAXLEN];
   register int i, nargs, insn_size =4;

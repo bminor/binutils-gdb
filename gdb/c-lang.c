@@ -245,10 +245,17 @@ c_create_fundamental_type (objfile, typeid)
 			  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 			  0, "void", objfile);
 	break;
+      case FT_BOOLEAN:
+        type = init_type (TYPE_CODE_BOOL,
+			  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+                          0, "bool", objfile);
+                          
+        break;
       case FT_CHAR:
 	type = init_type (TYPE_CODE_INT,
 			  TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 			  0, "char", objfile);
+        TYPE_FLAGS (type) |= TYPE_FLAG_NOSIGN;
 	break;
       case FT_SIGNED_CHAR:
 	type = init_type (TYPE_CODE_INT,
@@ -334,6 +341,12 @@ c_create_fundamental_type (objfile, typeid)
 	type = init_type (TYPE_CODE_FLT,
 			  TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
 			  0, "long double", objfile);
+        break;
+      case FT_TEMPLATE_ARG:
+        type = init_type (TYPE_CODE_TEMPLATE_ARG,
+			  0,
+		          0, "<template arg>", objfile);
+
 	break;
       }
   return (type);
@@ -428,10 +441,33 @@ const struct language_defn c_language_defn = {
   LANG_MAGIC
 };
 
+struct type ** const (cplus_builtin_types[]) = 
+{
+  &builtin_type_int,
+  &builtin_type_long,
+  &builtin_type_short,
+  &builtin_type_char,
+  &builtin_type_float,
+  &builtin_type_double,
+  &builtin_type_void,
+  &builtin_type_long_long,
+  &builtin_type_signed_char,
+  &builtin_type_unsigned_char,
+  &builtin_type_unsigned_short,
+  &builtin_type_unsigned_int,
+  &builtin_type_unsigned_long,
+  &builtin_type_unsigned_long_long,
+  &builtin_type_long_double,
+  &builtin_type_complex,
+  &builtin_type_double_complex,
+  &builtin_type_bool,
+  0
+};
+
 const struct language_defn cplus_language_defn = {
   "c++",				/* Language name */
   language_cplus,
-  c_builtin_types,
+  cplus_builtin_types,
   range_check_off,
   type_check_off,
   c_parse,

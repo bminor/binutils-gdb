@@ -144,7 +144,7 @@ f_emit_char (c, stream, quoter)
 static void
 f_printchar (c, stream)
      int c;
-     FILE *stream;
+     GDB_FILE *stream;
 {
   fputs_filtered ("'", stream);
   LA_EMIT_CHAR (c, stream, '\'');
@@ -160,7 +160,7 @@ f_printchar (c, stream)
 
 static void
 f_printstr (stream, string, length, width, force_ellipses)
-     FILE *stream;
+     GDB_FILE *stream;
      char *string;
      unsigned int length;
      int width;
@@ -176,7 +176,7 @@ f_printstr (stream, string, length, width, force_ellipses)
   
   if (length == 0)
     {
-      fputs_filtered ("''", stdout);
+      fputs_filtered ("''", gdb_stdout);
       return;
     }
   

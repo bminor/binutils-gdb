@@ -1936,7 +1936,7 @@ gnu_create_inferior (exec_file, allargs, env)
 
   inf_debug (inf, "creating inferior");
 
-  fork_inferior (exec_file, allargs, env, trace_me, attach_to_child, NULL);
+    fork_inferior (exec_file, allargs, env, trace_me, attach_to_child, NULL, NULL);
 
   inf_update_signal_thread (inf);
   inf_set_traced (inf, inf->want_signals);

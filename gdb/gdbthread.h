@@ -23,6 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef GDBTHREAD_H
 #define GDBTHREAD_H
 
+/* For bpstat */
+#include "breakpoint.h"
+
 extern void init_thread_list PARAMS ((void));
 
 extern void add_thread PARAMS ((int pid));
@@ -40,12 +43,14 @@ extern int valid_thread_id PARAMS ((int thread));
 extern void load_infrun_state PARAMS ((int, CORE_ADDR *, CORE_ADDR *, char **,
 				       int *, struct breakpoint **,
 				       struct breakpoint **, CORE_ADDR *,
-				       CORE_ADDR *, CORE_ADDR *, int *, int *));
+				       CORE_ADDR *, CORE_ADDR *, int *, int *,
+                                       int *, bpstat *, int *));
 
 extern void save_infrun_state PARAMS ((int, CORE_ADDR, CORE_ADDR, char *,
 				       int, struct breakpoint *,
 				       struct breakpoint *, CORE_ADDR,
-				       CORE_ADDR, CORE_ADDR, int, int));
+				       CORE_ADDR, CORE_ADDR, int, int,
+                                       int, bpstat, int));
 
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;

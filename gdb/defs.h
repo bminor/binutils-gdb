@@ -94,6 +94,16 @@ typedef bfd_vma CORE_ADDR;
 /* Check if a character is one of the commonly used C++ marker characters.  */
 extern int is_cplus_marker PARAMS ((int));
 
+/* use tui interface if non-zero */
+extern int tui_version;
+
+#if defined(TUI)
+/* all invocations of TUIDO should have two sets of parens */
+#define TUIDO(x)	tuiDo x
+#else
+#define TUIDO(x)
+#endif
+
 /* enable xdb commands if set */
 extern int xdb_commands;
 
@@ -156,6 +166,13 @@ enum language
    language_scm			/* Scheme / Guile */
 };
 
+enum precision_type
+{
+  single_precision,
+  double_precision,
+  unspecified_precision
+};
+   
 /* the cleanup list records things that have to be undone
    if an error happens (descriptors to be closed, memory to be freed, etc.)
    Each link in the chain records a function to call and an
@@ -311,9 +328,41 @@ extern void wrap_here PARAMS ((char *));
 
 extern void reinitialize_more_filter PARAMS ((void));
 
+/* new */
+enum streamtype
+{
+  afile,
+  astring
+};
+
+/* new */
+typedef struct tui_stream
+{
+  enum streamtype ts_streamtype;
+  FILE *ts_filestream;
+  char *ts_strbuf;
+  int ts_buflen;
+} GDB_FILE;
+
+extern GDB_FILE *gdb_stdout;
+extern GDB_FILE *gdb_stderr;
+
+#if 0
 typedef FILE GDB_FILE;
 #define gdb_stdout stdout
 #define gdb_stderr stderr
+#endif
+
+#if defined(TUI)
+#include "tui.h"
+#include "tuiCommand.h"
+#include "tuiData.h"
+#include "tuiIO.h"
+#include "tuiLayout.h"
+#include "tuiWin.h"
+#endif
+
+extern void gdb_fclose PARAMS ((GDB_FILE **));
 
 extern void gdb_flush PARAMS ((GDB_FILE *));
 
@@ -338,13 +387,13 @@ extern void puts_debug PARAMS ((char *prefix, char *string, char *suffix));
 extern void vprintf_filtered PARAMS ((const char *, va_list))
      ATTR_FORMAT(printf, 1, 0);
 
-extern void vfprintf_filtered PARAMS ((FILE *, const char *, va_list))
+extern void vfprintf_filtered PARAMS ((GDB_FILE *, const char *, va_list))
      ATTR_FORMAT(printf, 2, 0);
 
-extern void fprintf_filtered PARAMS ((FILE *, const char *, ...))
+extern void fprintf_filtered PARAMS ((GDB_FILE *, const char *, ...))
      ATTR_FORMAT(printf, 2, 3);
 
-extern void fprintfi_filtered PARAMS ((int, FILE *, const char *, ...))
+extern void fprintfi_filtered PARAMS ((int, GDB_FILE *, const char *, ...))
      ATTR_FORMAT(printf, 3, 4);
 
 extern void printf_filtered PARAMS ((const char *, ...))
@@ -356,14 +405,24 @@ extern void printfi_filtered PARAMS ((int, const char *, ...))
 extern void vprintf_unfiltered PARAMS ((const char *, va_list))
      ATTR_FORMAT(printf, 1, 0);
 
-extern void vfprintf_unfiltered PARAMS ((FILE *, const char *, va_list))
+extern void vfprintf_unfiltered PARAMS ((GDB_FILE *, const char *, va_list))
      ATTR_FORMAT(printf, 2, 0);
 
-extern void fprintf_unfiltered PARAMS ((FILE *, const char *, ...))
+extern void fprintf_unfiltered PARAMS ((GDB_FILE *, const char *, ...))
      ATTR_FORMAT(printf, 2, 3);
 
 extern void printf_unfiltered PARAMS ((const char *, ...))
      ATTR_FORMAT(printf, 1, 2);
+
+extern int gdb_file_isatty PARAMS ((GDB_FILE *));
+
+extern GDB_FILE *gdb_file_init_astring PARAMS ((int));
+
+extern void gdb_file_deallocate PARAMS ((GDB_FILE **));
+
+extern char *gdb_file_get_strbuf PARAMS ((GDB_FILE *));
+
+extern void gdb_file_adjust_strbuf PARAMS ((int, GDB_FILE *));
 
 extern void print_spaces PARAMS ((int, GDB_FILE *));
 
@@ -430,6 +489,8 @@ extern void print_address PARAMS ((CORE_ADDR, GDB_FILE *));
 /* From source.c */
 
 extern int openp PARAMS ((char *, int, char *, int, int, char **));
+
+extern int source_full_path_of PARAMS ((char *, char **));
 
 extern void mod_path PARAMS ((char *, char **));
 
@@ -785,7 +846,6 @@ extern void free ();
 #endif
 
 /* Dynamic target-system-dependent parameters for GDB. */
-
 #include "gdbarch.h"
 
 /* Static target-system-dependent parameters for GDB. */
@@ -865,11 +925,11 @@ extern int extract_long_unsigned_integer PARAMS ((void *, int, LONGEST *));
 
 extern CORE_ADDR extract_address PARAMS ((void *, int));
 
-extern void store_signed_integer PARAMS ((void *, int, LONGEST));
+extern void store_signed_integer PARAMS ((PTR, int, LONGEST));
 
-extern void store_unsigned_integer PARAMS ((void *, int, ULONGEST));
+extern void store_unsigned_integer PARAMS ((PTR, int, ULONGEST));
 
-extern void store_address PARAMS ((void *, int, CORE_ADDR));
+extern void store_address PARAMS ((PTR, int, LONGEST));
 
 /* Setup definitions for host and target floating point formats.  We need to
    consider the format for `float', `double', and `long double' for both target
@@ -989,13 +1049,14 @@ struct cmd_list_element;
 extern void (*init_ui_hook) PARAMS ((char *argv0));
 extern void (*command_loop_hook) PARAMS ((void));
 extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer,
-					      FILE *stream));
+					      GDB_FILE *stream));
 extern void (*print_frame_info_listing_hook) PARAMS ((struct symtab *s,
 						      int line, int stopline,
 						      int noerror));
+extern struct frame_info *parse_frame_specification PARAMS ((char *frame_exp));
 extern int  (*query_hook) PARAMS ((const char *, va_list));
 extern void (*warning_hook) PARAMS ((const char *, va_list));
-extern void (*flush_hook) PARAMS ((FILE *stream));
+extern void (*flush_hook) PARAMS ((GDB_FILE *stream));
 extern void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
 extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*modify_breakpoint_hook) PARAMS ((struct breakpoint *bpt));

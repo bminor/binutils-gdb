@@ -99,7 +99,7 @@ int gdbtk_test PARAMS ((char *));
  * way errors will go to stdout.
  */
 
-extern void   gdbtk_fputs PARAMS ((const char *, FILE *));
+extern void   gdbtk_fputs PARAMS ((const char *, GDB_FILE *));
 
 /* Handle for TCL interpreter */
 Tcl_Interp *gdbtk_interp = NULL;
@@ -569,14 +569,17 @@ gdbtk_find_main";
       fputs_unfiltered_hook = NULL; /* Force errors to stdout/stderr */
       if (getenv("GDBTK_LIBRARY"))
 	{
-	  fprintf_unfiltered (stderr, "Unable to find main.tcl in %s\n",getenv("GDBTK_LIBRARY"));
-	  fprintf_unfiltered (stderr, 
+	  fprintf_unfiltered (gdb_stderr, "Unable to find main.tcl in %s\n",
+			      getenv("GDBTK_LIBRARY"));
+	  fprintf_unfiltered (gdb_stderr, 
 			      "Please set GDBTK_LIBRARY to a path that includes the GDB tcl files.\n");
 	}
       else
 	{
-	  fprintf_unfiltered (stderr, "Unable to find main.tcl in %s\n", GDBTK_LIBRARY);
-	  fprintf_unfiltered (stderr, "You might want to set GDBTK_LIBRARY\n");	  
+	  fprintf_unfiltered (gdb_stderr,
+			      "Unable to find main.tcl in %s\n", GDBTK_LIBRARY);
+	  fprintf_unfiltered (gdb_stderr,
+			      "You might want to set GDBTK_LIBRARY\n");
 	}
       error("");
     }
