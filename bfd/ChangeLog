@@ -1,3 +1,14 @@
+Tue Jan 17 10:52:32 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elf32-mips.c (enum reloc_type): Define new relocs used on Irix.
+	(elf_mips_howto_table): Add entries for new relocs.
+	(mips_elf_section_from_shdr): Handle SHT_MIPS_MSYM,
+	SHT_MIPS_DWARF, and SHT_MIPS_EVENTS.
+	(mips_elf_fake_sections): Handle sections named .msym, .debug_*
+	and .MIPS.events.*.
+
+	* srec.c (srec_init): Remove unused local variable i.
+
 Sat Jan 14 19:09:48 1995  Steve Chamberlain  <sac@jonny>
 
 	* archures.c, Makefile.in, targets.c, bfd-in2.h, coffcode.h,
