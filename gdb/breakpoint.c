@@ -8078,15 +8078,20 @@ pending breakpoint behavior",
 		  &breakpoint_show_cmdlist, "show breakpoint ",
 		  0/*allow-unknown*/, &showlist);
 
-  add_setshow_cmd ("pending", no_class, var_auto_boolean,
-		   (char *) &pending_break_support,
-		   "Set debugger's behavior regarding pending breakpoints.\n\
-If on, an unrecognized breakpoint location will cause gdb to create a pending\n\
-breakpoint.  If off, an unrecognized breakpoint location results in an error.\n\
-If auto, an unrecognized breakpoint location results in a user-query to see if\n\
-a pending breakpoint should be created.","\
-Show debugger's behavior regarding pending breakpoints.",
-		   NULL, NULL, &breakpoint_set_cmdlist, &breakpoint_show_cmdlist);
+  add_setshow_auto_boolean_cmd ("pending", no_class, &pending_break_support, "\
+Set debugger's behavior regarding pending breakpoints.\n\
+If on, an unrecognized breakpoint location will cause gdb to create a\n\
+pending breakpoint.  If off, an unrecognized breakpoint location results in\n\
+an error.  If auto, an unrecognized breakpoint location results in a\n\
+user-query to see if a pending breakpoint should be created.","\
+Show debugger's behavior regarding pending breakpoints.\n\
+If on, an unrecognized breakpoint location will cause gdb to create a\n\
+pending breakpoint.  If off, an unrecognized breakpoint location results in\n\
+an error.  If auto, an unrecognized breakpoint location results in a\n\
+user-query to see if a pending breakpoint should be created.",
+				NULL, NULL,
+				&breakpoint_set_cmdlist,
+				&breakpoint_show_cmdlist);
 
   pending_break_support = AUTO_BOOLEAN_AUTO;
 }

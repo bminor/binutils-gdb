@@ -1,3 +1,9 @@
+2004-02-28  Andrew Cagney  <cagney@redhat.com>
+
+	* breakpoint.c (_initialize_breakpoint): Use
+	"add_setshow_auto_boolean_cmd.  Better word-wrap help messages.
+	Add help to show command.
+
 2004-02-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-nat.c: Reformat to be closer to coding standards.
