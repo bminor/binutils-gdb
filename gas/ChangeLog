@@ -1,3 +1,13 @@
+Thu Jan 25 12:21:53 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	SCO ELF support from Robert Lipe <robertl@arnet.com>:
+	* configure.in (i386-*-sco*elf*): Use fmt elf, targ sco5.
+	* configure: Rebuild.
+	* config/sco5.mt: New file; set TDEFINES to -DSCO_ELF.
+	* config/tc-i386.c (sco_id): New function, if SCO_ELF.
+	* config/tc-i386.h (tc_init_after_args): Define if SCO_ELF.
+	(sco_id): Declare if SCO_ELF.
+
 Thu Jan 25 03:10:53 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* config/tc-sparc.c (initial_architecture,can_bump_v9_p): Deleted.
