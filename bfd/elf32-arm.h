@@ -1607,13 +1607,23 @@ arm_add_to_rel (abfd, address, howto, increment)
     }
 
   /* Add in the increment, (which is a byte value).  */
-  addend <<= howto->size;
-  addend +=  increment;
+  switch (howto->type)
+    {
+    case R_ARM_THM_PC22:
+    default:
+      addend += increment;
+      break;
       
-  /* Should we check for overflow here ?  */
+    case R_ARM_PC24:
+      addend <<= howto->size;
+      addend +=  increment;
+      
+      /* Should we check for overflow here ?  */
 
-  /* Drop any undesired bits.  */
-  addend >>= howto->rightshift;
+      /* Drop any undesired bits.  */
+      addend >>= howto->rightshift;
+      break;
+    }
   
   contents = (contents & ~ howto->dst_mask) | (addend & howto->dst_mask);
   
