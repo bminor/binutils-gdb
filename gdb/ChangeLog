@@ -1,3 +1,13 @@
+2002-06-26  Tom Tromey  <tromey@redhat.com>
+
+	* command.h (add_setshow_cmd): Declare.
+	(add_setshow_cmd_full): Declare.
+	* cli/cli-decode.c (add_setshow_cmd): No longer static.  Now
+	returns void.  Use add_setshow_cmd_full.
+	(add_setshow_cmd_full): New function.
+	(add_setshow_auto_boolean_cmd): Use add_setshow_cmd_full.
+	(add_setshow_boolean_cmd): Likewise.
+
 2002-06-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config/vax/tm-vax.h: Protect from multiple inclusion.
