@@ -43,7 +43,7 @@ static int x86_64_regmap[] = {
   RSI, RDI, RBP, RSP,
   R8, R9, R10, R11,
   R12, R13, R14, R15,
-  RIP, EFLAGS, 
+  RIP, EFLAGS,
   DS, ES, FS, GS
 };
 
@@ -87,8 +87,7 @@ x86_64_linux_dr_set (int regnum, unsigned long value)
   tid = PIDGET (inferior_ptid);
 
   errno = 0;
-  ptrace (PT_WRITE_U, tid,
-	  offsetof (struct user, u_debugreg[regnum]), value);
+  ptrace (PT_WRITE_U, tid, offsetof (struct user, u_debugreg[regnum]), value);
   if (errno != 0)
     perror_with_name ("Couldn't write debug register");
 }
@@ -173,7 +172,7 @@ fetch_regs (int tid)
   elf_gregset_t regs;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
-      perror_with_name ("Couldn't get registers");
+    perror_with_name ("Couldn't get registers");
 
   supply_gregset (&regs);
 }
@@ -441,16 +440,17 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
       if (addr != memaddr || len < (int) sizeof (PTRACE_XFER_TYPE))
 	{
 	  /* Need part of initial word -- fetch it.  */
-	  ptrace (PT_READ_I, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) addr, buffer);
+	  buffer[0] = ptrace (PT_READ_I, PIDGET (inferior_ptid),
+			      (PTRACE_ARG3_TYPE) addr, 0);
 	}
 
       if (count > 1)		/* FIXME, avoid if even boundary */
 	{
-	  ptrace (PT_READ_I, PIDGET (inferior_ptid),
-		  ((PTRACE_ARG3_TYPE)
-		   (addr + (count - 1) * sizeof (PTRACE_XFER_TYPE))),
-		  buffer + count - 1);
+	  buffer[count - 1] = ptrace (PT_READ_I, PIDGET (inferior_ptid),
+				      ((PTRACE_ARG3_TYPE)
+				       (addr +
+					(count -
+					 1) * sizeof (PTRACE_XFER_TYPE))), 0);
 	}
 
       /* Copy data to be written over corresponding part of buffer */
@@ -486,8 +486,8 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
       for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
-	  ptrace (PT_READ_I, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) addr, buffer + i);
+	  buffer[i] = ptrace (PT_READ_I, PIDGET (inferior_ptid),
+			      (PTRACE_ARG3_TYPE) addr, 0);
 	  if (errno)
 	    return 0;
 	}
@@ -580,12 +580,12 @@ x86_64_register_u_addr (CORE_ADDR blockend, int regnum)
   CORE_ADDR fpstate;
   CORE_ADDR ubase;
   ubase = blockend;
-  if (IS_FP_REGNUM(regnum))
+  if (IS_FP_REGNUM (regnum))
     {
       fpstate = ubase + ((char *) &u.i387.st_space - (char *) &u);
       return (fpstate + 16 * (regnum - FP0_REGNUM));
     }
-  else if (IS_SSE_REGNUM(regnum))
+  else if (IS_SSE_REGNUM (regnum))
     {
       fpstate = ubase + ((char *) &u.i387.xmm_space - (char *) &u);
       return (fpstate + 16 * (regnum - XMM0_REGNUM));
