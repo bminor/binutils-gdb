@@ -2409,7 +2409,12 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
   "Error evaluating expression for watchpoint %d\n";
   char message[sizeof (message1) + 30 /* slop */ ];
 
-  /* Get the address where the breakpoint would have been.  */
+  /* Get the address where the breakpoint would have been.  
+     The "not_a_breakpoint" argument is meant to distinguish 
+     between a breakpoint trap event and a trace/singlestep
+     trap event.  For a trace/singlestep trap event, we would
+     not want to subtract DECR_PC_AFTER_BREAK from the PC. */
+
   bp_addr = *pc - (not_a_breakpoint && !SOFTWARE_SINGLE_STEP_P () ? 
                    0 : DECR_PC_AFTER_BREAK);
 

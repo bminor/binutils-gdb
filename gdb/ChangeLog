@@ -1,3 +1,15 @@
+2001-06-28  Michael Snyder  <msnyder@redhat.com>
+
+	* infrun.c (handle_inferior_event): Replace prev_pc test in all
+	calls to bpstat_stop_status (removed in 1999-09-24).  This test
+	helps distinguish stepping over a breakpoint trap from stepping
+	thru a jump to the instruction after a breakpoint trap.
+	(handle_inferior_event): Don't bother writing the PC if
+	DECR_PC_AFTER_BREAK is zero (optimization).
+	* breakpoint.c (bpstat_stop_status): Add comment explaining the
+	purpose and usage of the "not_a_breakpoint" argument in computing
+	the breakpoint address.
+
 2001-06-28  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2000-12-03 Stephane Carrez <Stephane.Carrez@worldnet.fr>:

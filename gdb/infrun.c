@@ -1617,7 +1617,17 @@ handle_inferior_event (struct execution_control_state *ecs)
 	stop_pc = read_pc_pid (ecs->ptid);
 	ecs->saved_inferior_ptid = inferior_ptid;
 	inferior_ptid = ecs->ptid;
-	stop_bpstat = bpstat_stop_status (&stop_pc, currently_stepping (ecs));
+	/* The second argument of bpstat_stop_status is meant to help
+	   distinguish between a breakpoint trap and a singlestep trap.
+	   This is only important on targets where DECR_PC_AFTER_BREAK
+	   is non-zero.  The prev_pc test is meant to distinguish between
+	   singlestepping a trap instruction, and singlestepping thru a
+	   jump to the instruction following a trap instruction. */
+	   
+	stop_bpstat = bpstat_stop_status (&stop_pc, 
+					  currently_stepping (ecs) &&
+					  prev_pc != 
+					  stop_pc - DECR_PC_AFTER_BREAK);
 	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 	inferior_ptid = ecs->saved_inferior_ptid;
 	goto process_event_stop_test;
@@ -1666,7 +1676,17 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  }
 
 	stop_pc = read_pc ();
-	stop_bpstat = bpstat_stop_status (&stop_pc, currently_stepping (ecs));
+	/* The second argument of bpstat_stop_status is meant to help
+	   distinguish between a breakpoint trap and a singlestep trap.
+	   This is only important on targets where DECR_PC_AFTER_BREAK
+	   is non-zero.  The prev_pc test is meant to distinguish between
+	   singlestepping a trap instruction, and singlestepping thru a
+	   jump to the instruction following a trap instruction. */
+	   
+	stop_bpstat = bpstat_stop_status (&stop_pc, 
+					  currently_stepping (ecs) &&
+					  prev_pc !=
+					  stop_pc - DECR_PC_AFTER_BREAK);
 	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 	goto process_event_stop_test;
 
@@ -1731,7 +1751,17 @@ handle_inferior_event (struct execution_control_state *ecs)
 	stop_pc = read_pc_pid (ecs->ptid);
 	ecs->saved_inferior_ptid = inferior_ptid;
 	inferior_ptid = ecs->ptid;
-	stop_bpstat = bpstat_stop_status (&stop_pc, currently_stepping (ecs));
+	/* The second argument of bpstat_stop_status is meant to help
+	   distinguish between a breakpoint trap and a singlestep trap.
+	   This is only important on targets where DECR_PC_AFTER_BREAK
+	   is non-zero.  The prev_pc test is meant to distinguish between
+	   singlestepping a trap instruction, and singlestepping thru a
+	   jump to the instruction following a trap instruction. */
+	   
+	stop_bpstat = bpstat_stop_status (&stop_pc, 
+					  currently_stepping (ecs) &&
+					  prev_pc !=
+					  stop_pc - DECR_PC_AFTER_BREAK);
 	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 	inferior_ptid = ecs->saved_inferior_ptid;
 	goto process_event_stop_test;
@@ -1840,7 +1870,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 		/* Saw a breakpoint, but it was hit by the wrong thread.
 		   Just continue. */
-		write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK, ecs->ptid);
+		if (DECR_PC_AFTER_BREAK)
+		  write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK, ecs->ptid);
 
 		remove_status = remove_breakpoints ();
 		/* Did we fail to remove breakpoints?  If so, try
@@ -1852,7 +1883,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 		   then either :-) or execs. */
 		if (remove_status != 0)
 		  {
-		    write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK + 4, ecs->ptid);
+		    /* FIXME!  This is obviously non-portable! */
+		    write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK + 4, 
+				  ecs->ptid);
 		    /* We need to restart all the threads now,
 		     * unles we're running in scheduler-locked mode. 
 		     * Use currently_stepping to determine whether to 
@@ -2016,7 +2049,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   includes evaluating watchpoints, things will come to a
 	   stop in the correct manner.  */
 
-	write_pc (stop_pc - DECR_PC_AFTER_BREAK);
+	if (DECR_PC_AFTER_BREAK)
+	  write_pc (stop_pc - DECR_PC_AFTER_BREAK);
 
 	remove_breakpoints ();
 	registers_changed ();
@@ -2097,6 +2131,14 @@ handle_inferior_event (struct execution_control_state *ecs)
 	else
 	  {
 	    /* See if there is a breakpoint at the current PC.  */
+
+	    /* The second argument of bpstat_stop_status is meant to help
+	       distinguish between a breakpoint trap and a singlestep trap.
+	       This is only important on targets where DECR_PC_AFTER_BREAK
+	       is non-zero.  The prev_pc test is meant to distinguish between
+	       singlestepping a trap instruction, and singlestepping thru a
+	       jump to the instruction following a trap instruction. */
+
 	    stop_bpstat = bpstat_stop_status
 	      (&stop_pc,
 	    /* Pass TRUE if our reason for stopping is something other
@@ -2106,6 +2148,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	       sigtramp, which is detected by a new stack pointer value
 	       below any usual function calling stack adjustments.  */
 		(currently_stepping (ecs)
+		 && prev_pc != stop_pc - DECR_PC_AFTER_BREAK
 		 && !(step_range_end
 		      && INNER_THAN (read_sp (), (step_sp - 16))))
 	      );
