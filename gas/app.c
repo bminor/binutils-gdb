@@ -387,7 +387,7 @@ do_scrub_chars (get, tostart, tolen)
   /* I added states 9 and 10 because the MIPS ECOFF assembler uses
      constructs like ``.loc 1 20''.  This was turning into ``.loc
      120''.  States 9 and 10 ensure that a space is never dropped in
-     between characters which could appear in a identifier.  Ian
+     between characters which could appear in an identifier.  Ian
      Taylor, ian@cygnus.com.
 
      I added state 11 so that something like "Lfoo add %r25,%r26,%r27" works

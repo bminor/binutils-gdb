@@ -507,7 +507,7 @@ itbl_assemble (char *name, char *s)
   int processor;
 
   if (!name || !*name)
-    return 0;			/* error!  must have a opcode name/expr */
+    return 0;			/* error!  must have an opcode name/expr */
 
   /* find entry in list of instructions for all processors */
   for (processor = 0; processor < e_nprocs; processor++)

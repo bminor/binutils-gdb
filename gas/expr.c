@@ -759,7 +759,7 @@ current_location (expressionp)
 /* In:	Input_line_pointer points to 1st char of operand, which may
 	be a space.
 
-   Out:	A expressionS.
+   Out:	An expressionS.
 	The operand may have been empty: in this case X_op == O_absent.
 	Input_line_pointer->(next non-blank) char after operand.  */
 
@@ -1342,7 +1342,7 @@ operand (expressionP)
 
 /* Internal.  Simplify a struct expression for use by expr ().  */
 
-/* In:	address of a expressionS.
+/* In:	address of an expressionS.
 	The X_op field of the expressionS may only take certain values.
 	Elsewise we waste time special-case testing. Sigh. Ditto SEG_ABSENT.
 
@@ -1399,7 +1399,7 @@ clean_up_expression (expressionP)
    Unary operators and parenthetical expressions are treated as operands.
    As usual, Q==quantity==operand, O==operator, X==expression mnemonics.
 
-   We used to do a aho/ullman shift-reduce parser, but the logic got so
+   We used to do an aho/ullman shift-reduce parser, but the logic got so
    warped that I flushed it and wrote a recursive-descent parser instead.
    Now things are stable, would anybody like to write a fast parser?
    Most expressions are either register (which does not even reach here)

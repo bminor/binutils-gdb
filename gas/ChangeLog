@@ -1,3 +1,10 @@
+2001-10-11  Kazu Hirata  <kazu@hxi.com>
+
+	* app.c: Fix comment typos.
+	* bit_fix.h: Likewise.
+	* expr.c: Likewise.
+	* itbl-ops.c: Likewise.
+
 2001-10-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* input-file.c: Include safe-ctype.h.
