@@ -1,3 +1,8 @@
+Thu Jul  1 15:33:10 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (pa_ip): Convert the opcode and all completers
+	into lower case.
+
 1999-06-27  H.J. Lu  <hjl@gnu.org>
 
 	* subsegs.c (subseg_text_p): Use 1/0 instead of true/false for
