@@ -349,9 +349,14 @@ gdbsim_wait (pid, status)
      int pid;
      WAITTYPE *status;
 {
+  int sigrc;
+
   if (sr_get_debug ())
     printf_filtered ("gdbsim_wait: ");
-  WSETSTOP (*status, sim_stop_signal ());
+  if (sim_stop_signal (&sigrc) == sim_exited)
+    WSETEXIT (*status, sigrc);
+  else
+    WSETSTOP (*status, sigrc);
   if (sr_get_debug ())
     printf_filtered ("status %d\n", *status);
   return inferior_pid;

@@ -63,11 +63,13 @@ int sim_store_register PARAMS ((int regno, char *buf));
 
 int sim_kill PARAMS ((void));
 
-/* Read LENGTH bytes of the simulated program's memory and store in BUF.  */
+/* Read LENGTH bytes of the simulated program's memory and store in BUF.
+   Result is number of bytes read, or zero if error.  */
 
 int sim_read PARAMS ((CORE_ADDR mem, char *buf, int length));
 
-/* Store LENGTH bytes from BUF in the simulated program's memory.  */
+/* Store LENGTH bytes from BUF in the simulated program's memory.
+   Result is number of bytes write, or zero if error.  */
 
 int sim_write PARAMS ((CORE_ADDR mem, char *buf, int length));
 
@@ -79,9 +81,12 @@ int sim_info PARAMS ((void));
 
 int sim_set_pc PARAMS ((CORE_ADDR pc));
 
-/* Fetch why the program stopped.  */
+/* Fetch why the program stopped.
+   SIGRC will contain either the argument to exit() or the signal number.  */
 
-int sim_stop_signal PARAMS ((void));
+enum sim_stop { sim_exited, sim_stopped, sim_signalled };
+
+enum sim_stop sim_stop_signal PARAMS ((int *sigrc));
 
 /* Run (or resume) the program.  */
 
