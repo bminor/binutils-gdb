@@ -1,5 +1,5 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright (C) 1993 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1995 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -28,27 +28,20 @@
 
 #include <ctype.h>
 
-#ifndef __STDC__
-#ifndef NO_STDARG
-#define NO_STDARG
-#endif
-#endif
-
-#ifndef NO_STDARG
+#ifdef USE_STDARG
 #include <stdarg.h>
-#else
-#ifndef NO_VARARGS
+#endif
+#ifdef USE_VARARGS
 #include <varargs.h>
-#endif /* NO_VARARGS */
-#endif /* NO_STDARG */
+#endif
 
 #include "opcode/mips.h"
 
 #ifdef OBJ_ELF
 #include "elf/mips.h"
+#endif
 
 static char *mips_regmask_frag;
-#endif
 
 #define AT  1
 #define PIC_CALL_REG 25
@@ -59,51 +52,33 @@ static char *mips_regmask_frag;
 #define FP  30
 #define RA  31
 
-/* Decide whether to do GP reference optimizations based on the object
-   file format.  */
-#undef GPOPT
-#ifdef OBJ_ECOFF
-#define GPOPT
-#endif
-#ifdef OBJ_ELF
-#define GPOPT
-#endif
+extern int target_big_endian;
 
 /* The default target format to use.  */
-#ifdef OBJ_AOUT
-#ifdef TARGET_BYTES_BIG_ENDIAN
-#define DEFAULT_TARGET_FORMAT "a.out-mips-big"
-#else
-#define DEFAULT_TARGET_FORMAT "a.out-mips-little"
-#endif
-#endif /* OBJ_AOUT */
-#ifdef OBJ_ECOFF
-#ifdef TARGET_BYTES_BIG_ENDIAN
-#define DEFAULT_TARGET_FORMAT "ecoff-bigmips"
-#else
-#define DEFAULT_TARGET_FORMAT "ecoff-littlemips"
-#endif
-#endif /* OBJ_ECOFF */
-#ifdef OBJ_ELF
-#ifdef TARGET_BYTES_BIG_ENDIAN
-#define DEFAULT_TARGET_FORMAT "elf32-bigmips"
-#else
-#define DEFAULT_TARGET_FORMAT "elf32-littlemips"
-#endif
-#endif /* OBJ_ELF */
-
-const char *mips_target_format = DEFAULT_TARGET_FORMAT;
+const char *
+mips_target_format ()
+{
+  switch (OUTPUT_FLAVOR)
+    {
+    case bfd_target_aout_flavour:
+      return target_big_endian ? "a.out-mips-big" : "a.out-mips-little";
+    case bfd_target_ecoff_flavour:
+      return target_big_endian ? "ecoff-bigmips" : "ecoff-littlemips";
+    case bfd_target_elf_flavour:
+      return target_big_endian ? "elf32-bigmips" : "elf32-littlemips";
+    default:
+      abort ();
+    }
+}
 
 /* The name of the readonly data section.  */
-#ifdef OBJ_AOUT
-#define RDATA_SECTION_NAME ".data"
-#endif
-#ifdef OBJ_ECOFF
-#define RDATA_SECTION_NAME ".rdata"
-#endif
-#ifdef OBJ_ELF
-#define RDATA_SECTION_NAME ".rodata"
-#endif
+#define RDATA_SECTION_NAME (OUTPUT_FLAVOR == bfd_target_aout_flavour \
+			    ? ".data" \
+			    : OUTPUT_FLAVOR == bfd_target_ecoff_flavour \
+			    ? ".rdata" \
+			    : OUTPUT_FLAVOR == bfd_target_elf_flavour \
+			    ? ".rodata" \
+			    : (abort (), ""))
 
 /* These variables are filled in with the masks of registers used.
    The object format code reads them and puts them in the appropriate
@@ -158,12 +133,10 @@ static int mips_nomove;
 static int mips_noat;
 static int mips_nobopt;
 
-#ifdef GPOPT
 /* The size of the small data section.  */
 static int g_switch_value = 8;
 /* Whether the -G option was used.  */
 static int g_switch_seen = 0;
-#endif
 
 #define N_RMASK 0xc4
 #define N_VFP   0xd4
@@ -511,20 +484,12 @@ const pseudo_typeS md_pseudo_table[] =
   {NULL}
 };
 
-const relax_typeS md_relax_table[] =
-{
-  { 0 }
-};
-
 static char *expr_end;
 
 static expressionS imm_expr;
 static expressionS offset_expr;
 static bfd_reloc_code_real_type imm_reloc;
 static bfd_reloc_code_real_type offset_reloc;
-
-/* FIXME: This should be handled in a different way.  */
-extern int target_big_endian;
 
 /*
  * This function is called once, at assembler startup time.  It should
@@ -682,49 +647,48 @@ md_begin ()
   /* set the default alignment for the text section (2**2) */
   record_alignment (text_section, 2);
 
-  /* FIXME: This should be handled in a different way.  */
-  target_big_endian = byte_order == BIG_ENDIAN;
+  if (USE_GLOBAL_POINTER_OPT)
+    bfd_set_gp_size (stdoutput, g_switch_value);
 
-#ifdef GPOPT
-  bfd_set_gp_size (stdoutput, g_switch_value);
-#endif
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+    {
+      /* Sections must be aligned to 16 byte boundaries.  */
+      (void) bfd_set_section_alignment (stdoutput, text_section, 4);
+      (void) bfd_set_section_alignment (stdoutput, data_section, 4);
+      (void) bfd_set_section_alignment (stdoutput, bss_section, 4);
+
+      /* Create a .reginfo section for register masks and a .mdebug
+	 section for debugging information.  */
+      {
+	segT seg;
+	subsegT subseg;
+	segT sec;
+
+	seg = now_seg;
+	subseg = now_subseg;
+	sec = subseg_new (".reginfo", (subsegT) 0);
+
+	/* The ABI says this section should be loaded so that the
+	   running program can access it.  */
+	(void) bfd_set_section_flags (stdoutput, sec,
+				      (SEC_ALLOC | SEC_LOAD
+				       | SEC_READONLY | SEC_DATA));
+	(void) bfd_set_section_alignment (stdoutput, sec, 2);
 
 #ifdef OBJ_ELF
-  /* Sections must be aligned to 16 byte boundaries.  */
-  (void) bfd_set_section_alignment (stdoutput, text_section, 4);
-  (void) bfd_set_section_alignment (stdoutput, data_section, 4);
-  (void) bfd_set_section_alignment (stdoutput, bss_section, 4);
-
-  /* Create a .reginfo section for register masks and a .mdebug
-     section for debugging information.  */
-  {
-    segT seg;
-    subsegT subseg;
-    segT sec;
-
-    seg = now_seg;
-    subseg = now_subseg;
-    sec = subseg_new (".reginfo", (subsegT) 0);
-
-    /* The ABI says this section should be loaded so that the running
-       program can access it.  */
-    (void) bfd_set_section_flags (stdoutput, sec,
-				  (SEC_ALLOC | SEC_LOAD
-				   | SEC_READONLY | SEC_DATA));
-    (void) bfd_set_section_alignment (stdoutput, sec, 2);
-
-    mips_regmask_frag = frag_more (sizeof (Elf32_External_RegInfo));
-
-#ifdef ECOFF_DEBUGGING
-    sec = subseg_new (".mdebug", (subsegT) 0);
-    (void) bfd_set_section_flags (stdoutput, sec,
-				  SEC_HAS_CONTENTS | SEC_READONLY);
-    (void) bfd_set_section_alignment (stdoutput, sec, 2);
+	mips_regmask_frag = frag_more (sizeof (Elf32_External_RegInfo));
 #endif
 
-    subseg_set (seg, subseg);
-  }
-#endif /* OBJ_ELF */
+#ifdef ECOFF_DEBUGGING
+	sec = subseg_new (".mdebug", (subsegT) 0);
+	(void) bfd_set_section_flags (stdoutput, sec,
+				      SEC_HAS_CONTENTS | SEC_READONLY);
+	(void) bfd_set_section_alignment (stdoutput, sec, 2);
+#endif
+
+	subseg_set (seg, subseg);
+      }
+    }
 
 #ifndef ECOFF_DEBUGGING
   md_obj_begin ();
@@ -1387,7 +1351,7 @@ mips_emit_delays ()
    expression, the name of the instruction to build, an operand format
    string, and corresponding arguments.  */
 
-#ifndef NO_STDARG
+#ifdef USE_STDARG
 static void
 macro_build (char *place,
 	     int *counter,
@@ -1395,7 +1359,7 @@ macro_build (char *place,
 	     const char *name,
 	     const char *fmt,
 	     ...)
-#else /* ! defined (NO_STDARG) */
+#else
 static void
 macro_build (place, counter, ep, name, fmt, va_alist)
      char *place;
@@ -1404,13 +1368,13 @@ macro_build (place, counter, ep, name, fmt, va_alist)
      const char *name;
      const char *fmt;
      va_dcl
-#endif /* ! defined (NO_STDARG) */
+#endif
 {
   struct mips_cl_insn insn;
   bfd_reloc_code_real_type r;
   va_list args;
 
-#ifndef NO_STDARG
+#ifdef USE_STDARG
   va_start (args, fmt);
 #else
   va_start (args);
@@ -4794,10 +4758,9 @@ mips_ip (str, ip)
 
 		if (*args == 'f'
 		    || (*args == 'l'
-#ifdef GPOPT
-			&& (mips_pic == EMBEDDED_PIC
+			&& (! USE_GLOBAL_POINTER_OPT
+			    || mips_pic == EMBEDDED_PIC
 			    || g_switch_value < 4)
-#endif
 			))
 		  {
 		    imm_expr.X_op = O_constant;
@@ -4827,28 +4790,24 @@ mips_ip (str, ip)
 		      default: /* unused default case avoids warnings.  */
 		      case 'L':
 			newname = RDATA_SECTION_NAME;
-#ifdef GPOPT
-			if (g_switch_value >= 8)
+			if (USE_GLOBAL_POINTER_OPT && g_switch_value >= 8)
 			  newname = ".lit8";
-#endif
 			break;
 		      case 'F':
 			newname = RDATA_SECTION_NAME;
 			break;
 		      case 'l':
-#ifdef GPOPT
-			assert (g_switch_value >= 4);
-#endif
+			assert (!USE_GLOBAL_POINTER_OPT
+				|| g_switch_value >= 4);
 			newname = ".lit4";
 			break;
 		      }
 		    new_seg = subseg_new (newname, (subsegT) 0);
 		    frag_align (*args == 'l' ? 2 : 3, 0);
-#ifdef OBJ_ELF
-		    record_alignment (new_seg, 4);
-#else
-		    record_alignment (new_seg, *args == 'l' ? 2 : 3);
-#endif
+		    if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+		      record_alignment (new_seg, 4);
+		    else
+		      record_alignment (new_seg, *args == 'l' ? 2 : 3);
 		    if (seg == now_seg)
 		      as_bad ("Can't use floating point insn in this section");
 
@@ -5227,11 +5186,8 @@ md_number_to_chars (buf, val, n)
     }
 }
 
-#ifdef GPOPT
 CONST char *md_shortopts = "O::g::G:";
-#else
-CONST char *md_shortopts = "O::g::";
-#endif
+
 struct option md_longopts[] = {
 #define OPTION_MIPS1 (OPTION_MD_BASE + 1)
   {"mips0", no_argument, NULL, OPTION_MIPS1},
@@ -5261,11 +5217,11 @@ struct option md_longopts[] = {
 #define OPTION_NO_M4650 (OPTION_MD_BASE + 14)
   {"no-m4650", no_argument, NULL, OPTION_NO_M4650},
 
-#ifdef OBJ_ELF
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
+#define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
+#ifdef OBJ_ELF
   {"KPIC", no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
-#define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
   {"non_shared", no_argument, NULL, OPTION_NON_SHARED},
 #endif
 
@@ -5290,28 +5246,12 @@ md_parse_option (c, arg)
 
     case OPTION_EB:
       byte_order = BIG_ENDIAN;
-#ifdef OBJ_AOUT
-      mips_target_format = "a.out-mips-big";
-#endif
-#ifdef OBJ_ECOFF
-      mips_target_format = "ecoff-bigmips";
-#endif
-#ifdef OBJ_ELF
-      mips_target_format = "elf32-bigmips";
-#endif
+      target_big_endian = 1;
       break;
 
     case OPTION_EL:
       byte_order = LITTLE_ENDIAN;
-#ifdef OBJ_AOUT
-      mips_target_format = "a.out-mips-little";
-#endif
-#ifdef OBJ_ECOFF
-      mips_target_format = "ecoff-littlemips";
-#endif
-#ifdef OBJ_ELF
-      mips_target_format = "elf32-littlemips";
-#endif
+      target_big_endian = 0;
       break;
 
     case 'O':
@@ -5444,21 +5384,23 @@ md_parse_option (c, arg)
 
     case OPTION_MEMBEDDED_PIC:
       mips_pic = EMBEDDED_PIC;
-#ifdef GPOPT
-      if (g_switch_seen)
+      if (USE_GLOBAL_POINTER_OPT && g_switch_seen)
 	{
 	  as_bad ("-G may not be used with embedded PIC code");
 	  return 0;
 	}
       g_switch_value = 0x7fffffff;
-#endif
       break;
 
-#ifdef OBJ_ELF
   /* When generating ELF code, we permit -KPIC and -call_shared to
      select SVR4_PIC, and -non_shared to select no PIC.  This is
      intended to be compatible with Irix 5.  */
     case OPTION_CALL_SHARED:
+      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+	{
+	  as_bad ("-call_shared is supported only for ELF format");
+	  return 0;
+	}
       mips_pic = SVR4_PIC;
       if (g_switch_seen && g_switch_value != 0)
 	{
@@ -5469,13 +5411,21 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_NON_SHARED:
+      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+	{
+	  as_bad ("-non_shared is supported only for ELF format");
+	  return 0;
+	}
       mips_pic = NO_PIC;
       break;
-#endif /* OBJ_ELF */
 
-#ifdef GPOPT
     case 'G':
-      if (mips_pic == SVR4_PIC || mips_pic == EMBEDDED_PIC)
+      if (! USE_GLOBAL_POINTER_OPT)
+	{
+	  as_bad ("-G is not supported for this configuration");
+	  return 0;
+	}
+      else if (mips_pic == SVR4_PIC || mips_pic == EMBEDDED_PIC)
 	{
 	  as_bad ("-G may not be used with SVR4 or embedded PIC code");
 	  return 0;
@@ -5484,7 +5434,6 @@ md_parse_option (c, arg)
 	g_switch_value = atoi (arg);
       g_switch_seen = 1;
       break;
-#endif
 
     default:
       return 0;
@@ -5527,15 +5476,14 @@ long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
-#ifndef OBJ_AOUT
-  if (fixP->fx_addsy != (symbolS *) NULL
+  if (OUTPUT_FLAVOR != bfd_target_aout_flavour
+      && fixP->fx_addsy != (symbolS *) NULL
       && ! S_IS_DEFINED (fixP->fx_addsy))
     {
       /* This makes a branch to an undefined symbol be a branch to the
 	 current location.  */
       return 4;
     }
-#endif
 
   /* return the address of the delay slot */
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
@@ -5965,9 +5913,7 @@ static void
 s_change_sec (sec)
      int sec;
 {
-#ifdef GPOPT
   segT seg;
-#endif
 
   /* When generating embedded PIC code, we only use the .text, .lit8,
      .sdata and .sbss sections.  We change the .data and .rdata
@@ -5991,41 +5937,50 @@ s_change_sec (sec)
       break;
 
     case 'r':
-#ifdef GPOPT
-      seg = subseg_new (RDATA_SECTION_NAME,
-			(subsegT) get_absolute_expression ());
-#ifdef OBJ_ELF
-      bfd_set_section_flags (stdoutput, seg,
-			     (SEC_ALLOC
-			      | SEC_LOAD
-			      | SEC_READONLY
-			      | SEC_RELOC
-			      | SEC_DATA));
-      bfd_set_section_alignment (stdoutput, seg, 4);
-#endif
-      demand_empty_rest_of_line ();
-#else /* ! defined (GPOPT) */
-      as_bad ("No read only data section in this object file format");
-      demand_empty_rest_of_line ();
-      return;
-#endif /* ! defined (GPOPT) */
+      if (USE_GLOBAL_POINTER_OPT)
+	{
+	  seg = subseg_new (RDATA_SECTION_NAME,
+			    (subsegT) get_absolute_expression ());
+	  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	    {
+	      bfd_set_section_flags (stdoutput, seg,
+				     (SEC_ALLOC
+				      | SEC_LOAD
+				      | SEC_READONLY
+				      | SEC_RELOC
+				      | SEC_DATA));
+	      bfd_set_section_alignment (stdoutput, seg, 4);
+	    }
+	  demand_empty_rest_of_line ();
+	}
+      else
+	{
+	  as_bad ("No read only data section in this object file format");
+	  demand_empty_rest_of_line ();
+	  return;
+	}
       break;
 
     case 's':
-#ifdef GPOPT
-      seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
-#ifdef OBJ_ELF
-      bfd_set_section_flags (stdoutput, seg,
-			     SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
-      bfd_set_section_alignment (stdoutput, seg, 4);
-#endif
-      demand_empty_rest_of_line ();
-      break;
-#else /* ! defined (GPOPT) */
-      as_bad ("Global pointers not supported; recompile -G 0");
-      demand_empty_rest_of_line ();
-      return;
-#endif /* ! defined (GPOPT) */
+      if (USE_GLOBAL_POINTER_OPT)
+	{
+	  seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
+	  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	    {
+	      bfd_set_section_flags (stdoutput, seg,
+				     SEC_ALLOC | SEC_LOAD | SEC_RELOC
+				     | SEC_DATA);
+	      bfd_set_section_alignment (stdoutput, seg, 4);
+	    }
+	  demand_empty_rest_of_line ();
+	  break;
+	}
+      else
+	{
+	  as_bad ("Global pointers not supported; recompile -G 0");
+	  demand_empty_rest_of_line ();
+	  return;
+	}
     }
 
   auto_align = 1;
@@ -6172,15 +6127,13 @@ s_option (x)
       else
 	as_bad (".option pic%d not supported", i);
 
-#ifdef GPOPT
-      if (mips_pic == SVR4_PIC)
+      if (USE_GLOBAL_POINTER_OPT && mips_pic == SVR4_PIC)
 	{
 	  if (g_switch_seen && g_switch_value != 0)
 	    as_warn ("-G may not be used with SVR4 PIC code");
 	  g_switch_value = 0;
 	  bfd_set_gp_size (stdoutput, 0);
 	}
-#endif
     }
   else
     as_warn ("Unrecognized option \"%s\"", opt);
@@ -6291,11 +6244,12 @@ s_abicalls (ignore)
      int ignore;
 {
   mips_pic = SVR4_PIC;
-#ifdef GPOPT
-  if (g_switch_seen && g_switch_value != 0)
-    as_warn ("-G may not be used with SVR4 PIC code");
-  g_switch_value = 0;
-#endif
+  if (USE_GLOBAL_POINTER_OPT)
+    {
+      if (g_switch_seen && g_switch_value != 0)
+	as_warn ("-G may not be used with SVR4 PIC code");
+      g_switch_value = 0;
+    }
   bfd_set_gp_size (stdoutput, 0);
   demand_empty_rest_of_line ();
 }
@@ -6512,49 +6466,49 @@ static int nopic_need_relax (sym)
   if (sym == 0)
     return 0;
 
-#ifdef GPOPT
-  {
-    const char *symname;
-    int change;
+  if (USE_GLOBAL_POINTER_OPT)
+    {
+      const char *symname;
+      int change;
 
-    /* Find out whether this symbol can be referenced off the GP
-       register.  It can be if it is smaller than the -G size or if it
-       is in the .sdata or .sbss section.  Certain symbols can not be
-       referenced off the GP, although it appears as though they can.  */
-    symname = S_GET_NAME (sym);
-    if (symname != (const char *) NULL
-	&& (strcmp (symname, "eprol") == 0
-	    || strcmp (symname, "etext") == 0
-	    || strcmp (symname, "_gp") == 0
-	    || strcmp (symname, "edata") == 0
-	    || strcmp (symname, "_fbss") == 0
-	    || strcmp (symname, "_fdata") == 0
-	    || strcmp (symname, "_ftext") == 0
-	    || strcmp (symname, "end") == 0
-	    || strcmp (symname, "_gp_disp") == 0))
-      change = 1;
-    else if (! S_IS_DEFINED (sym)
-	     && ((sym->ecoff_extern_size != 0
-		  && sym->ecoff_extern_size <= g_switch_value)
-		 || (S_GET_VALUE (sym) != 0
-		     && S_GET_VALUE (sym) <= g_switch_value)))
-      change = 0;
-    else
-      {
-	const char *segname;
+      /* Find out whether this symbol can be referenced off the GP
+	 register.  It can be if it is smaller than the -G size or if
+	 it is in the .sdata or .sbss section.  Certain symbols can
+	 not be referenced off the GP, although it appears as though
+	 they can.  */
+      symname = S_GET_NAME (sym);
+      if (symname != (const char *) NULL
+	  && (strcmp (symname, "eprol") == 0
+	      || strcmp (symname, "etext") == 0
+	      || strcmp (symname, "_gp") == 0
+	      || strcmp (symname, "edata") == 0
+	      || strcmp (symname, "_fbss") == 0
+	      || strcmp (symname, "_fdata") == 0
+	      || strcmp (symname, "_ftext") == 0
+	      || strcmp (symname, "end") == 0
+	      || strcmp (symname, "_gp_disp") == 0))
+	change = 1;
+      else if (! S_IS_DEFINED (sym)
+	       && ((sym->ecoff_extern_size != 0
+		    && sym->ecoff_extern_size <= g_switch_value)
+		   || (S_GET_VALUE (sym) != 0
+		       && S_GET_VALUE (sym) <= g_switch_value)))
+	change = 0;
+      else
+	{
+	  const char *segname;
 
-	segname = segment_name (S_GET_SEGMENT (sym));
-	assert (strcmp (segname, ".lit8") != 0
-		&& strcmp (segname, ".lit4") != 0);
-	change = (strcmp (segname, ".sdata") != 0
-		  && strcmp (segname, ".sbss") != 0);
-      }
-    return change;
-  }
-#else /* ! defined (GPOPT) */
-  /* We are not optimizing for the GP register.  */
-  return 1;
-#endif /* ! defined (GPOPT) */  
+	  segname = segment_name (S_GET_SEGMENT (sym));
+	  assert (strcmp (segname, ".lit8") != 0
+		  && strcmp (segname, ".lit4") != 0);
+	  change = (strcmp (segname, ".sdata") != 0
+		    && strcmp (segname, ".sbss") != 0);
+	}
+      return change;
+    }
+  else
+    /* We are not optimizing for the GP register.  */
+    return 1;
 }
 
 /*ARGSUSED*/
@@ -6625,9 +6579,8 @@ tc_gen_reloc (section, fixp)
 	 is actually the difference between the reloc address and the
 	 subtrahend.  */
       reloc->addend = reloc->address - S_GET_VALUE (fixp->fx_subsy);
-#ifndef OBJ_ECOFF
-      as_fatal ("Double check fx_r_type in tc-mips.c:tc_gen_reloc");
-#endif
+      if (OUTPUT_FLAVOR != bfd_target_ecoff_flavour)
+	as_fatal ("Double check fx_r_type in tc-mips.c:tc_gen_reloc");
       fixp->fx_r_type = BFD_RELOC_GPREL32;
     }
   else if (fixp->fx_r_type == BFD_RELOC_PCREL_LO16)
@@ -6658,13 +6611,12 @@ tc_gen_reloc (section, fixp)
     reloc->addend = fixp->fx_addnumber;
   else
     {
-#ifndef OBJ_AOUT
-      /* A gruesome hack which is a result of the gruesome gas reloc
-	 handling.  */
-      reloc->addend = reloc->address;
-#else
-      reloc->addend = -reloc->address;
-#endif
+      if (OUTPUT_FLAVOR != bfd_target_aout_flavour)
+	/* A gruesome hack which is a result of the gruesome gas reloc
+	   handling.  */
+	reloc->addend = reloc->address;
+      else
+	reloc->addend = -reloc->address;
     }
 
   /* If this is a variant frag, we may need to adjust the existing
@@ -6730,12 +6682,11 @@ tc_gen_reloc (section, fixp)
   /* To support a PC relative reloc when generating embedded PIC code
      for ECOFF, we use a Cygnus extension.  We check for that here to
      make sure that we don't let such a reloc escape normally.  */
-#ifdef OBJ_ECOFF
-  if (fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
+  if (OUTPUT_FLAVOR == bfd_target_ecoff_flavour
+      && fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
       && mips_pic != EMBEDDED_PIC)
     reloc->howto = NULL;
   else
-#endif
     reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
 
   if (reloc->howto == NULL)

@@ -33,52 +33,36 @@
 #define MAX_RELOC_EXPANSION 3
 #define LOCAL_LABELS_FB
 
-#define LOCAL_LABEL(name) ((name)[0] == '$')
+/* The MIPS assembler appears to keep all symbols.  */
+#define LOCAL_LABEL(name) 0
 
 #define md_relax_frag(fragp, stretch)	(0)
 #define md_undefined_symbol(name)	(0)
 #define md_operand(x)
 
+/* We permit PC relative difference expressions when generating
+   embedded PIC code.  */
+#define DIFF_EXPR_OK
+
 #define LITTLE_ENDIAN   1234
 #define BIG_ENDIAN      4321
 
-/* If neither TARGET_BYTES_BIG_ENDIAN nor TARGET_BYTES_LITTLE_ENDIAN
-   is specified, default to big endian.  */
-#ifndef TARGET_BYTES_BIG_ENDIAN
+/* Default to big endian.  */
 #ifndef TARGET_BYTES_LITTLE_ENDIAN
-#define TARGET_BYTES_BIG_ENDIAN
-#endif
+#undef  TARGET_BYTES_BIG_ENDIAN
+#define TARGET_BYTES_BIG_ENDIAN		1
 #endif
 
-#ifdef TARGET_BYTES_BIG_ENDIAN
+#if TARGET_BYTES_BIG_ENDIAN
 #define BYTE_ORDER	BIG_ENDIAN
 #else
 #define BYTE_ORDER      LITTLE_ENDIAN
 #endif
 
-#ifndef TARGET_FORMAT 
-#ifdef OBJ_AOUT
-#ifdef TARGET_BYTES_BIG_ENDIAN
-#define TARGET_FORMAT "a.out-mips-big"
-#else
-#define TARGET_FORMAT "a.out-mips-little"
-#endif
-#endif /* OBJ_AOUT */
-#ifdef OBJ_ECOFF
-#ifdef TARGET_BYTES_BIG_ENDIAN
-#define TARGET_FORMAT "ecoff-bigmips"
-#else
-#define TARGET_FORMAT "ecoff-littlemips"
-#endif
-#endif /* OBJ_ECOFF */
-#ifdef OBJ_ELF
-#ifdef TARGET_BYTES_BIG_ENDIAN
-#define TARGET_FORMAT "elf32-bigmips"
-#else
-#define TARGET_FORMAT "elf32-littlemips"
-#endif
-#endif /* OBJ_ELF */
-#endif /* ! defined (TARGET_FORMAT) */
+/* The endianness of the target format may change based on command
+   line arguments.  */
+#define TARGET_FORMAT mips_target_format()
+extern const char *mips_target_format ();
 
 struct mips_cl_insn {
     unsigned long		insn_opcode;
@@ -87,11 +71,22 @@ struct mips_cl_insn {
 
 extern int tc_get_register PARAMS ((int frame));
 
+#define md_parse_long_option(arg) mips_parse_long_option (arg)
+extern int mips_parse_long_option PARAMS ((const char *));
+
 #define tc_frob_label(sym) mips_define_label (sym)
 extern void mips_define_label PARAMS ((struct symbol *));
 
 #define TC_CONS_FIX_NEW cons_fix_new_mips
 extern void cons_fix_new_mips ();
+
+/* When generating embedded PIC code we must keep PC relative
+   relocations.  */
+#define TC_FORCE_RELOCATION(fixp) mips_force_relocation (fixp)
+extern int mips_force_relocation ();
+
+/* md_apply_fix sets fx_done correctly.  */
+#define TC_HANDLE_FX_DONE 1
 
 /* Register mask variables.  These are set by the MIPS assembly code
    and used by ECOFF and possibly other object file formats.  */
@@ -117,3 +112,6 @@ extern void mips_elf_final_processing PARAMS ((void));
 
 extern void md_mips_end PARAMS ((void));
 #define md_end()	md_mips_end()
+
+#define USE_GLOBAL_POINTER_OPT	(OUTPUT_FLAVOR == bfd_target_ecoff_flavour \
+				 || OUTPUT_FLAVOR == bfd_target_elf_flavour)
