@@ -1,3 +1,12 @@
+2002-02-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Don't call
+	find_variant_by_name, because it confuses the multiarch
+	framework. Return NULL if there isn't an architecture with the
+	user supplied name, instead of forcing a different one without
+	recording the change with the multiarch machinery.
+	(find_variant_by_name): Delete.
+
 2002-02-14  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* config/i386/i386sol2.mh (NATDEPFILES): Add i387-nat.o, needed by

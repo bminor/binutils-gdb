@@ -2262,21 +2262,6 @@ static const struct variant variants[] =
 
 #undef num_registers
 
-/* Look up the variant named NAME in the `variants' table.  Return a
-   pointer to the struct variant, or null if we couldn't find it.  */
-
-static const struct variant *
-find_variant_by_name (char *name)
-{
-  const struct variant *v;
-
-  for (v = variants; v->name; v++)
-    if (!strcmp (name, v->name))
-      return v;
-
-  return NULL;
-}
-
 /* Return the variant corresponding to architecture ARCH and machine number
    MACH.  If no such variant exists, return null. */
 
@@ -2471,7 +2456,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Choose variant. */
   v = find_variant_by_arch (arch, mach);
   if (!v)
-    v = find_variant_by_name (power ? "power" : "powerpc");
+    return NULL;
+
   tdep->regs = v->regs;
 
   tdep->ppc_gp0_regnum = 0;
