@@ -1,3 +1,19 @@
+Fri Apr 22 11:08:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Follow convention in which each NLM header has an 8 byte stamp
+	followed by a four byte length.
+	* libnlm.h (struct nlm_obj_tdata): Rename nlm_cygnus_section_hdr
+	to nlm_cygnus_ext_header, and change type to
+	Nlm_Internal_Cygnus_Ext_Header.
+	(nlm_cygnus_ext_header): Rename from nlm_cygnus_section_header.
+	* nlmcode.h (nlm_swap_auxiliary_headers_in): Use CyGnUsEx instead
+	of CyGnUsSeCs.  Rename from cygnus_section to cygnus_ext.  Require
+	length word to be 8.
+	(nlm_swap_auxiliary_headers_out): Rename from cygnus_section to
+	cygnus_ext.  Set length word to 8.
+	(nlm_compute_section_file_positions): Rename from cygnus_section
+	to cygnus_ext.
+
 Thu Apr 21 22:54:22 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* nlmcode.h (nlm_swap_auxiliary_headers_in):  Keep section table
