@@ -307,7 +307,17 @@ mi_open (struct ui_out *uiout,
 	 enum ui_out_type type)
 {
   struct ui_out_data *data = ui_out_data (uiout);
-  fputc_unfiltered ('{', data->buffer);
+  switch (type)
+    {
+    case ui_out_type_tuple:
+      fputc_unfiltered ('{', data->buffer);
+      break;
+    case ui_out_type_list:
+      fputc_unfiltered ('[', data->buffer);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
+    }
 }
 
 static void
@@ -315,7 +325,17 @@ mi_close (struct ui_out *uiout,
 	  enum ui_out_type type)
 {
   struct ui_out_data *data = ui_out_data (uiout);
-  fputc_unfiltered ('}', data->buffer);
+  switch (type)
+    {
+    case ui_out_type_tuple:
+      fputc_unfiltered ('}', data->buffer);
+      break;
+    case ui_out_type_list:
+      fputc_unfiltered (']', data->buffer);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
+    }
 }
 
 /* add a string to the buffer */

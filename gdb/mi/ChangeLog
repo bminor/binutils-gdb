@@ -1,3 +1,7 @@
+2001-05-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-out.c (mi_close, mi_open): Output ``[]'' when a list.
+
 Fri May 11 13:55:07 2001  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mi-cmd-var.c: Replace ui_out_list_begin, ui_out_list_end and
