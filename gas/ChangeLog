@@ -1,3 +1,13 @@
+2002-01-16  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+	    Johannes Stezenbach <js@convergence.de>
+	* config/tc-mips.c (percent_op): Ensure longer percent_op's are
+	matched before the shorter ones.
+	(my_getSmallParser): Fix handling of nested parentheses in
+	percent_op's. Code cleanup.
+	(my_getPercentOp): New function, code from my_getSmallParser.
+	(my_getSmallExpression): Fix handling of closing parentheses.
+	Code cleanup. Better comments.
+
 2002-01-16  Nick Clifton <nickc@redhat.com>
 
 	po/tr.po: New file: Turkish translation.

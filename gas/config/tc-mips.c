@@ -702,6 +702,7 @@ static void mips16_ip PARAMS ((char *str, struct mips_cl_insn * ip));
 static void mips16_immed PARAMS ((char *, unsigned int, int, offsetT, boolean,
 				  boolean, boolean, unsigned long *,
 				  boolean *, unsigned short *));
+static int my_getPercentOp PARAMS ((char **, unsigned int *, int *));
 static int my_getSmallParser PARAMS ((char **, unsigned int *, int *));
 static int my_getSmallExpression PARAMS ((expressionS *, char *));
 static void my_getExpression PARAMS ((expressionS *, char *));
@@ -9314,26 +9315,24 @@ static struct percent_op_match
    const enum small_ex_type type;
 } percent_op[] =
 {
-#ifdef OBJ_ELF
-  {"%half", S_EX_HALF},
-#endif
-  {"%hi", S_EX_HI},
   {"%lo", S_EX_LO},
 #ifdef OBJ_ELF
-  {"%gp_rel", S_EX_GP_REL},
-  {"%got", S_EX_GOT},
+  {"%call_hi", S_EX_CALL_HI},
+  {"%call_lo", S_EX_CALL_LO},
   {"%call16", S_EX_CALL16},
   {"%got_disp", S_EX_GOT_DISP},
   {"%got_page", S_EX_GOT_PAGE},
   {"%got_ofst", S_EX_GOT_OFST},
   {"%got_hi", S_EX_GOT_HI},
   {"%got_lo", S_EX_GOT_LO},
-  {"%neg", S_EX_NEG},
-  {"%higher", S_EX_HIGHER},
+  {"%got", S_EX_GOT},
+  {"%gp_rel", S_EX_GP_REL},
+  {"%half", S_EX_HALF},
   {"%highest", S_EX_HIGHEST},
-  {"%call_hi", S_EX_CALL_HI},
-  {"%call_lo", S_EX_CALL_LO}
+  {"%higher", S_EX_HIGHER},
+  {"%neg", S_EX_NEG},
 #endif
+  {"%hi", S_EX_HI}
 };
 
 /* Parse small expression input.  STR gets adjusted to eat up whitespace.
@@ -9347,10 +9346,9 @@ my_getSmallParser (str, len, nestlevel)
      unsigned int *len;
      int *nestlevel;
 {
-  int type = S_EX_NONE;
-
   *len = 0;
   *str += strspn (*str, " \t");
+  /* Check for expression in parentheses.  */
   if (**str == '(')
     {
       char *b = *str + 1 + strspn (*str + 1, " \t");
@@ -9377,50 +9375,68 @@ my_getSmallParser (str, len, nestlevel)
 		 }
 	    }
 	}
+      /* Check for percent_op (in parentheses).  */
       else if (b[0] == '%')
 	{
 	  *str = b;
-	  goto percent_op;
+	  return my_getPercentOp (str, len, nestlevel);
 	}
 
-      /* Some other expression in the braces.  */
-      *len = strcspn (*str, ")") + 1;
+      /* Some other expression in the parentheses, which can contain
+	 parentheses itself. Attempt to find the matching one.  */
+      {
+	int pcnt = 1;
+	char *s;
+
+	*len = 1;
+	for (s = *str + 1; *s && pcnt; s++, (*len)++)
+	  {
+	    if (*s == '(')
+	      pcnt++;
+	    else if (*s == ')')
+	      pcnt--;
+	  }
+      }
     }
-  /* Check for percent_op.  */
+  /* Check for percent_op (outside of parentheses).  */
   else if (*str[0] == '%')
-    {
-      char *tmp;
-      unsigned int i;
-
-percent_op:
-      tmp = *str + 1;
-      i = 0;
-
-      while (ISALPHA (*tmp) || *tmp == '_')
-	{
-	  *tmp = TOLOWER (*tmp);
-	  tmp++;
-	}
-      while (i < (sizeof (percent_op) / sizeof (struct percent_op_match)))
-	{
-	  if (strncmp (*str, percent_op[i].str, strlen (percent_op[i].str)))
-	      i++;
-	  else
-	    {
-	      type = percent_op[i].type;
-
-	      /* Only %hi and %lo are allowed for OldABI.  */
-	      if (! HAVE_NEWABI && type != S_EX_HI && type != S_EX_LO)
-		return S_EX_NONE;
-
-	      *len = strlen (percent_op[i].str);
-	      (*nestlevel)++;
-	      return type;
-	    }
-	}
-    }
+    return my_getPercentOp (str, len, nestlevel);
 
   /* Any other expression.  */
+  return S_EX_NONE;
+}
+
+static int
+my_getPercentOp (str, len, nestlevel)
+     char **str;
+     unsigned int *len;
+     int *nestlevel;
+{
+  char *tmp = *str + 1;
+  unsigned int i = 0;
+
+  while (ISALPHA (*tmp) || *tmp == '_')
+    {
+      *tmp = TOLOWER (*tmp);
+      tmp++;
+    }
+  while (i < (sizeof (percent_op) / sizeof (struct percent_op_match)))
+    {
+      if (strncmp (*str, percent_op[i].str, strlen (percent_op[i].str)))
+	  i++;
+      else
+	{
+	  int type = percent_op[i].type;
+
+	  /* Only %hi and %lo are allowed for OldABI.  */
+	  if (! HAVE_NEWABI && type != S_EX_HI && type != S_EX_LO)
+	    return S_EX_NONE;
+
+	  *len = strlen (percent_op[i].str);
+	  (*nestlevel)++;
+	  return type;
+	}
+    }
   return S_EX_NONE;
 }
 
@@ -9432,46 +9448,59 @@ my_getSmallExpression (ep, str)
   static char *oldstr = NULL;
   int c = S_EX_NONE;
   int oldc;
-  int nest_level = 0;
+  int nestlevel = -1;
   unsigned int len;
 
-  /* Don't update oldstr if the last call had nested percent_op's.  */
+  /* Don't update oldstr if the last call had nested percent_op's. We need
+     it to parse the outer ones later.  */
   if (! oldstr)
     oldstr = str;
 
   do
     {
       oldc = c;
-      c = my_getSmallParser (&str, &len, &nest_level);
+      c = my_getSmallParser (&str, &len, &nestlevel);
       if (c != S_EX_NONE && c != S_EX_REGISTER)
 	str += len;
     }
   while (c != S_EX_NONE && c != S_EX_REGISTER);
 
-  /* A percent_op was encountered.  */
-  if (nest_level)
+  if (nestlevel >= 0)
     {
-      /* Don't try to get an expression if it is already blanked out.  */
+      /* A percent_op was encountered.  Don't try to get an expression if
+	 it is already blanked out.  */
       if (*(str + strspn (str + 1, " )")) != ')')
 	{
 	  char save;
 
+	  /* Let my_getExpression() stop at the closing parenthesis.  */
 	  save = *(str + len);
 	  *(str + len) = '\0';
 	  my_getExpression (ep, str);
 	  *(str + len) = save;
 	}
-      if (nest_level > 1)
+      if (nestlevel > 0)
 	{
-	  /* blank out including the % sign.  */
-	  char *p = strrchr (oldstr, '%');
-	  memset (p, ' ', str - p + len);
+	  /* Blank out including the % sign and the proper matching
+	     parenthesis.  */
+	  int pcnt = 1;
+	  char *s = strrchr (oldstr, '%');
+	  char *end;
+
+	  for (end = strchr (s, '(') + 1; *end && pcnt; end++)
+	    {
+	      if (*end == '(')
+		pcnt++;
+	      else if (*end == ')')
+		pcnt--;
+	    }
+
+	  memset (s, ' ', end - s);
 	  str = oldstr;
 	}
       else
-	{
-	  expr_end = strchr (str, ')') + 1;
-	}
+	expr_end = str + len;
+
       c = oldc;
     }
   else if (c == S_EX_NONE)
@@ -9491,7 +9520,8 @@ my_getSmallExpression (ep, str)
       as_fatal(_("internal error"));
     }
 
-  if (nest_level <= 1)
+  if (nestlevel <= 0)
+    /* All percent_op's have been handled.  */
     oldstr = NULL;
 
   return c;
