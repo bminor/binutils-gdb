@@ -1,6 +1,30 @@
+Fri Jan  8 15:47:53 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coffcode.h: Moved many generic functions into coffgen.c.  Moved
+	swapping functions into coffswap.h for ECOFF use.  Moved
+	relocation functions, only used by h8300 and z8k, into reloc16.c.
+	Added hooks for coffgen.c functions to backend data structure, and
+	added hook functions.  Still more could be done.
+	* coffswap.h: New file to hold COFF swapping routines.
+	* coffgen.c: New file to hold generic COFF functions.
+	* reloc16.c: New file to hold h8300 and z8k specific relocation
+	functions.
+	* libcoff-in.h: Added declarations for functions in coffgen.c.
+	* libcoff.h: Rebuilt to incorporate changes.
+	* coff-h8300.c: Function name changes.
+	* coff-z8k.c: Function name changes.  Use coff_reloc16_extra_cases
+	hook rather than defining EXTRA_CASES.
+	* Makefile.in: Build new files coffgen and reloc16.  Added
+	dependencies of coff-*.o on coffswap.h and seclet.h.
+
+Thu Jan  7 16:16:26 1993  Per Bothner  (bothner@cygnus.com)
+
+	* ieee.c (ieee_slurp_sections):  Add cast to avoid warning
+	about discarding const.
+
 Wed Jan  6 00:16:49 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
-	* seclet.c (seclet_dump_seclet): use bfd_xmalloc instead of malloc
+	* archive.c, seclet.c, elf.c use bfd_xmalloc instead of malloc
 
 Tue Jan  5 09:35:57 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
