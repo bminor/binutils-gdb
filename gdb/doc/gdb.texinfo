@@ -533,7 +533,7 @@ Compile-time configuration (to select a particular architecture and
 operating system) is much easier.  The script @code{configure} now
 allows you to configure GDB as either a native debugger or a
 cross-debugger. @xref{Installing GDB}, for details on how to
-configure and on what architectures are now available.
+configure.
 
 @item Interaction
 The user interface to GDB's control variables has been simplified
@@ -6446,11 +6446,14 @@ command.
 
 @kindex set remotedebug
 @kindex show remotedebug
-If you have trouble with the serial connection, you can use the
-command @code{set remotedebug}.  This causes all packets sent back
-and forth across the serial line to be reported to GDB's standard output.
-@code{set remotedebug off} turns it off, and @code{show remotedebug} will
-show you its current state.
+@cindex packets, reporting on stdout
+@cindex serial connections, debugging
+If you have trouble with the serial connection, you can use the command
+@code{set remotedebug}.  This makes _GDBN__ report on all packets sent
+back and forth across the serial line to the remote machine.  The
+packet-debugging information is printed on the _GDBN__ standard output
+stream.  @code{set remotedebug off} turns it off, and @code{show
+remotedebug} will show you its current state.
 
 Other remote targets may be available in your
 configuration of GDB; use @code{help targets} to list them.
@@ -7811,96 +7814,6 @@ For example, you can use the alias @code{sun4} as a @var{host} argument
 or in a @code{--target=@var{target}} option, but the equivalent full name
 is @samp{sparc-sun-sunos4}.
 
-@c @group would be better, if it worked
-@page
-The following table shows all the architectures, hosts, and OS
-prefixes that @code{configure} recognizes in GDB version _GDB_VN__.  Entries
-in the ``OS prefix'' column ending in a @samp{*} may be followed by a
-release number.
-
-@c FIXME! Update for most recent gdb
-@c TEXI2ROFF-KILL
-@ifinfo
-@c END TEXI2ROFF-KILL
-@example
-
-ARCHITECTURE  VENDOR                     OS prefix
-@c TEXI2ROFF-KILL
-------------+--------------------------+---------------------------
-@c END TEXI2ROFF-KILL
-            |                          |
- 580        | altos        hp          | aix*          msdos*     
- a29k       | amd          ibm         | amigados      newsos* 
- alliant    | amdahl       intel       | aout          nindy*  
- arm        | aout         isi         | bout          osf*    
- c1         | apollo       little      | bsd*          sco*    
- c2         | att          mips        | coff          sunos*  
- cray2      | bcs          motorola    | ctix*         svr4    
- h8300      | bout         ncr         | dgux*         sym*    
- i386       | bull         next        | dynix*        sysv*   
- i860       | cbm          nyu         | ebmon         ultrix* 
- i960       | coff         sco         | esix*         unicos* 
- m68000     | convergent   sequent     | hds           unos*   
- m68k       | convex       sgi         | hpux*         uts     
- m88k       | cray         sony        | irix*         v88r*   
- mips       | dec          sun         | isc*          vms*    
- ns32k      | encore       unicom      | kern          vxworks*
- pyramid    | gould        utek        | mach*         
- romp       | hitachi      wrs         | 
- rs6000     |                          | 
- sparc      |                          | 
- tahoe      |                          | 
- tron       |                          | 
- vax        |                          | 
- xmp        |                          | 
- ymp        |                          |                          
-@end example
-
-@c TEXI2ROFF-KILL
-@end ifinfo
-@tex
-%\vskip\parskip
-\vskip \baselineskip
-\hfil\vbox{\offinterlineskip
-\halign{\strut\tt #\hfil\ &\vrule#&\strut\ \tt #\hfil\ &\strut\ \tt #\hfil
-\ &\vrule#&\strut\ \tt #\hfil\ &\strut\ \tt #\hfil \cr
-{\bf Architecture} &&{\bf Vendor} &&&{\bf OS prefix}\cr
-\multispan7\hrulefill\cr
- 580        && altos     &  hp          && aix*       &  msdos*     \cr
- a29k       && amd       &  ibm         && amigados   &  newsos*    \cr
- alliant    && amdahl    &  intel       && aout       &  nindy*     \cr
- arm        && aout      &  isi         && bout       &  osf*       \cr
- c1         && apollo    &  little      && bsd*       &  sco*       \cr
- c2         && att       &  mips        && coff       &  sunos*     \cr
- cray2      && bcs       &  motorola    && ctix*      &  svr4       \cr
- h8300      && bout      &  ncr         && dgux*      &  sym*       \cr
- i386       && bull      &  next        && dynix*     &  sysv*      \cr
- i860       && cbm       &  nyu         && ebmon      &  ultrix*    \cr
- i960       && coff      &  sco         && esix*      &  unicos*    \cr
- m68000     && convergent&  sequent     && hds        &  unos*      \cr
- m68k       && convex    &  sgi         && hpux*      &  uts        \cr
- m88k       && cray      &  sony        && irix*      &  v88r*      \cr
- mips       && dec       &  sun         && isc*       &  vms*       \cr
- ns32k      && encore    &  unicom      && kern       &  vxworks*   \cr
- pyramid    && gould     &  utek        && mach*      &             \cr
- romp       && hitachi   &  wrs         &&            &             \cr
- rs6000     &&           &              &&            &             \cr
- sparc      &&           &              &&            &             \cr
- tahoe      &&           &              &&            &             \cr
- tron       &&           &              &&            &             \cr
- vax        &&           &              &&            &             \cr
- xmp        &&           &              &&            &             \cr
- ymp        &&           &              &&            &             \cr
-}\hfil}
-@end tex
-@c END TEXI2ROFF-KILL
-
-@quotation
-@emph{Warning:} @code{configure} can represent a very large number of
-combinations of architecture, vendor, and OS.  There is by no means
-support available for all possible combinations!
-@end quotation
-
 The @code{configure} script accompanying GDB does not provide
 any query facility to list all supported host and target names or
 aliases.  @code{configure} calls the Bourne shell script
@@ -7910,17 +7823,17 @@ abbreviations---for example:
 
 @example
 % sh config.sub sun4
-sparc-sun-sunos4
+sparc-sun-sunos411
 % sh config.sub sun3
-m68k-sun-sunos4
+m68k-sun-sunos411
 % sh config.sub decstation
-mips-dec-ultrix
+mips-dec-ultrix42
 % sh config.sub hp300bsd
 m68k-hp-bsd
 % sh config.sub i386v
-i386-none-sysv
+i386-unknown-sysv
 % sh config.sub i786v
-*** Configuration "i786v" not recognized
+Invalid configuration `i786v': machine `i786v' not recognized
 @end example
 
 @noindent
