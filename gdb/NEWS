@@ -19,6 +19,7 @@ MIPS Linux					mips*-*-linux*
 * New targets
 
 Motorola 68HC11 and 68HC12			m68hc11-elf
+CRIS						cris-axis
 
 * OBSOLETE configurations and files
 
