@@ -1,6 +1,13 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+*** Changes in GDB-4.13:
+
+* New "complete" command for use by emacs.
+
+* "set prompt" no longer adds a space for you after the prompt you set.  This
+allows you to set a prompt which ends in a space or one that does not.
+
 *** Changes in GDB-4.12:
 
 * Irix 5 is now supported

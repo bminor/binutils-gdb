@@ -1,3 +1,10 @@
+Sat Mar 26 07:05:18 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* command.c (do_setshow_command, case var_string): Never add a
+	space to the end of the string.
+	* NEWS: Document this change.
+	* .gdbinit: Add a space to the "set prompt" command.
+
 Fri Mar 25 12:40:41 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	*  m3-nat.c, i386m3-nat.c, config/i386/i386m3.mh: Many minor

@@ -1053,6 +1053,11 @@ do_setshow_command (arg, from_tty, c)
 		  {
 		    /* \ at end of argument is used after spaces
 		       so they won't be lost.  */
+		    /* This is obsolete now that we no longer strip
+		       trailing whitespace and actually, the backslash
+		       didn't get here in my test, readline or
+		       something did something funky with a backslash
+		       right before a newline.  */
 		    if (*p == 0)
 		      break;
 		    ch = parse_escape (&p);
@@ -1064,8 +1069,10 @@ do_setshow_command (arg, from_tty, c)
 		else
 		  *q++ = ch;
 	      }
+#if 0
 	    if (*(p - 1) != '\\')
 	      *q++ = ' ';
+#endif
 	    *q++ = '\0';
 	    new = (char *) xrealloc (new, q - new);
 	    if (*(char **)c->var != NULL)
