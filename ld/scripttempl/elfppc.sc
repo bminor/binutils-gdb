@@ -46,34 +46,23 @@ SECTIONS
   ${CREATE_SHLIB-${RELOCATING+. = ${TEXT_START_ADDR} + SIZEOF_HEADERS;}}
   ${CREATE_SHLIB+${RELOCATING+. = SIZEOF_HEADERS;}}
   ${CREATE_SHLIB-${INTERP}}
-  .hash        ${RELOCATING-0} : { *(.hash)		}
-  .dynsym      ${RELOCATING-0} : { *(.dynsym)		}
-  .dynstr      ${RELOCATING-0} : { *(.dynstr)		}
-  .rel.text    ${RELOCATING-0} : { *(.rel.text)		}
-  .rela.text   ${RELOCATING-0} : { *(.rela.text) 	}
-  .rel.data    ${RELOCATING-0} : { *(.rel.data)		}
-  .rela.data   ${RELOCATING-0} : { *(.rela.data) 	}
-  .rel.rodata  ${RELOCATING-0} : { *(.rel.rodata) 	}
-  .rela.rodata ${RELOCATING-0} : { *(.rela.rodata) 	}
-  .rel.got     ${RELOCATING-0} : { *(.rel.got)		}
-  .rela.got    ${RELOCATING-0} : { *(.rela.got)		}
-  .rel.got1    ${RELOCATING-0} : { *(.rel.got1)		}
-  .rela.got1   ${RELOCATING-0} : { *(.rela.got1)	}
-  .rel.got2    ${RELOCATING-0} : { *(.rel.got2)		}
-  .rela.got2   ${RELOCATING-0} : { *(.rela.got2)	}
-  .rel.ctors   ${RELOCATING-0} : { *(.rel.ctors)	}
-  .rela.ctors  ${RELOCATING-0} : { *(.rela.ctors)	}
-  .rel.dtors   ${RELOCATING-0} : { *(.rel.dtors)	}
-  .rela.dtors  ${RELOCATING-0} : { *(.rela.dtors)	}
-  .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
-  .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
-  .rel.fini    ${RELOCATING-0} : { *(.rel.fini)	}
-  .rela.fini   ${RELOCATING-0} : { *(.rela.fini)	}
-  .rel.bss     ${RELOCATING-0} : { *(.rel.bss)		}
-  .rela.bss    ${RELOCATING-0} : { *(.rela.bss)		}
-  .rel.plt     ${RELOCATING-0} : { *(.rel.plt)		}
-  .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
-  .init        ${RELOCATING-0} : { *(.init)	} =${NOP-0}
+  .hash		${RELOCATING-0} : { *(.hash)		}
+  .dynsym	${RELOCATING-0} : { *(.dynsym)		}
+  .dynstr	${RELOCATING-0} : { *(.dynstr)		}
+  .rela.text	${RELOCATING-0} : { *(.rela.text) 	}
+  .rela.data	${RELOCATING-0} : { *(.rela.data) 	}
+  .rela.rodata	${RELOCATING-0} : { *(.rela.rodata) 	}
+  .rela.got	${RELOCATING-0} : { *(.rela.got)	}
+  .rela.got.neg	${RELOCATING-0} : { *(.rela.got.neg)	}
+  .rela.got1	${RELOCATING-0} : { *(.rela.got1)	}
+  .rela.got2	${RELOCATING-0} : { *(.rela.got2)	}
+  .rela.ctors	${RELOCATING-0} : { *(.rela.ctors)	}
+  .rela.dtors	${RELOCATING-0} : { *(.rela.dtors)	}
+  .rela.init	${RELOCATING-0} : { *(.rela.init)	}
+  .rela.fini	${RELOCATING-0} : { *(.rela.fini)	}
+  .rela.bss	${RELOCATING-0} : { *(.rela.bss)	}
+  .rela.plt	${RELOCATING-0} : { *(.rela.plt)	}
+  .init		${RELOCATING-0} : { *(.init)	} =${NOP-0}
   ${DATA_PLT-${PLT}}
   .text    ${RELOCATING-0} :
   {
