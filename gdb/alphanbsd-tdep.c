@@ -27,11 +27,12 @@
 #include "value.h"
 #include "osabi.h"
 
-#include "solib-svr4.h"
+#include "gdb-string.h"
 
 #include "alpha-tdep.h"
 #include "alphabsd-tdep.h"
 #include "nbsd-tdep.h"
+#include "solib-svr4.h"
 
 static void
 fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
@@ -224,8 +225,6 @@ void
 _initialize_alphanbsd_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_NETBSD_ELF,
-                          alphanbsd_init_abi);
-  gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_OPENBSD_ELF,
                           alphanbsd_init_abi);
 
   deprecated_add_core_fns (&alphanbsd_core_fns);

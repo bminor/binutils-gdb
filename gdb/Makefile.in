@@ -1520,8 +1520,8 @@ alpha-mdebug-tdep.o: alpha-mdebug-tdep.c $(defs_h) $(frame_h) \
 alpha-nat.o: alpha-nat.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 	$(gdbcore_h) $(target_h) $(regcache_h) $(alpha_tdep_h) $(gregset_h)
 alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
-	$(regcache_h) $(value_h) $(osabi_h) $(solib_svr4_h) $(alpha_tdep_h) \
-	$(alphabsd_tdep_h) $(nbsd_tdep_h)
+	$(regcache_h) $(value_h) $(osabi_h) $(gdb_string_h) $(alpha_tdep_h) \
+	$(alphabsd_tdep_h) $(nbsd_tdep_h) $(solib_svr4_h)
 alpha-osf1-tdep.o: alpha-osf1-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(value_h) $(osabi_h) $(gdb_string_h) $(objfiles_h) $(alpha_tdep_h)
 alpha-tdep.o: alpha-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
@@ -1576,8 +1576,8 @@ arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) $(target_h) $(value_h) \
 	$(glibc_tdep_h)
 armnbsd-nat.o: armnbsd-nat.c $(defs_h) $(arm_tdep_h) $(inferior_h) \
 	$(regcache_h) $(gdbcore_h)
-armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) $(osabi_h) $(arm_tdep_h) \
-	$(nbsd_tdep_h) $(solib_svr4_h)
+armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
+	$(arm_tdep_h) $(nbsd_tdep_h) $(solib_svr4_h)
 arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdb_string_h) $(dis_asm_h) $(regcache_h) \
 	$(doublest_h) $(value_h) $(arch_utils_h) $(osabi_h) \

@@ -1,5 +1,6 @@
 /* Target-specific functions for ARM running under NetBSD.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +21,8 @@
 
 #include "defs.h"
 #include "osabi.h"
+
+#include "gdb_string.h"
 
 #include "arm-tdep.h"
 #include "nbsd-tdep.h"
