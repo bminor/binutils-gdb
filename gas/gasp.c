@@ -51,7 +51,7 @@ suitable for gas to consume.
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <getopt.h>
+#include "getopt.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>

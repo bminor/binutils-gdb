@@ -19,8 +19,8 @@
    the Free Software Foundation, 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include <opcode/ia64.h>
-#include <elf/ia64.h>
+#include "opcode/ia64.h"
+#include "elf/ia64.h"
 
 #define TC_IA64
 

@@ -860,7 +860,7 @@ esac
 case "${need_bfd}" in
 yes)
   BFDLIB=../bfd/libbfd.la
-  ALL_OBJ_DEPS="$ALL_OBJ_DEPS ../bfd/bfd.h"
+  ALL_OBJ_DEPS="$ALL_OBJ_DEPS"' ../bfd/bfd.h $(INCDIR)/symcat.h'
   ;;
 esac
 
