@@ -90,6 +90,8 @@ vax.h
 Things-to-lose:
 
 .cvsignore
+make_hp_order_obj
+make_solaris_order_map
 
 Do-last:
 
