@@ -1,3 +1,7 @@
+2003-11-13  David Carlton  <carlton@kealia.com>
+
+	* cp-namespace.c (lookup_namespace_scope): Fix typo in comment.
+
 2003-11-13  Andrew Cagney  <cagney@redhat.com>
 
 	* arch-utils.h (selected_architecture_name): Declare.
