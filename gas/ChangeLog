@@ -1,3 +1,13 @@
+Thu Feb  9 18:16:34 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (md_assemble): Adjust conditions for changing
+	BFD_RELOC_32 to BFD_RELOC_386_GOTPC to handle a switch in frags.
+	Patch originally from Rob Ryan <robr@cmu.edu>.
+
+	* config/tc-i386.c: Include subsegs.h.
+	(tc_i386_fix_adjustable): Declare return value.
+	(i386_operand): Don't use an assignment directly as a condition.
+
 Thu Feb  9 10:37:13 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (md_apply_fix): In some cases subtract the
