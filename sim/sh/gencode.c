@@ -694,8 +694,8 @@ op tab[] =
   },
 
   { "0", "", "mov.w @(<disp>,GBR),R0", "11000101i8*2....",
-    "MA (1)",
-    ";R0 = RSWAT (i + GBR);",
+    "MA (1);",
+    "R0 = RSWAT (i + GBR);",
     "L (0);",
   },
   { "n", "", "mov.w @(<disp>,PC),<REG_N>", "1001nnnni8p2....",
