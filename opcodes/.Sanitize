@@ -249,6 +249,33 @@ else
 	done
 fi
 
+coldfire_files="ChangeLog m68k-opc.c"
+if ( echo $* | grep keep\-coldfire > /dev/null ) ; then
+	for i in $coldfire_files ; do
+		if test ! -d $i && (grep sanitize-coldfire $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping coldfire stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $coldfire_files ; do
+		if test ! -d $i && (grep sanitize-coldfire $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"coldfire\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-coldfire/,/end-\sanitize\-coldfire/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
 
 for i in * ; do
 	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
