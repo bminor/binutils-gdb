@@ -1,3 +1,9 @@
+2003-07-10  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Use gdb_assert instead of internal_error.  Compare
+	functions against NULL, not 0.
+	* gdbarch.c: Re-generate.
+	
 2003-07-10  Fred Fish  <fnf@ninemoons.com>
 
 	* coff-solib.h (SOLIB_LOADED_LIBRARY_PATHNAME): Default to a

@@ -1733,7 +1733,7 @@ do
 	then
 	    printf "  return ${predicate};\n"
 	else
-	    printf "  return gdbarch->${function} != 0;\n"
+	    printf "  return gdbarch->${function} != NULL;\n"
 	fi
 	printf "}\n"
     fi
@@ -1749,13 +1749,11 @@ do
 	fi
 	printf "{\n"
         printf "  gdb_assert (gdbarch != NULL);\n"
-        printf "  if (gdbarch->${function} == 0)\n"
-        printf "    internal_error (__FILE__, __LINE__,\n"
-	printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
+	printf "  gdb_assert (gdbarch->${function} != NULL);\n"
 	if class_is_predicate_p && test -n "${predicate}"
 	then
 	    # Allow a call to a function with a predicate.
-	    printf "  /* Ignore predicate (${predicate}).  */\n"
+	    printf "  /* Do not check predicate: ${predicate}, allow call.  */\n"
 	fi
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
@@ -1801,14 +1799,12 @@ do
 	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
 	elif [ -n "${invalid_p}" ]
 	then
-	  printf "  if (${invalid_p})\n"
-	  printf "    internal_error (__FILE__, __LINE__,\n"
-	  printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
+	    printf "  /* Check variable is valid.  */\n"
+	    printf "  gdb_assert (!(${invalid_p}));\n"
 	elif [ -n "${predefault}" ]
 	then
-	  printf "  if (gdbarch->${function} == ${predefault})\n"
-	  printf "    internal_error (__FILE__, __LINE__,\n"
-	  printf "                    \"gdbarch: gdbarch_${function} invalid\");\n"
+	    printf "  /* Check variable changed from pre-default.  */\n"
+	    printf "  gdb_assert (gdbarch->${function} != ${predefault});\n"
 	fi
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
