@@ -1212,6 +1212,9 @@ enum bfd_architecture
 #define bfd_mach_z8002		2
   bfd_arch_h8500,      /* Hitachi H8/500 */
   bfd_arch_sh,         /* Hitachi SH */
+  /* start-sanitize-tic80 */
+  bfd_arch_tic80,	/* TI TMS320C80 (MVP) */
+  /* end-sanitize-tic80 */
   bfd_arch_alpha,      /* Dec Alpha */
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
@@ -1668,6 +1671,9 @@ which is filled by the linker. */
 simple reloc otherwise. */
   BFD_RELOC_MIPS_JMP,
 
+/* The MIPS16 jump instruction. */
+  BFD_RELOC_MIPS16_JMP,
+
 /* High 16 bits of 32-bit value; simple reloc. */
   BFD_RELOC_HI16,
 
@@ -1844,17 +1850,17 @@ assumed to be 0. */
 /* start-sanitize-m32r */
 
 /* Mitsubishi M32R relocs.
-This is a 24 bit address. */
-  BFD_RELOC_M32R_UIMM24,
+This is a 24 bit absolute address. */
+  BFD_RELOC_M32R_24,
 
-/* This is a 10-bit reloc with the right 2 bits assumed to be 0. */
-  BFD_RELOC_M32R_DISP8,
+/* This is a 10-bit pc-relative reloc with the right 2 bits assumed to be 0. */
+  BFD_RELOC_M32R_10_PCREL,
 
 /* This is an 18-bit reloc with the right 2 bits assumed to be 0. */
-  BFD_RELOC_M32R_DISP16,
+  BFD_RELOC_M32R_18_PCREL,
 
 /* This is an 26-bit reloc with the right 2 bits assumed to be 0. */
-  BFD_RELOC_M32R_DISP24,
+  BFD_RELOC_M32R_26_PCREL,
 /* end-sanitize-m32r */
 
 /* start-sanitize-v850 */
@@ -1875,6 +1881,14 @@ This is a 24 bit address. */
   BFD_RELOC_V850_TDA_OFFSET,
 /* end-sanitize-v850 */
 
+
+/* This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
+instruction. */
+  BFD_RELOC_MN10300_32_PCREL,
+
+/* This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
+instruction. */
+  BFD_RELOC_MN10300_16_PCREL,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *

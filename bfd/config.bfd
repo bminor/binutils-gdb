@@ -509,6 +509,12 @@ case "${targ}" in
     ;;
 #endif
 
+# start-sanitize-tic80
+  tic80*-*-coff*)
+    targ_defvec=tic80coff_vec
+    ;;
+
+# end-sanitize-tic80
 # start-sanitize-v850
   v850-*-*)
     targ_defvec=bfd_elf32_v850_vec

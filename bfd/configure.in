@@ -143,6 +143,7 @@ BFD_NEED_DECLARATION(strstr)
 BFD_NEED_DECLARATION(malloc)
 BFD_NEED_DECLARATION(realloc)
 BFD_NEED_DECLARATION(free)
+BFD_NEED_DECLARATION(getenv)
 
 # If we are configured native, pick a core file support file.
 COREFILE=
@@ -232,6 +233,7 @@ changequote([,])dnl
 	;;
   mips-sgi-irix4*)	COREFILE=irix-core.o ;;
   mips-sgi-irix5*)	COREFILE=irix-core.o ;;
+  mips-sgi-irix6*)	COREFILE=irix-core.o ;;
   mips-*-mach3*)
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/mipsmach3.h")
@@ -541,6 +543,9 @@ do
     sunos_big_vec)		tb="$tb sunos.o aout32.o" ;;
     symbolsrec_vec)		tb="$tb srec.o" ;;
     tekhex_vec)			tb="$tb tekhex.o" ;;
+# start-sanitize-tic80
+    tic80coff_vec)		tp="$tp coff-tic80.o" ;;
+# end-sanitize-tic80
     we32kcoff_vec)		tb="$tb coff-we32k.o" ;;
     z8kcoff_vec)		tb="$tb coff-z8k.o reloc16.o" ;;
     w65_vec)			tb="$tb coff-w65.o reloc16.o" ;;
@@ -580,9 +585,13 @@ if test x${all_targets} = xtrue ; then
   bfd_backends="${bfd_backends}"' $(ALL_BACKENDS)'
   bfd_machines="${bfd_machines}"' $(ALL_MACHINES)'
   selvecs=
+  havevecs=
   selarchs=
 else	# all_targets is true
   # Only set these if they will be nonempty, for the clever echo.
+  havevecs=
+  test -n "$selvecs" &&
+    havevecs=`echo $selvecs | sed -e 's/^/-DHAVE_/' -e 's/ \(.\)/ -DHAVE_\1/g'`
   test -n "$selvecs" &&
     selvecs=`echo $selvecs | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
   test -n "$selarchs" &&
@@ -613,6 +622,7 @@ tdefaults=""
 test -n "${defvec}" && tdefaults="${tdefaults} -DDEFAULT_VECTOR=${defvec}"
 test -n "${selvecs}" && tdefaults="${tdefaults} -DSELECT_VECS='${selvecs}'"
 test -n "${selarchs}" && tdefaults="${tdefaults} -DSELECT_ARCHITECTURES='${selarchs}'"
+test -n "${havevecs}" && tdefaults="${tdefaults} ${havevecs}"
 AC_SUBST(tdefaults)
 
 dnl AC_CHECK_HEADERS(sys/mman.h)

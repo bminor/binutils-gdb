@@ -146,7 +146,8 @@ DESCRIPTION
 . {* start-sanitize-m32r *}
 .  bfd_arch_m32r,      {* Mitsubishi M32R *}
 . {* end-sanitize-m32r *}
-.  bfd_arch_mn10x00,   {* Matsushita MN10x00 *}
+.  bfd_arch_mn10200,   {* Matsushita MN10200 *}
+.  bfd_arch_mn10300,   {* Matsushita MN10300 *}
 .  bfd_arch_last
 .  };
 
@@ -206,11 +207,15 @@ extern const bfd_arch_info_type bfd_m32r_arch;
 extern const bfd_arch_info_type bfd_m68k_arch;
 extern const bfd_arch_info_type bfd_m88k_arch;
 extern const bfd_arch_info_type bfd_mips_arch;
-extern const bfd_arch_info_type bfd_mn10x00_arch;
+extern const bfd_arch_info_type bfd_mn10200_arch;
+extern const bfd_arch_info_type bfd_mn10300_arch;
 extern const bfd_arch_info_type bfd_powerpc_arch;
 extern const bfd_arch_info_type bfd_rs6000_arch;
 extern const bfd_arch_info_type bfd_sh_arch;
 extern const bfd_arch_info_type bfd_sparc_arch;
+/* start-sanitize-tic80 */
+extern const bfd_arch_info_type bfd_tic80_arch;
+/* end-sanitize-tic80 */
 extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_we32k_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
@@ -246,7 +251,8 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_m68k_arch,
   &bfd_m88k_arch,
   &bfd_mips_arch,
-  &bfd_mn10x00_arch,
+  &bfd_mn10200_arch,
+  &bfd_mn10300_arch,
   &bfd_powerpc_arch,
   &bfd_rs6000_arch,
   &bfd_sh_arch,

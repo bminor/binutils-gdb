@@ -1,3 +1,18 @@
+Fri Dec 27 20:56:41 1996  Fred Fish  <fnf@ninemoons.com>
+
+	* TODO: Correct a misspelling.
+start-sanitize-tic80
+	* coff-tic80.c: New file for TI TMS320C80 (MVP).
+	* cpu-tic80.c: New file for TI TMS320C80 (MVP).
+	* configure.in (case $vec): Add tic80coff_vec entry.
+	* configure: Regenerate with autoconf.
+	* archures.c (bfd_tic80_arch): Declare.
+	* bfd-in2.h (enum bfd_architecture): Add bfd_arch_tic80.
+	* config.bfd (case ${targ}): Add tic80*-*-coff* target.
+	* targets.c (tic80coff_vec): Add decl as extern bfd_target.
+	(bfd_target_vector): Add tic80coff_vec entry.
+end-sanitize-tic80
+
 Fri Dec 27 11:48:12 1996  H.J. Lu  <hjl@lucon.org>
 
 	* elflink.h (elf_buckets): Add some more values for larger
