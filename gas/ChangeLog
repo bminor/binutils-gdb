@@ -1,3 +1,8 @@
+Wed Nov 24 20:27:58 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (pa_ip): Handle PA2.0 unit completers.  Handle
+	'B' operand for PA2.0 bb instruction.
+	
 1999-11-18  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-mcore.h (TC_FORCE_RELOCATION): Define for Mcore-pe

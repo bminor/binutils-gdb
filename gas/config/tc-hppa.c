@@ -2794,6 +2794,30 @@ pa_ip (str)
 			    flag = 1;
 			    s += 3;
 			  }
+			else if (strncasecmp (s, "swz", 3) == 0)
+			  {
+			    cmpltr = 1;
+			    flag = 0;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "swc", 3) == 0)
+			  {
+			    cmpltr = 5;
+			    flag = 0;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "nwz", 3) == 0)
+			  {
+			    cmpltr = 1;
+			    flag = 1;
+			    s += 3;
+			  }
+			else if (strncasecmp (s, "nwc", 3) == 0)
+			  {
+			    cmpltr = 5;
+			    flag = 1;
+			    s += 3;
+			  }
 			/* ",*" is a valid condition.  */
 			else if (*args != 'U')
 			  as_bad (_("Invalid Unit Instruction Condition."));
@@ -3306,6 +3330,20 @@ pa_ip (str)
 	      CHECK_FIELD (num, 63, 0, strict);
 	      opcode |= (num & 0x20) << 6;
 	      INSERT_FIELD_AND_CONTINUE (opcode, num & 0x1f, 5);
+
+	    /* Handle a 5 bit immediate at 10 with 'd' as the complement
+	       of the high bit of the immediate.  */
+	    case 'B':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      if (strict && the_insn.exp.X_op != O_constant)
+		break;
+	      s = expr_end;
+	      CHECK_FIELD (num, 63, 0, strict);
+	      if (num & 0x20)
+		;
+	      else
+		opcode |= (1 << 13);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num & 0x1f, 21);
 
 	    /* Handle a 5 bit immediate at 10.  */
 	    case 'Q':
