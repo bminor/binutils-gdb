@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include "as.h"
 #include "safe-ctype.h"
-#include "dwarf2dbg.h"
 #include "subsegs.h"     
 #include "symcat.h"
 #include "opcodes/iq2000-desc.h"
@@ -103,8 +102,6 @@ const pseudo_typeS md_pseudo_table[] =
 {
     { "align",  s_align_bytes,           0 },
     { "word",   cons,                    4 },
-    { "file",	dwarf2_directive_file,	 0 },
-    { "loc",	dwarf2_directive_loc,	 0 },
     { "rdata",  s_change_sec, 		'r'},
     { "sdata",  s_change_sec, 		's'},
     { "set",	s_iq2000_set,		 0 },

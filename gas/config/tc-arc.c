@@ -94,8 +94,6 @@ const pseudo_typeS md_pseudo_table[] = {
   { "option", arc_option, 0 },
   { "cpu", arc_option, 0 },
   { "block", s_space, 0 },
-  { "file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
-  { "loc", dwarf2_directive_loc, 0 },
   { "extcondcode", arc_extoper, 0 },
   { "extcoreregister", arc_extoper, 1 },
   { "extauxregister", arc_extoper, 2 },

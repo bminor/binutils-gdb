@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include "as.h"
-#include "dwarf2dbg.h"
 #include "subsegs.h"     
 #include "symcat.h"
 #include "opcodes/frv-desc.h"
@@ -185,8 +184,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "eflags",	frv_set_flags,		0 },
   { "word",	cons,			4 },
   { "picptr",	frv_pic_ptr,		4 },
-  { "file",	(void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
-  { "loc",	dwarf2_directive_loc,	0 },
   { NULL, 	NULL,			0 }
 };
 

@@ -670,9 +670,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"equ", pa_equ, 0},
   {"exit", pa_exit, 0},
   {"export", pa_export, 0},
-#ifdef OBJ_ELF
-  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
-#endif
   {"fill", pa_fill, 0},
   {"float", pa_float_cons, 'f'},
   {"half", pa_cons, 2},
@@ -682,9 +679,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"lcomm", pa_lcomm, 0},
   {"leave", pa_leave, 0},
   {"level", pa_level, 0},
-#ifdef OBJ_ELF
-  {"loc", dwarf2_directive_loc, 0 },
-#endif
   {"long", pa_cons, 4},
   {"lsym", pa_lsym, 0},
 #ifdef OBJ_SOM

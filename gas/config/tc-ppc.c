@@ -237,8 +237,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "rdata",	ppc_elf_rdata,	0 },
   { "rodata",	ppc_elf_rdata,	0 },
   { "lcomm",	ppc_elf_lcomm,	0 },
-  { "file",	(void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
-  { "loc",	dwarf2_directive_loc, 0 },
 #endif
 
 #ifdef TE_PE

@@ -25,6 +25,7 @@
 #include "subsegs.h"
 #include "obstack.h"
 #include "struc-symbol.h"
+#include "dwarf2dbg.h"
 
 #ifndef ECOFF_DEBUGGING
 #define ECOFF_DEBUGGING 0
@@ -126,6 +127,9 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"2byte", cons, 2},
   {"4byte", cons, 4},
   {"8byte", cons, 8},
+  /* These are used for dwarf2.  */
+  { "file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
+  { "loc",  dwarf2_directive_loc,  0 },
 
   /* We need to trap the section changing calls to handle .previous.  */
   {"data", obj_elf_data, 0},

@@ -25,7 +25,6 @@
 #include "opcodes/xstormy16-desc.h"
 #include "opcodes/xstormy16-opc.h"
 #include "cgen.h"
-#include "dwarf2dbg.h"
 
 /* Structure to hold all of the different components describing
    an individual instruction.  */
@@ -85,8 +84,6 @@ md_show_usage (stream)
 const pseudo_typeS md_pseudo_table[] =
 {
   { "word",	cons,		4 },
-  { "file",     (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
-  { "loc",      dwarf2_directive_loc,  0 },
   { NULL, 	NULL, 		0 }
 };
 

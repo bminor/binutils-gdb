@@ -554,12 +554,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"extend", float_cons, 'x'},
   {"ldouble", float_cons, 'x'},
 
-#ifdef OBJ_ELF
-  /* Dwarf2 support for Gcc.  */
-  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0},
-  {"loc", dwarf2_directive_loc, 0},
-#endif
-
   /* The following pseudo-ops are supported for MRI compatibility.  */
   {"chip", s_chip, 0},
   {"comline", s_space, 1},

@@ -151,11 +151,6 @@ const pseudo_typeS md_pseudo_table[] =
   {"sbranch", sbranch, L_8},
   {"lbranch", sbranch, L_16},
 
-#ifdef BFD_ASSEMBLER
-  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
-  {"loc", dwarf2_directive_loc, 0 },
-#endif
-
   {"int", pint, 0},
   {"data.b", cons, 1},
   {"data.w", cons, 2},

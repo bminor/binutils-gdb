@@ -125,8 +125,6 @@ size_t md_longopts_size = sizeof (md_longopts);
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
-  { "file",     (void (*) PARAMS ((int))) dwarf2_directive_file,  0 },
-  { "loc",      dwarf2_directive_loc,   0 },
   { "am30",	set_arch_mach,		AM30 },
   { "am33",	set_arch_mach,		AM33 },
   { "mn10300",	set_arch_mach,		MN103 },

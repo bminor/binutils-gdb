@@ -539,8 +539,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "call_table_data",	v850_seg,		CALL_TABLE_DATA_SECTION	},
   { "call_table_text",	v850_seg,		CALL_TABLE_TEXT_SECTION	},
   { "v850e",		set_machine,		bfd_mach_v850e		},
-  { "file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
-  { "loc",		dwarf2_directive_loc,	0			},
   { "longcall",         v850_longcode,          1                       },
   { "longjump",         v850_longcode,          2                       },
   { NULL,		NULL,			0			}

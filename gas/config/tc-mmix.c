@@ -343,10 +343,6 @@ const pseudo_typeS md_pseudo_table[] =
    /* Support " .local $45" syntax.  */
    {"local", mmix_s_local, 1},
 
-   /* Support DWARF2 debugging info.  */
-   {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0},
-   {"loc", dwarf2_directive_loc, 0},
-
    {NULL, 0, 0}
  };
 

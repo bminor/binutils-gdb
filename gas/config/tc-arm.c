@@ -2345,8 +2345,6 @@ const pseudo_typeS md_pseudo_table[] =
 #ifdef OBJ_ELF
   { "word",        s_arm_elf_cons, 4 },
   { "long",        s_arm_elf_cons, 4 },
-  { "file",        (void (*) PARAMS ((int))) dwarf2_directive_file, 0 },
-  { "loc",         dwarf2_directive_loc,  0 },
 #else
   { "word",        cons, 4},
 #endif

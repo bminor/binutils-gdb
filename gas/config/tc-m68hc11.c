@@ -268,10 +268,6 @@ const pseudo_typeS md_pseudo_table[] = {
   {"fcc", stringer, 1},
   {"rmb", s_space, 0},
 
-  /* Dwarf2 support for Gcc.  */
-  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0},
-  {"loc", dwarf2_directive_loc, 0},
-
   /* Motorola ALIS.  */
   {"xrefb", s_ignore, 0}, /* Same as xref  */
 
