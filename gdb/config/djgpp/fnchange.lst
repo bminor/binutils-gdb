@@ -100,10 +100,7 @@
 @V@/gdb/config/i386/xm-i386v4.h @V@/gdb/config/i386/xm-v4.h
 @V@/gdb/config/m68k/apollo68v.mh @V@/gdb/config/m68k/apollo-v.mh
 @V@/gdb/config/m68k/nm-apollo68v.h @V@/gdb/config/m68k/nm-apolv.h
-@V@/gdb/config/m68k/nm-hp300hpux.h @V@/gdb/config/m68k/nm-300ux.h
-@V@/gdb/config/m68k/tm-hp300hpux.h @V@/gdb/config/m68k/tm-300ux.h
 @V@/gdb/config/m68k/xm-apollo68v.h @V@/gdb/config/m68k/xm-apolv.h
-@V@/gdb/config/m68k/xm-hp300hpux.h @V@/gdb/config/m68k/xm-300ux.h
 @V@/gdb/config/m88k/tm-delta88v4.h @V@/gdb/config/m88k/tm-d88v4.h
 @V@/gdb/config/m88k/xm-delta88v4.h @V@/gdb/config/m88k/xm-d88v4.h
 @V@/gdb/config/mips/tm-bigmips64.h @V@/gdb/config/mips/tm-bigm64.h

@@ -1,3 +1,14 @@
+2003-08-30  Michael Chastain  <mec@shout.net>
+
+	* Makefile.in: Remove tm-hp300bsd.h, tm-hp300hpux.h.
+	* config/m68k/nm-hp300hpux.h: Delete.
+	* config/m68k/tm-hp300hpux.h: Delete.
+	* config/m68k/xm-hp300hpux.h: Delete.
+	* config/m68k/xm-hp300bsd.h: Delete.
+	* config/djgpp/fnchange.lst: Remove nm-hp300hpux.h,
+	tm-hp300hpux.h, xm-hp300hpux.h.
+	* somsolib.c: Remove comment about hp300 shared libraries.
+
 2003-08-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-nat.c (ps_get_thread_area): Don't define as extern.
