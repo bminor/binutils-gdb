@@ -1,0 +1,25 @@
+This is preliminary information about the Mac MPW port of the Cygnus tools.
+
+To build everything, create an object directory, setdirectory into it, and do:
+
+	::src:mpw-configure --target <name> --srcdir ::src: --prefix <whatever>
+
+Then
+	mpw-build all
+
+will build everything, and
+
+	mpw-build install
+
+will install it.
+
+KNOWN BUGS
+
+ar rc xxx doesn't work.
+
+objdump -i idiocy where it creates dummy files.
+
+objcopy -O srec foo.o makes weird output filenames.
+
+Mac host requires -mgas but Unix hosts don't.
+

@@ -6,7 +6,7 @@ Set savedir "`Directory`"
 
 #Set Echo 1
 
-Set thisscript "{0}"
+Set ThisScript "{0}"
 
 Set srcroot "--------"
 
@@ -14,9 +14,13 @@ Set srcdir ":"
 
 Set objdir ":"
 
+Set prefix ":"
+
 Set hostalias "m68k-apple-mpw"
 
 Set targetalias {hostalias}
+
+Set prefix "{Boot}"Cygnus:latest:
 
 Set verify 0
 Set verifystr ""
@@ -80,14 +84,32 @@ If "`Exists "{srcdir}"mpw-make.in`" != ""
 	Echo "srcroot = " {srcroot} >> "{objdir}"Makefile.tem
 	Echo "topsrcdir = " {srcroot} >> "{objdir}"Makefile.tem
 	Echo "srcdir = " {srcdir} >> "{objdir}"Makefile.tem
+	Echo "mpw_prefix = " {prefix} >> "{objdir}"Makefile.tem
 	Echo "target_canonical = " {target_canonical} >> "{objdir}"Makefile.tem
 	Echo "mdname = " {mdname} >> "{objdir}"Makefile.tem
 	Echo "EMUL = " {emulname} >> "{objdir}"Makefile.tem
+	Echo "ARCHDEFS = -d" {archname} >> "{objdir}"Makefile.tem
+	If "{tdepfiles}" != ""
+		Echo "TDEPFILES = " {tdepfiles} >> "{objdir}"Makefile.tem
+	End If
+	If "{tm_file}" != ""
+		Echo "TM_FILE = " {tm_file} >> "{objdir}"Makefile.tem
+	End If
+	If "{xdepfiles}" != ""
+		Echo "XDEPFILES = " {xdepfiles} >> "{objdir}"Makefile.tem
+	End If
+	If "{xm_file}" != ""
+		Echo "XM_FILE = " {xm_file} >> "{objdir}"Makefile.tem
+	End If
+	If "{nat_file}" != ""
+		Echo "NAT_FILE = " {nat_file} >> "{objdir}"Makefile.tem
+	End If
 	Echo "host_makefile_frag = " >> "{objdir}"Makefile.tem
 	Echo "target_makefile_frag = " >> "{objdir}"Makefile.tem
 	mpw-7to8 "{srcroot}"config:mpw-mh-mpw >>"{objdir}"Makefile.tem
 	mpw-7to8 "{srcdir}"mpw-make.in >>"{objdir}"Makefile.tem
-	MoveIfChange "{objdir}"Makefile.tem "{objdir}"Makefile
+	mpw-edit-prefix "{objdir}"Makefile.tem >"{objdir}"Makefile.tem2
+	MoveIfChange "{objdir}"Makefile.tem2 "{objdir}"Makefile
 	If {verify} == 1
 		Echo Created Makefile in "`Directory`"
 	End If
@@ -97,11 +119,14 @@ If "`Exists "{srcdir}"mpw-build.in`" != ""
 	Echo "Set srcroot " {srcroot} > "{objdir}"mpw-build.tem
 	Echo "Set srcdir " {srcdir} >> "{objdir}"mpw-build.tem
 	Echo "Set target_canonical " {target_canonical} >> "{objdir}"mpw-build.tem
+	Echo "Set prefix " {prefix} >> "{objdir}"mpw-build.tem
 	mpw-7to8 "{srcdir}"mpw-build.in >>"{objdir}"mpw-build.tem
 	MoveIfChange "{objdir}"mpw-build.tem "{objdir}"mpw-build
 	If {verify} == 1
 		Echo Created mpw-build in "`Directory`"
 	End If
+Else
+	Echo '::mpw-build {1}' >"{objdir}"mpw-build
 End If
 
 For subdir In {configdirs}
@@ -117,7 +142,7 @@ For subdir In {configdirs}
 		NewFolder "{objdir}{subdir}"
 	End If
 	SetDirectory "{objdir}{subdir}:"
-	"{thisscript}" --target "{target_canonical}" --srcdir "{srcdir}{subdir}:" --srcroot "{srcroot}" {verifystr}
+	"{ThisScript}" --target "{target_canonical}" --srcdir "{srcdir}{subdir}:" --srcroot "{srcroot}" --prefix "{prefix}" {verifystr}
 	SetDirectory "{savedir}"
 End For
 

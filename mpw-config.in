@@ -1,6 +1,6 @@
 # Configuration fragment for Cygnus source tree.
 
-Set host_libs "mmalloc libiberty opcodes bfd readline"
+Set host_libs "libiberty opcodes bfd readline"
 
 Set host_tools "byacc flex binutils ld gas gcc gdb"
 
