@@ -1077,7 +1077,7 @@ static const struct frame_unwind x86_64_frame_unwind =
 };
 
 static const struct frame_unwind *
-x86_64_frame_p (CORE_ADDR pc)
+x86_64_frame_sniffer (struct frame_info *next_frame)
 {
   return &x86_64_frame_unwind;
 }
@@ -1149,8 +1149,9 @@ static const struct frame_unwind x86_64_sigtramp_frame_unwind =
 };
 
 static const struct frame_unwind *
-x86_64_sigtramp_frame_p (CORE_ADDR pc)
+x86_64_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
@@ -1260,8 +1261,8 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      in the future.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
 
-  frame_unwind_append_predicate (gdbarch, x86_64_sigtramp_frame_p);
-  frame_unwind_append_predicate (gdbarch, x86_64_frame_p);
+  frame_unwind_append_sniffer (gdbarch, x86_64_sigtramp_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, x86_64_frame_sniffer);
   frame_base_set_default (gdbarch, &x86_64_frame_base);
 }
 

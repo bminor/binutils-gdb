@@ -29,12 +29,12 @@ struct objfile;
 /* Return the frame unwind methods for the function that contains PC,
    or NULL if it can't be handled by DWARF CFI frame unwinder.  */
 
-const struct frame_unwind *dwarf2_frame_p (CORE_ADDR pc);
+const struct frame_unwind *dwarf2_frame_sniffer (struct frame_info *next_frame);
 
 /* Return the frame base methods for the function that contains PC, or
    NULL if it can't be handled by the DWARF CFI frame unwinder.  */
 
-const struct frame_base *dwarf2_frame_base_p (CORE_ADDR pc);
+const struct frame_base *dwarf2_frame_base_sniffer (struct frame_info *next_frame);
 
 /* Register the DWARF CFI for OBJFILE.  */
 

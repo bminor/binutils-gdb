@@ -29,12 +29,6 @@ struct frame_base;
 struct gdbarch;
 struct regcache;
 
-/* For compatibility.  */
-
-typedef const struct frame_base *(frame_base_p_ftype) (CORE_ADDR pc);
-extern void frame_base_append_predicate (struct gdbarch *gdbarch,
-					 frame_base_p_ftype *p);
-
 /* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
    and that this is a `normal frame'; use the NEXT frame, and its
    register unwind method, to determine the address of THIS frame's

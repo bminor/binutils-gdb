@@ -708,8 +708,9 @@ static const struct frame_unwind dwarf2_frame_unwind =
 };
 
 const struct frame_unwind *
-dwarf2_frame_p (CORE_ADDR pc)
+dwarf2_frame_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   /* The way GDB works, this function can be called with PC just after
      the last instruction of the function we're supposed to return the
      unwind methods for.  In that case we won't find the correct FDE;
@@ -748,8 +749,9 @@ static const struct frame_base dwarf2_frame_base =
 };
 
 const struct frame_base *
-dwarf2_frame_base_p (CORE_ADDR pc)
+dwarf2_frame_base_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   if (dwarf2_frame_find_fde (&pc))
     return &dwarf2_frame_base;
 

@@ -1440,7 +1440,7 @@ static const struct frame_unwind d10v_frame_unwind = {
 };
 
 static const struct frame_unwind *
-d10v_frame_p (CORE_ADDR pc)
+d10v_frame_sniffer (struct frame_info *next_frame)
 {
   return &d10v_frame_unwind;
 }
@@ -1580,7 +1580,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_print_registers_info (gdbarch, d10v_print_registers_info);
 
-  frame_unwind_append_predicate (gdbarch, d10v_frame_p);
+  frame_unwind_append_sniffer (gdbarch, d10v_frame_sniffer);
   frame_base_set_default (gdbarch, &d10v_frame_base);
 
   /* Methods for saving / extracting a dummy frame's ID.  The ID's

@@ -1080,7 +1080,7 @@ static const struct frame_unwind avr_frame_unwind = {
 };
 
 const struct frame_unwind *
-avr_frame_p (CORE_ADDR pc)
+avr_frame_sniffer (struct frame_info *next_frame)
 {
   return &avr_frame_unwind;
 }
@@ -1350,7 +1350,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
                                              frameless_look_for_prologue);
 
-  frame_unwind_append_predicate (gdbarch, avr_frame_p);
+  frame_unwind_append_sniffer (gdbarch, avr_frame_sniffer);
   frame_base_set_default (gdbarch, &avr_frame_base);
 
   set_gdbarch_unwind_dummy_id (gdbarch, avr_unwind_dummy_id);

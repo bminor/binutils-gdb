@@ -858,8 +858,9 @@ static const struct frame_unwind alpha_sigtramp_frame_unwind = {
 };
 
 static const struct frame_unwind *
-alpha_sigtramp_frame_p (CORE_ADDR pc)
+alpha_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   char *name;
 
   /* We shouldn't even bother to try if the OSABI didn't register
@@ -1199,7 +1200,7 @@ static const struct frame_unwind alpha_heuristic_frame_unwind = {
 };
 
 static const struct frame_unwind *
-alpha_heuristic_frame_p (CORE_ADDR pc)
+alpha_heuristic_frame_sniffer (struct frame_info *next_frame)
 {
   return &alpha_heuristic_frame_unwind;
 }
@@ -1571,8 +1572,8 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (tdep->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, alpha_get_longjmp_target);
 
-  frame_unwind_append_predicate (gdbarch, alpha_sigtramp_frame_p);
-  frame_unwind_append_predicate (gdbarch, alpha_heuristic_frame_p);
+  frame_unwind_append_sniffer (gdbarch, alpha_sigtramp_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, alpha_heuristic_frame_sniffer);
 
   frame_base_set_default (gdbarch, &alpha_heuristic_frame_base);
 
@@ -1582,8 +1583,8 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 void
 alpha_dwarf2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  frame_unwind_append_predicate (gdbarch, dwarf2_frame_p);
-  frame_base_append_predicate (gdbarch, dwarf2_frame_base_p);
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
 }
 

@@ -408,8 +408,9 @@ static struct frame_unwind dummy_frame_unwind =
 };
 
 const struct frame_unwind *
-dummy_frame_p (CORE_ADDR pc)
+dummy_frame_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   if (DEPRECATED_PC_IN_CALL_DUMMY_P ()
       ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
       : pc_in_dummy_frame (pc))
