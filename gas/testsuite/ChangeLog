@@ -1,3 +1,8 @@
+2005-03-08  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/pcrel.d: Account for big endian target.
+	* gas/ia64/reloc-bad.s: Enforce 64-bit ABI.
+
 2005-03-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	Adjust testsuite for cris-axis-aout.

@@ -1,3 +1,4 @@
+	.psr abi64
 	.global esym
 	.section .rodata, "a", @progbits
 	.text
