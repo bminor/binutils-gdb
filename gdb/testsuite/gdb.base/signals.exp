@@ -232,6 +232,7 @@ proc signal_tests_1 {} {
 
 	setup_xfail "sparc-*-*"
 	setup_xfail "rs6000-*-*"
+	setup_xfail "powerpc-*-*"
 
 	# A faulty bash will not step the inferior into sigtramp on sun3.
 	if {$bash_bug} then {
@@ -331,8 +332,9 @@ if [runto_main] then {
 
     # Haven't investigated this xfail
     setup_xfail "rs6000-*-*"
+    setup_xfail "powerpc-*-*"
     gdb_test "p count" "= 2" "p count #1 in signals.exp"
-    if [istarget "rs6000-*-*"] { return 0 }
+    if { [istarget "rs6000-*-*"] || [istarget "powerpc-*-*"] } { return 0 }
 
     gdb_test "condition \$handler_breakpoint_number" "now unconditional\\."
     gdb_test "next" "alarm \\(.*" "next to alarm #2 in signals.exp"

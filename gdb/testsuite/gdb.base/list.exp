@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -44,7 +44,7 @@ proc set_listsize { arg } {
 
     send "set listsize $arg\n"
     expect {
-	-re "set listsize $arg\r\n$prompt $" {}
+	-re "set listsize $arg\[\r\n\]+$prompt $" {}
 	-re ".*$prompt $" { fail "setting listsize to $arg" ; return 0 }
 	timeout { fail "set listsize to $arg (timeout)" ; return 0 } 
     }
@@ -81,13 +81,17 @@ proc test_listsize {} {
     }
     
     # Show the default lines
+    # The second case is for optimized code, it is still correct.
     
     # This doesn't work for COFF targets.
     setup_xfail "a29k-*-udi"
     send "list\n"
     expect {
 	-re "1\[ \t\]+#include \"list0.h\".*10\[ \t\]+x = 0;\r\n$prompt $" {
-	    pass "show default lines around main"
+	    pass "list default lines around main"
+	}
+	-re "2.*11\[ \t\]+foo .x\[+)\]+;\r\n$prompt $" {
+	    pass "list default lines around main"
 	}
 	-re ".*$prompt $" {
 	    fail "list default lines around main"
@@ -317,7 +321,7 @@ proc test_listsize {} {
 
     send "set listsize 0\n"
     expect {
-	-re "set listsize 0\r\n$prompt $" {
+	-re "set listsize 0\[\r\n\]+$prompt $" {
 	    setup_xfail "*-*-*"
 	    send "show listsize\n"
 	    expect {
@@ -336,7 +340,7 @@ proc test_listsize {} {
 	    }
 	    send "list 1\n"
 	    expect {
-		-re "list 1\r\n$prompt $" {
+		-re "list 1\[\r\n\]+$prompt $" {
 		    pass "listsize of 0 suppresses output"
 		}
 		-re ".*$prompt $" {
@@ -359,7 +363,7 @@ proc test_listsize {} {
 
     send "set listsize -1\n"
     expect {
-	-re "set listsize -1\r\n$prompt $" {
+	-re "set listsize -1\[\r\n\]+$prompt $" {
 	    send "show listsize\n"
 	    expect {
 		-re "Number of source lines .* is unlimited.\r\n.*$prompt $" {
@@ -378,7 +382,7 @@ proc test_listsize {} {
 		-re "1\[ \t\]+#include .*\r\n39\[ \t\]+\}\r\n$prompt $" {
 		    pass "list line 1 with unlimited listsize"
 		}
-		-re "list 1\r\n$prompt $" {
+		-re "list 1\[\r\n\]+$prompt $" {
 		    fail "listsize of -1 (unlimited) suppresses output"
 		}
 		timeout {
@@ -504,7 +508,7 @@ proc test_list_function {} {
 	-re "1\[ \t\]+#include .*8\[ \t\]+breakpoint\[(\]\[)\]+;\r\n$prompt $" {
 	    pass "list function in source file 1"
 	}
-	-re "2\[ \t\]+.*11\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$prompt $" {
+	-re "5\[ \t\]+int x;.*14\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$prompt $" {
 	    pass "list function in source file 1"
 	}
 	-re ".*$prompt $" { fail "list main" ; return }
@@ -533,6 +537,7 @@ proc test_list_function {} {
     # SunPRO cc is the third case.
     # FIXME This fails on DWARF
     setup_xfail "*-*-sysv4*"
+    setup_xfail "powerpc-*-*"
     send "list foo\n"
     expect {
 	-re "2\[ \t\]+including file.*11\[ \t\]+bar \[(\]+.*\[)\]+;\r\n$prompt $" {
@@ -714,7 +719,7 @@ proc test_list_filename_and_function {} {
 	-re "1\[ \t\]+#include .*8\[ \t\]+breakpoint\[(\]\[)\]+;\r\n$prompt $" {
 	    incr testcnt
 	}
-	-re "2\[ \t\]+.*11\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$prompt $" {
+	-re "5\[ \t\]+int x;.*14\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$prompt $" {
 	    pass "list function in source file 1"
 	}
 	-re ".*$prompt $" { fail "list list0.c:main" }
@@ -731,7 +736,7 @@ proc test_list_filename_and_function {} {
 	-re "36\[ \t\]+\}.*42\[ \t\]+\}\r\n$prompt $" {
 	    incr testcnt
 	}
-	-re "36.*42\[ \t\]+\}\r\n$prompt $" {
+	-re "37.*42\[ \t\]+\}\r\n$prompt $" {
 	    incr testcnt
 	}
 	-re ".*$prompt $" { fail "list list0.c:unused" }
@@ -745,6 +750,7 @@ proc test_list_filename_and_function {} {
     # SunPRO cc is the third case.
     # FIXME This fails on DWARF
     setup_xfail "rs6000-*-*" 1804
+    setup_xfail "powerpc-*-*" 1804
     setup_xfail "*-*-sysv4*"
     # FIXME Fails for COFF as well, I think.
     setup_xfail "a29k-*-udi"
@@ -869,7 +875,6 @@ proc test_list_filename_and_function {} {
 }
 
 proc test_forward_search {} {
-	global timeout
 
 	gdb_test "set listsize 4" ""
 	# On SunOS4, this gives us lines 19-22.  On AIX, it gives us
@@ -887,10 +892,8 @@ proc test_forward_search {} {
 	# In any case, we just want GDB to not crash if the line
 	# being searched is extremely long.
 
-	set oldtimeout $timeout
 	set timeout 30
 	gdb_test "search 1234" ""
-	set timeout $oldtimeout
 }
 
 # Start with a fresh gdb.

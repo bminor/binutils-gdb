@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -73,15 +73,8 @@ proc setup_xfail_on_long_vs_int {} {
 # uses in the stabs.  So we need to deal with names both from gcc and
 # native compilers.
 #
-# On the i960, which defaults to unsigned characters, gdb
-# misinterprets char as unsigned char.
-# Likewise with the rs6000; the compiler doesn't give us enough information
-# to distinguish between char and unsigned char
-setup_xfail "rs6000-*-*"
-setup_xfail "i960-*-*" 1821
-setup_xfail "mips-idt-*" "mips-sgi-*" "a29k-*-*"
 gdb_test "whatis v_char" \
-    "type = char" \
+    "type = (unsigned char|char)" \
     "whatis char"
 
 setup_xfail "a29k-*-*"
@@ -110,7 +103,7 @@ gdb_test "whatis v_int" \
     "whatis int"
 
 gdb_test "whatis v_signed_int" \
-    "type = int" \
+    "type = (signed |)int" \
     "whatis signed int"
 
 gdb_test "whatis v_unsigned_int" \
@@ -128,7 +121,7 @@ setup_xfail_on_long_vs_int
 # AIX xlc gets this wrong and unsigned long right.  Go figure.
 if {!$gcc_compiled} then {setup_xfail "rs6000-*-aix*"}
 gdb_test "whatis v_signed_long" \
-    "type = (long|long int)" \
+    "type = (signed |)(long|long int)" \
     "whatis signed long"
 
 setup_xfail_on_long_vs_int
@@ -167,7 +160,7 @@ gdb_test "whatis v_short_array" \
     pass "whatis short array"
 
 gdb_test "whatis v_signed_short_array" \
-    "type = (short|short int) \\\[2\\\]" \
+    "type = (signed |)(short|short int) \\\[2\\\]" \
     "whatis signed short array"
 
 gdb_test "whatis v_unsigned_short_array" \
@@ -179,7 +172,7 @@ gdb_test "whatis v_int_array" \
     "whatis int array"
 
 gdb_test "whatis v_signed_int_array" \
-    "type = int \\\[2\\\]" \
+    "type = (signed |)int \\\[2\\\]" \
     "whatis signed int array"
 
 gdb_test "whatis v_unsigned_int_array" \
@@ -231,7 +224,7 @@ gdb_test "whatis v_short_pointer" \
     pass "whatis short pointer"
 
 gdb_test "whatis v_signed_short_pointer" \
-    "type = (short|short int) \\*" \
+    "type = (signed |)(short|short int) \\*" \
     "whatis signed short pointer"
 
 gdb_test "whatis v_unsigned_short_pointer" \
@@ -243,7 +236,7 @@ gdb_test "whatis v_int_pointer" \
     "whatis int pointer"
 
 gdb_test "whatis v_signed_int_pointer" \
-    "type = int \\*" \
+    "type = (signed |)int \\*" \
     "whatis signed int pointer"
 
 gdb_test "whatis v_unsigned_int_pointer" \
@@ -311,7 +304,7 @@ gdb_test "whatis v_short_func" \
     "whatis short function"
 
 gdb_test "whatis v_signed_short_func" \
-    "type = short (int |)\\(\\)" \
+    "type = (signed |)short (int |)\\(\\)" \
     "whatis signed short function"
 
 gdb_test "whatis v_unsigned_short_func" \
@@ -323,7 +316,7 @@ gdb_test "whatis v_int_func" \
     "whatis int function"
 
 gdb_test "whatis v_signed_int_func" \
-    "type = int \\(\\)" \
+    "type = (signed |)int \\(\\)" \
     "whatis signed int function"
 
 gdb_test "whatis v_unsigned_int_func" \
@@ -335,7 +328,7 @@ gdb_test "whatis v_long_func" \
     "whatis long function"
 
 gdb_test "whatis v_signed_long_func" \
-    "type = (int|long|long int) \\(\\)" \
+    "type = (signed |)(int|long|long int) \\(\\)" \
     "whatis signed long function"
 
 gdb_test "whatis v_unsigned_long_func" \

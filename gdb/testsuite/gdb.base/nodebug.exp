@@ -32,70 +32,63 @@ if ![file exists $binfile] then {
 	# being told they are ints or functions returning int like old
 	# versions of gdb used to do.
 
-	# On alpha (and other ecoff systems, even stabs in ecoff) GCC
-	# puts out stProc and related symbols which cause GDB to think
-	# it knows the type.  GDB probably could be fixed to do
-	# better, but for now xfail these tests.  Irix5, even though
-	# it is ELF, counts as "ecoff" because gcc puts out a .mdebug
-	# section even without -g.  Personally, I think that is pretty
-	# dubious, but maybe dbx requires it.
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
-	gdb_test "p top" \
-	    "{<(text variable|function), no debug info>} \[0-9a-fx]* <top>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
-	gdb_test "whatis top" "<(text variable|function), no debug info>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
-	gdb_test "ptype top" "int \\((|<non-float parameter>)\\)"
+	# On alpha (and other ecoff systems) the native compilers put
+	# out debugging info for non-aggregate return values of functions
+	# even without -g, which should be accepted.
+	# Irix5, even though it is ELF, counts as "ecoff" because it
+	# encapsulates ecoff debugging info in a .mdebug section.
 
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
+	gdb_test "p top" \
+	    "{(<(text variable|function), no debug info>|short \\(\\))} \[0-9a-fx]* <top>"
+	gdb_test "whatis top" \
+	    "(<(text variable|function), no debug info>|short \\(\\))"
+	gdb_test "ptype top" "(short|int) \\((|<non-float parameter>|<non-float parameter>, <non-float parameter>)\\)"
+
 	gdb_test "p middle" \
-	    "{<(text variable|function), no debug info>} \[0-9a-fx]* <middle>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
-	gdb_test "whatis middle" "<(text variable|function), no debug info>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
-	gdb_test "ptype middle" "int \\((|<non-float parameter>)\\)"
+	    "{(<(text variable|function), no debug info>|short \\(\\))} \[0-9a-fx]* <middle>"
+	gdb_test "whatis middle" \
+	    "(<(text variable|function), no debug info>|short \\(\\))"
+	gdb_test "ptype middle" "(short|int) \\((|<non-float parameter>|<non-float parameter>, <non-float parameter>)\\)"
 
 	gdb_test "p dataglobal" "= 3"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
 	gdb_test "whatis dataglobal" \
 	    "<(data variable|variable), no debug info>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
 	gdb_test "ptype dataglobal" "<(data variable|variable), no debug info>"
 
 	# The only symbol xcoff puts out for statics is for the TOC entry.
 	# Possible, but hairy, for gdb to deal.  Right now it doesn't, it
 	# doesn't know the variables exist at all.
 	setup_xfail "rs6000*-*-aix*"
+	setup_xfail "powerpc*-*-aix*"
 	gdb_test "p datalocal" "= 4"
 	setup_xfail "rs6000*-*-aix*"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
+	setup_xfail "powerpc*-*-aix*"
 	gdb_test "whatis datalocal" "<(data variable|variable), no debug info>"
 	setup_xfail "rs6000*-*-aix*"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
+	setup_xfail "powerpc*-*-aix*"
 	gdb_test "ptype datalocal" "<(data variable|variable), no debug info>"
 
 	gdb_test "p bssglobal" "= 0"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
 	gdb_test "whatis bssglobal" "<(data variable|variable), no debug info>"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
 	gdb_test "ptype bssglobal" "<(data variable|variable), no debug info>"
 
 	setup_xfail "rs6000*-*-aix*"
+	setup_xfail "powerpc*-*-aix*"
 	gdb_test "p bsslocal" "= 0"
 	setup_xfail "rs6000*-*-aix*"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
+	setup_xfail "powerpc*-*-aix*"
 	gdb_test "whatis bsslocal" "<(data variable|variable), no debug info>"
 	setup_xfail "rs6000*-*-aix*"
-	setup_xfail "alpha*-*-osf*" "mips*-*-irix*" "*-*-ultrix*"
+	setup_xfail "powerpc*-*-aix*"
 	gdb_test "ptype bsslocal" "<(data variable|variable), no debug info>"
 
 	gdb_test "backtrace" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main.*" \
-	    "backtrace in nodebug.exp"
+	    "backtrace from inner in nodebug.exp"
 	# Or if that doesn't work, at least hope for the external symbols
 	# Commented out because if we aren't going to xfail the above test
 	# ever, why bother with a weaker test?
 	#gdb_test "backtrace" "#0.*inner.*#1.*#2.*top.*#3.*main.*" \
-	#    "backtrace in nodebug.exp for externals"
+	#    "backtrace from inner in nodebug.exp for externals"
 
 	# This test is not as obscure as it might look.  `p getenv ("TERM")'
 	# is a real-world example, at least on many systems.
@@ -104,7 +97,8 @@ if ![file exists $binfile] then {
 	# Now, try that we can give names of file-local symbols which happen
 	# to be unique, and have it still work
 	if [runto middle] then {
-	    gdb_test "backtrace" "#0.*middle.*#1.*top.*#2.*main.*"
+	    gdb_test "backtrace" "#0.*middle.*#1.*top.*#2.*main.*" \
+		"backtrace from middle in nodebug.exp"
 	}
     }
 }

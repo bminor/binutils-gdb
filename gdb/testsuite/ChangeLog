@@ -1,3 +1,15 @@
+Sat Aug 12 15:05:36 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* gdb.base/callfuncs.exp: Add xfails for the powerpc.
+	* gdb.base/corefile.exp: Likewise.
+	* gdb.base/list.exp: Likewise.
+	* gdb.base/scope.exp: Likewise.
+	* gdb.base/siganls.exp: Likewise.
+
+	* gdb.base/nodebug.exp: Add xfails for the powerpc.  Handle aix4
+	compiler output.
+	* gdb.base/whatis.exp: Likewise.
+
 start-sanitize-sh3e
 Fri Aug 11 13:36:20 1995  Jeff Law  (law@snake.cs.utah.edu)
 
