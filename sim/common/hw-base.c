@@ -23,15 +23,6 @@
 #include "hw-base.h"
 
 
-/* LATER: #include "hwconfig.h" */
-extern const struct hw_device_descriptor dv_core_descriptor[];
-extern const struct hw_device_descriptor dv_pal_descriptor[];
-const struct hw_device_descriptor *hw_descriptors[] = {
-  dv_core_descriptor,
-  dv_pal_descriptor,
-  NULL,
-};
-
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -45,6 +36,8 @@ const struct hw_device_descriptor *hw_descriptors[] = {
 #endif
 
 #include <ctype.h>
+
+#include "hw-config.h"
 
 struct hw_base_data {
   int finished_p;
@@ -222,9 +215,7 @@ panic_hw_io_read_buffer (struct hw *me,
 			 void *dest,
 			 int space,
 			 unsigned_word addr,
-			 unsigned nr_bytes,
-			 sim_cpu *processor,
-			 sim_cia cia)
+			 unsigned nr_bytes)
 {
   hw_abort (me, "no io-read method");
   return 0;
@@ -235,9 +226,7 @@ panic_hw_io_write_buffer (struct hw *me,
 			  const void *source,
 			  int space,
 			  unsigned_word addr,
-			  unsigned nr_bytes,
-			  sim_cpu *processor,
-			  sim_cia cia)
+			  unsigned nr_bytes)
 {
   hw_abort (me, "no io-write method");
   return 0;
@@ -270,22 +259,6 @@ passthrough_hw_dma_write_buffer (struct hw *me,
 			      space, addr,
 			      nr_bytes,
 			      violate_read_only_section);
-}
-
-const struct hw_port_descriptor empty_hw_ports[] = {
-  { NULL, },
-};
-
-static void
-panic_hw_port_event (struct hw *me,
-		     int my_port,
-		     struct hw *source,
-		     int source_port,
-		     int level,
-		     sim_cpu *processor,
-		     sim_cia cia)
-{
-  hw_abort (me, "no port method");
 }
 
 static void
@@ -342,12 +315,12 @@ full_name_of_hw (struct hw *leaf,
   
   /* return it usefully */
   if (buf == full_name)
-    buf = (char *) strdup (full_name);
+    buf = hw_strdup (leaf, full_name);
   return buf;
 }
 
 struct hw *
-hw_create (SIM_DESC sd,
+hw_create (struct sim_state *sd,
 	   struct hw *parent,
 	   const char *family,
 	   const char *name,
@@ -358,9 +331,9 @@ hw_create (SIM_DESC sd,
   struct hw *hw = ZALLOC (struct hw);
 
   /* our identity */
-  hw->family_of_hw = family;
-  hw->name_of_hw = name;
-  hw->args_of_hw = args;
+  hw->family_of_hw = hw_strdup (hw, family);
+  hw->name_of_hw = hw_strdup (hw, name);
+  hw->args_of_hw = hw_strdup (hw, args);
 
   /* a hook into the system */
   if (sd != NULL)
@@ -433,6 +406,7 @@ hw_create (SIM_DESC sd,
 	    if (strcmp (family, entry->family) == 0)
 	      {
 		hw->base_of_hw->descriptor = entry;
+		break;
 	      }
 	  }
       }
@@ -443,8 +417,7 @@ hw_create (SIM_DESC sd,
   }
 
   /* Attach dummy ports */
-  set_hw_ports (hw, empty_hw_ports);
-  set_hw_port_event (hw, panic_hw_port_event);
+  create_hw_port_data (hw);
   
   return hw;
 }
@@ -477,6 +450,12 @@ hw_finish (struct hw *me)
   /* Fill in the (hopefully) defined trace variable */
   if (hw_find_property (me, "trace?") != NULL)
     me->trace_of_hw_p = hw_find_boolean_property (me, "trace?");
+  /* allow global variable to define default tracing */
+  else if (! hw_trace_p (me)
+	   && hw_find_property (hw_root (me), "global-trace?") != NULL
+	   && hw_find_boolean_property (hw_root (me), "global-trace?"))
+    me->trace_of_hw_p = 1;
+    
 
   /* Allow the real device to override any methods */
   me->base_of_hw->descriptor->to_finish (me);
@@ -489,6 +468,8 @@ hw_delete (struct hw *me)
 {
   /* give the object a chance to tidy up */
   me->base_of_hw->to_delete (me);
+
+  delete_hw_port_data (me);
 
   /* now unlink us from the tree */
   if (hw_parent (me))

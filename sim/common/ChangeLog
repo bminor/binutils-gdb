@@ -1,3 +1,16 @@
+Mon May 25 16:55:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-base.c (panic_hw_port_event, empty_hw_ports): Move from here.
+  	* hw-ports.c: To here.
+	
+	* hw-base.h, hw-ports.c (create_hw_port_data,
+ 	delete_hw_port_data): New functions.
+	* hw-base.c (hw_delete, hw_create): Call same.
+	
+	* hw-base.h (set_hw_ports, set_hw_port_event): Move set functions
+ 	from here.
+  	* hw-ports.h: To here.
+
 Mon May 25 16:42:48 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-device.c (hw_ioctl), hw-device.h (hw_ioctl_callback): Drop

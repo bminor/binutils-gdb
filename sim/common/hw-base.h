@@ -42,7 +42,7 @@ struct hw_device_descriptor {
 /* Create a primative device */
 
 struct hw *hw_create
-(SIM_DESC sd,
+(struct sim_state *sd,
  struct hw *parent,
  const char *family,
  const char *name,
@@ -106,23 +106,38 @@ typedef void (hw_delete_callback)
 ((hw)->base_of_hw->to_delete = (method))
 
 
-struct hw_port_descriptor {
-  const char *name;
-  int number; 
-  int nr_ports;
-  port_direction direction;
+/* Helper functions to make the implementation of a device easier */
+
+/* Go through the devices reg properties and look for those specifying
+   an address to attach various registers to */
+
+void do_hw_attach_regs (struct hw *me);
+
+/* Perform a polling read on FD returning either the number of bytes
+   or a hw_io status code that indicates the reason for the read
+   failure */
+
+enum {
+  HW_IO_EOF = -1, HW_IO_NOT_READY = -2, /* See: IEEE 1275 */
 };
 
-typedef void (hw_port_event_callback)
-     (struct hw *me,
-      int my_port,
-      struct hw *source,
-      int source_port,
-      int level,
-      sim_cpu *processor,
-      sim_cia cia);
+typedef int (do_hw_poll_read_method)
+     (SIM_DESC sd, int, char *, int);
 
-extern void set_hw_ports (struct hw *hw, const struct hw_port_descriptor ports[]);
-extern void set_hw_port_event (struct hw *hw, hw_port_event_callback *to_port_event);
+int do_hw_poll_read
+(struct hw *me,
+ do_hw_poll_read_method *read,
+ int sim_io_fd,
+ void *buf,
+ unsigned size_of_buf);
+
+
+/* PORTS */
+
+extern void create_hw_port_data
+(struct hw *hw);
+extern void delete_hw_port_data
+(struct hw *hw);
+
 
 #endif
