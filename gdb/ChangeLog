@@ -1,3 +1,8 @@
+2002-12-03  J. Brobecker  <brobecker@gnat.com>
+
+	* config/pa/tm-hppah.h (SNAP1): Remove unused macro.
+	(SNAP2): Likewise.
+
 2002-12-03  Andrew Cagney  <cagney@redhat.com>
 
 	* NEWS: Mention Daniel Jacobowitz's multi-threaded shared library

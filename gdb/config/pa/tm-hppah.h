@@ -21,9 +21,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#define HPUX_SNAP1
-#define HPUX_SNAP2
-
 /* The solib hooks are not really designed to have a list of hook
    and handler routines.  So until we clean up those interfaces you
    either get SOM shared libraries or HP's unusual PA64 ELF shared
