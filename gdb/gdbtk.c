@@ -148,6 +148,7 @@ static int map_arg_registers PARAMS ((int, char *[], void (*) (int, void *), voi
 static void get_register_name PARAMS ((int, void *));
 static int gdb_regnames PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
 static void get_register PARAMS ((int, void *));
+static int gdb_trace_status PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
 static int gdb_target_has_execution_command PARAMS ((ClientData, Tcl_Interp *, int, char *argv[]));
 static int gdb_load_info PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 void TclDebug PARAMS ((const char *fmt, ...));
@@ -2139,6 +2140,9 @@ gdbtk_init ( argv0 )
   Tcl_CreateCommand (interp, "gdb_target_has_execution",
                      gdb_target_has_execution_command,
                      NULL, NULL);
+  Tcl_CreateCommand (interp, "gdb_is_tracing",
+                     gdb_trace_status,
+                     NULL, NULL);
   Tcl_CreateObjCommand (interp, "gdb_load_info", gdb_load_info, NULL, NULL);
   Tcl_CreateObjCommand (interp, "gdb_get_locals", gdb_get_vars_command, 
                         (ClientData) 0, NULL);
@@ -2371,6 +2375,22 @@ gdb_target_has_execution_command (clientData, interp, argc, argv)
   if (target_has_execution && inferior_pid != 0)
     result = 1;
 
+  Tcl_SetIntObj (Tcl_GetObjResult (interp), result);
+  return TCL_OK;
+}
+
+static int
+gdb_trace_status (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  int result = 0;
+ 
+  if (trace_running_p)
+    result = 1;
+ 
   Tcl_SetIntObj (Tcl_GetObjResult (interp), result);
   return TCL_OK;
 }
@@ -2797,7 +2817,7 @@ tracepoint_notify(tp, action)
   if (filename == NULL)
     filename = "N/A";
   sprintf (buf, "gdbtk_tcl_tracepoint %s %d 0x%lx %d {%s}", action, tp->number, 
-	   (long)tp->address, sal.line, filename);
+	   (long)tp->address, sal.line, filename, tp->pass_count);
 
   v = Tcl_Eval (interp, buf);
 

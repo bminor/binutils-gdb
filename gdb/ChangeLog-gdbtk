@@ -1,3 +1,9 @@
+Thu Mar 26 22:29:28 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * gdbtk.c: (gdb_trace_status) new function.
+        (gdbtk_init) added command "gdb_is_tracing".
+        (tracepoint_notify) added passcount information.
+
 Thu Mar 26 12:00:35 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* gdbtk.c (gdbtk_fputs): Insert fencepost.

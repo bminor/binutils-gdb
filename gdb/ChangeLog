@@ -1,3 +1,36 @@
+Thu Mar 26 22:29:28 1998  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * tracepoint.c (trace_status_command): Recognize a boolean return
+        value from the stub to indicate whether trace experiment is
+        running.  Export this value as a global state variable
+        (trace_running_p) for use by the GUI. (from Michael Snyder)
+        (trace_pass_command) added call to modify_tracepoint_hook.
+
+        * tracepoint.h export trace_running_p
+
+start-sanitize-sky
+Wed Mar 25 11:45:19 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* configure.in (sim-gpu2): Added target type checking to make
+ 	--with-sim-gpu2 option only valid for sky target.
+	* configure: Regenerated.
+end-sanitize-sky
+
+Tue Mar 24 16:22:40 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
+
+	* Makefile.in:  Derive SHELL from configure.
+	* config/d10v/d10v.mt config/d30v/d30v.mt config/m32r/m32r.mt
+	config/mn10200/mn10200.mt config/mn10300/mn10300.mt :  Remove -lm
+	from SIM.  This prevents dependency checking of -lm (under NT
+	native builds).  (It is automatically added by configure if it
+	exists.)
+	* doc/configure mswin/configure nlm/configure
+	testsuite/gdb.base/configure testsuite/gdb.c++/configure
+	testsuite/gdb.chill/configure testsuite/gdb.disasm/configure
+	testsuite/gdb.stabs/configure testsuite/gdb.threads/configure:
+	Regenerate with autoconf 2.12.1 to fix shell issues for NT native
+	builds.
+
 Mon Mar 23 18:10:57 1998  Ulrich Drepper  (drepper@cygnus.com)
 
 	* solib.c (solib_create_inferior_hook):  Rewrite previous

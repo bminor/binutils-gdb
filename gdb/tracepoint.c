@@ -701,6 +701,8 @@ trace_pass_command (args, from_tty)
     if (t1 == (struct tracepoint *) -1 || t1 == t2)
       {
 	t2->pass_count = count;
+        if (modify_tracepoint_hook)
+          modify_tracepoint_hook (t2);
 	if (from_tty)
 	  printf_filtered ("Setting tracepoint %d's passcount to %d\n", 
 			   t2->number, count);
@@ -1596,6 +1598,8 @@ trace_stop_command (args, from_tty)
     error ("Trace can only be run on remote targets.");
 }
 
+unsigned long trace_running_p;
+
 /* tstatus command */
 static void
 trace_status_command (args, from_tty)
@@ -1606,8 +1610,13 @@ trace_status_command (args, from_tty)
     {
       putpkt ("qTStatus");
       remote_get_noisy_reply (target_buf);
-      if (strcmp (target_buf, "OK"))
-	error ("Bogus reply from target: %s", target_buf);
+
+      if (target_buf[0] != 'T' ||
+          (target_buf[1] != '0' && target_buf[1] != '1'))
+        error ("Bogus reply from target: %s", target_buf);
+ 
+      /* exported for use by the GUI */
+      trace_running_p = (target_buf[1] == '1');
     }
   else
     error ("Trace can only be run on remote targets.");

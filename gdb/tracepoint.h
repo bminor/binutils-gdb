@@ -94,6 +94,8 @@ struct tracepoint
 
 extern struct tracepoint *tracepoint_chain;
 
+extern unsigned long trace_running_p;
+
 /* A hook used to notify the UI of tracepoint operations */
 
 void (*create_tracepoint_hook) PARAMS ((struct tracepoint *));
