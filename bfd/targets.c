@@ -512,6 +512,7 @@ extern const bfd_target bfd_elf64_alpha_vec;
 extern const bfd_target bfd_elf64_hppa_vec;
 extern const bfd_target bfd_elf64_ia64_little_vec;
 extern const bfd_target bfd_elf64_ia64_big_vec;
+extern const bfd_target bfd_elf32_ia64_big_vec;
 extern const bfd_target bfd_elf32_avr_vec;
 extern const bfd_target bfd_elf32_bigarc_vec;
 extern const bfd_target bfd_elf32_bigarm_vec;

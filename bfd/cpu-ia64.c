@@ -23,20 +23,36 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
+const bfd_arch_info_type bfd_ia64_elf32_arch =
+  {
+    64,	/* 64 bits in a word */
+    32,	/* 32 bits in an address */
+    8,	/* 8 bits in a byte */
+    bfd_arch_ia64,
+    bfd_mach_ia64_elf32,
+    "ia64",
+    "ia64-elf32",
+    3,	/* log2 of section alignment */
+    true, /* the one and only */
+    bfd_default_compatible, 
+    bfd_default_scan ,
+    0,
+  };
+
 const bfd_arch_info_type bfd_ia64_arch =
   {
     64,	/* 64 bits in a word */
     64,	/* 64 bits in an address */
     8,	/* 8 bits in a byte */
     bfd_arch_ia64,
-    0,	/* only 1 machine */
+    bfd_mach_ia64_elf64,
     "ia64",
-    "ia64",
+    "ia64-elf64",
     3,	/* log2 of section alignment */
     true, /* the one and only */
     bfd_default_compatible, 
     bfd_default_scan ,
-    0,
+    &bfd_ia64_elf32_arch,
   };
 
 #include "cpu-ia64-opc.c"

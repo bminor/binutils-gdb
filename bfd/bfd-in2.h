@@ -1497,6 +1497,8 @@ enum bfd_architecture
 #define bfd_mach_fr30          0x46523330
   bfd_arch_mcore,
   bfd_arch_ia64,      /* HP/Intel ia64 */
+#define bfd_mach_ia64_elf64    0
+#define bfd_mach_ia64_elf32    1
   bfd_arch_pj,
   bfd_arch_avr,       /* Atmel AVR microcontrollers */
 #define bfd_mach_avr1          1

@@ -1,3 +1,20 @@
+2000-11-06  Steve Ellcey <sje@cup.hp.com>
+
+	* archures.c: (bfd_mach_ia64_elf64, bfd_mach_ia64_elf32) Add defines
+	to differentiate elf32 and elf64 on ia64.
+	* bfd-in2.h: Regenerate.
+	* config.bfd: Add target for "ia64*-*-hpux*".
+	* configure.in: Add bfd_elf32_ia64_big_vec to selvecs switch.
+	* configure: Regenerate.
+	* cpu-ia64.c (bfd_ia64_elf32_arch) Add elf32 arch info structure.
+	* targets.c: Add bfd_target bfd_elf32_ia64_big_vec.
+
+	* Makefile.am: Make elf32-ia64.c and elf64-ia64.c derived objects
+	from elfxx-ia64.c.  Add depenency rules for making elf32-ia64.lo.
+	* Makefile.in: Regnerate.
+	* elf64-ia64.c: Deleted
+	* elfxx-ia64.c: New file, paramaterized version of elf64-ia64.c.
+
 2000-11-06  Kazu Hirata  <kazu@hxi.com>
 
 	* aout-adobe.c: Fix formatting.

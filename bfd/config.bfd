@@ -86,6 +86,10 @@ case "${targ}" in
     targ_defvec=bfd_elf64_ia64_little_vec
     targ_selvecs="bfd_elf64_ia64_big_vec bfd_efi_app_ia64_vec"
     ;;
+  ia64*-*-hpux*)
+    targ_defvec=bfd_elf64_ia64_big_vec
+    targ_selvecs="bfd_elf32_ia64_big_vec"
+    ;;
   sparc64-*-netbsd*)
     targ_defvec=bfd_elf64_sparc_vec
     targ_selvecs="bfd_elf32_sparc_vec sunos_big_vec"

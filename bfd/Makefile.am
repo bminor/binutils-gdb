@@ -186,6 +186,7 @@ BFD32_BACKENDS = \
 	elf32-i386.lo \
 	elf32-i860.lo \
 	elf32-i960.lo \
+	elf32-ia64.lo \
 	elf32-m32r.lo \
 	elf32-m68hc11.lo \
 	elf32-m68hc12.lo \
@@ -564,6 +565,16 @@ elf64-target.h : elfxx-target.h
 	rm -f elf64-target.h
 	sed -e s/NN/64/g < $(srcdir)/elfxx-target.h > elf64-target.new
 	mv -f elf64-target.new elf64-target.h
+
+elf32-ia64.c : elfxx-ia64.c
+	rm -f elf32-ia64.c
+	sed -e s/NN/32/g < $(srcdir)/elfxx-ia64.c > elf32-ia64.new
+	mv -f elf32-ia64.new elf32-ia64.c
+
+elf64-ia64.c : elfxx-ia64.c
+	rm -f elf64-ia64.c
+	sed -e s/NN/64/g < $(srcdir)/elfxx-ia64.c > elf64-ia64.new
+	mv -f elf64-ia64.new elf64-ia64.c
 
 BFD_H_DEPS= $(INCDIR)/ansidecl.h
 LOCAL_H_DEPS= libbfd.h sysdep.h config.h
@@ -964,6 +975,10 @@ elf32-i960.lo: elf32-i960.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/i960.h $(INCDIR)/elf/reloc-macros.h \
   elf32-target.h
+elf32-ia64.lo: elf32-ia64.c $(INCDIR)/filenames.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/opcode/ia64.h $(INCDIR)/elf/ia64.h \
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-m32r.lo: elf32-m32r.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/m32r.h $(INCDIR)/elf/reloc-macros.h \
