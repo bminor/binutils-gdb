@@ -1,5 +1,16 @@
 2002-05-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* config/tc-mips.c (macro_build_jalr): New Function.
+	(md_begin): NewABI uses big GOTs.
+	(macro_build): Recognize BFD_RELOC_MIPS_GOT_DISP,
+	BFD_RELOC_MIPS_GOT_PAGE, BFD_RELOC_MIPS_GOT_OFST as valid.
+	(load_address): Add some NewABI PIC support.
+	(macro): Likewise.
+	(md_apply_fix): Special handling for BFD_RELOC_MIPS_JALR.
+	(tc_gen_reloc): Don't encode NewABI vtables in REL relocations.
+
+2002-05-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (load_address): Use mips_gp_register instead
 	of hardcoded value. Remove dbl parameter, use HAVE_32BIT_ADDRESSES
 	instead.
