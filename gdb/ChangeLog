@@ -1,5 +1,8 @@
 2003-06-09  Mark Kettenis  <kettenis@gnu.org>
 
+ 	* valops.c (value_assign): Assign contents of FROMVAL instead of
+	TOVAL.
+
 	* i386-tdep.c (I386_EBX_REGNUM, I386_ECX_REGNUM, I386_ESI_REGNUM,
 	I386_EDI_REGNUM): New defines.
 	(i386_next_regnum, i386_convert_register_p,

@@ -588,13 +588,12 @@ value_assign (struct value *toval, struct value *fromval)
 	  error ("Value being assigned to is no longer active.");
 	
 	if (VALUE_LVAL (toval) == lval_reg_frame_relative
-	    && CONVERT_REGISTER_P (VALUE_FRAME_REGNUM (toval),
-				   VALUE_TYPE (toval)))
+	    && CONVERT_REGISTER_P (VALUE_FRAME_REGNUM (toval), type))
 	  {
 	    /* If TOVAL is a special machine register requiring
 	       conversion of program values to a special raw format.  */
 	    VALUE_TO_REGISTER (frame, VALUE_FRAME_REGNUM (toval),
-			       VALUE_TYPE (toval), VALUE_CONTENTS (toval));
+			       type, VALUE_CONTENTS (fromval));
 	  }
 	else
 	  {
