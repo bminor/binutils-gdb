@@ -1,3 +1,16 @@
+2000-04-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (ALLDEPFILES): Add ia64-linux-nat.c and ia64-tdep.c.
+	(ia64-linux-nat.o, ia64-tdep.o): Add dependencies.
+
+	* ia64-linux-nat.c (fill_gregset): Implement.
+	(supply_fpregset, fill_fpregset): New functions.
+
+	* ia64-tdep.c (ia64_init_extra_frame_info): Revise manner in
+	which the CFM is fetched for certain frames.
+	(find_global_pointer, find_extant_func_descr): Don't use
+	partial symtabs for locating sections.
+
 2000-04-03  Jim Blandy  <jimb@redhat.com>
 
 	* solib.c (solib_add): Move all the code for loading symbol tables

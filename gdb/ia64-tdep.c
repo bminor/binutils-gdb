@@ -1249,7 +1249,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
       if (frn->saved_regs[IA64_CFM_REGNUM] != 0)
 	cfm = read_memory_integer (frn->saved_regs[IA64_CFM_REGNUM], 8);
       else
-	cfm = read_register (IA64_CFM_REGNUM);
+	cfm = read_register (IA64_PFS_REGNUM);
 
       bsp = frn->extra_info->bsp;
     }
@@ -1325,20 +1325,20 @@ is_float_or_hfa_type (struct type *t)
 static CORE_ADDR
 find_global_pointer (CORE_ADDR faddr)
 {
-  struct partial_symtab *pst;
+  struct obj_section *faddr_sect;
      
-  pst = find_pc_psymtab (faddr);
-  if (pst != NULL)
+  faddr_sect = find_pc_section (faddr);
+  if (faddr_sect != NULL)
     {
       struct obj_section *osect;
 
-      ALL_OBJFILE_OSECTIONS (pst->objfile, osect)
+      ALL_OBJFILE_OSECTIONS (faddr_sect->objfile, osect)
 	{
 	  if (strcmp (osect->the_bfd_section->name, ".dynamic") == 0)
 	    break;
 	}
 
-      if (osect < pst->objfile->sections_end)
+      if (osect < faddr_sect->objfile->sections_end)
 	{
 	  CORE_ADDR addr;
 
@@ -1383,24 +1383,23 @@ find_global_pointer (CORE_ADDR faddr)
 static CORE_ADDR
 find_extant_func_descr (CORE_ADDR faddr)
 {
-  struct partial_symtab *pst;
-  struct obj_section *osect;
+  struct obj_section *faddr_sect;
 
   /* Return early if faddr is already a function descriptor */
-  osect = find_pc_section (faddr);
-  if (osect && strcmp (osect->the_bfd_section->name, ".opd") == 0)
+  faddr_sect = find_pc_section (faddr);
+  if (faddr_sect && strcmp (faddr_sect->the_bfd_section->name, ".opd") == 0)
     return faddr;
 
-  pst = find_pc_psymtab (faddr);
-  if (pst != NULL)
+  if (faddr_sect != NULL)
     {
-      ALL_OBJFILE_OSECTIONS (pst->objfile, osect)
+      struct obj_section *osect;
+      ALL_OBJFILE_OSECTIONS (faddr_sect->objfile, osect)
 	{
 	  if (strcmp (osect->the_bfd_section->name, ".opd") == 0)
 	    break;
 	}
 
-      if (osect < pst->objfile->sections_end)
+      if (osect < faddr_sect->objfile->sections_end)
 	{
 	  CORE_ADDR addr;
 

@@ -394,6 +394,82 @@ fill_gregset (gregsetp, regno)
      gregset_t *gregsetp;
      int regno;
 {
-  fprintf (stderr, "Warning: fill_gregset not implemented!\n");
-  /* FIXME: Implement later */
+  int regi;
+  greg_t *regp = (greg_t *) gregsetp;
+
+#define COPY_REG(_idx_,_regi_) \
+  if ((regno == -1) || regno == _regi_) \
+    memcpy (regp + _idx_, &registers[REGISTER_BYTE (_regi_)], \
+	    REGISTER_RAW_SIZE (_regi_))
+
+  for (regi = IA64_GR0_REGNUM; regi <= IA64_GR31_REGNUM; regi++)
+    {
+      COPY_REG (regi - IA64_GR0_REGNUM, regi);
+    }
+
+  /* FIXME: NAT collection bits at index 32? */
+
+  COPY_REG (33, IA64_PR_REGNUM);
+
+  for (regi = IA64_BR0_REGNUM; regi <= IA64_BR7_REGNUM; regi++)
+    {
+      COPY_REG (34 + (regi - IA64_BR0_REGNUM), regi);
+    }
+
+  COPY_REG (42, IA64_IP_REGNUM);
+  COPY_REG (43, IA64_CFM_REGNUM);
+  COPY_REG (44, IA64_PSR_REGNUM);
+  COPY_REG (45, IA64_RSC_REGNUM);
+  COPY_REG (46, IA64_BSP_REGNUM);
+  COPY_REG (47, IA64_BSPSTORE_REGNUM);
+  COPY_REG (48, IA64_RNAT_REGNUM);
+  COPY_REG (49, IA64_CCV_REGNUM);
+  COPY_REG (50, IA64_UNAT_REGNUM);
+  COPY_REG (51, IA64_FPSR_REGNUM);
+  COPY_REG (52, IA64_PFS_REGNUM);
+  COPY_REG (53, IA64_LC_REGNUM);
+  COPY_REG (54, IA64_EC_REGNUM);
+}
+
+/*  Given a pointer to a floating point register set in /proc format
+   (fpregset_t *), unpack the register contents and supply them as gdb's
+   idea of the current floating point register values. */
+
+void
+supply_fpregset (fpregsetp)
+     fpregset_t *fpregsetp;
+{
+  register int regi;
+  char *from;
+
+  for (regi = IA64_FR0_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
+    {
+      from = (char *) &((*fpregsetp)[regi - IA64_FR0_REGNUM]);
+      supply_register (regi, from);
+    }
+}
+
+/*  Given a pointer to a floating point register set in /proc format
+   (fpregset_t *), update the register specified by REGNO from gdb's idea
+   of the current floating point register set.  If REGNO is -1, update
+   them all. */
+
+void
+fill_fpregset (fpregsetp, regno)
+     fpregset_t *fpregsetp;
+     int regno;
+{
+  int regi;
+  char *to;
+  char *from;
+
+  for (regi = IA64_FR0_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
+    {
+      if ((regno == -1) || (regno == regi))
+	{
+	  from = (char *) &registers[REGISTER_BYTE (regi)];
+	  to = (char *) &((*fpregsetp)[regi - IA64_FR0_REGNUM]);
+	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
+	}
+    }
 }
