@@ -41,6 +41,7 @@
 #include "language.h"
 #include "target.h"
 #include "parser-defs.h"
+#include "jv-lang.h"
 
 extern void _initialize_language (void);
 
@@ -986,6 +987,15 @@ lang_bool_type ()
 	    return type;
 	}
       return builtin_type_bool;
+    case language_java:
+      sym = lookup_symbol ("boolean", NULL, VAR_NAMESPACE, NULL, NULL);
+      if (sym)
+	{
+	  type = SYMBOL_TYPE (sym);
+	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
+	    return type;
+	}
+      return java_boolean_type;
     default:
       return builtin_type_int;
     }

@@ -1,3 +1,7 @@
+Sun Jul 23 21:42:34 2000  Anthony Green  <green@redhat.com>
+
+	* gdb.java/jv-exp.exp: New file.
+
 Sun Jul 23 21:02:42 2000  Anthony Green  <green@redhat.com>
 
 	* configure: Rebuilt.
