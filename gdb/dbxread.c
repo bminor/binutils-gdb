@@ -41,6 +41,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define L_INCR 1
 #endif
 
+#ifdef hp9000s800
+/* We don't want to use HP-UX's nlists. */
+#define _NLIST_INCLUDED
+#endif
+
 #include <obstack.h>
 #include <sys/param.h>
 #ifndef	NO_SYS_FILE
@@ -54,7 +59,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "gdbcore.h"		/* for bfd stuff */
 #include "libbfd.h"		/* FIXME Secret internal BFD stuff (bfd_read) */
+#ifdef hp9000s800
+#include "libhppa.h"
+#include "syms.h"
+#else
 #include "libaout.h"	 	/* FIXME Secret internal BFD stuff for a.out */
+#endif
 #include "symfile.h"
 #include "objfiles.h"
 #include "buildsym.h"
@@ -66,6 +76,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    symbol files.  A pointer to this structure is kept in the sym_private
    field of the objfile struct.  */
  
+#ifdef hp9000s800
+struct dbx_symfile_info {
+  asection *text_sect;		/* Text section accessor */
+  int symcount;			/* How many symbols are there in the file */
+  char *stringtab;		/* The actual string table */
+  int stringtab_size;		/* Its size */
+  off_t symtab_offset;		/* Offset in file to symbol table */
+  int hp_symcount;
+  char *hp_stringtab;
+  int hp_stringtab_size;
+  off_t hp_symtab_offset;
+};
+#else
 struct dbx_symfile_info {
   asection *text_sect;		/* Text section accessor */
   int symcount;			/* How many symbols are there in the file */
@@ -74,6 +97,7 @@ struct dbx_symfile_info {
   off_t symtab_offset;		/* Offset in file to symbol table */
   int symbol_size;		/* Bytes in a single symbol */
 };
+#endif
 
 #define DBX_SYMFILE_INFO(o)	((struct dbx_symfile_info *)((o)->sym_private))
 #define DBX_TEXT_SECT(o)	(DBX_SYMFILE_INFO(o)->text_sect)
@@ -82,6 +106,12 @@ struct dbx_symfile_info {
 #define DBX_STRINGTAB_SIZE(o)	(DBX_SYMFILE_INFO(o)->stringtab_size)
 #define DBX_SYMTAB_OFFSET(o)	(DBX_SYMFILE_INFO(o)->symtab_offset)
 #define DBX_SYMBOL_SIZE(o)	(DBX_SYMFILE_INFO(o)->symbol_size)
+#ifdef hp9000s800
+#define HP_SYMCOUNT(o)		(DBX_SYMFILE_INFO(o)->hp_symcount)
+#define HP_STRINGTAB(o)		(DBX_SYMFILE_INFO(o)->hp_stringtab)
+#define HP_STRINGTAB_SIZE(o)	(DBX_SYMFILE_INFO(o)->hp_stringtab_size)
+#define HP_SYMTAB_OFFSET(o)	(DBX_SYMFILE_INFO(o)->hp_symtab_offset)
+#endif
 
 /* Each partial symbol table entry contains a pointer to private data for the
    read_symtab() function to use when expanding a partial symbol table entry
@@ -470,7 +500,11 @@ dbx_symfile_read (objfile, addr, mainline)
   if (mainline || objfile->global_psymbols.size == 0 || objfile->static_psymbols.size == 0)
     init_psymbol_list (objfile);
 
+#ifdef hp9000s800
+  symbol_size = obj_dbx_symbol_entry_size (sym_bfd);
+#else
   symbol_size = DBX_SYMBOL_SIZE (objfile);
+#endif
   symbol_table_offset = DBX_SYMTAB_OFFSET (objfile);
 
   pending_blocks = 0;
@@ -539,8 +573,15 @@ dbx_symfile_init (objfile)
     xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
 
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
+#ifdef hp9000s800
+#define STRING_TABLE_OFFSET  (sym_bfd->origin + obj_dbx_str_filepos (sym_bfd))
+#define SYMBOL_TABLE_OFFSET  (sym_bfd->origin + obj_dbx_sym_filepos (sym_bfd))
+#define HP_STRING_TABLE_OFFSET  (sym_bfd->origin + obj_hp_str_filepos (sym_bfd))
+#define HP_SYMBOL_TABLE_OFFSET  (sym_bfd->origin + obj_hp_sym_filepos (sym_bfd))
+#else
 #define	STRING_TABLE_OFFSET	(sym_bfd->origin + obj_str_filepos (sym_bfd))
 #define	SYMBOL_TABLE_OFFSET	(sym_bfd->origin + obj_sym_filepos (sym_bfd))
+#endif
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
 
   DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
@@ -548,7 +589,12 @@ dbx_symfile_init (objfile)
     error ("Can't find .text section in symbol file");
 
   DBX_SYMBOL_SIZE   (objfile) = obj_symbol_entry_size (sym_bfd);
-  DBX_SYMCOUNT      (objfile) = bfd_get_symcount (sym_bfd);
+#ifdef hp9000s800
+  HP_SYMCOUNT (objfile) = obj_hp_sym_count (sym_bfd);
+  DBX_SYMCOUNT (objfile) = obj_dbx_sym_count (sym_bfd);
+#else
+  DBX_SYMCOUNT (objfile) = bfd_get_symcount (sym_bfd);
+#endif
   DBX_SYMTAB_OFFSET (objfile) = SYMBOL_TABLE_OFFSET;
 
   /* Read the string table and stash it away in the psymbol_obstack.  It is
@@ -563,6 +609,10 @@ dbx_symfile_init (objfile)
      however at least check to see if the size is zero or some negative
      value. */
 
+#ifdef hp9000s800
+  DBX_STRINGTAB_SIZE (objfile) = obj_dbx_stringtab_size (sym_bfd);
+  HP_STRINGTAB_SIZE (objfile) = obj_hp_stringtab_size (sym_bfd);
+#else
   val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
   if (val < 0)
     perror_with_name (name);
@@ -572,6 +622,8 @@ dbx_symfile_init (objfile)
     perror_with_name (name);
 
   DBX_STRINGTAB_SIZE (objfile) = bfd_h_get_32 (sym_bfd, size_temp);
+#endif
+
   if (DBX_STRINGTAB_SIZE (objfile) <= 0)
     error ("ridiculous string table size (%d bytes).",
 	   DBX_STRINGTAB_SIZE (objfile));
@@ -579,6 +631,15 @@ dbx_symfile_init (objfile)
   DBX_STRINGTAB (objfile) =
     (char *) obstack_alloc (&objfile -> psymbol_obstack,
 			    DBX_STRINGTAB_SIZE (objfile));
+#ifdef hp9000s800
+  if (HP_STRINGTAB_SIZE (objfile) <= 0)
+    error ("ridiculous string table size (%d bytes).",
+	   HP_STRINGTAB_SIZE (objfile));
+
+  HP_STRINGTAB (objfile) =
+    (char *) obstack_alloc (&objfile -> psymbol_obstack,
+			    HP_STRINGTAB_SIZE (objfile));
+#endif
 
   /* Now read in the string table in one big gulp.  */
 
@@ -589,6 +650,18 @@ dbx_symfile_init (objfile)
 		  sym_bfd);
   if (val != DBX_STRINGTAB_SIZE (objfile))
     perror_with_name (name);
+#ifdef hp9000s800
+  val = bfd_seek (sym_bfd, HP_STRING_TABLE_OFFSET, L_SET);
+  if (val < 0)
+    perror_with_name (name);
+  val = bfd_read (HP_STRINGTAB (objfile), HP_STRINGTAB_SIZE (objfile), 1,
+		  sym_bfd);
+  if (val != HP_STRINGTAB_SIZE (objfile))
+    perror_with_name (name);
+#endif
+#ifdef hp9000s800
+  HP_SYMTAB_OFFSET (objfile) = HP_SYMBOL_TABLE_OFFSET;
+#endif
 }
 
 /* Perform any local cleanups required when we are done with a particular
@@ -642,6 +715,25 @@ fill_symbuf (sym_bfd)
   symbuf_end = nbytes / symbol_size;
   symbuf_idx = 0;
 }
+#ifdef hp9000s800
+/* same as above for the HP symbol table */
+
+static struct symbol_dictionary_record hp_symbuf[4096];
+static int hp_symbuf_idx;
+static int hp_symbuf_end;
+
+static int
+fill_hp_symbuf (sym_bfd)
+     bfd *sym_bfd;
+{
+  int nbytes = bfd_read ((PTR)hp_symbuf, sizeof (hp_symbuf), 1, sym_bfd);
+  if (nbytes <= 0)
+    error ("error or end of file reading symbol table");
+  hp_symbuf_end = nbytes / sizeof (struct symbol_dictionary_record);
+  hp_symbuf_idx = 0;
+  return 1;
+}
+#endif
 
 #define SWAP_SYMBOL(symp, abfd) \
   { \
@@ -689,8 +781,15 @@ init_psymbol_list (objfile)
   /* Current best guess is that there are approximately a twentieth
      of the total symbols (in a debugging file) are global or static
      oriented symbols */
+#ifdef hp9000s800
+  objfile -> global_psymbols.size = (DBX_SYMCOUNT (objfile) + 
+				     HP_SYMCOUNT (objfile)) / 10;
+  objfile -> static_psymbols.size = (DBX_SYMCOUNT (objfile) +
+				     HP_SYMCOUNT (objfile)) / 10;
+#else
   objfile -> global_psymbols.size = DBX_SYMCOUNT (objfile) / 10;
   objfile -> static_psymbols.size = DBX_SYMCOUNT (objfile) / 10;
+#endif
   objfile -> global_psymbols.next = objfile -> global_psymbols.list = (struct partial_symbol *)
     xmmalloc (objfile -> md, objfile -> global_psymbols.size * sizeof (struct partial_symbol));
   objfile -> static_psymbols.next = objfile -> static_psymbols.list = (struct partial_symbol *)
@@ -781,6 +880,14 @@ read_dbx_symtab (addr, objfile, text_addr, text_size)
   CORE_ADDR last_o_file_start = 0;
   struct cleanup *old_chain;
   bfd *abfd;
+#ifdef hp9000s800
+  /* HP stuff */
+  struct symbol_dictionary_record *hp_bufp;
+  int hp_symnum;
+  /* A hack: the first text symbol in the debugging library */
+  int dbsubc_addr = 0;
+#endif
+
 
   /* End of the text segment of the executable file.  */
   CORE_ADDR end_of_text_addr;
@@ -802,7 +909,11 @@ read_dbx_symtab (addr, objfile, text_addr, text_size)
   file_string_table_offset = 0;
   next_file_string_table_offset = 0;
 
+#ifdef hp9000s800
+  stringtab_global = HP_STRINGTAB (objfile);
+#else
   stringtab_global = DBX_STRINGTAB (objfile);
+#endif
   
   pst = (struct partial_symtab *) 0;
 
@@ -835,6 +946,75 @@ read_dbx_symtab (addr, objfile, text_addr, text_size)
   abfd = objfile->obfd;
   symbuf_end = symbuf_idx = 0;
   next_symbol_text_func = dbx_next_symbol_text;
+
+#ifdef hp9000s800
+  /* On pa machines, the global symbols are all in the regular HP-UX
+     symbol table. Read them in first. */
+
+  hp_symbuf_end = hp_symbuf_idx = 0;
+  bfd_seek (abfd, HP_SYMTAB_OFFSET (objfile), 0);
+
+  for (hp_symnum = 0; hp_symnum < HP_SYMCOUNT (objfile); hp_symnum++)
+    {
+      int dbx_type;
+
+      QUIT;
+      if (hp_symbuf_idx == hp_symbuf_end)
+        fill_hp_symbuf (abfd);
+      hp_bufp = &hp_symbuf[hp_symbuf_idx++];
+      switch (hp_bufp->symbol_type)
+        {
+        case ST_SYM_EXT:
+        case ST_ARG_EXT:
+          continue;
+        case ST_CODE:
+        case ST_PRI_PROG:
+        case ST_SEC_PROG:
+        case ST_ENTRY:
+        case ST_MILLICODE:
+          dbx_type = N_TEXT;
+          hp_bufp->symbol_value &= ~3; /* clear out permission bits */
+          break;
+        case ST_DATA:
+          dbx_type = N_DATA;
+          break;
+#ifdef KERNELDEBUG
+        case ST_ABSOLUTE:
+          {
+            extern int kernel_debugging;
+            if (!kernel_debugging)
+              continue;
+            dbx_type = N_ABS;
+            break;
+          }
+#endif
+        default:
+          continue;
+        }
+      /* Use the address of dbsubc to finish the last psymtab. */
+      if (hp_bufp->symbol_type == ST_CODE &&
+          HP_STRINGTAB (objfile)[hp_bufp->name.n_strx] == '_' &&
+          !strcmp (HP_STRINGTAB (objfile) + hp_bufp->name.n_strx, "_dbsubc"))
+        dbsubc_addr = hp_bufp->symbol_value;
+      if (hp_bufp->symbol_scope == SS_UNIVERSAL)
+        {
+          if (hp_bufp->name.n_strx > HP_STRINGTAB_SIZE (objfile))
+            error ("Invalid symbol data; bad HP string table offset: %d",
+                   hp_bufp->name.n_strx);
+          /* A hack, but gets the job done. */
+          if (!strcmp (hp_bufp->name.n_strx + HP_STRINGTAB (objfile), 
+		       "$START$"))
+	    objfile -> ei.entry_file_lowpc = hp_bufp->symbol_value;
+          if (!strcmp (hp_bufp->name.n_strx + HP_STRINGTAB (objfile), 
+		       "_sr4export"))
+	    objfile -> ei.entry_file_highpc = hp_bufp->symbol_value;
+          record_minimal_symbol (hp_bufp->name.n_strx + HP_STRINGTAB (objfile),
+				 hp_bufp->symbol_value, dbx_type | N_EXT, 
+				 objfile);
+        }
+    }
+  bfd_seek (abfd, DBX_SYMTAB_OFFSET (objfile), 0);
+#endif
 
   for (symnum = 0; symnum < DBX_SYMCOUNT (objfile); symnum++)
     {
@@ -889,6 +1069,7 @@ read_dbx_symtab (addr, objfile, text_addr, text_size)
     }
 
   /* If there's stuff to be cleaned up, clean it up.  */
+#ifndef hp9000s800
   if (DBX_SYMCOUNT (objfile) > 0			/* We have some syms */
 /*FIXME, does this have a bug at start address 0? */
       && last_o_file_start
@@ -898,12 +1079,19 @@ read_dbx_symtab (addr, objfile, text_addr, text_size)
       objfile -> ei.entry_file_lowpc = last_o_file_start;
       objfile -> ei.entry_file_highpc = bufp->n_value;
     }
+#endif
 
   if (pst)
     {
+#ifdef hp9000s800
+      end_psymtab (pst, psymtab_include_list, includes_used,
+		   symnum * symbol_size, dbsubc_addr,
+		   dependency_list, dependencies_used);
+#else
       end_psymtab (pst, psymtab_include_list, includes_used,
 		   symnum * symbol_size, end_of_text_addr,
 		   dependency_list, dependencies_used);
+#endif
     }
 
   free_bincl_list (objfile);
@@ -1184,7 +1372,11 @@ dbx_psymtab_to_symtab_1 (pst)
       buildsym_init ();
       old_chain = make_cleanup (really_free_pendings, 0);
       file_string_table_offset = FILE_STRING_OFFSET (pst);
+#ifdef hp9000s800
+      symbol_size = obj_dbx_symbol_entry_size (sym_bfd);
+#else
       symbol_size = SYMBOL_SIZE (pst);
+#endif
 
       /* Read in this file's symbols */
       bfd_seek (pst->objfile->obfd, SYMBOL_OFFSET (pst), L_SET);
@@ -1275,7 +1467,11 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
   current_objfile = objfile;
   subfile_stack = 0;
 
+#ifdef hp9000s800
+  stringtab_global = HP_STRINGTAB (objfile);
+#else
   stringtab_global = DBX_STRINGTAB (objfile);
+#endif
   last_source_file = 0;
 
   abfd = objfile->obfd;
@@ -1890,10 +2086,22 @@ static struct sym_fns bout_sym_fns =
   NULL			/* next: pointer to next struct sym_fns */
 };
 
+static struct sym_fns hppa_sym_fns =
+{
+  "hppa",		/* sym_name: name or name prefix of BFD target type */
+  4,			/* sym_namelen: number of significant sym_name chars */
+  dbx_new_init,		/* sym_new_init: init anything gbl to entire symtab */
+  dbx_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
+  dbx_symfile_read,	/* sym_read: read a symbol file into symtab */
+  dbx_symfile_finish,	/* sym_finish: finished with file, cleanup */
+  NULL			/* next: pointer to next struct sym_fns */
+};
+
 void
 _initialize_dbxread ()
 {
   add_symtab_fns(&sunos_sym_fns);
   add_symtab_fns(&aout_sym_fns);
   add_symtab_fns(&bout_sym_fns);
+  add_symtab_fns(&hppa_sym_fns);
 }

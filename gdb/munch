@@ -23,12 +23,21 @@ if test "`$MUNCH_NM main.o | egrep main | egrep FUNC | egrep GLOB`" != "" ; then
         's/^.*\(_initialize_[a-zA-Z0-9_]*\).*$/  {extern void \1 (); \1 ();}/'\
       | sort -u
 elif test "`$MUNCH_NM main.o | egrep '[TD] _?main$'`" = "" ; then
-    # System V style nm
-    shift;
-    $MUNCH_NM $* | egrep '_initialize_.*' | egrep '\.text'|\
-     sed -e \
-       's/^.*\(_initialize_[a-zA-Z0-9_]*\).*/  {extern void \1 (); \1 ();}/' \
-     | sort -u
+     if test "`$MUNCH_NM main.o | head -6 | egrep 'Subspace$'`" != "" ; then
+	# HP PA RISC compilers don't prepend underscores
+	shift;
+	$MUNCH_NM $* | egrep '_initialize_.*' | \
+	  sed -e \
+	    's/^.*\(_initialize_[a-zA-Z0-9_]*\).*/   {extern void \1 (); \1 ();}/' \
+	    | sort -u
+     else
+	# System V style nm
+	shift;
+	$MUNCH_NM $* | egrep '_initialize_.*' | egrep '\.text'|\
+	  sed -e \
+	    's/^.*\(_initialize_[a-zA-Z0-9_]*\).*/  {extern void \1 (); \1 ();}/' \
+	    | sort -u
+     fi
 else
     # BSD style nm
     # We now accept either text or data symbols, since the RT/PC uses data.

@@ -1,5 +1,10 @@
 Fri Jun 19 15:30:15 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* configure.in, dbxread.c, hppa-coredep.c, hppa-pinsn.c,
+	hppabsd-core.c, hppabsd-tdep.c, hppabsd-xdep.c, hppahpux-tdep.c,
+	hppahpux-xdep.c, munch, partial-stab.h, tm-hppabsd.h,
+	tm-hppahpux.h, xm-hppabsd.h, xm-hppahpux.h:  HPPA merge.
+
 	* Makefile.in (c-exp.tab.c, m2-exp.tab.c):  Filter out bogus extern
 	declarations of malloc/realloc/free that are inserted by some
 	versions of yacc.

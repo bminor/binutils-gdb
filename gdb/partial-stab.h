@@ -70,8 +70,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  SET_NAMESTRING();
 	  if ((namestring[0] == '-' && namestring[1] == 'l')
 	      || (namestring [(nsl = strlen (namestring)) - 1] == 'o'
-		  && namestring [nsl - 2] == '.'))
+		  && namestring [nsl - 2] == '.')
+#ifdef hp9000s800
+              /* some cooperation from gcc to get around ld stupidity */
+              || (namestring[0] == 'e' && !strcmp (namestring, "end_file."))
+#endif
+	      )
 	    {
+#ifndef hp9000s800
 	      if (objfile -> ei.entry_point <  CUR_SYMBOL_VALUE &&
 		  objfile -> ei.entry_point >= last_o_file_start &&
 		  addr == 0)		/* FIXME nogood nomore */
@@ -79,6 +85,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		  objfile -> ei.entry_file_lowpc = last_o_file_start;
 		  objfile -> ei.entry_file_highpc = CUR_SYMBOL_VALUE;
 		}
+#endif
 	      if (past_first_source_file && pst
 		  /* The gould NP1 uses low values for .o and -l symbols
 		     which are not the address.  */

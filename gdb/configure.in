@@ -155,6 +155,17 @@ arm | merlin | none | np1 | pn | pyramid | tahoe)
 	gdb_host=${host_cpu}
 	;;
 
+hppa)
+	case "${host_vendor}" in
+	hp)
+		case "${host_os}" in
+		hpux)	gdb_host=hppahpux ;;
+		bsd)	gdb_host=hppabsd ;;
+		esac
+		;;
+	esac
+	;;
+
 ### unhandled hosts
 #altosgas
 #i386v-g
@@ -324,6 +335,17 @@ ns32k)
 
 rs6000)
 	gdb_target=rs6000
+	;;
+
+hppa)
+	case "${target_vendor}" in
+	hp)
+		case "${target_os}" in
+		hpux)	gdb_target=hppahpux ;;
+		bsd)	gdb_target=hppabsd ;;
+		esac
+		;;
+	esac
 	;;
 
 ### unhandled targets
