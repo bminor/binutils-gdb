@@ -591,20 +591,20 @@ subseg_text_p (sec)
   const char * const *p;
 
   if (sec == data_section || sec == bss_section)
-    return false;
+    return 0;
 
   for (p = nontext_section_names; *p != NULL; ++p)
     {
       if (strcmp (segment_name (sec), *p) == 0)
-	return false;
+	return 0;
 
 #ifdef obj_segment_name
       if (strcmp (obj_segment_name (sec), *p) == 0)
-	return false;
+	return 0;
 #endif
     }
 
-  return true;
+  return 1;
 
 #endif /* ! BFD_ASSEMBLER */
 }

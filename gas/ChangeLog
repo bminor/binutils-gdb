@@ -1,3 +1,8 @@
+1999-06-27  H.J. Lu  <hjl@gnu.org>
+
+	* subsegs.c (subseg_text_p): Use 1/0 instead of true/false for
+	non BFD_ASSEMBLER case.
+
 1999-06-26  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* config/obj-coff.c (obj_coff_section): Mark writable sections as
