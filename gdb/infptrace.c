@@ -21,15 +21,16 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "frame.h"
-#include "inferior.h"
-#include "target.h"
-#include "gdb_string.h"
-#include "regcache.h"
-
-#include "gdb_wait.h"
-
 #include "command.h"
+#include "frame.h"
+#include "gdbcore.h"
+#include "inferior.h"
+#include "regcache.h"
+#include "target.h"
+
+#include "gdb_assert.h"
+#include "gdb_wait.h"
+#include "gdb_string.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -42,18 +43,9 @@
 
 #include "gdb_ptrace.h"
 
-#include "gdbcore.h"
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
-#if 0
-/* Don't think this is used anymore.  On the sequent (not sure whether it's
-   dynix or ptx or both), it is included unconditionally by sys/user.h and
-   not protected against multiple inclusion.  */
-#include "gdb_stat.h"
-#endif
-
-#include "gdb_assert.h"
 
 #if !defined (FETCH_INFERIOR_REGISTERS)
 #include <sys/user.h>		/* Probably need to poke the user structure */
@@ -61,11 +53,6 @@
 
 #if !defined (CHILD_XFER_MEMORY)
 static void udot_info (char *, int);
-#endif
-
-#if !defined (FETCH_INFERIOR_REGISTERS)
-static void fetch_register (int);
-static void store_register (int);
 #endif
 
 void _initialize_infptrace (void);
@@ -198,9 +185,8 @@ kill_inferior (void)
 void
 child_resume (ptid_t ptid, int step, enum target_signal signal)
 {
+  int request = PT_CONTINUE;
   int pid = PIDGET (ptid);
-
-  errno = 0;
 
   if (pid == -1)
     /* Resume all threads.  */
@@ -208,42 +194,39 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
        all threads" and "resume inferior_ptid" are the same.  */
     pid = PIDGET (inferior_ptid);
 
-  /* An address of (PTRACE_TYPE_ARG3)1 tells ptrace to continue from where
-     it was.  (If GDB wanted it to start some other way, we have already
-     written a new PC value to the child.)
-
-     If this system does not support PT_STEP, a higher level function will
-     have called single_step() to transmute the step request into a
-     continue request (by setting breakpoints on all possible successor
-     instructions), so we don't have to worry about that here.  */
-
   if (step)
     {
-      if (SOFTWARE_SINGLE_STEP_P ())
-	internal_error (__FILE__, __LINE__, "failed internal consistency check");		/* Make sure this doesn't happen. */
-      else
-	ptrace (PT_STEP, pid, (PTRACE_TYPE_ARG3) 1,
-		target_signal_to_host (signal));
-    }
-  else
-    ptrace (PT_CONTINUE, pid, (PTRACE_TYPE_ARG3) 1,
-	    target_signal_to_host (signal));
+      /* If this system does not support PT_STEP, a higher level
+	 function will have called single_step() to transmute the step
+	 request into a continue request (by setting breakpoints on
+	 all possible successor instructions), so we don't have to
+	 worry about that here.  */
 
-  if (errno)
-    {
-      perror_with_name ("ptrace");
+      gdb_assert (!SOFTWARE_SINGLE_STEP_P ());
+      request = PT_STEP;
     }
+
+  /* An address of (PTRACE_TYPE_ARG3)1 tells ptrace to continue from
+     where it was.  If GDB wanted it to start some other way, we have
+     already written a new PC value to the child.  */
+
+  errno = 0;
+  ptrace (request, pid, (PTRACE_TYPE_ARG3)1, target_signal_to_host (signal));
+  if (errno != 0)
+    perror_with_name ("ptrace");
 }
 #endif /* CHILD_RESUME */
 
+
 /* Start debugging the process whose number is PID.  */
+
 int
 attach (int pid)
 {
 #ifdef PT_ATTACH
   errno = 0;
   ptrace (PT_ATTACH, pid, (PTRACE_TYPE_ARG3) 0, 0);
-  if (errno)
+  if (errno != 0)
     perror_with_name ("ptrace");
   attach_flag = 1;
   return pid;
@@ -252,19 +235,19 @@ attach (int pid)
 #endif
 }
 
-/* Stop debugging the process whose number is PID
-   and continue it with signal number SIGNAL.
-   SIGNAL = 0 means just continue it.  */
+/* Stop debugging the process whose number is PID and continue it with
+   signal number SIGNAL.  SIGNAL = 0 means just continue it.  */
 
 void
 detach (int signal)
 {
 #ifdef PT_DETACH
+  int pid = PIDGET (inferior_ptid);
+
   errno = 0;
-  ptrace (PT_DETACH, PIDGET (inferior_ptid), (PTRACE_TYPE_ARG3) 1,
-          signal);
-  if (errno)
-    print_sys_errmsg ("ptrace", errno);
+  ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3) 1, signal);
+  if (errno != 0)
+    perror_with_name ("ptrace");
   attach_flag = 0;
 #else
   error ("This system does not support detaching from a process");

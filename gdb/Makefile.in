@@ -2049,10 +2049,9 @@ inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 	$(serial_h) $(terminal_h) $(target_h) $(gdbthread_h) $(gdb_string_h) \
 	$(inflow_h)
-infptrace.o: infptrace.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
-	$(gdb_string_h) $(regcache_h) $(gdb_wait_h) $(command_h) \
-	$(gdb_dirent_h) $(gdb_ptrace_h) $(gdbcore_h) $(gdb_stat_h) \
-	$(gdb_assert_h)
+infptrace.o: infptrace.c $(defs_h) $(command_h) $(frame_h) $(gdbcore_h) \
+	$(inferior_h) $(regcache_h) $(target_h) $(gdb_assert_h) \
+	$(gdb_wait_h) $(gdb_string_h) $(gdb_dirent_h) $(gdb_ptrace_h)
 infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 	$(inferior_h) $(breakpoint_h) $(gdb_wait_h) $(gdbcore_h) $(gdbcmd_h) \
 	$(cli_script_h) $(target_h) $(gdbthread_h) $(annotate_h) \

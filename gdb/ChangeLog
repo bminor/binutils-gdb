@@ -1,5 +1,15 @@
 2004-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* infptrace.c: Remove #ifdef'ed out inclusion of gdb_stat.h.
+	Reorder includes.
+	(fetch_register, store_register): Remove prototypes.
+	(child_resume): Reorganize code and comments such that it is
+	grouped a bit more logically.
+	(attach): Explicitly compare errno against 0.
+	(detach): Likewise.  Use perror_with_name instead of
+	print_sys_errmsg.
+	* Makefile.in (infptrace.o): Update dependencies.
+
 	* ia64-linux-nat.c: Update copyright year.
 	(fetch_debug_register, store_debug_register)
 	(ia64_linux_stopped_by_watchpoint): Replace PTRACE_ARG3_TYPE with
