@@ -1,3 +1,9 @@
+Mon Aug 23 1993  Sean Fagan  (sef@cygnus.com)
+		 and Jim Kingdon  (kingdon@cygnus.com)
+
+	Add NetBSD support:
+	* configure.in: Recognize netbsd.
+
 Fri Aug 20 14:01:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-nindy.c: Remove unused include of sys/ioctl.h.
