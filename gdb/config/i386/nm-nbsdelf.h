@@ -18,15 +18,10 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef NM_NBSD_H
-#define NM_NBSD_H
+#ifndef NM_NBSDELF_H
+#define NM_NBSDELF_H
 
-/* Get generic NetBSD native definitions. */
-#include "config/nm-nbsd.h"
+#define SVR4_SHARED_LIBS
+#include "i386/nm-nbsd.h"
 
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-	(addr) = i386_register_u_addr ((blockend),(regno));
-
-extern int i386_register_u_addr (int, int);
-
-#endif /* NM_NBSD_H */
+#endif /* NM_NBSDELF_H */

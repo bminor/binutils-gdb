@@ -1,3 +1,16 @@
+2000-05-31  J.T. Conklin  <jtc@redback.com>
+
+	* configure.host: Add patterns for i[3456]86-*-netbsdaout*
+	and i[3456]86-*-netbsdelf*.
+	* config/i386/nm-nbsdelf.h: New file.
+	* config/i386/nbsdelf.mh: New file.
+
+	* config/i386/nm-nbsd.h: change include of nm-nbsd.h to 
+	the more explicit config/nm-nbsd.h.
+	* config/i386/tm-nbsd.h: change include of tm-i386bsd.h to
+ 	tm-i386.h.
+	(SIGTRAMP_START, SIGTRAMP_END, SIGCONTEXT_PC_OFFSET): Define.
+
 2000-06-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS: Mention FreeBSD/Alpha and FreeBSD/i386 3.x and up as new
