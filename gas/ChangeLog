@@ -1,3 +1,11 @@
+start-sanitize-r5900
+Sun Mar 22 13:21:01 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * config/tc-mips.c (append_insn): Handle BFD_RELOC_MIPS16_S3.
+        (mips_ip): Handle 'O' operand.
+        (md_apply_fix): Handle BFD_RELOC_MIPS16_S3.
+
+end-sanitize-r5900
 Fri Mar 20 19:15:44 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aclocal.m4, configure: Rebuild with libtool 1.2.

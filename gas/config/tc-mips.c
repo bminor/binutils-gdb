@@ -1794,6 +1794,12 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		 | ((address_expr->X_add_number & 0x3fffc) >> 2));
 	      break;
 
+	    /* start-sanitize-r5900
+	    case BFD_RELOC_MIPS15_S3:
+	      ip->insn_opcode |= ((imm_expr.X_add_number & 0x7fff) >> 3) << 6;
+	      break;
+	    /* end-sanitize-r5900
+
 	    case BFD_RELOC_16_PCREL_S2:
 	      goto need_reloc;
 
@@ -7309,6 +7315,12 @@ mips_ip (str, ip)
 	      else
 		insn_error = "operand `ACC' expected";
 	      continue;
+
+	    case 'O':
+	      my_getSmallExpression (&imm_expr, s);
+	      imm_reloc = BFD_RELOC_MIPS15_S3;
+	      s = expr_end;
+	      continue;
 	    /* end-sanitize-r5900 */
 
 	    case 'k':		/* cache code */
@@ -9786,6 +9798,9 @@ md_apply_fix (fixP, valueP)
     case BFD_RELOC_MIPS_CALL_HI16:
     case BFD_RELOC_MIPS_CALL_LO16:
     case BFD_RELOC_MIPS16_GPREL:
+    /* start-sanitize-r5900 */
+    case BFD_RELOC_MIPS15_S3:
+    /* end-sanitize-r5900 */
       if (fixP->fx_pcrel)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      "Invalid PC relative reloc");
