@@ -1,3 +1,8 @@
+2004-05-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* section.c (bfd_make_section_anyway): Copy the whole
+	bfd_hash_entry, not just "next" from existing entry.
+
 2004-04-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (bfd_section_from_shdr): Maintain the section order in

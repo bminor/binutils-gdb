@@ -955,7 +955,7 @@ bfd_make_section_anyway (bfd *abfd, const char *name)
       if (new_sh == NULL)
 	return NULL;
 
-      new_sh->root.next = sh->root.next;
+      new_sh->root = sh->root;
       sh->root.next = &new_sh->root;
       newsect = &new_sh->section;
     }
