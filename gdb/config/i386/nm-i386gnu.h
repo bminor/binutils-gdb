@@ -21,8 +21,21 @@
 #ifndef NM_I386GNU_H
 #define NM_I386GNU_H
 
-/* Include common definitions for GNU systems.  */
-#include "config/nm-gnu.h"
+#include <unistd.h>
+#include <mach.h>
+#include <mach/exception.h>
+#include "regcache.h"
+
+extern char *gnu_target_pid_to_str (int pid);
+
+/* Before storing, we need to read all the registers.  */
+#define CHILD_PREPARE_TO_STORE() deprecated_read_register_bytes (0, NULL, deprecated_register_bytes ())
+
+/* Don't do wait_for_inferior on attach.  */
+#define ATTACH_NO_WAIT
+
+/* Use SVR4 style shared library support */
+#include "solib.h"
 
 /* Thread flavors used in re-setting the T bit.  */
 #define THREAD_STATE_FLAVOR		i386_REGS_SEGS_STATE

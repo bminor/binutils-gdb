@@ -1,5 +1,8 @@
 2004-11-30  Andrew Cagney  <cagney@gnu.org>
 
+	* config/nm-gnu.h: Delete file.
+	* config/i386/nm-i386gnu.h: Inline "config/nm-gnu.h".
+
 	* config/nm-sysv4.h: Delete file.
 	* config/i386/nm-i386v4.h: Inline "config/nm-sysv4.h".
 	* config/i386/nm-i386v42mp.h: Inline "config/nm-sysv4.h".
