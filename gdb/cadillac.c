@@ -814,7 +814,7 @@ getpty()
 
 /* Examine a protocol packet from the driver. */
 
-static int
+static void
 kernel_dispatch(queue)
      int queue;			/* Non-zero means we should just queue up
 				   commands. */
@@ -1386,7 +1386,8 @@ cadillac_new_process()
 }
 
 static void
-iosig()
+iosig(signo)
+     int signo;
 {
   while (1)
     {

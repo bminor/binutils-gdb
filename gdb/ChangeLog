@@ -22,6 +22,8 @@ Tue Jun 23 21:46:26 1992  Fred Fish  (fnf@cygnus.com)
 	* sparc-xdep.c, a68v-xdep.c (fetch_inferior_registers,
 	store_inferior_registers): Supply missing fourth argument to
 	ptrace().
+	* cadillac.c (kernel_dispatch):  Make return type void.
+	* cadillac.c (iosig):  Signal handlers take one int arg.
 
 Mon Jun 22 20:18:06 1992  Fred Fish  (fnf@cygnus.com)
 
