@@ -1,3 +1,8 @@
+Wed Jan 15 13:51:50 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (read_a_source_file): Make sure the symbol ends with
+	whitespace before checking whether the next character is '='.
+
 Tue Jan 14 15:07:27 1997  Robert Lipe <robertl@dgii.com>
 
 	* config/tc-i386.c (sco_id): Moved from here...
