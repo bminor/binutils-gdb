@@ -3726,6 +3726,7 @@ Some machine configurations provide additional directives.
 * Equ::                         @code{.equ @var{symbol}, @var{expression}}
 * Equiv::                       @code{.equiv @var{symbol}, @var{expression}}
 * Err::				@code{.err}
+* Error::			@code{.error @var{string}}
 * Exitm::			@code{.exitm}
 * Extern::                      @code{.extern}
 * Fail::			@code{.fail}
@@ -3842,6 +3843,7 @@ Some machine configurations provide additional directives.
 * VTableInherit::               @code{.vtable_inherit @var{child}, @var{parent}}
 @end ifset
 
+* Warning::			@code{.warning @var{string}}
 * Weak::                        @code{.weak @var{names}}
 * Word::                        @code{.word @var{expressions}}
 * Deprecated::                  Deprecated Directives
@@ -4239,6 +4241,19 @@ Except for the contents of the error message, this is roughly equivalent to
 If @command{@value{AS}} assembles a @code{.err} directive, it will print an error
 message and, unless the @option{-Z} option was used, it will not generate an
 object file.  This can be used to signal error an conditionally compiled code.
+
+@node Error
+@section @code{.error "@var{string}"}
+@cindex error directive
+
+Similarly to @code{.err}, this directive emits an error, but you can specify a
+string that will be emitted as the error message.  If you don't specify the
+message, it defaults to @code{".error directive invoked in source file"}.
+@xref{Errors, ,Error and Warning Messages}.
+
+@smallexample
+ .error "This code has not been assembled and tested."
+@end smallexample
 
 @node Exitm
 @section @code{.exitm}
@@ -5864,6 +5879,12 @@ This directive finds the symbol @code{child} and finds or creates the symbol
 parent whose addend is the value of the child symbol.  As a special case the
 parent name of @code{0} is treated as refering the @code{*ABS*} section.
 @end ifset
+
+@node Warning
+@section @code{.warning "@var{string}"}
+@cindex warning directive
+Similar to the directive @code{.error}
+(@pxref{Error,,@code{.error "@var{string}"}}), but just emits a warning.
 
 @node Weak
 @section @code{.weak @var{names}}

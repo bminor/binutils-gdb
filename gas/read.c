@@ -306,6 +306,7 @@ static const pseudo_typeS potable[] = {
   {"equ", s_set, 0},
   {"equiv", s_set, 1},
   {"err", s_err, 0},
+  {"error", s_errwarn, 1},
   {"exitm", s_mexit, 0},
 /* extend  */
   {"extern", s_ignore, 0},	/* We treat all undef as ext.  */
@@ -411,6 +412,7 @@ static const pseudo_typeS potable[] = {
   {"xdef", s_globl, 0},
   {"xref", s_ignore, 0},
   {"xstabs", s_xstab, 's'},
+  {"warning", s_errwarn, 0},
   {"word", cons, 2},
   {"zero", s_space, 0},
   {NULL, NULL, 0}			/* End sentinel.  */
@@ -1662,6 +1664,43 @@ void
 s_err (int ignore ATTRIBUTE_UNUSED)
 {
   as_bad (_(".err encountered"));
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the .error and .warning pseudo-ops.  */
+
+void
+s_errwarn (int err)
+{
+  int len;
+  /* The purpose for the conditional assignment is not to
+     internationalize the directive itself, but that we need a
+     self-contained message, one that can be passed like the
+     demand_copy_C_string return value, and with no assumption on the
+     location of the name of the directive within the message.  */
+  char *msg
+    = (err ? _(".error directive invoked in source file")
+       : _(".warning directive invoked in source file"));
+
+  if (!is_it_end_of_statement ())
+    {
+      if (*input_line_pointer != '\"')
+	{
+	  as_bad (_("%s argument must be a string"),
+		  err ? ".error" : ".warning");
+	  discard_rest_of_line ();
+	  return;
+	}
+
+      msg = demand_copy_C_string (&len);
+      if (msg == NULL)
+	return;
+    }
+
+  if (err)
+    as_bad ("%s", msg);
+  else
+    as_warn ("%s", msg);
   demand_empty_rest_of_line ();
 }
 

@@ -1,3 +1,10 @@
+2004-11-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	* read.c (potable): Add "error" and "warning".
+	(s_errwarn): New function.
+	* read.h (s_errwarn): Declare.
+	* doc/as.texinfo (Error, Warning): Document .error and .warning.
+
 2004-11-22  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-tic54x.c (tic54x_adjust_symtab): Adjust call to

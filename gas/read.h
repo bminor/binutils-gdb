@@ -151,6 +151,7 @@ extern void s_elseif (int arg);
 extern void s_end (int arg);
 extern void s_endif (int arg);
 extern void s_err (int);
+extern void s_errwarn (int);
 extern void s_fail (int);
 extern void s_fill (int);
 extern void s_float_space (int mult);
