@@ -1,3 +1,8 @@
+1999-08-31  Alexandre Petit-Bianco  <apbianco@cygnus.com>
+
+	* elflink.h (record_link_assignment): When possible, keep the
+	original type of the symbol.
+
 Mon Aug 30 15:26:48 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): Allow both
