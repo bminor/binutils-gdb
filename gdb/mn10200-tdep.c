@@ -644,7 +644,7 @@ mn10200_frame_chain (struct frame_info *fi)
   memset (dummy_frame.fsr.regs, '\000', sizeof dummy_frame.fsr.regs);
   dummy_frame.status = 0;
   dummy_frame.stack_size = 0;
-  mn10200_analyze_prologue (&dummy_frame);
+  mn10200_analyze_prologue (&dummy_frame, 0);
 
   if (dummy_frame.status & MY_FRAME_IN_FP)
     {

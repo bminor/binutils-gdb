@@ -20,6 +20,11 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+/* FIXME: cagney/2001-03-01: The below macros refer to functions
+   declared in "regcache.h".  The ``correct fix'' is to convert those
+   macros into functions.  */
+#include "regcache.h"
+
 /* The mn10200 is little endian.  */
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 

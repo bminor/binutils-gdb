@@ -1,3 +1,12 @@
+2001-03-02  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2001-03-01 Tom Rix <trix@redhat.com>:
+	* mn10200-tdep.c (mn10200_frame_chain): Pass 0 for ``pc''
+	parameter to mn10200_analyze_prologue.
+
+	* config/mn10200/tm-mn10200.h: Include "regcache.h".
+	* MAINTAINERS: Document that mn10200-elf target is buildable.
+
 2001-03-02  Kevin Buettner  <kevinb@redhat.com>
 
 	* config/ia64/xm-aix.h (GDB_GREGSET_T, GDB_FPREGSET_T): Move defines
