@@ -31,10 +31,7 @@ README.psim
 basics.h
 bits.c
 bits.h
-build-psim
 config.in
-config.make
-config.hdr
 configure
 configure.in
 corefile.c
@@ -59,8 +56,6 @@ events.c
 events.h
 filter_filename.c
 filter_filename.h
-function_unit.c
-function_unit.h
 idecode_branch.h
 idecode_expression.h
 idecode_fields.h
