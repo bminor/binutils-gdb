@@ -1,3 +1,18 @@
+2002-12-14  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (convert_from_extended): New argument to hold the
+	type of floating point result we want to convert to.  Make input 
+	argument const.  Fix all callers.
+	(convert_to_extended): Similarly.
+	(arm_extract_return_value): Now takes a regcache argument.  Change
+	code to use regcache accessor functions.  Correctly extract 
+	smaller-than-word results on big-endian machines.
+	(arm_store_return_value): Now takes a regcache argument.  Change
+	code to use regcache accessor functions.  Correctly zero/sign extend
+	smaller than word results before storing into r0.
+	(arm_gdbarch_init): Register new-style extract_return_value and
+	store_return_value functions.
+
 2002-12-13  Michael Snyder  <msnyder@to-limbo.toronto.redhat.com>
 
 	* thread-db.c (thread_from_lwp): Uniquify error msg.

@@ -131,7 +131,10 @@ static void set_disassembly_flavor_sfunc(char *, int,
 					 struct cmd_list_element *);
 static void set_disassembly_flavor (void);
 
-static void convert_from_extended (void *ptr, void *dbl);
+static void convert_from_extended (const struct floatformat *, const void *,
+				   void *);
+static void convert_to_extended (const struct floatformat *, void *,
+				 const void *);
 
 /* Define other aspects of the stack frame.  We keep the offsets of
    all saved registers, 'cause we need 'em a lot!  We also keep the
@@ -1664,7 +1667,8 @@ arm_register_sim_regno (int regnum)
    little-endian systems.  */
 
 static void
-convert_from_extended (void *ptr, void *dbl)
+convert_from_extended (const struct floatformat *fmt, const void *ptr,
+		       void *dbl)
 {
   DOUBLEST d;
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
@@ -1672,14 +1676,14 @@ convert_from_extended (void *ptr, void *dbl)
   else
     floatformat_to_doublest (&floatformat_arm_ext_littlebyte_bigword,
 			     ptr, &d);
-  floatformat_from_doublest (TARGET_DOUBLE_FORMAT, &d, dbl);
+  floatformat_from_doublest (fmt, &d, dbl);
 }
 
 static void
-convert_to_extended (void *dbl, void *ptr)
+convert_to_extended (const struct floatformat *fmt, void *dbl, const void *ptr)
 {
   DOUBLEST d;
-  floatformat_to_doublest (TARGET_DOUBLE_FORMAT, ptr, &d);
+  floatformat_to_doublest (fmt, ptr, &d);
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     floatformat_from_doublest (&floatformat_arm_ext_big, &d, dbl);
   else
@@ -2217,9 +2221,11 @@ arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 
 static void
 arm_extract_return_value (struct type *type,
-			  char regbuf[REGISTER_BYTES],
-			  char *valbuf)
+			  struct regcache *regs,
+			  void *dst)
 {
+  bfd_byte *valbuf = dst;
+
   if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
       struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
@@ -2227,14 +2233,24 @@ arm_extract_return_value (struct type *type,
       switch (tdep->fp_model)
 	{
 	case ARM_FLOAT_FPA:
-	  convert_from_extended (&regbuf[REGISTER_BYTE (ARM_F0_REGNUM)],
-				 valbuf);
+	  {
+	    /* The value is in register F0 in internal format.  We need to
+	       extract the raw value and then convert it to the desired
+	       internal type.  */
+	    bfd_byte tmpbuf[FP_REGISTER_RAW_SIZE];
+
+	    regcache_cooked_read (regs, ARM_F0_REGNUM, tmpbuf);
+	    convert_from_extended (floatformat_from_type (type), tmpbuf,
+				   valbuf);
+	  }
 	  break;
 
 	case ARM_FLOAT_SOFT:
 	case ARM_FLOAT_SOFT_VFP:
-	  memcpy (valbuf, &regbuf[REGISTER_BYTE (ARM_A1_REGNUM)],
-		  TYPE_LENGTH (type));
+	  regcache_cooked_read (regs, ARM_A1_REGNUM, valbuf);
+	  if (TYPE_LENGTH (type) > 4)
+	    regcache_cooked_read (regs, ARM_A1_REGNUM + 1,
+				  valbuf + INT_REGISTER_RAW_SIZE);
 	  break;
 
 	default:
@@ -2244,9 +2260,50 @@ arm_extract_return_value (struct type *type,
 	  break;
 	}
     }
+  else if (TYPE_CODE (type) == TYPE_CODE_INT
+	   || TYPE_CODE (type) == TYPE_CODE_CHAR
+	   || TYPE_CODE (type) == TYPE_CODE_BOOL
+	   || TYPE_CODE (type) == TYPE_CODE_PTR
+	   || TYPE_CODE (type) == TYPE_CODE_REF
+	   || TYPE_CODE (type) == TYPE_CODE_ENUM)
+    {
+      /* If the the type is a plain integer, then the access is
+	 straight-forward.  Otherwise we have to play around a bit more.  */
+      int len = TYPE_LENGTH (type);
+      int regno = ARM_A1_REGNUM;
+      ULONGEST tmp;
+
+      while (len > 0)
+	{
+	  /* By using store_unsigned_integer we avoid having to do
+	     anything special for small big-endian values.  */
+	  regcache_cooked_read_unsigned (regs, regno++, &tmp);
+	  store_unsigned_integer (valbuf, 
+				  (len > INT_REGISTER_RAW_SIZE
+				   ? INT_REGISTER_RAW_SIZE : len),
+				  tmp);
+	  len -= INT_REGISTER_RAW_SIZE;
+	  valbuf += INT_REGISTER_RAW_SIZE;
+	}
+    }
   else
-    memcpy (valbuf, &regbuf[REGISTER_BYTE (ARM_A1_REGNUM)],
-	    TYPE_LENGTH (type));
+    {
+      /* For a structure or union the behaviour is as if the value had
+         been stored to word-aligned memory and then loaded into 
+         registers with 32-bit load instruction(s).  */
+      int len = TYPE_LENGTH (type);
+      int regno = ARM_A1_REGNUM;
+      bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+
+      while (len > 0)
+	{
+	  regcache_cooked_read (regs, regno++, tmpbuf);
+	  memcpy (valbuf, tmpbuf,
+		  len > INT_REGISTER_RAW_SIZE ? INT_REGISTER_RAW_SIZE : len);
+	  len -= INT_REGISTER_RAW_SIZE;
+	  valbuf += INT_REGISTER_RAW_SIZE;
+	}
+    }
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -2359,8 +2416,11 @@ arm_use_struct_convention (int gcc_p, struct type *type)
    TYPE, given in virtual format.  */
 
 static void
-arm_store_return_value (struct type *type, char *valbuf)
+arm_store_return_value (struct type *type, struct regcache *regs,
+			const void *src)
 {
+  const bfd_byte *valbuf = src;
+
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
@@ -2370,15 +2430,16 @@ arm_store_return_value (struct type *type, char *valbuf)
 	{
 	case ARM_FLOAT_FPA:
 
-	  convert_to_extended (valbuf, buf);
-	  deprecated_write_register_bytes (REGISTER_BYTE (ARM_F0_REGNUM), buf,
-					   FP_REGISTER_RAW_SIZE);
+	  convert_to_extended (floatformat_from_type (type), buf, valbuf);
+	  regcache_cooked_write (regs, ARM_F0_REGNUM, buf);
 	  break;
 
 	case ARM_FLOAT_SOFT:
 	case ARM_FLOAT_SOFT_VFP:
-	  deprecated_write_register_bytes (ARM_A1_REGNUM, valbuf,
-					   TYPE_LENGTH (type));
+	  regcache_cooked_write (regs, ARM_A1_REGNUM, valbuf);
+	  if (TYPE_LENGTH (type) > 4)
+	    regcache_cooked_write (regs, ARM_A1_REGNUM + 1, 
+				   valbuf + INT_REGISTER_RAW_SIZE);
 	  break;
 
 	default:
@@ -2388,9 +2449,57 @@ arm_store_return_value (struct type *type, char *valbuf)
 	  break;
 	}
     }
+  else if (TYPE_CODE (type) == TYPE_CODE_INT
+	   || TYPE_CODE (type) == TYPE_CODE_CHAR
+	   || TYPE_CODE (type) == TYPE_CODE_BOOL
+	   || TYPE_CODE (type) == TYPE_CODE_PTR
+	   || TYPE_CODE (type) == TYPE_CODE_REF
+	   || TYPE_CODE (type) == TYPE_CODE_ENUM)
+    {
+      if (TYPE_LENGTH (type) <= 4)
+	{
+	  /* Values of one word or less are zero/sign-extended and
+	     returned in r0.  */
+	  bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+	  LONGEST val = unpack_long (type, valbuf);
+
+	  store_signed_integer (tmpbuf, INT_REGISTER_RAW_SIZE, val);
+	  regcache_cooked_write (regs, ARM_A1_REGNUM, tmpbuf);
+	}
+      else
+	{
+	  /* Integral values greater than one word are stored in consecutive
+	     registers starting with r0.  This will always be a multiple of
+	     the regiser size.  */
+	  int len = TYPE_LENGTH (type);
+	  int regno = ARM_A1_REGNUM;
+
+	  while (len > 0)
+	    {
+	      regcache_cooked_write (regs, regno++, valbuf);
+	      len -= INT_REGISTER_RAW_SIZE;
+	      valbuf += INT_REGISTER_RAW_SIZE;
+	    }
+	}
+    }
   else
-    deprecated_write_register_bytes (ARM_A1_REGNUM, valbuf,
-				     TYPE_LENGTH (type));
+    {
+      /* For a structure or union the behaviour is as if the value had
+         been stored to word-aligned memory and then loaded into 
+         registers with 32-bit load instruction(s).  */
+      int len = TYPE_LENGTH (type);
+      int regno = ARM_A1_REGNUM;
+      bfd_byte tmpbuf[INT_REGISTER_RAW_SIZE];
+
+      while (len > 0)
+	{
+	  memcpy (tmpbuf, valbuf,
+		  len > INT_REGISTER_RAW_SIZE ? INT_REGISTER_RAW_SIZE : len);
+	  regcache_cooked_write (regs, regno++, tmpbuf);
+	  len -= INT_REGISTER_RAW_SIZE;
+	  valbuf += INT_REGISTER_RAW_SIZE;
+	}
+    }
 }
 
 /* Store the address of the place in which to copy the structure the
@@ -2869,8 +2978,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, arm_register_name);
 
   /* Returning results.  */
-  set_gdbarch_deprecated_extract_return_value (gdbarch, arm_extract_return_value);
-  set_gdbarch_deprecated_store_return_value (gdbarch, arm_store_return_value);
+  set_gdbarch_extract_return_value (gdbarch, arm_extract_return_value);
+  set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, arm_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
   set_gdbarch_extract_struct_value_address (gdbarch,
