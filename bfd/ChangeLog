@@ -1,3 +1,43 @@
+Thu Aug  5 13:22:44 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (BFD_LIBS): Always include elf.o.
+	(BFD32_BACKENDS): Don't include elf.o here.
+	(ofiles): Delete references to ofiles2 and ofiles3.
+	(do_clean): Delete ofiles.
+	(BFDIN_H): Changed references to $(srcdir)/bfd-in2.h.
+	(stmp-bfd.h): Use bfd.h-new as temporary name, not bfd.h2.
+	(headers): Use bfd-in2.h-new as temporary name, not bfd.h-new.
+
+	* bfd-in.h: Reworded comment to make it clear that bfd-in2.h is a
+	generated file.
+
+	* reloc.c (enum bfd_reloc_code_real): Added i386-elf reloc types
+	(from Meissner's additions to bfd-in2.h).
+
+	* elf32-i386.c (ELF_MAXPAGESIZE): Define.
+
+	Merged:
+
+	Wed Jun 23 06:05:58 1993  Michael Meissner  (meissner@osf.org)
+
+	* elfcode.h (elf_write_object_contents): Don't drop core if
+	elf_symbol_from returns a NULL pointer when processing a non-elf
+	symbol, use a 0 size instead.
+
+	Tue Jun 15 14:38:32 1993  Michael Meissner  (meissner@osf.org)
+
+	* elfcode.h (elf_hash): Delete macro mapping elf_hash to
+	bfd_elf32_hash, since the hash table is independent of the 32/64
+	bit system.
+
+	Sat Jun 19 10:12:27 1993  Michael Meissner  (meissner@osf.org)
+
+	* elf32-i386.h (reloc_type): Reformat spacing.
+	(elf_howto_table): Add the rest of the 386/ELF relocations.
+	(elf_i386_reloc_type_lookup): Ditto.
+	(elf_i386_info_to_howto): Ditto.
+	(elf_i386_info_to_howto_rel): Ditto.
+
 Thu Aug  5 10:07:43 1993  Fred Fish  (fnf@cygnus.com)
 
 	* nlmcode.h (nlm_get_reloc_upper_bound):  Test return value
