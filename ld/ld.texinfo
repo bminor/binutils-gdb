@@ -1293,14 +1293,8 @@ line option.  When you do this, your linker script will replace the
 default linker script.
 
 You may also use linker scripts implicitly by naming them as input files
-to the linker, as though they were files to be linked.  If the linker
-opens a file which it can not recognize as an object file or as an
-archive file, it will try to read it as a linker script.  If the file
-can not be parsed as a linker script, the linker will report an error.
-
-An implicit linker script will not replace the default linker script.
-Typically an implicit linker script would contain only the @code{INPUT},
-@code{GROUP}, or @code{VERSION} commands.
+to the linker, as though they were files to be linked.  @xref{Implicit
+Linker Scripts}.
 
 @menu
 * Basic Script Concepts::	Basic Linker Script Concepts
@@ -1313,6 +1307,7 @@ Typically an implicit linker script would contain only the @code{INPUT},
 * PHDRS::			PHDRS Command
 * VERSION::			VERSION Command
 * Expressions::			Expressions in Linker Scripts
+* Implicit Linker Scripts::	Implicit Linker Scripts
 @end menu
 
 @node Basic Script Concepts
@@ -3430,6 +3425,24 @@ script to avoid forcing the linker to use additional program headers, or
 you must define the program headers yourself using the @code{PHDRS}
 command (@pxref{PHDRS}).
 @end table
+
+@node Implicit Linker Scripts
+@section Implicit Linker Scripts
+@cindex implicit linker scripts
+If you specify a linker input file which the linker can not recognize as
+an object file or an archive file, it will try to read the file as a
+linker script.  If the file can not be parsed as a linker script, the
+linker will report an error.
+
+An implicit linker script will not replace the default linker script.
+
+Typically an implicit linker script would contain only symbol
+assignments, or the @code{INPUT}, @code{GROUP}, or @code{VERSION}
+commands.
+
+Any input files read because of an implicit linker script will be read
+at the position in the command line where the implicit linker script was
+read.  This can affect archive searching.
 
 @ifset GENERIC
 @node Machine Dependent
