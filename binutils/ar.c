@@ -324,8 +324,8 @@ remove_output (void)
 {
   if (output_filename != NULL)
     {
-      if (output_bfd != NULL && output_bfd->iostream != NULL)
-	fclose ((FILE *) (output_bfd->iostream));
+      if (output_bfd != NULL)
+	bfd_cache_close (output_bfd);
       if (output_file != NULL)
 	fclose (output_file);
       unlink (output_filename);
