@@ -50,6 +50,7 @@ i386v.mt
 i386v32.mh
 i386v4.mh
 i386v4.mt
+i386win32.mh
 linux.mh
 linux.mt
 nbsd.mh
@@ -105,6 +106,7 @@ xm-i386sco.h
 xm-i386v.h
 xm-i386v32.h
 xm-i386v4.h
+xm-i386win32.h
 xm-linux.h
 xm-nbsd.h
 xm-ptx.h

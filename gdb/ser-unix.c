@@ -21,14 +21,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "serial.h"
 #include <fcntl.h>
 #include <sys/types.h>
-
-#if !defined (HAVE_TERMIOS) && !defined (HAVE_TERMIO) && !defined (HAVE_SGTTY)
-#define HAVE_SGTTY
+#include "terminal.h"
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 #ifdef HAVE_TERMIOS
-#include <termios.h>
-#include <unistd.h>
 
 struct hardwire_ttystate
 {
@@ -37,7 +35,6 @@ struct hardwire_ttystate
 #endif /* termios */
 
 #ifdef HAVE_TERMIO
-#include <termio.h>
 
 /* It is believed that all systems which have added job control to SVR3
    (e.g. sco) have also added termios.  Even if not, trying to figure out
@@ -54,8 +51,6 @@ struct hardwire_ttystate
 /* Needed for the code which uses select().  We would include <sys/select.h>
    too if it existed on all systems.  */
 #include <sys/time.h>
-
-#include <sgtty.h>
 
 struct hardwire_ttystate
 {
@@ -296,6 +291,9 @@ static int
 hardwire_flush_input (scb)
      serial_t scb;
 {
+  scb->bufcnt = 0;
+  scb->bufp = scb->buf;
+
 #ifdef HAVE_TERMIOS
   return tcflush (scb->fd, TCIFLUSH);
 #endif

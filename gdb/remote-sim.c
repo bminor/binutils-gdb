@@ -96,24 +96,6 @@ int regno;
 }
 
 
-int 
-sim_callback_write_stdout (arg, len)
-char *arg;
-int len;
-{
-  int i;
-  char b[2];
-  for (i = 0; i< len; i++) {
-    b[0] = arg[i];
-    b[1] = 0;
-    if (target_output_hook)
-      target_output_hook (b);
-    else
-      fputs_filtered (b, gdb_stdout);
-  }
-  return len;
-}
-
 static void
 gdbsim_store_register (regno)
 int regno;
@@ -169,7 +151,7 @@ gdbsim_load (prog, fromtty)
   program_loaded = 1;
 
   if (sim_load (prog, fromtty) != 0)
-    gr_load_image (prog, fromtty);
+    generic_load (prog, fromtty);
 }
 
 
@@ -234,12 +216,9 @@ gdbsim_open (args, from_tty)
 {
   if (sr_get_debug ())
     printf_filtered ("gdbsim_open: args \"%s\"\n", args ? args : "(null)");
-
   sim_open (args);
-
   push_target (&gdbsim_ops);
   target_fetch_registers (-1);
-
   printf_filtered ("Connected to the simulator.\n");
 }
 

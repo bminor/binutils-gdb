@@ -346,7 +346,7 @@ TARGET_FLAGS_TO_PASS = \
 # Links made at configuration time should not be specified here, since
 # SFILES is used in building the distribution archive.
 
-SFILES = blockframe.c breakpoint.c buildsym.c c-exp.y c-lang.c \
+SFILES = blockframe.c breakpoint.c buildsym.c callback.c c-exp.y c-lang.c \
 	c-typeprint.c c-valprint.c ch-exp.y ch-lang.c ch-typeprint.c \
 	ch-valprint.c coffread.c command.c complaints.c core.c cp-valprint.c \
 	dbxread.c demangle.c dwarfread.c \
@@ -469,7 +469,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	complaints.o typeprint.o \
 	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
-	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o
+	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o callback.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS) main.o
 
@@ -923,9 +923,9 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	ns32k-tdep.c ns32km3-nat.c osfsolib.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
 	procfs.c pyr-tdep.c pyr-xdep.c \
-	remote-adapt.c remote-bug.c remote-e7000.c remote-eb.c remote-es.c \
+	remote-adapt.c  remote-bug.c remote-e7000.c remote-eb.c remote-es.c \
 	remote-hms.c remote-mips.c \
-	remote-mm.c remote-nindy.c remote-os9k.c remote-sim.c \
+	remote-mm.c remote-nindy.c remote-os9k.c remote-rdp.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-udi.c remote-vx.c remote-vx29k.c \
 	rs6000-nat.c rs6000-tdep.c \
@@ -1034,6 +1034,8 @@ breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 
 buildsym.o: buildsym.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	objfiles.h symfile.h $(symtab_h)
+
+callback.o: callback.c $(defs_h) callback.h 
 
 c-lang.o: c-lang.c c-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h parser-defs.h $(symtab_h)
@@ -1334,6 +1336,9 @@ regex.o: regex.c regex.h $(defs_h)
 
 remote-adapt.o: remote-adapt.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h
+
+remote-rdp.o: remote-rdp.c $(wait_h) $(defs_h) $(gdbcore_h) \
+	$(inferior_h) remote-rdp.h
 
 remote-bug.o: remote-bug.c $(wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h $(remote_utils_h)

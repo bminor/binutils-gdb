@@ -1342,7 +1342,7 @@ by a serial line.",
   hms_insert_breakpoint, hms_remove_breakpoint,		/* Breakpoints */
   0, 0, 0, 0, 0,		/* Terminal handling */
   hms_kill,			/* FIXME, kill */
-  gr_load_image,
+  generic_load,
   0,				/* lookup_symbol */
   hms_create_inferior,		/* create_inferior */
   hms_mourn,			/* mourn_inferior FIXME */

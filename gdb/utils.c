@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #if !defined(__GO32__) && !defined(WIN32)
@@ -536,7 +536,7 @@ quit ()
 }
 
 
-#if defined(__GO32__)||defined(WIN32)
+#if defined(__GO32__)||defined(WINGDB)
 
 /* In the absence of signals, poll keyboard for a quit.
    Called from #define QUIT pollquit() in xm-go32.h. */
@@ -565,7 +565,7 @@ pollquit()
 
 
 #endif
-#if defined(__GO32__)||defined(WIN32)
+#if defined(__GO32__)||defined(WINGDB)
 void notice_quit()
 {
   if (kbhit ())
@@ -597,7 +597,6 @@ request_quit (signo)
      int signo;
 {
   quit_flag = 1;
-
   /* Restore the signal handler.  Harmless with BSD-style signals, needed
      for System V-style signals.  So just always do it, rather than worrying
      about USG defines and stuff like that.  */
@@ -606,7 +605,7 @@ request_quit (signo)
 #ifdef REQUEST_QUIT
   REQUEST_QUIT;
 #else
-  if (immediate_quit)
+  if (immediate_quit) 
     quit ();
 #endif
 }

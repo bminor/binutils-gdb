@@ -97,6 +97,8 @@ breakpoint.c
 breakpoint.h
 buildsym.c
 buildsym.h
+callback.c
+callback.h
 c-exp.y
 c-lang.c
 c-lang.h
@@ -266,6 +268,7 @@ remote-nindy.c
 remote-nrom.c
 remote-os9k.c
 remote-pa.c
+remote-rdp.c
 remote-sim.c
 remote-sim.h
 remote-st.c

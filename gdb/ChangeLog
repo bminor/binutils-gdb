@@ -1,3 +1,40 @@
+Thu Sep 28 14:32:11 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* callback.[ch]: New files.
+	* remote-rdp.c: Support for the ARM RDP monitor.
+	* Makefile: Update.
+	* arm-tdep.c (arm_othernames): New.
+	(_initialize_arm_tdep): install 'othernames' command.
+	(arm_nullified_insn, shifted_reg_val, arm_get_next_pc): New.
+	* configure.in: Check for termios.h, termio.h and sgtty.h.
+	(i[345]86-*-win32*): New host.
+	* configure: Regenerated.
+	* inflow.c: Clean up inclusions.
+	* main.c (main): Check for WINGDB, not WIN32.
+	* printcmd.c (do_examine): Put QUIT test in loop.
+	* remote-hms.c (e7000_load): Delete.
+	(hms_ops): Point to generic_load instead.
+	* remote-hms.c (hms_ops): Point to generic_load.
+	* remote-sim.c (sim_callback_write_stdout): Becomes
+	gdbsim_write_stdout.
+	(gdbsim_load): Call generic_load.
+	* remote-utils.c (gr_load_image): Delete.
+	* ser-unix.c (terminal.h): Include instead of havig
+	own #if tree.
+	(hardwire_flush_input): Reset input buffer too.
+	* source.c (openp): If WIN32 then open file in binary mode.
+	* terminal.h: Configure IO mechanism using autoconf defines if available and
+	not overriden.
+	* utils.c (quit, pollquit, notice_quit): WIN32 check becomes WINGDB check.
+	* config/arm/arm.mt (TDEPFILES): Add remote-rdp.o
+	* config/arm/tm-arm.h (TARGET_BYTE_ORDER): becomes TARGET_BYTE_ORDER_SELECTABLE.
+	(ADDR_BITS_REMOVE): New.
+	(ORIGINAL_REGISTER_NAMES, ADDITIONAL_REGISTER_NAMES): New.
+	(INST_xx): New
+	(FRAME_FIND_SAVED_REGS): Pass the right argument.
+	(arm_get_next_pc): Declare.
+	* mswin/prebuilt/*/bfdtarget.h (SELECT_ARCHITECTURES): Need leading &.
+
 Wed Sep 27 10:14:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* valops.c (search_struct_field):  Also allow "else" as a variant name,
