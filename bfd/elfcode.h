@@ -96,7 +96,6 @@ PTR alloca ();
 #define elf_set_section_contents	NAME(bfd_elf,set_section_contents)
 #define elf_no_info_to_howto		NAME(bfd_elf,no_info_to_howto)
 #define elf_no_info_to_howto_rel	NAME(bfd_elf,no_info_to_howto_rel)
-#define elf_hash			NAME(bfd_elf,hash)
 #define elf_new_section_hook		NAME(bfd_elf,new_section_hook)
 #define write_relocs			NAME(bfd_elf,_write_relocs)
 
@@ -1239,7 +1238,7 @@ fix_up_strtabs (abfd, asect, obj)
       && !strcmp ("str", asect->name + strlen (asect->name) - 3))
     {
       size_t len = strlen (asect->name) + 1;
-      char *s = alloca (len);
+      char *s = (char *) alloca (len);
       strcpy (s, asect->name);
       s[len - 4] = 0;
       asect = bfd_get_section_by_name (abfd, s);
@@ -1817,7 +1816,7 @@ map_program_segments (abfd)
   file_ptr lowest_offset = 0;
   struct seg_info *seg = 0;
 
-  done = alloca (i_ehdrp->e_shnum);
+  done = (char *) alloca (i_ehdrp->e_shnum);
   memset (done, 0, i_ehdrp->e_shnum);
   for (i = 0; i < i_ehdrp->e_shnum; i++)
     {
@@ -1944,7 +1943,8 @@ map_program_segments (abfd)
 	i_ehdrp->e_phoff = elf_tdata (abfd)->next_file_pos;
 	elf_tdata (abfd)->next_file_pos += sz;
       }
-    phdr = bfd_alloc (abfd, n_segs * sizeof (Elf_Internal_Phdr));
+    phdr = (Elf_Internal_Phdr*) bfd_alloc (abfd,
+					   n_segs * sizeof (Elf_Internal_Phdr));
     elf_tdata (abfd)->phdr = phdr;
     while (seg)
       {
@@ -2254,6 +2254,7 @@ swap_out_syms (abfd)
 	else
 	  {
 	    asection *sec = syms[idx]->section;
+	    elf_symbol_type *type_ptr;
 	    int shndx;
 
 	    if (sec->output_section)
@@ -2263,7 +2264,8 @@ swap_out_syms (abfd)
 	      }
 	    value += sec->vma;
 	    sym.st_value = value;
-	    sym.st_size = (elf_symbol_from (abfd, syms[idx]))->internal_elf_sym.st_size;
+	    type_ptr = elf_symbol_from (abfd, syms[idx]);
+	    sym.st_size = type_ptr ? type_ptr->internal_elf_sym.st_size : 0;
 	    sym.st_shndx = shndx = elf_section_from_bfd_section (abfd, sec);
 	    if (shndx == -1)
 	      {
