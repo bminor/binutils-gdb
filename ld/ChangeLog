@@ -1,3 +1,8 @@
+Fri Jul 16 13:44:26 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* configure.in: h8/300h support needs own .mt file.
+	config/coff-h8300h.mt: New file.
+
 Thu Jul 15 12:44:35 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldmain.c: Don't include sys/stat.h; it already got included
@@ -6,8 +11,8 @@ Thu Jul 15 12:44:35 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 Thu Jul 15 14:43:34 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* Makefile.in: Add h8300h support.
-	emulparms/h8300h.sh: New file.
-	scripttemp/h8300h.sc: New file.
+	emulparams/h8300h.sh: New file.
+	scripttempl/h8300h.sc: New file.
 
 Thu Jul 15 12:44:35 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
