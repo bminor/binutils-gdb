@@ -1,3 +1,8 @@
+Sun Oct 18 18:48:57 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-sh.c (md_assemble): Make sure the entire opcode is
+	converted into lower case.
+
 Fri Oct 16 13:36:34 CDT Catherine Moore  <clm@cygnus.com>
 
         * cgen.c (gas_cgen_md_apply_fix3):  Handle VTABLE relocs.

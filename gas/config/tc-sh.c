@@ -1023,7 +1023,14 @@ md_assemble (str)
        && !is_end_of_line[*op_end] && *op_end != ' ';
        op_end++)
     {
-      name[nlen] = op_start[nlen];
+      unsigned char c = op_start[nlen];
+
+      /* The machine independent code will convert CMP/EQ into cmp/EQ
+	 because it thinks the '/' is the end of the symbol.  Instead of
+	 hacking up the machine independent code, we just deal with it
+	 here.  */
+      c = isupper (c) ? tolower (c) : c;
+      name[nlen] = c;
       nlen++;
     }
   name[nlen] = 0;
@@ -1569,6 +1576,17 @@ md_convert_frag (headers, seg, fragP)
     case C (COND_JUMP, COND12):
     case C (COND_JUMP_DELAY, COND12):
       /* A bcond won't fit, so turn it into a b!cond; bra disp; nop */
+      /* I found that a relax failure for gcc.c-torture/execute/930628-1.c
+	 was due to gas incorrectly relaxing an out-of-range conditional
+	 branch with delay slot.  It turned:
+                     bf.s    L6              (slot mov.l   r12,@(44,r0))
+         into:
+   
+2c:  8f 01 a0 8b     bf.s    32 <_main+32>   (slot bra       L6)
+30:  00 09           nop
+32:  10 cb           mov.l   r12,@(44,r0)
+         Therefore, branches with delay slots have to be handled
+	 differently from ones without delay slots.  */
       {
 	unsigned char *buffer =
 	  (unsigned char *) (fragP->fr_fix + fragP->fr_literal);
