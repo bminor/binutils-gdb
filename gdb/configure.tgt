@@ -309,8 +309,6 @@ v850*-*-*)		gdb_target=v850
 			esac
 			;;
 
-# OBSOLETE w65-*-*)		gdb_target=w65 ;;
-
 z8k-*-coff*)		gdb_target=z8k ;;
 
 esac

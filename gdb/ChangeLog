@@ -1,5 +1,14 @@
 2001-12-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* NEWS, MAINTAINERS: Note that w65-*-* was deleted.
+	* configure.tgt: Delete w65-*-*.
+	* Makefile.in (w65-tdep.o): Delete.
+	* config/w65/tm-w65.h: Delete file.
+	* config/w65/w65.mt: Delete file.
+	* w65-tdep.c: Delete file.
+	
+2001-12-01  Andrew Cagney  <ac131313@redhat.com>
+
 	* NEWS: Mention deleted tic80-*-*.
 	* configure.tgt: Delete tic80-*-*.
 	* Makefile.in (tic80-tdep.o): Delete.

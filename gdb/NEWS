@@ -10,6 +10,7 @@ x86 OpenBSD					i[3456]86-*-openbsd*
 * REMOVED configurations and files
 
 TI TMS320C80					tic80-*-*
+WDC 65816					w65-*-*
 
 * Changes to command line processing
 
