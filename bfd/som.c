@@ -209,7 +209,7 @@ static void som_get_symbol_info
   PARAMS ((bfd *, asymbol *, symbol_info *));
 static asection * bfd_section_from_som_symbol
   PARAMS ((bfd *, struct symbol_dictionary_record *));
-static int log2
+static int exact_log2
   PARAMS ((unsigned int));
 static bfd_reloc_status_type hppa_som_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
@@ -1431,11 +1431,11 @@ som_reloc_call (abfd, p, subspace_reloc_sizep, bfd_reloc, sym_num, queue)
   return p;
 }
 
-/* Return the logarithm of X, base 2, considering X unsigned.
-   Abort -1 if X is not a power or two or is zero.  */
+/* Return the logarithm of X, base 2, considering X unsigned,
+   if X is a power of 2.  Otherwise, returns -1.  */
 
 static int
-log2 (x)
+exact_log2 (x)
      unsigned int x;
 {
   int log = 0;
@@ -1970,7 +1970,7 @@ setup_sections (abfd, file_hdr, current_offset)
 	 record.  */
       space_asect->vma = subspace.subspace_start;
       space_asect->filepos = subspace.file_loc_init_value + current_offset;
-      space_asect->alignment_power = log2 (subspace.alignment);
+      space_asect->alignment_power = exact_log2 (subspace.alignment);
       if (space_asect->alignment_power == (unsigned) -1)
 	goto error_return;
 
@@ -2100,7 +2100,7 @@ setup_sections (abfd, file_hdr, current_offset)
 	  subspace_asect->_raw_size = subspace.subspace_length;
 	  subspace_asect->filepos = (subspace.file_loc_init_value
 				     + current_offset);
-	  subspace_asect->alignment_power = log2 (subspace.alignment);
+	  subspace_asect->alignment_power = exact_log2 (subspace.alignment);
 	  if (subspace_asect->alignment_power == (unsigned) -1)
 	    goto error_return;
 	}
