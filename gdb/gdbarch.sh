@@ -550,9 +550,9 @@ F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, st
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
 F:2:DEPRECATED_GET_SAVED_REGISTER:void:deprecated_get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval
 #
-f:1:CONVERT_REGISTER_P:int:convert_register_p:int regnum, struct type *type:regnum, type::0:legacy_convert_register_p::0
-f:1:REGISTER_TO_VALUE:void:register_to_value:struct frame_info *frame, int regnum, struct type *type, void *buf:frame, regnum, type, buf::0:legacy_register_to_value::0
-f:1:VALUE_TO_REGISTER:void:value_to_register:struct frame_info *frame, int regnum, struct type *type, const void *buf:frame, regnum, type, buf::0:legacy_value_to_register::0
+f:1:CONVERT_REGISTER_P:int:convert_register_p:int regnum, struct type *type:regnum, type::0:generic_convert_register_p::0
+f:1:REGISTER_TO_VALUE:void:register_to_value:struct frame_info *frame, int regnum, struct type *type, void *buf:frame, regnum, type, buf::0
+f:1:VALUE_TO_REGISTER:void:value_to_register:struct frame_info *frame, int regnum, struct type *type, const void *buf:frame, regnum, type, buf::0
 #
 f:2:POINTER_TO_ADDRESS:CORE_ADDR:pointer_to_address:struct type *type, const void *buf:type, buf:::unsigned_pointer_to_address::0
 f:2:ADDRESS_TO_POINTER:void:address_to_pointer:struct type *type, void *buf, CORE_ADDR addr:type, buf, addr:::unsigned_address_to_pointer::0

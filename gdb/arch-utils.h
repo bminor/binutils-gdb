@@ -113,16 +113,8 @@ extern int generic_register_byte (int regnum);
 /* Prop up old targets that use various sigtramp macros.  */
 extern int legacy_pc_in_sigtramp (CORE_ADDR pc, char *name);
 
-/* The orginal register_convert*() functions were overloaded.  They
-   were used to both: convert between virtual and raw register formats
-   (something that is discouraged); and to convert a register to the
-   type of a corresponding variable.  These legacy functions preserve
-   that overloaded behavour in existing targets.  */
-extern int legacy_convert_register_p (int regnum, struct type *type);
-extern void legacy_register_to_value (struct frame_info *frame, int regnum,
-				      struct type *type, void *to);
-extern void legacy_value_to_register (struct frame_info *frame, int regnum,
-				      struct type *type, const void *from);
+/* By default, registers are not convertible.  */
+extern int generic_convert_register_p (int regnum, struct type *type);
 
 extern int default_stabs_argument_has_addr (struct gdbarch *gdbarch,
 					    struct type *type);

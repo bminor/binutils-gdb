@@ -1,5 +1,18 @@
 2004-06-09  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh (REGISTER_TO_VALUE, VALUE_TO_REGISTER): Do not
+	provide a default value.
+	(CONVERT_REGISTER_P): Default to generic_convert_register_p.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arch-utils.c (generic_convert_register_p): Rename
+	legacy_convert_register_p
+	(legacy_register_to_value, legacy_value_to_register): Delete
+	functions.
+	* arch-utils.h (generic_convert_register_p): Rename
+	legacy_convert_register_p.
+	(legacy_register_to_value, legacy_value_to_register): Delete
+	declarations.
+
 	* gdbarch.sh (DEPRECATED_REGISTER_CONVERT_TO_RAW)
 	(DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL)
 	(DEPRECATED_REGISTER_CONVERTIBLE): Delete.

@@ -463,9 +463,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
   current_gdbarch->deprecated_pc_in_call_dummy = deprecated_pc_in_call_dummy;
-  current_gdbarch->convert_register_p = legacy_convert_register_p;
-  current_gdbarch->register_to_value = legacy_register_to_value;
-  current_gdbarch->value_to_register = legacy_value_to_register;
+  current_gdbarch->convert_register_p = generic_convert_register_p;
   current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
   current_gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
@@ -611,8 +609,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of deprecated_init_frame_pc, has predicate */
   /* Skip verify of deprecated_get_saved_register, has predicate */
   /* Skip verify of convert_register_p, invalid_p == 0 */
-  /* Skip verify of register_to_value, invalid_p == 0 */
-  /* Skip verify of value_to_register, invalid_p == 0 */
   /* Skip verify of pointer_to_address, invalid_p == 0 */
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate */

@@ -299,23 +299,9 @@ legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
 }
 
 int
-legacy_convert_register_p (int regnum, struct type *type)
+generic_convert_register_p (int regnum, struct type *type)
 {
   return 0;
-}
-
-void
-legacy_register_to_value (struct frame_info *frame, int regnum,
-			  struct type *type, void *to)
-{
-  internal_error (__FILE__, __LINE__, "legacy_register_to_value called");
-}
-
-void
-legacy_value_to_register (struct frame_info *frame, int regnum,
-			  struct type *type, const void *tmp)
-{
-  internal_error (__FILE__, __LINE__, "legacy_value_to_register called");
 }
 
 int
