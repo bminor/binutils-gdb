@@ -1,3 +1,14 @@
+start-sanitize-tx3904
+Fri May 22 13:34:20 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (SIM_AC_OPTION_HARDWARE): Only enable when tx3904.
+	* interp.c (sim_open): Only create a device tree when HW is
+ 	enabled.
+
+	* dv-tx3904irc.c (tx3904irc_finish): Pacify GCC.
+	* interp.c (signal_exception): Ditto.
+
+end-sanitize-tx3904
 Thu May 21 14:24:11 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* gencode.c: Mark BEGEZALL as LIKELY.

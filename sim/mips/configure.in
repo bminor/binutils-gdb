@@ -239,15 +239,17 @@ AC_SUBST(mips_extra_objs)
 
 
 
+# start-sanitize-tx3904
+#
 # Add simulated hardware devices
 #
-SIM_AC_OPTION_HARDWARE()
+hw_enabled=no
 case "${target}" in
-# start-sanitize-tx3904
-  mips*tx39*) SIM_AC_OPTION_HARDWARE(,tx3904cpu tx3904irc) ;;
-# end-sanitize-tx3904
+  mips*tx39*) hw_enabled=yes ; hw_extra_devices="tx3904cpu tx3904irc" ;;
   *) ;;
 esac
+SIM_AC_OPTION_HARDWARE($hw_enabled,$hw_devices,$hw_extra_devices)
+# end-sanitize-tx3904
 
 
 AC_PATH_X

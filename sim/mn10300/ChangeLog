@@ -1,3 +1,7 @@
+Fri May 22 12:17:41 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (SIM_AC_OPTION_HARDWARE): Add argument "yes".
+
 start-sanitize-am30
 Wed May  6 13:29:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

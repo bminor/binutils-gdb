@@ -1,4 +1,10 @@
 start-sanitize-am30
+Fri May 22 12:16:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* aclocal.m4 (SIM_AC_OPTION_HW): Add enable / disable argument.
+  	Move common object files from here.
+	* Make-common.in (SIM_COMMON_HW_OBJS): To here.
+	
 Thu May 21 17:57:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-hw.c: Include ctype.h.

@@ -217,7 +217,6 @@ attach_tx3904irc_regs (struct hw *me,
 static void
 tx3904irc_finish (struct hw *me)
 {
-  int i;
   struct tx3904irc *controller;
 
   controller = HW_ZALLOC (me, struct tx3904irc);
@@ -274,7 +273,7 @@ tx3904irc_port_event (struct hw *me,
 	if(ILR_GET(controller, source) > IMR_GET(controller))
 	  {
 	    int ip_number = 16 + source; /* compute IP[4:0] */
-	    HW_TRACE ((me, "interrupt level %d", ILR_GET(controller,source)));
+	    HW_TRACE ((me, "interrupt level %ld", ILR_GET(controller,source)));
 	    hw_port_event(me, IP_PORT, ip_number);
 	  }
 	break;
@@ -336,7 +335,7 @@ tx3904irc_io_read_buffer (struct hw *me,
 	}
 
       /* write requested byte out */
-      memcpy(dest+byte, ((char*)& register_value)+reg_offset, 1);
+      memcpy ((char*) dest + byte, ((char*)& register_value)+reg_offset, 1);
     }
 
   return nr_bytes;
@@ -378,7 +377,7 @@ tx3904irc_io_write_buffer (struct hw *me,
       HW_TRACE ((me, "reg %d pre: %08lx", reg_number, (long) *register_ptr));
 
       /* overwrite requested byte */
-      memcpy(((char*)register_ptr)+reg_offset, source+byte, 1);
+      memcpy (((char*)register_ptr)+reg_offset, (char*)source + byte, 1);
 
       HW_TRACE ((me, "post: %08lx", (long) *register_ptr));
     }

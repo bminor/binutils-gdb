@@ -83,8 +83,8 @@ SIM_DEFAULT_MODEL = @sim_default_model@
 SIM_ENDIAN = @sim_endian@
 SIM_ENVIRONMENT = @sim_environment@
 SIM_FLOAT = @sim_float@
-SIM_HARDWARE = @sim_hardware@
-SIM_HW_OBJS = @sim_hw_obj@
+SIM_HW_CFLAGS = @sim_hw_cflags@
+SIM_HW_OBJS = @sim_hw_objs@
 SIM_HW = @sim_hw@
 SIM_HOSTENDIAN = @sim_hostendian@
 SIM_INLINE = @sim_inline@
@@ -141,6 +141,16 @@ SIM_EXTRA_CLEAN =
 # here.  Some files are used by all simulators (e.g. callback.o).
 # Those files are specified in LIB_OBJS below.
 
+# start-sanitize-am30
+SIM_COMMON_HW_OBJS = \
+	hw-device.o \
+	hw-ports.o \
+	hw-properties.o \
+	hw-base.o \
+	hw-tree.o \
+	sim-hw.o \
+
+# end-sanitize-am30
 SIM_NEW_COMMON_OBJS = \
 	sim-bits.o \
 	sim-break.o \
@@ -164,6 +174,7 @@ SIM_NEW_COMMON_OBJS = \
 	$(SIM_HW_OBJS) \
 
 
+
 ## End COMMON_PRE_CONFIG_FRAG
 
 ## COMMON_POST_CONFIG_FRAG
@@ -182,7 +193,7 @@ CONFIG_CFLAGS = \
 	$(SIM_ENDIAN) \
 	$(SIM_ENVIRONMENT) \
 	$(SIM_FLOAT) \
-	$(SIM_HARDWARE) \
+	$(SIM_HW_CFLAGS) \
 	$(SIM_HOSTENDIAN) \
 	$(SIM_INLINE) \
 	$(SIM_PACKAGES) \
