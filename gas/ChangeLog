@@ -1,5 +1,8 @@
 Thu Feb 20 13:56:00 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-coff.c (obj_coff_ln [both versions]): Call
+	new_logical_line.
+
 	* config/tc-arm.c (fix_new_arm): Use make_expr_symbol to handle a
 	complex expression.
 

@@ -410,6 +410,9 @@ obj_coff_ln (appline)
       add_lineno (frag_now, frag_now_fix (), l);
     }
 
+  if (appline)
+    new_logical_line ((char *) NULL, l - 1);
+
 #ifndef NO_LISTING
   {
     extern int listing;
@@ -473,6 +476,9 @@ obj_coff_def (what)
   symbol_name_length = strlen (symbol_name);
   symbol_name_copy = xmalloc (symbol_name_length + 1);
   strcpy (symbol_name_copy, symbol_name);
+#ifdef tc_canonicalize_symbol_name
+  symbol_name_copy = tc_canonicalize_symbol_name (symbol_name_copy);
+#endif
 
   /* Initialize the new symbol */
   def_symbol_in_progress = symbol_make (symbol_name_copy);
@@ -785,6 +791,10 @@ obj_coff_tag (ignore)
   symbol_name = input_line_pointer;
   name_end = get_symbol_end ();
 
+#ifdef tc_canonicalize_symbol_name
+  symbol_name = tc_canonicalize_symbol_name (symbol_name);
+#endif
+
   /* Assume that the symbol referred to by .tag is always defined.
      This was a bad assumption.  I've added find_or_make. xoxorich. */
   SA_SET_SYM_TAGNDX (def_symbol_in_progress,
@@ -838,6 +848,9 @@ obj_coff_val (ignore)
       char *symbol_name = input_line_pointer;
       char name_end = get_symbol_end ();
 
+#ifdef tc_canonicalize_symbol_name
+  symbol_name = tc_canonicalize_symbol_name (symbol_name);
+#endif
       if (!strcmp (symbol_name, "."))
 	{
 	  def_symbol_in_progress->sy_frag = frag_now;
@@ -2028,6 +2041,10 @@ obj_coff_ln (appline)
 
   l = get_absolute_expression ();
   c_line_new (0, frag_now_fix (), l, frag_now);
+
+  if (appline)
+    new_logical_line ((char *) NULL, l - 1);
+
 #ifndef NO_LISTING
   {
     extern int listing;
@@ -2089,6 +2106,9 @@ obj_coff_def (what)
   symbol_name_length = strlen (symbol_name);
   symbol_name_copy = xmalloc (symbol_name_length + 1);
   strcpy (symbol_name_copy, symbol_name);
+#ifdef tc_canonicalize_symbol_name
+  symbol_name_copy = tc_canonicalize_symbol_name (symbol_name_copy);
+#endif
 
   /* Initialize the new symbol */
 #ifdef STRIP_UNDERSCORE
@@ -2427,6 +2447,9 @@ obj_coff_tag (ignore)
   S_SET_NUMBER_AUXILIARY (def_symbol_in_progress, 1);
   symbol_name = input_line_pointer;
   name_end = get_symbol_end ();
+#ifdef tc_canonicalize_symbol_name
+  symbol_name = tc_canonicalize_symbol_name (symbol_name);
+#endif
 
   /* Assume that the symbol referred to by .tag is always defined.
      This was a bad assumption.  I've added find_or_make. xoxorich. */
@@ -2480,6 +2503,10 @@ obj_coff_val (ignore)
     {
       char *symbol_name = input_line_pointer;
       char name_end = get_symbol_end ();
+
+#ifdef tc_canonicalize_symbol_name
+  symbol_name = tc_canonicalize_symbol_name (symbol_name);
+#endif
 
       if (!strcmp (symbol_name, "."))
 	{
