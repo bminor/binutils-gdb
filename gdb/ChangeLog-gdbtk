@@ -1,3 +1,8 @@
+Wed Dec 31 16:50:26 1998  Keith Seitz  (keiths@onions.cygnus.com)
+ 
+        * gdbtk.c (gdb_actions_command): extract and save step count
+        from "while-stepping" command
+
 Tue Dec 16 21:16:42 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (LIBGUI): New variable.

@@ -6,13 +6,6 @@ Fri Jan  2 17:06:05 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
 	since list elements may be deleted during loop.
 	(read_actions): add actions to history list.
 
-Fri Jan  2 16:56:16 1998  Michael Snyder  (msnyder@cleaver.cygnus.com)
-[From Keith Seitz  (kseitz@cygnus.com)]
-
-	* actiondlg.tcl (change): handle '$' in register names.
-        gdbtk.c (gdb_actions_command): extract and save step count
-        from "while-stepping" command
-
 For older changes see ChangeLog-97
 
 Local Variables:
