@@ -1,5 +1,10 @@
 2002-02-04  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen: Remove gencode comment from top of file, fix
+	spelling in another comment.
+
+2002-02-04  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (check_fmt, check_fmt_p): New functions to check
 	whether specific floating point formats are usable.
 	(ABS.fmt, ADD.fmt, CEIL.L.fmt, CEIL.W, DIV.fmt, FLOOR.L.fmt)
