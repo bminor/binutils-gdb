@@ -148,7 +148,7 @@ info_macro_command (char *name, int from_tty)
 
   ms = default_macro_scope ();
   if (! ms)
-    error ("GDB has no preprocessor macro information for that code.\n");
+    error ("GDB has no preprocessor macro information for that code.");
 
   d = macro_lookup_definition (ms->file, ms->line, name);
   if (d)

@@ -1,3 +1,8 @@
+2002-07-17  Jim Blandy  <jimb@redhat.com>
+
+	* macrocmd.c (info_macro_command): Remove newline from error
+	message.
+
 Wed Jul 17 19:36:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* sh-tdep.c (sh_dsp_register_sim_regno): New function.
