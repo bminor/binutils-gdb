@@ -592,9 +592,9 @@ extern boolean bfd_mips_ecoff_create_embedded_relocs
 /* Externally visible ELF routines.  */
 
 extern boolean bfd_elf32_record_link_assignment
-  PARAMS ((bfd *, struct bfd_link_info *, const char *));
+  PARAMS ((bfd *, struct bfd_link_info *, const char *, boolean));
 extern boolean bfd_elf64_record_link_assignment
-  PARAMS ((bfd *, struct bfd_link_info *, const char *));
+  PARAMS ((bfd *, struct bfd_link_info *, const char *, boolean));
 struct bfd_elf_link_needed_list
 {
   struct bfd_elf_link_needed_list *next;

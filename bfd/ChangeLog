@@ -1,5 +1,11 @@
 Tue Jul  4 12:22:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elfcode.h (NAME(bfd_elf,record_link_assignment)): Add provide
+	argument.
+	* bfd-in.h (bfd_elf32_record_link_assignment): Update prototype.
+	(bfd_elf64_record_link_assignment): Likewise.
+	* bfd-in2.h: Rebuild.
+
 	* libelf.h (struct elf_link_hash_table): Add needed field.  Remove
 	saw_needed field.
 	* elfcode.h (elf_link_add_object_symbols): If elf_dt_needed_name

@@ -5107,10 +5107,11 @@ elf_link_read_relocs (abfd, o, external_relocs, internal_relocs, keep_memory)
 
 /*ARGSUSED*/
 boolean
-NAME(bfd_elf,record_link_assignment) (output_bfd, info, name)
+NAME(bfd_elf,record_link_assignment) (output_bfd, info, name, provide)
      bfd *output_bfd;
      struct bfd_link_info *info;
      const char *name;
+     boolean provide;
 {
   struct elf_link_hash_entry *h;
 
@@ -5120,6 +5121,15 @@ NAME(bfd_elf,record_link_assignment) (output_bfd, info, name)
   h = elf_link_hash_lookup (elf_hash_table (info), name, true, true, false);
   if (h == NULL)
     return false;
+
+  /* If this symbol is being provided by the linker script, and it is
+     currently defined by a dynamic object, but not by a regular
+     object, then mark it as undefined so that the generic linker will
+     force the correct value.  */
+  if (provide
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+    h->root.type = bfd_link_hash_undefined;
 
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
