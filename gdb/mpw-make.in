@@ -45,12 +45,12 @@ o = :
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-prefix = :usr:local
+prefix = :usr:local:
 
 program_transform_name =
 exec_prefix = {prefix}
-bindir = {exec_prefix}:bin
-libdir = {exec_prefix}:lib
+bindir = {exec_prefix}bin
+libdir = {exec_prefix}lib
 tooldir = {libdir}:{target_alias}
 
 datadir = {prefix}:lib
@@ -129,14 +129,14 @@ MMALLOC_CFLAGS = {MMALLOC_DISABLE}
 # Where are the BFD library?
 BFD_DIR = ::bfd
 BFD = {BFD_DIR}:libbfd.o
-BFD_SRC = "{srcdir}"{BFD_DIR}
+BFD_SRC = "{s}"{BFD_DIR}
 BFD_CFLAGS = -i {BFD_DIR} -i {BFD_SRC}
 
 # Where is the READLINE library?  Typically in ::readline.
 READLINE_DIR = ::readline
 READLINE = {READLINE_DIR}:libreadline.o
 #READLINE_DISABLE = -d NO_READLINE
-READLINE_SRC = "{srcdir}"{READLINE_DIR}
+READLINE_SRC = "{s}"{READLINE_DIR}
 READLINE_CFLAGS = -i {READLINE_SRC}
 #READLINE_CFLAGS = {READLINE_DISABLE}
 
@@ -153,13 +153,13 @@ OPCODES_CFLAGS = -i {OP_INCLUDE}
 
 # All the includes used for CFLAGS and for lint.
 # -i : for config files.
-# -i {srcdir} for gdb internal headers and possibly for "{s}"regex.h also.
-# -i "{srcdir}"config for more generic config files.
+# -i {s} for gdb internal headers and possibly for "{s}"regex.h also.
+# -i "{s}"config for more generic config files.
 
 # It is also possible that you will need to add -i :usr:include:sys if
 # your system doesn't have "{s}"fcntl.h in :usr:include (which is where it
 # should be according to Posix).
-GDB_CFLAGS = -i : -i {srcdir} -i "{srcdir}"config
+GDB_CFLAGS = -i : -i {s} -i "{s}"config
 
 # M{H,T}_CFLAGS, if defined, have host- and target-dependent CFLAGS
 # from the config directory.
@@ -217,8 +217,8 @@ DIST=gdb
 LINT=:usr:5bin:lint
 LINTFLAGS= {BFD_CFLAGS}
 
-RUNTEST = `if [ -f $"{srcdir}":dejagnu:runtest ] ; then \Option-d
-		echo $"{srcdir}":dejagnu:runtest ; else echo runtest; \Option-d
+RUNTEST = `if [ -f $"{s}":dejagnu:runtest ] ; then \Option-d
+		echo $"{s}":dejagnu:runtest ; else echo runtest; \Option-d
 	   fi`
 
 RUNTESTFLAGS=
@@ -560,14 +560,12 @@ remote_utils_h = {dcache_h} "{s}"serial.h "{s}"target.h "{s}"remote-utils.h "{s}
 readline_headers =
 
 udiheaders = \Option-d
-	"{srcdir}"29k-share:udi:udiproc.h \Option-d
-	"{srcdir}"29k-share:udi:udiphcfg.h \Option-d
-	"{srcdir}"29k-share:udi:udiphunix.h \Option-d
-	"{srcdir}"29k-share:udi:udiptcfg.h \Option-d
-	"{srcdir}"29k-share:udi:udipt29k.h \Option-d
-	"{srcdir}"29k-share:udi:udisoc.h
-
-dcache_h =	"{s}"dcache.h
+	"{s}"29k-share:udi:udiproc.h \Option-d
+	"{s}"29k-share:udi:udiphcfg.h \Option-d
+	"{s}"29k-share:udi:udiphunix.h \Option-d
+	"{s}"29k-share:udi:udiptcfg.h \Option-d
+	"{s}"29k-share:udi:udipt29k.h \Option-d
+	"{s}"29k-share:udi:udisoc.h
 
 gdbcore_h =	"{s}"gdbcore.h {bfd_h}
 
@@ -649,7 +647,7 @@ TARFILES = {SFILES} {HFILES_NO_SRCDIR} {HFILES_WITH_SRCDIR} \Option-d
 
 
 OBS =	"{o}"version.c.o "{o}"main.c.o "{o}"top.c.o "{o}"blockframe.c.o "{o}"breakpoint.gc.o "{o}"findvar.c.o "{o}"stack.c.o "{o}"thread.c.o \Option-d
-	"{o}"source.gc.o "{o}"values.c.o "{o}"eval.c.o "{o}"valops.c.o "{o}"valarith.c.o "{o}"valprint.c.o "{o}"printcmd.gc.o \Option-d
+	"{o}"source.c.o "{o}"values.c.o "{o}"eval.c.o "{o}"valops.c.o "{o}"valarith.c.o "{o}"valprint.c.o "{o}"printcmd.gc.o \Option-d
 	"{o}"symtab.c.o "{o}"symfile.c.o "{o}"symmisc.c.o "{o}"infcmd.c.o "{o}"infrun.gc.o "{o}"command.c.o \Option-d
 	"{o}"utils.c.o "{o}"expprint.c.o "{o}"environ.c.o "{o}"gdbtypes.c.o "{o}"copying.c.o {DEPFILES} \Option-d
 	"{o}"mem-break.c.o "{o}"target.c.o "{o}"parse.c.o "{o}"language.c.o {YYOBJ} "{o}"buildsym.c.o \Option-d
@@ -670,8 +668,8 @@ NTSSTART = "{o}"kdb-start.c.o
 SUBDIRS = doc testsuite
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
-YYFILES = c-exp.tab.c m2-exp.tab.c ch-exp.tab.c
-YYOBJ = c-exp.tab.c.o m2-exp.tab.c.o ch-exp.tab.c.o
+YYFILES = "{o}"c-exp.tab.c "{o}"m2-exp.tab.c "{o}"ch-exp.tab.c
+YYOBJ = "{o}"c-exp.tab.c.o "{o}"m2-exp.tab.c.o "{o}"ch-exp.tab.c.o
 
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
@@ -694,7 +692,7 @@ info dvi install-info clean-info \Option-f  force
 	@{MAKE} {FLAGS_TO_PASS} DO=$@ "DODIRS={SUBDIRS}" subdir_do
 
 gdb.z \Option-f gdb.1
-	nroff -man "{srcdir}"gdb.1 | col -b > gdb.t 
+	nroff -man "{s}"gdb.1 | col -b > gdb.t 
 	pack gdb.t ; rm -f gdb.t
 	Rename -y gdb.t.z gdb.z
 
@@ -703,10 +701,14 @@ gdb.z \Option-f gdb.1
 # source file and doesn't care about rebuilding or just wants to save the
 # time it takes for make to check that all is up to date.
 # install-only is intended to address that need.
+
 install \Option-f  all install-only
+
 install-only \Option-f  
-	Duplicate -y gdb "{bindir}":gdb
-	Duplicate -y MacGDB "{bindir}":MacGDB
+	{INSTALL} gdb "{bindir}":gdb
+	{INSTALL} SiowGDB "{bindir}":SiowGDB
+# this one doesn't work very wellz
+#	{INSTALL} MacGDB "{bindir}":MacGDB
 
 uninstall \Option-f  force
 	Delete -i -y {bindir}:gdb {man1dir}:gdb.1
@@ -716,7 +718,7 @@ uninstall \Option-f  force
 # maybe we could just require every "{o}".c.o file to have an initialization routine
 # of a given name (remote-udi.o -> _initialize_remote_udi, etc.).
 #
-# Formatting conventions \Option-f   The name of the _initialize_\Option-x routines must start
+# Formatting conventions:   The name of the _initialize_* routines must start
 # in column zero, and must not be inside #if.
 :init.c \Option-f  {OBS} {TSOBS}
 	Duplicate -d -y "{s}"mpw-init.c :init.c
@@ -763,7 +765,7 @@ gdb \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o
 saber_gdb \Option-f  {SFILES} {DEPFILES} "{s}"copying.c "{s}"version.c
 	#setopt load_flags {CFLAGS} {BFD_CFLAGS} -d HOST_SYS=SUN4_SYS
 	#load :init.c {SFILES}
-	#unload "{srcdir}"c-exp.y "{srcdir}"m2-exp.y "{srcdir}"ch-exp.y
+	#unload "{s}"c-exp.y "{s}"m2-exp.y "{s}"ch-exp.y
 	#unload vx-share:\Option-x.h
 	#unload nindy-share:[A-Z]\Option-x
 	#load c-exp.tab.c m2-exp.tab.c ch-exp.tab.c
@@ -815,16 +817,16 @@ config.status \Option-f
 # This checks the configure.in file versus the config: directory.
 config-check \Option-f  config-check-hosts config-check-targets
 config-check-hosts \Option-f 
-	grep gdb_host= "{srcdir}"configure.in | \Option-d
+	grep gdb_host= "{s}"configure.in | \Option-d
 		sed -e 's:.\Option-xgdb_host=::' -e 's: ;;$$:.mh:' | sort -u >HOSTconf.o
-	(cd "{srcdir}"config; ls \Option-x.mh) >HOSTdir.o
+	(cd "{s}"config; ls \Option-x.mh) >HOSTdir.o
 	diff -u "{o}"HOSTconf.c.o "{o}"HOSTdir.c.o
 
 ### fixme - nor can this.
 config-check-targets \Option-f 
-	grep gdb_target= "{srcdir}"configure.in | \Option-d
+	grep gdb_target= "{s}"configure.in | \Option-d
 		sed -e 's:.\Option-xgdb_target=::' -e 's: ;;$$:.mh:' | sort -u >TARGconf.o
-	(cd "{srcdir}"config; ls \Option-x.mt) >TARGdir.o
+	(cd "{s}"config; ls \Option-x.mt) >TARGdir.o
 	diff -u "{o}"HOSTconf.c.o "{o}"HOSTdir.c.o
 
 # FIXME. These are not generated by "make depend" because they only are there
@@ -840,13 +842,6 @@ xm-sun4os4.h \Option-f  "{s}"xm-sparc.h
 tm-sun4os4.h \Option-f  "{s}"tm-sparc.h
 xm-vaxult.h \Option-f  "{s}"xm-vax.h
 xm-vaxbsd.h \Option-f  "{s}"xm-vax.h
-
-kdb \Option-f 	{NTSSTART} {OBS} {NTSOBS} {ADD_DEPS} {CDEPS}
-	Delete -y "{s}"init.c
-	"{srcdir}"munch {MUNCH_DEFINE} {OBS} {NTSOBS} > "{s}"init.c
-	{CC} {INTERNAL_LDFLAGS} "{s}"init.c -o "{o}"init.c.o {CLIBS} 
-	ld -o kdb {NTSSTART} {OBS} {NTSOBS} "{o}"init.c.o {ADD_FILES} \Option-d
-	  lc {CLIBS}
 
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.  (FIXME \Option-f  those
@@ -954,7 +949,7 @@ distclean \Option-f  clean
 
 realclean \Option-f  clean
 	@{MAKE} {FLAGS_TO_PASS} DO=realclean "DODIRS={SUBDIRS}" subdir_do
-	Delete -y c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS {INFOFILES}
+	Delete -y "{o}"c-exp.tab.c m2-exp.tab.c ch-exp.tab.c TAGS {INFOFILES}
 	Delete -y "{s}"nm.h "{s}"tm.h "{s}"xm.h config.status
 	Delete -y "{o}"y.c.output yacc.acts yacc.tmp
 	Delete -y Makefile
@@ -999,9 +994,10 @@ copying.c \Option-f  COPYING copying.awk
 
 # Remove bogus decls for malloc:realloc:free which conflict with everything
 # else.
-c-exp.tab.c.o \Option-f  c-exp.tab.c
-c-exp.tab.c \Option-f  "{s}"c-exp.y "{s}"Makefile.in
-	{YACC} {YFLAGS} "{srcdir}"c-exp.y
+"{o}"c-exp.tab.c.o \Option-f  "{o}"c-exp.tab.c
+
+"{o}"c-exp.tab.c \Option-f  "{s}"c-exp.y
+	{YACC} {YFLAGS} "{s}"c-exp.y
 	sed -e ':extern.*malloc:d' \Option-d
 	    -e ':extern.*realloc:d' \Option-d
 	    -e ':extern.*free:d' \Option-d
@@ -1010,18 +1006,16 @@ c-exp.tab.c \Option-f  "{s}"c-exp.y "{s}"Makefile.in
 	    -e 's:realloc:xrealloc:g' \Option-d
 	  < y.tab.c > c-exp.new
 	Delete -y y.tab.c
-	Rename -y c-exp.new :c-exp.tab.c
+	Rename -y c-exp.new "{o}"c-exp.tab.c
 
 # ch-exp.tab.c is generated in objdir from "{s}"ch-exp.y if it doesn't exist
 # in srcdir, then compiled in objdir to ch-exp.tab.c.o.
 # Remove bogus decls for malloc:realloc:free which conflict with everything
 # else.
-ch-exp.tab.c.o \Option-f  ch-exp.tab.c
-# the dependency here on c-exp.tab.c is artificial.  Without this
-# dependency, a parallel make will attempt to build both at the same
-# time and the second yacc will pollute the first y.tab.c file.
-ch-exp.tab.c \Option-f  "{s}"ch-exp.y "{s}"Makefile.in c-exp.tab.c
-	{YACC} {YFLAGS} "{srcdir}"ch-exp.y
+"{o}"ch-exp.tab.c.o \Option-f  "{o}"ch-exp.tab.c
+
+"{o}"ch-exp.tab.c \Option-f  "{s}"ch-exp.y
+	{YACC} {YFLAGS} "{s}"ch-exp.y
 	sed -e ':extern.*malloc:d' \Option-d
 	    -e ':extern.*realloc:d' \Option-d
 	    -e ':extern.*free:d' \Option-d
@@ -1030,18 +1024,16 @@ ch-exp.tab.c \Option-f  "{s}"ch-exp.y "{s}"Makefile.in c-exp.tab.c
 	    -e 's:realloc:xrealloc:g' \Option-d
 	  < y.tab.c > ch-exp.new
 	Delete -y y.tab.c
-	Rename -y ch-exp.new :ch-exp.tab.c
+	Rename -y ch-exp.new "{o}"ch-exp.tab.c
 
 # m2-exp.tab.c is generated in objdir from "{s}"m2-exp.y if it doesn't exist
 # in srcdir, then compiled in objdir to m2-exp.tab.c.o.
 # Remove bogus decls for malloc:realloc:free which conflict with everything
 # else.
-m2-exp.tab.c.o \Option-f  m2-exp.tab.c
-# the dependency here on ch-exp.tab.c is artificial.  Without this
-# dependency, a parallel make will attempt to build both at the same
-# time and the second yacc will pollute the first y.tab.c file.
-m2-exp.tab.c \Option-f  "{s}"m2-exp.y "{s}"Makefile.in ch-exp.tab.c
-	{YACC} {YFLAGS} "{srcdir}"m2-exp.y
+"{o}"m2-exp.tab.c.o \Option-f  "{o}"m2-exp.tab.c
+
+"{o}"m2-exp.tab.c \Option-f  "{s}"m2-exp.y
+	{YACC} {YFLAGS} "{s}"m2-exp.y
 	sed -e ':extern.*malloc:d' \Option-d
 	    -e ':extern.*realloc:d' \Option-d
 	    -e ':extern.*free:d' \Option-d
@@ -1050,7 +1042,7 @@ m2-exp.tab.c \Option-f  "{s}"m2-exp.y "{s}"Makefile.in ch-exp.tab.c
 	    -e 's:realloc:xrealloc:g' \Option-d
 	  < y.tab.c > m2-exp.new
 	Delete -y y.tab.c
-	Rename -y m2-exp.new :m2-exp.tab.c
+	Rename -y m2-exp.new "{o}"m2-exp.tab.c
 
 # These files are updated atomically, so make never has to remove them
 # .PRECIOUS \Option-f  m2-exp.tab.c ch-exp.tab.c c-exp.tab.c
@@ -1085,14 +1077,14 @@ MAKEOVERRIDES=
 
 
 
-"{o}"udip2soc.c.o \Option-f  "{srcdir}"29k-share:udi:udip2soc.c {udiheaders}
-	{CC} {INTERNAL_CFLAGS} "{srcdir}"29k-share:udi:udip2soc.c -o "{o}"soc.c.o
+"{o}"udip2soc.c.o \Option-f  "{s}"29k-share:udi:udip2soc.c {udiheaders}
+	{CC} {INTERNAL_CFLAGS} "{s}"29k-share:udi:udip2soc.c -o "{o}"soc.c.o
 
-"{o}"udi2go32.c.o \Option-f  "{srcdir}"29k-share:udi:udi2go32.c {udiheaders}
-	{CC} {INTERNAL_CFLAGS} "{srcdir}"29k-share:udi:udi2go32.c -o "{o}".c.o
+"{o}"udi2go32.c.o \Option-f  "{s}"29k-share:udi:udi2go32.c {udiheaders}
+	{CC} {INTERNAL_CFLAGS} "{s}"29k-share:udi:udi2go32.c -o "{o}".c.o
 
-"{o}"udr.c.o \Option-f  "{srcdir}"29k-share:udi:udr.c {udiheaders} 
-	{CC} {INTERNAL_CFLAGS} "{srcdir}"29k-share:udi:udr.c -o "{o}"udr.c.o
+"{o}"udr.c.o \Option-f  "{s}"29k-share:udi:udr.c {udiheaders} 
+	{CC} {INTERNAL_CFLAGS} "{s}"29k-share:udi:udr.c -o "{o}"udr.c.o
 
 "{o}"a29k-pinsn.c.o \Option-f  "{s}"a29k-pinsn.c {bfd_h} {dis_asm_h}
 "{o}"a29k-tdep.c.o \Option-f  "{s}"a29k-tdep.c {gdbcmd_h} {gdbcore_h} {inferior_h} {defs_h}
@@ -1293,12 +1285,10 @@ MAKEOVERRIDES=
 "{o}"main.c.o \Option-f  "{s}"main.c {bfd_h} {getopt_h} {readline_headers} "{s}"call-cmds.h \Option-d
 	{defs_h} {gdbcmd_h} {inferior_h} "{s}"language.h "{s}"signals.h \Option-d
 	{remote_utils_h}
-	{CC} "{srcdir}"main.c {INTERNAL_CFLAGS} {READLINE_CFLAGS} -s gdb_main -o "{o}"main.c.o
 
 "{o}"top.c.o \Option-f  "{s}"top.c {bfd_h} {getopt_h} {readline_headers} "{s}"call-cmds.h \Option-d
 	{defs_h} {gdbcmd_h} {inferior_h} "{s}"language.h "{s}"signals.h \Option-d
 	{remote_utils_h}
-	{CC} "{srcdir}"top.c {INTERNAL_CFLAGS} {READLINE_CFLAGS} -s gdb_top -o "{o}"top.c.o
 
 "{o}"maint.c.o \Option-f  "{s}"maint.c {defs_h} {gdbcmd_h} {gdbtypes_h} {symtab_h} "{s}"language.h \Option-d
 	{expression_h}
@@ -1326,17 +1316,17 @@ MAKEOVERRIDES=
 
 "{o}"Onindy.c.o \Option-f  "{s}"nindy-share:Onindy.c {wait_h} "{s}"nindy-share:block_io.h \Option-d
 	"{s}"nindy-share:env.h
-	{CC} {INTERNAL_CFLAGS} "{srcdir}"nindy-share:Onindy.c -o "{o}"nindy.c.o
+	{CC} {INTERNAL_CFLAGS} "{s}"nindy-share:Onindy.c -o "{o}"nindy.c.o
 
 "{o}"nindy.c.o \Option-f  "{s}"nindy-share:nindy.c {wait_h} "{s}"nindy-share:block_io.h \Option-d
 	"{s}"nindy-share:env.h
-	{CC} {INTERNAL_CFLAGS} "{srcdir}"nindy-share:nindy.c -o "{o}"nindy.c.o
+	{CC} {INTERNAL_CFLAGS} "{s}"nindy-share:nindy.c -o "{o}"nindy.c.o
 
 "{o}"nlmread.c.o \Option-f  "{s}"nlmread.c {bfd_h} "{s}"buildsym.h "{s}"complaints.h {defs_h} \Option-d
 	"{s}"gdb-stabs.h "{s}"objfiles.h "{s}"symfile.h {symtab_h} "{s}"stabsread.h
 
 "{o}"ttyflush.c.o \Option-f  "{s}"nindy-share:ttyflush.c
-	{CC} {INTERNAL_CFLAGS} "{srcdir}"nindy-share:ttyflush.c -o "{o}"ttyflush.c.o
+	{CC} {INTERNAL_CFLAGS} "{s}"nindy-share:ttyflush.c -o "{o}"ttyflush.c.o
 
 "{o}"nindy-tdep.c.o \Option-f  "{s}"nindy-tdep.c {defs_h} {frame_h} {symtab_h} 
 
@@ -1376,7 +1366,7 @@ MAKEOVERRIDES=
 "{o}"remote-bug.c.o \Option-f  "{s}"remote-bug.c {wait_h} {defs_h} {gdbcore_h} \Option-d
 	{inferior_h} "{s}"target.h "{s}"terminal.h {remote_utils_h}
 
-"{o}"remote-eb.c.o \Option-f  "{s}"remote-eb.c {wait_h} "{srcdir}"config:a29k:tm-a29k.h \Option-d
+"{o}"remote-eb.c.o \Option-f  "{s}"remote-eb.c {wait_h} "{s}"config:a29k:tm-a29k.h \Option-d
 	{defs_h} {gdbcore_h} {inferior_h} "{s}"symfile.h "{s}"target.h "{s}"terminal.h
 
 "{o}"remote-es.c.o \Option-f  "{s}"remote-es.c {bfd_h} {wait_h} {command_h} {defs_h} \Option-d
@@ -1413,7 +1403,7 @@ MAKEOVERRIDES=
 	"{s}"vx-share:ptrace.h "{s}"vx-share:xdr_ld.h "{s}"vx-share:xdr_ptrace.h \Option-d
 	"{s}"vx-share:xdr_rdb.h
 
-"{o}"remote-z8k.c.o \Option-f  "{s}"remote-z8k.c {wait_h} "{srcdir}":sim:z8k:sim.h \Option-d
+"{o}"remote-z8k.c.o \Option-f  "{s}"remote-z8k.c {wait_h} "{s}":sim:z8k:sim.h \Option-d
 	{defs_h} {gdbcore_h} {inferior_h} "{s}"target.h "{s}"terminal.h
 
 "{o}"remote-utils.c.o \Option-f  "{s}"remote-utils.c {defs_h} {gdbcmd_h} {gdbcore_h} \Option-d
@@ -1436,13 +1426,13 @@ MAKEOVERRIDES=
 "{o}"serial.c.o \Option-f  "{s}"serial.c {defs_h} "{s}"serial.h 
 
 "{o}"sh-tdep.c.o \Option-f  "{s}"sh-tdep.c {bfd_h} {dis_asm_h} \Option-d
-	"{srcdir}":opcodes:sh-opc.h {defs_h} {expression_h} {frame_h} \Option-d
+	"{s}":opcodes:sh-opc.h {defs_h} {expression_h} {frame_h} \Option-d
 	{gdbcmd_h} {gdbtypes_h} {symtab_h} {value_h}
 
 "{o}"solib.c.o \Option-f  "{s}"solib.c {command_h} {defs_h} {gdbcore_h} {inferior_h} \Option-d
 	"{s}"objfiles.h "{s}"regex.h "{s}"symfile.h "{s}"target.h
 
-"{o}"source.gc.o \Option-f  "{s}"source.c {defs_h} {expression_h} {frame_h} {gdbcmd_h} \Option-d
+"{o}"source.c.o \Option-f  "{s}"source.c {defs_h} {expression_h} {frame_h} {gdbcmd_h} \Option-d
 	{gdbcore_h} "{s}"language.h "{s}"objfiles.h "{s}"regex.h "{s}"symfile.h {symtab_h}
 
 "{o}"sparc-nat.c.o \Option-f  "{s}"sparc-nat.c {bfd_h} {defs_h} {inferior_h} "{s}"target.h
@@ -1511,15 +1501,15 @@ MAKEOVERRIDES=
 
 "{o}"xdr_ld.c.o \Option-f  "{s}"vx-share:xdr_ld.c {defs_h} "{s}"vx-share:vxTypes.h \Option-d
 	"{s}"vx-share:vxWorks.h "{s}"vx-share:xdr_ld.h
-	{CC} {INTERNAL_CFLAGS} "{srcdir}"vx-share:xdr_ld.c -o "{o}"ld.c.o
+	{CC} {INTERNAL_CFLAGS} "{s}"vx-share:xdr_ld.c -o "{o}"ld.c.o
 
 "{o}"xdr_ptrace.c.o \Option-f  "{s}"vx-share:xdr_ptrace.c {defs_h} "{s}"vx-share:vxTypes.h \Option-d
 	"{s}"vx-share:vxWorks.h "{s}"vx-share:xdr_ptrace.h
-	{CC} {INTERNAL_CFLAGS} "{srcdir}"vx-share:xdr_ptrace.c -o "{o}"ptrace.c.o
+	{CC} {INTERNAL_CFLAGS} "{s}"vx-share:xdr_ptrace.c -o "{o}"ptrace.c.o
 
 "{o}"xdr_rdb.c.o \Option-f  "{s}"vx-share:xdr_rdb.c {defs_h} "{s}"vx-share:vxTypes.h \Option-d
 	"{s}"vx-share:vxWorks.h "{s}"vx-share:xdr_rdb.h
-	{CC} {INTERNAL_CFLAGS} "{srcdir}"vx-share:xdr_rdb.c -o "{o}"rdb.c.o
+	{CC} {INTERNAL_CFLAGS} "{s}"vx-share:xdr_rdb.c -o "{o}"rdb.c.o
 
 "{o}"xcoffexec.c.o \Option-f  "{s}"xcoffexec.c "{s}"{BFD_SRC}:libbfd.h {defs_h} {gdbcmd_h} \Option-d
 	{gdbcore_h} {inferior_h} "{s}"objfiles.h "{s}"symfile.h "{s}"target.h "{s}"xcoffsolib.h

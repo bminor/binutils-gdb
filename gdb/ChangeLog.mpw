@@ -1,3 +1,14 @@
+Wed Jun 29 18:04:55 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in: Use {s} instead of {srcdir} everywhere.
+	(bindir, libdir): Remove extra colon.
+	(source.c): Compile with C instead of gC.
+	(c-exp.tab.c, ch-exp.tab.c, m2-exp.tab.c): Add {o}.
+	(install-only): Don't install MacGDB.
+	* source.c (openp) [MPW]: Add a debugging display.
+	(open_source_file) [MPW]: Use MPW basename finders.
+	[MPW_C]: Briefer versions of help for line and list commands.
+
 Sun Jun 26 23:56:19 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* mpw-make.in: Change references from paread.c to somread.c
