@@ -47,11 +47,11 @@
 
 char *
 xmalloc (n)
-     long n;
+     unsigned long n;
 {
   char *retval;
 
-  retval = malloc ((unsigned) n);
+  retval = malloc (n);
   if (retval == NULL)
     error ("virtual memory exceeded");
   return (retval);
@@ -60,9 +60,9 @@ xmalloc (n)
 char *
 xrealloc (ptr, n)
      register char *ptr;
-     long n;
+     unsigned long n;
 {
-  ptr = realloc (ptr, (unsigned) n);
+  ptr = realloc (ptr, n);
   if (ptr == 0)
     error ("virtual memory exceeded");
   return (ptr);

@@ -46,7 +46,7 @@ bignum_copy (in, in_length, out, out_length)
 				      littlenum. */
 
       memcpy ((void *) out, (void *) in,
-	      out_length << LITTLENUM_SHIFT);
+	      (unsigned int) out_length << LITTLENUM_SHIFT);
       for (p = in + in_length - 1; p >= in; --p)
 	{
 	  if (*p)
@@ -62,12 +62,13 @@ bignum_copy (in, in_length, out, out_length)
   else
     {
       memcpy ((char *) out, (char *) in,
-	      in_length << LITTLENUM_SHIFT);
+	      (unsigned int) in_length << LITTLENUM_SHIFT);
 
       if (out_length > in_length)
 	{
 	  memset ((char *) (out + in_length),
-		  '\0', (out_length - in_length) << LITTLENUM_SHIFT);
+		  '\0',
+		  (unsigned int) (out_length - in_length) << LITTLENUM_SHIFT);
 	}
 
       significant_littlenums_dropped = 0;

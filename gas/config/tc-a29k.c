@@ -59,23 +59,10 @@ struct machine_it
 
 the_insn;
 
-#if __STDC__ == 1
-
-/* static int getExpression(char *str); */
-static void machine_ip (char *str);
-/* static void print_insn(struct machine_it *insn); */
-static void s_data1 (void);
-static void s_use (void);
-
-#else /* not __STDC__ */
-
-/* static int getExpression(); */
-static void machine_ip ();
-/* static void print_insn(); */
-static void s_data1 ();
-static void s_use ();
-
-#endif /* not __STDC__ */
+static void machine_ip PARAMS ((char *str));
+/* static void print_insn PARAMS ((struct machine_it *insn)); */
+static void s_data1 PARAMS ((void));
+static void s_use PARAMS ((void));
 
 const pseudo_typeS
   md_pseudo_table[] =
@@ -152,13 +139,13 @@ s_use ()
   if (strncmp (input_line_pointer, ".text", 5) == 0)
     {
       input_line_pointer += 5;
-      s_text ();
+      s_text (0);
       return;
     }
   if (strncmp (input_line_pointer, ".data", 5) == 0)
     {
       input_line_pointer += 5;
-      s_data ();
+      s_data (0);
       return;
     }
   if (strncmp (input_line_pointer, ".data1", 6) == 0)
