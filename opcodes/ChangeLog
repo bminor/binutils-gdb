@@ -1,4 +1,8 @@
 2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add m*ivor35.
+
+2004-02-20  Aldy Hernandez  <aldyh@redhat.com>
  
         * ppc-opc.c (powerpc_opcodes): Add mfivor32, mfivor33, mfivor34,
         mtivor32, mtivor33, mtivor34.
