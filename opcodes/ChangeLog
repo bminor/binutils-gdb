@@ -1,3 +1,9 @@
+Sun Jul 18 16:30:02 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* mips-opc.c: New file, containing opcode table from
+	../include/opcode/mips.h.
+	* Makefile.in: Add it.
+
 Thu Jul 15 12:37:05 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* m88k-dis.c: New file, moved in from gdb and changed to use the
