@@ -12,18 +12,17 @@ AC_SUBST(CC)
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
 AC_CANONICAL_SYSTEM
 
-# Directories to use in all configurations.
-configdirs=""
-
-# add test sub-directory for appropriate targets
-testdir=`echo ${target} | sed -e 's/-.*-/-/'`
-if test -r ${srcdir}/${testdir}/configure ; then
-  configdirs="${configdirs} $testdir"
-fi
-
-# add any extra subdirectories
-case $target in
-  *) ;;
+# Configure sub-directory for appropriate targets
+case ${target} in
+    frv-*-elf )
+	AC_CONFIG_SUBDIRS(frv-elf)
+	;;
+    m32r-*-elf )
+	AC_CONFIG_SUBDIRS(m32r-elf)
+	;;
+    mips64el-*-elf )
+        AC_CONFIG_SUBDIRS(mips64el-elf)
+	;;
 esac
 
 # Compute the target architecture.
@@ -33,8 +32,5 @@ case $target in
   *) arch=${target_cpu} ;;
 esac
 AC_SUBST(arch)
-
-# configure the subdirectories too
-AC_CONFIG_SUBDIRS($configdirs)
 
 AC_OUTPUT(Makefile)

@@ -644,18 +644,20 @@ test "$host_alias" != "$target_alias" &&
   program_prefix=${target_alias}-
 
 
-# Directories to use in all configurations.
-configdirs=""
+# Configure sub-directory for appropriate targets
+case ${target} in
+    frv-*-elf )
+	subdirs="frv-elf"
 
-# add test sub-directory for appropriate targets
-testdir=`echo ${target} | sed -e 's/-.*-/-/'`
-if test -r ${srcdir}/${testdir}/configure ; then
-  configdirs="${configdirs} $testdir"
-fi
+	;;
+    m32r-*-elf )
+	subdirs="frv-elf m32r-elf"
 
-# add any extra subdirectories
-case $target in
-  *) ;;
+	;;
+    mips64el-*-elf )
+        subdirs="frv-elf m32r-elf mips64el-elf"
+
+	;;
 esac
 
 # Compute the target architecture.
@@ -664,10 +666,6 @@ esac
 case $target in
   *) arch=${target_cpu} ;;
 esac
-
-
-# configure the subdirectories too
-subdirs="$configdirs"
 
 
 trap '' 1 2 15
@@ -830,8 +828,8 @@ s%@build_alias@%$build_alias%g
 s%@build_cpu@%$build_cpu%g
 s%@build_vendor@%$build_vendor%g
 s%@build_os@%$build_os%g
-s%@arch@%$arch%g
 s%@subdirs@%$subdirs%g
+s%@arch@%$arch%g
 
 CEOF
 EOF
@@ -964,7 +962,7 @@ if test "$no_recursion" != yes; then
     esac
   done
 
-  for ac_config_dir in $configdirs; do
+  for ac_config_dir in frv-elf m32r-elf mips64el-elf; do
 
     # Do not complain, so a configure script can configure whichever
     # parts of a large source tree are present.

@@ -1,5 +1,8 @@
 2005-01-07  Andrew Cagney  <cagney@gnu.org>
 
+	* configure.in: Pass literal subdirectories to AC_CONFIG_SUBDIRS.
+	* configure: Re-generate.
+	
 	* fr30-elf, d30v-elf: Delete directory.
 
 2004-11-16  Hans-Peter Nilsson  <hp@axis.com>
