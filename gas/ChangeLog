@@ -1,3 +1,9 @@
+Fri Apr  9 09:05:47 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config/obj-ecoff.h (ecoff_build_lineno): Make ilineMax in
+	symbolic header match cline in FDR; the native liinker seems to
+	want that.
+
 Thu Apr  8 15:51:28 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* doc/Makefile.in: as.texinfo is in $(srcdir).  Use

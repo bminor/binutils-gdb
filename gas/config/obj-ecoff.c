@@ -3713,7 +3713,7 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
   c = ecoff_longword_adjust (buf, bufend, c, &bufptr);
 
   if (linecntptr != (long *) NULL)
-    *linecntptr = iline;
+    *linecntptr = totcount;
 
   return c;
 }
@@ -3940,9 +3940,8 @@ ecoff_build_symbols (buf,
 			}
 		      else
 			{
-			  know (sym_ptr->begin_ptr->index_ptr
-				!= (aux_t *) NULL);
-			  sym_ptr->begin_ptr->index_ptr->data.isym =
+			  know (begin_ptr->index_ptr != (aux_t *) NULL);
+			  begin_ptr->index_ptr->data.isym =
 			    isym - ifilesym + 1;
 			}
 
