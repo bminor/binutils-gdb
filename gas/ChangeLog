@@ -1,3 +1,8 @@
+2001-05-08  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-m68k.c: Instead of replacing -1 by 64 in assignment to
+	fx_pcrel_adjust explicitly sign extend when reading it.
+
 2001-05-08  Alan Modra  <amodra@one.net.au>
 
 	* config/tc-m68k.c (md_estimate_size_before_relax): Set fr_var

@@ -968,8 +968,9 @@ tc_gen_reloc (section, fixp)
     reloc->addend = fixp->fx_addnumber;
   else
     reloc->addend = (section->vma
-		     + (fixp->fx_pcrel_adjust == 64
-			? -1 : fixp->fx_pcrel_adjust)
+		     /* Explicit sign extension in case char is
+			unsigned.  */
+		     + ((fixp->fx_pcrel_adjust & 0xff) ^ 0x80) - 0x80
 		     + fixp->fx_addnumber
 		     + md_pcrel_from (fixp));
 #endif
@@ -2546,11 +2547,7 @@ m68k_ip (instring)
 	  switch (s[1])
 	    {
 	    case 'B':
-	      /* The pc_fix argument winds up in fx_pcrel_adjust,
-                 which is a char, and may therefore be unsigned.  We
-                 want to pass -1, but we pass 64 instead, and convert
-                 back in md_pcrel_from.  */
-	      add_fix ('B', &opP->disp, 1, 64);
+	      add_fix ('B', &opP->disp, 1, -1);
 	      break;
 	    case 'W':
 	      add_fix ('w', &opP->disp, 1, 0);
@@ -7041,9 +7038,9 @@ md_pcrel_from (fixP)
 {
   int adjust;
 
-  /* Because fx_pcrel_adjust is a char, and may be unsigned, we store
-     -1 as 64.  */
-  adjust = fixP->fx_pcrel_adjust;
+  /* Because fx_pcrel_adjust is a char, and may be unsigned, we explicitly
+     sign extend the value here.  */
+  adjust = ((fixP->fx_pcrel_adjust & 0xff) ^ 0x80) - 0x80;
   if (adjust == 64)
     adjust = -1;
   return fixP->fx_where + fixP->fx_frag->fr_address - adjust;
