@@ -1,3 +1,8 @@
+1999-11-19  Catherine Moore  <clm@cygnus.com>
+
+	* elf32-m68k.c (elf_cpu32_plt0_entry): Fix encoding.
+	(elf_cpu32_plt_entry): Likewise.
+
 1999-11-18  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-mcore.c (coff_mcore_rtype_to_howto): Special case handling
