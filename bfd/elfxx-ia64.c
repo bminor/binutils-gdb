@@ -2941,8 +2941,12 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
   data.ofs = (data.ofs + 31) & (bfd_vma) -32;
 
   elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_plt2_entries, &data);
-  if (data.ofs != 0)
+  if (data.ofs != 0 || ia64_info->root.dynamic_sections_created)
     {
+      /* FIXME: we always reserve the memory for dynamic linker even if
+	 there are no PLT entries since dynamic linker may assume the
+	 reserved memory always exists.  */
+
       BFD_ASSERT (ia64_info->root.dynamic_sections_created);
 
       ia64_info->plt_sec->_raw_size = data.ofs;

@@ -1,3 +1,8 @@
+2004-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_size_dynamic_sections): Always
+	reserve the memory for dynamic linker
+
 2004-04-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* netbsd-core.c (CORE_WCOOKIE_OFFSET): New define.
