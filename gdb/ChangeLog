@@ -1,5 +1,7 @@
 Fri Apr 10 08:30:58 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* depend:  Generate new depend file for this release.
+
 	* Makefile.in (depend):  Fix dependancy generation so that it does
 	not include gcc 'fixincluded' files, which are usually in a system
 	specific location.
