@@ -252,32 +252,31 @@ check_range (num, bits, flags)
 	 Allow either.  */
       min = -((unsigned long) 1 << (bits - 1));
       max = ((unsigned long) 1 << bits) - 1;
-      return (long)num < min || (long)num > max;
+      return (long) num < min || (long) num > max;
     }
 
   if (flags & OPERAND_SHIFT)
     {
       /* We know that all shifts are right by three bits.  */
+      num >>= 3;
 
       if (flags & OPERAND_SIGNED)
-	num = (unsigned long) ((long) num >= 0)
-		? (((long) num) >> 3)
-		: ((num >> 3) | ~(~(unsigned long) 0 >> 3));
-      else
-	num >>= 3;
+	{
+	  unsigned long sign_bit = ((unsigned long) -1L >> 4) + 1;
+	  num = (num ^ sign_bit) - sign_bit;
+	}
     }
 
   if (flags & OPERAND_SIGNED)
     {
       max = ((unsigned long) 1 << (bits - 1)) - 1;
       min = - ((unsigned long) 1 << (bits - 1));
-      return (long)num > max || (long)num < min;
+      return (long) num > max || (long) num < min;
     }
   else
     {
       max = ((unsigned long) 1 << bits) - 1;
-      min = 0;
-      return num > max || num < min;
+      return num > (unsigned long) max;
     }
 }
 

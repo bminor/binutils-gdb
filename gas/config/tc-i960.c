@@ -1120,6 +1120,7 @@ md_estimate_size_before_relax (fragP, segment_type)
   	does do the reordering (Ian Taylor 28 Aug 92).
 
   *************************************************************************** */
+static void md_ri_to_chars PARAMS ((char *, struct relocation_info *));
 
 static void
 md_ri_to_chars (where, ri)

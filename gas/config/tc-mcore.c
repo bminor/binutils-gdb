@@ -210,7 +210,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "text",      mcore_s_text,    0 },
   { "data",      mcore_s_data,    0 },
   { "bss",       mcore_s_bss,     1 },
-#ifdef OBJ_EF
+#ifdef OBJ_ELF
   { "comm",      mcore_s_comm,    0 },
 #endif
   { "section",   mcore_s_section, 0 },
@@ -639,7 +639,7 @@ dump_literals (isforce)
 {
   unsigned int i;
   struct literal * p;
-  symbolS * brarsym;
+  symbolS * brarsym = NULL;
 
   if (poolsize == 0)
     return;
@@ -674,7 +674,7 @@ dump_literals (isforce)
   for (i = 0, p = litpool; i < poolsize; i++, p++)
     emit_expr (& p->e, 4);
 
-  if (isforce)
+  if (brarsym != NULL)
     colon (S_GET_NAME (brarsym));
 
    poolsize = 0;

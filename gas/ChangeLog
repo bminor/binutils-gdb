@@ -1,5 +1,11 @@
 2002-12-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-d30v.c (check_range): Warning fixes, formatting.
+	Simplify sign extension.  Remove redundant unsigned < 0 test.
+	* config/tc-i960.c (md_ri_to_chars): Prototype.
+	* config/tc-mcore.c (md_pseudo_table): Fix typo.
+	(dump_literals): Init brarsym, and test later instead of isforce.
+
 	* config/tc-ns32k.c (encode_operand): Constify operandsP and suffixP.
 	(parse): Constify line and lineptr.
 	(md_begin): Calculate endop here.
