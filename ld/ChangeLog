@@ -1,3 +1,7 @@
+Wed Jan 19 13:57:00 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ld.texinfo: Clarify what -T option does.
+
 Tue Jan 18 16:18:15 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* scripttempl/m88kbcs.sc: Don't use CREATE_OBJECT_SYMBOLS, that's
