@@ -1,6 +1,11 @@
+Tue Mar 28 11:18:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: Add setup_xfail for simple copy test
+	for m68*-ericsson-ose and m88*-*-coff.
+
 Mon Mar 27 11:27:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
-	* binutils-all/objcopy.exp: Add setup_xfail for simply copy test
+	* binutils-all/objcopy.exp: Add setup_xfail for simple copy test
 	for m68*-*-vxworks*.
 
 Fri Mar 24 11:44:25 1995  Ian Lance Taylor  <ian@cygnus.com>

@@ -49,11 +49,13 @@ if ![string match "" $got] then {
 
     setup_xfail "sh-*-coff" "sh-*-hms"
     setup_xfail "m68*-*-hpux*" "m68*-*-sunos*" "m68*-*-coff" "m68*-*-vxworks*"
+    setup_xfail "m68*-ericsson-ose"
     setup_xfail "i*86-*-linux"
     setup_xfail "a29k-*-udi" "a29k-*-coff"
     setup_xfail "i960-*-vxworks5.1" "i960-*-coff"
     setup_xfail "h8300-*-hms" "h8300-*-coff"
     setup_xfail "hppa*-*-*"
+    setup_xfail "m88*-*-coff"
 
     if [string match "" $exec_output] then {
 	pass "objcopy (simple copy)"
