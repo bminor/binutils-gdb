@@ -1,5 +1,8 @@
 Tue Dec  8 16:21:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* libbfd.c (COERCE32): Cast through unsigned long and long to
+	avoid bug in old version of gcc.
+
 	* elf64-alpha.c (elf64_alpha_additional_program_headers): Remove.
 	(elf_backend_additional_program_headers): Don't define.
 
