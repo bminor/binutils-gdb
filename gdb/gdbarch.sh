@@ -76,7 +76,11 @@ EOF
 		fi
 	    done
 
-	    test "${staticdefault}" || staticdefault=0
+	    case "${class}" in
+		m ) staticdefault="${predefault}" ;;
+		M ) staticdefault="0" ;;
+		* ) test "${staticdefault}" || staticdefault=0 ;;
+	    esac
 	    # NOT YET: Breaks BELIEVE_PCC_PROMOTION and confuses non-
 	    # multi-arch defaults.
 	    # test "${predefault}" || predefault=0
@@ -587,6 +591,16 @@ EOF
 	echo "Error: postdefault is useless when invalid_p=0" 1>&2
 	kill $$
 	exit 1
+    fi
+    if class_is_multiarch_p
+    then
+	if class_is_predicate_p ; then :
+	elif test "x${predefault}" = "x"
+	then
+	    echo "Error: pure multi-arch function must have a predefault" 1>&2
+	    kill $$
+	    exit 1
+	fi
     fi
     echo ""
 done

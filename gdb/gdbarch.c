@@ -393,7 +393,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  0,
+  generic_in_function_epilogue_p,
   /* startup_gdbarch() */
 };
 
