@@ -5641,7 +5641,7 @@ s_gpword (ignore)
   char *p;
 
   /* When not generating PIC code, this is treated as .word.  */
-  if (mips_pic == NO_PIC)
+  if (mips_pic != SVR4_PIC)
     {
       s_cons (2);
       return;
@@ -5680,7 +5680,7 @@ s_cpadd (ignore)
   int reg;
 
   /* This is ignored when not generating SVR4 PIC code.  */
-  if (mips_pic == NO_PIC)
+  if (mips_pic != SVR4_PIC)
     {
       s_ignore (0);
       return;
