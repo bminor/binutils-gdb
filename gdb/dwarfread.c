@@ -127,7 +127,7 @@ extern int info_verbose;		/* From main.c; nonzero => verbose */
    Some fields have a flag <name>_p that is set when the value of the
    field is valid (I.E. we found a matching attribute in the DIE).  Since
    we may want to test for the presence of some attributes in the DIE,
-   such as AT_is_external, without restricting the values of the field,
+   such as AT_low_pc, without restricting the values of the field,
    we need someway to note that we found such an attribute.
    
  */
@@ -152,7 +152,6 @@ struct dieinfo {
   long		at_byte_size;
   short		at_bit_offset;
   long		at_bit_size;
-  BLOCK *	at_deriv_list;
   BLOCK *	at_element_list;
   long		at_stmt_list;
   long		at_low_pc;
@@ -166,17 +165,13 @@ struct dieinfo {
   BLOCK *	at_string_length;
   char *	at_comp_dir;
   char *	at_producer;
-  long		at_loclist;
   long		at_frame_base;
-  short		at_incomplete;
   long		at_start_scope;
   long		at_stride_size;
   long		at_src_info;
   short		at_prototyped;
-  BLOCK *	at_const_data;
-  short		at_is_external;
-  unsigned int	at_is_external_p:1;
-  unsigned int	at_stmt_list_p:1;
+  unsigned int	has_at_low_pc:1;
+  unsigned int	has_at_stmt_list:1;
 };
 
 static int diecount;	/* Approximate count of dies for compilation unit */
@@ -1557,7 +1552,7 @@ DEFUN(process_dies, (thisdie, enddie, objfile),
 	      break;
 	    case TAG_global_subroutine:
 	    case TAG_subroutine:
-	      if (!di.at_is_external_p)
+	      if (di.has_at_low_pc)
 		{
 		  read_func_scope (&di, thisdie, nextdie, objfile);
 		}
@@ -2682,6 +2677,13 @@ DESCRIPTION
 	so, then extracting all the attributes info and generating a
 	partial symbol table entry.
 
+NOTES
+
+	Don't attempt to add anonymous structures, unions, or enumerations
+	since they have no name.  Also, for variables and subroutines,
+	check that this is the place where the actual definition occurs,
+	rather than just a reference to an external.
+
  */
 
 static void
@@ -2703,19 +2705,21 @@ DEFUN(scan_partial_symbols, (thisdie, enddie), char *thisdie AND char *enddie)
 	  switch (di.dietag)
 	    {
 	    case TAG_global_subroutine:
-	    case TAG_global_variable:
 	    case TAG_subroutine:
+	    case TAG_global_variable:
 	    case TAG_local_variable:
+	      completedieinfo (&di);
+	      if (di.at_name && (di.has_at_low_pc || di.at_location))
+		{
+		  add_partial_symbol (&di);
+		}
+	      break;
 	    case TAG_typedef:
 	    case TAG_structure_type:
 	    case TAG_union_type:
 	    case TAG_enumeration_type:
 	      completedieinfo (&di);
-	      /* Don't attempt to add anonymous structures, unions, or
-		 enumerations since they have no name.  Also check that
-		 this is the place where the actual definition occurs,
-		 rather than just a reference to an external. */
-	      if (di.at_name != NULL && !di.at_is_external_p)
+	      if (di.at_name)
 		{
 		  add_partial_symbol (&di);
 		}
@@ -2811,7 +2815,7 @@ DEFUN(scan_compilation_units,
 	    }
 	  curoff = thisdie - dbbase;
 	  culength = nextdie - thisdie;
-	  curlnoffset = di.at_stmt_list_p ? lnoffset + di.at_stmt_list : 0;
+	  curlnoffset = di.has_at_stmt_list ? lnoffset + di.at_stmt_list : 0;
 	  pst = start_psymtab (objfile, addr, di.at_name,
 				     di.at_low_pc, di.at_high_pc,
 				     dbfoff, curoff, culength, curlnoffset,
@@ -3420,10 +3424,11 @@ DEFUN(completedieinfo, (dip), struct dieinfo *dip)
 	  break;
 	case AT_stmt_list:
 	  (void) memcpy (&dip -> at_stmt_list, diep, sizeof (long));
-	  dip -> at_stmt_list_p = 1;
+	  dip -> has_at_stmt_list = 1;
 	  break;
 	case AT_low_pc:
 	  (void) memcpy (&dip -> at_low_pc, diep, sizeof (long));
+	  dip -> has_at_low_pc = 1;
 	  break;
 	case AT_high_pc:
 	  (void) memcpy (&dip -> at_high_pc, diep, sizeof (long));
@@ -3461,9 +3466,6 @@ DEFUN(completedieinfo, (dip), struct dieinfo *dip)
 	case AT_mod_u_d_type:
 	  dip -> at_mod_u_d_type = diep;
 	  break;
-	case AT_deriv_list:
-	  dip -> at_deriv_list = diep;
-	  break;
 	case AT_element_list:
 	  dip -> at_element_list = diep;
 	  break;
@@ -3482,14 +3484,8 @@ DEFUN(completedieinfo, (dip), struct dieinfo *dip)
 	case AT_producer:
 	  dip -> at_producer = diep;
 	  break;
-	case AT_loclist:
-	  (void) memcpy (&dip -> at_loclist, diep, sizeof (long));
-	  break;
 	case AT_frame_base:
 	  (void) memcpy (&dip -> at_frame_base, diep, sizeof (long));
-	  break;
-	case AT_incomplete:
-	  (void) memcpy (&dip -> at_incomplete, diep, sizeof (short));
 	  break;
 	case AT_start_scope:
 	  (void) memcpy (&dip -> at_start_scope, diep, sizeof (long));
@@ -3502,13 +3498,6 @@ DEFUN(completedieinfo, (dip), struct dieinfo *dip)
 	  break;
 	case AT_prototyped:
 	  (void) memcpy (&dip -> at_prototyped, diep, sizeof (short));
-	  break;
-	case AT_const_data:
-	  dip -> at_const_data = diep;
-	  break;
-	case AT_is_external:
-	  (void) memcpy (&dip -> at_is_external, diep, sizeof (short));
-	  dip -> at_is_external_p = 1;
 	  break;
 	default:
 	  /* Found an attribute that we are unprepared to handle.  However

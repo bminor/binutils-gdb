@@ -1,3 +1,9 @@
+Mon Nov 18 00:04:41 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dwarfread.c:  Changes to match new dwarf.h.  Remove 
+	AT_deriv_list, AT_loclist, AT_incomplete, AT_const_data,
+	and AT_is_external.
+
 Sun Nov 17 16:20:53 1991  Michael Tiemann  (tiemann at rtl.cygnus.com)
 
 	* symtab.h (struct type): Moved C++-specific fields into new type
