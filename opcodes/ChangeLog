@@ -1,4 +1,14 @@
 start-sanitize-tic80
+Thu Jan 16 20:54:40 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80-opc.c (V_a, V_m, V_S, V_Z, V_p, OP_V, MASK_V):
+	New macros for building vector instruction opcodes.
+	(tic80_opcodes): Remove all uses of FMT_SI, FMT_REG, and
+	FMT_LI, which were unused.  The field is now a flags field.
+	Remove some opcodes that are possible, but illegal, such
+	as long immediate instructions with doubles for immediate
+	values.  Add "vadd" and "vld" instructions.
+	
 Wed Jan 15 18:59:51 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80-opc.c (tic80_operands): Reorder some table entries to make
