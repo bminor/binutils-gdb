@@ -1,7 +1,12 @@
+Wed Feb 15 12:19:52 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips.h (M_ULD, M_ULD_A, M_USD, M_USD_A): Define.
+
 start-sanitize-arc
 Mon Feb 13 11:05:00 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* arc.h (ARC_OPERAND_LIMM): New flag.
+	(ARC_OPERAND_ADDRESS): Likewise.
 
 Thu Feb  9 18:55:59 1995  Doug Evans  <dje@canuck.cygnus.com>
 
