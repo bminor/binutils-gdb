@@ -2716,9 +2716,9 @@ static const struct dis386 prefix_user_table[][4] = {
   /* PREGRP21 */
   {
     { "(bad)", EX, XM, XX },
-    { "movq2dq", EX, EM, XX },
+    { "movq2dq", XM, MS, XX },
     { "movq", EX, XM, XX },
-    { "movdq2q", EM, MX, XX },
+    { "movdq2q", MX, XS, XX },
   },
   /* PREGRP22 */
   {
@@ -2730,7 +2730,7 @@ static const struct dis386 prefix_user_table[][4] = {
   /* PREGRP23 */
   {
     { "movd", Ed, MX, XX },
-    { "movq", Ed, XM, XX },
+    { "movq", XM, EX, XX },
     { "movd", Ed, XM, XX },
     { "(bad)", Ed, XM, XX },
   },
