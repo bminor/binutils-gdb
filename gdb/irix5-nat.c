@@ -1,5 +1,5 @@
 /* Native support for the SGI Iris running IRIX version 5, for GDB.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -49,6 +49,7 @@ supply_gregset (gregsetp)
 {
   register int regi;
   register greg_t *regp = &(*gregsetp)[0];
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
 
   for(regi = 0; regi <= CTX_RA; regi++)
     supply_register (regi, (char *)(regp + regi));
@@ -57,6 +58,9 @@ supply_gregset (gregsetp)
   supply_register (HI_REGNUM, (char *)(regp + CTX_MDHI));
   supply_register (LO_REGNUM, (char *)(regp + CTX_MDLO));
   supply_register (CAUSE_REGNUM, (char *)(regp + CTX_CAUSE));
+
+  /* Fill inaccessible registers with zero.  */
+  supply_register (BADVADDR_REGNUM, zerobuf);
 }
 
 void
@@ -75,7 +79,7 @@ fill_gregset (gregsetp, regno)
     *(regp + CTX_EPC) = *(greg_t *) &registers[REGISTER_BYTE (PC_REGNUM)];
 
   if ((regno == -1) || (regno == CAUSE_REGNUM))
-    *(regp + CTX_CAUSE) = *(greg_t *) &registers[REGISTER_BYTE (PS_REGNUM)];
+    *(regp + CTX_CAUSE) = *(greg_t *) &registers[REGISTER_BYTE (CAUSE_REGNUM)];
 
   if ((regno == -1) || (regno == HI_REGNUM))
     *(regp + CTX_MDHI) = *(greg_t *) &registers[REGISTER_BYTE (HI_REGNUM)];
@@ -97,6 +101,7 @@ supply_fpregset (fpregsetp)
      fpregset_t *fpregsetp;
 {
   register int regi;
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi,
@@ -105,6 +110,7 @@ supply_fpregset (fpregsetp)
   supply_register (FCRCS_REGNUM, (char *)&fpregsetp->fp_csr);
 
   /* FIXME: how can we supply FCRIR_REGNUM?  SGI doesn't tell us. */
+  supply_register (FCRIR_REGNUM, zerobuf);
 }
 
 void

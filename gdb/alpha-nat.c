@@ -156,11 +156,16 @@ supply_gregset (gregsetp)
 {
   register int regi;
   register long *regp = gregsetp->regs;
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
 
   for (regi = 0; regi < 31; regi++)
     supply_register (regi, (char *)(regp + regi));
 
   supply_register (PC_REGNUM, (char *)(regp + 31));
+
+  /* Fill inaccessible registers with zero.  */
+  supply_register (ZERO_REGNUM, zerobuf);
+  supply_register (FP_REGNUM, zerobuf);
 }
 
 void

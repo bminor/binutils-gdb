@@ -1,3 +1,19 @@
+Mon Mar 27 22:51:54 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* alpha-nat.c, irix4-nat.c, irix5-nat.c, mipsv4-nat.c,
+	sparc-tdep.c (supply_gregset, supply_fpregset):  Fill inaccessible
+	registers with zero to handle recent read_register_bytes change.
+	* irix4-nat.c, irix5-nat.c, mipsv4-nat.c (supply_gregset,
+	fill_gregset):  Fix handling of CAUSE_REGNUM.
+	* mips-nat.c (store_inferior_registers):  Handle unwritable
+	registers when storing a single register.
+	* config/mips/tm-irix3.h (CAUSE_REGNUM, BADVADDR_REGNUM):
+	Fix definitions.
+
+	* mdebugread.c (parse_symbol, psymtab_to_symtab_1):  Clear
+	allocated mips_extra_func_info, if the debug info is corrupt,
+	the PDR to fill it in might be missing.
+
 Mon Mar 27 14:43:00 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* vx-share/regPacket.h: a new file interfacing with vxworks.

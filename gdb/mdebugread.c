@@ -1150,6 +1150,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 	  e = ((struct mips_extra_func_info *)
 	       obstack_alloc (&current_objfile->symbol_obstack,
 			      sizeof (struct mips_extra_func_info)));
+	  memset ((PTR) e, 0, sizeof (struct mips_extra_func_info));
 	  SYMBOL_VALUE (s) = (long) e;
 	  e->numargs = top_stack->numargs;
 	  e->pdr.framereg = -1;
@@ -3119,6 +3120,8 @@ psymtab_to_symtab_1 (pst, filename)
 		     obstack_alloc (&current_objfile->symbol_obstack,
 				    sizeof (struct mips_extra_func_info)));
 		  struct symbol *s = new_symbol (MIPS_EFI_SYMBOL_NAME);
+
+		  memset ((PTR) e, 0, sizeof (struct mips_extra_func_info));
 		  SYMBOL_NAMESPACE (s) = LABEL_NAMESPACE;
 		  SYMBOL_CLASS (s) = LOC_CONST;
 		  SYMBOL_TYPE (s) = builtin_type_void;

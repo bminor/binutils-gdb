@@ -1,5 +1,5 @@
 /* Low level DECstation interface to ptrace, for GDB when running native.
-   Copyright 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1995 Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
 
@@ -101,11 +101,13 @@ store_inferior_registers (regno)
   register unsigned int regaddr;
   char buf[80];
 
-  if (regno == 0)
-    return;
-
   if (regno > 0)
     {
+      if (regno == ZERO_REGNUM || regno == PS_REGNUM
+	  || regno == BADVADDR_REGNUM || regno == CAUSE_REGNUM
+	  || regno == FCRIR_REGNUM || regno == FP_REGNUM
+	  || (regno >= FIRST_EMBED_REGNUM && regno <= LAST_EMBED_REGNUM))
+	return;
       regaddr = REGISTER_PTRACE_ADDR (regno);
       errno = 0;
       ptrace (PT_WRITE_U, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
@@ -119,22 +121,7 @@ store_inferior_registers (regno)
   else
     {
       for (regno = 0; regno < NUM_REGS; regno++)
-	{
-	  if (regno == ZERO_REGNUM || regno == PS_REGNUM
-	      || regno == BADVADDR_REGNUM || regno == CAUSE_REGNUM
-	      || regno == FCRIR_REGNUM || regno == FP_REGNUM
-	      || (regno >= FIRST_EMBED_REGNUM && regno <= LAST_EMBED_REGNUM))
-	    continue;
-	  regaddr = REGISTER_PTRACE_ADDR (regno);
-	  errno = 0;
-	  ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		  read_register (regno));
-	  if (errno != 0)
-	    {
-	      sprintf (buf, "writing all regs, number %d", regno);
-	      perror_with_name (buf);
-	    }
-	}
+	store_inferior_registers (regno);
     }
 }
 

@@ -1,5 +1,5 @@
 /* Native support for MIPS running SVR4, for GDB.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -43,14 +43,22 @@ supply_gregset (gregsetp)
 {
   register int regi;
   register greg_t *regp = &(*gregsetp)[0];
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
 
-  for(regi = 0; regi <= CXT_RA; regi++)
+  for (regi = 0; regi <= CXT_RA; regi++)
     supply_register (regi, (char *)(regp + regi));
 
   supply_register (PC_REGNUM, (char *)(regp + CXT_EPC));
   supply_register (HI_REGNUM, (char *)(regp + CXT_MDHI));
   supply_register (LO_REGNUM, (char *)(regp + CXT_MDLO));
   supply_register (CAUSE_REGNUM, (char *)(regp + CXT_CAUSE));
+
+  /* Fill inaccessible registers with zero.  */
+  supply_register (PS_REGNUM, zerobuf);
+  supply_register (BADVADDR_REGNUM, zerobuf);
+  supply_register (FP_REGNUM, zerobuf);
+  for (regi = FIRST_EMBED_REGNUM; regi <= LAST_EMBED_REGNUM; regi++)
+    supply_register (regi, zerobuf);
 }
 
 void
@@ -69,7 +77,7 @@ fill_gregset (gregsetp, regno)
     *(regp + CXT_EPC) = *(greg_t *) &registers[REGISTER_BYTE (PC_REGNUM)];
 
   if ((regno == -1) || (regno == CAUSE_REGNUM))
-    *(regp + CXT_CAUSE) = *(greg_t *) &registers[REGISTER_BYTE (PS_REGNUM)];
+    *(regp + CXT_CAUSE) = *(greg_t *) &registers[REGISTER_BYTE (CAUSE_REGNUM)];
 
   if ((regno == -1) || (regno == HI_REGNUM))
     *(regp + CXT_MDHI) = *(greg_t *) &registers[REGISTER_BYTE (HI_REGNUM)];
@@ -91,6 +99,7 @@ supply_fpregset (fpregsetp)
      fpregset_t *fpregsetp;
 {
   register int regi;
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi,
@@ -99,6 +108,7 @@ supply_fpregset (fpregsetp)
   supply_register (FCRCS_REGNUM, (char *)&fpregsetp->fp_csr);
 
   /* FIXME: how can we supply FCRIR_REGNUM?  The ABI doesn't tell us. */
+  supply_register (FCRIR_REGNUM, zerobuf);
 }
 
 void

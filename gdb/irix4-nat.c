@@ -1,5 +1,6 @@
 /* Native support for the SGI Iris running IRIX version 4, for GDB.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1995
+   Free Software Foundation, Inc.
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
    Implemented for Irix 4.x by Garrett A. Wollman.
@@ -43,6 +44,7 @@ supply_gregset (gregsetp)
 {
   register int regi;
   register greg_t *regp = (greg_t *)(gregsetp->gp_regs);
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
 
   /* FIXME: somewhere, there should be a #define for the meaning
      of this magic number 32; we should use that. */
@@ -52,7 +54,10 @@ supply_gregset (gregsetp)
   supply_register (PC_REGNUM, (char *)&(gregsetp->gp_pc));
   supply_register (HI_REGNUM, (char *)&(gregsetp->gp_mdhi));
   supply_register (LO_REGNUM, (char *)&(gregsetp->gp_mdlo));
-  supply_register (PS_REGNUM, (char *)&(gregsetp->gp_cause));
+  supply_register (CAUSE_REGNUM, (char *)&(gregsetp->gp_cause));
+
+  /* Fill inaccessible registers with zero.  */
+  supply_register (BADVADDR_REGNUM, zerobuf);
 }
 
 void
@@ -71,8 +76,8 @@ fill_gregset (gregsetp, regno)
   if ((regno == -1) || (regno == PC_REGNUM))
     gregsetp->gp_pc = *(greg_t *) &registers[REGISTER_BYTE (PC_REGNUM)];
 
-  if ((regno == -1) || (regno == PS_REGNUM))
-    gregsetp->gp_cause = *(greg_t *) &registers[REGISTER_BYTE (PS_REGNUM)];
+  if ((regno == -1) || (regno == CAUSE_REGNUM))
+    gregsetp->gp_cause = *(greg_t *) &registers[REGISTER_BYTE (CAUSE_REGNUM)];
 
   if ((regno == -1) || (regno == HI_REGNUM))
     gregsetp->gp_mdhi = *(greg_t *) &registers[REGISTER_BYTE (HI_REGNUM)];
@@ -94,6 +99,7 @@ supply_fpregset (fpregsetp)
      fpregset_t *fpregsetp;
 {
   register int regi;
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
 
   for (regi = 0; regi < 32; regi++)
     supply_register (FP0_REGNUM + regi,
@@ -102,6 +108,7 @@ supply_fpregset (fpregsetp)
   supply_register (FCRCS_REGNUM, (char *)&fpregsetp->fp_csr);
 
   /* FIXME: how can we supply FCRIR_REGNUM?  SGI doesn't tell us. */
+  supply_register (FCRIR_REGNUM, zerobuf);
 }
 
 void
