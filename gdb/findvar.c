@@ -308,6 +308,13 @@ value_of_register (int regnum, struct frame_info *frame)
   get_saved_register (raw_buffer, &optim, &addr,
 		      frame, regnum, &lval);
 
+  /* FIXME: cagney/2002-05-15: This test is just bogus.
+
+     It indicates that the target failed to supply a value for a
+     register because it was "not available" at this time.  Problem
+     is, the target still has the register and so get saved_register()
+     may be returning a value saved on the stack.  */
+
   if (register_cached (regnum) < 0)
     return NULL;		/* register value not available */
 

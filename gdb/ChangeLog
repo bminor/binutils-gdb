@@ -1,3 +1,10 @@
+2002-05-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.c (register_valid): Revise comments refering to "Not
+	available" and "unavailable".
+	* frame.c (frame_register_read): Ditto.
+	* findvar.c (value_of_register): Ditto.
+
 2002-05-15  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in (remote_sim_h): Replace remote-sim_h.
