@@ -30,11 +30,85 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
-#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (4)	/* FIXME: What should this be? */
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 
 #define coff_relocate_section _bfd_coff_generic_relocate_section
 
-#define RTYPE2HOWTO(internal, relocentry) abort()	/* FIXME: hack */
+static void rtype2howto PARAMS ((arelent *cache_ptr, struct internal_reloc *dst));
+
+static reloc_howto_type tic80_howto_table[] =
+{
+
+  HOWTO (R_RELLONG,			/* type */
+	 0,				/* rightshift */
+	 2,				/* size (0 = byte, 1 = short, 2 = long) */
+	 32,				/* bitsize */
+	 false,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 NULL,				/* special_function */
+	 "32",				/* name */
+	 true,				/* partial_inplace */
+	 0xffffffff,			/* src_mask */
+	 0xffffffff,			/* dst_mask */
+	 false),			/* pcrel_offset */
+
+  HOWTO (R_MPPCR,			/* type */
+	 0,				/* rightshift */
+	 2,				/* size (0 = byte, 1 = short, 2 = long) */
+	 32,				/* bitsize */
+	 true,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 NULL,				/* special_function */
+	 "MPPCR",			/* name */
+	 true,				/* partial_inplace */
+	 0xffffffff,			/* src_mask */
+	 0xffffffff,			/* dst_mask */
+	 true),				/* pcrel_offset */
+};
+
+/* Code to turn an external r_type into a pointer to an entry in the howto_table.
+   If passed an r_type we don't recognize, just set the howto field to NULL and
+   the caller will print an appropriate error message. */
+
+static void
+rtype2howto (cache_ptr, dst)
+     arelent *cache_ptr;
+     struct internal_reloc *dst;
+{
+  switch (dst -> r_type)
+    {
+    default:		cache_ptr -> howto = NULL; break;
+    case R_RELLONG:	cache_ptr -> howto = tic80_howto_table + 0; break;
+    case R_MPPCR:	cache_ptr -> howto = tic80_howto_table + 1; break;
+    }
+}
+
+#define RTYPE2HOWTO(cache_ptr, dst) rtype2howto (cache_ptr, dst)
+#define coff_rtype_to_howto coff_tic80_rtype_to_howto
+
+static reloc_howto_type *
+coff_tic80_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
+     bfd *abfd;
+     asection *sec;
+     struct internal_reloc *rel;
+     struct coff_link_hash_entry *h;
+     struct internal_syment *sym;
+     bfd_vma *addendp;
+{
+  arelent genrel;
+
+  if (rel -> r_symndx == -1 && addendp != NULL)
+    {
+      /* This is a TI "internal relocation", which means that the relocation
+	 amount is the amount by which the current section is being relocated
+	 in the output section. */
+      *addendp = (sec -> output_section -> vma + sec -> output_offset) - sec -> vma;
+    }
+  RTYPE2HOWTO (&genrel, rel);
+  return genrel.howto;
+}
 
 #ifndef BADMAG
 #define BADMAG(x) TIC80BADMAG(x)
@@ -71,9 +145,9 @@ const bfd_target
 #endif
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
-  bfd_getb64, bfd_getb_signed_64, bfd_putb64,
-     bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-     bfd_getb16, bfd_getb_signed_16, bfd_putb16, /* data */
+  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* data */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
      bfd_getl32, bfd_getl_signed_32, bfd_putl32,
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
