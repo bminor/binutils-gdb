@@ -1,5 +1,8 @@
 Tue Jul  4 12:55:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_find_exp_assignment):
+	Handle etree_provide.
+
 	* emultempl/elf32.em (global_needed): New static variable.
 	(global_found): Likewise.
 	(gld${EMULATION_NAME}_after_open): New static function.
