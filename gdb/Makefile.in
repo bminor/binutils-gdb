@@ -183,7 +183,8 @@ INTERNAL_CFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 # Profiling options need to go here to work.
 # I think it's perfectly reasonable for a user to set -pg in CFLAGS
 # and have it work; that's why CFLAGS is here.
-INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(LDFLAGS) @CONFIG_LDFLAGS@
+INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(LDFLAGS) @CONFIG_LDFLAGS@ @HLDFLAGS@
+HLDENV = @HLDENV@
 
 # We are using our own version of REGEX now to be consistent across
 # machines.
@@ -487,7 +488,7 @@ NTSOBS = standalone.o
 
 NTSSTART = kdb-start.o
 
-SUBDIRS = doc testsuite nlm mswin
+SUBDIRS = doc testsuite nlm
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.tab.c f-exp.tab.c m2-exp.tab.c
@@ -585,9 +586,9 @@ init.c: $(OBS) $(TSOBS)
 	@echo '#include "ansidecl.h"' >>init.c-tmp
 	@echo 'extern void initialize_all_files PARAMS ((void));' >>init.c-tmp
 	@echo 'void initialize_all_files PARAMS ((void)) {' >>init.c-tmp
-	@for i in $(OBS) $(TSOBS); do \
-	  filename=`echo $$i | sed \
-	    -e '/^Onindy.o/d' \
+	@echo $(OBS) $(TSOBS) | \
+	tr ' ' '\012' | \
+	sed -e '/^Onindy.o/d' \
 	    -e '/^nindy.o/d' \
 	    -e '/ttyflush.o/d' \
 	    -e '/xdr_ld.o/d' \
@@ -599,13 +600,10 @@ init.c: $(OBS) $(TSOBS)
 	    -e '/version.o/d' \
 	    -e '/^[a-z0-9A-Z_]*_[SU].o/d' \
 	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
-	    -e 's/\.o/.c/'` ; \
-	  case $$filename in \
-	    "") ;; \
-	    *) sed <$(srcdir)/$$filename >>init.c-tmp -n \
-	    -e '/^_initialize_[a-z_0-9A-Z]* *(/s/^\([a-z_0-9A-Z]*\).*/  {extern void \1 PARAMS ((void)); \1 ();}/p' ; ;; \
-	  esac ; \
-	done
+	    -e 's/\.o/.c/' \
+	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
+	xargs grep -h -s '^_initialize_[a-z_0-9A-Z]* *(' | \
+	sed -e 's/^\([a-z_0-9A-Z]*\).*/  {extern void \1 PARAMS ((void)); \1 ();}/p' >>init.c-tmp
 	@echo '}' >>init.c-tmp
 	@mv init.c-tmp init.c
 
@@ -614,16 +612,13 @@ init.c: $(OBS) $(TSOBS)
 # Removing the old gdb first works better if it is running, at least on SunOS.
 gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	rm -f gdb
-	$(CC_LD) $(INTERNAL_LDFLAGS) -o gdb \
+	$(HLDENV) $(CC_LD) $(INTERNAL_LDFLAGS) -o gdb \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 
 nlm:	force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
 
 libgdb:	libgdb-files $(LIBGDB_OBS)
-
-mswin/libwingdb.a: force
-	rootme=`pwd`; export rootme; $(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=mswin subdir_do
 
 # libproc is not listed here because all-libproc is a dependency of all-gui,
 # not all-gdb, and thus might be built after us.
@@ -1325,6 +1320,10 @@ somread.o: somread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h) gdb_string.h
 
 somsolib.o: somsolib.c $(defs_h)
+
+hpux-thread.o: hpux-thread.c $(defs_h) gdbthread.h target.h inferior.h
+	$(CC) -c $(INTERNAL_CFLAGS) -I$(srcdir)/osf-share \
+	  -I$(srcdir)/osf-share/HP800 -I/usr/include/dce $(srcdir)/hpux-thread.c
 
 hpread.o: hpread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	gdb-stabs.h objfiles.h symfile.h $(symtab_h) gdb_string.h

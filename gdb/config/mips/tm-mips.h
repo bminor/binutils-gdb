@@ -543,4 +543,6 @@ extern void fixup_sigtramp PARAMS ((void));
 /* Defined in mips-tdep.c and used in remote-mips.c */
 extern char *mips_read_processor_type PARAMS ((void));
 
+#define TARGET_MIPS
+
 #endif	/* TM_MIPS_H */

@@ -109,3 +109,12 @@
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
+
+/* Define if you have the select function.  */
+#undef HAVE_SELECT
+
+/* Define if you have the poll function.  */
+#undef HAVE_POLL
+
+/* Define if you have HPUX threads */
+#undef HAVE_HPUX_THREAD_SUPPORT

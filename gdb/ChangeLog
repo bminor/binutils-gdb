@@ -1,3 +1,42 @@
+Tue Oct  8 09:03:22 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in:  Add rule for hpux-thread.o (needs special header
+	files).
+	* (SUBDIRS):  Remove mswin.
+	* Change procedure for creating init.c.  Speeds things up quite a
+	bit.
+	* config.in configure configure.in:  Check for select, poll.
+	* Check for OSF header files before including hpux-thread.o.
+	* Don't configure doc or testsuite when building under MSVC.
+	* findvar.c value.h (read_register_pid write_register_pid):  Make
+	global.  Needed for hppa-tdep.c.
+	* (supply_register):  Don't set pid to inferior_pid when supplying
+	registers.
+	* hppa-tdep.c (saved_pc_after_call):  frame_saved_pc ->
+	FRAME_SAVED_PC.
+	* (frame_saved_pc):  Change name to hppa_frame_saved_pc.
+	* (hppa_pop_frame):  Don't use a pid of 0 with target_write_pc.
+	Use write_pc instead, which uses the correct pid.
+	* (target_read_pc target_write_pc):  Use read/write_register_pid
+	instead of read/write_register to preserve the pid passed in.
+	* inftarg.c (child_can_run):  Add flag child_suppress_run to allow
+	hpux-threads.c to override this as a runnable target.
+	* config/pa/nm-hppah.h:  Define target_new_objfile and
+	target_pid_to_str.
+	* config/pa/tm-hppa.h (FRAME_SAVED_PC):  Use hppa_frame_saved_pc
+	instead of frame_saved_pc.
+	* config/m68k/tm-m68k.h:  Define TARGET_M68K for Wingdb.
+	* config/m68k/tm-monitor.h:  Use FRAME_CHAIN_VALID_ALTERNATE, since
+	we can't easily determine the start file bounds with ELF.
+	* config/mips/tm-mips.h:  Define TARGET_MIPS for Wingdb.
+	* hpux-thread.c:  New file for HPUX/OSF thread support.
+	* osf-share/{README AT386/cma_thread_io.h HP800/cma_thread_io.h
+	RIOS/cma_thread_io.h cma_attr.h cma_deb_core.h cma_debug_client.h
+	cma_errors.h cma_handle.h cma_init.h cma_list.h cma_mutex.h
+	cma_sched.h cma_semaphore_defs.h cma_sequence.h cma_stack.h
+	cma_stack_int.h cma_tcb_defs.h cma_util.h}:  New files for OSF
+	thread support.
+
 Sun Oct  6 15:48:09 1996  Fred Fish  <fnf@cygnus.com>
 
 	* buildsym.c (finish_block): Change innerblock_anon_complaint to

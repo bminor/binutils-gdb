@@ -387,3 +387,5 @@ extern void m68k_pop_frame PARAMS ((void));
 /* Offset from SP to first arg on stack at first instruction of a function */
 
 #define SP_ARG0 (1 * 4)
+
+#define TARGET_M68K

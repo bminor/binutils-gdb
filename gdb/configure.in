@@ -45,7 +45,7 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid sbrk)
+AC_CHECK_FUNCS(setpgid sbrk select poll)
 
 # If we are configured native on Linux, work around problems with sys/procfs.h
 if test "${target}" = "${host}"; then
@@ -163,6 +163,18 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
 	else
 		AC_MSG_RESULT(no)
 	fi
+	case ${host_os} in
+	hpux*)
+		AC_MSG_CHECKING(for HPUX/OSF thread support)
+		if test -f /usr/include/dce/cma_config.h ; then
+			AC_MSG_RESULT(yes)
+			AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT)
+			THREAD_DB_OBS=hpux-thread.o
+		else
+			AC_MSG_RESULT(no)
+		fi
+		;;
+	esac
 	AC_SUBST(THREAD_DB_OBS)
 	AC_SUBST(CONFIG_LDFLAGS)
 fi
@@ -414,7 +426,7 @@ i[3456]86-*-isc*)	gdb_host=i386v32 ;;
 i[3456]86-*-os9k)	gdb_host=i386os9k ;;
 i[3456]86-*-cygwin32)	gdb_host=cygwin32 ;;
 i[3456]86-*-windows)	gdb_host=windows
-			configdirs="${configdirs} mswin" ;;
+			configdirs=mswin ;;
 m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
 m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
 m68030-sony-*)		gdb_host=news1000 ;;

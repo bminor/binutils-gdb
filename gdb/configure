@@ -1461,7 +1461,7 @@ EOF
 fi
 
 
-for ac_func in setpgid sbrk
+for ac_func in setpgid sbrk select poll
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
@@ -2044,6 +2044,21 @@ EOF
 	else
 		echo "$ac_t""no" 1>&6
 	fi
+	case ${host_os} in
+	hpux*)
+		echo $ac_n "checking for HPUX/OSF thread support""... $ac_c" 1>&6
+		if test -f /usr/include/dce/cma_config.h ; then
+			echo "$ac_t""yes" 1>&6
+			cat >> confdefs.h <<\EOF
+#define HAVE_HPUX_THREAD_SUPPORT 1
+EOF
+
+			THREAD_DB_OBS=hpux-thread.o
+		else
+			echo "$ac_t""no" 1>&6
+		fi
+		;;
+	esac
 	
 	
 fi
@@ -2422,12 +2437,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2426 "configure"
+#line 2441 "configure"
 #include "confdefs.h"
 #include <tclInt.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2431: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2446: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2554,12 +2569,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2558 "configure"
+#line 2573 "configure"
 #include "confdefs.h"
 #include <tk.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2563: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2578: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -2763,7 +2778,7 @@ i[3456]86-*-isc*)	gdb_host=i386v32 ;;
 i[3456]86-*-os9k)	gdb_host=i386os9k ;;
 i[3456]86-*-cygwin32)	gdb_host=cygwin32 ;;
 i[3456]86-*-windows)	gdb_host=windows
-			configdirs="${configdirs} mswin" ;;
+			configdirs=mswin ;;
 m680[01]0-sun-sunos3*)	gdb_host=sun2os3 ;;
 m680[01]0-sun-sunos4*)	gdb_host=sun2os4 ;;
 m68030-sony-*)		gdb_host=news1000 ;;

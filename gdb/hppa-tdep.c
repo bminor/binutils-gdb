@@ -812,13 +812,13 @@ saved_pc_after_call (frame)
      the stub will return to out of the stack.  */
   u = find_unwind_entry (pc);
   if (u && u->stub_type != 0)
-    return frame_saved_pc (frame);
+    return FRAME_SAVED_PC (frame);
   else
     return pc;
 }
 
 CORE_ADDR
-frame_saved_pc (frame)
+hppa_frame_saved_pc (frame)
      struct frame_info *frame;
 {
   CORE_ADDR pc = get_frame_pc (frame);
@@ -1394,7 +1394,7 @@ hppa_pop_frame ()
   else 
     {
       npc = read_register (RP_REGNUM);
-      target_write_pc (npc, 0);
+      write_pc (npc);
     }
 
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
@@ -1749,12 +1749,15 @@ CORE_ADDR
 target_read_pc (pid)
      int pid;
 {
-  int flags = read_register (FLAGS_REGNUM);
+  int flags = read_register_pid (FLAGS_REGNUM, pid);
 
-  if (flags & 2) {
-    return read_register (31) & ~0x3;
-  }
-  return read_register (PC_REGNUM) & ~0x3;
+  /* The following test does not belong here.  It is OS-specific, and belongs
+     in native code.  */
+  /* Test SS_INSYSCALL */
+  if (flags & 2)
+    return read_register_pid (31, pid) & ~0x3;
+
+  return read_register_pid (PC_REGNUM, pid) & ~0x3;
 }
 
 /* Write out the PC.  If currently in a syscall, then also write the new
@@ -1765,15 +1768,18 @@ target_write_pc (v, pid)
      CORE_ADDR v;
      int pid;
 {
-  int flags = read_register (FLAGS_REGNUM);
+  int flags = read_register_pid (FLAGS_REGNUM, pid);
 
+  /* The following test does not belong here.  It is OS-specific, and belongs
+     in native code.  */
   /* If in a syscall, then set %r31.  Also make sure to get the 
      privilege bits set correctly.  */
+  /* Test SS_INSYSCALL */
   if (flags & 2)
-    write_register (31, (long) (v | 0x3));
+    write_register_pid (31, v | 0x3, pid);
 
-  write_register (PC_REGNUM, (long) v);
-  write_register (NPC_REGNUM, (long) v + 4);
+  write_register_pid (PC_REGNUM, v, pid);
+  write_register_pid (NPC_REGNUM, v + 4, pid);
 }
 
 /* return the alignment of a type in bytes. Structures have the maximum
