@@ -1,3 +1,9 @@
+Tue Jan 23 18:54:09 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-vxsparc.c (vx_convert_to_virtual, vx_convert_from_virtual):
+	Remove, never used.
+	* config/sparc/vxsparc.mt (TDEPFILES): Add remote-vxsparc.o.
+
 Tue Jan 23 14:36:05 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* ch-exp.c (parse_tuple):  Error if invalid mode.
@@ -45,9 +51,11 @@ Tue Jan 23 13:08:26 1996  Jeffrey A Law  (law@cygnus.com)
 
 Tue Jan 23 09:00:48 1996  Doug Evans  <dje@charmed.cygnus.com>
 
-	* gdbtk.c (gdb_disassemble): Rework disassemble_info initialization.
-	Pass fprintf_unfiltered to INIT_DISASSEMBLE_INFO.
-	* printcmd.c (print_insn): Likewise.
+	* printcmd.c (print_insn): Pass fprintf_unfiltered to
+ 	INIT_DISASSEMBLE_INFO.
+start-sanitize-gdbtk
+	* gdbtk.c (gdb_disassemble): Likewise.
+end-sanitize-gdbtk
 
 Mon Jan 22 16:59:40 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
