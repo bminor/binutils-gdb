@@ -3796,9 +3796,11 @@ putpkt_binary (char *buf, int cnt)
 	      break;		/* Retransmit buffer */
 	    case '$':
 	      {
+	        if (remote_debug)
+		  fprintf_unfiltered (gdb_stdlog, "Packet instead of Ack, ignoring it\n");
 		/* It's probably an old response, and we're out of sync.
 		   Just gobble up the packet and ignore it.  */
-		getpkt (junkbuf, sizeof_junkbuf, 0);
+		read_frame (junkbuf, sizeof_junkbuf);
 		continue;	/* Now, go look for + */
 	      }
 	    default:
@@ -3887,7 +3889,11 @@ read_frame (char *buf,
 		return -1;
 	      }
 	    else if (check_0 < 0 || check_1 < 0)
-	      error ("Communication error in checksum");
+	      {
+		if (remote_debug)
+		  fputs_filtered ("Communication error in checksum\n", gdb_stdlog);
+		return -1;
+	      }
 
 	    pktcsum = (fromhex (check_0) << 4) | fromhex (check_1);
 	    if (csum == pktcsum)
