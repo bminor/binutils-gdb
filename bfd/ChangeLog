@@ -1,3 +1,13 @@
+Fri Feb 26 17:37:34 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* srec.c: add support for symbolsrec, srecords with symbols in
+	them.
+
+Thu Feb 25 11:43:30 1993  John Gilmore  (gnu@cacophony.cygnus.com)
+
+	* ieee.c:  cast all arguments of ieee_write_byte to bfd_byte
+	to avoid lint complaints.
+
 Thu Feb 25 02:15:52 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* elf.c (elf_write_object_contents): Section ".shstrtab" should be

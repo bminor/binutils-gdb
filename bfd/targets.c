@@ -1,5 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -277,10 +277,14 @@ Symbols and relocations
 .  void       (*_bfd_debug_info_accumulate) PARAMS ((bfd *, struct sec *));
 .
 .  bfd_byte * (*_bfd_get_relocated_section_contents) PARAMS ((bfd *,
-.                    struct bfd_seclet *, bfd_byte *data));
+.                    struct bfd_seclet *, bfd_byte *data,
+.                    boolean relocateable));
 .
 .  boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
 .                    struct symbol_cache_entry **));
+.
+.  boolean    (*_bfd_seclet_link) PARAMS ((bfd *, PTR data,
+.                     boolean relocateable));
 
 . {* See documentation on reloc types.  *}
 . CONST struct reloc_howto_struct *
@@ -332,9 +336,12 @@ above COFF-specific fields.
    we can't intermix extern's and initializers.  */
 extern bfd_target ecoff_little_vec;
 extern bfd_target ecoff_big_vec;
+extern bfd_target aout_mips_little_vec;
+extern bfd_target aout_mips_big_vec;
 extern bfd_target sunos_big_vec;
 extern bfd_target demo_64_vec;
 extern bfd_target srec_vec;
+extern bfd_target symbolsrec_vec;
 extern bfd_target tekhex_vec;
 extern bfd_target a_out_adobe_vec;
 extern bfd_target b_out_vec_little_host;
@@ -356,6 +363,7 @@ extern bfd_target sco_core_vec;
 extern bfd_target aix386_core_vec;
 extern bfd_target rs6000coff_vec;
 extern bfd_target h8300coff_vec;
+extern bfd_target h8500coff_vec;
 extern bfd_target z8kcoff_vec;
 extern bfd_target we32kcoff_vec;
 #ifdef HOST_HPPAHPUX
@@ -366,16 +374,12 @@ extern bfd_target hppa_vec;
 extern bfd_target DEFAULT_VECTOR;
 #endif
 
+
+bfd_target *target_vector[] = {
+
 #ifdef SELECT_VECS
-
-bfd_target *target_vector[] = {
-	SELECT_VECS,
-	0
-};
-
-#else
-
-bfd_target *target_vector[] = {
+        SELECT_VECS,
+#else /* SELECT_VECS */
 
 #ifdef DEFAULT_VECTOR
 	&DEFAULT_VECTOR,
@@ -385,6 +389,8 @@ bfd_target *target_vector[] = {
 	&i386aout_vec,
 	&ecoff_little_vec,
 	&ecoff_big_vec,
+	&aout_mips_little_vec,
+	&aout_mips_big_vec,
 	&ieee_vec,
 #if 0
 	/* We have no oasys tools anymore, so we can't test any of this
@@ -402,6 +408,7 @@ bfd_target *target_vector[] = {
 	&z8kcoff_vec,
 	&m88kbcs_vec,
 	&srec_vec,
+	&symbolsrec_vec,
 /*	&tekhex_vec,*/
 	&icoff_little_vec,
 	&icoff_big_vec,
@@ -427,10 +434,10 @@ bfd_target *target_vector[] = {
 #ifdef AIX386_CORE
   &aix386_core_vec,
 #endif
+
+#endif /* SELECT_VECS */
 	NULL, /* end of list marker */
 };
-
-#endif
 
 /* default_vector[0] contains either the address of the default vector,
    if there is one, or zero if there isn't.  */
