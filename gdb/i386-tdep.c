@@ -1417,21 +1417,21 @@ i386_nw_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 /* i386 register groups.  In addition to the normal groups, add "mmx"
    and "sse".  */
 
-struct reggroup *i368_sse_reggroup;
-struct reggroup *i368_mmx_reggroup;
+struct reggroup *i386_sse_reggroup;
+struct reggroup *i386_mmx_reggroup;
 
 static void
 i386_init_reggroups (void)
 {
-  i368_sse_reggroup = reggroup_new ("sse");
-  i368_mmx_reggroup = reggroup_new ("mmx");
+  i386_sse_reggroup = reggroup_new ("sse");
+  i386_mmx_reggroup = reggroup_new ("mmx");
 }
 
 static void
 i386_add_reggroups (struct gdbarch *gdbarch)
 {
-  reggroup_add (gdbarch, i368_sse_reggroup);
-  reggroup_add (gdbarch, i368_mmx_reggroup);
+  reggroup_add (gdbarch, i386_sse_reggroup);
+  reggroup_add (gdbarch, i386_mmx_reggroup);
   reggroup_add (gdbarch, general_reggroup);
   reggroup_add (gdbarch, float_reggroup);
   reggroup_add (gdbarch, all_reggroup);
@@ -1447,9 +1447,9 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 {
   int sse_regnum_p = SSE_REGNUM_P (regnum) || regnum == MXCSR_REGNUM;
   int fp_regnum_p = FP_REGNUM_P (regnum) || FPC_REGNUM_P (regnum);
-  if (group == i368_mmx_reggroup)
+  if (group == i386_mmx_reggroup)
     return mmx_regnum_p (regnum);
-  if (group == i368_sse_reggroup)
+  if (group == i386_sse_reggroup)
     return sse_regnum_p;
   if (group == vector_reggroup)
     return (mmx_regnum_p (regnum) || sse_regnum_p);
