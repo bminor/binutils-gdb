@@ -1,3 +1,33 @@
+Tue Apr 21 17:01:22 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* config/tc-i386.c (check_prefix): New static function, split out
+	from md_assemble.
+	(struct _i386_insn): Add wait_prefix field.
+	(md_assemble): Remove wait_prefix local variable.  Use
+	check_prefix when adding a prefix.
+
+	* config/tc-i386.c (current_templates): New static variable.
+	(md_assemble): Remove current_templates local variable.
+	(md_assemble, i386_operand): Improve error and warning messages in
+	many places.  Add RESTORE_END_STRING in many places before error
+	return.  Clarify some comments.
+
+	* config/tc-i386.c (struct _i386_insn): Change seg field to a two
+	element array.
+	(md_assemble): Parse string instruction operands, looking for
+	segment override prefixes.  Check for invalid segment prefixes on
+	string instruction.
+	(i386_operand): i.seg[] and max mem_operand changes for string
+	insns.
+	* config/tc-i386.h (EsSeg): Define.
+
+	* config/tc-i386.h (regKludge): Define.
+	(iclrKludge, imulKludge): Don't define.
+	* config/tc-i386.c (md_assemble): Merge imulKludge and iclrKludge
+	code.  Move ReverseRegRegmem fudges into Modrm case.  Reorder
+	opcode_modifier checks to look for more common cases first.  Add
+	default_seg for IsString case.
+
 Tue Apr 21 16:18:12 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Call AM_PROG_LEX rather than AC_PROG_LEX and

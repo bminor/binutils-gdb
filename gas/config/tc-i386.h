@@ -157,7 +157,7 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 #define MAX_OPERANDS 3		/* max operands per insn */
 #define MAX_PREFIXES 5		/* max prefixes per opcode */
 #define MAX_IMMEDIATE_OPERANDS 2/* max immediates per insn */
-#define MAX_MEMORY_OPERANDS 2	/* max memory ref per insn (lcall uses 2) */
+#define MAX_MEMORY_OPERANDS 2	/* max memory refs per insn (string ops) */
 
 /* we define the syntax here (modulo base,index,scale syntax) */
 #define REGISTER_PREFIX '%'
@@ -198,52 +198,58 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
   Operands are classified so that we can match given operand types with
   the opcode table in i386-opcode.h.
   */
-#define Unknown 0x0
 /* register */
-#define Reg8    0x1		/* 8 bit reg */
-#define Reg16   0x2		/* 16 bit reg */
-#define Reg32   0x4		/* 32 bit reg */
-#define Reg     (Reg8|Reg16|Reg32)	/* gen'l register */
-#define WordReg (Reg16|Reg32)	/* for push/pop operands */
+#define Reg8		   0x1	/* 8 bit reg */
+#define Reg16		   0x2	/* 16 bit reg */
+#define Reg32		   0x4	/* 32 bit reg */
 /* immediate */
-#define Imm8    0x8		/* 8 bit immediate */
-#define Imm8S	0x10		/* 8 bit immediate sign extended */
-#define Imm16   0x20		/* 16 bit immediate */
-#define Imm32   0x40		/* 32 bit immediate */
-#define Imm1    0x80		/* 1 bit immediate */
-#define ImmUnknown Imm32	/* for unknown expressions */
-#define Imm     (Imm8|Imm8S|Imm16|Imm32)	/* gen'l immediate */
+#define Imm8		   0x8	/* 8 bit immediate */
+#define Imm8S		  0x10	/* 8 bit immediate sign extended */
+#define Imm16		  0x20	/* 16 bit immediate */
+#define Imm32		  0x40	/* 32 bit immediate */
+#define Imm1		  0x80	/* 1 bit immediate */
 /* memory */
-#define Disp8   0x200		/* 8 bit displacement (for jumps) */
-#define Disp16  0x400		/* 16 bit displacement */
-#define Disp32  0x800		/* 32 bit displacement */
-#define Disp    (Disp8|Disp16|Disp32)	/* General displacement */
-#define DispUnknown Disp32	/* for unknown size displacements */
-#define Mem8    0x1000
-#define Mem16   0x2000
-#define Mem32   0x4000
-#define BaseIndex 0x8000
-#define Mem     (Disp|Mem8|Mem16|Mem32|BaseIndex)	/* General memory */
-#define WordMem   (Mem16|Mem32|Disp|BaseIndex)
-#define ByteMem   (Mem8|Disp|BaseIndex)
+#define BaseIndex	 0x100
+/* Disp8,16,32 are used in different ways, depending on the
+   instruction.  For jumps, they specify the size of the PC relative
+   displacement, for baseindex type instructions, they specify the
+   size of the offset relative to the base register, and for memory
+   offset instructions such as `mov 1234,%al' they specify the size of
+   the offset relative to the segment base.  */
+#define Disp8		 0x200	/* 8 bit displacement */
+#define Disp16		 0x400	/* 16 bit displacement */
+#define Disp32		 0x800	/* 32 bit displacement */
+/* Mem8,16,32 are used to limit the allowed sizes of memory operands */
+#define Mem8		0x1000
+#define Mem16		0x2000
+#define Mem32		0x4000
 /* specials */
-#define InOutPortReg 0x10000	/* register to hold in/out port addr = dx */
-#define ShiftCount 0x20000	/* register to hold shift cound = cl */
-#define Control 0x40000		/* Control register */
-#define Debug   0x80000		/* Debug register */
-#define Test    0x100000	/* Test register */
-#define FloatReg 0x200000	/* Float register */
-#define FloatAcc 0x400000	/* Float stack top %st(0) */
-#define SReg2   0x800000	/* 2 bit segment register */
-#define SReg3   0x1000000	/* 3 bit segment register */
-#define Acc     0x2000000	/* Accumulator %al or %ax or %eax */
-#define ImplicitRegister (InOutPortReg|ShiftCount|Acc|FloatAcc)
+#define InOutPortReg   0x10000	/* register to hold in/out port addr = dx */
+#define ShiftCount     0x20000	/* register to hold shift cound = cl */
+#define Control	       0x40000	/* Control register */
+#define Debug	       0x80000	/* Debug register */
+#define Test	      0x100000	/* Test register */
+#define FloatReg      0x200000	/* Float register */
+#define FloatAcc      0x400000	/* Float stack top %st(0) */
+#define SReg2	      0x800000	/* 2 bit segment register */
+#define SReg3	     0x1000000	/* 3 bit segment register */
+#define Acc	     0x2000000	/* Accumulator %al or %ax or %eax */
 #define JumpAbsolute 0x4000000
-#define Abs8  0x08000000
-#define Abs16 0x10000000
-#define Abs32 0x20000000
-#define Abs (Abs8|Abs16|Abs32)
-#define RegMMX 0x40000000	/* MMX register */
+#define Abs8	     0x8000000
+#define Abs16	    0x10000000
+#define Abs32	    0x20000000
+#define RegMMX	    0x40000000	/* MMX register */
+#define EsSeg	    0x80000000	/* String insn operand with fixed es segment */
+
+#define Reg	(Reg8|Reg16|Reg32)	/* gen'l register */
+#define WordReg (Reg16|Reg32)
+#define Imm	(Imm8|Imm8S|Imm16|Imm32) /* gen'l immediate */
+#define Disp	(Disp8|Disp16|Disp32)	/* General displacement */
+#define Mem	(Mem8|Mem16|Mem32|Disp|BaseIndex)	/* General memory */
+#define WordMem (Mem16|Mem32|Disp|BaseIndex)
+#define ByteMem (Mem8|Disp|BaseIndex)
+#define ImplicitRegister (InOutPortReg|ShiftCount|Acc|FloatAcc)
+#define Abs	(Abs8|Abs16|Abs32)
 
 #define Byte (Reg8|Imm8|Imm8S)
 #define Word (Reg16|Imm16)
@@ -274,35 +280,28 @@ typedef struct
   unsigned int opcode_modifier;
 
   /* opcode_modifier bits: */
-#define W        0x1		/* set if operands are words or dwords */
-#define D        0x2		/* D = 0 if Reg --> Regmem; D = 1 if Regmem --> Reg */
-  /* direction flag for floating insns:  MUST BE 0x400 */
-#define FloatD 0x400
-  /* shorthand */
-#define DW (D|W)
-#define ShortForm 0x10		/* register is in low 3 bits of opcode */
-#define ShortFormW 0x20		/* ShortForm and W bit is 0x8 */
-#define Seg2ShortForm 0x40	/* encoding of load segment reg insns */
-#define Seg3ShortForm 0x80	/* fs/gs segment register insns. */
-#define Jump 0x100		/* special case for jump insns. */
+#define W		   0x1	/* set if operands can be words or dwords
+				   encoded the canonical way:  MUST BE 0x1 */
+#define D		   0x2	/* D = 0 if Reg --> Regmem;
+				   D = 1 if Regmem --> Reg:    MUST BE 0x2 */
+#define Modrm		   0x4
+#define ReverseRegRegmem   0x8
+#define ShortForm	  0x10	/* register is in low 3 bits of opcode */
+#define ShortFormW	  0x20	/* ShortForm and W bit is 0x8 */
+#define Seg2ShortForm	  0x40	/* encoding of load segment reg insns */
+#define Seg3ShortForm	  0x80	/* fs/gs segment register insns. */
+#define Jump		 0x100	/* special case for jump insns. */
 #define JumpInterSegment 0x200	/* special case for intersegment leaps/calls */
-  /* 0x400 CANNOT BE USED since it's already used by FloatD above */
-#define DONT_USE 0x400
-#define NoModrm 0x800
-#define Modrm 0x1000
-#define imulKludge 0x2000
-#define JumpByte 0x4000
-#define JumpDword 0x8000
-#define ReverseRegRegmem 0x10000
-#define Data16 0x20000		/* needs data prefix if in 32-bit mode */
-#define Data32 0x40000		/* needs data prefix if in 16-bit mode */
-#define iclrKludge 0x80000	/* used to convert clr to xor */
-#define LinearAddress 0x100000	/* uses linear address (no segment) */
+#define FloatD		 0x400	/* direction for float insns:  MUST BE 0x400 */
+#define JumpByte	 0x800
+#define JumpDword	0x1000
+#define FWait		0x2000	/* instruction needs FWAIT */
+#define Data16		0x4000	/* needs data prefix if in 32-bit mode */
+#define Data32		0x8000	/* needs data prefix if in 16-bit mode */
+#define IsString      0x100000	/* quick test for string instructions */
+#define regKludge     0x200000	/* fake an extra reg operand for clr, imul */
 
-  /* (opcode_modifier & COMES_IN_ALL_SIZES) is true if the
-     instuction comes in byte, word, and dword sizes and is encoded into
-     machine code in the canonical way. */
-#define COMES_IN_ALL_SIZES (W)
+#define DW (D|W)		/* shorthand */
 
   /* (opcode_modifier & COMES_IN_BOTH_DIRECTIONS) indicates that the
      source and destination operands can be reversed by setting either

@@ -44,6 +44,7 @@ static int fits_in_unsigned_byte PARAMS ((long));
 static int fits_in_unsigned_word PARAMS ((long));
 static int fits_in_signed_word PARAMS ((long));
 static int smallest_imm_type PARAMS ((long));
+static int check_prefix PARAMS ((int));
 static void set_16bit_code_flag PARAMS ((int));
 #ifdef BFD_ASSEMBLER
 static bfd_reloc_code_real_type reloc
@@ -96,9 +97,9 @@ struct _i386_insn
     reg_entry *index_reg;
     unsigned int log2_scale_factor;
 
-    /* SEG gives the seg_entry of this insn.  It is equal to zero unless
-       an explicit segment override is given. */
-    const seg_entry *seg;	/* segment for memory operands (if given) */
+    /* SEG gives the seg_entries of this insn.  They are zero unless
+       explicit segment overrides are given. */
+    const seg_entry *seg[2];	/* segments for memory operands (if given) */
 
     /* PREFIX holds all the given prefix opcodes (usually null).
        PREFIXES is the size of PREFIX. */
@@ -106,7 +107,12 @@ struct _i386_insn
     unsigned char prefix[MAX_PREFIXES];
     unsigned int prefixes;
 
-    /* RM and IB are the modrm byte and the base index byte where the
+    /* Wait prefix needs to come before any other prefixes, so handle
+       it specially.  wait_prefix will hold the opcode modifier flag
+       FWait if a wait prefix is given.  */
+    int wait_prefix;
+
+    /* RM and BI are the modrm byte and the base index byte where the
        addressing modes of this insn are encoded. */
 
     modrm_byte rm;
@@ -179,10 +185,13 @@ static char *save_stack_p;	/* stack pointer */
 /* The instruction we're assembling. */
 static i386_insn i;
 
+/* Possible templates for current insn.  */
+static templates *current_templates;
+
 /* Per instruction expressionS buffers: 2 displacements & 2 immediate max. */
 static expressionS disp_expressions[2], im_expressions[2];
 
-/* pointers to ebp & esp entries in reg_hash hash table */
+/* Pointers to ebp & esp entries in reg_hash hash table.  */
 static reg_entry *ebp, *esp;
 
 static int this_operand;	/* current operand we are working on */
@@ -232,8 +241,9 @@ const relax_typeS md_relax_table[] =
   {1, 1, 0, 0},
   {1, 1, 0, 0},
 
-  /* For now we don't use word displacement jumps; they may be
-     untrustworthy. */
+  /* For now we don't use word displacement jumps; they will not work
+     for destination addresses > 0xFFFF, since they clear the upper 16
+     bits of %eip.  */
   {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (COND_JUMP, DWORD)},
   /* word conditionals add 3 bytes to frag:
      2 opcode prefix; 1 displacement bytes */
@@ -348,7 +358,7 @@ static reg_entry *parse_register PARAMS ((char *reg_string));
 static void s_bss PARAMS ((int));
 #endif
 
-symbolS *GOT_symbol;		/* Pre-defined "__GLOBAL_OFFSET_TABLE" */
+symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE_" */
 
 static INLINE unsigned long
 mode_from_disp_size (t)
@@ -421,6 +431,81 @@ smallest_imm_type (num)
 	  ? (Imm16 | Imm32)
 	  : (Imm32));
 }				/* smallest_imm_type() */
+
+static int
+check_prefix (prefix)
+     int prefix;
+{
+  int q;
+
+  for (q = 0; q < i.prefixes; q++)
+    {
+      switch (prefix)
+	{
+	case CS_PREFIX_OPCODE:
+	case DS_PREFIX_OPCODE:
+	case ES_PREFIX_OPCODE:
+	case FS_PREFIX_OPCODE:
+	case GS_PREFIX_OPCODE:
+	case SS_PREFIX_OPCODE:
+	  switch (i.prefix[q])
+	    {
+	    case CS_PREFIX_OPCODE:
+	    case DS_PREFIX_OPCODE:
+	    case ES_PREFIX_OPCODE:
+	    case FS_PREFIX_OPCODE:
+	    case GS_PREFIX_OPCODE:
+	    case SS_PREFIX_OPCODE:
+	      as_bad ("same type of prefix used twice");
+	      return 0;
+	    }
+	  break;
+
+	case REPNE:
+	case REPE:
+	  switch (i.prefix[q])
+	    {
+	    case REPNE:
+	    case REPE:
+	      as_bad ("same type of prefix used twice");
+	      return 0;
+	    }
+	  break;
+
+	case FWAIT_OPCODE:
+	  if (i.wait_prefix != 0)
+	    {
+	      as_bad ("same type of prefix used twice");
+	      return 0;
+	    }
+	  break;
+
+	default:
+	  if (i.prefix[q] == prefix)
+	    {
+	      as_bad ("same type of prefix used twice");
+	      return 0;
+	    }
+	}
+    }
+
+  if (i.prefixes == MAX_PREFIXES && prefix != FWAIT_OPCODE)
+    {
+      char *p = "another"; /* paranoia */
+
+      for (q = 0;
+	   q < sizeof (i386_prefixtab) / sizeof (i386_prefixtab[0]);
+	   q++)
+	if (i386_prefixtab[q].prefix_code == prefix)
+	  p = i386_prefixtab[q].prefix_name;
+
+      as_bad ("%d prefixes given and `%%%s' prefix gives too many",
+	      MAX_PREFIXES, p);
+      return 0;
+    }
+
+  return 1;
+}
 
 static void
 set_16bit_code_flag (new_16bit_code_flag)
@@ -736,10 +821,12 @@ type_names[] =
   { Imm1, "i1" },
   { Control, "control reg" },
   { Test, "test reg" },
+  { Debug, "debug reg" },
   { FloatReg, "FReg" },
   { FloatAcc, "FAcc" },
   { JumpAbsolute, "Jump Absolute" },
   { RegMMX, "rMMX" },
+  { EsSeg, "es" },
   { 0, "" }
 };
 
@@ -840,9 +927,6 @@ md_assemble (line)
   /* Count the size of the instruction generated.  */
   int insn_size = 0;
 
-  /* Possible templates for current insn */
-  templates *current_templates = (templates *) 0;
-
   int j;
 
   /* Initialize globals. */
@@ -861,8 +945,8 @@ md_assemble (line)
 
     /* 1 if operand is pending after ','. */
     unsigned int expecting_operand = 0;
-    /* 1 if we found a prefix only acceptable with string insns. */
-    unsigned int expecting_string_instruction = 0;
+    /* Non-zero if we found a prefix only acceptable with string insns. */
+    const char *expecting_string_instruction = NULL;
     /* Non-zero if operand parens not balanced. */
     unsigned int paren_not_balanced;
     char *token_start = l;
@@ -894,26 +978,26 @@ md_assemble (line)
 	    prefix = (prefix_entry *) hash_find (prefix_hash, token_start);
 	    if (!prefix)
 	      {
-		as_bad ("no such opcode prefix ('%s')", token_start);
+		as_bad ("no such opcode prefix `%s'", token_start);
+		RESTORE_END_STRING (l);
 		return;
 	      }
 	    RESTORE_END_STRING (l);
 	    /* check for repeated prefix */
-	    for (q = 0; q < i.prefixes; q++)
-	      if (i.prefix[q] == prefix->prefix_code)
-		{
-		  as_bad ("same prefix used twice; you don't really want this!");
-		  return;
-		}
-	    if (i.prefixes == MAX_PREFIXES)
+	    if (! check_prefix (prefix->prefix_code))
+	      return;
+	    if (prefix->prefix_code == FWAIT_OPCODE)
 	      {
-		as_bad ("too many opcode prefixes");
-		return;
+		i.wait_prefix = FWait;
 	      }
-	    i.prefix[i.prefixes++] = prefix->prefix_code;
-	    if (prefix->prefix_code == REPE || prefix->prefix_code == REPNE)
-	      expecting_string_instruction = 1;
-	    /* skip past PREFIX_SEPERATOR and reset token_start */
+	    else
+	      {
+		i.prefix[i.prefixes++] = prefix->prefix_code;
+		if (prefix->prefix_code == REPE
+		    || prefix->prefix_code == REPNE)
+		  expecting_string_instruction = prefix->prefix_name;
+	      }
+	    /* Skip past PREFIX_SEPARATOR and reset token_start.  */
 	    token_start = ++l;
 	  }
       }
@@ -921,6 +1005,7 @@ md_assemble (line)
     if (token_start == l)
       {
 	as_bad ("expecting opcode; got nothing");
+	RESTORE_END_STRING (l);
 	return;
       }
 
@@ -944,6 +1029,7 @@ md_assemble (line)
 	if (!current_templates)
 	  {
 	    as_bad ("no such 386 instruction: `%s'", token_start);
+	    RESTORE_END_STRING (l);
 	    return;
 	  }
       }
@@ -951,21 +1037,15 @@ md_assemble (line)
 
     /* check for rep/repne without a string instruction */
     if (expecting_string_instruction &&
-	!IS_STRING_INSTRUCTION (current_templates->
-				start->base_opcode))
+	!(current_templates->start->opcode_modifier & IsString))
       {
-	as_bad ("expecting string instruction after rep/repne");
+	as_bad ("expecting string instruction after `%s'",
+		expecting_string_instruction);
 	return;
       }
 
     /* There may be operands to parse. */
-    if (*l != END_OF_INSN &&
-	/* For string instructions, we ignore any operands if given.  This
-	   kludges, for example, 'rep/movsb %ds:(%esi), %es:(%edi)' where
-	   the operands are always going to be the same, and are not really
-	   encoded in machine code. */
-	!IS_STRING_INSTRUCTION (current_templates->
-				start->base_opcode))
+    if (*l != END_OF_INSN)
       {
 	/* parse operands */
 	do
@@ -1162,17 +1242,50 @@ md_assemble (line)
       }				/* for (t = ... */
     if (t == current_templates->end)
       {				/* we found no match */
-	as_bad ("operands given don't match any known 386 instruction");
+	as_bad ("suffix or operands invalid for `%s'",
+		current_templates->start->name);
 	return;
       }
 
-    /* Copy the template we found (we may change it!). */
+    /* Copy the template we found.  */
     i.tm = *t;
+    i.tm.opcode_modifier |= i.wait_prefix;
 
     if (found_reverse_match)
       {
 	i.tm.operand_types[0] = t->operand_types[1];
 	i.tm.operand_types[1] = t->operand_types[0];
+      }
+
+    /* Check string instruction segment overrides */
+    if ((i.tm.opcode_modifier & IsString) != 0 && i.mem_operands != 0)
+      {
+	int mem_op = (i.types[0] & Mem) ? 0 : 1;
+	if ((i.tm.operand_types[mem_op+0] & EsSeg) != 0)
+	  {
+	    if (i.seg[0] != (seg_entry *) 0 && i.seg[0] != (seg_entry *) &es)
+	      {
+		as_bad ("`%s' %s operand must use `%%es' segment",
+			i.tm.name,
+			ordinal_names[mem_op+0]);
+		return;
+	      }
+	    /* There's only ever one segment override allowed per instruction.
+	       This instruction possibly has a legal segment override on the
+	       second operand, so copy the segment to where non-string
+	       instructions store it, allowing common code.  */
+	    i.seg[0] = i.seg[1];
+	  }
+	else if ((i.tm.operand_types[mem_op+1] & EsSeg) != 0)
+	  {
+	    if (i.seg[1] != (seg_entry *) 0 && i.seg[1] != (seg_entry *) &es)
+	      {
+		as_bad ("`%s' %s operand must use `%%es' segment",
+			i.tm.name,
+			ordinal_names[mem_op+1]);
+		return;
+	      }
+	  }
       }
 
     /* If the matched instruction specifies an explicit opcode suffix,
@@ -1300,12 +1413,8 @@ md_assemble (line)
 				   operand size prefix. */
 	if ((i.suffix == WORD_OPCODE_SUFFIX) ^ flag_16bit_code)
 	  {
-	    if (i.prefixes == MAX_PREFIXES)
-	      {
-		as_bad ("%d prefixes given and data size prefix gives too many prefixes",
-			MAX_PREFIXES);
-		return;
-	      }
+	    if (! check_prefix (WORD_PREFIX_OPCODE))
+	      return;
 	    i.prefix[i.prefixes++] = WORD_PREFIX_OPCODE;
 	  }
       }
@@ -1327,39 +1436,17 @@ md_assemble (line)
 	   found_reverse_match holds bit to set (different for int &
 	   float insns). */
 
-	if (found_reverse_match)
-	  {
-	    i.tm.base_opcode |= found_reverse_match;
-	  }
+	i.tm.base_opcode ^= found_reverse_match;
 
 	/* The imul $imm, %reg instruction is converted into
-	   imul $imm, %reg, %reg. */
-	if (i.tm.opcode_modifier & imulKludge)
+	   imul $imm, %reg, %reg, and the clr %reg instruction
+	   is converted into xor %reg, %reg.  */
+	if (i.tm.opcode_modifier & regKludge)
 	  {
-	    /* Pretend we saw the 3 operand case. */
-	    i.regs[2] = i.regs[1];
+	    unsigned int first_reg_op = (i.types[0] & Reg) ? 0 : 1;
+	    /* Pretend we saw the extra register operand. */
+	    i.regs[first_reg_op+1] = i.regs[first_reg_op];
 	    i.reg_operands = 2;
-	  }
-
-	/* The clr %reg instruction is converted into xor %reg, %reg.  */
-	if (i.tm.opcode_modifier & iclrKludge)
-	  {
-	    i.regs[1] = i.regs[0];
-	    i.reg_operands = 2;
-	  }
-
-	/* Certain instructions expect the destination to be in the i.rm.reg
-	   field.  This is by far the exceptional case.  For these
-	   instructions, if the source operand is a register, we must reverse
-	   the i.rm.reg and i.rm.regmem fields.  We accomplish this by faking
-	   that the two register operands were given in the reverse order. */
-	if ((i.tm.opcode_modifier & ReverseRegRegmem) && i.reg_operands == 2)
-	  {
-	    unsigned int first_reg_operand = (i.types[0] & Reg) ? 0 : 1;
-	    unsigned int second_reg_operand = first_reg_operand + 1;
-	    reg_entry *tmp = i.regs[first_reg_operand];
-	    i.regs[first_reg_operand] = i.regs[second_reg_operand];
-	    i.regs[second_reg_operand] = tmp;
 	  }
 
 	if (i.tm.opcode_modifier & ShortForm)
@@ -1376,32 +1463,6 @@ md_assemble (line)
 	    if (i.suffix == WORD_OPCODE_SUFFIX ||
 		i.suffix == DWORD_OPCODE_SUFFIX)
 	      i.tm.base_opcode |= 0x8;
-	  }
-	else if (i.tm.opcode_modifier & Seg2ShortForm)
-	  {
-	    if (i.tm.base_opcode == POP_SEG_SHORT && i.regs[0]->reg_num == 1)
-	      {
-		as_bad ("you can't 'pop cs' on the 386.");
-		return;
-	      }
-	    i.tm.base_opcode |= (i.regs[0]->reg_num << 3);
-	  }
-	else if (i.tm.opcode_modifier & Seg3ShortForm)
-	  {
-	    /* 'push %fs' is 0x0fa0; 'pop %fs' is 0x0fa1.
-	       'push %gs' is 0x0fa8; 'pop %fs' is 0x0fa9.
-	       So, only if i.regs[0]->reg_num == 5 (%gs) do we need
-	       to change the opcode. */
-	    if (i.regs[0]->reg_num == 5)
-	      i.tm.base_opcode |= 0x08;
-	  }
-	else if ((i.tm.base_opcode & ~DW) == MOV_AX_DISP32)
-	  {
-	    /* This is a special non-modrm instruction
-	       that addresses memory with a 32-bit displacement mode anyway,
-	       and thus requires an address-size prefix if in 16-bit mode.  */
-	    uses_mem_addrmode = 1;
-	    default_seg = &ds;
 	  }
 	else if (i.tm.opcode_modifier & Modrm)
 	  {
@@ -1425,10 +1486,25 @@ md_assemble (line)
 			      | RegMMX))
 			  ? 0 : 1);
 		dest = source + 1;
+
+		/* Certain instructions expect the destination to be
+		   in the i.rm.reg field.  This is by far the
+		   exceptional case.  For these instructions, if the
+		   source operand is a register, we must reverse the
+		   i.rm.reg and i.rm.regmem fields.  We accomplish
+		   this by pretending that the two register operands
+		   were given in the reverse order.  */
+		if (i.tm.opcode_modifier & ReverseRegRegmem)
+		  {
+		    reg_entry *tmp = i.regs[source];
+		    i.regs[source] = i.regs[dest];
+		    i.regs[dest] = tmp;
+		  }
+
 		i.rm.mode = 3;
 		/* We must be careful to make sure that all
 		   segment/control/test/debug/MMX registers go into
-		   the i.rm.reg field (despite the whether they are
+		   the i.rm.reg field (despite whether they are
 		   source or destination operands). */
 		if (i.regs[dest]->reg_type
 		    & (SReg2 | SReg3 | Control | Debug | Test | RegMMX))
@@ -1447,7 +1523,9 @@ md_assemble (line)
 		if (i.mem_operands)
 		  {
 		    unsigned int fake_zero_displacement = 0;
-		    unsigned int op = (i.types[0] & Mem) ? 0 : ((i.types[1] & Mem) ? 1 : 2);
+		    unsigned int op = ((i.types[0] & Mem)
+				       ? 0
+				       : (i.types[1] & Mem) ? 1 : 2);
 
 		    /* Encode memory operand into modrm byte and base index
 		       byte. */
@@ -1540,10 +1618,9 @@ md_assemble (line)
 			exp->X_op_symbol = (symbolS *) 0;
 		      }
 
-		    /* Find the default segment for the memory
-		       operand.  Used to optimize out explicit segment
-		       specifications.  */
-		    if (i.seg && (t->opcode_modifier & LinearAddress) == 0)
+		    /* Find the default segment for the memory operand.
+		       Used to optimize out explicit segment specifications.  */
+		    if (i.seg[0])
 		      {
 			unsigned int seg_index;
 
@@ -1586,7 +1663,7 @@ md_assemble (line)
 
 		    /* Now, if no memory operand has set i.rm.mode = 0, 1, 2
 		       we must set it to 3 to indicate this is a register
-		       operand int the regmem field */
+		       operand in the regmem field.  */
 		    if (!i.mem_operands)
 		      i.rm.mode = 3;
 		  }
@@ -1599,18 +1676,46 @@ md_assemble (line)
 	    if (i.rm.mode != 3)
 	      uses_mem_addrmode = 1;
 	  }
+	else if (i.tm.opcode_modifier & Seg2ShortForm)
+	  {
+	    if (i.tm.base_opcode == POP_SEG_SHORT && i.regs[0]->reg_num == 1)
+	      {
+		as_bad ("you can't `pop %%cs' on the 386.");
+		return;
+	      }
+	    i.tm.base_opcode |= (i.regs[0]->reg_num << 3);
+	  }
+	else if (i.tm.opcode_modifier & Seg3ShortForm)
+	  {
+	    /* 'push %fs' is 0x0fa0; 'pop %fs' is 0x0fa1.
+	       'push %gs' is 0x0fa8; 'pop %fs' is 0x0fa9.
+	       So, only if i.regs[0]->reg_num == 5 (%gs) do we need
+	       to change the opcode. */
+	    if (i.regs[0]->reg_num == 5)
+	      i.tm.base_opcode |= 0x08;
+	  }
+	else if ((i.tm.base_opcode & ~DW) == MOV_AX_DISP32)
+	  {
+	    /* This is a special non-modrm instruction
+	       that addresses memory with a 32-bit displacement mode anyway,
+	       and thus requires an address-size prefix if in 16-bit mode.  */
+	    uses_mem_addrmode = 1;
+	    default_seg = &ds;
+	  }
+	else if ((i.tm.opcode_modifier & IsString) != 0)
+	  {
+	    /* For the string instructions that allow a segment override
+	       on one of their operands, the default segment is ds.  */
+	    default_seg = &ds;
+	  }
 
 	/* GAS currently doesn't support 16-bit memory addressing modes at all,
 	   so if we're writing 16-bit code and using a memory addressing mode,
 	   always spew out an address size prefix.  */
 	if (uses_mem_addrmode && flag_16bit_code)
 	  {
-	    if (i.prefixes == MAX_PREFIXES)
-	      {
-	        as_bad ("%d prefixes given and address size override gives too many prefixes",
-	        	MAX_PREFIXES);
-	        return;
-	      }
+	    if (! check_prefix (ADDR_PREFIX_OPCODE))
+	      return;
 	    i.prefix[i.prefixes++] = ADDR_PREFIX_OPCODE;
 	  }
 
@@ -1620,15 +1725,11 @@ md_assemble (line)
 	   If we never figured out what the default segment is,
 	   then default_seg will be zero at this point,
 	   and the specified segment prefix will always be used.  */
-	if ((i.seg) && (i.seg != default_seg))
+	if ((i.seg[0]) && (i.seg[0] != default_seg))
 	  {
-	    if (i.prefixes == MAX_PREFIXES)
-	      {
-	        as_bad ("%d prefixes given and %s segment override gives too many prefixes",
-	    	    MAX_PREFIXES, i.seg->seg_name);
-	        return;
-	      }
-	    i.prefix[i.prefixes++] = i.seg->seg_prefix;
+	    if (! check_prefix (i.seg[0]->seg_prefix))
+	      return;
+	    i.prefix[i.prefixes++] = i.seg[0]->seg_prefix;
 	  }
       }
   }
@@ -1649,6 +1750,9 @@ md_assemble (line)
       {
 	unsigned long n = i.disps[0]->X_add_number;
 
+	if (i.prefixes != 0)
+	  as_warn ("skipping prefixes on this instruction");
+
 	if (i.disps[0]->X_op == O_constant)
 	  {
 	    if (fits_in_signed_byte (n))
@@ -1661,10 +1765,10 @@ md_assemble (line)
 	    else
 	      {	/* It's an absolute word/dword displacement. */
 
-	        /* Use only 16-bit jumps for 16-bit code,
+	        /* Use 16-bit jumps only for 16-bit code,
 		   because text segments are limited to 64K anyway;
-	           use only 32-bit jumps for 32-bit code,
-		   because they're faster.  */
+	           Use 32-bit jumps for 32-bit code, because they're faster,
+		   and a 16-bit jump will clear the top 16 bits of %eip.  */
 		int jmp_size = flag_16bit_code ? 2 : 4;
 	      	if (flag_16bit_code && !fits_in_signed_word (n))
 		  {
@@ -1795,6 +1899,9 @@ md_assemble (line)
       }
     else if (i.tm.opcode_modifier & JumpInterSegment)
       {
+	if (i.prefixes != 0)
+	  as_warn ("skipping prefixes on this instruction");
+
 	if (flag_16bit_code)
 	  {
 	    FRAG_APPEND_1_CHAR (WORD_PREFIX_OPCODE);
@@ -1818,7 +1925,16 @@ md_assemble (line)
 	/* Output normal instructions here. */
 	unsigned char *q;
 
-	/* First the prefix bytes. */
+	/* Hack for fwait.  It must come before any prefixes, as it
+	   really is an instruction rather than a prefix. */
+	if ((i.tm.opcode_modifier & FWait) != 0)
+	  {
+	    p = frag_more (1);
+	    insn_size += 1;
+	    md_number_to_chars (p, (valueT) FWAIT_OPCODE, 1);
+	  }
+
+	/* The prefix bytes. */
 	for (q = i.prefix; q < i.prefix + i.prefixes; q++)
 	  {
 	    p = frag_more (1);
@@ -2045,7 +2161,7 @@ i386_operand (operand_string)
       register reg_entry *r;
       if (!(r = parse_register (op_string)))
 	{
-	  as_bad ("bad register name ('%s')", op_string);
+	  as_bad ("bad register name `%s'", op_string);
 	  return 0;
 	}
       /* Check for segment override, rather than segment register by
@@ -2055,22 +2171,22 @@ i386_operand (operand_string)
 	  switch (r->reg_num)
 	    {
 	    case 0:
-	      i.seg = (seg_entry *) & es;
+	      i.seg[i.mem_operands] = (seg_entry *) & es;
 	      break;
 	    case 1:
-	      i.seg = (seg_entry *) & cs;
+	      i.seg[i.mem_operands] = (seg_entry *) & cs;
 	      break;
 	    case 2:
-	      i.seg = (seg_entry *) & ss;
+	      i.seg[i.mem_operands] = (seg_entry *) & ss;
 	      break;
 	    case 3:
-	      i.seg = (seg_entry *) & ds;
+	      i.seg[i.mem_operands] = (seg_entry *) & ds;
 	      break;
 	    case 4:
-	      i.seg = (seg_entry *) & fs;
+	      i.seg[i.mem_operands] = (seg_entry *) & fs;
 	      break;
 	    case 5:
-	      i.seg = (seg_entry *) & gs;
+	      i.seg[i.mem_operands] = (seg_entry *) & gs;
 	      break;
 	    }
 	  op_string += 4;	/* skip % <x> s : */
@@ -2078,7 +2194,7 @@ i386_operand (operand_string)
 	  if (!is_digit_char (*op_string) && !is_identifier_char (*op_string)
 	      && *op_string != '(' && *op_string != ABSOLUTE_PREFIX)
 	    {
-	      as_bad ("bad memory operand after segment override");
+	      as_bad ("bad memory operand `%s'", op_string);
 	      return 0;
 	    }
 	  /* Handle case of %es:*foo. */
@@ -2118,7 +2234,7 @@ i386_operand (operand_string)
              in certain cases.  Oddly, the code in question turns out
              to work correctly anyhow, so we make this just a warning
              until those versions of gcc are obsolete.  */
-	  as_warn ("warning: unrecognized characters `%s' in expression",
+	  as_warn ("unrecognized characters `%s' in expression",
 		   input_line_pointer);
 	}
       input_line_pointer = save_input_line_pointer;
@@ -2126,7 +2242,7 @@ i386_operand (operand_string)
       if (exp->X_op == O_absent)
 	{
 	  /* missing or bad expr becomes absolute 0 */
-	  as_bad ("missing or invalid immediate expression '%s' taken as 0",
+	  as_bad ("missing or invalid immediate expression `%s' taken as 0",
 		  operand_string);
 	  exp->X_op = O_constant;
 	  exp->X_add_number = 0;
@@ -2182,9 +2298,12 @@ i386_operand (operand_string)
       unsigned int found_base_index_form;
 
     do_memory_reference:
-      if (i.mem_operands == MAX_MEMORY_OPERANDS)
+      if ((i.mem_operands == 1
+	   && (current_templates->start->opcode_modifier & IsString) == 0)
+	  || i.mem_operands == 2)
 	{
-	  as_bad ("more than 1 memory reference in instruction");
+	  as_bad ("too many memory references for `%s'",
+		  current_templates->start->name);
 	  return 0;
 	}
       i.mem_operands++;
@@ -2260,14 +2379,15 @@ i386_operand (operand_string)
 		base_string++;
 	      if (base_string == base_reg_name + 1)
 		{
-		  as_bad ("can't find base register name after '(%c'",
+		  as_bad ("can't find base register name after `(%c'",
 			  REGISTER_PREFIX);
 		  return 0;
 		}
 	      END_STRING_AND_SAVE (base_string);
 	      if (!(i.base_reg = parse_register (base_reg_name)))
 		{
-		  as_bad ("bad base register name ('%s')", base_reg_name);
+		  as_bad ("bad base register name `%s'", base_reg_name);
+		  RESTORE_END_STRING (base_string);
 		  return 0;
 		}
 	      RESTORE_END_STRING (base_string);
@@ -2278,7 +2398,7 @@ i386_operand (operand_string)
 			   OR ')' ==> end. (scale factor = 1) */
 	  if (*base_string != ',' && *base_string != ')')
 	    {
-	      as_bad ("expecting ',' or ')' after base register in `%s'",
+	      as_bad ("expecting `,' or `)' after base register in `%s'",
 		      operand_string);
 	      return 0;
 	    }
@@ -2291,7 +2411,8 @@ i386_operand (operand_string)
 	      END_STRING_AND_SAVE (base_string);
 	      if (!(i.index_reg = parse_register (index_reg_name)))
 		{
-		  as_bad ("bad index register name ('%s')", index_reg_name);
+		  as_bad ("bad index register name `%s'", index_reg_name);
+		  RESTORE_END_STRING (base_string);
 		  return 0;
 		}
 	      RESTORE_END_STRING (base_string);
@@ -2305,14 +2426,15 @@ i386_operand (operand_string)
 		base_string++;
 	      if (base_string == num_string)
 		{
-		  as_bad ("can't find a scale factor after ','");
+		  as_bad ("can't find a scale factor after `,'");
 		  return 0;
 		}
 	      END_STRING_AND_SAVE (base_string);
 	      /* We've got a scale factor. */
 	      if (!sscanf (num_string, "%d", &num))
 		{
-		  as_bad ("can't parse scale factor from '%s'", num_string);
+		  as_bad ("can't parse scale factor from `%s'", num_string);
+		  RESTORE_END_STRING (base_string);
 		  return 0;
 		}
 	      RESTORE_END_STRING (base_string);
@@ -2339,7 +2461,7 @@ i386_operand (operand_string)
 	    {
 	      if (!i.index_reg && *base_string == ',')
 		{
-		  as_bad ("expecting index register or scale factor after ','; got '%c'",
+		  as_bad ("expecting index register or scale factor after `,'; got '%c'",
 			  *(base_string + 1));
 		  return 0;
 		}
@@ -2407,7 +2529,7 @@ i386_operand (operand_string)
 		    *cp = '@';
 		  }
 		else
-		  as_bad ("Bad reloc specifier '%s' in expression", cp + 1);
+		  as_bad ("Bad reloc specifier `%s' in expression", cp + 1);
 
 		input_line_pointer = tmpbuf;
 	      }
@@ -2433,13 +2555,13 @@ i386_operand (operand_string)
 #endif
 
 	  if (*input_line_pointer)
-	    as_bad ("Ignoring junk '%s' after expression", input_line_pointer);
+	    as_bad ("Ignoring junk `%s' after expression", input_line_pointer);
 	  RESTORE_END_STRING (displacement_string_end);
 	  input_line_pointer = save_input_line_pointer;
 	  if (exp->X_op == O_absent)
 	    {
 	      /* missing expr becomes absolute 0 */
-	      as_bad ("missing or invalid displacement '%s' taken as 0",
+	      as_bad ("missing or invalid displacement `%s' taken as 0",
 		      operand_string);
 	      i.types[this_operand] |= (Disp | Abs);
 	      exp->X_op = O_constant;
@@ -2493,13 +2615,13 @@ i386_operand (operand_string)
 	}
       if (i.index_reg && i.index_reg == esp)
 	{
-	  as_bad ("%s may not be used as an index register", esp->reg_name);
+	  as_bad ("`%%s' may not be used as an index register", esp->reg_name);
 	  return 0;
 	}
     }
   else
     {				/* it's not a memory operand; argh! */
-      as_bad ("invalid char %s begining %s operand '%s'",
+      as_bad ("invalid char %s begining %s operand `%s'",
 	      output_invalid (*op_string), ordinal_names[this_operand],
 	      op_string);
       return 0;
