@@ -350,7 +350,7 @@ else
 	done
 fi
 
-r5900_files="ChangeLog config.bfd archures.c bfd-in2.h cpu-mips.c"
+r5900_files="ChangeLog config.bfd archures.c bfd-in2.h cpu-mips.c elf32-mips.c libbfd.h reloc.c"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
 	for i in $r5900_files ; do
 		if test ! -d $i && (grep sanitize-r5900 $i > /dev/null) ; then
