@@ -2,10 +2,10 @@
 ALLDEPFILES=\
 29k-share/udi/udip2soc.c\
 29k-share/udi/udr.c\
+a29k-pinsn.c\
+a29k-tdep.c\
 a68v-nat.c\
 altos-xdep.c\
-am29k-pinsn.c\
-am29k-tdep.c\
 arm-convert.s\
 arm-pinsn.c\
 arm-tdep.c\
@@ -101,6 +101,7 @@ z8k-tdep.c
 
 ALLPARAM=\
 ./config/a29k/nm-ultra3.h\
+./config/a29k/tm-a29k.h\
 ./config/a29k/tm-ultra3.h\
 ./config/a29k/xm-ultra3.h\
 ./config/arm/tm-arm.h\
@@ -147,14 +148,14 @@ ALLPARAM=\
 ./config/m68k/nm-sun2.h\
 ./config/m68k/nm-sun3.h\
 ./config/m68k/tm-3b1.h\
-./config/m68k/tm-68k-fp.h\
-./config/m68k/tm-68k-nofp.h\
 ./config/m68k/tm-altos.h\
 ./config/m68k/tm-amix.h\
 ./config/m68k/tm-es1800.h\
 ./config/m68k/tm-hp300bsd.h\
 ./config/m68k/tm-hp300hpux.h\
 ./config/m68k/tm-isi.h\
+./config/m68k/tm-m68k-fp.h\
+./config/m68k/tm-m68k-nofp.h\
 ./config/m68k/tm-news.h\
 ./config/m68k/tm-os68k.h\
 ./config/m68k/tm-st2000.h\

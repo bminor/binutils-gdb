@@ -1,5 +1,7 @@
 Mon Mar 29 15:03:25 1993  Fred Fish  (fnf@cygnus.com)
 
+	* alldeps.mak, depend:  Update for below changes.
+
 	* config/m68k/tm-m68k.h:  Renamed from config/m68k/tm-68k.h.
 	* m68k/{tm-3b1.h, tm-altos.h, tm-amix.h, tm-es1800.h,
 	tm-hp300bsd.h, tm-hp300hpux.h, tm-isi.h, tm-news.h, tm-os68k.h,
